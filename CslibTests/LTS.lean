@@ -1,3 +1,9 @@
+/-
+Copyright (c) 2025 Fabrizio Montesi. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Fabrizio Montesi
+-/
+
 import Cslib.Semantics.LTS.Basic
 import Cslib.Semantics.LTS.Bisimulation
 import Mathlib.Algebra.Group.Even

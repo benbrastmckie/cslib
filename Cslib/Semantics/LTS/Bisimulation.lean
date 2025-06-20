@@ -7,6 +7,8 @@ Authors: Fabrizio Montesi
 import Cslib.Semantics.LTS.Basic
 import Cslib.Semantics.LTS.TraceEq
 import Mathlib.Data.Rel
+import Cslib.Utils.Rel
+import Cslib.Semantics.LTS.Simulation
 
 /-! # Bisimulation and Bisimilarity
 
@@ -77,32 +79,29 @@ explicitly.
 notation s " ~[" lts "] " s' => Bisimilarity lts s s'
 
 /-- Bisimilarity is reflexive. -/
-theorem Bisimilarity.refl [DecidableEq State] (s : State) : s ~[lts] s := by
+theorem Bisimilarity.refl (s : State) : s ~[lts] s := by
   constructor
-  let r := (fun (s1 s2 : State) => if s1 = s2 then True else False)
-  exists r
+  exists Rel.Id
   constructor
   case left =>
-    simp [r]
+    constructor
   case right =>
     simp only [Bisimulation]
     intro s1 s2 hr μ
-    simp [r] at hr
+    cases hr
     constructor
     case left =>
-      simp [hr]
       intro s1' htr
       exists s1'
       constructor
       · exact htr
-      · simp [r]
+      · constructor
     case right =>
-      simp [hr]
       intro s1' htr
       exists s1'
       constructor
       · exact htr
-      · simp [r]
+      · constructor
 
 /-- The inverse of a bisimulation is a bisimulation. -/
 theorem Bisimulation.inv (r : Rel State State) (h : Bisimulation lts r) :
@@ -190,7 +189,7 @@ theorem Bisimilarity.trans
     apply Bisimulation.comp lts r1 r2 hr1b hr2b
 
 /-- Bisimilarity is an equivalence relation. -/
-theorem Bisimilarity.eqv [DecidableEq State] (lts : LTS State Label) :
+theorem Bisimilarity.eqv (lts : LTS State Label) :
   Equivalence (Bisimilarity lts) := {
     refl := Bisimilarity.refl lts
     symm := Bisimilarity.symm lts
@@ -253,11 +252,6 @@ theorem Bisimilarity.gfp (r : Rel State State) (h : Bisimulation lts r) :
   funext s1 s2
   simp [Rel.union]
   apply Bisimilarity.largest_bisimulation lts r h
-
-/-- The relation `r` 'up to' the relation `s`.
-
-TODO: move to `Rel`? -/
-def Rel.upTo {α} (r s : Rel α α) : Rel α α := s.comp (r.comp s)
 
 /-- A relation `r` is a bisimulation up to bisimilarity if, whenever it relates two
 states in an lts, the transitions originating from these states mimic each other and the reached
@@ -411,8 +405,6 @@ theorem Bisimulation.deterministic_trace_eq_is_bisim
 theorem Bisimilarity.deterministic_trace_eq_bisim
   (lts : LTS State Label) (hdet : lts.Deterministic) (s1 s2 : State) (h : s1 ~tr[lts] s2) :
   (s1 ~[lts] s2) := by
-  -- simp [TraceEq, LTS.traces, setOf] at h
-  -- simp [LTS.Deterministic] at hdet
   constructor
   exists TraceEq lts
   constructor
@@ -432,5 +424,50 @@ theorem Bisimilarity.deterministic_bisim_eq_trace_eq
     apply Bisimilarity.bisim_trace_eq
   case mpr =>
     apply Bisimilarity.deterministic_trace_eq_bisim lts hdet
+
+theorem Bisimulation.isSimulation (lts : LTS State Label) (r : Rel State State) : Bisimulation lts r → Simulation lts r := by
+  intro h
+  simp only [Bisimulation] at h
+  simp only [Simulation]
+  intro s1 s2 hr μ s1' htr
+  specialize h s1 s2 hr μ
+  rcases h with ⟨h1, h2⟩
+  apply h1 s1' htr
+
+theorem Bisimulation.simulation_iff (lts : LTS State Label) (r : Rel State State) : Bisimulation lts r ↔ (Simulation lts r ∧ Simulation lts r.inv) := by
+  constructor
+  intro h
+  simp only [Simulation]
+  case mp =>
+    constructor
+    case left =>
+      intro s1 s2 hr μ s1' htr
+      specialize h s1 s2 hr μ
+      rcases h with ⟨h1, h2⟩
+      specialize h1 _ htr
+      obtain ⟨s2', h1⟩ := h1
+      exists s2'
+    case right =>
+      simp only [Rel.inv, flip]
+      intro s2 s1 hr μ s2' htr
+      simp only [Bisimulation] at h
+      specialize h s1 s2 hr μ
+      obtain ⟨h1, h2⟩ := h
+      specialize h2 _ htr
+      apply h2
+  case mpr =>
+    intro hs
+    obtain ⟨hs, hsinv⟩ := hs
+    simp only [Bisimulation]
+    intro s1 s2 hr μ
+    constructor
+    case left =>
+      intro s1' htr
+      simp only [Simulation] at hs
+      apply hs _ _ hr _ _ htr
+    case right =>
+      intro s2' htr
+      apply hsinv _ _ hr _ _ htr
+
 
 end Bisimulation

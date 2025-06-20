@@ -7,6 +7,7 @@ Authors: Fabrizio Montesi
 import Mathlib.Tactic.Lemma
 import Mathlib.Data.Finite.Defs
 import Mathlib.Data.Fintype.Basic
+import Mathlib.Data.Rel
 import Mathlib.Logic.Function.Defs
 import Mathlib.Data.Set.Finite.Basic
 
@@ -55,6 +56,13 @@ labels (`Label`), and a labelled transition relation (`tr`).
 structure LTS (State : Type u) (Label : Type v) where
   /-- The transition relation. -/
   tr : State → Label → State → Prop
+
+section Relation
+
+def LTS.toRel (lts : LTS State Label) (μ : Label) : Rel State State :=
+  fun s1 s2 => lts.tr s1 μ s2
+
+end Relation
 
 section MultiStep
 

@@ -1,0 +1,12 @@
+{
+	"lean4.input.customTranslations": {
+		"nil": "𝟎",
+		"com": "⮕",
+		"seqcomp": "⨟",
+		"eppl": "⟦",
+		"eppr": "⟧",
+		"merge": "⊔",
+		"moreBranches": "⊒",
+		"par": "‖"
+	}
+}

@@ -4,6 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Fabrizio Montesi
 -/
 
+/-! # Calculus of Communicating Systems (CCS)
+
+CCS, as presented in [Sangiorgi2011]. In the semantics (see `CCS.lts`), we use the option of constant definitions (K = P).
+-/
 variable (Name : Type u) (Constant : Type v)
 
 namespace CCS

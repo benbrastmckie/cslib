@@ -103,6 +103,62 @@ theorem bisim_par_comm (p q : Process Name Constant) : (par p q) ~[@lts Name Con
             apply tr.com htrq htrp
           . constructor
 
+private inductive PreBisim : Rel (Process Name Constant) (Process Name Constant) where
+| pre : (p ~[@lts Name Constant defs] q) → PreBisim (pre μ p) (pre μ q)
+| bisim : (p ~[@lts Name Constant defs] q) → PreBisim p q
+
+theorem bisim_congr_pre : (p ~[@lts Name Constant defs] q) → (pre μ p) ~[@lts Name Constant defs] (pre μ q) := by
+  intro hpq
+  constructor
+  exists @PreBisim _ _ defs
+  constructor; constructor; assumption
+  simp only [Bisimulation]
+  intro s1 s2 hr μ'
+  cases hr
+  case pre =>
+    rename_i p' q' μ hbis
+    constructor
+    case left =>
+      intro s1' htr
+      cases htr
+      exists q'
+      constructor; constructor
+      apply PreBisim.bisim hbis
+    case right =>
+      intro s2' htr
+      cases htr
+      exists p'
+      constructor; constructor
+      apply PreBisim.bisim hbis
+  case bisim hbis =>
+    constructor
+    case left =>
+      intro s1' htr
+      obtain ⟨_, _, r, hr, hb⟩ := hbis
+      let hbisim := hb
+      simp only [Bisimulation] at hb
+      specialize hb _ _ hr μ'
+      obtain ⟨hb1, hb2⟩ := hb
+      specialize hb1 _ htr
+      obtain ⟨s2', htr2, hr2⟩ := hb1
+      exists s2'
+      apply And.intro htr2
+      constructor
+      apply Bisimilarity.largest_bisimulation _ r hbisim s1' s2' hr2
+    case right =>
+      intro s2' htr
+      obtain ⟨_, _, r, hr, hb⟩ := hbis
+      let hbisim := hb
+      simp only [Bisimulation] at hb
+      specialize hb _ _ hr μ'
+      obtain ⟨hb1, hb2⟩ := hb
+      specialize hb2 _ htr
+      obtain ⟨s1', htr1, hr1⟩ := hb2
+      exists s1'
+      apply And.intro htr1
+      constructor
+      apply Bisimilarity.largest_bisimulation _ r hbisim s1' s2' hr1
+
 end CCS
 
 end CCS.BehaviouralTheory

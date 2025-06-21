@@ -10,6 +10,18 @@ import Cslib.Semantics.LTS.Bisimulation
 import Cslib.ProcessCalculus.CCS.Basic
 import Cslib.ProcessCalculus.CCS.Semantics
 
+/-! # Behavioural theory of CCS
+
+## Main results
+
+- `CCS.bisimilarity_congr`: bisimilarity is a congruence in CCS
+
+Additionally, some standard laws of bisimilarity for CCS, including:
+- `CCS.bisimilarity_par_nil`: P | 𝟎 ~ P.
+- `CCS.bisimilarity_par_comm`: P | Q ~ Q | P
+- `CCS.bisimilarity_choice_comm`: P + Q ~ Q + P
+-/
+
 section CCS.BehaviouralTheory
 
 variable {Name : Type u} {Constant : Type v} {defs : Constant ⇀ CCS.Process Name Constant}
@@ -21,6 +33,7 @@ namespace CCS
 private inductive ParNil : Rel (Process Name Constant) (Process Name Constant) where
 | parNil : ParNil (par p nil) p
 
+/-- P | 𝟎 ~ P -/
 theorem bisimilarity_par_nil (p : Process Name Constant) : (par p nil) ~[@lts Name Constant defs] p := by
   constructor
   exists ParNil
@@ -52,6 +65,7 @@ theorem bisimilarity_par_nil (p : Process Name Constant) : (par p nil) ~[@lts Na
 private inductive ParComm : Rel (Process Name Constant) (Process Name Constant) where
 | parComm : ParComm (par p q) (par q p)
 
+/-- P | Q ~ Q | P -/
 theorem bisimilarity_par_comm (p q : Process Name Constant) : (par p q) ~[@lts Name Constant defs] (par q p) := by
   constructor
   exists ParComm
@@ -103,10 +117,64 @@ theorem bisimilarity_par_comm (p q : Process Name Constant) : (par p q) ~[@lts N
             apply tr.com htrq htrp
           . constructor
 
+private inductive ChoiceComm : Rel (Process Name Constant) (Process Name Constant) where
+| choiceComm : ChoiceComm (choice p q) (choice q p)
+| bisim : (p ~[@lts Name Constant defs] q) → ChoiceComm p q
+
+/-- P + Q ~ Q + P -/
+theorem bisimilarity_choice_comm : (choice p q) ~[@lts Name Constant defs] (choice q p) := by
+  constructor
+  exists @ChoiceComm Name Constant defs
+  repeat constructor
+  simp only [Bisimulation]
+  intro s1 s2 hr μ
+  cases hr
+  rename_i p q
+  constructor
+  case left =>
+    intro s1' htr
+    exists s1'
+    constructor
+    · cases htr
+      · apply tr.choiceR
+        assumption
+      · apply tr.choiceL
+        assumption
+    · constructor
+      apply Bisimilarity.refl (@lts _ _ defs) s1'
+  case right =>
+    intro s1' htr
+    exists s1'
+    constructor
+    · cases htr
+      · apply tr.choiceR
+        assumption
+      · apply tr.choiceL
+        assumption
+    · constructor
+      apply Bisimilarity.refl (@lts _ _ defs) s1'
+  case bisim h =>
+    constructor
+    case left =>
+      intro s1' htr
+      have hb := Bisimulation.follow_fst (Bisimilarity.is_bisimulation lts) h μ htr
+      obtain ⟨s2', htr2, hr2⟩ := hb
+      exists s2'
+      apply And.intro htr2
+      constructor; assumption
+    case right =>
+      intro s2' htr
+      have hb := Bisimulation.follow_snd (Bisimilarity.is_bisimulation lts) h μ htr
+      obtain ⟨s1', htr1, hr1⟩ := hb
+      exists s1'
+      apply And.intro htr1
+      constructor; assumption
+
 private inductive PreBisim : Rel (Process Name Constant) (Process Name Constant) where
 | pre : (p ~[@lts Name Constant defs] q) → PreBisim (pre μ p) (pre μ q)
 | bisim : (p ~[@lts Name Constant defs] q) → PreBisim p q
 
+/-- P ~ Q → μ.P ~ μ.Q -/
 theorem bisimilarity_congr_pre : (p ~[@lts Name Constant defs] q) → (pre μ p) ~[@lts Name Constant defs] (pre μ q) := by
   intro hpq
   constructor
@@ -154,10 +222,45 @@ theorem bisimilarity_congr_pre : (p ~[@lts Name Constant defs] q) → (pre μ p)
       constructor
       apply Bisimilarity.largest_bisimulation _ r hbisim s1' s2' hr1
 
+private inductive ResBisim : Rel (Process Name Constant) (Process Name Constant) where
+| res : (p ~[@lts Name Constant defs] q) → ResBisim (res a p) (res a q)
+-- | bisim : (p ~[@lts Name Constant defs] q) → ResBisim p q
+
+/-- P ~ Q → (ν a) P ~ (ν a) Q -/
+theorem bisimilarity_congr_res : (p ~[@lts Name Constant defs] q) → (res a p) ~[@lts Name Constant defs] (res a q) := by
+  intro hpq
+  constructor
+  exists @ResBisim _ _ defs
+  constructor; constructor; assumption
+  simp only [Bisimulation]
+  intro s1 s2 hr μ'
+  cases hr
+  rename_i p q a h
+  constructor
+  case left =>
+    intro s1' htr
+    cases htr
+    rename_i p' h1 h2 htr
+    have h := Bisimulation.follow_fst (Bisimilarity.is_bisimulation lts) h μ' htr
+    obtain ⟨q', htrq, h⟩ := h
+    exists (res a q')
+    constructor; constructor; repeat assumption
+    constructor; assumption
+  case right =>
+    intro s2' htr
+    cases htr
+    rename_i q' h1 h2 htr
+    have h := Bisimulation.follow_snd (Bisimilarity.is_bisimulation lts) h μ' htr
+    obtain ⟨p', htrq, h⟩ := h
+    exists (res a p')
+    constructor; constructor; repeat assumption
+    constructor; assumption
+
 private inductive ChoiceBisim : Rel (Process Name Constant) (Process Name Constant) where
 | choice : (p ~[@lts Name Constant defs] q) → ChoiceBisim (choice p r) (choice q r)
 | bisim : (p ~[@lts Name Constant defs] q) → ChoiceBisim p q
 
+/-- P ~ Q → P + R ~ Q + R -/
 theorem bisimilarity_congr_choice : (p ~[@lts Name Constant defs] q) → (choice p r) ~[@lts Name Constant defs] (choice q r) := by
   intro h
   constructor
@@ -219,6 +322,72 @@ theorem bisimilarity_congr_choice : (p ~[@lts Name Constant defs] q) → (choice
       constructor
       apply Bisimilarity.largest_bisimulation _ _ hb _ _ hr1
 
+private inductive ParBisim : Rel (Process Name Constant) (Process Name Constant) where
+| par : (p ~[@lts Name Constant defs] q) → ParBisim (par p r) (par q r)
+
+/-- P ~ Q → P | R ~ Q | R-/
+theorem bisimilarity_congr_par : (p ~[@lts Name Constant defs] q) → (par p r) ~[@lts Name Constant defs] (par q r) := by
+  intro h
+  constructor
+  exists @ParBisim _ _ defs
+  constructor; constructor; assumption
+  simp only [Bisimulation]
+  intro s1 s2 r μ
+  constructor
+  case left =>
+    intro s1' htr
+    cases r
+    case par p q r hbisim =>
+      obtain ⟨_, _, rel, hr, hb⟩ := hbisim
+      cases htr
+      case parL _ _ p' htr =>
+        obtain ⟨q', htr2, hr2⟩ := hb.follow_fst hr μ htr
+        exists (par q' r)
+        constructor
+        · apply tr.parL htr2
+        · constructor
+          apply Bisimilarity.largest_bisimulation _ _ hb _ _ hr2
+      case parR _ _ r' htr =>
+        exists (par q r')
+        constructor
+        · apply tr.parR htr
+        · constructor
+          apply Bisimilarity.largest_bisimulation _ _ hb _ _ hr
+      case com μ' p' r' htrp htrr =>
+        obtain ⟨q', htr2, hr2⟩ := hb.follow_fst hr μ' htrp
+        exists (par q' r')
+        constructor
+        · apply tr.com htr2 htrr
+        · constructor
+          apply Bisimilarity.largest_bisimulation _ _ hb _ _ hr2
+  case right =>
+    intro s2' htr
+    cases r
+    case par p q r hbisim =>
+      obtain ⟨_, _, rel, hr, hb⟩ := hbisim
+      cases htr
+      case parL _ _ p' htr =>
+        obtain ⟨p', htr2, hr2⟩ := hb.follow_snd hr μ htr
+        exists (par p' r)
+        constructor
+        · apply tr.parL htr2
+        · constructor
+          apply Bisimilarity.largest_bisimulation _ _ hb _ _ hr2
+      case parR _ _ r' htr =>
+        exists (par p r')
+        constructor
+        · apply tr.parR htr
+        · constructor
+          apply Bisimilarity.largest_bisimulation _ _ hb _ _ hr
+      case com μ' p' r' htrq htrr =>
+        obtain ⟨q', htr2, hr2⟩ := hb.follow_snd hr μ' htrq
+        exists (par q' r')
+        constructor
+        · apply tr.com htr2 htrr
+        · constructor
+          apply Bisimilarity.largest_bisimulation _ _ hb _ _ hr2
+
+/-- Bisimilarity is a congruence in CCS. -/
 theorem bisimilarity_congr (c : Context Name Constant) (p q : Process Name Constant) (h : p ~[@lts Name Constant defs] q) :
   c.fill p ~[@lts Name Constant defs] c.fill q := by
   induction c
@@ -230,18 +399,20 @@ theorem bisimilarity_congr (c : Context Name Constant) (p q : Process Name Const
     apply bisimilarity_congr_pre ih
   case parL c r ih =>
     simp [Context.fill]
-    -- apply bisimilarity_congr_par ih
-    sorry
+    apply bisimilarity_congr_par ih
   case parR r c ih =>
-    sorry
+    apply Bisimilarity.trans
+    · apply bisimilarity_par_comm
+    · apply Bisimilarity.trans
+      · apply bisimilarity_congr_par
+        exact ih
+      · apply bisimilarity_par_comm
   case choiceL c r ih =>
     simp [Context.fill]
     apply bisimilarity_congr_choice
     exact ih
   case choiceR r c ih =>
     simp [Context.fill]
-    have bisimilarity_choice_comm : ∀ p q, (choice p q) ~[@lts Name Constant defs] (choice q p) := by
-      sorry
     apply Bisimilarity.trans
     · apply bisimilarity_choice_comm
     · apply Bisimilarity.trans
@@ -249,7 +420,9 @@ theorem bisimilarity_congr (c : Context Name Constant) (p q : Process Name Const
         exact ih
       · apply bisimilarity_choice_comm
   case res =>
-    sorry
+    simp [Context.fill]
+    apply bisimilarity_congr_res
+    assumption
 
 end CCS
 

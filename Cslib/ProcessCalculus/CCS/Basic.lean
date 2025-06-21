@@ -7,17 +7,26 @@ Authors: Fabrizio Montesi
 /-! # Calculus of Communicating Systems (CCS)
 
 CCS, as presented in [Sangiorgi2011]. In the semantics (see `CCS.lts`), we use the option of constant definitions (K = P).
+
+## Main definitions
+- `CCS.Process`: processes.
+- `CCS.Context`: contexts.
+
+## Main results
+- `CCS.Context.complete`: any process is equal to some context filled an atomic process (nil or a constant).
 -/
 variable (Name : Type u) (Constant : Type v)
 
 namespace CCS
 
+/-- Actions. -/
 inductive Act : Type u where
 | name (a : Name)
 | coname (a : Name)
 | τ
 deriving DecidableEq
 
+/-- Processes. -/
 inductive Process : Type (max u v) where
 | nil
 | pre (μ : Act Name) (p : Process)
@@ -27,15 +36,18 @@ inductive Process : Type (max u v) where
 | const (c : Constant)
 deriving DecidableEq
 
+/-- Co action. -/
 def Act.co (μ : Act Name) : Act Name :=
   match μ with
   | name a => coname a
   | coname a => name a
   | τ => τ
 
+/-- `Act.co` is an involution. -/
 theorem Act.co.involution (μ : Act Name) : μ.co.co = μ := by
   cases μ <;> simp only [Act.co]
 
+/-- Contexts. -/
 inductive Context : Type (max u v) where
 | hole
 | pre (μ : Act Name) (c : Context)
@@ -46,6 +58,7 @@ inductive Context : Type (max u v) where
 | res (a : Name) (c : Context)
 deriving DecidableEq
 
+/-- Replaces the hole in a `Context` with a `Process`. -/
 def Context.fill {Name : Type u} {Constant : Type v} (c : Context Name Constant) (p : Process Name Constant) : Process Name Constant :=
   match c with
   | hole => p
@@ -56,7 +69,8 @@ def Context.fill {Name : Type u} {Constant : Type v} (c : Context Name Constant)
   | choiceR r c => Process.choice r (c.fill p)
   | res a c => Process.res a (c.fill p)
 
-/-- Any `Process` can be obtained by filling a `Context` with an atom. -/
+/-- Any `Process` can be obtained by filling a `Context` with an atom. This proves that `Context`
+is a complete formalisation of syntactic contexts for CCS. -/
 theorem Context.complete (p : Process Name Constant) : ∃ c : Context Name Constant, p = (c.fill Process.nil) ∨ ∃ k : Constant, p = c.fill (Process.const k) := by
   induction p
   case nil =>

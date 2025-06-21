@@ -6,6 +6,11 @@ Authors: Fabrizio Montesi, Xueying Qin
 
 import Mathlib.Data.Finset.Basic
 
+/-! # Finite Functions
+
+Formalisation of functions with a finite domain of definition.
+-/
+
 /-- A finite function FinFun is a function `f` equipped with a domain of definition `dom`. -/
 structure FinFun (α : Type u) (β : Type v) where
   f : α → β

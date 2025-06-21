@@ -8,5 +8,8 @@
 		"merge": "⊔",
 		"moreBranches": "⊒",
 		"par": "‖"
-	}
+	},
+	"editor.rulers": [
+		100
+	]
 }

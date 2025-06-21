@@ -36,4 +36,56 @@ def Act.co (μ : Act Name) : Act Name :=
 theorem Act.co.involution (μ : Act Name) : μ.co.co = μ := by
   cases μ <;> simp only [Act.co]
 
+inductive Context : Type (max u v) where
+| hole
+| pre (μ : Act Name) (c : Context)
+| parL (c : Context) (q : Process Name Constant)
+| parR (p : Process Name Constant) (c : Context)
+| choiceL (c : Context) (q : Process Name Constant)
+| choiceR (p : Process Name Constant) (c : Context)
+| res (a : Name) (c : Context)
+deriving DecidableEq
+
+def Context.fill {Name : Type u} {Constant : Type v} (c : Context Name Constant) (p : Process Name Constant) : Process Name Constant :=
+  match c with
+  | hole => p
+  | pre μ c => Process.pre μ (c.fill p)
+  | parL c r => Process.par (c.fill p) r
+  | parR r c => Process.par r (c.fill p)
+  | choiceL c r => Process.choice (c.fill p) r
+  | choiceR r c => Process.choice r (c.fill p)
+  | res a c => Process.res a (c.fill p)
+
+/-- Any `Process` can be obtained by filling a `Context` with an atom. -/
+theorem Context.complete (p : Process Name Constant) : ∃ c : Context Name Constant, p = (c.fill Process.nil) ∨ ∃ k : Constant, p = c.fill (Process.const k) := by
+  induction p
+  case nil =>
+    exists hole
+    left
+    simp [fill]
+  case pre μ p ih =>
+    obtain ⟨c, hc⟩ := ih
+    exists pre μ c
+    simp [fill]
+    assumption
+  case par p q ihp ihq =>
+    obtain ⟨cp, hcp⟩ := ihp
+    exists parL cp q
+    simp [fill]
+    assumption
+  case choice p q ihp ihq =>
+    obtain ⟨cp, hcp⟩ := ihp
+    exists choiceL cp q
+    simp [fill]
+    assumption
+  case res a p ih =>
+    obtain ⟨c, hc⟩ := ih
+    exists res a c
+    simp [fill]
+    assumption
+  case const k =>
+    exists hole
+    right
+    exists k
+
 end CCS

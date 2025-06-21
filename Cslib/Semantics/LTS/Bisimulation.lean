@@ -65,6 +65,14 @@ def Bisimulation (lts : LTS State Label) (r : Rel State State) : Prop :=
     (∀ s2', lts.tr s2 μ s2' → ∃ s1', lts.tr s1 μ s1' ∧ r s1' s2')
   )
 
+/-- Helper for following a transition using the first component of a `Bisimulation`. -/
+def Bisimulation.follow_fst {lts : LTS State Label} {r : Rel State State} (hb : Bisimulation lts r) (hr : r s1 s2) (μ : Label) (htr : lts.tr s1 μ s1'):=
+  (hb _ _ hr μ).1 _ htr
+
+/-- Helper for following a transition using the second component of a `Bisimulation`. -/
+def Bisimulation.follow_snd {lts : LTS State Label} {r : Rel State State} (hb : Bisimulation lts r) (hr : r s1 s2) (μ : Label) (htr : lts.tr s2 μ s2'):=
+  (hb _ _ hr μ).2 _ htr
+
 /-- Two states are bisimilar if they are related by some bisimulation. -/
 inductive Bisimilarity (lts : LTS State Label) : Rel State State where
 | bisim (s1 s2 : State) (h : ∃ r : Rel State State, r s1 s2 ∧ Bisimulation lts r) :

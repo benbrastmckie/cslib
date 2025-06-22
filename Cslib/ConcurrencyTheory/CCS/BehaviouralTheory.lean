@@ -4,11 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Fabrizio Montesi
 -/
 
-import Cslib.Data.FinFun
 import Cslib.Semantics.LTS.Basic
 import Cslib.Semantics.LTS.Bisimulation
-import Cslib.ProcessCalculus.CCS.Basic
-import Cslib.ProcessCalculus.CCS.Semantics
+import Cslib.ConcurrencyTheory.CCS.Basic
+import Cslib.ConcurrencyTheory.CCS.Semantics
 
 /-! # Behavioural theory of CCS
 
@@ -24,7 +23,7 @@ Additionally, some standard laws of bisimilarity for CCS, including:
 
 section CCS.BehaviouralTheory
 
-variable {Name : Type u} {Constant : Type v} {defs : Constant ⇀ CCS.Process Name Constant}
+variable {Name : Type u} {Constant : Type v} {defs : Rel Constant (CCS.Process Name Constant)}
 
 open CCS CCS.Process CCS.Act
 

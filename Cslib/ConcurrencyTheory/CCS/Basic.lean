@@ -6,14 +6,16 @@ Authors: Fabrizio Montesi
 
 /-! # Calculus of Communicating Systems (CCS)
 
-CCS, as presented in [Sangiorgi2011]. In the semantics (see `CCS.lts`), we use the option of constant definitions (K = P).
+CCS, as presented in [Sangiorgi2011]. In the semantics (see `CCS.lts`), we use the option of
+constant definitions (K = P).
 
 ## Main definitions
 - `CCS.Process`: processes.
 - `CCS.Context`: contexts.
 
 ## Main results
-- `CCS.Context.complete`: any process is equal to some context filled an atomic process (nil or a constant).
+- `CCS.Context.complete`: any process is equal to some context filled an atomic process
+(nil or a constant).
 -/
 variable (Name : Type u) (Constant : Type v)
 

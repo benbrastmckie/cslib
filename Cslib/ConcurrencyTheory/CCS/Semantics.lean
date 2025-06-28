@@ -37,4 +37,11 @@ def lts : LTS (Process Name Constant) (Act Name) := {
   tr := @CCS.tr Name Constant defs
 }
 
+/-- A process is (successfully) terminated if it is a composition of `nil`s. -/
+inductive Terminated : Process Name Constant → Prop where
+| nil : Terminated Process.nil
+| par : Terminated p → Terminated q → Terminated (par p q)
+| choice : Terminated p → Terminated q → Terminated (choice p q)
+| res : Terminated p → Terminated (res a p)
+
 end CCS

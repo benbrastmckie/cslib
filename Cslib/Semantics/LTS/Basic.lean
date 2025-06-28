@@ -59,6 +59,7 @@ structure LTS (State : Type u) (Label : Type v) where
 
 section Relation
 
+/-- Given an `lts` and a transition label `μ`, returns the relation that relates all states `s1` and `s2` such that `lts.tr s1 μ s2`. -/
 def LTS.toRel (lts : LTS State Label) (μ : Label) : Rel State State :=
   fun s1 s2 => lts.tr s1 μ s2
 
@@ -190,13 +191,9 @@ def Sum.isLeftP {α} {β} (x : α ⊕ β) : Prop := Sum.isLeft x = true
 /-- TODO: move this to `Sum`? -/
 def Sum.isRightP {α} {β} (x : α ⊕ β) : Prop := Sum.isRight x = true
 
-/-- TODO: move this to `True`? -/
-@[nolint unusedArguments]
-def True.trueFun {α} := fun _ : α => True
-
 /-- Lifting of an `LTS State Label` to `LTS (State ⊕ State') Label`. -/
 def LTS.inl {State'} (lts : LTS State Label) :
-  LTS (@Subtype (State ⊕ State') Sum.isLeftP) (@Subtype Label True.trueFun) := {
+  LTS (@Subtype (State ⊕ State') Sum.isLeftP) (@Subtype Label (Function.const Label True)) := {
   tr := fun s μ s' =>
     let ⟨s, _⟩ := s
     let ⟨s', _⟩ := s'
@@ -207,7 +204,7 @@ def LTS.inl {State'} (lts : LTS State Label) :
 
 /-- Lifting of an `LTS State Label` to `LTS (State' ⊕ State) Label`. -/
 def LTS.inr {State'} (lts : LTS State Label) :
-  LTS (@Subtype (State' ⊕ State) Sum.isRightP) (@Subtype Label True.trueFun) := {
+  LTS (@Subtype (State' ⊕ State) Sum.isRightP) (@Subtype Label (Function.const Label True)) := {
   tr := fun s μ s' =>
     let ⟨s, _⟩ := s
     let ⟨s', _⟩ := s'
@@ -223,9 +220,9 @@ def LTS.unionSum {State1} {State2} (lts1 : LTS State1 Label) (lts2 : LTS State2 
   @LTS.unionSubtype
     (State1 ⊕ State2) Label
     Sum.isLeftP
-    True.trueFun
+    (Function.const Label True)
     Sum.isRightP
-    True.trueFun
+    (Function.const Label True)
     (by
       simp [DecidablePred]
       intro s
@@ -237,7 +234,7 @@ def LTS.unionSum {State1} {State2} (lts1 : LTS State1 Label) (lts2 : LTS State2 
         trivial)
     (by
       intro μ
-      simp [True.trueFun]
+      simp [Function.const]
       apply Decidable.isTrue
       trivial)
     (by
@@ -251,7 +248,7 @@ def LTS.unionSum {State1} {State2} (lts1 : LTS State1 Label) (lts2 : LTS State2 
         trivial)
     (by
       intro μ
-      simp [True.trueFun]
+      simp [Function.const]
       apply Decidable.isTrue
       trivial)
     lts1.inl

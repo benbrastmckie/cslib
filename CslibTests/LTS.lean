@@ -30,7 +30,6 @@ inductive NatBisim : Rel ℕ ℕ where
 | two_two : NatBisim 2 2
 
 example : 1 ~[natLts] 2 := by
-  constructor
   exists NatBisim
   constructor
   . constructor

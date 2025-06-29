@@ -88,7 +88,7 @@ Notation for bisimilarity.
 Differently from standard pen-and-paper presentations, we require the lts to be mentioned
 explicitly.
 -/
-notation s " ~[" lts "] " s' => Bisimilarity lts s s'
+notation s:max " ~[" lts "] " s':max => Bisimilarity lts s s'
 
 /-- Bisimilarity is reflexive. -/
 theorem Bisimilarity.refl (s : State) : s ~[lts] s := by

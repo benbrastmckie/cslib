@@ -381,7 +381,7 @@ theorem bisimilarity_congr_par : (p ~[@lts Name Constant defs] q) → (par p r) 
 
 /-- Bisimilarity is a congruence in CCS. -/
 theorem bisimilarity_congr (c : Context Name Constant) (p q : Process Name Constant) (h : p ~[@lts Name Constant defs] q) :
-  c.fill p ~[@lts Name Constant defs] c.fill q := by
+  (c.fill p) ~[@lts Name Constant defs] (c.fill q) := by
   induction c
   case hole =>
     simp only [Context.fill]

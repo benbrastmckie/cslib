@@ -74,9 +74,13 @@ def Bisimulation.follow_snd {lts : LTS State Label} {r : Rel State State} (hb : 
   (hb _ _ hr μ).2 _ htr
 
 /-- Two states are bisimilar if they are related by some bisimulation. -/
-inductive Bisimilarity (lts : LTS State Label) : Rel State State where
-| bisim (s1 s2 : State) (h : ∃ r : Rel State State, r s1 s2 ∧ Bisimulation lts r) :
-  Bisimilarity lts s1 s2
+def Bisimilarity (lts : LTS State Label) : Rel State State :=
+  fun s1 s2 =>
+    ∃ r : Rel State State, r s1 s2 ∧ Bisimulation lts r
+-- Old definition:
+-- inductive Bisimilarity (lts : LTS State Label) : Rel State State where
+-- | bisim (s1 s2 : State) (h : ∃ r : Rel State State, r s1 s2 ∧ Bisimulation lts r) :
+--   Bisimilarity lts s1 s2
 
 /--
 Notation for bisimilarity.
@@ -88,7 +92,6 @@ notation s " ~[" lts "] " s' => Bisimilarity lts s s'
 
 /-- Bisimilarity is reflexive. -/
 theorem Bisimilarity.refl (s : State) : s ~[lts] s := by
-  constructor
   exists Rel.Id
   constructor
   case left =>
@@ -133,10 +136,7 @@ theorem Bisimulation.inv (r : Rel State State) (h : Bisimulation lts r) :
 
 /-- Bisimilarity is symmetric. -/
 theorem Bisimilarity.symm {s1 s2 : State} (h : s1 ~[lts] s2) : s2 ~[lts] s1 := by
-  cases h
-  rename_i h
   obtain ⟨r, hr, hb⟩ := h
-  constructor
   exists r.inv
   constructor
   case left =>
@@ -185,9 +185,8 @@ theorem Bisimulation.comp
 theorem Bisimilarity.trans
   {s1 s2 s3 : State} (h1 : s1 ~[lts] s2) (h2 : s2 ~[lts] s3) :
   s1 ~[lts] s3 := by
-  obtain ⟨_, _, r1, hr1, hr1b⟩ := h1
-  obtain ⟨_, _, r2, hr2, hr2b⟩ := h2
-  constructor
+  obtain ⟨r1, hr1, hr1b⟩ := h1
+  obtain ⟨r2, hr2, hr2b⟩ := h2
   exists r1.comp r2
   constructor
   case left =>
@@ -208,7 +207,7 @@ theorem Bisimilarity.eqv (lts : LTS State Label) :
 theorem Bisimilarity.is_bisimulation : Bisimulation lts (Bisimilarity lts) := by
   simp only [Bisimulation]
   intro s1 s2 h μ
-  obtain ⟨_, _, r, hr, hb⟩ := h
+  obtain ⟨r, hr, hb⟩ := h
   have hrBisim := hb
   simp [Bisimulation] at hb
   specialize hb s1 s2
@@ -224,7 +223,6 @@ theorem Bisimilarity.is_bisimulation : Bisimulation lts (Bisimilarity lts) := by
     case left =>
       exact htr2
     case right =>
-      constructor
       exists r
   case right =>
     intro s2' htr
@@ -237,7 +235,6 @@ theorem Bisimilarity.is_bisimulation : Bisimulation lts (Bisimilarity lts) := by
     case left =>
       exact htr1
     case right =>
-      constructor
       exists r
 
 /-- Bisimilarity is the largest bisimulation. -/
@@ -245,7 +242,6 @@ theorem Bisimilarity.largest_bisimulation
   (r : Rel State State) (h : Bisimulation lts r) (s1 s2 : State) :
   r s1 s2 → s1 ~[lts] s2 := by
   intro hr
-  constructor
   exists r
 
 /-- Union of two relations.
@@ -278,8 +274,8 @@ theorem Bisimulation.upTo_bisimulation (r : Rel State State) (h : BisimulationUp
   simp [BisimulationUpTo] at h
   intro s1 s2 hr μ
   rcases hr with ⟨s1b, hr1b, s2b, hrb, hr2b⟩
-  obtain ⟨_, _, r1, hr1, hr1b⟩ := hr1b
-  obtain ⟨_, _, r2, hr2, hr2b⟩ := hr2b
+  obtain ⟨r1, hr1, hr1b⟩ := hr1b
+  obtain ⟨r2, hr2, hr2b⟩ := hr2b
   constructor
   case left =>
     intro s1' htr1
@@ -383,10 +379,8 @@ theorem Bisimulation.bisim_trace_eq
 /-- Bisimilarity implies trace equivalence. -/
 theorem Bisimilarity.bisim_trace_eq (s1 s2 : State) (h : s1 ~[lts] s2) :
   s1 ~tr[lts] s2 := by
-  cases h
-  case bisim hb =>
-    obtain ⟨r, hr, hb⟩ := hb
-    apply Bisimulation.bisim_trace_eq lts s1 s2 r hb hr
+  obtain ⟨r, hr, hb⟩ := h
+  apply Bisimulation.bisim_trace_eq lts s1 s2 r hb hr
 
 /-- In a deterministic LTS, trace equivalence is a bisimulation. -/
 theorem Bisimulation.deterministic_trace_eq_is_bisim
@@ -413,7 +407,6 @@ theorem Bisimulation.deterministic_trace_eq_is_bisim
 theorem Bisimilarity.deterministic_trace_eq_bisim
   (lts : LTS State Label) (hdet : lts.Deterministic) (s1 s2 : State) (h : s1 ~tr[lts] s2) :
   (s1 ~[lts] s2) := by
-  constructor
   exists TraceEq lts
   constructor
   case left =>

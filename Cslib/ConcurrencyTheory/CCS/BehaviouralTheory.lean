@@ -34,7 +34,6 @@ private inductive ParNil : Rel (Process Name Constant) (Process Name Constant) w
 
 /-- P | 𝟎 ~ P -/
 theorem bisimilarity_par_nil (p : Process Name Constant) : (par p nil) ~[@lts Name Constant defs] p := by
-  constructor
   exists ParNil
   constructor; constructor
   simp only [Bisimulation]
@@ -66,7 +65,6 @@ private inductive ParComm : Rel (Process Name Constant) (Process Name Constant) 
 
 /-- P | Q ~ Q | P -/
 theorem bisimilarity_par_comm (p q : Process Name Constant) : (par p q) ~[@lts Name Constant defs] (par q p) := by
-  constructor
   exists ParComm
   constructor
   case left =>
@@ -122,7 +120,6 @@ private inductive ChoiceComm : Rel (Process Name Constant) (Process Name Constan
 
 /-- P + Q ~ Q + P -/
 theorem bisimilarity_choice_comm : (choice p q) ~[@lts Name Constant defs] (choice q p) := by
-  constructor
   exists @ChoiceComm Name Constant defs
   repeat constructor
   simp only [Bisimulation]
@@ -176,7 +173,6 @@ private inductive PreBisim : Rel (Process Name Constant) (Process Name Constant)
 /-- P ~ Q → μ.P ~ μ.Q -/
 theorem bisimilarity_congr_pre : (p ~[@lts Name Constant defs] q) → (pre μ p) ~[@lts Name Constant defs] (pre μ q) := by
   intro hpq
-  constructor
   exists @PreBisim _ _ defs
   constructor; constructor; assumption
   simp only [Bisimulation]
@@ -201,7 +197,7 @@ theorem bisimilarity_congr_pre : (p ~[@lts Name Constant defs] q) → (pre μ p)
     constructor
     case left =>
       intro s1' htr
-      obtain ⟨_, _, r, hr, hb⟩ := hbis
+      obtain ⟨r, hr, hb⟩ := hbis
       let hbisim := hb
       obtain ⟨s2', htr2, hr2⟩ := hb.follow_fst hr μ' htr
       exists s2'
@@ -210,7 +206,7 @@ theorem bisimilarity_congr_pre : (p ~[@lts Name Constant defs] q) → (pre μ p)
       apply Bisimilarity.largest_bisimulation _ r hbisim _ _ hr2
     case right =>
       intro s2' htr
-      obtain ⟨_, _, r, hr, hb⟩ := hbis
+      obtain ⟨r, hr, hb⟩ := hbis
       let hbisim := hb
       specialize hb _ _ hr μ'
       obtain ⟨hb1, hb2⟩ := hb
@@ -228,7 +224,6 @@ private inductive ResBisim : Rel (Process Name Constant) (Process Name Constant)
 /-- P ~ Q → (ν a) P ~ (ν a) Q -/
 theorem bisimilarity_congr_res : (p ~[@lts Name Constant defs] q) → (res a p) ~[@lts Name Constant defs] (res a q) := by
   intro hpq
-  constructor
   exists @ResBisim _ _ defs
   constructor; constructor; assumption
   simp only [Bisimulation]
@@ -262,7 +257,6 @@ private inductive ChoiceBisim : Rel (Process Name Constant) (Process Name Consta
 /-- P ~ Q → P + R ~ Q + R -/
 theorem bisimilarity_congr_choice : (p ~[@lts Name Constant defs] q) → (choice p r) ~[@lts Name Constant defs] (choice q r) := by
   intro h
-  constructor
   exists @ChoiceBisim _ _ defs
   constructor; constructor; assumption
   simp only [Bisimulation]
@@ -272,7 +266,7 @@ theorem bisimilarity_congr_choice : (p ~[@lts Name Constant defs] q) → (choice
     intro s1' htr
     cases r
     case choice p q r hbisim =>
-      obtain ⟨_, _, rel, hr, hb⟩ := hbisim
+      obtain ⟨rel, hr, hb⟩ := hbisim
       cases htr
       case choiceL a b c htr =>
         obtain ⟨s2', htr2, hr2⟩ := hb.follow_fst hr μ htr
@@ -288,7 +282,7 @@ theorem bisimilarity_congr_choice : (p ~[@lts Name Constant defs] q) → (choice
         · constructor
           apply Bisimilarity.refl
     case bisim hbisim =>
-      obtain ⟨_, _, rel, hr, hb⟩ := hbisim
+      obtain ⟨rel, hr, hb⟩ := hbisim
       obtain ⟨s2', htr2, hr2⟩ := hb.follow_fst hr μ htr
       exists s2'
       constructor; assumption
@@ -298,7 +292,7 @@ theorem bisimilarity_congr_choice : (p ~[@lts Name Constant defs] q) → (choice
     intro s2' htr
     cases r
     case choice p q r hbisim =>
-      obtain ⟨_, _, rel, hr, hb⟩ := hbisim
+      obtain ⟨rel, hr, hb⟩ := hbisim
       cases htr
       case choiceL a b c htr =>
         obtain ⟨s1', htr1, hr1⟩ := hb.follow_snd hr μ htr
@@ -314,7 +308,7 @@ theorem bisimilarity_congr_choice : (p ~[@lts Name Constant defs] q) → (choice
         · constructor
           apply Bisimilarity.refl
     case bisim hbisim =>
-      obtain ⟨_, _, rel, hr, hb⟩ := hbisim
+      obtain ⟨rel, hr, hb⟩ := hbisim
       obtain ⟨s1', htr1, hr1⟩ := hb.follow_snd hr μ htr
       exists s1'
       constructor; assumption
@@ -327,7 +321,6 @@ private inductive ParBisim : Rel (Process Name Constant) (Process Name Constant)
 /-- P ~ Q → P | R ~ Q | R-/
 theorem bisimilarity_congr_par : (p ~[@lts Name Constant defs] q) → (par p r) ~[@lts Name Constant defs] (par q r) := by
   intro h
-  constructor
   exists @ParBisim _ _ defs
   constructor; constructor; assumption
   simp only [Bisimulation]
@@ -337,7 +330,7 @@ theorem bisimilarity_congr_par : (p ~[@lts Name Constant defs] q) → (par p r) 
     intro s1' htr
     cases r
     case par p q r hbisim =>
-      obtain ⟨_, _, rel, hr, hb⟩ := hbisim
+      obtain ⟨rel, hr, hb⟩ := hbisim
       cases htr
       case parL _ _ p' htr =>
         obtain ⟨q', htr2, hr2⟩ := hb.follow_fst hr μ htr
@@ -363,7 +356,7 @@ theorem bisimilarity_congr_par : (p ~[@lts Name Constant defs] q) → (par p r) 
     intro s2' htr
     cases r
     case par p q r hbisim =>
-      obtain ⟨_, _, rel, hr, hb⟩ := hbisim
+      obtain ⟨rel, hr, hb⟩ := hbisim
       cases htr
       case parL _ _ p' htr =>
         obtain ⟨p', htr2, hr2⟩ := hb.follow_snd hr μ htr

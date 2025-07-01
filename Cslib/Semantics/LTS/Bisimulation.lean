@@ -779,3 +779,23 @@ theorem Bisimulation.simulation_iff (lts : LTS State Label) (r : Rel State State
       apply hsinv _ _ hr _ _ htr
 
 end Bisimulation
+
+section WeakBisimulation
+
+/-- A weak bisimulation is similar to a `Bisimulation`, but allows for the related processes to do
+internal work. -/
+def WeakBisimulation {Internal : Label → Prop} (lts : LTS State Label) (r : Rel State State) : Prop :=
+  ∀ s1 s2, r s1 s2 →
+    (∀ μ s1', @Visible Label Internal μ → @lts.wtr State Label Internal s1 μ s1' →
+      ∃ s2', @lts.wtr State Label Internal s2 μ s2' ∧ r s1' s2')
+    ∧
+    (∀ μ s1', Internal μ → @lts.wtr State Label Internal s1 μ s1' →
+      ∃ s2', @lts.imtr State Label Internal s2 s2' ∧ r s1' s2')
+    ∧
+    (∀ μ s2', @Visible Label Internal μ → @lts.wtr State Label Internal s2 μ s2' →
+      ∃ s1', @lts.wtr State Label Internal s1 μ s1' ∧ r s1' s2')
+    ∧
+    (∀ μ s2', Internal μ → @lts.wtr State Label Internal s2 μ s2' →
+      ∃ s1', @lts.imtr State Label Internal s1 s1' ∧ r s1' s2')
+
+end WeakBisimulation

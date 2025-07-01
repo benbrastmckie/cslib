@@ -385,3 +385,52 @@ def LTS.Finite : Prop :=
   lts.FiniteState ∧ lts.Acyclic
 
 end Classes
+
+/-! ### Weak transitions (single- and multi-step) -/
+
+section Weak
+
+class ILabel (Label : Type v) where
+  Internal : Label → Prop
+
+variable {State : Type u} {Label : Type v} {Internal : Label → Prop} (lts : LTS State Label)
+
+/-- Saturated transition relation. -/
+inductive LTS.str [ILabel Label] (lts : LTS State Label) : State → Label → State → Prop where
+| refl : ILabel.Internal μ → lts.str s μ s
+| tr : lts.str s1 μ
+
+def LTS.saturate [ILabel Label] (lts : LTS State Label) : LTS State Label := {
+  tr := fun s1 μ s2 =>
+    match
+}
+
+
+
+
+-- def LTS.str [ILabel Label] (lts : LTS State Label) (s1 s2 : State) : Prop :=
+
+
+/-- Internal multi-step transition relation. -/
+def LTS.imtr (lts : LTS State Label) (s1 s2 : State) : Prop :=
+  ∃ μs : List Label, μs.Forall Internal → lts.mtr s1 μs s2
+
+/-- Weak transition relation. -/
+def LTS.wtr {Internal : Label → Prop} (lts : LTS State Label) (s1 : State) (μ : Label) (s2 : State) : Prop :=
+  ∃ sb1 sb2,
+    @lts.imtr State Label Internal s1 sb1 ∧
+    lts.tr sb1 μ sb2 ∧
+    @lts.imtr State Label Internal sb2 s2
+
+/--
+Multi-step weak transitions.
+-/
+inductive LTS.mwtr (lts : LTS State Label) : State → List Label → State → Prop where
+| internal : lts.imtr s1 s2 → lts.mwtr s1 [] s2
+| stepL {s1 : State} {μ : Label} {s2 : State} {μs : List Label} {s3 : State} :
+  lts.wtr s1 μ s2 → lts.mwtr s2 μs s3 →
+  lts.mwtr s1 (μ :: μs) s3
+
+abbrev Visible {Internal : Label → Prop} (μ : Label) := ¬Internal μ
+
+end Weak

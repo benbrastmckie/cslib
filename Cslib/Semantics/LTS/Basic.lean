@@ -78,11 +78,11 @@ Definition of a multi-step transition.
 rule. This makes working with lists of labels more convenient, because we follow the same
 construction. It is also similar to what is done in the `SimpleGraph` library in mathlib.)
 -/
-inductive LTS.mtr (lts : LTS State Label) : State -> List Label -> State -> Prop where
-  | refl {s : State} : lts.mtr s [] s
-  | stepL {s1 : State} {μ : Label} {s2 : State} {μs : List Label} {s3 : State} :
-    lts.tr s1 μ s2 → lts.mtr s2 μs s3 →
-    lts.mtr s1 (μ :: μs) s3
+inductive LTS.mtr (lts : LTS State Label) : State → List Label → State → Prop where
+| refl {s : State} : lts.mtr s [] s
+| stepL {s1 : State} {μ : Label} {s2 : State} {μs : List Label} {s3 : State} :
+  lts.tr s1 μ s2 → lts.mtr s2 μs s3 →
+  lts.mtr s1 (μ :: μs) s3
 
 /-- Any transition is also a multi-step transition. -/
 theorem LTS.mtr.single {s1 : State} {μ : Label} {s2 : State} :
@@ -127,6 +127,11 @@ theorem LTS.mtr.single_invert (s1 : State) (μ : Label) (s2 : State) :
   case stepL s1' htr hmtr =>
     cases hmtr
     exact htr
+
+/-- In any zero-steps multi-step transition, the origin and the derivative are the same. -/
+theorem LTS.mtr.nil_eq (h : lts.mtr s1 [] s2) : s1 = s2 := by
+  cases h
+  rfl
 
 /-- A state `s1` can reach a state `s2` if there exists a multi-step transition from
 `s1` to `s2`. -/

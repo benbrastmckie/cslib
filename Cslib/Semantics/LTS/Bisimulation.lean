@@ -354,8 +354,10 @@ theorem Bisimulation.bisim_trace
       case right =>
         exact hr'
 
+/-! ### Relation to trace equivalence -/
+
 /-- Any bisimulation implies trace equivalence. -/
-theorem Bisimulation.bisim_trace_eq
+theorem Bisimulation.bisim_traceEq
   (s1 s2 : State) (r : Rel State State) (hb : Bisimulation lts r) (hr : r s1 s2) :
   s1 ~tr[lts] s2 := by
   simp [TraceEq, LTS.traces, setOf]
@@ -380,10 +382,312 @@ theorem Bisimulation.bisim_trace_eq
 theorem Bisimilarity.bisim_trace_eq (s1 s2 : State) (h : s1 ~[lts] s2) :
   s1 ~tr[lts] s2 := by
   obtain ⟨r, hr, hb⟩ := h
-  apply Bisimulation.bisim_trace_eq lts s1 s2 r hb hr
+  apply Bisimulation.bisim_traceEq lts s1 s2 r hb hr
 
-/-- In a deterministic LTS, trace equivalence is a bisimulation. -/
-theorem Bisimulation.deterministic_trace_eq_is_bisim
+/- One of the standard motivating examples for bisimulation: `1` and `5` are trace equivalent, but
+not bisimilar. -/
+private inductive BisimMotTr : ℕ → Char → ℕ → Prop where
+-- First process, `1`
+| one2two : BisimMotTr 1 'a' 2
+| two2three : BisimMotTr 2 'b' 3
+| two2four : BisimMotTr 2 'c' 4
+-- Second process, `5`
+| five2six : BisimMotTr 5 'a' 6
+| six2seven : BisimMotTr 6 'b' 7
+| five2eight : BisimMotTr 5 'a' 8
+| eight2nine : BisimMotTr 8 'c' 9
+
+/-- In general, trace equivalence is not a bisimulation (extra conditions are needed, see for
+example `Bisimulation.deterministic_trace_eq_is_bisim`). -/
+theorem Bisimulation.traceEq_not_bisim :
+  ∃ (State : Type) (Label : Type) (lts : LTS State Label), ¬(Bisimulation lts (TraceEq lts)) := by
+  exists ℕ
+  exists Char
+  let lts := LTS.mk BisimMotTr
+  exists lts
+  intro h
+  simp [Bisimulation] at h
+  specialize h 1 5
+  have htreq : (1 ~tr[lts] 5) := by
+    simp [TraceEq]
+    have htraces1 : lts.traces 1 = {[], ['a'], ['a', 'b'], ['a', 'c']} := by
+      simp [LTS.traces]
+      apply Set.ext_iff.2
+      intro μs
+      apply Iff.intro
+      case mp =>
+        intro h1
+        obtain ⟨s', htr⟩ := h1
+        cases htr
+        case intro.refl =>
+          simp
+        case intro.stepL μ sb μs' htr hmtr =>
+          cases htr
+          simp
+          cases hmtr <;> simp
+          case one2two.stepL μ sb μs' htr hmtr =>
+            cases htr <;> cases hmtr <;> simp <;> contradiction
+      case mpr =>
+        intro h1
+        cases h1
+        case inl h1 =>
+          simp [h1]
+          exists 1
+          constructor
+        case inr h1 =>
+          cases h1
+          case inl h1 =>
+            simp [h1]
+            exists 2
+            apply LTS.mtr.single; constructor
+          case inr h1 =>
+            cases h1
+            case inl h1 =>
+              simp [h1]
+              exists 3
+              constructor; apply BisimMotTr.one2two; apply LTS.mtr.single;
+                apply BisimMotTr.two2three
+            case inr h1 =>
+              cases h1
+              exists 4
+              constructor; apply BisimMotTr.one2two; apply LTS.mtr.single;
+                apply BisimMotTr.two2four
+    have htraces2 : lts.traces 5 = {[], ['a'], ['a', 'b'], ['a', 'c']} := by
+      simp [LTS.traces]
+      apply Set.ext_iff.2
+      intro μs
+      apply Iff.intro
+      case mp =>
+        intro h1
+        obtain ⟨s', htr⟩ := h1
+        cases htr
+        case intro.refl =>
+          simp
+        case intro.stepL μ sb μs' htr hmtr =>
+          cases htr
+          case five2six =>
+            simp
+            cases hmtr
+            case refl =>
+              simp
+            case stepL μ sb μs' htr hmtr =>
+              cases htr
+              cases hmtr
+              case refl => right; left; simp
+              case stepL μ sb μs' htr hmtr =>
+                cases htr
+          case five2eight =>
+            simp
+            cases hmtr
+            case refl =>
+              simp
+            case stepL μ sb μs' htr hmtr =>
+              cases htr
+              cases hmtr
+              case refl => right; right; simp
+              case stepL μ sb μs' htr hmtr =>
+                cases htr
+      case mpr =>
+        intro h1
+        cases h1
+        case inl h1 =>
+          simp [h1]
+          exists 5
+          constructor
+        case inr h1 =>
+          cases h1
+          case inl h1 =>
+            simp [h1]
+            exists 6
+            apply LTS.mtr.single; constructor
+          case inr h1 =>
+            cases h1
+            case inl h1 =>
+              simp [h1]
+              exists 7
+              constructor; apply BisimMotTr.five2six; apply LTS.mtr.single;
+                apply BisimMotTr.six2seven
+            case inr h1 =>
+              cases h1
+              exists 9
+              constructor; apply BisimMotTr.five2eight; apply LTS.mtr.single;
+                apply BisimMotTr.eight2nine
+    simp [htraces1, htraces2]
+  specialize h htreq
+  specialize h 'a'
+  obtain ⟨h1, h2⟩ := h
+  specialize h1 2 (by constructor)
+  obtain ⟨s2', htr5, cih⟩ := h1
+  cases htr5
+  case five2six =>
+    simp [TraceEq] at cih
+    have htraces2 : lts.traces 2 = {[], ['b'], ['c']} := by
+      simp [LTS.traces]
+      apply Set.ext_iff.2
+      intro μs
+      apply Iff.intro
+      case mp =>
+        intro h
+        obtain ⟨s', htr⟩ := h
+        cases htr
+        case refl => simp
+        case stepL μ sb μs' htr hmtr =>
+          cases htr
+          case two2three =>
+            cases hmtr <;> simp
+            case stepL μ sb μs' htr hmtr =>
+              cases htr
+          case two2four =>
+            cases hmtr
+            case refl => simp
+            case stepL μ sb μs' htr hmtr =>
+              cases htr
+      case mpr =>
+        intro h
+        cases h
+        case inl h =>
+          simp
+          exists 2
+          simp [h]
+          constructor
+        case inr h =>
+          simp
+          cases h
+          case inl h =>
+            exists 3; simp [h]; constructor; constructor; constructor
+          case inr h =>
+            exists 4
+            simp at h
+            simp [h]
+            constructor; constructor; constructor
+    have htraces6 : lts.traces 6 = {[], ['b']} := by
+      simp [LTS.traces]
+      apply Set.ext_iff.2
+      intro μs
+      apply Iff.intro
+      case mp =>
+        intro h
+        obtain ⟨s', htr⟩ := h
+        cases htr
+        case refl => simp
+        case stepL μ sb μs' htr hmtr =>
+          cases htr
+          cases hmtr <;> simp
+          case stepL μ sb μs' htr hmtr =>
+            cases htr
+      case mpr =>
+        intro h
+        cases h
+        case inl h =>
+          simp
+          exists 6
+          simp [h]
+          constructor
+        case inr h =>
+          simp
+          exists 7
+          simp at h
+          simp [h]
+          constructor; constructor; constructor
+    rw [htraces2, htraces6] at cih
+    apply Set.ext_iff.1 at cih
+    specialize cih ['c']
+    obtain ⟨cih1, cih2⟩ := cih
+    have cih1h : ['c'] ∈ @insert (List Char) (Set (List Char)) Set.instInsert [] {['b'], ['c']} := by
+      simp
+    specialize cih1 cih1h
+    simp at cih1
+  case five2eight =>
+    simp [TraceEq] at cih
+    have htraces2 : lts.traces 2 = {[], ['b'], ['c']} := by
+      simp [LTS.traces]
+      apply Set.ext_iff.2
+      intro μs
+      apply Iff.intro
+      case mp =>
+        intro h
+        obtain ⟨s', htr⟩ := h
+        cases htr
+        case refl => simp
+        case stepL μ sb μs' htr hmtr =>
+          cases htr
+          case two2three =>
+            cases hmtr <;> simp
+            case stepL μ sb μs' htr hmtr =>
+              cases htr
+          case two2four =>
+            cases hmtr
+            case refl => simp
+            case stepL μ sb μs' htr hmtr =>
+              cases htr
+      case mpr =>
+        intro h
+        cases h
+        case inl h =>
+          simp
+          exists 2
+          simp [h]
+          constructor
+        case inr h =>
+          simp
+          cases h
+          case inl h =>
+            exists 3; simp [h]; constructor; constructor; constructor
+          case inr h =>
+            exists 4
+            simp at h
+            simp [h]
+            constructor; constructor; constructor
+    have htraces8 : lts.traces 8 = {[], ['c']} := by
+      simp [LTS.traces]
+      apply Set.ext_iff.2
+      intro μs
+      apply Iff.intro
+      case mp =>
+        intro h
+        obtain ⟨s', htr⟩ := h
+        cases htr
+        case refl => simp
+        case stepL μ sb μs' htr hmtr =>
+          cases htr
+          cases hmtr <;> simp
+          case stepL μ sb μs' htr hmtr =>
+            cases htr
+      case mpr =>
+        intro h
+        cases h
+        case inl h =>
+          simp
+          exists 8
+          simp [h]
+          constructor
+        case inr h =>
+          simp
+          exists 9
+          simp at h
+          simp [h]
+          constructor; constructor; constructor
+    rw [htraces2, htraces8] at cih
+    apply Set.ext_iff.1 at cih
+    specialize cih ['b']
+    obtain ⟨cih1, cih2⟩ := cih
+    have cih1h : ['b'] ∈ @insert (List Char) (Set (List Char)) Set.instInsert [] {['b'], ['c']} := by
+      simp
+    specialize cih1 cih1h
+    simp at cih1
+
+/-- In general, bisimilarity and trace equivalence are distinct. -/
+theorem Bisimilarity.bisimilarity_neq_traceEq : ∃ (State : Type) (Label : Type) (lts : LTS State Label), Bisimilarity lts ≠ TraceEq lts := by
+  obtain ⟨State, Label, lts, h⟩ := Bisimulation.traceEq_not_bisim
+  exists State; exists Label; exists lts
+  simp
+  intro heq
+  have hb := Bisimilarity.is_bisimulation lts
+  rw [heq] at hb
+  contradiction
+
+/-- In any deterministic LTS, trace equivalence is a bisimulation. -/
+theorem Bisimulation.deterministic_traceEq_is_bisim
   (lts : LTS State Label) (hdet : lts.Deterministic) :
   (Bisimulation lts (TraceEq lts)) := by
   simp only [Bisimulation]
@@ -403,7 +707,7 @@ theorem Bisimulation.deterministic_trace_eq_is_bisim
     case right =>
       apply h.2.symm
 
-/-- In a deterministic LTS, trace equivalence implies bisimilarity. -/
+/-- In any deterministic LTS, trace equivalence implies bisimilarity. -/
 theorem Bisimilarity.deterministic_trace_eq_bisim
   (lts : LTS State Label) (hdet : lts.Deterministic) (s1 s2 : State) (h : s1 ~tr[lts] s2) :
   (s1 ~[lts] s2) := by
@@ -412,10 +716,10 @@ theorem Bisimilarity.deterministic_trace_eq_bisim
   case left =>
     exact h
   case right =>
-    apply Bisimulation.deterministic_trace_eq_is_bisim lts hdet
+    apply Bisimulation.deterministic_traceEq_is_bisim lts hdet
 
-/-- In a deterministic LTS, bisimilarity and trace equivalence coincide. -/
-theorem Bisimilarity.deterministic_bisim_eq_trace_eq
+/-- In any deterministic LTS, bisimilarity and trace equivalence coincide. -/
+theorem Bisimilarity.deterministic_bisim_eq_traceEq
   (lts : LTS State Label) (hdet : lts.Deterministic) :
   Bisimilarity lts = TraceEq lts := by
   funext s1 s2
@@ -426,7 +730,10 @@ theorem Bisimilarity.deterministic_bisim_eq_trace_eq
   case mpr =>
     apply Bisimilarity.deterministic_trace_eq_bisim lts hdet
 
-theorem Bisimulation.isSimulation (lts : LTS State Label) (r : Rel State State) : Bisimulation lts r → Simulation lts r := by
+/-! ### Relation to simulation -/
+
+/-- Any bisimulation is also a simulation. -/
+theorem Bisimulation.is_simulation (lts : LTS State Label) (r : Rel State State) : Bisimulation lts r → Simulation lts r := by
   intro h
   simp only [Bisimulation] at h
   simp only [Simulation]
@@ -435,6 +742,7 @@ theorem Bisimulation.isSimulation (lts : LTS State Label) (r : Rel State State) 
   rcases h with ⟨h1, h2⟩
   apply h1 s1' htr
 
+/-- A relation is a bisimulation iff both it and its inverse are simulations. -/
 theorem Bisimulation.simulation_iff (lts : LTS State Label) (r : Rel State State) : Bisimulation lts r ↔ (Simulation lts r ∧ Simulation lts r.inv) := by
   constructor
   intro h
@@ -469,6 +777,5 @@ theorem Bisimulation.simulation_iff (lts : LTS State Label) (r : Rel State State
     case right =>
       intro s2' htr
       apply hsinv _ _ hr _ _ htr
-
 
 end Bisimulation

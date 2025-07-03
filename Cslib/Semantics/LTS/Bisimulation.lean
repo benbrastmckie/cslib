@@ -20,6 +20,8 @@ these transitions remain related by the bisimulation.
 Bisimilarity is the largest bisimulation: given an `LTS`, it relates any two states that are related
 by a bisimulation for that LTS.
 
+Weak bisimulation (resp. bisimilarity) is the relaxed version of bisimulation (resp. bisimilarity) whereby internal actions performed by processes can be ignored.
+
 For an introduction to theory of bisimulation, we refer to [Sangiorgi2011].
 
 ## Main definitions
@@ -30,9 +32,16 @@ related by some bisimulation on `lts`.
 - `BisimulationUpTo lts r`: the relation `r` is a bisimulation up to bisimilarity (this is known as
 one of the 'up to' techniques for bisimulation).
 
+- `WeakBisimulation lts r`: the relation `r` on the states of the LTS `lts` is a weak bisimulation.
+- `WeakBisimilarity lts` is the binary relation on the states of `lts` that relates any two states
+related by some weak bisimulation on `lts`.
+- `SWBisimulation lts` is a more convenient definition for establishing weak bisimulations, which
+we prove to be sound and complete.
+
 ## Notations
 
 - `s1 ~[lts] s2`: the states `s1` and `s2` are bisimilar in the LTS `lts`.
+- `s1 ≈[lts] s2`: the states `s1` and `s2` are weakly bisimilar in the LTS `lts`.
 
 ## Main statements
 
@@ -77,10 +86,6 @@ def Bisimulation.follow_snd {lts : LTS State Label} {r : Rel State State} (hb : 
 def Bisimilarity (lts : LTS State Label) : Rel State State :=
   fun s1 s2 =>
     ∃ r : Rel State State, r s1 s2 ∧ Bisimulation lts r
--- Old definition:
--- inductive Bisimilarity (lts : LTS State Label) : Rel State State where
--- | bisim (s1 s2 : State) (h : ∃ r : Rel State State, r s1 s2 ∧ Bisimulation lts r) :
---   Bisimilarity lts s1 s2
 
 /--
 Notation for bisimilarity.
@@ -782,20 +787,171 @@ end Bisimulation
 
 section WeakBisimulation
 
+/-! ## Weak bisimulation and weak bisimilarity -/
+
 /-- A weak bisimulation is similar to a `Bisimulation`, but allows for the related processes to do
-internal work. -/
-def WeakBisimulation {Internal : Label → Prop} (lts : LTS State Label) (r : Rel State State) : Prop :=
-  ∀ s1 s2, r s1 s2 →
-    (∀ μ s1', @Visible Label Internal μ → @lts.wtr State Label Internal s1 μ s1' →
-      ∃ s2', @lts.wtr State Label Internal s2 μ s2' ∧ r s1' s2')
+internal work. Technically, this is defined as a `Bisimulation` on the saturation of the LTS. -/
+def WeakBisimulation [LabelWithTau Label] (lts : LTS State Label) (r : Rel State State) :=
+  Bisimulation (lts.saturate) r
+
+/-- Two states are weakly bisimilar if they are related by some weak bisimulation. -/
+def WeakBisimilarity [LabelWithTau Label] (lts : LTS State Label) : Rel State State :=
+  fun s1 s2 =>
+    ∃ r : Rel State State, r s1 s2 ∧ WeakBisimulation lts r
+
+/-- Notation for weak bisimilarity. -/
+notation s:max " ≈[" lts "] " s':max => WeakBisimilarity lts s s'
+
+/-- An `SWBisimulation` is a more convenient definition of weak bisimulation, because the challenge
+is a single transition. We prove later that this technique is sound, following a strategy inspired
+by [Sangiorgi2011]. -/
+def SWBisimulation [LabelWithTau Label] (lts : LTS State Label) (r : Rel State State) : Prop :=
+  ∀ s1 s2, r s1 s2 → ∀ μ, (
+    (∀ s1', lts.tr s1 μ s1' → ∃ s2', lts.str s2 μ s2' ∧ r s1' s2')
     ∧
-    (∀ μ s1', Internal μ → @lts.wtr State Label Internal s1 μ s1' →
-      ∃ s2', @lts.imtr State Label Internal s2 s2' ∧ r s1' s2')
-    ∧
-    (∀ μ s2', @Visible Label Internal μ → @lts.wtr State Label Internal s2 μ s2' →
-      ∃ s1', @lts.wtr State Label Internal s1 μ s1' ∧ r s1' s2')
-    ∧
-    (∀ μ s2', Internal μ → @lts.wtr State Label Internal s2 μ s2' →
-      ∃ s1', @lts.imtr State Label Internal s1 s1' ∧ r s1' s2')
+    (∀ s2', lts.tr s2 μ s2' → ∃ s1', lts.str s1 μ s1' ∧ r s1' s2')
+  )
+
+/-- Utility theorem for 'following' internal transitions using an `SWBisimulation`
+(first component, weighted version). -/
+theorem SWBisimulation.follow_internal_fst_n
+  [LabelWithTau Label] (lts : LTS State Label) (r : Rel State State)
+  (hswb : SWBisimulation lts r) (hr : r s1 s2) (hstrN : lts.strN n s1 LabelWithTau.τ s1') :
+  ∃ s2', lts.str s2 LabelWithTau.τ s2' ∧ r s1' s2' := by
+  cases n
+  case zero =>
+    cases hstrN
+    exists s2
+    constructor; constructor
+    exact hr
+  case succ n ih =>
+    cases hstrN
+    rename_i n1 sb sb' n2 hstrN1 htr hstrN2
+    let hswb_m := hswb
+    simp [SWBisimulation] at hswb
+    have ih1 := SWBisimulation.follow_internal_fst_n lts r hswb hr hstrN1
+    obtain ⟨sb2, hstrs2, hrsb⟩ := ih1
+    have h := (hswb sb sb2 hrsb LabelWithTau.τ).1 sb' htr
+    obtain ⟨sb2', hstrsb2, hrsb2⟩ := h
+    have ih2 := SWBisimulation.follow_internal_fst_n lts r hswb hrsb2 hstrN2
+    obtain ⟨s2', hstrs2', hrs2⟩ := ih2
+    exists s2'
+    constructor
+    · apply LTS.str.trans_τ lts (LTS.str.trans_τ lts hstrs2 hstrsb2) hstrs2'
+    · exact hrs2
+
+/-- Utility theorem for 'following' internal transitions using an `SWBisimulation`
+(second component, weighted version). -/
+theorem SWBisimulation.follow_internal_snd_n
+  [LabelWithTau Label] (lts : LTS State Label) (r : Rel State State)
+  (hswb : SWBisimulation lts r) (hr : r s1 s2) (hstrN : lts.strN n s2 LabelWithTau.τ s2') :
+  ∃ s1', lts.str s1 LabelWithTau.τ s1' ∧ r s1' s2' := by
+  cases n
+  case zero =>
+    cases hstrN
+    exists s1
+    constructor; constructor
+    exact hr
+  case succ n ih =>
+    cases hstrN
+    rename_i n1 sb sb' n2 hstrN1 htr hstrN2
+    let hswb_m := hswb
+    simp [SWBisimulation] at hswb
+    have ih1 := SWBisimulation.follow_internal_snd_n lts r hswb hr hstrN1
+    obtain ⟨sb1, hstrs1, hrsb⟩ := ih1
+    have h := (hswb sb1 sb hrsb LabelWithTau.τ).2 sb' htr
+    obtain ⟨sb2', hstrsb2, hrsb2⟩ := h
+    have ih2 := SWBisimulation.follow_internal_snd_n lts r hswb hrsb2 hstrN2
+    obtain ⟨s2', hstrs2', hrs2⟩ := ih2
+    exists s2'
+    constructor
+    · apply LTS.str.trans_τ lts (LTS.str.trans_τ lts hstrs1 hstrsb2) hstrs2'
+    · exact hrs2
+
+/-- Utility theorem for 'following' internal transitions using an `SWBisimulation`
+(first component). -/
+theorem SWBisimulation.follow_internal_fst
+  [LabelWithTau Label] (lts : LTS State Label) (r : Rel State State)
+  (hswb : SWBisimulation lts r) (hr : r s1 s2) (hstr : lts.str s1 LabelWithTau.τ s1') :
+  ∃ s2', lts.str s2 LabelWithTau.τ s2' ∧ r s1' s2' := by
+  obtain ⟨n, hstrN⟩ := (LTS.str_strN lts).1 hstr
+  apply SWBisimulation.follow_internal_fst_n lts r hswb hr hstrN
+
+/-- Utility theorem for 'following' internal transitions using an `SWBisimulation`
+(second component). -/
+theorem SWBisimulation.follow_internal_snd
+  [LabelWithTau Label] (lts : LTS State Label) (r : Rel State State)
+  (hswb : SWBisimulation lts r) (hr : r s1 s2) (hstr : lts.str s2 LabelWithTau.τ s2') :
+  ∃ s1', lts.str s1 LabelWithTau.τ s1' ∧ r s1' s2' := by
+  obtain ⟨n, hstrN⟩ := (LTS.str_strN lts).1 hstr
+  apply SWBisimulation.follow_internal_snd_n lts r hswb hr hstrN
+
+/-- We can now prove that any relation is a `WeakBisimulation` iff it is an `SWBisimulation`. This formalises lemma 4.2.10 in [Sangiorgi2011]. -/
+theorem WeakBisimulation.iff_swBisimulation [LabelWithTau Label] (lts : LTS State Label) (r : Rel State State) :
+  WeakBisimulation lts r ↔ SWBisimulation lts r := by
+  apply Iff.intro
+  case mp =>
+    intro h
+    simp [WeakBisimulation, Bisimulation] at h
+    simp [SWBisimulation]
+    intro s1 s2 hr μ
+    apply And.intro
+    case left =>
+      intro s1' htr
+      specialize h s1 s2 hr μ
+      have h' := h.1 s1' (LTS.str.single lts htr)
+      obtain ⟨s2', htr2, hr2⟩ := h'
+      exists s2'
+    case right =>
+      intro s2' htr
+      specialize h s1 s2 hr μ
+      have h' := h.2 s2' (LTS.str.single lts htr)
+      obtain ⟨s1', htr1, hr1⟩ := h'
+      exists s1'
+  case mpr =>
+    intro h
+    simp [WeakBisimulation, Bisimulation]
+    intro s1 s2 hr μ
+    apply And.intro
+    case left =>
+      intro s1' hstr
+      cases hstr
+      case refl =>
+        exists s2
+        constructor; constructor
+        exact hr
+      case tr sb sb' hstr1 htr hstr2 =>
+        obtain ⟨sb2, hstr2b, hrb⟩ := SWBisimulation.follow_internal_fst lts r h hr hstr1
+        obtain ⟨sb2', hstr2b', hrb'⟩ := (h sb sb2 hrb μ).1 _ htr
+        obtain ⟨s2', hstr2', hrb2⟩ := SWBisimulation.follow_internal_fst lts r h hrb' hstr2
+        exists s2'
+        constructor
+        · simp [LTS.saturate]
+          apply LTS.str.comp lts hstr2b hstr2b' hstr2'
+        · exact hrb2
+    case right =>
+      intro s2' hstr
+      cases hstr
+      case refl =>
+        exists s1
+        constructor; constructor
+        exact hr
+      case tr sb sb' hstr1 htr hstr2 =>
+        obtain ⟨sb1, hstr1b, hrb⟩ := SWBisimulation.follow_internal_snd lts r h hr hstr1
+        obtain ⟨sb2', hstr1b', hrb'⟩ := (h sb1 sb hrb μ).2 _ htr
+        obtain ⟨s1', hstr1', hrb2⟩ := SWBisimulation.follow_internal_snd lts r h hrb' hstr2
+        exists s1'
+        constructor
+        · simp [LTS.saturate]
+          apply LTS.str.comp lts hstr1b hstr1b' hstr1'
+        · exact hrb2
+
+/-- If two states are related by an `SWBisimulation`, then they are weakly bisimilar. -/
+theorem WeakBisimilarity.by_swBisimulation [LabelWithTau Label]
+  (lts : LTS State Label) (r : Rel State State)
+  (hb : SWBisimulation lts r) (hr : r s1 s2) : s1 ≈[lts] s2 := by
+  exists r
+  constructor; exact hr
+  apply (WeakBisimulation.iff_swBisimulation lts r).2 hb
 
 end WeakBisimulation

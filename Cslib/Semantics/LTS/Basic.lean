@@ -390,47 +390,120 @@ end Classes
 
 section Weak
 
-class ILabel (Label : Type v) where
-  Internal : Label → Prop
-
-variable {State : Type u} {Label : Type v} {Internal : Label → Prop} (lts : LTS State Label)
+/-- A type of transition labels that includes a special 'internal' transition `τ`. -/
+class LabelWithTau (Label : Type v) where
+  τ : Label
 
 /-- Saturated transition relation. -/
-inductive LTS.str [ILabel Label] (lts : LTS State Label) : State → Label → State → Prop where
-| refl : ILabel.Internal μ → lts.str s μ s
-| tr : lts.str s1 μ
+inductive LTS.str [LabelWithTau Label] (lts : LTS State Label) : State → Label → State → Prop where
+| refl : lts.str s LabelWithTau.τ s
+| tr : lts.str s1 LabelWithTau.τ s2 → lts.tr s2 μ s3 → lts.str s3 LabelWithTau.τ s4 → lts.str s1 μ s4
 
-def LTS.saturate [ILabel Label] (lts : LTS State Label) : LTS State Label := {
-  tr := fun s1 μ s2 =>
-    match
-}
+/-- The `LTS` obtained by saturating the transition relation in `lts`. -/
+def LTS.saturate [LabelWithTau Label] (lts : LTS State Label) : LTS State Label := { tr := LTS.str lts }
 
+/-- Any transition is also a saturated transition. -/
+theorem LTS.str.single [LabelWithTau Label] (lts : LTS State Label) : lts.tr s μ s' → lts.str s μ s' := by
+  intro h
+  apply LTS.str.tr LTS.str.refl h LTS.str.refl
 
+/-- As `LTS.str`, but counts the number of `τ`-transitions. This is convenient as induction metric. -/
+inductive LTS.strN [LabelWithTau Label] (lts : LTS State Label) : ℕ → State → Label → State → Prop where
+| refl : lts.strN 0 s LabelWithTau.τ s
+| tr : lts.strN n s1 LabelWithTau.τ s2 → lts.tr s2 μ s3 → lts.strN m s3 LabelWithTau.τ s4 → lts.strN (n + m + 1) s1 μ s4
 
+/-- `LTS.str` and `LTS.strN` are equivalent. -/
+theorem LTS.str_strN [LabelWithTau Label] (lts : LTS State Label) : lts.str s1 μ s2 ↔ ∃ n, lts.strN n s1 μ s2 := by
+  apply Iff.intro <;> intro h
+  case mp =>
+    induction h
+    case refl =>
+      exists 0
+      exact LTS.strN.refl
+    case tr s1 sb μ sb' s2 hstr1 htr hstr2 ih1 ih2 =>
+      obtain ⟨n1, ih1⟩ := ih1
+      obtain ⟨n2, ih2⟩ := ih2
+      exists (n1 + n2 + 1)
+      apply LTS.strN.tr ih1 htr ih2
+  case mpr =>
+    obtain ⟨n, h⟩ := h
+    induction h
+    case refl =>
+      constructor
+    case tr n s1 sb μ sb' m s2 hstr1 htr hstr2 ih1 ih2 =>
+      apply LTS.str.tr ih1 htr ih2
 
--- def LTS.str [ILabel Label] (lts : LTS State Label) (s1 s2 : State) : Prop :=
+/-- Saturated transitions labelled by τ can be composed (weighted version). -/
+theorem LTS.strN.trans_τ
+  [LabelWithTau Label] (lts : LTS State Label)
+  (h1 : lts.strN n s1 LabelWithTau.τ s2) (h2 : lts.strN m s2 LabelWithTau.τ s3) :
+  lts.strN (n + m) s1 LabelWithTau.τ s3 := by
+  cases h1
+  case refl =>
+    simp
+    exact h2
+  case tr n1 sb sb' n2 hstr1 htr hstr2 =>
+    have ih := LTS.strN.trans_τ lts hstr2 h2
+    have conc := LTS.strN.tr hstr1 htr ih
+    have n_eq : n1 + (n2 + m) + 1 = n1 + n2 + 1 + m := by omega
+    rw [← n_eq]
+    exact conc
 
+/-- Saturated transitions labelled by τ can be composed. -/
+theorem LTS.str.trans_τ
+  [LabelWithTau Label] (lts : LTS State Label)
+  (h1 : lts.str s1 LabelWithTau.τ s2) (h2 : lts.str s2 LabelWithTau.τ s3) :
+  lts.str s1 LabelWithTau.τ s3 := by
+  obtain ⟨n, h1N⟩ := (LTS.str_strN lts).1 h1
+  obtain ⟨m, h2N⟩ := (LTS.str_strN lts).1 h2
+  have concN := LTS.strN.trans_τ lts h1N h2N
+  apply (LTS.str_strN lts).2 ⟨n + m, concN⟩
 
-/-- Internal multi-step transition relation. -/
-def LTS.imtr (lts : LTS State Label) (s1 s2 : State) : Prop :=
-  ∃ μs : List Label, μs.Forall Internal → lts.mtr s1 μs s2
+/-- Saturated transitions can be appended with τ-transitions (weighted version). -/
+theorem LTS.strN.append
+  [LabelWithTau Label] (lts : LTS State Label)
+  (h1 : lts.strN n1 s1 μ s2)
+  (h2 : lts.strN n2 s2 LabelWithTau.τ s3) :
+  lts.strN (n1 + n2) s1 μ s3 := by
+  cases h1
+  case refl =>
+    simp
+    exact h2
+  case tr n11 sb sb' n12 hstr1 htr hstr2 =>
+    have hsuffix := LTS.strN.trans_τ lts hstr2 h2
+    have n_eq : n11 + (n12 + n2) + 1 = (n11 + n12 + 1 + n2) := by omega
+    rw [← n_eq]
+    apply LTS.strN.tr hstr1 htr hsuffix
 
-/-- Weak transition relation. -/
-def LTS.wtr {Internal : Label → Prop} (lts : LTS State Label) (s1 : State) (μ : Label) (s2 : State) : Prop :=
-  ∃ sb1 sb2,
-    @lts.imtr State Label Internal s1 sb1 ∧
-    lts.tr sb1 μ sb2 ∧
-    @lts.imtr State Label Internal sb2 s2
+/-- Saturated transitions can be composed (weighted version). -/
+theorem LTS.strN.comp
+  [LabelWithTau Label] (lts : LTS State Label)
+  (h1 : lts.strN n1 s1 LabelWithTau.τ s2)
+  (h2 : lts.strN n2 s2 μ s3)
+  (h3 : lts.strN n3 s3 LabelWithTau.τ s4) :
+  lts.strN (n1 + n2 + n3) s1 μ s4 := by
+  cases h2
+  case refl =>
+    apply LTS.strN.trans_τ lts h1 h3
+  case tr n21 sb sb' n22 hstr1 htr hstr2 =>
+    have hprefix_τ := LTS.strN.trans_τ lts h1 hstr1
+    have hprefix := LTS.strN.tr hprefix_τ htr hstr2
+    have conc := LTS.strN.append lts hprefix h3
+    have n_eq : (n1 + n21 + n22 + 1 + n3) = (n1 + (n21 + n22 + 1) + n3) := by omega
+    rw [← n_eq]
+    apply conc
 
-/--
-Multi-step weak transitions.
--/
-inductive LTS.mwtr (lts : LTS State Label) : State → List Label → State → Prop where
-| internal : lts.imtr s1 s2 → lts.mwtr s1 [] s2
-| stepL {s1 : State} {μ : Label} {s2 : State} {μs : List Label} {s3 : State} :
-  lts.wtr s1 μ s2 → lts.mwtr s2 μs s3 →
-  lts.mwtr s1 (μ :: μs) s3
-
-abbrev Visible {Internal : Label → Prop} (μ : Label) := ¬Internal μ
+/-- Saturated transitions can be composed. -/
+theorem LTS.str.comp
+  [LabelWithTau Label] (lts : LTS State Label)
+  (h1 : lts.str s1 LabelWithTau.τ s2)
+  (h2 : lts.str s2 μ s3)
+  (h3 : lts.str s3 LabelWithTau.τ s4) :
+  lts.str s1 μ s4 := by
+  obtain ⟨n1, h1N⟩ := (LTS.str_strN lts).1 h1
+  obtain ⟨n2, h2N⟩ := (LTS.str_strN lts).1 h2
+  obtain ⟨n3, h3N⟩ := (LTS.str_strN lts).1 h3
+  have concN := LTS.strN.comp lts h1N h2N h3N
+  apply (LTS.str_strN lts).2 ⟨n1 + n2 + n3, concN⟩
 
 end Weak

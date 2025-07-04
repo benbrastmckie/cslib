@@ -145,3 +145,35 @@ lemma Function.toFinFun_eq [DecidableEq α] [Zero β] (f : α → β) (dom : Fin
 
 theorem FinFun.toDomFun_char (f : α ⇀ β) (h : x ∈ f.dom) : f.toDomFun ⟨ x, h ⟩ = f.f x := by
   simp [FinFun.toDomFun]
+
+theorem FinFun.congrFinFun [DecidableEq α] [Zero β] {f g : α ⇀ β} (h : f = g) (a : α) : f.apply a = g.apply a := by
+  simp [FinFun.apply]
+  cases f
+  rename_i ff fdom
+  cases g
+  rename_i gf gdom
+  simp at h
+  obtain ⟨ h1, h2⟩ := h
+  exact congrFun h1 a
+
+theorem FinFun.eq_char₁ [DecidableEq α] [Zero β] {f g : α ⇀ β} (h : f = g) : f.f = g.f ∧ f.dom = g.dom := by
+  cases f
+  rename_i ff fdom
+  cases g
+  rename_i gf gdom
+  simp at h
+  assumption
+
+theorem FinFun.eq_char₂ [DecidableEq α] [Zero β] {f g : α ⇀ β} (heq : f.f = g.f ∧ f.dom = g.dom) : f = g := by
+  cases f
+  rename_i ff fdom
+  cases g
+  rename_i gf gdom
+  simp at heq
+  simp
+  assumption
+
+theorem FinFun.eq_char [DecidableEq α] [Zero β] {f g : α ⇀ β} : f = g ↔ f.f = g.f ∧ f.dom = g.dom := by
+  apply Iff.intro
+  . apply FinFun.eq_char₁
+  . apply FinFun.eq_char₂

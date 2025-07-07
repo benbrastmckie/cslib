@@ -249,12 +249,6 @@ theorem Bisimilarity.largest_bisimulation
   intro hr
   exists r
 
-/-- Union of two relations.
-
-TODO: move to `Rel`? -/
-def Rel.union {α β} (r1 r2 : Rel α β) : Rel α β :=
-  fun x y => r1 x y ∨ r2 x y
-
 /-- The union of bisimilarity with any bisimulation is bisimilarity. -/
 theorem Bisimilarity.gfp (r : Rel State State) (h : Bisimulation lts r) :
   (Bisimilarity lts).union r = Bisimilarity lts := by

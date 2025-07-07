@@ -8,7 +8,7 @@ import Mathlib.Data.Finset.Basic
 
 /-! # Finite Functions
 
-Formalisation of functions with a finite domain of definition.
+A `FinFun α β` is a function from `α` to `β` with a finite domain of definition.
 -/
 
 /-- A finite function FinFun is a function `f` equipped with a domain of definition `dom`. -/

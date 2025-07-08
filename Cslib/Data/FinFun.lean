@@ -8,6 +8,8 @@ import Mathlib.Data.Finset.Basic
 
 /-! # Finite Functions
 
+*Note:* the API and notation of `FinFun` is still unstable.
+
 A `FinFun α β` is a function from `α` to `β` with a finite domain of definition.
 -/
 

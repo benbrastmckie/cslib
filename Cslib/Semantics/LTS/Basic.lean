@@ -535,4 +535,8 @@ theorem LTS.divergent_drop [LabelWithTau Label] (lts : LTS State Label) (stream 
   rw [n_eq, ← n_comm]
   apply h
 
+/-- An LTS is divergence-free if it has no divergent state. -/
+def LTS.DivergenceFree [LabelWithTau Label] (lts : LTS State Label) : Prop :=
+  ¬∃ s, lts.Divergent s
+
 end Divergence

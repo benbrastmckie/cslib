@@ -1,6 +1,6 @@
 # Contributing to cslib
 
-Great that you're interested in contributing to cslib! :+1: :tada:
+Great that you're interested in contributing to cslib! :tada:
 
 # Style and Documentation
 

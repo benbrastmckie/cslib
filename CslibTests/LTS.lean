@@ -40,3 +40,48 @@ example : 1 ~[natLts] 2 := by
       cases htr <;> (cases hr <;> repeat constructor)
     . intro s2' htr
       cases htr <;> (cases hr <;> repeat constructor)
+
+inductive TLabel : Type where
+| τ
+
+instance : LabelWithTau TLabel := {
+  τ := TLabel.τ
+}
+
+inductive NatDivergentTr : ℕ → TLabel → ℕ → Prop where
+| step : NatDivergentTr n τ n.succ
+
+def natDivLts : LTS ℕ TLabel := ⟨NatDivergentTr⟩
+
+def natInfiniteExecution : Stream' ℕ := fun n => n
+
+theorem natInfiniteExecution.infiniteExecution : natDivLts.DivergentExecution natInfiniteExecution := by
+  simp [LTS.DivergentExecution]
+  intro n
+  constructor
+
+example : natDivLts.Divergent 0 := by
+  simp [LTS.Divergent]
+  exists natInfiniteExecution
+  constructor; constructor
+  exact natInfiniteExecution.infiniteExecution
+
+example : natDivLts.Divergent 3 := by
+  simp [LTS.Divergent]
+  exists natInfiniteExecution.drop 3
+  simp [Stream'.drop]
+  constructor
+  · constructor
+  · simp [LTS.DivergentExecution]
+    simp [Stream'.drop]
+    intro n
+    constructor
+
+example : natDivLts.Divergent n := by
+  simp [LTS.Divergent]
+  exists natInfiniteExecution.drop n
+  simp [Stream'.drop]
+  constructor
+  · constructor
+  · apply LTS.divergent_drop
+    exact natInfiniteExecution.infiniteExecution

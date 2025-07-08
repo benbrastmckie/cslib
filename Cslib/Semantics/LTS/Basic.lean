@@ -10,6 +10,7 @@ import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Rel
 import Mathlib.Logic.Function.Defs
 import Mathlib.Data.Set.Finite.Basic
+import Mathlib.Data.Stream.Defs
 
 /-!
 # Labelled Transition System
@@ -507,3 +508,31 @@ theorem LTS.str.comp
   apply (LTS.str_strN lts).2 ⟨n1 + n2 + n3, concN⟩
 
 end Weak
+
+/-! ### Divergence -/
+
+section Divergence
+
+/-- A divergent execution is a stream of states where each state is the anti-τ-derivative of the
+next. -/
+def LTS.DivergentExecution [LabelWithTau Label] (lts : LTS State Label)
+  (stream : Stream' State) : Prop :=
+  ∀ n, lts.tr (stream n) LabelWithTau.τ (stream n.succ)
+
+/-- A state is divergent if there is a divergent execution from it. -/
+def LTS.Divergent [LabelWithTau Label] (lts : LTS State Label) (s : State) : Prop :=
+  ∃ stream : Stream' State, stream 0 = s ∧ lts.DivergentExecution stream
+
+/-- If a stream is a divergent execution, then any 'suffix' is also a divergent execution. -/
+theorem LTS.divergent_drop [LabelWithTau Label] (lts : LTS State Label) (stream : Stream' State) (h : lts.DivergentExecution stream) (n : ℕ) : lts.DivergentExecution (stream.drop n) := by
+  simp only [LTS.DivergentExecution]
+  intro m
+  simp only [Stream'.drop, Stream'.get]
+  simp [LTS.DivergentExecution] at h
+  specialize h (n + m)
+  have n_eq : m.succ + n = n + m + 1 := by omega
+  have n_comm : n + m = m + n := by apply Nat.add_comm
+  rw [n_eq, ← n_comm]
+  apply h
+
+end Divergence

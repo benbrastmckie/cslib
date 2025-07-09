@@ -65,7 +65,7 @@ inductive Term.Subst [DecidableEq Var] : @Term Var → Var → @Term Var → @Te
 --       abs y (m.subst x r)
 --     else
 --       let z := (abs y m').freshVar
---       abs z ((m.subst y (var z)).subst x r)
+--       abs z ((m'.subst y (var z)).subst x r)
 --   | app m1 m2 => app (m1.subst x r) (m2.subst x r)
 
 /-

@@ -6,6 +6,6 @@ Authors: Fabrizio Montesi
 
 /-- Class for substitution relations. WIP. -/
 class Substitution where
-  subst : α → β → γ
+  subst : α → β → α → α
 
 notation t:max "[" x ":=" t' "]" => Substitution.subst t x t'

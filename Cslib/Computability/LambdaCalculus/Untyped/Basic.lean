@@ -42,6 +42,10 @@ def Term.bv [DecidableEq Var] (m : @Term Var) : Finset Var :=
   | abs x m => m.bv ∪ {x} -- Could also be `insert x m.bv`
   | app m n => m.bv ∪ n.bv
 
+/-- Variable names (free and bound) in a term. -/
+def Term.vars [DecidableEq Var] (m : @Term Var) : Finset Var :=
+  m.fv ∪ m.bv
+
 /-- Capture-avoiding substitution, as an inference system. -/
 inductive Term.Subst [DecidableEq Var] : @Term Var → Var → @Term Var → @Term Var → Prop where
 | varHit : (var x).Subst x r r
@@ -50,8 +54,19 @@ inductive Term.Subst [DecidableEq Var] : @Term Var → Var → @Term Var → @Te
 | absIn : x ≠ y → y ∉ r.fv → m.Subst x r m' → (abs y m).Subst x r (abs y m')
 | app : m.Subst x r m' → n.Subst x r n' → (app m n).Subst x r (app m' n')
 
--- TODO: functional version of Subst
--- def Term.subst
+-- WIP: functional version of Subst
+-- def Term.subst [DecidableEq Var] (m : @Term Var) (x : Var) (r : @Term Var) : @Term Var :=
+--   match m with
+--   | var y => if y = x then r else var y
+--   | abs y m' =>
+--     if y = x then
+--       abs y m'
+--     else if y ∉ r.fv then
+--       abs y (m.subst x r)
+--     else
+--       let z := (abs y m').freshVar
+--       abs z ((m.subst y (var z)).subst x r)
+--   | app m1 m2 => app (m1.subst x r) (m2.subst x r)
 
 /-
 TODO: Would be nice to have a (syntax-agnostic) class for what a Substitution is, with the expected
@@ -101,7 +116,7 @@ inductive AlphaEquiv [DecidableEq Var] : Rel (@Term Var) (@Term Var) where
 | ax {m : @Term Var} {x y : Var} : y ∉ m.fv → m.Subst x (var y) m' → AlphaEquiv (abs x m) (abs y m')
 -- Equivalence relation rules
 | refl : AlphaEquiv m m
-| symm : AlphaEquiv m n → AlphaEquiv n m
+| symm : AlphaEquiv m n → AlphaEquiv n m -- TODO: This might be provable as a theorem.
 | trans : AlphaEquiv m1 m2 → AlphaEquiv m2 m3 → AlphaEquiv m1 m3
 -- Context closure
 | ctx {c : @Context Var} {m n : @Term Var} : AlphaEquiv m n → AlphaEquiv (c.fill m) (c.fill n)

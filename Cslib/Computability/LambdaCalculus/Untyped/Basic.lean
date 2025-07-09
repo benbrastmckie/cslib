@@ -11,6 +11,8 @@ import Mathlib.Data.Rel
 
 The untyped λ-calculus.
 
+WIP.
+
 -/
 
 universe u
@@ -40,13 +42,21 @@ def Term.bv [DecidableEq Var] (m : @Term Var) : Finset Var :=
   | abs x m => m.bv ∪ {x} -- Could also be `insert x m.bv`
   | app m n => m.bv ∪ n.bv
 
-/-- Capture-avoiding substitution. -/
-inductive Term.subst [DecidableEq Var] : @Term Var → Var → @Term Var → @Term Var → Prop where
-| varHit : (var x).subst x r r
-| varMiss : x ≠ y → (var y).subst x r (var y)
-| absShadow : (abs x m).subst x r (abs x m)
-| absIn : x ≠ y → y ∉ r.fv → m.subst x r m' → (abs y m).subst x r (abs y m')
-| app : m.subst x r m' → n.subst x r n' → (app m n).subst x r (app m' n')
+/-- Capture-avoiding substitution, as an inference system. -/
+inductive Term.Subst [DecidableEq Var] : @Term Var → Var → @Term Var → @Term Var → Prop where
+| varHit : (var x).Subst x r r
+| varMiss : x ≠ y → (var y).Subst x r (var y)
+| absShadow : (abs x m).Subst x r (abs x m)
+| absIn : x ≠ y → y ∉ r.fv → m.Subst x r m' → (abs y m).Subst x r (abs y m')
+| app : m.Subst x r m' → n.Subst x r n' → (app m n).Subst x r (app m' n')
+
+-- TODO: functional version of Subst
+-- def Term.subst
+
+/-
+TODO: Would be nice to have a (syntax-agnostic) class for what a Substitution is, with the expected
+notation m[x := n]. Then show that Term.subst is an instance. See `Substitution`.
+-/
 
 /-- Contexts. -/
 inductive Context {Var : Type u} : Type u where
@@ -64,7 +74,41 @@ def Context.fill (c : @Context Var) (m : @Term Var) : @Term Var :=
   | appL c n => Term.app (c.fill m) n
   | appR n c => Term.app n (c.fill m)
 
-/- TODO: α-equivalence -/
--- λx.M = λy.M[x := y], provided that y does not occur in M
+/-- Any `Term` can be obtained by filling a `Context` with a variable. This proves that `Context`
+completely captures the syntax of terms. -/
+theorem Context.complete (m : @Term Var) :
+  ∃ (c : @Context Var) (x : Var), m = (c.fill (Term.var x)) := by
+  induction m
+  case var x =>
+    exists hole
+    simp [fill]
+  case abs x n ih =>
+    obtain ⟨c', y, ih⟩ := ih
+    exists Context.abs x c'
+    exists y
+    simp [ih, fill]
+  case app n1 n2 ih1 ih2 =>
+    obtain ⟨c1, x1, ih1⟩ := ih1
+    exists Context.appL c1 n2
+    exists x1
+    simp [ih1, fill]
+
+open Term
+
+/-- α-equivalence. WIP. -/
+inductive AlphaEquiv [DecidableEq Var] : Rel (@Term Var) (@Term Var) where
+-- The α-axiom
+| ax {m : @Term Var} {x y : Var} : y ∉ m.fv → m.Subst x (var y) m' → AlphaEquiv (abs x m) (abs y m')
+-- Equivalence relation rules
+| refl : AlphaEquiv m m
+| symm : AlphaEquiv m n → AlphaEquiv n m
+| trans : AlphaEquiv m1 m2 → AlphaEquiv m2 m3 → AlphaEquiv m1 m3
+-- Context closure
+| ctx {c : @Context Var} {m n : @Term Var} : AlphaEquiv m n → AlphaEquiv (c.fill m) (c.fill n)
+
+/- Notation for α-equivalence.
+
+TODO: make this a class, we want to use the same notation for different languages. -/
+-- notation m:max " =α " n:max => AlphaEquiv m n
 
 end LambdaCalculus

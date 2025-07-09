@@ -17,6 +17,7 @@ constant definitions (K = P).
 - `CCS.Context.complete`: any process is equal to some context filled an atomic process
 (nil or a constant).
 -/
+
 variable (Name : Type u) (Constant : Type v)
 
 namespace CCS

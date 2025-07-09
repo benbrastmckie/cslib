@@ -48,6 +48,23 @@ inductive Term.subst [DecidableEq Var] : @Term Var → Var → @Term Var → @Te
 | absIn : x ≠ y → y ∉ r.fv → m.subst x r m' → (abs y m).subst x r (abs y m')
 | app : m.subst x r m' → n.subst x r n' → (app m n).subst x r (app m' n')
 
+/-- Contexts. -/
+inductive Context {Var : Type u} : Type u where
+| hole
+| abs (x : Var) (c : @Context Var)
+| appL (c : @Context Var) (m : @Term Var)
+| appR (m : @Term Var) (c : @Context Var)
+deriving DecidableEq
+
+/-- Replaces the hole in a `Context` with a `Term`. -/
+def Context.fill (c : @Context Var) (m : @Term Var) : @Term Var :=
+  match c with
+  | hole => m
+  | abs x c => Term.abs x (c.fill m)
+  | appL c n => Term.app (c.fill m) n
+  | appR n c => Term.app n (c.fill m)
+
 /- TODO: α-equivalence -/
+-- λx.M = λy.M[x := y], provided that y does not occur in M
 
 end LambdaCalculus

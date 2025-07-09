@@ -1,6 +1,8 @@
 # cslib
 
-A Lean library for Computer Science
+A Lean library for Computer Science.
+
+Documentation at <https://cs-lean.github.io/>.
 
 # What's cslib?
 

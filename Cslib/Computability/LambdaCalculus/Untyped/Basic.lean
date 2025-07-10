@@ -4,15 +4,15 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Fabrizio Montesi
 -/
 
+import Cslib.Data.ComputableFresh
+import Cslib.Syntax.HasAlphaEquiv
+import Cslib.Syntax.Substitution
 import Mathlib.Data.Finset.Basic
 import Mathlib.Data.Rel
 
 /-! # λ-calculus
 
 The untyped λ-calculus.
-
-WIP.
-
 -/
 
 universe u
@@ -54,24 +54,62 @@ inductive Term.Subst [DecidableEq Var] : @Term Var → Var → @Term Var → @Te
 | absIn : x ≠ y → y ∉ r.fv → m.Subst x r m' → (abs y m).Subst x r (abs y m')
 | app : m.Subst x r m' → n.Subst x r n' → (app m n).Subst x r (app m' n')
 
--- WIP: functional version of Subst
--- def Term.subst [DecidableEq Var] (m : @Term Var) (x : Var) (r : @Term Var) : @Term Var :=
---   match m with
---   | var y => if y = x then r else var y
---   | abs y m' =>
---     if y = x then
---       abs y m'
---     else if y ∉ r.fv then
---       abs y (m.subst x r)
---     else
---       let z := (abs y m').freshVar
---       abs z ((m'.subst y (var z)).subst x r)
---   | app m1 m2 => app (m1.subst x r) (m2.subst x r)
+/-- Renaming, or variable substitution. `m.rename x y` renames `x` into `y` in `m`. -/
+def Term.rename [DecidableEq Var] (m : @Term Var) (x y : Var) : @Term Var :=
+  match m with
+  | var z => if z = x then (var y) else (var z)
+  | abs z m' =>
+    if z = x then
+      -- Shadowing
+      abs z m'
+    else
+      abs z (m'.rename x y)
+  | app n1 n2 => app (n1.rename x y) (n2.rename x y)
 
-/-
-TODO: Would be nice to have a (syntax-agnostic) class for what a Substitution is, with the expected
-notation m[x := n]. Then show that Term.subst is an instance. See `Substitution`.
--/
+/-- Renaming preserves size. -/
+theorem Term.rename.eq_sizeOf {m : @Term Var} {x y : Var} [DecidableEq Var] : sizeOf (m.rename x y) = sizeOf m := by
+  induction m
+  case var z =>
+    simp only [Term.rename]
+    by_cases hzx : z = x <;> simp [hzx]
+  case abs z m' ih =>
+    simp only [Term.rename]
+    by_cases hzx : z = x
+    case pos => simp [hzx]
+    case neg =>
+      simp [hzx]
+      apply ih
+  case app n1 n2 ih1 ih2 =>
+    simp [Term.rename, ih1, ih2]
+
+/-- Capture-avoiding substitution. `m.subst x r` replaces the free occurrences of variable `x` in `m` with `r`. -/
+def Term.subst [DecidableEq Var] [ComputableFresh Var] (m : @Term Var) (x : Var) (r : @Term Var) : @Term Var :=
+  match m with
+  | var y => if y = x then r else var y
+  | abs y m' =>
+    if y = x then
+      abs y m'
+    else if y ∉ r.fv then
+      abs y (m'.subst x r)
+    else
+      let z := ComputableFresh.fresh (abs y m').vars
+      abs z ((m'.rename y z).subst x r)
+  | app m1 m2 => app (m1.subst x r) (m2.subst x r)
+termination_by
+  sizeOf m
+decreasing_by
+  · simp
+  · rw [Term.rename.eq_sizeOf]
+    simp
+  · simp
+    omega
+  · simp
+    omega
+
+/-- `Term.subst` is a `Substitution` for λ-terms. -/
+instance instSubstitutionTerm[DecidableEq Var] [ComputableFresh Var] :
+  Substitution (@Term Var) Var where
+  subst := Term.subst
 
 /-- Contexts. -/
 inductive Context {Var : Type u} : Type u where
@@ -110,20 +148,20 @@ theorem Context.complete (m : @Term Var) :
 
 open Term
 
-/-- α-equivalence. WIP. -/
-inductive AlphaEquiv [DecidableEq Var] : Rel (@Term Var) (@Term Var) where
+/-- α-equivalence. -/
+inductive Term.AlphaEquiv [DecidableEq Var] : Rel (@Term Var) (@Term Var) where
 -- The α-axiom
-| ax {m : @Term Var} {x y : Var} : y ∉ m.fv → m.Subst x (var y) m' → AlphaEquiv (abs x m) (abs y m')
+| ax {m : @Term Var} {x y : Var} :
+  y ∉ m.fv → AlphaEquiv (abs x m) (abs y (m.rename x y))
 -- Equivalence relation rules
 | refl : AlphaEquiv m m
-| symm : AlphaEquiv m n → AlphaEquiv n m -- TODO: This might be provable as a theorem.
+| symm : AlphaEquiv m n → AlphaEquiv n m
 | trans : AlphaEquiv m1 m2 → AlphaEquiv m2 m3 → AlphaEquiv m1 m3
 -- Context closure
 | ctx {c : @Context Var} {m n : @Term Var} : AlphaEquiv m n → AlphaEquiv (c.fill m) (c.fill n)
 
-/- Notation for α-equivalence.
-
-TODO: make this a class, we want to use the same notation for different languages. -/
--- notation m:max " =α " n:max => AlphaEquiv m n
+/-- Instance for the substitution notation m[x := n]. -/
+instance hasAlphaEquivTerm [DecidableEq Var] : HasAlphaEquiv (@Term Var) where
+  AlphaEquiv := Term.AlphaEquiv
 
 end LambdaCalculus

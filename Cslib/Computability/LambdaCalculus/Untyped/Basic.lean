@@ -107,7 +107,7 @@ decreasing_by
     omega
 
 /-- `Term.subst` is a `Substitution` for λ-terms. -/
-instance instSubstitutionTerm[DecidableEq Var] [ComputableFresh Var] :
+instance instSubstitutionTerm [DecidableEq Var] [ComputableFresh Var] :
   Substitution (@Term Var) Var where
   subst := Term.subst
 

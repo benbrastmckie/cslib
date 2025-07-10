@@ -21,7 +21,8 @@ namespace CCS
 
 open Process
 
-/-- The transition relation for CCS. -/
+/-- The transition relation for CCS. This is a direct formalisation of the one found in
+[Sangiorgi2011]. -/
 inductive tr : Process Name Constant → Act Name → Process Name Constant → Prop where
 | pre : tr (pre μ p) μ p
 | parL : tr p μ p' → tr (par p q) μ (par p' q)

@@ -96,7 +96,7 @@ theorem Proposition.dual.neq (a : @Proposition Atom) : a ≠ a.dual := by
 /-- Two propositions are equal iff their respective duals are equal. -/
 theorem Proposition.dual.eq_iff (a b : @Proposition Atom) : a = b ↔ a.dual = b.dual := by
   apply Iff.intro <;> intro h
-  · cases a <;> cases b <;> simp [Proposition.dual] at h <;> simp [h]
+  · cases a <;> cases b <;> simp at h <;> simp [h]
   · induction a generalizing b <;> cases b
     all_goals try cases h
     all_goals try rfl

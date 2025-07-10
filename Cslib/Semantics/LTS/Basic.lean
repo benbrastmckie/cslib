@@ -315,13 +315,13 @@ theorem LTS.deterministic_image_char (hDet : lts.Deterministic) :
       exact Ne.symm heq
   case neg =>
     right
-    simp [Image, hs']
-    simp [setOf, singleton, Set.singleton]
+    simp [Image]
+    simp [setOf]
     simp [EmptyCollection.emptyCollection]
     funext s''
     by_contra hf
     simp at hf
-    simp [Ne] at hs'
+    simp at hs'
     specialize hs' s''
     contradiction
 

@@ -6,8 +6,8 @@ Authors: Fabrizio Montesi
 
 /-! # Calculus of Communicating Systems (CCS)
 
-CCS, as presented in [Sangiorgi2011]. In the semantics (see `CCS.lts`), we use the option of
-constant definitions (K = P).
+CCS [Milner80], as presented in [Sangiorgi2011]. In the semantics (see `CCS.lts`), we adopt the
+option of constant definitions (K = P).
 
 ## Main definitions
 - `CCS.Process`: processes.
@@ -16,6 +16,11 @@ constant definitions (K = P).
 ## Main results
 - `CCS.Context.complete`: any process is equal to some context filled an atomic process
 (nil or a constant).
+
+## References
+
+* [R. Milner, *A Calculus of Communicating Systems*] [Milner80]
+* [D. Sangiorgi, *Introduction to Bisimulation and Coinduction*] [Sangiorgi2011]
 -/
 
 variable (Name : Type u) (Constant : Type v)

@@ -106,7 +106,7 @@ decreasing_by
   · simp
     omega
 
-/-- `Term.subst` is a `Substitution` for λ-terms. -/
+/-- `Term.subst` is a substitution for λ-terms. Gives access to the notation `m[x := n]`. -/
 instance instHasSubstitutionTerm [DecidableEq Var] [HasFresh Var] :
   HasSubstitution (Term Var) Var where
   subst := Term.subst
@@ -169,7 +169,7 @@ inductive Term.AlphaEquiv [DecidableEq Var] : Rel (Term Var) (Term Var) where
 -- Context closure
 | ctx {c : Context Var} {m n : Term Var} : AlphaEquiv m n → AlphaEquiv (c.fill m) (c.fill n)
 
-/-- Instance for the substitution notation m[x := n]. -/
+/-- Instance for the notation `m =α n`. -/
 instance instHasAlphaEquivTerm [DecidableEq Var] : HasAlphaEquiv (Term Var) where
   AlphaEquiv := Term.AlphaEquiv
 

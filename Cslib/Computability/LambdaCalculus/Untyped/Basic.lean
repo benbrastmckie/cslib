@@ -4,9 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Fabrizio Montesi
 -/
 
-import Cslib.Data.ComputableFresh
+import Cslib.Data.HasFresh
 import Cslib.Syntax.HasAlphaEquiv
-import Cslib.Syntax.Substitution
+import Cslib.Syntax.HasSubstitution
 import Mathlib.Data.Finset.Basic
 import Mathlib.Data.Rel
 
@@ -83,7 +83,7 @@ theorem Term.rename.eq_sizeOf {m : Term Var} {x y : Var} [DecidableEq Var] : siz
     simp [Term.rename, ih1, ih2]
 
 /-- Capture-avoiding substitution. `m.subst x r` replaces the free occurrences of variable `x` in `m` with `r`. -/
-def Term.subst [DecidableEq Var] [ComputableFresh Var] (m : Term Var) (x : Var) (r : Term Var) : Term Var :=
+def Term.subst [DecidableEq Var] [HasFresh Var] (m : Term Var) (x : Var) (r : Term Var) : Term Var :=
   match m with
   | var y => if y = x then r else var y
   | abs y m' =>
@@ -92,7 +92,7 @@ def Term.subst [DecidableEq Var] [ComputableFresh Var] (m : Term Var) (x : Var) 
     else if y ∉ r.fv then
       abs y (m'.subst x r)
     else
-      let z := ComputableFresh.fresh (abs y m').vars
+      let z := HasFresh.fresh (abs y m').vars
       abs z ((m'.rename y z).subst x r)
   | app m1 m2 => app (m1.subst x r) (m2.subst x r)
 termination_by
@@ -107,13 +107,13 @@ decreasing_by
     omega
 
 /-- `Term.subst` is a `Substitution` for λ-terms. -/
-instance instSubstitutionTerm [DecidableEq Var] [ComputableFresh Var] :
-  Substitution (Term Var) Var where
+instance instHasSubstitutionTerm [DecidableEq Var] [HasFresh Var] :
+  HasSubstitution (Term Var) Var where
   subst := Term.subst
 
 -- TODO
 -- theorem Term.subst_comm
---   [DecidableEq Var] [ComputableFresh Var]
+--   [DecidableEq Var] [HasFresh Var]
 --   {m : Term Var} {x : Var} {n1 : Term Var} {y : Var} {n2 : Term Var} :
 --   (m[x := n1])[y := n2] = (m[y := n2])[x := n1] := by
 --   induction m
@@ -170,7 +170,7 @@ inductive Term.AlphaEquiv [DecidableEq Var] : Rel (Term Var) (Term Var) where
 | ctx {c : Context Var} {m n : Term Var} : AlphaEquiv m n → AlphaEquiv (c.fill m) (c.fill n)
 
 /-- Instance for the substitution notation m[x := n]. -/
-instance hasAlphaEquivTerm [DecidableEq Var] : HasAlphaEquiv (Term Var) where
+instance instHasAlphaEquivTerm [DecidableEq Var] : HasAlphaEquiv (Term Var) where
   AlphaEquiv := Term.AlphaEquiv
 
 end LambdaCalculus

@@ -6,7 +6,7 @@ testDriver = "CslibTests"
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "v4.21.0-rc3"
+rev = "v4.22.0-rc3"
 
 [[lean_lib]]
 name = "Cslib"

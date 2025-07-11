@@ -21,13 +21,13 @@ class HasFresh (α : Type u) where
 
 lemma WithBot.lt_succ {α : Type u} [Preorder α] [OrderBot α] [SuccOrder α] [NoMaxOrder α]
     (x : WithBot α) : x < x.succ :=
-  succ_eq_succ x ▸ Order.lt_succ_of_le_of_not_isMax le_rfl (not_isMax x)
+  succ_eq_succ x ▸ Order.lt_succ x
 
 open Finset in
-/-- Construct a fresh function from an embedding of ℕ. -/
+/-- Construct a fresh function from an embedding of `ℕ` using `Nat.find`. -/
 def HasFresh.ofNatEmbed {α : Type u} [DecidableEq α] (e : ℕ ↪ α) : HasFresh α where
   fresh s := e (Nat.find (p := fun n ↦ e n ∉ s) ⟨(s.preimage e e.2.injOn).max.succ,
-    fun h ↦ not_lt_of_ge (le_max <| (mem_preimage (hf := e.2.injOn)).2 h) (WithBot.lt_succ _)⟩)
+    fun h ↦ not_lt_of_ge (le_max <| mem_preimage.2 h) (WithBot.lt_succ _)⟩)
   fresh_notMem s := Nat.find_spec (p := fun n ↦ e n ∉ s) _
 
 /-- `ℕ` has a computable fresh function. -/

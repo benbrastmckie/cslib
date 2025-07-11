@@ -44,7 +44,7 @@ example : 1 ~[natLts] 2 := by
 inductive TLabel : Type where
 | τ
 
-instance : LabelWithTau TLabel := {
+instance : HasTau TLabel := {
   τ := TLabel.τ
 }
 

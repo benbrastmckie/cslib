@@ -392,29 +392,29 @@ end Classes
 section Weak
 
 /-- A type of transition labels that includes a special 'internal' transition `τ`. -/
-class LabelWithTau (Label : Type v) where
+class HasTau (Label : Type v) where
   τ : Label
 
 /-- Saturated transition relation. -/
-inductive LTS.str [LabelWithTau Label] (lts : LTS State Label) : State → Label → State → Prop where
-| refl : lts.str s LabelWithTau.τ s
-| tr : lts.str s1 LabelWithTau.τ s2 → lts.tr s2 μ s3 → lts.str s3 LabelWithTau.τ s4 → lts.str s1 μ s4
+inductive LTS.str [HasTau Label] (lts : LTS State Label) : State → Label → State → Prop where
+| refl : lts.str s HasTau.τ s
+| tr : lts.str s1 HasTau.τ s2 → lts.tr s2 μ s3 → lts.str s3 HasTau.τ s4 → lts.str s1 μ s4
 
 /-- The `LTS` obtained by saturating the transition relation in `lts`. -/
-def LTS.saturate [LabelWithTau Label] (lts : LTS State Label) : LTS State Label := { tr := LTS.str lts }
+def LTS.saturate [HasTau Label] (lts : LTS State Label) : LTS State Label := { tr := LTS.str lts }
 
 /-- Any transition is also a saturated transition. -/
-theorem LTS.str.single [LabelWithTau Label] (lts : LTS State Label) : lts.tr s μ s' → lts.str s μ s' := by
+theorem LTS.str.single [HasTau Label] (lts : LTS State Label) : lts.tr s μ s' → lts.str s μ s' := by
   intro h
   apply LTS.str.tr LTS.str.refl h LTS.str.refl
 
 /-- As `LTS.str`, but counts the number of `τ`-transitions. This is convenient as induction metric. -/
-inductive LTS.strN [LabelWithTau Label] (lts : LTS State Label) : ℕ → State → Label → State → Prop where
-| refl : lts.strN 0 s LabelWithTau.τ s
-| tr : lts.strN n s1 LabelWithTau.τ s2 → lts.tr s2 μ s3 → lts.strN m s3 LabelWithTau.τ s4 → lts.strN (n + m + 1) s1 μ s4
+inductive LTS.strN [HasTau Label] (lts : LTS State Label) : ℕ → State → Label → State → Prop where
+| refl : lts.strN 0 s HasTau.τ s
+| tr : lts.strN n s1 HasTau.τ s2 → lts.tr s2 μ s3 → lts.strN m s3 HasTau.τ s4 → lts.strN (n + m + 1) s1 μ s4
 
 /-- `LTS.str` and `LTS.strN` are equivalent. -/
-theorem LTS.str_strN [LabelWithTau Label] (lts : LTS State Label) : lts.str s1 μ s2 ↔ ∃ n, lts.strN n s1 μ s2 := by
+theorem LTS.str_strN [HasTau Label] (lts : LTS State Label) : lts.str s1 μ s2 ↔ ∃ n, lts.strN n s1 μ s2 := by
   apply Iff.intro <;> intro h
   case mp =>
     induction h
@@ -436,9 +436,9 @@ theorem LTS.str_strN [LabelWithTau Label] (lts : LTS State Label) : lts.str s1 �
 
 /-- Saturated transitions labelled by τ can be composed (weighted version). -/
 theorem LTS.strN.trans_τ
-  [LabelWithTau Label] (lts : LTS State Label)
-  (h1 : lts.strN n s1 LabelWithTau.τ s2) (h2 : lts.strN m s2 LabelWithTau.τ s3) :
-  lts.strN (n + m) s1 LabelWithTau.τ s3 := by
+  [HasTau Label] (lts : LTS State Label)
+  (h1 : lts.strN n s1 HasTau.τ s2) (h2 : lts.strN m s2 HasTau.τ s3) :
+  lts.strN (n + m) s1 HasTau.τ s3 := by
   cases h1
   case refl =>
     simp
@@ -452,9 +452,9 @@ theorem LTS.strN.trans_τ
 
 /-- Saturated transitions labelled by τ can be composed. -/
 theorem LTS.str.trans_τ
-  [LabelWithTau Label] (lts : LTS State Label)
-  (h1 : lts.str s1 LabelWithTau.τ s2) (h2 : lts.str s2 LabelWithTau.τ s3) :
-  lts.str s1 LabelWithTau.τ s3 := by
+  [HasTau Label] (lts : LTS State Label)
+  (h1 : lts.str s1 HasTau.τ s2) (h2 : lts.str s2 HasTau.τ s3) :
+  lts.str s1 HasTau.τ s3 := by
   obtain ⟨n, h1N⟩ := (LTS.str_strN lts).1 h1
   obtain ⟨m, h2N⟩ := (LTS.str_strN lts).1 h2
   have concN := LTS.strN.trans_τ lts h1N h2N
@@ -462,9 +462,9 @@ theorem LTS.str.trans_τ
 
 /-- Saturated transitions can be appended with τ-transitions (weighted version). -/
 theorem LTS.strN.append
-  [LabelWithTau Label] (lts : LTS State Label)
+  [HasTau Label] (lts : LTS State Label)
   (h1 : lts.strN n1 s1 μ s2)
-  (h2 : lts.strN n2 s2 LabelWithTau.τ s3) :
+  (h2 : lts.strN n2 s2 HasTau.τ s3) :
   lts.strN (n1 + n2) s1 μ s3 := by
   cases h1
   case refl =>
@@ -478,10 +478,10 @@ theorem LTS.strN.append
 
 /-- Saturated transitions can be composed (weighted version). -/
 theorem LTS.strN.comp
-  [LabelWithTau Label] (lts : LTS State Label)
-  (h1 : lts.strN n1 s1 LabelWithTau.τ s2)
+  [HasTau Label] (lts : LTS State Label)
+  (h1 : lts.strN n1 s1 HasTau.τ s2)
   (h2 : lts.strN n2 s2 μ s3)
-  (h3 : lts.strN n3 s3 LabelWithTau.τ s4) :
+  (h3 : lts.strN n3 s3 HasTau.τ s4) :
   lts.strN (n1 + n2 + n3) s1 μ s4 := by
   cases h2
   case refl =>
@@ -496,10 +496,10 @@ theorem LTS.strN.comp
 
 /-- Saturated transitions can be composed. -/
 theorem LTS.str.comp
-  [LabelWithTau Label] (lts : LTS State Label)
-  (h1 : lts.str s1 LabelWithTau.τ s2)
+  [HasTau Label] (lts : LTS State Label)
+  (h1 : lts.str s1 HasTau.τ s2)
   (h2 : lts.str s2 μ s3)
-  (h3 : lts.str s3 LabelWithTau.τ s4) :
+  (h3 : lts.str s3 HasTau.τ s4) :
   lts.str s1 μ s4 := by
   obtain ⟨n1, h1N⟩ := (LTS.str_strN lts).1 h1
   obtain ⟨n2, h2N⟩ := (LTS.str_strN lts).1 h2
@@ -515,16 +515,16 @@ section Divergence
 
 /-- A divergent execution is a stream of states where each state is the anti-τ-derivative of the
 next. -/
-def LTS.DivergentExecution [LabelWithTau Label] (lts : LTS State Label)
+def LTS.DivergentExecution [HasTau Label] (lts : LTS State Label)
   (stream : Stream' State) : Prop :=
-  ∀ n, lts.tr (stream n) LabelWithTau.τ (stream n.succ)
+  ∀ n, lts.tr (stream n) HasTau.τ (stream n.succ)
 
 /-- A state is divergent if there is a divergent execution from it. -/
-def LTS.Divergent [LabelWithTau Label] (lts : LTS State Label) (s : State) : Prop :=
+def LTS.Divergent [HasTau Label] (lts : LTS State Label) (s : State) : Prop :=
   ∃ stream : Stream' State, stream 0 = s ∧ lts.DivergentExecution stream
 
 /-- If a stream is a divergent execution, then any 'suffix' is also a divergent execution. -/
-theorem LTS.divergent_drop [LabelWithTau Label] (lts : LTS State Label) (stream : Stream' State) (h : lts.DivergentExecution stream) (n : ℕ) : lts.DivergentExecution (stream.drop n) := by
+theorem LTS.divergent_drop [HasTau Label] (lts : LTS State Label) (stream : Stream' State) (h : lts.DivergentExecution stream) (n : ℕ) : lts.DivergentExecution (stream.drop n) := by
   simp only [LTS.DivergentExecution]
   intro m
   simp only [Stream'.drop, Stream'.get]
@@ -536,7 +536,7 @@ theorem LTS.divergent_drop [LabelWithTau Label] (lts : LTS State Label) (stream 
   apply h
 
 /-- An LTS is divergence-free if it has no divergent state. -/
-def LTS.DivergenceFree [LabelWithTau Label] (lts : LTS State Label) : Prop :=
+def LTS.DivergenceFree [HasTau Label] (lts : LTS State Label) : Prop :=
   ¬∃ s, lts.Divergent s
 
 end Divergence

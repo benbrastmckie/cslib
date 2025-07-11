@@ -791,11 +791,11 @@ section WeakBisimulation
 
 /-- A weak bisimulation is similar to a `Bisimulation`, but allows for the related processes to do
 internal work. Technically, this is defined as a `Bisimulation` on the saturation of the LTS. -/
-def WeakBisimulation [LabelWithTau Label] (lts : LTS State Label) (r : Rel State State) :=
+def WeakBisimulation [HasTau Label] (lts : LTS State Label) (r : Rel State State) :=
   Bisimulation (lts.saturate) r
 
 /-- Two states are weakly bisimilar if they are related by some weak bisimulation. -/
-def WeakBisimilarity [LabelWithTau Label] (lts : LTS State Label) : Rel State State :=
+def WeakBisimilarity [HasTau Label] (lts : LTS State Label) : Rel State State :=
   fun s1 s2 =>
     ∃ r : Rel State State, r s1 s2 ∧ WeakBisimulation lts r
 
@@ -805,7 +805,7 @@ notation s:max " ≈[" lts "] " s':max => WeakBisimilarity lts s s'
 /-- An `SWBisimulation` is a more convenient definition of weak bisimulation, because the challenge
 is a single transition. We prove later that this technique is sound, following a strategy inspired
 by [Sangiorgi2011]. -/
-def SWBisimulation [LabelWithTau Label] (lts : LTS State Label) (r : Rel State State) : Prop :=
+def SWBisimulation [HasTau Label] (lts : LTS State Label) (r : Rel State State) : Prop :=
   ∀ s1 s2, r s1 s2 → ∀ μ, (
     (∀ s1', lts.tr s1 μ s1' → ∃ s2', lts.str s2 μ s2' ∧ r s1' s2')
     ∧
@@ -813,7 +813,7 @@ def SWBisimulation [LabelWithTau Label] (lts : LTS State Label) (r : Rel State S
   )
 
 /-- Two states are sw-bisimilar if they are related by some sw-bisimulation. -/
-def SWBisimilarity [LabelWithTau Label] (lts : LTS State Label) : Rel State State :=
+def SWBisimilarity [HasTau Label] (lts : LTS State Label) : Rel State State :=
   fun s1 s2 =>
     ∃ r : Rel State State, r s1 s2 ∧ SWBisimulation lts r
 
@@ -823,9 +823,9 @@ notation s:max " ≈sw[" lts "] " s':max => SWBisimilarity lts s s'
 /-- Utility theorem for 'following' internal transitions using an `SWBisimulation`
 (first component, weighted version). -/
 theorem SWBisimulation.follow_internal_fst_n
-  [LabelWithTau Label] (lts : LTS State Label) (r : Rel State State)
-  (hswb : SWBisimulation lts r) (hr : r s1 s2) (hstrN : lts.strN n s1 LabelWithTau.τ s1') :
-  ∃ s2', lts.str s2 LabelWithTau.τ s2' ∧ r s1' s2' := by
+  [HasTau Label] (lts : LTS State Label) (r : Rel State State)
+  (hswb : SWBisimulation lts r) (hr : r s1 s2) (hstrN : lts.strN n s1 HasTau.τ s1') :
+  ∃ s2', lts.str s2 HasTau.τ s2' ∧ r s1' s2' := by
   cases n
   case zero =>
     cases hstrN
@@ -839,7 +839,7 @@ theorem SWBisimulation.follow_internal_fst_n
     simp [SWBisimulation] at hswb
     have ih1 := SWBisimulation.follow_internal_fst_n lts r hswb hr hstrN1
     obtain ⟨sb2, hstrs2, hrsb⟩ := ih1
-    have h := (hswb sb sb2 hrsb LabelWithTau.τ).1 sb' htr
+    have h := (hswb sb sb2 hrsb HasTau.τ).1 sb' htr
     obtain ⟨sb2', hstrsb2, hrsb2⟩ := h
     have ih2 := SWBisimulation.follow_internal_fst_n lts r hswb hrsb2 hstrN2
     obtain ⟨s2', hstrs2', hrs2⟩ := ih2
@@ -851,9 +851,9 @@ theorem SWBisimulation.follow_internal_fst_n
 /-- Utility theorem for 'following' internal transitions using an `SWBisimulation`
 (second component, weighted version). -/
 theorem SWBisimulation.follow_internal_snd_n
-  [LabelWithTau Label] (lts : LTS State Label) (r : Rel State State)
-  (hswb : SWBisimulation lts r) (hr : r s1 s2) (hstrN : lts.strN n s2 LabelWithTau.τ s2') :
-  ∃ s1', lts.str s1 LabelWithTau.τ s1' ∧ r s1' s2' := by
+  [HasTau Label] (lts : LTS State Label) (r : Rel State State)
+  (hswb : SWBisimulation lts r) (hr : r s1 s2) (hstrN : lts.strN n s2 HasTau.τ s2') :
+  ∃ s1', lts.str s1 HasTau.τ s1' ∧ r s1' s2' := by
   cases n
   case zero =>
     cases hstrN
@@ -867,7 +867,7 @@ theorem SWBisimulation.follow_internal_snd_n
     simp [SWBisimulation] at hswb
     have ih1 := SWBisimulation.follow_internal_snd_n lts r hswb hr hstrN1
     obtain ⟨sb1, hstrs1, hrsb⟩ := ih1
-    have h := (hswb sb1 sb hrsb LabelWithTau.τ).2 sb' htr
+    have h := (hswb sb1 sb hrsb HasTau.τ).2 sb' htr
     obtain ⟨sb2', hstrsb2, hrsb2⟩ := h
     have ih2 := SWBisimulation.follow_internal_snd_n lts r hswb hrsb2 hstrN2
     obtain ⟨s2', hstrs2', hrs2⟩ := ih2
@@ -879,23 +879,23 @@ theorem SWBisimulation.follow_internal_snd_n
 /-- Utility theorem for 'following' internal transitions using an `SWBisimulation`
 (first component). -/
 theorem SWBisimulation.follow_internal_fst
-  [LabelWithTau Label] (lts : LTS State Label) (r : Rel State State)
-  (hswb : SWBisimulation lts r) (hr : r s1 s2) (hstr : lts.str s1 LabelWithTau.τ s1') :
-  ∃ s2', lts.str s2 LabelWithTau.τ s2' ∧ r s1' s2' := by
+  [HasTau Label] (lts : LTS State Label) (r : Rel State State)
+  (hswb : SWBisimulation lts r) (hr : r s1 s2) (hstr : lts.str s1 HasTau.τ s1') :
+  ∃ s2', lts.str s2 HasTau.τ s2' ∧ r s1' s2' := by
   obtain ⟨n, hstrN⟩ := (LTS.str_strN lts).1 hstr
   apply SWBisimulation.follow_internal_fst_n lts r hswb hr hstrN
 
 /-- Utility theorem for 'following' internal transitions using an `SWBisimulation`
 (second component). -/
 theorem SWBisimulation.follow_internal_snd
-  [LabelWithTau Label] (lts : LTS State Label) (r : Rel State State)
-  (hswb : SWBisimulation lts r) (hr : r s1 s2) (hstr : lts.str s2 LabelWithTau.τ s2') :
-  ∃ s1', lts.str s1 LabelWithTau.τ s1' ∧ r s1' s2' := by
+  [HasTau Label] (lts : LTS State Label) (r : Rel State State)
+  (hswb : SWBisimulation lts r) (hr : r s1 s2) (hstr : lts.str s2 HasTau.τ s2') :
+  ∃ s1', lts.str s1 HasTau.τ s1' ∧ r s1' s2' := by
   obtain ⟨n, hstrN⟩ := (LTS.str_strN lts).1 hstr
   apply SWBisimulation.follow_internal_snd_n lts r hswb hr hstrN
 
 /-- We can now prove that any relation is a `WeakBisimulation` iff it is an `SWBisimulation`. This formalises lemma 4.2.10 in [Sangiorgi2011]. -/
-theorem WeakBisimulation.iff_swBisimulation [LabelWithTau Label] (lts : LTS State Label) (r : Rel State State) :
+theorem WeakBisimulation.iff_swBisimulation [HasTau Label] (lts : LTS State Label) (r : Rel State State) :
   WeakBisimulation lts r ↔ SWBisimulation lts r := by
   apply Iff.intro
   case mp =>
@@ -954,12 +954,12 @@ theorem WeakBisimulation.iff_swBisimulation [LabelWithTau Label] (lts : LTS Stat
           apply LTS.str.comp lts hstr1b hstr1b' hstr1'
         · exact hrb2
 
-theorem WeakBisimulation.toSwBisimulation [LabelWithTau Label] {lts : LTS State Label} {r : Rel State State} (h : WeakBisimulation lts r) : SWBisimulation lts r := (WeakBisimulation.iff_swBisimulation lts r).1 h
+theorem WeakBisimulation.toSwBisimulation [HasTau Label] {lts : LTS State Label} {r : Rel State State} (h : WeakBisimulation lts r) : SWBisimulation lts r := (WeakBisimulation.iff_swBisimulation lts r).1 h
 
-theorem SWBisimulation.toWeakBisimulation [LabelWithTau Label] {lts : LTS State Label} {r : Rel State State} (h : SWBisimulation lts r) : WeakBisimulation lts r := (WeakBisimulation.iff_swBisimulation lts r).2 h
+theorem SWBisimulation.toWeakBisimulation [HasTau Label] {lts : LTS State Label} {r : Rel State State} (h : SWBisimulation lts r) : WeakBisimulation lts r := (WeakBisimulation.iff_swBisimulation lts r).2 h
 
 /-- If two states are related by an `SWBisimulation`, then they are weakly bisimilar. -/
-theorem WeakBisimilarity.by_swBisimulation [LabelWithTau Label]
+theorem WeakBisimilarity.by_swBisimulation [HasTau Label]
   (lts : LTS State Label) (r : Rel State State)
   (hb : SWBisimulation lts r) (hr : r s1 s2) : s1 ≈[lts] s2 := by
   exists r
@@ -967,7 +967,7 @@ theorem WeakBisimilarity.by_swBisimulation [LabelWithTau Label]
   apply (WeakBisimulation.iff_swBisimulation lts r).2 hb
 
 /-- Weak bisimilarity and sw-bisimilarity coincide for all LTSs. -/
-theorem WeakBisimilarity.weakBisim_eq_swBisim [LabelWithTau Label] (lts : LTS State Label) :
+theorem WeakBisimilarity.weakBisim_eq_swBisim [HasTau Label] (lts : LTS State Label) :
   WeakBisimilarity lts = SWBisimilarity lts := by
   funext s1 s2
   simp [WeakBisimilarity, SWBisimilarity]
@@ -986,7 +986,7 @@ theorem WeakBisimilarity.weakBisim_eq_swBisim [LabelWithTau Label] (lts : LTS St
     apply (WeakBisimulation.iff_swBisimulation lts r).2 hrh
 
 /-- sw-bisimilarity is reflexive. -/
-theorem SWBisimilarity.refl [LabelWithTau Label] (lts : LTS State Label) (s : State) : s ≈sw[lts] s := by
+theorem SWBisimilarity.refl [HasTau Label] (lts : LTS State Label) (s : State) : s ≈sw[lts] s := by
   simp [SWBisimilarity]
   exists Rel.Id
   constructor; constructor
@@ -1008,12 +1008,12 @@ theorem SWBisimilarity.refl [LabelWithTau Label] (lts : LTS State Label) (s : St
     · constructor
 
 /-- Weak bisimilarity is reflexive. -/
-theorem WeakBisimilarity.refl [LabelWithTau Label] (lts : LTS State Label) (s : State) : s ≈[lts] s := by
+theorem WeakBisimilarity.refl [HasTau Label] (lts : LTS State Label) (s : State) : s ≈[lts] s := by
   rw [WeakBisimilarity.weakBisim_eq_swBisim lts]
   apply SWBisimilarity.refl
 
 /-- The inverse of an sw-bisimulation is an sw-bisimulation. -/
-theorem SWBisimulation.inv [LabelWithTau Label] (lts : LTS State Label)
+theorem SWBisimulation.inv [HasTau Label] (lts : LTS State Label)
   (r : Rel State State) (h : SWBisimulation lts r) :
   SWBisimulation lts r.inv := by
   simp only [SWBisimulation] at h
@@ -1034,7 +1034,7 @@ theorem SWBisimulation.inv [LabelWithTau Label] (lts : LTS State Label)
     exists s1'
 
 /-- The inverse of a weak bisimulation is a weak bisimulation. -/
-theorem WeakBisimulation.inv [LabelWithTau Label] (lts : LTS State Label)
+theorem WeakBisimulation.inv [HasTau Label] (lts : LTS State Label)
   (r : Rel State State) (h : WeakBisimulation lts r) :
   WeakBisimulation lts r.inv := by
   apply WeakBisimulation.toSwBisimulation at h
@@ -1043,7 +1043,7 @@ theorem WeakBisimulation.inv [LabelWithTau Label] (lts : LTS State Label)
   exact h'
 
 /-- sw-bisimilarity is symmetric. -/
-theorem SWBisimilarity.symm [LabelWithTau Label] (lts : LTS State Label) (h : s1 ≈sw[lts] s2) : s2 ≈sw[lts] s1 := by
+theorem SWBisimilarity.symm [HasTau Label] (lts : LTS State Label) (h : s1 ≈sw[lts] s2) : s2 ≈sw[lts] s1 := by
   obtain ⟨r, hr, hrh⟩ := h
   exists r.inv
   constructor
@@ -1054,14 +1054,14 @@ theorem SWBisimilarity.symm [LabelWithTau Label] (lts : LTS State Label) (h : s1
     apply SWBisimulation.inv lts r hrh
 
 /-- Weak bisimilarity is symmetric. -/
-theorem WeakBisimilarity.symm [LabelWithTau Label] (lts : LTS State Label) (h : s1 ≈[lts] s2) : s2 ≈[lts] s1 := by
+theorem WeakBisimilarity.symm [HasTau Label] (lts : LTS State Label) (h : s1 ≈[lts] s2) : s2 ≈[lts] s1 := by
   rw [WeakBisimilarity.weakBisim_eq_swBisim]
   rw [WeakBisimilarity.weakBisim_eq_swBisim] at h
   apply SWBisimilarity.symm lts h
 
 /-- The composition of two weak bisimulations is a weak bisimulation. -/
 theorem WeakBisimulation.comp
-  [LabelWithTau Label]
+  [HasTau Label]
   (lts : LTS State Label)
   (r1 r2 : Rel State State) (h1 : WeakBisimulation lts r1) (h2 : WeakBisimulation lts r2) :
   WeakBisimulation lts (r1.comp r2) := by
@@ -1099,7 +1099,7 @@ theorem WeakBisimulation.comp
 
 /-- The composition of two sw-bisimulations is an sw-bisimulation. -/
 theorem SWBisimulation.comp
-  [LabelWithTau Label]
+  [HasTau Label]
   (lts : LTS State Label)
   (r1 r2 : Rel State State) (h1 : SWBisimulation lts r1) (h2 : SWBisimulation lts r2) :
   SWBisimulation lts (r1.comp r2) := by
@@ -1110,7 +1110,7 @@ theorem SWBisimulation.comp
 
 /-- Weak bisimilarity is transitive. -/
 theorem WeakBisimilarity.trans
-  [LabelWithTau Label] {s1 s2 s3 : State} (lts : LTS State Label) (h1 : s1 ≈[lts] s2) (h2 : s2 ≈[lts] s3) :
+  [HasTau Label] {s1 s2 s3 : State} (lts : LTS State Label) (h1 : s1 ≈[lts] s2) (h2 : s2 ≈[lts] s3) :
   s1 ≈[lts] s3 := by
   obtain ⟨r1, hr1, hr1b⟩ := h1
   obtain ⟨r2, hr2, hr2b⟩ := h2
@@ -1124,13 +1124,13 @@ theorem WeakBisimilarity.trans
 
 /-- sw-bisimilarity is transitive. -/
 theorem SWBisimilarity.trans
-  [LabelWithTau Label] {s1 s2 s3 : State} (lts : LTS State Label) (h1 : s1 ≈sw[lts] s2) (h2 : s2 ≈sw[lts] s3) :
+  [HasTau Label] {s1 s2 s3 : State} (lts : LTS State Label) (h1 : s1 ≈sw[lts] s2) (h2 : s2 ≈sw[lts] s3) :
   s1 ≈sw[lts] s3 := by
   rw [← (WeakBisimilarity.weakBisim_eq_swBisim lts)] at *
   apply WeakBisimilarity.trans lts h1 h2
 
 /-- Weak bisimilarity is an equivalence relation. -/
-theorem WeakBisimilarity.eqv [LabelWithTau Label] {lts : LTS State Label} :
+theorem WeakBisimilarity.eqv [HasTau Label] {lts : LTS State Label} :
   Equivalence (WeakBisimilarity lts) := {
     refl := WeakBisimilarity.refl lts
     symm := WeakBisimilarity.symm lts
@@ -1138,7 +1138,7 @@ theorem WeakBisimilarity.eqv [LabelWithTau Label] {lts : LTS State Label} :
   }
 
 /-- SW-bisimilarity is an equivalence relation. -/
-theorem SWBisimilarity.eqv [LabelWithTau Label] {lts : LTS State Label} :
+theorem SWBisimilarity.eqv [HasTau Label] {lts : LTS State Label} :
   Equivalence (SWBisimilarity lts) := {
     refl := SWBisimilarity.refl lts
     symm := SWBisimilarity.symm lts

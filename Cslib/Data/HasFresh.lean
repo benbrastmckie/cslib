@@ -1,14 +1,14 @@
 /-
 Copyright (c) 2025 Fabrizio Montesi. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Fabrizio Montesi
+Authors: Fabrizio Montesi, Kenny Lau
 -/
 
-import Mathlib.Data.Finset.Basic
 import Mathlib.Data.Finset.Max
-import Mathlib.Data.Nat.Find
+import Mathlib.Data.Finset.Preimage
 import Mathlib.Data.Fintype.EquivFin
-import Mathlib.Order.SuccPred.Basic
+import Mathlib.Data.Nat.SuccPred
+import Mathlib.Order.SuccPred.WithBot
 
 universe u
 
@@ -19,20 +19,21 @@ class HasFresh (α : Type u) where
   /-- Proof that `fresh` returns a fresh element for its input set. -/
   fresh_notMem (s : Finset α) : fresh s ∉ s
 
+def HasFresh.ofNatEmbed {α : Type u}  [DecidableEq α] (e : ℕ ↪ α) : HasFresh α where
+  fresh s := e (Nat.find (p := fun n ↦ e n ∉ s) <| Classical.exists_not_of_not_forall fun h ↦
+    not_injective_infinite_finite (fun n ↦ (⟨e n, h n⟩ : s)) fun x y q ↦ by aesop)
+  fresh_notMem s := Nat.find_spec (p := fun n ↦ e n ∉ s) _
+
+lemma WithBot.lt_succ {α : Type u} [Preorder α] [OrderBot α] [SuccOrder α] [NoMaxOrder α]
+    (x : WithBot α) : x < x.succ :=
+  succ_eq_succ x ▸ Order.lt_succ_of_le_of_not_isMax le_rfl (not_isMax x)
+
+open Finset in
+def HasFresh.ofNatEmbed' {α : Type u} [DecidableEq α] (e : ℕ ↪ α) : HasFresh α where
+  fresh s := e (Nat.find (p := fun n ↦ e n ∉ s) ⟨(s.preimage e e.2.injOn).max.succ, 
+    fun h ↦ not_lt_of_ge (le_max <| (mem_preimage (hf := e.2.injOn)).2 h) (WithBot.lt_succ _)⟩)
+  fresh_notMem s := Nat.find_spec (p := fun n ↦ e n ∉ s) _
+
 /-- `ℕ` has a computable fresh function. -/
-instance instHasFreshNat : HasFresh ℕ where
-  -- We could also use Nat.find here.
-  fresh s :=
-    match s.max with
-    | ⊥ => 0
-    | some n => n.succ
-  fresh_notMem s := by
-    cases h : s.max
-    case bot =>
-      simp [Finset.max] at h
-      simp
-      exact h 0
-    case coe n =>
-      simp
-      have h' : s.max < ↑(n + 1) := by simp_all only [WithBot.coe_lt_coe, Nat.lt_add_one]
-      apply Finset.notMem_of_max_lt_coe h'
+instance instHasFreshNat : HasFresh ℕ :=
+  .ofNatEmbed (.refl _)

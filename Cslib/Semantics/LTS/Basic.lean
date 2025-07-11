@@ -60,9 +60,17 @@ structure LTS (State : Type u) (Label : Type v) where
 
 section Relation
 
-/-- Given an `lts` and a transition label `μ`, returns the relation that relates all states `s1` and `s2` such that `lts.tr s1 μ s2`. -/
+/-- Given an `lts` and a transition label `μ`, returns the relation that relates all states `s1`
+and `s2` such that `lts.tr s1 μ s2`.
+
+This can be useful, for example, to see a reduction relation as an LTS. -/
 def LTS.toRel (lts : LTS State Label) (μ : Label) : Rel State State :=
   fun s1 s2 => lts.tr s1 μ s2
+
+/-- Any homogeneous relation can be seen as an LTS where all transitions have the same label. -/
+def Rel.toLTS [DecidableEq Label] (r : Rel State State) (μ : Label) : LTS State Label := {
+  tr := fun s1 μ' s2 => if μ' = μ then r s1 s2 else False
+}
 
 end Relation
 

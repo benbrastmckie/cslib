@@ -109,7 +109,6 @@ decreasing_by
   · simp
     omega
   · simp
-    omega
 
 /-- `Term.subst` is a substitution for λ-terms. Gives access to the notation `m[x := n]`. -/
 instance instHasSubstitutionTerm [DecidableEq Var] [HasFresh Var] :

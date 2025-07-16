@@ -22,9 +22,9 @@ languages.
 ## Main definitions
 
 - `LTS` is a structure for labelled transition systems, consisting of a labelled transition
-relation `tr` between states. We follow the style and conventions in [Sangiorgi2011].
+relation `Tr` between states. We follow the style and conventions in [Sangiorgi2011].
 
-- `lts.mtr` extends the transition relation of any LTS to a multi-step transition relation,
+- `LTS.Mtr` extends the transition relation of any LTS to a multi-step transition relation,
 formalising the inference system and admissible rules for such relations in [Montesi2023].
 
 - Definitions for all the common classes of LTSs: image-finite, finitely branching, finite-state,
@@ -32,7 +32,7 @@ finite, and deterministic.
 
 ## Main statements
 
-- A series of results on `lts.mtr` that allow for obtaining and composing multi-step transitions in
+- A series of results on `LTS.Mtr` that allow for obtaining and composing multi-step transitions in
 different ways.
 
 - `LTS.deterministic_imageFinite`: every deterministic LTS is also image-finite.
@@ -52,25 +52,24 @@ universe u v
 
 /--
 A Labelled Transition System (LTS) consists of a type of states (`State`), a type of transition
-labels (`Label`), and a labelled transition relation (`tr`).
+labels (`Label`), and a labelled transition relation (`Tr`).
 -/
 structure LTS (State : Type u) (Label : Type v) where
   /-- The transition relation. -/
-  tr : State → Label → State → Prop
+  Tr : State → Label → State → Prop
 
 section Relation
 
 /-- Given an `lts` and a transition label `μ`, returns the relation that relates all states `s1`
-and `s2` such that `lts.tr s1 μ s2`.
+and `s2` such that `lts.Tr s1 μ s2`.
 
 This can be useful, for example, to see a reduction relation as an LTS. -/
 def LTS.toRel (lts : LTS State Label) (μ : Label) : Rel State State :=
-  fun s1 s2 => lts.tr s1 μ s2
+  fun s1 s2 => lts.Tr s1 μ s2
 
 /-- Any homogeneous relation can be seen as an LTS where all transitions have the same label. -/
-def Rel.toLTS [DecidableEq Label] (r : Rel State State) (μ : Label) : LTS State Label := {
-  tr := fun s1 μ' s2 => if μ' = μ then r s1 s2 else False
-}
+def Rel.toLTS [DecidableEq Label] (r : Rel State State) (μ : Label) : LTS State Label where
+  Tr := fun s1 μ' s2 => if μ' = μ then r s1 s2 else False
 
 end Relation
 
@@ -87,50 +86,50 @@ Definition of a multi-step transition.
 rule. This makes working with lists of labels more convenient, because we follow the same
 construction. It is also similar to what is done in the `SimpleGraph` library in mathlib.)
 -/
-inductive LTS.mtr (lts : LTS State Label) : State → List Label → State → Prop where
-| refl {s : State} : lts.mtr s [] s
-| stepL {s1 : State} {μ : Label} {s2 : State} {μs : List Label} {s3 : State} :
-  lts.tr s1 μ s2 → lts.mtr s2 μs s3 →
-  lts.mtr s1 (μ :: μs) s3
+inductive LTS.Mtr (lts : LTS State Label) : State → List Label → State → Prop where
+  | refl {s : State} : lts.Mtr s [] s
+  | stepL {s1 : State} {μ : Label} {s2 : State} {μs : List Label} {s3 : State} :
+    lts.Tr s1 μ s2 → lts.Mtr s2 μs s3 →
+    lts.Mtr s1 (μ :: μs) s3
 
 /-- Any transition is also a multi-step transition. -/
-theorem LTS.mtr.single {s1 : State} {μ : Label} {s2 : State} :
-  lts.tr s1 μ s2 → lts.mtr s1 [μ] s2 := by
+theorem LTS.Mtr.single {s1 : State} {μ : Label} {s2 : State} :
+  lts.Tr s1 μ s2 → lts.Mtr s1 [μ] s2 := by
   intro h
-  apply LTS.mtr.stepL
+  apply LTS.Mtr.stepL
   · exact h
-  · apply LTS.mtr.refl
+  · apply LTS.Mtr.refl
 
 /-- Any multi-step transition can be extended by adding a transition. -/
-theorem LTS.mtr.stepR {s1 : State} {μs : List Label} {s2 : State} {μ : Label} {s3 : State} :
-  lts.mtr s1 μs s2 → lts.tr s2 μ s3 → lts.mtr s1 (μs ++ [μ]) s3 := by
+theorem LTS.Mtr.stepR {s1 : State} {μs : List Label} {s2 : State} {μ : Label} {s3 : State} :
+  lts.Mtr s1 μs s2 → lts.Tr s2 μ s3 → lts.Mtr s1 (μs ++ [μ]) s3 := by
   intro h1 h2
   induction h1
   case refl s1' =>
     simp
-    apply LTS.mtr.single lts h2
+    apply LTS.Mtr.single lts h2
   case stepL s1' μ' s2' μs' s3' h1' h3 ih =>
-    apply LTS.mtr.stepL
+    apply LTS.Mtr.stepL
     · exact h1'
     · apply ih h2
 
 /-- Multi-step transitions can be composed. -/
-theorem LTS.mtr.comp {s1 : State} {μs1 : List Label} {s2 : State} {μs2 : List Label} {s3 : State} :
-  lts.mtr s1 μs1 s2 → lts.mtr s2 μs2 s3 →
-  lts.mtr s1 (μs1 ++ μs2) s3 := by
+theorem LTS.Mtr.comp {s1 : State} {μs1 : List Label} {s2 : State} {μs2 : List Label} {s3 : State} :
+  lts.Mtr s1 μs1 s2 → lts.Mtr s2 μs2 s3 →
+  lts.Mtr s1 (μs1 ++ μs2) s3 := by
   intro h1 h2
   induction h1
   case refl =>
     simp
     assumption
   case stepL s1 μ s' μs1' s'' h1' h3 ih  =>
-    apply LTS.mtr.stepL
+    apply LTS.Mtr.stepL
     · exact h1'
     · apply ih h2
 
 /-- Any 1-sized multi-step transition implies a transition with the same states and label. -/
-theorem LTS.mtr.single_invert (s1 : State) (μ : Label) (s2 : State) :
-  lts.mtr s1 [μ] s2 → lts.tr s1 μ s2 := by
+theorem LTS.Mtr.single_invert (s1 : State) (μ : Label) (s2 : State) :
+  lts.Mtr s1 [μ] s2 → lts.Tr s1 μ s2 := by
   intro h
   cases h
   case stepL s1' htr hmtr =>
@@ -138,24 +137,23 @@ theorem LTS.mtr.single_invert (s1 : State) (μ : Label) (s2 : State) :
     exact htr
 
 /-- In any zero-steps multi-step transition, the origin and the derivative are the same. -/
-theorem LTS.mtr.nil_eq (h : lts.mtr s1 [] s2) : s1 = s2 := by
+theorem LTS.Mtr.nil_eq (h : lts.Mtr s1 [] s2) : s1 = s2 := by
   cases h
   rfl
 
 /-- A state `s1` can reach a state `s2` if there exists a multi-step transition from
 `s1` to `s2`. -/
 def LTS.CanReach (s1 s2 : State) : Prop :=
-  ∃ μs, lts.mtr s1 μs s2
+  ∃ μs, lts.Mtr s1 μs s2
 
 /-- Any state can reach itself. -/
 theorem LTS.CanReach.refl (s : State) : lts.CanReach s s := by
   exists []
-  apply LTS.mtr.refl
+  apply LTS.Mtr.refl
 
 /-- The LTS generated by a state `s` is the LTS given by all the states reachable from `s`. -/
-def LTS.generatedBy (s : State) : LTS {s' : State // lts.CanReach s s'} Label := {
-    tr := fun s1 μ s2 => lts.CanReach s s1 ∧ lts.CanReach s s2 ∧ lts.tr s1 μ s2
-  }
+def LTS.generatedBy (s : State) : LTS {s' : State // lts.CanReach s s'} Label where
+  Tr := fun s1 μ s2 => lts.CanReach s s1 ∧ lts.CanReach s s2 ∧ lts.Tr s1 μ s2
 
 end MultiStep
 
@@ -171,7 +169,7 @@ def LTS.MayTerminate (s : State) : Prop := ∃ s', Terminated s' ∧ lts.CanReac
 /-- A state 'is stuck' if it is not terminated and cannot go forward. The definition of `Terminated`
 is a parameter. -/
 def LTS.Stuck (s : State) : Prop :=
-  ¬Terminated s ∧ ¬∃ μ s', lts.tr s μ s'
+  ¬Terminated s ∧ ¬∃ μ s', lts.Tr s μ s'
 
 end Termination
 
@@ -189,15 +187,14 @@ def LTS.unionSubtype
 [DecidablePred S1] [DecidablePred L1] [DecidablePred S2] [DecidablePred L2]
 (lts1 : LTS (@Subtype State S1) (@Subtype Label L1))
 (lts2 : LTS (@Subtype State S2) (@Subtype Label L2)) :
-  LTS State Label := {
-  tr := fun s μ s' =>
+  LTS State Label where
+  Tr := fun s μ s' =>
     if h : S1 s ∧ L1 μ ∧ S1 s' then
-      lts1.tr ⟨s, h.1⟩ ⟨μ, h.2.1⟩ ⟨s', h.2.2⟩
+      lts1.Tr ⟨s, h.1⟩ ⟨μ, h.2.1⟩ ⟨s', h.2.2⟩
     else if h : S2 s ∧ L2 μ ∧ S2 s' then
-      lts2.tr ⟨s, h.1⟩ ⟨μ, h.2.1⟩ ⟨s', h.2.2⟩
+      lts2.Tr ⟨s, h.1⟩ ⟨μ, h.2.1⟩ ⟨s', h.2.2⟩
     else
       False
-}
 
 /-- TODO: move this to `Sum`? -/
 def Sum.isLeftP {α} {β} (x : α ⊕ β) : Prop := Sum.isLeft x = true
@@ -207,25 +204,23 @@ def Sum.isRightP {α} {β} (x : α ⊕ β) : Prop := Sum.isRight x = true
 
 /-- Lifting of an `LTS State Label` to `LTS (State ⊕ State') Label`. -/
 def LTS.inl {State'} (lts : LTS State Label) :
-  LTS (@Subtype (State ⊕ State') Sum.isLeftP) (@Subtype Label (Function.const Label True)) := {
-  tr := fun s μ s' =>
+  LTS (@Subtype (State ⊕ State') Sum.isLeftP) (@Subtype Label (Function.const Label True)) where
+  Tr := fun s μ s' =>
     let ⟨s, _⟩ := s
     let ⟨s', _⟩ := s'
     match s, μ, s' with
-    | Sum.inl s1, μ, Sum.inl s2 => lts.tr s1 μ s2
+    | Sum.inl s1, μ, Sum.inl s2 => lts.Tr s1 μ s2
     | _, _, _ => False
-}
 
 /-- Lifting of an `LTS State Label` to `LTS (State' ⊕ State) Label`. -/
 def LTS.inr {State'} (lts : LTS State Label) :
-  LTS (@Subtype (State' ⊕ State) Sum.isRightP) (@Subtype Label (Function.const Label True)) := {
-  tr := fun s μ s' =>
+  LTS (@Subtype (State' ⊕ State) Sum.isRightP) (@Subtype Label (Function.const Label True)) where
+  Tr := fun s μ s' =>
     let ⟨s, _⟩ := s
     let ⟨s', _⟩ := s'
     match s, μ, s' with
-    | Sum.inr s1, μ, Sum.inr s2 => lts.tr s1 μ s2
+    | Sum.inr s1, μ, Sum.inr s2 => lts.Tr s1 μ s2
     | _, _, _ => False
-}
 
 /-- Union of two LTSs with the same `Label` type. The result combines the original respective state
 types `State1` and `State2` into `(State1 ⊕ State2)`. -/
@@ -281,10 +276,10 @@ variable {State : Type u} {Label : Type v} (lts : LTS State Label)
 label. -/
 def LTS.Deterministic : Prop :=
   ∀ (s1 : State) (μ : Label) (s2 s3 : State),
-    lts.tr s1 μ s2 → lts.tr s1 μ s3 → s2 = s3
+    lts.Tr s1 μ s2 → lts.Tr s1 μ s3 → s2 = s3
 
 /-- The `μ`-image of a state `s` is the set of all `μ`-derivatives of `s`. -/
-def LTS.Image (s : State) (μ : Label) : Set State := { s' : State | lts.tr s μ s' }
+def LTS.Image (s : State) (μ : Label) : Set State := { s' : State | lts.Tr s μ s' }
 
 /-- An lts is image-finite if all images of its states are finite. -/
 def LTS.ImageFinite : Prop :=
@@ -293,7 +288,7 @@ def LTS.ImageFinite : Prop :=
 /-- In a deterministic LTS, if a state has a `μ`-derivative, then it can have no other
 `μ`-derivative. -/
 theorem LTS.deterministic_not_lto (hDet : lts.Deterministic) :
-  ∀ s μ s' s'', s' ≠ s'' → lts.tr s μ s' → ¬lts.tr s μ s'' := by
+  ∀ s μ s' s'', s' ≠ s'' → lts.Tr s μ s' → ¬lts.Tr s μ s'' := by
   intro s μ s' s'' hneq hltos'
   by_contra hltos''
   have hDet' := hDet s μ s' s'' hltos' hltos''
@@ -304,7 +299,7 @@ theorem LTS.deterministic_not_lto (hDet : lts.Deterministic) :
 theorem LTS.deterministic_image_char (hDet : lts.Deterministic) :
   ∀ s μ, (∃ s', lts.Image s μ = { s' }) ∨ (lts.Image s μ = ∅) := by
   intro s μ
-  by_cases hs' : ∃ s', lts.tr s μ s'
+  by_cases hs' : ∃ s', lts.Tr s μ s'
   case pos =>
     obtain ⟨s', hs'⟩ := hs'
     left
@@ -350,7 +345,7 @@ theorem LTS.deterministic_imageFinite :
 
 /-- A state has an outgoing label `μ` if it has a `μ`-derivative. -/
 def LTS.HasOutLabel (s : State) (μ : Label) : Prop :=
-  ∃ s', lts.tr s μ s'
+  ∃ s', lts.Tr s μ s'
 
 /-- The set of outgoing labels of a state. -/
 def LTS.OutgoingLabels (s : State) := { μ | lts.HasOutLabel s μ }
@@ -387,7 +382,7 @@ theorem LTS.finiteState_finitelyBranching
 
 /-- An LTS is acyclic if there are no infinite multi-step transitions. -/
 def LTS.Acyclic : Prop :=
-  ∃ n, ∀ s1 μs s2, lts.mtr s1 μs s2 → μs.length < n
+  ∃ n, ∀ s1 μs s2, lts.Mtr s1 μs s2 → μs.length < n
 
 /-- An LTS is finite if it is finite-state and acyclic. -/
 def LTS.Finite : Prop :=
@@ -404,25 +399,26 @@ class HasTau (Label : Type v) where
   τ : Label
 
 /-- Saturated transition relation. -/
-inductive LTS.str [HasTau Label] (lts : LTS State Label) : State → Label → State → Prop where
-| refl : lts.str s HasTau.τ s
-| tr : lts.str s1 HasTau.τ s2 → lts.tr s2 μ s3 → lts.str s3 HasTau.τ s4 → lts.str s1 μ s4
+inductive LTS.Str [HasTau Label] (lts : LTS State Label) : State → Label → State → Prop where
+| refl : lts.Str s HasTau.τ s
+| tr : lts.Str s1 HasTau.τ s2 → lts.Tr s2 μ s3 → lts.Str s3 HasTau.τ s4 → lts.Str s1 μ s4
 
 /-- The `LTS` obtained by saturating the transition relation in `lts`. -/
-def LTS.saturate [HasTau Label] (lts : LTS State Label) : LTS State Label := { tr := LTS.str lts }
+def LTS.saturate [HasTau Label] (lts : LTS State Label) : LTS State Label where
+  Tr := LTS.Str lts
 
 /-- Any transition is also a saturated transition. -/
-theorem LTS.str.single [HasTau Label] (lts : LTS State Label) : lts.tr s μ s' → lts.str s μ s' := by
+theorem LTS.Str.single [HasTau Label] (lts : LTS State Label) : lts.Tr s μ s' → lts.Str s μ s' := by
   intro h
-  apply LTS.str.tr LTS.str.refl h LTS.str.refl
+  apply LTS.Str.tr LTS.Str.refl h LTS.Str.refl
 
 /-- As `LTS.str`, but counts the number of `τ`-transitions. This is convenient as induction metric. -/
 inductive LTS.strN [HasTau Label] (lts : LTS State Label) : ℕ → State → Label → State → Prop where
 | refl : lts.strN 0 s HasTau.τ s
-| tr : lts.strN n s1 HasTau.τ s2 → lts.tr s2 μ s3 → lts.strN m s3 HasTau.τ s4 → lts.strN (n + m + 1) s1 μ s4
+| tr : lts.strN n s1 HasTau.τ s2 → lts.Tr s2 μ s3 → lts.strN m s3 HasTau.τ s4 → lts.strN (n + m + 1) s1 μ s4
 
 /-- `LTS.str` and `LTS.strN` are equivalent. -/
-theorem LTS.str_strN [HasTau Label] (lts : LTS State Label) : lts.str s1 μ s2 ↔ ∃ n, lts.strN n s1 μ s2 := by
+theorem LTS.str_strN [HasTau Label] (lts : LTS State Label) : lts.Str s1 μ s2 ↔ ∃ n, lts.strN n s1 μ s2 := by
   apply Iff.intro <;> intro h
   case mp =>
     induction h
@@ -440,7 +436,7 @@ theorem LTS.str_strN [HasTau Label] (lts : LTS State Label) : lts.str s1 μ s2 �
     case refl =>
       constructor
     case tr n s1 sb μ sb' m s2 hstr1 htr hstr2 ih1 ih2 =>
-      apply LTS.str.tr ih1 htr ih2
+      apply LTS.Str.tr ih1 htr ih2
 
 /-- Saturated transitions labelled by τ can be composed (weighted version). -/
 theorem LTS.strN.trans_τ
@@ -459,10 +455,10 @@ theorem LTS.strN.trans_τ
     exact conc
 
 /-- Saturated transitions labelled by τ can be composed. -/
-theorem LTS.str.trans_τ
+theorem LTS.Str.trans_τ
   [HasTau Label] (lts : LTS State Label)
-  (h1 : lts.str s1 HasTau.τ s2) (h2 : lts.str s2 HasTau.τ s3) :
-  lts.str s1 HasTau.τ s3 := by
+  (h1 : lts.Str s1 HasTau.τ s2) (h2 : lts.Str s2 HasTau.τ s3) :
+  lts.Str s1 HasTau.τ s3 := by
   obtain ⟨n, h1N⟩ := (LTS.str_strN lts).1 h1
   obtain ⟨m, h2N⟩ := (LTS.str_strN lts).1 h2
   have concN := LTS.strN.trans_τ lts h1N h2N
@@ -503,12 +499,12 @@ theorem LTS.strN.comp
     apply conc
 
 /-- Saturated transitions can be composed. -/
-theorem LTS.str.comp
+theorem LTS.Str.comp
   [HasTau Label] (lts : LTS State Label)
-  (h1 : lts.str s1 HasTau.τ s2)
-  (h2 : lts.str s2 μ s3)
-  (h3 : lts.str s3 HasTau.τ s4) :
-  lts.str s1 μ s4 := by
+  (h1 : lts.Str s1 HasTau.τ s2)
+  (h2 : lts.Str s2 μ s3)
+  (h3 : lts.Str s3 HasTau.τ s4) :
+  lts.Str s1 μ s4 := by
   obtain ⟨n1, h1N⟩ := (LTS.str_strN lts).1 h1
   obtain ⟨n2, h2N⟩ := (LTS.str_strN lts).1 h2
   obtain ⟨n3, h3N⟩ := (LTS.str_strN lts).1 h3
@@ -525,7 +521,7 @@ section Divergence
 next. -/
 def LTS.DivergentExecution [HasTau Label] (lts : LTS State Label)
   (stream : Stream' State) : Prop :=
-  ∀ n, lts.tr (stream n) HasTau.τ (stream n.succ)
+  ∀ n, lts.Tr (stream n) HasTau.τ (stream n.succ)
 
 /-- A state is divergent if there is a divergent execution from it. -/
 def LTS.Divergent [HasTau Label] (lts : LTS State Label) (s : State) : Prop :=

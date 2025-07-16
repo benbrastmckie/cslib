@@ -10,7 +10,7 @@ import Cslib.ConcurrencyTheory.CCS.Basic
 /-! # Semantics of CCS
 
 ## Main definitions
-- `CCS.tr`: transition relation for CCS.
+- `CCS.Tr`: transition relation for CCS.
 - `CCS.lts`: the `LTS` of CCS.
 
 -/

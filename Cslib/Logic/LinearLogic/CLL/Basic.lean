@@ -23,7 +23,7 @@ universe u
 
 section CLL
 
-variable {Atom : Type u} {Label : Type v}
+variable {Atom : Type u}
 
 namespace CLL
 
@@ -147,12 +147,19 @@ inductive Proof : @Sequent Atom → Prop where
 | contract : Proof (quest a :: quest a :: Γ) → Proof (quest a :: Γ)
 | bang {Γ : @Sequent Atom} {a} : Γ.allQuest → Proof (a :: Γ) → Proof (bang a :: Γ)
 
+section LogicalEquiv
 
+/-! ## Logical equivalences -/
+
+/-- Two propositions are equivalent if one implies the other and vice versa. -/
 def Proposition.equiv (a b : @Proposition Atom) : Prop := Proof [a.dual, b] ∧ Proof [b.dual, a]
+
+scoped infix:90 " ≡ " => Proposition.equiv
 
 namespace Proposition
 
-theorem exp_top_eq_one : @Proposition.equiv Atom (bang top) one := by
+/-- !⊤ ≡ 1 -/
+theorem bang_top_eqv_one : (bang top) ≡ @one Atom := by
   constructor
   · apply Proof.weaken
     exact Proof.one
@@ -161,7 +168,8 @@ theorem exp_top_eq_one : @Proposition.equiv Atom (bang top) one := by
     · intro _ _; contradiction
     exact Proof.top
 
-theorem exp_zero_eq_bot : @Proposition.equiv Atom (quest zero) bot := by
+/-- ?0 ≡ ⊥ -/
+theorem quest_zero_eqv_bot : (quest zero) ≡ @bot Atom := by
   constructor
   · apply Proof.exchange (List.Perm.swap (bang top) bot [])
     apply Proof.bot
@@ -173,6 +181,8 @@ theorem exp_zero_eq_bot : @Proposition.equiv Atom (quest zero) bot := by
     exact Proof.one
 
 end Proposition
+
+end LogicalEquiv
 
 end CLL
 

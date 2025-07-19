@@ -147,6 +147,33 @@ inductive Proof : @Sequent Atom → Prop where
 | contract : Proof (quest a :: quest a :: Γ) → Proof (quest a :: Γ)
 | bang {Γ : @Sequent Atom} {a} : Γ.allQuest → Proof (a :: Γ) → Proof (bang a :: Γ)
 
+
+def Proposition.equiv (a b : @Proposition Atom) : Prop := Proof [a.dual, b] ∧ Proof [b.dual, a]
+
+namespace Proposition
+
+theorem exp_top_eq_one : @Proposition.equiv Atom (bang top) one := by
+  constructor
+  · apply Proof.weaken
+    exact Proof.one
+  · apply Proof.bot
+    apply Proof.bang
+    · intro _ _; contradiction
+    exact Proof.top
+
+theorem exp_zero_eq_bot : @Proposition.equiv Atom (quest zero) bot := by
+  constructor
+  · apply Proof.exchange (List.Perm.swap (bang top) bot [])
+    apply Proof.bot
+    apply Proof.bang
+    · intro _ _; contradiction
+    exact Proof.top
+  · apply Proof.exchange (List.Perm.swap one (quest zero) [])
+    apply Proof.weaken
+    exact Proof.one
+
+end Proposition
+
 end CLL
 
 end CLL

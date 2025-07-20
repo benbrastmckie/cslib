@@ -1,0 +1,6 @@
+* @fmontesi
+/docs @cs-lean/reviewers
+/CslibTests @cs-lean/reviewers
+
+/Cslib/Computability/LambdaCalculus/ @cs-lean/lambda-calculus
+/Cslib/Logic/ @cs-lean/logic

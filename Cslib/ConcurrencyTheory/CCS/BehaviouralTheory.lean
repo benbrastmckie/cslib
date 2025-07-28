@@ -33,7 +33,7 @@ private inductive ParNil : (Process Name Constant) → (Process Name Constant) �
 | parNil : ParNil (par p nil) p
 
 /-- P | 𝟎 ~ P -/
-theorem bisimilarity_par_nil (p : Process Name Constant) : (par p nil) ~[@lts Name Constant defs] p := by
+theorem bisimilarity_par_nil : (par p nil) ~[@lts Name Constant defs] p := by
   exists ParNil
   constructor; constructor
   simp only [Bisimulation]
@@ -64,7 +64,7 @@ private inductive ParComm : (Process Name Constant) → (Process Name Constant) 
 | parComm : ParComm (par p q) (par q p)
 
 /-- P | Q ~ Q | P -/
-theorem bisimilarity_par_comm (p q : Process Name Constant) : (par p q) ~[@lts Name Constant defs] (par q p) := by
+theorem bisimilarity_par_comm : (par p q) ~[@lts Name Constant defs] (par q p) := by
   exists ParComm
   constructor
   case left =>
@@ -93,7 +93,7 @@ theorem bisimilarity_par_comm (p q : Process Name Constant) : (par p q) ~[@lts N
           constructor
           · rw [← Act.co.involution Name μ] at htrp
             apply Tr.com htrq htrp
-          . constructor
+          · constructor
       case right =>
         intro t htr
         cases htr
@@ -112,7 +112,50 @@ theorem bisimilarity_par_comm (p q : Process Name Constant) : (par p q) ~[@lts N
           constructor
           · rw [← Act.co.involution Name μ] at htrp
             apply Tr.com htrq htrp
-          . constructor
+          · constructor
+
+private inductive ParAssoc : (Process Name Constant) → (Process Name Constant) → Prop where
+| parAssoc : ParAssoc (par p (par q r)) (par (par p q) r)
+
+attribute [local grind] CCS.Tr
+attribute [local grind cases] ParAssoc
+attribute [local grind] ParAssoc
+attribute [local grind <=] CCS.Tr.parL CCS.Tr.parR CCS.Tr.com
+
+/-- P | (Q | R) ~ (P | Q) | R -/
+theorem bisimilarity_par_assoc :
+  (par p (par q r)) ~[@lts Name Constant defs] (par (par p q) r) := by
+  exists ParAssoc
+  constructor
+  case left =>
+    constructor
+  case right =>
+    intro s1 s2 hr μ
+    cases hr
+    case parAssoc p q r =>
+      constructor
+      case left =>
+        intro s1' htr
+        cases htr
+        case parL p q p' htr' =>
+          exists (par (par p' q) r)
+          -- grind
+          -- aesop
+          --   (add safe constructors Tr) (add safe apply Tr.parL) (add safe constructors ParAssoc)
+          constructor
+          case left =>
+            aesop (add unsafe constructors Tr)
+
+            -- repeat apply Tr.parL
+            -- assumption
+          -- case right =>
+          --   constructor
+        case parR p q qr' htr' =>
+          cases htr'
+
+
+
+
 
 private inductive ChoiceComm : (Process Name Constant) → (Process Name Constant) → Prop where
 | choiceComm : ChoiceComm (choice p q) (choice q p)
@@ -171,7 +214,8 @@ private inductive PreBisim : (Process Name Constant) → (Process Name Constant)
 | bisim : (p ~[@lts Name Constant defs] q) → PreBisim p q
 
 /-- P ~ Q → μ.P ~ μ.Q -/
-theorem bisimilarity_congr_pre : (p ~[@lts Name Constant defs] q) → (pre μ p) ~[@lts Name Constant defs] (pre μ q) := by
+theorem bisimilarity_congr_pre :
+  (p ~[@lts Name Constant defs] q) → (pre μ p) ~[@lts Name Constant defs] (pre μ q) := by
   intro hpq
   exists @PreBisim _ _ defs
   constructor; constructor; assumption
@@ -222,7 +266,8 @@ private inductive ResBisim : (Process Name Constant) → (Process Name Constant)
 -- | bisim : (p ~[@lts Name Constant defs] q) → ResBisim p q
 
 /-- P ~ Q → (ν a) P ~ (ν a) Q -/
-theorem bisimilarity_congr_res : (p ~[@lts Name Constant defs] q) → (res a p) ~[@lts Name Constant defs] (res a q) := by
+theorem bisimilarity_congr_res :
+  (p ~[@lts Name Constant defs] q) → (res a p) ~[@lts Name Constant defs] (res a q) := by
   intro hpq
   exists @ResBisim _ _ defs
   constructor; constructor; assumption
@@ -255,7 +300,8 @@ private inductive ChoiceBisim : (Process Name Constant) → (Process Name Consta
 | bisim : (p ~[@lts Name Constant defs] q) → ChoiceBisim p q
 
 /-- P ~ Q → P + R ~ Q + R -/
-theorem bisimilarity_congr_choice : (p ~[@lts Name Constant defs] q) → (choice p r) ~[@lts Name Constant defs] (choice q r) := by
+theorem bisimilarity_congr_choice :
+  (p ~[@lts Name Constant defs] q) → (choice p r) ~[@lts Name Constant defs] (choice q r) := by
   intro h
   exists @ChoiceBisim _ _ defs
   constructor; constructor; assumption

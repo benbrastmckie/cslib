@@ -116,6 +116,13 @@ theorem bisimilarity_par_comm : (par p q) ~[@lts Name Constant defs] (par q p) :
             apply Tr.com htrq htrp
           · constructor
 
+/-- 𝟎 | P ~ P -/
+@[simp, grind]
+theorem bisimilarity_nil_par : (par nil p) ~[@lts Name Constant defs] p :=
+  calc
+    (par nil p) ~[@lts Name Constant defs] (par p nil) := by grind
+    _ ~[@lts Name Constant defs] p := by simp
+
 /-- P | (Q | R) ~ (P | Q) | R -/
 proof_wanted bisimilarity_par_assoc :
   (par p (par q r)) ~[@lts Name Constant defs] (par (par p q) r)
@@ -127,14 +134,6 @@ proof_wanted bisimilarity_choice_nil :
 /-- P + P ~ P -/
 proof_wanted bisimilarity_choice_idem :
   (choice p p) ~[@lts Name Constant defs] p
-          · constructor
-
-/-- 𝟎 | P ~ P -/
-@[simp, grind]
-theorem bisimilarity_nil_par : (par nil p) ~[@lts Name Constant defs] p :=
-  calc
-    (par nil p) ~[@lts Name Constant defs] (par p nil) := by grind
-    _ ~[@lts Name Constant defs] p := by simp
 
 private inductive ChoiceComm : (Process Name Constant) → (Process Name Constant) → Prop where
   | choiceComm : ChoiceComm (choice p q) (choice q p)

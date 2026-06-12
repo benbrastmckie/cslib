@@ -1,6 +1,16 @@
 {
-  "next_project_number": 171,
+  "next_project_number": 172,
   "active_projects": [
+    {
+      "project_number": 171,
+      "project_name": "research_connective_basis_min_int_classical",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Research connective-basis design for minimal, intuitionistic, and classical propositional logic in CSLib: rigorously ground in literature (Gentzen 1935, Prawitz 1965, Troelstra & van Dalen 1988, Heyting 1930, Church 1956, Chagrov & Zakharyaschev 1997, Johansson 1937) whether {imp, bot} primitives with derived neg/top/and/or is adequate — addressing ctchou's objection on PR #635 that {imp, bot} is functionally complete only classically (intuitionistically, and/or are NOT definable), and his challenge that Gentzen/Prawitz/T&vD do not actually use this basis or the 10-to-5 natural deduction rule reduction. Determine the truth of these claims and design a formula type + proof system architecture that supports minimal, intuitionistic, and classical logics naturally and elegantly (e.g., full primitive connective set {bot, atom, imp, and, or} with logics distinguished by inference rules: minimal = no ex falso, intuitionistic = + ex falso, classical = + DNE/Peirce). Also reconcile with maintainer fmontesi's competing PR #607 typeclass approach (Operators/ files, notation-level classes over unchanged primitive constructors) and eric-wieser's suggestion to co-opt Mathlib's Bot/HImp classes. Verify all citations against references.bib and primary sources.",
+      "created": "2026-06-12T23:47:36Z",
+      "last_updated": "2026-06-12T23:47:36Z"
+    },
     {
       "project_number": 170,
       "project_name": "submit_subpr_3_1_3_2_temporal_syntax",

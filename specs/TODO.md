@@ -1,5 +1,5 @@
 ---
-next_project_number: 171
+next_project_number: 172
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 171
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,62,127,139,146,147,160,169,170 | -- | Bimodal Porting, Modal PRs, Propositional PRs, ... |
+| 1 | 36,37,62,127,139,146,147,160,169,170,171 | -- | Bimodal Porting, Modal PRs, Propositional Logic, ... |
 | 2 | 39,40,63,140,148,161 | 36,37,62,139,147,160 | Modal PRs, Propositional PRs, Temporal Logic, ... |
 | 3 | 41,64,141,149,162 | 39,40,63,140,148,161 | Foundations, Modal PRs, Propositional PRs, ... |
 | 4 | 128,129,142,150 | 141,146,149 | Modal PRs, Propositional PRs |
@@ -54,6 +54,10 @@ next_project_number: 171
       └─ 150 [NOT STARTED] — Sub-PR 2.6: K soundness and completeness. Adds ProofSystem/Instan (see above)
 169 [RESEARCHING] — Recreate the Modal primitives refactor (closed PR #637) as a clea
 
+### Propositional Logic
+
+171 [NOT STARTED] — Research connective-basis design for minimal, intuitionistic, and
+
 ### Propositional PRs
 
 127 [NOT STARTED] — Sub-PR 1.3: Propositional semantics (bivalent + Kripke). Introduc
@@ -94,6 +98,16 @@ next_project_number: 171
 170 [PR READY] — Submit Sub-PR 3.1+3.2: Temporal syntax (Formula + utilities). Cre
 
 ## Tasks
+
+### 171. Research connective basis min int classical
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Research connective-basis design for minimal, intuitionistic, and classical propositional logic in CSLib: rigorously ground in literature (Gentzen 1935, Prawitz 1965, Troelstra & van Dalen 1988, Heyting 1930, Church 1956, Chagrov & Zakharyaschev 1997, Johansson 1937) whether {imp, bot} primitives with derived neg/top/and/or is adequate — addressing ctchou's objection on PR #635 that {imp, bot} is functionally complete only classically (intuitionistically, and/or are NOT definable), and his challenge that Gentzen/Prawitz/T&vD do not actually use this basis or the 10-to-5 natural deduction rule reduction. Determine the truth of these claims and design a formula type + proof system architecture that supports minimal, intuitionistic, and classical logics naturally and elegantly (e.g., full primitive connective set {bot, atom, imp, and, or} with logics distinguished by inference rules: minimal = no ex falso, intuitionistic = + ex falso, classical = + DNE/Peirce). Also reconcile with maintainer fmontesi's competing PR #607 typeclass approach (Operators/ files, notation-level classes over unchanged primitive constructors) and eric-wieser's suggestion to co-opt Mathlib's Bot/HImp classes. Verify all citations against references.bib and primary sources.
+
+---
 
 ### 170. Submit subpr 3 1 3 2 temporal syntax
 - **Status**: [PR READY]

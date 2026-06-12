@@ -11,7 +11,7 @@ next_project_number: 169
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,62,127,139,146,147,160,166,167,168 | -- | Bimodal Porting, Submit PRs |
+| 1 | 36,37,62,127,139,146,147,160,166,168 | -- | Bimodal Porting, Submit PRs |
 | 2 | 39,40,63,140,148,161 | 36,37,62,139,147,160 | Submit PRs, Temporal Logic |
 | 3 | 41,64,141,149,162 | 39,40,63,140,148,161 | Submit PRs, Foundations |
 | 4 | 128,129,142,150 | 141,146,149 | Submit PRs |
@@ -78,7 +78,6 @@ next_project_number: 169
     └─ 162 [NOT STARTED] — Sub-PR 3.4: Temporal proof system instances. Adds Instances.lean  (see above)
   └─ 163 [NOT STARTED] — Sub-PR 3.5: Temporal semantics and PL embedding. Adds Model.lean  (see above)
 166 [IMPLEMENTING] — Add a commit to PR #633 (branch pr1/foundations-logic) incorporat
-167 [PR READY] — Add a commit to PR #637 (branch refactor/modal-primitives) incorp
 168 [IMPLEMENTING] — Add commits to the pr3/temporal-formula feature branch (tasks 159
 
 ### Temporal Logic
@@ -105,7 +104,7 @@ next_project_number: 169
 ---
 
 ### 167. Pr637 syntactic sugar and quality
-- **Status**: [PR READY]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Submit PRs
 - **Dependencies**: Task 165
@@ -118,7 +117,7 @@ next_project_number: 169
 ---
 
 ### 166. Pr633 syntactic sugar and quality
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Submit PRs
 - **Dependencies**: Task 165

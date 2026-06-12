@@ -1,0 +1,18 @@
+{
+  "status": "planned",
+  "summary": "4-phase plan: create clean pr3/temporal-syntax branch from refactor/proposition-lukasiewicz, add Formula.lean + bib entries + barrel import, run CI, submit PR to leanprover/cslib",
+  "artifacts": [
+    {
+      "path": "specs/170_submit_subpr_3_1_3_2_temporal_syntax/reports/01_pr-submission-research.md",
+      "type": "report",
+      "summary": "Research report covering upstream state, PR #635 dependency, branch strategy, bib gaps, CI requirements"
+    },
+    {
+      "path": "specs/170_submit_subpr_3_1_3_2_temporal_syntax/plans/01_pr-submission-plan.md",
+      "type": "plan",
+      "summary": "4-phase implementation plan: branch creation, references/citations, CI verification, PR submission (1.5 hours)"
+    }
+  ],
+  "blockers": [],
+  "next_action_hint": "implement"
+}

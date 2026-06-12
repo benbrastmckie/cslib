@@ -1,5 +1,5 @@
 ---
-next_project_number: 169
+next_project_number: 170
 ---
 
 # TODO
@@ -11,14 +11,14 @@ next_project_number: 169
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,62,127,139,146,147,160 | -- | Bimodal Porting, Submit PRs |
-| 2 | 39,40,63,140,148,161 | 36,37,62,139,147,160 | Submit PRs, Temporal Logic |
-| 3 | 41,64,141,149,162 | 39,40,63,140,148,161 | Submit PRs, Foundations |
-| 4 | 128,129,142,150 | 141,146,149 | Submit PRs |
-| 5 | 126,143,151,152,154,163 | 142,150,160 | Submit PRs |
-| 6 | 130,133,144,153,155,156 | 126,127,143,151,152,154 | Submit PRs |
-| 7 | 131,132,134,135,157 | 127,128,130,133,152,156 | Submit PRs |
-| 8 | 158 | 151,153,155,157 | Submit PRs |
+| 1 | 36,37,62,127,139,146,147,160,169 | -- | Bimodal Porting, Modal PRs, Propositional PRs, ... |
+| 2 | 39,40,63,140,148,161 | 36,37,62,139,147,160 | Modal PRs, Propositional PRs, Temporal Logic, ... |
+| 3 | 41,64,141,149,162 | 39,40,63,140,148,161 | Foundations, Modal PRs, Propositional PRs, ... |
+| 4 | 128,129,142,150 | 141,146,149 | Modal PRs, Propositional PRs |
+| 5 | 126,143,151,152,154,163 | 142,150,160 | Modal PRs, Propositional PRs, Temporal PRs |
+| 6 | 130,133,144,153,155,156 | 126,127,143,151,152,154 | Modal PRs, Propositional PRs |
+| 7 | 131,132,134,135,157 | 127,128,130,133,152,156 | Modal PRs, Propositional PRs |
+| 8 | 158 | 151,153,155,157 | Modal PRs |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -27,11 +27,35 @@ next_project_number: 169
 36 [BLOCKED] — Port discrete completeness (completeness_discrete theorem) and We
 37 [BLOCKED] — Port continuous extension completeness once developed upstream. T
 
-### Submit PRs
+### Foundations
 
-62 [RESEARCHED] — pr4_temporal_metalogic_core
-  └─ 63 [NOT STARTED] — pr5_chronicle_infrastructure
-    └─ 64 [NOT STARTED] — pr6_completeness_theorem
+41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
+
+### Modal PRs
+
+146 [NOT STARTED] — Sub-PR 2.2: Proof system hierarchy + PL embedding. Adds 13 bundle
+  └─ 150 [NOT STARTED] — Sub-PR 2.6: K soundness and completeness. Adds ProofSystem/Instan
+    └─ 151 [NOT STARTED] — Sub-PR 2.7: T and B soundness and completeness. T (reflexive fram
+      └─ 153 [NOT STARTED] — Sub-PR 2.9: S4 and S5 soundness and completeness. S4 (reflexive+t
+        └─ 158 [NOT STARTED] — Sub-PR 2.14: TB system + barrel files. TB (reflexive+symmetric): 
+      └─ 155 [NOT STARTED] — Sub-PR 2.11: K45 and KB5 soundness and completeness. K45 (transit
+        └─ 158 [NOT STARTED] — Sub-PR 2.14: TB system + barrel files. TB (reflexive+symmetric):  (see above)
+      └─ 158 [NOT STARTED] — Sub-PR 2.14: TB system + barrel files. TB (reflexive+symmetric):  (see above)
+    └─ 152 [NOT STARTED] — Sub-PR 2.8: D soundness and completeness. Adds Instances/D.lean (
+      └─ 156 [NOT STARTED] — Sub-PR 2.12: D4 and D5 soundness and completeness. D4 (serial+tra
+        └─ 157 [NOT STARTED] — Sub-PR 2.13: D45 and DB soundness and completeness. D45 (serial+t
+          └─ 158 [NOT STARTED] — Sub-PR 2.14: TB system + barrel files. TB (reflexive+symmetric):  (see above)
+      └─ 157 [NOT STARTED] — Sub-PR 2.13: D45 and DB soundness and completeness. D45 (serial+t (see above)
+    └─ 154 [NOT STARTED] — Sub-PR 2.10: K4 and K5 soundness and completeness. K4 (transitive
+      └─ 155 [NOT STARTED] — Sub-PR 2.11: K45 and KB5 soundness and completeness. K45 (transit (see above)
+147 [NOT STARTED] — Sub-PR 2.3: Derivation trees and deduction theorem. Adds Metalogi
+  └─ 148 [NOT STARTED] — Sub-PR 2.4: Maximal consistent sets + generic soundness framework
+    └─ 149 [NOT STARTED] — Sub-PR 2.5: Generic completeness framework. Adds Metalogic/Comple
+      └─ 150 [NOT STARTED] — Sub-PR 2.6: K soundness and completeness. Adds ProofSystem/Instan (see above)
+169 [NOT STARTED] — Recreate the Modal primitives refactor (closed PR #637) as a clea
+
+### Propositional PRs
+
 127 [NOT STARTED] — Sub-PR 1.3: Propositional semantics (bivalent + Kripke). Introduc
   └─ 130 [NOT STARTED] — Sub-PR 1.6: Classical soundness and completeness. Proves classica
     └─ 131 [NOT STARTED] — Sub-PR 1.7: Intuitionistic soundness and completeness via Kripke 
@@ -52,47 +76,38 @@ next_project_number: 169
             └─ 135 [NOT STARTED] — Sub-PR 1.11: ND-Hilbert extensional equivalence. Proves Hilbert d (see above)
         └─ 143 [NOT STARTED] — Sub-PR 1.1.6: Connective and combinator theorems. Adds Theorems/P
           └─ 144 [NOT STARTED] — Sub-PR 1.1.7: Metalogic foundations. Adds Consistency.lean (278),
-        └─ 163 [NOT STARTED] — Sub-PR 3.5: Temporal semantics and PL embedding. Adds Model.lean 
-    └─ 162 [NOT STARTED] — Sub-PR 3.4: Temporal proof system instances. Adds Instances.lean 
-146 [NOT STARTED] — Sub-PR 2.2: Proof system hierarchy + PL embedding. Adds 13 bundle
-  └─ 150 [NOT STARTED] — Sub-PR 2.6: K soundness and completeness. Adds ProofSystem/Instan
-    └─ 151 [NOT STARTED] — Sub-PR 2.7: T and B soundness and completeness. T (reflexive fram
-      └─ 153 [NOT STARTED] — Sub-PR 2.9: S4 and S5 soundness and completeness. S4 (reflexive+t
-        └─ 158 [NOT STARTED] — Sub-PR 2.14: TB system + barrel files. TB (reflexive+symmetric): 
-      └─ 155 [NOT STARTED] — Sub-PR 2.11: K45 and KB5 soundness and completeness. K45 (transit
-        └─ 158 [NOT STARTED] — Sub-PR 2.14: TB system + barrel files. TB (reflexive+symmetric):  (see above)
-      └─ 158 [NOT STARTED] — Sub-PR 2.14: TB system + barrel files. TB (reflexive+symmetric):  (see above)
-    └─ 152 [NOT STARTED] — Sub-PR 2.8: D soundness and completeness. Adds Instances/D.lean (
-      └─ 156 [NOT STARTED] — Sub-PR 2.12: D4 and D5 soundness and completeness. D4 (serial+tra
-        └─ 157 [NOT STARTED] — Sub-PR 2.13: D45 and DB soundness and completeness. D45 (serial+t
-          └─ 158 [NOT STARTED] — Sub-PR 2.14: TB system + barrel files. TB (reflexive+symmetric):  (see above)
-      └─ 157 [NOT STARTED] — Sub-PR 2.13: D45 and DB soundness and completeness. D45 (serial+t (see above)
-    └─ 154 [NOT STARTED] — Sub-PR 2.10: K4 and K5 soundness and completeness. K4 (transitive
-      └─ 155 [NOT STARTED] — Sub-PR 2.11: K45 and KB5 soundness and completeness. K45 (transit (see above)
-147 [NOT STARTED] — Sub-PR 2.3: Derivation trees and deduction theorem. Adds Metalogi
-  └─ 148 [NOT STARTED] — Sub-PR 2.4: Maximal consistent sets + generic soundness framework
-    └─ 149 [NOT STARTED] — Sub-PR 2.5: Generic completeness framework. Adds Metalogic/Comple
-      └─ 150 [NOT STARTED] — Sub-PR 2.6: K soundness and completeness. Adds ProofSystem/Instan (see above)
-160 [NOT STARTED] — Sub-PR 3.2: Temporal syntax utilities. Adds Context.lean (131 lin
-  └─ 161 [NOT STARTED] — Sub-PR 3.3: Temporal axioms and derivation trees. Adds Axioms.lea
-    └─ 162 [NOT STARTED] — Sub-PR 3.4: Temporal proof system instances. Adds Instances.lean  (see above)
-  └─ 163 [NOT STARTED] — Sub-PR 3.5: Temporal semantics and PL embedding. Adds Model.lean  (see above)
 
 ### Temporal Logic
 
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
-### Foundations
+### Temporal PRs
 
-41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
+62 [RESEARCHED] — pr4_temporal_metalogic_core
+  └─ 63 [NOT STARTED] — pr5_chronicle_infrastructure
+    └─ 64 [NOT STARTED] — pr6_completeness_theorem
+160 [NOT STARTED] — Sub-PR 3.2: Temporal syntax utilities. Adds Context.lean (131 lin
+  └─ 161 [NOT STARTED] — Sub-PR 3.3: Temporal axioms and derivation trees. Adds Axioms.lea
+    └─ 162 [NOT STARTED] — Sub-PR 3.4: Temporal proof system instances. Adds Instances.lean 
+  └─ 163 [NOT STARTED] — Sub-PR 3.5: Temporal semantics and PL embedding. Adds Model.lean 
 
 ## Tasks
+
+### 169. Recreate modal primitives pr upstream
+- **Status**: [NOT STARTED]
+- **Task Type**: pr
+- **Topic**: Modal PRs
+- **Dependencies**: Task 167
+
+**Description**: Recreate the Modal primitives refactor (closed PR #637) as a clean, small PR against upstream leanprover/cslib main. Root cause of closure: task 167 rebased refactor/modal-primitives onto fork main (38+ personal commits ahead of upstream), ballooning the PR to ~100 commits; maintainer chenson2018 closed it as too big to review. Recovery: (1) fetch upstream and create a fresh branch (e.g. refactor/modal-primitives-v2) from upstream/main; (2) port ONLY the PR's own changes — the original ~5 commits' content, which still exists CI-green with syntactic sugar applied at commit 3928feb4 on refactor/modal-primitives — by cherry-picking or re-deriving them onto the new base, keeping the diff scoped to the original PR files (Modal/Basic.lean, Modal/Denotation.lean, Modal/LogicalEquivalence.lean, and minimal shared-file touches: Connectives.lean, InferenceSystem.lean, Propositional/Defs.lean, NaturalDeduction/Basic.lean); note upstream/main may lack task 165 sugar and the ↔ notation, so the branch must build against upstream/main as-is — only include sugar/notation the PR's own files need and that the upstream base supports; (3) verify the diff stats are small (target: same ~10-13 files, low commit count) before anything is pushed; (4) full CI (lake build, lake test, checkInitImports, lint-style) against the upstream base; (5) push the branch to the fork and prepare a PR description referencing closed #637 and replying to chenson2018's size feedback — transition to [PR READY] for user review; do NOT open the PR automatically.
+
+---
 
 ### 168. Pr3 temporal syntactic sugar and quality
 - **Status**: [COMPLETED]
 - **Task Type**: cslib
-- **Topic**: Submit PRs
+- **Topic**: Temporal PRs
 - **Dependencies**: Task 165
 - **Research**: [168_pr3_temporal_syntactic_sugar_and_quality/reports/01_temporal-research.md]
 - **Plan**: [168_pr3_temporal_syntactic_sugar_and_quality/plans/02_implementation-plan.md]
@@ -105,7 +120,7 @@ next_project_number: 169
 ### 167. Pr637 syntactic sugar and quality
 - **Status**: [COMPLETED]
 - **Task Type**: cslib
-- **Topic**: Submit PRs
+- **Topic**: Modal PRs
 - **Dependencies**: Task 165
 - **Research**: [167_pr637_syntactic_sugar_and_quality/reports/01_pr637-research.md]
 - **Plan**: [167_pr637_syntactic_sugar_and_quality/plans/02_implementation-plan.md]
@@ -118,7 +133,7 @@ next_project_number: 169
 ### 166. Pr633 syntactic sugar and quality
 - **Status**: [COMPLETED]
 - **Task Type**: cslib
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: Task 165
 - **Research**: [166_pr633_syntactic_sugar_and_quality/reports/01_pr633-research.md]
 - **Plan**: [166_pr633_syntactic_sugar_and_quality/plans/02_implementation-plan.md]
@@ -144,7 +159,7 @@ next_project_number: 169
 ### 164. Fix formula pr quality
 - **Status**: [COMPLETED]
 - **Task Type**: cslib
-- **Topic**: Submit PRs
+- **Topic**: Temporal PRs
 - **Dependencies**: Task 159
 - **Research**: [164_fix_formula_pr_quality/reports/01_formula-pr-review.md]
 - **Plan**: [164_fix_formula_pr_quality/plans/01_formula-fixes-plan.md]
@@ -157,7 +172,7 @@ next_project_number: 169
 ### 163. Subpr 3 5 semantics embedding
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
-- **Topic**: Submit PRs
+- **Topic**: Temporal PRs
 - **Dependencies**: Task 160, Task 142
 
 **Description**: Sub-PR 3.5: Temporal semantics and PL embedding. Adds Model.lean (60 lines, TemporalModel structure on LinearOrder), Satisfies.lean (177 lines, recursive satisfaction relation with Burgess convention), Validity.lean (198 lines, validity hierarchy: Valid/ValidSerial/ValidDense/ValidDiscrete), FromPropositional.lean (56 lines, structural PL -> Temporal embedding with coercion), and Theorems.lean barrel (19 lines, re-exports Foundation temporal derived theorems). ~510 diff lines across 5 files. External dependencies: Cslib.Foundations.Logic.Theorems.Temporal.TemporalDerived and FrameConditions (PR1 sub-PRs 1.1.5/1.1.6, tasks 142-143).
@@ -167,7 +182,7 @@ next_project_number: 169
 ### 162. Subpr 3 4 proof system instances
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
-- **Topic**: Submit PRs
+- **Topic**: Temporal PRs
 - **Dependencies**: Task 161, Task 140
 
 **Description**: Sub-PR 3.4: Temporal proof system instances. Adds Instances.lean (214 lines, registers InferenceSystem, ModusPonens, ClassicalHilbert, TemporalNecessitation, 22 HasAxiom* instances, and TemporalBXHilbert for HilbertBX tag type) and ProofSystem.lean barrel (23 lines). Bridges abstract Foundation typeclass hierarchy to concrete derivation tree. ~237 diff lines across 2 files. External dependency: Cslib.Foundations.Logic.ProofSystem (PR1 sub-PR 1.1.3, task 140).
@@ -177,7 +192,7 @@ next_project_number: 169
 ### 161. Subpr 3 3 axioms derivation
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
-- **Topic**: Submit PRs
+- **Topic**: Temporal PRs
 - **Dependencies**: Task 160
 
 **Description**: Sub-PR 3.3: Temporal axioms and derivation trees. Adds Axioms.lean (235 lines, 26 BX axiom constructors with FrameClass classification: Base/Dense/Discrete), Derivation.lean (98 lines, Type-valued DerivationTree with 6 inference rules: axiom, assumption, modus_ponens, temporal_necessitation, temporal_duality, weakening), and Derivable.lean (99 lines, Prop-valued Nonempty wrapper with constructor-mirroring lemmas). ~432 diff lines across 3 files.
@@ -187,7 +202,7 @@ next_project_number: 169
 ### 160. Subpr 3 2 syntax utilities
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
-- **Topic**: Submit PRs
+- **Topic**: Temporal PRs
 - **Dependencies**: Task 159
 
 **Description**: Sub-PR 3.2: Temporal syntax utilities. Adds Context.lean (131 lines, Context = List (Formula Atom) with map/membership lemmas), BigConj.lean (52 lines, big conjunction over formula lists), and Subformulas.lean (218 lines, subformula closure with membership and transitivity lemmas). ~401 diff lines across 3 files.
@@ -197,7 +212,7 @@ next_project_number: 169
 ### 159. Subpr 3 1 temporal formula
 - **Status**: [COMPLETED]
 - **Task Type**: cslib
-- **Topic**: Submit PRs
+- **Topic**: Temporal PRs
 - **Dependencies**: Task 138
 - **Plan**: [159_subpr_3_1_temporal_formula/plans/01_temporal-formula-plan.md]
 - **Summary**: [159_subpr_3_1_temporal_formula/summaries/01_temporal-formula-summary.md]
@@ -209,7 +224,7 @@ next_project_number: 169
 ### 158. Subpr 2 14 tb barrels
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Modal PRs
 - **Dependencies**: Task 151, Task 153, Task 155, Task 157
 
 **Description**: Sub-PR 2.14: TB system + barrel files. TB (reflexive+symmetric): Instances/TB.lean (138), Systems/TB/Soundness.lean (107), Systems/TB/Completeness.lean (129). Also adds Metalogic.lean barrel (55 lines) aggregating all core metalogic + system imports. Includes final Cslib.lean import updates. Last sub-PR in the chain. ~485 new lines across 4 files.
@@ -219,7 +234,7 @@ next_project_number: 169
 ### 157. Subpr 2 13 d45 db systems
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Modal PRs
 - **Dependencies**: Task 152, Task 156
 
 **Description**: Sub-PR 2.13: D45 and DB soundness and completeness. D45 (serial+transitive+Euclidean): Instances/D45.lean (153), Systems/D45/Soundness.lean (115), Systems/D45/Completeness.lean (130). DB (serial+symmetric): Instances/DB.lean (139), Systems/DB/Soundness.lean (103), Systems/DB/Completeness.lean (119). Both are serial double-axiom extensions. D45 extends D4. Over 500-line limit (~759 lines) but logically grouped. ~759 new lines across 6 files.
@@ -229,7 +244,7 @@ next_project_number: 169
 ### 156. Subpr 2 12 d4 d5 systems
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Modal PRs
 - **Dependencies**: Task 152
 
 **Description**: Sub-PR 2.12: D4 and D5 soundness and completeness. D4 (serial+transitive): Instances/D4.lean (139), Systems/D4/Soundness.lean (103), Systems/D4/Completeness.lean (118). D5 (serial+Euclidean): Instances/D5.lean (140), Systems/D5/Soundness.lean (104), Systems/D5/Completeness.lean (119). Both are serial + single-axiom extensions. Over 500-line limit (~723 lines) but logically grouped. ~723 new lines across 6 files.
@@ -239,7 +254,7 @@ next_project_number: 169
 ### 155. Subpr 2 11 k45 kb5 systems
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Modal PRs
 - **Dependencies**: Task 151, Task 154
 
 **Description**: Sub-PR 2.11: K45 and KB5 soundness and completeness. K45 (transitive+Euclidean): Instances/K45.lean (139), Systems/K45/Soundness.lean (109), Systems/K45/Completeness.lean (117). KB5 (symmetric+Euclidean): Instances/KB5.lean (139), Systems/KB5/Soundness.lean (116), Systems/KB5/Completeness.lean (121). Both involve axiom 5; K45 extends K4 and KB5 extends B. Over 500-line limit (~741 lines) but mathematically related. ~741 new lines across 6 files.
@@ -249,7 +264,7 @@ next_project_number: 169
 ### 154. Subpr 2 10 k4 k5 systems
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Modal PRs
 - **Dependencies**: Task 150
 
 **Description**: Sub-PR 2.10: K4 and K5 soundness and completeness. K4 (transitive): Instances/K4.lean (124), Systems/K4/Soundness.lean (97), Systems/K4/Completeness.lean (107). K5 (Euclidean): Instances/K5.lean (125), Systems/K5/Soundness.lean (91), Systems/K5/Completeness.lean (93). Both are single-axiom extensions of K with related frame properties. Over 500-line limit (~637 lines) but logically grouped. ~637 new lines across 6 files.
@@ -259,7 +274,7 @@ next_project_number: 169
 ### 153. Subpr 2 9 s4 s5 systems
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Modal PRs
 - **Dependencies**: Task 151
 
 **Description**: Sub-PR 2.9: S4 and S5 soundness and completeness. S4 (reflexive+transitive): Instances/S4.lean (137), Systems/S4/Soundness.lean (106), Systems/S4/Completeness.lean (115). S5 (equivalence relations): Instances/S5.lean (111), Systems/S5/Soundness.lean (103), Systems/S5/Completeness.lean (94). S5 extends S4 — natural dependency chain. Over 500-line limit (~666 lines) but logically grouped. ~666 new lines across 6 files.
@@ -269,7 +284,7 @@ next_project_number: 169
 ### 152. Subpr 2 8 d system
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Modal PRs
 - **Dependencies**: Task 150
 
 **Description**: Sub-PR 2.8: D soundness and completeness. Adds Instances/D.lean (125), Systems/D/Soundness.lean (90), Systems/D/Completeness.lean (428). Serial frames — the D completeness proof is the largest individual completeness proof. Over 500-line limit (~643 lines) but logically indivisible. ~643 new lines across 3 files.
@@ -279,7 +294,7 @@ next_project_number: 169
 ### 151. Subpr 2 7 t b systems
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Modal PRs
 - **Dependencies**: Task 150
 
 **Description**: Sub-PR 2.7: T and B soundness and completeness. T (reflexive frames): Instances/T.lean (124), Systems/T/Soundness.lean (89), Systems/T/Completeness.lean (105). B (symmetric frames): Instances/B.lean (124), Systems/B/Soundness.lean (90), Systems/B/Completeness.lean (98). Both are simple single-axiom extensions of K. Slightly over 500-line limit (~630 lines) but closely related systems. ~630 new lines across 6 files.
@@ -289,7 +304,7 @@ next_project_number: 169
 ### 150. Subpr 2 6 k system
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Modal PRs
 - **Dependencies**: Task 146, Task 149
 
 **Description**: Sub-PR 2.6: K soundness and completeness. Adds ProofSystem/Instances/K.lean (112 lines) defining KAxiom inductive and HilbertK InferenceSystem instance. Adds Systems/K/Soundness.lean (82 lines) and Systems/K/Completeness.lean (301 lines). Base modal system K — establishes the pattern for all subsequent system PRs. ~495 new lines across 3 files.
@@ -299,7 +314,7 @@ next_project_number: 169
 ### 149. Subpr 2 5 completeness
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Modal PRs
 - **Dependencies**: Task 148
 
 **Description**: Sub-PR 2.5: Generic completeness framework. Adds Metalogic/Completeness.lean (475 lines) providing the canonical model construction for modal completeness via Zorn's lemma. Mathematical centerpiece of PR 2 — the generic completeness infrastructure that all 15 system-specific completeness proofs instantiate. ~475 new lines in 1 file.
@@ -309,7 +324,7 @@ next_project_number: 169
 ### 148. Subpr 2 4 mcs soundness
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Modal PRs
 - **Dependencies**: Task 147
 
 **Description**: Sub-PR 2.4: Maximal consistent sets + generic soundness framework. Adds Metalogic/MCS.lean (392 lines) constructing maximal consistent sets via Zorn's lemma with iterated deduction. Adds Metalogic/Soundness.lean (84 lines) providing the generic soundness framework for all modal systems. ~476 new lines across 2 files.
@@ -319,7 +334,7 @@ next_project_number: 169
 ### 147. Subpr 2 3 derivation deduction
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Modal PRs
 - **Dependencies**: Task 145
 
 **Description**: Sub-PR 2.3: Derivation trees and deduction theorem. Adds Metalogic/DerivationTree.lean (218 lines) defining Hilbert-style derivation trees parameterized over axiom predicates. Adds Metalogic/DeductionTheorem.lean (215 lines) proving the deduction theorem for modal Hilbert systems. Core proof infrastructure that all system-specific files depend on. ~433 new lines across 2 files.
@@ -329,7 +344,7 @@ next_project_number: 169
 ### 146. Subpr 2 2 proof system hierarchy
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Modal PRs
 - **Dependencies**: Task 145
 
 **Description**: Sub-PR 2.2: Proof system hierarchy + PL embedding. Adds 13 bundled typeclasses (ModalTHilbert through ModalDBHilbert) and 14 opaque tag types to Foundations/Logic/ProofSystem.lean. Adds FromPropositional.lean (103 lines) providing structural embedding from PL into modal logic with semantic coherence theorem. Adds ProofSystem/Instances.lean barrel file (56 lines). Pure definitions, no proofs beyond the embedding. ~280 diff lines across 3 files.
@@ -339,7 +354,7 @@ next_project_number: 169
 ### 145. Subpr 2 1 lukasiewicz primitives
 - **Status**: [COMPLETED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Modal PRs
 - **Dependencies**: None
 - **Research**: [145_subpr_2_1_lukasiewicz_primitives/reports/01_lukasiewicz-primitives.md]
 - **Plan**: [145_subpr_2_1_lukasiewicz_primitives/plans/01_lukasiewicz-primitives.md]
@@ -352,7 +367,7 @@ next_project_number: 169
 ### 144. Subpr 1 1 7 metalogic
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: Task 143
 
 **Description**: Sub-PR 1.1.7: Metalogic foundations. Adds Consistency.lean (278), DeductionHelpers.lean (120), DeductionTheorem.lean (217), MCS.lean (161). ~776 diff lines total, will likely need splitting into 2 PRs to stay under 500 lines each.
@@ -362,7 +377,7 @@ next_project_number: 169
 ### 143. Subpr 1 1 6 connective theorems
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: Task 142
 
 **Description**: Sub-PR 1.1.6: Connective and combinator theorems. Adds Theorems/Propositional/Connectives.lean (De Morgan, double negation stratified by logic strength), Theorems/Combinators.lean, and Theorems/Temporal/FrameConditions.lean. May need splitting if total exceeds 500 lines (~428-539 diff lines).
@@ -372,7 +387,7 @@ next_project_number: 169
 ### 142. Subpr 1 1 5 core theorems barrel
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: Task 141
 
 **Description**: Sub-PR 1.1.5: Core theorems and barrel file. Adds Theorems/Propositional/Core.lean (311 lines, stratified by logic strength), Theorems/BigConj.lean (142 lines), and reduced Theorems.lean barrel (~45 lines, excluding modal/temporal imports). ~498 diff lines.
@@ -382,7 +397,7 @@ next_project_number: 169
 ### 141. Subpr 1 1 4 propositional instances
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: Task 140
 
 **Description**: Sub-PR 1.1.4: Propositional Hilbert instances and derivation trees. Adds PropositionalAxiom inductive, DerivationTree parameterized over axiom type, HilbertCl/HilbertInt/HilbertMin instances, and ListHelpers utilities. 4 new files + Cslib.lean imports. ~430 diff lines.
@@ -392,7 +407,7 @@ next_project_number: 169
 ### 140. Subpr 1 1 3 proof system hierarchy
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: Task 139
 
 **Description**: Sub-PR 1.1.3: Hilbert proof system typeclass hierarchy. Adds ProofSystem.lean defining MinimalHilbert/IntuitionisticHilbert/ClassicalHilbert 3-tier propositional hierarchy plus modal extensions (K through S5, D-family) and temporal/bimodal systems. Needs curation to handle extra modal classes from tasks 92/100. ~490 diff lines.
@@ -402,7 +417,7 @@ next_project_number: 169
 ### 139. Subpr 1 1 2 axiom definitions
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: Task 138
 
 **Description**: Sub-PR 1.1.2: Polymorphic axiom definitions. Adds Axioms.lean with axiom formulas (ImplyK, ImplyS, EFQ, Peirce, modal K/T/4/B/5/D, temporal BX1-BX13) as polymorphic abbreviations over connective typeclasses. Pure definitions, no proofs. ~300 diff lines.
@@ -412,7 +427,7 @@ next_project_number: 169
 ### 138. Subpr 1 1 1 proposition refactor
 - **Status**: [COMPLETED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: None
 - **Research**: [138_subpr_1_1_1_proposition_refactor/reports/01_proposition-refactor.md]
 - **Plan**: [138_subpr_1_1_1_proposition_refactor/plans/01_proposition-refactor.md]
@@ -451,7 +466,7 @@ next_project_number: 169
 ### 135. Subpr 1 11 nd hilbert equivalence
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: Task 128, Task 133
 
 **Description**: Sub-PR 1.11: ND-Hilbert extensional equivalence. Proves Hilbert derivability and ND derivability are extensionally equivalent, with instances for classical, intuitionistic, and minimal logic.
@@ -461,7 +476,7 @@ next_project_number: 169
 ### 134. Subpr 1 10 hilbert derived rules
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: Task 133
 
 **Description**: Sub-PR 1.10: Hilbert-style derived connective rules. Adds derived rules for negation/top/conjunction/disjunction/biconditional at 3 logic levels, built over parameterized FromHilbert. Slightly over 500-line limit (559 lines) but indivisible.
@@ -471,7 +486,7 @@ next_project_number: 169
 ### 133. Subpr 1 9 fromhilbert parameterization
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: Task 126
 
 **Description**: Sub-PR 1.9: ND-Hilbert bridge parameterization. Parameterizes FromHilbert.lean over axiom sets, enabling the ND-Hilbert bridge to work for classical, intuitionistic, and minimal logic.
@@ -481,7 +496,7 @@ next_project_number: 169
 ### 132. Subpr 1 8 minimal soundness completeness
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: Task 127, Task 130
 
 **Description**: Sub-PR 1.8: Minimal soundness and completeness via Kripke models. Slightly over 500-line limit (514 lines) but logically indivisible: MinSoundness + MinLindenbaum + MinCompleteness.
@@ -491,7 +506,7 @@ next_project_number: 169
 ### 131. Subpr 1 7 intuitionistic soundness completeness
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: Task 127, Task 130
 
 **Description**: Sub-PR 1.7: Intuitionistic soundness and completeness via Kripke models. Slightly over 500-line limit (555 lines) but logically indivisible: IntSoundness + IntLindenbaum (DCCS extension lemma) + IntCompleteness.
@@ -501,7 +516,7 @@ next_project_number: 169
 ### 130. Subpr 1 6 classical soundness completeness
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: Task 126, Task 127
 
 **Description**: Sub-PR 1.6: Classical soundness and completeness. Proves classical propositional Hilbert logic is sound and complete w.r.t. bivalent semantics. Depends on 1.2 (IntMin instances) and 1.3 (semantics).
@@ -511,7 +526,7 @@ next_project_number: 169
 ### 129. Subpr 1 5 modal logical equivalence
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: Task 141
 
 **Description**: Sub-PR 1.5: Modal logical equivalence + Basic update. Adds LogicalEquivalence typeclass instance for modal logic and updates Modal/Basic.lean for MinimalHilbert rename.
@@ -521,7 +536,7 @@ next_project_number: 169
 ### 128. Subpr 1 4 nd derived rules
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: Task 141
 
 **Description**: Sub-PR 1.4: ND derived connective rules (standalone). Adds derived rules for natural deduction connectives using the standalone NaturalDeduction/Basic.lean already in upstream.
@@ -531,7 +546,7 @@ next_project_number: 169
 ### 127. Subpr 1 3 propositional semantics
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: Task 138
 
 **Description**: Sub-PR 1.3: Propositional semantics (bivalent + Kripke). Introduces Valuation/Evaluate/Tautology (bivalent) and KripkeModel/IForces/IValid/MValid (Kripke) for propositional logic.
@@ -541,7 +556,7 @@ next_project_number: 169
 ### 126. Subpr 1 2 intmin instances
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: Task 142
 
 **Description**: Sub-PR 1.2: Propositional axiom extensions and IntMin instances. Extends axiom system with IntPropAxiom/MinPropAxiom and adds instance registrations for intuitionistic and minimal Hilbert logics.
@@ -551,7 +566,7 @@ next_project_number: 169
 ### 125. Subpr 1 1 hilbert hierarchy refactoring
 - **Status**: [EXPANDED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: None
 - **Research**:
   - [125_subpr_1_1_hilbert_hierarchy_refactoring/reports/02_research-report.md]
@@ -565,7 +580,7 @@ next_project_number: 169
 ### 124. Plan pr1 decomposition into smaller prs
 - **Status**: [COMPLETED]
 - **Task Type**: general
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: None
 - **Plan**: [124_plan_pr1_decomposition_into_smaller_prs/plans/01_pr1-decomposition-plan.md]
 - **Summary**: [124_plan_pr1_decomposition_into_smaller_prs/summaries/01_pr1-decomposition-summary.md]
@@ -575,7 +590,7 @@ next_project_number: 169
 ### 123. Add bib references pr1
 - **Status**: [COMPLETED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Propositional PRs
 - **Dependencies**: None
 - **Research**: [123_add_bib_references_pr1/reports/01_bib-references-research.md]
 - **Plan**: [123_add_bib_references_pr1/plans/01_bib-references-plan.md]
@@ -586,7 +601,7 @@ next_project_number: 169
 ### 64. Pr6 completeness theorem
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Temporal PRs
 - **Dependencies**: Task 63
 
 ---
@@ -594,7 +609,7 @@ next_project_number: 169
 ### 63. Pr5 chronicle infrastructure
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Temporal PRs
 - **Dependencies**: Task 62
 
 ---
@@ -602,7 +617,7 @@ next_project_number: 169
 ### 62. Pr4 temporal metalogic core
 - **Status**: [RESEARCHED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Temporal PRs
 - **Dependencies**: Task 61
 - **Research_report**: [062_pr4_temporal_metalogic_core/reports/01_pr4-subdivision.md]
 
@@ -611,7 +626,7 @@ next_project_number: 169
 ### 61. Pr3 temporal proof system
 - **Status**: [EXPANDED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Temporal PRs
 - **Dependencies**: None
 - **Research_report**: [061_pr3_temporal_proof_system/reports/01_temporal-proof-pr-division.md]
 - **Plan**: [061_pr3_temporal_proof_system/plans/01_temporal-proof-pr-division.md]
@@ -621,7 +636,7 @@ next_project_number: 169
 ### 60. Pr2 modal metalogic
 - **Status**: [EXPANDED]
 - **Task Type**: lean4
-- **Topic**: Submit PRs
+- **Topic**: Modal PRs
 - **Dependencies**: None
 - **Research**:
   - [060_pr2_modal_metalogic/reports/01_team-research.md]

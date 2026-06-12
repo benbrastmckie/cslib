@@ -1,7 +1,7 @@
 # Implementation Plan: Task #167 -- PR #637 Syntactic Sugar and Quality Review
 
 - **Task**: 167 - PR #637 (refactor/modal-primitives) syntactic sugar and quality review
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 2 hours
 - **Dependencies**: 165 (syntactic sugar already merged to main)
 - **Research Inputs**: specs/167_pr637_syntactic_sugar_and_quality/reports/01_pr637-research.md

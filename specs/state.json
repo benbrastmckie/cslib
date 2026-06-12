@@ -1,10 +1,23 @@
 {
-  "next_project_number": 170,
+  "next_project_number": 171,
   "active_projects": [
+    {
+      "project_number": 170,
+      "project_name": "submit_subpr_3_1_3_2_temporal_syntax",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Temporal PRs",
+      "dependencies": [
+        138
+      ],
+      "description": "Submit Sub-PR 3.1+3.2: Temporal syntax (Formula + utilities). Create a clean branch from upstream/main (or from the merged PR1 Connectives.lean dependency) containing only the in-scope temporal syntax files. Scope: (1) Create branch pr3/temporal-syntax from the appropriate base; (2) Cherry-pick or extract Formula.lean (582 lines), Context.lean (131 lines), BigConj.lean (52 lines), and Subformulas.lean (218 lines) from Cslib/Logics/Temporal/Syntax/; (3) Add the barrel import entry to Cslib.lean; (4) Add any needed references.bib entries; (5) Verify dependency on Connectives.lean (task 138 / Sub-PR 1.1.1) is satisfied on the target base; (6) Run full CI (lake build, lake test, checkInitImports, lint-style); (7) Submit PR to upstream cslib. Total ~983 diff lines across 4 temporal files. External dependency: Cslib.Foundations.Logic.Connectives (Sub-PR 1.1.1, task 138) must be merged upstream first. Combines tasks 159 (Sub-PR 3.1) and 160 (Sub-PR 3.2) into a single PR since both are pure syntax with no proofs.",
+      "created": "2026-06-12T22:15:49Z",
+      "last_updated": "2026-06-12T22:15:49Z"
+    },
     {
       "project_number": 169,
       "project_name": "recreate_modal_primitives_pr_upstream",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "pr",
       "topic": "Modal PRs",
       "description": "Recreate the Modal primitives refactor (closed PR #637) as a clean, small PR against upstream leanprover/cslib main. Root cause of closure: task 167 rebased refactor/modal-primitives onto fork main (38+ personal commits ahead of upstream), ballooning the PR to ~100 commits; maintainer chenson2018 closed it as too big to review. Recovery: (1) fetch upstream and create a fresh branch (e.g. refactor/modal-primitives-v2) from upstream/main; (2) port ONLY the PR's own changes — the original ~5 commits' content, which still exists CI-green with syntactic sugar applied at commit 3928feb4 on refactor/modal-primitives — by cherry-picking or re-deriving them onto the new base, keeping the diff scoped to the original PR files (Modal/Basic.lean, Modal/Denotation.lean, Modal/LogicalEquivalence.lean, and minimal shared-file touches: Connectives.lean, InferenceSystem.lean, Propositional/Defs.lean, NaturalDeduction/Basic.lean); note upstream/main may lack task 165 sugar and the ↔ notation, so the branch must build against upstream/main as-is — only include sugar/notation the PR's own files need and that the upstream base supports; (3) verify the diff stats are small (target: same ~10-13 files, low commit count) before anything is pushed; (4) full CI (lake build, lake test, checkInitImports, lint-style) against the upstream base; (5) push the branch to the fork and prepare a PR description referencing closed #637 and replying to chenson2018's size feedback — transition to [PR READY] for user review; do NOT open the PR automatically.",
@@ -12,7 +25,8 @@
         167
       ],
       "created": "2026-06-12T22:10:32Z",
-      "last_updated": "2026-06-12T22:10:32Z"
+      "last_updated": "2026-06-12T22:15:38Z",
+      "session_id": "sess_1781293333_a108c0"
     },
     {
       "project_number": 166,

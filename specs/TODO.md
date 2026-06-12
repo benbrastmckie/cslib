@@ -1,5 +1,5 @@
 ---
-next_project_number: 170
+next_project_number: 171
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 170
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,62,127,139,146,147,160,169 | -- | Bimodal Porting, Modal PRs, Propositional PRs, ... |
+| 1 | 36,37,62,127,139,146,147,160,169,170 | -- | Bimodal Porting, Modal PRs, Propositional PRs, ... |
 | 2 | 39,40,63,140,148,161 | 36,37,62,139,147,160 | Modal PRs, Propositional PRs, Temporal Logic, ... |
 | 3 | 41,64,141,149,162 | 39,40,63,140,148,161 | Foundations, Modal PRs, Propositional PRs, ... |
 | 4 | 128,129,142,150 | 141,146,149 | Modal PRs, Propositional PRs |
@@ -52,7 +52,7 @@ next_project_number: 170
   └─ 148 [NOT STARTED] — Sub-PR 2.4: Maximal consistent sets + generic soundness framework
     └─ 149 [NOT STARTED] — Sub-PR 2.5: Generic completeness framework. Adds Metalogic/Comple
       └─ 150 [NOT STARTED] — Sub-PR 2.6: K soundness and completeness. Adds ProofSystem/Instan (see above)
-169 [NOT STARTED] — Recreate the Modal primitives refactor (closed PR #637) as a clea
+169 [RESEARCHING] — Recreate the Modal primitives refactor (closed PR #637) as a clea
 
 ### Propositional PRs
 
@@ -91,11 +91,22 @@ next_project_number: 170
   └─ 161 [NOT STARTED] — Sub-PR 3.3: Temporal axioms and derivation trees. Adds Axioms.lea
     └─ 162 [NOT STARTED] — Sub-PR 3.4: Temporal proof system instances. Adds Instances.lean 
   └─ 163 [NOT STARTED] — Sub-PR 3.5: Temporal semantics and PL embedding. Adds Model.lean 
+170 [NOT STARTED] — Submit Sub-PR 3.1+3.2: Temporal syntax (Formula + utilities). Cre
 
 ## Tasks
 
-### 169. Recreate modal primitives pr upstream
+### 170. Submit subpr 3 1 3 2 temporal syntax
 - **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal PRs
+- **Dependencies**: Task 138
+
+**Description**: Submit Sub-PR 3.1+3.2: Temporal syntax (Formula + utilities). Create a clean branch from upstream/main (or from the merged PR1 Connectives.lean dependency) containing only the in-scope temporal syntax files. Scope: (1) Create branch pr3/temporal-syntax from the appropriate base; (2) Cherry-pick or extract Formula.lean (582 lines), Context.lean (131 lines), BigConj.lean (52 lines), and Subformulas.lean (218 lines) from Cslib/Logics/Temporal/Syntax/; (3) Add the barrel import entry to Cslib.lean; (4) Add any needed references.bib entries; (5) Verify dependency on Connectives.lean (task 138 / Sub-PR 1.1.1) is satisfied on the target base; (6) Run full CI (lake build, lake test, checkInitImports, lint-style); (7) Submit PR to upstream cslib. Total ~983 diff lines across 4 temporal files. External dependency: Cslib.Foundations.Logic.Connectives (Sub-PR 1.1.1, task 138) must be merged upstream first. Combines tasks 159 (Sub-PR 3.1) and 160 (Sub-PR 3.2) into a single PR since both are pure syntax with no proofs.
+
+---
+
+### 169. Recreate modal primitives pr upstream
+- **Status**: [RESEARCHING]
 - **Task Type**: pr
 - **Topic**: Modal PRs
 - **Dependencies**: Task 167

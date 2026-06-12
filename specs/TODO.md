@@ -91,17 +91,17 @@ next_project_number: 171
   └─ 161 [NOT STARTED] — Sub-PR 3.3: Temporal axioms and derivation trees. Adds Axioms.lea
     └─ 162 [NOT STARTED] — Sub-PR 3.4: Temporal proof system instances. Adds Instances.lean 
   └─ 163 [NOT STARTED] — Sub-PR 3.5: Temporal semantics and PL embedding. Adds Model.lean 
-170 [NOT STARTED] — Submit Sub-PR 3.1+3.2: Temporal syntax (Formula + utilities). Cre
+170 [NOT STARTED] — Submit Sub-PR 3.1: Temporal formula type. Create a clean branch f
 
 ## Tasks
 
-### 170. Submit subpr 3 1 3 2 temporal syntax
+### 170. Submit subpr 3 1 temporal formula
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Temporal PRs
 - **Dependencies**: Task 138
 
-**Description**: Submit Sub-PR 3.1+3.2: Temporal syntax (Formula + utilities). Create a clean branch from upstream/main (or from the merged PR1 Connectives.lean dependency) containing only the in-scope temporal syntax files. Scope: (1) Create branch pr3/temporal-syntax from the appropriate base; (2) Cherry-pick or extract Formula.lean (582 lines), Context.lean (131 lines), BigConj.lean (52 lines), and Subformulas.lean (218 lines) from Cslib/Logics/Temporal/Syntax/; (3) Add the barrel import entry to Cslib.lean; (4) Add any needed references.bib entries; (5) Verify dependency on Connectives.lean (task 138 / Sub-PR 1.1.1) is satisfied on the target base; (6) Run full CI (lake build, lake test, checkInitImports, lint-style); (7) Submit PR to upstream cslib. Total ~983 diff lines across 4 temporal files. External dependency: Cslib.Foundations.Logic.Connectives (Sub-PR 1.1.1, task 138) must be merged upstream first. Combines tasks 159 (Sub-PR 3.1) and 160 (Sub-PR 3.2) into a single PR since both are pure syntax with no proofs.
+**Description**: Submit Sub-PR 3.1: Temporal formula type. Create a clean branch from upstream/main (or from the merged PR1 Connectives.lean dependency) containing only Formula.lean. Scope: (1) Create branch pr3/temporal-formula-clean from the appropriate base; (2) Extract Formula.lean (582 lines) from Cslib/Logics/Temporal/Syntax/; (3) Add the barrel import entry to Cslib.lean; (4) Add any needed references.bib entries; (5) Verify dependency on Connectives.lean (task 138 / Sub-PR 1.1.1) is satisfied on the target base; (6) Run full CI (lake build, lake test, checkInitImports, lint-style); (7) Submit PR to upstream cslib. ~582 diff lines in 1 temporal file. External dependency: Cslib.Foundations.Logic.Connectives (Sub-PR 1.1.1, task 138) must be merged upstream first.
 
 ---
 

@@ -77,9 +77,9 @@ next_project_number: 169
   └─ 161 [NOT STARTED] — Sub-PR 3.3: Temporal axioms and derivation trees. Adds Axioms.lea
     └─ 162 [NOT STARTED] — Sub-PR 3.4: Temporal proof system instances. Adds Instances.lean  (see above)
   └─ 163 [NOT STARTED] — Sub-PR 3.5: Temporal semantics and PL embedding. Adds Model.lean  (see above)
-166 [NOT STARTED] — Add a commit to PR #633 (branch pr1/foundations-logic) incorporat
-167 [NOT STARTED] — Add a commit to PR #637 (branch refactor/modal-primitives) incorp
-168 [NOT STARTED] — Add commits to the pr3/temporal-formula feature branch (tasks 159
+166 [IMPLEMENTING] — Add a commit to PR #633 (branch pr1/foundations-logic) incorporat
+167 [PR READY] — Add a commit to PR #637 (branch refactor/modal-primitives) incorp
+168 [IMPLEMENTING] — Add commits to the pr3/temporal-formula feature branch (tasks 159
 
 ### Temporal Logic
 
@@ -93,30 +93,37 @@ next_project_number: 169
 ## Tasks
 
 ### 168. Pr3 temporal syntactic sugar and quality
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Submit PRs
 - **Dependencies**: Task 165
+- **Research**: [168_pr3_temporal_syntactic_sugar_and_quality/reports/01_temporal-research.md]
+- **Plan**: [168_pr3_temporal_syntactic_sugar_and_quality/plans/02_implementation-plan.md]
 
 **Description**: Add commits to the pr3/temporal-formula feature branch (tasks 159/164) incorporating the syntactic sugar changes from task 165 into all files on that branch. The branch currently has Formula.lean (549 lines, temporal logic formula type with primitives {atom, bot, imp, untl, snce} and all derived connectives). Must: (1) reapply the relevant syntactic sugar replacements (.imp→→, .bot→⊥, .neg→¬, .and→∧, .or→∨, .untl→U, .snce→S, .someFuture→F, .allFuture→G, .somePast→P, .allPast→H) onto the pr3/temporal-formula branch for all files in scope, respecting the Pi-type binder constraint; (2) conduct a thorough quality review of every file in the branch diff looking for further improvements — naming consistency, proof style, documentation quality, notation usage, any remaining raw constructors, alignment with the patterns established in the Propositional and Modal PRs — while staying strictly within the existing branch scope; (3) run full CI (lake build, lake test, checkInitImports, lint-style); (4) commit changes but do NOT submit the PR (the branch is not yet ready for submission).
 
 ---
 
 ### 167. Pr637 syntactic sugar and quality
-- **Status**: [NOT STARTED]
+- **Status**: [PR READY]
 - **Task Type**: cslib
 - **Topic**: Submit PRs
 - **Dependencies**: Task 165
+- **Research**: [167_pr637_syntactic_sugar_and_quality/reports/01_pr637-research.md]
+- **Plan**: [167_pr637_syntactic_sugar_and_quality/plans/02_implementation-plan.md]
+- **Summary**: [167_pr637_syntactic_sugar_and_quality/summaries/03_implementation-summary.md]
 
 **Description**: Add a commit to PR #637 (branch refactor/modal-primitives) incorporating the syntactic sugar changes from task 165 into all files touched by this PR. The PR covers 10 files including Modal/Basic.lean, Modal/Denotation.lean, Modal/LogicalEquivalence.lean, and shared files (Connectives.lean, InferenceSystem.lean, Propositional/Defs.lean, NaturalDeduction/Basic.lean). Must: (1) cherry-pick or reapply the relevant syntactic sugar replacements (.imp→→, .bot→⊥, .neg→¬, .and→∧, .or→∨, .box→□, .diamond→◇) onto the refactor/modal-primitives branch for all files in scope, respecting the Pi-type binder constraint; (2) conduct a thorough quality review of every file in the PR diff looking for further improvements — naming consistency, proof style, documentation quality, notation usage, any remaining raw constructors — while staying strictly within the existing PR scope and keeping LOC impact minimal; (3) run full CI (lake build, lake test, checkInitImports, lint-style); (4) push the commit(s) to the existing PR branch.
 
 ---
 
 ### 166. Pr633 syntactic sugar and quality
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Submit PRs
 - **Dependencies**: Task 165
+- **Research**: [166_pr633_syntactic_sugar_and_quality/reports/01_pr633-research.md]
+- **Plan**: [166_pr633_syntactic_sugar_and_quality/plans/02_implementation-plan.md]
 
 **Description**: Add a commit to PR #633 (branch pr1/foundations-logic) incorporating the syntactic sugar changes from task 165 into all files touched by this PR. The PR covers 39 files across Foundations/ and Propositional/ (Hilbert proof systems, metalogic, ND equivalence, Kripke semantics). Must: (1) cherry-pick or reapply the relevant syntactic sugar replacements (.imp→→, .bot→⊥, .neg→¬, .and→∧, .or→∨, .iff→↔) onto the pr1/foundations-logic branch for all files in scope, respecting the Pi-type binder constraint discovered in task 165; (2) address xcthulhu review comment r3403944952 on Completeness.lean line 45 specifically; (3) conduct a thorough quality review of every file in the PR diff looking for further improvements — naming consistency, proof style, documentation quality, notation usage, any remaining raw constructors — while staying strictly within the existing PR scope and keeping LOC impact minimal to avoid overwhelming reviewers; (4) run full CI (lake build, lake test, checkInitImports, lint-style); (5) push the commit(s) to the existing PR branch.
 

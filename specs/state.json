@@ -24,9 +24,15 @@
           "path": "specs/166_pr633_syntactic_sugar_and_quality/plans/02_implementation-plan.md",
           "type": "plan",
           "summary": "6-phase plan: worktree+notation prerequisite, sugar by directory, review comment response, CI+push"
+        },
+        {
+          "path": "specs/166_pr633_syntactic_sugar_and_quality/summaries/03_implementation-summary.md",
+          "type": "summary",
+          "summary": "Applied sugar to 11 Propositional files on pr1/foundations-logic, replied to reviewer, full CI green, pushed to PR #633"
         }
       ],
-      "session_id": "sess_1781298334_941bd3"
+      "session_id": "sess_1781298334_941bd3",
+      "completion_summary": "Applied syntactic sugar (~141 replacements, 11 files) to pr1/foundations-logic, added missing ↔ notation, replied to review comment r3403944952 explaining Pi-type binder constraint, full CI green, pushed commit cd6b46d3 to PR #633."
     },
     {
       "project_number": 167,
@@ -65,14 +71,14 @@
       "project_number": 168,
       "project_name": "pr3_temporal_syntactic_sugar_and_quality",
       "description": "Add commits to the pr3/temporal-formula feature branch (tasks 159/164) incorporating the syntactic sugar changes from task 165 into all files on that branch. The branch currently has Formula.lean (549 lines, temporal logic formula type with primitives {atom, bot, imp, untl, snce} and all derived connectives). Must: (1) reapply the relevant syntactic sugar replacements (.imp→→, .bot→⊥, .neg→¬, .and→∧, .or→∨, .untl→U, .snce→S, .someFuture→F, .allFuture→G, .somePast→P, .allPast→H) onto the pr3/temporal-formula branch for all files in scope, respecting the Pi-type binder constraint; (2) conduct a thorough quality review of every file in the branch diff looking for further improvements — naming consistency, proof style, documentation quality, notation usage, any remaining raw constructors, alignment with the patterns established in the Propositional and Modal PRs — while staying strictly within the existing branch scope; (3) run full CI (lake build, lake test, checkInitImports, lint-style); (4) commit changes but do NOT submit the PR (the branch is not yet ready for submission).",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Submit PRs",
       "dependencies": [
         165
       ],
       "created": "2026-06-12T18:00:00Z",
-      "last_updated": "2026-06-12T19:54:59Z",
+      "last_updated": "2026-06-12T22:00:00Z",
       "next_artifact_number": 1,
       "artifacts": [
         {
@@ -84,9 +90,15 @@
           "path": "specs/168_pr3_temporal_syntactic_sugar_and_quality/plans/02_implementation-plan.md",
           "type": "plan",
           "summary": "5-phase plan: worktree+merge main, resolve structural/sugar conflicts, temporal sugar, CI+commit (no PR)"
+        },
+        {
+          "path": "specs/168_pr3_temporal_syntactic_sugar_and_quality/summaries/03_implementation-summary.md",
+          "type": "summary",
+          "summary": "Complete implementation record: all 5 phases done, CI results, plan deviations, branch pushed"
         }
       ],
-      "session_id": "sess_1781293333_a108c0_168"
+      "session_id": "sess_1749738000_f04aa0",
+      "completion_summary": "Merged main into pr3/temporal-formula (commit 7a11bcdc), resolving all 26 merge conflicts. Applied temporal syntactic sugar to derived operator definitions in Formula.lean. All 5 CI checks passed. Branch pushed to origin/pr3/temporal-formula."
     },
     {
       "project_number": 165,

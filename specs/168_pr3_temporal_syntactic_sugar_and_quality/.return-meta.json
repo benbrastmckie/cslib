@@ -1,0 +1,21 @@
+{
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/168_pr3_temporal_syntactic_sugar_and_quality/plans/02_implementation-plan.md",
+      "summary": "5-phase implementation plan for merging main into pr3/temporal-formula, resolving 136 conflicts, applying syntactic sugar, and running full CI"
+    }
+  ],
+  "next_steps": "Run /implement 168 to execute the plan",
+  "metadata": {
+    "session_id": "sess_1781293333_a108c0_168",
+    "agent_type": "planner-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 5,
+    "estimated_hours": 6,
+    "dependency_waves": [[1], [2], [3], [4], [5]]
+  },
+  "memory_candidates": []
+}

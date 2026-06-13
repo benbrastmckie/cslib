@@ -61,6 +61,31 @@ theorem int_axiom_sound {φ : PL.Proposition Atom}
     -- Goal: IForces val bf w (⊥ → φ) = ∀ w' ≥ w, False → IForces w' φ
     intro _ _ hbot
     exact absurd hbot id
+  | andI φ ψ =>
+    -- Goal: ∀ w₁ ≥ w, IForces w₁ φ → ∀ w₂ ≥ w₁, IForces w₂ ψ → IForces w₂ (φ ∧ ψ)
+    intro w₁ _ hφ w₂ hw₂ hψ
+    exact ⟨iforces_persistence v_uc (fun {_ _} _ h => absurd h id) hw₂ hφ, hψ⟩
+  | andE1 φ ψ =>
+    -- Goal: ∀ w' ≥ w, IForces w' (φ ∧ ψ) → IForces w' φ
+    intro _ _ h; exact h.1
+  | andE2 φ ψ =>
+    -- Goal: ∀ w' ≥ w, IForces w' (φ ∧ ψ) → IForces w' ψ
+    intro _ _ h; exact h.2
+  | orI1 φ ψ =>
+    -- Goal: ∀ w' ≥ w, IForces w' φ → IForces w' (φ ∨ ψ)
+    intro _ _ h; exact Or.inl h
+  | orI2 φ ψ =>
+    -- Goal: ∀ w' ≥ w, IForces w' ψ → IForces w' (φ ∨ ψ)
+    intro _ _ h; exact Or.inr h
+  | orE φ ψ χ =>
+    -- Goal: ∀ w₁ ≥ w, (∀ w₁' ≥ w₁, IForces w₁' φ → IForces w₁' χ) →
+    --       ∀ w₂ ≥ w₁, (∀ w₂' ≥ w₂, IForces w₂' ψ → IForces w₂' χ) →
+    --       ∀ w₃ ≥ w₂, (IForces w₃ φ ∨ IForces w₃ ψ) → IForces w₃ χ
+    intro w₁ _ h_pq w₂ hw₂ h_rq w₃ hw₃ h_pr
+    have hw₁₃ : w₁ ≤ w₃ := le_trans hw₂ hw₃
+    exact h_pr.elim
+      (fun hp => h_pq w₃ hw₁₃ hp)
+      (fun hr => h_rq w₃ hw₃ hr)
 
 /-! ## Soundness Theorem -/
 

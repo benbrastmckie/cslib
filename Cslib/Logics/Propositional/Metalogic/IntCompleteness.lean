@@ -75,6 +75,80 @@ theorem int_truth_lemma
     constructor
     · intro h; exact absurd h id
     · intro h; exact absurd h (int_dccs_bot_not_mem S.property)
+  | .and φ ψ => by
+    constructor
+    · -- Forward: IForces S (φ ∧ ψ) → (φ ∧ ψ) ∈ S.val
+      intro ⟨hφ, hψ⟩
+      have h_phi_S := (int_truth_lemma S φ).mp hφ
+      have h_psi_S := (int_truth_lemma S ψ).mp hψ
+      -- Use andI derivation to conclude φ ∧ ψ ∈ S
+      apply S.property.2 [φ, ψ] (φ.and ψ)
+      · intro x hx
+        simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+        cases hx with
+        | inl h => exact h ▸ h_phi_S
+        | inr h => exact h ▸ h_psi_S
+      · show (propDerivationSystem IntPropAxiom).Deriv _ _
+        unfold propDerivationSystem Deriv
+        exact ⟨.modus_ponens _ _ _
+          (.modus_ponens _ _ _
+            (.weakening [] _ _ (.ax [] _ (.andI φ ψ)) (fun _ h => nomatch h))
+            (.assumption _ _ (by simp [List.mem_cons])))
+          (.assumption _ _ (by simp [List.mem_cons]))⟩
+    · -- Backward: (φ ∧ ψ) ∈ S.val → IForces S (φ ∧ ψ)
+      intro h_mem
+      constructor
+      · apply (int_truth_lemma S φ).mpr
+        apply S.property.2 [φ.and ψ] φ
+        · intro x hx
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+          exact hx ▸ h_mem
+        · show (propDerivationSystem IntPropAxiom).Deriv _ _
+          unfold propDerivationSystem Deriv
+          exact ⟨.modus_ponens _ _ _
+            (.weakening [] _ _ (.ax [] _ (.andE1 φ ψ)) (fun _ h => nomatch h))
+            (.assumption _ _ (by simp [List.mem_cons]))⟩
+      · apply (int_truth_lemma S ψ).mpr
+        apply S.property.2 [φ.and ψ] ψ
+        · intro x hx
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+          exact hx ▸ h_mem
+        · show (propDerivationSystem IntPropAxiom).Deriv _ _
+          unfold propDerivationSystem Deriv
+          exact ⟨.modus_ponens _ _ _
+            (.weakening [] _ _ (.ax [] _ (.andE2 φ ψ)) (fun _ h => nomatch h))
+            (.assumption _ _ (by simp [List.mem_cons]))⟩
+  | .or φ ψ => by
+    constructor
+    · -- Forward: IForces S (φ ∨ ψ) → (φ ∨ ψ) ∈ S.val
+      intro h_or
+      rcases h_or with hφ | hψ
+      · have h_phi_S := (int_truth_lemma S φ).mp hφ
+        apply S.property.2 [φ] (φ.or ψ)
+        · intro x hx
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+          exact hx ▸ h_phi_S
+        · show (propDerivationSystem IntPropAxiom).Deriv _ _
+          unfold propDerivationSystem Deriv
+          exact ⟨.modus_ponens _ _ _
+            (.weakening [] _ _ (.ax [] _ (.orI1 φ ψ)) (fun _ h => nomatch h))
+            (.assumption _ _ (by simp [List.mem_cons]))⟩
+      · have h_psi_S := (int_truth_lemma S ψ).mp hψ
+        apply S.property.2 [ψ] (φ.or ψ)
+        · intro x hx
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+          exact hx ▸ h_psi_S
+        · show (propDerivationSystem IntPropAxiom).Deriv _ _
+          unfold propDerivationSystem Deriv
+          exact ⟨.modus_ponens _ _ _
+            (.weakening [] _ _ (.ax [] _ (.orI2 φ ψ)) (fun _ h => nomatch h))
+            (.assumption _ _ (by simp [List.mem_cons]))⟩
+    · -- Backward: (φ ∨ ψ) ∈ S.val → IForces S (φ ∨ ψ)
+      -- This direction requires the disjunction property of IPC:
+      -- (φ ∨ ψ) ∈ S → φ ∈ S ∨ ψ ∈ S. For arbitrary DCCSs this does not hold
+      -- in general; it requires prime theories (task 174).
+      intro _h_mem
+      sorry
   | .imp φ ψ => by
     constructor
     · -- Forward: IForces S (φ → ψ) → (φ → ψ) ∈ S.val

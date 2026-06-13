@@ -79,6 +79,121 @@ theorem prop_truth_lemma
     · intro h; exact absurd h id
     · intro h;
       exact absurd h (prop_mcs_bot_not_mem h_mcs)
+  | .and φ ψ => by
+    constructor
+    · -- Forward: Evaluate v (φ ∧ ψ) → (φ ∧ ψ) ∈ S
+      intro ⟨hφ, hψ⟩
+      have h_phi_S := (prop_truth_lemma h_mcs φ).mp hφ
+      have h_psi_S := (prop_truth_lemma h_mcs ψ).mp hψ
+      apply prop_closed_under_derivation h_implyK h_implyS h_mcs
+        (L := [φ, ψ])
+        (fun x hx => by
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+          cases hx with
+          | inl h => exact h ▸ h_phi_S
+          | inr h => exact h ▸ h_psi_S)
+      show (propDerivationSystem PropositionalAxiom).Deriv _ _
+      unfold propDerivationSystem Deriv
+      exact ⟨.modus_ponens _ _ _
+        (.modus_ponens _ _ _
+          (.weakening [] _ _
+            (.ax [] _ (.andI φ ψ))
+            (fun _ h => nomatch h))
+          (.assumption _ _ (by simp [List.mem_cons])))
+        (.assumption _ _ (by simp [List.mem_cons]))⟩
+    · -- Backward: (φ ∧ ψ) ∈ S → Evaluate v (φ ∧ ψ)
+      intro h_mem
+      constructor
+      · apply (prop_truth_lemma h_mcs φ).mpr
+        apply prop_closed_under_derivation h_implyK h_implyS h_mcs
+          (L := [φ.and ψ])
+          (fun x hx => by
+            simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+            exact hx ▸ h_mem)
+        show (propDerivationSystem PropositionalAxiom).Deriv _ _
+        unfold propDerivationSystem Deriv
+        exact ⟨.modus_ponens _ _ _
+          (.weakening [] _ _
+            (.ax [] _ (.andE1 φ ψ))
+            (fun _ h => nomatch h))
+          (.assumption _ _ (by simp [List.mem_cons]))⟩
+      · apply (prop_truth_lemma h_mcs ψ).mpr
+        apply prop_closed_under_derivation h_implyK h_implyS h_mcs
+          (L := [φ.and ψ])
+          (fun x hx => by
+            simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+            exact hx ▸ h_mem)
+        show (propDerivationSystem PropositionalAxiom).Deriv _ _
+        unfold propDerivationSystem Deriv
+        exact ⟨.modus_ponens _ _ _
+          (.weakening [] _ _
+            (.ax [] _ (.andE2 φ ψ))
+            (fun _ h => nomatch h))
+          (.assumption _ _ (by simp [List.mem_cons]))⟩
+  | .or φ ψ => by
+    constructor
+    · -- Forward: Evaluate v (φ ∨ ψ) → (φ ∨ ψ) ∈ S
+      intro h_or
+      rcases h_or with hφ | hψ
+      · have h_phi_S := (prop_truth_lemma h_mcs φ).mp hφ
+        apply prop_closed_under_derivation h_implyK h_implyS h_mcs
+          (L := [φ])
+          (fun x hx => by
+            simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+            exact hx ▸ h_phi_S)
+        show (propDerivationSystem PropositionalAxiom).Deriv _ _
+        unfold propDerivationSystem Deriv
+        exact ⟨.modus_ponens _ _ _
+          (.weakening [] _ _
+            (.ax [] _ (.orI1 φ ψ))
+            (fun _ h => nomatch h))
+          (.assumption _ _ (by simp [List.mem_cons]))⟩
+      · have h_psi_S := (prop_truth_lemma h_mcs ψ).mp hψ
+        apply prop_closed_under_derivation h_implyK h_implyS h_mcs
+          (L := [ψ])
+          (fun x hx => by
+            simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+            exact hx ▸ h_psi_S)
+        show (propDerivationSystem PropositionalAxiom).Deriv _ _
+        unfold propDerivationSystem Deriv
+        exact ⟨.modus_ponens _ _ _
+          (.weakening [] _ _
+            (.ax [] _ (.orI2 φ ψ))
+            (fun _ h => nomatch h))
+          (.assumption _ _ (by simp [List.mem_cons]))⟩
+    · -- Backward: (φ ∨ ψ) ∈ S → Evaluate v (φ ∨ ψ)
+      intro h_mem
+      -- Use negation_complete: either φ ∈ S or ¬φ ∈ S
+      rcases prop_negation_complete h_implyK h_implyS h_mcs φ with hφ | hnφ
+      · exact Or.inl ((prop_truth_lemma h_mcs φ).mpr hφ)
+      · rcases prop_negation_complete h_implyK h_implyS h_mcs ψ with hψ | hnψ
+        · exact Or.inr ((prop_truth_lemma h_mcs ψ).mpr hψ)
+        · -- Both ¬φ ∈ S and ¬ψ ∈ S; derive ⊥ using orE
+          exfalso
+          apply prop_mcs_bot_not_mem h_mcs
+          -- orE: (φ → ⊥) → ((ψ → ⊥) → ((φ ∨ ψ) → ⊥))
+          apply prop_closed_under_derivation h_implyK h_implyS h_mcs
+            (L := [φ.imp .bot, ψ.imp .bot, φ.or ψ])
+            (fun x hx => by
+              simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+              cases hx with
+              | inl h => exact h ▸ hnφ
+              | inr h =>
+                cases h with
+                | inl h => exact h ▸ hnψ
+                | inr h => exact h ▸ h_mem)
+          show (propDerivationSystem PropositionalAxiom).Deriv _ _
+          unfold propDerivationSystem Deriv
+          -- [¬φ, ¬ψ, φ ∨ ψ] ⊢ ⊥ via orE axiom + three modus ponens
+          exact ⟨.modus_ponens _ _ _
+            (.modus_ponens _ _ _
+              (.modus_ponens _ _ _
+                (.weakening [] _ _
+                  (.ax [] _ (.orE φ ψ .bot))
+                  (fun _ h => nomatch h))
+                (.assumption _ _ (by simp [List.mem_cons])))
+              (.assumption _ _ (by simp [List.mem_cons])))
+            (.assumption _ _ (by simp [List.mem_cons]))⟩
   | .imp φ ψ => by
     constructor
     · -- Forward: Evaluate v (φ → ψ) → (φ → ψ) ∈ S

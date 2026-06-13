@@ -48,6 +48,12 @@ theorem prop_axiom_sound {φ : PL.Proposition Atom}
   | peirce φ ψ =>
     intro h; by_contra h_not
     exact h_not (h (fun h_phi => absurd h_phi h_not))
+  | andI φ ψ => intro hp hq; exact ⟨hp, hq⟩
+  | andE1 φ ψ => intro h; exact h.1
+  | andE2 φ ψ => intro h; exact h.2
+  | orI1 φ ψ => intro h; exact Or.inl h
+  | orI2 φ ψ => intro h; exact Or.inr h
+  | orE φ ψ χ => intro h1 h2 h3; exact h3.elim h1 h2
 
 /-! ## Soundness Theorem -/
 

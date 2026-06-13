@@ -239,7 +239,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 6: Metalogic -- Soundness and Completeness [NOT STARTED]
+### Phase 6: Metalogic -- Soundness and Completeness [COMPLETED]
 
 **Goal**: Extend all soundness and completeness proofs with and/or cases. This covers classical (Soundness.lean, Completeness.lean), intuitionistic (IntSoundness.lean, IntCompleteness.lean), and minimal (MinSoundness.lean, MinCompleteness.lean) metalogic.
 

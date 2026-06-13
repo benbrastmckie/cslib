@@ -90,6 +90,78 @@ theorem min_truth_lemma
     (IForces minCanonicalVal minBotForces S φ ↔ φ ∈ S.val)
   | .atom p => Iff.rfl
   | .bot => Iff.rfl
+  | .and φ ψ => by
+    constructor
+    · -- Forward: IForces S (φ ∧ ψ) → (φ ∧ ψ) ∈ S.val
+      intro ⟨hφ, hψ⟩
+      have h_phi_S := (min_truth_lemma S φ).mp hφ
+      have h_psi_S := (min_truth_lemma S ψ).mp hψ
+      apply S.property [φ, ψ] (φ.and ψ)
+      · intro x hx
+        simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+        cases hx with
+        | inl h => exact h ▸ h_phi_S
+        | inr h => exact h ▸ h_psi_S
+      · show (propDerivationSystem MinPropAxiom).Deriv _ _
+        unfold propDerivationSystem Deriv
+        exact ⟨.modus_ponens _ _ _
+          (.modus_ponens _ _ _
+            (.weakening [] _ _ (.ax [] _ (.andI φ ψ)) (fun _ h => nomatch h))
+            (.assumption _ _ (by simp [List.mem_cons])))
+          (.assumption _ _ (by simp [List.mem_cons]))⟩
+    · -- Backward: (φ ∧ ψ) ∈ S.val → IForces S (φ ∧ ψ)
+      intro h_mem
+      constructor
+      · apply (min_truth_lemma S φ).mpr
+        apply S.property [φ.and ψ] φ
+        · intro x hx
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+          exact hx ▸ h_mem
+        · show (propDerivationSystem MinPropAxiom).Deriv _ _
+          unfold propDerivationSystem Deriv
+          exact ⟨.modus_ponens _ _ _
+            (.weakening [] _ _ (.ax [] _ (.andE1 φ ψ)) (fun _ h => nomatch h))
+            (.assumption _ _ (by simp [List.mem_cons]))⟩
+      · apply (min_truth_lemma S ψ).mpr
+        apply S.property [φ.and ψ] ψ
+        · intro x hx
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+          exact hx ▸ h_mem
+        · show (propDerivationSystem MinPropAxiom).Deriv _ _
+          unfold propDerivationSystem Deriv
+          exact ⟨.modus_ponens _ _ _
+            (.weakening [] _ _ (.ax [] _ (.andE2 φ ψ)) (fun _ h => nomatch h))
+            (.assumption _ _ (by simp [List.mem_cons]))⟩
+  | .or φ ψ => by
+    constructor
+    · -- Forward: IForces S (φ ∨ ψ) → (φ ∨ ψ) ∈ S.val
+      intro h_or
+      rcases h_or with hφ | hψ
+      · have h_phi_S := (min_truth_lemma S φ).mp hφ
+        apply S.property [φ] (φ.or ψ)
+        · intro x hx
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+          exact hx ▸ h_phi_S
+        · show (propDerivationSystem MinPropAxiom).Deriv _ _
+          unfold propDerivationSystem Deriv
+          exact ⟨.modus_ponens _ _ _
+            (.weakening [] _ _ (.ax [] _ (.orI1 φ ψ)) (fun _ h => nomatch h))
+            (.assumption _ _ (by simp [List.mem_cons]))⟩
+      · have h_psi_S := (min_truth_lemma S ψ).mp hψ
+        apply S.property [ψ] (φ.or ψ)
+        · intro x hx
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+          exact hx ▸ h_psi_S
+        · show (propDerivationSystem MinPropAxiom).Deriv _ _
+          unfold propDerivationSystem Deriv
+          exact ⟨.modus_ponens _ _ _
+            (.weakening [] _ _ (.ax [] _ (.orI2 φ ψ)) (fun _ h => nomatch h))
+            (.assumption _ _ (by simp [List.mem_cons]))⟩
+    · -- Backward: (φ ∨ ψ) ∈ S.val → IForces S (φ ∨ ψ)
+      -- This direction requires the disjunction property for MinTheory:
+      -- (φ ∨ ψ) ∈ S → φ ∈ S ∨ ψ ∈ S. Requires prime theories (task 174).
+      intro _h_mem
+      sorry
   | .imp φ ψ => by
     constructor
     · -- Forward: IForces S (φ → ψ) → (φ → ψ) ∈ S.val

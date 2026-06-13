@@ -209,7 +209,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 5: ND-Hilbert Equivalence Bridge [NOT STARTED]
+### Phase 5: ND-Hilbert Equivalence Bridge [COMPLETED]
 
 **Goal**: Update `Equivalence.lean` so the ND-Hilbert correspondence holds level-by-level. Add cases for the 6 new ND constructors in `ndToHilbert` and for the 6 new axiom constructors in `hilbertToND`. Remove `botE` case from `ndToHilbert`.
 

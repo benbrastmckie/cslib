@@ -21,8 +21,8 @@ necessity (`□φ`) and possibility `◇φ`.
 
 ## Primitives
 
-The formula type uses `{atom, bot, imp, box}` as primitive constructors. Negation, conjunction,
-disjunction, and diamond (possibility) are derived connectives following the Lukasiewicz convention.
+The formula type uses `{atom, bot, imp, and, or, box}` as primitive constructors. Negation,
+diamond (possibility), verum, and biconditional are derived connectives.
 
 ## References
 
@@ -42,7 +42,8 @@ structure Model (World : Type*) (Atom : Type*) where
   /-- Valuation of atoms at a world. -/
   v : World → Atom → Prop
 
-/-- Propositions. Primitives are atoms, falsum, implication, and necessity (box). -/
+/-- Propositions. Primitives are atoms, falsum, implication, conjunction, disjunction, and
+necessity (box). -/
 inductive Proposition (Atom : Type u) : Type u where
   /-- Atomic proposition. -/
   | atom (p : Atom)
@@ -50,6 +51,10 @@ inductive Proposition (Atom : Type u) : Type u where
   | bot
   /-- Implication. -/
   | imp (φ₁ φ₂ : Proposition Atom)
+  /-- Conjunction. -/
+  | and (φ₁ φ₂ : Proposition Atom)
+  /-- Disjunction. -/
+  | or (φ₁ φ₂ : Proposition Atom)
   /-- Necessity / box. -/
   | box (φ : Proposition Atom)
   deriving DecidableEq, BEq
@@ -59,14 +64,6 @@ abbrev Proposition.neg (φ : Proposition Atom) : Proposition Atom := .imp φ .bo
 
 /-- Verum / top: ⊤ := ⊥ → ⊥ -/
 abbrev Proposition.top : Proposition Atom := .imp .bot .bot
-
-/-- Disjunction: φ₁ ∨ φ₂ := ¬φ₁ → φ₂ -/
-abbrev Proposition.or (φ₁ φ₂ : Proposition Atom) : Proposition Atom :=
-  .imp (.imp φ₁ .bot) φ₂
-
-/-- Conjunction: φ₁ ∧ φ₂ := ¬(φ₁ → ¬φ₂) -/
-abbrev Proposition.and (φ₁ φ₂ : Proposition Atom) : Proposition Atom :=
-  .imp (.imp φ₁ (.imp φ₂ .bot)) .bot
 
 /-- Possibility / diamond: ◇φ := ¬□¬φ -/
 abbrev Proposition.diamond (φ : Proposition Atom) : Proposition Atom :=
@@ -92,6 +89,14 @@ instance : ModalConnectives (Proposition Atom) where
   imp := .imp
   box := .box
 
+/-- Register `HasAnd` instance for `Modal.Proposition`. -/
+instance : HasAnd (Proposition Atom) where
+  and := .and
+
+/-- Register `HasOr` instance for `Modal.Proposition`. -/
+instance : HasOr (Proposition Atom) where
+  or := .or
+
 /-- Satisfaction relation. `Satisfies m w φ` means that, in the model `m`, the world `w` satisfies
 the proposition `φ`. -/
 @[scoped grind]
@@ -99,6 +104,8 @@ def Satisfies (m : Model World Atom) (w : World) : Proposition Atom → Prop
   | .atom p => m.v w p
   | .bot => False
   | .imp φ₁ φ₂ => Satisfies m w φ₁ → Satisfies m w φ₂
+  | .and φ₁ φ₂ => Satisfies m w φ₁ ∧ Satisfies m w φ₂
+  | .or φ₁ φ₂ => Satisfies m w φ₁ ∨ Satisfies m w φ₂
   | .box φ => ∀ w', m.r w w' → Satisfies m w' φ
 
 /-- Satisfaction of negation. -/
@@ -118,27 +125,12 @@ theorem Satisfies.diamond_iff : Satisfies m w (◇φ) ↔ ∃ w', m.r w w' ∧ S
     exact hbox w' hr hs
 
 /-- Satisfaction of conjunction. -/
-theorem Satisfies.and_iff : Satisfies m w (φ₁ ∧ φ₂) ↔ Satisfies m w φ₁ ∧ Satisfies m w φ₂ := by
-  change ((Satisfies m w φ₁ → Satisfies m w φ₂ → False) → False) ↔ _
-  constructor
-  · intro h
-    constructor
-    · by_contra h1; exact h (fun hs => absurd hs h1)
-    · by_contra h2; exact h (fun _ hs => absurd hs h2)
-  · intro ⟨h1, h2⟩ hf; exact hf h1 h2
+theorem Satisfies.and_iff : Satisfies m w (φ₁ ∧ φ₂) ↔ Satisfies m w φ₁ ∧ Satisfies m w φ₂ :=
+  Iff.rfl
 
 /-- Satisfaction of disjunction. -/
-theorem Satisfies.or_iff : Satisfies m w (φ₁ ∨ φ₂) ↔ Satisfies m w φ₁ ∨ Satisfies m w φ₂ := by
-  change ((Satisfies m w φ₁ → False) → Satisfies m w φ₂) ↔ _
-  constructor
-  · intro h
-    rcases Classical.em (Satisfies m w φ₁) with h1 | h1
-    · exact Or.inl h1
-    · exact Or.inr (h h1)
-  · intro h hn
-    cases h with
-    | inl h => exact absurd h hn
-    | inr h => exact h
+theorem Satisfies.or_iff : Satisfies m w (φ₁ ∨ φ₂) ↔ Satisfies m w φ₁ ∨ Satisfies m w φ₂ :=
+  Iff.rfl
 
 /-- Judgement, representing the conclusions one reaches in modal logic. -/
 structure Judgement World Atom where

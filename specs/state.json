@@ -17,7 +17,7 @@
     {
       "project_number": 185,
       "project_name": "propositional_foundations_quality_audit",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Rigorous quality audit of Cslib/Logics/Propositional/ and its Cslib/Foundations/Logic/ dependencies. Survey architecture, organization, proof quality, literature references, docstrings, notation, and naming conventions against CSLib contribution standards and mathematical best practices. Identify improvements to: (1) file organization and module structure, (2) proof style and tactic usage (prefer term-mode where natural, eliminate unnecessary classical reasoning in constructive proofs), (3) BibTeX references in references.bib for all key theorems citing standard sources (CZ, Blackburn et al., Chagrov & Zakharyaschev, etc.), (4) module-level docstrings following Mathlib conventions, (5) notation consistency (scoped notation, typeclass-backed operators), (6) naming conventions (Mathlib snake_case, descriptive theorem names), (7) import hygiene (minimal imports, no transitive leakage), (8) redundant or duplicated lemmas across files. Produce a prioritized improvement plan with concrete file-level recommendations, ensuring long-term maintainability and contribution readiness.",
@@ -26,8 +26,8 @@
         184
       ],
       "created": "2026-06-13T19:08:12Z",
-      "last_updated": "2026-06-13T21:45:30Z",
-      "session_id": "sess_1781384225_4617ac",
+      "last_updated": "2026-06-13T23:42:59Z",
+      "session_id": "sess_1781393806_b7db66",
       "artifacts": [
         {
           "path": "specs/185_propositional_foundations_quality_audit/reports/01_team-research.md",
@@ -48,6 +48,11 @@
           "path": "specs/185_propositional_foundations_quality_audit/reports/01_teammate-c-findings.md",
           "type": "report",
           "summary": "Literature references, mathematical rigor, contribution readiness"
+        },
+        {
+          "path": "specs/185_propositional_foundations_quality_audit/plans/01_implementation-plan.md",
+          "type": "plan",
+          "summary": "5-phase implementation plan for propositional foundations quality audit: import hygiene, citation standardization, helper extraction, DNE deduplication, and proof decomposition"
         }
       ]
     },

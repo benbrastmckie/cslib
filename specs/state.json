@@ -1410,7 +1410,27 @@
         {
           "path": "specs/182_evaluate_classical_only_simplification/reports/01_classical-simplification-tradeoffs.md",
           "type": "report",
-          "summary": "Three-option tradeoff analysis: full intuitionistic vs keep-and/or vs revert, with cost comparison and decision criteria"
+          "summary": "Decision report: classical upper layers with minimal primitives, three expansion methods"
+        },
+        {
+          "path": "specs/182_evaluate_classical_only_simplification/reports/02_team-research.md",
+          "type": "report",
+          "summary": "Team synthesis: revert strategy (per-file, 6 phases, ~126 files), zero axiom gaps, conservative extension proof plan (~115-215 lines)"
+        },
+        {
+          "path": "specs/182_evaluate_classical_only_simplification/reports/02_teammate-a-findings.md",
+          "type": "report",
+          "summary": "Git revert feasibility: per-file selective revert, baseline commits identified"
+        },
+        {
+          "path": "specs/182_evaluate_classical_only_simplification/reports/02_teammate-b-findings.md",
+          "type": "report",
+          "summary": "Axiom inheritance: zero gaps, all Foundations theorems use Lukasiewicz encoding"
+        },
+        {
+          "path": "specs/182_evaluate_classical_only_simplification/reports/02_teammate-c-findings.md",
+          "type": "report",
+          "summary": "Conservative extension: Modal K trivial (3 lines), Temporal ~50 lines, Bimodal ~150 lines"
         }
       ]
     }

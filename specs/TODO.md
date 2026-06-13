@@ -1,5 +1,5 @@
 ---
-next_project_number: 172
+next_project_number: 179
 ---
 
 # TODO
@@ -11,10 +11,10 @@ next_project_number: 172
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,62,127,139,146,147,160,169,170,171 | -- | Bimodal Porting, Modal PRs, Propositional Logic, ... |
-| 2 | 39,40,63,140,148,161 | 36,37,62,139,147,160 | Modal PRs, Propositional PRs, Temporal Logic, ... |
-| 3 | 41,64,141,149,162 | 39,40,63,140,148,161 | Foundations, Modal PRs, Propositional PRs, ... |
-| 4 | 128,129,142,150 | 141,146,149 | Modal PRs, Propositional PRs |
+| 1 | 36,37,62,127,139,146,147,160,169,170,171,172 | -- | Bimodal Porting, Foundations, Modal PRs, ... |
+| 2 | 39,40,63,140,148,161,173 | 36,37,62,139,147,160,172 | Modal PRs, Propositional Logic, Propositional PRs, ... |
+| 3 | 41,64,141,149,162,174,175,176,178 | 39,40,63,140,148,161,173 | Foundations, Modal Logic, Modal PRs, ... |
+| 4 | 128,129,142,150,177 | 141,146,149,175,176 | Bimodal Porting, Modal PRs, Propositional PRs |
 | 5 | 126,143,151,152,154,163 | 142,150,160 | Modal PRs, Propositional PRs, Temporal PRs |
 | 6 | 130,133,144,153,155,156 | 126,127,143,151,152,154 | Modal PRs, Propositional PRs |
 | 7 | 131,132,134,135,157 | 127,128,130,133,152,156 | Modal PRs, Propositional PRs |
@@ -26,10 +26,16 @@ next_project_number: 172
 
 36 [BLOCKED] — Port discrete completeness (completeness_discrete theorem) and We
 37 [BLOCKED] — Port continuous extension completeness once developed upstream. T
+177 [NOT STARTED] — Propagate the hybrid five-primitive design to the Bimodal layer (
 
 ### Foundations
 
+172 [NOT STARTED] — Extend Cslib/Foundations/Logic/Connectives.lean for the hybrid fi
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
+
+### Modal Logic
+
+175 [NOT STARTED] — Propagate the hybrid five-primitive design to the Modal layer: Mo
 
 ### Modal PRs
 
@@ -57,6 +63,9 @@ next_project_number: 172
 ### Propositional Logic
 
 171 [RESEARCHED] — Research connective-basis design for minimal, intuitionistic, and
+173 [NOT STARTED] — Refactor Cslib/Logics/Propositional to the hybrid five-primitive 
+  └─ 174 [NOT STARTED] — Extend Cslib/Logics/Propositional/Semantics and Metalogic from th
+  └─ 178 [NOT STARTED] — Documentation and citation corrections from task 171 research: (1
 
 ### Propositional PRs
 
@@ -85,6 +94,7 @@ next_project_number: 172
 
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
+176 [NOT STARTED] — Propagate the hybrid five-primitive design to the Temporal layer:
 
 ### Temporal PRs
 
@@ -98,6 +108,76 @@ next_project_number: 172
 170 [PR READY] — Submit Sub-PR 3.1+3.2: Temporal syntax (Formula + utilities). Cre
 
 ## Tasks
+
+### 178. Johansson references doc corrections
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 173
+
+**Description**: Documentation and citation corrections from task 171 research: (1) Add Johansson1937 (Ingebrigt Johansson, Der Minimalkalkuel, ein reduzierter intuitionistischer Formalismus, Compositio Mathematica 4, 1937, pages 119-136) to references.bib. (2) Correct file headers and docstrings across Cslib/Logics/Propositional and Cslib/Foundations/Logic/Connectives.lean: the functional-completeness claim for {imp, bot} must be scoped to CLASSICAL logic only (non-interdefinability of intuitionistic connectives: Wajsberg 1938, McKinsey 1939, noted by Heyting 1930); cite Church 1956 and Chagrov & Zakharyaschev 1997 for the classical basis; cite Gentzen 1935/Prawitz 1965/Troelstra & van Dalen 1988 for the full-connective natural deduction (which the hybrid design now follows); cite Johansson 1937 for minimal logic and the MinimalHilbert naming. (3) Document the three-logic architecture (shared five-primitive syntax; minimal = rule-less bot; intuitionistic = + explosion; classical = + DNE) in the Propositional module docstring. (4) Rewrite the PR #635 description accordingly if that PR is revised rather than withdrawn, responding to ctchou's two review comments. Add Wajsberg1938 and McKinsey1939 entries to references.bib if those results are cited in docstrings.
+
+---
+
+### 177. Bimodal and or propagation
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Bimodal Porting
+- **Dependencies**: Task 175, Task 176
+
+**Description**: Propagate the hybrid five-primitive design to the Bimodal layer (largest propagation, ~130 files): Bimodal Formula becomes {atom, bot, imp, and, or, box, untl, snce} (or current bimodal constructor set + and/or). Scope: (1) Syntax/Formula.lean, Context.lean, Subformulas.lean, SubformulaClosure/*: add constructors, update closure computations and nesting depth. (2) Semantics/Truth.lean, Validity.lean, TaskFrame.lean, TaskModel.lean, WorldHistory.lean: structural clauses. (3) ProofSystem/Axioms.lean, Derivation.lean, Derivable.lean, Instances.lean, Substitution.lean: and/or axioms. (4) Embedding/PropositionalEmbedding.lean, ModalEmbedding.lean, TemporalEmbedding.lean: extend all three embeddings homomorphically for and/or (depends on tasks 175/176 landing first). (5) Metalogic/: extend Core (DerivationTree, DeductionTheorem, MaximalConsistent, MCSProperties), Soundness/*, Completeness, Bundle/*, BXCanonical/* (canonical model + chronicle constructions + truth lemmas), Decidability/* (tableau, signed formulas, closure, FMP), Separation/*, Algebraic/* with and/or cases. Much is mechanical case-addition but the volume is large; consider whether some Theorems/Propositional/* files simplify since and/or are now primitive with real rules. Verify with lake build and full CI. Reference: specs/171 research report.
+
+---
+
+### 176. Temporal and or propagation
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: Task 173
+
+**Description**: Propagate the hybrid five-primitive design to the Temporal layer: Temporal.Formula becomes {atom, bot, imp, and, or, untl, snce} with derived always/eventually/neg/top/iff unchanged where valid. Scope: (1) Syntax/Formula.lean: add and/or constructors; update complexity, subst, atoms; (2) Syntax/Context.lean, BigConj.lean (BigConj should now use the PRIMITIVE and constructor instead of the classical encoding - simplification), Subformulas.lean: new cases. (3) Semantics/Satisfies.lean, Model.lean, Validity.lean: structural and/or clauses. (4) ProofSystem/Axioms.lean, Derivation.lean, Derivable.lean, Instances.lean: extend axiom sets with and/or axioms from task 173. (5) Metalogic/: extend DerivationTree, DeductionTheorem, MCS, DenseMCS, Soundness, DenseSoundness, Completeness, DenseCompleteness, Chronicle/* construction with and/or cases (truth lemma, MCS lemmas, subformula closure). (6) FromPropositional.lean: extend embedding homomorphically. Verify with lake build Cslib.Logics.Temporal and full CI. Note: PR #642 (pr3/temporal-syntax) is in flight upstream - coordinate so this refactor lands either after that PR merges or as a revision to it.
+
+---
+
+### 175. Modal and or propagation
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: Task 173
+
+**Description**: Propagate the hybrid five-primitive design to the Modal layer: Modal.Proposition becomes {atom, bot, imp, and, or, box} with diamond/neg/top/iff derived. Scope: (1) Modal/Basic.lean: add and/or constructors; update satisfaction relation with structural clauses; keep derived-connective satisfaction lemmas (Satisfies.and_iff etc.) but as primitive clauses now; register HasAnd/HasOr instances from task 172. (2) Modal/Denotation.lean, LogicalEquivalence.lean, Cube.lean: new constructor cases. (3) Modal/FromPropositional.lean: extend the PL -> Modal embedding homomorphically for and/or. (4) ProofSystem/Instances/* (16 systems K, T, B, D, K4, K5, K45, KB5, D4, D5, D45, DB, TB, S4, S5): extend K-system axiom sets with the propositional and/or axioms from task 173. (5) Metalogic/: extend DerivationTree, DeductionTheorem, MCS, Soundness, Completeness plus all Systems/*/Soundness+Completeness with and/or cases (mechanical: MCS membership lemmas for and/or, truth lemma cases). Verify with lake build Cslib.Logics.Modal and full CI. Maintain upstream compatibility where Modal/Basic.lean exists upstream (grind annotations, chenson2018's simp-direction guidance from PR #607 review: simp lemmas should rewrite INTO notation).
+
+---
+
+### 174. Propositional metalogic full connectives
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 173
+
+**Description**: Extend Cslib/Logics/Propositional/Semantics and Metalogic from the {imp, bot} fragment to the full five-primitive language {atom, bot, imp, and, or}. Scope: (1) Semantics/Basic.lean: structural clauses - eval of bot = False, and = conjunction, or = disjunction (no side conditions on valuations). (2) Semantics/Kripke.lean: intuitionistic Kripke clauses for and/or; monotonicity (persistence) lemma extended. (3) Metalogic: extend Soundness (classical), MinSoundness, IntSoundness with and/or cases; extend Completeness (classical, via MCS - and/or cases are straightforward), MinCompleteness, IntCompleteness/IntLindenbaum - NOTE this is the mathematically hardest part: intuitionistic completeness with disjunction requires prime theories (if T proves A or B then A in T or B in T), so the Lindenbaum construction must be upgraded to produce prime extensions (standard reference: Troelstra & van Dalen 1988 vol 1 ch 2; Chagrov & Zakharyaschev 1997 ch 5 intuitionistic canonical model). (4) Document precisely which logic each completeness theorem covers; the disjunction property may be stated as future work. (5) MCS.lean/DeductionTheorem.lean: extend with and/or cases as needed. Verify full CI. Reference: specs/171_research_connective_basis_min_int_classical/reports/01_team-research.md (gap: completeness theorem scope).
+
+---
+
+### 173. Propositional five primitive refactor
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 172
+
+**Description**: Refactor Cslib/Logics/Propositional to the hybrid five-primitive formula type {atom, bot, imp, and, or}, restoring as much of the upstream (Thomas Waring) approach as possible. Scope: (1) Defs.lean: add and/or constructors back (upstream names them and/or with impl; keep fork's imp naming only if churn is lower, otherwise align to upstream); keep bot as constructor (the one deliberate departure from upstream's bot-as-atom trick, justified by structural semantics per task 171 research); derive neg := A -> bot, top := bot -> bot, iff as abbrevs (valid in all three logics); delete the classical-only and/or abbrevs. (2) NaturalDeduction/Basic.lean: restore upstream's 10-rule minimal-logic ND system (ax, ass, andI, andE1, andE2, orI1, orI2, orE, impI, impE) with NO botE primitive rule - minimal logic base, following upstream's design where intuitionistic = theory contains explosion axioms (bot -> A) and classical = + DNE, mirroring upstream IsIntuitionistic/IsClassical and the fork's MPL/IPL/CPL axiom sets. (3) ProofSystem/Axioms.lean + Derivation.lean + Instances + IntMinInstances: extend Hilbert axiom sets with standard and/or axioms (A -> B -> A and B, A and B -> A, A and B -> B, A -> A or B, B -> A or B, (A -> C) -> (B -> C) -> (A or B -> C)) so MinimalHilbert/IntuitionisticHilbert/ClassicalHilbert cover full connectives. (4) NaturalDeduction/DerivedRules.lean: andE1/andE2/orE become primitive - remove [IsClassical T] requirements; HilbertDerivedRules, FromHilbert, Equivalence updated for new constructors and rules. (5) Update subst, complexity, atoms functions for two new constructors. Verify with lake build Cslib.Logics.Propositional, lake test, checkInitImports, lint-style. Reference: specs/171_research_connective_basis_min_int_classical/reports/01_team-research.md and upstream Cslib/Logics/Propositional at upstream/main.
+
+---
+
+### 172. Connectives hasand hasor full primitives
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Foundations
+- **Dependencies**: None
+
+**Description**: Extend Cslib/Foundations/Logic/Connectives.lean for the hybrid five-primitive signature {atom, bot, imp, and, or}: add HasAnd and HasOr atomic typeclasses alongside HasBot/HasImp/HasBox/HasUntil/HasSince; update the bundled classes (PropositionalConnectives, ModalConnectives, TemporalConnectives, BimodalConnectives) to include them; revise or remove ImpBotDerived (the bot/imp-derived and/or defaults are classical-only per task 171 research and must not be presented as logic-neutral). Keep derived-connective defaults only for neg (A -> bot), top (bot -> bot), and iff, which are valid in minimal/intuitionistic/classical logic. Align design with fmontesi's PR #607 operator-typeclass direction (one class per operator, notation-level) to ease upstream reconciliation. Reference: specs/171_research_connective_basis_min_int_classical/reports/01_team-research.md.
+
+---
 
 ### 171. Research connective basis min int classical
 - **Status**: [RESEARCHED]

@@ -31,11 +31,17 @@ variable {Atom : Type*}
 
 /-- Axiom schemata for classical propositional logic.
 
-The 4 axiom constructors are:
+The 10 axiom constructors are:
 - **implyK** (weakening): `φ → (ψ → φ)`
 - **implyS** (distribution): `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))`
 - **efq** (ex falso quodlibet): `⊥ → φ`
 - **peirce** (Peirce's law): `((φ → ψ) → φ) → φ`
+- **andI** (conjunction introduction): `φ → (ψ → φ ∧ ψ)`
+- **andE1** (left conjunction elimination): `φ ∧ ψ → φ`
+- **andE2** (right conjunction elimination): `φ ∧ ψ → ψ`
+- **orI1** (left disjunction introduction): `φ → φ ∨ ψ`
+- **orI2** (right disjunction introduction): `ψ → φ ∨ ψ`
+- **orE** (disjunction elimination): `(φ → χ) → ((ψ → χ) → ((φ ∨ ψ) → χ))`
 
 Together with modus ponens, these axioms characterize classical propositional logic. -/
 inductive PropositionalAxiom : PL.Proposition Atom → Prop where
@@ -51,13 +57,32 @@ inductive PropositionalAxiom : PL.Proposition Atom → Prop where
   /-- Peirce's law / DNE: `((φ → ψ) → φ) → φ` -/
   | peirce (φ ψ : PL.Proposition Atom) :
       PropositionalAxiom (((φ.imp ψ).imp φ).imp φ)
+  /-- Conjunction introduction: `φ → (ψ → φ ∧ ψ)` -/
+  | andI (φ ψ : PL.Proposition Atom) :
+      PropositionalAxiom (φ.imp (ψ.imp (φ.and ψ)))
+  /-- Left conjunction elimination: `φ ∧ ψ → φ` -/
+  | andE1 (φ ψ : PL.Proposition Atom) :
+      PropositionalAxiom ((φ.and ψ).imp φ)
+  /-- Right conjunction elimination: `φ ∧ ψ → ψ` -/
+  | andE2 (φ ψ : PL.Proposition Atom) :
+      PropositionalAxiom ((φ.and ψ).imp ψ)
+  /-- Left disjunction introduction: `φ → φ ∨ ψ` -/
+  | orI1 (φ ψ : PL.Proposition Atom) :
+      PropositionalAxiom (φ.imp (φ.or ψ))
+  /-- Right disjunction introduction: `ψ → φ ∨ ψ` -/
+  | orI2 (φ ψ : PL.Proposition Atom) :
+      PropositionalAxiom (ψ.imp (φ.or ψ))
+  /-- Disjunction elimination: `(φ → χ) → ((ψ → χ) → ((φ ∨ ψ) → χ))` -/
+  | orE (φ ψ χ : PL.Proposition Atom) :
+      PropositionalAxiom ((φ.imp χ).imp ((ψ.imp χ).imp ((φ.or ψ).imp χ)))
 
 /-- Axiom schemata for intuitionistic propositional logic.
 
-The 3 axiom constructors are:
+The 9 axiom constructors are:
 - **implyK** (weakening): `φ → (ψ → φ)`
 - **implyS** (distribution): `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))`
 - **efq** (ex falso quodlibet): `⊥ → φ`
+- **andI**, **andE1**, **andE2**, **orI1**, **orI2**, **orE** (conjunction/disjunction axioms)
 
 Together with modus ponens, these axioms characterize intuitionistic propositional logic. -/
 inductive IntPropAxiom : PL.Proposition Atom → Prop where
@@ -70,12 +95,31 @@ inductive IntPropAxiom : PL.Proposition Atom → Prop where
   /-- Ex falso quodlibet: `⊥ → φ` -/
   | efq (φ : PL.Proposition Atom) :
       IntPropAxiom (Proposition.bot.imp φ)
+  /-- Conjunction introduction: `φ → (ψ → φ ∧ ψ)` -/
+  | andI (φ ψ : PL.Proposition Atom) :
+      IntPropAxiom (φ.imp (ψ.imp (φ.and ψ)))
+  /-- Left conjunction elimination: `φ ∧ ψ → φ` -/
+  | andE1 (φ ψ : PL.Proposition Atom) :
+      IntPropAxiom ((φ.and ψ).imp φ)
+  /-- Right conjunction elimination: `φ ∧ ψ → ψ` -/
+  | andE2 (φ ψ : PL.Proposition Atom) :
+      IntPropAxiom ((φ.and ψ).imp ψ)
+  /-- Left disjunction introduction: `φ → φ ∨ ψ` -/
+  | orI1 (φ ψ : PL.Proposition Atom) :
+      IntPropAxiom (φ.imp (φ.or ψ))
+  /-- Right disjunction introduction: `ψ → φ ∨ ψ` -/
+  | orI2 (φ ψ : PL.Proposition Atom) :
+      IntPropAxiom (ψ.imp (φ.or ψ))
+  /-- Disjunction elimination: `(φ → χ) → ((ψ → χ) → ((φ ∨ ψ) → χ))` -/
+  | orE (φ ψ χ : PL.Proposition Atom) :
+      IntPropAxiom ((φ.imp χ).imp ((ψ.imp χ).imp ((φ.or ψ).imp χ)))
 
 /-- Axiom schemata for minimal propositional logic.
 
-The 2 axiom constructors are:
+The 8 axiom constructors are:
 - **implyK** (weakening): `φ → (ψ → φ)`
 - **implyS** (distribution): `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))`
+- **andI**, **andE1**, **andE2**, **orI1**, **orI2**, **orE** (conjunction/disjunction axioms)
 
 Together with modus ponens, these axioms characterize minimal propositional logic. -/
 inductive MinPropAxiom : PL.Proposition Atom → Prop where
@@ -85,6 +129,24 @@ inductive MinPropAxiom : PL.Proposition Atom → Prop where
   /-- Distribution: `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))` -/
   | implyS (φ ψ χ : PL.Proposition Atom) :
       MinPropAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ)))
+  /-- Conjunction introduction: `φ → (ψ → φ ∧ ψ)` -/
+  | andI (φ ψ : PL.Proposition Atom) :
+      MinPropAxiom (φ.imp (ψ.imp (φ.and ψ)))
+  /-- Left conjunction elimination: `φ ∧ ψ → φ` -/
+  | andE1 (φ ψ : PL.Proposition Atom) :
+      MinPropAxiom ((φ.and ψ).imp φ)
+  /-- Right conjunction elimination: `φ ∧ ψ → ψ` -/
+  | andE2 (φ ψ : PL.Proposition Atom) :
+      MinPropAxiom ((φ.and ψ).imp ψ)
+  /-- Left disjunction introduction: `φ → φ ∨ ψ` -/
+  | orI1 (φ ψ : PL.Proposition Atom) :
+      MinPropAxiom (φ.imp (φ.or ψ))
+  /-- Right disjunction introduction: `ψ → φ ∨ ψ` -/
+  | orI2 (φ ψ : PL.Proposition Atom) :
+      MinPropAxiom (ψ.imp (φ.or ψ))
+  /-- Disjunction elimination: `(φ → χ) → ((ψ → χ) → ((φ ∨ ψ) → χ))` -/
+  | orE (φ ψ χ : PL.Proposition Atom) :
+      MinPropAxiom ((φ.imp χ).imp ((ψ.imp χ).imp ((φ.or ψ).imp χ)))
 
 /-! ## Axiom Subsumption -/
 
@@ -94,6 +156,12 @@ theorem MinPropAxiom.toIntProp {φ : PL.Proposition Atom}
   cases h with
   | implyK a b => exact .implyK a b
   | implyS a b c => exact .implyS a b c
+  | andI a b => exact .andI a b
+  | andE1 a b => exact .andE1 a b
+  | andE2 a b => exact .andE2 a b
+  | orI1 a b => exact .orI1 a b
+  | orI2 a b => exact .orI2 a b
+  | orE a b c => exact .orE a b c
 
 /-- Every intuitionistic propositional axiom is a classical propositional axiom. -/
 theorem IntPropAxiom.toProp {φ : PL.Proposition Atom}
@@ -102,5 +170,11 @@ theorem IntPropAxiom.toProp {φ : PL.Proposition Atom}
   | implyK a b => exact .implyK a b
   | implyS a b c => exact .implyS a b c
   | efq a => exact .efq a
+  | andI a b => exact .andI a b
+  | andE1 a b => exact .andE1 a b
+  | andE2 a b => exact .andE2 a b
+  | orI1 a b => exact .orI1 a b
+  | orI2 a b => exact .orI2 a b
+  | orE a b c => exact .orE a b c
 
 end Cslib.Logic.PL

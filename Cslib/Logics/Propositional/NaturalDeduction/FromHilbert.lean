@@ -239,6 +239,12 @@ theorem subst_preserves_axiom
   | implyS a b c => exact .implyS (a.subst f) (b.subst f) (c.subst f)
   | efq a => exact .efq (a.subst f)
   | peirce a b => exact .peirce (a.subst f) (b.subst f)
+  | andI a b => exact .andI (a.subst f) (b.subst f)
+  | andE1 a b => exact .andE1 (a.subst f) (b.subst f)
+  | andE2 a b => exact .andE2 (a.subst f) (b.subst f)
+  | orI1 a b => exact .orI1 (a.subst f) (b.subst f)
+  | orI2 a b => exact .orI2 (a.subst f) (b.subst f)
+  | orE a b c => exact .orE (a.subst f) (b.subst f) (c.subst f)
 
 /-- Helper: intuitionistic axiom schemata are preserved under substitution. -/
 theorem subst_preserves_intAxiom
@@ -250,6 +256,12 @@ theorem subst_preserves_intAxiom
   | implyK a b => exact .implyK (a.subst f) (b.subst f)
   | implyS a b c => exact .implyS (a.subst f) (b.subst f) (c.subst f)
   | efq a => exact .efq (a.subst f)
+  | andI a b => exact .andI (a.subst f) (b.subst f)
+  | andE1 a b => exact .andE1 (a.subst f) (b.subst f)
+  | andE2 a b => exact .andE2 (a.subst f) (b.subst f)
+  | orI1 a b => exact .orI1 (a.subst f) (b.subst f)
+  | orI2 a b => exact .orI2 (a.subst f) (b.subst f)
+  | orE a b c => exact .orE (a.subst f) (b.subst f) (c.subst f)
 
 /-- Helper: minimal axiom schemata are preserved under substitution. -/
 theorem subst_preserves_minAxiom
@@ -260,6 +272,12 @@ theorem subst_preserves_minAxiom
   cases h with
   | implyK a b => exact .implyK (a.subst f) (b.subst f)
   | implyS a b c => exact .implyS (a.subst f) (b.subst f) (c.subst f)
+  | andI a b => exact .andI (a.subst f) (b.subst f)
+  | andE1 a b => exact .andE1 (a.subst f) (b.subst f)
+  | andE2 a b => exact .andE2 (a.subst f) (b.subst f)
+  | orI1 a b => exact .orI1 (a.subst f) (b.subst f)
+  | orI2 a b => exact .orI2 (a.subst f) (b.subst f)
+  | orE a b c => exact .orE (a.subst f) (b.subst f) (c.subst f)
 
 /-- Transport a derivation tree along an atom substitution.
 

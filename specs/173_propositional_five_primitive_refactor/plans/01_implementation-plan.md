@@ -171,7 +171,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: Hilbert Axiom Extension -- Axioms, Instances, Bridge Files [NOT STARTED]
+### Phase 4: Hilbert Axiom Extension -- Axioms, Instances, Bridge Files [COMPLETED]
 
 **Goal**: Extend the three propositional axiom inductives (MinPropAxiom, IntPropAxiom, PropositionalAxiom) with 6 and/or axiom constructors each. Add HasAxiom* instances for all three Hilbert tag types. Update FromHilbert.lean subst_preserves_* theorems and HilbertDerivedRules.lean.
 

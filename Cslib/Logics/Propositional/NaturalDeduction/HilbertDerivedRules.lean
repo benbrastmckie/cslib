@@ -11,23 +11,29 @@ public import Cslib.Logics.Propositional.NaturalDeduction.FromHilbert
 /-! # Derived Rules for the Hilbert System
 
 This module provides derived introduction and elimination rules for the
-Lukasiewicz-encoded propositional connectives (negation, top, conjunction,
-disjunction, biconditional) in the Hilbert-style proof system
+propositional connectives in the Hilbert-style proof system
 (`DerivationTree` with `List` contexts).
 
-Rules are organized into two layers:
+Rules are organized into three layers:
+
+## Minimal Layer (K, S only)
+Introduction rules that require only the K and S axioms:
+- `hilbertNegI`, `hilbertNegE`
+- `hilbertIffI`
 
 ## Intuitionistic Layer (K, S, EFQ)
-Introduction rules that require only the minimal intuitionistic axioms:
-- `hilbertNegI`, `hilbertNegE`, `hilbertTopI`
-- `hilbertAndI`, `hilbertOrI1`, `hilbertOrI2`, `hilbertIffI`
+Rules that additionally require EFQ:
+- `hilbertTopI`, `hilbertBotE`
+- `hilbertAndI`, `hilbertAndE1`, `hilbertAndE2`
+- `hilbertOrI1`, `hilbertOrI2`, `hilbertOrE`
 
 ## Classical Layer (K, S, EFQ, Peirce)
-Elimination rules that additionally require Peirce's law:
+Rules that additionally require Peirce's law:
 - `hilbertDne` (double negation elimination)
-- `hilbertAndE1`, `hilbertAndE2`
-- `hilbertOrE`
 - `hilbertIffE1`, `hilbertIffE2`
+
+Since `and` and `or` are now primitive constructors with axioms, the corresponding
+introduction and elimination rules are simple one or two modus-ponens applications.
 
 ### Prop-level Wrappers
 All rules have `Deriv`-level versions with the suffix `Deriv`.
@@ -35,7 +41,6 @@ All rules have `Deriv`-level versions with the suffix `Deriv`.
 ## Design
 
 Rules that use `impI` (the deduction theorem) are `noncomputable`.
-Elimination rules that rely only on axioms + modus ponens are computable.
 All definitions are parameterized over a generic axiom predicate `Axioms`
 with explicit axiom witnesses, following the pattern from `DeductionTheorem.lean`.
 
@@ -54,7 +59,7 @@ open Cslib.Logic
 
 variable {Atom : Type*}
 
-/-! ## Intuitionistic Layer (K, S, EFQ) -/
+/-! ## Minimal Layer (K, S only) -/
 
 /-! ### Negation Rules -/
 
@@ -85,7 +90,30 @@ def hilbertNegE
     DerivationTree Axioms Γ ⊥ :=
   impE d₁ d₂
 
-/-! ### Verum -/
+/-! ### Biconditional Introduction -/
+
+/-- **Biconditional Introduction** (iffI): From `Gamma |- A -> B` and
+`Gamma |- B -> A`, derive `Gamma |- A iff B`.
+
+Since `A iff B := (A -> B) and (B -> A)`, uses the AndI axiom. -/
+def hilbertIffI
+    {Axioms : PL.Proposition Atom → Prop}
+    (h_andI : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp (φ.and ψ))))
+    {Γ : List (PL.Proposition Atom)}
+    {A B : PL.Proposition Atom}
+    (d₁ : DerivationTree Axioms Γ (A → B))
+    (d₂ : DerivationTree Axioms Γ (B → A)) :
+    DerivationTree Axioms Γ (A ↔ B) :=
+  -- Use andI axiom: (A → B) → ((B → A) → (A → B) ∧ (B → A))
+  DerivationTree.modus_ponens Γ _ _
+    (DerivationTree.modus_ponens Γ _ _
+      (DerivationTree.ax Γ _ (h_andI (A.imp B) (B.imp A)))
+      d₁)
+    d₂
+
+/-! ## Intuitionistic Layer (K, S, EFQ) -/
+
+/-! ### Verum and Falsum -/
 
 /-- **Top Introduction** (topI): `Gamma |- top` for any context.
 
@@ -99,172 +127,129 @@ def hilbertTopI
     (DerivationTree.ax [] _ (h_EFQ Proposition.bot))
     (fun _ h => nomatch h)
 
-/-! ### Conjunction Introduction -/
+/-- **Bottom Elimination** (botE): From `Gamma |- bot`, derive `Gamma |- A`.
+
+Uses the EFQ axiom `⊥ → A`. -/
+def hilbertBotE
+    {Axioms : PL.Proposition Atom → Prop}
+    (h_EFQ : ∀ (φ : PL.Proposition Atom), Axioms (Proposition.bot.imp φ))
+    {Γ : List (PL.Proposition Atom)}
+    {A : PL.Proposition Atom}
+    (d : DerivationTree Axioms Γ ⊥) :
+    DerivationTree Axioms Γ A :=
+  botE h_EFQ d
+
+/-! ### Conjunction Rules -/
 
 /-- **Conjunction Introduction** (andI): From `Gamma |- A` and `Gamma |- B`,
-derive `Gamma |- A and B`.
+derive `Gamma |- A ∧ B`.
 
-Since `A and B := (A -> (B -> bot)) -> bot`, introduce the implication
-using the deduction theorem, then apply the hypothesis. Requires K and S axioms. -/
-noncomputable def hilbertAndI
+Uses the AndI axiom: `A → (B → A ∧ B)`. Two modus ponens applications. -/
+def hilbertAndI
     {Axioms : PL.Proposition Atom → Prop}
-    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
-    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
-      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_andI : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp (φ.and ψ))))
     {Γ : List (PL.Proposition Atom)}
     {A B : PL.Proposition Atom}
     (d₁ : DerivationTree Axioms Γ A)
     (d₂ : DerivationTree Axioms Γ B) :
-    DerivationTree Axioms Γ (A ∧ B) := by
-  -- Goal: Gamma |- (A -> (B -> bot)) -> bot
-  apply impI h_K h_S
-  -- (A -> (B -> bot)) :: Gamma |- bot
-  apply impE (A := B)
-  · apply impE (A := A)
-    · exact assume List.mem_cons_self
-    · exact hilbertWeakening d₁ (fun x hx => List.mem_cons_of_mem _ hx)
-  · exact hilbertWeakening d₂ (fun x hx => List.mem_cons_of_mem _ hx)
+    DerivationTree Axioms Γ (A ∧ B) :=
+  DerivationTree.modus_ponens Γ _ _
+    (DerivationTree.modus_ponens Γ _ _
+      (DerivationTree.ax Γ _ (h_andI A B))
+      d₁)
+    d₂
 
-/-! ### Disjunction Introduction -/
+/-- **Left Conjunction Elimination** (andE1): From `Gamma |- A ∧ B`,
+derive `Gamma |- A`.
+
+Uses the AndE1 axiom: `A ∧ B → A`. One modus ponens application. -/
+def hilbertAndE1
+    {Axioms : PL.Proposition Atom → Prop}
+    (h_andE1 : ∀ (φ ψ : PL.Proposition Atom), Axioms ((φ.and ψ).imp φ))
+    {Γ : List (PL.Proposition Atom)}
+    {A B : PL.Proposition Atom}
+    (d : DerivationTree Axioms Γ (A ∧ B)) :
+    DerivationTree Axioms Γ A :=
+  DerivationTree.modus_ponens Γ _ _
+    (DerivationTree.ax Γ _ (h_andE1 A B))
+    d
+
+/-- **Right Conjunction Elimination** (andE2): From `Gamma |- A ∧ B`,
+derive `Gamma |- B`.
+
+Uses the AndE2 axiom: `A ∧ B → B`. One modus ponens application. -/
+def hilbertAndE2
+    {Axioms : PL.Proposition Atom → Prop}
+    (h_andE2 : ∀ (φ ψ : PL.Proposition Atom), Axioms ((φ.and ψ).imp ψ))
+    {Γ : List (PL.Proposition Atom)}
+    {A B : PL.Proposition Atom}
+    (d : DerivationTree Axioms Γ (A ∧ B)) :
+    DerivationTree Axioms Γ B :=
+  DerivationTree.modus_ponens Γ _ _
+    (DerivationTree.ax Γ _ (h_andE2 A B))
+    d
+
+/-! ### Disjunction Rules -/
 
 /-- **Left Disjunction Introduction** (orI1): From `Gamma |- A`,
-derive `Gamma |- A or B`.
+derive `Gamma |- A ∨ B`.
 
-Since `A or B := (A -> bot) -> B`, use the deduction theorem:
-assume `A -> bot`, derive `bot` from `A` and `A -> bot`, then `B` by EFQ.
-Requires K, S, and EFQ axioms. -/
-noncomputable def hilbertOrI1
+Uses the OrI1 axiom: `A → A ∨ B`. One modus ponens application. -/
+def hilbertOrI1
     {Axioms : PL.Proposition Atom → Prop}
-    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
-    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
-      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (h_EFQ : ∀ (φ : PL.Proposition Atom), Axioms (Proposition.bot.imp φ))
+    (h_orI1 : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (φ.or ψ)))
     {Γ : List (PL.Proposition Atom)}
     {A B : PL.Proposition Atom}
     (d : DerivationTree Axioms Γ A) :
-    DerivationTree Axioms Γ (A ∨ B) := by
-  -- Goal: Gamma |- (A -> bot) -> B
-  apply impI h_K h_S
-  -- (A -> bot) :: Gamma |- B
-  apply botE h_EFQ
-  -- (A -> bot) :: Gamma |- bot
-  apply impE (A := A)
-  · exact assume List.mem_cons_self
-  · exact hilbertWeakening d (fun x hx => List.mem_cons_of_mem _ hx)
+    DerivationTree Axioms Γ (A ∨ B) :=
+  DerivationTree.modus_ponens Γ _ _
+    (DerivationTree.ax Γ _ (h_orI1 A B))
+    d
 
 /-- **Right Disjunction Introduction** (orI2): From `Gamma |- B`,
-derive `Gamma |- A or B`.
+derive `Gamma |- A ∨ B`.
 
-Since `A or B := (A -> bot) -> B`, use ImplyK: `B -> ((A -> bot) -> B)`.
-Requires K axiom. -/
+Uses the OrI2 axiom: `B → A ∨ B`. One modus ponens application. -/
 def hilbertOrI2
     {Axioms : PL.Proposition Atom → Prop}
-    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_orI2 : ∀ (φ ψ : PL.Proposition Atom), Axioms (ψ.imp (φ.or ψ)))
     {Γ : List (PL.Proposition Atom)}
     {A B : PL.Proposition Atom}
     (d : DerivationTree Axioms Γ B) :
     DerivationTree Axioms Γ (A ∨ B) :=
-  -- ImplyK(B, A -> bot): B -> ((A -> bot) -> B)
   DerivationTree.modus_ponens Γ _ _
-    (DerivationTree.ax Γ _ (h_K B (A.imp Proposition.bot)))
+    (DerivationTree.ax Γ _ (h_orI2 A B))
     d
 
-/-! ### Biconditional Introduction -/
+/-- **Disjunction Elimination** (orE): From `Gamma |- A ∨ B`,
+`A :: Gamma |- C`, and `B :: Gamma |- C`, derive `Gamma |- C`.
 
-/-- **Biconditional Introduction** (iffI): From `Gamma |- A -> B` and
-`Gamma |- B -> A`, derive `Gamma |- A iff B`.
-
-Since `A iff B := (A -> B) and (B -> A)`, this is `andI`. Requires K and S axioms. -/
-noncomputable def hilbertIffI
+Uses the OrE axiom: `(A → C) → ((B → C) → ((A ∨ B) → C))`.
+Three modus ponens applications (after building A → C and B → C via impI). -/
+noncomputable def hilbertOrE
     {Axioms : PL.Proposition Atom → Prop}
     (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
       Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_orE : ∀ (φ ψ χ : PL.Proposition Atom),
+      Axioms ((φ.imp χ).imp ((ψ.imp χ).imp ((φ.or ψ).imp χ))))
     {Γ : List (PL.Proposition Atom)}
-    {A B : PL.Proposition Atom}
-    (d₁ : DerivationTree Axioms Γ (A → B))
-    (d₂ : DerivationTree Axioms Γ (B → A)) :
-    DerivationTree Axioms Γ (A ↔ B) :=
-  hilbertAndI h_K h_S d₁ d₂
-
-/-! ### Intuitionistic Deriv-level Wrappers -/
-
-/-- Negation introduction at the `Deriv` level. -/
-theorem hilbertNegIDeriv
-    {Axioms : PL.Proposition Atom → Prop}
-    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
-    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
-      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    {Γ : List (PL.Proposition Atom)}
-    {A : PL.Proposition Atom}
-    (h : Deriv Axioms (A :: Γ) ⊥) :
-    Deriv Axioms Γ (¬A) := by
-  obtain ⟨d⟩ := h; exact ⟨hilbertNegI h_K h_S d⟩
-
-/-- Negation elimination at the `Deriv` level. -/
-theorem hilbertNegEDeriv
-    {Axioms : PL.Proposition Atom → Prop}
-    {Γ : List (PL.Proposition Atom)}
-    {A : PL.Proposition Atom}
-    (h₁ : Deriv Axioms Γ (¬A))
-    (h₂ : Deriv Axioms Γ A) :
-    Deriv Axioms Γ ⊥ := by
-  obtain ⟨d₁⟩ := h₁; obtain ⟨d₂⟩ := h₂; exact ⟨hilbertNegE d₁ d₂⟩
-
-/-- Top introduction at the `Deriv` level. -/
-theorem hilbertTopIDeriv
-    {Axioms : PL.Proposition Atom → Prop}
-    (h_EFQ : ∀ (φ : PL.Proposition Atom), Axioms (Proposition.bot.imp φ))
-    {Γ : List (PL.Proposition Atom)} :
-    Deriv Axioms Γ (Proposition.top : PL.Proposition Atom) :=
-  ⟨hilbertTopI h_EFQ⟩
-
-/-- Conjunction introduction at the `Deriv` level. -/
-theorem hilbertAndIDeriv
-    {Axioms : PL.Proposition Atom → Prop}
-    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
-    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
-      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    {Γ : List (PL.Proposition Atom)}
-    {A B : PL.Proposition Atom}
-    (h₁ : Deriv Axioms Γ A)
-    (h₂ : Deriv Axioms Γ B) :
-    Deriv Axioms Γ (A ∧ B) := by
-  obtain ⟨d₁⟩ := h₁; obtain ⟨d₂⟩ := h₂; exact ⟨hilbertAndI h_K h_S d₁ d₂⟩
-
-/-- Left disjunction introduction at the `Deriv` level. -/
-theorem hilbertOrI1Deriv
-    {Axioms : PL.Proposition Atom → Prop}
-    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
-    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
-      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (h_EFQ : ∀ (φ : PL.Proposition Atom), Axioms (Proposition.bot.imp φ))
-    {Γ : List (PL.Proposition Atom)}
-    {A B : PL.Proposition Atom}
-    (h : Deriv Axioms Γ A) : Deriv Axioms Γ (A ∨ B) := by
-  obtain ⟨d⟩ := h; exact ⟨hilbertOrI1 h_K h_S h_EFQ d⟩
-
-/-- Right disjunction introduction at the `Deriv` level. -/
-theorem hilbertOrI2Deriv
-    {Axioms : PL.Proposition Atom → Prop}
-    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
-    {Γ : List (PL.Proposition Atom)}
-    {A B : PL.Proposition Atom}
-    (h : Deriv Axioms Γ B) : Deriv Axioms Γ (A ∨ B) := by
-  obtain ⟨d⟩ := h; exact ⟨hilbertOrI2 h_K d⟩
-
-/-- Biconditional introduction at the `Deriv` level. -/
-theorem hilbertIffIDeriv
-    {Axioms : PL.Proposition Atom → Prop}
-    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
-    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
-      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    {Γ : List (PL.Proposition Atom)}
-    {A B : PL.Proposition Atom}
-    (h₁ : Deriv Axioms Γ (A → B))
-    (h₂ : Deriv Axioms Γ (B → A)) :
-    Deriv Axioms Γ (A ↔ B) := by
-  obtain ⟨d₁⟩ := h₁; obtain ⟨d₂⟩ := h₂; exact ⟨hilbertIffI h_K h_S d₁ d₂⟩
+    {A B C : PL.Proposition Atom}
+    (d : DerivationTree Axioms Γ (A ∨ B))
+    (dA : DerivationTree Axioms (A :: Γ) C)
+    (dB : DerivationTree Axioms (B :: Γ) C) :
+    DerivationTree Axioms Γ C := by
+  -- Gamma |- A -> C
+  have hAC : DerivationTree Axioms Γ (A → C) := impI h_K h_S dA
+  -- Gamma |- B -> C
+  have hBC : DerivationTree Axioms Γ (B → C) := impI h_K h_S dB
+  -- Apply OrE axiom: (A → C) → ((B → C) → ((A ∨ B) → C))
+  -- Three MP: get (A ∨ B) → C, then apply to d
+  have h1 := DerivationTree.modus_ponens Γ _ _
+    (DerivationTree.ax Γ _ (h_orE A B C))
+    hAC
+  have h2 := DerivationTree.modus_ponens Γ _ _ h1 hBC
+  exact DerivationTree.modus_ponens Γ _ _ h2 d
 
 /-! ## Classical Layer (K, S, EFQ, Peirce) -/
 
@@ -309,167 +294,131 @@ def hilbertDne
   -- Apply Peirce: A
   exact DerivationTree.modus_ponens Γ _ _ peirce imp_peirce
 
-/-! ### Conjunction Elimination -/
-
-/-- **Left Conjunction Elimination** (andE1): From `Gamma |- A and B`,
-derive `Gamma |- A`.
-
-Uses Peirce(A, B -> bot) + EFQ composition.
-Requires K, S, EFQ, and Peirce axioms. -/
-def hilbertAndE1
-    {Axioms : PL.Proposition Atom → Prop}
-    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
-    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
-      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (h_EFQ : ∀ (φ : PL.Proposition Atom), Axioms (Proposition.bot.imp φ))
-    (h_Peirce : ∀ (φ ψ : PL.Proposition Atom), Axioms (((φ.imp ψ).imp φ).imp φ))
-    {Γ : List (PL.Proposition Atom)}
-    {A B : PL.Proposition Atom}
-    (d : DerivationTree Axioms Γ (A ∧ B)) :
-    DerivationTree Axioms Γ A := by
-  -- d : Gamma |- (A -> (B -> bot)) -> bot
-  have peirce := DerivationTree.ax Γ _
-    (h_Peirce A (B.imp Proposition.bot))
-  have efq := DerivationTree.ax Γ _ (h_EFQ A)
-  have k_efq := DerivationTree.modus_ponens Γ _ _
-    (DerivationTree.ax Γ _
-      (h_K (Proposition.bot.imp A) (A.imp (B.imp Proposition.bot))))
-    efq
-  have s_ax := DerivationTree.ax Γ _
-    (h_S (A.imp (B.imp Proposition.bot)) Proposition.bot A)
-  have composed := DerivationTree.modus_ponens Γ _ _ s_ax k_efq
-  have result := DerivationTree.modus_ponens Γ _ _ composed d
-  exact DerivationTree.modus_ponens Γ _ _ peirce result
-
-/-- **Right Conjunction Elimination** (andE2): From `Gamma |- A and B`,
-derive `Gamma |- B`.
-
-Uses ImplyK to extract B -> (A -> (B -> bot)), composes with d to get
-neg neg B, then applies dne.
-Requires K, S, EFQ, and Peirce axioms. -/
-def hilbertAndE2
-    {Axioms : PL.Proposition Atom → Prop}
-    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
-    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
-      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (h_EFQ : ∀ (φ : PL.Proposition Atom), Axioms (Proposition.bot.imp φ))
-    (h_Peirce : ∀ (φ ψ : PL.Proposition Atom), Axioms (((φ.imp ψ).imp φ).imp φ))
-    {Γ : List (PL.Proposition Atom)}
-    {A B : PL.Proposition Atom}
-    (d : DerivationTree Axioms Γ (A ∧ B)) :
-    DerivationTree Axioms Γ B := by
-  -- d : Gamma |- (A -> (B -> bot)) -> bot
-  have k_ax := DerivationTree.ax Γ _
-    (h_K (B.imp Proposition.bot) A)
-  have k_d := DerivationTree.modus_ponens Γ _ _
-    (DerivationTree.ax Γ _
-      (h_K
-        ((A.imp (B.imp Proposition.bot)).imp Proposition.bot)
-        (B.imp Proposition.bot)))
-    d
-  have s_ax := DerivationTree.ax Γ _
-    (h_S (B.imp Proposition.bot)
-      (A.imp (B.imp Proposition.bot)) Proposition.bot)
-  have composed := DerivationTree.modus_ponens Γ _ _ s_ax k_d
-  have dne_hyp := DerivationTree.modus_ponens Γ _ _ composed k_ax
-  exact hilbertDne h_K h_S h_EFQ h_Peirce dne_hyp
-
-/-! ### Disjunction Elimination -/
-
-/-- **Disjunction Elimination** (orE): From `Gamma |- A or B`,
-`A :: Gamma |- C`, and `B :: Gamma |- C`, derive `Gamma |- C`.
-
-Uses the deduction theorem, composition, and classical reasoning (DNE).
-Requires K, S, EFQ, and Peirce axioms. -/
-noncomputable def hilbertOrE
-    {Axioms : PL.Proposition Atom → Prop}
-    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
-    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
-      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (h_EFQ : ∀ (φ : PL.Proposition Atom), Axioms (Proposition.bot.imp φ))
-    (h_Peirce : ∀ (φ ψ : PL.Proposition Atom), Axioms (((φ.imp ψ).imp φ).imp φ))
-    {Γ : List (PL.Proposition Atom)}
-    {A B C : PL.Proposition Atom}
-    (d : DerivationTree Axioms Γ (A ∨ B))
-    (dA : DerivationTree Axioms (A :: Γ) C)
-    (dB : DerivationTree Axioms (B :: Γ) C) :
-    DerivationTree Axioms Γ C := by
-  -- d : Gamma |- (A -> bot) -> B
-  -- Step 1: Gamma |- A -> C
-  have hAC : DerivationTree Axioms Γ (A → C) := impI h_K h_S dA
-  -- Step 2: Gamma |- B -> C
-  have hBC : DerivationTree Axioms Γ (B → C) := impI h_K h_S dB
-  -- Step 3: Gamma |- (A -> bot) -> C (compose d with hBC)
-  have hNAC : DerivationTree Axioms Γ (¬A → C) := by
-    apply impI h_K h_S
-    -- (A -> bot) :: Gamma |- C
-    apply impE (A := B)
-    · exact hilbertWeakening hBC (fun x hx => List.mem_cons_of_mem _ hx)
-    · apply impE (A := Proposition.neg A)
-      · exact hilbertWeakening d (fun x hx => List.mem_cons_of_mem _ hx)
-      · exact assume List.mem_cons_self
-  -- Step 4: Derive C via DNE
-  apply hilbertDne h_K h_S h_EFQ h_Peirce
-  -- Gamma |- ¬¬C
-  apply hilbertNegI h_K h_S
-  -- (¬C) :: Gamma |- bot
-  have hContra : DerivationTree Axioms (Proposition.neg C :: Γ) (¬A) := by
-    apply hilbertNegI h_K h_S
-    -- A :: (C -> bot) :: Gamma |- bot
-    apply impE (A := C)
-    · exact assume (List.mem_cons_of_mem _ List.mem_cons_self)
-    · apply impE (A := A)
-      · exact hilbertWeakening (hilbertWeakening hAC
-          (fun x hx => List.mem_cons_of_mem _ hx))
-          (fun x hx => List.mem_cons_of_mem _ hx)
-      · exact assume List.mem_cons_self
-  -- (¬C) :: Gamma |- C from hNAC and hContra
-  have hC : DerivationTree Axioms (Proposition.neg C :: Γ) C :=
-    impE
-      (hilbertWeakening hNAC (fun x hx => List.mem_cons_of_mem _ hx))
-      hContra
-  -- Apply neg C to C
-  exact hilbertNegE (assume List.mem_cons_self) hC
-
-/-! ### Biconditional Elimination -/
+/-! ### Biconditional Elimination (Classical) -/
 
 /-- **Left Biconditional Elimination** (iffE1): From `Gamma |- A iff B`,
 derive `Gamma |- A -> B`.
 
-Since `A iff B := (A -> B) and (B -> A)`, this is `andE1`.
-Requires K, S, EFQ, and Peirce axioms. -/
+Since `A iff B := (A -> B) ∧ (B -> A)`, uses the AndE1 axiom.
+Requires AndE1. -/
 def hilbertIffE1
     {Axioms : PL.Proposition Atom → Prop}
-    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
-    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
-      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (h_EFQ : ∀ (φ : PL.Proposition Atom), Axioms (Proposition.bot.imp φ))
-    (h_Peirce : ∀ (φ ψ : PL.Proposition Atom), Axioms (((φ.imp ψ).imp φ).imp φ))
+    (h_andE1 : ∀ (φ ψ : PL.Proposition Atom), Axioms ((φ.and ψ).imp φ))
     {Γ : List (PL.Proposition Atom)}
     {A B : PL.Proposition Atom}
     (d : DerivationTree Axioms Γ (A ↔ B)) :
     DerivationTree Axioms Γ (A → B) :=
-  hilbertAndE1 h_K h_S h_EFQ h_Peirce d
+  hilbertAndE1 h_andE1 d
 
 /-- **Right Biconditional Elimination** (iffE2): From `Gamma |- A iff B`,
 derive `Gamma |- B -> A`.
 
-Since `A iff B := (A -> B) and (B -> A)`, this is `andE2`.
-Requires K, S, EFQ, and Peirce axioms. -/
+Since `A iff B := (A -> B) ∧ (B -> A)`, uses the AndE2 axiom.
+Requires AndE2. -/
 def hilbertIffE2
     {Axioms : PL.Proposition Atom → Prop}
-    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
-    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
-      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (h_EFQ : ∀ (φ : PL.Proposition Atom), Axioms (Proposition.bot.imp φ))
-    (h_Peirce : ∀ (φ ψ : PL.Proposition Atom), Axioms (((φ.imp ψ).imp φ).imp φ))
+    (h_andE2 : ∀ (φ ψ : PL.Proposition Atom), Axioms ((φ.and ψ).imp ψ))
     {Γ : List (PL.Proposition Atom)}
     {A B : PL.Proposition Atom}
     (d : DerivationTree Axioms Γ (A ↔ B)) :
     DerivationTree Axioms Γ (B → A) :=
-  hilbertAndE2 h_K h_S h_EFQ h_Peirce d
+  hilbertAndE2 h_andE2 d
 
-/-! ### Classical Deriv-level Wrappers -/
+/-! ### Deriv-level Wrappers -/
+
+/-- Negation introduction at the `Deriv` level. -/
+theorem hilbertNegIDeriv
+    {Axioms : PL.Proposition Atom → Prop}
+    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    {Γ : List (PL.Proposition Atom)}
+    {A : PL.Proposition Atom}
+    (h : Deriv Axioms (A :: Γ) ⊥) :
+    Deriv Axioms Γ (¬A) := by
+  obtain ⟨d⟩ := h; exact ⟨hilbertNegI h_K h_S d⟩
+
+/-- Negation elimination at the `Deriv` level. -/
+theorem hilbertNegEDeriv
+    {Axioms : PL.Proposition Atom → Prop}
+    {Γ : List (PL.Proposition Atom)}
+    {A : PL.Proposition Atom}
+    (h₁ : Deriv Axioms Γ (¬A))
+    (h₂ : Deriv Axioms Γ A) :
+    Deriv Axioms Γ ⊥ := by
+  obtain ⟨d₁⟩ := h₁; obtain ⟨d₂⟩ := h₂; exact ⟨hilbertNegE d₁ d₂⟩
+
+/-- Top introduction at the `Deriv` level. -/
+theorem hilbertTopIDeriv
+    {Axioms : PL.Proposition Atom → Prop}
+    (h_EFQ : ∀ (φ : PL.Proposition Atom), Axioms (Proposition.bot.imp φ))
+    {Γ : List (PL.Proposition Atom)} :
+    Deriv Axioms Γ (Proposition.top : PL.Proposition Atom) :=
+  ⟨hilbertTopI h_EFQ⟩
+
+/-- Conjunction introduction at the `Deriv` level. -/
+theorem hilbertAndIDeriv
+    {Axioms : PL.Proposition Atom → Prop}
+    (h_andI : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp (φ.and ψ))))
+    {Γ : List (PL.Proposition Atom)}
+    {A B : PL.Proposition Atom}
+    (h₁ : Deriv Axioms Γ A)
+    (h₂ : Deriv Axioms Γ B) :
+    Deriv Axioms Γ (A ∧ B) := by
+  obtain ⟨d₁⟩ := h₁; obtain ⟨d₂⟩ := h₂; exact ⟨hilbertAndI h_andI d₁ d₂⟩
+
+/-- Left conjunction elimination at the `Deriv` level. -/
+theorem hilbertAndE1Deriv
+    {Axioms : PL.Proposition Atom → Prop}
+    (h_andE1 : ∀ (φ ψ : PL.Proposition Atom), Axioms ((φ.and ψ).imp φ))
+    {Γ : List (PL.Proposition Atom)}
+    {A B : PL.Proposition Atom}
+    (h : Deriv Axioms Γ (A ∧ B)) : Deriv Axioms Γ A := by
+  obtain ⟨d⟩ := h; exact ⟨hilbertAndE1 h_andE1 d⟩
+
+/-- Right conjunction elimination at the `Deriv` level. -/
+theorem hilbertAndE2Deriv
+    {Axioms : PL.Proposition Atom → Prop}
+    (h_andE2 : ∀ (φ ψ : PL.Proposition Atom), Axioms ((φ.and ψ).imp ψ))
+    {Γ : List (PL.Proposition Atom)}
+    {A B : PL.Proposition Atom}
+    (h : Deriv Axioms Γ (A ∧ B)) : Deriv Axioms Γ B := by
+  obtain ⟨d⟩ := h; exact ⟨hilbertAndE2 h_andE2 d⟩
+
+/-- Left disjunction introduction at the `Deriv` level. -/
+theorem hilbertOrI1Deriv
+    {Axioms : PL.Proposition Atom → Prop}
+    (h_orI1 : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (φ.or ψ)))
+    {Γ : List (PL.Proposition Atom)}
+    {A B : PL.Proposition Atom}
+    (h : Deriv Axioms Γ A) : Deriv Axioms Γ (A ∨ B) := by
+  obtain ⟨d⟩ := h; exact ⟨hilbertOrI1 h_orI1 d⟩
+
+/-- Right disjunction introduction at the `Deriv` level. -/
+theorem hilbertOrI2Deriv
+    {Axioms : PL.Proposition Atom → Prop}
+    (h_orI2 : ∀ (φ ψ : PL.Proposition Atom), Axioms (ψ.imp (φ.or ψ)))
+    {Γ : List (PL.Proposition Atom)}
+    {A B : PL.Proposition Atom}
+    (h : Deriv Axioms Γ B) : Deriv Axioms Γ (A ∨ B) := by
+  obtain ⟨d⟩ := h; exact ⟨hilbertOrI2 h_orI2 d⟩
+
+/-- Disjunction elimination at the `Deriv` level. -/
+theorem hilbertOrEDeriv
+    {Axioms : PL.Proposition Atom → Prop}
+    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_orE : ∀ (φ ψ χ : PL.Proposition Atom),
+      Axioms ((φ.imp χ).imp ((ψ.imp χ).imp ((φ.or ψ).imp χ))))
+    {Γ : List (PL.Proposition Atom)}
+    {A B C : PL.Proposition Atom}
+    (h : Deriv Axioms Γ (A ∨ B))
+    (hA : Deriv Axioms (A :: Γ) C)
+    (hB : Deriv Axioms (B :: Γ) C) :
+    Deriv Axioms Γ C := by
+  obtain ⟨d⟩ := h; obtain ⟨dA⟩ := hA; obtain ⟨dB⟩ := hB
+  exact ⟨hilbertOrE h_K h_S h_orE d dA dB⟩
 
 /-- Double negation elimination at the `Deriv` level. -/
 theorem hilbertDneDeriv
@@ -485,75 +434,35 @@ theorem hilbertDneDeriv
     Deriv Axioms Γ A := by
   obtain ⟨d⟩ := h; exact ⟨hilbertDne h_K h_S h_EFQ h_Peirce d⟩
 
-/-- Left conjunction elimination at the `Deriv` level. -/
-theorem hilbertAndE1Deriv
+/-- Biconditional introduction at the `Deriv` level. -/
+theorem hilbertIffIDeriv
     {Axioms : PL.Proposition Atom → Prop}
-    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
-    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
-      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (h_EFQ : ∀ (φ : PL.Proposition Atom), Axioms (Proposition.bot.imp φ))
-    (h_Peirce : ∀ (φ ψ : PL.Proposition Atom), Axioms (((φ.imp ψ).imp φ).imp φ))
+    (h_andI : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp (φ.and ψ))))
     {Γ : List (PL.Proposition Atom)}
     {A B : PL.Proposition Atom}
-    (h : Deriv Axioms Γ (A ∧ B)) : Deriv Axioms Γ A := by
-  obtain ⟨d⟩ := h; exact ⟨hilbertAndE1 h_K h_S h_EFQ h_Peirce d⟩
-
-/-- Right conjunction elimination at the `Deriv` level. -/
-theorem hilbertAndE2Deriv
-    {Axioms : PL.Proposition Atom → Prop}
-    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
-    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
-      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (h_EFQ : ∀ (φ : PL.Proposition Atom), Axioms (Proposition.bot.imp φ))
-    (h_Peirce : ∀ (φ ψ : PL.Proposition Atom), Axioms (((φ.imp ψ).imp φ).imp φ))
-    {Γ : List (PL.Proposition Atom)}
-    {A B : PL.Proposition Atom}
-    (h : Deriv Axioms Γ (A ∧ B)) : Deriv Axioms Γ B := by
-  obtain ⟨d⟩ := h; exact ⟨hilbertAndE2 h_K h_S h_EFQ h_Peirce d⟩
-
-/-- Disjunction elimination at the `Deriv` level. -/
-theorem hilbertOrEDeriv
-    {Axioms : PL.Proposition Atom → Prop}
-    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
-    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
-      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (h_EFQ : ∀ (φ : PL.Proposition Atom), Axioms (Proposition.bot.imp φ))
-    (h_Peirce : ∀ (φ ψ : PL.Proposition Atom), Axioms (((φ.imp ψ).imp φ).imp φ))
-    {Γ : List (PL.Proposition Atom)}
-    {A B C : PL.Proposition Atom}
-    (h : Deriv Axioms Γ (A ∨ B))
-    (hA : Deriv Axioms (A :: Γ) C)
-    (hB : Deriv Axioms (B :: Γ) C) :
-    Deriv Axioms Γ C := by
-  obtain ⟨d⟩ := h; obtain ⟨dA⟩ := hA; obtain ⟨dB⟩ := hB
-  exact ⟨hilbertOrE h_K h_S h_EFQ h_Peirce d dA dB⟩
+    (h₁ : Deriv Axioms Γ (A → B))
+    (h₂ : Deriv Axioms Γ (B → A)) :
+    Deriv Axioms Γ (A ↔ B) := by
+  obtain ⟨d₁⟩ := h₁; obtain ⟨d₂⟩ := h₂; exact ⟨hilbertIffI h_andI d₁ d₂⟩
 
 /-- Left biconditional elimination at the `Deriv` level. -/
 theorem hilbertIffE1Deriv
     {Axioms : PL.Proposition Atom → Prop}
-    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
-    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
-      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (h_EFQ : ∀ (φ : PL.Proposition Atom), Axioms (Proposition.bot.imp φ))
-    (h_Peirce : ∀ (φ ψ : PL.Proposition Atom), Axioms (((φ.imp ψ).imp φ).imp φ))
+    (h_andE1 : ∀ (φ ψ : PL.Proposition Atom), Axioms ((φ.and ψ).imp φ))
     {Γ : List (PL.Proposition Atom)}
     {A B : PL.Proposition Atom}
     (h : Deriv Axioms Γ (A ↔ B)) :
     Deriv Axioms Γ (A → B) := by
-  obtain ⟨d⟩ := h; exact ⟨hilbertIffE1 h_K h_S h_EFQ h_Peirce d⟩
+  obtain ⟨d⟩ := h; exact ⟨hilbertIffE1 h_andE1 d⟩
 
 /-- Right biconditional elimination at the `Deriv` level. -/
 theorem hilbertIffE2Deriv
     {Axioms : PL.Proposition Atom → Prop}
-    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
-    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
-      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (h_EFQ : ∀ (φ : PL.Proposition Atom), Axioms (Proposition.bot.imp φ))
-    (h_Peirce : ∀ (φ ψ : PL.Proposition Atom), Axioms (((φ.imp ψ).imp φ).imp φ))
+    (h_andE2 : ∀ (φ ψ : PL.Proposition Atom), Axioms ((φ.and ψ).imp ψ))
     {Γ : List (PL.Proposition Atom)}
     {A B : PL.Proposition Atom}
     (h : Deriv Axioms Γ (A ↔ B)) :
     Deriv Axioms Γ (B → A) := by
-  obtain ⟨d⟩ := h; exact ⟨hilbertIffE2 h_K h_S h_EFQ h_Peirce d⟩
+  obtain ⟨d⟩ := h; exact ⟨hilbertIffE2 h_andE2 d⟩
 
 end Cslib.Logic.PL

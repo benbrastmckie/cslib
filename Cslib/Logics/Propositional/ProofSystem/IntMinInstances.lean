@@ -69,6 +69,36 @@ instance :
   efq := ⟨PL.DerivationTree.ax [] _ (.efq _)⟩
 
 instance :
+    HasAxiomAndI Propositional.HilbertInt
+      (F := PL.Proposition Atom) where
+  andI := ⟨PL.DerivationTree.ax [] _ (.andI _ _)⟩
+
+instance :
+    HasAxiomAndE1 Propositional.HilbertInt
+      (F := PL.Proposition Atom) where
+  andE1 := ⟨PL.DerivationTree.ax [] _ (.andE1 _ _)⟩
+
+instance :
+    HasAxiomAndE2 Propositional.HilbertInt
+      (F := PL.Proposition Atom) where
+  andE2 := ⟨PL.DerivationTree.ax [] _ (.andE2 _ _)⟩
+
+instance :
+    HasAxiomOrI1 Propositional.HilbertInt
+      (F := PL.Proposition Atom) where
+  orI1 := ⟨PL.DerivationTree.ax [] _ (.orI1 _ _)⟩
+
+instance :
+    HasAxiomOrI2 Propositional.HilbertInt
+      (F := PL.Proposition Atom) where
+  orI2 := ⟨PL.DerivationTree.ax [] _ (.orI2 _ _)⟩
+
+instance :
+    HasAxiomOrE Propositional.HilbertInt
+      (F := PL.Proposition Atom) where
+  orE := ⟨PL.DerivationTree.ax [] _ (.orE _ _ _)⟩
+
+instance :
     IntuitionisticHilbert Propositional.HilbertInt
       (F := PL.Proposition Atom) where
 
@@ -99,6 +129,36 @@ instance :
     HasAxiomImplyS Propositional.HilbertMin
       (F := PL.Proposition Atom) where
   implyS := ⟨PL.DerivationTree.ax [] _ (.implyS _ _ _)⟩
+
+instance :
+    HasAxiomAndI Propositional.HilbertMin
+      (F := PL.Proposition Atom) where
+  andI := ⟨PL.DerivationTree.ax [] _ (.andI _ _)⟩
+
+instance :
+    HasAxiomAndE1 Propositional.HilbertMin
+      (F := PL.Proposition Atom) where
+  andE1 := ⟨PL.DerivationTree.ax [] _ (.andE1 _ _)⟩
+
+instance :
+    HasAxiomAndE2 Propositional.HilbertMin
+      (F := PL.Proposition Atom) where
+  andE2 := ⟨PL.DerivationTree.ax [] _ (.andE2 _ _)⟩
+
+instance :
+    HasAxiomOrI1 Propositional.HilbertMin
+      (F := PL.Proposition Atom) where
+  orI1 := ⟨PL.DerivationTree.ax [] _ (.orI1 _ _)⟩
+
+instance :
+    HasAxiomOrI2 Propositional.HilbertMin
+      (F := PL.Proposition Atom) where
+  orI2 := ⟨PL.DerivationTree.ax [] _ (.orI2 _ _)⟩
+
+instance :
+    HasAxiomOrE Propositional.HilbertMin
+      (F := PL.Proposition Atom) where
+  orE := ⟨PL.DerivationTree.ax [] _ (.orE _ _ _)⟩
 
 instance :
     MinimalHilbert Propositional.HilbertMin

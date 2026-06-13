@@ -79,6 +79,36 @@ instance :
       (F := PL.Proposition Atom) where
   peirce := ⟨PL.DerivationTree.ax [] _ (.peirce _ _)⟩
 
+instance :
+    HasAxiomAndI Propositional.HilbertCl
+      (F := PL.Proposition Atom) where
+  andI := ⟨PL.DerivationTree.ax [] _ (.andI _ _)⟩
+
+instance :
+    HasAxiomAndE1 Propositional.HilbertCl
+      (F := PL.Proposition Atom) where
+  andE1 := ⟨PL.DerivationTree.ax [] _ (.andE1 _ _)⟩
+
+instance :
+    HasAxiomAndE2 Propositional.HilbertCl
+      (F := PL.Proposition Atom) where
+  andE2 := ⟨PL.DerivationTree.ax [] _ (.andE2 _ _)⟩
+
+instance :
+    HasAxiomOrI1 Propositional.HilbertCl
+      (F := PL.Proposition Atom) where
+  orI1 := ⟨PL.DerivationTree.ax [] _ (.orI1 _ _)⟩
+
+instance :
+    HasAxiomOrI2 Propositional.HilbertCl
+      (F := PL.Proposition Atom) where
+  orI2 := ⟨PL.DerivationTree.ax [] _ (.orI2 _ _)⟩
+
+instance :
+    HasAxiomOrE Propositional.HilbertCl
+      (F := PL.Proposition Atom) where
+  orE := ⟨PL.DerivationTree.ax [] _ (.orE _ _ _)⟩
+
 /-! ## ClassicalHilbert Instance -/
 
 instance :

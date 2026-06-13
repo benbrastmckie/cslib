@@ -17,19 +17,36 @@ public import Mathlib.Order.TypeTags
 ## Main definitions
 
 - `Proposition` : the type of propositions over a given type of atom. Primitives are `atom`,
-  `bot` (falsum), and `imp` (implication); since `{imp, bot}` is functionally complete for
-  classical logic, conjunction, disjunction, negation, and verum are derived connectives
-  (`abbrev`s) rather than constructors, keeping the inductive minimal.
+  `bot` (falsum), `imp` (implication), `and` (conjunction), and `or` (disjunction), following
+  the standard Gentzen/Prawitz/Troelstra-van Dalen full-connective tradition. Negation (`neg`),
+  verum (`top`), and biconditional (`iff`) are derived connectives (`abbrev`s) rather than
+  constructors.
 - `Theory` : set of `Proposition`.
 - `IsIntuitionistic` : a theory is intuitionistic if it contains the principle of explosion.
 - `IsClassical` : an intuitionistic theory is classical if it further contains double negation
-elimination.
+  elimination.
 - `Proposition.subst` : replace `atom x` in a `A : Proposition Atom` with `f x`, for a function
   `f : Atom → Proposition Atom'`. This induces a monad structure on `Proposition`, with
   `pure := Proposition.atom`. `Theory` is a functor, by mapping each proposition `A ∈ T` to
   `f <$> A`.
 - `Theory.intuitionisticCompletion` : the freely generated intuitionistic theory extending a given
-theory.
+  theory.
+
+## Architecture
+
+Two proof systems are defined for this propositional language:
+
+- **Layer 1 — Natural Deduction** (`NaturalDeduction/Basic.lean`): a `Theory.Derivation` inductive
+  with 10 primitive constructors (axiom, assumption, conjunction intro/elim ×2, disjunction
+  intro ×2/elim, implication intro/elim). The theory parameter controls logic strength: `MPL`
+  (Johansson's minimal logic, [Johansson1937]), `IPL` (intuitionistic), and `CPL` (classical).
+
+- **Layer 2 — Hilbert System** (`ProofSystem/`): an axiom predicate hierarchy
+  (`MinPropAxiom` / `IntPropAxiom` / `PropositionalAxiom`) with sequent derivability and a
+  Hilbert-style proof-theoretic treatment.
+
+- **Bridge**: `NaturalDeduction/Equivalence.lean` establishes extensional equivalence between the
+  two proof systems for all three logic strengths.
 
 ## Notation
 
@@ -38,6 +55,11 @@ conjunction, disjunction, implication and negation.
 
 ## References
 
+* [I. Johansson, *Der Minimalkalkül, ein reduzierter intuitionistischer Formalismus*][Johansson1937]
+* [G. Gentzen, *Untersuchungen über das logische Schließen*][Gentzen1935]
+* [D. Prawitz, *Natural Deduction: A Proof-Theoretical Study*][Prawitz1965]
+* [A. S. Troelstra, D. van Dalen,
+  *Constructivism in Mathematics: An Introduction*][TroelstraVanDalen1988]
 * [A. Church, *Introduction to Mathematical Logic*][Church1956]
 * [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Chapter 1
 -/

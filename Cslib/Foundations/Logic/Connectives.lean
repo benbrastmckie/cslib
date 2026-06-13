@@ -28,8 +28,8 @@ and registers as an instance of the appropriate bundled class.
 
 Conjunction and disjunction are treated as primitives rather than Lukasiewicz-derived
 connectives. The classical encodings `and φ ψ := ¬(φ → ¬ψ)` and `or φ ψ := ¬φ → ψ` are
-only propositionally equivalent to `∧` and `∨` in classical logic (Wajsberg 1938,
-McKinsey 1939); they fail in intuitionistic and minimal logic. Making `and` and `or`
+only propositionally equivalent to `∧` and `∨` in classical logic ([Wajsberg1938],
+[McKinsey1939]); they fail in intuitionistic and minimal logic. Making `and` and `or`
 primitives via `HasAnd`/`HasOr` supports all three logic strengths with a single typeclass
 hierarchy.
 
@@ -40,6 +40,13 @@ task 173 after `HasAnd` is instantiated on the formula types.
 
 ## References
 
+* [I. Johansson, *Der Minimalkalkül, ein reduzierter intuitionistischer Formalismus*][Johansson1937]
+* [M. Wajsberg, *Untersuchungen über den Aussagenkalkül von A. Heyting*][Wajsberg1938]
+* [J. C. C. McKinsey,
+  *Proof of the Independence of the Primitive Symbols of Heyting's Calculus*][McKinsey1939]
+* [D. Prawitz, *Natural Deduction: A Proof-Theoretical Study*][Prawitz1965]
+* [A. S. Troelstra, D. van Dalen,
+  *Constructivism in Mathematics: An Introduction*][TroelstraVanDalen1988]
 * [A. Church, *Introduction to Mathematical Logic*][Church1956]
 * [A. Heyting, *Die formalen Regeln der intuitionistischen Logik*][Heyting1930]
 * [G. Gentzen, *Untersuchungen über das logische Schließen*][Gentzen1935]

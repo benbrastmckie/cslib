@@ -43,12 +43,19 @@ abbreviates a derivation of `A` in the empty context: `T⇓(∅ ⊢ A)`.
 ## Implementation notes
 
 The primitive inference rules are: axiom (from theory), assumption (from context),
-implication introduction and elimination, and ex falso quodlibet (bottom elimination).
-Conjunction and disjunction rules are derivable from these primitives together with
-the definitions of `∧` and `∨` in terms of `→` and `⊥`, so they need not be postulated.
+conjunction introduction and elimination (×2), disjunction introduction (×2) and elimination,
+and implication introduction and elimination — 10 constructors in total. Ex falso quodlibet
+(bottom elimination) is a derived rule requiring `[IsIntuitionistic T]`.
+
+Logic strength is controlled by the theory parameter:
+- `MPL` (minimal propositional logic, Johansson 1937 [Johansson1937]): no axioms beyond the
+  10 primitive rules; bottom has no special status.
+- `IPL` (intuitionistic propositional logic): adds the principle of explosion `⊥ → A`.
+- `CPL` (classical propositional logic): adds double negation elimination `¬¬A → A`.
 
 ## References
 
+* [I. Johansson, *Der Minimalkalkül, ein reduzierter intuitionistischer Formalismus*][Johansson1937]
 * [D. Prawitz, *Natural Deduction: A Proof-Theoretical Study*][Prawitz1965]
 * [A. S. Troelstra, D. van Dalen,
   *Constructivism in Mathematics: An Introduction*][TroelstraVanDalen1988], Section 10.4

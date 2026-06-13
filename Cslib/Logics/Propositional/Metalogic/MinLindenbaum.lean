@@ -334,7 +334,8 @@ theorem min_maximal_is_prime {S : Set (PL.Proposition Atom)}
     · exact hL'_sub x hx
     · exact hL''_sub x hx
     · exact h_or
-  have h_orE : DerivationTree MinPropAxiom (Atom := Atom) [] ((A.imp phi).imp ((B.imp phi).imp ((A.or B).imp phi))) :=
+  have h_orE : DerivationTree MinPropAxiom (Atom := Atom) []
+      ((A.imp phi).imp ((B.imp phi).imp ((A.or B).imp phi))) :=
     .ax [] _ (.orE A B phi)
   have h_orE_w : DerivationTree MinPropAxiom (Atom := Atom) ctx
       ((A.imp phi).imp ((B.imp phi).imp ((A.or B).imp phi))) :=
@@ -342,9 +343,11 @@ theorem min_maximal_is_prime {S : Set (PL.Proposition Atom)}
   obtain ⟨dA⟩ := hL'_deriv
   obtain ⟨dB⟩ := hL''_deriv
   let dA_w : DerivationTree MinPropAxiom ctx (A.imp phi) :=
-    .weakening L' ctx _ dA (fun x hx => List.mem_append.mpr (Or.inl (List.mem_append.mpr (Or.inl hx))))
+    .weakening L' ctx _ dA
+      (fun x hx => List.mem_append.mpr (Or.inl (List.mem_append.mpr (Or.inl hx))))
   let dB_w : DerivationTree MinPropAxiom ctx (B.imp phi) :=
-    .weakening L'' ctx _ dB (fun x hx => List.mem_append.mpr (Or.inl (List.mem_append.mpr (Or.inr hx))))
+    .weakening L'' ctx _ dB
+      (fun x hx => List.mem_append.mpr (Or.inl (List.mem_append.mpr (Or.inr hx))))
   let d_or : DerivationTree MinPropAxiom ctx (A.or B) :=
     .assumption ctx _ (by
       simp only [ctx, List.mem_append, List.mem_cons, List.mem_nil_iff, or_false]

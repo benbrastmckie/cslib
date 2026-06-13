@@ -72,6 +72,24 @@ theorem axiom_sound {World : Type*} {φ : Proposition Atom}
     intro hφ w' hr h_box_neg
     have h_symm : m.r w' w := h_eucl w w' w hr (h_refl w)
     exact h_box_neg w h_symm hφ
+  | andI φ ψ =>
+    intro hφ hψ
+    exact ⟨hφ, hψ⟩
+  | andE1 φ ψ =>
+    intro ⟨hφ, _⟩
+    exact hφ
+  | andE2 φ ψ =>
+    intro ⟨_, hψ⟩
+    exact hψ
+  | orI1 φ ψ =>
+    intro hφ
+    exact Or.inl hφ
+  | orI2 φ ψ =>
+    intro hψ
+    exact Or.inr hψ
+  | orE φ ψ χ =>
+    intro h₁ h₂ h₃
+    exact h₃.elim h₁ h₂
 
 /-! ## S5 Soundness Theorems -/
 

@@ -70,6 +70,24 @@ theorem k4_axiom_sound {World : Type*} {φ : Proposition Atom}
   | modalFour φ =>
     intro h_box w₁ hr₁ w₂ hr₂
     exact h_box w₂ (h_trans w w₁ w₂ hr₁ hr₂)
+  | andI φ ψ =>
+    intro hφ hψ
+    exact ⟨hφ, hψ⟩
+  | andE1 φ ψ =>
+    intro ⟨hφ, _⟩
+    exact hφ
+  | andE2 φ ψ =>
+    intro ⟨_, hψ⟩
+    exact hψ
+  | orI1 φ ψ =>
+    intro hφ
+    exact Or.inl hφ
+  | orI2 φ ψ =>
+    intro hψ
+    exact Or.inr hψ
+  | orE φ ψ χ =>
+    intro h₁ h₂ h₃
+    exact h₃.elim h₁ h₂
 
 /-! ## K4 Soundness Theorems -/
 

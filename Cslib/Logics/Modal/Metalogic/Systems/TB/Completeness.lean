@@ -87,6 +87,12 @@ theorem tb_truth_lemma
     (fun φ ψ => .peirce φ ψ)
     (fun φ ψ => .modalK φ ψ)
     (fun φ => .modalT φ)
+    (fun φ ψ => .andI φ ψ)
+    (fun φ ψ => .andE1 φ ψ)
+    (fun φ ψ => .andE2 φ ψ)
+    (fun φ ψ => .orI1 φ ψ)
+    (fun φ ψ => .orI2 φ ψ)
+    (fun φ ψ χ => .orE φ ψ χ)
     S φ
 
 /-! ## TB Completeness Theorem (BRV Theorem 4.28 + Theorem 4.22) -/

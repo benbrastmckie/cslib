@@ -1,0 +1,88 @@
+{
+  "session_id": "sess_1781313950_b8ff9f",
+  "task_numbers": [
+    173,
+    174,
+    175,
+    176,
+    177,
+    178
+  ],
+  "waves": [
+    [
+      173
+    ],
+    [
+      174,
+      175,
+      176,
+      178
+    ],
+    [
+      177
+    ]
+  ],
+  "dependency_graph": {
+    "173": [],
+    "174": [
+      173
+    ],
+    "175": [
+      173
+    ],
+    "176": [
+      173
+    ],
+    "177": [
+      175,
+      176
+    ],
+    "178": [
+      173
+    ]
+  },
+  "task_types": {
+    "173": "cslib",
+    "174": "cslib",
+    "175": "cslib",
+    "176": "cslib",
+    "177": "cslib",
+    "178": "cslib"
+  },
+  "task_dirs": {
+    "173": "specs/173_propositional_five_primitive_refactor",
+    "174": "specs/174_propositional_metalogic_full_connectives",
+    "175": "specs/175_modal_and_or_propagation",
+    "176": "specs/176_temporal_and_or_propagation",
+    "177": "specs/177_bimodal_and_or_propagation",
+    "178": "specs/178_johansson_references_doc_corrections"
+  },
+  "current_statuses": {
+    "173": "researched",
+    "174": "not_started",
+    "175": "not_started",
+    "176": "not_started",
+    "177": "not_started",
+    "178": "not_started"
+  },
+  "research_agents": {
+    "173": "cslib-research-agent",
+    "174": "cslib-research-agent",
+    "175": "cslib-research-agent",
+    "176": "cslib-research-agent",
+    "177": "cslib-research-agent",
+    "178": "cslib-research-agent"
+  },
+  "implement_agents": {
+    "173": "cslib-implementation-agent",
+    "174": "cslib-implementation-agent",
+    "175": "cslib-implementation-agent",
+    "176": "cslib-implementation-agent",
+    "177": "cslib-implementation-agent",
+    "178": "cslib-implementation-agent"
+  },
+  "cycle_count": 0,
+  "max_cycles": 25,
+  "failed_tasks": [],
+  "completed_tasks": []
+}

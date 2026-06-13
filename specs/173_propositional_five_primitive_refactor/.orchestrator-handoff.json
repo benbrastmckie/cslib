@@ -1,0 +1,12 @@
+{
+  "status": "researched",
+  "summary": "Comprehensive codebase survey of 22 files under Cslib/Logics/Propositional/ plus 2 external embedding files. The refactor adds and/or constructors to the Proposition inductive (Defs.lean), removes botE from the ND system and replaces it with 6 new constructors (andI, andE1, andE2, orI1, orI2, orE) matching upstream Waring's 10-rule system, extends all 3 Hilbert axiom sets with 6 and/or axiom schemata, and updates all recursive functions on Proposition (subst, Evaluate, IForces, etc.) with 2 new cases each. Estimated ~860 lines changed across 21 files in 7 phases. The DerivedRules.lean [IsClassical T] constraints on andE1/andE2/orE become moot as these become primitive ND rules. Key risk: completeness proofs (3 files) and ND-Hilbert bridge (Equivalence.lean). Recommend keeping HasAxiom* typeclasses standalone (not bundled into MinimalHilbert) to avoid cascading breakage to Modal/Temporal/Bimodal until tasks 174-176.",
+  "blockers": [],
+  "artifacts": [
+    {
+      "path": "specs/173_propositional_five_primitive_refactor/reports/01_five-primitive-research.md",
+      "type": "report",
+      "summary": "File-by-file inventory with current state, specific changes needed, risk assessment, 7-phase ordering recommendation, Hilbert axiom extension details, ND-Hilbert bridge feasibility analysis, and upstream compatibility notes."
+    }
+  ]
+}

@@ -103,7 +103,7 @@ next_project_number: 183
   └─ 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
   └─ 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors  (see above)
-182 [RESEARCHED] — Evaluate whether Modal/, Temporal/, and Bimodal/ should remain cl
+182 [RESEARCHED] — Evaluate and execute reversion of primitive and/or constructors i
 
 ## Tasks
 
@@ -113,7 +113,7 @@ next_project_number: 183
 - **Dependencies**: None
 - **Research**: [182_evaluate_classical_only_simplification/reports/01_classical-simplification-tradeoffs.md]
 
-**Description**: Evaluate whether Modal/, Temporal/, and Bimodal/ should remain classical-only, and if so, whether to revert the primitive and/or constructors added by tasks 175-177 back to Lukasiewicz abbreviations. Three options: (1) Full intuitionistic path — keep and/or, add dia/G/H (tasks 179-181), build intuitionistic variants. (2) Keep and/or but skip further expansion — current state, preserves future optionality. (3) Revert and/or in upper layers to abbreviations — minimize constructors, simpler proofs, classical-only. Decision determines whether tasks 179-181 proceed, are closed, or are replaced with revert tasks.
+**Description**: Evaluate and execute reversion of primitive and/or constructors in Modal/, Temporal/, and Bimodal/ back to Lukasiewicz abbreviations, keeping these layers classical-only with minimal formula constructors: Modal {atom, bot, imp, box}, Temporal {atom, bot, imp, untl, snce}, Bimodal {atom, bot, imp, box, untl, snce}. The Propositional layer retains its five-primitive design and three-tier completeness. Three expansion methods connect Propositional to the upper layers: syntactic embedding (FromPropositional), axiom inheritance via Foundations typeclass theorems, and conservative extension. Tasks 179-181 are deferred (not abandoned) — the forward playbook for re-adding primitives is proven in tasks 175-177. Scope: revert ~55 Modal files, ~11 Temporal files, ~50+ Bimodal files; remove and/or constructors, axiom constructors, and MCS helpers; restore abbreviations and Lukasiewicz-based proofs.
 
 ---
 

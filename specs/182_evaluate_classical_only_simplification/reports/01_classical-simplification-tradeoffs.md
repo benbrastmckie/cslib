@@ -1,89 +1,158 @@
-# Research Report: Should Modal/Temporal/Bimodal Remain Classical-Only?
+# Research Report: Classical Upper Layers with Minimal Primitives
 
 ## Task 182 — evaluate_classical_only_simplification
 
-### The Question
+### Decision
 
-Tasks 173-178 added primitive `and`/`or` constructors across all four logic layers to enable intuitionistic and minimal variants. Tasks 179-181 propose adding primitive `dia`, `allFuture`, `allPast` for the same reason. This task asks: is the intuitionistic direction worth pursuing for Modal/, Temporal/, and Bimodal/, or should these layers remain classical-only — and if so, should we revert the `and`/`or` additions to keep them simple?
+Keep Modal/, Temporal/, and Bimodal/ classical-only with the minimum number of formula constructors. Revert the primitive `and`/`or` constructors added by tasks 175-177, restoring Lukasiewicz abbreviations in the upper layers. The Propositional layer retains its full five-primitive design and three-tier completeness (minimal/intuitionistic/classical). If weaker propositional logics are needed in the upper layers in the future, primitives can be re-added — the forward playbook is proven and documented in tasks 175-177.
 
-There are three options on the table:
+### Target Primitive Sets
 
-1. **Full intuitionistic path**: Keep `and`/`or` primitive, add `dia`/`allFuture`/`allPast` (tasks 179-181), build intuitionistic variants of all systems
-2. **Classical-only, keep primitives**: Keep `and`/`or` as primitive constructors (status quo after tasks 173-178) but don't add more primitives, don't build intuitionistic variants
-3. **Classical-only, revert to abbreviations**: Revert `and`/`or` to Lukasiewicz abbreviations in Modal/Temporal/Bimodal (keeping them primitive only in Propositional where the three-tier completeness requires them)
+```
+Propositional:  {atom, bot, imp, and, or}               — 5 (unchanged)
+Modal:          {atom, bot, imp, box}                    — 4 (revert and/or)
+Temporal:       {atom, bot, imp, untl, snce}             — 5 (revert and/or)
+Bimodal:        {atom, bot, imp, box, untl, snce}        — 6 (revert and/or)
+```
 
-### Arguments for Full Intuitionistic Path (Option 1)
+Derived connectives in the upper layers (classical-only):
+```
+neg φ   := imp φ bot              — valid in all logics
+top     := imp bot bot            — valid in all logics
+and φ ψ := neg (imp φ (neg ψ))   — classical only (Lukasiewicz)
+or φ ψ  := imp (neg φ) ψ         — classical only (Lukasiewicz)
+```
 
-**Mathematical completeness**: A library called "Computer Science Library" should cover the logics that matter in CS. Intuitionistic modal logic (IS4 in particular) connects to:
-- Type theory (Fitch-style modal types, Davies-Pfenning)
-- Staged computation (MetaML)
-- Constructive reasoning about distributed systems
-- Topological semantics (IS4 = interior operator on topological spaces)
+### Rationale
 
-**Architectural consistency**: The Propositional layer already supports three tiers (minimal/intuitionistic/classical). Having the upper layers locked to classical creates an asymmetry — the extension hierarchy promises that Modal extends Propositional, but it only extends Classical Propositional.
+**1. The Propositional layer is the right home for logic-tier complexity.** The three-tier structure (MinimalHilbert / IntuitionisticHilbert / ClassicalHilbert) with prime theories, Zorn's lemma, and ND-Hilbert bridges lives entirely in Propositional/. This is where and/or must be primitive — the intuitionistic completeness proof requires the disjunction property, which fails for the Lukasiewicz encoding. The upper layers consume the classical fragment and don't need this machinery.
 
-**Research value**: Intuitionistic tense logic with the bimodal combination is genuinely novel territory. A formalized library covering this space would be a meaningful contribution.
+**2. Abbreviations cascade simplification through the proof system.** With Lukasiewicz abbreviations, the propositional and/or axioms (andI, andE1, andE2, orI1, orI2, orE) become derivable *theorems* rather than primitive axiom constructors. This shrinks every axiom set:
 
-**Upstream direction**: Upstream CSLib chose diamond as primitive and negation as primitive — design choices that lean toward logic-neutrality rather than classical optimization.
+| Layer | Current axioms per system | Simplified |
+|-------|--------------------------|-----------|
+| Modal K | 11 (implyK, implyS, efq, peirce, andI, andE1, andE2, orI1, orI2, orE, modalK) | 5 (implyK, implyS, efq, peirce, modalK) |
+| Each modal system | 11 + system-specific | 5 + system-specific |
+| Soundness cases | 11 per system × 15 systems = 165 | 5 × 15 = 75 |
 
-### Arguments for Classical-Only (Options 2 or 3)
+A ~55% reduction in axiom constructors and soundness proof obligations across all 15 modal systems.
 
-**Practical usage**: The existing 15 modal systems, temporal logic, and bimodal logic with decidability/separation theorems are all classical. No current user or downstream project needs intuitionistic modal logic in CSLib.
+**3. Case analysis overhead is real and permanent.** Every pattern match and induction proof in the Bimodal layer (127 files) carries cases for each constructor. Going from 8 to 6 constructors eliminates ~25% of match cases. The `encodeNat` injectivity proof shrinks from 64 to 36 case pairs. This compounds across every future theorem.
 
-**Maintenance cost**: Each primitive constructor multiplies maintenance burden across every refactor. The and/or propagation (tasks 173-178) required 74 files changed, 4607 insertions, ~20 agent dispatches across the Bimodal layer alone. The dia/G/H expansion (tasks 179-181) would be similar. Every future change to the Formula type repeats this cost.
+**4. The forward path is proven and repeatable.** Tasks 175-177 established the exact playbook for adding primitive constructors to the upper layers. If intuitionistic modal or temporal logic becomes a research goal, the refactor can be re-executed with known cost (~20 agent dispatches for Bimodal). Nothing is lost by reverting — only deferred.
 
-**Performance**: More constructors = slower builds, larger proof terms, more exhaustiveness cases. The Bimodal layer with 11 constructors would have ~40% more match cases than the current 8, and `encodeNat` injectivity grows quadratically (64 → 121 case pairs).
+### How Classical Propositional Logic Expands to Upper Systems
 
-**Proof redundancy**: In classical systems, `◇A ↔ ¬□¬A` and `GA ↔ ¬F¬A` are theorems. Having both as constructors means every classical proof about ◇ must be stated separately from the equivalent ¬□¬ form, even though they're interchangeable.
+There are three methods by which the Propositional layer connects to Modal/, Temporal/, and Bimodal/. Each works cleanly with abbreviated and/or in the upper layers.
 
-**Research maturity**: Intuitionistic temporal logic is not well-standardized. Building a formalized library for something where the mathematical foundations are still being debated risks building on shifting ground.
+#### Method 1: Syntactic Embedding (FromPropositional)
 
-**Scope creep**: The original five-primitive refactor (task 173) was motivated by concrete problems — the Propositional completeness proofs needed real disjunction for prime theories. The Modal/Temporal/Bimodal propagation was a consistency requirement. But the intuitionistic modal/temporal extension is a new research direction, not a fix for existing problems.
+Each upper layer has a `FromPropositional.lean` file defining a homomorphic injection:
 
-### The Middle Ground: Keep and/or, Skip dia/G/H (Option 2)
+```
+embed : Propositional.Proposition Atom → Modal.Proposition Atom
+embed (.atom a)    := .atom a
+embed (.bot)       := .bot
+embed (.imp φ ψ)   := .imp (embed φ) (embed ψ)
+embed (.and φ ψ)   := Modal.Formula.and (embed φ) (embed ψ)    -- maps to abbreviation
+embed (.or φ ψ)    := Modal.Formula.or (embed φ) (embed ψ)     -- maps to abbreviation
+```
 
-This is the current state after tasks 173-178. The argument:
+The embedding maps Propositional's primitive `.and`/`.or` to Modal's abbreviation-defined `and`/`or`. This is a semantic homomorphism: it preserves all logical properties. The classical equivalence `and φ ψ = ¬(φ → ¬ψ)` holds in the target system (which has Peirce's law), so the embedding is sound.
 
-**and/or are already done**: The propagation is complete, the build is clean, and the constructors serve a purpose even classically — pattern matching on `Formula.and φ ψ` is clearer than pattern matching on `Formula.imp (Formula.imp φ (Formula.imp ψ Formula.bot)) Formula.bot`.
+**Proof obligation**: The embedding must satisfy `Satisfies m w (embed φ) ↔ eval v φ` (relating Modal Kripke satisfaction to Propositional Boolean evaluation). With abbreviations, this requires proving that the Lukasiewicz encoding satisfies the expected semantics — straightforward given Peirce's law.
 
-**and/or don't hurt much**: Going from 6 to 8 constructors (adding and/or) is a modest increase. Going from 8 to 11 (adding dia/allFuture/allPast) is proportionally larger and adds constructors that are truly redundant in classical logic.
+**Cost**: 2-3 lemmas per embedding file proving the and/or abbreviation cases. These may involve short `sorry`-stubs if the equivalence proof is deferred, or direct proofs using the classical axioms. This is the only concrete cost of reverting.
 
-**Preserves future optionality**: If intuitionistic modal logic becomes important later, the and/or foundation is already in place. Adding dia/G/H on top of an already-primitive and/or is easier than doing everything at once.
+#### Method 2: Axiom Inheritance via Derivability
 
-**Propositional consistency**: The and/or constructors match the Propositional layer's primitive set, so the embedding `Propositional → Modal` is a clean injection on all constructors. Reverting and/or in Modal would mean the embedding maps primitive constructors to abbreviations, which is semantically correct but architecturally ugly.
+The upper layers don't copy propositional axioms — they *derive* them. With a classical proof system (implyK, implyS, efq, peirce), all propositional tautologies are derivable as theorems:
 
-### The Revert Option (Option 3)
+```
+-- These become theorems, not axiom constructors:
+theorem andI_derived : Derivable Axioms (φ → (ψ → φ ∧ ψ))    -- from implyK, implyS, efq, peirce
+theorem andE1_derived : Derivable Axioms (φ ∧ ψ → φ)          -- from peirce
+theorem orI1_derived : Derivable Axioms (φ → φ ∨ ψ)           -- from implyK
+theorem orE_derived : Derivable Axioms ((φ→χ) → (ψ→χ) → (φ∨ψ→χ))  -- from implyS, peirce
+```
 
-Arguments for reverting and/or in Modal/Temporal/Bimodal (keeping them primitive only in Propositional):
+These derivability theorems live in the Foundations layer (`Theorems/Propositional/Core.lean`, `Theorems/Combinators.lean`) and are already proven for any system with `HasAxiomImplyK`, `HasAxiomImplyS`, `HasAxiomEFQ`, `HasAxiomPeirce`. The upper layers register these typeclass instances and inherit all propositional theorems for free.
 
-**Minimize blast radius**: The Propositional layer is small (~20 files) and genuinely needs primitive and/or for the three-tier completeness. The upper layers are large (Modal: 55, Temporal: 37, Bimodal: 127) and don't currently use the intuitionistic features.
+**Key insight**: The Foundations theorems use `HasImp`/`HasBot` typeclasses, so they produce `imp`/`bot`-encoded and/or. This matches the abbreviation definitions perfectly — no translation needed.
 
-**Simpler proofs**: Many Bimodal proofs were simpler with the Lukasiewicz encoding because `A ∧ B` was just `¬(A → ¬B)`, which is a nested `imp` — and `imp` already had all the proof infrastructure (deduction theorem, MCS implication property, etc.). With primitive `and`/`or`, every proof that worked via the encoding needed explicit and/or helpers (mcs_or_resolve, etc.).
+#### Method 3: Conservative Extension
 
-**Embedding still works**: The `FromPropositional` embedding can map Propositional's primitive `and`/`or` to Modal's derived `and`/`or` (abbreviations). The embedding is still semantically correct — it's a homomorphism at the logical level even if not at the constructor level.
+The strongest connection: a proof that the upper layer is a *conservative extension* of Classical Propositional Logic. This means: if φ is a propositional formula and Modal K proves φ, then CPL already proves φ. No new propositional truths are introduced by adding modalities.
 
-**Against reverting**: This would mean re-doing the 74-file refactor in reverse — a large effort to remove working code. The and/or cases are now part of every pattern match and every induction proof. Removing them is not just deleting lines; it's restructuring proofs back to the encoding-based versions.
+```
+theorem modal_conservative_extension :
+    Derivable (@KAxiom Atom) (embed φ) → Derivable (@CPLAxiom Atom) φ
+```
 
-### Cost Comparison
+This is a standard metalogical result for normal modal logics. It transfers the Propositional completeness theorem upward: if φ is a propositional tautology, the Propositional completeness proof already covers it, and the Modal soundness proof preserves it.
 
-| Option | Immediate cost | Ongoing cost | Expressiveness |
-|--------|---------------|-------------|---------------|
-| 1. Full intuitionistic | ~20 tasks (179-181 + intuitionistic systems) | High (11 constructors everywhere) | Maximum |
-| 2. Keep and/or, skip dia/G/H | 0 (already done) | Moderate (8 constructors) | Classical + future option |
-| 3. Revert and/or in upper layers | ~5-10 tasks (reverse refactor) | Low (6 constructors in upper layers) | Classical only |
+**Implication**: Propositional metalogic results (soundness, completeness, decidability for the propositional fragment) never need reproof in the upper layers. The embedding + conservative extension gives them for free.
 
-### Decision Criteria
+### Comparison of Methods
 
-The decision should weigh:
+| Method | What it provides | Where it lives | Abbreviation-compatible? |
+|--------|-----------------|----------------|-------------------------|
+| Syntactic embedding | Formula translation | `FromPropositional.lean` | Yes (maps to abbrevs) |
+| Axiom inheritance | Propositional theorems | `Foundations/Theorems/` | Yes (produces imp/bot terms) |
+| Conservative extension | Metalogic transfer | `Metalogic/` | Yes (classical equivalence) |
 
-1. **Is intuitionistic modal/temporal logic a research goal for CSLib?** If yes → Option 1. If no → Option 2 or 3.
-2. **Is the ~40% case-analysis overhead of 8 vs 6 constructors causing real problems?** If yes → Option 3. If no → Option 2.
-3. **Is there a near-term use case for IS4, intuitionistic temporal, or constructive bimodal logic?** If yes → Option 1. If no → Option 2.
-4. **How much does upstream compatibility matter?** Upstream uses `{atom, not, and, dia}` — both Options 1 and 2 have `and` as primitive (matching upstream), while Option 3 would diverge.
+All three methods work cleanly with abbreviated and/or in the upper layers. The Lukasiewicz encoding is invisible to users who work with the `∧`/`∨` notation — it only matters at the kernel level where proofs reduce through `imp`/`bot`.
 
-### Recommendation
+### Impact on Tasks 179-181
 
-This report presents the tradeoffs without making a recommendation. The decision depends on the project's research direction, which is a human judgment call. The task should be resolved by choosing one of the three options and either:
-- Proceeding with tasks 179-181 (Option 1)
-- Closing tasks 179-181 as unnecessary (Option 2)
-- Creating revert tasks and closing 179-181 (Option 3)
+Tasks 179-181 (primitive diamond, allFuture, allPast) should be **deferred**, not abandoned. Their research reports document valid motivation for intuitionistic modal/temporal logic. If that direction becomes a research goal:
+
+1. First re-add primitive and/or (replay tasks 175-177 playbook)
+2. Then add diamond/allFuture/allPast (tasks 179-181)
+3. Then build intuitionistic proof systems and metalogic
+
+The reverse order doesn't work — intuitionistic diamond requires primitive and/or already in place (can't express `◇A ∨ ◇B` without primitive `∨`).
+
+### Revert Scope
+
+Reverting and/or in the upper layers requires:
+
+| Layer | Files affected | Primary change |
+|-------|---------------|----------------|
+| Modal | ~55 | Remove .and/.or constructor + all match cases |
+| Temporal | ~11 | Remove .and/.or constructor + match cases + MCS helpers |
+| Bimodal | ~50+ | Remove .and/.or constructor + match cases (largest) |
+| Foundations/Theorems | 0 | Already uses HasImp/HasBot (no change needed) |
+| Propositional | 0 | Keeps primitive and/or (unchanged) |
+
+The revert is the mirror image of tasks 175-177. Key operations:
+1. Remove `.and`/`.or` constructors from Formula inductive types
+2. Restore `abbrev` definitions using Lukasiewicz encoding
+3. Remove all `.and`/`.or` match arms from every function and proof
+4. Remove andI/andE/orI/orE from axiom inductive types (they become derived theorems)
+5. Remove MCS and/or helpers (mcs_or_resolve, etc.) — `implication_property` handles everything via the encoding
+6. Restore FromPropositional embedding proofs (2-3 lemmas per file)
+7. Verify CI
+
+### Future Weakening Path
+
+If intuitionistic variants are needed later, the expansion path is:
+
+```
+Phase 1: Re-add primitive and/or to target layer (replay task 175/176/177)
+Phase 2: Add primitive dia / allFuture / allPast (tasks 179/180/181)
+Phase 3: Parameterize proof system by theory (remove Peirce as default)
+Phase 4: Add bi-relational Kripke semantics (intuitionistic frames)
+Phase 5: Prove intuitionistic soundness + completeness
+```
+
+Each phase is independently valuable and can stop at any point. Phase 1 alone gives cleaner pattern matching. Phases 1-2 give the full primitive set. Phases 1-5 give complete intuitionistic metalogic.
+
+### References
+
+- Wajsberg, M. (1938). Non-interdefinability of intuitionistic connectives.
+- McKinsey, J. (1939). Independence of Heyting's primitives.
+- Johansson, I. (1937). Der Minimalkalkül. *Compositio Mathematica*, 4, 119-136.
+- Fischer Servi, G. (1984). Axiomatisations for some intuitionistic modal logics.
+- Simpson, A. (1994). *The Proof Theory and Semantics of Intuitionistic Modal Logic*. PhD thesis.
+- Boudou, J. et al. (2017). A decidable intuitionistic temporal logic. *CSL*.

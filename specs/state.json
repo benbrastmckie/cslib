@@ -4,19 +4,24 @@
     {
       "project_number": 172,
       "project_name": "connectives_hasand_hasor_full_primitives",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Foundations Refactor",
       "dependencies": [],
       "description": "Extend Cslib/Foundations/Logic/Connectives.lean for the hybrid five-primitive signature {atom, bot, imp, and, or}: add HasAnd and HasOr atomic typeclasses alongside HasBot/HasImp/HasBox/HasUntil/HasSince; update the bundled classes (PropositionalConnectives, ModalConnectives, TemporalConnectives, BimodalConnectives) to include them; revise or remove ImpBotDerived (the bot/imp-derived and/or defaults are classical-only per task 171 research and must not be presented as logic-neutral). Keep derived-connective defaults only for neg (A -> bot), top (bot -> bot), and iff, which are valid in minimal/intuitionistic/classical logic. Align design with fmontesi's PR #607 operator-typeclass direction (one class per operator, notation-level) to ease upstream reconciliation. Reference: specs/171_research_connective_basis_min_int_classical/reports/01_team-research.md.",
       "created": "2026-06-13T00:28:47Z",
-      "last_updated": "2026-06-13T01:04:32Z",
-      "session_id": "sess_1781312396_0c26a5",
+      "last_updated": "2026-06-13T01:16:36Z",
+      "session_id": "sess_1781312776_63c955",
       "artifacts": [
         {
           "path": "specs/172_connectives_hasand_hasor_full_primitives/plans/01_hasand-hasor-plan.md",
           "type": "plan",
           "summary": "3-phase implementation plan for HasAnd/HasOr typeclasses, ImpBotDerived trim, and docstring updates in Connectives.lean"
+        },
+        {
+          "path": "specs/172_connectives_hasand_hasor_full_primitives/summaries/01_hasand-hasor-summary.md",
+          "type": "summary",
+          "summary": "Three phases implemented: HasAnd/HasOr standalone typeclasses added, ImpBotDerived trimmed to neg/top, module docstring updated to five-primitive design rationale. PropositionalConnectives bundled extension deferred to task 173 (abbrev-pathway does not auto-resolve in Lean 4 typeclass synthesizer)."
         }
       ],
       "plan_metadata": {
@@ -43,7 +48,8 @@
             "integrated_date": "2026-06-12"
           }
         ]
-      }
+      },
+      "completion_summary": "Added HasAnd/HasOr atomic typeclasses to Connectives.lean, trimmed ImpBotDerived to neg/top (removed classical-only Lukasiewicz and/or defaults), updated module docstring to five-primitive design rationale. PropositionalConnectives bundled extension deferred to task 173 (abbrev-pathway resolution failed). Full build, checkInitImports, and lint-style all passed; 0 sorries."
     },
     {
       "project_number": 173,

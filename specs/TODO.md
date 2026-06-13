@@ -11,10 +11,10 @@ next_project_number: 179
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,62,127,139,146,147,160,169,170,171,172 | -- | Bimodal Porting, Modal PRs, Propositional Logic, ... |
-| 2 | 39,40,63,140,148,161,173 | 36,37,62,139,147,160,172 | Modal PRs, Propositional PRs, Temporal Logic, ... |
-| 3 | 41,64,141,149,162,174,175,176,178 | 39,40,63,140,148,161,173 | Foundations, Modal PRs, Propositional PRs, ... |
-| 4 | 128,129,142,150,177 | 141,146,149,175,176 | Modal PRs, Propositional PRs, Foundations Refactor |
+| 1 | 36,37,62,127,139,146,147,160,169,170,171,173 | -- | Bimodal Porting, Modal PRs, Propositional Logic, ... |
+| 2 | 39,40,63,140,148,161,174,175,176,178 | 36,37,62,139,147,160,173 | Modal PRs, Propositional PRs, Temporal Logic, ... |
+| 3 | 41,64,141,149,162,177 | 39,40,63,140,148,161,175,176 | Foundations, Modal PRs, Propositional PRs, ... |
+| 4 | 128,129,142,150 | 141,146,149 | Modal PRs, Propositional PRs |
 | 5 | 126,143,151,152,154,163 | 142,150,160 | Modal PRs, Propositional PRs, Temporal PRs |
 | 6 | 130,133,144,153,155,156 | 126,127,143,151,152,154 | Modal PRs, Propositional PRs |
 | 7 | 131,132,134,135,157 | 127,128,130,133,152,156 | Modal PRs, Propositional PRs |
@@ -99,14 +99,13 @@ next_project_number: 179
 
 ### Foundations Refactor
 
-172 [PLANNED] — Extend Cslib/Foundations/Logic/Connectives.lean for the hybrid fi
-  └─ 173 [NOT STARTED] — Refactor Cslib/Logics/Propositional to the hybrid five-primitive 
-    └─ 174 [NOT STARTED] — Extend Cslib/Logics/Propositional/Semantics and Metalogic from th
-    └─ 175 [NOT STARTED] — Propagate the hybrid five-primitive design to the Modal layer: Mo
-      └─ 177 [NOT STARTED] — Propagate the hybrid five-primitive design to the Bimodal layer (
-    └─ 176 [NOT STARTED] — Propagate the hybrid five-primitive design to the Temporal layer:
-      └─ 177 [NOT STARTED] — Propagate the hybrid five-primitive design to the Bimodal layer ( (see above)
-    └─ 178 [NOT STARTED] — Documentation and citation corrections from task 171 research: (1
+173 [NOT STARTED] — Refactor Cslib/Logics/Propositional to the hybrid five-primitive 
+  └─ 174 [NOT STARTED] — Extend Cslib/Logics/Propositional/Semantics and Metalogic from th
+  └─ 175 [NOT STARTED] — Propagate the hybrid five-primitive design to the Modal layer: Mo
+    └─ 177 [NOT STARTED] — Propagate the hybrid five-primitive design to the Bimodal layer (
+  └─ 176 [NOT STARTED] — Propagate the hybrid five-primitive design to the Temporal layer:
+    └─ 177 [NOT STARTED] — Propagate the hybrid five-primitive design to the Bimodal layer ( (see above)
+  └─ 178 [NOT STARTED] — Documentation and citation corrections from task 171 research: (1
 
 ## Tasks
 
@@ -171,11 +170,12 @@ next_project_number: 179
 ---
 
 ### 172. Connectives hasand hasor full primitives
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations Refactor
 - **Dependencies**: None
 - **Plan**: [172_connectives_hasand_hasor_full_primitives/plans/01_hasand-hasor-plan.md]
+- **Summary**: [172_connectives_hasand_hasor_full_primitives/summaries/01_hasand-hasor-summary.md]
 
 **Description**: Extend Cslib/Foundations/Logic/Connectives.lean for the hybrid five-primitive signature {atom, bot, imp, and, or}: add HasAnd and HasOr atomic typeclasses alongside HasBot/HasImp/HasBox/HasUntil/HasSince; update the bundled classes (PropositionalConnectives, ModalConnectives, TemporalConnectives, BimodalConnectives) to include them; revise or remove ImpBotDerived (the bot/imp-derived and/or defaults are classical-only per task 171 research and must not be presented as logic-neutral). Keep derived-connective defaults only for neg (A -> bot), top (bot -> bot), and iff, which are valid in minimal/intuitionistic/classical logic. Align design with fmontesi's PR #607 operator-typeclass direction (one class per operator, notation-level) to ease upstream reconciliation. Reference: specs/171_research_connective_basis_min_int_classical/reports/01_team-research.md.
 

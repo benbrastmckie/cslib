@@ -1,7 +1,7 @@
 # Implementation Plan: HasAnd/HasOr Atomic Typeclasses
 
 - **Task**: 172 - connectives_hasand_hasor_full_primitives
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 1.5 hours
 - **Dependencies**: None (task 171 research complete; no code prerequisites)
 - **Research Inputs**: reports/01_team-research.md

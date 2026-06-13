@@ -12,7 +12,7 @@ next_project_number: 188
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,171,179,180,185 | -- | Bimodal Porting, Propositional Logic |
-| 2 | 39,40,181,186,187 | 36,37,179,180,185 | Propositional Logic, Temporal Logic |
+| 2 | 39,40,181,187 | 36,37,179,180,185 | Propositional Logic, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -30,7 +30,6 @@ next_project_number: 188
 
 171 [RESEARCHED] — Research connective-basis design for minimal, intuitionistic, and
 185 [RESEARCHED] — Rigorous quality audit of Cslib/Logics/Propositional/ and its Csl
-  └─ 186 [IMPLEMENTING] — Refactor the Hilbert / natural deduction extensional equivalence 
   └─ 187 [NOT STARTED] — Fix all issues identified in the task 185 quality audit. Prioriti
 
 ### Temporal Logic
@@ -58,7 +57,7 @@ next_project_number: 188
 ---
 
 ### 186. Hilbert nd equivalence refactor
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 185

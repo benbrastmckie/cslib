@@ -43,28 +43,13 @@ variable {Atom : Type*}
 
 theorem sat_and_iff {D : Type*} [LinearOrder D] (M : TemporalModel D Atom) (t : D)
     (φ ψ : Formula Atom) :
-    Satisfies M t (φ ∧ ψ) ↔ (Satisfies M t φ ∧ Satisfies M t ψ) := by
-  simp only [Satisfies]
-  constructor
-  · intro h
-    constructor
-    · by_contra hφ; exact h (fun hφ' => absurd hφ' hφ)
-    · by_contra hψ; exact h (fun _ hψ' => absurd hψ' hψ)
-  · intro ⟨hφ, hψ⟩ h; exact h hφ hψ
+    Satisfies M t (φ ∧ ψ) ↔ (Satisfies M t φ ∧ Satisfies M t ψ) :=
+  Satisfies.and_iff M t φ ψ
 
 theorem sat_or_iff {D : Type*} [LinearOrder D] (M : TemporalModel D Atom) (t : D)
     (φ ψ : Formula Atom) :
-    Satisfies M t (φ ∨ ψ) ↔ (Satisfies M t φ ∨ Satisfies M t ψ) := by
-  simp only [Satisfies]
-  constructor
-  · intro h
-    by_contra h_neg
-    push Not at h_neg
-    exact h_neg.2 (h (fun hφ => absurd hφ h_neg.1))
-  · intro h hnφ
-    rcases h with hφ | hψ
-    · exact absurd hφ hnφ
-    · exact hψ
+    Satisfies M t (φ ∨ ψ) ↔ (Satisfies M t φ ∨ Satisfies M t ψ) :=
+  Satisfies.or_iff M t φ ψ
 
 /-! ## Axiom Soundness -/
 
@@ -81,6 +66,32 @@ theorem axiom_sound {D : Type*} [LinearOrder D] [NoMaxOrder D] [NoMinOrder D]
   | imp_s φ ψ => intro hφ _; exact hφ
   | efq φ => intro h; exact absurd h id
   | peirce φ ψ => intro h; by_contra hn; exact hn (h (fun hφ => absurd hφ hn))
+  | and_intro φ ψ =>
+    -- φ → (ψ → (φ ∧ ψ))
+    intro hφ hψ
+    exact (sat_and_iff M t φ ψ).mpr ⟨hφ, hψ⟩
+  | and_elim_left φ ψ =>
+    -- (φ ∧ ψ) → φ
+    intro h
+    exact ((sat_and_iff M t φ ψ).mp h).1
+  | and_elim_right φ ψ =>
+    -- (φ ∧ ψ) → ψ
+    intro h
+    exact ((sat_and_iff M t φ ψ).mp h).2
+  | or_intro_left φ ψ =>
+    -- φ → (φ ∨ ψ)
+    intro hφ
+    exact (sat_or_iff M t φ ψ).mpr (Or.inl hφ)
+  | or_intro_right φ ψ =>
+    -- ψ → (φ ∨ ψ)
+    intro hψ
+    exact (sat_or_iff M t φ ψ).mpr (Or.inr hψ)
+  | or_elim φ ψ χ =>
+    -- (φ → χ) → ((ψ → χ) → ((φ ∨ ψ) → χ))
+    intro hφχ hψχ hor
+    rcases (sat_or_iff M t φ ψ).mp hor with hφ | hψ
+    · exact hφχ hφ
+    · exact hψχ hψ
   | serial_future =>
     intro _
     have : Satisfies M t (𝐅⊤) := by
@@ -348,6 +359,14 @@ theorem swapTemporal_dual {D : Type*} [LinearOrder D]
     simp only [Formula.swapTemporal, Satisfies]
     exact ⟨fun h hα => (ihβ t).mp (h ((ihα t).mpr hα)),
            fun h hα => (ihβ t).mpr (h ((ihα t).mp hα))⟩
+  | and α β ihα ihβ =>
+    simp only [Formula.swapTemporal, Satisfies]
+    exact ⟨fun ⟨ha, hb⟩ => ⟨(ihα t).mp ha, (ihβ t).mp hb⟩,
+           fun ⟨ha, hb⟩ => ⟨(ihα t).mpr ha, (ihβ t).mpr hb⟩⟩
+  | or α β ihα ihβ =>
+    simp only [Formula.swapTemporal, Satisfies]
+    exact ⟨fun h => h.imp (ihα t).mp (ihβ t).mp,
+           fun h => h.imp (ihα t).mpr (ihβ t).mpr⟩
   | untl α β ihα ihβ =>
     simp only [Formula.swapTemporal, Satisfies]
     constructor

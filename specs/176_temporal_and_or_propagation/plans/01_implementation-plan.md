@@ -111,7 +111,7 @@ Phases are fully sequential: each layer depends on the previous layer compiling 
 
 ---
 
-### Phase 2: Semantics and ProofSystem [NOT STARTED]
+### Phase 2: Semantics and ProofSystem [IN PROGRESS]
 
 **Goal**: Add direct `and`/`or` satisfaction clauses and 6 new axiom constructors with HasAxiom instances.
 

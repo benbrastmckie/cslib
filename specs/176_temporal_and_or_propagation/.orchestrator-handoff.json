@@ -1,0 +1,18 @@
+{
+  "status": "planned",
+  "summary": "5-phase plan created: syntax foundation (3h), semantics+proofsystem (1.5h), soundness (1.5h), truth lemma+MCS (1.5h), fromPropositional+CI (0.5h); 10 files, ~640 lines, fully sequential dependency chain.",
+  "blockers": [],
+  "artifacts": [
+    {
+      "path": "specs/176_temporal_and_or_propagation/reports/01_temporal-propagation-research.md",
+      "type": "report",
+      "summary": "Comprehensive file-by-file analysis of Temporal layer changes needed to promote and/or from abbrev to primitive constructors"
+    },
+    {
+      "path": "specs/176_temporal_and_or_propagation/plans/01_implementation-plan.md",
+      "type": "plan",
+      "summary": "5-phase implementation plan: syntax foundation, semantics+proofsystem, soundness, truth lemma+MCS helpers, fromPropositional+CI verification"
+    }
+  ],
+  "phases_total": 5
+}

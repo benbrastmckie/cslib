@@ -129,6 +129,50 @@ theorem restricted_parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
         exact set_consistent_not_both h_mcs.1 χ
           ((ih_χ h_χ_sub fam hfam t).mpr (h_truth_imp ((ih_ψ h_ψ_sub fam hfam t).mp h_ψ_mcs)))
           h_neg_χ_mcs
+  | and φ ψ ih_φ ih_ψ =>
+    have h_φ_sub := closure_and_left root φ ψ h_sub
+    have h_ψ_sub := closure_and_right root φ ψ h_sub
+    simp only [truthAt]
+    have h_mcs := fam.is_mcs t
+    constructor
+    · intro h_and
+      exact ⟨(ih_φ h_φ_sub fam hfam t).mp
+              (SetMaximalConsistent.implication_property h_mcs
+                (theoremInMcsFc h_mcs (.axiom [] _ (.andE1 φ ψ) (FrameClass.base_le fc)))
+                h_and),
+             (ih_ψ h_ψ_sub fam hfam t).mp
+              (SetMaximalConsistent.implication_property h_mcs
+                (theoremInMcsFc h_mcs (.axiom [] _ (.andE2 φ ψ) (FrameClass.base_le fc)))
+                h_and)⟩
+    · intro ⟨h_φ_true, h_ψ_true⟩
+      have h_φ_mcs : φ ∈ fam.mcs t := (ih_φ h_φ_sub fam hfam t).mpr h_φ_true
+      have h_ψ_mcs : ψ ∈ fam.mcs t := (ih_ψ h_ψ_sub fam hfam t).mpr h_ψ_true
+      have h_φ_to_ψ_to_and : (φ.imp (ψ.imp (φ.and ψ))) ∈ fam.mcs t :=
+        theoremInMcsFc h_mcs (.axiom [] _ (.andI φ ψ) (FrameClass.base_le fc))
+      have h_ψ_to_and : (ψ.imp (φ.and ψ)) ∈ fam.mcs t :=
+        SetMaximalConsistent.implication_property h_mcs h_φ_to_ψ_to_and h_φ_mcs
+      exact SetMaximalConsistent.implication_property h_mcs h_ψ_to_and h_ψ_mcs
+  | or φ ψ ih_φ ih_ψ =>
+    have h_φ_sub := closure_or_left root φ ψ h_sub
+    have h_ψ_sub := closure_or_right root φ ψ h_sub
+    simp only [truthAt]
+    have h_mcs := fam.is_mcs t
+    constructor
+    · intro h_or
+      rcases SetMaximalConsistent.negation_complete h_mcs φ with h_φ | h_neg_φ
+      · exact Or.inl ((ih_φ h_φ_sub fam hfam t).mp h_φ)
+      · exact Or.inr ((ih_ψ h_ψ_sub fam hfam t).mp
+          (SetMaximalConsistent.mcs_or_resolve h_mcs h_or h_neg_φ))
+    · intro h_or_true
+      rcases h_or_true with h_φ_true | h_ψ_true
+      · have h_φ_mcs : φ ∈ fam.mcs t := (ih_φ h_φ_sub fam hfam t).mpr h_φ_true
+        exact SetMaximalConsistent.implication_property h_mcs
+          (theoremInMcsFc h_mcs (.axiom [] _ (.orI1 φ ψ) (FrameClass.base_le fc)))
+          h_φ_mcs
+      · have h_ψ_mcs : ψ ∈ fam.mcs t := (ih_ψ h_ψ_sub fam hfam t).mpr h_ψ_true
+        exact SetMaximalConsistent.implication_property h_mcs
+          (theoremInMcsFc h_mcs (.axiom [] _ (.orI2 φ ψ) (FrameClass.base_le fc)))
+          h_ψ_mcs
   | box ψ ih =>
     have h_ψ_sub := closure_box root ψ h_sub
     constructor
@@ -252,6 +296,50 @@ theorem fully_restricted_parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
         exact set_consistent_not_both h_mcs.1 χ
           ((ih_χ h_χ_sub fam hfam t).mpr (h_truth_imp ((ih_ψ h_ψ_sub fam hfam t).mp h_ψ_mcs)))
           h_neg_χ_mcs
+  | and φ ψ ih_φ ih_ψ =>
+    have h_φ_sub := closure_and_left root φ ψ h_sub
+    have h_ψ_sub := closure_and_right root φ ψ h_sub
+    simp only [truthAt]
+    have h_mcs := fam.is_mcs t
+    constructor
+    · intro h_and
+      exact ⟨(ih_φ h_φ_sub fam hfam t).mp
+              (SetMaximalConsistent.implication_property h_mcs
+                (theoremInMcsFc h_mcs (.axiom [] _ (.andE1 φ ψ) (FrameClass.base_le fc)))
+                h_and),
+             (ih_ψ h_ψ_sub fam hfam t).mp
+              (SetMaximalConsistent.implication_property h_mcs
+                (theoremInMcsFc h_mcs (.axiom [] _ (.andE2 φ ψ) (FrameClass.base_le fc)))
+                h_and)⟩
+    · intro ⟨h_φ_true, h_ψ_true⟩
+      have h_φ_mcs : φ ∈ fam.mcs t := (ih_φ h_φ_sub fam hfam t).mpr h_φ_true
+      have h_ψ_mcs : ψ ∈ fam.mcs t := (ih_ψ h_ψ_sub fam hfam t).mpr h_ψ_true
+      have h_φ_to_ψ_to_and : (φ.imp (ψ.imp (φ.and ψ))) ∈ fam.mcs t :=
+        theoremInMcsFc h_mcs (.axiom [] _ (.andI φ ψ) (FrameClass.base_le fc))
+      have h_ψ_to_and : (ψ.imp (φ.and ψ)) ∈ fam.mcs t :=
+        SetMaximalConsistent.implication_property h_mcs h_φ_to_ψ_to_and h_φ_mcs
+      exact SetMaximalConsistent.implication_property h_mcs h_ψ_to_and h_ψ_mcs
+  | or φ ψ ih_φ ih_ψ =>
+    have h_φ_sub := closure_or_left root φ ψ h_sub
+    have h_ψ_sub := closure_or_right root φ ψ h_sub
+    simp only [truthAt]
+    have h_mcs := fam.is_mcs t
+    constructor
+    · intro h_or
+      rcases SetMaximalConsistent.negation_complete h_mcs φ with h_φ | h_neg_φ
+      · exact Or.inl ((ih_φ h_φ_sub fam hfam t).mp h_φ)
+      · exact Or.inr ((ih_ψ h_ψ_sub fam hfam t).mp
+          (SetMaximalConsistent.mcs_or_resolve h_mcs h_or h_neg_φ))
+    · intro h_or_true
+      rcases h_or_true with h_φ_true | h_ψ_true
+      · have h_φ_mcs : φ ∈ fam.mcs t := (ih_φ h_φ_sub fam hfam t).mpr h_φ_true
+        exact SetMaximalConsistent.implication_property h_mcs
+          (theoremInMcsFc h_mcs (.axiom [] _ (.orI1 φ ψ) (FrameClass.base_le fc)))
+          h_φ_mcs
+      · have h_ψ_mcs : ψ ∈ fam.mcs t := (ih_ψ h_ψ_sub fam hfam t).mpr h_ψ_true
+        exact SetMaximalConsistent.implication_property h_mcs
+          (theoremInMcsFc h_mcs (.axiom [] _ (.orI2 φ ψ) (FrameClass.base_le fc)))
+          h_ψ_mcs
   | box ψ ih =>
     have h_ψ_sub := closure_box root ψ h_sub
     constructor

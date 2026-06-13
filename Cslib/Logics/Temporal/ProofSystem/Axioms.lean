@@ -16,7 +16,7 @@ BX temporal proof system.
 ## Organization
 
 - `FrameClass`: Classification for axiom validity (Base, Dense, Discrete)
-- `Axiom`: Inductive type with 26 constructors (4 propositional + 22 temporal)
+- `Axiom`: Inductive type with 34 constructors (10 propositional + 22 temporal + 2 density)
 - `minFrameClass`: Minimum frame class for each axiom
 -/
 
@@ -66,13 +66,13 @@ theorem FrameClass.base_le (fc : FrameClass) : FrameClass.Base ≤ fc := by
 /--
 Axiom schemata for temporal logic under the Burgess-Xu (BX) system.
 
-28 constructors organized into three layers:
-- **Propositional** (4): Classical propositional tautologies
+34 constructors organized into three layers:
+- **Propositional** (10): Classical propositional tautologies + and/or rules
 - **BX Temporal** (22): Burgess-Xu axioms for Until/Since on linear orders
 - **Density** (2): Axioms valid on dense linear orders
 -/
 inductive Axiom : Formula Atom → Type u where
-  -- Layer 1: Propositional (4)
+  -- Layer 1: Propositional (10)
 
   /-- Propositional K (distribution): (φ → (ψ → χ)) → ((φ → ψ) → (φ → χ)) -/
   | imp_k (φ ψ χ : Formula Atom) :
@@ -86,6 +86,30 @@ inductive Axiom : Formula Atom → Type u where
 
   /-- Peirce's Law: ((φ → ψ) → φ) → φ -/
   | peirce (φ ψ : Formula Atom) : Axiom (((φ.imp ψ).imp φ).imp φ)
+
+  /-- Conjunction introduction: φ → (ψ → (φ ∧ ψ)) -/
+  | and_intro (φ ψ : Formula Atom) :
+      Axiom (φ.imp (ψ.imp (Formula.and φ ψ)))
+
+  /-- Conjunction elimination left: (φ ∧ ψ) → φ -/
+  | and_elim_left (φ ψ : Formula Atom) :
+      Axiom ((Formula.and φ ψ).imp φ)
+
+  /-- Conjunction elimination right: (φ ∧ ψ) → ψ -/
+  | and_elim_right (φ ψ : Formula Atom) :
+      Axiom ((Formula.and φ ψ).imp ψ)
+
+  /-- Disjunction introduction left: φ → (φ ∨ ψ) -/
+  | or_intro_left (φ ψ : Formula Atom) :
+      Axiom (φ.imp (Formula.or φ ψ))
+
+  /-- Disjunction introduction right: ψ → (φ ∨ ψ) -/
+  | or_intro_right (φ ψ : Formula Atom) :
+      Axiom (ψ.imp (Formula.or φ ψ))
+
+  /-- Disjunction elimination: (φ → χ) → ((ψ → χ) → ((φ ∨ ψ) → χ)) -/
+  | or_elim (φ ψ χ : Formula Atom) :
+      Axiom ((φ.imp χ).imp ((ψ.imp χ).imp ((Formula.or φ ψ).imp χ)))
 
   -- Layer 2: BX Temporal (22)
 

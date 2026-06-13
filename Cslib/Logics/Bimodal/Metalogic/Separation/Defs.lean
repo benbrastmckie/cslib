@@ -57,6 +57,8 @@ def intTruth (M : IntStructure Atom) (t : ℤ) : Formula Atom → Prop
   | .atom a => t ∈ M.val a
   | .bot => False
   | .imp φ ψ => intTruth M t φ → intTruth M t ψ
+  | .and φ ψ => intTruth M t φ ∧ intTruth M t ψ
+  | .or φ ψ => intTruth M t φ ∨ intTruth M t ψ
   | .box _ => True
   | .untl φ ψ => ∃ s : ℤ, t < s ∧ intTruth M s φ ∧
       ∀ r : ℤ, t < r → r < s → intTruth M r ψ
@@ -119,14 +121,14 @@ def intTruth (M : IntStructure Atom) (t : ℤ) : Formula Atom → Prop
 @[simp] theorem int_truth_and
     (M : IntStructure Atom) (t : ℤ) (φ ψ : Formula Atom) :
     intTruth M t (Formula.and φ ψ) ↔
-      intTruth M t φ ∧ intTruth M t ψ := by
-  simp only [intTruth]; tauto
+      intTruth M t φ ∧ intTruth M t ψ :=
+  Iff.rfl
 
 @[simp] theorem int_truth_or
     (M : IntStructure Atom) (t : ℤ) (φ ψ : Formula Atom) :
     intTruth M t (Formula.or φ ψ) ↔
-      intTruth M t φ ∨ intTruth M t ψ := by
-  simp only [intTruth]; tauto
+      intTruth M t φ ∨ intTruth M t ψ :=
+  Iff.rfl
 
 @[simp] theorem int_truth_top (M : IntStructure Atom) (t : ℤ) :
     intTruth M t (Formula.top : Formula Atom) ↔ True := by
@@ -139,6 +141,8 @@ def formulaAtoms : Formula Atom → Set Atom
   | .atom a => {a}
   | .bot => ∅
   | .imp φ ψ => formulaAtoms φ ∪ formulaAtoms ψ
+  | .and φ ψ => formulaAtoms φ ∪ formulaAtoms ψ
+  | .or φ ψ => formulaAtoms φ ∪ formulaAtoms ψ
   | .box φ => formulaAtoms φ
   | .untl φ ψ => formulaAtoms φ ∪ formulaAtoms ψ
   | .snce φ ψ => formulaAtoms φ ∪ formulaAtoms ψ
@@ -206,6 +210,8 @@ def isUFree : Formula Atom → Bool
   | .atom _ => true
   | .bot => true
   | .imp φ ψ => isUFree φ && isUFree ψ
+  | .and φ ψ => isUFree φ && isUFree ψ
+  | .or φ ψ => isUFree φ && isUFree ψ
   | .box φ => isUFree φ
   | .untl _ _ => false
   | .snce φ ψ => isUFree φ && isUFree ψ
@@ -215,6 +221,8 @@ def isSFree : Formula Atom → Bool
   | .atom _ => true
   | .bot => true
   | .imp φ ψ => isSFree φ && isSFree ψ
+  | .and φ ψ => isSFree φ && isSFree ψ
+  | .or φ ψ => isSFree φ && isSFree ψ
   | .box φ => isSFree φ
   | .untl φ ψ => isSFree φ && isSFree ψ
   | .snce _ _ => false
@@ -245,6 +253,10 @@ def isSyntacticallySeparated : Formula Atom → Bool
   | .bot => true
   | .imp φ ψ =>
     isSyntacticallySeparated φ && isSyntacticallySeparated ψ
+  | .and φ ψ =>
+    isSyntacticallySeparated φ && isSyntacticallySeparated ψ
+  | .or φ ψ =>
+    isSyntacticallySeparated φ && isSyntacticallySeparated ψ
   | .box _ => true
   | .untl φ ψ => isSFree φ && isSFree ψ
   | .snce φ ψ => isUFree φ && isUFree ψ
@@ -274,6 +286,8 @@ def isFutureOnly : Formula Atom → Bool
   | .atom _ => true
   | .bot => true
   | .imp φ ψ => isFutureOnly φ && isFutureOnly ψ
+  | .and φ ψ => isFutureOnly φ && isFutureOnly ψ
+  | .or φ ψ => isFutureOnly φ && isFutureOnly ψ
   | .box φ => isFutureOnly φ
   | .untl φ ψ => isFutureOnly φ && isFutureOnly ψ
   | .snce _ _ => false
@@ -291,6 +305,8 @@ def isPastOnly : Formula Atom → Bool
   | .atom _ => true
   | .bot => true
   | .imp φ ψ => isPastOnly φ && isPastOnly ψ
+  | .and φ ψ => isPastOnly φ && isPastOnly ψ
+  | .or φ ψ => isPastOnly φ && isPastOnly ψ
   | .box φ => isPastOnly φ
   | .untl _ _ => false
   | .snce φ ψ => isPastOnly φ && isPastOnly ψ
@@ -310,6 +326,10 @@ def isProperlySeparated : Formula Atom → Bool
   | .atom _ => true
   | .bot => true
   | .imp φ ψ =>
+    isProperlySeparated φ && isProperlySeparated ψ
+  | .and φ ψ =>
+    isProperlySeparated φ && isProperlySeparated ψ
+  | .or φ ψ =>
     isProperlySeparated φ && isProperlySeparated ψ
   | .box _ => true
   | .untl φ ψ => isFutureOnly φ && isFutureOnly ψ
@@ -342,6 +362,10 @@ def junctionDepth : Formula Atom -> Nat
   | .bot => 0
   | .imp phi psi =>
     max (junctionDepth phi) (junctionDepth psi)
+  | .and phi psi =>
+    max (junctionDepth phi) (junctionDepth psi)
+  | .or phi psi =>
+    max (junctionDepth phi) (junctionDepth psi)
   | .box phi => junctionDepth phi
   | .untl phi psi =>
     max (junctionDepthU phi) (junctionDepthU psi)
@@ -353,6 +377,10 @@ def junctionDepthU : Formula Atom -> Nat
   | .bot => 0
   | .imp phi psi =>
     max (junctionDepthU phi) (junctionDepthU psi)
+  | .and phi psi =>
+    max (junctionDepthU phi) (junctionDepthU psi)
+  | .or phi psi =>
+    max (junctionDepthU phi) (junctionDepthU psi)
   | .box phi => junctionDepthU phi
   | .untl phi psi =>
     max (junctionDepthU phi) (junctionDepthU psi)
@@ -363,6 +391,10 @@ def junctionDepthS : Formula Atom -> Nat
   | .atom _ => 0
   | .bot => 0
   | .imp phi psi =>
+    max (junctionDepthS phi) (junctionDepthS psi)
+  | .and phi psi =>
+    max (junctionDepthS phi) (junctionDepthS psi)
+  | .or phi psi =>
     max (junctionDepthS phi) (junctionDepthS psi)
   | .box phi => junctionDepthS phi
   | .untl phi psi =>
@@ -388,6 +420,8 @@ def U_depth_under_S : Formula Atom → Nat
   | .atom _ => 0
   | .bot => 0
   | .imp φ ψ => max (U_depth_under_S φ) (U_depth_under_S ψ)
+  | .and φ ψ => max (U_depth_under_S φ) (U_depth_under_S ψ)
+  | .or φ ψ => max (U_depth_under_S φ) (U_depth_under_S ψ)
   | .box φ => U_depth_under_S φ
   | .untl φ ψ =>
     1 + max (U_depth_under_S φ) (U_depth_under_S ψ)
@@ -399,6 +433,10 @@ def countUSubformulas : Formula Atom → Nat
   | .bot => 0
   | .imp φ ψ =>
     countUSubformulas φ + countUSubformulas ψ
+  | .and φ ψ =>
+    countUSubformulas φ + countUSubformulas ψ
+  | .or φ ψ =>
+    countUSubformulas φ + countUSubformulas ψ
   | .box φ => countUSubformulas φ
   | .untl _ _ => 1
   | .snce φ ψ =>
@@ -409,6 +447,8 @@ def countUTotal : Formula Atom → Nat
   | .atom _ => 0
   | .bot => 0
   | .imp φ ψ => countUTotal φ + countUTotal ψ
+  | .and φ ψ => countUTotal φ + countUTotal ψ
+  | .or φ ψ => countUTotal φ + countUTotal ψ
   | .box φ => countUTotal φ
   | .untl φ ψ => 1 + countUTotal φ + countUTotal ψ
   | .snce φ ψ => countUTotal φ + countUTotal ψ
@@ -421,6 +461,12 @@ theorem count_U_total_zero_iff_U_free
   | atom _ => simp [countUTotal, isUFree]
   | bot => simp [countUTotal, isUFree]
   | imp a b ih1 ih2 =>
+    simp only [countUTotal, isUFree,
+      Nat.add_eq_zero_iff, Bool.and_eq_true, ih1, ih2]
+  | and a b ih1 ih2 =>
+    simp only [countUTotal, isUFree,
+      Nat.add_eq_zero_iff, Bool.and_eq_true, ih1, ih2]
+  | or a b ih1 ih2 =>
     simp only [countUTotal, isUFree,
       Nat.add_eq_zero_iff, Bool.and_eq_true, ih1, ih2]
   | box a ih =>
@@ -438,6 +484,10 @@ def S_nesting_above_U : Formula Atom → Nat
   | .bot => 0
   | .imp φ ψ =>
     max (S_nesting_above_U φ) (S_nesting_above_U ψ)
+  | .and φ ψ =>
+    max (S_nesting_above_U φ) (S_nesting_above_U ψ)
+  | .or φ ψ =>
+    max (S_nesting_above_U φ) (S_nesting_above_U ψ)
   | .box φ => S_nesting_above_U φ
   | .untl _ _ => 0
   | .snce φ ψ =>
@@ -450,6 +500,12 @@ where
     | .atom _ => 0
     | .bot => 0
     | .imp φ ψ =>
+      max (S_nesting_above_U_inner φ)
+        (S_nesting_above_U_inner ψ)
+    | .and φ ψ =>
+      max (S_nesting_above_U_inner φ)
+        (S_nesting_above_U_inner ψ)
+    | .or φ ψ =>
       max (S_nesting_above_U_inner φ)
         (S_nesting_above_U_inner ψ)
     | .box φ => S_nesting_above_U_inner φ
@@ -470,6 +526,12 @@ def uAppearancesTopLevelOnly :
   | .imp φ ψ, A, B =>
     uAppearancesTopLevelOnly φ A B ∧
       uAppearancesTopLevelOnly ψ A B
+  | .and φ ψ, A, B =>
+    uAppearancesTopLevelOnly φ A B ∧
+      uAppearancesTopLevelOnly ψ A B
+  | .or φ ψ, A, B =>
+    uAppearancesTopLevelOnly φ A B ∧
+      uAppearancesTopLevelOnly ψ A B
   | .box φ, A, B => uAppearancesTopLevelOnly φ A B
   | .untl φ ψ, A, B => φ = A ∧ ψ = B
   | .snce φ ψ, _, _ =>
@@ -481,6 +543,12 @@ def uAppearsOnlyAsTopLevel :
   | .atom _, _, _ => True
   | .bot, _, _ => True
   | .imp φ ψ, A, B =>
+    uAppearsOnlyAsTopLevel φ A B ∧
+      uAppearsOnlyAsTopLevel ψ A B
+  | .and φ ψ, A, B =>
+    uAppearsOnlyAsTopLevel φ A B ∧
+      uAppearsOnlyAsTopLevel ψ A B
+  | .or φ ψ, A, B =>
     uAppearsOnlyAsTopLevel φ A B ∧
       uAppearsOnlyAsTopLevel ψ A B
   | .box φ, A, B => uAppearsOnlyAsTopLevel φ A B
@@ -495,6 +563,10 @@ def noSNestedInU : Formula Atom -> Prop
   | .atom _ => True
   | .bot => True
   | .imp phi psi =>
+    noSNestedInU phi ∧ noSNestedInU psi
+  | .and phi psi =>
+    noSNestedInU phi ∧ noSNestedInU psi
+  | .or phi psi =>
     noSNestedInU phi ∧ noSNestedInU psi
   | .box phi => noSNestedInU phi
   | .untl phi psi =>
@@ -533,6 +605,16 @@ theorem int_truth_depends_only_on_atoms
         h a (Set.mem_union_left _ ha)))
       (ih2 t (fun a ha =>
         h a (Set.mem_union_right _ ha)))
+  | and c d ih1 ih2 =>
+    simp only [intTruth]
+    exact Iff.and
+      (ih1 t (fun a ha => h a (Set.mem_union_left _ ha)))
+      (ih2 t (fun a ha => h a (Set.mem_union_right _ ha)))
+  | or c d ih1 ih2 =>
+    simp only [intTruth]
+    exact Iff.or
+      (ih1 t (fun a ha => h a (Set.mem_union_left _ ha)))
+      (ih2 t (fun a ha => h a (Set.mem_union_right _ ha)))
   | box _ => rfl
   | untl c d ih1 ih2 =>
     simp only [intTruth]; constructor
@@ -581,6 +663,10 @@ theorem s_free_eq_future_only (φ : Formula Atom) :
   | bot => rfl
   | imp a b ih1 ih2 =>
     simp [isSFree, isFutureOnly, ih1, ih2]
+  | and a b ih1 ih2 =>
+    simp [isSFree, isFutureOnly, ih1, ih2]
+  | or a b ih1 ih2 =>
+    simp [isSFree, isFutureOnly, ih1, ih2]
   | box a ih => simp [isSFree, isFutureOnly, ih]
   | untl a b ih1 ih2 =>
     simp [isSFree, isFutureOnly, ih1, ih2]
@@ -593,6 +679,10 @@ theorem u_free_eq_past_only (φ : Formula Atom) :
   | atom _ => rfl
   | bot => rfl
   | imp a b ih1 ih2 =>
+    simp [isUFree, isPastOnly, ih1, ih2]
+  | and a b ih1 ih2 =>
+    simp [isUFree, isPastOnly, ih1, ih2]
+  | or a b ih1 ih2 =>
     simp [isUFree, isPastOnly, ih1, ih2]
   | box a ih => simp [isUFree, isPastOnly, ih]
   | untl _ _ => rfl
@@ -608,6 +698,12 @@ theorem syn_sep_eq_proper_sep (φ : Formula Atom) :
   | atom _ => rfl
   | bot => rfl
   | imp a b ih1 ih2 =>
+    simp [isSyntacticallySeparated,
+      isProperlySeparated, ih1, ih2]
+  | and a b ih1 ih2 =>
+    simp [isSyntacticallySeparated,
+      isProperlySeparated, ih1, ih2]
+  | or a b ih1 ih2 =>
     simp [isSyntacticallySeparated,
       isProperlySeparated, ih1, ih2]
   | box _ => rfl

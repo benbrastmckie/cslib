@@ -220,6 +220,37 @@ theorem chronicle_truth_lemma (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaxi
   | bot => exact truth_lemma_bot A h_mcs t
   | imp φ ψ ih_φ ih_ψ =>
     exact truth_lemma_imp A h_mcs t φ ψ (ih_φ t) (ih_ψ t)
+  | and φ ψ ih_φ ih_ψ =>
+    have h_mcs_t := limit_c0 A h_mcs t.val t.property
+    simp only [Satisfies]
+    constructor
+    · -- mp: Sat φ ∧ Sat ψ → (φ ∧ ψ) ∈ f(t)
+      intro ⟨h_sat_φ, h_sat_ψ⟩
+      exact conj_mcs h_mcs_t φ ψ ((ih_φ t).mp h_sat_φ) ((ih_ψ t).mp h_sat_ψ)
+    · -- mpr: (φ ∧ ψ) ∈ f(t) → Sat φ ∧ Sat ψ
+      intro h_and
+      exact ⟨(ih_φ t).mpr (temporal_implication_property h_mcs_t
+            (theoremInMcs h_mcs_t (lceImp φ ψ)) h_and),
+           (ih_ψ t).mpr (temporal_implication_property h_mcs_t
+            (theoremInMcs h_mcs_t (rceImp φ ψ)) h_and)⟩
+  | or φ ψ ih_φ ih_ψ =>
+    have h_mcs_t := limit_c0 A h_mcs t.val t.property
+    simp only [Satisfies]
+    constructor
+    · -- mp: Sat φ ∨ Sat ψ → (φ ∨ ψ) ∈ f(t)
+      intro h_sat
+      rcases h_sat with h_sat_φ | h_sat_ψ
+      · exact temporal_implication_property h_mcs_t
+          (theoremInMcs h_mcs_t (.axiom [] _ (.or_intro_left φ ψ) trivial))
+          ((ih_φ t).mp h_sat_φ)
+      · exact temporal_implication_property h_mcs_t
+          (theoremInMcs h_mcs_t (.axiom [] _ (.or_intro_right φ ψ) trivial))
+          ((ih_ψ t).mp h_sat_ψ)
+    · -- mpr: (φ ∨ ψ) ∈ f(t) → Sat φ ∨ Sat ψ
+      intro h_or
+      rcases or_elim_mcs h_mcs_t h_or with h_φ | h_ψ
+      · exact Or.inl ((ih_φ t).mpr h_φ)
+      · exact Or.inr ((ih_ψ t).mpr h_ψ)
   | untl φ ψ ih_φ ih_ψ =>
     constructor
     · exact truth_lemma_untl_backward A h_mcs t φ ψ ih_φ ih_ψ

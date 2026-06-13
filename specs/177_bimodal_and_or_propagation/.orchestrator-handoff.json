@@ -1,0 +1,13 @@
+{
+  "status": "planned",
+  "summary": "8-phase plan for Bimodal and/or propagation: Syntax, ProofSystem, Semantics+Soundness, Completeness, ConservativeExtension, Separation, Decidability, Embeddings+Algebraic+CI (~50-60 files, ~1,860 lines, 16 hours estimated)",
+  "blockers": [],
+  "artifacts": [
+    {
+      "path": "specs/177_bimodal_and_or_propagation/plans/01_implementation-plan.md",
+      "type": "plan",
+      "summary": "8-phase implementation plan with 5-wave dependency analysis for propagating and/or constructors across the Bimodal layer"
+    }
+  ],
+  "phases_total": 8
+}

@@ -30,7 +30,7 @@ open Cslib.Logic.Theorems.Combinators
 open Cslib.Logic.Theorems.Propositional.Core
 open Cslib.Logic.Theorems.Propositional.Connectives
 
-variable {F : Type*} [HasBot F] [HasImp F] [HasUntil F] [HasSince F]
+variable {F : Type*} [HasBot F] [HasImp F] [HasAnd F] [HasOr F] [HasUntil F] [HasSince F]
 variable {S : Type*} [InferenceSystem S F]
 variable [TemporalBXHilbert S (F := F)]
 
@@ -278,13 +278,13 @@ theorem connect_future_G {φ : F} :
     InferenceSystem.DerivableIn S
       (HasImp.imp (allFuture φ)
         (allFuture (allFuture (somePast φ)))) := by
-  have g_conn := TemporalNecessitation.tempNec (@connect_future_thm F _ _ _ _ S _ _ (φ := φ))
+  have g_conn := TemporalNecessitation.tempNec (connect_future_thm (S := S) (φ := φ))
   exact ModusPonens.mp (G_distribution (S := S)) g_conn
 
 /-- `⊢ Hφ → H(H(Fφ))`. -/
 theorem connect_past_H {φ : F} :
     InferenceSystem.DerivableIn S (HasImp.imp (allPast φ) (allPast (allPast (someFuture φ)))) := by
-  have h_conn := TemporalNecessitation.tempNecPast (@connect_past_thm F _ _ _ _ S _ _ (φ := φ))
+  have h_conn := TemporalNecessitation.tempNecPast (connect_past_thm (S := S) (φ := φ))
   exact ModusPonens.mp (H_distribution (S := S)) h_conn
 
 end TemporalDerived

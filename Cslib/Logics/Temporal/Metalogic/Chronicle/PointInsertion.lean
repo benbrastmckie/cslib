@@ -215,7 +215,7 @@ theorem or_elim_mcs {A : Set (Formula Atom)}
     (h : (φ.or ψ) ∈ A) : φ ∈ A ∨ ψ ∈ A := by
   rcases temporal_negation_complete h_mcs φ with h_φ | h_neg_φ
   · exact Or.inl h_φ
-  · exact Or.inr (temporal_implication_property h_mcs h h_neg_φ)
+  · exact Or.inr (temporal_or_resolve_left h_mcs h h_neg_φ)
 
 /-- BX7 (linear_until) at MCS level. -/
 theorem linear_until_mcs {A : Set (Formula Atom)}
@@ -1111,42 +1111,38 @@ noncomputable def combineImpConj {R A B : Formula Atom}
   exact deductionTheorem [] R (Formula.and A B) d3
 
 /-- De Morgan for disjunction negation: ⊢ ¬(A ∨ B) → ¬A ∧ ¬B.
-    Recall A.or B = A.neg.imp B. -/
+
+    Uses contrapositive of or_intro_left/or_intro_right to derive ¬A and ¬B from ¬(A ∨ B),
+    then pairs them. With `or` now a primitive constructor, the proof uses the or introduction
+    axioms rather than the old `A.neg.imp B` abbreviation. -/
 noncomputable def demorganDisjNegForward (A B : Formula Atom) :
     DerivationTree FrameClass.Base [] ((A.or B).neg.imp (Formula.and A.neg B.neg)) := by
-  set neg_disj := (A.or B).neg -- = (A.neg.imp B).neg = (A.neg.imp B) → ⊥
-  -- Step 1: derive ¬A from neg_disj
-  -- ⊢ A → (¬A → B): this is exFalsoFromAssumption A B
-  have h_A_to_disj : DerivationTree FrameClass.Base [] (A.imp (A.neg.imp B)) :=
-    exFalsoFromAssumption A B
-  -- In context [neg_disj, A]: derive ⊥
-  have d_negA : DerivationTree FrameClass.Base [neg_disj] A.neg := by
-    have d1 : DerivationTree FrameClass.Base [A, neg_disj] (A.neg.imp B) :=
-      DerivationTree.modus_ponens [A, neg_disj] A (A.neg.imp B)
-        (DerivationTree.weakening [] [A, neg_disj] _ h_A_to_disj (List.nil_subset _))
-        (DerivationTree.assumption _ A (by simp))
-    have d2 : DerivationTree FrameClass.Base [A, neg_disj] Formula.bot :=
-      DerivationTree.modus_ponens [A, neg_disj] (A.neg.imp B) Formula.bot
-        (DerivationTree.assumption _ neg_disj (by simp)) d1
-    exact deductionTheorem [neg_disj] A Formula.bot d2
-  -- Step 2: derive ¬B from neg_disj
-  -- ⊢ B → (¬A → B) via weakening: ⊢ B → ¬A → B is Axiom.imp_s
-  have h_B_to_disj : DerivationTree FrameClass.Base [] (B.imp (A.neg.imp B)) :=
-    DerivationTree.axiom [] _ (Axiom.imp_s B A.neg) trivial
-  have d_negB : DerivationTree FrameClass.Base [neg_disj] B.neg := by
-    have d1 : DerivationTree FrameClass.Base [B, neg_disj] (A.neg.imp B) :=
-      DerivationTree.modus_ponens [B, neg_disj] B (A.neg.imp B)
-        (DerivationTree.weakening [] [B, neg_disj] _ h_B_to_disj (List.nil_subset _))
-        (DerivationTree.assumption _ B (by simp))
-    have d2 : DerivationTree FrameClass.Base [B, neg_disj] Formula.bot :=
-      DerivationTree.modus_ponens [B, neg_disj] (A.neg.imp B) Formula.bot
-        (DerivationTree.assumption _ neg_disj (by simp)) d1
-    exact deductionTheorem [neg_disj] B Formula.bot d2
-  -- Step 3: pair ¬A and ¬B
+  -- Step 1: derive ⊢ ¬(A∨B) → ¬A via contrapositive of ⊢ A → (A∨B)
+  have d_neg_disj_to_negA : DerivationTree FrameClass.Base []
+      ((Formula.or A B).neg.imp A.neg) :=
+    .modus_ponens [] _ _
+      (deriveContrapositive A (Formula.or A B))
+      (.axiom [] _ (.or_intro_left A B) trivial)
+  -- Step 2: derive ⊢ ¬(A∨B) → ¬B via contrapositive of ⊢ B → (A∨B)
+  have d_neg_disj_to_negB : DerivationTree FrameClass.Base []
+      ((Formula.or A B).neg.imp B.neg) :=
+    .modus_ponens [] _ _
+      (deriveContrapositive B (Formula.or A B))
+      (.axiom [] _ (.or_intro_right A B) trivial)
+  -- Step 3: build ⊢ ¬(A∨B) → (¬A ∧ ¬B) by pairing ¬A and ¬B in context [neg_disj]
+  set neg_disj := (Formula.or A B).neg
+  have d_negA : DerivationTree FrameClass.Base [neg_disj] A.neg :=
+    .modus_ponens [neg_disj] neg_disj A.neg
+      (.weakening [] [neg_disj] _ d_neg_disj_to_negA (List.nil_subset _))
+      (.assumption [neg_disj] neg_disj (by simp))
+  have d_negB : DerivationTree FrameClass.Base [neg_disj] B.neg :=
+    .modus_ponens [neg_disj] neg_disj B.neg
+      (.weakening [] [neg_disj] _ d_neg_disj_to_negB (List.nil_subset _))
+      (.assumption [neg_disj] neg_disj (by simp))
   have d_conj : DerivationTree FrameClass.Base [neg_disj] (Formula.and A.neg B.neg) :=
-    DerivationTree.modus_ponens [neg_disj] B.neg (Formula.and A.neg B.neg)
-      (DerivationTree.modus_ponens [neg_disj] A.neg (B.neg.imp (Formula.and A.neg B.neg))
-        (DerivationTree.weakening [] [neg_disj] _ (pairing A.neg B.neg) (List.nil_subset _))
+    .modus_ponens [neg_disj] B.neg (Formula.and A.neg B.neg)
+      (.modus_ponens [neg_disj] A.neg (B.neg.imp (Formula.and A.neg B.neg))
+        (.weakening [] [neg_disj] _ (pairing A.neg B.neg) (List.nil_subset _))
         d_negA)
       d_negB
   exact deductionTheorem [] neg_disj (Formula.and A.neg B.neg) d_conj
@@ -1277,11 +1273,11 @@ theorem untl_conj_guard {A : Set (Formula Atom)}
   · have h_D1_or_D2 : Formula.or D1 D2 ∈ A := by
       rcases temporal_negation_complete h_mcs (Formula.or D1 D2) with h' | h'
       · exact h'
-      · have := temporal_implication_property h_mcs h_disj h'
+      · have := temporal_or_resolve_left h_mcs h_disj h'
         exact absurd this (mcs_not_mem_of_neg h_mcs h)
     rcases temporal_negation_complete h_mcs D1 with h' | h'
     · exact temporal_implication_property h_mcs h_D1_impl h'
-    · have h_D2 := temporal_implication_property h_mcs h_D1_or_D2 h'
+    · have h_D2 := temporal_or_resolve_left h_mcs h_D1_or_D2 h'
       exact temporal_implication_property h_mcs h_D2_impl h_D2
 
 /-- Guard conjunction for Since: If snce(β₁, γ) ∈ A and snce(β₂, γ) ∈ A (MCS A),
@@ -1316,11 +1312,11 @@ theorem snce_conj_guard {A : Set (Formula Atom)}
   · have h_D1_or_D2 : Formula.or D1 D2 ∈ A := by
       rcases temporal_negation_complete h_mcs (Formula.or D1 D2) with h' | h'
       · exact h'
-      · have := temporal_implication_property h_mcs h_disj h'
+      · have := temporal_or_resolve_left h_mcs h_disj h'
         exact absurd this (mcs_not_mem_of_neg h_mcs h)
     rcases temporal_negation_complete h_mcs D1 with h' | h'
     · exact temporal_implication_property h_mcs h_D1_impl h'
-    · have h_D2 := temporal_implication_property h_mcs h_D1_or_D2 h'
+    · have h_D2 := temporal_or_resolve_left h_mcs h_D1_or_D2 h'
       exact temporal_implication_property h_mcs h_D2_impl h_D2
 
 /-- Set-level guard conjunction for burgessR. -/
@@ -1489,9 +1485,8 @@ theorem l27_collect_guards_mem_of_B {A B C : Set (Formula Atom)}
 
 /-- Formula.and is injective in the first argument. -/
 theorem formula_and_left_cancel {a b c : Formula Atom}
-    (h : Formula.and a c = Formula.and b c) : a = b := by
-  simp only [Formula.and, Formula.neg] at h
-  exact (Formula.imp.injEq _ _ _ _ |>.mp (Formula.imp.injEq _ _ _ _ |>.mp h).1).1
+    (h : Formula.and a c = Formula.and b c) : a = b :=
+  (Formula.and.inj h).1
 
 /-- l27_guard for snce(β'∧xi,α') when snce(β'∧xi,α') ∉ B returns β'. -/
 theorem l27_guard_snce_xi_val {A B C : Set (Formula Atom)}
@@ -2150,11 +2145,8 @@ theorem l27s_b5_β_mem {B C : Set (Formula Atom)} {xi : Formula Atom}
   have h : ∃ β'' ∈ B, ∃ γ'' ∈ C, Formula.untl γ' (Formula.and β' xi) =
       Formula.untl γ'' (Formula.and β'' xi) := ⟨β', hβ', γ', hγ', rfl⟩
   simp only [h, ↓reduceDIte]
-  have h_spec := Classical.choose_spec h
-  obtain ⟨_, γ'', _, h_formula_eq⟩ := h_spec
-  have h_inj := Formula.untl.inj h_formula_eq
-  simp only [Formula.and] at h_inj
-  exact congr_arg some ((Formula.imp.inj (Formula.imp.inj h_inj.2).1).1).symm
+  congr 1
+  exact (Formula.and.inj (Formula.untl.inj (Classical.choose_spec (Classical.choose_spec h).2).2).2).1.symm
 
 /-- Since-direction seed consistency. Uses BX5'+BX7'+BX13' chain. -/
 theorem lemma_2_7_since_seed_consistent {A B C : Set (Formula Atom)}

@@ -71,19 +71,15 @@ theorem K_minus_bot_on_Z (q : Formula Atom) (M : IntStructure Atom) (t : ℤ) :
 /-- Gamma+(B) is always false on integer time. -/
 theorem Gamma_plus_bot_on_Z (B : Formula Atom) (M : IntStructure Atom) (t : ℤ) :
     ¬ intTruth M t (Gamma_plus B) := by
-  simp only [Gamma_plus]
-  intro h
-  apply h
-  intro _ hKm
+  simp only [Gamma_plus, int_truth_and]
+  intro ⟨_, hKm⟩
   exact K_minus_bot_on_Z (Formula.neg B) M t hKm
 
 /-- Gamma-(B) is always false on integer time. -/
 theorem Gamma_minus_bot_on_Z (B : Formula Atom) (M : IntStructure Atom) (t : ℤ) :
     ¬ intTruth M t (Gamma_minus B) := by
-  simp only [Gamma_minus]
-  intro h
-  apply h
-  intro _ hKp
+  simp only [Gamma_minus, int_truth_and]
+  intro ⟨_, hKp⟩
   exact K_plus_bot_on_Z (Formula.neg B) M t hKp
 
 /-! ## Q-Lemma for Z (GHR94 Lemma 10.3.6 specialized) -/

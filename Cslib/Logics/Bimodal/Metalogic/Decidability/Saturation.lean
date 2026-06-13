@@ -162,6 +162,8 @@ def temporalCount : Formula Atom → Nat
   | .atom _ => 0
   | .bot => 0
   | .imp φ ψ => temporalCount φ + temporalCount ψ
+  | .and φ ψ => temporalCount φ + temporalCount ψ
+  | .or φ ψ => temporalCount φ + temporalCount ψ
   | .box φ => temporalCount φ
   | .untl φ ψ => 1 + temporalCount φ + temporalCount ψ
   | .snce φ ψ => 1 + temporalCount φ + temporalCount ψ
@@ -174,6 +176,8 @@ def modalCount : Formula Atom → Nat
   | .atom _ => 0
   | .bot => 0
   | .imp φ ψ => modalCount φ + modalCount ψ
+  | .and φ ψ => modalCount φ + modalCount ψ
+  | .or φ ψ => modalCount φ + modalCount ψ
   | .box φ => 1 + modalCount φ
   | .untl φ ψ => modalCount φ + modalCount ψ
   | .snce φ ψ => modalCount φ + modalCount ψ

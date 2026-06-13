@@ -11,9 +11,9 @@ next_project_number: 179
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,62,127,139,146,147,160,169,170,171,173 | -- | Bimodal Porting, Modal PRs, Propositional Logic, ... |
-| 2 | 39,40,63,140,148,161,174,175,176,178 | 36,37,62,139,147,160,173 | Modal PRs, Propositional PRs, Temporal Logic, ... |
-| 3 | 41,64,141,149,162,177 | 39,40,63,140,148,161,175,176 | Foundations, Modal PRs, Propositional PRs, ... |
+| 1 | 36,37,62,127,139,146,147,160,169,170,171 | -- | Bimodal Porting, Modal PRs, Propositional Logic, ... |
+| 2 | 39,40,63,140,148,161 | 36,37,62,139,147,160 | Modal PRs, Propositional PRs, Temporal Logic, ... |
+| 3 | 41,64,141,149,162 | 39,40,63,140,148,161 | Foundations, Modal PRs, Propositional PRs, ... |
 | 4 | 128,129,142,150 | 141,146,149 | Modal PRs, Propositional PRs |
 | 5 | 126,143,151,152,154,163 | 142,150,160 | Modal PRs, Propositional PRs, Temporal PRs |
 | 6 | 130,133,144,153,155,156 | 126,127,143,151,152,154 | Modal PRs, Propositional PRs |
@@ -97,20 +97,10 @@ next_project_number: 179
   └─ 163 [NOT STARTED] — Sub-PR 3.5: Temporal semantics and PL embedding. Adds Model.lean 
 170 [PR READY] — Submit Sub-PR 3.1+3.2: Temporal syntax (Formula + utilities). Cre
 
-### Foundations Refactor
-
-173 [PLANNED] — Refactor Cslib/Logics/Propositional to the hybrid five-primitive 
-  └─ 174 [NOT STARTED] — Extend Cslib/Logics/Propositional/Semantics and Metalogic from th
-  └─ 175 [NOT STARTED] — Propagate the hybrid five-primitive design to the Modal layer: Mo
-    └─ 177 [NOT STARTED] — Propagate the hybrid five-primitive design to the Bimodal layer (
-  └─ 176 [NOT STARTED] — Propagate the hybrid five-primitive design to the Temporal layer:
-    └─ 177 [NOT STARTED] — Propagate the hybrid five-primitive design to the Bimodal layer ( (see above)
-  └─ 178 [NOT STARTED] — Documentation and citation corrections from task 171 research: (1
-
 ## Tasks
 
 ### 178. Johansson references doc corrections
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations Refactor
 - **Dependencies**: Task 173
@@ -120,7 +110,7 @@ next_project_number: 179
 ---
 
 ### 177. Bimodal and or propagation
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations Refactor
 - **Dependencies**: Task 175, Task 176
@@ -130,7 +120,7 @@ next_project_number: 179
 ---
 
 ### 176. Temporal and or propagation
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations Refactor
 - **Dependencies**: Task 173
@@ -140,7 +130,7 @@ next_project_number: 179
 ---
 
 ### 175. Modal and or propagation
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations Refactor
 - **Dependencies**: Task 173
@@ -150,7 +140,7 @@ next_project_number: 179
 ---
 
 ### 174. Propositional metalogic full connectives
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations Refactor
 - **Dependencies**: Task 173
@@ -160,7 +150,7 @@ next_project_number: 179
 ---
 
 ### 173. Propositional five primitive refactor
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations Refactor
 - **Dependencies**: Task 172

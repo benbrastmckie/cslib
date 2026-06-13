@@ -133,11 +133,15 @@ def app2 {fc : FrameClass} {A B C : Formula Atom} :
 
 /--
 Pairing combinator: `⊢ A → B → A ∧ B`.
+
+Uses `HasAxiomAndI` directly since `Formula.and` is a primitive constructor,
+not the implication encoding `¬(A → ¬B)` used by the Foundations combinator.
 -/
 def pairing {fc : FrameClass} (A B : Formula Atom) :
     DerivationTree fc [] (A.imp (B.imp (A.and B))) :=
   DerivationTree.lift (FrameClass.base_le fc)
-    (unwrap (@_root_.Cslib.Logic.Theorems.Combinators.pairing _ _ _ Bimodal.HilbertTM _ _ A B))
+    (unwrap (HasAxiomAndI.andI (φ := A) (ψ := B) :
+      InferenceSystem.DerivableIn Bimodal.HilbertTM _))
 
 /--
 Double negation introduction: `⊢ A → ¬¬A`.

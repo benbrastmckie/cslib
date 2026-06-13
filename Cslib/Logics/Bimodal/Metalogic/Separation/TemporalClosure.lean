@@ -45,6 +45,8 @@ def replaceBoxWithTop : Formula Atom -> Formula Atom
   | .atom a => .atom a
   | .bot => .bot
   | .imp phi psi => .imp (replaceBoxWithTop phi) (replaceBoxWithTop psi)
+  | .and phi psi => .and (replaceBoxWithTop phi) (replaceBoxWithTop psi)
+  | .or phi psi => .or (replaceBoxWithTop phi) (replaceBoxWithTop psi)
   | .box _ => .imp .bot .bot  -- top
   | .untl phi psi => .untl (replaceBoxWithTop phi) (replaceBoxWithTop psi)
   | .snce phi psi => .snce (replaceBoxWithTop phi) (replaceBoxWithTop psi)
@@ -59,6 +61,14 @@ theorem replace_box_equiv (phi : Formula Atom) : intEquiv phi (replaceBoxWithTop
     simp [replaceBoxWithTop, intTruth]
     exact ⟨fun h hp => (ih2 t).mp (h ((ih1 t).mpr hp)),
            fun h hp => (ih2 t).mpr (h ((ih1 t).mp hp))⟩
+  | and a b ih1 ih2 =>
+    simp [replaceBoxWithTop, intTruth]
+    exact ⟨fun ⟨h1, h2⟩ => ⟨(ih1 t).mp h1, (ih2 t).mp h2⟩,
+           fun ⟨h1, h2⟩ => ⟨(ih1 t).mpr h1, (ih2 t).mpr h2⟩⟩
+  | or a b ih1 ih2 =>
+    simp [replaceBoxWithTop, intTruth]
+    exact ⟨fun h => h.imp (ih1 t).mp (ih2 t).mp,
+           fun h => h.imp (ih1 t).mpr (ih2 t).mpr⟩
   | box _ => simp [replaceBoxWithTop, intTruth]
   | untl a b ih1 ih2 =>
     simp [replaceBoxWithTop, intTruth]
@@ -82,6 +92,8 @@ theorem replace_box_preserves_U_free (phi : Formula Atom) (h : isUFree phi = tru
   | atom _ => rfl
   | bot => rfl
   | imp a b ih1 ih2 => simp [isUFree] at h; simp [replaceBoxWithTop, isUFree, ih1 h.1, ih2 h.2]
+  | and a b ih1 ih2 => simp [isUFree] at h; simp [replaceBoxWithTop, isUFree, ih1 h.1, ih2 h.2]
+  | or a b ih1 ih2 => simp [isUFree] at h; simp [replaceBoxWithTop, isUFree, ih1 h.1, ih2 h.2]
   | box _ => simp [replaceBoxWithTop, isUFree]
   | untl _ _ => simp [isUFree] at h
   | snce a b ih1 ih2 => simp [isUFree] at h; simp [replaceBoxWithTop, isUFree, ih1 h.1, ih2 h.2]
@@ -93,6 +105,8 @@ theorem replace_box_preserves_S_free (phi : Formula Atom) (h : isSFree phi = tru
   | atom _ => rfl
   | bot => rfl
   | imp a b ih1 ih2 => simp [isSFree] at h; simp [replaceBoxWithTop, isSFree, ih1 h.1, ih2 h.2]
+  | and a b ih1 ih2 => simp [isSFree] at h; simp [replaceBoxWithTop, isSFree, ih1 h.1, ih2 h.2]
+  | or a b ih1 ih2 => simp [isSFree] at h; simp [replaceBoxWithTop, isSFree, ih1 h.1, ih2 h.2]
   | box _ => simp [replaceBoxWithTop, isSFree]
   | untl a b ih1 ih2 => simp [isSFree] at h; simp [replaceBoxWithTop, isSFree, ih1 h.1, ih2 h.2]
   | snce _ _ => simp [isSFree] at h
@@ -105,6 +119,12 @@ theorem replace_box_preserves_separated (phi : Formula Atom)
   | atom _ => rfl
   | bot => rfl
   | imp a b ih1 ih2 =>
+    simp [isSyntacticallySeparated] at h
+    simp [replaceBoxWithTop, isSyntacticallySeparated, ih1 h.1, ih2 h.2]
+  | and a b ih1 ih2 =>
+    simp [isSyntacticallySeparated] at h
+    simp [replaceBoxWithTop, isSyntacticallySeparated, ih1 h.1, ih2 h.2]
+  | or a b ih1 ih2 =>
     simp [isSyntacticallySeparated] at h
     simp [replaceBoxWithTop, isSyntacticallySeparated, ih1 h.1, ih2 h.2]
   | box _ => simp [replaceBoxWithTop, isSyntacticallySeparated]
@@ -126,6 +146,8 @@ theorem u_free_no_S_nested (phi : Formula Atom) (h : isUFree phi = true) :
   | atom _ => trivial
   | bot => trivial
   | imp a b ih1 ih2 => simp [isUFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
+  | and a b ih1 ih2 => simp [isUFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
+  | or a b ih1 ih2 => simp [isUFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
   | box a ih => simp [isUFree] at h; exact ih h
   | untl _ _ => simp [isUFree] at h
   | snce a b ih1 ih2 => simp [isUFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
@@ -137,6 +159,8 @@ theorem s_free_no_S_nested (phi : Formula Atom) (h : isSFree phi = true) :
   | atom _ => trivial
   | bot => trivial
   | imp a b ih1 ih2 => simp [isSFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
+  | and a b ih1 ih2 => simp [isSFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
+  | or a b ih1 ih2 => simp [isSFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
   | box a ih => simp [isSFree] at h; exact ih h
   | untl a b _ih1 _ih2 => simp [isSFree] at h; exact h
   | snce _ _ => simp [isSFree] at h
@@ -149,6 +173,14 @@ theorem replace_box_separated_no_S_nested (phi : Formula Atom)
   | atom _ => trivial
   | bot => trivial
   | imp a b ih1 ih2 =>
+    simp [isSyntacticallySeparated] at h
+    simp [replaceBoxWithTop, noSNestedInU]
+    exact ⟨ih1 h.1, ih2 h.2⟩
+  | and a b ih1 ih2 =>
+    simp [isSyntacticallySeparated] at h
+    simp [replaceBoxWithTop, noSNestedInU]
+    exact ⟨ih1 h.1, ih2 h.2⟩
+  | or a b ih1 ih2 =>
     simp [isSyntacticallySeparated] at h
     simp [replaceBoxWithTop, noSNestedInU]
     exact ⟨ih1 h.1, ih2 h.2⟩
@@ -171,6 +203,8 @@ def noUNestedInS : Formula Atom -> Prop
   | .atom _ => True
   | .bot => True
   | .imp phi psi => noUNestedInS phi ∧ noUNestedInS psi
+  | .and phi psi => noUNestedInS phi ∧ noUNestedInS psi
+  | .or phi psi => noUNestedInS phi ∧ noUNestedInS psi
   | .box phi => noUNestedInS phi
   | .untl phi psi => noUNestedInS phi ∧ noUNestedInS psi
   | .snce phi psi => isUFree phi = true ∧ isUFree psi = true
@@ -182,6 +216,8 @@ theorem swap_no_U_nested_gives_no_S_nested (phi : Formula Atom)
   | atom _ => trivial
   | bot => trivial
   | imp a b ih1 ih2 => exact ⟨ih1 h.1, ih2 h.2⟩
+  | and a b ih1 ih2 => exact ⟨ih1 h.1, ih2 h.2⟩
+  | or a b ih1 ih2 => exact ⟨ih1 h.1, ih2 h.2⟩
   | box a ih => exact ih h
   | untl a b ih1 ih2 =>
     exact ⟨ih1 h.1, ih2 h.2⟩
@@ -198,6 +234,8 @@ theorem swap_no_S_nested_gives_no_U_nested (phi : Formula Atom)
   | atom _ => trivial
   | bot => trivial
   | imp a b ih1 ih2 => exact ⟨ih1 h.1, ih2 h.2⟩
+  | and a b ih1 ih2 => exact ⟨ih1 h.1, ih2 h.2⟩
+  | or a b ih1 ih2 => exact ⟨ih1 h.1, ih2 h.2⟩
   | box a ih => exact ih h
   | untl a b _ih1 _ih2 =>
     obtain ⟨ha, hb⟩ := h
@@ -218,6 +256,14 @@ theorem replace_box_separated_no_U_nested (phi : Formula Atom)
     simp [isSyntacticallySeparated] at h
     simp [replaceBoxWithTop, noUNestedInS]
     exact ⟨ih1 h.1, ih2 h.2⟩
+  | and a b ih1 ih2 =>
+    simp [isSyntacticallySeparated] at h
+    simp [replaceBoxWithTop, noUNestedInS]
+    exact ⟨ih1 h.1, ih2 h.2⟩
+  | or a b ih1 ih2 =>
+    simp [isSyntacticallySeparated] at h
+    simp [replaceBoxWithTop, noUNestedInS]
+    exact ⟨ih1 h.1, ih2 h.2⟩
   | box _ =>
     simp [replaceBoxWithTop, noUNestedInS]
   | untl a b _ih1 _ih2 =>
@@ -235,6 +281,8 @@ where
     | atom _ => trivial
     | bot => trivial
     | imp a b ih1 ih2 => simp [isUFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
+    | and a b ih1 ih2 => simp [isUFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
+    | or a b ih1 ih2 => simp [isUFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
     | box a ih => simp [isUFree] at h; exact ih h
     | untl _ _ => simp [isUFree] at h
     | snce a b _ih1 _ih2 => simp [isUFree] at h; exact h
@@ -243,6 +291,8 @@ where
     | atom _ => trivial
     | bot => trivial
     | imp a b ih1 ih2 => simp [isSFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
+    | and a b ih1 ih2 => simp [isSFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
+    | or a b ih1 ih2 => simp [isSFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
     | box a ih => simp [isSFree] at h; exact ih h
     | untl a b ih1 ih2 => simp [isSFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
     | snce _ _ => simp [isSFree] at h
@@ -332,6 +382,10 @@ theorem junction_depth_S_zero_imp_U_free (phi : Formula Atom) (h : junctionDepth
   | bot => rfl
   | imp a b ih1 ih2 =>
     simp [junctionDepthS] at h; simp [isUFree, ih1 (by omega), ih2 (by omega)]
+  | and a b ih1 ih2 =>
+    simp [junctionDepthS] at h; simp [isUFree, ih1 (by omega), ih2 (by omega)]
+  | or a b ih1 ih2 =>
+    simp [junctionDepthS] at h; simp [isUFree, ih1 (by omega), ih2 (by omega)]
   | box a ih => simp [junctionDepthS] at h; simp [isUFree, ih h]
   | untl _ _ => simp [junctionDepthS] at h
   | snce a b ih1 ih2 =>
@@ -345,6 +399,10 @@ theorem junction_depth_U_zero_imp_S_free (phi : Formula Atom) (h : junctionDepth
   | bot => rfl
   | imp a b ih1 ih2 =>
     simp [junctionDepthU] at h; simp [isSFree, ih1 (by omega), ih2 (by omega)]
+  | and a b ih1 ih2 =>
+    simp [junctionDepthU] at h; simp [isSFree, ih1 (by omega), ih2 (by omega)]
+  | or a b ih1 ih2 =>
+    simp [junctionDepthU] at h; simp [isSFree, ih1 (by omega), ih2 (by omega)]
   | box a ih => simp [junctionDepthU] at h; simp [isSFree, ih h]
   | untl a b ih1 ih2 =>
     simp [junctionDepthU] at h; simp [isSFree, ih1 (by omega), ih2 (by omega)]
@@ -357,6 +415,10 @@ theorem s_free_junction_depth_zero (phi : Formula Atom) (h : isSFree phi = true)
   | atom _ => rfl
   | bot => rfl
   | imp a b ih1 ih2 =>
+    simp [isSFree] at h; simp [junctionDepth, ih1 h.1, ih2 h.2]
+  | and a b ih1 ih2 =>
+    simp [isSFree] at h; simp [junctionDepth, ih1 h.1, ih2 h.2]
+  | or a b ih1 ih2 =>
     simp [isSFree] at h; simp [junctionDepth, ih1 h.1, ih2 h.2]
   | box a ih => simp [isSFree] at h; simp [junctionDepth, ih h]
   | untl a b ih1 ih2 =>
@@ -374,6 +436,10 @@ where
     | bot => rfl
     | imp a b ih1 ih2 =>
       simp [isSFree] at h; simp [junctionDepthU, ih1 h.1, ih2 h.2]
+    | and a b ih1 ih2 =>
+      simp [isSFree] at h; simp [junctionDepthU, ih1 h.1, ih2 h.2]
+    | or a b ih1 ih2 =>
+      simp [isSFree] at h; simp [junctionDepthU, ih1 h.1, ih2 h.2]
     | box a ih => simp [isSFree] at h; simp [junctionDepthU, ih h]
     | untl a b ih1 ih2 =>
       simp [isSFree] at h; simp [junctionDepthU, ih1 h.1, ih2 h.2]
@@ -386,6 +452,10 @@ theorem u_free_junction_depth_zero (phi : Formula Atom) (h : isUFree phi = true)
   | atom _ => rfl
   | bot => rfl
   | imp a b ih1 ih2 =>
+    simp [isUFree] at h; simp [junctionDepth, ih1 h.1, ih2 h.2]
+  | and a b ih1 ih2 =>
+    simp [isUFree] at h; simp [junctionDepth, ih1 h.1, ih2 h.2]
+  | or a b ih1 ih2 =>
     simp [isUFree] at h; simp [junctionDepth, ih1 h.1, ih2 h.2]
   | box a ih => simp [isUFree] at h; simp [junctionDepth, ih h]
   | untl _ _ => simp [isUFree] at h
@@ -402,6 +472,10 @@ where
     | atom _ => rfl
     | bot => rfl
     | imp a b ih1 ih2 =>
+      simp [isUFree] at h; simp [junctionDepthS, ih1 h.1, ih2 h.2]
+    | and a b ih1 ih2 =>
+      simp [isUFree] at h; simp [junctionDepthS, ih1 h.1, ih2 h.2]
+    | or a b ih1 ih2 =>
       simp [isUFree] at h; simp [junctionDepthS, ih1 h.1, ih2 h.2]
     | box a ih => simp [isUFree] at h; simp [junctionDepthS, ih h]
     | untl _ _ => simp [isUFree] at h
@@ -424,6 +498,14 @@ where
     | atom _ => simp [replaceBoxWithTop, junctionDepthS]
     | bot => simp [replaceBoxWithTop, junctionDepthS]
     | imp a b ih1 ih2 =>
+      simp [isSyntacticallySeparated] at h
+      simp [replaceBoxWithTop, junctionDepthS]
+      exact ⟨ih1 h.1, ih2 h.2⟩
+    | and a b ih1 ih2 =>
+      simp [isSyntacticallySeparated] at h
+      simp [replaceBoxWithTop, junctionDepthS]
+      exact ⟨ih1 h.1, ih2 h.2⟩
+    | or a b ih1 ih2 =>
       simp [isSyntacticallySeparated] at h
       simp [replaceBoxWithTop, junctionDepthS]
       exact ⟨ih1 h.1, ih2 h.2⟩
@@ -452,6 +534,8 @@ def expandTemporal : Formula Atom → Formula Atom
   | .atom a => .atom a
   | .bot => .bot
   | .imp φ ψ => .imp (expandTemporal φ) (expandTemporal ψ)
+  | .and φ ψ => .and (expandTemporal φ) (expandTemporal ψ)
+  | .or φ ψ => .or (expandTemporal φ) (expandTemporal ψ)
   | .box φ => .box φ
   | .untl φ ψ => .untl (expandTemporal φ) (expandTemporal ψ)
   | .snce φ ψ => .snce (expandTemporal φ) (expandTemporal ψ)
@@ -462,6 +546,8 @@ def expandTemporal : Formula Atom → Formula Atom
   | atom _ => rfl
   | bot => rfl
   | imp a b ih1 ih2 => simp only [expandTemporal, ih1, ih2]
+  | and a b ih1 ih2 => simp only [expandTemporal, ih1, ih2]
+  | or a b ih1 ih2 => simp only [expandTemporal, ih1, ih2]
   | box _ => simp only [expandTemporal]
   | untl a b ih1 ih2 => simp only [expandTemporal, ih1, ih2]
   | snce a b ih1 ih2 => simp only [expandTemporal, ih1, ih2]
@@ -475,6 +561,8 @@ def hasNoAllpastAllfuture : Formula Atom → Bool
   | .atom _ => true
   | .bot => true
   | .imp φ ψ => hasNoAllpastAllfuture φ && hasNoAllpastAllfuture ψ
+  | .and φ ψ => hasNoAllpastAllfuture φ && hasNoAllpastAllfuture ψ
+  | .or φ ψ => hasNoAllpastAllfuture φ && hasNoAllpastAllfuture ψ
   | .box _ => true
   | .untl φ ψ => hasNoAllpastAllfuture φ && hasNoAllpastAllfuture ψ
   | .snce φ ψ => hasNoAllpastAllfuture φ && hasNoAllpastAllfuture ψ
@@ -486,6 +574,8 @@ def hasNoAllpastAllfuture : Formula Atom → Bool
   | atom _ => rfl
   | bot => rfl
   | imp a b ih1 ih2 => simp only [hasNoAllpastAllfuture, ih1, ih2, Bool.and_self]
+  | and a b ih1 ih2 => simp only [hasNoAllpastAllfuture, ih1, ih2, Bool.and_self]
+  | or a b ih1 ih2 => simp only [hasNoAllpastAllfuture, ih1, ih2, Bool.and_self]
   | box _ => rfl
   | untl a b ih1 ih2 => simp only [hasNoAllpastAllfuture, ih1, ih2, Bool.and_self]
   | snce a b ih1 ih2 => simp only [hasNoAllpastAllfuture, ih1, ih2, Bool.and_self]
@@ -499,6 +589,16 @@ theorem expanded_jd_zero_imp_separated (φ : Formula Atom)
   | atom _ => rfl
   | bot => rfl
   | imp a b iha ihb =>
+    simp only [junctionDepth] at hjd
+    simp only [isSyntacticallySeparated,
+      iha (has_no_allpast_allfuture_true a) (by omega),
+      ihb (has_no_allpast_allfuture_true b) (by omega), Bool.and_self]
+  | and a b iha ihb =>
+    simp only [junctionDepth] at hjd
+    simp only [isSyntacticallySeparated,
+      iha (has_no_allpast_allfuture_true a) (by omega),
+      ihb (has_no_allpast_allfuture_true b) (by omega), Bool.and_self]
+  | or a b iha ihb =>
     simp only [junctionDepth] at hjd
     simp only [isSyntacticallySeparated,
       iha (has_no_allpast_allfuture_true a) (by omega),

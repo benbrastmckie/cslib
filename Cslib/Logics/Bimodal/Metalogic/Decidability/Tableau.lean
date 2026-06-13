@@ -199,21 +199,19 @@ def asNeg? : Formula Atom → Option (Formula Atom)
   | _ => none
 
 /--
-Try to decompose a formula as conjunction (neg(A -> neg B)).
-Note: A AND B = (A.imp B.neg).neg = (A.imp (B.imp .bot)).imp .bot
-Returns `some (A, B)` if it matches the pattern, otherwise `none`.
+Try to decompose a formula as conjunction.
+Returns `some (A, B)` if the formula is `.and A B`, otherwise `none`.
 -/
 def asAnd? : Formula Atom → Option (Formula Atom × Formula Atom)
-  | .imp (.imp φ (.imp ψ .bot)) .bot => some (φ, ψ)
+  | .and φ ψ => some (φ, ψ)
   | _ => none
 
 /--
-Try to decompose a formula as disjunction (neg A -> B).
-Note: A OR B = A.neg.imp B = (A.imp .bot).imp B
-Returns `some (A, B)` if it matches the pattern, otherwise `none`.
+Try to decompose a formula as disjunction.
+Returns `some (A, B)` if the formula is `.or A B`, otherwise `none`.
 -/
 def asOr? : Formula Atom → Option (Formula Atom × Formula Atom)
-  | .imp (.imp φ .bot) ψ => some (φ, ψ)
+  | .or φ ψ => some (φ, ψ)
   | _ => none
 
 /--

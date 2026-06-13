@@ -111,6 +111,20 @@ theorem Formula.beq_top_false_of_ne (guard : Formula Atom)
       simp only [Bool.and_eq_true] at h
       exact congr (congrArg _ (ih1 b1 h.1)) (ih2 b2 h.2)
     | _ => cases h
+  | and a1 a2 ih1 ih2 =>
+    intro b h; cases b with
+    | and b1 b2 =>
+      change (a1 == b1 && a2 == b2) = true at h
+      simp only [Bool.and_eq_true] at h
+      exact congr (congrArg _ (ih1 b1 h.1)) (ih2 b2 h.2)
+    | _ => cases h
+  | or a1 a2 ih1 ih2 =>
+    intro b h; cases b with
+    | or b1 b2 =>
+      change (a1 == b1 && a2 == b2) = true at h
+      simp only [Bool.and_eq_true] at h
+      exact congr (congrArg _ (ih1 b1 h.1)) (ih2 b2 h.2)
+    | _ => cases h
   | box a ih =>
     intro b h; cases b with
     | box b => change (a == b) = true at h; exact congrArg _ (ih b h)
@@ -322,6 +336,8 @@ def branchTruth (cm : SemanticCountermodel Atom) (w : WorldIndex) (t : TimeIndex
   | .atom p => cm.atomValuation w t p = true
   | .bot => False
   | .imp φ ψ => branchTruth cm w t φ → branchTruth cm w t ψ
+  | .and φ ψ => branchTruth cm w t φ ∧ branchTruth cm w t ψ
+  | .or φ ψ => branchTruth cm w t φ ∨ branchTruth cm w t ψ
   | .box φ => ∀ w' ∈ cm.worlds, branchTruth cm w' t φ
   | .untl event guard =>
       -- Direct-successor semantics: there exists a direct future time where
@@ -510,6 +526,34 @@ theorem impNeg_not_expanded (b : Branch Atom) (ψ χ : Formula Atom) (l : Label)
 
 theorem impPos_not_expanded (b : Branch Atom) (ψ χ : Formula Atom) (l : Label)
     (timeOrd : TimeOrdering := .empty) : isExpanded ⟨.pos, .imp ψ χ, l⟩ b (timeOrd := timeOrd) = false := by
+  unfold isExpanded findApplicableRule
+  simp only [allRulesForFC, allRules, denseRules, discreteRules]
+  simp only [List.findSome?, isApplicable, asNeg?, asAnd?, asOr?, asDiamond?, applyRule]
+  simp
+
+theorem andPos_not_expanded (b : Branch Atom) (ψ χ : Formula Atom) (l : Label)
+    (timeOrd : TimeOrdering := .empty) : isExpanded ⟨.pos, .and ψ χ, l⟩ b (timeOrd := timeOrd) = false := by
+  unfold isExpanded findApplicableRule
+  simp only [allRulesForFC, allRules, denseRules, discreteRules]
+  simp only [List.findSome?, isApplicable, asNeg?, asAnd?, asOr?, asDiamond?, applyRule]
+  simp
+
+theorem andNeg_not_expanded (b : Branch Atom) (ψ χ : Formula Atom) (l : Label)
+    (timeOrd : TimeOrdering := .empty) : isExpanded ⟨.neg, .and ψ χ, l⟩ b (timeOrd := timeOrd) = false := by
+  unfold isExpanded findApplicableRule
+  simp only [allRulesForFC, allRules, denseRules, discreteRules]
+  simp only [List.findSome?, isApplicable, asNeg?, asAnd?, asOr?, asDiamond?, applyRule]
+  simp
+
+theorem orPos_not_expanded (b : Branch Atom) (ψ χ : Formula Atom) (l : Label)
+    (timeOrd : TimeOrdering := .empty) : isExpanded ⟨.pos, .or ψ χ, l⟩ b (timeOrd := timeOrd) = false := by
+  unfold isExpanded findApplicableRule
+  simp only [allRulesForFC, allRules, denseRules, discreteRules]
+  simp only [List.findSome?, isApplicable, asNeg?, asAnd?, asOr?, asDiamond?, applyRule]
+  simp
+
+theorem orNeg_not_expanded (b : Branch Atom) (ψ χ : Formula Atom) (l : Label)
+    (timeOrd : TimeOrdering := .empty) : isExpanded ⟨.neg, .or ψ χ, l⟩ b (timeOrd := timeOrd) = false := by
   unfold isExpanded findApplicableRule
   simp only [allRulesForFC, allRules, denseRules, discreteRules]
   simp only [List.findSome?, isApplicable, asNeg?, asAnd?, asOr?, asDiamond?, applyRule]
@@ -898,6 +942,14 @@ theorem truthLemma_pos (b : Branch Atom) (timeOrd : TimeOrdering)
     exfalso
     have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.pos, .imp ψ χ, ⟨w, t⟩⟩ hmem
     simp [impPos_not_expanded] at hExp
+  | and ψ χ _ih_ψ _ih_χ =>
+    exfalso
+    have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.pos, .and ψ χ, ⟨w, t⟩⟩ hmem
+    simp [andPos_not_expanded] at hExp
+  | or ψ χ _ih_ψ _ih_χ =>
+    exfalso
+    have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.pos, .or ψ χ, ⟨w, t⟩⟩ hmem
+    simp [orPos_not_expanded] at hExp
   | box ψ ih =>
     simp only [branchTruth]
     intro w' hw'
@@ -941,6 +993,14 @@ theorem truthLemma_neg (b : Branch Atom) (timeOrd : TimeOrdering)
     have hψ_true := truthLemma_pos b timeOrd hSat fc hOpen cm hCm ψ w t hψ
     have hχ_false := ih_χ w t hχ
     exact hχ_false (h hψ_true)
+  | and ψ χ _ih_ψ _ih_χ =>
+    exfalso
+    have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.neg, .and ψ χ, ⟨w, t⟩⟩ hmem
+    simp [andNeg_not_expanded] at hExp
+  | or ψ χ _ih_ψ _ih_χ =>
+    exfalso
+    have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.neg, .or ψ χ, ⟨w, t⟩⟩ hmem
+    simp [orNeg_not_expanded] at hExp
   | box ψ ih =>
     simp only [branchTruth]
     intro h

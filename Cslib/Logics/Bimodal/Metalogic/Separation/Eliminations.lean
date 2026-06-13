@@ -47,6 +47,12 @@ theorem u_free_s_free_imp_separated (φ : Formula Atom)
   | imp a b ih1 ih2 =>
     simp [isSyntacticallySeparated, isUFree, isSFree] at *
     exact ⟨ih1 hu.1 hs.1, ih2 hu.2 hs.2⟩
+  | and a b ih1 ih2 =>
+    simp [isSyntacticallySeparated, isUFree, isSFree] at *
+    exact ⟨ih1 hu.1 hs.1, ih2 hu.2 hs.2⟩
+  | or a b ih1 ih2 =>
+    simp [isSyntacticallySeparated, isUFree, isSFree] at *
+    exact ⟨ih1 hu.1 hs.1, ih2 hu.2 hs.2⟩
   | box _ => rfl
   | untl _ _ => simp [isUFree] at hu
   | snce _ _ => simp [isSFree] at hs

@@ -975,11 +975,11 @@ theorem untl_conj_guard (fc : FrameClass) {A : Set (Formula Atom)}
   · have h_D1_or_D2 : Formula.or D1 D2 ∈ A := by
       rcases SetMaximalConsistent.negation_complete h_mcs (Formula.or D1 D2) with h' | h'
       · exact h'
-      · have := SetMaximalConsistent.implication_property h_mcs h_disj h'
+      · have := SetMaximalConsistent.mcs_or_resolve h_mcs h_disj h'
         exact absurd this (SetMaximalConsistent.neg_excludes h_mcs _ h)
     rcases SetMaximalConsistent.negation_complete h_mcs D1 with h' | h'
     · exact SetMaximalConsistent.implication_property h_mcs h_D1_impl h'
-    · have h_D2 := SetMaximalConsistent.implication_property h_mcs h_D1_or_D2 h'
+    · have h_D2 := SetMaximalConsistent.mcs_or_resolve h_mcs h_D1_or_D2 h'
       exact SetMaximalConsistent.implication_property h_mcs h_D2_impl h_D2
 
 /--
@@ -1020,11 +1020,11 @@ theorem snce_conj_guard (fc : FrameClass) {A : Set (Formula Atom)}
   · have h_D1_or_D2 : Formula.or D1 D2 ∈ A := by
       rcases SetMaximalConsistent.negation_complete h_mcs (Formula.or D1 D2) with h' | h'
       · exact h'
-      · have := SetMaximalConsistent.implication_property h_mcs h_disj h'
+      · have := SetMaximalConsistent.mcs_or_resolve h_mcs h_disj h'
         exact absurd this (SetMaximalConsistent.neg_excludes h_mcs _ h)
     rcases SetMaximalConsistent.negation_complete h_mcs D1 with h' | h'
     · exact SetMaximalConsistent.implication_property h_mcs h_D1_impl h'
-    · have h_D2 := SetMaximalConsistent.implication_property h_mcs h_D1_or_D2 h'
+    · have h_D2 := SetMaximalConsistent.mcs_or_resolve h_mcs h_D1_or_D2 h'
       exact SetMaximalConsistent.implication_property h_mcs h_D2_impl h_D2
 
 /--

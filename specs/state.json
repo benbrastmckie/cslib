@@ -54,7 +54,7 @@
     {
       "project_number": 173,
       "project_name": "propositional_five_primitive_refactor",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Foundations Refactor",
       "dependencies": [
@@ -75,12 +75,13 @@
           "type": "plan",
           "summary": "7-phase implementation plan for five-primitive refactor"
         }
-      ]
+      ],
+      "completion_summary": "All 7 phases of five-primitive propositional refactor implemented: formula type with and/or constructors, minimal ND system, Hilbert axiom extension, ND-Hilbert equivalence bridges, metalogic soundness/completeness, external embeddings. Full CI verified."
     },
     {
       "project_number": 174,
       "project_name": "propositional_metalogic_full_connectives",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Foundations Refactor",
       "dependencies": [
@@ -88,12 +89,13 @@
       ],
       "description": "Extend Cslib/Logics/Propositional/Semantics and Metalogic from the {imp, bot} fragment to the full five-primitive language {atom, bot, imp, and, or}, keeping all metalogic theorems stated for the fork's Hilbert systems (MinimalHilbert/IntuitionisticHilbert/ClassicalHilbert) with ND results obtained via the ND-Hilbert equivalence bridges from task 173. Scope: (1) Semantics/Basic.lean: structural clauses - eval of bot = False, and = conjunction, or = disjunction (no side conditions on valuations). (2) Semantics/Kripke.lean: add structural forcing clauses for and/or (pointwise conjunction; pointwise disjunction); extend the persistence lemma. CRITICAL CONSTRAINT: RETAIN the botForces parameterization of IForces - do NOT hard-code bot to False in the Kripke forcing relation. Minimal completeness (min_completeness) requires bot-flexible models (botForces free and upward-closed, Johansson-style); hard-coding bot = False would validate explosion and break minimal completeness. Only the intuitionistic/classical instantiations set botForces to fun _ => False. (3) Metalogic: extend Soundness (classical), MinSoundness, IntSoundness with and/or cases against the extended Hilbert axiom bases; extend Completeness (classical, via MCS - and/or cases are straightforward), MinCompleteness, IntCompleteness/IntLindenbaum - NOTE this is the mathematically hardest part: intuitionistic completeness with disjunction requires prime theories (if T proves A or B then A in T or B in T), so the Lindenbaum construction must be upgraded to produce prime extensions (standard reference: Troelstra & van Dalen 1988 vol 1 ch 2; Chagrov & Zakharyaschev 1997 ch 5 intuitionistic canonical model). (4) Document precisely which logic each completeness theorem covers; the disjunction property may be stated as future work. (5) MCS.lean/DeductionTheorem.lean: extend with and/or cases as needed - the deduction theorem proof gains axiom cases for the new and/or axioms. Verify full CI. Reference: specs/171_research_connective_basis_min_int_classical/reports/01_team-research.md (gap: completeness theorem scope).",
       "created": "2026-06-13T00:28:47Z",
-      "last_updated": "2026-06-13T00:41:41Z"
+      "last_updated": "2026-06-13T00:41:41Z",
+      "completion_summary": "Eliminated 2 sorries in MinCompleteness and IntCompleteness or-backward cases by introducing MinPrimeTheory/IntPrimeDCCS with prime exclusion via Zorn lemma. Zero sorries, zero new axioms."
     },
     {
       "project_number": 175,
       "project_name": "modal_and_or_propagation",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Foundations Refactor",
       "dependencies": [
@@ -101,12 +103,13 @@
       ],
       "description": "Propagate the hybrid five-primitive design to the Modal layer: Modal.Proposition becomes {atom, bot, imp, and, or, box} with diamond/neg/top/iff derived. Scope: (1) Modal/Basic.lean: add and/or constructors; update satisfaction relation with structural clauses; keep derived-connective satisfaction lemmas (Satisfies.and_iff etc.) but as primitive clauses now; register HasAnd/HasOr instances from task 172. (2) Modal/Denotation.lean, LogicalEquivalence.lean, Cube.lean: new constructor cases. (3) Modal/FromPropositional.lean: extend the PL -> Modal embedding homomorphically for and/or. (4) ProofSystem/Instances/* (16 systems K, T, B, D, K4, K5, K45, KB5, D4, D5, D45, DB, TB, S4, S5): extend K-system axiom sets with the propositional and/or axioms from task 173. (5) Metalogic/: extend DerivationTree, DeductionTheorem, MCS, Soundness, Completeness plus all Systems/*/Soundness+Completeness with and/or cases (mechanical: MCS membership lemmas for and/or, truth lemma cases). Verify with lake build Cslib.Logics.Modal and full CI. Maintain upstream compatibility where Modal/Basic.lean exists upstream (grind annotations, chenson2018's simp-direction guidance from PR #607 review: simp lemmas should rewrite INTO notation).",
       "created": "2026-06-13T00:28:47Z",
-      "last_updated": "2026-06-13T00:41:41Z"
+      "last_updated": "2026-06-13T00:41:41Z",
+      "completion_summary": "Propagated five-primitive and/or design to Modal layer: 6 constructors in Proposition, Satisfies clauses, 15 axiom predicates with andI/andE/orI/orE, all 15 soundness proofs, 3 truth lemma families, 15 completeness files. FromPropositional sorries resolved. Zero sorries, zero new axioms."
     },
     {
       "project_number": 176,
       "project_name": "temporal_and_or_propagation",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Foundations Refactor",
       "dependencies": [
@@ -114,12 +117,13 @@
       ],
       "description": "Propagate the hybrid five-primitive design to the Temporal layer: Temporal.Formula becomes {atom, bot, imp, and, or, untl, snce} with derived always/eventually/neg/top/iff unchanged where valid. Scope: (1) Syntax/Formula.lean: add and/or constructors; update complexity, subst, atoms; (2) Syntax/Context.lean, BigConj.lean (BigConj should now use the PRIMITIVE and constructor instead of the classical encoding - simplification), Subformulas.lean: new cases. (3) Semantics/Satisfies.lean, Model.lean, Validity.lean: structural and/or clauses. (4) ProofSystem/Axioms.lean, Derivation.lean, Derivable.lean, Instances.lean: extend axiom sets with and/or axioms from task 173. (5) Metalogic/: extend DerivationTree, DeductionTheorem, MCS, DenseMCS, Soundness, DenseSoundness, Completeness, DenseCompleteness, Chronicle/* construction with and/or cases (truth lemma, MCS lemmas, subformula closure). (6) FromPropositional.lean: extend embedding homomorphically. Verify with lake build Cslib.Logics.Temporal and full CI. Note: PR #642 (pr3/temporal-syntax) is in flight upstream - coordinate so this refactor lands either after that PR merges or as a revision to it.",
       "created": "2026-06-13T00:28:47Z",
-      "last_updated": "2026-06-13T00:41:41Z"
+      "last_updated": "2026-06-13T00:41:41Z",
+      "completion_summary": "Propagated five-primitive and/or design to Temporal layer: 11 files modified (284 insertions), primitive Formula.and/or constructors, 6 axiom constructors, soundness proofs, MCS or-resolution helpers, truth lemma cases, OrderedSeedConsistency or-resolve fix. Zero sorries, all modules build clean."
     },
     {
       "project_number": 177,
       "project_name": "bimodal_and_or_propagation",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Foundations Refactor",
       "dependencies": [
@@ -128,12 +132,13 @@
       ],
       "description": "Propagate the hybrid five-primitive design to the Bimodal layer (largest propagation, ~130 files): Bimodal Formula becomes {atom, bot, imp, and, or, box, untl, snce} (or current bimodal constructor set + and/or). Scope: (1) Syntax/Formula.lean, Context.lean, Subformulas.lean, SubformulaClosure/*: add constructors, update closure computations and nesting depth. (2) Semantics/Truth.lean, Validity.lean, TaskFrame.lean, TaskModel.lean, WorldHistory.lean: structural clauses. (3) ProofSystem/Axioms.lean, Derivation.lean, Derivable.lean, Instances.lean, Substitution.lean: and/or axioms. (4) Embedding/PropositionalEmbedding.lean, ModalEmbedding.lean, TemporalEmbedding.lean: extend all three embeddings homomorphically for and/or (depends on tasks 175/176 landing first). (5) Metalogic/: extend Core (DerivationTree, DeductionTheorem, MaximalConsistent, MCSProperties), Soundness/*, Completeness, Bundle/*, BXCanonical/* (canonical model + chronicle constructions + truth lemmas), Decidability/* (tableau, signed formulas, closure, FMP), Separation/*, Algebraic/* with and/or cases. Much is mechanical case-addition but the volume is large; consider whether some Theorems/Propositional/* files simplify since and/or are now primitive with real rules. Verify with lake build and full CI. Reference: specs/171 research report.",
       "created": "2026-06-13T00:28:47Z",
-      "last_updated": "2026-06-13T00:41:41Z"
+      "last_updated": "2026-06-13T00:41:41Z",
+      "completion_summary": "Propagated five-primitive and/or design to Bimodal layer: all 127 files building clean. ~50 files modified with primitive Formula.and/or constructors, 6 axiom constructors, soundness proofs, truth lemmas, MCS or-resolution, separation hierarchy, decidability, algebraic completeness, conservative extension, and embedding updates. Zero new sorries."
     },
     {
       "project_number": 178,
       "project_name": "johansson_references_doc_corrections",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Foundations Refactor",
       "dependencies": [
@@ -141,7 +146,8 @@
       ],
       "description": "Documentation and citation corrections from task 171 research: (1) Add Johansson1937 (Ingebrigt Johansson, Der Minimalkalkuel, ein reduzierter intuitionistischer Formalismus, Compositio Mathematica 4, 1937, pages 119-136) to references.bib. (2) Correct file headers and docstrings across Cslib/Logics/Propositional and Cslib/Foundations/Logic/Connectives.lean: the functional-completeness claim for {imp, bot} must be scoped to CLASSICAL logic only (non-interdefinability of intuitionistic connectives: Wajsberg 1938, McKinsey 1939, noted by Heyting 1930); cite Church 1956 and Chagrov & Zakharyaschev 1997 for the classical basis; cite Gentzen 1935/Prawitz 1965/Troelstra & van Dalen 1988 for the full-connective natural deduction (which the hybrid design now follows); cite Johansson 1937 for minimal logic and the MinimalHilbert naming. (3) Document the two-layer proof-system architecture in the Propositional module docstring: shared five-primitive syntax; a Waring-style sequent ND system whose rule set is minimal logic with intuitionistic/classical obtained via theory axioms; the fork's Hilbert hierarchy (MinimalHilbert -> IntuitionisticHilbert -> ClassicalHilbert over MPL/IPL/CPL); and the level-by-level ND-Hilbert equivalence bridges from task 173 connecting the two. (4) Rewrite the PR #635 description accordingly if that PR is revised rather than withdrawn, responding to ctchou's two review comments. Add Wajsberg1938 and McKinsey1939 entries to references.bib if those results are cited in docstrings.",
       "created": "2026-06-13T00:28:47Z",
-      "last_updated": "2026-06-13T00:41:41Z"
+      "last_updated": "2026-06-13T00:41:41Z",
+      "completion_summary": "Added Johansson1937, Wajsberg1938, McKinsey1939 to references.bib. Rewrote stale docstrings in Defs.lean and Basic.lean for five-primitive design. Updated Connectives.lean citations. All CI passes."
     },
     {
       "project_number": 171,

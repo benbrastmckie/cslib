@@ -107,21 +107,20 @@ noncomputable def deriveHNec (φ : Formula Atom)
   rw [Formula.swapTemporal_involution] at h_eq
   exact h_eq ▸ d_h
 
-/-- Derive ⊢ φ → ⊤ ∧ φ. -/
+/-- Derive ⊢ φ → ⊤ ∧ φ.
+
+    Proof: `efq` gives `⊢ ⊤`. `and_intro` gives `⊤ → (φ → ⊤ ∧ φ)`. MP gives `φ → ⊤ ∧ φ`. -/
 noncomputable def deriveAndTopIntro (φ : Formula Atom) :
-    DerivationTree FrameClass.Base [] (φ.imp (Formula.and Formula.top φ)) := by
-  let ctx := [Formula.imp Formula.top (Formula.neg φ), φ]
-  have d_top : DerivationTree FrameClass.Base ctx Formula.top :=
-    .weakening [] ctx _ (.axiom [] _ (.efq Formula.bot) trivial) (fun _ h => nomatch h)
-  have d_neg_phi : DerivationTree FrameClass.Base ctx (Formula.neg φ) :=
-    .modus_ponens ctx Formula.top (Formula.neg φ)
-      (.assumption ctx _ (by simp [List.mem_cons, ctx]))
-      d_top
-  have d_bot : DerivationTree FrameClass.Base ctx Formula.bot :=
-    .modus_ponens ctx φ Formula.bot d_neg_phi
-      (.assumption ctx φ (by simp [List.mem_cons, ctx]))
-  have d1 := deductionTheorem [φ] (Formula.imp Formula.top (Formula.neg φ)) Formula.bot d_bot
-  exact deductionTheorem [] φ (Formula.and Formula.top φ) d1
+    DerivationTree FrameClass.Base [] (φ.imp (Formula.and Formula.top φ)) :=
+  -- d_top : ⊢ ⊤  (efq on ⊥ gives ⊥ → ⊥ = ⊤)
+  let d_top : DerivationTree FrameClass.Base [] Formula.top :=
+    DerivationTree.axiom [] Formula.top (.efq Formula.bot) le_rfl
+  -- d_andI_ax : ⊢ ⊤ → (φ → ⊤ ∧ φ)
+  let d_andI_ax : DerivationTree FrameClass.Base []
+      (Formula.top.imp (φ.imp (Formula.and Formula.top φ))) :=
+    DerivationTree.axiom [] _ (.and_intro Formula.top φ) trivial
+  -- MP: from ⊤ → (φ → ⊤ ∧ φ) and ⊤, derive φ → ⊤ ∧ φ
+  DerivationTree.modus_ponens [] Formula.top _ d_andI_ax d_top
 
 /-- ¬¬X ∈ Ω ↔ X ∈ Ω in MCS. -/
 theorem mcs_dne

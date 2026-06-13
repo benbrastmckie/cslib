@@ -165,15 +165,39 @@ theorem provEquiv_imp_congr {φ₁ φ₂ ψ₁ ψ₂ : Formula Atom}
 /-- Conjunction respects provable equivalence. -/
 theorem provEquiv_and_congr {φ₁ φ₂ ψ₁ ψ₂ : Formula Atom}
     (hφ : φ₁ ≈ₚ φ₂) (hψ : ψ₁ ≈ₚ ψ₂) : φ₁.and ψ₁ ≈ₚ φ₂.and ψ₂ := by
-  have hψ_neg := provEquiv_neg_congr hψ
-  have h_imp := provEquiv_imp_congr hφ hψ_neg
-  exact provEquiv_neg_congr h_imp
+  unfold ProvEquiv Derives at *
+  obtain ⟨⟨d_φ_fwd⟩, ⟨d_φ_bwd⟩⟩ := hφ
+  obtain ⟨⟨d_ψ_fwd⟩, ⟨d_ψ_bwd⟩⟩ := hψ
+  constructor
+  · exact ⟨Theorems.Combinators.combineImpConj
+      (Theorems.Combinators.impTrans (Theorems.Propositional.lceImp φ₁ ψ₁) d_φ_fwd)
+      (Theorems.Combinators.impTrans (Theorems.Propositional.rceImp φ₁ ψ₁) d_ψ_fwd)⟩
+  · exact ⟨Theorems.Combinators.combineImpConj
+      (Theorems.Combinators.impTrans (Theorems.Propositional.lceImp φ₂ ψ₂) d_φ_bwd)
+      (Theorems.Combinators.impTrans (Theorems.Propositional.rceImp φ₂ ψ₂) d_ψ_bwd)⟩
 
 /-- Disjunction respects provable equivalence. -/
 theorem provEquiv_or_congr {φ₁ φ₂ ψ₁ ψ₂ : Formula Atom}
     (hφ : φ₁ ≈ₚ φ₂) (hψ : ψ₁ ≈ₚ ψ₂) : φ₁.or ψ₁ ≈ₚ φ₂.or ψ₂ := by
-  have hφ_neg := provEquiv_neg_congr hφ
-  exact provEquiv_imp_congr hφ_neg hψ
+  unfold ProvEquiv Derives at *
+  obtain ⟨⟨d_φ_fwd⟩, ⟨d_φ_bwd⟩⟩ := hφ
+  obtain ⟨⟨d_ψ_fwd⟩, ⟨d_ψ_bwd⟩⟩ := hψ
+  -- Build ⊢ φ₁∨ψ₁ → φ₂∨ψ₂ using orE, orI1, orI2
+  have mk_or_impl : ∀ (a b c d : Formula Atom),
+      DerivationTree FrameClass.Base [] (a.imp c) →
+      DerivationTree FrameClass.Base [] (b.imp d) →
+      DerivationTree FrameClass.Base [] ((a.or b).imp (c.or d)) := fun a b c d hac hbd => by
+    have orI1_cd := DerivationTree.axiom (fc := FrameClass.Base) [] _ (Axiom.orI1 c d) trivial
+    have orI2_cd := DerivationTree.axiom (fc := FrameClass.Base) [] _ (Axiom.orI2 c d) trivial
+    have h_a_to_cd := Theorems.Combinators.impTrans hac orI1_cd
+    have h_b_to_cd := Theorems.Combinators.impTrans hbd orI2_cd
+    have orE_ax := DerivationTree.axiom (fc := FrameClass.Base) []
+        _ (Axiom.orE a b (c.or d)) trivial
+    exact DerivationTree.modus_ponens [] _ _
+      (DerivationTree.modus_ponens [] _ _ orE_ax h_a_to_cd) h_b_to_cd
+  constructor
+  · exact ⟨mk_or_impl _ _ _ _ d_φ_fwd d_ψ_fwd⟩
+  · exact ⟨mk_or_impl _ _ _ _ d_φ_bwd d_ψ_bwd⟩
 
 /-- Negation lifted to the Lindenbaum algebra quotient. -/
 noncomputable def negQuot : LindenbaumAlg Atom → LindenbaumAlg Atom :=

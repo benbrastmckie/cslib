@@ -26,15 +26,14 @@ namespace Cslib.Logic
 
 /-- Embed a propositional formula into temporal logic.
 
-The `and` and `or` cases use Lukasiewicz encoding into `{atom, bot, imp, untl, snce}`:
-- `A ∧ B` maps to `¬(A → ¬B)` = `(A → (B → ⊥)) → ⊥`
-- `A ∨ B` maps to `¬A → B` = `(A → ⊥) → B` -/
+Each propositional constructor maps to the corresponding temporal constructor: `and` to `and`
+and `or` to `or`, preserving the native primitive structure of both formula types. -/
 def PL.Proposition.toTemporal : PL.Proposition Atom → Temporal.Formula Atom
   | .atom p => .atom p
   | .bot => .bot
   | .imp φ₁ φ₂ => .imp (φ₁.toTemporal) (φ₂.toTemporal)
-  | .and φ₁ φ₂ => .imp (.imp φ₁.toTemporal (.imp φ₂.toTemporal .bot)) .bot
-  | .or φ₁ φ₂ => .imp (.imp φ₁.toTemporal .bot) φ₂.toTemporal
+  | .and φ₁ φ₂ => .and (φ₁.toTemporal) (φ₂.toTemporal)
+  | .or φ₁ φ₂ => .or (φ₁.toTemporal) (φ₂.toTemporal)
 
 /-- Coercion from propositional to temporal formulas. -/
 instance instCoePLToTemporal : Coe (PL.Proposition Atom) (Temporal.Formula Atom) where
@@ -55,17 +54,17 @@ theorem PL.Proposition.toTemporal_bot :
 theorem PL.Proposition.toTemporal_imp (φ₁ φ₂ : PL.Proposition Atom) :
     (PL.Proposition.imp φ₁ φ₂).toTemporal = Temporal.Formula.imp φ₁.toTemporal φ₂.toTemporal := rfl
 
-/-- Embedding preserves and (Lukasiewicz encoding). -/
+/-- Embedding preserves and. -/
 @[simp]
 theorem PL.Proposition.toTemporal_and (φ₁ φ₂ : PL.Proposition Atom) :
     (PL.Proposition.and φ₁ φ₂).toTemporal =
-    .imp (.imp φ₁.toTemporal (.imp φ₂.toTemporal .bot)) .bot := rfl
+    Temporal.Formula.and φ₁.toTemporal φ₂.toTemporal := rfl
 
-/-- Embedding preserves or (Lukasiewicz encoding). -/
+/-- Embedding preserves or. -/
 @[simp]
 theorem PL.Proposition.toTemporal_or (φ₁ φ₂ : PL.Proposition Atom) :
     (PL.Proposition.or φ₁ φ₂).toTemporal =
-    .imp (.imp φ₁.toTemporal .bot) φ₂.toTemporal := rfl
+    Temporal.Formula.or φ₁.toTemporal φ₂.toTemporal := rfl
 
 /-- Embedding preserves neg. -/
 theorem PL.Proposition.toTemporal_neg (φ : PL.Proposition Atom) :

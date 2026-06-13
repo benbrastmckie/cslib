@@ -320,21 +320,19 @@ def temp_4_derived (phi : Formula Atom) :
   have topAndIntro : DerivationTree FrameClass.Base ([] : List (Formula Atom))
       ((Formula.someFuture phi.neg).imp
        (Formula.top.and (Formula.someFuture phi.neg))) := by
-    -- We need: X -> top and X where top = bot -> bot and and is conjunction
-    -- pairing gives: top -> (X -> top and X) (at typeclass level)
-    -- identity gives: |- top (i.e., |- bot -> bot)
-    -- mp gives: |- X -> top and X
+    -- We need: X -> top and X
+    -- Use HasAxiomAndI: ⊢ top → X → top ∧ X
+    -- Then mp with ⊢ top to get ⊢ X → top ∧ X
     let X := Formula.someFuture phi.neg
     -- Derive |- top (bot -> bot) using identity
     have h_top : DerivationTree FrameClass.Base ([] : List (Formula Atom))
         (Formula.top (Atom := Atom)) :=
       Cslib.Logic.Bimodal.Theorems.Perpetuity.identity (Atom := Atom) Formula.bot
-    -- Derive |- top -> (X -> top and X) using pairing
+    -- Derive |- top -> (X -> top and X) using AndI axiom (native conjunction)
     have h_pair : DerivationTree FrameClass.Base ([] : List (Formula Atom))
-        (Formula.top.imp (X.imp (Formula.top.and X))) := by
-      exact unwrap
-        (@Cslib.Logic.Theorems.Combinators.pairing (Formula Atom) _ _
-          Bimodal.HilbertTM _ _ (Formula.top (Atom := Atom)) X)
+        (Formula.top.imp (X.imp (Formula.top.and X))) :=
+      unwrap (HasAxiomAndI.andI (φ := Formula.top) (ψ := X) :
+        InferenceSystem.DerivableIn Bimodal.HilbertTM _)
     -- mp: |- X -> top and X
     exact DerivationTree.modus_ponens [] _ _ h_pair h_top
   have ff_to_f_top_and : DerivationTree FrameClass.Base ([] : List (Formula Atom))
@@ -483,5 +481,53 @@ theorem SetMaximalConsistent.neg_excludes {fc : FrameClass}
     (phi : Formula Atom) (h_neg : phi.neg ∈ Omega) : phi ∉ Omega := by
   intro h_phi
   exact set_consistent_not_both h_mcs.1 phi h_phi h_neg
+
+/--
+Or-resolution for MCS: from `(φ ∨ ψ) ∈ Ω` and `(¬φ) ∈ Ω`, conclude `ψ ∈ Ω`.
+
+Proof strategy:
+1. Build `⊢ ¬φ → (φ → ψ)` via efq: context [¬φ, φ] derives ⊥ then ψ, then
+   apply deduction theorem twice.
+2. Apply `implication_property` twice to get `(φ → ψ) ∈ Ω`.
+3. Build `⊢ (φ → ψ) → ((ψ → ψ) → ((φ ∨ ψ) → ψ))` from the orE axiom.
+4. Build `⊢ ψ → ψ` (identity combinator).
+5. Chain implication properties to get `(φ ∨ ψ) → ψ ∈ Ω`, then apply to `h_or`.
+-/
+theorem SetMaximalConsistent.mcs_or_resolve {fc : FrameClass}
+    {Omega : Set (Formula Atom)} {phi psi : Formula Atom}
+    (h_mcs : SetMaximalConsistent fc Omega)
+    (h_or : (Formula.or phi psi) ∈ Omega) (h_neg : phi.neg ∈ Omega) : psi ∈ Omega := by
+  -- Step 1: ⊢ ¬φ → (φ → ψ)
+  have d_neg_to_imp : DerivationTree fc [] (phi.neg.imp (phi.imp psi)) := by
+    let ctx := [phi, phi.neg]
+    have d_bot : DerivationTree fc ctx Formula.bot :=
+      .modus_ponens ctx phi Formula.bot
+        (.assumption ctx phi.neg (by simp [List.mem_cons, ctx]))
+        (.assumption ctx phi (by simp [List.mem_cons, ctx]))
+    have d_psi : DerivationTree fc ctx psi :=
+      .modus_ponens ctx Formula.bot psi
+        (.weakening [] ctx _ (.axiom [] _ (.efq psi) (FrameClass.base_le fc)) (fun _ h => nomatch h))
+        d_bot
+    exact deductionTheorem [] phi.neg (phi.imp psi) (deductionTheorem [phi.neg] phi psi d_psi)
+  -- Step 2: (φ → ψ) ∈ Ω
+  have h_phi_to_psi : (phi.imp psi) ∈ Omega :=
+    SetMaximalConsistent.implication_property h_mcs
+      (theoremInMcsFc h_mcs d_neg_to_imp) h_neg
+  -- Step 3: ⊢ ψ → ψ (inline SKK construction: MP (MP imp_k imp_s) imp_s)
+  have d_id : DerivationTree fc [] (psi.imp psi) :=
+    .modus_ponens [] _ _
+      (.modus_ponens [] _ _
+        (.axiom [] _ (.imp_k psi (psi.imp psi) psi) (FrameClass.base_le fc))
+        (.axiom [] _ (.imp_s psi (psi.imp psi)) (FrameClass.base_le fc)))
+      (.axiom [] _ (.imp_s psi psi) (FrameClass.base_le fc))
+  -- Step 4: get ((ψ → ψ) → ((φ ∨ ψ) → ψ)) ∈ Ω via orE and h_phi_to_psi
+  have h_id_to_or : ((psi.imp psi).imp ((Formula.or phi psi).imp psi)) ∈ Omega :=
+    SetMaximalConsistent.implication_property h_mcs
+      (theoremInMcsFc h_mcs (.axiom [] _ (.orE phi psi psi) (FrameClass.base_le fc)))
+      h_phi_to_psi
+  -- Step 5: get ((φ ∨ ψ) → ψ) ∈ Ω, then conclude
+  have h_or_to_psi : ((Formula.or phi psi).imp psi) ∈ Omega :=
+    SetMaximalConsistent.implication_property h_mcs h_id_to_or (theoremInMcsFc h_mcs d_id)
+  exact SetMaximalConsistent.implication_property h_mcs h_or_to_psi h_or
 
 end Cslib.Logic.Bimodal.Metalogic.Core

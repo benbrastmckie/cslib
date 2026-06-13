@@ -93,6 +93,12 @@ theorem axiom_sound_dense {D : Type*} [LinearOrder D] [DenselyOrdered D]
   | imp_s => exact axiom_sound (.imp_s _ _) (FrameClass.base_le _) M t
   | efq => exact axiom_sound (.efq _) (FrameClass.base_le _) M t
   | peirce => exact axiom_sound (.peirce _ _) (FrameClass.base_le _) M t
+  | and_intro => exact axiom_sound (.and_intro _ _) (FrameClass.base_le _) M t
+  | and_elim_left => exact axiom_sound (.and_elim_left _ _) (FrameClass.base_le _) M t
+  | and_elim_right => exact axiom_sound (.and_elim_right _ _) (FrameClass.base_le _) M t
+  | or_intro_left => exact axiom_sound (.or_intro_left _ _) (FrameClass.base_le _) M t
+  | or_intro_right => exact axiom_sound (.or_intro_right _ _) (FrameClass.base_le _) M t
+  | or_elim => exact axiom_sound (.or_elim _ _ _) (FrameClass.base_le _) M t
   | serial_future => exact axiom_sound .serial_future (FrameClass.base_le _) M t
   | serial_past => exact axiom_sound .serial_past (FrameClass.base_le _) M t
   | left_mono_until_G => exact axiom_sound (.left_mono_until_G _ _ _) (FrameClass.base_le _) M t

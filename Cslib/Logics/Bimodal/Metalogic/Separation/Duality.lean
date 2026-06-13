@@ -71,6 +71,12 @@ theorem swapTemporal_int_truth
   | imp phi psi ih1 ih2 =>
     simp only [Formula.swapTemporal, intTruth]
     rw [ih1, ih2]
+  | and phi psi ih1 ih2 =>
+    simp only [Formula.swapTemporal, intTruth]
+    rw [ih1, ih2]
+  | or phi psi ih1 ih2 =>
+    simp only [Formula.swapTemporal, intTruth]
+    rw [ih1, ih2]
   | box phi _ih =>
     simp [Formula.swapTemporal, intTruth]
   | untl phi psi ih1 ih2 =>
@@ -134,6 +140,12 @@ theorem dual_U_free_iff_S_free (phi : Formula Atom) :
   | imp a b ih1 ih2 =>
     simp [Formula.swapTemporal, isUFree,
       isSFree, ih1, ih2]
+  | and a b ih1 ih2 =>
+    simp [Formula.swapTemporal, isUFree,
+      isSFree, ih1, ih2]
+  | or a b ih1 ih2 =>
+    simp [Formula.swapTemporal, isUFree,
+      isSFree, ih1, ih2]
   | box a ih =>
     simp [Formula.swapTemporal, isUFree,
       isSFree, ih]
@@ -150,6 +162,12 @@ theorem dual_S_free_iff_U_free (phi : Formula Atom) :
   | atom _ => rfl
   | bot => rfl
   | imp a b ih1 ih2 =>
+    simp [Formula.swapTemporal, isUFree,
+      isSFree, ih1, ih2]
+  | and a b ih1 ih2 =>
+    simp [Formula.swapTemporal, isUFree,
+      isSFree, ih1, ih2]
+  | or a b ih1 ih2 =>
     simp [Formula.swapTemporal, isUFree,
       isSFree, ih1, ih2]
   | box a ih =>
@@ -169,6 +187,12 @@ theorem dual_separated (phi : Formula Atom) :
   | atom _ => rfl
   | bot => rfl
   | imp a b ih1 ih2 =>
+    simp [Formula.swapTemporal,
+      isSyntacticallySeparated, ih1, ih2]
+  | and a b ih1 ih2 =>
+    simp [Formula.swapTemporal,
+      isSyntacticallySeparated, ih1, ih2]
+  | or a b ih1 ih2 =>
     simp [Formula.swapTemporal,
       isSyntacticallySeparated, ih1, ih2]
   | box _a =>
@@ -207,6 +231,12 @@ theorem dual_future_only_iff_past_only
   | imp a b ih1 ih2 =>
     simp [Formula.swapTemporal, isFutureOnly,
       isPastOnly, ih1, ih2]
+  | and a b ih1 ih2 =>
+    simp [Formula.swapTemporal, isFutureOnly,
+      isPastOnly, ih1, ih2]
+  | or a b ih1 ih2 =>
+    simp [Formula.swapTemporal, isFutureOnly,
+      isPastOnly, ih1, ih2]
   | box a ih =>
     simp [Formula.swapTemporal, isFutureOnly,
       isPastOnly, ih]
@@ -228,6 +258,12 @@ theorem dual_past_only_iff_future_only
   | imp a b ih1 ih2 =>
     simp [Formula.swapTemporal, isFutureOnly,
       isPastOnly, ih1, ih2]
+  | and a b ih1 ih2 =>
+    simp [Formula.swapTemporal, isFutureOnly,
+      isPastOnly, ih1, ih2]
+  | or a b ih1 ih2 =>
+    simp [Formula.swapTemporal, isFutureOnly,
+      isPastOnly, ih1, ih2]
   | box a ih =>
     simp [Formula.swapTemporal, isFutureOnly,
       isPastOnly, ih]
@@ -246,6 +282,12 @@ theorem dual_properly_separated (phi : Formula Atom) :
   | atom _ => rfl
   | bot => rfl
   | imp a b ih1 ih2 =>
+    simp [Formula.swapTemporal,
+      isProperlySeparated, ih1, ih2]
+  | and a b ih1 ih2 =>
+    simp [Formula.swapTemporal,
+      isProperlySeparated, ih1, ih2]
+  | or a b ih1 ih2 =>
     simp [Formula.swapTemporal,
       isProperlySeparated, ih1, ih2]
   | box _a =>
@@ -285,6 +327,12 @@ theorem future_only_imp_S_free
   | imp a b ih1 ih2 =>
     simp [isFutureOnly] at h
     simp [isSFree, ih1 h.1, ih2 h.2]
+  | and a b ih1 ih2 =>
+    simp [isFutureOnly] at h
+    simp [isSFree, ih1 h.1, ih2 h.2]
+  | or a b ih1 ih2 =>
+    simp [isFutureOnly] at h
+    simp [isSFree, ih1 h.1, ih2 h.2]
   | box a ih =>
     simp [isFutureOnly] at h
     simp [isSFree, ih h]
@@ -304,6 +352,12 @@ theorem past_only_imp_U_free
   | imp a b ih1 ih2 =>
     simp [isPastOnly] at h
     simp [isUFree, ih1 h.1, ih2 h.2]
+  | and a b ih1 ih2 =>
+    simp [isPastOnly] at h
+    simp [isUFree, ih1 h.1, ih2 h.2]
+  | or a b ih1 ih2 =>
+    simp [isPastOnly] at h
+    simp [isUFree, ih1 h.1, ih2 h.2]
   | box a ih =>
     simp [isPastOnly] at h
     simp [isUFree, ih h]
@@ -321,6 +375,14 @@ theorem properly_separated_imp_syntactically_separated
   | atom _ => rfl
   | bot => rfl
   | imp a b ih1 ih2 =>
+    simp [isProperlySeparated] at h
+    simp [isSyntacticallySeparated,
+      ih1 h.1, ih2 h.2]
+  | and a b ih1 ih2 =>
+    simp [isProperlySeparated] at h
+    simp [isSyntacticallySeparated,
+      ih1 h.1, ih2 h.2]
+  | or a b ih1 ih2 =>
     simp [isProperlySeparated] at h
     simp [isSyntacticallySeparated,
       ih1 h.1, ih2 h.2]

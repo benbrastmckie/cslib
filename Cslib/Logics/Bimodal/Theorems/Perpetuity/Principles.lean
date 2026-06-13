@@ -88,7 +88,8 @@ def boxToBoxPast (φ : Bimodal.Formula Atom) : ⊢ φ.box.imp (φ.allPast.box) :
 def boxConjIntroImp {φ₀ φ₁ φ₂ : Bimodal.Formula Atom}
     (hA : ⊢ φ₀.imp φ₁.box) (hB : ⊢ φ₀.imp φ₂.box) : ⊢ φ₀.imp (φ₁.and φ₂).box := by
   have pair : ⊢ φ₁.imp (φ₂.imp (φ₁.and φ₂)) :=
-    unwrap (@Theorems.Combinators.pairing _ _ _ Bimodal.HilbertTM _ _ φ₁ φ₂)
+    unwrap (HasAxiomAndI.andI (φ := φ₁) (ψ := φ₂) :
+      InferenceSystem.DerivableIn Bimodal.HilbertTM _)
   have box_pair := Bimodal.DerivationTree.necessitation _ pair
   have mk1 := ax [] _ (Bimodal.Axiom.modal_k_dist φ₁ (φ₂.imp (φ₁.and φ₂)))
   have h1 := Bimodal.DerivationTree.modus_ponens [] _ _ mk1 box_pair
@@ -135,13 +136,13 @@ def perpetuity_4 (φ : Bimodal.Formula Atom) : ⊢ φ.sometimes.diamond.imp φ.d
 def futureKDist (φ₁ φ₂ : Bimodal.Formula Atom) :
     ⊢ (φ₁.imp φ₂).allFuture.imp (φ₁.allFuture.imp φ₂.allFuture) := by
   exact unwrap (@Theorems.Temporal.TemporalDerived.G_distribution
-    (Bimodal.Formula Atom) _ _ _ _ Bimodal.HilbertTM _ _ (φ := φ₁) (ψ := φ₂))
+    (Bimodal.Formula Atom) _ _ _ _ _ _ Bimodal.HilbertTM _ _ (φ := φ₁) (ψ := φ₂))
 
 /-- H-distribution: `⊢ H(φ → ψ) → (Hφ → Hψ)`. Wraps generic typeclass theorem. -/
 def pastKDist (φ₁ φ₂ : Bimodal.Formula Atom) :
     ⊢ (φ₁.imp φ₂).allPast.imp (φ₁.allPast.imp φ₂.allPast) := by
   exact unwrap (@Theorems.Temporal.TemporalDerived.H_distribution
-    (Bimodal.Formula Atom) _ _ _ _ Bimodal.HilbertTM _ _ (φ := φ₁) (ψ := φ₂))
+    (Bimodal.Formula Atom) _ _ _ _ _ _ Bimodal.HilbertTM _ _ (φ := φ₁) (ψ := φ₂))
 
 /-- Modal 5: `⊢ ◇φ → □◇φ`. Wraps S5 typeclass theorem. -/
 def modal_5 (φ : Bimodal.Formula Atom) : ⊢ φ.diamond.imp φ.diamond.box :=

@@ -205,6 +205,32 @@ instance :
   pSinceEquiv :=
     ⟨Temporal.DerivationTree.axiom [] _ (Temporal.Axiom.P_since_equiv _) trivial⟩
 
+/-! ## And/Or Axiom Instances (6) -/
+
+instance :
+    HasAxiomAndI Temporal.HilbertBX (F := Temporal.Formula Atom) where
+  andI := ⟨Temporal.DerivationTree.axiom [] _ (Temporal.Axiom.and_intro _ _) trivial⟩
+
+instance :
+    HasAxiomAndE1 Temporal.HilbertBX (F := Temporal.Formula Atom) where
+  andE1 := ⟨Temporal.DerivationTree.axiom [] _ (Temporal.Axiom.and_elim_left _ _) trivial⟩
+
+instance :
+    HasAxiomAndE2 Temporal.HilbertBX (F := Temporal.Formula Atom) where
+  andE2 := ⟨Temporal.DerivationTree.axiom [] _ (Temporal.Axiom.and_elim_right _ _) trivial⟩
+
+instance :
+    HasAxiomOrI1 Temporal.HilbertBX (F := Temporal.Formula Atom) where
+  orI1 := ⟨Temporal.DerivationTree.axiom [] _ (Temporal.Axiom.or_intro_left _ _) trivial⟩
+
+instance :
+    HasAxiomOrI2 Temporal.HilbertBX (F := Temporal.Formula Atom) where
+  orI2 := ⟨Temporal.DerivationTree.axiom [] _ (Temporal.Axiom.or_intro_right _ _) trivial⟩
+
+instance :
+    HasAxiomOrE Temporal.HilbertBX (F := Temporal.Formula Atom) where
+  orE := ⟨Temporal.DerivationTree.axiom [] _ (Temporal.Axiom.or_elim _ _ _) trivial⟩
+
 /-! ## TemporalBXHilbert Instance -/
 
 /-- The bundled `TemporalBXHilbert` instance for `Temporal.HilbertBX`. -/

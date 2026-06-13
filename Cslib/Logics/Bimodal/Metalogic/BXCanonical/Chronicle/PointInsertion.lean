@@ -242,20 +242,20 @@ theorem connect_future_mcs (fc : FrameClass) {A : Set (Formula Atom)}
 theorem conj_mcs (fc : FrameClass) {A : Set (Formula Atom)}
     (h_mcs : SetMaximalConsistent fc A) (φ ψ : Formula Atom)
     (h_φ : φ ∈ A) (h_ψ : ψ ∈ A) :
-    Formula.and φ ψ ∈ A := by
-  rcases SetMaximalConsistent.negation_complete h_mcs (φ.imp ψ.neg) with h | h
-  · have h_neg_ψ := SetMaximalConsistent.implication_property h_mcs h h_φ
-    exact absurd h_ψ (SetMaximalConsistent.neg_excludes h_mcs _ h_neg_ψ)
-  · exact h
+    Formula.and φ ψ ∈ A :=
+  SetMaximalConsistent.implication_property h_mcs
+    (SetMaximalConsistent.implication_property h_mcs
+      (theoremInMcsFc h_mcs (DerivationTree.axiom [] _ (Axiom.andI φ ψ) (FrameClass.base_le fc)))
+      h_φ)
+    h_ψ
 
-/-- MCS disjunction elimination (local version): If (φ ∨ ψ) ∈ A then φ ∈ A ∨ ψ ∈ A.
-Recall φ.or ψ = φ.neg.imp ψ. -/
+/-- MCS disjunction elimination (local version): If (φ ∨ ψ) ∈ A then φ ∈ A ∨ ψ ∈ A. -/
 theorem or_elim_mcs (fc : FrameClass) {A : Set (Formula Atom)}
     (h_mcs : SetMaximalConsistent fc A) {φ ψ : Formula Atom}
     (h : (φ.or ψ) ∈ A) : φ ∈ A ∨ ψ ∈ A := by
   rcases SetMaximalConsistent.negation_complete h_mcs φ with h_φ | h_neg_φ
   · exact Or.inl h_φ
-  · exact Or.inr (SetMaximalConsistent.implication_property h_mcs h h_neg_φ)
+  · exact Or.inr (SetMaximalConsistent.mcs_or_resolve h_mcs h h_neg_φ)
 
 /-- BX7 (linear_until) at MCS level: If U(φ,ψ) ∈ A and U(χ,θ) ∈ A,
 then one of three disjuncts holds:
@@ -1934,9 +1934,8 @@ theorem l27_collect_guards_mem_of_B (fc : FrameClass) {A B C : Set (Formula Atom
 
 /-- Formula.and is injective in the first argument. -/
 theorem formula_and_left_cancel (fc : FrameClass) {a b c : Formula Atom}
-    (h : Formula.and a c = Formula.and b c) : a = b := by
-  simp only [Formula.and, Formula.neg] at h
-  exact (Formula.imp.injEq _ _ _ _ |>.mp (Formula.imp.injEq _ _ _ _ |>.mp h).1).1
+    (h : Formula.and a c = Formula.and b c) : a = b :=
+  (Formula.and.inj h).1
 
 /-- l27_guard for snce(β'∧xi,α') when snce(β'∧xi,α') ∉ B returns β'. -/
 theorem l27_guard_snce_xi_val (fc : FrameClass) {A B C : Set (Formula Atom)}
@@ -2674,8 +2673,7 @@ theorem l27s_b5_β_mem {B C : Set (Formula Atom)} {xi : Formula Atom}
   have h_spec := Classical.choose_spec h
   obtain ⟨_, γ'', _, h_formula_eq⟩ := h_spec
   have h_inj := Formula.untl.inj h_formula_eq
-  simp only [Formula.and, Formula.neg] at h_inj
-  exact congr_arg some ((Formula.imp.inj (Formula.imp.inj h_inj.2).1).1).symm
+  exact congr_arg some (Formula.and.inj h_inj.2).1.symm
 
 /-- Since-direction seed consistency (simplified via Xu 3.2.1):
 Given BurgessR3Maximal(A, B, C) with snce(xi, eta) ∈ C and xi ∉ B,

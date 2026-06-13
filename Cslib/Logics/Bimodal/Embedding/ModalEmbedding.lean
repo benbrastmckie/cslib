@@ -28,6 +28,8 @@ def Modal.Proposition.toBimodal : Modal.Proposition Atom → Bimodal.Formula Ato
   | .atom p => .atom p
   | .bot => .bot
   | .imp φ₁ φ₂ => .imp (φ₁.toBimodal) (φ₂.toBimodal)
+  | .and φ₁ φ₂ => .and (φ₁.toBimodal) (φ₂.toBimodal)
+  | .or φ₁ φ₂ => .or (φ₁.toBimodal) (φ₂.toBimodal)
   | .box φ => .box (φ.toBimodal)
 
 /-- Coercion from modal to bimodal formulas. -/
@@ -49,6 +51,18 @@ theorem Modal.Proposition.toBimodal_bot :
 theorem Modal.Proposition.toBimodal_imp (φ₁ φ₂ : Modal.Proposition Atom) :
     (Modal.Proposition.imp φ₁ φ₂).toBimodal =
       Bimodal.Formula.imp φ₁.toBimodal φ₂.toBimodal := rfl
+
+/-- Embedding preserves and. -/
+@[simp]
+theorem Modal.Proposition.toBimodal_and (φ₁ φ₂ : Modal.Proposition Atom) :
+    (Modal.Proposition.and φ₁ φ₂).toBimodal =
+      Bimodal.Formula.and φ₁.toBimodal φ₂.toBimodal := rfl
+
+/-- Embedding preserves or. -/
+@[simp]
+theorem Modal.Proposition.toBimodal_or (φ₁ φ₂ : Modal.Proposition Atom) :
+    (Modal.Proposition.or φ₁ φ₂).toBimodal =
+      Bimodal.Formula.or φ₁.toBimodal φ₂.toBimodal := rfl
 
 /-- Embedding preserves box. -/
 @[simp]

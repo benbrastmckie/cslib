@@ -61,6 +61,8 @@ inductive ExtFormula (Atom : Type u) : Type u where
   | atom : ExtAtom Atom → ExtFormula Atom
   | bot : ExtFormula Atom
   | imp : ExtFormula Atom → ExtFormula Atom → ExtFormula Atom
+  | and : ExtFormula Atom → ExtFormula Atom → ExtFormula Atom
+  | or : ExtFormula Atom → ExtFormula Atom → ExtFormula Atom
   | box : ExtFormula Atom → ExtFormula Atom
   | untl : ExtFormula Atom → ExtFormula Atom → ExtFormula Atom
   | snce : ExtFormula Atom → ExtFormula Atom → ExtFormula Atom
@@ -73,12 +75,6 @@ def top : ExtFormula Atom := ExtFormula.bot.imp ExtFormula.bot
 
 /-- Negation: ¬φ := φ → ⊥ -/
 def neg (φ : ExtFormula Atom) : ExtFormula Atom := φ.imp bot
-
-/-- Conjunction: φ ∧ ψ := ¬(φ → ¬ψ) -/
-def and (φ ψ : ExtFormula Atom) : ExtFormula Atom := (φ.imp ψ.neg).neg
-
-/-- Disjunction: φ ∨ ψ := ¬φ → ψ -/
-def or (φ ψ : ExtFormula Atom) : ExtFormula Atom := φ.neg.imp ψ
 
 /-- Modal diamond: ◇φ := ¬□¬φ -/
 def diamond (φ : ExtFormula Atom) : ExtFormula Atom := φ.neg.box.neg
@@ -96,7 +92,8 @@ def allFuture (φ : ExtFormula Atom) : ExtFormula Atom := (someFuture φ.neg).ne
 def allPast (φ : ExtFormula Atom) : ExtFormula Atom := (somePast φ.neg).neg
 
 /-- Always: △φ := Hφ ∧ φ ∧ Gφ -/
-def always (φ : ExtFormula Atom) : ExtFormula Atom := allPast φ |>.and (φ.and (allFuture φ))
+def always (φ : ExtFormula Atom) : ExtFormula Atom :=
+  ExtFormula.and (allPast φ) (ExtFormula.and φ (allFuture φ))
 
 /-- Sometimes: ▽φ := ¬△¬φ -/
 def sometimes (φ : ExtFormula Atom) : ExtFormula Atom := φ.neg.always.neg
@@ -106,6 +103,8 @@ def swapTemporal : ExtFormula Atom → ExtFormula Atom
   | atom s => atom s
   | bot => bot
   | imp φ ψ => imp φ.swapTemporal ψ.swapTemporal
+  | and φ ψ => and φ.swapTemporal ψ.swapTemporal
+  | or φ ψ => or φ.swapTemporal ψ.swapTemporal
   | box φ => box φ.swapTemporal
   | untl φ ψ => snce φ.swapTemporal ψ.swapTemporal
   | snce φ ψ => untl φ.swapTemporal ψ.swapTemporal
@@ -119,6 +118,8 @@ def atoms : ExtFormula Atom → Finset (ExtAtom Atom)
   | atom s => {s}
   | bot => ∅
   | imp φ ψ => φ.atoms ∪ ψ.atoms
+  | and φ ψ => φ.atoms ∪ ψ.atoms
+  | or φ ψ => φ.atoms ∪ ψ.atoms
   | box φ => φ.atoms
   | untl φ ψ => φ.atoms ∪ ψ.atoms
   | snce φ ψ => φ.atoms ∪ ψ.atoms
@@ -130,6 +131,8 @@ def complexity : ExtFormula Atom → Nat
   | atom _ => 1
   | bot => 1
   | imp φ ψ => 1 + φ.complexity + ψ.complexity
+  | and φ ψ => 1 + φ.complexity + ψ.complexity
+  | or φ ψ => 1 + φ.complexity + ψ.complexity
   | box φ => 1 + φ.complexity
   | untl φ ψ => 1 + φ.complexity + ψ.complexity
   | snce φ ψ => 1 + φ.complexity + ψ.complexity
@@ -148,6 +151,8 @@ def embedFormula : Formula Atom → ExtFormula Atom
   | Formula.atom a => ExtFormula.atom (embedAtom a)
   | Formula.bot => ExtFormula.bot
   | Formula.imp φ ψ => ExtFormula.imp (embedFormula φ) (embedFormula ψ)
+  | Formula.and φ ψ => ExtFormula.and (embedFormula φ) (embedFormula ψ)
+  | Formula.or φ ψ => ExtFormula.or (embedFormula φ) (embedFormula ψ)
   | Formula.box φ => ExtFormula.box (embedFormula φ)
   | Formula.untl φ ψ => ExtFormula.untl (embedFormula φ) (embedFormula ψ)
   | Formula.snce φ ψ => ExtFormula.snce (embedFormula φ) (embedFormula ψ)
@@ -217,6 +222,8 @@ theorem embedFormula_swapTemporal (φ : Formula Atom) :
   | atom _ => rfl
   | bot => rfl
   | imp _ _ ih1 ih2 => simp [Formula.swapTemporal, ExtFormula.swapTemporal, embedFormula, ih1, ih2]
+  | and _ _ ih1 ih2 => simp [Formula.swapTemporal, ExtFormula.swapTemporal, embedFormula, ih1, ih2]
+  | or _ _ ih1 ih2 => simp [Formula.swapTemporal, ExtFormula.swapTemporal, embedFormula, ih1, ih2]
   | box _ ih => simp [Formula.swapTemporal, ExtFormula.swapTemporal, embedFormula, ih]
   | untl _ _ ih1 ih2 =>
     simp [Formula.swapTemporal, ExtFormula.swapTemporal, embedFormula, ih1, ih2]
@@ -238,6 +245,8 @@ theorem embedFormula_injective : Function.Injective (embedFormula : Formula Atom
     | atom t => simp [embedFormula, embedAtom] at h; exact congrArg Formula.atom h
     | bot => simp [embedFormula] at h
     | imp _ _ => simp [embedFormula] at h
+    | and _ _ => simp [embedFormula] at h
+    | or _ _ => simp [embedFormula] at h
     | box _ => simp [embedFormula] at h
     | untl _ _ => simp [embedFormula] at h
     | snce _ _ => simp [embedFormula] at h
@@ -246,6 +255,8 @@ theorem embedFormula_injective : Function.Injective (embedFormula : Formula Atom
     | bot => rfl
     | atom _ => simp [embedFormula] at h
     | imp _ _ => simp [embedFormula] at h
+    | and _ _ => simp [embedFormula] at h
+    | or _ _ => simp [embedFormula] at h
     | box _ => simp [embedFormula] at h
     | untl _ _ => simp [embedFormula] at h
     | snce _ _ => simp [embedFormula] at h
@@ -256,6 +267,32 @@ theorem embedFormula_injective : Function.Injective (embedFormula : Formula Atom
       exact congrArg₂ Formula.imp (iha h.1) (ihb h.2)
     | atom _ => simp [embedFormula] at h
     | bot => simp [embedFormula] at h
+    | and _ _ => simp [embedFormula] at h
+    | or _ _ => simp [embedFormula] at h
+    | box _ => simp [embedFormula] at h
+    | untl _ _ => simp [embedFormula] at h
+    | snce _ _ => simp [embedFormula] at h
+  | and a b iha ihb =>
+    cases ψ with
+    | and c d =>
+      simp [embedFormula] at h
+      exact congrArg₂ Formula.and (iha h.1) (ihb h.2)
+    | atom _ => simp [embedFormula] at h
+    | bot => simp [embedFormula] at h
+    | imp _ _ => simp [embedFormula] at h
+    | or _ _ => simp [embedFormula] at h
+    | box _ => simp [embedFormula] at h
+    | untl _ _ => simp [embedFormula] at h
+    | snce _ _ => simp [embedFormula] at h
+  | or a b iha ihb =>
+    cases ψ with
+    | or c d =>
+      simp [embedFormula] at h
+      exact congrArg₂ Formula.or (iha h.1) (ihb h.2)
+    | atom _ => simp [embedFormula] at h
+    | bot => simp [embedFormula] at h
+    | imp _ _ => simp [embedFormula] at h
+    | and _ _ => simp [embedFormula] at h
     | box _ => simp [embedFormula] at h
     | untl _ _ => simp [embedFormula] at h
     | snce _ _ => simp [embedFormula] at h
@@ -265,6 +302,8 @@ theorem embedFormula_injective : Function.Injective (embedFormula : Formula Atom
     | atom _ => simp [embedFormula] at h
     | bot => simp [embedFormula] at h
     | imp _ _ => simp [embedFormula] at h
+    | and _ _ => simp [embedFormula] at h
+    | or _ _ => simp [embedFormula] at h
     | untl _ _ => simp [embedFormula] at h
     | snce _ _ => simp [embedFormula] at h
   | untl a b iha ihb =>
@@ -275,6 +314,8 @@ theorem embedFormula_injective : Function.Injective (embedFormula : Formula Atom
     | atom _ => simp [embedFormula] at h
     | bot => simp [embedFormula] at h
     | imp _ _ => simp [embedFormula] at h
+    | and _ _ => simp [embedFormula] at h
+    | or _ _ => simp [embedFormula] at h
     | box _ => simp [embedFormula] at h
     | snce _ _ => simp [embedFormula] at h
   | snce a b iha ihb =>
@@ -285,6 +326,8 @@ theorem embedFormula_injective : Function.Injective (embedFormula : Formula Atom
     | atom _ => simp [embedFormula] at h
     | bot => simp [embedFormula] at h
     | imp _ _ => simp [embedFormula] at h
+    | and _ _ => simp [embedFormula] at h
+    | or _ _ => simp [embedFormula] at h
     | box _ => simp [embedFormula] at h
     | untl _ _ => simp [embedFormula] at h
 
@@ -309,6 +352,12 @@ theorem fresh_not_in_embedFormula_atoms (φ : Formula Atom) :
   | imp a b iha ihb =>
     simp [embedFormula, ExtFormula.atoms, Finset.mem_union]
     exact ⟨iha, ihb⟩
+  | and a b iha ihb =>
+    simp [embedFormula, ExtFormula.atoms, Finset.mem_union]
+    exact ⟨iha, ihb⟩
+  | or a b iha ihb =>
+    simp [embedFormula, ExtFormula.atoms, Finset.mem_union]
+    exact ⟨iha, ihb⟩
   | box a ih =>
     simp [embedFormula, ExtFormula.atoms]
     exact ih
@@ -331,6 +380,18 @@ theorem embedFormula_atoms_subset_inl (φ : Formula Atom) :
     intro a ha
     simp [embedFormula, ExtFormula.atoms] at ha
   | imp a b iha ihb =>
+    intro x hx
+    simp [embedFormula, ExtFormula.atoms, Finset.mem_union] at hx
+    cases hx with
+    | inl h => exact iha x h
+    | inr h => exact ihb x h
+  | and a b iha ihb =>
+    intro x hx
+    simp [embedFormula, ExtFormula.atoms, Finset.mem_union] at hx
+    cases hx with
+    | inl h => exact iha x h
+    | inr h => exact ihb x h
+  | or a b iha ihb =>
     intro x hx
     simp [embedFormula, ExtFormula.atoms, Finset.mem_union] at hx
     cases hx with
@@ -362,6 +423,10 @@ theorem embedAtom_mem_embedFormula_atoms_iff (p : Atom) (φ : Formula Atom) :
   | bot =>
     simp [embedFormula, ExtFormula.atoms, Formula.atoms]
   | imp a b iha ihb =>
+    simp [embedFormula, ExtFormula.atoms, Formula.atoms, Finset.mem_union, iha, ihb]
+  | and a b iha ihb =>
+    simp [embedFormula, ExtFormula.atoms, Formula.atoms, Finset.mem_union, iha, ihb]
+  | or a b iha ihb =>
     simp [embedFormula, ExtFormula.atoms, Formula.atoms, Finset.mem_union, iha, ihb]
   | box a ih =>
     simp [embedFormula, ExtFormula.atoms, Formula.atoms, ih]

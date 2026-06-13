@@ -58,6 +58,10 @@ def truthAt (M : TaskModel Atom ℱ) (Omega : Set (WorldHistory ℱ))
   | Formula.bot => False
   | Formula.imp φ ψ =>
     truthAt M Omega τ t φ → truthAt M Omega τ t ψ
+  | Formula.and φ ψ =>
+    truthAt M Omega τ t φ ∧ truthAt M Omega τ t ψ
+  | Formula.or φ ψ =>
+    truthAt M Omega τ t φ ∨ truthAt M Omega τ t ψ
   | Formula.box φ =>
     ∀ (σ : WorldHistory ℱ), σ ∈ Omega →
       truthAt M Omega σ t φ
@@ -317,6 +321,20 @@ theorem truth_double_shift_cancel (M : TaskModel Atom ℱ)
     · intro h h_ψ'
       have h_ψ := (ih_ψ t).mp h_ψ'
       exact (ih_χ t).mpr (h h_ψ)
+  | and ψ χ ih_ψ ih_χ =>
+    simp only [truthAt]
+    constructor
+    · intro ⟨hψ, hχ⟩
+      exact ⟨(ih_ψ t).mp hψ, (ih_χ t).mp hχ⟩
+    · intro ⟨hψ, hχ⟩
+      exact ⟨(ih_ψ t).mpr hψ, (ih_χ t).mpr hχ⟩
+  | or ψ χ ih_ψ ih_χ =>
+    simp only [truthAt]
+    constructor
+    · intro h
+      exact h.imp (ih_ψ t).mp (ih_χ t).mp
+    · intro h
+      exact h.imp (ih_ψ t).mpr (ih_χ t).mpr
   | box ψ ih =>
     simp only [truthAt]
   | untl φ ψ ih_φ ih_ψ =>
@@ -381,6 +399,20 @@ theorem time_shift_preserves_truth (M : TaskModel Atom ℱ)
     · intro h h_psi'
       have h_psi := (ih_ψ σ x y).mp h_psi'
       exact (ih_χ σ x y).mpr (h h_psi)
+  | and ψ χ ih_ψ ih_χ =>
+    simp only [truthAt]
+    constructor
+    · intro ⟨hψ, hχ⟩
+      exact ⟨(ih_ψ σ x y).mp hψ, (ih_χ σ x y).mp hχ⟩
+    · intro ⟨hψ, hχ⟩
+      exact ⟨(ih_ψ σ x y).mpr hψ, (ih_χ σ x y).mpr hχ⟩
+  | or ψ χ ih_ψ ih_χ =>
+    simp only [truthAt]
+    constructor
+    · intro h
+      exact h.imp (ih_ψ σ x y).mp (ih_χ σ x y).mp
+    · intro h
+      exact h.imp (ih_ψ σ x y).mpr (ih_χ σ x y).mpr
   | box ψ ih =>
     simp only [truthAt]
     constructor

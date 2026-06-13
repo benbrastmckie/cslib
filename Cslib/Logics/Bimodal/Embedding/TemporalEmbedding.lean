@@ -29,6 +29,8 @@ def Temporal.Formula.toBimodal : Temporal.Formula Atom → Bimodal.Formula Atom
   | .atom p => .atom p
   | .bot => .bot
   | .imp φ₁ φ₂ => .imp (φ₁.toBimodal) (φ₂.toBimodal)
+  | .and φ₁ φ₂ => .and (φ₁.toBimodal) (φ₂.toBimodal)
+  | .or φ₁ φ₂ => .or (φ₁.toBimodal) (φ₂.toBimodal)
   | .untl φ₁ φ₂ => .untl (φ₁.toBimodal) (φ₂.toBimodal)
   | .snce φ₁ φ₂ => .snce (φ₁.toBimodal) (φ₂.toBimodal)
 
@@ -51,6 +53,18 @@ theorem Temporal.Formula.toBimodal_bot :
 theorem Temporal.Formula.toBimodal_imp (φ₁ φ₂ : Temporal.Formula Atom) :
     (Temporal.Formula.imp φ₁ φ₂).toBimodal =
       Bimodal.Formula.imp φ₁.toBimodal φ₂.toBimodal := rfl
+
+/-- Embedding preserves and. -/
+@[simp]
+theorem Temporal.Formula.toBimodal_and (φ₁ φ₂ : Temporal.Formula Atom) :
+    (Temporal.Formula.and φ₁ φ₂).toBimodal =
+      Bimodal.Formula.and φ₁.toBimodal φ₂.toBimodal := rfl
+
+/-- Embedding preserves or. -/
+@[simp]
+theorem Temporal.Formula.toBimodal_or (φ₁ φ₂ : Temporal.Formula Atom) :
+    (Temporal.Formula.or φ₁ φ₂).toBimodal =
+      Bimodal.Formula.or φ₁.toBimodal φ₂.toBimodal := rfl
 
 /-- Embedding preserves untl. -/
 @[simp]

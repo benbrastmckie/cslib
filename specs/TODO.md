@@ -1,5 +1,5 @@
 ---
-next_project_number: 183
+next_project_number: 184
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 183
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,171,179,180 | -- | Bimodal Porting, Propositional Logic |
+| 1 | 36,37,171,179,180,183 | -- | Bimodal Porting, Propositional Logic |
 | 2 | 39,40,181 | 36,37,179,180 | Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -29,6 +29,7 @@ next_project_number: 183
 ### Propositional Logic
 
 171 [RESEARCHED] — Research connective-basis design for minimal, intuitionistic, and
+183 [NOT STARTED] — Establish strong completeness for the minimal, intuitionistic, an
 
 ### Temporal Logic
 
@@ -43,6 +44,16 @@ next_project_number: 183
   └─ 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors  (see above)
 
 ## Tasks
+
+### 183. Strong completeness propositional logics
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Establish strong completeness for the minimal, intuitionistic, and classical propositional logics
+
+---
 
 ### 181. Bimodal primitive dia always historically
 - **Status**: [NOT STARTED]

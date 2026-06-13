@@ -1,6 +1,17 @@
 {
-  "next_project_number": 183,
+  "next_project_number": 184,
   "active_projects": [
+    {
+      "project_number": 183,
+      "project_name": "strong_completeness_propositional_logics",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Establish strong completeness for the minimal, intuitionistic, and classical propositional logics",
+      "dependencies": [],
+      "created": "2026-06-13T18:15:05Z",
+      "last_updated": "2026-06-13T18:15:05Z"
+    },
     {
       "project_number": 171,
       "project_name": "research_connective_basis_min_int_classical",

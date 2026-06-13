@@ -8,7 +8,7 @@ module
 
 public import Cslib.Logics.Modal.FromPropositional
 public import Cslib.Logics.Modal.Metalogic.Systems.K.Soundness
-public import Cslib.Logics.Propositional.Metalogic.Completeness
+public import Cslib.Logics.Propositional.Metalogic.StrongCompleteness
 
 /-! # Modal K as a Conservative Extension of Classical Propositional Logic
 
@@ -47,7 +47,7 @@ then gives CPL derivability of `φ`. -/
 theorem modal_conservative_extension {Atom : Type*} {φ : PL.Proposition Atom}
     (h : Derivable (@KAxiom Atom) φ.toModal) :
     PL.Derivable PropositionalAxiom φ :=
-  prop_completeness φ (toModal_valid_implies_tautology
+  prop_completeness (toModal_valid_implies_tautology
     (fun _ m w => k_soundness_derivable h m w))
 
 end Cslib.Logic

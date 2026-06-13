@@ -145,4 +145,29 @@ theorem min_compactness {Γ : Set (PL.Proposition Atom)} {φ : PL.Proposition At
   apply min_strong_soundness
   exact ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
 
+/-! ## Weak Completeness Corollary -/
+
+/-- **Weak Completeness for Minimal Propositional Logic**:
+If `φ` is minimally valid (forced at every world of every minimal Kripke model),
+then `φ` is derivable from the empty context using `MinPropAxiom`.
+
+This is a corollary of `min_strong_completeness`: a minimally valid formula
+is a minimal semantic consequence of the empty set, so strong completeness
+gives set-derivability from `∅`, and `SetDerivable_empty_iff` converts this to
+ordinary derivability. -/
+theorem min_completeness {φ : PL.Proposition Atom}
+    (h_valid : MValid.{u, u} φ) : Derivable MinPropAxiom φ :=
+  SetDerivable_empty_iff.mp
+    (min_strong_completeness (MSemanticEntails_of_MValid h_valid ∅))
+
+/-- **Soundness and Completeness for Minimal Logic**:
+`φ` is minimally valid iff `φ` is derivable from the empty context
+using `MinPropAxiom`.
+
+This is a corollary of `min_strong_completeness_iff` obtained by instantiating at
+`Γ = ∅` and using `SetDerivable_empty_iff`. -/
+theorem min_soundness_completeness {φ : PL.Proposition Atom} :
+    MValid.{u, u} φ ↔ Derivable MinPropAxiom φ :=
+  ⟨min_completeness, min_soundness_derivable⟩
+
 end Cslib.Logic.PL

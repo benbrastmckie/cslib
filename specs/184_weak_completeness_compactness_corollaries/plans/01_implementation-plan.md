@@ -1,7 +1,7 @@
 # Implementation Plan: Weak Completeness and Compactness as Corollaries
 
 - **Task**: 184 - Derive weak completeness and compactness as clean corollaries of strong completeness
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 1.5 hours
 - **Dependencies**: 183 (strong completeness infrastructure)
 - **Research Inputs**: specs/184_weak_completeness_compactness_corollaries/reports/01_corollary-research.md
@@ -64,7 +64,7 @@ No ROADMAP.md items directly reference this task. This is a code-quality refacto
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Add Corollaries and Remove Old Proofs [NOT STARTED]
+### Phase 1: Add Corollaries and Remove Old Proofs [COMPLETED]
 
 **Goal**: Add weak completeness corollaries to the three strong completeness files and remove the standalone proofs from the three weak completeness files.
 
@@ -97,7 +97,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Update Downstream Imports and CI Verification [NOT STARTED]
+### Phase 2: Update Downstream Imports and CI Verification [COMPLETED]
 
 **Goal**: Fix the three downstream files that reference `prop_completeness` so they import from `StrongCompleteness` instead of `Completeness`, then run the full CI pipeline.
 

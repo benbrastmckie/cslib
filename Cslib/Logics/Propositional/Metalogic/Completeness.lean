@@ -8,20 +8,21 @@ module
 
 public import Cslib.Logics.Propositional.Semantics.Basic
 public import Cslib.Logics.Propositional.Metalogic.MCS
-public import Cslib.Logics.Propositional.Metalogic.Soundness
 
-/-! # Completeness Theorem for Classical Propositional Logic
+/-! # Canonical Model Infrastructure for Classical Propositional Logic
 
-This module proves completeness for classical propositional logic via the
-Henkin (canonical model / MCS) construction: every tautology is derivable.
+This module provides the canonical model (MCS) construction used in the completeness
+proof for classical propositional logic. The main completeness theorems are derived
+as corollaries of the strong completeness results in `StrongCompleteness.lean`.
 
 ## Main Results
 
 - `canonicalValuation`: The canonical valuation from a maximally consistent set.
 - `prop_truth_lemma`: `Evaluate (canonicalValuation S) φ ↔ φ ∈ S` for MCS `S`.
-- `prop_completeness`: `Tautology φ → Derivable PropositionalAxiom φ`.
-- `completeness_iff_tautology`:
-    `Tautology φ ↔ Derivable PropositionalAxiom φ`.
+
+See `Cslib.Logics.Propositional.Metalogic.StrongCompleteness` for:
+- `prop_completeness`: `Tautology φ → Derivable PropositionalAxiom φ`
+- `completeness_iff_tautology`: `Tautology φ ↔ Derivable PropositionalAxiom φ`
 
 ## References
 
@@ -306,104 +307,5 @@ theorem prop_truth_lemma
           h_implyK h_implyS h_mcs h_mem
           ((prop_truth_lemma h_mcs φ).mp
             h_sat_phi))
-
-/-! ## Completeness Theorem -/
-
-/-- **Completeness Theorem for Classical Propositional Logic**:
-
-If `φ` is a tautology (true under all valuations), then `φ` is
-derivable from the empty context using `PropositionalAxiom`. -/
-theorem prop_completeness (φ : PL.Proposition Atom)
-    (h_taut : Tautology φ) :
-    Derivable PropositionalAxiom φ := by
-  by_contra h_not_deriv
-  -- Show {¬φ} is consistent
-  have h_cons : PropSetConsistent PropositionalAxiom
-      ({(¬φ)} :
-        Set (PL.Proposition Atom)) := by
-    intro L hL
-    unfold Metalogic.Consistent
-    intro ⟨d⟩
-    -- Weaken to [¬φ] ⊢ ⊥
-    have d_weak :
-        DerivationTree PropositionalAxiom
-        [(¬φ)] ⊥ :=
-      .weakening L [(¬φ)] .bot d
-        (fun x hx => by
-          have := Set.mem_singleton_iff.mp (hL x hx)
-          exact List.mem_cons.mpr (Or.inl this))
-    -- Deduction theorem: [] ⊢ ¬φ → ⊥
-    have d_dne := deductionTheorem
-      h_implyK h_implyS
-      [] (¬φ) .bot d_weak
-    -- Build [] ⊢ φ from [] ⊢ ¬φ → ⊥
-    let neg_phi := Proposition.neg φ
-    -- EFQ: [] ⊢ ⊥ → φ
-    have efq_ax :
-        DerivationTree PropositionalAxiom
-          (Atom := Atom) []
-        (Proposition.bot.imp φ) :=
-      .ax [] _ (.efq φ)
-    -- implyK: [] ⊢ (⊥→φ) → (¬φ → (⊥→φ))
-    have ik :
-        DerivationTree PropositionalAxiom
-          (Atom := Atom) []
-        ((Proposition.bot.imp φ).imp
-          (neg_phi.imp
-            (Proposition.bot.imp φ))) :=
-      .ax [] _
-        (.implyK (Proposition.bot.imp φ) neg_phi)
-    -- MP: [] ⊢ ¬φ → (⊥ → φ)
-    have step_k :=
-      DerivationTree.modus_ponens [] _ _ ik efq_ax
-    -- implyS
-    have is_ax :
-        DerivationTree PropositionalAxiom
-          (Atom := Atom) []
-        ((neg_phi.imp (Proposition.bot.imp φ)).imp
-         ((neg_phi.imp Proposition.bot).imp
-          (neg_phi.imp φ))) :=
-      .ax [] _
-        (.implyS neg_phi Proposition.bot φ)
-    -- MP: [] ⊢ (¬φ→⊥) → (¬φ→φ)
-    have step_s :=
-      DerivationTree.modus_ponens [] _ _
-        is_ax step_k
-    -- MP: [] ⊢ ¬φ → φ
-    have step3 :=
-      DerivationTree.modus_ponens [] _ _
-        step_s d_dne
-    -- Peirce: [] ⊢ ((φ→⊥)→φ) → φ
-    have peirce_ax :
-        DerivationTree PropositionalAxiom
-          (Atom := Atom) []
-        (((φ.imp Proposition.bot).imp φ).imp φ) :=
-      .ax [] _ (.peirce φ Proposition.bot)
-    -- MP: [] ⊢ φ
-    have d_phi :=
-      DerivationTree.modus_ponens [] _ _
-        peirce_ax step3
-    exact h_not_deriv ⟨d_phi⟩
-  -- Lindenbaum: extend {¬φ} to MCS M
-  obtain ⟨M, hM_sup, hM_mcs⟩ :=
-    prop_lindenbaum h_cons
-  -- ¬φ ∈ M
-  have h_neg : (¬φ) ∈ M :=
-    hM_sup (Set.mem_singleton _)
-  -- By truth lemma (backward), Evaluate v (¬φ)
-  have h_eval_neg :=
-    (prop_truth_lemma hM_mcs (¬φ)).mpr h_neg
-  -- h_taut gives Evaluate v φ -- contradiction
-  exact h_eval_neg
-    (h_taut (canonicalValuation M))
-
-/-! ## Biconditional Wrapper -/
-
-/-- **Soundness and Completeness**: `φ` is a tautology iff `φ` is
-derivable from the empty context. -/
-theorem completeness_iff_tautology
-    {φ : PL.Proposition Atom} :
-    Tautology φ ↔ Derivable PropositionalAxiom φ :=
-  ⟨prop_completeness φ, soundness_tautology⟩
 
 end Cslib.Logic.PL

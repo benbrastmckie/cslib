@@ -9,7 +9,7 @@ module
 public import Cslib.Logics.Temporal.FromPropositional
 public import Cslib.Logics.Temporal.Semantics.Satisfies
 public import Cslib.Logics.Temporal.Metalogic.Soundness
-public import Cslib.Logics.Propositional.Metalogic.Completeness
+public import Cslib.Logics.Propositional.Metalogic.StrongCompleteness
 public import Cslib.Logics.Propositional.Semantics.Basic
 public import Mathlib.Algebra.Order.Ring.Int
 

@@ -8,6 +8,7 @@ module
 
 public import Cslib.Logics.Propositional.Semantics.SemanticConsequence
 public import Cslib.Logics.Propositional.Metalogic.Completeness
+public import Cslib.Logics.Propositional.Metalogic.Soundness
 
 /-! # Strong Completeness for Classical Propositional Logic
 
@@ -224,5 +225,28 @@ theorem prop_compactness {Γ : Set (PL.Proposition Atom)} {φ : PL.Proposition A
       SemanticEntails {ψ | ψ ∈ L} φ := by
   obtain ⟨L, hL_sub, hL_deriv⟩ := prop_strong_completeness h
   exact ⟨L, hL_sub, prop_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩⟩
+
+/-! ## Weak Completeness Corollary -/
+
+/-- **Weak Completeness for Classical Propositional Logic**:
+If `φ` is a tautology (true under all valuations), then `φ` is derivable using
+`PropositionalAxiom`.
+
+This is a corollary of `prop_strong_completeness`: a tautology is a semantic consequence
+of the empty set, so strong completeness gives set-derivability from `∅`, and
+`SetDerivable_empty_iff` converts this to ordinary derivability. -/
+theorem prop_completeness {φ : PL.Proposition Atom}
+    (h_taut : Tautology φ) : Derivable PropositionalAxiom φ :=
+  SetDerivable_empty_iff.mp
+    (prop_strong_completeness (SemanticEntails_of_Tautology h_taut ∅))
+
+/-- **Soundness and Completeness**: `φ` is a tautology iff `φ` is derivable
+from the empty context using `PropositionalAxiom`.
+
+This is a corollary of `prop_strong_completeness_iff` obtained by instantiating at
+`Γ = ∅` and using `SetDerivable_empty_iff`. -/
+theorem completeness_iff_tautology {φ : PL.Proposition Atom} :
+    Tautology φ ↔ Derivable PropositionalAxiom φ :=
+  ⟨prop_completeness, soundness_tautology⟩
 
 end Cslib.Logic.PL

@@ -10,16 +10,18 @@ public import Cslib.Logics.Propositional.Semantics.Kripke
 public import Cslib.Logics.Propositional.Metalogic.MinSoundness
 public import Cslib.Logics.Propositional.Metalogic.MinLindenbaum
 
-/-! # Completeness Theorem for Minimal Propositional Logic
+/-! # Canonical Model Infrastructure for Minimal Propositional Logic
 
-This module proves completeness for minimal propositional logic via the
-canonical Kripke model construction with MinTheory (deductively closed sets)
-as worlds.
+This module provides the canonical Kripke model construction (prime MinTheory worlds) used
+in the completeness proof for minimal propositional logic. The main completeness theorems
+are derived as corollaries of the strong completeness results in `MinStrongCompleteness.lean`.
 
 ## Main Results
 
-- `MinCanonicalWorld`: Canonical world type (MinTheory for MinPropAxiom)
+- `MinCanonicalWorld`: Canonical world type (prime MinTheory for MinPropAxiom)
 - `min_truth_lemma`: `IForces v bf S φ ↔ φ ∈ S.val` for canonical worlds
+
+See `Cslib.Logics.Propositional.Metalogic.MinStrongCompleteness` for:
 - `min_completeness`: `MValid φ → Derivable MinPropAxiom φ`
 - `min_soundness_completeness`: `MValid φ ↔ Derivable MinPropAxiom φ`
 
@@ -189,38 +191,5 @@ theorem min_truth_lemma
       have h_φ_T : φ ∈ T.val := (min_truth_lemma T φ).mp hf_φ
       have h_ψ_T : ψ ∈ T.val := min_theory_imp_property T.property.1 h_imp_T h_φ_T
       exact (min_truth_lemma T ψ).mpr h_ψ_T
-
-/-! ## Completeness -/
-
-/-- **Completeness Theorem for Minimal Propositional Logic**:
-
-If `φ` is minimally valid (forced at every world of every minimal
-Kripke model), then `φ` is derivable from the empty context using MinPropAxiom. -/
-theorem min_completeness {φ : PL.Proposition Atom}
-    (h_valid : MValid.{u, u} φ) : Derivable MinPropAxiom φ := by
-  by_contra h_not_deriv
-  have h_not_mem : φ ∉ {ψ : PL.Proposition Atom | Derivable MinPropAxiom ψ} :=
-    h_not_deriv
-  -- Extend the theorems theory to a prime MinTheory W₀ that excludes φ
-  obtain ⟨W₀_set, _, hW₀_prime, hW₀_excl⟩ :=
-    min_prime_exclusion min_theorems_theory h_not_mem
-  let W₀ : MinCanonicalWorld Atom := ⟨W₀_set, hW₀_prime⟩
-  have h_not_forced : ¬ IForces minCanonicalVal minBotForces W₀ φ := by
-    intro h; exact hW₀_excl ((min_truth_lemma W₀ φ).mp h)
-  have h_forced : IForces minCanonicalVal minBotForces W₀ φ :=
-    h_valid (MinCanonicalWorld Atom) minCanonicalVal minBotForces
-      (fun {_ _} p hw hv => minCanonicalVal_upward_closed p hw hv)
-      (fun {_ _} hw hbf => minBotForces_upward_closed hw hbf)
-      W₀
-  exact h_not_forced h_forced
-
-/-! ## Biconditional Wrapper -/
-
-/-- **Soundness and Completeness**: `φ` is minimally valid iff `φ` is
-derivable from the empty context using MinPropAxiom. -/
-theorem min_soundness_completeness
-    {φ : PL.Proposition Atom} :
-    MValid.{u, u} φ ↔ Derivable MinPropAxiom φ :=
-  ⟨min_completeness, min_soundness_derivable⟩
 
 end Cslib.Logic.PL

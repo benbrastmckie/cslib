@@ -10,16 +10,19 @@ public import Cslib.Logics.Propositional.Semantics.Kripke
 public import Cslib.Logics.Propositional.Metalogic.IntSoundness
 public import Cslib.Logics.Propositional.Metalogic.IntLindenbaum
 
-/-! # Completeness Theorem for Intuitionistic Propositional Logic
+/-! # Canonical Model Infrastructure for Intuitionistic Propositional Logic
 
-This module proves completeness for intuitionistic propositional logic via the
-canonical Kripke model construction with DCCS (deductively closed consistent sets)
-as worlds.
+This module provides the canonical Kripke model construction (prime DCCS worlds) used
+in the completeness proof for intuitionistic propositional logic. The main completeness
+theorems are derived as corollaries of the strong completeness results in
+`IntStrongCompleteness.lean`.
 
 ## Main Results
 
-- `IntCanonicalWorld`: Canonical world type (DCCS for IntPropAxiom)
+- `IntCanonicalWorld`: Canonical world type (prime DCCS for IntPropAxiom)
 - `int_truth_lemma`: `IForces v bf S φ ↔ φ ∈ S.val` for canonical worlds
+
+See `Cslib.Logics.Propositional.Metalogic.IntStrongCompleteness` for:
 - `int_completeness`: `IValid φ → Derivable IntPropAxiom φ`
 - `int_soundness_completeness`: `IValid φ ↔ Derivable IntPropAxiom φ`
 
@@ -175,36 +178,5 @@ theorem int_truth_lemma
       have h_φ_T : φ ∈ T.val := (int_truth_lemma T φ).mp hf_φ
       have h_ψ_T : ψ ∈ T.val := int_dccs_imp_property T.property.1 h_imp_T h_φ_T
       exact (int_truth_lemma T ψ).mpr h_ψ_T
-
-/-! ## Completeness -/
-
-/-- **Completeness Theorem for Intuitionistic Propositional Logic**:
-
-If `φ` is intuitionistically valid (forced at every world of every intuitionistic
-Kripke model), then `φ` is derivable from the empty context using IntPropAxiom. -/
-theorem int_completeness {φ : PL.Proposition Atom}
-    (h_valid : IValid.{u, u} φ) : Derivable IntPropAxiom φ := by
-  by_contra h_not_deriv
-  have h_not_mem : φ ∉ {ψ : PL.Proposition Atom | Derivable IntPropAxiom ψ} :=
-    h_not_deriv
-  -- Extend the theorems DCCS to a prime IntDCCS W₀ that excludes φ
-  obtain ⟨W₀_set, _, hW₀_prime, hW₀_excl⟩ :=
-    int_prime_exclusion (@int_theorems_dccs Atom) h_not_mem
-  let W₀ : IntCanonicalWorld Atom := ⟨W₀_set, hW₀_prime⟩
-  have h_not_forced : ¬ IForces intCanonicalVal (fun _ => False) W₀ φ := by
-    intro h; exact hW₀_excl ((int_truth_lemma W₀ φ).mp h)
-  have h_forced : IForces intCanonicalVal (fun _ => False) W₀ φ :=
-    h_valid (IntCanonicalWorld Atom) intCanonicalVal
-      (fun {_ _} p hw hv => intCanonicalVal_upward_closed p hw hv) W₀
-  exact h_not_forced h_forced
-
-/-! ## Biconditional Wrapper -/
-
-/-- **Soundness and Completeness**: `φ` is intuitionistically valid iff `φ` is
-derivable from the empty context using IntPropAxiom. -/
-theorem int_soundness_completeness
-    {φ : PL.Proposition Atom} :
-    IValid.{u, u} φ ↔ Derivable IntPropAxiom φ :=
-  ⟨int_completeness, int_soundness_derivable⟩
 
 end Cslib.Logic.PL

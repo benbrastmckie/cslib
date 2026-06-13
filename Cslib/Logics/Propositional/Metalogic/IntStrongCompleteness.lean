@@ -164,4 +164,29 @@ theorem int_compactness {Γ : Set (PL.Proposition Atom)} {φ : PL.Proposition At
   obtain ⟨L, hL_sub, hL_deriv⟩ := int_strong_completeness h
   exact ⟨L, hL_sub, int_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩⟩
 
+/-! ## Weak Completeness Corollary -/
+
+/-- **Weak Completeness for Intuitionistic Propositional Logic**:
+If `φ` is intuitionistically valid (forced at every world of every intuitionistic
+Kripke model), then `φ` is derivable from the empty context using `IntPropAxiom`.
+
+This is a corollary of `int_strong_completeness`: an intuitionistically valid formula
+is an intuitionistic semantic consequence of the empty set, so strong completeness
+gives set-derivability from `∅`, and `SetDerivable_empty_iff` converts this to
+ordinary derivability. -/
+theorem int_completeness {φ : PL.Proposition Atom}
+    (h_valid : IValid.{u, u} φ) : Derivable IntPropAxiom φ :=
+  SetDerivable_empty_iff.mp
+    (int_strong_completeness (ISemanticEntails_of_IValid h_valid ∅))
+
+/-- **Soundness and Completeness for Intuitionistic Logic**:
+`φ` is intuitionistically valid iff `φ` is derivable from the empty context
+using `IntPropAxiom`.
+
+This is a corollary of `int_strong_completeness_iff` obtained by instantiating at
+`Γ = ∅` and using `SetDerivable_empty_iff`. -/
+theorem int_soundness_completeness {φ : PL.Proposition Atom} :
+    IValid.{u, u} φ ↔ Derivable IntPropAxiom φ :=
+  ⟨int_completeness, int_soundness_derivable⟩
+
 end Cslib.Logic.PL

@@ -2257,6 +2257,628 @@
       "planned": "2026-06-11T14:56:11Z",
       "completed": "2026-06-11T15:14:42Z",
       "completion_summary": "Parameterized NaturalDeduction files (FromHilbert, HilbertDerivedRules, Equivalence) over generic Axioms with explicit K/S/EFQ parameters. Split HilbertDerivedRules into intuitionistic/classical layers. Added generic hilbert_iff_nd with IntPropAxiom and PropositionalAxiom corollaries. Full build passes, zero sorries, zero new axioms."
+    },
+    {
+      "project_number": 172,
+      "project_name": "connectives_hasand_hasor_full_primitives",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Foundations Refactor",
+      "dependencies": [],
+      "description": "Extend Cslib/Foundations/Logic/Connectives.lean for the hybrid five-primitive signature {atom, bot, imp, and, or}: add HasAnd and HasOr atomic typeclasses alongside HasBot/HasImp/HasBox/HasUntil/HasSince; update the bundled classes (PropositionalConnectives, ModalConnectives, TemporalConnectives, BimodalConnectives) to include them; revise or remove ImpBotDerived (the bot/imp-derived and/or defaults are classical-only per task 171 research and must not be presented as logic-neutral). Keep derived-connective defaults only for neg (A -> bot), top (bot -> bot), and iff, which are valid in minimal/intuitionistic/classical logic. Align design with fmontesi's PR #607 operator-typeclass direction (one class per operator, notation-level) to ease upstream reconciliation. Reference: specs/171_research_connective_basis_min_int_classical/reports/01_team-research.md.",
+      "created": "2026-06-13T00:28:47Z",
+      "last_updated": "2026-06-13T01:16:36Z",
+      "session_id": "sess_1781312776_63c955",
+      "artifacts": [
+        {
+          "path": "specs/172_connectives_hasand_hasor_full_primitives/plans/01_hasand-hasor-plan.md",
+          "type": "plan",
+          "summary": "3-phase implementation plan for HasAnd/HasOr typeclasses, ImpBotDerived trim, and docstring updates in Connectives.lean"
+        },
+        {
+          "path": "specs/172_connectives_hasand_hasor_full_primitives/summaries/01_hasand-hasor-summary.md",
+          "type": "summary",
+          "summary": "Three phases implemented: HasAnd/HasOr standalone typeclasses added, ImpBotDerived trimmed to neg/top, module docstring updated to five-primitive design rationale. PropositionalConnectives bundled extension deferred to task 173 (abbrev-pathway does not auto-resolve in Lean 4 typeclass synthesizer)."
+        }
+      ],
+      "plan_metadata": {
+        "phases": 3,
+        "total_effort_hours": 1.5,
+        "complexity": "simple",
+        "research_integrated": true,
+        "plan_version": 1,
+        "dependency_waves": [
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/01_team-research.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-06-12"
+          }
+        ]
+      },
+      "completion_summary": "Added HasAnd/HasOr atomic typeclasses to Connectives.lean, trimmed ImpBotDerived to neg/top (removed classical-only Lukasiewicz and/or defaults), updated module docstring to five-primitive design rationale. PropositionalConnectives bundled extension deferred to task 173 (abbrev-pathway resolution failed). Full build, checkInitImports, and lint-style all passed; 0 sorries."
+    },
+    {
+      "project_number": 173,
+      "project_name": "propositional_five_primitive_refactor",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Foundations Refactor",
+      "dependencies": [
+        172
+      ],
+      "description": "Refactor Cslib/Logics/Propositional to the hybrid five-primitive formula type {atom, bot, imp, and, or}, RETAINING the fork's Hilbert systems while aligning the ND layer with upstream (Thomas Waring). Scope: (1) Defs.lean: add and/or constructors; keep bot as constructor (the one deliberate departure from upstream's bot-as-atom trick, justified by structural semantics per task 171 research); derive neg := A -> bot, top := bot -> bot, iff as abbrevs (valid in all three logics); delete the classical-only and/or abbrevs; update subst, complexity, atoms for the new constructors. (2) NaturalDeduction/Basic.lean: restore Waring's sequent-style 10-rule minimal-logic ND system (ax, ass, andI, andE1, andE2, orI1, orI2, orE, impI, impE) with NO botE primitive rule; intuitionistic and classical ND derivations are obtained by appealing to theory axioms (explosion bot -> A; DNE) exactly as upstream models it - the rule set itself stays minimal. (3) ProofSystem (Axioms.lean, Derivation.lean, Instances.lean, IntMinInstances.lean): RETAIN the fork's MinimalHilbert -> IntuitionisticHilbert -> ClassicalHilbert typeclass hierarchy and MPL/IPL/CPL axiom-set parameterization unchanged in structure (do NOT replace with upstream's theory-predicate-only approach); extend the Hilbert axiom bases with the standard and/or axioms (A -> (B -> A and B); A and B -> A; A and B -> B; A -> A or B; B -> A or B; (A -> C) -> ((B -> C) -> ((A or B) -> C))) so all three Hilbert systems cover the full five-primitive language. (4) Alignment bridges: update FromHilbert.lean, HilbertDerivedRules.lean, Equivalence.lean so the ND-Hilbert correspondence holds level-by-level: minimal ND (empty theory) corresponds to MinimalHilbert; ND + explosion theory axioms corresponds to IntuitionisticHilbert; ND + DNE corresponds to ClassicalHilbert. This equivalence is the keystone deliverable reconciling the fork's Hilbert architecture with Waring's ND design. (5) NaturalDeduction/DerivedRules.lean: andE1/andE2/orE become primitive ND rules - remove the [IsClassical T] requirements flagged by task 171 research. Verify with lake build Cslib.Logics.Propositional, lake test, checkInitImports, lint-style. References: specs/171_research_connective_basis_min_int_classical/reports/01_team-research.md; upstream Cslib/Logics/Propositional at upstream/main.",
+      "created": "2026-06-13T00:28:47Z",
+      "last_updated": "2026-06-13T01:42:13Z",
+      "session_id": "sess_1781313950_b8ff9f_173",
+      "artifacts": [
+        {
+          "path": "specs/173_propositional_five_primitive_refactor/reports/01_five-primitive-research.md",
+          "type": "report",
+          "summary": "File-by-file inventory, 7-phase ordering, risk assessment for five-primitive refactor"
+        },
+        {
+          "path": "specs/173_propositional_five_primitive_refactor/plans/01_implementation-plan.md",
+          "type": "plan",
+          "summary": "7-phase implementation plan for five-primitive refactor"
+        }
+      ],
+      "completion_summary": "All 7 phases of five-primitive propositional refactor implemented: formula type with and/or constructors, minimal ND system, Hilbert axiom extension, ND-Hilbert equivalence bridges, metalogic soundness/completeness, external embeddings. Full CI verified."
+    },
+    {
+      "project_number": 174,
+      "project_name": "propositional_metalogic_full_connectives",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Foundations Refactor",
+      "dependencies": [
+        173
+      ],
+      "description": "Extend Cslib/Logics/Propositional/Semantics and Metalogic from the {imp, bot} fragment to the full five-primitive language {atom, bot, imp, and, or}, keeping all metalogic theorems stated for the fork's Hilbert systems (MinimalHilbert/IntuitionisticHilbert/ClassicalHilbert) with ND results obtained via the ND-Hilbert equivalence bridges from task 173. Scope: (1) Semantics/Basic.lean: structural clauses - eval of bot = False, and = conjunction, or = disjunction (no side conditions on valuations). (2) Semantics/Kripke.lean: add structural forcing clauses for and/or (pointwise conjunction; pointwise disjunction); extend the persistence lemma. CRITICAL CONSTRAINT: RETAIN the botForces parameterization of IForces - do NOT hard-code bot to False in the Kripke forcing relation. Minimal completeness (min_completeness) requires bot-flexible models (botForces free and upward-closed, Johansson-style); hard-coding bot = False would validate explosion and break minimal completeness. Only the intuitionistic/classical instantiations set botForces to fun _ => False. (3) Metalogic: extend Soundness (classical), MinSoundness, IntSoundness with and/or cases against the extended Hilbert axiom bases; extend Completeness (classical, via MCS - and/or cases are straightforward), MinCompleteness, IntCompleteness/IntLindenbaum - NOTE this is the mathematically hardest part: intuitionistic completeness with disjunction requires prime theories (if T proves A or B then A in T or B in T), so the Lindenbaum construction must be upgraded to produce prime extensions (standard reference: Troelstra & van Dalen 1988 vol 1 ch 2; Chagrov & Zakharyaschev 1997 ch 5 intuitionistic canonical model). (4) Document precisely which logic each completeness theorem covers; the disjunction property may be stated as future work. (5) MCS.lean/DeductionTheorem.lean: extend with and/or cases as needed - the deduction theorem proof gains axiom cases for the new and/or axioms. Verify full CI. Reference: specs/171_research_connective_basis_min_int_classical/reports/01_team-research.md (gap: completeness theorem scope).",
+      "created": "2026-06-13T00:28:47Z",
+      "last_updated": "2026-06-13T00:41:41Z",
+      "completion_summary": "Eliminated 2 sorries in MinCompleteness and IntCompleteness or-backward cases by introducing MinPrimeTheory/IntPrimeDCCS with prime exclusion via Zorn lemma. Zero sorries, zero new axioms."
+    },
+    {
+      "project_number": 175,
+      "project_name": "modal_and_or_propagation",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Foundations Refactor",
+      "dependencies": [
+        173
+      ],
+      "description": "Propagate the hybrid five-primitive design to the Modal layer: Modal.Proposition becomes {atom, bot, imp, and, or, box} with diamond/neg/top/iff derived. Scope: (1) Modal/Basic.lean: add and/or constructors; update satisfaction relation with structural clauses; keep derived-connective satisfaction lemmas (Satisfies.and_iff etc.) but as primitive clauses now; register HasAnd/HasOr instances from task 172. (2) Modal/Denotation.lean, LogicalEquivalence.lean, Cube.lean: new constructor cases. (3) Modal/FromPropositional.lean: extend the PL -> Modal embedding homomorphically for and/or. (4) ProofSystem/Instances/* (16 systems K, T, B, D, K4, K5, K45, KB5, D4, D5, D45, DB, TB, S4, S5): extend K-system axiom sets with the propositional and/or axioms from task 173. (5) Metalogic/: extend DerivationTree, DeductionTheorem, MCS, Soundness, Completeness plus all Systems/*/Soundness+Completeness with and/or cases (mechanical: MCS membership lemmas for and/or, truth lemma cases). Verify with lake build Cslib.Logics.Modal and full CI. Maintain upstream compatibility where Modal/Basic.lean exists upstream (grind annotations, chenson2018's simp-direction guidance from PR #607 review: simp lemmas should rewrite INTO notation).",
+      "created": "2026-06-13T00:28:47Z",
+      "last_updated": "2026-06-13T00:41:41Z",
+      "completion_summary": "Propagated five-primitive and/or design to Modal layer: 6 constructors in Proposition, Satisfies clauses, 15 axiom predicates with andI/andE/orI/orE, all 15 soundness proofs, 3 truth lemma families, 15 completeness files. FromPropositional sorries resolved. Zero sorries, zero new axioms."
+    },
+    {
+      "project_number": 176,
+      "project_name": "temporal_and_or_propagation",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Foundations Refactor",
+      "dependencies": [
+        173
+      ],
+      "description": "Propagate the hybrid five-primitive design to the Temporal layer: Temporal.Formula becomes {atom, bot, imp, and, or, untl, snce} with derived always/eventually/neg/top/iff unchanged where valid. Scope: (1) Syntax/Formula.lean: add and/or constructors; update complexity, subst, atoms; (2) Syntax/Context.lean, BigConj.lean (BigConj should now use the PRIMITIVE and constructor instead of the classical encoding - simplification), Subformulas.lean: new cases. (3) Semantics/Satisfies.lean, Model.lean, Validity.lean: structural and/or clauses. (4) ProofSystem/Axioms.lean, Derivation.lean, Derivable.lean, Instances.lean: extend axiom sets with and/or axioms from task 173. (5) Metalogic/: extend DerivationTree, DeductionTheorem, MCS, DenseMCS, Soundness, DenseSoundness, Completeness, DenseCompleteness, Chronicle/* construction with and/or cases (truth lemma, MCS lemmas, subformula closure). (6) FromPropositional.lean: extend embedding homomorphically. Verify with lake build Cslib.Logics.Temporal and full CI. Note: PR #642 (pr3/temporal-syntax) is in flight upstream - coordinate so this refactor lands either after that PR merges or as a revision to it.",
+      "created": "2026-06-13T00:28:47Z",
+      "last_updated": "2026-06-13T00:41:41Z",
+      "completion_summary": "Propagated five-primitive and/or design to Temporal layer: 11 files modified (284 insertions), primitive Formula.and/or constructors, 6 axiom constructors, soundness proofs, MCS or-resolution helpers, truth lemma cases, OrderedSeedConsistency or-resolve fix. Zero sorries, all modules build clean."
+    },
+    {
+      "project_number": 177,
+      "project_name": "bimodal_and_or_propagation",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Foundations Refactor",
+      "dependencies": [
+        175,
+        176
+      ],
+      "description": "Propagate the hybrid five-primitive design to the Bimodal layer (largest propagation, ~130 files): Bimodal Formula becomes {atom, bot, imp, and, or, box, untl, snce} (or current bimodal constructor set + and/or). Scope: (1) Syntax/Formula.lean, Context.lean, Subformulas.lean, SubformulaClosure/*: add constructors, update closure computations and nesting depth. (2) Semantics/Truth.lean, Validity.lean, TaskFrame.lean, TaskModel.lean, WorldHistory.lean: structural clauses. (3) ProofSystem/Axioms.lean, Derivation.lean, Derivable.lean, Instances.lean, Substitution.lean: and/or axioms. (4) Embedding/PropositionalEmbedding.lean, ModalEmbedding.lean, TemporalEmbedding.lean: extend all three embeddings homomorphically for and/or (depends on tasks 175/176 landing first). (5) Metalogic/: extend Core (DerivationTree, DeductionTheorem, MaximalConsistent, MCSProperties), Soundness/*, Completeness, Bundle/*, BXCanonical/* (canonical model + chronicle constructions + truth lemmas), Decidability/* (tableau, signed formulas, closure, FMP), Separation/*, Algebraic/* with and/or cases. Much is mechanical case-addition but the volume is large; consider whether some Theorems/Propositional/* files simplify since and/or are now primitive with real rules. Verify with lake build and full CI. Reference: specs/171 research report.",
+      "created": "2026-06-13T00:28:47Z",
+      "last_updated": "2026-06-13T00:41:41Z",
+      "completion_summary": "Propagated five-primitive and/or design to Bimodal layer: all 127 files building clean. ~50 files modified with primitive Formula.and/or constructors, 6 axiom constructors, soundness proofs, truth lemmas, MCS or-resolution, separation hierarchy, decidability, algebraic completeness, conservative extension, and embedding updates. Zero new sorries."
+    },
+    {
+      "project_number": 178,
+      "project_name": "johansson_references_doc_corrections",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Foundations Refactor",
+      "dependencies": [
+        173
+      ],
+      "description": "Documentation and citation corrections from task 171 research: (1) Add Johansson1937 (Ingebrigt Johansson, Der Minimalkalkuel, ein reduzierter intuitionistischer Formalismus, Compositio Mathematica 4, 1937, pages 119-136) to references.bib. (2) Correct file headers and docstrings across Cslib/Logics/Propositional and Cslib/Foundations/Logic/Connectives.lean: the functional-completeness claim for {imp, bot} must be scoped to CLASSICAL logic only (non-interdefinability of intuitionistic connectives: Wajsberg 1938, McKinsey 1939, noted by Heyting 1930); cite Church 1956 and Chagrov & Zakharyaschev 1997 for the classical basis; cite Gentzen 1935/Prawitz 1965/Troelstra & van Dalen 1988 for the full-connective natural deduction (which the hybrid design now follows); cite Johansson 1937 for minimal logic and the MinimalHilbert naming. (3) Document the two-layer proof-system architecture in the Propositional module docstring: shared five-primitive syntax; a Waring-style sequent ND system whose rule set is minimal logic with intuitionistic/classical obtained via theory axioms; the fork's Hilbert hierarchy (MinimalHilbert -> IntuitionisticHilbert -> ClassicalHilbert over MPL/IPL/CPL); and the level-by-level ND-Hilbert equivalence bridges from task 173 connecting the two. (4) Rewrite the PR #635 description accordingly if that PR is revised rather than withdrawn, responding to ctchou's two review comments. Add Wajsberg1938 and McKinsey1939 entries to references.bib if those results are cited in docstrings.",
+      "created": "2026-06-13T00:28:47Z",
+      "last_updated": "2026-06-13T00:41:41Z",
+      "completion_summary": "Added Johansson1937, Wajsberg1938, McKinsey1939 to references.bib. Rewrote stale docstrings in Defs.lean and Basic.lean for five-primitive design. Updated Connectives.lean citations. All CI passes."
+    },
+    {
+      "project_number": 166,
+      "project_name": "pr633_syntactic_sugar_and_quality",
+      "description": "Add a commit to PR #633 (branch pr1/foundations-logic) incorporating the syntactic sugar changes from task 165 into all files touched by this PR. The PR covers 39 files across Foundations/ and Propositional/ (Hilbert proof systems, metalogic, ND equivalence, Kripke semantics). Must: (1) cherry-pick or reapply the relevant syntactic sugar replacements (.imp→→, .bot→⊥, .neg→¬, .and→∧, .or→∨, .iff→↔) onto the pr1/foundations-logic branch for all files in scope, respecting the Pi-type binder constraint discovered in task 165; (2) address xcthulhu review comment r3403944952 on Completeness.lean line 45 specifically; (3) conduct a thorough quality review of every file in the PR diff looking for further improvements — naming consistency, proof style, documentation quality, notation usage, any remaining raw constructors — while staying strictly within the existing PR scope and keeping LOC impact minimal to avoid overwhelming reviewers; (4) run full CI (lake build, lake test, checkInitImports, lint-style); (5) push the commit(s) to the existing PR branch.",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Propositional PRs",
+      "dependencies": [
+        165
+      ],
+      "created": "2026-06-12T18:00:00Z",
+      "last_updated": "2026-06-12T21:07:33Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/166_pr633_syntactic_sugar_and_quality/reports/01_pr633-research.md",
+          "type": "report",
+          "summary": "PR #633 analysis: 14 files need ~141 sugar replacements, missing ↔ notation prerequisite, reviewer comment response strategy"
+        },
+        {
+          "path": "specs/166_pr633_syntactic_sugar_and_quality/plans/02_implementation-plan.md",
+          "type": "plan",
+          "summary": "6-phase plan: worktree+notation prerequisite, sugar by directory, review comment response, CI+push"
+        },
+        {
+          "path": "specs/166_pr633_syntactic_sugar_and_quality/summaries/03_implementation-summary.md",
+          "type": "summary",
+          "summary": "Applied sugar to 11 Propositional files on pr1/foundations-logic, replied to reviewer, full CI green, pushed to PR #633"
+        }
+      ],
+      "session_id": "sess_1781298334_941bd3",
+      "completion_summary": "Applied syntactic sugar (~141 replacements, 11 files) to pr1/foundations-logic, added missing ↔ notation, replied to review comment r3403944952 explaining Pi-type binder constraint, full CI green, pushed commit cd6b46d3 to PR #633."
+    },
+    {
+      "project_number": 167,
+      "project_name": "pr637_syntactic_sugar_and_quality",
+      "description": "Add a commit to PR #637 (branch refactor/modal-primitives) incorporating the syntactic sugar changes from task 165 into all files touched by this PR. The PR covers 10 files including Modal/Basic.lean, Modal/Denotation.lean, Modal/LogicalEquivalence.lean, and shared files (Connectives.lean, InferenceSystem.lean, Propositional/Defs.lean, NaturalDeduction/Basic.lean). Must: (1) cherry-pick or reapply the relevant syntactic sugar replacements (.imp→→, .bot→⊥, .neg→¬, .and→∧, .or→∨, .box→□, .diamond→◇) onto the refactor/modal-primitives branch for all files in scope, respecting the Pi-type binder constraint; (2) conduct a thorough quality review of every file in the PR diff looking for further improvements — naming consistency, proof style, documentation quality, notation usage, any remaining raw constructors — while staying strictly within the existing PR scope and keeping LOC impact minimal; (3) run full CI (lake build, lake test, checkInitImports, lint-style); (4) push the commit(s) to the existing PR branch.",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Modal PRs",
+      "dependencies": [
+        165
+      ],
+      "created": "2026-06-12T18:00:00Z",
+      "last_updated": "2026-06-12T20:52:22Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/167_pr637_syntactic_sugar_and_quality/reports/01_pr637-research.md",
+          "type": "report",
+          "summary": "Complete analysis of PR #637 files, sugar delta, merge conflicts, quality issues, and recommended rebase approach"
+        },
+        {
+          "path": "specs/167_pr637_syntactic_sugar_and_quality/plans/02_implementation-plan.md",
+          "type": "plan",
+          "summary": "3-phase plan: rebase+conflict resolution, CI verification, push"
+        },
+        {
+          "path": "specs/167_pr637_syntactic_sugar_and_quality/summaries/03_implementation-summary.md",
+          "type": "summary",
+          "summary": "Rebased refactor/modal-primitives onto main, resolved 7-file conflicts, full CI green, pushed to PR #637"
+        }
+      ],
+      "session_id": "sess_1781293333_a108c0_167",
+      "completion_summary": "Rebased refactor/modal-primitives onto main resolving all 29 conflicts across 7 files, applied syntactic sugar, full CI green (0 sorries), force-pushed to PR #637."
+    },
+    {
+      "project_number": 168,
+      "project_name": "pr3_temporal_syntactic_sugar_and_quality",
+      "description": "Add commits to the pr3/temporal-formula feature branch (tasks 159/164) incorporating the syntactic sugar changes from task 165 into all files on that branch. The branch currently has Formula.lean (549 lines, temporal logic formula type with primitives {atom, bot, imp, untl, snce} and all derived connectives). Must: (1) reapply the relevant syntactic sugar replacements (.imp→→, .bot→⊥, .neg→¬, .and→∧, .or→∨, .untl→U, .snce→S, .someFuture→F, .allFuture→G, .somePast→P, .allPast→H) onto the pr3/temporal-formula branch for all files in scope, respecting the Pi-type binder constraint; (2) conduct a thorough quality review of every file in the branch diff looking for further improvements — naming consistency, proof style, documentation quality, notation usage, any remaining raw constructors, alignment with the patterns established in the Propositional and Modal PRs — while staying strictly within the existing branch scope; (3) run full CI (lake build, lake test, checkInitImports, lint-style); (4) commit changes but do NOT submit the PR (the branch is not yet ready for submission).",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Temporal PRs",
+      "dependencies": [
+        165
+      ],
+      "created": "2026-06-12T18:00:00Z",
+      "last_updated": "2026-06-12T22:00:00Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/168_pr3_temporal_syntactic_sugar_and_quality/reports/01_temporal-research.md",
+          "type": "report",
+          "summary": "Complete analysis of temporal branch files, sugar delta, merge conflicts, and merge-main strategy"
+        },
+        {
+          "path": "specs/168_pr3_temporal_syntactic_sugar_and_quality/plans/02_implementation-plan.md",
+          "type": "plan",
+          "summary": "5-phase plan: worktree+merge main, resolve structural/sugar conflicts, temporal sugar, CI+commit (no PR)"
+        },
+        {
+          "path": "specs/168_pr3_temporal_syntactic_sugar_and_quality/summaries/03_implementation-summary.md",
+          "type": "summary",
+          "summary": "Merged main into pr3/temporal-formula (136 conflicts resolved), temporal sugar applied, full CI green, pushed (no PR)"
+        }
+      ],
+      "session_id": "sess_1749738000_f04aa0",
+      "completion_summary": "Merged main into pr3/temporal-formula resolving 136 conflicts across 25 files, applied temporal syntactic sugar (10 derived operator bodies + propositional sugar), full CI green (no new sorries/axioms), pushed to origin without creating a PR."
+    },
+    {
+      "project_number": 165,
+      "project_name": "syntactic_sugar_survey_and_refactor",
+      "description": "Survey Foundations/, Propositional/, Modal/, and Tense/ (Temporal/) for opportunities to introduce elegant and ergonomic syntactic sugar, refactoring everything that is better expressed in notation. Motivated by PR #633 review comment (r3403944952) indicating raw constructors like φ.imp (ψ.imp φ) should use the scoped notation defined in Cslib/Logics/Propositional/Defs.lean (e.g. φ → ψ → φ).",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Syntactic Sugar",
+      "created": "2026-06-12T16:15:09Z",
+      "last_updated": "2026-06-12T16:46:44Z",
+      "session_id": "sess_1781282351_53fffc",
+      "researched": "2026-06-12T16:31:49Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/165_syntactic_sugar_survey_and_refactor/reports/01_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates: syntactic sugar survey across PL, Modal, Temporal, Bimodal, Foundations"
+        },
+        {
+          "path": "specs/165_syntactic_sugar_survey_and_refactor/plans/01_syntactic-sugar-refactor.md",
+          "type": "plan",
+          "summary": "9-phase plan: syntactic sugar refactor across Propositional, Modal, Temporal (~2,600 replacements, ~113 files)"
+        },
+        {
+          "path": "specs/165_syntactic_sugar_survey_and_refactor/summaries/01_syntactic-sugar-refactor-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary: all 9 phases complete, ~115 Lean files refactored, full CI passes"
+        }
+      ],
+      "completion_summary": "All 9 phases complete. Added missing PL biconditional notation and replaced raw constructors (.imp, .bot, .neg, .and, .or, .box, .diamond, .untl, .snce, .someFuture, .allFuture, .somePast, .allPast) with scoped notation across ~115 Lean files in Propositional/, Modal/, and Temporal/. Full CI passes."
+    },
+    {
+      "project_number": 164,
+      "project_name": "fix_formula_pr_quality",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Temporal PRs",
+      "dependencies": [
+        159
+      ],
+      "description": "Fix 7 PR quality issues in Formula.lean (pr3/temporal-formula branch) identified during review: (1) HIGH: doc/code argument order mismatch for U/S derived operators — docs say ⊤ U φ but code computes φ U ⊤, will cause semantic bugs; (2) MEDIUM: missing ## References section (both Propositional and Modal peer files cite foundational works); (3) LOW-MEDIUM: missing iff derived connective listed in task 159 description; (4) MEDIUM: bare-letter notation F/G/P/H risks variable shadowing (peer files use Unicode); (5) LOW: missing Bot/Top Mathlib instances (Propositional/Defs.lean has them); (6) LOW: second half of file outside @[expose] public section; (7) COSMETIC: redundant open before namespace. All changes to single file on pr3/temporal-formula branch.",
+      "created": "2026-06-12T08:55:00Z",
+      "last_updated": "2026-06-12T10:26:30Z",
+      "session_id": "sess_1781258395_440da0",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/164_fix_formula_pr_quality/reports/01_formula-pr-review.md",
+          "type": "report",
+          "summary": "Detailed review of 7 PR quality issues with comparison to Propositional/Defs.lean and Modal/Basic.lean"
+        },
+        {
+          "path": "specs/164_fix_formula_pr_quality/plans/01_formula-fixes-plan.md",
+          "type": "plan",
+          "summary": "3-phase plan for Formula.lean PR quality fixes with CI verification and merge"
+        },
+        {
+          "path": "specs/164_fix_formula_pr_quality/summaries/01_formula-fixes-summary.md",
+          "type": "summary",
+          "summary": "Detailed summary of all fixes, deviations, and CI results"
+        }
+      ],
+      "completion_summary": "Fixed 6 of 7 PR quality issues in Formula.lean. Issue 1 (argument order) resolved via documentation clarifying Burgess convention rather than code swap (abbrevs used in downstream files). Issues 2-7 fully applied: References, iff connective, Unicode notation, Bot/Top instances, expose section, redundant open removed. Full CI passes. Branch pr3/temporal-formula synced to main."
+    },
+    {
+      "project_number": 159,
+      "project_name": "subpr_3_1_temporal_formula",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Temporal PRs",
+      "dependencies": [
+        138
+      ],
+      "description": "Sub-PR 3.1: Temporal formula type. Introduces Syntax/Formula.lean (549 lines) defining the temporal logic Formula inductive with primitives {atom, bot, imp, untl, snce}, all derived connectives (neg, top, or, and, iff, allFuture/G, someFuture/F, allPast/H, somePast/P), the swapTemporal involution, Encodable/Denumerable instances, and connective typeclass registrations (HasBot, HasImp, HasUntil, HasSince, TemporalConnectives). Gateway PR for all temporal logic. ~549 diff lines. External dependency: Cslib.Foundations.Logic.Connectives (PR1 sub-PR 1.1.1, task 138).",
+      "created": "2026-06-12T06:33:54Z",
+      "last_updated": "2026-06-12T08:45:00Z",
+      "session_id": "sess_1781252799_3ed79e",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/159_subpr_3_1_temporal_formula/plans/01_temporal-formula-plan.md",
+          "type": "plan",
+          "summary": "3-phase implementation plan for temporal Formula.lean PR submission"
+        },
+        {
+          "path": "specs/159_subpr_3_1_temporal_formula/summaries/01_temporal-formula-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary covering branch creation, CI verification, and PR submission steps"
+        }
+      ],
+      "completion_summary": "Branch pr3/temporal-formula created from pr1/foundations-logic with Formula.lean (549 lines, 0 sorrys) and barrel import. All CI checks passed. PR prepared but not submitted per user instruction."
+    },
+    {
+      "project_number": 137,
+      "project_name": "refactor_modal_directory_structure",
+      "status": "completed",
+      "task_type": "lean4",
+      "topic": "Modal Logic",
+      "description": "Refactor Modal/ directory structure for the modal cube. Systematically reorganize Cslib/Logics/Modal/ to make the architecture self-documenting through clear directory names and small files, while respecting the upstream/fork boundary for clean PRs. PR 1 restructures fork-only files (Hilbert/, Metalogic/Systems/, split Instances.lean). PR 2 restructures upstream-originating files (Syntax.lean, Semantics/).",
+      "created": "2026-06-11T23:48:36Z",
+      "last_updated": "2026-06-12T01:09:26Z",
+      "session_id": "sess_1781225690_3f42cf",
+      "researched": "2026-06-11T23:56:48Z",
+      "artifacts": [
+        {
+          "path": "specs/137_refactor_modal_directory_structure/reports/01_directory-structure-research.md",
+          "type": "research_report",
+          "summary": "Comprehensive analysis of Modal/ directory: 41 files (4 upstream, 37 fork-only), import dependency graph, Instances.lean splitting plan, and PR boundary validation"
+        },
+        {
+          "path": "specs/137_refactor_modal_directory_structure/summaries/01_modal-directory-refactor-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary for Modal directory refactoring (4/6 phases completed)"
+        },
+        {
+          "path": "specs/137_refactor_modal_directory_structure/plans/01_modal-directory-refactor.md",
+          "type": "plan",
+          "summary": "Revised plan (v2): marks phases 1-4 COMPLETED, replaces blocked phases 5-6 with fork-native LogicalEquivalence.lean implementation and CI verification"
+        },
+        {
+          "path": "specs/137_refactor_modal_directory_structure/summaries/01_modal-directory-refactor-summary.md",
+          "type": "summary",
+          "summary": "Full implementation summary covering all 6 phases of Modal directory refactor"
+        }
+      ],
+      "completion_summary": "Refactored Modal/ directory: split Instances.lean into 15 per-system files, moved 30 Metalogic files into Systems/ subdirectories, wrote LogicalEquivalence.lean from scratch with Context inductive and congruence theorem. Full CI passes."
+    },
+    {
+      "project_number": 136,
+      "project_name": "pr1_citation_conformance",
+      "status": "completed",
+      "task_type": "lean4",
+      "description": "Revise citations on the pr1/foundations-logic branch to conform to the canonical citation conventions (standards/citation-conventions.md). Scope: (1) Remove orphaned HughesCresswell1996 entry from references.bib (uncited anywhere). (2) Add SorensenUrzyczyn2006 bib entry and convert the inline Sorensen & Urzyczyn mention in NaturalDeduction/Basic.lean to a proper BibKey citation on its own bullet. (3) Standardize internal cross-reference formatting — some files use backtick-wrapped paths (e.g., `Cslib/...`) while others use bare paths; pick one convention and apply consistently across all PR 1 Propositional and Modal files. (4) Review all 22 Propositional and 4 Modal files on the PR branch for any remaining discrepancies against the citation standard (dash bullets, missing BibKeys, inconsistent formatting). All work targets the pr1/foundations-logic branch. Documentation-only changes — no Lean code modifications.",
+      "artifacts": [
+        {
+          "path": "specs/136_pr1_citation_conformance/reports/01_citation-conformance.md",
+          "type": "report",
+          "summary": "Per-file audit of all 26 Propositional and Modal files"
+        },
+        {
+          "path": "specs/136_pr1_citation_conformance/plans/01_citation-conformance-plan.md",
+          "type": "plan",
+          "summary": "2-phase implementation plan for citation fixes"
+        }
+      ],
+      "last_updated": "2026-06-11T23:40:00Z",
+      "session_id": "sess_1749688800_orchestrate",
+      "completion_summary": "Revised citations on pr1/foundations-logic to conform to citation-conventions.md: removed orphaned HughesCresswell1996 bib entry, added SorensenUrzyczyn2006 with proper BibKey citation in NaturalDeduction/Basic.lean, converted 8 backtick-wrapped internal cross-refs to bare paths across 3 NaturalDeduction files. All 26 PR 1 files now conform to the canonical citation standard."
+    },
+    {
+      "project_number": 124,
+      "project_name": "plan_pr1_decomposition_into_smaller_prs",
+      "status": "completed",
+      "task_type": "general",
+      "topic": "Propositional PRs",
+      "created": "2026-06-11T20:47:26Z",
+      "last_updated": "2026-06-11T22:31:46Z",
+      "session_id": "sess_1781216211_3e9442",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/124_plan_pr1_decomposition_into_smaller_prs/plans/01_pr1-decomposition-plan.md",
+          "type": "plan",
+          "summary": "Revised plan: create 11 sub-PR tasks with detailed spec reports, then verify dependencies"
+        },
+        {
+          "path": "specs/124_plan_pr1_decomposition_into_smaller_prs/summaries/01_pr1-decomposition-summary.md",
+          "type": "summary",
+          "summary": "Created 11 sub-PR tasks (125-135) with detailed spec reports"
+        }
+      ],
+      "completion_summary": "Created 11 sub-PR tasks (125-135) with detailed spec reports for decomposing PR 1 into smaller PRs under 500 LOC each; tasks organized in 4 dependency waves with verified acyclic dependency graph"
+    },
+    {
+      "project_number": 123,
+      "project_name": "add_bib_references_pr1",
+      "status": "completed",
+      "task_type": "lean4",
+      "topic": "Propositional PRs",
+      "created": "2026-06-11T20:29:11Z",
+      "last_updated": "2026-06-11T21:15:28Z",
+      "session_id": "sess_1749674900_a3c1f2",
+      "artifacts": [
+        {
+          "path": "specs/123_add_bib_references_pr1/reports/01_bib-references-research.md",
+          "type": "report",
+          "summary": "Bibliographic reference research for PR 1: citation conventions, per-file mapping, and recommended bib entries"
+        },
+        {
+          "path": "specs/123_add_bib_references_pr1/plans/01_bib-references-plan.md",
+          "type": "plan",
+          "summary": "Implementation plan for adding bib references to PR 1"
+        },
+        {
+          "path": "specs/123_add_bib_references_pr1/summaries/01_bib-references-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary for adding bib references to PR 1"
+        }
+      ],
+      "next_artifact_number": 2,
+      "completion_summary": "Added 4 BibTeX entries (ChagrovZakharyaschev1997, Prawitz1965, TroelstraVanDalen1988, HughesCresswell1996) to references.bib and updated 15 Lean files with Mathlib-style citations on pr1/foundations-logic branch"
+    },
+    {
+      "project_number": 38,
+      "project_name": "temporal_dense_completeness",
+      "status": "completed",
+      "task_type": "lean4",
+      "created": "2026-06-08T00:00:00Z",
+      "last_updated": "2026-06-12T01:33:24Z",
+      "description": "Dense temporal completeness: prove that every formula valid on all dense serial linear orders is derivable in the Dense temporal proof system.\n\nScope:\n1. Add dense-specific axioms to Temporal.Axiom: `density` (G(G φ) → G φ) and `dense_indicator` (¬U(⊤,⊥)), gated to FrameClass.Dense via minFrameClass.\n2. Prove dense soundness: density axiom valid on DenselyOrdered, dense_indicator valid on DenselyOrdered (no immediate successor).\n3. Prove dense completeness via contrapositive + MCS + canonical model on Rat. The dense case eliminates the non-dense branch by deriving ¬U(⊤,⊥) as a Dense theorem, so □(¬U(⊤,⊥)) is in every Dense-MCS.\n\nNew development (not a port), following the pattern established by bimodal completeness_dense. The canonical model construction reuses the base temporal canonical order from task 31, specialized to Rat (DenselyOrdered).\n\nTarget: Cslib/Logics/Temporal/Metalogic/DenseCompleteness.lean + axiom additions to Axioms.lean\nEstimated scope: ~400-600 lines (new axioms + dense soundness + dense completeness)",
+      "topic": "Temporal Logic",
+      "session_id": "sess_1749647400_a3b2c1",
+      "completion_summary": "Proved dense temporal completeness: ValidDense phi -> ThDerivableFc .Dense phi. Added density and dense_indicator axioms, built FC-parameterized MCS infrastructure, proved dense soundness, showed DenselyOrdered for chronicle subtype via C4 + truth lemma propagation, assembled completeness theorem. Zero sorry, full build passes."
+    },
+    {
+      "project_number": 138,
+      "project_name": "subpr_1_1_1_proposition_refactor",
+      "status": "completed",
+      "task_type": "lean4",
+      "topic": "Propositional PRs",
+      "dependencies": [],
+      "created": "2026-06-12T00:15:00Z",
+      "last_updated": "2026-06-12T00:46:25Z",
+      "description": "Sub-PR 1.1.1: Proposition type to Lukasiewicz convention. Introduces Connectives.lean (98 lines), refactors Defs.lean to bot/imp primitives with derived connectives, updates NaturalDeduction/Basic.lean (3 rules replacing 8). Includes Zulip topic creation before PR submission. Adds ChagrovZakharyaschev1997 to references.bib. ~302 diff lines across 6 files.",
+      "session_id": "sess_1781224549_831844",
+      "researched": "2026-06-12T00:10:52Z",
+      "artifacts": [
+        {
+          "path": "specs/138_subpr_1_1_1_proposition_refactor/reports/01_proposition-refactor.md",
+          "type": "report",
+          "summary": "Research report for Sub-PR 1.1.1 proposition refactor to Lukasiewicz convention"
+        },
+        {
+          "path": "specs/138_subpr_1_1_1_proposition_refactor/plans/01_proposition-refactor.md",
+          "type": "plan",
+          "summary": "Implementation plan for Sub-PR 1.1.1: branch creation, file extraction, CI verification, and PR submission"
+        },
+        {
+          "path": "specs/138_subpr_1_1_1_proposition_refactor/summaries/01_proposition-refactor-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary for Sub-PR 1.1.1"
+        }
+      ],
+      "plan_metadata": {
+        "phases": 3,
+        "total_effort_hours": 1.5,
+        "complexity": "simple",
+        "research_integrated": true,
+        "plan_version": 1,
+        "dependency_waves": [
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/01_proposition-refactor.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-06-11"
+          }
+        ]
+      },
+      "completion_summary": "Created branch refactor/proposition-lukasiewicz with Lukasiewicz convention refactoring. 6 files changed, all CI checks passing, PR description drafted for review."
+    },
+    {
+      "project_number": 145,
+      "project_name": "subpr_2_1_lukasiewicz_primitives",
+      "status": "completed",
+      "task_type": "lean4",
+      "topic": "Modal PRs",
+      "dependencies": [],
+      "created": "2026-06-12T02:00:00Z",
+      "last_updated": "2026-06-11",
+      "description": "Sub-PR 2.1: Lukasiewicz primitive refactoring. Refactors Modal/Basic.lean from {atom, not, and, diamond} to {atom, bot, imp, box} primitives with derived connectives as abbrevs. Updates Modal/Denotation.lean for new primitives. Deletes LogicalEquivalence.lean (incompatible with new primitives). Replaces all grind-based proofs with explicit term-mode proofs for axiom validity theorems. This is the gateway PR — clear, focused, and establishes the Lukasiewicz convention for all subsequent PRs. ~440 diff lines across 3 files.",
+      "session_id": "sess_1781205592_c62b5b",
+      "researched": "2026-06-12T06:35:00Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/145_subpr_2_1_lukasiewicz_primitives/reports/01_lukasiewicz-primitives.md",
+          "type": "report",
+          "summary": "Research report: upstream/fork diff analysis, grind inventory, import dependencies, risk assessment, implementation strategy for Lukasiewicz primitive refactoring"
+        },
+        {
+          "path": "specs/145_subpr_2_1_lukasiewicz_primitives/plans/01_lukasiewicz-primitives.md",
+          "type": "plan",
+          "summary": "Implementation plan: 6-phase Lukasiewicz primitive refactoring with branch setup, Basic.lean/Denotation.lean/LogicalEquivalence.lean changes, and CI verification"
+        },
+        {
+          "type": "summary",
+          "path": "specs/145_subpr_2_1_lukasiewicz_primitives/summaries/01_lukasiewicz-primitives-summary.md",
+          "summary": "Implementation summary for Lukasiewicz primitive refactoring"
+        }
+      ],
+      "plan_metadata": {
+        "phases": 6,
+        "total_effort_hours": 3,
+        "complexity": "medium",
+        "research_integrated": true,
+        "plan_version": 1,
+        "dependency_waves": [
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            5
+          ],
+          [
+            6
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/01_lukasiewicz-primitives.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-06-11"
+          }
+        ]
+      },
+      "completion_summary": "Replaced 3 remaining tactic-level grind proofs in Modal/Basic.lean with explicit term-mode proofs (Set.ext_iff, direct hypothesis, push Not/rcases). Added grind_lint skip entries for 3 Modal theorems. All CI checks pass."
+    },
+    {
+      "project_number": 182,
+      "project_name": "evaluate_classical_only_simplification",
+      "status": "completed",
+      "task_type": "cslib",
+      "dependencies": [],
+      "description": "Revert Modal/, Temporal/, and Bimodal/ to purely classical systems with minimal formula constructors, undoing the and/or propagation from tasks 175-177. Propositional/ is unchanged (retains five primitives and three-tier min/int/classical completeness). Target formula types: Modal {atom, bot, imp, box} (4 constructors), Temporal {atom, bot, imp, untl, snce} (5 constructors), Bimodal {atom, bot, imp, box, untl, snce} (6 constructors). Derived connectives via Lukasiewicz encoding: and phi psi := neg (imp phi (neg psi)), or phi psi := imp (neg phi) psi, neg phi := imp phi bot, top := imp bot bot. REVERT SCOPE — per layer: (A) Formula type: remove .and/.or constructors from the inductive type, restore abbrev definitions using Lukasiewicz encoding. (B) All pattern matches: remove .and/.or arms from every match/cases/induction across all files (~55 Modal, ~11 Temporal, ~50+ Bimodal). (C) Axiom sets: remove andI/andE1/andE2/orI1/orI2/orE constructors from axiom inductive types (6 fewer axioms per system). (D) HasAxiom instances: remove HasAxiomAndI/AndE1/AndE2/OrI1/OrI2/OrE instance registrations. (E) Soundness proofs: remove the 6 and/or axiom soundness cases from all system soundness files (15 files in Modal, 2 in Temporal). (F) Completeness/truth lemma: remove .and/.or truth lemma cases; the Lukasiewicz encoding means and/or satisfaction reduces to imp/bot cases automatically. (G) MCS helpers: remove mcs_or_resolve, mcs_and_iff, and similar helpers added for primitive and/or — implication_property handles everything via the encoding. (H) PropositionalHelpers: remove pairing, lceImp, rceImp, demorganDisjNegBackward and similar helpers that were added to bridge primitive and/or — the Foundations typeclass theorems (lce_imp, rce_imp, combine_imp_conj) handle these via the Lukasiewicz encoding. (I) DerivationTree: remove .andI/.andE1/.andE2/.orI1/.orI2/.orE constructors from derivation tree types. (J) Semantics: remove structural and/or satisfaction clauses — with abbreviations, and/or satisfaction reduces through imp/bot automatically. (K) DenseValidity/Soundness proof restoration: restore proofs that were rewritten from encoding-based to constructor-based back to the encoding pattern (intro/function application style instead of And.intro/Or.inl destructuring). (L) Separation/Decidability/Algebraic: remove .and/.or cases from all pattern matches in these subsystems. THREE DELIVERABLES after revert: (1) Syntactic embedding: update FromPropositional.lean in each layer so the embedding maps Propositional primitive .and/.or to the upper layer Lukasiewicz abbreviations, with proofs that the embedding preserves satisfaction/validity. (2) Axiom inheritance: verify that the Foundations typeclass theorems (Theorems/Propositional/Core.lean lce_imp/rce_imp, Theorems/Combinators.lean combine_imp_conj/combine_imp_conj_3, Theorems/Propositional/Connectives.lean contraposition/demorgan) provide all and/or reasoning as derived theorems via the wrap/unwrap bridge, requiring only HasAxiomImplyK/ImplyS/EFQ/Peirce. (3) Conservative extension: prove that each upper layer is a conservative extension of Classical Propositional Logic — if a propositional formula phi is derivable in the upper system, then phi was already derivable in CPL. This validates that adding modalities/temporal operators introduces no new propositional truths.",
+      "artifacts": [
+        {
+          "path": "specs/182_evaluate_classical_only_simplification/reports/01_classical-simplification-tradeoffs.md",
+          "type": "report",
+          "summary": "Decision report: classical upper layers with minimal primitives, three expansion methods"
+        },
+        {
+          "path": "specs/182_evaluate_classical_only_simplification/reports/02_team-research.md",
+          "type": "report",
+          "summary": "Team synthesis: revert strategy (per-file, 6 phases, ~126 files), zero axiom gaps, conservative extension proof plan (~115-215 lines)"
+        },
+        {
+          "path": "specs/182_evaluate_classical_only_simplification/reports/02_teammate-a-findings.md",
+          "type": "report",
+          "summary": "Git revert feasibility: per-file selective revert, baseline commits identified"
+        },
+        {
+          "path": "specs/182_evaluate_classical_only_simplification/reports/02_teammate-b-findings.md",
+          "type": "report",
+          "summary": "Axiom inheritance: zero gaps, all Foundations theorems use Lukasiewicz encoding"
+        },
+        {
+          "path": "specs/182_evaluate_classical_only_simplification/reports/02_teammate-c-findings.md",
+          "type": "report",
+          "summary": "Conservative extension: Modal K trivial (3 lines), Temporal ~50 lines, Bimodal ~150 lines"
+        },
+        {
+          "path": "specs/182_evaluate_classical_only_simplification/plans/01_implementation-plan.md",
+          "type": "plan",
+          "summary": "8-phase plan: formula types, embeddings, Modal revert, Temporal revert, Bimodal revert (2 phases), conservative extension proofs (2 phases)"
+        }
+      ],
+      "completion_summary": "Reverted Modal/, Temporal/, and Bimodal/ to purely classical systems with minimal formula constructors (4/5/6 respectively), removing primitive and/or in favor of Lukasiewicz abbreviations. Removed ~4700 lines across 126 files. Created three conservative extension proofs (modal_conservative_extension, temporal_conservative_extension, bimodal_conservative_extension) showing each upper layer introduces no new propositional truths. All CI checks pass: lake build (2979 jobs), checkInitImports, lint-style, zero new sorries."
     }
   ],
   "archived_projects": [
@@ -2268,6 +2890,684 @@
       "created": "2026-06-08T00:45:00Z",
       "last_updated": "2026-06-08T20:30:00Z",
       "archived": "2026-06-08T22:58:07Z"
+    },
+    {
+      "project_number": 170,
+      "project_name": "submit_subpr_3_1_3_2_temporal_syntax",
+      "status": "abandoned",
+      "task_type": "pr",
+      "topic": "Temporal PRs",
+      "dependencies": [
+        138
+      ],
+      "description": "Submit Sub-PR 3.1+3.2: Temporal syntax (Formula + utilities). Create a clean branch from upstream/main (or from the merged PR1 Connectives.lean dependency) containing only the in-scope temporal syntax files. Scope: (1) Create branch pr3/temporal-syntax from the appropriate base; (2) Cherry-pick or extract Formula.lean (582 lines), Context.lean (131 lines), BigConj.lean (52 lines), and Subformulas.lean (218 lines) from Cslib/Logics/Temporal/Syntax/; (3) Add the barrel import entry to Cslib.lean; (4) Add any needed references.bib entries; (5) Verify dependency on Connectives.lean (task 138 / Sub-PR 1.1.1) is satisfied on the target base; (6) Run full CI (lake build, lake test, checkInitImports, lint-style); (7) Submit PR to upstream cslib. Total ~983 diff lines across 4 temporal files. External dependency: Cslib.Foundations.Logic.Connectives (Sub-PR 1.1.1, task 138) must be merged upstream first. Combines tasks 159 (Sub-PR 3.1) and 160 (Sub-PR 3.2) into a single PR since both are pure syntax with no proofs.",
+      "created": "2026-06-12T22:15:49Z",
+      "last_updated": "2026-06-12T23:44:45Z",
+      "session_id": "sess_1781307197_e61477",
+      "artifacts": [
+        {
+          "path": "specs/170_submit_subpr_3_1_3_2_temporal_syntax/reports/01_pr-submission-research.md",
+          "type": "report"
+        },
+        {
+          "path": "specs/170_submit_subpr_3_1_3_2_temporal_syntax/plans/01_pr-submission-plan.md",
+          "type": "plan"
+        }
+      ]
+    },
+    {
+      "project_number": 169,
+      "project_name": "recreate_modal_primitives_pr_upstream",
+      "status": "abandoned",
+      "task_type": "pr",
+      "topic": "Modal PRs",
+      "description": "Recreate the Modal primitives refactor (closed PR #637) as a clean, small PR against upstream leanprover/cslib main. Root cause of closure: task 167 rebased refactor/modal-primitives onto fork main (38+ personal commits ahead of upstream), ballooning the PR to ~100 commits; maintainer chenson2018 closed it as too big to review. Recovery: (1) fetch upstream and create a fresh branch (e.g. refactor/modal-primitives-v2) from upstream/main; (2) port ONLY the PR's own changes — the original ~5 commits' content, which still exists CI-green with syntactic sugar applied at commit 3928feb4 on refactor/modal-primitives — by cherry-picking or re-deriving them onto the new base, keeping the diff scoped to the original PR files (Modal/Basic.lean, Modal/Denotation.lean, Modal/LogicalEquivalence.lean, and minimal shared-file touches: Connectives.lean, InferenceSystem.lean, Propositional/Defs.lean, NaturalDeduction/Basic.lean); note upstream/main may lack task 165 sugar and the ↔ notation, so the branch must build against upstream/main as-is — only include sugar/notation the PR's own files need and that the upstream base supports; (3) verify the diff stats are small (target: same ~10-13 files, low commit count) before anything is pushed; (4) full CI (lake build, lake test, checkInitImports, lint-style) against the upstream base; (5) push the branch to the fork and prepare a PR description referencing closed #637 and replying to chenson2018's size feedback — transition to [PR READY] for user review; do NOT open the PR automatically.",
+      "dependencies": [
+        167
+      ],
+      "created": "2026-06-12T22:10:32Z",
+      "last_updated": "2026-06-12T22:15:38Z",
+      "session_id": "sess_1781293333_a108c0"
+    },
+    {
+      "project_number": 160,
+      "project_name": "subpr_3_2_syntax_utilities",
+      "status": "abandoned",
+      "task_type": "cslib",
+      "topic": "Temporal PRs",
+      "dependencies": [
+        159
+      ],
+      "description": "Sub-PR 3.2: Temporal syntax utilities. Adds Context.lean (131 lines, Context = List (Formula Atom) with map/membership lemmas), BigConj.lean (52 lines, big conjunction over formula lists), and Subformulas.lean (218 lines, subformula closure with membership and transitivity lemmas). ~401 diff lines across 3 files.",
+      "created": "2026-06-12T06:33:54Z",
+      "last_updated": "2026-06-12T06:33:54Z",
+      "session_id": "sess_1781245722_780d58",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 161,
+      "project_name": "subpr_3_3_axioms_derivation",
+      "status": "abandoned",
+      "task_type": "cslib",
+      "topic": "Temporal PRs",
+      "dependencies": [
+        160
+      ],
+      "description": "Sub-PR 3.3: Temporal axioms and derivation trees. Adds Axioms.lean (235 lines, 26 BX axiom constructors with FrameClass classification: Base/Dense/Discrete), Derivation.lean (98 lines, Type-valued DerivationTree with 6 inference rules: axiom, assumption, modus_ponens, temporal_necessitation, temporal_duality, weakening), and Derivable.lean (99 lines, Prop-valued Nonempty wrapper with constructor-mirroring lemmas). ~432 diff lines across 3 files.",
+      "created": "2026-06-12T06:33:54Z",
+      "last_updated": "2026-06-12T06:33:54Z",
+      "session_id": "sess_1781245722_780d58",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 162,
+      "project_name": "subpr_3_4_proof_system_instances",
+      "status": "abandoned",
+      "task_type": "cslib",
+      "topic": "Temporal PRs",
+      "dependencies": [
+        161,
+        140
+      ],
+      "description": "Sub-PR 3.4: Temporal proof system instances. Adds Instances.lean (214 lines, registers InferenceSystem, ModusPonens, ClassicalHilbert, TemporalNecessitation, 22 HasAxiom* instances, and TemporalBXHilbert for HilbertBX tag type) and ProofSystem.lean barrel (23 lines). Bridges abstract Foundation typeclass hierarchy to concrete derivation tree. ~237 diff lines across 2 files. External dependency: Cslib.Foundations.Logic.ProofSystem (PR1 sub-PR 1.1.3, task 140).",
+      "created": "2026-06-12T06:33:54Z",
+      "last_updated": "2026-06-12T06:33:54Z",
+      "session_id": "sess_1781245722_780d58",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 163,
+      "project_name": "subpr_3_5_semantics_embedding",
+      "status": "abandoned",
+      "task_type": "cslib",
+      "topic": "Temporal PRs",
+      "dependencies": [
+        160,
+        142
+      ],
+      "description": "Sub-PR 3.5: Temporal semantics and PL embedding. Adds Model.lean (60 lines, TemporalModel structure on LinearOrder), Satisfies.lean (177 lines, recursive satisfaction relation with Burgess convention), Validity.lean (198 lines, validity hierarchy: Valid/ValidSerial/ValidDense/ValidDiscrete), FromPropositional.lean (56 lines, structural PL -> Temporal embedding with coercion), and Theorems.lean barrel (19 lines, re-exports Foundation temporal derived theorems). ~510 diff lines across 5 files. External dependencies: Cslib.Foundations.Logic.Theorems.Temporal.TemporalDerived and FrameConditions (PR1 sub-PRs 1.1.5/1.1.6, tasks 142-143).",
+      "created": "2026-06-12T06:33:54Z",
+      "last_updated": "2026-06-12T06:33:54Z",
+      "session_id": "sess_1781245722_780d58",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 125,
+      "project_name": "subpr_1_1_hilbert_hierarchy_refactoring",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Propositional PRs",
+      "dependencies": [],
+      "created": "2026-06-11T22:30:00Z",
+      "last_updated": "2026-06-12T00:15:00Z",
+      "description": "Sub-PR 1.1: 3-tier Hilbert hierarchy refactoring. Modifies 12 already-merged files to introduce MinimalHilbert/IntuitionisticHilbert/ClassicalHilbert 3-level hierarchy, replacing the flat PropositionalHilbert. Pure refactoring - no new logic. Foundation for all other sub-PRs.",
+      "session_id": "sess_1781221214_ace4f8",
+      "researched": "2026-06-11T23:38:02Z",
+      "artifacts": [
+        {
+          "path": "specs/125_subpr_1_1_hilbert_hierarchy_refactoring/reports/02_research-report.md",
+          "type": "report",
+          "summary": "Detailed extraction analysis: 12/13 files NEW to upstream (not modifications), 5 additional dependency files needed, NaturalDeduction/Basic.lean update required, Theorems.lean barrel needs reduction. Scope expands from 13 to ~21 files."
+        },
+        {
+          "path": "specs/125_subpr_1_1_hilbert_hierarchy_refactoring/reports/03_feedback-analysis.md",
+          "type": "report",
+          "summary": "Reviewer feedback analysis: sub-PR 1.1 at 21 files / ~4000 diff lines is 8x over the 500-line limit. Recommends re-decomposing into 5+ smaller PRs, starting with a ~300-line Proposition type refactoring. Includes Zulip topic strategy and PR presentation templates."
+        },
+        {
+          "path": "specs/125_subpr_1_1_hilbert_hierarchy_refactoring/plans/01_implementation-plan.md",
+          "type": "plan",
+          "summary": "7-phase plan: Zulip topic + 5-6 PRs (each <500 lines) extracting Hilbert hierarchy foundation layer to upstream CSLib. Covers Proposition refactoring, axiom definitions, proof system hierarchy, instances, theorems, and metalogic."
+        }
+      ],
+      "completion_summary": "Expanded into tasks 138-144 (Sub-PRs 1.1.1 through 1.1.7) based on reviewer feedback requiring <500 diff lines per PR."
+    },
+    {
+      "project_number": 126,
+      "project_name": "subpr_1_2_intmin_instances",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Propositional PRs",
+      "dependencies": [
+        142
+      ],
+      "created": "2026-06-11T22:30:00Z",
+      "last_updated": "2026-06-11T22:30:00Z",
+      "description": "Sub-PR 1.2: Propositional axiom extensions and IntMin instances. Extends axiom system with IntPropAxiom/MinPropAxiom and adds instance registrations for intuitionistic and minimal Hilbert logics."
+    },
+    {
+      "project_number": 127,
+      "project_name": "subpr_1_3_propositional_semantics",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Propositional PRs",
+      "dependencies": [
+        138
+      ],
+      "created": "2026-06-11T22:30:00Z",
+      "last_updated": "2026-06-11T22:30:00Z",
+      "description": "Sub-PR 1.3: Propositional semantics (bivalent + Kripke). Introduces Valuation/Evaluate/Tautology (bivalent) and KripkeModel/IForces/IValid/MValid (Kripke) for propositional logic."
+    },
+    {
+      "project_number": 128,
+      "project_name": "subpr_1_4_nd_derived_rules",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Propositional PRs",
+      "dependencies": [
+        141
+      ],
+      "created": "2026-06-11T22:30:00Z",
+      "last_updated": "2026-06-11T22:30:00Z",
+      "description": "Sub-PR 1.4: ND derived connective rules (standalone). Adds derived rules for natural deduction connectives using the standalone NaturalDeduction/Basic.lean already in upstream."
+    },
+    {
+      "project_number": 129,
+      "project_name": "subpr_1_5_modal_logical_equivalence",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Propositional PRs",
+      "dependencies": [
+        141
+      ],
+      "created": "2026-06-11T22:30:00Z",
+      "last_updated": "2026-06-11T22:30:00Z",
+      "description": "Sub-PR 1.5: Modal logical equivalence + Basic update. Adds LogicalEquivalence typeclass instance for modal logic and updates Modal/Basic.lean for MinimalHilbert rename."
+    },
+    {
+      "project_number": 130,
+      "project_name": "subpr_1_6_classical_soundness_completeness",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Propositional PRs",
+      "dependencies": [
+        126,
+        127
+      ],
+      "created": "2026-06-11T22:30:00Z",
+      "last_updated": "2026-06-11T22:30:00Z",
+      "description": "Sub-PR 1.6: Classical soundness and completeness. Proves classical propositional Hilbert logic is sound and complete w.r.t. bivalent semantics. Depends on 1.2 (IntMin instances) and 1.3 (semantics)."
+    },
+    {
+      "project_number": 131,
+      "project_name": "subpr_1_7_intuitionistic_soundness_completeness",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Propositional PRs",
+      "dependencies": [
+        127,
+        130
+      ],
+      "created": "2026-06-11T22:30:00Z",
+      "last_updated": "2026-06-11T22:30:00Z",
+      "description": "Sub-PR 1.7: Intuitionistic soundness and completeness via Kripke models. Slightly over 500-line limit (555 lines) but logically indivisible: IntSoundness + IntLindenbaum (DCCS extension lemma) + IntCompleteness."
+    },
+    {
+      "project_number": 132,
+      "project_name": "subpr_1_8_minimal_soundness_completeness",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Propositional PRs",
+      "dependencies": [
+        127,
+        130
+      ],
+      "created": "2026-06-11T22:30:00Z",
+      "last_updated": "2026-06-11T22:30:00Z",
+      "description": "Sub-PR 1.8: Minimal soundness and completeness via Kripke models. Slightly over 500-line limit (514 lines) but logically indivisible: MinSoundness + MinLindenbaum + MinCompleteness."
+    },
+    {
+      "project_number": 133,
+      "project_name": "subpr_1_9_fromhilbert_parameterization",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Propositional PRs",
+      "dependencies": [
+        126
+      ],
+      "created": "2026-06-11T22:30:00Z",
+      "last_updated": "2026-06-11T22:30:00Z",
+      "description": "Sub-PR 1.9: ND-Hilbert bridge parameterization. Parameterizes FromHilbert.lean over axiom sets, enabling the ND-Hilbert bridge to work for classical, intuitionistic, and minimal logic."
+    },
+    {
+      "project_number": 134,
+      "project_name": "subpr_1_10_hilbert_derived_rules",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Propositional PRs",
+      "dependencies": [
+        133
+      ],
+      "created": "2026-06-11T22:30:00Z",
+      "last_updated": "2026-06-11T22:30:00Z",
+      "description": "Sub-PR 1.10: Hilbert-style derived connective rules. Adds derived rules for negation/top/conjunction/disjunction/biconditional at 3 logic levels, built over parameterized FromHilbert. Slightly over 500-line limit (559 lines) but indivisible."
+    },
+    {
+      "project_number": 135,
+      "project_name": "subpr_1_11_nd_hilbert_equivalence",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Propositional PRs",
+      "dependencies": [
+        128,
+        133
+      ],
+      "created": "2026-06-11T22:30:00Z",
+      "last_updated": "2026-06-11T22:30:00Z",
+      "description": "Sub-PR 1.11: ND-Hilbert extensional equivalence. Proves Hilbert derivability and ND derivability are extensionally equivalent, with instances for classical, intuitionistic, and minimal logic."
+    },
+    {
+      "project_number": 60,
+      "project_name": "pr2_modal_metalogic",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "created": "2026-06-10T00:22:30Z",
+      "last_updated": "2026-06-12T02:00:00Z",
+      "topic": "Modal PRs",
+      "session_id": "sess_1781205592_c62b5b",
+      "researched": "2026-06-11T19:19:05Z",
+      "next_artifact_number": 3,
+      "artifacts": [
+        {
+          "path": "specs/060_pr2_modal_metalogic/reports/01_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates: modal metalogic PR readiness review"
+        },
+        {
+          "path": "specs/060_pr2_modal_metalogic/reports/02_pr2-preparation.md",
+          "type": "research",
+          "summary": "PR2 preparation research: scope (43 files, ~7400 lines), dependencies, branch strategy, CI readiness, docstrings, commit history, PR description draft"
+        },
+        {
+          "path": "specs/060_pr2_modal_metalogic/plans/02_pr2-preparation.md",
+          "type": "plan",
+          "summary": "Implementation plan with 6 phases for PR2 branch creation, file checkout, import updates, build verification, cleanup, and PR submission"
+        }
+      ],
+      "completion_summary": "Expanded into 14 sub-PRs (tasks 145-158) for incremental submission under 500 LOC each"
+    },
+    {
+      "project_number": 61,
+      "project_name": "pr3_temporal_proof_system",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "created": "2026-06-10T00:22:30Z",
+      "last_updated": "2026-06-12T06:34:14Z",
+      "topic": "Temporal PRs",
+      "session_id": "sess_1781245722_780d58",
+      "artifacts": [
+        {
+          "path": "specs/061_pr3_temporal_proof_system/reports/01_temporal-proof-pr-division.md",
+          "type": "research_report",
+          "summary": "PR3 temporal proof system subdivision: 5 sub-PRs (549/401/432/237/510 LOC) covering 14 files (2,129 lines) across Formula, Syntax, Axioms, ProofSystem, and Semantics layers"
+        },
+        {
+          "path": "specs/061_pr3_temporal_proof_system/plans/01_temporal-proof-pr-division.md",
+          "type": "plan",
+          "summary": "Plan for creating 5 sub-PR tasks (159-163) for temporal proof system"
+        }
+      ],
+      "completion_summary": "Expanded into 5 sub-PRs (tasks 159-163) for temporal proof system incremental submission: 3.1 Formula (549 LOC), 3.2 Syntax utilities (401 LOC), 3.3 Axioms/derivation (432 LOC), 3.4 ProofSystem instances (237 LOC), 3.5 Semantics/embedding (510 LOC). Total: 2,129 lines across 14 files."
+    },
+    {
+      "project_number": 62,
+      "project_name": "pr4_temporal_metalogic_core",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "dependencies": [
+        61
+      ],
+      "created": "2026-06-10T00:22:30Z",
+      "last_updated": "2026-06-12T06:08:04Z",
+      "topic": "Temporal PRs",
+      "session_id": "sess_1749681600_a3c7f2",
+      "artifacts": [
+        {
+          "path": "specs/062_pr4_temporal_metalogic_core/reports/01_pr4-subdivision.md",
+          "type": "research_report",
+          "summary": "PR4 subdivision analysis: 9 core Metalogic files (2,269 lines) divided into 6 sub-PRs following PR 1 gateway pattern"
+        }
+      ]
+    },
+    {
+      "project_number": 63,
+      "project_name": "pr5_chronicle_infrastructure",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "dependencies": [
+        62
+      ],
+      "created": "2026-06-10T00:22:30Z",
+      "last_updated": "2026-06-10T00:22:30Z",
+      "topic": "Temporal PRs"
+    },
+    {
+      "project_number": 64,
+      "project_name": "pr6_completeness_theorem",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "dependencies": [
+        63
+      ],
+      "created": "2026-06-10T00:22:30Z",
+      "last_updated": "2026-06-10T00:22:30Z",
+      "topic": "Temporal PRs"
+    },
+    {
+      "project_number": 12,
+      "project_name": "coordinate_cslib_pr_submission_bimodal_logic",
+      "status": "abandoned",
+      "task_type": "general",
+      "created": "2026-06-08T00:45:00Z",
+      "last_updated": "2026-06-09T23:52:20Z",
+      "dependencies": [
+        41
+      ],
+      "description": "Coordinate the cslib PR submission process for the modular logic integration (standalone modules + bimodal). This task runs in parallel with porting tasks and handles maintainer communication, namespace decisions, and CI compliance.\n\n**Standalone Module PRs** (can proceed in parallel with bimodal PRs since they target different directories):\n- PR-Foundations (Task 20): Propositional Hilbert theorems to Cslib/Foundations/Logic/Theorems/ -- Wave 1, no dependencies\n- PR-Modal (Task 21): Modal proof system + theorems to Cslib/Logics/Modal/ProofSystem/ + Theorems/ -- after PR-Foundations\n- PR-Temporal-Infra (Task 22): Temporal infrastructure + theorems to Cslib/Logics/Temporal/ProofSystem/ + Theorems/ -- after PR-Foundations\n- PR-TempSem (Task 23): Temporal semantics to Cslib/Logics/Temporal/Semantics/ -- after PR-Temporal-Infra\n\n**Bimodal PRs** (in dependency order):\n- PR 1 (Bimodal Syntax, task 2): submit first, establish review pattern\n- PR 2 (Semantics, task 3) and PR 3 (ProofSystem, task 4): after PR 1 merged, can overlap\n- PR 4 (Perpetuity Theorems, task 5): after PRs 3, PR-Modal, PR-Temporal-Infra merged\n- PR 5 (FrameConditions+Soundness, task 6): after PRs 2+3 merged\n- PR 6 (MCS/Deduction, task 7): after PRs 3+4 merged\n- PR 7 (Completeness, task 8): after PRs 5+6 merged\n- PR 8 (Decidability, task 9): after PRs 3+6 merged (largest PR, ~10k lines)\n- PR 9 (Separation, task 10): after PRs 3+4+6 merged\n- PR 10 (ConservativeExtension, task 11): after PR 3 merged (independent of 5-9)\n\n**Coordination Workflow**:\n\n1. **Open Zulip Discussion** (first step): propose modular architecture (standalone Foundations/Modal/Temporal modules + Bimodal), PR strategy (4 standalone PRs + 10 bimodal PRs)\n2. **Namespace Decision**: confirm before starting task 2\n3. **CI Checks** (before each PR): lake build, lake shake, linter.all, zero sorry, Apache 2.0 headers\n4. **Review Cycle**: keep PRs small (max ~3,500 lines); address feedback within 48 hours",
+      "session_id": "sess_1780964447_c6a4ec",
+      "topic": "Project Management",
+      "subtasks": [
+        51,
+        52,
+        53,
+        54
+      ]
+    },
+    {
+      "project_number": 139,
+      "project_name": "subpr_1_1_2_axiom_definitions",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Propositional PRs",
+      "dependencies": [
+        138
+      ],
+      "created": "2026-06-12T00:15:00Z",
+      "last_updated": "2026-06-12T00:15:00Z",
+      "description": "Sub-PR 1.1.2: Polymorphic axiom definitions. Adds Axioms.lean with axiom formulas (ImplyK, ImplyS, EFQ, Peirce, modal K/T/4/B/5/D, temporal BX1-BX13) as polymorphic abbreviations over connective typeclasses. Pure definitions, no proofs. ~300 diff lines."
+    },
+    {
+      "project_number": 140,
+      "project_name": "subpr_1_1_3_proof_system_hierarchy",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Propositional PRs",
+      "dependencies": [
+        139
+      ],
+      "created": "2026-06-12T00:15:00Z",
+      "last_updated": "2026-06-12T00:15:00Z",
+      "description": "Sub-PR 1.1.3: Hilbert proof system typeclass hierarchy. Adds ProofSystem.lean defining MinimalHilbert/IntuitionisticHilbert/ClassicalHilbert 3-tier propositional hierarchy plus modal extensions (K through S5, D-family) and temporal/bimodal systems. Needs curation to handle extra modal classes from tasks 92/100. ~490 diff lines."
+    },
+    {
+      "project_number": 141,
+      "project_name": "subpr_1_1_4_propositional_instances",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Propositional PRs",
+      "dependencies": [
+        140
+      ],
+      "created": "2026-06-12T00:15:00Z",
+      "last_updated": "2026-06-12T00:15:00Z",
+      "description": "Sub-PR 1.1.4: Propositional Hilbert instances and derivation trees. Adds PropositionalAxiom inductive, DerivationTree parameterized over axiom type, HilbertCl/HilbertInt/HilbertMin instances, and ListHelpers utilities. 4 new files + Cslib.lean imports. ~430 diff lines."
+    },
+    {
+      "project_number": 142,
+      "project_name": "subpr_1_1_5_core_theorems_barrel",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Propositional PRs",
+      "dependencies": [
+        141
+      ],
+      "created": "2026-06-12T00:15:00Z",
+      "last_updated": "2026-06-12T00:15:00Z",
+      "description": "Sub-PR 1.1.5: Core theorems and barrel file. Adds Theorems/Propositional/Core.lean (311 lines, stratified by logic strength), Theorems/BigConj.lean (142 lines), and reduced Theorems.lean barrel (~45 lines, excluding modal/temporal imports). ~498 diff lines."
+    },
+    {
+      "project_number": 143,
+      "project_name": "subpr_1_1_6_connective_theorems",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Propositional PRs",
+      "dependencies": [
+        142
+      ],
+      "created": "2026-06-12T00:15:00Z",
+      "last_updated": "2026-06-12T00:15:00Z",
+      "description": "Sub-PR 1.1.6: Connective and combinator theorems. Adds Theorems/Propositional/Connectives.lean (De Morgan, double negation stratified by logic strength), Theorems/Combinators.lean, and Theorems/Temporal/FrameConditions.lean. May need splitting if total exceeds 500 lines (~428-539 diff lines)."
+    },
+    {
+      "project_number": 144,
+      "project_name": "subpr_1_1_7_metalogic",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Propositional PRs",
+      "dependencies": [
+        143
+      ],
+      "created": "2026-06-12T00:15:00Z",
+      "last_updated": "2026-06-12T00:15:00Z",
+      "description": "Sub-PR 1.1.7: Metalogic foundations. Adds Consistency.lean (278), DeductionHelpers.lean (120), DeductionTheorem.lean (217), MCS.lean (161). ~776 diff lines total, will likely need splitting into 2 PRs to stay under 500 lines each."
+    },
+    {
+      "project_number": 146,
+      "project_name": "subpr_2_2_proof_system_hierarchy",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Modal PRs",
+      "dependencies": [
+        145
+      ],
+      "created": "2026-06-12T02:00:00Z",
+      "last_updated": "2026-06-12T02:00:00Z",
+      "description": "Sub-PR 2.2: Proof system hierarchy + PL embedding. Adds 13 bundled typeclasses (ModalTHilbert through ModalDBHilbert) and 14 opaque tag types to Foundations/Logic/ProofSystem.lean. Adds FromPropositional.lean (103 lines) providing structural embedding from PL into modal logic with semantic coherence theorem. Adds ProofSystem/Instances.lean barrel file (56 lines). Pure definitions, no proofs beyond the embedding. ~280 diff lines across 3 files.",
+      "session_id": "sess_1781205592_c62b5b",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 147,
+      "project_name": "subpr_2_3_derivation_deduction",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Modal PRs",
+      "dependencies": [
+        145
+      ],
+      "created": "2026-06-12T02:00:00Z",
+      "last_updated": "2026-06-12T02:00:00Z",
+      "description": "Sub-PR 2.3: Derivation trees and deduction theorem. Adds Metalogic/DerivationTree.lean (218 lines) defining Hilbert-style derivation trees parameterized over axiom predicates. Adds Metalogic/DeductionTheorem.lean (215 lines) proving the deduction theorem for modal Hilbert systems. Core proof infrastructure that all system-specific files depend on. ~433 new lines across 2 files.",
+      "session_id": "sess_1781205592_c62b5b",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 148,
+      "project_name": "subpr_2_4_mcs_soundness",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Modal PRs",
+      "dependencies": [
+        147
+      ],
+      "created": "2026-06-12T02:00:00Z",
+      "last_updated": "2026-06-12T02:00:00Z",
+      "description": "Sub-PR 2.4: Maximal consistent sets + generic soundness framework. Adds Metalogic/MCS.lean (392 lines) constructing maximal consistent sets via Zorn's lemma with iterated deduction. Adds Metalogic/Soundness.lean (84 lines) providing the generic soundness framework for all modal systems. ~476 new lines across 2 files.",
+      "session_id": "sess_1781205592_c62b5b",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 149,
+      "project_name": "subpr_2_5_completeness",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Modal PRs",
+      "dependencies": [
+        148
+      ],
+      "created": "2026-06-12T02:00:00Z",
+      "last_updated": "2026-06-12T02:00:00Z",
+      "description": "Sub-PR 2.5: Generic completeness framework. Adds Metalogic/Completeness.lean (475 lines) providing the canonical model construction for modal completeness via Zorn's lemma. Mathematical centerpiece of PR 2 — the generic completeness infrastructure that all 15 system-specific completeness proofs instantiate. ~475 new lines in 1 file.",
+      "session_id": "sess_1781205592_c62b5b",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 150,
+      "project_name": "subpr_2_6_k_system",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Modal PRs",
+      "dependencies": [
+        146,
+        149
+      ],
+      "created": "2026-06-12T02:00:00Z",
+      "last_updated": "2026-06-12T02:00:00Z",
+      "description": "Sub-PR 2.6: K soundness and completeness. Adds ProofSystem/Instances/K.lean (112 lines) defining KAxiom inductive and HilbertK InferenceSystem instance. Adds Systems/K/Soundness.lean (82 lines) and Systems/K/Completeness.lean (301 lines). Base modal system K — establishes the pattern for all subsequent system PRs. ~495 new lines across 3 files.",
+      "session_id": "sess_1781205592_c62b5b",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 151,
+      "project_name": "subpr_2_7_t_b_systems",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Modal PRs",
+      "dependencies": [
+        150
+      ],
+      "created": "2026-06-12T02:00:00Z",
+      "last_updated": "2026-06-12T02:00:00Z",
+      "description": "Sub-PR 2.7: T and B soundness and completeness. T (reflexive frames): Instances/T.lean (124), Systems/T/Soundness.lean (89), Systems/T/Completeness.lean (105). B (symmetric frames): Instances/B.lean (124), Systems/B/Soundness.lean (90), Systems/B/Completeness.lean (98). Both are simple single-axiom extensions of K. Slightly over 500-line limit (~630 lines) but closely related systems. ~630 new lines across 6 files.",
+      "session_id": "sess_1781205592_c62b5b",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 152,
+      "project_name": "subpr_2_8_d_system",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Modal PRs",
+      "dependencies": [
+        150
+      ],
+      "created": "2026-06-12T02:00:00Z",
+      "last_updated": "2026-06-12T02:00:00Z",
+      "description": "Sub-PR 2.8: D soundness and completeness. Adds Instances/D.lean (125), Systems/D/Soundness.lean (90), Systems/D/Completeness.lean (428). Serial frames — the D completeness proof is the largest individual completeness proof. Over 500-line limit (~643 lines) but logically indivisible. ~643 new lines across 3 files.",
+      "session_id": "sess_1781205592_c62b5b",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 153,
+      "project_name": "subpr_2_9_s4_s5_systems",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Modal PRs",
+      "dependencies": [
+        151
+      ],
+      "created": "2026-06-12T02:00:00Z",
+      "last_updated": "2026-06-12T02:00:00Z",
+      "description": "Sub-PR 2.9: S4 and S5 soundness and completeness. S4 (reflexive+transitive): Instances/S4.lean (137), Systems/S4/Soundness.lean (106), Systems/S4/Completeness.lean (115). S5 (equivalence relations): Instances/S5.lean (111), Systems/S5/Soundness.lean (103), Systems/S5/Completeness.lean (94). S5 extends S4 — natural dependency chain. Over 500-line limit (~666 lines) but logically grouped. ~666 new lines across 6 files.",
+      "session_id": "sess_1781205592_c62b5b",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 154,
+      "project_name": "subpr_2_10_k4_k5_systems",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Modal PRs",
+      "dependencies": [
+        150
+      ],
+      "created": "2026-06-12T02:00:00Z",
+      "last_updated": "2026-06-12T02:00:00Z",
+      "description": "Sub-PR 2.10: K4 and K5 soundness and completeness. K4 (transitive): Instances/K4.lean (124), Systems/K4/Soundness.lean (97), Systems/K4/Completeness.lean (107). K5 (Euclidean): Instances/K5.lean (125), Systems/K5/Soundness.lean (91), Systems/K5/Completeness.lean (93). Both are single-axiom extensions of K with related frame properties. Over 500-line limit (~637 lines) but logically grouped. ~637 new lines across 6 files.",
+      "session_id": "sess_1781205592_c62b5b",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 155,
+      "project_name": "subpr_2_11_k45_kb5_systems",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Modal PRs",
+      "dependencies": [
+        151,
+        154
+      ],
+      "created": "2026-06-12T02:00:00Z",
+      "last_updated": "2026-06-12T02:00:00Z",
+      "description": "Sub-PR 2.11: K45 and KB5 soundness and completeness. K45 (transitive+Euclidean): Instances/K45.lean (139), Systems/K45/Soundness.lean (109), Systems/K45/Completeness.lean (117). KB5 (symmetric+Euclidean): Instances/KB5.lean (139), Systems/KB5/Soundness.lean (116), Systems/KB5/Completeness.lean (121). Both involve axiom 5; K45 extends K4 and KB5 extends B. Over 500-line limit (~741 lines) but mathematically related. ~741 new lines across 6 files.",
+      "session_id": "sess_1781205592_c62b5b",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 156,
+      "project_name": "subpr_2_12_d4_d5_systems",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Modal PRs",
+      "dependencies": [
+        152
+      ],
+      "created": "2026-06-12T02:00:00Z",
+      "last_updated": "2026-06-12T02:00:00Z",
+      "description": "Sub-PR 2.12: D4 and D5 soundness and completeness. D4 (serial+transitive): Instances/D4.lean (139), Systems/D4/Soundness.lean (103), Systems/D4/Completeness.lean (118). D5 (serial+Euclidean): Instances/D5.lean (140), Systems/D5/Soundness.lean (104), Systems/D5/Completeness.lean (119). Both are serial + single-axiom extensions. Over 500-line limit (~723 lines) but logically grouped. ~723 new lines across 6 files.",
+      "session_id": "sess_1781205592_c62b5b",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 157,
+      "project_name": "subpr_2_13_d45_db_systems",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Modal PRs",
+      "dependencies": [
+        152,
+        156
+      ],
+      "created": "2026-06-12T02:00:00Z",
+      "last_updated": "2026-06-12T02:00:00Z",
+      "description": "Sub-PR 2.13: D45 and DB soundness and completeness. D45 (serial+transitive+Euclidean): Instances/D45.lean (153), Systems/D45/Soundness.lean (115), Systems/D45/Completeness.lean (130). DB (serial+symmetric): Instances/DB.lean (139), Systems/DB/Soundness.lean (103), Systems/DB/Completeness.lean (119). Both are serial double-axiom extensions. D45 extends D4. Over 500-line limit (~759 lines) but logically grouped. ~759 new lines across 6 files.",
+      "session_id": "sess_1781205592_c62b5b",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 158,
+      "project_name": "subpr_2_14_tb_barrels",
+      "status": "abandoned",
+      "task_type": "lean4",
+      "topic": "Modal PRs",
+      "dependencies": [
+        151,
+        153,
+        155,
+        157
+      ],
+      "created": "2026-06-12T02:00:00Z",
+      "last_updated": "2026-06-12T02:00:00Z",
+      "description": "Sub-PR 2.14: TB system + barrel files. TB (reflexive+symmetric): Instances/TB.lean (138), Systems/TB/Soundness.lean (107), Systems/TB/Completeness.lean (129). Also adds Metalogic.lean barrel (55 lines) aggregating all core metalogic + system imports. Includes final Cslib.lean import updates. Last sub-PR in the chain. ~485 new lines across 4 files.",
+      "session_id": "sess_1781205592_c62b5b",
+      "next_artifact_number": 1,
+      "artifacts": []
     }
   ]
 }

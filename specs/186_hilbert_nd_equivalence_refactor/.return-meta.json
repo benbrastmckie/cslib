@@ -1,0 +1,22 @@
+{
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/186_hilbert_nd_equivalence_refactor/plans/01_implementation-plan.md",
+      "summary": "3-phase implementation plan: remove h_EFQ, add context-based equivalence with minimal/int/cl corollaries, update documentation and citations"
+    }
+  ],
+  "next_steps": "Run /implement 186 to execute the plan",
+  "metadata": {
+    "session_id": "sess_1781387056_63df94",
+    "agent_type": "planner-agent",
+    "duration_seconds": 180,
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 3,
+    "estimated_hours": 3,
+    "dependency_waves": [[1], [2], [3]]
+  },
+  "memory_candidates": []
+}

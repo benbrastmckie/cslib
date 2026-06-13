@@ -46,7 +46,10 @@ Two proof systems are defined for this propositional language:
   Hilbert-style proof-theoretic treatment.
 
 - **Bridge**: `NaturalDeduction/Equivalence.lean` establishes extensional equivalence between the
-  two proof systems for all three logic strengths.
+  two proof systems for all three logic strengths, in both closed-context (`hilbert_iff_nd`,
+  `hilbert_iff_nd_min`, `hilbert_iff_nd_int`, `hilbert_iff_nd_cl`) and context-based forms
+  (`hilbert_iff_nd_ctx`, `hilbert_iff_nd_ctx_min`, `hilbert_iff_nd_ctx_int`,
+  `hilbert_iff_nd_ctx_cl`).
 
 ## Notation
 

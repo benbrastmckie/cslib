@@ -16,8 +16,9 @@ This module proves the extensional equivalence between the Hilbert-style proof s
 (`DerivationTree`, `Deriv`, `Derivable`) and the standalone natural deduction system
 (`Theory.Derivation`, `DerivableIn`).
 
-The equivalence is parameterized over any axiom predicate `Axioms` that includes K and S,
-with instantiated corollaries for minimal, intuitionistic, and classical logic.
+The equivalence is parameterized over any axiom predicate `Axioms` that includes K, S,
+and the 6 conjunction/disjunction schemata. The primary form is context-based
+(`hilbert_iff_nd_ctx`); closed-context forms are corollaries at `Γ = ∅`.
 
 ## Main Definitions
 
@@ -25,21 +26,39 @@ with instantiated corollaries for minimal, intuitionistic, and classical logic.
 - `HilbertAxiomTheory` : Classical specialization (backward compatibility).
 - `hilbertToND` : Translation from Hilbert derivation trees to ND derivations (structural).
 - `ndToHilbert` : Translation from ND derivations to Hilbert derivation trees (needs K, S).
-- `hilbert_iff_nd` : Generic extensional equivalence for closed derivability.
-- `hilbert_iff_nd_int` : Intuitionistic instantiation.
-- `hilbert_iff_nd_cl` : Classical instantiation.
+- `hilbert_iff_nd_ctx` : Generic context-based equivalence (primary form).
+- `hilbert_iff_nd_ctx_min` : Minimal logic context-based instantiation.
+- `hilbert_iff_nd_ctx_int` : Intuitionistic context-based instantiation.
+- `hilbert_iff_nd_ctx_cl` : Classical context-based instantiation.
+- `hilbert_iff_nd` : Generic closed-context equivalence (8 axiom parameters).
+- `hilbert_iff_nd_min` : Minimal logic closed-context corollary.
+- `hilbert_iff_nd_int` : Intuitionistic closed-context corollary.
+- `hilbert_iff_nd_cl` : Classical closed-context corollary.
 
 ## Design
 
 The two systems differ in context representation (List vs Finset) and axiom handling
 (baked-in vs parameterized). The bridge uses `List.toFinset` / `Finset.toList` for
-context conversion and wraps Hilbert axiom schemata into an ND `Theory`.
+context conversion (with `Finset.toList_toFinset` as the key bridge lemma) and wraps
+Hilbert axiom schemata into an ND `Theory` via `AxiomTheory`.
+
+Note: `AxiomTheory Axioms` is not the same as `MPL`, `IPL`, or `CPL` (which are defined
+by specific axiom sets). The equivalence bridges two parameterized systems sharing the
+same axiom predicate; it is not a statement about pure logic strength.
 
 The `ndToHilbert` direction is `noncomputable` because it uses `deductionTheorem`,
-which relies on `Classical.propDecidable`.
+which relies on `Classical.propDecidable`. The `hilbertToND` direction is computable.
+
+The `h_EFQ` parameter was removed from `ndToHilbert` and all downstream signatures
+because `bot` elimination does not appear as a ND constructor; EFQ in the Hilbert sense
+is an axiom schema instance (`ax` constructor), handled uniformly without a special witness.
 
 ## References
 
+* [D. Prawitz, *Natural Deduction: A Proof-Theoretical Study*][Prawitz1965], Ch. I, §1.2
+  -- primary reference for the Hilbert/ND equivalence
+* [A. S. Troelstra and D. van Dalen, *Constructivism in Mathematics*][TroelstraVanDalen1988],
+  Vol. I, §10.4 -- intuitionistic case
 * `Cslib/Logics/Propositional/ProofSystem/Derivation.lean` -- Hilbert system
 * `Cslib/Logics/Propositional/NaturalDeduction/Basic.lean` -- ND system
 * `Cslib/Logics/Propositional/Metalogic/DeductionTheorem.lean` -- deduction theorem
@@ -84,12 +103,6 @@ variable {Atom : Type*} [DecidableEq Atom]
 theorem finset_insert_toList_mem_cons (A : PL.Proposition Atom) (Γ : Ctx Atom)
     {x : PL.Proposition Atom} :
     x ∈ (Insert.insert A Γ : Ctx Atom).toList → x ∈ A :: Γ.toList := by
-  simp [Finset.mem_toList, List.mem_cons]
-
-/-- Elements of `A :: Γ.toList` belong to `(insert A Γ).toList`. -/
-theorem list_cons_mem_finset_insert_toList (A : PL.Proposition Atom)
-    (Γ : Ctx Atom) {x : PL.Proposition Atom} :
-    x ∈ A :: Γ.toList → x ∈ (Insert.insert A Γ : Ctx Atom).toList := by
   simp [Finset.mem_toList, List.mem_cons]
 
 /-! ## Hilbert to ND Translation -/

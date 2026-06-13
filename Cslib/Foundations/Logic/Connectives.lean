@@ -22,7 +22,6 @@ following the operator-typeclass direction of fmontesi's PR #607 (one class per 
 - **Atomic classes**: `HasBot`, `HasImp`, `HasAnd`, `HasOr`, `HasBox`, `HasUntil`, `HasSince`
 - **Bundled classes**: `PropositionalConnectives`, `ModalConnectives`,
   `TemporalConnectives`, `BimodalConnectives`
-- **Derived connectives**: `ImpBotDerived` for `neg` and `top` from `bot`/`imp`
 
 Each concrete formula type duplicates its constructors (Lean 4 cannot extend inductives)
 and registers as an instance of the appropriate bundled class.
@@ -34,9 +33,10 @@ McKinsey 1939); they fail in intuitionistic and minimal logic. Making `and` and 
 primitives via `HasAnd`/`HasOr` supports all three logic strengths with a single typeclass
 hierarchy.
 
-Negation and verum remain `ImpBotDerived` defaults because `neg φ := φ → ⊥` and
-`top := ⊥ → ⊥` are valid in minimal, intuitionistic, and classical logic alike. Biconditional
-(`iff`) is deferred to task 173 after `HasAnd` is instantiated on the formula types.
+Negation and verum stay derived: each concrete formula type defines `neg φ := φ → ⊥` and
+`top := ⊥ → ⊥` as `abbrev`s, which are valid in minimal, intuitionistic, and classical logic
+alike, so no typeclass machinery is needed for them. Biconditional (`iff`) is deferred to
+task 173 after `HasAnd` is instantiated on the formula types.
 
 ## References
 
@@ -103,32 +103,5 @@ class TemporalConnectives (F : Type*) extends PropositionalConnectives F, HasUnt
     Note: we extend `ModalConnectives` and add `HasUntil`/`HasSince` directly
     rather than extending `TemporalConnectives`, to avoid a typeclass diamond. -/
 class BimodalConnectives (F : Type*) extends ModalConnectives F, HasUntil F, HasSince F
-
-/-- Derived connectives definable from `bot` and `imp` alone that are valid in minimal,
-intuitionistic, and classical logic.
-
-Provides `neg` and `top` as abbreviations: negation is implication to falsum
-(`neg φ := imp φ bot`), and verum is `imp bot bot`. These are valid in minimal logic and
-preserve meaning across logic strengths, so they are safe logic-neutral defaults.
-
-Conjunction and disjunction have been removed from this class. The Lukasiewicz encodings
-`and φ ψ := ¬(φ → ¬ψ)` and `or φ ψ := ¬φ → ψ` are classical-only: they are propositionally
-equivalent to `∧` and `∨` only in classical logic (Wajsberg 1938, McKinsey 1939), not in
-intuitionistic or minimal logic. Conjunction and disjunction are now first-class primitives
-via `HasAnd` and `HasOr`.
-
-**Status**: This class is intentionally uninstantiated. Each concrete formula type
-(PL.Proposition, Modal.Proposition, Temporal.Formula, Bimodal.Formula) defines its
-own `abbrev` connectives directly on the inductive constructors, which are
-definitionally equal to these defaults. Registering typeclass instances would add
-resolution overhead at every use site with no benefit, since the `abbrev` definitions
-already compute. The class is retained as a specification artifact and for potential
-future use in polymorphic proof-system abstractions that need to quantify over derived
-connectives generically. -/
-class ImpBotDerived (F : Type*) [HasBot F] [HasImp F] where
-  /-- Negation: `neg φ := imp φ bot` -/
-  neg : F → F := fun φ => HasImp.imp φ HasBot.bot
-  /-- Top/verum: `top := imp bot bot` -/
-  top : F := HasImp.imp HasBot.bot HasBot.bot
 
 end Cslib.Logic

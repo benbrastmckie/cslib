@@ -11,8 +11,8 @@ next_project_number: 186
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,171,179,180,184 | -- | Bimodal Porting, Propositional Logic |
-| 2 | 39,40,181,185 | 36,37,179,180,184 | Propositional Logic, Temporal Logic |
+| 1 | 36,37,171,179,180,185 | -- | Bimodal Porting, Propositional Logic |
+| 2 | 39,40,181 | 36,37,179,180 | Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -29,8 +29,7 @@ next_project_number: 186
 ### Propositional Logic
 
 171 [RESEARCHED] — Research connective-basis design for minimal, intuitionistic, and
-184 [PLANNED] — Derive weak completeness and compactness as clean corollaries of 
-  └─ 185 [NOT STARTED] — Rigorous quality audit of Cslib/Logics/Propositional/ and its Csl
+185 [NOT STARTED] — Rigorous quality audit of Cslib/Logics/Propositional/ and its Csl
 
 ### Temporal Logic
 
@@ -57,7 +56,7 @@ next_project_number: 186
 ---
 
 ### 184. Weak completeness compactness corollaries
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 183

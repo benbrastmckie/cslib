@@ -56,18 +56,6 @@ next_project_number: 188
 
 ---
 
-### 186. Hilbert nd equivalence refactor
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 185
-- **Research**: [186_hilbert_nd_equivalence_refactor/reports/01_team-research.md]
-- **Plan**: [186_hilbert_nd_equivalence_refactor/plans/01_implementation-plan.md]
-
-**Description**: Refactor the Hilbert / natural deduction extensional equivalence in Cslib/Logics/Propositional/NaturalDeduction/ to the highest standards of quality and elegance. Current gaps: (1) no minimal logic instantiation (hilbert_iff_nd_min) — the generic theorem requires EFQ which MinPropAxiom lacks, so either a separate EFQ-free version or an adapted ND system is needed; (2) equivalence is only for closed derivability (empty context Derivable ↔ DerivableIn ∅) — extend to full context-based equivalence (Deriv Axioms Γ φ ↔ NDDeriv Theory Γ φ) for the stronger result; (3) review proof style in ndToHilbert and hilbertToND for clarity and decomposition; (4) ensure all three systems (minimal, intuitionistic, classical) have clean corollary instantiations; (5) add proper literature references for the equivalence result (Prawitz 1965, Troelstra & van Dalen 1988); (6) review naming conventions and docstrings against Mathlib standards.
-
----
-
 ### 185. Propositional foundations quality audit
 - **Status**: [RESEARCHED]
 - **Task Type**: cslib
@@ -80,35 +68,6 @@ next_project_number: 188
   - [185_propositional_foundations_quality_audit/reports/01_teammate-c-findings.md]
 
 **Description**: Rigorous quality audit of Cslib/Logics/Propositional/ and its Cslib/Foundations/Logic/ dependencies. Survey architecture, organization, proof quality, literature references, docstrings, notation, and naming conventions against CSLib contribution standards and mathematical best practices. Identify improvements to: (1) file organization and module structure, (2) proof style and tactic usage (prefer term-mode where natural, eliminate unnecessary classical reasoning in constructive proofs), (3) BibTeX references in references.bib for all key theorems citing standard sources (CZ, Blackburn et al., Chagrov & Zakharyaschev, etc.), (4) module-level docstrings following Mathlib conventions, (5) notation consistency (scoped notation, typeclass-backed operators), (6) naming conventions (Mathlib snake_case, descriptive theorem names), (7) import hygiene (minimal imports, no transitive leakage), (8) redundant or duplicated lemmas across files. Produce a prioritized improvement plan with concrete file-level recommendations, ensuring long-term maintainability and contribution readiness.
-
----
-
-### 184. Weak completeness compactness corollaries
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 183
-- **Research**: [184_weak_completeness_compactness_corollaries/reports/01_corollary-research.md]
-- **Plan**: [184_weak_completeness_compactness_corollaries/plans/01_implementation-plan.md]
-
-**Description**: Derive weak completeness and compactness as clean corollaries of strong completeness for all three propositional logics (minimal, intuitionistic, classical). Refactor existing standalone weak completeness theorems (prop_completeness, int_completeness, min_completeness) to delegate to the strong completeness results via SetDerivable_empty_iff, eliminating duplicated proof infrastructure. Prove compactness for each semantics (Boolean, intuitionistic Kripke, minimal Kripke) from strong completeness + strong soundness. Ensure zero redundancy between the standalone and corollary versions.
-
----
-
-### 183. Strong completeness propositional logics
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: None
-- **Research**:
-  - [183_strong_completeness_propositional_logics/reports/01_team-research.md]
-  - [183_strong_completeness_propositional_logics/reports/01_teammate-a-findings.md]
-  - [183_strong_completeness_propositional_logics/reports/01_teammate-b-findings.md]
-  - [183_strong_completeness_propositional_logics/reports/01_teammate-c-findings.md]
-  - [183_strong_completeness_propositional_logics/reports/01_teammate-d-findings.md]
-- **Plan**: [183_strong_completeness_propositional_logics/plans/01_implementation-plan.md]
-
-**Description**: Establish strong completeness for the minimal, intuitionistic, and classical propositional logics
 
 ---
 

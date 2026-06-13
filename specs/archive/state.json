@@ -2879,6 +2879,110 @@
         }
       ],
       "completion_summary": "Reverted Modal/, Temporal/, and Bimodal/ to purely classical systems with minimal formula constructors (4/5/6 respectively), removing primitive and/or in favor of Lukasiewicz abbreviations. Removed ~4700 lines across 126 files. Created three conservative extension proofs (modal_conservative_extension, temporal_conservative_extension, bimodal_conservative_extension) showing each upper layer introduces no new propositional truths. All CI checks pass: lake build (2979 jobs), checkInitImports, lint-style, zero new sorries."
+    },
+    {
+      "project_number": 183,
+      "project_name": "strong_completeness_propositional_logics",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Establish strong completeness for the minimal, intuitionistic, and classical propositional logics",
+      "dependencies": [],
+      "created": "2026-06-13T18:15:05Z",
+      "last_updated": "2026-06-13T18:55:28Z",
+      "session_id": "sess_1781376667_ae4c75",
+      "artifacts": [
+        {
+          "path": "specs/183_strong_completeness_propositional_logics/reports/01_team-research.md",
+          "type": "report",
+          "summary": "Team synthesis: direct MCS/Lindenbaum approach recommended, 85-90% infrastructure exists, ~400-660 lines new code"
+        },
+        {
+          "path": "specs/183_strong_completeness_propositional_logics/reports/01_teammate-a-findings.md",
+          "type": "report",
+          "summary": "MCS/Lindenbaum direct approach analysis"
+        },
+        {
+          "path": "specs/183_strong_completeness_propositional_logics/reports/01_teammate-b-findings.md",
+          "type": "report",
+          "summary": "Compactness route analysis (not recommended)"
+        },
+        {
+          "path": "specs/183_strong_completeness_propositional_logics/reports/01_teammate-c-findings.md",
+          "type": "report",
+          "summary": "CSLib codebase audit and gap analysis"
+        },
+        {
+          "path": "specs/183_strong_completeness_propositional_logics/reports/01_teammate-d-findings.md",
+          "type": "report",
+          "summary": "Algebraic representation approach (BimodalLogic prior art, deferred)"
+        },
+        {
+          "path": "specs/183_strong_completeness_propositional_logics/plans/01_implementation-plan.md",
+          "type": "plan",
+          "summary": "5-phase plan: shared defs, minimal/intuitionistic/classical strong completeness, CI verification"
+        }
+      ],
+      "completion_summary": "Proved strong completeness for minimal, intuitionistic, and classical propositional logics. 724 lines across 4 new files: SemanticConsequence.lean (shared definitions including SetDerivable and semantic entailment), MinStrongCompleteness.lean, IntStrongCompleteness.lean, StrongCompleteness.lean. Zero sorries, all CI checks pass. Compactness corollaries included for all three logics.",
+      "archived": "2026-06-13T22:23:51Z"
+    },
+    {
+      "project_number": 184,
+      "project_name": "weak_completeness_compactness_corollaries",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Derive weak completeness and compactness as clean corollaries of strong completeness for all three propositional logics (minimal, intuitionistic, classical). Refactor existing standalone weak completeness theorems (prop_completeness, int_completeness, min_completeness) to delegate to the strong completeness results via SetDerivable_empty_iff, eliminating duplicated proof infrastructure. Prove compactness for each semantics (Boolean, intuitionistic Kripke, minimal Kripke) from strong completeness + strong soundness. Ensure zero redundancy between the standalone and corollary versions.",
+      "dependencies": [
+        183
+      ],
+      "created": "2026-06-13T19:04:33Z",
+      "last_updated": "2026-06-13T20:39:39Z",
+      "session_id": "sess_1781382646_04146a",
+      "artifacts": [
+        {
+          "path": "specs/184_weak_completeness_compactness_corollaries/reports/01_corollary-research.md",
+          "type": "report",
+          "summary": "Redundancy analysis and refactoring plan"
+        },
+        {
+          "path": "specs/184_weak_completeness_compactness_corollaries/plans/01_implementation-plan.md",
+          "type": "plan",
+          "summary": "2-phase refactoring plan"
+        }
+      ],
+      "completion_summary": "Refactored weak completeness for all 3 logics from standalone proofs into 3-line corollaries of strong completeness via SetDerivable_empty_iff. Removed ~126 lines, replaced with ~18 lines. Updated 3 downstream conservative extension imports. All compactness corollaries already existed from task 183. Full CI passes.",
+      "archived": "2026-06-13T22:23:51Z"
+    },
+    {
+      "project_number": 186,
+      "project_name": "hilbert_nd_equivalence_refactor",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Refactor the Hilbert / natural deduction extensional equivalence in Cslib/Logics/Propositional/NaturalDeduction/ to the highest standards of quality and elegance. Current gaps: (1) no minimal logic instantiation (hilbert_iff_nd_min) — the generic theorem requires EFQ which MinPropAxiom lacks, so either a separate EFQ-free version or an adapted ND system is needed; (2) equivalence is only for closed derivability (empty context Derivable ↔ DerivableIn ∅) — extend to full context-based equivalence (Deriv Axioms Γ φ ↔ NDDeriv Theory Γ φ) for the stronger result; (3) review proof style in ndToHilbert and hilbertToND for clarity and decomposition; (4) ensure all three systems (minimal, intuitionistic, classical) have clean corollary instantiations; (5) add proper literature references for the equivalence result (Prawitz 1965, Troelstra & van Dalen 1988); (6) review naming conventions and docstrings against Mathlib standards.",
+      "dependencies": [
+        185
+      ],
+      "created": "2026-06-13T21:39:55Z",
+      "last_updated": "2026-06-13T22:10:51Z",
+      "session_id": "sess_1781387056_63df94",
+      "researched": "2026-06-13T21:53:06Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/186_hilbert_nd_equivalence_refactor/reports/01_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates"
+        },
+        {
+          "path": "specs/186_hilbert_nd_equivalence_refactor/plans/01_implementation-plan.md",
+          "type": "plan",
+          "summary": "3-phase implementation plan"
+        }
+      ],
+      "completion_summary": "Refactored Hilbert/ND equivalence: removed unused h_EFQ parameter, added context-based hilbert_iff_nd_ctx with 3 corollaries (min/int/cl), added hilbert_iff_nd_min, updated literature citations (Prawitz 1965, Troelstra & van Dalen 1988), added 3 BibTeX entries. All 8 equivalence theorems verified, full CI green.",
+      "archived": "2026-06-13T22:23:51Z"
     }
   ],
   "archived_projects": [

@@ -264,6 +264,187 @@ theorem int_imp_witness {S : Set (PL.Proposition Atom)}
     obtain ⟨L', hL'_sub, hL'_deriv⟩ := int_deriv_imp_of_union hL_sub hL_deriv
     exact h_not (h_dccs.2 L' _ hL'_sub hL'_deriv)
 
+/-! ## Prime DCCSs for Intuitionistic Logic -/
+
+/-- A prime DCCS: an IntDCCS satisfying the disjunction property.
+If `φ ∨ ψ ∈ S`, then `φ ∈ S` or `ψ ∈ S`. -/
+def IntPrimeDCCS (S : Set (PL.Proposition Atom)) : Prop :=
+  IntDCCS S ∧
+  ∀ (φ ψ : PL.Proposition Atom), (φ.or ψ) ∈ S → φ ∈ S ∨ ψ ∈ S
+
+/-- The set of phi-excluding IntDCCS supersets of S. Used as the domain for Zorn's lemma
+in the prime exclusion lemma. -/
+def IntPrimeExcludingSupersets (S : Set (PL.Proposition Atom))
+    (phi : PL.Proposition Atom) : Set (Set (PL.Proposition Atom)) :=
+  {T | S ⊆ T ∧ IntDCCS T ∧ phi ∉ T}
+
+/-- Base membership: if S is an IntDCCS and phi ∉ S, then S is in its own
+phi-excluding supersets. -/
+theorem int_excluding_base_mem {S : Set (PL.Proposition Atom)}
+    (h_dccs : IntDCCS S) {phi : PL.Proposition Atom}
+    (h_not : phi ∉ S) : S ∈ IntPrimeExcludingSupersets S phi :=
+  ⟨Set.Subset.refl S, h_dccs, h_not⟩
+
+/-- The union of a nonempty chain of IntDCCS phi-excluding supersets is itself an
+IntDCCS phi-excluding superset.
+
+This is the key chain condition for Zorn's lemma in `int_prime_exclusion`. -/
+theorem int_excluding_chain_union {S : Set (PL.Proposition Atom)}
+    {phi : PL.Proposition Atom}
+    {C : Set (Set (PL.Proposition Atom))}
+    (hCsub : C ⊆ IntPrimeExcludingSupersets S phi)
+    (hchain : IsChain (· ⊆ ·) C) (hCne : C.Nonempty) :
+    (⋃₀ C) ∈ IntPrimeExcludingSupersets S phi := by
+  refine ⟨?_, ?_, ?_⟩
+  · -- S ⊆ ⋃₀ C
+    intro x hx
+    obtain ⟨T, hT⟩ := hCne
+    exact Set.mem_sUnion.mpr ⟨T, hT, (hCsub hT).1 hx⟩
+  · -- IntDCCS (⋃₀ C)
+    constructor
+    · -- Consistency
+      intro L hL hd
+      obtain ⟨T, hTC, hLT⟩ := Metalogic.finite_list_in_chain_member hchain hCne L hL
+      exact (hCsub hTC).2.1.1 L hLT hd
+    · -- Deductive closure
+      intro L psi hL hd
+      have hL' : ∀ x ∈ L, x ∈ ⋃₀ C := hL
+      obtain ⟨T, hTC, hLT⟩ := Metalogic.finite_list_in_chain_member hchain hCne L hL'
+      exact Set.mem_sUnion.mpr ⟨T, hTC, (hCsub hTC).2.1.2 L psi hLT hd⟩
+  · -- phi ∉ ⋃₀ C
+    intro ⟨T, hTC, hphi_T⟩
+    exact (hCsub hTC).2.2 hphi_T
+
+/-! ## Prime Exclusion Lemma (Intuitionistic) -/
+
+/-- If T is maximal in `IntPrimeExcludingSupersets S phi`, then T is prime.
+Proof: assume `A ∨ B ∈ T`, `A ∉ T`, `B ∉ T`. By maximality, both
+`intDeductiveClosure(T ∪ {A})` and `intDeductiveClosure(T ∪ {B})` must contain
+phi. By `int_deriv_imp_of_union`, `T ⊢ A → phi` and `T ⊢ B → phi`. By orE and
+deductive closure, `phi ∈ T`. Contradiction. -/
+theorem int_maximal_is_prime {S : Set (PL.Proposition Atom)}
+    {phi : PL.Proposition Atom}
+    {T : Set (PL.Proposition Atom)}
+    (hmax : Maximal (· ∈ IntPrimeExcludingSupersets S phi) T) :
+    IntPrimeDCCS T := by
+  refine ⟨hmax.prop.2.1, ?_⟩
+  intro A B h_or
+  by_contra h_not
+  push Not at h_not
+  obtain ⟨hA, hB⟩ := h_not
+  -- Strategy: in both cases (T ∪ {A} consistent or not), phi ∈ intDeductiveClosure(T ∪ {A}).
+  -- If consistent: use maximality. If inconsistent: everything is in the closure.
+  have hT_cons : PropSetConsistent IntPropAxiom T := hmax.prop.2.1.1
+  -- phi ∈ intDeductiveClosure(T ∪ {A})
+  have hTA_phi : phi ∈ intDeductiveClosure (T ∪ {A}) := by
+    let TA := intDeductiveClosure (T ∪ {A})
+    have hTA_sup : T ⊆ TA :=
+      Set.Subset.trans Set.subset_union_left (int_subset_deductive_closure _)
+    have hA_in_TA : A ∈ TA :=
+      int_subset_deductive_closure _ (Set.mem_union_right T (Set.mem_singleton_iff.mpr rfl))
+    -- Either T ∪ {A} is consistent (use maximality) or inconsistent (use EFQ)
+    by_cases h_cons_A : PropSetConsistent IntPropAxiom (T ∪ {A})
+    · -- Consistent case: intDeductiveClosure(T ∪ {A}) is an IntDCCS
+      have hTA_dccs : IntDCCS TA := intDeductiveClosure_is_dccs h_cons_A
+      by_contra h_not_phi
+      have hTA_mem : TA ∈ IntPrimeExcludingSupersets S phi :=
+        ⟨Set.Subset.trans hmax.prop.1 hTA_sup, hTA_dccs, h_not_phi⟩
+      have := hmax.eq_of_ge hTA_mem hTA_sup
+      exact hA (this ▸ hA_in_TA)
+    · -- Inconsistent case: phi is derivable from T ∪ {A} by EFQ
+      simp only [PropSetConsistent, Metalogic.SetConsistent, Metalogic.Consistent, not_forall,
+        not_not] at h_cons_A
+      obtain ⟨Linc, hLinc_sub, hLinc_bot⟩ := h_cons_A
+      -- Apply EFQ: from ⊥ derive phi
+      let efq : DerivationTree IntPropAxiom (Atom := Atom) [] ((⊥ : PL.Proposition Atom).imp phi) :=
+        .ax [] _ (.efq phi)
+      let efq_w : DerivationTree IntPropAxiom Linc ((⊥ : PL.Proposition Atom).imp phi) :=
+        .weakening [] Linc _ efq (fun _ h => nomatch h)
+      obtain ⟨d_bot⟩ := hLinc_bot
+      let d_phi := DerivationTree.modus_ponens Linc _ _ efq_w d_bot
+      exact ⟨Linc, hLinc_sub, ⟨d_phi⟩⟩
+  -- By int_deriv_imp_of_union, ∃ L' ⊆ T, L' ⊢ A → phi
+  obtain ⟨LTA, hLTA_sub, hLTA_deriv⟩ := hTA_phi
+  obtain ⟨L', hL'_sub, hL'_deriv⟩ := int_deriv_imp_of_union hLTA_sub hLTA_deriv
+  -- phi ∈ intDeductiveClosure(T ∪ {B})
+  have hTB_phi : phi ∈ intDeductiveClosure (T ∪ {B}) := by
+    let TB := intDeductiveClosure (T ∪ {B})
+    have hTB_sup : T ⊆ TB :=
+      Set.Subset.trans Set.subset_union_left (int_subset_deductive_closure _)
+    have hB_in_TB : B ∈ TB :=
+      int_subset_deductive_closure _ (Set.mem_union_right T (Set.mem_singleton_iff.mpr rfl))
+    by_cases h_cons_B : PropSetConsistent IntPropAxiom (T ∪ {B})
+    · have hTB_dccs : IntDCCS TB := intDeductiveClosure_is_dccs h_cons_B
+      by_contra h_not_phi
+      have hTB_mem : TB ∈ IntPrimeExcludingSupersets S phi :=
+        ⟨Set.Subset.trans hmax.prop.1 hTB_sup, hTB_dccs, h_not_phi⟩
+      have := hmax.eq_of_ge hTB_mem hTB_sup
+      exact hB (this ▸ hB_in_TB)
+    · simp only [PropSetConsistent, Metalogic.SetConsistent, Metalogic.Consistent, not_forall,
+        not_not] at h_cons_B
+      obtain ⟨Linc, hLinc_sub, hLinc_bot⟩ := h_cons_B
+      let efq : DerivationTree IntPropAxiom (Atom := Atom) [] ((⊥ : PL.Proposition Atom).imp phi) :=
+        .ax [] _ (.efq phi)
+      let efq_w : DerivationTree IntPropAxiom Linc ((⊥ : PL.Proposition Atom).imp phi) :=
+        .weakening [] Linc _ efq (fun _ h => nomatch h)
+      obtain ⟨d_bot⟩ := hLinc_bot
+      let d_phi := DerivationTree.modus_ponens Linc _ _ efq_w d_bot
+      exact ⟨Linc, hLinc_sub, ⟨d_phi⟩⟩
+  -- By int_deriv_imp_of_union, ∃ L'' ⊆ T, L'' ⊢ B → phi
+  obtain ⟨LTB, hLTB_sub, hLTB_deriv⟩ := hTB_phi
+  obtain ⟨L'', hL''_sub, hL''_deriv⟩ := int_deriv_imp_of_union hLTB_sub hLTB_deriv
+  -- By orE, combine to get phi ∈ T
+  let ctx := L' ++ L'' ++ [A.or B]
+  have h_ctx_T : ∀ x ∈ ctx, x ∈ T := by
+    intro x hx
+    simp only [ctx, List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hx
+    rcases hx with (hx | hx) | rfl
+    · exact hL'_sub x hx
+    · exact hL''_sub x hx
+    · exact h_or
+  have h_orE : DerivationTree IntPropAxiom (Atom := Atom) []
+      ((A.imp phi).imp ((B.imp phi).imp ((A.or B).imp phi))) :=
+    .ax [] _ (.orE A B phi)
+  have h_orE_w : DerivationTree IntPropAxiom (Atom := Atom) ctx
+      ((A.imp phi).imp ((B.imp phi).imp ((A.or B).imp phi))) :=
+    .weakening [] ctx _ h_orE (fun _ h => nomatch h)
+  obtain ⟨dA⟩ := hL'_deriv
+  obtain ⟨dB⟩ := hL''_deriv
+  let dA_w : DerivationTree IntPropAxiom ctx (A.imp phi) :=
+    .weakening L' ctx _ dA
+      (fun x hx => List.mem_append.mpr (Or.inl (List.mem_append.mpr (Or.inl hx))))
+  let dB_w : DerivationTree IntPropAxiom ctx (B.imp phi) :=
+    .weakening L'' ctx _ dB
+      (fun x hx => List.mem_append.mpr (Or.inl (List.mem_append.mpr (Or.inr hx))))
+  let d_or : DerivationTree IntPropAxiom ctx (A.or B) :=
+    .assumption ctx _ (by
+      simp only [ctx, List.mem_append, List.mem_cons, List.mem_nil_iff, or_false]
+      exact Or.inr trivial)
+  let d_step1 := DerivationTree.modus_ponens ctx _ _ h_orE_w dA_w
+  let d_step2 := DerivationTree.modus_ponens ctx _ _ d_step1 dB_w
+  let d_phi_in_T := DerivationTree.modus_ponens ctx _ _ d_step2 d_or
+  have h_phi_T : phi ∈ T :=
+    hmax.prop.2.1.2 ctx phi h_ctx_T ⟨d_phi_in_T⟩
+  exact hmax.prop.2.2 h_phi_T
+
+/-- **Prime Exclusion Lemma for IntDCCS**:
+Given an IntDCCS S with phi ∉ S, there exists a prime IntDCCS T ⊇ S with phi ∉ T.
+
+Uses Zorn's lemma on `IntPrimeExcludingSupersets S phi` with `int_excluding_chain_union`
+for the chain condition and `int_maximal_is_prime` for the primality argument. -/
+theorem int_prime_exclusion {S : Set (PL.Proposition Atom)}
+    (h_dccs : IntDCCS S) {phi : PL.Proposition Atom}
+    (h_not : phi ∉ S) :
+    ∃ T : Set (PL.Proposition Atom),
+      S ⊆ T ∧ IntPrimeDCCS T ∧ phi ∉ T := by
+  -- Apply Zorn's lemma to IntPrimeExcludingSupersets S phi
+  have ⟨T, hST, hmax⟩ := zorn_subset_nonempty (IntPrimeExcludingSupersets S phi)
+    (fun C hCsub hchain hCne =>
+      ⟨⋃₀ C, int_excluding_chain_union hCsub hchain hCne,
+       fun s hs => Set.subset_sUnion_of_mem hs⟩)
+    S (int_excluding_base_mem h_dccs h_not)
+  exact ⟨T, hST, int_maximal_is_prime hmax, hmax.prop.2.2⟩
+
 /-! ## Int Theorems Form a DCCS -/
 
 /-- IntPropAxiom is consistent: `[] ⊬ ⊥`. -/

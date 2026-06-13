@@ -225,6 +225,156 @@ theorem min_imp_witness {S : Set (PL.Proposition Atom)}
     obtain ⟨L', hL'_sub, hL'_deriv⟩ := min_deriv_imp_of_union hL_sub hL_deriv
     exact h_not (h_theory L' _ hL'_sub hL'_deriv)
 
+/-! ## Prime Theories for Minimal Logic -/
+
+/-- A prime MinTheory: a MinTheory satisfying the disjunction property.
+If `φ ∨ ψ ∈ S`, then `φ ∈ S` or `ψ ∈ S`. -/
+def MinPrimeTheory (S : Set (PL.Proposition Atom)) : Prop :=
+  MinTheory S ∧
+  ∀ (φ ψ : PL.Proposition Atom), (φ.or ψ) ∈ S → φ ∈ S ∨ ψ ∈ S
+
+/-- The set of phi-excluding MinTheory supersets of S. Used as the domain for Zorn's lemma
+in the prime exclusion lemma. -/
+def MinPrimeExcludingSupersets (S : Set (PL.Proposition Atom))
+    (phi : PL.Proposition Atom) : Set (Set (PL.Proposition Atom)) :=
+  {T | S ⊆ T ∧ MinTheory T ∧ phi ∉ T}
+
+/-- Base membership: if S is a MinTheory and phi ∉ S, then S is in its own
+phi-excluding supersets. -/
+theorem min_excluding_base_mem {S : Set (PL.Proposition Atom)}
+    (h_theory : MinTheory S) {phi : PL.Proposition Atom}
+    (h_not : phi ∉ S) : S ∈ MinPrimeExcludingSupersets S phi :=
+  ⟨Set.Subset.refl S, h_theory, h_not⟩
+
+/-- The union of a nonempty chain of MinTheory phi-excluding supersets is itself a
+MinTheory phi-excluding superset.
+
+This is the key chain condition for Zorn's lemma in `min_prime_exclusion`. -/
+theorem min_excluding_chain_union {S : Set (PL.Proposition Atom)}
+    {phi : PL.Proposition Atom}
+    {C : Set (Set (PL.Proposition Atom))}
+    (hCsub : C ⊆ MinPrimeExcludingSupersets S phi)
+    (hchain : IsChain (· ⊆ ·) C) (hCne : C.Nonempty) :
+    (⋃₀ C) ∈ MinPrimeExcludingSupersets S phi := by
+  refine ⟨?_, ?_, ?_⟩
+  · -- S ⊆ ⋃₀ C
+    intro x hx
+    obtain ⟨T, hT⟩ := hCne
+    exact Set.mem_sUnion.mpr ⟨T, hT, (hCsub hT).1 hx⟩
+  · -- MinTheory (⋃₀ C)
+    intro L psi hL hd
+    -- Every element of L is in some chain member
+    have hL' : ∀ x ∈ L, x ∈ ⋃₀ C := hL
+    obtain ⟨T, hTC, hLT⟩ := Metalogic.finite_list_in_chain_member hchain hCne L hL'
+    -- T is a MinTheory containing L, so psi ∈ T ⊆ ⋃₀ C
+    exact Set.mem_sUnion.mpr ⟨T, hTC, (hCsub hTC).2.1 L psi hLT hd⟩
+  · -- phi ∉ ⋃₀ C
+    intro ⟨T, hTC, hphi_T⟩
+    exact (hCsub hTC).2.2 hphi_T
+
+/-! ## Prime Exclusion Lemma -/
+
+/-- If T is maximal in `MinPrimeExcludingSupersets S phi`, then T is prime.
+Proof: assume `A ∨ B ∈ T`, `A ∉ T`, `B ∉ T`. By maximality, both
+`minDeductiveClosure(T ∪ {A})` and `minDeductiveClosure(T ∪ {B})` must contain
+phi. By `min_deriv_imp_of_union`, `T ⊢ A → phi` and `T ⊢ B → phi`. By orE and
+deductive closure, `phi ∈ T`. Contradiction. -/
+theorem min_maximal_is_prime {S : Set (PL.Proposition Atom)}
+    {phi : PL.Proposition Atom}
+    {T : Set (PL.Proposition Atom)}
+    (hmax : Maximal (· ∈ MinPrimeExcludingSupersets S phi) T) :
+    MinPrimeTheory T := by
+  refine ⟨hmax.prop.2.1, ?_⟩
+  intro A B h_or
+  by_contra h_not
+  push Not at h_not
+  obtain ⟨hA, hB⟩ := h_not
+  -- The deductive closure of T ∪ {A} is a MinTheory superset of T
+  let TA := minDeductiveClosure (T ∪ {A})
+  have hTA_theory : MinTheory TA := minDeductiveClosure_is_theory _
+  have hTA_sup : T ⊆ TA :=
+    Set.Subset.trans Set.subset_union_left (min_subset_deductive_closure _)
+  have hA_in_TA : A ∈ TA :=
+    min_subset_deductive_closure _ (Set.mem_union_right T (Set.mem_singleton_iff.mpr rfl))
+  -- By maximality of T, phi ∈ TA
+  have hTA_phi : phi ∈ TA := by
+    by_contra h_not_phi
+    have hTA_mem : TA ∈ MinPrimeExcludingSupersets S phi :=
+      ⟨Set.Subset.trans hmax.prop.1 hTA_sup, hTA_theory, h_not_phi⟩
+    have := hmax.eq_of_ge hTA_mem hTA_sup
+    exact hA (this ▸ hA_in_TA)
+  -- By min_deriv_imp_of_union, ∃ L' ⊆ T, L' ⊢ A → phi
+  obtain ⟨LTA, hLTA_sub, hLTA_deriv⟩ := hTA_phi
+  obtain ⟨L', hL'_sub, hL'_deriv⟩ := min_deriv_imp_of_union hLTA_sub hLTA_deriv
+  -- The deductive closure of T ∪ {B} is a MinTheory superset of T
+  let TB := minDeductiveClosure (T ∪ {B})
+  have hTB_theory : MinTheory TB := minDeductiveClosure_is_theory _
+  have hTB_sup : T ⊆ TB :=
+    Set.Subset.trans Set.subset_union_left (min_subset_deductive_closure _)
+  have hB_in_TB : B ∈ TB :=
+    min_subset_deductive_closure _ (Set.mem_union_right T (Set.mem_singleton_iff.mpr rfl))
+  -- By maximality of T, phi ∈ TB
+  have hTB_phi : phi ∈ TB := by
+    by_contra h_not_phi
+    have hTB_mem : TB ∈ MinPrimeExcludingSupersets S phi :=
+      ⟨Set.Subset.trans hmax.prop.1 hTB_sup, hTB_theory, h_not_phi⟩
+    have := hmax.eq_of_ge hTB_mem hTB_sup
+    exact hB (this ▸ hB_in_TB)
+  -- By min_deriv_imp_of_union, ∃ L'' ⊆ T, L'' ⊢ B → phi
+  obtain ⟨LTB, hLTB_sub, hLTB_deriv⟩ := hTB_phi
+  obtain ⟨L'', hL''_sub, hL''_deriv⟩ := min_deriv_imp_of_union hLTB_sub hLTB_deriv
+  -- By orE, T ⊢ (A ∨ B) → phi (via A → phi and B → phi)
+  -- Combine: L' ++ L'' ++ [A ∨ B] ⊢ phi, all from T
+  -- Use orE axiom: (A → phi) → ((B → phi) → ((A ∨ B) → phi))
+  let ctx := L' ++ L'' ++ [A.or B]
+  have h_ctx_T : ∀ x ∈ ctx, x ∈ T := by
+    intro x hx
+    simp only [ctx, List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hx
+    rcases hx with (hx | hx) | rfl
+    · exact hL'_sub x hx
+    · exact hL''_sub x hx
+    · exact h_or
+  have h_orE : DerivationTree MinPropAxiom (Atom := Atom) [] ((A.imp phi).imp ((B.imp phi).imp ((A.or B).imp phi))) :=
+    .ax [] _ (.orE A B phi)
+  have h_orE_w : DerivationTree MinPropAxiom (Atom := Atom) ctx
+      ((A.imp phi).imp ((B.imp phi).imp ((A.or B).imp phi))) :=
+    .weakening [] ctx _ h_orE (fun _ h => nomatch h)
+  obtain ⟨dA⟩ := hL'_deriv
+  obtain ⟨dB⟩ := hL''_deriv
+  let dA_w : DerivationTree MinPropAxiom ctx (A.imp phi) :=
+    .weakening L' ctx _ dA (fun x hx => List.mem_append.mpr (Or.inl (List.mem_append.mpr (Or.inl hx))))
+  let dB_w : DerivationTree MinPropAxiom ctx (B.imp phi) :=
+    .weakening L'' ctx _ dB (fun x hx => List.mem_append.mpr (Or.inl (List.mem_append.mpr (Or.inr hx))))
+  let d_or : DerivationTree MinPropAxiom ctx (A.or B) :=
+    .assumption ctx _ (by
+      simp only [ctx, List.mem_append, List.mem_cons, List.mem_nil_iff, or_false]
+      exact Or.inr trivial)
+  let d_step1 := DerivationTree.modus_ponens ctx _ _ h_orE_w dA_w
+  let d_step2 := DerivationTree.modus_ponens ctx _ _ d_step1 dB_w
+  let d_phi_in_T := DerivationTree.modus_ponens ctx _ _ d_step2 d_or
+  -- phi ∈ T (since T is a MinTheory closed under derivation from T)
+  have h_phi_T : phi ∈ T :=
+    hmax.prop.2.1 ctx phi h_ctx_T ⟨d_phi_in_T⟩
+  exact hmax.prop.2.2 h_phi_T
+
+/-- **Prime Exclusion Lemma for MinTheory**:
+Given a MinTheory S with phi ∉ S, there exists a prime MinTheory T ⊇ S with phi ∉ T.
+
+Uses Zorn's lemma on `MinPrimeExcludingSupersets S phi` with `min_excluding_chain_union`
+for the chain condition and `min_maximal_is_prime` for the primality argument. -/
+theorem min_prime_exclusion {S : Set (PL.Proposition Atom)}
+    (h_theory : MinTheory S) {phi : PL.Proposition Atom}
+    (h_not : phi ∉ S) :
+    ∃ T : Set (PL.Proposition Atom),
+      S ⊆ T ∧ MinPrimeTheory T ∧ phi ∉ T := by
+  -- Apply Zorn's lemma to MinPrimeExcludingSupersets S phi
+  have ⟨T, hST, hmax⟩ := zorn_subset_nonempty (MinPrimeExcludingSupersets S phi)
+    (fun C hCsub hchain hCne =>
+      ⟨⋃₀ C, min_excluding_chain_union hCsub hchain hCne,
+       fun s hs => Set.subset_sUnion_of_mem hs⟩)
+    S (min_excluding_base_mem h_theory h_not)
+  exact ⟨T, hST, min_maximal_is_prime hmax, hmax.prop.2.2⟩
+
 /-! ## Consistency of MinPropAxiom -/
 
 /-- Lift a MinPropAxiom derivation tree to a PropositionalAxiom (classical)

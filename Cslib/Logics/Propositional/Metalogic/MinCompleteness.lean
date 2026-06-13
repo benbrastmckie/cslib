@@ -47,9 +47,11 @@ variable {Atom : Type u}
 
 /-! ## Canonical Model -/
 
-/-- A canonical world for minimal logic is a MinTheory for MinPropAxiom. -/
+/-- A canonical world for minimal logic is a prime MinTheory for MinPropAxiom.
+Worlds are prime to support the or-backward direction of the truth lemma:
+if (φ ∨ ψ) ∈ S then φ ∈ S or ψ ∈ S. -/
 def MinCanonicalWorld (Atom : Type*) :=
-  { S : Set (PL.Proposition Atom) // MinTheory S }
+  { S : Set (PL.Proposition Atom) // MinPrimeTheory S }
 
 /-- The canonical preorder on MinCanonicalWorld: set inclusion. -/
 instance : Preorder (MinCanonicalWorld Atom) where
@@ -96,7 +98,7 @@ theorem min_truth_lemma
       intro ⟨hφ, hψ⟩
       have h_phi_S := (min_truth_lemma S φ).mp hφ
       have h_psi_S := (min_truth_lemma S ψ).mp hψ
-      apply S.property [φ, ψ] (φ.and ψ)
+      apply S.property.1 [φ, ψ] (φ.and ψ)
       · intro x hx
         simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
         cases hx with
@@ -113,7 +115,7 @@ theorem min_truth_lemma
       intro h_mem
       constructor
       · apply (min_truth_lemma S φ).mpr
-        apply S.property [φ.and ψ] φ
+        apply S.property.1 [φ.and ψ] φ
         · intro x hx
           simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
           exact hx ▸ h_mem
@@ -123,7 +125,7 @@ theorem min_truth_lemma
             (.weakening [] _ _ (.ax [] _ (.andE1 φ ψ)) (fun _ h => nomatch h))
             (.assumption _ _ (by simp [List.mem_cons]))⟩
       · apply (min_truth_lemma S ψ).mpr
-        apply S.property [φ.and ψ] ψ
+        apply S.property.1 [φ.and ψ] ψ
         · intro x hx
           simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
           exact hx ▸ h_mem
@@ -138,7 +140,7 @@ theorem min_truth_lemma
       intro h_or
       rcases h_or with hφ | hψ
       · have h_phi_S := (min_truth_lemma S φ).mp hφ
-        apply S.property [φ] (φ.or ψ)
+        apply S.property.1 [φ] (φ.or ψ)
         · intro x hx
           simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
           exact hx ▸ h_phi_S
@@ -148,7 +150,7 @@ theorem min_truth_lemma
             (.weakening [] _ _ (.ax [] _ (.orI1 φ ψ)) (fun _ h => nomatch h))
             (.assumption _ _ (by simp [List.mem_cons]))⟩
       · have h_psi_S := (min_truth_lemma S ψ).mp hψ
-        apply S.property [ψ] (φ.or ψ)
+        apply S.property.1 [ψ] (φ.or ψ)
         · intro x hx
           simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
           exact hx ▸ h_psi_S
@@ -158,19 +160,26 @@ theorem min_truth_lemma
             (.weakening [] _ _ (.ax [] _ (.orI2 φ ψ)) (fun _ h => nomatch h))
             (.assumption _ _ (by simp [List.mem_cons]))⟩
     · -- Backward: (φ ∨ ψ) ∈ S.val → IForces S (φ ∨ ψ)
-      -- This direction requires the disjunction property for MinTheory:
-      -- (φ ∨ ψ) ∈ S → φ ∈ S ∨ ψ ∈ S. Requires prime theories (task 174).
-      intro _h_mem
-      sorry
+      -- Use the disjunction property of prime MinTheory worlds:
+      -- (φ ∨ ψ) ∈ S → φ ∈ S ∨ ψ ∈ S.
+      intro h_mem
+      rcases S.property.2 φ ψ h_mem with h | h
+      · exact Or.inl ((min_truth_lemma S φ).mpr h)
+      · exact Or.inr ((min_truth_lemma S ψ).mpr h)
   | .imp φ ψ => by
     constructor
     · -- Forward: IForces S (φ → ψ) → (φ → ψ) ∈ S.val
       intro h_forces
       by_contra h_not_mem
-      obtain ⟨T_set, hST, hT_theory, hφT, hψT⟩ :=
-        min_imp_witness S.property h_not_mem
-      let T : MinCanonicalWorld Atom := ⟨T_set, hT_theory⟩
-      have hle : S ≤ T := hST
+      -- Get a MinTheory T' with S ⊆ T', φ ∈ T', ψ ∉ T' (using min_imp_witness)
+      obtain ⟨T'_set, hST', hT'_theory, hφT', hψT'⟩ :=
+        min_imp_witness S.property.1 h_not_mem
+      -- Extend T' to a prime MinTheory T that still excludes ψ
+      obtain ⟨T_set, hT'T, hT_prime, hψT⟩ :=
+        min_prime_exclusion hT'_theory hψT'
+      let T : MinCanonicalWorld Atom := ⟨T_set, hT_prime⟩
+      have hle : S ≤ T := Set.Subset.trans hST' hT'T
+      have hφT : φ ∈ T.val := hT'T hφT'
       have hf_φ := (min_truth_lemma T φ).mpr hφT
       have hf_ψ := h_forces T hle hf_φ
       exact hψT ((min_truth_lemma T ψ).mp hf_ψ)
@@ -178,7 +187,7 @@ theorem min_truth_lemma
       intro h_mem T hle hf_φ
       have h_imp_T : (φ → ψ) ∈ T.val := hle h_mem
       have h_φ_T : φ ∈ T.val := (min_truth_lemma T φ).mp hf_φ
-      have h_ψ_T : ψ ∈ T.val := min_theory_imp_property T.property h_imp_T h_φ_T
+      have h_ψ_T : ψ ∈ T.val := min_theory_imp_property T.property.1 h_imp_T h_φ_T
       exact (min_truth_lemma T ψ).mpr h_ψ_T
 
 /-! ## Completeness -/
@@ -192,10 +201,12 @@ theorem min_completeness {φ : PL.Proposition Atom}
   by_contra h_not_deriv
   have h_not_mem : φ ∉ {ψ : PL.Proposition Atom | Derivable MinPropAxiom ψ} :=
     h_not_deriv
-  let W₀ : MinCanonicalWorld Atom :=
-    ⟨{ψ | Derivable MinPropAxiom ψ}, min_theorems_theory⟩
+  -- Extend the theorems theory to a prime MinTheory W₀ that excludes φ
+  obtain ⟨W₀_set, _, hW₀_prime, hW₀_excl⟩ :=
+    min_prime_exclusion min_theorems_theory h_not_mem
+  let W₀ : MinCanonicalWorld Atom := ⟨W₀_set, hW₀_prime⟩
   have h_not_forced : ¬ IForces minCanonicalVal minBotForces W₀ φ := by
-    intro h; exact h_not_mem ((min_truth_lemma W₀ φ).mp h)
+    intro h; exact hW₀_excl ((min_truth_lemma W₀ φ).mp h)
   have h_forced : IForces minCanonicalVal minBotForces W₀ φ :=
     h_valid (MinCanonicalWorld Atom) minCanonicalVal minBotForces
       (fun {_ _} p hw hv => minCanonicalVal_upward_closed p hw hv)

@@ -15,9 +15,10 @@ public import Mathlib.Data.Finset.Basic
 /-! # Temporal Logic Formula
 
 This module defines the formula type for temporal logic with primitives
-`{atom, bot, imp, untl, snce}`. The `untl` (until) and `snce` (since) operators
+`{atom, bot, imp, and, or, untl, snce}`. The `untl` (until) and `snce` (since) operators
 are the basic temporal modalities from which all other temporal operators
-(globally, eventually, etc.) are derived.
+(globally, eventually, etc.) are derived. Conjunction (`and`) and disjunction (`or`)
+are primitive constructors following the hybrid five-primitive design.
 
 ## Derived Temporal Operators
 
@@ -42,7 +43,8 @@ the first argument is the **event** (holds at the witness point) and the second 
 
 namespace Cslib.Logic.Temporal
 
-/-- Temporal logic formula type. Primitives: atoms, falsum, implication, until, and since. -/
+/-- Temporal logic formula type. Primitives: atoms, falsum, implication, conjunction,
+disjunction, until, and since. -/
 inductive Formula (Atom : Type u) : Type u where
   /-- Atomic proposition. -/
   | atom (p : Atom)
@@ -50,6 +52,10 @@ inductive Formula (Atom : Type u) : Type u where
   | bot
   /-- Implication. -/
   | imp (φ₁ φ₂ : Formula Atom)
+  /-- Conjunction (primitive). -/
+  | and (φ₁ φ₂ : Formula Atom)
+  /-- Disjunction (primitive). -/
+  | or (φ₁ φ₂ : Formula Atom)
   /-- Until temporal operator: φ₁ U φ₂. -/
   | untl (φ₁ φ₂ : Formula Atom)
   /-- Since temporal operator: φ₁ S φ₂. -/
@@ -62,17 +68,9 @@ abbrev Formula.neg (φ : Formula Atom) : Formula Atom := .imp φ .bot
 /-- Verum / top: ⊤ := ⊥ → ⊥ -/
 abbrev Formula.top : Formula Atom := .imp .bot .bot
 
-/-- Disjunction: φ₁ ∨ φ₂ := ¬φ₁ → φ₂ -/
-abbrev Formula.or (φ₁ φ₂ : Formula Atom) : Formula Atom :=
-  .imp (.imp φ₁ .bot) φ₂
-
-/-- Conjunction: φ₁ ∧ φ₂ := ¬(φ₁ → ¬φ₂) -/
-abbrev Formula.and (φ₁ φ₂ : Formula Atom) : Formula Atom :=
-  .imp (.imp φ₁ (.imp φ₂ .bot)) .bot
-
 /-- Biconditional: φ₁ ↔ φ₂ := (φ₁ → φ₂) ∧ (φ₂ → φ₁) -/
 abbrev Formula.iff (φ₁ φ₂ : Formula Atom) : Formula Atom :=
-  (φ₁.imp φ₂).and (φ₂.imp φ₁)
+  Formula.and (φ₁.imp φ₂) (φ₂.imp φ₁)
 
 /-- Some future (eventually): F φ := φ U ⊤.
     Note: uses Burgess convention where `untl event guard` — φ is the event (holds at witness),
@@ -112,6 +110,14 @@ instance : TemporalConnectives (Formula Atom) where
   imp := .imp
   untl := .untl
   snce := .snce
+
+/-- Register `HasAnd` instance for `Temporal.Formula`. -/
+instance : HasAnd (Formula Atom) where
+  and := .and
+
+/-- Register `HasOr` instance for `Temporal.Formula`. -/
+instance : HasOr (Formula Atom) where
+  or := .or
 
 instance : Bot (Formula Atom) := ⟨.bot⟩
 instance : Top (Formula Atom) := ⟨.top⟩
@@ -154,8 +160,10 @@ noncomputable def encodeNat [Encodable Atom] : Formula Atom → ℕ
   | .atom a => Nat.pair 0 (Encodable.encode a)
   | .bot => Nat.pair 1 0
   | .imp φ ψ => Nat.pair 2 (Nat.pair φ.encodeNat ψ.encodeNat)
-  | .untl φ ψ => Nat.pair 3 (Nat.pair φ.encodeNat ψ.encodeNat)
-  | .snce φ ψ => Nat.pair 4 (Nat.pair φ.encodeNat ψ.encodeNat)
+  | .and φ ψ => Nat.pair 3 (Nat.pair φ.encodeNat ψ.encodeNat)
+  | .or φ ψ => Nat.pair 4 (Nat.pair φ.encodeNat ψ.encodeNat)
+  | .untl φ ψ => Nat.pair 5 (Nat.pair φ.encodeNat ψ.encodeNat)
+  | .snce φ ψ => Nat.pair 6 (Nat.pair φ.encodeNat ψ.encodeNat)
 
 theorem nat_pair_inj {a b c d : ℕ} (h : Nat.pair a b = Nat.pair c d) :
     a = c ∧ b = d := by
@@ -175,6 +183,8 @@ theorem encodeNat_injective [Encodable Atom] :
       exact congrArg Formula.atom (Encodable.encode_injective h2)
     | bot => exact absurd (nat_pair_inj h).1 (by decide)
     | imp _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | and _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | or _ _ => exact absurd (nat_pair_inj h).1 (by decide)
     | untl _ _ => exact absurd (nat_pair_inj h).1 (by decide)
     | snce _ _ => exact absurd (nat_pair_inj h).1 (by decide)
   | bot =>
@@ -182,6 +192,8 @@ theorem encodeNat_injective [Encodable Atom] :
     | bot => rfl
     | atom _ => exact absurd (nat_pair_inj h).1 (by decide)
     | imp _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | and _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | or _ _ => exact absurd (nat_pair_inj h).1 (by decide)
     | untl _ _ => exact absurd (nat_pair_inj h).1 (by decide)
     | snce _ _ => exact absurd (nat_pair_inj h).1 (by decide)
   | imp a b iha ihb =>
@@ -192,6 +204,32 @@ theorem encodeNat_injective [Encodable Atom] :
       exact congrArg₂ Formula.imp (iha h3) (ihb h4)
     | atom _ => exact absurd (nat_pair_inj h).1 (by decide)
     | bot => exact absurd (nat_pair_inj h).1 (by decide)
+    | and _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | or _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | untl _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | snce _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+  | and a b iha ihb =>
+    cases ψ with
+    | and c d =>
+      have ⟨_, h2⟩ := nat_pair_inj h
+      have ⟨h3, h4⟩ := nat_pair_inj h2
+      exact congrArg₂ Formula.and (iha h3) (ihb h4)
+    | atom _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | bot => exact absurd (nat_pair_inj h).1 (by decide)
+    | imp _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | or _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | untl _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | snce _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+  | or a b iha ihb =>
+    cases ψ with
+    | or c d =>
+      have ⟨_, h2⟩ := nat_pair_inj h
+      have ⟨h3, h4⟩ := nat_pair_inj h2
+      exact congrArg₂ Formula.or (iha h3) (ihb h4)
+    | atom _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | bot => exact absurd (nat_pair_inj h).1 (by decide)
+    | imp _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | and _ _ => exact absurd (nat_pair_inj h).1 (by decide)
     | untl _ _ => exact absurd (nat_pair_inj h).1 (by decide)
     | snce _ _ => exact absurd (nat_pair_inj h).1 (by decide)
   | untl a b iha ihb =>
@@ -203,6 +241,8 @@ theorem encodeNat_injective [Encodable Atom] :
     | atom _ => exact absurd (nat_pair_inj h).1 (by decide)
     | bot => exact absurd (nat_pair_inj h).1 (by decide)
     | imp _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | and _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | or _ _ => exact absurd (nat_pair_inj h).1 (by decide)
     | snce _ _ => exact absurd (nat_pair_inj h).1 (by decide)
   | snce a b iha ihb =>
     cases ψ with
@@ -213,6 +253,8 @@ theorem encodeNat_injective [Encodable Atom] :
     | atom _ => exact absurd (nat_pair_inj h).1 (by decide)
     | bot => exact absurd (nat_pair_inj h).1 (by decide)
     | imp _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | and _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | or _ _ => exact absurd (nat_pair_inj h).1 (by decide)
     | untl _ _ => exact absurd (nat_pair_inj h).1 (by decide)
 
 end Formula
@@ -245,6 +287,14 @@ namespace Formula
 theorem beq_imp_eq (a b c d : Formula Atom) :
     (imp a b == imp c d) = ((a == c) && (b == d)) := rfl
 
+/-- Helper: BEq on and reduces to component BEq. -/
+theorem beq_and_eq (a b c d : Formula Atom) :
+    (and a b == and c d) = ((a == c) && (b == d)) := rfl
+
+/-- Helper: BEq on or reduces to component BEq. -/
+theorem beq_or_eq (a b c d : Formula Atom) :
+    (or a b == or c d) = ((a == c) && (b == d)) := rfl
+
 /-- Helper: BEq on untl reduces to component BEq. -/
 theorem beq_untl_eq (a b c d : Formula Atom) :
     (untl a b == untl c d) = ((a == c) && (b == d)) := rfl
@@ -259,6 +309,8 @@ theorem beq_refl [ReflBEq Atom] (φ : Formula Atom) : (φ == φ) = true := by
   | atom p => exact @beq_self_eq_true Atom _ _ p
   | bot => rfl
   | imp a b iha ihb => rw [beq_imp_eq, iha, ihb]; rfl
+  | and a b iha ihb => rw [beq_and_eq, iha, ihb]; rfl
+  | or a b iha ihb => rw [beq_or_eq, iha, ihb]; rfl
   | untl a b iha ihb => rw [beq_untl_eq, iha, ihb]; rfl
   | snce a b iha ihb => rw [beq_snce_eq, iha, ihb]; rfl
 
@@ -271,32 +323,46 @@ theorem eq_of_beq [LawfulBEq Atom] {φ ψ : Formula Atom}
     | atom q =>
       have heq : (atom p == atom q) = (p == q) := rfl
       rw [heq] at h; exact congrArg atom (beq_iff_eq.mp h)
-    | bot | imp _ _ | untl _ _ | snce _ _ => exact nomatch h
+    | bot | imp _ _ | and _ _ | or _ _ | untl _ _ | snce _ _ => exact nomatch h
   | bot =>
     match ψ with
     | bot => rfl
-    | atom _ | imp _ _ | untl _ _ | snce _ _ => exact nomatch h
+    | atom _ | imp _ _ | and _ _ | or _ _ | untl _ _ | snce _ _ => exact nomatch h
   | imp a b iha ihb =>
     match ψ with
     | imp c d =>
       have heq : (imp a b == imp c d) = ((a == c) && (b == d)) := rfl
       rw [heq] at h; simp only [Bool.and_eq_true] at h
       exact congrArg₂ imp (iha h.1) (ihb h.2)
-    | atom _ | bot | untl _ _ | snce _ _ => exact nomatch h
+    | atom _ | bot | and _ _ | or _ _ | untl _ _ | snce _ _ => exact nomatch h
+  | and a b iha ihb =>
+    match ψ with
+    | and c d =>
+      have heq : (and a b == and c d) = ((a == c) && (b == d)) := rfl
+      rw [heq] at h; simp only [Bool.and_eq_true] at h
+      exact congrArg₂ and (iha h.1) (ihb h.2)
+    | atom _ | bot | imp _ _ | or _ _ | untl _ _ | snce _ _ => exact nomatch h
+  | or a b iha ihb =>
+    match ψ with
+    | or c d =>
+      have heq : (or a b == or c d) = ((a == c) && (b == d)) := rfl
+      rw [heq] at h; simp only [Bool.and_eq_true] at h
+      exact congrArg₂ or (iha h.1) (ihb h.2)
+    | atom _ | bot | imp _ _ | and _ _ | untl _ _ | snce _ _ => exact nomatch h
   | untl a b iha ihb =>
     match ψ with
     | untl c d =>
       have heq : (untl a b == untl c d) = ((a == c) && (b == d)) := rfl
       rw [heq] at h; simp only [Bool.and_eq_true] at h
       exact congrArg₂ untl (iha h.1) (ihb h.2)
-    | atom _ | bot | imp _ _ | snce _ _ => exact nomatch h
+    | atom _ | bot | imp _ _ | and _ _ | or _ _ | snce _ _ => exact nomatch h
   | snce a b iha ihb =>
     match ψ with
     | snce c d =>
       have heq : (snce a b == snce c d) = ((a == c) && (b == d)) := rfl
       rw [heq] at h; simp only [Bool.and_eq_true] at h
       exact congrArg₂ snce (iha h.1) (ihb h.2)
-    | atom _ | bot | imp _ _ | untl _ _ => exact nomatch h
+    | atom _ | bot | imp _ _ | and _ _ | or _ _ | untl _ _ => exact nomatch h
 
 end Formula
 
@@ -343,6 +409,10 @@ def complexity : Formula Atom → Nat
     1 + complexity φ + complexity ψ
   -- generic imp
   | .imp φ ψ => 1 + complexity φ + complexity ψ
+  -- and (primitive)
+  | .and φ ψ => 1 + complexity φ + complexity ψ
+  -- or (primitive)
+  | .or φ ψ => 1 + complexity φ + complexity ψ
   -- F(φ) = untl φ (imp bot bot)  [φ U ⊤ in Burgess]
   | .untl φ (.imp .bot .bot) => 1 + complexity φ
   -- next(φ) = untl φ bot  [φ U ⊥ in Burgess: guard ⊥ impossible, forces immediate step]
@@ -367,6 +437,8 @@ def temporalDepth : Formula Atom → Nat
   | .atom _ => 0
   | .bot => 0
   | .imp φ ψ => max φ.temporalDepth ψ.temporalDepth
+  | .and φ ψ => max φ.temporalDepth ψ.temporalDepth
+  | .or φ ψ => max φ.temporalDepth ψ.temporalDepth
   | .untl φ ψ => 1 + max φ.temporalDepth ψ.temporalDepth
   | .snce φ ψ => 1 + max φ.temporalDepth ψ.temporalDepth
 
@@ -379,6 +451,8 @@ def countImplications : Formula Atom → Nat
   | .atom _ => 0
   | .bot => 0
   | .imp φ ψ => 1 + φ.countImplications + ψ.countImplications
+  | .and φ ψ => φ.countImplications + ψ.countImplications
+  | .or φ ψ => φ.countImplications + ψ.countImplications
   | .untl φ ψ => φ.countImplications + ψ.countImplications
   | .snce φ ψ => φ.countImplications + ψ.countImplications
 
@@ -460,6 +534,8 @@ def swapTemporal : Formula Atom → Formula Atom
   | .atom s => .atom s
   | .bot => .bot
   | .imp φ ψ => .imp (swapTemporal φ) (swapTemporal ψ)
+  | .and φ ψ => .and (swapTemporal φ) (swapTemporal ψ)
+  | .or φ ψ => .or (swapTemporal φ) (swapTemporal ψ)
   | .untl φ ψ => .snce (swapTemporal φ) (swapTemporal ψ)
   | .snce φ ψ => .untl (swapTemporal φ) (swapTemporal ψ)
 
@@ -470,6 +546,8 @@ theorem swapTemporal_involution (φ : Formula Atom) :
   | atom _ => rfl
   | bot => rfl
   | imp _ _ ihp ihq => simp only [swapTemporal, ihp, ihq]
+  | and _ _ ih1 ih2 => simp only [swapTemporal, ih1, ih2]
+  | or _ _ ih1 ih2 => simp only [swapTemporal, ih1, ih2]
   | untl _ _ ih1 ih2 => simp only [swapTemporal, ih1, ih2]
   | snce _ _ ih1 ih2 => simp only [swapTemporal, ih1, ih2]
 
@@ -477,6 +555,16 @@ theorem swapTemporal_involution (φ : Formula Atom) :
 theorem swapTemporal_neg (φ : Formula Atom) :
     (Formula.neg φ).swapTemporal = Formula.neg φ.swapTemporal := by
   simp only [Formula.neg, swapTemporal]
+
+/-- swapTemporal distributes over and: swap(φ ∧ ψ) = swap(φ) ∧ swap(ψ). -/
+theorem swapTemporal_and (φ ψ : Formula Atom) :
+    (Formula.and φ ψ).swapTemporal = Formula.and φ.swapTemporal ψ.swapTemporal := by
+  simp only [swapTemporal]
+
+/-- swapTemporal distributes over or: swap(φ ∨ ψ) = swap(φ) ∨ swap(ψ). -/
+theorem swapTemporal_or (φ ψ : Formula Atom) :
+    (Formula.or φ ψ).swapTemporal = Formula.or φ.swapTemporal ψ.swapTemporal := by
+  simp only [swapTemporal]
 
 /-- swapTemporal exchanges someFuture and somePast: swap(Fφ) = P(swap φ). -/
 @[simp]
@@ -516,13 +604,13 @@ theorem swapTemporal_prev (φ : Formula Atom) :
 theorem swapTemporal_strongRelease (φ ψ : Formula Atom) :
     (strongRelease φ ψ).swapTemporal =
       strongTrigger φ.swapTemporal ψ.swapTemporal := by
-  simp [strongRelease, strongTrigger, Formula.and, swapTemporal]
+  simp [strongRelease, strongTrigger, swapTemporal]
 
 /-- swapTemporal distributes over strongTrigger: swap(ST(φ,ψ)) = M(swap φ, swap ψ). -/
 theorem swapTemporal_strongTrigger (φ ψ : Formula Atom) :
     (strongTrigger φ ψ).swapTemporal =
       strongRelease φ.swapTemporal ψ.swapTemporal := by
-  simp [strongRelease, strongTrigger, Formula.and, swapTemporal]
+  simp [strongRelease, strongTrigger, swapTemporal]
 
 /-! ### Positive Hypothesis Predicate -/
 
@@ -539,6 +627,12 @@ def needsPositiveHypotheses : Formula Atom → Bool
 
 @[simp] lemma needsPositiveHypotheses_bot :
     (Formula.bot : Formula Atom).needsPositiveHypotheses = true := rfl
+
+@[simp] lemma needsPositiveHypotheses_and (p q : Formula Atom) :
+    (Formula.and p q).needsPositiveHypotheses = true := rfl
+
+@[simp] lemma needsPositiveHypotheses_or (p q : Formula Atom) :
+    (Formula.or p q).needsPositiveHypotheses = true := rfl
 
 @[simp] lemma needsPositiveHypotheses_untl (p q : Formula Atom) :
     (Formula.untl p q).needsPositiveHypotheses = true := rfl
@@ -560,6 +654,8 @@ def atoms : Formula Atom → Finset Atom
   | .atom s => {s}
   | .bot => ∅
   | .imp φ ψ => atoms φ ∪ atoms ψ
+  | .and φ ψ => atoms φ ∪ atoms ψ
+  | .or φ ψ => atoms φ ∪ atoms ψ
   | .untl φ ψ => atoms φ ∪ atoms ψ
   | .snce φ ψ => atoms φ ∪ atoms ψ
 
@@ -570,6 +666,8 @@ theorem atoms_swapTemporal (φ : Formula Atom) :
   | atom _ => rfl
   | bot => rfl
   | imp _ _ ih1 ih2 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
+  | and _ _ ih1 ih2 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
+  | or _ _ ih1 ih2 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
   | untl _ _ ih1 ih2 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
   | snce _ _ ih1 ih2 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
 

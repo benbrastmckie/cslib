@@ -1,0 +1,12 @@
+{
+  "status": "planned",
+  "summary": "4-phase plan created: (1) worktree + branch from PR #635 tip, (2) cherry-pick 3928feb4 + verify ~4-file stacked diff, (3) full CI (lake build/test/checkInitImports/lint-style) + push, (4) write pr-description.md + transition to PR READY. Estimated 2 hours. Stacked on PR #635 branch.",
+  "blockers": [],
+  "artifacts": [
+    {
+      "path": "specs/169_recreate_modal_primitives_pr_upstream/plans/02_implementation-plan.md",
+      "type": "plan",
+      "summary": "4-phase implementation plan for recreating Modal primitives PR as stacked PR on #635"
+    }
+  ]
+}

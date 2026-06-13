@@ -99,7 +99,7 @@ next_project_number: 179
 
 ### Foundations Refactor
 
-172 [NOT STARTED] — Extend Cslib/Foundations/Logic/Connectives.lean for the hybrid fi
+172 [PLANNED] — Extend Cslib/Foundations/Logic/Connectives.lean for the hybrid fi
   └─ 173 [NOT STARTED] — Refactor Cslib/Logics/Propositional to the hybrid five-primitive 
     └─ 174 [NOT STARTED] — Extend Cslib/Logics/Propositional/Semantics and Metalogic from th
     └─ 175 [NOT STARTED] — Propagate the hybrid five-primitive design to the Modal layer: Mo
@@ -171,10 +171,11 @@ next_project_number: 179
 ---
 
 ### 172. Connectives hasand hasor full primitives
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Foundations Refactor
 - **Dependencies**: None
+- **Plan**: [172_connectives_hasand_hasor_full_primitives/plans/01_hasand-hasor-plan.md]
 
 **Description**: Extend Cslib/Foundations/Logic/Connectives.lean for the hybrid five-primitive signature {atom, bot, imp, and, or}: add HasAnd and HasOr atomic typeclasses alongside HasBot/HasImp/HasBox/HasUntil/HasSince; update the bundled classes (PropositionalConnectives, ModalConnectives, TemporalConnectives, BimodalConnectives) to include them; revise or remove ImpBotDerived (the bot/imp-derived and/or defaults are classical-only per task 171 research and must not be presented as logic-neutral). Keep derived-connective defaults only for neg (A -> bot), top (bot -> bot), and iff, which are valid in minimal/intuitionistic/classical logic. Align design with fmontesi's PR #607 operator-typeclass direction (one class per operator, notation-level) to ease upstream reconciliation. Reference: specs/171_research_connective_basis_min_int_classical/reports/01_team-research.md.
 

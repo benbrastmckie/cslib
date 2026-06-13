@@ -35,8 +35,10 @@ sub-proposition positions (left and right), and `box` has one. The ground constr
 namespace Cslib.Logic.Modal
 
 /-- A one-hole context for `Proposition`. Each constructor corresponds to a recursive position
-in `Proposition`: `impL` is the left argument of `imp`, `impR` is the right argument, and `box`
-is the argument of `box`. The `hole` constructor marks the position to be filled. -/
+in `Proposition`: `impL` is the left argument of `imp`, `impR` is the right argument,
+`andL`/`andR` are the left/right arguments of `and`, `orL`/`orR` are the left/right arguments
+of `or`, and `box` is the argument of `box`. The `hole` constructor marks the position to be
+filled. -/
 inductive Proposition.Context (Atom : Type u) : Type u where
   /-- The position to substitute. -/
   | hole
@@ -44,6 +46,14 @@ inductive Proposition.Context (Atom : Type u) : Type u where
   | impL (c : Context Atom) (φ : Proposition Atom)
   /-- Context in the right argument of `imp`. -/
   | impR (φ : Proposition Atom) (c : Context Atom)
+  /-- Context in the left argument of `and`. -/
+  | andL (c : Context Atom) (φ : Proposition Atom)
+  /-- Context in the right argument of `and`. -/
+  | andR (φ : Proposition Atom) (c : Context Atom)
+  /-- Context in the left argument of `or`. -/
+  | orL (c : Context Atom) (φ : Proposition Atom)
+  /-- Context in the right argument of `or`. -/
+  | orR (φ : Proposition Atom) (c : Context Atom)
   /-- Context under `box`. -/
   | box (c : Context Atom)
 
@@ -52,6 +62,10 @@ def Proposition.Context.fill : Proposition.Context Atom → Proposition Atom →
   | .hole, φ => φ
   | .impL c ψ, φ => c.fill φ → ψ
   | .impR ψ c, φ => ψ → c.fill φ
+  | .andL c ψ, φ => c.fill φ ∧ ψ
+  | .andR ψ c, φ => ψ ∧ c.fill φ
+  | .orL c ψ, φ => c.fill φ ∨ ψ
+  | .orR ψ c, φ => ψ ∨ c.fill φ
   | .box c, φ => □(c.fill φ)
 
 /-- Two propositions are logically equivalent when they agree on satisfaction across all models
@@ -75,6 +89,22 @@ theorem LogicallyEquivalent.congruence.{v} {Atom : Type u} {φ ψ : Proposition 
     intro w
     simp only [Proposition.Context.fill, Satisfies]
     exact ⟨fun hf ha => (ih w).mp (hf ha), fun hf ha => (ih w).mpr (hf ha)⟩
+  | andL c _ ih =>
+    intro w
+    simp only [Proposition.Context.fill, Satisfies]
+    exact ⟨fun ⟨ha, hb⟩ => ⟨(ih w).mp ha, hb⟩, fun ⟨ha, hb⟩ => ⟨(ih w).mpr ha, hb⟩⟩
+  | andR _ c ih =>
+    intro w
+    simp only [Proposition.Context.fill, Satisfies]
+    exact ⟨fun ⟨ha, hb⟩ => ⟨ha, (ih w).mp hb⟩, fun ⟨ha, hb⟩ => ⟨ha, (ih w).mpr hb⟩⟩
+  | orL c _ ih =>
+    intro w
+    simp only [Proposition.Context.fill, Satisfies]
+    exact ⟨fun h => h.imp (ih w).mp id, fun h => h.imp (ih w).mpr id⟩
+  | orR _ c ih =>
+    intro w
+    simp only [Proposition.Context.fill, Satisfies]
+    exact ⟨fun h => h.imp id (ih w).mp, fun h => h.imp id (ih w).mpr⟩
   | box c ih =>
     intro w
     simp only [Proposition.Context.fill, Satisfies]

@@ -104,7 +104,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Formula Type and Semantics -- Add and/or Constructors [NOT STARTED]
+### Phase 2: Formula Type and Semantics -- Add and/or Constructors [COMPLETED]
 
 **Goal**: Add `and` and `or` as constructors to `Proposition`, update all pattern-matching functions in Defs.lean and Semantics, and register `HasAnd`/`HasOr` instances. This is the core structural change that causes cascading breakage in downstream modules.
 

@@ -50,7 +50,7 @@ variable {Atom : Type u} [DecidableEq Atom]
 
 namespace Cslib.Logic.PL
 
-/-- Propositions. Primitives are atoms, falsum, and implication. -/
+/-- Propositions. Primitives are atoms, falsum, implication, conjunction, and disjunction. -/
 inductive Proposition (Atom : Type u) : Type u where
   /-- Propositional atoms -/
   | atom (x : Atom)
@@ -58,6 +58,10 @@ inductive Proposition (Atom : Type u) : Type u where
   | bot
   /-- Implication -/
   | imp (a b : Proposition Atom)
+  /-- Conjunction -/
+  | and (a b : Proposition Atom)
+  /-- Disjunction -/
+  | or (a b : Proposition Atom)
 deriving DecidableEq, BEq
 
 /-- Negation as a derived connective: ¬A := A → ⊥ -/
@@ -65,14 +69,6 @@ abbrev Proposition.neg : Proposition Atom → Proposition Atom := (Proposition.i
 
 /-- Verum / top as a derived connective: ⊤ := ⊥ → ⊥ -/
 abbrev Proposition.top : Proposition Atom := .imp .bot .bot
-
-/-- Disjunction as a derived connective: A ∨ B := ¬A → B -/
-abbrev Proposition.or (A B : Proposition Atom) : Proposition Atom :=
-  .imp (.imp A .bot) B
-
-/-- Conjunction as a derived connective: A ∧ B := ¬(A → ¬B) -/
-abbrev Proposition.and (A B : Proposition Atom) : Proposition Atom :=
-  .imp (.imp A (.imp B .bot)) .bot
 
 /-- Biconditional as a derived connective: A ↔ B := (A → B) ∧ (B → A) -/
 abbrev Proposition.iff (A B : Proposition Atom) : Proposition Atom :=
@@ -92,6 +88,14 @@ instance : PropositionalConnectives (Proposition Atom) where
   bot := .bot
   imp := .imp
 
+/-- Register `HasAnd` instance for `Proposition`. -/
+instance : HasAnd (Proposition Atom) where
+  and := .and
+
+/-- Register `HasOr` instance for `Proposition`. -/
+instance : HasOr (Proposition Atom) where
+  or := .or
+
 /-- Substitute each atom in a proposition for a proposition, possibly changing the atomic
 language. -/
 def Proposition.subst {Atom Atom' : Type u} (f : Atom → Proposition Atom') :
@@ -99,6 +103,8 @@ def Proposition.subst {Atom Atom' : Type u} (f : Atom → Proposition Atom') :
   | atom x => f x
   | bot => .bot
   | imp A B => .imp (A.subst f) (B.subst f)
+  | and A B => .and (A.subst f) (B.subst f)
+  | or A B => .or (A.subst f) (B.subst f)
 
 -- This is probably a lawful monad, but that doesn't seem to be important.
 instance : Monad Proposition where

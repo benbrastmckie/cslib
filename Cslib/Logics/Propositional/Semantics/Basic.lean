@@ -39,6 +39,8 @@ def Evaluate (v : Valuation Atom) : PL.Proposition Atom → Prop
   | .atom x => v x
   | .bot => False
   | .imp a b => Evaluate v a → Evaluate v b
+  | .and a b => Evaluate v a ∧ Evaluate v b
+  | .or a b => Evaluate v a ∨ Evaluate v b
 
 /-- A proposition is a tautology iff it is true under every valuation. -/
 def Tautology (φ : PL.Proposition Atom) : Prop :=

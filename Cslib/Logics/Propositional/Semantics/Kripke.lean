@@ -34,8 +34,8 @@ This module defines Kripke semantics for propositional (intuitionistic and minim
 - `IForces` is standalone (not reusing `Modal.Satisfies`) because intuitionistic implication
   requires universal quantification over accessible worlds, which is semantically different from
   the local interpretation in `Modal.Satisfies`.
-- `PL.Proposition` has only `atom | bot | imp`; derived connectives (and/or/neg) reduce
-  automatically via abbreviations.
+- `PL.Proposition` has five constructors `atom | bot | imp | and | or`; negation and verum
+  remain derived connectives via abbreviations.
 
 ## References
 
@@ -71,17 +71,21 @@ structure KripkeModel (World : Type*) (Atom : Type*) [Preorder World] where
 - **Intuitionistic instantiation**: `bot_forces = fun _ => False`
 - **Minimal instantiation**: `bot_forces` is an arbitrary upward-closed predicate
 
-The three cases correspond to the constructors of `PL.Proposition`:
+The five cases correspond to the constructors of `PL.Proposition`:
 - `atom p`: forced iff the valuation assigns `p` at world `w`
 - `bot`: forced iff `bot_forces w`
 - `imp φ ψ`: forced iff for every successor `w' ≥ w`, forcing `φ` at `w'` implies forcing `ψ`
-  at `w'` -/
+  at `w'`
+- `and φ ψ`: forced iff both `φ` and `ψ` are forced at `w`
+- `or φ ψ`: forced iff `φ` or `ψ` is forced at `w` -/
 def IForces [Preorder World]
     (v : World → Atom → Prop) (bot_forces : World → Prop)
     (w : World) : PL.Proposition Atom → Prop
   | .atom p => v w p
   | .bot => bot_forces w
   | .imp φ ψ => ∀ w', w ≤ w' → IForces v bot_forces w' φ → IForces v bot_forces w' ψ
+  | .and φ ψ => IForces v bot_forces w φ ∧ IForces v bot_forces w ψ
+  | .or φ ψ => IForces v bot_forces w φ ∨ IForces v bot_forces w ψ
 
 /-- Persistence of forcing under the preorder (CZ Proposition 2.1).
 
@@ -102,6 +106,10 @@ theorem iforces_persistence [Preorder World]
   | imp φ ψ _ _ =>
     intro u hu hfu
     exact hf u (le_trans hw hu) hfu
+  | and φ ψ ih_φ ih_ψ =>
+    exact ⟨ih_φ hf.1, ih_ψ hf.2⟩
+  | or φ ψ ih_φ ih_ψ =>
+    exact hf.elim (fun h => Or.inl (ih_φ h)) (fun h => Or.inr (ih_ψ h))
 
 /-- A formula is intuitionistically valid (`IValid`) if it is forced at every world
 in every intuitionistic Kripke model, i.e., for every preordered type of worlds,

@@ -110,6 +110,7 @@ next_project_number: 182
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Dependencies**: Task 179, Task 180
+- **Research**: [181_bimodal_primitive_dia_always_historically/reports/01_bimodal-primitive-expansion-research.md]
 
 **Description**: Propagate primitive diamond, allFuture, and allPast constructors to the Bimodal layer, giving {atom, bot, imp, and, or, box, dia, untl, snce, allFuture, allPast} (11 primitives). This is the union of Modal (task 179) and Temporal (task 180) primitive sets. Scope: (1) Syntax/Formula.lean: add .dia/.allFuture/.allPast constructors, update all match cases. (2) Semantics/Truth.lean: structural truthAt clauses. (3) ProofSystem: axiom constructors for diamond duality and G/H axioms. (4) Embedding: extend ModalEmbedding (.dia), TemporalEmbedding (.allFuture/.allPast). (5) Metalogic: propagate through ~50 files (Core, Soundness, Completeness, BXCanonical, ConservativeExtension, Separation, Decidability, Algebraic). Follow task 177 playbook. (6) Classical equivalences become theorems. Verify full CI. Estimated ~50 files, ~2000 lines, similar scope to task 177.
 
@@ -119,6 +120,7 @@ next_project_number: 182
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Dependencies**: Task 176
+- **Research**: [180_temporal_primitive_always_historically/reports/01_primitive-always-historically-research.md]
 
 **Description**: Add allFuture (G) and allPast (H) as primitive constructors to Temporal.Formula, giving {atom, bot, imp, and, or, untl, snce, allFuture, allPast}. Currently G is derived as neg(someFuture(neg phi)) and H as neg(somePast(neg phi)), which are only valid classically. Making them primitive enables intuitionistic temporal logics. Note: someFuture (F) and somePast (P) remain derivable without negation (F = top U phi, P = top S phi). Scope: (1) Syntax/Formula.lean: add .allFuture/.allPast constructors, update complexity, subst, atoms, encodeNat, temporalDepth, swapTemporal. (2) Semantics: structural clauses for universal future/past quantification. (3) ProofSystem: temporal axioms referencing G/H now use primitive constructors. (4) Metalogic: cases in Soundness, Chronicle/TruthLemma, MCS, Completeness. (5) Classical equivalences become theorems. Verify full CI. Reference: Boudou et al. for intuitionistic temporal logic.
 
@@ -128,6 +130,7 @@ next_project_number: 182
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Dependencies**: Task 175
+- **Research**: [179_modal_primitive_diamond/reports/01_primitive-diamond-research.md]
 
 **Description**: Add diamond (dia) as a primitive constructor to Modal.Proposition, giving {atom, bot, imp, and, or, box, dia}. Currently diamond is derived as neg(box(neg phi)), which is only valid classically. Making it primitive enables intuitionistic and minimal modal logics where box and diamond are independent operators. Scope: (1) Basic.lean: add .dia constructor, structural Satisfies clause, keep notation. (2) Denotation, LogicalEquivalence, Cube: .dia cases. (3) ProofSystem/Instances: diamond-related axiom constructors and dual axioms. (4) Metalogic: .dia cases in DerivationTree, truth lemmas, all 15 soundness/completeness files. (5) Classical equivalence dia(A) iff neg(box(neg(A))) becomes a theorem. Verify full CI. Reference: upstream CSLib uses diamond as primitive; Fischer Servi 1984, Simpson 1994 for intuitionistic modal logic.
 

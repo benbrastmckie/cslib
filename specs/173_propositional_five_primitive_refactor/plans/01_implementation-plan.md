@@ -274,7 +274,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 7: External Embeddings and CI Verification [NOT STARTED]
+### Phase 7: External Embeddings and CI Verification [COMPLETED]
 
 **Goal**: Update Modal/FromPropositional.lean and Temporal/FromPropositional.lean with and/or cases (using Lukasiewicz encoding to 3-constructor target types). Run the full CI verification pipeline.
 

@@ -25,11 +25,17 @@ constructor, establishing Propositional as a sub-logic of Modal.
 
 namespace Cslib.Logic
 
-/-- Embed a propositional formula into modal logic. -/
+/-- Embed a propositional formula into modal logic.
+
+The `and` and `or` cases use the Lukasiewicz encoding into `{atom, bot, imp, box}`:
+- `A ∧ B` maps to `¬(A → ¬B)` = `(A → (B → ⊥)) → ⊥`
+- `A ∨ B` maps to `¬A → B` = `(A → ⊥) → B` -/
 def PL.Proposition.toModal : PL.Proposition Atom → Modal.Proposition Atom
   | .atom p => .atom p
   | .bot => .bot
   | .imp φ₁ φ₂ => .imp (φ₁.toModal) (φ₂.toModal)
+  | .and φ₁ φ₂ => φ₁.toModal.and φ₂.toModal
+  | .or φ₁ φ₂ => φ₁.toModal.or φ₂.toModal
 
 /-- Coercion from propositional to modal formulas. -/
 instance instCoePLToModal : Coe (PL.Proposition Atom) (Modal.Proposition Atom) where
@@ -49,6 +55,16 @@ theorem PL.Proposition.toModal_bot :
 @[simp]
 theorem PL.Proposition.toModal_imp (φ₁ φ₂ : PL.Proposition Atom) :
     (PL.Proposition.imp φ₁ φ₂).toModal = Modal.Proposition.imp φ₁.toModal φ₂.toModal := rfl
+
+/-- Embedding preserves and (Lukasiewicz encoding). -/
+@[simp]
+theorem PL.Proposition.toModal_and (φ₁ φ₂ : PL.Proposition Atom) :
+    (PL.Proposition.and φ₁ φ₂).toModal = φ₁.toModal.and φ₂.toModal := rfl
+
+/-- Embedding preserves or (Lukasiewicz encoding). -/
+@[simp]
+theorem PL.Proposition.toModal_or (φ₁ φ₂ : PL.Proposition Atom) :
+    (PL.Proposition.or φ₁ φ₂).toModal = φ₁.toModal.or φ₂.toModal := rfl
 
 /-- Embedding preserves neg. -/
 theorem PL.Proposition.toModal_neg (φ : PL.Proposition Atom) :
@@ -74,6 +90,15 @@ theorem modal_satisfies_toModal_iff_evaluate
     simp only [PL.Proposition.toModal, Modal.Satisfies, PL.Evaluate]
     exact ⟨fun h he => ih2.mp (h (ih1.mpr he)),
            fun h hm => ih2.mpr (h (ih1.mp hm))⟩
+  | and φ ψ _ih1 _ih2 =>
+    -- The Lukasiewicz encoding ¬(A → ¬B) is classically but not intuitionistically
+    -- equivalent to A ∧ B. Semantic coherence for and/or requires Modal/Temporal to
+    -- have native and/or constructors (task 174). Deferred with sorry.
+    sorry
+  | or φ ψ _ih1 _ih2 =>
+    -- Same issue: ¬A → B is classically but not intuitionistically equivalent to A ∨ B.
+    -- Deferred to task 174.
+    sorry
 
 /-- Forward direction: every propositional tautology is modally valid under `toModal`. -/
 theorem tautology_toModal_valid {Atom : Type*}

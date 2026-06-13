@@ -79,7 +79,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Remove `h_EFQ` Parameter [NOT STARTED]
+### Phase 1: Remove `h_EFQ` Parameter [COMPLETED]
 
 **Goal**: Delete the unused `h_EFQ` parameter from `ndToHilbert`, `nd_to_hilbert_deriv`, and `hilbert_iff_nd`, along with all recursive call sites. Verify the build passes with no proof changes.
 

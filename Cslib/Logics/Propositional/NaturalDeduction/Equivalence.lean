@@ -16,15 +16,15 @@ This module proves the extensional equivalence between the Hilbert-style proof s
 (`DerivationTree`, `Deriv`, `Derivable`) and the standalone natural deduction system
 (`Theory.Derivation`, `DerivableIn`).
 
-The equivalence is parameterized over any axiom predicate `Axioms` that includes K, S,
-and EFQ, with instantiated corollaries for intuitionistic and classical logic.
+The equivalence is parameterized over any axiom predicate `Axioms` that includes K and S,
+with instantiated corollaries for minimal, intuitionistic, and classical logic.
 
 ## Main Definitions
 
 - `AxiomTheory` : Generic ND theory for any axiom predicate.
 - `HilbertAxiomTheory` : Classical specialization (backward compatibility).
 - `hilbertToND` : Translation from Hilbert derivation trees to ND derivations (structural).
-- `ndToHilbert` : Translation from ND derivations to Hilbert derivation trees (needs K, S, EFQ).
+- `ndToHilbert` : Translation from ND derivations to Hilbert derivation trees (needs K, S).
 - `hilbert_iff_nd` : Generic extensional equivalence for closed derivability.
 - `hilbert_iff_nd_int` : Intuitionistic instantiation.
 - `hilbert_iff_nd_cl` : Classical instantiation.
@@ -142,7 +142,7 @@ theorem hilbert_to_nd_deriv
 
 /-- Translate an ND derivation under `AxiomTheory Axioms` into a Hilbert derivation tree.
 
-Requires explicit K, S, and EFQ axiom witnesses along with the 6 and/or axiom witnesses.
+Requires explicit K and S axiom witnesses along with the 6 and/or axiom witnesses.
 Each constructor maps to its Hilbert counterpart:
 - `ax`: theory membership -> Hilbert axiom rule
 - `ass`: context membership -> Hilbert assumption (via `Finset.mem_toList`)
@@ -159,7 +159,6 @@ noncomputable def ndToHilbert
     (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
       Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (h_EFQ : ∀ (φ : PL.Proposition Atom), Axioms (Proposition.bot.imp φ))
     (h_andI : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp (φ.and ψ))))
     (h_andE1 : ∀ (φ ψ : PL.Proposition Atom), Axioms ((φ.and ψ).imp φ))
     (h_andE2 : ∀ (φ ψ : PL.Proposition Atom), Axioms ((φ.and ψ).imp ψ))
@@ -175,25 +174,25 @@ noncomputable def ndToHilbert
   | .ass h_mem =>
     .assumption Γ.toList φ (Finset.mem_toList.mpr h_mem)
   | @Theory.Derivation.andI _ _ _ A B G d₁ d₂ => by
-    have ih₁ := ndToHilbert h_K h_S h_EFQ h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d₁
-    have ih₂ := ndToHilbert h_K h_S h_EFQ h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d₂
+    have ih₁ := ndToHilbert h_K h_S h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d₁
+    have ih₂ := ndToHilbert h_K h_S h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d₂
     exact hilbertAndI h_andI ih₁ ih₂
   | @Theory.Derivation.andE1 _ _ _ A B G d => by
-    have ih := ndToHilbert h_K h_S h_EFQ h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d
+    have ih := ndToHilbert h_K h_S h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d
     exact hilbertAndE1 h_andE1 ih
   | @Theory.Derivation.andE2 _ _ _ A B G d => by
-    have ih := ndToHilbert h_K h_S h_EFQ h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d
+    have ih := ndToHilbert h_K h_S h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d
     exact hilbertAndE2 h_andE2 ih
   | @Theory.Derivation.orI1 _ _ _ A B G d => by
-    have ih := ndToHilbert h_K h_S h_EFQ h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d
+    have ih := ndToHilbert h_K h_S h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d
     exact hilbertOrI1 h_orI1 ih
   | @Theory.Derivation.orI2 _ _ _ A B G d => by
-    have ih := ndToHilbert h_K h_S h_EFQ h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d
+    have ih := ndToHilbert h_K h_S h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d
     exact hilbertOrI2 h_orI2 ih
   | @Theory.Derivation.orE _ _ _ A B C G d dA dB => by
-    have ihd := ndToHilbert h_K h_S h_EFQ h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d
-    have ihA := ndToHilbert h_K h_S h_EFQ h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE dA
-    have ihB := ndToHilbert h_K h_S h_EFQ h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE dB
+    have ihd := ndToHilbert h_K h_S h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d
+    have ihA := ndToHilbert h_K h_S h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE dA
+    have ihB := ndToHilbert h_K h_S h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE dB
     -- ihA : DerivationTree (insert A G).toList C -- weaken to A :: G.toList
     have ihA' := DerivationTree.weakening _ (A :: G.toList) C ihA
       (fun x hx => finset_insert_toList_mem_cons A G hx)
@@ -203,11 +202,11 @@ noncomputable def ndToHilbert
     exact hilbertOrE h_K h_S h_orE ihd ihA' ihB'
   | .impE d₁ d₂ =>
     .modus_ponens Γ.toList _ φ
-      (ndToHilbert h_K h_S h_EFQ h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d₁)
-      (ndToHilbert h_K h_S h_EFQ h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d₂)
+      (ndToHilbert h_K h_S h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d₁)
+      (ndToHilbert h_K h_S h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d₂)
   | @Theory.Derivation.impI _ _ _ A B Γ' d => by
     -- Recursive call gives: DerivationTree (insert A Γ').toList B
-    have ih := ndToHilbert h_K h_S h_EFQ h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d
+    have ih := ndToHilbert h_K h_S h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d
     -- Weaken to A :: Γ'.toList using the bridge lemma
     have ih' := DerivationTree.weakening _ (A :: Γ'.toList) B ih
       (fun x hx => finset_insert_toList_mem_cons A Γ' hx)
@@ -221,7 +220,6 @@ theorem nd_to_hilbert_deriv
     (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
       Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (h_EFQ : ∀ (φ : PL.Proposition Atom), Axioms (Proposition.bot.imp φ))
     (h_andI : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp (φ.and ψ))))
     (h_andE1 : ∀ (φ ψ : PL.Proposition Atom), Axioms ((φ.and ψ).imp φ))
     (h_andE2 : ∀ (φ ψ : PL.Proposition Atom), Axioms ((φ.and ψ).imp ψ))
@@ -233,7 +231,7 @@ theorem nd_to_hilbert_deriv
     (h : DerivableIn (AxiomTheory Axioms : Theory Atom) ((Γ : Ctx Atom) ⊢ φ)) :
     Deriv Axioms Γ.toList φ := by
   obtain ⟨d⟩ := h
-  exact ⟨ndToHilbert h_K h_S h_EFQ h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d⟩
+  exact ⟨ndToHilbert h_K h_S h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE d⟩
 
 /-! ## Top-Level Equivalence -/
 
@@ -241,13 +239,12 @@ theorem nd_to_hilbert_deriv
 (from the empty context) if and only if it is derivable in natural deduction
 under `AxiomTheory Axioms` (from the empty context).
 
-This bridges the two proof systems for any axiom predicate that includes K, S, and EFQ. -/
+This bridges the two proof systems for any axiom predicate that includes K and S. -/
 theorem hilbert_iff_nd
     {Axioms : PL.Proposition Atom → Prop}
     (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
       Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (h_EFQ : ∀ (φ : PL.Proposition Atom), Axioms (Proposition.bot.imp φ))
     (h_andI : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp (φ.and ψ))))
     (h_andE1 : ∀ (φ ψ : PL.Proposition Atom), Axioms ((φ.and ψ).imp φ))
     (h_andE2 : ∀ (φ ψ : PL.Proposition Atom), Axioms ((φ.and ψ).imp ψ))
@@ -264,7 +261,7 @@ theorem hilbert_iff_nd
     have := hilbert_to_nd_deriv h
     rwa [List.toFinset_nil] at this
   · intro h
-    have hd := nd_to_hilbert_deriv h_K h_S h_EFQ h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h
+    have hd := nd_to_hilbert_deriv h_K h_S h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h
     exact weakening_deriv hd (fun x hx => by simp [Finset.mem_toList] at hx)
 
 /-! ## Corollaries -/
@@ -278,7 +275,6 @@ theorem hilbert_iff_nd_int {φ : PL.Proposition Atom} :
   hilbert_iff_nd
     (fun φ ψ => .implyK φ ψ)
     (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
     (fun φ ψ => .andI φ ψ)
     (fun φ ψ => .andE1 φ ψ)
     (fun φ ψ => .andE2 φ ψ)
@@ -295,7 +291,6 @@ theorem hilbert_iff_nd_cl {φ : PL.Proposition Atom} :
   hilbert_iff_nd
     (fun φ ψ => .implyK φ ψ)
     (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
     (fun φ ψ => .andI φ ψ)
     (fun φ ψ => .andE1 φ ψ)
     (fun φ ψ => .andE2 φ ψ)

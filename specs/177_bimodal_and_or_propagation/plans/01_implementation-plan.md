@@ -140,7 +140,7 @@ pattern-matching functions (swapTemporal, atoms, subformulas, closure, nesting d
 
 ---
 
-### Phase 2: Proof System Layer [IN PROGRESS]
+### Phase 2: Proof System Layer [COMPLETED]
 
 **Goal**: Add 6 new and/or axiom constructors and extend the proof system substitution
 and instance registrations.
@@ -173,7 +173,7 @@ and instance registrations.
 
 ---
 
-### Phase 3: Semantics and Soundness [NOT STARTED]
+### Phase 3: Semantics and Soundness [IN PROGRESS]
 
 **Goal**: Extend the primary truth evaluation function and all soundness proofs with
 and/or structural clauses and axiom validity theorems.

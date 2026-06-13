@@ -66,8 +66,8 @@ theorem FrameClass.base_le (fc : FrameClass) : FrameClass.Base ≤ fc := by
 /--
 Axiom schemata for bimodal logic TM under the Burgess-Xu (BX) system.
 
-42 constructors organized into eight layers:
-- **Propositional** (4): Classical propositional tautologies
+48 constructors organized into eight layers:
+- **Propositional** (10): Classical propositional tautologies + and/or axioms
 - **S5 Modal** (5): S5 axioms for metaphysical necessity
 - **BX Temporal** (22): Burgess-Xu axioms for Until/Since on linear orders
 - **Interaction** (1): Modal-temporal interaction axiom MF
@@ -77,7 +77,7 @@ Axiom schemata for bimodal logic TM under the Burgess-Xu (BX) system.
 - **Density** (2): GGphi -> Gphi and neg U(top, bot)
 -/
 inductive Axiom : Formula Atom -> Type u where
-  -- Layer 1: Propositional (4)
+  -- Layer 1: Propositional (10)
 
   /-- Propositional K (distribution): (phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi)) -/
   | imp_k (phi psi chi : Formula Atom) :
@@ -91,6 +91,30 @@ inductive Axiom : Formula Atom -> Type u where
 
   /-- Peirce's Law: ((phi -> psi) -> phi) -> phi -/
   | peirce (phi psi : Formula Atom) : Axiom (((phi.imp psi).imp phi).imp phi)
+
+  /-- Conjunction introduction: phi -> (psi -> (phi ∧ psi)) -/
+  | andI (phi psi : Formula Atom) :
+      Axiom (phi.imp (psi.imp (Formula.and phi psi)))
+
+  /-- Left conjunction elimination: (phi ∧ psi) -> phi -/
+  | andE1 (phi psi : Formula Atom) :
+      Axiom ((Formula.and phi psi).imp phi)
+
+  /-- Right conjunction elimination: (phi ∧ psi) -> psi -/
+  | andE2 (phi psi : Formula Atom) :
+      Axiom ((Formula.and phi psi).imp psi)
+
+  /-- Left disjunction introduction: phi -> (phi ∨ psi) -/
+  | orI1 (phi psi : Formula Atom) :
+      Axiom (phi.imp (Formula.or phi psi))
+
+  /-- Right disjunction introduction: psi -> (phi ∨ psi) -/
+  | orI2 (phi psi : Formula Atom) :
+      Axiom (psi.imp (Formula.or phi psi))
+
+  /-- Disjunction elimination: (phi -> chi) -> ((psi -> chi) -> ((phi ∨ psi) -> chi)) -/
+  | orE (phi psi chi : Formula Atom) :
+      Axiom ((phi.imp chi).imp ((psi.imp chi).imp ((Formula.or phi psi).imp chi)))
 
   -- Layer 2: S5 Modal (5)
 

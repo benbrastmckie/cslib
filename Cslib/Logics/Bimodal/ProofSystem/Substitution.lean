@@ -46,6 +46,8 @@ def subst (q r : Atom) : Formula Atom -> Formula Atom
   | .atom s => if s = q then .atom r else .atom s
   | .bot => .bot
   | .imp phi psi => .imp (phi.subst q r) (psi.subst q r)
+  | .and phi psi => .and (phi.subst q r) (psi.subst q r)
+  | .or phi psi => .or (phi.subst q r) (psi.subst q r)
   | .box phi => .box (phi.subst q r)
   | .untl phi psi => .untl (phi.subst q r) (psi.subst q r)
   | .snce phi psi => .snce (phi.subst q r) (psi.subst q r)
@@ -72,6 +74,16 @@ theorem subst_imp (q r : Atom) (phi psi : Formula Atom) :
       .imp (phi.subst q r) (psi.subst q r) := rfl
 
 @[simp]
+theorem subst_and (q r : Atom) (phi psi : Formula Atom) :
+    (Formula.and phi psi).subst q r =
+      .and (phi.subst q r) (psi.subst q r) := rfl
+
+@[simp]
+theorem subst_or (q r : Atom) (phi psi : Formula Atom) :
+    (Formula.or phi psi).subst q r =
+      .or (phi.subst q r) (psi.subst q r) := rfl
+
+@[simp]
 theorem subst_box (q r : Atom) (phi : Formula Atom) :
     (Formula.box phi).subst q r = .box (phi.subst q r) := rfl
 
@@ -91,18 +103,6 @@ theorem subst_snce (q r : Atom) (phi psi : Formula Atom) :
 theorem subst_neg (q r : Atom) (phi : Formula Atom) :
     (Formula.neg phi).subst q r = Formula.neg (phi.subst q r) := by
   simp [Formula.neg, subst]
-
-@[simp]
-theorem subst_and (q r : Atom) (phi psi : Formula Atom) :
-    (Formula.and phi psi).subst q r =
-      Formula.and (phi.subst q r) (psi.subst q r) := by
-  simp only [Formula.and, Formula.neg, subst_imp, subst_bot]
-
-@[simp]
-theorem subst_or (q r : Atom) (phi psi : Formula Atom) :
-    (Formula.or phi psi).subst q r =
-      Formula.or (phi.subst q r) (psi.subst q r) := by
-  simp only [Formula.or, Formula.neg, subst_imp, subst_bot]
 
 @[simp]
 theorem subst_diamond (q r : Atom) (phi : Formula Atom) :
@@ -156,6 +156,12 @@ theorem subst_fresh_eq (q r : Atom) (phi : Formula Atom)
   | imp phi psi ih1 ih2 =>
     simp only [atoms, Finset.mem_union, not_or] at h
     simp [subst, ih1 h.1, ih2 h.2]
+  | and phi psi ih1 ih2 =>
+    simp only [atoms, Finset.mem_union, not_or] at h
+    simp [subst, ih1 h.1, ih2 h.2]
+  | or phi psi ih1 ih2 =>
+    simp only [atoms, Finset.mem_union, not_or] at h
+    simp [subst, ih1 h.1, ih2 h.2]
   | box phi ih =>
     simp only [atoms] at h
     simp [subst, ih h]
@@ -179,6 +185,10 @@ theorem subst_atoms (q r : Atom) (phi : Formula Atom) :
     · simp only [if_neg hs, atoms, Finset.image_singleton]
   | bot => simp [subst, atoms, Finset.image_empty]
   | imp phi psi ih1 ih2 =>
+    simp only [subst, atoms, Finset.image_union, ih1, ih2]
+  | and phi psi ih1 ih2 =>
+    simp only [subst, atoms, Finset.image_union, ih1, ih2]
+  | or phi psi ih1 ih2 =>
     simp only [subst, atoms, Finset.image_union, ih1, ih2]
   | box phi ih =>
     simp only [subst, atoms, ih]
@@ -265,6 +275,24 @@ def axiomSubst (q r : Atom) {phi : Formula Atom}
   | peirce a b =>
     simp only [Formula.subst_imp]
     exact Axiom.peirce (a.subst q r) (b.subst q r)
+  | andI a b =>
+    simp only [Formula.subst_imp, Formula.subst_and]
+    exact Axiom.andI (a.subst q r) (b.subst q r)
+  | andE1 a b =>
+    simp only [Formula.subst_imp, Formula.subst_and]
+    exact Axiom.andE1 (a.subst q r) (b.subst q r)
+  | andE2 a b =>
+    simp only [Formula.subst_imp, Formula.subst_and]
+    exact Axiom.andE2 (a.subst q r) (b.subst q r)
+  | orI1 a b =>
+    simp only [Formula.subst_imp, Formula.subst_or]
+    exact Axiom.orI1 (a.subst q r) (b.subst q r)
+  | orI2 a b =>
+    simp only [Formula.subst_imp, Formula.subst_or]
+    exact Axiom.orI2 (a.subst q r) (b.subst q r)
+  | orE a b c =>
+    simp only [Formula.subst_imp, Formula.subst_or]
+    exact Axiom.orE (a.subst q r) (b.subst q r) (c.subst q r)
   | modal_t a =>
     simp only [Formula.subst_imp, Formula.subst_box]
     exact Axiom.modal_t (a.subst q r)
@@ -448,6 +476,10 @@ theorem swapTemporal_subst (q r : Atom)
       simp [hs, Formula.swapTemporal]
   | bot => simp [Formula.swapTemporal, Formula.subst]
   | imp a b iha ihb =>
+    simp [Formula.swapTemporal, Formula.subst, iha, ihb]
+  | and a b iha ihb =>
+    simp [Formula.swapTemporal, Formula.subst, iha, ihb]
+  | or a b iha ihb =>
     simp [Formula.swapTemporal, Formula.subst, iha, ihb]
   | box a ih =>
     simp [Formula.swapTemporal, Formula.subst, ih]

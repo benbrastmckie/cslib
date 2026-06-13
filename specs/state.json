@@ -1,5 +1,5 @@
 {
-  "next_project_number": 191,
+  "next_project_number": 183,
   "active_projects": [
     {
       "project_number": 172,
@@ -1438,88 +1438,6 @@
           "summary": "8-phase plan: formula types, embeddings, Modal revert, Temporal revert, Bimodal revert (2 phases), conservative extension proofs (2 phases)"
         }
       ]
-    },
-    {
-      "project_number": 183,
-      "project_name": "revert_formula_types_foundations",
-      "status": "not_started",
-      "task_type": "cslib",
-      "dependencies": [],
-      "description": "Phase 1 of task 182: Remove .and/.or constructors from Modal/Basic.lean (4 constructors), Temporal/Syntax/Formula.lean (5 constructors), Bimodal/Syntax/Formula.lean (6 constructors). Restore Lukasiewicz abbreviations. Revert Foundations/Logic/Axioms.lean and ProofSystem.lean to remove HasAnd/HasOr from temporal section. Revert TemporalDerived.lean. Baseline commits: 8b2a470d (Modal), abd1aa15^ (Temporal), c38fe3d6^ (Bimodal), 1852de3a (Foundations). 6 files, ~1 hour."
-    },
-    {
-      "project_number": 184,
-      "project_name": "revert_embeddings_from_propositional",
-      "status": "not_started",
-      "task_type": "cslib",
-      "dependencies": [
-        183
-      ],
-      "description": "Phase 2 of task 182: Update FromPropositional.lean in Modal, Temporal, and Bimodal to map Propositional primitive .and/.or to upper-layer Lukasiewicz abbreviations. Requires NEW proof code for semantic coherence (Peirce law + classical reasoning). Update ModalEmbedding.lean and TemporalEmbedding.lean to remove .and/.or cases. 5 files, ~2 hours."
-    },
-    {
-      "project_number": 185,
-      "project_name": "revert_modal_and_or",
-      "status": "not_started",
-      "task_type": "cslib",
-      "dependencies": [
-        184
-      ],
-      "description": "Phase 3 of task 182: Remove all .and/.or from Modal layer (~51 files). Remove 6 axiom constructors and HasAxiom instances from 15 ProofSystem/Instances files. Remove 6 soundness cases from 15 Systems/*/Soundness.lean. Remove truth lemma cases from 15 Completeness files. Remove .and/.or from Denotation, LogicalEquivalence, DerivationTree, parameterized Soundness/Completeness, MCS. Restore from baseline 8b2a470d. Verify: lake build Cslib.Logics.Modal. ~2 hours."
-    },
-    {
-      "project_number": 186,
-      "project_name": "revert_temporal_and_or",
-      "status": "not_started",
-      "task_type": "cslib",
-      "dependencies": [
-        184
-      ],
-      "description": "Phase 4 of task 182: Remove all .and/.or from Temporal layer (~14 files). Remove 6 axiom constructors, satisfaction clauses, soundness cases, MCS helpers (temporal_or_resolve_left becomes unnecessary since or = neg phi -> psi is handled by implication_property). Simplify PropositionalHelpers (~40% reduction: remove pairing, lceImp, rceImp, demorganDisjNegBackward). Remove .and/.or from Chronicle/*.lean truth lemma and related files. Verify: lake build Cslib.Logics.Temporal. ~2 hours."
-    },
-    {
-      "project_number": 187,
-      "project_name": "revert_bimodal_syntax_semantics_proofsystem",
-      "status": "not_started",
-      "task_type": "cslib",
-      "dependencies": [
-        185,
-        186
-      ],
-      "description": "Phase 5 of task 182: Remove .and/.or from Bimodal non-metalogic (~25 files). Syntax: Subformulas, SubformulaClosure, Context. ProofSystem: Axioms (remove 6 constructors), Instances (remove 6 registrations), Derivation, Substitution. Semantics: Truth.lean (remove satisfaction clauses). Theorems: simplify Helpers.lean (remove combineImpConj, lceImp, rceImp), re-prove Core.lean ldi/rdi/lem with Lukasiewicz encoding, update Connectives.lean De Morgan proofs, remove Combinators and TemporalDerived .and/.or cases. ~2 hours."
-    },
-    {
-      "project_number": 188,
-      "project_name": "revert_bimodal_metalogic",
-      "status": "not_started",
-      "task_type": "cslib",
-      "dependencies": [
-        186,
-        187
-      ],
-      "description": "Phase 6 of task 182: Remove .and/.or from Bimodal metalogic (~34 files). Core: DeductionTheorem, MCSProperties (remove mcs_or_resolve, re-prove via implication_property). Soundness: DenseValidity, FrameClassVariants (restore encoding-based proofs). Bundle, Algebraic (re-prove provEquiv_or_congr via Lukasiewicz), BXCanonical (OrderedSeedConsistency, Chronicle, truth lemma), Separation (Defs, Hierarchy, TemporalClosure, DedekindZ), ConservativeExtension (ExtFormula, Lifting), Decidability (SignedFormula, Saturation, CountermodelExtraction). Verify: lake build Cslib.Logics.Bimodal. ~2 hours."
-    },
-    {
-      "project_number": 189,
-      "project_name": "conservative_extension_modal_temporal",
-      "status": "not_started",
-      "task_type": "cslib",
-      "dependencies": [
-        185
-      ],
-      "description": "Phase 7 of task 182: Prove Modal K and Temporal BX are conservative extensions of CPL. Modal K: 3-line composition of k_soundness_derivable -> toModal_valid_implies_tautology -> prop_completeness (~5-15 lines). Temporal BX: prove temporal_satisfies_toTemporal_iff_evaluate (structural induction, ~15-20 lines), prove toTemporal_valid_implies_tautology (single-point Int model, ~10-15 lines), compose temporal_conservative_extension (~5-10 lines). Total ~50 lines new code. ~2 hours."
-    },
-    {
-      "project_number": 190,
-      "project_name": "conservative_extension_bimodal",
-      "status": "not_started",
-      "task_type": "cslib",
-      "dependencies": [
-        187,
-        188,
-        189
-      ],
-      "description": "Phase 8 of task 182: Prove Bimodal F is a conservative extension of CPL. Approach A (preferred): syntactic projection from Bimodal to Modal for propositional-fragment formulas using lift_derivation_qfree infrastructure, compose with modal_conservative_extension (~50-100 lines). Approach B (fallback): direct semantic bridge with single-point task model (~80-120 lines). Run full CI pipeline: lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake. Verify zero new sorries. ~3 hours."
     }
   ],
   "repository_health": {

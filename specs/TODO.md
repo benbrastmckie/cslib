@@ -1,5 +1,5 @@
 ---
-next_project_number: 191
+next_project_number: 183
 ---
 
 # TODO
@@ -11,12 +11,12 @@ next_project_number: 191
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,62,127,139,146,147,160,169,170,171,179,180,183 | -- | Bimodal Porting, Modal PRs, Propositional Logic, ... |
-| 2 | 39,40,63,140,148,161,181,184 | 36,37,62,139,147,160,179,180,183 | Modal PRs, Propositional PRs, Temporal Logic, ... |
-| 3 | 41,64,141,149,162,185,186 | 39,40,63,140,148,161,184 | Foundations, Modal PRs, Propositional PRs, ... |
-| 4 | 128,129,142,150,187,189 | 141,146,149,185,186 | Modal PRs, Propositional PRs |
-| 5 | 126,143,151,152,154,163,188 | 142,150,160,186,187 | Modal PRs, Propositional PRs, Temporal PRs |
-| 6 | 130,133,144,153,155,156,190 | 126,127,143,151,152,154,187,188,189 | Modal PRs, Propositional PRs |
+| 1 | 36,37,62,127,139,146,147,160,169,170,171,179,180 | -- | Bimodal Porting, Modal PRs, Propositional Logic, ... |
+| 2 | 39,40,63,140,148,161,181 | 36,37,62,139,147,160,179,180 | Modal PRs, Propositional PRs, Temporal Logic, ... |
+| 3 | 41,64,141,149,162 | 39,40,63,140,148,161 | Foundations, Modal PRs, Propositional PRs, ... |
+| 4 | 128,129,142,150 | 141,146,149 | Modal PRs, Propositional PRs |
+| 5 | 126,143,151,152,154,163 | 142,150,160 | Modal PRs, Propositional PRs, Temporal PRs |
+| 6 | 130,133,144,153,155,156 | 126,127,143,151,152,154 | Modal PRs, Propositional PRs |
 | 7 | 131,132,134,135,157 | 127,128,130,133,152,156 | Modal PRs, Propositional PRs |
 | 8 | 158 | 151,153,155,157 | Modal PRs |
 
@@ -103,92 +103,8 @@ next_project_number: 191
   └─ 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
   └─ 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors  (see above)
-183 [NOT STARTED] — Phase 1 of task 182: Remove .and/.or constructors from Modal/Basi
-  └─ 184 [NOT STARTED] — Phase 2 of task 182: Update FromPropositional.lean in Modal, Temp
-    └─ 185 [NOT STARTED] — Phase 3 of task 182: Remove all .and/.or from Modal layer (~51 fi
-      └─ 187 [NOT STARTED] — Phase 5 of task 182: Remove .and/.or from Bimodal non-metalogic (
-        └─ 188 [NOT STARTED] — Phase 6 of task 182: Remove .and/.or from Bimodal metalogic (~34 
-          └─ 190 [NOT STARTED] — Phase 8 of task 182: Prove Bimodal F is a conservative extension 
-        └─ 190 [NOT STARTED] — Phase 8 of task 182: Prove Bimodal F is a conservative extension  (see above)
-      └─ 189 [NOT STARTED] — Phase 7 of task 182: Prove Modal K and Temporal BX are conservati
-        └─ 190 [NOT STARTED] — Phase 8 of task 182: Prove Bimodal F is a conservative extension  (see above)
-    └─ 186 [NOT STARTED] — Phase 4 of task 182: Remove all .and/.or from Temporal layer (~14
-      └─ 187 [NOT STARTED] — Phase 5 of task 182: Remove .and/.or from Bimodal non-metalogic ( (see above)
-      └─ 188 [NOT STARTED] — Phase 6 of task 182: Remove .and/.or from Bimodal metalogic (~34  (see above)
 
 ## Tasks
-
-### 190. Conservative extension bimodal
-- **Status**: [NOT STARTED]
-- **Task Type**: cslib
-- **Dependencies**: Task 187, Task 188, Task 189
-
-**Description**: Phase 8 of task 182: Prove Bimodal F is a conservative extension of CPL. Approach A (preferred): syntactic projection from Bimodal to Modal for propositional-fragment formulas using lift_derivation_qfree infrastructure, compose with modal_conservative_extension (~50-100 lines). Approach B (fallback): direct semantic bridge with single-point task model (~80-120 lines). Run full CI pipeline: lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake. Verify zero new sorries. ~3 hours.
-
----
-
-### 189. Conservative extension modal temporal
-- **Status**: [NOT STARTED]
-- **Task Type**: cslib
-- **Dependencies**: Task 185
-
-**Description**: Phase 7 of task 182: Prove Modal K and Temporal BX are conservative extensions of CPL. Modal K: 3-line composition of k_soundness_derivable -> toModal_valid_implies_tautology -> prop_completeness (~5-15 lines). Temporal BX: prove temporal_satisfies_toTemporal_iff_evaluate (structural induction, ~15-20 lines), prove toTemporal_valid_implies_tautology (single-point Int model, ~10-15 lines), compose temporal_conservative_extension (~5-10 lines). Total ~50 lines new code. ~2 hours.
-
----
-
-### 188. Revert bimodal metalogic
-- **Status**: [NOT STARTED]
-- **Task Type**: cslib
-- **Dependencies**: Task 186, Task 187
-
-**Description**: Phase 6 of task 182: Remove .and/.or from Bimodal metalogic (~34 files). Core: DeductionTheorem, MCSProperties (remove mcs_or_resolve, re-prove via implication_property). Soundness: DenseValidity, FrameClassVariants (restore encoding-based proofs). Bundle, Algebraic (re-prove provEquiv_or_congr via Lukasiewicz), BXCanonical (OrderedSeedConsistency, Chronicle, truth lemma), Separation (Defs, Hierarchy, TemporalClosure, DedekindZ), ConservativeExtension (ExtFormula, Lifting), Decidability (SignedFormula, Saturation, CountermodelExtraction). Verify: lake build Cslib.Logics.Bimodal. ~2 hours.
-
----
-
-### 187. Revert bimodal syntax semantics proofsystem
-- **Status**: [NOT STARTED]
-- **Task Type**: cslib
-- **Dependencies**: Task 185, Task 186
-
-**Description**: Phase 5 of task 182: Remove .and/.or from Bimodal non-metalogic (~25 files). Syntax: Subformulas, SubformulaClosure, Context. ProofSystem: Axioms (remove 6 constructors), Instances (remove 6 registrations), Derivation, Substitution. Semantics: Truth.lean (remove satisfaction clauses). Theorems: simplify Helpers.lean (remove combineImpConj, lceImp, rceImp), re-prove Core.lean ldi/rdi/lem with Lukasiewicz encoding, update Connectives.lean De Morgan proofs, remove Combinators and TemporalDerived .and/.or cases. ~2 hours.
-
----
-
-### 186. Revert temporal and or
-- **Status**: [NOT STARTED]
-- **Task Type**: cslib
-- **Dependencies**: Task 184
-
-**Description**: Phase 4 of task 182: Remove all .and/.or from Temporal layer (~14 files). Remove 6 axiom constructors, satisfaction clauses, soundness cases, MCS helpers (temporal_or_resolve_left becomes unnecessary since or = neg phi -> psi is handled by implication_property). Simplify PropositionalHelpers (~40% reduction: remove pairing, lceImp, rceImp, demorganDisjNegBackward). Remove .and/.or from Chronicle/*.lean truth lemma and related files. Verify: lake build Cslib.Logics.Temporal. ~2 hours.
-
----
-
-### 185. Revert modal and or
-- **Status**: [NOT STARTED]
-- **Task Type**: cslib
-- **Dependencies**: Task 184
-
-**Description**: Phase 3 of task 182: Remove all .and/.or from Modal layer (~51 files). Remove 6 axiom constructors and HasAxiom instances from 15 ProofSystem/Instances files. Remove 6 soundness cases from 15 Systems/*/Soundness.lean. Remove truth lemma cases from 15 Completeness files. Remove .and/.or from Denotation, LogicalEquivalence, DerivationTree, parameterized Soundness/Completeness, MCS. Restore from baseline 8b2a470d. Verify: lake build Cslib.Logics.Modal. ~2 hours.
-
----
-
-### 184. Revert embeddings from propositional
-- **Status**: [NOT STARTED]
-- **Task Type**: cslib
-- **Dependencies**: Task 183
-
-**Description**: Phase 2 of task 182: Update FromPropositional.lean in Modal, Temporal, and Bimodal to map Propositional primitive .and/.or to upper-layer Lukasiewicz abbreviations. Requires NEW proof code for semantic coherence (Peirce law + classical reasoning). Update ModalEmbedding.lean and TemporalEmbedding.lean to remove .and/.or cases. 5 files, ~2 hours.
-
----
-
-### 183. Revert formula types foundations
-- **Status**: [NOT STARTED]
-- **Task Type**: cslib
-- **Dependencies**: None
-
-**Description**: Phase 1 of task 182: Remove .and/.or constructors from Modal/Basic.lean (4 constructors), Temporal/Syntax/Formula.lean (5 constructors), Bimodal/Syntax/Formula.lean (6 constructors). Restore Lukasiewicz abbreviations. Revert Foundations/Logic/Axioms.lean and ProofSystem.lean to remove HasAnd/HasOr from temporal section. Revert TemporalDerived.lean. Baseline commits: 8b2a470d (Modal), abd1aa15^ (Temporal), c38fe3d6^ (Bimodal), 1852de3a (Foundations). 6 files, ~1 hour.
-
----
 
 ### 182. Evaluate classical only simplification
 - **Status**: [EXPANDED]

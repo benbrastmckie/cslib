@@ -99,7 +99,7 @@ next_project_number: 179
 
 ### Foundations Refactor
 
-173 [RESEARCHED] — Refactor Cslib/Logics/Propositional to the hybrid five-primitive 
+173 [PLANNED] — Refactor Cslib/Logics/Propositional to the hybrid five-primitive 
   └─ 174 [NOT STARTED] — Extend Cslib/Logics/Propositional/Semantics and Metalogic from th
   └─ 175 [NOT STARTED] — Propagate the hybrid five-primitive design to the Modal layer: Mo
     └─ 177 [NOT STARTED] — Propagate the hybrid five-primitive design to the Bimodal layer (
@@ -160,11 +160,12 @@ next_project_number: 179
 ---
 
 ### 173. Propositional five primitive refactor
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Foundations Refactor
 - **Dependencies**: Task 172
 - **Research**: [173_propositional_five_primitive_refactor/reports/01_five-primitive-research.md]
+- **Plan**: [173_propositional_five_primitive_refactor/plans/01_implementation-plan.md]
 
 **Description**: Refactor Cslib/Logics/Propositional to the hybrid five-primitive formula type {atom, bot, imp, and, or}, RETAINING the fork's Hilbert systems while aligning the ND layer with upstream (Thomas Waring). Scope: (1) Defs.lean: add and/or constructors; keep bot as constructor (the one deliberate departure from upstream's bot-as-atom trick, justified by structural semantics per task 171 research); derive neg := A -> bot, top := bot -> bot, iff as abbrevs (valid in all three logics); delete the classical-only and/or abbrevs; update subst, complexity, atoms for the new constructors. (2) NaturalDeduction/Basic.lean: restore Waring's sequent-style 10-rule minimal-logic ND system (ax, ass, andI, andE1, andE2, orI1, orI2, orE, impI, impE) with NO botE primitive rule; intuitionistic and classical ND derivations are obtained by appealing to theory axioms (explosion bot -> A; DNE) exactly as upstream models it - the rule set itself stays minimal. (3) ProofSystem (Axioms.lean, Derivation.lean, Instances.lean, IntMinInstances.lean): RETAIN the fork's MinimalHilbert -> IntuitionisticHilbert -> ClassicalHilbert typeclass hierarchy and MPL/IPL/CPL axiom-set parameterization unchanged in structure (do NOT replace with upstream's theory-predicate-only approach); extend the Hilbert axiom bases with the standard and/or axioms (A -> (B -> A and B); A and B -> A; A and B -> B; A -> A or B; B -> A or B; (A -> C) -> ((B -> C) -> ((A or B) -> C))) so all three Hilbert systems cover the full five-primitive language. (4) Alignment bridges: update FromHilbert.lean, HilbertDerivedRules.lean, Equivalence.lean so the ND-Hilbert correspondence holds level-by-level: minimal ND (empty theory) corresponds to MinimalHilbert; ND + explosion theory axioms corresponds to IntuitionisticHilbert; ND + DNE corresponds to ClassicalHilbert. This equivalence is the keystone deliverable reconciling the fork's Hilbert architecture with Waring's ND design. (5) NaturalDeduction/DerivedRules.lean: andE1/andE2/orE become primitive ND rules - remove the [IsClassical T] requirements flagged by task 171 research. Verify with lake build Cslib.Logics.Propositional, lake test, checkInitImports, lint-style. References: specs/171_research_connective_basis_min_int_classical/reports/01_team-research.md; upstream Cslib/Logics/Propositional at upstream/main.
 

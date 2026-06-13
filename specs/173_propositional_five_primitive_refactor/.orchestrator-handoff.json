@@ -1,12 +1,13 @@
 {
-  "status": "researched",
-  "summary": "Comprehensive codebase survey of 22 files under Cslib/Logics/Propositional/ plus 2 external embedding files. The refactor adds and/or constructors to the Proposition inductive (Defs.lean), removes botE from the ND system and replaces it with 6 new constructors (andI, andE1, andE2, orI1, orI2, orE) matching upstream Waring's 10-rule system, extends all 3 Hilbert axiom sets with 6 and/or axiom schemata, and updates all recursive functions on Proposition (subst, Evaluate, IForces, etc.) with 2 new cases each. Estimated ~860 lines changed across 21 files in 7 phases. The DerivedRules.lean [IsClassical T] constraints on andE1/andE2/orE become moot as these become primitive ND rules. Key risk: completeness proofs (3 files) and ND-Hilbert bridge (Equivalence.lean). Recommend keeping HasAxiom* typeclasses standalone (not bundled into MinimalHilbert) to avoid cascading breakage to Modal/Temporal/Bimodal until tasks 174-176.",
+  "status": "planned",
+  "summary": "7-phase implementation plan created for five-primitive propositional refactor. Phases: (1) Foundations axiom abbrevs and HasAxiom* typeclasses, (2) Formula type and semantics with and/or constructors, (3) ND system overhaul removing botE and adding 6 new constructors, (4) Hilbert axiom extension and bridge files, (5) ND-Hilbert equivalence bridge, (6) Metalogic soundness and completeness, (7) External embeddings and CI verification. Total effort: 12 hours. Fully sequential dependency chain.",
   "blockers": [],
   "artifacts": [
     {
-      "path": "specs/173_propositional_five_primitive_refactor/reports/01_five-primitive-research.md",
-      "type": "report",
-      "summary": "File-by-file inventory with current state, specific changes needed, risk assessment, 7-phase ordering recommendation, Hilbert axiom extension details, ND-Hilbert bridge feasibility analysis, and upstream compatibility notes."
+      "path": "specs/173_propositional_five_primitive_refactor/plans/01_implementation-plan.md",
+      "type": "plan",
+      "summary": "7-phase implementation plan covering formula type, ND system, Hilbert axioms, bridge, metalogic, and embeddings for five-primitive refactor"
     }
-  ]
+  ],
+  "phases_total": 7
 }

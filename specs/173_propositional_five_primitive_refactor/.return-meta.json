@@ -1,25 +1,29 @@
 {
-  "status": "partial",
-  "started_at": "2026-06-12T00:00:00Z",
+  "status": "planned",
   "artifacts": [
     {
-      "path": "specs/173_propositional_five_primitive_refactor/reports/01_five-primitive-research.md",
-      "type": "report",
-      "summary": "Comprehensive five-primitive refactor research with file-by-file inventory, change analysis, 7-phase ordering, and risk assessment"
-    },
-    {
-      "path": "specs/173_propositional_five_primitive_refactor/.orchestrator-handoff.json",
-      "type": "handoff",
-      "summary": "Orchestrator handoff with status, summary, and artifact list"
+      "type": "plan",
+      "path": "specs/173_propositional_five_primitive_refactor/plans/01_implementation-plan.md",
+      "summary": "7-phase implementation plan for five-primitive propositional refactor covering formula type, ND system, Hilbert axioms, bridge, metalogic, and embeddings"
     }
   ],
-  "partial_progress": {
-    "stage": "report_written",
-    "details": "Research report and orchestrator handoff written. Ready for planning phase."
-  },
+  "next_steps": "Run /implement 173 to execute the plan",
   "metadata": {
-    "agent_type": "cslib-research-agent",
+    "session_id": "sess_1781313950_b8ff9f_173",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 7,
+    "estimated_hours": 12,
+    "dependency_waves": [[1], [2], [3], [4], [5], [6], [7]]
+  },
+  "memory_candidates": [
+    {
+      "content": "When refactoring a formula inductive type to add new constructors, the safe ordering is: (1) add polymorphic axiom abbrevs and HasAxiom* typeclasses at the Foundations level first (no downstream breakage), (2) add formula constructors (causes cascading breaks), (3) fix ND/proof system files, (4) fix bridge files, (5) fix metalogic, (6) fix embeddings last. Keeping new HasAxiom* typeclasses standalone rather than bundling into MinimalHilbert avoids breaking downstream formula types (Modal/Temporal/Bimodal) that don't yet have the new constructors. External embeddings can use Lukasiewicz encoding as a temporary bridge, though the coherence proof may require sorry if the encoding is only classically equivalent.",
+      "category": "PATTERN",
+      "source_artifact": "specs/173_propositional_five_primitive_refactor/plans/01_implementation-plan.md",
+      "confidence": 0.85,
+      "suggested_keywords": ["formula-refactor", "inductive-constructor", "HasAxiom-standalone", "Lukasiewicz-bridge", "cascading-breakage"]
+    }
+  ]
 }

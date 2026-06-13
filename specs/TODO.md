@@ -30,7 +30,7 @@ next_project_number: 187
 
 171 [RESEARCHED] — Research connective-basis design for minimal, intuitionistic, and
 185 [RESEARCHED] — Rigorous quality audit of Cslib/Logics/Propositional/ and its Csl
-  └─ 186 [RESEARCHED] — Refactor the Hilbert / natural deduction extensional equivalence 
+  └─ 186 [PLANNED] — Refactor the Hilbert / natural deduction extensional equivalence 
 
 ### Temporal Logic
 
@@ -47,7 +47,7 @@ next_project_number: 187
 ## Tasks
 
 ### 186. Hilbert nd equivalence refactor
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 185

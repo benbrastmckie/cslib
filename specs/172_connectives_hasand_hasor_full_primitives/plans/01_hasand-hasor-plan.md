@@ -1,7 +1,7 @@
 # Implementation Plan: HasAnd/HasOr Atomic Typeclasses
 
 - **Task**: 172 - connectives_hasand_hasor_full_primitives
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 1.5 hours
 - **Dependencies**: None (task 171 research complete; no code prerequisites)
 - **Research Inputs**: reports/01_team-research.md
@@ -67,7 +67,7 @@ This plan advances the Foundations/Logic infrastructure layer in the ROADMAP. Th
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Add HasAnd/HasOr and Update PropositionalConnectives [NOT STARTED]
+### Phase 1: Add HasAnd/HasOr and Update PropositionalConnectives [COMPLETED]
 
 **Goal**: Add the two new atomic typeclasses and extend the bundled class hierarchy.
 
@@ -107,7 +107,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Trim ImpBotDerived [NOT STARTED]
+### Phase 2: Trim ImpBotDerived [COMPLETED]
 
 **Goal**: Remove the classical-only `and`/`or` defaults from `ImpBotDerived`, retaining only `neg` and `top`.
 
@@ -134,7 +134,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Update Module Docstring and Final Build Verification [NOT STARTED]
+### Phase 3: Update Module Docstring and Final Build Verification [COMPLETED]
 
 **Goal**: Replace the "{imp, bot} functionally complete" module docstring with the five-primitive design rationale, and run full build verification.
 

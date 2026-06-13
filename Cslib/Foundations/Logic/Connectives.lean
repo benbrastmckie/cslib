@@ -17,22 +17,26 @@ and notation.
 
 ## Design
 
-The hierarchy follows the Foundation pattern (FormalizedFormalLogic/Foundation):
-- **Atomic classes**: `HasBot`, `HasImp`, `HasBox`, `HasUntil`, `HasSince`
+The hierarchy adopts a hybrid five-primitive propositional signature `{atom, bot, imp, and, or}`,
+following the operator-typeclass direction of fmontesi's PR #607 (one class per operator):
+- **Atomic classes**: `HasBot`, `HasImp`, `HasAnd`, `HasOr`, `HasBox`, `HasUntil`, `HasSince`
 - **Bundled classes**: `PropositionalConnectives`, `ModalConnectives`,
   `TemporalConnectives`, `BimodalConnectives`
-- **Derived connectives**: `ImpBotDerived` for `neg`, `top`, `or`, `and` from `bot`/`imp`
+- **Derived connectives**: `ImpBotDerived` for `neg` and `top` from `bot`/`imp`
 
 Each concrete formula type duplicates its constructors (Lean 4 cannot extend inductives)
 and registers as an instance of the appropriate bundled class.
 
-Falsum and implication are taken as the only propositional primitives because `{imp, bot}`
-is functionally complete for classical logic: every other connective is definable, so it can
-be a derived `abbrev` rather than a constructor. This keeps the inductive formula types as
-small as possible -- minimising the case count in every recursion and induction over formulas
--- and lets the derived connectives unfold to `imp`/`bot` definitionally, so reasoning about
-`¬`, `∧`, `∨`, and `↔` needs no separate axioms or bridging lemmas.
+Conjunction and disjunction are treated as primitives rather than Lukasiewicz-derived
+connectives. The classical encodings `and φ ψ := ¬(φ → ¬ψ)` and `or φ ψ := ¬φ → ψ` are
+only propositionally equivalent to `∧` and `∨` in classical logic (Wajsberg 1938,
+McKinsey 1939); they fail in intuitionistic and minimal logic. Making `and` and `or`
+primitives via `HasAnd`/`HasOr` supports all three logic strengths with a single typeclass
+hierarchy.
 
+Negation and verum remain `ImpBotDerived` defaults because `neg φ := φ → ⊥` and
+`top := ⊥ → ⊥` are valid in minimal, intuitionistic, and classical logic alike. Biconditional
+(`iff`) is deferred to task 173 after `HasAnd` is instantiated on the formula types.
 
 ## References
 
@@ -71,7 +75,22 @@ class HasSince (F : Type*) where
   /-- The since temporal operator. -/
   snce : F → F → F
 
-/-- Propositional connectives: falsum and implication. -/
+/-- A type has a conjunction connective. -/
+class HasAnd (F : Type*) where
+  /-- The conjunction connective. -/
+  and : F → F → F
+
+/-- A type has a disjunction connective. -/
+class HasOr (F : Type*) where
+  /-- The disjunction connective. -/
+  or : F → F → F
+
+/-- Propositional connectives: falsum and implication.
+
+`HasAnd` and `HasOr` are defined as standalone atomic classes in this module.
+Extending `PropositionalConnectives` to include them is deferred to task 173,
+when the four concrete formula types will be updated to provide `and`/`or`
+explicitly in their instances. -/
 class PropositionalConnectives (F : Type*) extends HasBot F, HasImp F
 
 /-- Modal connectives: propositional connectives plus necessity. -/
@@ -85,13 +104,18 @@ class TemporalConnectives (F : Type*) extends PropositionalConnectives F, HasUnt
     rather than extending `TemporalConnectives`, to avoid a typeclass diamond. -/
 class BimodalConnectives (F : Type*) extends ModalConnectives F, HasUntil F, HasSince F
 
-/-- Derived connectives definable from `bot` and `imp` alone.
+/-- Derived connectives definable from `bot` and `imp` alone that are valid in minimal,
+intuitionistic, and classical logic.
 
-Provides `neg`, `top`, `or`, `and` as abbreviations: negation is implication to falsum
-(`neg φ := imp φ bot`), verum is `imp bot bot`, disjunction is `imp (neg φ) ψ`, and conjunction
-is `neg (imp φ (neg ψ))`. These are forced once `{imp, bot}` is fixed as the primitive basis --
-each is the truth-functional definition of the connective in terms of implication and falsum --
-so the choice carries no information beyond the basis itself.
+Provides `neg` and `top` as abbreviations: negation is implication to falsum
+(`neg φ := imp φ bot`), and verum is `imp bot bot`. These are valid in minimal logic and
+preserve meaning across logic strengths, so they are safe logic-neutral defaults.
+
+Conjunction and disjunction have been removed from this class. The Lukasiewicz encodings
+`and φ ψ := ¬(φ → ¬ψ)` and `or φ ψ := ¬φ → ψ` are classical-only: they are propositionally
+equivalent to `∧` and `∨` only in classical logic (Wajsberg 1938, McKinsey 1939), not in
+intuitionistic or minimal logic. Conjunction and disjunction are now first-class primitives
+via `HasAnd` and `HasOr`.
 
 **Status**: This class is intentionally uninstantiated. Each concrete formula type
 (PL.Proposition, Modal.Proposition, Temporal.Formula, Bimodal.Formula) defines its
@@ -106,10 +130,5 @@ class ImpBotDerived (F : Type*) [HasBot F] [HasImp F] where
   neg : F → F := fun φ => HasImp.imp φ HasBot.bot
   /-- Top/verum: `top := imp bot bot` -/
   top : F := HasImp.imp HasBot.bot HasBot.bot
-  /-- Disjunction: `or φ ψ := imp (neg φ) ψ` where `neg φ := imp φ bot` -/
-  or : F → F → F := fun φ ψ => HasImp.imp (HasImp.imp φ HasBot.bot) ψ
-  /-- Conjunction: `and φ ψ := neg (imp φ (neg ψ))` -/
-  and : F → F → F := fun φ ψ =>
-    HasImp.imp (HasImp.imp φ (HasImp.imp ψ HasBot.bot)) HasBot.bot
 
 end Cslib.Logic

@@ -62,8 +62,6 @@ def Formula.hashFormula [Hashable Atom] : Formula Atom → UInt64
   | .atom a => mixHash 0 (hash a)
   | .bot => 1
   | .imp φ₁ φ₂ => mixHash 2 (mixHash φ₁.hashFormula φ₂.hashFormula)
-  | .and φ₁ φ₂ => mixHash 6 (mixHash φ₁.hashFormula φ₂.hashFormula)
-  | .or φ₁ φ₂ => mixHash 7 (mixHash φ₁.hashFormula φ₂.hashFormula)
   | .box φ => mixHash 3 φ.hashFormula
   | .untl φ₁ φ₂ => mixHash 4 (mixHash φ₁.hashFormula φ₂.hashFormula)
   | .snce φ₁ φ₂ => mixHash 5 (mixHash φ₁.hashFormula φ₂.hashFormula)
@@ -81,8 +79,6 @@ def Formula.complexity : Formula Atom → Nat
   | .atom _ => 1
   | .bot => 1
   | .imp φ ψ => 1 + φ.complexity + ψ.complexity
-  | .and φ ψ => 1 + φ.complexity + ψ.complexity
-  | .or φ ψ => 1 + φ.complexity + ψ.complexity
   | .box φ => 1 + φ.complexity
   | .untl φ ψ => 1 + φ.complexity + ψ.complexity
   | .snce φ ψ => 1 + φ.complexity + ψ.complexity
@@ -839,8 +835,6 @@ def unexpandedComplexity (sf : SignedFormula Atom) : Nat :=
   | .atom _ => 0
   | .bot => 0
   | .imp _ _ => sf.formula.complexity
-  | .and _ _ => sf.formula.complexity
-  | .or _ _ => sf.formula.complexity
   | .box _ => sf.formula.complexity
   | .untl _ _ => sf.formula.complexity
   | .snce _ _ => sf.formula.complexity

@@ -51,12 +51,6 @@ def substFormula [DecidableEq Atom]
   | .imp psi1 psi2 =>
     .imp (substFormula psi1 target replacement)
       (substFormula psi2 target replacement)
-  | .and psi1 psi2 =>
-    .and (substFormula psi1 target replacement)
-      (substFormula psi2 target replacement)
-  | .or psi1 psi2 =>
-    .or (substFormula psi1 target replacement)
-      (substFormula psi2 target replacement)
   | .box psi =>
     .box (substFormula psi target replacement)
   | .untl psi1 psi2 =>
@@ -98,16 +92,6 @@ theorem subst_correctness [DecidableEq Atom]
       exact (ihq t).mp (h ((ihp t).mpr hp))
     · intro h hp
       exact (ihq t).mpr (h ((ihp t).mp hp))
-  | and p q ihp ihq =>
-    simp only [substFormula, intTruth]
-    exact ⟨fun ⟨hp, hq⟩ => ⟨(ihp t).mp hp, (ihq t).mp hq⟩,
-      fun ⟨hp, hq⟩ => ⟨(ihp t).mpr hp, (ihq t).mpr hq⟩⟩
-  | or p q ihp ihq =>
-    simp only [substFormula, intTruth]
-    exact ⟨fun h => h.elim (fun hp => Or.inl ((ihp t).mp hp))
-        (fun hq => Or.inr ((ihq t).mp hq)),
-      fun h => h.elim (fun hp => Or.inl ((ihp t).mpr hp))
-        (fun hq => Or.inr ((ihq t).mpr hq))⟩
   | box p _ih => exact Iff.rfl
   | untl p q ihp ihq =>
     constructor

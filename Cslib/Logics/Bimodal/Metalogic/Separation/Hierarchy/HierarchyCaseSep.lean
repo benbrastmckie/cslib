@@ -36,16 +36,40 @@ theorem case1_psi_has_single_U_type (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hx : isUFree x = true) (hy : isUFree y = true) :
     hasSingleUType (case1_psi a q x y) x y := by
-  simp only [case1_psi, hasSingleUType]
-  simp_all [u_free_has_single_U_type]
+  simp only [case1_psi, Formula.or, Formula.and, Formula.neg, hasSingleUType]
+  refine ⟨⟨⟨⟨⟨⟨⟨⟨?_, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩
+  all_goals (try exact u_free_has_single_U_type ha)
+  all_goals (try exact u_free_has_single_U_type hq)
+  all_goals (try exact u_free_has_single_U_type hx)
+  all_goals (try exact u_free_has_single_U_type hy)
+  all_goals (try trivial)
+  all_goals (try exact ⟨rfl, rfl⟩)
+  all_goals (try exact ⟨trivial, trivial⟩)
+  all_goals simp_all [hasSingleUType, isUFree,
+    u_free_has_single_U_type ha, u_free_has_single_U_type hq,
+    u_free_has_single_U_type hx, u_free_has_single_U_type hy]
 
 /-- hasSingleUType for case2_psi when a, q, A, B are U-free. -/
 theorem case2_psi_has_single_U_type (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hx : isUFree x = true) (hy : isUFree y = true) :
     hasSingleUType (case2_psi a q x y) x y := by
-  simp only [case2_psi, hasSingleUType]
-  simp_all [u_free_has_single_U_type]
+  delta case2_psi
+  simp only [Formula.or, Formula.and, Formula.neg, hasSingleUType]
+  refine ⟨⟨⟨⟨⟨⟨⟨⟨?_, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩
+  all_goals (try exact u_free_has_single_U_type ha)
+  all_goals (try exact u_free_has_single_U_type hq)
+  all_goals (try exact u_free_has_single_U_type hx)
+  all_goals (try exact u_free_has_single_U_type hy)
+  all_goals (try trivial)
+  all_goals (try exact ⟨trivial, trivial⟩)
+  all_goals (try exact ⟨⟨trivial, trivial⟩, trivial⟩)
+  all_goals (try exact ⟨u_free_has_single_U_type hx, trivial⟩)
+  all_goals (try exact ⟨u_free_has_single_U_type hq, trivial⟩)
+  all_goals (try exact ⟨u_free_has_single_U_type hy, trivial⟩)
+  all_goals simp_all [hasSingleUType, isUFree,
+    u_free_has_single_U_type ha, u_free_has_single_U_type hq,
+    u_free_has_single_U_type hx, u_free_has_single_U_type hy]
 
 /-! ### Case-specific isSeparableWithUType -/
 
@@ -176,7 +200,9 @@ theorem case5_sep_with_U_type_Z_gen (a q x y : Formula Atom)
               exact int_truth_and_iff.mpr ⟨hnq, (hσ_equiv m t).mpr hσ'⟩
           apply is_separable_with_U_type_of_equiv (snce_event_congr_hier (and_left_congr_hier hY_congr))
           have h_nqσ_bool : untlUnderBoolOnly (Formula.and (Formula.neg q) σ) x y := by
-            exact ⟨⟨u_free_untl_under_bool q x y hq, trivial⟩, case1_psi_bool_only a q x y ha hq hx hy⟩
+            show untlUnderBoolOnly (.imp (.imp (Formula.neg q) (.imp σ .bot)) .bot) x y
+            refine ⟨⟨?_, case1_psi_bool_only a q x y ha hq hx hy, trivial⟩, trivial⟩
+            exact ⟨u_free_untl_under_bool q x y hq, trivial⟩
           exact snce_combined_U_sep_with_U_type (Formula.and (Formula.neg q) σ)
             (Q_Z x y (Formula.neg q)) x y hx hy hx' hy'
             (Q_Z_neg_q_U_free x y q hx hy hq) h_nqσ_bool
@@ -200,21 +226,25 @@ theorem case5_sep_with_U_type_Z_gen (a q x y : Formula Atom)
     apply or_separable_with_U_type
     · have h_event_bool : untlUnderBoolOnly
           (Formula.and (Formula.and x (Formula.or q (.untl x y))) (d21_sep a q x y)) x y := by
-        constructor
-        · constructor
-          · exact u_free_untl_under_bool x x y hx
-          · exact ⟨u_free_untl_under_bool q x y hq, Or.inl ⟨rfl, rfl⟩⟩
-        · exact d21_sep_bool_only a q x y ha hq hx hy
+        show untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl x y)))
+          (.imp (d21_sep a q x y) .bot)) .bot) x y
+        refine ⟨⟨?_, d21_sep_bool_only a q x y ha hq hx hy, trivial⟩, trivial⟩
+        show untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl x y)) .bot)) .bot) x y
+        refine ⟨⟨u_free_untl_under_bool x x y hx, ?_, trivial⟩, trivial⟩
+        show untlUnderBoolOnly (.imp (.imp q .bot) (.untl x y)) x y
+        exact ⟨⟨u_free_untl_under_bool q x y hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
       exact snce_combined_U_sep_with_U_type
         (Formula.and (Formula.and x (Formula.or q (.untl x y))) (d21_sep a q x y))
         q x y hx hy hx' hy' hq h_event_bool
     · have h_event_bool : untlUnderBoolOnly
           (Formula.and (Formula.and x (Formula.or q (.untl x y))) (d21_sep a q x y)) x y := by
-        constructor
-        · constructor
-          · exact u_free_untl_under_bool x x y hx
-          · exact ⟨u_free_untl_under_bool q x y hq, Or.inl ⟨rfl, rfl⟩⟩
-        · exact d21_sep_bool_only a q x y ha hq hx hy
+        show untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl x y)))
+          (.imp (d21_sep a q x y) .bot)) .bot) x y
+        refine ⟨⟨?_, d21_sep_bool_only a q x y ha hq hx hy, trivial⟩, trivial⟩
+        show untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl x y)) .bot)) .bot) x y
+        refine ⟨⟨u_free_untl_under_bool x x y hx, ?_, trivial⟩, trivial⟩
+        show untlUnderBoolOnly (.imp (.imp q .bot) (.untl x y)) x y
+        exact ⟨⟨u_free_untl_under_bool q x y hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
       exact snce_combined_notU_sep_with_U_type
         (Formula.and (Formula.and x (Formula.or q (.untl x y))) (d21_sep a q x y))
         q x y hx hy hx' hy' hq h_event_bool
@@ -294,7 +324,7 @@ theorem snce_Ufree_event_qU_guard_sep_with_U_type (ev q x y : Formula Atom)
     have h_d21_bool : untlUnderBoolOnly d21_local x y := by
       have h_or_bool : ∀ p q, untlUnderBoolOnly p x y → untlUnderBoolOnly q x y →
           untlUnderBoolOnly (Formula.or p q) x y := by
-        intro p q hp hq; exact ⟨hp, hq⟩
+        intro p q hp hq; exact ⟨⟨hp, trivial⟩, hq⟩
       apply h_or_bool
       · exact ⟨hev_uf, hQ_uf_D3⟩
       · exact case1_psi_bool_only _ _ x y h_nqSev_uf_D3 hQ_uf_D3 hx hy
@@ -348,21 +378,25 @@ theorem snce_Ufree_event_qU_guard_sep_with_U_type (ev q x y : Formula Atom)
     apply or_separable_with_U_type
     · have h_event_bool : untlUnderBoolOnly
           (Formula.and (Formula.and x (Formula.or q (.untl x y))) d21_local) x y := by
-        constructor
-        · constructor
-          · exact u_free_untl_under_bool x x y hx
-          · exact ⟨u_free_untl_under_bool q x y hq, Or.inl ⟨rfl, rfl⟩⟩
-        · exact h_d21_bool
+        show untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl x y)))
+          (.imp d21_local .bot)) .bot) x y
+        refine ⟨⟨?_, h_d21_bool, trivial⟩, trivial⟩
+        show untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl x y)) .bot)) .bot) x y
+        refine ⟨⟨u_free_untl_under_bool x x y hx, ?_, trivial⟩, trivial⟩
+        show untlUnderBoolOnly (.imp (.imp q .bot) (.untl x y)) x y
+        exact ⟨⟨u_free_untl_under_bool q x y hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
       exact snce_combined_U_sep_with_U_type
         (Formula.and (Formula.and x (Formula.or q (.untl x y))) d21_local)
         q x y hx hy hx' hy' hq h_event_bool
     · have h_event_bool : untlUnderBoolOnly
           (Formula.and (Formula.and x (Formula.or q (.untl x y))) d21_local) x y := by
-        constructor
-        · constructor
-          · exact u_free_untl_under_bool x x y hx
-          · exact ⟨u_free_untl_under_bool q x y hq, Or.inl ⟨rfl, rfl⟩⟩
-        · exact h_d21_bool
+        show untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl x y)))
+          (.imp d21_local .bot)) .bot) x y
+        refine ⟨⟨?_, h_d21_bool, trivial⟩, trivial⟩
+        show untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl x y)) .bot)) .bot) x y
+        refine ⟨⟨u_free_untl_under_bool x x y hx, ?_, trivial⟩, trivial⟩
+        show untlUnderBoolOnly (.imp (.imp q .bot) (.untl x y)) x y
+        exact ⟨⟨u_free_untl_under_bool q x y hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
       exact snce_combined_notU_sep_with_U_type
         (Formula.and (Formula.and x (Formula.or q (.untl x y))) d21_local)
         q x y hx hy hx' hy' hq h_event_bool

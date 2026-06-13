@@ -107,7 +107,7 @@ next_project_number: 183
 ## Tasks
 
 ### 182. Evaluate classical only simplification
-- **Status**: [EXPANDED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 - **Research**:

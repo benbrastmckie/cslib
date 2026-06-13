@@ -51,8 +51,6 @@ The evaluation is defined recursively on formula structure:
 - Atoms: true iff the valuation assigns true at this time.
 - Bot (⊥): always false.
 - Implication: standard material conditional.
-- And (∧): both conjuncts hold.
-- Or (∨): at least one disjunct holds.
 - Until U(φ,ψ): ∃ s > t, φ(s) ∧ ∀ r ∈ (t,s), ψ(r).  (φ=EVENT, ψ=GUARD)
 - Since S(φ,ψ): ∃ s < t, φ(s) ∧ ∀ r ∈ (s,t), ψ(r).  (φ=EVENT, ψ=GUARD)
 -/
@@ -60,8 +58,6 @@ def Satisfies (M : TemporalModel D Atom) (t : D) : Formula Atom → Prop
   | .atom p => M.valuation t p
   | .bot => False
   | .imp φ ψ => Satisfies M t φ → Satisfies M t ψ
-  | .and φ ψ => Satisfies M t φ ∧ Satisfies M t ψ
-  | .or φ ψ => Satisfies M t φ ∨ Satisfies M t ψ
   | .untl φ ψ =>
     ∃ s, t < s ∧ Satisfies M s φ ∧
       ∀ r, t < r → r < s → Satisfies M r ψ
@@ -90,22 +86,6 @@ theorem imp_iff (M : TemporalModel D Atom) (t : D)
     (φ ψ : Formula Atom) :
     Satisfies M t (.imp φ ψ) ↔
       (Satisfies M t φ → Satisfies M t ψ) :=
-  Iff.rfl
-
-/-- Truth of conjunction: both conjuncts hold. -/
-@[simp]
-theorem and_iff (M : TemporalModel D Atom) (t : D)
-    (φ ψ : Formula Atom) :
-    Satisfies M t (.and φ ψ) ↔
-      (Satisfies M t φ ∧ Satisfies M t ψ) :=
-  Iff.rfl
-
-/-- Truth of disjunction: at least one disjunct holds. -/
-@[simp]
-theorem or_iff (M : TemporalModel D Atom) (t : D)
-    (φ ψ : Formula Atom) :
-    Satisfies M t (.or φ ψ) ↔
-      (Satisfies M t φ ∨ Satisfies M t ψ) :=
   Iff.rfl
 
 /-- Characterization of Until: ∃ s > t with event φ at s and guard ψ between. -/

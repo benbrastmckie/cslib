@@ -58,8 +58,6 @@ def unembedFormula : ExtFormula Atom → Formula Atom
   | ExtFormula.atom (Sum.inr ()) => Formula.bot  -- unreachable for q-free formulas
   | ExtFormula.bot => Formula.bot
   | ExtFormula.imp φ ψ => Formula.imp (unembedFormula φ) (unembedFormula ψ)
-  | ExtFormula.and φ ψ => Formula.and (unembedFormula φ) (unembedFormula ψ)
-  | ExtFormula.or φ ψ => Formula.or (unembedFormula φ) (unembedFormula ψ)
   | ExtFormula.box φ => Formula.box (unembedFormula φ)
   | ExtFormula.untl φ ψ => Formula.untl (unembedFormula φ) (unembedFormula ψ)
   | ExtFormula.snce φ ψ => Formula.snce (unembedFormula φ) (unembedFormula ψ)
@@ -70,8 +68,6 @@ theorem unembed_embed (φ : Formula Atom) : unembedFormula (embedFormula φ) = �
   | atom s => rfl
   | bot => rfl
   | imp a b iha ihb => simp [embedFormula, unembedFormula, iha, ihb]
-  | and a b iha ihb => simp [embedFormula, unembedFormula, iha, ihb]
-  | or a b iha ihb => simp [embedFormula, unembedFormula, iha, ihb]
   | box a ih => simp [embedFormula, unembedFormula, ih]
   | untl a b iha ihb => simp [embedFormula, unembedFormula, iha, ihb]
   | snce a b iha ihb => simp [embedFormula, unembedFormula, iha, ihb]
@@ -90,12 +86,6 @@ theorem embed_unembed_qfree (φ : ExtFormula Atom) (h : freshAtom ∉ φ.atoms) 
     | inr u => cases u; simp [ExtFormula.atoms, freshAtom] at h
   | bot => rfl
   | imp a b iha ihb =>
-    simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
-    simp [unembedFormula, embedFormula, iha h.1, ihb h.2]
-  | and a b iha ihb =>
-    simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
-    simp [unembedFormula, embedFormula, iha h.1, ihb h.2]
-  | or a b iha ihb =>
     simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
     simp [unembedFormula, embedFormula, iha h.1, ihb h.2]
   | box a ih =>
@@ -134,14 +124,6 @@ theorem inl_not_in_substFormula_atoms {a : Atom} {phi : ExtFormula Atom}
     | inr u => cases u; simp [substFormula, ExtFormula.atoms]
   | bot => simp [substFormula, ExtFormula.atoms]
   | imp a' b iha ihb =>
-    simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
-    simp only [substFormula, ExtFormula.atoms, Finset.mem_union, not_or]
-    exact ⟨iha h.1, ihb h.2⟩
-  | and a' b iha ihb =>
-    simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
-    simp only [substFormula, ExtFormula.atoms, Finset.mem_union, not_or]
-    exact ⟨iha h.1, ihb h.2⟩
-  | or a' b iha ihb =>
     simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
     simp only [substFormula, ExtFormula.atoms, Finset.mem_union, not_or]
     exact ⟨iha h.1, ihb h.2⟩
@@ -206,8 +188,6 @@ def substFreshWith (a : Atom) : ExtFormula Atom → ExtFormula Atom
   | ExtFormula.atom (Sum.inr ()) => ExtFormula.atom (Sum.inl a)
   | ExtFormula.bot => ExtFormula.bot
   | ExtFormula.imp φ ψ => ExtFormula.imp (substFreshWith a φ) (substFreshWith a ψ)
-  | ExtFormula.and φ ψ => ExtFormula.and (substFreshWith a φ) (substFreshWith a ψ)
-  | ExtFormula.or φ ψ => ExtFormula.or (substFreshWith a φ) (substFreshWith a ψ)
   | ExtFormula.box φ => ExtFormula.box (substFreshWith a φ)
   | ExtFormula.untl φ ψ => ExtFormula.untl (substFreshWith a φ) (substFreshWith a ψ)
   | ExtFormula.snce φ ψ => ExtFormula.snce (substFreshWith a φ) (substFreshWith a ψ)
@@ -221,8 +201,6 @@ theorem substFreshWith_swapTemporal (a : Atom) (φ : ExtFormula Atom) :
     | inr u => cases u; simp [ExtFormula.swapTemporal, substFreshWith]
   | bot => rfl
   | imp _ _ ih1 ih2 => simp [ExtFormula.swapTemporal, substFreshWith, ih1, ih2]
-  | and _ _ ih1 ih2 => simp [ExtFormula.swapTemporal, substFreshWith, ih1, ih2]
-  | or _ _ ih1 ih2 => simp [ExtFormula.swapTemporal, substFreshWith, ih1, ih2]
   | box _ ih => simp [ExtFormula.swapTemporal, substFreshWith, ih]
   | untl _ _ ih1 ih2 => simp [ExtFormula.swapTemporal, substFreshWith, ih1, ih2]
   | snce _ _ ih1 ih2 => simp [ExtFormula.swapTemporal, substFreshWith, ih1, ih2]
@@ -241,12 +219,6 @@ theorem substFreshWith_preserves_qfree (a : Atom) (φ : ExtFormula Atom)
     | inr u => cases u; simp [ExtFormula.atoms, freshAtom] at h
   | bot => rfl
   | imp a' b iha ihb =>
-    simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
-    simp [substFreshWith, iha h.1, ihb h.2]
-  | and a' b iha ihb =>
-    simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
-    simp [substFreshWith, iha h.1, ihb h.2]
-  | or a' b iha ihb =>
     simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
     simp [substFreshWith, iha h.1, ihb h.2]
   | box a' ih => simp [ExtFormula.atoms] at h; simp [substFreshWith, ih h]
@@ -271,12 +243,6 @@ def substAxiomFresh (a : Atom) {φ : ExtFormula Atom} (h : ExtAxiom φ) :
   | imp_s x y => exact .imp_s _ _
   | efq x => exact .efq _
   | peirce x y => exact .peirce _ _
-  | andI x y => exact .andI _ _
-  | andE1 x y => exact .andE1 _ _
-  | andE2 x y => exact .andE2 _ _
-  | orI1 x y => exact .orI1 _ _
-  | orI2 x y => exact .orI2 _ _
-  | orE x y z => exact .orE _ _ _
   | modal_t x => exact .modal_t _
   | modal_4 x => exact .modal_4 _
   | modal_b x => exact .modal_b _
@@ -332,12 +298,6 @@ def unembedAxiom {φ : ExtFormula Atom} (h : ExtAxiom φ) : Axiom (unembedFormul
   | imp_s a b => exact .imp_s _ _
   | efq a => exact .efq _
   | peirce a b => exact .peirce _ _
-  | andI a b => exact .andI _ _
-  | andE1 a b => exact .andE1 _ _
-  | andE2 a b => exact .andE2 _ _
-  | orI1 a b => exact .orI1 _ _
-  | orI2 a b => exact .orI2 _ _
-  | orE a b c => exact .orE _ _ _
   | modal_t a => exact .modal_t _
   | modal_4 a => exact .modal_4 _
   | modal_b a => exact .modal_b _
@@ -385,10 +345,6 @@ theorem unembed_swapTemporal (φ : ExtFormula Atom) :
   | bot => rfl
   | imp _ _ ih1 ih2 =>
     simp [ExtFormula.swapTemporal, Formula.swapTemporal, unembedFormula, ih1, ih2]
-  | and _ _ ih1 ih2 =>
-    simp [ExtFormula.swapTemporal, Formula.swapTemporal, unembedFormula, ih1, ih2]
-  | or _ _ ih1 ih2 =>
-    simp [ExtFormula.swapTemporal, Formula.swapTemporal, unembedFormula, ih1, ih2]
   | box _ ih =>
     simp [ExtFormula.swapTemporal, Formula.swapTemporal, unembedFormula, ih]
   | untl _ _ ih1 ih2 =>
@@ -433,14 +389,6 @@ theorem inl_not_in_atoms_implies_unembed {a : Atom} {φ : ExtFormula Atom}
     simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
     simp only [unembedFormula, Formula.atoms, Finset.mem_union, not_or]
     exact ⟨iha h.1, ihb h.2⟩
-  | and a' b iha ihb =>
-    simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
-    simp only [unembedFormula, Formula.atoms, Finset.mem_union, not_or]
-    exact ⟨iha h.1, ihb h.2⟩
-  | or a' b iha ihb =>
-    simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
-    simp only [unembedFormula, Formula.atoms, Finset.mem_union, not_or]
-    exact ⟨iha h.1, ihb h.2⟩
   | box a' ih =>
     simp [ExtFormula.atoms] at h; simp [unembedFormula, Formula.atoms, ih h]
   | untl a' b iha ihb =>
@@ -472,8 +420,6 @@ def collectInl : ExtFormula Atom → Finset Atom
   | ExtFormula.atom (Sum.inr ()) => ∅
   | ExtFormula.bot => ∅
   | ExtFormula.imp φ ψ => collectInl φ ∪ collectInl ψ
-  | ExtFormula.and φ ψ => collectInl φ ∪ collectInl ψ
-  | ExtFormula.or φ ψ => collectInl φ ∪ collectInl ψ
   | ExtFormula.box φ => collectInl φ
   | ExtFormula.untl φ ψ => collectInl φ ∪ collectInl ψ
   | ExtFormula.snce φ ψ => collectInl φ ∪ collectInl ψ
@@ -486,14 +432,6 @@ theorem inl_mem_implies_collectInl {a : Atom} {φ : ExtFormula Atom}
     | inr u => cases u; simp [ExtFormula.atoms] at h
   | bot => simp [ExtFormula.atoms] at h
   | imp a' b iha ihb =>
-    simp only [ExtFormula.atoms, Finset.mem_union] at h
-    simp only [collectInl, Finset.mem_union]
-    cases h with | inl h => left; exact iha h | inr h => right; exact ihb h
-  | and a' b iha ihb =>
-    simp only [ExtFormula.atoms, Finset.mem_union] at h
-    simp only [collectInl, Finset.mem_union]
-    cases h with | inl h => left; exact iha h | inr h => right; exact ihb h
-  | or a' b iha ihb =>
     simp only [ExtFormula.atoms, Finset.mem_union] at h
     simp only [collectInl, Finset.mem_union]
     cases h with | inl h => left; exact iha h | inr h => right; exact ihb h
@@ -591,14 +529,6 @@ theorem substFreshWith_preserves_irr_fresh {a t : Atom}
     simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
     simp only [substFreshWith, ExtFormula.atoms, Finset.mem_union, not_or]
     exact ⟨iha h.1, ihb h.2⟩
-  | and a' b iha ihb =>
-    simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
-    simp only [substFreshWith, ExtFormula.atoms, Finset.mem_union, not_or]
-    exact ⟨iha h.1, ihb h.2⟩
-  | or a' b iha ihb =>
-    simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
-    simp only [substFreshWith, ExtFormula.atoms, Finset.mem_union, not_or]
-    exact ⟨iha h.1, ihb h.2⟩
   | box a' ih =>
     simp [ExtFormula.atoms] at h; simp [substFreshWith, ExtFormula.atoms, ih h]
   | untl a' b iha ihb =>
@@ -652,12 +582,6 @@ def liftAxiom (a : Atom) {φ : ExtFormula Atom} (h : ExtAxiom φ) :
   | imp_s x y => exact .imp_s _ _
   | efq x => exact .efq _
   | peirce x y => exact .peirce _ _
-  | andI x y => exact .andI _ _
-  | andE1 x y => exact .andE1 _ _
-  | andE2 x y => exact .andE2 _ _
-  | orI1 x y => exact .orI1 _ _
-  | orI2 x y => exact .orI2 _ _
-  | orE x y z => exact .orE _ _ _
   | modal_t x => exact .modal_t _
   | modal_4 x => exact .modal_4 _
   | modal_b x => exact .modal_b _

@@ -169,46 +169,6 @@ theorem parametric_canonical_truth_lemma
         have h_chi_true := h_truth_imp h_psi_true
         have h_chi_mcs : chi ∈ fam.mcs t := (ih_chi fam hfam t).mpr h_chi_true
         exact set_consistent_not_both (fam.is_mcs t).1 chi h_chi_mcs h_neg_chi_mcs
-  | and phi psi ih_phi ih_psi =>
-    simp only [truthAt]
-    have h_mcs := fam.is_mcs t
-    constructor
-    · intro h_and
-      exact ⟨(ih_phi fam hfam t).mp
-              (SetMaximalConsistent.implication_property h_mcs
-                (theoremInMcsFc h_mcs (.axiom [] _ (.andE1 phi psi) (FrameClass.base_le fc)))
-                h_and),
-             (ih_psi fam hfam t).mp
-              (SetMaximalConsistent.implication_property h_mcs
-                (theoremInMcsFc h_mcs (.axiom [] _ (.andE2 phi psi) (FrameClass.base_le fc)))
-                h_and)⟩
-    · intro ⟨h_phi_true, h_psi_true⟩
-      have h_phi_mcs : phi ∈ fam.mcs t := (ih_phi fam hfam t).mpr h_phi_true
-      have h_psi_mcs : psi ∈ fam.mcs t := (ih_psi fam hfam t).mpr h_psi_true
-      have h_phi_to_psi_to_and : (phi.imp (psi.imp (phi.and psi))) ∈ fam.mcs t :=
-        theoremInMcsFc h_mcs (.axiom [] _ (.andI phi psi) (FrameClass.base_le fc))
-      have h_psi_to_and : (psi.imp (phi.and psi)) ∈ fam.mcs t :=
-        SetMaximalConsistent.implication_property h_mcs h_phi_to_psi_to_and h_phi_mcs
-      exact SetMaximalConsistent.implication_property h_mcs h_psi_to_and h_psi_mcs
-  | or phi psi ih_phi ih_psi =>
-    simp only [truthAt]
-    have h_mcs := fam.is_mcs t
-    constructor
-    · intro h_or
-      rcases SetMaximalConsistent.negation_complete h_mcs phi with h_phi | h_neg_phi
-      · exact Or.inl ((ih_phi fam hfam t).mp h_phi)
-      · exact Or.inr ((ih_psi fam hfam t).mp
-          (SetMaximalConsistent.mcs_or_resolve h_mcs h_or h_neg_phi))
-    · intro h_or_true
-      rcases h_or_true with h_phi_true | h_psi_true
-      · have h_phi_mcs : phi ∈ fam.mcs t := (ih_phi fam hfam t).mpr h_phi_true
-        exact SetMaximalConsistent.implication_property h_mcs
-          (theoremInMcsFc h_mcs (.axiom [] _ (.orI1 phi psi) (FrameClass.base_le fc)))
-          h_phi_mcs
-      · have h_psi_mcs : psi ∈ fam.mcs t := (ih_psi fam hfam t).mpr h_psi_true
-        exact SetMaximalConsistent.implication_property h_mcs
-          (theoremInMcsFc h_mcs (.axiom [] _ (.orI2 phi psi) (FrameClass.base_le fc)))
-          h_psi_mcs
   | box psi ih =>
     simp only [truthAt]
     constructor
@@ -296,46 +256,6 @@ theorem parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
         have h_χ_true := h_truth_imp h_ψ_true
         have h_χ_mcs : χ ∈ fam.mcs t := (ih_χ fam hfam t).mpr h_χ_true
         exact set_consistent_not_both (fam.is_mcs t).1 χ h_χ_mcs h_neg_χ_mcs
-  | and φ ψ ih_φ ih_ψ =>
-    simp only [truthAt]
-    have h_mcs := fam.is_mcs t
-    constructor
-    · intro h_and
-      exact ⟨(ih_φ fam hfam t).mp
-              (SetMaximalConsistent.implication_property h_mcs
-                (theoremInMcsFc h_mcs (.axiom [] _ (.andE1 φ ψ) (FrameClass.base_le fc)))
-                h_and),
-             (ih_ψ fam hfam t).mp
-              (SetMaximalConsistent.implication_property h_mcs
-                (theoremInMcsFc h_mcs (.axiom [] _ (.andE2 φ ψ) (FrameClass.base_le fc)))
-                h_and)⟩
-    · intro ⟨h_φ_true, h_ψ_true⟩
-      have h_φ_mcs : φ ∈ fam.mcs t := (ih_φ fam hfam t).mpr h_φ_true
-      have h_ψ_mcs : ψ ∈ fam.mcs t := (ih_ψ fam hfam t).mpr h_ψ_true
-      have h_φ_to_ψ_to_and : (φ.imp (ψ.imp (φ.and ψ))) ∈ fam.mcs t :=
-        theoremInMcsFc h_mcs (.axiom [] _ (.andI φ ψ) (FrameClass.base_le fc))
-      have h_ψ_to_and : (ψ.imp (φ.and ψ)) ∈ fam.mcs t :=
-        SetMaximalConsistent.implication_property h_mcs h_φ_to_ψ_to_and h_φ_mcs
-      exact SetMaximalConsistent.implication_property h_mcs h_ψ_to_and h_ψ_mcs
-  | or φ ψ ih_φ ih_ψ =>
-    simp only [truthAt]
-    have h_mcs := fam.is_mcs t
-    constructor
-    · intro h_or
-      rcases SetMaximalConsistent.negation_complete h_mcs φ with h_φ | h_neg_φ
-      · exact Or.inl ((ih_φ fam hfam t).mp h_φ)
-      · exact Or.inr ((ih_ψ fam hfam t).mp
-          (SetMaximalConsistent.mcs_or_resolve h_mcs h_or h_neg_φ))
-    · intro h_or_true
-      rcases h_or_true with h_φ_true | h_ψ_true
-      · have h_φ_mcs : φ ∈ fam.mcs t := (ih_φ fam hfam t).mpr h_φ_true
-        exact SetMaximalConsistent.implication_property h_mcs
-          (theoremInMcsFc h_mcs (.axiom [] _ (.orI1 φ ψ) (FrameClass.base_le fc)))
-          h_φ_mcs
-      · have h_ψ_mcs : ψ ∈ fam.mcs t := (ih_ψ fam hfam t).mpr h_ψ_true
-        exact SetMaximalConsistent.implication_property h_mcs
-          (theoremInMcsFc h_mcs (.axiom [] _ (.orI2 φ ψ) (FrameClass.base_le fc)))
-          h_ψ_mcs
   | box ψ ih =>
     constructor
     · intro h_box σ h_σ_mem

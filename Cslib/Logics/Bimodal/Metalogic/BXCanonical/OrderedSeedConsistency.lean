@@ -102,12 +102,12 @@ theorem temp_linearity_mcs {M : Set (Formula Atom)} (h_mcs : SetMaximalConsisten
   · right
     have h_right : Formula.or (Formula.someFuture (Formula.and A (Formula.someFuture B)))
         (Formula.someFuture (Formula.and (Formula.someFuture A) B)) ∈ M :=
-      SetMaximalConsistent.mcs_or_resolve h_mcs h_disj h_neg_l
+      SetMaximalConsistent.implication_property h_mcs h_disj h_neg_l
     rcases SetMaximalConsistent.negation_complete h_mcs
       (Formula.someFuture (Formula.and A (Formula.someFuture B))) with h_m | h_neg_m
     · exact Or.inl h_m
     · right
-      exact SetMaximalConsistent.mcs_or_resolve h_mcs h_right h_neg_m
+      exact SetMaximalConsistent.implication_property h_mcs h_right h_neg_m
 
 /-- Two defect consistent seed. -/
 theorem two_defect_consistent_seed {M : Set (Formula Atom)}

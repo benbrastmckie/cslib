@@ -145,38 +145,6 @@ theorem closure_imp_right (phi psi chi : Formula Atom)
   simp only [List.mem_toFinset] at h ⊢
   exact Formula.mem_subformulas_of_imp_right h
 
-/-- Left component of conjunction is in closure. -/
-theorem closure_and_left (phi psi chi : Formula Atom)
-    (h : Formula.and psi chi ∈ subformulaClosure phi) :
-    psi ∈ subformulaClosure phi := by
-  unfold subformulaClosure at h ⊢
-  simp only [List.mem_toFinset] at h ⊢
-  exact Formula.mem_subformulas_of_and_left h
-
-/-- Right component of conjunction is in closure. -/
-theorem closure_and_right (phi psi chi : Formula Atom)
-    (h : Formula.and psi chi ∈ subformulaClosure phi) :
-    chi ∈ subformulaClosure phi := by
-  unfold subformulaClosure at h ⊢
-  simp only [List.mem_toFinset] at h ⊢
-  exact Formula.mem_subformulas_of_and_right h
-
-/-- Left component of disjunction is in closure. -/
-theorem closure_or_left (phi psi chi : Formula Atom)
-    (h : Formula.or psi chi ∈ subformulaClosure phi) :
-    psi ∈ subformulaClosure phi := by
-  unfold subformulaClosure at h ⊢
-  simp only [List.mem_toFinset] at h ⊢
-  exact Formula.mem_subformulas_of_or_left h
-
-/-- Right component of disjunction is in closure. -/
-theorem closure_or_right (phi psi chi : Formula Atom)
-    (h : Formula.or psi chi ∈ subformulaClosure phi) :
-    chi ∈ subformulaClosure phi := by
-  unfold subformulaClosure at h ⊢
-  simp only [List.mem_toFinset] at h ⊢
-  exact Formula.mem_subformulas_of_or_right h
-
 /--
 Inner formula of Box is in closure.
 -/

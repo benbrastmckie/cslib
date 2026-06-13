@@ -81,7 +81,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Formula Type and Foundations Revert [NOT STARTED]
+### Phase 1: Formula Type and Foundations Revert [COMPLETED]
 
 **Goal**: Remove `.and`/`.or` constructors from all three formula inductive types and restore Lukasiewicz abbreviations. Revert Foundations files that added `[HasAnd F] [HasOr F]` constraints.
 
@@ -113,7 +113,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Embedding Updates (FromPropositional + Cross-Layer) [NOT STARTED]
+### Phase 2: Embedding Updates (FromPropositional + Cross-Layer) [COMPLETED]
 
 **Goal**: Update all embedding files so PL's 5-constructor formulas map correctly to the upper layers' reduced constructor sets plus Lukasiewicz abbreviations. This is the only phase requiring genuinely new proof code.
 
@@ -144,7 +144,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Modal Layer Bulk Revert [NOT STARTED]
+### Phase 3: Modal Layer Bulk Revert [COMPLETED]
 
 **Goal**: Remove all `.and`/`.or` match arms, axiom constructors, soundness cases, and related infrastructure from the Modal layer (~51 files). Restore from baseline `8b2a470d`.
 
@@ -182,7 +182,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: Temporal Layer Revert [NOT STARTED]
+### Phase 4: Temporal Layer Revert [COMPLETED]
 
 **Goal**: Remove all `.and`/`.or` match arms, axiom constructors, soundness cases, MCS helpers, truth lemma cases, and related infrastructure from the Temporal layer (~14 files). Restore helpers to use Foundations theorems directly.
 
@@ -220,7 +220,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 5: Bimodal Layer Revert -- Syntax, ProofSystem, Semantics, Theorems [NOT STARTED]
+### Phase 5: Bimodal Layer Revert -- Syntax, ProofSystem, Semantics, Theorems [COMPLETED]
 
 **Goal**: Remove `.and`/`.or` from the non-metalogic portions of the Bimodal layer: syntax infrastructure, proof system, semantics, and theorems. This is the first half of the Bimodal revert, covering the foundational files that the metalogic depends on.
 
@@ -265,7 +265,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 6: Bimodal Layer Revert -- Metalogic [NOT STARTED]
+### Phase 6: Bimodal Layer Revert -- Metalogic [COMPLETED]
 
 **Goal**: Remove `.and`/`.or` from the Bimodal metalogic: soundness, completeness (algebraic, bundle, BX canonical), MCS, separation, conservative extension (F+ over F), and decidability. This is the largest single-phase change (~34 metalogic files).
 
@@ -306,7 +306,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 7: Modal and Temporal Conservative Extension Proofs [NOT STARTED]
+### Phase 7: Modal and Temporal Conservative Extension Proofs [COMPLETED]
 
 **Goal**: Prove that Modal K and Temporal BX are conservative extensions of CPL. Modal K is a 3-line composition of existing infrastructure. Temporal BX requires a new semantic bridge lemma (~30-50 lines).
 
@@ -333,7 +333,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 8: Bimodal Conservative Extension and CI Verification [NOT STARTED]
+### Phase 8: Bimodal Conservative Extension and CI Verification [COMPLETED]
 
 **Goal**: Prove that the base Bimodal system F is a conservative extension of CPL. Then run the full CSLib CI pipeline to confirm zero regressions.
 

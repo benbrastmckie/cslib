@@ -89,11 +89,11 @@ theorem temp_linearity_mcs {M : Set (Formula Atom)}
     (𝐅(A ∧ B)) with h_l | h_neg_l
   · exact Or.inl h_l
   · right
-    have h_right := temporal_or_resolve_left h_mcs h_disj h_neg_l
+    have h_right := temporal_implication_property h_mcs h_disj h_neg_l
     rcases temporal_negation_complete h_mcs
       (𝐅(A ∧ 𝐅B)) with h_m | h_neg_m
     · exact Or.inl h_m
-    · exact Or.inr (temporal_or_resolve_left h_mcs h_right h_neg_m)
+    · exact Or.inr (temporal_implication_property h_mcs h_right h_neg_m)
 
 /-- Two defect consistent seed. -/
 theorem two_defect_consistent_seed {M : Set (Formula Atom)}

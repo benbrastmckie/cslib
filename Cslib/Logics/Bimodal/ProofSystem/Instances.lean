@@ -94,44 +94,6 @@ instance :
   peirce := ⟨Bimodal.DerivationTree.axiom [] _
     (Bimodal.Axiom.peirce _ _) trivial⟩
 
-/-! ## And/Or Axiom Instances -/
-
-instance :
-    HasAxiomAndI Bimodal.HilbertTM
-      (F := Bimodal.Formula Atom) where
-  andI := ⟨Bimodal.DerivationTree.axiom [] _
-    (Bimodal.Axiom.andI _ _) trivial⟩
-
-instance :
-    HasAxiomAndE1 Bimodal.HilbertTM
-      (F := Bimodal.Formula Atom) where
-  andE1 := ⟨Bimodal.DerivationTree.axiom [] _
-    (Bimodal.Axiom.andE1 _ _) trivial⟩
-
-instance :
-    HasAxiomAndE2 Bimodal.HilbertTM
-      (F := Bimodal.Formula Atom) where
-  andE2 := ⟨Bimodal.DerivationTree.axiom [] _
-    (Bimodal.Axiom.andE2 _ _) trivial⟩
-
-instance :
-    HasAxiomOrI1 Bimodal.HilbertTM
-      (F := Bimodal.Formula Atom) where
-  orI1 := ⟨Bimodal.DerivationTree.axiom [] _
-    (Bimodal.Axiom.orI1 _ _) trivial⟩
-
-instance :
-    HasAxiomOrI2 Bimodal.HilbertTM
-      (F := Bimodal.Formula Atom) where
-  orI2 := ⟨Bimodal.DerivationTree.axiom [] _
-    (Bimodal.Axiom.orI2 _ _) trivial⟩
-
-instance :
-    HasAxiomOrE Bimodal.HilbertTM
-      (F := Bimodal.Formula Atom) where
-  orE := ⟨Bimodal.DerivationTree.axiom [] _
-    (Bimodal.Axiom.orE _ _ _) trivial⟩
-
 /-! ## ClassicalHilbert Instance -/
 
 instance :

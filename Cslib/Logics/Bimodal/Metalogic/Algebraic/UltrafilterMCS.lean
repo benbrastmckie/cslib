@@ -195,12 +195,15 @@ theorem mcsToSet_inf_mem {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsistent
     have d_φ : (ψ :: φ :: Γ') ⊢ᴮ φ := DerivationTree.assumption (ψ :: φ :: Γ') φ (by simp)
     have d_ψ : (ψ :: φ :: Γ') ⊢ᴮ ψ := DerivationTree.assumption (ψ :: φ :: Γ') ψ (by simp)
     have d_and : (ψ :: φ :: Γ') ⊢ᴮ φ.and ψ := by
-      -- Use andI axiom: φ → (ψ → φ ∧ ψ)
-      have andI_inst : (ψ :: φ :: Γ') ⊢ᴮ φ.imp (ψ.imp (φ.and ψ)) :=
-        DerivationTree.weakening [] _ _
-          (DerivationTree.axiom [] _ (Axiom.andI φ ψ) trivial) (List.nil_subset _)
-      exact DerivationTree.modus_ponens _ _ _
-        (DerivationTree.modus_ponens _ _ _ andI_inst d_φ) d_ψ
+      have d_hyp : (φ.imp ψ.neg :: ψ :: φ :: Γ') ⊢ᴮ φ.imp ψ.neg :=
+        DerivationTree.assumption _ _ (by simp)
+      have d_φ' : (φ.imp ψ.neg :: ψ :: φ :: Γ') ⊢ᴮ φ :=
+        DerivationTree.assumption _ _ (by simp)
+      have d_ψ' : (φ.imp ψ.neg :: ψ :: φ :: Γ') ⊢ᴮ ψ :=
+        DerivationTree.assumption _ _ (by simp)
+      have d_neg_ψ' := DerivationTree.modus_ponens (φ.imp ψ.neg :: ψ :: φ :: Γ') φ ψ.neg d_hyp d_φ'
+      have d_bot' := DerivationTree.modus_ponens (φ.imp ψ.neg :: ψ :: φ :: Γ') ψ Formula.bot d_neg_ψ' d_ψ'
+      exact deductionTheorem (ψ :: φ :: Γ') (φ.imp ψ.neg) Formula.bot d_bot'
     have d_bot'' := DerivationTree.modus_ponens (ψ :: φ :: Γ') (φ.and ψ) Formula.bot d_neg' d_and
     have h_cons : Consistent (fc := FrameClass.Base) (ψ :: φ :: Γ') := by
       apply h_mcs.1 (ψ :: φ :: Γ')

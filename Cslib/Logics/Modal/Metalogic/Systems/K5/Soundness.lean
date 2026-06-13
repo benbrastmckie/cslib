@@ -67,24 +67,6 @@ theorem k5_axiom_sound {World : Type*} {φ : Proposition Atom}
     intro h_diam w' hr h_box_neg_w'
     exact h_diam (fun w'' hr' h_phi =>
       h_box_neg_w' w'' (h_eucl w w' w'' hr hr') h_phi)
-  | andI φ ψ =>
-    intro hφ hψ
-    exact ⟨hφ, hψ⟩
-  | andE1 φ ψ =>
-    intro ⟨hφ, _⟩
-    exact hφ
-  | andE2 φ ψ =>
-    intro ⟨_, hψ⟩
-    exact hψ
-  | orI1 φ ψ =>
-    intro hφ
-    exact Or.inl hφ
-  | orI2 φ ψ =>
-    intro hψ
-    exact Or.inr hψ
-  | orE φ ψ χ =>
-    intro h₁ h₂ h₃
-    exact h₃.elim h₁ h₂
 
 /-! ## K5 Soundness Theorems -/
 

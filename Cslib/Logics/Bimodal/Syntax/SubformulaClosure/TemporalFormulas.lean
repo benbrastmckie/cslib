@@ -50,7 +50,7 @@ def IsUntilFormula : Formula Atom → Prop
 instance : DecidablePred (IsUntilFormula (Atom := Atom)) :=
   fun f => match f with
   | .untl _ _ => isTrue True.intro
-  | .atom _ | .bot | .imp _ _ | .and _ _ | .or _ _ | .box _ | .snce _ _ =>
+  | .atom _ | .bot | .imp _ _ | .box _ | .snce _ _ =>
     isFalse (by simp [IsUntilFormula])
 
 def IsSinceFormula : Formula Atom → Prop
@@ -60,7 +60,7 @@ def IsSinceFormula : Formula Atom → Prop
 instance : DecidablePred (IsSinceFormula (Atom := Atom)) :=
   fun f => match f with
   | .snce _ _ => isTrue True.intro
-  | .atom _ | .bot | .imp _ _ | .and _ _ | .or _ _ | .box _ | .untl _ _ =>
+  | .atom _ | .bot | .imp _ _ | .box _ | .untl _ _ =>
     isFalse (by simp [IsSinceFormula])
 
 def toUntilDeferral : Formula Atom → Formula Atom
@@ -283,19 +283,11 @@ theorem deferral_of_P_in_closure (phi chi : Formula Atom)
 
 theorem f_nesting_depth_or (chi psi : Formula Atom) :
     fNestingDepth (Formula.or chi psi) = 0 := by
-  simp only [fNestingDepth]
+  simp only [Formula.or, Formula.neg, fNestingDepth]
 
 theorem p_nesting_depth_or (chi psi : Formula Atom) :
     pNestingDepth (Formula.or chi psi) = 0 := by
-  simp only [pNestingDepth]
-
-theorem f_nesting_depth_and (chi psi : Formula Atom) :
-    fNestingDepth (Formula.and chi psi) = 0 := by
-  simp only [fNestingDepth]
-
-theorem p_nesting_depth_and (chi psi : Formula Atom) :
-    pNestingDepth (Formula.and chi psi) = 0 := by
-  simp only [pNestingDepth]
+  simp only [Formula.or, Formula.neg, pNestingDepth]
 
 theorem f_nesting_depth_F_deferral (chi : Formula Atom) :
     fNestingDepth (Formula.or chi (Formula.someFuture chi)) = 0 :=

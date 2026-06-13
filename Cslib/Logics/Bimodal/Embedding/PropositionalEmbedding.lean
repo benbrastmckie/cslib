@@ -37,14 +37,15 @@ namespace Cslib.Logic
 
 /-- Embed a propositional formula directly into bimodal logic.
 
-Each propositional constructor maps to the corresponding bimodal constructor, preserving
-the native primitive structure across all formula types. -/
+The `and` and `or` cases use Lukasiewicz encoding, consistent with Modal and Temporal
+embeddings (which also use Lukasiewicz encoding since those formula types lack and/or
+constructors). Tasks 174/176 will add native constructors to those types. -/
 def PL.Proposition.toBimodal : PL.Proposition Atom → Bimodal.Formula Atom
   | .atom p => .atom p
   | .bot => .bot
   | .imp φ₁ φ₂ => .imp φ₁.toBimodal φ₂.toBimodal
-  | .and φ₁ φ₂ => .and φ₁.toBimodal φ₂.toBimodal
-  | .or φ₁ φ₂ => .or φ₁.toBimodal φ₂.toBimodal
+  | .and φ₁ φ₂ => .imp (.imp φ₁.toBimodal (.imp φ₂.toBimodal .bot)) .bot
+  | .or φ₁ φ₂ => .imp (.imp φ₁.toBimodal .bot) φ₂.toBimodal
 
 /-- Coercion from propositional to bimodal formulas. -/
 instance instCoePLToBimodal : Coe (PL.Proposition Atom) (Bimodal.Formula Atom) where
@@ -66,17 +67,17 @@ theorem PL.Proposition.toBimodal_imp (φ₁ φ₂ : PL.Proposition Atom) :
     (PL.Proposition.imp φ₁ φ₂).toBimodal =
       Bimodal.Formula.imp φ₁.toBimodal φ₂.toBimodal := rfl
 
-/-- Direct embedding preserves and. -/
+/-- Direct embedding preserves and (Lukasiewicz encoding). -/
 @[simp]
 theorem PL.Proposition.toBimodal_and (φ₁ φ₂ : PL.Proposition Atom) :
     (PL.Proposition.and φ₁ φ₂).toBimodal =
-      Bimodal.Formula.and φ₁.toBimodal φ₂.toBimodal := rfl
+      .imp (.imp φ₁.toBimodal (.imp φ₂.toBimodal .bot)) .bot := rfl
 
-/-- Direct embedding preserves or. -/
+/-- Direct embedding preserves or (Lukasiewicz encoding). -/
 @[simp]
 theorem PL.Proposition.toBimodal_or (φ₁ φ₂ : PL.Proposition Atom) :
     (PL.Proposition.or φ₁ φ₂).toBimodal =
-      Bimodal.Formula.or φ₁.toBimodal φ₂.toBimodal := rfl
+      .imp (.imp φ₁.toBimodal .bot) φ₂.toBimodal := rfl
 
 /-- Direct embedding preserves neg. -/
 @[simp]

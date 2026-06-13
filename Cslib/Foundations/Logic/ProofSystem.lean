@@ -197,7 +197,7 @@ end ModalAxiomClasses
 
 section TemporalAxiomClasses
 
-variable (S : Type*) [HasBot F] [HasImp F] [HasAnd F] [HasOr F] [HasUntil F] [HasSince F]
+variable (S : Type*) [HasBot F] [HasImp F] [HasUntil F] [HasSince F]
   [InferenceSystem S F]
 
 /-- The proof system proves serial future (BX1): ⊤ → F ⊤. -/
@@ -424,7 +424,7 @@ class ModalDBHilbert (S : Type*) [HasBot F] [HasImp F] [HasBox F]
 
 /-- Temporal Hilbert system BX: extends classical propositional logic with
     temporal necessitation and all 22 BX temporal axiom typeclasses. -/
-class TemporalBXHilbert (S : Type*) [HasBot F] [HasImp F] [HasAnd F] [HasOr F] [HasUntil F]
+class TemporalBXHilbert (S : Type*) [HasBot F] [HasImp F] [HasUntil F]
     [HasSince F] [InferenceSystem S F]
     extends ClassicalHilbert S (F := F),
             TemporalNecessitation S (F := F),
@@ -453,7 +453,7 @@ class TemporalBXHilbert (S : Type*) [HasBot F] [HasImp F] [HasAnd F] [HasOr F] [
 
 /-- Bimodal Hilbert system TM: extends S5 modal logic and BX temporal logic
     with the modal-future interaction axiom. -/
-class BimodalTMHilbert (S : Type*) [HasBot F] [HasImp F] [HasAnd F] [HasOr F] [HasBox F]
+class BimodalTMHilbert (S : Type*) [HasBot F] [HasImp F] [HasBox F]
     [HasUntil F] [HasSince F] [InferenceSystem S F]
     extends ModalS5Hilbert S (F := F),
             TemporalBXHilbert S (F := F),

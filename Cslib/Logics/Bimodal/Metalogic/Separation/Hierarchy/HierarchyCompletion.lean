@@ -100,8 +100,6 @@ theorem has_single_U_type_gives_no_S_nested (phi A B : Formula Atom)
   | atom _ => trivial
   | bot => trivial
   | imp a b ih1 ih2 => exact ⟨ih1 h_single.1, ih2 h_single.2⟩
-  | and a b ih1 ih2 => exact ⟨ih1 h_single.1, ih2 h_single.2⟩
-  | or a b ih1 ih2 => exact ⟨ih1 h_single.1, ih2 h_single.2⟩
   | box a ih => exact ih h_single
   | untl a b _ _ =>
     have ⟨ha, hb⟩ := h_single; subst ha; subst hb
@@ -118,10 +116,6 @@ theorem replace_box_preserves_single_U_type (phi A B : Formula Atom)
   | atom _ => trivial
   | bot => trivial
   | imp a b ih1 ih2 =>
-    exact ⟨ih1 h.1, ih2 h.2⟩
-  | and a b ih1 ih2 =>
-    exact ⟨ih1 h.1, ih2 h.2⟩
-  | or a b ih1 ih2 =>
     exact ⟨ih1 h.1, ih2 h.2⟩
   | box _ => -- replaceBoxWithTop (.box _) = .imp .bot .bot
     simp only [replaceBoxWithTop, hasSingleUType]; trivial
@@ -171,18 +165,6 @@ theorem single_U_formula_separable_noax_param (phi A B : Formula Atom)
       have hle_a : snceDepthOfU a ≤ n := Nat.le_trans (snce_depth_of_U_le_imp_left a b) hdepth
       have hle_b : snceDepthOfU b ≤ n := Nat.le_trans (snce_depth_of_U_le_imp_right a b) hdepth
       exact imp_separable (ih_a hle_a h_single_ψ.1) (ih_b hle_b h_single_ψ.2)
-    | and a b ih_a ih_b =>
-      have hle_a : snceDepthOfU a ≤ n :=
-        Nat.le_trans (by simp [snceDepthOfU]) hdepth
-      have hle_b : snceDepthOfU b ≤ n :=
-        Nat.le_trans (by simp [snceDepthOfU]) hdepth
-      exact and_separable (ih_a hle_a h_single_ψ.1) (ih_b hle_b h_single_ψ.2)
-    | or a b ih_a ih_b =>
-      have hle_a : snceDepthOfU a ≤ n :=
-        Nat.le_trans (by simp [snceDepthOfU]) hdepth
-      have hle_b : snceDepthOfU b ≤ n :=
-        Nat.le_trans (by simp [snceDepthOfU]) hdepth
-      exact or_separable (ih_a hle_a h_single_ψ.1) (ih_b hle_b h_single_ψ.2)
     | box _ => exact ⟨.box _, rfl, int_equiv_refl _⟩
     | untl a b _ _ =>
       have ⟨ha, hb⟩ := h_single_ψ; subst ha; subst hb
@@ -281,18 +263,6 @@ theorem single_U_formula_sep_with_U_type_no_oracle (phi A B : Formula Atom)
       have hle_a : snceDepthOfU a ≤ n := Nat.le_trans (snce_depth_of_U_le_imp_left a b) hdepth
       have hle_b : snceDepthOfU b ≤ n := Nat.le_trans (snce_depth_of_U_le_imp_right a b) hdepth
       exact imp_separable_with_type (ih_a hle_a h_single_ψ.1) (ih_b hle_b h_single_ψ.2)
-    | and a b ih_a ih_b =>
-      have hle_a : snceDepthOfU a ≤ n :=
-        Nat.le_trans (by simp [snceDepthOfU]) hdepth
-      have hle_b : snceDepthOfU b ≤ n :=
-        Nat.le_trans (by simp [snceDepthOfU]) hdepth
-      exact and_separable_with_U_type (ih_a hle_a h_single_ψ.1) (ih_b hle_b h_single_ψ.2)
-    | or a b ih_a ih_b =>
-      have hle_a : snceDepthOfU a ≤ n :=
-        Nat.le_trans (by simp [snceDepthOfU]) hdepth
-      have hle_b : snceDepthOfU b ≤ n :=
-        Nat.le_trans (by simp [snceDepthOfU]) hdepth
-      exact or_separable_with_U_type (ih_a hle_a h_single_ψ.1) (ih_b hle_b h_single_ψ.2)
     | box _ =>
       -- .box on Z is equivalent to .imp .bot .bot (True), which is U-free
       exact ⟨.box _, rfl, int_equiv_refl _, h_single_ψ⟩
@@ -427,32 +397,6 @@ theorem extract_U_type_U_free (φ : Formula Atom) (h : isUFree φ = false)
       have hd : isUFree d = false := by
         simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
       have hle : U_nesting_depth d ≤ 1 := Nat.le_trans (U_nesting_depth_le_imp_right c d) hdepth
-      exact ih2 hd hns.2 hle
-  | and c d ih1 ih2 =>
-    unfold extractUType
-    by_cases hc : isUFree c = false
-    · simp only [hc, ↓reduceDIte]
-      have hle : U_nesting_depth c ≤ 1 :=
-        Nat.le_trans (by simp [U_nesting_depth]) hdepth
-      exact ih1 hc hns.1 hle
-    · simp only [hc, ↓reduceDIte]
-      have hd : isUFree d = false := by
-        simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
-      have hle : U_nesting_depth d ≤ 1 :=
-        Nat.le_trans (by simp [U_nesting_depth]) hdepth
-      exact ih2 hd hns.2 hle
-  | or c d ih1 ih2 =>
-    unfold extractUType
-    by_cases hc : isUFree c = false
-    · simp only [hc, ↓reduceDIte]
-      have hle : U_nesting_depth c ≤ 1 :=
-        Nat.le_trans (by simp [U_nesting_depth]) hdepth
-      exact ih1 hc hns.1 hle
-    · simp only [hc, ↓reduceDIte]
-      have hd : isUFree d = false := by
-        simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
-      have hle : U_nesting_depth d ≤ 1 :=
-        Nat.le_trans (by simp [U_nesting_depth]) hdepth
       exact ih2 hd hns.2 hle
   | box c ih =>
     simp only [isUFree] at h
@@ -596,14 +540,6 @@ theorem subst_U_free_U_nesting_depth_le_one (ψ : Formula Atom) (p : Atom) (A B 
     simp only [isUFree, Bool.and_eq_true] at hψ_uf
     simp only [substFormula, U_nesting_depth]
     have := ih1 hψ_uf.1; have := ih2 hψ_uf.2; omega
-  | and a b ih1 ih2 =>
-    simp only [isUFree, Bool.and_eq_true] at hψ_uf
-    simp only [substFormula, U_nesting_depth]
-    have := ih1 hψ_uf.1; have := ih2 hψ_uf.2; omega
-  | or a b ih1 ih2 =>
-    simp only [isUFree, Bool.and_eq_true] at hψ_uf
-    simp only [substFormula, U_nesting_depth]
-    have := ih1 hψ_uf.1; have := ih2 hψ_uf.2; omega
   | box a ih =>
     simp only [isUFree] at hψ_uf
     simp only [substFormula, U_nesting_depth]; exact ih hψ_uf
@@ -647,12 +583,6 @@ theorem subst_in_separated_separable_depth (ψ : Formula Atom) (p : Atom) (A B :
   | imp c d ih_c ih_d =>
     simp [isSyntacticallySeparated] at hsep
     exact imp_separable (ih_c hsep.1) (ih_d hsep.2)
-  | and c d ih_c ih_d =>
-    simp [isSyntacticallySeparated] at hsep
-    exact and_separable (ih_c hsep.1) (ih_d hsep.2)
-  | or c d ih_c ih_d =>
-    simp [isSyntacticallySeparated] at hsep
-    exact or_separable (ih_c hsep.1) (ih_d hsep.2)
   | untl c d _ _ =>
     simp [isSyntacticallySeparated] at hsep
     have hU_sf : isSFree (.untl A B) = true := by
@@ -716,12 +646,6 @@ where
     | imp a b ih1 ih2 =>
       simp [isUFree] at huf
       simp [substFormula, junctionDepthS, ih1 huf.1, ih2 huf.2]
-    | and a b ih1 ih2 =>
-      simp [isUFree] at huf
-      simp [substFormula, junctionDepthS, ih1 huf.1, ih2 huf.2]
-    | or a b ih1 ih2 =>
-      simp [isUFree] at huf
-      simp [substFormula, junctionDepthS, ih1 huf.1, ih2 huf.2]
     | box a ih =>
       simp [isUFree] at huf
       simp [substFormula, junctionDepthS, ih huf]
@@ -753,12 +677,6 @@ theorem subst_in_separated_separable_jd (ψ : Formula Atom) (p : Atom) (A B : Fo
   | imp c d ih_c ih_d =>
     simp [isSyntacticallySeparated] at hsep
     exact imp_separable (ih_c hsep.1) (ih_d hsep.2)
-  | and c d ih_c ih_d =>
-    simp [isSyntacticallySeparated] at hsep
-    exact and_separable (ih_c hsep.1) (ih_d hsep.2)
-  | or c d ih_c ih_d =>
-    simp [isSyntacticallySeparated] at hsep
-    exact or_separable (ih_c hsep.1) (ih_d hsep.2)
   | untl c d _ _ =>
     simp [isSyntacticallySeparated] at hsep
     have hU_sf : isSFree (.untl A B) = true := by
@@ -974,20 +892,6 @@ theorem all_formulas_separable_aux (φ : Formula Atom)
       have hle_b : junctionDepth b ≤ n := Nat.le_trans (jd_imp_le_right a b) hjd
       exact imp_separable (ih_a hle_a (has_no_allpast_allfuture_true a))
                           (ih_b hle_b (has_no_allpast_allfuture_true b))
-    | and a b ih_a ih_b =>
-      have hle_a : junctionDepth a ≤ n :=
-        Nat.le_trans (by simp [junctionDepth]) hjd
-      have hle_b : junctionDepth b ≤ n :=
-        Nat.le_trans (by simp [junctionDepth]) hjd
-      exact and_separable (ih_a hle_a (has_no_allpast_allfuture_true a))
-                          (ih_b hle_b (has_no_allpast_allfuture_true b))
-    | or a b ih_a ih_b =>
-      have hle_a : junctionDepth a ≤ n :=
-        Nat.le_trans (by simp [junctionDepth]) hjd
-      have hle_b : junctionDepth b ≤ n :=
-        Nat.le_trans (by simp [junctionDepth]) hjd
-      exact or_separable (ih_a hle_a (has_no_allpast_allfuture_true a))
-                         (ih_b hle_b (has_no_allpast_allfuture_true b))
     | snce a b ih_a ih_b =>
       -- Sub-formulas a, b have JD ≤ n (same level), but are structurally smaller
       have hle_a : junctionDepth a ≤ n := Nat.le_trans (jd_snce_le_left a b) hjd

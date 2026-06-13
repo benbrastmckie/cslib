@@ -47,8 +47,6 @@ def subformulas : Formula Atom → List (Formula Atom)
   | φ@(.atom _) => [φ]
   | φ@.bot => [φ]
   | φ@(.imp ψ χ) => φ :: (subformulas ψ ++ subformulas χ)
-  | φ@(.and ψ χ) => φ :: (subformulas ψ ++ subformulas χ)
-  | φ@(.or ψ χ) => φ :: (subformulas ψ ++ subformulas χ)
   | φ@(.untl ψ χ) => φ :: (subformulas ψ ++ subformulas χ)
   | φ@(.snce ψ χ) => φ :: (subformulas ψ ++ subformulas χ)
 
@@ -59,38 +57,6 @@ def subformulaCount [DecidableEq (Formula Atom)] (φ : Formula Atom) : Nat :=
 /-- Subformulas include the formula itself. -/
 theorem self_mem_subformulas (φ : Formula Atom) : φ ∈ subformulas φ := by
   cases φ <;> simp [subformulas]
-
-/-- Subformulas of and include the left component. -/
-theorem and_left_mem_subformulas (ψ χ : Formula Atom) :
-    ψ ∈ subformulas (.and ψ χ) := by
-  simp only [subformulas, List.mem_cons, List.mem_append]
-  right
-  left
-  exact self_mem_subformulas ψ
-
-/-- Subformulas of and include the right component. -/
-theorem and_right_mem_subformulas (ψ χ : Formula Atom) :
-    χ ∈ subformulas (.and ψ χ) := by
-  simp only [subformulas, List.mem_cons, List.mem_append]
-  right
-  right
-  exact self_mem_subformulas χ
-
-/-- Subformulas of or include the left component. -/
-theorem or_left_mem_subformulas (ψ χ : Formula Atom) :
-    ψ ∈ subformulas (.or ψ χ) := by
-  simp only [subformulas, List.mem_cons, List.mem_append]
-  right
-  left
-  exact self_mem_subformulas ψ
-
-/-- Subformulas of or include the right component. -/
-theorem or_right_mem_subformulas (ψ χ : Formula Atom) :
-    χ ∈ subformulas (.or ψ χ) := by
-  simp only [subformulas, List.mem_cons, List.mem_append]
-  right
-  right
-  exact self_mem_subformulas χ
 
 /-- Subformulas of imp include the left component. -/
 theorem imp_left_mem_subformulas (ψ χ : Formula Atom) :
@@ -143,26 +109,6 @@ theorem subformulas_trans {chi psi phi : Formula Atom}
     subst h2
     exact h1
   | imp a b iha ihb =>
-    simp only [subformulas, List.mem_cons, List.mem_append] at h2
-    rcases h2 with rfl | ha | hb
-    · exact h1
-    · simp only [subformulas, List.mem_cons, List.mem_append]
-      right; left
-      exact iha ha
-    · simp only [subformulas, List.mem_cons, List.mem_append]
-      right; right
-      exact ihb hb
-  | and a b iha ihb =>
-    simp only [subformulas, List.mem_cons, List.mem_append] at h2
-    rcases h2 with rfl | ha | hb
-    · exact h1
-    · simp only [subformulas, List.mem_cons, List.mem_append]
-      right; left
-      exact iha ha
-    · simp only [subformulas, List.mem_cons, List.mem_append]
-      right; right
-      exact ihb hb
-  | or a b iha ihb =>
     simp only [subformulas, List.mem_cons, List.mem_append] at h2
     rcases h2 with rfl | ha | hb
     · exact h1
@@ -246,26 +192,6 @@ theorem snce_right_mem_subformulas (ψ χ : Formula Atom) :
   simp only [subformulas, List.mem_cons, List.mem_append]
   right; right
   exact self_mem_subformulas χ
-
-/-- Left of and is in subformulas. -/
-theorem mem_subformulas_of_and_left {ψ χ phi : Formula Atom}
-    (h : (ψ ∧ χ) ∈ subformulas phi) : ψ ∈ subformulas phi := by
-  exact subformulas_trans (and_left_mem_subformulas ψ χ) h
-
-/-- Right of and is in subformulas. -/
-theorem mem_subformulas_of_and_right {ψ χ phi : Formula Atom}
-    (h : (ψ ∧ χ) ∈ subformulas phi) : χ ∈ subformulas phi := by
-  exact subformulas_trans (and_right_mem_subformulas ψ χ) h
-
-/-- Left of or is in subformulas. -/
-theorem mem_subformulas_of_or_left {ψ χ phi : Formula Atom}
-    (h : (ψ ∨ χ) ∈ subformulas phi) : ψ ∈ subformulas phi := by
-  exact subformulas_trans (or_left_mem_subformulas ψ χ) h
-
-/-- Right of or is in subformulas. -/
-theorem mem_subformulas_of_or_right {ψ χ phi : Formula Atom}
-    (h : (ψ ∨ χ) ∈ subformulas phi) : χ ∈ subformulas phi := by
-  exact subformulas_trans (or_right_mem_subformulas ψ χ) h
 
 /-- Left of untl is in subformulas. -/
 theorem mem_subformulas_of_untl_left {ψ χ phi : Formula Atom}

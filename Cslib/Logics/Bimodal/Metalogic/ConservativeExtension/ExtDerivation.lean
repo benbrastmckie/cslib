@@ -44,24 +44,12 @@ Axiom schemata for the extended proof system.
 Mirrors all axiom schemas from `Cslib.Logic.Bimodal.Axiom` but over `ExtFormula`.
 -/
 inductive ExtAxiom : ExtFormula Atom → Type u where
-  -- Layer 1: Propositional (10)
+  -- Layer 1: Propositional (4)
   | imp_k (φ ψ χ : ExtFormula Atom) :
       ExtAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ)))
   | imp_s (φ ψ : ExtFormula Atom) : ExtAxiom (φ.imp (ψ.imp φ))
   | efq (φ : ExtFormula Atom) : ExtAxiom (ExtFormula.bot.imp φ)
   | peirce (φ ψ : ExtFormula Atom) : ExtAxiom (((φ.imp ψ).imp φ).imp φ)
-  | andI (φ ψ : ExtFormula Atom) :
-      ExtAxiom (φ.imp (ψ.imp (ExtFormula.and φ ψ)))
-  | andE1 (φ ψ : ExtFormula Atom) :
-      ExtAxiom ((ExtFormula.and φ ψ).imp φ)
-  | andE2 (φ ψ : ExtFormula Atom) :
-      ExtAxiom ((ExtFormula.and φ ψ).imp ψ)
-  | orI1 (φ ψ : ExtFormula Atom) :
-      ExtAxiom (φ.imp (ExtFormula.or φ ψ))
-  | orI2 (φ ψ : ExtFormula Atom) :
-      ExtAxiom (ψ.imp (ExtFormula.or φ ψ))
-  | orE (φ ψ χ : ExtFormula Atom) :
-      ExtAxiom ((φ.imp χ).imp ((ψ.imp χ).imp ((ExtFormula.or φ ψ).imp χ)))
 
   -- Layer 2: S5 Modal (5)
   | modal_t (φ : ExtFormula Atom) : ExtAxiom (ExtFormula.box φ |>.imp φ)
@@ -224,12 +212,6 @@ def embedAxiom {φ : Formula Atom} : Axiom φ → ExtAxiom (embedFormula φ)
   | .imp_s a b => .imp_s (embedFormula a) (embedFormula b)
   | .efq a => .efq (embedFormula a)
   | .peirce a b => .peirce (embedFormula a) (embedFormula b)
-  | .andI a b => .andI (embedFormula a) (embedFormula b)
-  | .andE1 a b => .andE1 (embedFormula a) (embedFormula b)
-  | .andE2 a b => .andE2 (embedFormula a) (embedFormula b)
-  | .orI1 a b => .orI1 (embedFormula a) (embedFormula b)
-  | .orI2 a b => .orI2 (embedFormula a) (embedFormula b)
-  | .orE a b c => .orE (embedFormula a) (embedFormula b) (embedFormula c)
   | .modal_t a => .modal_t (embedFormula a)
   | .modal_4 a => .modal_4 (embedFormula a)
   | .modal_b a => .modal_b (embedFormula a)

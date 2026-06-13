@@ -41,60 +41,9 @@ variable {Atom : Type*}
 
 noncomputable section
 
-def lem (A : Formula Atom) : DerivationTree FrameClass.Base [] (A.or A.neg) := by
-  -- Prove A ∨ ¬A classically using Peirce + OrI1 + OrI2 + B-combinator + flip.
-  -- orI1: ⊢ A → A ∨ ¬A
-  have orI1_ax : DerivationTree FrameClass.Base [] (A.imp (A.or A.neg)) :=
-    DerivationTree.axiom [] _ (Axiom.orI1 A A.neg) trivial
-  -- orI2: ⊢ ¬A → A ∨ ¬A
-  have orI2_ax : DerivationTree FrameClass.Base [] (A.neg.imp (A.or A.neg)) :=
-    DerivationTree.axiom [] _ (Axiom.orI2 A A.neg) trivial
-  -- Peirce: ⊢ (((A∨¬A → ⊥) → A∨¬A) → A∨¬A)
-  have peirce_ax : DerivationTree FrameClass.Base []
-      ((((A.or A.neg).imp Formula.bot).imp (A.or A.neg)).imp (A.or A.neg)) :=
-    DerivationTree.axiom [] _ (Axiom.peirce (A.or A.neg) Formula.bot) trivial
-  -- bc1: bCombinator(A, A∨¬A, ⊥):
-  --   ⊢ (A∨¬A→⊥) → (A→A∨¬A) → (A→⊥)
-  have bc1 : DerivationTree FrameClass.Base []
-      ((A.or A.neg |>.imp Formula.bot).imp
-        (A.imp (A.or A.neg) |>.imp (A.imp Formula.bot))) :=
-    @bCombinator Atom FrameClass.Base A (A.or A.neg) Formula.bot
-  -- flip_inst: flip with X:=(A∨¬A→⊥), Y:=(A→A∨¬A), Z:=(A→⊥):
-  --   ⊢ ((A∨¬A→⊥)→(A→A∨¬A)→(A→⊥)) → (A→A∨¬A) → (A∨¬A→⊥) → (A→⊥)
-  have flip_inst : DerivationTree FrameClass.Base []
-      (((A.or A.neg |>.imp Formula.bot).imp (A.imp (A.or A.neg) |>.imp (A.imp Formula.bot))).imp
-        (A.imp (A.or A.neg) |>.imp ((A.or A.neg |>.imp Formula.bot).imp (A.imp Formula.bot)))) :=
-    @flip Atom FrameClass.Base
-      (A.or A.neg |>.imp Formula.bot)
-      (A.imp (A.or A.neg))
-      (A.imp Formula.bot)
-  -- flip_bc1: ⊢ (A→A∨¬A) → (A∨¬A→⊥) → (A→⊥)
-  have flip_bc1 : DerivationTree FrameClass.Base []
-      (A.imp (A.or A.neg) |>.imp ((A.or A.neg |>.imp Formula.bot).imp (A.imp Formula.bot))) :=
-    DerivationTree.modus_ponens [] _ _ flip_inst bc1
-  -- neg_from_lem: ⊢ (A∨¬A→⊥) → (A→⊥)  [= (A∨¬A→⊥) → ¬A]
-  have neg_from_lem : DerivationTree FrameClass.Base []
-      ((A.or A.neg |>.imp Formula.bot).imp (A.imp Formula.bot)) :=
-    DerivationTree.modus_ponens [] _ _ flip_bc1 orI1_ax
-  -- bc2: bCombinator((A∨¬A→⊥), ¬A=(A→⊥), A∨¬A):
-  --   ⊢ (¬A→A∨¬A) → ((A∨¬A→⊥)→¬A) → (A∨¬A→⊥) → A∨¬A
-  have bc2 : DerivationTree FrameClass.Base []
-      ((A.imp Formula.bot |>.imp (A.or A.neg)).imp
-        ((A.or A.neg |>.imp Formula.bot |>.imp (A.imp Formula.bot)).imp
-          (A.or A.neg |>.imp Formula.bot |>.imp (A.or A.neg)))) :=
-    @bCombinator Atom FrameClass.Base
-      (A.or A.neg |>.imp Formula.bot) (A.imp Formula.bot) (A.or A.neg)
-  -- step1: ⊢ ((A∨¬A→⊥)→¬A) → (A∨¬A→⊥) → A∨¬A
-  have step1 : DerivationTree FrameClass.Base []
-      ((A.or A.neg |>.imp Formula.bot |>.imp (A.imp Formula.bot)).imp
-        (A.or A.neg |>.imp Formula.bot |>.imp (A.or A.neg))) :=
-    DerivationTree.modus_ponens [] _ _ bc2 orI2_ax
-  -- neg_to_lem: ⊢ (A∨¬A→⊥) → A∨¬A
-  have neg_to_lem : DerivationTree FrameClass.Base []
-      ((A.or A.neg |>.imp Formula.bot).imp (A.or A.neg)) :=
-    DerivationTree.modus_ponens [] _ _ step1 neg_from_lem
-  -- Final: apply peirce to neg_to_lem
-  exact DerivationTree.modus_ponens [] _ _ peirce_ax neg_to_lem
+def lem (A : Formula Atom) : DerivationTree FrameClass.Base [] (A.or A.neg) :=
+  unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.lem
+    _ _ _ Bimodal.HilbertTM _ _ (φ := A))
 
 def efqAxiom {fc : FrameClass} (φ : Formula Atom) :
     DerivationTree fc [] (Formula.bot.imp φ) :=
@@ -127,14 +76,14 @@ def efqNeg (A B : Formula Atom) :
 def lceImp {fc : FrameClass} (A B : Formula Atom) :
     DerivationTree fc [] ((A.and B).imp A) :=
   DerivationTree.lift (FrameClass.base_le fc)
-    (unwrap (HasAxiomAndE1.andE1 (φ := A) (ψ := B) :
-      InferenceSystem.DerivableIn Bimodal.HilbertTM _))
+    (unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.lce_imp
+      _ _ _ Bimodal.HilbertTM _ _ (φ := A) (ψ := B)))
 
 def rceImp {fc : FrameClass} (A B : Formula Atom) :
     DerivationTree fc [] ((A.and B).imp B) :=
   DerivationTree.lift (FrameClass.base_le fc)
-    (unwrap (HasAxiomAndE2.andE2 (φ := A) (ψ := B) :
-      InferenceSystem.DerivableIn Bimodal.HilbertTM _))
+    (unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.rce_imp
+      _ _ _ Bimodal.HilbertTM _ _ (φ := A) (ψ := B)))
 
 -- ecq, ldi, rdi, lce, rce use context-based proofs and are kept as-is
 
@@ -161,25 +110,37 @@ def ecq (A B : Formula Atom) :
 
 def ldi (A B : Formula Atom) :
     DerivationTree FrameClass.Base [A] (A.or B) := by
-  -- Use OrI1: ⊢ A → A ∨ B, then apply to A from context
-  have orI1_inst : DerivationTree FrameClass.Base [] (A.imp (A.or B)) :=
-    DerivationTree.axiom [] _ (Axiom.orI1 A B) trivial
-  have h_a : DerivationTree FrameClass.Base [A] A :=
-    DerivationTree.assumption [A] A (by simp)
-  have orI1_ctx : DerivationTree FrameClass.Base [A] (A.imp (A.or B)) :=
-    DerivationTree.weakening [] [A] _ orI1_inst (by intro; simp)
-  exact DerivationTree.modus_ponens [A] _ _ orI1_ctx h_a
+  have efq_inst : DerivationTree FrameClass.Base [] (A.neg.imp (A.imp B)) :=
+    efqNeg A B
+  have h_a : DerivationTree FrameClass.Base [A] A := by
+    apply DerivationTree.assumption; simp
+  have efq_ctx : DerivationTree FrameClass.Base [A] (A.neg.imp (A.imp B)) :=
+    DerivationTree.weakening [] [A] _ efq_inst (by intro; simp)
+  have k_inst : DerivationTree FrameClass.Base []
+      ((A.neg.imp (A.imp B)).imp ((A.neg.imp A).imp (A.neg.imp B))) :=
+    DerivationTree.axiom [] _ (Axiom.imp_k A.neg A B) trivial
+  have k_ctx : DerivationTree FrameClass.Base [A]
+      ((A.neg.imp (A.imp B)).imp ((A.neg.imp A).imp (A.neg.imp B))) :=
+    DerivationTree.weakening [] [A] _ k_inst (by intro; simp)
+  have step1 : DerivationTree FrameClass.Base [A] ((A.neg.imp A).imp (A.neg.imp B)) :=
+    DerivationTree.modus_ponens [A] _ _ k_ctx efq_ctx
+  have s_inst : DerivationTree FrameClass.Base [] (A.imp (A.neg.imp A)) :=
+    DerivationTree.axiom [] _ (Axiom.imp_s A A.neg) trivial
+  have s_ctx : DerivationTree FrameClass.Base [A] (A.imp (A.neg.imp A)) :=
+    DerivationTree.weakening [] [A] _ s_inst (by intro; simp)
+  have step2 : DerivationTree FrameClass.Base [A] (A.neg.imp A) :=
+    DerivationTree.modus_ponens [A] A _ s_ctx h_a
+  exact DerivationTree.modus_ponens [A] _ _ step1 step2
 
 def rdi (A B : Formula Atom) :
     DerivationTree FrameClass.Base [B] (A.or B) := by
-  -- Use OrI2: ⊢ B → A ∨ B, then apply to B from context
-  have orI2_inst : DerivationTree FrameClass.Base [] (B.imp (A.or B)) :=
-    DerivationTree.axiom [] _ (Axiom.orI2 A B) trivial
-  have h_b : DerivationTree FrameClass.Base [B] B :=
-    DerivationTree.assumption [B] B (by simp)
-  have orI2_ctx : DerivationTree FrameClass.Base [B] (B.imp (A.or B)) :=
-    DerivationTree.weakening [] [B] _ orI2_inst (by intro; simp)
-  exact DerivationTree.modus_ponens [B] _ _ orI2_ctx h_b
+  have s_inst : DerivationTree FrameClass.Base [] (B.imp (A.neg.imp B)) :=
+    DerivationTree.axiom [] _ (Axiom.imp_s B A.neg) trivial
+  have h_b : DerivationTree FrameClass.Base [B] B := by
+    apply DerivationTree.assumption; simp
+  have s_ctx : DerivationTree FrameClass.Base [B] (B.imp (A.neg.imp B)) :=
+    DerivationTree.weakening [] [B] _ s_inst (by intro; simp)
+  exact DerivationTree.modus_ponens [B] B _ s_ctx h_b
 
 def rcp {fc : FrameClass} (Γ : Context Atom) (A B : Formula Atom)
     (h : DerivationTree fc Γ (A.neg.imp B.neg)) :
@@ -237,21 +198,85 @@ def rcp {fc : FrameClass} (Γ : Context Atom) (A B : Formula Atom)
 
 def lce (A B : Formula Atom) :
     DerivationTree FrameClass.Base [A.and B] A := by
-  -- Use AndE1: ⊢ A ∧ B → A, then apply to (A ∧ B) from context
-  have h_conj : DerivationTree FrameClass.Base [A.and B] (A.and B) :=
-    DerivationTree.assumption [A.and B] (A.and B) (by simp)
-  have andE1_ctx : DerivationTree FrameClass.Base [A.and B] ((A.and B).imp A) :=
-    DerivationTree.weakening [] [A.and B] _ (lceImp A B) (by intro; simp)
-  exact DerivationTree.modus_ponens [A.and B] _ _ andE1_ctx h_conj
+  have h_conj : DerivationTree FrameClass.Base [A.and B] (A.and B) := by
+    apply DerivationTree.assumption; simp
+  have h_conj_unf : DerivationTree FrameClass.Base [A.and B] (A.imp B.neg).neg := h_conj
+  have efq_helper : DerivationTree FrameClass.Base [] (A.neg.imp (A.imp B.neg)) :=
+    efqNeg A B.neg
+  have efq_ctx : DerivationTree FrameClass.Base [A.and B] (A.neg.imp (A.imp B.neg)) :=
+    DerivationTree.weakening [] [A.and B] _ efq_helper (by intro; simp)
+  have contra_step : DerivationTree FrameClass.Base []
+      ((A.neg.imp (A.imp B.neg)).imp ((A.imp B.neg).neg.imp A.neg.neg)) := by
+    have bc : DerivationTree FrameClass.Base []
+        (((A.imp (B.imp Formula.bot)).imp Formula.bot).imp
+         (((A.imp Formula.bot).imp (A.imp (B.imp Formula.bot))).imp
+          ((A.imp Formula.bot).imp Formula.bot))) :=
+      @bCombinator Atom FrameClass.Base (A.imp Formula.bot) (A.imp (B.imp Formula.bot)) Formula.bot
+    have flip' : DerivationTree FrameClass.Base []
+        ((((A.imp (B.imp Formula.bot)).imp Formula.bot).imp
+         (((A.imp Formula.bot).imp (A.imp (B.imp Formula.bot))).imp
+          ((A.imp Formula.bot).imp Formula.bot))).imp
+        (((A.imp Formula.bot).imp (A.imp (B.imp Formula.bot))).imp
+         (((A.imp (B.imp Formula.bot)).imp Formula.bot).imp
+          ((A.imp Formula.bot).imp Formula.bot)))) :=
+      @flip Atom FrameClass.Base ((A.imp (B.imp Formula.bot)).imp Formula.bot)
+                    ((A.imp Formula.bot).imp (A.imp (B.imp Formula.bot)))
+                    ((A.imp Formula.bot).imp Formula.bot)
+    exact DerivationTree.modus_ponens [] _ _ flip' bc
+  have contra_step_ctx : DerivationTree FrameClass.Base [A.and B]
+      ((A.neg.imp (A.imp B.neg)).imp ((A.imp B.neg).neg.imp A.neg.neg)) :=
+    DerivationTree.weakening [] [A.and B] _ contra_step (by intro; simp)
+  have step1 : DerivationTree FrameClass.Base [A.and B]
+      ((A.imp B.neg).neg.imp A.neg.neg) :=
+    DerivationTree.modus_ponens [A.and B] _ _ contra_step_ctx efq_ctx
+  have neg_neg_a : DerivationTree FrameClass.Base [A.and B] A.neg.neg :=
+    DerivationTree.modus_ponens [A.and B] _ _ step1 h_conj_unf
+  have dne_a : DerivationTree FrameClass.Base [] (A.neg.neg.imp A) :=
+    doubleNegation A
+  have dne_a_ctx : DerivationTree FrameClass.Base [A.and B] (A.neg.neg.imp A) :=
+    DerivationTree.weakening [] [A.and B] _ dne_a (by intro; simp)
+  exact DerivationTree.modus_ponens [A.and B] _ _ dne_a_ctx neg_neg_a
 
 def rce (A B : Formula Atom) :
     DerivationTree FrameClass.Base [A.and B] B := by
-  -- Use AndE2: ⊢ A ∧ B → B, then apply to (A ∧ B) from context
-  have h_conj : DerivationTree FrameClass.Base [A.and B] (A.and B) :=
-    DerivationTree.assumption [A.and B] (A.and B) (by simp)
-  have andE2_ctx : DerivationTree FrameClass.Base [A.and B] ((A.and B).imp B) :=
-    DerivationTree.weakening [] [A.and B] _ (rceImp A B) (by intro; simp)
-  exact DerivationTree.modus_ponens [A.and B] _ _ andE2_ctx h_conj
+  have h_conj : DerivationTree FrameClass.Base [A.and B] (A.and B) := by
+    apply DerivationTree.assumption; simp
+  have h_conj_unf : DerivationTree FrameClass.Base [A.and B] (A.imp B.neg).neg := h_conj
+  have s_helper : DerivationTree FrameClass.Base [] (B.neg.imp (A.imp B.neg)) :=
+    DerivationTree.axiom [] _ (Axiom.imp_s B.neg A) trivial
+  have s_ctx : DerivationTree FrameClass.Base [A.and B] (B.neg.imp (A.imp B.neg)) :=
+    DerivationTree.weakening [] [A.and B] _ s_helper (by intro; simp)
+  have contra_step : DerivationTree FrameClass.Base []
+      ((B.neg.imp (A.imp B.neg)).imp ((A.imp B.neg).neg.imp B.neg.neg)) := by
+    have bc : DerivationTree FrameClass.Base []
+        (((A.imp (B.imp Formula.bot)).imp Formula.bot).imp
+         (((B.imp Formula.bot).imp (A.imp (B.imp Formula.bot))).imp
+          ((B.imp Formula.bot).imp Formula.bot))) :=
+      @bCombinator Atom FrameClass.Base (B.imp Formula.bot) (A.imp (B.imp Formula.bot)) Formula.bot
+    have flip' : DerivationTree FrameClass.Base []
+        ((((A.imp (B.imp Formula.bot)).imp Formula.bot).imp
+         (((B.imp Formula.bot).imp (A.imp (B.imp Formula.bot))).imp
+          ((B.imp Formula.bot).imp Formula.bot))).imp
+        (((B.imp Formula.bot).imp (A.imp (B.imp Formula.bot))).imp
+         (((A.imp (B.imp Formula.bot)).imp Formula.bot).imp
+          ((B.imp Formula.bot).imp Formula.bot)))) :=
+      @flip Atom FrameClass.Base ((A.imp (B.imp Formula.bot)).imp Formula.bot)
+                    ((B.imp Formula.bot).imp (A.imp (B.imp Formula.bot)))
+                    ((B.imp Formula.bot).imp Formula.bot)
+    exact DerivationTree.modus_ponens [] _ _ flip' bc
+  have contra_step_ctx : DerivationTree FrameClass.Base [A.and B]
+      ((B.neg.imp (A.imp B.neg)).imp ((A.imp B.neg).neg.imp B.neg.neg)) :=
+    DerivationTree.weakening [] [A.and B] _ contra_step (by intro; simp)
+  have step1 : DerivationTree FrameClass.Base [A.and B]
+      ((A.imp B.neg).neg.imp B.neg.neg) :=
+    DerivationTree.modus_ponens [A.and B] _ _ contra_step_ctx s_ctx
+  have neg_neg_b : DerivationTree FrameClass.Base [A.and B] B.neg.neg :=
+    DerivationTree.modus_ponens [A.and B] _ _ step1 h_conj_unf
+  have dne_b : DerivationTree FrameClass.Base [] (B.neg.neg.imp B) :=
+    doubleNegation B
+  have dne_b_ctx : DerivationTree FrameClass.Base [A.and B] (B.neg.neg.imp B) :=
+    DerivationTree.weakening [] [A.and B] _ dne_b (by intro; simp)
+  exact DerivationTree.modus_ponens [A.and B] _ _ dne_b_ctx neg_neg_b
 
 end -- noncomputable section
 

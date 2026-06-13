@@ -83,22 +83,6 @@ theorem truth_at_swap_swap {ℱ : TaskFrame D} (M : TaskModel Atom ℱ)
     constructor <;> intro h <;> intro h_φ
     · exact (ih_ψ τ t).mp (h ((ih_φ τ t).mpr h_φ))
     · exact (ih_ψ τ t).mpr (h ((ih_φ τ t).mp h_φ))
-  | and φ ψ ih_φ ih_ψ =>
-    -- Conjunction case: (φ.swap.swap ∧ ψ.swap.swap) <-> (φ ∧ ψ)
-    simp only [Formula.swapTemporal, truthAt]
-    constructor
-    · intro ⟨hφ, hψ⟩
-      exact ⟨(ih_φ τ t).mp hφ, (ih_ψ τ t).mp hψ⟩
-    · intro ⟨hφ, hψ⟩
-      exact ⟨(ih_φ τ t).mpr hφ, (ih_ψ τ t).mpr hψ⟩
-  | or φ ψ ih_φ ih_ψ =>
-    -- Disjunction case: (φ.swap.swap ∨ ψ.swap.swap) <-> (φ ∨ ψ)
-    simp only [Formula.swapTemporal, truthAt]
-    constructor
-    · intro h
-      exact h.imp (ih_φ τ t).mp (ih_ψ τ t).mp
-    · intro h
-      exact h.imp (ih_φ τ t).mpr (ih_ψ τ t).mpr
   | box φ ih =>
     -- Box case: box(φ.swap.swap) <-> box φ
     simp only [Formula.swapTemporal, truthAt]

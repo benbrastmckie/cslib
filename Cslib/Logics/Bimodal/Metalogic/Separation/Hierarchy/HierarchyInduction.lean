@@ -72,12 +72,6 @@ theorem subst_S_free_preserves_S_free (ψ : Formula Atom) (p : Atom) (r : Formul
   | imp c d ih1 ih2 =>
     simp [isSFree] at hψ
     simp [substFormula, isSFree, ih1 hψ.1, ih2 hψ.2]
-  | and c d ih1 ih2 =>
-    simp [isSFree] at hψ
-    simp [substFormula, isSFree, ih1 hψ.1, ih2 hψ.2]
-  | or c d ih1 ih2 =>
-    simp [isSFree] at hψ
-    simp [substFormula, isSFree, ih1 hψ.1, ih2 hψ.2]
   | box c ih =>
     simp [isSFree] at hψ
     simp [substFormula, isSFree, ih hψ]
@@ -99,12 +93,6 @@ theorem subst_U_free_preserves_U_free (ψ : Formula Atom) (p : Atom) (r : Formul
     · simp [isUFree]
   | bot => simp [substFormula, isUFree]
   | imp c d ih1 ih2 =>
-    simp [isUFree] at hψ
-    simp [substFormula, isUFree, ih1 hψ.1, ih2 hψ.2]
-  | and c d ih1 ih2 =>
-    simp [isUFree] at hψ
-    simp [substFormula, isUFree, ih1 hψ.1, ih2 hψ.2]
-  | or c d ih1 ih2 =>
     simp [isUFree] at hψ
     simp [substFormula, isUFree, ih1 hψ.1, ih2 hψ.2]
   | box c ih =>
@@ -133,12 +121,6 @@ theorem subst_U_free_gives_no_S_nested (ψ : Formula Atom) (p : Atom) (A B : For
   | imp c d ih1 ih2 =>
     simp [isUFree] at hψ
     exact ⟨ih1 hψ.1, ih2 hψ.2⟩
-  | and c d ih1 ih2 =>
-    simp [isUFree] at hψ
-    exact ⟨ih1 hψ.1, ih2 hψ.2⟩
-  | or c d ih1 ih2 =>
-    simp [isUFree] at hψ
-    exact ⟨ih1 hψ.1, ih2 hψ.2⟩
   | box c ih =>
     simp [isUFree] at hψ
     exact ih hψ
@@ -162,12 +144,6 @@ theorem subst_preserves_no_allpast_allfuture (ψ : Formula Atom) (p : Atom) (r :
   | imp c d ih1 ih2 =>
     simp [substFormula, hasNoAllpastAllfuture,
       ih1 (has_no_allpast_allfuture_true c), ih2 (has_no_allpast_allfuture_true d)]
-  | and c d ih1 ih2 =>
-    simp [substFormula, hasNoAllpastAllfuture,
-      ih1 (has_no_allpast_allfuture_true c), ih2 (has_no_allpast_allfuture_true d)]
-  | or c d ih1 ih2 =>
-    simp [substFormula, hasNoAllpastAllfuture,
-      ih1 (has_no_allpast_allfuture_true c), ih2 (has_no_allpast_allfuture_true d)]
   | box _ => simp [substFormula, hasNoAllpastAllfuture]
   | untl c d ih1 ih2 =>
     simp [substFormula, hasNoAllpastAllfuture,
@@ -186,8 +162,6 @@ def containsUntlSurface : Formula Atom → Formula Atom → Formula Atom → Pro
   | .atom _, _, _ => False
   | .bot, _, _ => False
   | .imp c d, A, B => containsUntlSurface c A B ∨ containsUntlSurface d A B
-  | .and c d, A, B => containsUntlSurface c A B ∨ containsUntlSurface d A B
-  | .or c d, A, B => containsUntlSurface c A B ∨ containsUntlSurface d A B
   | .box c, A, B => containsUntlSurface c A B
   | .untl c d, A, B => c = A ∧ d = B
   | .snce c d, A, B => containsUntlSurface c A B ∨ containsUntlSurface d A B
@@ -204,18 +178,6 @@ theorem abstract_untl_count_lt_of_contains_surface (phi A B : Formula Atom) (p :
   | atom _ => exact absurd h_contains id
   | bot => exact absurd h_contains id
   | imp c d ih1 ih2 =>
-    simp only [containsUntlSurface] at h_contains
-    simp only [abstractUntl, countUSubformulas]
-    rcases h_contains with hc | hd
-    · have := ih1 hc; have := abstract_untl_count_le d A B p; omega
-    · have := ih2 hd; have := abstract_untl_count_le c A B p; omega
-  | and c d ih1 ih2 =>
-    simp only [containsUntlSurface] at h_contains
-    simp only [abstractUntl, countUSubformulas]
-    rcases h_contains with hc | hd
-    · have := ih1 hc; have := abstract_untl_count_le d A B p; omega
-    · have := ih2 hd; have := abstract_untl_count_le c A B p; omega
-  | or c d ih1 ih2 =>
     simp only [containsUntlSurface] at h_contains
     simp only [abstractUntl, countUSubformulas]
     rcases h_contains with hc | hd
@@ -249,10 +211,6 @@ theorem abstract_untl_count_total_le (phi A B : Formula Atom) (p : Atom) :
   | bot => simp [abstractUntl, countUTotal]
   | imp c d ih1 ih2 =>
     simp [abstractUntl, countUTotal]; exact Nat.add_le_add ih1 ih2
-  | and c d ih1 ih2 =>
-    simp [abstractUntl, countUTotal]; exact Nat.add_le_add ih1 ih2
-  | or c d ih1 ih2 =>
-    simp [abstractUntl, countUTotal]; exact Nat.add_le_add ih1 ih2
   | box c ih =>
     simp [abstractUntl, countUTotal]; exact ih
   | untl c d ih1 ih2 =>
@@ -268,8 +226,6 @@ def containsUntlDeep : Formula Atom → Formula Atom → Formula Atom → Prop
   | .atom _, _, _ => False
   | .bot, _, _ => False
   | .imp c d, A, B => containsUntlDeep c A B ∨ containsUntlDeep d A B
-  | .and c d, A, B => containsUntlDeep c A B ∨ containsUntlDeep d A B
-  | .or c d, A, B => containsUntlDeep c A B ∨ containsUntlDeep d A B
   | .box c, A, B => containsUntlDeep c A B
   | .untl c d, A, B => (c = A ∧ d = B) ∨
       containsUntlDeep c A B ∨ containsUntlDeep d A B
@@ -282,16 +238,6 @@ theorem contains_untl_surface_implies_deep (phi A B : Formula Atom) :
   | atom _ => exact id
   | bot => exact id
   | imp c d ih1 ih2 =>
-    simp only [containsUntlSurface, containsUntlDeep]
-    intro h; rcases h with hc | hd
-    · exact Or.inl (ih1 hc)
-    · exact Or.inr (ih2 hd)
-  | and c d ih1 ih2 =>
-    simp only [containsUntlSurface, containsUntlDeep]
-    intro h; rcases h with hc | hd
-    · exact Or.inl (ih1 hc)
-    · exact Or.inr (ih2 hd)
-  | or c d ih1 ih2 =>
     simp only [containsUntlSurface, containsUntlDeep]
     intro h; rcases h with hc | hd
     · exact Or.inl (ih1 hc)
@@ -316,18 +262,6 @@ theorem abstract_untl_count_total_lt_of_contains_deep (phi A B : Formula Atom) (
   | atom _ => exact absurd h_contains id
   | bot => exact absurd h_contains id
   | imp c d ih1 ih2 =>
-    simp only [containsUntlDeep] at h_contains
-    simp only [abstractUntl, countUTotal]
-    rcases h_contains with hc | hd
-    · have := ih1 hc; have := abstract_untl_count_total_le d A B p; omega
-    · have := ih2 hd; have := abstract_untl_count_total_le c A B p; omega
-  | and c d ih1 ih2 =>
-    simp only [containsUntlDeep] at h_contains
-    simp only [abstractUntl, countUTotal]
-    rcases h_contains with hc | hd
-    · have := ih1 hc; have := abstract_untl_count_total_le d A B p; omega
-    · have := ih2 hd; have := abstract_untl_count_total_le c A B p; omega
-  | or c d ih1 ih2 =>
     simp only [containsUntlDeep] at h_contains
     simp only [abstractUntl, countUTotal]
     rcases h_contains with hc | hd
@@ -363,12 +297,6 @@ theorem s_free_implies_no_S_nested (phi : Formula Atom) (h : isSFree phi = true)
   | imp a b ih1 ih2 =>
     simp only [isSFree, Bool.and_eq_true] at h
     exact ⟨ih1 h.1, ih2 h.2⟩
-  | and a b ih1 ih2 =>
-    simp only [isSFree, Bool.and_eq_true] at h
-    exact ⟨ih1 h.1, ih2 h.2⟩
-  | or a b ih1 ih2 =>
-    simp only [isSFree, Bool.and_eq_true] at h
-    exact ⟨ih1 h.1, ih2 h.2⟩
   | box a ih => simp only [isSFree] at h; exact ih h
   | untl a b =>
     simp only [isSFree, Bool.and_eq_true] at h
@@ -383,12 +311,6 @@ noncomputable def extractInnermostUType :
   | .atom _, h, _ => by simp [isUFree] at h
   | .bot, h, _ => by simp [isUFree] at h
   | .imp c d, h, hns =>
-    if hc : isUFree c = false then extractInnermostUType c hc hns.1
-    else extractInnermostUType d (by simp only [isUFree] at h; simp [hc] at h; exact h) hns.2
-  | .and c d, h, hns =>
-    if hc : isUFree c = false then extractInnermostUType c hc hns.1
-    else extractInnermostUType d (by simp only [isUFree] at h; simp [hc] at h; exact h) hns.2
-  | .or c d, h, hns =>
     if hc : isUFree c = false then extractInnermostUType c hc hns.1
     else extractInnermostUType d (by simp only [isUFree] at h; simp [hc] at h; exact h) hns.2
   | .box c, h, hns => extractInnermostUType c (by simp only [isUFree] at h; exact h) hns
@@ -412,22 +334,6 @@ theorem extract_innermost_U_type_S_free (φ : Formula Atom) (h : isUFree φ = fa
   | atom _ => simp [isUFree] at h
   | bot => simp [isUFree] at h
   | imp c d ih1 ih2 =>
-    unfold extractInnermostUType
-    by_cases hc : isUFree c = false
-    · simp only [hc, ↓reduceDIte]; exact ih1 hc hns.1
-    · simp only [hc, ↓reduceDIte]
-      have hd : isUFree d = false := by
-        simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
-      exact ih2 hd hns.2
-  | and c d ih1 ih2 =>
-    unfold extractInnermostUType
-    by_cases hc : isUFree c = false
-    · simp only [hc, ↓reduceDIte]; exact ih1 hc hns.1
-    · simp only [hc, ↓reduceDIte]
-      have hd : isUFree d = false := by
-        simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
-      exact ih2 hd hns.2
-  | or c d ih1 ih2 =>
     unfold extractInnermostUType
     by_cases hc : isUFree c = false
     · simp only [hc, ↓reduceDIte]; exact ih1 hc hns.1
@@ -465,22 +371,6 @@ theorem extract_innermost_U_type_U_free (φ : Formula Atom) (h : isUFree φ = fa
   | atom _ => simp [isUFree] at h
   | bot => simp [isUFree] at h
   | imp c d ih1 ih2 =>
-    unfold extractInnermostUType
-    by_cases hc : isUFree c = false
-    · simp only [hc, ↓reduceDIte]; exact ih1 hc hns.1
-    · simp only [hc, ↓reduceDIte]
-      have hd : isUFree d = false := by
-        simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
-      exact ih2 hd hns.2
-  | and c d ih1 ih2 =>
-    unfold extractInnermostUType
-    by_cases hc : isUFree c = false
-    · simp only [hc, ↓reduceDIte]; exact ih1 hc hns.1
-    · simp only [hc, ↓reduceDIte]
-      have hd : isUFree d = false := by
-        simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
-      exact ih2 hd hns.2
-  | or c d ih1 ih2 =>
     unfold extractInnermostUType
     by_cases hc : isUFree c = false
     · simp only [hc, ↓reduceDIte]; exact ih1 hc hns.1
@@ -532,24 +422,6 @@ theorem extract_innermost_U_type_contains_deep (φ : Formula Atom) (h : isUFree 
       have hd : isUFree d = false := by
         simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
       exact Or.inr (ih2 hd hns.2)
-  | and c d ih1 ih2 =>
-    unfold extractInnermostUType
-    by_cases hc : isUFree c = false
-    · simp only [hc, ↓reduceDIte, containsUntlDeep]
-      exact Or.inl (ih1 hc hns.1)
-    · simp only [hc, ↓reduceDIte, containsUntlDeep]
-      have hd : isUFree d = false := by
-        simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
-      exact Or.inr (ih2 hd hns.2)
-  | or c d ih1 ih2 =>
-    unfold extractInnermostUType
-    by_cases hc : isUFree c = false
-    · simp only [hc, ↓reduceDIte, containsUntlDeep]
-      exact Or.inl (ih1 hc hns.1)
-    · simp only [hc, ↓reduceDIte, containsUntlDeep]
-      have hd : isUFree d = false := by
-        simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
-      exact Or.inr (ih2 hd hns.2)
   | box c ih =>
     simp only [isUFree] at h
     unfold extractInnermostUType; simp only [containsUntlDeep]; exact ih h hns
@@ -582,12 +454,6 @@ theorem abstract_untl_preserves_no_allpast_allfuture (phi A B : Formula Atom) (p
   | atom _ => simp [abstractUntl, hasNoAllpastAllfuture]
   | bot => simp [abstractUntl, hasNoAllpastAllfuture]
   | imp c d ih1 ih2 =>
-    simp [abstractUntl, hasNoAllpastAllfuture,
-      ih1 (has_no_allpast_allfuture_true c), ih2 (has_no_allpast_allfuture_true d)]
-  | and c d ih1 ih2 =>
-    simp [abstractUntl, hasNoAllpastAllfuture,
-      ih1 (has_no_allpast_allfuture_true c), ih2 (has_no_allpast_allfuture_true d)]
-  | or c d ih1 ih2 =>
     simp [abstractUntl, hasNoAllpastAllfuture,
       ih1 (has_no_allpast_allfuture_true c), ih2 (has_no_allpast_allfuture_true d)]
   | box _ => simp [abstractUntl, hasNoAllpastAllfuture]
@@ -626,12 +492,6 @@ theorem subst_in_separated_separable (ψ : Formula Atom) (p : Atom) (A B : Formu
   | imp c d ih_c ih_d =>
     simp [isSyntacticallySeparated] at hsep
     exact imp_separable (ih_c hsep.1) (ih_d hsep.2)
-  | and c d ih_c ih_d =>
-    simp [isSyntacticallySeparated] at hsep
-    exact and_separable (ih_c hsep.1) (ih_d hsep.2)
-  | or c d ih_c ih_d =>
-    simp [isSyntacticallySeparated] at hsep
-    exact or_separable (ih_c hsep.1) (ih_d hsep.2)
   | untl c d _ _ =>
     simp [isSyntacticallySeparated] at hsep
     have hU_sf : isSFree (.untl A B) = true := by
@@ -678,12 +538,6 @@ noncomputable def extractUType : (φ : Formula Atom) → (isUFree φ = false) �
   | .imp c d, h, hns =>
     if hc : isUFree c = false then extractUType c hc hns.1
     else extractUType d (by simp only [isUFree] at h; simp [hc] at h; exact h) hns.2
-  | .and c d, h, hns =>
-    if hc : isUFree c = false then extractUType c hc hns.1
-    else extractUType d (by simp only [isUFree] at h; simp [hc] at h; exact h) hns.2
-  | .or c d, h, hns =>
-    if hc : isUFree c = false then extractUType c hc hns.1
-    else extractUType d (by simp only [isUFree] at h; simp [hc] at h; exact h) hns.2
   | .box c, h, hns => extractUType c (by simp only [isUFree] at h; exact h) hns
   | .untl a b, _, _ => (a, b)
   | .snce c d, h, hns =>
@@ -698,22 +552,6 @@ theorem extract_U_type_S_free (φ : Formula Atom) (h : isUFree φ = false)
   | atom _ => simp [isUFree] at h
   | bot => simp [isUFree] at h
   | imp c d ih1 ih2 =>
-    unfold extractUType
-    by_cases hc : isUFree c = false
-    · simp only [hc, ↓reduceDIte]; exact ih1 hc hns.1
-    · simp only [hc, ↓reduceDIte]
-      have hd : isUFree d = false := by
-        simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
-      exact ih2 hd hns.2
-  | and c d ih1 ih2 =>
-    unfold extractUType
-    by_cases hc : isUFree c = false
-    · simp only [hc, ↓reduceDIte]; exact ih1 hc hns.1
-    · simp only [hc, ↓reduceDIte]
-      have hd : isUFree d = false := by
-        simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
-      exact ih2 hd hns.2
-  | or c d ih1 ih2 =>
     unfold extractUType
     by_cases hc : isUFree c = false
     · simp only [hc, ↓reduceDIte]; exact ih1 hc hns.1
@@ -751,24 +589,6 @@ theorem extract_U_type_contains_surface (φ : Formula Atom) (h : isUFree φ = fa
       have hd : isUFree d = false := by
         simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
       exact Or.inr (ih2 hd hns.2)
-  | and c d ih1 ih2 =>
-    unfold extractUType
-    by_cases hc : isUFree c = false
-    · simp only [hc, ↓reduceDIte, containsUntlSurface]
-      exact Or.inl (ih1 hc hns.1)
-    · simp only [hc, containsUntlSurface]
-      have hd : isUFree d = false := by
-        simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
-      exact Or.inr (ih2 hd hns.2)
-  | or c d ih1 ih2 =>
-    unfold extractUType
-    by_cases hc : isUFree c = false
-    · simp only [hc, ↓reduceDIte, containsUntlSurface]
-      exact Or.inl (ih1 hc hns.1)
-    · simp only [hc, containsUntlSurface]
-      have hd : isUFree d = false := by
-        simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
-      exact Or.inr (ih2 hd hns.2)
   | box c ih =>
     simp only [isUFree] at h
     unfold extractUType; simp only [containsUntlSurface]; exact ih h hns
@@ -798,8 +618,6 @@ def snceDepthOfU : Formula Atom → Nat
   | .atom _ => 0
   | .bot => 0
   | .imp a b => max (snceDepthOfU a) (snceDepthOfU b)
-  | .and a b => max (snceDepthOfU a) (snceDepthOfU b)
-  | .or a b => max (snceDepthOfU a) (snceDepthOfU b)
   | .box a => snceDepthOfU a
   | .untl _ _ => 0
   | .snce a b =>
@@ -813,12 +631,6 @@ theorem snce_depth_of_U_zero_of_U_free (phi : Formula Atom)
   | atom _ => rfl
   | bot => rfl
   | imp a b ih1 ih2 =>
-    simp [isUFree] at h
-    simp [snceDepthOfU, ih1 h.1, ih2 h.2]
-  | and a b ih1 ih2 =>
-    simp [isUFree] at h
-    simp [snceDepthOfU, ih1 h.1, ih2 h.2]
-  | or a b ih1 ih2 =>
     simp [isUFree] at h
     simp [snceDepthOfU, ih1 h.1, ih2 h.2]
   | box a ih => simp [isUFree] at h; simp [snceDepthOfU, ih h]
@@ -890,14 +702,6 @@ theorem snce_depth_zero_no_S_nested_separated (phi : Formula Atom)
     simp [snceDepthOfU] at hd
     simp [noSNestedInU] at hns
     simp [isSyntacticallySeparated, ih1 hns.1 (by omega), ih2 hns.2 (by omega)]
-  | and a b ih1 ih2 =>
-    simp [snceDepthOfU] at hd
-    simp [noSNestedInU] at hns
-    simp [isSyntacticallySeparated, ih1 hns.1 (by omega), ih2 hns.2 (by omega)]
-  | or a b ih1 ih2 =>
-    simp [snceDepthOfU] at hd
-    simp [noSNestedInU] at hns
-    simp [isSyntacticallySeparated, ih1 hns.1 (by omega), ih2 hns.2 (by omega)]
   | box a ih =>
     simp [isSyntacticallySeparated]
   | untl a b _ _ =>
@@ -933,16 +737,6 @@ theorem snce_depth_zero_single_U_separated (phi A B : Formula Atom)
     simp [isSyntacticallySeparated,
       ih1 hsingle.1 (has_no_allpast_allfuture_true a) (by omega),
       ih2 hsingle.2 (has_no_allpast_allfuture_true b) (by omega)]
-  | and a b ih1 ih2 =>
-    simp [snceDepthOfU] at hdepth
-    simp [isSyntacticallySeparated,
-      ih1 hsingle.1 (has_no_allpast_allfuture_true a) (by omega),
-      ih2 hsingle.2 (has_no_allpast_allfuture_true b) (by omega)]
-  | or a b ih1 ih2 =>
-    simp [snceDepthOfU] at hdepth
-    simp [isSyntacticallySeparated,
-      ih1 hsingle.1 (has_no_allpast_allfuture_true a) (by omega),
-      ih2 hsingle.2 (has_no_allpast_allfuture_true b) (by omega)]
   | box _ => rfl
   | untl a b _ _ =>
     have ⟨ha, hb⟩ := hsingle; subst ha; subst hb
@@ -968,8 +762,6 @@ def U_nesting_depth : Formula Atom → Nat
   | .atom _ => 0
   | .bot => 0
   | .imp a b => max (U_nesting_depth a) (U_nesting_depth b)
-  | .and a b => max (U_nesting_depth a) (U_nesting_depth b)
-  | .or a b => max (U_nesting_depth a) (U_nesting_depth b)
   | .box a => U_nesting_depth a
   | .untl a b => 1 + max (U_nesting_depth a) (U_nesting_depth b)
   | .snce a b => max (U_nesting_depth a) (U_nesting_depth b)
@@ -981,10 +773,6 @@ theorem U_nesting_depth_zero_iff_U_free (phi : Formula Atom) :
   | atom _ => simp only [U_nesting_depth, isUFree]
   | bot => simp only [U_nesting_depth, isUFree]
   | imp a b ih1 ih2 =>
-    simp only [U_nesting_depth, isUFree, Nat.max_eq_zero_iff, Bool.and_eq_true, ih1, ih2]
-  | and a b ih1 ih2 =>
-    simp only [U_nesting_depth, isUFree, Nat.max_eq_zero_iff, Bool.and_eq_true, ih1, ih2]
-  | or a b ih1 ih2 =>
     simp only [U_nesting_depth, isUFree, Nat.max_eq_zero_iff, Bool.and_eq_true, ih1, ih2]
   | box a ih =>
     simp only [U_nesting_depth, isUFree]
@@ -1056,10 +844,6 @@ theorem abstract_untl_U_nesting_depth_le (phi A B : Formula Atom) (p : Atom) :
   | bot => simp [abstractUntl, U_nesting_depth]
   | imp c d ih1 ih2 =>
     simp only [abstractUntl, U_nesting_depth]; omega
-  | and c d ih1 ih2 =>
-    simp only [abstractUntl, U_nesting_depth]; omega
-  | or c d ih1 ih2 =>
-    simp only [abstractUntl, U_nesting_depth]; omega
   | box c ih =>
     simp only [abstractUntl, U_nesting_depth]; exact ih
   | untl c d ih1 ih2 =>
@@ -1100,14 +884,6 @@ theorem subst_U_free_gives_single_U_type (c : Formula Atom) (p : Atom)
       trivial
   | bot => simp only [substFormula, hasSingleUType]
   | imp c d ih1 ih2 =>
-    simp only [isUFree, Bool.and_eq_true] at hc_U_free
-    simp only [substFormula, hasSingleUType]
-    exact ⟨ih1 hc_U_free.1, ih2 hc_U_free.2⟩
-  | and c d ih1 ih2 =>
-    simp only [isUFree, Bool.and_eq_true] at hc_U_free
-    simp only [substFormula, hasSingleUType]
-    exact ⟨ih1 hc_U_free.1, ih2 hc_U_free.2⟩
-  | or c d ih1 ih2 =>
     simp only [isUFree, Bool.and_eq_true] at hc_U_free
     simp only [substFormula, hasSingleUType]
     exact ⟨ih1 hc_U_free.1, ih2 hc_U_free.2⟩
@@ -1153,12 +929,6 @@ theorem subst_in_separated_separable_typed (ψ : Formula Atom) (p : Atom) (A B :
   | imp c d ih_c ih_d =>
     simp [isSyntacticallySeparated] at hsep
     exact imp_separable (ih_c hsep.1) (ih_d hsep.2)
-  | and c d ih_c ih_d =>
-    simp [isSyntacticallySeparated] at hsep
-    exact and_separable (ih_c hsep.1) (ih_d hsep.2)
-  | or c d ih_c ih_d =>
-    simp [isSyntacticallySeparated] at hsep
-    exact or_separable (ih_c hsep.1) (ih_d hsep.2)
   | untl c d _ _ =>
     simp [isSyntacticallySeparated] at hsep
     have hU_sf : isSFree (.untl A B) = true := by
@@ -1204,12 +974,6 @@ theorem separated_boxnorm_snce_depth_zero (phi : Formula Atom)
   | imp a b ih1 ih2 =>
     simp only [isSyntacticallySeparated, Bool.and_eq_true] at hsep
     simp only [replaceBoxWithTop, snceDepthOfU, ih1 hsep.1, ih2 hsep.2, Nat.max_self]
-  | and a b ih1 ih2 =>
-    simp only [isSyntacticallySeparated, Bool.and_eq_true] at hsep
-    simp only [replaceBoxWithTop, snceDepthOfU, ih1 hsep.1, ih2 hsep.2, Nat.max_self]
-  | or a b ih1 ih2 =>
-    simp only [isSyntacticallySeparated, Bool.and_eq_true] at hsep
-    simp only [replaceBoxWithTop, snceDepthOfU, ih1 hsep.1, ih2 hsep.2, Nat.max_self]
   | box _ =>
     simp only [replaceBoxWithTop, snceDepthOfU, Nat.max_self]
   | untl _ _ =>
@@ -1237,8 +1001,6 @@ def replaceUntl (C A B r : Formula Atom) : Formula Atom :=
   | .atom a => .atom a
   | .bot => .bot
   | .imp c d => .imp (replaceUntl c A B r) (replaceUntl d A B r)
-  | .and c d => .and (replaceUntl c A B r) (replaceUntl d A B r)
-  | .or c d => .or (replaceUntl c A B r) (replaceUntl d A B r)
   | .box c => .box (replaceUntl c A B r)
   | .untl c d => if c = A ∧ d = B then r else .untl (replaceUntl c A B r) (replaceUntl d A B r)
   | .snce c d => .snce (replaceUntl c A B r) (replaceUntl d A B r)
@@ -1251,10 +1013,6 @@ theorem replace_untl_U_free (C A B r : Formula Atom)
   | atom _ => simp [replaceUntl, isUFree]
   | bot => simp [replaceUntl, isUFree]
   | imp c d ih1 ih2 =>
-    simp [replaceUntl, isUFree, ih1 hsingle.1, ih2 hsingle.2]
-  | and c d ih1 ih2 =>
-    simp [replaceUntl, isUFree, ih1 hsingle.1, ih2 hsingle.2]
-  | or c d ih1 ih2 =>
     simp [replaceUntl, isUFree, ih1 hsingle.1, ih2 hsingle.2]
   | box c ih =>
     simp [replaceUntl, isUFree, ih hsingle]
@@ -1271,8 +1029,6 @@ theorem replace_untl_identity_U_free (C A B r : Formula Atom) (h : isUFree C = t
   | atom _ => simp [replaceUntl]
   | bot => simp [replaceUntl]
   | imp c d ih1 ih2 => simp [isUFree] at h; simp [replaceUntl, ih1 h.1, ih2 h.2]
-  | and c d ih1 ih2 => simp [isUFree] at h; simp [replaceUntl, ih1 h.1, ih2 h.2]
-  | or c d ih1 ih2 => simp [isUFree] at h; simp [replaceUntl, ih1 h.1, ih2 h.2]
   | box c ih => simp [isUFree] at h; simp [replaceUntl, ih h]
   | untl _ _ => simp [isUFree] at h
   | snce c d ih1 ih2 => simp [isUFree] at h; simp [replaceUntl, ih1 h.1, ih2 h.2]
@@ -1295,16 +1051,6 @@ theorem single_U_eval_when_U_true (C A B : Formula Atom)
     simp only [replaceUntl, intTruth]
     exact Iff.imp (ih1 hsingle.1 (has_no_allpast_allfuture_true c) (by omega))
                   (ih2 hsingle.2 (has_no_allpast_allfuture_true d) (by omega))
-  | and c d ih1 ih2 =>
-    simp [snceDepthOfU] at hdepth
-    simp only [replaceUntl, intTruth]
-    exact Iff.and (ih1 hsingle.1 (has_no_allpast_allfuture_true c) (by omega))
-                  (ih2 hsingle.2 (has_no_allpast_allfuture_true d) (by omega))
-  | or c d ih1 ih2 =>
-    simp [snceDepthOfU] at hdepth
-    simp only [replaceUntl, intTruth]
-    exact Iff.or (ih1 hsingle.1 (has_no_allpast_allfuture_true c) (by omega))
-                 (ih2 hsingle.2 (has_no_allpast_allfuture_true d) (by omega))
   | box _ => simp [replaceUntl, intTruth]
   | untl c d _ _ =>
     have ⟨hc, hd⟩ := hsingle; subst hc; subst hd
@@ -1334,16 +1080,6 @@ theorem single_U_eval_when_U_false (C A B : Formula Atom)
     simp only [replaceUntl, intTruth]
     exact Iff.imp (ih1 hsingle.1 (has_no_allpast_allfuture_true c) (by omega))
                   (ih2 hsingle.2 (has_no_allpast_allfuture_true d) (by omega))
-  | and c d ih1 ih2 =>
-    simp [snceDepthOfU] at hdepth
-    simp only [replaceUntl, intTruth]
-    exact Iff.and (ih1 hsingle.1 (has_no_allpast_allfuture_true c) (by omega))
-                  (ih2 hsingle.2 (has_no_allpast_allfuture_true d) (by omega))
-  | or c d ih1 ih2 =>
-    simp [snceDepthOfU] at hdepth
-    simp only [replaceUntl, intTruth]
-    exact Iff.or (ih1 hsingle.1 (has_no_allpast_allfuture_true c) (by omega))
-                 (ih2 hsingle.2 (has_no_allpast_allfuture_true d) (by omega))
   | box _ => simp [replaceUntl, intTruth]
   | untl c d _ _ =>
     have ⟨hc, hd⟩ := hsingle; subst hc; subst hd

@@ -13,14 +13,13 @@ public import Mathlib.Data.Finset.Basic
 /-! # Bimodal Logic Formula
 
 This module defines the formula type for bimodal (temporal-modal) logic with primitives
-`{atom, bot, imp, and, or, box, untl, snce}`. This is the combined language that includes
-both modal necessity and temporal until/since operators, with conjunction and disjunction
-as native constructors following the hybrid five-primitive design.
+`{atom, bot, imp, box, untl, snce}`. This is the combined language that includes both
+modal necessity and temporal until/since operators.
 
 ## Derived Connectives
 
-Derived connectives from both modal and temporal logic are available:
-- Propositional: `neg`, `top`
+All derived connectives from both modal and temporal logic are available:
+- Propositional: `neg`, `top`, `and`, `or`
 - Modal: `diamond` (◇φ := ¬□¬φ)
 - Temporal: `someFuture`, `allFuture`, `somePast`, `allPast`
 -/
@@ -29,8 +28,7 @@ Derived connectives from both modal and temporal logic are available:
 
 namespace Cslib.Logic.Bimodal
 
-/-- Bimodal logic formula type. Primitives: atoms, falsum, implication, conjunction,
-disjunction, box, until, since. -/
+/-- Bimodal logic formula type. Primitives: atoms, falsum, implication, box, until, since. -/
 inductive Formula (Atom : Type u) : Type u where
   /-- Atomic proposition. -/
   | atom (p : Atom)
@@ -38,10 +36,6 @@ inductive Formula (Atom : Type u) : Type u where
   | bot
   /-- Implication. -/
   | imp (φ₁ φ₂ : Formula Atom)
-  /-- Conjunction (primitive). -/
-  | and (φ₁ φ₂ : Formula Atom)
-  /-- Disjunction (primitive). -/
-  | or (φ₁ φ₂ : Formula Atom)
   /-- Necessity / box. -/
   | box (φ : Formula Atom)
   /-- Until temporal operator: φ₁ U φ₂. -/
@@ -56,11 +50,19 @@ abbrev Formula.neg (φ : Formula Atom) : Formula Atom := .imp φ .bot
 /-- Verum / top: ⊤ := ⊥ → ⊥ -/
 abbrev Formula.top : Formula Atom := .imp .bot .bot
 
+/-- Disjunction: φ₁ ∨ φ₂ := ¬φ₁ → φ₂ -/
+abbrev Formula.or (φ₁ φ₂ : Formula Atom) : Formula Atom :=
+  .imp (.imp φ₁ .bot) φ₂
+
+/-- Conjunction: φ₁ ∧ φ₂ := ¬(φ₁ → ¬φ₂) -/
+abbrev Formula.and (φ₁ φ₂ : Formula Atom) : Formula Atom :=
+  .imp (.imp φ₁ (.imp φ₂ .bot)) .bot
+
 /-- Possibility / diamond: ◇φ := ¬□¬φ -/
 abbrev Formula.diamond (φ : Formula Atom) : Formula Atom :=
   .neg (.box (.neg φ))
 
-/-- Some future (eventually): F φ := φ U ⊤ -/
+/-- Some future (eventually): F φ := ⊤ U φ -/
 abbrev Formula.someFuture (φ : Formula Atom) : Formula Atom :=
   .untl φ .top
 
@@ -68,7 +70,7 @@ abbrev Formula.someFuture (φ : Formula Atom) : Formula Atom :=
 abbrev Formula.allFuture (φ : Formula Atom) : Formula Atom :=
   .neg (.someFuture (.neg φ))
 
-/-- Some past: P φ := φ S ⊤ -/
+/-- Some past: P φ := ⊤ S φ -/
 abbrev Formula.somePast (φ : Formula Atom) : Formula Atom :=
   .snce φ .top
 
@@ -108,14 +110,6 @@ instance : BimodalConnectives (Formula Atom) where
   untl := .untl
   snce := .snce
 
-/-- Register `HasAnd` instance for `Bimodal.Formula` (native conjunction). -/
-instance : HasAnd (Formula Atom) where
-  and := .and
-
-/-- Register `HasOr` instance for `Bimodal.Formula` (native disjunction). -/
-instance : HasOr (Formula Atom) where
-  or := .or
-
 /-! ## Swap Temporal Duality -/
 
 namespace Formula
@@ -134,8 +128,6 @@ def swapTemporal : Formula Atom -> Formula Atom
   | .atom s => .atom s
   | .bot => .bot
   | .imp phi psi => .imp (swapTemporal phi) (swapTemporal psi)
-  | .and phi psi => .and (swapTemporal phi) (swapTemporal psi)
-  | .or phi psi => .or (swapTemporal phi) (swapTemporal psi)
   | .box phi => .box (swapTemporal phi)
   | .untl phi psi => .snce (swapTemporal phi) (swapTemporal psi)
   | .snce phi psi => .untl (swapTemporal phi) (swapTemporal psi)
@@ -147,8 +139,6 @@ theorem swapTemporal_involution (phi : Formula Atom) :
   | atom _ => rfl
   | bot => rfl
   | imp _ _ ihp ihq => simp only [swapTemporal, ihp, ihq]
-  | and _ _ ih1 ih2 => simp only [swapTemporal, ih1, ih2]
-  | or _ _ ih1 ih2 => simp only [swapTemporal, ih1, ih2]
   | box _ ih => simp only [swapTemporal, ih]
   | untl _ _ ih1 ih2 => simp only [swapTemporal, ih1, ih2]
   | snce _ _ ih1 ih2 => simp only [swapTemporal, ih1, ih2]
@@ -198,8 +188,6 @@ def atoms : Formula Atom -> Finset Atom
   | .atom s => {s}
   | .bot => {}
   | .imp phi psi => atoms phi ∪ atoms psi
-  | .and phi psi => atoms phi ∪ atoms psi
-  | .or phi psi => atoms phi ∪ atoms psi
   | .box phi => atoms phi
   | .untl phi psi => atoms phi ∪ atoms psi
   | .snce phi psi => atoms phi ∪ atoms psi
@@ -211,8 +199,6 @@ theorem atoms_swapTemporal (phi : Formula Atom) :
   | atom _ => rfl
   | bot => rfl
   | imp _ _ ih1 ih2 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
-  | and _ _ ih1 ih2 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
-  | or _ _ ih1 ih2 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
   | box _ ih => simp only [swapTemporal, atoms]; rw [ih]
   | untl _ _ ih1 ih2 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
   | snce _ _ ih1 ih2 => simp only [swapTemporal, atoms]; rw [ih1, ih2]

@@ -245,8 +245,6 @@ noncomputable def restrictAtoms (φ : Formula Atom) (allowed : Set Atom) : Formu
   | .atom b => if b ∈ allowed then .atom b else .imp .bot .bot
   | .bot => .bot
   | .imp ψ₁ ψ₂ => .imp (restrictAtoms ψ₁ allowed) (restrictAtoms ψ₂ allowed)
-  | .and ψ₁ ψ₂ => .and (restrictAtoms ψ₁ allowed) (restrictAtoms ψ₂ allowed)
-  | .or ψ₁ ψ₂ => .or (restrictAtoms ψ₁ allowed) (restrictAtoms ψ₂ allowed)
   | .box ψ => .box (restrictAtoms ψ allowed)
   | .untl ψ₁ ψ₂ => .untl (restrictAtoms ψ₁ allowed) (restrictAtoms ψ₂ allowed)
   | .snce ψ₁ ψ₂ => .snce (restrictAtoms ψ₁ allowed) (restrictAtoms ψ₂ allowed)
@@ -262,8 +260,6 @@ theorem formula_atoms_restrict_subset (φ : Formula Atom) (allowed : Set Atom) :
     · simp only [formulaAtoms]; exact Set.union_subset (Set.empty_subset _) (Set.empty_subset _)
   | bot => exact Set.empty_subset _
   | imp ψ₁ ψ₂ ih1 ih2 => unfold restrictAtoms; simp only [formulaAtoms]; exact Set.union_subset ih1 ih2
-  | and ψ₁ ψ₂ ih1 ih2 => unfold restrictAtoms; simp only [formulaAtoms]; exact Set.union_subset ih1 ih2
-  | or ψ₁ ψ₂ ih1 ih2 => unfold restrictAtoms; simp only [formulaAtoms]; exact Set.union_subset ih1 ih2
   | box ψ ih => exact ih
   | untl ψ₁ ψ₂ ih1 ih2 => unfold restrictAtoms; simp only [formulaAtoms]; exact Set.union_subset ih1 ih2
   | snce ψ₁ ψ₂ ih1 ih2 => unfold restrictAtoms; simp only [formulaAtoms]; exact Set.union_subset ih1 ih2
@@ -275,10 +271,6 @@ theorem restrict_atoms_S_free (φ : Formula Atom) (allowed : Set Atom)
     unfold restrictAtoms; split <;> simp [isSFree]
   | bot => rfl
   | imp ψ₁ ψ₂ ih1 ih2 =>
-    simp [isSFree] at h; unfold restrictAtoms; simp [isSFree, ih1 h.1, ih2 h.2]
-  | and ψ₁ ψ₂ ih1 ih2 =>
-    simp [isSFree] at h; unfold restrictAtoms; simp [isSFree, ih1 h.1, ih2 h.2]
-  | or ψ₁ ψ₂ ih1 ih2 =>
     simp [isSFree] at h; unfold restrictAtoms; simp [isSFree, ih1 h.1, ih2 h.2]
   | box ψ ih =>
     simp [isSFree] at h; unfold restrictAtoms; simp [isSFree, ih h]
@@ -293,10 +285,6 @@ theorem restrict_atoms_U_free (φ : Formula Atom) (allowed : Set Atom)
     unfold restrictAtoms; split <;> simp [isUFree]
   | bot => rfl
   | imp ψ₁ ψ₂ ih1 ih2 =>
-    simp [isUFree] at h; unfold restrictAtoms; simp [isUFree, ih1 h.1, ih2 h.2]
-  | and ψ₁ ψ₂ ih1 ih2 =>
-    simp [isUFree] at h; unfold restrictAtoms; simp [isUFree, ih1 h.1, ih2 h.2]
-  | or ψ₁ ψ₂ ih1 ih2 =>
     simp [isUFree] at h; unfold restrictAtoms; simp [isUFree, ih1 h.1, ih2 h.2]
   | box ψ ih =>
     simp [isUFree] at h; unfold restrictAtoms; simp [isUFree, ih h]
@@ -313,12 +301,6 @@ theorem restrict_atoms_preserves_properly_separated (φ : Formula Atom) (allowed
     unfold restrictAtoms; split <;> simp [isProperlySeparated]
   | bot => exact h
   | imp ψ₁ ψ₂ ih1 ih2 =>
-    simp [isProperlySeparated] at h
-    unfold restrictAtoms; simp [isProperlySeparated, ih1 h.1, ih2 h.2]
-  | and ψ₁ ψ₂ ih1 ih2 =>
-    simp [isProperlySeparated] at h
-    unfold restrictAtoms; simp [isProperlySeparated, ih1 h.1, ih2 h.2]
-  | or ψ₁ ψ₂ ih1 ih2 =>
     simp [isProperlySeparated] at h
     unfold restrictAtoms; simp [isProperlySeparated, ih1 h.1, ih2 h.2]
   | box _ => unfold restrictAtoms; simp only [isProperlySeparated]
@@ -348,10 +330,6 @@ theorem restrict_atoms_truth (ψ : Formula Atom) (allowed : Set Atom)
   | bot => rfl
   | imp c d ih1 ih2 =>
     unfold restrictAtoms; simp only [intTruth]; exact Iff.imp (ih1 t) (ih2 t)
-  | and c d ih1 ih2 =>
-    unfold restrictAtoms; simp only [intTruth]; exact Iff.and (ih1 t) (ih2 t)
-  | or c d ih1 ih2 =>
-    unfold restrictAtoms; simp only [intTruth]; exact Iff.or (ih1 t) (ih2 t)
   | box _ => rfl
   | untl c d ih1 ih2 =>
     unfold restrictAtoms; simp only [intTruth]; constructor

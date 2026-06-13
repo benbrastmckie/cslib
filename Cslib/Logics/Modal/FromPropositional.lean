@@ -27,14 +27,15 @@ namespace Cslib.Logic
 
 /-- Embed a propositional formula into modal logic.
 
-Each propositional constructor maps to the corresponding modal constructor: `and` to `and`
-and `or` to `or`, preserving the native primitive structure of both formula types. -/
+The `and` and `or` cases use the Lukasiewicz encoding into `{atom, bot, imp, box}`:
+- `A ∧ B` maps to `¬(A → ¬B)` = `(A → (B → ⊥)) → ⊥`
+- `A ∨ B` maps to `¬A → B` = `(A → ⊥) → B` -/
 def PL.Proposition.toModal : PL.Proposition Atom → Modal.Proposition Atom
   | .atom p => .atom p
   | .bot => .bot
   | .imp φ₁ φ₂ => .imp (φ₁.toModal) (φ₂.toModal)
-  | .and φ₁ φ₂ => .and (φ₁.toModal) (φ₂.toModal)
-  | .or φ₁ φ₂ => .or (φ₁.toModal) (φ₂.toModal)
+  | .and φ₁ φ₂ => φ₁.toModal.and φ₂.toModal
+  | .or φ₁ φ₂ => φ₁.toModal.or φ₂.toModal
 
 /-- Coercion from propositional to modal formulas. -/
 instance instCoePLToModal : Coe (PL.Proposition Atom) (Modal.Proposition Atom) where
@@ -55,17 +56,15 @@ theorem PL.Proposition.toModal_bot :
 theorem PL.Proposition.toModal_imp (φ₁ φ₂ : PL.Proposition Atom) :
     (PL.Proposition.imp φ₁ φ₂).toModal = Modal.Proposition.imp φ₁.toModal φ₂.toModal := rfl
 
-/-- Embedding preserves and. -/
+/-- Embedding preserves and (Lukasiewicz encoding). -/
 @[simp]
 theorem PL.Proposition.toModal_and (φ₁ φ₂ : PL.Proposition Atom) :
-    (PL.Proposition.and φ₁ φ₂).toModal =
-      Modal.Proposition.and φ₁.toModal φ₂.toModal := rfl
+    (PL.Proposition.and φ₁ φ₂).toModal = φ₁.toModal.and φ₂.toModal := rfl
 
-/-- Embedding preserves or. -/
+/-- Embedding preserves or (Lukasiewicz encoding). -/
 @[simp]
 theorem PL.Proposition.toModal_or (φ₁ φ₂ : PL.Proposition Atom) :
-    (PL.Proposition.or φ₁ φ₂).toModal =
-      Modal.Proposition.or φ₁.toModal φ₂.toModal := rfl
+    (PL.Proposition.or φ₁ φ₂).toModal = φ₁.toModal.or φ₂.toModal := rfl
 
 /-- Embedding preserves neg. -/
 theorem PL.Proposition.toModal_neg (φ : PL.Proposition Atom) :
@@ -75,9 +74,7 @@ theorem PL.Proposition.toModal_neg (φ : PL.Proposition Atom) :
 
 The `toModal` embedding preserves semantic meaning: modal satisfaction of `φ.toModal` at a
 world `w` in model `m` coincides with propositional evaluation of `φ` under the valuation
-`m.v w`. Since `toModal` never introduces `box`, the accessibility relation plays no role.
-The `and`/`or` cases are now trivial since both formula types share native `and`/`or`
-constructors with matching satisfaction clauses. -/
+`m.v w`. Since `toModal` never introduces `box`, the accessibility relation plays no role. -/
 
 /-- Bridge lemma: modal satisfaction of `φ.toModal` equals propositional
 evaluation under `m.v w`. -/
@@ -94,12 +91,34 @@ theorem modal_satisfies_toModal_iff_evaluate
     exact ⟨fun h he => ih2.mp (h (ih1.mpr he)),
            fun h hm => ih2.mpr (h (ih1.mp hm))⟩
   | and φ ψ ih1 ih2 =>
-    simp only [PL.Proposition.toModal, Modal.Satisfies, PL.Evaluate]
-    exact ⟨fun ⟨h1, h2⟩ => ⟨ih1.mp h1, ih2.mp h2⟩,
-           fun ⟨h1, h2⟩ => ⟨ih1.mpr h1, ih2.mpr h2⟩⟩
+    -- Lukasiewicz: φ ∧ ψ := ¬(φ → ¬ψ) = (φ → ψ → ⊥) → ⊥
+    -- Classical equivalence: ¬(A → ¬B) ↔ A ∧ B
+    simp only [PL.Proposition.toModal, PL.Evaluate]
+    constructor
+    · intro h
+      simp only [Modal.Satisfies] at h
+      constructor
+      · by_contra hna; exact h (fun ha _ => hna (ih1.mp ha))
+      · by_contra hnb; exact h (fun _ hb => hnb (ih2.mp hb))
+    · intro ⟨ha, hb⟩
+      simp only [Modal.Satisfies]
+      intro h; exact h (ih1.mpr ha) (ih2.mpr hb)
   | or φ ψ ih1 ih2 =>
-    simp only [PL.Proposition.toModal, Modal.Satisfies, PL.Evaluate]
-    exact ⟨fun h => h.imp ih1.mp ih2.mp, fun h => h.imp ih1.mpr ih2.mpr⟩
+    -- Lukasiewicz: φ ∨ ψ := ¬φ → ψ = (φ → ⊥) → ψ
+    -- Classical equivalence: (¬A → B) ↔ A ∨ B
+    simp only [PL.Proposition.toModal, PL.Evaluate]
+    constructor
+    · intro h
+      simp only [Modal.Satisfies] at h
+      by_cases ha : PL.Evaluate (m.v w) φ
+      · exact Or.inl ha
+      · exact Or.inr (ih2.mp (h (fun hma => ha (ih1.mp hma))))
+    · intro h
+      simp only [Modal.Satisfies]
+      intro hna
+      cases h with
+      | inl ha => exact absurd (ih1.mpr ha) hna
+      | inr hb => exact ih2.mpr hb
 
 /-- Forward direction: every propositional tautology is modally valid under `toModal`. -/
 theorem tautology_toModal_valid {Atom : Type*}

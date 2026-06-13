@@ -333,18 +333,6 @@ theorem truth_lemma
         ((Proposition.box φ).imp (Proposition.box ψ))))
     (h_T : ∀ (φ : Proposition Atom),
       Axioms ((Proposition.box φ).imp φ))
-    (h_andI : ∀ (φ ψ : Proposition Atom),
-      Axioms (φ.imp (ψ.imp (φ.and ψ))))
-    (h_andE1 : ∀ (φ ψ : Proposition Atom),
-      Axioms ((φ.and ψ).imp φ))
-    (h_andE2 : ∀ (φ ψ : Proposition Atom),
-      Axioms ((φ.and ψ).imp ψ))
-    (h_orI1 : ∀ (φ ψ : Proposition Atom),
-      Axioms (φ.imp (φ.or ψ)))
-    (h_orI2 : ∀ (φ ψ : Proposition Atom),
-      Axioms (ψ.imp (φ.or ψ)))
-    (h_orE : ∀ (φ ψ χ : Proposition Atom),
-      Axioms ((φ.imp χ).imp ((ψ.imp χ).imp ((φ.or ψ).imp χ))))
     (S : CanonicalWorld Axioms) :
     (φ : Proposition Atom) →
     (Satisfies (CanonicalModel Axioms) S φ ↔ φ ∈ S.val)
@@ -356,48 +344,6 @@ theorem truth_lemma
     constructor
     · intro h; exact absurd h id
     · intro h; exact absurd h (mcs_bot_not_mem S.property)
-  | .and φ ψ => by
-    constructor
-    · intro ⟨h_sat_phi, h_sat_psi⟩
-      have h_phi_S := (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
-        h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE S φ).mp h_sat_phi
-      have h_psi_S := (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
-        h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE S ψ).mp h_sat_psi
-      have h_psi_and : (ψ.imp (φ.and ψ)) ∈ S.val :=
-        mcs_mp_axiom h_implyK h_implyS S.property h_phi_S (h_andI φ ψ)
-      exact modal_implication_property h_implyK h_implyS S.property h_psi_and h_psi_S
-    · intro h_mem
-      constructor
-      · exact (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
-          h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE S φ).mpr
-          (mcs_mp_axiom h_implyK h_implyS S.property h_mem (h_andE1 φ ψ))
-      · exact (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
-          h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE S ψ).mpr
-          (mcs_mp_axiom h_implyK h_implyS S.property h_mem (h_andE2 φ ψ))
-  | .or φ ψ => by
-    constructor
-    · intro h_sat
-      rcases h_sat with hφ | hψ
-      · have h_phi_S := (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
-          h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE S φ).mp hφ
-        exact mcs_mp_axiom h_implyK h_implyS S.property h_phi_S (h_orI1 φ ψ)
-      · have h_psi_S := (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
-          h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE S ψ).mp hψ
-        exact mcs_mp_axiom h_implyK h_implyS S.property h_psi_S (h_orI2 φ ψ)
-    · intro h_mem
-      rcases modal_negation_complete h_implyK h_implyS S.property φ with hφ | h_neg_φ
-      · exact Or.inl ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
-          h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE S φ).mpr hφ)
-      · rcases modal_negation_complete h_implyK h_implyS S.property ψ with hψ | h_neg_ψ
-        · exact Or.inr ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
-            h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE S ψ).mpr hψ)
-        · exfalso
-          have h_step1 : ((ψ.imp .bot).imp ((φ.or ψ).imp .bot)) ∈ S.val :=
-            mcs_mp_axiom h_implyK h_implyS S.property h_neg_φ (h_orE φ ψ .bot)
-          have h_step2 : ((φ.or ψ).imp .bot) ∈ S.val :=
-            modal_implication_property h_implyK h_implyS S.property h_step1 h_neg_ψ
-          exact mcs_bot_not_mem S.property
-            (modal_implication_property h_implyK h_implyS S.property h_step2 h_mem)
   | .imp φ ψ => by
     constructor
     · intro h_sat
@@ -429,11 +375,9 @@ theorem truth_lemma
             .weakening [] _ _ (.ax [] _ (h_peirce φ ψ)) (fun _ h => nomatch h)
           exact ⟨.modus_ponens _ _ _ d_peirce' d_dt⟩
         have h_sat_phi :=
-          (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
-            h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE S φ).mpr h_phi_S
+          (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T S φ).mpr h_phi_S
         have h_psi_S :=
-          (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
-            h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE S ψ).mp
+          (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T S ψ).mp
             (h_sat h_sat_phi)
         have h_neg_psi_S : (¬ψ) ∈ S.val := by
           apply modal_closed_under_derivation h_implyK h_implyS S.property
@@ -459,11 +403,9 @@ theorem truth_lemma
           (modal_implication_property h_implyK h_implyS S.property
             h_neg_psi_S h_psi_S)
     · intro h_mem h_sat_phi
-      exact (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
-          h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE S ψ).mpr
+      exact (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T S ψ).mpr
         (modal_implication_property h_implyK h_implyS S.property h_mem
-          ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
-            h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE S φ).mp
+          ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T S φ).mp
             h_sat_phi))
   | .box φ => by
     constructor
@@ -474,11 +416,9 @@ theorem truth_lemma
           S.property h_not_box
       exact h_phi_not_T
         ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
-          h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE ⟨T, hT_mcs⟩ φ).mp
-          (h_sat ⟨T, hT_mcs⟩ hST))
+          ⟨T, hT_mcs⟩ φ).mp (h_sat ⟨T, hT_mcs⟩ hST))
     · intro h_box T hST
-      exact (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
-          h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE T φ).mpr
+      exact (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T T φ).mpr
         (hST φ h_box)
 
 /-! ## Consistency of Negation -/

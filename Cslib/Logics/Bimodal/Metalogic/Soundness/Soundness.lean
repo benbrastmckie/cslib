@@ -128,11 +128,18 @@ theorem temp_l_valid (φ : Formula Atom) :
     ⊨ (φ.always.imp (Formula.allFuture (Formula.allPast φ))) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
   simp only [truthAt]
-  -- h_always : △φ = Hφ ∧ (φ ∧ Gφ) (now native conjunction)
+  -- Always encodes: Hφ ∧ φ ∧ Gφ (conjunction via double negation)
+  -- h_always encodes △φ = Hφ ∧ φ ∧ Gφ (conjunction via double negation)
   intro h_always ⟨s, _hts, h_neg_Hφs, _⟩
   apply h_neg_Hφs; intro ⟨r, hrs, h_neg_φr, _⟩
-  -- Extract Hφ, φ, Gφ from native conjunction
-  obtain ⟨h_past, h_now, h_future⟩ := h_always
+  -- Extract Hφ, (φ ∧ Gφ) from h_always
+  have h1 := and_of_not_imp_not h_always
+  obtain ⟨h_past, h_middle⟩ := h1
+  have h2 := and_of_not_imp_not h_middle
+  obtain ⟨h_now, h_future⟩ := h2
+  -- h_past : ¬∃ s < t, ¬φ(s) ∧ guard (i.e., Hφ)
+  -- h_now : truthAt ... t φ
+  -- h_future : ¬∃ s > t, ¬φ(s) ∧ guard (i.e., Gφ)
   rcases lt_trichotomy r t with h_lt | h_eq | h_gt
   · exact h_neg_φr (by by_contra h_neg; apply h_past; exact ⟨r, h_lt, h_neg, fun _ _ _ hf => absurd hf not_false⟩)
   · exact h_neg_φr (h_eq ▸ h_now)
@@ -203,43 +210,58 @@ theorem enrichment_until_valid (φ ψ p : Formula Atom) :
     ⊨ (Formula.and p (Formula.untl ψ φ) |>.imp
       (Formula.untl (Formula.and ψ (Formula.snce p φ)) φ)) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [truthAt]
-  intro ⟨h_pt, h_until⟩
+  simp only [Formula.and, Formula.neg, truthAt]
+  intro h_conj
+  have h_pt : truthAt M Omega τ t p := by
+    by_contra h_neg; exact h_conj (fun h_p _ => h_neg h_p)
+  have h_until : ∃ s, t < s ∧ truthAt M Omega τ s ψ ∧
+      ∀ r, t < r → r < s → truthAt M Omega τ r φ := by
+    by_contra h_neg; exact h_conj (fun _ h_u => h_neg h_u)
   obtain ⟨s, hts, h_ψs, h_guard⟩ := h_until
   refine ⟨s, hts, ?_, h_guard⟩
-  exact ⟨h_ψs, ⟨t, hts, h_pt, fun r htr hrs => h_guard r htr hrs⟩⟩
+  intro h_imp; exact h_imp h_ψs ⟨t, hts, h_pt, fun r htr hrs => h_guard r htr hrs⟩
 
 theorem enrichment_since_valid (φ ψ p : Formula Atom) :
     ⊨ (Formula.and p (Formula.snce ψ φ) |>.imp
       (Formula.snce (Formula.and ψ (Formula.untl p φ)) φ)) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [truthAt]
-  intro ⟨h_pt, h_since⟩
+  simp only [Formula.and, Formula.neg, truthAt]
+  intro h_conj
+  have h_pt : truthAt M Omega τ t p := by
+    by_contra h_neg; exact h_conj (fun h_p _ => h_neg h_p)
+  have h_since : ∃ s, s < t ∧ truthAt M Omega τ s ψ ∧
+      ∀ r, s < r → r < t → truthAt M Omega τ r φ := by
+    by_contra h_neg; exact h_conj (fun _ h_s => h_neg h_s)
   obtain ⟨s, hst, h_ψs, h_guard⟩ := h_since
   refine ⟨s, hst, ?_, h_guard⟩
-  exact ⟨h_ψs, ⟨t, hst, h_pt, fun r hsr hrt => h_guard r hsr hrt⟩⟩
+  intro h_imp; exact h_imp h_ψs ⟨t, hst, h_pt, fun r hsr hrt => h_guard r hsr hrt⟩
 
 theorem self_accum_until_valid (φ ψ : Formula Atom) :
     ⊨ ((Formula.untl ψ φ).imp (Formula.untl ψ (Formula.and φ (Formula.untl ψ φ)))) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [truthAt]
+  simp only [Formula.and, Formula.neg, truthAt]
   intro ⟨s, hts, h_ψs, h_guard⟩
-  refine ⟨s, hts, h_ψs, fun r htr hrs => ?_⟩
-  exact ⟨h_guard r htr hrs, ⟨s, hrs, h_ψs, fun q hqr hqs => h_guard q (lt_trans htr hqr) hqs⟩⟩
+  refine ⟨s, hts, h_ψs, fun r htr hrs h_imp => ?_⟩
+  exact h_imp (h_guard r htr hrs) ⟨s, hrs, h_ψs, fun q hqr hqs => h_guard q (lt_trans htr hqr) hqs⟩
 
 theorem self_accum_since_valid (φ ψ : Formula Atom) :
     ⊨ ((Formula.snce ψ φ).imp (Formula.snce ψ (Formula.and φ (Formula.snce ψ φ)))) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [truthAt]
+  simp only [Formula.and, Formula.neg, truthAt]
   intro ⟨s, hst, h_ψs, h_guard⟩
-  refine ⟨s, hst, h_ψs, fun r hsr hrt => ?_⟩
-  exact ⟨h_guard r hsr hrt, ⟨s, hsr, h_ψs, fun q hsq hqr => h_guard q hsq (lt_trans hqr hrt)⟩⟩
+  refine ⟨s, hst, h_ψs, fun r hsr hrt h_imp => ?_⟩
+  exact h_imp (h_guard r hsr hrt) ⟨s, hsr, h_ψs, fun q hsq hqr => h_guard q hsq (lt_trans hqr hrt)⟩
 
 theorem absorb_until_valid (φ ψ : Formula Atom) :
     ⊨ ((Formula.untl (Formula.and φ (Formula.untl ψ φ)) φ).imp (Formula.untl ψ φ)) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [truthAt]
-  intro ⟨s₁, hts₁, ⟨h_φs₁, s₂, hs₁s₂, h_ψs₂, h_guard₂⟩, h_guard₁⟩
+  simp only [Formula.and, Formula.neg, truthAt]
+  intro ⟨s₁, hts₁, h_conj, h_guard₁⟩
+  have ⟨h_φs₁, s₂, hs₁s₂, h_ψs₂, h_guard₂⟩ :
+      truthAt M Omega τ s₁ φ ∧ (∃ s₂, s₁ < s₂ ∧ truthAt M Omega τ s₂ ψ ∧
+        ∀ q, s₁ < q → q < s₂ → truthAt M Omega τ q φ) := by
+    exact ⟨by by_contra h; exact h_conj (fun a _ => h a),
+           by by_contra h; exact h_conj (fun _ b => h b)⟩
   refine ⟨s₂, lt_trans hts₁ hs₁s₂, h_ψs₂, fun q htq hqs₂ => ?_⟩
   rcases lt_trichotomy q s₁ with h_lt | h_eq | h_gt
   · exact h_guard₁ q htq h_lt
@@ -249,8 +271,13 @@ theorem absorb_until_valid (φ ψ : Formula Atom) :
 theorem absorb_since_valid (φ ψ : Formula Atom) :
     ⊨ ((Formula.snce (Formula.and φ (Formula.snce ψ φ)) φ).imp (Formula.snce ψ φ)) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [truthAt]
-  intro ⟨s₁, hs₁t, ⟨h_φs₁, s₂, hs₂s₁, h_ψs₂, h_guard₂⟩, h_guard₁⟩
+  simp only [Formula.and, Formula.neg, truthAt]
+  intro ⟨s₁, hs₁t, h_conj, h_guard₁⟩
+  have ⟨h_φs₁, s₂, hs₂s₁, h_ψs₂, h_guard₂⟩ :
+      truthAt M Omega τ s₁ φ ∧ (∃ s₂, s₂ < s₁ ∧ truthAt M Omega τ s₂ ψ ∧
+        ∀ q, s₂ < q → q < s₁ → truthAt M Omega τ q φ) := by
+    exact ⟨by by_contra h; exact h_conj (fun a _ => h a),
+           by by_contra h; exact h_conj (fun _ b => h b)⟩
   refine ⟨s₂, lt_trans hs₂s₁ hs₁t, h_ψs₂, fun q hs₂q hqt => ?_⟩
   rcases lt_trichotomy q s₁ with h_lt | h_eq | h_gt
   · exact h_guard₂ q hs₂q h_lt
@@ -263,18 +290,29 @@ theorem linear_until_valid (φ ψ χ θ : Formula Atom) :
           (Formula.untl (Formula.and ψ χ) (Formula.and φ χ)))
         (Formula.untl (Formula.and φ θ) (Formula.and φ χ)))) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [truthAt]
-  intro ⟨⟨s₁, hts₁, h_ψs₁, h_guard₁⟩, s₂, hts₂, h_θs₂, h_guard₂⟩
+  simp only [Formula.and, Formula.or, Formula.neg, truthAt]
+  intro h_conj
+  have h_both : (∃ s, t < s ∧ truthAt M Omega τ s ψ ∧
+      ∀ r, t < r → r < s → truthAt M Omega τ r φ) ∧
+    (∃ s, t < s ∧ truthAt M Omega τ s θ ∧
+      ∀ r, t < r → r < s → truthAt M Omega τ r χ) := by
+    constructor
+    · by_contra h; exact h_conj (fun h1 _ => h h1)
+    · by_contra h; exact h_conj (fun _ h2 => h h2)
+  obtain ⟨⟨s₁, hts₁, h_ψs₁, h_guard₁⟩, s₂, hts₂, h_θs₂, h_guard₂⟩ := h_both
   rcases lt_trichotomy s₁ s₂ with h_lt | h_eq | h_gt
-  · -- s₁ < s₂: second disjunct U(ψ∧χ, φ∧χ) at s₁
-    exact Or.inl (Or.inr ⟨s₁, hts₁, ⟨h_ψs₁, h_guard₂ s₁ hts₁ h_lt⟩,
-      fun r htr hrs => ⟨h_guard₁ r htr hrs, h_guard₂ r htr (lt_trans hrs h_lt)⟩⟩)
-  · -- s₁ = s₂: first disjunct U(ψ∧θ, φ∧χ)
-    exact Or.inl (Or.inl ⟨s₁, hts₁, ⟨h_ψs₁, h_eq ▸ h_θs₂⟩,
-      fun r htr hrs => ⟨h_guard₁ r htr hrs, h_guard₂ r htr (h_eq ▸ hrs)⟩⟩)
-  · -- s₂ < s₁: third disjunct U(φ∧θ, φ∧χ) at s₂
-    exact Or.inr ⟨s₂, hts₂, ⟨h_guard₁ s₂ hts₂ h_gt, h_θs₂⟩,
-      fun r htr hrs => ⟨h_guard₁ r htr (lt_trans hrs h_gt), h_guard₂ r htr hrs⟩⟩
+  · intro h_neg; exfalso; apply h_neg; intro _
+    refine ⟨s₁, hts₁, ?_, fun r htr hrs h_imp => ?_⟩
+    · intro h_neg; exact h_neg h_ψs₁ (h_guard₂ s₁ hts₁ h_lt)
+    · exact h_imp (h_guard₁ r htr hrs) (h_guard₂ r htr (lt_trans hrs h_lt))
+  · intro h_outer; exfalso; apply h_outer; intro h_inner; exfalso; apply h_inner
+    refine ⟨s₁, hts₁, ?_, fun r htr hrs h_imp => ?_⟩
+    · intro h_neg; exact h_neg h_ψs₁ (h_eq ▸ h_θs₂)
+    · exact h_imp (h_guard₁ r htr hrs) (h_guard₂ r htr (h_eq ▸ hrs))
+  · intro _
+    refine ⟨s₂, hts₂, ?_, fun r htr hrs h_imp => ?_⟩
+    · intro h_neg; exact h_neg (h_guard₁ s₂ hts₂ h_gt) h_θs₂
+    · exact h_imp (h_guard₁ r htr (lt_trans hrs h_gt)) (h_guard₂ r htr hrs)
 
 theorem linear_since_valid (φ ψ χ θ : Formula Atom) :
     ⊨ (Formula.and (Formula.snce ψ φ) (Formula.snce θ χ) |>.imp
@@ -282,20 +320,29 @@ theorem linear_since_valid (φ ψ χ θ : Formula Atom) :
           (Formula.snce (Formula.and ψ χ) (Formula.and φ χ)))
         (Formula.snce (Formula.and φ θ) (Formula.and φ χ)))) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [truthAt]
-  intro ⟨h_left, h_right⟩
-  obtain ⟨s₁, hs₁t, h_ψs₁, h_guard₁⟩ := h_left
-  obtain ⟨s₂, hs₂t, h_θs₂, h_guard₂⟩ := h_right
+  simp only [Formula.and, Formula.or, Formula.neg, truthAt]
+  intro h_conj
+  have h_both : (∃ s, s < t ∧ truthAt M Omega τ s ψ ∧
+      ∀ r, s < r → r < t → truthAt M Omega τ r φ) ∧
+    (∃ s, s < t ∧ truthAt M Omega τ s θ ∧
+      ∀ r, s < r → r < t → truthAt M Omega τ r χ) := by
+    constructor
+    · by_contra h; exact h_conj (fun h1 _ => h h1)
+    · by_contra h; exact h_conj (fun _ h2 => h h2)
+  obtain ⟨⟨s₁, hs₁t, h_ψs₁, h_guard₁⟩, s₂, hs₂t, h_θs₂, h_guard₂⟩ := h_both
   rcases lt_trichotomy s₁ s₂ with h_lt | h_eq | h_gt
-  · -- s₁ < s₂: third disjunct S(φ∧θ, φ∧χ) at s₂
-    exact Or.inr ⟨s₂, hs₂t, ⟨h_guard₁ s₂ h_lt hs₂t, h_θs₂⟩,
-      fun r hsr hrt => ⟨h_guard₁ r (lt_trans h_lt hsr) hrt, h_guard₂ r hsr hrt⟩⟩
-  · -- s₁ = s₂: first disjunct S(ψ∧θ, φ∧χ)
-    exact Or.inl (Or.inl ⟨s₁, hs₁t, ⟨h_ψs₁, h_eq ▸ h_θs₂⟩,
-      fun r hsr hrt => ⟨h_guard₁ r hsr hrt, h_guard₂ r (h_eq ▸ hsr) hrt⟩⟩)
-  · -- s₂ < s₁: second disjunct S(ψ∧χ, φ∧χ) at s₁
-    exact Or.inl (Or.inr ⟨s₁, hs₁t, ⟨h_ψs₁, h_guard₂ s₁ h_gt hs₁t⟩,
-      fun r hsr hrt => ⟨h_guard₁ r hsr hrt, h_guard₂ r (lt_trans h_gt hsr) hrt⟩⟩)
+  · intro _
+    refine ⟨s₂, hs₂t, ?_, fun r hs₂r hrt h_imp => ?_⟩
+    · intro h_neg; exact h_neg (h_guard₁ s₂ h_lt hs₂t) h_θs₂
+    · exact h_imp (h_guard₁ r (lt_trans h_lt hs₂r) hrt) (h_guard₂ r hs₂r hrt)
+  · intro h_outer; exfalso; apply h_outer; intro h_inner; exfalso; apply h_inner
+    refine ⟨s₁, hs₁t, ?_, fun r hs₁r hrt h_imp => ?_⟩
+    · intro h_neg; exact h_neg h_ψs₁ (h_eq ▸ h_θs₂)
+    · exact h_imp (h_guard₁ r hs₁r hrt) (h_guard₂ r (h_eq ▸ hs₁r) hrt)
+  · intro h_neg; exfalso; apply h_neg; intro _
+    refine ⟨s₁, hs₁t, ?_, fun r hs₁r hrt h_imp => ?_⟩
+    · intro h_neg; exact h_neg h_ψs₁ (h_guard₂ s₁ h_gt hs₁t)
+    · exact h_imp (h_guard₁ r hs₁r hrt) (h_guard₂ r (lt_trans h_gt hs₁r) hrt)
 
 theorem until_F_valid (φ ψ : Formula Atom) :
     ⊨ ((Formula.untl ψ φ).imp (Formula.someFuture ψ)) := by
@@ -317,20 +364,26 @@ theorem temp_linearity_valid (φ ψ : Formula Atom) :
         (Formula.or (Formula.someFuture (Formula.and φ (Formula.someFuture ψ)))
           (Formula.someFuture (Formula.and (Formula.someFuture φ) ψ))))) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [truthAt]
-  intro ⟨h_left, h_right⟩
-  obtain ⟨s1, hts1, h_phi_s1, _⟩ := h_left
-  obtain ⟨s2, hts2, h_psi_s2, _⟩ := h_right
+  simp only [Formula.and, Formula.or, Formula.neg, truthAt]
+  intro h_conj
+  have h_F_phi : ∃ s, t < s ∧ truthAt M Omega τ s φ ∧ ∀ r, t < r → r < s → False → False := by
+    by_contra h; exact h_conj (fun h1 _ => h h1)
+  have h_F_psi : ∃ s, t < s ∧ truthAt M Omega τ s ψ ∧ ∀ r, t < r → r < s → False → False := by
+    by_contra h; exact h_conj (fun _ h2 => h h2)
+  obtain ⟨s1, hs1t, h_phi_s1, _⟩ := h_F_phi
+  obtain ⟨s2, hs2t, h_psi_s2, _⟩ := h_F_psi
   rcases lt_trichotomy s1 s2 with h_lt | h_eq | h_gt
-  · -- s1 < s2: F(φ ∧ F(ψ)) -- disjunct 2
-    exact Or.inr (Or.inl ⟨s1, hts1, ⟨h_phi_s1, s2, h_lt, h_psi_s2, fun _ _ _ hf => absurd hf not_false⟩,
-      fun _ _ _ hf => absurd hf not_false⟩)
-  · -- s1 = s2: F(φ ∧ ψ) -- disjunct 1
-    subst h_eq
-    exact Or.inl ⟨s1, hts1, ⟨h_phi_s1, h_psi_s2⟩, fun _ _ _ hf => absurd hf not_false⟩
-  · -- s2 < s1: F(F(φ) ∧ ψ) -- disjunct 3
-    exact Or.inr (Or.inr ⟨s2, hts2, ⟨⟨s1, h_gt, h_phi_s1, fun _ _ _ hf => absurd hf not_false⟩, h_psi_s2⟩,
-      fun _ _ _ hf => absurd hf not_false⟩)
+  · intro _; intro h_neg; exfalso
+    exact h_neg ⟨s1, hs1t, fun h_imp => h_imp h_phi_s1
+      ⟨s2, h_lt, h_psi_s2, fun _ _ _ hf => absurd hf not_false⟩,
+      fun _ _ _ hf => absurd hf not_false⟩
+  · subst h_eq; intro h_neg; exfalso
+    exact h_neg ⟨s1, hs1t, fun h_imp => h_imp h_phi_s1 h_psi_s2,
+      fun _ _ _ hf => absurd hf not_false⟩
+  · intro _; intro _
+    exact ⟨s2, hs2t, fun h_imp => h_imp
+      ⟨s1, h_gt, h_phi_s1, fun _ _ _ hf => absurd hf not_false⟩ h_psi_s2,
+      fun _ _ _ hf => absurd hf not_false⟩
 
 theorem temp_linearity_past_valid (φ ψ : Formula Atom) :
     ⊨ (Formula.and (Formula.somePast φ) (Formula.somePast ψ) |>.imp
@@ -338,20 +391,26 @@ theorem temp_linearity_past_valid (φ ψ : Formula Atom) :
         (Formula.or (Formula.somePast (Formula.and φ (Formula.somePast ψ)))
           (Formula.somePast (Formula.and (Formula.somePast φ) ψ))))) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [truthAt]
-  intro ⟨h_left, h_right⟩
-  obtain ⟨s1, hs1t, h_phi_s1, _⟩ := h_left
-  obtain ⟨s2, hs2t, h_psi_s2, _⟩ := h_right
+  simp only [Formula.and, Formula.or, Formula.neg, truthAt]
+  intro h_conj
+  have h_P_phi : ∃ s, s < t ∧ truthAt M Omega τ s φ ∧ ∀ r, s < r → r < t → False → False := by
+    by_contra h; exact h_conj (fun h1 _ => h h1)
+  have h_P_psi : ∃ s, s < t ∧ truthAt M Omega τ s ψ ∧ ∀ r, s < r → r < t → False → False := by
+    by_contra h; exact h_conj (fun _ h2 => h h2)
+  obtain ⟨s1, hs1t, h_phi_s1, _⟩ := h_P_phi
+  obtain ⟨s2, hs2t, h_psi_s2, _⟩ := h_P_psi
   rcases lt_trichotomy s1 s2 with h_lt | h_eq | h_gt
-  · -- s1 < s2: P(P(φ) ∧ ψ) -- disjunct 3
-    exact Or.inr (Or.inr ⟨s2, hs2t, ⟨⟨s1, h_lt, h_phi_s1, fun _ _ _ hf => absurd hf not_false⟩, h_psi_s2⟩,
-      fun _ _ _ hf => absurd hf not_false⟩)
-  · -- s1 = s2: P(φ ∧ ψ) -- disjunct 1
-    subst h_eq
-    exact Or.inl ⟨s1, hs1t, ⟨h_phi_s1, h_psi_s2⟩, fun _ _ _ hf => absurd hf not_false⟩
-  · -- s1 > s2: P(φ ∧ P(ψ)) -- disjunct 2
-    exact Or.inr (Or.inl ⟨s1, hs1t, ⟨h_phi_s1, s2, h_gt, h_psi_s2, fun _ _ _ hf => absurd hf not_false⟩,
-      fun _ _ _ hf => absurd hf not_false⟩)
+  · intro _; intro _
+    exact ⟨s2, hs2t, fun h_imp => h_imp
+      ⟨s1, h_lt, h_phi_s1, fun _ _ _ hf => absurd hf not_false⟩ h_psi_s2,
+      fun _ _ _ hf => absurd hf not_false⟩
+  · subst h_eq; intro h_neg; exfalso
+    exact h_neg ⟨s1, hs1t, fun h_imp => h_imp h_phi_s1 h_psi_s2,
+      fun _ _ _ hf => absurd hf not_false⟩
+  · intro _; intro h_neg; exfalso
+    exact h_neg ⟨s1, hs1t, fun h_imp => h_imp h_phi_s1
+      ⟨s2, h_gt, h_psi_s2, fun _ _ _ hf => absurd hf not_false⟩,
+      fun _ _ _ hf => absurd hf not_false⟩
 
 theorem F_until_equiv_valid (φ : Formula Atom) :
     ⊨ ((Formula.someFuture φ).imp (Formula.untl φ (Formula.bot.imp Formula.bot))) := by
@@ -471,45 +530,6 @@ theorem z1_valid (φ : Formula Atom) : validDiscrete
   intro D _ _ _ _ _ _ _ _ ℱ M Omega h_sc τ h_mem t
   exact SoundnessLemmas.z1_is_valid φ ℱ M Omega h_sc τ h_mem t
 
-/-! ## And/Or Axiom Validity Theorems -/
-
-theorem andI_valid (φ ψ : Formula Atom) :
-    ⊨ (φ.imp (ψ.imp (Formula.and φ ψ))) := by
-  intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [truthAt]
-  intro hφ hψ; exact ⟨hφ, hψ⟩
-
-theorem andE1_valid (φ ψ : Formula Atom) :
-    ⊨ ((Formula.and φ ψ).imp φ) := by
-  intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [truthAt]
-  intro ⟨hφ, _⟩; exact hφ
-
-theorem andE2_valid (φ ψ : Formula Atom) :
-    ⊨ ((Formula.and φ ψ).imp ψ) := by
-  intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [truthAt]
-  intro ⟨_, hψ⟩; exact hψ
-
-theorem orI1_valid (φ ψ : Formula Atom) :
-    ⊨ (φ.imp (Formula.or φ ψ)) := by
-  intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [truthAt]
-  intro hφ; exact Or.inl hφ
-
-theorem orI2_valid (φ ψ : Formula Atom) :
-    ⊨ (ψ.imp (Formula.or φ ψ)) := by
-  intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [truthAt]
-  intro hψ; exact Or.inr hψ
-
-theorem orE_valid (φ ψ χ : Formula Atom) :
-    ⊨ ((φ.imp χ).imp ((ψ.imp χ).imp ((Formula.or φ ψ).imp χ))) := by
-  intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [truthAt]
-  intro hφχ hψχ h
-  exact h.elim hφχ hψχ
-
 /-! ## Combined Axiom Validators -/
 
 /-- All base TM axioms are universally valid. -/
@@ -523,12 +543,6 @@ theorem axiom_valid {φ : Formula Atom} (h : Axiom φ) (h_fc : h.minFrameClass �
   | modal_5_collapse ψ => exact modal_5_collapse_valid ψ
   | efq ψ => exact ex_falso_valid ψ
   | peirce φ ψ => exact peirce_valid φ ψ
-  | andI φ ψ => exact andI_valid φ ψ
-  | andE1 φ ψ => exact andE1_valid φ ψ
-  | andE2 φ ψ => exact andE2_valid φ ψ
-  | orI1 φ ψ => exact orI1_valid φ ψ
-  | orI2 φ ψ => exact orI2_valid φ ψ
-  | orE φ ψ χ => exact orE_valid φ ψ χ
   | modal_k_dist φ ψ => exact modal_k_dist_valid φ ψ
   | serial_future => exact serial_future_axiom_valid
   | serial_past => exact serial_past_axiom_valid
@@ -575,12 +589,6 @@ theorem axiom_dense_valid {φ : Formula Atom} (h : Axiom φ) (h_fc : h.minFrameC
   | modal_5_collapse ψ => exact Validity.valid_implies_valid_dense (modal_5_collapse_valid ψ)
   | efq ψ => exact Validity.valid_implies_valid_dense (ex_falso_valid ψ)
   | peirce φ ψ => exact Validity.valid_implies_valid_dense (peirce_valid φ ψ)
-  | andI φ ψ => exact Validity.valid_implies_valid_dense (andI_valid φ ψ)
-  | andE1 φ ψ => exact Validity.valid_implies_valid_dense (andE1_valid φ ψ)
-  | andE2 φ ψ => exact Validity.valid_implies_valid_dense (andE2_valid φ ψ)
-  | orI1 φ ψ => exact Validity.valid_implies_valid_dense (orI1_valid φ ψ)
-  | orI2 φ ψ => exact Validity.valid_implies_valid_dense (orI2_valid φ ψ)
-  | orE φ ψ χ => exact Validity.valid_implies_valid_dense (orE_valid φ ψ χ)
   | modal_k_dist φ ψ => exact Validity.valid_implies_valid_dense (modal_k_dist_valid φ ψ)
   | serial_future => exact Validity.valid_implies_valid_dense serial_future_axiom_valid
   | serial_past => exact Validity.valid_implies_valid_dense serial_past_axiom_valid
@@ -628,12 +636,6 @@ theorem axiom_discrete_valid {φ : Formula Atom} (h : Axiom φ) (h_fc : h.minFra
   | modal_5_collapse ψ => exact Validity.valid_implies_valid_discrete (modal_5_collapse_valid ψ)
   | efq ψ => exact Validity.valid_implies_valid_discrete (ex_falso_valid ψ)
   | peirce φ ψ => exact Validity.valid_implies_valid_discrete (peirce_valid φ ψ)
-  | andI φ ψ => exact Validity.valid_implies_valid_discrete (andI_valid φ ψ)
-  | andE1 φ ψ => exact Validity.valid_implies_valid_discrete (andE1_valid φ ψ)
-  | andE2 φ ψ => exact Validity.valid_implies_valid_discrete (andE2_valid φ ψ)
-  | orI1 φ ψ => exact Validity.valid_implies_valid_discrete (orI1_valid φ ψ)
-  | orI2 φ ψ => exact Validity.valid_implies_valid_discrete (orI2_valid φ ψ)
-  | orE φ ψ χ => exact Validity.valid_implies_valid_discrete (orE_valid φ ψ χ)
   | modal_k_dist φ ψ => exact Validity.valid_implies_valid_discrete (modal_k_dist_valid φ ψ)
   | serial_future => exact Validity.valid_implies_valid_discrete serial_future_axiom_valid
   | serial_past => exact Validity.valid_implies_valid_discrete serial_past_axiom_valid

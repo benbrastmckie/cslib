@@ -158,7 +158,7 @@ end Modal
 /-! ### Temporal Axioms -/
 
 section Temporal
-variable [HasBot F] [HasImp F] [HasAnd F] [HasOr F] [HasUntil F] [HasSince F]
+variable [HasBot F] [HasImp F] [HasUntil F] [HasSince F]
 
 /-- Serial future (BX1): ⊤ → F ⊤
     where ⊤ = ⊥ → ⊥, F φ = ⊤ U φ -/
@@ -217,56 +217,57 @@ protected abbrev ConnectPast (φ : F) : F :=
   HasImp.imp φ H_F_φ
 
 /-- Until-Since enrichment (BX13):
-    p ∧ (ψ U φ) → (ψ ∧ S(p, φ)) U φ -/
+    p ∧ (ψ U φ) → (ψ ∧ S(p, φ)) U φ
+    where ∧ is Lukasiewicz conjunction -/
 protected abbrev EnrichmentUntil (φ ψ p : F) : F :=
-  HasImp.imp (HasAnd.and p (HasUntil.untl ψ φ))
-    (HasUntil.untl (HasAnd.and ψ (HasSince.snce p φ)) φ)
+  HasImp.imp (conj' p (HasUntil.untl ψ φ))
+    (HasUntil.untl (conj' ψ (HasSince.snce p φ)) φ)
 
 /-- Since-Until enrichment (BX13'):
     p ∧ (ψ S φ) → (ψ ∧ U(p, φ)) S φ -/
 protected abbrev EnrichmentSince (φ ψ p : F) : F :=
-  HasImp.imp (HasAnd.and p (HasSince.snce ψ φ))
-    (HasSince.snce (HasAnd.and ψ (HasUntil.untl p φ)) φ)
+  HasImp.imp (conj' p (HasSince.snce ψ φ))
+    (HasSince.snce (conj' ψ (HasUntil.untl p φ)) φ)
 
 /-- Self-accumulation of Until (BX5):
     U(ψ, φ) → U(ψ, φ ∧ U(ψ, φ)) -/
 protected abbrev SelfAccumUntil (φ ψ : F) : F :=
   HasImp.imp (HasUntil.untl ψ φ)
-    (HasUntil.untl ψ (HasAnd.and φ (HasUntil.untl ψ φ)))
+    (HasUntil.untl ψ (conj' φ (HasUntil.untl ψ φ)))
 
 /-- Self-accumulation of Since (BX5'):
     S(ψ, φ) → S(ψ, φ ∧ S(ψ, φ)) -/
 protected abbrev SelfAccumSince (φ ψ : F) : F :=
   HasImp.imp (HasSince.snce ψ φ)
-    (HasSince.snce ψ (HasAnd.and φ (HasSince.snce ψ φ)))
+    (HasSince.snce ψ (conj' φ (HasSince.snce ψ φ)))
 
 /-- Absorption of Until (BX6):
     U(φ ∧ U(ψ, φ), φ) → U(ψ, φ) -/
 protected abbrev AbsorbUntil (φ ψ : F) : F :=
-  HasImp.imp (HasUntil.untl (HasAnd.and φ (HasUntil.untl ψ φ)) φ)
+  HasImp.imp (HasUntil.untl (conj' φ (HasUntil.untl ψ φ)) φ)
     (HasUntil.untl ψ φ)
 
 /-- Absorption of Since (BX6'):
     S(φ ∧ S(ψ, φ), φ) → S(ψ, φ) -/
 protected abbrev AbsorbSince (φ ψ : F) : F :=
-  HasImp.imp (HasSince.snce (HasAnd.and φ (HasSince.snce ψ φ)) φ)
+  HasImp.imp (HasSince.snce (conj' φ (HasSince.snce ψ φ)) φ)
     (HasSince.snce ψ φ)
 
 /-- Linearity of Until (BX7):
     U(ψ,φ) ∧ U(θ,χ) → U(ψ∧θ, φ∧χ) ∨ U(ψ∧χ, φ∧χ) ∨ U(φ∧θ, φ∧χ) -/
 protected abbrev LinearUntil (φ ψ χ θ : F) : F :=
-  HasImp.imp (HasAnd.and (HasUntil.untl ψ φ) (HasUntil.untl θ χ))
-    (HasOr.or (HasOr.or (HasUntil.untl (HasAnd.and ψ θ) (HasAnd.and φ χ))
-                        (HasUntil.untl (HasAnd.and ψ χ) (HasAnd.and φ χ)))
-              (HasUntil.untl (HasAnd.and φ θ) (HasAnd.and φ χ)))
+  HasImp.imp (conj' (HasUntil.untl ψ φ) (HasUntil.untl θ χ))
+    (disj' (disj' (HasUntil.untl (conj' ψ θ) (conj' φ χ))
+                  (HasUntil.untl (conj' ψ χ) (conj' φ χ)))
+           (HasUntil.untl (conj' φ θ) (conj' φ χ)))
 
 /-- Linearity of Since (BX7'):
     S(ψ,φ) ∧ S(θ,χ) → S(ψ∧θ, φ∧χ) ∨ S(ψ∧χ, φ∧χ) ∨ S(φ∧θ, φ∧χ) -/
 protected abbrev LinearSince (φ ψ χ θ : F) : F :=
-  HasImp.imp (HasAnd.and (HasSince.snce ψ φ) (HasSince.snce θ χ))
-    (HasOr.or (HasOr.or (HasSince.snce (HasAnd.and ψ θ) (HasAnd.and φ χ))
-                        (HasSince.snce (HasAnd.and ψ χ) (HasAnd.and φ χ)))
-              (HasSince.snce (HasAnd.and φ θ) (HasAnd.and φ χ)))
+  HasImp.imp (conj' (HasSince.snce ψ φ) (HasSince.snce θ χ))
+    (disj' (disj' (HasSince.snce (conj' ψ θ) (conj' φ χ))
+                  (HasSince.snce (conj' ψ χ) (conj' φ χ)))
+           (HasSince.snce (conj' φ θ) (conj' φ χ)))
 
 /-- Until implies eventuality (BX10):
     U(ψ, φ) → F(ψ)
@@ -284,19 +285,19 @@ protected abbrev SinceP (φ ψ : F) : F :=
     F(φ) ∧ F(ψ) → F(φ ∧ ψ) ∨ F(φ ∧ F(ψ)) ∨ F(F(φ) ∧ ψ) -/
 protected abbrev TempLinearity (φ ψ : F) : F :=
   let F' := fun (x : F) => HasUntil.untl x top'
-  HasImp.imp (HasAnd.and (F' φ) (F' ψ))
-    (HasOr.or (F' (HasAnd.and φ ψ))
-      (HasOr.or (F' (HasAnd.and φ (F' ψ)))
-                (F' (HasAnd.and (F' φ) ψ))))
+  HasImp.imp (conj' (F' φ) (F' ψ))
+    (disj' (F' (conj' φ ψ))
+      (disj' (F' (conj' φ (F' ψ)))
+             (F' (conj' (F' φ) ψ))))
 
 /-- Temporal linearity past (BX11'):
     P(φ) ∧ P(ψ) → P(φ ∧ ψ) ∨ P(φ ∧ P(ψ)) ∨ P(P(φ) ∧ ψ) -/
 protected abbrev TempLinearityPast (φ ψ : F) : F :=
   let P' := fun (x : F) => HasSince.snce x top'
-  HasImp.imp (HasAnd.and (P' φ) (P' ψ))
-    (HasOr.or (P' (HasAnd.and φ ψ))
-      (HasOr.or (P' (HasAnd.and φ (P' ψ)))
-                (P' (HasAnd.and (P' φ) ψ))))
+  HasImp.imp (conj' (P' φ) (P' ψ))
+    (disj' (P' (conj' φ ψ))
+      (disj' (P' (conj' φ (P' ψ)))
+             (P' (conj' (P' φ) ψ))))
 
 /-- F-Until equivalence (BX12):
     F(φ) → U(φ, ⊤)

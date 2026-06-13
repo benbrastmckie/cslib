@@ -69,24 +69,17 @@ def impTrans {φ ψ χ : Bimodal.Formula Atom}
 def identity (φ : Bimodal.Formula Atom) : ⊢ φ.imp φ :=
   unwrap (@Theorems.Combinators.identity _ _ _ Bimodal.HilbertTM _ _ φ)
 
-/-- Combine two implications into conjunction. -/
-def combineImpConj {φ₀ φ₁ φ₂ : Bimodal.Formula Atom}
-    (h1 : ⊢ φ₀.imp φ₁) (h2 : ⊢ φ₀.imp φ₂) :
-    ⊢ φ₀.imp (φ₁.and φ₂) := by
-  have andI_ax := unwrap (HasAxiomAndI.andI (φ := φ₁) (ψ := φ₂) :
-    InferenceSystem.DerivableIn Bimodal.HilbertTM _)
-  have step1 := impTrans h1 andI_ax
-  have s_ax := unwrap (HasAxiomImplyS.implyS (φ := φ₀) (ψ := φ₂)
-    (χ := Formula.and φ₁ φ₂) :
-    InferenceSystem.DerivableIn Bimodal.HilbertTM _)
-  exact Bimodal.DerivationTree.modus_ponens [] _ _
-    (Bimodal.DerivationTree.modus_ponens [] _ _ s_ax step1) h2
-
 /-- Combine three implications into conjunction. -/
 def combineImpConj_3 {φ₀ φ₁ φ₂ φ₃ : Bimodal.Formula Atom}
     (h1 : ⊢ φ₀.imp φ₁) (h2 : ⊢ φ₀.imp φ₂) (h3 : ⊢ φ₀.imp φ₃) :
     ⊢ φ₀.imp (φ₁.and (φ₂.and φ₃)) :=
-  combineImpConj h1 (combineImpConj h2 h3)
+  unwrap (Theorems.Combinators.combine_imp_conj_3 (wrap h1) (wrap h2) (wrap h3))
+
+/-- Combine two implications into conjunction. -/
+def combineImpConj {φ₀ φ₁ φ₂ : Bimodal.Formula Atom}
+    (h1 : ⊢ φ₀.imp φ₁) (h2 : ⊢ φ₀.imp φ₂) :
+    ⊢ φ₀.imp (φ₁.and φ₂) :=
+  unwrap (Theorems.Combinators.combine_imp_conj (wrap h1) (wrap h2))
 
 /-- DNI: `⊢ φ → ¬¬φ`. -/
 def dni (φ : Bimodal.Formula Atom) : ⊢ φ.imp φ.neg.neg :=
@@ -103,13 +96,11 @@ def doubleNegation (φ : Bimodal.Formula Atom) : ⊢ φ.neg.neg.imp φ :=
 
 /-- Left conjunction elimination: `⊢ (φ₁ ∧ φ₂) → φ₁`. -/
 def lceImp (φ₁ φ₂ : Bimodal.Formula Atom) : ⊢ (φ₁.and φ₂).imp φ₁ :=
-  unwrap (HasAxiomAndE1.andE1 (φ := φ₁) (ψ := φ₂) :
-    InferenceSystem.DerivableIn Bimodal.HilbertTM _)
+  unwrap (@Theorems.Propositional.Core.lce_imp _ _ _ Bimodal.HilbertTM _ _ (φ := φ₁) (ψ := φ₂))
 
 /-- Right conjunction elimination: `⊢ (φ₁ ∧ φ₂) → φ₂`. -/
 def rceImp (φ₁ φ₂ : Bimodal.Formula Atom) : ⊢ (φ₁.and φ₂).imp φ₂ :=
-  unwrap (HasAxiomAndE2.andE2 (φ := φ₁) (ψ := φ₂) :
-    InferenceSystem.DerivableIn Bimodal.HilbertTM _)
+  unwrap (@Theorems.Propositional.Core.rce_imp _ _ _ Bimodal.HilbertTM _ _ (φ := φ₁) (ψ := φ₂))
 
 /-! ## Helper Lemmas: Temporal Components -/
 

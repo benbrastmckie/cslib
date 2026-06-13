@@ -104,8 +104,6 @@ def replaceUntlWithTop (phi A B : Formula Atom) : Formula Atom :=
   | .atom a => .atom a
   | .bot => .bot
   | .imp p q => .imp (replaceUntlWithTop p A B) (replaceUntlWithTop q A B)
-  | .and p q => .and (replaceUntlWithTop p A B) (replaceUntlWithTop q A B)
-  | .or p q => .or (replaceUntlWithTop p A B) (replaceUntlWithTop q A B)
   | .box p => .box (replaceUntlWithTop p A B)
   | .untl p q => if p = A ∧ q = B then Formula.neg .bot else
       .untl (replaceUntlWithTop p A B) (replaceUntlWithTop q A B)
@@ -117,8 +115,6 @@ theorem replace_id_of_U_free (phi A B : Formula Atom) (h : isUFree phi = true) :
   induction phi with
   | atom _ => rfl | bot => rfl
   | imp p q ihp ihq => simp [isUFree] at h; simp [replaceUntlWithTop, ihp h.1, ihq h.2]
-  | and p q ihp ihq => simp [isUFree] at h; simp [replaceUntlWithTop, ihp h.1, ihq h.2]
-  | or p q ihp ihq => simp [isUFree] at h; simp [replaceUntlWithTop, ihp h.1, ihq h.2]
   | box p ih => simp [isUFree] at h; simp [replaceUntlWithTop, ih h]
   | untl _ _ => simp [isUFree] at h
   | snce p q ihp ihq => simp [isUFree] at h; simp [replaceUntlWithTop, ihp h.1, ihq h.2]
@@ -130,8 +126,6 @@ def untlUnderBoolOnly : Formula Atom → Formula Atom → Formula Atom → Prop
   | .atom _, _, _ => True
   | .bot, _, _ => True
   | .imp p q, A, B => untlUnderBoolOnly p A B ∧ untlUnderBoolOnly q A B
-  | .and p q, A, B => untlUnderBoolOnly p A B ∧ untlUnderBoolOnly q A B
-  | .or p q, A, B => untlUnderBoolOnly p A B ∧ untlUnderBoolOnly q A B
   | .box p, _, _ => isUFree p = true
   | .untl p q, A, B => (p = A ∧ q = B) ∨ (isUFree (.untl p q) = true)
   | .snce p q, _, _ => isUFree p = true ∧ isUFree q = true
@@ -142,8 +136,6 @@ theorem u_free_untl_under_bool (phi A B : Formula Atom) (h : isUFree phi = true)
   induction phi with
   | atom _ => trivial | bot => trivial
   | imp p q ihp ihq => simp [isUFree] at h; exact ⟨ihp h.1, ihq h.2⟩
-  | and p q ihp ihq => simp [isUFree] at h; exact ⟨ihp h.1, ihq h.2⟩
-  | or p q ihp ihq => simp [isUFree] at h; exact ⟨ihp h.1, ihq h.2⟩
   | box _ => simp [isUFree] at h; exact h
   | untl _ _ => simp [isUFree] at h
   | snce p q _ _ => simp [isUFree] at h; exact h
@@ -155,12 +147,6 @@ theorem replace_U_free_of_bool (phi A B : Formula Atom)
   induction phi with
   | atom _ => rfl | bot => rfl
   | imp p q ihp ihq =>
-    have ⟨hp, hq⟩ := h_bool
-    simp [replaceUntlWithTop, isUFree, ihp hp, ihq hq]
-  | and p q ihp ihq =>
-    have ⟨hp, hq⟩ := h_bool
-    simp [replaceUntlWithTop, isUFree, ihp hp, ihq hq]
-  | or p q ihp ihq =>
     have ⟨hp, hq⟩ := h_bool
     simp [replaceUntlWithTop, isUFree, ihp hp, ihq hq]
   | box p _ =>
@@ -189,14 +175,6 @@ theorem replace_correct_bool (phi A B : Formula Atom) (M : IntStructure Atom) (t
     have ⟨hp, hq⟩ := h_bool
     simp only [replaceUntlWithTop, intTruth]
     exact Iff.imp (ihp t hp hU) (ihq t hq hU)
-  | and p q ihp ihq =>
-    have ⟨hp, hq⟩ := h_bool
-    simp only [replaceUntlWithTop, intTruth]
-    exact Iff.and (ihp t hp hU) (ihq t hq hU)
-  | or p q ihp ihq =>
-    have ⟨hp, hq⟩ := h_bool
-    simp only [replaceUntlWithTop, intTruth]
-    exact Iff.or (ihp t hp hU) (ihq t hq hU)
   | box _ => simp [replaceUntlWithTop, intTruth]
   | untl p q _ _ =>
     simp only [replaceUntlWithTop]
@@ -216,10 +194,12 @@ theorem case1_psi_bool_only (a q A B : Formula Atom)
     untlUnderBoolOnly (case1_psi a q A B) A B := by
   have h_and : ∀ p q, untlUnderBoolOnly p A B → untlUnderBoolOnly q A B →
       untlUnderBoolOnly (Formula.and p q) A B := by
-    intro p q hp hq; exact ⟨hp, hq⟩
+    intro p q hp hq; show untlUnderBoolOnly (.imp (.imp p (.imp q .bot)) .bot) A B
+    exact ⟨⟨hp, hq, trivial⟩, trivial⟩
   have h_or : ∀ p q, untlUnderBoolOnly p A B → untlUnderBoolOnly q A B →
       untlUnderBoolOnly (Formula.or p q) A B := by
-    intro p q hp hq; exact ⟨hp, hq⟩
+    intro p q hp hq; show untlUnderBoolOnly (.imp (.imp p .bot) q) A B
+    exact ⟨⟨hp, trivial⟩, hq⟩
   unfold case1_psi
   apply h_or; apply h_or
   · apply h_and; apply h_and; apply h_and
@@ -303,8 +283,6 @@ def replaceUntlWithBot (phi A B : Formula Atom) : Formula Atom :=
   | .atom a => .atom a
   | .bot => .bot
   | .imp p q => .imp (replaceUntlWithBot p A B) (replaceUntlWithBot q A B)
-  | .and p q => .and (replaceUntlWithBot p A B) (replaceUntlWithBot q A B)
-  | .or p q => .or (replaceUntlWithBot p A B) (replaceUntlWithBot q A B)
   | .box p => .box (replaceUntlWithBot p A B)
   | .untl p q => if p = A ∧ q = B then .bot else
       .untl (replaceUntlWithBot p A B) (replaceUntlWithBot q A B)
@@ -316,8 +294,6 @@ theorem replace_bot_id_of_U_free (phi A B : Formula Atom) (h : isUFree phi = tru
   induction phi with
   | atom _ => rfl | bot => rfl
   | imp p q ihp ihq => simp [isUFree] at h; simp [replaceUntlWithBot, ihp h.1, ihq h.2]
-  | and p q ihp ihq => simp [isUFree] at h; simp [replaceUntlWithBot, ihp h.1, ihq h.2]
-  | or p q ihp ihq => simp [isUFree] at h; simp [replaceUntlWithBot, ihp h.1, ihq h.2]
   | box p ih => simp [isUFree] at h; simp [replaceUntlWithBot, ih h]
   | untl _ _ => simp [isUFree] at h
   | snce p q ihp ihq => simp [isUFree] at h; simp [replaceUntlWithBot, ihp h.1, ihq h.2]
@@ -329,12 +305,6 @@ theorem replace_bot_U_free_of_bool (phi A B : Formula Atom)
   induction phi with
   | atom _ => rfl | bot => rfl
   | imp p q ihp ihq =>
-    have ⟨hp, hq⟩ := h_bool
-    simp [replaceUntlWithBot, isUFree, ihp hp, ihq hq]
-  | and p q ihp ihq =>
-    have ⟨hp, hq⟩ := h_bool
-    simp [replaceUntlWithBot, isUFree, ihp hp, ihq hq]
-  | or p q ihp ihq =>
     have ⟨hp, hq⟩ := h_bool
     simp [replaceUntlWithBot, isUFree, ihp hp, ihq hq]
   | box p _ =>
@@ -363,14 +333,6 @@ theorem replace_correct_bot (phi A B : Formula Atom) (M : IntStructure Atom) (t 
     have ⟨hp, hq⟩ := h_bool
     simp only [replaceUntlWithBot, intTruth]
     exact Iff.imp (ihp t hp hnotU) (ihq t hq hnotU)
-  | and p q ihp ihq =>
-    have ⟨hp, hq⟩ := h_bool
-    simp only [replaceUntlWithBot, intTruth]
-    exact Iff.and (ihp t hp hnotU) (ihq t hq hnotU)
-  | or p q ihp ihq =>
-    have ⟨hp, hq⟩ := h_bool
-    simp only [replaceUntlWithBot, intTruth]
-    exact Iff.or (ihp t hp hnotU) (ihq t hq hnotU)
   | box _ => simp [replaceUntlWithBot, intTruth]
   | untl p q _ _ =>
     simp only [replaceUntlWithBot]
@@ -443,14 +405,16 @@ theorem d21_sep_bool_only (a q A B : Formula Atom)
     untlUnderBoolOnly (d21_sep a q A B) A B := by
   have h_or : ∀ p q, untlUnderBoolOnly p A B → untlUnderBoolOnly q A B →
       untlUnderBoolOnly (Formula.or p q) A B := by
-    intro p q hp hq; exact ⟨hp, hq⟩
+    intro p q hp hq; show untlUnderBoolOnly (.imp (.imp p .bot) q) A B
+    exact ⟨⟨hp, trivial⟩, hq⟩
   unfold d21_sep
   apply h_or
   · exact case1_psi_bool_only a (Q_Z A B (Formula.neg q)) A B ha
       (Q_Z_neg_q_U_free A B q hA hB hq) hA hB
   · have h_nqσ_bool : untlUnderBoolOnly (Formula.and (Formula.neg q) (case1_psi a q A B)) A B := by
-      exact ⟨u_free_untl_under_bool (Formula.neg q) A B (by simp [Formula.neg, isUFree, hq]),
-             case1_psi_bool_only a q A B ha hq hA hB⟩
+      show untlUnderBoolOnly (.imp (.imp (Formula.neg q) (.imp (case1_psi a q A B) .bot)) .bot) A B
+      refine ⟨⟨?_, case1_psi_bool_only a q A B ha hq hA hB, trivial⟩, trivial⟩
+      exact ⟨u_free_untl_under_bool q A B hq, trivial⟩
     have h_replaced_uf : isUFree (replaceUntlWithTop (Formula.and (Formula.neg q) (case1_psi a q A B)) A B) = true :=
       replace_U_free_of_bool _ A B h_nqσ_bool
     exact case1_psi_bool_only
@@ -521,8 +485,9 @@ theorem d21_sep_equiv (a q A B : Formula Atom)
     exact int_equiv_trans step4a_congr step4a
   -- For S((¬q∧σ)∧U, Q_Z): (¬q∧σ) satisfies untlUnderBoolOnly
   have h_nqσ_bool : untlUnderBoolOnly (Formula.and (Formula.neg q) σ) A B := by
-    exact ⟨u_free_untl_under_bool (Formula.neg q) A B (by simp [Formula.neg, isUFree, hq]),
-           case1_psi_bool_only a q A B ha hq hA hB⟩
+    show untlUnderBoolOnly (.imp (.imp (Formula.neg q) (.imp σ .bot)) .bot) A B
+    refine ⟨⟨?_, case1_psi_bool_only a q A B ha hq hA hB, trivial⟩, trivial⟩
+    exact ⟨u_free_untl_under_bool q A B hq, trivial⟩
   let nqσ' := replaceUntlWithTop (Formula.and (Formula.neg q) σ) A B
   have h_nqσ_congr : ∀ M : IntStructure Atom, ∀ t : ℤ, intTruth M t (.untl A B) →
       (intTruth M t (Formula.and (Formula.neg q) σ) ↔ intTruth M t nqσ') :=
@@ -610,8 +575,9 @@ theorem case5_separable_Z_gen (a q A B : Formula Atom)
               exact (int_truth_and M t _ _).mpr ⟨hnq, (hσ_equiv M t).mpr hσ'⟩
           apply is_separable_of_equiv (snce_event_congr (and_left_congr hY_congr))
           have h_nqσ_bool : untlUnderBoolOnly (Formula.and (Formula.neg q) σ) A B := by
-            exact ⟨u_free_untl_under_bool (Formula.neg q) A B (by simp [Formula.neg, isUFree, hq]),
-                   case1_psi_bool_only a q A B ha hq hA hB⟩
+            show untlUnderBoolOnly (.imp (.imp (Formula.neg q) (.imp σ .bot)) .bot) A B
+            refine ⟨⟨?_, case1_psi_bool_only a q A B ha hq hA hB, trivial⟩, trivial⟩
+            exact ⟨u_free_untl_under_bool q A B hq, trivial⟩
           exact snce_combined_U_separable (Formula.and (Formula.neg q) σ)
             (Q_Z A B (Formula.neg q)) A B hA hB hA' hB'
             (Q_Z_neg_q_U_free A B q hA hB hq) h_nqσ_bool
@@ -634,16 +600,26 @@ theorem case5_separable_Z_gen (a q A B : Formula Atom)
     apply is_separable_of_equiv (since_event_split _ (.untl A B) q)
     apply or_separable
     · have h_event_bool : untlUnderBoolOnly
-          (Formula.and (Formula.and A (Formula.or q (.untl A B))) (d21_sep a q A B)) A B :=
-        ⟨⟨u_free_untl_under_bool A A B hA, u_free_untl_under_bool q A B hq, Or.inl ⟨rfl, rfl⟩⟩,
-         d21_sep_bool_only a q A B ha hq hA hB⟩
+          (Formula.and (Formula.and A (Formula.or q (.untl A B))) (d21_sep a q A B)) A B := by
+        show untlUnderBoolOnly (.imp (.imp (Formula.and A (Formula.or q (.untl A B)))
+          (.imp (d21_sep a q A B) .bot)) .bot) A B
+        refine ⟨⟨?_, d21_sep_bool_only a q A B ha hq hA hB, trivial⟩, trivial⟩
+        show untlUnderBoolOnly (.imp (.imp A (.imp (Formula.or q (.untl A B)) .bot)) .bot) A B
+        refine ⟨⟨u_free_untl_under_bool A A B hA, ?_, trivial⟩, trivial⟩
+        show untlUnderBoolOnly (.imp (.imp q .bot) (.untl A B)) A B
+        exact ⟨⟨u_free_untl_under_bool q A B hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
       exact snce_combined_U_separable
         (Formula.and (Formula.and A (Formula.or q (.untl A B))) (d21_sep a q A B))
         q A B hA hB hA' hB' hq h_event_bool
     · have h_event_bool : untlUnderBoolOnly
-          (Formula.and (Formula.and A (Formula.or q (.untl A B))) (d21_sep a q A B)) A B :=
-        ⟨⟨u_free_untl_under_bool A A B hA, u_free_untl_under_bool q A B hq, Or.inl ⟨rfl, rfl⟩⟩,
-         d21_sep_bool_only a q A B ha hq hA hB⟩
+          (Formula.and (Formula.and A (Formula.or q (.untl A B))) (d21_sep a q A B)) A B := by
+        show untlUnderBoolOnly (.imp (.imp (Formula.and A (Formula.or q (.untl A B)))
+          (.imp (d21_sep a q A B) .bot)) .bot) A B
+        refine ⟨⟨?_, d21_sep_bool_only a q A B ha hq hA hB, trivial⟩, trivial⟩
+        show untlUnderBoolOnly (.imp (.imp A (.imp (Formula.or q (.untl A B)) .bot)) .bot) A B
+        refine ⟨⟨u_free_untl_under_bool A A B hA, ?_, trivial⟩, trivial⟩
+        show untlUnderBoolOnly (.imp (.imp q .bot) (.untl A B)) A B
+        exact ⟨⟨u_free_untl_under_bool q A B hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
       exact snce_combined_notU_separable
         (Formula.and (Formula.and A (Formula.or q (.untl A B))) (d21_sep a q A B))
         q A B hA hB hA' hB' hq h_event_bool
@@ -681,7 +657,8 @@ theorem untl_neguntl_contradictory (A B : Formula Atom) (M : IntStructure Atom) 
   obtain ⟨s₂, hts₂, hAB₂, hA₂⟩ := hU'
   -- hAB₂ : intTruth M s₂ (and (neg A) (neg B))
   -- Extract ¬A(s₂) and ¬B(s₂)
-  have ⟨hnotA₂, hnotB₂⟩ := (int_truth_and M s₂ _ _).mp hAB₂
+  have hnotA₂ : ¬ intTruth M s₂ A := fun h => hAB₂ (fun hna _ => hna h)
+  have hnotB₂ : ¬ intTruth M s₂ B := fun h => hAB₂ (fun _ hnb => hnb h)
   rcases lt_trichotomy s₁ s₂ with h | h | h
   · -- s₁ < s₂: s₁ ∈ (t, s₂), guard gives ¬A(s₁), but A(s₁)
     exact hA₂ s₁ hts₁ h hA₁
@@ -780,17 +757,19 @@ theorem snce_Ufree_event_qU_guard_separable (ev q A B : Formula Atom)
         (.snce ev q)) (Formula.or q (.untl A B)))) A B
       have h_or : ∀ p q, untlUnderBoolOnly p A B → untlUnderBoolOnly q A B →
           untlUnderBoolOnly (Formula.or p q) A B := by
-        intro p q hp hq; exact ⟨hp, hq⟩
+        intro p q hp hq; show untlUnderBoolOnly (.imp (.imp p .bot) q) A B
+        exact ⟨⟨hp, trivial⟩, hq⟩
       have h_and : ∀ p q, untlUnderBoolOnly p A B → untlUnderBoolOnly q A B →
           untlUnderBoolOnly (Formula.and p q) A B := by
-        intro p q hp hq; exact ⟨hp, hq⟩
+        intro p q hp hq; show untlUnderBoolOnly (.imp (.imp p (.imp q .bot)) .bot) A B
+        exact ⟨⟨hp, hq, trivial⟩, trivial⟩
       apply h_or
       · exact u_free_untl_under_bool ev A B hev_uf
       · apply h_and
         · apply h_and
           · exact ⟨u_free_untl_under_bool q A B hq, trivial⟩
           · exact ⟨hev_uf, hq⟩
-        · exact ⟨u_free_untl_under_bool q A B hq, Or.inl ⟨rfl, rfl⟩⟩
+        · exact ⟨⟨u_free_untl_under_bool q A B hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
     -- Get explicit separated equiv of S(alpha, Q_Z) satisfying untlUnderBoolOnly
     -- For this, build a d21-sep analog. The alpha for U-free ev factors as:
     -- alpha = ev ∨ ((¬q ∧ S(ev, q)) ∧ (q∨U))
@@ -810,7 +789,7 @@ theorem snce_Ufree_event_qU_guard_separable (ev q A B : Formula Atom)
     have h_d21_bool : untlUnderBoolOnly d21_6A A B := by
       have h_or : ∀ p q, untlUnderBoolOnly p A B → untlUnderBoolOnly q A B →
           untlUnderBoolOnly (Formula.or p q) A B := by
-        intro p q hp hq; exact ⟨hp, hq⟩
+        intro p q hp hq; exact ⟨⟨hp, trivial⟩, hq⟩
       apply h_or
       · -- S(ev, Q_Z): U-free args → untlUnderBoolOnly for snce
         exact ⟨hev_uf, hQ_uf⟩
@@ -871,17 +850,25 @@ theorem snce_Ufree_event_qU_guard_separable (ev q A B : Formula Atom)
     apply or_separable
     · -- U branch
       have h_event_bool : untlUnderBoolOnly
-          (Formula.and (Formula.and A (Formula.or q (.untl A B))) d21_6A) A B :=
-        ⟨⟨u_free_untl_under_bool A A B hA, u_free_untl_under_bool q A B hq, Or.inl ⟨rfl, rfl⟩⟩,
-         h_d21_bool⟩
+          (Formula.and (Formula.and A (Formula.or q (.untl A B))) d21_6A) A B := by
+        show untlUnderBoolOnly (.imp (.imp (Formula.and A (Formula.or q (.untl A B)))
+          (.imp d21_6A .bot)) .bot) A B
+        refine ⟨⟨?_, h_d21_bool, trivial⟩, trivial⟩
+        show untlUnderBoolOnly (.imp (.imp A (.imp (Formula.or q (.untl A B)) .bot)) .bot) A B
+        refine ⟨⟨u_free_untl_under_bool A A B hA, ?_, trivial⟩, trivial⟩
+        exact ⟨⟨u_free_untl_under_bool q A B hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
       exact snce_combined_U_separable
         (Formula.and (Formula.and A (Formula.or q (.untl A B))) d21_6A)
         q A B hA hB hA' hB' hq h_event_bool
     · -- ¬U branch
       have h_event_bool : untlUnderBoolOnly
-          (Formula.and (Formula.and A (Formula.or q (.untl A B))) d21_6A) A B :=
-        ⟨⟨u_free_untl_under_bool A A B hA, u_free_untl_under_bool q A B hq, Or.inl ⟨rfl, rfl⟩⟩,
-         h_d21_bool⟩
+          (Formula.and (Formula.and A (Formula.or q (.untl A B))) d21_6A) A B := by
+        show untlUnderBoolOnly (.imp (.imp (Formula.and A (Formula.or q (.untl A B)))
+          (.imp d21_6A .bot)) .bot) A B
+        refine ⟨⟨?_, h_d21_bool, trivial⟩, trivial⟩
+        show untlUnderBoolOnly (.imp (.imp A (.imp (Formula.or q (.untl A B)) .bot)) .bot) A B
+        refine ⟨⟨u_free_untl_under_bool A A B hA, ?_, trivial⟩, trivial⟩
+        exact ⟨⟨u_free_untl_under_bool q A B hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
       exact snce_combined_notU_separable
         (Formula.and (Formula.and A (Formula.or q (.untl A B))) d21_6A)
         q A B hA hB hA' hB' hq h_event_bool

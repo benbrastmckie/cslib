@@ -196,6 +196,7 @@ public import Cslib.Logics.Bimodal.Metalogic.Completeness
 public import Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.ExtDerivation
 public import Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.ExtFormula
 public import Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.Lifting
+public import Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.PropositionalConservativity
 public import Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.Substitution
 public import Cslib.Logics.Bimodal.Metalogic.Core
 public import Cslib.Logics.Bimodal.Metalogic.Core.DeductionTheorem
@@ -302,6 +303,7 @@ public import Cslib.Logics.Modal.Metalogic.Systems.D5.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.DB.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.DB.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.K.Completeness
+public import Cslib.Logics.Modal.Metalogic.Systems.K.ConservativeExtension
 public import Cslib.Logics.Modal.Metalogic.Systems.K.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.K4.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.K4.Soundness
@@ -357,6 +359,7 @@ public import Cslib.Logics.Propositional.ProofSystem.Instances
 public import Cslib.Logics.Propositional.ProofSystem.IntMinInstances
 public import Cslib.Logics.Propositional.Semantics.Basic
 public import Cslib.Logics.Propositional.Semantics.Kripke
+public import Cslib.Logics.Temporal.ConservativeExtension
 public import Cslib.Logics.Temporal.FromPropositional
 public import Cslib.Logics.Temporal.Metalogic
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.CanonicalChain

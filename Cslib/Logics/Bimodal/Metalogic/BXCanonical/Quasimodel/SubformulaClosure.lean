@@ -37,8 +37,6 @@ def subformulas : Formula Atom → Finset (Formula Atom)
   | f@(Formula.atom _) => {f}
   | f@Formula.bot => {f}
   | f@(Formula.imp φ ψ) => insert f (subformulas φ ∪ subformulas ψ)
-  | f@(Formula.and φ ψ) => insert f (subformulas φ ∪ subformulas ψ)
-  | f@(Formula.or φ ψ) => insert f (subformulas φ ∪ subformulas ψ)
   | f@(Formula.box φ) => insert f (subformulas φ)
   | f@(Formula.untl φ ψ) => insert f (subformulas φ ∪ subformulas ψ)
   | f@(Formula.snce φ ψ) => insert f (subformulas φ ∪ subformulas ψ)

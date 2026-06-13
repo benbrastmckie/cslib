@@ -11,9 +11,9 @@ next_project_number: 186
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,171,179,180,183 | -- | Bimodal Porting, Propositional Logic |
-| 2 | 39,40,181,184 | 36,37,179,180,183 | Propositional Logic, Temporal Logic |
-| 3 | 41,185 | 39,40,183,184 | Foundations, Propositional Logic |
+| 1 | 36,37,171,179,180,184 | -- | Bimodal Porting, Propositional Logic |
+| 2 | 39,40,181,185 | 36,37,179,180,184 | Propositional Logic, Temporal Logic |
+| 3 | 41 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -29,10 +29,8 @@ next_project_number: 186
 ### Propositional Logic
 
 171 [RESEARCHED] — Research connective-basis design for minimal, intuitionistic, and
-183 [PLANNED] — Establish strong completeness for the minimal, intuitionistic, an
-  └─ 184 [NOT STARTED] — Derive weak completeness and compactness as clean corollaries of 
-    └─ 185 [NOT STARTED] — Rigorous quality audit of Cslib/Logics/Propositional/ and its Csl
-  └─ 185 [NOT STARTED] — Rigorous quality audit of Cslib/Logics/Propositional/ and its Csl (see above)
+184 [NOT STARTED] — Derive weak completeness and compactness as clean corollaries of 
+  └─ 185 [NOT STARTED] — Rigorous quality audit of Cslib/Logics/Propositional/ and its Csl
 
 ### Temporal Logic
 
@@ -69,7 +67,7 @@ next_project_number: 186
 ---
 
 ### 183. Strong completeness propositional logics
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

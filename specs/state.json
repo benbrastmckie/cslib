@@ -31,7 +31,7 @@
     {
       "project_number": 183,
       "project_name": "strong_completeness_propositional_logics",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Establish strong completeness for the minimal, intuitionistic, and classical propositional logics",
@@ -70,7 +70,8 @@
           "type": "plan",
           "summary": "5-phase plan: shared defs, minimal/intuitionistic/classical strong completeness, CI verification"
         }
-      ]
+      ],
+      "completion_summary": "Proved strong completeness for minimal, intuitionistic, and classical propositional logics. 724 lines across 4 new files: SemanticConsequence.lean (shared definitions including SetDerivable and semantic entailment), MinStrongCompleteness.lean, IntStrongCompleteness.lean, StrongCompleteness.lean. Zero sorries, all CI checks pass. Compactness corollaries included for all three logics."
     },
     {
       "project_number": 171,

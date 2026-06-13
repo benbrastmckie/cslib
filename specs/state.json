@@ -33,7 +33,7 @@
         {
           "path": "specs/185_propositional_foundations_quality_audit/reports/01_team-research.md",
           "type": "report",
-          "summary": "Team synthesis: 8-dimension quality audit, prioritized improvement list"
+          "summary": "Team synthesis: quality audit across 8 dimensions, 42 files audited"
         },
         {
           "path": "specs/185_propositional_foundations_quality_audit/reports/01_teammate-a-findings.md",
@@ -43,12 +43,12 @@
         {
           "path": "specs/185_propositional_foundations_quality_audit/reports/01_teammate-b-findings.md",
           "type": "report",
-          "summary": "Proof quality, naming conventions, notation audit"
+          "summary": "Proof quality, naming, notation audit"
         },
         {
           "path": "specs/185_propositional_foundations_quality_audit/reports/01_teammate-c-findings.md",
           "type": "report",
-          "summary": "Literature references, mathematical rigor, contribution readiness audit"
+          "summary": "Literature references, mathematical rigor, contribution readiness"
         }
       ]
     },

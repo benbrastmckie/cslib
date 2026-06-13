@@ -29,7 +29,7 @@ next_project_number: 184
 ### Propositional Logic
 
 171 [RESEARCHED] — Research connective-basis design for minimal, intuitionistic, and
-183 [RESEARCHED] — Establish strong completeness for the minimal, intuitionistic, an
+183 [PLANNED] — Establish strong completeness for the minimal, intuitionistic, an
 
 ### Temporal Logic
 
@@ -46,7 +46,7 @@ next_project_number: 184
 ## Tasks
 
 ### 183. Strong completeness propositional logics
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -56,6 +56,7 @@ next_project_number: 184
   - [183_strong_completeness_propositional_logics/reports/01_teammate-b-findings.md]
   - [183_strong_completeness_propositional_logics/reports/01_teammate-c-findings.md]
   - [183_strong_completeness_propositional_logics/reports/01_teammate-d-findings.md]
+- **Plan**: [183_strong_completeness_propositional_logics/plans/01_implementation-plan.md]
 
 **Description**: Establish strong completeness for the minimal, intuitionistic, and classical propositional logics
 

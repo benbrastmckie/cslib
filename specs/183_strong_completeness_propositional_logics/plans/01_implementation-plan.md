@@ -183,7 +183,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: Classical Strong Completeness (StrongCompleteness.lean) [IN PROGRESS]
+### Phase 4: Classical Strong Completeness (StrongCompleteness.lean) [COMPLETED]
 
 **Goal**: Prove classical strong soundness, classical strong completeness (with the Peirce-based consistency argument), the biconditional wrapper, and the compactness corollary. The classical proof is conceptually the closest to the existing `prop_completeness` proof -- it extends from `{neg phi}` to `Gamma union {neg phi}`.
 
@@ -224,7 +224,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 5: Full CI Verification [NOT STARTED]
+### Phase 5: Full CI Verification [IN PROGRESS]
 
 **Goal**: Run the complete CSLib CI verification pipeline to confirm all new files integrate cleanly with the existing codebase.
 

@@ -1,5 +1,5 @@
 ---
-next_project_number: 185
+next_project_number: 186
 ---
 
 # TODO
@@ -13,7 +13,7 @@ next_project_number: 185
 |------|-------|------------|--------|
 | 1 | 36,37,171,179,180,183 | -- | Bimodal Porting, Propositional Logic |
 | 2 | 39,40,181,184 | 36,37,179,180,183 | Propositional Logic, Temporal Logic |
-| 3 | 41 | 39,40 | Foundations |
+| 3 | 41,185 | 39,40,183,184 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -31,6 +31,8 @@ next_project_number: 185
 171 [RESEARCHED] — Research connective-basis design for minimal, intuitionistic, and
 183 [PLANNED] — Establish strong completeness for the minimal, intuitionistic, an
   └─ 184 [NOT STARTED] — Derive weak completeness and compactness as clean corollaries of 
+    └─ 185 [NOT STARTED] — Rigorous quality audit of Cslib/Logics/Propositional/ and its Csl
+  └─ 185 [NOT STARTED] — Rigorous quality audit of Cslib/Logics/Propositional/ and its Csl (see above)
 
 ### Temporal Logic
 
@@ -45,6 +47,16 @@ next_project_number: 185
   └─ 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors  (see above)
 
 ## Tasks
+
+### 185. Propositional foundations quality audit
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 183, Task 184
+
+**Description**: Rigorous quality audit of Cslib/Logics/Propositional/ and its Cslib/Foundations/Logic/ dependencies. Survey architecture, organization, proof quality, literature references, docstrings, notation, and naming conventions against CSLib contribution standards and mathematical best practices. Identify improvements to: (1) file organization and module structure, (2) proof style and tactic usage (prefer term-mode where natural, eliminate unnecessary classical reasoning in constructive proofs), (3) BibTeX references in references.bib for all key theorems citing standard sources (CZ, Blackburn et al., Chagrov & Zakharyaschev, etc.), (4) module-level docstrings following Mathlib conventions, (5) notation consistency (scoped notation, typeclass-backed operators), (6) naming conventions (Mathlib snake_case, descriptive theorem names), (7) import hygiene (minimal imports, no transitive leakage), (8) redundant or duplicated lemmas across files. Produce a prioritized improvement plan with concrete file-level recommendations, ensuring long-term maintainability and contribution readiness.
+
+---
 
 ### 184. Weak completeness compactness corollaries
 - **Status**: [NOT STARTED]

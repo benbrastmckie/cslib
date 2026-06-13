@@ -71,7 +71,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Shared Definitions (SemanticConsequence.lean) [NOT STARTED]
+### Phase 1: Shared Definitions (SemanticConsequence.lean) [COMPLETED]
 
 **Goal**: Create the shared definitions file containing `SetDerivable`, all three semantic entailment definitions, and basic lemmas. This is the foundation that all subsequent phases depend on.
 
@@ -109,7 +109,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Minimal Strong Completeness (MinStrongCompleteness.lean) [NOT STARTED]
+### Phase 2: Minimal Strong Completeness (MinStrongCompleteness.lean) [COMPLETED]
 
 **Goal**: Prove minimal strong soundness, minimal strong completeness, the biconditional wrapper, and the compactness corollary. Minimal logic is the simplest case because `MinTheory` has no consistency requirement -- `minDeductiveClosure(Gamma)` is always a MinTheory.
 
@@ -149,7 +149,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Intuitionistic Strong Completeness (IntStrongCompleteness.lean) [NOT STARTED]
+### Phase 3: Intuitionistic Strong Completeness (IntStrongCompleteness.lean) [COMPLETED]
 
 **Goal**: Prove intuitionistic strong soundness, intuitionistic strong completeness (with the EFQ consistency case split), the biconditional wrapper, and the compactness corollary. This is more involved than the minimal case because `IntDCCS` has a consistency requirement, so a case split on `Gamma`'s Int-consistency is needed.
 
@@ -183,7 +183,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: Classical Strong Completeness (StrongCompleteness.lean) [NOT STARTED]
+### Phase 4: Classical Strong Completeness (StrongCompleteness.lean) [IN PROGRESS]
 
 **Goal**: Prove classical strong soundness, classical strong completeness (with the Peirce-based consistency argument), the biconditional wrapper, and the compactness corollary. The classical proof is conceptually the closest to the existing `prop_completeness` proof -- it extends from `{neg phi}` to `Gamma union {neg phi}`.
 

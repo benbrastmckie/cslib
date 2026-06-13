@@ -1,5 +1,5 @@
 ---
-next_project_number: 184
+next_project_number: 185
 ---
 
 # TODO
@@ -12,7 +12,7 @@ next_project_number: 184
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,171,179,180,183 | -- | Bimodal Porting, Propositional Logic |
-| 2 | 39,40,181 | 36,37,179,180 | Temporal Logic |
+| 2 | 39,40,181,184 | 36,37,179,180,183 | Propositional Logic, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -30,6 +30,7 @@ next_project_number: 184
 
 171 [RESEARCHED] — Research connective-basis design for minimal, intuitionistic, and
 183 [PLANNED] — Establish strong completeness for the minimal, intuitionistic, an
+  └─ 184 [NOT STARTED] — Derive weak completeness and compactness as clean corollaries of 
 
 ### Temporal Logic
 
@@ -44,6 +45,16 @@ next_project_number: 184
   └─ 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors  (see above)
 
 ## Tasks
+
+### 184. Weak completeness compactness corollaries
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 183
+
+**Description**: Derive weak completeness and compactness as clean corollaries of strong completeness for all three propositional logics (minimal, intuitionistic, classical). Refactor existing standalone weak completeness theorems (prop_completeness, int_completeness, min_completeness) to delegate to the strong completeness results via SetDerivable_empty_iff, eliminating duplicated proof infrastructure. Prove compactness for each semantics (Boolean, intuitionistic Kripke, minimal Kripke) from strong completeness + strong soundness. Ensure zero redundancy between the standalone and corollary versions.
+
+---
 
 ### 183. Strong completeness propositional logics
 - **Status**: [PLANNED]

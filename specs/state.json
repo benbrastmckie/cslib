@@ -4,7 +4,7 @@
     {
       "project_number": 186,
       "project_name": "hilbert_nd_equivalence_refactor",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Refactor the Hilbert / natural deduction extensional equivalence in Cslib/Logics/Propositional/NaturalDeduction/ to the highest standards of quality and elegance. Current gaps: (1) no minimal logic instantiation (hilbert_iff_nd_min) — the generic theorem requires EFQ which MinPropAxiom lacks, so either a separate EFQ-free version or an adapted ND system is needed; (2) equivalence is only for closed derivability (empty context Derivable ↔ DerivableIn ∅) — extend to full context-based equivalence (Deriv Axioms Γ φ ↔ NDDeriv Theory Γ φ) for the stronger result; (3) review proof style in ndToHilbert and hilbertToND for clarity and decomposition; (4) ensure all three systems (minimal, intuitionistic, classical) have clean corollary instantiations; (5) add proper literature references for the equivalence result (Prawitz 1965, Troelstra & van Dalen 1988); (6) review naming conventions and docstrings against Mathlib standards.",
@@ -12,12 +12,13 @@
         185
       ],
       "created": "2026-06-13T21:39:55Z",
-      "last_updated": "2026-06-13T21:39:55Z"
+      "last_updated": "2026-06-13T21:44:16Z",
+      "session_id": "sess_1781387056_63df94"
     },
     {
       "project_number": 185,
       "project_name": "propositional_foundations_quality_audit",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Rigorous quality audit of Cslib/Logics/Propositional/ and its Cslib/Foundations/Logic/ dependencies. Survey architecture, organization, proof quality, literature references, docstrings, notation, and naming conventions against CSLib contribution standards and mathematical best practices. Identify improvements to: (1) file organization and module structure, (2) proof style and tactic usage (prefer term-mode where natural, eliminate unnecessary classical reasoning in constructive proofs), (3) BibTeX references in references.bib for all key theorems citing standard sources (CZ, Blackburn et al., Chagrov & Zakharyaschev, etc.), (4) module-level docstrings following Mathlib conventions, (5) notation consistency (scoped notation, typeclass-backed operators), (6) naming conventions (Mathlib snake_case, descriptive theorem names), (7) import hygiene (minimal imports, no transitive leakage), (8) redundant or duplicated lemmas across files. Produce a prioritized improvement plan with concrete file-level recommendations, ensuring long-term maintainability and contribution readiness.",
@@ -26,7 +27,30 @@
         184
       ],
       "created": "2026-06-13T19:08:12Z",
-      "last_updated": "2026-06-13T19:08:12Z"
+      "last_updated": "2026-06-13T21:45:30Z",
+      "session_id": "sess_1781384225_4617ac",
+      "artifacts": [
+        {
+          "path": "specs/185_propositional_foundations_quality_audit/reports/01_team-research.md",
+          "type": "report",
+          "summary": "Team synthesis: 8-dimension quality audit, prioritized improvement list"
+        },
+        {
+          "path": "specs/185_propositional_foundations_quality_audit/reports/01_teammate-a-findings.md",
+          "type": "report",
+          "summary": "Architecture, organization, import hygiene audit"
+        },
+        {
+          "path": "specs/185_propositional_foundations_quality_audit/reports/01_teammate-b-findings.md",
+          "type": "report",
+          "summary": "Proof quality, naming conventions, notation audit"
+        },
+        {
+          "path": "specs/185_propositional_foundations_quality_audit/reports/01_teammate-c-findings.md",
+          "type": "report",
+          "summary": "Literature references, mathematical rigor, contribution readiness audit"
+        }
+      ]
     },
     {
       "project_number": 184,

@@ -264,7 +264,107 @@ theorem hilbert_iff_nd
     have hd := nd_to_hilbert_deriv h_K h_S h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h
     exact weakening_deriv hd (fun x hx => by simp [Finset.mem_toList] at hx)
 
+/-! ## Context-Based Equivalence -/
+
+/-- **Generic context-based extensional equivalence**: Hilbert derivability from a context
+`Γ.toList` is equivalent to ND derivability from `Γ` under `AxiomTheory Axioms`.
+
+This is the primary generic form of the equivalence, parameterized over any axiom predicate
+that includes K, S, and the 6 conjunction/disjunction schemata. The closed-context versions
+(`hilbert_iff_nd`, `hilbert_iff_nd_min`, `hilbert_iff_nd_int`, `hilbert_iff_nd_cl`) are
+corollaries at `Γ = ∅`.
+
+The forward direction uses `Finset.toList_toFinset` to bridge
+`Γ.toList.toFinset = Γ`. The backward direction applies `nd_to_hilbert_deriv` directly. -/
+theorem hilbert_iff_nd_ctx
+    {Axioms : PL.Proposition Atom → Prop}
+    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_andI : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp (φ.and ψ))))
+    (h_andE1 : ∀ (φ ψ : PL.Proposition Atom), Axioms ((φ.and ψ).imp φ))
+    (h_andE2 : ∀ (φ ψ : PL.Proposition Atom), Axioms ((φ.and ψ).imp ψ))
+    (h_orI1 : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (φ.or ψ)))
+    (h_orI2 : ∀ (φ ψ : PL.Proposition Atom), Axioms (ψ.imp (φ.or ψ)))
+    (h_orE : ∀ (φ ψ χ : PL.Proposition Atom),
+      Axioms ((φ.imp χ).imp ((ψ.imp χ).imp ((φ.or ψ).imp χ))))
+    {Γ : Ctx Atom} {φ : PL.Proposition Atom} :
+    Deriv Axioms Γ.toList φ ↔
+    DerivableIn (AxiomTheory Axioms : Theory Atom) (Γ ⊢ φ) := by
+  constructor
+  · intro h
+    have := hilbert_to_nd_deriv h
+    rwa [Finset.toList_toFinset] at this
+  · intro h
+    exact nd_to_hilbert_deriv h_K h_S h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h
+
+/-- Minimal context-based equivalence: Hilbert derivability with `MinPropAxiom` from
+context `Γ.toList` is equivalent to ND derivability under `AxiomTheory MinPropAxiom`
+from context `Γ`. -/
+theorem hilbert_iff_nd_ctx_min {Γ : Ctx Atom} {φ : PL.Proposition Atom} :
+    Deriv MinPropAxiom Γ.toList φ ↔
+    DerivableIn (AxiomTheory (@MinPropAxiom Atom) : Theory Atom) (Γ ⊢ φ) :=
+  hilbert_iff_nd_ctx
+    (fun φ ψ => .implyK φ ψ)
+    (fun φ ψ χ => .implyS φ ψ χ)
+    (fun φ ψ => .andI φ ψ)
+    (fun φ ψ => .andE1 φ ψ)
+    (fun φ ψ => .andE2 φ ψ)
+    (fun φ ψ => .orI1 φ ψ)
+    (fun φ ψ => .orI2 φ ψ)
+    (fun φ ψ χ => .orE φ ψ χ)
+
+/-- Intuitionistic context-based equivalence: Hilbert derivability with `IntPropAxiom` from
+context `Γ.toList` is equivalent to ND derivability under `AxiomTheory IntPropAxiom`
+from context `Γ`. -/
+theorem hilbert_iff_nd_ctx_int {Γ : Ctx Atom} {φ : PL.Proposition Atom} :
+    Deriv IntPropAxiom Γ.toList φ ↔
+    DerivableIn (AxiomTheory (@IntPropAxiom Atom) : Theory Atom) (Γ ⊢ φ) :=
+  hilbert_iff_nd_ctx
+    (fun φ ψ => .implyK φ ψ)
+    (fun φ ψ χ => .implyS φ ψ χ)
+    (fun φ ψ => .andI φ ψ)
+    (fun φ ψ => .andE1 φ ψ)
+    (fun φ ψ => .andE2 φ ψ)
+    (fun φ ψ => .orI1 φ ψ)
+    (fun φ ψ => .orI2 φ ψ)
+    (fun φ ψ χ => .orE φ ψ χ)
+
+/-- Classical context-based equivalence: Hilbert derivability with `PropositionalAxiom` from
+context `Γ.toList` is equivalent to ND derivability under `AxiomTheory PropositionalAxiom`
+from context `Γ`. -/
+theorem hilbert_iff_nd_ctx_cl {Γ : Ctx Atom} {φ : PL.Proposition Atom} :
+    Deriv PropositionalAxiom Γ.toList φ ↔
+    DerivableIn (AxiomTheory (@PropositionalAxiom Atom) : Theory Atom) (Γ ⊢ φ) :=
+  hilbert_iff_nd_ctx
+    (fun φ ψ => .implyK φ ψ)
+    (fun φ ψ χ => .implyS φ ψ χ)
+    (fun φ ψ => .andI φ ψ)
+    (fun φ ψ => .andE1 φ ψ)
+    (fun φ ψ => .andE2 φ ψ)
+    (fun φ ψ => .orI1 φ ψ)
+    (fun φ ψ => .orI2 φ ψ)
+    (fun φ ψ χ => .orE φ ψ χ)
+
 /-! ## Corollaries -/
+
+/-- Minimal equivalence: Hilbert derivability with `MinPropAxiom` (from empty context) is
+equivalent to ND derivability under `AxiomTheory MinPropAxiom` (from empty context).
+
+This is the minimal logic corollary of `hilbert_iff_nd_ctx_min` at `Γ = ∅`. -/
+theorem hilbert_iff_nd_min {φ : PL.Proposition Atom} :
+    Derivable MinPropAxiom φ ↔
+    DerivableIn (AxiomTheory (@MinPropAxiom Atom) : Theory Atom)
+      ((∅ : Ctx Atom) ⊢ φ) :=
+  hilbert_iff_nd
+    (fun φ ψ => .implyK φ ψ)
+    (fun φ ψ χ => .implyS φ ψ χ)
+    (fun φ ψ => .andI φ ψ)
+    (fun φ ψ => .andE1 φ ψ)
+    (fun φ ψ => .andE2 φ ψ)
+    (fun φ ψ => .orI1 φ ψ)
+    (fun φ ψ => .orI2 φ ψ)
+    (fun φ ψ χ => .orE φ ψ χ)
 
 /-- Intuitionistic equivalence: Hilbert derivability with `IntPropAxiom` is equivalent
 to ND derivability under `AxiomTheory IntPropAxiom`. -/

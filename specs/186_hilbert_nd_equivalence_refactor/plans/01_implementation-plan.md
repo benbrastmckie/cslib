@@ -108,7 +108,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Add Context-Based Equivalence and Corollaries [NOT STARTED]
+### Phase 2: Add Context-Based Equivalence and Corollaries [COMPLETED]
 
 **Goal**: Add the context-based generic equivalence theorem `hilbert_iff_nd_ctx` using `Finset.toList_toFinset` as the bridge, then add all 4 corollary instantiations (min/int/cl context-based, plus refactored closed-context versions).
 

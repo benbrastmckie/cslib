@@ -26,8 +26,9 @@ namespace Cslib.Logic.Modal
 
 /-- Axiom schemata for modal logic KB.
 
-The 6 axiom constructors cover:
-- **Propositional** (4): `implyK`, `implyS`, `efq`, `peirce`
+The 12 axiom constructors cover:
+- **Propositional** (10): `implyK`, `implyS`, `efq`, `peirce`, `andI`, `andE1`, `andE2`,
+  `orI1`, `orI2`, `orE`
 - **Modal** (2): `modalK` (K distribution), `modalB` (symmetry) -/
 inductive BAxiom : Proposition Atom → Prop where
   /-- Weakening: `φ → (ψ → φ)` -/
@@ -43,6 +44,25 @@ inductive BAxiom : Proposition Atom → Prop where
   /-- Peirce's law / DNE: `((φ → ψ) → φ) → φ` -/
   | peirce (φ ψ : Proposition Atom) :
       BAxiom (Proposition.imp (Proposition.imp (Proposition.imp φ ψ) φ) φ)
+  /-- Conjunction introduction: `φ → (ψ → φ ∧ ψ)` -/
+  | andI (φ ψ : Proposition Atom) :
+      BAxiom (Proposition.imp φ (Proposition.imp ψ (Proposition.and φ ψ)))
+  /-- Left conjunction elimination: `φ ∧ ψ → φ` -/
+  | andE1 (φ ψ : Proposition Atom) :
+      BAxiom (Proposition.imp (Proposition.and φ ψ) φ)
+  /-- Right conjunction elimination: `φ ∧ ψ → ψ` -/
+  | andE2 (φ ψ : Proposition Atom) :
+      BAxiom (Proposition.imp (Proposition.and φ ψ) ψ)
+  /-- Left disjunction introduction: `φ → φ ∨ ψ` -/
+  | orI1 (φ ψ : Proposition Atom) :
+      BAxiom (Proposition.imp φ (Proposition.or φ ψ))
+  /-- Right disjunction introduction: `ψ → φ ∨ ψ` -/
+  | orI2 (φ ψ : Proposition Atom) :
+      BAxiom (Proposition.imp ψ (Proposition.or φ ψ))
+  /-- Disjunction elimination: `(φ → χ) → ((ψ → χ) → ((φ ∨ ψ) → χ))` -/
+  | orE (φ ψ χ : Proposition Atom) :
+      BAxiom (Proposition.imp (Proposition.imp φ χ)
+        (Proposition.imp (Proposition.imp ψ χ) (Proposition.imp (Proposition.or φ ψ) χ)))
   /-- K distribution: `□(φ → ψ) → (□φ → □ψ)` -/
   | modalK (φ ψ : Proposition Atom) :
       BAxiom (Proposition.imp (Proposition.box (Proposition.imp φ ψ))
@@ -112,6 +132,36 @@ instance :
       (F := Modal.Proposition Atom) where
   B := ⟨Modal.DerivationTree.ax [] _
     (Modal.BAxiom.modalB _)⟩
+
+instance :
+    HasAxiomAndI Modal.HilbertB
+      (F := Modal.Proposition Atom) where
+  andI := ⟨Modal.DerivationTree.ax [] _ (Modal.BAxiom.andI _ _)⟩
+
+instance :
+    HasAxiomAndE1 Modal.HilbertB
+      (F := Modal.Proposition Atom) where
+  andE1 := ⟨Modal.DerivationTree.ax [] _ (Modal.BAxiom.andE1 _ _)⟩
+
+instance :
+    HasAxiomAndE2 Modal.HilbertB
+      (F := Modal.Proposition Atom) where
+  andE2 := ⟨Modal.DerivationTree.ax [] _ (Modal.BAxiom.andE2 _ _)⟩
+
+instance :
+    HasAxiomOrI1 Modal.HilbertB
+      (F := Modal.Proposition Atom) where
+  orI1 := ⟨Modal.DerivationTree.ax [] _ (Modal.BAxiom.orI1 _ _)⟩
+
+instance :
+    HasAxiomOrI2 Modal.HilbertB
+      (F := Modal.Proposition Atom) where
+  orI2 := ⟨Modal.DerivationTree.ax [] _ (Modal.BAxiom.orI2 _ _)⟩
+
+instance :
+    HasAxiomOrE Modal.HilbertB
+      (F := Modal.Proposition Atom) where
+  orE := ⟨Modal.DerivationTree.ax [] _ (Modal.BAxiom.orE _ _ _)⟩
 
 instance :
     ModalHilbert Modal.HilbertB

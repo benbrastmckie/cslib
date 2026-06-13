@@ -26,8 +26,9 @@ namespace Cslib.Logic.Modal
 
 /-- Axiom schemata for modal logic K5.
 
-The 6 axiom constructors cover:
-- **Propositional** (4): `implyK`, `implyS`, `efq`, `peirce`
+The 12 axiom constructors cover:
+- **Propositional** (10): `implyK`, `implyS`, `efq`, `peirce`, `andI`, `andE1`, `andE2`,
+  `orI1`, `orI2`, `orE`
 - **Modal** (2): `modalK` (K distribution), `modalFive` (Euclideanness) -/
 inductive K5Axiom : Proposition Atom → Prop where
   /-- Weakening: `φ → (ψ → φ)` -/
@@ -43,6 +44,25 @@ inductive K5Axiom : Proposition Atom → Prop where
   /-- Peirce's law / DNE: `((φ → ψ) → φ) → φ` -/
   | peirce (φ ψ : Proposition Atom) :
       K5Axiom (Proposition.imp (Proposition.imp (Proposition.imp φ ψ) φ) φ)
+  /-- Conjunction introduction: `φ → (ψ → φ ∧ ψ)` -/
+  | andI (φ ψ : Proposition Atom) :
+      K5Axiom (Proposition.imp φ (Proposition.imp ψ (Proposition.and φ ψ)))
+  /-- Left conjunction elimination: `φ ∧ ψ → φ` -/
+  | andE1 (φ ψ : Proposition Atom) :
+      K5Axiom (Proposition.imp (Proposition.and φ ψ) φ)
+  /-- Right conjunction elimination: `φ ∧ ψ → ψ` -/
+  | andE2 (φ ψ : Proposition Atom) :
+      K5Axiom (Proposition.imp (Proposition.and φ ψ) ψ)
+  /-- Left disjunction introduction: `φ → φ ∨ ψ` -/
+  | orI1 (φ ψ : Proposition Atom) :
+      K5Axiom (Proposition.imp φ (Proposition.or φ ψ))
+  /-- Right disjunction introduction: `ψ → φ ∨ ψ` -/
+  | orI2 (φ ψ : Proposition Atom) :
+      K5Axiom (Proposition.imp ψ (Proposition.or φ ψ))
+  /-- Disjunction elimination: `(φ → χ) → ((ψ → χ) → ((φ ∨ ψ) → χ))` -/
+  | orE (φ ψ χ : Proposition Atom) :
+      K5Axiom (Proposition.imp (Proposition.imp φ χ)
+        (Proposition.imp (Proposition.imp ψ χ) (Proposition.imp (Proposition.or φ ψ) χ)))
   /-- K distribution: `□(φ → ψ) → (□φ → □ψ)` -/
   | modalK (φ ψ : Proposition Atom) :
       K5Axiom (Proposition.imp (Proposition.box (Proposition.imp φ ψ))
@@ -113,6 +133,36 @@ instance :
       (F := Modal.Proposition Atom) where
   five := ⟨Modal.DerivationTree.ax [] _
     (Modal.K5Axiom.modalFive _)⟩
+
+instance :
+    HasAxiomAndI Modal.HilbertK5
+      (F := Modal.Proposition Atom) where
+  andI := ⟨Modal.DerivationTree.ax [] _ (Modal.K5Axiom.andI _ _)⟩
+
+instance :
+    HasAxiomAndE1 Modal.HilbertK5
+      (F := Modal.Proposition Atom) where
+  andE1 := ⟨Modal.DerivationTree.ax [] _ (Modal.K5Axiom.andE1 _ _)⟩
+
+instance :
+    HasAxiomAndE2 Modal.HilbertK5
+      (F := Modal.Proposition Atom) where
+  andE2 := ⟨Modal.DerivationTree.ax [] _ (Modal.K5Axiom.andE2 _ _)⟩
+
+instance :
+    HasAxiomOrI1 Modal.HilbertK5
+      (F := Modal.Proposition Atom) where
+  orI1 := ⟨Modal.DerivationTree.ax [] _ (Modal.K5Axiom.orI1 _ _)⟩
+
+instance :
+    HasAxiomOrI2 Modal.HilbertK5
+      (F := Modal.Proposition Atom) where
+  orI2 := ⟨Modal.DerivationTree.ax [] _ (Modal.K5Axiom.orI2 _ _)⟩
+
+instance :
+    HasAxiomOrE Modal.HilbertK5
+      (F := Modal.Proposition Atom) where
+  orE := ⟨Modal.DerivationTree.ax [] _ (Modal.K5Axiom.orE _ _ _)⟩
 
 instance :
     ModalHilbert Modal.HilbertK5

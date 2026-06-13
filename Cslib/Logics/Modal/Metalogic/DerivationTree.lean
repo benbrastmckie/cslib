@@ -53,9 +53,11 @@ variable {Atom : Type*}
 
 /-- Axiom schemata for S5 modal logic.
 
-The 8 axiom constructors cover:
-- **Propositional** (4): `implyK` (weakening), `implyS` (distribution), `efq` (ex falso),
-  `peirce` (double negation elimination / Peirce's law)
+The 14 axiom constructors cover:
+- **Propositional** (10): `implyK` (weakening), `implyS` (distribution), `efq` (ex falso),
+  `peirce` (double negation elimination / Peirce's law), `andI` (conjunction introduction),
+  `andE1`/`andE2` (conjunction elimination), `orI1`/`orI2` (disjunction introduction),
+  `orE` (disjunction elimination)
 - **Modal** (4): `modalK` (K distribution), `modalT` (reflexivity), `modalFour` (transitivity),
   `modalB` (symmetry)
 
@@ -73,6 +75,24 @@ inductive ModalAxiom : Proposition Atom → Prop where
   /-- Peirce's law / DNE: `((φ → ψ) → φ) → φ` -/
   | peirce (φ ψ : Proposition Atom) :
       ModalAxiom (((φ.imp ψ).imp φ).imp φ)
+  /-- Conjunction introduction: `φ → (ψ → φ ∧ ψ)` -/
+  | andI (φ ψ : Proposition Atom) :
+      ModalAxiom (φ.imp (ψ.imp (φ.and ψ)))
+  /-- Left conjunction elimination: `φ ∧ ψ → φ` -/
+  | andE1 (φ ψ : Proposition Atom) :
+      ModalAxiom ((φ.and ψ).imp φ)
+  /-- Right conjunction elimination: `φ ∧ ψ → ψ` -/
+  | andE2 (φ ψ : Proposition Atom) :
+      ModalAxiom ((φ.and ψ).imp ψ)
+  /-- Left disjunction introduction: `φ → φ ∨ ψ` -/
+  | orI1 (φ ψ : Proposition Atom) :
+      ModalAxiom (φ.imp (φ.or ψ))
+  /-- Right disjunction introduction: `ψ → φ ∨ ψ` -/
+  | orI2 (φ ψ : Proposition Atom) :
+      ModalAxiom (ψ.imp (φ.or ψ))
+  /-- Disjunction elimination: `(φ → χ) → ((ψ → χ) → ((φ ∨ ψ) → χ))` -/
+  | orE (φ ψ χ : Proposition Atom) :
+      ModalAxiom ((φ.imp χ).imp ((ψ.imp χ).imp ((φ.or ψ).imp χ)))
   /-- K distribution: `□(φ → ψ) → (□φ → □ψ)` -/
   | modalK (φ ψ : Proposition Atom) :
       ModalAxiom ((Proposition.box (φ.imp ψ)).imp ((Proposition.box φ).imp (Proposition.box ψ)))

@@ -1,6 +1,19 @@
 {
-  "next_project_number": 186,
+  "next_project_number": 187,
   "active_projects": [
+    {
+      "project_number": 186,
+      "project_name": "hilbert_nd_equivalence_refactor",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Refactor the Hilbert / natural deduction extensional equivalence in Cslib/Logics/Propositional/NaturalDeduction/ to the highest standards of quality and elegance. Current gaps: (1) no minimal logic instantiation (hilbert_iff_nd_min) — the generic theorem requires EFQ which MinPropAxiom lacks, so either a separate EFQ-free version or an adapted ND system is needed; (2) equivalence is only for closed derivability (empty context Derivable ↔ DerivableIn ∅) — extend to full context-based equivalence (Deriv Axioms Γ φ ↔ NDDeriv Theory Γ φ) for the stronger result; (3) review proof style in ndToHilbert and hilbertToND for clarity and decomposition; (4) ensure all three systems (minimal, intuitionistic, classical) have clean corollary instantiations; (5) add proper literature references for the equivalence result (Prawitz 1965, Troelstra & van Dalen 1988); (6) review naming conventions and docstrings against Mathlib standards.",
+      "dependencies": [
+        185
+      ],
+      "created": "2026-06-13T21:39:55Z",
+      "last_updated": "2026-06-13T21:39:55Z"
+    },
     {
       "project_number": 185,
       "project_name": "propositional_foundations_quality_audit",

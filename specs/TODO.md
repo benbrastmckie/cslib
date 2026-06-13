@@ -103,12 +103,12 @@ next_project_number: 183
   └─ 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
   └─ 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors  (see above)
-182 [RESEARCHED] — Revert Modal/, Temporal/, and Bimodal/ to purely classical system
+182 [PLANNED] — Revert Modal/, Temporal/, and Bimodal/ to purely classical system
 
 ## Tasks
 
 ### 182. Evaluate classical only simplification
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Dependencies**: None
 - **Research**:
@@ -117,6 +117,7 @@ next_project_number: 183
   - [182_evaluate_classical_only_simplification/reports/02_teammate-a-findings.md]
   - [182_evaluate_classical_only_simplification/reports/02_teammate-b-findings.md]
   - [182_evaluate_classical_only_simplification/reports/02_teammate-c-findings.md]
+- **Plan**: [182_evaluate_classical_only_simplification/plans/01_implementation-plan.md]
 
 **Description**: Revert Modal/, Temporal/, and Bimodal/ to purely classical systems with minimal formula constructors, undoing the and/or propagation from tasks 175-177. Propositional/ is unchanged (retains five primitives and three-tier min/int/classical completeness). Target formula types: Modal {atom, bot, imp, box} (4 constructors), Temporal {atom, bot, imp, untl, snce} (5 constructors), Bimodal {atom, bot, imp, box, untl, snce} (6 constructors). Derived connectives via Lukasiewicz encoding: and phi psi := neg (imp phi (neg psi)), or phi psi := imp (neg phi) psi, neg phi := imp phi bot, top := imp bot bot. REVERT SCOPE — per layer: (A) Formula type: remove .and/.or constructors from the inductive type, restore abbrev definitions using Lukasiewicz encoding. (B) All pattern matches: remove .and/.or arms from every match/cases/induction across all files (~55 Modal, ~11 Temporal, ~50+ Bimodal). (C) Axiom sets: remove andI/andE1/andE2/orI1/orI2/orE constructors from axiom inductive types (6 fewer axioms per system). (D) HasAxiom instances: remove HasAxiomAndI/AndE1/AndE2/OrI1/OrI2/OrE instance registrations. (E) Soundness proofs: remove the 6 and/or axiom soundness cases from all system soundness files (15 files in Modal, 2 in Temporal). (F) Completeness/truth lemma: remove .and/.or truth lemma cases; the Lukasiewicz encoding means and/or satisfaction reduces to imp/bot cases automatically. (G) MCS helpers: remove mcs_or_resolve, mcs_and_iff, and similar helpers added for primitive and/or — implication_property handles everything via the encoding. (H) PropositionalHelpers: remove pairing, lceImp, rceImp, demorganDisjNegBackward and similar helpers that were added to bridge primitive and/or — the Foundations typeclass theorems (lce_imp, rce_imp, combine_imp_conj) handle these via the Lukasiewicz encoding. (I) DerivationTree: remove .andI/.andE1/.andE2/.orI1/.orI2/.orE constructors from derivation tree types. (J) Semantics: remove structural and/or satisfaction clauses — with abbreviations, and/or satisfaction reduces through imp/bot automatically. (K) DenseValidity/Soundness proof restoration: restore proofs that were rewritten from encoding-based to constructor-based back to the encoding pattern (intro/function application style instead of And.intro/Or.inl destructuring). (L) Separation/Decidability/Algebraic: remove .and/.or cases from all pattern matches in these subsystems. THREE DELIVERABLES after revert: (1) Syntactic embedding: update FromPropositional.lean in each layer so the embedding maps Propositional primitive .and/.or to the upper layer Lukasiewicz abbreviations, with proofs that the embedding preserves satisfaction/validity. (2) Axiom inheritance: verify that the Foundations typeclass theorems (Theorems/Propositional/Core.lean lce_imp/rce_imp, Theorems/Combinators.lean combine_imp_conj/combine_imp_conj_3, Theorems/Propositional/Connectives.lean contraposition/demorgan) provide all and/or reasoning as derived theorems via the wrap/unwrap bridge, requiring only HasAxiomImplyK/ImplyS/EFQ/Peirce. (3) Conservative extension: prove that each upper layer is a conservative extension of Classical Propositional Logic — if a propositional formula phi is derivable in the upper system, then phi was already derivable in CPL. This validates that adding modalities/temporal operators introduces no new propositional truths.
 

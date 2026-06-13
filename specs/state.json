@@ -18,7 +18,7 @@
     {
       "project_number": 184,
       "project_name": "weak_completeness_compactness_corollaries",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Derive weak completeness and compactness as clean corollaries of strong completeness for all three propositional logics (minimal, intuitionistic, classical). Refactor existing standalone weak completeness theorems (prop_completeness, int_completeness, min_completeness) to delegate to the strong completeness results via SetDerivable_empty_iff, eliminating duplicated proof infrastructure. Prove compactness for each semantics (Boolean, intuitionistic Kripke, minimal Kripke) from strong completeness + strong soundness. Ensure zero redundancy between the standalone and corollary versions.",
@@ -26,7 +26,20 @@
         183
       ],
       "created": "2026-06-13T19:04:33Z",
-      "last_updated": "2026-06-13T19:04:33Z"
+      "last_updated": "2026-06-13T20:39:39Z",
+      "session_id": "sess_1781382646_04146a",
+      "artifacts": [
+        {
+          "path": "specs/184_weak_completeness_compactness_corollaries/reports/01_corollary-research.md",
+          "type": "report",
+          "summary": "Redundancy analysis and refactoring plan"
+        },
+        {
+          "path": "specs/184_weak_completeness_compactness_corollaries/plans/01_implementation-plan.md",
+          "type": "plan",
+          "summary": "2-phase refactoring plan"
+        }
+      ]
     },
     {
       "project_number": 183,

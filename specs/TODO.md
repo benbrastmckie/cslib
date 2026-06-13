@@ -29,7 +29,7 @@ next_project_number: 186
 ### Propositional Logic
 
 171 [RESEARCHED] — Research connective-basis design for minimal, intuitionistic, and
-184 [NOT STARTED] — Derive weak completeness and compactness as clean corollaries of 
+184 [PLANNED] — Derive weak completeness and compactness as clean corollaries of 
   └─ 185 [NOT STARTED] — Rigorous quality audit of Cslib/Logics/Propositional/ and its Csl
 
 ### Temporal Logic
@@ -57,10 +57,12 @@ next_project_number: 186
 ---
 
 ### 184. Weak completeness compactness corollaries
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 183
+- **Research**: [184_weak_completeness_compactness_corollaries/reports/01_corollary-research.md]
+- **Plan**: [184_weak_completeness_compactness_corollaries/plans/01_implementation-plan.md]
 
 **Description**: Derive weak completeness and compactness as clean corollaries of strong completeness for all three propositional logics (minimal, intuitionistic, classical). Refactor existing standalone weak completeness theorems (prop_completeness, int_completeness, min_completeness) to delegate to the strong completeness results via SetDerivable_empty_iff, eliminating duplicated proof infrastructure. Prove compactness for each semantics (Boolean, intuitionistic Kripke, minimal Kripke) from strong completeness + strong soundness. Ensure zero redundancy between the standalone and corollary versions.
 

@@ -80,22 +80,39 @@ abbrev Sequent {Atom} := Ctx Atom × Proposition Atom
 scoped notation Γ:60 " ⊢ " A => (⟨Γ, A⟩ : Sequent)
 
 /-- A `T`-derivation of {A₁, ..., Aₙ} ⊢ B demonstrates B using (undischarged) assumptions among Aᵢ,
-possibly appealing to axioms from `T`. Primitives: axiom, assumption, implication intro/elim,
-and ex falso quodlibet (bottom elimination). -/
+possibly appealing to axioms from `T`. Primitives: axiom, assumption, conjunction intro/elim,
+disjunction intro/elim, and implication intro/elim.
+Ex falso quodlibet (bottom elimination) is a derived rule requiring `[IsIntuitionistic T]`. -/
 inductive Theory.Derivation {T : Theory Atom} : Ctx Atom → Proposition Atom → Type u where
   /-- Axiom -/
   | ax {Γ : Ctx Atom} {A : Proposition Atom} (_ : A ∈ T) : Derivation Γ A
   /-- Assumption -/
   | ass {Γ : Ctx Atom} {A : Proposition Atom} (_ : A ∈ Γ) : Derivation Γ A
+  /-- Conjunction introduction -/
+  | andI {A B : Proposition Atom} (G : Ctx Atom) :
+      Derivation G A → Derivation G B → Derivation G (A ∧ B)
+  /-- Left conjunction elimination -/
+  | andE1 {A B : Proposition Atom} (G : Ctx Atom) :
+      Derivation G (A ∧ B) → Derivation G A
+  /-- Right conjunction elimination -/
+  | andE2 {A B : Proposition Atom} (G : Ctx Atom) :
+      Derivation G (A ∧ B) → Derivation G B
+  /-- Left disjunction introduction -/
+  | orI1 {A B : Proposition Atom} (G : Ctx Atom) :
+      Derivation G A → Derivation G (A ∨ B)
+  /-- Right disjunction introduction -/
+  | orI2 {A B : Proposition Atom} (G : Ctx Atom) :
+      Derivation G B → Derivation G (A ∨ B)
+  /-- Disjunction elimination -/
+  | orE {A B C : Proposition Atom} (G : Ctx Atom) :
+      Derivation G (A ∨ B) → Derivation (insert A G) C → Derivation (insert B G) C →
+      Derivation G C
   /-- Implication introduction -/
   | impI {A B : Proposition Atom} (Γ : Ctx Atom) :
       Derivation (insert A Γ) B → Derivation Γ (A → B)
   /-- Implication elimination (modus ponens) -/
   | impE {Γ : Ctx Atom} {A B : Proposition Atom} :
       Derivation Γ (A → B) → Derivation Γ A → Derivation Γ B
-  /-- Ex falso quodlibet (bottom elimination) -/
-  | botE {Γ : Ctx Atom} {A : Proposition Atom} :
-      Derivation Γ ⊥ → Derivation Γ A
 
 /-- Inference system for derivations under the theory `T`. -/
 instance (T : Theory Atom) : InferenceSystem T (Sequent (Atom := Atom)) where
@@ -157,9 +174,17 @@ def Theory.Derivation.weak {T T' : Theory Atom} {Γ Δ : Ctx Atom} {A : Proposit
     (hTheory : T ⊆ T') (hCtx : Γ ⊆ Δ) : T.Derivation Γ A → T'.Derivation Δ A
   | ax hA => ax <| hTheory hA
   | ass hA => ass <| hCtx hA
+  | @andI _ _ _ A B G D₁ D₂ => andI Δ (D₁.weak hTheory hCtx) (D₂.weak hTheory hCtx)
+  | @andE1 _ _ _ A B G D => andE1 Δ (D.weak hTheory hCtx)
+  | @andE2 _ _ _ A B G D => andE2 Δ (D.weak hTheory hCtx)
+  | @orI1 _ _ _ A B G D => orI1 Δ (D.weak hTheory hCtx)
+  | @orI2 _ _ _ A B G D => orI2 Δ (D.weak hTheory hCtx)
+  | @orE _ _ _ _ _ _ _ D DA DB =>
+    orE Δ (D.weak hTheory hCtx)
+      (DA.weak hTheory (Finset.insert_subset_insert _ hCtx))
+      (DB.weak hTheory (Finset.insert_subset_insert _ hCtx))
   | @impI _ _ _ A B Γ D => impI (Δ) <| D.weak hTheory <| Finset.insert_subset_insert _ hCtx
   | impE D D' => impE (D.weak hTheory hCtx) (D'.weak hTheory hCtx)
-  | botE D => botE <| D.weak hTheory hCtx
 
 /-- Weakening the theory only. -/
 def Theory.Derivation.weakTheory {T T' : Theory Atom} {Γ : Ctx Atom} {A : Proposition Atom}
@@ -228,12 +253,22 @@ def Theory.Derivation.subs {Γ Γ' Δ : Ctx Atom} {B : Proposition Atom}
       exact (Ds B h).weakCtx <| by grind
     case neg h =>
       exact ass <| by grind
+  | @andI _ _ _ A' B' _ E₁ E₂ => andI _ (E₁.subs Ds) (E₂.subs Ds)
+  | @andE1 _ _ _ A' B' _ E => andE1 _ (E.subs Ds)
+  | @andE2 _ _ _ A' B' _ E => andE2 _ (E.subs Ds)
+  | @orI1 _ _ _ A' B' _ E => orI1 _ (E.subs Ds)
+  | @orI2 _ _ _ A' B' _ E => orI2 _ (E.subs Ds)
+  | @orE _ _ _ A' B' C' _ E EA EB => by
+    apply orE _ (E.subs Ds)
+    · rw [show insert A' (Γ \ Γ' ∪ Δ) = (insert A' Γ \ Γ') ∪ insert A' Δ by grind]
+      exact EA.subs Ds |>.weakCtx (by grind)
+    · rw [show insert B' (Γ \ Γ' ∪ Δ) = (insert B' Γ \ Γ') ∪ insert B' Δ by grind]
+      exact EB.subs Ds |>.weakCtx (by grind)
   | @impI _ _ _ A' _ _ E .. => by
     apply impI
     rw [show insert A' (Γ \ Γ' ∪ Δ) = (insert A' Γ \ Γ') ∪ insert A' Δ by grind]
     exact E.subs Ds |>.weakCtx (by grind)
   | impE E E' => impE (E.subs Ds) (E'.subs Ds)
-  | botE E => botE <| E.subs Ds
 
 /-- Transport a derivation along a substitution of atoms. -/
 def Theory.Derivation.substAtom {Atom Atom' : Type u} [DecidableEq Atom] [DecidableEq Atom']
@@ -241,9 +276,17 @@ def Theory.Derivation.substAtom {Atom Atom' : Type u} [DecidableEq Atom] [Decida
     T.Derivation Γ B → (T.subst f).Derivation (Γ.subst f) (B >>= f)
   | ax h => ax <| Set.mem_image_of_mem (· >>= f) h
   | ass h => ass <| Finset.mem_image_of_mem (· >>= f) h
+  | andI _ D₁ D₂ => andI _ (D₁.substAtom f) (D₂.substAtom f)
+  | andE1 _ D => andE1 _ (D.substAtom f)
+  | andE2 _ D => andE2 _ (D.substAtom f)
+  | orI1 _ D => orI1 _ (D.substAtom f)
+  | orI2 _ D => orI2 _ (D.substAtom f)
+  | orE _ D DA DB =>
+    orE _ (D.substAtom f)
+      ((Finset.image_insert (· >>= f) _ _) ▸ (DA.substAtom f))
+      ((Finset.image_insert (· >>= f) _ _) ▸ (DB.substAtom f))
   | impI _ D => impI _ <| (Finset.image_insert (· >>= f) _ _) ▸ (D.substAtom f)
   | impE D E => impE (D.substAtom f) (E.substAtom f)
-  | botE D => botE (D.substAtom f)
 
 theorem DerivableIn.substAtom {Atom Atom' : Type u} [DecidableEq Atom] [DecidableEq Atom']
     {T : Theory Atom}

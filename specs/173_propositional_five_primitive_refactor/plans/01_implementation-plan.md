@@ -134,7 +134,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: ND System Overhaul -- Remove botE, Add 6 Constructors, Update DerivedRules [NOT STARTED]
+### Phase 3: ND System Overhaul -- Remove botE, Add 6 Constructors, Update DerivedRules [COMPLETED]
 
 **Goal**: Transform the ND system from 5 constructors (ax, ass, impI, impE, botE) to 10 constructors (ax, ass, andI, andE1, andE2, orI1, orI2, orE, impI, impE). Update `weak`, `subs`, `substAtom` for the new constructors. Make `botE` a derived rule under `[IsIntuitionistic T]`. Rewrite DerivedRules to use new primitives.
 

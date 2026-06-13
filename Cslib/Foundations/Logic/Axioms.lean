@@ -83,6 +83,39 @@ protected abbrev DNE (φ : F) : F :=
 
 end Propositional
 
+/-! ### And/Or Axioms -/
+
+section AndOrAxioms
+variable [HasAnd F] [HasOr F] [HasBot F] [HasImp F]
+
+/-- Conjunction introduction: φ → (ψ → φ ∧ ψ) -/
+protected abbrev AndI (φ ψ : F) : F :=
+  HasImp.imp φ (HasImp.imp ψ (HasAnd.and φ ψ))
+
+/-- Left conjunction elimination: φ ∧ ψ → φ -/
+protected abbrev AndE1 (φ ψ : F) : F :=
+  HasImp.imp (HasAnd.and φ ψ) φ
+
+/-- Right conjunction elimination: φ ∧ ψ → ψ -/
+protected abbrev AndE2 (φ ψ : F) : F :=
+  HasImp.imp (HasAnd.and φ ψ) ψ
+
+/-- Left disjunction introduction: φ → φ ∨ ψ -/
+protected abbrev OrI1 (φ ψ : F) : F :=
+  HasImp.imp φ (HasOr.or φ ψ)
+
+/-- Right disjunction introduction: ψ → φ ∨ ψ -/
+protected abbrev OrI2 (φ ψ : F) : F :=
+  HasImp.imp ψ (HasOr.or φ ψ)
+
+/-- Disjunction elimination: (φ → χ) → ((ψ → χ) → ((φ ∨ ψ) → χ)) -/
+protected abbrev OrE (φ ψ χ : F) : F :=
+  HasImp.imp (HasImp.imp φ χ)
+    (HasImp.imp (HasImp.imp ψ χ)
+      (HasImp.imp (HasOr.or φ ψ) χ))
+
+end AndOrAxioms
+
 /-! ### Modal Axioms -/
 
 section Modal

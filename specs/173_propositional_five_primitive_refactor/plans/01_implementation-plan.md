@@ -1,7 +1,7 @@
 # Implementation Plan: Propositional Five-Primitive Refactor
 
 - **Task**: 173 - propositional_five_primitive_refactor
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 12 hours
 - **Dependencies**: 172 (Connectives refactor -- completed)
 - **Research Inputs**: specs/173_propositional_five_primitive_refactor/reports/01_five-primitive-research.md
@@ -79,7 +79,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Foundations -- Polymorphic Axiom Abbrevs and HasAxiom* Typeclasses [NOT STARTED]
+### Phase 1: Foundations -- Polymorphic Axiom Abbrevs and HasAxiom* Typeclasses [COMPLETED]
 
 **Goal**: Add and/or axiom definitions to `Foundations/Logic/Axioms.lean` and corresponding `HasAxiom*` typeclasses to `Foundations/Logic/ProofSystem.lean`. This phase touches only Foundations-level files and causes no downstream breakage.
 

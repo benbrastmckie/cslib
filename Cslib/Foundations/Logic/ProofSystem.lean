@@ -120,6 +120,44 @@ class HasAxiomPeirce where
   peirce {φ ψ : F} :
     InferenceSystem.DerivableIn S (Axioms.Peirce φ ψ)
 
+end AxiomClasses
+
+/-! ### And/Or Axiom Typeclasses -/
+
+section AndOrAxiomClasses
+
+variable (S : Type*) [HasBot F] [HasImp F] [HasAnd F] [HasOr F] [InferenceSystem S F]
+
+/-- The proof system proves AndI: φ → (ψ → φ ∧ ψ). -/
+class HasAxiomAndI where
+  andI {φ ψ : F} : InferenceSystem.DerivableIn S (Axioms.AndI φ ψ)
+
+/-- The proof system proves AndE1: φ ∧ ψ → φ. -/
+class HasAxiomAndE1 where
+  andE1 {φ ψ : F} : InferenceSystem.DerivableIn S (Axioms.AndE1 φ ψ)
+
+/-- The proof system proves AndE2: φ ∧ ψ → ψ. -/
+class HasAxiomAndE2 where
+  andE2 {φ ψ : F} : InferenceSystem.DerivableIn S (Axioms.AndE2 φ ψ)
+
+/-- The proof system proves OrI1: φ → φ ∨ ψ. -/
+class HasAxiomOrI1 where
+  orI1 {φ ψ : F} : InferenceSystem.DerivableIn S (Axioms.OrI1 φ ψ)
+
+/-- The proof system proves OrI2: ψ → φ ∨ ψ. -/
+class HasAxiomOrI2 where
+  orI2 {φ ψ : F} : InferenceSystem.DerivableIn S (Axioms.OrI2 φ ψ)
+
+/-- The proof system proves OrE: (φ → χ) → ((ψ → χ) → ((φ ∨ ψ) → χ)). -/
+class HasAxiomOrE where
+  orE {φ ψ χ : F} : InferenceSystem.DerivableIn S (Axioms.OrE φ ψ χ)
+
+end AndOrAxiomClasses
+
+section ModalAxiomClasses
+
+variable (S : Type*) [HasBot F] [HasImp F] [InferenceSystem S F]
+
 variable [HasBox F]
 
 /-- The proof system proves axiom K: □(φ → ψ) → (□φ → □ψ). -/
@@ -153,7 +191,7 @@ class HasAxiomMF where
   MF {φ : F} :
     InferenceSystem.DerivableIn S (Axioms.ModalFuture φ)
 
-end AxiomClasses
+end ModalAxiomClasses
 
 /-! ### Temporal Axiom Typeclasses -/
 

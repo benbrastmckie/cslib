@@ -160,7 +160,7 @@ next_project_number: 179
 ---
 
 ### 173. Propositional five primitive refactor
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Foundations Refactor
 - **Dependencies**: Task 172

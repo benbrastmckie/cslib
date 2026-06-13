@@ -1,5 +1,5 @@
 {
-  "next_project_number": 182,
+  "next_project_number": 183,
   "active_projects": [
     {
       "project_number": 172,
@@ -1396,6 +1396,21 @@
           "path": "specs/181_bimodal_primitive_dia_always_historically/reports/01_bimodal-primitive-expansion-research.md",
           "type": "report",
           "summary": "11-primitive justification, extension architecture, scope assessment, task 177 lessons, interaction analysis"
+        }
+      ]
+    },
+    {
+      "project_number": 182,
+      "project_name": "evaluate_classical_only_simplification",
+      "status": "researched",
+      "task_type": "cslib",
+      "dependencies": [],
+      "description": "Evaluate whether Modal/, Temporal/, and Bimodal/ should remain classical-only, and if so, whether to revert the primitive and/or constructors added by tasks 175-177 back to Lukasiewicz abbreviations. Three options: (1) Full intuitionistic path — keep and/or, add dia/G/H (tasks 179-181), build intuitionistic variants. (2) Keep and/or but skip further expansion — current state, preserves future optionality. (3) Revert and/or in upper layers to abbreviations — minimize constructors, simpler proofs, classical-only. Decision determines whether tasks 179-181 proceed, are closed, or are replaced with revert tasks.",
+      "artifacts": [
+        {
+          "path": "specs/182_evaluate_classical_only_simplification/reports/01_classical-simplification-tradeoffs.md",
+          "type": "report",
+          "summary": "Three-option tradeoff analysis: full intuitionistic vs keep-and/or vs revert, with cost comparison and decision criteria"
         }
       ]
     }

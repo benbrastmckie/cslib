@@ -1,5 +1,5 @@
 ---
-next_project_number: 182
+next_project_number: 183
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 182
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,62,127,139,146,147,160,169,170,171,179,180 | -- | Bimodal Porting, Modal PRs, Propositional Logic, ... |
+| 1 | 36,37,62,127,139,146,147,160,169,170,171,179,180,182 | -- | Bimodal Porting, Modal PRs, Propositional Logic, ... |
 | 2 | 39,40,63,140,148,161,181 | 36,37,62,139,147,160,179,180 | Modal PRs, Propositional PRs, Temporal Logic, ... |
 | 3 | 41,64,141,149,162 | 39,40,63,140,148,161 | Foundations, Modal PRs, Propositional PRs, ... |
 | 4 | 128,129,142,150 | 141,146,149 | Modal PRs, Propositional PRs |
@@ -103,8 +103,19 @@ next_project_number: 182
   └─ 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
   └─ 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors  (see above)
+182 [RESEARCHED] — Evaluate whether Modal/, Temporal/, and Bimodal/ should remain cl
 
 ## Tasks
+
+### 182. Evaluate classical only simplification
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Dependencies**: None
+- **Research**: [182_evaluate_classical_only_simplification/reports/01_classical-simplification-tradeoffs.md]
+
+**Description**: Evaluate whether Modal/, Temporal/, and Bimodal/ should remain classical-only, and if so, whether to revert the primitive and/or constructors added by tasks 175-177 back to Lukasiewicz abbreviations. Three options: (1) Full intuitionistic path — keep and/or, add dia/G/H (tasks 179-181), build intuitionistic variants. (2) Keep and/or but skip further expansion — current state, preserves future optionality. (3) Revert and/or in upper layers to abbreviations — minimize constructors, simpler proofs, classical-only. Decision determines whether tasks 179-181 proceed, are closed, or are replaced with revert tasks.
+
+---
 
 ### 181. Bimodal primitive dia always historically
 - **Status**: [NOT STARTED]

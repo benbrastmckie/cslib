@@ -1,0 +1,11 @@
+{
+  "status": "researched",
+  "summary": "Confirmed s5_has_deduction_theorem is dead code (0 external references). modal_has_deduction_theorem has exactly 3 call sites in MCS.lean (lines 78, 92, 105). Rename to hasDeductionTheorem mirrors propositional cleanup from task 191. No namespace conflict -- modal is in Cslib.Logic.Modal, propositional is in Cslib.Logic.PL. Only 2 files need changes: DeductionTheorem.lean (delete dead wrapper + rename) and MCS.lean (3 call-site renames).",
+  "artifacts": [
+    {
+      "path": "specs/193_clean_up_modal_deduction_theorem_naming/reports/01_modal-naming-research.md",
+      "type": "report",
+      "summary": "Research report confirming dead code status, documenting all 3 call sites, verifying namespace safety, and providing implementation plan"
+    }
+  ]
+}

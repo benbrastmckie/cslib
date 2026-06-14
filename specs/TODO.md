@@ -49,7 +49,7 @@ next_project_number: 194
 ## Tasks
 
 ### 193. Clean up modal deduction theorem naming
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

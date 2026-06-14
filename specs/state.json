@@ -4,13 +4,15 @@
     {
       "project_number": 198,
       "project_name": "submit_propositional_upstream_pr",
-      "status": "not_started",
+      "status": "pr_ready",
       "task_type": "pr",
       "topic": "Propositional Logic",
       "title": "Submit first propositional logic upstream PR (~300 LOC)",
       "description": "Submit first propositional logic upstream PR (~300 LOC) to CSLib contributing Foundations/Logic/Connectives.lean and Propositional/ changes. Create a new feature branch from upstream/main, cherry-pick the appropriate changes from main while maintaining the scope defined in pr-description.md, then push and submit PR. The pr-description.md from task 188 has been copied into this task directory as the authoritative PR description.",
       "created": "2026-06-14T19:25:06Z",
-      "last_updated": "2026-06-14T19:25:06Z"
+      "last_updated": "2026-06-14T19:41:28Z",
+      "session_id": "sess_1781465311_060bcc",
+      "completion_summary": "PR #647 submitted to upstream CSLib: feat(Logics/Propositional) five-primitive formula type with connective typeclasses. Branch feat/propositional-five-primitive pushed to origin and PR created against leanprover/cslib."
     },
     {
       "project_number": 197,

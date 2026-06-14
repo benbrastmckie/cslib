@@ -39,7 +39,7 @@ next_project_number: 199
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
-198 [NOT STARTED] — Submit first propositional logic upstream PR (~300 LOC) to CSLib 
+198 [PR READY] — Submit first propositional logic upstream PR (~300 LOC) to CSLib 
 
 ### Propositional PRs
 
@@ -54,7 +54,7 @@ next_project_number: 199
 ## Tasks
 
 ### 198. Submit first propositional logic upstream PR (~300 LOC)
-- **Status**: [NOT STARTED]
+- **Status**: [PR READY]
 - **Task Type**: pr
 - **Topic**: Propositional Logic
 - **Dependencies**: None

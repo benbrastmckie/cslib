@@ -1,6 +1,16 @@
 {
-  "next_project_number": 201,
+  "next_project_number": 202,
   "active_projects": [
+    {
+      "project_number": 201,
+      "project_name": "review_modal_pr_citations",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Review citations in Modal PR changes for accuracy and completeness, covering the Basic.lean and Denotation.lean files in scope for the initial Modal/ upstream PR (task 197). Verify literature references (Blackburn2001, ChagrovZakharyaschev1997, Bentzen2023, Trufas2024, Johansson1937), check BibTeX entries in references.bib, and ensure pr-description.md citations are accurate and properly grounded in primary sources",
+      "topic": "Modal Logic",
+      "created": "2026-06-14T21:23:59Z",
+      "last_updated": "2026-06-14T21:23:59Z"
+    },
     {
       "project_number": 200,
       "project_name": "fix_literature_directory_quality",

@@ -1,5 +1,5 @@
 ---
-next_project_number: 201
+next_project_number: 202
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 201
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,198,199,200 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,188,192,195,197,198,199,201 | -- | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -31,10 +31,7 @@ next_project_number: 201
 ### Modal Logic
 
 197 [PLANNED] — Review the ambition to contribute Modal/ to upstream, identifying
-
-### Project Management
-
-200 [IMPLEMENTING] — Fix literature directory quality: complete incomplete book splits
+201 [NOT STARTED] — Review citations in Modal PR changes for accuracy and completenes
 
 ### Propositional Logic
 
@@ -53,6 +50,16 @@ next_project_number: 201
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 201. Review modal pr citations
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Review citations in Modal PR changes for accuracy and completeness, covering the Basic.lean and Denotation.lean files in scope for the initial Modal/ upstream PR (task 197). Verify literature references (Blackburn2001, ChagrovZakharyaschev1997, Bentzen2023, Trufas2024, Johansson1937), check BibTeX entries in references.bib, and ensure pr-description.md citations are accurate and properly grounded in primary sources
+
+---
 
 ### 200. Fix literature directory quality
 - **Status**: [COMPLETED]

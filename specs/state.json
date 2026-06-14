@@ -1,25 +1,37 @@
 {
-  "next_project_number": 197,
+  "next_project_number": 198,
   "active_projects": [
+    {
+      "project_number": 197,
+      "project_name": "modal_upstream_initial_pr",
+      "status": "not_started",
+      "task_type": "pr",
+      "title": "Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible",
+      "description": "Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible",
+      "topic": "Modal Logic",
+      "created": "2026-06-14T19:08:07Z",
+      "last_updated": "2026-06-14T19:08:07Z"
+    },
     {
       "project_number": 196,
       "project_name": "refactor_connectives_mathlib_bot",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "topic": "Propositional PRs",
       "description": "Keep HasBot/HasImp/HasAnd/HasOr as custom CSLib classes for naming symmetry and to match the Has* convention used across ProofSystem.lean, Axioms.lean, Consistency.lean, and BigConj.lean. No bridge instance needed — concrete formula types already provide direct Bot instances for ⊥ notation, and generic code intentionally uses HasBot.bot. Update pr-description.md Mathlib section to accurately explain the design choice: uniform Has* naming, concrete types get ⊥ via direct Bot instances, HImp notation mismatch prevents HasImp replacement. Scope: pr-description.md (Mathlib section rewrite)",
       "created": "2026-06-14T18:48:19Z",
-      "last_updated": "2026-06-14T19:00:29Z"
+      "last_updated": "2026-06-14T19:05:08Z",
+      "session_id": "sess_1781463892_2cf03f"
     },
     {
       "project_number": 194,
       "project_name": "curate_zotero_pdfs_for_literature",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "general",
       "topic": "Project Management",
       "created": "2026-06-14T18:15:52Z",
-      "last_updated": "2026-06-14T19:00:20Z",
-      "session_id": "sess_1781463403_180558",
+      "last_updated": "2026-06-14T19:03:36Z",
+      "session_id": "sess_1781463802_4efcea",
       "researched": "2026-06-14T18:28:20Z",
       "next_artifact_number": 3,
       "artifacts": [

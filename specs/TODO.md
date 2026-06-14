@@ -1,5 +1,5 @@
 ---
-next_project_number: 197
+next_project_number: 198
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 197
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,194,195,196 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,194,195,196,197 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -28,9 +28,13 @@ next_project_number: 197
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
+### Modal Logic
+
+197 [NOT STARTED] — Review the ambition to contribute Modal/ to upstream, identifying
+
 ### Project Management
 
-194 [PLANNED] — curate_zotero_pdfs_for_literature
+194 [IMPLEMENTING] — curate_zotero_pdfs_for_literature
 
 ### Propositional Logic
 
@@ -39,7 +43,7 @@ next_project_number: 197
 ### Propositional PRs
 
 192 [PLANNED] — Draw on sources in specs/literature/ to verify and improve citati
-196 [NOT STARTED] — Keep HasBot/HasImp/HasAnd/HasOr as custom CSLib classes for namin
+196 [RESEARCHING] — Keep HasBot/HasImp/HasAnd/HasOr as custom CSLib classes for namin
 
 ### Temporal Logic
 
@@ -49,8 +53,18 @@ next_project_number: 197
 
 ## Tasks
 
-### 196. Refactor connectives mathlib bot
+### 197. Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible
 - **Status**: [NOT STARTED]
+- **Task Type**: pr
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible
+
+---
+
+### 196. Refactor connectives mathlib bot
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Propositional PRs
 - **Dependencies**: None
@@ -70,7 +84,7 @@ next_project_number: 197
 ---
 
 ### 194. Curate zotero pdfs for literature
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: general
 - **Topic**: Project Management
 - **Dependencies**: None

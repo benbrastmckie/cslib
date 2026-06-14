@@ -1,7 +1,7 @@
 # Implementation Plan: Curate Zotero PDFs for Literature
 
 - **Task**: 194 - Curate Zotero PDFs for literature
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 5 hours
 - **Dependencies**: None (user will fix literature-retrieve.sh separately)
 - **Research Inputs**: reports/01_team-research.md, reports/02_literature-organization-practices.md
@@ -67,7 +67,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Create Master Index Schema and Index Paper-Length Files [NOT STARTED]
+### Phase 1: Create Master Index Schema and Index Paper-Length Files [IN PROGRESS]
 
 **Goal**: Establish the `specs/literature/index.json` with the correct schema and populate it with entries for all existing paper-length files that already fit within the token budget.
 

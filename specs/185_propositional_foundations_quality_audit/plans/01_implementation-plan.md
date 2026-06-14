@@ -182,7 +182,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: Extract Shared DNE Helper in StrongCompleteness [IN PROGRESS]
+### Phase 4: Extract Shared DNE Helper in StrongCompleteness [COMPLETED]
 
 **Goal**: Extract the duplicated double-negation elimination chain (~40 lines duplicated between two branches of `prop_not_SetDerivable_union_neg_consistent`) into a shared helper lemma.
 
@@ -205,7 +205,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 5: Decompose prop_truth_lemma into Helper Lemmas [NOT STARTED]
+### Phase 5: Decompose prop_truth_lemma into Helper Lemmas [IN PROGRESS]
 
 **Goal**: Decompose the 241-line monolithic `prop_truth_lemma` proof in `Completeness.lean` into per-connective helper lemmas following Mathlib conventions. This is the highest-risk change in the task.
 

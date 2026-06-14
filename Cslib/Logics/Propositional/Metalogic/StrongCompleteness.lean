@@ -66,6 +66,42 @@ theorem prop_strong_soundness {Γ : Set (PL.Proposition Atom)} {φ : PL.Proposit
   intro v h_sat
   exact prop_soundness d v (fun ψ hψ => h_sat ψ (hL_sub ψ hψ))
 
+/-! ## Helper: Double-Negation Elimination via EFQ + Peirce -/
+
+/-- Given a derivation `ctx ⊢ ¬φ → ⊥` (i.e., `ctx ⊢ (φ → ⊥) → ⊥`), produce
+`ctx ⊢ φ` via EFQ + implyS composition + Peirce's law. -/
+private noncomputable def dne_from_neg_neg
+    {Atom : Type*} {φ : PL.Proposition Atom}
+    {ctx : List (PL.Proposition Atom)}
+    (d_neg_neg : DerivationTree PropositionalAxiom ctx ((¬φ).imp Proposition.bot)) :
+    DerivationTree PropositionalAxiom ctx φ :=
+  -- EFQ: ctx ⊢ ⊥ → φ
+  let d_efq : DerivationTree PropositionalAxiom ctx (Proposition.bot.imp φ) :=
+    .weakening [] ctx _ (.ax [] _ (.efq φ)) (fun _ h => nomatch h)
+  -- implyK: ctx ⊢ (⊥ → φ) → (¬φ → (⊥ → φ))
+  let d_k : DerivationTree PropositionalAxiom ctx
+      ((Proposition.bot.imp φ).imp ((¬φ).imp (Proposition.bot.imp φ))) :=
+    .weakening [] ctx _ (.ax [] _ (.implyK (Proposition.bot.imp φ) (¬φ)))
+      (fun _ h => nomatch h)
+  -- Combine: ctx ⊢ ¬φ → (⊥ → φ)
+  let d_step2 := DerivationTree.modus_ponens ctx _ _ d_k d_efq
+  -- implyS: ctx ⊢ (¬φ → (⊥ → φ)) → ((¬φ → ⊥) → (¬φ → φ))
+  let d_s2 : DerivationTree PropositionalAxiom ctx
+      (((¬φ).imp (Proposition.bot.imp φ)).imp
+        (((¬φ).imp Proposition.bot).imp ((¬φ).imp φ))) :=
+    .weakening [] ctx _ (.ax [] _ (.implyS (¬φ) Proposition.bot φ))
+      (fun _ h => nomatch h)
+  -- ctx ⊢ (¬φ → ⊥) → (¬φ → φ)
+  let d_step3 := DerivationTree.modus_ponens ctx _ _ d_s2 d_step2
+  -- ctx ⊢ ¬φ → φ
+  let d_neg_to_phi : DerivationTree PropositionalAxiom ctx ((¬φ).imp φ) :=
+    DerivationTree.modus_ponens ctx _ _ d_step3 d_neg_neg
+  -- Peirce: ctx ⊢ (¬φ → φ) → φ
+  let d_peirce : DerivationTree PropositionalAxiom ctx (((¬φ).imp φ).imp φ) :=
+    .weakening [] ctx _ (.ax [] _ (.peirce φ Proposition.bot)) (fun _ h => nomatch h)
+  -- ctx ⊢ φ
+  DerivationTree.modus_ponens ctx _ _ d_peirce d_neg_to_phi
+
 /-! ## Key Lemma: Consistency of Γ ∪ {¬φ} -/
 
 /-- If `φ` is not set-derivable from `Γ`, then `Γ ∪ {¬φ}` is
@@ -96,29 +132,8 @@ theorem prop_not_SetDerivable_union_neg_consistent
       · exact h
       · exact absurd (Set.mem_singleton_iff.mp h) hx_ne
     let ctx := removeAll L (¬φ)
-    -- EFQ + S: ctx ⊢ ¬φ → ⊥ and ctx ⊢ ⊥ → φ, so ctx ⊢ ¬φ → φ
-    have d_efq : DerivationTree PropositionalAxiom (Atom := Atom) ctx
-        (Proposition.bot.imp φ) :=
-      .weakening [] ctx _ (.ax [] _ (.efq φ)) (fun _ h => nomatch h)
-    have d_k : DerivationTree PropositionalAxiom (Atom := Atom) ctx
-        ((Proposition.bot.imp φ).imp ((¬φ).imp (Proposition.bot.imp φ))) :=
-      .weakening [] ctx _ (.ax [] _ (.implyK (Proposition.bot.imp φ) (¬φ)))
-        (fun _ h => nomatch h)
-    have d_step2 := DerivationTree.modus_ponens ctx _ _ d_k d_efq
-    have d_s2 : DerivationTree PropositionalAxiom (Atom := Atom) ctx
-        (((¬φ).imp (Proposition.bot.imp φ)).imp
-          (((¬φ).imp Proposition.bot).imp ((¬φ).imp φ))) :=
-      .weakening [] ctx _ (.ax [] _ (.implyS (¬φ) Proposition.bot φ))
-        (fun _ h => nomatch h)
-    have d_step3 := DerivationTree.modus_ponens ctx _ _ d_s2 d_step2
-    have d_neg_to_phi : DerivationTree PropositionalAxiom (Atom := Atom) ctx ((¬φ).imp φ) :=
-      DerivationTree.modus_ponens ctx _ _ d_step3 d_neg_neg
-    -- Peirce: (¬φ → φ) → φ
-    have d_peirce : DerivationTree PropositionalAxiom (Atom := Atom) ctx (((¬φ).imp φ).imp φ) :=
-      .weakening [] ctx _ (.ax [] _ (.peirce φ Proposition.bot)) (fun _ h => nomatch h)
-    have d_phi : DerivationTree PropositionalAxiom (Atom := Atom) ctx φ :=
-      DerivationTree.modus_ponens ctx _ _ d_peirce d_neg_to_phi
-    exact h_not ⟨ctx, h_rem_sub, ⟨d_phi⟩⟩
+    -- DNE: ctx ⊢ ¬φ → ⊥ gives ctx ⊢ φ via EFQ + Peirce
+    exact h_not ⟨ctx, h_rem_sub, ⟨dne_from_neg_neg d_neg_neg⟩⟩
   · -- ¬φ ∉ L: all elements of L are already in Γ
     have hL_Γ : ∀ x ∈ L, x ∈ Γ := by
       intro x hx
@@ -133,28 +148,8 @@ theorem prop_not_SetDerivable_union_neg_consistent
       .weakening L ((¬φ) :: L) _ d_bot (fun x hx => List.mem_cons.mpr (Or.inr hx))
     have d_dt := deductionTheorem prop_h_implyK prop_h_implyS L (¬φ) Proposition.bot d_ext
     -- d_dt : L ⊢ ¬φ → ⊥ (even though ¬φ wasn't in L)
-    -- EFQ: ⊥ → φ
-    have d_efq : DerivationTree PropositionalAxiom (Atom := Atom) L
-        (Proposition.bot.imp φ) :=
-      .weakening [] L _ (.ax [] _ (.efq φ)) (fun _ h => nomatch h)
-    have d_k : DerivationTree PropositionalAxiom (Atom := Atom) L
-        ((Proposition.bot.imp φ).imp ((¬φ).imp (Proposition.bot.imp φ))) :=
-      .weakening [] L _ (.ax [] _ (.implyK (Proposition.bot.imp φ) (¬φ)))
-        (fun _ h => nomatch h)
-    have d_step2 := DerivationTree.modus_ponens L _ _ d_k d_efq
-    have d_s2 : DerivationTree PropositionalAxiom (Atom := Atom) L
-        (((¬φ).imp (Proposition.bot.imp φ)).imp
-          (((¬φ).imp Proposition.bot).imp ((¬φ).imp φ))) :=
-      .weakening [] L _ (.ax [] _ (.implyS (¬φ) Proposition.bot φ))
-        (fun _ h => nomatch h)
-    have d_step3 := DerivationTree.modus_ponens L _ _ d_s2 d_step2
-    have d_neg_to_phi : DerivationTree PropositionalAxiom (Atom := Atom) L ((¬φ).imp φ) :=
-      DerivationTree.modus_ponens L _ _ d_step3 d_dt
-    have d_peirce : DerivationTree PropositionalAxiom (Atom := Atom) L (((¬φ).imp φ).imp φ) :=
-      .weakening [] L _ (.ax [] _ (.peirce φ Proposition.bot)) (fun _ h => nomatch h)
-    have d_phi : DerivationTree PropositionalAxiom (Atom := Atom) L φ :=
-      DerivationTree.modus_ponens L _ _ d_peirce d_neg_to_phi
-    exact h_not ⟨L, hL_Γ, ⟨d_phi⟩⟩
+    -- DNE: L ⊢ ¬φ → ⊥ gives L ⊢ φ via EFQ + Peirce
+    exact h_not ⟨L, hL_Γ, ⟨dne_from_neg_neg d_dt⟩⟩
 
 /-! ## Strong Completeness -/
 

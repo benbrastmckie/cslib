@@ -11,7 +11,7 @@ next_project_number: 193
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,179,180,191,192 | -- | Bimodal Porting, Propositional Logic, Propositional PRs |
+| 1 | 36,37,179,180,192 | -- | Bimodal Porting, Propositional PRs |
 | 2 | 39,40,181 | 36,37,179,180 | Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -26,13 +26,9 @@ next_project_number: 193
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
-### Propositional Logic
-
-191 [IMPLEMENTING] — clean_up_propositional_deduction_theorem_naming
-
 ### Propositional PRs
 
-192 [RESEARCHING] — research_verify_literature_refs_pr_188
+192 [RESEARCHED] — research_verify_literature_refs_pr_188
 
 ### Temporal Logic
 
@@ -49,10 +45,11 @@ next_project_number: 193
 ## Tasks
 
 ### 192. Research verify literature refs pr 188
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: general
 - **Topic**: Propositional PRs
 - **Dependencies**: None
+- **Research**: [192_research_verify_literature_refs_pr_188/reports/01_team-research.md]
 
 ---
 

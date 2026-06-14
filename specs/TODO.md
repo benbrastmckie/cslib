@@ -29,7 +29,7 @@ next_project_number: 190
 ### Propositional Logic
 
 188 [RESEARCHED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
-189 [NOT STARTED] — Rename the three legacy weak completeness files to reflect their 
+189 [NOT STARTED] — Reorganize the completeness file structure by eliminating the thr
 
 ### Temporal Logic
 
@@ -51,7 +51,7 @@ next_project_number: 190
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 
-**Description**: Rename the three legacy weak completeness files to reflect their actual role as canonical model infrastructure. Completeness.lean -> CanonicalModel.lean (contains canonicalValuation and prop_truth_lemma), IntCompleteness.lean -> IntCanonicalModel.lean (contains IntCanonicalWorld and int_truth_lemma), MinCompleteness.lean -> MinCanonicalModel.lean (contains MinCanonicalWorld and min_truth_lemma). The actual completeness theorems now live in StrongCompleteness.lean, IntStrongCompleteness.lean, and MinStrongCompleteness.lean. Update all imports across the project, update Cslib.lean barrel file, and ensure lake build passes. Consider whether the truth lemma infrastructure should be merged into the strong completeness files instead of remaining in separate files.
+**Description**: Reorganize the completeness file structure by eliminating the three legacy weak completeness files entirely. Move the canonical model infrastructure (canonicalValuation, prop_truth_lemma, IntCanonicalWorld, int_truth_lemma, MinCanonicalWorld, min_truth_lemma) into the corresponding strong completeness files (StrongCompleteness.lean, IntStrongCompleteness.lean, MinStrongCompleteness.lean) so each logic has a single self-contained completeness file containing: canonical model construction, truth lemma, strong soundness, strong completeness, weak completeness corollary, and compactness corollary. Delete Completeness.lean, IntCompleteness.lean, and MinCompleteness.lean after merging. Update all imports across the project (including Modal/Temporal/Bimodal conservative extension files), update Cslib.lean barrel file, and ensure lake build passes.
 
 ---
 

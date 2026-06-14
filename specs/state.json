@@ -1,6 +1,15 @@
 {
-  "next_project_number": 194,
+  "next_project_number": 195,
   "active_projects": [
+    {
+      "project_number": 194,
+      "project_name": "curate_zotero_pdfs_for_literature",
+      "status": "not_started",
+      "task_type": "general",
+      "topic": "Project Management",
+      "created": "2026-06-14T18:15:52Z",
+      "last_updated": "2026-06-14T18:15:52Z"
+    },
     {
       "project_number": 188,
       "project_name": "first_propositional_upstream_pr",

@@ -1,5 +1,5 @@
 ---
-next_project_number: 194
+next_project_number: 195
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 194
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,179,180,188,192 | -- | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 1 | 36,37,179,180,188,192,194 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181 | 36,37,179,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -31,6 +31,10 @@ next_project_number: 194
 
 179 [RESEARCHED] — Add diamond (dia) as a primitive constructor to Modal.Proposition
 
+### Project Management
+
+194 [NOT STARTED] — curate_zotero_pdfs_for_literature
+
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
@@ -46,6 +50,14 @@ next_project_number: 194
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 194. Curate zotero pdfs for literature
+- **Status**: [NOT STARTED]
+- **Task Type**: general
+- **Topic**: Project Management
+- **Dependencies**: None
+
+---
 
 ### 193. Clean up modal deduction theorem naming
 - **Status**: [COMPLETED]

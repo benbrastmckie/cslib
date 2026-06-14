@@ -103,7 +103,7 @@ All files follow the naming convention `{author}_{year}.md` (first author surnam
 
 - **Zakharyaschev, Wolter & Chagrov 2001** `[MD]`: *Advanced Modal Logic*. In Gabbay & Guenthner (eds.),
   Handbook of Philosophical Logic, Vol. 3, 2nd ed. Springer.
-  Files: `zakharyaschev_2001.md`, `zakharyaschev_2001_pt2.md`.
+  File: `zakharyaschev_2001.md`.
   Supplementary modal logic material covering advanced topics.
 
 ## Natural Deduction and Proof Theory

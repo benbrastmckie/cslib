@@ -152,15 +152,15 @@ Phases within the same wave can execute in parallel. Phase 3 is already [COMPLET
 
 ---
 
-### Phase 4: Verify monolithic removal completeness [NOT STARTED]
+### Phase 4: Verify monolithic removal completeness [COMPLETED]
 
 **Goal**: Confirm that removing monolithic files did not break any references or lose content, and that all split directories are intact.
 
 **Tasks**:
-- [ ] Run `grep -rn "chagrov_1997\.md\|church_1956\.md\|mendelson_2016\.md\|hughes_1996\.md\|zakharyaschev_2001\.md\|blackburn_2001\.md\|gentzen_1935\.md" specs/literature/` to confirm no internal references to removed files remain
-- [ ] Verify each per-book index.json within subdirectories (e.g., `specs/literature/blackburn_2001/index.json`) still has valid file references
-- [ ] Confirm no `index.json` entries in the master index reference removed monolithic files
-- [ ] Verify README.md no longer references any monolithic book files by their original filenames
+- [x] Run `grep -rn "chagrov_1997\.md\|church_1956\.md\|mendelson_2016\.md\|hughes_1996\.md\|zakharyaschev_2001\.md\|blackburn_2001\.md\|gentzen_1935\.md" specs/literature/` to confirm no internal references to removed files remain *(completed: 0 references found)*
+- [x] Verify each per-book index.json within subdirectories (e.g., `specs/literature/blackburn_2001/index.json`) still has valid file references *(completed: all 7 per-book index.json files valid)*
+- [x] Confirm no `index.json` entries in the master index reference removed monolithic files *(completed)*
+- [x] Verify README.md no longer references any monolithic book files by their original filenames *(completed: 0 references found)*
 
 **Timing**: 15 minutes
 

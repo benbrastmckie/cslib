@@ -205,7 +205,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 5: Decompose prop_truth_lemma into Helper Lemmas [IN PROGRESS]
+### Phase 5: Decompose prop_truth_lemma into Helper Lemmas [COMPLETED]
 
 **Goal**: Decompose the 241-line monolithic `prop_truth_lemma` proof in `Completeness.lean` into per-connective helper lemmas following Mathlib conventions. This is the highest-risk change in the task.
 

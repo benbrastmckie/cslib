@@ -131,7 +131,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Curate Temporal/Bimodal Papers from Zotero [NOT STARTED]
+### Phase 3: Curate Temporal/Bimodal Papers from Zotero [IN PROGRESS]
 
 **Goal**: Extract and curate the 5 highest-priority temporal/bimodal papers from Zotero as scoped markdown excerpts, targeting sections cited in existing Lean files.
 

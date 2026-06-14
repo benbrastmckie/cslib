@@ -1,0 +1,18 @@
+{
+  "phase": 3,
+  "phase_name": "Curate Temporal/Bimodal Papers from Zotero",
+  "started_at": "2026-06-14T12:40:00Z",
+  "last_updated": "2026-06-14T12:40:00Z",
+  "objectives": [
+    {"id": 1, "description": "Extract and curate GHR94 Chapter 10 (gabbay_1994_ch10.md)", "status": "not_started"},
+    {"id": 2, "description": "Extract and curate Burgess 1982 Part II (burgess_1982_ii.md)", "status": "not_started"},
+    {"id": 3, "description": "Extract and curate Burgess 1984 (burgess_1984.md)", "status": "not_started"},
+    {"id": 4, "description": "Extract and curate Burgess 1982 Part I (burgess_1982_i.md)", "status": "not_started"},
+    {"id": 5, "description": "Extract and curate Reynolds 1992 (reynolds_1992.md)", "status": "not_started"},
+    {"id": 6, "description": "Add all 5 new files to master index.json", "status": "not_started"}
+  ],
+  "current_objective": 1,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": []
+}

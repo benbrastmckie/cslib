@@ -52,7 +52,7 @@ next_project_number: 198
 
 ## Tasks
 
-### 197. Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible
+### 197. Scope initial Modal/ upstream PR (~300 LOC)
 - **Status**: [NOT STARTED]
 - **Task Type**: pr
 - **Topic**: Modal Logic

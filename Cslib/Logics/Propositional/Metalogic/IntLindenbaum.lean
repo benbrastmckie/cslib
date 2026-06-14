@@ -30,17 +30,6 @@ variable {Atom : Type*}
 
 attribute [local instance] Classical.propDecidable
 
-/-! ## IntPropAxiom helper hypotheses -/
-
-private def int_h_implyK :
-    ∀ (φ ψ : PL.Proposition Atom), IntPropAxiom (φ.imp (ψ.imp φ)) :=
-  fun φ ψ => .implyK φ ψ
-
-private def int_h_implyS :
-    ∀ (φ ψ χ : PL.Proposition Atom),
-    IntPropAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))) :=
-  fun φ ψ χ => .implyS φ ψ χ
-
 /-! ## DCCS Definition -/
 
 /-- A deductively closed consistent set (DCCS) for IntPropAxiom. -/

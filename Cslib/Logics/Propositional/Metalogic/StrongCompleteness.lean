@@ -54,18 +54,6 @@ variable {Atom : Type u}
 
 attribute [local instance] Classical.propDecidable
 
-/-! ## Axiom hypotheses for PropositionalAxiom -/
-
-private def sc_h_implyK :
-    ∀ (φ ψ : PL.Proposition Atom),
-    PropositionalAxiom (φ.imp (ψ.imp φ)) :=
-  fun φ ψ => .implyK φ ψ
-
-private def sc_h_implyS :
-    ∀ (φ ψ χ : PL.Proposition Atom),
-    PropositionalAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))) :=
-  fun φ ψ χ => .implyS φ ψ χ
-
 /-! ## Strong Soundness -/
 
 /-- **Strong Soundness for Classical Logic**:
@@ -96,7 +84,7 @@ theorem prop_not_SetDerivable_union_neg_consistent
   by_cases h_neg_in_L : (¬φ) ∈ L
   · -- ¬φ ∈ L: use deductionWithMem to eliminate ¬φ from L
     -- deductionWithMem: removeAll L (¬φ) ⊢ ¬φ → ⊥
-    have d_neg_neg := deductionWithMem sc_h_implyK sc_h_implyS L (¬φ)
+    have d_neg_neg := deductionWithMem prop_h_implyK prop_h_implyS L (¬φ)
         Proposition.bot d_bot h_neg_in_L
     -- removeAll L (¬φ) ⊆ Γ
     have h_rem_sub : ∀ x ∈ removeAll L (¬φ), x ∈ Γ := by
@@ -143,7 +131,7 @@ theorem prop_not_SetDerivable_union_neg_consistent
     -- Apply deduction theorem on ¬φ:
     have d_ext : DerivationTree PropositionalAxiom ((¬φ) :: L) Proposition.bot :=
       .weakening L ((¬φ) :: L) _ d_bot (fun x hx => List.mem_cons.mpr (Or.inr hx))
-    have d_dt := deductionTheorem sc_h_implyK sc_h_implyS L (¬φ) Proposition.bot d_ext
+    have d_dt := deductionTheorem prop_h_implyK prop_h_implyS L (¬φ) Proposition.bot d_ext
     -- d_dt : L ⊢ ¬φ → ⊥ (even though ¬φ wasn't in L)
     -- EFQ: ⊥ → φ
     have d_efq : DerivationTree PropositionalAxiom (Atom := Atom) L

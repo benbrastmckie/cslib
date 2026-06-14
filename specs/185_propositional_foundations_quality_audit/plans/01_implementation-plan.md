@@ -152,7 +152,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Extract Shared h_implyK/h_implyS Helpers [IN PROGRESS]
+### Phase 3: Extract Shared h_implyK/h_implyS Helpers [COMPLETED]
 
 **Goal**: Extract the duplicated `h_implyK`/`h_implyS` private helper definitions from 4 files into `ProofSystem/Axioms.lean` as non-private definitions, eliminating code duplication.
 
@@ -182,7 +182,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: Extract Shared DNE Helper in StrongCompleteness [NOT STARTED]
+### Phase 4: Extract Shared DNE Helper in StrongCompleteness [IN PROGRESS]
 
 **Goal**: Extract the duplicated double-negation elimination chain (~40 lines duplicated between two branches of `prop_not_SetDerivable_union_neg_consistent`) into a shared helper lemma.
 

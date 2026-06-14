@@ -42,17 +42,6 @@ variable {Atom : Type*}
 
 attribute [local instance] Classical.propDecidable
 
-/-! ## MinPropAxiom helper hypotheses -/
-
-private def min_h_implyK :
-    ∀ (φ ψ : PL.Proposition Atom), MinPropAxiom (φ.imp (ψ.imp φ)) :=
-  fun φ ψ => .implyK φ ψ
-
-private def min_h_implyS :
-    ∀ (φ ψ χ : PL.Proposition Atom),
-    MinPropAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))) :=
-  fun φ ψ χ => .implyS φ ψ χ
-
 /-! ## MinTheory Definition -/
 
 /-- A deductively closed set (MinTheory) for MinPropAxiom.

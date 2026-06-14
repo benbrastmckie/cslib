@@ -38,19 +38,6 @@ open Cslib.Logic
 
 variable {Atom : Type*}
 
-/-! ## Axiom hypotheses for PropositionalAxiom -/
-
-private def h_implyK :
-    ∀ (φ ψ : PL.Proposition Atom),
-    PropositionalAxiom (φ.imp (ψ.imp φ)) :=
-  fun φ ψ => .implyK φ ψ
-
-private def h_implyS :
-    ∀ (φ ψ χ : PL.Proposition Atom),
-    PropositionalAxiom
-      ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))) :=
-  fun φ ψ χ => .implyS φ ψ χ
-
 /-! ## Canonical Valuation -/
 
 /-- The canonical valuation from a maximally consistent set.
@@ -86,7 +73,7 @@ theorem prop_truth_lemma
       intro ⟨hφ, hψ⟩
       have h_phi_S := (prop_truth_lemma h_mcs φ).mp hφ
       have h_psi_S := (prop_truth_lemma h_mcs ψ).mp hψ
-      apply prop_closed_under_derivation h_implyK h_implyS h_mcs
+      apply prop_closed_under_derivation prop_h_implyK prop_h_implyS h_mcs
         (L := [φ, ψ])
         (fun x hx => by
           simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
@@ -106,7 +93,7 @@ theorem prop_truth_lemma
       intro h_mem
       constructor
       · apply (prop_truth_lemma h_mcs φ).mpr
-        apply prop_closed_under_derivation h_implyK h_implyS h_mcs
+        apply prop_closed_under_derivation prop_h_implyK prop_h_implyS h_mcs
           (L := [φ.and ψ])
           (fun x hx => by
             simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
@@ -119,7 +106,7 @@ theorem prop_truth_lemma
             (fun _ h => nomatch h))
           (.assumption _ _ (by simp [List.mem_cons]))⟩
       · apply (prop_truth_lemma h_mcs ψ).mpr
-        apply prop_closed_under_derivation h_implyK h_implyS h_mcs
+        apply prop_closed_under_derivation prop_h_implyK prop_h_implyS h_mcs
           (L := [φ.and ψ])
           (fun x hx => by
             simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
@@ -137,7 +124,7 @@ theorem prop_truth_lemma
       intro h_or
       rcases h_or with hφ | hψ
       · have h_phi_S := (prop_truth_lemma h_mcs φ).mp hφ
-        apply prop_closed_under_derivation h_implyK h_implyS h_mcs
+        apply prop_closed_under_derivation prop_h_implyK prop_h_implyS h_mcs
           (L := [φ])
           (fun x hx => by
             simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
@@ -150,7 +137,7 @@ theorem prop_truth_lemma
             (fun _ h => nomatch h))
           (.assumption _ _ (by simp [List.mem_cons]))⟩
       · have h_psi_S := (prop_truth_lemma h_mcs ψ).mp hψ
-        apply prop_closed_under_derivation h_implyK h_implyS h_mcs
+        apply prop_closed_under_derivation prop_h_implyK prop_h_implyS h_mcs
           (L := [ψ])
           (fun x hx => by
             simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
@@ -165,15 +152,15 @@ theorem prop_truth_lemma
     · -- Backward: (φ ∨ ψ) ∈ S → Evaluate v (φ ∨ ψ)
       intro h_mem
       -- Use negation_complete: either φ ∈ S or ¬φ ∈ S
-      rcases prop_negation_complete h_implyK h_implyS h_mcs φ with hφ | hnφ
+      rcases prop_negation_complete prop_h_implyK prop_h_implyS h_mcs φ with hφ | hnφ
       · exact Or.inl ((prop_truth_lemma h_mcs φ).mpr hφ)
-      · rcases prop_negation_complete h_implyK h_implyS h_mcs ψ with hψ | hnψ
+      · rcases prop_negation_complete prop_h_implyK prop_h_implyS h_mcs ψ with hψ | hnψ
         · exact Or.inr ((prop_truth_lemma h_mcs ψ).mpr hψ)
         · -- Both ¬φ ∈ S and ¬ψ ∈ S; derive ⊥ using orE
           exfalso
           apply prop_mcs_bot_not_mem h_mcs
           -- orE: (φ → ⊥) → ((ψ → ⊥) → ((φ ∨ ψ) → ⊥))
-          apply prop_closed_under_derivation h_implyK h_implyS h_mcs
+          apply prop_closed_under_derivation prop_h_implyK prop_h_implyS h_mcs
             (L := [φ.imp .bot, ψ.imp .bot, φ.or ψ])
             (fun x hx => by
               simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
@@ -199,7 +186,7 @@ theorem prop_truth_lemma
     constructor
     · -- Forward: Evaluate v (φ → ψ) → (φ → ψ) ∈ S
       intro h_sat
-      rcases prop_negation_complete h_implyK h_implyS
+      rcases prop_negation_complete prop_h_implyK prop_h_implyS
         h_mcs (φ → ψ) with h | h
       · exact h
       · exfalso
@@ -207,7 +194,7 @@ theorem prop_truth_lemma
         -- Derive φ ∈ S from neg (φ.imp ψ) ∈ S
         have h_phi_S : φ ∈ S := by
           apply prop_closed_under_derivation
-            h_implyK h_implyS h_mcs
+            prop_h_implyK prop_h_implyS h_mcs
             (L := [(φ.imp ψ).imp .bot])
             (fun x hx => by
               simp only [List.mem_cons,
@@ -237,7 +224,7 @@ theorem prop_truth_lemma
               d_bot'
           -- deduction: [(φ→ψ)→⊥] ⊢ (φ→ψ) → φ
           have d_dt := deductionTheorem
-            h_implyK h_implyS
+            prop_h_implyK prop_h_implyS
             [(φ.imp ψ).imp .bot] (φ.imp ψ) φ
             d_efq'
           -- Peirce: [(φ→ψ)→⊥] ⊢ ((φ→ψ)→φ) → φ
@@ -262,7 +249,7 @@ theorem prop_truth_lemma
         have h_neg_psi_S :
             (¬ψ) ∈ S := by
           apply prop_closed_under_derivation
-            h_implyK h_implyS h_mcs
+            prop_h_implyK prop_h_implyS h_mcs
             (L := [(φ.imp ψ).imp .bot])
             (fun x hx => by
               simp only [List.mem_cons,
@@ -293,18 +280,18 @@ theorem prop_truth_lemma
               d_imp
           -- deduction: [(φ→ψ)→⊥] ⊢ ψ → ⊥
           exact ⟨deductionTheorem
-            h_implyK h_implyS
+            prop_h_implyK prop_h_implyS
             [(φ.imp ψ).imp .bot] ψ .bot d_bot''⟩
         -- Contradiction: ψ ∈ S and ¬ψ ∈ S
         exact prop_mcs_bot_not_mem h_mcs
           (prop_implication_property
-            h_implyK h_implyS h_mcs
+            prop_h_implyK prop_h_implyS h_mcs
             h_neg_psi_S h_psi_S)
     · -- Backward: (φ → ψ) ∈ S → Evaluate v φ → Evaluate v ψ
       intro h_mem h_sat_phi
       exact (prop_truth_lemma h_mcs ψ).mpr
         (prop_implication_property
-          h_implyK h_implyS h_mcs h_mem
+          prop_h_implyK prop_h_implyS h_mcs h_mem
           ((prop_truth_lemma h_mcs φ).mp
             h_sat_phi))
 

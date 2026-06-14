@@ -11,7 +11,7 @@ next_project_number: 191
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,179,180,190 | -- | Bimodal Porting, Propositional PRs |
+| 1 | 36,37,179,180 | -- | Bimodal Porting |
 | 2 | 39,40,181 | 36,37,179,180 | Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -25,10 +25,6 @@ next_project_number: 191
 ### Foundations
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
-
-### Propositional PRs
-
-190 [PLANNED] — review_propositional_pr_readiness
 
 ### Temporal Logic
 
@@ -45,12 +41,13 @@ next_project_number: 191
 ## Tasks
 
 ### 190. Review propositional pr readiness
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional PRs
 - **Dependencies**: None
 - **Research**: [190_review_propositional_pr_readiness/reports/01_team-research.md]
 - **Plan**: [190_review_propositional_pr_readiness/plans/01_pr-readiness-fixes.md]
+- **Summary**: [190_review_propositional_pr_readiness/summaries/01_pr-readiness-summary.md]
 
 ---
 

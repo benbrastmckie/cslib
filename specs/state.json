@@ -4,12 +4,12 @@
     {
       "project_number": 190,
       "project_name": "review_propositional_pr_readiness",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional PRs",
       "created": "2026-06-14T16:00:39Z",
-      "last_updated": "2026-06-14T16:15:47Z",
-      "session_id": "sess_1781453586_64a8aa",
+      "last_updated": "2026-06-14T17:03:55Z",
+      "session_id": "sess_1781453847_16ba4b",
       "researched": "2026-06-14T16:10:46Z",
       "next_artifact_number": 2,
       "artifacts": [
@@ -22,8 +22,14 @@
           "path": "specs/190_review_propositional_pr_readiness/plans/01_pr-readiness-fixes.md",
           "type": "plan",
           "summary": "3 phases: fix global HasHilbertTree instance, add @[simp] tags, CI verification"
+        },
+        {
+          "path": "specs/190_review_propositional_pr_readiness/summaries/01_pr-readiness-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary: 3 phases completed, CI green"
         }
-      ]
+      ],
+      "completion_summary": "Fixed global HasHilbertTree instance (made local), added @[simp] to 6 soundness/completeness biconditionals. Full CI pipeline passed (lake build, checkInitImports, lint-style, lake shake)."
     },
     {
       "project_number": 189,

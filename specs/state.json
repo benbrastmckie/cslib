@@ -162,7 +162,9 @@
           "type": "report",
           "summary": "Primitive diamond motivation, upstream comparison, intuitionistic modal logic background, scope assessment, axiom design"
         }
-      ]
+      ],
+      "topic": "Modal Logic",
+      "last_updated": "2026-06-14T17:54:05Z"
     },
     {
       "project_number": 180,
@@ -179,7 +181,9 @@
           "type": "report",
           "summary": "Primitive G/H motivation, axiom dependency analysis, scope assessment, intuitionistic temporal references"
         }
-      ]
+      ],
+      "topic": "Temporal Logic",
+      "last_updated": "2026-06-14T17:54:05Z"
     },
     {
       "project_number": 181,
@@ -197,7 +201,9 @@
           "type": "report",
           "summary": "11-primitive justification, extension architecture, scope assessment, task 177 lessons, interaction analysis"
         }
-      ]
+      ],
+      "topic": "Bimodal Porting",
+      "last_updated": "2026-06-14T17:54:05Z"
     }
   ],
   "repository_health": {

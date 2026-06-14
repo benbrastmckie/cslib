@@ -1,15 +1,22 @@
 {
-  "status": "in_progress",
-  "started_at": "2026-06-14T12:00:00Z",
-  "artifacts": [],
-  "partial_progress": {
-    "stage": "initializing",
-    "details": "Planner agent started, reading research reports and in-scope files"
-  },
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/192_research_verify_literature_refs_pr_188/plans/03_verify-literature-refs.md",
+      "summary": "4-phase implementation plan covering references.bib updates, docstring corrections, PR description revisions, and sources.md marker updates"
+    }
+  ],
+  "next_steps": "Run /implement 192 to execute the plan",
   "metadata": {
     "session_id": "sess_1781459348_05ef55",
     "agent_type": "planner-agent",
+    "duration_seconds": 120,
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 4,
+    "estimated_hours": 3,
+    "dependency_waves": [[1], [2, 3], [4]]
+  },
+  "memory_candidates": []
 }

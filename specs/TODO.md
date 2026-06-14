@@ -11,8 +11,8 @@ next_project_number: 194
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,179,180,188,192 | -- | Bimodal Porting, Propositional Logic, Propositional PRs |
-| 2 | 39,40,181 | 36,37,179,180 | Temporal Logic |
+| 1 | 36,37,179,180,188,192 | -- | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 2 | 39,40,181 | 36,37,179,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -21,10 +21,15 @@ next_project_number: 194
 
 36 [BLOCKED] — Port discrete completeness (completeness_discrete theorem) and We
 37 [BLOCKED] — Port continuous extension completeness once developed upstream. T
+181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
 
 ### Foundations
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
+
+### Modal Logic
+
+179 [NOT STARTED] — Add diamond (dia) as a primitive constructor to Modal.Proposition
 
 ### Propositional Logic
 
@@ -32,19 +37,13 @@ next_project_number: 194
 
 ### Propositional PRs
 
-192 [PLANNING] — Draw on sources in specs/literature/ to verify and improve citati
+192 [PLANNED] — Draw on sources in specs/literature/ to verify and improve citati
 
 ### Temporal Logic
 
+180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
-
-### Uncategorized
-
-179 [NOT STARTED] — Add diamond (dia) as a primitive constructor to Modal.Proposition
-  └─ 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
-180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-  └─ 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors  (see above)
 
 ## Tasks
 
@@ -93,6 +92,7 @@ next_project_number: 194
 ### 181. Bimodal primitive dia always historically
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
+- **Topic**: Bimodal Porting
 - **Dependencies**: Task 179, Task 180
 - **Research**: [181_bimodal_primitive_dia_always_historically/reports/01_bimodal-primitive-expansion-research.md]
 
@@ -103,6 +103,7 @@ next_project_number: 194
 ### 180. Temporal primitive always historically
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
+- **Topic**: Temporal Logic
 - **Dependencies**: Task 176
 - **Research**: [180_temporal_primitive_always_historically/reports/01_primitive-always-historically-research.md]
 
@@ -113,6 +114,7 @@ next_project_number: 194
 ### 179. Modal primitive diamond
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
+- **Topic**: Modal Logic
 - **Dependencies**: Task 175
 - **Research**: [179_modal_primitive_diamond/reports/01_primitive-diamond-research.md]
 

@@ -4,11 +4,21 @@
     {
       "project_number": 190,
       "project_name": "review_propositional_pr_readiness",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Propositional PRs",
       "created": "2026-06-14T16:00:39Z",
-      "last_updated": "2026-06-14T16:00:39Z"
+      "last_updated": "2026-06-14T16:10:46Z",
+      "session_id": "sess_1781453019_9f6ae6",
+      "researched": "2026-06-14T16:10:46Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/190_review_propositional_pr_readiness/reports/01_team-research.md",
+          "type": "research",
+          "summary": "Team research: PR readiness review with 4 teammates"
+        }
+      ]
     },
     {
       "project_number": 189,

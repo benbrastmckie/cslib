@@ -1,0 +1,30 @@
+{
+  "status": "researched",
+  "summary": "Team research completed with 4 teammates: code is PR-ready, noncomputable usage justified",
+  "artifacts": [
+    {
+      "type": "research",
+      "path": "specs/190_review_propositional_pr_readiness/reports/01_team-research.md",
+      "summary": "Synthesized research from 4 teammates on propositional PR readiness"
+    }
+  ],
+  "team_execution": {
+    "enabled": true,
+    "wave_count": 1,
+    "teammates_spawned": 4,
+    "teammates_completed": 4,
+    "teammates_failed": 0,
+    "token_usage_multiplier": 5.0,
+    "degraded_to_single": false
+  },
+  "synthesis": {
+    "conflicts_found": 1,
+    "conflicts_resolved": 1,
+    "gaps_identified": 3,
+    "wave_2_triggered": false
+  },
+  "metadata": {
+    "session_id": "sess_1781453019_9f6ae6",
+    "agent_type": "skill-team-research"
+  }
+}

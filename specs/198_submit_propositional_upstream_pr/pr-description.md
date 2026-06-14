@@ -30,7 +30,11 @@ This PR refactors the propositional logic foundations with three changes:
    - Removed `[Inhabited Atom]` constraints from `derivationTop`, `derivableIn_top`,
      `derivable_iff_equiv_top` (now constraint-free with primitive `bot`)
 
-## Why `bot` Should Be Primitive
+See [CSLib > Propositional Logic](https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/with/603087026) for the motivation discussion.
+
+## Design Rationale
+
+### Why `bot` Should Be Primitive
 
 The `[Bot Atom]` approach embedded ⊥ as a special atom (`.atom ⊥`). This has three concrete
 defects:
@@ -55,15 +59,21 @@ with negation and top derived as `ϕ ⇒ ⊥` and `∼⊥`. The convention trace
 Johansson [Johansson1937], who treats `⊥` as an undefined primitive symbol ("undefiniertes
 Grundzeichen") and defines negation `¬a := a ⊃ ⊥`.
 
-## Naming: `imp` vs `impl`
+### Naming: `imp` vs `impl`
 
 The name `imp` is used for consistency with CSLib's existing formula types (e.g., Bimodal and
 Temporal), where `imp` is the constructor name for implication. It also aligns constructor
 names with natural deduction rule name prefixes (`impI`/`impE`, cf. `andI`/`andE1`).
 
-## Zulip Discussion
+### Why `Has*` Instead of Mathlib's `Bot`/`HImp`
 
-See [CSLib > Propositional Logic](https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/with/603087026) for the motivation discussion around making `bot` primitive.
+Mathlib defines `Bot` and `HImp` (both in `Mathlib.Order.Notation`) as pure notation classes.
+We use a uniform `Has*` naming convention (`HasBot`, `HasImp`, `HasAnd`, `HasOr`) for the
+generic polymorphic layer, where these classes parameterize proof system infrastructure
+(`Axioms.lean`, `ProofSystem.lean`, `Consistency.lean`, `BigConj.lean`). Concrete formula
+types separately provide direct `Bot` instances for `⊥` notation. We kept `HasImp` rather
+than Mathlib's `HImp` because `HImp` uses the field name `himp` and notation `⇨`, which
+differ from CSLib's `imp`/`→` convention across all four formula types.
 
 ## Relationship to Other PRs
 
@@ -92,16 +102,6 @@ so that proof system infrastructure can be defined polymorphically. PR #587 oper
 **semantic** level — it abstracts over models that interpret formulas. Both PRs modify
 `Connectives.lean`, but the concerns are orthogonal: ours provides the syntactic interface
 that semantic typeclasses would interpret.
-
-### Mathlib `Bot`/`HImp` Classes
-
-Mathlib defines `Bot` and `HImp` (both in `Mathlib.Order.Notation`) as pure notation classes.
-We use a uniform `Has*` naming convention (`HasBot`, `HasImp`, `HasAnd`, `HasOr`) for the
-generic polymorphic layer, where these classes parameterize proof system infrastructure
-(`Axioms.lean`, `ProofSystem.lean`, `Consistency.lean`, `BigConj.lean`). Concrete formula
-types separately provide direct `Bot` instances for `⊥` notation. We kept `HasImp` rather
-than Mathlib's `HImp` because `HImp` uses the field name `himp` and notation `⇨`, which
-differ from CSLib's `imp`/`→` convention across all four formula types.
 
 ## Contribution Roadmap
 

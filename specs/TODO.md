@@ -1,5 +1,5 @@
 ---
-next_project_number: 199
+next_project_number: 200
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 199
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,198 | -- | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,195,197,198,199 | -- | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -36,6 +36,7 @@ next_project_number: 199
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
 198 [PR READY] — Submit first propositional logic upstream PR (~300 LOC) to CSLib 
+199 [NOT STARTED] — Review citations in PR changes for accuracy and completeness
 
 ### Propositional PRs
 
@@ -48,6 +49,16 @@ next_project_number: 199
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 199. Review pr citations
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Review citations in PR changes for accuracy and completeness
+
+---
 
 ### 198. Submit first propositional logic upstream PR (~300 LOC)
 - **Status**: [PR READY]

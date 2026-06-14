@@ -1,14 +1,15 @@
 {
-  "next_project_number": 195,
+  "next_project_number": 196,
   "active_projects": [
     {
       "project_number": 194,
       "project_name": "curate_zotero_pdfs_for_literature",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "general",
       "topic": "Project Management",
       "created": "2026-06-14T18:15:52Z",
-      "last_updated": "2026-06-14T18:15:52Z"
+      "last_updated": "2026-06-14T18:18:52Z",
+      "session_id": "sess_1781461104_4734b5"
     },
     {
       "project_number": 188,
@@ -123,7 +124,6 @@
       "created": "2026-06-08T00:00:00Z",
       "last_updated": "2026-06-08T00:00:00Z",
       "dependencies": [
-        38,
         39,
         40
       ],
@@ -159,11 +159,9 @@
     {
       "project_number": 179,
       "project_name": "modal_primitive_diamond",
-      "status": "researched",
+      "status": "planning",
       "task_type": "cslib",
-      "dependencies": [
-        175
-      ],
+      "dependencies": [],
       "description": "Add diamond (dia) as a primitive constructor to Modal.Proposition, giving {atom, bot, imp, and, or, box, dia}. Currently diamond is derived as neg(box(neg phi)), which is only valid classically. Making it primitive enables intuitionistic and minimal modal logics where box and diamond are independent operators. Scope: (1) Basic.lean: add .dia constructor, structural Satisfies clause, keep notation. (2) Denotation, LogicalEquivalence, Cube: .dia cases. (3) ProofSystem/Instances: diamond-related axiom constructors and dual axioms. (4) Metalogic: .dia cases in DerivationTree, truth lemmas, all 15 soundness/completeness files. (5) Classical equivalence dia(A) iff neg(box(neg(A))) becomes a theorem. Verify full CI. Reference: upstream CSLib uses diamond as primitive; Fischer Servi 1984, Simpson 1994 for intuitionistic modal logic.",
       "artifacts": [
         {
@@ -188,8 +186,8 @@
         }
       ],
       "topic": "Modal Logic",
-      "last_updated": "2026-06-14T18:11:56Z",
-      "session_id": "sess_1781459800_a7c3f2",
+      "last_updated": "2026-06-14T18:17:22Z",
+      "session_id": "sess_1781463500_c9f2a3",
       "next_artifact_number": 5,
       "researched": "2026-06-14T18:04:17Z"
     },
@@ -198,9 +196,7 @@
       "project_name": "temporal_primitive_always_historically",
       "status": "not_started",
       "task_type": "cslib",
-      "dependencies": [
-        176
-      ],
+      "dependencies": [],
       "description": "Add allFuture (G) and allPast (H) as primitive constructors to Temporal.Formula, giving {atom, bot, imp, and, or, untl, snce, allFuture, allPast}. Currently G is derived as neg(someFuture(neg phi)) and H as neg(somePast(neg phi)), which are only valid classically. Making them primitive enables intuitionistic temporal logics. Note: someFuture (F) and somePast (P) remain derivable without negation (F = top U phi, P = top S phi). Scope: (1) Syntax/Formula.lean: add .allFuture/.allPast constructors, update complexity, subst, atoms, encodeNat, temporalDepth, swapTemporal. (2) Semantics: structural clauses for universal future/past quantification. (3) ProofSystem: temporal axioms referencing G/H now use primitive constructors. (4) Metalogic: cases in Soundness, Chronicle/TruthLemma, MCS, Completeness. (5) Classical equivalences become theorems. Verify full CI. Reference: Boudou et al. for intuitionistic temporal logic.",
       "artifacts": [
         {
@@ -231,6 +227,16 @@
       ],
       "topic": "Bimodal Porting",
       "last_updated": "2026-06-14T17:54:05Z"
+    },
+    {
+      "project_number": 195,
+      "project_name": "fix_dense_validity_linter_warnings",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Bimodal Porting",
+      "description": "Fix 30+ linter warnings in Cslib/Logics/Bimodal/Metalogic/Soundness/DenseValidity.lean: remove ~20 unused simp arguments and replace 6 deprecated push_neg calls with push Not.",
+      "created": "2026-06-14T18:19:47Z",
+      "last_updated": "2026-06-14T18:19:47Z"
     }
   ],
   "repository_health": {
@@ -244,13 +250,9 @@
     "Bimodal Porting",
     "Foundations",
     "Modal Logic",
-    "Modal PRs",
     "Project Management",
     "Propositional Logic",
     "Propositional PRs",
-    "Syntactic Sugar",
-    "Temporal Logic",
-    "Temporal PRs",
-    "Foundations Refactor"
+    "Temporal Logic"
   ]
 }

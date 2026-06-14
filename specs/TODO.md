@@ -1,5 +1,5 @@
 ---
-next_project_number: 195
+next_project_number: 196
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 195
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,179,180,188,192,194 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,179,180,188,192,194,195 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181 | 36,37,179,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -21,6 +21,7 @@ next_project_number: 195
 
 36 [BLOCKED] — Port discrete completeness (completeness_discrete theorem) and We
 37 [BLOCKED] — Port continuous extension completeness once developed upstream. T
+195 [NOT STARTED] — Fix 30+ linter warnings in Cslib/Logics/Bimodal/Metalogic/Soundne
 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
 
 ### Foundations
@@ -29,11 +30,11 @@ next_project_number: 195
 
 ### Modal Logic
 
-179 [RESEARCHED] — Add diamond (dia) as a primitive constructor to Modal.Proposition
+179 [PLANNING] — Add diamond (dia) as a primitive constructor to Modal.Proposition
 
 ### Project Management
 
-194 [NOT STARTED] — curate_zotero_pdfs_for_literature
+194 [RESEARCHING] — curate_zotero_pdfs_for_literature
 
 ### Propositional Logic
 
@@ -51,8 +52,18 @@ next_project_number: 195
 
 ## Tasks
 
-### 194. Curate zotero pdfs for literature
+### 195. Fix dense validity linter warnings
 - **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Bimodal Porting
+- **Dependencies**: None
+
+**Description**: Fix 30+ linter warnings in Cslib/Logics/Bimodal/Metalogic/Soundness/DenseValidity.lean: remove ~20 unused simp arguments and replace 6 deprecated push_neg calls with push Not.
+
+---
+
+### 194. Curate zotero pdfs for literature
+- **Status**: [RESEARCHING]
 - **Task Type**: general
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -116,7 +127,7 @@ next_project_number: 195
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: Task 176
+- **Dependencies**: None
 - **Research**: [180_temporal_primitive_always_historically/reports/01_primitive-always-historically-research.md]
 
 **Description**: Add allFuture (G) and allPast (H) as primitive constructors to Temporal.Formula, giving {atom, bot, imp, and, or, untl, snce, allFuture, allPast}. Currently G is derived as neg(someFuture(neg phi)) and H as neg(somePast(neg phi)), which are only valid classically. Making them primitive enables intuitionistic temporal logics. Note: someFuture (F) and somePast (P) remain derivable without negation (F = top U phi, P = top S phi). Scope: (1) Syntax/Formula.lean: add .allFuture/.allPast constructors, update complexity, subst, atoms, encodeNat, temporalDepth, swapTemporal. (2) Semantics: structural clauses for universal future/past quantification. (3) ProofSystem: temporal axioms referencing G/H now use primitive constructors. (4) Metalogic: cases in Soundness, Chronicle/TruthLemma, MCS, Completeness. (5) Classical equivalences become theorems. Verify full CI. Reference: Boudou et al. for intuitionistic temporal logic.
@@ -124,10 +135,10 @@ next_project_number: 195
 ---
 
 ### 179. Modal primitive diamond
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 175
+- **Dependencies**: None
 - **Research**:
   - [179_modal_primitive_diamond/reports/01_primitive-diamond-research.md]
   - [179_modal_primitive_diamond/reports/02_team-research.md]
@@ -142,7 +153,7 @@ next_project_number: 195
 - **Status**: [NOT STARTED]
 - **Task Type**: lean4
 - **Topic**: Foundations
-- **Dependencies**: Task 38, Task 39, Task 40
+- **Dependencies**: Task 39, Task 40
 
 **Description**: Abstract shared completeness infrastructure between temporal and bimodal logic once concrete completeness proofs are finished for both.
 

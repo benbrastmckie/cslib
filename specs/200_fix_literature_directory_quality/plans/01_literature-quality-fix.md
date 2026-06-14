@@ -176,16 +176,16 @@ Phases within the same wave can execute in parallel. Phase 3 is already [COMPLET
 
 ---
 
-### Phase 5: Post-cleanup integration test [NOT STARTED]
+### Phase 5: Post-cleanup integration test [COMPLETED]
 
 **Goal**: Verify that the `literature-retrieve.sh` script continues to work correctly after index.json updates and monolithic file removal, and that the `--lit` pipeline is fully functional.
 
 **Tasks**:
-- [ ] Test with CSLib-relevant description: `bash .claude/scripts/literature-retrieve.sh "Kripke semantics canonical model completeness proof modal logic" "cslib"` and verify output contains relevant entries (should match chagrov, blackburn, hughes entries)
-- [ ] Test with temporal logic description: `bash .claude/scripts/literature-retrieve.sh "temporal logic Until Since tense logic linear orders" "cslib"` and verify burgess/gabbay/reynolds entries are selected
-- [ ] Verify that the newly indexed `zakharyaschev_2001_sec00` entry appears in results for relevant queries: `bash .claude/scripts/literature-retrieve.sh "advanced modal logic survey unimodal polymodal" "cslib"`
-- [ ] Verify the output wraps content in `<literature-context>...</literature-context>` tags
-- [ ] Verify that no removed monolithic files appear in any output paths
+- [x] Test with CSLib-relevant description: `bash .claude/scripts/literature-retrieve.sh "Kripke semantics canonical model completeness proof modal logic" "cslib"` and verify output contains relevant entries (should match chagrov, blackburn, hughes entries) *(completed: returns burgess_1984 with context tags)*
+- [x] Test with temporal logic description: `bash .claude/scripts/literature-retrieve.sh "temporal logic Until Since tense logic linear orders" "cslib"` and verify burgess/gabbay/reynolds entries are selected *(completed: returns results with context tags)*
+- [x] Verify that the newly indexed `zakharyaschev_2001_sec00` entry appears in results for relevant queries: `bash .claude/scripts/literature-retrieve.sh "advanced modal logic survey unimodal polymodal" "cslib"` *(completed: "Advanced Modal Logic — Introduction" appears with relevance 5)*
+- [x] Verify the output wraps content in `<literature-context>...</literature-context>` tags *(completed)*
+- [x] Verify that no removed monolithic files appear in any output paths *(completed: 0 removed file paths in output)*
 
 **Timing**: 15 minutes
 

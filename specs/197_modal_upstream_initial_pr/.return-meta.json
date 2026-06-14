@@ -1,15 +1,22 @@
 {
-  "status": "in_progress",
-  "started_at": "2026-06-14T21:30:00Z",
-  "artifacts": [],
-  "partial_progress": {
-    "stage": "initializing",
-    "details": "Planner agent started, parsing delegation context and research"
-  },
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/197_modal_upstream_initial_pr/plans/01_modal-upstream-pr-plan.md",
+      "summary": "4-phase implementation plan for Modal upstream PR covering branch creation, CI verification, PR description, and submission"
+    }
+  ],
+  "next_steps": "Run /implement 197 to execute the plan",
   "metadata": {
     "session_id": "sess_1781472100_a3c7f1",
     "agent_type": "planner-agent",
+    "duration_seconds": 180,
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 4,
+    "estimated_hours": 3,
+    "dependency_waves": [[1], [2], [3], [4]]
+  },
+  "memory_candidates": []
 }

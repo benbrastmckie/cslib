@@ -1,0 +1,21 @@
+{
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/189_rename_completeness_to_canonical_model/plans/01_implementation-plan.md",
+      "summary": "2-phase implementation plan: merge 3 legacy files into strong completeness targets, then delete and run full CI"
+    }
+  ],
+  "next_steps": "Run /implement 189 to execute the plan",
+  "metadata": {
+    "session_id": "sess_1781435667_eb411d",
+    "agent_type": "planner-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 2,
+    "estimated_hours": 1.5,
+    "dependency_waves": [[1], [2]]
+  },
+  "memory_candidates": []
+}

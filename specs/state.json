@@ -1,6 +1,15 @@
 {
-  "next_project_number": 191,
+  "next_project_number": 192,
   "active_projects": [
+    {
+      "project_number": 191,
+      "project_name": "clean_up_propositional_deduction_theorem_naming",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "created": "2026-06-14T17:04:45Z",
+      "last_updated": "2026-06-14T17:04:45Z"
+    },
     {
       "project_number": 190,
       "project_name": "review_propositional_pr_readiness",

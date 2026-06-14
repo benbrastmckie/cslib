@@ -29,59 +29,38 @@ This PR refactors the propositional logic foundations with three changes:
    - Removed `[Inhabited Atom]` constraints from `derivationTop`, `derivableIn_top`,
      `derivable_iff_equiv_top` (now constraint-free with primitive `bot`)
 
-## Resolving PR #635: Functional Completeness
+## Why `bot` Should Be Primitive
 
-PR #635 reviewer ctchou raised the question of functional completeness. The four-primitive
-`{atom, and, or, impl}` type is *not* functionally complete for classical logic: one cannot
-express unsatisfiable formulas (there is no way to say "contradiction") without special-casing
-the atom type.
+The `[Bot Atom]` approach embedded ⊥ as a special atom (`.atom ⊥`). This has three concrete
+defects:
 
-The five-primitive `{atom, bot, imp, and, or}` type resolves this objection:
-- `bot` is now a genuine formula constructor, not an atomic formula encoding of bottom
-- `¬A := A → ⊥` is uniformly available without any typeclass constraint on `Atom`
-- The formula type is the standard propositional signature studied in [Church1956] §24 and
-  [TroelstraVanDalen1988] Chapter 2
-- Tautological constants ⊥ and ⊤ are available at all logic levels (MPL, IPL, CPL) without
-  additional assumptions
+1. **Substitution breaks `⊥`**: `Proposition.subst f` replaces all atoms, including the
+   "bottom atom" — `(.atom ⊥).subst f = f ⊥`. Substitution should preserve `⊥`; with
+   primitive `bot` it does so by construction.
+2. **`⊤` depends on an arbitrary `Inhabited` instance**: The previous `Proposition.top` was
+   `impl (.atom default) (.atom default)` — i.e., `a → a` for an arbitrary atom, not the
+   standard `⊥ → ⊥`. Different `Inhabited` instances give definitionally different `⊤` terms.
+3. **`Bot Atom` conflates logical bottom with atomic data**: `neg`, `top`, `IPL`,
+   `IsIntuitionistic`, `IsClassical` all required `[Bot Atom]` constraints, making definitions
+   needlessly complex.
 
-## Literature Justification for Primitive `bot`
+With primitive `bot`, all derived connectives (`neg`, `top`, `iff`) and logic definitions
+(`IPL`, `IsIntuitionistic`, `IsClassical`) are constraint-free. The choice of primitive
+connectives for propositional logic is discussed in [Church1956] §24; the five-primitive
+signature with `⊥` is the standard one for intuitionistic and minimal logic in
+[TroelstraVanDalen1988] Chapter 2. Primitive `⊥` is required for Johansson's minimal logic
+[Johansson1937], which defines negation `¬A := A → ⊥` using `⊥` as an undefined primitive
+symbol ("undefiniertes Grundzeichen").
 
-**Why `bot` must be a primitive, not simulated via `[Bot Atom]`**:
+## Naming: `imp` vs `impl`
 
-Johansson's minimal logic (1937, [Johansson1937]) is the standard foundation for
-proof-relevant propositional logic and the weakest sensible propositional logic for which
-the Curry-Howard correspondence works in its standard form. Minimal logic requires a
-distinguishable bottom formula ⊥ with no further axioms about it. Without primitive ⊥:
-- The formula type represents only the *positive fragment* (purely positive logic: no ⊥, no ¬)
-- Negation cannot be defined; `¬A := A → ⊥` requires a specific ⊥ term, not just a class
-- The correspondence between the logic hierarchy MPL ⊂ IPL ⊂ CPL breaks down
+The name `imp` is standard in Lean formalization practice (e.g., Lean's own `Prop` operations
+and modal logic formalizations). The previous `impl` was non-standard — no major proof theory
+reference uses this abbreviation for implication.
 
-The `[Bot Atom]` approach in the previous version was a workaround that embedded ⊥ as a
-special atom. This has the following problems:
-1. `Bot Atom` conflates the logical bottom with atomic data
-2. `neg` and `top` required separate typeclass constraints `[Bot Atom]` and `[Inhabited Atom]`
-3. `IPL`, `IsIntuitionistic`, `IsClassical` all required `[Bot Atom]` constraints, making
-   definitions needlessly complex
+## Zulip Discussion
 
-With primitive `bot`:
-- `neg`, `top`, and `iff` are constraint-free `abbrev`s
-- `IPL`, `IsIntuitionistic`, `IsClassical` have no typeclass constraints
-- `derivationTop`, `derivableIn_top`, `derivable_iff_equiv_top` are constraint-free
-
-## Naming Rationale: `imp` vs `impl`
-
-The constructor name `impl` was non-standard. The standard notation in the proof theory
-literature is:
-
-- Gentzen (1935, [Gentzen1935]): writes implication as `⊃`
-- Prawitz (1965, [Prawitz1965]): writes implication as `⊃`
-- Troelstra & van Dalen (1988, [TroelstraVanDalen1988]): write implication as `→`
-- Church (1956, [Church1956]): writes implication as `⊃`
-
-None of these sources use `impl` as the name for the implication constructor. The name
-`imp` (short for implication) is standard in Lean formalization practice (see e.g., Lean's
-own `Prop` operations and modal logic formalizations). We adopt `imp` for consistency with
-both the literature and Lean conventions.
+See [CSLib > Propositional Logic](https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/with/603087026) for the motivation discussion around making `bot` primitive.
 
 ## Relationship to PR #607
 
@@ -125,19 +104,8 @@ Chapter 2, with PR 5-6 following the completeness proof strategy there.
 
 Files affected upstream: `Defs.lean`, `NaturalDeduction/Basic.lean` (only consumers)
 
-## CI Verification
-
-All checks pass on the feature branch `feat/propositional-five-primitive`:
-- `lake build` succeeds (all modules compile)
-- `lake exe checkInitImports` passes
-- `lake exe lint-style` passes (all three files)
-- `lake exe mk_all --module` confirms barrel file is correct
-
 ## AI Tools Used
 
-- **Claude (claude-sonnet-4-6 via Claude Code)**: Used for research, implementation planning,
-  literature review, and code assistance. The implementation follows the plan in
-  `specs/188_first_propositional_upstream_pr/plans/01_implementation-plan.md`. All
-  mathematical content (logic literature justifications, typeclass hierarchy design, naming
-  conventions) was verified against primary sources. Code was reviewed and tested with
-  `lake build` before submission.
+This PR was prepared with the assistance of Claude Code (Anthropic). The AI tool was used for:
+- Drafting and extracting files from a development branch to create a clean PR branch
+- Running CI verification commands

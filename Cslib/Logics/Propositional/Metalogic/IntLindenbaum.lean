@@ -107,7 +107,7 @@ theorem int_deriv_from_closure_to_S {S : Set (PL.Proposition Atom)}
   | nil => exact ⟨[], fun _ h => (nomatch h), hd⟩
   | cons a L' ih =>
     -- DT: L' ⊢ a → φ
-    have hd_dt := prop_has_deduction_theorem int_h_implyK int_h_implyS hd
+    have hd_dt := hasDeductionTheorem IntPropAxiom.mem_implyK IntPropAxiom.mem_implyS hd
     -- IH on L' with formula (a → φ): get L_imp ⊆ S with L_imp ⊢ a → φ
     obtain ⟨L_imp, hL_imp_sub, hL_imp_deriv⟩ :=
       ih (fun x hx => hL x (List.mem_cons.mpr (Or.inr hx))) (a → φ) hd_dt
@@ -142,10 +142,11 @@ theorem int_deriv_imp_of_union
   -- Weaken to φ :: L, then DT gives L ⊢ φ → ψ
   have d_ext := DerivationTree.weakening L (φ :: L) ψ d
     (fun x hx => List.mem_cons.mpr (Or.inr hx))
-  have d_dt := deductionTheorem int_h_implyK int_h_implyS L φ ψ d_ext
+  have d_dt := deductionTheorem IntPropAxiom.mem_implyK IntPropAxiom.mem_implyS L φ ψ d_ext
   by_cases hφL : φ ∈ L
   · -- φ ∈ L: use deductionWithMem to remove ALL occurrences of φ
-    have d_mem := deductionWithMem int_h_implyK int_h_implyS L φ (φ → ψ) d_dt hφL
+    have d_mem := deductionWithMem
+        IntPropAxiom.mem_implyK IntPropAxiom.mem_implyS L φ (φ → ψ) d_dt hφL
     -- d_mem : DerivationTree (removeAll L φ) (φ → (φ → ψ))
     -- removeAll L φ ⊆ S
     have h_rem_sub : ∀ x ∈ removeAll L φ, x ∈ S := by

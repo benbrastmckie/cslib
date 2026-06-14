@@ -180,40 +180,52 @@ theorem IntPropAxiom.toPropAxiom {φ : PL.Proposition Atom}
 
 /-! ## Implication Axiom Witnesses -/
 
+namespace PropositionalAxiom
+
 /-- `PropositionalAxiom` includes implyK: witness for deduction theorem arguments. -/
-theorem prop_h_implyK :
+theorem mem_implyK :
     ∀ (φ ψ : PL.Proposition Atom),
     PropositionalAxiom (φ.imp (ψ.imp φ)) :=
   fun φ ψ => .implyK φ ψ
 
 /-- `PropositionalAxiom` includes implyS: witness for deduction theorem arguments. -/
-theorem prop_h_implyS :
+theorem mem_implyS :
     ∀ (φ ψ χ : PL.Proposition Atom),
     PropositionalAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))) :=
   fun φ ψ χ => .implyS φ ψ χ
 
+end PropositionalAxiom
+
+namespace IntPropAxiom
+
 /-- `IntPropAxiom` includes implyK: witness for deduction theorem arguments. -/
-theorem int_h_implyK :
+theorem mem_implyK :
     ∀ (φ ψ : PL.Proposition Atom),
     IntPropAxiom (φ.imp (ψ.imp φ)) :=
   fun φ ψ => .implyK φ ψ
 
 /-- `IntPropAxiom` includes implyS: witness for deduction theorem arguments. -/
-theorem int_h_implyS :
+theorem mem_implyS :
     ∀ (φ ψ χ : PL.Proposition Atom),
     IntPropAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))) :=
   fun φ ψ χ => .implyS φ ψ χ
 
+end IntPropAxiom
+
+namespace MinPropAxiom
+
 /-- `MinPropAxiom` includes implyK: witness for deduction theorem arguments. -/
-theorem min_h_implyK :
+theorem mem_implyK :
     ∀ (φ ψ : PL.Proposition Atom),
     MinPropAxiom (φ.imp (ψ.imp φ)) :=
   fun φ ψ => .implyK φ ψ
 
 /-- `MinPropAxiom` includes implyS: witness for deduction theorem arguments. -/
-theorem min_h_implyS :
+theorem mem_implyS :
     ∀ (φ ψ χ : PL.Proposition Atom),
     MinPropAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))) :=
   fun φ ψ χ => .implyS φ ψ χ
+
+end MinPropAxiom
 
 end Cslib.Logic.PL

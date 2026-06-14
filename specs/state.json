@@ -4,21 +4,32 @@
     {
       "project_number": 192,
       "project_name": "research_verify_literature_refs_pr_188",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "general",
       "topic": "Propositional PRs",
       "created": "2026-06-14T17:18:44Z",
-      "last_updated": "2026-06-14T17:18:44Z"
+      "last_updated": "2026-06-14T17:26:54Z",
+      "session_id": "sess_1781457566_6c4f38",
+      "researched": "2026-06-14T17:26:54Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/192_research_verify_literature_refs_pr_188/reports/01_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates — literature claim verification"
+        }
+      ]
     },
     {
       "project_number": 191,
       "project_name": "clean_up_propositional_deduction_theorem_naming",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "created": "2026-06-14T17:04:45Z",
-      "last_updated": "2026-06-14T17:14:02Z",
-      "session_id": "sess_1781456783_f22155"
+      "last_updated": "2026-06-14T17:26:41Z",
+      "session_id": "sess_1781456783_f22155",
+      "completion_summary": "Cleaned up propositional deduction theorem naming: renamed 6 witness theorems to namespace-qualified form, renamed generic hasDeductionTheorem, deleted dead cl_prop_has_deduction_theorem, updated 29 call sites. All CI checks passed."
     },
     {
       "project_number": 39,

@@ -32,7 +32,7 @@ next_project_number: 193
 
 ### Propositional PRs
 
-192 [NOT STARTED] — research_verify_literature_refs_pr_188
+192 [RESEARCHING] — research_verify_literature_refs_pr_188
 
 ### Temporal Logic
 
@@ -49,7 +49,7 @@ next_project_number: 193
 ## Tasks
 
 ### 192. Research verify literature refs pr 188
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: general
 - **Topic**: Propositional PRs
 - **Dependencies**: None
@@ -57,7 +57,7 @@ next_project_number: 193
 ---
 
 ### 191. Clean up propositional deduction theorem naming
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

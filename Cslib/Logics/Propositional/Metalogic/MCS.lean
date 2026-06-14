@@ -75,7 +75,7 @@ theorem prop_closed_under_derivation
     (h_deriv : (propDerivationSystem Axioms).Deriv L φ) : φ ∈ S :=
   Metalogic.SetMaximalConsistent.closed_under_derivation
     (propDerivationSystem Axioms)
-    (prop_has_deduction_theorem h_implyK h_implyS)
+    (hasDeductionTheorem h_implyK h_implyS)
     h_mcs h_sub h_deriv
 
 /-- Implication property: if `φ → ψ ∈ S` and `φ ∈ S`, then `ψ ∈ S`. -/
@@ -89,7 +89,7 @@ theorem prop_implication_property
     (h_imp : (φ → ψ) ∈ S) (h_phi : φ ∈ S) : ψ ∈ S :=
   Metalogic.SetMaximalConsistent.implication_property
     (propDerivationSystem Axioms)
-    (prop_has_deduction_theorem h_implyK h_implyS)
+    (hasDeductionTheorem h_implyK h_implyS)
     h_mcs h_imp h_phi
 
 /-- Negation completeness: for any formula `φ`, either `φ ∈ S` or `¬φ ∈ S`. -/
@@ -102,7 +102,7 @@ theorem prop_negation_complete
     (φ : PL.Proposition Atom) : φ ∈ S ∨ (¬φ) ∈ S :=
   Metalogic.SetMaximalConsistent.negation_complete
     (propDerivationSystem Axioms)
-    (prop_has_deduction_theorem h_implyK h_implyS)
+    (hasDeductionTheorem h_implyK h_implyS)
     h_mcs φ
 
 /-! ## Propositional-Specific MCS Properties -/

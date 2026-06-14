@@ -21,7 +21,7 @@ if `A :: Γ ⊢ B` then `Γ ⊢ A → B`.
 - `deductionTheorem`: The core metatheorem, by well-founded recursion on derivation height.
 - `deductionWithMem`: Helper for the weakening case where the deduction hypothesis
   appears in the middle of the context.
-- `prop_has_deduction_theorem`: The `HasDeductionTheorem` instance for the generic MCS
+- `hasDeductionTheorem`: The `HasDeductionTheorem` instance for the generic MCS
   framework.
 
 ## Implementation
@@ -195,7 +195,7 @@ decreasing_by
 
 Parameterized over `Axioms` with explicit proofs that `Axioms` includes
 implyK and implyS. -/
-theorem prop_has_deduction_theorem
+theorem hasDeductionTheorem
     {Axioms : PL.Proposition Atom → Prop}
     (h_implyK : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_implyS : ∀ (φ ψ χ : PL.Proposition Atom),
@@ -206,14 +206,5 @@ theorem prop_has_deduction_theorem
   simp only [] at h ⊢
   obtain ⟨d⟩ := h
   exact ⟨deductionTheorem h_implyK h_implyS Γ φ ψ d⟩
-
-/-! ## Classical backward-compatible wrapper -/
-
-/-- Classical deduction theorem: the deduction theorem for the classical axiom set. -/
-theorem cl_prop_has_deduction_theorem :
-    Metalogic.HasDeductionTheorem (propDerivationSystem (@PropositionalAxiom Atom)) :=
-  prop_has_deduction_theorem
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
 
 end Cslib.Logic.PL

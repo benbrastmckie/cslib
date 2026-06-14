@@ -1,7 +1,7 @@
 # Implementation Plan: Clean Up Propositional Deduction Theorem Naming
 
 - **Task**: 191 - Clean up propositional deduction theorem naming and dead code
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 1.5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/191_clean_up_propositional_deduction_theorem_naming/reports/01_naming-cleanup-research.md
@@ -125,7 +125,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Build Verification [IN PROGRESS]
+### Phase 3: Build Verification [COMPLETED]
 
 **Goal**: Verify all changes compile cleanly and pass CI checks
 

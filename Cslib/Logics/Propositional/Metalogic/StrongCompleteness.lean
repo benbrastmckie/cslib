@@ -109,7 +109,8 @@ theorem prop_truth_lemma_and
     intro ⟨hφ, hψ⟩
     have h_phi_S := ih_φ.mp hφ
     have h_psi_S := ih_ψ.mp hψ
-    apply prop_closed_under_derivation prop_h_implyK prop_h_implyS h_mcs
+    apply prop_closed_under_derivation
+        PropositionalAxiom.mem_implyK PropositionalAxiom.mem_implyS h_mcs
       (L := [φ, ψ])
       (fun x hx => by
         simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
@@ -129,7 +130,8 @@ theorem prop_truth_lemma_and
     intro h_mem
     constructor
     · apply ih_φ.mpr
-      apply prop_closed_under_derivation prop_h_implyK prop_h_implyS h_mcs
+      apply prop_closed_under_derivation
+        PropositionalAxiom.mem_implyK PropositionalAxiom.mem_implyS h_mcs
         (L := [φ.and ψ])
         (fun x hx => by
           simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
@@ -142,7 +144,8 @@ theorem prop_truth_lemma_and
           (fun _ h => nomatch h))
         (.assumption _ _ (by simp [List.mem_cons]))⟩
     · apply ih_ψ.mpr
-      apply prop_closed_under_derivation prop_h_implyK prop_h_implyS h_mcs
+      apply prop_closed_under_derivation
+        PropositionalAxiom.mem_implyK PropositionalAxiom.mem_implyS h_mcs
         (L := [φ.and ψ])
         (fun x hx => by
           simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
@@ -169,7 +172,8 @@ theorem prop_truth_lemma_or
     intro h_or
     rcases h_or with hφ | hψ
     · have h_phi_S := ih_φ.mp hφ
-      apply prop_closed_under_derivation prop_h_implyK prop_h_implyS h_mcs
+      apply prop_closed_under_derivation
+        PropositionalAxiom.mem_implyK PropositionalAxiom.mem_implyS h_mcs
         (L := [φ])
         (fun x hx => by
           simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
@@ -182,7 +186,8 @@ theorem prop_truth_lemma_or
           (fun _ h => nomatch h))
         (.assumption _ _ (by simp [List.mem_cons]))⟩
     · have h_psi_S := ih_ψ.mp hψ
-      apply prop_closed_under_derivation prop_h_implyK prop_h_implyS h_mcs
+      apply prop_closed_under_derivation
+        PropositionalAxiom.mem_implyK PropositionalAxiom.mem_implyS h_mcs
         (L := [ψ])
         (fun x hx => by
           simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
@@ -197,15 +202,18 @@ theorem prop_truth_lemma_or
   · -- Backward: (φ ∨ ψ) ∈ S → Evaluate v (φ ∨ ψ)
     intro h_mem
     -- Use negation_complete: either φ ∈ S or ¬φ ∈ S
-    rcases prop_negation_complete prop_h_implyK prop_h_implyS h_mcs φ with hφ | hnφ
+    rcases prop_negation_complete
+        PropositionalAxiom.mem_implyK PropositionalAxiom.mem_implyS h_mcs φ with hφ | hnφ
     · exact Or.inl (ih_φ.mpr hφ)
-    · rcases prop_negation_complete prop_h_implyK prop_h_implyS h_mcs ψ with hψ | hnψ
+    · rcases prop_negation_complete
+          PropositionalAxiom.mem_implyK PropositionalAxiom.mem_implyS h_mcs ψ with hψ | hnψ
       · exact Or.inr (ih_ψ.mpr hψ)
       · -- Both ¬φ ∈ S and ¬ψ ∈ S; derive ⊥ using orE
         exfalso
         apply prop_mcs_bot_not_mem h_mcs
         -- orE: (φ → ⊥) → ((ψ → ⊥) → ((φ ∨ ψ) → ⊥))
-        apply prop_closed_under_derivation prop_h_implyK prop_h_implyS h_mcs
+        apply prop_closed_under_derivation
+            PropositionalAxiom.mem_implyK PropositionalAxiom.mem_implyS h_mcs
           (L := [φ.imp .bot, ψ.imp .bot, φ.or ψ])
           (fun x hx => by
             simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
@@ -240,7 +248,7 @@ theorem prop_truth_lemma_imp
   constructor
   · -- Forward: Evaluate v (φ → ψ) → (φ → ψ) ∈ S
     intro h_sat
-    rcases prop_negation_complete prop_h_implyK prop_h_implyS
+    rcases prop_negation_complete PropositionalAxiom.mem_implyK PropositionalAxiom.mem_implyS
       h_mcs (φ → ψ) with h | h
     · exact h
     · exfalso
@@ -248,7 +256,7 @@ theorem prop_truth_lemma_imp
       -- Derive φ ∈ S from neg (φ.imp ψ) ∈ S
       have h_phi_S : φ ∈ S := by
         apply prop_closed_under_derivation
-          prop_h_implyK prop_h_implyS h_mcs
+          PropositionalAxiom.mem_implyK PropositionalAxiom.mem_implyS h_mcs
           (L := [(φ.imp ψ).imp .bot])
           (fun x hx => by
             simp only [List.mem_cons,
@@ -278,7 +286,7 @@ theorem prop_truth_lemma_imp
             d_bot'
         -- deduction: [(φ→ψ)→⊥] ⊢ (φ→ψ) → φ
         have d_dt := deductionTheorem
-          prop_h_implyK prop_h_implyS
+          PropositionalAxiom.mem_implyK PropositionalAxiom.mem_implyS
           [(φ.imp ψ).imp .bot] (φ.imp ψ) φ
           d_efq'
         -- Peirce: [(φ→ψ)→⊥] ⊢ ((φ→ψ)→φ) → φ
@@ -300,7 +308,7 @@ theorem prop_truth_lemma_imp
       have h_neg_psi_S :
           (¬ψ) ∈ S := by
         apply prop_closed_under_derivation
-          prop_h_implyK prop_h_implyS h_mcs
+          PropositionalAxiom.mem_implyK PropositionalAxiom.mem_implyS h_mcs
           (L := [(φ.imp ψ).imp .bot])
           (fun x hx => by
             simp only [List.mem_cons,
@@ -331,18 +339,18 @@ theorem prop_truth_lemma_imp
             d_imp
         -- deduction: [(φ→ψ)→⊥] ⊢ ψ → ⊥
         exact ⟨deductionTheorem
-          prop_h_implyK prop_h_implyS
+          PropositionalAxiom.mem_implyK PropositionalAxiom.mem_implyS
           [(φ.imp ψ).imp .bot] ψ .bot d_bot''⟩
       -- Contradiction: ψ ∈ S and ¬ψ ∈ S
       exact prop_mcs_bot_not_mem h_mcs
         (prop_implication_property
-          prop_h_implyK prop_h_implyS h_mcs
+          PropositionalAxiom.mem_implyK PropositionalAxiom.mem_implyS h_mcs
           h_neg_psi_S h_psi_S)
   · -- Backward: (φ → ψ) ∈ S → Evaluate v φ → Evaluate v ψ
     intro h_mem h_sat_phi
     exact ih_ψ.mpr
       (prop_implication_property
-        prop_h_implyK prop_h_implyS h_mcs h_mem
+        PropositionalAxiom.mem_implyK PropositionalAxiom.mem_implyS h_mcs h_mem
         (ih_φ.mp h_sat_phi))
 
 /-! ## Truth Lemma -/
@@ -436,7 +444,8 @@ theorem prop_not_SetDerivable_union_neg_consistent
   by_cases h_neg_in_L : (¬φ) ∈ L
   · -- ¬φ ∈ L: use deductionWithMem to eliminate ¬φ from L
     -- deductionWithMem: removeAll L (¬φ) ⊢ ¬φ → ⊥
-    have d_neg_neg := deductionWithMem prop_h_implyK prop_h_implyS L (¬φ)
+    have d_neg_neg := deductionWithMem
+        PropositionalAxiom.mem_implyK PropositionalAxiom.mem_implyS L (¬φ)
         Proposition.bot d_bot h_neg_in_L
     -- removeAll L (¬φ) ⊆ Γ
     have h_rem_sub : ∀ x ∈ removeAll L (¬φ), x ∈ Γ := by
@@ -462,7 +471,8 @@ theorem prop_not_SetDerivable_union_neg_consistent
     -- Apply deduction theorem on ¬φ:
     have d_ext : DerivationTree PropositionalAxiom ((¬φ) :: L) Proposition.bot :=
       .weakening L ((¬φ) :: L) _ d_bot (fun x hx => List.mem_cons.mpr (Or.inr hx))
-    have d_dt := deductionTheorem prop_h_implyK prop_h_implyS L (¬φ) Proposition.bot d_ext
+    have d_dt := deductionTheorem
+        PropositionalAxiom.mem_implyK PropositionalAxiom.mem_implyS L (¬φ) Proposition.bot d_ext
     -- d_dt : L ⊢ ¬φ → ⊥ (even though ¬φ wasn't in L)
     -- DNE: L ⊢ ¬φ → ⊥ gives L ⊢ φ via EFQ + Peirce
     exact h_not ⟨L, hL_Γ, ⟨dne_from_neg_neg d_dt⟩⟩

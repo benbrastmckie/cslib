@@ -1,21 +1,26 @@
 {
-  "status": "planned",
+  "status": "implemented",
+  "started_at": "2026-06-14T00:00:00Z",
   "artifacts": [
     {
-      "type": "plan",
-      "path": "specs/191_clean_up_propositional_deduction_theorem_naming/plans/01_naming-cleanup-plan.md",
-      "summary": "3-phase implementation plan for mechanical renames and dead code deletion in Propositional/"
+      "path": "specs/191_clean_up_propositional_deduction_theorem_naming/summaries/01_naming-cleanup-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary covering all 3 phases: definition-side renames/deletion, call-site updates, and CI verification"
     }
   ],
-  "next_steps": "Run /implement 191 to execute the plan",
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 18,
+    "build_passed": true,
+    "ci_pipeline_passed": true
+  },
   "metadata": {
     "session_id": "sess_1781456783_f22155",
-    "agent_type": "planner-agent",
+    "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
-    "phase_count": 3,
-    "estimated_hours": 1.5,
-    "dependency_waves": [[1], [2], [3]]
-  },
-  "memory_candidates": []
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
 }

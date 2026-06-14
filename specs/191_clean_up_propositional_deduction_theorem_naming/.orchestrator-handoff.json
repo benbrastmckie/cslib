@@ -1,12 +1,21 @@
 {
-  "status": "planned",
-  "summary": "3-phase plan: (1) rename/delete definitions in Axioms.lean and DeductionTheorem.lean, (2) update all 29 call sites across StrongCompleteness, IntLindenbaum, MinLindenbaum, MCS, (3) verify with lake build + lint-style + checkInitImports + test. Total effort: 1.5 hours.",
+  "status": "implemented",
+  "summary": "All 3 phases completed. Renamed 6 witness theorems to namespace-qualified form (PropositionalAxiom.mem_implyK/S, IntPropAxiom.mem_implyK/S, MinPropAxiom.mem_implyK/S), renamed prop_has_deduction_theorem to hasDeductionTheorem, deleted cl_prop_has_deduction_theorem dead code, updated 29 call sites across 4 files, and fixed 13 lines that exceeded 100-char limit due to longer qualified names. All CI checks passed: lake build, checkInitImports, lint-style, lake test. Zero sorries, zero new axioms.",
+  "phases_completed": 3,
   "phases_total": 3,
   "artifacts": [
     {
-      "path": "specs/191_clean_up_propositional_deduction_theorem_naming/plans/01_naming-cleanup-plan.md",
-      "type": "plan",
-      "summary": "3-phase implementation plan for propositional naming cleanup"
+      "path": "specs/191_clean_up_propositional_deduction_theorem_naming/summaries/01_naming-cleanup-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary covering all 3 phases: definition-side renames/deletion, call-site updates, and CI verification"
     }
-  ]
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 18,
+    "build_passed": true,
+    "ci_pipeline_passed": true
+  }
 }

@@ -1,7 +1,7 @@
 # Implementation Plan: Clean Up Propositional Deduction Theorem Naming
 
 - **Task**: 191 - Clean up propositional deduction theorem naming and dead code
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 1.5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/191_clean_up_propositional_deduction_theorem_naming/reports/01_naming-cleanup-research.md
@@ -64,7 +64,7 @@ This task is a code quality cleanup within the Propositional module. It does not
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Definition-Side Changes [NOT STARTED]
+### Phase 1: Definition-Side Changes [COMPLETED]
 
 **Goal**: Rename/delete declarations at their definition sites (Axioms.lean, DeductionTheorem.lean)
 
@@ -93,7 +93,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Call-Site Updates [NOT STARTED]
+### Phase 2: Call-Site Updates [COMPLETED]
 
 **Goal**: Update all 29 call sites across 4 files to use the new names
 
@@ -125,7 +125,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Build Verification [NOT STARTED]
+### Phase 3: Build Verification [IN PROGRESS]
 
 **Goal**: Verify all changes compile cleanly and pass CI checks
 

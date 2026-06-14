@@ -1,5 +1,5 @@
 ---
-next_project_number: 192
+next_project_number: 193
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 192
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,179,180,191 | -- | Bimodal Porting, Propositional Logic |
+| 1 | 36,37,179,180,191,192 | -- | Bimodal Porting, Propositional Logic, Propositional PRs |
 | 2 | 39,40,181 | 36,37,179,180 | Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -30,6 +30,10 @@ next_project_number: 192
 
 191 [IMPLEMENTING] — clean_up_propositional_deduction_theorem_naming
 
+### Propositional PRs
+
+192 [NOT STARTED] — research_verify_literature_refs_pr_188
+
 ### Temporal Logic
 
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
@@ -43,6 +47,14 @@ next_project_number: 192
   └─ 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors  (see above)
 
 ## Tasks
+
+### 192. Research verify literature refs pr 188
+- **Status**: [NOT STARTED]
+- **Task Type**: general
+- **Topic**: Propositional PRs
+- **Dependencies**: None
+
+---
 
 ### 191. Clean up propositional deduction theorem naming
 - **Status**: [IMPLEMENTING]

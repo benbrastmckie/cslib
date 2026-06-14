@@ -40,7 +40,8 @@ any temporal model `M` is equivalent to propositional evaluation of `φ` under t
 `M.valuation t`.
 
 Proof: Structural induction on `φ`. The `and`/`or` cases follow by classical logic since
-`toTemporal` encodes these using the Lukasiewicz convention. -/
+`toTemporal` encodes these using the Lukasiewicz convention (`Temporal.Formula` has no native
+`and`/`or` constructors; the encoding is classically sound though not intuitionistically). -/
 theorem temporal_satisfies_toTemporal_iff_evaluate
     {D : Type*} [LinearOrder D] {Atom : Type*}
     (M : TemporalModel D Atom) (t : D)

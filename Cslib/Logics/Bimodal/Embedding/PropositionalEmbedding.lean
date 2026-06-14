@@ -22,13 +22,23 @@ and `Temporal.FromPropositional` respectively.
 
 ## Main Definitions
 
-- `PL.Proposition.toBimodal`: Propositional → Bimodal (maps atom/bot/imp)
+- `PL.Proposition.toBimodal`: Propositional → Bimodal (maps atom/bot/imp/and/or)
 
 ## Main Results
 
 - `PL.Proposition.toModal_toBimodal`: PL → Modal → Bimodal = PL → Bimodal
 - `PL.Proposition.toTemporal_toBimodal`: PL → Temporal → Bimodal = PL → Bimodal
 - `PL.Proposition.embedding_commutes`: both composite paths agree
+
+## Encoding Rationale
+
+`PL.Proposition` has five primitive constructors `{atom, bot, imp, and, or}`, while
+`Bimodal.Formula` has only `{atom, bot, imp, box, untl, snce}`. The `and`/`or` cases
+must therefore be encoded using a formula built from the available bimodal connectives.
+The Lukasiewicz encodings (`and φ ψ := ¬(φ → ¬ψ)`, `or φ ψ := ¬φ → ψ`) are used here
+for consistency with the Modal and Temporal embeddings, and because this embedding targets
+classical bimodal logic. These encodings are classically equivalent to `∧`/`∨` but not
+intuitionistically ([Wajsberg1938], [McKinsey1939]).
 -/
 
 @[expose] public section
@@ -37,9 +47,15 @@ namespace Cslib.Logic
 
 /-- Embed a propositional formula directly into bimodal logic.
 
-The `and` and `or` cases use Lukasiewicz encoding, consistent with Modal and Temporal
-embeddings (which also use Lukasiewicz encoding since those formula types lack and/or
-constructors). Tasks 174/176 will add native constructors to those types. -/
+The `atom`, `bot`, and `imp` cases map to the corresponding `Bimodal.Formula` constructors.
+The `and` and `or` cases use the Lukasiewicz encoding because `Bimodal.Formula` lacks
+native `and`/`or` constructors (its primitives are `{atom, bot, imp, box, untl, snce}`):
+- `A ∧ B` maps to `¬(A → ¬B)` = `(A → (B → ⊥)) → ⊥`
+- `A ∨ B` maps to `¬A → B` = `(A → ⊥) → B`
+
+This is consistent with the `toModal` and `toTemporal` embeddings, which use the same
+Lukasiewicz encoding for the same reason. The diamond commutativity theorems below confirm
+all three paths agree. -/
 def PL.Proposition.toBimodal : PL.Proposition Atom → Bimodal.Formula Atom
   | .atom p => .atom p
   | .bot => .bot

@@ -53,7 +53,8 @@ with the trivial world history (domain = everything) and the model whose valuati
 the unique world state `()` to the propositional valuation `v`.
 
 Proof: Structural induction on `φ`. The `and`/`or` cases follow because `toBimodal`
-encodes them using the Lukasiewicz convention. -/
+encodes them using the Lukasiewicz convention (`Bimodal.Formula` has no native `and`/`or`
+constructors; the Lukasiewicz encoding is classically sound though not intuitionistically). -/
 theorem bimodal_truthAt_toBimodal_iff_evaluate
     (v : Atom → Prop)
     (φ : PL.Proposition Atom) :

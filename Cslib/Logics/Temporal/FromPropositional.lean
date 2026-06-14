@@ -17,7 +17,19 @@ constructor, establishing Propositional as a sub-logic of Temporal.
 
 ## Main Definitions
 
-- `PL.Proposition.toTemporal`: Propositional → Temporal (maps atom/bot/imp)
+- `PL.Proposition.toTemporal`: Propositional → Temporal (maps atom/bot/imp/and/or)
+
+## Encoding Rationale
+
+`PL.Proposition` has five primitive constructors `{atom, bot, imp, and, or}`, while
+`Temporal.Formula` has only `{atom, bot, imp, untl, snce}`. The `and`/`or` cases must
+therefore be encoded using a formula built from the available temporal connectives. The
+Lukasiewicz encodings `and φ ψ := ¬(φ → ¬ψ)` and `or φ ψ := ¬φ → ψ` are classically
+sound and are used here because this embedding targets classical temporal logic (BX).
+
+Note: This differs from the propositional level, where `and`/`or` are native constructors
+with `HasAnd`/`HasOr` instances. The embedding necessarily uses Lukasiewicz because
+`Temporal.Formula` lacks native `and`/`or` constructors.
 -/
 
 @[expose] public section
@@ -26,9 +38,14 @@ namespace Cslib.Logic
 
 /-- Embed a propositional formula into temporal logic.
 
-The `and` and `or` cases use Lukasiewicz encoding into `{atom, bot, imp, untl, snce}`:
+The `atom`, `bot`, and `imp` cases map to the corresponding `Temporal.Formula` constructors.
+The `and` and `or` cases use the Lukasiewicz encoding into `{atom, bot, imp, untl, snce}`
+because `Temporal.Formula` has no native `and`/`or` constructors:
 - `A ∧ B` maps to `¬(A → ¬B)` = `(A → (B → ⊥)) → ⊥`
-- `A ∨ B` maps to `¬A → B` = `(A → ⊥) → B` -/
+- `A ∨ B` maps to `¬A → B` = `(A → ⊥) → B`
+
+These encodings are classically equivalent to `∧` and `∨` but not intuitionistically
+([Wajsberg1938], [McKinsey1939]); this embedding therefore targets classical temporal logic. -/
 def PL.Proposition.toTemporal : PL.Proposition Atom → Temporal.Formula Atom
   | .atom p => .atom p
   | .bot => .bot

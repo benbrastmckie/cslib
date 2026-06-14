@@ -21,8 +21,14 @@ necessity (`□φ`) and possibility `◇φ`.
 
 ## Primitives
 
-The formula type uses `{atom, bot, imp, box}` as primitive constructors. Negation, conjunction,
-disjunction, and diamond (possibility) are derived connectives following the Lukasiewicz convention.
+The formula type uses `{atom, bot, imp, box}` as primitive constructors (no native `and`/`or`).
+Negation, conjunction, disjunction, and diamond (possibility) are derived connectives via
+the Lukasiewicz convention: `¬φ := φ → ⊥`, `φ ∧ ψ := ¬(φ → ¬ψ)`, `φ ∨ ψ := ¬φ → ψ`.
+
+Note: The propositional formula type `PL.Proposition` has `and`/`or` as native constructors
+with `HasAnd`/`HasOr` instances. The Lukasiewicz convention here is specific to `Modal.Proposition`
+because it lacks those constructors. The embedding `PL.Proposition.toModal` (in `FromPropositional`)
+therefore encodes `and`/`or` using this convention when translating propositional formulas.
 
 ## References
 

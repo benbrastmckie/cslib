@@ -39,9 +39,14 @@ namespace Cslib.Logic
 
 /-- Embed a propositional formula into modal logic.
 
-The `and` and `or` cases use the Lukasiewicz encoding into `{atom, bot, imp, box}`:
+The `atom`, `bot`, and `imp` cases map to the corresponding `Modal.Proposition` constructors.
+The `and` and `or` cases use the Lukasiewicz encoding into `{atom, bot, imp, box}` because
+`Modal.Proposition` has no native `and`/`or` constructors:
 - `A ∧ B` maps to `¬(A → ¬B)` = `(A → (B → ⊥)) → ⊥`
-- `A ∨ B` maps to `¬A → B` = `(A → ⊥) → B` -/
+- `A ∨ B` maps to `¬A → B` = `(A → ⊥) → B`
+
+These encodings are classically equivalent to `∧` and `∨` but not intuitionistically
+([Wajsberg1938], [McKinsey1939]); this embedding therefore targets classical modal logic. -/
 def PL.Proposition.toModal : PL.Proposition Atom → Modal.Proposition Atom
   | .atom p => .atom p
   | .bot => .bot

@@ -75,7 +75,7 @@ theorem modal_closed_under_derivation
     (h_deriv : (modalDerivationSystem Axioms).Deriv L φ) : φ ∈ S :=
   Metalogic.SetMaximalConsistent.closed_under_derivation
     (modalDerivationSystem Axioms)
-    (modal_has_deduction_theorem h_implyK h_implyS)
+    (hasDeductionTheorem h_implyK h_implyS)
     h_mcs h_sub h_deriv
 
 /-- Implication property: if `phi -> psi in S` and `phi in S`, then `psi in S`. -/
@@ -89,7 +89,7 @@ theorem modal_implication_property
     ψ ∈ S :=
   Metalogic.SetMaximalConsistent.implication_property
     (modalDerivationSystem Axioms)
-    (modal_has_deduction_theorem h_implyK h_implyS)
+    (hasDeductionTheorem h_implyK h_implyS)
     h_mcs h_imp h_phi
 
 /-- Negation completeness: for any formula `phi`, either `phi in S` or `neg phi in S`. -/
@@ -102,7 +102,7 @@ theorem modal_negation_complete
     (φ : Proposition Atom) : φ ∈ S ∨ (¬φ) ∈ S :=
   Metalogic.SetMaximalConsistent.negation_complete
     (modalDerivationSystem Axioms)
-    (modal_has_deduction_theorem h_implyK h_implyS)
+    (hasDeductionTheorem h_implyK h_implyS)
     h_mcs φ
 
 /-! ## Modal-Specific MCS Properties -/

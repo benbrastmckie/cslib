@@ -20,13 +20,8 @@ provided `Axioms` includes `implyK` and `implyS`.
 
 - `deductionTheorem`: The core metatheorem, parameterized over `Axioms`.
 - `deductionWithMem`: Helper for the weakening case.
-- `modal_has_deduction_theorem`: The `HasDeductionTheorem` instance for any
+- `hasDeductionTheorem`: The `HasDeductionTheorem` instance for any
   `Axioms` including implyK and implyS.
-
-## Backward Compatibility
-
-The `HasHilbertTree` instance remains at `ModalAxiom` for backward compatibility.
-The `s5_has_deduction_theorem` wrapper instantiates at `ModalAxiom`.
 
 ## References
 
@@ -191,7 +186,7 @@ decreasing_by
 
 Parameterized over `Axioms` with explicit proofs that `Axioms` includes
 implyK and implyS. -/
-theorem modal_has_deduction_theorem
+theorem hasDeductionTheorem
     {Axioms : Proposition Atom → Prop}
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_implyS : ∀ (φ ψ χ : Proposition Atom),
@@ -202,14 +197,5 @@ theorem modal_has_deduction_theorem
   simp only [] at h ⊢
   obtain ⟨d⟩ := h
   exact ⟨deductionTheorem h_implyK h_implyS Γ φ ψ d⟩
-
-/-! ## S5-specific backward-compatible wrappers -/
-
-/-- S5 deduction theorem: the deduction theorem for the S5 axiom set. -/
-theorem s5_has_deduction_theorem :
-    Metalogic.HasDeductionTheorem (modalDerivationSystem (@ModalAxiom Atom)) :=
-  modal_has_deduction_theorem
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
 
 end Cslib.Logic.Modal

@@ -11,7 +11,7 @@ next_project_number: 198
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,194,195,196,197 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,188,192,194,195,197 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -43,7 +43,6 @@ next_project_number: 198
 ### Propositional PRs
 
 192 [PLANNED] — Draw on sources in specs/literature/ to verify and improve citati
-196 [RESEARCHING] — Keep HasBot/HasImp/HasAnd/HasOr as custom CSLib classes for namin
 
 ### Temporal Logic
 
@@ -64,10 +63,13 @@ next_project_number: 198
 ---
 
 ### 196. Refactor connectives mathlib bot
-- **Status**: [RESEARCHING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional PRs
 - **Dependencies**: None
+- **Research**: [196_refactor_connectives_mathlib_bot/reports/01_mathlib-section-research.md]
+- **Plan**: [196_refactor_connectives_mathlib_bot/plans/02_implementation-plan.md]
+- **Summary**: [196_refactor_connectives_mathlib_bot/summaries/02_verification-summary.md]
 
 **Description**: Keep HasBot/HasImp/HasAnd/HasOr as custom CSLib classes for naming symmetry and to match the Has* convention used across ProofSystem.lean, Axioms.lean, Consistency.lean, and BigConj.lean. No bridge instance needed — concrete formula types already provide direct Bot instances for ⊥ notation, and generic code intentionally uses HasBot.bot. Update pr-description.md Mathlib section to accurately explain the design choice: uniform Has* naming, concrete types get ⊥ via direct Bot instances, HImp notation mismatch prevents HasImp replacement. Scope: pr-description.md (Mathlib section rewrite)
 

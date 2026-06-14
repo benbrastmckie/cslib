@@ -6,13 +6,13 @@ next_project_number: 188
 
 ## Task Order
 
-*Updated 2026-06-13. Generated from state.json dependency graph.*
+*Updated 2026-06-14. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,171,179,180,185 | -- | Bimodal Porting, Propositional Logic |
-| 2 | 39,40,181,187 | 36,37,179,180,185 | Propositional Logic, Temporal Logic |
+| 1 | 36,37,171,179,180,187 | -- | Bimodal Porting, Propositional Logic |
+| 2 | 39,40,181 | 36,37,179,180 | Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -29,8 +29,7 @@ next_project_number: 188
 ### Propositional Logic
 
 171 [RESEARCHED] — Research connective-basis design for minimal, intuitionistic, and
-185 [PLANNED] — Rigorous quality audit of Cslib/Logics/Propositional/ and its Csl
-  └─ 187 [NOT STARTED] — Fix all issues identified in the task 185 quality audit. Prioriti
+187 [NOT STARTED] — Fix all issues identified in the task 185 quality audit. Prioriti
 
 ### Temporal Logic
 
@@ -67,6 +66,7 @@ next_project_number: 188
   - [185_propositional_foundations_quality_audit/reports/01_teammate-b-findings.md]
   - [185_propositional_foundations_quality_audit/reports/01_teammate-c-findings.md]
 - **Plan**: [185_propositional_foundations_quality_audit/plans/01_implementation-plan.md]
+- **Summary**: [185_propositional_foundations_quality_audit/summaries/01_execution-summary.md]
 
 **Description**: Rigorous quality audit of Cslib/Logics/Propositional/ and its Cslib/Foundations/Logic/ dependencies. Survey architecture, organization, proof quality, literature references, docstrings, notation, and naming conventions against CSLib contribution standards and mathematical best practices. Identify improvements to: (1) file organization and module structure, (2) proof style and tactic usage (prefer term-mode where natural, eliminate unnecessary classical reasoning in constructive proofs), (3) BibTeX references in references.bib for all key theorems citing standard sources (CZ, Blackburn et al., Chagrov & Zakharyaschev, etc.), (4) module-level docstrings following Mathlib conventions, (5) notation consistency (scoped notation, typeclass-backed operators), (6) naming conventions (Mathlib snake_case, descriptive theorem names), (7) import hygiene (minimal imports, no transitive leakage), (8) redundant or duplicated lemmas across files. Produce a prioritized improvement plan with concrete file-level recommendations, ensuring long-term maintainability and contribution readiness.
 

@@ -1,11 +1,21 @@
 {
-  "status": "researched",
-  "summary": "All 4 PR citations verified (Bentzen accurate, Trufas accurate, Johansson accurate with notation modernization, TroelstraVanDalen plausible); 2 BibTeX entries missing (Bentzen2023, Trufas2024); Defs.lean 'full-connective tradition' phrase needs rewording; Church1956 tangential but acceptable in reference blocks",
-  "artifacts": ["specs/199_review_pr_citations/reports/01_pr-citation-review.md"],
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/199_review_pr_citations/plans/01_pr-citation-plan.md",
+      "summary": "3-phase plan to add 2 BibTeX entries, fix Defs.lean docstring, and update PR description pronoun"
+    }
+  ],
+  "next_steps": "Run /implement 199 to execute the plan",
   "metadata": {
-    "session_id": "sess_1781472454_5c6dc9",
-    "agent_type": "cslib-research-agent",
+    "session_id": "sess_1781473129_b3948e",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 3,
+    "estimated_hours": 1.5,
+    "dependency_waves": [[1], [2], [3]]
+  },
+  "memory_candidates": []
 }

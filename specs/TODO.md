@@ -37,7 +37,7 @@ next_project_number: 202
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
 198 [PR READY] — Submit first propositional logic upstream PR (~300 LOC) to CSLib 
-199 [RESEARCHED] — Review citations in PR changes for accuracy and completeness
+199 [PLANNED] — Review citations in PR changes for accuracy and completeness
 
 ### Propositional PRs
 
@@ -72,11 +72,12 @@ next_project_number: 202
 ---
 
 ### 199. Review pr citations
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [199_review_pr_citations/reports/01_pr-citation-review.md]
+- **Plan**: [199_review_pr_citations/plans/01_pr-citation-plan.md]
 
 **Description**: Review citations in PR changes for accuracy and completeness
 

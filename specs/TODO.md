@@ -11,7 +11,7 @@ next_project_number: 188
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,179,180,186 | -- | Bimodal Porting, Propositional Logic |
+| 1 | 36,37,179,180 | -- | Bimodal Porting |
 | 2 | 39,40,181 | 36,37,179,180 | Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -25,10 +25,6 @@ next_project_number: 188
 ### Foundations
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
-
-### Propositional Logic
-
-186 [NOT STARTED] — Refactor the Hilbert / natural deduction extensional equivalence 
 
 ### Temporal Logic
 
@@ -57,12 +53,13 @@ next_project_number: 188
 ---
 
 ### 186. Hilbert nd equivalence refactor
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 185
-- **Research**: [186_hilbert_nd_equivalence_refactor/reports/01_team-research.md]
+- **Research**: [186_hilbert_nd_equivalence_refactor/reports/01_nd-equivalence-research.md]
 - **Plan**: [186_hilbert_nd_equivalence_refactor/plans/01_implementation-plan.md]
+- **Summary**: [186_hilbert_nd_equivalence_refactor/summaries/01_execution-summary.md]
 
 **Description**: Refactor the Hilbert / natural deduction extensional equivalence in Cslib/Logics/Propositional/NaturalDeduction/ to the highest standards of quality and elegance. Current gaps: (1) no minimal logic instantiation (hilbert_iff_nd_min) — the generic theorem requires EFQ which MinPropAxiom lacks, so either a separate EFQ-free version or an adapted ND system is needed; (2) equivalence is only for closed derivability (empty context Derivable ↔ DerivableIn ∅) — extend to full context-based equivalence (Deriv Axioms Γ φ ↔ NDDeriv Theory Γ φ) for the stronger result; (3) review proof style in ndToHilbert and hilbertToND for clarity and decomposition; (4) ensure all three systems (minimal, intuitionistic, classical) have clean corollary instantiations; (5) add proper literature references for the equivalence result (Prawitz 1965, Troelstra & van Dalen 1988); (6) review naming conventions and docstrings against Mathlib standards.
 

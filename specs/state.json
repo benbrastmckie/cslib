@@ -4,7 +4,7 @@
     {
       "project_number": 186,
       "project_name": "hilbert_nd_equivalence_refactor",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Refactor the Hilbert / natural deduction extensional equivalence in Cslib/Logics/Propositional/NaturalDeduction/ to the highest standards of quality and elegance. Current gaps: (1) no minimal logic instantiation (hilbert_iff_nd_min) — the generic theorem requires EFQ which MinPropAxiom lacks, so either a separate EFQ-free version or an adapted ND system is needed; (2) equivalence is only for closed derivability (empty context Derivable ↔ DerivableIn ∅) — extend to full context-based equivalence (Deriv Axioms Γ φ ↔ NDDeriv Theory Γ φ) for the stronger result; (3) review proof style in ndToHilbert and hilbertToND for clarity and decomposition; (4) ensure all three systems (minimal, intuitionistic, classical) have clean corollary instantiations; (5) add proper literature references for the equivalence result (Prawitz 1965, Troelstra & van Dalen 1988); (6) review naming conventions and docstrings against Mathlib standards.",
@@ -12,23 +12,28 @@
         185
       ],
       "created": "2026-06-13T21:39:55Z",
-      "last_updated": "2026-06-14T01:08:12Z",
-      "session_id": "sess_1781387056_63df94",
+      "last_updated": "2026-06-14T04:28:09Z",
+      "session_id": "sess_1781411289_9d5926",
       "researched": "2026-06-13T21:53:06Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
-          "path": "specs/186_hilbert_nd_equivalence_refactor/reports/01_team-research.md",
-          "type": "research",
-          "summary": "Team research with 4 teammates"
+          "path": "specs/186_hilbert_nd_equivalence_refactor/reports/01_nd-equivalence-research.md",
+          "type": "report",
+          "summary": "Research report confirming EFQ and context equiv already resolved; identified boilerplate reduction as primary target"
         },
         {
           "path": "specs/186_hilbert_nd_equivalence_refactor/plans/01_implementation-plan.md",
           "type": "plan",
-          "summary": "3-phase implementation plan"
+          "summary": "3-phase plan: MinimalAxioms typeclass, signature refactoring, corollary collapse"
+        },
+        {
+          "path": "specs/186_hilbert_nd_equivalence_refactor/summaries/01_execution-summary.md",
+          "type": "summary",
+          "summary": "Execution summary: all 3 phases completed, full CI passes, zero sorries"
         }
       ],
-      "completion_summary": "Refactored Hilbert/ND equivalence: removed unused h_EFQ parameter, added context-based hilbert_iff_nd_ctx with 3 corollaries (min/int/cl), added hilbert_iff_nd_min, updated literature citations (Prawitz 1965, Troelstra & van Dalen 1988), added 3 BibTeX entries. All 8 equivalence theorems verified, full CI green.",
+      "completion_summary": "Refactored Equivalence.lean: introduced MinimalAxioms typeclass bundling 8 axiom witnesses with 3 instances (MinPropAxiom, IntPropAxiom, PropositionalAxiom). Replaced 8 explicit parameters in ndToHilbert/nd_to_hilbert_deriv/hilbert_iff_nd/hilbert_iff_nd_ctx with [MinimalAxioms Axioms]. Collapsed 6 corollary bodies from 96 lines to 6 one-liners. All 8 theorem names preserved. Full CI passes.",
       "archived": "2026-06-13T22:23:51Z"
     },
     {

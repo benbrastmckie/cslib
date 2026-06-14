@@ -1,7 +1,7 @@
 # Implementation Plan: Refactor Hilbert/ND Extensional Equivalence
 
 - **Task**: 186 - Refactor the Hilbert/ND extensional equivalence
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 2 hours
 - **Dependencies**: 185
 - **Research Inputs**: specs/186_hilbert_nd_equivalence_refactor/reports/01_nd-equivalence-research.md

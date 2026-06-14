@@ -14,19 +14,45 @@
     {
       "project_number": 194,
       "project_name": "curate_zotero_pdfs_for_literature",
-      "status": "researching",
+      "status": "researched",
       "task_type": "general",
       "topic": "Project Management",
       "created": "2026-06-14T18:15:52Z",
-      "last_updated": "2026-06-14T18:45:24Z",
+      "last_updated": "2026-06-14T18:51:49Z",
       "session_id": "sess_1781462707_59ea2e",
       "researched": "2026-06-14T18:28:20Z",
-      "next_artifact_number": 2,
+      "next_artifact_number": 3,
       "artifacts": [
         {
-          "path": "specs/194_curate_zotero_pdfs_for_literature/reports/01_team-research.md",
+          "path": "specs/194_curate_zotero_pdfs_for_literature/reports/02_literature-organization-practices.md",
           "type": "research",
-          "summary": "Team research with 4 teammates"
+          "summary": "Best practices for structuring large markdown literature files with index.json metadata"
+        }
+      ],
+      "memory_candidates": [
+        {
+          "content": "The specs/literature/ directory holds markdown exports of academic books/papers for --lit injection. Best practice: split book-length files (>50KB) into chapter-level .md files in subdirectories (specs/literature/{bibkey}/), with a master index.json at specs/literature/index.json using the same schema as .claude/context/index.json. Paper-length files (<50KB) stay as single files. The retrieval script scores entries by keyword overlap against the task description and focus_prompt, then greedily selects within a 4000-token budget.",
+          "category": "PATTERN",
+          "confidence": 0.9,
+          "suggested_keywords": [
+            "literature",
+            "specs/literature",
+            "chunking",
+            "index.json",
+            "retrieval",
+            "token-budget"
+          ]
+        },
+        {
+          "content": "Current specs/literature/*.md files lack semantic markdown headers. blackburn_2001.md uses Page N comments, mendelson_2016.md uses Page N headers, hughes_1996.md has no headers, chagrov_1997.md has OCR artifacts. Manual chapter extraction guided by each books table of contents is required.",
+          "category": "INSIGHT",
+          "confidence": 0.95,
+          "suggested_keywords": [
+            "literature",
+            "markdown",
+            "headers",
+            "OCR"
+          ]
         }
       ]
     },

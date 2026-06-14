@@ -30,7 +30,7 @@ next_project_number: 197
 
 ### Modal Logic
 
-179 [PLANNED] — Add diamond (dia) as a primitive constructor to Modal.Proposition
+179 [IMPLEMENTING] — Add diamond (dia) as a primitive constructor to Modal.Proposition
 
 ### Project Management
 
@@ -43,7 +43,7 @@ next_project_number: 197
 ### Propositional PRs
 
 192 [PLANNED] — Draw on sources in specs/literature/ to verify and improve citati
-196 [NOT STARTED] — Refactor Connectives.lean to extend Mathlib's Bot class instead o
+196 [NOT STARTED] — Keep HasBot/HasImp/HasAnd/HasOr as custom CSLib classes for namin
 
 ### Temporal Logic
 
@@ -59,7 +59,7 @@ next_project_number: 197
 - **Topic**: Propositional PRs
 - **Dependencies**: None
 
-**Description**: Refactor Connectives.lean to extend Mathlib's Bot class instead of defining a redundant HasBot, update PropositionalConnectives and all downstream instances accordingly, keep HasImp/HasAnd/HasOr custom with documented rationale (HImp uses himp/⇨ notation mismatched with CSLib's imp/→ convention; no Mathlib standalone conjunction/disjunction classes exist), update the PR description's Mathlib section to accurately state the design choice, and ensure alignment with PR #607 conventions where appropriate. Scope: Connectives.lean, Defs.lean, any formula type files providing HasBot instances, pr-description.md Mathlib section
+**Description**: Keep HasBot/HasImp/HasAnd/HasOr as custom CSLib classes for naming symmetry and to match the Has* convention used across ProofSystem.lean (31+ refs), Consistency.lean, and BigConj.lean. Add a bridge instance [HasBot F] : Bot F to Connectives.lean so formula types get Mathlib ⊥ notation for free. Update pr-description.md Mathlib section to replace the inaccurate "order-theoretic connotations" rationale with the correct reasoning: uniform Has* naming, semantic fit for syntactic formula types, and trivial bridge. Scope: Connectives.lean (bridge instance), pr-description.md (Mathlib section rewrite)
 
 ---
 
@@ -147,7 +147,7 @@ next_project_number: 197
 ---
 
 ### 179. Modal primitive diamond
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

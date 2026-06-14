@@ -1,7 +1,7 @@
 # Implementation Plan: Task #179 -- Document Box-as-Primitive Design Choice
 
 - **Task**: 179 - Document why box is primitive in classical modal logic (scope revised from primitive dia)
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 1.5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/179_modal_primitive_diamond/reports/05_team-research.md, specs/179_modal_primitive_diamond/reports/05_teammate-d-findings.md

@@ -7,9 +7,9 @@
       "status": "not_started",
       "task_type": "cslib",
       "topic": "Propositional PRs",
-      "description": "Refactor Connectives.lean to extend Mathlib's Bot class instead of defining a redundant HasBot, update PropositionalConnectives and all downstream instances accordingly, keep HasImp/HasAnd/HasOr custom with documented rationale (HImp uses himp/⇨ notation mismatched with CSLib's imp/→ convention; no Mathlib standalone conjunction/disjunction classes exist), update the PR description's Mathlib section to accurately state the design choice, and ensure alignment with PR #607 conventions where appropriate. Scope: Connectives.lean, Defs.lean, any formula type files providing HasBot instances, pr-description.md Mathlib section",
+      "description": "Keep HasBot/HasImp/HasAnd/HasOr as custom CSLib classes for naming symmetry and to match the Has* convention used across ProofSystem.lean (31+ refs), Consistency.lean, and BigConj.lean. Add a bridge instance [HasBot F] : Bot F to Connectives.lean so formula types get Mathlib ⊥ notation for free. Update pr-description.md Mathlib section to replace the inaccurate \"order-theoretic connotations\" rationale with the correct reasoning: uniform Has* naming, semantic fit for syntactic formula types, and trivial bridge. Scope: Connectives.lean (bridge instance), pr-description.md (Mathlib section rewrite)",
       "created": "2026-06-14T18:48:19Z",
-      "last_updated": "2026-06-14T18:48:19Z"
+      "last_updated": "2026-06-14T18:55:41Z"
     },
     {
       "project_number": 194,
@@ -204,7 +204,7 @@
     {
       "project_number": 179,
       "project_name": "modal_primitive_diamond",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "dependencies": [],
       "description": "Add diamond (dia) as a primitive constructor to Modal.Proposition, giving {atom, bot, imp, and, or, box, dia}. Currently diamond is derived as neg(box(neg phi)), which is only valid classically. Making it primitive enables intuitionistic and minimal modal logics where box and diamond are independent operators. Scope: (1) Basic.lean: add .dia constructor, structural Satisfies clause, keep notation. (2) Denotation, LogicalEquivalence, Cube: .dia cases. (3) ProofSystem/Instances: diamond-related axiom constructors and dual axioms. (4) Metalogic: .dia cases in DerivationTree, truth lemmas, all 15 soundness/completeness files. (5) Classical equivalence dia(A) iff neg(box(neg(A))) becomes a theorem. Verify full CI. Reference: upstream CSLib uses diamond as primitive; Fischer Servi 1984, Simpson 1994 for intuitionistic modal logic.",
@@ -241,8 +241,8 @@
         }
       ],
       "topic": "Modal Logic",
-      "last_updated": "2026-06-14T18:51:14Z",
-      "session_id": "sess_1781467800_f5b2c4",
+      "last_updated": "2026-06-14T18:55:37Z",
+      "session_id": "sess_1781463313_db2937",
       "next_artifact_number": 6,
       "researched": "2026-06-14T18:43:02Z"
     },

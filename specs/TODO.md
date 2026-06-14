@@ -1,5 +1,5 @@
 ---
-next_project_number: 196
+next_project_number: 197
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 196
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,179,180,188,192,194,195 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,179,180,188,192,194,195,196 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181 | 36,37,179,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -34,7 +34,7 @@ next_project_number: 196
 
 ### Project Management
 
-194 [RESEARCHED] — curate_zotero_pdfs_for_literature
+194 [RESEARCHING] — curate_zotero_pdfs_for_literature
 
 ### Propositional Logic
 
@@ -43,6 +43,7 @@ next_project_number: 196
 ### Propositional PRs
 
 192 [PLANNED] — Draw on sources in specs/literature/ to verify and improve citati
+196 [NOT STARTED] — Refactor Connectives.lean to extend Mathlib's Bot class instead o
 
 ### Temporal Logic
 
@@ -51,6 +52,16 @@ next_project_number: 196
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 196. Refactor connectives mathlib bot
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional PRs
+- **Dependencies**: None
+
+**Description**: Refactor Connectives.lean to extend Mathlib's Bot class instead of defining a redundant HasBot, update PropositionalConnectives and all downstream instances accordingly, keep HasImp/HasAnd/HasOr custom with documented rationale (HImp uses himp/⇨ notation mismatched with CSLib's imp/→ convention; no Mathlib standalone conjunction/disjunction classes exist), update the PR description's Mathlib section to accurately state the design choice, and ensure alignment with PR #607 conventions where appropriate. Scope: Connectives.lean, Defs.lean, any formula type files providing HasBot instances, pr-description.md Mathlib section
+
+---
 
 ### 195. Fix dense validity linter warnings
 - **Status**: [NOT STARTED]
@@ -63,7 +74,7 @@ next_project_number: 196
 ---
 
 ### 194. Curate zotero pdfs for literature
-- **Status**: [RESEARCHED]
+- **Status**: [RESEARCHING]
 - **Task Type**: general
 - **Topic**: Project Management
 - **Dependencies**: None

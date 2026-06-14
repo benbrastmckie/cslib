@@ -1,15 +1,25 @@
 {
-  "next_project_number": 196,
+  "next_project_number": 197,
   "active_projects": [
+    {
+      "project_number": 196,
+      "project_name": "refactor_connectives_mathlib_bot",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional PRs",
+      "description": "Refactor Connectives.lean to extend Mathlib's Bot class instead of defining a redundant HasBot, update PropositionalConnectives and all downstream instances accordingly, keep HasImp/HasAnd/HasOr custom with documented rationale (HImp uses himp/⇨ notation mismatched with CSLib's imp/→ convention; no Mathlib standalone conjunction/disjunction classes exist), update the PR description's Mathlib section to accurately state the design choice, and ensure alignment with PR #607 conventions where appropriate. Scope: Connectives.lean, Defs.lean, any formula type files providing HasBot instances, pr-description.md Mathlib section",
+      "created": "2026-06-14T18:48:19Z",
+      "last_updated": "2026-06-14T18:48:19Z"
+    },
     {
       "project_number": 194,
       "project_name": "curate_zotero_pdfs_for_literature",
-      "status": "researched",
+      "status": "researching",
       "task_type": "general",
       "topic": "Project Management",
       "created": "2026-06-14T18:15:52Z",
-      "last_updated": "2026-06-14T18:28:20Z",
-      "session_id": "sess_1781461104_4734b5",
+      "last_updated": "2026-06-14T18:45:24Z",
+      "session_id": "sess_1781462707_59ea2e",
       "researched": "2026-06-14T18:28:20Z",
       "next_artifact_number": 2,
       "artifacts": [

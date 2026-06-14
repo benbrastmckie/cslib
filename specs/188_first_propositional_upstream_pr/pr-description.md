@@ -70,7 +70,7 @@ PR #607 by @fmontesi introduces per-operator typeclass files under `Operators/`,
 propositional and modal connectives. Our `Connectives.lean` overlaps in the propositional case
 (`HasBot`, `HasImp`, `HasAnd`, `HasOr`). If PR #607 merges first, we can align our definitions
 with its typeclass names and file structure; if ours merges first, #607 can import from
-`Connectives.lean` for the propositional operators. We are happy to coordinate on the final
+`Connectives.lean` for the propositional operators. I am happy to coordinate on the final
 structure.
 
 ### PR #536
@@ -78,7 +78,7 @@ structure.
 PR #536 by @thomaskwaring refactors `IsClassical` and `IsIntuitionistic` to refer to inference
 systems. Both PRs modify `Defs.lean` and `NaturalDeduction/Basic.lean`. The changes are
 conceptually independent — #536 restructures inference system predicates while this PR changes
-the primitive connective set. Whichever merges second will need a straightforward rebase.
+the primitive connective set.
 
 ### PR #587
 

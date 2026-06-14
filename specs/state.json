@@ -178,7 +178,7 @@
     {
       "project_number": 179,
       "project_name": "modal_primitive_diamond",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "dependencies": [],
       "description": "Add diamond (dia) as a primitive constructor to Modal.Proposition, giving {atom, bot, imp, and, or, box, dia}. Currently diamond is derived as neg(box(neg phi)), which is only valid classically. Making it primitive enables intuitionistic and minimal modal logics where box and diamond are independent operators. Scope: (1) Basic.lean: add .dia constructor, structural Satisfies clause, keep notation. (2) Denotation, LogicalEquivalence, Cube: .dia cases. (3) ProofSystem/Instances: diamond-related axiom constructors and dual axioms. (4) Metalogic: .dia cases in DerivationTree, truth lemmas, all 15 soundness/completeness files. (5) Classical equivalence dia(A) iff neg(box(neg(A))) becomes a theorem. Verify full CI. Reference: upstream CSLib uses diamond as primitive; Fischer Servi 1984, Simpson 1994 for intuitionistic modal logic.",
@@ -204,19 +204,19 @@
           "summary": "Upstream CSLib comparison and clean-break refactor strategy"
         },
         {
-          "path": "specs/179_modal_primitive_diamond/plans/04_primitive-dia-plan.md",
-          "type": "plan",
-          "summary": "6-phase implementation plan for primitive dia (~10 hours)"
-        },
-        {
           "path": "specs/179_modal_primitive_diamond/reports/05_team-research.md",
           "type": "research",
           "summary": "Team research: defer dia vs proceed, why box is primitive"
+        },
+        {
+          "path": "specs/179_modal_primitive_diamond/plans/05_documentation-plan.md",
+          "type": "plan",
+          "summary": "3-phase documentation-only plan (1.5 hours)"
         }
       ],
       "topic": "Modal Logic",
-      "last_updated": "2026-06-14T18:43:02Z",
-      "session_id": "sess_1781465200_e3a1b7",
+      "last_updated": "2026-06-14T18:51:14Z",
+      "session_id": "sess_1781467800_f5b2c4",
       "next_artifact_number": 6,
       "researched": "2026-06-14T18:43:02Z"
     },

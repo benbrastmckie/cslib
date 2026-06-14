@@ -1,0 +1,32 @@
+{
+  "status": "researched",
+  "artifacts": [
+    {
+      "type": "research",
+      "path": "specs/194_curate_zotero_pdfs_for_literature/reports/02_literature-organization-practices.md",
+      "summary": "Best practices for structuring large markdown literature files with index.json metadata: chapter-level splitting into subdirectories, JSON master index mirroring .claude/context/index.json schema, keyword-overlap retrieval mirroring memory-retrieve.sh, token-budget-aware greedy selection"
+    }
+  ],
+  "metadata": {
+    "session_id": "sess_1781462707_59ea2e",
+    "agent_type": "general-research-agent",
+    "findings_count": 8
+  },
+  "memory_candidates": [
+    {
+      "content": "The specs/literature/ directory holds markdown exports of academic books/papers for --lit injection. Best practice: split book-length files (>50KB) into chapter-level .md files in subdirectories (specs/literature/{bibkey}/), with a master index.json at specs/literature/index.json using the same schema as .claude/context/index.json. Paper-length files (<50KB, e.g. bentzen_2023.md) stay as single files. The retrieval script scores entries by keyword overlap against the task description and focus_prompt, then greedily selects within a 4000-token budget — identical architecture to memory-retrieve.sh.",
+      "category": "PATTERN",
+      "source_artifact": "specs/194_curate_zotero_pdfs_for_literature/reports/02_literature-organization-practices.md",
+      "confidence": 0.9,
+      "suggested_keywords": ["literature", "specs/literature", "chunking", "index.json", "retrieval", "token-budget"]
+    },
+    {
+      "content": "Current specs/literature/*.md files lack semantic markdown headers. blackburn_2001.md uses <!-- Page N --> comments (66 pages), mendelson_2016.md uses ## Page N headers (492 pages), hughes_1996.md has no headers at all, chagrov_1997.md has OCR artifact # lines (not real headings). Manual chapter extraction guided by each book's table of contents is required — automatic header-based splitting produces meaningless page-granular chunks.",
+      "category": "INSIGHT",
+      "source_artifact": "specs/194_curate_zotero_pdfs_for_literature/reports/02_literature-organization-practices.md",
+      "confidence": 0.95,
+      "suggested_keywords": ["literature", "markdown", "headers", "OCR", "blackburn", "mendelson", "hughes", "chagrov"]
+    }
+  ],
+  "next_steps": "Run /plan 194 to create implementation plan for splitting and indexing the literature files"
+}

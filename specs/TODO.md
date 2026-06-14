@@ -45,7 +45,7 @@ next_project_number: 192
 ## Tasks
 
 ### 191. Clean up propositional deduction theorem naming
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

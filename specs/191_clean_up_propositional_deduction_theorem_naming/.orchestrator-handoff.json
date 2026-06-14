@@ -1,11 +1,12 @@
 {
-  "status": "researched",
-  "summary": "Comprehensive survey of Propositional/ naming issues. Found 1 dead declaration (cl_prop_has_deduction_theorem, 0 references), 6 non-standard _h_ witness theorems (24 call sites across 3 files), and 1 misleadingly-named generic theorem (prop_has_deduction_theorem, 5 active call sites). Recommended: delete dead code, rename witnesses to namespace-qualified form (PropositionalAxiom.mem_implyK etc.), rename generic theorem to hasDeductionTheorem. No symmetric wrappers needed. Broader snake_case prefix pattern (60+ declarations) is out of scope. All changes are mechanical renames with zero semantic impact.",
+  "status": "planned",
+  "summary": "3-phase plan: (1) rename/delete definitions in Axioms.lean and DeductionTheorem.lean, (2) update all 29 call sites across StrongCompleteness, IntLindenbaum, MinLindenbaum, MCS, (3) verify with lake build + lint-style + checkInitImports + test. Total effort: 1.5 hours.",
+  "phases_total": 3,
   "artifacts": [
     {
-      "path": "specs/191_clean_up_propositional_deduction_theorem_naming/reports/01_naming-cleanup-research.md",
-      "type": "report",
-      "summary": "Detailed research report covering all 5 task items with current state, usage sites, concrete rename proposals, risk assessment, and implementation order."
+      "path": "specs/191_clean_up_propositional_deduction_theorem_naming/plans/01_naming-cleanup-plan.md",
+      "type": "plan",
+      "summary": "3-phase implementation plan for propositional naming cleanup"
     }
   ]
 }

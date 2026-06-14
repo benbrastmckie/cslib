@@ -1,26 +1,21 @@
 {
-  "status": "done",
-  "started_at": "2026-06-14T00:00:00Z",
+  "status": "planned",
   "artifacts": [
     {
-      "path": "specs/191_clean_up_propositional_deduction_theorem_naming/reports/01_naming-cleanup-research.md",
-      "type": "report",
-      "summary": "Detailed research report covering all 5 task items with current state, usage sites, concrete rename proposals, risk assessment, and implementation order."
-    },
-    {
-      "path": "specs/191_clean_up_propositional_deduction_theorem_naming/.orchestrator-handoff.json",
-      "type": "handoff",
-      "summary": "Orchestrator handoff with researched status and summary."
+      "type": "plan",
+      "path": "specs/191_clean_up_propositional_deduction_theorem_naming/plans/01_naming-cleanup-plan.md",
+      "summary": "3-phase implementation plan for mechanical renames and dead code deletion in Propositional/"
     }
   ],
-  "partial_progress": {
-    "stage": "report_written",
-    "details": "Research report and orchestrator handoff written successfully."
-  },
+  "next_steps": "Run /implement 191 to execute the plan",
   "metadata": {
     "session_id": "sess_1781456783_f22155",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 3,
+    "estimated_hours": 1.5,
+    "dependency_waves": [[1], [2], [3]]
+  },
+  "memory_candidates": []
 }

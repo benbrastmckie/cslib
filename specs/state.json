@@ -150,7 +150,7 @@
     {
       "project_number": 179,
       "project_name": "modal_primitive_diamond",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "dependencies": [
         175
@@ -161,10 +161,17 @@
           "path": "specs/179_modal_primitive_diamond/reports/01_primitive-diamond-research.md",
           "type": "report",
           "summary": "Primitive diamond motivation, upstream comparison, intuitionistic modal logic background, scope assessment, axiom design"
+        },
+        {
+          "path": "specs/179_modal_primitive_diamond/reports/02_team-research.md",
+          "type": "report",
+          "description": "Team research synthesis: primitive diamond for Modal.Proposition"
         }
       ],
       "topic": "Modal Logic",
-      "last_updated": "2026-06-14T17:54:05Z"
+      "last_updated": "2026-06-14T17:56:47Z",
+      "session_id": "sess_1781459800_a7c3f2",
+      "next_artifact_number": 3
     },
     {
       "project_number": 180,

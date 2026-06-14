@@ -29,7 +29,7 @@ next_project_number: 194
 
 ### Modal Logic
 
-179 [NOT STARTED] — Add diamond (dia) as a primitive constructor to Modal.Proposition
+179 [RESEARCHED] — Add diamond (dia) as a primitive constructor to Modal.Proposition
 
 ### Propositional Logic
 
@@ -112,11 +112,13 @@ next_project_number: 194
 ---
 
 ### 179. Modal primitive diamond
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 175
-- **Research**: [179_modal_primitive_diamond/reports/01_primitive-diamond-research.md]
+- **Research**:
+  - [179_modal_primitive_diamond/reports/01_primitive-diamond-research.md]
+  - [179_modal_primitive_diamond/reports/02_team-research.md]
 
 **Description**: Add diamond (dia) as a primitive constructor to Modal.Proposition, giving {atom, bot, imp, and, or, box, dia}. Currently diamond is derived as neg(box(neg phi)), which is only valid classically. Making it primitive enables intuitionistic and minimal modal logics where box and diamond are independent operators. Scope: (1) Basic.lean: add .dia constructor, structural Satisfies clause, keep notation. (2) Denotation, LogicalEquivalence, Cube: .dia cases. (3) ProofSystem/Instances: diamond-related axiom constructors and dual axioms. (4) Metalogic: .dia cases in DerivationTree, truth lemmas, all 15 soundness/completeness files. (5) Classical equivalence dia(A) iff neg(box(neg(A))) becomes a theorem. Verify full CI. Reference: upstream CSLib uses diamond as primitive; Fischer Servi 1984, Simpson 1994 for intuitionistic modal logic.
 

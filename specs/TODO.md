@@ -11,7 +11,7 @@ next_project_number: 197
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,179,180,188,192,194,195,196 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,188,192,194,195,196 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -28,13 +28,9 @@ next_project_number: 197
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
-### Modal Logic
-
-179 [IMPLEMENTING] — Document why box is primitive in classical modal logic; add docst
-
 ### Project Management
 
-194 [PLANNING] — curate_zotero_pdfs_for_literature
+194 [PLANNED] — curate_zotero_pdfs_for_literature
 
 ### Propositional Logic
 
@@ -148,7 +144,7 @@ next_project_number: 197
 ---
 
 ### 179. Modal primitive diamond
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -159,6 +155,7 @@ next_project_number: 197
   - [179_modal_primitive_diamond/reports/03_upstream-study.md]
   - [179_modal_primitive_diamond/reports/05_team-research.md]
 - **Plan**: [179_modal_primitive_diamond/plans/05_documentation-plan.md]
+- **Summary**: [179_modal_primitive_diamond/summaries/05_documentation-summary.md]
 
 **Description**: Document why box is primitive in classical modal logic; add docstrings citing Blackburn2001 and ChagrovZakharyaschev1997
 

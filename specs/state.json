@@ -209,7 +209,7 @@
     {
       "project_number": 179,
       "project_name": "modal_primitive_diamond",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "dependencies": [],
       "description": "Document why box is primitive in classical modal logic; add docstrings citing Blackburn2001 and ChagrovZakharyaschev1997",
@@ -243,13 +243,19 @@
           "path": "specs/179_modal_primitive_diamond/plans/05_documentation-plan.md",
           "type": "plan",
           "summary": "3-phase documentation-only plan (1.5 hours)"
+        },
+        {
+          "path": "specs/179_modal_primitive_diamond/summaries/05_documentation-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary: box-as-primitive docstrings"
         }
       ],
       "topic": "Modal Logic",
-      "last_updated": "2026-06-14T18:55:37Z",
+      "last_updated": "2026-06-14T19:02:45Z",
       "session_id": "sess_1781463313_db2937",
       "next_artifact_number": 6,
-      "researched": "2026-06-14T18:43:02Z"
+      "researched": "2026-06-14T18:43:02Z",
+      "completion_summary": "Added docstrings documenting box-as-primitive design choice at 8 locations across 6 files (Basic.lean, Connectives.lean, Axioms.lean, D.lean, B.lean, K5.lean), citing Blackburn2001 and ChagrovZakharyaschev1997. Updated task scope to documentation-only; removed task 181 dependency on 179."
     },
     {
       "project_number": 180,

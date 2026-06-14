@@ -11,9 +11,17 @@ public import Cslib.Foundations.Logic.Theorems.Propositional.Core
 
 /-! # Big Conjunction over Lists of Formulas
 
-Defines `bigconj : List F → F` as a generic fold using
-`HasBot.bot` and `HasImp.imp` (Lukasiewicz encoding of conjunction),
+Defines `bigconj : List F → F` as a generic fold using only `HasBot.bot` and `HasImp.imp`,
 plus derivability lemmas for `[ClassicalHilbert S]`.
+
+## Scope
+
+`bigconj` operates at the `HasBot`/`HasImp` typeclass level so that it can be instantiated
+across all formula types in CSLib: propositional, modal, temporal, and bimodal. Since not
+all of these types implement `HasAnd`, using the Lukasiewicz conjunction encoding
+`φ ∧ ψ := (φ → (ψ → ⊥)) → ⊥` is the maximally general choice here. Formula types
+that do implement `HasAnd` (e.g., `PL.Proposition`) can use `HasAnd.and` directly for
+native conjunction; `bigconj` provides a uniform interface across all types.
 
 ## Main Definitions
 

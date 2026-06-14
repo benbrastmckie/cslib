@@ -44,11 +44,24 @@ abbrev top' : F := HasImp.imp (HasBot.bot : F) HasBot.bot
 /-- Negation: φ → ⊥ -/
 abbrev neg' (x : F) : F := HasImp.imp x HasBot.bot
 
-/-- Lukasiewicz conjunction: ¬(φ → ¬ψ) -/
+/-- Lukasiewicz conjunction encoding: `¬(φ → ¬ψ)` = `(φ → (ψ → ⊥)) → ⊥`.
+
+This is an **embedding-layer helper**, not a primary connective definition. It is used
+specifically for formula types that lack a native `HasAnd` constructor (Modal, Temporal,
+Bimodal formula types only have `{atom, bot, imp, box/until/since}`). The propositional
+formula type `PL.Proposition` has a primitive `and` constructor and uses `HasAnd`/`HasOr`
+directly. The Lukasiewicz encoding is classically equivalent to `∧`, but not
+intuitionistically ([Wajsberg1938], [McKinsey1939]). -/
 abbrev conj' (a b : F) : F :=
   HasImp.imp (HasImp.imp a (neg' b)) HasBot.bot
 
-/-- Lukasiewicz disjunction: ¬φ → ψ -/
+/-- Lukasiewicz disjunction encoding: `¬φ → ψ` = `(φ → ⊥) → ψ`.
+
+This is an **embedding-layer helper**, not a primary connective definition. It is used
+specifically for formula types that lack a native `HasOr` constructor (Modal, Temporal,
+Bimodal formula types). The propositional formula type `PL.Proposition` has a primitive
+`or` constructor and uses `HasOr` directly. The Lukasiewicz encoding is classically
+equivalent to `∨`, but not intuitionistically ([Wajsberg1938], [McKinsey1939]). -/
 abbrev disj' (a b : F) : F :=
   HasImp.imp (neg' a) b
 

@@ -85,7 +85,7 @@ the theory parameter and proof system typeclasses.
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Update Foundations/Logic Documentation [NOT STARTED]
+### Phase 1: Update Foundations/Logic Documentation [COMPLETED]
 
 **Goal**: Update docstrings in `Foundations/Logic/Axioms.lean`, `Foundations/Logic/Theorems/BigConj.lean`, and `Foundations/Logic/Theorems/Propositional/Core.lean` to accurately describe the role of Lukasiewicz encodings as embedding-layer helpers, not as the primary connective definitions.
 

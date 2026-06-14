@@ -12,10 +12,18 @@ public import Cslib.Foundations.Logic.Theorems.Combinators
 /-! # Core Propositional Theorems
 
 Core propositional theorems for the Hilbert-style proof system, stratified
-by logical strength:
+by logical strength. These theorems work at the `HasBot`/`HasImp` typeclass level and
+are therefore available for any formula type, including those without native `HasAnd`/`HasOr`
+constructors (modal, temporal, bimodal formula types).
+
+For full and/or axioms using native conjunction and disjunction, see
+`Cslib.Foundations.Logic.Axioms` (`AndI`, `AndE1`, `AndE2`, `OrI1`, `OrI2`, `OrE`) and
+the `HasAnd`/`HasOr` typeclasses in `Cslib.Foundations.Logic.Connectives`.
 
 ### Minimal (`[MinimalHilbert S]`)
-- `neg_identity`: Identity on negation (`¬φ → ¬φ`); LEM under Lukasiewicz encoding
+- `neg_identity`: Identity on negation (`¬φ → ¬φ`); under Lukasiewicz encoding this is
+  the law of excluded middle `φ ∨ ¬φ` (since `¬φ → ¬φ` reads as `¬φ ∨ ¬φ` = `¬φ`
+  classically, but as LEM `(φ → ⊥) → (φ → ⊥)` in the Hilbert system)
 
 ### Intuitionistic (`[IntuitionisticHilbert S]`)
 - `efq_axiom`: EFQ wrapper (⊥ → φ)
@@ -26,16 +34,17 @@ by logical strength:
 - `peirce_axiom`: Peirce's law wrapper
 - `double_negation`: DNE derived from EFQ + Peirce + B-combinator
 - `rcp`: Reverse contraposition ((¬φ → ¬ψ) → (ψ → φ))
-- `lce_imp`: Left conjunction elimination ((φ ∧ ψ) → φ) -- DT-free
-- `rce_imp`: Right conjunction elimination ((φ ∧ ψ) → ψ) -- DT-free
+- `lce_imp`: Left conjunction elimination ((φ ∧ ψ) → φ) -- DT-free, Lukasiewicz encoding
+- `rce_imp`: Right conjunction elimination ((φ ∧ ψ) → ψ) -- DT-free, Lukasiewicz encoding
 
-## Naming Convention
+## Encoding
 
-All negation, conjunction, disjunction use raw `HasImp.imp`/`HasBot.bot`
-encoding (Lukasiewicz style):
+All negation, conjunction, disjunction in this module use the Lukasiewicz encoding
+via raw `HasImp.imp`/`HasBot.bot`, enabling use across formula types that lack native
+`and`/`or` constructors:
 - `¬φ := φ → ⊥`
-- `φ ∧ ψ := (φ → (ψ → ⊥)) → ⊥`
-- `φ ∨ ψ := (φ → ⊥) → ψ`
+- `φ ∧ ψ := (φ → (ψ → ⊥)) → ⊥`  (classically equivalent to `HasAnd.and`; not intuitionistically)
+- `φ ∨ ψ := (φ → ⊥) → ψ`  (classically equivalent to `HasOr.or`; not intuitionistically)
 -/
 
 @[expose] public section

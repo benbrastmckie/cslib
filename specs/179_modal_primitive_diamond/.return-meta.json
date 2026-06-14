@@ -1,17 +1,30 @@
 {
-  "status": "researched",
-  "summary": "Upstream CSLib uses fundamentally different primitives {atom, not, and, diamond} vs our {atom, bot, imp, box}. Upstream alignment is not feasible. Recommended clean-break: extend to {atom, bot, imp, box, dia} with HasDia typeclass, keep diamond as abbrev, add duality axiom to proof system. ~40 files affected across 5 phases.",
+  "status": "planned",
   "artifacts": [
     {
-      "path": "specs/179_modal_primitive_diamond/reports/03_upstream-study.md",
-      "type": "report",
-      "summary": "Comprehensive upstream comparison and clean-break refactor strategy for adding primitive dia constructor to Modal.Proposition"
+      "type": "plan",
+      "path": "specs/179_modal_primitive_diamond/plans/04_primitive-dia-plan.md",
+      "summary": "6-phase implementation plan for adding .dia as 5th primitive constructor to Modal.Proposition with HasDia typeclass, simplified axioms, and updated truth lemmas across ~40 files"
     }
   ],
+  "next_steps": "Run /implement 179 to execute the plan",
   "metadata": {
-    "session_id": "sess_1781462100_b4d8e1",
-    "agent_type": "cslib-research-agent",
+    "session_id": "sess_1781463500_c9f2a3",
+    "agent_type": "planner-agent",
+    "duration_seconds": 300,
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 6,
+    "estimated_hours": 10,
+    "dependency_waves": [[1], [2], [3], [4], [5], [6]]
+  },
+  "memory_candidates": [
+    {
+      "content": "When adding a new constructor to an inductive type that is pattern-matched across many files (like Modal.Proposition), the Lean 4 exhaustiveness checker guides the work: after adding the constructor, every pattern-match site raises an error indicating exactly where a new case is needed. This makes the change mechanically self-directing. The critical new proof obligation is typically in the truth lemma (completeness proof) where the new case requires a non-trivial witness construction.",
+      "category": "PATTERN",
+      "source_artifact": "specs/179_modal_primitive_diamond/plans/04_primitive-dia-plan.md",
+      "confidence": 0.85,
+      "suggested_keywords": ["lean4", "inductive", "constructor", "exhaustiveness", "truth-lemma", "modal-logic"]
+    }
+  ]
 }

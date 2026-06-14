@@ -1,5 +1,5 @@
 ---
-next_project_number: 200
+next_project_number: 201
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 200
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,198,199,199 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,188,192,195,197,198,199,200 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -30,11 +30,12 @@ next_project_number: 200
 
 ### Modal Logic
 
-197 [NOT STARTED] — Review the ambition to contribute Modal/ to upstream, identifying
+197 [RESEARCHED] — Review the ambition to contribute Modal/ to upstream, identifying
 
 ### Project Management
 
 199 [NOT STARTED] — Review citations in PR changes for accuracy and completeness
+200 [PLANNED] — Fix literature directory quality: complete incomplete book splits
 
 ### Propositional Logic
 
@@ -53,33 +54,23 @@ next_project_number: 200
 
 ## Tasks
 
-### 199. Fix literature directory quality
-review pr citations
-- **Status**: [NOT_STARTED
-NOT_STARTED]
+### 200. Fix literature directory quality
+- **Status**: [PLANNED]
 - **Task Type**: general
-cslib
 - **Topic**: Project Management
-Project Management
-- **Dependencies**: 
+- **Dependencies**: None
 
 **Description**: Fix literature directory quality: complete incomplete book splits (blackburn_2001 only has 3 of 7+ chapters, mendelson_2016 and church_1956 have content loss), remove redundant monolithic .md files after verifying split completeness, audit index.json entries for accuracy (token counts, paths, keywords), ensure all chapter files are within the 4000-token budget for --lit injection, and verify the 3 scholarly reconstruction files (burgess_1984, gabbay_1994_ch10, reynolds_1992) have adequate content for research use. Goal: make specs/literature/ fully functional for --lit flag during /research, /plan, and /implement phases
-Review citations in PR changes for accuracy and completeness
 
 ---
 
-### 199. Fix literature directory quality
-review pr citations
-- **Status**: [NOT_STARTED
-NOT_STARTED]
-- **Task Type**: general
-cslib
+### 199. Review pr citations
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
 - **Topic**: Project Management
-Project Management
-- **Dependencies**: 
+- **Dependencies**: None
 
-**Description**: Fix literature directory quality: complete incomplete book splits (blackburn_2001 only has 3 of 7+ chapters, mendelson_2016 and church_1956 have content loss), remove redundant monolithic .md files after verifying split completeness, audit index.json entries for accuracy (token counts, paths, keywords), ensure all chapter files are within the 4000-token budget for --lit injection, and verify the 3 scholarly reconstruction files (burgess_1984, gabbay_1994_ch10, reynolds_1992) have adequate content for research use. Goal: make specs/literature/ fully functional for --lit flag during /research, /plan, and /implement phases
-Review citations in PR changes for accuracy and completeness
+**Description**: Review citations in PR changes for accuracy and completeness
 
 ---
 
@@ -94,7 +85,7 @@ Review citations in PR changes for accuracy and completeness
 ---
 
 ### 197. Scope initial Modal/ upstream PR (~300 LOC)
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: pr
 - **Topic**: Modal Logic
 - **Dependencies**: None

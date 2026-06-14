@@ -1,0 +1,25 @@
+{
+  "phase": 4,
+  "phase_name": "Add BibTeX Entries and Final Index Validation",
+  "started_at": "2026-06-14T14:00:00Z",
+  "last_updated": "2026-06-14T14:10:00Z",
+  "objectives": [
+    {"id": 1, "description": "Add BibTeX entries for Burgess1982I, Burgess1982II, Burgess1984, GHR94, Reynolds1994 to references.bib", "status": "done", "note": "5 entries added"},
+    {"id": 2, "description": "Cross-reference: verify all bib_key values in index.json have matching entries in references.bib", "status": "done", "note": "All 10 non-null bib_keys verified present in references.bib"},
+    {"id": 3, "description": "Final validation: jq . specs/literature/index.json and verify all paths resolve", "status": "done", "note": "45 entries, all 45 paths resolved OK"},
+    {"id": 4, "description": "Update specs/literature/README.md with Temporal/Bimodal section and index schema", "status": "done"},
+    {"id": 5, "description": "Consider adding original monolithic .md files to .gitignore", "status": "skipped", "note": "Out of scope; deferred to user decision"}
+  ],
+  "current_objective": null,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": [
+    {
+      "task_id": "4.5",
+      "description": "Consider adding original monolithic .md files to .gitignore",
+      "type": "skipped",
+      "reason": "Out of scope — plan explicitly stated this as optional (copyright decision for user, not agent)",
+      "annotation": "*(deviation: skipped — out of scope; user can decide)*"
+    }
+  ]
+}

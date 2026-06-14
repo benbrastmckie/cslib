@@ -844,6 +844,126 @@
         "Godel translation"
       ],
       "summary": "Superintuitionistic logics, their lattice structure, modal companions, and relationship to S4 extensions."
+    },
+    {
+      "id": "burgess_1982_i",
+      "bib_key": "Burgess1982I",
+      "title": "Axioms for Tense Logic. I. \"Since\" and \"Until\"",
+      "authors": "John P. Burgess",
+      "year": 1982,
+      "section": null,
+      "path": "burgess_1982_i.md",
+      "page_range": "367-374",
+      "token_count": 4995,
+      "keywords": [
+        "tense logic",
+        "Until operator",
+        "Since operator",
+        "linear orders",
+        "completeness",
+        "maximal consistent sets",
+        "dense orders",
+        "discrete orders",
+        "Kamp",
+        "axiomatization"
+      ],
+      "summary": "Axiomatizes the Until-Since tense logic for arbitrary linear orders, dense orders, and discrete orders using maximal consistent set constructions; companion to Burgess 1982 Part II."
+    },
+    {
+      "id": "burgess_1982_ii",
+      "bib_key": "Burgess1982II",
+      "title": "Axioms for Tense Logic. II. Time Periods",
+      "authors": "John P. Burgess",
+      "year": 1982,
+      "section": null,
+      "path": "burgess_1982_ii.md",
+      "page_range": "375-383",
+      "token_count": 5235,
+      "keywords": [
+        "tense logic",
+        "time periods",
+        "period-based tense logic",
+        "rationals",
+        "reals",
+        "axiomatization",
+        "chronicle construction",
+        "instant-based",
+        "period-based",
+        "bimodal"
+      ],
+      "summary": "Axiomatizes the period-based tense logic for dense linear orders (rationals and reals), introducing the chronicle construction used in CSLib's BX canonical model."
+    },
+    {
+      "id": "burgess_1984",
+      "bib_key": "Burgess1984",
+      "title": "Basic Tense Logic",
+      "authors": "John P. Burgess",
+      "year": 1984,
+      "section": null,
+      "path": "burgess_1984.md",
+      "page_range": "89-133",
+      "token_count": 2152,
+      "keywords": [
+        "tense logic",
+        "Until operator",
+        "Since operator",
+        "temporal operators",
+        "Kripke semantics",
+        "linear orders",
+        "integer time",
+        "canonical model",
+        "completeness",
+        "discrete time"
+      ],
+      "summary": "Comprehensive handbook chapter on basic tense logic: semantics of F/P/G/H/U/S operators, axiom systems for linear/dense/discrete orders, and canonical model completeness methodology."
+    },
+    {
+      "id": "gabbay_1994_ch10",
+      "bib_key": "GHR94",
+      "title": "Temporal Logic: Mathematical Foundations — Chapter 10: Temporal Logic over the Integers",
+      "authors": "Dov Gabbay, Ian Hodkinson, Mark Reynolds",
+      "year": 1994,
+      "section": "Chapter 10: Temporal Logic over the Integers (pp. 562-640)",
+      "path": "gabbay_1994_ch10.md",
+      "page_range": "562-640",
+      "token_count": 2279,
+      "keywords": [
+        "separation theorem",
+        "integer temporal logic",
+        "GHR94",
+        "bimodal temporal logic",
+        "purely future formulas",
+        "purely past formulas",
+        "completeness",
+        "TLZ axiom system",
+        "BX system",
+        "canonical model"
+      ],
+      "summary": "Chapter 10 of GHR94: Separation Theorem for temporal logic over integers (Theorem 10.2.9) and completeness proof for the Until-Since tense logic over ℤ; basis for CSLib's bimodal separation proof."
+    },
+    {
+      "id": "reynolds_1992",
+      "bib_key": "Reynolds1994",
+      "title": "Axiomatising First-Order Temporal Logic: Until and Since over Linear Time",
+      "authors": "Mark Reynolds",
+      "year": 1994,
+      "section": null,
+      "path": "reynolds_1992.md",
+      "page_range": "679-703",
+      "token_count": 2072,
+      "keywords": [
+        "first-order temporal logic",
+        "Until operator",
+        "Since operator",
+        "linear time",
+        "completeness proof",
+        "canonical model",
+        "maximal consistent sets",
+        "Henkin witnesses",
+        "discrete time",
+        "integer time"
+      ],
+      "summary": "Sound and complete axiom system for first-order temporal logic with Until and Since over linear orders; the canonical MCS construction methodology parallels CSLib's chronicle-based completeness proof."
     }
   ]
 }

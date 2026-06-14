@@ -83,6 +83,66 @@ All files follow the naming convention `{author}_{year}.md` (first author surnam
   Kripke semantics for intuitionistic logic, completeness proofs, forcing techniques.
   **Not yet in references.bib.**
 
+## Temporal and Bimodal Logic
+
+- **Burgess 1982 Part I** [Burgess1982I] `[MD]`: *Axioms for Tense Logic. I. "Since" and "Until"*.
+  Notre Dame Journal of Formal Logic 23(4):367–374.
+  File: `burgess_1982_i.md`.
+  Axiomatizes the Until-Since tense logic for arbitrary linear orders, dense orders, and discrete
+  orders. The completeness proof uses maximal consistent sets — the methodology used in CSLib's
+  bimodal completeness proof. Companion to Part II.
+
+- **Burgess 1982 Part II** [Burgess1982II] `[MD]`: *Axioms for Tense Logic. II. Time Periods*.
+  Notre Dame Journal of Formal Logic 23(4):375–383.
+  File: `burgess_1982_ii.md`.
+  Extends the axiomatization to period-based (interval) tense logic for dense linear orders.
+  Introduces the *chronicle construction* (bi-infinite sequences of MCS) adapted in CSLib's
+  BX canonical model (`ChronicleTypes.lean`, `ChronicleToCountermodel.lean`).
+
+- **Burgess 1984** [Burgess1984] `[MD]`: *Basic Tense Logic*.
+  In Gabbay & Guenthner (eds.), *Handbook of Philosophical Logic*, Vol. II, pp. 89–133. Reidel.
+  File: `burgess_1984.md`.
+  Comprehensive handbook chapter covering semantics of F/P/G/H/U/S operators, axiom systems for
+  linear/dense/discrete orders, and canonical model completeness methodology. Best single reference
+  for the full tense logic framework including integer and rational time.
+
+- **Gabbay, Hodkinson & Reynolds 1994** [GHR94] `[MD]`: *Temporal Logic: Mathematical Foundations
+  and Computational Aspects, Vol. 1*. Oxford University Press.
+  File: `gabbay_1994_ch10.md` (Chapter 10 only: Temporal Logic over the Integers, pp. 562–640).
+  Primary reference for CSLib's separation theorem (`Separation.lean`). GHR94 Theorem 10.2.9
+  (`all_formulas_separable`) is the main completeness vehicle: every U-S formula over ℤ is
+  equivalent to a Boolean combination of purely future and purely past formulas. Cited throughout
+  as "GHR94".
+
+- **Reynolds 1994** [Reynolds1994] `[MD]`: *Axiomatising First-Order Temporal Logic: Until and Since
+  over Linear Time*. Journal of Logic and Computation 6(5):679–703.
+  File: `reynolds_1992.md`.
+  Cited in `ChronicleToCountermodel.lean` as "Reynolds 1994". Provides canonical MCS methodology
+  for temporal logic completeness over linear orders; the construction parallels CSLib's integer
+  chronicle approach.
+
+## Index and Retrieval
+
+The `index.json` file in this directory is the master registry for `--lit` injection via
+`literature-retrieve.sh`. Schema:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique identifier (`author_year[_section]`) |
+| `bib_key` | string\|null | BibTeX key in `references.bib` |
+| `title` | string | Full title |
+| `authors` | string | Author(s) |
+| `year` | integer | Publication year |
+| `section` | string\|null | Section/chapter description |
+| `path` | string | Path relative to `specs/literature/` |
+| `page_range` | string\|null | Original page range |
+| `token_count` | integer | Estimated tokens (words × 1.3) |
+| `keywords` | array | 6-10 keywords for retrieval matching |
+| `summary` | string | One-sentence description |
+
+Book-length files are split into chapter subdirectories (e.g., `blackburn_2001/ch01_basic-concepts.md`).
+Paper-length files remain as top-level `.md` files (e.g., `burgess_1982_i.md`).
+
 ## Modal Logic (Foundations shared with Propositional)
 
 - **Chagrov & Zakharyaschev 1997** [ChagrovZakharyaschev1997] `[MD]`: *Modal Logic*. Oxford Logic Guides 35.

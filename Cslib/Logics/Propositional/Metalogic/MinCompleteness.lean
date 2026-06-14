@@ -7,7 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Propositional.Semantics.Kripke
-public import Cslib.Logics.Propositional.Metalogic.MinSoundness
 public import Cslib.Logics.Propositional.Metalogic.MinLindenbaum
 
 /-! # Canonical Model Infrastructure for Minimal Propositional Logic

@@ -14,12 +14,13 @@ This module defines the axiom schemata for the propositional Hilbert-style proof
 
 ## Main Definition
 
-- `PropositionalAxiom`: An inductive type enumerating the 4 axiom schemata of classical
+- `PropositionalAxiom`: An inductive type enumerating the 10 axiom schemata of classical
   propositional logic: `implyK` (weakening), `implyS` (distribution), `efq` (ex falso),
-  and `peirce` (Peirce's law / classical reasoning).
+  `peirce` (Peirce's law), and 6 conjunction/disjunction axioms.
 
 ## References
 
+* [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Section 1.1
 * Cslib/Logics/Modal/Metalogic/DerivationTree.lean -- modal axiom pattern (first 4 constructors)
 -/
 

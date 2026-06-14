@@ -28,6 +28,7 @@ and the corresponding constructor proofs.
 
 ## References
 
+* [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Section 5.1
 * Cslib/Logics/Modal/Metalogic/MCS.lean -- modal MCS pattern
 * Cslib/Foundations/Logic/Metalogic/Consistency.lean -- generic MCS framework
 -/

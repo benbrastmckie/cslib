@@ -17,11 +17,11 @@ every derivable formula is a tautology.
 
 ## Main Results
 
-- `prop_axiom_sound`: Each of the 4 axiom schemata is valid under all valuations.
+- `prop_axiom_sound`: Each of the 10 axiom schemata is valid under all valuations.
 - `prop_soundness`: If `Γ ⊢ φ` (via `DerivationTree PropositionalAxiom`), then `φ`
   is true under any valuation where all of `Γ` is true.
 - `prop_soundness_derivable`: If `⊢ φ`, then `φ` is true under all valuations.
-- `soundness_tautology`: If `⊢ φ`, then `φ` is a tautology.
+- `prop_soundness_tautology`: If `⊢ φ`, then `φ` is a tautology.
 
 ## References
 
@@ -86,7 +86,7 @@ theorem prop_soundness_derivable {φ : PL.Proposition Atom}
 
 /-- Soundness at the tautology level: every derivable formula is a
 tautology. -/
-theorem soundness_tautology {φ : PL.Proposition Atom}
+theorem prop_soundness_tautology {φ : PL.Proposition Atom}
     (h : Derivable PropositionalAxiom φ) : Tautology φ :=
   fun v => prop_soundness_derivable h v
 

@@ -9,7 +9,6 @@ module
 public import Cslib.Logics.Propositional.Semantics.Basic
 public import Cslib.Logics.Propositional.Semantics.Kripke
 public import Cslib.Logics.Propositional.ProofSystem.Derivation
-public import Std.Tactic.BVDecide.Normalize
 
 /-! # Set-Based Derivability and Semantic Consequence
 

@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Propositional.Semantics.SemanticConsequence
+public import Cslib.Logics.Propositional.Metalogic.IntSoundness
 public import Cslib.Logics.Propositional.Metalogic.IntCompleteness
 
 /-! # Strong Completeness for Intuitionistic Propositional Logic

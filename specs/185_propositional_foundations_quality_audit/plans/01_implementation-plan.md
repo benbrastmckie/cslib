@@ -1,7 +1,7 @@
 # Implementation Plan: Propositional Foundations Quality Audit
 
 - **Task**: 185 - Propositional Foundations Quality Audit
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 6 hours
 - **Dependencies**: None (task 186 already added vanDalen2013, Fitting1969, Herbrand1930 to references.bib)
 - **Research Inputs**: specs/185_propositional_foundations_quality_audit/reports/01_team-research.md
@@ -66,7 +66,7 @@ No specific ROADMAP.md items map directly to this quality audit task. The work i
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Import Hygiene and Naming Fixes [NOT STARTED]
+### Phase 1: Import Hygiene and Naming Fixes [COMPLETED]
 
 **Goal**: Fix all HIGH-priority import issues and MEDIUM-priority naming inconsistencies. These are mechanical changes with low risk.
 
@@ -106,7 +106,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Citation Format Standardization [NOT STARTED]
+### Phase 2: Citation Format Standardization [IN PROGRESS]
 
 **Goal**: Replace all bare "CZ" abbreviations with proper BibKey citation format across 14 Propositional files, and add missing citations to `set_lindenbaum`, `deductionTheorem`, `int_prime_exclusion`, and three docstrings. This is mechanical text editing with no proof changes.
 

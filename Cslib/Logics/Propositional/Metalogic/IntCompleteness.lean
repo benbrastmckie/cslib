@@ -7,7 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Propositional.Semantics.Kripke
-public import Cslib.Logics.Propositional.Metalogic.IntSoundness
 public import Cslib.Logics.Propositional.Metalogic.IntLindenbaum
 
 /-! # Canonical Model Infrastructure for Intuitionistic Propositional Logic

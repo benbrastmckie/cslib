@@ -39,6 +39,7 @@ Unlike the modal `DerivationTree`, the propositional version has only 4 construc
 
 ## References
 
+* [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Section 1.1
 * Cslib/Logics/Modal/Metalogic/DerivationTree.lean -- modal derivation tree pattern
 * Cslib/Foundations/Logic/Metalogic/Consistency.lean -- generic MCS API
 -/

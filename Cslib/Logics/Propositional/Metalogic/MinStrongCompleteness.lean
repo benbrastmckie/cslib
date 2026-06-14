@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Propositional.Semantics.SemanticConsequence
+public import Cslib.Logics.Propositional.Metalogic.MinSoundness
 public import Cslib.Logics.Propositional.Metalogic.MinCompleteness
 
 /-! # Strong Completeness for Minimal Propositional Logic

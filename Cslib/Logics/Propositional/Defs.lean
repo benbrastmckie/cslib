@@ -6,7 +6,7 @@ Authors: Thomas Waring, Benjamin Brast-McKie
 
 module
 
-public import Cslib.Init
+import Cslib.Init
 public import Cslib.Foundations.Logic.Connectives
 public import Mathlib.Data.FunLike.Basic
 public import Mathlib.Data.Set.Basic

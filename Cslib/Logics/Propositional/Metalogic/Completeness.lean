@@ -22,7 +22,7 @@ as corollaries of the strong completeness results in `StrongCompleteness.lean`.
 
 See `Cslib.Logics.Propositional.Metalogic.StrongCompleteness` for:
 - `prop_completeness`: `Tautology φ → Derivable PropositionalAxiom φ`
-- `completeness_iff_tautology`: `Tautology φ ↔ Derivable PropositionalAxiom φ`
+- `prop_completeness_iff_tautology`: `Tautology φ ↔ Derivable PropositionalAxiom φ`
 
 ## References
 

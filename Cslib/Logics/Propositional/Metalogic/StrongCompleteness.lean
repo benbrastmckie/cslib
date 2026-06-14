@@ -245,8 +245,8 @@ from the empty context using `PropositionalAxiom`.
 
 This is a corollary of `prop_strong_completeness_iff` obtained by instantiating at
 `Γ = ∅` and using `SetDerivable_empty_iff`. -/
-theorem completeness_iff_tautology {φ : PL.Proposition Atom} :
+theorem prop_completeness_iff_tautology {φ : PL.Proposition Atom} :
     Tautology φ ↔ Derivable PropositionalAxiom φ :=
-  ⟨prop_completeness, soundness_tautology⟩
+  ⟨prop_completeness, prop_soundness_tautology⟩
 
 end Cslib.Logic.PL

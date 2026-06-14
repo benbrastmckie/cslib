@@ -57,7 +57,7 @@ next_project_number: 188
 ---
 
 ### 185. Propositional foundations quality audit
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 183, Task 184

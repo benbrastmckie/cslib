@@ -1,7 +1,7 @@
 # Implementation Plan: Curate Zotero PDFs for Literature
 
 - **Task**: 194 - Curate Zotero PDFs for literature
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 5 hours
 - **Dependencies**: None (user will fix literature-retrieve.sh separately)
 - **Research Inputs**: reports/01_team-research.md, reports/02_literature-organization-practices.md

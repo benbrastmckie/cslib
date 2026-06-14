@@ -54,11 +54,11 @@
     {
       "project_number": 194,
       "project_name": "curate_zotero_pdfs_for_literature",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "general",
       "topic": "Project Management",
       "created": "2026-06-14T18:15:52Z",
-      "last_updated": "2026-06-14T19:03:36Z",
+      "last_updated": "2026-06-14T20:24:52Z",
       "session_id": "sess_1781463802_4efcea",
       "researched": "2026-06-14T18:28:20Z",
       "next_artifact_number": 3,
@@ -72,6 +72,11 @@
           "path": "specs/194_curate_zotero_pdfs_for_literature/plans/02_literature-curation-plan.md",
           "type": "plan",
           "summary": "Implementation plan for organizing literature into indexed chapter subdirectories with temporal/bimodal paper curation"
+        },
+        {
+          "path": "specs/194_curate_zotero_pdfs_for_literature/summaries/02_literature-curation-summary.md",
+          "type": "summary",
+          "summary": "Literature curation: index.json extended to 45 entries, 5 temporal papers curated, BibTeX entries added, README updated"
         }
       ],
       "memory_candidates": [
@@ -99,7 +104,8 @@
             "OCR"
           ]
         }
-      ]
+      ],
+      "completion_summary": "Created specs/literature/index.json with 45 entries covering all literature files; split 6 book-length markdown files into chapter subdirectories; curated 5 temporal/bimodal papers (Burgess 1982 I/II, Burgess 1984, GHR94 Ch.10, Reynolds 1994) as scoped excerpts; added 5 BibTeX entries to references.bib; documented index schema in README."
     },
     {
       "project_number": 188,

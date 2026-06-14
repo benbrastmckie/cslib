@@ -11,7 +11,7 @@ next_project_number: 199
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,194,195,197,198 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,188,192,195,197,198 | -- | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -31,10 +31,6 @@ next_project_number: 199
 ### Modal Logic
 
 197 [NOT STARTED] — Review the ambition to contribute Modal/ to upstream, identifying
-
-### Project Management
-
-194 [IMPLEMENTING] — curate_zotero_pdfs_for_literature
 
 ### Propositional Logic
 
@@ -97,12 +93,13 @@ next_project_number: 199
 ---
 
 ### 194. Curate zotero pdfs for literature
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: general
 - **Topic**: Project Management
 - **Dependencies**: None
 - **Research**: [194_curate_zotero_pdfs_for_literature/reports/02_literature-organization-practices.md]
 - **Plan**: [194_curate_zotero_pdfs_for_literature/plans/02_literature-curation-plan.md]
+- **Summary**: [194_curate_zotero_pdfs_for_literature/summaries/02_literature-curation-summary.md]
 
 ---
 

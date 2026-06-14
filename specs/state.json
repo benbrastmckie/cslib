@@ -68,19 +68,56 @@
     {
       "project_number": 197,
       "project_name": "modal_upstream_initial_pr",
-      "status": "researched",
+      "status": "planned",
       "task_type": "pr",
       "title": "Scope initial Modal/ upstream PR (~300 LOC)",
       "description": "Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible",
       "topic": "Modal Logic",
       "created": "2026-06-14T19:08:07Z",
-      "last_updated": "2026-06-14T22:30:00Z",
-      "session_id": "sess_1749934000_a8c2f1",
+      "last_updated": "2026-06-14T22:11:49Z",
+      "session_id": "sess_1749934100_b3d4e5",
       "research_artifacts": [
         "specs/197_modal_upstream_initial_pr/reports/01_modal-upstream-pr-scope.md",
         "specs/197_modal_upstream_initial_pr/reports/02_literature-grounded-analysis.md"
       ],
-      "next_artifact_number": 3
+      "next_artifact_number": 3,
+      "plan_artifacts": [
+        "specs/197_modal_upstream_initial_pr/plans/02_modal-upstream-pr-plan.md"
+      ],
+      "plan_metadata": {
+        "phases": 5,
+        "total_effort_hours": 3.5,
+        "complexity": "medium",
+        "research_integrated": true,
+        "plan_version": 2,
+        "dependency_waves": [
+          [
+            1
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            3
+          ],
+          [
+            5
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/01_modal-upstream-pr-scope.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-06-14"
+          },
+          {
+            "path": "reports/02_literature-grounded-analysis.md",
+            "integrated_in_plan_version": 2,
+            "integrated_date": "2026-06-14"
+          }
+        ]
+      }
     },
     {
       "project_number": 196,

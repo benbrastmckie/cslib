@@ -30,7 +30,7 @@ next_project_number: 202
 
 ### Modal Logic
 
-197 [RESEARCHED] — Review the ambition to contribute Modal/ to upstream, identifying
+197 [PLANNED] — Review the ambition to contribute Modal/ to upstream, identifying
 201 [NOT STARTED] — Review citations in Modal PR changes for accuracy and completenes
 
 ### Propositional Logic
@@ -94,7 +94,7 @@ next_project_number: 202
 ---
 
 ### 197. Scope initial Modal/ upstream PR (~300 LOC)
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: pr
 - **Topic**: Modal Logic
 - **Dependencies**: None

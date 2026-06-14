@@ -252,70 +252,6 @@
       "summary": "Proves that the natural deduction calculi NJ, NK are equivalent to the sequent calculi LJ, LK."
     },
     {
-      "id": "blackburn_2001_ch00",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — Preface and Table of Contents",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Preface and Table of Contents",
-      "path": "blackburn_2001/ch00_preface.md",
-      "page_range": "viii-xiv",
-      "token_count": 6910,
-      "keywords": [
-        "modal logic overview",
-        "relational structures",
-        "Kripke semantics",
-        "correspondence theory",
-        "completeness theory",
-        "book structure"
-      ],
-      "summary": "Preface and TOC for Blackburn et al.'s Modal Logic (Cambridge 2001), a key reference for Kripke semantics and completeness theory."
-    },
-    {
-      "id": "blackburn_2001_ch01",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — Chapter 1: Basic Concepts",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 1: Basic Concepts (pages 1-49)",
-      "path": "blackburn_2001/ch01_basic-concepts.md",
-      "page_range": "1-49",
-      "token_count": 14498,
-      "keywords": [
-        "relational structures",
-        "modal languages",
-        "Kripke frames",
-        "Kripke models",
-        "satisfaction definition",
-        "validity",
-        "general frames",
-        "normal modal logics",
-        "K axiom",
-        "bisimulation"
-      ],
-      "summary": "Introduces basic concepts: relational structures, modal languages, Kripke semantics, validity, general frames, and normal modal logics."
-    },
-    {
-      "id": "blackburn_2001_ch02",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — Chapter 2: Models (partial, pages 50-69)",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 2: Models (partial, pages 50-69)",
-      "path": "blackburn_2001/ch02_models-partial.md",
-      "page_range": "50-69",
-      "token_count": 12131,
-      "keywords": [
-        "invariance results",
-        "bisimulations",
-        "tree unraveling",
-        "ultrafilter extensions",
-        "modal saturation",
-        "semantic equivalence"
-      ],
-      "summary": "Partial coverage of Chapter 2 (pages 50-69): invariance results and bisimulations for Kripke models."
-    },
-    {
       "id": "hughes_1996_p00",
       "bib_key": null,
       "title": "A New Introduction to Modal Logic — Preface and Contents",
@@ -663,7 +599,11 @@
       "path": "church_1956/ch00_front-matter.md",
       "page_range": "i-xii",
       "token_count": 2961,
-      "keywords": ["Church 1956", "mathematical logic", "propositional calculus"]
+      "keywords": [
+        "Church 1956",
+        "mathematical logic",
+        "propositional calculus"
+      ]
     },
     {
       "id": "church_1956_ch00b",
@@ -984,6 +924,193 @@
         "integer time"
       ],
       "summary": "Sound and complete axiom system for first-order temporal logic with Until and Since over linear orders; the canonical MCS construction methodology parallels CSLib's chronicle-based completeness proof."
+    },
+    {
+      "id": "blackburn_2001_ch00",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — Preface and Table of Contents",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Front matter including Preface and Table of Contents",
+      "path": "blackburn_2001/ch00_preface.md",
+      "page_range": "viii-xix",
+      "token_count": 7102,
+      "keywords": [
+        "modal logic overview",
+        "relational structures",
+        "Kripke semantics",
+        "correspondence theory",
+        "completeness theory",
+        "book structure"
+      ],
+      "summary": "Preface and TOC for Blackburn et al. Modal Logic (Cambridge 2001), covering book structure and reading paths."
+    },
+    {
+      "id": "blackburn_2001_ch01",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — Chapter 1: Basic Concepts",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 1: Basic Concepts (pages 1-49)",
+      "path": "blackburn_2001/ch01_basic-concepts.md",
+      "page_range": "1-49",
+      "token_count": 32518,
+      "keywords": [
+        "relational structures",
+        "modal languages",
+        "Kripke frames",
+        "Kripke models",
+        "satisfaction",
+        "validity",
+        "general frames",
+        "normal modal logics",
+        "K axiom",
+        "bisimulation",
+        "modal consequence relations"
+      ],
+      "summary": "Introduces relational structures, modal languages, Kripke semantics, validity, general frames, and normal modal logics."
+    },
+    {
+      "id": "blackburn_2001_ch02",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — Chapter 2: Models",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 2: Models (pages 50-123)",
+      "path": "blackburn_2001/ch02_models.md",
+      "page_range": "50-123",
+      "token_count": 51336,
+      "keywords": [
+        "invariance",
+        "bisimulations",
+        "finite models",
+        "standard translation",
+        "ultrafilter extensions",
+        "modal saturation",
+        "characterization",
+        "definability",
+        "simulation",
+        "safety"
+      ],
+      "summary": "Model-theoretic analysis: invariance results, bisimulations, finite model property, standard translation, and characterization theorems."
+    },
+    {
+      "id": "blackburn_2001_ch03",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — Chapter 3: Frames",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 3: Frames (pages 124-189)",
+      "path": "blackburn_2001/ch03_frames.md",
+      "page_range": "124-189",
+      "token_count": 43832,
+      "keywords": [
+        "frame definability",
+        "correspondence theory",
+        "Sahlqvist formulas",
+        "first-order definability",
+        "frame constructions",
+        "generated subframes",
+        "disjoint unions",
+        "bounded morphisms",
+        "ultrafilter extensions"
+      ],
+      "summary": "Frame definability, correspondence theory, Sahlqvist formulas, and frame constructions (generated subframes, bounded morphisms)."
+    },
+    {
+      "id": "blackburn_2001_ch04",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — Chapter 4: Completeness",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 4: Completeness (pages 190-262)",
+      "path": "blackburn_2001/ch04_completeness.md",
+      "page_range": "190-262",
+      "token_count": 50330,
+      "keywords": [
+        "canonical models",
+        "completeness theorems",
+        "Henkin construction",
+        "limitative results",
+        "step-by-step construction",
+        "rules for the undefinable",
+        "finitary methods",
+        "filtration",
+        "mosaic method"
+      ],
+      "summary": "Completeness proofs via canonical models and Henkin construction, limitative results, step-by-step methods, and finitary techniques."
+    },
+    {
+      "id": "blackburn_2001_ch05",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — Chapter 5: Algebras and General Frames",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 5: Algebras and General Frames (pages 263-333)",
+      "path": "blackburn_2001/ch05_algebras-general-frames.md",
+      "page_range": "263-333",
+      "token_count": 46170,
+      "keywords": [
+        "Boolean algebras with operators",
+        "modal algebras",
+        "general frames",
+        "descriptive frames",
+        "Stone duality",
+        "Jonsson-Tarski theorem",
+        "persistence",
+        "canonicity",
+        "Sahlqvist canonicity"
+      ],
+      "summary": "Algebraic semantics: BAOs, modal algebras, general frames, Stone duality, Jonsson-Tarski theorem, and Sahlqvist canonicity."
+    },
+    {
+      "id": "blackburn_2001_ch06",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — Chapter 6: Computability and Complexity",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 6: Computability and Complexity (pages 334-414)",
+      "path": "blackburn_2001/ch06_computability-complexity.md",
+      "page_range": "334-414",
+      "token_count": 54984,
+      "keywords": [
+        "decidability",
+        "complexity",
+        "PSPACE",
+        "EXPTIME",
+        "satisfiability problem",
+        "model checking",
+        "tiling problems",
+        "undecidability",
+        "tableau methods",
+        "automata"
+      ],
+      "summary": "Decidability, complexity results (PSPACE/EXPTIME), satisfiability algorithms, tiling reductions, and tableau/automata methods."
+    },
+    {
+      "id": "blackburn_2001_ch07",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — Chapter 7: Extended Modal Logic",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 7: Extended Modal Logic (pages 415-487)",
+      "path": "blackburn_2001/ch07_extended-modal-logic.md",
+      "page_range": "415-487",
+      "token_count": 49888,
+      "keywords": [
+        "temporal logic",
+        "tense logic",
+        "hybrid logic",
+        "nominals",
+        "global modality",
+        "propositional dynamic logic",
+        "PDL",
+        "description logic",
+        "graded modalities",
+        "fixed-point logic",
+        "mu-calculus"
+      ],
+      "summary": "Extended modal logics: temporal/tense logic, hybrid logic, PDL, description logic, graded modalities, and mu-calculus."
     }
   ]
 }

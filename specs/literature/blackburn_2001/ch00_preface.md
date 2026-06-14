@@ -1,4 +1,4 @@
-<!-- Source: Blackburn, de Rijke & Venema (2001). Modal Logic. Cambridge University Press. Front matter including Preface and Table of Contents. BibKey: Blackburn2001 -->
+<!-- Source: Blackburn, de Rijke & Venema (2001). Modal Logic. Cambridge University Press. Front matter including Preface and Table of Contents (pages viii-xix). BibKey: Blackburn2001 -->
 
 
 Modal Logic
@@ -10,13 +10,9 @@ Yde Venema
 yde@wins.uva.nl
 
 
----
-
 
 For Johan
 
-
----
 
 
 Contents
@@ -104,8 +100,6 @@ More about Sahlqvist Formulas
 168
 v
 
-
----
 
 
 vi
@@ -228,8 +222,6 @@ The Guarded Fragment
 448
 
 
----
-
 
 Contents
 vii
@@ -262,8 +254,6 @@ Index
 547
 
 
----
-
 
 Preface
 Ask three modal logicians what modal logic is, and you are likely to get at least
@@ -280,12 +270,12 @@ Slogan 1: Modal languages are simple yet expressive languages for talk-
 ing about relational structures.
 In this book we will be examining various propositional modal languages: that is,
 the familiar language of propositional logic augmented by a collection of modal
-operators. Like the familiar boolean connectives ( ,
-,
-,
-,
-, and
-), modal
+operators. Like the familiar boolean connectives (:,
+^,
+_,
+!,
+?, and
+>), modal
 operators do not bind variables. Thus, as far as syntax is concerned, we will be
 working with the simplest non-trivial languages imaginable.
 But in spite of their simplicity, propositional modal languages turn out to be an
@@ -300,8 +290,6 @@ that set. Given the broad nature of this deﬁnition, it is unsurprising that re
 structures are to be found just about everywhere. Virtually all familiar mathe-
 viii
 
-
----
 
 
 Preface
@@ -347,8 +335,6 @@ applications. For a start, the decidability of many important modal systems stem
 from the local step-by-step way that modal formulas are evaluated. Moreover, in
 
 
----
-
 
 x
 Preface
@@ -372,7 +358,8 @@ Slogan 3: Modal languages are not isolated formal systems.
 One of the key lessons to have emerged since about 1970 is that it is fruitful to
 systematically explore the way modal logic is related to other branches of math-
 ematical logic. In the pair
-MODAL LANGUAGES, RELATIONAL STRUCTURES ,
+hMODAL LANGUAGES, RELATIONAL STRUCTURES
+i,
 there are two obvious variations that should be considered: the relationships with
 other languages for describing relational structures, and the use of other kinds of
 structures for interpreting modal languages.
@@ -393,8 +380,6 @@ In the most important example of the second variation, modal logic is linked
 up with universal algebra via the apparatus of duality theory. In this framework,
 modal formulas are viewed as algebraic terms which have a natural algebraic se-
 
-
----
 
 
 Preface
@@ -439,8 +424,6 @@ detail the perspectives provided by correspondence theory and algebra.
 This much is predictable from our earlier discussion. However three additional
 
 
----
-
 
 xii
 Preface
@@ -448,8 +431,8 @@ desiderata have helped shape the book. First, we have attempted to emphasize the
 ﬂexibility of modal logic as a tool for working with relational structures. One still
 encounters with annoying frequency the view that modal logic amounts to rather
 simple-minded uses of two operators
-and
-. This view has been out of date at
+3 and
+. This view has been out of date at
 least since the late 1960s (say, since Hans Kamp’s expressive completeness result
 for since/until logic, to give a signiﬁcant, if arbitrary, example), and in view of such
 developments as propositional dynamic logic and arrow logic it is now hopelessly
@@ -487,8 +470,6 @@ lie outside the scope of this book.
 The omission of proof theory and automated reasoning techniques calls for a
 
 
----
-
 
 Preface
 xiii
@@ -514,14 +495,14 @@ ones exist, for example Boolos [66, 67], and Smory´nski [409]) is typically abo
 ten percent modal and ninety percent arithmetical. A second omission is a topic
 that is a traditional favorite of modal logicians: the ﬁne structure of the lattice of
 normal modal logics in the basic
-and
-language; we conﬁne ourselves in this
+3 and
+2 language; we conﬁne ourselves in this
 book to the relatively easy case of logics extending S4.3. The reader interested in
 learning more about this type of work should consult Bull and Segerberg [73] or
 Chagrov and Zakharyaschev [86]. Other omissions we regret include: a discussion
 of meta-logical properties such as interpolation, a detailed examination of local
 versus global consequence, and an introduction to the modal
--calculus and model
+-calculus and model
 checking. Restrictions of space and time made their inclusion impossible.
 Audience and prerequisites
 The book is aimed at people who use or study modal logic, and more generally,
@@ -535,8 +516,6 @@ To this end, there are two distinct tracks through this book: the basic track (t
 consists of selected sections from each chapter, and will be described shortly) and
 an advanced track (that is, the entire book).
 
-
----
 
 
 xiv
@@ -580,8 +559,6 @@ are fundamental to later developments — indeed the sections on bisimulations a
 the standard translation are among the most important in the entire book — and
 
 
----
-
 
 Preface
 xv
@@ -622,8 +599,6 @@ gebraic perspective, introduce the concept of persistence (a generalization of t
 idea of canonicity) and use it to prove the Sahlqvist Completeness Theorem, the
 completeness-theoretic twin of the correspondence result proved in Chapter 3.
 
-
----
 
 
 xvi
@@ -668,8 +643,6 @@ The book can be used as the basis for a number of different courses. Here are so
 suggestions.
 
 
----
-
 
 Preface
 xvii
@@ -710,8 +683,6 @@ ground knowledge and commitment, this is do-able in 2 semesters. Though we
 should confess right away that the course’s title is highly misleading: once you
 get to the end of the book, you will discover that far from having learned every-
 
-
----
 
 
 xviii
@@ -754,8 +725,6 @@ Jansana, Theo Janssen, Tim Klinger, Johan W. Kl¨uwer, Holger Schlingloff, Moshe
 Vardi, and Rineke Verbrugge. Special thanks are due to Maarten Marx who worked
 
 
----
-
 
 Preface
 xix
@@ -786,4 +755,3 @@ Maarten de Rijke
 Yde Venema
 
 
----

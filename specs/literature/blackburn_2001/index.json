@@ -5,56 +5,71 @@
   "year": 2001,
   "publisher": "Cambridge University Press",
   "series": "Cambridge Tracts in Theoretical Computer Science",
-  "note": "Source file covers pages 1-69 only (Chapters 1-2 partial). Chapters 3-7 not available in this markdown source.",
+  "note": "Complete textbook split into 7 chapters plus front matter. Covers basic modal logic, models, frames, completeness, algebras, computability, and extended modal logic.",
   "chapters": [
     {
       "id": "ch00",
       "file": "ch00_preface.md",
-      "title": "Preface and Table of Contents",
-      "pages": "viii-xiv",
-      "token_count": 6910,
-      "keywords": [
-        "modal logic overview",
-        "relational structures",
-        "Kripke semantics",
-        "correspondence theory",
-        "completeness theory",
-        "book structure"
-      ]
+      "title": "Front Matter (Preface and Table of Contents)",
+      "pages": "viii-xix",
+      "token_count": 7102,
+      "keywords": ["modal logic overview", "relational structures", "Kripke semantics", "correspondence theory", "completeness theory", "book structure"]
     },
     {
       "id": "ch01",
       "file": "ch01_basic-concepts.md",
-      "title": "Basic Concepts",
+      "title": "Chapter 1: Basic Concepts",
       "pages": "1-49",
-      "token_count": 14498,
-      "keywords": [
-        "relational structures",
-        "modal languages",
-        "Kripke frames",
-        "Kripke models",
-        "satisfaction",
-        "validity",
-        "general frames",
-        "normal modal logics",
-        "K axiom",
-        "bisimulation"
-      ]
+      "token_count": 32518,
+      "keywords": ["relational structures", "modal languages", "Kripke frames", "Kripke models", "satisfaction", "validity", "general frames", "normal modal logics", "K axiom", "bisimulation", "modal consequence relations"]
     },
     {
-      "id": "ch02_partial",
-      "file": "ch02_models-partial.md",
-      "title": "Models (partial, pages 50-69)",
-      "pages": "50-69",
-      "token_count": 12131,
-      "keywords": [
-        "invariance",
-        "bisimulations",
-        "tree unraveling",
-        "ultrafilter extensions",
-        "modal saturation",
-        "semantic equivalence"
-      ]
+      "id": "ch02",
+      "file": "ch02_models.md",
+      "title": "Chapter 2: Models",
+      "pages": "50-123",
+      "token_count": 51336,
+      "keywords": ["invariance", "bisimulations", "finite models", "standard translation", "ultrafilter extensions", "modal saturation", "characterization", "definability", "simulation", "safety"]
+    },
+    {
+      "id": "ch03",
+      "file": "ch03_frames.md",
+      "title": "Chapter 3: Frames",
+      "pages": "124-189",
+      "token_count": 43832,
+      "keywords": ["frame definability", "correspondence theory", "Sahlqvist formulas", "first-order definability", "frame constructions", "generated subframes", "disjoint unions", "bounded morphisms", "ultrafilter extensions"]
+    },
+    {
+      "id": "ch04",
+      "file": "ch04_completeness.md",
+      "title": "Chapter 4: Completeness",
+      "pages": "190-262",
+      "token_count": 50330,
+      "keywords": ["canonical models", "completeness theorems", "Henkin construction", "limitative results", "step-by-step construction", "rules for the undefinable", "finitary methods", "filtration", "mosaic method"]
+    },
+    {
+      "id": "ch05",
+      "file": "ch05_algebras-general-frames.md",
+      "title": "Chapter 5: Algebras and General Frames",
+      "pages": "263-333",
+      "token_count": 46170,
+      "keywords": ["Boolean algebras with operators", "modal algebras", "general frames", "descriptive frames", "Stone duality", "Jonsson-Tarski theorem", "persistence", "canonicity", "Sahlqvist canonicity"]
+    },
+    {
+      "id": "ch06",
+      "file": "ch06_computability-complexity.md",
+      "title": "Chapter 6: Computability and Complexity",
+      "pages": "334-414",
+      "token_count": 54984,
+      "keywords": ["decidability", "complexity", "PSPACE", "EXPTIME", "satisfiability problem", "model checking", "tiling problems", "undecidability", "tableau methods", "automata"]
+    },
+    {
+      "id": "ch07",
+      "file": "ch07_extended-modal-logic.md",
+      "title": "Chapter 7: Extended Modal Logic",
+      "pages": "415-487",
+      "token_count": 49888,
+      "keywords": ["temporal logic", "tense logic", "hybrid logic", "nominals", "global modality", "propositional dynamic logic", "PDL", "description logic", "graded modalities", "fixed-point logic", "mu-calculus"]
     }
   ]
 }

@@ -28,7 +28,7 @@ next_project_number: 191
 
 ### Propositional PRs
 
-190 [RESEARCHED] — review_propositional_pr_readiness
+190 [PLANNED] — review_propositional_pr_readiness
 
 ### Temporal Logic
 
@@ -45,11 +45,12 @@ next_project_number: 191
 ## Tasks
 
 ### 190. Review propositional pr readiness
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional PRs
 - **Dependencies**: None
 - **Research**: [190_review_propositional_pr_readiness/reports/01_team-research.md]
+- **Plan**: [190_review_propositional_pr_readiness/plans/01_pr-readiness-fixes.md]
 
 ---
 

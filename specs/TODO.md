@@ -11,7 +11,7 @@ next_project_number: 190
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,179,180,188,189 | -- | Bimodal Porting, Propositional Logic |
+| 1 | 36,37,179,180,188 | -- | Bimodal Porting, Propositional Logic |
 | 2 | 39,40,181 | 36,37,179,180 | Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -28,8 +28,7 @@ next_project_number: 190
 
 ### Propositional Logic
 
-188 [RESEARCHED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
-189 [PLANNED] — Reorganize the completeness file structure by eliminating the thr
+188 [PLANNING] — Design and prepare a first upstream PR (~300 LOC) contributing pr
 
 ### Temporal Logic
 
@@ -46,7 +45,7 @@ next_project_number: 190
 ## Tasks
 
 ### 189. Rename completeness to canonical model
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

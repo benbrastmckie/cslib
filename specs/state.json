@@ -4,7 +4,7 @@
     {
       "project_number": 189,
       "project_name": "rename_completeness_to_canonical_model",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Reorganize the completeness file structure by eliminating the three legacy weak completeness files entirely. Move the canonical model infrastructure (canonicalValuation, prop_truth_lemma, IntCanonicalWorld, int_truth_lemma, MinCanonicalWorld, min_truth_lemma) into the corresponding strong completeness files (StrongCompleteness.lean, IntStrongCompleteness.lean, MinStrongCompleteness.lean) so each logic has a single self-contained completeness file containing: canonical model construction, truth lemma, strong soundness, strong completeness, weak completeness corollary, and compactness corollary. Delete Completeness.lean, IntCompleteness.lean, and MinCompleteness.lean after merging. Update all imports across the project (including Modal/Temporal/Bimodal conservative extension files), update Cslib.lean barrel file, and ensure lake build passes.",
@@ -23,7 +23,8 @@
           "type": "plan",
           "summary": "2-phase merge plan: absorb content then delete files"
         }
-      ]
+      ],
+      "completion_summary": "Merged canonical model infrastructure into strong completeness files and deleted 3 legacy weak completeness files. Each logic now has a single self-contained file: StrongCompleteness.lean (~545 lines), IntStrongCompleteness.lean (~340 lines), MinStrongCompleteness.lean (~335 lines). Build passes at 2980 jobs (3 fewer modules). All CI green."
     },
     {
       "project_number": 186,

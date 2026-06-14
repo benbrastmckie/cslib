@@ -87,15 +87,13 @@ PR #587 by @thomaskwaring proposes model and semantics typeclasses and also modi
 
 ### Mathlib `Bot`/`HImp` Classes
 
-Mathlib defines `Bot` (`Mathlib.Order.Notation`) and `HImp` (`Mathlib.Order.Notation`) as
-pure notation classes with no order-theoretic requirements. We use a uniform `Has*` naming
-convention (`HasBot`, `HasImp`, `HasAnd`, `HasOr`) for the generic polymorphic layer, where
-these classes parameterize proof system infrastructure (`ProofSystem.lean`, `Consistency.lean`,
-`BigConj.lean`). A bridge instance `[HasBot F] : Bot F` in `Connectives.lean` provides
-Mathlib's `⊥` notation to any type with `HasBot`, so concrete formula code can use `⊥`
-directly. We kept `HasImp` rather than Mathlib's `HImp` because `HImp` uses the field name
-`himp` and notation `⇨`, which differ from CSLib's `imp`/`→` convention across all four
-formula types.
+Mathlib defines `Bot` and `HImp` (both in `Mathlib.Order.Notation`) as pure notation classes.
+We use a uniform `Has*` naming convention (`HasBot`, `HasImp`, `HasAnd`, `HasOr`) for the
+generic polymorphic layer, where these classes parameterize proof system infrastructure
+(`Axioms.lean`, `ProofSystem.lean`, `Consistency.lean`, `BigConj.lean`). Concrete formula
+types separately provide direct `Bot` instances for `⊥` notation. We kept `HasImp` rather
+than Mathlib's `HImp` because `HImp` uses the field name `himp` and notation `⇨`, which
+differ from CSLib's `imp`/`→` convention across all four formula types.
 
 ## Contribution Roadmap
 

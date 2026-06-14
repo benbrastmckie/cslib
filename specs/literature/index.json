@@ -928,189 +928,619 @@
     {
       "id": "blackburn_2001_ch00",
       "bib_key": "Blackburn2001",
-      "title": "Modal Logic — Preface and Table of Contents",
+      "title": "Modal Logic — Front Matter and Preface",
       "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
       "year": 2001,
-      "section": "Front matter including Preface and Table of Contents",
+      "section": "Front matter, Table of Contents, and Preface (pages viii-xx)",
       "path": "blackburn_2001/ch00_preface.md",
-      "page_range": "viii-xix",
-      "token_count": 7102,
+      "page_range": "viii-xx",
+      "token_count": 5801,
       "keywords": [
         "modal logic overview",
         "relational structures",
+        "book structure",
+        "reading guide",
         "Kripke semantics",
-        "correspondence theory",
-        "completeness theory",
-        "book structure"
+        "correspondence theory"
       ],
-      "summary": "Preface and TOC for Blackburn et al. Modal Logic (Cambridge 2001), covering book structure and reading paths."
+      "summary": "Front matter, TOC, and preface for Blackburn et al. Modal Logic."
     },
     {
-      "id": "blackburn_2001_ch01",
+      "id": "blackburn_2001_ch01a",
       "bib_key": "Blackburn2001",
-      "title": "Modal Logic — Chapter 1: Basic Concepts",
+      "title": "Modal Logic — §1.1-1.2 Relational Structures and Modal Languages",
       "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
       "year": 2001,
-      "section": "Chapter 1: Basic Concepts (pages 1-49)",
-      "path": "blackburn_2001/ch01_basic-concepts.md",
-      "page_range": "1-49",
-      "token_count": 32518,
+      "section": "Chapter 1: §1.1 Relational Structures, §1.2 Modal Languages",
+      "path": "blackburn_2001/ch01_relational-structures.md",
+      "page_range": "1-15",
+      "token_count": 6486,
       "keywords": [
         "relational structures",
         "modal languages",
+        "basic modal language",
         "Kripke frames",
+        "labeled transition systems",
+        "syntax"
+      ],
+      "summary": "Defines relational structures and modal languages including the basic modal language and its extensions."
+    },
+    {
+      "id": "blackburn_2001_ch01b",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §1.3 Models and Frames",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 1: §1.3 Models and Frames",
+      "path": "blackburn_2001/ch01_models-and-frames.md",
+      "page_range": "16-26",
+      "token_count": 5585,
+      "keywords": [
         "Kripke models",
         "satisfaction",
         "validity",
+        "frames",
+        "truth definition",
+        "modal equivalence"
+      ],
+      "summary": "Links modal languages to relational structures via Kripke models and frames."
+    },
+    {
+      "id": "blackburn_2001_ch01c",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §1.4-1.8 General Frames through Summary",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 1: §1.4-1.8 General Frames through Summary",
+      "path": "blackburn_2001/ch01_general-frames.md",
+      "page_range": "27-49",
+      "token_count": 11761,
+      "keywords": [
         "general frames",
+        "modal consequence",
         "normal modal logics",
         "K axiom",
-        "bisimulation",
-        "modal consequence relations"
+        "historical overview",
+        "admissible valuations"
       ],
-      "summary": "Introduces relational structures, modal languages, Kripke semantics, validity, general frames, and normal modal logics."
+      "summary": "General frames, modal consequence relations, normal modal logics, and historical overview."
     },
     {
-      "id": "blackburn_2001_ch02",
+      "id": "blackburn_2001_ch02a",
       "bib_key": "Blackburn2001",
-      "title": "Modal Logic — Chapter 2: Models",
+      "title": "Modal Logic — §2.1 Invariance Results",
       "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
       "year": 2001,
-      "section": "Chapter 2: Models (pages 50-123)",
-      "path": "blackburn_2001/ch02_models.md",
-      "page_range": "50-123",
-      "token_count": 51336,
+      "section": "Chapter 2: §2.1 Invariance Results",
+      "path": "blackburn_2001/ch02_invariance-results.md",
+      "page_range": "50-63",
+      "token_count": 6775,
       "keywords": [
         "invariance",
-        "bisimulations",
-        "finite models",
-        "standard translation",
-        "ultrafilter extensions",
-        "modal saturation",
-        "characterization",
-        "definability",
-        "simulation",
-        "safety"
-      ],
-      "summary": "Model-theoretic analysis: invariance results, bisimulations, finite model property, standard translation, and characterization theorems."
-    },
-    {
-      "id": "blackburn_2001_ch03",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — Chapter 3: Frames",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 3: Frames (pages 124-189)",
-      "path": "blackburn_2001/ch03_frames.md",
-      "page_range": "124-189",
-      "token_count": 43832,
-      "keywords": [
-        "frame definability",
-        "correspondence theory",
-        "Sahlqvist formulas",
-        "first-order definability",
-        "frame constructions",
-        "generated subframes",
+        "generated submodels",
         "disjoint unions",
         "bounded morphisms",
-        "ultrafilter extensions"
+        "ultraproducts"
       ],
-      "summary": "Frame definability, correspondence theory, Sahlqvist formulas, and frame constructions (generated subframes, bounded morphisms)."
+      "summary": "Invariance results for modal logic: generated submodels, disjoint unions, bounded morphisms."
     },
     {
-      "id": "blackburn_2001_ch04",
+      "id": "blackburn_2001_ch02b",
       "bib_key": "Blackburn2001",
-      "title": "Modal Logic — Chapter 4: Completeness",
+      "title": "Modal Logic — §2.2-2.3 Bisimulations and Finite Models",
       "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
       "year": 2001,
-      "section": "Chapter 4: Completeness (pages 190-262)",
-      "path": "blackburn_2001/ch04_completeness.md",
-      "page_range": "190-262",
-      "token_count": 50330,
+      "section": "Chapter 2: §2.2 Bisimulations, §2.3 Finite Models",
+      "path": "blackburn_2001/ch02_bisimulations.md",
+      "page_range": "64-82",
+      "token_count": 9516,
+      "keywords": [
+        "bisimulation",
+        "modal equivalence",
+        "finite model property",
+        "tree unraveling",
+        "filtration"
+      ],
+      "summary": "Bisimulations, modal equivalence, finite model property via filtration and tree unraveling."
+    },
+    {
+      "id": "blackburn_2001_ch02c",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §2.4-2.5 Standard Translation and Modal Saturation",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 2: §2.4-2.5 Standard Translation and Ultrafilter Extensions",
+      "path": "blackburn_2001/ch02_standard-translation.md",
+      "page_range": "83-99",
+      "token_count": 8907,
+      "keywords": [
+        "standard translation",
+        "first-order logic",
+        "ultrafilter extensions",
+        "modal saturation",
+        "compactness"
+      ],
+      "summary": "Standard translation to first-order logic and modal saturation via ultrafilter extensions."
+    },
+    {
+      "id": "blackburn_2001_ch02d",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §2.6 Characterization and Definability",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 2: §2.6 Characterization and Definability",
+      "path": "blackburn_2001/ch02_characterization.md",
+      "page_range": "100-109",
+      "token_count": 5180,
+      "keywords": [
+        "characterization theorem",
+        "definability",
+        "van Benthem theorem",
+        "bisimulation invariance"
+      ],
+      "summary": "Van Benthem characterization theorem: modal logic as the bisimulation-invariant fragment of first-order logic."
+    },
+    {
+      "id": "blackburn_2001_ch02e",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §2.7-2.8 Simulation, Safety, and Summary",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 2: §2.7-2.8 Simulation, Safety, and Summary",
+      "path": "blackburn_2001/ch02_simulation-safety.md",
+      "page_range": "110-123",
+      "token_count": 7141,
+      "keywords": [
+        "simulation",
+        "safety",
+        "monotone operators",
+        "chapter summary"
+      ],
+      "summary": "Simulation, safety properties, and summary of Chapter 2 on models."
+    },
+    {
+      "id": "blackburn_2001_ch03a",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §3.1-3.2 Frame Definability",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 3: §3.1-3.2 Frame Definability",
+      "path": "blackburn_2001/ch03_frame-definability.md",
+      "page_range": "124-138",
+      "token_count": 7230,
+      "keywords": [
+        "frame definability",
+        "second-order logic",
+        "correspondence theory",
+        "frame conditions"
+      ],
+      "summary": "Frame definability and its relationship to second-order logic."
+    },
+    {
+      "id": "blackburn_2001_ch03b",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §3.3-3.5 Definable Properties, Finite Frames, Correspondence",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 3: §3.3-3.5 Definable/Undefinable Properties, Finite Frames, Correspondence",
+      "path": "blackburn_2001/ch03_definable-properties.md",
+      "page_range": "139-156",
+      "token_count": 8764,
+      "keywords": [
+        "undefinable properties",
+        "finite frames",
+        "first-order correspondence",
+        "McKinsey axiom",
+        "Goldblatt-Thomason"
+      ],
+      "summary": "Definable and undefinable frame properties, finite frames, and automatic first-order correspondence."
+    },
+    {
+      "id": "blackburn_2001_ch03c",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §3.6 Sahlqvist Formulas",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 3: §3.6 Sahlqvist Formulas",
+      "path": "blackburn_2001/ch03_sahlqvist-formulas.md",
+      "page_range": "157-167",
+      "token_count": 5009,
+      "keywords": [
+        "Sahlqvist formulas",
+        "correspondence",
+        "canonicity",
+        "Sahlqvist theorem",
+        "first-order definability"
+      ],
+      "summary": "Sahlqvist formulas and the Sahlqvist correspondence/canonicity theorem."
+    },
+    {
+      "id": "blackburn_2001_ch03d",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §3.7 More about Sahlqvist Formulas",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 3: §3.7 More about Sahlqvist Formulas",
+      "path": "blackburn_2001/ch03_more-sahlqvist.md",
+      "page_range": "168-179",
+      "token_count": 5688,
+      "keywords": [
+        "Sahlqvist formulas",
+        "elementary classes",
+        "inductive formulas",
+        "complex Sahlqvist"
+      ],
+      "summary": "Extended Sahlqvist formula theory and inductive formulas."
+    },
+    {
+      "id": "blackburn_2001_ch03e",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §3.8-3.9 Advanced Frame Theory and Summary",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 3: §3.8-3.9 Advanced Frame Theory and Summary",
+      "path": "blackburn_2001/ch03_advanced-frame-theory.md",
+      "page_range": "180-189",
+      "token_count": 5027,
+      "keywords": [
+        "advanced frame theory",
+        "universal modality",
+        "chapter summary"
+      ],
+      "summary": "Advanced frame theory and summary of Chapter 3 on frames."
+    },
+    {
+      "id": "blackburn_2001_ch04a",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §4.1-4.2 Preliminaries and Canonical Models",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 4: §4.1-4.2 Preliminaries and Canonical Models",
+      "path": "blackburn_2001/ch04_preliminaries-canonical.md",
+      "page_range": "190-202",
+      "token_count": 5876,
       "keywords": [
         "canonical models",
-        "completeness theorems",
-        "Henkin construction",
-        "limitative results",
+        "maximal consistent sets",
+        "Lindenbaum lemma",
+        "completeness preliminaries"
+      ],
+      "summary": "Completeness preliminaries: maximal consistent sets, Lindenbaum lemma, and canonical model construction."
+    },
+    {
+      "id": "blackburn_2001_ch04b",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §4.3-4.4 Applications and Limitative Results",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 4: §4.3-4.4 Applications and Limitative Results",
+      "path": "blackburn_2001/ch04_applications.md",
+      "page_range": "203-218",
+      "token_count": 8319,
+      "keywords": [
+        "completeness applications",
+        "S4",
+        "S5",
+        "Kripke incompleteness",
+        "limitative results"
+      ],
+      "summary": "Canonical model completeness for S4, S5, and limitative results on Kripke incompleteness."
+    },
+    {
+      "id": "blackburn_2001_ch04c",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §4.5-4.6 Transforming Canonical Model and Step-by-step",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 4: §4.5-4.6 Transforming Canonical Model and Step-by-step",
+      "path": "blackburn_2001/ch04_transforming-canonical.md",
+      "page_range": "219-230",
+      "token_count": 6374,
+      "keywords": [
+        "canonical model transformation",
         "step-by-step construction",
-        "rules for the undefinable",
+        "filtration completeness",
+        "bulldozing"
+      ],
+      "summary": "Techniques for transforming canonical models and step-by-step constructions."
+    },
+    {
+      "id": "blackburn_2001_ch04d",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §4.7-4.8 Rules for the Undefinable and Finitary Methods I",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 4: §4.7-4.8 Rules and Finitary Methods I",
+      "path": "blackburn_2001/ch04_rules-finitary-i.md",
+      "page_range": "231-247",
+      "token_count": 8893,
+      "keywords": [
+        "derivation rules",
+        "undefinable frames",
         "finitary methods",
-        "filtration",
-        "mosaic method"
+        "tableaux",
+        "labeled deduction"
       ],
-      "summary": "Completeness proofs via canonical models and Henkin construction, limitative results, step-by-step methods, and finitary techniques."
+      "summary": "Rules for undefinable frame properties and finitary proof methods including tableaux."
     },
     {
-      "id": "blackburn_2001_ch05",
+      "id": "blackburn_2001_ch04e",
       "bib_key": "Blackburn2001",
-      "title": "Modal Logic — Chapter 5: Algebras and General Frames",
+      "title": "Modal Logic — §4.9-4.10 Finitary Methods II and Summary",
       "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
       "year": 2001,
-      "section": "Chapter 5: Algebras and General Frames (pages 263-333)",
-      "path": "blackburn_2001/ch05_algebras-general-frames.md",
-      "page_range": "263-333",
-      "token_count": 46170,
+      "section": "Chapter 4: §4.9-4.10 Finitary Methods II and Summary",
+      "path": "blackburn_2001/ch04_finitary-ii-summary.md",
+      "page_range": "248-258",
+      "token_count": 7942,
       "keywords": [
-        "Boolean algebras with operators",
+        "resolution",
+        "translation methods",
+        "proof methods",
+        "completeness summary"
+      ],
+      "summary": "Resolution, translation methods, and summary of Chapter 4 on completeness."
+    },
+    {
+      "id": "blackburn_2001_ch05a",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §5.1-5.2 Logic as Algebra",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 5: §5.1-5.2 Logic as Algebra and Algebraizing Modal Logic",
+      "path": "blackburn_2001/ch05_logic-as-algebra.md",
+      "page_range": "263-284",
+      "token_count": 9471,
+      "keywords": [
+        "Boolean algebras",
         "modal algebras",
-        "general frames",
-        "descriptive frames",
-        "Stone duality",
-        "Jonsson-Tarski theorem",
-        "persistence",
-        "canonicity",
-        "Sahlqvist canonicity"
+        "algebraic semantics",
+        "BAOs",
+        "algebraization"
       ],
-      "summary": "Algebraic semantics: BAOs, modal algebras, general frames, Stone duality, Jonsson-Tarski theorem, and Sahlqvist canonicity."
+      "summary": "Algebraic approach to modal logic: Boolean algebras with operators and algebraization."
     },
     {
-      "id": "blackburn_2001_ch06",
+      "id": "blackburn_2001_ch05b",
       "bib_key": "Blackburn2001",
-      "title": "Modal Logic — Chapter 6: Computability and Complexity",
+      "title": "Modal Logic — §5.3 Jonsson-Tarski Theorem",
       "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
       "year": 2001,
-      "section": "Chapter 6: Computability and Complexity (pages 334-414)",
-      "path": "blackburn_2001/ch06_computability-complexity.md",
-      "page_range": "334-414",
-      "token_count": 54984,
+      "section": "Chapter 5: §5.3 The Jonsson-Tarski Theorem",
+      "path": "blackburn_2001/ch05_jonsson-tarski.md",
+      "page_range": "285-295",
+      "token_count": 5577,
       "keywords": [
+        "Jonsson-Tarski theorem",
+        "atom structures",
+        "complex algebras",
+        "representation"
+      ],
+      "summary": "The Jonsson-Tarski representation theorem connecting modal algebras and relational structures."
+    },
+    {
+      "id": "blackburn_2001_ch05c",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §5.4 Duality Theory",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 5: §5.4 Duality Theory",
+      "path": "blackburn_2001/ch05_duality-theory.md",
+      "page_range": "296-304",
+      "token_count": 4331,
+      "keywords": [
+        "Stone duality",
+        "descriptive frames",
+        "ultrafilter frames",
+        "topological duality"
+      ],
+      "summary": "Stone duality between modal algebras and descriptive frames."
+    },
+    {
+      "id": "blackburn_2001_ch05d",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §5.5 General Frames",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 5: §5.5 General Frames",
+      "path": "blackburn_2001/ch05_general-frames.md",
+      "page_range": "305-318",
+      "token_count": 6801,
+      "keywords": [
+        "general frames",
+        "refined frames",
+        "compact frames",
+        "descriptive frames",
+        "frame morphisms"
+      ],
+      "summary": "General frame theory: refined, compact, and descriptive frames with morphisms."
+    },
+    {
+      "id": "blackburn_2001_ch05e",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §5.6-5.7 Persistence and Summary",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 5: §5.6-5.7 Persistence and Summary",
+      "path": "blackburn_2001/ch05_persistence-summary.md",
+      "page_range": "319-333",
+      "token_count": 7372,
+      "keywords": [
+        "d-persistence",
+        "canonicity",
+        "Sahlqvist persistence",
+        "algebras summary"
+      ],
+      "summary": "Persistence, Sahlqvist canonicity, and summary of Chapter 5 on algebras and general frames."
+    },
+    {
+      "id": "blackburn_2001_ch06a",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §6.1-6.3 Satisfiability and Decidability",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 6: §6.1-6.3 Satisfiability and Decidability",
+      "path": "blackburn_2001/ch06_satisfiability-decidability.md",
+      "page_range": "334-357",
+      "token_count": 11718,
+      "keywords": [
+        "satisfiability",
         "decidability",
-        "complexity",
-        "PSPACE",
-        "EXPTIME",
-        "satisfiability problem",
-        "model checking",
+        "finite models",
+        "interpretations",
+        "computational complexity"
+      ],
+      "summary": "Computing satisfiability and decidability via finite models and interpretations."
+    },
+    {
+      "id": "blackburn_2001_ch06b",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §6.4-6.5 Quasi-models, Mosaics, and Tiling",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 6: §6.4-6.5 Quasi-models and Tiling",
+      "path": "blackburn_2001/ch06_quasi-models-tiling.md",
+      "page_range": "358-374",
+      "token_count": 8498,
+      "keywords": [
+        "quasi-models",
+        "mosaics",
         "tiling problems",
         "undecidability",
-        "tableau methods",
-        "automata"
+        "domino problems"
       ],
-      "summary": "Decidability, complexity results (PSPACE/EXPTIME), satisfiability algorithms, tiling reductions, and tableau/automata methods."
+      "summary": "Decidability via quasi-models and mosaics, undecidability via tiling reductions."
     },
     {
-      "id": "blackburn_2001_ch07",
+      "id": "blackburn_2001_ch06c",
       "bib_key": "Blackburn2001",
-      "title": "Modal Logic — Chapter 7: Extended Modal Logic",
+      "title": "Modal Logic — §6.6-6.7 NP and PSPACE",
       "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
       "year": 2001,
-      "section": "Chapter 7: Extended Modal Logic (pages 415-487)",
-      "path": "blackburn_2001/ch07_extended-modal-logic.md",
-      "page_range": "415-487",
-      "token_count": 49888,
+      "section": "Chapter 6: §6.6-6.7 NP and PSPACE",
+      "path": "blackburn_2001/ch06_np-pspace.md",
+      "page_range": "375-394",
+      "token_count": 10261,
+      "keywords": [
+        "NP-completeness",
+        "PSPACE",
+        "satisfiability complexity",
+        "K satisfiability",
+        "S4 complexity"
+      ],
+      "summary": "NP-completeness and PSPACE results for modal satisfiability."
+    },
+    {
+      "id": "blackburn_2001_ch06d",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §6.8-6.9 EXPTIME and Summary",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 6: §6.8-6.9 EXPTIME and Summary",
+      "path": "blackburn_2001/ch06_exptime-summary.md",
+      "page_range": "395-414",
+      "token_count": 10264,
+      "keywords": [
+        "EXPTIME",
+        "PDL complexity",
+        "alternating automata",
+        "complexity summary"
+      ],
+      "summary": "EXPTIME results for PDL and summary of Chapter 6 on computability and complexity."
+    },
+    {
+      "id": "blackburn_2001_ch07a",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §7.1 Logical Modalities",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 7: §7.1 Logical Modalities",
+      "path": "blackburn_2001/ch07_logical-modalities.md",
+      "page_range": "415-427",
+      "token_count": 6476,
+      "keywords": [
+        "global modality",
+        "difference modality",
+        "universal modality",
+        "extended languages"
+      ],
+      "summary": "Logical modalities: global and difference modalities as extensions of the basic modal language."
+    },
+    {
+      "id": "blackburn_2001_ch07b",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §7.2-7.3 Since/Until and Hybrid Logic",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 7: §7.2-7.3 Since and Until, Hybrid Logic",
+      "path": "blackburn_2001/ch07_since-until-hybrid.md",
+      "page_range": "428-447",
+      "token_count": 9428,
       "keywords": [
         "temporal logic",
-        "tense logic",
+        "Since",
+        "Until",
         "hybrid logic",
         "nominals",
-        "global modality",
-        "propositional dynamic logic",
-        "PDL",
-        "description logic",
-        "graded modalities",
-        "fixed-point logic",
-        "mu-calculus"
+        "satisfaction operator"
       ],
-      "summary": "Extended modal logics: temporal/tense logic, hybrid logic, PDL, description logic, graded modalities, and mu-calculus."
+      "summary": "Temporal logic with Since and Until operators, and hybrid logic with nominals."
+    },
+    {
+      "id": "blackburn_2001_ch07c",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §7.4 The Guarded Fragment",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 7: §7.4 The Guarded Fragment",
+      "path": "blackburn_2001/ch07_guarded-fragment.md",
+      "page_range": "448-459",
+      "token_count": 7262,
+      "keywords": [
+        "guarded fragment",
+        "decidability",
+        "loose fragment",
+        "packed fragment",
+        "first-order fragments"
+      ],
+      "summary": "The guarded fragment of first-order logic and its relationship to modal logic."
+    },
+    {
+      "id": "blackburn_2001_ch07d",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §7.5 Multi-Dimensional Modal Logic",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 7: §7.5 Multi-Dimensional Modal Logic",
+      "path": "blackburn_2001/ch07_multi-dimensional.md",
+      "page_range": "460-471",
+      "token_count": 5871,
+      "keywords": [
+        "multi-dimensional",
+        "products of modal logics",
+        "cylindric modal logic",
+        "arrow logic"
+      ],
+      "summary": "Multi-dimensional modal logics: products, cylindric modal logic, and arrow logic."
+    },
+    {
+      "id": "blackburn_2001_ch07e",
+      "bib_key": "Blackburn2001",
+      "title": "Modal Logic — §7.6-7.7 Lindstrom Theorem and Summary",
+      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+      "year": 2001,
+      "section": "Chapter 7: §7.6-7.7 Lindstrom Theorem, Summary, and Notes",
+      "path": "blackburn_2001/ch07_lindstrom-summary.md",
+      "page_range": "472-487",
+      "token_count": 7410,
+      "keywords": [
+        "Lindstrom theorem",
+        "modal characterization",
+        "compactness",
+        "Lowenheim-Skolem",
+        "extended modal logic summary"
+      ],
+      "summary": "Lindstrom theorem for modal logic and summary of Chapter 7 on extended modal logics."
     }
   ]
 }

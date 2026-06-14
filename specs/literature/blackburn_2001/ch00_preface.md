@@ -1,4 +1,7 @@
-<!-- Source: Blackburn, de Rijke & Venema (2001). Modal Logic. Cambridge University Press. Front matter including Preface and Table of Contents (pages viii-xix). BibKey: Blackburn2001 -->
+<!-- Source: Blackburn, de Rijke & Venema (2001). Modal Logic. Cambridge University Press. Front matter, Table of Contents, and Preface (pages viii-xx). BibKey: Blackburn2001 -->
+
+
+
 
 
 Modal Logic
@@ -11,93 +14,69 @@ yde@wins.uva.nl
 
 
 
+
+
+
 For Johan
+
+
+
 
 
 
 Contents
 Preface
 page viii
-1
 Basic Concepts
-1
 1.1
 Relational Structures
-2
 1.2
 Modal Languages
-9
 1.3
 Models and Frames
-16
 1.4
 General Frames
-27
 1.5
 Modal Consequence Relations
-31
 1.6
 Normal Modal Logics
-33
 1.7
 Historical Overview
-38
 1.8
 Summary of Chapter 1
-48
-2
 Models
-50
 2.1
 Invariance Results
-51
 2.2
 Bisimulations
-64
 2.3
 Finite Models
-73
 2.4
 The Standard Translation
-83
 2.5
 Modal Saturation via Ultraﬁlter Extensions
-91
 2.6
 Characterization and Deﬁnability
-100
 2.7
 Simulation and Safety
-110
 2.8
 Summary of Chapter 2
-118
 Notes
-119
-3
 Frames
-124
 3.1
 Frame Deﬁnability
-125
 3.2
 Frame Deﬁnability and Second-Order Logic
-131
 3.3
 Deﬁnable and Undeﬁnable Properties
-139
 3.4
 Finite Frames
-144
 3.5
 Automatic First-Order Correspondence
-150
 3.6
 Sahlqvist Formulas
-157
 3.7
 More about Sahlqvist Formulas
-168
 v
 
 
@@ -106,120 +85,76 @@ vi
 0 Contents
 3.8
 Advanced Frame Theory
-180
 3.9
 Summary of Chapter 3
-185
 Notes
-186
-4
 Completeness
-190
 4.1
 Preliminaries
-191
 4.2
 Canonical Models
-198
 4.3
 Applications
-203
 4.4
 Limitative Results
-213
 4.5
 Transforming the Canonical Model
-219
 4.6
 Step-by-step
-225
 4.7
 Rules for the Undeﬁnable
-231
 4.8
 Finitary Methods I
-241
 4.9
 Finitary Methods II
-248
 4.10
 Summary of Chapter 4
-258
 Notes
-259
-5
 Algebras and General Frames
-263
 5.1
 Logic as Algebra
-264
 5.2
 Algebraizing Modal Logic
-276
 5.3
 The J´onsson-Tarski Theorem
-285
 5.4
 Duality Theory
-296
 5.5
 General Frames
-305
 5.6
 Persistence
-319
 5.7
 Summary of Chapter 5
-327
 Notes
-329
-6
 Computability and Complexity
-334
 6.1
 Computing Satisﬁability
-335
 6.2
 Decidability via Finite Models
-340
 6.3
 Decidability via Interpretations
-349
 6.4
 Decidability via Quasi-models and Mosaics
-358
 6.5
 Undecidability via Tiling
-366
 6.6
 NP
-375
 6.7
 PSPACE
-383
 6.8
 EXPTIME
-395
 6.9
 Summary of Chapter 6
-407
 Notes
-408
-7
 Extended Modal Logic
-415
 7.1
 Logical Modalities
-416
 7.2
 Since and Until
-428
 7.3
 Hybrid Logic
-436
 7.4
 The Guarded Fragment
-448
 
 
 
@@ -227,31 +162,21 @@ Contents
 vii
 7.5
 Multi-Dimensional Modal Logic
-460
 7.6
 A Lindstr¨om Theorem for Modal Logic
-472
 7.7
 Summary of Chapter 7
-478
 Notes
-479
 Appendix A
 A Logical Toolkit
-488
 Appendix B
 An Algebraic Toolkit
-500
 Appendix C
 A Computational Toolkit
-507
 Appendix D
 A Guide to the Literature
-519
 Bibliography
-527
 Index
-547
 
 
 
@@ -689,7 +614,6 @@ xviii
 Preface
 thing about modal logic, you have merely arrived at the beginning of an unending
 journey . . .
-1
 2.1–2.5
 2.6
 2.7
@@ -755,3 +679,60 @@ Maarten de Rijke
 Yde Venema
 
 
+
+Basic Concepts
+Languages of propositional modal logic are propositional languages to which sen-
+tential operators (usually called modalities or modal operators) have been added.
+In spite of their syntactic simplicity, such languages turn out to be useful tools for
+describing and reasoning about relational structures. A relational structure is a
+non-empty set on which a number of relations have been deﬁned; they are wide-
+spread in mathematics, computer science, artiﬁcial intelligence and linguistics, and
+are also used to interpret ﬁrst-order languages.
+Now, when working with relational structures we are often interested in struc-
+tures possessing certain properties. Perhaps a certain transitive binary relation is
+particularly important. Or perhaps we are interested in applications where ‘dead
+ends,’ ‘loops,’ and ‘forkings’ are crucial, or where each relation is a partial func-
+tion. Wherever our interests lie, modal languages can be useful, for modal oper-
+ators are essentially a simple way of accessing the information contained in rela-
+tional structures. As we will see, the local and internal access method that modali-
+ties offer is strong enough to describe, constrain, and reason about many interesting
+and important aspects of relational structures.
+Much of this book is essentially an exploration and elaboration of these remarks.
+The present chapter introduces the concepts and terminology we will need, and the
+concluding section places them in historical context.
+Chapter guide
+Section 1.1: Relational Structures. Relational structures are deﬁned, and a num-
+ber of examples are given.
+Section 1.2: Modal Languages. We are going to talk about relational structures
+using a number of different modal languages. This section deﬁnes the
+basic modal language and some of its extensions.
+Section 1.3: Models and Frames. Here we link modal languages and relational
+structures. In fact, we introduce two levels at which modal languages can
+
+
+
+1 Basic Concepts
+be used to talk about structures: the level of models (which we explore
+in Chapter 2) and the level of frames (which is examined in Chapter 3).
+This section contains the fundamental satisfaction deﬁnition, and deﬁnes
+the key logical notion of validity.
+Section 1.4: General Frames. In this section we link modal languages and rela-
+tional structures in yet another way: via general frames. Roughly speak-
+ing, general frames provide a third level at which modal languages can be
+used to talk about relational structures, a level intermediate between those
+provided by models and frames. We will make heavy use of general frames
+in Chapter 5.
+Section 1.5: Modal Consequence Relations. Which conclusions do we wish to
+draw from a given a set of modal premises? That is, which consequence
+relations are appropriate for modal languages? We opt for a local conse-
+quence relation, though we note that there is a global alternative.
+Section 1.6: Normal Modal Logics. Both validity and local consequence are de-
+ﬁned semantically (that is, in terms of relational structures). However, we
+want to be able to generate validities and draw conclusions syntactically.
+We take our ﬁrst steps in modal proof theory and introduce Hilbert-style
+axiom systems for modal reasoning. This motivates a concept of central
+importance in Chapters 4 and 5: normal modal logics.
+Section 1.7: Historical Overview. The ideas introduced in this chapter have a long
+and interesting history. Some knowledge of this will make it easier to
+understand developments in subsequent chapters, so we conclude with a
+historical overview that highlights a number of key themes.

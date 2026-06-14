@@ -1,0 +1,16 @@
+{
+  "status": "planned",
+  "summary": "Created 5-phase plan: (1) fix index.json and README.md metadata, (2) remove 7 redundant monolithic files (~1.25M tokens), (3) create literature-retrieve.sh script following memory-retrieve.sh architecture, (4) verify monolithic removal completeness, (5) end-to-end --lit integration testing. Phases 1-2 are parallel (Wave 1); Phase 3 depends on 1; Phase 4 depends on 2; Phase 5 depends on 3+4.",
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "implement",
+  "phases_completed": 0,
+  "phases_total": 5,
+  "artifacts": [
+    {
+      "path": "specs/200_fix_literature_directory_quality/plans/01_literature-quality-fix.md",
+      "type": "plan",
+      "summary": "Implementation plan for literature directory fixes"
+    }
+  ]
+}

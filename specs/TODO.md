@@ -30,11 +30,11 @@ next_project_number: 201
 
 ### Modal Logic
 
-197 [RESEARCHED] — Review the ambition to contribute Modal/ to upstream, identifying
+197 [PLANNING] — Review the ambition to contribute Modal/ to upstream, identifying
 
 ### Project Management
 
-200 [PLANNED] — Fix literature directory quality: complete incomplete book splits
+200 [IMPLEMENTING] — Fix literature directory quality: complete incomplete book splits
 
 ### Propositional Logic
 
@@ -55,7 +55,7 @@ next_project_number: 201
 ## Tasks
 
 ### 200. Fix literature directory quality
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: general
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -85,7 +85,7 @@ next_project_number: 201
 ---
 
 ### 197. Scope initial Modal/ upstream PR (~300 LOC)
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: pr
 - **Topic**: Modal Logic
 - **Dependencies**: None

@@ -98,20 +98,20 @@ Phases within the same wave can execute in parallel. Phase 3 is already [COMPLET
 
 ---
 
-### Phase 2: Remove redundant monolithic files [NOT STARTED]
+### Phase 2: Remove redundant monolithic files [COMPLETED]
 
 **Goal**: Delete 7 verified-redundant monolithic .md files to eliminate ~1.25M tokens of duplicate content.
 
 **Tasks**:
-- [ ] Final verification: for each book with splits (chagrov_1997, church_1956, mendelson_2016, hughes_1996, gentzen_1935, zakharyaschev_2001, blackburn_2001), confirm the split directory exists and contains the expected number of files
-- [ ] Remove `specs/literature/chagrov_1997.md` (329k tokens, 6 split files cover content)
-- [ ] Remove `specs/literature/church_1956.md` (268k tokens, 7 split files cover content)
-- [ ] Remove `specs/literature/mendelson_2016.md` (292k tokens, 6 split files cover content)
-- [ ] Remove `specs/literature/hughes_1996.md` (208k tokens, 4 split files cover content)
-- [ ] Remove `specs/literature/zakharyaschev_2001.md` (110k tokens, 4 split files cover content)
-- [ ] Remove `specs/literature/blackburn_2001.md` (34k tokens, 3 split files cover same pages 1-69)
-- [ ] Remove `specs/literature/gentzen_1935.md` (28k tokens, 5 split files cover content)
-- [ ] Verify no index.json entries reference the removed files (they should not -- monolithic files were not indexed)
+- [x] Final verification: for each book with splits (chagrov_1997, church_1956, mendelson_2016, hughes_1996, gentzen_1935, zakharyaschev_2001, blackburn_2001), confirm the split directory exists and contains the expected number of files *(completed)*
+- [x] Remove `specs/literature/chagrov_1997.md` (329k tokens, 6 split files cover content) *(completed)*
+- [x] Remove `specs/literature/church_1956.md` (268k tokens, 7 split files cover content) *(completed)*
+- [x] Remove `specs/literature/mendelson_2016.md` (292k tokens, 6 split files cover content) *(completed)*
+- [x] Remove `specs/literature/hughes_1996.md` (208k tokens, 4 split files cover content) *(completed)*
+- [x] Remove `specs/literature/zakharyaschev_2001.md` (110k tokens, 4 split files cover content) *(completed)*
+- [x] Remove `specs/literature/blackburn_2001.md` (34k tokens, 3 split files cover same pages 1-69) *(completed)*
+- [x] Remove `specs/literature/gentzen_1935.md` (28k tokens, 5 split files cover content) *(completed)*
+- [x] Verify no index.json entries reference the removed files (they should not -- monolithic files were not indexed) *(completed)*
 
 **Timing**: 20 minutes
 

@@ -57,7 +57,7 @@ next_project_number: 194
 ---
 
 ### 192. Research verify literature refs pr 188
-- **Status**: [PLANNING]
+- **Status**: [PLANNED]
 - **Task Type**: general
 - **Topic**: Propositional PRs
 - **Dependencies**: None

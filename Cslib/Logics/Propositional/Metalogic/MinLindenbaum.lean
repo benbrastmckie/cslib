@@ -370,12 +370,12 @@ theorem min_prime_exclusion {S : Set (PL.Proposition Atom)}
 /-! ## Consistency of MinPropAxiom -/
 
 /-- Lift a MinPropAxiom derivation tree to a PropositionalAxiom (classical)
-derivation tree via `MinPropAxiom.toIntProp.toProp`. -/
+derivation tree via `MinPropAxiom.toIntPropAxiom.toPropAxiom`. -/
 noncomputable def liftMinToCl {Γ : List (PL.Proposition Atom)} {φ : PL.Proposition Atom}
     (d : DerivationTree MinPropAxiom Γ φ) :
     DerivationTree PropositionalAxiom Γ φ := by
   match d with
-  | .ax Γ ψ h_ax => exact .ax Γ ψ h_ax.toIntProp.toProp
+  | .ax Γ ψ h_ax => exact .ax Γ ψ h_ax.toIntPropAxiom.toPropAxiom
   | .assumption Γ ψ h_mem => exact .assumption Γ ψ h_mem
   | .modus_ponens Γ ψ χ d₁ d₂ =>
     exact .modus_ponens Γ ψ χ (liftMinToCl d₁) (liftMinToCl d₂)

@@ -443,7 +443,7 @@ private noncomputable def lift_int_to_cl {Γ : List (PL.Proposition Atom)} {φ :
     (d : DerivationTree IntPropAxiom Γ φ) :
     DerivationTree PropositionalAxiom Γ φ := by
   match d with
-  | .ax Γ ψ h_ax => exact .ax Γ ψ h_ax.toProp
+  | .ax Γ ψ h_ax => exact .ax Γ ψ h_ax.toPropAxiom
   | .assumption Γ ψ h_mem => exact .assumption Γ ψ h_mem
   | .modus_ponens Γ ψ χ d₁ d₂ =>
     exact .modus_ponens Γ ψ χ (lift_int_to_cl d₁) (lift_int_to_cl d₂)

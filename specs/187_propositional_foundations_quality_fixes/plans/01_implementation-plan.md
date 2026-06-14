@@ -62,7 +62,7 @@ No ROADMAP.md found.
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Docstring and Naming Fixes [NOT STARTED]
+### Phase 1: Docstring and Naming Fixes [COMPLETED]
 
 **Goal**: Fix the References docstring gap, rename misleading `lem` theorem and subsumption helpers, update all downstream references.
 

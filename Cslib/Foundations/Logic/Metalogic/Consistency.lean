@@ -28,6 +28,11 @@ parameterized over an abstract derivation relation. The key components are:
 Downstream modal (task 30) and temporal (task 31) metalogic tasks instantiate
 `DerivationSystem` from their concrete `DerivationTree` types and supply deduction
 theorem proofs.
+
+## References
+
+* [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Section 5.1
+  (Lindenbaum's lemma via Zorn's lemma)
 -/
 
 @[expose] public section

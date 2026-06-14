@@ -152,7 +152,7 @@ inductive MinPropAxiom : PL.Proposition Atom → Prop where
 /-! ## Axiom Subsumption -/
 
 /-- Every minimal propositional axiom is an intuitionistic propositional axiom. -/
-theorem MinPropAxiom.toIntProp {φ : PL.Proposition Atom}
+theorem MinPropAxiom.toIntPropAxiom {φ : PL.Proposition Atom}
     (h : MinPropAxiom φ) : IntPropAxiom φ := by
   cases h with
   | implyK a b => exact .implyK a b
@@ -165,7 +165,7 @@ theorem MinPropAxiom.toIntProp {φ : PL.Proposition Atom}
   | orE a b c => exact .orE a b c
 
 /-- Every intuitionistic propositional axiom is a classical propositional axiom. -/
-theorem IntPropAxiom.toProp {φ : PL.Proposition Atom}
+theorem IntPropAxiom.toPropAxiom {φ : PL.Proposition Atom}
     (h : IntPropAxiom φ) : PropositionalAxiom φ := by
   cases h with
   | implyK a b => exact .implyK a b

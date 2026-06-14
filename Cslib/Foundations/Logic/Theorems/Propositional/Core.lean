@@ -15,7 +15,7 @@ Core propositional theorems for the Hilbert-style proof system, stratified
 by logical strength:
 
 ### Minimal (`[MinimalHilbert S]`)
-- `lem`: Law of Excluded Middle (identity on ¬φ)
+- `neg_identity`: Identity on negation (`¬φ → ¬φ`); LEM under Lukasiewicz encoding
 
 ### Intuitionistic (`[IntuitionisticHilbert S]`)
 - `efq_axiom`: EFQ wrapper (⊥ → φ)
@@ -58,9 +58,10 @@ variable {F : Type*} [HasBot F] [HasImp F]
 variable {S : Type*} [InferenceSystem S F]
 variable [MinimalHilbert S (F := F)]
 
-/-- Law of Excluded Middle: `⊢ φ ∨ ¬φ`
-    where `φ ∨ ¬φ = (φ → ⊥) → (φ → ⊥)`. -/
-theorem lem {φ : F} :
+/-- Negation identity: `⊢ ¬φ → ¬φ`, where `¬φ = φ → ⊥`.
+    Under the Lukasiewicz encoding `φ ∨ ¬φ = (φ → ⊥) → (φ → ⊥)`, this is LEM.
+    Provable in minimal logic as the identity combinator on `¬φ`. -/
+theorem neg_identity {φ : F} :
     InferenceSystem.DerivableIn S
       (HasImp.imp (HasImp.imp φ HasBot.bot)
         (HasImp.imp φ HasBot.bot)) :=

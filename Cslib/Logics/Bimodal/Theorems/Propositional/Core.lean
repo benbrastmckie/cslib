@@ -42,7 +42,7 @@ variable {Atom : Type*}
 noncomputable section
 
 def lem (A : Formula Atom) : DerivationTree FrameClass.Base [] (A.or A.neg) :=
-  unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.lem
+  unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.neg_identity
     _ _ _ Bimodal.HilbertTM _ _ (φ := A))
 
 def efqAxiom {fc : FrameClass} (φ : Formula Atom) :

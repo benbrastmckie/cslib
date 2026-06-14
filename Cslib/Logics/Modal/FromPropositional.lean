@@ -18,7 +18,19 @@ constructor, establishing Propositional as a sub-logic of Modal.
 
 ## Main Definitions
 
-- `PL.Proposition.toModal`: Propositional → Modal (maps atom/bot/imp)
+- `PL.Proposition.toModal`: Propositional → Modal (maps atom/bot/imp/and/or)
+
+## Encoding Rationale
+
+`PL.Proposition` has five primitive constructors `{atom, bot, imp, and, or}`, while
+`Modal.Proposition` has only `{atom, bot, imp, box}`. The `and`/`or` cases must therefore
+be encoded using a formula built from the available modal connectives. The Lukasiewicz
+encodings `and φ ψ := ¬(φ → ¬ψ)` and `or φ ψ := ¬φ → ψ` are classically sound and
+are used here because this embedding targets classical modal logic.
+
+Note: This differs from the propositional level, where `and`/`or` are native constructors
+with `HasAnd`/`HasOr` instances. The embedding necessarily uses Lukasiewicz because
+`Modal.Proposition` lacks native `and`/`or` constructors.
 -/
 
 @[expose] public section

@@ -113,7 +113,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Update Embedding Module Documentation [NOT STARTED]
+### Phase 2: Update Embedding Module Documentation [IN PROGRESS]
 
 **Goal**: Update docstrings in the Modal, Temporal, and Bimodal embedding and conservative extension modules to accurately describe why Lukasiewicz encodings are used in those specific contexts (Modal/Temporal/Bimodal formula types lack `and`/`or` constructors) and to distinguish this from the propositional level where `and`/`or` are now primitives.
 

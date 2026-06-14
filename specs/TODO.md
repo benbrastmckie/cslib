@@ -11,7 +11,7 @@ next_project_number: 188
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,171,179,180,186,187 | -- | Bimodal Porting, Propositional Logic |
+| 1 | 36,37,171,179,180,186 | -- | Bimodal Porting, Propositional Logic |
 | 2 | 39,40,181 | 36,37,179,180 | Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -28,9 +28,8 @@ next_project_number: 188
 
 ### Propositional Logic
 
-171 [PLANNED] — Research connective-basis design for minimal, intuitionistic, and
+171 [IMPLEMENTING] — Research connective-basis design for minimal, intuitionistic, and
 186 [NOT STARTED] — Refactor the Hilbert / natural deduction extensional equivalence 
-187 [PLANNED] — Fix all issues identified in the task 185 quality audit. Prioriti
 
 ### Temporal Logic
 
@@ -47,7 +46,7 @@ next_project_number: 188
 ## Tasks
 
 ### 187. Propositional foundations quality fixes
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 185
@@ -118,7 +117,7 @@ next_project_number: 188
 ---
 
 ### 171. Research connective basis min int classical
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

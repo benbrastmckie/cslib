@@ -786,6 +786,26 @@
       "summary": "Second-order functional calculi and the simple theory of types."
     },
     {
+      "id": "zakharyaschev_2001_sec00",
+      "bib_key": null,
+      "title": "Advanced Modal Logic — Introduction",
+      "authors": "Michael Zakharyaschev, Frank Wolter, Alexander Chagrov",
+      "year": 2001,
+      "section": "Section 0: Introduction",
+      "path": "zakharyaschev_2001/sec00_introduction.md",
+      "page_range": null,
+      "token_count": 2294,
+      "keywords": [
+        "advanced modal logic",
+        "survey",
+        "historical overview",
+        "unimodal",
+        "polymodal",
+        "superintuitionistic"
+      ],
+      "summary": "Introduction to the Advanced Modal Logic handbook chapter, providing historical overview and roadmap for unimodal, polymodal, and superintuitionistic logic sections."
+    },
+    {
       "id": "zakharyaschev_2001_sec01",
       "bib_key": null,
       "title": "Advanced Modal Logic — Section 1: Unimodal Logics",

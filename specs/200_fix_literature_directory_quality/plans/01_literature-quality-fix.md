@@ -1,7 +1,7 @@
 # Implementation Plan: Task #200
 
 - **Task**: 200 - Fix Literature Directory Quality
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 1.5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/200_fix_literature_directory_quality/reports/01_literature-quality-audit.md
@@ -73,15 +73,15 @@ Phases within the same wave can execute in parallel. Phase 3 is already [COMPLET
 
 ---
 
-### Phase 1: Fix index.json and README.md [NOT STARTED]
+### Phase 1: Fix index.json and README.md [COMPLETED]
 
 **Goal**: Correct metadata inaccuracies in index.json and README.md before any file operations.
 
 **Tasks**:
-- [ ] Add missing entry for `zakharyaschev_2001/sec00_introduction.md` to `specs/literature/index.json` with id `zakharyaschev_2001_sec00`, path `zakharyaschev_2001/sec00_introduction.md`, token_count 2294, and keywords `["advanced modal logic", "survey", "historical overview", "unimodal", "polymodal", "superintuitionistic"]`
-- [ ] Fix README.md line 169: replace `blackburn_2001_ch4_summary.md` reference with accurate description of the actual split files (`blackburn_2001/ch00_preface.md`, `ch01_basic-concepts.md`, `ch02_models-partial.md`)
-- [ ] Update README.md book entries to reference split directories instead of monolithic files (chagrov_1997, church_1956, gentzen_1935, hughes_1996, mendelson_2016, zakharyaschev_2001)
-- [ ] Verify the updated index.json is valid JSON with `jq . specs/literature/index.json`
+- [x] Add missing entry for `zakharyaschev_2001/sec00_introduction.md` to `specs/literature/index.json` with id `zakharyaschev_2001_sec00`, path `zakharyaschev_2001/sec00_introduction.md`, token_count 2294, and keywords `["advanced modal logic", "survey", "historical overview", "unimodal", "polymodal", "superintuitionistic"]` *(completed)*
+- [x] Fix README.md line 169: replace `blackburn_2001_ch4_summary.md` reference with accurate description of the actual split files (`blackburn_2001/ch00_preface.md`, `ch01_basic-concepts.md`, `ch02_models-partial.md`) *(completed)*
+- [x] Update README.md book entries to reference split directories instead of monolithic files (chagrov_1997, church_1956, gentzen_1935, hughes_1996, mendelson_2016, zakharyaschev_2001) *(completed)*
+- [x] Verify the updated index.json is valid JSON with `jq . specs/literature/index.json` *(completed)*
 
 **Timing**: 30 minutes
 

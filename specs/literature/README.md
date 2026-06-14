@@ -16,11 +16,11 @@ All files follow the naming convention `{author}_{year}.md` (first author surnam
   systematically here.
 
 - **Church 1956** [Church1956] `[MD]`: *Introduction to Mathematical Logic*, Vol. 1. Princeton University Press.
-  File: `church_1956.md`.
+  Directory: `church_1956/` (ch00_front-matter.md, ch00b_introduction.md, ch01_propositional-calculus.md, ch02_propositional-calculus-continued.md, ch03_functional-calculi-first-order.md, ch04_pure-functional-calculus.md, ch05_functional-calculi-second-order.md).
   Classical reference for propositional and predicate logic foundations. Hilbert-style axiomatization.
 
 - **Mendelson 2016** `[MD]`: *Introduction to Mathematical Logic*, 6th ed. CRC Press.
-  File: `mendelson_2016.md`.
+  Directory: `mendelson_2016/` (ch00_front-matter.md, ch01_propositional-calculus.md, ch02_first-order-logic.md, ch03_formal-number-theory.md, ch04_axiomatic-set-theory.md, ch05_computability.md).
   Standard textbook covering propositional logic, first-order logic, formal number theory,
   and axiomatic set theory. Detailed Hilbert-style completeness proofs.
 
@@ -158,7 +158,7 @@ Paper-length files remain as top-level `.md` files (e.g., `burgess_1982_i.md`).
 ## Modal Logic (Foundations shared with Propositional)
 
 - **Chagrov & Zakharyaschev 1997** [ChagrovZakharyaschev1997] `[MD]`: *Modal Logic*. Oxford Logic Guides 35.
-  File: `chagrov_1997.md`.
+  Directory: `chagrov_1997/` (p00_front-matter.md, p01_introduction.md, p02_kripke-semantics.md, p03_adequate-semantics.md, p04_properties-of-logics.md, p05_algorithmic-problems.md).
   Primary reference for CSLib (cited as "CZ" throughout). Key sections:
   - Chapter 1: Classical propositional logic, truth tables, tautologies, completeness (Thm 1.16)
   - Section 2.2: Kripke semantics, persistence (Prop 2.1)
@@ -166,22 +166,23 @@ Paper-length files remain as top-level `.md` files (e.g., `burgess_1982_i.md`).
   - Section 5.1: Maximal consistent sets, Lindenbaum's lemma, canonical models
 
 - **Blackburn, de Rijke & Venema 2001** [Blackburn2001] `[MD]`: *Modal Logic*. Cambridge Tracts.
-  Files: `blackburn_2001.md`, `blackburn_2001_ch4_summary.md` (curated completeness chapter summary).
+  Directory: `blackburn_2001/` (ch00_preface.md, ch01_basic-concepts.md, ch02_models-partial.md).
   Alternative modal logic reference. Covers Kripke semantics, bisimulation, correspondence theory.
+  Note: Only pages 1-69 are available due to source PDF limitation (chapters 3-7 are not present).
 
 - **Hughes & Cresswell 1996** `[MD]`: *A New Introduction to Modal Logic*. Routledge.
-  File: `hughes_1996.md`.
+  Directory: `hughes_1996/` (p00_front-matter.md, p01_basic-modal-propositional-logic.md, p02_normal-modal-systems.md, p03_modal-predicate-logic.md).
   Accessible introduction to modal logic with detailed completeness proofs.
 
 - **Zakharyaschev, Wolter & Chagrov 2001** `[MD]`: *Advanced Modal Logic*. In Gabbay & Guenthner (eds.),
   Handbook of Philosophical Logic, Vol. 3, 2nd ed. Springer.
-  File: `zakharyaschev_2001.md`.
+  Directory: `zakharyaschev_2001/` (sec00_introduction.md, sec01_unimodal-logics.md, sec02_polymodal-logics.md, sec03_superintuitionistic-logics.md).
   Supplementary modal logic material covering advanced topics.
 
 ## Natural Deduction and Proof Theory
 
 - **Gentzen 1935** [Gentzen1935] `[MD]`: *Untersuchungen uber das logische Schliessen*.
-  File: `gentzen_1935.md`.
+  Directory: `gentzen_1935/` (sec00_synopsis-and-notation.md, sec02_natural-deduction.md, sec03_lj-lk-hauptsatz.md, sec04_applications.md, sec05_equivalence.md).
   English translation by M.E. Szabo from *The Collected Papers of Gerhard Gentzen* (1969).
   Introduces natural deduction and sequent calculus. Foundation for the ND proof system.
   Note: Gentzen uses all connectives as primitive in his intuitionistic system.

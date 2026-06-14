@@ -289,13 +289,13 @@
     {
       "project_number": 188,
       "project_name": "first_propositional_upstream_pr",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Design and prepare a first upstream PR (~300 LOC) contributing propositional logic foundations to CSLib. Study what upstream CSLib currently includes to identify gaps. The PR should set the foundation for eventually contributing: (1) completeness results for all three propositional Hilbert systems (minimal, intuitionistic, classical), and (2) the extensional equivalence between Hilbert and natural deduction systems. Select a self-contained ~300 LOC slice from Foundations/ and Propositional/ that gives reviewers something easy to take in — likely the core Proposition type, axiom schemata, derivation tree, and basic metatheorems — while building towards the larger contribution. Must study upstream repo structure, existing PRs, and reviewer expectations to scope appropriately.",
       "dependencies": [],
       "created": "2026-06-14T10:49:41Z",
-      "last_updated": "2026-06-14T11:34:09Z",
+      "last_updated": "2026-06-14T13:17:15Z",
       "session_id": "sess_1781436581_3d124a",
       "researched": "2026-06-14T11:03:04Z",
       "next_artifact_number": 2,
@@ -309,8 +309,14 @@
           "path": "specs/188_first_propositional_upstream_pr/plans/01_implementation-plan.md",
           "type": "plan",
           "summary": "5-phase implementation plan for first upstream PR: Connectives.lean + Defs.lean refactor + NaturalDeduction/Basic.lean update + CI verification + PR description"
+        },
+        {
+          "path": "specs/188_first_propositional_upstream_pr/summaries/01_execution-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary"
         }
-      ]
+      ],
+      "completion_summary": "Created feature branch feat/propositional-five-primitive (1 commit, 259 ins/84 del across 4 files). Added Connectives.lean (96 LOC), refactored Defs.lean to 5-primitive {atom,bot,imp,and,or} type, updated NaturalDeduction/Basic.lean. All CI passed. PR description drafted with ctchou resolution, literature justification, roadmap, AI disclosure. Ready for Zulip discussion then PR submission."
     }
   ],
   "repository_health": {

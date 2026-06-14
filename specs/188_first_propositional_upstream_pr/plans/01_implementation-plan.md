@@ -1,7 +1,7 @@
 # Implementation Plan: Task #188
 
 - **Task**: 188 - first_propositional_upstream_pr
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 4 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/188_first_propositional_upstream_pr/reports/01_team-research.md, specs/188_first_propositional_upstream_pr/reports/02_bot-primitive-justification.md
@@ -79,7 +79,7 @@ This task advances the upstream contribution track. The ROADMAP.md focuses on po
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Create Feature Branch and Upstream Workspace [NOT STARTED]
+### Phase 1: Create Feature Branch and Upstream Workspace [COMPLETED]
 
 **Goal**: Establish a clean working branch based on upstream `main` for PR preparation.
 
@@ -102,7 +102,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Add Connectives.lean [NOT STARTED]
+### Phase 2: Add Connectives.lean [COMPLETED]
 
 **Goal**: Introduce the connective typeclass hierarchy as a new file in Foundations/Logic/.
 
@@ -136,7 +136,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Refactor Defs.lean [NOT STARTED]
+### Phase 3: Refactor Defs.lean [COMPLETED]
 
 **Goal**: Modify `Defs.lean` to use the five-primitive Proposition type with derived negation and verum.
 
@@ -175,7 +175,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: Update NaturalDeduction/Basic.lean [NOT STARTED]
+### Phase 4: Update NaturalDeduction/Basic.lean [COMPLETED]
 
 **Goal**: Update the natural deduction system for the new Proposition signature.
 
@@ -212,7 +212,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 5: Draft PR Description and Final Verification [NOT STARTED]
+### Phase 5: Draft PR Description and Final Verification [COMPLETED]
 
 **Goal**: Write the PR description and run complete CI verification.
 

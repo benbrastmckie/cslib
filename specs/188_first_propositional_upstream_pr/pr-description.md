@@ -106,6 +106,13 @@ This PR is the first in a planned series contributing our propositional logic fo
 The planned roadmap mirrors the structure of Troelstra & van Dalen [TroelstraVanDalen1988]
 Chapter 2, with PR 5-6 following the completeness proof strategy there.
 
+## Changed Files
+
+- [`Cslib/Foundations/Logic/Connectives.lean`](Cslib/Foundations/Logic/Connectives.lean) — **New**: connective typeclass hierarchy (`HasBot`, `HasImp`, `HasAnd`, `HasOr`, `PropositionalConnectives`)
+- [`Cslib/Logics/Propositional/Defs.lean`](Cslib/Logics/Propositional/Defs.lean) — **Modified**: five-primitive `Proposition` type, constraint-free derived connectives, typeclass instances
+- [`Cslib/Logics/Propositional/NaturalDeduction/Basic.lean`](Cslib/Logics/Propositional/NaturalDeduction/Basic.lean) — **Modified**: renamed constructors (`impl`→`imp`, subscript→ASCII), removed type constraints
+- [`Cslib.lean`](Cslib.lean) — **Modified**: added `Connectives` import
+
 ## Breaking Changes
 
 - `Proposition.impl` renamed to `Proposition.imp`

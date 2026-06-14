@@ -12,7 +12,7 @@ next_project_number: 197
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,179,180,188,192,194,195,196 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
-| 2 | 39,40,181 | 36,37,179,180 | Bimodal Porting, Temporal Logic |
+| 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -30,11 +30,11 @@ next_project_number: 197
 
 ### Modal Logic
 
-179 [IMPLEMENTING] — Add diamond (dia) as a primitive constructor to Modal.Proposition
+179 [IMPLEMENTING] — Document why box is primitive in classical modal logic; add docst
 
 ### Project Management
 
-194 [RESEARCHED] — curate_zotero_pdfs_for_literature
+194 [PLANNING] — curate_zotero_pdfs_for_literature
 
 ### Propositional Logic
 
@@ -74,7 +74,7 @@ next_project_number: 197
 ---
 
 ### 194. Curate zotero pdfs for literature
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: general
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -129,7 +129,7 @@ next_project_number: 197
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Bimodal Porting
-- **Dependencies**: Task 179, Task 180
+- **Dependencies**: Task 180
 - **Research**: [181_bimodal_primitive_dia_always_historically/reports/01_bimodal-primitive-expansion-research.md]
 
 **Description**: Propagate primitive diamond, allFuture, and allPast constructors to the Bimodal layer, giving {atom, bot, imp, and, or, box, dia, untl, snce, allFuture, allPast} (11 primitives). This is the union of Modal (task 179) and Temporal (task 180) primitive sets. Scope: (1) Syntax/Formula.lean: add .dia/.allFuture/.allPast constructors, update all match cases. (2) Semantics/Truth.lean: structural truthAt clauses. (3) ProofSystem: axiom constructors for diamond duality and G/H axioms. (4) Embedding: extend ModalEmbedding (.dia), TemporalEmbedding (.allFuture/.allPast). (5) Metalogic: propagate through ~50 files (Core, Soundness, Completeness, BXCanonical, ConservativeExtension, Separation, Decidability, Algebraic). Follow task 177 playbook. (6) Classical equivalences become theorems. Verify full CI. Estimated ~50 files, ~2000 lines, similar scope to task 177.
@@ -160,7 +160,7 @@ next_project_number: 197
   - [179_modal_primitive_diamond/reports/05_team-research.md]
 - **Plan**: [179_modal_primitive_diamond/plans/05_documentation-plan.md]
 
-**Description**: Add diamond (dia) as a primitive constructor to Modal.Proposition, giving {atom, bot, imp, and, or, box, dia}. Currently diamond is derived as neg(box(neg phi)), which is only valid classically. Making it primitive enables intuitionistic and minimal modal logics where box and diamond are independent operators. Scope: (1) Basic.lean: add .dia constructor, structural Satisfies clause, keep notation. (2) Denotation, LogicalEquivalence, Cube: .dia cases. (3) ProofSystem/Instances: diamond-related axiom constructors and dual axioms. (4) Metalogic: .dia cases in DerivationTree, truth lemmas, all 15 soundness/completeness files. (5) Classical equivalence dia(A) iff neg(box(neg(A))) becomes a theorem. Verify full CI. Reference: upstream CSLib uses diamond as primitive; Fischer Servi 1984, Simpson 1994 for intuitionistic modal logic.
+**Description**: Document why box is primitive in classical modal logic; add docstrings citing Blackburn2001 and ChagrovZakharyaschev1997
 
 ---
 

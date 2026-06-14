@@ -47,7 +47,11 @@ inductive BAxiom : Proposition Atom → Prop where
   | modalK (φ ψ : Proposition Atom) :
       BAxiom (Proposition.imp (Proposition.box (Proposition.imp φ ψ))
         (Proposition.imp (Proposition.box φ) (Proposition.box ψ)))
-  /-- B / symmetry: `φ → □◇φ` -/
+  /-- B / symmetry: `φ → □◇φ` where `◇φ = (□(φ → ⊥)) → ⊥`.
+
+  Diamond is encoded classically as the negation of box-negation (see `Axioms.AxiomB`).
+  This corresponds to symmetry of the accessibility relation (`r w v → r v w`).
+  See [Blackburn2001] Section 1.4 and [ChagrovZakharyaschev1997] Section 3.2. -/
   | modalB (φ : Proposition Atom) :
       BAxiom (φ.imp (Proposition.box (Proposition.diamond φ)))
 

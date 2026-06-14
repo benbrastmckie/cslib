@@ -60,7 +60,7 @@ Phases are sequential: state update first, then documentation, then verification
 
 ---
 
-### Phase 1: Update Task Scope and Dependencies [NOT STARTED]
+### Phase 1: Update Task Scope and Dependencies [COMPLETED]
 
 **Goal**: Update state.json to reflect the revised documentation-only scope and remove the task 181 dependency on 179.
 
@@ -83,7 +83,7 @@ Phases are sequential: state update first, then documentation, then verification
 
 ---
 
-### Phase 2: Add Docstrings to Modal Files [NOT STARTED]
+### Phase 2: Add Docstrings to Modal Files [COMPLETED]
 
 **Goal**: Add docstrings explaining the box-as-primitive design choice at 8 specific locations across 4 files, following Teammate D's documentation design.
 
@@ -114,7 +114,7 @@ Phases are sequential: state update first, then documentation, then verification
 
 ---
 
-### Phase 3: Build Verification [NOT STARTED]
+### Phase 3: Build Verification [COMPLETED]
 
 **Goal**: Verify that all docstring changes compile and pass style checks.
 

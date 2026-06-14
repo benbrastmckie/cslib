@@ -47,7 +47,11 @@ inductive K5Axiom : Proposition Atom → Prop where
   | modalK (φ ψ : Proposition Atom) :
       K5Axiom (Proposition.imp (Proposition.box (Proposition.imp φ ψ))
         (Proposition.imp (Proposition.box φ) (Proposition.box ψ)))
-  /-- 5 / Euclideanness: `◇φ → □◇φ` -/
+  /-- 5 / Euclideanness: `◇φ → □◇φ` where `◇φ = (□(φ → ⊥)) → ⊥`.
+
+  Diamond is encoded classically as the negation of box-negation (see `Axioms.Axiom5`).
+  This corresponds to right-Euclideanness of the accessibility relation (`r w v → r w u → r v u`).
+  See [Blackburn2001] Section 1.4 and [ChagrovZakharyaschev1997] Section 3.2. -/
   | modalFive (φ : Proposition Atom) :
       K5Axiom (((Proposition.box (φ.imp .bot)).imp .bot).imp
         (Proposition.box ((Proposition.box (φ.imp .bot)).imp .bot)))

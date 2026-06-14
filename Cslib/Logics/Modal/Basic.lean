@@ -25,6 +25,18 @@ The formula type uses `{atom, bot, imp, box}` as primitive constructors (no nati
 Negation, conjunction, disjunction, and diamond (possibility) are derived connectives via
 the Lukasiewicz convention: `¬φ := φ → ⊥`, `φ ∧ ψ := ¬(φ → ¬ψ)`, `φ ∨ ψ := ¬φ → ψ`.
 
+**Why box, not diamond?** Box (necessity `□φ`) is the canonical primitive modal operator in
+classical systems, following [P. Blackburn, M. de Rijke, Y. Venema, *Modal Logic*][Blackburn2001]
+Chapter 1 and [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997] Section 1.1.
+Box is chosen because it corresponds to universal quantification over accessible worlds
+(`∀ w', r w w' → φ`), preserves conjunction (`□(φ ∧ ψ) ↔ □φ ∧ □ψ`), distributes over
+implication (axiom K), and is
+the subject of necessitation (`⊢ φ` implies `⊢ □φ`). Diamond is then derived classically as
+`◇φ := ¬□¬φ`, which corresponds to `(□(φ → ⊥)) → ⊥`. This derivation relies on excluded middle
+(`¬¬p ↔ p`) and fails in intuitionistic or minimal modal logic, where box and diamond are
+independent operators. Once non-classical modal logics are formalized in CSLib, `HasDia` should
+be added as a primitive typeclass alongside `HasBox`.
+
 Note: The propositional formula type `PL.Proposition` has `and`/`or` as native constructors
 with `HasAnd`/`HasOr` instances. The Lukasiewicz convention here is specific to `Modal.Proposition`
 because it lacks those constructors. The embedding `PL.Proposition.toModal` (in `FromPropositional`)
@@ -74,7 +86,13 @@ abbrev Proposition.or (φ₁ φ₂ : Proposition Atom) : Proposition Atom :=
 abbrev Proposition.and (φ₁ φ₂ : Proposition Atom) : Proposition Atom :=
   .imp (.imp φ₁ (.imp φ₂ .bot)) .bot
 
-/-- Possibility / diamond: ◇φ := ¬□¬φ -/
+/-- Possibility / diamond: `◇φ := ¬□¬φ = (□(φ → ⊥)) → ⊥`.
+
+Diamond is a derived connective in classical modal logic. It is defined via classical negation as
+`◇φ := ¬□¬φ`, which expands to `(□(φ → ⊥)) → ⊥`. The forward direction (`◇φ → ¬□¬φ`) holds by
+definition; the backward direction (`¬□¬φ → ◇φ`) uses excluded middle. This derivation fails in
+minimal modal logic, where `□` and `◇` are independent operators. See [Blackburn2001] Chapter 1
+and [ChagrovZakharyaschev1997] Section 1.1. -/
 abbrev Proposition.diamond (φ : Proposition Atom) : Proposition Atom :=
   .neg (.box (.neg φ))
 

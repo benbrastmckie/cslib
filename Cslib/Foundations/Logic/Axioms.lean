@@ -147,21 +147,36 @@ protected abbrev AxiomT (φ : F) : F :=
 protected abbrev Axiom4 (φ : F) : F :=
   HasImp.imp (HasBox.box φ) (HasBox.box (HasBox.box φ))
 
-/-- Symmetry axiom B: φ → □◇φ
-    where ◇φ = ¬□¬φ = (□(φ → ⊥)) → ⊥ -/
+/-- Symmetry axiom B: `φ → □◇φ`.
+
+Diamond is encoded classically as `◇φ = ¬□¬φ = (□(φ → ⊥)) → ⊥`, since `HasDia` is not yet
+a primitive in `ModalConnectives`. The encoding relies on excluded middle and is equivalent to
+the standard `φ → □◇φ` only in classical logic. Corresponds to symmetry of the accessibility
+relation: `r w v → r v w`. See [Blackburn2001] Section 1.4, [ChagrovZakharyaschev1997]
+Section 3.2. -/
 protected abbrev AxiomB (φ : F) : F :=
   HasImp.imp φ (HasBox.box
     (HasImp.imp (HasBox.box (HasImp.imp φ HasBot.bot)) HasBot.bot))
 
-/-- Euclidean axiom 5: ◇φ → □◇φ
-    where ◇φ = (□(φ → ⊥)) → ⊥ -/
+/-- Euclidean axiom 5: `◇φ → □◇φ`.
+
+Diamond is encoded classically as `◇φ = ¬□¬φ = (□(φ → ⊥)) → ⊥`, since `HasDia` is not yet
+a primitive in `ModalConnectives`. The encoding relies on excluded middle and is equivalent to
+the standard `◇φ → □◇φ` only in classical logic. Corresponds to right-Euclideanness of the
+accessibility relation: `r w v → r w u → r v u`. See [Blackburn2001] Section 1.4,
+[ChagrovZakharyaschev1997] Section 3.2. -/
 protected abbrev Axiom5 (φ : F) : F :=
   HasImp.imp
     (HasImp.imp (HasBox.box (HasImp.imp φ HasBot.bot)) HasBot.bot)
     (HasBox.box (HasImp.imp (HasBox.box (HasImp.imp φ HasBot.bot)) HasBot.bot))
 
-/-- Seriality axiom D: □φ → ◇φ
-    where ◇φ = (□(φ → ⊥)) → ⊥ -/
+/-- Seriality axiom D: `□φ → ◇φ`.
+
+Diamond is encoded classically as `◇φ = ¬□¬φ = (□(φ → ⊥)) → ⊥`, since `HasDia` is not yet
+a primitive in `ModalConnectives`. The encoding relies on excluded middle and is equivalent to
+the standard `□φ → ◇φ` only in classical logic. Corresponds to seriality of the accessibility
+relation: `∀ w, ∃ v, r w v`. See [Blackburn2001] Section 1.4,
+[ChagrovZakharyaschev1997] Section 3.2. -/
 protected abbrev AxiomD (φ : F) : F :=
   HasImp.imp (HasBox.box φ)
     (HasImp.imp (HasBox.box (HasImp.imp φ HasBot.bot)) HasBot.bot)

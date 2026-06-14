@@ -1,5 +1,5 @@
 ---
-next_project_number: 198
+next_project_number: 199
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 198
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,194,195,197 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,188,192,194,195,197,198 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -39,6 +39,7 @@ next_project_number: 198
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
+198 [NOT STARTED] — Submit first propositional logic upstream PR (~300 LOC) to CSLib 
 
 ### Propositional PRs
 
@@ -51,6 +52,16 @@ next_project_number: 198
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 198. Submit first propositional logic upstream PR (~300 LOC)
+- **Status**: [NOT STARTED]
+- **Task Type**: pr
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Submit first propositional logic upstream PR (~300 LOC) to CSLib contributing Foundations/Logic/Connectives.lean and Propositional/ changes. Create a new feature branch from upstream/main, cherry-pick the appropriate changes from main while maintaining the scope defined in pr-description.md, then push and submit PR. The pr-description.md from task 188 has been copied into this task directory as the authoritative PR description.
+
+---
 
 ### 197. Scope initial Modal/ upstream PR (~300 LOC)
 - **Status**: [NOT STARTED]

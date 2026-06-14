@@ -84,8 +84,16 @@ File availability key: `[PDF]` = PDF in this directory, `[MD]` = markdown conver
   - Section 5.1: Maximal consistent sets, Lindenbaum's lemma, canonical models
 
 - **Blackburn, de Rijke & Venema 2001** [Blackburn2001] `[PDF] [MD]`: *Modal Logic*. Cambridge Tracts.
-  Files: `blackburn.pdf`, `blackburn.md`, `blackburn_1-4.pdf/md` (chapter extracts).
+  Files: `blackburn.pdf`, `blackburn.md`, `blackburn_1-4.pdf/md` (chapter extracts),
+  `blackburn-ch4-completeness.md` (completeness chapter summary).
   Alternative modal logic reference. Covers Kripke semantics, bisimulation, correspondence theory.
+
+- **Hughes & Cresswell 1996** `[PDF] [MD]`: *A New Introduction to Modal Logic*. Routledge.
+  Files: `A New Introduction to Modal Logic (...).pdf`, `hughes_cresswell.md`.
+  Accessible introduction to modal logic with detailed completeness proofs.
+
+- **Advanced Modal Logic chapters** `[PDF] [MD]`: Supplementary modal logic material.
+  Files: `advanced_modal_logic.pdf/md`, `advanced_modal_logic_2.pdf/md`.
 
 ## Natural Deduction and Proof Theory
 

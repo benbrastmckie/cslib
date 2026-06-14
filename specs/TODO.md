@@ -34,7 +34,7 @@ next_project_number: 196
 
 ### Project Management
 
-194 [RESEARCHING] — curate_zotero_pdfs_for_literature
+194 [RESEARCHED] — curate_zotero_pdfs_for_literature
 
 ### Propositional Logic
 
@@ -63,10 +63,11 @@ next_project_number: 196
 ---
 
 ### 194. Curate zotero pdfs for literature
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: general
 - **Topic**: Project Management
 - **Dependencies**: None
+- **Research**: [194_curate_zotero_pdfs_for_literature/reports/01_team-research.md]
 
 ---
 

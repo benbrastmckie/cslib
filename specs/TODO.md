@@ -1,5 +1,5 @@
 ---
-next_project_number: 188
+next_project_number: 189
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 188
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,179,180 | -- | Bimodal Porting |
+| 1 | 36,37,179,180,188 | -- | Bimodal Porting, Propositional Logic |
 | 2 | 39,40,181 | 36,37,179,180 | Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -26,6 +26,10 @@ next_project_number: 188
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
+### Propositional Logic
+
+188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
+
 ### Temporal Logic
 
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
@@ -39,6 +43,16 @@ next_project_number: 188
   └─ 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors  (see above)
 
 ## Tasks
+
+### 188. First propositional upstream pr
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Design and prepare a first upstream PR (~300 LOC) contributing propositional logic foundations to CSLib. Study what upstream CSLib currently includes to identify gaps. The PR should set the foundation for eventually contributing: (1) completeness results for all three propositional Hilbert systems (minimal, intuitionistic, classical), and (2) the extensional equivalence between Hilbert and natural deduction systems. Select a self-contained ~300 LOC slice from Foundations/ and Propositional/ that gives reviewers something easy to take in — likely the core Proposition type, axiom schemata, derivation tree, and basic metatheorems — while building towards the larger contribution. Must study upstream repo structure, existing PRs, and reviewer expectations to scope appropriately.
+
+---
 
 ### 187. Propositional foundations quality fixes
 - **Status**: [COMPLETED]

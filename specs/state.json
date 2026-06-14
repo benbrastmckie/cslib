@@ -1,5 +1,5 @@
 {
-  "next_project_number": 188,
+  "next_project_number": 189,
   "active_projects": [
     {
       "project_number": 186,
@@ -260,6 +260,17 @@
           "summary": "11-primitive justification, extension architecture, scope assessment, task 177 lessons, interaction analysis"
         }
       ]
+    },
+    {
+      "project_number": 188,
+      "project_name": "first_propositional_upstream_pr",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Design and prepare a first upstream PR (~300 LOC) contributing propositional logic foundations to CSLib. Study what upstream CSLib currently includes to identify gaps. The PR should set the foundation for eventually contributing: (1) completeness results for all three propositional Hilbert systems (minimal, intuitionistic, classical), and (2) the extensional equivalence between Hilbert and natural deduction systems. Select a self-contained ~300 LOC slice from Foundations/ and Propositional/ that gives reviewers something easy to take in — likely the core Proposition type, axiom schemata, derivation tree, and basic metatheorems — while building towards the larger contribution. Must study upstream repo structure, existing PRs, and reviewer expectations to scope appropriately.",
+      "dependencies": [],
+      "created": "2026-06-14T10:49:41Z",
+      "last_updated": "2026-06-14T10:49:41Z"
     }
   ],
   "repository_health": {

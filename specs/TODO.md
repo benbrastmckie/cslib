@@ -58,7 +58,7 @@ next_project_number: 190
 ---
 
 ### 188. First propositional upstream pr
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

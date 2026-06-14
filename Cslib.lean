@@ -338,14 +338,11 @@ public import Cslib.Logics.Modal.ProofSystem.Instances.S5
 public import Cslib.Logics.Modal.ProofSystem.Instances.T
 public import Cslib.Logics.Modal.ProofSystem.Instances.TB
 public import Cslib.Logics.Propositional.Defs
-public import Cslib.Logics.Propositional.Metalogic.Completeness
 public import Cslib.Logics.Propositional.Metalogic.DeductionTheorem
-public import Cslib.Logics.Propositional.Metalogic.IntCompleteness
 public import Cslib.Logics.Propositional.Metalogic.IntLindenbaum
 public import Cslib.Logics.Propositional.Metalogic.IntSoundness
 public import Cslib.Logics.Propositional.Metalogic.IntStrongCompleteness
 public import Cslib.Logics.Propositional.Metalogic.MCS
-public import Cslib.Logics.Propositional.Metalogic.MinCompleteness
 public import Cslib.Logics.Propositional.Metalogic.MinLindenbaum
 public import Cslib.Logics.Propositional.Metalogic.MinSoundness
 public import Cslib.Logics.Propositional.Metalogic.MinStrongCompleteness

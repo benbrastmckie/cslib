@@ -1,21 +1,25 @@
 {
-  "status": "planned",
+  "status": "implemented",
+  "started_at": "2026-06-14T00:00:00Z",
+  "completed_at": "2026-06-14T01:00:00Z",
   "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/189_rename_completeness_to_canonical_model/plans/01_implementation-plan.md",
-      "summary": "2-phase implementation plan: merge 3 legacy files into strong completeness targets, then delete and run full CI"
-    }
+    "specs/189_rename_completeness_to_canonical_model/plans/01_implementation-plan.md",
+    "specs/189_rename_completeness_to_canonical_model/summaries/01_execution-summary.md"
   ],
-  "next_steps": "Run /implement 189 to execute the plan",
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 18,
+    "build_passed": true,
+    "ci_pipeline_passed": true
+  },
+  "partial_progress": null,
   "metadata": {
     "session_id": "sess_1781435667_eb411d",
-    "agent_type": "planner-agent",
+    "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
-    "phase_count": 2,
-    "estimated_hours": 1.5,
-    "dependency_waves": [[1], [2]]
-  },
-  "memory_candidates": []
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
 }

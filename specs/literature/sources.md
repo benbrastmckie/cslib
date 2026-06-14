@@ -5,8 +5,23 @@ These sources inform the mathematical content, proof architecture, and citation 
 
 ## Propositional Logic (General)
 
+- **Hilbert & Bernays 1934**: *Grundlagen der Mathematik*, Vol. 1. Springer.
+  CSLib's Hilbert-style proof system (`Deriv`, `DerivationTree`) is named after this axiomatization.
+  Truth-value semantics, completeness, and decidability for propositional logic first presented
+  systematically here.
+
 - **Church 1956** [Church1956]: *Introduction to Mathematical Logic*, Vol. 1. Princeton University Press.
   Classical reference for propositional and predicate logic foundations. Hilbert-style axiomatization.
+
+- **Post 1921**: *Introduction to a General Theory of Elementary Propositions*. American Journal
+  of Mathematics, 43(3):163-185.
+  Proved functional completeness of propositional connectives, introduced truth tables systematically.
+  Relevant to CSLib's `Evaluate`/`Tautology` definitions.
+
+- **Lukasiewicz & Tarski 1930**: *Untersuchungen uber den Aussagenkalkul*. Comptes Rendus des
+  Seances de la Societe des Sciences et des Lettres de Varsovie, Classe III, 23:30-50.
+  The Lukasiewicz encoding `and phi psi := neg (phi -> neg psi)` and `or phi psi := neg phi -> psi`
+  used in CSLib's upper layers (Modal, Temporal, Bimodal) is named after this work.
 
 - **van Dalen 2013**: *Logic and Structure*, 5th ed. Springer.
   Standard graduate textbook covering propositional logic, predicate logic, completeness, compactness.
@@ -34,6 +49,16 @@ These sources inform the mathematical content, proof architecture, and citation 
   Comprehensive reference for constructive mathematics. Covers intuitionistic propositional
   logic, Kripke semantics, completeness, natural deduction. Section 2.5 for Kripke completeness,
   Section 10.4 for natural deduction.
+
+- **Kripke 1965**: *Semantical Analysis of Intuitionistic Logic I*. In Crossley & Dummett (eds.),
+  Formal Systems and Recursive Functions, pp. 92-130. North-Holland.
+  CSLib's entire intuitionistic and minimal completeness proof architecture is built on Kripke
+  frames (`IForces`, `KripkeFrame`, `KripkeModel` in `Kripke.lean`). This is the foundational paper.
+
+- **Glivenko 1929**: *Sur quelques points de la logique de M. Brouwer*. Academie Royale de
+  Belgique, Bulletin de la Classe des Sciences, 15:183-188.
+  Glivenko's theorem: phi is classically provable iff not-not-phi is intuitionistically provable.
+  Foundational result connecting classical and intuitionistic logic.
 
 - **Fitting 1969**: *Intuitionistic Logic, Model Theory and Forcing*. North-Holland.
   Kripke semantics for intuitionistic logic, completeness proofs, forcing techniques.
@@ -63,25 +88,57 @@ These sources inform the mathematical content, proof architecture, and citation 
 
 ## Completeness and Compactness
 
+- **Henkin 1949**: *The Completeness of the First-Order Functional Calculus*. Journal of Symbolic
+  Logic, 14(3):159-166.
+  The MCS-extension method used in CSLib's completeness proofs (`set_lindenbaum`, `prop_lindenbaum`,
+  canonical model construction) is the Henkin method. While Henkin's paper is for first-order logic,
+  the propositional specialization is what CSLib implements.
+
+- **Tarski 1930**: *Fundamentale Begriffe der Methodologie der deduktiven Wissenschaften I*.
+  Monatshefte fur Mathematik und Physik, 37:361-404. English translation in *Logic, Semantics,
+  Metamathematics*, 2nd ed., Hackett, 1983.
+  Formalized the consequence operation and attributed Lindenbaum's lemma. CSLib's `SetDerivable`
+  is essentially Tarski's consequence operator restricted to finite derivations.
+
+- **Godel 1930**: *Die Vollstandigkeit der Axiome des logischen Funktionenkalkuls*. Monatshefte
+  fur Mathematik und Physik, 37:349-360.
+  First completeness proof (for first-order logic). Historical context for the completeness
+  tradition CSLib participates in.
+
 - **Lindenbaum's lemma**: Every consistent set extends to a maximal consistent set (via Zorn's lemma).
-  Attributed to Adolf Lindenbaum by Alfred Tarski (1930, *On Fundamental Concepts of Metamathematics*).
-  Not published by Lindenbaum himself.
+  Attributed to Adolf Lindenbaum by Alfred Tarski (1930). Not published by Lindenbaum himself.
 
 - **Strong completeness**: Standard result in CZ Chapter 1 (classical) and Chapter 2 (intuitionistic).
   The proof architecture (contrapositive: non-derivability -> MCS extension -> canonical model ->
-  countermodel) is uniform across all three logics.
+  countermodel) is the Henkin method adapted to propositional logic.
 
 - **Compactness**: Follows as a corollary of strong completeness + strong soundness for
   propositional logics. For first-order logic, independent proofs exist via ultraproducts.
 
+## Algebraic Logic (Future Direction)
+
+- **Rasiowa & Sikorski 1963**: *The Mathematics of Metamathematics*. PWN, Warsaw.
+  The algebraic approach to logic (Lindenbaum-Tarski algebras, representation theorems).
+  Relevant background for any future algebraic completeness work in CSLib.
+
 ## Lean 4 Formalizations (Prior Art)
 
-- **Bentzen 2023**: Lean 4 formalization of intuitionistic propositional logic completeness.
-  Uses direct canonical model approach (same as CSLib).
+- **Bentzen 2023**: *Verified completeness in Henkin-style for intuitionistic propositional logic*.
+  arXiv:2310.01916. First verified Henkin-style proof of completeness for IPL following
+  Troelstra & van Dalen's method in Lean.
 
-- **Borges et al. 2024**: Lean 4 formalization of propositional logic.
+- **Trufas 2024**: *Intuitionistic Propositional Logic in Lean*. arXiv:2410.23765.
+  Formalizes strong completeness for IPL with both Kripke and algebraic semantics in Lean.
+  Directly comparable to CSLib's approach.
 
-- **From & Jacobsen 2025**: Lean 4 completeness results.
+- **FormalizedFormalLogic**: *Logic Formalization in Lean 4*.
+  GitHub: https://github.com/FormalizedFormalLogic/Foundation
+  Book: https://formalizedformallogic.github.io/Book/
+  Most comprehensive Lean 4 logic formalization project. Covers propositional completeness,
+  modal logic completeness, and more. Important prior art for positioning CSLib.
+
+- **From & Jacobsen 2022**: *SeCaV: A Sequent Calculus Verifier in Isabelle/HOL*.
+  arXiv:2204.03884. Formalized soundness and completeness for sequent calculus.
 
 ## Cautionary Notes
 

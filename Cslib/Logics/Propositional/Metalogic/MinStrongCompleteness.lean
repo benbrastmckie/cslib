@@ -35,7 +35,7 @@ but not `φ`, witnessing failure of `MSemanticEntails Γ φ`.
 
 ## References
 
-* CZ Theorem 2.43
+* [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Theorem 2.43
 * Cslib/Logics/Propositional/Metalogic/MinCompleteness.lean
 -/
 

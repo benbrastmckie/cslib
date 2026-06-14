@@ -26,7 +26,7 @@ See `Cslib.Logics.Propositional.Metalogic.StrongCompleteness` for:
 
 ## References
 
-* CZ Theorem 1.16 (completeness direction), Section 5.1
+* [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Theorem 1.16
 * Cslib/Logics/Modal/Metalogic/KCompleteness.lean -- modal K completeness
 -/
 

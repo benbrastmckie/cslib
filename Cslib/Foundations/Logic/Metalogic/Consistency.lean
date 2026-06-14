@@ -141,7 +141,9 @@ theorem consistent_chain_union (D : DerivationSystem F)
 
 /-- **Lindenbaum's Lemma**: Every set-consistent set can be extended to a maximally
 consistent set. The proof applies `zorn_subset_nonempty` to the collection of consistent
-supersets, using `consistent_chain_union` to verify the chain condition. -/
+supersets, using `consistent_chain_union` to verify the chain condition.
+
+See [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Section 5.1. -/
 theorem set_lindenbaum (D : DerivationSystem F) {S : Set F}
     (hS : SetConsistent D S) :
     ∃ M : Set F, S ⊆ M ∧ SetMaximalConsistent D M := by

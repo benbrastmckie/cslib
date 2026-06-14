@@ -16,7 +16,7 @@ This module defines DCCS for IntPropAxiom and proves the implication witness lem
 
 ## References
 
-* CZ Section 5.1, Theorem 2.43
+* [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Section 5.1, Theorem 2.43
 -/
 
 @[expose] public section
@@ -431,7 +431,9 @@ theorem int_maximal_is_prime {S : Set (PL.Proposition Atom)}
 Given an IntDCCS S with phi ∉ S, there exists a prime IntDCCS T ⊇ S with phi ∉ T.
 
 Uses Zorn's lemma on `IntPrimeExcludingSupersets S phi` with `int_excluding_chain_union`
-for the chain condition and `int_maximal_is_prime` for the primality argument. -/
+for the chain condition and `int_maximal_is_prime` for the primality argument.
+
+See [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Lemma 5.5. -/
 theorem int_prime_exclusion {S : Set (PL.Proposition Atom)}
     (h_dccs : IntDCCS S) {phi : PL.Proposition Atom}
     (h_not : phi ∉ S) :

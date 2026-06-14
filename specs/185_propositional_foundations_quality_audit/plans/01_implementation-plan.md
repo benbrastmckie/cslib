@@ -106,7 +106,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Citation Format Standardization [IN PROGRESS]
+### Phase 2: Citation Format Standardization [COMPLETED]
 
 **Goal**: Replace all bare "CZ" abbreviations with proper BibKey citation format across 14 Propositional files, and add missing citations to `set_lindenbaum`, `deductionTheorem`, `int_prime_exclusion`, and three docstrings. This is mechanical text editing with no proof changes.
 
@@ -152,7 +152,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Extract Shared h_implyK/h_implyS Helpers [NOT STARTED]
+### Phase 3: Extract Shared h_implyK/h_implyS Helpers [IN PROGRESS]
 
 **Goal**: Extract the duplicated `h_implyK`/`h_implyS` private helper definitions from 4 files into `ProofSystem/Axioms.lean` as non-private definitions, eliminating code duplication.
 

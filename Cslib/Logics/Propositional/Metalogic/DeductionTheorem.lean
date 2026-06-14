@@ -124,7 +124,9 @@ decreasing_by
 /-- **Deduction Theorem**: If `A :: Γ ⊢ B` then `Γ ⊢ A → B`.
 
 Parameterized over `Axioms` with explicit proofs that `Axioms` includes
-implyK and implyS. -/
+implyK and implyS.
+
+See [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Theorem 1.4.3. -/
 noncomputable def deductionTheorem
     {Axioms : PL.Proposition Atom → Prop}
     (h_implyK : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))

@@ -27,7 +27,7 @@ See `Cslib.Logics.Propositional.Metalogic.IntStrongCompleteness` for:
 
 ## References
 
-* CZ Theorem 2.43
+* [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Theorem 2.43
 -/
 
 @[expose] public section

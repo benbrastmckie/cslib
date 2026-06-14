@@ -33,8 +33,8 @@ foundations needed for strong completeness theorems.
 
 ## References
 
-* CZ Theorem 1.16 (compactness for classical logic)
-* CZ Theorem 2.43 (compactness for intuitionistic/minimal logic)
+* [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Theorem 1.16
+* [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Theorem 2.43
 -/
 
 @[expose] public section

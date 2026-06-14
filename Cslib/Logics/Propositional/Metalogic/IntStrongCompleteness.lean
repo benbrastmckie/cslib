@@ -40,7 +40,7 @@ Case split on `PropSetConsistent IntPropAxiom (intDeductiveClosure Γ)`:
 
 ## References
 
-* CZ Theorem 2.43
+* [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Theorem 2.43
 * Cslib/Logics/Propositional/Metalogic/IntCompleteness.lean
 -/
 

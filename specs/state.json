@@ -15,19 +15,24 @@
     {
       "project_number": 192,
       "project_name": "research_verify_literature_refs_pr_188",
-      "status": "researching",
+      "status": "researched",
       "task_type": "general",
       "topic": "Propositional PRs",
       "created": "2026-06-14T17:18:44Z",
-      "last_updated": "2026-06-14T17:37:42Z",
+      "last_updated": "2026-06-14T17:42:51Z",
       "session_id": "sess_1781458639_96acef",
-      "researched": "2026-06-14T17:26:54Z",
-      "next_artifact_number": 2,
+      "researched": "2026-06-14T17:42:51Z",
+      "next_artifact_number": 3,
       "artifacts": [
         {
           "path": "specs/192_research_verify_literature_refs_pr_188/reports/01_team-research.md",
           "type": "research",
           "summary": "Team research with 4 teammates — literature claim verification"
+        },
+        {
+          "path": "specs/192_research_verify_literature_refs_pr_188/reports/02_team-research.md",
+          "type": "research",
+          "summary": "Round 2: primary source verification, BibTeX drafts, concrete PR revisions"
         }
       ]
     },

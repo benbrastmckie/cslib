@@ -34,8 +34,14 @@ These sources inform the mathematical content, proof architecture, and citation 
   primitive (not definable from implication and falsum).
 
 - **Johansson 1937** [Johansson1937]: *Der Minimalkalkul, ein reduzierter intuitionistischer Formalismus*.
-  Defines minimal logic (removes ex falso quodlibet from intuitionistic logic). Key reference
-  for MinPropAxiom.
+  Compositio Mathematica, 4:119-136.
+  Defines minimal logic by removing ex falso quodlibet (`⊥ → A`) from Heyting's intuitionistic
+  system. Key reference for `MinPropAxiom`. Critically, Johansson's formula language **retains
+  `⊥` (falsum) as a primitive** — minimal logic is not the positive fragment without falsum, but
+  rather the full language `{⊥, →, ∧, ∨}` without the explosion principle. Negation is defined
+  as `¬A := A → ⊥`, which requires `⊥` in the language. This justifies CSLib's design choice of
+  `bot` as a primitive constructor in `Proposition`: all three logics (minimal, intuitionistic,
+  classical) share the same formula type and differ only in inference rules/theory axioms.
 
 - **McKinsey 1939** [McKinsey1939]: *Proof of the Independence of the Primitive Symbols of Heyting's Calculus of Propositions*.
   Proves that conjunction and disjunction cannot be defined from implication and negation in

@@ -15,12 +15,13 @@
     {
       "project_number": 199,
       "project_name": "review_pr_citations",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "description": "Review citations in PR changes for accuracy and completeness",
-      "topic": "Project Management",
+      "topic": "Propositional Logic",
       "created": "2026-06-14T20:32:26Z",
-      "last_updated": "2026-06-14T20:32:26Z"
+      "last_updated": "2026-06-14T21:06:15Z",
+      "session_id": "sess_1781471141_0cbe00"
     },
     {
       "project_number": 198,

@@ -34,13 +34,13 @@ next_project_number: 201
 
 ### Project Management
 
-199 [NOT STARTED] — Review citations in PR changes for accuracy and completeness
 200 [PLANNED] — Fix literature directory quality: complete incomplete book splits
 
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
 198 [PR READY] — Submit first propositional logic upstream PR (~300 LOC) to CSLib 
+199 [RESEARCHING] — Review citations in PR changes for accuracy and completeness
 
 ### Propositional PRs
 
@@ -65,9 +65,9 @@ next_project_number: 201
 ---
 
 ### 199. Review pr citations
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
-- **Topic**: Project Management
+- **Topic**: Propositional Logic
 - **Dependencies**: None
 
 **Description**: Review citations in PR changes for accuracy and completeness

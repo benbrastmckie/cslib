@@ -28,7 +28,7 @@ next_project_number: 193
 
 ### Propositional PRs
 
-192 [RESEARCHED] — research_verify_literature_refs_pr_188
+192 [RESEARCHING] — research_verify_literature_refs_pr_188
 
 ### Temporal Logic
 
@@ -45,7 +45,7 @@ next_project_number: 193
 ## Tasks
 
 ### 192. Research verify literature refs pr 188
-- **Status**: [RESEARCHED]
+- **Status**: [RESEARCHING]
 - **Task Type**: general
 - **Topic**: Propositional PRs
 - **Dependencies**: None

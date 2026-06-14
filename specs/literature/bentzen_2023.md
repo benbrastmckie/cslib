@@ -40,6 +40,7 @@ and van Dalen’s Henkin-proof is a model construction based on a consistent ext
 formulas, which is achieved by going through all disjunctions of the language [17, lem 6.3]. To
 carry out this extension, they assume an enumeration of disjunctions with inﬁnite repetitions,
 
+---
 
 Veriﬁed completeness in Henkin-style for intuitionistic propositional logic
 H. Guo, D. Chen, and B. Bentzen
@@ -94,6 +95,7 @@ of our implementation is provided in Section 3. Finally, some concluding remarks
 in Section 4.
 2
 
+---
 
 Veriﬁed completeness in Henkin-style for intuitionistic propositional logic
 H. Guo, D. Chen, and B. Bentzen
@@ -189,6 +191,7 @@ p r
 {Γ} {p q} :prf Γ ((p & q) ⊃q)
 3
 
+---
 
 Veriﬁed completeness in Henkin-style for intuitionistic propositional logic
 H. Guo, D. Chen, and B. Bentzen
@@ -275,6 +278,7 @@ construction of a model unlike in [1]. What is more, the type of propositions Pr
 encode our truth values true or false.
 4
 
+---
 
 Veriﬁed completeness in Henkin-style for intuitionistic propositional logic
 H. Guo, D. Chen, and B. Bentzen
@@ -354,6 +358,7 @@ uation function are formalized in Lean in a slightly diﬀerent way. The reﬂex
 and monotonicity proofs are straightforward, so we shall omit them:
 5
 
+---
 
 Veriﬁed completeness in Henkin-style for intuitionistic propositional logic
 H. Guo, D. Chen, and B. Bentzen
@@ -411,6 +416,7 @@ The reader can refer to the completeness.lean ﬁle for the full details of our 
 of the completeness proof.
 6
 
+---
 
 Veriﬁed completeness in Henkin-style for intuitionistic propositional logic
 H. Guo, D. Chen, and B. Bentzen
@@ -464,6 +470,7 @@ in the language once more. The following Lean code encapsulates the idea of the 
 sketched above:
 7
 
+---
 
 Veriﬁed completeness in Henkin-style for intuitionistic propositional logic
 H. Guo, D. Chen, and B. Bentzen
@@ -574,6 +581,7 @@ there exists an n such that p ∈Γn+1. We use the above lemma insertn to prime 
 that p ∈Γ′:
 8
 
+---
 
 Veriﬁed completeness in Henkin-style for intuitionistic propositional logic
 H. Guo, D. Chen, and B. Bentzen
@@ -649,6 +657,7 @@ model_tt_iff_prf {p : form} :
 ∀(w ∈domain ), (w |= {M} p) ↔(w ⊢i p)
 9
 
+---
 
 Veriﬁed completeness in Henkin-style for intuitionistic propositional logic
 H. Guo, D. Chen, and B. Bentzen
@@ -703,6 +712,7 @@ formula q, we can conclude that Γ′ ⊮M p. Thus, we contradict our assumption
 given that Γ′ ⊩M Γ but Γ′ ⊮M p.
 10
 
+---
 
 Veriﬁed completeness in Henkin-style for intuitionistic propositional logic
 H. Guo, D. Chen, and B. Bentzen
@@ -793,6 +803,7 @@ A.
 Interna-
 11
 
+---
 
 Veriﬁed completeness in Henkin-style for intuitionistic propositional logic
 H. Guo, D. Chen, and B. Bentzen

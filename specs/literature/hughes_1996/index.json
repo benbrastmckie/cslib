@@ -1,0 +1,82 @@
+{
+  "book": "A New Introduction to Modal Logic",
+  "bib_key": null,
+  "authors": "G. E. Hughes, M. J. Cresswell",
+  "year": 1996,
+  "publisher": "Routledge",
+  "note": "Textbook split into 3 parts. Individual part files are large (54k-88k tokens); prefer keyword-based selective retrieval.",
+  "chapters": [
+    {
+      "id": "p00",
+      "file": "p00_front-matter.md",
+      "title": "Preface and Table of Contents",
+      "pages": "ix-xiv",
+      "token_count": 2600,
+      "keywords": [
+        "modal logic overview",
+        "propositional calculus",
+        "necessity",
+        "possibility",
+        "possible worlds",
+        "book structure"
+      ]
+    },
+    {
+      "id": "p01",
+      "file": "p01_basic-modal-propositional-logic.md",
+      "title": "Part I: Basic Modal Propositional Logic (Chapters 1-6)",
+      "pages": "3-130",
+      "token_count": 62312,
+      "keywords": [
+        "propositional calculus",
+        "system K",
+        "system T",
+        "system D",
+        "system S4",
+        "system S5",
+        "Brouwerian system B",
+        "completeness",
+        "canonical models",
+        "Kripke frames",
+        "validity",
+        "modal axioms"
+      ]
+    },
+    {
+      "id": "p02",
+      "file": "p02_normal-modal-systems.md",
+      "title": "Part II: Normal Modal Systems (Chapters 7-12)",
+      "pages": "133-230",
+      "token_count": 54676,
+      "keywords": [
+        "canonical models",
+        "finite models",
+        "incompleteness",
+        "normal modal systems",
+        "completeness proofs",
+        "temporal logic",
+        "S4.3",
+        "S4M",
+        "S4.2",
+        "frame properties"
+      ]
+    },
+    {
+      "id": "p03",
+      "file": "p03_modal-predicate-logic.md",
+      "title": "Part III: Modal Predicate Logic (Chapters 13-19)",
+      "pages": "233-408",
+      "token_count": 88839,
+      "keywords": [
+        "modal predicate logic",
+        "quantified modal logic",
+        "lower predicate calculus",
+        "intensional objects",
+        "counterpart theory",
+        "Barcan formula",
+        "identity",
+        "descriptions"
+      ]
+    }
+  ]
+}

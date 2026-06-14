@@ -1,0 +1,105 @@
+{
+  "book": "Modal Logic",
+  "bib_key": "ChagrovZakharyaschev1997",
+  "authors": "Alexander Chagrov, Michael Zakharyaschev",
+  "year": 1997,
+  "publisher": "Oxford University Press",
+  "series": "Oxford Logic Guides 35",
+  "note": "Primary CSLib reference (cited as 'CZ'). Split into 5 Parts; Part I (intro) and Part II (Kripke semantics) are most relevant for current CSLib work.",
+  "chapters": [
+    {
+      "id": "p00",
+      "file": "p00_front-matter.md",
+      "title": "Front Matter (Contents, Preface)",
+      "pages": "i-xv",
+      "token_count": 4460,
+      "keywords": ["modal logic overview", "CZ book structure", "superintuitionistic logics", "normal modal logics"]
+    },
+    {
+      "id": "p01",
+      "file": "p01_introduction.md",
+      "title": "Part I: Introduction (Ch 1-4)",
+      "pages": "3-128",
+      "token_count": 70202,
+      "keywords": [
+        "classical propositional logic",
+        "intuitionistic logic",
+        "Kripke frames",
+        "Kripke models",
+        "modal logics",
+        "system K",
+        "completeness",
+        "Hintikka systems",
+        "MCS",
+        "canonical model",
+        "truth tables",
+        "Lindenbaum lemma"
+      ]
+    },
+    {
+      "id": "p02",
+      "file": "p02_kripke-semantics.md",
+      "title": "Part II: Kripke Semantics (Ch 5-6)",
+      "pages": "131-191",
+      "token_count": 33248,
+      "keywords": [
+        "canonical models",
+        "Henkin construction",
+        "filtration method",
+        "completeness theorems",
+        "Kripke incompleteness",
+        "finitely approximable",
+        "Diego theorem",
+        "selective filtration"
+      ]
+    },
+    {
+      "id": "p03",
+      "file": "p03_adequate-semantics.md",
+      "title": "Part III: Adequate Semantics (Ch 7-9)",
+      "pages": "193-336",
+      "token_count": 80241,
+      "keywords": [
+        "algebraic semantics",
+        "Tarski-Lindenbaum construction",
+        "pseudo-Boolean algebras",
+        "modal algebras",
+        "general frames",
+        "descriptive frames",
+        "canonical formulas",
+        "Stone theorem"
+      ]
+    },
+    {
+      "id": "p04",
+      "file": "p04_properties-of-logics.md",
+      "title": "Part IV: Properties of Logics (Ch 10-15)",
+      "pages": "337-489",
+      "token_count": 85664,
+      "keywords": [
+        "Kripke completeness",
+        "Sahlqvist theorem",
+        "D-persistence",
+        "finite approximability",
+        "tabularity",
+        "interpolation",
+        "disjunction property",
+        "Hallden completeness"
+      ]
+    },
+    {
+      "id": "p05",
+      "file": "p05_algorithmic-problems.md",
+      "title": "Part V: Algorithmic Problems (Ch 16+)",
+      "pages": "493-592",
+      "token_count": 55227,
+      "keywords": [
+        "decidability",
+        "complexity",
+        "algorithmic problems",
+        "modal logic decidability",
+        "Ackermann reduction"
+      ]
+    }
+  ]
+}

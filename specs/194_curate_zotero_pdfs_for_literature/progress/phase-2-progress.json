@@ -1,0 +1,35 @@
+{
+  "phase": 2,
+  "phase_name": "Split Book-Length Files into Chapter Subdirectories",
+  "started_at": "2026-06-14T12:20:00Z",
+  "last_updated": "2026-06-14T12:35:00Z",
+  "objectives": [
+    {"id": 1, "description": "Split blackburn_2001 into chapter files + per-book index", "status": "done"},
+    {"id": 2, "description": "Split hughes_1996 into part files + per-book index", "status": "done"},
+    {"id": 3, "description": "Split mendelson_2016 into chapter files + per-book index", "status": "done"},
+    {"id": 4, "description": "Split chagrov_1997 into chapter files + per-book index", "status": "done"},
+    {"id": 5, "description": "Split church_1956 into chapter files + per-book index", "status": "done"},
+    {"id": 6, "description": "Split gentzen_1935 into section files + per-book index", "status": "done"},
+    {"id": 7, "description": "Add all chapter entries to master index.json", "status": "done"},
+    {"id": 8, "description": "Verify no content is lost", "status": "done"}
+  ],
+  "current_objective": null,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": [
+    {
+      "task_id": "2.book_list",
+      "description": "Split book-length files",
+      "type": "altered",
+      "reason": "Also split zakharyaschev_2001.md which was not in the plan's book list but is present in the directory at 110k tokens",
+      "annotation": "*(deviation: altered — also split zakharyaschev_2001)*"
+    },
+    {
+      "task_id": "2.7",
+      "description": "Repeat for mendelson_2016",
+      "type": "altered",
+      "reason": "Page markers in mendelson use ## Page N format (not <!-- Page N -->); handled correctly",
+      "annotation": "*(deviation: altered — ## Page N format handled)*"
+    }
+  ]
+}

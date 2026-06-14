@@ -92,23 +92,23 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Split Book-Length Files into Chapter Subdirectories [NOT STARTED]
+### Phase 2: Split Book-Length Files into Chapter Subdirectories [COMPLETED]
 
 **Goal**: Convert the 6 oversized book-length markdown files into chapter-level subdirectories, starting with blackburn_2001 as the template pattern, then applying to remaining books.
 
 **Tasks**:
-- [ ] Read blackburn_2001.md table of contents and identify chapter boundaries (pages/line numbers)
-- [ ] Create `specs/literature/blackburn_2001/` directory with chapter files (ch01_basic-concepts.md through ch07 or similar)
-- [ ] Strip `<!-- Page N -->` comments during extraction (noise reduction)
-- [ ] Add source metadata comment at top of each chapter file (`<!-- Source: ... -->`)
-- [ ] Measure token count for each resulting chapter file
-- [ ] Create per-book `specs/literature/blackburn_2001/index.json` with chapter metadata
-- [ ] Repeat pattern for hughes_1996 (split by Parts: 3 files)
-- [ ] Repeat for mendelson_2016 (split by chapters using `## Page N` boundaries)
-- [ ] Repeat for chagrov_1997 (use PDF ToC for boundaries)
-- [ ] Repeat for church_1956 and gentzen_1935
-- [ ] Add all chapter entries to the master `specs/literature/index.json`
-- [ ] Verify no content is lost: compare line counts of original vs sum of chapter files
+- [x] Read blackburn_2001.md table of contents and identify chapter boundaries (pages/line numbers) *(completed)*
+- [x] Create `specs/literature/blackburn_2001/` directory with chapter files (ch01_basic-concepts.md through ch07 or similar) *(completed: 3 files — preface, ch01, ch02 partial)*
+- [x] Strip `<!-- Page N -->` comments during extraction (noise reduction) *(completed)*
+- [x] Add source metadata comment at top of each chapter file (`<!-- Source: ... -->`) *(completed)*
+- [x] Measure token count for each resulting chapter file *(completed)*
+- [x] Create per-book `specs/literature/blackburn_2001/index.json` with chapter metadata *(completed)*
+- [x] Repeat pattern for hughes_1996 (split by Parts: 3 files) *(completed: 4 files including front matter)*
+- [x] Repeat for mendelson_2016 (split by chapters using `## Page N` boundaries) *(completed: 6 files)*
+- [x] Repeat for chagrov_1997 (use PDF ToC for boundaries) *(completed: 6 files)*
+- [x] Repeat for church_1956 and gentzen_1935 *(completed: church 7 files, gentzen 5 section files)*
+- [x] Add all chapter entries to the master `specs/literature/index.json` *(completed: 40 total entries)*
+- [x] Verify no content is lost: compare line counts of original vs sum of chapter files *(completed: 4205 vs 4143 for blackburn — 66 page markers removed + 3 headers added; content preserved)* *(deviation: altered — also split zakharyaschev_2001 which was not in the plan's book list)*
 
 **Timing**: 2 hours
 

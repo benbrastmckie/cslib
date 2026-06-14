@@ -1,0 +1,60 @@
+{
+  "book": "Modal Logic",
+  "bib_key": "Blackburn2001",
+  "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
+  "year": 2001,
+  "publisher": "Cambridge University Press",
+  "series": "Cambridge Tracts in Theoretical Computer Science",
+  "note": "Source file covers pages 1-69 only (Chapters 1-2 partial). Chapters 3-7 not available in this markdown source.",
+  "chapters": [
+    {
+      "id": "ch00",
+      "file": "ch00_preface.md",
+      "title": "Preface and Table of Contents",
+      "pages": "viii-xiv",
+      "token_count": 6910,
+      "keywords": [
+        "modal logic overview",
+        "relational structures",
+        "Kripke semantics",
+        "correspondence theory",
+        "completeness theory",
+        "book structure"
+      ]
+    },
+    {
+      "id": "ch01",
+      "file": "ch01_basic-concepts.md",
+      "title": "Basic Concepts",
+      "pages": "1-49",
+      "token_count": 14498,
+      "keywords": [
+        "relational structures",
+        "modal languages",
+        "Kripke frames",
+        "Kripke models",
+        "satisfaction",
+        "validity",
+        "general frames",
+        "normal modal logics",
+        "K axiom",
+        "bisimulation"
+      ]
+    },
+    {
+      "id": "ch02_partial",
+      "file": "ch02_models-partial.md",
+      "title": "Models (partial, pages 50-69)",
+      "pages": "50-69",
+      "token_count": 12131,
+      "keywords": [
+        "invariance",
+        "bisimulations",
+        "tree unraveling",
+        "ultrafilter extensions",
+        "modal saturation",
+        "semantic equivalence"
+      ]
+    }
+  ]
+}

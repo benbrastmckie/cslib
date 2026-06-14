@@ -4,13 +4,14 @@
     {
       "project_number": 200,
       "project_name": "fix_literature_directory_quality",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "general",
       "description": "Fix literature directory quality: complete incomplete book splits (blackburn_2001 only has 3 of 7+ chapters, mendelson_2016 and church_1956 have content loss), remove redundant monolithic .md files after verifying split completeness, audit index.json entries for accuracy (token counts, paths, keywords), ensure all chapter files are within the 4000-token budget for --lit injection, and verify the 3 scholarly reconstruction files (burgess_1984, gabbay_1994_ch10, reynolds_1992) have adequate content for research use. Goal: make specs/literature/ fully functional for --lit flag during /research, /plan, and /implement phases",
       "topic": "Project Management",
       "created": "2026-06-14T20:36:46Z",
-      "last_updated": "2026-06-14T21:16:15Z",
-      "session_id": "sess_1781471755_c68e24"
+      "last_updated": "2026-06-14T21:21:13Z",
+      "session_id": "sess_1781471755_c68e24",
+      "completion_summary": "Fixed specs/literature/ directory quality: added missing zakharyaschev_2001_sec00 index.json entry (45 -> 46 entries), corrected broken README.md references by replacing blackburn_2001_ch4_summary.md with actual split directory listings, and removed 7 redundant monolithic .md files (1.25M+ tokens of duplicate content) after verifying all split directories were intact."
     },
     {
       "project_number": 199,

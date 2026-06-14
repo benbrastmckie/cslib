@@ -17,10 +17,11 @@ public import Mathlib.Order.TypeTags
 ## Main definitions
 
 - `Proposition` : the type of propositions over a given type of atom. Primitives are `atom`,
-  `bot` (falsum), `imp` (implication), `and` (conjunction), and `or` (disjunction), following
-  the standard Gentzen/Prawitz/Troelstra-van Dalen full-connective tradition. Negation (`neg`),
-  verum (`top`), and biconditional (`iff`) are derived connectives (`abbrev`s) rather than
-  constructors.
+  `bot` (falsum), `imp` (implication), `and` (conjunction), and `or` (disjunction). Negation
+  (`neg`), verum (`top`), and biconditional (`iff`) are derived connectives (`abbrev`s). This
+  follows natural deduction style ([Gentzen1935], [Prawitz1965], Ch. I sec. 1.2) and the
+  constructive mathematics tradition ([Johansson1937], [TroelstraVanDalen1988]) in which `neg A`
+  abbreviates `A → ⊥` rather than being taken as primitive.
 - `Theory` : set of `Proposition`.
 - `IsIntuitionistic` : a theory is intuitionistic if it contains the principle of explosion.
 - `IsClassical` : an intuitionistic theory is classical if it further contains double negation

@@ -1,7 +1,7 @@
 # Implementation Plan: Task #199 -- PR Citation Review
 
 - **Task**: 199 - Review PR citations for accuracy and completeness
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 1.5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/199_review_pr_citations/reports/01_pr-citation-review.md
@@ -65,7 +65,7 @@ No ROADMAP.md found.
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Add BibTeX Entries to references.bib [NOT STARTED]
+### Phase 1: Add BibTeX Entries to references.bib [COMPLETED]
 
 **Goal**: Add verified Bentzen2023 and Trufas2024 entries to `references.bib` in alphabetical order, matching the existing entry style.
 
@@ -91,7 +91,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Fix Defs.lean Docstring [NOT STARTED]
+### Phase 2: Fix Defs.lean Docstring [COMPLETED]
 
 **Goal**: Replace the invented "full-connective tradition" label at line 21 of `Defs.lean` with literature-grounded language that properly credits Johansson1937 and uses only verifiable claims.
 
@@ -115,7 +115,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Update PR Description and Final Verification [NOT STARTED]
+### Phase 3: Update PR Description and Final Verification [COMPLETED]
 
 **Goal**: Fix the pronoun error in the PR description, ensure PR description reflects the updated Lean file citations, and run final build verification.
 

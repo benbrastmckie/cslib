@@ -53,7 +53,7 @@ With primitive `bot`, all derived connectives (`neg`, `top`, `iff`) and logic de
 (`IPL`, `IsIntuitionistic`, `IsClassical`) are constraint-free. The five-primitive signature
 `{atom, bot, imp, and, or}` is standard in formalizations of intuitionistic and minimal
 propositional logic: [Bentzen2023](https://arxiv.org/abs/2310.01916) uses exactly
-`{atom, bot, impl, and, or}` in his Lean formalization of IPL completeness, and
+`{atom, bot, impl, and, or}` in their Lean formalization of IPL completeness, and
 [Trufas2024](https://doi.org/10.4204/EPTCS.410.9) uses `{var, bottom, and, or, implication}`
 with negation and top derived as `ϕ ⇒ ⊥` and `∼⊥`. The convention traces to
 Johansson [Johansson1937], who treats `⊥` as an undefined primitive symbol ("undefiniertes
@@ -83,8 +83,7 @@ PR #607 by @fmontesi introduces per-operator typeclass files under `Operators/`,
 propositional and modal connectives. Our `Connectives.lean` overlaps in the propositional case
 (`HasBot`, `HasImp`, `HasAnd`, `HasOr`). If PR #607 merges first, we can align our definitions
 with its typeclass names and file structure; if ours merges first, #607 can import from
-`Connectives.lean` for the propositional operators. I am happy to coordinate on the final
-structure.
+`Connectives.lean` for the propositional operators.
 
 ### PR #536
 
@@ -115,6 +114,9 @@ This PR is the first in a planned series contributing our propositional logic fo
 5. **PR 5**: Strong completeness for minimal/intuitionistic/classical Hilbert systems
    (canonical model construction)
 6. **PR 6**: Weak completeness and compactness
+7. **PR 7**: Tableau system for classical propositional logic with soundness and completeness
+8. **PR 8**: Tableau system for intuitionistic propositional logic with soundness and completeness
+9. **PR 9**: Tableau system for minimal propositional logic with soundness and completeness
 
 All results in this roadmap have been completed in our development branch:
 https://github.com/benbrastmckie/cslib/tree/main/Cslib/Logics/Propositional
@@ -143,7 +145,6 @@ Files affected upstream: `Defs.lean`, `NaturalDeduction/Basic.lean` (only consum
 This PR was prepared with the assistance of Claude Code (Anthropic). The AI tool was used for:
 - Drafting and extracting files from a development branch to create a clean PR branch
 - Running CI verification commands
-- Literature verification and citation checking
 
 The mathematical content, proof architecture, and design decisions were verified by the author.
 All Lean code compiles with no sorries.

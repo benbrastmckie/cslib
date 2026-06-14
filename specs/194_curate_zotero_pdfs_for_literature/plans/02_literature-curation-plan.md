@@ -67,16 +67,16 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Create Master Index Schema and Index Paper-Length Files [IN PROGRESS]
+### Phase 1: Create Master Index Schema and Index Paper-Length Files [COMPLETED]
 
 **Goal**: Establish the `specs/literature/index.json` with the correct schema and populate it with entries for all existing paper-length files that already fit within the token budget.
 
 **Tasks**:
-- [ ] Design the index.json schema (fields: id, bib_key, book_title, authors, year, section, path, page_range, token_count, keywords, summary)
-- [ ] Measure token counts for all paper-length files (bentzen_2023.md, from_2022.md, henkin_1949.md, johansson_1937.md, post_1921.md, trufas_2024.md)
-- [ ] Create `specs/literature/index.json` with version=1, token_budget=4000, max_chunks=10
-- [ ] Add entries for each paper-length file with curated keywords (6-10 per entry) and one-sentence summaries
-- [ ] Verify the index is valid JSON with `jq . specs/literature/index.json`
+- [x] Design the index.json schema (fields: id, bib_key, book_title, authors, year, section, path, page_range, token_count, keywords, summary) *(completed)*
+- [x] Measure token counts for all paper-length files (bentzen_2023.md, from_2022.md, henkin_1949.md, johansson_1937.md, post_1921.md, trufas_2024.md) *(completed)*
+- [x] Create `specs/literature/index.json` with version=1, token_budget=4000, max_chunks=10 *(completed)*
+- [x] Add entries for each paper-length file with curated keywords (6-10 per entry) and one-sentence summaries *(completed: 7 entries including gentzen_1935)*
+- [x] Verify the index is valid JSON with `jq . specs/literature/index.json` *(completed)*
 
 **Timing**: 1 hour
 

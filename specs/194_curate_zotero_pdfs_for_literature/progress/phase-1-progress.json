@@ -2,16 +2,24 @@
   "phase": 1,
   "phase_name": "Create Master Index Schema and Index Paper-Length Files",
   "started_at": "2026-06-14T12:10:00Z",
-  "last_updated": "2026-06-14T12:10:00Z",
+  "last_updated": "2026-06-14T12:15:00Z",
   "objectives": [
-    {"id": 1, "description": "Design the index.json schema", "status": "in_progress"},
+    {"id": 1, "description": "Design the index.json schema", "status": "done"},
     {"id": 2, "description": "Measure token counts for all paper-length files", "status": "done"},
-    {"id": 3, "description": "Create specs/literature/index.json with version=1, token_budget=4000, max_chunks=10", "status": "not_started"},
-    {"id": 4, "description": "Add entries for each paper-length file with curated keywords and one-sentence summaries", "status": "not_started"},
-    {"id": 5, "description": "Verify the index is valid JSON", "status": "not_started"}
+    {"id": 3, "description": "Create specs/literature/index.json with version=1, token_budget=4000, max_chunks=10", "status": "done"},
+    {"id": 4, "description": "Add entries for each paper-length file with curated keywords and one-sentence summaries", "status": "done"},
+    {"id": 5, "description": "Verify the index is valid JSON", "status": "done"}
   ],
-  "current_objective": 3,
+  "current_objective": null,
   "approaches_tried": [],
   "handoff_count": 0,
-  "deviations": []
+  "deviations": [
+    {
+      "task_id": "1.4",
+      "description": "Add entries for each paper-length file",
+      "type": "altered",
+      "reason": "Also included gentzen_1935.md (28k tokens) even though it exceeds 4k budget, since it is a single paper translation worth indexing; all 7 entries created successfully",
+      "annotation": "*(deviation: altered — included gentzen_1935 in addition to the 6 named files)*"
+    }
+  ]
 }

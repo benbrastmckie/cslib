@@ -47,10 +47,13 @@ defects:
 
 With primitive `bot`, all derived connectives (`neg`, `top`, `iff`) and logic definitions
 (`IPL`, `IsIntuitionistic`, `IsClassical`) are constraint-free. The five-primitive signature
-`{atom, bot, imp, and, or}` is the standard one for intuitionistic and minimal logic in
-[TroelstraVanDalen1988] Chapter 2. Primitive `⊥` is required for Johansson's minimal logic
-[Johansson1937], which defines negation `¬A := A → ⊥` using `⊥` as an undefined primitive
-symbol ("undefiniertes Grundzeichen").
+`{atom, bot, imp, and, or}` is standard in formalizations of intuitionistic and minimal
+propositional logic: [Bentzen2023](https://arxiv.org/abs/2310.01916) uses exactly
+`{atom, bot, impl, and, or}` in his Lean formalization of IPL completeness, and
+[Trufas2024](https://doi.org/10.4204/EPTCS.410.9) uses `{var, bottom, and, or, implication}`
+with negation and top derived as `ϕ ⇒ ⊥` and `∼⊥`. The convention traces to
+Johansson [Johansson1937], who treats `⊥` as an undefined primitive symbol ("undefiniertes
+Grundzeichen") and defines negation `¬a := a ⊃ ⊥`.
 
 ## Naming: `imp` vs `impl`
 
@@ -82,8 +85,13 @@ the primitive connective set.
 
 ### PR #587
 
-PR #587 by @thomaskwaring proposes model and semantics typeclasses and also modifies
-`Connectives.lean`. We should coordinate to avoid conflicting changes to this file.
+PR #587 by @thomaskwaring introduces model and semantics typeclasses (satisfaction relations,
+valuations, frame conditions). Our `Connectives.lean` operates at the **syntactic** level —
+it abstracts over formula types that provide connective constructors (`HasBot`, `HasImp`, etc.)
+so that proof system infrastructure can be defined polymorphically. PR #587 operates at the
+**semantic** level — it abstracts over models that interpret formulas. Both PRs modify
+`Connectives.lean`, but the concerns are orthogonal: ours provides the syntactic interface
+that semantic typeclasses would interpret.
 
 ### Mathlib `Bot`/`HImp` Classes
 
@@ -104,11 +112,12 @@ This PR is the first in a planned series contributing our propositional logic fo
    predicates and sequent derivability
 3. **PR 3**: ND-Hilbert equivalence for all three logic strengths
 4. **PR 4**: Semantics (valuation-based, Kripke frames) with soundness
-5. **PR 5**: Completeness for CPL (truth table argument)
-6. **PR 6**: Completeness for IPL (canonical model construction)
+5. **PR 5**: Strong completeness for minimal/intuitionistic/classical Hilbert systems
+   (canonical model construction)
+6. **PR 6**: Weak completeness and compactness
 
-The planned roadmap draws from the development in Troelstra & van Dalen [TroelstraVanDalen1988]
-Chapter 2, with PR 5-6 following the completeness proof strategy there.
+All results in this roadmap have been completed in our development branch:
+https://github.com/benbrastmckie/cslib/tree/main/Cslib/Logics/Propositional
 
 ## Changed Files
 

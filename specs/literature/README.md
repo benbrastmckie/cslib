@@ -69,6 +69,18 @@ All files follow the naming convention `{author}_{year}.md` (first author surnam
   logic, Kripke semantics, completeness, natural deduction. Section 2.5 for Kripke completeness,
   Section 10.4 for natural deduction.
 
+- **Van der Molen 2016** `[NO FILE]`: *The Johansson/Heyting letters and the birth of minimal logic*.
+  ILLC Report X-2016-04, University of Amsterdam.
+  URL: https://eprints.illc.uva.nl/696/
+  Historical study of the 1935–1936 Johansson/Heyting correspondence that led to the 1937
+  publication. Confirms that in Johansson's general system, falsum is "an undefined primitive
+  symbol" — matching the original German "undefiniertes Grundzeichen".
+
+- **Odintsov 2008** `[NO FILE]`: *Constructive Negations and Paraconsistency*. Trends in Logic 26, Springer.
+  Systematic study of negation in constructive logic. Treats Johansson's minimal logic (1937)
+  as foundational: "the negation is defined as reduction to absurdity" with Johansson's system
+  as the paraconsistent analog of intuitionistic logic (refusing the explosion axiom).
+
 - **Kripke 1965** `[NO FILE]`: *Semantical Analysis of Intuitionistic Logic I*. In Crossley & Dummett (eds.),
   Formal Systems and Recursive Functions, pp. 92-130. North-Holland.
   CSLib's entire intuitionistic and minimal completeness proof architecture is built on Kripke
@@ -177,6 +189,13 @@ Paper-length files remain as top-level `.md` files (e.g., `burgess_1982_i.md`).
 - **Prawitz 1965** [Prawitz1965] `[NO FILE]`: *Natural Deduction: A Proof-Theoretical Study*. Almqvist & Wiksell.
   Definitive treatment of natural deduction. Normalization theorem. Key reference for the
   Hilbert/ND equivalence (task 186).
+
+- **Troelstra & Schwichtenberg 2000** `[NO FILE]`: *Basic Proof Theory*, 2nd ed. Cambridge Tracts in
+  Theoretical Computer Science 43. Cambridge University Press.
+  Confirms "Minimal logic has been introduced by Johansson (1937)" and that minimal and
+  intuitionistic logic "differ only in the treatment of negation, or (equivalently) falsehood."
+  Comprehensive treatment of natural deduction and sequent calculus for intuitionistic and
+  minimal systems.
 
 ## Completeness and Compactness
 

@@ -58,7 +58,7 @@ No ROADMAP.md found.
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Merge Content and Update Imports [NOT STARTED]
+### Phase 1: Merge Content and Update Imports [COMPLETED]
 
 **Goal**: Absorb all declarations from the 3 legacy files into the 3 strong completeness files, update imports, and install docstrings.
 
@@ -87,7 +87,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Delete Legacy Files and Full CI [NOT STARTED]
+### Phase 2: Delete Legacy Files and Full CI [IN PROGRESS]
 
 **Goal**: Remove the 3 legacy files, regenerate the barrel file, and verify the full CI pipeline passes.
 

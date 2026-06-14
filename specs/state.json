@@ -1,6 +1,15 @@
 {
-  "next_project_number": 190,
+  "next_project_number": 191,
   "active_projects": [
+    {
+      "project_number": 190,
+      "project_name": "review_propositional_pr_readiness",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional PRs",
+      "created": "2026-06-14T16:00:39Z",
+      "last_updated": "2026-06-14T16:00:39Z"
+    },
     {
       "project_number": 189,
       "project_name": "rename_completeness_to_canonical_model",

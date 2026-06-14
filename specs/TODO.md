@@ -1,5 +1,5 @@
 ---
-next_project_number: 190
+next_project_number: 191
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 190
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,179,180 | -- | Bimodal Porting |
+| 1 | 36,37,179,180,190 | -- | Bimodal Porting, Propositional PRs |
 | 2 | 39,40,181 | 36,37,179,180 | Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -26,6 +26,10 @@ next_project_number: 190
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
+### Propositional PRs
+
+190 [NOT STARTED] — review_propositional_pr_readiness
+
 ### Temporal Logic
 
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
@@ -39,6 +43,14 @@ next_project_number: 190
   └─ 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors  (see above)
 
 ## Tasks
+
+### 190. Review propositional pr readiness
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional PRs
+- **Dependencies**: None
+
+---
 
 ### 189. Rename completeness to canonical model
 - **Status**: [COMPLETED]

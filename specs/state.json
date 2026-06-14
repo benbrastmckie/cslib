@@ -7,9 +7,9 @@
       "status": "not_started",
       "task_type": "cslib",
       "topic": "Propositional PRs",
-      "description": "Keep HasBot/HasImp/HasAnd/HasOr as custom CSLib classes for naming symmetry and to match the Has* convention used across ProofSystem.lean (31+ refs), Consistency.lean, and BigConj.lean. Add a bridge instance [HasBot F] : Bot F to Connectives.lean so formula types get Mathlib ⊥ notation for free. Update pr-description.md Mathlib section to replace the inaccurate \"order-theoretic connotations\" rationale with the correct reasoning: uniform Has* naming, semantic fit for syntactic formula types, and trivial bridge. Scope: Connectives.lean (bridge instance), pr-description.md (Mathlib section rewrite)",
+      "description": "Keep HasBot/HasImp/HasAnd/HasOr as custom CSLib classes for naming symmetry and to match the Has* convention used across ProofSystem.lean, Axioms.lean, Consistency.lean, and BigConj.lean. No bridge instance needed — concrete formula types already provide direct Bot instances for ⊥ notation, and generic code intentionally uses HasBot.bot. Update pr-description.md Mathlib section to accurately explain the design choice: uniform Has* naming, concrete types get ⊥ via direct Bot instances, HImp notation mismatch prevents HasImp replacement. Scope: pr-description.md (Mathlib section rewrite)",
       "created": "2026-06-14T18:48:19Z",
-      "last_updated": "2026-06-14T18:55:41Z"
+      "last_updated": "2026-06-14T19:00:29Z"
     },
     {
       "project_number": 194,
@@ -27,6 +27,11 @@
           "path": "specs/194_curate_zotero_pdfs_for_literature/reports/02_literature-organization-practices.md",
           "type": "research",
           "summary": "Best practices for structuring large markdown literature files with index.json metadata"
+        },
+        {
+          "path": "specs/194_curate_zotero_pdfs_for_literature/plans/02_literature-curation-plan.md",
+          "type": "plan",
+          "summary": "Implementation plan for organizing literature into indexed chapter subdirectories with temporal/bimodal paper curation"
         }
       ],
       "memory_candidates": [

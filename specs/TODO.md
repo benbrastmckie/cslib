@@ -59,7 +59,7 @@ next_project_number: 197
 - **Topic**: Propositional PRs
 - **Dependencies**: None
 
-**Description**: Keep HasBot/HasImp/HasAnd/HasOr as custom CSLib classes for naming symmetry and to match the Has* convention used across ProofSystem.lean (31+ refs), Consistency.lean, and BigConj.lean. Add a bridge instance [HasBot F] : Bot F to Connectives.lean so formula types get Mathlib ⊥ notation for free. Update pr-description.md Mathlib section to replace the inaccurate "order-theoretic connotations" rationale with the correct reasoning: uniform Has* naming, semantic fit for syntactic formula types, and trivial bridge. Scope: Connectives.lean (bridge instance), pr-description.md (Mathlib section rewrite)
+**Description**: Keep HasBot/HasImp/HasAnd/HasOr as custom CSLib classes for naming symmetry and to match the Has* convention used across ProofSystem.lean, Axioms.lean, Consistency.lean, and BigConj.lean. No bridge instance needed — concrete formula types already provide direct Bot instances for ⊥ notation, and generic code intentionally uses HasBot.bot. Update pr-description.md Mathlib section to accurately explain the design choice: uniform Has* naming, concrete types get ⊥ via direct Bot instances, HImp notation mismatch prevents HasImp replacement. Scope: pr-description.md (Mathlib section rewrite)
 
 ---
 
@@ -79,6 +79,7 @@ next_project_number: 197
 - **Topic**: Project Management
 - **Dependencies**: None
 - **Research**: [194_curate_zotero_pdfs_for_literature/reports/02_literature-organization-practices.md]
+- **Plan**: [194_curate_zotero_pdfs_for_literature/plans/02_literature-curation-plan.md]
 
 ---
 

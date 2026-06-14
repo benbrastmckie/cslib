@@ -39,13 +39,13 @@
     {
       "project_number": 197,
       "project_name": "modal_upstream_initial_pr",
-      "status": "planning",
+      "status": "planned",
       "task_type": "pr",
       "title": "Scope initial Modal/ upstream PR (~300 LOC)",
       "description": "Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible",
       "topic": "Modal Logic",
       "created": "2026-06-14T19:08:07Z",
-      "last_updated": "2026-06-14T21:20:00Z",
+      "last_updated": "2026-06-14T21:22:00Z",
       "session_id": "sess_1781469976_273d9b",
       "research_artifacts": [
         "specs/197_modal_upstream_initial_pr/reports/01_modal-upstream-pr-scope.md"

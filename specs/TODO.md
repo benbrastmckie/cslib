@@ -30,7 +30,7 @@ next_project_number: 201
 
 ### Modal Logic
 
-197 [PLANNING] — Review the ambition to contribute Modal/ to upstream, identifying
+197 [PLANNED] — Review the ambition to contribute Modal/ to upstream, identifying
 
 ### Project Management
 
@@ -85,7 +85,7 @@ next_project_number: 201
 ---
 
 ### 197. Scope initial Modal/ upstream PR (~300 LOC)
-- **Status**: [PLANNING]
+- **Status**: [PLANNED]
 - **Task Type**: pr
 - **Topic**: Modal Logic
 - **Dependencies**: None

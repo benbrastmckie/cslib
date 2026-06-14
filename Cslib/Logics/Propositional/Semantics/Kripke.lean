@@ -87,6 +87,34 @@ def IForces [Preorder World]
   | .and φ ψ => IForces v bot_forces w φ ∧ IForces v bot_forces w ψ
   | .or φ ψ => IForces v bot_forces w φ ∨ IForces v bot_forces w ψ
 
+@[simp] theorem IForces_atom [Preorder World]
+    (v : World → Atom → Prop) (bot_forces : World → Prop)
+    (w : World) (p : Atom) :
+    IForces v bot_forces w (.atom p) = v w p := rfl
+
+@[simp] theorem IForces_bot [Preorder World]
+    (v : World → Atom → Prop) (bot_forces : World → Prop)
+    (w : World) :
+    IForces v bot_forces w .bot = bot_forces w := rfl
+
+@[simp] theorem IForces_imp [Preorder World]
+    (v : World → Atom → Prop) (bot_forces : World → Prop)
+    (w : World) (φ ψ : PL.Proposition Atom) :
+    IForces v bot_forces w (.imp φ ψ) =
+      ∀ w', w ≤ w' → IForces v bot_forces w' φ → IForces v bot_forces w' ψ := rfl
+
+@[simp] theorem IForces_and [Preorder World]
+    (v : World → Atom → Prop) (bot_forces : World → Prop)
+    (w : World) (φ ψ : PL.Proposition Atom) :
+    IForces v bot_forces w (.and φ ψ) =
+      (IForces v bot_forces w φ ∧ IForces v bot_forces w ψ) := rfl
+
+@[simp] theorem IForces_or [Preorder World]
+    (v : World → Atom → Prop) (bot_forces : World → Prop)
+    (w : World) (φ ψ : PL.Proposition Atom) :
+    IForces v bot_forces w (.or φ ψ) =
+      (IForces v bot_forces w φ ∨ IForces v bot_forces w ψ) := rfl
+
 /-- Persistence of forcing under the preorder (Proposition 2.1 of [ChagrovZakharyaschev1997]).
 
 If a formula is forced at world `w` and `w ≤ w'`, then the formula is forced at `w'`.

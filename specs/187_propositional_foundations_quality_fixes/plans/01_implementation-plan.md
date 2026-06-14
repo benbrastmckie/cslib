@@ -97,7 +97,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Add @[simp] Lemmas [NOT STARTED]
+### Phase 2: Add @[simp] Lemmas [COMPLETED]
 
 **Goal**: Add @[simp] lemmas for Evaluate and IForces base cases to improve downstream proof automation.
 

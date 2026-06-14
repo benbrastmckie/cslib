@@ -42,6 +42,21 @@ def Evaluate (v : Valuation Atom) : PL.Proposition Atom → Prop
   | .and a b => Evaluate v a ∧ Evaluate v b
   | .or a b => Evaluate v a ∨ Evaluate v b
 
+@[simp] theorem Evaluate_atom (v : Valuation Atom) (x : Atom) :
+    Evaluate v (.atom x) = v x := rfl
+
+@[simp] theorem Evaluate_bot (v : Valuation Atom) :
+    Evaluate v (.bot) = False := rfl
+
+@[simp] theorem Evaluate_imp (v : Valuation Atom) (a b : PL.Proposition Atom) :
+    Evaluate v (.imp a b) = (Evaluate v a → Evaluate v b) := rfl
+
+@[simp] theorem Evaluate_and (v : Valuation Atom) (a b : PL.Proposition Atom) :
+    Evaluate v (.and a b) = (Evaluate v a ∧ Evaluate v b) := rfl
+
+@[simp] theorem Evaluate_or (v : Valuation Atom) (a b : PL.Proposition Atom) :
+    Evaluate v (.or a b) = (Evaluate v a ∨ Evaluate v b) := rfl
+
 /-- A proposition is a tautology iff it is true under every valuation. -/
 def Tautology (φ : PL.Proposition Atom) : Prop :=
   ∀ (v : Valuation Atom), Evaluate v φ

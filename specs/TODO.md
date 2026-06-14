@@ -1,5 +1,5 @@
 ---
-next_project_number: 193
+next_project_number: 194
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 193
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,179,180,192 | -- | Bimodal Porting, Propositional PRs |
+| 1 | 36,37,179,180,192,193 | -- | Bimodal Porting, Modal Logic, Propositional PRs |
 | 2 | 39,40,181 | 36,37,179,180 | Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -25,6 +25,10 @@ next_project_number: 193
 ### Foundations
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
+
+### Modal Logic
+
+193 [NOT STARTED] — clean_up_modal_deduction_theorem_naming
 
 ### Propositional PRs
 
@@ -43,6 +47,14 @@ next_project_number: 193
   └─ 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors  (see above)
 
 ## Tasks
+
+### 193. Clean up modal deduction theorem naming
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+---
 
 ### 192. Research verify literature refs pr 188
 - **Status**: [RESEARCHING]

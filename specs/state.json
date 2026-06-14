@@ -1,6 +1,15 @@
 {
-  "next_project_number": 193,
+  "next_project_number": 194,
   "active_projects": [
+    {
+      "project_number": 193,
+      "project_name": "clean_up_modal_deduction_theorem_naming",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "created": "2026-06-14T17:37:54Z",
+      "last_updated": "2026-06-14T17:37:54Z"
+    },
     {
       "project_number": 192,
       "project_name": "research_verify_literature_refs_pr_188",

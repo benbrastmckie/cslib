@@ -11,7 +11,7 @@ next_project_number: 188
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,171,179,180,186 | -- | Bimodal Porting, Propositional Logic |
+| 1 | 36,37,179,180,186 | -- | Bimodal Porting, Propositional Logic |
 | 2 | 39,40,181 | 36,37,179,180 | Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -28,7 +28,6 @@ next_project_number: 188
 
 ### Propositional Logic
 
-171 [IMPLEMENTING] — Research connective-basis design for minimal, intuitionistic, and
 186 [NOT STARTED] — Refactor the Hilbert / natural deduction extensional equivalence 
 
 ### Temporal Logic
@@ -117,12 +116,13 @@ next_project_number: 188
 ---
 
 ### 171. Research connective basis min int classical
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [171_research_connective_basis_min_int_classical/reports/01_team-research.md]
 - **Plan**: [171_research_connective_basis_min_int_classical/plans/01_implementation-plan.md]
+- **Summary**: [171_research_connective_basis_min_int_classical/summaries/01_execution-summary.md]
 
 **Description**: Research connective-basis design for minimal, intuitionistic, and classical propositional logic in CSLib: rigorously ground in literature (Gentzen 1935, Prawitz 1965, Troelstra & van Dalen 1988, Heyting 1930, Church 1956, Chagrov & Zakharyaschev 1997, Johansson 1937) whether {imp, bot} primitives with derived neg/top/and/or is adequate — addressing ctchou's objection on PR #635 that {imp, bot} is functionally complete only classically (intuitionistically, and/or are NOT definable), and his challenge that Gentzen/Prawitz/T&vD do not actually use this basis or the 10-to-5 natural deduction rule reduction. Determine the truth of these claims and design a formula type + proof system architecture that supports minimal, intuitionistic, and classical logics naturally and elegantly (e.g., full primitive connective set {bot, atom, imp, and, or} with logics distinguished by inference rules: minimal = no ex falso, intuitionistic = + ex falso, classical = + DNE/Peirce). Also reconcile with maintainer fmontesi's competing PR #607 typeclass approach (Operators/ files, notation-level classes over unchanged primitive constructors) and eric-wieser's suggestion to co-opt Mathlib's Bot/HImp classes. Verify all citations against references.bib and primary sources.
 

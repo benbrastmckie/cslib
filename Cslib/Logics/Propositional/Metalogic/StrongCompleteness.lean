@@ -505,6 +505,7 @@ theorem prop_strong_completeness {Γ : Set (PL.Proposition Atom)} {φ : PL.Propo
 
 /-- **Strong Soundness and Completeness for Classical Logic**:
 `φ` is a classical semantic consequence of `Γ` iff `φ` is set-derivable from `Γ`. -/
+@[simp]
 theorem prop_strong_completeness_iff {Γ : Set (PL.Proposition Atom)} {φ : PL.Proposition Atom} :
     SemanticEntails Γ φ ↔ SetDerivable PropositionalAxiom Γ φ :=
   ⟨prop_strong_completeness, prop_strong_soundness⟩
@@ -544,7 +545,7 @@ from the empty context using `PropositionalAxiom`.
 
 This is a corollary of `prop_strong_completeness_iff` obtained by instantiating at
 `Γ = ∅` and using `SetDerivable_empty_iff`. -/
-theorem prop_completeness_iff_tautology {φ : PL.Proposition Atom} :
+@[simp] theorem prop_completeness_iff_tautology {φ : PL.Proposition Atom} :
     Tautology φ ↔ Derivable PropositionalAxiom φ :=
   ⟨prop_completeness, prop_soundness_tautology⟩
 

@@ -279,6 +279,7 @@ theorem min_strong_completeness {Γ : Set (PL.Proposition Atom)} {φ : PL.Propos
 
 /-- **Strong Soundness and Completeness for Minimal Logic**:
 `φ` is a minimal Kripke semantic consequence of `Γ` iff `φ` is set-derivable from `Γ`. -/
+@[simp]
 theorem min_strong_completeness_iff {Γ : Set (PL.Proposition Atom)} {φ : PL.Proposition Atom} :
     MSemanticEntails Γ φ ↔ SetDerivable MinPropAxiom Γ φ :=
   ⟨min_strong_completeness, min_strong_soundness⟩
@@ -329,7 +330,7 @@ using `MinPropAxiom`.
 
 This is a corollary of `min_strong_completeness_iff` obtained by instantiating at
 `Γ = ∅` and using `SetDerivable_empty_iff`. -/
-theorem min_soundness_completeness {φ : PL.Proposition Atom} :
+@[simp] theorem min_soundness_completeness {φ : PL.Proposition Atom} :
     MValid.{u, u} φ ↔ Derivable MinPropAxiom φ :=
   ⟨min_completeness, min_soundness_derivable⟩
 

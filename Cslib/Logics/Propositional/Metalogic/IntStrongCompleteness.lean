@@ -293,6 +293,7 @@ theorem int_strong_completeness {Γ : Set (PL.Proposition Atom)} {φ : PL.Propos
 
 /-- **Strong Soundness and Completeness for Intuitionistic Logic**:
 `φ` is an intuitionistic Kripke semantic consequence of `Γ` iff `φ` is set-derivable from `Γ`. -/
+@[simp]
 theorem int_strong_completeness_iff {Γ : Set (PL.Proposition Atom)} {φ : PL.Proposition Atom} :
     ISemanticEntails Γ φ ↔ SetDerivable IntPropAxiom Γ φ :=
   ⟨int_strong_completeness, int_strong_soundness⟩
@@ -334,7 +335,7 @@ using `IntPropAxiom`.
 
 This is a corollary of `int_strong_completeness_iff` obtained by instantiating at
 `Γ = ∅` and using `SetDerivable_empty_iff`. -/
-theorem int_soundness_completeness {φ : PL.Proposition Atom} :
+@[simp] theorem int_soundness_completeness {φ : PL.Proposition Atom} :
     IValid.{u, u} φ ↔ Derivable IntPropAxiom φ :=
   ⟨int_completeness, int_soundness_derivable⟩
 

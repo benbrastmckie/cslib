@@ -53,7 +53,7 @@ attribute [local instance] Classical.propDecidable
 /-- `HasHilbertTree` instance for propositional logic, fixed at `PropositionalAxiom`
 for backward compatibility. Maps PL's `.implyK`/`.implyS` axiom constructors to the
 generic typeclass fields. -/
-noncomputable instance : HasHilbertTree (PL.Proposition Atom) where
+noncomputable local instance : HasHilbertTree (PL.Proposition Atom) where
   Tree := fun Γ φ => DerivationTree PropositionalAxiom Γ φ
   implyK := fun φ ψ => .ax [] _ (.implyK φ ψ)
   implyS := fun φ ψ χ => .ax [] _ (.implyS φ ψ χ)

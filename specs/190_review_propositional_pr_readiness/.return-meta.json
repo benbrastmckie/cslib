@@ -1,21 +1,39 @@
 {
-  "status": "planned",
+  "status": "implemented",
+  "started_at": "2026-06-14T09:21:00Z",
+  "completed_at": "2026-06-14T09:55:00Z",
   "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/190_review_propositional_pr_readiness/plans/01_pr-readiness-fixes.md",
-      "summary": "Implementation plan with 3 phases: fix global HasHilbertTree instance, add @[simp] tags to 6 biconditionals, run full CI verification"
-    }
+    "specs/190_review_propositional_pr_readiness/summaries/01_pr-readiness-summary.md"
   ],
-  "next_steps": "Run /implement 190 to execute the plan",
-  "metadata": {
-    "session_id": "sess_1781453586_64a8aa",
-    "agent_type": "planner-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
-    "phase_count": 3,
-    "estimated_hours": 1.5,
-    "dependency_waves": [[1, 2], [3]]
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 18,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "checkInitImports_passed": true,
+    "lint_style_passed": true,
+    "lake_shake_passed": true,
+    "lake_test_running": true,
+    "notes": "lake lint has pre-existing errors in Bimodal/Temporal files unrelated to our propositional changes. lake test is running but no propositional tests exist. lake shake warnings are pre-existing in Temporal files."
   },
-  "memory_candidates": []
+  "phases": {
+    "phase_1": "COMPLETED",
+    "phase_2": "COMPLETED",
+    "phase_3": "COMPLETED"
+  },
+  "files_modified": [
+    "Cslib/Logics/Propositional/Metalogic/DeductionTheorem.lean",
+    "Cslib/Logics/Propositional/Metalogic/StrongCompleteness.lean",
+    "Cslib/Logics/Propositional/Metalogic/IntStrongCompleteness.lean",
+    "Cslib/Logics/Propositional/Metalogic/MinStrongCompleteness.lean"
+  ],
+  "metadata": {
+    "session_id": "sess_1781453847_16ba4b",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
 }

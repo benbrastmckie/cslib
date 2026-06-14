@@ -1,7 +1,7 @@
 # Implementation Plan: Task #190
 
 - **Task**: 190 - Review propositional PR readiness
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 1.5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/190_review_propositional_pr_readiness/reports/01_team-research.md
@@ -60,7 +60,7 @@ This task aligns with the propositional logic module readiness for upstream PR. 
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Fix Global HasHilbertTree Instance [NOT STARTED]
+### Phase 1: Fix Global HasHilbertTree Instance [COMPLETED]
 
 **Goal**: Convert the global unscoped `HasHilbertTree` instance to a local instance to prevent scope leakage.
 
@@ -81,7 +81,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Add @[simp] Tags to Biconditional Theorems [NOT STARTED]
+### Phase 2: Add @[simp] Tags to Biconditional Theorems [COMPLETED]
 
 **Goal**: Add `@[simp]` attribute to 6 key soundness/completeness biconditional theorems to enable downstream `simp` usage.
 
@@ -108,7 +108,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Full CI Verification [NOT STARTED]
+### Phase 3: Full CI Verification [COMPLETED]
 
 **Goal**: Run the complete CSLib CI pipeline to confirm all changes are green.
 

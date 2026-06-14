@@ -1,0 +1,22 @@
+{
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/187_propositional_foundations_quality_fixes/plans/01_implementation-plan.md",
+      "summary": "2-phase implementation plan for 4 remaining quality fixes (docstring, renames, simp lemmas)"
+    }
+  ],
+  "next_steps": "Run /implement 187 to execute the plan",
+  "metadata": {
+    "session_id": "sess_1781403613_51bc1e",
+    "agent_type": "planner-agent",
+    "duration_seconds": 120,
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 2,
+    "estimated_hours": 1.5,
+    "dependency_waves": [[1], [2]]
+  },
+  "memory_candidates": []
+}

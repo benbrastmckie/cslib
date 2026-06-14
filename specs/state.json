@@ -2,9 +2,39 @@
   "next_project_number": 188,
   "active_projects": [
     {
+      "project_number": 186,
+      "project_name": "hilbert_nd_equivalence_refactor",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Refactor the Hilbert / natural deduction extensional equivalence in Cslib/Logics/Propositional/NaturalDeduction/ to the highest standards of quality and elegance. Current gaps: (1) no minimal logic instantiation (hilbert_iff_nd_min) — the generic theorem requires EFQ which MinPropAxiom lacks, so either a separate EFQ-free version or an adapted ND system is needed; (2) equivalence is only for closed derivability (empty context Derivable ↔ DerivableIn ∅) — extend to full context-based equivalence (Deriv Axioms Γ φ ↔ NDDeriv Theory Γ φ) for the stronger result; (3) review proof style in ndToHilbert and hilbertToND for clarity and decomposition; (4) ensure all three systems (minimal, intuitionistic, classical) have clean corollary instantiations; (5) add proper literature references for the equivalence result (Prawitz 1965, Troelstra & van Dalen 1988); (6) review naming conventions and docstrings against Mathlib standards.",
+      "dependencies": [
+        185
+      ],
+      "created": "2026-06-13T21:39:55Z",
+      "last_updated": "2026-06-14T01:08:12Z",
+      "session_id": "sess_1781387056_63df94",
+      "researched": "2026-06-13T21:53:06Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/186_hilbert_nd_equivalence_refactor/reports/01_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates"
+        },
+        {
+          "path": "specs/186_hilbert_nd_equivalence_refactor/plans/01_implementation-plan.md",
+          "type": "plan",
+          "summary": "3-phase implementation plan"
+        }
+      ],
+      "completion_summary": "Refactored Hilbert/ND equivalence: removed unused h_EFQ parameter, added context-based hilbert_iff_nd_ctx with 3 corollaries (min/int/cl), added hilbert_iff_nd_min, updated literature citations (Prawitz 1965, Troelstra & van Dalen 1988), added 3 BibTeX entries. All 8 equivalence theorems verified, full CI green.",
+      "archived": "2026-06-13T22:23:51Z"
+    },
+    {
       "project_number": 187,
       "project_name": "propositional_foundations_quality_fixes",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Fix all issues identified in the task 185 quality audit. Prioritized list: HIGH: (1) Remove unused public import Std.Tactic.BVDecide.Normalize from DerivedRules.lean and SemanticConsequence.lean; (2) Fix 14 files using bare CZ abbreviation — replace with proper [ChagrovZakharyaschev1997] BibKey format for doc-gen cross-linking; (3) Add literature citations to Lindenbaum lemma (set_lindenbaum) and deduction theorem (deductionTheorem); (4) Fix lake shake import hygiene — move IntSoundness/MinSoundness imports from Completeness to StrongCompleteness files. MEDIUM: (5) Decompose 241-line prop_truth_lemma in Completeness.lean into 6 helper lemmas (one per connective direction); (6) Add van Dalen 2013 and Fitting 1969 to references.bib; (7) Add References sections to 5 files lacking them (MCS.lean, Axioms.lean, Derivation.lean, Consistency.lean, DeductionHelpers.lean); (8) Fix naming convention violations — rename soundness_tautology to prop_soundness_tautology, completeness_iff_tautology to prop_completeness_iff_tautology; (9) Extract duplicated private h_implyK/h_implyS helpers from 4 files into ProofSystem/Axioms.lean; (10) Change public import Cslib.Init to private import in Defs.lean. LOW: (11) Rename misleading lem theorem; (12) Replace 3 instances of bare simp with simp only; (13) Add missing @[simp] attributes where appropriate; (14) Fix stale docstring axiom count.",
@@ -12,7 +42,20 @@
         185
       ],
       "created": "2026-06-13T22:00:11Z",
-      "last_updated": "2026-06-13T22:00:11Z"
+      "last_updated": "2026-06-14T03:47:38Z",
+      "session_id": "sess_1781403613_51bc1e",
+      "artifacts": [
+        {
+          "path": "specs/187_propositional_foundations_quality_fixes/reports/01_fix-verification.md",
+          "type": "report",
+          "summary": "9/14 items already fixed, 4 remaining open items"
+        },
+        {
+          "path": "specs/187_propositional_foundations_quality_fixes/plans/01_implementation-plan.md",
+          "type": "plan",
+          "summary": "2-phase plan for 4 remaining fixes"
+        }
+      ]
     },
     {
       "project_number": 185,

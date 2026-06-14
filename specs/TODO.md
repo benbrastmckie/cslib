@@ -11,7 +11,7 @@ next_project_number: 188
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,171,179,180,187 | -- | Bimodal Porting, Propositional Logic |
+| 1 | 36,37,171,179,180,186,187 | -- | Bimodal Porting, Propositional Logic |
 | 2 | 39,40,181 | 36,37,179,180 | Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -29,7 +29,8 @@ next_project_number: 188
 ### Propositional Logic
 
 171 [RESEARCHED] — Research connective-basis design for minimal, intuitionistic, and
-187 [NOT STARTED] — Fix all issues identified in the task 185 quality audit. Prioriti
+186 [NOT STARTED] — Refactor the Hilbert / natural deduction extensional equivalence 
+187 [PLANNED] — Fix all issues identified in the task 185 quality audit. Prioriti
 
 ### Temporal Logic
 
@@ -46,12 +47,26 @@ next_project_number: 188
 ## Tasks
 
 ### 187. Propositional foundations quality fixes
+- **Status**: [PLANNED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 185
+- **Research**: [187_propositional_foundations_quality_fixes/reports/01_fix-verification.md]
+- **Plan**: [187_propositional_foundations_quality_fixes/plans/01_implementation-plan.md]
+
+**Description**: Fix all issues identified in the task 185 quality audit. Prioritized list: HIGH: (1) Remove unused public import Std.Tactic.BVDecide.Normalize from DerivedRules.lean and SemanticConsequence.lean; (2) Fix 14 files using bare CZ abbreviation — replace with proper [ChagrovZakharyaschev1997] BibKey format for doc-gen cross-linking; (3) Add literature citations to Lindenbaum lemma (set_lindenbaum) and deduction theorem (deductionTheorem); (4) Fix lake shake import hygiene — move IntSoundness/MinSoundness imports from Completeness to StrongCompleteness files. MEDIUM: (5) Decompose 241-line prop_truth_lemma in Completeness.lean into 6 helper lemmas (one per connective direction); (6) Add van Dalen 2013 and Fitting 1969 to references.bib; (7) Add References sections to 5 files lacking them (MCS.lean, Axioms.lean, Derivation.lean, Consistency.lean, DeductionHelpers.lean); (8) Fix naming convention violations — rename soundness_tautology to prop_soundness_tautology, completeness_iff_tautology to prop_completeness_iff_tautology; (9) Extract duplicated private h_implyK/h_implyS helpers from 4 files into ProofSystem/Axioms.lean; (10) Change public import Cslib.Init to private import in Defs.lean. LOW: (11) Rename misleading lem theorem; (12) Replace 3 instances of bare simp with simp only; (13) Add missing @[simp] attributes where appropriate; (14) Fix stale docstring axiom count.
+
+---
+
+### 186. Hilbert nd equivalence refactor
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 185
+- **Research**: [186_hilbert_nd_equivalence_refactor/reports/01_team-research.md]
+- **Plan**: [186_hilbert_nd_equivalence_refactor/plans/01_implementation-plan.md]
 
-**Description**: Fix all issues identified in the task 185 quality audit. Prioritized list: HIGH: (1) Remove unused public import Std.Tactic.BVDecide.Normalize from DerivedRules.lean and SemanticConsequence.lean; (2) Fix 14 files using bare CZ abbreviation — replace with proper [ChagrovZakharyaschev1997] BibKey format for doc-gen cross-linking; (3) Add literature citations to Lindenbaum lemma (set_lindenbaum) and deduction theorem (deductionTheorem); (4) Fix lake shake import hygiene — move IntSoundness/MinSoundness imports from Completeness to StrongCompleteness files. MEDIUM: (5) Decompose 241-line prop_truth_lemma in Completeness.lean into 6 helper lemmas (one per connective direction); (6) Add van Dalen 2013 and Fitting 1969 to references.bib; (7) Add References sections to 5 files lacking them (MCS.lean, Axioms.lean, Derivation.lean, Consistency.lean, DeductionHelpers.lean); (8) Fix naming convention violations — rename soundness_tautology to prop_soundness_tautology, completeness_iff_tautology to prop_completeness_iff_tautology; (9) Extract duplicated private h_implyK/h_implyS helpers from 4 files into ProofSystem/Axioms.lean; (10) Change public import Cslib.Init to private import in Defs.lean. LOW: (11) Rename misleading lem theorem; (12) Replace 3 instances of bare simp with simp only; (13) Add missing @[simp] attributes where appropriate; (14) Fix stale docstring axiom count.
+**Description**: Refactor the Hilbert / natural deduction extensional equivalence in Cslib/Logics/Propositional/NaturalDeduction/ to the highest standards of quality and elegance. Current gaps: (1) no minimal logic instantiation (hilbert_iff_nd_min) — the generic theorem requires EFQ which MinPropAxiom lacks, so either a separate EFQ-free version or an adapted ND system is needed; (2) equivalence is only for closed derivability (empty context Derivable ↔ DerivableIn ∅) — extend to full context-based equivalence (Deriv Axioms Γ φ ↔ NDDeriv Theory Γ φ) for the stronger result; (3) review proof style in ndToHilbert and hilbertToND for clarity and decomposition; (4) ensure all three systems (minimal, intuitionistic, classical) have clean corollary instantiations; (5) add proper literature references for the equivalence result (Prawitz 1965, Troelstra & van Dalen 1988); (6) review naming conventions and docstrings against Mathlib standards.
 
 ---
 

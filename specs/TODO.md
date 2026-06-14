@@ -28,7 +28,7 @@ next_project_number: 192
 
 ### Propositional Logic
 
-191 [NOT STARTED] — clean_up_propositional_deduction_theorem_naming
+191 [IMPLEMENTING] — clean_up_propositional_deduction_theorem_naming
 
 ### Temporal Logic
 
@@ -45,88 +45,10 @@ next_project_number: 192
 ## Tasks
 
 ### 191. Clean up propositional deduction theorem naming
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
-
----
-
-### 190. Review propositional pr readiness
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional PRs
-- **Dependencies**: None
-- **Research**: [190_review_propositional_pr_readiness/reports/01_team-research.md]
-- **Plan**: [190_review_propositional_pr_readiness/plans/01_pr-readiness-fixes.md]
-- **Summary**: [190_review_propositional_pr_readiness/summaries/01_pr-readiness-summary.md]
-
----
-
-### 189. Rename completeness to canonical model
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: None
-- **Research**: [189_rename_completeness_to_canonical_model/reports/01_team-research.md]
-- **Plan**: [189_rename_completeness_to_canonical_model/plans/01_implementation-plan.md]
-
-**Description**: Reorganize the completeness file structure by eliminating the three legacy weak completeness files entirely. Move the canonical model infrastructure (canonicalValuation, prop_truth_lemma, IntCanonicalWorld, int_truth_lemma, MinCanonicalWorld, min_truth_lemma) into the corresponding strong completeness files (StrongCompleteness.lean, IntStrongCompleteness.lean, MinStrongCompleteness.lean) so each logic has a single self-contained completeness file containing: canonical model construction, truth lemma, strong soundness, strong completeness, weak completeness corollary, and compactness corollary. Delete Completeness.lean, IntCompleteness.lean, and MinCompleteness.lean after merging. Update all imports across the project (including Modal/Temporal/Bimodal conservative extension files), update Cslib.lean barrel file, and ensure lake build passes.
-
----
-
-### 188. First propositional upstream pr
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: None
-- **Research**: [188_first_propositional_upstream_pr/reports/01_team-research.md]
-- **Plan**: [188_first_propositional_upstream_pr/plans/01_implementation-plan.md]
-- **Summary**: [188_first_propositional_upstream_pr/summaries/01_execution-summary.md]
-
-**Description**: Design and prepare a first upstream PR (~300 LOC) contributing propositional logic foundations to CSLib. Study what upstream CSLib currently includes to identify gaps. The PR should set the foundation for eventually contributing: (1) completeness results for all three propositional Hilbert systems (minimal, intuitionistic, classical), and (2) the extensional equivalence between Hilbert and natural deduction systems. Select a self-contained ~300 LOC slice from Foundations/ and Propositional/ that gives reviewers something easy to take in — likely the core Proposition type, axiom schemata, derivation tree, and basic metatheorems — while building towards the larger contribution. Must study upstream repo structure, existing PRs, and reviewer expectations to scope appropriately.
-
----
-
-### 187. Propositional foundations quality fixes
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 185
-- **Research**: [187_propositional_foundations_quality_fixes/reports/01_fix-verification.md]
-- **Plan**: [187_propositional_foundations_quality_fixes/plans/01_implementation-plan.md]
-
-**Description**: Fix all issues identified in the task 185 quality audit. Prioritized list: HIGH: (1) Remove unused public import Std.Tactic.BVDecide.Normalize from DerivedRules.lean and SemanticConsequence.lean; (2) Fix 14 files using bare CZ abbreviation — replace with proper [ChagrovZakharyaschev1997] BibKey format for doc-gen cross-linking; (3) Add literature citations to Lindenbaum lemma (set_lindenbaum) and deduction theorem (deductionTheorem); (4) Fix lake shake import hygiene — move IntSoundness/MinSoundness imports from Completeness to StrongCompleteness files. MEDIUM: (5) Decompose 241-line prop_truth_lemma in Completeness.lean into 6 helper lemmas (one per connective direction); (6) Add van Dalen 2013 and Fitting 1969 to references.bib; (7) Add References sections to 5 files lacking them (MCS.lean, Axioms.lean, Derivation.lean, Consistency.lean, DeductionHelpers.lean); (8) Fix naming convention violations — rename soundness_tautology to prop_soundness_tautology, completeness_iff_tautology to prop_completeness_iff_tautology; (9) Extract duplicated private h_implyK/h_implyS helpers from 4 files into ProofSystem/Axioms.lean; (10) Change public import Cslib.Init to private import in Defs.lean. LOW: (11) Rename misleading lem theorem; (12) Replace 3 instances of bare simp with simp only; (13) Add missing @[simp] attributes where appropriate; (14) Fix stale docstring axiom count.
-
----
-
-### 186. Hilbert nd equivalence refactor
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 185
-- **Research**: [186_hilbert_nd_equivalence_refactor/reports/01_nd-equivalence-research.md]
-- **Plan**: [186_hilbert_nd_equivalence_refactor/plans/01_implementation-plan.md]
-- **Summary**: [186_hilbert_nd_equivalence_refactor/summaries/01_execution-summary.md]
-
-**Description**: Refactor the Hilbert / natural deduction extensional equivalence in Cslib/Logics/Propositional/NaturalDeduction/ to the highest standards of quality and elegance. Current gaps: (1) no minimal logic instantiation (hilbert_iff_nd_min) — the generic theorem requires EFQ which MinPropAxiom lacks, so either a separate EFQ-free version or an adapted ND system is needed; (2) equivalence is only for closed derivability (empty context Derivable ↔ DerivableIn ∅) — extend to full context-based equivalence (Deriv Axioms Γ φ ↔ NDDeriv Theory Γ φ) for the stronger result; (3) review proof style in ndToHilbert and hilbertToND for clarity and decomposition; (4) ensure all three systems (minimal, intuitionistic, classical) have clean corollary instantiations; (5) add proper literature references for the equivalence result (Prawitz 1965, Troelstra & van Dalen 1988); (6) review naming conventions and docstrings against Mathlib standards.
-
----
-
-### 185. Propositional foundations quality audit
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 183, Task 184
-- **Research**:
-  - [185_propositional_foundations_quality_audit/reports/01_team-research.md]
-  - [185_propositional_foundations_quality_audit/reports/01_teammate-a-findings.md]
-  - [185_propositional_foundations_quality_audit/reports/01_teammate-b-findings.md]
-  - [185_propositional_foundations_quality_audit/reports/01_teammate-c-findings.md]
-- **Plan**: [185_propositional_foundations_quality_audit/plans/01_implementation-plan.md]
-- **Summary**: [185_propositional_foundations_quality_audit/summaries/01_execution-summary.md]
-
-**Description**: Rigorous quality audit of Cslib/Logics/Propositional/ and its Cslib/Foundations/Logic/ dependencies. Survey architecture, organization, proof quality, literature references, docstrings, notation, and naming conventions against CSLib contribution standards and mathematical best practices. Identify improvements to: (1) file organization and module structure, (2) proof style and tactic usage (prefer term-mode where natural, eliminate unnecessary classical reasoning in constructive proofs), (3) BibTeX references in references.bib for all key theorems citing standard sources (CZ, Blackburn et al., Chagrov & Zakharyaschev, etc.), (4) module-level docstrings following Mathlib conventions, (5) notation consistency (scoped notation, typeclass-backed operators), (6) naming conventions (Mathlib snake_case, descriptive theorem names), (7) import hygiene (minimal imports, no transitive leakage), (8) redundant or duplicated lemmas across files. Produce a prioritized improvement plan with concrete file-level recommendations, ensuring long-term maintainability and contribution readiness.
 
 ---
 
@@ -157,19 +79,6 @@ next_project_number: 192
 - **Research**: [179_modal_primitive_diamond/reports/01_primitive-diamond-research.md]
 
 **Description**: Add diamond (dia) as a primitive constructor to Modal.Proposition, giving {atom, bot, imp, and, or, box, dia}. Currently diamond is derived as neg(box(neg phi)), which is only valid classically. Making it primitive enables intuitionistic and minimal modal logics where box and diamond are independent operators. Scope: (1) Basic.lean: add .dia constructor, structural Satisfies clause, keep notation. (2) Denotation, LogicalEquivalence, Cube: .dia cases. (3) ProofSystem/Instances: diamond-related axiom constructors and dual axioms. (4) Metalogic: .dia cases in DerivationTree, truth lemmas, all 15 soundness/completeness files. (5) Classical equivalence dia(A) iff neg(box(neg(A))) becomes a theorem. Verify full CI. Reference: upstream CSLib uses diamond as primitive; Fischer Servi 1984, Simpson 1994 for intuitionistic modal logic.
-
----
-
-### 171. Research connective basis min int classical
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: None
-- **Research**: [171_research_connective_basis_min_int_classical/reports/01_team-research.md]
-- **Plan**: [171_research_connective_basis_min_int_classical/plans/01_implementation-plan.md]
-- **Summary**: [171_research_connective_basis_min_int_classical/summaries/01_execution-summary.md]
-
-**Description**: Research connective-basis design for minimal, intuitionistic, and classical propositional logic in CSLib: rigorously ground in literature (Gentzen 1935, Prawitz 1965, Troelstra & van Dalen 1988, Heyting 1930, Church 1956, Chagrov & Zakharyaschev 1997, Johansson 1937) whether {imp, bot} primitives with derived neg/top/and/or is adequate — addressing ctchou's objection on PR #635 that {imp, bot} is functionally complete only classically (intuitionistically, and/or are NOT definable), and his challenge that Gentzen/Prawitz/T&vD do not actually use this basis or the 10-to-5 natural deduction rule reduction. Determine the truth of these claims and design a formula type + proof system architecture that supports minimal, intuitionistic, and classical logics naturally and elegantly (e.g., full primitive connective set {bot, atom, imp, and, or} with logics distinguished by inference rules: minimal = no ex falso, intuitionistic = + ex falso, classical = + DNE/Peirce). Also reconcile with maintainer fmontesi's competing PR #607 typeclass approach (Operators/ files, notation-level classes over unchanged primitive constructors) and eric-wieser's suggestion to co-opt Mathlib's Bot/HImp classes. Verify all citations against references.bib and primary sources.
 
 ---
 

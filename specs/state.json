@@ -166,12 +166,18 @@
           "path": "specs/179_modal_primitive_diamond/reports/02_team-research.md",
           "type": "report",
           "description": "Team research synthesis: primitive diamond for Modal.Proposition"
+        },
+        {
+          "path": "specs/179_modal_primitive_diamond/reports/02_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates"
         }
       ],
       "topic": "Modal Logic",
-      "last_updated": "2026-06-14T17:56:47Z",
+      "last_updated": "2026-06-14T18:04:17Z",
       "session_id": "sess_1781459800_a7c3f2",
-      "next_artifact_number": 3
+      "next_artifact_number": 4,
+      "researched": "2026-06-14T18:04:17Z"
     },
     {
       "project_number": 180,

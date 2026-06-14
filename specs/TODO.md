@@ -11,7 +11,7 @@ next_project_number: 194
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,179,180,192 | -- | Bimodal Porting, Propositional PRs |
+| 1 | 36,37,179,180,188,192 | -- | Bimodal Porting, Propositional Logic, Propositional PRs |
 | 2 | 39,40,181 | 36,37,179,180 | Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -26,9 +26,13 @@ next_project_number: 194
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
+### Propositional Logic
+
+188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
+
 ### Propositional PRs
 
-192 [RESEARCHED] — research_verify_literature_refs_pr_188
+192 [PLANNING] — Draw on sources in specs/literature/ to verify and improve citati
 
 ### Temporal Logic
 
@@ -53,13 +57,15 @@ next_project_number: 194
 ---
 
 ### 192. Research verify literature refs pr 188
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: general
 - **Topic**: Propositional PRs
 - **Dependencies**: None
 - **Research**:
   - [192_research_verify_literature_refs_pr_188/reports/01_team-research.md]
   - [192_research_verify_literature_refs_pr_188/reports/02_team-research.md]
+
+**Description**: Draw on sources in specs/literature/ to verify and improve citations throughout the files within scope of the task 188 PR, update references.bib following CONTRIBUTING.md conventions, and improve literature claims in specs/archive/188_first_propositional_upstream_pr/pr-description.md while maintaining a clear and concise style for reviewers
 
 ---
 
@@ -68,6 +74,19 @@ next_project_number: 194
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+
+---
+
+### 188. First propositional upstream pr
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+- **Research**: [188_first_propositional_upstream_pr/reports/01_team-research.md]
+- **Plan**: [188_first_propositional_upstream_pr/plans/01_implementation-plan.md]
+- **Summary**: [188_first_propositional_upstream_pr/summaries/01_execution-summary.md]
+
+**Description**: Design and prepare a first upstream PR (~300 LOC) contributing propositional logic foundations to CSLib.
 
 ---
 

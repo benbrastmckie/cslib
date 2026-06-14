@@ -2,6 +2,38 @@
   "next_project_number": 194,
   "active_projects": [
     {
+      "project_number": 188,
+      "project_name": "first_propositional_upstream_pr",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Design and prepare a first upstream PR (~300 LOC) contributing propositional logic foundations to CSLib.",
+      "dependencies": [],
+      "created": "2026-06-14T10:49:41Z",
+      "last_updated": "2026-06-14T17:50:06Z",
+      "session_id": "sess_1781436581_3d124a",
+      "researched": "2026-06-14T11:03:04Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/188_first_propositional_upstream_pr/reports/01_team-research.md",
+          "type": "research",
+          "summary": "Team research: upstream inventory, PR scoping, risks"
+        },
+        {
+          "path": "specs/188_first_propositional_upstream_pr/plans/01_implementation-plan.md",
+          "type": "plan",
+          "summary": "5-phase implementation plan for first upstream PR"
+        },
+        {
+          "path": "specs/188_first_propositional_upstream_pr/summaries/01_execution-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary"
+        }
+      ],
+      "completion_summary": "Created feature branch feat/propositional-five-primitive (1 commit, 259 ins/84 del across 4 files). Added Connectives.lean (96 LOC), refactored Defs.lean to 5-primitive {atom,bot,imp,and,or} type, updated NaturalDeduction/Basic.lean. All CI passed. PR description drafted with ctchou resolution, literature justification, roadmap, AI disclosure. Ready for Zulip discussion then PR submission."
+    },
+    {
       "project_number": 193,
       "project_name": "clean_up_modal_deduction_theorem_naming",
       "status": "completed",
@@ -15,12 +47,12 @@
     {
       "project_number": 192,
       "project_name": "research_verify_literature_refs_pr_188",
-      "status": "researched",
+      "status": "planning",
       "task_type": "general",
       "topic": "Propositional PRs",
       "created": "2026-06-14T17:18:44Z",
-      "last_updated": "2026-06-14T17:42:51Z",
-      "session_id": "sess_1781458639_96acef",
+      "last_updated": "2026-06-14T17:49:24Z",
+      "session_id": "sess_1781459348_05ef55",
       "researched": "2026-06-14T17:42:51Z",
       "next_artifact_number": 3,
       "artifacts": [
@@ -34,7 +66,8 @@
           "type": "research",
           "summary": "Round 2: primary source verification, BibTeX drafts, concrete PR revisions"
         }
-      ]
+      ],
+      "description": "Draw on sources in specs/literature/ to verify and improve citations throughout the files within scope of the task 188 PR, update references.bib following CONTRIBUTING.md conventions, and improve literature claims in specs/archive/188_first_propositional_upstream_pr/pr-description.md while maintaining a clear and concise style for reviewers"
     },
     {
       "project_number": 191,

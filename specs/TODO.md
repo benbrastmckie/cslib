@@ -30,14 +30,14 @@ next_project_number: 202
 
 ### Modal Logic
 
-197 [PLANNED] — Review the ambition to contribute Modal/ to upstream, identifying
+197 [RESEARCHED] — Review the ambition to contribute Modal/ to upstream, identifying
 201 [NOT STARTED] — Review citations in Modal PR changes for accuracy and completenes
 
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
 198 [PR READY] — Submit first propositional logic upstream PR (~300 LOC) to CSLib 
-199 [PLANNED] — Review citations in PR changes for accuracy and completeness
+199 [IMPLEMENTING] — Review citations in PR changes for accuracy and completeness
 
 ### Propositional PRs
 
@@ -72,7 +72,7 @@ next_project_number: 202
 ---
 
 ### 199. Review pr citations
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -94,7 +94,7 @@ next_project_number: 202
 ---
 
 ### 197. Scope initial Modal/ upstream PR (~300 LOC)
-- **Status**: [PLANNED]
+- **Status**: [RESEARCHED]
 - **Task Type**: pr
 - **Topic**: Modal Logic
 - **Dependencies**: None

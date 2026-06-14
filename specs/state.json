@@ -1,6 +1,17 @@
 {
-  "next_project_number": 189,
+  "next_project_number": 190,
   "active_projects": [
+    {
+      "project_number": 189,
+      "project_name": "rename_completeness_to_canonical_model",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Rename the three legacy weak completeness files to reflect their actual role as canonical model infrastructure. Completeness.lean -> CanonicalModel.lean (contains canonicalValuation and prop_truth_lemma), IntCompleteness.lean -> IntCanonicalModel.lean (contains IntCanonicalWorld and int_truth_lemma), MinCompleteness.lean -> MinCanonicalModel.lean (contains MinCanonicalWorld and min_truth_lemma). The actual completeness theorems now live in StrongCompleteness.lean, IntStrongCompleteness.lean, and MinStrongCompleteness.lean. Update all imports across the project, update Cslib.lean barrel file, and ensure lake build passes. Consider whether the truth lemma infrastructure should be merged into the strong completeness files instead of remaining in separate files.",
+      "dependencies": [],
+      "created": "2026-06-14T11:00:51Z",
+      "last_updated": "2026-06-14T11:00:51Z"
+    },
     {
       "project_number": 186,
       "project_name": "hilbert_nd_equivalence_refactor",
@@ -264,13 +275,14 @@
     {
       "project_number": 188,
       "project_name": "first_propositional_upstream_pr",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Design and prepare a first upstream PR (~300 LOC) contributing propositional logic foundations to CSLib. Study what upstream CSLib currently includes to identify gaps. The PR should set the foundation for eventually contributing: (1) completeness results for all three propositional Hilbert systems (minimal, intuitionistic, classical), and (2) the extensional equivalence between Hilbert and natural deduction systems. Select a self-contained ~300 LOC slice from Foundations/ and Propositional/ that gives reviewers something easy to take in — likely the core Proposition type, axiom schemata, derivation tree, and basic metatheorems — while building towards the larger contribution. Must study upstream repo structure, existing PRs, and reviewer expectations to scope appropriately.",
       "dependencies": [],
       "created": "2026-06-14T10:49:41Z",
-      "last_updated": "2026-06-14T10:49:41Z"
+      "last_updated": "2026-06-14T10:53:41Z",
+      "session_id": "sess_1781434421_36c791"
     }
   ],
   "repository_health": {

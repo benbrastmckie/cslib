@@ -1,5 +1,5 @@
 ---
-next_project_number: 189
+next_project_number: 190
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 189
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,179,180,188 | -- | Bimodal Porting, Propositional Logic |
+| 1 | 36,37,179,180,188,189 | -- | Bimodal Porting, Propositional Logic |
 | 2 | 39,40,181 | 36,37,179,180 | Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -28,7 +28,8 @@ next_project_number: 189
 
 ### Propositional Logic
 
-188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
+188 [RESEARCHING] — Design and prepare a first upstream PR (~300 LOC) contributing pr
+189 [NOT STARTED] — Rename the three legacy weak completeness files to reflect their 
 
 ### Temporal Logic
 
@@ -44,8 +45,18 @@ next_project_number: 189
 
 ## Tasks
 
-### 188. First propositional upstream pr
+### 189. Rename completeness to canonical model
 - **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Rename the three legacy weak completeness files to reflect their actual role as canonical model infrastructure. Completeness.lean -> CanonicalModel.lean (contains canonicalValuation and prop_truth_lemma), IntCompleteness.lean -> IntCanonicalModel.lean (contains IntCanonicalWorld and int_truth_lemma), MinCompleteness.lean -> MinCanonicalModel.lean (contains MinCanonicalWorld and min_truth_lemma). The actual completeness theorems now live in StrongCompleteness.lean, IntStrongCompleteness.lean, and MinStrongCompleteness.lean. Update all imports across the project, update Cslib.lean barrel file, and ensure lake build passes. Consider whether the truth lemma infrastructure should be merged into the strong completeness files instead of remaining in separate files.
+
+---
+
+### 188. First propositional upstream pr
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

@@ -28,7 +28,7 @@ next_project_number: 190
 
 ### Propositional Logic
 
-188 [PLANNING] — Design and prepare a first upstream PR (~300 LOC) contributing pr
+188 [PLANNED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
 
 ### Temporal Logic
 
@@ -57,11 +57,12 @@ next_project_number: 190
 ---
 
 ### 188. First propositional upstream pr
-- **Status**: [PLANNING]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [188_first_propositional_upstream_pr/reports/01_team-research.md]
+- **Plan**: [188_first_propositional_upstream_pr/plans/01_implementation-plan.md]
 
 **Description**: Design and prepare a first upstream PR (~300 LOC) contributing propositional logic foundations to CSLib. Study what upstream CSLib currently includes to identify gaps. The PR should set the foundation for eventually contributing: (1) completeness results for all three propositional Hilbert systems (minimal, intuitionistic, classical), and (2) the extensional equivalence between Hilbert and natural deduction systems. Select a self-contained ~300 LOC slice from Foundations/ and Propositional/ that gives reviewers something easy to take in — likely the core Proposition type, axiom schemata, derivation tree, and basic metatheorems — while building towards the larger contribution. Must study upstream repo structure, existing PRs, and reviewer expectations to scope appropriately.
 

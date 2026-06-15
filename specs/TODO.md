@@ -46,7 +46,7 @@ next_project_number: 219
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 217 [RESEARCHED] — Investigate and push appropriate changes from task 207 implementa
-218 [NOT STARTED] — Push missing bib entries and minor fixes to PR #649: add 7 missin
+218 [PLANNING] — Push missing bib entries and minor fixes to PR #649: add 7 missin
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -57,7 +57,7 @@ next_project_number: 219
 ## Tasks
 
 ### 218. Push bib entries minor fixes pr649
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNING]
 - **Task Type**: pr
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -74,19 +74,6 @@ next_project_number: 219
 - **Research**: [217_push_generic_metalogic_to_pr649/reports/01_pr649-research.md]
 
 **Description**: Investigate and push appropriate changes from task 207 implementation to PR #649 (https://github.com/leanprover/cslib/pull/649), selecting only the Foundations/Logic/Metalogic files (ListImplication, ListDeduction, SetDeduction, GenericMCS, MCSProperties) and Combinators addition that are relevant to the reviewer's feedback on abstracting the deduction theorem and MCS proofs
-
----
-
-### 216. Push relevant changes to pr 648
-- **Status**: [COMPLETED]
-- **Task Type**: pr
-- **Topic**: Propositional Logic
-- **Dependencies**: None
-- **Research**: [216_push_relevant_changes_to_pr_648/reports/01_pr648-changes-review.md]
-- **Plan**: [216_push_relevant_changes_to_pr_648/plans/01_pr648-push-plan.md]
-- **Pr_description**: [216_push_relevant_changes_to_pr_648/pr-description.md]
-
-**Description**: Given what task 202 implemented, push a single commit with all and only the relevant changes to https://github.com/leanprover/cslib/pull/648, where the aim is to keep the LOC ~300 to avoid overwhelming reviewers
 
 ---
 
@@ -110,46 +97,6 @@ next_project_number: 219
 
 ---
 
-### 213. Fix unused argument lint errors
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Project Management
-- **Dependencies**: None
-
-**Description**: Fix ~17 unused argument lint errors across Bimodal and Temporal chronicle files. Arguments flagged as not used in the declaration body need to be removed or the code restructured.
-
----
-
-### 212. Fix simp lint issues (LHS simplifies, simp can prove)
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Project Management
-- **Dependencies**: None
-
-**Description**: Fix 25 simp-related lint errors: 23 where the LHS of a simp lemma already simplifies (need to adjust the simp normal form) and 2 where simp can prove the lemma outright.
-
----
-
-### 211. Change def to lemma/theorem for Prop-valued declarations
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Project Management
-- **Dependencies**: None
-
-**Description**: Fix 55 lint errors where Prop-valued declarations use def instead of lemma/theorem. These are in Bimodal frame conditions, soundness, BXCanonical, and Temporal chronicle files.
-
----
-
-### 210. Fix naming convention violations (underscore to camelCase)
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Project Management
-- **Dependencies**: None
-
-**Description**: Fix 105 naming convention violations where declaration names contain underscores instead of lowerCamelCase or UpperCamelCase per Mathlib convention. Mostly in Bimodal and Temporal metalogic files.
-
----
-
 ### 209. Fix namespace lint errors (not namespaced + duplicate namespace)
 - **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
@@ -157,108 +104,6 @@ next_project_number: 219
 - **Dependencies**: None
 
 **Description**: Fix 298 namespace lint errors: 239 declarations not properly namespaced and 59 duplicate namespace components (Chronicle, Temporal, Bimodal repeated in names). Requires moving declarations into correct namespaces or renaming.
-
----
-
-### 208. Add missing documentation strings to Bimodal/Temporal/Modal declarations
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Project Management
-- **Dependencies**: None
-
-**Description**: Add docstrings to 327 declarations flagged by #lint across Bimodal/ (190), Temporal/ (80), Modal/ (57). Most are theorems and definitions that need brief /-- ... -/ docstrings describing their purpose.
-
----
-
-### 207. Research temporal modal refactor pr649
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: None
-- **Research**:
-  - [207_research_temporal_modal_refactor_pr649/reports/01_team-research.md]
-  - [207_research_temporal_modal_refactor_pr649/reports/02_reviewer-directed-research.md]
-  - [207_research_temporal_modal_refactor_pr649/reports/03_ideal-solution-research.md]
-- **Plan**: [207_research_temporal_modal_refactor_pr649/plans/04_revised-refactor-plan.md]
-- **Summary**: [207_research_temporal_modal_refactor_pr649/summaries/04_implementation-summary.md]
-
-**Description**: Research refactoring Temporal/ and Modal/ implementations based on PR #649 review feedback on Tense Logic, drawing on Isabelle Propositional_Logic_Class formalization for a dependent type system approach in Lean 4
-
----
-
-### 206. Fix --wfail CI warnings across Bimodal, Temporal, and Modal files
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Project Management
-- **Dependencies**: None
-
-**Description**: Fix all --wfail CI warnings across Bimodal/, Temporal/, and Modal/ files (push_neg deprecation, unused simp args, show tactic misuse, empty lines in commands, unscoped options, module docstring placement, flexible simp, open Classical)
-
----
-
-### 205. Review pr649 quality conventions
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: None
-- **Research**: [205_review_pr649_quality_conventions/reports/01_pr649-quality-review.md]
-- **Plan**: [205_review_pr649_quality_conventions/plans/01_pr649-quality-fixes.md]
-- **Summary**: [205_review_pr649_quality_conventions/summaries/01_execution-summary.md]
-
-**Description**: Review PR #649 (Temporal/Syntax/Formula.lean and Connectives.lean extensions) for proof quality, comment style, naming conventions, and docstring standards against existing CSLib modules as a baseline. Compare against established patterns in Propositional/, Modal/, and Foundations/ to ensure consistency before upstream review
-
----
-
-### 204. Polish pr 648 propositional
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: None
-
-**Description**: Polish PR #648: remove Aesop.BuiltinRules import, trim Architecture section from Defs.lean docstring (references non-existent upstream files), fix inconsistent context variable naming (G vs Γ) in NaturalDeduction/Basic.lean constructors, fix copyright header format. Then squash and force-push to feat/propositional-v2
-
----
-
-### 203. First temporal pr classical propositional
-- **Status**: [COMPLETED]
-- **Task Type**: pr
-- **Topic**: Temporal Logic
-- **Dependencies**: None
-- **Pr-description**: [203_first_temporal_pr_classical_propositional/pr-description.md]
-- **Summary**: [203_first_temporal_pr_classical_propositional/summaries/01_execution-summary.md]
-
-**Description**: Create first ~300 LOC PR for Temporal/ extending classical propositional logic, establishing foundations for full temporal logic development (follows PR #648)
-
----
-
-### 202. Review hilbert classes vs pr648
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: None
-- **Research**:
-  - [202_review_hilbert_classes_vs_pr648/reports/01_hilbert-classes-comparison.md]
-  - [202_review_hilbert_classes_vs_pr648/reports/02_team-research.md]
-  - [202_review_hilbert_classes_vs_pr648/reports/03_team-research.md]
-  - [202_review_hilbert_classes_vs_pr648/reports/04_bool-evaluate-design.md]
-- **Plan**: [202_review_hilbert_classes_vs_pr648/plans/05_bool-evaluate-plan.md]
-- **Lean_file**: [Cslib/Logics/Propositional/Semantics/Bool.lean]
-- **Summary**: [202_review_hilbert_classes_vs_pr648/summaries/05_bool-evaluate-summary.md]
-
-**Description**: Comprehensive review of cslib PR #648 (https://github.com/leanprover/cslib/pull/648). This task serves as the central tracking point for all review dimensions: upstream reviewer feedback, architectural concerns, API design decisions, compatibility with existing Propositional/ and Hilbert/ developments, naming conventions, and any requested changes. Initial research compared the thomaskwaring/cslib_SKI Hilbert branch approach against the PR's Hilbert system design; further research rounds should address additional review concerns as they arise, including code quality, proof style, module organization, and alignment with cslib contribution standards.
-
----
-
-### 201. Review modal pr citations
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Modal Logic
-- **Dependencies**: None
-- **Research**: [201_review_modal_pr_citations/reports/01_modal-citation-review.md]
-- **Plan**: [201_review_modal_pr_citations/plans/01_modal-citation-fixes.md]
-- **Summary**: [201_review_modal_pr_citations/summaries/01_modal-citation-fixes-summary.md]
-
-**Description**: Review citations in Modal PR changes for accuracy and completeness, covering the Basic.lean and Denotation.lean files in scope for the initial Modal/ upstream PR (task 197). Verify literature references (Blackburn2001, ChagrovZakharyaschev1997, Bentzen2023, Trufas2024, Johansson1937), check BibTeX entries in references.bib, and ensure pr-description.md citations are accurate and properly grounded in primary sources
 
 ---
 

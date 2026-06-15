@@ -12,7 +12,7 @@
 - PR #648 (OPEN, our propositional connective typeclasses) and PR #649 (OPEN, our temporal formula type) are the two upstream PRs we own, both stacking independently off `main`; neither has received any reviewer comments yet.
 - The key naming conflict is `HasImpl` (PR #607, fmontesi) vs `HasImp` (our PR #648/649). PR #607's CHANGES_REQUESTED status and the chenson2018 feedback suggesting "one file for all these" rather than per-operator files creates an opening for our `Connectives.lean` single-file approach to win on ergonomics grounds.
 - The planned Modal PR should explicitly reference PR #607 in its description, framing our refactoring as a convergence path that makes the per-operator typeclass question moot (the refactored `Proposition` uses `imp` natively, removing the need for `HasImpl.impl` as an alias).
-- The blocking dependency chain is: PR #648 must merge before PR #649 (de facto — they carry the same `Connectives.lean` changes; #649 is rebased to include #648's changes), then the Modal PR stacks on PR #649's branch; but since #648 and #649 both base off `main`, our Modal PR can stack on `feat/temporal-formula-propositional` directly even before #648 merges formally.
+- The Modal PR should stack on PR #648 (`feat/propositional-v2`) in the same manner that PR #649 stacks on it — carrying #648's `Connectives.lean` changes and branching from its head. This keeps the Modal PR independent of the temporal additions in PR #649, making it simpler to review and merge independently.
 - No Zulip discussion threads were found in issue comments about the Modal signature direction specifically; the coordination opportunity is in the PR description itself.
 
 ## Context & Scope
@@ -58,7 +58,7 @@ The planned Modal PR proposes: refactoring `Modal/Proposition` from `{atom, not,
 - **Status**: OPEN, no inline comments or reviews received as of 2026-06-15.
 - **Files changed**: `Cslib.lean`, `Cslib/Foundations/Logic/Connectives.lean` (new), `Cslib/Logics/Propositional/Defs.lean`, `Cslib/Logics/Propositional/NaturalDeduction/Basic.lean`
 - **What it proposes**: New `Connectives.lean` with `HasBot`, `HasImp`, `HasAnd`, `HasOr`, `PropositionalConnectives`; refactors `Proposition` to `{atom, bot, imp, and, or}`.
-- **Relevance to Modal PR**: Modal PR must stack on this branch (directly or via PR #649's branch) to have access to `Connectives.lean`.
+- **Relevance to Modal PR**: Modal PR should stack on this branch (`feat/propositional-v2`) to have access to `Connectives.lean`, in the same manner that PR #649 stacks on it. This keeps the Modal PR independent of temporal additions.
 
 #### PR #649 — feat(Logics/Temporal): temporal formula type (OPEN, no reviews)
 - **Author**: benbrastmckie (our PR, stacking target for Modal PR)
@@ -66,7 +66,7 @@ The planned Modal PR proposes: refactoring `Modal/Proposition` from `{atom, not,
 - **Base branch**: `main` (not PR #648's branch — PR #649's `feat/temporal-formula-propositional` branch carries all of PR #648's changes plus the temporal additions, so it is effectively stacked even though the GitHub base is `main`).
 - **Files changed**: Same 4 files as PR #648 plus `Cslib/Logics/Temporal/Syntax/Formula.lean` and `references.bib`.
 - **What it proposes**: Extends `Connectives.lean` with `HasUntil`, `HasSince`, `TemporalConnectives`; adds `Formula.lean` with temporal formula type.
-- **Relevance**: The Modal PR should branch from `feat/temporal-formula-propositional` to include `Connectives.lean` and avoid conflict with PR #649's changes.
+- **Relevance**: PR #649 demonstrates the stacking pattern the Modal PR should follow — branching from PR #648's `feat/propositional-v2` and carrying its `Connectives.lean` changes. The Modal PR should stack on #648 directly (not #649) to remain independent of temporal additions.
 
 #### Closed PRs (ours, for context)
 - **PR #636** (CLOSED 2026-06-12): Superseded by #637.
@@ -119,7 +119,7 @@ A full search (`gh pr list -R leanprover/cslib --search "modal" --state all --li
 
 1. **PR #607 does not block our plan**: PR #607 is CHANGES_REQUESTED and stalled. Our Modal PR can proceed independently. We should explicitly acknowledge PR #607 in our PR description, noting that our `Connectives.lean` consolidates the same functionality into one file (addressing chenson2018's structural feedback on #607 proactively).
 
-2. **Stack on `feat/temporal-formula-propositional`**: The Modal PR branch should be created from PR #649's branch (`feat/temporal-formula-propositional`), not from PR #648's branch or `main`. This ensures `Connectives.lean` with `PropositionalConnectives` and `TemporalConnectives` already exists, and our `HasBox`/`ModalConnectives` addition is purely additive.
+2. **Stack on `feat/propositional-v2` (PR #648)**: The Modal PR branch should be created from PR #648's branch (`feat/propositional-v2`), in the same manner that PR #649 stacks on it. This gives access to `Connectives.lean` with `PropositionalConnectives` while keeping the Modal PR independent of temporal additions — simpler to review and merge independently. The `HasBox`/`ModalConnectives` addition to `Connectives.lean` is purely additive on top of #648's propositional classes.
 
 3. **`HasBox` naming is already compatible**: PR #607 uses `HasBox` with field `box`. Our plan also uses `HasBox` with field `box`. No renaming needed.
 
@@ -129,11 +129,11 @@ A full search (`gh pr list -R leanprover/cslib --search "modal" --state all --li
 
 ## Recommendations
 
-### 1. Submit Modal PR Stacked on PR #649 (Primary Recommendation)
+### 1. Submit Modal PR Stacked on PR #648 (Primary Recommendation)
 
-**Strategy**: Create branch `feat/modal-formula-classical` from `feat/temporal-formula-propositional`. Add `HasBox`/`ModalConnectives` to `Connectives.lean`, then overwrite the three Modal files with our `{bot, imp, box}` versions.
+**Strategy**: Create branch `feat/modal-formula-classical` from `feat/propositional-v2` (PR #648), following the same stacking pattern as PR #649. Add `HasBox`/`ModalConnectives` to `Connectives.lean`, then overwrite the three Modal files with our `{bot, imp, box}` versions. This keeps the Modal PR independent of temporal additions, making it reviewable and mergeable on its own.
 
-**Why now**: PR #648 and #649 have been OPEN for 24 hours with no reviewer activity. Given the pattern from PRs #528, #535 (fmontesi's PRs received reviews within days), our lack of any reviewer feedback suggests the PRs may be in queue. Submitting the Modal PR now establishes our intent before #607's author can restart their work with incompatible signatures.
+**Why now**: PR #648 and #649 have been OPEN with no reviewer activity. Submitting the Modal PR now establishes our intent before #607's author can restart their work with incompatible signatures. Stacking on #648 (not #649) means the Modal PR can merge as soon as #648 merges, without waiting for #649.
 
 **PR description framing**: Explicitly reference PR #607, noting that our approach addresses chenson2018's structural feedback (single file vs 8 files), and that `HasImpl` → `HasImp` is a one-character rename aligning with CSLib's Bimodal/Temporal naming convention. Frame the classical signature refactoring as enabling the typeclass approach (once primitives are `{bot, imp, box}`, the `HasImp`/`HasBox` instances work without impedance mismatch from derived-vs-primitive confusion).
 
@@ -152,9 +152,9 @@ Since fmontesi is the original `Modal/` author (PRs #528, #535), is a requested 
 
 The appropriate Zulip channel is [CSLib > Modal Logic](https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Modal.20Logic) or equivalent.
 
-### 4. Do Not Wait for PR #648 to Merge Before Submitting Modal PR
+### 4. Two-PR Dependency Chain (Not Three)
 
-Since PR #649 already carries all of PR #648's changes in its branch, the Modal PR can stack on `feat/temporal-formula-propositional` without waiting for #648 to formally merge. The PR description should note the three-PR dependency chain (#648 → #649 → Modal) and request review in that order.
+The Modal PR stacks on PR #648 directly, giving a two-PR dependency chain (#648 → Modal). PR #649 (temporal) is a sibling, not a prerequisite — both #649 and the Modal PR independently stack on #648. The PR description should note the dependency on #648 and request review in that order.
 
 ## Risks & Mitigations
 

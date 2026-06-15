@@ -1,26 +1,21 @@
 {
-  "status": "success",
-  "summary": "Citation review identified 2 factual errors and 1 substantive accuracy issue across 5 BibKeys. All BibKeys present in references.bib with correct metadata. ChagrovZakharyaschev1997 Section 1.1 references should be Section 3.1; Blackburn2001 Ch. 1 uses diamond as primitive (not box as claimed).",
-  "artifacts": ["specs/201_review_modal_pr_citations/reports/01_modal-citation-review.md"],
-  "task_number": 201,
-  "session_id": "sess_1781505781_7a3c35",
-  "metadata": {
-    "agent_type": "cslib-research-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
-    "findings": {
-      "bibkeys_verified": 5,
-      "bibkeys_all_present": true,
-      "errors_found": 3,
-      "critical_errors": [
-        "ChagrovZakharyaschev1997 Section 1.1 should be Section 3.1 (4 occurrences across Basic.lean and Connectives.lean)",
-        "Blackburn2001 Ch. 1 uses diamond as primitive, not box -- docstring claim is inaccurate"
-      ],
-      "advisory_items": [
-        "Connectives.lean line 53 Chapter 1 should be Chapter 3",
-        "Consider adding Burgess1984 citation to PR description",
-        "Clarify IPL vs modal context for Bentzen2023/Trufas2024 if cited in Modal PR"
-      ]
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/201_review_modal_pr_citations/plans/01_modal-citation-fixes.md",
+      "summary": "2-phase plan to fix 5 citation errors in Modal/Basic.lean and Foundations/Logic/Connectives.lean docstrings"
     }
-  }
+  ],
+  "next_steps": "Run /implement 201 to execute the plan",
+  "metadata": {
+    "session_id": "sess_1781506708_5c34c5",
+    "agent_type": "planner-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 2,
+    "estimated_hours": 1,
+    "dependency_waves": [[1], [2]]
+  },
+  "memory_candidates": []
 }

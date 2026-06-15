@@ -19,23 +19,52 @@ This module defines the formula type for temporal logic with primitives
 are the basic temporal modalities from which all other temporal operators
 (globally, eventually, etc.) are derived.
 
+## Main definitions
+
+- `Formula` : Inductive type for temporal logic formulas with constructors
+  `atom`, `bot`, `imp`, `untl`, `snce`
+- `Formula.encodeNat` : Injective encoding of formulas into natural numbers
+  (via Cantor pairing), used to establish countability
+- `Formula.encodeNat_injective` : Proof that `encodeNat` is injective
+- `Formula.someFuture` (𝐅): `φ U ⊤` — φ holds at some future point
+- `Formula.allFuture` (𝐆): `¬𝐅¬φ` — φ holds at all future points
+- `Formula.somePast` (𝐏): `φ S ⊤` — φ held at some past point
+- `Formula.allPast` (𝐇): `¬𝐏¬φ` — φ held at all past points
+
+## Notation
+
+Propositional connectives (scoped to `Cslib.Logic.Temporal`):
+- `¬` (prefix, 40) : negation (`Formula.neg`)
+- `∧` (infix, 36) : conjunction (`Formula.and`)
+- `∨` (infix, 35) : disjunction (`Formula.or`)
+- `→` (infix, 30) : implication (`Formula.imp`)
+- `↔` (infix, 30) : biconditional (`Formula.iff`)
+
+Temporal operators (scoped to `Cslib.Logic.Temporal`):
+- `U` (infix, 40) : until (`Formula.untl`)
+- `S` (infix, 40) : since (`Formula.snce`)
+- `𝐅` (prefix, 40) : some future / eventually (`Formula.someFuture`)
+- `𝐆` (prefix, 40) : all future / globally (`Formula.allFuture`)
+- `𝐏` (prefix, 40) : some past (`Formula.somePast`)
+- `𝐇` (prefix, 40) : all past / historically (`Formula.allPast`)
+- `△` (prefix, 80) : always — at all times past, present, and future (`Formula.always`)
+- `▽` (prefix, 80) : sometimes — at some time past, present, or future (`Formula.sometimes`)
+
 ## Derived Temporal Operators
 
 The derived operators use the Burgess convention: in `untl event guard` and `snce event guard`,
 the first argument is the **event** (holds at the witness point) and the second is the **guard**
 (holds at all intermediate points). This matches the abstract typeclass expansion in `Axioms.lean`.
 
-- `someFuture φ` (F φ): `φ U ⊤` — φ holds at some future point (Burgess: `untl φ ⊤`)
-- `allFuture φ` (G φ): `¬F ¬φ` — φ holds at all future points
-- `somePast φ` (P φ): `φ S ⊤` — φ held at some past point (Burgess: `snce φ ⊤`)
-- `allPast φ` (H φ): `¬P ¬φ` — φ held at all past points
+- `someFuture φ` (𝐅 φ): `φ U ⊤` — φ holds at some future point (Burgess: `untl φ ⊤`)
+- `allFuture φ` (𝐆 φ): `¬𝐅¬φ` — φ holds at all future points
+- `somePast φ` (𝐏 φ): `φ S ⊤` — φ held at some past point (Burgess: `snce φ ⊤`)
+- `allPast φ` (𝐇 φ): `¬𝐏¬φ` — φ held at all past points
 
 ## References
 
-- Kamp, H. (1968). *Tense Logic and the Theory of Linear Order*. PhD thesis, UCLA.
-- Gabbay, D., Pnueli, A., Shelah, S., and Stavi, J. (1980). On the temporal analysis of fairness.
-  In *Proceedings of the 7th ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages*,
-  pp. 163–173. ACM.
+* [H. Kamp, *Tense Logic and the Theory of Linear Order*][Kamp1968]
+* [D. Gabbay, A. Pnueli, S. Shelah, J. Stavi, *On the temporal analysis of fairness*][GPSS1980]
 -/
 
 @[expose] public section
@@ -157,12 +186,6 @@ noncomputable def encodeNat [Encodable Atom] : Formula Atom → ℕ
   | .untl φ ψ => Nat.pair 3 (Nat.pair φ.encodeNat ψ.encodeNat)
   | .snce φ ψ => Nat.pair 4 (Nat.pair φ.encodeNat ψ.encodeNat)
 
-theorem nat_pair_inj {a b c d : ℕ} (h : Nat.pair a b = Nat.pair c d) :
-    a = c ∧ b = d := by
-  have := congr_arg Nat.unpair h
-  simp only [Nat.unpair_pair] at this
-  exact Prod.mk.inj this
-
 /-- The encoding is injective. -/
 theorem encodeNat_injective [Encodable Atom] :
     Function.Injective (encodeNat (Atom := Atom)) := by
@@ -171,49 +194,49 @@ theorem encodeNat_injective [Encodable Atom] :
   | atom a =>
     cases ψ with
     | atom b =>
-      have ⟨_, h2⟩ := nat_pair_inj h
+      have ⟨_, h2⟩ := Nat.pair_eq_pair.mp h
       exact congrArg Formula.atom (Encodable.encode_injective h2)
-    | bot => exact absurd (nat_pair_inj h).1 (by decide)
-    | imp _ _ => exact absurd (nat_pair_inj h).1 (by decide)
-    | untl _ _ => exact absurd (nat_pair_inj h).1 (by decide)
-    | snce _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | bot => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
+    | imp _ _ => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
+    | untl _ _ => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
+    | snce _ _ => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
   | bot =>
     cases ψ with
     | bot => rfl
-    | atom _ => exact absurd (nat_pair_inj h).1 (by decide)
-    | imp _ _ => exact absurd (nat_pair_inj h).1 (by decide)
-    | untl _ _ => exact absurd (nat_pair_inj h).1 (by decide)
-    | snce _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | atom _ => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
+    | imp _ _ => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
+    | untl _ _ => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
+    | snce _ _ => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
   | imp a b iha ihb =>
     cases ψ with
     | imp c d =>
-      have ⟨_, h2⟩ := nat_pair_inj h
-      have ⟨h3, h4⟩ := nat_pair_inj h2
+      have ⟨_, h2⟩ := Nat.pair_eq_pair.mp h
+      have ⟨h3, h4⟩ := Nat.pair_eq_pair.mp h2
       exact congrArg₂ Formula.imp (iha h3) (ihb h4)
-    | atom _ => exact absurd (nat_pair_inj h).1 (by decide)
-    | bot => exact absurd (nat_pair_inj h).1 (by decide)
-    | untl _ _ => exact absurd (nat_pair_inj h).1 (by decide)
-    | snce _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | atom _ => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
+    | bot => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
+    | untl _ _ => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
+    | snce _ _ => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
   | untl a b iha ihb =>
     cases ψ with
     | untl c d =>
-      have ⟨_, h2⟩ := nat_pair_inj h
-      have ⟨h3, h4⟩ := nat_pair_inj h2
+      have ⟨_, h2⟩ := Nat.pair_eq_pair.mp h
+      have ⟨h3, h4⟩ := Nat.pair_eq_pair.mp h2
       exact congrArg₂ Formula.untl (iha h3) (ihb h4)
-    | atom _ => exact absurd (nat_pair_inj h).1 (by decide)
-    | bot => exact absurd (nat_pair_inj h).1 (by decide)
-    | imp _ _ => exact absurd (nat_pair_inj h).1 (by decide)
-    | snce _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | atom _ => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
+    | bot => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
+    | imp _ _ => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
+    | snce _ _ => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
   | snce a b iha ihb =>
     cases ψ with
     | snce c d =>
-      have ⟨_, h2⟩ := nat_pair_inj h
-      have ⟨h3, h4⟩ := nat_pair_inj h2
+      have ⟨_, h2⟩ := Nat.pair_eq_pair.mp h
+      have ⟨h3, h4⟩ := Nat.pair_eq_pair.mp h2
       exact congrArg₂ Formula.snce (iha h3) (ihb h4)
-    | atom _ => exact absurd (nat_pair_inj h).1 (by decide)
-    | bot => exact absurd (nat_pair_inj h).1 (by decide)
-    | imp _ _ => exact absurd (nat_pair_inj h).1 (by decide)
-    | untl _ _ => exact absurd (nat_pair_inj h).1 (by decide)
+    | atom _ => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
+    | bot => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
+    | imp _ _ => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
+    | untl _ _ => exact absurd (Nat.pair_eq_pair.mp h).1 (by decide)
 
 end Formula
 

@@ -11,7 +11,7 @@ next_project_number: 206
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,201,202,205 | -- | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,195,197,201,202 | -- | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -45,18 +45,19 @@ next_project_number: 206
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-205 [RESEARCHED] — Review PR #649 (Temporal/Syntax/Formula.lean and Connectives.lean
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
 
 ### 205. Review pr649 quality conventions
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
 - **Research**: [205_review_pr649_quality_conventions/reports/01_pr649-quality-review.md]
+- **Plan**: [205_review_pr649_quality_conventions/plans/01_pr649-quality-fixes.md]
+- **Summary**: [205_review_pr649_quality_conventions/summaries/01_execution-summary.md]
 
 **Description**: Review PR #649 (Temporal/Syntax/Formula.lean and Connectives.lean extensions) for proof quality, comment style, naming conventions, and docstring standards against existing CSLib modules as a baseline. Compare against established patterns in Propositional/, Modal/, and Foundations/ to ensure consistency before upstream review
 

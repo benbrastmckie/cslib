@@ -4,15 +4,15 @@
     {
       "project_number": 207,
       "project_name": "research_temporal_modal_refactor_pr649",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Research refactoring Temporal/ and Modal/ implementations based on PR #649 review feedback on Tense Logic, drawing on Isabelle Propositional_Logic_Class formalization for a dependent type system approach in Lean 4",
       "topic": "Temporal Logic",
       "created": "2026-06-15T16:39:14Z",
-      "last_updated": "2026-06-15T17:47:40Z",
-      "session_id": "sess_1781543837_ee626d",
+      "last_updated": "2026-06-15T17:53:37Z",
+      "session_id": "sess_1781545740_7a473a",
       "researched": "2026-06-15T17:47:40Z",
-      "next_artifact_number": 4,
+      "next_artifact_number": 5,
       "artifacts": [
         {
           "path": "specs/207_research_temporal_modal_refactor_pr649/reports/01_team-research.md",
@@ -25,14 +25,13 @@
           "summary": "Round 2: line-by-line analysis and concrete refactoring design based on reviewer feedback"
         },
         {
-          "path": "specs/207_research_temporal_modal_refactor_pr649/plans/03_refactor-plan.md",
-          "type": "plan",
-          "summary": "5-phase plan: generic MCS properties in Foundations, migrate 4 logics"
-        },
-        {
           "path": "specs/207_research_temporal_modal_refactor_pr649/reports/03_ideal-solution-research.md",
           "type": "research",
           "summary": "Round 3: ideal solution design for generic deduction theorem + MCS class"
+        },
+        {
+          "path": "specs/207_research_temporal_modal_refactor_pr649/plans/04_revised-refactor-plan.md",
+          "type": "plan"
         }
       ]
     },

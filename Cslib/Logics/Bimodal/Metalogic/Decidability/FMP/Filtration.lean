@@ -198,7 +198,7 @@ The refined filtered task frame with proper nullity_identity.
 noncomputable def RefinedFilteredTaskFrame (phi : Formula Atom) :
     TaskFrame D where
   WorldState := FilteredWorld phi
-  task_rel w d u := if d = 0 then w = u else True
+  taskRel w d u := if d = 0 then w = u else True
   nullity_identity := by
     intro w u
     simp

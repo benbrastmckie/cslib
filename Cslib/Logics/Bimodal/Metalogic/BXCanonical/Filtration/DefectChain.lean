@@ -41,10 +41,12 @@ variable {Atom : Type*} [DecidableEq Atom]
 
 /-! ## Until Defect Count -/
 
+/-- Predicate for an Until-defect: an Until-formula in `Sigma` whose guard does not hold at `w`. -/
 def isUntilDefect (w : BXPoint Atom) (Sigma : Finset (Formula Atom)) (f : Formula Atom) : Prop :=
   f ∈ Sigma ∧ f ∈ w.formulas ∧
   ∃ φ ψ : Formula Atom, f = Formula.untl ψ φ ∧ ψ ∉ w.formulas
 
+/-- The number of Until-defects at `w` relative to `Sigma`. -/
 noncomputable def sigmaDefectCount (w : BXPoint Atom) (Sigma : Finset (Formula Atom)) : Nat :=
   (Sigma.filter (fun f =>
     f ∈ w.formulas ∧
@@ -80,6 +82,7 @@ theorem defect_step_self_accum {w : BXPoint Atom} {φ ψ : Formula Atom}
 
 /-! ## Since Defect Properties -/
 
+/-- The number of Since-defects at `w` relative to `Sigma`. -/
 noncomputable def sigmaSinceDefectCount (w : BXPoint Atom) (Sigma : Finset (Formula Atom)) : Nat :=
   (Sigma.filter (fun f =>
     f ∈ w.formulas ∧

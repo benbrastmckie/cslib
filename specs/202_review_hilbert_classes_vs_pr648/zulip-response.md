@@ -10,4 +10,4 @@ I've added both layers to [PR 648](https://github.com/leanprover/cslib/pull/648)
 
 ## Follow Up
 
-Regarding the smaller PR with strong soundness — PR 648 now includes the assignment semantics you'd need, so that part is covered. Strong soundness for bivalent semantics (i.e., if `Γ ⊢ φ` then every `Bool`/`Prop` valuation satisfying `Γ` also satisfies `φ`) is straightforward and doesn't require Kripke frames. I could put that in a follow-up PR ahead of the full Kripke semantics (PR 4 in the roadmap). Would that be enough to get DPLL going, or do you need anything else from the metatheory side?
+Regarding the smaller PR with strong soundness — PR 648 now includes the assignment semantics you'd need, so that part is covered. Strong soundness for bivalent semantics is [`prop_strong_soundness`](https://github.com/benbrastmckie/cslib/blob/main/Cslib/Logics/Propositional/Metalogic/StrongCompleteness.lean#L386), which will roll out with PR 5 in the contribution roadmap. If you need it sooner, feel free to stack a PR on top of 648 — the proof is straightforward and doesn't require the completeness machinery in that file.

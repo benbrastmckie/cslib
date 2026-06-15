@@ -14,7 +14,7 @@ monotonicity lemmas, and the proof of perpetuity principle P6.
 
 ## Main Theorems
 
-- `perpetuity_6`: `▽□φ → □△φ` (occurrent necessity is perpetual)
+- `perpetuity6`: `▽□φ → □△φ` (occurrent necessity is perpetual)
 
 ## Bridge Lemmas
 
@@ -132,7 +132,7 @@ def alwaysDni (φ : Bimodal.Formula Atom) : ⊢ φ.always.imp φ.neg.neg.always 
   have past_comp := impTrans (alwaysToPast φ) past_lift
   have present_comp := impTrans (alwaysToPresent φ) dni_phi
   have future_comp := impTrans (alwaysToFuture φ) future_lift
-  exact combineImpConj_3 past_comp present_comp future_comp
+  exact combineImpConj3 past_comp present_comp future_comp
 
 /-- DNE distributes over always: `⊢ △(¬¬φ) → △φ`. -/
 def alwaysDne (φ : Bimodal.Formula Atom) : ⊢ φ.neg.neg.always.imp φ.always := by
@@ -142,7 +142,7 @@ def alwaysDne (φ : Bimodal.Formula Atom) : ⊢ φ.neg.neg.always.imp φ.always 
   have past_comp := impTrans (alwaysToPast φ.neg.neg) past_lift
   have present_comp := impTrans (alwaysToPresent φ.neg.neg) dne_phi
   have future_comp := impTrans (alwaysToFuture φ.neg.neg) future_lift
-  exact combineImpConj_3 past_comp present_comp future_comp
+  exact combineImpConj3 past_comp present_comp future_comp
 
 /-! ## Temporal Duality Lemmas -/
 
@@ -163,7 +163,7 @@ def alwaysMono {φ₁ φ₂ : Bimodal.Formula Atom} (h : ⊢ φ₁.imp φ₂) : 
   have comp_past := impTrans (alwaysToPast φ₁) past_h
   have comp_present := impTrans (alwaysToPresent φ₁) h
   have comp_future := impTrans (alwaysToFuture φ₁) future_h
-  exact combineImpConj_3 comp_past comp_present comp_future
+  exact combineImpConj3 comp_past comp_present comp_future
 
 /-! ## Double Contraposition -/
 
@@ -211,8 +211,8 @@ Derivation via P5 applied to `¬φ` with bridge lemmas:
 3. Bridge 2: `△◇¬φ → ¬▽□φ`
 4. Chain: `¬□△φ → ¬▽□φ`
 5. Double contrapose: `▽□φ → □△φ` -/
-def perpetuity_6 (φ : Bimodal.Formula Atom) : ⊢ φ.box.sometimes.imp φ.always.box := by
-  have p5_neg := perpetuity_5 φ.neg
+def perpetuity6 (φ : Bimodal.Formula Atom) : ⊢ φ.box.sometimes.imp φ.always.box := by
+  have p5_neg := perpetuity5 φ.neg
   have b1 := bridge1 φ
   have b2 := bridge2 φ
   have chain := impTrans (impTrans b1 p5_neg) b2

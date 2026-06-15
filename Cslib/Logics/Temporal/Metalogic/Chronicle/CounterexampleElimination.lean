@@ -66,9 +66,12 @@ A **C5 counterexample** for a chronicle: a point x and formulas xi, eta such tha
 xi U eta in f(x) but no witness exists in the current domain.
 -/
 structure C5Counterexample (χ : Chronicle Atom) where
+  /-- The rational point in the chronicle domain witnessing the counterexample. -/
   x : Rat
   x_mem : x ∈ χ.dom
+  /-- The guard formula (the body of the Until). -/
   ξ : Formula Atom
+  /-- The event formula (the trigger of the Until). -/
   η : Formula Atom
   until_mem : (η U ξ) ∈ χ.f x
   no_witness : ¬∃ y ∈ χ.dom, x < y ∧ η ∈ χ.f y ∧
@@ -79,9 +82,12 @@ A **C5' counterexample** (Since direction): a point x and formulas xi, eta such 
 xi S eta in f(x) but no backward witness exists.
 -/
 structure C5'Counterexample (χ : Chronicle Atom) where
+  /-- The rational point in the chronicle domain witnessing the counterexample. -/
   x : Rat
   x_mem : x ∈ χ.dom
+  /-- The guard formula (the body of the Since). -/
   ξ : Formula Atom
+  /-- The event formula (the trigger of the Since). -/
   η : Formula Atom
   since_mem : (η S ξ) ∈ χ.f x
   no_witness : ¬∃ y ∈ χ.dom, y < x ∧ η ∈ χ.f y ∧
@@ -177,10 +183,10 @@ theorem BurgessR3Maximal_g_content_sub {A B C : Set (Formula Atom)}
   set top := Formula.bot.imp Formula.bot with top_def
   have h_top_B : top ∈ B :=
     cud_contains_theorems h_r3m.1 (identity Formula.bot)
-  have h_untl : Formula.untl φ.neg top ∈ A :=
+  have hUntl : Formula.untl φ.neg top ∈ A :=
     h_r3m.2.1.1 top h_top_B φ.neg h_neg_C
   have h_F_neg : (𝐅(¬φ)) ∈ A :=
-    until_implies_F_in_mcs h_mcs_A h_untl
+    until_implies_F_in_mcs h_mcs_A hUntl
   have h_dni : DerivationTree FrameClass.Base [] (φ.imp φ.neg.neg) := by
     have h1 : DerivationTree FrameClass.Base [φ.neg, φ] Formula.bot :=
       DerivationTree.modus_ponens [φ.neg, φ] φ Formula.bot
@@ -290,7 +296,7 @@ theorem burgessR3Maximal_from_h_content_sub {A C : Set (Formula Atom)}
 and a C5 counterexample (x, xi, eta), extend the chronicle by adding a new point y
 with eta in f'(y).
 -/
-noncomputable def eliminateC5Counterexample {χ : Chronicle Atom}
+lemma eliminateC5Counterexample {χ : Chronicle Atom}
     (h_c0 : χ.c0)
     (ce : C5Counterexample χ)
     :
@@ -305,7 +311,7 @@ noncomputable def eliminateC5Counterexample {χ : Chronicle Atom}
   obtain ⟨y, hy_gt, hy_notin⟩ := exists_rat_gt_finset χ.dom
   have h_mcs_x := h_c0 ce.x ce.x_mem
   obtain ⟨_B, C, h_C_mcs, h_η_C, _, _, _⟩ :=
-    lemma_2_4 h_mcs_x ce.ξ ce.η ce.until_mem
+    lemma24 h_mcs_x ce.ξ ce.η ce.until_mem
   refine ⟨⟨fun q => if q = y then C else χ.f q, χ.g, insert y χ.dom⟩,
     Finset.subset_insert y χ.dom, ?_, ?_, ?_, Finset.ssubset_insert hy_notin,
     fun _ _ _ _ => rfl, fun _ _ => rfl⟩
@@ -325,7 +331,7 @@ noncomputable def eliminateC5Counterexample {χ : Chronicle Atom}
 /--
 **Lemma 2.10'** (C5' Counterexample Elimination): Mirror of Lemma 2.10 for Since.
 -/
-noncomputable def eliminateC5'Counterexample {χ : Chronicle Atom}
+lemma eliminateC5'Counterexample {χ : Chronicle Atom}
     (h_c0 : χ.c0)
     (ce : C5'Counterexample χ) :
     ∃ χ' : Chronicle Atom,
@@ -396,16 +402,22 @@ instance : Encodable PotentialCounterexampleKind where
 A **potential counterexample** encodes a tuple (x, y, xi, eta, kind).
 -/
 structure PotentialCounterexample where
+  /-- The base point of the potential counterexample. -/
   x : Rat
+  /-- The witness candidate point (used for C4 counterexamples). -/
   y : Rat
+  /-- The guard formula. -/
   ξ : Formula Atom
+  /-- The event formula. -/
   η : Formula Atom
+  /-- The kind of counterexample (C4 forward/backward or C5 forward/backward). -/
   kind : PotentialCounterexampleKind
 
 /--
 Result type for `eliminatePotentialCounterexample`.
 -/
 structure EliminationResult (χ : Chronicle Atom) (pc : PotentialCounterexample) where
+  /-- The extended chronicle produced by the elimination step. -/
   val : Chronicle Atom
   dom_sub : χ.dom ⊆ val.dom
   c0 : val.c0
@@ -458,12 +470,14 @@ structure EliminationResult (χ : Chronicle Atom) (pc : PotentialCounterexample)
 Result of the C5 forward recursive walk (Burgess 2.10 induction).
 -/
 structure C5ForwardWalkResult (χ : Chronicle Atom) (ξ η : Formula Atom) (start : Rat) where
+  /-- The extended chronicle produced by the forward walk. -/
   val : Chronicle Atom
   dom_sub : χ.dom ⊆ val.dom
   c0 : val.c0
   c2' : val.c2'
   f_agrees : ∀ x ∈ χ.dom, val.f x = χ.f x
   g_agrees : ∀ a b, a ∈ χ.dom → b ∈ χ.dom → val.g a b = χ.g a b
+  /-- The new domain point witnessing the Until formula after `start`. -/
   witness : Rat
   witness_mem : witness ∈ val.dom
   witness_gt : start < witness
@@ -482,12 +496,14 @@ structure C5ForwardWalkResult (χ : Chronicle Atom) (ξ η : Formula Atom) (star
 Result of the C5 backward recursive walk (mirror for Since).
 -/
 structure C5BackwardWalkResult (χ : Chronicle Atom) (ξ η : Formula Atom) (start : Rat) where
+  /-- The extended chronicle produced by the backward walk. -/
   val : Chronicle Atom
   dom_sub : χ.dom ⊆ val.dom
   c0 : val.c0
   c2' : val.c2'
   f_agrees : ∀ x ∈ χ.dom, val.f x = χ.f x
   g_agrees : ∀ a b, a ∈ χ.dom → b ∈ χ.dom → val.g a b = χ.g a b
+  /-- The new domain point witnessing the Since formula before `start`. -/
   witness : Rat
   witness_mem : witness ∈ val.dom
   witness_lt : witness < start
@@ -505,8 +521,8 @@ structure C5BackwardWalkResult (χ : Chronicle Atom) (ξ η : Formula Atom) (sta
 /-! ## Recursive Walks -/
 
 set_option maxHeartbeats 3200000 in
--- Complex term elaboration requires extended heartbeats
-noncomputable def c5_forward_walk
+/-- Recursive walk that eliminates a C5 forward (Until) counterexample by inserting a new witness point. -/
+noncomputable def c5ForwardWalk
     (χ : Chronicle Atom) (h_c0 : χ.c0) (h_c2' : χ.c2')
     (ξ η : Formula Atom) (pt : Rat)
     (h_start_mem : pt ∈ χ.dom)
@@ -527,7 +543,7 @@ noncomputable def c5_forward_walk
     let y := h_fresh.choose
     have hy_gt : ∀ s ∈ χ.dom, s < y := h_fresh.choose_spec.1
     have hy_notin : y ∉ χ.dom := h_fresh.choose_spec.2
-    have h_l24 := lemma_2_4_with_guard h_mcs_start ξ η h_until_start
+    have h_l24 := lemma24WithGuard h_mcs_start ξ η h_until_start
     let B := h_l24.choose
     let C := h_l24.choose_spec.choose
     have h_l24_prop := h_l24.choose_spec.choose_spec
@@ -747,7 +763,7 @@ noncomputable def c5_forward_walk
           exact ⟨x', Finset.mem_filter.mpr ⟨hx'_dom, hstart_lt_x'⟩,
             fun h => absurd (Finset.mem_filter.mp h).2 (lt_irrefl _)⟩
       -- Recurse
-      have r := c5_forward_walk χ h_c0 h_c2' ξ η x' hx'_dom h_untl_x' h_no_wit_x'
+      have r := c5ForwardWalk χ h_c0 h_c2' ξ η x' hx'_dom h_untl_x' h_no_wit_x'
       -- Compose: guard at (pt, x') from condition (i) + recursive guard from x'
       exact { val := r.val
               dom_sub := r.dom_sub
@@ -1046,8 +1062,8 @@ decreasing_by
   all_goals simp_all only [gt_iff_lt]
   all_goals exact h_term
 set_option maxHeartbeats 3200000 in
--- Complex term elaboration requires extended heartbeats
-noncomputable def c5_backward_walk
+/-- Recursive walk that eliminates a C5 backward (Since) counterexample by inserting a new witness point. -/
+noncomputable def c5BackwardWalk
     (χ : Chronicle Atom) (h_c0 : χ.c0) (h_c2' : χ.c2')
     (ξ η : Formula Atom) (pt : Rat)
     (h_start_mem : pt ∈ χ.dom)
@@ -1068,9 +1084,9 @@ noncomputable def c5_backward_walk
     let y := h_fresh.choose
     have hy_lt : ∀ s ∈ χ.dom, y < s := h_fresh.choose_spec.1
     have hy_notin : y ∉ χ.dom := h_fresh.choose_spec.2
-    -- Use lemma_2_4_since_with_guard: from snce(ξ,η) ∈ f(pt), get B,C with
+    -- Use lemma24SinceWithGuard: from snce(ξ,η) ∈ f(pt), get B,C with
     -- η ∈ C, ξ ∈ B, BurgessR3Maximal(C, B, f(pt))
-    have h_l24s := lemma_2_4_since_with_guard h_mcs_start ξ η h_since_start
+    have h_l24s := lemma24SinceWithGuard h_mcs_start ξ η h_since_start
     let B := h_l24s.choose
     let C := h_l24s.choose_spec.choose
     have h_l24s_prop := h_l24s.choose_spec.choose_spec
@@ -1283,7 +1299,7 @@ noncomputable def c5_backward_walk
           exact ⟨x'', Finset.mem_filter.mpr ⟨hx''_dom, hx''_lt_start⟩,
             fun h => absurd (Finset.mem_filter.mp h).2 (lt_irrefl _)⟩
       -- Recurse
-      have r := c5_backward_walk χ h_c0 h_c2' ξ η x'' hx''_dom h_snce_x'' h_no_wit_x''
+      have r := c5BackwardWalk χ h_c0 h_c2' ξ η x'' hx''_dom h_snce_x'' h_no_wit_x''
       -- Compose: guard at (x'', pt) from condition (i) + recursive guard from x''
       exact { val := r.val
               dom_sub := r.dom_sub
@@ -1594,7 +1610,7 @@ decreasing_by
 /-! ## Main Elimination Function -/
 
 set_option maxHeartbeats 6400000 in
--- Complex term elaboration requires extended heartbeats
+/-- Eliminates a single potential counterexample from a chronicle, returning an extended chronicle with the counterexample resolved. -/
 noncomputable def eliminatePotentialCounterexample
     (χ : Chronicle Atom) (h_c0 : χ.c0) (h_c2' : χ.c2')
     (pc : PotentialCounterexample)
@@ -1627,7 +1643,7 @@ noncomputable def eliminatePotentialCounterexample
         let y := h_fresh.choose
         have hy_gt : ∀ s ∈ χ.dom, s < y := h_fresh.choose_spec.1
         have hy_notin : y ∉ χ.dom := h_fresh.choose_spec.2
-        have h_l24 := lemma_2_4_with_guard h_mcs_x pc.ξ pc.η h_until
+        have h_l24 := lemma24WithGuard h_mcs_x pc.ξ pc.η h_until
         let B := h_l24.choose
         let C := h_l24.choose_spec.choose
         have h_l24_prop := h_l24.choose_spec.choose_spec
@@ -1807,7 +1823,7 @@ noncomputable def eliminatePotentialCounterexample
         -- If not, the existing splitting lemmas handle all cases.
         by_cases h_cond_i : Formula.and pc.ξ (Formula.untl pc.η pc.ξ) ∈ χ.f x' ∧ pc.ξ ∈ χ.g pc.x x'
         · -- **Condition (i)**: use recursive walk helper (Burgess 2.10 induction).
-          let r := c5_forward_walk χ h_c0 h_c2' pc.ξ pc.η pc.x h_mem h_until h_no_wit
+          let r := c5ForwardWalk χ h_c0 h_c2' pc.ξ pc.η pc.x h_mem h_until h_no_wit
           exact { val := r.val
                   dom_sub := r.dom_sub
                   c0 := r.c0
@@ -1901,7 +1917,7 @@ noncomputable def eliminatePotentialCounterexample
                   exact ⟨B'4, D4, B''4, h_B'4, h_B''4, h_D4_mcs, h_eta_D4, h_B_sub_D4, h_B_sub_B'4, h_B_sub_B''4, h_xi_B'4⟩
               · -- eta ∉ g, (¬eta) ∉ g. Case split on xi ∈ g for the guard.
                 by_cases h_xi_g6 : pc.ξ ∈ χ.g pc.x x'
-                · -- xi ∈ g: use lemma_2_6 and derive xi ∈ B' from g ⊆ B'
+                · -- xi ∈ g: use lemma26 and derive xi ∈ B' from g ⊆ B'
                   have h_split5 := lemma_2_6_splitting h_mcs_x h_mcs_x' h_r3m_adj
                     pc.η.neg h_eta_neg_g
                   obtain ⟨B'5, D5, B''5, h_B'5, h_B''5, h_D5_mcs, h_eta_neg_neg_D5, h_B_sub_D5, h_B_sub_B'5, h_B_sub_B''5⟩ := h_split5
@@ -2154,12 +2170,12 @@ noncomputable def eliminatePotentialCounterexample
       by_cases h_eq_min : pc.x = min_old
       · -- **Case n=0**: pc.x is the minimum domain point.
         -- Place y before all points. Only new pair is (y, pc.x).
-        -- Use lemma_2_4_since_with_guard for guard ξ ∈ B.
+        -- Use lemma24SinceWithGuard for guard ξ ∈ B.
         have h_fresh := exists_rat_lt_finset χ.dom
         let y := h_fresh.choose
         have hy_lt : ∀ s ∈ χ.dom, y < s := h_fresh.choose_spec.1
         have hy_notin : y ∉ χ.dom := h_fresh.choose_spec.2
-        have h_l24s := lemma_2_4_since_with_guard h_mcs_x pc.ξ pc.η h_since
+        have h_l24s := lemma24SinceWithGuard h_mcs_x pc.ξ pc.η h_since
         let B_new := h_l24s.choose
         let C := h_l24s.choose_spec.choose
         have h_l24s_prop := h_l24s.choose_spec.choose_spec
@@ -2335,7 +2351,7 @@ noncomputable def eliminatePotentialCounterexample
         -- If no, splitting at (x'', pc.x) succeeds.
         by_cases h_cond_i_back : Formula.and pc.ξ (Formula.snce pc.η pc.ξ) ∈ χ.f x'' ∧ pc.ξ ∈ χ.g x'' pc.x
         · -- **Condition (i) backward**: use recursive backward walk helper
-          let r := c5_backward_walk χ h_c0 h_c2' pc.ξ pc.η pc.x h_mem h_since h_no_wit
+          let r := c5BackwardWalk χ h_c0 h_c2' pc.ξ pc.η pc.x h_mem h_since h_no_wit
           exact { val := r.val
                   dom_sub := r.dom_sub
                   c0 := r.c0
@@ -2709,8 +2725,8 @@ noncomputable def eliminatePotentialCounterexample
         intro h_xi_g
         by_cases h_eta_wn : pc.η ∈ χ.f w_next
         · -- η ∈ f(w_next): direct contradiction
-          have h_untl := h_r3m_w.2.1.1 pc.ξ h_xi_g pc.η h_eta_wn
-          exact absurd h_untl (mcs_not_mem_of_neg h_mcs_w hw_neg_until)
+          have hUntl := h_r3m_w.2.1.1 pc.ξ h_xi_g pc.η h_eta_wn
+          exact absurd hUntl (mcs_not_mem_of_neg h_mcs_w hw_neg_until)
         · -- η ∉ f(w_next): need more involved argument
           -- w_next must be < y (if w_next = y, then η ∈ f(y) = f(w_next) by h_event)
           have hw_next_lt_y : w_next < pc.y := by
@@ -3001,8 +3017,8 @@ noncomputable def eliminatePotentialCounterexample
         intro h_xi_g
         by_cases h_eta_wp : pc.η ∈ χ.f w_prev
         · -- η ∈ f(w_prev): S(ξ, η) ∈ f(w) by burgessRSetSince, contradiction
-          have h_snce := h_r3m_w.2.1.2 pc.ξ h_xi_g pc.η h_eta_wp
-          exact absurd h_snce (mcs_not_mem_of_neg h_mcs_w hw_neg_since)
+          have hSnce := h_r3m_w.2.1.2 pc.ξ h_xi_g pc.η h_eta_wp
+          exact absurd hSnce (mcs_not_mem_of_neg h_mcs_w hw_neg_since)
         · -- η ∉ f(w_prev): need more involved argument
           have hy_lt_prev : pc.y < w_prev := by
             rcases lt_or_eq_of_le hy_le_prev with h | h

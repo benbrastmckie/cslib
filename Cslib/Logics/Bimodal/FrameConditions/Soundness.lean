@@ -27,7 +27,9 @@ variable {Atom : Type*}
 
 /-! ## Parameterized Soundness -/
 
-def soundnessOver (D : Type) [AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D]
+/-- Soundness of derivations over a fixed temporal domain `D`: any derivation of `φ` from `Γ`
+is truth-preserving over all TaskFrames on `D` with shift-closed worlds. -/
+theorem soundnessOver (D : Type) [AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D]
     [Nontrivial D] (Γ : Context Atom) (φ : Formula Atom)
     (d : DerivationTree FrameClass.Base Γ φ) :
     ∀ (ℱ : TaskFrame D) (M : TaskModel Atom ℱ)

@@ -30,6 +30,7 @@ open Formula
 
 variable {Atom : Type*} [DecidableEq Atom]
 
+/-- The F-nesting depth of a formula: counts nested someFuture (Until with ⊤) layers. -/
 def fNestingDepth : Formula Atom → Nat
   | .untl inner (.imp .bot .bot) => 1 + fNestingDepth inner
   | _ => 0
@@ -62,6 +63,7 @@ theorem f_nesting_depth_allPast (psi : Formula Atom) : fNestingDepth (Formula.al
 theorem f_nesting_depth_allFuture (psi : Formula Atom) : fNestingDepth (Formula.allFuture psi) = 0 := by
   simp only [Formula.allFuture, Formula.someFuture, Formula.neg, Formula.top, fNestingDepth]
 
+/-- The maximum F-nesting depth among all formulas in the closure of `phi`. -/
 def maxFDepthInClosure (phi : Formula Atom) : Nat :=
   (closureWithNeg phi).sup fNestingDepth
 
@@ -69,6 +71,7 @@ theorem f_depth_le_max {phi psi : Formula Atom} (h : psi ∈ closureWithNeg phi)
     fNestingDepth psi ≤ maxFDepthInClosure phi := by
   exact Finset.le_sup h
 
+/-- The P-nesting depth of a formula: counts nested somePast (Since with ⊤) layers. -/
 def pNestingDepth : Formula Atom → Nat
   | .snce inner (.imp .bot .bot) => 1 + pNestingDepth inner
   | _ => 0
@@ -100,6 +103,7 @@ theorem p_nesting_depth_allFuture (psi : Formula Atom) : pNestingDepth (Formula.
 theorem p_nesting_depth_allPast (psi : Formula Atom) : pNestingDepth (Formula.allPast psi) = 0 := by
   simp only [Formula.allPast, Formula.somePast, Formula.neg, Formula.top, pNestingDepth]
 
+/-- The maximum P-nesting depth among all formulas in the closure of `phi`. -/
 def maxPDepthInClosure (phi : Formula Atom) : Nat :=
   (closureWithNeg phi).sup pNestingDepth
 
@@ -107,10 +111,12 @@ theorem p_depth_le_max {phi psi : Formula Atom} (h : psi ∈ closureWithNeg phi)
     pNestingDepth psi ≤ maxPDepthInClosure phi := by
   exact Finset.le_sup h
 
+/-- Extract the inner formula from a someFuture (Until ⊤) formula, if present. -/
 def extractFutureInner : Formula Atom → Option (Formula Atom)
   | .untl inner (.imp .bot .bot) => some inner
   | _ => none
 
+/-- Extract the inner formula from a somePast (Since ⊤) formula, if present. -/
 def extractPastInner : Formula Atom → Option (Formula Atom)
   | .snce inner (.imp .bot .bot) => some inner
   | _ => none
@@ -123,12 +129,14 @@ theorem extractPastInner_somePast (chi : Formula Atom) :
     extractPastInner (Formula.somePast chi) = some chi := by
   simp only [Formula.somePast, Formula.top, extractPastInner]
 
+/-- A formula is a future formula if it is of the form someFuture(inner). -/
 def IsFutureFormula (f : Formula Atom) : Prop := (extractFutureInner f).isSome = true
 
 instance : DecidablePred (IsFutureFormula (Atom := Atom)) :=
   fun f => decidable_of_iff ((extractFutureInner f).isSome = true)
     (by simp only [IsFutureFormula])
 
+/-- A formula is a past formula if it is of the form somePast(inner). -/
 def IsPastFormula (f : Formula Atom) : Prop := (extractPastInner f).isSome = true
 
 instance : DecidablePred (IsPastFormula (Atom := Atom)) :=

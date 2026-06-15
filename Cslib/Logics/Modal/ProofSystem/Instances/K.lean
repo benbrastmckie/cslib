@@ -53,6 +53,8 @@ end Cslib.Logic.Modal
 
 /-! ## Instance Registrations -/
 
+namespace Cslib.Logic.Modal
+
 section ModalInstances
 
 /-! ### System K Instances -/
@@ -110,3 +112,5 @@ instance :
       (F := Modal.Proposition Atom) where
 
 end ModalInstances
+
+end Cslib.Logic.Modal

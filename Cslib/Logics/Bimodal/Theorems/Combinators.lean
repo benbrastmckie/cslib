@@ -35,7 +35,7 @@ equivalents via the wrap/unwrap bridge pattern, eliminating redundant proofs.
 ### Conjunction Introduction
 - `pairing`: Pairing combinator (derived from app2)
 - `combineImpConj`: Combine two implications into conjunction
-- `combineImpConj_3`: Combine three implications into nested conjunction
+- `combineImpConj3`: Combine three implications into nested conjunction
 
 ### Double Negation
 - `dni`: Double negation introduction (derived from app1)
@@ -169,7 +169,7 @@ Combine three implications into a nested conjunction implication.
 
 Given `⊢ P → A`, `⊢ P → B`, and `⊢ P → C`, derive `⊢ P → A ∧ (B ∧ C)`.
 -/
-def combineImpConj_3 {fc : FrameClass} {R A B C : Formula Atom}
+def combineImpConj3 {fc : FrameClass} {R A B C : Formula Atom}
     (hA : DerivationTree fc [] (R.imp A))
     (hB : DerivationTree fc [] (R.imp B))
     (hC : DerivationTree fc [] (R.imp C)) :

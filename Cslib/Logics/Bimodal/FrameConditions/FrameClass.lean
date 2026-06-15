@@ -219,7 +219,7 @@ done for canonical quotient constructions that build in density.
 Given a type D with all the required structures including `DenselyOrdered`,
 this constructs a `DenseTemporalFrame` instance.
 -/
-@[reducible] def DenseTemporalFrame.mk' (D : Type) [AddCommGroup D] [LinearOrder D]
+lemma DenseTemporalFrame.mk' (D : Type) [AddCommGroup D] [LinearOrder D]
     [IsOrderedAddMonoid D] [Nontrivial D] [NoMaxOrder D] [NoMinOrder D]
     [DenselyOrdered D] : DenseTemporalFrame D := {}
 
@@ -227,7 +227,7 @@ this constructs a `DenseTemporalFrame` instance.
 Given a type D with all the required structures for a discrete frame,
 this constructs a `DiscreteTemporalFrame` instance.
 -/
-@[reducible] def DiscreteTemporalFrame.mk' (D : Type) [AddCommGroup D] [LinearOrder D]
+lemma DiscreteTemporalFrame.mk' (D : Type) [AddCommGroup D] [LinearOrder D]
     [IsOrderedAddMonoid D] [Nontrivial D] [NoMaxOrder D] [NoMinOrder D]
     [SuccOrder D] [PredOrder D] [IsSuccArchimedean D] :
     DiscreteTemporalFrame D := {}

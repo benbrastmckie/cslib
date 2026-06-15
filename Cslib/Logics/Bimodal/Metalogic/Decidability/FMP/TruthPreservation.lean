@@ -273,7 +273,7 @@ theorem mcs_allFuture_allFuture {phi : Formula Atom}
   have h_temp_4_thm : DerivationTree FrameClass.Base
       ([] : List (Formula Atom))
       ((ψ.allFuture).imp (ψ.allFuture.allFuture)) :=
-    temp_4_derived ψ
+    temp4Derived ψ
   have h_deriv : DerivationTree FrameClass.Base
       [ψ.allFuture] ψ.allFuture.allFuture := by
     have h_axiom : DerivationTree FrameClass.Base
@@ -299,7 +299,7 @@ theorem mcs_allPast_allPast {phi : Formula Atom}
   have h_temp_4_past_thm : DerivationTree FrameClass.Base
       ([] : List (Formula Atom))
       ((ψ.allPast).imp (ψ.allPast.allPast)) :=
-    temp_4_past ψ
+    temp4Past ψ
   have h_deriv : DerivationTree FrameClass.Base
       [ψ.allPast] ψ.allPast.allPast := by
     have h_axiom : DerivationTree FrameClass.Base

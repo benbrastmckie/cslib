@@ -30,22 +30,27 @@ open Formula
 
 variable {Atom : Type*} [DecidableEq Atom]
 
+/-- Map a future formula F(χ) to its deferral disjunction χ ∨ F(χ); `⊥` otherwise. -/
 def toFutureDeferral (f : Formula Atom) : Formula Atom :=
   match extractFutureInner f with
   | some chi => Formula.or chi (Formula.someFuture chi)
   | none => Formula.bot
 
+/-- Map a past formula P(χ) to its deferral disjunction χ ∨ P(χ); `⊥` otherwise. -/
 def toPastDeferral (f : Formula Atom) : Formula Atom :=
   match extractPastInner f with
   | some chi => Formula.or chi (Formula.somePast chi)
   | none => Formula.bot
 
+/-- The set of forward deferral disjunctions for future formulas in the closure of `phi`. -/
 def deferralDisjunctionSet (phi : Formula Atom) : Finset (Formula Atom) :=
   ((closureWithNeg phi).filter IsFutureFormula).image toFutureDeferral
 
+/-- The set of backward deferral disjunctions for past formulas in the closure of `phi`. -/
 def backwardDeferralSet (phi : Formula Atom) : Finset (Formula Atom) :=
   ((closureWithNeg phi).filter IsPastFormula).image toPastDeferral
 
+/-- A formula is an Until formula if it has the form `φ U ψ`. -/
 def IsUntilFormula : Formula Atom → Prop
   | .untl _ _ => True
   | _ => False
@@ -56,6 +61,7 @@ instance : DecidablePred (IsUntilFormula (Atom := Atom)) :=
   | .atom _ | .bot | .imp _ _ | .box _ | .snce _ _ =>
     isFalse (by simp [IsUntilFormula])
 
+/-- Predicate recognizing exactly the since-formulas `φ S ψ`. -/
 def IsSinceFormula : Formula Atom → Prop
   | .snce _ _ => True
   | _ => False
@@ -66,44 +72,61 @@ instance : DecidablePred (IsSinceFormula (Atom := Atom)) :=
   | .atom _ | .bot | .imp _ _ | .box _ | .untl _ _ =>
     isFalse (by simp [IsSinceFormula])
 
+/-- Maps `φ U ψ` to its deferral expansion `ψ ∨ (φ ∧ (φ U ψ))`; returns `⊥` on non-until-formulas. -/
 def toUntilDeferral : Formula Atom → Formula Atom
   | .untl phi psi => Formula.or psi (Formula.and phi (.untl phi psi))
   | _ => Formula.bot
 
+/-- Maps `φ S ψ` to its deferral expansion `ψ ∨ (φ ∧ (φ S ψ))`; returns `⊥` on non-since-formulas. -/
 def toSinceDeferral : Formula Atom → Formula Atom
   | .snce phi psi => Formula.or psi (Formula.and phi (.snce phi psi))
   | _ => Formula.bot
 
+/-- The set of deferral expansions for all until-subformulas of `phi`. -/
 def untilDeferralSet (phi : Formula Atom) : Finset (Formula Atom) :=
   ((closureWithNeg phi).filter IsUntilFormula).image toUntilDeferral
 
+/-- The set of deferral expansions for all since-subformulas of `phi`. -/
 def sinceDeferralSet (phi : Formula Atom) : Finset (Formula Atom) :=
   ((closureWithNeg phi).filter IsSinceFormula).image toSinceDeferral
 
-abbrev F_top : Formula Atom := Formula.someFuture (Formula.neg Formula.bot)
-abbrev P_top : Formula Atom := Formula.somePast (Formula.neg Formula.bot)
+/-- The formula `◇⊤` asserting that some future moment exists. -/
+abbrev fTop : Formula Atom := Formula.someFuture (Formula.neg Formula.bot)
+/-- The formula `◁⊤` asserting that some past moment exists. -/
+abbrev pTop : Formula Atom := Formula.somePast (Formula.neg Formula.bot)
+/-- The formula `¬¬⊥`, used in serially-closed closure sets. -/
 abbrev negNegBot : Formula Atom := Formula.neg (Formula.neg Formula.bot)
-abbrev G_neg_neg_bot : Formula Atom := Formula.allFuture (negNegBot : Formula Atom)
-abbrev H_neg_neg_bot : Formula Atom := Formula.allPast (negNegBot : Formula Atom)
-abbrev negGNegNegBot : Formula Atom := Formula.neg (G_neg_neg_bot : Formula Atom)
-abbrev negHNegNegBot : Formula Atom := Formula.neg (H_neg_neg_bot : Formula Atom)
-abbrev F_top_deferral : Formula Atom := Formula.or (Formula.neg Formula.bot) (F_top : Formula Atom)
-abbrev P_top_deferral : Formula Atom := Formula.or (Formula.neg Formula.bot) (P_top : Formula Atom)
+/-- The formula `□(¬¬⊥)`. -/
+abbrev gNegNegBot : Formula Atom := Formula.allFuture (negNegBot : Formula Atom)
+/-- The formula `■(¬¬⊥)`. -/
+abbrev hNegNegBot : Formula Atom := Formula.allPast (negNegBot : Formula Atom)
+/-- The negation of `□(¬¬⊥)`. -/
+abbrev negGNegNegBot : Formula Atom := Formula.neg (gNegNegBot : Formula Atom)
+/-- The negation of `■(¬¬⊥)`. -/
+abbrev negHNegNegBot : Formula Atom := Formula.neg (hNegNegBot : Formula Atom)
+/-- The deferral expansion `¬⊥ ∨ ◇⊤` for future serility. -/
+abbrev fTopDeferral : Formula Atom := Formula.or (Formula.neg Formula.bot) (fTop : Formula Atom)
+/-- The deferral expansion `¬⊥ ∨ ◁⊤` for past seriality. -/
+abbrev pTopDeferral : Formula Atom := Formula.or (Formula.neg Formula.bot) (pTop : Formula Atom)
 
+/-- The finite set of seriality-witnessing formulas required in deferral closures. -/
 def serialityFormulas : Finset (Formula Atom) :=
-  {F_top, P_top, Formula.neg Formula.bot, negNegBot, G_neg_neg_bot, H_neg_neg_bot,
-   negGNegNegBot, negHNegNegBot, F_top_deferral, P_top_deferral}
+  {fTop, pTop, Formula.neg Formula.bot, negNegBot, gNegNegBot, hNegNegBot,
+   negGNegNegBot, negHNegNegBot, fTopDeferral, pTopDeferral}
 
+/-- Maps a future-formula `◇χ` to its blocking counterpart `□(¬χ)`; returns `⊥` otherwise. -/
 def toFutureBlocking (f : Formula Atom) : Formula Atom :=
   match extractFutureInner f with
   | some chi => Formula.allFuture chi.neg
   | none => Formula.bot
 
+/-- Maps a past-formula `◁χ` to its blocking counterpart `■(¬χ)`; returns `⊥` otherwise. -/
 def toPastBlocking (f : Formula Atom) : Formula Atom :=
   match extractPastInner f with
   | some chi => Formula.allPast chi.neg
   | none => Formula.bot
 
+/-- The set of blocking formulas for all future- and past-subformulas of `phi`. -/
 def temporalBlockingSet (phi : Formula Atom) : Finset (Formula Atom) :=
   ((closureWithNeg phi).filter IsFutureFormula).image toFutureBlocking ∪
   ((closureWithNeg phi).filter IsPastFormula).image toPastBlocking
@@ -136,13 +159,16 @@ theorem allPast_neg_mem_temporalBlockingSet_of_somePast {phi chi : Formula Atom}
   rw [Finset.mem_filter]
   exact ⟨h, by simp [IsPastFormula, extractPastInner_somePast]⟩
 
+/-- The base deferral closure of `phi`: subformulas, deferrals, blocking formulas, and seriality witnesses. -/
 def baseDeferralClosure (phi : Formula Atom) : Finset (Formula Atom) :=
   closureWithNeg phi ∪ deferralDisjunctionSet phi ∪ backwardDeferralSet phi
   ∪ serialityFormulas ∪ temporalBlockingSet phi
 
+/-- The deferral closure of `phi`, equal to its base deferral closure. -/
 def deferralClosure (phi : Formula Atom) : Finset (Formula Atom) :=
   baseDeferralClosure phi
 
+/-- The extended deferral closure of `phi`, additionally including until- and since-deferral expansions. -/
 def extendedDeferralClosure (phi : Formula Atom) : Finset (Formula Atom) :=
   baseDeferralClosure phi ∪ untilDeferralSet phi ∪ sinceDeferralSet phi
 
@@ -183,11 +209,11 @@ theorem temporalBlockingSet_subset_deferralClosure (phi : Formula Atom) :
   unfold deferralClosure baseDeferralClosure
   exact Finset.mem_union_right _ h
 
-theorem F_top_mem_serialityFormulas : (F_top : Formula Atom) ∈ serialityFormulas := by
+theorem F_top_mem_serialityFormulas : (fTop : Formula Atom) ∈ serialityFormulas := by
   simp only [serialityFormulas, Finset.mem_insert, Finset.mem_singleton]
   left; trivial
 
-theorem P_top_mem_serialityFormulas : (P_top : Formula Atom) ∈ serialityFormulas := by
+theorem P_top_mem_serialityFormulas : (pTop : Formula Atom) ∈ serialityFormulas := by
   simp only [serialityFormulas, Finset.mem_insert, Finset.mem_singleton]
   right; left; trivial
 
@@ -202,21 +228,21 @@ theorem neg_neg_bot_mem_serialityFormulas :
   right; right; right; left; trivial
 
 theorem G_neg_neg_bot_mem_serialityFormulas :
-    (G_neg_neg_bot : Formula Atom) ∈ serialityFormulas := by
+    (gNegNegBot : Formula Atom) ∈ serialityFormulas := by
   simp only [serialityFormulas, Finset.mem_insert, Finset.mem_singleton]
   right; right; right; right; left; trivial
 
 theorem H_neg_neg_bot_mem_serialityFormulas :
-    (H_neg_neg_bot : Formula Atom) ∈ serialityFormulas := by
+    (hNegNegBot : Formula Atom) ∈ serialityFormulas := by
   simp only [serialityFormulas, Finset.mem_insert, Finset.mem_singleton]
   right; right; right; right; right; left; trivial
 
 theorem F_top_mem_deferralClosure (phi : Formula Atom) :
-    (F_top : Formula Atom) ∈ deferralClosure phi :=
+    (fTop : Formula Atom) ∈ deferralClosure phi :=
   serialityFormulas_subset_deferralClosure phi F_top_mem_serialityFormulas
 
 theorem P_top_mem_deferralClosure (phi : Formula Atom) :
-    (P_top : Formula Atom) ∈ deferralClosure phi :=
+    (pTop : Formula Atom) ∈ deferralClosure phi :=
   serialityFormulas_subset_deferralClosure phi P_top_mem_serialityFormulas
 
 theorem neg_bot_mem_deferralClosure (phi : Formula Atom) :
@@ -228,11 +254,11 @@ theorem neg_neg_bot_mem_deferralClosure (phi : Formula Atom) :
   serialityFormulas_subset_deferralClosure phi neg_neg_bot_mem_serialityFormulas
 
 theorem G_neg_neg_bot_mem_deferralClosure (phi : Formula Atom) :
-    (G_neg_neg_bot : Formula Atom) ∈ deferralClosure phi :=
+    (gNegNegBot : Formula Atom) ∈ deferralClosure phi :=
   serialityFormulas_subset_deferralClosure phi G_neg_neg_bot_mem_serialityFormulas
 
 theorem H_neg_neg_bot_mem_deferralClosure (phi : Formula Atom) :
-    (H_neg_neg_bot : Formula Atom) ∈ deferralClosure phi :=
+    (hNegNegBot : Formula Atom) ∈ deferralClosure phi :=
   serialityFormulas_subset_deferralClosure phi H_neg_neg_bot_mem_serialityFormulas
 
 theorem allFuture_neg_mem_deferralClosure_of_someFuture {phi chi : Formula Atom}
@@ -306,13 +332,13 @@ theorem p_nesting_depth_P_deferral (chi : Formula Atom) :
 
 -- Placeholder for forward references from later phases:
 theorem F_top_deferral_mem_deferralClosure (phi : Formula Atom) :
-    (F_top_deferral : Formula Atom) ∈ deferralClosure phi := by
+    (fTopDeferral : Formula Atom) ∈ deferralClosure phi := by
   apply serialityFormulas_subset_deferralClosure
   simp only [serialityFormulas, Finset.mem_insert, Finset.mem_singleton]
   right; right; right; right; right; right; right; right; left; trivial
 
 theorem P_top_deferral_mem_deferralClosure (phi : Formula Atom) :
-    (P_top_deferral : Formula Atom) ∈ deferralClosure phi := by
+    (pTopDeferral : Formula Atom) ∈ deferralClosure phi := by
   apply serialityFormulas_subset_deferralClosure
   simp only [serialityFormulas, Finset.mem_insert, Finset.mem_singleton]
   right; right; right; right; right; right; right; right; right; trivial

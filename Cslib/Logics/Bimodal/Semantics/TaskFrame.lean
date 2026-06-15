@@ -42,19 +42,19 @@ A task frame consists of:
 - A task relation connecting world states via timed tasks
 - Nullity identity: zero-duration task iff identity (w = u)
 - Forward compositionality: tasks compose for non-negative durations
-- Converse: task_rel w d u iff task_rel u (-d) w
+- Converse: taskRel w d u iff taskRel u (-d) w
 -/
 structure TaskFrame (D : Type*) [AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D] where
   /-- Type of world states -/
   WorldState : Type
-  /-- Task relation: `task_rel w x u` means u is reachable from w by task of duration x -/
-  task_rel : WorldState → D → WorldState → Prop
+  /-- Task relation: `taskRel w x u` means u is reachable from w by task of duration x -/
+  taskRel : WorldState → D → WorldState → Prop
   /-- Zero-duration task relates exactly identical states. -/
-  nullity_identity : ∀ w u, task_rel w 0 u ↔ w = u
+  nullity_identity : ∀ w u, taskRel w 0 u ↔ w = u
   /-- Forward compositionality: tasks compose for non-negative durations. -/
-  forward_comp : ∀ w u v x y, 0 ≤ x → 0 ≤ y → task_rel w x u → task_rel u y v → task_rel w (x + y) v
+  forward_comp : ∀ w u v x y, 0 ≤ x → 0 ≤ y → taskRel w x u → taskRel u y v → taskRel w (x + y) v
   /-- Converse: task relation is symmetric under duration negation. -/
-  converse : ∀ w d u, task_rel w d u ↔ task_rel u (-d) w
+  converse : ∀ w d u, taskRel w d u ↔ taskRel u (-d) w
 
 namespace TaskFrame
 
@@ -63,7 +63,7 @@ variable {D : Type*} [AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D]
 /--
 Derived nullity: zero-duration task is reflexive.
 -/
-theorem nullity (F : TaskFrame D) (w : F.WorldState) : F.task_rel w 0 w :=
+theorem nullity (F : TaskFrame D) (w : F.WorldState) : F.taskRel w 0 w :=
   F.nullity_identity w w |>.mpr rfl
 
 /--
@@ -71,13 +71,13 @@ Derived backward compositionality: tasks compose in the backward direction.
 -/
 theorem backward_comp (F : TaskFrame D) (w u v : F.WorldState) (x y : D)
     (hx : x ≤ 0) (hy : y ≤ 0)
-    (h1 : F.task_rel w x u) (h2 : F.task_rel u y v) :
-    F.task_rel w (x + y) v := by
-  have h1' : F.task_rel u (-x) w := F.converse w x u |>.mp h1
-  have h2' : F.task_rel v (-y) u := F.converse u y v |>.mp h2
+    (h1 : F.taskRel w x u) (h2 : F.taskRel u y v) :
+    F.taskRel w (x + y) v := by
+  have h1' : F.taskRel u (-x) w := F.converse w x u |>.mp h1
+  have h2' : F.taskRel v (-y) u := F.converse u y v |>.mp h2
   have hx' : 0 ≤ -x := neg_nonneg.mpr hx
   have hy' : 0 ≤ -y := neg_nonneg.mpr hy
-  have h3 : F.task_rel v ((-y) + (-x)) w := F.forward_comp v u w (-y) (-x) hy' hx' h2' h1'
+  have h3 : F.taskRel v ((-y) + (-x)) w := F.forward_comp v u w (-y) (-x) hy' hx' h2' h1'
   have h4 : -y + -x = -(x + y) := by simp [neg_add_rev, add_comm]
   rw [h4] at h3
   exact F.converse w (x + y) v |>.mpr h3
@@ -88,7 +88,7 @@ Simple unit-based task frame for testing.
 def trivialFrame {D : Type*} [AddCommGroup D] [LinearOrder D]
     [IsOrderedAddMonoid D] : TaskFrame D where
   WorldState := Unit
-  task_rel := fun _ _ _ => True
+  taskRel := fun _ _ _ => True
   nullity_identity := fun _ _ => ⟨fun _ => Subsingleton.elim _ _, fun _ => trivial⟩
   forward_comp := fun _ _ _ _ _ _ _ _ _ => trivial
   converse := fun _ _ _ => ⟨fun _ => trivial, fun _ => trivial⟩
@@ -99,7 +99,7 @@ Identity task frame: task relation is identity.
 def identityFrame (W : Type) {D : Type*} [AddCommGroup D]
     [LinearOrder D] [IsOrderedAddMonoid D] : TaskFrame D where
   WorldState := W
-  task_rel := fun w x u => w = u ∧ x = 0
+  taskRel := fun w x u => w = u ∧ x = 0
   nullity_identity := fun w u => by
     constructor
     · intro ⟨h1, _⟩; exact h1
@@ -126,7 +126,7 @@ Natural number based task frame.
 def natFrame {D : Type*} [AddCommGroup D] [LinearOrder D]
     [IsOrderedAddMonoid D] : TaskFrame D where
   WorldState := Nat
-  task_rel := fun w d u => d ≠ 0 ∨ w = u
+  taskRel := fun w d u => d ≠ 0 ∨ w = u
   nullity_identity := fun w u => by
     constructor
     · intro h

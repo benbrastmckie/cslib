@@ -32,21 +32,27 @@ open Cslib.Logic.Bimodal
 
 variable {Atom : Type*}
 
+/-- The set of formulas φ such that Gφ (always in the future) belongs to M. -/
 def gContent (M : Set (Formula Atom)) : Set (Formula Atom) :=
   {phi | Formula.allFuture phi ∈ M}
 
+/-- The set of formulas φ such that Hφ (always in the past) belongs to M. -/
 def hContent (M : Set (Formula Atom)) : Set (Formula Atom) :=
   {phi | Formula.allPast phi ∈ M}
 
+/-- The set of formulas φ such that Fφ (sometime in the future) belongs to M. -/
 def fContent (M : Set (Formula Atom)) : Set (Formula Atom) :=
   {phi | Formula.someFuture phi ∈ M}
 
+/-- The set of formulas φ such that Pφ (sometime in the past) belongs to M. -/
 def pContent (M : Set (Formula Atom)) : Set (Formula Atom) :=
   {phi | Formula.somePast phi ∈ M}
 
+/-- The set of pairs (φ, ψ) such that φ Until ψ belongs to M. -/
 def uContent (M : Set (Formula Atom)) : Set (Formula Atom × Formula Atom) :=
   { p | Formula.untl p.1 p.2 ∈ M }
 
+/-- The set of pairs (φ, ψ) such that φ Since ψ belongs to M. -/
 def sContent (M : Set (Formula Atom)) : Set (Formula Atom × Formula Atom) :=
   { p | Formula.snce p.1 p.2 ∈ M }
 

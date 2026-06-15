@@ -87,45 +87,38 @@ theorem subst_snce (q r : Atom) (phi psi : Formula Atom) :
 
 /-! ### Derived operator substitution lemmas -/
 
-@[simp]
 theorem subst_neg (q r : Atom) (phi : Formula Atom) :
     (Formula.neg phi).subst q r = Formula.neg (phi.subst q r) := by
   simp [Formula.neg, subst]
 
-@[simp]
 theorem subst_and (q r : Atom) (phi psi : Formula Atom) :
     (Formula.and phi psi).subst q r =
       Formula.and (phi.subst q r) (psi.subst q r) := by
   simp only [Formula.and, Formula.neg, subst_imp, subst_bot]
 
-@[simp]
 theorem subst_or (q r : Atom) (phi psi : Formula Atom) :
     (Formula.or phi psi).subst q r =
       Formula.or (phi.subst q r) (psi.subst q r) := by
   simp only [Formula.or, Formula.neg, subst_imp, subst_bot]
 
-@[simp]
 theorem subst_diamond (q r : Atom) (phi : Formula Atom) :
     (Formula.diamond phi).subst q r =
       Formula.diamond (phi.subst q r) := by
   simp only [Formula.diamond, Formula.neg, subst_imp,
     subst_bot, subst_box]
 
-@[simp]
 theorem subst_someFuture (q r : Atom) (phi : Formula Atom) :
     (Formula.someFuture phi).subst q r =
       Formula.someFuture (phi.subst q r) := by
   simp only [Formula.someFuture, Formula.top, subst_untl,
     subst_imp, subst_bot]
 
-@[simp]
 theorem subst_somePast (q r : Atom) (phi : Formula Atom) :
     (Formula.somePast phi).subst q r =
       Formula.somePast (phi.subst q r) := by
   simp only [Formula.somePast, Formula.top, subst_snce,
     subst_imp, subst_bot]
 
-@[simp]
 theorem subst_allFuture (q r : Atom) (phi : Formula Atom) :
     (Formula.allFuture phi).subst q r =
       Formula.allFuture (phi.subst q r) := by
@@ -133,7 +126,6 @@ theorem subst_allFuture (q r : Atom) (phi : Formula Atom) :
     Formula.someFuture, Formula.top,
     subst_imp, subst_bot, subst_untl]
 
-@[simp]
 theorem subst_allPast (q r : Atom) (phi : Formula Atom) :
     (Formula.allPast phi).subst q r =
       Formula.allPast (phi.subst q r) := by

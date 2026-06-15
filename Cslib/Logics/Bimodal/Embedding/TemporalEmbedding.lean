@@ -65,7 +65,6 @@ theorem Temporal.Formula.toBimodal_snce (φ₁ φ₂ : Temporal.Formula Atom) :
       Bimodal.Formula.snce φ₁.toBimodal φ₂.toBimodal := rfl
 
 /-- Embedding preserves neg. -/
-@[simp]
 theorem Temporal.Formula.toBimodal_neg (φ : Temporal.Formula Atom) :
     (Temporal.Formula.neg φ).toBimodal = Bimodal.Formula.neg φ.toBimodal := rfl
 

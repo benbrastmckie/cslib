@@ -39,6 +39,7 @@ variable {Atom : Type*} {D : Type*} [Preorder D]
 
 /-! ## Extending Context to MCS -/
 
+/-- Converts a list context to the corresponding set of formulas. -/
 def contextAsSet (Gamma : List (Formula Atom)) : Set (Formula Atom) := {phi | phi ∈ Gamma}
 
 lemma list_consistent_to_set_consistent {Gamma : List (Formula Atom)}
@@ -50,9 +51,11 @@ lemma list_consistent_to_set_consistent {Gamma : List (Formula Atom)}
 
 /-! ## Core Definitions -/
 
+/-- Consistency predicate asserting a list context does not derive falsum. -/
 def ContextConsistent (Gamma : List (Formula Atom)) : Prop :=
   ¬Nonempty (DerivationTree FrameClass.Base Gamma (Formula.bot : Formula Atom))
 
+/-- Extends a consistent list context to a maximal consistent set via the Lindenbaum construction. -/
 noncomputable def lindenbaumMCS (Gamma : List (Formula Atom)) (h_cons : ContextConsistent Gamma) :
     Set (Formula Atom) :=
   let h_set_cons : SetConsistent (FrameClass.Base : FrameClass) (contextAsSet Gamma) := list_consistent_to_set_consistent h_cons
@@ -68,6 +71,7 @@ lemma lindenbaumMCS_is_mcs (Gamma : List (Formula Atom)) (h_cons : ContextConsis
   let h_set_cons : SetConsistent (FrameClass.Base : FrameClass) (contextAsSet Gamma) := list_consistent_to_set_consistent h_cons
   (Classical.choose_spec (set_lindenbaum_base h_set_cons)).2
 
+/-- Extends a consistent set of formulas to a maximal consistent set via the Lindenbaum construction. -/
 noncomputable def lindenbaumMCSSet (Omega : Set (Formula Atom)) (h_cons : SetConsistent (FrameClass.Base : FrameClass) Omega) :
     Set (Formula Atom) :=
   Classical.choose (set_lindenbaum_base h_cons)
@@ -82,6 +86,7 @@ lemma lindenbaumMCS_set_is_mcs (Omega : Set (Formula Atom)) (h_cons : SetConsist
 
 /-! ## Context Derivability Utilities -/
 
+/-- Derivability predicate asserting a formula is derivable from a list context. -/
 def ContextDerivable (Γ : List (Formula Atom)) (φ : Formula Atom) : Prop :=
   Nonempty (DerivationTree FrameClass.Base Γ φ)
 

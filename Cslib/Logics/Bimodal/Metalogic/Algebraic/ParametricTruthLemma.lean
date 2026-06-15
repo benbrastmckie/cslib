@@ -126,9 +126,9 @@ theorem parametric_box_persistent
 
 /-- The parametric canonical truth lemma. -/
 theorem parametric_canonical_truth_lemma
-    (B : BFMCS Atom D fc) (_h_tc : B.temporally_coherent)
-    (h_buc : B.backward_until_since_coherent)
-    (h_fuc : B.forward_until_since_coherent)
+    (B : BFMCS Atom D fc) (_h_tc : B.temporallyCoherent)
+    (h_buc : B.backwardUntilSinceCoherent)
+    (h_fuc : B.forwardUntilSinceCoherent)
     (fam : FMCS Atom D fc) (hfam : fam ∈ B.families)
     (t : D) (phi : Formula Atom) :
     phi ∈ fam.mcs t ↔
@@ -216,9 +216,9 @@ theorem parametric_canonical_truth_lemma
 
 /-- Shifted truth lemma for ShiftClosedParametricCanonicalOmega. -/
 theorem parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
-    (_h_tc : B.temporally_coherent)
-    (h_buc : B.backward_until_since_coherent)
-    (h_fuc : B.forward_until_since_coherent) (φ : Formula Atom)
+    (_h_tc : B.temporallyCoherent)
+    (h_buc : B.backwardUntilSinceCoherent)
+    (h_fuc : B.forwardUntilSinceCoherent) (φ : Formula Atom)
     (fam : FMCS Atom D fc) (hfam : fam ∈ B.families) (t : D) :
     φ ∈ fam.mcs t ↔
     truthAt ParametricCanonicalTaskModel (ShiftClosedParametricCanonicalOmega B)

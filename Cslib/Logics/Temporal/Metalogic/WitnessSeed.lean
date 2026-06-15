@@ -47,9 +47,9 @@ lemma someFuture_allFuture_neg_absurd {M : Set (Formula Atom)}
   have h_bx3 : DerivationTree FrameClass.Base [] ((psi.imp psi.neg.neg).allFuture.imp
       ((Formula.untl psi Formula.top).imp (Formula.untl psi.neg.neg Formula.top))) :=
     DerivationTree.axiom [] _ (Axiom.right_mono_until psi psi.neg.neg Formula.top) trivial
-  have h_impl := DerivationTree.modus_ponens [] _ _ h_bx3
+  have hImpl := DerivationTree.modus_ponens [] _ _ h_bx3
     (DerivationTree.temporal_necessitation _ (dni psi))
-  have h_sf_nn := temporal_implication_property h_mcs (theoremInMcs h_mcs h_impl) h_F
+  have h_sf_nn := temporal_implication_property h_mcs (theoremInMcs h_mcs hImpl) h_F
   exact mcs_not_mem_of_neg h_mcs h_G_neg h_sf_nn
 
 lemma somePast_allPast_neg_absurd {M : Set (Formula Atom)}
@@ -59,9 +59,9 @@ lemma somePast_allPast_neg_absurd {M : Set (Formula Atom)}
   have h_bx3 : DerivationTree FrameClass.Base [] ((psi.imp psi.neg.neg).allPast.imp
       ((Formula.snce psi Formula.top).imp (Formula.snce psi.neg.neg Formula.top))) :=
     DerivationTree.axiom [] _ (Axiom.right_mono_since psi psi.neg.neg Formula.top) trivial
-  have h_impl := DerivationTree.modus_ponens [] _ _ h_bx3
+  have hImpl := DerivationTree.modus_ponens [] _ _ h_bx3
     (pastNecessitation _ (dni psi))
-  have h_sp_nn := temporal_implication_property h_mcs (theoremInMcs h_mcs h_impl) h_P
+  have h_sp_nn := temporal_implication_property h_mcs (theoremInMcs h_mcs hImpl) h_P
   exact mcs_not_mem_of_neg h_mcs h_H_neg h_sp_nn
 
 /-! ## Shared helper for G(¬X) extraction from seed inconsistency -/
@@ -166,6 +166,7 @@ theorem extract_h_neg_from_seed {M : Set (Formula Atom)}
 
 /-! ## Forward Temporal Witness Seed -/
 
+/-- The seed set for constructing a future witness, combining `{ψ}` with the G-content of `M`. -/
 def forwardTemporalWitnessSeed (M : Set (Formula Atom)) (psi : Formula Atom) : Set (Formula Atom) :=
   {psi} ∪ gContent M
 
@@ -179,6 +180,7 @@ theorem forward_temporal_witness_seed_consistent (M : Set (Formula Atom))
 
 /-! ## Past Temporal Witness Seed -/
 
+/-- The seed set for constructing a past witness, combining `{ψ}` with the H-content of `M`. -/
 def pastTemporalWitnessSeed (M : Set (Formula Atom)) (psi : Formula Atom) : Set (Formula Atom) :=
   {psi} ∪ hContent M
 

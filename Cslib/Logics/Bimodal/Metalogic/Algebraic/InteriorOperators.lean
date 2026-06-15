@@ -85,7 +85,7 @@ G is monotone: `φ ≤ ψ → Gφ ≤ Gψ`.
 Uses K-distribution and temporal necessitation.
 This property holds under both reflexive and strict semantics.
 -/
-theorem G_monotone (a b : LindenbaumAlg Atom) (h : a ≤ b) : G_quot a ≤ G_quot b := by
+theorem G_monotone (a b : LindenbaumAlg Atom) (h : a ≤ b) : gQuot a ≤ gQuot b := by
   induction a using Quotient.ind
   induction b using Quotient.ind
   rename_i φ ψ
@@ -107,7 +107,7 @@ H is monotone: `φ ≤ ψ → Hφ ≤ Hψ`.
 Uses `pastMono` from Perpetuity (derived via temporal duality).
 This property holds under both reflexive and strict semantics.
 -/
-theorem H_monotone (a b : LindenbaumAlg Atom) (h : a ≤ b) : H_quot a ≤ H_quot b := by
+theorem H_monotone (a b : LindenbaumAlg Atom) (h : a ≤ b) : hQuot a ≤ hQuot b := by
   induction a using Quotient.ind
   induction b using Quotient.ind
   rename_i φ ψ

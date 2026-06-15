@@ -23,7 +23,7 @@ Core definitions for the separation theorem over integer time (GHR94 Chapter 10.
 - `isUFree`, `isSFree`: Syntactic absence predicates (decidable)
 - `isSyntacticallySeparated`: Recursive syntactic separation check
 - `isSeparable`: Existential separation predicate
-- `junctionDepth`, `U_depth_under_S`, `countUSubformulas`: Structural measures
+- `junctionDepth`, `uDepthUnderS`, `countUSubformulas`: Structural measures
 
 ## References
 
@@ -45,6 +45,7 @@ variable {Atom : Type*}
 /-- A temporal structure over integers: a valuation mapping atoms to sets of Z.
     This is GHR94's "linear temporal structure" (T, <, h) specialized to T = Z. -/
 structure IntStructure (Atom : Type*) where
+  /-- The valuation assigning each atom a set of integers where it holds. -/
   val : Atom → Set ℤ
 
 /-! ## Truth Evaluation -/
@@ -65,7 +66,7 @@ def intTruth (M : IntStructure Atom) (t : ℤ) : Formula Atom → Prop
 
 /-! ## intTruth simp lemmas for derived temporal operators -/
 
-@[simp] theorem int_truth_allPast
+theorem int_truth_allPast
     (M : IntStructure Atom) (t : ℤ) (φ : Formula Atom) :
     intTruth M t (Formula.allPast φ) ↔
       ∀ s : ℤ, s < t → intTruth M s φ := by
@@ -77,7 +78,7 @@ def intTruth (M : IntStructure Atom) (t : ℤ) : Formula Atom → Prop
   · rintro h ⟨s, hs, hns, _⟩
     exact hns (h s hs)
 
-@[simp] theorem int_truth_allFuture
+theorem int_truth_allFuture
     (M : IntStructure Atom) (t : ℤ) (φ : Formula Atom) :
     intTruth M t (Formula.allFuture φ) ↔
       ∀ s : ℤ, t < s → intTruth M s φ := by
@@ -116,7 +117,7 @@ def intTruth (M : IntStructure Atom) (t : ℤ) : Formula Atom → Prop
     intTruth M t (Formula.neg φ) ↔ ¬ intTruth M t φ := by
   simp only [intTruth]
 
-@[simp] theorem int_truth_and
+theorem int_truth_and
     (M : IntStructure Atom) (t : ℤ) (φ ψ : Formula Atom) :
     intTruth M t (Formula.and φ ψ) ↔
       intTruth M t φ ∧ intTruth M t ψ := by
@@ -128,7 +129,7 @@ def intTruth (M : IntStructure Atom) (t : ℤ) : Formula Atom → Prop
       intTruth M t φ ∨ intTruth M t ψ := by
   simp only [intTruth]; tauto
 
-@[simp] theorem int_truth_top (M : IntStructure Atom) (t : ℤ) :
+theorem int_truth_top (M : IntStructure Atom) (t : ℤ) :
     intTruth M t (Formula.top : Formula Atom) ↔ True := by
   simp only [intTruth]; tauto
 
@@ -348,6 +349,7 @@ def junctionDepth : Formula Atom -> Nat
   | .snce phi psi =>
     max (junctionDepthS phi) (junctionDepthS psi)
 
+/-- Junction depth for a formula in the context of a U-subterm: counts S-nesting as alternation. -/
 def junctionDepthU : Formula Atom -> Nat
   | .atom _ => 0
   | .bot => 0
@@ -359,6 +361,7 @@ def junctionDepthU : Formula Atom -> Nat
   | .snce phi psi =>
     1 + max (junctionDepth phi) (junctionDepth psi)
 
+/-- Junction depth for a formula in the context of an S-subterm: counts U-nesting as alternation. -/
 def junctionDepthS : Formula Atom -> Nat
   | .atom _ => 0
   | .bot => 0
@@ -384,13 +387,13 @@ end
   simp only [junctionDepth, junctionDepthU]; omega
 
 /-- U-nesting depth beneath S. -/
-def U_depth_under_S : Formula Atom → Nat
+def uDepthUnderS : Formula Atom → Nat
   | .atom _ => 0
   | .bot => 0
-  | .imp φ ψ => max (U_depth_under_S φ) (U_depth_under_S ψ)
-  | .box φ => U_depth_under_S φ
+  | .imp φ ψ => max (uDepthUnderS φ) (uDepthUnderS ψ)
+  | .box φ => uDepthUnderS φ
   | .untl φ ψ =>
-    1 + max (U_depth_under_S φ) (U_depth_under_S ψ)
+    1 + max (uDepthUnderS φ) (uDepthUnderS ψ)
   | .snce _ _ => 0
 
 /-- Count of maximal U-subformulas in a formula. -/
@@ -433,30 +436,30 @@ theorem count_U_total_zero_iff_U_free
       Nat.add_eq_zero_iff, Bool.and_eq_true, ih1, ih2]
 
 /-- S-nesting depth above U occurrences. -/
-def S_nesting_above_U : Formula Atom → Nat
+def sNestingAboveU : Formula Atom → Nat
   | .atom _ => 0
   | .bot => 0
   | .imp φ ψ =>
-    max (S_nesting_above_U φ) (S_nesting_above_U ψ)
-  | .box φ => S_nesting_above_U φ
+    max (sNestingAboveU φ) (sNestingAboveU ψ)
+  | .box φ => sNestingAboveU φ
   | .untl _ _ => 0
   | .snce φ ψ =>
-    let sub := max (S_nesting_above_U_inner φ)
-      (S_nesting_above_U_inner ψ)
+    let sub := max (sNestingAboveUInner φ)
+      (sNestingAboveUInner ψ)
     if sub > 0 then 1 + sub else 0
 where
   /-- Helper: counts S-nesting above U inside an S context. -/
-  S_nesting_above_U_inner : Formula Atom → Nat
+  sNestingAboveUInner : Formula Atom → Nat
     | .atom _ => 0
     | .bot => 0
     | .imp φ ψ =>
-      max (S_nesting_above_U_inner φ)
-        (S_nesting_above_U_inner ψ)
-    | .box φ => S_nesting_above_U_inner φ
+      max (sNestingAboveUInner φ)
+        (sNestingAboveUInner ψ)
+    | .box φ => sNestingAboveUInner φ
     | .untl _ _ => 1
     | .snce φ ψ =>
-      let sub := max (S_nesting_above_U_inner φ)
-        (S_nesting_above_U_inner ψ)
+      let sub := max (sNestingAboveUInner φ)
+        (sNestingAboveUInner ψ)
       if sub > 0 then 1 + sub else 0
 
 /-! ## Auxiliary Predicates for Elimination Cases -/

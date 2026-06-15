@@ -73,9 +73,9 @@ theorem not_provable_implies_neg_set_consistent (φ : Formula Atom)
 
 /-- Relative completeness theorem. -/
 theorem parametric_canonical_completeness_relative
-    (B : BFMCS Atom D FrameClass.Base) (h_tc : B.temporally_coherent)
-    (h_buc : B.backward_until_since_coherent)
-    (h_fuc : B.forward_until_since_coherent)
+    (B : BFMCS Atom D FrameClass.Base) (h_tc : B.temporallyCoherent)
+    (h_buc : B.backwardUntilSinceCoherent)
+    (h_fuc : B.forwardUntilSinceCoherent)
     (φ : Formula Atom) (_h_not_prov : ¬Nonempty (DerivationTree FrameClass.Base [] φ))
     (fam : FMCS Atom D FrameClass.Base) (hfam : fam ∈ B.families)
     (t : D) (h_neg_in : φ.neg ∈ fam.mcs t) :
@@ -87,9 +87,9 @@ theorem parametric_canonical_completeness_relative
 
 /-- Completeness from neg membership. -/
 theorem parametric_completeness_from_neg_membership
-    (B : BFMCS Atom D FrameClass.Base) (h_tc : B.temporally_coherent)
-    (h_buc : B.backward_until_since_coherent)
-    (h_fuc : B.forward_until_since_coherent)
+    (B : BFMCS Atom D FrameClass.Base) (h_tc : B.temporallyCoherent)
+    (h_buc : B.backwardUntilSinceCoherent)
+    (h_fuc : B.forwardUntilSinceCoherent)
     (φ : Formula Atom)
     (fam : FMCS Atom D FrameClass.Base) (hfam : fam ∈ B.families)
     (t : D) (h_neg_in : φ.neg ∈ fam.mcs t) :
@@ -111,12 +111,12 @@ theorem not_provable_implies_neg_extends_to_mcs
 theorem parametric_canonical_completeness_conditional
     (φ : Formula Atom) (h_not_prov : ¬Nonempty (DerivationTree FrameClass.Base [] φ))
     (construct_bfmcs : (M : Set (Formula Atom)) → SetMaximalConsistent (fc := FrameClass.Base) M →
-      Σ' (B : BFMCS Atom D FrameClass.Base) (_h_tc : B.temporally_coherent)
-         (_h_buc : B.backward_until_since_coherent)
-         (_h_fuc : B.forward_until_since_coherent)
+      Σ' (B : BFMCS Atom D FrameClass.Base) (_h_tc : B.temporallyCoherent)
+         (_h_buc : B.backwardUntilSinceCoherent)
+         (_h_fuc : B.forwardUntilSinceCoherent)
          (fam : FMCS Atom D FrameClass.Base) (_hfam : fam ∈ B.families) (t : D),
          M = fam.mcs t) :
-    ∃ (B : BFMCS Atom D FrameClass.Base) (_h_tc : B.temporally_coherent)
+    ∃ (B : BFMCS Atom D FrameClass.Base) (_h_tc : B.temporallyCoherent)
       (fam : FMCS Atom D FrameClass.Base) (_hfam : fam ∈ B.families) (t : D),
       ¬truthAt ParametricCanonicalTaskModel (ShiftClosedParametricCanonicalOmega B)
         (parametricToHistory fam) t φ := by
@@ -127,9 +127,9 @@ theorem parametric_canonical_completeness_conditional
 
 /-- Countermodel implies not provable. -/
 theorem countermodel_implies_not_provable
-    (B : BFMCS Atom D FrameClass.Base) (h_tc : B.temporally_coherent)
-    (h_buc : B.backward_until_since_coherent)
-    (h_fuc : B.forward_until_since_coherent)
+    (B : BFMCS Atom D FrameClass.Base) (h_tc : B.temporallyCoherent)
+    (h_buc : B.backwardUntilSinceCoherent)
+    (h_fuc : B.forwardUntilSinceCoherent)
     (φ : Formula Atom)
     (fam : FMCS Atom D FrameClass.Base) (hfam : fam ∈ B.families) (t : D)
     (h_false : ¬truthAt ParametricCanonicalTaskModel (ShiftClosedParametricCanonicalOmega B)

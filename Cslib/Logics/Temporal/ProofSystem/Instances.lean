@@ -34,6 +34,8 @@ open Cslib.Logic
 
 variable {Atom : Type u}
 
+namespace Cslib.Logic.Temporal
+
 section TempInstances
 
 /-! ## InferenceSystem Instance -/
@@ -212,3 +214,5 @@ instance :
     TemporalBXHilbert Temporal.HilbertBX (F := Temporal.Formula Atom) where
 
 end TempInstances
+
+end Cslib.Logic.Temporal

@@ -46,21 +46,25 @@ variable {Atom : Type*}
 
 /-! ## BX Canonical Point -/
 
+/-- A point in the BX canonical model: a set of formulas forming a maximal consistent set. -/
 structure BXPoint (Atom : Type*) where
+  /-- The maximal consistent set of formulas at this canonical model point. -/
   formulas : Set (Formula Atom)
   is_mcs : SetMaximalConsistent FrameClass.Base formulas
 
 /-! ## Canonical Temporal Ordering -/
 
+/-- The canonical temporal ordering: `w ≤ v` iff the g-content of `w` is contained in `v`. -/
 def bxLe (w v : BXPoint Atom) : Prop :=
   gContent w.formulas ⊆ v.formulas
 
+/-- Modal equivalence of canonical points: agreement on all boxed formulas. -/
 def bxModalEquiv (w v : BXPoint Atom) : Prop :=
   ∀ φ : Formula Atom, Formula.box φ ∈ w.formulas ↔ Formula.box φ ∈ v.formulas
 
 /-! ## Key Helper: gContent Closed Under Derivation -/
 
-noncomputable def gContentClosedDerivation {Omega : Set (Formula Atom)} {φ : Formula Atom}
+lemma gContentClosedDerivation {Omega : Set (Formula Atom)} {φ : Formula Atom}
     (h_mcs : SetMaximalConsistent FrameClass.Base Omega)
     (L : List (Formula Atom)) (h_sub : ∀ ψ ∈ L, ψ ∈ gContent Omega)
     (h_deriv : DerivationTree FrameClass.Base L φ) : Formula.allFuture φ ∈ Omega := by
@@ -75,7 +79,7 @@ noncomputable def gContentClosedDerivation {Omega : Set (Formula Atom)} {φ : Fo
   exact SetMaximalConsistent.closed_under_derivation h_mcs
     (Context.map Formula.allFuture L) h_GL_in d_G
 
-noncomputable def hContentClosedDerivation {Omega : Set (Formula Atom)} {φ : Formula Atom}
+lemma hContentClosedDerivation {Omega : Set (Formula Atom)} {φ : Formula Atom}
     (h_mcs : SetMaximalConsistent FrameClass.Base Omega)
     (L : List (Formula Atom)) (h_sub : ∀ ψ ∈ L, ψ ∈ hContent Omega)
     (h_deriv : DerivationTree FrameClass.Base L φ) : Formula.allPast φ ∈ Omega := by
@@ -165,7 +169,7 @@ theorem bx_le_trans {w u v : BXPoint Atom} (hwu : bxLe w u) (huv : bxLe u v) :
 
 /-! ## Forward/Backward Temporal Witnesses -/
 
-noncomputable def bxForwardWitness (w : BXPoint Atom) (ψ : Formula Atom)
+lemma bxForwardWitness (w : BXPoint Atom) (ψ : Formula Atom)
     (h_F : Formula.someFuture ψ ∈ w.formulas) :
     ∃ v : BXPoint Atom, bxLe w v ∧ ψ ∈ v.formulas := by
   have h_seed_cons := forward_temporal_witness_seed_consistent w.formulas w.is_mcs ψ h_F
@@ -174,7 +178,7 @@ noncomputable def bxForwardWitness (w : BXPoint Atom) (ψ : Formula Atom)
     fun χ hχ => hM_sup (Set.mem_union_right _ hχ),
     hM_sup (Set.mem_union_left _ (Set.mem_singleton ψ))⟩
 
-noncomputable def bxBackwardWitness (w : BXPoint Atom) (ψ : Formula Atom)
+lemma bxBackwardWitness (w : BXPoint Atom) (ψ : Formula Atom)
     (h_P : Formula.somePast ψ ∈ w.formulas) :
     ∃ v : BXPoint Atom, bxLe v w ∧ ψ ∈ v.formulas := by
   have h_seed_cons := past_temporal_witness_seed_consistent w.formulas w.is_mcs ψ h_P
@@ -192,7 +196,7 @@ theorem bx_G_forward {w v : BXPoint Atom} {φ : Formula Atom}
     φ ∈ v.formulas :=
   h_le h_G
 
-noncomputable def bxGBackward (w : BXPoint Atom) (φ : Formula Atom)
+lemma bxGBackward (w : BXPoint Atom) (φ : Formula Atom)
     (h_not_G : Formula.allFuture φ ∉ w.formulas) :
     ∃ v : BXPoint Atom, bxLe w v ∧ φ ∉ v.formulas := by
   have h_seed_cons : SetConsistent FrameClass.Base ({Formula.neg φ} ∪ gContent w.formulas : Set (Formula Atom)) := by
@@ -242,7 +246,7 @@ theorem bx_H_forward {w v : BXPoint Atom} {φ : Formula Atom}
   g_content_subset_implies_h_content_reverse v.formulas w.formulas
     v.is_mcs w.is_mcs h_le h_H
 
-noncomputable def bxHBackward (w : BXPoint Atom) (φ : Formula Atom)
+lemma bxHBackward (w : BXPoint Atom) (φ : Formula Atom)
     (h_not_H : Formula.allPast φ ∉ w.formulas) :
     ∃ v : BXPoint Atom, bxLe v w ∧ φ ∉ v.formulas := by
   have h_seed_cons : SetConsistent FrameClass.Base ({Formula.neg φ} ∪ hContent w.formulas : Set (Formula Atom)) := by
@@ -302,7 +306,7 @@ theorem bx_modal_equiv_trans {w u v : BXPoint Atom}
 
 /-! ## Modal Witness -/
 
-noncomputable def bxModalWitness (w : BXPoint Atom) (ψ : Formula Atom)
+lemma bxModalWitness (w : BXPoint Atom) (ψ : Formula Atom)
     (h_dia : Formula.diamond ψ ∈ w.formulas) :
     ∃ v : BXPoint Atom, bxModalEquiv w v ∧ ψ ∈ v.formulas := by
   let bc := {χ : Formula Atom | Formula.box χ ∈ w.formulas}
@@ -395,6 +399,7 @@ noncomputable def bxModalWitness (w : BXPoint Atom) (ψ : Formula Atom)
 
 /-! ## Box Preservation Along bxLe -/
 
+/-- Derives the schema `¬□φ → □¬□φ` from the modal-5-collapse axiom. -/
 noncomputable def negBoxToBoxNegBox' (φ : Formula Atom) :
     DerivationTree FrameClass.Base [] ((Formula.box φ).neg.imp (Formula.box (Formula.box φ).neg)) := by
   have h_m5 : DerivationTree FrameClass.Base [] ((Formula.box φ).neg.box.neg.imp (Formula.box φ)) :=
@@ -440,7 +445,7 @@ theorem bx_modal_equiv_of_bx_le {w v : BXPoint Atom} (h_le : bxLe w v) :
 
 /-! ## Eventuality Resolution for Until/Since -/
 
-noncomputable def bxUntilEventualityResolution
+lemma bxUntilEventualityResolution
     (w : BXPoint Atom) (φ ψ : Formula Atom)
     (h_until : Formula.untl ψ φ ∈ w.formulas)
     (_h_not_psi : ψ ∉ w.formulas) :
@@ -451,7 +456,7 @@ noncomputable def bxUntilEventualityResolution
       (theoremInMcsFc w.is_mcs h_ax) h_until
   exact bxForwardWitness w ψ h_F_psi
 
-noncomputable def bxSinceEventualityResolution
+lemma bxSinceEventualityResolution
     (w : BXPoint Atom) (φ ψ : Formula Atom)
     (h_since : Formula.snce ψ φ ∈ w.formulas)
     (_h_not_psi : ψ ∉ w.formulas) :

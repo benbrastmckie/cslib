@@ -503,6 +503,7 @@ def expansionMeasure (b : Branch Atom) (fc : FrameClass := .Base) : Nat :=
 ## Tableau Statistics
 -/
 
+set_option linter.unusedVariables false in
 /--
 Statistics about a tableau expansion.
 -/
@@ -516,6 +517,8 @@ structure TableauStats where
   /-- Total expansion steps. -/
   expansionSteps : Nat
   deriving Repr, Inhabited
+
+attribute [nolint unusedArguments] instReprTableauStats.repr
 
 /-!
 ## Blocking Correctness and Termination Theorems

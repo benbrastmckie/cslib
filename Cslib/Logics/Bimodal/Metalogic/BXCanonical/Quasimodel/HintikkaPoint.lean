@@ -39,12 +39,15 @@ variable {Atom : Type*} [DecidableEq Atom]
 
 /-! ## Hintikka Point Definition -/
 
+/-- A Hintikka point: a locally consistent, bot-free subset of the subformula closure `Sigma`. -/
 structure HintikkaPoint (Sigma : Finset (Formula Atom)) where
+  /-- The finset of formulas held at this Hintikka point. -/
   formulas : Finset (Formula Atom)
   subset_sigma : formulas ⊆ Sigma
   locally_consistent : ∀ f ∈ formulas, Formula.neg f ∉ formulas
   bot_free : (Formula.bot : Formula Atom) ∉ formulas
 
+/-- Extensionality for Hintikka points: equality of formula sets implies equality of points. -/
 theorem HintikkaPoint.ext {Sigma : Finset (Formula Atom)} {h1 h2 : HintikkaPoint Sigma}
     (heq : h1.formulas = h2.formulas) : h1 = h2 := by
   cases h1; cases h2; simp at heq; subst heq; rfl
@@ -68,6 +71,7 @@ theorem HintikkaPoint.not_mem_of_neg_mem {Sigma : Finset (Formula Atom)} (h : Hi
 /-! ## Sigma-Signature -/
 
 open Classical in
+/-- The Sigma-signature of a BX point: the subformulas in `Sigma` that hold at `w`. -/
 noncomputable def sigmaSignatureFormulas (w : BXPoint Atom) (Sigma : Finset (Formula Atom)) :
     Finset (Formula Atom) :=
   Sigma.filter (fun f => f ∈ w.formulas)
@@ -100,6 +104,7 @@ theorem sigma_signature_bot_free (w : BXPoint Atom) (Sigma : Finset (Formula Ato
     ⟨DerivationTree.assumption [(Formula.bot : Formula Atom)] (Formula.bot : Formula Atom) (by simp)⟩
 
 open Classical in
+/-- Constructs the Hintikka point at `w` by restricting its formulas to `Sigma`. -/
 noncomputable def sigmaSignature (w : BXPoint Atom) (Sigma : Finset (Formula Atom)) :
     HintikkaPoint Sigma where
   formulas := sigmaSignatureFormulas w Sigma

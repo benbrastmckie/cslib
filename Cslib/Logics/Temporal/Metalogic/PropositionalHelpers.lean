@@ -49,7 +49,7 @@ noncomputable section
 /-! ## Typeclass Bridge -/
 
 /-- Convert a derivation tree to a Nonempty (for typeclass functions). -/
-def wrap {φ : Formula Atom}
+lemma wrap {φ : Formula Atom}
     (d : DerivationTree FrameClass.Base [] φ) :
     InferenceSystem.DerivableIn Temporal.HilbertBX φ := ⟨d⟩
 

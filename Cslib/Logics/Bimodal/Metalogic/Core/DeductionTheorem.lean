@@ -223,7 +223,7 @@ This witnesses that `bimodalDerivationSystem` satisfies the `HasDeductionTheorem
 property, enabling use of generic MCS closure properties (closed_under_derivation,
 implication_property, negation_complete) from `Consistency.lean`.
 -/
-def bimodalHasDeductionTheorem :
+lemma bimodalHasDeductionTheorem :
     Metalogic.HasDeductionTheorem (bimodalDerivationSystem (Atom := Atom)) := by
   intro Γ φ ψ h
   show Bimodal.Deriv Γ (φ.imp ψ)

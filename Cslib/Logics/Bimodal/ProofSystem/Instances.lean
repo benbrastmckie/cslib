@@ -38,6 +38,8 @@ open Cslib.Logic
 
 variable {Atom : Type u}
 
+namespace Cslib.Logics.Bimodal.ProofSystem.HilbertTMInstances
+
 section BimodalInstances
 
 /-! ## InferenceSystem Instance -/
@@ -324,3 +326,5 @@ instance :
       (F := Bimodal.Formula Atom) where
 
 end BimodalInstances
+
+end Cslib.Logics.Bimodal.ProofSystem.HilbertTMInstances

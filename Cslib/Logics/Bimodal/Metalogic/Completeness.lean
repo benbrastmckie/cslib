@@ -364,13 +364,13 @@ theorem SetMaximalConsistent.neg_box_implies_diamond_neg {fc : FrameClass}
     have h_modal_k : DerivationTree FrameClass.Base ([] : List (Formula Atom))
         ((φ.neg.neg.imp φ).box.imp ((φ.neg.neg.box).imp (φ.box))) :=
       DerivationTree.axiom [] _ (Axiom.modal_k_dist φ.neg.neg φ) trivial
-    have h_impl : DerivationTree FrameClass.Base ([] : List (Formula Atom))
+    have hImpl : DerivationTree FrameClass.Base ([] : List (Formula Atom))
         ((φ.neg.neg.box).imp (φ.box)) :=
       DerivationTree.modus_ponens [] _ _ h_modal_k h_nec_dne
     -- Lift to generic fc
     have h_impl_fc : DerivationTree fc ([] : List (Formula Atom))
         ((φ.neg.neg.box).imp (φ.box)) :=
-      DerivationTree.lift (FrameClass.base_le fc) h_impl
+      DerivationTree.lift (FrameClass.base_le fc) hImpl
     have h_sub : ∀ χ ∈ [φ.neg.neg.box], χ ∈ Omega := by simp [h_dne_box]
     have h_impl_ctx : DerivationTree fc [φ.neg.neg.box]
         ((φ.neg.neg.box).imp (φ.box)) :=
@@ -423,13 +423,13 @@ theorem SetMaximalConsistent.diamond_neg_implies_neg_box {fc : FrameClass}
     have h_modal_k : DerivationTree FrameClass.Base ([] : List (Formula Atom))
         ((φ.imp φ.neg.neg).box.imp ((φ.box).imp (φ.neg.neg.box))) :=
       DerivationTree.axiom [] _ (Axiom.modal_k_dist φ φ.neg.neg) trivial
-    have h_impl : DerivationTree FrameClass.Base ([] : List (Formula Atom))
+    have hImpl : DerivationTree FrameClass.Base ([] : List (Formula Atom))
         ((φ.box).imp (φ.neg.neg.box)) :=
       DerivationTree.modus_ponens [] _ _ h_modal_k h_nec_dni
     -- Lift to generic fc
     have h_impl_fc : DerivationTree fc ([] : List (Formula Atom))
         ((φ.box).imp (φ.neg.neg.box)) :=
-      DerivationTree.lift (FrameClass.base_le fc) h_impl
+      DerivationTree.lift (FrameClass.base_le fc) hImpl
     have h_sub : ∀ χ ∈ [φ.box], χ ∈ Omega := by simp [h_box]
     have h_impl_ctx : DerivationTree fc [φ.box]
         ((φ.box).imp (φ.neg.neg.box)) :=

@@ -18,14 +18,14 @@ public import Cslib.Logics.Bimodal.Syntax.Formula
 This module defines the canonical frame where:
 - **Worlds** = all maximal consistent sets (MCSes)
 - **Future relation** `ExistsTask M M'` iff `gContent M ⊆ M'`
-- **Past relation** `ExistsTask_past M M'` iff `hContent M ⊆ M'`
+- **Past relation** `ExistsTaskPast M M'` iff `hContent M ⊆ M'`
 
 ## Key Results
 
 - `canonical_forward_F`: F(psi) in M implies exists MCS W with psi in W and ExistsTask M W
-- `canonical_backward_P`: P(psi) in M implies exists MCS W with psi in W and ExistsTask_past M W
+- `canonical_backward_P`: P(psi) in M implies exists MCS W with psi in W and ExistsTaskPast M W
 - `canonical_forward_G`: G(phi) in M and ExistsTask M M' implies phi in M'
-- `canonical_backward_H`: H(phi) in M and ExistsTask_past M M' implies phi in M'
+- `canonical_backward_H`: H(phi) in M and ExistsTaskPast M M' implies phi in M'
 
 ## References
 
@@ -101,11 +101,11 @@ def ExistsTask (M M' : Set (Formula Atom)) : Prop :=
 /--
 Canonical past relation: `M` sees `M'` in the past iff `hContent M ⊆ M'`.
 -/
-def ExistsTask_past (M M' : Set (Formula Atom)) : Prop :=
+def ExistsTaskPast (M M' : Set (Formula Atom)) : Prop :=
   hContent M ⊆ M'
 
-/-- Unfolding lemma for ExistsTask_past. -/
-@[simp] lemma ExistsTask_past_def {M M' : Set (Formula Atom)} : ExistsTask_past M M' = (hContent M ⊆ M') := rfl
+/-- Unfolding lemma for ExistsTaskPast. -/
+@[simp] lemma ExistsTask_past_def {M M' : Set (Formula Atom)} : ExistsTaskPast M M' = (hContent M ⊆ M') := rfl
 
 
 /-!
@@ -121,10 +121,10 @@ theorem canonical_forward_G (M M' : Set (Formula Atom))
   exact h_R h_G
 
 /--
-H-backward property: If `H phi ∈ M` and `ExistsTask_past M M'`, then `phi ∈ M'`.
+H-backward property: If `H phi ∈ M` and `ExistsTaskPast M M'`, then `phi ∈ M'`.
 -/
 theorem canonical_backward_H (M M' : Set (Formula Atom))
-    (h_R : ExistsTask_past M M') (phi : Formula Atom) (h_H : Formula.allPast phi ∈ M) :
+    (h_R : ExistsTaskPast M M') (phi : Formula Atom) (h_H : Formula.allPast phi ∈ M) :
     phi ∈ M' := by
   exact h_R h_H
 
@@ -158,11 +158,11 @@ theorem canonical_forward_F (M : Set (Formula Atom)) (h_mcs : SetMaximalConsiste
 
 /--
 P-backward property: If `P(psi) ∈ M` and `M` is MCS, then there exists an MCS `W`
-such that `ExistsTask_past M W` and `psi ∈ W`.
+such that `ExistsTaskPast M W` and `psi ∈ W`.
 -/
 theorem canonical_backward_P (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
     (psi : Formula Atom) (h_P : Formula.somePast psi ∈ M) :
-    ∃ W : Set (Formula Atom), SetMaximalConsistent FrameClass.Base W ∧ ExistsTask_past M W ∧ psi ∈ W := by
+    ∃ W : Set (Formula Atom), SetMaximalConsistent FrameClass.Base W ∧ ExistsTaskPast M W ∧ psi ∈ W := by
   -- Step 1: {psi} ∪ hContent(M) is consistent
   have h_seed_cons : SetConsistent (FrameClass.Base : FrameClass) (pastTemporalWitnessSeed M psi) :=
     past_temporal_witness_seed_consistent M h_mcs psi h_P
@@ -171,7 +171,7 @@ theorem canonical_backward_P (M : Set (Formula Atom)) (h_mcs : SetMaximalConsist
   -- Step 3: W is the witness
   use W, h_W_mcs
   constructor
-  · -- ExistsTask_past M W: hContent M ⊆ W
+  · -- ExistsTaskPast M W: hContent M ⊆ W
     exact Set.Subset.trans (h_content_subset_past_temporal_witness_seed M psi) h_extends
   · -- psi ∈ W
     exact h_extends (psi_mem_past_temporal_witness_seed M psi)
@@ -202,11 +202,11 @@ theorem canonical_forward_U (M : Set (Formula Atom)) (h_mcs : SetMaximalConsiste
 
 /--
 S-backward property: If `φ S ψ ∈ M` and `M` is MCS, then there exists an MCS `W`
-such that `ExistsTask_past M W` and `ψ ∈ W`.
+such that `ExistsTaskPast M W` and `ψ ∈ W`.
 -/
 theorem canonical_backward_S (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
     (φ ψ : Formula Atom) (h_S : Formula.snce ψ φ ∈ M) :
-    ∃ W : Set (Formula Atom), SetMaximalConsistent FrameClass.Base W ∧ ExistsTask_past M W ∧ ψ ∈ W := by
+    ∃ W : Set (Formula Atom), SetMaximalConsistent FrameClass.Base W ∧ ExistsTaskPast M W ∧ ψ ∈ W := by
   -- Step 1: {ψ} ∪ hContent(M) is consistent (uses since_induction)
   have h_seed_cons : SetConsistent (FrameClass.Base : FrameClass) (pastTemporalWitnessSeed M ψ) :=
     since_witness_seed_consistent M h_mcs φ ψ h_S
@@ -215,7 +215,7 @@ theorem canonical_backward_S (M : Set (Formula Atom)) (h_mcs : SetMaximalConsist
   -- Step 3: W is the witness
   use W, h_W_mcs
   constructor
-  · -- ExistsTask_past M W: hContent M ⊆ W
+  · -- ExistsTaskPast M W: hContent M ⊆ W
     exact Set.Subset.trans (h_content_subset_past_temporal_witness_seed M ψ) h_extends
   · -- ψ ∈ W
     exact h_extends (psi_mem_past_temporal_witness_seed M ψ)
@@ -235,7 +235,7 @@ theorem existsTask_transitive {fc : FrameClass} (M M' M'' : Set (Formula Atom))
   -- phi ∈ gContent M means G phi ∈ M
   -- By Temporal 4: ⊢ G phi → G(G phi), so G(G phi) ∈ M
   have h_T4 : DerivationTree fc [] ((Formula.allFuture phi).imp (Formula.allFuture (Formula.allFuture phi))) :=
-    (temp_4_derived phi).lift (FrameClass.base_le fc)
+    (temp4Derived phi).lift (FrameClass.base_le fc)
   have h_GG : Formula.allFuture (Formula.allFuture phi) ∈ M :=
     SetMaximalConsistent.implication_property h_mcs (theoremInMcsFc h_mcs h_T4) h_G_phi
   -- G phi ∈ gContent M, and gContent M ⊆ M' by h_R1
@@ -244,7 +244,7 @@ theorem existsTask_transitive {fc : FrameClass} (M M' M'' : Set (Formula Atom))
   exact h_R2 h_G_in_M'
 
 /-- Backward compatibility alias. -/
-abbrev canonicalRTransitive := @existsTask_transitive
+alias canonicalRTransitive := existsTask_transitive
 
 /--
 hContent chain transitivity using the Temporal 4 axiom for past (H phi -> HH phi).
@@ -257,7 +257,7 @@ theorem h_content_chain_transitive {fc : FrameClass} (M N V : Set (Formula Atom)
   -- h_H_phi : phi ∈ hContent V, i.e., H phi ∈ V
   -- By Temporal 4 for H: H phi → H(H phi), so H(H phi) ∈ V
   have h_H4 : DerivationTree fc [] (phi.allPast.imp phi.allPast.allPast) :=
-    (temp_4_past phi).lift (FrameClass.base_le fc)
+    (temp4Past phi).lift (FrameClass.base_le fc)
   have h_HH_in_V := SetMaximalConsistent.implication_property h_mcs_V (theoremInMcsFc h_mcs_V h_H4) h_H_phi
   -- H phi ∈ hContent V, and hContent V ⊆ N, so H phi ∈ N
   have h_Hphi_in_N := hNV h_HH_in_V

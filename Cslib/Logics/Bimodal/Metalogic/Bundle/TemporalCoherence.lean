@@ -39,7 +39,8 @@ variable {Atom : Type*} {fc : FrameClass} {D : Type*} [Preorder D] [Zero D]
 
 /-! ## Temporal Duality Infrastructure -/
 
-noncomputable def G_dne_theorem (phi : Formula Atom) :
+/-- Derives G-operator double negation elimination in the base frame class. -/
+noncomputable def gDneTheorem (phi : Formula Atom) :
     DerivationTree FrameClass.Base [] ((Formula.allFuture (Formula.neg (Formula.neg phi))).imp (Formula.allFuture phi)) := by
   have h_dne : DerivationTree FrameClass.Base [] ((Formula.neg (Formula.neg phi)).imp phi) :=
     dneTheorem phi
@@ -50,7 +51,8 @@ noncomputable def G_dne_theorem (phi : Formula Atom) :
     Theorems.TemporalDerived.tempKDistDerived (Formula.neg (Formula.neg phi)) phi
   exact DerivationTree.modus_ponens [] _ _ h_K h_G_dne
 
-noncomputable def H_dne_theorem (phi : Formula Atom) :
+/-- Derives H-operator double negation elimination in the base frame class. -/
+noncomputable def hDneTheorem (phi : Formula Atom) :
     DerivationTree FrameClass.Base [] ((Formula.allPast (Formula.neg (Formula.neg phi))).imp (Formula.allPast phi)) := by
   have h_dne : DerivationTree FrameClass.Base [] ((Formula.neg (Formula.neg phi)).imp phi) :=
     dneTheorem phi
@@ -92,6 +94,7 @@ lemma SetMaximalConsistent.double_neg_elim {M : Set (Formula Atom)} (h_mcs : Set
 
 /-! ## TemporalCoherentFamily and Backward Lemmas -/
 
+/-- Extends an FMCS with witnesses for F and P eventualities at every time point. -/
 structure TemporalCoherentFamily (Atom : Type*) (fc : FrameClass := FrameClass.Base) (D : Type*) [Preorder D] [Zero D] extends FMCS Atom D fc where
   forward_F : ∀ t : D, ∀ φ : Formula Atom,
     Formula.someFuture φ ∈ mcs t → ∃ s : D, t < s ∧ φ ∈ mcs s
@@ -166,7 +169,8 @@ theorem temporal_backward_H_with_bwd_P {D : Type*} [Preorder D]
 
 /-! ## BFMCS Temporal Coherence Predicates -/
 
-def BFMCS.temporally_coherent (B : BFMCS Atom D fc) : Prop :=
+/-- Predicate asserting every family in the bundle witnesses F and P eventualities. -/
+def BFMCS.temporallyCoherent (B : BFMCS Atom D fc) : Prop :=
   ∀ fam ∈ B.families,
     (∀ t : D, ∀ φ : Formula Atom, Formula.someFuture φ ∈ fam.mcs t → ∃ s : D, t < s ∧ φ ∈ fam.mcs s) ∧
     (∀ t : D, ∀ φ : Formula Atom, Formula.somePast φ ∈ fam.mcs t → ∃ s : D, s < t ∧ φ ∈ fam.mcs s)
@@ -176,7 +180,8 @@ def BFMCS.temporally_coherent (B : BFMCS Atom D fc) : Prop :=
 section DecidableAtom
 variable [DecidableEq Atom]
 
-def BFMCS.restricted_temporally_coherent (B : BFMCS Atom D fc) (root : Formula Atom) : Prop :=
+/-- Restricted temporal coherence predicate for eventualities within the deferral closure of a root formula. -/
+def BFMCS.restrictedTemporallyCoherent (B : BFMCS Atom D fc) (root : Formula Atom) : Prop :=
   ∀ fam ∈ B.families,
     (∀ t : D, ∀ φ : Formula Atom, φ ∈ deferralClosure root →
       Formula.someFuture φ ∈ fam.mcs t → ∃ s : D, t < s ∧ φ ∈ fam.mcs s) ∧
@@ -185,7 +190,7 @@ def BFMCS.restricted_temporally_coherent (B : BFMCS Atom D fc) (root : Formula A
 
 omit [Zero D] in
 theorem BFMCS.temporally_coherent_implies_restricted (B : BFMCS Atom D fc) (root : Formula Atom)
-    (h_tc : B.temporally_coherent) : B.restricted_temporally_coherent root := by
+    (h_tc : B.temporallyCoherent) : B.restrictedTemporallyCoherent root := by
   intro fam hfam
   obtain ⟨h_F, h_P⟩ := h_tc fam hfam
   exact ⟨fun t φ _ h_F_in => h_F t φ h_F_in, fun t φ _ h_P_in => h_P t φ h_P_in⟩
@@ -280,7 +285,8 @@ end DecidableAtom
 
 /-! ## Until/Since Coherence -/
 
-def BFMCS.until_since_coherent (B : BFMCS Atom D fc) : Prop :=
+/-- Full until/since coherence predicate for both forward and backward directions. -/
+def BFMCS.untilSinceCoherent (B : BFMCS Atom D fc) : Prop :=
   ∀ fam ∈ B.families,
     (∀ t : D, ∀ φ ψ : Formula Atom,
       Formula.untl φ ψ ∈ fam.mcs t →
@@ -297,7 +303,8 @@ def BFMCS.until_since_coherent (B : BFMCS Atom D fc) : Prop :=
 
 /-! ## Split Until/Since Coherence -/
 
-def BFMCS.backward_until_since_coherent (B : BFMCS Atom D fc) : Prop :=
+/-- Backward until/since coherence: witnessing conditions imply the until/since formulas hold. -/
+def BFMCS.backwardUntilSinceCoherent (B : BFMCS Atom D fc) : Prop :=
   ∀ fam ∈ B.families,
     (∀ t : D, ∀ φ ψ : Formula Atom,
       (∃ s : D, t < s ∧ φ ∈ fam.mcs s ∧ ∀ r : D, t < r → r < s → ψ ∈ fam.mcs r) →
@@ -306,7 +313,8 @@ def BFMCS.backward_until_since_coherent (B : BFMCS Atom D fc) : Prop :=
       (∃ s : D, s < t ∧ φ ∈ fam.mcs s ∧ ∀ r : D, s < r → r < t → ψ ∈ fam.mcs r) →
       Formula.snce φ ψ ∈ fam.mcs t)
 
-def BFMCS.forward_until_since_coherent (B : BFMCS Atom D fc) : Prop :=
+/-- Forward until/since coherence: until/since formulas imply the existence of witnesses. -/
+def BFMCS.forwardUntilSinceCoherent (B : BFMCS Atom D fc) : Prop :=
   ∀ fam ∈ B.families,
     (∀ t : D, ∀ φ ψ : Formula Atom,
       Formula.untl φ ψ ∈ fam.mcs t →
@@ -320,7 +328,8 @@ def BFMCS.forward_until_since_coherent (B : BFMCS Atom D fc) : Prop :=
 section DecidableAtom2
 variable [DecidableEq Atom]
 
-def BFMCS.restricted_forward_until_since_coherent (B : BFMCS Atom D fc) (root : Formula Atom) : Prop :=
+/-- Restricted forward until/since coherence for subformulas within the subformula closure of a root. -/
+def BFMCS.restrictedForwardUntilSinceCoherent (B : BFMCS Atom D fc) (root : Formula Atom) : Prop :=
   ∀ fam ∈ B.families,
     (∀ t : D, ∀ φ ψ : Formula Atom,
       Formula.untl φ ψ ∈ subformulaClosure root →
@@ -333,14 +342,15 @@ def BFMCS.restricted_forward_until_since_coherent (B : BFMCS Atom D fc) (root : 
 
 omit [Zero D] in
 theorem BFMCS.forward_implies_restricted_forward (B : BFMCS Atom D fc) (root : Formula Atom)
-    (h_fuc : B.forward_until_since_coherent) :
-    B.restricted_forward_until_since_coherent root := by
+    (h_fuc : B.forwardUntilSinceCoherent) :
+    B.restrictedForwardUntilSinceCoherent root := by
   intro fam hfam
   obtain ⟨h_fwd_U, h_fwd_S⟩ := h_fuc fam hfam
   exact ⟨fun t φ ψ _ h_mem => h_fwd_U t φ ψ h_mem,
          fun t φ ψ _ h_mem => h_fwd_S t φ ψ h_mem⟩
 
-def BFMCS.restricted_backward_until_since_coherent (B : BFMCS Atom D fc) (root : Formula Atom) : Prop :=
+/-- Restricted backward until/since coherence for subformulas within the subformula closure of a root. -/
+def BFMCS.restrictedBackwardUntilSinceCoherent (B : BFMCS Atom D fc) (root : Formula Atom) : Prop :=
   ∀ fam ∈ B.families,
     (∀ t : D, ∀ φ ψ : Formula Atom,
       Formula.untl φ ψ ∈ subformulaClosure root →
@@ -353,8 +363,8 @@ def BFMCS.restricted_backward_until_since_coherent (B : BFMCS Atom D fc) (root :
 
 omit [Zero D] in
 theorem BFMCS.backward_implies_restricted_backward (B : BFMCS Atom D fc) (root : Formula Atom)
-    (h_buc : B.backward_until_since_coherent) :
-    B.restricted_backward_until_since_coherent root := by
+    (h_buc : B.backwardUntilSinceCoherent) :
+    B.restrictedBackwardUntilSinceCoherent root := by
   intro fam hfam
   obtain ⟨h_bwd_U, h_bwd_S⟩ := h_buc fam hfam
   exact ⟨fun t φ ψ _ h_wit => h_bwd_U t φ ψ h_wit,
@@ -364,8 +374,8 @@ end DecidableAtom2
 
 omit [Zero D] in
 theorem BFMCS.split_until_since_coherent (B : BFMCS Atom D fc)
-    (h_buc : B.backward_until_since_coherent) (h_fuc : B.forward_until_since_coherent) :
-    B.until_since_coherent := by
+    (h_buc : B.backwardUntilSinceCoherent) (h_fuc : B.forwardUntilSinceCoherent) :
+    B.untilSinceCoherent := by
   intro fam hfam
   obtain ⟨h_bwd_U, h_bwd_S⟩ := h_buc fam hfam
   obtain ⟨h_fwd_U, h_fwd_S⟩ := h_fuc fam hfam
@@ -373,14 +383,14 @@ theorem BFMCS.split_until_since_coherent (B : BFMCS Atom D fc)
 
 omit [Zero D] in
 theorem BFMCS.until_since_coherent_backward (B : BFMCS Atom D fc)
-    (h_uc : B.until_since_coherent) : B.backward_until_since_coherent := by
+    (h_uc : B.untilSinceCoherent) : B.backwardUntilSinceCoherent := by
   intro fam hfam
   obtain ⟨_, h_bwd_U, _, h_bwd_S⟩ := h_uc fam hfam
   exact ⟨h_bwd_U, h_bwd_S⟩
 
 omit [Zero D] in
 theorem BFMCS.until_since_coherent_forward (B : BFMCS Atom D fc)
-    (h_uc : B.until_since_coherent) : B.forward_until_since_coherent := by
+    (h_uc : B.untilSinceCoherent) : B.forwardUntilSinceCoherent := by
   intro fam hfam
   obtain ⟨h_fwd_U, _, h_fwd_S, _⟩ := h_uc fam hfam
   exact ⟨h_fwd_U, h_fwd_S⟩

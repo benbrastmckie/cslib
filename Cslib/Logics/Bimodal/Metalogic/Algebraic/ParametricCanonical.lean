@@ -115,7 +115,7 @@ theorem parametric_task_rel_converse
 /-- The D-parametric canonical task frame. -/
 noncomputable def ParametricCanonicalTaskFrame : TaskFrame D where
   WorldState := ParametricCanonicalWorldState Atom fc
-  task_rel := parametricCanonicalTaskRel
+  taskRel := parametricCanonicalTaskRel
   nullity_identity := parametric_task_rel_nullity_identity
   forward_comp := fun M W V x y hx hy h1 h2 =>
     parametric_task_rel_forward_comp M W V x y hx hy h1 h2

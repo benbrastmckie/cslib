@@ -375,14 +375,14 @@ theorem single_U_formula_separable_noax (phi A B : Formula Atom)
 
 /-! ### Step 5d': GHR94 Lemma 10.2.6 (self-contained) and Lemma 10.2.7 (direct)
 
-Lemma 10.2.6: `noSNestedInU phi` and `U_nesting_depth phi <= 1` implies separable.
-Lemma 10.2.7: `noSNestedInU phi` implies separable (by U_nesting_depth induction). -/
+Lemma 10.2.6: `noSNestedInU phi` and `uNestingDepth phi <= 1` implies separable.
+Lemma 10.2.7: `noSNestedInU phi` implies separable (by uNestingDepth induction). -/
 
-/-- Helper: `extractUType` returns U-free arguments when `U_nesting_depth phi <= 1`.
-    At depth <= 1, every `.untl a b` has `U_nesting_depth (.untl a b) <= 1`,
-    so `U_nesting_depth a = 0` and `U_nesting_depth b = 0`, meaning a and b are U-free. -/
+/-- Helper: `extractUType` returns U-free arguments when `uNestingDepth phi <= 1`.
+    At depth <= 1, every `.untl a b` has `uNestingDepth (.untl a b) <= 1`,
+    so `uNestingDepth a = 0` and `uNestingDepth b = 0`, meaning a and b are U-free. -/
 theorem extract_U_type_U_free (φ : Formula Atom) (h : isUFree φ = false)
-    (hns : noSNestedInU φ) (hdepth : U_nesting_depth φ ≤ 1) :
+    (hns : noSNestedInU φ) (hdepth : uNestingDepth φ ≤ 1) :
     isUFree (extractUType φ h hns).1 = true ∧
     isUFree (extractUType φ h hns).2 = true := by
   induction φ with
@@ -392,18 +392,18 @@ theorem extract_U_type_U_free (φ : Formula Atom) (h : isUFree φ = false)
     unfold extractUType
     by_cases hc : isUFree c = false
     · simp only [hc, ↓reduceDIte]
-      have hle : U_nesting_depth c ≤ 1 := Nat.le_trans (U_nesting_depth_le_imp_left c d) hdepth
+      have hle : uNestingDepth c ≤ 1 := Nat.le_trans (U_nesting_depth_le_imp_left c d) hdepth
       exact ih1 hc hns.1 hle
     · simp only [hc, ↓reduceDIte]
       have hd : isUFree d = false := by
         simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
-      have hle : U_nesting_depth d ≤ 1 := Nat.le_trans (U_nesting_depth_le_imp_right c d) hdepth
+      have hle : uNestingDepth d ≤ 1 := Nat.le_trans (U_nesting_depth_le_imp_right c d) hdepth
       exact ih2 hd hns.2 hle
   | box c ih =>
     simp only [isUFree] at h
     unfold extractUType
-    have hle : U_nesting_depth c ≤ 1 := by
-      simp only [U_nesting_depth] at hdepth; exact hdepth
+    have hle : uNestingDepth c ≤ 1 := by
+      simp only [uNestingDepth] at hdepth; exact hdepth
     exact ih h hns hle
   | untl a b =>
     unfold extractUType
@@ -412,16 +412,16 @@ theorem extract_U_type_U_free (φ : Formula Atom) (h : isUFree φ = false)
     unfold extractUType
     by_cases hc : isUFree c = false
     · simp only [hc, ↓reduceDIte]
-      have hle : U_nesting_depth c ≤ 1 := Nat.le_trans (U_nesting_depth_le_snce_left c d) hdepth
+      have hle : uNestingDepth c ≤ 1 := Nat.le_trans (U_nesting_depth_le_snce_left c d) hdepth
       exact ih1 hc hns.1 hle
     · simp only [hc, ↓reduceDIte]
       have hd : isUFree d = false := by
         simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
-      have hle : U_nesting_depth d ≤ 1 := Nat.le_trans (U_nesting_depth_le_snce_right c d) hdepth
+      have hle : uNestingDepth d ≤ 1 := Nat.le_trans (U_nesting_depth_le_snce_right c d) hdepth
       exact ih2 hd hns.2 hle
 
 /-- GHR94 Lemma 10.2.6 (oracle-parameterized):
-    A formula with `noSNestedInU` and `U_nesting_depth <= 1` is separable,
+    A formula with `noSNestedInU` and `uNestingDepth <= 1` is separable,
     given an oracle for `noSNestedInU` formulas with JD ≤ 1.
 
     Proved by inlining the `no_S_nested_in_U_separable_param` logic with
@@ -429,7 +429,7 @@ theorem extract_U_type_U_free (φ : Formula Atom) (h : isUFree φ = false)
     The oracle is threaded through to `single_U_formula_separable_noax_param`. -/
 theorem lemma_10_2_6_self_contained_param (phi : Formula Atom)
     (hns : noSNestedInU phi)
-    (hd : U_nesting_depth phi ≤ 1)
+    (hd : uNestingDepth phi ≤ 1)
     (oracle : ∀ (chi : Formula Atom), noSNestedInU chi →
         junctionDepth chi ≤ 1 → isSeparable chi) :
     isSeparable phi := by
@@ -473,7 +473,7 @@ theorem lemma_10_2_6_self_contained_param (phi : Formula Atom)
     Uses `single_U_formula_separable_no_oracle` directly instead of an oracle. -/
 theorem lemma_10_2_6_no_oracle (phi : Formula Atom)
     (hns : noSNestedInU phi)
-    (hd : U_nesting_depth phi ≤ 1) :
+    (hd : uNestingDepth phi ≤ 1) :
     isSeparable phi := by
   induction h : countUSubformulas phi using Nat.strongRecOn generalizing phi with
   | ind n ih =>
@@ -515,64 +515,64 @@ theorem lemma_10_2_6_no_oracle (phi : Formula Atom)
     Now delegates to the oracle-free version. -/
 theorem lemma_10_2_6_self_contained (phi : Formula Atom)
     (hns : noSNestedInU phi)
-    (hd : U_nesting_depth phi ≤ 1) :
+    (hd : uNestingDepth phi ≤ 1) :
     isSeparable phi :=
   lemma_10_2_6_no_oracle phi hns hd
 
 /-- Substituting `.untl A B` (with U-free A, B) into a U-free formula gives
-    `U_nesting_depth <= 1`. Since the base formula has no `.untl` nodes, the only
+    `uNestingDepth <= 1`. Since the base formula has no `.untl` nodes, the only
     `.untl` in the result comes from substituting `.untl A B` for atoms. Each such
     occurrence has depth 1 (U-free args), and they don't nest inside each other. -/
 theorem subst_U_free_U_nesting_depth_le_one (ψ : Formula Atom) (p : Atom) (A B : Formula Atom)
     (hψ_uf : isUFree ψ = true) (hA_uf : isUFree A = true) (hB_uf : isUFree B = true) :
-    U_nesting_depth (substFormula ψ p (.untl A B)) ≤ 1 := by
+    uNestingDepth (substFormula ψ p (.untl A B)) ≤ 1 := by
   induction ψ with
   | atom a =>
     simp only [substFormula]
     split
     · -- a = p: result is .untl A B
-      simp only [U_nesting_depth]
+      simp only [uNestingDepth]
       have ha := U_nesting_depth_zero_of_U_free A hA_uf
       have hb := U_nesting_depth_zero_of_U_free B hB_uf
       omega
-    · simp only [U_nesting_depth]; omega
-  | bot => simp only [substFormula, U_nesting_depth]; omega
+    · simp only [uNestingDepth]; omega
+  | bot => simp only [substFormula, uNestingDepth]; omega
   | imp a b ih1 ih2 =>
     simp only [isUFree, Bool.and_eq_true] at hψ_uf
-    simp only [substFormula, U_nesting_depth]
+    simp only [substFormula, uNestingDepth]
     have := ih1 hψ_uf.1; have := ih2 hψ_uf.2; omega
   | box a ih =>
     simp only [isUFree] at hψ_uf
-    simp only [substFormula, U_nesting_depth]; exact ih hψ_uf
+    simp only [substFormula, uNestingDepth]; exact ih hψ_uf
   | untl _ _ => simp only [isUFree] at hψ_uf; exact absurd hψ_uf (by decide)
   | snce a b ih1 ih2 =>
     simp only [isUFree, Bool.and_eq_true] at hψ_uf
-    simp only [substFormula, U_nesting_depth]
+    simp only [substFormula, uNestingDepth]
     have := ih1 hψ_uf.1; have := ih2 hψ_uf.2; omega
 
-/-- Callback formulas from `subst_in_separated_separable_typed` have `U_nesting_depth ≤ 1`
+/-- Callback formulas from `subst_in_separated_separable_typed` have `uNestingDepth ≤ 1`
     when A, B are U-free. The callback formula is `.snce (subst c p (.untl A B)) (subst d p (.untl A B))`
     where c, d are U-free. -/
 theorem callback_U_nesting_depth_le_one (c d : Formula Atom) (p : Atom) (A B : Formula Atom)
     (hc_uf : isUFree c = true) (hd_uf : isUFree d = true)
     (hA_uf : isUFree A = true) (hB_uf : isUFree B = true) :
-    U_nesting_depth (.snce (substFormula c p (.untl A B))
+    uNestingDepth (.snce (substFormula c p (.untl A B))
                            (substFormula d p (.untl A B))) ≤ 1 := by
-  simp only [U_nesting_depth]
+  simp only [uNestingDepth]
   have h1 := subst_U_free_U_nesting_depth_le_one c p A B hc_uf hA_uf hB_uf
   have h2 := subst_U_free_U_nesting_depth_le_one d p A B hd_uf hA_uf hB_uf
   omega
 
 /-- Version of `subst_in_separated_separable` where the callback also receives
-    `U_nesting_depth χ ≤ 1`. Used by `no_S_nested_sep` to thread the
-    `U_nesting_depth` IH through back-substitution at depth >= 2.
+    `uNestingDepth χ ≤ 1`. Used by `no_S_nested_sep` to thread the
+    `uNestingDepth` IH through back-substitution at depth >= 2.
     Requires U-free A, B (so callback formulas have depth <= 1). -/
 theorem subst_in_separated_separable_depth (ψ : Formula Atom) (p : Atom) (A B : Formula Atom)
     (hA_sf : isSFree A = true) (hB_sf : isSFree B = true)
     (hA_uf : isUFree A = true) (hB_uf : isUFree B = true)
     (hsep : isSyntacticallySeparated ψ = true)
     (ih_snce : ∀ (χ : Formula Atom), noSNestedInU χ →
-        U_nesting_depth χ ≤ 1 → isSeparable χ) :
+        uNestingDepth χ ≤ 1 → isSeparable χ) :
     isSeparable (substFormula ψ p (.untl A B)) := by
   induction ψ with
   | atom a =>
@@ -599,7 +599,7 @@ theorem subst_in_separated_separable_depth (ψ : Formula Atom) (p : Atom) (A B :
         (substFormula d p (.untl A B))) :=
       ⟨subst_U_free_gives_no_S_nested c p A B hsep.1 hA_sf hB_sf,
        subst_U_free_gives_no_S_nested d p A B hsep.2 hA_sf hB_sf⟩
-    have hdepth : U_nesting_depth (.snce (substFormula c p (.untl A B))
+    have hdepth : uNestingDepth (.snce (substFormula c p (.untl A B))
         (substFormula d p (.untl A B))) ≤ 1 :=
       callback_U_nesting_depth_le_one c d p A B hsep.1 hsep.2 hA_uf hB_uf
     exact ih_snce _ hns hdepth
@@ -702,7 +702,7 @@ theorem subst_in_separated_separable_jd (ψ : Formula Atom) (p : Atom) (A B : Fo
     A formula with `noSNestedInU` is separable, given an oracle for
     `noSNestedInU` formulas with JD ≤ 1.
 
-    Proved by strong induction on `U_nesting_depth`.
+    Proved by strong induction on `uNestingDepth`.
     - Depth ≤ 1: `lemma_10_2_6_self_contained_param` with oracle.
     - Depth ≥ 2: Abstract a surface `.untl A B`, prove abstracted formula
       separable by inner `countUSubformulas` induction, then back-substitute
@@ -713,8 +713,8 @@ theorem no_S_nested_in_U_separable_direct_param (phi : Formula Atom)
     (oracle : ∀ (chi : Formula Atom), noSNestedInU chi →
         junctionDepth chi ≤ 1 → isSeparable chi) :
     isSeparable phi := by
-  -- Outer induction on U_nesting_depth
-  have outer : ∀ (d : Nat) (ψ : Formula Atom), U_nesting_depth ψ ≤ d →
+  -- Outer induction on uNestingDepth
+  have outer : ∀ (d : Nat) (ψ : Formula Atom), uNestingDepth ψ ≤ d →
       noSNestedInU ψ → isSeparable ψ := by
     intro d
     induction d using Nat.strongRecOn with
@@ -760,16 +760,16 @@ theorem no_S_nested_in_U_separable_direct_param (phi : Formula Atom)
           subst_in_separated_separable_jd psi p AB.1 AB.2
             hAB_sf.1 hAB_sf.2 hpsi_sep oracle
         exact is_separable_of_equiv hphi_equiv h_subst_sep
-  exact outer (U_nesting_depth phi) phi (Nat.le_refl _) hns
+  exact outer (uNestingDepth phi) phi (Nat.le_refl _) hns
 
 /-- GHR94 Lemmas 10.2.6 + 10.2.7 (oracle-free):
     A formula with noSNestedInU is separable.
     No oracle parameter, no axiom-backed functions.
-    Proved by double strong induction on (U_nesting_depth, countUTotal). -/
+    Proved by double strong induction on (uNestingDepth, countUTotal). -/
 theorem no_S_nested_sep (phi : Formula Atom) (hns : noSNestedInU phi) :
     isSeparable phi := by
-  -- Double strong induction: outer on U_nesting_depth, inner on countUTotal
-  have proof : ∀ (d c : Nat) (ψ : Formula Atom), U_nesting_depth ψ ≤ d →
+  -- Double strong induction: outer on uNestingDepth, inner on countUTotal
+  have proof : ∀ (d c : Nat) (ψ : Formula Atom), uNestingDepth ψ ≤ d →
       countUTotal ψ ≤ c → noSNestedInU ψ → isSeparable ψ := by
     intro d
     induction d using Nat.strongRecOn with | ind d ih_d =>
@@ -782,7 +782,7 @@ theorem no_S_nested_sep (phi : Formula Atom) (hns : noSNestedInU phi) :
         (restricted_u_free_separated ψ (has_no_allpast_allfuture_true ψ) huf)
     · push Not at huf; simp only [Bool.not_eq_true] at huf
       have huf' : isUFree ψ = false := huf
-      -- Case split on U_nesting_depth
+      -- Case split on uNestingDepth
       by_cases hd_ge2 : d ≥ 2
       · -- UND >= 2: extract innermost U-type (U-free args)
         let AB := extractInnermostUType ψ huf' hns_ψ
@@ -796,7 +796,7 @@ theorem no_S_nested_sep (phi : Formula Atom) (hns : noSNestedInU phi) :
           abstract_untl_count_total_lt_of_contains_deep ψ AB.1 AB.2 p hcontains
         have hns' := abstract_untl_preserves_no_S_nested ψ AB.1 AB.2 p hns_ψ
         -- ψ' separable by inner IH (same d, smaller countUTotal)
-        have h_und_le : U_nesting_depth ψ' ≤ d :=
+        have h_und_le : uNestingDepth ψ' ≤ d :=
           Nat.le_trans (abstract_untl_U_nesting_depth_le ψ AB.1 AB.2 p) hd
         have h_psi'_sep : isSeparable ψ' :=
           ih_c (countUTotal ψ') (by omega) ψ' h_und_le (le_refl _) hns'
@@ -816,7 +816,7 @@ theorem no_S_nested_sep (phi : Formula Atom) (hns : noSNestedInU phi) :
       · -- UND <= 1: use oracle-free lemma_10_2_6_no_oracle
         push Not at hd_ge2
         exact lemma_10_2_6_no_oracle ψ hns_ψ (by omega)
-  exact proof (U_nesting_depth phi) (countUTotal phi) phi (le_refl _) (le_refl _) hns
+  exact proof (uNestingDepth phi) (countUTotal phi) phi (le_refl _) (le_refl _) hns
 
 /-- Version of `no_S_nested_in_U_separable_param` with JD-bounded callback. -/
 theorem no_S_nested_in_U_separable_param_jd (phi : Formula Atom)

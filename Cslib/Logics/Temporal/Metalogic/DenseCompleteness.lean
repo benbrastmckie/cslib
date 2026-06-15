@@ -25,7 +25,7 @@ which by the truth lemma gives membership.
 ## Main Results
 
 - `dense_indicator_in_all_limit_points`: neg U(top, bot) in limitF(x) for all x.
-- `chronicle_densely_ordered_dense`: DenselyOrdered for chronicle from Dense-MCS.
+- `chronicleDenselyOrderedDense`: DenselyOrdered for chronicle from Dense-MCS.
 - `completeness_dense`: ValidDense phi -> ThDerivableFc .Dense phi.
 -/
 
@@ -192,8 +192,7 @@ theorem dense_indicator_in_all_limit_points
 
 For any x < y, neg U(top, bot) in limitF(x) and top in limitF(y).
 By limit_satisfies_c4, there exists z with x < z < y. -/
-@[reducible]
-def chronicle_densely_ordered_dense
+lemma chronicleDenselyOrderedDense
     {A : Set (Formula Atom)}
     (h_dense_mcs : Temporal.SetMaximalConsistentFc FrameClass.Dense A)
     (h_base_mcs : Temporal.SetMaximalConsistent A) :
@@ -260,7 +259,7 @@ theorem completeness_dense {φ : Formula Atom}
   let D := ChronicleSubtype M h_base_mcs
   let model := chronicleModel M h_base_mcs
   let t₀ : D := chronicleZero M h_base_mcs
-  have : DenselyOrdered D := chronicle_densely_ordered_dense hM_mcs h_base_mcs
+  have : DenselyOrdered D := chronicleDenselyOrderedDense hM_mcs h_base_mcs
   have h_sat := h_valid D model t₀
   have h_mem := (chronicle_truth_lemma M h_base_mcs t₀ φ).mp h_sat
   have h_zero : t₀.val = 0 := rfl

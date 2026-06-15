@@ -19,9 +19,9 @@ establish fundamental connections between modal necessity (□) and temporal ope
 
 - `perpetuity_1`: `□φ → △φ` (necessary implies always)
 - `perpetuity_2`: `▽φ → ◇φ` (sometimes implies possible)
-- `perpetuity_3`: `□φ → □△φ` (necessity of perpetuity)
-- `perpetuity_4`: `◇▽φ → ◇φ` (possibility of occurrence)
-- `perpetuity_5`: `◇▽φ → △◇φ` (persistent possibility)
+- `perpetuity3`: `□φ → □△φ` (necessity of perpetuity)
+- `perpetuity4`: `◇▽φ → ◇φ` (possibility of occurrence)
+- `perpetuity5`: `◇▽φ → △◇φ` (persistent possibility)
 
 ## References
 
@@ -43,7 +43,7 @@ variable {Atom : Type u}
 local notation:50 "⊢ " phi =>
   Bimodal.DerivationTree Bimodal.FrameClass.Base ([] : List (Bimodal.Formula Atom)) phi
 
--- Abbreviation for axiom constructor with base frame class
+/-- Abbreviation for the axiom constructor specialized to the base frame class. -/
 abbrev ax (Gamma : List (Bimodal.Formula Atom)) (phi : Bimodal.Formula Atom)
     (h : Bimodal.Axiom phi) (h_fc : h.minFrameClass ≤ Bimodal.FrameClass.Base := by trivial) :
     Bimodal.DerivationTree Bimodal.FrameClass.Base Gamma phi :=
@@ -61,7 +61,7 @@ Derivation combines three components:
 3. `□φ → Gφ` (future): via MF then MT
 4. Combine: `□φ → Hφ ∧ (φ ∧ Gφ)` -/
 def perpetuity_1 (φ : Bimodal.Formula Atom) : ⊢ φ.box.imp φ.always :=
-  combineImpConj_3 (boxToPast φ) (boxToPresent φ) (boxToFuture φ)
+  combineImpConj3 (boxToPast φ) (boxToPresent φ) (boxToFuture φ)
 
 /-! ## P2: Sometimes Implies Possible -/
 
@@ -100,16 +100,16 @@ def boxConjIntroImp {φ₀ φ₁ φ₂ : Bimodal.Formula Atom}
   exact Bimodal.DerivationTree.modus_ponens [] _ _ h3 hB
 
 /-- Three-way boxed conjunction intro from implications. -/
-def boxConjIntroImp_3 {φ₀ φ₁ φ₂ φ₃ : Bimodal.Formula Atom}
+def boxConjIntroImp3 {φ₀ φ₁ φ₂ φ₃ : Bimodal.Formula Atom}
     (hA : ⊢ φ₀.imp φ₁.box) (hB : ⊢ φ₀.imp φ₂.box) (hC : ⊢ φ₀.imp φ₃.box) :
     ⊢ φ₀.imp (φ₁.and (φ₂.and φ₃)).box :=
   boxConjIntroImp hA (boxConjIntroImp hB hC)
 
 /-- P3: `□φ → □△φ` (necessity of perpetuity).
 
-Uses `boxToBoxPast`, identity, MF, and `boxConjIntroImp_3`. -/
-def perpetuity_3 (φ : Bimodal.Formula Atom) : ⊢ φ.box.imp (φ.always.box) :=
-  boxConjIntroImp_3
+Uses `boxToBoxPast`, identity, MF, and `boxConjIntroImp3`. -/
+def perpetuity3 (φ : Bimodal.Formula Atom) : ⊢ φ.box.imp (φ.always.box) :=
+  boxConjIntroImp3
     (boxToBoxPast φ)
     (identity φ.box)
     (ax [] _ (Bimodal.Axiom.modal_future φ))
@@ -119,8 +119,8 @@ def perpetuity_3 (φ : Bimodal.Formula Atom) : ⊢ φ.box.imp (φ.always.box) :=
 /-- P4: `◇▽φ → ◇φ` (possibility of occurrence).
 
 Contraposition of P3 at ¬φ, with DNI bridge for double negation. -/
-def perpetuity_4 (φ : Bimodal.Formula Atom) : ⊢ φ.sometimes.diamond.imp φ.diamond := by
-  have p3_neg := perpetuity_3 φ.neg
+def perpetuity4 (φ : Bimodal.Formula Atom) : ⊢ φ.sometimes.diamond.imp φ.diamond := by
+  have p3_neg := perpetuity3 φ.neg
   have contraposed := contraposition p3_neg
   have dni_always := dni φ.neg.always
   have box_dni_always := Bimodal.DerivationTree.necessitation _ dni_always
@@ -134,25 +134,25 @@ def perpetuity_4 (φ : Bimodal.Formula Atom) : ⊢ φ.sometimes.diamond.imp φ.d
 /-- G-distribution: `⊢ G(φ → ψ) → (Gφ → Gψ)`. Wraps generic typeclass theorem. -/
 def futureKDist (φ₁ φ₂ : Bimodal.Formula Atom) :
     ⊢ (φ₁.imp φ₂).allFuture.imp (φ₁.allFuture.imp φ₂.allFuture) := by
-  exact unwrap (@Theorems.Temporal.TemporalDerived.G_distribution
+  exact unwrap (@Theorems.Temporal.TemporalDerived.gDistribution
     (Bimodal.Formula Atom) _ _ _ _ Bimodal.HilbertTM _ _ (φ := φ₁) (ψ := φ₂))
 
 /-- H-distribution: `⊢ H(φ → ψ) → (Hφ → Hψ)`. Wraps generic typeclass theorem. -/
 def pastKDist (φ₁ φ₂ : Bimodal.Formula Atom) :
     ⊢ (φ₁.imp φ₂).allPast.imp (φ₁.allPast.imp φ₂.allPast) := by
-  exact unwrap (@Theorems.Temporal.TemporalDerived.H_distribution
+  exact unwrap (@Theorems.Temporal.TemporalDerived.hDistribution
     (Bimodal.Formula Atom) _ _ _ _ Bimodal.HilbertTM _ _ (φ := φ₁) (ψ := φ₂))
 
 /-- Modal 5: `⊢ ◇φ → □◇φ`. Wraps S5 typeclass theorem. -/
-def modal_5 (φ : Bimodal.Formula Atom) : ⊢ φ.diamond.imp φ.diamond.box :=
+def modal5 (φ : Bimodal.Formula Atom) : ⊢ φ.diamond.imp φ.diamond.box :=
   unwrap (@Theorems.Modal.S5.axiom5_derived _ _ _ _ _ _ _ _)
 
 /-- Persistence lemma: `◇φ → △◇φ` (possibility is perpetual).
 
-Uses modal_5 (◇φ → □◇φ), tempFutureDerived, temporal duality,
-future/past K distribution, and combineImpConj_3. -/
+Uses modal5 (◇φ → □◇φ), tempFutureDerived, temporal duality,
+future/past K distribution, and combineImpConj3. -/
 def persistence (φ : Bimodal.Formula Atom) : ⊢ φ.diamond.imp φ.diamond.always := by
-  have m5 := modal_5 φ
+  have m5 := modal5 φ
   have tf := tempFutureDerived φ.diamond
 
   -- TD for □◇φ: □◇φ → H□◇φ
@@ -191,13 +191,13 @@ def persistence (φ : Bimodal.Formula Atom) : ⊢ φ.diamond.imp φ.diamond.alwa
     have future_bridge := Bimodal.DerivationTree.modus_ponens [] _ _ fk future_mt
     exact impTrans chain2 future_bridge
 
-  exact combineImpConj_3 past_comp present_comp future_comp
+  exact combineImpConj3 past_comp present_comp future_comp
 
 /-- P5: `◇▽φ → △◇φ` (persistent possibility).
 
 Composition of P4 and persistence. -/
-def perpetuity_5 (φ : Bimodal.Formula Atom) : ⊢ φ.sometimes.diamond.imp φ.diamond.always :=
-  impTrans (perpetuity_4 φ) (persistence φ)
+def perpetuity5 (φ : Bimodal.Formula Atom) : ⊢ φ.sometimes.diamond.imp φ.diamond.always :=
+  impTrans (perpetuity4 φ) (persistence φ)
 
 end -- noncomputable section
 

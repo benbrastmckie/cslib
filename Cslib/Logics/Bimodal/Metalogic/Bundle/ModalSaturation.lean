@@ -98,9 +98,11 @@ lemma diamond_implies_psi_consistent {Omega : Set (Formula Atom)} (h_mcs : SetMa
 
 /-! ## Helper Lemmas for Modal Backward Proof -/
 
+/-- Derives the double negation elimination theorem in the base frame class. -/
 noncomputable def dneTheorem (phi : Formula Atom) : DerivationTree FrameClass.Base [] (Formula.neg (Formula.neg phi) |>.imp phi) :=
   Theorems.Propositional.doubleNegation phi
 
+/-- Derives the box-distributed double negation elimination theorem. -/
 noncomputable def boxDneTheorem (phi : Formula Atom) :
     DerivationTree FrameClass.Base [] ((Formula.box (Formula.neg (Formula.neg phi))).imp (Formula.box phi)) := by
   have h_dne : DerivationTree FrameClass.Base [] ((Formula.neg (Formula.neg phi)).imp phi) := dneTheorem phi
@@ -112,11 +114,11 @@ noncomputable def boxDneTheorem (phi : Formula Atom) :
   exact DerivationTree.modus_ponens [] _ _ h_K h_box_dne
 
 lemma SetMaximalConsistent.contrapositive_lemma {fc : FrameClass} {Omega : Set (Formula Atom)} (h_mcs : SetMaximalConsistent fc Omega)
-    {A B : Formula Atom} (h_impl : DerivationTree fc [] (A.imp B)) (h_negB : B.neg ∈ Omega) : A.neg ∈ Omega := by
+    {A B : Formula Atom} (hImpl : DerivationTree fc [] (A.imp B)) (h_negB : B.neg ∈ Omega) : A.neg ∈ Omega := by
   have h1 : DerivationTree fc [A, B.neg] A :=
     DerivationTree.assumption _ A (by simp)
   have h2 : DerivationTree fc [A, B.neg] (A.imp B) :=
-    DerivationTree.weakening [] _ _ h_impl (by intro x hx; exact False.elim (List.not_mem_nil hx))
+    DerivationTree.weakening [] _ _ hImpl (by intro x hx; exact False.elim (List.not_mem_nil hx))
   have h3 : DerivationTree fc [A, B.neg] B :=
     DerivationTree.modus_ponens _ A B h2 h1
   have h4 : DerivationTree fc [A, B.neg] B.neg :=
@@ -156,7 +158,9 @@ theorem saturated_modal_backward (B : BFMCS Atom D) (h_sat : isModallySaturated 
 
 /-! ## Saturated BFMCS Structure -/
 
+/-- Bundles a BFMCS together with a proof that it satisfies modal saturation. -/
 structure SaturatedBFMCS (Atom : Type*) (D : Type*) [Preorder D] where
+  /-- The underlying bundle of maximal consistent sets. -/
   bfmcs : BFMCS Atom D
   saturated : isModallySaturated bfmcs
 
@@ -168,14 +172,16 @@ theorem SaturatedBFMCS.modal_backward (S_bfmcs : SaturatedBFMCS Atom D)
 
 /-! ## Axiom 5 (Negative Introspection) -/
 
-noncomputable def modal_5_collapse_theorem (phi : Formula Atom) :
+/-- Proves the modal axiom 5 collapse: diamond-box implies the formula itself. -/
+noncomputable def modal5CollapseTheorem (phi : Formula Atom) :
     DerivationTree FrameClass.Base [] (Formula.box phi |>.diamond.imp (Formula.box phi)) :=
   DerivationTree.axiom [] _ (Axiom.modal_5_collapse phi) trivial
 
-noncomputable def axiom_5_negative_introspection (phi : Formula Atom) :
+/-- Derives negative introspection: absence of box-phi implies box of its absence. -/
+noncomputable def axiom5NegativeIntrospection (phi : Formula Atom) :
     DerivationTree FrameClass.Base [] ((Formula.box phi).neg.imp (Formula.box (Formula.box phi).neg)) := by
   have h_collapse : DerivationTree FrameClass.Base [] ((Formula.box phi).diamond.imp (Formula.box phi)) :=
-    modal_5_collapse_theorem phi
+    modal5CollapseTheorem phi
   have h_contra : DerivationTree FrameClass.Base [] ((Formula.box phi).neg.imp (Formula.box phi).diamond.neg) :=
     Theorems.Propositional.contraposition h_collapse
   have h_dne : DerivationTree FrameClass.Base [] (((Formula.box phi).neg.box.neg.neg).imp ((Formula.box phi).neg.box)) :=
@@ -185,9 +191,10 @@ noncomputable def axiom_5_negative_introspection (phi : Formula Atom) :
   rw [h_contra_expanded] at h_contra
   exact Theorems.Combinators.impTrans h_contra h_dne
 
+/-- Derives that negation of box implies box of the negation, via axiom 5. -/
 noncomputable def negBoxToBoxNegBox (phi : Formula Atom) :
     DerivationTree FrameClass.Base [] ((Formula.box phi).neg.imp (Formula.box (Formula.box phi).neg)) :=
-  axiom_5_negative_introspection phi
+  axiom5NegativeIntrospection phi
 
 lemma SetMaximalConsistent.neg_box_implies_box_neg_box {fc : FrameClass} {Omega : Set (Formula Atom)} (h_mcs : SetMaximalConsistent fc Omega)
     (phi : Formula Atom) (h_neg_box : (Formula.box phi).neg ∈ Omega) :

@@ -26,8 +26,8 @@ framework wrappers in `MaximalConsistent.lean` which are specialized to `FrameCl
 - `SetMaximalConsistent.closed_under_derivation`: Derivable formulas are in MCS
 - `SetMaximalConsistent.implication_property`: Modus ponens reflected in membership
 - `SetMaximalConsistent.negation_complete`: Either phi or neg phi in MCS
-- `temp_4_derived`: Derived temporal 4 axiom for future (G phi -> GG phi)
-- `temp_4_past`: Derived temporal 4 axiom for past (H phi -> HH phi)
+- `temp4Derived`: Derived temporal 4 axiom for future (G phi -> GG phi)
+- `temp4Past`: Derived temporal 4 axiom for past (H phi -> HH phi)
 - `SetMaximalConsistent.allFuture_allFuture`: G phi in Omega implies GG phi in Omega
 - `SetMaximalConsistent.allPast_allPast`: H phi in Omega implies HH phi in Omega
 - `set_consistent_not_both`: phi and neg phi cannot both be in a consistent set
@@ -203,7 +203,7 @@ This is the key convenience wrapper around `closed_under_derivation` with an emp
 context list, used throughout the metalogic modules. It eliminates the need for
 private local copies of the same pattern.
 -/
-noncomputable def theoremInMcsFc {fc : FrameClass} {M : Set (Formula Atom)} {phi : Formula Atom}
+lemma theoremInMcsFc {fc : FrameClass} {M : Set (Formula Atom)} {phi : Formula Atom}
     (h_mcs : SetMaximalConsistent fc M)
     (h_deriv : DerivationTree fc [] phi) : phi ∈ M :=
   SetMaximalConsistent.closed_under_derivation h_mcs [] (fun _ h => by simp at h) h_deriv
@@ -303,7 +303,7 @@ Positive introspection for G, derived from BX3 (right_mono_until), BX6
 The contrapositive `F(not not F(not phi)) -> F(not phi)` is proved by composing
 three F-monotonicity steps, then negated to obtain `G phi -> GG phi`.
 -/
-def temp_4_derived (phi : Formula Atom) :
+def temp4Derived (phi : Formula Atom) :
     DerivationTree FrameClass.Base ([] : List (Formula Atom))
       (phi.allFuture.imp phi.allFuture.allFuture) := by
   -- Step 1: F(not not F(not phi)) -> F(F(not phi)) via DNE under F
@@ -362,7 +362,7 @@ Derivation of temporal 4 axiom for past: H phi -> HH phi.
 
 Derived by applying temporal duality to the temp_4 axiom (G phi -> GG phi).
 -/
-def temp_4_past (phi : Formula Atom) :
+def temp4Past (phi : Formula Atom) :
     DerivationTree FrameClass.Base ([] : List (Formula Atom))
       (phi.allPast.imp phi.allPast.allPast) := by
   -- By temporal duality from: G psi -> GG psi where psi = swapTemporal phi
@@ -370,7 +370,7 @@ def temp_4_past (phi : Formula Atom) :
   -- Step 1: Get T4 derived theorem for psi: G psi -> GG psi
   have h1 : DerivationTree FrameClass.Base ([] : List (Formula Atom))
       (psi.allFuture.imp psi.allFuture.allFuture) :=
-    temp_4_derived psi
+    temp4Derived psi
   -- Step 2: Apply temporal duality
   have h2 : DerivationTree FrameClass.Base ([] : List (Formula Atom))
       ((psi.allFuture.imp psi.allFuture.allFuture).swapTemporal) :=
@@ -395,7 +395,7 @@ theorem SetMaximalConsistent.allFuture_allFuture {fc : FrameClass}
     (h_allFuture : Formula.allFuture phi ∈ Omega) :
     (Formula.allFuture phi).allFuture ∈ Omega := by
   -- Temporal 4 axiom: G phi -> GG phi (derived from BX3 + BX6, at Base, then lifted)
-  have h_temp_4_base := temp_4_derived (Atom := Atom) phi
+  have h_temp_4_base := temp4Derived (Atom := Atom) phi
   have h_temp_4_thm : DerivationTree fc ([] : List (Formula Atom))
       ((Formula.allFuture phi).imp (Formula.allFuture (Formula.allFuture phi))) :=
     DerivationTree.lift (FrameClass.base_le fc) h_temp_4_base
@@ -426,7 +426,7 @@ theorem SetMaximalConsistent.allPast_allPast {fc : FrameClass}
     (h_allPast : Formula.allPast phi ∈ Omega) :
     (Formula.allPast phi).allPast ∈ Omega := by
   -- Derived temporal 4 for past: H phi -> HH phi (at Base, then lifted)
-  have h_temp_4_past_base := temp_4_past (Atom := Atom) phi
+  have h_temp_4_past_base := temp4Past (Atom := Atom) phi
   have h_temp_4_past_thm : DerivationTree fc ([] : List (Formula Atom))
       ((Formula.allPast phi).imp (Formula.allPast (Formula.allPast phi))) :=
     DerivationTree.lift (FrameClass.base_le fc) h_temp_4_past_base

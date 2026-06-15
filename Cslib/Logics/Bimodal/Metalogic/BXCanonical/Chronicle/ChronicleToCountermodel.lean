@@ -82,7 +82,7 @@ theorem succ_cofinal (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaxi
   exact chronicle_gap_contradiction fc A h_mcs h_discrete a b h_lt (fun k => h_all k)
 
 /-- `IsSuccArchimedean` for `LimitDomSubtype` in the discrete case. -/
-@[reducible] noncomputable def limitDomSubtypeIsSuccArchimedean (fc : FrameClass)
+lemma limitDomSubtypeIsSuccArchimedean (fc : FrameClass)
     (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (h_discrete : ∀ x ∈ limitDom fc A h_mcs, nextTop ∈ limitF fc A h_mcs x) :
     @IsSuccArchimedean _ _ (limitDomSubtypeSuccOrder fc A h_mcs h_discrete) := by
@@ -170,7 +170,7 @@ noncomputable def cantorBfmcsDiscrete (fc : FrameClass) (A : Set (Formula Atom))
   nonempty := sorry  -- sorry: blocked on task 36
   modal_forward := by sorry  -- sorry: blocked on task 36
   modal_backward := by sorry  -- sorry: blocked on task 36
-  eval_family := sorry  -- sorry: blocked on task 36
+  evalFamily := sorry  -- sorry: blocked on task 36
   eval_family_mem := sorry  -- sorry: blocked on task 36
 
 /-- Discrete countermodel. Sorry-stubbed (task 36). -/

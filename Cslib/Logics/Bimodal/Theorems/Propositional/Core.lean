@@ -41,44 +41,52 @@ variable {Atom : Type*}
 
 noncomputable section
 
+/-- `⊢ A ∨ ¬A`: law of excluded middle. -/
 def lem (A : Formula Atom) : DerivationTree FrameClass.Base [] (A.or A.neg) :=
   unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.neg_identity
     _ _ _ Bimodal.HilbertTM _ _ (φ := A))
 
+/-- `⊢ ⊥ → φ`: ex falso quodlibet (explosion) axiom. -/
 def efqAxiom {fc : FrameClass} (φ : Formula Atom) :
     DerivationTree fc [] (Formula.bot.imp φ) :=
   DerivationTree.lift (FrameClass.base_le fc)
     (unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.efq_axiom
       _ _ _ Bimodal.HilbertTM _ _ (φ := φ)))
 
+/-- `⊢ ((φ → ψ) → φ) → φ`: Peirce's law. -/
 def peirceAxiom {fc : FrameClass} (φ ψ : Formula Atom) :
     DerivationTree fc [] (((φ.imp ψ).imp φ).imp φ) :=
   DerivationTree.lift (FrameClass.base_le fc)
     (unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.peirce_axiom
       _ _ _ Bimodal.HilbertTM _ _ (φ := φ) (ψ := ψ)))
 
+/-- `⊢ ¬¬φ → φ`: double negation elimination. -/
 def doubleNegation {fc : FrameClass} (φ : Formula Atom) :
     DerivationTree fc [] (φ.neg.neg.imp φ) :=
   DerivationTree.lift (FrameClass.base_le fc)
     (unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.double_negation
       _ _ _ Bimodal.HilbertTM _ _ (φ := φ)))
 
+/-- `⊢ A → (¬A → B)`: reductio ad absurdum (derives anything from a contradiction). -/
 def raa (A B : Formula Atom) :
     DerivationTree FrameClass.Base [] (A.imp (A.neg.imp B)) :=
   unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.raa
     _ _ _ Bimodal.HilbertTM _ _ (φ := A) (ψ := B))
 
+/-- `⊢ ¬A → (A → B)`: explosion from negated hypothesis. -/
 def efqNeg (A B : Formula Atom) :
     DerivationTree FrameClass.Base [] (A.neg.imp (A.imp B)) :=
   unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.efq_neg
     _ _ _ Bimodal.HilbertTM _ _ (φ := A) (ψ := B))
 
+/-- `⊢ (A ∧ B) → A`: left conjunction elimination as implication. -/
 def lceImp {fc : FrameClass} (A B : Formula Atom) :
     DerivationTree fc [] ((A.and B).imp A) :=
   DerivationTree.lift (FrameClass.base_le fc)
     (unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.lce_imp
       _ _ _ Bimodal.HilbertTM _ _ (φ := A) (ψ := B)))
 
+/-- `⊢ (A ∧ B) → B`: right conjunction elimination as implication. -/
 def rceImp {fc : FrameClass} (A B : Formula Atom) :
     DerivationTree fc [] ((A.and B).imp B) :=
   DerivationTree.lift (FrameClass.base_le fc)
@@ -87,6 +95,7 @@ def rceImp {fc : FrameClass} (A B : Formula Atom) :
 
 -- ecq, ldi, rdi, lce, rce use context-based proofs and are kept as-is
 
+/-- `{A, ¬A} ⊢ B`: ex contradictione quodlibet in context. -/
 def ecq (A B : Formula Atom) :
     DerivationTree FrameClass.Base [A, A.neg] B := by
   have h_neg_a : DerivationTree FrameClass.Base [A, A.neg] A.neg := by
@@ -108,6 +117,7 @@ def ecq (A B : Formula Atom) :
     DerivationTree.weakening [] [A, A.neg] _ dne_b (by intro; simp)
   exact DerivationTree.modus_ponens [A, A.neg] B.neg.neg B dne_b_ctx neg_neg_b
 
+/-- `{A} ⊢ A ∨ B`: left disjunction introduction from context. -/
 def ldi (A B : Formula Atom) :
     DerivationTree FrameClass.Base [A] (A.or B) := by
   have efq_inst : DerivationTree FrameClass.Base [] (A.neg.imp (A.imp B)) :=
@@ -132,6 +142,7 @@ def ldi (A B : Formula Atom) :
     DerivationTree.modus_ponens [A] A _ s_ctx h_a
   exact DerivationTree.modus_ponens [A] _ _ step1 step2
 
+/-- `{B} ⊢ A ∨ B`: right disjunction introduction from context. -/
 def rdi (A B : Formula Atom) :
     DerivationTree FrameClass.Base [B] (A.or B) := by
   have s_inst : DerivationTree FrameClass.Base [] (B.imp (A.neg.imp B)) :=
@@ -142,6 +153,7 @@ def rdi (A B : Formula Atom) :
     DerivationTree.weakening [] [B] _ s_inst (by intro; simp)
   exact DerivationTree.modus_ponens [B] B _ s_ctx h_b
 
+/-- `Γ ⊢ (¬A → ¬B) → Γ ⊢ (B → A)`: resolution by contrapositive. -/
 def rcp {fc : FrameClass} (Γ : Context Atom) (A B : Formula Atom)
     (h : DerivationTree fc Γ (A.neg.imp B.neg)) :
     DerivationTree fc Γ (B.imp A) := by
@@ -196,6 +208,7 @@ def rcp {fc : FrameClass} (Γ : Context Atom) (A B : Formula Atom)
     DerivationTree.modus_ponens Γ _ _ b_final_ctx dne_a_ctx
   exact DerivationTree.modus_ponens Γ _ _ step2 b_to_neg_neg_a
 
+/-- `{A ∧ B} ⊢ A`: left conjunction elimination from context. -/
 def lce (A B : Formula Atom) :
     DerivationTree FrameClass.Base [A.and B] A := by
   have h_conj : DerivationTree FrameClass.Base [A.and B] (A.and B) := by
@@ -237,6 +250,7 @@ def lce (A B : Formula Atom) :
     DerivationTree.weakening [] [A.and B] _ dne_a (by intro; simp)
   exact DerivationTree.modus_ponens [A.and B] _ _ dne_a_ctx neg_neg_a
 
+/-- `{A ∧ B} ⊢ B`: right conjunction elimination from context. -/
 def rce (A B : Formula Atom) :
     DerivationTree FrameClass.Base [A.and B] B := by
   have h_conj : DerivationTree FrameClass.Base [A.and B] (A.and B) := by

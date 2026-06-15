@@ -72,11 +72,11 @@ lemma someFuture_allFuture_neg_absurd {fc : FrameClass} {M : Set (Formula Atom)}
   have h_bx3 : DerivationTree fc [] ((psi.imp psi.neg.neg).allFuture.imp
       ((Formula.untl psi Formula.top).imp (Formula.untl psi.neg.neg Formula.top))) :=
     DerivationTree.axiom [] _ (Axiom.right_mono_until psi psi.neg.neg Formula.top) (FrameClass.base_le fc)
-  have h_impl : DerivationTree fc [] ((Formula.someFuture psi).imp (Formula.someFuture psi.neg.neg)) :=
+  have hImpl : DerivationTree fc [] ((Formula.someFuture psi).imp (Formula.someFuture psi.neg.neg)) :=
     DerivationTree.modus_ponens [] _ _ h_bx3 h_G_dni
   have h_sf_nn : Formula.someFuture psi.neg.neg ∈ M :=
     SetMaximalConsistent.implication_property h_mcs
-      (theoremInMcsFc h_mcs h_impl) h_F
+      (theoremInMcsFc h_mcs hImpl) h_F
   exact set_consistent_not_both h_mcs.1 (Formula.someFuture psi.neg.neg) h_sf_nn h_G_neg
 
 /-- In an MCS, `somePast psi ∈ M` and `allPast (neg psi) ∈ M` is contradictory. -/
@@ -90,11 +90,11 @@ lemma somePast_allPast_neg_absurd {fc : FrameClass} {M : Set (Formula Atom)}
   have h_bx3 : DerivationTree fc [] ((psi.imp psi.neg.neg).allPast.imp
       ((Formula.snce psi Formula.top).imp (Formula.snce psi.neg.neg Formula.top))) :=
     DerivationTree.axiom [] _ (Axiom.right_mono_since psi psi.neg.neg Formula.top) (FrameClass.base_le fc)
-  have h_impl : DerivationTree fc [] ((Formula.somePast psi).imp (Formula.somePast psi.neg.neg)) :=
+  have hImpl : DerivationTree fc [] ((Formula.somePast psi).imp (Formula.somePast psi.neg.neg)) :=
     DerivationTree.modus_ponens [] _ _ h_bx3 h_H_dni
   have h_sp_nn : Formula.somePast psi.neg.neg ∈ M :=
     SetMaximalConsistent.implication_property h_mcs
-      (theoremInMcsFc h_mcs h_impl) h_P
+      (theoremInMcsFc h_mcs hImpl) h_P
   exact set_consistent_not_both h_mcs.1 (Formula.somePast psi.neg.neg) h_sp_nn h_H_neg
 
 /-! ## Duality Conversions

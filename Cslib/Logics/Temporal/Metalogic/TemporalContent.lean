@@ -32,21 +32,27 @@ variable {Atom : Type*}
 
 /-! ## Content Definitions -/
 
+/-- The set of formulas `φ` such that `Gφ` belongs to `M`. -/
 def gContent (M : Set (Formula Atom)) : Set (Formula Atom) :=
   {phi | (𝐆phi) ∈ M}
 
+/-- The set of formulas `φ` such that `Hφ` belongs to `M`. -/
 def hContent (M : Set (Formula Atom)) : Set (Formula Atom) :=
   {phi | (𝐇phi) ∈ M}
 
+/-- The set of formulas `φ` such that `Fφ` belongs to `M`. -/
 def fContent (M : Set (Formula Atom)) : Set (Formula Atom) :=
   {phi | (𝐅phi) ∈ M}
 
+/-- The set of formulas `φ` such that `Pφ` belongs to `M`. -/
 def pContent (M : Set (Formula Atom)) : Set (Formula Atom) :=
   {phi | (𝐏phi) ∈ M}
 
+/-- The set of pairs `(φ, ψ)` such that `φ U ψ` belongs to `M`. -/
 def uContent (M : Set (Formula Atom)) : Set (Formula Atom × Formula Atom) :=
   { p | Formula.untl p.1 p.2 ∈ M }
 
+/-- The set of pairs `(φ, ψ)` such that `φ S ψ` belongs to `M`. -/
 def sContent (M : Set (Formula Atom)) : Set (Formula Atom × Formula Atom) :=
   { p | Formula.snce p.1 p.2 ∈ M }
 

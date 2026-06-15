@@ -119,7 +119,7 @@ The filtered world type is finite.
 /--
 The subformula closure is a Finset, which gives us a Fintype instance.
 -/
-instance subformulaClosure_fintype (phi : Formula Atom) :
+instance subformulaClosureFintype (phi : Formula Atom) :
     Fintype (subformulaClosure phi) :=
   (subformulaClosure phi).fintypeCoeSort
 

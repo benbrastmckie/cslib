@@ -50,13 +50,13 @@ Mathematical justification: GHR94 Lemma 10.3.11 items 5-8 specialized to Z. -/
 
 /-! ## Helper lemmas for Cases 5-8 -/
 
-/-- case3_alpha(a∧U, q, A, B) implies U(A,B): the alpha event always makes U true.
+/-- case3Alpha(a∧U, q, A, B) implies U(A,B): the alpha event always makes U true.
     alpha = (a∧U) ∨ ((¬q ∧ S(a∧U, q)) ∧ (q∨U))
     First disjunct has U. Second disjunct: ¬q ∧ (q∨U) → ¬q ∧ U → U. -/
 theorem case3_alpha_aU_implies_U (a q A B : Formula Atom) (M : IntStructure Atom) (t : ℤ)
-    (h : intTruth M t (case3_alpha (Formula.and a (.untl A B)) q A B)) :
+    (h : intTruth M t (case3Alpha (Formula.and a (.untl A B)) q A B)) :
     intTruth M t (.untl A B) := by
-  simp only [case3_alpha] at h
+  simp only [case3Alpha] at h
   -- h : intTruth M t ((a∧U) ∨ ((¬q ∧ S(a∧U, q)) ∧ (q∨U)))
   rcases (int_truth_or M t _ _).mp h with h_left | h_right
   · -- Case (a∧U): extract U from the ∧
@@ -74,7 +74,7 @@ theorem case3_alpha_aU_implies_U (a q A B : Formula Atom) (M : IntStructure Atom
 /-- alpha(a∧U, q, A, B) is intEquiv to (a ∨ (¬q ∧ S(a∧U, q))) ∧ U(A,B).
     This factoring allows us to extract a U-free event for Case 1 application. -/
 theorem case3_alpha_aU_factor (a q A B : Formula Atom) :
-    intEquiv (case3_alpha (Formula.and a (.untl A B)) q A B)
+    intEquiv (case3Alpha (Formula.and a (.untl A B)) q A B)
       (Formula.and (Formula.or a (Formula.and (Formula.neg q)
         (.snce (Formula.and a (.untl A B)) q))) (.untl A B)) := by
   intro M t; constructor
@@ -83,7 +83,7 @@ theorem case3_alpha_aU_factor (a q A B : Formula Atom) :
     apply (int_truth_and M t _ _).mpr
     constructor
     · -- (a ∨ (¬q ∧ S(a∧U, q))) from alpha
-      simp only [case3_alpha] at h
+      simp only [case3Alpha] at h
       rcases (int_truth_or M t _ _).mp h with h_left | h_right
       · exact (int_truth_or M t _ _).mpr (Or.inl ((int_truth_and M t _ _).mp h_left).1)
       · have hand := (int_truth_and M t _ _).mp h_right
@@ -91,7 +91,7 @@ theorem case3_alpha_aU_factor (a q A B : Formula Atom) :
     · exact hU
   · intro h
     have ⟨h_or, hU⟩ := (int_truth_and M t _ _).mp h
-    simp only [case3_alpha]
+    simp only [case3Alpha]
     rcases (int_truth_or M t _ _).mp h_or with h_a | h_nq_s
     · exact (int_truth_or M t _ _).mpr (Or.inl ((int_truth_and M t _ _).mpr ⟨h_a, hU⟩))
     · exact (int_truth_or M t _ _).mpr (Or.inr ((int_truth_and M t _ _).mpr ⟨h_nq_s, (int_truth_or M t _ _).mpr (Or.inr hU)⟩))
@@ -191,12 +191,12 @@ theorem replace_correct_bool (phi A B : Formula Atom) (M : IntStructure Atom) (t
                replace_id_of_U_free q A B hq]
 
 set_option linter.unusedTactic false in
-/-- case1_psi satisfies untlUnderBoolOnly: its only .untl is .untl A B,
+/-- case1Psi satisfies untlUnderBoolOnly: its only .untl is .untl A B,
     and all .snce args are U-free. -/
 theorem case1_psi_bool_only (a q A B : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hA : isUFree A = true) (hB : isUFree B = true) :
-    untlUnderBoolOnly (case1_psi a q A B) A B := by
+    untlUnderBoolOnly (case1Psi a q A B) A B := by
   have h_and : ∀ p q, untlUnderBoolOnly p A B → untlUnderBoolOnly q A B →
       untlUnderBoolOnly (Formula.and p q) A B := by
     intro p q hp hq; show untlUnderBoolOnly (.imp (.imp p (.imp q .bot)) .bot) A B
@@ -205,7 +205,7 @@ theorem case1_psi_bool_only (a q A B : Formula Atom)
       untlUnderBoolOnly (Formula.or p q) A B := by
     intro p q hp hq; show untlUnderBoolOnly (.imp (.imp p .bot) q) A B
     exact ⟨⟨hp, trivial⟩, hq⟩
-  unfold case1_psi
+  unfold case1Psi
   apply h_or; apply h_or
   · apply h_and; apply h_and; apply h_and
     · exact (⟨ha, hq⟩ : untlUnderBoolOnly (.snce a q) A B)
@@ -270,10 +270,10 @@ theorem and_or_distrib (a b c : Formula Atom) :
     · have ⟨hb, hc⟩ := (int_truth_and M t _ _).mp h2
       exact (int_truth_and M t _ _).mpr ⟨(int_truth_or M t _ _).mpr (Or.inr hb), hc⟩
 
-/-- Q_Z with negated q argument is U-free. -/
+/-- qZ with negated q argument is U-free. -/
 theorem Q_Z_neg_q_U_free (A B q : Formula Atom)
     (hA : isUFree A = true) (hB : isUFree B = true) (hq : isUFree q = true) :
-    isUFree (Q_Z A B (Formula.neg q)) = true :=
+    isUFree (qZ A B (Formula.neg q)) = true :=
   Q_Z_U_free A B (Formula.neg q) hA hB (by simp [Formula.neg, isUFree, hq])
 
 /-! ## Replace U(A,B) with False (bot) Infrastructure
@@ -389,72 +389,72 @@ theorem snce_combined_notU_separable
 
 /-! ## D2.1 Explicit Formula for D3
 
-The separated equivalent of S(alpha, Q_Z) needs to be constructed explicitly
+The separated equivalent of S(alpha, qZ) needs to be constructed explicitly
 (not just existentially) so we can prove it satisfies untlUnderBoolOnly.
-This is needed for the D3 proof where S(alpha, Q_Z) appears inside the event. -/
+This is needed for the D3 proof where S(alpha, qZ) appears inside the event. -/
 
-/-- The explicit separated equivalent of S(alpha, Q_Z) from D2.1.
-    = or (case1_psi a Q_Z_nq A B) (case1_psi (replaceUntlWithTop (¬q ∧ σ) A B) Q_Z_nq A B)
-    where σ = case1_psi a q A B and Q_Z_nq = Q_Z A B (neg q). -/
-def d21_sep (a q A B : Formula Atom) : Formula Atom :=
-  let σ := case1_psi a q A B
-  let Q_Z_nq := Q_Z A B (Formula.neg q)
+/-- The explicit separated equivalent of S(alpha, qZ) from D2.1.
+    = or (case1Psi a Q_Z_nq A B) (case1Psi (replaceUntlWithTop (¬q ∧ σ) A B) Q_Z_nq A B)
+    where σ = case1Psi a q A B and Q_Z_nq = qZ A B (neg q). -/
+def d21Sep (a q A B : Formula Atom) : Formula Atom :=
+  let σ := case1Psi a q A B
+  let Q_Z_nq := qZ A B (Formula.neg q)
   Formula.or
-    (case1_psi a Q_Z_nq A B)
-    (case1_psi (replaceUntlWithTop (Formula.and (Formula.neg q) σ) A B) Q_Z_nq A B)
+    (case1Psi a Q_Z_nq A B)
+    (case1Psi (replaceUntlWithTop (Formula.and (Formula.neg q) σ) A B) Q_Z_nq A B)
 
-/-- d21_sep satisfies untlUnderBoolOnly. -/
+/-- d21Sep satisfies untlUnderBoolOnly. -/
 theorem d21_sep_bool_only (a q A B : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hA : isUFree A = true) (hB : isUFree B = true) :
-    untlUnderBoolOnly (d21_sep a q A B) A B := by
+    untlUnderBoolOnly (d21Sep a q A B) A B := by
   have h_or : ∀ p q, untlUnderBoolOnly p A B → untlUnderBoolOnly q A B →
       untlUnderBoolOnly (Formula.or p q) A B := by
     intro p q hp hq; show untlUnderBoolOnly (.imp (.imp p .bot) q) A B
     exact ⟨⟨hp, trivial⟩, hq⟩
-  unfold d21_sep
+  unfold d21Sep
   apply h_or
-  · exact case1_psi_bool_only a (Q_Z A B (Formula.neg q)) A B ha
+  · exact case1_psi_bool_only a (qZ A B (Formula.neg q)) A B ha
       (Q_Z_neg_q_U_free A B q hA hB hq) hA hB
-  · have h_nqσ_bool : untlUnderBoolOnly (Formula.and (Formula.neg q) (case1_psi a q A B)) A B := by
-      show untlUnderBoolOnly (.imp (.imp (Formula.neg q) (.imp (case1_psi a q A B) .bot)) .bot) A B
+  · have h_nqσ_bool : untlUnderBoolOnly (Formula.and (Formula.neg q) (case1Psi a q A B)) A B := by
+      show untlUnderBoolOnly (.imp (.imp (Formula.neg q) (.imp (case1Psi a q A B) .bot)) .bot) A B
       refine ⟨⟨?_, case1_psi_bool_only a q A B ha hq hA hB, trivial⟩, trivial⟩
       exact ⟨u_free_untl_under_bool q A B hq, trivial⟩
-    have h_replaced_uf : isUFree (replaceUntlWithTop (Formula.and (Formula.neg q) (case1_psi a q A B)) A B) = true :=
+    have h_replaced_uf : isUFree (replaceUntlWithTop (Formula.and (Formula.neg q) (case1Psi a q A B)) A B) = true :=
       replace_U_free_of_bool _ A B h_nqσ_bool
     exact case1_psi_bool_only
-      (replaceUntlWithTop (Formula.and (Formula.neg q) (case1_psi a q A B)) A B)
-      (Q_Z A B (Formula.neg q)) A B h_replaced_uf
+      (replaceUntlWithTop (Formula.and (Formula.neg q) (case1Psi a q A B)) A B)
+      (qZ A B (Formula.neg q)) A B h_replaced_uf
       (Q_Z_neg_q_U_free A B q hA hB hq) hA hB
 
 set_option maxHeartbeats 3200000 in
-/-- d21_sep is intEquiv to S(alpha, Q_Z) where alpha = case3_alpha(a∧U, q, A, B).
-    This non-existential form allows using d21_sep in D3's event. -/
+/-- d21Sep is intEquiv to S(alpha, qZ) where alpha = case3Alpha(a∧U, q, A, B).
+    This non-existential form allows using d21Sep in D3's event. -/
 theorem d21_sep_equiv (a q A B : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hA : isUFree A = true) (hB : isUFree B = true)
     (hA' : isSFree A = true) (hB' : isSFree B = true) :
-    intEquiv (.snce (case3_alpha (Formula.and a (.untl A B)) q A B) (Q_Z A B (Formula.neg q)))
-              (d21_sep a q A B) := by
+    intEquiv (.snce (case3Alpha (Formula.and a (.untl A B)) q A B) (qZ A B (Formula.neg q)))
+              (d21Sep a q A B) := by
   -- Step 1: alpha ↔ (a ∨ (¬q ∧ S(a∧U,q))) ∧ U
   have step1 : intEquiv
-    (.snce (case3_alpha (Formula.and a (.untl A B)) q A B) (Q_Z A B (Formula.neg q)))
-    (.snce (Formula.and (Formula.or a (Formula.and (Formula.neg q) (.snce (Formula.and a (.untl A B)) q))) (.untl A B)) (Q_Z A B (Formula.neg q))) :=
+    (.snce (case3Alpha (Formula.and a (.untl A B)) q A B) (qZ A B (Formula.neg q)))
+    (.snce (Formula.and (Formula.or a (Formula.and (Formula.neg q) (.snce (Formula.and a (.untl A B)) q))) (.untl A B)) (qZ A B (Formula.neg q))) :=
     snce_event_congr (case3_alpha_aU_factor a q A B)
-  -- Step 2: Distribute → S(a∧U, Q_Z) ∨ S((¬q∧S(a∧U,q))∧U, Q_Z)
+  -- Step 2: Distribute → S(a∧U, qZ) ∨ S((¬q∧S(a∧U,q))∧U, qZ)
   have step2 : intEquiv
-    (.snce (Formula.and (Formula.or a (Formula.and (Formula.neg q) (.snce (Formula.and a (.untl A B)) q))) (.untl A B)) (Q_Z A B (Formula.neg q)))
-    (Formula.or (.snce (Formula.and a (.untl A B)) (Q_Z A B (Formula.neg q)))
-                (.snce (Formula.and (Formula.and (Formula.neg q) (.snce (Formula.and a (.untl A B)) q)) (.untl A B)) (Q_Z A B (Formula.neg q)))) :=
+    (.snce (Formula.and (Formula.or a (Formula.and (Formula.neg q) (.snce (Formula.and a (.untl A B)) q))) (.untl A B)) (qZ A B (Formula.neg q)))
+    (Formula.or (.snce (Formula.and a (.untl A B)) (qZ A B (Formula.neg q)))
+                (.snce (Formula.and (Formula.and (Formula.neg q) (.snce (Formula.and a (.untl A B)) q)) (.untl A B)) (qZ A B (Formula.neg q)))) :=
     int_equiv_trans
       (snce_event_congr (and_or_distrib a
         (Formula.and (Formula.neg q) (.snce (Formula.and a (.untl A B)) q))
         (.untl A B)))
-      (since_distrib_or_left _ _ (Q_Z A B (Formula.neg q)))
+      (since_distrib_or_left _ _ (qZ A B (Formula.neg q)))
   have steps12 := int_equiv_trans step1 step2
-  -- Now: S(alpha, Q_Z) ↔ S(a∧U, Q_Z) ∨ S((¬q∧S(a∧U,q))∧U, Q_Z)
-  -- Step 3: Replace S(a∧U,q) with σ = case1_psi
-  let σ := case1_psi a q A B
+  -- Now: S(alpha, qZ) ↔ S(a∧U, qZ) ∨ S((¬q∧S(a∧U,q))∧U, qZ)
+  -- Step 3: Replace S(a∧U,q) with σ = case1Psi
+  let σ := case1Psi a q A B
   have hσ_equiv : intEquiv (.snce (Formula.and a (.untl A B)) q) σ :=
     (case1_psi_properties a q A B ha hq hA hB hA' hB').1
   have hY_congr : intEquiv
@@ -467,14 +467,14 @@ theorem d21_sep_equiv (a q A B : Formula Atom)
       exact (int_truth_and M t _ _).mpr ⟨hnq, (hσ_equiv M t).mpr hσ'⟩
   have step3 : intEquiv
     (.snce (Formula.and (Formula.and (Formula.neg q) (.snce (Formula.and a (.untl A B)) q)) (.untl A B))
-           (Q_Z A B (Formula.neg q)))
+           (qZ A B (Formula.neg q)))
     (.snce (Formula.and (Formula.and (Formula.neg q) σ) (.untl A B))
-           (Q_Z A B (Formula.neg q))) :=
+           (qZ A B (Formula.neg q))) :=
     snce_event_congr (and_left_congr hY_congr)
   -- Step 4: Replace U with True in event of each disjunct
-  let Q_Z_nq := Q_Z A B (Formula.neg q)
+  let Q_Z_nq := qZ A B (Formula.neg q)
   have hQ_uf : isUFree Q_Z_nq = true := Q_Z_neg_q_U_free A B q hA hB hq
-  -- For S(a∧U, Q_Z): a is U-free → replace a with a (identity) → case1_psi a Q_Z A B
+  -- For S(a∧U, qZ): a is U-free → replace a with a (identity) → case1Psi a qZ A B
   have h_a_congr : ∀ M : IntStructure Atom, ∀ t : ℤ, intTruth M t (.untl A B) →
       (intTruth M t a ↔ intTruth M t (replaceUntlWithTop a A B)) :=
     fun M t _ => by rw [replace_id_of_U_free a A B ha]
@@ -484,11 +484,11 @@ theorem d21_sep_equiv (a q A B : Formula Atom)
   have step4a := (case1_psi_properties (replaceUntlWithTop a A B) Q_Z_nq A B
     h_a_uf hQ_uf hA hB hA' hB').1
   have step4a_full : intEquiv
-    (.snce (Formula.and a (.untl A B)) Q_Z_nq) (case1_psi a Q_Z_nq A B) := by
+    (.snce (Formula.and a (.untl A B)) Q_Z_nq) (case1Psi a Q_Z_nq A B) := by
     have : replaceUntlWithTop a A B = a := replace_id_of_U_free a A B ha
     rw [this] at step4a step4a_congr
     exact int_equiv_trans step4a_congr step4a
-  -- For S((¬q∧σ)∧U, Q_Z): (¬q∧σ) satisfies untlUnderBoolOnly
+  -- For S((¬q∧σ)∧U, qZ): (¬q∧σ) satisfies untlUnderBoolOnly
   have h_nqσ_bool : untlUnderBoolOnly (Formula.and (Formula.neg q) σ) A B := by
     show untlUnderBoolOnly (.imp (.imp (Formula.neg q) (.imp σ .bot)) .bot) A B
     refine ⟨⟨?_, case1_psi_bool_only a q A B ha hq hA hB, trivial⟩, trivial⟩
@@ -502,9 +502,9 @@ theorem d21_sep_equiv (a q A B : Formula Atom)
   have step4b := (case1_psi_properties nqσ' Q_Z_nq A B h_nqσ_uf hQ_uf hA hB hA' hB').1
   have step4b_full : intEquiv
     (.snce (Formula.and (Formula.and (Formula.neg q) σ) (.untl A B)) Q_Z_nq)
-    (case1_psi nqσ' Q_Z_nq A B) :=
+    (case1Psi nqσ' Q_Z_nq A B) :=
     int_equiv_trans step4b_congr step4b
-  -- Combine: S(alpha, Q_Z) ↔ case1_psi a Q_Z A B ∨ case1_psi nqσ' Q_Z A B = d21_sep
+  -- Combine: S(alpha, qZ) ↔ case1Psi a qZ A B ∨ case1Psi nqσ' qZ A B = d21Sep
   intro M t; constructor
   · intro h
     have h12 := (steps12 M t).mp h
@@ -551,7 +551,7 @@ theorem case5_separable_Z_gen (a q A B : Formula Atom)
     isSeparable (.snce (Formula.and a (.untl A B)) (Formula.or q (.untl A B))) := by
   -- Same proof as case5_separable_Z but without ha'/hq'
   apply is_separable_of_equiv (case3_equiv_Z_general (Formula.and a (.untl A B)) q A B)
-  simp only [case3_rhs]
+  simp only [case3Rhs]
   apply or_separable
   · apply or_separable
     · obtain ⟨psi, hequiv_psi, hsep_psi⟩ := elim_case_1_gen a q A B ha hq hA hB hA' hB'
@@ -562,12 +562,12 @@ theorem case5_separable_Z_gen (a q A B : Formula Atom)
           (snce_event_congr (and_or_distrib a
             (Formula.and (Formula.neg q) (.snce (Formula.and a (.untl A B)) q))
             (.untl A B)))
-          (since_distrib_or_left _ _ (Q_Z A B (Formula.neg q))))
+          (since_distrib_or_left _ _ (qZ A B (Formula.neg q))))
         apply or_separable
-        · exact snce_combined_U_separable a (Q_Z A B (Formula.neg q)) A B
+        · exact snce_combined_U_separable a (qZ A B (Formula.neg q)) A B
             hA hB hA' hB' (Q_Z_neg_q_U_free A B q hA hB hq)
             (u_free_untl_under_bool a A B ha)
-        · let σ := case1_psi a q A B
+        · let σ := case1Psi a q A B
           have hσ_equiv : intEquiv (.snce (Formula.and a (.untl A B)) q) σ :=
             (case1_psi_properties a q A B ha hq hA hB hA' hB').1
           have hY_congr : intEquiv
@@ -584,7 +584,7 @@ theorem case5_separable_Z_gen (a q A B : Formula Atom)
             refine ⟨⟨?_, case1_psi_bool_only a q A B ha hq hA hB, trivial⟩, trivial⟩
             exact ⟨u_free_untl_under_bool q A B hq, trivial⟩
           exact snce_combined_U_separable (Formula.and (Formula.neg q) σ)
-            (Q_Z A B (Formula.neg q)) A B hA hB hA' hB'
+            (qZ A B (Formula.neg q)) A B hA hB hA' hB'
             (Q_Z_neg_q_U_free A B q hA hB hq) h_nqσ_bool
       · apply or_separable
         · exact u_free_s_free_is_separable A hA hA'
@@ -594,8 +594,8 @@ theorem case5_separable_Z_gen (a q A B : Formula Atom)
   · have h_d21 := d21_sep_equiv a q A B ha hq hA hB hA' hB'
     have h_event_congr : intEquiv
       (Formula.and (Formula.and A (Formula.or q (.untl A B)))
-        (.snce (case3_alpha (Formula.and a (.untl A B)) q A B) (Q_Z A B (Formula.neg q))))
-      (Formula.and (Formula.and A (Formula.or q (.untl A B))) (d21_sep a q A B)) := by
+        (.snce (case3Alpha (Formula.and a (.untl A B)) q A B) (qZ A B (Formula.neg q))))
+      (Formula.and (Formula.and A (Formula.or q (.untl A B))) (d21Sep a q A B)) := by
       intro M t; constructor
       · intro h; have ⟨hAqU, hS⟩ := (int_truth_and M t _ _).mp h
         exact (int_truth_and M t _ _).mpr ⟨hAqU, (h_d21 M t).mp hS⟩
@@ -605,28 +605,28 @@ theorem case5_separable_Z_gen (a q A B : Formula Atom)
     apply is_separable_of_equiv (since_event_split _ (.untl A B) q)
     apply or_separable
     · have h_event_bool : untlUnderBoolOnly
-          (Formula.and (Formula.and A (Formula.or q (.untl A B))) (d21_sep a q A B)) A B := by
+          (Formula.and (Formula.and A (Formula.or q (.untl A B))) (d21Sep a q A B)) A B := by
         show untlUnderBoolOnly (.imp (.imp (Formula.and A (Formula.or q (.untl A B)))
-          (.imp (d21_sep a q A B) .bot)) .bot) A B
+          (.imp (d21Sep a q A B) .bot)) .bot) A B
         refine ⟨⟨?_, d21_sep_bool_only a q A B ha hq hA hB, trivial⟩, trivial⟩
         show untlUnderBoolOnly (.imp (.imp A (.imp (Formula.or q (.untl A B)) .bot)) .bot) A B
         refine ⟨⟨u_free_untl_under_bool A A B hA, ?_, trivial⟩, trivial⟩
         show untlUnderBoolOnly (.imp (.imp q .bot) (.untl A B)) A B
         exact ⟨⟨u_free_untl_under_bool q A B hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
       exact snce_combined_U_separable
-        (Formula.and (Formula.and A (Formula.or q (.untl A B))) (d21_sep a q A B))
+        (Formula.and (Formula.and A (Formula.or q (.untl A B))) (d21Sep a q A B))
         q A B hA hB hA' hB' hq h_event_bool
     · have h_event_bool : untlUnderBoolOnly
-          (Formula.and (Formula.and A (Formula.or q (.untl A B))) (d21_sep a q A B)) A B := by
+          (Formula.and (Formula.and A (Formula.or q (.untl A B))) (d21Sep a q A B)) A B := by
         show untlUnderBoolOnly (.imp (.imp (Formula.and A (Formula.or q (.untl A B)))
-          (.imp (d21_sep a q A B) .bot)) .bot) A B
+          (.imp (d21Sep a q A B) .bot)) .bot) A B
         refine ⟨⟨?_, d21_sep_bool_only a q A B ha hq hA hB, trivial⟩, trivial⟩
         show untlUnderBoolOnly (.imp (.imp A (.imp (Formula.or q (.untl A B)) .bot)) .bot) A B
         refine ⟨⟨u_free_untl_under_bool A A B hA, ?_, trivial⟩, trivial⟩
         show untlUnderBoolOnly (.imp (.imp q .bot) (.untl A B)) A B
         exact ⟨⟨u_free_untl_under_bool q A B hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
       exact snce_combined_notU_separable
-        (Formula.and (Formula.and A (Formula.or q (.untl A B))) (d21_sep a q A B))
+        (Formula.and (Formula.and A (Formula.or q (.untl A B))) (d21Sep a q A B))
         q A B hA hB hA' hB' hq h_event_bool
 
 theorem case5_separable_Z (a q A B : Formula Atom)
@@ -702,33 +702,33 @@ theorem snce_Ufree_event_qU_guard_separable (ev q A B : Formula Atom)
     (hA' : isSFree A = true) (hB' : isSFree B = true) :
     isSeparable (.snce ev (Formula.or q (.untl A B))) := by
   apply is_separable_of_equiv (case3_equiv_Z_general ev q A B)
-  simp only [case3_rhs]
-  have hQ_uf : isUFree (Q_Z A B (Formula.neg q)) = true :=
+  simp only [case3Rhs]
+  have hQ_uf : isUFree (qZ A B (Formula.neg q)) = true :=
     Q_Z_neg_q_U_free A B q hA hB hq
   -- D1: S(ev, q) -- U-free event and guard → syntactically separated
-  -- D2: S(alpha, Q_Z) ∧ (A∨B∧U)
-  -- D3: S(A ∧ (q∨U) ∧ S(alpha, Q_Z), q)
+  -- D2: S(alpha, qZ) ∧ (A∨B∧U)
+  -- D3: S(A ∧ (q∨U) ∧ S(alpha, qZ), q)
   -- alpha = ev ∨ ((¬q ∧ S(ev,q)) ∧ (q∨U))
   -- Since ev is U-free: alpha has U only in (q∨U) → untlUnderBoolOnly
   have h_nqSev_uf : isUFree (Formula.and (Formula.neg q) (.snce ev q)) = true := by
     simp [Formula.and, Formula.neg, isUFree, hq, hev_uf]
   -- alpha = ev ∨ (nqSev ∧ (q∨U)) where nqSev = ¬q∧S(ev,q) is U-free
-  -- S(alpha, Q_Z): distribute via since_distrib_or_left
+  -- S(alpha, qZ): distribute via since_distrib_or_left
   -- then event-split the second disjunct on U
-  -- Key helper: S(alpha, Q_Z) separable
-  have h_Salpha_sep : isSeparable (.snce (case3_alpha ev q A B) (Q_Z A B (Formula.neg q))) := by
-    apply is_separable_of_equiv (since_distrib_or_left _ _ (Q_Z A B (Formula.neg q)))
+  -- Key helper: S(alpha, qZ) separable
+  have h_Salpha_sep : isSeparable (.snce (case3Alpha ev q A B) (qZ A B (Formula.neg q))) := by
+    apply is_separable_of_equiv (since_distrib_or_left _ _ (qZ A B (Formula.neg q)))
     apply or_separable
-    · exact ⟨.snce ev (Q_Z A B (Formula.neg q)),
+    · exact ⟨.snce ev (qZ A B (Formula.neg q)),
         by simp [isSyntacticallySeparated, hev_uf, hQ_uf], int_equiv_refl _⟩
-    · apply is_separable_of_equiv (since_event_split _ (.untl A B) (Q_Z A B (Formula.neg q)))
+    · apply is_separable_of_equiv (since_event_split _ (.untl A B) (qZ A B (Formula.neg q)))
       apply or_separable
       · -- U branch
         apply is_separable_of_equiv (snce_event_congr_with_U _ _ _ A B
           (fun M t hU => ⟨fun h => ((int_truth_and M t _ _).mp h).1,
             fun h => (int_truth_and M t _ _).mpr ⟨h, (int_truth_or M t _ _).mpr (Or.inr hU)⟩⟩))
         exact snce_combined_U_separable (Formula.and (Formula.neg q) (.snce ev q))
-          (Q_Z A B (Formula.neg q)) A B hA hB hA' hB' hQ_uf
+          (qZ A B (Formula.neg q)) A B hA hB hA' hB' hQ_uf
           (u_free_untl_under_bool _ A B h_nqSev_uf)
       · -- ¬U branch: ¬q∧q = ⊥
         apply is_separable_of_equiv (by
@@ -753,11 +753,11 @@ theorem snce_Ufree_event_qU_guard_separable (ev q A B : Formula Atom)
         · exact u_free_s_free_is_separable A hA hA'
         · exact and_separable (u_free_s_free_is_separable B hB hB')
             ⟨.untl A B, by simp [isSyntacticallySeparated, hA', hB'], int_equiv_refl _⟩
-  · -- D3: S(A ∧ (q∨U) ∧ S(alpha, Q_Z), q)
-    -- Use d21_sep-style infrastructure: alpha has untlUnderBoolOnly
+  · -- D3: S(A ∧ (q∨U) ∧ S(alpha, qZ), q)
+    -- Use d21Sep-style infrastructure: alpha has untlUnderBoolOnly
     -- The alpha for U-free ev: same structure as Case 5 but simpler
     -- alpha satisfies untlUnderBoolOnly because ev is U-free
-    have h_alpha_bool : untlUnderBoolOnly (case3_alpha ev q A B) A B := by
+    have h_alpha_bool : untlUnderBoolOnly (case3Alpha ev q A B) A B := by
       show untlUnderBoolOnly (Formula.or ev (Formula.and (Formula.and (Formula.neg q)
         (.snce ev q)) (Formula.or q (.untl A B)))) A B
       have h_or : ∀ p q, untlUnderBoolOnly p A B → untlUnderBoolOnly q A B →
@@ -775,49 +775,49 @@ theorem snce_Ufree_event_qU_guard_separable (ev q A B : Formula Atom)
           · exact ⟨u_free_untl_under_bool q A B hq, trivial⟩
           · exact ⟨hev_uf, hq⟩
         · exact ⟨⟨u_free_untl_under_bool q A B hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
-    -- Get explicit separated equiv of S(alpha, Q_Z) satisfying untlUnderBoolOnly
+    -- Get explicit separated equiv of S(alpha, qZ) satisfying untlUnderBoolOnly
     -- For this, build a d21-sep analog. The alpha for U-free ev factors as:
     -- alpha = ev ∨ ((¬q ∧ S(ev, q)) ∧ (q∨U))
     -- = (ev ∧ (q∨U)) ∨ ((¬q ∧ S(ev,q)) ∧ (q∨U))   (since ev doesn't involve U; actually false)
     -- No, we can't factor out (q∨U) because ev doesn't imply anything about (q∨U).
-    -- Instead, distribute: S(alpha, Q_Z) ↔ S(ev, Q_Z) ∨ S(nqSev∧(q∨U), Q_Z)
-    -- S(ev, Q_Z) is U-free → its separated equiv is U-free → untlUnderBoolOnly trivially
-    -- S(nqSev∧(q∨U), Q_Z) after event-split:
-    --   U branch → S(nqSev∧U, Q_Z) → snce_combined_U_separable → case1_psi(nqSev, Q_Z, A, B)
+    -- Instead, distribute: S(alpha, qZ) ↔ S(ev, qZ) ∨ S(nqSev∧(q∨U), qZ)
+    -- S(ev, qZ) is U-free → its separated equiv is U-free → untlUnderBoolOnly trivially
+    -- S(nqSev∧(q∨U), qZ) after event-split:
+    --   U branch → S(nqSev∧U, qZ) → snce_combined_U_separable → case1Psi(nqSev, qZ, A, B)
     --   ¬U branch → empty
-    -- case1_psi(nqSev, Q_Z, A, B) satisfies case1_psi_bool_only → untlUnderBoolOnly
+    -- case1Psi(nqSev, qZ, A, B) satisfies case1_psi_bool_only → untlUnderBoolOnly
     -- So the or of these satisfies untlUnderBoolOnly.
-    -- Define explicit d21_sep for this case:
-    let d21_6A := Formula.or (.snce ev (Q_Z A B (Formula.neg q)))
-      (case1_psi (Formula.and (Formula.neg q) (.snce ev q)) (Q_Z A B (Formula.neg q)) A B)
+    -- Define explicit d21Sep for this case:
+    let d21_6A := Formula.or (.snce ev (qZ A B (Formula.neg q)))
+      (case1Psi (Formula.and (Formula.neg q) (.snce ev q)) (qZ A B (Formula.neg q)) A B)
     -- Show d21_6A satisfies untlUnderBoolOnly
     have h_d21_bool : untlUnderBoolOnly d21_6A A B := by
       have h_or : ∀ p q, untlUnderBoolOnly p A B → untlUnderBoolOnly q A B →
           untlUnderBoolOnly (Formula.or p q) A B := by
         intro p q hp hq; exact ⟨⟨hp, trivial⟩, hq⟩
       apply h_or
-      · -- S(ev, Q_Z): U-free args → untlUnderBoolOnly for snce
+      · -- S(ev, qZ): U-free args → untlUnderBoolOnly for snce
         exact ⟨hev_uf, hQ_uf⟩
       · exact case1_psi_bool_only _ _ A B h_nqSev_uf hQ_uf hA hB
-    -- Show d21_6A is intEquiv to S(alpha, Q_Z)
-    have h_d21_equiv : intEquiv (.snce (case3_alpha ev q A B) (Q_Z A B (Formula.neg q))) d21_6A := by
-      -- S(alpha, Q_Z) ↔ S(ev, Q_Z) ∨ S((¬q∧S(ev,q))∧(q∨U), Q_Z) via distribute
-      -- S((¬q∧S(ev,q))∧(q∨U), Q_Z) ↔ S((¬q∧S(ev,q))∧U, Q_Z) ∨ ⊥ via event-split
-      -- S((¬q∧S(ev,q))∧U, Q_Z) ↔ case1_psi via snce_event_congr_with_U + case1_psi_properties
+    -- Show d21_6A is intEquiv to S(alpha, qZ)
+    have h_d21_equiv : intEquiv (.snce (case3Alpha ev q A B) (qZ A B (Formula.neg q))) d21_6A := by
+      -- S(alpha, qZ) ↔ S(ev, qZ) ∨ S((¬q∧S(ev,q))∧(q∨U), qZ) via distribute
+      -- S((¬q∧S(ev,q))∧(q∨U), qZ) ↔ S((¬q∧S(ev,q))∧U, qZ) ∨ ⊥ via event-split
+      -- S((¬q∧S(ev,q))∧U, qZ) ↔ case1Psi via snce_event_congr_with_U + case1_psi_properties
       have h_step1 := since_distrib_or_left ev
         (Formula.and (Formula.and (Formula.neg q) (.snce ev q)) (Formula.or q (.untl A B)))
-        (Q_Z A B (Formula.neg q))
+        (qZ A B (Formula.neg q))
       have h_step2 := since_event_split
         (Formula.and (Formula.and (Formula.neg q) (.snce ev q)) (Formula.or q (.untl A B)))
-        (.untl A B) (Q_Z A B (Formula.neg q))
+        (.untl A B) (qZ A B (Formula.neg q))
       have h_congr_U := snce_event_congr_with_U
         (Formula.and (Formula.and (Formula.neg q) (.snce ev q)) (Formula.or q (.untl A B)))
         (Formula.and (Formula.neg q) (.snce ev q))
-        (Q_Z A B (Formula.neg q)) A B
+        (qZ A B (Formula.neg q)) A B
         (fun M t hU => ⟨fun h => ((int_truth_and M t _ _).mp h).1,
           fun h => (int_truth_and M t _ _).mpr ⟨h, (int_truth_or M t _ _).mpr (Or.inr hU)⟩⟩)
       have h_psi := (case1_psi_properties (Formula.and (Formula.neg q) (.snce ev q))
-        (Q_Z A B (Formula.neg q)) A B h_nqSev_uf hQ_uf hA hB hA' hB').1
+        (qZ A B (Formula.neg q)) A B h_nqSev_uf hQ_uf hA hB hA' hB').1
       intro M t; constructor
       · intro h
         have h12 := (h_step1 M t).mp h
@@ -843,7 +843,7 @@ theorem snce_Ufree_event_qU_guard_separable (ev q A B : Formula Atom)
     -- Now handle D3 using d21_6A
     have h_event_congr : intEquiv
       (Formula.and (Formula.and A (Formula.or q (.untl A B)))
-        (.snce (case3_alpha ev q A B) (Q_Z A B (Formula.neg q))))
+        (.snce (case3Alpha ev q A B) (qZ A B (Formula.neg q))))
       (Formula.and (Formula.and A (Formula.or q (.untl A B))) d21_6A) := by
       intro M t; constructor
       · intro h; have ⟨hAqU, hS⟩ := (int_truth_and M t _ _).mp h

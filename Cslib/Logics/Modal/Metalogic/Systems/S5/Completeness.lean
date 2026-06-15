@@ -89,6 +89,6 @@ theorem s5_completeness (φ : Proposition Atom)
         w))
 
 /-- Backward-compatible alias for `s5_completeness`. -/
-abbrev completeness := @s5_completeness
+alias completeness := s5_completeness
 
 end Cslib.Logic.Modal

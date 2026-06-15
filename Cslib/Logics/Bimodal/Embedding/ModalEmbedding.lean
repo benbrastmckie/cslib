@@ -56,12 +56,10 @@ theorem Modal.Proposition.toBimodal_box (φ : Modal.Proposition Atom) :
     (Modal.Proposition.box φ).toBimodal = Bimodal.Formula.box φ.toBimodal := rfl
 
 /-- Embedding preserves neg. -/
-@[simp]
 theorem Modal.Proposition.toBimodal_neg (φ : Modal.Proposition Atom) :
     (Modal.Proposition.neg φ).toBimodal = Bimodal.Formula.neg φ.toBimodal := rfl
 
 /-- Embedding preserves diamond. -/
-@[simp]
 theorem Modal.Proposition.toBimodal_diamond (φ : Modal.Proposition Atom) :
     (Modal.Proposition.diamond φ).toBimodal = Bimodal.Formula.diamond φ.toBimodal := rfl
 

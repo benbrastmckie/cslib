@@ -160,15 +160,12 @@ def embedFormula : Formula Atom → ExtFormula Atom
 Primitive constructors commute by `rfl`; derived operators commute by unfolding.
 -/
 
-@[simp]
 theorem embedFormula_neg (φ : Formula Atom) :
     embedFormula (Formula.neg φ) = ExtFormula.neg (embedFormula φ) := rfl
 
-@[simp]
 theorem embedFormula_and (φ ψ : Formula Atom) :
     embedFormula (Formula.and φ ψ) = ExtFormula.and (embedFormula φ) (embedFormula ψ) := rfl
 
-@[simp]
 theorem embedFormula_or (φ ψ : Formula Atom) :
     embedFormula (Formula.or φ ψ) = ExtFormula.or (embedFormula φ) (embedFormula ψ) := rfl
 
@@ -188,27 +185,21 @@ theorem embedFormula_untl (φ ψ : Formula Atom) :
 theorem embedFormula_snce (φ ψ : Formula Atom) :
     embedFormula (Formula.snce φ ψ) = ExtFormula.snce (embedFormula φ) (embedFormula ψ) := rfl
 
-@[simp]
 theorem embedFormula_diamond (φ : Formula Atom) :
     embedFormula (Formula.diamond φ) = ExtFormula.diamond (embedFormula φ) := rfl
 
-@[simp]
 theorem embedFormula_someFuture (φ : Formula Atom) :
     embedFormula (Formula.someFuture φ) = ExtFormula.someFuture (embedFormula φ) := rfl
 
-@[simp]
 theorem embedFormula_somePast (φ : Formula Atom) :
     embedFormula (Formula.somePast φ) = ExtFormula.somePast (embedFormula φ) := rfl
 
-@[simp]
 theorem embedFormula_allFuture (φ : Formula Atom) :
     embedFormula (Formula.allFuture φ) = ExtFormula.allFuture (embedFormula φ) := rfl
 
-@[simp]
 theorem embedFormula_allPast (φ : Formula Atom) :
     embedFormula (Formula.allPast φ) = ExtFormula.allPast (embedFormula φ) := rfl
 
-@[simp]
 theorem embedFormula_always (φ : Formula Atom) :
     embedFormula (Formula.always φ) = ExtFormula.always (embedFormula φ) := rfl
 

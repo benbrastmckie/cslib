@@ -53,7 +53,7 @@ we can convert freely between the two representations.
 noncomputable section
 
 /-- Convert a derivation tree to a Nonempty (for typeclass functions). -/
-def wrap {φ : Bimodal.Formula Atom}
+lemma wrap {φ : Bimodal.Formula Atom}
     (d : ⊢ φ) : InferenceSystem.DerivableIn Bimodal.HilbertTM φ := ⟨d⟩
 
 /-- Extract a derivation tree from Nonempty (from typeclass functions). -/
@@ -70,7 +70,7 @@ def identity (φ : Bimodal.Formula Atom) : ⊢ φ.imp φ :=
   unwrap (@Theorems.Combinators.identity _ _ _ Bimodal.HilbertTM _ _ φ)
 
 /-- Combine three implications into conjunction. -/
-def combineImpConj_3 {φ₀ φ₁ φ₂ φ₃ : Bimodal.Formula Atom}
+def combineImpConj3 {φ₀ φ₁ φ₂ φ₃ : Bimodal.Formula Atom}
     (h1 : ⊢ φ₀.imp φ₁) (h2 : ⊢ φ₀.imp φ₂) (h3 : ⊢ φ₀.imp φ₃) :
     ⊢ φ₀.imp (φ₁.and (φ₂.and φ₃)) :=
   unwrap (Theorems.Combinators.combine_imp_conj_3 (wrap h1) (wrap h2) (wrap h3))

@@ -96,7 +96,6 @@ theorem PL.Proposition.toBimodal_or (φ₁ φ₂ : PL.Proposition Atom) :
       .imp (.imp φ₁.toBimodal .bot) φ₂.toBimodal := rfl
 
 /-- Direct embedding preserves neg. -/
-@[simp]
 theorem PL.Proposition.toBimodal_neg (φ : PL.Proposition Atom) :
     (PL.Proposition.neg φ).toBimodal = Bimodal.Formula.neg φ.toBimodal := rfl
 

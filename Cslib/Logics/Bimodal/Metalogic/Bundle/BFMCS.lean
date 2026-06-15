@@ -67,10 +67,10 @@ structure BFMCS (fc : FrameClass := FrameClass.Base) where
     (∀ fam' ∈ families, φ ∈ fam'.mcs t) → Formula.box φ ∈ fam.mcs t
 
   /-- The distinguished evaluation family where we start truth evaluation. -/
-  eval_family : FMCS Atom D fc
+  evalFamily : FMCS Atom D fc
 
   /-- The evaluation family is in the bundle -/
-  eval_family_mem : eval_family ∈ families
+  eval_family_mem : evalFamily ∈ families
 
 variable {Atom : Type*} {D : Type*} [Preorder D]
 

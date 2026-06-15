@@ -614,7 +614,7 @@ the key properties needed for the well-founded induction. -/
 
 /-- Maximum number of `.snce` ancestors above any `.untl` node in the formula tree.
     Returns 0 if the formula is U-free. For `.snce C F`, adds 1 if U appears below.
-    Non-mutual version of `S_nesting_above_U` for easier theorem proving. -/
+    Non-mutual version of `sNestingAboveU` for easier theorem proving. -/
 def snceDepthOfU : Formula Atom → Nat
   | .atom _ => 0
   | .bot => 0
@@ -752,113 +752,113 @@ theorem snce_depth_zero_single_U_separated (phi A B : Formula Atom)
 GHR94 Lemma 10.2.7 inducts on the maximum depth of U-nesting chains
 (the "maximum depth n of nesting of Us beneath an S"). This is different
 from `snceDepthOfU` (which counts S-layers above U and stops at `.untl`
-nodes). `U_nesting_depth` counts `.untl` nesting levels throughout the
+nodes). `uNestingDepth` counts `.untl` nesting levels throughout the
 formula, passing through `.snce` transparently. -/
 
 /-- Maximum depth of U-nesting chains in a formula.
     Counts how many levels of `.untl` are nested (through U-args).
     `.snce` passes through (takes max), `.untl` increments by 1.
     This is GHR94's "depth of nesting of Us beneath an S" for 10.2.7. -/
-def U_nesting_depth : Formula Atom → Nat
+def uNestingDepth : Formula Atom → Nat
   | .atom _ => 0
   | .bot => 0
-  | .imp a b => max (U_nesting_depth a) (U_nesting_depth b)
-  | .box a => U_nesting_depth a
-  | .untl a b => 1 + max (U_nesting_depth a) (U_nesting_depth b)
-  | .snce a b => max (U_nesting_depth a) (U_nesting_depth b)
+  | .imp a b => max (uNestingDepth a) (uNestingDepth b)
+  | .box a => uNestingDepth a
+  | .untl a b => 1 + max (uNestingDepth a) (uNestingDepth b)
+  | .snce a b => max (uNestingDepth a) (uNestingDepth b)
 
-/-- U_nesting_depth = 0 iff the formula is U-free. -/
+/-- uNestingDepth = 0 iff the formula is U-free. -/
 theorem U_nesting_depth_zero_iff_U_free (phi : Formula Atom) :
-    U_nesting_depth phi = 0 ↔ isUFree phi = true := by
+    uNestingDepth phi = 0 ↔ isUFree phi = true := by
   induction phi with
-  | atom _ => simp only [U_nesting_depth, isUFree]
-  | bot => simp only [U_nesting_depth, isUFree]
+  | atom _ => simp only [uNestingDepth, isUFree]
+  | bot => simp only [uNestingDepth, isUFree]
   | imp a b ih1 ih2 =>
-    simp only [U_nesting_depth, isUFree, Nat.max_eq_zero_iff, Bool.and_eq_true, ih1, ih2]
+    simp only [uNestingDepth, isUFree, Nat.max_eq_zero_iff, Bool.and_eq_true, ih1, ih2]
   | box a ih =>
-    simp only [U_nesting_depth, isUFree]
+    simp only [uNestingDepth, isUFree]
     exact ih
   | untl _ _ _ _ =>
-    simp only [U_nesting_depth, isUFree]
+    simp only [uNestingDepth, isUFree]
     exact iff_of_false (by omega) (by decide)
   | snce a b ih1 ih2 =>
-    simp only [U_nesting_depth, isUFree, Nat.max_eq_zero_iff, Bool.and_eq_true, ih1, ih2]
+    simp only [uNestingDepth, isUFree, Nat.max_eq_zero_iff, Bool.and_eq_true, ih1, ih2]
 
-/-- U-free formulas have U_nesting_depth = 0. -/
+/-- U-free formulas have uNestingDepth = 0. -/
 theorem U_nesting_depth_zero_of_U_free (phi : Formula Atom)
-    (h : isUFree phi = true) : U_nesting_depth phi = 0 :=
+    (h : isUFree phi = true) : uNestingDepth phi = 0 :=
   (U_nesting_depth_zero_iff_U_free phi).mpr h
 
-/-- When U_nesting_depth <= 1 and noSNestedInU, all U-args are U-free.
+/-- When uNestingDepth <= 1 and noSNestedInU, all U-args are U-free.
     This is the key property: at depth <= 1, U-args are boolean (U-free AND S-free). -/
 theorem U_nesting_depth_le_one_untl_args_U_free (a b : Formula Atom)
-    (h : U_nesting_depth (.untl a b) ≤ 1) :
+    (h : uNestingDepth (.untl a b) ≤ 1) :
     isUFree a = true ∧ isUFree b = true := by
-  simp only [U_nesting_depth] at h
-  have ha : U_nesting_depth a = 0 := by omega
-  have hb : U_nesting_depth b = 0 := by omega
+  simp only [uNestingDepth] at h
+  have ha : uNestingDepth a = 0 := by omega
+  have hb : uNestingDepth b = 0 := by omega
   exact ⟨(U_nesting_depth_zero_iff_U_free a).mp ha,
          (U_nesting_depth_zero_iff_U_free b).mp hb⟩
 
 -- Monotonicity lemmas
 
 theorem U_nesting_depth_le_imp_left (a b : Formula Atom) :
-    U_nesting_depth a ≤ U_nesting_depth (.imp a b) := by
-  simp only [U_nesting_depth]
+    uNestingDepth a ≤ uNestingDepth (.imp a b) := by
+  simp only [uNestingDepth]
   exact Nat.le_max_left _ _
 
 theorem U_nesting_depth_le_imp_right (a b : Formula Atom) :
-    U_nesting_depth b ≤ U_nesting_depth (.imp a b) := by
-  simp only [U_nesting_depth]
+    uNestingDepth b ≤ uNestingDepth (.imp a b) := by
+  simp only [uNestingDepth]
   exact Nat.le_max_right _ _
 
 theorem U_nesting_depth_le_box (a : Formula Atom) :
-    U_nesting_depth a ≤ U_nesting_depth (.box a) := by
-  simp only [U_nesting_depth, le_refl]
+    uNestingDepth a ≤ uNestingDepth (.box a) := by
+  simp only [uNestingDepth, le_refl]
 
 theorem U_nesting_depth_le_snce_left (a b : Formula Atom) :
-    U_nesting_depth a ≤ U_nesting_depth (.snce a b) := by
-  simp only [U_nesting_depth]
+    uNestingDepth a ≤ uNestingDepth (.snce a b) := by
+  simp only [uNestingDepth]
   exact Nat.le_max_left _ _
 
 theorem U_nesting_depth_le_snce_right (a b : Formula Atom) :
-    U_nesting_depth b ≤ U_nesting_depth (.snce a b) := by
-  simp only [U_nesting_depth]
+    uNestingDepth b ≤ uNestingDepth (.snce a b) := by
+  simp only [uNestingDepth]
   exact Nat.le_max_right _ _
 
 theorem U_nesting_depth_lt_untl_left (a b : Formula Atom) :
-    U_nesting_depth a < U_nesting_depth (.untl a b) := by
-  simp only [U_nesting_depth]
+    uNestingDepth a < uNestingDepth (.untl a b) := by
+  simp only [uNestingDepth]
   omega
 
 theorem U_nesting_depth_lt_untl_right (a b : Formula Atom) :
-    U_nesting_depth b < U_nesting_depth (.untl a b) := by
-  simp only [U_nesting_depth]
+    uNestingDepth b < uNestingDepth (.untl a b) := by
+  simp only [uNestingDepth]
   omega
 
-/-- abstractUntl does not increase U_nesting_depth.
+/-- abstractUntl does not increase uNestingDepth.
     Replacing `.untl A B` with `.atom p` can only decrease or maintain the depth. -/
 theorem abstract_untl_U_nesting_depth_le (phi A B : Formula Atom) (p : Atom) :
-    U_nesting_depth (abstractUntl phi A B p) ≤ U_nesting_depth phi := by
+    uNestingDepth (abstractUntl phi A B p) ≤ uNestingDepth phi := by
   induction phi with
-  | atom _ => simp [abstractUntl, U_nesting_depth]
-  | bot => simp [abstractUntl, U_nesting_depth]
+  | atom _ => simp [abstractUntl, uNestingDepth]
+  | bot => simp [abstractUntl, uNestingDepth]
   | imp c d ih1 ih2 =>
-    simp only [abstractUntl, U_nesting_depth]; omega
+    simp only [abstractUntl, uNestingDepth]; omega
   | box c ih =>
-    simp only [abstractUntl, U_nesting_depth]; exact ih
+    simp only [abstractUntl, uNestingDepth]; exact ih
   | untl c d ih1 ih2 =>
     simp only [abstractUntl]
     split
-    · simp only [U_nesting_depth]; omega
-    · simp only [U_nesting_depth]; omega
+    · simp only [uNestingDepth]; omega
+    · simp only [uNestingDepth]; omega
   | snce c d ih1 ih2 =>
-    simp only [abstractUntl, U_nesting_depth]; omega
+    simp only [abstractUntl, uNestingDepth]; omega
 
-/-- Corollary: abstractUntl preserves the U_nesting_depth <= k bound. -/
+/-- Corollary: abstractUntl preserves the uNestingDepth <= k bound. -/
 theorem abstract_untl_U_nesting_depth_le_of_le (phi A B : Formula Atom) (p : Atom) (k : Nat)
-    (h : U_nesting_depth phi ≤ k) :
-    U_nesting_depth (abstractUntl phi A B p) ≤ k :=
+    (h : uNestingDepth phi ≤ k) :
+    uNestingDepth (abstractUntl phi A B p) ≤ k :=
   Nat.le_trans (abstract_untl_U_nesting_depth_le phi A B p) h
 
 /-! ### Callback Single-U-Type Infrastructure (Task 3.4)

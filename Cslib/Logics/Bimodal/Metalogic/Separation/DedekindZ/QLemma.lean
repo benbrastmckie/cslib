@@ -13,7 +13,7 @@ public import Cslib.Logics.Bimodal.Metalogic.Separation.NegationEquiv
 /-!
 # K+/K- Operators and Q-Lemma for Dedekind-Complete Integer Orders
 
-K+/K- definitions, Q-lemma (forward and backward), Q_Z syntactic properties,
+K+/K- definitions, Q-lemma (forward and backward), qZ syntactic properties,
 and Case 3 equivalence for Z.
 -/
 
@@ -34,27 +34,27 @@ variable {Atom : Type*}
 /-! ## K-plus, K-minus, Gamma Definitions -/
 
 /-- K+(q) = not(U(top, not q)). Here top = neg bot = (bot -> bot). -/
-def K_plus (q : Formula Atom) : Formula Atom :=
+def kPlus (q : Formula Atom) : Formula Atom :=
   Formula.neg (.untl (Formula.neg .bot) (Formula.neg q))
 
 /-- K-(q) = not(S(top, not q)). -/
-def K_minus (q : Formula Atom) : Formula Atom :=
+def kMinus (q : Formula Atom) : Formula Atom :=
   Formula.neg (.snce (Formula.neg .bot) (Formula.neg q))
 
 /-- Gamma+(B) = not(K+(not B)) and K-(not B). -/
-def Gamma_plus (B : Formula Atom) : Formula Atom :=
-  Formula.and (Formula.neg (K_plus (Formula.neg B))) (K_minus (Formula.neg B))
+def gammaPlus (B : Formula Atom) : Formula Atom :=
+  Formula.and (Formula.neg (kPlus (Formula.neg B))) (kMinus (Formula.neg B))
 
 /-- Gamma-(B) = not(K-(not B)) and K+(not B). -/
-def Gamma_minus (B : Formula Atom) : Formula Atom :=
-  Formula.and (Formula.neg (K_minus (Formula.neg B))) (K_plus (Formula.neg B))
+def gammaMinus (B : Formula Atom) : Formula Atom :=
+  Formula.and (Formula.neg (kMinus (Formula.neg B))) (kPlus (Formula.neg B))
 
 /-! ## K+/K- Triviality on Z -/
 
 /-- K+(q) is always false on integer time. -/
 theorem K_plus_bot_on_Z (q : Formula Atom) (M : IntStructure Atom) (t : ℤ) :
-    ¬ intTruth M t (K_plus q) := by
-  simp only [K_plus, Formula.neg]
+    ¬ intTruth M t (kPlus q) := by
+  simp only [kPlus, Formula.neg]
   intro h
   apply h
   refine ⟨t + 1, by omega, id, fun r htr hrs => ?_⟩
@@ -62,8 +62,8 @@ theorem K_plus_bot_on_Z (q : Formula Atom) (M : IntStructure Atom) (t : ℤ) :
 
 /-- K-(q) is always false on integer time. -/
 theorem K_minus_bot_on_Z (q : Formula Atom) (M : IntStructure Atom) (t : ℤ) :
-    ¬ intTruth M t (K_minus q) := by
-  simp only [K_minus, Formula.neg]
+    ¬ intTruth M t (kMinus q) := by
+  simp only [kMinus, Formula.neg]
   intro h
   apply h
   refine ⟨t - 1, by omega, id, fun r hrs hrt => ?_⟩
@@ -71,8 +71,8 @@ theorem K_minus_bot_on_Z (q : Formula Atom) (M : IntStructure Atom) (t : ℤ) :
 
 /-- Gamma+(B) is always false on integer time. -/
 theorem Gamma_plus_bot_on_Z (B : Formula Atom) (M : IntStructure Atom) (t : ℤ) :
-    ¬ intTruth M t (Gamma_plus B) := by
-  simp only [Gamma_plus]
+    ¬ intTruth M t (gammaPlus B) := by
+  simp only [gammaPlus]
   intro h
   apply h
   intro _ hKm
@@ -80,8 +80,8 @@ theorem Gamma_plus_bot_on_Z (B : Formula Atom) (M : IntStructure Atom) (t : ℤ)
 
 /-- Gamma-(B) is always false on integer time. -/
 theorem Gamma_minus_bot_on_Z (B : Formula Atom) (M : IntStructure Atom) (t : ℤ) :
-    ¬ intTruth M t (Gamma_minus B) := by
-  simp only [Gamma_minus]
+    ¬ intTruth M t (gammaMinus B) := by
+  simp only [gammaMinus]
   intro h
   apply h
   intro _ hKp
@@ -91,7 +91,7 @@ theorem Gamma_minus_bot_on_Z (B : Formula Atom) (M : IntStructure Atom) (t : ℤ
 
 /-- Q(A,B,C) on Z: the simplified Dedekind Q function.
     B or A or not(S(C, not A)) -/
-def Q_Z (A B C : Formula Atom) : Formula Atom :=
+def qZ (A B C : Formula Atom) : Formula Atom :=
   Formula.or (Formula.or B A) (Formula.neg (.snce C (Formula.neg A)))
 
 /-! ## Q-Lemma Forward Direction -/
@@ -104,9 +104,9 @@ theorem Q_lemma_Z_fwd (A B C : Formula Atom) (M : IntStructure Atom) (t0 t1 : �
     (hguard : ∀ z : ℤ, t0 < z → z < t1 →
       (intTruth M z C → intTruth M z (.untl A B)))
     (hinit : intTruth M t0 (.untl A B)) :
-    ∀ z : ℤ, t0 < z → z < t1 → intTruth M z (Q_Z A B C) := by
+    ∀ z : ℤ, t0 < z → z < t1 → intTruth M z (qZ A B C) := by
   intro z hz0 hz1
-  rw [Q_Z, int_truth_or, int_truth_or, int_truth_neg]
+  rw [qZ, int_truth_or, int_truth_or, int_truth_neg]
   by_cases hS : intTruth M z (.snce C (Formula.neg A))
   · obtain ⟨u, huz, hCu, hnotA_guard⟩ := hS
     by_cases hut0 : t0 < u
@@ -136,7 +136,7 @@ set_option maxHeartbeats 1600000 in
 /-- Q-lemma backward direction for Z. -/
 theorem Q_lemma_Z_bwd (A B C : Formula Atom) (M : IntStructure Atom) (t0 t1 : ℤ)
     (_ht : t0 < t1)
-    (hQ : ∀ z : ℤ, t0 < z → z < t1 → intTruth M z (Q_Z A B C))
+    (hQ : ∀ z : ℤ, t0 < z → z < t1 → intTruth M z (qZ A B C))
     (hend : intTruth M t1 A
           ∨ intTruth M t1 (Formula.and B (.untl A B))) :
     ∀ z : ℤ, t0 < z → z < t1 →
@@ -155,7 +155,7 @@ theorem Q_lemma_Z_bwd (A B C : Formula Atom) (M : IntStructure Atom) (t0 t1 : �
     have hrt1 : r < t1 := lt_of_lt_of_le hry hyt1
     have hrt0 : t0 < r := lt_trans hz0 hzr
     have hQr := hQ r hrt0 hrt1
-    rw [Q_Z, int_truth_or, int_truth_or, int_truth_neg] at hQr
+    rw [qZ, int_truth_or, int_truth_or, int_truth_neg] at hQr
     rcases hQr with (hBr | hAr) | hnotS
     · exact hBr
     · exact absurd hAr hnotAr
@@ -167,7 +167,7 @@ theorem Q_lemma_Z_bwd (A B C : Formula Atom) (M : IntStructure Atom) (t0 t1 : �
       intro r hzr hrt1
       have hnotAr := hA_exists r hzr (le_of_lt hrt1)
       have hQr := hQ r (lt_trans hz0 hzr) hrt1
-      rw [Q_Z, int_truth_or, int_truth_or, int_truth_neg] at hQr
+      rw [qZ, int_truth_or, int_truth_or, int_truth_neg] at hQr
       rcases hQr with (hBr | hAr) | hnotS
       · exact hBr
       · exact absurd hAr hnotAr
@@ -184,33 +184,33 @@ theorem Q_lemma_Z_bwd (A B C : Formula Atom) (M : IntStructure Atom) (t0 t1 : �
       · exact hrt1 ▸ hBt1
       · exact hBgd_w r hrt1 hrw
 
-/-! ## Q_Z Syntactic Properties -/
+/-! ## qZ Syntactic Properties -/
 
-/-- Q_Z(A,B,C) is U-free when A, B, C are U-free. -/
+/-- qZ(A,B,C) is U-free when A, B, C are U-free. -/
 theorem Q_Z_U_free (A B C : Formula Atom)
     (hA : isUFree A = true) (hB : isUFree B = true) (hC : isUFree C = true) :
-    isUFree (Q_Z A B C) = true := by
-  simp [Q_Z, isUFree, hA, hB, hC]
+    isUFree (qZ A B C) = true := by
+  simp [qZ, isUFree, hA, hB, hC]
 
-/-- Q_Z(A,B,C) has noSNestedInU when A, B, C do. -/
+/-- qZ(A,B,C) has noSNestedInU when A, B, C do. -/
 theorem Q_Z_no_S_nested (A B C : Formula Atom)
     (hA : noSNestedInU A) (hB : noSNestedInU B) (hC : noSNestedInU C) :
-    noSNestedInU (Q_Z A B C) := by
-  simp only [Q_Z, Formula.or, Formula.neg]
+    noSNestedInU (qZ A B C) := by
+  simp only [qZ, Formula.or, Formula.neg]
   repeat (first | constructor | exact hA | exact hB | exact hC | trivial)
 
 /-! ## Case 3 General Equivalence (GHR94 Lemma 10.3.11.3 for Z) -/
 
 /-- General alpha for Case 3: a v (~q ^ S(a, q) ^ (q v U(A,B))) -/
-def case3_alpha (a q A B : Formula Atom) : Formula Atom :=
+def case3Alpha (a q A B : Formula Atom) : Formula Atom :=
   Formula.or a
     (Formula.and (Formula.and (Formula.neg q) (.snce a q))
       (Formula.or q (.untl A B)))
 
 /-- Case 3 RHS for general event a -/
-def case3_rhs (a q A B : Formula Atom) : Formula Atom :=
-  let al := case3_alpha a q A B
-  let qz := Q_Z A B (Formula.neg q)
+def case3Rhs (a q A B : Formula Atom) : Formula Atom :=
+  let al := case3Alpha a q A B
+  let qz := qZ A B (Formula.neg q)
   Formula.or (Formula.or
     (.snce a q)
     (Formula.and (.snce al qz)
@@ -219,15 +219,15 @@ def case3_rhs (a q A B : Formula Atom) : Formula Atom :=
              (.snce al qz))
            q)
 
-/-! ### Backward Direction: case3_rhs -> S(a, q v U(A,B)) -/
+/-! ### Backward Direction: case3Rhs -> S(a, q v U(A,B)) -/
 
 set_option maxHeartbeats 1600000 in
 -- Ported from BimodalLogic
 /-- Case 3 backward direction. -/
 theorem case3_equiv_Z_bwd (a q A B : Formula Atom) (M : IntStructure Atom) (t : ℤ)
-    (h : intTruth M t (case3_rhs a q A B)) :
+    (h : intTruth M t (case3Rhs a q A B)) :
     intTruth M t (.snce a (Formula.or q (.untl A B))) := by
-  simp only [case3_rhs] at h
+  simp only [case3Rhs] at h
   rcases (int_truth_or M t _ _).mp h with h12 | h3
   · rcases (int_truth_or M t _ _).mp h12 with h1 | h2
     · obtain ⟨s, hst, ha_s, hq_guard⟩ := h1
@@ -235,7 +235,7 @@ theorem case3_equiv_Z_bwd (a q A B : Formula Atom) (M : IntStructure Atom) (t : 
         (int_truth_or M r _ _).mpr (Or.inl (hq_guard r hrs hrt))⟩
     · have ⟨hSalpha, hABU⟩ := (int_truth_and M t _ _).mp h2
       obtain ⟨v, hvt, halpha_v, hQZ_guard⟩ := hSalpha
-      simp only [case3_alpha] at halpha_v
+      simp only [case3Alpha] at halpha_v
       rcases (int_truth_or M v _ _).mp halpha_v with ha_v | halpha2
       · have hend_for_Q : intTruth M t A ∨ intTruth M t (Formula.and B (.untl A B)) := by
           rcases (int_truth_or M t _ _).mp hABU with hA | hBU
@@ -268,7 +268,7 @@ theorem case3_equiv_Z_bwd (a q A B : Formula Atom) (M : IntStructure Atom) (t : 
     have ⟨hA_qU, hSalpha_u⟩ := (int_truth_and M u _ _).mp hevent_u
     have ⟨hA_u, hqU_u⟩ := (int_truth_and M u _ _).mp hA_qU
     obtain ⟨v, hvu, halpha_v, hQZ_vu⟩ := hSalpha_u
-    simp only [case3_alpha] at halpha_v
+    simp only [case3Alpha] at halpha_v
     rcases (int_truth_or M v _ _).mp halpha_v with ha_v | halpha2
     · have hend_u : intTruth M u A ∨ intTruth M u (Formula.and B (.untl A B)) :=
         Or.inl hA_u
@@ -302,17 +302,17 @@ theorem case3_equiv_Z_bwd (a q A B : Formula Atom) (M : IntStructure Atom) (t : 
         · subst hru; exact (int_truth_or M r _ _).mp hqU_u
         · exact Or.inl (hq_guard r hru hrt)
 
-/-! ### Forward Direction: S(a, q v U(A,B)) -> case3_rhs -/
+/-! ### Forward Direction: S(a, q v U(A,B)) -> case3Rhs -/
 
 set_option maxHeartbeats 3200000 in
 -- Ported from BimodalLogic, heartbeats needed for complex case analysis
 /-- Case 3 forward direction. -/
 theorem case3_equiv_Z_fwd (a q A B : Formula Atom) (M : IntStructure Atom) (t : ℤ)
     (h : intTruth M t (.snce a (Formula.or q (.untl A B)))) :
-    intTruth M t (case3_rhs a q A B) := by
+    intTruth M t (case3Rhs a q A B) := by
   obtain ⟨s, hst, ha_s, hguard⟩ := h
   by_cases hq_all : ∀ r, s < r → r < t → intTruth M r q
-  · simp only [case3_rhs]
+  · simp only [case3Rhs]
     apply (int_truth_or M t _ _).mpr; left; apply (int_truth_or M t _ _).mpr; left
     exact ⟨s, hst, ha_s, hq_all⟩
   · push Not at hq_all
@@ -336,38 +336,38 @@ theorem case3_equiv_Z_fwd (a q A B : Formula Atom) (M : IntStructure Atom) (t : 
       obtain ⟨w, hf₀w, hAw, hBguard_w⟩ := hU_f₀_copy
       have hSaq_f₀ : intTruth M f₀ (.snce a q) :=
         ⟨s, hsf₀, ha_s, hq_left⟩
-      have halpha_f₀ : intTruth M f₀ (case3_alpha a q A B) := by
-        simp only [case3_alpha]
+      have halpha_f₀ : intTruth M f₀ (case3Alpha a q A B) := by
+        simp only [case3Alpha]
         apply (int_truth_or M f₀ _ _).mpr; right
         exact (int_truth_and M f₀ _ _).mpr
           ⟨(int_truth_and M f₀ _ _).mpr ⟨hnqf₀, hSaq_f₀⟩, hqU_f₀⟩
-      have hQ_on_interval : ∀ z, f₀ < z → z < t → intTruth M z (Q_Z A B (Formula.neg q)) := by
+      have hQ_on_interval : ∀ z, f₀ < z → z < t → intTruth M z (qZ A B (Formula.neg q)) := by
         apply Q_lemma_Z_fwd A B (Formula.neg q) M f₀ t hf₀t
         · intro z hz0 hz1 hC
           exact absurd (hq_right z hz0 hz1) hC
         · exact hU_f₀
-      have hSalpha_t : intTruth M t (.snce (case3_alpha a q A B) (Q_Z A B (Formula.neg q))) :=
+      have hSalpha_t : intTruth M t (.snce (case3Alpha a q A B) (qZ A B (Formula.neg q))) :=
         ⟨f₀, hf₀t, halpha_f₀, hQ_on_interval⟩
       rcases le_or_gt w t with hwt | htw
       · rcases eq_or_lt_of_le hwt with rfl | hwt'
-        · simp only [case3_rhs]
+        · simp only [case3Rhs]
           apply (int_truth_or M w _ _).mpr; left; apply (int_truth_or M w _ _).mpr; right
           exact (int_truth_and M w _ _).mpr ⟨hSalpha_t, (int_truth_or M w _ _).mpr (Or.inl hAw)⟩
         · have hqw : intTruth M w q := hq_right w hf₀w hwt'
           have hqU_w : intTruth M w (Formula.or q (.untl A B)) :=
             (int_truth_or M w _ _).mpr (Or.inl hqw)
-          have hSalpha_w : intTruth M w (.snce (case3_alpha a q A B) (Q_Z A B (Formula.neg q))) :=
+          have hSalpha_w : intTruth M w (.snce (case3Alpha a q A B) (qZ A B (Formula.neg q))) :=
             ⟨f₀, hf₀w, halpha_f₀, fun z hz1 hz2 => hQ_on_interval z hz1 (lt_trans hz2 hwt')⟩
           have hevent_w : intTruth M w (Formula.and (Formula.and A (Formula.or q (.untl A B)))
-               (.snce (case3_alpha a q A B) (Q_Z A B (Formula.neg q)))) :=
+               (.snce (case3Alpha a q A B) (qZ A B (Formula.neg q)))) :=
             (int_truth_and M w _ _).mpr ⟨(int_truth_and M w _ _).mpr ⟨hAw, hqU_w⟩, hSalpha_w⟩
-          simp only [case3_rhs]
+          simp only [case3Rhs]
           apply (int_truth_or M t _ _).mpr; right
           exact ⟨w, hwt', hevent_w, fun r hwr hrt => hq_right r (lt_trans hf₀w hwr) hrt⟩
       · have hBt : intTruth M t B := hBguard_w t hf₀t htw
         have hUt : intTruth M t (.untl A B) :=
           ⟨w, htw, hAw, fun r htr hrw => hBguard_w r (lt_trans hf₀t htr) hrw⟩
-        simp only [case3_rhs]
+        simp only [case3Rhs]
         apply (int_truth_or M t _ _).mpr; left; apply (int_truth_or M t _ _).mpr; right
         exact (int_truth_and M t _ _).mpr ⟨hSalpha_t, (int_truth_or M t _ _).mpr (Or.inr ((int_truth_and M t _ _).mpr ⟨hBt, hUt⟩))⟩
     · push Not at hq_right
@@ -390,8 +390,8 @@ theorem case3_equiv_Z_fwd (a q A B : Formula Atom) (M : IntStructure Atom) (t : 
       have hSaq_f₀ : intTruth M f₀ (.snce a q) :=
         ⟨s, hsf₀, ha_s, hq_left⟩
       have hqU_f₀ := hguard f₀ hsf₀ hf₀t
-      have halpha_f₀ : intTruth M f₀ (case3_alpha a q A B) := by
-        simp only [case3_alpha]
+      have halpha_f₀ : intTruth M f₀ (case3Alpha a q A B) := by
+        simp only [case3Alpha]
         apply (int_truth_or M f₀ _ _).mpr; right
         exact (int_truth_and M f₀ _ _).mpr
           ⟨(int_truth_and M f₀ _ _).mpr ⟨hnqf₀, hSaq_f₀⟩, hqU_f₀⟩
@@ -405,37 +405,37 @@ theorem case3_equiv_Z_fwd (a q A B : Formula Atom) (M : IntStructure Atom) (t : 
         rcases (int_truth_or M f₀ _ _).mp hqU_f₀ with hq | hU
         · exact absurd hq hnqf₀
         · exact hU
-      have hQ_full : ∀ z, f₀ < z → z < t → intTruth M z (Q_Z A B (Formula.neg q)) :=
+      have hQ_full : ∀ z, f₀ < z → z < t → intTruth M z (qZ A B (Formula.neg q)) :=
         Q_lemma_Z_fwd A B (Formula.neg q) M f₀ t hf₀t hguard_full hU_f₀
-      have hSalpha_t : intTruth M t (.snce (case3_alpha a q A B) (Q_Z A B (Formula.neg q))) :=
+      have hSalpha_t : intTruth M t (.snce (case3Alpha a q A B) (qZ A B (Formula.neg q))) :=
         ⟨f₀, hf₀t, halpha_f₀, hQ_full⟩
       rcases le_or_gt w t with hwt | htw
       · rcases eq_or_lt_of_le hwt with rfl | hwt'
-        · simp only [case3_rhs]
+        · simp only [case3Rhs]
           apply (int_truth_or M w _ _).mpr; left; apply (int_truth_or M w _ _).mpr; right
           exact (int_truth_and M w _ _).mpr ⟨hSalpha_t, (int_truth_or M w _ _).mpr (Or.inl hAw)⟩
         · have hqw : intTruth M w q := hq_after_g w hgw hwt'
           have hqU_w : intTruth M w (Formula.or q (.untl A B)) :=
             (int_truth_or M w _ _).mpr (Or.inl hqw)
-          have hSalpha_w : intTruth M w (.snce (case3_alpha a q A B) (Q_Z A B (Formula.neg q))) :=
+          have hSalpha_w : intTruth M w (.snce (case3Alpha a q A B) (qZ A B (Formula.neg q))) :=
             ⟨f₀, lt_of_le_of_lt hf₀g hgw, halpha_f₀,
               fun z hz1 hz2 => hQ_full z hz1 (lt_trans hz2 hwt')⟩
           have hevent_w : intTruth M w (Formula.and (Formula.and A (Formula.or q (.untl A B)))
-               (.snce (case3_alpha a q A B) (Q_Z A B (Formula.neg q)))) :=
+               (.snce (case3Alpha a q A B) (qZ A B (Formula.neg q)))) :=
             (int_truth_and M w _ _).mpr ⟨(int_truth_and M w _ _).mpr ⟨hAw, hqU_w⟩, hSalpha_w⟩
-          simp only [case3_rhs]
+          simp only [case3Rhs]
           apply (int_truth_or M t _ _).mpr; right
           exact ⟨w, hwt', hevent_w, fun r hwr hrt => hq_after_g r (lt_trans hgw hwr) hrt⟩
       · have hBt : intTruth M t B := hBguard_w t hgt htw
         have hUt : intTruth M t (.untl A B) :=
           ⟨w, htw, hAw, fun r htr hrw => hBguard_w r (lt_trans hgt htr) hrw⟩
-        simp only [case3_rhs]
+        simp only [case3Rhs]
         apply (int_truth_or M t _ _).mpr; left; apply (int_truth_or M t _ _).mpr; right
         exact (int_truth_and M t _ _).mpr ⟨hSalpha_t, (int_truth_or M t _ _).mpr (Or.inr ((int_truth_and M t _ _).mpr ⟨hBt, hUt⟩))⟩
 
 /-- Case 3 general equivalence for Z. -/
 theorem case3_equiv_Z_general (a q A B : Formula Atom) :
-    intEquiv (.snce a (Formula.or q (.untl A B))) (case3_rhs a q A B) :=
+    intEquiv (.snce a (Formula.or q (.untl A B))) (case3Rhs a q A B) :=
   fun M t => ⟨case3_equiv_Z_fwd a q A B M t, case3_equiv_Z_bwd a q A B M t⟩
 
 end Cslib.Logic.Bimodal.Metalogic.Separation

@@ -33,6 +33,7 @@ variable {Atom : Type*} [DecidableEq Atom]
 
 /-! ## Subformula Extraction -/
 
+/-- The set of all subformulas of a formula, including the formula itself. -/
 def subformulas : Formula Atom → Finset (Formula Atom)
   | f@(Formula.atom _) => {f}
   | f@Formula.bot => {f}
@@ -46,11 +47,13 @@ theorem self_mem_subformulas (f : Formula Atom) : f ∈ subformulas f := by
 
 /-! ## G/H Enrichment -/
 
+/-- Enriches a formula set with its G- and H-closures (allFuture and allPast). -/
 def ghEnrichment (Omega : Finset (Formula Atom)) : Finset (Formula Atom) :=
   Omega ∪ Omega.image Formula.allFuture ∪ Omega.image Formula.allPast
 
 /-! ## Full Subformula Closure -/
 
+/-- The full subformula closure: G/H-enriched subformulas together with their negations. -/
 def SubformulaClosure (target : Formula Atom) : Finset (Formula Atom) :=
   let base := ghEnrichment (subformulas target)
   base ∪ base.image Formula.neg

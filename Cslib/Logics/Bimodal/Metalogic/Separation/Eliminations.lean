@@ -73,7 +73,7 @@ theorem and_separated {φ ψ : Formula Atom}
 
 /-- The separated equivalent of S(a ∧ U(A,B), q) from Case 1.
     Structure: (S(a,q) ∧ S(a,B) ∧ B ∧ U(A,B)) ∨ (A ∧ S(a,B) ∧ S(a,q)) ∨ S(A∧q∧S(a,B)∧S(a,q), q) -/
-def case1_psi (a q A B : Formula Atom) : Formula Atom :=
+def case1Psi (a q A B : Formula Atom) : Formula Atom :=
   Formula.or (Formula.or
     (Formula.and (Formula.and (Formula.and (.snce a q) (.snce a B)) B) (.untl A B))
     (Formula.and (Formula.and A (.snce a B)) (.snce a q)))
@@ -89,9 +89,9 @@ theorem elim_case_1 (a q A B : Formula Atom)
     ∃ psi : Formula Atom,
       intEquiv (.snce (Formula.and a (.untl A B)) q) psi ∧
       isSyntacticallySeparated psi = true := by
-  refine ⟨case1_psi a q A B, ?_, ?_⟩
+  refine ⟨case1Psi a q A B, ?_, ?_⟩
   · intro M t
-    simp only [case1_psi]
+    simp only [case1Psi]
     constructor
     · intro ⟨s, hst, hand, hq_guard⟩
       have ⟨ha_s, huntl⟩ := (int_truth_and M s a (.untl A B)).mp hand
@@ -159,7 +159,7 @@ theorem elim_case_1 (a q A B : Formula Atom)
           · exact hq₂ r (lt_trans hle hrs) hrw
           · exact hrw ▸ hqw
           · exact hq_rest r hrw hrt
-  · simp [case1_psi, Formula.and, Formula.or, Formula.neg,
+  · simp [case1Psi, Formula.and, Formula.or, Formula.neg,
           isSyntacticallySeparated, isUFree, ha, hq, hA, hB, hA', hB']
     exact ⟨u_free_s_free_imp_separated B hB hB',
            u_free_s_free_imp_separated A hA hA'⟩
@@ -171,7 +171,7 @@ theorem elim_case_1 (a q A B : Formula Atom)
   come from abstracted separated formulas (which are U-free but not S-free).
 
   The proof is identical to `elim_case_1` because the separation check for
-  `case1_psi` never uses S-freeness of a or q:
+  `case1Psi` never uses S-freeness of a or q:
   - `a` and `q` appear only under `snce` nodes, where U-freeness is the requirement
   - Only `A` and `B` need S-freeness (they appear under `untl` and as standalone
     terms where `u_free_s_free_imp_separated` is applied)
@@ -186,9 +186,9 @@ theorem elim_case_1_gen (a q A B : Formula Atom)
     ∃ psi : Formula Atom,
       intEquiv (.snce (Formula.and a (.untl A B)) q) psi ∧
       isSyntacticallySeparated psi = true := by
-  refine ⟨case1_psi a q A B, ?_, ?_⟩
+  refine ⟨case1Psi a q A B, ?_, ?_⟩
   · intro M t
-    simp only [case1_psi]
+    simp only [case1Psi]
     constructor
     · intro ⟨s, hst, hand, hq_guard⟩
       have ⟨ha_s, huntl⟩ := (int_truth_and M s a (.untl A B)).mp hand
@@ -256,24 +256,24 @@ theorem elim_case_1_gen (a q A B : Formula Atom)
           · exact hq₂ r (lt_trans hle hrs) hrw
           · exact hrw ▸ hqw
           · exact hq_rest r hrw hrt
-  · simp [case1_psi, Formula.and, Formula.or, Formula.neg,
+  · simp [case1Psi, Formula.and, Formula.or, Formula.neg,
           isSyntacticallySeparated, isUFree, ha, hq, hA, hB, hA', hB']
     exact ⟨u_free_s_free_imp_separated B hB hB',
            u_free_s_free_imp_separated A hA hA'⟩
 
 set_option maxHeartbeats 800000 in
 -- Complex term elaboration requires extended heartbeats
-/-- case1_psi is intEquiv to S(a∧U, q) and syntactically separated.
+/-- case1Psi is intEquiv to S(a∧U, q) and syntactically separated.
     This is the non-existential form of elim_case_1_gen for direct formula access. -/
 theorem case1_psi_properties (a q A B : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hA : isUFree A = true) (hB : isUFree B = true)
     (hA' : isSFree A = true) (hB' : isSFree B = true) :
-    intEquiv (.snce (Formula.and a (.untl A B)) q) (case1_psi a q A B) ∧
-    isSyntacticallySeparated (case1_psi a q A B) = true := by
+    intEquiv (.snce (Formula.and a (.untl A B)) q) (case1Psi a q A B) ∧
+    isSyntacticallySeparated (case1Psi a q A B) = true := by
   refine ⟨?_, ?_⟩
   · intro M t
-    simp only [case1_psi]
+    simp only [case1Psi]
     constructor
     · intro ⟨s, hst, hand, hq_guard⟩
       have ⟨ha_s, huntl⟩ := (int_truth_and M s a (.untl A B)).mp hand
@@ -341,7 +341,7 @@ theorem case1_psi_properties (a q A B : Formula Atom)
           · exact hq₂ r (lt_trans hle hrs) hrw
           · exact hrw ▸ hqw
           · exact hq_rest r hrw hrt
-  · simp [case1_psi, Formula.and, Formula.or, Formula.neg,
+  · simp [case1Psi, Formula.and, Formula.or, Formula.neg,
           isSyntacticallySeparated, isUFree, ha, hq, hA, hB, hA', hB']
     exact ⟨u_free_s_free_imp_separated B hB hB',
            u_free_s_free_imp_separated A hA hA'⟩
@@ -360,7 +360,7 @@ theorem case1_psi_properties (a q A B : Formula Atom)
 
 /-- The GHR94-faithful output formula for Case 2: S(a ∧ ¬U(A,B), q).
     d1 ∨ d2 ∨ d3 as described above. -/
-def case2_psi (a q A B : Formula Atom) : Formula Atom :=
+def case2Psi (a q A B : Formula Atom) : Formula Atom :=
   -- d1: S(a, q ∧ ¬A) ∧ ¬A ∧ ¬U(A,B)
   let d1 := Formula.and (Formula.and
     (.snce a (Formula.and q (Formula.neg A)))
@@ -377,15 +377,15 @@ def case2_psi (a q A B : Formula Atom) : Formula Atom :=
 
 set_option maxHeartbeats 3200000 in
 -- Complex term elaboration requires extended heartbeats
-/-- case2_psi is intEquiv to S(a∧¬U, q) and syntactically separated.
+/-- case2Psi is intEquiv to S(a∧¬U, q) and syntactically separated.
     This is the non-existential form of elim_case_2_gen for direct formula access. -/
 theorem case2_psi_properties (a q A B : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hA : isUFree A = true) (hB : isUFree B = true)
     (hA' : isSFree A = true) (hB' : isSFree B = true) :
-    intEquiv (.snce (Formula.and a (Formula.neg (.untl A B))) q) (case2_psi a q A B) ∧
-    isSyntacticallySeparated (case2_psi a q A B) = true := by
-  simp only [case2_psi]
+    intEquiv (.snce (Formula.and a (Formula.neg (.untl A B))) q) (case2Psi a q A B) ∧
+    isSyntacticallySeparated (case2Psi a q A B) = true := by
+  simp only [case2Psi]
   let d1 := Formula.and (Formula.and
     (.snce a (Formula.and q (Formula.neg A)))
     (Formula.neg A))
@@ -514,7 +514,7 @@ theorem elim_case_2_gen (a q A B : Formula Atom)
     ∃ psi : Formula Atom,
       intEquiv (.snce (Formula.and a (Formula.neg (.untl A B))) q) psi ∧
       isSyntacticallySeparated psi = true :=
-  ⟨case2_psi a q A B, case2_psi_properties a q A B ha hq hA hB hA' hB'⟩
+  ⟨case2Psi a q A B, case2_psi_properties a q A B ha hq hA hB hA' hB'⟩
 
 /-! ## Case 2: S(a ^ not U(A,B), q) -/
 

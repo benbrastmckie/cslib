@@ -41,6 +41,7 @@ def Derives (φ ψ : Formula Atom) : Prop := Nonempty (DerivationTree FrameClass
 /-- Two formulas are provably equivalent when each derives the other. -/
 def ProvEquiv (φ ψ : Formula Atom) : Prop := Derives φ ψ ∧ Derives ψ φ
 
+/-- Infix notation for propositional equivalence in the Lindenbaum quotient. -/
 scoped infix:50 " ≈ₚ " => ProvEquiv
 
 /-- Derivability is reflexive: every formula derives itself via the identity combinator. -/
@@ -85,6 +86,7 @@ def LindenbaumAlg (Atom : Type*) : Type _ := Quotient (provEquivSetoid (Atom := 
 /-- Canonical quotient map sending a formula to its equivalence class. -/
 def toQuot (φ : Formula Atom) : LindenbaumAlg Atom := Quotient.mk provEquivSetoid φ
 
+/-- Notation for the quotient map sending a formula to its equivalence class. -/
 scoped notation "⟦" φ "⟧" => toQuot φ
 
 /-- Negation is antitone with respect to derivability: if `ψ` derives `φ`, then `¬φ` derives `¬ψ`. -/
@@ -203,12 +205,12 @@ noncomputable def boxQuot : LindenbaumAlg Atom → LindenbaumAlg Atom :=
     (fun _ _ h => Quotient.sound (provEquiv_box_congr h))
 
 /-- The G (allFuture) operator lifted to the Lindenbaum algebra quotient. -/
-noncomputable def G_quot : LindenbaumAlg Atom → LindenbaumAlg Atom :=
+noncomputable def gQuot : LindenbaumAlg Atom → LindenbaumAlg Atom :=
   Quotient.lift (fun φ => toQuot φ.allFuture)
     (fun _ _ h => Quotient.sound (provEquiv_allFuture_congr h))
 
 /-- The H (allPast) operator lifted to the Lindenbaum algebra quotient. -/
-noncomputable def H_quot : LindenbaumAlg Atom → LindenbaumAlg Atom :=
+noncomputable def hQuot : LindenbaumAlg Atom → LindenbaumAlg Atom :=
   Quotient.lift (fun φ => toQuot φ.allPast)
     (fun _ _ h => Quotient.sound (provEquiv_allPast_congr h))
 
@@ -264,19 +266,19 @@ theorem sigma_quot_sup (a b : LindenbaumAlg Atom) :
 
 /-- Sigma maps G to H: `σ(G a) = H(σ a)`. -/
 theorem sigma_quot_G_H (a : LindenbaumAlg Atom) :
-    sigmaQuot (G_quot a) = H_quot (sigmaQuot a) := by
+    sigmaQuot (gQuot a) = hQuot (sigmaQuot a) := by
   induction a using Quotient.ind
   rename_i φ
-  show toQuot (φ.allFuture.swapTemporal) = H_quot (toQuot φ.swapTemporal)
+  show toQuot (φ.allFuture.swapTemporal) = hQuot (toQuot φ.swapTemporal)
   simp only [Formula.swapTemporal_allFuture]
   rfl
 
 /-- Sigma maps H to G: `σ(H a) = G(σ a)`. -/
 theorem sigma_quot_H_G (a : LindenbaumAlg Atom) :
-    sigmaQuot (H_quot a) = G_quot (sigmaQuot a) := by
+    sigmaQuot (hQuot a) = gQuot (sigmaQuot a) := by
   induction a using Quotient.ind
   rename_i φ
-  show toQuot (φ.allPast.swapTemporal) = G_quot (toQuot φ.swapTemporal)
+  show toQuot (φ.allPast.swapTemporal) = gQuot (toQuot φ.swapTemporal)
   simp only [Formula.swapTemporal_allPast]
   rfl
 

@@ -14,7 +14,7 @@ public import Cslib.Logics.Bimodal.Syntax.SubformulaClosure.TemporalFormulas
 # Restricted Parametric Truth Lemma
 
 Restricted version of the parametric shifted truth lemma that only requires
-`B.restricted_temporally_coherent root` instead of full `B.temporally_coherent`.
+`B.restrictedTemporallyCoherent root` instead of full `B.temporallyCoherent`.
 
 ## References
 
@@ -40,6 +40,7 @@ open Cslib.Logic.Bimodal
 
 variable {Atom : Type} [DecidableEq Atom] {fc : FrameClass} {D : Type*} [AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D]
 
+/-- Proves that the negation of an implication implies its antecedent. -/
 noncomputable def negImpImpliesAntecedent (ψ χ : Formula Atom) :
     DerivationTree fc [] ((ψ.imp χ).neg.imp ψ) := by
   have h_efq : DerivationTree FrameClass.Base [] (ψ.neg.imp (ψ.imp χ)) :=
@@ -68,6 +69,7 @@ noncomputable def negImpImpliesAntecedent (ψ χ : Formula Atom) :
     DerivationTree.modus_ponens _ _ _ h_step1 h_deduct
   exact h_base.lift (FrameClass.base_le fc)
 
+/-- Proves that the negation of an implication implies the negation of its consequent. -/
 noncomputable def negImpImpliesNegConsequent (ψ χ : Formula Atom) :
     DerivationTree fc [] ((ψ.imp χ).neg.imp χ.neg) := by
   have h_prop_s : DerivationTree FrameClass.Base [] (χ.imp (ψ.imp χ)) :=
@@ -91,9 +93,9 @@ noncomputable def negImpImpliesNegConsequent (ψ χ : Formula Atom) :
 /-- Restricted parametric shifted truth lemma. -/
 theorem restricted_parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
     (root : Formula Atom)
-    (_h_rtc : B.restricted_temporally_coherent root)
-    (h_buc : B.backward_until_since_coherent)
-    (h_fuc : B.forward_until_since_coherent) (φ : Formula Atom)
+    (_h_rtc : B.restrictedTemporallyCoherent root)
+    (h_buc : B.backwardUntilSinceCoherent)
+    (h_fuc : B.forwardUntilSinceCoherent) (φ : Formula Atom)
     (h_sub : φ ∈ subformulaClosure root)
     (fam : FMCS Atom D fc) (hfam : fam ∈ B.families) (t : D) :
     φ ∈ fam.mcs t ↔
@@ -185,9 +187,9 @@ theorem restricted_parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
 /-- Restricted completeness from neg membership. -/
 theorem restricted_parametric_completeness_from_neg_membership
     (B : BFMCS Atom D fc) (root : Formula Atom)
-    (h_rtc : B.restricted_temporally_coherent root)
-    (h_buc : B.backward_until_since_coherent)
-    (h_fuc : B.forward_until_since_coherent)
+    (h_rtc : B.restrictedTemporallyCoherent root)
+    (h_buc : B.backwardUntilSinceCoherent)
+    (h_fuc : B.forwardUntilSinceCoherent)
     (φ : Formula Atom) (h_sub : φ ∈ subformulaClosure root)
     (fam : FMCS Atom D fc) (hfam : fam ∈ B.families)
     (t : D) (h_neg_in : φ.neg ∈ fam.mcs t) :
@@ -202,9 +204,9 @@ theorem restricted_parametric_completeness_from_neg_membership
 ## Fully Restricted Truth Lemma and Completeness
 
 These variants weaken ALL three coherence hypotheses to their restricted forms:
-- `restricted_temporally_coherent root` (forward_F/backward_P for deferralClosure only)
-- `restricted_backward_until_since_coherent root` (buc for subformulaClosure only)
-- `restricted_forward_until_since_coherent root` (fuc for subformulaClosure only)
+- `restrictedTemporallyCoherent root` (forward_F/backward_P for deferralClosure only)
+- `restrictedBackwardUntilSinceCoherent root` (buc for subformulaClosure only)
+- `restrictedForwardUntilSinceCoherent root` (fuc for subformulaClosure only)
 
 The truth lemma induction only uses these coherence properties for subformulas of root,
 so the restricted versions suffice.
@@ -214,9 +216,9 @@ so the restricted versions suffice.
 are restricted to subformulaClosure/deferralClosure of root. -/
 theorem fully_restricted_parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
     (root : Formula Atom)
-    (_h_rtc : B.restricted_temporally_coherent root)
-    (h_buc : B.restricted_backward_until_since_coherent root)
-    (h_fuc : B.restricted_forward_until_since_coherent root) (φ : Formula Atom)
+    (_h_rtc : B.restrictedTemporallyCoherent root)
+    (h_buc : B.restrictedBackwardUntilSinceCoherent root)
+    (h_fuc : B.restrictedForwardUntilSinceCoherent root) (φ : Formula Atom)
     (h_sub : φ ∈ subformulaClosure root)
     (fam : FMCS Atom D fc) (hfam : fam ∈ B.families) (t : D) :
     φ ∈ fam.mcs t ↔
@@ -308,9 +310,9 @@ theorem fully_restricted_parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
 /-- Fully restricted completeness from neg membership. -/
 theorem fully_restricted_parametric_completeness_from_neg_membership
     (B : BFMCS Atom D fc) (root : Formula Atom)
-    (h_rtc : B.restricted_temporally_coherent root)
-    (h_buc : B.restricted_backward_until_since_coherent root)
-    (h_fuc : B.restricted_forward_until_since_coherent root)
+    (h_rtc : B.restrictedTemporallyCoherent root)
+    (h_buc : B.restrictedBackwardUntilSinceCoherent root)
+    (h_fuc : B.restrictedForwardUntilSinceCoherent root)
     (φ : Formula Atom) (h_sub : φ ∈ subformulaClosure root)
     (fam : FMCS Atom D fc) (hfam : fam ∈ B.families)
     (t : D) (h_neg_in : φ.neg ∈ fam.mcs t) :

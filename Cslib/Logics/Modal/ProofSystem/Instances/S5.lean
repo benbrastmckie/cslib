@@ -22,6 +22,8 @@ variable {Atom : Type u}
 
 /-! ## Instance Registrations -/
 
+namespace Cslib.Logic.Modal
+
 section ModalInstances
 
 /-! ### System S5 Instances -/
@@ -109,3 +111,5 @@ instance :
       (F := Modal.Proposition Atom) where
 
 end ModalInstances
+
+end Cslib.Logic.Modal

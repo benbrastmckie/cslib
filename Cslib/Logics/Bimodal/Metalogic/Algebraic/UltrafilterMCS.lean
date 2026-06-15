@@ -58,6 +58,7 @@ An ultrafilter on a Boolean algebra. Named BoolAlgUltrafilter to avoid
 collision with Mathlib's Ultrafilter.
 -/
 structure BoolAlgUltrafilter (α : Type*) [BooleanAlgebra α] where
+  /-- The underlying set of elements belonging to the ultrafilter. -/
   carrier : Set α
   top_mem : ⊤ ∈ carrier
   bot_not_mem : ⊥ ∉ carrier

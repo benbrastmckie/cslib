@@ -201,6 +201,7 @@ def SimpleCountermodel.isConsistent [BEq Atom] (cm : SimpleCountermodel Atom) : 
 /--
 Extract a simple countermodel from an open saturated branch.
 -/
+@[nolint unusedArguments]
 def extractCountermodelSimple (φ : Formula Atom) (b : Branch Atom)
     {ord : TimeOrdering} {applied : AppliedSet Atom}
     (_hSaturated : findUnexpandedWithApplied b (timeOrd := ord) (applied := applied) = none)
@@ -210,6 +211,7 @@ def extractCountermodelSimple (φ : Formula Atom) (b : Branch Atom)
 /--
 Extract countermodel from an expanded tableau with an open branch.
 -/
+@[nolint unusedArguments]
 def extractCountermodelFromTableau (φ : Formula Atom) (tableau : ExpandedTableau Atom)
     (_fc : FrameClass := .Base) : Option (SimpleCountermodel Atom) :=
   match tableau with

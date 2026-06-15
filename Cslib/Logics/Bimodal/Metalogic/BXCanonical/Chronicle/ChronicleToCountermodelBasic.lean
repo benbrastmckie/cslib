@@ -226,7 +226,7 @@ theorem limit_dom_dense_from_F'T (fc : FrameClass) (A : Set (Formula Atom)) (h_m
 `DenselyOrdered` instance for `LimitDomSubtype`, conditional on F'T being
 in every domain MCS. Wraps `limit_dom_dense_from_F'T`.
 -/
-@[reducible] def limitDomSubtypeDenselyOrderedFromF'T (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
+lemma limitDomSubtypeDenselyOrderedFromF'T (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (h_dense : ∀ x ∈ limitDom fc A h_mcs,
       nextTop.neg ∈ limitF fc A h_mcs x) :
     DenselyOrdered (LimitDomSubtype fc A h_mcs) where
@@ -599,7 +599,7 @@ noncomputable def cantorBfmcsDense (fc : FrameClass) (A : Set (Formula Atom)) (h
     rw [rooted_cantor_fmcs_dense_at_s] at h_phi_v
     -- Contradiction: φ and ¬φ both in v
     exact set_consistent_not_both h_v_mcs.1 φ h_phi_v h_neg_phi_v
-  eval_family := rootedCantorFmcsDense fc A h_mcs h_box_dense 0
+  evalFamily := rootedCantorFmcsDense fc A h_mcs h_box_dense 0
   eval_family_mem := ⟨A, h_mcs, h_box_dense, 0, fun _ => Iff.rfl, rfl⟩
 
 /-! ## Dense Restricted Coherence
@@ -620,7 +620,7 @@ theorem cantor_bfmcs_dense_restricted_tc (fc : FrameClass) (A : Set (Formula Ato
     (h_box_dense : Formula.box nextTop.neg ∈ A)
     (root : Formula Atom)
     (_ : ∀ ψ, ψ ∈ deferralClosure root → ψ ∈ (extendedDeferralClosure root).toList) :
-    (cantorBfmcsDense fc A h_mcs h_box_dense).restricted_temporally_coherent root := by
+    (cantorBfmcsDense fc A h_mcs h_box_dense).restrictedTemporallyCoherent root := by
   intro fam hfam
   obtain ⟨N, h_N, h_box_N, s, h_eqN, rfl⟩ := hfam
   set h_dense_N := box_dense_gives_density fc N h_N h_box_N
@@ -668,7 +668,7 @@ a contradiction via an intermediate point where the guard fails.
 -/
 theorem cantor_bfmcs_dense_restricted_buc (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (h_box_dense : Formula.box nextTop.neg ∈ A) (root : Formula Atom) :
-    (cantorBfmcsDense fc A h_mcs h_box_dense).restricted_backward_until_since_coherent root := by
+    (cantorBfmcsDense fc A h_mcs h_box_dense).restrictedBackwardUntilSinceCoherent root := by
   intro fam hfam
   obtain ⟨N, h_N, h_box_N, s, h_eqN, rfl⟩ := hfam
   set h_dense_N := box_dense_gives_density fc N h_N h_box_N
@@ -740,7 +740,7 @@ making all rationals domain points (so the guard covers D = Rat).
 -/
 theorem cantor_bfmcs_dense_restricted_fuc (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (h_box_dense : Formula.box nextTop.neg ∈ A) (root : Formula Atom) :
-    (cantorBfmcsDense fc A h_mcs h_box_dense).restricted_forward_until_since_coherent root := by
+    (cantorBfmcsDense fc A h_mcs h_box_dense).restrictedForwardUntilSinceCoherent root := by
   intro fam hfam
   obtain ⟨N, h_N, h_box_N, s, h_eqN, rfl⟩ := hfam
   set h_dense_N := box_dense_gives_density fc N h_N h_box_N
@@ -809,7 +809,7 @@ build a countermodel on `Rat` where `φ` is false.
 
 Uses `cantorBfmcsDense` (sorry-free BFMCS) with the three restricted
 coherence conditions. The eval family is `rootedCantorFmcsDense fc A h_mcs h_box_dense 0`
-which has `mcs 0 = A`, so `¬φ ∈ eval_family.mcs 0`.
+which has `mcs 0 = A`, so `¬φ ∈ evalFamily.mcs 0`.
 -/
 theorem countermodel_dense (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (φ : Formula Atom) (h_neg_in : φ.neg ∈ A)

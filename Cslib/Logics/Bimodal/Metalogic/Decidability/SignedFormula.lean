@@ -106,6 +106,7 @@ abbrev WorldIndex := Nat
 /-- Time index for temporal reasoning in labeled tableaux. -/
 abbrev TimeIndex := Nat
 
+set_option linter.unusedVariables false in
 /--
 A label combining world and time indices for tableau signed formulas.
 Each signed formula carries a label indicating the world and time at which
@@ -117,6 +118,8 @@ structure Label : Type where
   /-- The time at which the formula is evaluated. -/
   time : TimeIndex
   deriving Repr, DecidableEq, BEq, Hashable
+
+attribute [nolint unusedArguments] instReprLabel.repr
 
 namespace Label
 
@@ -267,6 +270,7 @@ Branches grow as tableau rules are applied. A branch is closed if it
 contains a contradiction (both T(φ) and F(φ) for some formula φ, or T(⊥)).
 A branch is open if it is saturated (all rules applied) and not closed.
 -/
+@[nolint unusedArguments]
 abbrev Branch (Atom : Type u) [DecidableEq Atom] [Hashable Atom] :=
   List (SignedFormula Atom)
 
@@ -671,6 +675,7 @@ end Branch
 ## Time Ordering Constraints
 -/
 
+set_option linter.unusedVariables false in
 /--
 Time ordering constraints for abstract temporal order tracking.
 Each constraint `(a, b)` means `a` is strictly before `b` in the abstract
@@ -680,6 +685,8 @@ structure TimeOrdering : Type where
   /-- List of ordering constraints. -/
   constraints : List (TimeIndex × TimeIndex)
   deriving Repr
+
+attribute [nolint unusedArguments] instReprTimeOrdering.repr
 
 namespace TimeOrdering
 
@@ -776,6 +783,7 @@ def findBlockedTime (b : Branch Atom) (ord : TimeOrdering)
       EventualityTracker.empty) : Option TimeIndex :=
   b.knownTimes.find? fun t => isTemporallyBlocked b t ord tracker
 
+set_option linter.unusedVariables false in
 /--
 State tracking for blocking decisions during tableau expansion.
 Records which times have been blocked and the blocking ancestor.
@@ -784,6 +792,8 @@ structure BlockingState where
   /-- List of (blocked_time, blocking_ancestor) pairs. -/
   blockedTimes : List (TimeIndex × TimeIndex)
   deriving Repr
+
+attribute [nolint unusedArguments] instReprBlockingState.repr
 
 namespace BlockingState
 

@@ -48,7 +48,7 @@ structure WorldHistory {D : Type*} [AddCommGroup D] [LinearOrder D]
   states : (t : D) → domain t → F.WorldState
   /-- Task relation respect constraint. -/
   respects_task : ∀ (s t : D) (hs : domain s) (ht : domain t),
-    s ≤ t → F.task_rel (states s hs) (t - s) (states t ht)
+    s ≤ t → F.taskRel (states s hs) (t - s) (states t ht)
 
 namespace WorldHistory
 
@@ -60,7 +60,7 @@ Universal world history over all time (requires explicit reflexivity
 proof).
 -/
 def universal (F : TaskFrame D) (w : F.WorldState)
-    (h_refl : ∀ d : D, F.task_rel w d w) : WorldHistory F where
+    (h_refl : ∀ d : D, F.taskRel w d w) : WorldHistory F where
   domain := fun _ => True
   convex := by
     intros x z hx hz y hxy hyz

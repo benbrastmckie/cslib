@@ -35,19 +35,23 @@ def validOver (D : Type) [AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D]
     (τ : WorldHistory ℱ) (_ : τ ∈ Omega) (t : D),
     truthAt M Omega τ t φ
 
+/-- Notation for `validOver D φ`. -/
 notation:50 "⊨[" D "] " φ:50 => validOver D φ
 
 /-! ## Frame-Class Specific Validity -/
 
+/-- A formula is valid over all linear temporal domains. -/
 def validLinear (φ : Formula Atom) : Prop :=
   ∀ (D : Type) [AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D]
     [Nontrivial D] [LinearTemporalFrame D], validOver D φ
 
+/-- A formula is valid over all dense temporal domains (dense, unbounded order). -/
 def validDenseFc (φ : Formula Atom) : Prop :=
   ∀ (D : Type) [AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D]
     [Nontrivial D] [NoMaxOrder D] [NoMinOrder D] [DenselyOrdered D]
     [DenseTemporalFrame D], validOver D φ
 
+/-- A formula is valid over all discrete temporal domains (successor-archimedean order). -/
 def validDiscreteFc (φ : Formula Atom) : Prop :=
   ∀ (D : Type) [AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D]
     [Nontrivial D] [NoMaxOrder D] [NoMinOrder D] [SuccOrder D] [PredOrder D] [IsSuccArchimedean D]
@@ -103,6 +107,7 @@ theorem valid_discrete_fc_of_valid_linear {φ : Formula Atom} (h : validLinear �
 
 /-! ## Validity over Int -/
 
+/-- A formula is valid over the integers as a temporal domain. -/
 abbrev validOverInt (φ : Formula Atom) : Prop := validOver Int φ
 
 theorem valid_over_Int_of_valid_discrete {φ : Formula Atom} (h : validDiscrete φ) :

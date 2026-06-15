@@ -43,6 +43,7 @@ variable {Atom : Type*}
 
 /-- A temporal canonical point: an MCS of temporal formulas. -/
 structure TPoint (Atom : Type*) where
+  /-- The set of formulas constituting this canonical point. -/
   formulas : Set (Formula Atom)
   is_mcs : Temporal.SetMaximalConsistent formulas
 
@@ -54,7 +55,7 @@ def tLe (w v : TPoint Atom) : Prop :=
 
 /-! ## g/h-content Closed Under Derivation -/
 
-noncomputable def gContentClosedDerivation {Omega : Set (Formula Atom)} {φ : Formula Atom}
+lemma gContentClosedDerivation {Omega : Set (Formula Atom)} {φ : Formula Atom}
     (h_mcs : Temporal.SetMaximalConsistent Omega)
     (L : List (Formula Atom)) (h_sub : ∀ ψ ∈ L, ψ ∈ gContent Omega)
     (h_deriv : DerivationTree FrameClass.Base L φ) : (𝐆φ) ∈ Omega := by
@@ -64,7 +65,7 @@ noncomputable def gContentClosedDerivation {Omega : Set (Formula Atom)} {φ : Fo
     obtain ⟨ψ, hψ_in, hψ_eq⟩ := hf; rw [← hψ_eq]; exact h_sub ψ hψ_in
   exact temporal_closed_under_derivation h_mcs h_GL_in ⟨d_G⟩
 
-noncomputable def hContentClosedDerivation {Omega : Set (Formula Atom)} {φ : Formula Atom}
+lemma hContentClosedDerivation {Omega : Set (Formula Atom)} {φ : Formula Atom}
     (h_mcs : Temporal.SetMaximalConsistent Omega)
     (L : List (Formula Atom)) (h_sub : ∀ ψ ∈ L, ψ ∈ hContent Omega)
     (h_deriv : DerivationTree FrameClass.Base L φ) : (𝐇φ) ∈ Omega := by
@@ -111,7 +112,7 @@ theorem t_le_trans {w u v : TPoint Atom} (hwu : tLe w u) (huv : tLe u v) :
 
 /-! ## Forward/Backward Temporal Witnesses -/
 
-noncomputable def tForwardWitness (w : TPoint Atom) (ψ : Formula Atom)
+lemma tForwardWitness (w : TPoint Atom) (ψ : Formula Atom)
     (h_F : (𝐅ψ) ∈ w.formulas) :
     ∃ v : TPoint Atom, tLe w v ∧ ψ ∈ v.formulas := by
   have h_seed_cons := forward_temporal_witness_seed_consistent w.formulas w.is_mcs ψ h_F
@@ -120,7 +121,7 @@ noncomputable def tForwardWitness (w : TPoint Atom) (ψ : Formula Atom)
     fun χ hχ => hM_sup (Set.mem_union_right _ hχ),
     hM_sup (Set.mem_union_left _ (Set.mem_singleton ψ))⟩
 
-noncomputable def tBackwardWitness (w : TPoint Atom) (ψ : Formula Atom)
+lemma tBackwardWitness (w : TPoint Atom) (ψ : Formula Atom)
     (h_P : (𝐏ψ) ∈ w.formulas) :
     ∃ v : TPoint Atom, tLe v w ∧ ψ ∈ v.formulas := by
   have h_seed_cons := past_temporal_witness_seed_consistent w.formulas w.is_mcs ψ h_P
@@ -138,7 +139,7 @@ theorem t_G_forward {w v : TPoint Atom} {φ : Formula Atom}
     φ ∈ v.formulas :=
   h_le h_G
 
-noncomputable def tGBackward (w : TPoint Atom) (φ : Formula Atom)
+lemma tGBackward (w : TPoint Atom) (φ : Formula Atom)
     (h_not_G : (𝐆φ) ∉ w.formulas) :
     ∃ v : TPoint Atom, tLe w v ∧ φ ∉ v.formulas := by
   have h_seed_cons : Temporal.SetConsistent ({Formula.neg φ} ∪ gContent w.formulas : Set (Formula Atom)) := by
@@ -185,7 +186,7 @@ theorem t_H_forward {w v : TPoint Atom} {φ : Formula Atom}
   g_content_subset_implies_h_content_reverse v.formulas w.formulas
     v.is_mcs w.is_mcs h_le h_H
 
-noncomputable def tHBackward (w : TPoint Atom) (φ : Formula Atom)
+lemma tHBackward (w : TPoint Atom) (φ : Formula Atom)
     (h_not_H : (𝐇φ) ∉ w.formulas) :
     ∃ v : TPoint Atom, tLe v w ∧ φ ∉ v.formulas := by
   have h_seed_cons : Temporal.SetConsistent ({Formula.neg φ} ∪ hContent w.formulas : Set (Formula Atom)) := by
@@ -228,7 +229,7 @@ noncomputable def tHBackward (w : TPoint Atom) (φ : Formula Atom)
 
 /-! ## Eventuality Resolution for Until/Since -/
 
-noncomputable def tUntilEventualityResolution
+lemma tUntilEventualityResolution
     (w : TPoint Atom) (φ ψ : Formula Atom)
     (h_until : (ψ U φ) ∈ w.formulas)
     (_h_not_psi : ψ ∉ w.formulas) :
@@ -238,7 +239,7 @@ noncomputable def tUntilEventualityResolution
     exact temporal_implication_property w.is_mcs (theoremInMcs w.is_mcs h_ax) h_until
   exact tForwardWitness w ψ h_F_psi
 
-noncomputable def tSinceEventualityResolution
+lemma tSinceEventualityResolution
     (w : TPoint Atom) (φ ψ : Formula Atom)
     (h_since : (ψ S φ) ∈ w.formulas)
     (_h_not_psi : ψ ∉ w.formulas) :

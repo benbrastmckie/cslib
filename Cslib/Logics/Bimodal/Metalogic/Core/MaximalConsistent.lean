@@ -96,7 +96,7 @@ theorem bimodal_lindenbaum (Ω : Set (Formula Atom))
 
 /-- MCS closure under derivation for bimodal logic.
 Delegates to the generic `closed_under_derivation`. -/
-noncomputable def bimodalClosedUnderDerivation
+lemma bimodalClosedUnderDerivation
     {Ω : Set (Formula Atom)}
     (h_mcs : BimodalSetMaximalConsistent Ω)
     {L : List (Formula Atom)} (h_sub : ∀ ψ ∈ L, ψ ∈ Ω)
@@ -106,7 +106,7 @@ noncomputable def bimodalClosedUnderDerivation
 
 /-- MCS implication property for bimodal logic.
 Delegates to the generic `implication_property`. -/
-noncomputable def bimodalImplicationProperty
+lemma bimodalImplicationProperty
     {Ω : Set (Formula Atom)}
     (h_mcs : BimodalSetMaximalConsistent Ω)
     {φ ψ : Formula Atom}
@@ -116,7 +116,7 @@ noncomputable def bimodalImplicationProperty
 
 /-- MCS negation completeness for bimodal logic.
 Delegates to the generic `negation_complete`. -/
-noncomputable def bimodalNegationComplete
+lemma bimodalNegationComplete
     {Ω : Set (Formula Atom)}
     (h_mcs : BimodalSetMaximalConsistent Ω)
     (φ : Formula Atom) : φ ∈ Ω ∨ Formula.neg φ ∈ Ω :=
@@ -145,7 +145,7 @@ context derives ¬φ (i.e., φ → ⊥).
 
 Uses the deduction theorem.
 -/
-@[reducible] noncomputable def derivesNegFromInconsistentExtension {fc : FrameClass}
+lemma derivesNegFromInconsistentExtension {fc : FrameClass}
     {Γ : Context Atom} {φ : Formula Atom}
     (h_incons : ¬Consistent (fc := fc) (φ :: Γ)) :
     Nonempty (DerivationTree fc Γ (Formula.neg φ)) := by
@@ -178,7 +178,7 @@ Maximal consistent sets are deductively closed.
 
 **Statement**: `MaximalConsistent Γ → (Γ ⊢ φ → φ ∈ Γ)`
 -/
-noncomputable def maximalConsistentClosed {fc : FrameClass} (Γ : Context Atom)
+lemma maximalConsistentClosed {fc : FrameClass} (Γ : Context Atom)
     (φ : Formula Atom)
     (h_max : MaximalConsistent (fc := fc) Γ)
     (h_deriv : DerivationTree fc Γ φ) : φ ∈ Γ := by
@@ -193,7 +193,7 @@ Maximal consistent sets are negation complete.
 
 **Statement**: `MaximalConsistent Γ → (φ ∉ Γ → ¬φ ∈ Γ)`
 -/
-noncomputable def maximalNegationComplete {fc : FrameClass} (Γ : Context Atom)
+lemma maximalNegationComplete {fc : FrameClass} (Γ : Context Atom)
     (φ : Formula Atom)
     (h_max : MaximalConsistent (fc := fc) Γ) (h_not_mem : φ ∉ Γ) :
     Formula.neg φ ∈ Γ := by
@@ -210,7 +210,7 @@ Theorems (formulas derivable from empty context) are in every MCS (set-based).
 
 Uses `bimodalClosedUnderDerivation` with empty list.
 -/
-noncomputable def theoremInMcs {Ω : Set (Formula Atom)} {φ : Formula Atom}
+lemma theoremInMcs {Ω : Set (Formula Atom)} {φ : Formula Atom}
     (h_mcs : BimodalSetMaximalConsistent Ω)
     (h_deriv : DerivationTree FrameClass.Base [] φ) : φ ∈ Ω := by
   exact bimodalClosedUnderDerivation h_mcs (L := []) (fun _ h => by simp at h)

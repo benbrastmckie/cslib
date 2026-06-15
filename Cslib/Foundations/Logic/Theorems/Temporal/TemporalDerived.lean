@@ -88,7 +88,7 @@ theorem since_implies_somePast {φ ψ : F} :
     InferenceSystem.DerivableIn S (Axioms.SinceP φ ψ) :=
   HasAxiomSinceP.sinceP
 
-/-! ### F_mono, P_mono
+/-! ### fMono, pMono
 
 With Burgess convention, F(φ) = untl(φ, ⊤) where the EVENT is φ (first arg).
 So F(A) → F(B) = untl(A,⊤) → untl(B,⊤) changes the event (first arg),
@@ -97,7 +97,7 @@ which is BX3 (RightMonoUntil) with χ := ⊤.
 
 /-- F is monotone under G: `⊢ G(φ→ψ) → (Fφ → Fψ)`.
     BX3 with χ := ⊤ (event position changes). -/
-theorem F_mono {φ ψ : F} :
+theorem fMono {φ ψ : F} :
     InferenceSystem.DerivableIn S
       (HasImp.imp (allFuture (HasImp.imp φ ψ))
         (HasImp.imp (someFuture φ) (someFuture ψ))) :=
@@ -105,7 +105,7 @@ theorem F_mono {φ ψ : F} :
 
 /-- P is monotone under H: `⊢ H(φ→ψ) → (Pφ → Pψ)`.
     BX3' with χ := ⊤ (event position changes). -/
-theorem P_mono {φ ψ : F} :
+theorem pMono {φ ψ : F} :
     InferenceSystem.DerivableIn S
       (HasImp.imp (allPast (HasImp.imp φ ψ))
         (HasImp.imp (somePast φ) (somePast ψ))) :=
@@ -114,12 +114,12 @@ theorem P_mono {φ ψ : F} :
 /-! ### Duality Lemmas (DNI-based) -/
 
 /-- `⊢ F(¬φ) → ¬(Gφ)`: DNI at F(¬φ). -/
-theorem F_neg_G {φ : F} :
+theorem fNegG {φ : F} :
     InferenceSystem.DerivableIn S (HasImp.imp (someFuture (neg' φ)) (neg' (allFuture φ))) :=
   dni (someFuture (neg' φ))
 
 /-- `⊢ P(¬φ) → ¬(Hφ)`: DNI at P(¬φ). -/
-theorem P_neg_H {φ : F} :
+theorem pNegH {φ : F} :
     InferenceSystem.DerivableIn S (HasImp.imp (somePast (neg' φ)) (neg' (allPast φ))) :=
   dni (somePast (neg' φ))
 
@@ -136,7 +136,7 @@ private theorem neg_contrapositive_imp_neg {φ ψ : F} :
 
 /-- **G-distribution**: `⊢ G(φ→ψ) → (Gφ → Gψ)`.
     Derived from BX3 and propositional contraposition. -/
-theorem G_distribution {φ ψ : F} :
+theorem gDistribution {φ ψ : F} :
     InferenceSystem.DerivableIn S
       (HasImp.imp (allFuture (HasImp.imp φ ψ))
         (HasImp.imp (allFuture φ) (allFuture ψ))) := by
@@ -144,7 +144,7 @@ theorem G_distribution {φ ψ : F} :
   have neg_contra := neg_contrapositive_imp_neg (S := S) (φ := φ) (ψ := ψ)
   have g_nc := TemporalNecessitation.tempNec neg_contra
   -- Step 2: BX3: G(¬(¬ψ→¬φ) → ¬(φ→ψ)) → (F(¬(¬ψ→¬φ)) → F(¬(φ→ψ)))
-  -- Using F_mono pattern (BX3 with χ := ⊤, event monotonicity)
+  -- Using fMono pattern (BX3 with χ := ⊤, event monotonicity)
   have bx3 := HasAxiomRightMonoUntil.rightMonoUntil (S := S)
     (φ := neg' (HasImp.imp (neg' ψ) (neg' φ)))
     (ψ := neg' (HasImp.imp φ ψ))
@@ -163,7 +163,7 @@ theorem G_distribution {φ ψ : F} :
 
 /-- **H-distribution**: `⊢ H(φ→ψ) → (Hφ → Hψ)`.
     Derived from BX3' and propositional contraposition (uses tempNecPast). -/
-theorem H_distribution {φ ψ : F} :
+theorem hDistribution {φ ψ : F} :
     InferenceSystem.DerivableIn S
       (HasImp.imp (allPast (HasImp.imp φ ψ))
         (HasImp.imp (allPast φ) (allPast ψ))) := by
@@ -185,7 +185,7 @@ theorem H_distribution {φ ψ : F} :
 /-! ### G/H Contraposition -/
 
 /-- `⊢ G(φ→ψ) → G(¬ψ→¬φ)`. -/
-theorem G_contrapose {φ ψ : F} :
+theorem gContrapose {φ ψ : F} :
     InferenceSystem.DerivableIn S
       (HasImp.imp (allFuture (HasImp.imp φ ψ))
         (allFuture (HasImp.imp (neg' ψ) (neg' φ)))) := by
@@ -198,7 +198,7 @@ theorem G_contrapose {φ ψ : F} :
   exact contraposition (ModusPonens.mp bx3 g_nc)
 
 /-- `⊢ H(φ→ψ) → H(¬ψ→¬φ)`. -/
-theorem H_contrapose {φ ψ : F} :
+theorem hContrapose {φ ψ : F} :
     InferenceSystem.DerivableIn S
       (HasImp.imp (allPast (HasImp.imp φ ψ))
         (allPast (HasImp.imp (neg' ψ) (neg' φ)))) := by
@@ -213,39 +213,39 @@ theorem H_contrapose {φ ψ : F} :
 /-! ### G/H Conjunction Introduction -/
 
 /-- `⊢ Gφ → Gψ → G(φ∧ψ)`. -/
-theorem G_and_intro {φ ψ : F} :
+theorem gAndIntro {φ ψ : F} :
     InferenceSystem.DerivableIn S
       (HasImp.imp (allFuture φ)
         (HasImp.imp (allFuture ψ)
           (allFuture (HasImp.imp (HasImp.imp φ (neg' ψ))
             HasBot.bot)))) := by
   have g_pair := TemporalNecessitation.tempNec (@pairing F _ _ S _ _ φ ψ)
-  have step1 := ModusPonens.mp (G_distribution (S := S)) g_pair
-  exact imp_trans step1 (G_distribution (S := S))
+  have step1 := ModusPonens.mp (gDistribution (S := S)) g_pair
+  exact imp_trans step1 (gDistribution (S := S))
 
 /-- `⊢ Hφ → Hψ → H(φ∧ψ)`. -/
-theorem H_and_intro {φ ψ : F} :
+theorem hAndIntro {φ ψ : F} :
     InferenceSystem.DerivableIn S
       (HasImp.imp (allPast φ)
         (HasImp.imp (allPast ψ)
           (allPast (HasImp.imp (HasImp.imp φ (neg' ψ))
             HasBot.bot)))) := by
   have h_pair := TemporalNecessitation.tempNecPast (@pairing F _ _ S _ _ φ ψ)
-  have step1 := ModusPonens.mp (H_distribution (S := S)) h_pair
-  exact imp_trans step1 (H_distribution (S := S))
+  have step1 := ModusPonens.mp (hDistribution (S := S)) h_pair
+  exact imp_trans step1 (hDistribution (S := S))
 
 /-! ### G/H Implication Transitivity -/
 
 /-- `⊢ G(φ→ψ) → G(ψ→χ) → G(φ→χ)`. -/
-theorem G_imp_trans {φ ψ χ : F} :
+theorem gImpTrans {φ ψ χ : F} :
     InferenceSystem.DerivableIn S
       (HasImp.imp (allFuture (HasImp.imp φ ψ))
         (HasImp.imp (allFuture (HasImp.imp ψ χ))
           (allFuture (HasImp.imp φ χ)))) := by
   have g_b := TemporalNecessitation.tempNec
     (@b_combinator F _ _ S _ _ (φ := φ) (ψ := ψ) (χ := χ))
-  have step1 := ModusPonens.mp (G_distribution (S := S)) g_b
-  have step2 := imp_trans step1 (G_distribution (S := S))
+  have step1 := ModusPonens.mp (gDistribution (S := S)) g_b
+  have step2 := imp_trans step1 (gDistribution (S := S))
   -- step2 : G(ψ→χ) → G(φ→ψ) → G(φ→χ). Flip to get the right order.
   exact ModusPonens.mp
     (@flip F _ _ S _ _
@@ -255,15 +255,15 @@ theorem G_imp_trans {φ ψ χ : F} :
     step2
 
 /-- `⊢ H(φ→ψ) → H(ψ→χ) → H(φ→χ)`. -/
-theorem H_imp_trans {φ ψ χ : F} :
+theorem hImpTrans {φ ψ χ : F} :
     InferenceSystem.DerivableIn S
       (HasImp.imp (allPast (HasImp.imp φ ψ))
         (HasImp.imp (allPast (HasImp.imp ψ χ))
           (allPast (HasImp.imp φ χ)))) := by
   have h_b := TemporalNecessitation.tempNecPast
     (@b_combinator F _ _ S _ _ (φ := φ) (ψ := ψ) (χ := χ))
-  have step1 := ModusPonens.mp (H_distribution (S := S)) h_b
-  have step2 := imp_trans step1 (H_distribution (S := S))
+  have step1 := ModusPonens.mp (hDistribution (S := S)) h_b
+  have step2 := imp_trans step1 (hDistribution (S := S))
   exact ModusPonens.mp
     (@flip F _ _ S _ _
       (φ := allPast (HasImp.imp ψ χ))
@@ -279,13 +279,13 @@ theorem connect_future_G {φ : F} :
       (HasImp.imp (allFuture φ)
         (allFuture (allFuture (somePast φ)))) := by
   have g_conn := TemporalNecessitation.tempNec (@connect_future_thm F _ _ _ _ S _ _ (φ := φ))
-  exact ModusPonens.mp (G_distribution (S := S)) g_conn
+  exact ModusPonens.mp (gDistribution (S := S)) g_conn
 
 /-- `⊢ Hφ → H(H(Fφ))`. -/
 theorem connect_past_H {φ : F} :
     InferenceSystem.DerivableIn S (HasImp.imp (allPast φ) (allPast (allPast (someFuture φ)))) := by
   have h_conn := TemporalNecessitation.tempNecPast (@connect_past_thm F _ _ _ _ S _ _ (φ := φ))
-  exact ModusPonens.mp (H_distribution (S := S)) h_conn
+  exact ModusPonens.mp (hDistribution (S := S)) h_conn
 
 end TemporalDerived
 

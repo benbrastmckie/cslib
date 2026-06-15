@@ -32,17 +32,9 @@ open Cslib.Logic.Bimodal.Metalogic.Core
 
 variable {Atom : Type*}
 
-/--
-A family of maximal consistent sets indexed by time, with temporal coherence.
-
-- `D`: Duration/time type with preorder structure
-- `fc`: Frame class (default Base)
-- `mcs`: Function assigning an MCS to each time point
-- `is_mcs`: Proof that each assigned set is maximal consistent
-- `forward_G`: G formulas propagate to strictly future times (t < t')
-- `backward_H`: H formulas propagate to strictly past times (t' < t)
--/
+/-- A family of maximal consistent sets indexed by a preordered type, respecting G and H propagation. -/
 structure FMCS (Atom : Type*) (D : Type*) [Preorder D] (fc : FrameClass := FrameClass.Base) where
+  /-- The function assigning an MCS to each time point. -/
   mcs : D → Set (Formula Atom)
   is_mcs : ∀ t, SetMaximalConsistent fc (mcs t)
   forward_G : ∀ t t' phi, t < t' → Formula.allFuture phi ∈ mcs t → phi ∈ mcs t'

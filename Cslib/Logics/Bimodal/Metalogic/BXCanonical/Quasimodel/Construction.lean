@@ -108,6 +108,7 @@ Instead of constructing this directly (which would require complex well-founded
 recursion in Lean), we prove the existence theorem using the BXPoint infrastructure:
 we construct the chain at the MCS level and project down to Hintikka points. -/
 
+/-- A finite chain of Hintikka points witnessing satisfaction of an Until-formula. -/
 structure QuasimodelChain (Sigma : Finset (Formula Atom)) (target_lhs target_rhs : Formula Atom) where
   /-- The list of Hintikka points forming the chain (always nonempty). -/
   points : List (HintikkaPoint Sigma)
@@ -279,6 +280,7 @@ noncomputable def sinceDefectSet {Sigma : Finset (Formula Atom)} (h : HintikkaPo
     | _ => False)
 
 open Classical in
+/-- The number of Since-defects at a Hintikka point. -/
 noncomputable def sinceDefectCount {Sigma : Finset (Formula Atom)} (h : HintikkaPoint Sigma) : Nat :=
   (sinceDefectSet h).card
 
@@ -351,9 +353,9 @@ def HintikkaStepOracle {Sigma : Finset (Formula Atom)} (φ ψ : Formula Atom) : 
         (Formula.untl φ ψ ∈ wh'.point.formulas ∧
           defectCount wh'.point < defectCount h))
 
-/-- A raw Hintikka chain: a nonempty list of Hintikka points with each
-    consecutive pair related by `hintikkaStep`. -/
+/-- A raw Hintikka chain: a nonempty list of Hintikka points with each consecutive pair related by `hintikkaStep`. -/
 structure HintikkaRawChain (Sigma : Finset (Formula Atom)) where
+  /-- The list of Hintikka points forming the chain. -/
   points : List (HintikkaPoint Sigma)
   nonempty : points ≠ []
   is_chain : points.IsChain hintikkaStep

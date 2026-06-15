@@ -453,6 +453,7 @@ The full implementation performs depth-limited DFS to find derivation trees.
 This is deferred since the decidability procedure uses tableau expansion
 rather than forward proof search.
 -/
+@[nolint unusedArguments]
 def boundedSearchWithProofStub
     (_ : Context Atom) (φ : Formula Atom) (_ : Nat) :
     Option (DerivationTree FrameClass.Base ([] : Context Atom) φ) × Nat × Nat :=
@@ -472,6 +473,7 @@ Proof sketch:
 - imp_s A A : A -> (A -> A)
 - MP gives: A -> A
 -/
+/-- Derives the identity tautology `A → A` in the base frame class. -/
 def identity (A : Formula Atom) :
     DerivationTree FrameClass.Base ([] : Context Atom) (A.imp A) :=
   -- Step 1: imp_k A (A->A) A

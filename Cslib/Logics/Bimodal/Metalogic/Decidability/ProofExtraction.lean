@@ -264,6 +264,7 @@ approach:
 Returns `ProofExtractionResult.success proof` if extraction succeeds,
 or `ProofExtractionResult.incomplete reason` if all strategies fail.
 -/
+@[nolint unusedArguments]
 def extractProof (phi : Formula Atom) (tableau : ExpandedTableau Atom)
     (_fc : FrameClass := .Base) : ProofExtractionResult phi :=
   match tableau with
@@ -343,6 +344,7 @@ Verify that a proof term is well-formed (type-checks).
 This is automatically enforced by Lean's type system, but we provide
 this function for documentation and potential runtime checks.
 -/
+@[nolint unusedArguments]
 def verifyProof (_phi : Formula Atom) (_proof : DerivationTree .Base ([] : Context Atom) _phi) : Bool :=
   true  -- Type system ensures well-formedness
 
@@ -356,6 +358,7 @@ def proofHeight {phi : Formula Atom} (proof : DerivationTree .Base ([] : Context
 ## Statistics
 -/
 
+set_option linter.unusedVariables false in
 /--
 Statistics about proof extraction.
 -/
@@ -367,5 +370,7 @@ structure ProofExtractionStats where
   /-- Proof height if successful. -/
   height : Option Nat
   deriving Repr, Inhabited
+
+attribute [nolint unusedArguments] instReprProofExtractionStats.repr
 
 end Cslib.Logic.Bimodal.Metalogic.Decidability

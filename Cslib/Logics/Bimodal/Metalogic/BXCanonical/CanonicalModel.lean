@@ -92,7 +92,7 @@ theorem set_lindenbaum_fc {fc : FrameClass} {Omega : Set (Formula Atom)}
 
 /-- Modal witness at arbitrary fc: given an fc-MCS A with diamond-psi in A, produce an fc-MCS v
 that is box-equivalent to A and contains psi. -/
-noncomputable def bxModalWitnessFc {fc : FrameClass} {A : Set (Formula Atom)}
+lemma bxModalWitnessFc {fc : FrameClass} {A : Set (Formula Atom)}
     (h_mcs : SetMaximalConsistent fc A) (psi : Formula Atom)
     (h_dia : Formula.diamond psi ∈ A) :
     ∃ (v : Set (Formula Atom)), SetMaximalConsistent fc v ∧
@@ -172,7 +172,7 @@ noncomputable def bxModalWitnessFc {fc : FrameClass} {A : Set (Formula Atom)}
         · exact absurd h h_not_box
         · exact h
       have h_m5 : DerivationTree fc [] ((Formula.box chi).neg.imp (Formula.box (Formula.box chi).neg)) :=
-        liftBase fc (axiom_5_negative_introspection chi)
+        liftBase fc (axiom5NegativeIntrospection chi)
       have h_box_neg_box := SetMaximalConsistent.implication_property h_mcs
         (theoremInMcsFc h_mcs h_m5) h_neg_box
       have h_neg_box_v : (Formula.box chi).neg ∈ v := h_bc_sub h_box_neg_box
@@ -183,6 +183,7 @@ noncomputable def bxModalWitnessFc {fc : FrameClass} {A : Set (Formula Atom)}
 
 variable [Denumerable (Formula Atom)]
 
+/-- Enumerates formulas via Gödel pairing to schedule witnesses during chain construction. -/
 noncomputable def schedule (n : Nat) : Formula Atom :=
   Denumerable.ofNat (Formula Atom) (Nat.unpair n).2
 
@@ -194,6 +195,7 @@ theorem schedule_surjective_above (psi : Formula Atom) (k : Nat) :
 
 /-! ## Forward Step -/
 
+/-- Constructs the forward successor MCS witnessing F-eventualities scheduled at step `psi`. -/
 noncomputable def fwdSucc (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent FrameClass.Base M) (psi : Formula Atom) :
     Set (Formula Atom) := by
   by_cases h_F : Formula.someFuture psi ∈ M
@@ -221,6 +223,7 @@ theorem fwd_succ_resolves (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent
 
 /-! ## Backward Step -/
 
+/-- Constructs the backward predecessor MCS witnessing P-eventualities scheduled at step `psi`. -/
 noncomputable def bwdPred (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent FrameClass.Base M) (psi : Formula Atom) :
     Set (Formula Atom) := by
   by_cases h_P : Formula.somePast psi ∈ M
@@ -248,6 +251,7 @@ theorem bwd_pred_resolves (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent
 
 /-! ## Forward/Backward Chains -/
 
+/-- Builds the forward chain of MCSs indexed by natural numbers via iterated forward successors. -/
 noncomputable def fwdChain (M0 : Set (Formula Atom)) (h0 : SetMaximalConsistent FrameClass.Base M0) :
     (n : Nat) → { M : Set (Formula Atom) // SetMaximalConsistent FrameClass.Base M }
   | 0 => ⟨M0, h0⟩
@@ -255,6 +259,7 @@ noncomputable def fwdChain (M0 : Set (Formula Atom)) (h0 : SetMaximalConsistent 
     let ⟨M, hM⟩ := fwdChain M0 h0 n
     ⟨fwdSucc M hM (schedule n), fwd_succ_mcs M hM (schedule n)⟩
 
+/-- Builds the backward chain of MCSs indexed by natural numbers via iterated backward predecessors. -/
 noncomputable def bwdChain (M0 : Set (Formula Atom)) (h0 : SetMaximalConsistent FrameClass.Base M0) :
     (n : Nat) → { M : Set (Formula Atom) // SetMaximalConsistent FrameClass.Base M }
   | 0 => ⟨M0, h0⟩
@@ -264,6 +269,7 @@ noncomputable def bwdChain (M0 : Set (Formula Atom)) (h0 : SetMaximalConsistent 
 
 /-! ## Int-indexed Chain -/
 
+/-- Combines the forward and backward chains into a single integer-indexed chain of MCSs. -/
 noncomputable def intChain (M0 : Set (Formula Atom)) (h0 : SetMaximalConsistent FrameClass.Base M0) (t : Int) :
     Set (Formula Atom) :=
   if t ≥ 0 then (fwdChain M0 h0 t.toNat).val
@@ -364,6 +370,7 @@ theorem int_chain_backward_H (M0 : Set (Formula Atom)) (h0 : SetMaximalConsisten
 
 /-! ## FMCS -/
 
+/-- Builds the base FMCS over integers from a given MCS using the integer-indexed chain. -/
 noncomputable def bxFmcs (M0 : Set (Formula Atom)) (h0 : SetMaximalConsistent FrameClass.Base M0) : FMCS Atom Int where
   mcs := intChain M0 h0
   is_mcs := int_chain_mcs M0 h0
@@ -373,6 +380,7 @@ noncomputable def bxFmcs (M0 : Set (Formula Atom)) (h0 : SetMaximalConsistent Fr
 theorem bx_fmcs_at_zero (M0 : Set (Formula Atom)) (h0 : SetMaximalConsistent FrameClass.Base M0) :
     (bxFmcs M0 h0).mcs 0 = M0 := int_chain_zero M0 h0
 
+/-- Builds a shifted base FMCS anchored at integer `s` by translating the integer-indexed chain. -/
 noncomputable def shiftedBxFmcs (M0 : Set (Formula Atom)) (h0 : SetMaximalConsistent FrameClass.Base M0)
     (s : Int) : FMCS Atom Int where
   mcs t := intChain M0 h0 (t - s)
@@ -461,6 +469,7 @@ theorem h_content_fc_consistent {fc : FrameClass} {M : Set (Formula Atom)}
 
 /-! ### FC-Parametric Forward/Backward Steps -/
 
+/-- Frame-class-parametric forward successor MCS witnessing F-eventualities at step `psi`. -/
 noncomputable def fwdSuccFc {fc : FrameClass}
     (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc M) (psi : Formula Atom) :
     Set (Formula Atom) := by
@@ -490,6 +499,7 @@ theorem fwd_succ_fc_resolves {fc : FrameClass}
   exact (set_lindenbaum_fc (forward_temporal_witness_seed_consistent M h_mcs psi h_F)).choose_spec.1
     (Set.mem_union_left _ (Set.mem_singleton psi))
 
+/-- Frame-class-parametric backward predecessor MCS witnessing P-eventualities at step `psi`. -/
 noncomputable def bwdPredFc {fc : FrameClass}
     (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc M) (psi : Formula Atom) :
     Set (Formula Atom) := by
@@ -521,6 +531,7 @@ theorem bwd_pred_fc_resolves {fc : FrameClass}
 
 /-! ### FC-Parametric Chains -/
 
+/-- Frame-class-parametric forward chain of MCSs indexed by natural numbers. -/
 noncomputable def fwdChainFc {fc : FrameClass}
     (M0 : Set (Formula Atom)) (h0 : SetMaximalConsistent fc M0) :
     (n : Nat) → { M : Set (Formula Atom) // SetMaximalConsistent fc M }
@@ -529,6 +540,7 @@ noncomputable def fwdChainFc {fc : FrameClass}
     let ⟨M, hM⟩ := fwdChainFc M0 h0 n
     ⟨fwdSuccFc M hM (schedule n), fwd_succ_fc_mcs M hM (schedule n)⟩
 
+/-- Frame-class-parametric backward chain of MCSs indexed by natural numbers. -/
 noncomputable def bwdChainFc {fc : FrameClass}
     (M0 : Set (Formula Atom)) (h0 : SetMaximalConsistent fc M0) :
     (n : Nat) → { M : Set (Formula Atom) // SetMaximalConsistent fc M }
@@ -537,6 +549,7 @@ noncomputable def bwdChainFc {fc : FrameClass}
     let ⟨M, hM⟩ := bwdChainFc M0 h0 n
     ⟨bwdPredFc M hM (schedule n), bwd_pred_fc_mcs M hM (schedule n)⟩
 
+/-- Frame-class-parametric integer-indexed chain combining forward and backward FC-chains. -/
 noncomputable def intChainFc {fc : FrameClass}
     (M0 : Set (Formula Atom)) (h0 : SetMaximalConsistent fc M0) (t : Int) :
     Set (Formula Atom) :=
@@ -653,6 +666,7 @@ theorem int_chain_fc_backward_H {fc : FrameClass}
 
 /-! ### FC-Parametric FMCS -/
 
+/-- Frame-class-parametric FMCS over integers built from the FC-parametric integer-indexed chain. -/
 noncomputable def bxFmcsFc {fc : FrameClass}
     (M0 : Set (Formula Atom)) (h0 : SetMaximalConsistent fc M0) : FMCS Atom Int fc where
   mcs := intChainFc M0 h0
@@ -660,6 +674,7 @@ noncomputable def bxFmcsFc {fc : FrameClass}
   forward_G := int_chain_fc_forward_G M0 h0
   backward_H := int_chain_fc_backward_H M0 h0
 
+/-- Frame-class-parametric shifted FMCS anchored at integer `s` via translation of the FC-chain. -/
 noncomputable def shiftedBxFmcsFc {fc : FrameClass}
     (M0 : Set (Formula Atom)) (h0 : SetMaximalConsistent fc M0)
     (s : Int) : FMCS Atom Int fc where
@@ -723,6 +738,7 @@ theorem box_stable_in_shifted_fmcs_fc {fc : FrameClass}
 
 /-! ## Henkin BFMCS on Int -/
 
+/-- Constructs the Henkin BFMCS on integers from an MCS as the family of all box-equivalent shifted FC-FMCSs. -/
 noncomputable def henkinBfmcs (fc : FrameClass) (A : Set (Formula Atom))
     (h_mcs : SetMaximalConsistent fc A) :
     BFMCS Atom ℤ fc where
@@ -766,7 +782,7 @@ noncomputable def henkinBfmcs (fc : FrameClass) (A : Set (Formula Atom))
     have h_phi_v := h_all (shiftedBxFmcsFc v h_v_mcs t) h_fam_v_mem
     rw [shifted_bx_fmcs_fc_at_s] at h_phi_v
     exact set_consistent_not_both h_v_mcs.1 phi h_phi_v h_neg_phi_v
-  eval_family := shiftedBxFmcsFc A h_mcs 0
+  evalFamily := shiftedBxFmcsFc A h_mcs 0
   eval_family_mem := ⟨A, h_mcs, 0, fun _ => Iff.rfl, rfl⟩
 
 end Cslib.Logic.Bimodal.Metalogic.BXCanonical.CanonicalModel

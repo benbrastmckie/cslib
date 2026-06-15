@@ -31,7 +31,7 @@ next_project_number: 206
 ### Modal Logic
 
 197 [PLANNED] — Review the ambition to contribute Modal/ to upstream, identifying
-201 [NOT STARTED] — Review citations in Modal PR changes for accuracy and completenes
+201 [RESEARCHED] — Review citations in Modal PR changes for accuracy and completenes
 
 ### Propositional Logic
 
@@ -97,10 +97,11 @@ next_project_number: 206
 ---
 
 ### 201. Review modal pr citations
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
+- **Research**: [201_review_modal_pr_citations/reports/01_modal-citation-review.md]
 
 **Description**: Review citations in Modal PR changes for accuracy and completeness, covering the Basic.lean and Denotation.lean files in scope for the initial Modal/ upstream PR (task 197). Verify literature references (Blackburn2001, ChagrovZakharyaschev1997, Bentzen2023, Trufas2024, Johansson1937), check BibTeX entries in references.bib, and ensure pr-description.md citations are accurate and properly grounded in primary sources
 

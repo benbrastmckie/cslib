@@ -1,5 +1,5 @@
 ---
-next_project_number: 207
+next_project_number: 208
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 207
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,202 | -- | Bimodal Porting, Propositional Logic, Propositional PRs, ... |
+| 1 | 36,37,180,188,192,195,197,202,207 | -- | Bimodal Porting, Propositional Logic, Propositional PRs, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -40,6 +40,7 @@ next_project_number: 207
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
+207 [NOT STARTED] — Research refactoring Temporal/ and Modal/ implementations based o
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -48,6 +49,16 @@ next_project_number: 207
 197 [PR READY] — Review the ambition to contribute Modal/ to upstream, identifying
 
 ## Tasks
+
+### 207. Research temporal modal refactor pr649
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Research refactoring Temporal/ and Modal/ implementations based on PR #649 review feedback on Tense Logic, drawing on Isabelle Propositional_Logic_Class formalization for a dependent type system approach in Lean 4
+
+---
 
 ### 206. Fix --wfail CI warnings across Bimodal, Temporal, and Modal files
 - **Status**: [COMPLETED]

@@ -1,6 +1,16 @@
 {
-  "next_project_number": 207,
+  "next_project_number": 208,
   "active_projects": [
+    {
+      "project_number": 207,
+      "project_name": "research_temporal_modal_refactor_pr649",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Research refactoring Temporal/ and Modal/ implementations based on PR #649 review feedback on Tense Logic, drawing on Isabelle Propositional_Logic_Class formalization for a dependent type system approach in Lean 4",
+      "topic": "Temporal Logic",
+      "created": "2026-06-15T16:39:14Z",
+      "last_updated": "2026-06-15T16:39:14Z"
+    },
     {
       "project_number": 206,
       "project_name": "fix_wfail_ci_warnings",

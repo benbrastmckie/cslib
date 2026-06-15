@@ -96,14 +96,14 @@
     {
       "project_number": 197,
       "project_name": "modal_upstream_initial_pr",
-      "status": "researched",
+      "status": "planned",
       "task_type": "pr",
       "title": "Scope initial Modal/ upstream PR (~300 LOC)",
       "description": "Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible",
       "topic": "Modal Logic",
       "created": "2026-06-14T19:08:07Z",
-      "last_updated": "2026-06-15T06:15:22Z",
-      "session_id": "sess_1781503656_5d7a7b",
+      "last_updated": "2026-06-15T06:33:22Z",
+      "session_id": "sess_1781504941_82709e",
       "research_artifacts": [
         "specs/197_modal_upstream_initial_pr/reports/01_modal-upstream-pr-scope.md",
         "specs/197_modal_upstream_initial_pr/reports/02_literature-grounded-analysis.md",
@@ -112,38 +112,48 @@
       ],
       "next_artifact_number": 5,
       "plan_artifacts": [
-        "specs/197_modal_upstream_initial_pr/plans/02_modal-upstream-pr-plan.md"
+        "specs/197_modal_upstream_initial_pr/plans/02_modal-upstream-pr-plan.md",
+        "specs/197_modal_upstream_initial_pr/plans/05_modal-upstream-pr-plan.md"
       ],
       "plan_metadata": {
-        "phases": 5,
-        "total_effort_hours": 3.5,
+        "phases": 4,
+        "total_effort_hours": 3,
         "complexity": "medium",
         "research_integrated": true,
-        "plan_version": 2,
+        "plan_version": 3,
         "dependency_waves": [
           [
             1
           ],
           [
-            2,
-            4
+            2
           ],
           [
             3
           ],
           [
-            5
+            4
           ]
         ],
         "reports_integrated": [
           {
+            "path": "reports/04_pr649-comparison-classical-signature.md",
+            "integrated_in_plan_version": 3,
+            "integrated_date": "2026-06-14"
+          },
+          {
+            "path": "reports/03_team-research.md",
+            "integrated_in_plan_version": 3,
+            "integrated_date": "2026-06-14"
+          },
+          {
             "path": "reports/01_modal-upstream-pr-scope.md",
-            "integrated_in_plan_version": 1,
+            "integrated_in_plan_version": 3,
             "integrated_date": "2026-06-14"
           },
           {
             "path": "reports/02_literature-grounded-analysis.md",
-            "integrated_in_plan_version": 2,
+            "integrated_in_plan_version": 3,
             "integrated_date": "2026-06-14"
           }
         ]

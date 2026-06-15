@@ -23,7 +23,7 @@
     {
       "project_number": 216,
       "project_name": "push_relevant_changes_to_pr_648",
-      "status": "pr_ready",
+      "status": "completed",
       "task_type": "pr",
       "description": "Given what task 202 implemented, push a single commit with all and only the relevant changes to https://github.com/leanprover/cslib/pull/648, where the aim is to keep the LOC ~300 to avoid overwhelming reviewers",
       "topic": "Propositional Logic",

@@ -11,7 +11,7 @@ next_project_number: 218
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,209,214,215,216,217 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,195,197,209,214,215,217 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -37,7 +37,6 @@ next_project_number: 218
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
-216 [PR READY] — Given what task 202 implemented, push a single commit with all an
 
 ### Propositional PRs
 
@@ -68,7 +67,7 @@ next_project_number: 218
 ---
 
 ### 216. Push relevant changes to pr 648
-- **Status**: [PR READY]
+- **Status**: [COMPLETED]
 - **Task Type**: pr
 - **Topic**: Propositional Logic
 - **Dependencies**: None

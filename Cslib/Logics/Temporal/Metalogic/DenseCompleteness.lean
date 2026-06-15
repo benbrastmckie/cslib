@@ -29,6 +29,8 @@ which by the truth lemma gives membership.
 - `completeness_dense`: ValidDense phi -> ThDerivableFc .Dense phi.
 -/
 
+set_option linter.unusedSectionVars false
+set_option linter.unusedSimpArgs false
 set_option linter.style.setOption false
 set_option linter.dupNamespace false
 set_option maxHeartbeats 3200000

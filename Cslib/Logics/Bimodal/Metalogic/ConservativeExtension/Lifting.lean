@@ -35,6 +35,9 @@ step can be preserved without modification.
 - Goldblatt 1992, Logics of Time and Computation
 -/
 
+set_option linter.style.setOption false
+set_option linter.unusedSimpArgs false
+set_option linter.flexible false
 set_option linter.style.emptyLine false
 set_option linter.unusedSectionVars false
 set_option linter.unusedDecidableInType false

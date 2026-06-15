@@ -21,7 +21,9 @@ witnesses, and eventuality resolution for the temporal chronicle construction.
 * Ported from Cslib/Logics/Bimodal/Metalogic/BXCanonical/Frame.lean
 -/
 
+set_option linter.unusedSimpArgs false
 set_option linter.style.setOption false
+set_option linter.flexible false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 set_option maxHeartbeats 800000

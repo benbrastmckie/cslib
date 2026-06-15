@@ -25,6 +25,8 @@ These are the foundation for proving axiom closure and the lifting theorem.
 - Goldblatt 1992, Logics of Time and Computation
 -/
 
+set_option linter.style.setOption false
+set_option linter.flexible false
 set_option linter.style.emptyLine false
 set_option linter.unusedDecidableInType false
 

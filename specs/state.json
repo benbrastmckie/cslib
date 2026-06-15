@@ -163,14 +163,14 @@
     {
       "project_number": 197,
       "project_name": "modal_upstream_initial_pr",
-      "status": "planned",
+      "status": "pr_ready",
       "task_type": "pr",
       "title": "Scope initial Modal/ upstream PR (~300 LOC)",
       "description": "Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible",
       "topic": "pr",
       "created": "2026-06-14T19:08:07Z",
-      "last_updated": "2026-06-15T14:16:14Z",
-      "session_id": "sess_1781532709_eb0889",
+      "last_updated": "2026-06-15T15:09:50Z",
+      "session_id": "sess_1781535860_c7d8e9",
       "research_artifacts": [
         "specs/197_modal_upstream_initial_pr/reports/01_modal-upstream-pr-scope.md",
         "specs/197_modal_upstream_initial_pr/reports/02_literature-grounded-analysis.md",
@@ -292,8 +292,14 @@
         {
           "path": "specs/197_modal_upstream_initial_pr/plans/08_modal-upstream-pr-plan.md",
           "type": "plan"
+        },
+        {
+          "path": "specs/197_modal_upstream_initial_pr/pr-description.md",
+          "type": "pr_description",
+          "summary": "PR description for Modal/ formula primitives refactoring, stacking on PR #648"
         }
-      ]
+      ],
+      "base_branch": "feat/propositional-v2"
     },
     {
       "project_number": 188,

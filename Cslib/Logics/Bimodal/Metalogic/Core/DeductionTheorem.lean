@@ -39,6 +39,7 @@ We handle each case of the 7-constructor DerivationTree:
 * Cslib/Logics/Temporal/Metalogic/DeductionTheorem.lean — temporal pattern
 -/
 
+set_option linter.style.show false
 set_option linter.style.emptyLine false
 set_option linter.style.setOption false
 set_option linter.flexible false

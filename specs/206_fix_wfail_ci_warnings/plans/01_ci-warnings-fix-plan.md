@@ -343,7 +343,7 @@ theorem f_nesting_depth_nonneg ...
 
 ---
 
-### Phase 5: Build Verification and Incremental Fixes [NOT STARTED]
+### Phase 5: Build Verification and Incremental Fixes [IN PROGRESS]
 
 **Goal**: Run a full `lake build --wfail --iofail` to catch any remaining warnings not covered by the research analysis, and fix them.
 

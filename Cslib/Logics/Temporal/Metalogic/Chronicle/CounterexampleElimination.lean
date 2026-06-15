@@ -45,6 +45,8 @@ by inserting new points into the domain.
 
 namespace Cslib.Logic.Temporal.Metalogic.Chronicle
 
+set_option linter.unusedSimpArgs false
+set_option linter.style.show false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 set_option linter.style.setOption false
@@ -502,6 +504,7 @@ structure C5BackwardWalkResult (χ : Chronicle Atom) (ξ η : Formula Atom) (sta
 
 /-! ## Recursive Walks -/
 
+-- Complex term elaboration requires extended heartbeats
 set_option maxHeartbeats 3200000 in
 noncomputable def c5_forward_walk
     (χ : Chronicle Atom) (h_c0 : χ.c0) (h_c2' : χ.c2')
@@ -1042,6 +1045,7 @@ decreasing_by
      This yields a single WF goal closed by simp_all + exact h_term. -/
   all_goals simp_all only [gt_iff_lt]
   all_goals exact h_term
+-- Complex term elaboration requires extended heartbeats
 set_option maxHeartbeats 3200000 in
 noncomputable def c5_backward_walk
     (χ : Chronicle Atom) (h_c0 : χ.c0) (h_c2' : χ.c2')
@@ -1589,6 +1593,7 @@ decreasing_by
 
 /-! ## Main Elimination Function -/
 
+-- Complex term elaboration requires extended heartbeats
 set_option maxHeartbeats 6400000 in
 noncomputable def eliminatePotentialCounterexample
     (χ : Chronicle Atom) (h_c0 : χ.c0) (h_c2' : χ.c2')

@@ -42,6 +42,8 @@ the target formula.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Core/RestrictedMCS/Basic.lean
 -/
 
+set_option linter.style.setOption false
+set_option linter.flexible false
 set_option linter.style.emptyLine false
 
 @[expose] public section

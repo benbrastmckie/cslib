@@ -18,6 +18,7 @@ Main soundness theorems for bimodal logic TM:
 - Full derivation soundness (`soundness`, `soundness_dense`, `soundness_discrete`)
 -/
 
+set_option linter.unusedSimpArgs false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 

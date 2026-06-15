@@ -44,6 +44,8 @@ The Until/Since forward direction (eventuality resolution) is proved via
 * Burgess 1984, Goldblatt 1992 (canonical model truth lemma)
 -/
 
+set_option linter.style.setOption false
+set_option linter.flexible false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 

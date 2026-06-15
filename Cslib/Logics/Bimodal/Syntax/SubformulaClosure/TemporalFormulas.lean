@@ -16,6 +16,9 @@ Deferral closure, seriality formulas, temporal blocking set, and structural lemm
 Ported from BimodalLogic/Theories/Bimodal/Syntax/SubformulaClosure/TemporalFormulas.lean
 -/
 
+set_option linter.unusedSectionVars false
+set_option linter.unusedDecidableInType false
+set_option linter.unusedSimpArgs false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 

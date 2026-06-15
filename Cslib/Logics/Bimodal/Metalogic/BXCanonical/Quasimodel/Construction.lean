@@ -36,6 +36,9 @@ with the defect-discharge property for Until/Since formulas.
 * Reynolds 1996: Formal treatment of quasimodel chains
 -/
 
+set_option linter.style.setOption false
+set_option linter.style.show false
+set_option linter.flexible false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 

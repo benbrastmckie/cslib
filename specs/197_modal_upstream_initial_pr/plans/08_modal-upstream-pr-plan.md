@@ -1,7 +1,7 @@
 # Implementation Plan: Draft PR description for Modal/ upstream refactoring
 
 - **Task**: 197 - Scope initial Modal/ upstream PR (~300 LOC)
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 1.5 hours
 - **Dependencies**: PR #648 (`feat/propositional-v2`, OPEN) for Connectives.lean foundation
 - **Research Inputs**: reports/01_modal-upstream-pr-scope.md, reports/02_literature-grounded-analysis.md, reports/03_team-research.md, reports/04_pr649-comparison-classical-signature.md, reports/06_modal-pr-landscape.md
@@ -75,7 +75,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Analyze Diff Scope and Draft PR Description [NOT STARTED]
+### Phase 1: Analyze Diff Scope and Draft PR Description [COMPLETED]
 
 **Goal**: Read the local modal files and upstream state to understand the exact diff, then write the complete `pr-description.md` artifact.
 
@@ -120,7 +120,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Quality Review and Finalization [NOT STARTED]
+### Phase 2: Quality Review and Finalization [COMPLETED]
 
 **Goal**: Review the drafted PR description for accuracy, completeness, and diplomatic tone, then finalize.
 

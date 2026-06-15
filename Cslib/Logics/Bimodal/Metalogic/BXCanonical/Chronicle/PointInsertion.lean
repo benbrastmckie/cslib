@@ -79,6 +79,7 @@ Local definitions used for point insertion lemmas.
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle
 
+set_option linter.unusedSimpArgs false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 set_option linter.style.setOption false

@@ -39,6 +39,8 @@ Filtration is a technique to construct finite models from infinite ones:
 - Ported from BimodalLogic/Theories/Bimodal/Metalogic/Decidability/FMP/Filtration.lean
 -/
 
+set_option linter.style.setOption false
+set_option linter.flexible false
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Decidability.FMP

@@ -36,6 +36,7 @@ The dense completeness theorem is fully ported from the source. The
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical
 
+set_option linter.unusedSectionVars false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 set_option linter.style.setOption false

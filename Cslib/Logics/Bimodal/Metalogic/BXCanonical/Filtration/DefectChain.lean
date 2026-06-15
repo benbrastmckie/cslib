@@ -21,6 +21,8 @@ Sigma defect count on BXPoints and defect-discharge infrastructure.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/BXCanonical/Filtration/DefectChain.lean
 -/
 
+set_option linter.unusedSectionVars false
+set_option linter.unusedDecidableInType false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 

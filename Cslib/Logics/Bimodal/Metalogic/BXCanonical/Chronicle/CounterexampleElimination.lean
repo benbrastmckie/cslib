@@ -45,6 +45,8 @@ by inserting new points into the domain.
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle
 
+set_option linter.unusedSimpArgs false
+set_option linter.style.show false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 set_option linter.style.setOption false

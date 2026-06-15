@@ -42,6 +42,7 @@ the modal T-axiom `□φ → φ` is still valid (modal accessibility is reflexiv
   (1 sorry in G_monotone resolved using tempKDistDerived)
 -/
 
+set_option linter.style.show false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 

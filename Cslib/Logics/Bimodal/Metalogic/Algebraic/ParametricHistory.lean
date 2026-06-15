@@ -21,6 +21,7 @@ Converts FMCS (Family of MCS) to WorldHistory for the D-parametric canonical Tas
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Algebraic/ParametricHistory.lean
 -/
 
+set_option linter.style.show false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 

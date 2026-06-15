@@ -59,6 +59,7 @@ succ chain reaching any target element).
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle
 
+set_option linter.style.show false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 set_option linter.style.setOption false

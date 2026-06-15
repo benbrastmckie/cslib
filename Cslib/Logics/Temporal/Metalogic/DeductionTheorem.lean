@@ -36,10 +36,10 @@ vacuously impossible when the context is `A :: Gamma`.
 * Cslib/Foundations/Logic/Metalogic/Consistency.lean
 -/
 
+set_option linter.style.setOption false
 set_option linter.flexible false
 set_option linter.style.multiGoal false
 set_option linter.unusedTactic false
-set_option linter.style.setOption false
 
 @[expose] public section
 

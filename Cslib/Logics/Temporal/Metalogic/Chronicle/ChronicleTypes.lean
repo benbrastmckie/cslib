@@ -23,6 +23,7 @@ definitions for the temporal chronicle construction.
 * Burgess 1982: "Axioms for tense logic II: Time periods"
 -/
 
+set_option linter.dupNamespace false
 set_option linter.style.emptyLine false
 
 @[expose] public section

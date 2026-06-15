@@ -15,6 +15,8 @@ Replace-U infrastructure, congruence lemmas, and Cases 5-8 separability proofs
 for Dedekind-complete integer orders (GHR94 Lemma 10.3.11 items 5-8 on Z).
 -/
 
+set_option linter.style.setOption false
+set_option linter.flexible false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 set_option linter.unusedSimpArgs false

@@ -25,6 +25,7 @@ Defines the chronicle data structure from Burgess 1982, Section 2.
 * Burgess 1982: "Axioms for tense logic II: Time periods"
 -/
 
+set_option linter.dupNamespace false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 

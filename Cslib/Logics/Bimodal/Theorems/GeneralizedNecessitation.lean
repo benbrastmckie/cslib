@@ -21,6 +21,9 @@ Derived generalized necessitation rules for modal, temporal future, and temporal
 Ported from BimodalLogic/Theories/Bimodal/Theorems/GeneralizedNecessitation.lean
 -/
 
+set_option linter.style.setOption false
+set_option linter.unusedSimpArgs false
+set_option linter.flexible false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 

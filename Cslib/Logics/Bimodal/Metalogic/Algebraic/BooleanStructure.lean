@@ -26,6 +26,7 @@ This module proves that the Lindenbaum-Tarski algebra is a `BooleanAlgebra`.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Algebraic/BooleanStructure.lean
 -/
 
+set_option linter.style.show false
 set_option linter.style.setOption false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false

@@ -21,6 +21,8 @@ Proves the truth lemma for the D-parametric canonical model construction.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Algebraic/ParametricTruthLemma.lean
 -/
 
+set_option linter.style.setOption false
+set_option linter.flexible false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 

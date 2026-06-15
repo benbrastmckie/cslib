@@ -26,6 +26,10 @@ algebraic completeness theorem for the BX completeness proof.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/BXCanonical/CanonicalModel.lean
 -/
 
+set_option linter.style.setOption false
+set_option linter.unusedSectionVars false
+set_option linter.style.show false
+set_option linter.flexible false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 

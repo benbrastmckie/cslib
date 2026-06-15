@@ -52,6 +52,7 @@ adaptations for universe-polymorphic `Formula Atom`.
 * Gore, R. (1999). Tableau Methods for Modal and Temporal Logics
 -/
 
+set_option linter.unusedSectionVars false
 set_option linter.style.longLine false
 
 @[expose] public section

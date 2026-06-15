@@ -27,6 +27,8 @@ Defines the canonical frame for BX completeness.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/BXCanonical/Frame.lean
 -/
 
+set_option linter.style.setOption false
+set_option linter.flexible false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 

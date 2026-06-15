@@ -22,6 +22,8 @@ Ported from BimodalLogic/Theories/Bimodal/Metalogic/Algebraic/LindenbaumQuotient
 (2 sorries: temp_k_dist in provEquiv_allFuture_congr -- now resolved using derived theorem)
 -/
 
+set_option linter.style.show false
+set_option linter.unusedSimpArgs false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 

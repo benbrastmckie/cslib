@@ -16,6 +16,9 @@ F/P-nesting depth, max nesting depth in closure, and F/P inner formula extractio
 Ported from BimodalLogic/Theories/Bimodal/Syntax/SubformulaClosure/NestingDepth.lean
 -/
 
+set_option linter.unusedSectionVars false
+set_option linter.unusedDecidableInType false
+set_option linter.unusedSimpArgs false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 

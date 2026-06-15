@@ -21,6 +21,7 @@ Temporal theorems derived from the Burgess-Xu (BX) axiom system.
 Ported from BimodalLogic/Theories/Bimodal/Theorems/TemporalDerived.lean
 -/
 
+set_option linter.unusedSimpArgs false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 

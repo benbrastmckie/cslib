@@ -35,6 +35,7 @@ construction, adapted for temporal logic (no FrameClass parameter, no liftBase).
 
 namespace Cslib.Logic.Temporal.Metalogic.Chronicle
 
+set_option linter.unusedSimpArgs false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 set_option linter.style.setOption false

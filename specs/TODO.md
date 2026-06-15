@@ -45,17 +45,18 @@ next_project_number: 206
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-205 [NOT STARTED] — Review PR #649 (Temporal/Syntax/Formula.lean and Connectives.lean
+205 [RESEARCHED] — Review PR #649 (Temporal/Syntax/Formula.lean and Connectives.lean
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
 
 ### 205. Review pr649 quality conventions
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
+- **Research**: [205_review_pr649_quality_conventions/reports/01_pr649-quality-review.md]
 
 **Description**: Review PR #649 (Temporal/Syntax/Formula.lean and Connectives.lean extensions) for proof quality, comment style, naming conventions, and docstring standards against existing CSLib modules as a baseline. Compare against established patterns in Propositional/, Modal/, and Foundations/ to ensure consistency before upstream review
 

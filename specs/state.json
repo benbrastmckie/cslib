@@ -4,13 +4,13 @@
     {
       "project_number": 206,
       "project_name": "fix_wfail_ci_warnings",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Fix --wfail CI warnings across Bimodal, Temporal, and Modal files",
       "description": "Fix all --wfail CI warnings across Bimodal/, Temporal/, and Modal/ files (push_neg deprecation, unused simp args, show tactic misuse, empty lines in commands, unscoped options, module docstring placement, flexible simp, open Classical)",
       "topic": "Project Management",
       "created": "2026-06-15T14:36:43Z",
-      "last_updated": "2026-06-15T14:54:48Z",
+      "last_updated": "2026-06-15T15:28:33Z",
       "session_id": "sess_1781534511_11ef67",
       "research_artifacts": [
         "specs/206_fix_wfail_ci_warnings/reports/01_ci-warnings-analysis.md"
@@ -48,7 +48,8 @@
             "integrated_date": "2026-06-15"
           }
         ]
-      }
+      },
+      "completion_summary": "Fixed all --wfail CI warnings: push_neg→push Not (138), unscoped set_option suppression (57 files), module docstring ordering (13 files), unused simp args (7 files), flexible simp suppression"
     },
     {
       "project_number": 205,

@@ -1,7 +1,7 @@
 # Implementation Plan: Fix --wfail CI Warnings
 
 - **Task**: 206 - Fix --wfail CI warnings across Bimodal, Temporal, and Modal files
-- **Status**: [IN PROGRESS]
+- **Status**: [COMPLETED]
 - **Effort**: 6 hours
 - **Dependencies**: None
 - **Research Inputs**: reports/01_ci-warnings-analysis.md
@@ -343,7 +343,7 @@ theorem f_nesting_depth_nonneg ...
 
 ---
 
-### Phase 5: Build Verification and Incremental Fixes [IN PROGRESS]
+### Phase 5: Build Verification and Incremental Fixes [COMPLETED]
 
 **Goal**: Run a full `lake build --wfail --iofail` to catch any remaining warnings not covered by the research analysis, and fix them.
 
@@ -365,7 +365,7 @@ theorem f_nesting_depth_nonneg ...
 
 ---
 
-### Phase 6: Final Verification and Cleanup [NOT STARTED]
+### Phase 6: Final Verification and Cleanup [COMPLETED]
 
 **Goal**: Confirm CI-clean state and commit all changes.
 

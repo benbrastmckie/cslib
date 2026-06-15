@@ -11,7 +11,7 @@ next_project_number: 207
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,202,206 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,195,197,202 | -- | Bimodal Porting, Propositional Logic, Propositional PRs, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -27,10 +27,6 @@ next_project_number: 207
 ### Foundations
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
-
-### Project Management
-
-206 [PLANNED] — Fix all --wfail CI warnings across Bimodal/, Temporal/, and Modal
 
 ### Propositional Logic
 
@@ -54,7 +50,7 @@ next_project_number: 207
 ## Tasks
 
 ### 206. Fix --wfail CI warnings across Bimodal, Temporal, and Modal files
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None

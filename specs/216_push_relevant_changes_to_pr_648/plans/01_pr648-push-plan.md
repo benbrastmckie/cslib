@@ -1,7 +1,7 @@
 # Implementation Plan: Push Relevant Changes to PR 648
 
 - **Task**: 216 - push_relevant_changes_to_pr_648
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 1 hour
 - **Dependencies**: Task 202 (review_hilbert_classes_vs_pr648)
 - **Research Inputs**: specs/216_push_relevant_changes_to_pr_648/reports/01_pr648-changes-review.md
@@ -61,7 +61,9 @@ This plan advances the CSLib PR pipeline for `Logics/Propositional/`. PR 648 is 
 | 2 | 2 | 1 |
 | 3 | 3 | 2 |
 
-### Phase 1: Prepare PR Branch with Selective Changes [NOT STARTED]
+### Phase 1: Prepare PR Branch with Selective Changes [COMPLETED]
+
+*(deviation: altered -- included Semantics/Basic.lean alongside Bool.lean because Bool.lean imports Basic.lean which was absent from PR branch; added 64 lines bringing total to ~405 additions instead of ~339)*
 
 **Goal**: Check out the PR branch, apply exactly the right changes from local main, and create a single commit.
 
@@ -95,31 +97,38 @@ This plan advances the CSLib PR pipeline for `Logics/Propositional/`. PR 648 is 
 
 ---
 
-### Phase 2: Build Verification and Push [NOT STARTED]
+### Phase 2: Build Verification and Push [COMPLETED]
 
-**Goal**: Verify the PR branch builds cleanly, then push to origin.
+**Goal**: Run the full CI verification pipeline from CONTRIBUTING.md on the PR branch, then push to origin.
 
 **Tasks**:
-- [ ] Run `lake build Cslib.Logics.Propositional.Semantics.Bool` to verify Bool.lean compiles on PR branch
-- [ ] Run `lake build Cslib.Logics.Propositional.Defs` and `lake build Cslib.Logics.Propositional.NaturalDeduction.Basic` to verify modified files
-- [ ] If build passes, force-push to origin: `git push origin feat/propositional-v2 --force-with-lease`
+- [ ] Run `lake build` to verify all modified modules compile on PR branch
+- [ ] Run `lake test` to execute CslibTests suite
+- [ ] Run `lake exe checkInitImports` to verify all files import Cslib.Init
+- [ ] Run `lake exe lint-style` to check text linting
+- [ ] Run `lake shake --add-public --keep-implied --keep-prefix` to verify minimized imports
+- [ ] If all checks pass, force-push to origin: `git push origin feat/propositional-v2 --force-with-lease`
 - [ ] Verify push succeeded: `gh pr view 648 --repo leanprover/cslib --json additions,deletions,changedFiles`
 
-**Timing**: 15 minutes
+**Timing**: 20 minutes
 
 **Depends on**: 1
 
 **Files to modify**:
-- None (git operations only)
+- None (git operations only); lint-style `--fix` or shake `--fix` may require re-staging if issues are found
 
 **Verification**:
-- `lake build` succeeds for all modified modules
+- `lake build` succeeds
+- `lake test` passes
+- `lake exe checkInitImports` passes
+- `lake exe lint-style` passes
+- `lake shake` reports no issues
 - GitHub PR shows ~339 additions, ~105 deletions, 5 files
 - Force-push completed without errors
 
 ---
 
-### Phase 3: Update PR Description [NOT STARTED]
+### Phase 3: Update PR Description [COMPLETED]
 
 **Goal**: Update the PR description on GitHub to mention Bool.lean and its Zulip motivation.
 
@@ -147,7 +156,11 @@ This plan advances the CSLib PR pipeline for `Logics/Propositional/`. PR 648 is 
 
 - [ ] `git diff upstream/main..feat/propositional-v2 --stat` shows exactly 5 files changed
 - [ ] Addition count is ~339 (within 10 of target)
-- [ ] `lake build Cslib.Logics.Propositional.Semantics.Bool` succeeds on PR branch
+- [ ] `lake build` succeeds on PR branch
+- [ ] `lake test` passes (CslibTests suite)
+- [ ] `lake exe checkInitImports` passes (Cslib.Init imports)
+- [ ] `lake exe lint-style` passes (text linting)
+- [ ] `lake shake --add-public --keep-implied --keep-prefix` passes (minimized imports)
 - [ ] No files outside the 5 expected are modified
 - [ ] PR description on GitHub includes Bool.lean entry
 - [ ] Backup tag exists at `backup/feat-propositional-v2-pre-216`

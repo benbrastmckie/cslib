@@ -1,0 +1,14 @@
+{
+  "status": "planned",
+  "summary": "5-phase plan to fix all 55 defLemma lint errors: 4 parallel file-group phases (Bimodal Core 13 decls, BXCanonical 16 decls, Theorems+Modal 8 decls, Temporal 18 decls) plus a verification phase. 45 become lemma, 10 become theorem. Includes 3 abbrev conversions and 4 @[reducible] removals. Estimated 2 hours.",
+  "artifacts": [
+    {
+      "path": "specs/211_lint_def_to_lemma/plans/01_def-lemma-plan.md",
+      "type": "plan",
+      "summary": "5-phase plan organized by file group with 4 parallel edit phases and 1 verification phase"
+    }
+  ],
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "implement"
+}

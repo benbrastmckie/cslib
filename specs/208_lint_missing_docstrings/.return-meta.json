@@ -1,26 +1,22 @@
 {
-  "status": "done",
-  "started_at": "2026-06-15T00:00:00Z",
+  "status": "planned",
   "artifacts": [
     {
-      "path": "specs/208_lint_missing_docstrings/reports/01_lint-docstring-research.md",
-      "type": "report",
-      "summary": "Complete analysis of 327 missing docstring declarations with per-file counts, semantic categories, style guide, and recommended plan structure."
-    },
-    {
-      "path": "specs/208_lint_missing_docstrings/.orchestrator-handoff.json",
-      "type": "handoff",
-      "summary": "Orchestrator handoff with status=researched and next_action_hint=plan."
+      "type": "plan",
+      "path": "specs/208_lint_missing_docstrings/plans/01_docstring-plan.md",
+      "summary": "7-phase implementation plan to add 327 missing docstrings across 35 files in Bimodal/ and Temporal/"
     }
   ],
-  "partial_progress": {
-    "stage": "research_report_written",
-    "details": "All 327 docBlame errors identified, categorized, and documented. Report and handoff files written."
-  },
+  "next_steps": "Run /implement 208 to execute the plan",
   "metadata": {
     "session_id": "sess_1750000000_a1b2c3_208",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
+    "duration_seconds": 300,
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 7,
+    "estimated_hours": 9,
+    "dependency_waves": [[1, 2, 3, 5, 7], [4], [6]]
+  },
+  "memory_candidates": []
 }

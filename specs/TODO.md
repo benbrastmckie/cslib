@@ -32,17 +32,17 @@ next_project_number: 217
 
 ### Project Management
 
-208 [RESEARCHED] — Add docstrings to 327 declarations flagged by #lint across Bimoda
-209 [NOT STARTED] — Fix 298 namespace lint errors: 239 declarations not properly name
-210 [RESEARCHED] — Fix 105 naming convention violations where declaration names cont
-211 [RESEARCHED] — Fix 55 lint errors where Prop-valued declarations use def instead
-212 [RESEARCHED] — Fix 25 simp-related lint errors: 23 where the LHS of a simp lemma
-213 [RESEARCHED] — Fix ~17 unused argument lint errors across Bimodal and Temporal c
+208 [PLANNING] — Add docstrings to 327 declarations flagged by #lint across Bimoda
+209 [PLANNING] — Fix 298 namespace lint errors: 239 declarations not properly name
+210 [PLANNING] — Fix 105 naming convention violations where declaration names cont
+211 [PLANNING] — Fix 55 lint errors where Prop-valued declarations use def instead
+212 [PLANNING] — Fix 25 simp-related lint errors: 23 where the LHS of a simp lemma
+213 [PLANNING] — Fix ~17 unused argument lint errors across Bimodal and Temporal c
 
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
-216 [RESEARCHING] — Given what task 202 implemented, push a single commit with all an
+216 [RESEARCHED] — Given what task 202 implemented, push a single commit with all an
 
 ### Propositional PRs
 
@@ -61,10 +61,11 @@ next_project_number: 217
 ## Tasks
 
 ### 216. Push relevant changes to pr 648
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: pr
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [216_push_relevant_changes_to_pr_648/reports/01_pr648-changes-review.md]
 
 **Description**: Given what task 202 implemented, push a single commit with all and only the relevant changes to https://github.com/leanprover/cslib/pull/648, where the aim is to keep the LOC ~300 to avoid overwhelming reviewers
 
@@ -91,7 +92,7 @@ next_project_number: 217
 ---
 
 ### 213. Fix unused argument lint errors
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -101,7 +102,7 @@ next_project_number: 217
 ---
 
 ### 212. Fix simp lint issues (LHS simplifies, simp can prove)
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -111,7 +112,7 @@ next_project_number: 217
 ---
 
 ### 211. Change def to lemma/theorem for Prop-valued declarations
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -121,7 +122,7 @@ next_project_number: 217
 ---
 
 ### 210. Fix naming convention violations (underscore to camelCase)
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -131,7 +132,7 @@ next_project_number: 217
 ---
 
 ### 209. Fix namespace lint errors (not namespaced + duplicate namespace)
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -141,7 +142,7 @@ next_project_number: 217
 ---
 
 ### 208. Add missing documentation strings to Bimodal/Temporal/Modal declarations
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None

@@ -1,0 +1,14 @@
+{
+  "status": "planned",
+  "summary": "3-phase plan to fix all 298 namespace lint errors. Phase 1: wrap 17 instance files in namespaces (239 topNamespace errors, 1.5h, zero risk). Phase 2: annotate 2 Chronicle structs with @[nolint dupNamespace] (30 errors, 0.5h, zero risk). Phase 3: remove redundant Temporal/Bimodal qualifiers and update ~463 reference sites (29 errors, 3h, moderate risk). Total: 5 hours.",
+  "artifacts": [
+    {
+      "path": "specs/209_lint_namespace_fixes/plans/01_namespace-plan.md",
+      "type": "plan",
+      "summary": "3-phase implementation plan for 298 namespace lint errors with dependency analysis and risk mitigations"
+    }
+  ],
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "implement"
+}

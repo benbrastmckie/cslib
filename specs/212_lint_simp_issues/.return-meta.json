@@ -1,24 +1,21 @@
 {
-  "status": "report_written",
-  "started_at": "2026-06-15T18:04:01Z",
+  "status": "planned",
   "artifacts": [
     {
-      "path": "specs/212_lint_simp_issues/reports/01_simp-research.md",
-      "type": "report"
-    },
-    {
-      "path": "specs/212_lint_simp_issues/.orchestrator-handoff.json",
-      "type": "handoff"
+      "type": "plan",
+      "path": "specs/212_lint_simp_issues/plans/01_simp-plan.md",
+      "summary": "2-phase plan to remove @[simp] from 25 declarations across 6 files and verify with CI pipeline"
     }
   ],
-  "partial_progress": {
-    "stage": "report_written",
-    "details": "Research report and orchestrator handoff written. 25 simpNF errors fully analyzed."
-  },
+  "next_steps": "Run /implement 212 to execute the plan",
   "metadata": {
     "session_id": "sess_1750000000_a1b2c3_212",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 2,
+    "estimated_hours": 0.5,
+    "dependency_waves": [[1], [2]]
+  },
+  "memory_candidates": []
 }

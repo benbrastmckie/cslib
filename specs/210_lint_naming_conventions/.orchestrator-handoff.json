@@ -1,14 +1,14 @@
 {
-  "status": "researched",
-  "summary": "Identified all 105 defsWithUnderscore lint violations across 24 files in Bimodal (87) and Temporal (18) namespaces. Categorized into 6 patterns: letter-prefix underscore (38), snake_case defs (13), numeric suffix (17), abbreviated prefix (13), struct fields (9), UpperCamelCase underscore (4). Plus 15 Bimodal/Temporal duplicate pairs. Created rename mapping for all 105 with camelCase targets and downstream reference counts. Highest impact: Q_Z (100 refs), U_nesting_depth (88 refs), lemma_2_7_seed (48 refs). Recommended 5-phase implementation grouped by file cluster.",
+  "status": "planned",
+  "summary": "Created 5-phase sequential plan to fix all 105 defsWithUnderscore lint violations. Phase 1: TemporalDerived.lean (23 renames, 1.5h). Phase 2: PointInsertion pair + chronicle types (30 renames including Q_Z/100refs and U_nesting_depth/88refs, 2h). Phase 3: Bundle files (13 renames, 1h). Phase 4: Separation + SubformulaClosure (14 renames, 0.75h). Phase 5: Remaining files + full CI verification (25 renames, 0.75h). Total: 6 hours.",
   "artifacts": [
     {
-      "path": "specs/210_lint_naming_conventions/reports/01_naming-research.md",
-      "type": "report",
-      "summary": "Complete analysis of 105 naming convention violations with per-declaration rename mapping, reference counts, file grouping, and phased implementation recommendation"
+      "path": "specs/210_lint_naming_conventions/plans/01_naming-plan.md",
+      "type": "plan",
+      "summary": "5-phase plan organizing 105 underscore-to-camelCase renames by file cluster with specific rename tables and reference counts per phase"
     }
   ],
   "blockers": [],
   "continuation_context": null,
-  "next_action_hint": "plan"
+  "next_action_hint": "implement"
 }

@@ -1,14 +1,14 @@
 {
-  "status": "researched",
-  "summary": "All 25 simpNF lint errors analyzed across 6 files. Root cause: derived connectives are abbrevs that unfold transparently, so their simp lemmas have LHS that already simplifies via primitive constructor simp lemmas. Fix: remove @[simp] from all 25 declarations. No downstream code depends on global simp set membership. Risk: LOW.",
+  "status": "planned",
+  "summary": "2-phase plan to fix 25 simpNF lint errors by removing @[simp] from declarations across 6 Bimodal logic files. Phase 1: mechanical attribute removal (15 min). Phase 2: lake build + lint + test verification (15 min). Total effort: 0.5 hours.",
   "artifacts": [
     {
-      "path": "specs/212_lint_simp_issues/reports/01_simp-research.md",
-      "type": "report",
-      "summary": "Complete analysis of 25 simpNF errors with per-declaration fix instructions, dependency chain analysis, alternative approaches evaluation, and verification plan"
+      "path": "specs/212_lint_simp_issues/plans/01_simp-plan.md",
+      "type": "plan",
+      "summary": "Implementation plan: remove @[simp] from 25 declarations across 6 files, verify with CI"
     }
   ],
   "blockers": [],
   "continuation_context": null,
-  "next_action_hint": "plan"
+  "next_action_hint": "implement"
 }

@@ -18,15 +18,15 @@
       213
     ]
   ],
-  "cycle_count": 0,
+  "cycle_count": 1,
   "max_cycles": 25,
   "completed_tasks": [],
   "failed_tasks": [],
   "current_statuses": {
     "208": "researched",
-    "209": "not_started",
+    "209": "researched",
     "210": "researched",
-    "211": "not_started",
+    "211": "researched",
     "212": "researched",
     "213": "researched"
   },

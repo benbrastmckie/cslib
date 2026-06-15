@@ -1,26 +1,22 @@
 {
-  "status": "partial",
-  "started_at": "2026-06-15T00:00:00Z",
+  "status": "planned",
   "artifacts": [
     {
-      "path": "specs/210_lint_naming_conventions/reports/01_naming-research.md",
-      "type": "report",
-      "summary": "Complete analysis of 105 naming convention violations with rename mapping and phased implementation plan"
-    },
-    {
-      "path": "specs/210_lint_naming_conventions/.orchestrator-handoff.json",
-      "type": "handoff",
-      "summary": "Orchestrator handoff with status=researched"
+      "type": "plan",
+      "path": "specs/210_lint_naming_conventions/plans/01_naming-plan.md",
+      "summary": "5-phase implementation plan to fix 105 defsWithUnderscore lint violations across Bimodal and Temporal namespaces"
     }
   ],
-  "partial_progress": {
-    "stage": "research_report_written",
-    "details": "Research report and orchestrator handoff written. All 105 violations categorized with rename targets and reference counts."
-  },
+  "next_steps": "Run /implement 210 to execute the plan",
   "metadata": {
     "session_id": "sess_1750000000_a1b2c3_210",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
+    "duration_seconds": 300,
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 5,
+    "estimated_hours": 6,
+    "dependency_waves": [[1], [2], [3], [4], [5]]
+  },
+  "memory_candidates": []
 }

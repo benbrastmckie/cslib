@@ -1,47 +1,15 @@
 {
-  "status": "planned",
-  "summary": "Implementation plan for generic MCS properties refactoring: 5 phases, 6 hours estimated effort. Creates MCSProperties.lean in Foundations and migrates 4 logics to use it.",
+  "status": "researched",
+  "summary": "Round 3: ideal solution design for generic deduction theorem + MCS class following reviewer's vision",
   "artifacts": [
     {
-      "type": "plan",
-      "path": "specs/207_research_temporal_modal_refactor_pr649/plans/03_refactor-plan.md",
-      "summary": "Phased plan for abstracting shared MCS infrastructure into generic Foundations file and migrating Propositional, Modal, Temporal, and Bimodal logics"
-    }
-  ],
-  "next_steps": "Run /implement 207 to execute the plan",
-  "plan_metadata": {
-    "phases": 5,
-    "total_effort_hours": 6,
-    "complexity": "medium",
-    "research_integrated": true,
-    "plan_version": 1,
-    "dependency_waves": [[1], [2], [3, 4], [5]],
-    "reports_integrated": [
-      {
-        "path": "reports/01_team-research.md",
-        "integrated_in_plan_version": 1,
-        "integrated_date": "2026-06-15"
-      },
-      {
-        "path": "reports/02_reviewer-directed-research.md",
-        "integrated_in_plan_version": 1,
-        "integrated_date": "2026-06-15"
-      }
-    ]
-  },
-  "memory_candidates": [
-    {
-      "content": "CSLib's DerivationSystem + HasDeductionTheorem abstraction in Consistency.lean already provides the infrastructure for generic MCS properties. The deduction theorem itself cannot be genericized (requires concrete DerivationTree pattern matching due to Type-valued trees), but all MCS-derived properties (bot_not_mem, negation completeness, membership iff, mp_axiom) can be proved once generically and instantiated per-logic via the existing abstraction layer.",
-      "category": "PATTERN",
-      "source_artifact": "specs/207_research_temporal_modal_refactor_pr649/plans/03_refactor-plan.md",
-      "confidence": 0.85,
-      "suggested_keywords": ["cslib", "mcs", "deduction-theorem", "generic-metalogic", "derivation-system", "typeclass-abstraction"]
+      "type": "research",
+      "path": "specs/207_research_temporal_modal_refactor_pr649/reports/03_ideal-solution-research.md",
+      "summary": "Complete design for listImp-based generic deduction theorem and MCS class"
     }
   ],
   "metadata": {
     "session_id": "sess_1781543837_ee626d",
-    "agent_type": "planner-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"]
+    "agent_type": "cslib-research-agent"
   }
 }

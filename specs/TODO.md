@@ -11,7 +11,7 @@ next_project_number: 218
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,208,209,210,211,212,213,214,215,216,217 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,195,197,208,209,210,211,213,214,215,216,217 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -36,7 +36,6 @@ next_project_number: 218
 209 [IMPLEMENTING] — Fix 298 namespace lint errors: 239 declarations not properly name
 210 [IMPLEMENTING] — Fix 105 naming convention violations where declaration names cont
 211 [IMPLEMENTING] — Fix 55 lint errors where Prop-valued declarations use def instead
-212 [IMPLEMENTING] — Fix 25 simp-related lint errors: 23 where the LHS of a simp lemma
 213 [IMPLEMENTING] — Fix ~17 unused argument lint errors across Bimodal and Temporal c
 
 ### Propositional Logic
@@ -62,7 +61,7 @@ next_project_number: 218
 ## Tasks
 
 ### 217. Push generic metalogic to pr649
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: pr
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -114,7 +113,7 @@ next_project_number: 218
 ---
 
 ### 212. Fix simp lint issues (LHS simplifies, simp can prove)
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None

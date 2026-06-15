@@ -1,13 +1,10 @@
 {
-  "status": "in_progress",
-  "started_at": "2026-06-15T00:00:00Z",
-  "artifacts": [],
-  "partial_progress": {
-    "stage": "initializing",
-    "details": "Agent started, parsing delegation context"
-  },
+  "status": "done",
+  "summary": "Identified 13 files needed to push generic metalogic to PR #649: 5 new metalogic files (~683 LOC), 4 dependency files (~1288 LOC), and 4 file updates. PR branch is missing entire Foundations/Logic layer (ProofSystem, Axioms, Metalogic/). Connectives.lean needs HasBox addition. Recommended separate stacked PR due to ~2000 LOC total.",
+  "artifacts": ["specs/217_push_generic_metalogic_to_pr649/reports/01_pr649-research.md"],
+  "task_number": 217,
+  "session_id": "sess_1781549007_3bd2f7",
   "metadata": {
-    "session_id": "sess_1781549007_3bd2f7",
     "agent_type": "cslib-research-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "research", "cslib-research-agent"]

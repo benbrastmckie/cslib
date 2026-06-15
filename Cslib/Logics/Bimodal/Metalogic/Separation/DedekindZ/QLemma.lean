@@ -10,16 +10,16 @@ public import Cslib.Logics.Bimodal.Metalogic.Separation.Defs
 public import Cslib.Logics.Bimodal.Metalogic.Separation.Eliminations
 public import Cslib.Logics.Bimodal.Metalogic.Separation.NegationEquiv
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.unusedSimpArgs false
-
 /-!
 # K+/K- Operators and Q-Lemma for Dedekind-Complete Integer Orders
 
 K+/K- definitions, Q-lemma (forward and backward), Q_Z syntactic properties,
 and Case 3 equivalence for Z.
 -/
+
+set_option linter.style.emptyLine false
+set_option linter.style.longLine false
+set_option linter.unusedSimpArgs false
 
 @[expose] public section
 
@@ -115,16 +115,16 @@ theorem Q_lemma_Z_fwd (A B C : Formula Atom) (M : IntStructure Atom) (t0 t1 : �
       · rcases eq_or_lt_of_le hwz with rfl | hwz'
         · exact Or.inl (Or.inr hAw)
         · exact absurd hAw ((int_truth_neg M w A).mp (hnotA_guard w huw hwz'))
-      · push_neg at hwz
+      · push Not at hwz
         exact Or.inl (Or.inl (hBgd z huz hwz))
-    · push_neg at hut0
+    · push Not at hut0
       obtain ⟨w, ht0w, hAw, hBgd⟩ := hinit
       by_cases hwz : w ≤ z
       · rcases eq_or_lt_of_le hwz with rfl | hwz'
         · exact Or.inl (Or.inr hAw)
         · have huw' : u < w := lt_of_le_of_lt hut0 ht0w
           exact absurd hAw ((int_truth_neg M w A).mp (hnotA_guard w huw' hwz'))
-      · push_neg at hwz
+      · push Not at hwz
         exact Or.inl (Or.inl (hBgd z hz0 hwz))
   · exact Or.inr hS
 
@@ -149,7 +149,7 @@ theorem Q_lemma_Z_bwd (A B C : Formula Atom) (M : IntStructure Atom) (t0 t1 : �
     refine ⟨y, hzy, hAy, fun r hzr hry => ?_⟩
     have hnotAr : ¬ intTruth M r A := hmin r hzr hry
     have hyt1 : y ≤ t1 := by
-      by_contra h; push_neg at h
+      by_contra h; push Not at h
       exact hmin w₀ hw₀.1 (lt_of_le_of_lt hw₀.2.1 h) hw₀.2.2
     have hrt1 : r < t1 := lt_of_lt_of_le hry hyt1
     have hrt0 : t0 < r := lt_trans hz0 hzr
@@ -161,7 +161,7 @@ theorem Q_lemma_Z_bwd (A B C : Formula Atom) (M : IntStructure Atom) (t0 t1 : �
     · exfalso; apply hnotS
       refine ⟨z, hzr, hCz, fun r' hr'z hr'r => ?_⟩
       exact hmin r' hr'z (lt_trans hr'r hry)
-  · push_neg at hA_exists
+  · push Not at hA_exists
     have hB_interval : ∀ r, z < r → r < t1 → intTruth M r B := by
       intro r hzr hrt1
       have hnotAr := hA_exists r hzr (le_of_lt hrt1)
@@ -314,7 +314,7 @@ theorem case3_equiv_Z_fwd (a q A B : Formula Atom) (M : IntStructure Atom) (t : 
   · simp only [case3_rhs]
     apply (int_truth_or M t _ _).mpr; left; apply (int_truth_or M t _ _).mpr; left
     exact ⟨s, hst, ha_s, hq_all⟩
-  · push_neg at hq_all
+  · push Not at hq_all
     obtain ⟨f, hsf, hft, hnqf⟩ := hq_all
     haveI : DecidablePred (fun r => ¬intTruth M r q) := Classical.decPred _
     have hex_fail : ∃ n, s < n ∧ ¬intTruth M n q := ⟨f, hsf, hnqf⟩
@@ -322,7 +322,7 @@ theorem case3_equiv_Z_fwd (a q A B : Formula Atom) (M : IntStructure Atom) (t : 
     have hq_left : ∀ r, s < r → r < f₀ → intTruth M r q := by
       intro r hsr hrf₀; by_contra hnq; exact hf₀_min r hsr hrf₀ hnq
     have hf₀t : f₀ < t := by
-      by_contra hle; push_neg at hle
+      by_contra hle; push Not at hle
       have hff₀ : f < f₀ := lt_of_lt_of_le hft hle
       exact hf₀_min f hsf hff₀ hnqf
     by_cases hq_right : ∀ r, f₀ < r → r < t → intTruth M r q
@@ -369,7 +369,7 @@ theorem case3_equiv_Z_fwd (a q A B : Formula Atom) (M : IntStructure Atom) (t : 
         simp only [case3_rhs]
         apply (int_truth_or M t _ _).mpr; left; apply (int_truth_or M t _ _).mpr; right
         exact (int_truth_and M t _ _).mpr ⟨hSalpha_t, (int_truth_or M t _ _).mpr (Or.inr ((int_truth_and M t _ _).mpr ⟨hBt, hUt⟩))⟩
-    · push_neg at hq_right
+    · push Not at hq_right
       obtain ⟨f₁, hf₀f₁, hf₁t, hnqf₁⟩ := hq_right
       haveI : DecidablePred (fun r => ¬intTruth M r q) := Classical.decPred _
       have hex_fail2 : ∃ n, n < t ∧ ¬intTruth M n q := ⟨f₁, hf₁t, hnqf₁⟩
@@ -377,7 +377,7 @@ theorem case3_equiv_Z_fwd (a q A B : Formula Atom) (M : IntStructure Atom) (t : 
       have hq_after_g : ∀ r, g < r → r < t → intTruth M r q := by
         intro r hgr hrt; by_contra hnq; exact hg_max r hgr hrt hnq
       have hf₀g : f₀ ≤ g := by
-        by_contra hlt; push_neg at hlt
+        by_contra hlt; push Not at hlt
         exact hg_max f₀ hlt hf₀t hnqf₀
       have hsg : s < g := lt_of_lt_of_le hsf₀ hf₀g
       have hU_g : intTruth M g (.untl A B) := by

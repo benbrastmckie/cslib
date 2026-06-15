@@ -10,11 +10,6 @@ public import Cslib.Logics.Bimodal.Metalogic.Separation.Eliminations
 public import Cslib.Logics.Bimodal.Metalogic.Separation.Distributivity
 public import Cslib.Logics.Bimodal.Metalogic.Separation.DedekindZ.Cases
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-
 /-!
 # Normal Form Reduction (GHR94 Lemma 10.2.4)
 
@@ -23,6 +18,11 @@ U(A,B) (with A, B S-free) at top level only is separable. This uses the 8
 elimination cases (Cases 1-4 proved, Cases 5-8 via DedekindZ) to decompose the
 Since formula into separable components.
 -/
+
+set_option linter.style.emptyLine false
+set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
+set_option linter.unusedDecidableInType false
 
 @[expose] public section
 

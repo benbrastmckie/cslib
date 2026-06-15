@@ -20,6 +20,7 @@ oracle threading, and all_formulas_separable.
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
+set_option linter.style.setOption false
 set_option linter.flexible false
 set_option linter.unusedDecidableInType false
 set_option linter.style.maxHeartbeats false
@@ -50,7 +51,7 @@ theorem no_S_nested_in_U_separable_param (phi : Formula Atom)
   by_cases huf : isUFree phi = true
   · exact separated_imp_separable phi (restricted_u_free_separated phi hexp huf)
   · -- Case n > 0: extract U-type and abstract
-    push_neg at huf; simp [Bool.not_eq_true] at huf
+    push Not at huf; simp [Bool.not_eq_true] at huf
     have huf' : isUFree phi = false := huf
     let AB := extractUType phi huf' hns
     have hAB_sf := extract_U_type_S_free phi huf' hns
@@ -214,7 +215,7 @@ theorem single_U_formula_separable_noax_param (phi A B : Formula Atom)
               hsingle_C'' hsingle_F'' hdC'' hdF''
               (has_no_allpast_allfuture_true C'') (has_no_allpast_allfuture_true w''))
         · -- Depth >= 2: IH on C, w, then apply oracle on .snce C'' w''
-          push_neg at hn_le1
+          push Not at hn_le1
           have hC_sep : isSeparable C := ih_C hle_C h_single_ψ.1
           have hF_sep : isSeparable w := ih_F hle_F h_single_ψ.2
           obtain ⟨C', hC'_sep, hC'_equiv⟩ := hC_sep
@@ -319,7 +320,7 @@ theorem single_U_formula_sep_with_U_type_no_oracle (phi A B : Formula Atom)
           exact is_separable_with_U_type_replace_args h_sep_CF_AB''
             (replace_box_equiv A) (replace_box_equiv B) hA_sf hB_sf
         · -- Depth >= 2: IH on C, w → isSeparableWithUType
-          push_neg at hn_le1
+          push Not at hn_le1
           have hC_sep_ut : isSeparableWithUType C A B := ih_C hle_C h_single_ψ.1
           have hF_sep_ut : isSeparableWithUType w A B := ih_F hle_F h_single_ψ.2
           obtain ⟨C', hC'_sep, hC'_equiv, hC'_single⟩ := hC_sep_ut
@@ -437,7 +438,7 @@ theorem lemma_10_2_6_self_contained_param (phi : Formula Atom)
   have hexp : hasNoAllpastAllfuture phi = true := has_no_allpast_allfuture_true phi
   by_cases huf : isUFree phi = true
   · exact separated_imp_separable phi (restricted_u_free_separated phi hexp huf)
-  · push_neg at huf; simp [Bool.not_eq_true] at huf
+  · push Not at huf; simp [Bool.not_eq_true] at huf
     have huf' : isUFree phi = false := huf
     let AB := extractUType phi huf' hns
     have hAB_sf := extract_U_type_S_free phi huf' hns
@@ -479,7 +480,7 @@ theorem lemma_10_2_6_no_oracle (phi : Formula Atom)
   have hexp : hasNoAllpastAllfuture phi = true := has_no_allpast_allfuture_true phi
   by_cases huf : isUFree phi = true
   · exact separated_imp_separable phi (restricted_u_free_separated phi hexp huf)
-  · push_neg at huf; simp [Bool.not_eq_true] at huf
+  · push Not at huf; simp [Bool.not_eq_true] at huf
     have huf' : isUFree phi = false := huf
     let AB := extractUType phi huf' hns
     have hAB_sf := extract_U_type_S_free phi huf' hns
@@ -723,7 +724,7 @@ theorem no_S_nested_in_U_separable_direct_param (phi : Formula Atom)
     by_cases hd_le1 : d ≤ 1
     · exact lemma_10_2_6_self_contained_param ψ hns_ψ (Nat.le_trans hd_le hd_le1) oracle
     · -- Depth ≥ 2: inner induction on countUSubformulas
-      push_neg at hd_le1
+      push Not at hd_le1
       induction hc : countUSubformulas ψ using Nat.strongRecOn generalizing ψ with
       | ind m ih_count =>
       have hexp : hasNoAllpastAllfuture ψ = true := has_no_allpast_allfuture_true ψ
@@ -731,7 +732,7 @@ theorem no_S_nested_in_U_separable_direct_param (phi : Formula Atom)
       by_cases huf : isUFree ψ = true
       · exact separated_imp_separable ψ (restricted_u_free_separated ψ hexp huf)
       · -- Not U-free: extract surface U-type and abstract
-        push_neg at huf; simp only [Bool.not_eq_true] at huf
+        push Not at huf; simp only [Bool.not_eq_true] at huf
         have huf' : isUFree ψ = false := huf
         let AB := extractUType ψ huf' hns_ψ
         have hAB_sf := extract_U_type_S_free ψ huf' hns_ψ
@@ -779,7 +780,7 @@ theorem no_S_nested_sep (phi : Formula Atom) (hns : noSNestedInU phi) :
     by_cases huf : isUFree ψ = true
     · exact separated_imp_separable ψ
         (restricted_u_free_separated ψ (has_no_allpast_allfuture_true ψ) huf)
-    · push_neg at huf; simp only [Bool.not_eq_true] at huf
+    · push Not at huf; simp only [Bool.not_eq_true] at huf
       have huf' : isUFree ψ = false := huf
       -- Case split on U_nesting_depth
       by_cases hd_ge2 : d ≥ 2
@@ -813,7 +814,7 @@ theorem no_S_nested_sep (phi : Formula Atom) (hns : noSNestedInU phi) :
               ih_d 1 (by omega) (countUTotal chi) chi hund_chi (le_refl _) hns_chi)
         exact is_separable_of_equiv hphi_equiv h_subst_sep
       · -- UND <= 1: use oracle-free lemma_10_2_6_no_oracle
-        push_neg at hd_ge2
+        push Not at hd_ge2
         exact lemma_10_2_6_no_oracle ψ hns_ψ (by omega)
   exact proof (U_nesting_depth phi) (countUTotal phi) phi (le_refl _) (le_refl _) hns
 
@@ -830,7 +831,7 @@ theorem no_S_nested_in_U_separable_param_jd (phi : Formula Atom)
   by_cases huf : isUFree phi = true
   · exact separated_imp_separable phi (restricted_u_free_separated phi hexp huf)
   · -- Case n > 0: extract U-type and abstract
-    push_neg at huf; simp [Bool.not_eq_true] at huf
+    push Not at huf; simp [Bool.not_eq_true] at huf
     have huf' : isUFree phi = false := huf
     let AB := extractUType phi huf' hns
     have hAB_sf := extract_U_type_S_free phi huf' hns

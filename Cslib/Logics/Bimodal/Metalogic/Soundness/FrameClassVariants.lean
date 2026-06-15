@@ -663,7 +663,7 @@ theorem prior_UZ_is_valid
       simp; exact hj
     have hj_lt : j < k₀ := by
       by_contra h_ge
-      push_neg at h_ge
+      push Not at h_ge
       have h_le := h_iter_mono (show k₀ + 1 ≤ j + 1 by omega)
       simp only at h_le
       rw [hj1] at h_le
@@ -701,7 +701,7 @@ theorem prior_SZ_is_valid
       simp; exact hj
     have hj_lt : j < k₀ := by
       by_contra h_ge
-      push_neg at h_ge
+      push Not at h_ge
       have h_le := h_iter_anti (show k₀ + 1 ≤ j + 1 by omega)
       simp only at h_le
       rw [hj1] at h_le

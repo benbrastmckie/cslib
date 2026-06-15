@@ -34,6 +34,8 @@ formula from the original language, enabling the standard Goldblatt/BdRV naming 
 
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
+set_option linter.style.setOption false
+set_option linter.flexible false
 
 @[expose] public section
 

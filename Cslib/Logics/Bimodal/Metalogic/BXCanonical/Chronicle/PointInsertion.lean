@@ -81,6 +81,7 @@ namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle
 
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
+set_option linter.style.setOption false
 set_option linter.flexible false
 
 attribute [local instance] Classical.propDecidable
@@ -1541,7 +1542,7 @@ theorem xu_lemma_3_2_1_until (fc : FrameClass) {A B C : Set (Formula Atom)}
   have h_neg_until_exists : ∃ beta' ∈ B, ∃ gamma' ∈ C,
       Formula.untl gamma' (Formula.and beta' (Formula.untl gamma beta)) ∉ A := by
     by_contra h_all
-    push_neg at h_all
+    push Not at h_all
     -- Show burgessRSet(A, DC({untl(gamma,beta)} ∪ B), C)
     have h_rset : burgessRSet A (deductiveClosure fc ({Formula.untl gamma beta} ∪ B)) C := by
       intro phi hphi gamma' hgamma'
@@ -1674,7 +1675,7 @@ theorem xu_lemma_3_2_1_since (fc : FrameClass) {A B C : Set (Formula Atom)}
   have h_neg_since_exists : ∃ beta' ∈ B, ∃ alpha' ∈ A,
       Formula.snce alpha' (Formula.and beta' (Formula.snce alpha beta)) ∉ C := by
     by_contra h_all
-    push_neg at h_all
+    push Not at h_all
     -- Show burgessRSetSince(C, DC({snce(alpha,beta)} ∪ B), A)
     have h_rsince : burgessRSetSince C (deductiveClosure fc ({Formula.snce alpha beta} ∪ B)) A := by
       intro phi hphi alpha' halpha'
@@ -2023,7 +2024,7 @@ theorem lemma_2_7_seed_consistent (fc : FrameClass) {A B C : Set (Formula Atom)}
   have h_neg_until_exists : ∃ beta0 ∈ B, ∃ gamma0 ∈ C,
       Formula.untl gamma0 (Formula.and beta0 xi) ∉ A := by
     by_contra h_all_until
-    push_neg at h_all_until
+    push Not at h_all_until
     have h_rset : burgessRSet A (deductiveClosure fc ({xi} ∪ B)) C := by
       intro phi hphi gamma hgamma
       obtain ⟨Ldc, hL_sub, ⟨ddc⟩⟩ := hphi
@@ -2697,7 +2698,7 @@ theorem lemma_2_7_since_seed_consistent (fc : FrameClass) {A B C : Set (Formula 
   have h_neg_since_exists : ∃ beta0 ∈ B, ∃ alpha0 ∈ A,
       Formula.snce alpha0 (Formula.and beta0 xi) ∉ C := by
     by_contra h_all_since
-    push_neg at h_all_since
+    push Not at h_all_since
     have h_rset : burgessRSet A (deductiveClosure fc ({xi} ∪ B)) C := by
       intro phi hphi gamma hgamma
       obtain ⟨Ldc, hL_sub, ⟨ddc⟩⟩ := hphi

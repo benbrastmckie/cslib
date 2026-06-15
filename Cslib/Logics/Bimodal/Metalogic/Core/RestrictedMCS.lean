@@ -154,7 +154,7 @@ theorem restricted_mcs_negation_complete {Omega : Set (Formula Atom)}
     by_contra h_neg_not
     -- From h_incons: ¬SetConsistent FrameClass.Base (insert psi Omega)
     unfold SetConsistent at h_incons
-    push_neg at h_incons
+    push Not at h_incons
     obtain ⟨L, h_L_sub, h_L_incons⟩ := h_incons
     -- L is inconsistent, so L ⊢ ⊥
     have h_bot : Nonempty (DerivationTree FrameClass.Base L Formula.bot) :=
@@ -192,7 +192,7 @@ theorem restricted_mcs_negation_complete {Omega : Set (Formula Atom)}
     have h_incons_neg := h_mcs.2 psi.neg h_neg_closneg h_neg_not
     -- So there exists L' ⊆ insert psi.neg Omega with ¬Consistent L'
     unfold SetConsistent at h_incons_neg
-    push_neg at h_incons_neg
+    push Not at h_incons_neg
     obtain ⟨L', h_L'_sub, h_L'_incons⟩ := h_incons_neg
     -- L' is inconsistent, so L' ⊢ ⊥
     have h_bot'' : Nonempty (DerivationTree FrameClass.Base L' Formula.bot) :=

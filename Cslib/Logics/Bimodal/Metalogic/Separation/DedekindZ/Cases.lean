@@ -8,6 +8,13 @@ module
 
 public import Cslib.Logics.Bimodal.Metalogic.Separation.DedekindZ.QLemma
 
+/-!
+# Cases 5-8 Separability on Z via Replacement and Direct-Formula Construction
+
+Replace-U infrastructure, congruence lemmas, and Cases 5-8 separability proofs
+for Dedekind-complete integer orders (GHR94 Lemma 10.3.11 items 5-8 on Z).
+-/
+
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 set_option linter.unusedSimpArgs false
@@ -15,13 +22,6 @@ set_option linter.style.show false
 set_option linter.style.maxHeartbeats false
 set_option linter.unusedDecidableInType false
 set_option linter.unusedSectionVars false
-
-/-!
-# Cases 5-8 Separability on Z via Replacement and Direct-Formula Construction
-
-Replace-U infrastructure, congruence lemmas, and Cases 5-8 separability proofs
-for Dedekind-complete integer orders (GHR94 Lemma 10.3.11 items 5-8 on Z).
--/
 
 @[expose] public section
 
@@ -940,12 +940,12 @@ theorem case6_equiv_Z (a q A B : Formula Atom) :
             · exact hBt
             · exact hBtw z htz' hzw⟩
     · -- Case: ∃ r₀ ∈ (s,t) with ¬B(r₀)
-      push_neg at h_allB
+      push Not at h_allB
       obtain ⟨r₀, hsr₀, hr₀t, hnotBr₀⟩ := h_allB
       have h_min : ∃ r₁, s < r₁ ∧ r₁ < t ∧ ¬ intTruth M r₁ B ∧
           (∀ z, s < z → z < r₁ → intTruth M z B) := by
         by_contra h_no_min
-        push_neg at h_no_min
+        push Not at h_no_min
         have : ∀ n : ℕ, ∀ r, s < r → r < t → r - s ≤ ↑n → ¬ intTruth M r B →
             ∃ r₁, s < r₁ ∧ r₁ < t ∧ ¬ intTruth M r₁ B ∧
             (∀ z, s < z → z < r₁ → intTruth M z B) := by
@@ -1442,7 +1442,7 @@ theorem snce_Ufree_event_qNotU_guard_separable (ev q A B : Formula Atom)
     apply (int_truth_and M t _ _).mpr; constructor
     · -- ¬H(¬ev): ∃ s < t with ev(s)
       rw [int_truth_neg, int_truth_allPast]
-      push_neg
+      push Not
       obtain ⟨s, hst, hev_s, _⟩ := hS
       exact ⟨s, hst, fun h => h hev_s⟩
     · -- ¬psi1: ¬S((¬ev∧¬q)∧U, ¬ev)

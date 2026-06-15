@@ -21,6 +21,7 @@ Also contains the gContent/hContent duality theorems.
 * Ported from Cslib/Logics/Bimodal/Metalogic/Bundle/WitnessSeed.lean
 -/
 
+set_option linter.style.setOption false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 set_option maxHeartbeats 800000

@@ -465,7 +465,7 @@ theorem valuation_reflects_neg (b : Branch Atom) (fc : FrameClass)
     buildAtomValuation b w t p = false := by
   unfold buildAtomValuation
   by_contra h
-  push_neg at h
+  push Not at h
   have hPosAt : Branch.hasPosAt b (.atom p) ⟨w, t⟩ = true := by
     cases hc : Branch.hasPosAt b (.atom p) ⟨w, t⟩ <;> simp_all
   have hNegAt : Branch.hasNegAt b (.atom p) ⟨w, t⟩ = true := by
@@ -795,7 +795,7 @@ theorem sat_untl_neg (b : Branch Atom) (timeOrd : TimeOrdering)
   simp only [asUntil?, hg', ite_false, Bool.false_eq_true] at hNA
   intro t' ht'
   by_contra habs
-  push_neg at habs
+  push Not at habs
   obtain ⟨hne, hng⟩ := habs
   have hNotContainsE : Branch.contains b ⟨.neg, event, ⟨w, t'⟩⟩ = false := by
     simp only [Bool.eq_false_iff]; exact fun h => hne ((contains_iff_mem b _).mp h)
@@ -844,7 +844,7 @@ theorem sat_snce_neg (b : Branch Atom) (timeOrd : TimeOrdering)
   simp only [asSince?, hg', ite_false, Bool.false_eq_true] at hNA
   intro t' ht'
   by_contra habs
-  push_neg at habs
+  push Not at habs
   obtain ⟨hne, hng⟩ := habs
   have hNotContainsE : Branch.contains b ⟨.neg, event, ⟨w, t'⟩⟩ = false := by
     simp only [Bool.eq_false_iff]; exact fun h => hne ((contains_iff_mem b _).mp h)

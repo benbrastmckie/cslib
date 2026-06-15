@@ -10,8 +10,6 @@ public import Cslib.Logics.Bimodal.Metalogic.Separation.Defs
 public import Cslib.Logics.Bimodal.Metalogic.Separation.Duality
 public import Cslib.Logics.Bimodal.Metalogic.Separation.IntHelpers
 
-set_option linter.style.emptyLine false
-
 /-!
 # Negation Equivalences (GHR94 Lemma 10.2.2)
 
@@ -19,6 +17,8 @@ set_option linter.style.emptyLine false
 
 - GHR94, Lemma 10.2.2, p. 572
 -/
+
+set_option linter.style.emptyLine false
 
 @[expose] public section
 
@@ -53,7 +53,7 @@ theorem neg_until_equiv
     · left; exact fun w hw =>
         (int_truth_neg M w A).mpr (hG w hw)
     · right
-      push_neg at hG
+      push Not at hG
       obtain ⟨w, hwt, hwA⟩ := hG
       have hexA : ∃ n, t < n ∧
           intTruth M n A := ⟨w, hwt, hwA⟩
@@ -62,7 +62,7 @@ theorem neg_until_equiv
       have hexnotB :
           ∃ r, t < r ∧ r < u ∧
             ¬ intTruth M r B := by
-        by_contra hall; push_neg at hall
+        by_contra hall; push Not at hall
         exact hnotU ⟨u, htu, hAu,
           fun r hr1 hr2 => hall r hr1 hr2⟩
       have hexnotB' :
@@ -74,7 +74,7 @@ theorem neg_until_equiv
         Int.exists_least_above' hexnotB'
       have hmu : m < u := by
         obtain ⟨r, hr1, hr2, hr3⟩ := hexnotB
-        by_contra hge; push_neg at hge
+        by_contra hge; push Not at hge
         exact hminB r hr1 (by omega) hr3
       refine ⟨m, htm, ?_, ?_⟩
       · rw [int_truth_and, int_truth_neg,
@@ -126,7 +126,7 @@ theorem neg_since_equiv
     · left; exact fun w hw =>
         (int_truth_neg M w A).mpr (hH w hw)
     · right
-      push_neg at hH
+      push Not at hH
       obtain ⟨w, hwt, hwA⟩ := hH
       have hexA : ∃ n, n < t ∧
           intTruth M n A := ⟨w, hwt, hwA⟩
@@ -135,7 +135,7 @@ theorem neg_since_equiv
       have hexnotB :
           ∃ r, u < r ∧ r < t ∧
             ¬ intTruth M r B := by
-        by_contra hall; push_neg at hall
+        by_contra hall; push Not at hall
         exact hnotS ⟨u, hut, hAu,
           fun r hr1 hr2 => hall r hr1 hr2⟩
       have hexnotB' :
@@ -147,7 +147,7 @@ theorem neg_since_equiv
         Int.exists_greatest_below' hexnotB'
       have hum : u < m := by
         obtain ⟨r, hr1, hr2, hr3⟩ := hexnotB
-        by_contra hge; push_neg at hge
+        by_contra hge; push Not at hge
         exact (hmaxB r (by omega) hr2) hr3
       refine ⟨m, hmt, ?_, ?_⟩
       · rw [int_truth_and, int_truth_neg,

@@ -20,6 +20,7 @@ measures, and callback infrastructure.
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
+set_option linter.style.setOption false
 set_option linter.flexible false
 set_option linter.unusedDecidableInType false
 set_option linter.style.maxHeartbeats false
@@ -1243,7 +1244,7 @@ theorem snce_single_U_depth_one_separable (C w A B : Formula Atom)
     · -- w is U-free: Case 1
       exact case1_separable_gen a_pos w A B ha_uf hwuf hA_uf hB_uf hA_sf hB_sf
     · -- w not U-free: apply guard 2-clause CNF
-      push_neg at hwuf; simp [Bool.not_eq_true] at hwuf
+      push Not at hwuf; simp [Bool.not_eq_true] at hwuf
       -- Guard CNF: w <-> (q_pos v -U) ^ (U v q_neg)
       have h_cnf := single_U_guard_cnf w A B hsingle_w hexp_w hdw
       let q_pos := replaceUntl w A B (Formula.neg .bot)
@@ -1301,7 +1302,7 @@ theorem snce_single_U_depth_one_separable (C w A B : Formula Atom)
     · -- w U-free: Case 2
       exact case2_separable_gen a_neg w A B ha_neg_uf hwuf hA_uf hB_uf hA_sf hB_sf
     · -- w not U-free: apply guard 2-clause CNF
-      push_neg at hwuf; simp [Bool.not_eq_true] at hwuf
+      push Not at hwuf; simp [Bool.not_eq_true] at hwuf
       have h_cnf := single_U_guard_cnf w A B hsingle_w hexp_w hdw
       let q_pos := replaceUntl w A B (Formula.neg .bot)
       let q_neg := replaceUntl w A B .bot
@@ -1369,7 +1370,7 @@ theorem snce_single_U_depth_one_sep_with_U_type (C w A B : Formula Atom)
     apply is_separable_with_U_type_of_equiv h_equiv_pos
     by_cases hFuf : isUFree w = true
     · exact case1_sep_with_U_type_gen a_pos w A B ha_uf hFuf hA_uf hB_uf hA_sf hB_sf
-    · push_neg at hFuf; simp [Bool.not_eq_true] at hFuf
+    · push Not at hFuf; simp [Bool.not_eq_true] at hFuf
       have h_cnf := single_U_guard_cnf w A B hsingle_F hexp_F hdF
       let q_pos := replaceUntl w A B (Formula.neg .bot)
       let q_neg := replaceUntl w A B .bot
@@ -1415,7 +1416,7 @@ theorem snce_single_U_depth_one_sep_with_U_type (C w A B : Formula Atom)
     apply is_separable_with_U_type_of_equiv h_equiv_neg
     by_cases hFuf : isUFree w = true
     · exact case2_sep_with_U_type_gen a_neg w A B ha_neg_uf hFuf hA_uf hB_uf hA_sf hB_sf
-    · push_neg at hFuf; simp [Bool.not_eq_true] at hFuf
+    · push Not at hFuf; simp [Bool.not_eq_true] at hFuf
       have h_cnf := single_U_guard_cnf w A B hsingle_F hexp_F hdF
       let q_pos := replaceUntl w A B (Formula.neg .bot)
       let q_neg := replaceUntl w A B .bot

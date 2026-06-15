@@ -37,6 +37,7 @@ namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle
 
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
+set_option linter.style.setOption false
 set_option linter.flexible false
 
 attribute [local instance] Classical.propDecidable
@@ -74,7 +75,7 @@ theorem succ_cofinal (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaxi
     (a b : LimitDomSubtype fc A h_mcs) (h_lt : a < b) :
     ∃ k : Nat, (limitDomSubtypeSucc fc A h_mcs h_discrete)^[k] a = b := by
   by_contra h_all
-  push_neg at h_all
+  push Not at h_all
   exact chronicle_gap_contradiction fc A h_mcs h_discrete a b h_lt (fun k => h_all k)
 
 /-- `IsSuccArchimedean` for `LimitDomSubtype` in the discrete case. -/

@@ -1,36 +1,15 @@
 {
-  "status": "planned",
-  "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/206_fix_wfail_ci_warnings/plans/01_ci-warnings-fix-plan.md",
-      "summary": "6-phase plan to fix all --wfail CI warnings across Bimodal/, Temporal/, and Modal/ files organized by warning category"
-    }
-  ],
-  "next_steps": "Run /implement 206 to execute the plan",
+  "status": "in_progress",
+  "started_at": "2026-06-15T14:55:26Z",
+  "artifacts": [],
+  "partial_progress": {
+    "stage": "initializing",
+    "details": "Agent started, reading plan and beginning Phase 1"
+  },
   "metadata": {
     "session_id": "sess_1781534511_11ef67",
-    "agent_type": "planner-agent",
+    "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
-    "phase_count": 6,
-    "estimated_hours": 6,
-    "dependency_waves": [[1, 2, 3], [4], [5], [6]]
-  },
-  "plan_metadata": {
-    "phases": 6,
-    "total_effort_hours": 6,
-    "complexity": "complex",
-    "research_integrated": true,
-    "plan_version": 1,
-    "dependency_waves": [[1, 2, 3], [4], [5], [6]],
-    "reports_integrated": [
-      {
-        "path": "reports/01_ci-warnings-analysis.md",
-        "integrated_in_plan_version": 1,
-        "integrated_date": "2026-06-15"
-      }
-    ]
-  },
-  "memory_candidates": []
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+  }
 }

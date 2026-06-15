@@ -1,7 +1,7 @@
 # Implementation Plan: Fix --wfail CI Warnings
 
 - **Task**: 206 - Fix --wfail CI warnings across Bimodal, Temporal, and Modal files
-- **Status**: [NOT STARTED]
+- **Status**: [IN PROGRESS]
 - **Effort**: 6 hours
 - **Dependencies**: None
 - **Research Inputs**: reports/01_ci-warnings-analysis.md
@@ -74,7 +74,7 @@ Phases 1, 2, and 3 can execute in parallel. Phases 4-6 are sequential due to bui
 
 ---
 
-### Phase 1: push_neg Deprecation Fix [NOT STARTED]
+### Phase 1: push_neg Deprecation Fix [COMPLETED]
 
 **Goal**: Replace all 138 `push_neg` calls with `push Not` across 22 files.
 
@@ -130,7 +130,7 @@ push Not at *
 
 ---
 
-### Phase 2: Module Docstring Ordering + Intro Merging [NOT STARTED]
+### Phase 2: Module Docstring Ordering + Intro Merging [COMPLETED]
 
 **Goal**: Fix module docstring placement in 13 files (move `set_option` after `/-!` block) and merge intro calls in 1 file.
 
@@ -196,7 +196,7 @@ intro h1 h2
 
 ---
 
-### Phase 3: Unscoped set_option Fixes (linter.flexible + maxHeartbeats) [NOT STARTED]
+### Phase 3: Unscoped set_option Fixes (linter.flexible + maxHeartbeats) [COMPLETED]
 
 **Goal**: Scope all unscoped `set_option` directives to pass the setOption linter. This covers `linter.flexible false` (24 files) and `maxHeartbeats` (16 occurrences in 12 files).
 
@@ -282,7 +282,7 @@ set_option maxHeartbeats 3200000 in
 
 ---
 
-### Phase 4: Unused Simp Args, Unused Hypotheses, and Flexible Simp Suppression [NOT STARTED]
+### Phase 4: Unused Simp Args, Unused Hypotheses, and Flexible Simp Suppression [COMPLETED]
 
 **Goal**: Remove unused simp arguments (18 occurrences), remove unused type-class hypotheses (4 occurrences), and suppress flexible simp warnings in the 2 currently-flagged files.
 

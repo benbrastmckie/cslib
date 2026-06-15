@@ -11,10 +11,6 @@ public import Cslib.Logics.Bimodal.Metalogic.Separation.NegationEquiv
 public import Cslib.Logics.Bimodal.Metalogic.Separation.Distributivity
 public import Cslib.Logics.Bimodal.Metalogic.Separation.IntHelpers
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.unusedSimpArgs false
-
 /-!
 # Elimination Cases (GHR94 Lemma 10.2.3)
 
@@ -26,6 +22,10 @@ formula where U(A,B) appears only at top level (not under S).
 
 - GHR94, Lemma 10.2.3, pp. 572-580
 -/
+
+set_option linter.style.emptyLine false
+set_option linter.style.longLine false
+set_option linter.unusedSimpArgs false
 
 @[expose] public section
 
@@ -122,7 +122,7 @@ theorem elim_case_1 (a q A B : Formula Atom)
             · exact hB₂ r hrs hrt
             · exact hrt ▸ hBt
             · exact hBu r hrt hru
-          · push_neg at hle
+          · push Not at hle
             refine ⟨s₁, hs₁t, (int_truth_and M s₁ a (.untl A B)).mpr ⟨ha₁,
               u, lt_trans hs₁t htu, hAu, fun r hrs hru => ?_⟩, hq₁⟩
             rcases lt_trichotomy r t with hrt | hrt | hrt
@@ -134,7 +134,7 @@ theorem elim_case_1 (a q A B : Formula Atom)
           by_cases hle : s₁ ≤ s₂
           · exact ⟨s₂, hs₂t, (int_truth_and M s₂ a (.untl A B)).mpr ⟨ha₂,
               t, hs₂t, hAt, fun r hrs hrt => hB₁ r (lt_of_le_of_lt hle hrs) hrt⟩, hq₂⟩
-          · push_neg at hle
+          · push Not at hle
             exact ⟨s₁, hs₁t, (int_truth_and M s₁ a (.untl A B)).mpr ⟨ha₁, t, hs₁t, hAt, hB₁⟩,
               fun r hr1 hr2 => hq₂ r (lt_trans hle hr1) hr2⟩
       · obtain ⟨w, hwt, hw_and, hq_rest⟩ := h3
@@ -148,7 +148,7 @@ theorem elim_case_1 (a q A B : Formula Atom)
           · exact hq₂ r hrs hrw
           · exact hrw ▸ hqw
           · exact hq_rest r hrw hrt
-        · push_neg at hle
+        · push Not at hle
           refine ⟨s₁, lt_trans hs₁w hwt, (int_truth_and M s₁ a (.untl A B)).mpr ⟨ha₁,
             w, hs₁w, hAw, hB₁⟩, fun r hrs hrt => ?_⟩
           rcases lt_trichotomy r w with hrw | hrw | hrw
@@ -218,7 +218,7 @@ theorem elim_case_1_gen (a q A B : Formula Atom)
             · exact hB₂ r hrs hrt
             · exact hrt ▸ hBt
             · exact hBu r hrt hru
-          · push_neg at hle
+          · push Not at hle
             refine ⟨s₁, hs₁t, (int_truth_and M s₁ a (.untl A B)).mpr ⟨ha₁,
               u, lt_trans hs₁t htu, hAu, fun r hrs hru => ?_⟩, hq₁⟩
             rcases lt_trichotomy r t with hrt | hrt | hrt
@@ -230,7 +230,7 @@ theorem elim_case_1_gen (a q A B : Formula Atom)
           by_cases hle : s₁ ≤ s₂
           · exact ⟨s₂, hs₂t, (int_truth_and M s₂ a (.untl A B)).mpr ⟨ha₂,
               t, hs₂t, hAt, fun r hrs hrt => hB₁ r (lt_of_le_of_lt hle hrs) hrt⟩, hq₂⟩
-          · push_neg at hle
+          · push Not at hle
             exact ⟨s₁, hs₁t, (int_truth_and M s₁ a (.untl A B)).mpr ⟨ha₁, t, hs₁t, hAt, hB₁⟩,
               fun r hr1 hr2 => hq₂ r (lt_trans hle hr1) hr2⟩
       · obtain ⟨w, hwt, hw_and, hq_rest⟩ := h3
@@ -244,7 +244,7 @@ theorem elim_case_1_gen (a q A B : Formula Atom)
           · exact hq₂ r hrs hrw
           · exact hrw ▸ hqw
           · exact hq_rest r hrw hrt
-        · push_neg at hle
+        · push Not at hle
           refine ⟨s₁, lt_trans hs₁w hwt, (int_truth_and M s₁ a (.untl A B)).mpr ⟨ha₁,
             w, hs₁w, hAw, hB₁⟩, fun r hrs hrt => ?_⟩
           rcases lt_trichotomy r w with hrw | hrw | hrw
@@ -302,7 +302,7 @@ theorem case1_psi_properties (a q A B : Formula Atom)
             · exact hB₂ r hrs hrt
             · exact hrt ▸ hBt
             · exact hBu r hrt hru
-          · push_neg at hle
+          · push Not at hle
             refine ⟨s₁, hs₁t, (int_truth_and M s₁ a (.untl A B)).mpr ⟨ha₁,
               u, lt_trans hs₁t htu, hAu, fun r hrs hru => ?_⟩, hq₁⟩
             rcases lt_trichotomy r t with hrt | hrt | hrt
@@ -314,7 +314,7 @@ theorem case1_psi_properties (a q A B : Formula Atom)
           by_cases hle : s₁ ≤ s₂
           · exact ⟨s₂, hs₂t, (int_truth_and M s₂ a (.untl A B)).mpr ⟨ha₂,
               t, hs₂t, hAt, fun r hrs hrt => hB₁ r (lt_of_le_of_lt hle hrs) hrt⟩, hq₂⟩
-          · push_neg at hle
+          · push Not at hle
             exact ⟨s₁, hs₁t, (int_truth_and M s₁ a (.untl A B)).mpr ⟨ha₁, t, hs₁t, hAt, hB₁⟩,
               fun r hr1 hr2 => hq₂ r (lt_trans hle hr1) hr2⟩
       · obtain ⟨w, hwt, hw_and, hq_rest⟩ := h3
@@ -328,7 +328,7 @@ theorem case1_psi_properties (a q A B : Formula Atom)
           · exact hq₂ r hrs hrw
           · exact hrw ▸ hqw
           · exact hq_rest r hrw hrt
-        · push_neg at hle
+        · push Not at hle
           refine ⟨s₁, lt_trans hs₁w hwt, (int_truth_and M s₁ a (.untl A B)).mpr ⟨ha₁,
             w, hs₁w, hAw, hB₁⟩, fun r hrs hrt => ?_⟩
           rcases lt_trichotomy r w with hrw | hrw | hrw
@@ -554,7 +554,7 @@ theorem elim_case_3 (a q A B : Formula Atom)
       have ⟨haq2, hnotU2⟩ := (int_truth_and M s2 _ _).mp hand2
       have hna2 := ((int_truth_and M s2 _ _).mp haq2).1
       have hnq2 := ((int_truth_and M s2 _ _).mp haq2).2
-      have hs_le : s ≤ s2 := by by_contra h; push_neg at h; exact hguard2 s h hst ha_s
+      have hs_le : s ≤ s2 := by by_contra h; push Not at h; exact hguard2 s h hst ha_s
       rcases eq_or_lt_of_le hs_le with heq | hlt
       · exact hna2 (heq ▸ ha_s)
       · rcases (int_truth_or M s2 _ _).mp (hqU_guard s2 hlt hs2t) with hq2 | hU2
@@ -612,7 +612,7 @@ theorem elim_case_4 (a q A B : Formula Atom)
       have ⟨haq1, hU1⟩ := (int_truth_and M s1 _ _).mp hevent1
       have hna1 := ((int_truth_and M s1 _ _).mp haq1).1
       have hnq1 := ((int_truth_and M s1 _ _).mp haq1).2
-      have hs_le : s ≤ s1 := by by_contra h; push_neg at h; exact hguard1 s h hst ha_s
+      have hs_le : s ≤ s1 := by by_contra h; push Not at h; exact hguard1 s h hst ha_s
       rcases eq_or_lt_of_le hs_le with heq | hlt
       · exact hna1 (heq ▸ ha_s)
       · rcases (int_truth_or M s1 _ _).mp (hguard_S s1 hlt hs1t) with hq1 | hnotU1
@@ -667,7 +667,7 @@ theorem elim_case_3_gen (a q A B : Formula Atom)
       have ⟨haq2, hnotU2⟩ := (int_truth_and M s2 _ _).mp hand2
       have hna2 := ((int_truth_and M s2 _ _).mp haq2).1
       have hnq2 := ((int_truth_and M s2 _ _).mp haq2).2
-      have hs_le : s ≤ s2 := by by_contra h; push_neg at h; exact hguard2 s h hst ha_s
+      have hs_le : s ≤ s2 := by by_contra h; push Not at h; exact hguard2 s h hst ha_s
       rcases eq_or_lt_of_le hs_le with heq | hlt
       · exact hna2 (heq ▸ ha_s)
       · rcases (int_truth_or M s2 _ _).mp (hqU_guard s2 hlt hs2t) with hq2 | hU2
@@ -721,7 +721,7 @@ theorem elim_case_4_gen (a q A B : Formula Atom)
       have ⟨haq1, hU1⟩ := (int_truth_and M s1 _ _).mp hevent1
       have hna1 := ((int_truth_and M s1 _ _).mp haq1).1
       have hnq1 := ((int_truth_and M s1 _ _).mp haq1).2
-      have hs_le : s ≤ s1 := by by_contra h; push_neg at h; exact hguard1 s h hst ha_s
+      have hs_le : s ≤ s1 := by by_contra h; push Not at h; exact hguard1 s h hst ha_s
       rcases eq_or_lt_of_le hs_le with heq | hlt
       · exact hna1 (heq ▸ ha_s)
       · rcases (int_truth_or M s1 _ _).mp (hguard_S s1 hlt hs1t) with hq1 | hnotU1

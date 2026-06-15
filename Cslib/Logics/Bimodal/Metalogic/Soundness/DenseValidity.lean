@@ -91,14 +91,14 @@ theorem swap_axiom_tl_valid (φ : Formula Atom) :
   -- h_always : ((Gφ' → (φ'(t) → Hφ' → ⊥) → ⊥) → ⊥)
   -- In unfolded form: Gφ' = (∃ s > t, ¬φ'(s) ∧ ...) → ⊥, etc.
   have h_future : ∀ r, t < r → truthAt M Omega τ r φ.swapTemporal := by
-    by_contra h_not; push_neg at h_not
+    by_contra h_not; push Not at h_not
     obtain ⟨r, htr, h_neg⟩ := h_not
     exact h_always fun h_G _ => h_G ⟨r, htr, h_neg, fun _ _ _ hf => absurd hf not_false⟩
   have h_present : truthAt M Omega τ t φ.swapTemporal := by
     by_contra h_not
     exact h_always fun _ h_inner => h_inner (fun h_pres _ => h_not h_pres)
   have h_past : ∀ r, r < t → truthAt M Omega τ r φ.swapTemporal := by
-    by_contra h_not; push_neg at h_not
+    by_contra h_not; push Not at h_not
     obtain ⟨r, hrt, h_neg⟩ := h_not
     exact h_always fun _ h_inner => h_inner (fun _ h_H => h_H ⟨r, hrt, h_neg, fun _ _ _ hf => absurd hf not_false⟩)
   apply h_neg_Gφ_s
@@ -438,10 +438,10 @@ theorem axiom_swap_valid (φ : Formula Atom) (h : Axiom φ) [DenselyOrdered D] [
     simp only [Formula.swapTemporal, Formula.and, Formula.or, Formula.neg, truthAt]
     intro h_conj
     have ⟨s1, hs1t, h_φs1⟩ : ∃ s, s < t ∧ truthAt M Omega τ s φ.swapTemporal := by
-      by_contra h_no; push_neg at h_no
+      by_contra h_no; push Not at h_no
       exact h_conj (fun ⟨s, hst, h_phi, _⟩ _ => absurd h_phi (h_no s hst))
     have ⟨s2, hs2t, h_ψs2⟩ : ∃ s, s < t ∧ truthAt M Omega τ s ψ.swapTemporal := by
-      by_contra h_no; push_neg at h_no
+      by_contra h_no; push Not at h_no
       exact h_conj (fun _ ⟨s, hst, h_psi, _⟩ => absurd h_psi (h_no s hst))
     rcases lt_trichotomy s1 s2 with h_lt | h_eq | h_gt
     · -- s1 < s2: P(P(φ') ∧ ψ')
@@ -460,10 +460,10 @@ theorem axiom_swap_valid (φ : Formula Atom) (h : Axiom φ) [DenselyOrdered D] [
     simp only [Formula.swapTemporal, Formula.and, Formula.or, Formula.neg, truthAt]
     intro h_conj
     have ⟨s1, hts1, h_φs1⟩ : ∃ s, t < s ∧ truthAt M Omega τ s φ.swapTemporal := by
-      by_contra h_no; push_neg at h_no
+      by_contra h_no; push Not at h_no
       exact h_conj (fun ⟨s, hts, h_phi, _⟩ _ => absurd h_phi (h_no s hts))
     have ⟨s2, hts2, h_ψs2⟩ : ∃ s, t < s ∧ truthAt M Omega τ s ψ.swapTemporal := by
-      by_contra h_no; push_neg at h_no
+      by_contra h_no; push Not at h_no
       exact h_conj (fun _ ⟨s, hts, h_psi, _⟩ => absurd h_psi (h_no s hts))
     rcases lt_trichotomy s1 s2 with h_lt | h_eq | h_gt
     · -- s1 < s2: F(φ' ∧ F(ψ'))
@@ -654,10 +654,10 @@ theorem axiom_temp_linearity_valid (φ ψ : Formula Atom) :
   -- Extract Fφ and Fψ witnesses from the conjunction encoding
   -- Guard conversion: h_conj has guard (False → False), goal has (False → False) → False
   have h_Fφ : ∃ s, t < s ∧ truthAt M Omega τ s φ := by
-    by_contra h_no; push_neg at h_no
+    by_contra h_no; push Not at h_no
     exact h_conj (fun ⟨s, hts, h_φ, _⟩ _ => absurd h_φ (h_no s hts))
   have h_Fψ : ∃ s, t < s ∧ truthAt M Omega τ s ψ := by
-    by_contra h_no; push_neg at h_no
+    by_contra h_no; push Not at h_no
     exact h_conj (fun _ ⟨s, hts, h_ψ, _⟩ => absurd h_ψ (h_no s hts))
   obtain ⟨s1, hts1, h_φs1⟩ := h_Fφ
   obtain ⟨s2, hts2, h_ψs2⟩ := h_Fψ
@@ -683,10 +683,10 @@ theorem axiom_temp_linearity_past_valid (φ ψ : Formula Atom) :
   simp only [truthAt]
   intro h_conj
   have h_Pφ : ∃ s, s < t ∧ truthAt M Omega τ s φ := by
-    by_contra h_no; push_neg at h_no
+    by_contra h_no; push Not at h_no
     exact h_conj (fun ⟨s, hst, h_φ, _⟩ _ => absurd h_φ (h_no s hst))
   have h_Pψ : ∃ s, s < t ∧ truthAt M Omega τ s ψ := by
-    by_contra h_no; push_neg at h_no
+    by_contra h_no; push Not at h_no
     exact h_conj (fun _ ⟨s, hst, h_ψ, _⟩ => absurd h_ψ (h_no s hst))
   obtain ⟨s1, hs1t, h_φs1⟩ := h_Pφ
   obtain ⟨s2, hs2t, h_ψs2⟩ := h_Pψ

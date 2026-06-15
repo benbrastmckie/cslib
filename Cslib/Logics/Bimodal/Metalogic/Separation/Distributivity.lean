@@ -8,8 +8,6 @@ module
 
 public import Cslib.Logics.Bimodal.Metalogic.Separation.Defs
 
-set_option linter.style.emptyLine false
-
 /-!
 # Distributivity Laws (GHR94 Lemma 10.2.1)
 
@@ -27,6 +25,8 @@ linear flows of time (not just integers).
 
 - GHR94, Lemma 10.2.1, p. 571
 -/
+
+set_option linter.style.emptyLine false
 
 @[expose] public section
 
@@ -110,8 +110,7 @@ theorem until_distrib_and_right
   · intro h_and
     by_contra h_not
     apply h_and
-    intro ⟨s1, hts1, hA1, hB⟩
-    intro ⟨s2, hts2, hA2, hC⟩
+    intro ⟨s1, hts1, hA1, hB⟩ ⟨s2, hts2, hA2, hC⟩
     apply h_not
     by_cases hle : s1 ≤ s2
     · exact ⟨s1, hts1, hA1,
@@ -121,7 +120,7 @@ theorem until_distrib_and_right
           · exact hB r hr1 hr2
           · exact hC r hr1
               (lt_of_lt_of_le hr2 hle)⟩
-    · push_neg at hle
+    · push Not at hle
       exact ⟨s2, hts2, hA2,
         fun r hr1 hr2 => by
           intro h_imp_BC
@@ -152,8 +151,7 @@ theorem since_distrib_and_right
   · intro h_and
     by_contra h_not
     apply h_and
-    intro ⟨s1, hst1, hA1, hB⟩
-    intro ⟨s2, hst2, hA2, hC⟩
+    intro ⟨s1, hst1, hA1, hB⟩ ⟨s2, hst2, hA2, hC⟩
     apply h_not
     by_cases hle : s2 ≤ s1
     · exact ⟨s1, hst1, hA1,
@@ -163,7 +161,7 @@ theorem since_distrib_and_right
           · exact hB r hr1 hr2
           · exact hC r
               (lt_of_le_of_lt hle hr1) hr2⟩
-    · push_neg at hle
+    · push Not at hle
       exact ⟨s2, hst2, hA2,
         fun r hr1 hr2 => by
           intro h_imp_BC

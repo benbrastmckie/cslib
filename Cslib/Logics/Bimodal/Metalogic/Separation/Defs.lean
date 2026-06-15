@@ -9,8 +9,6 @@ module
 public import Cslib.Logics.Bimodal.Syntax.Formula
 public import Mathlib.Algebra.Order.Group.Int
 
-set_option linter.style.emptyLine false
-
 /-!
 # Separation Definitions: Integer Temporal Semantics
 
@@ -31,6 +29,8 @@ Core definitions for the separation theorem over integer time (GHR94 Chapter 10.
 
 - GHR94, Chapter 10, Section 10.2 (pp. 569-592)
 -/
+
+set_option linter.style.emptyLine false
 
 @[expose] public section
 

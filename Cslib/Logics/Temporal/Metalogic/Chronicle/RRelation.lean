@@ -24,6 +24,7 @@ Core r-relation infrastructure for the temporal chronicle construction.
 * Burgess 1982: "Axioms for tense logic II: Time periods"
 -/
 
+set_option linter.style.setOption false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 set_option maxHeartbeats 1600000

@@ -9,11 +9,6 @@ module
 public import Cslib.Logics.Bimodal.Metalogic.Separation.Defs
 public import Cslib.Logics.Bimodal.Metalogic.Separation.Duality
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.flexible false
-
 /-!
 # Temporal Closure Infrastructure
 
@@ -29,6 +24,12 @@ operators preserve separability) without axioms.
 - `noUNestedInS`: Dual of `noSNestedInU`
 - `swap_no_U_nested_gives_no_S_nested`: Duality converts between the two predicates
 -/
+
+set_option linter.style.emptyLine false
+set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
+set_option linter.style.setOption false
+set_option linter.flexible false
 
 @[expose] public section
 
@@ -278,8 +279,7 @@ theorem untl_of_boxfree_sep_no_U_nested (phi psi : Formula Atom)
 theorem allFuture_of_boxfree_sep_no_U_nested (phi : Formula Atom)
     (h : isSyntacticallySeparated phi = true) :
     noUNestedInS (.allFuture (replaceBoxWithTop phi)) := by
-  simp only [Formula.allFuture, Formula.neg, Formula.someFuture, Formula.top,
-    noUNestedInS, and_true]
+  simp only [noUNestedInS, and_true]
   exact replace_box_separated_no_U_nested phi h
 
 /-! ## Congruence Lemmas for Box Normalization -/
@@ -361,7 +361,7 @@ theorem s_free_junction_depth_zero (phi : Formula Atom) (h : isSFree phi = true)
   | box a ih => simp [isSFree] at h; simp [junctionDepth, ih h]
   | untl a b ih1 ih2 =>
     simp [isSFree] at h
-    simp [junctionDepth, junctionDepthU]
+    simp [junctionDepth]
     have : junctionDepthU a = 0 := s_free_junction_depth_U_zero a h.1
     have : junctionDepthU b = 0 := s_free_junction_depth_U_zero b h.2
     omega
@@ -391,7 +391,7 @@ theorem u_free_junction_depth_zero (phi : Formula Atom) (h : isUFree phi = true)
   | untl _ _ => simp [isUFree] at h
   | snce a b ih1 ih2 =>
     simp [isUFree] at h
-    simp [junctionDepth, junctionDepthS]
+    simp [junctionDepth]
     have : junctionDepthS a = 0 := u_free_junction_depth_S_zero a h.1
     have : junctionDepthS b = 0 := u_free_junction_depth_S_zero b h.2
     omega

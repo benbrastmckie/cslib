@@ -61,6 +61,7 @@ namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle
 
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
+set_option linter.style.setOption false
 set_option linter.flexible false
 
 attribute [local instance] Classical.propDecidable
@@ -914,7 +915,7 @@ theorem limitDomSubtype_succ_le_iff (fc : FrameClass) (A : Set (Formula Atom)) (
     have h_no_between := witness.choose_spec.2.2
     -- Need: y ≤ b.val
     by_contra h_not_le
-    push_neg at h_not_le
+    push Not at h_not_le
     -- y > b.val, so a < b < y, and b is in domain — contradiction
     exact h_no_between b.val b.property h_lt h_not_le
 
@@ -967,7 +968,7 @@ theorem limitDomSubtype_le_pred_iff (fc : FrameClass) (A : Set (Formula Atom)) (
     have h_no_between := witness.choose_spec.2.2
     -- Need: a.val ≤ y
     by_contra h_not_le
-    push_neg at h_not_le
+    push Not at h_not_le
     -- a > y, so y < a < b, and a is in domain — contradiction
     exact h_no_between a.val a.property h_not_le h_lt
 
@@ -1033,7 +1034,7 @@ theorem limitDomSubtype_succ_pred (fc : FrameClass) (A : Set (Formula Atom)) (h_
   · -- b ≤ succ(pred(b)): by contradiction.
     -- If spb < b, then pred(b) < spb < b, contradicting the predecessor property.
     by_contra h_not_le
-    push_neg at h_not_le
+    push Not at h_not_le
     -- spb < b, so pred(b) < spb (since spb > pred(b) by succ property)
     -- and spb < b. We also need spb ≤ pred(b) from the pred property.
     -- Actually: from a ≤ pred(b) ↔ a < b, with a = spb: spb ≤ pred(b) ↔ spb < b
@@ -1062,7 +1063,7 @@ theorem limitDomSubtype_pred_succ (fc : FrameClass) (A : Set (Formula Atom)) (h_
   · -- pred(succ(a)) ≤ a: by contradiction.
     -- If a < psa, then a < psa < succ(a), contradicting the successor property.
     by_contra h_not_le
-    push_neg at h_not_le
+    push Not at h_not_le
     -- a < psa, so succ(a) ≤ psa (from succ_le_iff: succ(a) ≤ b ↔ a < b)
     have h_sa_le_psa : sa ≤ psa :=
       (limitDomSubtype_succ_le_iff fc A h_mcs h_discrete a psa).mpr h_not_le

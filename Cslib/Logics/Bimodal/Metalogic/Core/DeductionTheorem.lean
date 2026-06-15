@@ -40,6 +40,7 @@ We handle each case of the 7-constructor DerivationTree:
 -/
 
 set_option linter.style.emptyLine false
+set_option linter.style.setOption false
 set_option linter.flexible false
 
 @[expose] public section

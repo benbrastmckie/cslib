@@ -36,6 +36,7 @@ via `bimodalDerivationSystem` and `bimodalHasDeductionTheorem`.
 -/
 
 set_option linter.style.emptyLine false
+set_option linter.style.setOption false
 set_option linter.flexible false
 
 @[expose] public section
@@ -135,7 +136,7 @@ lemma inconsistent_derives_bot {fc : FrameClass} {Γ : Context Atom}
     (h : ¬Consistent (fc := fc) Γ) :
     Nonempty (DerivationTree fc Γ Formula.bot) := by
   unfold Consistent at h
-  push_neg at h
+  push Not at h
   exact h
 
 /--

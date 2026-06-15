@@ -11,11 +11,6 @@ public import Cslib.Logics.Bimodal.Metalogic.Separation.TemporalClosure
 public import Cslib.Logics.Bimodal.Metalogic.Separation.DedekindZ.Cases
 public import Cslib.Logics.Bimodal.Metalogic.Separation.FormulaOps
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.flexible false
-
 /-!
 # Separation Hierarchy Definitions: U/S-Type Predicates, Abstraction, and Junction-Depth Monotonicity
 
@@ -23,6 +18,12 @@ Single U/S-type predicates, Lemma 10.2.5 (single-U separability), U/S-formula
 abstraction, semantic correctness, preservation lemmas, count properties, and
 junction-depth monotonicity.
 -/
+
+set_option linter.style.emptyLine false
+set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
+set_option linter.style.setOption false
+set_option linter.flexible false
 
 @[expose] public section
 

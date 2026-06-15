@@ -26,6 +26,7 @@ and maximal consistent sets.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Algebraic/UltrafilterMCS.lean
 -/
 
+set_option linter.style.setOption false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 set_option maxHeartbeats 800000
@@ -122,7 +123,7 @@ theorem mcsToSet_mem_of_le {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsiste
       by_contra h_not
       have h_incons : ¬SetConsistent FrameClass.Base (insert ψ Γ) := h_mcs.2 ψ h_not
       unfold SetConsistent at h_incons
-      push_neg at h_incons
+      push Not at h_incons
       obtain ⟨L, hL, hL_incons⟩ := h_incons
       have ⟨d_bot⟩ := inconsistent_derives_bot hL_incons
       let Γ' := L.filter (· ≠ ψ)
@@ -169,7 +170,7 @@ theorem mcsToSet_inf_mem {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsistent
     by_contra h_not
     have h_incons : ¬SetConsistent FrameClass.Base (insert (φ.and ψ) Γ) := h_mcs.2 (φ.and ψ) h_not
     unfold SetConsistent at h_incons
-    push_neg at h_incons
+    push Not at h_incons
     obtain ⟨L, hL, hL_incons⟩ := h_incons
     have ⟨d_bot⟩ := inconsistent_derives_bot hL_incons
     let Γ' := L.filter (· ≠ φ.and ψ)
@@ -228,7 +229,7 @@ theorem mcsToSet_compl_or {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsisten
     · right
       have h_incons : ¬SetConsistent FrameClass.Base (insert φ Γ) := h_mcs.2 φ h
       unfold SetConsistent at h_incons
-      push_neg at h_incons
+      push Not at h_incons
       obtain ⟨L, hL, hL_incons⟩ := h_incons
       have ⟨d_bot⟩ := inconsistent_derives_bot hL_incons
       let Γ' := L.filter (· ≠ φ)
@@ -253,7 +254,7 @@ theorem mcsToSet_compl_or {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsisten
         by_contra h_neg_not
         have h_incons' : ¬SetConsistent FrameClass.Base (insert φ.neg Γ) := h_mcs.2 φ.neg h_neg_not
         unfold SetConsistent at h_incons'
-        push_neg at h_incons'
+        push Not at h_incons'
         obtain ⟨L', hL', hL'_incons⟩ := h_incons'
         have ⟨d_bot'⟩ := inconsistent_derives_bot hL'_incons
         let Γ'' := L'.filter (· ≠ φ.neg)
@@ -486,7 +487,7 @@ theorem SetMaximalConsistent.ultrafilter_correspondence :
       by_contra h_not
       have h_incons : ¬SetConsistent FrameClass.Base (insert φ Γ.val) := Γ.property.2 φ h_not
       unfold SetConsistent at h_incons
-      push_neg at h_incons
+      push Not at h_incons
       obtain ⟨L, hL, hL_incons⟩ := h_incons
       have ⟨d_bot⟩ := inconsistent_derives_bot hL_incons
       let Γ' := L.filter (· ≠ φ)
@@ -604,7 +605,7 @@ theorem ultrafilter_mcs_round_trip (Γ : {Omega : Set (Formula Atom) // SetMaxim
     by_contra h_not
     have h_incons : ¬SetConsistent FrameClass.Base (insert φ Γ.val) := Γ.property.2 φ h_not
     unfold SetConsistent at h_incons
-    push_neg at h_incons
+    push Not at h_incons
     obtain ⟨L, hL, hL_incons⟩ := h_incons
     have ⟨d_bot⟩ := inconsistent_derives_bot hL_incons
     let Γ' := L.filter (· ≠ φ)

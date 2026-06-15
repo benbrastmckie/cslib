@@ -45,6 +45,7 @@ Depends on `DeductionTheorem.lean` for the deduction theorem and
 -/
 
 set_option linter.style.emptyLine false
+set_option linter.style.setOption false
 set_option linter.flexible false
 
 @[expose] public section

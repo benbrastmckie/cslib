@@ -8,12 +8,6 @@ module
 
 public import Cslib.Logics.Bimodal.Metalogic.Separation.Hierarchy.HierarchyDefs
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.flexible false
-set_option linter.unusedDecidableInType false
-
 /-!
 # Case-specific isSeparableWithUType theorems
 
@@ -22,6 +16,13 @@ Extracted from HierarchyCompletion.lean to break a circular dependency
 
 These theorems do NOT depend on HierarchyInduction.
 -/
+
+set_option linter.style.emptyLine false
+set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
+set_option linter.style.setOption false
+set_option linter.flexible false
+set_option linter.unusedDecidableInType false
 
 @[expose] public section
 
@@ -532,7 +533,7 @@ theorem snce_Ufree_event_qNotU_guard_sep_with_U_type (ev q x y : Formula Atom)
         fun h => (int_truth_neg_iff.mp hnotQnU_s) (int_truth_or_iff.mpr (Or.inl h))
       have hnotNotU_s : ¬ (¬ intTruth m s (.untl x y)) :=
         fun h => (int_truth_neg_iff.mp hnotQnU_s) (int_truth_or_iff.mpr (Or.inr h))
-      push_neg at hnotNotU_s
+      push Not at hnotNotU_s
       exact hnotS1 ⟨s, hst, int_truth_and_iff.mpr
         ⟨int_truth_and_iff.mpr ⟨hna_s, hnotQ_s⟩, hnotNotU_s⟩, hguard⟩
 

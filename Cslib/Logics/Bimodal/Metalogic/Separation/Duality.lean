@@ -8,8 +8,6 @@ module
 
 public import Cslib.Logics.Bimodal.Metalogic.Separation.Defs
 
-set_option linter.style.emptyLine false
-
 /-!
 # Temporal Duality for Integer Semantics
 
@@ -29,6 +27,10 @@ cases.
 
 - GHR94 Chapter 10.2: duality halves the proof burden
 -/
+
+set_option linter.style.emptyLine false
+set_option linter.style.setOption false
+set_option linter.flexible false
 
 @[expose] public section
 
@@ -351,39 +353,39 @@ theorem properly_separable_imp_separable
 theorem neg_future_only {φ : Formula Atom}
     (h : isFutureOnly φ = true) :
     isFutureOnly (Formula.neg φ) = true := by
-  simp [Formula.neg, isFutureOnly, h]
+  simp [isFutureOnly, h]
 
 theorem neg_past_only {φ : Formula Atom}
     (h : isPastOnly φ = true) :
     isPastOnly (Formula.neg φ) = true := by
-  simp [Formula.neg, isPastOnly, h]
+  simp [isPastOnly, h]
 
 theorem and_future_only {φ ψ : Formula Atom}
     (h1 : isFutureOnly φ = true)
     (h2 : isFutureOnly ψ = true) :
     isFutureOnly (Formula.and φ ψ) = true := by
-  simp [Formula.and, Formula.neg, isFutureOnly,
+  simp [isFutureOnly,
     h1, h2]
 
 theorem and_past_only {φ ψ : Formula Atom}
     (h1 : isPastOnly φ = true)
     (h2 : isPastOnly ψ = true) :
     isPastOnly (Formula.and φ ψ) = true := by
-  simp [Formula.and, Formula.neg, isPastOnly,
+  simp [isPastOnly,
     h1, h2]
 
 theorem or_future_only {φ ψ : Formula Atom}
     (h1 : isFutureOnly φ = true)
     (h2 : isFutureOnly ψ = true) :
     isFutureOnly (Formula.or φ ψ) = true := by
-  simp [Formula.or, Formula.neg, isFutureOnly,
+  simp [isFutureOnly,
     h1, h2]
 
 theorem or_past_only {φ ψ : Formula Atom}
     (h1 : isPastOnly φ = true)
     (h2 : isPastOnly ψ = true) :
     isPastOnly (Formula.or φ ψ) = true := by
-  simp [Formula.or, Formula.neg, isPastOnly,
+  simp [isPastOnly,
     h1, h2]
 
 theorem imp_future_only {φ ψ : Formula Atom}

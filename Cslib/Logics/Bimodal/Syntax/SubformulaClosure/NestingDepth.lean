@@ -31,6 +31,7 @@ def fNestingDepth : Formula Atom → Nat
   | .untl inner (.imp .bot .bot) => 1 + fNestingDepth inner
   | _ => 0
 
+omit [DecidableEq Atom] in
 theorem f_nesting_depth_nonneg (phi : Formula Atom) : fNestingDepth phi ≥ 0 := Nat.zero_le _
 
 theorem someFuture_unfold (psi : Formula Atom) :

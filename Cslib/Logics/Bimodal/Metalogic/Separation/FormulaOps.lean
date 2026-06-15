@@ -9,8 +9,6 @@ module
 public import Cslib.Logics.Bimodal.Metalogic.Separation.Defs
 public import Mathlib.Data.Set.Finite.Basic
 
-set_option linter.style.emptyLine false
-
 /-!
 # Formula Operations for Separation
 
@@ -28,6 +26,8 @@ needed by the separation proof.
 
 - GHR94, Chapter 10.2: Substitution is used in Lemmas 10.2.5-10.2.8
 -/
+
+set_option linter.style.emptyLine false
 
 @[expose] public section
 
@@ -182,7 +182,7 @@ theorem cnf_equiv (phi : Formula Atom) :
 
 /-- For any finset of atoms and natural number n, there exist
     n distinct atoms not in the finset. -/
-theorem exists_n_fresh_atoms [DecidableEq Atom] [Infinite Atom]
+theorem exists_n_fresh_atoms [Infinite Atom]
     (fs : Finset Atom) (n : Nat) :
     ∃ L : List Atom,
       L.length = n ∧ L.Nodup ∧

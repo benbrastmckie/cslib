@@ -11,7 +11,7 @@ next_project_number: 205
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,201,202,203,204 | -- | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,195,197,201,202,203 | -- | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -37,7 +37,6 @@ next_project_number: 205
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
 202 [RESEARCHED] — Review thomaskwaring/cslib_SKI Hilbert branch (https://github.com
-204 [NOT STARTED] — Polish PR #648: remove Aesop.BuiltinRules import, trim Architectu
 
 ### Propositional PRs
 
@@ -53,7 +52,7 @@ next_project_number: 205
 ## Tasks
 
 ### 204. Polish pr 648 propositional
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

@@ -4,12 +4,13 @@
     {
       "project_number": 204,
       "project_name": "polish_pr_648_propositional",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Polish PR #648: remove Aesop.BuiltinRules import, trim Architecture section from Defs.lean docstring (references non-existent upstream files), fix inconsistent context variable naming (G vs Γ) in NaturalDeduction/Basic.lean constructors, fix copyright header format. Then squash and force-push to feat/propositional-v2",
       "topic": "Propositional Logic",
       "created": "2026-06-15T01:56:14Z",
-      "last_updated": "2026-06-15T01:56:14Z"
+      "last_updated": "2026-06-15T02:20:56Z",
+      "completion_summary": "Applied 4 PR review fixes to feat/propositional-v2: removed Aesop.BuiltinRules import, removed Architecture docstring section referencing non-existent files, standardized G→Γ context variable naming in NaturalDeduction constructors, fixed copyright header format. Squashed and force-pushed."
     },
     {
       "project_number": 203,

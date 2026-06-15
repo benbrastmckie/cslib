@@ -46,7 +46,7 @@ next_project_number: 205
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-203 [PLANNED] — Create first ~300 LOC PR for Temporal/ extending classical propos
+203 [PR READY] — Create first ~300 LOC PR for Temporal/ extending classical propos
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -63,10 +63,12 @@ next_project_number: 205
 ---
 
 ### 203. First temporal pr classical propositional
-- **Status**: [PLANNED]
+- **Status**: [PR READY]
 - **Task Type**: pr
 - **Topic**: Temporal Logic
 - **Dependencies**: None
+- **Pr-description**: [203_first_temporal_pr_classical_propositional/pr-description.md]
+- **Summary**: [203_first_temporal_pr_classical_propositional/summaries/01_execution-summary.md]
 
 **Description**: Create first ~300 LOC PR for Temporal/ extending classical propositional logic, establishing foundations for full temporal logic development (follows PR #648)
 

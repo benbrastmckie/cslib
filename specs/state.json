@@ -6,7 +6,7 @@
       "project_name": "polish_pr_648_propositional",
       "status": "not_started",
       "task_type": "cslib",
-      "description": "Polish PR #648: remove Aesop.BuiltinRules import, trim Architecture section from Defs.lean docstring (references non-existent upstream files), fix inconsistent context variable naming (G vs Γ) in NaturalDeduction/Basic.lean constructors, fix copyright header format. Then squash and force-push to feat/propositional-v2",
+      "description": "Polish PR #648: remove Aesop.BuiltinRules import, trim Architecture section from Defs.lean docstring (references non-existent upstream files), fix inconsistent context variable naming (G vs \u0393) in NaturalDeduction/Basic.lean constructors, fix copyright header format. Then squash and force-push to feat/propositional-v2",
       "topic": "Propositional Logic",
       "created": "2026-06-15T01:56:14Z",
       "last_updated": "2026-06-15T01:56:14Z"
@@ -14,13 +14,26 @@
     {
       "project_number": 203,
       "project_name": "first_temporal_pr_classical_propositional",
-      "status": "planned",
+      "status": "pr_ready",
       "task_type": "pr",
       "description": "Create first ~300 LOC PR for Temporal/ extending classical propositional logic, establishing foundations for full temporal logic development (follows PR #648)",
       "topic": "Temporal Logic",
       "created": "2026-06-15T01:06:47Z",
-      "last_updated": "2026-06-15T01:44:17Z",
-      "session_id": "sess_1781487302_dddcf1"
+      "last_updated": "2026-06-14T00:00:00Z",
+      "session_id": "sess_1781487302_dddcf1",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/203_first_temporal_pr_classical_propositional/pr-description.md",
+          "type": "pr-description",
+          "summary": "PR description for feat(Logics/Temporal): temporal formula type with propositional structure"
+        },
+        {
+          "path": "specs/203_first_temporal_pr_classical_propositional/summaries/01_execution-summary.md",
+          "type": "summary",
+          "summary": "Execution summary for task 203 PR preparation"
+        }
+      ]
     },
     {
       "project_number": 202,
@@ -152,7 +165,7 @@
         {
           "path": "specs/192_research_verify_literature_refs_pr_188/reports/01_team-research.md",
           "type": "research",
-          "summary": "Team research with 4 teammates — literature claim verification"
+          "summary": "Team research with 4 teammates \u2014 literature claim verification"
         },
         {
           "path": "specs/192_research_verify_literature_refs_pr_188/reports/02_team-research.md",
@@ -172,7 +185,7 @@
       "dependencies": [
         36
       ],
-      "description": "Discrete temporal completeness: prove that every formula valid on all discrete serial linear orders is derivable in the Discrete temporal proof system.\n\nScope:\n1. Add discrete-specific axioms to Temporal.Axiom: `prior_UZ` (F(φ) → U(φ,¬φ)), `prior_SZ` (P(φ) → S(φ,¬φ)), `z1` (G(Gφ→φ) → (F(Gφ)→Gφ)), and discrete uniformity axioms (discrete_symm_fwd/bwd, discrete_propagate_fwd/bwd), gated to FrameClass.Discrete via minFrameClass.\n2. Prove discrete soundness: each discrete axiom valid on SuccOrder+PredOrder+IsSuccArchimedean.\n3. Prove discrete completeness via contrapositive + MCS + canonical model on Int. The non-discrete branch is eliminated by deriving U(⊤,⊥) as a Discrete theorem.\n\nNew development (not a port). The canonical model specializes the base temporal canonical order to Int. The discrete uniformity axioms (minus discrete_box_necessity which is bimodal-only) ensure U(⊤,⊥) propagates uniformly.\n\nTarget: Cslib/Logics/Temporal/Metalogic/DiscreteCompleteness.lean + axiom additions to Axioms.lean\nEstimated scope: ~500-700 lines (new axioms + discrete soundness + discrete completeness)",
+      "description": "Discrete temporal completeness: prove that every formula valid on all discrete serial linear orders is derivable in the Discrete temporal proof system.\n\nScope:\n1. Add discrete-specific axioms to Temporal.Axiom: `prior_UZ` (F(\u03c6) \u2192 U(\u03c6,\u00ac\u03c6)), `prior_SZ` (P(\u03c6) \u2192 S(\u03c6,\u00ac\u03c6)), `z1` (G(G\u03c6\u2192\u03c6) \u2192 (F(G\u03c6)\u2192G\u03c6)), and discrete uniformity axioms (discrete_symm_fwd/bwd, discrete_propagate_fwd/bwd), gated to FrameClass.Discrete via minFrameClass.\n2. Prove discrete soundness: each discrete axiom valid on SuccOrder+PredOrder+IsSuccArchimedean.\n3. Prove discrete completeness via contrapositive + MCS + canonical model on Int. The non-discrete branch is eliminated by deriving U(\u22a4,\u22a5) as a Discrete theorem.\n\nNew development (not a port). The canonical model specializes the base temporal canonical order to Int. The discrete uniformity axioms (minus discrete_box_necessity which is bimodal-only) ensure U(\u22a4,\u22a5) propagates uniformly.\n\nTarget: Cslib/Logics/Temporal/Metalogic/DiscreteCompleteness.lean + axiom additions to Axioms.lean\nEstimated scope: ~500-700 lines (new axioms + discrete soundness + discrete completeness)",
       "topic": "Temporal Logic"
     },
     {
@@ -185,7 +198,7 @@
       "dependencies": [
         37
       ],
-      "description": "Continuous temporal completeness: completeness for temporal logic over Dedekind-complete (continuous) linear orders, e.g. the reals.\n\nScope: Define a Continuous frame class extending Dense, add any required axioms (e.g., Dedekind completeness schema or equivalent), prove soundness over conditionally complete linear orders, prove completeness via canonical model on Real or equivalent.\n\nBlocked: The continuous case has not been developed for either the temporal or bimodal logic upstream. Requires foundational research into which additional axioms (if any) are needed beyond density to characterize continuous time. The standard result (Burgess 1982) is that the Until/Since temporal logic over the reals has the same theorems as over the rationals (density suffices), which would make this task trivial — but this equivalence itself needs to be formalized.\n\nTarget: Cslib/Logics/Temporal/Metalogic/ContinuousCompleteness.lean\nBlocker: Research needed on whether continuous frames require additional axioms beyond density",
+      "description": "Continuous temporal completeness: completeness for temporal logic over Dedekind-complete (continuous) linear orders, e.g. the reals.\n\nScope: Define a Continuous frame class extending Dense, add any required axioms (e.g., Dedekind completeness schema or equivalent), prove soundness over conditionally complete linear orders, prove completeness via canonical model on Real or equivalent.\n\nBlocked: The continuous case has not been developed for either the temporal or bimodal logic upstream. Requires foundational research into which additional axioms (if any) are needed beyond density to characterize continuous time. The standard result (Burgess 1982) is that the Until/Since temporal logic over the reals has the same theorems as over the rationals (density suffices), which would make this task trivial \u2014 but this equivalence itself needs to be formalized.\n\nTarget: Cslib/Logics/Temporal/Metalogic/ContinuousCompleteness.lean\nBlocker: Research needed on whether continuous frames require additional axioms beyond density",
       "topic": "Temporal Logic"
     },
     {
@@ -199,7 +212,7 @@
         39,
         40
       ],
-      "description": "Abstract shared completeness infrastructure between temporal and bimodal logic once concrete completeness proofs are finished for both.\n\nThe temporal (tasks 31, 38, 39) and bimodal (tasks 34, 35) completeness proofs share structural patterns that can be factored into a generic completeness scaffold in Cslib/Foundations/Logic/Metalogic/, extending the existing generic MCS framework (Task 29).\n\nCandidate abstractions (to be confirmed once concrete implementations exist):\n1. Generic neg_consistent_of_not_derivable: if φ is not derivable then {¬φ} is consistent — identical structure in both logics, parameterized over DerivationSystem\n2. Generic completeness contrapositive skeleton: not derivable → consistent → Lindenbaum → MCS → canonical model → countermodel — the overall proof shape is shared\n3. Dense/discrete case split pattern: the three-way case split on □(F'T) / □(U(T,⊥)) / mixed is structurally similar (temporal uses G/H instead of □)\n4. Canonical order construction patterns: both define canonical_lt via G-sets (temporal) or box-sets (bimodal); the linearity/irreflexivity/transitivity proofs follow parallel structures\n5. Dense indicator elimination: both dense completeness proofs eliminate the non-dense branch by showing the dense indicator axiom is a theorem — identical pattern\n\nScope: Identify which abstractions yield genuine code savings vs. premature generalization, implement those that do, and refactor both temporal and bimodal completeness to use the shared infrastructure.\n\nTarget: Cslib/Foundations/Logic/Metalogic/Completeness.lean (or similar)\nDepends on: Tasks 35 (dense bimodal), 38 (dense temporal), 39 (discrete temporal) — transitively includes 31 (base temporal) and 34 (base bimodal MCS)",
+      "description": "Abstract shared completeness infrastructure between temporal and bimodal logic once concrete completeness proofs are finished for both.\n\nThe temporal (tasks 31, 38, 39) and bimodal (tasks 34, 35) completeness proofs share structural patterns that can be factored into a generic completeness scaffold in Cslib/Foundations/Logic/Metalogic/, extending the existing generic MCS framework (Task 29).\n\nCandidate abstractions (to be confirmed once concrete implementations exist):\n1. Generic neg_consistent_of_not_derivable: if \u03c6 is not derivable then {\u00ac\u03c6} is consistent \u2014 identical structure in both logics, parameterized over DerivationSystem\n2. Generic completeness contrapositive skeleton: not derivable \u2192 consistent \u2192 Lindenbaum \u2192 MCS \u2192 canonical model \u2192 countermodel \u2014 the overall proof shape is shared\n3. Dense/discrete case split pattern: the three-way case split on \u25a1(F'T) / \u25a1(U(T,\u22a5)) / mixed is structurally similar (temporal uses G/H instead of \u25a1)\n4. Canonical order construction patterns: both define canonical_lt via G-sets (temporal) or box-sets (bimodal); the linearity/irreflexivity/transitivity proofs follow parallel structures\n5. Dense indicator elimination: both dense completeness proofs eliminate the non-dense branch by showing the dense indicator axiom is a theorem \u2014 identical pattern\n\nScope: Identify which abstractions yield genuine code savings vs. premature generalization, implement those that do, and refactor both temporal and bimodal completeness to use the shared infrastructure.\n\nTarget: Cslib/Foundations/Logic/Metalogic/Completeness.lean (or similar)\nDepends on: Tasks 35 (dense bimodal), 38 (dense temporal), 39 (discrete temporal) \u2014 transitively includes 31 (base temporal) and 34 (base bimodal MCS)",
       "topic": "Foundations"
     },
     {
@@ -212,7 +225,7 @@
       "dependencies": [
         "BimodalLogic:discrete_sorry_elimination"
       ],
-      "description": "Port discrete completeness (completeness_discrete theorem) and WeakCanonical/IntegerModel/ infrastructure (~6 files). The discrete branch constructs countermodels on Int via the Reynolds pipeline. Currently blocked: upstream BimodalLogic has sorryAx tracing through chronicle_gap_contradiction → succ_cofinal → limitDomSubtype_isSuccArchimedean → succ_embed_surjective. Port after upstream sorry elimination completes.\n\n**Source**: BimodalLogic/Theories/Bimodal/Metalogic/WeakCanonical/IntegerModel/ (~6 files), discrete branch of BXCanonical/Completeness.lean\n**Target**: Cslib/Logics/Bimodal/Metalogic/\n**Blocker**: Upstream BimodalLogic discrete completeness sorry elimination (36 sorries across IntegerModel/)\n**Parent task**: 8 (expanded)",
+      "description": "Port discrete completeness (completeness_discrete theorem) and WeakCanonical/IntegerModel/ infrastructure (~6 files). The discrete branch constructs countermodels on Int via the Reynolds pipeline. Currently blocked: upstream BimodalLogic has sorryAx tracing through chronicle_gap_contradiction \u2192 succ_cofinal \u2192 limitDomSubtype_isSuccArchimedean \u2192 succ_embed_surjective. Port after upstream sorry elimination completes.\n\n**Source**: BimodalLogic/Theories/Bimodal/Metalogic/WeakCanonical/IntegerModel/ (~6 files), discrete branch of BXCanonical/Completeness.lean\n**Target**: Cslib/Logics/Bimodal/Metalogic/\n**Blocker**: Upstream BimodalLogic discrete completeness sorry elimination (36 sorries across IntegerModel/)\n**Parent task**: 8 (expanded)",
       "topic": "Bimodal Porting"
     },
     {

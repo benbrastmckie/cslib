@@ -116,6 +116,6 @@ theorem sigma_signature_mem {w : BXPoint Atom} {Sigma : Finset (Formula Atom)} {
 
 theorem hintikka_point_formulas_injective (Sigma : Finset (Formula Atom)) :
     Function.Injective (fun (h : HintikkaPoint Sigma) => h.formulas) :=
-  fun h1 h2 heq => HintikkaPoint.ext heq
+  fun _h1 _h2 heq => HintikkaPoint.ext heq
 
 end Cslib.Logic.Bimodal.Metalogic.BXCanonical.Quasimodel

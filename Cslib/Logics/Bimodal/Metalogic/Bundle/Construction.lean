@@ -44,8 +44,7 @@ def contextAsSet (Gamma : List (Formula Atom)) : Set (Formula Atom) := {phi | ph
 lemma list_consistent_to_set_consistent {Gamma : List (Formula Atom)}
     (h_cons : Consistent (fc := FrameClass.Base) Gamma) :
     SetConsistent (FrameClass.Base : FrameClass) (contextAsSet Gamma) := by
-  intro L hL
-  intro ⟨d⟩
+  intro L hL ⟨d⟩
   apply h_cons
   exact ⟨DerivationTree.weakening L Gamma (Formula.bot : Formula Atom) d hL⟩
 

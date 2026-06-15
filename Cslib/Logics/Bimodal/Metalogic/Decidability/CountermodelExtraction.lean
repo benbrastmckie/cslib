@@ -542,8 +542,8 @@ theorem contains_iff_mem (b : Branch Atom) (sf : SignedFormula Atom) :
   · intro h
     exact ⟨sf, h, beq_self_eq_true _⟩
 
--- Complex term elaboration requires extended heartbeats
 set_option maxHeartbeats 1600000 in
+-- Complex term elaboration requires extended heartbeats
 theorem sat_box_pos (b : Branch Atom) (timeOrd : TimeOrdering)
     (hSat : findUnexpanded b (timeOrd := timeOrd) = none)
     (φ : Formula Atom) (w : WorldIndex) (t : TimeIndex)
@@ -593,8 +593,8 @@ theorem sat_box_neg (b : Branch Atom) (timeOrd : TimeOrdering)
   have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.neg, .box φ, ⟨w, t⟩⟩ hmem
   simp [boxNeg_not_expanded] at hExp
 
--- Complex term elaboration requires extended heartbeats
 set_option maxHeartbeats 800000 in
+-- Complex term elaboration requires extended heartbeats
 /--
 Helper: T(U(event, guard)) is never expanded in any branch.
 If guard = top, someFuturePos applies (consumable). If guard != top, untlPos applies (branching).
@@ -628,8 +628,8 @@ theorem sat_untl_pos (b : Branch Atom) (timeOrd : TimeOrdering)
   have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.pos, .untl event guard, ⟨w, t⟩⟩ hmem
   simp [untlPos_not_expanded] at hExp
 
--- Complex term elaboration requires extended heartbeats
 set_option maxHeartbeats 800000 in
+-- Complex term elaboration requires extended heartbeats
 /--
 Helper: T(S(event, guard)) is never expanded in any branch (mirror of untlPos).
 -/
@@ -661,8 +661,8 @@ theorem sat_snce_pos (b : Branch Atom) (timeOrd : TimeOrdering)
   have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.pos, .snce event guard, ⟨w, t⟩⟩ hmem
   simp [sncePos_not_expanded] at hExp
 
--- Complex term elaboration requires extended heartbeats
 set_option maxHeartbeats 3200000 in
+-- Complex term elaboration requires extended heartbeats
 /--
 **Some-future negative saturation**: If `F(FA)` at `(w, t)` is in a saturated
 branch, then `F(A)` is at `(w, t')` for every known future time `t'`.
@@ -716,8 +716,8 @@ theorem sat_someFuture_neg (b : Branch Atom) (timeOrd : TimeOrdering)
   simp only [SignedFormula.neg] at hNA hNE
   simp [hNE] at hNA
 
--- Complex term elaboration requires extended heartbeats
 set_option maxHeartbeats 3200000 in
+-- Complex term elaboration requires extended heartbeats
 /--
 **Some-past negative saturation**: If `F(PA)` at `(w, t)` is in a saturated
 branch, then `F(A)` is at `(w, t')` for every known past time `t'`.
@@ -771,8 +771,8 @@ theorem sat_somePast_neg (b : Branch Atom) (timeOrd : TimeOrdering)
   simp only [SignedFormula.neg] at hNA hNE
   simp [hNE] at hNA
 
--- Complex term elaboration requires extended heartbeats
 set_option maxHeartbeats 3200000 in
+-- Complex term elaboration requires extended heartbeats
 /--
 **Until negative saturation**: If `F(U(event, guard))` at `(w, t)` is in a
 saturated branch with guard not equal to `top`, then for every known future
@@ -823,8 +823,8 @@ theorem sat_untl_neg (b : Branch Atom) (timeOrd : TimeOrdering)
   rw [hcons] at hNA
   simp at hNA
 
--- Complex term elaboration requires extended heartbeats
 set_option maxHeartbeats 3200000 in
+-- Complex term elaboration requires extended heartbeats
 /--
 **Since negative saturation**: Mirror of `sat_untl_neg` for past-directed Since.
 -/

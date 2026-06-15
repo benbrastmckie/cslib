@@ -400,8 +400,7 @@ theorem restricted_mcs_from_formula (phi : Formula Atom)
   -- {phi} is consistent (follows from phi.neg not being a theorem)
   have h_singleton_cons :
       SetConsistent FrameClass.Base ({phi} : Set (Formula Atom)) := by
-    intro L hL
-    intro ⟨d⟩
+    intro L hL ⟨d⟩
     by_cases h_phi_in_L : phi ∈ L
     · -- Derive [phi] ⊢ ⊥ by weakening
       have h_weak : ∀ x ∈ L, x ∈ [phi] := by

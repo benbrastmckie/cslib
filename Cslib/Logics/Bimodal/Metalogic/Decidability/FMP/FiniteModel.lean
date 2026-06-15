@@ -89,7 +89,7 @@ Lift characteristic set to filtered worlds.
 def filteredCharacteristicSet (phi : Formula Atom) (w : FilteredWorld phi) :
     Set (subformulaClosure phi) :=
   Quotient.lift (characteristicSet phi)
-    (fun Omega Theta h => characteristicSet_respects_equiv phi h) w
+    (fun _Omega _Theta h => characteristicSet_respects_equiv phi h) w
 
 /--
 The filtered characteristic set map is injective.

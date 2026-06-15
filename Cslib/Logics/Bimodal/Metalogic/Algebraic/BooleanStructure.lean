@@ -338,6 +338,6 @@ noncomputable instance : BooleanAlgebra (LindenbaumAlg Atom) where
   inf_compl_le_bot := inf_compl_le_bot_quot
   top_le_sup_compl := top_le_sup_compl_quot
   sdiff_eq := fun _ _ => rfl
-  himp_eq := fun a b => sup_comm_quot _ _
+  himp_eq := fun _a _b => sup_comm_quot _ _
 
 end Cslib.Logic.Bimodal.Metalogic.Algebraic.BooleanStructure

@@ -52,7 +52,7 @@ def SetDeductivelyClosed (Omega : Set (Formula Atom)) : Prop :=
 theorem mcs_is_dcs {Omega : Set (Formula Atom)}
     (h : Temporal.SetMaximalConsistent Omega) :
     SetDeductivelyClosed Omega :=
-  ⟨h.1, fun L _ hL hd => temporal_closed_under_derivation h hL ⟨hd⟩⟩
+  ⟨h.1, fun _L _ hL hd => temporal_closed_under_derivation h hL ⟨hd⟩⟩
 
 /-- A CUD set contains all theorems. -/
 theorem cud_contains_theorems {Omega : Set (Formula Atom)}

@@ -334,7 +334,7 @@ theorem lemma_2_5b_past (fc : FrameClass) {A D C : Set (Formula Atom)}
 if δ ∉ C, then there exists MCS D with ¬δ ∈ D and gContent(A) ⊆ D. -/
 noncomputable def lemma_2_6 (fc : FrameClass) {A C : Set (Formula Atom)}
     (h_mcs_A : SetMaximalConsistent fc A)
-    (h_mcs_C : SetMaximalConsistent fc C)
+    (_h_mcs_C : SetMaximalConsistent fc C)
     (h_g_AC : gContent A ⊆ C)
     (δ : Formula Atom)
     (h_δ_not_C : δ ∉ C) :
@@ -1857,7 +1857,7 @@ Convention alignment with Burgess:
   The condition is xi ∉ B (guard not in B, matching Burgess η ∉ B).
   The seed contains {eta} (event, Burgess ξ) → eta ∈ D.
   The 3rd component snce(β∧xi, α) (Burgess S(α, β∧η)) → xi ∈ B'. -/
-def lemma_2_7_seed (fc : FrameClass) (A B _C : Set (Formula Atom)) (xi eta : Formula Atom) : Set (Formula Atom) :=
+def lemma_2_7_seed (_fc : FrameClass) (A B _C : Set (Formula Atom)) (xi eta : Formula Atom) : Set (Formula Atom) :=
   B ∪ {eta} ∪ {φ | ∃ β ∈ B, ∃ α ∈ A, φ = Formula.snce α (Formula.and β xi)}
 
 /-- Extract a B-guard from a single element of the lemma_2_7_seed.
@@ -1867,7 +1867,7 @@ For each of the 3 cases:
 3. φ = snce(β'∧xi, α'): guard = β' -/
 noncomputable def l27_guard (fc : FrameClass) {A B C : Set (Formula Atom)}
     (h_dcs : ClosedUnderDerivation fc B)
-    (xi eta : Formula Atom) (φ : Formula Atom) (h : φ ∈ lemma_2_7_seed fc A B C xi eta) :
+    (xi eta : Formula Atom) (φ : Formula Atom) (_h : φ ∈ lemma_2_7_seed fc A B C xi eta) :
     { g : Formula Atom // g ∈ B } := by
   classical
   by_cases h1 : φ ∈ B
@@ -1935,7 +1935,7 @@ theorem l27_collect_guards_mem_of_B (fc : FrameClass) {A B C : Set (Formula Atom
     · right; exact l27_collect_guards_mem_of_B fc h_dcs xi eta rest _ φ h_rest h_B
 
 /-- Formula.and is injective in the first argument. -/
-theorem formula_and_left_cancel (fc : FrameClass) {a b c : Formula Atom}
+theorem formula_and_left_cancel (_fc : FrameClass) {a b c : Formula Atom}
     (h : Formula.and a c = Formula.and b c) : a = b := by
   simp only [Formula.and, Formula.neg] at h
   exact (Formula.imp.injEq _ _ _ _ |>.mp (Formula.imp.injEq _ _ _ _ |>.mp h).1).1
@@ -2317,7 +2317,7 @@ The same seed as Lemma 2.7 (3 components after Xu 3.2.1 simplification), but
 consistency proved using ¬(eta ∨ (xi ∧ untl(xi, eta))) ∈ C instead of xi ∉ B. -/
 theorem lemma_2_8_seed_consistent (fc : FrameClass) {A B C : Set (Formula Atom)}
     (h_mcs_A : SetMaximalConsistent fc A)
-    (h_mcs_C : SetMaximalConsistent fc C)
+    (_h_mcs_C : SetMaximalConsistent fc C)
     (h_r3m : BurgessR3Maximal fc A B C)
     (h_B_dcs : ClosedUnderDerivation fc B)
     (_h_gc : gContent A ⊆ C)

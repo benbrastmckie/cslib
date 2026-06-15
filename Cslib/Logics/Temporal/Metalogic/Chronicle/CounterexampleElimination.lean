@@ -228,7 +228,7 @@ theorem c2'_preserved_on_old_adjacent {χ χ' : Chronicle Atom}
     (h_c2' : χ.c2')
     (h_f_agrees : ∀ x ∈ χ.dom, χ'.f x = χ.f x)
     (h_g_agrees : ∀ a b, a ∈ χ.dom → b ∈ χ.dom → χ'.g a b = χ.g a b)
-    (h_dom_sub : χ.dom ⊆ χ'.dom)
+    (_h_dom_sub : χ.dom ⊆ χ'.dom)
     {a b : Rat}
     (h_adj' : Adjacent χ'.dom a b)
     (h_a_old : a ∈ χ.dom) (h_b_old : b ∈ χ.dom)
@@ -504,8 +504,8 @@ structure C5BackwardWalkResult (χ : Chronicle Atom) (ξ η : Formula Atom) (sta
 
 /-! ## Recursive Walks -/
 
--- Complex term elaboration requires extended heartbeats
 set_option maxHeartbeats 3200000 in
+-- Complex term elaboration requires extended heartbeats
 noncomputable def c5_forward_walk
     (χ : Chronicle Atom) (h_c0 : χ.c0) (h_c2' : χ.c2')
     (ξ η : Formula Atom) (pt : Rat)
@@ -1045,8 +1045,8 @@ decreasing_by
      This yields a single WF goal closed by simp_all + exact h_term. -/
   all_goals simp_all only [gt_iff_lt]
   all_goals exact h_term
--- Complex term elaboration requires extended heartbeats
 set_option maxHeartbeats 3200000 in
+-- Complex term elaboration requires extended heartbeats
 noncomputable def c5_backward_walk
     (χ : Chronicle Atom) (h_c0 : χ.c0) (h_c2' : χ.c2')
     (ξ η : Formula Atom) (pt : Rat)
@@ -1593,8 +1593,8 @@ decreasing_by
 
 /-! ## Main Elimination Function -/
 
--- Complex term elaboration requires extended heartbeats
 set_option maxHeartbeats 6400000 in
+-- Complex term elaboration requires extended heartbeats
 noncomputable def eliminatePotentialCounterexample
     (χ : Chronicle Atom) (h_c0 : χ.c0) (h_c2' : χ.c2')
     (pc : PotentialCounterexample)

@@ -217,7 +217,7 @@ theorem mcs_mixed_case_absurd (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs 
 
 /-- Mixed-case countermodel: vacuously true since the mixed case is impossible. -/
 theorem dd_countermodel_chronicle_mixed_sorry (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
-    (φ : Formula Atom) (h_neg_in : φ.neg ∈ A)
+    (φ : Formula Atom) (_h_neg_in : φ.neg ∈ A)
     (h_not_box_dense : (Formula.box nextTop.neg).neg ∈ A)
     (h_not_box_discrete : (Formula.box (nextTop (Atom := Atom))).neg ∈ A) :
     ∃ (D : Type _) (_ : AddCommGroup D) (_ : LinearOrder D) (_ : IsOrderedAddMonoid D)

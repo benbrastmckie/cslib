@@ -271,7 +271,7 @@ theorem snce_u_free_separable (a q : Formula Atom)
 /-- Lemma 10.2.4 base: S(a, q) with U-free/S-free a, q is separable. -/
 theorem lemma_10_2_4_base (a q : Formula Atom)
     (ha_uf : isUFree a = true) (hq_uf : isUFree q = true)
-    (ha_sf : isSFree a = true) (hq_sf : isSFree q = true) :
+    (_ha_sf : isSFree a = true) (_hq_sf : isSFree q = true) :
     isSeparable (.snce a q) :=
   ⟨.snce a q, by simp [isSyntacticallySeparated, ha_uf, hq_uf], int_equiv_refl _⟩
 

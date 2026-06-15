@@ -231,7 +231,7 @@ noncomputable def tHBackward (w : TPoint Atom) (φ : Formula Atom)
 noncomputable def tUntilEventualityResolution
     (w : TPoint Atom) (φ ψ : Formula Atom)
     (h_until : (ψ U φ) ∈ w.formulas)
-    (h_not_psi : ψ ∉ w.formulas) :
+    (_h_not_psi : ψ ∉ w.formulas) :
     ∃ v : TPoint Atom, tLe w v ∧ ψ ∈ v.formulas := by
   have h_F_psi : (𝐅ψ) ∈ w.formulas := by
     have h_ax := DerivationTree.axiom (fc := FrameClass.Base) [] _ (Axiom.until_F φ ψ) trivial
@@ -241,7 +241,7 @@ noncomputable def tUntilEventualityResolution
 noncomputable def tSinceEventualityResolution
     (w : TPoint Atom) (φ ψ : Formula Atom)
     (h_since : (ψ S φ) ∈ w.formulas)
-    (h_not_psi : ψ ∉ w.formulas) :
+    (_h_not_psi : ψ ∉ w.formulas) :
     ∃ v : TPoint Atom, tLe v w ∧ ψ ∈ v.formulas := by
   have h_P_psi : (𝐏ψ) ∈ w.formulas := by
     have h_ax := DerivationTree.axiom (fc := FrameClass.Base) [] _ (Axiom.since_P φ ψ) trivial

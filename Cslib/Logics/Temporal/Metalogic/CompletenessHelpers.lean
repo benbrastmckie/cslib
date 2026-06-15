@@ -271,7 +271,7 @@ def canonicalAcc (W₁ W₂ : CanonicalWorld Atom) : Prop :=
 theorem truth_lemma_g_forward (W : CanonicalWorld Atom)
     {ψ : Formula Atom} (h_g : (𝐆ψ) ∈ W.val) :
     ∀ T : CanonicalWorld Atom, canonicalAcc W T → ψ ∈ T.val :=
-  fun T hWT => hWT ψ h_g
+  fun _T hWT => hWT ψ h_g
 
 /-- Reverse G-direction for truth lemma. -/
 theorem truth_lemma_g_reverse (W : CanonicalWorld Atom)

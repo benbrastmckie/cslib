@@ -1425,7 +1425,7 @@ def lemma_2_7_seed (A B _C : Set (Formula Atom)) (xi eta : Formula Atom) : Set (
 /-- Extract a B-guard from a single element of the lemma_2_7_seed. -/
 noncomputable def l27_guard {A B C : Set (Formula Atom)}
     (h_dcs : ClosedUnderDerivation B)
-    (xi eta : Formula Atom) (φ : Formula Atom) (h : φ ∈ lemma_2_7_seed A B C xi eta) :
+    (xi eta : Formula Atom) (φ : Formula Atom) (_h : φ ∈ lemma_2_7_seed A B C xi eta) :
     { g : Formula Atom // g ∈ B } := by
   classical
   by_cases h1 : φ ∈ B
@@ -1812,7 +1812,7 @@ theorem lemma_2_7 {A B C : Set (Formula Atom)}
 ¬(eta ∨ (xi ∧ untl(xi, eta))) ∈ C instead of xi ∉ B. -/
 theorem lemma_2_8_seed_consistent {A B C : Set (Formula Atom)}
     (h_mcs_A : Temporal.SetMaximalConsistent A)
-    (h_mcs_C : Temporal.SetMaximalConsistent C)
+    (_h_mcs_C : Temporal.SetMaximalConsistent C)
     (h_r3m : BurgessR3Maximal A B C)
     (h_B_dcs : ClosedUnderDerivation B)
     (_h_gc : gContent A ⊆ C)

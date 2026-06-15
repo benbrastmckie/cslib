@@ -94,7 +94,7 @@ theorem BFMCS.transitivity (B : BFMCS Atom D) (fam : FMCS Atom D) (hfam : fam �
   B.reflexivity fam hfam (Formula.box φ) t h
 
 /-- The MCS at any family and time is consistent (used by BFMCS.diamond_witness) -/
-lemma BFMCS.consistent (B : BFMCS Atom D) (fam : FMCS Atom D) (hfam : fam ∈ B.families) (t : D) :
+lemma BFMCS.consistent (B : BFMCS Atom D) (fam : FMCS Atom D) (_hfam : fam ∈ B.families) (t : D) :
     SetConsistent FrameClass.Base (fam.mcs t) :=
   (fam.is_mcs t).1
 

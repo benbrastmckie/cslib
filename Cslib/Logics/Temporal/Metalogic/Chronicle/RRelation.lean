@@ -377,8 +377,8 @@ theorem mcs_contrapositive_mem {M : Set (Formula Atom)}
 /-! ## burgessR3Maximal_extension_exists -/
 
 theorem burgessR3Maximal_extension_exists {A C : Set (Formula Atom)}
-    (h_mcs_A : Temporal.SetMaximalConsistent A)
-    (h_mcs_C : Temporal.SetMaximalConsistent C)
+    (_h_mcs_A : Temporal.SetMaximalConsistent A)
+    (_h_mcs_C : Temporal.SetMaximalConsistent C)
     {Sig : Set (Formula Atom)}
     (h_cud : ClosedUnderDerivation Sig)
     (h_br3 : burgessR3 A Sig C) :

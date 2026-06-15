@@ -443,7 +443,7 @@ theorem bx_modal_equiv_of_bx_le {w v : BXPoint Atom} (h_le : bxLe w v) :
 noncomputable def bxUntilEventualityResolution
     (w : BXPoint Atom) (φ ψ : Formula Atom)
     (h_until : Formula.untl ψ φ ∈ w.formulas)
-    (h_not_psi : ψ ∉ w.formulas) :
+    (_h_not_psi : ψ ∉ w.formulas) :
     ∃ v : BXPoint Atom, bxLe w v ∧ ψ ∈ v.formulas := by
   have h_F_psi : Formula.someFuture ψ ∈ w.formulas := by
     have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.until_F φ ψ) trivial
@@ -454,7 +454,7 @@ noncomputable def bxUntilEventualityResolution
 noncomputable def bxSinceEventualityResolution
     (w : BXPoint Atom) (φ ψ : Formula Atom)
     (h_since : Formula.snce ψ φ ∈ w.formulas)
-    (h_not_psi : ψ ∉ w.formulas) :
+    (_h_not_psi : ψ ∉ w.formulas) :
     ∃ v : BXPoint Atom, bxLe v w ∧ ψ ∈ v.formulas := by
   have h_P_psi : Formula.somePast ψ ∈ w.formulas := by
     have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.since_P φ ψ) trivial

@@ -280,7 +280,7 @@ theorem c2'_preserved_on_old_adjacent {fc : FrameClass} {χ χ' : Chronicle Atom
     (h_c2' : χ.c2' fc)
     (h_f_agrees : ∀ x ∈ χ.dom, χ'.f x = χ.f x)
     (h_g_agrees : ∀ a b, a ∈ χ.dom → b ∈ χ.dom → χ'.g a b = χ.g a b)
-    (h_dom_sub : χ.dom ⊆ χ'.dom)
+    (_h_dom_sub : χ.dom ⊆ χ'.dom)
     {a b : Rat}
     (h_adj' : Adjacent χ'.dom a b)
     (h_a_old : a ∈ χ.dom) (h_b_old : b ∈ χ.dom)
@@ -463,10 +463,10 @@ gContent(f(x)) ⊆ f(z).
 noncomputable def eliminateGPropCounterexample {fc : FrameClass} {χ : Chronicle Atom}
     (h_c0 : χ.c0 fc)
     (x y : Rat) (α : Formula Atom)
-    (h_x_mem : x ∈ χ.dom) (h_y_mem : y ∈ χ.dom)
+    (h_x_mem : x ∈ χ.dom) (_h_y_mem : y ∈ χ.dom)
     (h_adj : Adjacent χ.dom x y)
     (h_G : Formula.allFuture α ∈ χ.f x)
-    (h_not : α ∉ χ.f y) :
+    (_h_not : α ∉ χ.f y) :
     ∃ χ' : Chronicle Atom,
       χ.dom ⊆ χ'.dom ∧
       (∀ q ∈ χ.dom, χ'.f q = χ.f q) ∧
@@ -503,10 +503,10 @@ Given H(α) ∈ f(x) and α ∉ f(y) for adjacent y < x, insert z between y and 
 noncomputable def eliminateHPropCounterexample {fc : FrameClass} {χ : Chronicle Atom}
     (h_c0 : χ.c0 fc)
     (x y : Rat) (α : Formula Atom)
-    (h_x_mem : x ∈ χ.dom) (h_y_mem : y ∈ χ.dom)
+    (h_x_mem : x ∈ χ.dom) (_h_y_mem : y ∈ χ.dom)
     (h_adj : Adjacent χ.dom y x)
     (h_H : Formula.allPast α ∈ χ.f x)
-    (h_not : α ∉ χ.f y) :
+    (_h_not : α ∉ χ.f y) :
     ∃ χ' : Chronicle Atom,
       χ.dom ⊆ χ'.dom ∧
       (∀ q ∈ χ.dom, χ'.f q = χ.f q) ∧

@@ -133,7 +133,7 @@ theorem singleton_invariant {A : Set (Formula Atom)} (h_mcs : Temporal.SetMaxima
 /--
 The singleton chronicle satisfies C2' vacuously (no adjacent pairs in {0}).
 -/
-theorem singleton_c2' {A : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistent A) :
+theorem singleton_c2' {A : Set (Formula Atom)} (_h_mcs : Temporal.SetMaximalConsistent A) :
     (singletonChronicle A).c2' := by
   intro x y hadj
   obtain ⟨hx, hy, hxy, _⟩ := hadj
@@ -865,8 +865,8 @@ Together: phi in f(w) for all w in (x,z) in limitDom.
 -/
 theorem limit_c3 (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaximalConsistent A)
     (x y z : Rat)
-    (hx : x ∈ limitDom A h_mcs) (hy : y ∈ limitDom A h_mcs)
-    (hz : z ∈ limitDom A h_mcs) (hxy : x < y) (hyz : y < z) :
+    (_hx : x ∈ limitDom A h_mcs) (hy : y ∈ limitDom A h_mcs)
+    (_hz : z ∈ limitDom A h_mcs) (hxy : x < y) (hyz : y < z) :
     limitG A h_mcs x z = limitG A h_mcs x y ∩ limitF A h_mcs y ∩ limitG A h_mcs y z := by
   ext φ
   simp only [Set.mem_inter_iff, limitG, Set.mem_setOf_eq]
@@ -1302,7 +1302,7 @@ there exists an adjacent pair (a, b) in D with x ≤ a < w < b ≤ y.
 /-- For a point between two domain members that is not itself in the domain,
 there exists an adjacent pair in the domain that contains it. -/
 theorem exists_containing_adjacent (D : Finset Rat) (x y w : Rat)
-    (hx : x ∈ D) (hy : y ∈ D) (hxy : x < y) (hw_not : w ∉ D)
+    (hx : x ∈ D) (hy : y ∈ D) (_hxy : x < y) (hw_not : w ∉ D)
     (hxw : x < w) (hwy : w < y) :
     ∃ a b, Adjacent D a b ∧ x ≤ a ∧ b ≤ y ∧ a < w ∧ w < b := by
   -- Let L = {d ∈ D | d < w}, R = {d ∈ D | w < d}

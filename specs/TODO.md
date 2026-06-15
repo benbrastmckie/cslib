@@ -1,5 +1,5 @@
 ---
-next_project_number: 216
+next_project_number: 217
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 216
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,207,208,209,210,211,212,213,214,215 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,195,197,207,208,209,210,211,212,213,214,215,216 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -34,14 +34,15 @@ next_project_number: 216
 
 208 [RESEARCHED] — Add docstrings to 327 declarations flagged by #lint across Bimoda
 209 [NOT STARTED] — Fix 298 namespace lint errors: 239 declarations not properly name
-210 [NOT STARTED] — Fix 105 naming convention violations where declaration names cont
+210 [RESEARCHED] — Fix 105 naming convention violations where declaration names cont
 211 [NOT STARTED] — Fix 55 lint errors where Prop-valued declarations use def instead
-212 [NOT STARTED] — Fix 25 simp-related lint errors: 23 where the LHS of a simp lemma
+212 [RESEARCHED] — Fix 25 simp-related lint errors: 23 where the LHS of a simp lemma
 213 [RESEARCHED] — Fix ~17 unused argument lint errors across Bimodal and Temporal c
 
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
+216 [NOT STARTED] — Given what task 202 implemented, push a single commit with all an
 
 ### Propositional PRs
 
@@ -59,6 +60,16 @@ next_project_number: 216
 197 [PR READY] — Review the ambition to contribute Modal/ to upstream, identifying
 
 ## Tasks
+
+### 216. Push relevant changes to pr 648
+- **Status**: [NOT STARTED]
+- **Task Type**: pr
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Given what task 202 implemented, push a single commit with all and only the relevant changes to https://github.com/leanprover/cslib/pull/648, where the aim is to keep the LOC ~300 to avoid overwhelming reviewers
+
+---
 
 ### 215. Fill sorry declarations in Bimodal BXCanonical and Bundle files
 - **Status**: [NOT STARTED]
@@ -91,7 +102,7 @@ next_project_number: 216
 ---
 
 ### 212. Fix simp lint issues (LHS simplifies, simp can prove)
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -111,7 +122,7 @@ next_project_number: 216
 ---
 
 ### 210. Fix naming convention violations (underscore to camelCase)
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None

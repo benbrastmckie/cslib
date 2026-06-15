@@ -1,6 +1,16 @@
 {
-  "next_project_number": 216,
+  "next_project_number": 217,
   "active_projects": [
+    {
+      "project_number": 216,
+      "project_name": "push_relevant_changes_to_pr_648",
+      "status": "not_started",
+      "task_type": "pr",
+      "description": "Given what task 202 implemented, push a single commit with all and only the relevant changes to https://github.com/leanprover/cslib/pull/648, where the aim is to keep the LOC ~300 to avoid overwhelming reviewers",
+      "topic": "Propositional Logic",
+      "created": "2026-06-15T18:19:59Z",
+      "last_updated": "2026-06-15T18:19:59Z"
+    },
     {
       "project_number": 208,
       "project_name": "lint_missing_docstrings",
@@ -26,7 +36,7 @@
     {
       "project_number": 210,
       "project_name": "lint_naming_conventions",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "title": "Fix naming convention violations (underscore to camelCase)",
       "description": "Fix 105 naming convention violations where declaration names contain underscores instead of lowerCamelCase or UpperCamelCase per Mathlib convention. Mostly in Bimodal and Temporal metalogic files.",
@@ -48,7 +58,7 @@
     {
       "project_number": 212,
       "project_name": "lint_simp_issues",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "title": "Fix simp lint issues (LHS simplifies, simp can prove)",
       "description": "Fix 25 simp-related lint errors: 23 where the LHS of a simp lemma already simplifies (need to adjust the simp normal form) and 2 where simp can prove the lemma outright.",

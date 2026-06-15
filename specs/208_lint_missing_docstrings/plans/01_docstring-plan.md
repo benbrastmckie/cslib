@@ -1,7 +1,7 @@
 # Implementation Plan: Add Missing Documentation Strings
 
 - **Task**: 208 - Add missing documentation strings to Bimodal/Temporal/Modal declarations
-- **Status**: [NOT STARTED]
+- **Status**: [IN PROGRESS]
 - **Effort**: 9 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/208_lint_missing_docstrings/reports/01_lint-docstring-research.md

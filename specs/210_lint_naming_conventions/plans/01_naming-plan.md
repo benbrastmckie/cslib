@@ -67,7 +67,7 @@ Phases are sequential because later phases depend on a clean build from earlier 
 
 ---
 
-### Phase 1: Bimodal Theorems -- TemporalDerived.lean (23 violations) [NOT STARTED]
+### Phase 1: Bimodal Theorems -- TemporalDerived.lean (23 violations) [COMPLETED]
 
 **Goal**: Rename all 23 violations in the highest-violation single file, plus update references in downstream files. This file contains temporal operator abbreviations (G_, H_, F_, P_ prefix) and snake_case definitions.
 
@@ -121,7 +121,7 @@ Phases are sequential because later phases depend on a clean build from earlier 
 
 ---
 
-### Phase 2: PointInsertion Pair + Chronicle Types (30 violations) [NOT STARTED]
+### Phase 2: PointInsertion Pair + Chronicle Types (30 violations) [IN PROGRESS]
 
 **Goal**: Rename all violations in the Bimodal and Temporal PointInsertion.lean files and their shared chronicle types. This phase handles the highest-reference names: Q_Z (100 refs), U_nesting_depth (88 refs), lemma_2_7_seed (48 refs), case1_psi (44 refs), and all abbreviated-prefix names (l27_, l27s_, c5_, d21_, case_).
 

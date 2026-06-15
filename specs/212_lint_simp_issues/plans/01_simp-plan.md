@@ -60,7 +60,7 @@ This task advances repository CI health by eliminating lint errors. No specific 
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Remove @[simp] Attributes from All 6 Files [IN PROGRESS]
+### Phase 1: Remove @[simp] Attributes from All 6 Files [COMPLETED]
 
 **Goal**: Remove `@[simp]` from all 25 declarations that trigger simpNF lint errors.
 
@@ -89,7 +89,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Build and Lint Verification [NOT STARTED]
+### Phase 2: Build and Lint Verification [IN PROGRESS]
 
 **Goal**: Confirm that the attribute removals introduce no regressions and that all 25 simpNF errors are resolved.
 

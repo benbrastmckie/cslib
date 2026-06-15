@@ -1,7 +1,7 @@
 # Implementation Plan: Task #211
 
 - **Task**: 211 - Change def to lemma/theorem for Prop-valued declarations
-- **Status**: [NOT STARTED]
+- **Status**: [IN PROGRESS]
 - **Effort**: 2 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/211_lint_def_to_lemma/reports/01_def-lemma-research.md
@@ -59,7 +59,7 @@ No ROADMAP.md found.
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Bimodal FrameConditions, Soundness, and Core Metalogic [NOT STARTED]
+### Phase 1: Bimodal FrameConditions, Soundness, and Core Metalogic [COMPLETED]
 
 **Goal**: Fix 13 declarations across Bimodal FrameConditions (2 files), Soundness (1 file), and Core Metalogic (4 files).
 
@@ -89,7 +89,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Bimodal BXCanonical [NOT STARTED]
+### Phase 2: Bimodal BXCanonical [IN PROGRESS]
 
 **Goal**: Fix 16 declarations across 5 BXCanonical files (the largest single cluster).
 

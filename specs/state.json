@@ -14,13 +14,13 @@
     {
       "project_number": 216,
       "project_name": "push_relevant_changes_to_pr_648",
-      "status": "researched",
+      "status": "planned",
       "task_type": "pr",
       "description": "Given what task 202 implemented, push a single commit with all and only the relevant changes to https://github.com/leanprover/cslib/pull/648, where the aim is to keep the LOC ~300 to avoid overwhelming reviewers",
       "topic": "Propositional Logic",
       "created": "2026-06-15T18:19:59Z",
-      "last_updated": "2026-06-15T18:34:29Z",
-      "session_id": "sess_1781547723_09e045",
+      "last_updated": "2026-06-15T18:45:22Z",
+      "session_id": "sess_1781548967_6e45b2",
       "next_artifact_number": 2,
       "memory_candidates": [
         {
@@ -42,8 +42,38 @@
           "path": "specs/216_push_relevant_changes_to_pr_648/reports/01_pr648-changes-review.md",
           "type": "research",
           "summary": "Analysis of what local changes from task 202 should go to PR 648. Recommends adding Bool.lean as a 5th file alongside the 4 existing PR files, bringing total to ~339 additions."
+        },
+        {
+          "path": "specs/216_push_relevant_changes_to_pr_648/plans/01_pr648-push-plan.md",
+          "type": "plan",
+          "summary": "3-phase plan to push Bool.lean and minor fixes to PR 648, verify build, and update PR description"
         }
-      ]
+      ],
+      "plan_metadata": {
+        "phases": 3,
+        "total_effort_hours": 1,
+        "complexity": "simple",
+        "research_integrated": true,
+        "plan_version": 1,
+        "dependency_waves": [
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/01_pr648-changes-review.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-06-15"
+          }
+        ]
+      }
     },
     {
       "project_number": 208,

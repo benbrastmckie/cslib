@@ -66,7 +66,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: topNamespace Fixes (239 errors) [NOT STARTED]
+### Phase 1: topNamespace Fixes (239 errors) [IN PROGRESS]
 
 **Goal**: Wrap all instance `section` blocks in the 17 affected ProofSystem/Instances files inside the appropriate namespace, eliminating all 239 topNamespace lint errors.
 

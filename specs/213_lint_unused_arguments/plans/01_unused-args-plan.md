@@ -1,7 +1,7 @@
 # Implementation Plan: Fix Unused Argument Lint Errors in Bimodal/Separation
 
 - **Task**: 213 - Fix 28 unused argument lint errors across 3 files in Bimodal/Metalogic/Separation/
-- **Status**: [NOT STARTED]
+- **Status**: [IN PROGRESS]
 - **Effort**: 1 hour
 - **Dependencies**: None
 - **Research Inputs**: specs/213_lint_unused_arguments/reports/01_unused-args-research.md
@@ -59,7 +59,7 @@ This task advances repository hygiene and CI cleanliness, supporting the ongoing
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Fix Explicit-Signature Declarations (3 warnings) [NOT STARTED]
+### Phase 1: Fix Explicit-Signature Declarations (3 warnings) [COMPLETED]
 
 **Goal**: Remove unused typeclass instances from explicit theorem signatures in FormulaOps.lean and IntHelpers.lean, introducing them via `haveI` in proof bodies instead.
 
@@ -84,7 +84,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Fix Section-Variable Declarations via `omit` (25 warnings) [NOT STARTED]
+### Phase 2: Fix Section-Variable Declarations via `omit` (25 warnings) [IN PROGRESS]
 
 **Goal**: Add `omit [DecidableEq Atom]` subsections in HierarchyDefs.lean to exclude the inherited section variable from 25 declarations that do not use it.
 

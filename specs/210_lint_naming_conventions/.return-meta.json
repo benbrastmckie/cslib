@@ -1,22 +1,15 @@
 {
-  "status": "planned",
-  "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/210_lint_naming_conventions/plans/01_naming-plan.md",
-      "summary": "5-phase implementation plan to fix 105 defsWithUnderscore lint violations across Bimodal and Temporal namespaces"
-    }
-  ],
-  "next_steps": "Run /implement 210 to execute the plan",
+  "status": "in_progress",
+  "started_at": "2026-06-15T00:00:00Z",
+  "artifacts": [],
+  "partial_progress": {
+    "stage": "phase_1",
+    "details": "Starting Phase 1: TemporalDerived.lean renames"
+  },
   "metadata": {
     "session_id": "sess_1750000000_a1b2c3_210",
-    "agent_type": "planner-agent",
-    "duration_seconds": 300,
+    "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
-    "phase_count": 5,
-    "estimated_hours": 6,
-    "dependency_waves": [[1], [2], [3], [4], [5]]
-  },
-  "memory_candidates": []
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+  }
 }

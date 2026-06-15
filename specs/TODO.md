@@ -42,7 +42,7 @@ next_project_number: 218
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
-216 [RESEARCHED] — Given what task 202 implemented, push a single commit with all an
+216 [PLANNED] — Given what task 202 implemented, push a single commit with all an
 
 ### Propositional PRs
 
@@ -72,11 +72,12 @@ next_project_number: 218
 ---
 
 ### 216. Push relevant changes to pr 648
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: pr
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [216_push_relevant_changes_to_pr_648/reports/01_pr648-changes-review.md]
+- **Plan**: [216_push_relevant_changes_to_pr_648/plans/01_pr648-push-plan.md]
 
 **Description**: Given what task 202 implemented, push a single commit with all and only the relevant changes to https://github.com/leanprover/cslib/pull/648, where the aim is to keep the LOC ~300 to avoid overwhelming reviewers
 

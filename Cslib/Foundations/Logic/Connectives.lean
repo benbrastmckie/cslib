@@ -50,7 +50,7 @@ task 173 after `HasAnd` is instantiated on the formula types.
 * [A. Church, *Introduction to Mathematical Logic*][Church1956]
 * [A. Heyting, *Die formalen Regeln der intuitionistischen Logik*][Heyting1930]
 * [G. Gentzen, *Untersuchungen über das logische Schließen*][Gentzen1935]
-* [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Chapter 1
+* [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Chapter 3
 -/
 
 @[expose] public section
@@ -69,12 +69,15 @@ class HasImp (F : Type*) where
 
 /-- A type has a necessity (box) modality.
 
-Box is the canonical primitive modal operator in classical systems ([Blackburn2001] Chapter 1,
-[ChagrovZakharyaschev1997] Section 1.1). It corresponds to universal quantification over
-accessible worlds, preserves conjunction, distributes over implication (axiom K), and is the
-subject of the necessitation rule. In classical systems, diamond (possibility) is derived as
-`¬□¬φ`. Non-classical modal logics (intuitionistic, minimal) require a separate `HasDia`
-typeclass, since `□` and `◇` become independent operators. -/
+Box is primitive because the necessitation rule (`if ⊢ φ then ⊢ □φ`) and the K axiom are
+pure proof rules on a single connective; with diamond primitive, necessitation becomes the
+interaction law `¬◇¬` ([Blackburn2001] Chapter 1 takes the diamond-first alternative).
+See [ChagrovZakharyaschev1997] Section 3.1 for the box-first presentation. Box corresponds
+to universal quantification over accessible worlds, preserves conjunction, distributes over
+implication (axiom K), and is the subject of the necessitation rule. In classical systems,
+diamond (possibility) is derived as `¬□¬φ`. Non-classical modal logics (intuitionistic,
+minimal) require a separate `HasDia` typeclass, since `□` and `◇` become independent
+operators. -/
 class HasBox (F : Type*) where
   /-- The necessity/box modality. -/
   box : F → F
@@ -109,10 +112,13 @@ class PropositionalConnectives (F : Type*) extends HasBot F, HasImp F
 
 /-- Modal connectives: propositional connectives plus necessity.
 
-Box is chosen as the sole primitive modal operator, following [Blackburn2001] Chapter 1 and
-[ChagrovZakharyaschev1997] Section 1.1. Diamond is derived via classical negation (`◇φ := ¬□¬φ`)
-and need not appear in the typeclass. Non-classical modal logics (intuitionistic, minimal) require
-extending this class with a primitive `HasDia` once such systems are formalized in CSLib. -/
+Box is the sole primitive modal operator because necessitation and the K axiom are pure proof
+rules on box; with diamond primitive, necessitation becomes the interaction law `¬◇¬`
+([Blackburn2001] Chapter 1 takes the diamond-first alternative). See
+[ChagrovZakharyaschev1997] Section 3.1 for the box-first presentation. Diamond is derived via
+classical negation (`◇φ := ¬□¬φ`) and need not appear in the typeclass. Non-classical modal
+logics (intuitionistic, minimal) require extending this class with a primitive `HasDia` once
+such systems are formalized in CSLib. -/
 class ModalConnectives (F : Type*) extends PropositionalConnectives F, HasBox F
 
 /-- Temporal connectives: propositional connectives plus until and since. -/

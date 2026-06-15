@@ -1,7 +1,7 @@
 # Implementation Plan: Fix Modal PR Citation Errors
 
 - **Task**: 201 - Review modal PR citations
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 1 hour
 - **Dependencies**: None (task 197 PR not yet submitted; fixes apply to current main)
 - **Research Inputs**: reports/01_modal-citation-review.md
@@ -63,16 +63,16 @@ This task maintains documentation quality for the Modal/ module listed in the RO
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Fix All Citation Errors [NOT STARTED]
+### Phase 1: Fix All Citation Errors [COMPLETED]
 
 **Goal**: Correct all six citation sites across Basic.lean and Connectives.lean.
 
 **Tasks**:
-- [ ] Edit `Cslib/Logics/Modal/Basic.lean` lines 29-30: Reword the Blackburn/Chagrov citation block. Replace the claim that box is "the canonical primitive modal operator ... following [Blackburn2001] Chapter 1 and [ChagrovZakharyaschev1997] Section 1.1" with wording that gives the proof-theoretic justification. Suggested replacement: "CSLib takes box as primitive because the necessitation rule (`if ⊢ φ then ⊢ □φ`) and the K axiom are pure proof rules on box; with diamond primitive, necessitation becomes the interaction law `¬◇¬` ([Blackburn2001] Chapter 1 takes the diamond-first alternative). See [ChagrovZakharyaschev1997] Section 3.1 for the box-first presentation."
-- [ ] Edit `Cslib/Logics/Modal/Basic.lean` lines 94-95: Change `[ChagrovZakharyaschev1997] Section 1.1` to `[ChagrovZakharyaschev1997] Section 3.1` in the diamond docstring. Also update the Blackburn reference to note the duality rather than claiming box primacy.
-- [ ] Edit `Cslib/Foundations/Logic/Connectives.lean` lines 72-73 (HasBox docstring): Reword to match the corrected attribution pattern. Change `[ChagrovZakharyaschev1997] Section 1.1` to `Section 3.1` and clarify the Blackburn citation.
-- [ ] Edit `Cslib/Foundations/Logic/Connectives.lean` line 53: Change `Chapter 1` to `Chapter 3` in the module-level references list for ChagrovZakharyaschev1997.
-- [ ] Edit `Cslib/Foundations/Logic/Connectives.lean` lines 112-113 (ModalConnectives docstring): Change `[ChagrovZakharyaschev1997] Section 1.1` to `Section 3.1` and update the Blackburn reference.
+- [x] Edit `Cslib/Logics/Modal/Basic.lean` lines 29-30: Reword the Blackburn/Chagrov citation block. Replace the claim that box is "the canonical primitive modal operator ... following [Blackburn2001] Chapter 1 and [ChagrovZakharyaschev1997] Section 1.1" with wording that gives the proof-theoretic justification. Suggested replacement: "CSLib takes box as primitive because the necessitation rule (`if ⊢ φ then ⊢ □φ`) and the K axiom are pure proof rules on box; with diamond primitive, necessitation becomes the interaction law `¬◇¬` ([Blackburn2001] Chapter 1 takes the diamond-first alternative). See [ChagrovZakharyaschev1997] Section 3.1 for the box-first presentation."
+- [x] Edit `Cslib/Logics/Modal/Basic.lean` lines 94-95: Change `[ChagrovZakharyaschev1997] Section 1.1` to `[ChagrovZakharyaschev1997] Section 3.1` in the diamond docstring. Also update the Blackburn reference to note the duality rather than claiming box primacy.
+- [x] Edit `Cslib/Foundations/Logic/Connectives.lean` lines 72-73 (HasBox docstring): Reword to match the corrected attribution pattern. Change `[ChagrovZakharyaschev1997] Section 1.1` to `Section 3.1` and clarify the Blackburn citation.
+- [x] Edit `Cslib/Foundations/Logic/Connectives.lean` line 53: Change `Chapter 1` to `Chapter 3` in the module-level references list for ChagrovZakharyaschev1997.
+- [x] Edit `Cslib/Foundations/Logic/Connectives.lean` lines 112-113 (ModalConnectives docstring): Change `[ChagrovZakharyaschev1997] Section 1.1` to `Section 3.1` and update the Blackburn reference.
 
 **Timing**: 30 minutes
 
@@ -89,15 +89,15 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Build Verification and Style Lint [NOT STARTED]
+### Phase 2: Build Verification and Style Lint [COMPLETED]
 
 **Goal**: Verify all changes compile and pass CSLib CI checks.
 
 **Tasks**:
-- [ ] Run `lake build` (full project build) to verify no compilation breakage
-- [ ] Run `lake exe lint-style` to verify no style violations from rewording (line length, trailing whitespace)
-- [ ] If lint-style reports issues, fix line wrapping and re-run
-- [ ] Spot-check that all 5 edit sites have correct text by grepping for remaining `Section 1.1` references
+- [x] Run `lake build` (full project build) to verify no compilation breakage
+- [x] Run `lake exe lint-style` to verify no style violations from rewording (line length, trailing whitespace)
+- [x] If lint-style reports issues, fix line wrapping and re-run
+- [x] Spot-check that all 5 edit sites have correct text by grepping for remaining `Section 1.1` references
 
 **Timing**: 15 minutes
 

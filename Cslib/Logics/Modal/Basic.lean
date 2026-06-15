@@ -25,13 +25,15 @@ The formula type uses `{atom, bot, imp, box}` as primitive constructors (no nati
 Negation, conjunction, disjunction, and diamond (possibility) are derived connectives via
 the Lukasiewicz convention: `¬φ := φ → ⊥`, `φ ∧ ψ := ¬(φ → ¬ψ)`, `φ ∨ ψ := ¬φ → ψ`.
 
-**Why box, not diamond?** Box (necessity `□φ`) is the canonical primitive modal operator in
-classical systems, following [P. Blackburn, M. de Rijke, Y. Venema, *Modal Logic*][Blackburn2001]
-Chapter 1 and [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997] Section 1.1.
-Box is chosen because it corresponds to universal quantification over accessible worlds
-(`∀ w', r w w' → φ`), preserves conjunction (`□(φ ∧ ψ) ↔ □φ ∧ □ψ`), distributes over
-implication (axiom K), and is
-the subject of necessitation (`⊢ φ` implies `⊢ □φ`). Diamond is then derived classically as
+**Why box, not diamond?** CSLib takes box as primitive because the necessitation rule
+(`if ⊢ φ then ⊢ □φ`) and the K axiom (`□(φ → ψ) → (□φ → □ψ)`) are pure proof rules on a
+single primitive; with diamond primitive, necessitation becomes the interaction law `¬◇¬`
+([P. Blackburn, M. de Rijke, Y. Venema, *Modal Logic*][Blackburn2001] Chapter 1 takes the
+diamond-first alternative). See [A. Chagrov, M. Zakharyaschev,
+*Modal Logic*][ChagrovZakharyaschev1997] Section 3.1 for the box-first presentation. Box
+corresponds to universal quantification over accessible worlds (`∀ w', r w w' → φ`),
+preserves conjunction (`□(φ ∧ ψ) ↔ □φ ∧ □ψ`), and distributes over implication (axiom K).
+Diamond is then derived classically as
 `◇φ := ¬□¬φ`, which corresponds to `(□(φ → ⊥)) → ⊥`. This derivation relies on excluded middle
 (`¬¬p ↔ p`) and fails in intuitionistic or minimal modal logic, where box and diamond are
 independent operators. Once non-classical modal logics are formalized in CSLib, `HasDia` should
@@ -91,8 +93,9 @@ abbrev Proposition.and (φ₁ φ₂ : Proposition Atom) : Proposition Atom :=
 Diamond is a derived connective in classical modal logic. It is defined via classical negation as
 `◇φ := ¬□¬φ`, which expands to `(□(φ → ⊥)) → ⊥`. The forward direction (`◇φ → ¬□¬φ`) holds by
 definition; the backward direction (`¬□¬φ → ◇φ`) uses excluded middle. This derivation fails in
-minimal modal logic, where `□` and `◇` are independent operators. See [Blackburn2001] Chapter 1
-and [ChagrovZakharyaschev1997] Section 1.1. -/
+minimal modal logic, where `□` and `◇` are independent operators. [Blackburn2001] Chapter 1
+takes diamond as primitive; [ChagrovZakharyaschev1997] Section 3.1 takes box as primitive
+and derives diamond via classical negation. -/
 abbrev Proposition.diamond (φ : Proposition Atom) : Proposition Atom :=
   .neg (.box (.neg φ))
 

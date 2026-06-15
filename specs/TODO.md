@@ -1,5 +1,5 @@
 ---
-next_project_number: 217
+next_project_number: 218
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 217
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,208,209,210,211,212,213,214,215,216 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,195,197,208,209,210,211,212,213,214,215,216,217 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -32,12 +32,12 @@ next_project_number: 217
 
 ### Project Management
 
-208 [PLANNING] — Add docstrings to 327 declarations flagged by #lint across Bimoda
-209 [PLANNING] — Fix 298 namespace lint errors: 239 declarations not properly name
-210 [PLANNING] — Fix 105 naming convention violations where declaration names cont
-211 [PLANNING] — Fix 55 lint errors where Prop-valued declarations use def instead
-212 [PLANNING] — Fix 25 simp-related lint errors: 23 where the LHS of a simp lemma
-213 [PLANNING] — Fix ~17 unused argument lint errors across Bimodal and Temporal c
+208 [IMPLEMENTING] — Add docstrings to 327 declarations flagged by #lint across Bimoda
+209 [IMPLEMENTING] — Fix 298 namespace lint errors: 239 declarations not properly name
+210 [IMPLEMENTING] — Fix 105 naming convention violations where declaration names cont
+211 [IMPLEMENTING] — Fix 55 lint errors where Prop-valued declarations use def instead
+212 [IMPLEMENTING] — Fix 25 simp-related lint errors: 23 where the LHS of a simp lemma
+213 [IMPLEMENTING] — Fix ~17 unused argument lint errors across Bimodal and Temporal c
 
 ### Propositional Logic
 
@@ -51,6 +51,7 @@ next_project_number: 217
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
+217 [NOT STARTED] — Investigate and push appropriate changes from task 207 implementa
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -59,6 +60,16 @@ next_project_number: 217
 197 [PR READY] — Review the ambition to contribute Modal/ to upstream, identifying
 
 ## Tasks
+
+### 217. Push generic metalogic to pr649
+- **Status**: [NOT STARTED]
+- **Task Type**: pr
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Investigate and push appropriate changes from task 207 implementation to PR #649 (https://github.com/leanprover/cslib/pull/649), selecting only the Foundations/Logic/Metalogic files (ListImplication, ListDeduction, SetDeduction, GenericMCS, MCSProperties) and Combinators addition that are relevant to the reviewer's feedback on abstracting the deduction theorem and MCS proofs
+
+---
 
 ### 216. Push relevant changes to pr 648
 - **Status**: [RESEARCHED]
@@ -92,7 +103,7 @@ next_project_number: 217
 ---
 
 ### 213. Fix unused argument lint errors
-- **Status**: [PLANNING]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -102,7 +113,7 @@ next_project_number: 217
 ---
 
 ### 212. Fix simp lint issues (LHS simplifies, simp can prove)
-- **Status**: [PLANNING]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -112,7 +123,7 @@ next_project_number: 217
 ---
 
 ### 211. Change def to lemma/theorem for Prop-valued declarations
-- **Status**: [PLANNING]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -122,7 +133,7 @@ next_project_number: 217
 ---
 
 ### 210. Fix naming convention violations (underscore to camelCase)
-- **Status**: [PLANNING]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -132,7 +143,7 @@ next_project_number: 217
 ---
 
 ### 209. Fix namespace lint errors (not namespaced + duplicate namespace)
-- **Status**: [PLANNING]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -142,7 +153,7 @@ next_project_number: 217
 ---
 
 ### 208. Add missing documentation strings to Bimodal/Temporal/Modal declarations
-- **Status**: [PLANNING]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None

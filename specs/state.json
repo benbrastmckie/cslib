@@ -1,6 +1,16 @@
 {
-  "next_project_number": 217,
+  "next_project_number": 218,
   "active_projects": [
+    {
+      "project_number": 217,
+      "project_name": "push_generic_metalogic_to_pr649",
+      "status": "not_started",
+      "task_type": "pr",
+      "description": "Investigate and push appropriate changes from task 207 implementation to PR #649 (https://github.com/leanprover/cslib/pull/649), selecting only the Foundations/Logic/Metalogic files (ListImplication, ListDeduction, SetDeduction, GenericMCS, MCSProperties) and Combinators addition that are relevant to the reviewer's feedback on abstracting the deduction theorem and MCS proofs",
+      "topic": "Temporal Logic",
+      "created": "2026-06-15T18:41:56Z",
+      "last_updated": "2026-06-15T18:41:56Z"
+    },
     {
       "project_number": 216,
       "project_name": "push_relevant_changes_to_pr_648",
@@ -38,7 +48,7 @@
     {
       "project_number": 208,
       "project_name": "lint_missing_docstrings",
-      "status": "planning",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "Add missing documentation strings to Bimodal/Temporal/Modal declarations",
       "description": "Add docstrings to 327 declarations flagged by #lint across Bimodal/ (190), Temporal/ (80), Modal/ (57). Most are theorems and definitions that need brief /-- ... -/ docstrings describing their purpose.",
@@ -49,7 +59,7 @@
     {
       "project_number": 209,
       "project_name": "lint_namespace_fixes",
-      "status": "planning",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "Fix namespace lint errors (not namespaced + duplicate namespace)",
       "description": "Fix 298 namespace lint errors: 239 declarations not properly namespaced and 59 duplicate namespace components (Chronicle, Temporal, Bimodal repeated in names). Requires moving declarations into correct namespaces or renaming.",
@@ -60,7 +70,7 @@
     {
       "project_number": 210,
       "project_name": "lint_naming_conventions",
-      "status": "planning",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "Fix naming convention violations (underscore to camelCase)",
       "description": "Fix 105 naming convention violations where declaration names contain underscores instead of lowerCamelCase or UpperCamelCase per Mathlib convention. Mostly in Bimodal and Temporal metalogic files.",
@@ -71,7 +81,7 @@
     {
       "project_number": 211,
       "project_name": "lint_def_to_lemma",
-      "status": "planning",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "Change def to lemma/theorem for Prop-valued declarations",
       "description": "Fix 55 lint errors where Prop-valued declarations use def instead of lemma/theorem. These are in Bimodal frame conditions, soundness, BXCanonical, and Temporal chronicle files.",
@@ -82,7 +92,7 @@
     {
       "project_number": 212,
       "project_name": "lint_simp_issues",
-      "status": "planning",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "Fix simp lint issues (LHS simplifies, simp can prove)",
       "description": "Fix 25 simp-related lint errors: 23 where the LHS of a simp lemma already simplifies (need to adjust the simp normal form) and 2 where simp can prove the lemma outright.",
@@ -93,7 +103,7 @@
     {
       "project_number": 213,
       "project_name": "lint_unused_arguments",
-      "status": "planning",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "Fix unused argument lint errors",
       "description": "Fix ~17 unused argument lint errors across Bimodal and Temporal chronicle files. Arguments flagged as not used in the declaration body need to be removed or the code restructured.",

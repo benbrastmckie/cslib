@@ -18,17 +18,17 @@
       213
     ]
   ],
-  "cycle_count": 1,
+  "cycle_count": 2,
   "max_cycles": 25,
   "completed_tasks": [],
   "failed_tasks": [],
   "current_statuses": {
-    "208": "researched",
-    "209": "researched",
-    "210": "researched",
-    "211": "researched",
-    "212": "researched",
-    "213": "researched"
+    "208": "implementing",
+    "209": "implementing",
+    "210": "implementing",
+    "211": "implementing",
+    "212": "implementing",
+    "213": "implementing"
   },
   "task_types": {
     "208": "cslib",

@@ -1,21 +1,15 @@
 {
-  "status": "planned",
-  "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/211_lint_def_to_lemma/plans/01_def-lemma-plan.md",
-      "summary": "5-phase implementation plan for fixing 55 defLemma lint errors (4 parallel edit phases + verification)"
-    }
-  ],
-  "next_steps": "Run /implement 211 to execute the plan",
+  "status": "in_progress",
+  "started_at": "2026-06-15T00:00:00Z",
+  "artifacts": [],
+  "partial_progress": {
+    "stage": "initializing",
+    "details": "Agent started, reading plan and research report"
+  },
   "metadata": {
     "session_id": "sess_1750000000_a1b2c3_211",
-    "agent_type": "planner-agent",
+    "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
-    "phase_count": 5,
-    "estimated_hours": 2,
-    "dependency_waves": [[1, 2, 3, 4], [5]]
-  },
-  "memory_candidates": []
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+  }
 }

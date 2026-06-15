@@ -36,7 +36,7 @@ next_project_number: 203
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
-202 [RESEARCHING] — Review thomaskwaring/cslib_SKI Hilbert branch (https://github.com
+202 [RESEARCHED] — Review thomaskwaring/cslib_SKI Hilbert branch (https://github.com
 
 ### Propositional PRs
 
@@ -51,10 +51,11 @@ next_project_number: 203
 ## Tasks
 
 ### 202. Review hilbert classes vs pr648
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [specs/202_review_hilbert_classes_vs_pr648/reports/01_hilbert-classes-comparison.md]
 
 **Description**: Review thomaskwaring/cslib_SKI Hilbert branch (https://github.com/thomaskwaring/cslib_SKI/blob/hilbert/Cslib/Logics/Hilbert/Classes.lean) in contrast to cslib PR #648 (https://github.com/leanprover/cslib/pull/648) to understand how they relate, differ, overlap, and what if anything is in conflict with Propositional/ Hilbert system development in this fork
 

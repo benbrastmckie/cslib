@@ -4,13 +4,18 @@
     {
       "project_number": 202,
       "project_name": "review_hilbert_classes_vs_pr648",
-      "status": "researching",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Review thomaskwaring/cslib_SKI Hilbert branch (https://github.com/thomaskwaring/cslib_SKI/blob/hilbert/Cslib/Logics/Hilbert/Classes.lean) in contrast to cslib PR #648 (https://github.com/leanprover/cslib/pull/648) to understand how they relate, differ, overlap, and what if anything is in conflict with Propositional/ Hilbert system development in this fork",
       "created": "2026-06-15T00:22:18Z",
-      "last_updated": "2026-06-15T00:23:32Z",
-      "session_id": "sess_1781483005_a59dae"
+      "last_updated": "2026-06-15T00:29:06Z",
+      "session_id": "sess_1781483005_a59dae",
+      "artifacts": {
+        "research": [
+          "specs/202_review_hilbert_classes_vs_pr648/reports/01_hilbert-classes-comparison.md"
+        ]
+      }
     },
     {
       "project_number": 201,

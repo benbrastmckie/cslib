@@ -144,29 +144,23 @@
         "specs/197_modal_upstream_initial_pr/reports/03_team-research.md",
         "specs/197_modal_upstream_initial_pr/reports/04_pr649-comparison-classical-signature.md"
       ],
-      "next_artifact_number": 8,
+      "next_artifact_number": 9,
       "plan_artifacts": [
         "specs/197_modal_upstream_initial_pr/plans/02_modal-upstream-pr-plan.md",
         "specs/197_modal_upstream_initial_pr/plans/05_modal-upstream-pr-plan.md"
       ],
       "plan_metadata": {
-        "phases": 4,
-        "total_effort_hours": 3,
+        "phases": 2,
+        "total_effort_hours": 1.5,
         "complexity": "medium",
         "research_integrated": true,
-        "plan_version": 4,
+        "plan_version": 5,
         "dependency_waves": [
           [
             1
           ],
           [
             2
-          ],
-          [
-            3
-          ],
-          [
-            4
           ]
         ],
         "reports_integrated": [
@@ -263,7 +257,7 @@
           "summary": "Upstream PR landscape audit: no competing Modal/ signature PRs, PR #607 stalled, recommends stacking on PR #649"
         },
         {
-          "path": "specs/197_modal_upstream_initial_pr/plans/07_modal-upstream-pr-plan.md",
+          "path": "specs/197_modal_upstream_initial_pr/plans/08_modal-upstream-pr-plan.md",
           "type": "plan"
         }
       ]

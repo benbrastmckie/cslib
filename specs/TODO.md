@@ -128,7 +128,7 @@ next_project_number: 207
 - **Topic**: pr
 - **Dependencies**: None
 - **Research**: [197_modal_upstream_initial_pr/reports/06_modal-pr-landscape.md]
-- **Plan**: [197_modal_upstream_initial_pr/plans/07_modal-upstream-pr-plan.md]
+- **Plan**: [197_modal_upstream_initial_pr/plans/08_modal-upstream-pr-plan.md]
 
 **Description**: Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible
 

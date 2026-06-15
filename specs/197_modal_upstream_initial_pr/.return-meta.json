@@ -1,24 +1,24 @@
 {
   "status": "planned",
-  "summary": "Revised plan v4 integrating PR landscape audit and updated stacking strategy (PR #648, not #649)",
+  "summary": "Revised plan v5 (2 phases, 1.5 hours) scoped to pr-description.md only -- removed all git branch, CI, and submission phases to match pr task type",
   "artifacts": [
     {
       "type": "plan",
-      "path": "specs/197_modal_upstream_initial_pr/plans/07_modal-upstream-pr-plan.md",
-      "summary": "Revised plan v4: stack on PR #648 with diplomatic PR description as first-class deliverable"
+      "path": "specs/197_modal_upstream_initial_pr/plans/08_modal-upstream-pr-plan.md",
+      "summary": "Revised plan v5: 2 phases focused on drafting and reviewing pr-description.md for Modal/ upstream refactoring"
     }
   ],
   "next_steps": "Run /implement 197 to execute the revised plan",
   "task_number": 197,
-  "session_id": "sess_1781532709_eb0889",
+  "session_id": "sess_1781534990_a1b2c3",
   "metadata": {
-    "session_id": "sess_1781532709_eb0889",
+    "session_id": "sess_1781534990_a1b2c3",
     "agent_type": "reviser-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "revise", "reviser-agent"],
-    "phase_count": 4,
-    "estimated_hours": 3,
-    "plan_version": 4,
+    "phase_count": 2,
+    "estimated_hours": 1.5,
+    "plan_version": 5,
     "reports_integrated": [
       {
         "path": "reports/01_modal-upstream-pr-scope.md",

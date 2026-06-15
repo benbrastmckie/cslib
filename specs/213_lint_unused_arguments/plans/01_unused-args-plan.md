@@ -1,7 +1,7 @@
 # Implementation Plan: Fix Unused Argument Lint Errors in Bimodal/Separation
 
 - **Task**: 213 - Fix 28 unused argument lint errors across 3 files in Bimodal/Metalogic/Separation/
-- **Status**: [IN PROGRESS]
+- **Status**: [COMPLETED]
 - **Effort**: 1 hour
 - **Dependencies**: None
 - **Research Inputs**: specs/213_lint_unused_arguments/reports/01_unused-args-research.md
@@ -84,7 +84,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Fix Section-Variable Declarations via `omit` (25 warnings) [IN PROGRESS]
+### Phase 2: Fix Section-Variable Declarations via `omit` (25 warnings) [COMPLETED]
 
 **Goal**: Add `omit [DecidableEq Atom]` subsections in HierarchyDefs.lean to exclude the inherited section variable from 25 declarations that do not use it.
 

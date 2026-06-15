@@ -1,14 +1,16 @@
 {
-  "status": "planned",
-  "summary": "2-phase plan to fix 28 unused hypothesis lint warnings: Phase 1 removes DecidableEq/DecidablePred from 3 explicit signatures (FormulaOps.lean, IntHelpers.lean) with haveI in body; Phase 2 adds omit [DecidableEq Atom] subsections for 25 section-inherited warnings in HierarchyDefs.lean. Both phases are independent (Wave 1). Estimated 1 hour total.",
+  "status": "implemented",
+  "summary": "Fixed all 28 unused hypothesis lint warnings across 3 Separation files. Phase 1: removed DecidableEq/DecidablePred from 3 explicit signatures, added haveI in proof bodies, aliased primed versions. Phase 2: added omit [DecidableEq Atom] in prefix, section NoDecEqJD (10 theorems), and section NoDecEqSep (14 declarations) in HierarchyDefs.lean; also removed set_option linter.unusedSectionVars false. One deviation: u_free_separable_with_type required haveI in proof body because it calls separated_imp_separable which needs DecidableEq. All 3 target files build cleanly with 0 unused hypothesis warnings.",
   "artifacts": [
     {
-      "path": "specs/213_lint_unused_arguments/plans/01_unused-args-plan.md",
-      "type": "plan",
-      "summary": "2-phase implementation plan for fixing 28 unused hypothesis lint warnings via haveI and omit patterns"
+      "path": "specs/213_lint_unused_arguments/summaries/01_unused-args-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary with verification results and plan deviations"
     }
   ],
   "blockers": [],
+  "phases_completed": 2,
+  "phases_total": 2,
   "continuation_context": null,
-  "next_action_hint": "implement"
+  "next_action_hint": "complete"
 }

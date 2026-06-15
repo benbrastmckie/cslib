@@ -56,9 +56,10 @@ theorem Int.succ_least (t s : Int) (h : t < s) :
     Lemma 10.2.2. -/
 theorem Int.exists_least_above
     {pred : Int → Prop} {t : Int}
-    (hex : ∃ n, t < n ∧ pred n) [DecidablePred pred] :
+    (hex : ∃ n, t < n ∧ pred n) :
     ∃ m, t < m ∧ pred m ∧
       ∀ k, t < k → k < m → ¬pred k := by
+  haveI : DecidablePred pred := Classical.decPred pred
   obtain ⟨n, htn, hpn⟩ := hex
   let Q : ℕ → Prop := fun k => pred (t + 1 + ↑k)
   have hQ_dec : DecidablePred Q :=
@@ -81,9 +82,10 @@ theorem Int.exists_least_above
     such n. -/
 theorem Int.exists_greatest_below
     {pred : Int → Prop} {t : Int}
-    (hex : ∃ n, n < t ∧ pred n) [DecidablePred pred] :
+    (hex : ∃ n, n < t ∧ pred n) :
     ∃ m, m < t ∧ pred m ∧
       ∀ k, m < k → k < t → ¬pred k := by
+  haveI : DecidablePred pred := Classical.decPred pred
   obtain ⟨n, hnt, hpn⟩ := hex
   let Q : ℕ → Prop := fun k => pred (t - 1 - ↑k)
   have hQ_dec : DecidablePred Q :=
@@ -104,26 +106,11 @@ theorem Int.exists_greatest_below
     change pred (t - 1 - ↑((t - k - 1).toNat))
     convert hpk using 1; omega)
 
-/-- Non-decidable version of exists_least_above.
-    Uses classical logic. -/
-theorem Int.exists_least_above'
-    {pred : Int → Prop} {t : Int}
-    (hex : ∃ n, t < n ∧ pred n) :
-    ∃ m, t < m ∧ pred m ∧
-      ∀ k, t < k → k < m → ¬pred k := by
-  haveI : DecidablePred pred := Classical.decPred pred
-  exact Int.exists_least_above hex
+/-- Alias of exists_least_above (classical version). -/
+alias Int.exists_least_above' := Int.exists_least_above
 
-/-- Non-decidable version of exists_greatest_below.
-    Uses classical logic. -/
-theorem Int.exists_greatest_below'
-    {pred : Int → Prop} {t : Int}
-    (hex : ∃ n, n < t ∧ pred n) :
-    ∃ m, m < t ∧ pred m ∧
-      ∀ k, m < k → k < t → ¬pred k := by
-  haveI : DecidablePred pred :=
-    Classical.decPred pred
-  exact Int.exists_greatest_below hex
+/-- Alias of exists_greatest_below (classical version). -/
+alias Int.exists_greatest_below' := Int.exists_greatest_below
 
 /-! ## Direct Witness Constructions -/
 

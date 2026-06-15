@@ -182,11 +182,12 @@ theorem cnf_equiv (phi : Formula Atom) :
 
 /-- For any finset of atoms and natural number n, there exist
     n distinct atoms not in the finset. -/
-theorem exists_n_fresh_atoms [DecidableEq Atom] [Infinite Atom]
+theorem exists_n_fresh_atoms [Infinite Atom]
     (fs : Finset Atom) (n : Nat) :
     ∃ L : List Atom,
       L.length = n ∧ L.Nodup ∧
         ∀ a ∈ L, a ∉ fs := by
+  haveI : DecidableEq Atom := Classical.decEq Atom
   induction n with
   | zero =>
     exact ⟨[], rfl, List.nodup_nil,

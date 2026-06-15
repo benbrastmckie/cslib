@@ -21,7 +21,6 @@ junction-depth monotonicity.
 
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.style.setOption false
 set_option linter.flexible false
 
@@ -325,6 +324,7 @@ theorem abstract_untl_makes_U_free (phi x y : Formula Atom) (p : Atom)
 
 /-! ### Count Properties -/
 
+omit [DecidableEq Atom] in
 /-- countUSubformulas = 0 iff the formula is U-free. -/
 theorem count_U_zero_iff_U_free (phi : Formula Atom) :
     countUSubformulas phi = 0 ↔ isUFree phi = true := by
@@ -529,6 +529,9 @@ theorem abstract_snce_makes_S_free (phi x y : Formula Atom) (p : Atom)
 
 /-! ### Junction-Depth Monotonicity Lemmas -/
 
+section NoDecEqJD
+omit [DecidableEq Atom]
+
 /-- joint 4-way bound relating junctionDepth, junctionDepthU, junctionDepthS. -/
 theorem junction_depth_bounds (φ : Formula Atom) :
     junctionDepth φ ≤ junctionDepthU φ ∧
@@ -581,6 +584,8 @@ theorem jd_snce_le_left (φ ψ : Formula Atom) : junctionDepth φ ≤ junctionDe
 theorem jd_snce_le_right (φ ψ : Formula Atom) : junctionDepth ψ ≤ junctionDepth (.snce φ ψ) := by
   simp only [junctionDepth]
   exact Nat.le_trans (junction_depth_le_jdS ψ) (Nat.le_max_right _ _)
+
+end NoDecEqJD
 
 /-! ### abstractUntl Identity and Preservation -/
 
@@ -771,6 +776,9 @@ theorem abstract_snce_inside_untl_jd_lt (a b x y : Formula Atom) (p : Atom)
 
 /-! ### GHR94-Faithful Strengthening: Separation preserving single U-type -/
 
+section NoDecEqSep
+omit [DecidableEq Atom]
+
 /-- Stronger separability: separated equivalent with preserved single U-type. -/
 def isSeparableWithUType (φ x y : Formula Atom) : Prop :=
   ∃ ψ : Formula Atom, isSyntacticallySeparated ψ = true ∧ intEquiv φ ψ ∧ hasSingleUType ψ x y
@@ -802,6 +810,7 @@ theorem imp_separable_with_type {a b x y : Formula Atom}
 /-- U-free formulas are separable_with_U_type (vacuously). -/
 theorem u_free_separable_with_type {φ x y : Formula Atom} (h : isUFree φ = true) :
     isSeparableWithUType φ x y := by
+  haveI : DecidableEq Atom := Classical.decEq Atom
   have hsep := separated_imp_separable φ (restricted_u_free_separated φ (has_no_allpast_allfuture_true φ) h)
   obtain ⟨ψ, hsep_ψ, hequiv⟩ := hsep
   exact ⟨φ, by {
@@ -983,6 +992,8 @@ theorem is_separable_with_U_type_replace_args {φ x x' y y' : Formula Atom}
     int_equiv_trans h_equiv (replace_untl_args_equiv ψ x' y' x y h_single
       (int_equiv_symm hx_equiv) (int_equiv_symm hy_equiv)),
     replace_untl_args_has_single_U_type ψ x y⟩
+
+end NoDecEqSep
 
 end DecEq
 

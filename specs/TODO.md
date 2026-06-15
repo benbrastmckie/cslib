@@ -1,5 +1,5 @@
 ---
-next_project_number: 203
+next_project_number: 204
 ---
 
 # TODO
@@ -44,11 +44,18 @@ next_project_number: 203
 
 ### Temporal Logic
 
+203 [NOT STARTED] — Create first ~300 LOC PR for Temporal/ extending classical propo
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 203. Create first ~300 LOC PR for Temporal/ extending classical propositional logic
+- **Status**: [NOT STARTED]
+- **Task Type**: pr
+- **Topic**: Temporal Logic
+- **Dependencies**: None
 
 ### 202. Review hilbert classes vs pr648
 - **Status**: [RESEARCHED]

@@ -11,7 +11,7 @@ next_project_number: 218
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,208,209,210,211,213,214,215,216,217 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,195,197,209,214,215,216,217 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -32,16 +32,12 @@ next_project_number: 218
 
 ### Project Management
 
-208 [IMPLEMENTING] — Add docstrings to 327 declarations flagged by #lint across Bimoda
 209 [IMPLEMENTING] — Fix 298 namespace lint errors: 239 declarations not properly name
-210 [IMPLEMENTING] — Fix 105 naming convention violations where declaration names cont
-211 [IMPLEMENTING] — Fix 55 lint errors where Prop-valued declarations use def instead
-213 [IMPLEMENTING] — Fix ~17 unused argument lint errors across Bimodal and Temporal c
 
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
-216 [PLANNED] — Given what task 202 implemented, push a single commit with all an
+216 [PR READY] — Given what task 202 implemented, push a single commit with all an
 
 ### Propositional PRs
 
@@ -50,7 +46,7 @@ next_project_number: 218
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-217 [NOT STARTED] — Investigate and push appropriate changes from task 207 implementa
+217 [RESEARCHED] — Investigate and push appropriate changes from task 207 implementa
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -65,18 +61,20 @@ next_project_number: 218
 - **Task Type**: pr
 - **Topic**: Temporal Logic
 - **Dependencies**: None
+- **Research**: [217_push_generic_metalogic_to_pr649/reports/01_pr649-research.md]
 
 **Description**: Investigate and push appropriate changes from task 207 implementation to PR #649 (https://github.com/leanprover/cslib/pull/649), selecting only the Foundations/Logic/Metalogic files (ListImplication, ListDeduction, SetDeduction, GenericMCS, MCSProperties) and Combinators addition that are relevant to the reviewer's feedback on abstracting the deduction theorem and MCS proofs
 
 ---
 
 ### 216. Push relevant changes to pr 648
-- **Status**: [PLANNED]
+- **Status**: [PR READY]
 - **Task Type**: pr
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [216_push_relevant_changes_to_pr_648/reports/01_pr648-changes-review.md]
 - **Plan**: [216_push_relevant_changes_to_pr_648/plans/01_pr648-push-plan.md]
+- **Pr_description**: [216_push_relevant_changes_to_pr_648/pr-description.md]
 
 **Description**: Given what task 202 implemented, push a single commit with all and only the relevant changes to https://github.com/leanprover/cslib/pull/648, where the aim is to keep the LOC ~300 to avoid overwhelming reviewers
 
@@ -103,7 +101,7 @@ next_project_number: 218
 ---
 
 ### 213. Fix unused argument lint errors
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -123,7 +121,7 @@ next_project_number: 218
 ---
 
 ### 211. Change def to lemma/theorem for Prop-valued declarations
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -133,7 +131,7 @@ next_project_number: 218
 ---
 
 ### 210. Fix naming convention violations (underscore to camelCase)
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -153,7 +151,7 @@ next_project_number: 218
 ---
 
 ### 208. Add missing documentation strings to Bimodal/Temporal/Modal declarations
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None

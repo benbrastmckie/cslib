@@ -9,6 +9,8 @@ module
 public import Cslib.Logics.Bimodal.Metalogic.Separation.Defs
 public import Mathlib.Data.Int.Interval
 
+set_option linter.style.emptyLine false
+
 /-!
 # Integer-Specific Helper Lemmas for Separation
 
@@ -22,8 +24,6 @@ Provides integer-arithmetic lemmas needed by the separation proof:
 - GHR94, Chapter 10.2: These lemmas support the key Z-dependent steps
   (particularly Lemma 10.2.2, the negation equivalence)
 -/
-
-set_option linter.style.emptyLine false
 
 @[expose] public section
 
@@ -56,10 +56,9 @@ theorem Int.succ_least (t s : Int) (h : t < s) :
     Lemma 10.2.2. -/
 theorem Int.exists_least_above
     {pred : Int → Prop} {t : Int}
-    (hex : ∃ n, t < n ∧ pred n) :
+    (hex : ∃ n, t < n ∧ pred n) [DecidablePred pred] :
     ∃ m, t < m ∧ pred m ∧
       ∀ k, t < k → k < m → ¬pred k := by
-  haveI : DecidablePred pred := Classical.decPred pred
   obtain ⟨n, htn, hpn⟩ := hex
   let Q : ℕ → Prop := fun k => pred (t + 1 + ↑k)
   have hQ_dec : DecidablePred Q :=
@@ -82,10 +81,9 @@ theorem Int.exists_least_above
     such n. -/
 theorem Int.exists_greatest_below
     {pred : Int → Prop} {t : Int}
-    (hex : ∃ n, n < t ∧ pred n) :
+    (hex : ∃ n, n < t ∧ pred n) [DecidablePred pred] :
     ∃ m, m < t ∧ pred m ∧
       ∀ k, m < k → k < t → ¬pred k := by
-  haveI : DecidablePred pred := Classical.decPred pred
   obtain ⟨n, hnt, hpn⟩ := hex
   let Q : ℕ → Prop := fun k => pred (t - 1 - ↑k)
   have hQ_dec : DecidablePred Q :=

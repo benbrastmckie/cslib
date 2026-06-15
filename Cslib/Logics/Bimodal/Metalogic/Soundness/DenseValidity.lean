@@ -15,7 +15,6 @@ class. Proves that all TM axioms remain valid after temporal swap, and that deri
 implies both local validity and swap validity.
 -/
 
-set_option linter.unusedSimpArgs false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 
@@ -446,14 +445,14 @@ theorem axiom_swap_valid (φ : Formula Atom) (h : Axiom φ) [DenselyOrdered D] [
       exact h_conj (fun _ ⟨s, hst, h_psi, _⟩ => absurd h_psi (h_no s hst))
     rcases lt_trichotomy s1 s2 with h_lt | h_eq | h_gt
     · -- s1 < s2: P(P(φ') ∧ ψ')
-      intro _ _
+      intro _; intro _
       exact ⟨s2, hs2t, fun h_imp => h_imp ⟨s1, h_lt, h_φs1, fun _ _ _ hf => absurd hf not_false⟩ h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
     · -- s1 = s2: P(φ' ∧ ψ')
       subst h_eq
       intro h_neg_first; exfalso; apply h_neg_first
       exact ⟨s1, hs1t, fun h_imp => h_imp h_φs1 h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
     · -- s2 < s1: P(φ' ∧ P(ψ'))
-      intro _ h_neg_second
+      intro _; intro h_neg_second; exfalso; apply h_neg_second
       exact ⟨s1, hs1t, fun h_imp => h_imp h_φs1 ⟨s2, h_gt, h_ψs2, fun _ _ _ hf => absurd hf not_false⟩, fun _ _ _ hf => absurd hf not_false⟩
   | temp_linearity_past φ ψ =>
     -- swap of past linearity is future linearity with swapped subformulas
@@ -468,14 +467,14 @@ theorem axiom_swap_valid (φ : Formula Atom) (h : Axiom φ) [DenselyOrdered D] [
       exact h_conj (fun _ ⟨s, hts, h_psi, _⟩ => absurd h_psi (h_no s hts))
     rcases lt_trichotomy s1 s2 with h_lt | h_eq | h_gt
     · -- s1 < s2: F(φ' ∧ F(ψ'))
-      intro _ h_neg_second
+      intro _; intro h_neg_second; exfalso; apply h_neg_second
       exact ⟨s1, hts1, fun h_imp => h_imp h_φs1 ⟨s2, h_lt, h_ψs2, fun _ _ _ hf => absurd hf not_false⟩, fun _ _ _ hf => absurd hf not_false⟩
     · -- s1 = s2: F(φ' ∧ ψ')
       subst h_eq
       intro h_neg_first; exfalso; apply h_neg_first
       exact ⟨s1, hts1, fun h_imp => h_imp h_φs1 h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
     · -- s2 < s1: F(F(φ') ∧ ψ')
-      intro _ _
+      intro _; intro _
       exact ⟨s2, hts2, fun h_imp => h_imp ⟨s1, h_gt, h_φs1, fun _ _ _ hf => absurd hf not_false⟩ h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
   | F_until_equiv φ => exact swap_axiom_F_until_equiv_valid φ
   | P_since_equiv φ => exact swap_axiom_P_since_equiv_valid φ
@@ -664,14 +663,14 @@ theorem axiom_temp_linearity_valid (φ ψ : Formula Atom) :
   obtain ⟨s2, hts2, h_ψs2⟩ := h_Fψ
   rcases lt_trichotomy s1 s2 with h_lt | h_eq | h_gt
   · -- s1 < s2: F(φ ∧ F(ψ))
-    intro _ h_neg_second
+    intro _; intro h_neg_second; exfalso; apply h_neg_second
     exact ⟨s1, hts1, fun h_imp => h_imp h_φs1 ⟨s2, h_lt, h_ψs2, fun _ _ _ hf => absurd hf not_false⟩, fun _ _ _ hf => absurd hf not_false⟩
   · -- s1 = s2: F(φ ∧ ψ)
     subst h_eq
     intro h_neg_first; exfalso; apply h_neg_first
     exact ⟨s1, hts1, fun h_imp => h_imp h_φs1 h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
   · -- s2 < s1: F(F(φ) ∧ ψ)
-    intro _ _
+    intro _; intro _
     exact ⟨s2, hts2, fun h_imp => h_imp ⟨s1, h_gt, h_φs1, fun _ _ _ hf => absurd hf not_false⟩ h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
 
 /-- Past temporal linearity axiom is locally valid. -/
@@ -693,14 +692,14 @@ theorem axiom_temp_linearity_past_valid (φ ψ : Formula Atom) :
   obtain ⟨s2, hs2t, h_ψs2⟩ := h_Pψ
   rcases lt_trichotomy s1 s2 with h_lt | h_eq | h_gt
   · -- s1 < s2: P(P(φ) ∧ ψ)
-    intro _ _
+    intro _; intro _
     exact ⟨s2, hs2t, fun h_imp => h_imp ⟨s1, h_lt, h_φs1, fun _ _ _ hf => absurd hf not_false⟩ h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
   · -- s1 = s2: P(φ ∧ ψ)
     subst h_eq
     intro h_neg_first; exfalso; apply h_neg_first
     exact ⟨s1, hs1t, fun h_imp => h_imp h_φs1 h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
   · -- s1 > s2: P(φ ∧ P(ψ))
-    intro _ h_neg_second
+    intro _; intro h_neg_second; exfalso; apply h_neg_second
     exact ⟨s1, hs1t, fun h_imp => h_imp h_φs1 ⟨s2, h_gt, h_ψs2, fun _ _ _ hf => absurd hf not_false⟩, fun _ _ _ hf => absurd hf not_false⟩
 
 /-- F-Until equivalence axiom validity (BX12). -/

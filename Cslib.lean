@@ -76,6 +76,11 @@ public import Cslib.Foundations.Logic.InferenceSystem
 public import Cslib.Foundations.Logic.LogicalEquivalence
 public import Cslib.Foundations.Logic.Metalogic.Consistency
 public import Cslib.Foundations.Logic.Metalogic.DeductionHelpers
+public import Cslib.Foundations.Logic.Metalogic.GenericMCS
+public import Cslib.Foundations.Logic.Metalogic.ListDeduction
+public import Cslib.Foundations.Logic.Metalogic.ListImplication
+public import Cslib.Foundations.Logic.Metalogic.MCSProperties
+public import Cslib.Foundations.Logic.Metalogic.SetDeduction
 public import Cslib.Foundations.Logic.ProofSystem
 public import Cslib.Foundations.Logic.Theorems
 public import Cslib.Foundations.Logic.Theorems.BigConj
@@ -358,6 +363,7 @@ public import Cslib.Logics.Propositional.ProofSystem.Derivation
 public import Cslib.Logics.Propositional.ProofSystem.Instances
 public import Cslib.Logics.Propositional.ProofSystem.IntMinInstances
 public import Cslib.Logics.Propositional.Semantics.Basic
+public import Cslib.Logics.Propositional.Semantics.Bool
 public import Cslib.Logics.Propositional.Semantics.Kripke
 public import Cslib.Logics.Propositional.Semantics.SemanticConsequence
 public import Cslib.Logics.Temporal.ConservativeExtension

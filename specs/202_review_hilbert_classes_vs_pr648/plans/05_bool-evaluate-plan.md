@@ -63,7 +63,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Create BoolEvaluate File [NOT STARTED]
+### Phase 1: Create BoolEvaluate File [COMPLETED]
 
 **Goal**: Write the new file with all definitions, simp lemmas, bridge lemma, and decidability instance.
 
@@ -85,7 +85,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: CI Verification [NOT STARTED]
+### Phase 2: CI Verification [COMPLETED]
 
 **Goal**: Confirm the new file compiles and passes the full CSLib CI pipeline.
 

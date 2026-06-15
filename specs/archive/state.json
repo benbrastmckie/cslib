@@ -3333,6 +3333,223 @@
         "plans/",
         "summaries/"
       ]
+    },
+    {
+      "project_number": 200,
+      "project_name": "fix_literature_directory_quality",
+      "status": "completed",
+      "task_type": "general",
+      "description": "Fix literature directory quality: complete incomplete book splits (blackburn_2001 only has 3 of 7+ chapters, mendelson_2016 and church_1956 have content loss), remove redundant monolithic .md files after verifying split completeness, audit index.json entries for accuracy (token counts, paths, keywords), ensure all chapter files are within the 4000-token budget for --lit injection, and verify the 3 scholarly reconstruction files (burgess_1984, gabbay_1994_ch10, reynolds_1992) have adequate content for research use. Goal: make specs/literature/ fully functional for --lit flag during /research, /plan, and /implement phases",
+      "topic": "Project Management",
+      "created": "2026-06-14T20:36:46Z",
+      "last_updated": "2026-06-14T21:21:13Z",
+      "session_id": "sess_1781471755_c68e24",
+      "completion_summary": "Fixed specs/literature/ directory quality: added missing zakharyaschev_2001_sec00 index.json entry (45 -> 46 entries), corrected broken README.md references by replacing blackburn_2001_ch4_summary.md with actual split directory listings, and removed 7 redundant monolithic .md files (1.25M+ tokens of duplicate content) after verifying all split directories were intact.",
+      "archived": "2026-06-15T00:08:17Z"
+    },
+    {
+      "project_number": 199,
+      "project_name": "review_pr_citations",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "Review citations in PR changes for accuracy and completeness",
+      "topic": "Propositional Logic",
+      "created": "2026-06-14T20:32:26Z",
+      "last_updated": "2026-06-14T22:04:40Z",
+      "session_id": "sess_1781473432_e60a86",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/199_review_pr_citations/reports/01_pr-citation-review.md"
+        },
+        {
+          "path": "specs/199_review_pr_citations/plans/01_pr-citation-plan.md",
+          "type": "plan",
+          "summary": "3-phase plan to add 2 BibTeX entries, fix Defs.lean docstring, and update PR description pronoun"
+        },
+        {
+          "path": "specs/199_review_pr_citations/summaries/01_pr-citation-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary: BibTeX additions, Defs.lean docstring fix, PR description pronoun fix"
+        }
+      ],
+      "next_artifact_number": 2,
+      "completion_summary": "Added Bentzen2023 and Trufas2024 BibTeX entries to references.bib, replaced invented full-connective tradition label in Defs.lean with grounded citations, and fixed pronoun in PR description",
+      "archived": "2026-06-15T00:08:17Z"
+    },
+    {
+      "project_number": 198,
+      "project_name": "submit_propositional_upstream_pr",
+      "status": "completed",
+      "task_type": "pr",
+      "topic": "Propositional Logic",
+      "title": "Submit first propositional logic upstream PR (~300 LOC)",
+      "description": "Submit first propositional logic upstream PR (~300 LOC) to CSLib contributing Foundations/Logic/Connectives.lean and Propositional/ changes. Create a new feature branch from upstream/main, cherry-pick the appropriate changes from main while maintaining the scope defined in pr-description.md, then push and submit PR. The pr-description.md from task 188 has been copied into this task directory as the authoritative PR description.",
+      "created": "2026-06-14T19:25:06Z",
+      "last_updated": "2026-06-14T19:41:28Z",
+      "session_id": "sess_1781465311_060bcc",
+      "completion_summary": "Submitted PR #648 to leanprover/cslib: five-primitive propositional signature with connective typeclasses. All CI checks passed (lake build, test, lint, shake, checkInitImports, mk_all).",
+      "archived": "2026-06-15T00:08:17Z"
+    },
+    {
+      "project_number": 196,
+      "project_name": "refactor_connectives_mathlib_bot",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Propositional PRs",
+      "description": "Keep HasBot/HasImp/HasAnd/HasOr as custom CSLib classes for naming symmetry and to match the Has* convention used across ProofSystem.lean, Axioms.lean, Consistency.lean, and BigConj.lean. No bridge instance needed — concrete formula types already provide direct Bot instances for ⊥ notation, and generic code intentionally uses HasBot.bot. Update pr-description.md Mathlib section to accurately explain the design choice: uniform Has* naming, concrete types get ⊥ via direct Bot instances, HImp notation mismatch prevents HasImp replacement. Scope: pr-description.md (Mathlib section rewrite)",
+      "created": "2026-06-14T18:48:19Z",
+      "last_updated": "2026-06-14T19:13:27Z",
+      "session_id": "sess_1781464345_7ccf25",
+      "completion_summary": "Verified pr-description.md Mathlib section is accurate. All six claims match the codebase: Mathlib Bot/HImp are pure notation classes; CSLib uses uniform Has* naming across 833+ references; four concrete formula types provide direct Bot instances; HImp field/notation mismatch prevents replacement. Documentation-only verification task, no Lean source changes.",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/196_refactor_connectives_mathlib_bot/reports/01_mathlib-section-research.md"
+        },
+        {
+          "type": "plan",
+          "path": "specs/196_refactor_connectives_mathlib_bot/plans/02_implementation-plan.md"
+        },
+        {
+          "type": "summary",
+          "path": "specs/196_refactor_connectives_mathlib_bot/summaries/02_verification-summary.md"
+        }
+      ],
+      "archived": "2026-06-15T00:08:17Z"
+    },
+    {
+      "project_number": 194,
+      "project_name": "curate_zotero_pdfs_for_literature",
+      "status": "completed",
+      "task_type": "general",
+      "topic": "Project Management",
+      "created": "2026-06-14T18:15:52Z",
+      "last_updated": "2026-06-14T20:24:52Z",
+      "session_id": "sess_1781463802_4efcea",
+      "researched": "2026-06-14T18:28:20Z",
+      "next_artifact_number": 3,
+      "artifacts": [
+        {
+          "path": "specs/194_curate_zotero_pdfs_for_literature/reports/02_literature-organization-practices.md",
+          "type": "research",
+          "summary": "Best practices for structuring large markdown literature files with index.json metadata"
+        },
+        {
+          "path": "specs/194_curate_zotero_pdfs_for_literature/plans/02_literature-curation-plan.md",
+          "type": "plan",
+          "summary": "Implementation plan for organizing literature into indexed chapter subdirectories with temporal/bimodal paper curation"
+        },
+        {
+          "path": "specs/194_curate_zotero_pdfs_for_literature/summaries/02_literature-curation-summary.md",
+          "type": "summary",
+          "summary": "Literature curation: index.json extended to 45 entries, 5 temporal papers curated, BibTeX entries added, README updated"
+        }
+      ],
+      "memory_candidates": [
+        {
+          "content": "The specs/literature/ directory holds markdown exports of academic books/papers for --lit injection. Best practice: split book-length files (>50KB) into chapter-level .md files in subdirectories (specs/literature/{bibkey}/), with a master index.json at specs/literature/index.json using the same schema as .claude/context/index.json. Paper-length files (<50KB) stay as single files. The retrieval script scores entries by keyword overlap against the task description and focus_prompt, then greedily selects within a 4000-token budget.",
+          "category": "PATTERN",
+          "confidence": 0.9,
+          "suggested_keywords": [
+            "literature",
+            "specs/literature",
+            "chunking",
+            "index.json",
+            "retrieval",
+            "token-budget"
+          ]
+        },
+        {
+          "content": "Current specs/literature/*.md files lack semantic markdown headers. blackburn_2001.md uses Page N comments, mendelson_2016.md uses Page N headers, hughes_1996.md has no headers, chagrov_1997.md has OCR artifacts. Manual chapter extraction guided by each books table of contents is required.",
+          "category": "INSIGHT",
+          "confidence": 0.95,
+          "suggested_keywords": [
+            "literature",
+            "markdown",
+            "headers",
+            "OCR"
+          ]
+        }
+      ],
+      "completion_summary": "Created specs/literature/index.json with 45 entries covering all literature files; split 6 book-length markdown files into chapter subdirectories; curated 5 temporal/bimodal papers (Burgess 1982 I/II, Burgess 1984, GHR94 Ch.10, Reynolds 1994) as scoped excerpts; added 5 BibTeX entries to references.bib; documented index schema in README.",
+      "archived": "2026-06-15T00:08:17Z"
+    },
+    {
+      "project_number": 193,
+      "project_name": "clean_up_modal_deduction_theorem_naming",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "created": "2026-06-14T17:37:54Z",
+      "last_updated": "2026-06-14T17:42:40Z",
+      "session_id": "sess_1781458686_d856d6",
+      "completion_summary": "Deleted dead s5_has_deduction_theorem, renamed modal_has_deduction_theorem to hasDeductionTheorem, updated 3 call sites in MCS.lean. All CI checks passed.",
+      "archived": "2026-06-15T00:08:17Z"
+    },
+    {
+      "project_number": 191,
+      "project_name": "clean_up_propositional_deduction_theorem_naming",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "created": "2026-06-14T17:04:45Z",
+      "last_updated": "2026-06-14T17:26:41Z",
+      "session_id": "sess_1781456783_f22155",
+      "completion_summary": "Cleaned up propositional deduction theorem naming: renamed 6 witness theorems to namespace-qualified form, renamed generic hasDeductionTheorem, deleted dead cl_prop_has_deduction_theorem, updated 29 call sites. All CI checks passed.",
+      "archived": "2026-06-15T00:08:17Z"
+    },
+    {
+      "project_number": 179,
+      "project_name": "modal_primitive_diamond",
+      "status": "completed",
+      "task_type": "cslib",
+      "dependencies": [],
+      "description": "Document why box is primitive in classical modal logic; add docstrings citing Blackburn2001 and ChagrovZakharyaschev1997",
+      "artifacts": [
+        {
+          "path": "specs/179_modal_primitive_diamond/reports/01_primitive-diamond-research.md",
+          "type": "report",
+          "summary": "Primitive diamond motivation, upstream comparison, intuitionistic modal logic background, scope assessment, axiom design"
+        },
+        {
+          "path": "specs/179_modal_primitive_diamond/reports/02_team-research.md",
+          "type": "report",
+          "description": "Team research synthesis: primitive diamond for Modal.Proposition"
+        },
+        {
+          "path": "specs/179_modal_primitive_diamond/reports/02_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates"
+        },
+        {
+          "path": "specs/179_modal_primitive_diamond/reports/03_upstream-study.md",
+          "type": "research",
+          "summary": "Upstream CSLib comparison and clean-break refactor strategy"
+        },
+        {
+          "path": "specs/179_modal_primitive_diamond/reports/05_team-research.md",
+          "type": "research",
+          "summary": "Team research: defer dia vs proceed, why box is primitive"
+        },
+        {
+          "path": "specs/179_modal_primitive_diamond/plans/05_documentation-plan.md",
+          "type": "plan",
+          "summary": "3-phase documentation-only plan (1.5 hours)"
+        },
+        {
+          "path": "specs/179_modal_primitive_diamond/summaries/05_documentation-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary: box-as-primitive docstrings"
+        }
+      ],
+      "topic": "Modal Logic",
+      "last_updated": "2026-06-14T19:02:45Z",
+      "session_id": "sess_1781463313_db2937",
+      "next_artifact_number": 6,
+      "researched": "2026-06-14T18:43:02Z",
+      "completion_summary": "Added docstrings documenting box-as-primitive design choice at 8 locations across 6 files (Basic.lean, Connectives.lean, Axioms.lean, D.lean, B.lean, K5.lean), citing Blackburn2001 and ChagrovZakharyaschev1997. Updated task scope to documentation-only; removed task 181 dependency on 179.",
+      "archived": "2026-06-15T00:08:17Z"
     }
   ],
   "archived_projects": [

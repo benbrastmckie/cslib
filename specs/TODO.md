@@ -1,5 +1,5 @@
 ---
-next_project_number: 202
+next_project_number: 203
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 202
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,201 | -- | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,195,197,201,202 | -- | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -30,12 +30,13 @@ next_project_number: 202
 
 ### Modal Logic
 
-197 [PLANNED] — Review the ambition to contribute Modal/ to upstream, identifying
+197 [RESEARCHING] — Review the ambition to contribute Modal/ to upstream, identifying
 201 [NOT STARTED] — Review citations in Modal PR changes for accuracy and completenes
 
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
+202 [NOT STARTED] — Review thomaskwaring/cslib_SKI Hilbert branch (https://github.com
 
 ### Propositional PRs
 
@@ -49,6 +50,16 @@ next_project_number: 202
 
 ## Tasks
 
+### 202. Review hilbert classes vs pr648
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Review thomaskwaring/cslib_SKI Hilbert branch (https://github.com/thomaskwaring/cslib_SKI/blob/hilbert/Cslib/Logics/Hilbert/Classes.lean) in contrast to cslib PR #648 (https://github.com/leanprover/cslib/pull/648) to understand how they relate, differ, overlap, and what if anything is in conflict with Propositional/ Hilbert system development in this fork
+
+---
+
 ### 201. Review modal pr citations
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
@@ -60,7 +71,7 @@ next_project_number: 202
 ---
 
 ### 197. Scope initial Modal/ upstream PR (~300 LOC)
-- **Status**: [PLANNED]
+- **Status**: [RESEARCHING]
 - **Task Type**: pr
 - **Topic**: Modal Logic
 - **Dependencies**: None

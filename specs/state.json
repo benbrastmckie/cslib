@@ -1,6 +1,16 @@
 {
-  "next_project_number": 202,
+  "next_project_number": 203,
   "active_projects": [
+    {
+      "project_number": 202,
+      "project_name": "review_hilbert_classes_vs_pr648",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Review thomaskwaring/cslib_SKI Hilbert branch (https://github.com/thomaskwaring/cslib_SKI/blob/hilbert/Cslib/Logics/Hilbert/Classes.lean) in contrast to cslib PR #648 (https://github.com/leanprover/cslib/pull/648) to understand how they relate, differ, overlap, and what if anything is in conflict with Propositional/ Hilbert system development in this fork",
+      "created": "2026-06-15T00:22:18Z",
+      "last_updated": "2026-06-15T00:22:18Z"
+    },
     {
       "project_number": 201,
       "project_name": "review_modal_pr_citations",
@@ -14,14 +24,14 @@
     {
       "project_number": 197,
       "project_name": "modal_upstream_initial_pr",
-      "status": "planned",
+      "status": "researching",
       "task_type": "pr",
       "title": "Scope initial Modal/ upstream PR (~300 LOC)",
       "description": "Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible",
       "topic": "Modal Logic",
       "created": "2026-06-14T19:08:07Z",
-      "last_updated": "2026-06-14T22:11:49Z",
-      "session_id": "sess_1749934100_b3d4e5",
+      "last_updated": "2026-06-15T00:16:50Z",
+      "session_id": "sess_1781482606_82b085",
       "research_artifacts": [
         "specs/197_modal_upstream_initial_pr/reports/01_modal-upstream-pr-scope.md",
         "specs/197_modal_upstream_initial_pr/reports/02_literature-grounded-analysis.md"

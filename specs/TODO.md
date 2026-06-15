@@ -30,13 +30,13 @@ next_project_number: 203
 
 ### Modal Logic
 
-197 [RESEARCHING] — Review the ambition to contribute Modal/ to upstream, identifying
+197 [RESEARCHED] — Review the ambition to contribute Modal/ to upstream, identifying
 201 [NOT STARTED] — Review citations in Modal PR changes for accuracy and completenes
 
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
-202 [NOT STARTED] — Review thomaskwaring/cslib_SKI Hilbert branch (https://github.com
+202 [RESEARCHING] — Review thomaskwaring/cslib_SKI Hilbert branch (https://github.com
 
 ### Propositional PRs
 
@@ -51,7 +51,7 @@ next_project_number: 203
 ## Tasks
 
 ### 202. Review hilbert classes vs pr648
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -71,7 +71,7 @@ next_project_number: 203
 ---
 
 ### 197. Scope initial Modal/ upstream PR (~300 LOC)
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: pr
 - **Topic**: Modal Logic
 - **Dependencies**: None

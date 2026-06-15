@@ -1,5 +1,5 @@
 ---
-next_project_number: 206
+next_project_number: 207
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 206
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,202 | -- | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,195,197,202,206 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -32,6 +32,10 @@ next_project_number: 206
 
 197 [PLANNED] — Review the ambition to contribute Modal/ to upstream, identifying
 
+### Project Management
+
+206 [NOT STARTED] — Fix all --wfail CI warnings across Bimodal/, Temporal/, and Modal
+
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
@@ -48,6 +52,16 @@ next_project_number: 206
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 206. Fix --wfail CI warnings across Bimodal, Temporal, and Modal files
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Project Management
+- **Dependencies**: None
+
+**Description**: Fix all --wfail CI warnings across Bimodal/, Temporal/, and Modal/ files (push_neg deprecation, unused simp args, show tactic misuse, empty lines in commands, unscoped options, module docstring placement, flexible simp, open Classical)
+
+---
 
 ### 205. Review pr649 quality conventions
 - **Status**: [COMPLETED]

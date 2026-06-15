@@ -1,6 +1,17 @@
 {
-  "next_project_number": 206,
+  "next_project_number": 207,
   "active_projects": [
+    {
+      "project_number": 206,
+      "project_name": "fix_wfail_ci_warnings",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Fix --wfail CI warnings across Bimodal, Temporal, and Modal files",
+      "description": "Fix all --wfail CI warnings across Bimodal/, Temporal/, and Modal/ files (push_neg deprecation, unused simp args, show tactic misuse, empty lines in commands, unscoped options, module docstring placement, flexible simp, open Classical)",
+      "topic": "Project Management",
+      "created": "2026-06-15T14:36:43Z",
+      "last_updated": "2026-06-15T14:36:43Z"
+    },
     {
       "project_number": 205,
       "project_name": "review_pr649_quality_conventions",

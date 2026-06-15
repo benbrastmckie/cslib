@@ -1,7 +1,7 @@
 # Implementation Plan: Generic Deduction Theorem and MCS via listImp
 
 - **Task**: 207 - Research refactoring Temporal/ and Modal/ implementations based on PR #649 review feedback
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 25 hours
 - **Dependencies**: None (PR #649 must be merged first, but the generic files build independently)
 - **Research Inputs**: reports/01_team-research.md, reports/02_reviewer-directed-research.md, reports/03_ideal-solution-research.md

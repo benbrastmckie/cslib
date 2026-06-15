@@ -11,7 +11,7 @@ next_project_number: 217
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,207,208,209,210,211,212,213,214,215,216 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,195,197,208,209,210,211,212,213,214,215,216 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -35,14 +35,14 @@ next_project_number: 217
 208 [RESEARCHED] — Add docstrings to 327 declarations flagged by #lint across Bimoda
 209 [NOT STARTED] — Fix 298 namespace lint errors: 239 declarations not properly name
 210 [RESEARCHED] — Fix 105 naming convention violations where declaration names cont
-211 [NOT STARTED] — Fix 55 lint errors where Prop-valued declarations use def instead
+211 [RESEARCHED] — Fix 55 lint errors where Prop-valued declarations use def instead
 212 [RESEARCHED] — Fix 25 simp-related lint errors: 23 where the LHS of a simp lemma
 213 [RESEARCHED] — Fix ~17 unused argument lint errors across Bimodal and Temporal c
 
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
-216 [NOT STARTED] — Given what task 202 implemented, push a single commit with all an
+216 [RESEARCHING] — Given what task 202 implemented, push a single commit with all an
 
 ### Propositional PRs
 
@@ -51,7 +51,6 @@ next_project_number: 217
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-207 [IMPLEMENTING] — Research refactoring Temporal/ and Modal/ implementations based o
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -62,7 +61,7 @@ next_project_number: 217
 ## Tasks
 
 ### 216. Push relevant changes to pr 648
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: pr
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -112,7 +111,7 @@ next_project_number: 217
 ---
 
 ### 211. Change def to lemma/theorem for Prop-valued declarations
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -152,7 +151,7 @@ next_project_number: 217
 ---
 
 ### 207. Research temporal modal refactor pr649
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -161,6 +160,7 @@ next_project_number: 217
   - [207_research_temporal_modal_refactor_pr649/reports/02_reviewer-directed-research.md]
   - [207_research_temporal_modal_refactor_pr649/reports/03_ideal-solution-research.md]
 - **Plan**: [207_research_temporal_modal_refactor_pr649/plans/04_revised-refactor-plan.md]
+- **Summary**: [207_research_temporal_modal_refactor_pr649/summaries/04_implementation-summary.md]
 
 **Description**: Research refactoring Temporal/ and Modal/ implementations based on PR #649 review feedback on Tense Logic, drawing on Isabelle Propositional_Logic_Class formalization for a dependent type system approach in Lean 4
 

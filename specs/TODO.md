@@ -40,7 +40,7 @@ next_project_number: 208
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-207 [NOT STARTED] — Research refactoring Temporal/ and Modal/ implementations based o
+207 [RESEARCHED] — Research refactoring Temporal/ and Modal/ implementations based o
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -51,10 +51,11 @@ next_project_number: 208
 ## Tasks
 
 ### 207. Research temporal modal refactor pr649
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
+- **Research**: [207_research_temporal_modal_refactor_pr649/reports/01_team-research.md]
 
 **Description**: Research refactoring Temporal/ and Modal/ implementations based on PR #649 review feedback on Tense Logic, drawing on Isabelle Propositional_Logic_Class formalization for a dependent type system approach in Lean 4
 

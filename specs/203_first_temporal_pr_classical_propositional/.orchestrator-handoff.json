@@ -1,0 +1,24 @@
+{
+  "status": "implemented",
+  "summary": "Verified truncated Formula.lean (307 LOC through BEqLaws) builds correctly, ran CI checks, restored local file to 582-line original (Derivation.lean depends on swapTemporal), created PR description for feat(Logics/Temporal): temporal formula type with propositional structure",
+  "artifacts": [
+    {
+      "path": "specs/203_first_temporal_pr_classical_propositional/pr-description.md",
+      "type": "pr-description",
+      "summary": "PR description for temporal formula type PR"
+    },
+    {
+      "path": "specs/203_first_temporal_pr_classical_propositional/summaries/01_execution-summary.md",
+      "type": "summary",
+      "summary": "Execution summary for task 203"
+    }
+  ],
+  "blockers": [],
+  "continuation_context": null,
+  "phases_completed": 4,
+  "phases_total": 4,
+  "next_action_hint": "complete",
+  "deviation_note": "Local Formula.lean restored to original 582-line state after build verification. The PR branch will be created by /pr command on a separate branch. No local Lean files were modified in the final state.",
+  "pr_title": "feat(Logics/Temporal): temporal formula type with propositional structure",
+  "pr_dependency": "PR #648 (Connectives.lean typeclass hierarchy)"
+}

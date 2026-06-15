@@ -192,6 +192,7 @@ theorem replace_correct_bool (phi A B : Formula Atom) (M : IntStructure Atom) (t
 
 /-- case1_psi satisfies untlUnderBoolOnly: its only .untl is .untl A B,
     and all .snce args are U-free. -/
+set_option linter.unusedTactic false in
 theorem case1_psi_bool_only (a q A B : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hA : isUFree A = true) (hB : isUFree B = true) :

@@ -13,25 +13,6 @@
       "session_id": "sess_1781566272_a93d83"
     },
     {
-      "project_number": 217,
-      "project_name": "push_generic_metalogic_to_pr649",
-      "status": "researched",
-      "task_type": "pr",
-      "description": "Investigate and push appropriate changes from task 207 implementation to PR #649 (https://github.com/leanprover/cslib/pull/649), selecting only the Foundations/Logic/Metalogic files (ListImplication, ListDeduction, SetDeduction, GenericMCS, MCSProperties) and Combinators addition that are relevant to the reviewer's feedback on abstracting the deduction theorem and MCS proofs",
-      "topic": "Temporal Logic",
-      "created": "2026-06-15T18:41:56Z",
-      "last_updated": "2026-06-15T18:50:24Z",
-      "session_id": "sess_1781549007_3bd2f7",
-      "artifacts": [
-        {
-          "path": "specs/217_push_generic_metalogic_to_pr649/reports/01_pr649-research.md",
-          "type": "research",
-          "summary": "Research report for PR 649 changes"
-        }
-      ],
-      "next_artifact_number": 2
-    },
-    {
       "project_number": 209,
       "project_name": "lint_namespace_fixes",
       "status": "implementing",

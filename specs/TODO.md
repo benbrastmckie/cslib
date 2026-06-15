@@ -11,7 +11,7 @@ next_project_number: 219
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,209,214,215,217,218 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,195,197,209,214,215,218 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -45,7 +45,6 @@ next_project_number: 219
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-217 [RESEARCHED] — Investigate and push appropriate changes from task 207 implementa
 218 [PLANNING] — Push missing bib entries and minor fixes to PR #649: add 7 missin
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
@@ -63,17 +62,6 @@ next_project_number: 219
 - **Dependencies**: None
 
 **Description**: Push missing bib entries and minor fixes to PR #649: add 7 missing references.bib entries (Church1956, Gentzen1935, Johansson1937, McKinsey1939, Prawitz1965, TroelstraVanDalen1988, Wajsberg1938) referenced by Connectives.lean, Defs.lean, and NaturalDeduction/Basic.lean; include Defs.lean architecture docstring, NaturalDeduction/Basic.lean Γ→G rename, and copyright date updates
-
----
-
-### 217. Push generic metalogic to pr649
-- **Status**: [RESEARCHED]
-- **Task Type**: pr
-- **Topic**: Temporal Logic
-- **Dependencies**: None
-- **Research**: [217_push_generic_metalogic_to_pr649/reports/01_pr649-research.md]
-
-**Description**: Investigate and push appropriate changes from task 207 implementation to PR #649 (https://github.com/leanprover/cslib/pull/649), selecting only the Foundations/Logic/Metalogic files (ListImplication, ListDeduction, SetDeduction, GenericMCS, MCSProperties) and Combinators addition that are relevant to the reviewer's feedback on abstracting the deduction theorem and MCS proofs
 
 ---
 

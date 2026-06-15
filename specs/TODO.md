@@ -31,7 +31,7 @@ next_project_number: 208
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
-202 [RESEARCHED] — Comprehensive review of cslib PR #648 (https://github.com/leanpro
+202 [PLANNED] — Comprehensive review of cslib PR #648 (https://github.com/leanpro
 
 ### Propositional PRs
 
@@ -111,7 +111,7 @@ next_project_number: 208
 ---
 
 ### 202. Review hilbert classes vs pr648
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -120,6 +120,7 @@ next_project_number: 208
   - [202_review_hilbert_classes_vs_pr648/reports/02_team-research.md]
   - [202_review_hilbert_classes_vs_pr648/reports/03_team-research.md]
   - [202_review_hilbert_classes_vs_pr648/reports/04_bool-evaluate-design.md]
+- **Plan**: [202_review_hilbert_classes_vs_pr648/plans/05_bool-evaluate-plan.md]
 
 **Description**: Comprehensive review of cslib PR #648 (https://github.com/leanprover/cslib/pull/648). This task serves as the central tracking point for all review dimensions: upstream reviewer feedback, architectural concerns, API design decisions, compatibility with existing Propositional/ and Hilbert/ developments, naming conventions, and any requested changes. Initial research compared the thomaskwaring/cslib_SKI Hilbert branch approach against the PR's Hilbert system design; further research rounds should address additional review concerns as they arise, including code quality, proof style, module organization, and alignment with cslib contribution standards.
 

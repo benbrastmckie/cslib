@@ -7,7 +7,8 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
-public import Cslib.Foundations.Logic.Metalogic.SetDeduction
+public import Cslib.Foundations.Logic.Metalogic.ListDeduction
+public import Cslib.Foundations.Logic.Metalogic.Consistency
 
 /-! # Algebraic Derivation System with Free Deduction Theorem
 
@@ -32,7 +33,6 @@ namespace Cslib.Logic.Metalogic.GenericMCS
 open Cslib.Logic
 open Cslib.Logic.Metalogic.ListImplication
 open Cslib.Logic.Metalogic.ListDeduction
-open Cslib.Logic.Metalogic.SetDeduction
 open Cslib.Logic.Metalogic
 
 variable {F : Type*} [HasBot F] [HasImp F]

@@ -11,7 +11,7 @@ next_project_number: 219
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,209,214,215,218 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,195,197,209,214,215 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -45,7 +45,6 @@ next_project_number: 219
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-218 [PLANNING] — Push missing bib entries and minor fixes to PR #649: add 7 missin
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -56,7 +55,7 @@ next_project_number: 219
 ## Tasks
 
 ### 218. Push bib entries minor fixes pr649
-- **Status**: [PLANNING]
+- **Status**: [COMPLETED]
 - **Task Type**: pr
 - **Topic**: Temporal Logic
 - **Dependencies**: None

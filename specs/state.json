@@ -4,13 +4,14 @@
     {
       "project_number": 218,
       "project_name": "push_bib_entries_minor_fixes_pr649",
-      "status": "planning",
+      "status": "completed",
       "task_type": "pr",
       "description": "Push missing bib entries and minor fixes to PR #649: add 7 missing references.bib entries (Church1956, Gentzen1935, Johansson1937, McKinsey1939, Prawitz1965, TroelstraVanDalen1988, Wajsberg1938) referenced by Connectives.lean, Defs.lean, and NaturalDeduction/Basic.lean; include Defs.lean architecture docstring, NaturalDeduction/Basic.lean Γ→G rename, and copyright date updates",
       "topic": "Temporal Logic",
       "created": "2026-06-15T23:13:54Z",
-      "last_updated": "2026-06-15T23:35:10Z",
-      "session_id": "sess_1781566272_a93d83"
+      "last_updated": "2026-06-15T23:46:43Z",
+      "session_id": "sess_1781566272_a93d83",
+      "completion_summary": "Restored 7 missing bib entries (Church1956, Gentzen1935, Johansson1937, McKinsey1939, Prawitz1965, TroelstraVanDalen1988, Wajsberg1938) and Architecture docstring section in Defs.lean on feat/temporal-formula-propositional branch for PR #649. Committed as 7be6d7b7."
     },
     {
       "project_number": 209,

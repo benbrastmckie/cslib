@@ -30,7 +30,7 @@ next_project_number: 207
 
 ### Project Management
 
-206 [RESEARCHED] — Fix all --wfail CI warnings across Bimodal/, Temporal/, and Modal
+206 [PLANNED] — Fix all --wfail CI warnings across Bimodal/, Temporal/, and Modal
 
 ### Propositional Logic
 
@@ -54,7 +54,7 @@ next_project_number: 207
 ## Tasks
 
 ### 206. Fix --wfail CI warnings across Bimodal, Temporal, and Modal files
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None

@@ -1,22 +1,36 @@
 {
-  "status": "researched",
-  "started_at": "2026-06-15T00:00:00Z",
+  "status": "planned",
   "artifacts": [
     {
-      "path": "specs/206_fix_wfail_ci_warnings/reports/01_ci-warnings-analysis.md",
-      "type": "research",
-      "summary": "Comprehensive CI warning analysis: 70 active warnings across 10 files, plus ~250-350 latent warnings across ~50 files. Categorized by type (push_neg, flexible simp, unused simp args, module docstring, unscoped options, unused hypotheses). Risk-assessed fix strategies and parallelization guidance provided."
+      "type": "plan",
+      "path": "specs/206_fix_wfail_ci_warnings/plans/01_ci-warnings-fix-plan.md",
+      "summary": "6-phase plan to fix all --wfail CI warnings across Bimodal/, Temporal/, and Modal/ files organized by warning category"
     }
   ],
-  "partial_progress": {
-    "stage": "research_delivered",
-    "details": "Full CI log analysis complete with file-by-file warning mapping"
-  },
+  "next_steps": "Run /implement 206 to execute the plan",
   "metadata": {
     "session_id": "sess_1781534511_11ef67",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 6,
+    "estimated_hours": 6,
+    "dependency_waves": [[1, 2, 3], [4], [5], [6]]
+  },
+  "plan_metadata": {
+    "phases": 6,
+    "total_effort_hours": 6,
+    "complexity": "complex",
+    "research_integrated": true,
+    "plan_version": 1,
+    "dependency_waves": [[1, 2, 3], [4], [5], [6]],
+    "reports_integrated": [
+      {
+        "path": "reports/01_ci-warnings-analysis.md",
+        "integrated_in_plan_version": 1,
+        "integrated_date": "2026-06-15"
+      }
+    ]
   },
   "memory_candidates": []
 }

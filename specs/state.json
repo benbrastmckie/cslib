@@ -102,14 +102,15 @@
       "description": "Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible",
       "topic": "Modal Logic",
       "created": "2026-06-14T19:08:07Z",
-      "last_updated": "2026-06-15T00:25:16Z",
-      "session_id": "sess_1781482606_82b085",
+      "last_updated": "2026-06-15T06:15:22Z",
+      "session_id": "sess_1781503656_5d7a7b",
       "research_artifacts": [
         "specs/197_modal_upstream_initial_pr/reports/01_modal-upstream-pr-scope.md",
         "specs/197_modal_upstream_initial_pr/reports/02_literature-grounded-analysis.md",
-        "specs/197_modal_upstream_initial_pr/reports/03_team-research.md"
+        "specs/197_modal_upstream_initial_pr/reports/03_team-research.md",
+        "specs/197_modal_upstream_initial_pr/reports/04_pr649-comparison-classical-signature.md"
       ],
-      "next_artifact_number": 4,
+      "next_artifact_number": 5,
       "plan_artifacts": [
         "specs/197_modal_upstream_initial_pr/plans/02_modal-upstream-pr-plan.md"
       ],
@@ -147,7 +148,37 @@
           }
         ]
       },
-      "researched": "2026-06-15T00:25:16Z"
+      "researched": "2026-06-15T00:25:16Z",
+      "memory_candidates": [
+        {
+          "content": "CSLib PR quality conventions require a fix-up commit pattern: after initial submission, a quality convention fixes commit is typically needed to add ## Main definitions, ## Notation, and ## References docstring sections, convert prose references to Mathlib BibKey format, and polish derived operator docs with Unicode notation. Apply these proactively to avoid post-submission fix commits.",
+          "category": "WORKFLOW",
+          "confidence": 0.85,
+          "suggested_keywords": [
+            "cslib",
+            "pr",
+            "quality",
+            "conventions",
+            "docstring",
+            "bibkey",
+            "module-docstring"
+          ]
+        },
+        {
+          "content": "PR #649 (feat/temporal-formula-propositional, OPEN 2026-06-14) added Connectives.lean with {HasBot, HasImp, HasAnd, HasOr, HasUntil, HasSince, PropositionalConnectives, TemporalConnectives} but NOT HasBox or ModalConnectives. The Modal PR must add HasBox (~10 LOC) and ModalConnectives (~15 LOC) to Connectives.lean as a modification, stacked on PR #649.",
+          "category": "PATTERN",
+          "confidence": 0.9,
+          "suggested_keywords": [
+            "cslib",
+            "connectives",
+            "hasbox",
+            "modalconnectives",
+            "pr649",
+            "temporal",
+            "stacking"
+          ]
+        }
+      ]
     },
     {
       "project_number": 188,

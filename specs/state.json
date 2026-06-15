@@ -114,21 +114,21 @@
     {
       "project_number": 197,
       "project_name": "modal_upstream_initial_pr",
-      "status": "planned",
+      "status": "researched",
       "task_type": "pr",
       "title": "Scope initial Modal/ upstream PR (~300 LOC)",
       "description": "Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible",
       "topic": "Modal Logic",
       "created": "2026-06-14T19:08:07Z",
-      "last_updated": "2026-06-15T06:33:22Z",
-      "session_id": "sess_1781504941_82709e",
+      "last_updated": "2026-06-15T14:02:06Z",
+      "session_id": "sess_1781531573_4cdbb4",
       "research_artifacts": [
         "specs/197_modal_upstream_initial_pr/reports/01_modal-upstream-pr-scope.md",
         "specs/197_modal_upstream_initial_pr/reports/02_literature-grounded-analysis.md",
         "specs/197_modal_upstream_initial_pr/reports/03_team-research.md",
         "specs/197_modal_upstream_initial_pr/reports/04_pr649-comparison-classical-signature.md"
       ],
-      "next_artifact_number": 5,
+      "next_artifact_number": 7,
       "plan_artifacts": [
         "specs/197_modal_upstream_initial_pr/plans/02_modal-upstream-pr-plan.md",
         "specs/197_modal_upstream_initial_pr/plans/05_modal-upstream-pr-plan.md"
@@ -205,6 +205,41 @@
             "temporal",
             "stacking"
           ]
+        },
+        {
+          "content": "CSLib upstream PR #607 (fmontesi/connectives, OPEN as of 2026-06-15): proposes 8 separate operator typeclass files under Foundations/Logic/Operators/ with class names HasAnd, HasBox, HasDiamond, HasIff, HasImpl, HasNot, HasOr, HasTensor. CHANGES_REQUESTED by chenson2018. HasBox naming-compatible with ours. Conflict: HasImpl (PR #607) vs HasImp (our PRs). Keeps existing {not, and, diamond} Modal primitives.",
+          "category": "INSIGHT",
+          "confidence": 0.9,
+          "suggested_keywords": [
+            "cslib",
+            "upstream",
+            "PR607",
+            "HasImpl",
+            "HasBox",
+            "connectives",
+            "typeclass"
+          ]
+        },
+        {
+          "content": "CSLib upstream stacking pattern: PR #649 (feat/temporal-formula-propositional) carries all PR #648 Connectives.lean changes plus temporal additions. Neither has reviews as of 2026-06-15. Modal PR should branch from feat/temporal-formula-propositional.",
+          "category": "PATTERN",
+          "confidence": 0.85,
+          "suggested_keywords": [
+            "cslib",
+            "stacking",
+            "PR648",
+            "PR649",
+            "propositional",
+            "temporal",
+            "Connectives"
+          ]
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "specs/197_modal_upstream_initial_pr/reports/06_modal-pr-landscape.md",
+          "type": "research",
+          "summary": "Upstream PR landscape audit: no competing Modal/ signature PRs, PR #607 stalled, recommends stacking on PR #649"
         }
       ]
     },

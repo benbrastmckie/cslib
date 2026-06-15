@@ -1,0 +1,14 @@
+{
+  "status": "researched",
+  "summary": "28 unused-hypothesis-in-type lint warnings across 3 Bimodal Separation files. All involve typeclass instances (DecidableEq Atom or DecidablePred pred) in declaration signatures that the return type does not depend on. Fix: remove from signatures + haveI in body (3 cases), or omit [DecidableEq Atom] via subsections (25 cases in HierarchyDefs.lean). All fixes are low-risk cosmetic changes with no caller breakage.",
+  "artifacts": [
+    {
+      "path": "specs/213_lint_unused_arguments/reports/01_unused-args-research.md",
+      "type": "report",
+      "summary": "Detailed analysis of 28 unused hypothesis warnings with per-declaration fix categorization, caller impact analysis, and implementation plan"
+    }
+  ],
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "plan"
+}

@@ -11,7 +11,7 @@ next_project_number: 216
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,202,207,208,209,210,211,212,213,214,215 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,195,197,207,208,209,210,211,212,213,214,215 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -32,17 +32,16 @@ next_project_number: 216
 
 ### Project Management
 
-208 [NOT STARTED] — Add docstrings to 327 declarations flagged by #lint across Bimoda
+208 [RESEARCHED] — Add docstrings to 327 declarations flagged by #lint across Bimoda
 209 [NOT STARTED] — Fix 298 namespace lint errors: 239 declarations not properly name
 210 [NOT STARTED] — Fix 105 naming convention violations where declaration names cont
 211 [NOT STARTED] — Fix 55 lint errors where Prop-valued declarations use def instead
 212 [NOT STARTED] — Fix 25 simp-related lint errors: 23 where the LHS of a simp lemma
-213 [NOT STARTED] — Fix ~17 unused argument lint errors across Bimodal and Temporal c
+213 [RESEARCHED] — Fix ~17 unused argument lint errors across Bimodal and Temporal c
 
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
-202 [IMPLEMENTING] — Comprehensive review of cslib PR #648 (https://github.com/leanpro
 
 ### Propositional PRs
 
@@ -82,7 +81,7 @@ next_project_number: 216
 ---
 
 ### 213. Fix unused argument lint errors
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -132,7 +131,7 @@ next_project_number: 216
 ---
 
 ### 208. Add missing documentation strings to Bimodal/Temporal/Modal declarations
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -202,7 +201,7 @@ next_project_number: 216
 ---
 
 ### 202. Review hilbert classes vs pr648
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -212,6 +211,8 @@ next_project_number: 216
   - [202_review_hilbert_classes_vs_pr648/reports/03_team-research.md]
   - [202_review_hilbert_classes_vs_pr648/reports/04_bool-evaluate-design.md]
 - **Plan**: [202_review_hilbert_classes_vs_pr648/plans/05_bool-evaluate-plan.md]
+- **Lean_file**: [Cslib/Logics/Propositional/Semantics/Bool.lean]
+- **Summary**: [202_review_hilbert_classes_vs_pr648/summaries/05_bool-evaluate-summary.md]
 
 **Description**: Comprehensive review of cslib PR #648 (https://github.com/leanprover/cslib/pull/648). This task serves as the central tracking point for all review dimensions: upstream reviewer feedback, architectural concerns, API design decisions, compatibility with existing Propositional/ and Hilbert/ developments, naming conventions, and any requested changes. Initial research compared the thomaskwaring/cslib_SKI Hilbert branch approach against the PR's Hilbert system design; further research rounds should address additional review concerns as they arise, including code quality, proof style, module organization, and alignment with cslib contribution standards.
 

@@ -83,7 +83,7 @@ Phases are strictly sequential. Each builds on the prior phase's output.
 
 ---
 
-### Phase 1: Add Missing Combinator [IN PROGRESS]
+### Phase 1: Add Missing Combinator [COMPLETED]
 
 **Goal**: Add `implication_absorption` (`|- (phi -> phi -> psi) -> phi -> psi`) to the combinator library, which is required by the `list_flip_implication` proofs.
 
@@ -108,7 +108,7 @@ Phases are strictly sequential. Each builds on the prior phase's output.
 
 ---
 
-### Phase 2: ListImplication.lean -- listImp and Flip Lemmas [NOT STARTED]
+### Phase 2: ListImplication.lean -- listImp and Flip Lemmas [COMPLETED]
 
 **Goal**: Create the foundational `ListImplication.lean` file defining the `listImp` function and proving the four key lemmas: `listImp_axiom_k`, `listImp_axiom_s`, `list_flip_implication1`, and `list_flip_implication2`. This is the CRITICAL PATH -- the entire plan depends on these proofs.
 
@@ -145,7 +145,7 @@ Phases are strictly sequential. Each builds on the prior phase's output.
 
 ---
 
-### Phase 3: ListDeduction.lean -- Algebraic Deduction Theorem [NOT STARTED]
+### Phase 3: ListDeduction.lean -- Algebraic Deduction Theorem [COMPLETED]
 
 **Goal**: Create `ListDeduction.lean` defining `ListDeriv` (algebraic contextual derivation) and proving the deduction theorem, monotonicity, reflection, cut, and contextual modus ponens. The deduction theorem proof uses the flip lemmas from Phase 2.
 
@@ -179,7 +179,7 @@ Phases are strictly sequential. Each builds on the prior phase's output.
 
 ---
 
-### Phase 4: SetDeduction.lean -- Set-Level Derivation [NOT STARTED]
+### Phase 4: SetDeduction.lean -- Set-Level Derivation [COMPLETED]
 
 **Goal**: Create `SetDeduction.lean` lifting list-level derivation to set-level. This provides the interface used by the MCS machinery, which works with `Set F` rather than `List F`.
 
@@ -211,7 +211,7 @@ Phases are strictly sequential. Each builds on the prior phase's output.
 
 ---
 
-### Phase 5: GenericMCS.lean -- Algebraic Derivation System with Free Deduction Theorem [NOT STARTED]
+### Phase 5: GenericMCS.lean -- Algebraic Derivation System with Free Deduction Theorem [COMPLETED]
 
 **Goal**: Create `GenericMCS.lean` that builds a `DerivationSystem` from `ListDeriv` and proves `HasDeductionTheorem` for it automatically. This is the bridge between the new algebraic infrastructure and CSLib's existing `Consistency.lean` framework, making all existing MCS lemmas (`closed_under_derivation`, `implication_property`, `negation_complete`) available for free.
 
@@ -242,7 +242,7 @@ Phases are strictly sequential. Each builds on the prior phase's output.
 
 ---
 
-### Phase 6: MCSProperties.lean -- Generic Bot/Negation/Membership Lemmas [NOT STARTED]
+### Phase 6: MCSProperties.lean -- Generic Bot/Negation/Membership Lemmas [COMPLETED]
 
 **Goal**: Create generic MCS bot/negation/membership lemmas that are proved ONCE and reusable by all logics. This phase corresponds to the v1 plan's Phase 1, now built on top of the algebraic infrastructure from Phase 5.
 
@@ -275,24 +275,26 @@ Phases are strictly sequential. Each builds on the prior phase's output.
 
 ---
 
-### Phase 7: Per-Logic MCS Migration [NOT STARTED]
+### Phase 7: Per-Logic MCS Migration [PARTIAL]
 
 **Goal**: Simplify Modal, Temporal, and Bimodal MCS files to delegate common lemmas to generic `MCSProperties.lean`. Preserve all existing API names via `alias` or direct delegation. Keep logic-specific lemmas unchanged.
 
 **Tasks**:
-- [ ] **Modal**: Add `import Cslib.Foundations.Logic.Metalogic.MCSProperties` to `Cslib/Logics/Modal/Metalogic/MCS.lean`
-- [ ] **Modal**: Replace `mcs_bot_not_mem`, `mcs_neg_of_not_mem`, `mcs_not_mem_of_neg`, `mcs_mem_iff_neg_not_mem`, `mcs_mp_axiom` bodies with calls to generic versions
-- [ ] **Modal**: Preserve modal-specific lemmas (`mcs_box_closure`, `mcs_box_box`, `mcs_box_diamond`, `mcs_box_mp`, `mcs_box_witness`, `iteratedDeduction`, etc.) unchanged
-- [ ] **Modal**: Verify `lake build Cslib.Logics.Modal` succeeds
-- [ ] **Temporal**: Add import to `Cslib/Logics/Temporal/Metalogic/MCS.lean`
-- [ ] **Temporal**: Replace common wrapper lemmas with generic calls
-- [ ] **Temporal**: Preserve temporal-specific lemmas (`mcs_g_mp`, `mcs_h_mp`, `mcs_g_witness`, `mcs_h_witness`, `derive_g_contradiction`, `derive_h_contradiction`, `deriveContrapositive`, `theoremInMcs`, `futureSet`, `pastSet`) unchanged
-- [ ] **Temporal**: Verify `lake build Cslib.Logics.Temporal` succeeds (expect slow due to `maxHeartbeats 1600000`)
-- [ ] **Bimodal**: Add import to `Cslib/Logics/Bimodal/Metalogic/Core/MaximalConsistent.lean`
-- [ ] **Bimodal**: Evaluate which wrappers can delegate to generic (Bimodal's set-based `BimodalSetConsistent` is a separate layer; only touch list-based wrappers)
-- [ ] **Bimodal**: Preserve all Bimodal list-based MCS definitions and helpers
-- [ ] **Bimodal**: Verify `lake build Cslib.Logics.Bimodal` succeeds
-- [ ] Run `lake exe lint-style` across all three logics
+- [ ] **Modal**: Add `import Cslib.Foundations.Logic.Metalogic.MCSProperties` to `Cslib/Logics/Modal/Metalogic/MCS.lean` *(deviation: deferred -- requires bridge theorem `tree_to_listDeriv` connecting modalDerivationSystem to algebraicDerivationSystem)*
+- [ ] **Modal**: Replace `mcs_bot_not_mem`, `mcs_neg_of_not_mem`, `mcs_not_mem_of_neg`, `mcs_mem_iff_neg_not_mem`, `mcs_mp_axiom` bodies with calls to generic versions *(deviation: deferred -- same blocker)*
+- [ ] **Modal**: Preserve modal-specific lemmas (`mcs_box_closure`, `mcs_box_box`, `mcs_box_diamond`, `mcs_box_mp`, `mcs_box_witness`, `iteratedDeduction`, etc.) unchanged *(deviation: skipped -- no changes made)*
+- [ ] **Modal**: Verify `lake build Cslib.Logics.Modal` succeeds *(deviation: skipped -- no changes made)*
+- [ ] **Temporal**: Add import to `Cslib/Logics/Temporal/Metalogic/MCS.lean` *(deviation: deferred -- requires bridge theorem)*
+- [ ] **Temporal**: Replace common wrapper lemmas with generic calls *(deviation: deferred -- same blocker)*
+- [ ] **Temporal**: Preserve temporal-specific lemmas *(deviation: skipped -- no changes made)*
+- [ ] **Temporal**: Verify `lake build Cslib.Logics.Temporal` succeeds *(deviation: skipped -- no changes made)*
+- [ ] **Bimodal**: Add import to `Cslib/Logics/Bimodal/Metalogic/Core/MaximalConsistent.lean` *(deviation: deferred -- requires bridge theorem)*
+- [ ] **Bimodal**: Evaluate which wrappers can delegate to generic *(deviation: deferred -- same blocker)*
+- [ ] **Bimodal**: Preserve all Bimodal list-based MCS definitions and helpers *(deviation: skipped -- no changes made)*
+- [ ] **Bimodal**: Verify `lake build Cslib.Logics.Bimodal` succeeds *(deviation: skipped -- no changes made)*
+- [ ] Run `lake exe lint-style` across all three logics *(deviation: skipped -- no changes made)*
+
+**Phase 7 Deviation Note**: Per-logic MCS migration requires bridge theorems connecting each logic's `DerivationTree`-based derivation system to the `algebraicDerivationSystem`. This is explicitly listed in Non-Goals: "Connecting bridge theorems (`tree_to_listDeriv`) for each logic (follow-up PR)". The generic infrastructure (Phases 1-6) is complete and new logics can use it directly. Migration of existing logics is a follow-up task.
 
 **Timing**: 3-4 hours
 
@@ -312,7 +314,7 @@ Phases are strictly sequential. Each builds on the prior phase's output.
 
 ---
 
-### Phase 8: Full CI Verification and Cleanup [NOT STARTED]
+### Phase 8: Full CI Verification and Cleanup [IN PROGRESS]
 
 **Goal**: Run the complete CI pipeline, fix any remaining issues, and verify the entire project builds cleanly with the new generic metalogic infrastructure.
 

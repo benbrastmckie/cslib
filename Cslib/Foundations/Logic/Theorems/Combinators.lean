@@ -334,6 +334,28 @@ theorem combine_imp_conj_3 {P A₁ B₁ C₁ : F}
           HasBot.bot)) :=
   combine_imp_conj hA (combine_imp_conj hB hC)
 
+/-- Implication absorption (W combinator):
+    `⊢ (φ → φ → ψ) → φ → ψ`.
+    Derivable as `MP(flip(S), identity)` where S is instantiated at
+    `(φ → (φ → ψ)) → (φ → φ) → (φ → ψ)`. -/
+theorem implication_absorption {φ ψ : F} :
+    InferenceSystem.DerivableIn S
+      (HasImp.imp (HasImp.imp φ (HasImp.imp φ ψ))
+        (HasImp.imp φ ψ)) := by
+  -- flip: ⊢ (A → B → C) → B → A → C  with A := (φ → (φ → ψ)), B := (φ → φ), C := (φ → ψ)
+  have fl := @flip F _ _ S _ _
+    (φ := HasImp.imp φ (HasImp.imp φ ψ))
+    (ψ := HasImp.imp φ φ)
+    (χ := HasImp.imp φ ψ)
+  -- S instance: ⊢ (φ → (φ → ψ)) → (φ → φ) → (φ → ψ)
+  have s := HasAxiomImplyS.implyS (S := S) (φ := φ) (ψ := φ) (χ := ψ)
+  -- MP(flip, S): ⊢ (φ → φ) → (φ → (φ → ψ)) → (φ → ψ)
+  have fs := ModusPonens.mp fl s
+  -- identity: ⊢ φ → φ
+  have id := identity (S := S) φ
+  -- MP(fs, identity): ⊢ (φ → (φ → ψ)) → (φ → ψ)
+  exact ModusPonens.mp fs id
+
 end Combinators
 
 end Cslib.Logic.Theorems.Combinators

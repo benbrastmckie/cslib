@@ -1,0 +1,26 @@
+{
+  "status": "researched",
+  "started_at": "2026-06-15T00:00:00Z",
+  "artifacts": [
+    {
+      "path": "specs/213_lint_unused_arguments/reports/01_unused-args-research.md",
+      "type": "report",
+      "summary": "Detailed analysis of 28 unused hypothesis warnings with per-declaration fix categorization, caller impact analysis, and implementation plan"
+    },
+    {
+      "path": "specs/213_lint_unused_arguments/.orchestrator-handoff.json",
+      "type": "handoff",
+      "summary": "Orchestrator handoff with researched status"
+    }
+  ],
+  "partial_progress": {
+    "stage": "research_complete",
+    "details": "All 28 warnings identified, categorized, and fix strategies determined"
+  },
+  "metadata": {
+    "session_id": "sess_1750000000_a1b2c3_213",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  }
+}

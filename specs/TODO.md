@@ -1,5 +1,5 @@
 ---
-next_project_number: 204
+next_project_number: 205
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 204
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,201,202 | -- | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,195,197,201,202,203,204 | -- | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -37,6 +37,7 @@ next_project_number: 204
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
 202 [RESEARCHED] — Review thomaskwaring/cslib_SKI Hilbert branch (https://github.com
+204 [NOT STARTED] — Polish PR #648: remove Aesop.BuiltinRules import, trim Architectu
 
 ### Propositional PRs
 
@@ -44,25 +45,39 @@ next_project_number: 204
 
 ### Temporal Logic
 
-203 [NOT STARTED] — Create first ~300 LOC PR for Temporal/ extending classical propo
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
+203 [PLANNED] — Create first ~300 LOC PR for Temporal/ extending classical propos
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
 
-### 203. Create first ~300 LOC PR for Temporal/ extending classical propositional logic
+### 204. Polish pr 648 propositional
 - **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Polish PR #648: remove Aesop.BuiltinRules import, trim Architecture section from Defs.lean docstring (references non-existent upstream files), fix inconsistent context variable naming (G vs Γ) in NaturalDeduction/Basic.lean constructors, fix copyright header format. Then squash and force-push to feat/propositional-v2
+
+---
+
+### 203. First temporal pr classical propositional
+- **Status**: [PLANNED]
 - **Task Type**: pr
 - **Topic**: Temporal Logic
 - **Dependencies**: None
+
+**Description**: Create first ~300 LOC PR for Temporal/ extending classical propositional logic, establishing foundations for full temporal logic development (follows PR #648)
+
+---
 
 ### 202. Review hilbert classes vs pr648
 - **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
-- **Research**: [specs/202_review_hilbert_classes_vs_pr648/reports/01_hilbert-classes-comparison.md]
+- **Research**: [202_review_hilbert_classes_vs_pr648/reports/01_hilbert-classes-comparison.md]
 
 **Description**: Review thomaskwaring/cslib_SKI Hilbert branch (https://github.com/thomaskwaring/cslib_SKI/blob/hilbert/Cslib/Logics/Hilbert/Classes.lean) in contrast to cslib PR #648 (https://github.com/leanprover/cslib/pull/648) to understand how they relate, differ, overlap, and what if anything is in conflict with Propositional/ Hilbert system development in this fork
 

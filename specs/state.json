@@ -1,15 +1,26 @@
 {
-  "next_project_number": 204,
+  "next_project_number": 205,
   "active_projects": [
+    {
+      "project_number": 204,
+      "project_name": "polish_pr_648_propositional",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Polish PR #648: remove Aesop.BuiltinRules import, trim Architecture section from Defs.lean docstring (references non-existent upstream files), fix inconsistent context variable naming (G vs Γ) in NaturalDeduction/Basic.lean constructors, fix copyright header format. Then squash and force-push to feat/propositional-v2",
+      "topic": "Propositional Logic",
+      "created": "2026-06-15T01:56:14Z",
+      "last_updated": "2026-06-15T01:56:14Z"
+    },
     {
       "project_number": 203,
       "project_name": "first_temporal_pr_classical_propositional",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "pr",
       "description": "Create first ~300 LOC PR for Temporal/ extending classical propositional logic, establishing foundations for full temporal logic development (follows PR #648)",
       "topic": "Temporal Logic",
       "created": "2026-06-15T01:06:47Z",
-      "last_updated": "2026-06-15T01:06:47Z"
+      "last_updated": "2026-06-15T01:44:17Z",
+      "session_id": "sess_1781487302_dddcf1"
     },
     {
       "project_number": 202,
@@ -21,11 +32,12 @@
       "created": "2026-06-15T00:22:18Z",
       "last_updated": "2026-06-15T00:29:06Z",
       "session_id": "sess_1781483005_a59dae",
-      "artifacts": {
-        "research": [
-          "specs/202_review_hilbert_classes_vs_pr648/reports/01_hilbert-classes-comparison.md"
-        ]
-      }
+      "artifacts": [
+        {
+          "type": "research",
+          "path": "specs/202_review_hilbert_classes_vs_pr648/reports/01_hilbert-classes-comparison.md"
+        }
+      ]
     },
     {
       "project_number": 201,

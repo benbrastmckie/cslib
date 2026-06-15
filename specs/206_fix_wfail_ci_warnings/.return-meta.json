@@ -1,0 +1,22 @@
+{
+  "status": "researched",
+  "started_at": "2026-06-15T00:00:00Z",
+  "artifacts": [
+    {
+      "path": "specs/206_fix_wfail_ci_warnings/reports/01_ci-warnings-analysis.md",
+      "type": "research",
+      "summary": "Comprehensive CI warning analysis: 70 active warnings across 10 files, plus ~250-350 latent warnings across ~50 files. Categorized by type (push_neg, flexible simp, unused simp args, module docstring, unscoped options, unused hypotheses). Risk-assessed fix strategies and parallelization guidance provided."
+    }
+  ],
+  "partial_progress": {
+    "stage": "research_delivered",
+    "details": "Full CI log analysis complete with file-by-file warning mapping"
+  },
+  "metadata": {
+    "session_id": "sess_1781534511_11ef67",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  },
+  "memory_candidates": []
+}

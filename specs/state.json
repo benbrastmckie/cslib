@@ -4,13 +4,18 @@
     {
       "project_number": 206,
       "project_name": "fix_wfail_ci_warnings",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "title": "Fix --wfail CI warnings across Bimodal, Temporal, and Modal files",
       "description": "Fix all --wfail CI warnings across Bimodal/, Temporal/, and Modal/ files (push_neg deprecation, unused simp args, show tactic misuse, empty lines in commands, unscoped options, module docstring placement, flexible simp, open Classical)",
       "topic": "Project Management",
       "created": "2026-06-15T14:36:43Z",
-      "last_updated": "2026-06-15T14:36:43Z"
+      "last_updated": "2026-06-15T14:50:58Z",
+      "session_id": "sess_1781534511_11ef67",
+      "research_artifacts": [
+        "specs/206_fix_wfail_ci_warnings/reports/01_ci-warnings-analysis.md"
+      ],
+      "next_artifact_number": 2
     },
     {
       "project_number": 205,
@@ -129,7 +134,7 @@
       "task_type": "pr",
       "title": "Scope initial Modal/ upstream PR (~300 LOC)",
       "description": "Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible",
-      "topic": "Modal Logic",
+      "topic": "pr",
       "created": "2026-06-14T19:08:07Z",
       "last_updated": "2026-06-15T14:16:14Z",
       "session_id": "sess_1781532709_eb0889",

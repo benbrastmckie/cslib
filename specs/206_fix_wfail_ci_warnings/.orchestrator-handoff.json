@@ -1,0 +1,16 @@
+{
+  "status": "researched",
+  "summary": "Analyzed CI run 27551734921: 70 active warnings across 10 files (incremental build). Clean build would reveal ~250-350 warnings across ~50 files. Seven warning categories identified: push_neg deprecation (138 occurrences, 22 files), unscoped linter.flexible (24 files), unscoped maxHeartbeats (16 occurrences, 12 files), module docstring placement (13 files), unused simp args (18 in 3 files), flexible simp (18 in 2 files), unused hypotheses (4 in 3 files). All fixes are mechanical. Recommended 5-phase implementation: (1) push_neg global rename, (2) docstring reordering, (3) unused arg/hypothesis removal, (4) option scoping, (5) flexible simp suppression. Parallelizable by subdirectory.",
+  "artifacts": [
+    {
+      "path": "specs/206_fix_wfail_ci_warnings/reports/01_ci-warnings-analysis.md",
+      "type": "report",
+      "summary": "Full CI warning categorization with file-by-file analysis, risk assessment, and phased implementation strategy"
+    }
+  ],
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "plan",
+  "phases_completed": 0,
+  "phases_total": 0
+}

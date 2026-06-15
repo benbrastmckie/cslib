@@ -11,7 +11,7 @@ next_project_number: 207
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,202,206 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,188,192,195,197,202,206 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -28,13 +28,9 @@ next_project_number: 207
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
-### Modal Logic
-
-197 [PLANNED] — Review the ambition to contribute Modal/ to upstream, identifying
-
 ### Project Management
 
-206 [NOT STARTED] — Fix all --wfail CI warnings across Bimodal/, Temporal/, and Modal
+206 [RESEARCHED] — Fix all --wfail CI warnings across Bimodal/, Temporal/, and Modal
 
 ### Propositional Logic
 
@@ -51,10 +47,14 @@ next_project_number: 207
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
+### Pr
+
+197 [PLANNED] — Review the ambition to contribute Modal/ to upstream, identifying
+
 ## Tasks
 
 ### 206. Fix --wfail CI warnings across Bimodal, Temporal, and Modal files
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -125,7 +125,7 @@ next_project_number: 207
 ### 197. Scope initial Modal/ upstream PR (~300 LOC)
 - **Status**: [PLANNED]
 - **Task Type**: pr
-- **Topic**: Modal Logic
+- **Topic**: pr
 - **Dependencies**: None
 - **Research**: [197_modal_upstream_initial_pr/reports/06_modal-pr-landscape.md]
 - **Plan**: [197_modal_upstream_initial_pr/plans/07_modal-upstream-pr-plan.md]

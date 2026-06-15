@@ -25,7 +25,6 @@ Defines the chronicle data structure from Burgess 1982, Section 2.
 * Burgess 1982: "Axioms for tense logic II: Time periods"
 -/
 
-set_option linter.dupNamespace false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 
@@ -139,29 +138,35 @@ theorem cud_not_mem_is_sdc {fc : FrameClass} {B : Set (Formula Atom)}
 
 /-! ## Adjacency predicate -/
 
+/-- Two rationals are adjacent in `dom` if they are consecutive elements with no point between them. -/
 def Adjacent (dom : Finset Rat) (x y : Rat) : Prop :=
   x ∈ dom ∧ y ∈ dom ∧ x < y ∧ ∀ z ∈ dom, ¬(x < z ∧ z < y)
 
 /-! ## The r-Relation (Burgess Lemma 2.3) -/
 
+/-- The r-relation holds between sets `A` and `B` if every until-formula in `A` is witnessed in `B` (Burgess Lemma 2.3). -/
 def rRelation (A B : Set (Formula Atom)) : Prop :=
   ∀ (gamma delta : Formula Atom),
     Formula.untl delta gamma ∈ A →
     delta ∈ B ∨ (gamma ∈ B ∧ Formula.untl delta gamma ∈ B)
 
+/-- The since-variant of the r-relation, witnessing since-formulas in `A` via `B`. -/
 def rRelationSince (A B : Set (Formula Atom)) : Prop :=
   ∀ (gamma delta : Formula Atom),
     Formula.snce delta gamma ∈ A →
     delta ∈ B ∨ (gamma ∈ B ∧ Formula.snce delta gamma ∈ B)
 
+/-- The combined r3-relation: `A` r-relates to `B` via until and `C` r-since-relates to `B`. -/
 def r3Relation (A B C : Set (Formula Atom)) : Prop :=
   rRelation A B ∧ rRelationSince C B
 
+/-- The since-variant of r3: `A` r-since-relates to `B` and `C` r-relates to `B`. -/
 def r3RelationSince (A B C : Set (Formula Atom)) : Prop :=
   rRelationSince A B ∧ rRelation C B
 
 /-! ## R-Maximality -/
 
+/-- A set `B` is r-maximal for `A` if it is deductively closed, r-relates to `A`, and no proper extension also r-relates to `A`. -/
 def rMaximal (fc : FrameClass) (A B : Set (Formula Atom)) : Prop :=
   SetDeductivelyClosed fc B ∧
   rRelation A B ∧
@@ -170,6 +175,7 @@ def rMaximal (fc : FrameClass) (A B : Set (Formula Atom)) : Prop :=
     B ⊂ C →
     ¬rRelation A C
 
+/-- The since-variant of r-maximality: `B` is deductively closed, r-since-relates to `A`, and no proper extension does. -/
 def rMaximalSince (fc : FrameClass) (A B : Set (Formula Atom)) : Prop :=
   SetDeductivelyClosed fc B ∧
   rRelationSince A B ∧
@@ -178,6 +184,7 @@ def rMaximalSince (fc : FrameClass) (A B : Set (Formula Atom)) : Prop :=
     B ⊂ C →
     ¬rRelationSince A C
 
+/-- A set `B` is R3-maximal for `(A, C)` if it is deductively closed, r3-relates to `(A, C)`, and no proper extension does. -/
 def R3Maximal (fc : FrameClass) (A B C : Set (Formula Atom)) : Prop :=
   SetDeductivelyClosed fc B ∧
   r3Relation A B C ∧
@@ -186,6 +193,7 @@ def R3Maximal (fc : FrameClass) (A B C : Set (Formula Atom)) : Prop :=
     B ⊂ D →
     ¬r3Relation A D C
 
+/-- The since-variant of R3-maximality: `B` r3-since-relates to `(A, C)` and no proper extension does. -/
 def R3MaximalSince (fc : FrameClass) (A B C : Set (Formula Atom)) : Prop :=
   SetDeductivelyClosed fc B ∧
   r3RelationSince A B C ∧
@@ -196,21 +204,27 @@ def R3MaximalSince (fc : FrameClass) (A B C : Set (Formula Atom)) : Prop :=
 
 /-! ## Burgess r-Relation (Content-Based) -/
 
+/-- Content-based Burgess r-relation: every `gamma` in `C` satisfies `untl gamma beta ∈ A`. -/
 def burgessR (A : Set (Formula Atom)) (beta : Formula Atom) (C : Set (Formula Atom)) : Prop :=
   ∀ gamma ∈ C, Formula.untl gamma beta ∈ A
 
+/-- Burgess r-relation lifted to a set of pivot formulas `B`. -/
 def burgessRSet (A B C : Set (Formula Atom)) : Prop :=
   ∀ beta ∈ B, burgessR A beta C
 
+/-- Since-variant of the content-based Burgess r-relation: every `gamma` in `C` satisfies `snce gamma beta ∈ A`. -/
 def burgessRSince (A : Set (Formula Atom)) (beta : Formula Atom) (C : Set (Formula Atom)) : Prop :=
   ∀ gamma ∈ C, Formula.snce gamma beta ∈ A
 
+/-- Since-variant of `burgessRSet`: every pivot in `B` since-relates `A` to `C`. -/
 def burgessRSetSince (A B C : Set (Formula Atom)) : Prop :=
   ∀ beta ∈ B, burgessRSince A beta C
 
+/-- Combined Burgess r3-relation: `burgessRSet A B C` and `burgessRSetSince C B A`. -/
 def burgessR3 (A B C : Set (Formula Atom)) : Prop :=
   burgessRSet A B C ∧ burgessRSetSince C B A
 
+/-- A set `B` is Burgess-R3-maximal for `(A, C)` if it is CUD, burgessR3-relates to `(A, C)`, and no proper extension does. -/
 def BurgessR3Maximal (fc : FrameClass) (A B C : Set (Formula Atom)) : Prop :=
   ClosedUnderDerivation fc B ∧
   burgessR3 A B C ∧
@@ -218,30 +232,51 @@ def BurgessR3Maximal (fc : FrameClass) (A B C : Set (Formula Atom)) : Prop :=
 
 /-! ## Chronicle Structure -/
 
+/-- A chronicle: a finite rational domain with point-sets `f` and interval-sets `g` (Burgess 1982, Section 2). -/
+@[nolint dupNamespace]
 structure Chronicle (Atom : Type*) where
+  /-- Point-set function assigning a formula set to each rational point. -/
   f : Rat → Set (Formula Atom)
+  /-- Interval-set function assigning a formula set to each rational interval. -/
   g : Rat → Rat → Set (Formula Atom)
+  /-- Finite set of rational time-points forming the chronicle domain. -/
   dom : Finset Rat
+
+-- Suppress dupNamespace for auto-generated Chronicle declarations
+attribute [nolint dupNamespace] Chronicle.mk Chronicle.rec
+  Chronicle.f Chronicle.g Chronicle.dom
 
 /-! ## Chronicle Conditions -/
 
+/-- Condition c0: every point in the domain carries a maximal consistent set. -/
+@[nolint dupNamespace]
 def Chronicle.c0 (fc : FrameClass) (chi : Chronicle Atom) : Prop :=
   ∀ x ∈ chi.dom, SetMaximalConsistent fc (chi.f x)
 
+/-- Condition c1: every interval-set `g x y` is closed under derivation. -/
+@[nolint dupNamespace]
 def Chronicle.c1 (fc : FrameClass) (chi : Chronicle Atom) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → x < y → ClosedUnderDerivation fc (chi.g x y)
 
+/-- Condition c2: the interval-set `g x y` r3-relates the point-sets at each pair of domain points. -/
+@[nolint dupNamespace]
 def Chronicle.c2 (chi : Chronicle Atom) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → x < y → r3Relation (chi.f x) (chi.g x y) (chi.f y)
 
+/-- Condition c2': the interval-set is Burgess-R3-maximal at each adjacent pair of domain points. -/
+@[nolint dupNamespace]
 def Chronicle.c2' (fc : FrameClass) (chi : Chronicle Atom) : Prop :=
   ∀ x y : Rat, Adjacent chi.dom x y →
     BurgessR3Maximal fc (chi.f x) (chi.g x y) (chi.f y)
 
+/-- Condition c3: the interval-set over `[x,z]` decomposes as `g x y ∩ f y ∩ g y z` for intermediate `y`. -/
+@[nolint dupNamespace]
 def Chronicle.c3 (chi : Chronicle Atom) : Prop :=
   ∀ x y z : Rat, x ∈ chi.dom → y ∈ chi.dom → z ∈ chi.dom →
     x < y → y < z → chi.g x z = chi.g x y ∩ chi.f y ∩ chi.g y z
 
+/-- Condition c4: if `¬(delta U gamma) ∈ f x` and `delta ∈ f y` then some intermediate point witnesses `¬gamma`. -/
+@[nolint dupNamespace]
 def Chronicle.c4 (chi : Chronicle Atom) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → x < y →
     ∀ (gamma delta : Formula Atom),
@@ -249,6 +284,8 @@ def Chronicle.c4 (chi : Chronicle Atom) : Prop :=
       delta ∈ chi.f y →
       ∃ z ∈ chi.dom, x < z ∧ z < y ∧ gamma.neg ∈ chi.f z
 
+/-- Condition c4': the since-variant of c4, witnessing `¬gamma` between `y` and `x` in the past direction. -/
+@[nolint dupNamespace]
 def Chronicle.c4' (chi : Chronicle Atom) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → y < x →
     ∀ (gamma delta : Formula Atom),
@@ -256,6 +293,8 @@ def Chronicle.c4' (chi : Chronicle Atom) : Prop :=
       delta ∈ chi.f y →
       ∃ z ∈ chi.dom, y < z ∧ z < x ∧ gamma.neg ∈ chi.f z
 
+/-- Condition c5: if `delta U gamma ∈ f x` then some future `y` witnesses `delta` with `gamma` holding at all intermediate points. -/
+@[nolint dupNamespace]
 def Chronicle.c5 (chi : Chronicle Atom) : Prop :=
   ∀ x ∈ chi.dom,
     ∀ (gamma delta : Formula Atom),
@@ -264,6 +303,8 @@ def Chronicle.c5 (chi : Chronicle Atom) : Prop :=
         ∀ z ∈ chi.dom, x < z → z < y →
           gamma ∈ chi.f z ∧ Formula.untl delta gamma ∈ chi.f z
 
+/-- Condition c5': the since-variant of c5, witnessing `delta` in the past with `gamma` at all intermediate points. -/
+@[nolint dupNamespace]
 def Chronicle.c5' (chi : Chronicle Atom) : Prop :=
   ∀ x ∈ chi.dom,
     ∀ (gamma delta : Formula Atom),
@@ -274,6 +315,7 @@ def Chronicle.c5' (chi : Chronicle Atom) : Prop :=
 
 /-! ## Valid Chronicle -/
 
+/-- A valid chronicle: a `Chronicle` satisfying all conditions c0–c5'. -/
 structure ValidChronicle (Atom : Type*) (fc : FrameClass) extends Chronicle Atom where
   hc0 : toChronicle.c0 fc
   hc1 : toChronicle.c1 fc
@@ -307,6 +349,7 @@ theorem c3_interval_subset_right (chi : Chronicle Atom) (h_c3 : chi.c3)
 
 /-! ## ChronicleInvariant Bundle -/
 
+/-- Bundle of the core chronicle invariants (c0, c1, c2', c3) used throughout the canonicity argument. -/
 structure ChronicleInvariant (fc : FrameClass) (chi : Chronicle Atom) : Prop where
   hc0 : chi.c0 fc
   hc1 : chi.c1 fc

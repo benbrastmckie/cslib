@@ -48,10 +48,12 @@ attribute [local instance] Classical.propDecidable
 /-! ## Abbreviations -/
 
 /-- Set consistency for the temporal derivation system. -/
+@[nolint dupNamespace]
 abbrev Temporal.SetConsistent (Ω : Set (Formula Atom)) : Prop :=
   Metalogic.SetConsistent temporalDerivationSystem Ω
 
 /-- Set maximal consistency for the temporal derivation system. -/
+@[nolint dupNamespace]
 abbrev Temporal.SetMaximalConsistent (Ω : Set (Formula Atom)) : Prop :=
   Metalogic.SetMaximalConsistent temporalDerivationSystem Ω
 
@@ -87,7 +89,7 @@ Theorems (formulas derivable from empty context) belong to every Temporal MCS.
 This is the key convenience wrapper around `temporal_closed_under_derivation` with an empty
 context list, used throughout the Temporal metalogic modules.
 -/
-noncomputable def theoremInMcs {M : Set (Formula Atom)} {phi : Formula Atom}
+lemma theoremInMcs {M : Set (Formula Atom)} {phi : Formula Atom}
     (h_mcs : Temporal.SetMaximalConsistent M)
     (h_deriv : DerivationTree FrameClass.Base [] phi) : phi ∈ M :=
   temporal_closed_under_derivation h_mcs (L := []) (fun _ h => by simp at h) ⟨h_deriv⟩

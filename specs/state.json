@@ -114,21 +114,21 @@
     {
       "project_number": 197,
       "project_name": "modal_upstream_initial_pr",
-      "status": "researched",
+      "status": "planned",
       "task_type": "pr",
       "title": "Scope initial Modal/ upstream PR (~300 LOC)",
       "description": "Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible",
       "topic": "Modal Logic",
       "created": "2026-06-14T19:08:07Z",
-      "last_updated": "2026-06-15T14:02:06Z",
-      "session_id": "sess_1781531573_4cdbb4",
+      "last_updated": "2026-06-15T14:16:14Z",
+      "session_id": "sess_1781532709_eb0889",
       "research_artifacts": [
         "specs/197_modal_upstream_initial_pr/reports/01_modal-upstream-pr-scope.md",
         "specs/197_modal_upstream_initial_pr/reports/02_literature-grounded-analysis.md",
         "specs/197_modal_upstream_initial_pr/reports/03_team-research.md",
         "specs/197_modal_upstream_initial_pr/reports/04_pr649-comparison-classical-signature.md"
       ],
-      "next_artifact_number": 7,
+      "next_artifact_number": 8,
       "plan_artifacts": [
         "specs/197_modal_upstream_initial_pr/plans/02_modal-upstream-pr-plan.md",
         "specs/197_modal_upstream_initial_pr/plans/05_modal-upstream-pr-plan.md"
@@ -138,7 +138,7 @@
         "total_effort_hours": 3,
         "complexity": "medium",
         "research_integrated": true,
-        "plan_version": 3,
+        "plan_version": 4,
         "dependency_waves": [
           [
             1
@@ -155,7 +155,12 @@
         ],
         "reports_integrated": [
           {
-            "path": "reports/04_pr649-comparison-classical-signature.md",
+            "path": "reports/01_modal-upstream-pr-scope.md",
+            "integrated_in_plan_version": 3,
+            "integrated_date": "2026-06-14"
+          },
+          {
+            "path": "reports/02_literature-grounded-analysis.md",
             "integrated_in_plan_version": 3,
             "integrated_date": "2026-06-14"
           },
@@ -165,14 +170,14 @@
             "integrated_date": "2026-06-14"
           },
           {
-            "path": "reports/01_modal-upstream-pr-scope.md",
+            "path": "reports/04_pr649-comparison-classical-signature.md",
             "integrated_in_plan_version": 3,
             "integrated_date": "2026-06-14"
           },
           {
-            "path": "reports/02_literature-grounded-analysis.md",
-            "integrated_in_plan_version": 3,
-            "integrated_date": "2026-06-14"
+            "path": "reports/06_modal-pr-landscape.md",
+            "integrated_in_plan_version": 4,
+            "integrated_date": "2026-06-15"
           }
         ]
       },
@@ -240,6 +245,10 @@
           "path": "specs/197_modal_upstream_initial_pr/reports/06_modal-pr-landscape.md",
           "type": "research",
           "summary": "Upstream PR landscape audit: no competing Modal/ signature PRs, PR #607 stalled, recommends stacking on PR #649"
+        },
+        {
+          "path": "specs/197_modal_upstream_initial_pr/plans/07_modal-upstream-pr-plan.md",
+          "type": "plan"
         }
       ]
     },

@@ -1,33 +1,50 @@
 {
-  "status": "researched",
-  "agent_type": "general-research-agent",
-  "delegation_path": ["orchestrator", "research", "general-research-agent"],
-  "task_number": 197,
-  "session_id": "sess_1781531573_4cdbb4",
-  "summary": "Upstream PR landscape audit for Modal/ logic. Key finding: no competing OPEN PRs for the modal signature refactoring. PR #607 (fmontesi) is OPEN but CHANGES_REQUESTED/stalled since 2026-05-29 — it proposes typeclass wrappers over the existing {not,and,diamond} primitives rather than refactoring them. The HasBox class name is identical in both approaches; the only conflict is HasImpl (PR #607) vs HasImp (our PRs). PRs #648 and #649 (our propositional and temporal PRs) are OPEN with no reviews yet. Recommended strategy: stack Modal PR on feat/temporal-formula-propositional branch, address HasImpl conflict proactively in PR description, coordinate with fmontesi via Zulip.",
+  "status": "planned",
+  "summary": "Revised plan v4 integrating PR landscape audit and updated stacking strategy (PR #648, not #649)",
   "artifacts": [
     {
-      "path": "specs/197_modal_upstream_initial_pr/reports/06_modal-pr-landscape.md",
-      "type": "research",
-      "summary": "Complete audit of upstream cslib PRs related to Modal/ logic: PR #528 and #535 (MERGED, original modal additions by fmontesi), PR #607 (OPEN CHANGES_REQUESTED, typeclass wrappers keeping existing primitives), PRs #648 and #649 (our OPEN PRs with no reviews). No competing signature-change PRs exist. Recommends stacking Modal PR on feat/temporal-formula-propositional, addressing HasImpl vs HasImp conflict in description, and Zulip coordination with fmontesi."
+      "type": "plan",
+      "path": "specs/197_modal_upstream_initial_pr/plans/07_modal-upstream-pr-plan.md",
+      "summary": "Revised plan v4: stack on PR #648 with diplomatic PR description as first-class deliverable"
     }
   ],
-  "findings_count": 7,
-  "next_steps": "Run /implement 197 to submit the Modal PR following the plan in plans/05_modal-upstream-pr-plan.md",
-  "memory_candidates": [
-    {
-      "content": "CSLib upstream PR #607 (fmontesi/connectives, OPEN as of 2026-06-15): proposes 8 separate operator typeclass files under Foundations/Logic/Operators/ with class names HasAnd, HasBox, HasDiamond, HasIff, HasImpl, HasNot, HasOr, HasTensor. CHANGES_REQUESTED by chenson2018 (direction of simp/grind lemmas, suggestion to consolidate into one file). The class HasBox (field: box) is naming-compatible with our HasBox. The conflict is HasImpl (PR #607) vs HasImp (our PRs). PR #607 keeps existing {not, and, diamond} Modal primitives and adds typeclass wrappers.",
-      "category": "INSIGHT",
-      "source_artifact": "specs/197_modal_upstream_initial_pr/reports/06_modal-pr-landscape.md",
-      "confidence": 0.9,
-      "suggested_keywords": ["cslib", "upstream", "PR607", "HasImpl", "HasBox", "connectives", "typeclass"]
-    },
-    {
-      "content": "CSLib upstream stacking pattern for our PRs #648 and #649: PR #649 (feat/temporal-formula-propositional) bases off main but carries all of PR #648's (feat/propositional-v2) Connectives.lean changes plus temporal additions. The GitHub baseRefName shows 'main' for both, but #649 is effectively stacked on #648 by carrying its commits. Neither PR has received reviews as of 2026-06-15. The Modal PR should branch from feat/temporal-formula-propositional.",
-      "category": "PATTERN",
-      "source_artifact": "specs/197_modal_upstream_initial_pr/reports/06_modal-pr-landscape.md",
-      "confidence": 0.85,
-      "suggested_keywords": ["cslib", "stacking", "PR648", "PR649", "propositional", "temporal", "Connectives"]
-    }
-  ]
+  "next_steps": "Run /implement 197 to execute the revised plan",
+  "task_number": 197,
+  "session_id": "sess_1781532709_eb0889",
+  "metadata": {
+    "session_id": "sess_1781532709_eb0889",
+    "agent_type": "reviser-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
+    "phase_count": 4,
+    "estimated_hours": 3,
+    "plan_version": 4,
+    "reports_integrated": [
+      {
+        "path": "reports/01_modal-upstream-pr-scope.md",
+        "integrated_in_plan_version": 3,
+        "integrated_date": "2026-06-14"
+      },
+      {
+        "path": "reports/02_literature-grounded-analysis.md",
+        "integrated_in_plan_version": 3,
+        "integrated_date": "2026-06-14"
+      },
+      {
+        "path": "reports/03_team-research.md",
+        "integrated_in_plan_version": 3,
+        "integrated_date": "2026-06-14"
+      },
+      {
+        "path": "reports/04_pr649-comparison-classical-signature.md",
+        "integrated_in_plan_version": 3,
+        "integrated_date": "2026-06-14"
+      },
+      {
+        "path": "reports/06_modal-pr-landscape.md",
+        "integrated_in_plan_version": 4,
+        "integrated_date": "2026-06-15"
+      }
+    ]
+  }
 }

@@ -9,7 +9,8 @@
 ## Executive Summary
 
 - **Two factual errors found** in section-number citations: CSLib docstrings cite `[ChagrovZakharyaschev1997] Section 1.1` for the box-as-primitive convention, but Section 1.1 covers classical propositional logic; the modal language with box as primitive is defined in **Section 3.1** of that book.
-- **One substantive accuracy issue**: CSLib docstrings claim "Box (necessity) is the canonical primitive modal operator ... following [Blackburn2001] Chapter 1." In fact, Blackburn et al. (2001) Definition 1.9 defines **diamond** as the primitive modal operator, with box derived as `box phi := neg diamond neg phi`. The claim is defensible as a statement about general convention (box is widely used as primitive in many other presentations), but the specific Blackburn citation does not support it -- it supports the opposite convention.
+- **One substantive accuracy issue**: CSLib docstrings claim "Box (necessity) is the canonical primitive modal operator ... following [Blackburn2001] Chapter 1." In fact, Blackburn et al. (2001) Definition 1.9 defines **diamond** as the primitive modal operator, with box derived as `box phi := neg diamond neg phi`. The specific Blackburn citation does not support the claim -- it supports the opposite convention.
+- **Proof-theoretic justification for box-as-primitive**: The choice of box over diamond as primitive is not merely conventional -- it is the proof-theoretically natural choice. Necessitation (`if ⊢ φ then ⊢ □φ`) and the K axiom (`□(φ → ψ) → (□φ → □ψ)`) are pure proof rules stated in terms of a single primitive. With diamond as primitive, necessitation becomes the interaction law `if ⊢ φ then ⊢ ¬◇¬φ`, mixing two connectives (negation and diamond). Pure proof rules on a single primitive make for a cleaner foundation. This argument should be cited alongside Chagrov & Zakharyaschev as justification for CSLib's design choice.
 - **All 5 BibKeys present and correct** in `references.bib` with accurate bibliographic metadata.
 - **All literature files exist** and can be cross-checked against claims.
 - **Bentzen2023 and Trufas2024 citations are appropriate** for the five-primitive signature precedent, though neither paper uses a box operator (both formalize intuitionistic propositional logic, not modal logic).
@@ -48,12 +49,13 @@ What Blackburn2001 Chapter 1 actually says:
 - Box is then **derived**: "we have a dual operator box ('box') for our diamond which is defined by box phi := neg diamond neg phi"
 - **Definition 1.20** (Section 1.3, "Models and Frames"): The satisfaction definition lists diamond as the primitive clause: "M,w |= diamond phi iff for some v in W with Rwv we have M,v |= phi. It follows from this definition that M,w |= box phi if and only if for all v in W such that Rwv, we have M,v |= phi."
 
-**Verdict**: The citation is **factually inaccurate**. Blackburn2001 Chapter 1 uses diamond as the primitive, not box. The overall claim that box is "the canonical primitive" in classical modal logic is a reasonable design choice (many textbooks and formalizations do use box as primitive), but the specific citation to Blackburn2001 Chapter 1 does not support it -- it supports the opposite convention.
+**Verdict**: The citation is **factually inaccurate**. Blackburn2001 Chapter 1 uses diamond as the primitive, not box. However, the choice of box as primitive is not merely a matter of convention -- it is the proof-theoretically natural choice. With box as primitive, the necessitation rule (`if ⊢ φ then ⊢ □φ`) and the K axiom (`□(φ → ψ) → (□φ → □ψ)`) are pure proof rules stated in terms of a single primitive connective. With diamond as primitive, necessitation becomes the interaction law `if ⊢ φ then ⊢ ¬◇¬φ`, which mixes negation and diamond rather than operating on a single primitive. Pure proof rules make for a cleaner axiomatic foundation -- the proof system speaks directly in terms of its primitive rather than requiring detours through derived notation.
 
-**Recommendation**: Either:
-(a) Replace the Blackburn citation with one that actually uses box as primitive (Chagrov & Zakharyaschev Section 3.1 does), or
-(b) Reword the docstring to acknowledge that different presentations use different primitives, and cite Blackburn as an example of the duality while citing Chagrov & Zakharyaschev for box-as-primitive, or
-(c) Reword to: "Box and diamond are interdefinable in classical systems; CSLib chooses box as primitive because it corresponds to universal quantification over accessible worlds and is the subject of necessitation and the K axiom. See [Blackburn2001] Chapter 1 for the duality and [ChagrovZakharyaschev1997] Section 3.1 for the box-first presentation."
+**Recommendation**: Reword the docstring to give the proof-theoretic justification and correct the citations:
+- State that box is primitive because necessitation and the K axiom are pure proof rules on box -- with diamond as primitive, necessitation becomes the interaction law `¬◇¬`, mixing two connectives.
+- Cite [ChagrovZakharyaschev1997] Section 3.1 for the box-first presentation.
+- Cite [Blackburn2001] Chapter 1 for the diamond-first alternative and the interdefinability of box and diamond in classical modal logic.
+- This is stronger than merely citing convention: it gives a principled reason for the design choice.
 
 ### 2. ChagrovZakharyaschev1997
 
@@ -218,9 +220,7 @@ The current documentation meets this requirement -- all major design choices (pr
    - `Basic.lean` lines 29, 95
    - `Connectives.lean` lines 73, 113
 
-2. **Fix or reword Blackburn2001 box-as-primitive claim**: Blackburn2001 Ch. 1 uses diamond as primitive. Options:
-   - (Preferred) Reword docstrings to acknowledge both conventions exist. Example: "Box and diamond are interdefinable in classical modal logic ([Blackburn2001] Ch. 1). CSLib adopts box as primitive following [ChagrovZakharyaschev1997] Section 3.1, where box is the primitive modal operator."
-   - Alternatively, remove the claim that Blackburn supports box-as-primitive and cite only Chagrov & Zakharyaschev.
+2. **Reword Blackburn2001 box-as-primitive claim with proof-theoretic justification**: Blackburn2001 Ch. 1 uses diamond as primitive. The docstrings should give the principled reason for CSLib's box-as-primitive choice: necessitation (`if ⊢ φ then ⊢ □φ`) and the K axiom are pure proof rules on a single primitive. With diamond as primitive, necessitation becomes the interaction law `if ⊢ φ then ⊢ ¬◇¬φ`, mixing negation and diamond. Suggested wording: "CSLib takes box as primitive because the necessitation rule and K axiom are pure proof rules on box; with diamond primitive, necessitation becomes the interaction law ¬◇¬ ([Blackburn2001] Ch. 1 takes the diamond-first alternative). See [ChagrovZakharyaschev1997] Section 3.1 for the box-first presentation."
 
 ### Advisory (improvements)
 

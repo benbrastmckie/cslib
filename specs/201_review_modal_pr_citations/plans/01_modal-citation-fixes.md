@@ -12,7 +12,7 @@
 
 ## Overview
 
-Research identified two classes of citation error in the Modal/ and Foundations/Logic/ docstrings: (1) four occurrences of `[ChagrovZakharyaschev1997] Section 1.1` that should read `Section 3.1` (Section 1.1 covers classical propositional logic; the modal language with box as primitive is defined in Section 3.1), and (2) two docstrings that cite `[Blackburn2001] Chapter 1` as evidence that box is the canonical primitive, when in fact Blackburn Definition 1.9 uses diamond as primitive. All changes are to Lean 4 doc-comments only -- no proof code is modified. Done when all six citation sites are corrected, `lake build` passes, and `lake exe lint-style` reports no new issues.
+Research identified two classes of citation error in the Modal/ and Foundations/Logic/ docstrings: (1) four occurrences of `[ChagrovZakharyaschev1997] Section 1.1` that should read `Section 3.1` (Section 1.1 covers classical propositional logic; the modal language with box as primitive is defined in Section 3.1), and (2) two docstrings that cite `[Blackburn2001] Chapter 1` as evidence that box is the canonical primitive, when in fact Blackburn Definition 1.9 uses diamond as primitive. The corrected docstrings will give the proof-theoretic justification for box-as-primitive: necessitation (`if ⊢ φ then ⊢ □φ`) and the K axiom are pure proof rules on a single primitive, whereas with diamond primitive necessitation becomes the interaction law `¬◇¬`, mixing two connectives. All changes are to Lean 4 doc-comments only -- no proof code is modified. Done when all six citation sites are corrected, `lake build` passes, and `lake exe lint-style` reports no new issues.
 
 ### Research Integration
 
@@ -20,7 +20,7 @@ Key findings from report 01_modal-citation-review.md:
 - ChagrovZakharyaschev1997 Section 1.1 is classical propositional logic; modal box is defined in Section 3.1
 - Blackburn2001 Chapter 1 Definition 1.9 defines diamond as primitive, box as derived
 - Both conventions (box-first, diamond-first) are widespread; neither is universally "canonical"
-- Research recommends option (c): acknowledge both conventions, cite Chagrov for box-first, cite Blackburn for the duality
+- Research recommends giving the proof-theoretic justification: necessitation and K are pure proof rules on box; with diamond primitive, necessitation becomes the interaction law ¬◇¬. Cite Chagrov Section 3.1 for box-first, Blackburn Ch. 1 for the diamond-first alternative
 - Connectives.lean line 53 has a separate "Chapter 1" reference to ChagrovZakharyaschev that should be "Chapter 3"
 
 ### Prior Plan Reference
@@ -36,7 +36,7 @@ This task maintains documentation quality for the Modal/ module listed in the RO
 **Goals**:
 - Fix all four `Section 1.1` -> `Section 3.1` references for ChagrovZakharyaschev1997
 - Fix the `Chapter 1` -> `Chapter 3` reference for ChagrovZakharyaschev1997 in Connectives.lean line 53
-- Reword Blackburn2001 attribution to accurately reflect that Blackburn uses diamond as primitive while CSLib follows the box-first convention of Chagrov & Zakharyaschev
+- Reword Blackburn2001 attribution to give the proof-theoretic justification: necessitation and K are pure proof rules on box; with diamond primitive, necessitation becomes the interaction law ¬◇¬. Cite Blackburn for the diamond-first alternative and Chagrov & Zakharyaschev Section 3.1 for the box-first presentation
 - Verify build and style lint pass after all edits
 
 **Non-Goals**:
@@ -68,7 +68,7 @@ Phases within the same wave can execute in parallel.
 **Goal**: Correct all six citation sites across Basic.lean and Connectives.lean.
 
 **Tasks**:
-- [ ] Edit `Cslib/Logics/Modal/Basic.lean` lines 29-30: Reword the Blackburn/Chagrov citation block. Replace the claim that box is "the canonical primitive modal operator ... following [Blackburn2001] Chapter 1 and [ChagrovZakharyaschev1997] Section 1.1" with wording that acknowledges both conventions. Suggested replacement: "Box and diamond are interdefinable in classical modal logic ([Blackburn2001] Chapter 1). CSLib adopts box as primitive following [ChagrovZakharyaschev1997] Section 3.1, where box is the primitive modal connective."
+- [ ] Edit `Cslib/Logics/Modal/Basic.lean` lines 29-30: Reword the Blackburn/Chagrov citation block. Replace the claim that box is "the canonical primitive modal operator ... following [Blackburn2001] Chapter 1 and [ChagrovZakharyaschev1997] Section 1.1" with wording that gives the proof-theoretic justification. Suggested replacement: "CSLib takes box as primitive because the necessitation rule (`if ⊢ φ then ⊢ □φ`) and the K axiom are pure proof rules on box; with diamond primitive, necessitation becomes the interaction law `¬◇¬` ([Blackburn2001] Chapter 1 takes the diamond-first alternative). See [ChagrovZakharyaschev1997] Section 3.1 for the box-first presentation."
 - [ ] Edit `Cslib/Logics/Modal/Basic.lean` lines 94-95: Change `[ChagrovZakharyaschev1997] Section 1.1` to `[ChagrovZakharyaschev1997] Section 3.1` in the diamond docstring. Also update the Blackburn reference to note the duality rather than claiming box primacy.
 - [ ] Edit `Cslib/Foundations/Logic/Connectives.lean` lines 72-73 (HasBox docstring): Reword to match the corrected attribution pattern. Change `[ChagrovZakharyaschev1997] Section 1.1` to `Section 3.1` and clarify the Blackburn citation.
 - [ ] Edit `Cslib/Foundations/Logic/Connectives.lean` line 53: Change `Chapter 1` to `Chapter 3` in the module-level references list for ChagrovZakharyaschev1997.

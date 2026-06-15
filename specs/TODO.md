@@ -40,7 +40,7 @@ next_project_number: 208
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-207 [RESEARCHED] — Research refactoring Temporal/ and Modal/ implementations based o
+207 [RESEARCHING] — Research refactoring Temporal/ and Modal/ implementations based o
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -51,7 +51,7 @@ next_project_number: 208
 ## Tasks
 
 ### 207. Research temporal modal refactor pr649
-- **Status**: [RESEARCHED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -111,7 +111,9 @@ next_project_number: 208
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
-- **Research**: [202_review_hilbert_classes_vs_pr648/reports/01_hilbert-classes-comparison.md]
+- **Research**:
+  - [202_review_hilbert_classes_vs_pr648/reports/01_hilbert-classes-comparison.md]
+  - [202_review_hilbert_classes_vs_pr648/reports/02_team-research.md]
 
 **Description**: Comprehensive review of cslib PR #648 (https://github.com/leanprover/cslib/pull/648). This task serves as the central tracking point for all review dimensions: upstream reviewer feedback, architectural concerns, API design decisions, compatibility with existing Propositional/ and Hilbert/ developments, naming conventions, and any requested changes. Initial research compared the thomaskwaring/cslib_SKI Hilbert branch approach against the PR's Hilbert system design; further research rounds should address additional review concerns as they arise, including code quality, proof style, module organization, and alignment with cslib contribution standards.
 

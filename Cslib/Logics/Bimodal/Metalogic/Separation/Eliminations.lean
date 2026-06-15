@@ -28,6 +28,7 @@ set_option linter.flexible false
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 set_option linter.unusedSimpArgs false
+set_option linter.style.openClassical false
 
 @[expose] public section
 
@@ -83,7 +84,7 @@ set_option maxHeartbeats 800000 in
 theorem elim_case_1 (a q A B : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hA : isUFree A = true) (hB : isUFree B = true)
-    (ha' : isSFree a = true) (_hq' : isSFree q = true)
+    (_ha' : isSFree a = true) (_hq' : isSFree q = true)
     (hA' : isSFree A = true) (hB' : isSFree B = true) :
     ∃ psi : Formula Atom,
       intEquiv (.snce (Formula.and a (.untl A B)) q) psi ∧

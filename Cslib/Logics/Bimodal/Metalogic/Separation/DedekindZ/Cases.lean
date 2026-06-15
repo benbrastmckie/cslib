@@ -24,6 +24,8 @@ set_option linter.style.show false
 set_option linter.style.maxHeartbeats false
 set_option linter.unusedDecidableInType false
 set_option linter.unusedSectionVars false
+set_option linter.style.openClassical false
+set_option linter.unusedTactic false
 
 @[expose] public section
 

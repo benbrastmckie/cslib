@@ -145,7 +145,7 @@ context derives ¬φ (i.e., φ → ⊥).
 
 Uses the deduction theorem.
 -/
-noncomputable def derivesNegFromInconsistentExtension {fc : FrameClass}
+@[reducible] noncomputable def derivesNegFromInconsistentExtension {fc : FrameClass}
     {Γ : Context Atom} {φ : Formula Atom}
     (h_incons : ¬Consistent (fc := fc) (φ :: Γ)) :
     Nonempty (DerivationTree fc Γ (Formula.neg φ)) := by

@@ -64,6 +64,7 @@ set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 set_option linter.style.setOption false
 set_option linter.flexible false
+set_option linter.style.openClassical false
 
 attribute [local instance] Classical.propDecidable
 
@@ -225,7 +226,7 @@ theorem limit_dom_dense_from_F'T (fc : FrameClass) (A : Set (Formula Atom)) (h_m
 `DenselyOrdered` instance for `LimitDomSubtype`, conditional on F'T being
 in every domain MCS. Wraps `limit_dom_dense_from_F'T`.
 -/
-def limitDomSubtypeDenselyOrderedFromF'T (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
+@[reducible] def limitDomSubtypeDenselyOrderedFromF'T (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (h_dense : ∀ x ∈ limitDom fc A h_mcs,
       nextTop.neg ∈ limitF fc A h_mcs x) :
     DenselyOrdered (LimitDomSubtype fc A h_mcs) where
@@ -923,7 +924,7 @@ theorem limitDomSubtype_succ_le_iff (fc : FrameClass) (A : Set (Formula Atom)) (
 /--
 `SuccOrder` instance for `LimitDomSubtype` in the discrete case.
 -/
-noncomputable def limitDomSubtypeSuccOrder (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
+@[reducible] noncomputable def limitDomSubtypeSuccOrder (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (h_discrete : ∀ x ∈ limitDom fc A h_mcs, nextTop ∈ limitF fc A h_mcs x) :
     SuccOrder (LimitDomSubtype fc A h_mcs) :=
   SuccOrder.ofSuccLeIff
@@ -976,7 +977,7 @@ theorem limitDomSubtype_le_pred_iff (fc : FrameClass) (A : Set (Formula Atom)) (
 /--
 `PredOrder` instance for `LimitDomSubtype` in the discrete case.
 -/
-noncomputable def limitDomSubtypePredOrder (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
+@[reducible] noncomputable def limitDomSubtypePredOrder (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (h_discrete : ∀ x ∈ limitDom fc A h_mcs, nextTop ∈ limitF fc A h_mcs x) :
     PredOrder (LimitDomSubtype fc A h_mcs) where
   pred := limitDomSubtypePred fc A h_mcs h_discrete

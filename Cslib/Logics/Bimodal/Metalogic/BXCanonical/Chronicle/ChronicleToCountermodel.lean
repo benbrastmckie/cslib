@@ -41,6 +41,7 @@ set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 set_option linter.style.setOption false
 set_option linter.flexible false
+set_option linter.style.openClassical false
 
 attribute [local instance] Classical.propDecidable
 
@@ -81,7 +82,7 @@ theorem succ_cofinal (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaxi
   exact chronicle_gap_contradiction fc A h_mcs h_discrete a b h_lt (fun k => h_all k)
 
 /-- `IsSuccArchimedean` for `LimitDomSubtype` in the discrete case. -/
-noncomputable def limitDomSubtypeIsSuccArchimedean (fc : FrameClass)
+@[reducible] noncomputable def limitDomSubtypeIsSuccArchimedean (fc : FrameClass)
     (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (h_discrete : ∀ x ∈ limitDom fc A h_mcs, nextTop ∈ limitF fc A h_mcs x) :
     @IsSuccArchimedean _ _ (limitDomSubtypeSuccOrder fc A h_mcs h_discrete) := by

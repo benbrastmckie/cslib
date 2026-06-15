@@ -282,7 +282,7 @@ theorem c2'_preserved_on_old_adjacent {fc : FrameClass} {χ χ' : Chronicle Atom
     (h_g_agrees : ∀ a b, a ∈ χ.dom → b ∈ χ.dom → χ'.g a b = χ.g a b)
     (_h_dom_sub : χ.dom ⊆ χ'.dom)
     {a b : Rat}
-    (h_adj' : Adjacent χ'.dom a b)
+    (_h_adj' : Adjacent χ'.dom a b)
     (h_a_old : a ∈ χ.dom) (h_b_old : b ∈ χ.dom)
     (h_adj_old : Adjacent χ.dom a b) :
     BurgessR3Maximal fc (χ'.f a) (χ'.g a b) (χ'.f b) := by

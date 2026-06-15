@@ -20,6 +20,7 @@ and Case 3 equivalence for Z.
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 set_option linter.unusedSimpArgs false
+set_option linter.style.openClassical false
 
 @[expose] public section
 

@@ -410,8 +410,7 @@ def ultrafilterToSet (uf : BoolAlgUltrafilter (LindenbaumAlg Atom)) : Set (Formu
 theorem ultrafilterToSet_mcs (uf : BoolAlgUltrafilter (LindenbaumAlg Atom)) :
     SetMaximalConsistent FrameClass.Base (ultrafilterToSet uf) := by
   constructor
-  · intro L hL
-    intro ⟨d_bot⟩
+  · intro L hL ⟨d_bot⟩
     have h_meet_in_uf : ∀ M : List (Formula Atom), (∀ ψ ∈ M, toQuot ψ ∈ uf.carrier) →
         List.foldl (fun acc φ => acc ⊓ toQuot φ) ⊤ M ∈ uf.carrier := by
       intro M

@@ -1,7 +1,7 @@
 # Implementation Plan: Generic Deduction Theorem and MCS via listImp
 
 - **Task**: 207 - Research refactoring Temporal/ and Modal/ implementations based on PR #649 review feedback
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 25 hours
 - **Dependencies**: None (PR #649 must be merged first, but the generic files build independently)
 - **Research Inputs**: reports/01_team-research.md, reports/02_reviewer-directed-research.md, reports/03_ideal-solution-research.md
@@ -83,7 +83,7 @@ Phases are strictly sequential. Each builds on the prior phase's output.
 
 ---
 
-### Phase 1: Add Missing Combinator [NOT STARTED]
+### Phase 1: Add Missing Combinator [IN PROGRESS]
 
 **Goal**: Add `implication_absorption` (`|- (phi -> phi -> psi) -> phi -> psi`) to the combinator library, which is required by the `list_flip_implication` proofs.
 

@@ -1,16 +1,104 @@
 {
-  "next_project_number": 208,
+  "next_project_number": 216,
   "active_projects": [
+    {
+      "project_number": 208,
+      "project_name": "lint_missing_docstrings",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Add missing documentation strings to Bimodal/Temporal/Modal declarations",
+      "description": "Add docstrings to 327 declarations flagged by #lint across Bimodal/ (190), Temporal/ (80), Modal/ (57). Most are theorems and definitions that need brief /-- ... -/ docstrings describing their purpose.",
+      "topic": "Project Management",
+      "created": "2026-06-15T17:59:27Z",
+      "last_updated": "2026-06-15T17:59:27Z"
+    },
+    {
+      "project_number": 209,
+      "project_name": "lint_namespace_fixes",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Fix namespace lint errors (not namespaced + duplicate namespace)",
+      "description": "Fix 298 namespace lint errors: 239 declarations not properly namespaced and 59 duplicate namespace components (Chronicle, Temporal, Bimodal repeated in names). Requires moving declarations into correct namespaces or renaming.",
+      "topic": "Project Management",
+      "created": "2026-06-15T17:59:27Z",
+      "last_updated": "2026-06-15T17:59:27Z"
+    },
+    {
+      "project_number": 210,
+      "project_name": "lint_naming_conventions",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Fix naming convention violations (underscore to camelCase)",
+      "description": "Fix 105 naming convention violations where declaration names contain underscores instead of lowerCamelCase or UpperCamelCase per Mathlib convention. Mostly in Bimodal and Temporal metalogic files.",
+      "topic": "Project Management",
+      "created": "2026-06-15T17:59:27Z",
+      "last_updated": "2026-06-15T17:59:27Z"
+    },
+    {
+      "project_number": 211,
+      "project_name": "lint_def_to_lemma",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Change def to lemma/theorem for Prop-valued declarations",
+      "description": "Fix 55 lint errors where Prop-valued declarations use def instead of lemma/theorem. These are in Bimodal frame conditions, soundness, BXCanonical, and Temporal chronicle files.",
+      "topic": "Project Management",
+      "created": "2026-06-15T17:59:27Z",
+      "last_updated": "2026-06-15T17:59:27Z"
+    },
+    {
+      "project_number": 212,
+      "project_name": "lint_simp_issues",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Fix simp lint issues (LHS simplifies, simp can prove)",
+      "description": "Fix 25 simp-related lint errors: 23 where the LHS of a simp lemma already simplifies (need to adjust the simp normal form) and 2 where simp can prove the lemma outright.",
+      "topic": "Project Management",
+      "created": "2026-06-15T17:59:27Z",
+      "last_updated": "2026-06-15T17:59:27Z"
+    },
+    {
+      "project_number": 213,
+      "project_name": "lint_unused_arguments",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Fix unused argument lint errors",
+      "description": "Fix ~17 unused argument lint errors across Bimodal and Temporal chronicle files. Arguments flagged as not used in the declaration body need to be removed or the code restructured.",
+      "topic": "Project Management",
+      "created": "2026-06-15T17:59:27Z",
+      "last_updated": "2026-06-15T17:59:27Z"
+    },
+    {
+      "project_number": 214,
+      "project_name": "fix_cases_tactic_warnings",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Fix tactic goal-count warnings in DedekindZ/Cases.lean",
+      "description": "Fix 4 tactic goal-count warnings in Cslib/Logics/Bimodal/Metalogic/Separation/DedekindZ/Cases.lean where apply chains create unfocused goals. Restructure the proof to properly focus each subgoal.",
+      "topic": "Bimodal Porting",
+      "created": "2026-06-15T17:59:27Z",
+      "last_updated": "2026-06-15T17:59:27Z"
+    },
+    {
+      "project_number": 215,
+      "project_name": "fill_bimodal_sorries",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Fill sorry declarations in Bimodal BXCanonical and Bundle files",
+      "description": "Fill 22 sorry declarations across 5 files: Bundle/SuccRelation.lean (7), BXCanonical/Chronicle/ChronicleToCountermodel.lean (10), Bundle/UntilSinceCoherence.lean (2), BXCanonical/Completeness/Dense.lean (1), BXCanonical/Frame.lean (1). These are incomplete proofs in the bimodal temporal logic development.",
+      "topic": "Bimodal Porting",
+      "created": "2026-06-15T17:59:27Z",
+      "last_updated": "2026-06-15T17:59:27Z"
+    },
     {
       "project_number": 207,
       "project_name": "research_temporal_modal_refactor_pr649",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Research refactoring Temporal/ and Modal/ implementations based on PR #649 review feedback on Tense Logic, drawing on Isabelle Propositional_Logic_Class formalization for a dependent type system approach in Lean 4",
       "topic": "Temporal Logic",
       "created": "2026-06-15T16:39:14Z",
-      "last_updated": "2026-06-15T17:53:37Z",
-      "session_id": "sess_1781545740_7a473a",
+      "last_updated": "2026-06-15T17:57:21Z",
+      "session_id": "sess_1781546230_13748d",
       "researched": "2026-06-15T17:47:40Z",
       "next_artifact_number": 5,
       "artifacts": [
@@ -153,13 +241,13 @@
     {
       "project_number": 202,
       "project_name": "review_hilbert_classes_vs_pr648",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Comprehensive review of cslib PR #648 (https://github.com/leanprover/cslib/pull/648). This task serves as the central tracking point for all review dimensions: upstream reviewer feedback, architectural concerns, API design decisions, compatibility with existing Propositional/ and Hilbert/ developments, naming conventions, and any requested changes. Initial research compared the thomaskwaring/cslib_SKI Hilbert branch approach against the PR's Hilbert system design; further research rounds should address additional review concerns as they arise, including code quality, proof style, module organization, and alignment with cslib contribution standards.",
       "created": "2026-06-15T00:22:18Z",
-      "last_updated": "2026-06-15T17:56:42Z",
-      "session_id": "sess_1781546055_d49ece",
+      "last_updated": "2026-06-15T17:59:30Z",
+      "session_id": "sess_1781546361_308405",
       "artifacts": [
         {
           "type": "research",

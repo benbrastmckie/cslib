@@ -1,5 +1,5 @@
 ---
-next_project_number: 208
+next_project_number: 216
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 208
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,202,207 | -- | Bimodal Porting, Propositional Logic, Propositional PRs, ... |
+| 1 | 36,37,180,188,192,195,197,202,207,208,209,210,211,212,213,214,215 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -22,16 +22,27 @@ next_project_number: 208
 36 [BLOCKED] — Port discrete completeness (completeness_discrete theorem) and We
 37 [BLOCKED] — Port continuous extension completeness once developed upstream. T
 195 [NOT STARTED] — Fix 30+ linter warnings in Cslib/Logics/Bimodal/Metalogic/Soundne
+214 [NOT STARTED] — Fix 4 tactic goal-count warnings in Cslib/Logics/Bimodal/Metalogi
+215 [NOT STARTED] — Fill 22 sorry declarations across 5 files: Bundle/SuccRelation.le
 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
 
 ### Foundations
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
+### Project Management
+
+208 [NOT STARTED] — Add docstrings to 327 declarations flagged by #lint across Bimoda
+209 [NOT STARTED] — Fix 298 namespace lint errors: 239 declarations not properly name
+210 [NOT STARTED] — Fix 105 naming convention violations where declaration names cont
+211 [NOT STARTED] — Fix 55 lint errors where Prop-valued declarations use def instead
+212 [NOT STARTED] — Fix 25 simp-related lint errors: 23 where the LHS of a simp lemma
+213 [NOT STARTED] — Fix ~17 unused argument lint errors across Bimodal and Temporal c
+
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
-202 [PLANNED] — Comprehensive review of cslib PR #648 (https://github.com/leanpro
+202 [IMPLEMENTING] — Comprehensive review of cslib PR #648 (https://github.com/leanpro
 
 ### Propositional PRs
 
@@ -40,7 +51,7 @@ next_project_number: 208
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-207 [PLANNED] — Research refactoring Temporal/ and Modal/ implementations based o
+207 [IMPLEMENTING] — Research refactoring Temporal/ and Modal/ implementations based o
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -50,8 +61,88 @@ next_project_number: 208
 
 ## Tasks
 
+### 215. Fill sorry declarations in Bimodal BXCanonical and Bundle files
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Bimodal Porting
+- **Dependencies**: None
+
+**Description**: Fill 22 sorry declarations across 5 files: Bundle/SuccRelation.lean (7), BXCanonical/Chronicle/ChronicleToCountermodel.lean (10), Bundle/UntilSinceCoherence.lean (2), BXCanonical/Completeness/Dense.lean (1), BXCanonical/Frame.lean (1). These are incomplete proofs in the bimodal temporal logic development.
+
+---
+
+### 214. Fix tactic goal-count warnings in DedekindZ/Cases.lean
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Bimodal Porting
+- **Dependencies**: None
+
+**Description**: Fix 4 tactic goal-count warnings in Cslib/Logics/Bimodal/Metalogic/Separation/DedekindZ/Cases.lean where apply chains create unfocused goals. Restructure the proof to properly focus each subgoal.
+
+---
+
+### 213. Fix unused argument lint errors
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Project Management
+- **Dependencies**: None
+
+**Description**: Fix ~17 unused argument lint errors across Bimodal and Temporal chronicle files. Arguments flagged as not used in the declaration body need to be removed or the code restructured.
+
+---
+
+### 212. Fix simp lint issues (LHS simplifies, simp can prove)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Project Management
+- **Dependencies**: None
+
+**Description**: Fix 25 simp-related lint errors: 23 where the LHS of a simp lemma already simplifies (need to adjust the simp normal form) and 2 where simp can prove the lemma outright.
+
+---
+
+### 211. Change def to lemma/theorem for Prop-valued declarations
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Project Management
+- **Dependencies**: None
+
+**Description**: Fix 55 lint errors where Prop-valued declarations use def instead of lemma/theorem. These are in Bimodal frame conditions, soundness, BXCanonical, and Temporal chronicle files.
+
+---
+
+### 210. Fix naming convention violations (underscore to camelCase)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Project Management
+- **Dependencies**: None
+
+**Description**: Fix 105 naming convention violations where declaration names contain underscores instead of lowerCamelCase or UpperCamelCase per Mathlib convention. Mostly in Bimodal and Temporal metalogic files.
+
+---
+
+### 209. Fix namespace lint errors (not namespaced + duplicate namespace)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Project Management
+- **Dependencies**: None
+
+**Description**: Fix 298 namespace lint errors: 239 declarations not properly namespaced and 59 duplicate namespace components (Chronicle, Temporal, Bimodal repeated in names). Requires moving declarations into correct namespaces or renaming.
+
+---
+
+### 208. Add missing documentation strings to Bimodal/Temporal/Modal declarations
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Project Management
+- **Dependencies**: None
+
+**Description**: Add docstrings to 327 declarations flagged by #lint across Bimodal/ (190), Temporal/ (80), Modal/ (57). Most are theorems and definitions that need brief /-- ... -/ docstrings describing their purpose.
+
+---
+
 ### 207. Research temporal modal refactor pr649
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -111,7 +202,7 @@ next_project_number: 208
 ---
 
 ### 202. Review hilbert classes vs pr648
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

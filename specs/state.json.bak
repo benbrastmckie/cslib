@@ -1,16 +1,6 @@
 {
-  "next_project_number": 219,
+  "next_project_number": 218,
   "active_projects": [
-    {
-      "project_number": 218,
-      "project_name": "push_bib_entries_minor_fixes_pr649",
-      "status": "not_started",
-      "task_type": "pr",
-      "description": "Push missing bib entries and minor fixes to PR #649: add 7 missing references.bib entries (Church1956, Gentzen1935, Johansson1937, McKinsey1939, Prawitz1965, TroelstraVanDalen1988, Wajsberg1938) referenced by Connectives.lean, Defs.lean, and NaturalDeduction/Basic.lean; include Defs.lean architecture docstring, NaturalDeduction/Basic.lean Γ→G rename, and copyright date updates",
-      "topic": "Temporal Logic",
-      "created": "2026-06-15T23:13:54Z",
-      "last_updated": "2026-06-15T23:13:54Z"
-    },
     {
       "project_number": 217,
       "project_name": "push_generic_metalogic_to_pr649",
@@ -21,25 +11,23 @@
       "created": "2026-06-15T18:41:56Z",
       "last_updated": "2026-06-15T18:50:24Z",
       "session_id": "sess_1781549007_3bd2f7",
-      "artifacts": [
-        {
-          "path": "specs/217_push_generic_metalogic_to_pr649/reports/01_pr649-research.md",
-          "type": "research",
-          "summary": "Research report for PR 649 changes"
-        }
-      ],
+      "artifacts": {
+        "research": [
+          "specs/217_push_generic_metalogic_to_pr649/reports/01_pr649-research.md"
+        ]
+      },
       "next_artifact_number": 2
     },
     {
       "project_number": 216,
       "project_name": "push_relevant_changes_to_pr_648",
-      "status": "completed",
+      "status": "planned",
       "task_type": "pr",
       "description": "Given what task 202 implemented, push a single commit with all and only the relevant changes to https://github.com/leanprover/cslib/pull/648, where the aim is to keep the LOC ~300 to avoid overwhelming reviewers",
       "topic": "Propositional Logic",
       "created": "2026-06-15T18:19:59Z",
-      "last_updated": "2026-06-15T22:17:48Z",
-      "session_id": "sess_1781558473_4eec57",
+      "last_updated": "2026-06-15T18:45:22Z",
+      "session_id": "sess_1781548967_6e45b2",
       "next_artifact_number": 2,
       "memory_candidates": [
         {
@@ -66,11 +54,6 @@
           "path": "specs/216_push_relevant_changes_to_pr_648/plans/01_pr648-push-plan.md",
           "type": "plan",
           "summary": "3-phase plan to push Bool.lean and minor fixes to PR 648, verify build, and update PR description"
-        },
-        {
-          "path": "specs/216_push_relevant_changes_to_pr_648/pr-description.md",
-          "type": "pr_description",
-          "summary": "Updated PR 648 description with Semantics files, Zulip context, and Atom→Prop rationale"
         }
       ],
       "plan_metadata": {
@@ -97,21 +80,18 @@
             "integrated_date": "2026-06-15"
           }
         ]
-      },
-      "base_branch": "main",
-      "completion_summary": "Pushed Bool.lean + Basic.lean (semantics) + minor copyright/citation fixes to PR 648. 405 additions across 6 files."
+      }
     },
     {
       "project_number": 208,
       "project_name": "lint_missing_docstrings",
-      "status": "completed",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "Add missing documentation strings to Bimodal/Temporal/Modal declarations",
       "description": "Add docstrings to 327 declarations flagged by #lint across Bimodal/ (190), Temporal/ (80), Modal/ (57). Most are theorems and definitions that need brief /-- ... -/ docstrings describing their purpose.",
       "topic": "Project Management",
       "created": "2026-06-15T17:59:27Z",
-      "last_updated": "2026-06-15T17:59:27Z",
-      "completion_summary": "Added 400+ docstrings eliminating all docBlame lint errors across Bimodal and Temporal"
+      "last_updated": "2026-06-15T17:59:27Z"
     },
     {
       "project_number": 209,
@@ -127,26 +107,24 @@
     {
       "project_number": 210,
       "project_name": "lint_naming_conventions",
-      "status": "completed",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "Fix naming convention violations (underscore to camelCase)",
       "description": "Fix 105 naming convention violations where declaration names contain underscores instead of lowerCamelCase or UpperCamelCase per Mathlib convention. Mostly in Bimodal and Temporal metalogic files.",
       "topic": "Project Management",
       "created": "2026-06-15T17:59:27Z",
-      "last_updated": "2026-06-15T17:59:27Z",
-      "completion_summary": "Fixed all 105 naming violations"
+      "last_updated": "2026-06-15T17:59:27Z"
     },
     {
       "project_number": 211,
       "project_name": "lint_def_to_lemma",
-      "status": "completed",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "Change def to lemma/theorem for Prop-valued declarations",
       "description": "Fix 55 lint errors where Prop-valued declarations use def instead of lemma/theorem. These are in Bimodal frame conditions, soundness, BXCanonical, and Temporal chronicle files.",
       "topic": "Project Management",
       "created": "2026-06-15T17:59:27Z",
-      "last_updated": "2026-06-15T17:59:27Z",
-      "completion_summary": "Changed 55 def declarations to lemma/theorem across 22 files"
+      "last_updated": "2026-06-15T17:59:27Z"
     },
     {
       "project_number": 212,

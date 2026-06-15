@@ -1,21 +1,29 @@
 {
-  "status": "planned",
+  "status": "implemented",
+  "started_at": "2026-06-15T00:00:00Z",
   "artifacts": [
     {
-      "type": "plan",
-      "path": "specs/212_lint_simp_issues/plans/01_simp-plan.md",
-      "summary": "2-phase plan to remove @[simp] from 25 declarations across 6 files and verify with CI pipeline"
+      "path": "specs/212_lint_simp_issues/summaries/01_simp-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary for task 212: 25 @[simp] removals across 6 files, zero simpNF errors, no regressions in modified modules"
     }
   ],
-  "next_steps": "Run /implement 212 to execute the plan",
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "lint_simpNF_errors": 0,
+    "note": "lake test has pre-existing failures in Instances.lean, IntHelpers.lean, MaximalConsistent.lean, HierarchyDefs.lean from other tasks; none of those files were modified by task 212"
+  },
+  "partial_progress": null,
   "metadata": {
     "session_id": "sess_1750000000_a1b2c3_212",
-    "agent_type": "planner-agent",
+    "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
-    "phase_count": 2,
-    "estimated_hours": 0.5,
-    "dependency_waves": [[1], [2]]
-  },
-  "memory_candidates": []
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
 }

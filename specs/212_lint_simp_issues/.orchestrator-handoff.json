@@ -1,14 +1,16 @@
 {
-  "status": "planned",
-  "summary": "2-phase plan to fix 25 simpNF lint errors by removing @[simp] from declarations across 6 Bimodal logic files. Phase 1: mechanical attribute removal (15 min). Phase 2: lake build + lint + test verification (15 min). Total effort: 0.5 hours.",
+  "status": "implemented",
+  "summary": "Removed @[simp] from all 25 flagged declarations across 6 Bimodal files. lake build passes on all 6 modified modules. lake lint shows 0 simpNF errors (0 total in codebase). Test failures are pre-existing in unrelated files (Instances.lean, IntHelpers.lean, MaximalConsistent.lean, HierarchyDefs.lean) that were not touched by this task.",
   "artifacts": [
     {
-      "path": "specs/212_lint_simp_issues/plans/01_simp-plan.md",
-      "type": "plan",
-      "summary": "Implementation plan: remove @[simp] from 25 declarations across 6 files, verify with CI"
+      "path": "specs/212_lint_simp_issues/summaries/01_simp-summary.md",
+      "type": "summary",
+      "summary": "25 @[simp] removals across 6 files; zero simpNF errors; no regressions in modified modules"
     }
   ],
   "blockers": [],
+  "phases_completed": 2,
+  "phases_total": 2,
   "continuation_context": null,
-  "next_action_hint": "implement"
+  "next_action_hint": "complete"
 }

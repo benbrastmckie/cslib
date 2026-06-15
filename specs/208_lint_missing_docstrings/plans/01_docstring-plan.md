@@ -1,7 +1,7 @@
 # Implementation Plan: Add Missing Documentation Strings
 
 - **Task**: 208 - Add missing documentation strings to Bimodal/Temporal/Modal declarations
-- **Status**: [IN PROGRESS]
+- **Status**: [COMPLETED]
 - **Effort**: 9 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/208_lint_missing_docstrings/reports/01_lint-docstring-research.md
@@ -61,16 +61,16 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Bimodal/Theorems -- Proof-Bearing Definitions [NOT STARTED]
+### Phase 1: Bimodal/Theorems -- Proof-Bearing Definitions [COMPLETED]
 
 **Goal**: Add docstrings to 78 proof-bearing definitions across 5 theorem files. These are the most formulaic: each definition proves a Hilbert-style derivation, so the docstring follows the pattern `` /-- `formula`: brief description. -/ ``.
 
 **Tasks**:
-- [ ] Add 41 docstrings to `Bimodal/Theorems/TemporalDerived.lean` (G/H/F/P distribution, monotonicity, duality derivations)
-- [ ] Add 16 docstrings to `Bimodal/Theorems/Propositional/Connectives.lean` (iff, contraposition, De Morgan combinators)
-- [ ] Add 14 docstrings to `Bimodal/Theorems/Propositional/Core.lean` (LEM, DNE, RAA, ECQ, disjunction)
-- [ ] Add 7 docstrings to `Bimodal/Theorems/GeneralizedNecessitation.lean` (generalized modal/temporal K, past necessitation)
-- [ ] Verify with `lake lint` that docBlame errors are resolved for these files
+- [x] Add 41 docstrings to `Bimodal/Theorems/TemporalDerived.lean` (41/41)
+- [x] Add 16 docstrings to `Bimodal/Theorems/Propositional/Connectives.lean` (16/16)
+- [x] Add 14 docstrings to `Bimodal/Theorems/Propositional/Core.lean` (14/14)
+- [x] Add 7 docstrings to `Bimodal/Theorems/GeneralizedNecessitation.lean` (7/7)
+- [x] Verify with `lake lint` that docBlame errors are resolved for these files
 
 **Timing**: 1.5 hours
 
@@ -88,14 +88,14 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Bimodal/Syntax -- Formula Infrastructure [NOT STARTED]
+### Phase 2: Bimodal/Syntax -- Formula Infrastructure [COMPLETED]
 
 **Goal**: Add docstrings to 34 formula-level definitions across 2 subformula closure files. These are predicates, extractors, and set definitions operating on the formula datatype.
 
 **Tasks**:
-- [ ] Add 26 docstrings to `Bimodal/Syntax/SubformulaClosure/TemporalFormulas.lean` (deferral closure, seriality formulas, blocking sets, abbreviations)
-- [ ] Add 8 docstrings to `Bimodal/Syntax/SubformulaClosure/NestingDepth.lean` (nesting depth functions, extractors, formula predicates)
-- [ ] Verify with `lake lint` that docBlame errors are resolved for these files
+- [x] Add 26 docstrings to `Bimodal/Syntax/SubformulaClosure/TemporalFormulas.lean` (26/26)
+- [x] Add 8 docstrings to `Bimodal/Syntax/SubformulaClosure/NestingDepth.lean` (8/8)
+- [x] Verify with `lake lint` that docBlame errors are resolved for these files
 
 **Timing**: 1 hour
 
@@ -111,21 +111,23 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Bimodal/Metalogic/Bundle + Bimodal/Metalogic/Separation + Bimodal/Metalogic/Algebraic [NOT STARTED]
+### Phase 3: Bimodal/Metalogic/Bundle + Bimodal/Metalogic/Separation + Bimodal/Metalogic/Algebraic [COMPLETED]
 
 **Goal**: Add docstrings to 32 declarations across 8 files in the Bundle, Separation, and Algebraic subdirectories. These are content-set definitions, saturation predicates, and algebraic constructions.
 
 **Tasks**:
-- [ ] Add 10 docstrings to `Bimodal/Metalogic/Bundle/TemporalCoherence.lean` (temporal coherence family, G/H DNE, until/since coherence)
-- [ ] Add 7 docstrings to `Bimodal/Metalogic/Bundle/ModalSaturation.lean` (modal saturation, DNE theorems, SaturatedBFMCS inductive)
-- [ ] Add 6 docstrings to `Bimodal/Metalogic/Bundle/TemporalContent.lean` (g/h/f/p/u/s content set definitions)
-- [ ] Add 5 docstrings to `Bimodal/Metalogic/Bundle/Construction.lean` (context utilities, Lindenbaum MCS, context consistency)
-- [ ] Add 1 docstring to `Bimodal/Metalogic/Bundle/FMCSDef.lean` (FMCS.mcs field)
-- [ ] Add 3 docstrings to `Bimodal/Metalogic/Separation/Defs.lean` (IntStructure field, junction depth functions)
-- [ ] Add 2 docstrings to `Bimodal/Metalogic/Algebraic/RestrictedParametricTruthLemma.lean` (negImpImplies helper lemmas)
-- [ ] Add 2 docstrings to `Bimodal/Metalogic/Algebraic/LindenbaumQuotient.lean` (notation terms for provable equivalence and quotient)
-- [ ] Add 1 docstring to `Bimodal/Metalogic/Algebraic/UltrafilterMCS.lean` (BoolAlgUltrafilter.carrier field)
-- [ ] Verify with `lake lint` that docBlame errors are resolved for these files
+- [x] Add 10 docstrings to `Bimodal/Metalogic/Bundle/TemporalCoherence.lean` (10/10)
+- [x] Add 7 docstrings to `Bimodal/Metalogic/Bundle/ModalSaturation.lean` (8/7 — exceeded target)
+- [x] Add 6 docstrings to `Bimodal/Metalogic/Bundle/TemporalContent.lean` (6/6)
+- [x] Add 5 docstrings to `Bimodal/Metalogic/Bundle/Construction.lean` (9/5 — exceeded target)
+- [x] Add 1 docstring to `Bimodal/Metalogic/Bundle/FMCSDef.lean`
+- [x] Add 3 docstrings to `Bimodal/Metalogic/Separation/Defs.lean` (3/3)
+- [x] Add 2 docstrings to `Bimodal/Metalogic/Algebraic/RestrictedParametricTruthLemma.lean` (2/2)
+- [x] Add 2 docstrings to `Bimodal/Metalogic/Algebraic/LindenbaumQuotient.lean`
+- [x] Add 1 docstring to `Bimodal/Metalogic/Algebraic/UltrafilterMCS.lean`
+- [x] Verify with `lake lint` that docBlame errors are resolved for these files
+
+**Extra work**: Agent also added docstrings to `Bundle/CanonicalFrame.lean` (1), `Separation/DedekindZ/Cases.lean` (6), `Separation/DedekindZ/QLemma.lean` (2), `Separation/Eliminations.lean` (2), `Separation/Hierarchy/HierarchyInduction.lean` (5), `Separation/Hierarchy/HierarchyCompletion.lean` (2), `Separation/Hierarchy/HierarchyCaseSep.lean` (2), `Core/DerivationTree.lean` (1) — 21 extra docstrings in files beyond plan scope.
 
 **Timing**: 1 hour
 
@@ -148,21 +150,21 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: Bimodal/Metalogic/BXCanonical -- Canonical Model Construction [NOT STARTED]
+### Phase 4: Bimodal/Metalogic/BXCanonical -- Canonical Model Construction [COMPLETED]
 
 **Goal**: Add docstrings to 82 declarations across 10 files in the BXCanonical subdirectory. This is the largest single subdirectory and includes the chronicle data structures, canonical model construction, frame definitions, and quasimodel components.
 
 **Tasks**:
-- [ ] Add 30 docstrings to `BXCanonical/Chronicle/ChronicleTypes.lean` (chronicle data structures, r-relations, Burgess relations)
-- [ ] Add 16 docstrings to `BXCanonical/Chronicle/CounterexampleElimination.lean` (counterexample structure fields, elimination procedures)
-- [ ] Add 16 docstrings to `BXCanonical/CanonicalModel.lean` (schedule, chains, FMCS construction)
-- [ ] Add 14 docstrings to `BXCanonical/Frame.lean` (BX frame points, ordering, witnesses, content-closed derivation)
-- [ ] Add 6 docstrings to `BXCanonical/Chronicle/PointInsertion.lean` (EnrichedEvent/EnrichedEventSince structure fields)
-- [ ] Add 4 docstrings to `BXCanonical/Quasimodel/HintikkaPoint.lean` (Hintikka point inductive, signature formulas)
-- [ ] Add 3 docstrings to `BXCanonical/Quasimodel/SubformulaClosure.lean` (subformulas, GH enrichment)
-- [ ] Add 3 docstrings to `BXCanonical/Quasimodel/Construction.lean` (QuasimodelChain inductive, sinceDefectCount, HintikkaRawChain field)
-- [ ] Add 3 docstrings to `BXCanonical/Filtration/DefectChain.lean` (until/since defect predicates and counts)
-- [ ] Verify with `lake lint` that docBlame errors are resolved for these files
+- [x] Add 30 docstrings to `BXCanonical/Chronicle/ChronicleTypes.lean` (43/30 — exceeded target)
+- [x] Add 16 docstrings to `BXCanonical/Chronicle/CounterexampleElimination.lean`
+- [x] Add 16 docstrings to `BXCanonical/CanonicalModel.lean`
+- [x] Add 14 docstrings to `BXCanonical/Frame.lean` (24/14 — exceeded target)
+- [x] Add 6 docstrings to `BXCanonical/Chronicle/PointInsertion.lean` (8/6 — exceeded target)
+- [x] Add 4 docstrings to `BXCanonical/Quasimodel/HintikkaPoint.lean` (13/4 — exceeded target)
+- [x] Add 3 docstrings to `BXCanonical/Quasimodel/SubformulaClosure.lean` (11/3 — exceeded target)
+- [x] Add 3 docstrings to `BXCanonical/Quasimodel/Construction.lean` (15/3 — exceeded target)
+- [x] Add 3 docstrings to `BXCanonical/Filtration/DefectChain.lean` (9/3 — exceeded target)
+- [x] Verify with `lake lint` that docBlame errors are resolved for these files
 
 **Timing**: 2 hours
 
@@ -186,16 +188,16 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 5: Bimodal/FrameConditions + Bimodal/Metalogic/Decidability -- Remaining Bimodal [NOT STARTED]
+### Phase 5: Bimodal/FrameConditions + Bimodal/Metalogic/Decidability -- Remaining Bimodal [COMPLETED]
 
 **Goal**: Add docstrings to the 7 remaining Bimodal declarations across 3 files: frame condition validity definitions, the tableau axiom matcher identity, and the Perpetuity helper.
 
 **Tasks**:
-- [ ] Add 5 docstrings to `Bimodal/FrameConditions/Validity.lean` (parameterized validity definitions for linear, dense, discrete, Int)
-- [ ] Add 1 docstring to `Bimodal/FrameConditions/Soundness.lean` (soundnessOver definition)
-- [ ] Add 1 docstring to `Bimodal/Metalogic/Decidability/AxiomMatcher.lean` (identity definition)
-- [ ] Verify with `lake lint` that docBlame errors are resolved for these files
-- [ ] Confirm all 252 Bimodal/ docBlame errors are now resolved
+- [x] Add 5 docstrings to `Bimodal/FrameConditions/Validity.lean` (5/5)
+- [x] Add 1 docstring to `Bimodal/FrameConditions/Soundness.lean` (1/1)
+- [x] Add 1 docstring to `Bimodal/Metalogic/Decidability/AxiomMatcher.lean` (1/1)
+- [x] Verify with `lake lint` that docBlame errors are resolved for these files
+- [x] Confirm all 252 Bimodal/ docBlame errors are now resolved
 
 **Timing**: 0.5 hours
 
@@ -212,20 +214,22 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 6: Temporal/ -- All Temporal Declarations [NOT STARTED]
+### Phase 6: Temporal/ -- All Temporal Declarations [COMPLETED]
 
 **Goal**: Add docstrings to all 75 Temporal/ declarations across 7 files. Many of these parallel Bimodal/ structures (Chronicle, PointInsertion, TemporalContent), so docstrings should be consistent with those written in phases 3-4.
 
 **Tasks**:
-- [ ] Add 30 docstrings to `Temporal/Metalogic/Chronicle/ChronicleTypes.lean` (chronicle types, r-relations, Burgess relations -- parallel to Bimodal)
-- [ ] Add 19 docstrings to `Temporal/Metalogic/Chronicle/CounterexampleElimination.lean` (counterexample structures, walk results, elimination procedures)
-- [ ] Add 9 docstrings to `Temporal/Metalogic/Chronicle/Frame.lean` (TPoint fields, content-closed derivation, witnesses)
-- [ ] Add 6 docstrings to `Temporal/Metalogic/TemporalContent.lean` (g/h/f/p/u/s content set definitions -- parallel to Bimodal)
-- [ ] Add 6 docstrings to `Temporal/Metalogic/Chronicle/PointInsertion.lean` (EnrichedEvent/EnrichedEventSince structure fields -- parallel to Bimodal)
-- [ ] Add 3 docstrings to `Temporal/Metalogic/Chronicle/RRelation.lean` (deductive closure, r/r3 DCS extensions)
-- [ ] Add 2 docstrings to `Temporal/Metalogic/WitnessSeed.lean` (forward/past temporal witness seeds)
-- [ ] Verify with `lake lint` that all docBlame errors are resolved for Temporal/ files
-- [ ] Run full `lake lint` to confirm zero remaining docBlame errors across the entire codebase
+- [x] Add 30 docstrings to `Temporal/Metalogic/Chronicle/ChronicleTypes.lean`
+- [x] Add 19 docstrings to `Temporal/Metalogic/Chronicle/CounterexampleElimination.lean`
+- [x] Add 9 docstrings to `Temporal/Metalogic/Chronicle/Frame.lean` (13/9 — exceeded target)
+- [x] Add 6 docstrings to `Temporal/Metalogic/TemporalContent.lean` (6/6)
+- [x] Add 6 docstrings to `Temporal/Metalogic/Chronicle/PointInsertion.lean` (10/6 — exceeded target)
+- [x] Add 3 docstrings to `Temporal/Metalogic/Chronicle/RRelation.lean` (6/3 — exceeded target)
+- [x] Add 2 docstrings to `Temporal/Metalogic/WitnessSeed.lean` (2/2)
+- [x] Verify with `lake lint` that all docBlame errors are resolved for Temporal/ files
+- [x] Run full `lake lint` to confirm zero remaining docBlame errors across the entire codebase
+
+**Extra work**: Agent also added 1 docstring to `Temporal/Metalogic/DerivationTree.lean` (not in plan).
 
 **Timing**: 1.5 hours
 
@@ -247,12 +251,12 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 7: Perpetuity Helper [NOT STARTED]
+### Phase 7: Perpetuity Helper [COMPLETED]
 
 **Goal**: Add the single remaining docstring to the Perpetuity helper file.
 
 **Tasks**:
-- [ ] Add 1 docstring to `Bimodal/Theorems/Perpetuity/Principles.lean` (perpetuity axiom helper)
+- [x] Add 1 docstring to `Bimodal/Theorems/Perpetuity/Principles.lean` (1/1)
 
 **Timing**: 5 minutes
 
@@ -266,10 +270,10 @@ Phases within the same wave can execute in parallel.
 
 ## Testing & Validation
 
-- [ ] After each phase, run `lake lint 2>&1 | grep docBlame` on modified files to confirm errors resolved
-- [ ] After final phase, run full `lake lint` to confirm zero remaining `docBlame` errors
-- [ ] Run `lake build` to confirm docstrings do not break compilation
-- [ ] Spot-check 5-10 docstrings per phase for accuracy and style consistency
+- [x] After each phase, run `lake lint 2>&1 | grep docBlame` on modified files to confirm errors resolved
+- [x] After final phase, run full `lake lint` to confirm zero remaining `docBlame` errors
+- [x] Run `lake build` to confirm docstrings do not break compilation (2986 jobs, 0 errors)
+- [x] Spot-check 5-10 docstrings per phase for accuracy and style consistency
 
 ## Artifacts & Outputs
 
@@ -283,3 +287,21 @@ All changes are comment-only additions. If any phase introduces issues:
 - `git revert` the phase commit to remove all docstrings from that phase
 - Individual docstrings can be removed without affecting other declarations
 - No functional code is modified, so rollback risk is minimal
+
+## Progress Audit (post-implementation)
+
+**Final result**: `lake lint` reports **0 docBlame errors**. `lake build` passes (2986 jobs, 0 errors).
+
+Implementation required 3 agent dispatches (first two hit context limits; third completed remaining work).
+
+| Phase | Status | Notes |
+|-------|--------|-------|
+| 1 (Theorems) | COMPLETED | All 4 files done |
+| 2 (Syntax) | COMPLETED | Both files done |
+| 3 (Bundle+Sep+Alg) | COMPLETED | All 9 files done (continuation agent filled gaps) |
+| 4 (BXCanonical) | COMPLETED | All 9 files done (continuation agent filled gaps) |
+| 5 (FrameCond) | COMPLETED | All 3 files done |
+| 6 (Temporal) | COMPLETED | All 7 files done (continuation agent filled gaps) |
+| 7 (Perpetuity) | COMPLETED | Done |
+
+Additional docstrings added to files beyond original plan scope (Separation/, DedekindZ/, Core/, ProofSystem/Instances/, Modal/ProofSystem/Instances/).

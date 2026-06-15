@@ -121,7 +121,7 @@ Phases are sequential because later phases depend on a clean build from earlier 
 
 ---
 
-### Phase 2: PointInsertion Pair + Chronicle Types (30 violations) [IN PROGRESS]
+### Phase 2: PointInsertion Pair + Chronicle Types (30 violations) [COMPLETED]
 
 **Goal**: Rename all violations in the Bimodal and Temporal PointInsertion.lean files and their shared chronicle types. This phase handles the highest-reference names: Q_Z (100 refs), U_nesting_depth (88 refs), lemma_2_7_seed (48 refs), case1_psi (44 refs), and all abbreviated-prefix names (l27_, l27s_, c5_, d21_, case_).
 
@@ -195,7 +195,7 @@ Phases are sequential because later phases depend on a clean build from earlier 
 
 ---
 
-### Phase 3: Bundle Files (13 violations) [NOT STARTED]
+### Phase 3: Bundle Files (13 violations) [COMPLETED]
 
 **Goal**: Rename all violations in the Bimodal Bundle/ directory files: TemporalCoherence, BFMCS, CanonicalFrame, ModalSaturation, and UntilSinceCoherence.
 
@@ -241,7 +241,7 @@ Phases are sequential because later phases depend on a clean build from earlier 
 
 ---
 
-### Phase 4: Separation Files + SubformulaClosure (14 violations) [NOT STARTED]
+### Phase 4: Separation Files + SubformulaClosure (14 violations) [COMPLETED]
 
 **Goal**: Rename violations in Separation/ directory files (QLemma, Defs, Eliminations, HierarchyInduction, Cases) and SubformulaClosure/TemporalFormulas.lean.
 
@@ -284,7 +284,7 @@ Phases are sequential because later phases depend on a clean build from earlier 
 
 ---
 
-### Phase 5: Remaining Files -- Perpetuity, Combinators, TaskFrame, Temporal Theorems (25 violations) [NOT STARTED]
+### Phase 5: Remaining Files -- Perpetuity, Combinators, TaskFrame, Temporal Theorems (25 violations) [COMPLETED]
 
 **Goal**: Rename all remaining violations in Perpetuity/Principles.lean, Theorems/Combinators.lean, Semantics/TaskFrame.lean, and Temporal/Theorems/ files. Run full CI verification.
 

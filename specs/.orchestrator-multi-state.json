@@ -20,15 +20,18 @@
   ],
   "cycle_count": 2,
   "max_cycles": 25,
-  "completed_tasks": [],
+  "completed_tasks": [
+    212,
+    213
+  ],
   "failed_tasks": [],
   "current_statuses": {
     "208": "implementing",
     "209": "implementing",
     "210": "implementing",
     "211": "implementing",
-    "212": "implementing",
-    "213": "implementing"
+    "212": "completed",
+    "213": "completed"
   },
   "task_types": {
     "208": "cslib",

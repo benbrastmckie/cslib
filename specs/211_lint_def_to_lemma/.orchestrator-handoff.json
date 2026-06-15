@@ -1,14 +1,39 @@
 {
-  "status": "planned",
-  "summary": "5-phase plan to fix all 55 defLemma lint errors: 4 parallel file-group phases (Bimodal Core 13 decls, BXCanonical 16 decls, Theorems+Modal 8 decls, Temporal 18 decls) plus a verification phase. 45 become lemma, 10 become theorem. Includes 3 abbrev conversions and 4 @[reducible] removals. Estimated 2 hours.",
+  "status": "implemented",
+  "summary": "Changed 55 Prop-valued defs to lemma/theorem across 22 files. All defLemma lint violations cleared. Build passes (2986 jobs).",
   "artifacts": [
-    {
-      "path": "specs/211_lint_def_to_lemma/plans/01_def-lemma-plan.md",
-      "type": "plan",
-      "summary": "5-phase plan organized by file group with 4 parallel edit phases and 1 verification phase"
-    }
+    "Cslib/Logics/Bimodal/FrameConditions/FrameClass.lean",
+    "Cslib/Logics/Bimodal/FrameConditions/Soundness.lean",
+    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/CanonicalModel.lean",
+    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodel.lean",
+    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean",
+    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination.lean",
+    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion.lean",
+    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Frame.lean",
+    "Cslib/Logics/Bimodal/Metalogic/Bundle/CanonicalFrame.lean",
+    "Cslib/Logics/Bimodal/Metalogic/Core/DeductionTheorem.lean",
+    "Cslib/Logics/Bimodal/Metalogic/Core/MCSProperties.lean",
+    "Cslib/Logics/Bimodal/Metalogic/Core/MaximalConsistent.lean",
+    "Cslib/Logics/Bimodal/Theorems/Perpetuity/Helpers.lean",
+    "Cslib/Logics/Bimodal/Theorems/Propositional/Connectives.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/S5/Completeness.lean",
+    "Cslib/Logics/Temporal/Metalogic/Chronicle/CounterexampleElimination.lean",
+    "Cslib/Logics/Temporal/Metalogic/Chronicle/Frame.lean",
+    "Cslib/Logics/Temporal/Metalogic/Chronicle/PointInsertion.lean",
+    "Cslib/Logics/Temporal/Metalogic/DenseCompleteness.lean",
+    "Cslib/Logics/Temporal/Metalogic/DenseMCS.lean",
+    "Cslib/Logics/Temporal/Metalogic/MCS.lean",
+    "Cslib/Logics/Temporal/Metalogic/PropositionalHelpers.lean"
   ],
   "blockers": [],
+  "phases_completed": 5,
+  "phases_total": 5,
   "continuation_context": null,
-  "next_action_hint": "implement"
+  "next_action_hint": "complete",
+  "notes": [
+    "2 abbrev aliases changed to alias (canonicalRTransitive, completeness)",
+    "1 abbrev changed to lemma (wrap' in Connectives)",
+    "All noncomputable modifiers removed from lemma/theorem declarations",
+    "55 total defLemma violations cleared"
+  ]
 }

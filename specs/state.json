@@ -30,12 +30,12 @@
     {
       "project_number": 219,
       "project_name": "address_pr648_merge_semantics_files",
-      "status": "researched",
+      "status": "planned",
       "task_type": "pr",
       "description": "Address PR #648 review from ctchou: merge Semantics/Basic.lean and Bool.lean into a single file, update references to Avigad, and coordinate with PRs #536, #587, #607. PR: https://github.com/leanprover/cslib/pull/648 Zulip: https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/with/603538889",
       "topic": "Propositional Logic",
       "created": "2026-06-16T00:19:13Z",
-      "last_updated": "2026-06-16T00:34:52Z",
+      "last_updated": "2026-06-16T06:33:46Z",
       "artifacts": [
         {
           "type": "research",
@@ -46,10 +46,15 @@
           "type": "research",
           "path": "specs/219_address_pr648_merge_semantics_files/reports/02_team-research.md",
           "summary": "Synthesized team research: merge approach, PR coordination, strategic horizons"
+        },
+        {
+          "path": "specs/219_address_pr648_merge_semantics_files/plans/03_merge-semantics-avigad.md",
+          "type": "plan",
+          "summary": "5-phase plan: merge Semantics files, add Avigad reference, coordinate PRs"
         }
       ],
       "next_artifact_number": 3,
-      "session_id": "sess_1781569584_f9ff81",
+      "session_id": "sess_1781590532_8myafw",
       "researched": "2026-06-16T00:34:52Z"
     },
     {

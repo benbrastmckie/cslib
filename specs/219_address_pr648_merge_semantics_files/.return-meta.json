@@ -1,0 +1,21 @@
+{
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/219_address_pr648_merge_semantics_files/plans/03_merge-semantics-avigad.md",
+      "summary": "5-phase implementation plan for PR #648 review: merge Semantics files, add Avigad reference, post PR response, coordinate with overlapping PRs"
+    }
+  ],
+  "next_steps": "Run /implement 219 to execute the plan",
+  "metadata": {
+    "session_id": "sess_1781590532_8myafw",
+    "agent_type": "planner-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "skill-planner"],
+    "phase_count": 5,
+    "estimated_hours": 4,
+    "dependency_waves": [[1], [2, 3], [4], [5]]
+  },
+  "memory_candidates": []
+}

@@ -46,7 +46,7 @@ next_project_number: 221
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-220 [NOT STARTED] — Refactor PR #649: trim completeness-only content, add FutureTempo
+220 [RESEARCHED] — Refactor PR #649: trim completeness-only content, add FutureTempo
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -57,10 +57,11 @@ next_project_number: 221
 ## Tasks
 
 ### 220. Refactor pr649 typeclass split ltl formula
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
+- **Research**: [220_refactor_pr649_typeclass_split_ltl_formula/reports/01_team-research.md]
 
 **Description**: Refactor PR #649: trim completeness-only content, add FutureTemporalConnectives typeclass layer, and LTL.Formula type. Remove Encodable/Countable/Infinite/Denumerable and BEq instances from PR scope (save for completeness PR). Split TemporalConnectives into FutureTemporalConnectives + TemporalConnectives in Connectives.lean. Add HasNext typeclass and LTLConnectives bundle. Create Cslib/Logics/LTL/Syntax/Formula.lean with {atom, bot, imp, next, untl} and derived connectives. Create LTL.Formula.toTemporal embedding. Add basic LTL satisfaction over omega-words. Addresses PR #649 review (ctchou) and Zulip LTL/Büchi discussion. References: Kamp (1968), Burgess (1982), Vardi & Wolper (1986)
 

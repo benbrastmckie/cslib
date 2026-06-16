@@ -1,5 +1,5 @@
 ---
-next_project_number: 220
+next_project_number: 221
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 220
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,209,214,215,219 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,195,197,209,214,215,219,220 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -46,6 +46,7 @@ next_project_number: 220
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
+220 [NOT STARTED] — Refactor PR #649: trim completeness-only content, add FutureTempo
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -54,6 +55,16 @@ next_project_number: 220
 197 [PR READY] — Review the ambition to contribute Modal/ to upstream, identifying
 
 ## Tasks
+
+### 220. Refactor pr649 typeclass split ltl formula
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Refactor PR #649: trim completeness-only content, add FutureTemporalConnectives typeclass layer, and LTL.Formula type. Remove Encodable/Countable/Infinite/Denumerable and BEq instances from PR scope (save for completeness PR). Split TemporalConnectives into FutureTemporalConnectives + TemporalConnectives in Connectives.lean. Add HasNext typeclass and LTLConnectives bundle. Create Cslib/Logics/LTL/Syntax/Formula.lean with {atom, bot, imp, next, untl} and derived connectives. Create LTL.Formula.toTemporal embedding. Add basic LTL satisfaction over omega-words. Addresses PR #649 review (ctchou) and Zulip LTL/Büchi discussion. References: Kamp (1968), Burgess (1982), Vardi & Wolper (1986)
+
+---
 
 ### 219. Address pr648 merge semantics files
 - **Status**: [RESEARCHED]

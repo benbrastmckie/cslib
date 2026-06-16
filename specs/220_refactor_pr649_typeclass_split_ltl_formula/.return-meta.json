@@ -1,0 +1,30 @@
+{
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/220_refactor_pr649_typeclass_split_ltl_formula/plans/01_typeclass-ltl-refactor.md",
+      "summary": "5-phase implementation plan for PR #649 typeclass split and LTL formula creation"
+    }
+  ],
+  "next_steps": "Run /implement 220 to execute the plan",
+  "metadata": {
+    "session_id": "sess_1781576396_e49877",
+    "agent_type": "planner-agent",
+    "duration_seconds": 180,
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 5,
+    "estimated_hours": 4,
+    "dependency_waves": [[1], [2, 3], [4], [5]]
+  },
+  "memory_candidates": [
+    {
+      "content": "When splitting a typeclass bundle in CSLib's Connectives.lean, the PR branch state (not main) determines diamond risk. The PR branch may have a simplified hierarchy missing classes present on main (e.g., BimodalConnectives), making restructuring safe on the PR branch even when it would create diamond inheritance on main. Always check the actual PR branch Connectives.lean before deciding additive vs. restructure approach.",
+      "category": "PATTERN",
+      "source_artifact": "specs/220_refactor_pr649_typeclass_split_ltl_formula/plans/01_typeclass-ltl-refactor.md",
+      "confidence": 0.8,
+      "suggested_keywords": ["typeclass", "diamond-inheritance", "connectives", "PR-branch", "restructure"]
+    }
+  ]
+}

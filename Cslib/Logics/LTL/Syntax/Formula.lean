@@ -125,17 +125,18 @@ instance : LTLConnectives (Formula Atom) where
 instance : Bot (Formula Atom) := ⟨.bot⟩
 instance : Top (Formula Atom) := ⟨.top⟩
 
-/-- Embed `LTL.Formula` into `Temporal.Formula` by translating `next` as `untl · bot`.
+/-- Embed `LTL.Formula` into `Temporal.Formula`.
 
-The `next φ` constructor has no direct counterpart in `Temporal.Formula`, so it is
-encoded as `φ U ⊥` (until with an impossible guard), which forces the witness to be
-the immediate next time point on discrete non-ending sequences. -/
+`LTL.Satisfies` uses reflexive (non-strict) until: `∃ j ≥ i, ...`. The BX tense logic
+uses strict until: `∃ s > t, ...`. To preserve semantics, `untl` maps to
+`reflexiveUntl` (the derived non-strict operator), while `next` maps to the strict
+`untl · bot` which forces the witness to be the immediate successor on ℕ. -/
 def Formula.toTemporal : Formula Atom → Temporal.Formula Atom
   | .atom p => .atom p
   | .bot => .bot
   | .imp φ ψ => .imp (toTemporal φ) (toTemporal ψ)
   | .next φ => .untl (toTemporal φ) .bot
-  | .untl φ ψ => .untl (toTemporal φ) (toTemporal ψ)
+  | .untl φ ψ => (toTemporal φ).reflexiveUntl (toTemporal ψ)
 
 end Cslib.Logic.LTL
 

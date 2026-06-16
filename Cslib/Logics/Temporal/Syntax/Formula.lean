@@ -78,7 +78,7 @@ inductive Formula (Atom : Type u) : Type u where
   | untl (φ₁ φ₂ : Formula Atom)
   /-- Since temporal operator: φ₁ S φ₂. -/
   | snce (φ₁ φ₂ : Formula Atom)
-deriving DecidableEq, BEq
+deriving DecidableEq
 
 /-- Negation: ¬φ := φ → ⊥ -/
 abbrev Formula.neg (φ : Formula Atom) : Formula Atom := .imp φ .bot
@@ -147,8 +147,6 @@ end Cslib.Logic.Temporal
 /-! ## Structural Properties and Derived Operators
 
 Extensions to `Temporal.Formula` providing:
-- Countable, Infinite, Denumerable instances
-- BEq reflexivity and lawfulness
 - Complexity measure
 - Temporal depth and implication count
 - Additional derived temporal operators
@@ -251,6 +249,18 @@ def weakFuture (φ : Formula Atom) : Formula Atom :=
 /-- Derived reflexive past operator: H'φ := φ ∧ Hφ. -/
 def weakPast (φ : Formula Atom) : Formula Atom :=
   φ ∧ 𝐇φ
+
+/-- Reflexive until: φ holds at some point ≥ t with ψ at all intermediate points.
+    Derives the non-strict (reflexive) until from the strict (Venema) until:
+    `reflexiveUntl φ ψ` at t ↔ ∃ s ≥ t, φ(s) ∧ ∀ r ∈ [t,s), ψ(r). -/
+abbrev reflexiveUntl (φ ψ : Formula Atom) : Formula Atom :=
+  φ ∨ (ψ ∧ (φ U ψ))
+
+/-- Reflexive since: φ held at some point ≤ t with ψ at all intermediate points.
+    Derives the non-strict (reflexive) since from the strict (Venema) since:
+    `reflexiveSnce φ ψ` at t ↔ ∃ s ≤ t, φ(s) ∧ ∀ r ∈ (s,t], ψ(r). -/
+abbrev reflexiveSnce (φ ψ : Formula Atom) : Formula Atom :=
+  φ ∨ (ψ ∧ (φ S ψ))
 
 /-- Temporal 'always' operator (△φ): Hφ ∧ φ ∧ Gφ.
     φ holds at all times (past, present, and future). -/

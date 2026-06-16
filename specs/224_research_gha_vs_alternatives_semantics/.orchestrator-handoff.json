@@ -1,0 +1,13 @@
+{
+  "status": "researched",
+  "summary": "GHA is the correct framework for propositional semantics across MPL/IPL/CPL. The primitive bot constructor is handled naturally via a bot_val parameter (unconstrained for MPL, specialized to algebra's bottom for IPL/CPL). HeytingAlgebra alone is insufficient because bot_himp forces ex falso, ruling out MPL. The existing Prop-valued canonical model construction is a GHA instance and requires no changes. Line 5 of zulip-response.md has been revised to reflect these findings.",
+  "blockers": [],
+  "artifacts": [
+    {
+      "path": "specs/224_research_gha_vs_alternatives_semantics/reports/01_gha-vs-alternatives.md",
+      "type": "report",
+      "summary": "Comprehensive analysis of GHA vs HeytingAlgebra vs BooleanAlgebra for propositional semantics, with Lean code verification and Mathlib lemma survey"
+    }
+  ],
+  "next_action_hint": "No implementation needed -- this is a pure research task. The findings inform the semantics follow-up PR design and the revised Zulip response."
+}

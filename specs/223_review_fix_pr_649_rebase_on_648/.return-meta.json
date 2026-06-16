@@ -1,0 +1,36 @@
+{
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/223_review_fix_pr_649_rebase_on_648/plans/02_fix-ci-rebase.md",
+      "summary": "3-phase implementation plan for fixing CI failure, addressing reviewer requests, and rebasing PR #649 onto PR #648"
+    }
+  ],
+  "next_steps": "Run /implement 223 to execute the plan",
+  "metadata": {
+    "session_id": "sess_1781649229_8f651f",
+    "agent_type": "planner-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 3,
+    "estimated_hours": 4,
+    "dependency_waves": [[1], [2], [3]],
+    "plan_metadata": {
+      "phases": 3,
+      "total_effort_hours": 4,
+      "complexity": "medium",
+      "research_integrated": true,
+      "plan_version": 1,
+      "dependency_waves": [[1], [2], [3]],
+      "reports_integrated": [
+        {
+          "path": "reports/01_team-research.md",
+          "integrated_in_plan_version": 1,
+          "integrated_date": "2026-06-16"
+        }
+      ]
+    }
+  },
+  "memory_candidates": []
+}

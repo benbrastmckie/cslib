@@ -1,0 +1,13 @@
+{
+  "status": "implemented",
+  "session_id": "sess_1781647479_c74aca",
+  "task_number": 222,
+  "artifacts": [
+    {"type": "pr_description", "path": "specs/tmp/pr-description.md"},
+    {"type": "pr_response", "path": "specs/tmp/pr-comment.md"},
+    {"type": "zulip_response", "path": "specs/tmp/zulip-response.md"}
+  ],
+  "summary": "Drafted 3 PR response documents from team research findings",
+  "phases_completed": 3,
+  "phases_total": 3
+}

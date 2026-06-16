@@ -1,16 +1,26 @@
 {
-  "next_project_number": 223,
+  "next_project_number": 224,
   "active_projects": [
+    {
+      "project_number": 223,
+      "project_name": "review_fix_pr_649_rebase_on_648",
+      "status": "not_started",
+      "task_type": "pr",
+      "description": "Review and fix PR #649 (stacked on PR #648): resolve CI failure at https://github.com/leanprover/cslib/actions/runs/27633080931/job/81712989982?pr=649 and rebase onto updated PR #648",
+      "topic": "Temporal Logic",
+      "created": "2026-06-16T22:10:16Z",
+      "last_updated": "2026-06-16T22:10:16Z"
+    },
     {
       "project_number": 222,
       "project_name": "review_pr648_zulip_feedback_analysis",
-      "status": "planned",
+      "status": "pr_ready",
       "task_type": "pr",
       "description": "Review PR #648 changes on feat/propositional-v2 and analyze Zulip feedback from specs/221_revise_pr649_reviewer_feedback/zulip.md, creating a detailed overview document of all issues with verified explanations and flagged concerns",
       "topic": "Propositional Logic",
       "created": "2026-06-16T21:25:21Z",
-      "last_updated": "2026-06-16T21:58:55Z",
-      "session_id": "sess_1781646913_02137d",
+      "last_updated": "2026-06-16T22:10:18Z",
+      "session_id": "sess_1781647479_c74aca",
       "researched": "2026-06-16T21:49:29Z",
       "next_artifact_number": 2,
       "artifacts": [

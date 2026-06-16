@@ -1,5 +1,5 @@
 ---
-next_project_number: 223
+next_project_number: 224
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 223
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,197,209,214,215,219,221,222 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,197,209,214,215,219,221,222,223 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -38,7 +38,7 @@ next_project_number: 223
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
 219 [PLANNED] — Address PR #648 review from ctchou: merge Semantics/Basic.lean an
 221 [PR READY] — Revise PR #648 (feat/propositional-v2) to reconcile with merged P
-222 [PLANNED] — Review PR #648 changes on feat/propositional-v2 and analyze Zulip
+222 [PR READY] — Review PR #648 changes on feat/propositional-v2 and analyze Zulip
 
 ### Propositional PRs
 
@@ -47,6 +47,7 @@ next_project_number: 223
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
+223 [NOT STARTED] — Review and fix PR #649 (stacked on PR #648): resolve CI failure a
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -56,8 +57,18 @@ next_project_number: 223
 
 ## Tasks
 
+### 223. Review fix pr 649 rebase on 648
+- **Status**: [NOT STARTED]
+- **Task Type**: pr
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Review and fix PR #649 (stacked on PR #648): resolve CI failure at https://github.com/leanprover/cslib/actions/runs/27633080931/job/81712989982?pr=649 and rebase onto updated PR #648
+
+---
+
 ### 222. Review pr648 zulip feedback analysis
-- **Status**: [PLANNED]
+- **Status**: [PR READY]
 - **Task Type**: pr
 - **Topic**: Propositional Logic
 - **Dependencies**: None

@@ -74,6 +74,9 @@ next_project_number: 224
 - **Dependencies**: None
 - **Research**: [222_review_pr648_zulip_feedback_analysis/reports/01_team-research.md]
 - **Plan**: [222_review_pr648_zulip_feedback_analysis/plans/01_pr-response-drafts.md]
+- **Pr_description**: [tmp/pr-description.md]
+- **Pr_response**: [tmp/pr-comment.md]
+- **Zulip_response**: [tmp/zulip-response.md]
 
 **Description**: Review PR #648 changes on feat/propositional-v2 and analyze Zulip feedback from specs/221_revise_pr649_reviewer_feedback/zulip.md, creating a detailed overview document of all issues with verified explanations and flagged concerns
 

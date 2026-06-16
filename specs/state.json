@@ -32,6 +32,21 @@
         {
           "type": "plan",
           "path": "specs/222_review_pr648_zulip_feedback_analysis/plans/01_pr-response-drafts.md"
+        },
+        {
+          "type": "pr_description",
+          "path": "specs/tmp/pr-description.md",
+          "summary": "Revised PR description for PR #648"
+        },
+        {
+          "type": "pr_response",
+          "path": "specs/tmp/pr-comment.md",
+          "summary": "PR comment reply addressing reviewer feedback"
+        },
+        {
+          "type": "zulip_response",
+          "path": "specs/tmp/zulip-response.md",
+          "summary": "Zulip thread response with coordination proposals"
         }
       ],
       "plan_path": "plans/01_pr-response-drafts.md",

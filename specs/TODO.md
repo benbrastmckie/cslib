@@ -1,5 +1,5 @@
 ---
-next_project_number: 224
+next_project_number: 225
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 224
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,197,209,214,215,219,221,222,223 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,197,209,214,215,219,221,222,223,224 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -39,6 +39,7 @@ next_project_number: 224
 219 [PLANNED] — Address PR #648 review from ctchou: merge Semantics/Basic.lean an
 221 [PR READY] — Revise PR #648 (feat/propositional-v2) to reconcile with merged P
 222 [PR READY] — Review PR #648 changes on feat/propositional-v2 and analyze Zulip
+224 [NOT STARTED] — Research whether GeneralizedHeytingAlgebra is the right algebraic
 
 ### Propositional PRs
 
@@ -56,6 +57,16 @@ next_project_number: 224
 197 [PR READY] — Review the ambition to contribute Modal/ to upstream, identifying
 
 ## Tasks
+
+### 224. Research gha vs alternatives semantics
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Research whether GeneralizedHeytingAlgebra is the right algebraic framework for propositional semantics in CSLib, considering alternatives (HeytingAlgebra, BooleanAlgebra, custom typeclass hierarchy). Evaluate thomaskwaring's GHA proposal from PR #587 against the requirements of the full propositional hierarchy (MPL → IPL → CPL) and downstream modal/temporal/bimodal Kripke semantics. Key questions: (1) Does GHA handle primitive bot correctly or does it require workarounds? (2) Is HeytingAlgebra sufficient and simpler? (3) How does each option interact with the existing Prop-valued canonical model construction in strong completeness? Revise line 5 of specs/tmp/zulip-response.md based on findings
+
+---
 
 ### 223. Review fix pr 649 rebase on 648
 - **Status**: [RESEARCHED]

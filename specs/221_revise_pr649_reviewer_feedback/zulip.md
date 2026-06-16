@@ -49,3 +49,20 @@ that way we also get Heyting algebra semantics for non-classical logics too.
 
 I think the zoo of non-classical logics may not always abide by Heyting algebra semantics; linear logics, for instance, don't always obey a ≤ b ⇨ c ↔ a ⊓ b ≤ c and instead have a separate residual for ⇨.
 But now that I reread HasInterp, this looks like a good abstraction.Thomas Waring: right, sure — i was referring to semantics specifically for PL in this case. there a generalized heyting algebra is exactly the structure you need to prove the soundness theorem.
+Thomas Waring: right, sure — i was referring to semantics specifically for PL in this case. there a generalized heyting algebra is exactly the structure you need to prove the soundness theorem.Matthew Doty: Might be more appropriate to call it Cslib.Logic.Structural instead of Cslib.Logic.PL, but that's just being pedantic.
+I do agree with @Ching-Tsun Chou about a separate bot constructor.
+But with that in mind, I agree with @Thomas Waring that it would be nice if we could just have the following polymorphic Evaluate (although for HeytingAlgebras rather than GeneralizedHeytingAlgebras):
+def Evaluate {Atom A : Type u} [HeytingAlgebra A]
+    (v : Atom → A) : Proposition Atom → A
+  | .atom p => v p
+  | .bot => ⊥
+  | .imp φ ψ => Evaluate v φ ⇨ Evaluate v ψ
+  | .and φ ψ => Evaluate v φ ⊓ Evaluate v ψ
+  | .or φ ψ => Evaluate v φ ⊔ Evaluate v ψ
+Thomas Waring: with that definition of evaluate completeness is no longer true for minimal logic — this (i think) is why Benjamin's Kripke definitions need separate fields for the valuation of atoms and of bottom, which is avoided by just making ⊥ an atom itself.
+for reference, this file has my development of algebraic semantics, including the evaluation function i propose — the general completeness theorem is:
+theorem Theory.complete [Inhabited Atom] {A : Proposition Atom} :
+    DerivableIn T A ↔
+    ∀ {H : Type u} [GeneralizedHeytingAlgebra H] {v : Valuation Atom H}, (v ⊨ T) → v ⊨ A
+
+where v ⊨ T (resp v ⊨ A) denotes that every axiom (resp the proposition A) is mapped to ⊤ under the valuation v. i find this very neat, but there is a tradeoff of course, you can remove the v ⊨ T hypothesis for T = IPL (resp CPL) by requiring that H is a HeytingAlgebra (resp BooleanAlgebra) and that v ⊥ = ⊥. (Note that in Benjamin's development a similar thing happens, where ISemanticConsequence specialises IForces by requiring that ⊥ is never forced.)

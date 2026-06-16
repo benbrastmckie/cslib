@@ -1,6 +1,16 @@
 {
-  "next_project_number": 222,
+  "next_project_number": 223,
   "active_projects": [
+    {
+      "project_number": 222,
+      "project_name": "review_pr648_zulip_feedback_analysis",
+      "status": "not_started",
+      "task_type": "pr",
+      "description": "Review PR #648 changes on feat/propositional-v2 and analyze Zulip feedback from specs/221_revise_pr649_reviewer_feedback/zulip.md, creating a detailed overview document of all issues with verified explanations and flagged concerns",
+      "topic": "Propositional Logic",
+      "created": "2026-06-16T21:25:21Z",
+      "last_updated": "2026-06-16T21:25:21Z"
+    },
     {
       "project_number": 221,
       "project_name": "revise_pr649_reviewer_feedback",

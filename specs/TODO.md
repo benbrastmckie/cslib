@@ -1,5 +1,5 @@
 ---
-next_project_number: 222
+next_project_number: 223
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 222
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,209,214,215,219,221 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,195,197,209,214,215,219,221,222 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -38,7 +38,8 @@ next_project_number: 222
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
 219 [PLANNED] — Address PR #648 review from ctchou: merge Semantics/Basic.lean an
-221 [PLANNED] — Revise PR #648 (feat/propositional-v2) to reconcile with merged P
+221 [PR READY] — Revise PR #648 (feat/propositional-v2) to reconcile with merged P
+222 [NOT STARTED] — Review PR #648 changes on feat/propositional-v2 and analyze Zulip
 
 ### Propositional PRs
 
@@ -56,8 +57,18 @@ next_project_number: 222
 
 ## Tasks
 
+### 222. Review pr648 zulip feedback analysis
+- **Status**: [NOT STARTED]
+- **Task Type**: pr
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Review PR #648 changes on feat/propositional-v2 and analyze Zulip feedback from specs/221_revise_pr649_reviewer_feedback/zulip.md, creating a detailed overview document of all issues with verified explanations and flagged concerns
+
+---
+
 ### 221. Revise pr649 reviewer feedback
-- **Status**: [PLANNED]
+- **Status**: [PR READY]
 - **Task Type**: pr
 - **Topic**: Propositional Logic
 - **Dependencies**: None

@@ -62,14 +62,14 @@ next_project_number: 222
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [221_revise_pr649_reviewer_feedback/reports/01_team-research.md]
-- **Plan**: [221_revise_pr649_reviewer_feedback/plans/03_revise-pr648-bot-refactor.md]
+- **Plan**: [221_revise_pr649_reviewer_feedback/plans/04_revise-pr648-bot-refactor.md]
 
 **Description**: Revise PR #648 (feat/propositional-v2) to reconcile with merged PR #536 and address reviewer feedback. Main goal: add bot as primitive to propositional formula type, eliminating [Bot Atom] constraints.
 
 Key changes:
 1. Resolve 3 merge conflicts with upstream/main post-#536 (Cslib.lean imports, Defs.lean imports, Defs.lean Theory section)
 2. Adopt InferenceSystem-parameterized IsIntuitionistic/IsClassical from #536, removing [Bot Atom] constraints since bot is now primitive
-3. Keep upstream's impl constructor naming (revert imp rename) for consistency with Modal and merged codebase
+3. Keep imp constructor naming and update Theory.lean to match (impI/impE instead of implI/implE)
 4. Remove Semantics files (Basic.lean, Bool.lean) to a follow-up PR per thomaskwaring's request
 5. Adapt Theory.lean (from #536) to work with primitive bot: remove [Bot Atom] from all signatures
 6. Replace German references (Johansson1937, Gentzen1935, Wajsberg1938) with English alternatives (Avigad2022, Prawitz1965)

@@ -6,13 +6,13 @@
       "project_name": "revise_pr649_reviewer_feedback",
       "status": "planned",
       "task_type": "pr",
-      "description": "Revise PR #648 (feat/propositional-v2) to reconcile with merged PR #536 and address reviewer feedback. Main goal: add bot as primitive to propositional formula type, eliminating [Bot Atom] constraints.\n\nKey changes:\n1. Resolve 3 merge conflicts with upstream/main post-#536 (Cslib.lean imports, Defs.lean imports, Defs.lean Theory section)\n2. Adopt InferenceSystem-parameterized IsIntuitionistic/IsClassical from #536, removing [Bot Atom] constraints since bot is now primitive\n3. Keep upstream's impl constructor naming (revert imp rename) for consistency with Modal and merged codebase\n4. Remove Semantics files (Basic.lean, Bool.lean) to a follow-up PR per thomaskwaring's request\n5. Adapt Theory.lean (from #536) to work with primitive bot: remove [Bot Atom] from all signatures\n6. Replace German references (Johansson1937, Gentzen1935, Wajsberg1938) with English alternatives (Avigad2022, Prawitz1965)\n7. Revise PR description with balanced bot-as-primitive rationale addressing ctchou and thomaskwaring feedback\n\nPR #649 (feat/temporal-formula-propositional) will be handled in a separate later task.\n\nSources:\n- PR #648: https://github.com/leanprover/cslib/pull/648\n- Maintainer review: https://github.com/leanprover/cslib/pull/648#pullrequestreview-4502084546\n- Contributor comment: https://github.com/leanprover/cslib/pull/648#issuecomment-4715838618\n- Merged PR #536: refactor(Logics/Propositional): classical and intuitionistic inference systems",
+      "description": "Revise PR #648 (feat/propositional-v2) to reconcile with merged PR #536 and address reviewer feedback. Main goal: add bot as primitive to propositional formula type, eliminating [Bot Atom] constraints.\n\nKey changes:\n1. Resolve 3 merge conflicts with upstream/main post-#536 (Cslib.lean imports, Defs.lean imports, Defs.lean Theory section)\n2. Adopt InferenceSystem-parameterized IsIntuitionistic/IsClassical from #536, removing [Bot Atom] constraints since bot is now primitive\n3. Keep imp constructor naming and update Theory.lean to match (impI/impE instead of implI/implE)\n4. Remove Semantics files (Basic.lean, Bool.lean) to a follow-up PR per thomaskwaring's request\n5. Adapt Theory.lean (from #536) to work with primitive bot: remove [Bot Atom] from all signatures\n6. Replace German references (Johansson1937, Gentzen1935, Wajsberg1938) with English alternatives (Avigad2022, Prawitz1965)\n7. Revise PR description with balanced bot-as-primitive rationale addressing ctchou and thomaskwaring feedback\n\nPR #649 (feat/temporal-formula-propositional) will be handled in a separate later task.\n\nSources:\n- PR #648: https://github.com/leanprover/cslib/pull/648\n- Maintainer review: https://github.com/leanprover/cslib/pull/648#pullrequestreview-4502084546\n- Contributor comment: https://github.com/leanprover/cslib/pull/648#issuecomment-4715838618\n- Merged PR #536: refactor(Logics/Propositional): classical and intuitionistic inference systems",
       "topic": "Propositional Logic",
       "created": "2026-06-16T16:50:01Z",
-      "last_updated": "2026-06-16T17:55:51Z",
+      "last_updated": "2026-06-16T18:01:56Z",
       "session_id": "sess_1781629818_51b490",
       "researched": "2026-06-16T17:07:19Z",
-      "next_artifact_number": 3,
+      "next_artifact_number": 4,
       "artifacts": [
         {
           "path": "specs/221_revise_pr649_reviewer_feedback/reports/01_team-research.md",
@@ -20,9 +20,9 @@
           "summary": "Team research with 4 teammates"
         },
         {
-          "path": "specs/221_revise_pr649_reviewer_feedback/plans/03_revise-pr648-bot-refactor.md",
+          "path": "specs/221_revise_pr649_reviewer_feedback/plans/04_revise-pr648-bot-refactor.md",
           "type": "plan",
-          "summary": "Revised 6-phase plan for PR #648 bot refactor: rebase, remove semantics, reconcile naming, adapt to primitive bot, replace refs, revise PR description"
+          "summary": "Revised plan v3: keep imp naming instead of reverting to impl"
         }
       ]
     },

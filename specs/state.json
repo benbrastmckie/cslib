@@ -4,12 +4,22 @@
     {
       "project_number": 221,
       "project_name": "revise_pr649_reviewer_feedback",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "pr",
       "description": "Revise PR #649 (feat/temporal-formula-propositional) based on reviewer feedback from PR #648. Key changes needed:\n\n1. Split LTL semantics into separate PR: Remove Cslib/Logics/LTL/Semantics/Satisfies.lean from this PR as contributor thomaskwaring requests splitting semantics development into a separate PR. The LTL.Formula syntax file stays.\n\n2. Adapt to merged PR #536: PR #649 is now rebased on upstream/main which includes PR #536 (refactor: classical and intuitionistic inference systems). The IsIntuitionistic/IsClassical classes are now inference-system-based (parameterized by S : Type*). Our changes (removing [Bot Atom], adapting to primitive bot) are already reconciled in the rebase. Verify consistency.\n\n3. Address reference concerns: Both ctchou and thomaskwaring object to citing 1930s German-language papers. Replace with modern English references — ctchou recommends Avigad's Mathematical Logic and Computation (Cambridge, 2022) chapters 2-3. Keep BibKey format per CONTRIBUTING.md.\n\n4. Address thomaskwaring's design concerns on PR #648: He raises valid points about bot-as-primitive: (a) in minimal logic bot behaves like an atom, (b) adding a constructor makes proofs more verbose, (c) substitution should allow maps that don't preserve bottom (WithBot.some pattern), (d) top being a→a for arbitrary a is a feature. The PR description for #649 should acknowledge these trade-offs rather than asserting the five-primitive design is unambiguously better. Since #536 just merged with the old design, our PR needs to present compelling benefits.\n\n5. Revise PR description: Update to reflect (a) stacking on merged #536, (b) semantics split out, (c) coordination with #607/#587, (d) balanced design rationale addressing thomaskwaring's objections, (e) updated references.\n\n6. Rename imp vs impl: thomaskwaring notes citing \"CSLib's existing formula types\" when those are our own unmerged work is not convincing. The actually existing example (Modal) uses \"impl\". Either justify the rename on independent grounds or reconsider.\n\nSources:\n- Maintainer review: https://github.com/leanprover/cslib/pull/648#pullrequestreview-4502084546\n- Contributor comment: https://github.com/leanprover/cslib/pull/648#issuecomment-4715838618\n- PR #649: https://github.com/leanprover/cslib/pull/649\n- PR #648: https://github.com/leanprover/cslib/pull/648\n- Merged PR #536: refactor(Logics/Propositional): classical and intuitionistic inference systems",
       "topic": "Propositional Logic",
       "created": "2026-06-16T16:50:01Z",
-      "last_updated": "2026-06-16T16:50:01Z"
+      "last_updated": "2026-06-16T17:07:19Z",
+      "session_id": "sess_1781628891_e75c9a",
+      "researched": "2026-06-16T17:07:19Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/221_revise_pr649_reviewer_feedback/reports/01_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates"
+        }
+      ]
     },
     {
       "project_number": 220,

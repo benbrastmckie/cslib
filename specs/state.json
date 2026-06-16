@@ -4,13 +4,13 @@
     {
       "project_number": 220,
       "project_name": "refactor_pr649_typeclass_split_ltl_formula",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Refactor PR #649: trim completeness-only content, add FutureTemporalConnectives typeclass layer, and LTL.Formula type. Remove Encodable/Countable/Infinite/Denumerable and BEq instances from PR scope (save for completeness PR). Split TemporalConnectives into FutureTemporalConnectives + TemporalConnectives in Connectives.lean. Add HasNext typeclass and LTLConnectives bundle. Create Cslib/Logics/LTL/Syntax/Formula.lean with {atom, bot, imp, next, untl} and derived connectives. Create LTL.Formula.toTemporal embedding. Add basic LTL satisfaction over omega-words. Addresses PR #649 review (ctchou) and Zulip LTL/Büchi discussion. References: Kamp (1968), Burgess (1982), Vardi & Wolper (1986)",
       "topic": "Temporal Logic",
       "created": "2026-06-16T01:34:44Z",
-      "last_updated": "2026-06-16T02:28:05Z",
-      "session_id": "sess_1781576396_e49877",
+      "last_updated": "2026-06-16T03:42:34Z",
+      "session_id": "sess_1750038000_a1b2c3",
       "researched": "2026-06-16T02:18:18Z",
       "next_artifact_number": 2,
       "artifacts": [
@@ -24,7 +24,8 @@
           "type": "plan",
           "summary": "5-phase implementation plan for PR #649 typeclass split and LTL formula creation"
         }
-      ]
+      ],
+      "completion_summary": "Added HasNext/FutureTemporalConnectives/LTLConnectives typeclasses, cleaned Temporal.Formula, created LTL.Formula and LTL.Satisfies; full CI pipeline passed"
     },
     {
       "project_number": 219,

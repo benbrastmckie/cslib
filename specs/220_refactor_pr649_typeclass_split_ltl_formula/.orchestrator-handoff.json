@@ -1,0 +1,36 @@
+{
+  "status": "implemented",
+  "summary": "Added HasNext/FutureTemporalConnectives/LTLConnectives typeclasses, cleaned Temporal.Formula, created LTL.Formula and LTL.Satisfies; full CI pipeline passed",
+  "phases_completed": 5,
+  "phases_total": 5,
+  "blockers": [],
+  "continuation_context": null,
+  "artifacts": [
+    {
+      "path": "specs/220_refactor_pr649_typeclass_split_ltl_formula/summaries/01_typeclass-ltl-refactor-summary.md",
+      "type": "summary",
+      "summary": "Complete implementation summary with all phases, deviations, and CI results"
+    },
+    {
+      "path": "Cslib/Foundations/Logic/Connectives.lean",
+      "type": "modified",
+      "summary": "Added HasNext, FutureTemporalConnectives, LTLConnectives; restructured TemporalConnectives parent"
+    },
+    {
+      "path": "Cslib/Logics/Temporal/Syntax/Formula.lean",
+      "type": "modified",
+      "summary": "Removed Countability/BEqLaws sections and Encodable/Denumerable imports"
+    },
+    {
+      "path": "Cslib/Logics/LTL/Syntax/Formula.lean",
+      "type": "created",
+      "summary": "LTL formula inductive with LTLConnectives instance and toTemporal embedding"
+    },
+    {
+      "path": "Cslib/Logics/LTL/Semantics/Satisfies.lean",
+      "type": "created",
+      "summary": "Omega-word satisfaction relation (Satisfies/Valid/Satisfiable)"
+    }
+  ],
+  "next_action_hint": "none"
+}

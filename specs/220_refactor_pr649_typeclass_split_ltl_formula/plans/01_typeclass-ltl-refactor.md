@@ -1,7 +1,7 @@
 # Implementation Plan: Refactor PR #649 Typeclass Split and LTL Formula
 
 - **Task**: 220 - Refactor PR #649: typeclass split and LTL formula
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 4 hours
 - **Dependencies**: None (targets PR branch `feat/temporal-formula-propositional`)
 - **Research Inputs**: reports/01_team-research.md

@@ -38,7 +38,7 @@ next_project_number: 222
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
 219 [PLANNED] — Address PR #648 review from ctchou: merge Semantics/Basic.lean an
-221 [PLANNED] — Revise PR #649 (feat/temporal-formula-propositional) based on rev
+221 [PLANNED] — Revise PR #648 (feat/propositional-v2) to reconcile with merged P
 
 ### Propositional PRs
 
@@ -62,27 +62,25 @@ next_project_number: 222
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [221_revise_pr649_reviewer_feedback/reports/01_team-research.md]
-- **Plan**: [221_revise_pr649_reviewer_feedback/plans/01_revise-pr649-feedback.md]
+- **Plan**: [221_revise_pr649_reviewer_feedback/plans/03_revise-pr648-bot-refactor.md]
 
-**Description**: Revise PR #649 (feat/temporal-formula-propositional) based on reviewer feedback from PR #648. Key changes needed:
+**Description**: Revise PR #648 (feat/propositional-v2) to reconcile with merged PR #536 and address reviewer feedback. Main goal: add bot as primitive to propositional formula type, eliminating [Bot Atom] constraints.
 
-1. Split LTL semantics into separate PR: Remove Cslib/Logics/LTL/Semantics/Satisfies.lean from this PR as contributor thomaskwaring requests splitting semantics development into a separate PR. The LTL.Formula syntax file stays.
+Key changes:
+1. Resolve 3 merge conflicts with upstream/main post-#536 (Cslib.lean imports, Defs.lean imports, Defs.lean Theory section)
+2. Adopt InferenceSystem-parameterized IsIntuitionistic/IsClassical from #536, removing [Bot Atom] constraints since bot is now primitive
+3. Keep upstream's impl constructor naming (revert imp rename) for consistency with Modal and merged codebase
+4. Remove Semantics files (Basic.lean, Bool.lean) to a follow-up PR per thomaskwaring's request
+5. Adapt Theory.lean (from #536) to work with primitive bot: remove [Bot Atom] from all signatures
+6. Replace German references (Johansson1937, Gentzen1935, Wajsberg1938) with English alternatives (Avigad2022, Prawitz1965)
+7. Revise PR description with balanced bot-as-primitive rationale addressing ctchou and thomaskwaring feedback
 
-2. Adapt to merged PR #536: PR #649 is now rebased on upstream/main which includes PR #536 (refactor: classical and intuitionistic inference systems). The IsIntuitionistic/IsClassical classes are now inference-system-based (parameterized by S : Type*). Our changes (removing [Bot Atom], adapting to primitive bot) are already reconciled in the rebase. Verify consistency.
-
-3. Address reference concerns: Both ctchou and thomaskwaring object to citing 1930s German-language papers. Replace with modern English references — ctchou recommends Avigad's Mathematical Logic and Computation (Cambridge, 2022) chapters 2-3. Keep BibKey format per CONTRIBUTING.md.
-
-4. Address thomaskwaring's design concerns on PR #648: He raises valid points about bot-as-primitive: (a) in minimal logic bot behaves like an atom, (b) adding a constructor makes proofs more verbose, (c) substitution should allow maps that don't preserve bottom (WithBot.some pattern), (d) top being a→a for arbitrary a is a feature. The PR description for #649 should acknowledge these trade-offs rather than asserting the five-primitive design is unambiguously better. Since #536 just merged with the old design, our PR needs to present compelling benefits.
-
-5. Revise PR description: Update to reflect (a) stacking on merged #536, (b) semantics split out, (c) coordination with #607/#587, (d) balanced design rationale addressing thomaskwaring's objections, (e) updated references.
-
-6. Rename imp vs impl: thomaskwaring notes citing "CSLib's existing formula types" when those are our own unmerged work is not convincing. The actually existing example (Modal) uses "impl". Either justify the rename on independent grounds or reconsider.
+PR #649 (feat/temporal-formula-propositional) will be handled in a separate later task.
 
 Sources:
+- PR #648: https://github.com/leanprover/cslib/pull/648
 - Maintainer review: https://github.com/leanprover/cslib/pull/648#pullrequestreview-4502084546
 - Contributor comment: https://github.com/leanprover/cslib/pull/648#issuecomment-4715838618
-- PR #649: https://github.com/leanprover/cslib/pull/649
-- PR #648: https://github.com/leanprover/cslib/pull/648
 - Merged PR #536: refactor(Logics/Propositional): classical and intuitionistic inference systems
 
 ---

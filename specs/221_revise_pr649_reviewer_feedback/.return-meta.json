@@ -2,35 +2,40 @@
   "status": "planned",
   "artifacts": [
     {
-      "path": "specs/221_revise_pr649_reviewer_feedback/plans/01_revise-pr649-feedback.md",
+      "path": "specs/221_revise_pr649_reviewer_feedback/plans/03_revise-pr648-bot-refactor.md",
       "type": "plan",
-      "summary": "4-phase implementation plan for revising PR #649 based on reviewer feedback: LTL semantics removal, reference replacement, build verification, and PR description revision"
+      "summary": "Revised 6-phase plan for PR #648 (feat/propositional-v2) bot refactor: rebase on post-#536 upstream, remove Semantics files, reconcile constructor naming to impl, adapt IsIntuitionistic/IsClassical to primitive bot, replace German references, and revise PR description"
     }
   ],
-  "next_steps": "Run /implement 221 to execute the plan",
+  "next_steps": "Run /implement 221 to execute the revised plan",
   "metadata": {
-    "session_id": "sess_1781629818_51b490",
-    "agent_type": "planner-agent",
+    "session_id": "sess_1781632241_ba8d68",
+    "agent_type": "reviser-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
-    "phase_count": 4,
-    "estimated_hours": 4,
-    "dependency_waves": [[1], [2], [3], [4]],
+    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
+    "new_description": "Revise PR #648 (feat/propositional-v2) to reconcile with merged PR #536 and address reviewer feedback. Main goal: add bot as primitive to propositional formula type, eliminating [Bot Atom] constraints.\n\nKey changes:\n1. Resolve 3 merge conflicts with upstream/main post-#536 (Cslib.lean imports, Defs.lean imports, Defs.lean Theory section)\n2. Adopt InferenceSystem-parameterized IsIntuitionistic/IsClassical from #536, removing [Bot Atom] constraints since bot is now primitive\n3. Keep upstream's impl constructor naming (revert imp rename) for consistency with Modal and merged codebase\n4. Remove Semantics files (Basic.lean, Bool.lean) to a follow-up PR per thomaskwaring's request\n5. Adapt Theory.lean (from #536) to work with primitive bot: remove [Bot Atom] from all signatures\n6. Replace German references (Johansson1937, Gentzen1935, Wajsberg1938) with English alternatives (Avigad2022, Prawitz1965)\n7. Revise PR description with balanced bot-as-primitive rationale addressing ctchou and thomaskwaring feedback\n\nPR #649 (feat/temporal-formula-propositional) will be handled in a separate later task.\n\nSources:\n- PR #648: https://github.com/leanprover/cslib/pull/648\n- Maintainer review: https://github.com/leanprover/cslib/pull/648#pullrequestreview-4502084546\n- Contributor comment: https://github.com/leanprover/cslib/pull/648#issuecomment-4715838618\n- Merged PR #536: refactor(Logics/Propositional): classical and intuitionistic inference systems",
+    "plan_version": 2,
+    "phase_count": 6,
+    "estimated_hours": 5,
     "plan_metadata": {
-      "phases": 4,
-      "total_effort_hours": 4,
+      "phases": 6,
+      "total_effort_hours": 5,
       "complexity": "medium",
       "research_integrated": true,
-      "plan_version": 1,
-      "dependency_waves": [[1], [2], [3], [4]],
+      "plan_version": 2,
+      "dependency_waves": [[1], [2], [3], [4], [5], [6]],
       "reports_integrated": [
         {
           "path": "reports/01_team-research.md",
           "integrated_in_plan_version": 1,
           "integrated_date": "2026-06-16"
+        },
+        {
+          "path": "reports/02_pr648-branch-analysis.md",
+          "integrated_in_plan_version": 2,
+          "integrated_date": "2026-06-16"
         }
       ]
     }
-  },
-  "memory_candidates": []
+  }
 }

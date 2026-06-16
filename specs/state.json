@@ -4,12 +4,21 @@
     {
       "project_number": 223,
       "project_name": "review_fix_pr_649_rebase_on_648",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "pr",
       "description": "Review and fix PR #649 (stacked on PR #648): resolve CI failure at https://github.com/leanprover/cslib/actions/runs/27633080931/job/81712989982?pr=649 and rebase onto updated PR #648",
       "topic": "Temporal Logic",
       "created": "2026-06-16T22:10:16Z",
-      "last_updated": "2026-06-16T22:10:16Z"
+      "last_updated": "2026-06-16T22:32:45Z",
+      "researched": "2026-06-16T22:32:45Z",
+      "artifacts": [
+        {
+          "path": "specs/223_review_fix_pr_649_rebase_on_648/reports/01_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates"
+        }
+      ],
+      "next_artifact_number": 2
     },
     {
       "project_number": 222,

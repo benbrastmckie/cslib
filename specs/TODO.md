@@ -47,7 +47,7 @@ next_project_number: 224
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-223 [NOT STARTED] — Review and fix PR #649 (stacked on PR #648): resolve CI failure a
+223 [RESEARCHED] — Review and fix PR #649 (stacked on PR #648): resolve CI failure a
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -58,10 +58,11 @@ next_project_number: 224
 ## Tasks
 
 ### 223. Review fix pr 649 rebase on 648
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: pr
 - **Topic**: Temporal Logic
 - **Dependencies**: None
+- **Research**: [223_review_fix_pr_649_rebase_on_648/reports/01_team-research.md]
 
 **Description**: Review and fix PR #649 (stacked on PR #648): resolve CI failure at https://github.com/leanprover/cslib/actions/runs/27633080931/job/81712989982?pr=649 and rebase onto updated PR #648
 

@@ -142,7 +142,7 @@
       "status": "not_started",
       "task_type": "cslib",
       "title": "Fill sorry declarations in Bimodal BXCanonical and Bundle files",
-      "description": "Fill 22 sorry declarations across 5 files: Bundle/SuccRelation.lean (7), BXCanonical/Chronicle/ChronicleToCountermodel.lean (10), Bundle/UntilSinceCoherence.lean (2), BXCanonical/Completeness/Dense.lean (1), BXCanonical/Frame.lean (1). These are incomplete proofs in the bimodal temporal logic development.",
+      "description": "Fill 22 sorry declarations across 6 files in Cslib/Logics/Bimodal/Metalogic/:\n- Bundle/SuccRelation.lean: 7 sorries (lines 253, 258, 263, 269, 275, 281, 285)\n- BXCanonical/Chronicle/ChronicleToCountermodel.lean: 10 sorries (lines 66, 143, 144, 147, 153, 157, 163, 171, 172, 177)\n- Bundle/UntilSinceCoherence.lean: 2 sorries (lines 37, 41)\n- BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean: 1 sorry (line 814)\n- BXCanonical/Completeness/Dense.lean: 1 sorry (line 110)\n- BXCanonical/Frame.lean: 1 sorry (line 159)\n\nThese are incomplete proofs in the bimodal temporal logic development (BX dense completeness). The heaviest concentrations are ChronicleToCountermodel (chronicle-to-countermodel construction) and SuccRelation (successor relation properties). These are the last CI blockers after style warnings were fixed.",
       "topic": "Bimodal Porting",
       "created": "2026-06-15T17:59:27Z",
       "last_updated": "2026-06-15T17:59:27Z"
@@ -450,12 +450,13 @@
     {
       "project_number": 195,
       "project_name": "fix_dense_validity_linter_warnings",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Bimodal Porting",
       "description": "Fix 30+ linter warnings in Cslib/Logics/Bimodal/Metalogic/Soundness/DenseValidity.lean: remove ~20 unused simp arguments and replace 6 deprecated push_neg calls with push Not.",
       "created": "2026-06-14T18:19:47Z",
-      "last_updated": "2026-06-14T18:19:47Z"
+      "last_updated": "2026-06-14T18:19:47Z",
+      "completion_summary": "Fixed all unused simp argument warnings in DenseValidity.lean as part of broader CI style warning fix (commit 920dfbe9). Also fixed intro? warnings and dupNamespace suppressions across 13 files."
     }
   ],
   "repository_health": {

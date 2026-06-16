@@ -11,7 +11,7 @@ next_project_number: 223
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,209,214,215,219,221,222 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,197,209,214,215,219,221,222 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -21,9 +21,8 @@ next_project_number: 223
 
 36 [BLOCKED] — Port discrete completeness (completeness_discrete theorem) and We
 37 [BLOCKED] — Port continuous extension completeness once developed upstream. T
-195 [NOT STARTED] — Fix 30+ linter warnings in Cslib/Logics/Bimodal/Metalogic/Soundne
 214 [NOT STARTED] — Fix 4 tactic goal-count warnings in Cslib/Logics/Bimodal/Metalogi
-215 [NOT STARTED] — Fill 22 sorry declarations across 5 files: Bundle/SuccRelation.le
+215 [NOT STARTED] — Fill 22 sorry declarations across 6 files in Cslib/Logics/Bimodal
 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
 
 ### Foundations
@@ -139,7 +138,15 @@ Sources:
 - **Topic**: Bimodal Porting
 - **Dependencies**: None
 
-**Description**: Fill 22 sorry declarations across 5 files: Bundle/SuccRelation.lean (7), BXCanonical/Chronicle/ChronicleToCountermodel.lean (10), Bundle/UntilSinceCoherence.lean (2), BXCanonical/Completeness/Dense.lean (1), BXCanonical/Frame.lean (1). These are incomplete proofs in the bimodal temporal logic development.
+**Description**: Fill 22 sorry declarations across 6 files in Cslib/Logics/Bimodal/Metalogic/:
+- Bundle/SuccRelation.lean: 7 sorries (lines 253, 258, 263, 269, 275, 281, 285)
+- BXCanonical/Chronicle/ChronicleToCountermodel.lean: 10 sorries (lines 66, 143, 144, 147, 153, 157, 163, 171, 172, 177)
+- Bundle/UntilSinceCoherence.lean: 2 sorries (lines 37, 41)
+- BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean: 1 sorry (line 814)
+- BXCanonical/Completeness/Dense.lean: 1 sorry (line 110)
+- BXCanonical/Frame.lean: 1 sorry (line 159)
+
+These are incomplete proofs in the bimodal temporal logic development (BX dense completeness). The heaviest concentrations are ChronicleToCountermodel (chronicle-to-countermodel construction) and SuccRelation (successor relation properties). These are the last CI blockers after style warnings were fixed.
 
 ---
 
@@ -177,7 +184,7 @@ Sources:
 ---
 
 ### 195. Fix dense validity linter warnings
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Bimodal Porting
 - **Dependencies**: None

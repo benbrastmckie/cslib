@@ -38,7 +38,7 @@ next_project_number: 222
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
 219 [PLANNED] — Address PR #648 review from ctchou: merge Semantics/Basic.lean an
-221 [RESEARCHED] — Revise PR #649 (feat/temporal-formula-propositional) based on rev
+221 [PLANNED] — Revise PR #649 (feat/temporal-formula-propositional) based on rev
 
 ### Propositional PRs
 
@@ -57,11 +57,12 @@ next_project_number: 222
 ## Tasks
 
 ### 221. Revise pr649 reviewer feedback
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: pr
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [221_revise_pr649_reviewer_feedback/reports/01_team-research.md]
+- **Plan**: [221_revise_pr649_reviewer_feedback/plans/01_revise-pr649-feedback.md]
 
 **Description**: Revise PR #649 (feat/temporal-formula-propositional) based on reviewer feedback from PR #648. Key changes needed:
 

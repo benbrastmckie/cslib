@@ -1,7 +1,7 @@
 # Implementation Plan: Fix CI and Rebase PR #649 on PR #648
 
 - **Task**: 223 - review_fix_pr_649_rebase_on_648
-- **Status**: [NOT STARTED]
+- **Status**: [IN PROGRESS]
 - **Effort**: 4 hours
 - **Dependencies**: PR #648 approval (external, blocks Phase 3 only)
 - **Research Inputs**: reports/01_team-research.md
@@ -65,7 +65,7 @@ This task advances the Temporal module layer in the CSLib roadmap dependency str
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Fix CI Failure [NOT STARTED]
+### Phase 1: Fix CI Failure [COMPLETED]
 
 **Goal**: Delete the two theorems causing the `--wfail` build failure and verify the build passes.
 
@@ -91,7 +91,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Address Reviewer Requests [NOT STARTED]
+### Phase 2: Address Reviewer Requests [COMPLETED]
 
 **Goal**: Implement all substantive changes requested by ctchou in the PR #649 review.
 
@@ -121,7 +121,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Rebase onto PR #648 [NOT STARTED]
+### Phase 3: Rebase onto PR #648 [BLOCKED]
 
 **Goal**: Cleanly rebase `feat/temporal-formula-propositional` onto `feat/propositional-v2` head, resolving all merge conflicts correctly.
 

@@ -1,36 +1,45 @@
 {
-  "status": "planned",
+  "status": "partial",
+  "started_at": "2026-06-16T23:02:07Z",
+  "summary": "Phase 1 (fix CI failure by deleting instBot_eq/instTop_eq) and Phase 2 (remove snce past-time operator from Temporal.Formula) complete and pushed to feat/temporal-formula-propositional. Phase 3 (rebase onto PR #648) blocked pending PR #648 approval.",
+  "partial_progress": {
+    "phases_completed": [1, 2],
+    "phases_remaining": [3],
+    "blocked_reason": "Phase 3 blocked on PR #648 approval: feat/propositional-v2 is in CHANGES_REQUESTED state (ctchou review 2026-06-15)"
+  },
   "artifacts": [
     {
-      "type": "plan",
+      "path": "specs/223_review_fix_pr_649_rebase_on_648/summaries/02_fix-ci-rebase-summary.md",
+      "type": "summary",
+      "summary": "Execution summary for phases 1-2: CI fix and reviewer request (snce removal)"
+    },
+    {
       "path": "specs/223_review_fix_pr_649_rebase_on_648/plans/02_fix-ci-rebase.md",
-      "summary": "3-phase implementation plan for fixing CI failure, addressing reviewer requests, and rebasing PR #649 onto PR #648"
+      "type": "plan",
+      "summary": "3-phase implementation plan with Phase 1 [COMPLETED], Phase 2 [COMPLETED], Phase 3 [BLOCKED]"
     }
   ],
-  "next_steps": "Run /implement 223 to execute the plan",
-  "metadata": {
-    "session_id": "sess_1781649229_8f651f",
-    "agent_type": "planner-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
-    "phase_count": 3,
-    "estimated_hours": 4,
-    "dependency_waves": [[1], [2], [3]],
-    "plan_metadata": {
-      "phases": 3,
-      "total_effort_hours": 4,
-      "complexity": "medium",
-      "research_integrated": true,
-      "plan_version": 1,
-      "dependency_waves": [[1], [2], [3]],
-      "reports_integrated": [
-        {
-          "path": "reports/01_team-research.md",
-          "integrated_in_plan_version": 1,
-          "integrated_date": "2026-06-16"
-        }
-      ]
-    }
+  "verification": {
+    "build_passed": true,
+    "lint_passed": true,
+    "sorry_count": 0,
+    "build_modules_verified": [
+      "Cslib.Logics.Propositional.Defs",
+      "Cslib.Foundations.Logic.Connectives",
+      "Cslib.Logics.Temporal.Syntax.Formula",
+      "Cslib.Logics.LTL.Syntax.Formula",
+      "Cslib.Logics.LTL.Semantics.Satisfies"
+    ],
+    "verification_passed": true,
+    "note": "checkInitImports has pre-existing stale olean conflict from DerivedRules.lean absent on this branch; not caused by our changes. CI at GitHub runs fresh without this stale cache.",
+    "commits_pushed": ["636d8a38", "3912c230", "4eaf427a", "79c6ba38"]
   },
-  "memory_candidates": []
+  "metadata": {
+    "session_id": "sess_1781650791_5f754f",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "branch": "feat/temporal-formula-propositional",
+    "remote_pushed": true
+  }
 }

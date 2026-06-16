@@ -47,7 +47,7 @@ next_project_number: 225
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-223 [PLANNED] — Review and fix PR #649 (stacked on PR #648): resolve CI failure a
+223 [IMPLEMENTING] — Review and fix PR #649 (stacked on PR #648): resolve CI failure a
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -69,7 +69,7 @@ next_project_number: 225
 ---
 
 ### 223. Review fix pr 649 rebase on 648
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: pr
 - **Topic**: Temporal Logic
 - **Dependencies**: None

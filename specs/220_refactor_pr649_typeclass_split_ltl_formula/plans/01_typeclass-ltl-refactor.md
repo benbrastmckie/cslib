@@ -1,7 +1,7 @@
 # Implementation Plan: Refactor PR #649 Typeclass Split and LTL Formula
 
 - **Task**: 220 - Refactor PR #649: typeclass split and LTL formula
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 4 hours
 - **Dependencies**: None (targets PR branch `feat/temporal-formula-propositional`)
 - **Research Inputs**: reports/01_team-research.md
@@ -72,7 +72,7 @@ This plan advances the Temporal module infrastructure in the ROADMAP. Adding the
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Typeclass Hierarchy in Connectives.lean [NOT STARTED]
+### Phase 1: Typeclass Hierarchy in Connectives.lean [COMPLETED]
 
 **Goal**: Add `HasNext`, `FutureTemporalConnectives`, `LTLConnectives` typeclasses and restructure `TemporalConnectives` parent.
 
@@ -96,7 +96,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Clean Temporal Formula.lean [NOT STARTED]
+### Phase 2: Clean Temporal Formula.lean [COMPLETED]
 
 **Goal**: Remove completeness-only content (Encodable/Countable/Infinite/Denumerable instances and manual BEq proofs) and unnecessary imports.
 
@@ -123,7 +123,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Create LTL Formula Type [NOT STARTED]
+### Phase 3: Create LTL Formula Type [COMPLETED]
 
 **Goal**: Create `Cslib/Logics/LTL/Syntax/Formula.lean` with the LTL formula inductive, `LTLConnectives` instance, derived connectives, scoped notation, and `toTemporal` embedding.
 
@@ -153,7 +153,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: Create LTL Satisfaction Semantics [NOT STARTED]
+### Phase 4: Create LTL Satisfaction Semantics [COMPLETED]
 
 **Goal**: Create minimal omega-word satisfaction relation to address ctchou's omega-execution request.
 
@@ -179,7 +179,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 5: CI Verification and Barrel Imports [NOT STARTED]
+### Phase 5: CI Verification and Barrel Imports [COMPLETED]
 
 **Goal**: Update barrel imports and pass full CI pipeline.
 

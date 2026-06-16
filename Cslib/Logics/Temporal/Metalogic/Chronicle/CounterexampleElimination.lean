@@ -13,6 +13,7 @@ public import Cslib.Logics.Temporal.Metalogic.Chronicle.Frame
 public import Mathlib.Data.Rat.Defs
 public import Mathlib.Algebra.Order.Ring.Rat
 public import Mathlib.Data.Finset.Max
+public import Mathlib.Logic.Encodable.Basic
 public import Mathlib.Tactic.Linarith
 
 /-!

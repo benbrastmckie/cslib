@@ -1,30 +1,65 @@
 {
-  "status": "planned",
+  "status": "implemented",
+  "started_at": "2026-06-16T02:31:28Z",
   "artifacts": [
     {
-      "type": "plan",
-      "path": "specs/220_refactor_pr649_typeclass_split_ltl_formula/plans/01_typeclass-ltl-refactor.md",
-      "summary": "5-phase implementation plan for PR #649 typeclass split and LTL formula creation"
+      "path": "specs/220_refactor_pr649_typeclass_split_ltl_formula/summaries/01_typeclass-ltl-refactor-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary for all 5 phases"
+    },
+    {
+      "path": "Cslib/Foundations/Logic/Connectives.lean",
+      "type": "modified",
+      "summary": "Added HasNext, FutureTemporalConnectives, LTLConnectives typeclasses; restructured TemporalConnectives"
+    },
+    {
+      "path": "Cslib/Logics/Temporal/Syntax/Formula.lean",
+      "type": "modified",
+      "summary": "Removed Countability and BEqLaws sections, removed Encodable/Denumerable imports"
+    },
+    {
+      "path": "Cslib/Logics/Temporal/Metalogic/Chronicle/CounterexampleElimination.lean",
+      "type": "modified",
+      "summary": "Added Mathlib.Logic.Encodable.Basic import (was previously provided transitively)"
+    },
+    {
+      "path": "Cslib/Logics/LTL/Syntax/Formula.lean",
+      "type": "created",
+      "summary": "New LTL formula inductive type with LTLConnectives instance and toTemporal embedding"
+    },
+    {
+      "path": "Cslib/Logics/LTL/Semantics/Satisfies.lean",
+      "type": "created",
+      "summary": "Basic omega-word satisfaction relation for LTL"
+    },
+    {
+      "path": "Cslib.lean",
+      "type": "modified",
+      "summary": "Updated barrel imports with new LTL modules"
     }
   ],
-  "next_steps": "Run /implement 220 to execute the plan",
-  "metadata": {
-    "session_id": "sess_1781576396_e49877",
-    "agent_type": "planner-agent",
-    "duration_seconds": 180,
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
-    "phase_count": 5,
-    "estimated_hours": 4,
-    "dependency_waves": [[1], [2, 3], [4], [5]]
+  "partial_progress": {
+    "stage": "complete",
+    "phases_completed": 5,
+    "last_completed_phase": "CI Verification and Barrel Imports"
   },
-  "memory_candidates": [
-    {
-      "content": "When splitting a typeclass bundle in CSLib's Connectives.lean, the PR branch state (not main) determines diamond risk. The PR branch may have a simplified hierarchy missing classes present on main (e.g., BimodalConnectives), making restructuring safe on the PR branch even when it would create diamond inheritance on main. Always check the actual PR branch Connectives.lean before deciding additive vs. restructure approach.",
-      "category": "PATTERN",
-      "source_artifact": "specs/220_refactor_pr649_typeclass_split_ltl_formula/plans/01_typeclass-ltl-refactor.md",
-      "confidence": 0.8,
-      "suggested_keywords": ["typeclass", "diamond-inheritance", "connectives", "PR-branch", "restructure"]
-    }
-  ]
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "lake_build": "passed (2988 jobs)",
+    "lake_lint": "passed",
+    "lake_lint_style": "passed",
+    "lake_check_init_imports": "passed"
+  },
+  "metadata": {
+    "session_id": "sess_1750038000_a1b2c3",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
 }

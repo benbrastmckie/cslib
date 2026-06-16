@@ -92,6 +92,11 @@ class HasSince (F : Type*) where
   /-- The since temporal operator. -/
   snce : F → F → F
 
+/-- A type has a next-step temporal operator. -/
+class HasNext (F : Type*) where
+  /-- The next-step temporal operator. -/
+  next : F → F
+
 /-- A type has a conjunction connective. -/
 class HasAnd (F : Type*) where
   /-- The conjunction connective. -/
@@ -121,8 +126,26 @@ logics (intuitionistic, minimal) require extending this class with a primitive `
 such systems are formalized in CSLib. -/
 class ModalConnectives (F : Type*) extends PropositionalConnectives F, HasBox F
 
-/-- Temporal connectives: propositional connectives plus until and since. -/
-class TemporalConnectives (F : Type*) extends PropositionalConnectives F, HasUntil F, HasSince F
+/-- Future temporal connectives: propositional connectives plus until (no since, no next).
+
+This bundle is shared by both `LTLConnectives` (which adds `HasNext`) and
+`TemporalConnectives` (which adds `HasSince`). Factoring out the future fragment
+allows code generic over future-only temporal logics without committing to past or
+next-step operators. -/
+class FutureTemporalConnectives (F : Type*) extends PropositionalConnectives F, HasUntil F
+
+/-- LTL connectives: future temporal connectives plus a primitive next-step operator.
+
+Linear Temporal Logic uses `next` as a primitive rather than deriving it from `until`
+(the encoding `next φ = φ U ⊥` does not hold in all models). `FutureTemporalConnectives`
+provides `bot`, `imp`, and `untl`; this bundle adds `next`. -/
+class LTLConnectives (F : Type*) extends FutureTemporalConnectives F, HasNext F
+
+/-- Temporal connectives: propositional connectives plus until and since.
+
+Extends `FutureTemporalConnectives` with the `since` operator, forming the standard
+two-sorted temporal signature (future + past). -/
+class TemporalConnectives (F : Type*) extends FutureTemporalConnectives F, HasSince F
 
 /-- Bimodal connectives: modal connectives plus until and since.
     Note: we extend `ModalConnectives` and add `HasUntil`/`HasSince` directly

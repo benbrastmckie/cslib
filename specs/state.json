@@ -4,12 +4,22 @@
     {
       "project_number": 222,
       "project_name": "review_pr648_zulip_feedback_analysis",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "pr",
       "description": "Review PR #648 changes on feat/propositional-v2 and analyze Zulip feedback from specs/221_revise_pr649_reviewer_feedback/zulip.md, creating a detailed overview document of all issues with verified explanations and flagged concerns",
       "topic": "Propositional Logic",
       "created": "2026-06-16T21:25:21Z",
-      "last_updated": "2026-06-16T21:25:21Z"
+      "last_updated": "2026-06-16T21:49:29Z",
+      "session_id": "sess_1781645175_4f9ee2",
+      "researched": "2026-06-16T21:49:29Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/222_review_pr648_zulip_feedback_analysis/reports/01_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates"
+        }
+      ]
     },
     {
       "project_number": 221,

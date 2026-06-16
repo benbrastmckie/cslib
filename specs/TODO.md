@@ -39,7 +39,7 @@ next_project_number: 223
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
 219 [PLANNED] — Address PR #648 review from ctchou: merge Semantics/Basic.lean an
 221 [PR READY] — Revise PR #648 (feat/propositional-v2) to reconcile with merged P
-222 [NOT STARTED] — Review PR #648 changes on feat/propositional-v2 and analyze Zulip
+222 [RESEARCHED] — Review PR #648 changes on feat/propositional-v2 and analyze Zulip
 
 ### Propositional PRs
 
@@ -58,10 +58,11 @@ next_project_number: 223
 ## Tasks
 
 ### 222. Review pr648 zulip feedback analysis
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: pr
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [222_review_pr648_zulip_feedback_analysis/reports/01_team-research.md]
 
 **Description**: Review PR #648 changes on feat/propositional-v2 and analyze Zulip feedback from specs/221_revise_pr649_reviewer_feedback/zulip.md, creating a detailed overview document of all issues with verified explanations and flagged concerns
 

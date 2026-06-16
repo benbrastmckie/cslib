@@ -4,13 +4,13 @@
     {
       "project_number": 222,
       "project_name": "review_pr648_zulip_feedback_analysis",
-      "status": "researched",
+      "status": "planned",
       "task_type": "pr",
       "description": "Review PR #648 changes on feat/propositional-v2 and analyze Zulip feedback from specs/221_revise_pr649_reviewer_feedback/zulip.md, creating a detailed overview document of all issues with verified explanations and flagged concerns",
       "topic": "Propositional Logic",
       "created": "2026-06-16T21:25:21Z",
-      "last_updated": "2026-06-16T21:49:29Z",
-      "session_id": "sess_1781645175_4f9ee2",
+      "last_updated": "2026-06-16T21:58:55Z",
+      "session_id": "sess_1781646913_02137d",
       "researched": "2026-06-16T21:49:29Z",
       "next_artifact_number": 2,
       "artifacts": [
@@ -18,8 +18,36 @@
           "path": "specs/222_review_pr648_zulip_feedback_analysis/reports/01_team-research.md",
           "type": "research",
           "summary": "Team research with 4 teammates"
+        },
+        {
+          "type": "plan",
+          "path": "specs/222_review_pr648_zulip_feedback_analysis/plans/01_pr-response-drafts.md"
         }
-      ]
+      ],
+      "plan_path": "plans/01_pr-response-drafts.md",
+      "plan_metadata": {
+        "phases": 3,
+        "total_effort_hours": 2.5,
+        "complexity": "simple",
+        "research_integrated": true,
+        "plan_version": 1,
+        "dependency_waves": [
+          [
+            1
+          ],
+          [
+            2,
+            3
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/01_team-research.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-06-16"
+          }
+        ]
+      }
     },
     {
       "project_number": 221,
@@ -139,13 +167,14 @@
     {
       "project_number": 215,
       "project_name": "fill_bimodal_sorries",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "title": "Fill sorry declarations in Bimodal BXCanonical and Bundle files",
       "description": "Fill 22 sorry declarations across 6 files in Cslib/Logics/Bimodal/Metalogic/:\n- Bundle/SuccRelation.lean: 7 sorries (lines 253, 258, 263, 269, 275, 281, 285)\n- BXCanonical/Chronicle/ChronicleToCountermodel.lean: 10 sorries (lines 66, 143, 144, 147, 153, 157, 163, 171, 172, 177)\n- Bundle/UntilSinceCoherence.lean: 2 sorries (lines 37, 41)\n- BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean: 1 sorry (line 814)\n- BXCanonical/Completeness/Dense.lean: 1 sorry (line 110)\n- BXCanonical/Frame.lean: 1 sorry (line 159)\n\nThese are incomplete proofs in the bimodal temporal logic development (BX dense completeness). The heaviest concentrations are ChronicleToCountermodel (chronicle-to-countermodel construction) and SuccRelation (successor relation properties). These are the last CI blockers after style warnings were fixed.",
       "topic": "Bimodal Porting",
       "created": "2026-06-15T17:59:27Z",
-      "last_updated": "2026-06-15T17:59:27Z"
+      "last_updated": "2026-06-16T21:57:22Z",
+      "session_id": "sess_1750098000_a7b3c1"
     },
     {
       "project_number": 197,

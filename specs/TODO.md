@@ -22,7 +22,7 @@ next_project_number: 223
 36 [BLOCKED] — Port discrete completeness (completeness_discrete theorem) and We
 37 [BLOCKED] — Port continuous extension completeness once developed upstream. T
 214 [NOT STARTED] — Fix 4 tactic goal-count warnings in Cslib/Logics/Bimodal/Metalogi
-215 [NOT STARTED] — Fill 22 sorry declarations across 6 files in Cslib/Logics/Bimodal
+215 [RESEARCHING] — Fill 22 sorry declarations across 6 files in Cslib/Logics/Bimodal
 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
 
 ### Foundations
@@ -38,7 +38,7 @@ next_project_number: 223
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
 219 [PLANNED] — Address PR #648 review from ctchou: merge Semantics/Basic.lean an
 221 [PR READY] — Revise PR #648 (feat/propositional-v2) to reconcile with merged P
-222 [RESEARCHED] — Review PR #648 changes on feat/propositional-v2 and analyze Zulip
+222 [PLANNED] — Review PR #648 changes on feat/propositional-v2 and analyze Zulip
 
 ### Propositional PRs
 
@@ -57,11 +57,12 @@ next_project_number: 223
 ## Tasks
 
 ### 222. Review pr648 zulip feedback analysis
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: pr
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [222_review_pr648_zulip_feedback_analysis/reports/01_team-research.md]
+- **Plan**: [222_review_pr648_zulip_feedback_analysis/plans/01_pr-response-drafts.md]
 
 **Description**: Review PR #648 changes on feat/propositional-v2 and analyze Zulip feedback from specs/221_revise_pr649_reviewer_feedback/zulip.md, creating a detailed overview document of all issues with verified explanations and flagged concerns
 
@@ -133,7 +134,7 @@ Sources:
 ---
 
 ### 215. Fill sorry declarations in Bimodal BXCanonical and Bundle files
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Bimodal Porting
 - **Dependencies**: None

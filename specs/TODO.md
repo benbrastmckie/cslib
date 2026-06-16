@@ -1,5 +1,5 @@
 ---
-next_project_number: 221
+next_project_number: 222
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 221
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,195,197,209,214,215,219 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,195,197,209,214,215,219,221 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -38,6 +38,7 @@ next_project_number: 221
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
 219 [PLANNED] — Address PR #648 review from ctchou: merge Semantics/Basic.lean an
+221 [NOT STARTED] — Revise PR #649 (feat/temporal-formula-propositional) based on rev
 
 ### Propositional PRs
 
@@ -54,6 +55,35 @@ next_project_number: 221
 197 [PR READY] — Review the ambition to contribute Modal/ to upstream, identifying
 
 ## Tasks
+
+### 221. Revise pr649 reviewer feedback
+- **Status**: [NOT STARTED]
+- **Task Type**: pr
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Revise PR #649 (feat/temporal-formula-propositional) based on reviewer feedback from PR #648. Key changes needed:
+
+1. Split LTL semantics into separate PR: Remove Cslib/Logics/LTL/Semantics/Satisfies.lean from this PR as contributor thomaskwaring requests splitting semantics development into a separate PR. The LTL.Formula syntax file stays.
+
+2. Adapt to merged PR #536: PR #649 is now rebased on upstream/main which includes PR #536 (refactor: classical and intuitionistic inference systems). The IsIntuitionistic/IsClassical classes are now inference-system-based (parameterized by S : Type*). Our changes (removing [Bot Atom], adapting to primitive bot) are already reconciled in the rebase. Verify consistency.
+
+3. Address reference concerns: Both ctchou and thomaskwaring object to citing 1930s German-language papers. Replace with modern English references — ctchou recommends Avigad's Mathematical Logic and Computation (Cambridge, 2022) chapters 2-3. Keep BibKey format per CONTRIBUTING.md.
+
+4. Address thomaskwaring's design concerns on PR #648: He raises valid points about bot-as-primitive: (a) in minimal logic bot behaves like an atom, (b) adding a constructor makes proofs more verbose, (c) substitution should allow maps that don't preserve bottom (WithBot.some pattern), (d) top being a→a for arbitrary a is a feature. The PR description for #649 should acknowledge these trade-offs rather than asserting the five-primitive design is unambiguously better. Since #536 just merged with the old design, our PR needs to present compelling benefits.
+
+5. Revise PR description: Update to reflect (a) stacking on merged #536, (b) semantics split out, (c) coordination with #607/#587, (d) balanced design rationale addressing thomaskwaring's objections, (e) updated references.
+
+6. Rename imp vs impl: thomaskwaring notes citing "CSLib's existing formula types" when those are our own unmerged work is not convincing. The actually existing example (Modal) uses "impl". Either justify the rename on independent grounds or reconsider.
+
+Sources:
+- Maintainer review: https://github.com/leanprover/cslib/pull/648#pullrequestreview-4502084546
+- Contributor comment: https://github.com/leanprover/cslib/pull/648#issuecomment-4715838618
+- PR #649: https://github.com/leanprover/cslib/pull/649
+- PR #648: https://github.com/leanprover/cslib/pull/648
+- Merged PR #536: refactor(Logics/Propositional): classical and intuitionistic inference systems
+
+---
 
 ### 220. Refactor pr649 typeclass split ltl formula
 - **Status**: [COMPLETED]

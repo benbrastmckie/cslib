@@ -122,58 +122,63 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Cherry-pick Changes from Main [NOT STARTED]
+### Phase 3: Commit and Push Review Changes to PR Branch [NOT STARTED]
 
-**Goal**: Bring relevant commits from main onto the PR branch so the PR includes the latest local improvements to Propositional/ files.
+**Goal**: Ensure the PR branch contains exactly the review-addressed changes and nothing outside the PR's scope.
 
 **Tasks**:
-- [ ] Identify commits on main that touch `Cslib/Logics/Propositional/` since the PR branch diverged (`git log feat/propositional-v2..main -- Cslib/Logics/Propositional/`)
-- [ ] Evaluate which commits apply cleanly vs which conflict with the PR branch state
-- [ ] Cherry-pick applicable commits one at a time, resolving conflicts as needed
-- [ ] For files that exist on main but not on the PR branch (e.g., Metalogic/, ProofSystem/), consider whether they should be added to the PR or kept for follow-up
-- [ ] Build after all cherry-picks to confirm clean state
+- [ ] Verify PR scope is limited to the files the PR already touches plus `references.bib`:
+  - `Cslib/Foundations/Logic/Connectives.lean`
+  - `Cslib/Logics/Propositional/Defs.lean`
+  - `Cslib/Logics/Propositional/NaturalDeduction/Basic.lean`
+  - `Cslib/Logics/Propositional/Semantics/Basic.lean` (now merged)
+  - `Cslib.lean` (Bool import removed)
+  - `references.bib` (Avigad2023 added)
+- [ ] Confirm no files outside PR scope were modified (e.g., Metalogic/, ProofSystem/, Kripke.lean are follow-up PRs, not this one)
+- [ ] Commit Phase 1-2 changes on `feat/propositional-v2`
+- [ ] Run `lake build` to verify the PR branch compiles cleanly
+- [ ] Push to origin
 
-**Timing**: 1 hour
+**Timing**: 30 minutes
 
 **Depends on**: 1
 
 **Files to modify**:
-- Various files under `Cslib/Logics/Propositional/` depending on commits
-- Potentially `Cslib.lean` if new modules were added on main
+- None beyond what Phases 1-2 already changed
 
 **Verification**:
-- `lake build` succeeds after cherry-picks
-- `git log --oneline` shows cherry-picked commits on PR branch
-- No unresolved merge conflicts remain
+- `lake build` succeeds on PR branch
+- `git diff --name-only upstream/main..feat/propositional-v2` shows only in-scope files
+- No Metalogic/ProofSystem/Kripke files appear in the diff
 
 ---
 
-### Phase 4: Post PR Response and Cross-PR Coordination Comments [NOT STARTED]
+### Phase 4: Draft PR Response and Coordination Comments [NOT STARTED]
 
-**Goal**: Respond to ctchou's review and tag relevant PR authors for coordination.
+**Goal**: Write draft response and coordination comments for user review before posting.
 
 **Tasks**:
-- [ ] Draft PR #648 response comment addressing:
+- [ ] Draft PR #648 response to ctchou addressing:
   - File merge completed (Bool.lean absorbed into Basic.lean)
   - Explicit rebuttal of Interpretation B: StrongCompleteness.lean uses `fun p => atom p in S` which is Prop-valued (MCS set membership has no DecidablePred); BoolEvaluate serves the computable layer; bridge lemma connects them
   - Avigad reference added, docstrings updated
   - Kripke.lean exists locally as planned follow-up
   - SemanticConsequence.lean retains Chagrov refs for specific theorems (1.16, 2.43), will address in follow-up
-- [ ] Post the PR response comment via `gh pr comment 648`
-- [ ] Tag thomaskwaring in PR #648 noting: (1) Connectives.lean path collision with PR #587, (2) Valuation.interp needs updating for five-primitive Proposition type
-- [ ] Tag fmontesi in PR #648 noting: HasImp/HasImpl naming divergence with PR #607
-- [ ] Verify comments appear on GitHub
+- [ ] Draft coordination comment for thomaskwaring noting: (1) Connectives.lean path collision with PR #587, (2) Valuation.interp needs updating for five-primitive Proposition type
+- [ ] Draft coordination comment for fmontesi noting: HasImp/HasImpl naming divergence with PR #607
+- [ ] Write all drafts to task directory for user review
 
-**Timing**: 45 minutes
+**Timing**: 30 minutes
 
 **Depends on**: 2, 3
 
-**Files to modify**:
-- None (GitHub API operations only)
+**Files to create**:
+- `specs/219_address_pr648_merge_semantics_files/drafts/pr648-response.md` - Main review response
+- `specs/219_address_pr648_merge_semantics_files/drafts/pr648-coordination.md` - Comments for thomaskwaring and fmontesi
 
 **Verification**:
-- `gh pr view 648 --comments` shows the posted comments
-- Tagged users received notifications
+- Draft files exist and cover all review points
+- User reviews and posts comments manually
 
 ---
 

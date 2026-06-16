@@ -37,7 +37,7 @@ next_project_number: 220
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
-219 [NOT STARTED] — Address PR #648 review from ctchou: merge Semantics/Basic.lean an
+219 [RESEARCHED] — Address PR #648 review from ctchou: merge Semantics/Basic.lean an
 
 ### Propositional PRs
 
@@ -56,11 +56,13 @@ next_project_number: 220
 ## Tasks
 
 ### 219. Address pr648 merge semantics files
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: pr
 - **Topic**: Propositional Logic
 - **Dependencies**: None
-- **Research**: [219_address_pr648_merge_semantics_files/reports/01_pr648-review-analysis.md]
+- **Research**:
+  - [219_address_pr648_merge_semantics_files/reports/01_pr648-review-analysis.md]
+  - [219_address_pr648_merge_semantics_files/reports/02_team-research.md]
 
 **Description**: Address PR #648 review from ctchou: merge Semantics/Basic.lean and Bool.lean into a single file, update references to Avigad, and coordinate with PRs #536, #587, #607. PR: https://github.com/leanprover/cslib/pull/648 Zulip: https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/with/603538889
 

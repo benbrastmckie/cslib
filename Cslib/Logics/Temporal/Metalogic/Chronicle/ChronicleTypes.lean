@@ -24,6 +24,7 @@ definitions for the temporal chronicle construction.
 -/
 
 set_option linter.style.emptyLine false
+set_option linter.dupNamespace false
 
 @[expose] public section
 

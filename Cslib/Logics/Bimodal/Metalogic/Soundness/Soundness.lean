@@ -374,14 +374,14 @@ theorem temp_linearity_valid (φ ψ : Formula Atom) :
   obtain ⟨s1, hs1t, h_phi_s1, _⟩ := h_F_phi
   obtain ⟨s2, hs2t, h_psi_s2, _⟩ := h_F_psi
   rcases lt_trichotomy s1 s2 with h_lt | h_eq | h_gt
-  · intro _; intro h_neg; exfalso
+  · intro _ h_neg; exfalso
     exact h_neg ⟨s1, hs1t, fun h_imp => h_imp h_phi_s1
       ⟨s2, h_lt, h_psi_s2, fun _ _ _ hf => absurd hf not_false⟩,
       fun _ _ _ hf => absurd hf not_false⟩
   · subst h_eq; intro h_neg; exfalso
     exact h_neg ⟨s1, hs1t, fun h_imp => h_imp h_phi_s1 h_psi_s2,
       fun _ _ _ hf => absurd hf not_false⟩
-  · intro _; intro _
+  · intro _ _
     exact ⟨s2, hs2t, fun h_imp => h_imp
       ⟨s1, h_gt, h_phi_s1, fun _ _ _ hf => absurd hf not_false⟩ h_psi_s2,
       fun _ _ _ hf => absurd hf not_false⟩
@@ -401,14 +401,14 @@ theorem temp_linearity_past_valid (φ ψ : Formula Atom) :
   obtain ⟨s1, hs1t, h_phi_s1, _⟩ := h_P_phi
   obtain ⟨s2, hs2t, h_psi_s2, _⟩ := h_P_psi
   rcases lt_trichotomy s1 s2 with h_lt | h_eq | h_gt
-  · intro _; intro _
+  · intro _ _
     exact ⟨s2, hs2t, fun h_imp => h_imp
       ⟨s1, h_lt, h_phi_s1, fun _ _ _ hf => absurd hf not_false⟩ h_psi_s2,
       fun _ _ _ hf => absurd hf not_false⟩
   · subst h_eq; intro h_neg; exfalso
     exact h_neg ⟨s1, hs1t, fun h_imp => h_imp h_phi_s1 h_psi_s2,
       fun _ _ _ hf => absurd hf not_false⟩
-  · intro _; intro h_neg; exfalso
+  · intro _ h_neg; exfalso
     exact h_neg ⟨s1, hs1t, fun h_imp => h_imp h_phi_s1
       ⟨s2, h_gt, h_psi_s2, fun _ _ _ hf => absurd hf not_false⟩,
       fun _ _ _ hf => absurd hf not_false⟩

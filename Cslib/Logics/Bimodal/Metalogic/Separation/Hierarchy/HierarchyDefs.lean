@@ -112,21 +112,21 @@ theorem s_free_has_single_S_type {φ x y : Formula Atom} (h : isSFree φ = true)
 /-- Helper: Formula.neg preserves hasSingleUType. -/
 theorem has_single_U_type_neg {φ x y : Formula Atom} (h : hasSingleUType φ x y) :
     hasSingleUType (Formula.neg φ) x y := by
-  simp [Formula.neg, hasSingleUType]
+  simp [hasSingleUType]
   exact h
 
 /-- Helper: Formula.and preserves hasSingleUType. -/
 theorem has_single_U_type_and {φ ψ x y : Formula Atom}
     (h1 : hasSingleUType φ x y) (h2 : hasSingleUType ψ x y) :
     hasSingleUType (Formula.and φ ψ) x y := by
-  simp [Formula.and, Formula.neg, hasSingleUType]
+  simp [hasSingleUType]
   exact ⟨h1, h2⟩
 
 /-- Helper: Formula.or preserves hasSingleUType. -/
 theorem has_single_U_type_or {φ ψ x y : Formula Atom}
     (h1 : hasSingleUType φ x y) (h2 : hasSingleUType ψ x y) :
     hasSingleUType (Formula.or φ ψ) x y := by
-  simp [Formula.or, Formula.neg, hasSingleUType]
+  simp [hasSingleUType]
   exact ⟨h1, h2⟩
 
 /-- Helper: U(A,B) trivially has single U-type U(A,B). -/
@@ -833,7 +833,7 @@ theorem or_separable_with_U_type {a b x y : Formula Atom}
   obtain ⟨ψa, hsepa, hequiva, hsinglea⟩ := ha
   obtain ⟨ψb, hsepb, hequivb, hsingleb⟩ := hb
   refine ⟨Formula.or ψa ψb, ?_, ?_, ?_⟩
-  · simp [Formula.or, Formula.neg, isSyntacticallySeparated, hsepa, hsepb]
+  · simp [isSyntacticallySeparated, hsepa, hsepb]
   · intro m t; constructor
     · intro h; rcases int_truth_or_iff.mp h with hp | hq
       · exact int_truth_or_iff.mpr (Or.inl ((hequiva m t).mp hp))

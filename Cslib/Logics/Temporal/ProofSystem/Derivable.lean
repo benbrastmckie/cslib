@@ -19,6 +19,8 @@ This module provides a Prop-valued wrapper `Derivable` around the Type-valued
 - `Derivable.lift`: Frame class monotonicity for Prop-valued derivability
 -/
 
+set_option linter.dupNamespace false
+
 @[expose] public section
 
 namespace Cslib.Logic.Temporal

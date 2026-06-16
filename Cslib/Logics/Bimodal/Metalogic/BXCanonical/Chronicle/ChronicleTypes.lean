@@ -27,6 +27,7 @@ Defines the chronicle data structure from Burgess 1982, Section 2.
 
 set_option linter.style.emptyLine false
 set_option linter.style.longLine false
+set_option linter.dupNamespace false
 
 @[expose] public section
 

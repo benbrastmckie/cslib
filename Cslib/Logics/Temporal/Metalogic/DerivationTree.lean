@@ -33,6 +33,8 @@ framework.
 * Cslib/Foundations/Logic/Metalogic/Consistency.lean — generic MCS API
 -/
 
+set_option linter.dupNamespace false
+
 @[expose] public section
 
 namespace Cslib.Logic.Temporal

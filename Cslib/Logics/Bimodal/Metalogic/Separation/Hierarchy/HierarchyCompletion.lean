@@ -394,7 +394,7 @@ theorem extract_U_type_U_free (φ : Formula Atom) (h : isUFree φ = false)
     · simp only [hc, ↓reduceDIte]
       have hle : uNestingDepth c ≤ 1 := Nat.le_trans (U_nesting_depth_le_imp_left c d) hdepth
       exact ih1 hc hns.1 hle
-    · simp only [hc, ↓reduceDIte]
+    · simp only [hc]
       have hd : isUFree d = false := by
         simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
       have hle : uNestingDepth d ≤ 1 := Nat.le_trans (U_nesting_depth_le_imp_right c d) hdepth
@@ -414,7 +414,7 @@ theorem extract_U_type_U_free (φ : Formula Atom) (h : isUFree φ = false)
     · simp only [hc, ↓reduceDIte]
       have hle : uNestingDepth c ≤ 1 := Nat.le_trans (U_nesting_depth_le_snce_left c d) hdepth
       exact ih1 hc hns.1 hle
-    · simp only [hc, ↓reduceDIte]
+    · simp only [hc]
       have hd : isUFree d = false := by
         simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
       have hle : uNestingDepth d ≤ 1 := Nat.le_trans (U_nesting_depth_le_snce_right c d) hdepth

@@ -20,11 +20,11 @@
     {
       "id": "johansson_1937",
       "bib_key": "Johansson1937",
-      "title": "Der Minimalkalkül, ein reduzierter intuitionistischer Formalismus",
+      "title": "Der Minimalkalk\u00fcl, ein reduzierter intuitionistischer Formalismus",
       "authors": "Ingebrigt Johansson",
       "year": 1937,
       "section": null,
-      "path": "johansson_1937.md",
+      "path": "sources/johansson_1937/johansson_1937.md",
       "page_range": "119-136",
       "token_count": 5653,
       "keywords": [
@@ -37,7 +37,7 @@
         "MinPropAxiom",
         "Heyting calculus"
       ],
-      "summary": "Defines minimal logic by removing ex falso quodlibet from Heyting's intuitionistic system, retaining falsum as a primitive and negation defined as A→⊥."
+      "summary": "Defines minimal logic by removing ex falso quodlibet from Heyting's intuitionistic system, retaining falsum as a primitive and negation defined as A\u2192\u22a5."
     },
     {
       "id": "henkin_1949",
@@ -46,7 +46,7 @@
       "authors": "Leon Henkin",
       "year": 1949,
       "section": null,
-      "path": "henkin_1949.md",
+      "path": "sources/henkin_1949/henkin_1949.md",
       "page_range": "159-166",
       "token_count": 5872,
       "keywords": [
@@ -68,7 +68,7 @@
       "authors": "Huayu Guo, Dongheng Chen, Bruno Bentzen",
       "year": 2023,
       "section": null,
-      "path": "bentzen_2023.md",
+      "path": "sources/bentzen_2023/bentzen_2023.md",
       "page_range": "36-48",
       "token_count": 7334,
       "keywords": [
@@ -90,7 +90,7 @@
       "authors": "Dafina Trufas",
       "year": 2024,
       "section": null,
-      "path": "trufas_2024.md",
+      "path": "sources/trufas_2024/trufas_2024.md",
       "page_range": "133-149",
       "token_count": 9699,
       "keywords": [
@@ -109,10 +109,10 @@
       "id": "from_2022",
       "bib_key": null,
       "title": "SeCaV: A Sequent Calculus Verifier in Isabelle/HOL",
-      "authors": "Asta Halkjær From, Frederik Krogsdal Jacobsen, Jørgen Villadsen",
+      "authors": "Asta Halkj\u00e6r From, Frederik Krogsdal Jacobsen, J\u00f8rgen Villadsen",
       "year": 2022,
       "section": null,
-      "path": "from_2022.md",
+      "path": "sources/from_2022/from_2022.md",
       "page_range": "38-55",
       "token_count": 11549,
       "keywords": [
@@ -134,7 +134,7 @@
       "authors": "Emil L. Post",
       "year": 1921,
       "section": null,
-      "path": "post_1921.md",
+      "path": "sources/post_1921/post_1921.md",
       "page_range": "163-185",
       "token_count": 13230,
       "keywords": [
@@ -152,11 +152,11 @@
     {
       "id": "gentzen_1935_sec00",
       "bib_key": "Gentzen1935",
-      "title": "Investigations into Logical Deduction — Synopsis and Notation",
+      "title": "Investigations into Logical Deduction \u2014 Synopsis and Notation",
       "authors": "Gerhard Gentzen",
       "year": 1935,
       "section": "Synopsis and Section I: Terminology and Notation",
-      "path": "gentzen_1935/sec00_synopsis-and-notation.md",
+      "path": "sources/gentzen_1935/sec00_synopsis-and-notation.md",
       "page_range": "68-76",
       "token_count": 3074,
       "keywords": [
@@ -172,11 +172,11 @@
     {
       "id": "gentzen_1935_sec02",
       "bib_key": "Gentzen1935",
-      "title": "Investigations into Logical Deduction — Section II: Natural Deduction",
+      "title": "Investigations into Logical Deduction \u2014 Section II: Natural Deduction",
       "authors": "Gerhard Gentzen",
       "year": 1935,
       "section": "Section II: The Calculus of Natural Deduction",
-      "path": "gentzen_1935/sec02_natural-deduction.md",
+      "path": "sources/gentzen_1935/sec02_natural-deduction.md",
       "page_range": "77-87",
       "token_count": 3617,
       "keywords": [
@@ -194,11 +194,11 @@
     {
       "id": "gentzen_1935_sec03",
       "bib_key": "Gentzen1935",
-      "title": "Investigations into Logical Deduction — Section III: LJ, LK and Hauptsatz",
+      "title": "Investigations into Logical Deduction \u2014 Section III: LJ, LK and Hauptsatz",
       "authors": "Gerhard Gentzen",
       "year": 1935,
       "section": "Section III: The Deductive Calculi LJ, LK and Proof of the Hauptsatz",
-      "path": "gentzen_1935/sec03_lj-lk-hauptsatz.md",
+      "path": "sources/gentzen_1935/sec03_lj-lk-hauptsatz.md",
       "page_range": "87-120",
       "token_count": 9995,
       "keywords": [
@@ -216,11 +216,11 @@
     {
       "id": "gentzen_1935_sec04",
       "bib_key": "Gentzen1935",
-      "title": "Investigations into Logical Deduction — Section IV: Applications",
+      "title": "Investigations into Logical Deduction \u2014 Section IV: Applications",
       "authors": "Gerhard Gentzen",
       "year": 1935,
       "section": "Section IV: Some Applications of the Hauptsatz",
-      "path": "gentzen_1935/sec04_applications.md",
+      "path": "sources/gentzen_1935/sec04_applications.md",
       "page_range": "121-131",
       "token_count": 6032,
       "keywords": [
@@ -235,11 +235,11 @@
     {
       "id": "gentzen_1935_sec05",
       "bib_key": "Gentzen1935",
-      "title": "Investigations into Logical Deduction — Section V: Equivalence",
+      "title": "Investigations into Logical Deduction \u2014 Section V: Equivalence",
       "authors": "Gerhard Gentzen",
       "year": 1935,
       "section": "Section V: Equivalence of NJ, NK with LJ, LK",
-      "path": "gentzen_1935/sec05_equivalence.md",
+      "path": "sources/gentzen_1935/sec05_equivalence.md",
       "page_range": "131-end",
       "token_count": 5625,
       "keywords": [
@@ -254,11 +254,11 @@
     {
       "id": "hughes_1996_p00",
       "bib_key": null,
-      "title": "A New Introduction to Modal Logic — Preface and Contents",
+      "title": "A New Introduction to Modal Logic \u2014 Preface and Contents",
       "authors": "G. E. Hughes, M. J. Cresswell",
       "year": 1996,
       "section": "Preface and Table of Contents",
-      "path": "hughes_1996/p00_front-matter.md",
+      "path": "sources/hughes_1996/p00_front-matter.md",
       "page_range": "ix-xiv",
       "token_count": 2600,
       "keywords": [
@@ -274,11 +274,11 @@
     {
       "id": "hughes_1996_p01",
       "bib_key": null,
-      "title": "A New Introduction to Modal Logic — Part I: Basic Modal Propositional Logic",
+      "title": "A New Introduction to Modal Logic \u2014 Part I: Basic Modal Propositional Logic",
       "authors": "G. E. Hughes, M. J. Cresswell",
       "year": 1996,
       "section": "Part I: Basic Modal Propositional Logic (Ch 1-6, pages 3-130)",
-      "path": "hughes_1996/p01_basic-modal-propositional-logic.md",
+      "path": "sources/hughes_1996/p01_basic-modal-propositional-logic.md",
       "page_range": "3-130",
       "token_count": 62312,
       "keywords": [
@@ -298,11 +298,11 @@
     {
       "id": "hughes_1996_p02",
       "bib_key": null,
-      "title": "A New Introduction to Modal Logic — Part II: Normal Modal Systems",
+      "title": "A New Introduction to Modal Logic \u2014 Part II: Normal Modal Systems",
       "authors": "G. E. Hughes, M. J. Cresswell",
       "year": 1996,
       "section": "Part II: Normal Modal Systems (Ch 7-12, pages 133-230)",
-      "path": "hughes_1996/p02_normal-modal-systems.md",
+      "path": "sources/hughes_1996/p02_normal-modal-systems.md",
       "page_range": "133-230",
       "token_count": 54676,
       "keywords": [
@@ -321,11 +321,11 @@
     {
       "id": "hughes_1996_p03",
       "bib_key": null,
-      "title": "A New Introduction to Modal Logic — Part III: Modal Predicate Logic",
+      "title": "A New Introduction to Modal Logic \u2014 Part III: Modal Predicate Logic",
       "authors": "G. E. Hughes, M. J. Cresswell",
       "year": 1996,
       "section": "Part III: Modal Predicate Logic (Ch 13-19, pages 233-408)",
-      "path": "hughes_1996/p03_modal-predicate-logic.md",
+      "path": "sources/hughes_1996/p03_modal-predicate-logic.md",
       "page_range": "233-408",
       "token_count": 88839,
       "keywords": [
@@ -342,11 +342,11 @@
     {
       "id": "mendelson_2016_ch00",
       "bib_key": null,
-      "title": "Introduction to Mathematical Logic (6th ed.) — Front Matter",
+      "title": "Introduction to Mathematical Logic (6th ed.) \u2014 Front Matter",
       "authors": "Elliott Mendelson",
       "year": 2016,
       "section": "Front Matter (Contents, Preface, Introduction)",
-      "path": "mendelson_2016/ch00_front-matter.md",
+      "path": "sources/mendelson_2016/ch00_front-matter.md",
       "page_range": "i-xxiv",
       "token_count": 9330,
       "keywords": [
@@ -361,11 +361,11 @@
     {
       "id": "mendelson_2016_ch01",
       "bib_key": null,
-      "title": "Introduction to Mathematical Logic — Chapter 1: The Propositional Calculus",
+      "title": "Introduction to Mathematical Logic \u2014 Chapter 1: The Propositional Calculus",
       "authors": "Elliott Mendelson",
       "year": 2016,
       "section": "Chapter 1: The Propositional Calculus (pages 1-44)",
-      "path": "mendelson_2016/ch01_propositional-calculus.md",
+      "path": "sources/mendelson_2016/ch01_propositional-calculus.md",
       "page_range": "1-44",
       "token_count": 22239,
       "keywords": [
@@ -383,11 +383,11 @@
     {
       "id": "mendelson_2016_ch02",
       "bib_key": null,
-      "title": "Introduction to Mathematical Logic — Chapter 2: First-Order Logic",
+      "title": "Introduction to Mathematical Logic \u2014 Chapter 2: First-Order Logic",
       "authors": "Elliott Mendelson",
       "year": 2016,
       "section": "Chapter 2: First-Order Logic and Model Theory (pages 45-152)",
-      "path": "mendelson_2016/ch02_first-order-logic.md",
+      "path": "sources/mendelson_2016/ch02_first-order-logic.md",
       "page_range": "45-152",
       "token_count": 70352,
       "keywords": [
@@ -405,11 +405,11 @@
     {
       "id": "mendelson_2016_ch03",
       "bib_key": null,
-      "title": "Introduction to Mathematical Logic — Chapter 3: Formal Number Theory",
+      "title": "Introduction to Mathematical Logic \u2014 Chapter 3: Formal Number Theory",
       "authors": "Elliott Mendelson",
       "year": 2016,
       "section": "Chapter 3: Formal Number Theory (pages 153-230)",
-      "path": "mendelson_2016/ch03_formal-number-theory.md",
+      "path": "sources/mendelson_2016/ch03_formal-number-theory.md",
       "page_range": "153-230",
       "token_count": 48314,
       "keywords": [
@@ -425,11 +425,11 @@
     {
       "id": "mendelson_2016_ch04",
       "bib_key": null,
-      "title": "Introduction to Mathematical Logic — Chapter 4: Axiomatic Set Theory",
+      "title": "Introduction to Mathematical Logic \u2014 Chapter 4: Axiomatic Set Theory",
       "authors": "Elliott Mendelson",
       "year": 2016,
       "section": "Chapter 4: Axiomatic Set Theory (pages 231-310)",
-      "path": "mendelson_2016/ch04_axiomatic-set-theory.md",
+      "path": "sources/mendelson_2016/ch04_axiomatic-set-theory.md",
       "page_range": "231-310",
       "token_count": 46241,
       "keywords": [
@@ -445,11 +445,11 @@
     {
       "id": "mendelson_2016_ch05",
       "bib_key": null,
-      "title": "Introduction to Mathematical Logic — Chapter 5: Computability",
+      "title": "Introduction to Mathematical Logic \u2014 Chapter 5: Computability",
       "authors": "Elliott Mendelson",
       "year": 2016,
       "section": "Chapter 5: Computability (pages 311-443)",
-      "path": "mendelson_2016/ch05_computability.md",
+      "path": "sources/mendelson_2016/ch05_computability.md",
       "page_range": "311-443",
       "token_count": 93601,
       "keywords": [
@@ -465,11 +465,11 @@
     {
       "id": "chagrov_1997_p00",
       "bib_key": "ChagrovZakharyaschev1997",
-      "title": "Modal Logic (CZ) — Front Matter",
+      "title": "Modal Logic (CZ) \u2014 Front Matter",
       "authors": "Alexander Chagrov, Michael Zakharyaschev",
       "year": 1997,
       "section": "Front Matter (Contents, Preface)",
-      "path": "chagrov_1997/p00_front-matter.md",
+      "path": "sources/chagrov_1997/p00_front-matter.md",
       "page_range": "i-xv",
       "token_count": 4460,
       "keywords": [
@@ -483,11 +483,11 @@
     {
       "id": "chagrov_1997_p01",
       "bib_key": "ChagrovZakharyaschev1997",
-      "title": "Modal Logic (CZ) — Part I: Introduction",
+      "title": "Modal Logic (CZ) \u2014 Part I: Introduction",
       "authors": "Alexander Chagrov, Michael Zakharyaschev",
       "year": 1997,
-      "section": "Part I: Introduction — Classical Logic, Intuitionistic Logic, Modal Logics (Ch 1-4)",
-      "path": "chagrov_1997/p01_introduction.md",
+      "section": "Part I: Introduction \u2014 Classical Logic, Intuitionistic Logic, Modal Logics (Ch 1-4)",
+      "path": "sources/chagrov_1997/p01_introduction.md",
       "page_range": "3-128",
       "token_count": 70202,
       "keywords": [
@@ -507,11 +507,11 @@
     {
       "id": "chagrov_1997_p02",
       "bib_key": "ChagrovZakharyaschev1997",
-      "title": "Modal Logic (CZ) — Part II: Kripke Semantics",
+      "title": "Modal Logic (CZ) \u2014 Part II: Kripke Semantics",
       "authors": "Alexander Chagrov, Michael Zakharyaschev",
       "year": 1997,
-      "section": "Part II: Kripke Semantics — Canonical Models, Filtration, Incompleteness (Ch 5-6)",
-      "path": "chagrov_1997/p02_kripke-semantics.md",
+      "section": "Part II: Kripke Semantics \u2014 Canonical Models, Filtration, Incompleteness (Ch 5-6)",
+      "path": "sources/chagrov_1997/p02_kripke-semantics.md",
       "page_range": "131-191",
       "token_count": 33248,
       "keywords": [
@@ -529,11 +529,11 @@
     {
       "id": "chagrov_1997_p03",
       "bib_key": "ChagrovZakharyaschev1997",
-      "title": "Modal Logic (CZ) — Part III: Adequate Semantics",
+      "title": "Modal Logic (CZ) \u2014 Part III: Adequate Semantics",
       "authors": "Alexander Chagrov, Michael Zakharyaschev",
       "year": 1997,
-      "section": "Part III: Adequate Semantics — Algebraic and Relational Semantics, Canonical Formulas (Ch 7-9)",
-      "path": "chagrov_1997/p03_adequate-semantics.md",
+      "section": "Part III: Adequate Semantics \u2014 Algebraic and Relational Semantics, Canonical Formulas (Ch 7-9)",
+      "path": "sources/chagrov_1997/p03_adequate-semantics.md",
       "page_range": "193-336",
       "token_count": 80241,
       "keywords": [
@@ -551,11 +551,11 @@
     {
       "id": "chagrov_1997_p04",
       "bib_key": "ChagrovZakharyaschev1997",
-      "title": "Modal Logic (CZ) — Part IV: Properties of Logics",
+      "title": "Modal Logic (CZ) \u2014 Part IV: Properties of Logics",
       "authors": "Alexander Chagrov, Michael Zakharyaschev",
       "year": 1997,
-      "section": "Part IV: Properties of Logics — Kripke Completeness, Finite Approximability, etc. (Ch 10-15)",
-      "path": "chagrov_1997/p04_properties-of-logics.md",
+      "section": "Part IV: Properties of Logics \u2014 Kripke Completeness, Finite Approximability, etc. (Ch 10-15)",
+      "path": "sources/chagrov_1997/p04_properties-of-logics.md",
       "page_range": "337-489",
       "token_count": 85664,
       "keywords": [
@@ -573,11 +573,11 @@
     {
       "id": "chagrov_1997_p05",
       "bib_key": "ChagrovZakharyaschev1997",
-      "title": "Modal Logic (CZ) — Part V: Algorithmic Problems",
+      "title": "Modal Logic (CZ) \u2014 Part V: Algorithmic Problems",
       "authors": "Alexander Chagrov, Michael Zakharyaschev",
       "year": 1997,
       "section": "Part V: Algorithmic Problems (Ch 16+)",
-      "path": "chagrov_1997/p05_algorithmic-problems.md",
+      "path": "sources/chagrov_1997/p05_algorithmic-problems.md",
       "page_range": "493-592",
       "token_count": 55227,
       "keywords": [
@@ -592,11 +592,11 @@
     {
       "id": "church_1956_ch00",
       "bib_key": "Church1956",
-      "title": "Introduction to Mathematical Logic — Front Matter",
+      "title": "Introduction to Mathematical Logic \u2014 Front Matter",
       "authors": "Alonzo Church",
       "year": 1956,
       "section": "Front Matter",
-      "path": "church_1956/ch00_front-matter.md",
+      "path": "sources/church_1956/ch00_front-matter.md",
       "page_range": "i-xii",
       "token_count": 2961,
       "keywords": [
@@ -608,11 +608,11 @@
     {
       "id": "church_1956_ch00b",
       "bib_key": "Church1956",
-      "title": "Introduction to Mathematical Logic — Introduction",
+      "title": "Introduction to Mathematical Logic \u2014 Introduction",
       "authors": "Alonzo Church",
       "year": 1956,
       "section": "Introduction (pages 1-68)",
-      "path": "church_1956/ch00b_introduction.md",
+      "path": "sources/church_1956/ch00b_introduction.md",
       "page_range": "1-68",
       "token_count": 55534,
       "keywords": [
@@ -630,11 +630,11 @@
     {
       "id": "church_1956_ch01",
       "bib_key": "Church1956",
-      "title": "Introduction to Mathematical Logic — Chapter I: The Propositional Calculus",
+      "title": "Introduction to Mathematical Logic \u2014 Chapter I: The Propositional Calculus",
       "authors": "Alonzo Church",
       "year": 1956,
       "section": "Chapter I: The Propositional Calculus (pages 69-118)",
-      "path": "church_1956/ch01_propositional-calculus.md",
+      "path": "sources/church_1956/ch01_propositional-calculus.md",
       "page_range": "69-118",
       "token_count": 35631,
       "keywords": [
@@ -652,11 +652,11 @@
     {
       "id": "church_1956_ch02",
       "bib_key": "Church1956",
-      "title": "Introduction to Mathematical Logic — Chapter II: Propositional Calculus (Continued)",
+      "title": "Introduction to Mathematical Logic \u2014 Chapter II: Propositional Calculus (Continued)",
       "authors": "Alonzo Church",
       "year": 1956,
       "section": "Chapter II: The Propositional Calculus (Continued, pages 119-179)",
-      "path": "church_1956/ch02_propositional-calculus-continued.md",
+      "path": "sources/church_1956/ch02_propositional-calculus-continued.md",
       "page_range": "119-179",
       "token_count": 31599,
       "keywords": [
@@ -672,11 +672,11 @@
     {
       "id": "church_1956_ch03",
       "bib_key": "Church1956",
-      "title": "Introduction to Mathematical Logic — Chapter III: Functional Calculi of First Order",
+      "title": "Introduction to Mathematical Logic \u2014 Chapter III: Functional Calculi of First Order",
       "authors": "Alonzo Church",
       "year": 1956,
       "section": "Chapter III: Functional Calculi of First Order (pages 180-225)",
-      "path": "church_1956/ch03_functional-calculi-first-order.md",
+      "path": "sources/church_1956/ch03_functional-calculi-first-order.md",
       "page_range": "180-225",
       "token_count": 32363,
       "keywords": [
@@ -691,11 +691,11 @@
     {
       "id": "church_1956_ch04",
       "bib_key": "Church1956",
-      "title": "Introduction to Mathematical Logic — Chapter IV: Pure Functional Calculus of First Order",
+      "title": "Introduction to Mathematical Logic \u2014 Chapter IV: Pure Functional Calculus of First Order",
       "authors": "Alonzo Church",
       "year": 1956,
       "section": "Chapter IV: The Pure Functional Calculus of First Order (pages 226-307)",
-      "path": "church_1956/ch04_pure-functional-calculus.md",
+      "path": "sources/church_1956/ch04_pure-functional-calculus.md",
       "page_range": "226-307",
       "token_count": 54783,
       "keywords": [
@@ -709,11 +709,11 @@
     {
       "id": "church_1956_ch05",
       "bib_key": "Church1956",
-      "title": "Introduction to Mathematical Logic — Chapter V: Functional Calculi of Second Order",
+      "title": "Introduction to Mathematical Logic \u2014 Chapter V: Functional Calculi of Second Order",
       "authors": "Alonzo Church",
       "year": 1956,
       "section": "Chapter V: Functional Calculi of Second Order (pages 308+)",
-      "path": "church_1956/ch05_functional-calculi-second-order.md",
+      "path": "sources/church_1956/ch05_functional-calculi-second-order.md",
       "page_range": "308-end",
       "token_count": 52674,
       "keywords": [
@@ -728,11 +728,11 @@
     {
       "id": "zakharyaschev_2001_sec00",
       "bib_key": null,
-      "title": "Advanced Modal Logic — Introduction",
+      "title": "Advanced Modal Logic \u2014 Introduction",
       "authors": "Michael Zakharyaschev, Frank Wolter, Alexander Chagrov",
       "year": 2001,
       "section": "Section 0: Introduction",
-      "path": "zakharyaschev_2001/sec00_introduction.md",
+      "path": "sources/zakharyaschev_2001/sec00_introduction.md",
       "page_range": null,
       "token_count": 2294,
       "keywords": [
@@ -748,11 +748,11 @@
     {
       "id": "zakharyaschev_2001_sec01",
       "bib_key": null,
-      "title": "Advanced Modal Logic — Section 1: Unimodal Logics",
+      "title": "Advanced Modal Logic \u2014 Section 1: Unimodal Logics",
       "authors": "Michael Zakharyaschev, Frank Wolter, Alexander Chagrov",
       "year": 2001,
       "section": "Section 1: Unimodal Logics",
-      "path": "zakharyaschev_2001/sec01_unimodal-logics.md",
+      "path": "sources/zakharyaschev_2001/sec01_unimodal-logics.md",
       "page_range": null,
       "token_count": 46109,
       "keywords": [
@@ -770,11 +770,11 @@
     {
       "id": "zakharyaschev_2001_sec02",
       "bib_key": null,
-      "title": "Advanced Modal Logic — Section 2: Polymodal Logics",
+      "title": "Advanced Modal Logic \u2014 Section 2: Polymodal Logics",
       "authors": "Michael Zakharyaschev, Frank Wolter, Alexander Chagrov",
       "year": 2001,
       "section": "Section 2: Polymodal Logics",
-      "path": "zakharyaschev_2001/sec02_polymodal-logics.md",
+      "path": "sources/zakharyaschev_2001/sec02_polymodal-logics.md",
       "page_range": null,
       "token_count": 19585,
       "keywords": [
@@ -789,11 +789,11 @@
     {
       "id": "zakharyaschev_2001_sec03",
       "bib_key": null,
-      "title": "Advanced Modal Logic — Section 3: Superintuitionistic Logics",
+      "title": "Advanced Modal Logic \u2014 Section 3: Superintuitionistic Logics",
       "authors": "Michael Zakharyaschev, Frank Wolter, Alexander Chagrov",
       "year": 2001,
       "section": "Section 3: Superintuitionistic Logics",
-      "path": "zakharyaschev_2001/sec03_superintuitionistic-logics.md",
+      "path": "sources/zakharyaschev_2001/sec03_superintuitionistic-logics.md",
       "page_range": null,
       "token_count": 42573,
       "keywords": [
@@ -812,7 +812,7 @@
       "authors": "John P. Burgess",
       "year": 1982,
       "section": null,
-      "path": "burgess_1982_i.md",
+      "path": "sources/burgess_1982_i/burgess_1982_i.md",
       "page_range": "367-374",
       "token_count": 4995,
       "keywords": [
@@ -836,7 +836,7 @@
       "authors": "John P. Burgess",
       "year": 1982,
       "section": null,
-      "path": "burgess_1982_ii.md",
+      "path": "sources/burgess_1982_ii/burgess_1982_ii.md",
       "page_range": "375-383",
       "token_count": 5235,
       "keywords": [
@@ -860,7 +860,7 @@
       "authors": "John P. Burgess",
       "year": 1984,
       "section": null,
-      "path": "burgess_1984.md",
+      "path": "sources/burgess_1984/burgess_1984.md",
       "page_range": "89-133",
       "token_count": 2152,
       "keywords": [
@@ -880,11 +880,11 @@
     {
       "id": "gabbay_1994_ch10",
       "bib_key": "GHR94",
-      "title": "Temporal Logic: Mathematical Foundations — Chapter 10: Temporal Logic over the Integers",
+      "title": "Temporal Logic: Mathematical Foundations \u2014 Chapter 10: Temporal Logic over the Integers",
       "authors": "Dov Gabbay, Ian Hodkinson, Mark Reynolds",
       "year": 1994,
       "section": "Chapter 10: Temporal Logic over the Integers (pp. 562-640)",
-      "path": "gabbay_1994_ch10.md",
+      "path": "sources/gabbay_1994_ch10/gabbay_1994_ch10.md",
       "page_range": "562-640",
       "token_count": 2279,
       "keywords": [
@@ -899,7 +899,7 @@
         "BX system",
         "canonical model"
       ],
-      "summary": "Chapter 10 of GHR94: Separation Theorem for temporal logic over integers (Theorem 10.2.9) and completeness proof for the Until-Since tense logic over ℤ; basis for CSLib's bimodal separation proof."
+      "summary": "Chapter 10 of GHR94: Separation Theorem for temporal logic over integers (Theorem 10.2.9) and completeness proof for the Until-Since tense logic over \u2124; basis for CSLib's bimodal separation proof."
     },
     {
       "id": "reynolds_1992",
@@ -908,7 +908,7 @@
       "authors": "Mark Reynolds",
       "year": 1994,
       "section": null,
-      "path": "reynolds_1992.md",
+      "path": "sources/reynolds_1992/reynolds_1992.md",
       "page_range": "679-703",
       "token_count": 2072,
       "keywords": [
@@ -924,623 +924,6 @@
         "integer time"
       ],
       "summary": "Sound and complete axiom system for first-order temporal logic with Until and Since over linear orders; the canonical MCS construction methodology parallels CSLib's chronicle-based completeness proof."
-    },
-    {
-      "id": "blackburn_2001_ch00",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — Front Matter and Preface",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Front matter, Table of Contents, and Preface (pages viii-xx)",
-      "path": "blackburn_2001/ch00_preface.md",
-      "page_range": "viii-xx",
-      "token_count": 5801,
-      "keywords": [
-        "modal logic overview",
-        "relational structures",
-        "book structure",
-        "reading guide",
-        "Kripke semantics",
-        "correspondence theory"
-      ],
-      "summary": "Front matter, TOC, and preface for Blackburn et al. Modal Logic."
-    },
-    {
-      "id": "blackburn_2001_ch01a",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §1.1-1.2 Relational Structures and Modal Languages",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 1: §1.1 Relational Structures, §1.2 Modal Languages",
-      "path": "blackburn_2001/ch01_relational-structures.md",
-      "page_range": "1-15",
-      "token_count": 6486,
-      "keywords": [
-        "relational structures",
-        "modal languages",
-        "basic modal language",
-        "Kripke frames",
-        "labeled transition systems",
-        "syntax"
-      ],
-      "summary": "Defines relational structures and modal languages including the basic modal language and its extensions."
-    },
-    {
-      "id": "blackburn_2001_ch01b",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §1.3 Models and Frames",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 1: §1.3 Models and Frames",
-      "path": "blackburn_2001/ch01_models-and-frames.md",
-      "page_range": "16-26",
-      "token_count": 5585,
-      "keywords": [
-        "Kripke models",
-        "satisfaction",
-        "validity",
-        "frames",
-        "truth definition",
-        "modal equivalence"
-      ],
-      "summary": "Links modal languages to relational structures via Kripke models and frames."
-    },
-    {
-      "id": "blackburn_2001_ch01c",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §1.4-1.8 General Frames through Summary",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 1: §1.4-1.8 General Frames through Summary",
-      "path": "blackburn_2001/ch01_general-frames.md",
-      "page_range": "27-49",
-      "token_count": 11761,
-      "keywords": [
-        "general frames",
-        "modal consequence",
-        "normal modal logics",
-        "K axiom",
-        "historical overview",
-        "admissible valuations"
-      ],
-      "summary": "General frames, modal consequence relations, normal modal logics, and historical overview."
-    },
-    {
-      "id": "blackburn_2001_ch02a",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §2.1 Invariance Results",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 2: §2.1 Invariance Results",
-      "path": "blackburn_2001/ch02_invariance-results.md",
-      "page_range": "50-63",
-      "token_count": 6775,
-      "keywords": [
-        "invariance",
-        "generated submodels",
-        "disjoint unions",
-        "bounded morphisms",
-        "ultraproducts"
-      ],
-      "summary": "Invariance results for modal logic: generated submodels, disjoint unions, bounded morphisms."
-    },
-    {
-      "id": "blackburn_2001_ch02b",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §2.2-2.3 Bisimulations and Finite Models",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 2: §2.2 Bisimulations, §2.3 Finite Models",
-      "path": "blackburn_2001/ch02_bisimulations.md",
-      "page_range": "64-82",
-      "token_count": 9516,
-      "keywords": [
-        "bisimulation",
-        "modal equivalence",
-        "finite model property",
-        "tree unraveling",
-        "filtration"
-      ],
-      "summary": "Bisimulations, modal equivalence, finite model property via filtration and tree unraveling."
-    },
-    {
-      "id": "blackburn_2001_ch02c",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §2.4-2.5 Standard Translation and Modal Saturation",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 2: §2.4-2.5 Standard Translation and Ultrafilter Extensions",
-      "path": "blackburn_2001/ch02_standard-translation.md",
-      "page_range": "83-99",
-      "token_count": 8907,
-      "keywords": [
-        "standard translation",
-        "first-order logic",
-        "ultrafilter extensions",
-        "modal saturation",
-        "compactness"
-      ],
-      "summary": "Standard translation to first-order logic and modal saturation via ultrafilter extensions."
-    },
-    {
-      "id": "blackburn_2001_ch02d",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §2.6 Characterization and Definability",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 2: §2.6 Characterization and Definability",
-      "path": "blackburn_2001/ch02_characterization.md",
-      "page_range": "100-109",
-      "token_count": 5180,
-      "keywords": [
-        "characterization theorem",
-        "definability",
-        "van Benthem theorem",
-        "bisimulation invariance"
-      ],
-      "summary": "Van Benthem characterization theorem: modal logic as the bisimulation-invariant fragment of first-order logic."
-    },
-    {
-      "id": "blackburn_2001_ch02e",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §2.7-2.8 Simulation, Safety, and Summary",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 2: §2.7-2.8 Simulation, Safety, and Summary",
-      "path": "blackburn_2001/ch02_simulation-safety.md",
-      "page_range": "110-123",
-      "token_count": 7141,
-      "keywords": [
-        "simulation",
-        "safety",
-        "monotone operators",
-        "chapter summary"
-      ],
-      "summary": "Simulation, safety properties, and summary of Chapter 2 on models."
-    },
-    {
-      "id": "blackburn_2001_ch03a",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §3.1-3.2 Frame Definability",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 3: §3.1-3.2 Frame Definability",
-      "path": "blackburn_2001/ch03_frame-definability.md",
-      "page_range": "124-138",
-      "token_count": 7230,
-      "keywords": [
-        "frame definability",
-        "second-order logic",
-        "correspondence theory",
-        "frame conditions"
-      ],
-      "summary": "Frame definability and its relationship to second-order logic."
-    },
-    {
-      "id": "blackburn_2001_ch03b",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §3.3-3.5 Definable Properties, Finite Frames, Correspondence",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 3: §3.3-3.5 Definable/Undefinable Properties, Finite Frames, Correspondence",
-      "path": "blackburn_2001/ch03_definable-properties.md",
-      "page_range": "139-156",
-      "token_count": 8764,
-      "keywords": [
-        "undefinable properties",
-        "finite frames",
-        "first-order correspondence",
-        "McKinsey axiom",
-        "Goldblatt-Thomason"
-      ],
-      "summary": "Definable and undefinable frame properties, finite frames, and automatic first-order correspondence."
-    },
-    {
-      "id": "blackburn_2001_ch03c",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §3.6 Sahlqvist Formulas",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 3: §3.6 Sahlqvist Formulas",
-      "path": "blackburn_2001/ch03_sahlqvist-formulas.md",
-      "page_range": "157-167",
-      "token_count": 5009,
-      "keywords": [
-        "Sahlqvist formulas",
-        "correspondence",
-        "canonicity",
-        "Sahlqvist theorem",
-        "first-order definability"
-      ],
-      "summary": "Sahlqvist formulas and the Sahlqvist correspondence/canonicity theorem."
-    },
-    {
-      "id": "blackburn_2001_ch03d",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §3.7 More about Sahlqvist Formulas",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 3: §3.7 More about Sahlqvist Formulas",
-      "path": "blackburn_2001/ch03_more-sahlqvist.md",
-      "page_range": "168-179",
-      "token_count": 5688,
-      "keywords": [
-        "Sahlqvist formulas",
-        "elementary classes",
-        "inductive formulas",
-        "complex Sahlqvist"
-      ],
-      "summary": "Extended Sahlqvist formula theory and inductive formulas."
-    },
-    {
-      "id": "blackburn_2001_ch03e",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §3.8-3.9 Advanced Frame Theory and Summary",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 3: §3.8-3.9 Advanced Frame Theory and Summary",
-      "path": "blackburn_2001/ch03_advanced-frame-theory.md",
-      "page_range": "180-189",
-      "token_count": 5027,
-      "keywords": [
-        "advanced frame theory",
-        "universal modality",
-        "chapter summary"
-      ],
-      "summary": "Advanced frame theory and summary of Chapter 3 on frames."
-    },
-    {
-      "id": "blackburn_2001_ch04a",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §4.1-4.2 Preliminaries and Canonical Models",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 4: §4.1-4.2 Preliminaries and Canonical Models",
-      "path": "blackburn_2001/ch04_preliminaries-canonical.md",
-      "page_range": "190-202",
-      "token_count": 5876,
-      "keywords": [
-        "canonical models",
-        "maximal consistent sets",
-        "Lindenbaum lemma",
-        "completeness preliminaries"
-      ],
-      "summary": "Completeness preliminaries: maximal consistent sets, Lindenbaum lemma, and canonical model construction."
-    },
-    {
-      "id": "blackburn_2001_ch04b",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §4.3-4.4 Applications and Limitative Results",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 4: §4.3-4.4 Applications and Limitative Results",
-      "path": "blackburn_2001/ch04_applications.md",
-      "page_range": "203-218",
-      "token_count": 8319,
-      "keywords": [
-        "completeness applications",
-        "S4",
-        "S5",
-        "Kripke incompleteness",
-        "limitative results"
-      ],
-      "summary": "Canonical model completeness for S4, S5, and limitative results on Kripke incompleteness."
-    },
-    {
-      "id": "blackburn_2001_ch04c",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §4.5-4.6 Transforming Canonical Model and Step-by-step",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 4: §4.5-4.6 Transforming Canonical Model and Step-by-step",
-      "path": "blackburn_2001/ch04_transforming-canonical.md",
-      "page_range": "219-230",
-      "token_count": 6374,
-      "keywords": [
-        "canonical model transformation",
-        "step-by-step construction",
-        "filtration completeness",
-        "bulldozing"
-      ],
-      "summary": "Techniques for transforming canonical models and step-by-step constructions."
-    },
-    {
-      "id": "blackburn_2001_ch04d",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §4.7-4.8 Rules for the Undefinable and Finitary Methods I",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 4: §4.7-4.8 Rules and Finitary Methods I",
-      "path": "blackburn_2001/ch04_rules-finitary-i.md",
-      "page_range": "231-247",
-      "token_count": 8893,
-      "keywords": [
-        "derivation rules",
-        "undefinable frames",
-        "finitary methods",
-        "tableaux",
-        "labeled deduction"
-      ],
-      "summary": "Rules for undefinable frame properties and finitary proof methods including tableaux."
-    },
-    {
-      "id": "blackburn_2001_ch04e",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §4.9-4.10 Finitary Methods II and Summary",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 4: §4.9-4.10 Finitary Methods II and Summary",
-      "path": "blackburn_2001/ch04_finitary-ii-summary.md",
-      "page_range": "248-258",
-      "token_count": 7942,
-      "keywords": [
-        "resolution",
-        "translation methods",
-        "proof methods",
-        "completeness summary"
-      ],
-      "summary": "Resolution, translation methods, and summary of Chapter 4 on completeness."
-    },
-    {
-      "id": "blackburn_2001_ch05a",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §5.1-5.2 Logic as Algebra",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 5: §5.1-5.2 Logic as Algebra and Algebraizing Modal Logic",
-      "path": "blackburn_2001/ch05_logic-as-algebra.md",
-      "page_range": "263-284",
-      "token_count": 9471,
-      "keywords": [
-        "Boolean algebras",
-        "modal algebras",
-        "algebraic semantics",
-        "BAOs",
-        "algebraization"
-      ],
-      "summary": "Algebraic approach to modal logic: Boolean algebras with operators and algebraization."
-    },
-    {
-      "id": "blackburn_2001_ch05b",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §5.3 Jonsson-Tarski Theorem",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 5: §5.3 The Jonsson-Tarski Theorem",
-      "path": "blackburn_2001/ch05_jonsson-tarski.md",
-      "page_range": "285-295",
-      "token_count": 5577,
-      "keywords": [
-        "Jonsson-Tarski theorem",
-        "atom structures",
-        "complex algebras",
-        "representation"
-      ],
-      "summary": "The Jonsson-Tarski representation theorem connecting modal algebras and relational structures."
-    },
-    {
-      "id": "blackburn_2001_ch05c",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §5.4 Duality Theory",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 5: §5.4 Duality Theory",
-      "path": "blackburn_2001/ch05_duality-theory.md",
-      "page_range": "296-304",
-      "token_count": 4331,
-      "keywords": [
-        "Stone duality",
-        "descriptive frames",
-        "ultrafilter frames",
-        "topological duality"
-      ],
-      "summary": "Stone duality between modal algebras and descriptive frames."
-    },
-    {
-      "id": "blackburn_2001_ch05d",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §5.5 General Frames",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 5: §5.5 General Frames",
-      "path": "blackburn_2001/ch05_general-frames.md",
-      "page_range": "305-318",
-      "token_count": 6801,
-      "keywords": [
-        "general frames",
-        "refined frames",
-        "compact frames",
-        "descriptive frames",
-        "frame morphisms"
-      ],
-      "summary": "General frame theory: refined, compact, and descriptive frames with morphisms."
-    },
-    {
-      "id": "blackburn_2001_ch05e",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §5.6-5.7 Persistence and Summary",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 5: §5.6-5.7 Persistence and Summary",
-      "path": "blackburn_2001/ch05_persistence-summary.md",
-      "page_range": "319-333",
-      "token_count": 7372,
-      "keywords": [
-        "d-persistence",
-        "canonicity",
-        "Sahlqvist persistence",
-        "algebras summary"
-      ],
-      "summary": "Persistence, Sahlqvist canonicity, and summary of Chapter 5 on algebras and general frames."
-    },
-    {
-      "id": "blackburn_2001_ch06a",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §6.1-6.3 Satisfiability and Decidability",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 6: §6.1-6.3 Satisfiability and Decidability",
-      "path": "blackburn_2001/ch06_satisfiability-decidability.md",
-      "page_range": "334-357",
-      "token_count": 11718,
-      "keywords": [
-        "satisfiability",
-        "decidability",
-        "finite models",
-        "interpretations",
-        "computational complexity"
-      ],
-      "summary": "Computing satisfiability and decidability via finite models and interpretations."
-    },
-    {
-      "id": "blackburn_2001_ch06b",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §6.4-6.5 Quasi-models, Mosaics, and Tiling",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 6: §6.4-6.5 Quasi-models and Tiling",
-      "path": "blackburn_2001/ch06_quasi-models-tiling.md",
-      "page_range": "358-374",
-      "token_count": 8498,
-      "keywords": [
-        "quasi-models",
-        "mosaics",
-        "tiling problems",
-        "undecidability",
-        "domino problems"
-      ],
-      "summary": "Decidability via quasi-models and mosaics, undecidability via tiling reductions."
-    },
-    {
-      "id": "blackburn_2001_ch06c",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §6.6-6.7 NP and PSPACE",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 6: §6.6-6.7 NP and PSPACE",
-      "path": "blackburn_2001/ch06_np-pspace.md",
-      "page_range": "375-394",
-      "token_count": 10261,
-      "keywords": [
-        "NP-completeness",
-        "PSPACE",
-        "satisfiability complexity",
-        "K satisfiability",
-        "S4 complexity"
-      ],
-      "summary": "NP-completeness and PSPACE results for modal satisfiability."
-    },
-    {
-      "id": "blackburn_2001_ch06d",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §6.8-6.9 EXPTIME and Summary",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 6: §6.8-6.9 EXPTIME and Summary",
-      "path": "blackburn_2001/ch06_exptime-summary.md",
-      "page_range": "395-414",
-      "token_count": 10264,
-      "keywords": [
-        "EXPTIME",
-        "PDL complexity",
-        "alternating automata",
-        "complexity summary"
-      ],
-      "summary": "EXPTIME results for PDL and summary of Chapter 6 on computability and complexity."
-    },
-    {
-      "id": "blackburn_2001_ch07a",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §7.1 Logical Modalities",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 7: §7.1 Logical Modalities",
-      "path": "blackburn_2001/ch07_logical-modalities.md",
-      "page_range": "415-427",
-      "token_count": 6476,
-      "keywords": [
-        "global modality",
-        "difference modality",
-        "universal modality",
-        "extended languages"
-      ],
-      "summary": "Logical modalities: global and difference modalities as extensions of the basic modal language."
-    },
-    {
-      "id": "blackburn_2001_ch07b",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §7.2-7.3 Since/Until and Hybrid Logic",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 7: §7.2-7.3 Since and Until, Hybrid Logic",
-      "path": "blackburn_2001/ch07_since-until-hybrid.md",
-      "page_range": "428-447",
-      "token_count": 9428,
-      "keywords": [
-        "temporal logic",
-        "Since",
-        "Until",
-        "hybrid logic",
-        "nominals",
-        "satisfaction operator"
-      ],
-      "summary": "Temporal logic with Since and Until operators, and hybrid logic with nominals."
-    },
-    {
-      "id": "blackburn_2001_ch07c",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §7.4 The Guarded Fragment",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 7: §7.4 The Guarded Fragment",
-      "path": "blackburn_2001/ch07_guarded-fragment.md",
-      "page_range": "448-459",
-      "token_count": 7262,
-      "keywords": [
-        "guarded fragment",
-        "decidability",
-        "loose fragment",
-        "packed fragment",
-        "first-order fragments"
-      ],
-      "summary": "The guarded fragment of first-order logic and its relationship to modal logic."
-    },
-    {
-      "id": "blackburn_2001_ch07d",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §7.5 Multi-Dimensional Modal Logic",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 7: §7.5 Multi-Dimensional Modal Logic",
-      "path": "blackburn_2001/ch07_multi-dimensional.md",
-      "page_range": "460-471",
-      "token_count": 5871,
-      "keywords": [
-        "multi-dimensional",
-        "products of modal logics",
-        "cylindric modal logic",
-        "arrow logic"
-      ],
-      "summary": "Multi-dimensional modal logics: products, cylindric modal logic, and arrow logic."
-    },
-    {
-      "id": "blackburn_2001_ch07e",
-      "bib_key": "Blackburn2001",
-      "title": "Modal Logic — §7.6-7.7 Lindstrom Theorem and Summary",
-      "authors": "Patrick Blackburn, Maarten de Rijke, Yde Venema",
-      "year": 2001,
-      "section": "Chapter 7: §7.6-7.7 Lindstrom Theorem, Summary, and Notes",
-      "path": "blackburn_2001/ch07_lindstrom-summary.md",
-      "page_range": "472-487",
-      "token_count": 7410,
-      "keywords": [
-        "Lindstrom theorem",
-        "modal characterization",
-        "compactness",
-        "Lowenheim-Skolem",
-        "extended modal logic summary"
-      ],
-      "summary": "Lindstrom theorem for modal logic and summary of Chapter 7 on extended modal logics."
     }
   ]
 }

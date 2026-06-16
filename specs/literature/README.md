@@ -152,8 +152,9 @@ The `index.json` file in this directory is the master registry for `--lit` injec
 | `keywords` | array | 6-10 keywords for retrieval matching |
 | `summary` | string | One-sentence description |
 
-Book-length files are split into chapter subdirectories (e.g., `blackburn_2001/ch01_basic-concepts.md`).
-Paper-length files remain as top-level `.md` files (e.g., `burgess_1982_i.md`).
+All files live under `sources/`. Book-length files are split into chapter subdirectories
+(e.g., `sources/chagrov_1997/p01_introduction.md`).
+Paper-length files are in their own directory (e.g., `sources/burgess_1982_i/burgess_1982_i.md`).
 
 ## Modal Logic (Foundations shared with Propositional)
 
@@ -165,10 +166,9 @@ Paper-length files remain as top-level `.md` files (e.g., `burgess_1982_i.md`).
   - Section 2.4: Intuitionistic completeness (Thm 2.43)
   - Section 5.1: Maximal consistent sets, Lindenbaum's lemma, canonical models
 
-- **Blackburn, de Rijke & Venema 2001** [Blackburn2001] `[MD]`: *Modal Logic*. Cambridge Tracts.
-  Directory: `blackburn_2001/` (ch00_preface.md, ch01_basic-concepts.md, ch02_models-partial.md).
+- **Blackburn, de Rijke & Venema 2001** [Blackburn2001] `[NO FILE]`: *Modal Logic*. Cambridge Tracts.
   Alternative modal logic reference. Covers Kripke semantics, bisimulation, correspondence theory.
-  Note: Only pages 1-69 are available due to source PDF limitation (chapters 3-7 are not present).
+  Note: Local files removed; source PDF was incomplete (only pages 1-69 available).
 
 - **Hughes & Cresswell 1996** `[MD]`: *A New Introduction to Modal Logic*. Routledge.
   Directory: `hughes_1996/` (p00_front-matter.md, p01_basic-modal-propositional-logic.md, p02_normal-modal-systems.md, p03_modal-predicate-logic.md).

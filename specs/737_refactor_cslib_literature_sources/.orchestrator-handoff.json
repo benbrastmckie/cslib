@@ -1,0 +1,16 @@
+{
+  "status": "implemented",
+  "summary": "Moved all literature files into sources/ subdirectory, removed blackburn_2001/, updated index.json (43 entries, paths prefixed with sources/) and README.md",
+  "artifacts": [
+    {
+      "path": "specs/737_refactor_cslib_literature_sources/summaries/01_cslib-refactor-summary.md",
+      "type": "summary",
+      "summary": "Full implementation summary with file-by-file change list"
+    }
+  ],
+  "blockers": [],
+  "continuation_context": null,
+  "phases_completed": 2,
+  "phases_total": 2,
+  "next_action_hint": "complete"
+}

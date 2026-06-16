@@ -60,54 +60,9 @@ next_project_number: 220
 - **Task Type**: pr
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [219_address_pr648_merge_semantics_files/reports/01_pr648-review-analysis.md]
 
-**Description**: Address PR #648 review from ctchou: merge Semantics/Basic.lean and Semantics/Bool.lean into a single file, update references, and respond to reviewer comments.
-
-## Context
-
-PR #648 received a CHANGES_REQUESTED review from ctchou (pullrequestreview-4502084546) with four points:
-
-1. **bot as primitive** — Reviewer likes adding bot as a primitive constructor (positive)
-2. **Merge Basic.lean and Bool.lean** — Reviewer doesn't understand why both files exist; thinks Bool.lean alone suffices
-3. **Reference update** — Reviewer finds 1930s German paper references unhelpful; recommends Avigad's Mathematical Logic and Computation (Cambridge)
-4. **Coordinate with related PRs** — Must coordinate with #607 (fmontesi: logical operators), #587 (thomaskwaring: notation typeclasses and models), and #536 (thomaskwaring: classical/intuitionistic inference systems, ready to merge)
-
-## Analysis: Why Both Files Exist
-
-Current structure:
-- `Semantics/Basic.lean` (~65 lines): `Valuation` (Atom → Prop), `Evaluate` (Prop-valued recursive evaluation), `Tautology`
-- `Semantics/Bool.lean` (~110 lines): `BoolValuation` (Atom → Bool), `BoolEvaluate` (Bool-valued), bridge lemmas connecting Bool to Prop, `Decidable` instance
-
-The Prop-valued `Evaluate` is needed because:
-- Canonical model construction in strong completeness uses `fun p => atom p ∈ S` where S is an MCS — set membership is inherently Prop-valued with no DecidablePred
-- The same Atom → Prop convention runs through modal, temporal, and bimodal Kripke semantics (`Satisfies` is Prop-valued)
-- Propositional `Evaluate` is the degenerate case of Kripke `Satisfies` (no worlds, no accessibility) — uniform Prop-valued shape across all logics
-
-The Bool-valued `BoolEvaluate` is needed because:
-- DPLL/SAT procedures (Matthew Doty's planned work) need computable Bool evaluation
-- Bridge lemma `BoolEvaluate_eq_iff` connects Bool computation to Prop metatheory
-
-Matthew Doty suggested on Zulip that `decide` + `Classical.propDecidable` could collapse everything to Bool, but this would be a stylistic outlier against the Prop-valued semantics used throughout the rest of the library.
-
-## Practical Move
-
-**Merge into one file** (satisfies ctchou's review comment):
-- Combine Basic.lean and Bool.lean into a single `Semantics/Bool.lean` (or rename to `Semantics.lean`)
-- ~170 combined lines is reasonable for one file
-- Keep both evaluators — Prop-valued `Evaluate` for metatheory and Kripke compatibility, Bool-valued `BoolEvaluate` for computation
-- The bridge lemma connecting them stays
-
-**Update references**:
-- Replace Chagrov/Zakharyaschev 1930s-era citations with Avigad's Mathematical Logic and Computation (chapters 2-3)
-
-**Coordinate with related PRs**:
-- Wait for #536 to merge (ready to merge per ctchou)
-- Review #607 and #587 for conflicts/overlap, especially #587's `HasEntails` framework which defines generic `Valuation` and `Valuation.interp` for PL
-
-**Respond to review**:
-- Acknowledge file consolidation
-- Explain that Prop-valued Evaluate is needed for uniform Kripke semantics shape across logics (not just classical PL)
-- Note that BoolEvaluate serves Matthew Doty's DPLL/SAT work (Zulip discussion)
+**Description**: Address PR #648 review from ctchou: merge Semantics/Basic.lean and Bool.lean into a single file, update references to Avigad, and coordinate with PRs #536, #587, #607
 
 ---
 

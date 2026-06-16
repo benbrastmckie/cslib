@@ -6,10 +6,10 @@
       "project_name": "address_pr648_merge_semantics_files",
       "status": "not_started",
       "task_type": "pr",
-      "description": "Address PR #648 review from ctchou: merge Semantics/Basic.lean and Bool.lean into a single file, update references to Avigad, and coordinate with PRs #536, #587, #607",
+      "description": "Address PR #648 review from ctchou: merge Semantics/Basic.lean and Bool.lean into a single file, update references to Avigad, and coordinate with PRs #536, #587, #607. PR: https://github.com/leanprover/cslib/pull/648 Zulip: https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/with/603538889",
       "topic": "Propositional Logic",
       "created": "2026-06-16T00:19:13Z",
-      "last_updated": "2026-06-16T00:20:53Z",
+      "last_updated": "2026-06-16T00:21:59Z",
       "artifacts": [
         {
           "type": "research",

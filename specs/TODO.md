@@ -1,5 +1,5 @@
 ---
-next_project_number: 232
+next_project_number: 233
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 232
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,197,209,226 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,197,209,226,232 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -31,7 +31,7 @@ next_project_number: 232
 
 ### Modal Logic
 
-197 [RESEARCHING] — Review the ambition to contribute Modal/ to upstream, identifying
+197 [RESEARCHED] — Review the ambition to contribute Modal/ to upstream, identifying
 
 ### Project Management
 
@@ -40,6 +40,7 @@ next_project_number: 232
 ### Propositional Logic
 
 226 [RESEARCHED] — Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648
+232 [NOT STARTED] — Rebase PR #649 (feat/temporal-formula-propositional) onto PR #648
 
 ### Temporal Logic
 
@@ -48,6 +49,16 @@ next_project_number: 232
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 232. Rebase pr649 onto pr648
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Rebase PR #649 (feat/temporal-formula-propositional) onto PR #648 base branch (feat/propositional-v2) and remove unrelated file changes per reviewer ctchou's request. Currently the branch is a single commit on main with many unrelated changes (HasFresh, LTS/Notation, CCS/Semantics, LambdaCalculus files, Modal logic files, Propositional/Defs.lean). Cherry-pick only the temporal-specific changes (Temporal/Syntax/Formula.lean, LTL/Syntax/Formula.lean, Connectives.lean temporal additions, Cslib.lean imports, references.bib) onto feat/propositional-v2 as the new base
+
+---
 
 ### 226. Propositional semantics upstream pr
 - **Status**: [RESEARCHED]
@@ -91,13 +102,14 @@ Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completenes
 ---
 
 ### 197. Scope initial Modal/ upstream PR (~300 LOC)
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: pr
 - **Topic**: Modal Logic
 - **Dependencies**: None
 - **Research**:
   - [197_modal_upstream_initial_pr/reports/06_modal-pr-landscape.md]
   - [197_modal_upstream_initial_pr/reports/09_team-research.md]
+  - [197_modal_upstream_initial_pr/reports/10_plan-review.md]
 - **Pr_description**: [197_modal_upstream_initial_pr/pr-description.md]
 - **Plan**: [197_modal_upstream_initial_pr/plans/10_modal-pr-revision.md]
 

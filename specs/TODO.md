@@ -1,5 +1,5 @@
 ---
-next_project_number: 231
+next_project_number: 232
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 231
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,197,209,226 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,188,192,197,209,226,231 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -20,9 +20,10 @@ next_project_number: 231
 ### Bimodal Porting
 
 36 [BLOCKED] — Port discrete completeness (completeness_discrete theorem) and We
-  └─ 215 [BLOCKED] — Fill 22 sorry declarations across 6 files in Cslib/Logics/Bimodal
+  └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal
 37 [BLOCKED] — Port continuous extension completeness once developed upstream. T
-  └─ 215 [BLOCKED] — Fill 22 sorry declarations across 6 files in Cslib/Logics/Bimodal (see above)
+  └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal (see above)
+231 [NOT STARTED] — Fix universe mismatch in countermodel_dense (ChronicleToCountermo
 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
 
 ### Foundations
@@ -50,6 +51,16 @@ next_project_number: 231
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 231. Fix countermodel_dense universe mismatch in ChronicleToCountermodelBasic
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Bimodal Porting
+- **Dependencies**: None
+
+**Description**: Fix universe mismatch in countermodel_dense (ChronicleToCountermodelBasic.lean:825): Atom : Type* vs Atom : Type in ParametricCanonicalTaskFrame. This is a Lean engineering fix, not a mathematical blocker. Fixing it also unblocks completeness_dense (Dense.lean:122) which depends on countermodel_dense. Carved off from task 215.
+
+---
 
 ### 230. Fix pr649 reynolds bib beq deriving
 - **Status**: [COMPLETED]
@@ -117,15 +128,15 @@ next_project_number: 231
 - **Topic**: Bimodal Porting
 - **Dependencies**: Task 36, Task 37
 
-**Description**: Fill 22 sorry declarations across 6 files in Cslib/Logics/Bimodal/Metalogic/:
+**Description**: Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal/Metalogic/:
 - Bundle/SuccRelation.lean: 7 sorries (lines 253, 258, 263, 269, 275, 281, 285)
 - BXCanonical/Chronicle/ChronicleToCountermodel.lean: 10 sorries (lines 66, 143, 144, 147, 153, 157, 163, 171, 172, 177)
 - Bundle/UntilSinceCoherence.lean: 2 sorries (lines 37, 41)
-- BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean: 1 sorry (line 814)
-- BXCanonical/Completeness/Dense.lean: 1 sorry (line 110)
 - BXCanonical/Frame.lean: 1 sorry (line 159)
 
-These are incomplete proofs in the bimodal temporal logic development (BX dense completeness). The heaviest concentrations are ChronicleToCountermodel (chronicle-to-countermodel construction) and SuccRelation (successor relation properties). These are the last CI blockers after style warnings were fixed.
+Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completeness_dense (Dense.lean:122) carved off to task 231.
+
+9 sorries blocked on task 37 (strict Until/Since semantics gap: BX8/BX9/temporal-T axioms removed as unsound). 11 sorries blocked on task 36 (discrete completeness pipeline requires unported GoodStructuresModelSurgery infrastructure).
 
 ---
 

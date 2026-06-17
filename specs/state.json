@@ -1,5 +1,5 @@
 {
-  "next_project_number": 231,
+  "next_project_number": 232,
   "active_projects": [
     {
       "project_number": 230,
@@ -158,7 +158,7 @@
       "status": "blocked",
       "task_type": "cslib",
       "title": "Fill sorry declarations in Bimodal BXCanonical and Bundle files",
-      "description": "Fill 22 sorry declarations across 6 files in Cslib/Logics/Bimodal/Metalogic/:\n- Bundle/SuccRelation.lean: 7 sorries (lines 253, 258, 263, 269, 275, 281, 285)\n- BXCanonical/Chronicle/ChronicleToCountermodel.lean: 10 sorries (lines 66, 143, 144, 147, 153, 157, 163, 171, 172, 177)\n- Bundle/UntilSinceCoherence.lean: 2 sorries (lines 37, 41)\n- BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean: 1 sorry (line 814)\n- BXCanonical/Completeness/Dense.lean: 1 sorry (line 110)\n- BXCanonical/Frame.lean: 1 sorry (line 159)\n\nThese are incomplete proofs in the bimodal temporal logic development (BX dense completeness). The heaviest concentrations are ChronicleToCountermodel (chronicle-to-countermodel construction) and SuccRelation (successor relation properties). These are the last CI blockers after style warnings were fixed.",
+      "description": "Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal/Metalogic/:\n- Bundle/SuccRelation.lean: 7 sorries (lines 253, 258, 263, 269, 275, 281, 285)\n- BXCanonical/Chronicle/ChronicleToCountermodel.lean: 10 sorries (lines 66, 143, 144, 147, 153, 157, 163, 171, 172, 177)\n- Bundle/UntilSinceCoherence.lean: 2 sorries (lines 37, 41)\n- BXCanonical/Frame.lean: 1 sorry (line 159)\n\nNote: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completeness_dense (Dense.lean:122) carved off to task 231.\n\n9 sorries blocked on task 37 (strict Until/Since semantics gap: BX8/BX9/temporal-T axioms removed as unsound). 11 sorries blocked on task 36 (discrete completeness pipeline requires unported GoodStructuresModelSurgery infrastructure).",
       "topic": "Bimodal Porting",
       "created": "2026-06-15T17:59:27Z",
       "last_updated": "2026-06-17T00:00:00Z",
@@ -167,7 +167,7 @@
         36,
         37
       ],
-      "blockers": "9 sorries require axioms removed as unsound (task 37 strict Until/Since); 13 sorries require unported discrete completeness infrastructure (task 36). 1 universe mismatch (countermodel_dense) potentially fixable independently."
+      "blockers": "9 sorries require axioms removed as unsound (task 37 strict Until/Since); 11 sorries require unported discrete completeness infrastructure (task 36)."
     },
     {
       "project_number": 197,
@@ -476,6 +476,18 @@
       ],
       "session_id": "sess_1750217870_a3b2c1",
       "completion_summary": "Fixed two docstrings in PR #648: updated intuitionisticCompletion description to reflect primitive bot semantics, changed five-primitive propositional signature to five constructors in Connectives.lean"
+    },
+    {
+      "project_number": 231,
+      "project_name": "fix_countermodel_dense_universe",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Fix countermodel_dense universe mismatch in ChronicleToCountermodelBasic",
+      "description": "Fix universe mismatch in countermodel_dense (ChronicleToCountermodelBasic.lean:825): Atom : Type* vs Atom : Type in ParametricCanonicalTaskFrame. This is a Lean engineering fix, not a mathematical blocker. Fixing it also unblocks completeness_dense (Dense.lean:122) which depends on countermodel_dense. Carved off from task 215.",
+      "topic": "Bimodal Porting",
+      "created": "2026-06-17T00:00:00Z",
+      "last_updated": "2026-06-17T00:00:00Z",
+      "parent_task": 215
     }
   ],
   "repository_health": {

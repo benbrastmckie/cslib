@@ -31,7 +31,7 @@ next_project_number: 231
 
 ### Modal Logic
 
-197 [PLANNING] — Review the ambition to contribute Modal/ to upstream, identifying
+197 [PLANNED] — Review the ambition to contribute Modal/ to upstream, identifying
 
 ### Project Management
 
@@ -151,15 +151,15 @@ These are incomplete proofs in the bimodal temporal logic development (BX dense 
 ---
 
 ### 197. Scope initial Modal/ upstream PR (~300 LOC)
-- **Status**: [PLANNING]
+- **Status**: [PLANNED]
 - **Task Type**: pr
 - **Topic**: Modal Logic
 - **Dependencies**: None
 - **Research**:
   - [197_modal_upstream_initial_pr/reports/06_modal-pr-landscape.md]
   - [197_modal_upstream_initial_pr/reports/09_team-research.md]
-- **Plan**: [197_modal_upstream_initial_pr/plans/08_modal-upstream-pr-plan.md]
 - **Pr_description**: [197_modal_upstream_initial_pr/pr-description.md]
+- **Plan**: [197_modal_upstream_initial_pr/plans/10_modal-pr-revision.md]
 
 **Description**: Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible
 

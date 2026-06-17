@@ -11,7 +11,7 @@ next_project_number: 232
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,197,209,226 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,197,209,226 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -31,7 +31,7 @@ next_project_number: 232
 
 ### Modal Logic
 
-197 [PLANNED] — Review the ambition to contribute Modal/ to upstream, identifying
+197 [RESEARCHING] — Review the ambition to contribute Modal/ to upstream, identifying
 
 ### Project Management
 
@@ -39,9 +39,7 @@ next_project_number: 232
 
 ### Propositional Logic
 
-188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
-192 [PLANNED] — Draw on sources in specs/literature/ to verify and improve citati
-226 [RESEARCHED] — Cherry-pick GHA algebraic semantics from main to create a PR stac
+226 [RESEARCHED] — Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648
 
 ### Temporal Logic
 
@@ -51,13 +49,16 @@ next_project_number: 232
 
 ## Tasks
 
-### 226. Gha semantics upstream pr
+### 226. Propositional semantics upstream pr
 - **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: Task 225
+- **Dependencies**: None
+- **Research**:
+  - [226_propositional_semantics_upstream_pr/reports/01_upstream-pr-research.md]
+  - [226_propositional_semantics_upstream_pr/reports/02_three-way-comparison.md]
 
-**Description**: Cherry-pick GHA algebraic semantics from main to create a PR stacked on PR #648 for upstream contribution to leanprover/cslib. (1) Create a branch from PR #648 head. (2) Cherry-pick or rebase the Semantics/Algebra.lean and Soundness.lean commits from task 225. (3) Adapt file paths and imports to match PR #648 structure (Basic.lean merged into Bool.lean). (4) Resolve the HasImp/HasImpl naming conflict with PR #587 and #607 — use whichever convention the Zulip design thread settles on, or flag for discussion. (5) Ensure lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake all pass. (6) Write PR description referencing thomaskwaring's GHA proposal from PR #587 and the bot_val parameter design.
+**Description**: Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648, contributing propositional semantics to CSLib. Scope: (1) Semantics/Algebra.lean — GHA evaluation with bot_val parameter for minimal/intuitionistic/classical logic, following Thomas Waring's GeneralizedHeytingAlgebra direction from the Zulip thread. (2) Semantics/Bool.lean — BoolEvaluate with bridge lemma to AlgEvaluate for computable procedures (DPLL/SAT). (3) Semantics/SemanticConsequence.lean — semantic consequence and tautology definitions. (4) Possibly Semantics/Kripke.lean — Kripke semantics with botForces for minimal logic if LOC budget permits. Soundness proofs deferred to a subsequent Hilbert systems + metalogic PR. Ensure lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake all pass. Write PR description referencing the Zulip Propositional Logic thread discussion with Thomas Waring and Matthew Doty on GHA semantics and bot_val design.
 
 ---
 
@@ -90,7 +91,7 @@ Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completenes
 ---
 
 ### 197. Scope initial Modal/ upstream PR (~300 LOC)
-- **Status**: [PLANNED]
+- **Status**: [RESEARCHING]
 - **Task Type**: pr
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -105,7 +106,7 @@ Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completenes
 ---
 
 ### 192. Research verify literature refs pr 188
-- **Status**: [PLANNED]
+- **Status**: [ABANDONED]
 - **Task Type**: general
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -118,7 +119,7 @@ Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completenes
 ---
 
 ### 188. First propositional upstream pr
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

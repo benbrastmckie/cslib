@@ -3,17 +3,28 @@
   "active_projects": [
     {
       "project_number": 226,
-      "project_name": "gha_semantics_upstream_pr",
+      "project_name": "propositional_semantics_upstream_pr",
       "status": "researched",
       "task_type": "cslib",
-      "description": "Cherry-pick GHA algebraic semantics from main to create a PR stacked on PR #648 for upstream contribution to leanprover/cslib. (1) Create a branch from PR #648 head. (2) Cherry-pick or rebase the Semantics/Algebra.lean and Soundness.lean commits from task 225. (3) Adapt file paths and imports to match PR #648 structure (Basic.lean merged into Bool.lean). (4) Resolve the HasImp/HasImpl naming conflict with PR #587 and #607 — use whichever convention the Zulip design thread settles on, or flag for discussion. (5) Ensure lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake all pass. (6) Write PR description referencing thomaskwaring's GHA proposal from PR #587 and the bot_val parameter design.",
+      "description": "Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648, contributing propositional semantics to CSLib. Scope: (1) Semantics/Algebra.lean — GHA evaluation with bot_val parameter for minimal/intuitionistic/classical logic, following Thomas Waring's GeneralizedHeytingAlgebra direction from the Zulip thread. (2) Semantics/Bool.lean — BoolEvaluate with bridge lemma to AlgEvaluate for computable procedures (DPLL/SAT). (3) Semantics/SemanticConsequence.lean — semantic consequence and tautology definitions. (4) Possibly Semantics/Kripke.lean — Kripke semantics with botForces for minimal logic if LOC budget permits. Soundness proofs deferred to a subsequent Hilbert systems + metalogic PR. Ensure lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake all pass. Write PR description referencing the Zulip Propositional Logic thread discussion with Thomas Waring and Matthew Doty on GHA semantics and bot_val design.",
       "topic": "Propositional Logic",
-      "dependencies": [
-        225
-      ],
+      "dependencies": [],
       "created": "2026-06-16T23:00:00Z",
-      "last_updated": "2026-06-17T05:50:06Z",
-      "session_id": "sess_1750123500_research226"
+      "last_updated": "2026-06-17T00:00:00Z",
+      "session_id": "sess_1781736993_cab15d",
+      "artifacts": [
+        {
+          "path": "specs/226_propositional_semantics_upstream_pr/reports/01_upstream-pr-research.md",
+          "type": "research",
+          "summary": "Cherry-pick GHA semantics research (pre-revision, stale)"
+        },
+        {
+          "path": "specs/226_propositional_semantics_upstream_pr/reports/02_three-way-comparison.md",
+          "type": "research",
+          "summary": "Three-way comparison: our semantics vs Thomas Waring vs Matthew Doty implementations"
+        }
+      ],
+      "next_artifact_number": 3
     },
     {
       "project_number": 209,
@@ -46,14 +57,14 @@
     {
       "project_number": 197,
       "project_name": "modal_upstream_initial_pr",
-      "status": "planned",
+      "status": "researching",
       "task_type": "pr",
       "title": "Scope initial Modal/ upstream PR (~300 LOC)",
       "description": "Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible",
       "topic": "Modal Logic",
       "created": "2026-06-14T19:08:07Z",
-      "last_updated": "2026-06-17T19:30:40Z",
-      "session_id": "sess_1781724458_6a63d0",
+      "last_updated": "2026-06-17T23:00:20Z",
+      "session_id": "sess_1781737198_8dd1bb",
       "research_artifacts": [
         "specs/197_modal_upstream_initial_pr/reports/01_modal-upstream-pr-scope.md",
         "specs/197_modal_upstream_initial_pr/reports/02_literature-grounded-analysis.md",
@@ -173,7 +184,7 @@
     {
       "project_number": 188,
       "project_name": "first_propositional_upstream_pr",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Design and prepare a first upstream PR (~300 LOC) contributing propositional logic foundations to CSLib.",
@@ -205,7 +216,7 @@
     {
       "project_number": 192,
       "project_name": "research_verify_literature_refs_pr_188",
-      "status": "planned",
+      "status": "abandoned",
       "task_type": "general",
       "topic": "Propositional Logic",
       "created": "2026-06-14T17:18:44Z",

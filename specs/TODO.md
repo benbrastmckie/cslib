@@ -37,7 +37,7 @@ next_project_number: 228
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
 226 [RESEARCHED] — Cherry-pick GHA algebraic semantics from main to create a PR stac
-227 [RESEARCHING] — Design and implement maximally general algebraic semantics for pr
+227 [RESEARCHED] — Design and implement maximally general algebraic semantics for pr
 
 ### Propositional PRs
 
@@ -56,7 +56,7 @@ next_project_number: 228
 ## Tasks
 
 ### 227. Algebraic completeness design
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 225

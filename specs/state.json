@@ -161,7 +161,7 @@
       "description": "Fill 22 sorry declarations across 6 files in Cslib/Logics/Bimodal/Metalogic/:\n- Bundle/SuccRelation.lean: 7 sorries (lines 253, 258, 263, 269, 275, 281, 285)\n- BXCanonical/Chronicle/ChronicleToCountermodel.lean: 10 sorries (lines 66, 143, 144, 147, 153, 157, 163, 171, 172, 177)\n- Bundle/UntilSinceCoherence.lean: 2 sorries (lines 37, 41)\n- BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean: 1 sorry (line 814)\n- BXCanonical/Completeness/Dense.lean: 1 sorry (line 110)\n- BXCanonical/Frame.lean: 1 sorry (line 159)\n\nThese are incomplete proofs in the bimodal temporal logic development (BX dense completeness). The heaviest concentrations are ChronicleToCountermodel (chronicle-to-countermodel construction) and SuccRelation (successor relation properties). These are the last CI blockers after style warnings were fixed.",
       "topic": "Bimodal Porting",
       "created": "2026-06-15T17:59:27Z",
-      "last_updated": "2026-06-16T21:57:22Z",
+      "last_updated": "2026-06-17T00:00:00Z",
       "session_id": "sess_1750098000_a7b3c1"
     },
     {

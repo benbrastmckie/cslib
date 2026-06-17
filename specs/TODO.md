@@ -27,7 +27,7 @@ next_project_number: 230
 
 ### Foundations
 
-229 [NOT STARTED] — Study best practices (as of June 2026) for resolving typeclass di
+229 [RESEARCHED] — Study best practices (as of June 2026) for resolving typeclass di
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Project Management
@@ -57,10 +57,11 @@ next_project_number: 230
 ## Tasks
 
 ### 229. Typeclass diamond resolution lean4
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
+- **Research**: [229_typeclass_diamond_resolution_lean4/reports/01_team-research.md]
 
 **Description**: Study best practices (as of June 2026) for resolving typeclass diamond inheritance issues in Lean 4, with specific application to CSLib BimodalConnectives design. Research should cover: (1) Current Lean 4 mechanisms for handling diamond inheritance (default instances, instance priorities, manual projections, flat hierarchies). (2) Best practices from Mathlib and other large Lean 4 projects for avoiding or mitigating diamond problems. (3) Analysis of the specific trade-off: BimodalConnectives currently extends ModalConnectives + HasUntil + HasSince; evaluate whether extending TemporalConnectives + HasBox would be preferable, with arguments for and against each design. (4) Techniques to reduce downsides of whichever approach is chosen (convenience instances, abbreviations, simp lemmas for projection equalities). (5) Whether any recent Lean 4 features (post-2025) change the calculus. Context: see specs/tmp/note.md for the diamond diagram and explanation
 

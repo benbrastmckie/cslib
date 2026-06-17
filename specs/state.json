@@ -1,6 +1,16 @@
 {
-  "next_project_number": 230,
+  "next_project_number": 231,
   "active_projects": [
+    {
+      "project_number": 230,
+      "project_name": "fix_pr649_reynolds_bib_beq_deriving",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Fix two minor issues in PR #649 (feat/temporal-formula-propositional branch): (1) Rename Reynolds1994 bib key to Reynolds1996 in references.bib — the year field is 1996 (confirmed by DOI), key is wrong. (2) Add BEq to Temporal.Formula deriving clause for consistency with LTL.Formula which derives both DecidableEq, BEq. Both are cosmetic fixes on the upstream PR branch",
+      "topic": "Temporal Logic",
+      "created": "2026-06-17T19:28:14Z",
+      "last_updated": "2026-06-17T19:28:14Z"
+    },
     {
       "project_number": 229,
       "project_name": "typeclass_diamond_resolution_lean4",

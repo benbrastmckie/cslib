@@ -1,5 +1,5 @@
 ---
-next_project_number: 230
+next_project_number: 231
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 230
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,197,209,214,215,226,227 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,188,192,197,209,214,215,226,227,230 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -47,10 +47,21 @@ next_project_number: 230
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
+230 [NOT STARTED] — Fix two minor issues in PR #649 (feat/temporal-formula-propositio
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 230. Fix pr649 reynolds bib beq deriving
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Fix two minor issues in PR #649 (feat/temporal-formula-propositional branch): (1) Rename Reynolds1994 bib key to Reynolds1996 in references.bib — the year field is 1996 (confirmed by DOI), key is wrong. (2) Add BEq to Temporal.Formula deriving clause for consistency with LTL.Formula which derives both DecidableEq, BEq. Both are cosmetic fixes on the upstream PR branch
+
+---
 
 ### 229. Typeclass diamond resolution lean4
 - **Status**: [COMPLETED]

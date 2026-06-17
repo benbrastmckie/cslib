@@ -1,0 +1,21 @@
+{
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/230_fix_pr649_reynolds_bib_beq_deriving/plans/01_pr649-fixes-plan.md",
+      "summary": "Single-phase plan for two single-line edits: Reynolds bib key rename and BEq deriving addition"
+    }
+  ],
+  "next_steps": "Run /implement 230 to execute the plan",
+  "metadata": {
+    "session_id": "sess_1781724665_ae5019",
+    "agent_type": "planner-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 1,
+    "estimated_hours": 0.25,
+    "dependency_waves": [[1]]
+  },
+  "memory_candidates": []
+}

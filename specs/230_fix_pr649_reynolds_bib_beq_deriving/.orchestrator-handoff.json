@@ -1,0 +1,21 @@
+{
+  "status": "completed",
+  "summary": "Both fixes applied on feat/temporal-formula-propositional branch: Reynolds1994 -> Reynolds1996 in references.bib, added BEq to Temporal.Formula deriving clause. Build verified (449 jobs, no errors). Committed as 780f9573.",
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": null,
+  "phases_completed": 1,
+  "phases_total": 1,
+  "artifacts": [
+    {
+      "path": "specs/230_fix_pr649_reynolds_bib_beq_deriving/reports/01_pr649-fixes-research.md",
+      "type": "report",
+      "summary": "Research confirming both issues"
+    },
+    {
+      "path": "specs/230_fix_pr649_reynolds_bib_beq_deriving/plans/01_pr649-fixes-plan.md",
+      "type": "plan",
+      "summary": "Single-phase plan for two edits"
+    }
+  ]
+}

@@ -110,7 +110,7 @@
           }
         ]
       },
-      "completion_summary": "Implemented algebraic completeness for propositional logic: Lindenbaum quotient algebra (GHA/HA/BA instances), truth lemma, ND-level soundness, general completeness theorem, and tier-specific completeness (MPL/IPL/CPL). Added bot-free analysis infrastructure and validity subsumption. 5 new files (~700 lines), 0 sorries except 1 expected (conservative extension requires D-M completion)."
+      "completion_summary": "Algebraic completeness for propositional logic: 3 new files (Lindenbaum.lean 426 lines, Completeness.lean 236 lines, Conservative.lean 100 lines), sorry-free except 1 expected sorry for D-M-dependent conservative extension. Proves Theory.alg_complete, MPL.alg_complete, IPL.alg_complete, alg_complete_classical. Includes Lindenbaum quotient with GHA/HA/BA instances, truth lemma, ND soundness, bot-free analysis, validity subsumption."
     },
     {
       "project_number": 226,

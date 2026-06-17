@@ -1,37 +1,45 @@
 {
   "status": "researched",
-  "started_at": "2026-06-17T06:00:00Z",
   "artifacts": [
     {
-      "path": "specs/227_algebraic_completeness_design/reports/02_deep-algebraic-research.md",
       "type": "report",
-      "summary": "Agent A: Complete architecture for Lindenbaum algebra, D-M completion, completeness theorems, JohanssonAlgebra typeclass design, file structure with ~1000 lines across 4 new files"
-    },
-    {
-      "path": "specs/227_algebraic_completeness_design/reports/02_b-mathlib-api-survey.md",
-      "type": "report",
-      "summary": "Agent B: Mathlib API survey — D-M completion NOT in Mathlib (~500 lines to port), HeytingHom available, LatticeCon exists but no Heyting variant, BooleanAlgebra.ofRegular available"
-    },
-    {
-      "path": "specs/227_algebraic_completeness_design/reports/02_c-conservative-extensions.md",
-      "type": "report",
-      "summary": "Agent C: Conservative extensions (IsBotFree predicate, AlgEvaluate independence lemma), Glivenko via Heyting.Regular (novel), Kripke-algebraic bridge via UpperSet, validity subsumption"
-    },
-    {
-      "path": "specs/227_algebraic_completeness_design/reports/02_d-thomas-approach.md",
-      "type": "report",
-      "summary": "Agent D: Thomas's cslib_SKI design — 4-constructor Proposition, v ⊨ T parametric completeness, formal equivalence with bot_val, hybrid recommendation (keep primitive bot + Thomas's completeness style)"
-    },
-    {
-      "path": "specs/227_algebraic_completeness_design/reports/02_team-synthesis.md",
-      "type": "report",
-      "summary": "Team synthesis: Adopt Thomas's v ⊨ T style with primitive bot, no JohanssonAlgebra needed, 4-phase plan (~1000 lines), D-M completion is largest porting task"
+      "path": "specs/227_algebraic_completeness_design/reports/05_hard-implementation-research.md",
+      "summary": "Implementation-ready research for algebraic completeness with primitive bot: 3 files (~585 lines), D-M deferred"
     }
   ],
+  "next_steps": "Run /plan 227 to create implementation plan",
   "metadata": {
-    "session_id": "sess_1750130000_research227",
-    "agent_type": "team-research",
-    "team_size": 4,
-    "delegation_depth": 1
-  }
+    "session_id": "sess_1750135000_research227hard",
+    "agent_type": "cslib-research-hard-agent",
+    "duration_seconds": 600,
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-hard-agent"],
+    "findings_count": 12,
+    "adversarial_verification_triggered": true,
+    "reference_grounding_tier": 3,
+    "bibkey_verification_status": "6 present, 6 missing (Rasiowa1974, RasiowaSikorski1963, BlokPigozzi1989, Font2016, MacNeille1937, TroelstraSchwichtenberg2000)"
+  },
+  "memory_candidates": [
+    {
+      "content": "CSLib's primitive .bot constructor eliminates both [Bot Atom] and [Inhabited Atom] requirements from Thomas's algebraic completeness code. derivationTop and derivableIn_top require only [DecidableEq Atom] because top = .bot -> .bot uses primitive .bot, not an arbitrary atom. This is a strict improvement over the Bot-as-atom approach.",
+      "category": "INSIGHT",
+      "source_artifact": "specs/227_algebraic_completeness_design/reports/05_hard-implementation-research.md",
+      "confidence": 0.95,
+      "suggested_keywords": ["primitive-bot", "Inhabited-Atom", "Bot-Atom", "derivationTop", "algebraic-completeness", "Lindenbaum"]
+    },
+    {
+      "content": "Thomas's Theory.complete theorem does NOT require Dedekind-MacNeille completion. By stating completeness over GHA (not HA), the Lindenbaum quotient suffices directly. D-M completion is only needed to (1) state MPL completeness over HA instead of GHA, or (2) prove the conservative extension theorem (ipl_conservative_over_mpl). Core completeness works without D-M.",
+      "category": "TECHNIQUE",
+      "source_artifact": "specs/227_algebraic_completeness_design/reports/05_hard-implementation-research.md",
+      "confidence": 0.9,
+      "suggested_keywords": ["Dedekind-MacNeille", "Theory-complete", "GHA-completeness", "Lindenbaum", "conservative-extension"]
+    },
+    {
+      "content": "BooleanAlgebra.ofRegular in Mathlib (Heyting._root_.BooleanAlgebra.ofRegular) promotes a HeytingAlgebra to BooleanAlgebra given that every element is regular (complement-complement = identity). For the Lindenbaum algebra, regularity is exactly DNE: DerivableIn T ({neg neg A} ⊢ A). This avoids manually proving all BooleanAlgebra fields.",
+      "category": "TECHNIQUE",
+      "source_artifact": "specs/227_algebraic_completeness_design/reports/05_hard-implementation-research.md",
+      "confidence": 0.85,
+      "suggested_keywords": ["BooleanAlgebra-ofRegular", "HeytingAlgebra", "DNE", "regularity", "Lindenbaum", "Mathlib"]
+    }
+  ]
 }

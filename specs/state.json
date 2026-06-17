@@ -12,7 +12,7 @@
         225
       ],
       "created": "2026-06-17T06:00:00Z",
-      "last_updated": "2026-06-17T12:40:21Z",
+      "last_updated": "2026-06-17T16:11:41Z",
       "artifacts": [
         {
           "path": "specs/227_algebraic_completeness_design/reports/01_algebraic-completeness-design.md",
@@ -25,7 +25,7 @@
           "summary": "Defense of primitive bot: substitution invariance, universal algebra, Johansson algebras, convergent evidence from proof theory, formalization practice, and type theory"
         }
       ],
-      "session_id": "sess_1750130000_research227"
+      "session_id": "sess_1750135000_research227hard"
     },
     {
       "project_number": 226,

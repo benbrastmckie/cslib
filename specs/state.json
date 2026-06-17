@@ -4,12 +4,14 @@
     {
       "project_number": 225,
       "project_name": "gha_semantics_refactor",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Implement GHA algebraic semantics with primitive bot on main. (1) Create Semantics/Algebra.lean with generic `Evaluate [GeneralizedHeytingAlgebra H] (v : Atom → H) (bot_val : H) : PL.Proposition Atom → H` and validity definitions (GHAValid, HAValid, BAValid). (2) Create Semantics/Algebra/Soundness.lean proving soundness for MinPropAxiom/IntPropAxiom/PropositionalAxiom using Mathlib GHA/HA/BA API (le_himp_iff, himp_himp, bot_himp, compl_compl, etc.). (3) Combine Basic.lean into Bool.lean to align with PR #648 file structure — move Prop-valued Evaluate into Bool.lean alongside BoolEvaluate, preserving the bridge lemma BoolEvaluate_eq_iff. (4) Create bridge lemmas connecting existing evaluators to the generic Evaluate: prop_evaluate_eq, bool_evaluate_eq, iforces_eq. Do not modify Kripke.lean or any completeness proofs. Existing downstream modal/temporal/bimodal logics must remain untouched.",
       "topic": "Propositional Logic",
       "created": "2026-06-16T23:00:00Z",
-      "last_updated": "2026-06-16T23:00:00Z"
+      "last_updated": "2026-06-17T03:03:49Z",
+      "session_id": "sess_1750122000_orchestrate225",
+      "completion_summary": "Implemented GHA algebraic semantics: created AlgEvaluate with primitive bot_val over GeneralizedHeytingAlgebra, proved 3-tier axiom soundness (GHA/HA/BA), consolidated Basic.lean into Bool.lean, added prop/bool bridge lemmas. All CI checks pass."
     },
     {
       "project_number": 226,
@@ -75,7 +77,7 @@
     {
       "project_number": 222,
       "project_name": "review_pr648_zulip_feedback_analysis",
-      "status": "pr_ready",
+      "status": "abandoned",
       "task_type": "pr",
       "description": "Review PR #648 changes on feat/propositional-v2 and analyze Zulip feedback from specs/221_revise_pr649_reviewer_feedback/zulip.md, creating a detailed overview document of all issues with verified explanations and flagged concerns",
       "topic": "Propositional Logic",
@@ -133,12 +135,13 @@
             "integrated_date": "2026-06-16"
           }
         ]
-      }
+      },
+      "completion_summary": "Analysis task that informed 221; work already pushed to PR #648"
     },
     {
       "project_number": 221,
       "project_name": "revise_pr649_reviewer_feedback",
-      "status": "pr_ready",
+      "status": "abandoned",
       "task_type": "pr",
       "description": "Revise PR #648 (feat/propositional-v2) to reconcile with merged PR #536 and address reviewer feedback. Main goal: add bot as primitive to propositional formula type, eliminating [Bot Atom] constraints.\n\nKey changes:\n1. Resolve 3 merge conflicts with upstream/main post-#536 (Cslib.lean imports, Defs.lean imports, Defs.lean Theory section)\n2. Adopt InferenceSystem-parameterized IsIntuitionistic/IsClassical from #536, removing [Bot Atom] constraints since bot is now primitive\n3. Keep imp constructor naming and update Theory.lean to match (impI/impE instead of implI/implE)\n4. Remove Semantics files (Basic.lean, Bool.lean) to a follow-up PR per thomaskwaring's request\n5. Adapt Theory.lean (from #536) to work with primitive bot: remove [Bot Atom] from all signatures\n6. Replace German references (Johansson1937, Gentzen1935, Wajsberg1938) with English alternatives (Avigad2022, Prawitz1965)\n7. Revise PR description with balanced bot-as-primitive rationale addressing ctchou and thomaskwaring feedback\n\nPR #649 (feat/temporal-formula-propositional) will be handled in a separate later task.\n\nSources:\n- PR #648: https://github.com/leanprover/cslib/pull/648\n- Maintainer review: https://github.com/leanprover/cslib/pull/648#pullrequestreview-4502084546\n- Contributor comment: https://github.com/leanprover/cslib/pull/648#issuecomment-4715838618\n- Merged PR #536: refactor(Logics/Propositional): classical and intuitionistic inference systems",
       "topic": "Propositional Logic",
@@ -158,7 +161,8 @@
           "type": "plan",
           "summary": "Revised plan v3: keep imp naming instead of reverting to impl"
         }
-      ]
+      ],
+      "completion_summary": "All revisions already pushed to PR #648 (rebase on #536, primitive bot, semantics removed, refs replaced)"
     },
     {
       "project_number": 220,
@@ -189,7 +193,7 @@
     {
       "project_number": 219,
       "project_name": "address_pr648_merge_semantics_files",
-      "status": "planned",
+      "status": "abandoned",
       "task_type": "pr",
       "description": "Address PR #648 review from ctchou: merge Semantics/Basic.lean and Bool.lean into a single file, update references to Avigad, and coordinate with PRs #536, #587, #607. PR: https://github.com/leanprover/cslib/pull/648 Zulip: https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/with/603538889",
       "topic": "Propositional Logic",
@@ -214,7 +218,8 @@
       ],
       "next_artifact_number": 3,
       "session_id": "sess_1781590532_8myafw",
-      "researched": "2026-06-16T00:34:52Z"
+      "researched": "2026-06-16T00:34:52Z",
+      "completion_summary": "Semantics files already removed from PR #648; GHA semantics moved to tasks 225/226"
     },
     {
       "project_number": 218,

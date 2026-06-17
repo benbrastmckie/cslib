@@ -11,8 +11,8 @@ next_project_number: 227
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,197,209,214,215,219,221,222,225 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
-| 2 | 39,40,181,226 | 36,37,180,225 | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 1 | 36,37,180,188,192,197,209,214,215,226 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -36,11 +36,7 @@ next_project_number: 227
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
-219 [PLANNED] — Address PR #648 review from ctchou: merge Semantics/Basic.lean an
-221 [PR READY] — Revise PR #648 (feat/propositional-v2) to reconcile with merged P
-222 [PR READY] — Review PR #648 changes on feat/propositional-v2 and analyze Zulip
-225 [NOT STARTED] — Implement GHA algebraic semantics with primitive bot on main. (1)
-  └─ 226 [NOT STARTED] — Cherry-pick GHA algebraic semantics from main to create a PR stac
+226 [NOT STARTED] — Cherry-pick GHA algebraic semantics from main to create a PR stac
 
 ### Propositional PRs
 
@@ -69,7 +65,7 @@ next_project_number: 227
 ---
 
 ### 225. Gha semantics refactor
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -103,7 +99,7 @@ next_project_number: 227
 ---
 
 ### 222. Review pr648 zulip feedback analysis
-- **Status**: [PR READY]
+- **Status**: [ABANDONED]
 - **Task Type**: pr
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -118,7 +114,7 @@ next_project_number: 227
 ---
 
 ### 221. Revise pr649 reviewer feedback
-- **Status**: [PR READY]
+- **Status**: [ABANDONED]
 - **Task Type**: pr
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -159,7 +155,7 @@ Sources:
 ---
 
 ### 219. Address pr648 merge semantics files
-- **Status**: [PLANNED]
+- **Status**: [ABANDONED]
 - **Task Type**: pr
 - **Topic**: Propositional Logic
 - **Dependencies**: None

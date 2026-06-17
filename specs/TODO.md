@@ -6,12 +6,12 @@ next_project_number: 225
 
 ## Task Order
 
-*Updated 2026-06-16. Generated from state.json dependency graph.*
+*Updated 2026-06-17. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,197,209,214,215,219,221,222,223 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,188,192,197,209,214,215,219,221,222 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -47,7 +47,6 @@ next_project_number: 225
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-223 [IMPLEMENTING] — Review and fix PR #649 (stacked on PR #648): resolve CI failure a
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -69,12 +68,13 @@ next_project_number: 225
 ---
 
 ### 223. Review fix pr 649 rebase on 648
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: pr
 - **Topic**: Temporal Logic
 - **Dependencies**: None
 - **Research**: [223_review_fix_pr_649_rebase_on_648/reports/01_team-research.md]
 - **Plan**: [223_review_fix_pr_649_rebase_on_648/plans/02_fix-ci-rebase.md]
+- **Summary**: [223_review_fix_pr_649_rebase_on_648/summaries/02_fix-ci-rebase-summary.md]
 
 **Description**: Review and fix PR #649 (stacked on PR #648): resolve CI failure at https://github.com/leanprover/cslib/actions/runs/27633080931/job/81712989982?pr=649 and rebase onto updated PR #648
 

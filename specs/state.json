@@ -21,12 +21,12 @@
     {
       "project_number": 223,
       "project_name": "review_fix_pr_649_rebase_on_648",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "pr",
       "description": "Review and fix PR #649 (stacked on PR #648): resolve CI failure at https://github.com/leanprover/cslib/actions/runs/27633080931/job/81712989982?pr=649 and rebase onto updated PR #648",
       "topic": "Temporal Logic",
       "created": "2026-06-16T22:10:16Z",
-      "last_updated": "2026-06-16T23:01:06Z",
+      "last_updated": "2026-06-17T00:13:23Z",
       "researched": "2026-06-16T22:32:45Z",
       "artifacts": [
         {
@@ -38,10 +38,16 @@
           "path": "specs/223_review_fix_pr_649_rebase_on_648/plans/02_fix-ci-rebase.md",
           "type": "plan",
           "summary": "3-phase plan: fix CI failure, address reviewer requests, rebase onto PR #648"
+        },
+        {
+          "path": "specs/223_review_fix_pr_649_rebase_on_648/summaries/02_fix-ci-rebase-summary.md",
+          "type": "summary",
+          "summary": "Execution summary: CI fix, snce removal, rebase onto PR #648"
         }
       ],
       "next_artifact_number": 2,
-      "session_id": "sess_1781650791_5f754f"
+      "session_id": "sess_1781650791_5f754f",
+      "completion_summary": "All 3 phases complete. Phase 1: deleted instBot_eq/instTop_eq (CI fix). Phase 2: removed snce past-time operator. Phase 3: rebased feat/temporal-formula-propositional onto feat/propositional-v2 (7cc09612), resolved conflicts in 4 files. All CI checks pass. Force-pushed with --force-with-lease."
     },
     {
       "project_number": 222,

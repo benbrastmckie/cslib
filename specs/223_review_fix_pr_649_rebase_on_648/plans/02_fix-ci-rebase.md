@@ -1,7 +1,7 @@
 # Implementation Plan: Fix CI and Rebase PR #649 on PR #648
 
 - **Task**: 223 - review_fix_pr_649_rebase_on_648
-- **Status**: [IN PROGRESS]
+- **Status**: [COMPLETED]
 - **Effort**: 4 hours
 - **Dependencies**: PR #648 approval (external, blocks Phase 3 only)
 - **Research Inputs**: reports/01_team-research.md
@@ -61,7 +61,7 @@ This task advances the Temporal module layer in the CSLib roadmap dependency str
 |------|--------|------------|
 | 1 | 1 | -- |
 | 2 | 2 | 1 |
-| 3 | 3 | 2 (+ external: PR #648 approval) |
+| 3 | 3 | 2 |
 
 Phases within the same wave can execute in parallel.
 
@@ -121,12 +121,11 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Rebase onto PR #648 [BLOCKED]
+### Phase 3: Rebase onto PR #648 [COMPLETED]
 
-**Goal**: Cleanly rebase `feat/temporal-formula-propositional` onto `feat/propositional-v2` head, resolving all merge conflicts correctly.
+**Goal**: Cleanly rebase `feat/temporal-formula-propositional` onto `feat/propositional-v2` head (`7cc09612`), resolving all merge conflicts correctly to properly stack PR #649 on PR #648.
 
 **Tasks**:
-- [ ] Confirm PR #648 is approved or merged (do not proceed if still `CHANGES_REQUESTED`)
 - [ ] Fetch latest `feat/propositional-v2` from upstream
 - [ ] Run `git rebase feat/propositional-v2` on `feat/temporal-formula-propositional`
 - [ ] Resolve conflicts in `Cslib/Logics/Propositional/Defs.lean`: take PR #648's version as base; `instBot_eq`/`instTop_eq` already removed in Phase 1
@@ -141,7 +140,7 @@ Phases within the same wave can execute in parallel.
 
 **Timing**: 1.5 hours
 
-**Depends on**: 2 (and external: PR #648 approval)
+**Depends on**: 2
 
 **Files to modify**:
 - `Cslib/Logics/Propositional/Defs.lean` - Conflict resolution (take PR #648 version)

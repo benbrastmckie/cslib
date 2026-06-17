@@ -152,13 +152,13 @@
     {
       "project_number": 197,
       "project_name": "modal_upstream_initial_pr",
-      "status": "researching",
+      "status": "researched",
       "task_type": "pr",
       "title": "Scope initial Modal/ upstream PR (~300 LOC)",
       "description": "Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible",
       "topic": "Modal Logic",
       "created": "2026-06-14T19:08:07Z",
-      "last_updated": "2026-06-17T19:04:07Z",
+      "last_updated": "2026-06-17T19:11:31Z",
       "session_id": "sess_1781723029_b66104",
       "research_artifacts": [
         "specs/197_modal_upstream_initial_pr/reports/01_modal-upstream-pr-scope.md",
@@ -166,7 +166,7 @@
         "specs/197_modal_upstream_initial_pr/reports/03_team-research.md",
         "specs/197_modal_upstream_initial_pr/reports/04_pr649-comparison-classical-signature.md"
       ],
-      "next_artifact_number": 9,
+      "next_artifact_number": 10,
       "plan_artifacts": [
         "specs/197_modal_upstream_initial_pr/plans/02_modal-upstream-pr-plan.md",
         "specs/197_modal_upstream_initial_pr/plans/05_modal-upstream-pr-plan.md"
@@ -213,7 +213,7 @@
           }
         ]
       },
-      "researched": "2026-06-15T00:25:16Z",
+      "researched": "2026-06-17T19:11:31Z",
       "memory_candidates": [
         {
           "content": "CSLib PR quality conventions require a fix-up commit pattern: after initial submission, a quality convention fixes commit is typically needed to add ## Main definitions, ## Notation, and ## References docstring sections, convert prose references to Mathlib BibKey format, and polish derived operator docs with Unicode notation. Apply these proactively to avoid post-submission fix commits.",
@@ -286,6 +286,11 @@
           "path": "specs/197_modal_upstream_initial_pr/pr-description.md",
           "type": "pr_description",
           "summary": "PR description for Modal/ formula primitives refactoring, stacking on PR #648"
+        },
+        {
+          "path": "specs/197_modal_upstream_initial_pr/reports/09_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates — revision assessment, alternative stacking strategies, gaps/blind spots, strategic horizons"
         }
       ],
       "base_branch": "feat/propositional-v2"

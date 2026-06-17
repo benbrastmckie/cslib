@@ -11,8 +11,8 @@ next_project_number: 231
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,197,209,215,226 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
-| 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
+| 1 | 36,37,180,188,192,197,209,226 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -20,8 +20,9 @@ next_project_number: 231
 ### Bimodal Porting
 
 36 [BLOCKED] — Port discrete completeness (completeness_discrete theorem) and We
+  └─ 215 [BLOCKED] — Fill 22 sorry declarations across 6 files in Cslib/Logics/Bimodal
 37 [BLOCKED] — Port continuous extension completeness once developed upstream. T
-215 [RESEARCHING] — Fill 22 sorry declarations across 6 files in Cslib/Logics/Bimodal
+  └─ 215 [BLOCKED] — Fill 22 sorry declarations across 6 files in Cslib/Logics/Bimodal (see above)
 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
 
 ### Foundations
@@ -111,10 +112,10 @@ next_project_number: 231
 ---
 
 ### 215. Fill sorry declarations in Bimodal BXCanonical and Bundle files
-- **Status**: [RESEARCHING]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Bimodal Porting
-- **Dependencies**: None
+- **Dependencies**: Task 36, Task 37
 
 **Description**: Fill 22 sorry declarations across 6 files in Cslib/Logics/Bimodal/Metalogic/:
 - Bundle/SuccRelation.lean: 7 sorries (lines 253, 258, 263, 269, 275, 281, 285)

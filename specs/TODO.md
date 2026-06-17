@@ -11,7 +11,7 @@ next_project_number: 231
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,197,209,214,215,226,227,230 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,188,192,197,209,214,215,226,230 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -42,7 +42,6 @@ next_project_number: 231
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
 192 [PLANNED] — Draw on sources in specs/literature/ to verify and improve citati
 226 [RESEARCHED] — Cherry-pick GHA algebraic semantics from main to create a PR stac
-227 [PR READY] — Design and implement maximally general algebraic semantics for pr
 
 ### Temporal Logic
 
@@ -89,7 +88,7 @@ next_project_number: 231
 ---
 
 ### 227. Algebraic completeness design
-- **Status**: [PR READY]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 225

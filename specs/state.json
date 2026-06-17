@@ -44,7 +44,7 @@
     {
       "project_number": 227,
       "project_name": "algebraic_completeness_design",
-      "status": "pr_ready",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Design and implement maximally general algebraic semantics for propositional logic with primitive bot. (1) Evaluate whether to introduce a JohanssonAlgebra typeclass (GHA + designated bot constant) as the algebraic counterpart of minimal logic, providing a clean three-tier hierarchy: JohanssonAlgebra (MPL) → HeytingAlgebra (IPL) → BooleanAlgebra (CPL). (2) Adapt xcthulhu's Lindenbaum algebra + Dedekind-MacNeille completeness proofs to work with primitive-⊥ Proposition and AlgEvaluate/bot_val framework — estimated ~15 lines of structural changes. (3) Port or integrate DedekindMacneille.lean and ForMathlib/Order/Heyting/Hom.lean dependencies. (4) Prove algebraic completeness for all three tiers: MPL complete w.r.t. GHA/Johansson (arbitrary bot_val), IPL complete w.r.t. HA (bot_val = ⊥), CPL complete w.r.t. BA (bot_val = ⊥). (5) Update Algebra.lean docstrings to reference Johansson algebras and the algebraic lineage. (6) Ensure compatibility with existing Kripke completeness proofs and downstream Modal/Temporal/Bimodal code.",
       "topic": "Propositional Logic",
@@ -52,7 +52,7 @@
         225
       ],
       "created": "2026-06-17T06:00:00Z",
-      "last_updated": "2026-06-17T19:27:34Z",
+      "last_updated": "2026-06-17T19:28:31Z",
       "artifacts": [
         {
           "path": "specs/227_algebraic_completeness_design/reports/01_algebraic-completeness-design.md",
@@ -75,7 +75,7 @@
           "summary": "Hard-mode research: 5 completeness statement alternatives evaluated; recommends status quo (v, bot_val) with optional AlgInterp sugar"
         }
       ],
-      "session_id": "sess_1781714866_c040b7",
+      "session_id": "sess_1781721416_1cb2dc",
       "plan_metadata": {
         "phases": 5,
         "total_effort_hours": 10,

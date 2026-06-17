@@ -206,16 +206,20 @@ theorem case1_psi_bool_only (a q A B : Formula Atom)
     intro p q hp hq; show untlUnderBoolOnly (.imp (.imp p .bot) q) A B
     exact ⟨⟨hp, trivial⟩, hq⟩
   unfold case1Psi
-  apply h_or; apply h_or
-  · apply h_and; apply h_and; apply h_and
-    · exact (⟨ha, hq⟩ : untlUnderBoolOnly (.snce a q) A B)
-    · exact (⟨ha, hB⟩ : untlUnderBoolOnly (.snce a B) A B)
-    · exact u_free_untl_under_bool B A B hB
-    · exact Or.inl ⟨rfl, rfl⟩
-  · apply h_and; apply h_and
-    · exact u_free_untl_under_bool A A B hA
-    · exact (⟨ha, hB⟩ : untlUnderBoolOnly (.snce a B) A B)
-    · exact (⟨ha, hq⟩ : untlUnderBoolOnly (.snce a q) A B)
+  apply h_or
+  · apply h_or
+    · apply h_and
+      · apply h_and
+        · apply h_and
+          · exact (⟨ha, hq⟩ : untlUnderBoolOnly (.snce a q) A B)
+          · exact (⟨ha, hB⟩ : untlUnderBoolOnly (.snce a B) A B)
+        · exact u_free_untl_under_bool B A B hB
+      · exact Or.inl ⟨rfl, rfl⟩
+    · apply h_and
+      · apply h_and
+        · exact u_free_untl_under_bool A A B hA
+        · exact (⟨ha, hB⟩ : untlUnderBoolOnly (.snce a B) A B)
+      · exact (⟨ha, hq⟩ : untlUnderBoolOnly (.snce a q) A B)
   · have hev_uf : isUFree (Formula.and (Formula.and (Formula.and A q) (.snce a B)) (.snce a q)) = true := by
       simp [Formula.and, Formula.neg, isUFree, hA, hq, ha, hB]
     exact (⟨hev_uf, hq⟩ : untlUnderBoolOnly (.snce _ q) A B)

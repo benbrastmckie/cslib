@@ -142,14 +142,15 @@
     {
       "project_number": 214,
       "project_name": "fix_cases_tactic_warnings",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Fix tactic goal-count warnings in DedekindZ/Cases.lean",
       "description": "Fix 4 tactic goal-count warnings in Cslib/Logics/Bimodal/Metalogic/Separation/DedekindZ/Cases.lean where apply chains create unfocused goals. Restructure the proof to properly focus each subgoal.",
       "topic": "Bimodal Porting",
       "created": "2026-06-15T17:59:27Z",
       "last_updated": "2026-06-17T19:54:41Z",
-      "session_id": "sess_1750210000_orchestrate214"
+      "session_id": "sess_1750210000_orchestrate214",
+      "completion_summary": "Fixed all 4 tactic goal-count warnings in case1_psi_bool_only theorem in DedekindZ/Cases.lean by replacing semicolon-chained apply calls with properly nested focus blocks."
     },
     {
       "project_number": 215,

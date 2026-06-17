@@ -11,7 +11,7 @@ next_project_number: 231
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,197,209,214,215,226 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,188,192,197,209,215,226 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -21,7 +21,6 @@ next_project_number: 231
 
 36 [BLOCKED] — Port discrete completeness (completeness_discrete theorem) and We
 37 [BLOCKED] — Port continuous extension completeness once developed upstream. T
-214 [IMPLEMENTING] — Fix 4 tactic goal-count warnings in Cslib/Logics/Bimodal/Metalogi
 215 [RESEARCHING] — Fill 22 sorry declarations across 6 files in Cslib/Logics/Bimodal
 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
 
@@ -130,7 +129,7 @@ These are incomplete proofs in the bimodal temporal logic development (BX dense 
 ---
 
 ### 214. Fix tactic goal-count warnings in DedekindZ/Cases.lean
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Bimodal Porting
 - **Dependencies**: None

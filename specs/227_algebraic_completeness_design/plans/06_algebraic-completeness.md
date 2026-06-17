@@ -85,24 +85,24 @@ This task advances propositional algebraic completeness infrastructure. While no
 | 3 | 3 | 2 |
 | 4 | 4 | 3 |
 
-### Phase 1: Congruence Lemmas and Lindenbaum Algebra [NOT STARTED]
+### Phase 1: Congruence Lemmas and Lindenbaum Algebra [IN PROGRESS]
 
 **Goal**: Prove the three missing congruence lemmas and build the Lindenbaum quotient with PartialOrder, Lattice, GHA, HA, and BA instances.
 
 **Tasks**:
-- [ ] Prove `Theory.Equiv.imp_congr`: if `A equiv A'` and `B equiv B'` then `(A -> B) equiv (A' -> B')` -- use `impI`, `impE`, cut
-- [ ] Prove `Theory.Equiv.and_congr`: congruence for conjunction -- use `andI`, `andE1`, `andE2`
-- [ ] Prove `Theory.Equiv.or_congr`: congruence for disjunction -- use `orI1`, `orI2`, `orE`
-- [ ] Define `PartialOrder` on `Quotient T.propositionSetoid` where `le` uses `Quotient.lift2` with `DerivableIn T ({A} |- B)`
-- [ ] Prove `mk_le_mk` simp lemma: `quotient_mk A <= quotient_mk B <-> DerivableIn T ({A} |- B)`
-- [ ] Define `Lattice` instance with `sup := Quotient.lift2 (fun A B => quotient_mk (A or B))` and `inf` for conjunction, using congruence lemmas for well-definedness
-- [ ] Prove `mk_sup_mk` and `mk_inf_mk` simp lemmas
-- [ ] Define `GeneralizedHeytingAlgebra` instance with `top := quotient_mk top` and `himp := Quotient.lift2 (fun A B => quotient_mk (A -> B))`
-- [ ] Prove `le_himp_iff` (deduction theorem in quotient form): `a inf b <= c <-> a <= b himp c`
-- [ ] Prove `mk_himp_mk` simp lemma and `top_eq` lemma
-- [ ] Define `HeytingAlgebra` instance (conditional on `[IsIntuitionistic T]`) with `bot := quotient_mk .bot` and `bot_le` via `botE`
-- [ ] Define `BooleanAlgebra` instance (conditional on `[IsClassical T]`) via `BooleanAlgebra.ofRegular` + DNE
-- [ ] Prove `nontrivial_of_consistent`: if T does not derive bot, then the quotient is nontrivial
+- [x] Prove `Theory.Equiv.imp_congr`: if `A equiv A'` and `B equiv B'` then `(A -> B) equiv (A' -> B')` -- use `impI`, `impE`, cut *(compiles, Basic.lean:402)*
+- [x] Prove `Theory.Equiv.and_congr`: congruence for conjunction -- use `andI`, `andE1`, `andE2` *(compiles, Basic.lean:426)*
+- [x] Prove `Theory.Equiv.or_congr`: congruence for disjunction -- use `orI1`, `orI2`, `orE` *(compiles, Basic.lean:445)*
+- [ ] Define `PartialOrder` on `Quotient T.propositionSetoid` where `le` uses `Quotient.lift2` with `DerivableIn T ({A} |- B)` *(drafted in GHA instance but has build errors: `wk`/`ct` private helpers not in scope, `le_antisymm` anonymous constructor wrong)*
+- [ ] Prove `mk_le_mk` simp lemma: `quotient_mk A <= quotient_mk B <-> DerivableIn T ({A} |- B)` *(drafted but type mismatch: `Iff.rfl` fails, needs proof via Quotient induction)*
+- [ ] Define `Lattice` instance with `sup := Quotient.lift2 (fun A B => quotient_mk (A or B))` and `inf` for conjunction, using congruence lemmas for well-definedness *(drafted in GHA instance but has build errors)*
+- [ ] Prove `mk_sup_mk` and `mk_inf_mk` simp lemmas *(drafted but `rfl` fails: not definitional equalities)*
+- [ ] Define `GeneralizedHeytingAlgebra` instance with `top := quotient_mk top` and `himp := Quotient.lift2 (fun A B => quotient_mk (A -> B))` *(drafted but 25 build errors: `le_sup_inf` not a GHA field, `wk`/`ct` scope issues)*
+- [ ] Prove `le_himp_iff` (deduction theorem in quotient form): `a inf b <= c <-> a <= b himp c` *(drafted, blocked on upstream GHA instance errors)*
+- [ ] Prove `mk_himp_mk` simp lemma and `top_eq` lemma *(drafted but `rfl` fails)*
+- [ ] Define `HeytingAlgebra` instance (conditional on `[IsIntuitionistic T]`) with `bot := quotient_mk .bot` and `bot_le` via `botE` *(drafted but missing `compl` and `himp_bot` fields)*
+- [ ] Define `BooleanAlgebra` instance (conditional on `[IsClassical T]`) via `BooleanAlgebra.ofRegular` + DNE *(drafted but `IsRegular`/`BooleanAlgebra.ofRegular` API mismatch, `Derivation.dne`/`negI` signature issues)*
+- [ ] Prove `nontrivial_of_consistent`: if T does not derive bot, then the quotient is nontrivial *(drafted but `grind` fails on final subset goal)*
 
 **Timing**: 3.5 hours
 

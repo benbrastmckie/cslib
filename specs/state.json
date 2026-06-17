@@ -10,7 +10,8 @@
       "topic": "Temporal Logic",
       "created": "2026-06-17T19:28:14Z",
       "last_updated": "2026-06-17T19:35:43Z",
-      "session_id": "sess_1781724665_ae5019"
+      "session_id": "sess_1781724665_ae5019",
+      "completion_summary": "Fixed Reynolds1994→Reynolds1996 bib key and added BEq to Temporal.Formula deriving clause on feat/temporal-formula-propositional branch (commit 780f9573)"
     },
     {
       "project_number": 229,

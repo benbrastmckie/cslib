@@ -17,7 +17,7 @@ and notation.
 
 ## Design
 
-The hierarchy adopts a hybrid five-primitive propositional signature `{atom, bot, imp, and, or}`,
+The hierarchy adopts a hybrid five constructors `{atom, bot, imp, and, or}`,
 following the operator-typeclass direction of fmontesi's PR #607 (one class per operator):
 - **Atomic classes**: `HasBot`, `HasImp`, `HasAnd`, `HasOr`, `HasBox`, `HasUntil`, `HasSince`
 - **Bundled classes**: `PropositionalConnectives`, `ModalConnectives`,

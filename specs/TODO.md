@@ -1,5 +1,5 @@
 ---
-next_project_number: 228
+next_project_number: 229
 ---
 
 # TODO
@@ -54,6 +54,17 @@ next_project_number: 228
 197 [PR READY] — Review the ambition to contribute Modal/ to upstream, identifying
 
 ## Tasks
+
+### 228. Pr648 primitive bot cleanup
+- **Status**: [COMPLETED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 227
+- **Research**: [228_pr648_primitive_bot_cleanup/reports/01_pr648-review-findings.md]
+
+**Description**: Fix two documentation issues in PR #648 (feat/propositional-v2) to align with the primitive bot perspective: (1) Update intuitionisticCompletion docstring — it says "Attach a bottom element" but with primitive bot this is misleading since bot is already a constructor; (2) Fix Connectives.lean docstring — change "five-primitive propositional signature" to "five constructors" to avoid conflating generators with operations in the algebraic signature.
+
+---
 
 ### 227. Algebraic completeness design
 - **Status**: [PLANNED]

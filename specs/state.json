@@ -4,7 +4,7 @@
     {
       "project_number": 227,
       "project_name": "algebraic_completeness_design",
-      "status": "researched",
+      "status": "researching",
       "task_type": "cslib",
       "description": "Design and implement maximally general algebraic semantics for propositional logic with primitive bot. (1) Evaluate whether to introduce a JohanssonAlgebra typeclass (GHA + designated bot constant) as the algebraic counterpart of minimal logic, providing a clean three-tier hierarchy: JohanssonAlgebra (MPL) → HeytingAlgebra (IPL) → BooleanAlgebra (CPL). (2) Adapt xcthulhu's Lindenbaum algebra + Dedekind-MacNeille completeness proofs to work with primitive-⊥ Proposition and AlgEvaluate/bot_val framework — estimated ~15 lines of structural changes. (3) Port or integrate DedekindMacneille.lean and ForMathlib/Order/Heyting/Hom.lean dependencies. (4) Prove algebraic completeness for all three tiers: MPL complete w.r.t. GHA/Johansson (arbitrary bot_val), IPL complete w.r.t. HA (bot_val = ⊥), CPL complete w.r.t. BA (bot_val = ⊥). (5) Update Algebra.lean docstrings to reference Johansson algebras and the algebraic lineage. (6) Ensure compatibility with existing Kripke completeness proofs and downstream Modal/Temporal/Bimodal code.",
       "topic": "Propositional Logic",
@@ -12,26 +12,15 @@
         225
       ],
       "created": "2026-06-17T06:00:00Z",
-      "last_updated": "2026-06-17T06:00:00Z",
+      "last_updated": "2026-06-17T08:34:07Z",
       "artifacts": [
         {
           "path": "specs/227_algebraic_completeness_design/reports/01_algebraic-completeness-design.md",
           "type": "report",
           "summary": "Comprehensive design report: Johansson algebras, xcthulhu adaptation, JohanssonAlgebra typeclass, algebraic completeness architecture"
         }
-      ]
-    },
-    {
-      "project_number": 225,
-      "project_name": "gha_semantics_refactor",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "Implement GHA algebraic semantics with primitive bot on main. (1) Create Semantics/Algebra.lean with generic `Evaluate [GeneralizedHeytingAlgebra H] (v : Atom → H) (bot_val : H) : PL.Proposition Atom → H` and validity definitions (GHAValid, HAValid, BAValid). (2) Create Semantics/Algebra/Soundness.lean proving soundness for MinPropAxiom/IntPropAxiom/PropositionalAxiom using Mathlib GHA/HA/BA API (le_himp_iff, himp_himp, bot_himp, compl_compl, etc.). (3) Combine Basic.lean into Bool.lean to align with PR #648 file structure — move Prop-valued Evaluate into Bool.lean alongside BoolEvaluate, preserving the bridge lemma BoolEvaluate_eq_iff. (4) Create bridge lemmas connecting existing evaluators to the generic Evaluate: prop_evaluate_eq, bool_evaluate_eq, iforces_eq. Do not modify Kripke.lean or any completeness proofs. Existing downstream modal/temporal/bimodal logics must remain untouched.",
-      "topic": "Propositional Logic",
-      "created": "2026-06-16T23:00:00Z",
-      "last_updated": "2026-06-17T03:03:49Z",
-      "session_id": "sess_1750122000_orchestrate225",
-      "completion_summary": "Implemented GHA algebraic semantics: created AlgEvaluate with primitive bot_val over GeneralizedHeytingAlgebra, proved 3-tier axiom soundness (GHA/HA/BA), consolidated Basic.lean into Bool.lean, added prop/bool bridge lemmas. All CI checks pass."
+      ],
+      "session_id": "sess_1750130000_research227"
     },
     {
       "project_number": 226,
@@ -46,213 +35,6 @@
       "created": "2026-06-16T23:00:00Z",
       "last_updated": "2026-06-17T05:50:06Z",
       "session_id": "sess_1750123500_research226"
-    },
-    {
-      "project_number": 224,
-      "project_name": "research_gha_vs_alternatives_semantics",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "Research whether GeneralizedHeytingAlgebra is the right algebraic framework for propositional semantics in CSLib, considering alternatives (HeytingAlgebra, BooleanAlgebra, custom typeclass hierarchy). Evaluate thomaskwaring's GHA proposal from PR #587 against the requirements of the full propositional hierarchy (MPL → IPL → CPL) and downstream modal/temporal/bimodal Kripke semantics. Key questions: (1) Does GHA handle primitive bot correctly or does it require workarounds? (2) Is HeytingAlgebra sufficient and simpler? (3) How does each option interact with the existing Prop-valued canonical model construction in strong completeness? Revise line 5 of specs/tmp/zulip-response.md based on findings",
-      "topic": "Propositional Logic",
-      "created": "2026-06-16T22:33:28Z",
-      "last_updated": "2026-06-16T22:33:28Z",
-      "artifacts": [
-        {
-          "type": "report",
-          "path": "224_research_gha_vs_alternatives_semantics/reports/01_gha-vs-alternatives.md"
-        }
-      ],
-      "completion_summary": "GHA is the correct algebraic framework for propositional semantics across MPL/IPL/CPL. Primitive bot handled naturally via bot_val parameter. HeytingAlgebra alone insufficient (forces ex falso). Existing Prop-valued canonical models are GHA instances requiring no changes. Zulip response line 5 revised."
-    },
-    {
-      "project_number": 223,
-      "project_name": "review_fix_pr_649_rebase_on_648",
-      "status": "completed",
-      "task_type": "pr",
-      "description": "Review and fix PR #649 (stacked on PR #648): resolve CI failure at https://github.com/leanprover/cslib/actions/runs/27633080931/job/81712989982?pr=649 and rebase onto updated PR #648",
-      "topic": "Temporal Logic",
-      "created": "2026-06-16T22:10:16Z",
-      "last_updated": "2026-06-17T00:13:23Z",
-      "researched": "2026-06-16T22:32:45Z",
-      "artifacts": [
-        {
-          "path": "specs/223_review_fix_pr_649_rebase_on_648/reports/01_team-research.md",
-          "type": "research",
-          "summary": "Team research with 4 teammates"
-        },
-        {
-          "path": "specs/223_review_fix_pr_649_rebase_on_648/plans/02_fix-ci-rebase.md",
-          "type": "plan",
-          "summary": "3-phase plan: fix CI failure, address reviewer requests, rebase onto PR #648"
-        },
-        {
-          "path": "specs/223_review_fix_pr_649_rebase_on_648/summaries/02_fix-ci-rebase-summary.md",
-          "type": "summary",
-          "summary": "Execution summary: CI fix, snce removal, rebase onto PR #648"
-        }
-      ],
-      "next_artifact_number": 2,
-      "session_id": "sess_1781650791_5f754f",
-      "completion_summary": "All 3 phases complete. Phase 1: deleted instBot_eq/instTop_eq (CI fix). Phase 2: removed snce past-time operator. Phase 3: rebased feat/temporal-formula-propositional onto feat/propositional-v2 (7cc09612), resolved conflicts in 4 files. All CI checks pass. Force-pushed with --force-with-lease."
-    },
-    {
-      "project_number": 222,
-      "project_name": "review_pr648_zulip_feedback_analysis",
-      "status": "abandoned",
-      "task_type": "pr",
-      "description": "Review PR #648 changes on feat/propositional-v2 and analyze Zulip feedback from specs/221_revise_pr649_reviewer_feedback/zulip.md, creating a detailed overview document of all issues with verified explanations and flagged concerns",
-      "topic": "Propositional Logic",
-      "created": "2026-06-16T21:25:21Z",
-      "last_updated": "2026-06-16T22:10:18Z",
-      "session_id": "sess_1781647479_c74aca",
-      "researched": "2026-06-16T21:49:29Z",
-      "next_artifact_number": 2,
-      "artifacts": [
-        {
-          "path": "specs/222_review_pr648_zulip_feedback_analysis/reports/01_team-research.md",
-          "type": "research",
-          "summary": "Team research with 4 teammates"
-        },
-        {
-          "type": "plan",
-          "path": "specs/222_review_pr648_zulip_feedback_analysis/plans/01_pr-response-drafts.md"
-        },
-        {
-          "type": "pr_description",
-          "path": "specs/tmp/pr-description.md",
-          "summary": "Revised PR description for PR #648"
-        },
-        {
-          "type": "pr_response",
-          "path": "specs/tmp/pr-comment.md",
-          "summary": "PR comment reply addressing reviewer feedback"
-        },
-        {
-          "type": "zulip_response",
-          "path": "specs/tmp/zulip-response.md",
-          "summary": "Zulip thread response with coordination proposals"
-        }
-      ],
-      "plan_path": "plans/01_pr-response-drafts.md",
-      "plan_metadata": {
-        "phases": 3,
-        "total_effort_hours": 2.5,
-        "complexity": "simple",
-        "research_integrated": true,
-        "plan_version": 1,
-        "dependency_waves": [
-          [
-            1
-          ],
-          [
-            2,
-            3
-          ]
-        ],
-        "reports_integrated": [
-          {
-            "path": "reports/01_team-research.md",
-            "integrated_in_plan_version": 1,
-            "integrated_date": "2026-06-16"
-          }
-        ]
-      },
-      "completion_summary": "Analysis task that informed 221; work already pushed to PR #648"
-    },
-    {
-      "project_number": 221,
-      "project_name": "revise_pr649_reviewer_feedback",
-      "status": "abandoned",
-      "task_type": "pr",
-      "description": "Revise PR #648 (feat/propositional-v2) to reconcile with merged PR #536 and address reviewer feedback. Main goal: add bot as primitive to propositional formula type, eliminating [Bot Atom] constraints.\n\nKey changes:\n1. Resolve 3 merge conflicts with upstream/main post-#536 (Cslib.lean imports, Defs.lean imports, Defs.lean Theory section)\n2. Adopt InferenceSystem-parameterized IsIntuitionistic/IsClassical from #536, removing [Bot Atom] constraints since bot is now primitive\n3. Keep imp constructor naming and update Theory.lean to match (impI/impE instead of implI/implE)\n4. Remove Semantics files (Basic.lean, Bool.lean) to a follow-up PR per thomaskwaring's request\n5. Adapt Theory.lean (from #536) to work with primitive bot: remove [Bot Atom] from all signatures\n6. Replace German references (Johansson1937, Gentzen1935, Wajsberg1938) with English alternatives (Avigad2022, Prawitz1965)\n7. Revise PR description with balanced bot-as-primitive rationale addressing ctchou and thomaskwaring feedback\n\nPR #649 (feat/temporal-formula-propositional) will be handled in a separate later task.\n\nSources:\n- PR #648: https://github.com/leanprover/cslib/pull/648\n- Maintainer review: https://github.com/leanprover/cslib/pull/648#pullrequestreview-4502084546\n- Contributor comment: https://github.com/leanprover/cslib/pull/648#issuecomment-4715838618\n- Merged PR #536: refactor(Logics/Propositional): classical and intuitionistic inference systems",
-      "topic": "Propositional Logic",
-      "created": "2026-06-16T16:50:01Z",
-      "last_updated": "2026-06-16T19:55:55Z",
-      "session_id": "sess_1781629818_51b490",
-      "researched": "2026-06-16T17:07:19Z",
-      "next_artifact_number": 4,
-      "artifacts": [
-        {
-          "path": "specs/221_revise_pr649_reviewer_feedback/reports/01_team-research.md",
-          "type": "research",
-          "summary": "Team research with 4 teammates"
-        },
-        {
-          "path": "specs/221_revise_pr649_reviewer_feedback/plans/04_revise-pr648-bot-refactor.md",
-          "type": "plan",
-          "summary": "Revised plan v3: keep imp naming instead of reverting to impl"
-        }
-      ],
-      "completion_summary": "All revisions already pushed to PR #648 (rebase on #536, primitive bot, semantics removed, refs replaced)"
-    },
-    {
-      "project_number": 220,
-      "project_name": "refactor_pr649_typeclass_split_ltl_formula",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "Refactor PR #649: trim completeness-only content, add FutureTemporalConnectives typeclass layer, and LTL.Formula type. Remove Encodable/Countable/Infinite/Denumerable and BEq instances from PR scope (save for completeness PR). Split TemporalConnectives into FutureTemporalConnectives + TemporalConnectives in Connectives.lean. Add HasNext typeclass and LTLConnectives bundle. Create Cslib/Logics/LTL/Syntax/Formula.lean with {atom, bot, imp, next, untl} and derived connectives. Create LTL.Formula.toTemporal embedding. Add basic LTL satisfaction over omega-words. Addresses PR #649 review (ctchou) and Zulip LTL/Büchi discussion. References: Kamp (1968), Burgess (1982), Vardi & Wolper (1986)",
-      "topic": "Temporal Logic",
-      "created": "2026-06-16T01:34:44Z",
-      "last_updated": "2026-06-16T03:42:34Z",
-      "session_id": "sess_1750038000_a1b2c3",
-      "researched": "2026-06-16T02:18:18Z",
-      "next_artifact_number": 2,
-      "artifacts": [
-        {
-          "path": "specs/220_refactor_pr649_typeclass_split_ltl_formula/reports/01_team-research.md",
-          "type": "research",
-          "summary": "Team research with 4 teammates"
-        },
-        {
-          "path": "specs/220_refactor_pr649_typeclass_split_ltl_formula/plans/01_typeclass-ltl-refactor.md",
-          "type": "plan",
-          "summary": "5-phase implementation plan for PR #649 typeclass split and LTL formula creation"
-        }
-      ],
-      "completion_summary": "Added HasNext/FutureTemporalConnectives/LTLConnectives typeclasses, cleaned Temporal.Formula, created LTL.Formula and LTL.Satisfies; full CI pipeline passed"
-    },
-    {
-      "project_number": 219,
-      "project_name": "address_pr648_merge_semantics_files",
-      "status": "abandoned",
-      "task_type": "pr",
-      "description": "Address PR #648 review from ctchou: merge Semantics/Basic.lean and Bool.lean into a single file, update references to Avigad, and coordinate with PRs #536, #587, #607. PR: https://github.com/leanprover/cslib/pull/648 Zulip: https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/with/603538889",
-      "topic": "Propositional Logic",
-      "created": "2026-06-16T00:19:13Z",
-      "last_updated": "2026-06-16T06:33:46Z",
-      "artifacts": [
-        {
-          "type": "research",
-          "path": "specs/219_address_pr648_merge_semantics_files/reports/01_pr648-review-analysis.md",
-          "summary": "Initial analysis of ctchou review comments"
-        },
-        {
-          "type": "research",
-          "path": "specs/219_address_pr648_merge_semantics_files/reports/02_team-research.md",
-          "summary": "Synthesized team research: merge approach, PR coordination, strategic horizons"
-        },
-        {
-          "path": "specs/219_address_pr648_merge_semantics_files/plans/03_merge-semantics-avigad.md",
-          "type": "plan",
-          "summary": "5-phase plan: merge Semantics files, add Avigad reference, coordinate PRs"
-        }
-      ],
-      "next_artifact_number": 3,
-      "session_id": "sess_1781590532_8myafw",
-      "researched": "2026-06-16T00:34:52Z",
-      "completion_summary": "Semantics files already removed from PR #648; GHA semantics moved to tasks 225/226"
-    },
-    {
-      "project_number": 218,
-      "project_name": "push_bib_entries_minor_fixes_pr649",
-      "status": "completed",
-      "task_type": "pr",
-      "description": "Push missing bib entries and minor fixes to PR #649: add 7 missing references.bib entries (Church1956, Gentzen1935, Johansson1937, McKinsey1939, Prawitz1965, TroelstraVanDalen1988, Wajsberg1938) referenced by Connectives.lean, Defs.lean, and NaturalDeduction/Basic.lean; include Defs.lean architecture docstring, NaturalDeduction/Basic.lean Γ→G rename, and copyright date updates",
-      "topic": "Temporal Logic",
-      "created": "2026-06-15T23:13:54Z",
-      "last_updated": "2026-06-15T23:46:43Z",
-      "session_id": "sess_1781566272_a93d83",
-      "completion_summary": "Restored 7 missing bib entries (Church1956, Gentzen1935, Johansson1937, McKinsey1939, Prawitz1965, TroelstraVanDalen1988, Wajsberg1938) and Architecture docstring section in Defs.lean on feat/temporal-formula-propositional branch for PR #649. Committed as 7be6d7b7."
     },
     {
       "project_number": 209,
@@ -587,24 +369,10 @@
       ],
       "topic": "Bimodal Porting",
       "last_updated": "2026-06-14T17:54:05Z"
-    },
-    {
-      "project_number": 195,
-      "project_name": "fix_dense_validity_linter_warnings",
-      "status": "completed",
-      "task_type": "cslib",
-      "topic": "Bimodal Porting",
-      "description": "Fix 30+ linter warnings in Cslib/Logics/Bimodal/Metalogic/Soundness/DenseValidity.lean: remove ~20 unused simp arguments and replace 6 deprecated push_neg calls with push Not.",
-      "created": "2026-06-14T18:19:47Z",
-      "last_updated": "2026-06-14T18:19:47Z",
-      "completion_summary": "Fixed all unused simp argument warnings in DenseValidity.lean as part of broader CI style warning fix (commit 920dfbe9). Also fixed intro? warnings and dupNamespace suppressions across 13 files."
     }
   ],
   "repository_health": {
-    "last_assessed": "2026-06-14T17:15:44Z",
-    "todo_count": 24,
-    "fixme_count": 0,
-    "build_errors": 0,
+    "last_assessed": "2026-06-17T08:49:13Z",
     "status": "healthy"
   },
   "active_topics": [

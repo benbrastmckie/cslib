@@ -61,7 +61,9 @@ next_project_number: 230
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
-- **Research**: [229_typeclass_diamond_resolution_lean4/reports/01_team-research.md]
+- **Research**:
+  - [229_typeclass_diamond_resolution_lean4/reports/01_team-research.md]
+  - [229_typeclass_diamond_resolution_lean4/reports/02_team-research.md]
 
 **Description**: Study best practices (as of June 2026) for resolving typeclass diamond inheritance issues in Lean 4, with specific application to CSLib BimodalConnectives design. Research should cover: (1) Current Lean 4 mechanisms for handling diamond inheritance (default instances, instance priorities, manual projections, flat hierarchies). (2) Best practices from Mathlib and other large Lean 4 projects for avoiding or mitigating diamond problems. (3) Analysis of the specific trade-off: BimodalConnectives currently extends ModalConnectives + HasUntil + HasSince; evaluate whether extending TemporalConnectives + HasBox would be preferable, with arguments for and against each design. (4) Techniques to reduce downsides of whichever approach is chosen (convenience instances, abbreviations, simp lemmas for projection equalities). (5) Whether any recent Lean 4 features (post-2025) change the calculus. Context: see specs/tmp/note.md for the diamond diagram and explanation
 
@@ -86,6 +88,7 @@ next_project_number: 230
 - **Research**:
   - [227_algebraic_completeness_design/reports/01_algebraic-completeness-design.md]
   - [227_algebraic_completeness_design/reports/03_primitive-bot-defense.md]
+  - [227_algebraic_completeness_design/reports/06_completeness-statement-alternatives.md]
 - **Plan**: [227_algebraic_completeness_design/plans/06_algebraic-completeness.md]
 
 **Description**: Design and implement maximally general algebraic semantics for propositional logic with primitive bot. (1) Evaluate whether to introduce a JohanssonAlgebra typeclass (GHA + designated bot constant) as the algebraic counterpart of minimal logic, providing a clean three-tier hierarchy: JohanssonAlgebra (MPL) → HeytingAlgebra (IPL) → BooleanAlgebra (CPL). (2) Adapt xcthulhu's Lindenbaum algebra + Dedekind-MacNeille completeness proofs to work with primitive-⊥ Proposition and AlgEvaluate/bot_val framework — estimated ~15 lines of structural changes. (3) Port or integrate DedekindMacneille.lean and ForMathlib/Order/Heyting/Hom.lean dependencies. (4) Prove algebraic completeness for all three tiers: MPL complete w.r.t. GHA/Johansson (arbitrary bot_val), IPL complete w.r.t. HA (bot_val = ⊥), CPL complete w.r.t. BA (bot_val = ⊥). (5) Update Algebra.lean docstrings to reference Johansson algebras and the algebraic lineage. (6) Ensure compatibility with existing Kripke completeness proofs and downstream Modal/Temporal/Bimodal code.

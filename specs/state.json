@@ -9,15 +9,20 @@
       "description": "Study best practices (as of June 2026) for resolving typeclass diamond inheritance issues in Lean 4, with specific application to CSLib BimodalConnectives design. Research should cover: (1) Current Lean 4 mechanisms for handling diamond inheritance (default instances, instance priorities, manual projections, flat hierarchies). (2) Best practices from Mathlib and other large Lean 4 projects for avoiding or mitigating diamond problems. (3) Analysis of the specific trade-off: BimodalConnectives currently extends ModalConnectives + HasUntil + HasSince; evaluate whether extending TemporalConnectives + HasBox would be preferable, with arguments for and against each design. (4) Techniques to reduce downsides of whichever approach is chosen (convenience instances, abbreviations, simp lemmas for projection equalities). (5) Whether any recent Lean 4 features (post-2025) change the calculus. Context: see specs/tmp/note.md for the diamond diagram and explanation",
       "topic": "Foundations",
       "created": "2026-06-17T17:52:22Z",
-      "last_updated": "2026-06-17T18:08:17Z",
-      "session_id": "sess_1750268000_a3b7c1",
+      "last_updated": "2026-06-17T18:35:02Z",
+      "session_id": "sess_1750270200_b4c8d2",
       "researched": "2026-06-17T18:08:17Z",
-      "next_artifact_number": 2,
+      "next_artifact_number": 3,
       "artifacts": [
         {
           "path": "specs/229_typeclass_diamond_resolution_lean4/reports/01_team-research.md",
           "type": "research",
           "summary": "Team research with 4 teammates"
+        },
+        {
+          "path": "specs/229_typeclass_diamond_resolution_lean4/reports/02_team-research.md",
+          "type": "research",
+          "summary": "Round 2: class abbrev vs true diamond comparison"
         }
       ]
     },
@@ -48,6 +53,11 @@
           "path": "specs/227_algebraic_completeness_design/plans/06_algebraic-completeness.md",
           "type": "plan",
           "summary": "5-phase plan: congruence lemmas + Lindenbaum algebra, completeness theorems (MPL/IPL/CPL), conservative extension infrastructure, docstrings + CI verification, parallel docstring update"
+        },
+        {
+          "path": "specs/227_algebraic_completeness_design/reports/06_completeness-statement-alternatives.md",
+          "type": "report",
+          "summary": "Hard-mode research: 5 completeness statement alternatives evaluated; recommends status quo (v, bot_val) with optional AlgInterp sugar"
         }
       ],
       "session_id": "sess_1781714866_c040b7",

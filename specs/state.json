@@ -6,13 +6,13 @@
       "project_name": "typeclass_diamond_resolution_lean4",
       "status": "planned",
       "task_type": "cslib",
-      "description": "Refactor CSLib's connective hierarchy to use class abbrev for diamond-affected classes (FutureTemporalConnectives, TemporalConnectives, BimodalConnectives), enabling automatic instance chaining across logic intersections without bridge instances or warning suppressions.",
+      "description": "Refactor BimodalConnectives to extend TemporalConnectives (primary) with HasBox as atomic mixin, adding a priority-100 bridge instance for ModalConnectives. Standard Mathlib mixin pattern — 9 lines changed in 1 file.",
       "topic": "Foundations",
       "created": "2026-06-17T17:52:22Z",
-      "last_updated": "2026-06-17T18:41:30Z",
+      "last_updated": "2026-06-17T18:56:41Z",
       "session_id": "sess_1781721509_9b603d",
       "researched": "2026-06-17T18:08:17Z",
-      "next_artifact_number": 4,
+      "next_artifact_number": 5,
       "artifacts": [
         {
           "path": "specs/229_typeclass_diamond_resolution_lean4/reports/01_team-research.md",
@@ -25,7 +25,7 @@
           "summary": "Round 2: class abbrev vs true diamond comparison"
         },
         {
-          "path": "specs/229_typeclass_diamond_resolution_lean4/plans/03_class-abbrev-refactor.md",
+          "path": "specs/229_typeclass_diamond_resolution_lean4/plans/04_mixin-bridge-refactor.md",
           "type": "plan"
         }
       ]

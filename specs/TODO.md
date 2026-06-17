@@ -27,7 +27,7 @@ next_project_number: 230
 
 ### Foundations
 
-229 [PLANNED] — Refactor CSLib's connective hierarchy to use class abbrev for dia
+229 [PLANNED] — Refactor BimodalConnectives to extend TemporalConnectives (primar
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Modal Logic
@@ -61,9 +61,9 @@ next_project_number: 230
 - **Research**:
   - [229_typeclass_diamond_resolution_lean4/reports/01_team-research.md]
   - [229_typeclass_diamond_resolution_lean4/reports/02_team-research.md]
-- **Plan**: [229_typeclass_diamond_resolution_lean4/plans/03_class-abbrev-refactor.md]
+- **Plan**: [229_typeclass_diamond_resolution_lean4/plans/04_mixin-bridge-refactor.md]
 
-**Description**: Refactor CSLib's connective hierarchy to use class abbrev for diamond-affected classes (FutureTemporalConnectives, TemporalConnectives, BimodalConnectives), enabling automatic instance chaining across logic intersections without bridge instances or warning suppressions.
+**Description**: Refactor BimodalConnectives to extend TemporalConnectives (primary) with HasBox as atomic mixin, adding a priority-100 bridge instance for ModalConnectives. Standard Mathlib mixin pattern — 9 lines changed in 1 file.
 
 ---
 

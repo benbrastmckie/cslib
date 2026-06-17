@@ -16,7 +16,7 @@
     {
       "project_number": 226,
       "project_name": "gha_semantics_upstream_pr",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "description": "Cherry-pick GHA algebraic semantics from main to create a PR stacked on PR #648 for upstream contribution to leanprover/cslib. (1) Create a branch from PR #648 head. (2) Cherry-pick or rebase the Semantics/Algebra.lean and Soundness.lean commits from task 225. (3) Adapt file paths and imports to match PR #648 structure (Basic.lean merged into Bool.lean). (4) Resolve the HasImp/HasImpl naming conflict with PR #587 and #607 — use whichever convention the Zulip design thread settles on, or flag for discussion. (5) Ensure lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake all pass. (6) Write PR description referencing thomaskwaring's GHA proposal from PR #587 and the bot_val parameter design.",
       "topic": "Propositional Logic",
@@ -24,7 +24,8 @@
         225
       ],
       "created": "2026-06-16T23:00:00Z",
-      "last_updated": "2026-06-16T23:00:00Z"
+      "last_updated": "2026-06-17T05:50:06Z",
+      "session_id": "sess_1750123500_research226"
     },
     {
       "project_number": 224,

@@ -36,7 +36,7 @@ next_project_number: 227
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
-226 [NOT STARTED] — Cherry-pick GHA algebraic semantics from main to create a PR stac
+226 [RESEARCHED] — Cherry-pick GHA algebraic semantics from main to create a PR stac
 
 ### Propositional PRs
 
@@ -55,7 +55,7 @@ next_project_number: 227
 ## Tasks
 
 ### 226. Gha semantics upstream pr
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 225

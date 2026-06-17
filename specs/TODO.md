@@ -31,7 +31,7 @@ next_project_number: 230
 
 ### Modal Logic
 
-197 [RESEARCHED] — Review the ambition to contribute Modal/ to upstream, identifying
+197 [PLANNING] — Review the ambition to contribute Modal/ to upstream, identifying
 
 ### Project Management
 
@@ -42,7 +42,7 @@ next_project_number: 230
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
 192 [PLANNED] — Draw on sources in specs/literature/ to verify and improve citati
 226 [RESEARCHED] — Cherry-pick GHA algebraic semantics from main to create a PR stac
-227 [IMPLEMENTING] — Design and implement maximally general algebraic semantics for pr
+227 [PR READY] — Design and implement maximally general algebraic semantics for pr
 
 ### Temporal Logic
 
@@ -78,7 +78,7 @@ next_project_number: 230
 ---
 
 ### 227. Algebraic completeness design
-- **Status**: [IMPLEMENTING]
+- **Status**: [PR READY]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 225
@@ -141,7 +141,7 @@ These are incomplete proofs in the bimodal temporal logic development (BX dense 
 ---
 
 ### 197. Scope initial Modal/ upstream PR (~300 LOC)
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: pr
 - **Topic**: Modal Logic
 - **Dependencies**: None

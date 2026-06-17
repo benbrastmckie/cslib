@@ -34,7 +34,7 @@
     {
       "project_number": 227,
       "project_name": "algebraic_completeness_design",
-      "status": "implementing",
+      "status": "pr_ready",
       "task_type": "cslib",
       "description": "Design and implement maximally general algebraic semantics for propositional logic with primitive bot. (1) Evaluate whether to introduce a JohanssonAlgebra typeclass (GHA + designated bot constant) as the algebraic counterpart of minimal logic, providing a clean three-tier hierarchy: JohanssonAlgebra (MPL) → HeytingAlgebra (IPL) → BooleanAlgebra (CPL). (2) Adapt xcthulhu's Lindenbaum algebra + Dedekind-MacNeille completeness proofs to work with primitive-⊥ Proposition and AlgEvaluate/bot_val framework — estimated ~15 lines of structural changes. (3) Port or integrate DedekindMacneille.lean and ForMathlib/Order/Heyting/Hom.lean dependencies. (4) Prove algebraic completeness for all three tiers: MPL complete w.r.t. GHA/Johansson (arbitrary bot_val), IPL complete w.r.t. HA (bot_val = ⊥), CPL complete w.r.t. BA (bot_val = ⊥). (5) Update Algebra.lean docstrings to reference Johansson algebras and the algebraic lineage. (6) Ensure compatibility with existing Kripke completeness proofs and downstream Modal/Temporal/Bimodal code.",
       "topic": "Propositional Logic",
@@ -42,7 +42,7 @@
         225
       ],
       "created": "2026-06-17T06:00:00Z",
-      "last_updated": "2026-06-17T16:52:50Z",
+      "last_updated": "2026-06-17T19:27:34Z",
       "artifacts": [
         {
           "path": "specs/227_algebraic_completeness_design/reports/01_algebraic-completeness-design.md",
@@ -99,7 +99,8 @@
             "integrated_date": "2026-06-17"
           }
         ]
-      }
+      },
+      "completion_summary": "Implemented algebraic completeness for propositional logic: Lindenbaum quotient algebra (GHA/HA/BA instances), truth lemma, ND-level soundness, general completeness theorem, and tier-specific completeness (MPL/IPL/CPL). Added bot-free analysis infrastructure and validity subsumption. 5 new files (~700 lines), 0 sorries except 1 expected (conservative extension requires D-M completion)."
     },
     {
       "project_number": 226,
@@ -152,14 +153,14 @@
     {
       "project_number": 197,
       "project_name": "modal_upstream_initial_pr",
-      "status": "researched",
+      "status": "planning",
       "task_type": "pr",
       "title": "Scope initial Modal/ upstream PR (~300 LOC)",
       "description": "Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible",
       "topic": "Modal Logic",
       "created": "2026-06-14T19:08:07Z",
-      "last_updated": "2026-06-17T19:11:31Z",
-      "session_id": "sess_1781723029_b66104",
+      "last_updated": "2026-06-17T19:27:53Z",
+      "session_id": "sess_1781724458_6a63d0",
       "research_artifacts": [
         "specs/197_modal_upstream_initial_pr/reports/01_modal-upstream-pr-scope.md",
         "specs/197_modal_upstream_initial_pr/reports/02_literature-grounded-analysis.md",

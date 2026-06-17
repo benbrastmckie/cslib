@@ -16,25 +16,46 @@ public import Mathlib.Order.BooleanAlgebra.Basic
 
 This module defines a generic algebraic evaluator for propositional logic, parameterized over
 any `GeneralizedHeytingAlgebra`. This generalizes the bivalent `Evaluate` (using `Prop`) and
-the Boolean `BoolEvaluate` (using `Bool`), providing a uniform framework for soundness proofs
-at each axiom tier.
+the Boolean `BoolEvaluate` (using `Bool`), providing a uniform framework for soundness and
+completeness proofs at each axiom tier.
+
+The algebraic hierarchy mirrors the proof-theoretic one:
+- `GeneralizedHeytingAlgebra` (GHA) = Johansson algebra = semantics for **MPL** (minimal logic)
+- `HeytingAlgebra` (HA) = GHA + designated `⊥` = semantics for **IPL** (intuitionistic logic)
+- `BooleanAlgebra` (BA) = HA + excluded middle = semantics for **CPL** (classical logic)
+
+A GHA is precisely a Johansson algebra: a bounded distributive lattice with relative
+pseudo-complement (Heyting implication `⇨`) but no designated bottom element. The connection
+to minimal logic was established by Rasiowa and Sikorski.
 
 ## Main Definitions
 
 - `AlgEvaluate`: Generic evaluator mapping propositions to elements of a GHA `H`, with an
   explicit `bot_val : H` parameter (since GHA lacks a bottom element).
-- `GHAValid`: Validity in all Generalized Heyting Algebras.
-- `HAValid`: Validity in all Heyting Algebras (which have a primitive `⊥`).
-- `BAValid`: Validity in all Boolean Algebras.
+- `GHAValid`: Validity in all Generalized Heyting Algebras (quantifies over `bot_val`).
+- `HAValid`: Validity in all Heyting Algebras (uses canonical `⊥`).
+- `BAValid`: Validity in all Boolean Algebras (uses canonical `⊥`).
+- `AlgTValid`: Theory validity — a valuation models a theory `T` if every axiom evaluates
+  to `⊤`. Used to state general algebraic completeness via `Theory.alg_complete`.
 
 ## Design Notes
 
-`AlgEvaluate` takes a primitive `bot_val : H` parameter because `GeneralizedHeytingAlgebra`
-does not guarantee a bottom element. At the `HeytingAlgebra` and `BooleanAlgebra` levels,
-`bot_val = ⊥` is the canonical choice (and `HAValid`/`BAValid` use it).
+`AlgEvaluate` takes `bot_val : H` as an explicit parameter because `GeneralizedHeytingAlgebra`
+does not guarantee a bottom element. This parameter is the Johansson "designated constant" —
+it can be any element of the algebra. At the `HeytingAlgebra` and `BooleanAlgebra` levels,
+`bot_val = ⊥` is the unique canonical choice (and `HAValid`/`BAValid` hardcode it, eliminating
+the parameter entirely).
+
+The general completeness theorem `Theory.alg_complete` unifies the three validity predicates:
+a formula `A` is derivable in theory `T` iff `AlgEvaluate v bot_val A = ⊤` for every GHA,
+every valuation `v`, every `bot_val`, and every `T`-valid assignment (via `AlgTValid`). The
+tier-specific results (`MPL.alg_complete`, `IPL.alg_complete`, `alg_complete_classical`)
+specialize this by fixing the algebra class and (for HA/BA) setting `bot_val = ⊥`.
 
 ## References
 
+* [A. Rasiowa, *An Algebraic Approach to Non-Classical Logics*][Rasiowa1974]
+* [A. Rasiowa, R. Sikorski, *The Mathematics of Metamathematics*][RasiowaSikorski1963]
 * [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Section 1.2
 -/
 
@@ -112,5 +133,13 @@ def BAValid (φ : PL.Proposition Atom) : Prop :=
   ∀ (H : Type*) [BooleanAlgebra H] (v : Atom → H),
     AlgEvaluate v (⊥ : H) φ = ⊤
 
+/-- A valuation `v` with bottom value `bot_val` models a theory `T` if every axiom of `T`
+evaluates to `⊤`. This is Thomas Waring's `v ⊨ T` pattern, parametric in the theory.
+
+This predicate is used to state general algebraic completeness: a formula is derivable in `T`
+iff it evaluates to `⊤` in every GHA under every `T`-valid valuation. -/
+def AlgTValid {H : Type*} [GeneralizedHeytingAlgebra H]
+    (T : PL.Theory Atom) (v : Atom → H) (bot_val : H) : Prop :=
+  ∀ B ∈ T, AlgEvaluate v bot_val B = ⊤
 
 end Cslib.Logic.PL

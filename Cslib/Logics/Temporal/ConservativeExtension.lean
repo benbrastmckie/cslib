@@ -10,7 +10,7 @@ public import Cslib.Logics.Temporal.FromPropositional
 public import Cslib.Logics.Temporal.Semantics.Satisfies
 public import Cslib.Logics.Temporal.Metalogic.Soundness
 public import Cslib.Logics.Propositional.Metalogic.StrongCompleteness
-public import Cslib.Logics.Propositional.Semantics.Basic
+public import Cslib.Logics.Propositional.Semantics.Bool
 public import Mathlib.Algebra.Order.Ring.Int
 
 /-! # Temporal BX as a Conservative Extension of Classical Propositional Logic

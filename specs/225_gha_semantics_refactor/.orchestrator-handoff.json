@@ -1,0 +1,16 @@
+{
+  "status": "planned",
+  "summary": "5-phase plan: consolidate Basic->Bool, create AlgEvaluate with GHA/HA/BA validity, prove 3-tier axiom soundness, add Prop/Bool bridge lemmas, CI verification",
+  "blockers": [],
+  "continuation_context": null,
+  "artifacts": [
+    {
+      "path": "specs/225_gha_semantics_refactor/plans/01_gha-semantics-plan.md",
+      "type": "plan",
+      "summary": "Implementation plan with 5 phases across 3 dependency waves, estimated 7 hours total effort"
+    }
+  ],
+  "phases_completed": 0,
+  "phases_total": 5,
+  "next_action_hint": "implement"
+}

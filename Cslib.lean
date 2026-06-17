@@ -65,13 +65,8 @@ public import Cslib.Foundations.Data.OmegaSequence.Flatten
 public import Cslib.Foundations.Data.OmegaSequence.InfOcc
 public import Cslib.Foundations.Data.OmegaSequence.Init
 public import Cslib.Foundations.Data.OmegaSequence.Temporal
-public import Cslib.Foundations.Data.RelatesInSteps
 public import Cslib.Foundations.Data.PFunctor.Free
-public import Cslib.Foundations.Relation.Attr
-public import Cslib.Foundations.Relation.Confluence
-public import Cslib.Foundations.Relation.Defs
-public import Cslib.Foundations.Relation.Domain
-public import Cslib.Foundations.Relation.Euclidean
+public import Cslib.Foundations.Data.RelatesInSteps
 public import Cslib.Foundations.Data.Set.Saturation
 public import Cslib.Foundations.Data.StackTape
 public import Cslib.Foundations.Lint.Basic
@@ -96,6 +91,11 @@ public import Cslib.Foundations.Logic.Theorems.Propositional.Connectives
 public import Cslib.Foundations.Logic.Theorems.Propositional.Core
 public import Cslib.Foundations.Logic.Theorems.Temporal.FrameConditions
 public import Cslib.Foundations.Logic.Theorems.Temporal.TemporalDerived
+public import Cslib.Foundations.Relation.Attr
+public import Cslib.Foundations.Relation.Confluence
+public import Cslib.Foundations.Relation.Defs
+public import Cslib.Foundations.Relation.Domain
+public import Cslib.Foundations.Relation.Euclidean
 public import Cslib.Foundations.Semantics.FLTS.Basic
 public import Cslib.Foundations.Semantics.FLTS.FLTSToLTS
 public import Cslib.Foundations.Semantics.FLTS.LTSToFLTS
@@ -369,7 +369,9 @@ public import Cslib.Logics.Propositional.ProofSystem.Axioms
 public import Cslib.Logics.Propositional.ProofSystem.Derivation
 public import Cslib.Logics.Propositional.ProofSystem.Instances
 public import Cslib.Logics.Propositional.ProofSystem.IntMinInstances
-public import Cslib.Logics.Propositional.Semantics.Basic
+public import Cslib.Logics.Propositional.Semantics.Algebra
+public import Cslib.Logics.Propositional.Semantics.Algebra.Bridge
+public import Cslib.Logics.Propositional.Semantics.Algebra.Soundness
 public import Cslib.Logics.Propositional.Semantics.Bool
 public import Cslib.Logics.Propositional.Semantics.Kripke
 public import Cslib.Logics.Propositional.Semantics.SemanticConsequence

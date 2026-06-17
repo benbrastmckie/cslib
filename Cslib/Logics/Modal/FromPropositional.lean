@@ -7,7 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Propositional.Defs
-public import Cslib.Logics.Propositional.Semantics.Basic
+public import Cslib.Logics.Propositional.Semantics.Bool
 public import Cslib.Logics.Modal.Basic
 
 /-! # Propositional to Modal Embedding

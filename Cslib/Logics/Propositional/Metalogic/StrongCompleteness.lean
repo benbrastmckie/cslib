@@ -6,7 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Propositional.Semantics.Basic
+public import Cslib.Logics.Propositional.Semantics.Bool
 public import Cslib.Logics.Propositional.Semantics.SemanticConsequence
 public import Cslib.Logics.Propositional.Metalogic.MCS
 public import Cslib.Logics.Propositional.Metalogic.Soundness

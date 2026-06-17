@@ -6,15 +6,18 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Propositional.Semantics.Basic
+public import Cslib.Logics.Propositional.Defs
 
-/-! # Boolean Evaluation for Propositional Logic
+/-! # Bivalent and Boolean Evaluators for Propositional Logic
 
-This module defines a computable Boolean evaluation function for propositional logic,
-alongside the `Prop`-valued `Evaluate` from `Semantics.Basic`.
+This module defines both the `Prop`-valued bivalent semantics and the computable Boolean
+evaluation function for propositional logic.
 
 ## Main Definitions
 
+- `Valuation`: A (bivalent) propositional valuation assigns a truth value to each atom.
+- `Evaluate`: Evaluate a proposition under a valuation (recursive, using `Prop` values).
+- `Tautology`: A proposition is a tautology iff it is true under every valuation.
 - `BoolValuation`: A Boolean propositional valuation assigns a `Bool` to each atom.
 - `BoolEvaluate`: Evaluate a proposition under a Boolean valuation, returning `Bool`.
 
@@ -41,6 +44,42 @@ the two worlds: `Bool` computation to `Prop` metatheory.
 namespace Cslib.Logic.PL
 
 variable {Atom : Type*}
+
+/-! ## Prop-Valued Bivalent Semantics -/
+
+/-- A (bivalent) propositional valuation assigns a truth value to each atom. -/
+abbrev Valuation (Atom : Type*) := Atom → Prop
+
+/-- Evaluate a proposition under a valuation.
+
+This is the propositional specialization of modal `Satisfies`, without the box case. -/
+def Evaluate (v : Valuation Atom) : PL.Proposition Atom → Prop
+  | .atom x => v x
+  | .bot => False
+  | .imp a b => Evaluate v a → Evaluate v b
+  | .and a b => Evaluate v a ∧ Evaluate v b
+  | .or a b => Evaluate v a ∨ Evaluate v b
+
+@[simp] theorem Evaluate_atom (v : Valuation Atom) (x : Atom) :
+    Evaluate v (.atom x) = v x := rfl
+
+@[simp] theorem Evaluate_bot (v : Valuation Atom) :
+    Evaluate v (.bot) = False := rfl
+
+@[simp] theorem Evaluate_imp (v : Valuation Atom) (a b : PL.Proposition Atom) :
+    Evaluate v (.imp a b) = (Evaluate v a → Evaluate v b) := rfl
+
+@[simp] theorem Evaluate_and (v : Valuation Atom) (a b : PL.Proposition Atom) :
+    Evaluate v (.and a b) = (Evaluate v a ∧ Evaluate v b) := rfl
+
+@[simp] theorem Evaluate_or (v : Valuation Atom) (a b : PL.Proposition Atom) :
+    Evaluate v (.or a b) = (Evaluate v a ∨ Evaluate v b) := rfl
+
+/-- A proposition is a tautology iff it is true under every valuation. -/
+def Tautology (φ : PL.Proposition Atom) : Prop :=
+  ∀ (v : Valuation Atom), Evaluate v φ
+
+/-! ## Boolean Evaluation -/
 
 /-- A Boolean propositional valuation assigns a `Bool` value to each atom. -/
 abbrev BoolValuation (Atom : Type*) := Atom → Bool

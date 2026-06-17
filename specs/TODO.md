@@ -1,5 +1,5 @@
 ---
-next_project_number: 225
+next_project_number: 227
 ---
 
 # TODO
@@ -11,8 +11,8 @@ next_project_number: 225
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,197,209,214,215,219,221,222 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
-| 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
+| 1 | 36,37,180,188,192,197,209,214,215,219,221,222,225 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 2 | 39,40,181,226 | 36,37,180,225 | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -39,6 +39,8 @@ next_project_number: 225
 219 [PLANNED] — Address PR #648 review from ctchou: merge Semantics/Basic.lean an
 221 [PR READY] — Revise PR #648 (feat/propositional-v2) to reconcile with merged P
 222 [PR READY] — Review PR #648 changes on feat/propositional-v2 and analyze Zulip
+225 [NOT STARTED] — Implement GHA algebraic semantics with primitive bot on main. (1)
+  └─ 226 [NOT STARTED] — Cherry-pick GHA algebraic semantics from main to create a PR stac
 
 ### Propositional PRs
 
@@ -55,6 +57,26 @@ next_project_number: 225
 197 [PR READY] — Review the ambition to contribute Modal/ to upstream, identifying
 
 ## Tasks
+
+### 226. Gha semantics upstream pr
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 225
+
+**Description**: Cherry-pick GHA algebraic semantics from main to create a PR stacked on PR #648 for upstream contribution to leanprover/cslib. (1) Create a branch from PR #648 head. (2) Cherry-pick or rebase the Semantics/Algebra.lean and Soundness.lean commits from task 225. (3) Adapt file paths and imports to match PR #648 structure (Basic.lean merged into Bool.lean). (4) Resolve the HasImp/HasImpl naming conflict with PR #587 and #607 — use whichever convention the Zulip design thread settles on, or flag for discussion. (5) Ensure lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake all pass. (6) Write PR description referencing thomaskwaring's GHA proposal from PR #587 and the bot_val parameter design.
+
+---
+
+### 225. Gha semantics refactor
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Implement GHA algebraic semantics with primitive bot on main. (1) Create Semantics/Algebra.lean with generic `Evaluate [GeneralizedHeytingAlgebra H] (v : Atom → H) (bot_val : H) : PL.Proposition Atom → H` and validity definitions (GHAValid, HAValid, BAValid). (2) Create Semantics/Algebra/Soundness.lean proving soundness for MinPropAxiom/IntPropAxiom/PropositionalAxiom using Mathlib GHA/HA/BA API (le_himp_iff, himp_himp, bot_himp, compl_compl, etc.). (3) Combine Basic.lean into Bool.lean to align with PR #648 file structure — move Prop-valued Evaluate into Bool.lean alongside BoolEvaluate, preserving the bridge lemma BoolEvaluate_eq_iff. (4) Create bridge lemmas connecting existing evaluators to the generic Evaluate: prop_evaluate_eq, bool_evaluate_eq, iforces_eq. Do not modify Kripke.lean or any completeness proofs. Existing downstream modal/temporal/bimodal logics must remain untouched.
+
+---
 
 ### 224. Research gha vs alternatives semantics
 - **Status**: [COMPLETED]

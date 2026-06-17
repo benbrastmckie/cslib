@@ -11,7 +11,7 @@ next_project_number: 230
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,197,209,214,215,226,227,229 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,188,192,197,209,214,215,226,227 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -27,12 +27,11 @@ next_project_number: 230
 
 ### Foundations
 
-229 [PLANNED] — Refactor BimodalConnectives to extend TemporalConnectives (primar
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Modal Logic
 
-197 [PR READY] — Review the ambition to contribute Modal/ to upstream, identifying
+197 [RESEARCHING] — Review the ambition to contribute Modal/ to upstream, identifying
 
 ### Project Management
 
@@ -54,7 +53,7 @@ next_project_number: 230
 ## Tasks
 
 ### 229. Typeclass diamond resolution lean4
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
@@ -142,7 +141,7 @@ These are incomplete proofs in the bimodal temporal logic development (BX dense 
 ---
 
 ### 197. Scope initial Modal/ upstream PR (~300 LOC)
-- **Status**: [PR READY]
+- **Status**: [RESEARCHING]
 - **Task Type**: pr
 - **Topic**: Modal Logic
 - **Dependencies**: None

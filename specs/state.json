@@ -4,13 +4,13 @@
     {
       "project_number": 229,
       "project_name": "typeclass_diamond_resolution_lean4",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Refactor BimodalConnectives to extend TemporalConnectives (primary) with HasBox as atomic mixin, adding a priority-100 bridge instance for ModalConnectives. Standard Mathlib mixin pattern — 9 lines changed in 1 file.",
       "topic": "Foundations",
       "created": "2026-06-17T17:52:22Z",
-      "last_updated": "2026-06-17T18:56:41Z",
-      "session_id": "sess_1781721509_9b603d",
+      "last_updated": "2026-06-17T19:08:08Z",
+      "session_id": "sess_1750218164_a1b2c3",
       "researched": "2026-06-17T18:08:17Z",
       "next_artifact_number": 5,
       "artifacts": [
@@ -28,7 +28,8 @@
           "path": "specs/229_typeclass_diamond_resolution_lean4/plans/04_mixin-bridge-refactor.md",
           "type": "plan"
         }
-      ]
+      ],
+      "completion_summary": "Refactored BimodalConnectives to extend TemporalConnectives (primary) with HasBox as atomic mixin, added priority-100 bridge instance for ModalConnectives. Resolves typeclass diamond using standard Mathlib mixin pattern."
     },
     {
       "project_number": 227,
@@ -151,14 +152,14 @@
     {
       "project_number": 197,
       "project_name": "modal_upstream_initial_pr",
-      "status": "pr_ready",
+      "status": "researching",
       "task_type": "pr",
       "title": "Scope initial Modal/ upstream PR (~300 LOC)",
       "description": "Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible",
       "topic": "Modal Logic",
       "created": "2026-06-14T19:08:07Z",
-      "last_updated": "2026-06-15T15:09:50Z",
-      "session_id": "sess_1781535860_c7d8e9",
+      "last_updated": "2026-06-17T19:04:07Z",
+      "session_id": "sess_1781723029_b66104",
       "research_artifacts": [
         "specs/197_modal_upstream_initial_pr/reports/01_modal-upstream-pr-scope.md",
         "specs/197_modal_upstream_initial_pr/reports/02_literature-grounded-analysis.md",

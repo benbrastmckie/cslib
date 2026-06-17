@@ -4,7 +4,7 @@
     {
       "project_number": 227,
       "project_name": "algebraic_completeness_design",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Design and implement maximally general algebraic semantics for propositional logic with primitive bot. (1) Evaluate whether to introduce a JohanssonAlgebra typeclass (GHA + designated bot constant) as the algebraic counterpart of minimal logic, providing a clean three-tier hierarchy: JohanssonAlgebra (MPL) → HeytingAlgebra (IPL) → BooleanAlgebra (CPL). (2) Adapt xcthulhu's Lindenbaum algebra + Dedekind-MacNeille completeness proofs to work with primitive-⊥ Proposition and AlgEvaluate/bot_val framework — estimated ~15 lines of structural changes. (3) Port or integrate DedekindMacneille.lean and ForMathlib/Order/Heyting/Hom.lean dependencies. (4) Prove algebraic completeness for all three tiers: MPL complete w.r.t. GHA/Johansson (arbitrary bot_val), IPL complete w.r.t. HA (bot_val = ⊥), CPL complete w.r.t. BA (bot_val = ⊥). (5) Update Algebra.lean docstrings to reference Johansson algebras and the algebraic lineage. (6) Ensure compatibility with existing Kripke completeness proofs and downstream Modal/Temporal/Bimodal code.",
       "topic": "Propositional Logic",
@@ -12,7 +12,7 @@
         225
       ],
       "created": "2026-06-17T06:00:00Z",
-      "last_updated": "2026-06-17T16:11:41Z",
+      "last_updated": "2026-06-17T16:52:50Z",
       "artifacts": [
         {
           "path": "specs/227_algebraic_completeness_design/reports/01_algebraic-completeness-design.md",
@@ -23,9 +23,48 @@
           "path": "specs/227_algebraic_completeness_design/reports/03_primitive-bot-defense.md",
           "type": "report",
           "summary": "Defense of primitive bot: substitution invariance, universal algebra, Johansson algebras, convergent evidence from proof theory, formalization practice, and type theory"
+        },
+        {
+          "path": "specs/227_algebraic_completeness_design/plans/06_algebraic-completeness.md",
+          "type": "plan",
+          "summary": "5-phase plan: congruence lemmas + Lindenbaum algebra, completeness theorems (MPL/IPL/CPL), conservative extension infrastructure, docstrings + CI verification, parallel docstring update"
         }
       ],
-      "session_id": "sess_1750135000_research227hard"
+      "session_id": "sess_1781714866_c040b7",
+      "plan_metadata": {
+        "phases": 5,
+        "total_effort_hours": 10,
+        "complexity": "complex",
+        "research_integrated": true,
+        "plan_version": 1,
+        "dependency_waves": [
+          [
+            1,
+            5
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ],
+          [
+            4
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/05_hard-implementation-research.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-06-17"
+          },
+          {
+            "path": "reports/01_algebraic-completeness-design.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-06-17"
+          }
+        ]
+      }
     },
     {
       "project_number": 226,

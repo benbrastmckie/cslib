@@ -1,7 +1,7 @@
 # Implementation Plan: Mixin + Bridge Refactor for BimodalConnectives
 
 - **Task**: 229 - typeclass_diamond_resolution_lean4
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 30 minutes
 - **Dependencies**: None
 - **Research Inputs**:
@@ -46,7 +46,7 @@ Done when: `lake build` passes, all 8 parent instances synthesize from `[Bimodal
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Refactor BimodalConnectives and add bridge [NOT STARTED]
+### Phase 1: Refactor BimodalConnectives and add bridge [COMPLETED]
 
 - **Goal**: Change primary parent to `TemporalConnectives`, add `ModalConnectives` bridge
 - **Tasks**:

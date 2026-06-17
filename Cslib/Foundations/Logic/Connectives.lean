@@ -147,9 +147,23 @@ Extends `FutureTemporalConnectives` with the `since` operator, forming the stand
 two-sorted temporal signature (future + past). -/
 class TemporalConnectives (F : Type*) extends FutureTemporalConnectives F, HasSince F
 
-/-- Bimodal connectives: modal connectives plus until and since.
-    Note: we extend `ModalConnectives` and add `HasUntil`/`HasSince` directly
-    rather than extending `TemporalConnectives`, to avoid a typeclass diamond. -/
-class BimodalConnectives (F : Type*) extends ModalConnectives F, HasUntil F, HasSince F
+/-- Bimodal connectives: temporal connectives (primary) plus necessity.
+
+Extends `TemporalConnectives` as the primary parent so that `[BimodalConnectives F]` provides
+`[TemporalConnectives F]`, `[FutureTemporalConnectives F]`, and `[PropositionalConnectives F]`
+automatically through the inheritance chain. The necessity operator `□` is added as an atomic
+mixin via `HasBox`. A priority-100 bridge instance (below) provides `[ModalConnectives F]` for
+code that needs the modal fragment. This follows the standard Mathlib mixin pattern:
+primary chain for the dominant fragment, bridge for the secondary bundle. -/
+class BimodalConnectives (F : Type*) extends TemporalConnectives F, HasBox F
+
+/-- Bridge: any `BimodalConnectives` instance synthesizes `ModalConnectives`.
+
+Priority 100 (below default 1000) avoids interfering with direct `ModalConnectives` instances
+while still making `inferInstance : ModalConnectives F` work from `[BimodalConnectives F]`. -/
+instance (priority := 100) [BimodalConnectives F] : ModalConnectives F where
+  bot := HasBot.bot
+  imp := HasImp.imp
+  box := HasBox.box
 
 end Cslib.Logic

@@ -4,15 +4,15 @@
     {
       "project_number": 229,
       "project_name": "typeclass_diamond_resolution_lean4",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
-      "description": "Study best practices (as of June 2026) for resolving typeclass diamond inheritance issues in Lean 4, with specific application to CSLib BimodalConnectives design. Research should cover: (1) Current Lean 4 mechanisms for handling diamond inheritance (default instances, instance priorities, manual projections, flat hierarchies). (2) Best practices from Mathlib and other large Lean 4 projects for avoiding or mitigating diamond problems. (3) Analysis of the specific trade-off: BimodalConnectives currently extends ModalConnectives + HasUntil + HasSince; evaluate whether extending TemporalConnectives + HasBox would be preferable, with arguments for and against each design. (4) Techniques to reduce downsides of whichever approach is chosen (convenience instances, abbreviations, simp lemmas for projection equalities). (5) Whether any recent Lean 4 features (post-2025) change the calculus. Context: see specs/tmp/note.md for the diamond diagram and explanation",
+      "description": "Refactor CSLib's connective hierarchy to use class abbrev for diamond-affected classes (FutureTemporalConnectives, TemporalConnectives, BimodalConnectives), enabling automatic instance chaining across logic intersections without bridge instances or warning suppressions.",
       "topic": "Foundations",
       "created": "2026-06-17T17:52:22Z",
-      "last_updated": "2026-06-17T18:35:02Z",
-      "session_id": "sess_1750270200_b4c8d2",
+      "last_updated": "2026-06-17T18:41:30Z",
+      "session_id": "sess_1781721509_9b603d",
       "researched": "2026-06-17T18:08:17Z",
-      "next_artifact_number": 3,
+      "next_artifact_number": 4,
       "artifacts": [
         {
           "path": "specs/229_typeclass_diamond_resolution_lean4/reports/01_team-research.md",
@@ -23,6 +23,10 @@
           "path": "specs/229_typeclass_diamond_resolution_lean4/reports/02_team-research.md",
           "type": "research",
           "summary": "Round 2: class abbrev vs true diamond comparison"
+        },
+        {
+          "path": "specs/229_typeclass_diamond_resolution_lean4/plans/03_class-abbrev-refactor.md",
+          "type": "plan"
         }
       ]
     },
@@ -151,7 +155,7 @@
       "task_type": "pr",
       "title": "Scope initial Modal/ upstream PR (~300 LOC)",
       "description": "Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible",
-      "topic": "pr",
+      "topic": "Modal Logic",
       "created": "2026-06-14T19:08:07Z",
       "last_updated": "2026-06-15T15:09:50Z",
       "session_id": "sess_1781535860_c7d8e9",
@@ -322,7 +326,7 @@
       "project_name": "research_verify_literature_refs_pr_188",
       "status": "planned",
       "task_type": "general",
-      "topic": "Propositional PRs",
+      "topic": "Propositional Logic",
       "created": "2026-06-14T17:18:44Z",
       "last_updated": "2026-06-14T17:52:56Z",
       "session_id": "sess_1781459348_05ef55",

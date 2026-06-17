@@ -4,7 +4,7 @@
 - **Status**: [NOT STARTED]
 - **Effort**: 10 hours
 - **Dependencies**: None (Task 226 GHA semantics refactor is upstream context, not a blocker)
-- **Research Inputs**: reports/05_hard-implementation-research.md, reports/01_algebraic-completeness-design.md
+- **Research Inputs**: reports/05_hard-implementation-research.md, reports/01_algebraic-completeness-design.md, reports/06_completeness-statement-alternatives.md
 - **Artifacts**: plans/06_algebraic-completeness.md (this file)
 - **Standards**: plan-format.md, status-markers.md, artifact-management.md, tasks.md
 - **Type**: cslib
@@ -33,6 +33,14 @@ Key findings from report 05 (hard-mode implementation research):
 - Hilbert corollaries require bridging `AxiomTheory MinPropAxiom` to `MPL` -- may be complex; defer if needed
 - Conservative extension needs D-M completion -- deferred to separate task
 
+Key findings from report 06 (completeness statement alternatives):
+- The explicit `(v, bot_val)` completeness statement is confirmed as the correct design
+- Five alternatives evaluated (bundled AlgInterp, Option Atom, Atom ⊕ Unit, Johansson typeclass, AAL); all dismissed or demoted to optional sugar
+- JohanssonAlgebra typeclass has a fatal diamond problem: typeclass resolution picks one `designated` per type, but MPL needs all choices while IPL needs `designated = ⊥`
+- CSLib's `HAValid`/`BAValid` are strictly cleaner than Thomas's IPL/CPL statements (0 extra hypotheses vs his `v ⊥ = ⊥`)
+- The `bot_val` quantifier is only visible in the general theorem and `GHAValid`; IPL/CPL specializations are already optimal
+- The `v ⊨ T` parametric completeness architecture (via `AlgTValid`) is orthogonal to the Proposition type design and should be adopted
+
 ### Prior Plan Reference
 
 No prior plan.
@@ -59,7 +67,7 @@ This task advances propositional algebraic completeness infrastructure. While no
 **Non-Goals**:
 - Dedekind-MacNeille completion (deferred to separate task)
 - Conservative extension theorem `ipl_conservative_over_mpl` (depends on D-M)
-- JohanssonAlgebra typeclass (deferred; current bot_val parameter suffices)
+- JohanssonAlgebra typeclass (dismissed: diamond problem — typeclass resolution forces one `designated` per type, blocking MPL/IPL joint quantification; see report 06)
 - Hilbert-level completeness corollaries (defer if AxiomTheory bridging is complex)
 - Modifications to Kripke completeness proofs
 
@@ -73,7 +81,7 @@ This task advances propositional algebraic completeness infrastructure. While no
 | AxiomTheory bridging for Hilbert corollaries is harder than expected | L | M | Defer Hilbert corollaries entirely to a follow-up if bridging exceeds 30 min |
 | `le_sup_inf` (distributivity) not automatically available in GHA | L | L | GHA extends DistribLattice in Mathlib; should be inherited |
 | references.bib has unresolved merge conflict markers | L | H | Fix conflicts manually before adding new BibKeys |
-| IPL/CPL specialization from general completeness has bot_val mismatch | M | M | Use direct proof via Lindenbaum HA/BA instance instead of going through general theorem |
+| IPL/CPL specialization from general completeness has bot_val mismatch | L | L | Confirmed non-issue (report 06): `HAValid`/`BAValid` hardcode `bot_val = ⊥`, eliminating the parameter entirely. Direct proof via Lindenbaum HA/BA instance |
 
 ## Implementation Phases
 
@@ -123,18 +131,45 @@ This task advances propositional algebraic completeness infrastructure. While no
 
 **Goal**: Prove algebraic completeness for all three tiers using the Lindenbaum algebra from Phase 1.
 
+**Design rationale** (report 06): The completeness statement uses explicit `(v, bot_val)` quantification, adopting Thomas's `v ⊨ T` parametric style via `AlgTValid`. The `bot_val` quantifier is the correct cost of primitive `⊥` — it is only visible in the general theorem and `GHAValid`. The IPL/CPL specializations hardcode `bot_val = ⊥` into `HAValid`/`BAValid`, eliminating the parameter entirely (0 extra hypotheses, strictly cleaner than Thomas's `v ⊥ = ⊥` condition). Five alternatives were evaluated and dismissed; see report 06 for details.
+
+**Exact statement forms**:
+```
+-- General (parametric in T, adopts v ⊨ T pattern):
+Theory.alg_complete :
+  DerivableIn T A ↔
+    ∀ {H} [GHA H] (v : Atom → H) (bot_val : H),
+      AlgTValid T v bot_val → AlgEvaluate v bot_val A = ⊤
+
+-- MPL (T = ∅, AlgTValid vacuous, bot_val free):
+MPL.alg_complete :
+  DerivableIn ∅ A ↔
+    ∀ {H} [GHA H] (v : Atom → H) (bot_val : H),
+      AlgEvaluate v bot_val A = ⊤
+
+-- IPL (bot_val = ⊥, no extra hypothesis):
+IPL.alg_complete :
+  DerivableIn IPL A ↔
+    ∀ {H} [HA H] (v : Atom → H), AlgEvaluate v ⊥ A = ⊤
+
+-- CPL (bot_val = ⊥, no extra hypothesis):
+CPL.alg_complete :
+  DerivableIn CPL A ↔
+    ∀ {H} [BA H] (v : Atom → H), AlgEvaluate v ⊥ A = ⊤
+```
+
 **Tasks**:
-- [ ] Add `AlgTValid` definition to `Algebra.lean` (~5 lines): `forall B in T, AlgEvaluate v bot_val B = top`
-- [ ] Define `Theory.canonicalV`: canonical valuation `fun x => quotient_mk (.atom x)`
+- [ ] Add `AlgTValid` definition to `Algebra.lean` (~5 lines): `∀ B ∈ T, AlgEvaluate v bot_val B = ⊤`
+- [ ] Define `Theory.canonicalV`: canonical valuation `fun x => quotient_mk (.atom x)` with `bot_val := quotient_mk .bot`
 - [ ] Prove truth lemma `Theory.canonicalV_spec`: `AlgEvaluate T.canonicalV (quotient_mk .bot) A = quotient_mk A` by induction on A (5 cases including `.bot`)
-- [ ] Prove `Theory.lindenbaum_complete`: `quotient_mk A = top <-> DerivableIn T A` using `derivable_iff_equiv_top`
-- [ ] Prove `Theory.tValid_canonicalV`: canonical valuation models T
+- [ ] Prove `Theory.lindenbaum_complete`: `quotient_mk A = ⊤ ↔ DerivableIn T A` using `derivable_iff_equiv_top`
+- [ ] Prove `Theory.tValid_canonicalV`: canonical valuation models T (i.e., `AlgTValid T canonicalV (quotient_mk .bot)`)
 - [ ] Prove ND-level soundness `nd_sound_aux` by structural induction on `Theory.Derivation` (~40 lines, each constructor case 2-5 lines)
-- [ ] Prove `nd_alg_sound`: wrapper from `DerivableIn T (empty |- A)` to `AlgEvaluate v bot_val A = top`
-- [ ] Prove `Theory.alg_complete`: general completeness `DerivableIn T A <-> forall GHA H, v, bot_val, AlgTValid T v bot_val -> AlgEvaluate v bot_val A = top`
-- [ ] Prove `MPL.alg_complete`: `DerivableIn MPL A <-> GHAValid A` (MPL = empty, so AlgTValid is vacuous)
-- [ ] Prove `IPL.alg_complete`: `DerivableIn IPL A <-> HAValid A` -- direct proof using Lindenbaum HA instance
-- [ ] Prove `CPL.alg_complete`: `DerivableIn CPL A <-> BAValid A` -- direct proof using Lindenbaum BA instance
+- [ ] Prove `nd_alg_sound`: wrapper from `DerivableIn T (∅ ⊢ A)` to `AlgEvaluate v bot_val A = ⊤`
+- [ ] Prove `Theory.alg_complete`: general completeness (see exact form above)
+- [ ] Prove `MPL.alg_complete`: rewrite of general theorem with `T = ∅` (AlgTValid vacuous, drops out)
+- [ ] Prove `IPL.alg_complete`: `DerivableIn IPL A ↔ HAValid A` — direct proof using Lindenbaum HA instance; `HAValid` hardcodes `bot_val = ⊥`
+- [ ] Prove `CPL.alg_complete`: `DerivableIn CPL A ↔ BAValid A` — direct proof using Lindenbaum BA instance; `BAValid` hardcodes `bot_val = ⊥`
 
 **Timing**: 3 hours
 
@@ -182,7 +217,7 @@ This task advances propositional algebraic completeness infrastructure. While no
 **Goal**: Update documentation, fix references.bib, register new files, and pass full CI.
 
 **Tasks**:
-- [ ] Update `Algebra.lean` module docstring to reference Johansson algebras, Rasiowa 1974, and the algebraic lineage (GHA = Johansson, HA = Heyting, BA = Boolean)
+- [ ] Update `Algebra.lean` module docstring to reference Johansson algebras, Rasiowa 1974, and the algebraic lineage (GHA = Johansson, HA = Heyting, BA = Boolean). Include design rationale: why `bot_val` is an explicit parameter (GHA lacks `⊥`), why `HAValid`/`BAValid` hardcode `⊥` (HA/BA have one), and how the general completeness theorem unifies the three validity predicates via `AlgTValid`
 - [ ] Add `@[inherit_doc]` or doc comments to `AlgTValid`
 - [ ] Fix merge conflict markers in `references.bib` (around Fitting1969/Heyting1930/Herbrand1930/Trufas2024 region)
 - [ ] Add missing BibKeys to `references.bib`: Rasiowa1974, RasiowaSikorski1963, BlokPigozzi1989, Font2016, MacNeille1937, TroelstraSchwichtenberg2000
@@ -220,9 +255,9 @@ This task advances propositional algebraic completeness infrastructure. While no
 NOTE: This phase can execute in parallel with Phase 1 since it only modifies the docstring/comment portion of `Algebra.lean`, which Phase 1 does not touch. However, given Phase 4 also touches `Algebra.lean` docstrings, this phase is subsumed by Phase 4 if executed sequentially. If running in parallel, Phase 4 should skip the docstring update.
 
 **Tasks**:
-- [ ] Add reference to Johansson algebras in `Algebra.lean` module docstring: explain that GHA + designated bot constant = Johansson algebra
+- [ ] Add reference to Johansson algebras in `Algebra.lean` module docstring: explain that GHA + designated bot constant = Johansson algebra (but NOT as a typeclass — diamond problem, see report 06)
 - [ ] Add Rasiowa 1974 citation to module docstring references section
-- [ ] Add design note explaining bot_val = Johansson algebra designated constant
+- [ ] Add design note: `bot_val` is the Johansson designated constant as an explicit parameter (not a typeclass field); `HAValid`/`BAValid` specialize it to `⊥`; the parametric `AlgTValid` adopts Thomas Waring's `v ⊨ T` completeness style
 
 **Timing**: 0.5 hours
 
@@ -244,7 +279,7 @@ NOTE: This phase can execute in parallel with Phase 1 since it only modifies the
 - [ ] `lake test` passes
 - [ ] `lake build` (full project) shows no regressions in existing Modal/Temporal/Bimodal code
 - [ ] Verify `Theory.alg_complete` via `lean_verify` for axiom check (no Prop or Classical.choice in proof term)
-- [ ] Verify `MPL.alg_complete`, `IPL.alg_complete`, `CPL.alg_complete` type signatures match research report 05
+- [ ] Verify tier specializations match exact forms from Phase 2: `IPL.alg_complete` uses `HAValid` (no `bot_val` parameter), `CPL.alg_complete` uses `BAValid` (no `bot_val` parameter), `MPL.alg_complete` uses `GHAValid` (free `bot_val`)
 
 ## Artifacts & Outputs
 

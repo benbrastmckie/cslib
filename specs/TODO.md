@@ -11,7 +11,7 @@ next_project_number: 230
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,197,209,214,215,226,227,229 | -- | Bimodal Porting, Foundations, Project Management, ... |
+| 1 | 36,37,180,188,192,197,209,214,215,226,227,229 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -27,8 +27,12 @@ next_project_number: 230
 
 ### Foundations
 
-229 [RESEARCHED] — Study best practices (as of June 2026) for resolving typeclass di
+229 [PLANNED] — Refactor CSLib's connective hierarchy to use class abbrev for dia
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
+
+### Modal Logic
+
+197 [PR READY] — Review the ambition to contribute Modal/ to upstream, identifying
 
 ### Project Management
 
@@ -37,12 +41,9 @@ next_project_number: 230
 ### Propositional Logic
 
 188 [NOT STARTED] — Design and prepare a first upstream PR (~300 LOC) contributing pr
+192 [PLANNED] — Draw on sources in specs/literature/ to verify and improve citati
 226 [RESEARCHED] — Cherry-pick GHA algebraic semantics from main to create a PR stac
 227 [IMPLEMENTING] — Design and implement maximally general algebraic semantics for pr
-
-### Propositional PRs
-
-192 [PLANNED] — Draw on sources in specs/literature/ to verify and improve citati
 
 ### Temporal Logic
 
@@ -50,22 +51,19 @@ next_project_number: 230
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
-### Pr
-
-197 [PR READY] — Review the ambition to contribute Modal/ to upstream, identifying
-
 ## Tasks
 
 ### 229. Typeclass diamond resolution lean4
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
 - **Research**:
   - [229_typeclass_diamond_resolution_lean4/reports/01_team-research.md]
   - [229_typeclass_diamond_resolution_lean4/reports/02_team-research.md]
+- **Plan**: [229_typeclass_diamond_resolution_lean4/plans/03_class-abbrev-refactor.md]
 
-**Description**: Study best practices (as of June 2026) for resolving typeclass diamond inheritance issues in Lean 4, with specific application to CSLib BimodalConnectives design. Research should cover: (1) Current Lean 4 mechanisms for handling diamond inheritance (default instances, instance priorities, manual projections, flat hierarchies). (2) Best practices from Mathlib and other large Lean 4 projects for avoiding or mitigating diamond problems. (3) Analysis of the specific trade-off: BimodalConnectives currently extends ModalConnectives + HasUntil + HasSince; evaluate whether extending TemporalConnectives + HasBox would be preferable, with arguments for and against each design. (4) Techniques to reduce downsides of whichever approach is chosen (convenience instances, abbreviations, simp lemmas for projection equalities). (5) Whether any recent Lean 4 features (post-2025) change the calculus. Context: see specs/tmp/note.md for the diamond diagram and explanation
+**Description**: Refactor CSLib's connective hierarchy to use class abbrev for diamond-affected classes (FutureTemporalConnectives, TemporalConnectives, BimodalConnectives), enabling automatic instance chaining across logic intersections without bridge instances or warning suppressions.
 
 ---
 
@@ -146,7 +144,7 @@ These are incomplete proofs in the bimodal temporal logic development (BX dense 
 ### 197. Scope initial Modal/ upstream PR (~300 LOC)
 - **Status**: [PR READY]
 - **Task Type**: pr
-- **Topic**: pr
+- **Topic**: Modal Logic
 - **Dependencies**: None
 - **Research**: [197_modal_upstream_initial_pr/reports/06_modal-pr-landscape.md]
 - **Plan**: [197_modal_upstream_initial_pr/plans/08_modal-upstream-pr-plan.md]
@@ -159,7 +157,7 @@ These are incomplete proofs in the bimodal temporal logic development (BX dense 
 ### 192. Research verify literature refs pr 188
 - **Status**: [PLANNED]
 - **Task Type**: general
-- **Topic**: Propositional PRs
+- **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**:
   - [192_research_verify_literature_refs_pr_188/reports/01_team-research.md]

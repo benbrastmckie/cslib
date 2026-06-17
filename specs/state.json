@@ -18,6 +18,11 @@
           "path": "specs/227_algebraic_completeness_design/reports/01_algebraic-completeness-design.md",
           "type": "report",
           "summary": "Comprehensive design report: Johansson algebras, xcthulhu adaptation, JohanssonAlgebra typeclass, algebraic completeness architecture"
+        },
+        {
+          "path": "specs/227_algebraic_completeness_design/reports/03_primitive-bot-defense.md",
+          "type": "report",
+          "summary": "Defense of primitive bot: substitution invariance, universal algebra, Johansson algebras, convergent evidence from proof theory, formalization practice, and type theory"
         }
       ],
       "session_id": "sess_1750130000_research227"

@@ -392,4 +392,72 @@ theorem equiv_equivalence (T : Theory Atom) : Equivalence (T.Equiv (Atom := Atom
 protected def propositionSetoid (T : Theory Atom) : Setoid (Proposition Atom) :=
   ⟨T.Equiv, T.equiv_equivalence⟩
 
+/-! ### Congruence lemmas for equivalence -/
+
+/-- Congruence of equivalence under implication: if `A ≡[T] A'` and `B ≡[T] B'`
+then `(A → B) ≡[T] (A' → B')`.
+
+Proved using `impI`, `impE`, and the existing `mapEquivConclusion`/`mapEquivHypothesis`
+helpers. -/
+theorem Equiv.imp_congr {T : Theory Atom} {A A' B B' : Proposition Atom}
+    (hA : A ≡[T] A') (hB : B ≡[T] B') : (A → B) ≡[T] (A' → B') := by
+  obtain ⟨eA⟩ := hA; obtain ⟨eB⟩ := hB
+  -- In the forward direction, `impI {A → B}` produces context `insert A' {A → B}`.
+  -- There: A' ∈ insert A' {A → B} by mem_insert_self
+  --        A → B ∈ insert A' {A → B} by mem_insert_of_mem, mem_singleton_self
+  let fwd : T⇓({A → B} ⊢ A' → B') :=
+    Derivation.impI {A → B}
+      (mapEquivConclusion _ eB
+        (Derivation.impE
+          (Derivation.ass (Finset.mem_insert_of_mem (Finset.mem_singleton_self _)))
+          (mapEquivConclusion _ eA.symm
+            (Derivation.ass (Finset.mem_insert_self _ _)))))
+  let bwd : T⇓({A' → B'} ⊢ A → B) :=
+    Derivation.impI {A' → B'}
+      (mapEquivConclusion _ eB.symm
+        (Derivation.impE
+          (Derivation.ass (Finset.mem_insert_of_mem (Finset.mem_singleton_self _)))
+          (mapEquivConclusion _ eA
+            (Derivation.ass (Finset.mem_insert_self _ _)))))
+  exact ⟨⟨fwd, bwd⟩⟩
+
+/-- Congruence of equivalence under conjunction: if `A ≡[T] A'` and `B ≡[T] B'`
+then `(A ∧ B) ≡[T] (A' ∧ B')`. -/
+theorem Equiv.and_congr {T : Theory Atom} {A A' B B' : Proposition Atom}
+    (hA : A ≡[T] A') (hB : B ≡[T] B') : (A ∧ B) ≡[T] (A' ∧ B') := by
+  obtain ⟨eA⟩ := hA; obtain ⟨eB⟩ := hB
+  let fwd : T⇓({A ∧ B} ⊢ A' ∧ B') :=
+    Derivation.andI {A ∧ B}
+      (mapEquivConclusion _ eA
+        (Derivation.andE1 {A ∧ B} (Derivation.ass (Finset.mem_singleton_self _))))
+      (mapEquivConclusion _ eB
+        (Derivation.andE2 {A ∧ B} (Derivation.ass (Finset.mem_singleton_self _))))
+  let bwd : T⇓({A' ∧ B'} ⊢ A ∧ B) :=
+    Derivation.andI {A' ∧ B'}
+      (mapEquivConclusion _ eA.symm
+        (Derivation.andE1 {A' ∧ B'} (Derivation.ass (Finset.mem_singleton_self _))))
+      (mapEquivConclusion _ eB.symm
+        (Derivation.andE2 {A' ∧ B'} (Derivation.ass (Finset.mem_singleton_self _))))
+  exact ⟨⟨fwd, bwd⟩⟩
+
+/-- Congruence of equivalence under disjunction: if `A ≡[T] A'` and `B ≡[T] B'`
+then `(A ∨ B) ≡[T] (A' ∨ B')`. -/
+theorem Equiv.or_congr {T : Theory Atom} {A A' B B' : Proposition Atom}
+    (hA : A ≡[T] A') (hB : B ≡[T] B') : (A ∨ B) ≡[T] (A' ∨ B') := by
+  obtain ⟨eA⟩ := hA; obtain ⟨eB⟩ := hB
+  -- orE context: `insert A {A ∨ B}` and `insert B {A ∨ B}`
+  let fwd : T⇓({A ∨ B} ⊢ A' ∨ B') :=
+    Derivation.orE {A ∨ B} (Derivation.ass (Finset.mem_singleton_self _))
+      (Derivation.orI1 _
+        (mapEquivConclusion _ eA (Derivation.ass (Finset.mem_insert_self _ _))))
+      (Derivation.orI2 _
+        (mapEquivConclusion _ eB (Derivation.ass (Finset.mem_insert_self _ _))))
+  let bwd : T⇓({A' ∨ B'} ⊢ A ∨ B) :=
+    Derivation.orE {A' ∨ B'} (Derivation.ass (Finset.mem_singleton_self _))
+      (Derivation.orI1 _
+        (mapEquivConclusion _ eA.symm (Derivation.ass (Finset.mem_insert_self _ _))))
+      (Derivation.orI2 _
+        (mapEquivConclusion _ eB.symm (Derivation.ass (Finset.mem_insert_self _ _))))
+  exact ⟨⟨fwd, bwd⟩⟩
+
 end Cslib.Logic.PL.Theory

@@ -93,7 +93,7 @@ This task advances propositional algebraic completeness infrastructure. While no
 | 3 | 3 | 2 |
 | 4 | 4 | 3 |
 
-### Phase 1: Congruence Lemmas and Lindenbaum Algebra [IN PROGRESS]
+### Phase 1: Congruence Lemmas and Lindenbaum Algebra [COMPLETED]
 
 **Goal**: Prove the three missing congruence lemmas and build the Lindenbaum quotient with PartialOrder, Lattice, GHA, HA, and BA instances.
 
@@ -127,7 +127,7 @@ This task advances propositional algebraic completeness infrastructure. While no
 
 ---
 
-### Phase 2: Completeness Theorems [NOT STARTED]
+### Phase 2: Completeness Theorems [IN PROGRESS]
 
 **Goal**: Prove algebraic completeness for all three tiers using the Lindenbaum algebra from Phase 1.
 

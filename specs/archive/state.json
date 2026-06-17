@@ -4043,6 +4043,194 @@
       "last_updated": "2026-06-14T18:19:47Z",
       "completion_summary": "Fixed all unused simp argument warnings in DenseValidity.lean as part of broader CI style warning fix (commit 920dfbe9). Also fixed intro? warnings and dupNamespace suppressions across 13 files.",
       "archived": "2026-06-17T08:48:45Z"
+    },
+    {
+      "project_number": 230,
+      "project_name": "fix_pr649_reynolds_bib_beq_deriving",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "Fix two minor issues in PR #649 (feat/temporal-formula-propositional branch): (1) Rename Reynolds1994 bib key to Reynolds1996 in references.bib — the year field is 1996 (confirmed by DOI), key is wrong. (2) Add BEq to Temporal.Formula deriving clause for consistency with LTL.Formula which derives both DecidableEq, BEq. Both are cosmetic fixes on the upstream PR branch",
+      "topic": "Temporal Logic",
+      "created": "2026-06-17T19:28:14Z",
+      "last_updated": "2026-06-17T19:35:43Z",
+      "session_id": "sess_1781724665_ae5019",
+      "completion_summary": "Fixed Reynolds1994→Reynolds1996 bib key and added BEq to Temporal.Formula deriving clause on feat/temporal-formula-propositional branch (commit 780f9573)",
+      "archived": "2026-06-17T21:25:31Z"
+    },
+    {
+      "project_number": 229,
+      "project_name": "typeclass_diamond_resolution_lean4",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "Refactor BimodalConnectives to extend TemporalConnectives (primary) with HasBox as atomic mixin, adding a priority-100 bridge instance for ModalConnectives. Standard Mathlib mixin pattern — 9 lines changed in 1 file.",
+      "topic": "Foundations",
+      "created": "2026-06-17T17:52:22Z",
+      "last_updated": "2026-06-17T19:08:08Z",
+      "session_id": "sess_1750218164_a1b2c3",
+      "researched": "2026-06-17T18:08:17Z",
+      "next_artifact_number": 5,
+      "artifacts": [
+        {
+          "path": "specs/229_typeclass_diamond_resolution_lean4/reports/01_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates"
+        },
+        {
+          "path": "specs/229_typeclass_diamond_resolution_lean4/reports/02_team-research.md",
+          "type": "research",
+          "summary": "Round 2: class abbrev vs true diamond comparison"
+        },
+        {
+          "path": "specs/229_typeclass_diamond_resolution_lean4/plans/04_mixin-bridge-refactor.md",
+          "type": "plan"
+        }
+      ],
+      "completion_summary": "Refactored BimodalConnectives to extend TemporalConnectives (primary) with HasBox as atomic mixin, added priority-100 bridge instance for ModalConnectives. Resolves typeclass diamond using standard Mathlib mixin pattern.",
+      "archived": "2026-06-17T21:25:31Z"
+    },
+    {
+      "project_number": 227,
+      "project_name": "algebraic_completeness_design",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "Design and implement maximally general algebraic semantics for propositional logic with primitive bot. (1) Evaluate whether to introduce a JohanssonAlgebra typeclass (GHA + designated bot constant) as the algebraic counterpart of minimal logic, providing a clean three-tier hierarchy: JohanssonAlgebra (MPL) → HeytingAlgebra (IPL) → BooleanAlgebra (CPL). (2) Adapt xcthulhu's Lindenbaum algebra + Dedekind-MacNeille completeness proofs to work with primitive-⊥ Proposition and AlgEvaluate/bot_val framework — estimated ~15 lines of structural changes. (3) Port or integrate DedekindMacneille.lean and ForMathlib/Order/Heyting/Hom.lean dependencies. (4) Prove algebraic completeness for all three tiers: MPL complete w.r.t. GHA/Johansson (arbitrary bot_val), IPL complete w.r.t. HA (bot_val = ⊥), CPL complete w.r.t. BA (bot_val = ⊥). (5) Update Algebra.lean docstrings to reference Johansson algebras and the algebraic lineage. (6) Ensure compatibility with existing Kripke completeness proofs and downstream Modal/Temporal/Bimodal code.",
+      "topic": "Propositional Logic",
+      "dependencies": [
+        225
+      ],
+      "created": "2026-06-17T06:00:00Z",
+      "last_updated": "2026-06-17T19:28:31Z",
+      "artifacts": [
+        {
+          "path": "specs/227_algebraic_completeness_design/reports/01_algebraic-completeness-design.md",
+          "type": "report",
+          "summary": "Comprehensive design report: Johansson algebras, xcthulhu adaptation, JohanssonAlgebra typeclass, algebraic completeness architecture"
+        },
+        {
+          "path": "specs/227_algebraic_completeness_design/reports/03_primitive-bot-defense.md",
+          "type": "report",
+          "summary": "Defense of primitive bot: substitution invariance, universal algebra, Johansson algebras, convergent evidence from proof theory, formalization practice, and type theory"
+        },
+        {
+          "path": "specs/227_algebraic_completeness_design/plans/06_algebraic-completeness.md",
+          "type": "plan",
+          "summary": "5-phase plan: congruence lemmas + Lindenbaum algebra, completeness theorems (MPL/IPL/CPL), conservative extension infrastructure, docstrings + CI verification, parallel docstring update"
+        },
+        {
+          "path": "specs/227_algebraic_completeness_design/reports/06_completeness-statement-alternatives.md",
+          "type": "report",
+          "summary": "Hard-mode research: 5 completeness statement alternatives evaluated; recommends status quo (v, bot_val) with optional AlgInterp sugar"
+        }
+      ],
+      "session_id": "sess_1781721416_1cb2dc",
+      "plan_metadata": {
+        "phases": 5,
+        "total_effort_hours": 10,
+        "complexity": "complex",
+        "research_integrated": true,
+        "plan_version": 1,
+        "dependency_waves": [
+          [
+            1,
+            5
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ],
+          [
+            4
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/05_hard-implementation-research.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-06-17"
+          },
+          {
+            "path": "reports/01_algebraic-completeness-design.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-06-17"
+          }
+        ]
+      },
+      "completion_summary": "Algebraic completeness for propositional logic: 3 new files (Lindenbaum.lean 426 lines, Completeness.lean 236 lines, Conservative.lean 100 lines), sorry-free except 1 expected sorry for D-M-dependent conservative extension. Proves Theory.alg_complete, MPL.alg_complete, IPL.alg_complete, alg_complete_classical. Includes Lindenbaum quotient with GHA/HA/BA instances, truth lemma, ND soundness, bot-free analysis, validity subsumption.",
+      "archived": "2026-06-17T21:25:31Z"
+    },
+    {
+      "project_number": 214,
+      "project_name": "fix_cases_tactic_warnings",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "Fix tactic goal-count warnings in DedekindZ/Cases.lean",
+      "description": "Fix 4 tactic goal-count warnings in Cslib/Logics/Bimodal/Metalogic/Separation/DedekindZ/Cases.lean where apply chains create unfocused goals. Restructure the proof to properly focus each subgoal.",
+      "topic": "Bimodal Porting",
+      "created": "2026-06-15T17:59:27Z",
+      "last_updated": "2026-06-17T19:54:41Z",
+      "session_id": "sess_1750210000_orchestrate214",
+      "completion_summary": "Fixed all 4 tactic goal-count warnings in case1_psi_bool_only theorem in DedekindZ/Cases.lean by replacing semicolon-chained apply calls with properly nested focus blocks.",
+      "archived": "2026-06-17T21:25:31Z"
+    },
+    {
+      "project_number": 228,
+      "project_name": "pr648_primitive_bot_cleanup",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "Fix two documentation issues in PR #648 (feat/propositional-v2) to align with the primitive bot perspective: (1) Update intuitionisticCompletion docstring — it says \"Attach a bottom element\" but with primitive bot this is misleading since bot is already a constructor; (2) Fix Connectives.lean docstring — change \"five-primitive propositional signature\" to \"five constructors\" to avoid conflating generators with operations in the algebraic signature.",
+      "topic": "Propositional Logic",
+      "dependencies": [
+        227
+      ],
+      "created": "2026-06-17T18:00:00Z",
+      "last_updated": "2026-06-17T17:21:47Z",
+      "artifacts": [
+        {
+          "path": "specs/228_pr648_primitive_bot_cleanup/reports/01_pr648-review-findings.md",
+          "type": "report",
+          "summary": "PR #648 review: two docstring issues found, all structural changes confirmed correct"
+        }
+      ],
+      "session_id": "sess_1750217870_a3b2c1",
+      "completion_summary": "Fixed two docstrings in PR #648: updated intuitionisticCompletion description to reflect primitive bot semantics, changed five-primitive propositional signature to five constructors in Connectives.lean",
+      "archived": "2026-06-17T21:25:31Z"
+    },
+    {
+      "project_number": 231,
+      "project_name": "fix_countermodel_dense_universe",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "Fix countermodel_dense universe mismatch in ChronicleToCountermodelBasic",
+      "description": "Fix universe mismatch in countermodel_dense (ChronicleToCountermodelBasic.lean:825): Atom : Type* vs Atom : Type in ParametricCanonicalTaskFrame. This is a Lean engineering fix, not a mathematical blocker. Fixing it also unblocks completeness_dense (Dense.lean:122) which depends on countermodel_dense. Carved off from task 215.",
+      "topic": "Bimodal Porting",
+      "created": "2026-06-17T00:00:00Z",
+      "last_updated": "2026-06-17T00:00:00Z",
+      "parent_task": 215,
+      "completion_summary": "Eliminated 2 sorries (countermodel_dense, completeness_dense) using section-scoped variable override Atom : Type instead of generalizing 5 Parametric files. Build succeeds, both theorems verify sorry-free.",
+      "archived": "2026-06-17T21:25:31Z"
+    },
+    {
+      "project_number": 219,
+      "project_name": "address_pr648_merge_semantics_files",
+      "status": "orphan_archived",
+      "archived": "2026-06-17T21:25:46Z",
+      "source": "orphan_recovery"
+    },
+    {
+      "project_number": 221,
+      "project_name": "revise_pr649_reviewer_feedback",
+      "status": "orphan_archived",
+      "archived": "2026-06-17T21:25:46Z",
+      "source": "orphan_recovery"
+    },
+    {
+      "project_number": 222,
+      "project_name": "review_pr648_zulip_feedback_analysis",
+      "status": "orphan_archived",
+      "archived": "2026-06-17T21:25:46Z",
+      "source": "orphan_recovery"
     }
   ],
   "archived_projects": [

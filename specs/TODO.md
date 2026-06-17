@@ -51,66 +51,6 @@ next_project_number: 232
 
 ## Tasks
 
-### 231. Fix countermodel_dense universe mismatch in ChronicleToCountermodelBasic
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Bimodal Porting
-- **Dependencies**: None
-
-**Description**: Fix universe mismatch in countermodel_dense (ChronicleToCountermodelBasic.lean:825): Atom : Type* vs Atom : Type in ParametricCanonicalTaskFrame. This is a Lean engineering fix, not a mathematical blocker. Fixing it also unblocks completeness_dense (Dense.lean:122) which depends on countermodel_dense. Carved off from task 215.
-
----
-
-### 230. Fix pr649 reynolds bib beq deriving
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: None
-
-**Description**: Fix two minor issues in PR #649 (feat/temporal-formula-propositional branch): (1) Rename Reynolds1994 bib key to Reynolds1996 in references.bib — the year field is 1996 (confirmed by DOI), key is wrong. (2) Add BEq to Temporal.Formula deriving clause for consistency with LTL.Formula which derives both DecidableEq, BEq. Both are cosmetic fixes on the upstream PR branch
-
----
-
-### 229. Typeclass diamond resolution lean4
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Foundations
-- **Dependencies**: None
-- **Research**:
-  - [229_typeclass_diamond_resolution_lean4/reports/01_team-research.md]
-  - [229_typeclass_diamond_resolution_lean4/reports/02_team-research.md]
-- **Plan**: [229_typeclass_diamond_resolution_lean4/plans/04_mixin-bridge-refactor.md]
-
-**Description**: Refactor BimodalConnectives to extend TemporalConnectives (primary) with HasBox as atomic mixin, adding a priority-100 bridge instance for ModalConnectives. Standard Mathlib mixin pattern — 9 lines changed in 1 file.
-
----
-
-### 228. Pr648 primitive bot cleanup
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 227
-- **Research**: [228_pr648_primitive_bot_cleanup/reports/01_pr648-review-findings.md]
-
-**Description**: Fix two documentation issues in PR #648 (feat/propositional-v2) to align with the primitive bot perspective: (1) Update intuitionisticCompletion docstring — it says "Attach a bottom element" but with primitive bot this is misleading since bot is already a constructor; (2) Fix Connectives.lean docstring — change "five-primitive propositional signature" to "five constructors" to avoid conflating generators with operations in the algebraic signature.
-
----
-
-### 227. Algebraic completeness design
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 225
-- **Research**:
-  - [227_algebraic_completeness_design/reports/01_algebraic-completeness-design.md]
-  - [227_algebraic_completeness_design/reports/03_primitive-bot-defense.md]
-  - [227_algebraic_completeness_design/reports/06_completeness-statement-alternatives.md]
-- **Plan**: [227_algebraic_completeness_design/plans/06_algebraic-completeness.md]
-
-**Description**: Design and implement maximally general algebraic semantics for propositional logic with primitive bot. (1) Evaluate whether to introduce a JohanssonAlgebra typeclass (GHA + designated bot constant) as the algebraic counterpart of minimal logic, providing a clean three-tier hierarchy: JohanssonAlgebra (MPL) → HeytingAlgebra (IPL) → BooleanAlgebra (CPL). (2) Adapt xcthulhu's Lindenbaum algebra + Dedekind-MacNeille completeness proofs to work with primitive-⊥ Proposition and AlgEvaluate/bot_val framework — estimated ~15 lines of structural changes. (3) Port or integrate DedekindMacneille.lean and ForMathlib/Order/Heyting/Hom.lean dependencies. (4) Prove algebraic completeness for all three tiers: MPL complete w.r.t. GHA/Johansson (arbitrary bot_val), IPL complete w.r.t. HA (bot_val = ⊥), CPL complete w.r.t. BA (bot_val = ⊥). (5) Update Algebra.lean docstrings to reference Johansson algebras and the algebraic lineage. (6) Ensure compatibility with existing Kripke completeness proofs and downstream Modal/Temporal/Bimodal code.
-
----
-
 ### 226. Gha semantics upstream pr
 - **Status**: [RESEARCHED]
 - **Task Type**: cslib
@@ -136,16 +76,6 @@ next_project_number: 232
 Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completeness_dense (Dense.lean:122) carved off to task 231.
 
 9 sorries blocked on task 37 (strict Until/Since semantics gap: BX8/BX9/temporal-T axioms removed as unsound). 11 sorries blocked on task 36 (discrete completeness pipeline requires unported GoodStructuresModelSurgery infrastructure).
-
----
-
-### 214. Fix tactic goal-count warnings in DedekindZ/Cases.lean
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Bimodal Porting
-- **Dependencies**: None
-
-**Description**: Fix 4 tactic goal-count warnings in Cslib/Logics/Bimodal/Metalogic/Separation/DedekindZ/Cases.lean where apply chains create unfocused goals. Restructure the proof to properly focus each subgoal.
 
 ---
 

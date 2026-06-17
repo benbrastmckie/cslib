@@ -23,9 +23,9 @@ the Dense proof system.
 
 ## Port Status
 
-The dense completeness theorem is fully ported from the source. The
-`countermodel_dense_enriched` proof inherits a universe sorry from
-`countermodel_dense` in ChronicleToCountermodelBasic.lean.
+The dense completeness theorem is fully proved (no sorry). `Atom` is
+specialized to `Type` (universe 0) to match the `ParametricCanonicalTaskFrame`
+infrastructure, where `TaskFrame.WorldState : Type`.
 
 ## References
 
@@ -97,6 +97,9 @@ theorem neg_consistent_of_not_derivable {fc : FrameClass} (φ : Formula Atom)
 
 /-! ## Dense Completeness Theorem -/
 
+section DenseCompleteness
+variable {Atom : Type} [Denumerable (Formula Atom)]
+
 /--
 Dense Completeness Theorem: If a formula is valid on all densely ordered models,
 then it is derivable in the Dense proof system.
@@ -106,6 +109,9 @@ then it is derivable in the Dense proof system.
 - {¬φ} is Dense-consistent, extends to MCS M containing ¬φ
 - Dense case (□(F'T) ∈ M): countermodel on Rat via Cantor iso
 - Non-dense case: impossible because Dense-MCS contains □(F'T) via dense_indicator axiom
+
+Note: `Atom` is specialized to `Type` (universe 0) to match
+`countermodel_dense`, which uses `ParametricCanonicalTaskFrame`.
 -/
 theorem completeness_dense (φ : Formula Atom) :
     validDense φ → Nonempty (DerivationTree FrameClass.Dense [] φ) := by
@@ -117,10 +123,9 @@ theorem completeness_dense (φ : Formula Atom) :
   rcases SetMaximalConsistent.negation_complete hM_mcs
     (Formula.box Chronicle.nextTop.neg) with h_box_dense | h_not_box_dense
   · -- Dense case: □(F'T) ∈ M — countermodel on Rat (DenselyOrdered)
-    -- Use countermodel_dense which produces a countermodel (sorry for universe mismatch)
-    -- The countermodel contradicts validDense
-    sorry  -- sorry: blocked on task 36 (universe mismatch: countermodel_dense produces
-           -- ∃ (D : Type _) which doesn't match validDense's universe)
+    obtain ⟨D, hAG, hLO, hOAM, hDO, hNT, TF, TM, Omega, hSC, τ, hτ, t, h_false⟩ :=
+      Chronicle.countermodel_dense FrameClass.Dense M hM_mcs φ h_neg_in h_box_dense
+    exact h_false (h_valid_dense D TF TM Omega hSC τ hτ t)
   · -- Non-dense case: ¬□(F'T) ∈ M. But the dense_indicator axiom ¬U(⊤,⊥)
     -- is a Dense theorem, so □(¬U(⊤,⊥)) = □(F'T) is in every Dense-MCS.
     -- Contradiction with h_not_box_dense : ¬□(F'T) ∈ M.
@@ -130,5 +135,7 @@ theorem completeness_dense (φ : Formula Atom) :
       DerivationTree.necessitation _ h_ax
     have h_in : (Chronicle.nextTop (Atom := Atom)).neg.box ∈ M := theoremInMcsFc hM_mcs h_box
     exact set_consistent_not_both hM_mcs.1 (Chronicle.nextTop (Atom := Atom)).neg.box h_in h_not_box_dense
+
+end DenseCompleteness
 
 end Cslib.Logic.Bimodal.Metalogic.BXCanonical

@@ -803,6 +803,9 @@ from any MCS containing ¬φ and □(F'T), using the Cantor-based chronicle
 construction.
 -/
 
+section DenseCountermodel
+variable {Atom : Type} [Denumerable (Formula Atom)]
+
 /--
 Dense countermodel: given MCS A with `¬φ ∈ A` and `□(F'T) ∈ A`,
 build a countermodel on `Rat` where `φ` is false.
@@ -810,19 +813,46 @@ build a countermodel on `Rat` where `φ` is false.
 Uses `cantorBfmcsDense` (sorry-free BFMCS) with the three restricted
 coherence conditions. The eval family is `rootedCantorFmcsDense fc A h_mcs h_box_dense 0`
 which has `mcs 0 = A`, so `¬φ ∈ evalFamily.mcs 0`.
+
+Note: `Atom` is specialized to `Type` (universe 0) to match the
+`ParametricCanonicalTaskFrame` infrastructure, which requires
+`WorldState : Type` via `TaskFrame.WorldState`.
 -/
 theorem countermodel_dense (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (φ : Formula Atom) (h_neg_in : φ.neg ∈ A)
     (h_box_dense : Formula.box nextTop.neg ∈ A) :
-    ∃ (D : Type _) (_ : AddCommGroup D) (_ : LinearOrder D) (_ : IsOrderedAddMonoid D)
-      (_ : Nontrivial D) (TF : TaskFrame D) (TM : TaskModel Atom TF)
+    ∃ (D : Type) (_ : AddCommGroup D) (_ : LinearOrder D) (_ : IsOrderedAddMonoid D)
+      (_ : DenselyOrdered D) (_ : Nontrivial D) (TF : TaskFrame D) (TM : TaskModel Atom TF)
       (Omega : Set (WorldHistory TF)) (_ : ShiftClosed Omega)
       (τ : WorldHistory TF) (_ : τ ∈ Omega) (t : D),
       ¬truthAt TM Omega τ t φ := by
-  -- Universe mismatch: ParametricCanonicalTaskFrame requires Atom : Type (not Type*)
-  -- when D = Rat : Type. This is a known issue with the polymorphic Formula Atom port.
-  -- The proof body is correct modulo universe levels; sorry preserves source sorry count.
-  sorry  -- sorry: blocked on task 36 (universe mismatch with ParametricCanonicalTaskFrame)
+  let B := cantorBfmcsDense fc A h_mcs h_box_dense
+  have h_dc_sub : ∀ ψ, ψ ∈ deferralClosure φ → ψ ∈ (extendedDeferralClosure φ).toList := by
+    intro ψ hψ
+    rw [Finset.mem_toList]
+    exact deferralClosure_subset_extendedDeferralClosure φ hψ
+  have h_rtc : B.restrictedTemporallyCoherent φ :=
+    cantor_bfmcs_dense_restricted_tc fc A h_mcs h_box_dense φ h_dc_sub
+  have h_buc : B.restrictedBackwardUntilSinceCoherent φ :=
+    cantor_bfmcs_dense_restricted_buc fc A h_mcs h_box_dense φ
+  have h_fuc : B.restrictedForwardUntilSinceCoherent φ :=
+    cantor_bfmcs_dense_restricted_fuc fc A h_mcs h_box_dense φ
+  have h_neg_eval : φ.neg ∈ B.evalFamily.mcs 0 := by
+    show φ.neg ∈ (rootedCantorFmcsDense fc A h_mcs h_box_dense 0).mcs 0
+    rw [rooted_cantor_fmcs_dense_at_s]
+    exact h_neg_in
+  have h_not_truth := fully_restricted_parametric_completeness_from_neg_membership
+    B φ h_rtc h_buc h_fuc φ (self_mem_subformulaClosure φ)
+    B.evalFamily B.eval_family_mem 0 h_neg_eval
+  exact ⟨Rat, inferInstance, inferInstance, inferInstance, inferInstance, inferInstance,
+    ParametricCanonicalTaskFrame, ParametricCanonicalTaskModel,
+    ShiftClosedParametricCanonicalOmega B,
+    shiftClosedParametricCanonicalOmega_is_shift_closed B,
+    parametricToHistory B.evalFamily,
+    parametricCanonicalOmega_subset_shiftClosed B ⟨B.evalFamily, B.eval_family_mem, rfl⟩,
+    0, h_not_truth⟩
+
+end DenseCountermodel
 
 /-! ## Discrete Case: Z-Isomorphism from U(⊤,⊥)
 

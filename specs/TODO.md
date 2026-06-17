@@ -11,7 +11,7 @@ next_project_number: 232
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,188,192,197,209,226,231 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,188,192,197,209,226 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -23,7 +23,6 @@ next_project_number: 232
   └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal
 37 [BLOCKED] — Port continuous extension completeness once developed upstream. T
   └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal (see above)
-231 [NOT STARTED] — Fix universe mismatch in countermodel_dense (ChronicleToCountermo
 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
 
 ### Foundations
@@ -53,7 +52,7 @@ next_project_number: 232
 ## Tasks
 
 ### 231. Fix countermodel_dense universe mismatch in ChronicleToCountermodelBasic
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Bimodal Porting
 - **Dependencies**: None

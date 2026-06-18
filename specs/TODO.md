@@ -40,7 +40,6 @@ next_project_number: 233
 ### Propositional Logic
 
 226 [RESEARCHED] — Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648
-232 [NOT STARTED] — Rebase PR #649 (feat/temporal-formula-propositional) onto PR #648
 
 ### Temporal Logic
 
@@ -48,12 +47,16 @@ next_project_number: 233
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
+### Pr
+
+232 [IMPLEMENTING] — Rebase PR #649 (feat/temporal-formula-propositional) onto PR #648
+
 ## Tasks
 
 ### 232. Rebase pr649 onto pr648
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
-- **Topic**: Propositional Logic
+- **Topic**: pr
 - **Dependencies**: None
 
 **Description**: Rebase PR #649 (feat/temporal-formula-propositional) onto PR #648 base branch (feat/propositional-v2) and remove unrelated file changes per reviewer ctchou's request. Currently the branch is a single commit on main with many unrelated changes (HasFresh, LTS/Notation, CCS/Semantics, LambdaCalculus files, Modal logic files, Propositional/Defs.lean). Cherry-pick only the temporal-specific changes (Temporal/Syntax/Formula.lean, LTL/Syntax/Formula.lean, Connectives.lean temporal additions, Cslib.lean imports, references.bib) onto feat/propositional-v2 as the new base

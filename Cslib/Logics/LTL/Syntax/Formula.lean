@@ -51,6 +51,7 @@ intermediate points). `someFuture φ` is `φ U ⊤` (φ is the event, ⊤ is the
 
 * [A. Pnueli, *The Temporal Logic of Programs*][Pnueli1977]
 * [H. Kamp, *Tense Logic and the Theory of Linear Order*][Kamp1968]
+* [J. P. Burgess, *Axioms for Tense Logic. I. "Since" and "Until"*][Burgess1982I]
 * [J. P. Burgess, *Basic Tense Logic*][Burgess1984]
 * [M. Y. Vardi, P. Wolper,
   *An automata-theoretic approach to automatic program verification*][VardiWolper1986]

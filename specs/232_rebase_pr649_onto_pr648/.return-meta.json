@@ -1,0 +1,21 @@
+{
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/232_rebase_pr649_onto_pr648/plans/01_rebase-plan.md",
+      "summary": "4-phase implementation plan for rebasing PR #649 onto PR #648 with PR base branch update (user-review gate)"
+    }
+  ],
+  "next_steps": "Run /implement 232 to execute the plan",
+  "metadata": {
+    "session_id": "sess_1750203600_orchestrate",
+    "agent_type": "planner-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 4,
+    "estimated_hours": 0.75,
+    "dependency_waves": [[1], [2], [3], [4]]
+  },
+  "memory_candidates": []
+}

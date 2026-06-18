@@ -1,5 +1,5 @@
 ---
-next_project_number: 234
+next_project_number: 235
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 234
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,197,209,226,232 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,197,209,226,232,234 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -44,6 +44,7 @@ next_project_number: 234
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
+234 [NOT STARTED] — Revise main branch to use standard LTL convention for untl and sn
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -52,6 +53,16 @@ next_project_number: 234
 232 [IMPLEMENTING] — Rebase PR #649 (feat/temporal-formula-propositional) onto PR #648
 
 ## Tasks
+
+### 234. Revise untl snce convention
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Revise main branch to use standard LTL convention for untl and snce: first argument is the guard (holds at intermediate points), second argument is the event (eventually holds at the witness point). Update all Lean code, docstrings, and comments that reference the Burgess convention to align with the standard temporal logic convention
+
+---
 
 ### 233. Revise pr649 ltl only
 - **Status**: [COMPLETED]

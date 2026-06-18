@@ -1,6 +1,16 @@
 {
-  "next_project_number": 234,
+  "next_project_number": 235,
   "active_projects": [
+    {
+      "project_number": 234,
+      "project_name": "revise_untl_snce_convention",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Revise main branch to use standard LTL convention for untl and snce: first argument is the guard (holds at intermediate points), second argument is the event (eventually holds at the witness point). Update all Lean code, docstrings, and comments that reference the Burgess convention to align with the standard temporal logic convention",
+      "topic": "Temporal Logic",
+      "created": "2026-06-18T23:50:25Z",
+      "last_updated": "2026-06-18T23:50:25Z"
+    },
     {
       "project_number": 233,
       "project_name": "revise_pr649_ltl_only",

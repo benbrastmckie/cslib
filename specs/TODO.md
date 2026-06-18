@@ -1,17 +1,17 @@
 ---
-next_project_number: 233
+next_project_number: 234
 ---
 
 # TODO
 
 ## Task Order
 
-*Updated 2026-06-17. Generated from state.json dependency graph.*
+*Updated 2026-06-18. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,197,209,226,232 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,197,209,226,232,233 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -44,6 +44,7 @@ next_project_number: 233
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
+233 [NOT STARTED] — Revise PR #649 on branch feat/temporal-formula-propositional to i
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -52,6 +53,16 @@ next_project_number: 233
 232 [IMPLEMENTING] — Rebase PR #649 (feat/temporal-formula-propositional) onto PR #648
 
 ## Tasks
+
+### 233. Revise pr649 ltl only
+- **Status**: [NOT STARTED]
+- **Task Type**: pr
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Revise PR #649 on branch feat/temporal-formula-propositional to include LTL only per reviewer comment (pullrequestreview-4528240645), add LTL semantics if space permits (~300LOC), and update pr-description accordingly
+
+---
 
 ### 232. Rebase pr649 onto pr648
 - **Status**: [IMPLEMENTING]

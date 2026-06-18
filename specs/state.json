@@ -1,6 +1,16 @@
 {
-  "next_project_number": 233,
+  "next_project_number": 234,
   "active_projects": [
+    {
+      "project_number": 233,
+      "project_name": "revise_pr649_ltl_only",
+      "status": "not_started",
+      "task_type": "pr",
+      "description": "Revise PR #649 on branch feat/temporal-formula-propositional to include LTL only per reviewer comment (pullrequestreview-4528240645), add LTL semantics if space permits (~300LOC), and update pr-description accordingly",
+      "topic": "Temporal Logic",
+      "created": "2026-06-18T23:05:27Z",
+      "last_updated": "2026-06-18T23:05:27Z"
+    },
     {
       "project_number": 232,
       "project_name": "rebase_pr649_onto_pr648",

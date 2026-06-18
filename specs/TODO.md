@@ -11,7 +11,7 @@ next_project_number: 234
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,197,209,226,232,233 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,197,209,226,232 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -44,7 +44,6 @@ next_project_number: 234
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-233 [PR READY] — Revise PR #649 on branch feat/temporal-formula-propositional to i
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -55,7 +54,7 @@ next_project_number: 234
 ## Tasks
 
 ### 233. Revise pr649 ltl only
-- **Status**: [PR READY]
+- **Status**: [COMPLETED]
 - **Task Type**: pr
 - **Topic**: Temporal Logic
 - **Dependencies**: None

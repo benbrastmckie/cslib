@@ -1,0 +1,38 @@
+{
+  "session_id": "sess_1781823963_4f9f03",
+  "task_number": 233,
+  "task_name": "revise_pr649_ltl_only",
+  "status": "implemented",
+  "branch": "feat/temporal-formula-propositional",
+  "phases_completed": [1, 2, 3, 4],
+  "phases_total": 4,
+  "all_phases_complete": true,
+  "build_status": "passing",
+  "ci_checks": {
+    "lake_build": "passed",
+    "checkInitImports": "passed",
+    "lint_style": "passed"
+  },
+  "artifacts": [
+    "specs/233_revise_pr649_ltl_only/plans/01_revise-pr649-ltl.md",
+    "specs/233_revise_pr649_ltl_only/pr-description.md",
+    "specs/233_revise_pr649_ltl_only/summaries/01_revise-pr649-ltl-summary.md"
+  ],
+  "files_changed_on_branch": [
+    "Cslib.lean",
+    "Cslib/Foundations/Logic/Connectives.lean",
+    "Cslib/Logics/LTL/Semantics/Satisfies.lean",
+    "Cslib/Logics/LTL/Syntax/Formula.lean",
+    "references.bib"
+  ],
+  "files_removed_from_pr": [
+    "Cslib/Logics/Temporal/Syntax/Formula.lean"
+  ],
+  "sorry_inventory": [],
+  "open_items": [
+    "Force-push feat/temporal-formula-propositional to update GitHub PR #649",
+    "Update PR title and body via gh pr edit 649",
+    "Temporal PR (HasSince, TemporalConnectives, Temporal/Syntax/Formula.lean) deferred to follow-up"
+  ],
+  "completion_summary": "Revised PR #649 to LTL-only scope per reviewer pullrequestreview-4528240645. Removed Temporal content (HasSince, TemporalConnectives, Temporal/Syntax/Formula.lean). Updated notation to standard unicode (◯, 𝓤, ◇, □). Added leadsto abbreviation (⇝). Added LTL semantics over omega-words. All CI checks pass."
+}

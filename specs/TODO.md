@@ -44,7 +44,7 @@ next_project_number: 234
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-233 [NOT STARTED] — Revise PR #649 on branch feat/temporal-formula-propositional to i
+233 [PR READY] — Revise PR #649 on branch feat/temporal-formula-propositional to i
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -55,7 +55,7 @@ next_project_number: 234
 ## Tasks
 
 ### 233. Revise pr649 ltl only
-- **Status**: [NOT STARTED]
+- **Status**: [PR READY]
 - **Task Type**: pr
 - **Topic**: Temporal Logic
 - **Dependencies**: None

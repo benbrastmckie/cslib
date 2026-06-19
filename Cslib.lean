@@ -285,6 +285,7 @@ public import Cslib.Logics.Bimodal.Theorems.TemporalDerived
 public import Cslib.Logics.HML.Basic
 public import Cslib.Logics.HML.LogicalEquivalence
 public import Cslib.Logics.LTL.Embedding
+public import Cslib.Logics.LTL.Semantics.OmegaExecutionSatisfies
 public import Cslib.Logics.LTL.Semantics.Satisfies
 public import Cslib.Logics.LTL.Syntax.Formula
 public import Cslib.Logics.LinearLogic.CLL.Basic

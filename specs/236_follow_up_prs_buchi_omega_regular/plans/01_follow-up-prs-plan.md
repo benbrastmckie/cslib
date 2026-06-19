@@ -104,7 +104,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: LTL Satisfaction over OmegaExecution [NOT STARTED]
+### Phase 2: LTL Satisfaction over OmegaExecution [COMPLETED]
 
 **Goal**: Define LTL satisfaction over `LTS.OmegaExecution` pairs via a labeling function, and prove equivalence with the existing `Satisfies` definition.
 

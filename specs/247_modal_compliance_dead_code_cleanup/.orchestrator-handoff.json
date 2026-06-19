@@ -1,0 +1,14 @@
+{
+  "status": "planned",
+  "summary": "Created 6-phase plan covering docstrings, dead code removal, parameter/import cleanup, blank line normalization, PR description update, and CI verification",
+  "blockers": [],
+  "artifacts": [
+    {
+      "path": "specs/247_modal_compliance_dead_code_cleanup/plans/01_compliance-cleanup-plan.md",
+      "type": "plan",
+      "summary": "6-phase implementation plan: (1) 17 docstrings + @[simp] + typo, (2) 26 dead declarations, (3) unused param + redundant imports, (4) blank line normalization, (5) PR description line-number update, (6) CI verification"
+    }
+  ],
+  "phases_completed": 0,
+  "phases_total": 6
+}

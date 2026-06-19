@@ -52,6 +52,9 @@ next_project_number: 248
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
+- **Plan**: [247_modal_compliance_dead_code_cleanup/plans/01_compliance-cleanup-plan.md]
+- **Pr_description**: [247_modal_compliance_dead_code_cleanup/pr-description.md]
+- **Research**: [247_modal_compliance_dead_code_cleanup/reports/02_verified-audit.md]
 
 **Description**: Clean up Modal/ compliance issues and dead code: fix 17 missing docstrings, remove @[simp] from k_strong_completeness_iff, fix satifies typo in Basic.lean, remove 25 dead declarations (4 S5 aliases, 2 unused ModalSetDerivable lemmas, 5 dead per-system wrappers, 13 dead _soundness_derivable wrappers, 1 dead HasHilbertTree instance), remove unused _h_T param from canonical_eucl, clean up 2 redundant imports, normalize blank lines in 11 Completeness files
 

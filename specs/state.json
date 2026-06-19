@@ -54,15 +54,22 @@
     {
       "project_number": 236,
       "project_name": "follow_up_prs_buchi_omega_regular",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Complete follow-up PRs from PR #649 for Büchi automata and closure of omega-regular languages under boolean operations",
       "topic": "Temporal Logic",
       "created": "2026-06-19T02:21:37Z",
-      "last_updated": "2026-06-19T07:32:01Z",
+      "last_updated": "2026-06-19T13:50:23Z",
       "completion_summary": "All 3 phases implemented. Phase 1: LTL/Temporal decoupled (Embedding.lean). Phase 2: OmegaExecution bridge (OmegaExecutionSatisfies.lean). Phase 3: LTL omega-regularity theorem proved for atom/bot/imp/next cases; untl case marked proof_wanted for future Vardi-Wolper construction.",
-      "session_id": "sess_1781853529_5eda3c",
-      "next_artifact_number": 4
+      "session_id": "sess_1781876719_ffbb54",
+      "next_artifact_number": 4,
+      "artifacts": [
+        {
+          "path": "specs/236_follow_up_prs_buchi_omega_regular/plans/03_gnba-tableau-plan.md",
+          "type": "plan",
+          "summary": "5-phase GNBA tableau construction plan (Fischer-Ladner closure, Vardi-Wolper)"
+        }
+      ]
     },
     {
       "project_number": 226,

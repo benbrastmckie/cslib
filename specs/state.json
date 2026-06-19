@@ -1,6 +1,16 @@
 {
-  "next_project_number": 237,
+  "next_project_number": 238,
   "active_projects": [
+    {
+      "project_number": 237,
+      "project_name": "weak_completeness_corollaries_modal_cube",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Derive weak completeness as corollaries of strong completeness for all 15 modal cube systems. Move each {sys}_completeness theorem from Completeness.lean into StrongCompleteness.lean, replacing the direct ~30-line proof with a ~5-line corollary via ModalSetDerivable_empty_iff and {sys}_strong_completeness. Remove the original theorem from each Completeness.lean (keeping all supporting infrastructure like truth lemmas and canonical model construction). Update docstrings in both files accordingly. Systems: K, T, B, D, S4, S5, K4, K5, K45, KB5, D4, D5, D45, DB, TB",
+      "topic": "Modal Logic",
+      "created": "2026-06-19T02:53:37Z",
+      "last_updated": "2026-06-19T02:53:37Z"
+    },
     {
       "project_number": 236,
       "project_name": "follow_up_prs_buchi_omega_regular",

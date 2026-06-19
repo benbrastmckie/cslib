@@ -1,16 +1,31 @@
 {
-  "status": "planned",
-  "summary": "3-phase plan created: Phase 1 decouples LTL/Temporal (1h), Phase 2 bridges LTL to OmegaExecution (2h), Phase 3 proves LTL formulas define omega-regular languages (7h)",
+  "status": "partial",
+  "summary": "Phases 1-2 completed. Phase 3 partially done: atom/bot/imp/next omega-regularity cases proved; untl case has sorry (marked proof_wanted). All files build except sorry warning in OmegaRegular.lean.",
   "blockers": [],
-  "continuation_context": null,
+  "continuation_context": "The untl (Until) case in Formula.isRegular requires an NBA construction for the Vardi-Wolper Fischer-Ladner closure. All boolean closure results exist (IsRegular.compl, IsRegular.sup, etc.). The fixed-point approach (phi U psi = psi or (phi and X(phi U psi))) is recommended but was not completed.",
   "next_action_hint": "implement",
-  "phases_completed": 0,
+  "phases_completed": 2,
   "phases_total": 3,
   "artifacts": [
     {
       "path": "specs/236_follow_up_prs_buchi_omega_regular/plans/01_follow-up-prs-plan.md",
       "type": "plan",
-      "summary": "Implementation plan with 3 sequential phases: LTL/Temporal decoupling, OmegaExecution satisfaction bridge, and LTL omega-regularity theorem via structural induction"
+      "summary": "Implementation plan with 3 sequential phases"
+    },
+    {
+      "path": "Cslib/Logics/LTL/Embedding.lean",
+      "type": "implementation",
+      "summary": "LTL-to-Temporal embedding (Phase 1 complete)"
+    },
+    {
+      "path": "Cslib/Logics/LTL/Semantics/OmegaExecutionSatisfies.lean",
+      "type": "implementation",
+      "summary": "OmegaExecution satisfaction bridge (Phase 2 complete)"
+    },
+    {
+      "path": "Cslib/Logics/LTL/Semantics/OmegaRegular.lean",
+      "type": "implementation",
+      "summary": "LTL omega-regularity theorem (Phase 3 partial: 4/5 cases proved, untl sorry)"
     }
   ]
 }

@@ -1,7 +1,7 @@
 # Implementation Plan: Task #236
 
 - **Task**: 236 - Complete follow-up PRs from PR #649 for Buchi automata and closure of omega-regular languages under boolean operations
-- **Status**: [NOT STARTED]
+- **Status**: [IN PROGRESS]
 - **Effort**: 10 hours
 - **Dependencies**: None (PR #649 content is already on main)
 - **Research Inputs**: specs/236_follow_up_prs_buchi_omega_regular/reports/01_follow-up-prs-research.md
@@ -146,7 +146,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: LTL-to-Buchi Translation (Omega-Regularity of LTL) [NOT STARTED]
+### Phase 3: LTL-to-Buchi Translation (Omega-Regularity of LTL) [IN PROGRESS]
 
 **Goal**: Prove the main theorem: for every LTL formula `φ` over a finite atom set, the set of omega-words satisfying `φ` is an omega-regular language. This is done by structural induction on `φ`, using existing boolean closure results for the propositional cases and new NBA constructions for `atom`, `next`, and `until`.
 

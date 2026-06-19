@@ -1,5 +1,5 @@
 ---
-next_project_number: 237
+next_project_number: 238
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 237
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,209,226,232,234,236 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,209,226,232,234,236,237 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -28,6 +28,10 @@ next_project_number: 237
 ### Foundations
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
+
+### Modal Logic
+
+237 [NOT STARTED] — Derive weak completeness as corollaries of strong completeness fo
 
 ### Project Management
 
@@ -50,6 +54,16 @@ next_project_number: 237
 232 [IMPLEMENTING] — Rebase PR #649 (feat/temporal-formula-propositional) onto PR #648
 
 ## Tasks
+
+### 237. Weak completeness corollaries modal cube
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Derive weak completeness as corollaries of strong completeness for all 15 modal cube systems. Move each {sys}_completeness theorem from Completeness.lean into StrongCompleteness.lean, replacing the direct ~30-line proof with a ~5-line corollary via ModalSetDerivable_empty_iff and {sys}_strong_completeness. Remove the original theorem from each Completeness.lean (keeping all supporting infrastructure like truth lemmas and canonical model construction). Update docstrings in both files accordingly. Systems: K, T, B, D, S4, S5, K4, K5, K45, KB5, D4, D5, D45, DB, TB
+
+---
 
 ### 236. Follow up prs buchi omega regular
 - **Status**: [PLANNED]

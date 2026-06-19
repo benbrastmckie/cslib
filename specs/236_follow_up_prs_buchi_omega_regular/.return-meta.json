@@ -1,19 +1,42 @@
 {
-  "status": "in_progress",
-  "started_at": "2026-06-18T19:32:26-07:00",
-  "artifacts": [],
+  "status": "partial",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/236_follow_up_prs_buchi_omega_regular/plans/01_follow-up-prs-plan.md",
+      "summary": "3-phase plan: LTL/Temporal decoupling, OmegaExecution bridge, LTL-to-Buchi omega-regularity theorem"
+    },
+    {
+      "type": "implementation",
+      "path": "Cslib/Logics/LTL/Embedding.lean",
+      "summary": "LTL-to-Temporal embedding extracted from Formula.lean"
+    },
+    {
+      "type": "implementation",
+      "path": "Cslib/Logics/LTL/Semantics/OmegaExecutionSatisfies.lean",
+      "summary": "LTL satisfaction over OmegaExecution via labeling function"
+    },
+    {
+      "type": "implementation",
+      "path": "Cslib/Logics/LTL/Semantics/OmegaRegular.lean",
+      "summary": "LTL omega-regularity theorem (atom/bot/imp/next proved; untl case sorry)"
+    }
+  ],
   "partial_progress": {
-    "stage": "phase_2_complete",
-    "details": "Phase 1 (LTL/Temporal decoupling) and Phase 2 (OmegaExecutionSatisfies) completed",
-    "lint_count_start": null,
-    "lint_count_current": null,
+    "stage": "phase_3_in_progress",
+    "details": "Phases 1-2 completed. Phase 3: atom/bot/imp/next cases proved; untl case has sorry (marked proof_wanted). Two simp warnings fixed.",
     "phases_completed": 2,
-    "last_completed_phase": "LTL Satisfaction over OmegaExecution"
+    "phases_total": 3
   },
+  "next_steps": "Run /implement 236 to complete the untl case in Phase 3, or submit Phases 1-2 as separate PRs",
   "metadata": {
     "session_id": "sess_1781835768_ac3571",
-    "agent_type": "cslib-implementation-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 3,
+    "estimated_hours": 10,
+    "dependency_waves": [[1], [2], [3]]
+  },
+  "memory_candidates": []
 }

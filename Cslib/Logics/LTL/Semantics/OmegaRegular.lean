@@ -323,14 +323,42 @@ theorem Formula.isRegular_next {Atom : Type*} {φ : Formula Atom}
     rw [nextNBA_language_eq, h_na]
   exact ⟨Option State, inferInstance, nextNBA na, h_eq⟩
 
-/-! ## Until case (proof_wanted) -/
+/-! ## Until case -/
+
+/-- Membership in `φ.omegaLanguage` at a shifted index: `v.drop k ∈ φ.omegaLanguage` iff
+`φ` is satisfied at position `k` in the canonical valuation `fun n p => p ∈ v n`. -/
+private theorem mem_omegaLanguage_drop {Atom : Type*} {φ : Formula Atom}
+    {v : ωSequence (Set Atom)} {k : ℕ} :
+    v.drop k ∈ φ.omegaLanguage ↔ Satisfies (fun n p => p ∈ v n) k φ := by
+  simp only [mem_omegaLanguage, ωSequence.drop]
+  -- LHS: Satisfies (fun n p => p ∈ v (n + k)) 0 φ
+  -- RHS: Satisfies (fun n p => p ∈ v n) k φ  =  Satisfies (fun n p => p ∈ v n) (0 + k) φ
+  -- Use satisfies_shift k (i := 0): Satisfies val (0 + k) φ ↔ Satisfies (fun n => val (n+k)) 0 φ
+  have h := @satisfies_shift Atom (fun n p => p ∈ v n) k 0 φ
+  simpa using h.symm
+
+/-- The ω-language of `φ U ψ` (guard `φ`, event `ψ`) expressed via `Stream.drop`.
+
+`v ∈ L(untl φ ψ)` iff there exists a position `j` such that `ψ` holds at `j` (the event)
+and `φ` holds at every position `k < j` (the guard). -/
+private theorem omegaLanguage_untl {Atom : Type*} (φ ψ : Formula Atom) :
+    (Formula.untl φ ψ).omegaLanguage =
+      ⟨{ v | ∃ j, v.drop j ∈ ψ.omegaLanguage ∧ ∀ k < j, v.drop k ∈ φ.omegaLanguage }⟩ := by
+  apply ωLanguage.mem_ext
+  intro v
+  simp only [ωLanguage.mem_def, Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨j, -, hj_psi, hguard⟩
+    exact ⟨j, mem_omegaLanguage_drop.mpr hj_psi,
+      fun k hkj => mem_omegaLanguage_drop.mpr (hguard k (Nat.zero_le k) hkj)⟩
+  · rintro ⟨j, hj_psi, hguard⟩
+    exact ⟨j, Nat.zero_le j, mem_omegaLanguage_drop.mp hj_psi,
+      fun k _ hkj => mem_omegaLanguage_drop.mp (hguard k hkj)⟩
 
 /-- The ω-language of `φ U ψ` (guard `φ`, event `ψ` in Burgess convention) is ω-regular,
 given IH for both subformulas.
 
-This is the main technical step of the LTL-to-Büchi translation (Vardi-Wolper 1986).
-The full construction requires an NBA tracking "progress obligations" via the Fischer-Ladner
-closure of the formula. Deferred to a follow-up PR. -/
+This is the main technical step of the LTL-to-Büchi translation (Vardi-Wolper 1986). -/
 proof_wanted Formula.isRegular_untl {Atom : Type} [Finite Atom] {φ ψ : Formula Atom}
     (hφ : φ.omegaLanguage.IsRegular) (hψ : ψ.omegaLanguage.IsRegular) :
     (Formula.untl φ ψ).omegaLanguage.IsRegular

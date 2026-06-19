@@ -125,7 +125,7 @@ The main theorem `Formula.isRegular` uses `sorry` only for the `untl` case (via 
 
 ---
 
-### Phase 3a: Semantic Equation for untl [IN PROGRESS]
+### Phase 3a: Semantic Equation for untl [COMPLETED]
 
 **Goal**: Prove `omegaLanguage_untl` expressing the until language in terms of `Stream.drop` and sub-formula omega-languages. This establishes the mathematical foundation for the NBA construction.
 
@@ -156,7 +156,7 @@ The main theorem `Formula.isRegular` uses `sorry` only for the `untl` case (via 
 
 ---
 
-### Phase 3b: Construct untlNBA and Prove Language Equality [NOT STARTED]
+### Phase 3b: Construct untlNBA and Prove Language Equality [BLOCKED]
 
 **Goal**: Build a nondeterministic Buchi automaton `untlNBA` whose accepted language equals the until language `(Formula.untl phi psi).omegaLanguage`, following the direct NBA construction approach recommended by the research.
 

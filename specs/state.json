@@ -90,13 +90,13 @@
     {
       "project_number": 209,
       "project_name": "lint_namespace_fixes",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Fix namespace lint errors (not namespaced + duplicate namespace)",
       "description": "Fix 298 namespace lint errors: 239 declarations not properly namespaced and 59 duplicate namespace components (Chronicle, Temporal, Bimodal repeated in names). Requires moving declarations into correct namespaces or renaming.",
       "topic": "Project Management",
       "created": "2026-06-15T17:59:27Z",
-      "last_updated": "2026-06-15T17:59:27Z",
+      "last_updated": "2026-06-19T05:54:03Z",
       "artifacts": [
         {
           "path": "specs/209_lint_namespace_fixes/reports/01_namespace-research.md",
@@ -107,8 +107,14 @@
           "path": "specs/209_lint_namespace_fixes/plans/01_namespace-plan.md",
           "type": "plan",
           "summary": "01_namespace-plan.md"
+        },
+        {
+          "path": "specs/209_lint_namespace_fixes/summaries/01_namespace-summary.md",
+          "type": "summary",
+          "summary": "Task 209 complete: 298 namespace lint errors resolved (0 topNamespace, 0 dupNamespace remaining), GrindLint test fixed, CslibTests.lean format aligned with upstream"
         }
-      ]
+      ],
+      "session_id": "sess_1781845109_e0a99c"
     },
     {
       "project_number": 215,

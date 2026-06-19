@@ -11,7 +11,7 @@ next_project_number: 246
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,209,226,236,241,242,243,244,245 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,226,236,241,242,243,244,245 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -28,10 +28,6 @@ next_project_number: 246
 ### Foundations
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
-
-### Project Management
-
-209 [IMPLEMENTING] — Fix 298 namespace lint errors: 239 declarations not properly name
 
 ### Propositional Logic
 
@@ -182,12 +178,13 @@ Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completenes
 ---
 
 ### 209. Fix namespace lint errors (not namespaced + duplicate namespace)
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
 - **Research**: [209_lint_namespace_fixes/reports/01_namespace-research.md]
 - **Plan**: [209_lint_namespace_fixes/plans/01_namespace-plan.md]
+- **Summary**: [209_lint_namespace_fixes/summaries/01_namespace-summary.md]
 
 **Description**: Fix 298 namespace lint errors: 239 declarations not properly namespaced and 59 duplicate namespace components (Chronicle, Temporal, Bimodal repeated in names). Requires moving declarations into correct namespaces or renaming.
 

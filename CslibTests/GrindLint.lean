@@ -1,6 +1,8 @@
 import Cslib
 
 set_option linter.hashCommand false
+-- Long identifiers in `#grind_lint skip` cannot be line-wrapped; suppress long-line warnings.
+set_option linter.style.longLine false
 
 open Lean Elab.Command
 

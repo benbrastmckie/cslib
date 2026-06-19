@@ -43,21 +43,6 @@ public import Cslib.Logics.Modal.Metalogic.Systems.DB.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.S5.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.S5.Completeness
 public import Cslib.Logics.Modal.Metalogic.StrongCompleteness
-public import Cslib.Logics.Modal.Metalogic.Systems.K.StrongCompleteness
-public import Cslib.Logics.Modal.Metalogic.Systems.T.StrongCompleteness
-public import Cslib.Logics.Modal.Metalogic.Systems.D.StrongCompleteness
-public import Cslib.Logics.Modal.Metalogic.Systems.S4.StrongCompleteness
-public import Cslib.Logics.Modal.Metalogic.Systems.K4.StrongCompleteness
-public import Cslib.Logics.Modal.Metalogic.Systems.B.StrongCompleteness
-public import Cslib.Logics.Modal.Metalogic.Systems.K45.StrongCompleteness
-public import Cslib.Logics.Modal.Metalogic.Systems.K5.StrongCompleteness
-public import Cslib.Logics.Modal.Metalogic.Systems.D4.StrongCompleteness
-public import Cslib.Logics.Modal.Metalogic.Systems.KB5.StrongCompleteness
-public import Cslib.Logics.Modal.Metalogic.Systems.TB.StrongCompleteness
-public import Cslib.Logics.Modal.Metalogic.Systems.D45.StrongCompleteness
-public import Cslib.Logics.Modal.Metalogic.Systems.D5.StrongCompleteness
-public import Cslib.Logics.Modal.Metalogic.Systems.DB.StrongCompleteness
-public import Cslib.Logics.Modal.Metalogic.Systems.S5.StrongCompleteness
 public import Cslib.Logics.Modal.ProofSystem.Instances
 
 /-! # Modal Metalogic Module

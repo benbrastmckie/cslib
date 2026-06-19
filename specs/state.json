@@ -66,14 +66,14 @@
     {
       "project_number": 236,
       "project_name": "follow_up_prs_buchi_omega_regular",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Complete follow-up PRs from PR #649 for Büchi automata and closure of omega-regular languages under boolean operations",
       "topic": "Temporal Logic",
       "created": "2026-06-19T02:21:37Z",
-      "last_updated": "2026-06-19T17:20:05Z",
+      "last_updated": "2026-06-19T17:54:28Z",
       "completion_summary": null,
-      "session_id": "sess_1781889380_5d817d",
+      "session_id": "sess_1781889786_46eb53",
       "next_artifact_number": 5,
       "artifacts": [
         {

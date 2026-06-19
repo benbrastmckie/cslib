@@ -47,8 +47,8 @@ def subst (q r : Atom) : Formula Atom -> Formula Atom
   | .bot => .bot
   | .imp phi psi => .imp (phi.subst q r) (psi.subst q r)
   | .box phi => .box (phi.subst q r)
-  | .untl phi psi => .untl (phi.subst q r) (psi.subst q r)
-  | .snce phi psi => .snce (phi.subst q r) (psi.subst q r)
+  | .untl psi phi => .untl (psi.subst q r) (phi.subst q r)
+  | .snce psi phi => .snce (psi.subst q r) (phi.subst q r)
 
 /-! ### Structural simp lemmas -/
 
@@ -77,13 +77,13 @@ theorem subst_box (q r : Atom) (phi : Formula Atom) :
 
 @[simp]
 theorem subst_untl (q r : Atom) (phi psi : Formula Atom) :
-    (Formula.untl phi psi).subst q r =
-      .untl (phi.subst q r) (psi.subst q r) := rfl
+    (Formula.untl psi phi).subst q r =
+      .untl (psi.subst q r) (phi.subst q r) := rfl
 
 @[simp]
 theorem subst_snce (q r : Atom) (phi psi : Formula Atom) :
-    (Formula.snce phi psi).subst q r =
-      .snce (phi.subst q r) (psi.subst q r) := rfl
+    (Formula.snce psi phi).subst q r =
+      .snce (psi.subst q r) (phi.subst q r) := rfl
 
 /-! ### Derived operator substitution lemmas -/
 
@@ -151,10 +151,10 @@ theorem subst_fresh_eq (q r : Atom) (phi : Formula Atom)
   | box phi ih =>
     simp only [atoms] at h
     simp [subst, ih h]
-  | untl phi psi ih1 ih2 =>
+  | untl psi phi ih2 ih1 =>
     simp only [atoms, Finset.mem_union, not_or] at h
     simp [subst, ih1 h.1, ih2 h.2]
-  | snce phi psi ih1 ih2 =>
+  | snce psi phi ih2 ih1 =>
     simp only [atoms, Finset.mem_union, not_or] at h
     simp [subst, ih1 h.1, ih2 h.2]
 
@@ -174,9 +174,9 @@ theorem subst_atoms (q r : Atom) (phi : Formula Atom) :
     simp only [subst, atoms, Finset.image_union, ih1, ih2]
   | box phi ih =>
     simp only [subst, atoms, ih]
-  | untl phi psi ih1 ih2 =>
+  | untl psi phi ih2 ih1 =>
     simp only [subst, atoms, Finset.image_union, ih1, ih2]
-  | snce phi psi ih1 ih2 =>
+  | snce psi phi ih2 ih1 =>
     simp only [subst, atoms, Finset.image_union, ih1, ih2]
 
 end Formula
@@ -443,9 +443,9 @@ theorem swapTemporal_subst (q r : Atom)
     simp [Formula.swapTemporal, Formula.subst, iha, ihb]
   | box a ih =>
     simp [Formula.swapTemporal, Formula.subst, ih]
-  | untl a b iha ihb =>
+  | untl b a ihb iha =>
     simp [Formula.swapTemporal, Formula.subst, iha, ihb]
-  | snce a b iha ihb =>
+  | snce b a ihb iha =>
     simp [Formula.swapTemporal, Formula.subst, iha, ihb]
 
 /-- Axiom substitution preserves `minFrameClass`. -/

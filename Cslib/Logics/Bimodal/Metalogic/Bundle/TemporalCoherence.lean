@@ -289,17 +289,17 @@ end DecidableAtom
 def BFMCS.untilSinceCoherent (B : BFMCS Atom D fc) : Prop :=
   ∀ fam ∈ B.families,
     (∀ t : D, ∀ φ ψ : Formula Atom,
-      Formula.untl φ ψ ∈ fam.mcs t →
+      Formula.untl ψ φ ∈ fam.mcs t →
       ∃ s : D, t < s ∧ φ ∈ fam.mcs s ∧ ∀ r : D, t < r → r < s → ψ ∈ fam.mcs r) ∧
     (∀ t : D, ∀ φ ψ : Formula Atom,
       (∃ s : D, t < s ∧ φ ∈ fam.mcs s ∧ ∀ r : D, t < r → r < s → ψ ∈ fam.mcs r) →
-      Formula.untl φ ψ ∈ fam.mcs t) ∧
+      Formula.untl ψ φ ∈ fam.mcs t) ∧
     (∀ t : D, ∀ φ ψ : Formula Atom,
-      Formula.snce φ ψ ∈ fam.mcs t →
+      Formula.snce ψ φ ∈ fam.mcs t →
       ∃ s : D, s < t ∧ φ ∈ fam.mcs s ∧ ∀ r : D, s < r → r < t → ψ ∈ fam.mcs r) ∧
     (∀ t : D, ∀ φ ψ : Formula Atom,
       (∃ s : D, s < t ∧ φ ∈ fam.mcs s ∧ ∀ r : D, s < r → r < t → ψ ∈ fam.mcs r) →
-      Formula.snce φ ψ ∈ fam.mcs t)
+      Formula.snce ψ φ ∈ fam.mcs t)
 
 /-! ## Split Until/Since Coherence -/
 
@@ -308,19 +308,19 @@ def BFMCS.backwardUntilSinceCoherent (B : BFMCS Atom D fc) : Prop :=
   ∀ fam ∈ B.families,
     (∀ t : D, ∀ φ ψ : Formula Atom,
       (∃ s : D, t < s ∧ φ ∈ fam.mcs s ∧ ∀ r : D, t < r → r < s → ψ ∈ fam.mcs r) →
-      Formula.untl φ ψ ∈ fam.mcs t) ∧
+      Formula.untl ψ φ ∈ fam.mcs t) ∧
     (∀ t : D, ∀ φ ψ : Formula Atom,
       (∃ s : D, s < t ∧ φ ∈ fam.mcs s ∧ ∀ r : D, s < r → r < t → ψ ∈ fam.mcs r) →
-      Formula.snce φ ψ ∈ fam.mcs t)
+      Formula.snce ψ φ ∈ fam.mcs t)
 
 /-- Forward until/since coherence: until/since formulas imply the existence of witnesses. -/
 def BFMCS.forwardUntilSinceCoherent (B : BFMCS Atom D fc) : Prop :=
   ∀ fam ∈ B.families,
     (∀ t : D, ∀ φ ψ : Formula Atom,
-      Formula.untl φ ψ ∈ fam.mcs t →
+      Formula.untl ψ φ ∈ fam.mcs t →
       ∃ s : D, t < s ∧ φ ∈ fam.mcs s ∧ ∀ r : D, t < r → r < s → ψ ∈ fam.mcs r) ∧
     (∀ t : D, ∀ φ ψ : Formula Atom,
-      Formula.snce φ ψ ∈ fam.mcs t →
+      Formula.snce ψ φ ∈ fam.mcs t →
       ∃ s : D, s < t ∧ φ ∈ fam.mcs s ∧ ∀ r : D, s < r → r < t → ψ ∈ fam.mcs r)
 
 /-! ## Restricted forward/backward Until/Since Coherence -/
@@ -332,12 +332,12 @@ variable [DecidableEq Atom]
 def BFMCS.restrictedForwardUntilSinceCoherent (B : BFMCS Atom D fc) (root : Formula Atom) : Prop :=
   ∀ fam ∈ B.families,
     (∀ t : D, ∀ φ ψ : Formula Atom,
-      Formula.untl φ ψ ∈ subformulaClosure root →
-      Formula.untl φ ψ ∈ fam.mcs t →
+      Formula.untl ψ φ ∈ subformulaClosure root →
+      Formula.untl ψ φ ∈ fam.mcs t →
       ∃ s : D, t < s ∧ φ ∈ fam.mcs s ∧ ∀ r : D, t < r → r < s → ψ ∈ fam.mcs r) ∧
     (∀ t : D, ∀ φ ψ : Formula Atom,
-      Formula.snce φ ψ ∈ subformulaClosure root →
-      Formula.snce φ ψ ∈ fam.mcs t →
+      Formula.snce ψ φ ∈ subformulaClosure root →
+      Formula.snce ψ φ ∈ fam.mcs t →
       ∃ s : D, s < t ∧ φ ∈ fam.mcs s ∧ ∀ r : D, s < r → r < t → ψ ∈ fam.mcs r)
 
 omit [Zero D] in
@@ -353,13 +353,13 @@ theorem BFMCS.forward_implies_restricted_forward (B : BFMCS Atom D fc) (root : F
 def BFMCS.restrictedBackwardUntilSinceCoherent (B : BFMCS Atom D fc) (root : Formula Atom) : Prop :=
   ∀ fam ∈ B.families,
     (∀ t : D, ∀ φ ψ : Formula Atom,
-      Formula.untl φ ψ ∈ subformulaClosure root →
+      Formula.untl ψ φ ∈ subformulaClosure root →
       (∃ s : D, t < s ∧ φ ∈ fam.mcs s ∧ ∀ r : D, t < r → r < s → ψ ∈ fam.mcs r) →
-      Formula.untl φ ψ ∈ fam.mcs t) ∧
+      Formula.untl ψ φ ∈ fam.mcs t) ∧
     (∀ t : D, ∀ φ ψ : Formula Atom,
-      Formula.snce φ ψ ∈ subformulaClosure root →
+      Formula.snce ψ φ ∈ subformulaClosure root →
       (∃ s : D, s < t ∧ φ ∈ fam.mcs s ∧ ∀ r : D, s < r → r < t → ψ ∈ fam.mcs r) →
-      Formula.snce φ ψ ∈ fam.mcs t)
+      Formula.snce ψ φ ∈ fam.mcs t)
 
 omit [Zero D] in
 theorem BFMCS.backward_implies_restricted_backward (B : BFMCS Atom D fc) (root : Formula Atom)

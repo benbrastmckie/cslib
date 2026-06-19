@@ -30,15 +30,15 @@ variable {Atom : Type*}
 theorem neg_until_equiv
     (A B : Cslib.Logic.Bimodal.Formula Atom) :
     intEquiv
-      (Cslib.Logic.Bimodal.Formula.neg (.untl A B))
+      (Cslib.Logic.Bimodal.Formula.neg (.untl B A))
       (Cslib.Logic.Bimodal.Formula.or
         (Cslib.Logic.Bimodal.Formula.allFuture
           (Cslib.Logic.Bimodal.Formula.neg A))
         (.untl
+          (Cslib.Logic.Bimodal.Formula.neg A)
           (Cslib.Logic.Bimodal.Formula.and
             (Cslib.Logic.Bimodal.Formula.neg A)
-            (Cslib.Logic.Bimodal.Formula.neg B))
-          (Cslib.Logic.Bimodal.Formula.neg A))) := by
+            (Cslib.Logic.Bimodal.Formula.neg B)))) := by
   intro M t
   rw [int_truth_neg, int_truth_or,
     int_truth_allFuture]
@@ -107,15 +107,15 @@ theorem neg_until_equiv
 theorem neg_since_equiv
     (A B : Cslib.Logic.Bimodal.Formula Atom) :
     intEquiv
-      (Cslib.Logic.Bimodal.Formula.neg (.snce A B))
+      (Cslib.Logic.Bimodal.Formula.neg (.snce B A))
       (Cslib.Logic.Bimodal.Formula.or
         (Cslib.Logic.Bimodal.Formula.allPast
           (Cslib.Logic.Bimodal.Formula.neg A))
         (.snce
+          (Cslib.Logic.Bimodal.Formula.neg A)
           (Cslib.Logic.Bimodal.Formula.and
             (Cslib.Logic.Bimodal.Formula.neg A)
-            (Cslib.Logic.Bimodal.Formula.neg B))
-          (Cslib.Logic.Bimodal.Formula.neg A))) := by
+            (Cslib.Logic.Bimodal.Formula.neg B)))) := by
   intro M t
   rw [int_truth_neg, int_truth_or,
     int_truth_allPast]

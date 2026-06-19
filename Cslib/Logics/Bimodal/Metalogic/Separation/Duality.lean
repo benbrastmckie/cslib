@@ -75,7 +75,7 @@ theorem swapTemporal_int_truth
     rw [ih1, ih2]
   | box phi _ih =>
     simp [Formula.swapTemporal, intTruth]
-  | untl phi psi ih1 ih2 =>
+  | untl psi phi ih2 ih1 =>
     simp only [Formula.swapTemporal, intTruth]
     constructor
     · rintro ⟨s, hst, h1, h2⟩
@@ -92,7 +92,7 @@ theorem swapTemporal_int_truth
         rw [ih2]
         have := h2 (-r) (by omega) (by omega)
         simpa [neg_neg] using this
-  | snce phi psi ih1 ih2 =>
+  | snce psi phi ih2 ih1 =>
     simp only [Formula.swapTemporal, intTruth]
     constructor
     · rintro ⟨s, hts, h1, h2⟩
@@ -139,10 +139,10 @@ theorem dual_U_free_iff_S_free (phi : Formula Atom) :
   | box a ih =>
     simp [Formula.swapTemporal, isUFree,
       isSFree, ih]
-  | untl a b ih1 ih2 =>
+  | untl b a ih2 ih1 =>
     simp [Formula.swapTemporal, isUFree,
       isSFree, ih1, ih2]
-  | snce a b _ih1 _ih2 =>
+  | snce b a _ih2 _ih1 =>
     simp [Formula.swapTemporal, isUFree, isSFree]
 
 /-- S-free after swap is the same as U-free before swap. -/
@@ -157,9 +157,9 @@ theorem dual_S_free_iff_U_free (phi : Formula Atom) :
   | box a ih =>
     simp [Formula.swapTemporal, isUFree,
       isSFree, ih]
-  | untl a b _ih1 _ih2 =>
+  | untl b a _ih2 _ih1 =>
     simp [Formula.swapTemporal, isUFree, isSFree]
-  | snce a b ih1 ih2 =>
+  | snce b a ih2 ih1 =>
     simp [Formula.swapTemporal, isUFree,
       isSFree, ih1, ih2]
 
@@ -176,12 +176,12 @@ theorem dual_separated (phi : Formula Atom) :
   | box _a =>
     simp [Formula.swapTemporal,
       isSyntacticallySeparated]
-  | untl a b _ih1 _ih2 =>
+  | untl b a _ih2 _ih1 =>
     simp [Formula.swapTemporal,
       isSyntacticallySeparated]
     rw [dual_U_free_iff_S_free a,
       dual_U_free_iff_S_free b]
-  | snce a b _ih1 _ih2 =>
+  | snce b a _ih2 _ih1 =>
     simp [Formula.swapTemporal,
       isSyntacticallySeparated]
     rw [dual_S_free_iff_U_free a,
@@ -212,10 +212,10 @@ theorem dual_future_only_iff_past_only
   | box a ih =>
     simp [Formula.swapTemporal, isFutureOnly,
       isPastOnly, ih]
-  | untl a b _ih1 _ih2 =>
+  | untl b a _ih2 _ih1 =>
     simp [Formula.swapTemporal, isFutureOnly,
       isPastOnly]
-  | snce a b ih1 ih2 =>
+  | snce b a ih2 ih1 =>
     simp [Formula.swapTemporal, isFutureOnly,
       isPastOnly, ih1, ih2]
 
@@ -233,10 +233,10 @@ theorem dual_past_only_iff_future_only
   | box a ih =>
     simp [Formula.swapTemporal, isFutureOnly,
       isPastOnly, ih]
-  | untl a b ih1 ih2 =>
+  | untl b a ih2 ih1 =>
     simp [Formula.swapTemporal, isFutureOnly,
       isPastOnly, ih1, ih2]
-  | snce a b _ih1 _ih2 =>
+  | snce b a _ih2 _ih1 =>
     simp [Formula.swapTemporal, isFutureOnly,
       isPastOnly]
 
@@ -253,12 +253,12 @@ theorem dual_properly_separated (phi : Formula Atom) :
   | box _a =>
     simp [Formula.swapTemporal,
       isProperlySeparated]
-  | untl a b _ih1 _ih2 =>
+  | untl b a _ih2 _ih1 =>
     simp [Formula.swapTemporal,
       isProperlySeparated]
     rw [dual_past_only_iff_future_only a,
       dual_past_only_iff_future_only b]
-  | snce a b _ih1 _ih2 =>
+  | snce b a _ih2 _ih1 =>
     simp [Formula.swapTemporal,
       isProperlySeparated]
     rw [dual_future_only_iff_past_only a,
@@ -290,7 +290,7 @@ theorem future_only_imp_S_free
   | box a ih =>
     simp [isFutureOnly] at h
     simp [isSFree, ih h]
-  | untl a b ih1 ih2 =>
+  | untl b a ih2 ih1 =>
     simp [isFutureOnly] at h
     simp [isSFree, ih1 h.1, ih2 h.2]
   | snce _ _ => simp [isFutureOnly] at h
@@ -310,7 +310,7 @@ theorem past_only_imp_U_free
     simp [isPastOnly] at h
     simp [isUFree, ih h]
   | untl _ _ => simp [isPastOnly] at h
-  | snce a b ih1 ih2 =>
+  | snce b a ih2 ih1 =>
     simp [isPastOnly] at h
     simp [isUFree, ih1 h.1, ih2 h.2]
 
@@ -327,12 +327,12 @@ theorem properly_separated_imp_syntactically_separated
     simp [isSyntacticallySeparated,
       ih1 h.1, ih2 h.2]
   | box _ => rfl
-  | untl a b _ih1 _ih2 =>
+  | untl b a _ih2 _ih1 =>
     simp [isProperlySeparated] at h
     simp [isSyntacticallySeparated,
       future_only_imp_S_free h.1,
       future_only_imp_S_free h.2]
-  | snce a b _ih1 _ih2 =>
+  | snce b a _ih2 _ih1 =>
     simp [isProperlySeparated] at h
     simp [isSyntacticallySeparated,
       past_only_imp_U_free h.1,

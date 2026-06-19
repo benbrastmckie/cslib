@@ -74,12 +74,12 @@ instance : DecidablePred (IsSinceFormula (Atom := Atom)) :=
 
 /-- Maps `φ U ψ` to its deferral expansion `ψ ∨ (φ ∧ (φ U ψ))`; returns `⊥` on non-until-formulas. -/
 def toUntilDeferral : Formula Atom → Formula Atom
-  | .untl phi psi => Formula.or psi (Formula.and phi (.untl phi psi))
+  | .untl psi phi => Formula.or psi (Formula.and phi (.untl psi phi))
   | _ => Formula.bot
 
 /-- Maps `φ S ψ` to its deferral expansion `ψ ∨ (φ ∧ (φ S ψ))`; returns `⊥` on non-since-formulas. -/
 def toSinceDeferral : Formula Atom → Formula Atom
-  | .snce phi psi => Formula.or psi (Formula.and phi (.snce phi psi))
+  | .snce psi phi => Formula.or psi (Formula.and phi (.snce psi phi))
   | _ => Formula.bot
 
 /-- The set of deferral expansions for all until-subformulas of `phi`. -/

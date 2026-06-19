@@ -220,11 +220,11 @@ theorem chronicle_truth_lemma (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaxi
   | bot => exact truth_lemma_bot A h_mcs t
   | imp φ ψ ih_φ ih_ψ =>
     exact truth_lemma_imp A h_mcs t φ ψ (ih_φ t) (ih_ψ t)
-  | untl φ ψ ih_φ ih_ψ =>
+  | untl ψ φ ih_ψ ih_φ =>
     constructor
     · exact truth_lemma_untl_backward A h_mcs t φ ψ ih_φ ih_ψ
     · exact truth_lemma_untl_forward A h_mcs t φ ψ ih_φ ih_ψ
-  | snce φ ψ ih_φ ih_ψ =>
+  | snce ψ φ ih_ψ ih_φ =>
     constructor
     · exact truth_lemma_snce_backward A h_mcs t φ ψ ih_φ ih_ψ
     · exact truth_lemma_snce_forward A h_mcs t φ ψ ih_φ ih_ψ

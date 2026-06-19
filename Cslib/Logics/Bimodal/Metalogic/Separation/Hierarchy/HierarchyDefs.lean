@@ -58,8 +58,8 @@ def hasSingleUType (φ x y : Formula Atom) : Prop :=
   | .bot => True
   | .imp ψ₁ ψ₂ => hasSingleUType ψ₁ x y ∧ hasSingleUType ψ₂ x y
   | .box ψ => hasSingleUType ψ x y
-  | .untl ψ₁ ψ₂ => ψ₁ = x ∧ ψ₂ = y
-  | .snce ψ₁ ψ₂ => hasSingleUType ψ₁ x y ∧ hasSingleUType ψ₂ x y
+  | .untl ψ₂ ψ₁ => ψ₁ = x ∧ ψ₂ = y
+  | .snce ψ₂ ψ₁ => hasSingleUType ψ₁ x y ∧ hasSingleUType ψ₂ x y
 
 /-- A formula is U-free implies it trivially has single U-type (vacuously). -/
 theorem u_free_has_single_U_type {φ x y : Formula Atom} (h : isUFree φ = true) :
@@ -74,7 +74,7 @@ theorem u_free_has_single_U_type {φ x y : Formula Atom} (h : isUFree φ = true)
     simp [isUFree] at h
     exact ih h
   | untl _ _ => simp [isUFree] at h
-  | snce ψ₁ ψ₂ ih1 ih2 =>
+  | snce ψ₂ ψ₁ ih2 ih1 =>
     simp [isUFree] at h
     exact ⟨ih1 h.1, ih2 h.2⟩
 
@@ -87,8 +87,8 @@ def hasSingleSType (φ x y : Formula Atom) : Prop :=
   | .bot => True
   | .imp ψ₁ ψ₂ => hasSingleSType ψ₁ x y ∧ hasSingleSType ψ₂ x y
   | .box ψ => hasSingleSType ψ x y
-  | .untl ψ₁ ψ₂ => hasSingleSType ψ₁ x y ∧ hasSingleSType ψ₂ x y
-  | .snce ψ₁ ψ₂ => ψ₁ = x ∧ ψ₂ = y
+  | .untl ψ₂ ψ₁ => hasSingleSType ψ₁ x y ∧ hasSingleSType ψ₂ x y
+  | .snce ψ₂ ψ₁ => ψ₁ = x ∧ ψ₂ = y
 
 /-- A formula is S-free implies it trivially has single S-type (vacuously). -/
 theorem s_free_has_single_S_type {φ x y : Formula Atom} (h : isSFree φ = true) :
@@ -103,7 +103,7 @@ theorem s_free_has_single_S_type {φ x y : Formula Atom} (h : isSFree φ = true)
     simp [isSFree] at h
     exact ih h
   | snce _ _ => simp [isSFree] at h
-  | untl ψ₁ ψ₂ ih1 ih2 =>
+  | untl ψ₂ ψ₁ ih2 ih1 =>
     simp [isSFree] at h
     exact ⟨ih1 h.1, ih2 h.2⟩
 
@@ -131,13 +131,13 @@ theorem has_single_U_type_or {φ ψ x y : Formula Atom}
 
 /-- Helper: U(A,B) trivially has single U-type U(A,B). -/
 theorem has_single_U_type_untl (x y : Formula Atom) :
-    hasSingleUType (.untl x y) x y :=
+    hasSingleUType (.untl y x) x y :=
   ⟨rfl, rfl⟩
 
 /-- Helper: snce preserves hasSingleUType. -/
 theorem has_single_U_type_snce {φ ψ x y : Formula Atom}
     (h1 : hasSingleUType φ x y) (h2 : hasSingleUType ψ x y) :
-    hasSingleUType (.snce φ ψ) x y := ⟨h1, h2⟩
+    hasSingleUType (.snce ψ φ) x y := ⟨h1, h2⟩
 
 /-- Helper: imp preserves hasSingleUType. -/
 theorem has_single_U_type_imp {φ ψ x y : Formula Atom}
@@ -147,14 +147,14 @@ theorem has_single_U_type_imp {φ ψ x y : Formula Atom}
 /-- U(A,B) with S-free A, B is itself syntactically separated. -/
 theorem untl_s_free_separated {x y : Formula Atom}
     (hx : isSFree x = true) (hy : isSFree y = true) :
-    isSyntacticallySeparated (.untl x y) = true := by
+    isSyntacticallySeparated (.untl y x) = true := by
   simp [isSyntacticallySeparated, hx, hy]
 
 /-- U(A,B) with S-free A, B is separable. -/
 theorem untl_s_free_separable {x y : Formula Atom}
     (hx : isSFree x = true) (hy : isSFree y = true) :
-    isSeparable (.untl x y) :=
-  ⟨.untl x y, untl_s_free_separated hx hy, int_equiv_refl _⟩
+    isSeparable (.untl y x) :=
+  ⟨.untl y x, untl_s_free_separated hx hy, int_equiv_refl _⟩
 
 /-! ## Lemma 10.2.6: Multi-U Induction on Count (GHR94) -/
 
@@ -170,10 +170,10 @@ def abstractUntl (phi x y : Formula Atom) (p : Atom) : Formula Atom :=
   | .bot => .bot
   | .imp psi1 psi2 => .imp (abstractUntl psi1 x y p) (abstractUntl psi2 x y p)
   | .box psi => .box (abstractUntl psi x y p)
-  | .untl psi1 psi2 =>
+  | .untl psi2 psi1 =>
     if psi1 = x ∧ psi2 = y then .atom p
-    else .untl (abstractUntl psi1 x y p) (abstractUntl psi2 x y p)
-  | .snce psi1 psi2 => .snce (abstractUntl psi1 x y p) (abstractUntl psi2 x y p)
+    else .untl (abstractUntl psi2 x y p) (abstractUntl psi1 x y p)
+  | .snce psi2 psi1 => .snce (abstractUntl psi2 x y p) (abstractUntl psi1 x y p)
 
 /-! ### Syntactic Roundtrip: abstract then substitute back -/
 
@@ -181,7 +181,7 @@ def abstractUntl (phi x y : Formula Atom) (p : Atom) : Formula Atom :=
     provided p does not appear in the original formula. -/
 theorem abstract_subst_roundtrip (phi x y : Formula Atom) (p : Atom)
     (hfresh : ¬ (p ∈ phi.atoms)) :
-    substFormula (abstractUntl phi x y p) p (.untl x y) = phi := by
+    substFormula (abstractUntl phi x y p) p (.untl y x) = phi := by
   induction phi with
   | atom a =>
     simp [Formula.atoms, Finset.mem_singleton] at hfresh
@@ -194,7 +194,7 @@ theorem abstract_subst_roundtrip (phi x y : Formula Atom) (p : Atom)
   | box c ih =>
     simp [Formula.atoms] at hfresh
     simp [abstractUntl, substFormula, ih hfresh]
-  | untl c d ih1 ih2 =>
+  | untl d c ih2 ih1 =>
     simp [Formula.atoms, Finset.mem_union] at hfresh
     simp only [abstractUntl]
     split
@@ -202,9 +202,9 @@ theorem abstract_subst_roundtrip (phi x y : Formula Atom) (p : Atom)
     · next _ =>
       simp only [substFormula]
       congr 1
-      · exact ih1 hfresh.1
       · exact ih2 hfresh.2
-  | snce c d ih1 ih2 =>
+      · exact ih1 hfresh.1
+  | snce d c ih2 ih1 =>
     simp [Formula.atoms, Finset.mem_union] at hfresh
     simp [abstractUntl, substFormula, ih1 hfresh.1, ih2 hfresh.2]
 
@@ -216,7 +216,7 @@ theorem abstract_untl_correct (phi x y : Formula Atom) (p : Atom)
     (hfresh : ¬ (p ∈ phi.atoms))
     (m : IntStructure Atom) (t : Int) :
     intTruth m t phi ↔
-    intTruth (m.withAtom p {s | intTruth m s (.untl x y)}) t
+    intTruth (m.withAtom p {s | intTruth m s (.untl y x)}) t
       (abstractUntl phi x y p) := by
   induction phi generalizing t with
   | atom a =>
@@ -230,7 +230,7 @@ theorem abstract_untl_correct (phi x y : Formula Atom) (p : Atom)
     · intro h hc; exact (ih2 hfresh.2 t).mp (h ((ih1 hfresh.1 t).mpr hc))
     · intro h hc; exact (ih2 hfresh.2 t).mpr (h ((ih1 hfresh.1 t).mp hc))
   | box _ => simp [abstractUntl, intTruth]
-  | untl c d ih1 ih2 =>
+  | untl d c ih2 ih1 =>
     simp [Formula.atoms, Finset.mem_union] at hfresh
     simp only [abstractUntl]
     split
@@ -246,7 +246,7 @@ theorem abstract_untl_correct (phi x y : Formula Atom) (p : Atom)
       · rintro ⟨s, hts, hc, hd⟩
         exact ⟨s, hts, (ih1 hfresh.1 s).mpr hc,
           fun r hr1 hr2 => (ih2 hfresh.2 r).mpr (hd r hr1 hr2)⟩
-  | snce c d ih1 ih2 =>
+  | snce d c ih2 ih1 =>
     simp [Formula.atoms, Finset.mem_union] at hfresh
     simp only [abstractUntl, intTruth]
     constructor
@@ -260,7 +260,7 @@ theorem abstract_untl_correct (phi x y : Formula Atom) (p : Atom)
 /-- The syntactic roundtrip gives intEquiv directly. -/
 theorem abstract_untl_equiv (phi x y : Formula Atom) (p : Atom)
     (hfresh : ¬ (p ∈ phi.atoms)) :
-    intEquiv phi (substFormula (abstractUntl phi x y p) p (.untl x y)) := by
+    intEquiv phi (substFormula (abstractUntl phi x y p) p (.untl y x)) := by
   rw [abstract_subst_roundtrip phi x y p hfresh]
   exact int_equiv_refl phi
 
@@ -279,7 +279,7 @@ theorem abstract_untl_preserves_S_free (phi x y : Formula Atom) (p : Atom)
   | box c ih =>
     simp [isSFree] at h
     simp [abstractUntl, isSFree, ih h]
-  | untl c d ih1 ih2 =>
+  | untl d c ih2 ih1 =>
     simp [isSFree] at h
     simp only [abstractUntl]
     split
@@ -296,14 +296,14 @@ theorem abstract_untl_preserves_no_S_nested (phi x y : Formula Atom) (p : Atom)
   | bot => trivial
   | imp c d ih1 ih2 => exact ⟨ih1 h.1, ih2 h.2⟩
   | box c ih => exact ih h
-  | untl c d _ _ =>
+  | untl d c _ _ =>
     simp only [abstractUntl]
     split
     · trivial
     · have ⟨hc_sf, hd_sf⟩ := h
       exact ⟨abstract_untl_preserves_S_free c x y p hc_sf,
              abstract_untl_preserves_S_free d x y p hd_sf⟩
-  | snce c d ih1 ih2 => exact ⟨ih1 h.1, ih2 h.2⟩
+  | snce d c ih2 ih1 => exact ⟨ih1 h.1, ih2 h.2⟩
 
 /-- If φ has single U-type U(A,B), abstracting it out gives a U-free formula. -/
 theorem abstract_untl_makes_U_free (phi x y : Formula Atom) (p : Atom)
@@ -316,10 +316,10 @@ theorem abstract_untl_makes_U_free (phi x y : Formula Atom) (p : Atom)
     simp [abstractUntl, isUFree, ih1 h.1, ih2 h.2]
   | box c ih =>
     simp [abstractUntl, isUFree, ih h]
-  | untl c d _ _ =>
+  | untl d c _ _ =>
     obtain ⟨hc, hd⟩ := h; subst hc; subst hd
     simp [abstractUntl, isUFree]
-  | snce c d ih1 ih2 =>
+  | snce d c ih2 ih1 =>
     simp [abstractUntl, isUFree, ih1 h.1, ih2 h.2]
 
 /-! ### Count Properties -/
@@ -335,9 +335,9 @@ theorem count_U_zero_iff_U_free (phi : Formula Atom) :
     simp [countUSubformulas, isUFree, ih1, ih2]
   | box c ih =>
     simp [countUSubformulas, isUFree, ih]
-  | untl c d =>
+  | untl d c =>
     simp [countUSubformulas, isUFree]
-  | snce c d ih1 ih2 =>
+  | snce d c ih2 ih1 =>
     simp [countUSubformulas, isUFree, ih1, ih2]
 
 /-- abstractUntl does not increase the U-subformula count. -/
@@ -351,14 +351,14 @@ theorem abstract_untl_count_le (phi x y : Formula Atom) (p : Atom) :
     exact Nat.add_le_add ih1 ih2
   | box c ih =>
     simp [abstractUntl, countUSubformulas]; exact ih
-  | untl c d ih1 ih2 =>
+  | untl d c ih2 ih1 =>
     simp only [abstractUntl, countUSubformulas]
     split
     · simp [countUSubformulas]
     · simp only [countUSubformulas]
       have := Nat.add_le_add ih1 ih2
       omega
-  | snce c d ih1 ih2 =>
+  | snce d c ih2 ih1 =>
     simp [abstractUntl, countUSubformulas]
     exact Nat.add_le_add ih1 ih2
 
@@ -378,15 +378,15 @@ def abstractSnce (phi x y : Formula Atom) (p : Atom) : Formula Atom :=
   | .bot => .bot
   | .imp psi1 psi2 => .imp (abstractSnce psi1 x y p) (abstractSnce psi2 x y p)
   | .box psi => .box (abstractSnce psi x y p)
-  | .untl psi1 psi2 => .untl (abstractSnce psi1 x y p) (abstractSnce psi2 x y p)
-  | .snce psi1 psi2 =>
+  | .untl psi2 psi1 => .untl (abstractSnce psi2 x y p) (abstractSnce psi1 x y p)
+  | .snce psi2 psi1 =>
     if psi1 = x ∧ psi2 = y then .atom p
-    else .snce (abstractSnce psi1 x y p) (abstractSnce psi2 x y p)
+    else .snce (abstractSnce psi2 x y p) (abstractSnce psi1 x y p)
 
 /-- Semantic correctness of abstractSnce. -/
 theorem abstract_snce_correct (phi x y : Formula Atom) (p : Atom)
     (m : IntStructure Atom) (t : ℤ)
-    (h_eq : m.val p = {s | intTruth m s (.snce x y)}) :
+    (h_eq : m.val p = {s | intTruth m s (.snce y x)}) :
     intTruth m t (abstractSnce phi x y p) ↔ intTruth m t phi := by
   induction phi generalizing t with
   | atom a =>
@@ -396,7 +396,7 @@ theorem abstract_snce_correct (phi x y : Formula Atom) (p : Atom)
     simp only [abstractSnce, intTruth]
     exact Iff.imp (ih1 t) (ih2 t)
   | box _ => simp [abstractSnce, intTruth]
-  | untl c d ih1 ih2 =>
+  | untl d c ih2 ih1 =>
     simp only [abstractSnce, intTruth]
     constructor
     · rintro ⟨s, hts, hc, hd⟩
@@ -405,7 +405,7 @@ theorem abstract_snce_correct (phi x y : Formula Atom) (p : Atom)
     · rintro ⟨s, hts, hc, hd⟩
       exact ⟨s, hts, (ih1 s).mpr hc,
         fun r hr1 hr2 => (ih2 r).mpr (hd r hr1 hr2)⟩
-  | snce c d ih1 ih2 =>
+  | snce d c ih2 ih1 =>
     simp only [abstractSnce]
     split
     · next h =>
@@ -424,7 +424,7 @@ theorem abstract_snce_correct (phi x y : Formula Atom) (p : Atom)
 /-- Substituting S(A,B) for atom p in the abstracted formula recovers the original. -/
 theorem abstract_snce_subst_roundtrip (phi x y : Formula Atom) (p : Atom)
     (hfresh : ¬ (p ∈ phi.atoms)) :
-    substFormula (abstractSnce phi x y p) p (.snce x y) = phi := by
+    substFormula (abstractSnce phi x y p) p (.snce y x) = phi := by
   induction phi with
   | atom a =>
     simp [Formula.atoms, Finset.mem_singleton] at hfresh
@@ -437,10 +437,10 @@ theorem abstract_snce_subst_roundtrip (phi x y : Formula Atom) (p : Atom)
   | box c ih =>
     simp [Formula.atoms] at hfresh
     simp [abstractSnce, substFormula, ih hfresh]
-  | untl c d ih1 ih2 =>
+  | untl d c ih2 ih1 =>
     simp [Formula.atoms, Finset.mem_union] at hfresh
-    simp [abstractSnce, substFormula, ih1 hfresh.1, ih2 hfresh.2]
-  | snce c d ih1 ih2 =>
+    simp [abstractSnce, substFormula, ih2 hfresh.2, ih1 hfresh.1]
+  | snce d c ih2 ih1 =>
     simp [Formula.atoms, Finset.mem_union] at hfresh
     simp only [abstractSnce]
     split
@@ -448,8 +448,8 @@ theorem abstract_snce_subst_roundtrip (phi x y : Formula Atom) (p : Atom)
     · next _ =>
       simp only [substFormula]
       congr 1
-      · exact ih1 hfresh.1
       · exact ih2 hfresh.2
+      · exact ih1 hfresh.1
 
 /-! ### Preservation Lemmas for abstractSnce -/
 
@@ -467,7 +467,7 @@ theorem abstract_snce_preserves_U_free (phi x y : Formula Atom) (p : Atom)
     simp [isUFree] at h
     simp [abstractSnce, isUFree, ih h]
   | untl _ _ => simp [isUFree] at h
-  | snce c d ih1 ih2 =>
+  | snce d c ih2 ih1 =>
     simp [isUFree] at h
     simp only [abstractSnce]
     split
@@ -487,7 +487,7 @@ theorem abstract_snce_preserves_S_free (phi x y : Formula Atom) (p : Atom)
   | box c ih =>
     simp [isSFree] at h
     simp [abstractSnce, isSFree, ih h]
-  | untl c d ih1 ih2 =>
+  | untl d c ih2 ih1 =>
     simp [isSFree] at h
     simp [abstractSnce, isSFree, ih1 h.1, ih2 h.2]
   | snce _ _ => simp [isSFree] at h
@@ -501,8 +501,8 @@ theorem abstract_snce_preserves_no_U_nested (phi x y : Formula Atom) (p : Atom)
   | bot => trivial
   | imp c d ih1 ih2 => exact ⟨ih1 h.1, ih2 h.2⟩
   | box c ih => exact ih h
-  | untl c d ih1 ih2 => exact ⟨ih1 h.1, ih2 h.2⟩
-  | snce c d _ _ =>
+  | untl d c ih2 ih1 => exact ⟨ih1 h.1, ih2 h.2⟩
+  | snce d c _ _ =>
     simp only [abstractSnce]
     split
     · trivial
@@ -521,9 +521,9 @@ theorem abstract_snce_makes_S_free (phi x y : Formula Atom) (p : Atom)
     simp [abstractSnce, isSFree, ih1 h.1, ih2 h.2]
   | box c ih =>
     simp [abstractSnce, isSFree, ih h]
-  | untl c d ih1 ih2 =>
+  | untl d c ih2 ih1 =>
     simp [abstractSnce, isSFree, ih1 h.1, ih2 h.2]
-  | snce c d _ _ =>
+  | snce d c _ _ =>
     obtain ⟨hc, hd⟩ := h; subst hc; subst hd
     simp [abstractSnce, isSFree]
 
@@ -545,10 +545,10 @@ theorem junction_depth_bounds (φ : Formula Atom) :
     simp only [junctionDepth, junctionDepthU, junctionDepthS]
     omega
   | box a ih => simp [junctionDepth, junctionDepthU, junctionDepthS, ih.1, ih.2.1, ih.2.2.1, ih.2.2.2]
-  | untl a b ih1 ih2 =>
+  | untl b a ih2 ih1 =>
     simp only [junctionDepth, junctionDepthU, junctionDepthS]
     omega
-  | snce a b ih1 ih2 =>
+  | snce b a ih2 ih1 =>
     simp only [junctionDepth, junctionDepthU, junctionDepthS]
     omega
 
@@ -569,19 +569,19 @@ theorem jd_imp_le_right (φ ψ : Formula Atom) : junctionDepth ψ ≤ junctionDe
 theorem jd_box_le (φ : Formula Atom) : junctionDepth φ ≤ junctionDepth (.box φ) :=
   Nat.le_refl _
 
-theorem jd_untl_le_left (φ ψ : Formula Atom) : junctionDepth φ ≤ junctionDepth (.untl φ ψ) := by
+theorem jd_untl_le_left (φ ψ : Formula Atom) : junctionDepth φ ≤ junctionDepth (.untl ψ φ) := by
   simp only [junctionDepth]
   exact Nat.le_trans (junction_depth_le_jdU φ) (Nat.le_max_left _ _)
 
-theorem jd_untl_le_right (φ ψ : Formula Atom) : junctionDepth ψ ≤ junctionDepth (.untl φ ψ) := by
+theorem jd_untl_le_right (φ ψ : Formula Atom) : junctionDepth ψ ≤ junctionDepth (.untl ψ φ) := by
   simp only [junctionDepth]
   exact Nat.le_trans (junction_depth_le_jdU ψ) (Nat.le_max_right _ _)
 
-theorem jd_snce_le_left (φ ψ : Formula Atom) : junctionDepth φ ≤ junctionDepth (.snce φ ψ) := by
+theorem jd_snce_le_left (φ ψ : Formula Atom) : junctionDepth φ ≤ junctionDepth (.snce ψ φ) := by
   simp only [junctionDepth]
   exact Nat.le_trans (junction_depth_le_jdS φ) (Nat.le_max_left _ _)
 
-theorem jd_snce_le_right (φ ψ : Formula Atom) : junctionDepth ψ ≤ junctionDepth (.snce φ ψ) := by
+theorem jd_snce_le_right (φ ψ : Formula Atom) : junctionDepth ψ ≤ junctionDepth (.snce ψ φ) := by
   simp only [junctionDepth]
   exact Nat.le_trans (junction_depth_le_jdS ψ) (Nat.le_max_right _ _)
 
@@ -599,7 +599,7 @@ theorem abstract_untl_identity_on_U_free (phi x y : Formula Atom) (p : Atom)
   | imp c d ih1 ih2 => simp [isUFree] at h; simp [abstractUntl, ih1 h.1, ih2 h.2]
   | box c ih => simp [isUFree] at h; simp [abstractUntl, ih h]
   | untl _ _ => simp [isUFree] at h
-  | snce c d ih1 ih2 => simp [isUFree] at h; simp [abstractUntl, ih1 h.1, ih2 h.2]
+  | snce d c ih2 ih1 => simp [isUFree] at h; simp [abstractUntl, ih1 h.1, ih2 h.2]
 
 /-- abstractUntl preserves U-freeness (trivially, since it's identity on U-free). -/
 theorem abstract_untl_preserves_U_free (phi x y : Formula Atom) (p : Atom)
@@ -618,7 +618,7 @@ theorem abstract_untl_preserves_separated (phi x y : Formula Atom) (p : Atom)
     simp [isSyntacticallySeparated] at hsep
     simp [abstractUntl, isSyntacticallySeparated, ih1 hsep.1, ih2 hsep.2]
   | box _ => simp [abstractUntl, isSyntacticallySeparated]
-  | untl a b _ih1 _ih2 =>
+  | untl b a _ih2 _ih1 =>
     simp [isSyntacticallySeparated] at hsep
     simp only [abstractUntl]
     split
@@ -626,7 +626,7 @@ theorem abstract_untl_preserves_separated (phi x y : Formula Atom) (p : Atom)
     · simp [isSyntacticallySeparated,
             abstract_untl_preserves_S_free a x y p hsep.1,
             abstract_untl_preserves_S_free b x y p hsep.2]
-  | snce a b _ih1 _ih2 =>
+  | snce b a _ih2 _ih1 =>
     simp [isSyntacticallySeparated] at hsep
     simp [abstractUntl, isSyntacticallySeparated]
     exact ⟨by rw [abstract_untl_identity_on_U_free a x y p hsep.1]; exact hsep.1,
@@ -648,10 +648,10 @@ theorem abstract_snce_jd_le_all (phi x y : Formula Atom) (p : Atom) :
   | box a ih =>
     simp only [abstractSnce, junctionDepth, junctionDepthU, junctionDepthS]
     exact ih
-  | untl a b ih1 ih2 =>
+  | untl b a ih2 ih1 =>
     simp only [abstractSnce, junctionDepth, junctionDepthU, junctionDepthS]
     omega
-  | snce a b ih1 ih2 =>
+  | snce b a ih2 ih1 =>
     simp only [abstractSnce]
     split
     · simp only [junctionDepth, junctionDepthU, junctionDepthS]
@@ -678,7 +678,7 @@ theorem abstract_snce_jdS_le (phi x y : Formula Atom) (p : Atom) :
 
 /-- Abstracting S(A,B) when it occurs directly at the root as a snce node drops jdU. -/
 theorem jdU_abstract_snce_snce_lt (x y : Formula Atom) (p : Atom) :
-    junctionDepthU (abstractSnce (.snce x y) x y p) < junctionDepthU (.snce x y) := by
+    junctionDepthU (abstractSnce (.snce y x) x y p) < junctionDepthU (.snce y x) := by
   simp only [abstractSnce]
   split
   · simp only [junctionDepthU]; omega
@@ -687,26 +687,26 @@ theorem jdU_abstract_snce_snce_lt (x y : Formula Atom) (p : Atom) :
 /-- Predicate: S(A,B) appears directly in φ in a position reachable via junctionDepthU
     tracking. -/
 def snceAchievesMaxJdU : Formula Atom → Formula Atom → Formula Atom → Prop
-  | .untl a b, x, y =>
-      (a = .snce x y ∧ junctionDepthU (.snce x y) ≥ junctionDepthU b) ∨
-      (b = .snce x y ∧ junctionDepthU (.snce x y) ≥ junctionDepthU a) ∨
+  | .untl b a, x, y =>
+      (a = .snce y x ∧ junctionDepthU (.snce y x) ≥ junctionDepthU b) ∨
+      (b = .snce y x ∧ junctionDepthU (.snce y x) ≥ junctionDepthU a) ∨
       (snceAchievesMaxJdU a x y ∧ junctionDepthU a ≥ junctionDepthU b) ∨
       (snceAchievesMaxJdU b x y ∧ junctionDepthU b ≥ junctionDepthU a)
   | _, _, _ => False
 
-/-- Predicate: S(A,B) appears in the U-argument of a `.untl` node. -/
+/-- Predicate: S(A,B) appears in the U-argument of a `.untlnode. ` -/
 def snceInsideUArg : Formula Atom → Formula Atom → Formula Atom → Prop
-  | .untl a b, x, y =>
-      a = .snce x y ∨ b = .snce x y ∨
+  | .untl b a, x, y =>
+      a = .snce y x ∨ b = .snce y x ∨
       snceInsideUArg a x y ∨ snceInsideUArg b x y
   | _, _, _ => False
 
 /-- Key lemma: abstracting S(A,B) from the LEFT U-argument when jdU a STRICTLY exceeds
-    jdU b strictly decreases junctionDepthU of `.untl a b`. -/
+    jdU b strictly decreases junctionDepthU of `.untl b`. a -/
 theorem abstract_snce_untl_jdU_lt_left (a b x y : Formula Atom) (p : Atom)
     (h_a_dec : junctionDepthU (abstractSnce a x y p) < junctionDepthU a)
     (h_max : junctionDepthU a > junctionDepthU b) :
-    junctionDepthU (abstractSnce (.untl a b) x y p) < junctionDepthU (.untl a b) := by
+    junctionDepthU (abstractSnce (.untl b a) x y p) < junctionDepthU (.untl b a) := by
   simp only [abstractSnce, junctionDepthU]
   have hle_b := abstract_snce_jdU_le b x y p
   apply Nat.max_lt.mpr; constructor
@@ -717,7 +717,7 @@ theorem abstract_snce_untl_jdU_lt_left (a b x y : Formula Atom) (p : Atom)
 theorem abstract_snce_untl_jdU_lt_right (a b x y : Formula Atom) (p : Atom)
     (h_b_dec : junctionDepthU (abstractSnce b x y p) < junctionDepthU b)
     (h_max : junctionDepthU b > junctionDepthU a) :
-    junctionDepthU (abstractSnce (.untl a b) x y p) < junctionDepthU (.untl a b) := by
+    junctionDepthU (abstractSnce (.untl b a) x y p) < junctionDepthU (.untl b a) := by
   simp only [abstractSnce, junctionDepthU]
   have hle_a := abstract_snce_jdU_le a x y p
   apply Nat.max_lt.mpr; constructor
@@ -728,7 +728,7 @@ theorem abstract_snce_untl_jdU_lt_right (a b x y : Formula Atom) (p : Atom)
 theorem abstract_snce_untl_jdU_lt_both (a b x y : Formula Atom) (p : Atom)
     (h_a_dec : junctionDepthU (abstractSnce a x y p) < junctionDepthU a)
     (h_b_dec : junctionDepthU (abstractSnce b x y p) < junctionDepthU b) :
-    junctionDepthU (abstractSnce (.untl a b) x y p) < junctionDepthU (.untl a b) := by
+    junctionDepthU (abstractSnce (.untl b a) x y p) < junctionDepthU (.untl b a) := by
   simp only [abstractSnce, junctionDepthU]
   apply Nat.max_lt.mpr; constructor
   · exact Nat.lt_of_lt_of_le h_a_dec (Nat.le_max_left _ _)
@@ -736,27 +736,27 @@ theorem abstract_snce_untl_jdU_lt_both (a b x y : Formula Atom) (p : Atom)
 
 /-- Direct case: abstracting S(A,B) when it IS the left U-arg and strictly dominates. -/
 theorem abstract_snce_untl_left_snce_jdU_lt (b x y : Formula Atom) (p : Atom)
-    (h_max : junctionDepthU (.snce x y) > junctionDepthU b) :
-    junctionDepthU (abstractSnce (.untl (.snce x y) b) x y p) <
-    junctionDepthU (.untl (.snce x y) b) :=
+    (h_max : junctionDepthU (.snce y x) > junctionDepthU b) :
+    junctionDepthU (abstractSnce (.untl b (.snce y x)) x y p) <
+    junctionDepthU (.untl b (.snce y x)) :=
   abstract_snce_untl_jdU_lt_left _ _ _ _ _ (jdU_abstract_snce_snce_lt x y p) h_max
 
 /-- Direct case: abstracting S(A,B) when it IS the right U-arg and strictly dominates. -/
 theorem abstract_snce_untl_right_snce_jdU_lt (a x y : Formula Atom) (p : Atom)
-    (h_max : junctionDepthU (.snce x y) > junctionDepthU a) :
-    junctionDepthU (abstractSnce (.untl a (.snce x y)) x y p) <
-    junctionDepthU (.untl a (.snce x y)) :=
+    (h_max : junctionDepthU (.snce y x) > junctionDepthU a) :
+    junctionDepthU (abstractSnce (.untl (.snce y x) a) x y p) <
+    junctionDepthU (.untl (.snce y x) a) :=
   abstract_snce_untl_jdU_lt_right _ _ _ _ _ (jdU_abstract_snce_snce_lt x y p) h_max
 
 /-- Direct case: abstracting S(A,B) from both sides when they are equal. -/
 theorem abstract_snce_untl_both_snce_jdU_lt (x y : Formula Atom) (p : Atom) :
-    junctionDepthU (abstractSnce (.untl (.snce x y) (.snce x y)) x y p) <
-    junctionDepthU (.untl (.snce x y) (.snce x y)) :=
+    junctionDepthU (abstractSnce (.untl (.snce y x) (.snce y x)) x y p) <
+    junctionDepthU (.untl (.snce y x) (.snce y x)) :=
   abstract_snce_untl_jdU_lt_both _ _ _ _ _
     (jdU_abstract_snce_snce_lt x y p) (jdU_abstract_snce_snce_lt x y p)
 
 /-- Key theorem: abstracting S(A,B) from the U-argument that achieves
-    the maximum jdU decreases junctionDepth of the whole `.untl` node. -/
+    the maximum jdU decreases junctionDepth of the whole `.untlnode. ` -/
 theorem abstract_snce_inside_untl_jd_lt (a b x y : Formula Atom) (p : Atom)
     (h : (junctionDepthU (abstractSnce a x y p) < junctionDepthU a ∧
           junctionDepthU a > junctionDepthU b)
@@ -764,7 +764,7 @@ theorem abstract_snce_inside_untl_jd_lt (a b x y : Formula Atom) (p : Atom)
           junctionDepthU b > junctionDepthU a)
       ∨ (junctionDepthU (abstractSnce a x y p) < junctionDepthU a ∧
           junctionDepthU (abstractSnce b x y p) < junctionDepthU b)) :
-    junctionDepth (abstractSnce (.untl a b) x y p) < junctionDepth (.untl a b) := by
+    junctionDepth (abstractSnce (.untl b a) x y p) < junctionDepth (.untl b a) := by
   simp only [abstractSnce, junctionDepth]
   rcases h with ⟨hlt_a, hgt⟩ | ⟨hlt_b, hgt⟩ | ⟨hlt_a, hlt_b⟩
   · have := abstract_snce_untl_jdU_lt_left a b x y p hlt_a hgt
@@ -817,11 +817,11 @@ theorem u_free_separable_with_type {φ x y : Formula Atom} (h : isUFree φ = tru
     exact restricted_u_free_separated φ (has_no_allpast_allfuture_true φ) h
   }, int_equiv_refl φ, u_free_has_single_U_type h⟩
 
-/-- .untl A B with S-free args is separable_with_U_type. -/
+/-- .untl B A with S-free args is separable_with_U_type. -/
 theorem untl_s_free_separable_with_type {x y : Formula Atom}
     (hx_sf : isSFree x = true) (hy_sf : isSFree y = true) :
-    isSeparableWithUType (.untl x y) x y := by
-  exact ⟨.untl x y, by simp [isSyntacticallySeparated, hx_sf, hy_sf],
+    isSeparableWithUType (.untl y x) x y := by
+  exact ⟨.untl y x, by simp [isSyntacticallySeparated, hx_sf, hy_sf],
          int_equiv_refl _, has_single_U_type_untl x y⟩
 
 /-! ### Combinators for isSeparableWithUType -/
@@ -868,15 +868,15 @@ theorem neg_separable_with_U_type {a x y : Formula Atom}
 
 /-! ### U-Type Argument Replacement Bridge -/
 
-/-- Replace U-type arguments in a formula: every `.untl _ _` node gets new arguments. -/
+/-- Replace U-type arguments in a formula: every `.untl _` _ node gets new arguments. -/
 def replaceUntlArgs (ψ x_new y_new : Formula Atom) : Formula Atom :=
   match ψ with
   | .atom a => .atom a
   | .bot => .bot
   | .imp p q => .imp (replaceUntlArgs p x_new y_new) (replaceUntlArgs q x_new y_new)
   | .box p => .box (replaceUntlArgs p x_new y_new)
-  | .untl _ _ => .untl x_new y_new
-  | .snce p q => .snce (replaceUntlArgs p x_new y_new) (replaceUntlArgs q x_new y_new)
+  | .untl _ _ => .untl y_new x_new
+  | .snce q p => .snce (replaceUntlArgs q x_new y_new) (replaceUntlArgs p x_new y_new)
 
 /-- `replaceUntlArgs` produces `hasSingleUType _ A_new B_new`. -/
 theorem replace_untl_args_has_single_U_type (ψ x_new y_new : Formula Atom) :
@@ -887,7 +887,7 @@ theorem replace_untl_args_has_single_U_type (ψ x_new y_new : Formula Atom) :
   | imp _ _ ih1 ih2 => exact ⟨ih1, ih2⟩
   | box _ ih => exact ih
   | untl _ _ => exact ⟨rfl, rfl⟩
-  | snce _ _ ih1 ih2 => exact ⟨ih1, ih2⟩
+  | snce _ _ ih2 ih1 => exact ⟨ih1, ih2⟩
 
 /-- For U-free formulas, `replaceUntlArgs` is the identity. -/
 theorem replace_untl_args_u_free_eq (ψ x_new y_new : Formula Atom)
@@ -902,7 +902,7 @@ theorem replace_untl_args_u_free_eq (ψ x_new y_new : Formula Atom)
     simp [isUFree] at h
     simp [replaceUntlArgs, ih h]
   | untl _ _ => simp [isUFree] at h
-  | snce _ _ ih1 ih2 =>
+  | snce _ _ ih2 ih1 =>
     simp [isUFree] at h
     simp [replaceUntlArgs, ih1 h.1, ih2 h.2]
 
@@ -935,7 +935,7 @@ theorem replace_untl_args_preserves_separated (ψ x_new y_new : Formula Atom)
   | box _ => simp [replaceUntlArgs, isSyntacticallySeparated]
   | untl _ _ =>
     simp [replaceUntlArgs, isSyntacticallySeparated, hx_sf, hy_sf]
-  | snce p q ih1 ih2 =>
+  | snce q p ih2 ih1 =>
     simp [isSyntacticallySeparated] at h_sep
     simp only [replaceUntlArgs, isSyntacticallySeparated]
     rw [replace_untl_args_u_free_eq p x_new y_new h_sep.1,
@@ -957,7 +957,7 @@ theorem replace_untl_args_equiv (ψ x_old y_old x_new y_new : Formula Atom)
     exact Iff.imp (ih1 h1 m t) (ih2 h2 m t)
   | box _ ih =>
     intro m t; simp only [replaceUntlArgs, intTruth]
-  | untl p q =>
+  | untl q p =>
     obtain ⟨hp, hq⟩ := h_single
     subst hp; subst hq
     intro m t; simp only [replaceUntlArgs, intTruth]
@@ -968,7 +968,7 @@ theorem replace_untl_args_equiv (ψ x_old y_old x_new y_new : Formula Atom)
     · rintro ⟨s, hts, h1, h2⟩
       exact ⟨s, hts, (hx_equiv m s).mpr h1,
         fun r hr1 hr2 => (hy_equiv m r).mpr (h2 r hr1 hr2)⟩
-  | snce p q ih1 ih2 =>
+  | snce q p ih2 ih1 =>
     obtain ⟨h1, h2⟩ := h_single
     intro m t; simp only [replaceUntlArgs, intTruth]
     constructor

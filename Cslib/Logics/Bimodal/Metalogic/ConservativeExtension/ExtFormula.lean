@@ -86,10 +86,10 @@ def or (φ ψ : ExtFormula Atom) : ExtFormula Atom := φ.neg.imp ψ
 def diamond (φ : ExtFormula Atom) : ExtFormula Atom := φ.neg.box.neg
 
 /-- Existential future: Fφ := U(φ, ⊤) -/
-def someFuture (φ : ExtFormula Atom) : ExtFormula Atom := ExtFormula.untl φ top
+def someFuture (φ : ExtFormula Atom) : ExtFormula Atom := ExtFormula.untl top φ
 
 /-- Existential past: Pφ := S(φ, ⊤) -/
-def somePast (φ : ExtFormula Atom) : ExtFormula Atom := ExtFormula.snce φ top
+def somePast (φ : ExtFormula Atom) : ExtFormula Atom := ExtFormula.snce top φ
 
 /-- Universal future: Gφ := ¬F(¬φ) -/
 def allFuture (φ : ExtFormula Atom) : ExtFormula Atom := (someFuture φ.neg).neg
@@ -109,8 +109,8 @@ def swapTemporal : ExtFormula Atom → ExtFormula Atom
   | bot => bot
   | imp φ ψ => imp φ.swapTemporal ψ.swapTemporal
   | box φ => box φ.swapTemporal
-  | untl φ ψ => snce φ.swapTemporal ψ.swapTemporal
-  | snce φ ψ => untl φ.swapTemporal ψ.swapTemporal
+  | untl ψ φ => snce ψ.swapTemporal φ.swapTemporal
+  | snce ψ φ => untl ψ.swapTemporal φ.swapTemporal
 
 section DecEq
 
@@ -122,8 +122,8 @@ def atoms : ExtFormula Atom → Finset (ExtAtom Atom)
   | bot => ∅
   | imp φ ψ => φ.atoms ∪ ψ.atoms
   | box φ => φ.atoms
-  | untl φ ψ => φ.atoms ∪ ψ.atoms
-  | snce φ ψ => φ.atoms ∪ ψ.atoms
+  | untl ψ φ => φ.atoms ∪ ψ.atoms
+  | snce ψ φ => φ.atoms ∪ ψ.atoms
 
 end DecEq
 
@@ -133,8 +133,8 @@ def complexity : ExtFormula Atom → Nat
   | bot => 1
   | imp φ ψ => 1 + φ.complexity + ψ.complexity
   | box φ => 1 + φ.complexity
-  | untl φ ψ => 1 + φ.complexity + ψ.complexity
-  | snce φ ψ => 1 + φ.complexity + ψ.complexity
+  | untl ψ φ => 1 + φ.complexity + ψ.complexity
+  | snce ψ φ => 1 + φ.complexity + ψ.complexity
 
 end ExtFormula
 
@@ -151,8 +151,8 @@ def embedFormula : Formula Atom → ExtFormula Atom
   | Formula.bot => ExtFormula.bot
   | Formula.imp φ ψ => ExtFormula.imp (embedFormula φ) (embedFormula ψ)
   | Formula.box φ => ExtFormula.box (embedFormula φ)
-  | Formula.untl φ ψ => ExtFormula.untl (embedFormula φ) (embedFormula ψ)
-  | Formula.snce φ ψ => ExtFormula.snce (embedFormula φ) (embedFormula ψ)
+  | Formula.untl ψ φ => ExtFormula.untl (embedFormula ψ) (embedFormula φ)
+  | Formula.snce ψ φ => ExtFormula.snce (embedFormula ψ) (embedFormula φ)
 
 /-!
 ## Embedding Preservation Lemmas
@@ -179,11 +179,11 @@ theorem embedFormula_box (φ : Formula Atom) :
 
 @[simp]
 theorem embedFormula_untl (φ ψ : Formula Atom) :
-    embedFormula (Formula.untl φ ψ) = ExtFormula.untl (embedFormula φ) (embedFormula ψ) := rfl
+    embedFormula (Formula.untl ψ φ) = ExtFormula.untl (embedFormula ψ) (embedFormula φ) := rfl
 
 @[simp]
 theorem embedFormula_snce (φ ψ : Formula Atom) :
-    embedFormula (Formula.snce φ ψ) = ExtFormula.snce (embedFormula φ) (embedFormula ψ) := rfl
+    embedFormula (Formula.snce ψ φ) = ExtFormula.snce (embedFormula ψ) (embedFormula φ) := rfl
 
 theorem embedFormula_diamond (φ : Formula Atom) :
     embedFormula (Formula.diamond φ) = ExtFormula.diamond (embedFormula φ) := rfl
@@ -211,10 +211,10 @@ theorem embedFormula_swapTemporal (φ : Formula Atom) :
   | bot => rfl
   | imp _ _ ih1 ih2 => simp [Formula.swapTemporal, ExtFormula.swapTemporal, embedFormula, ih1, ih2]
   | box _ ih => simp [Formula.swapTemporal, ExtFormula.swapTemporal, embedFormula, ih]
-  | untl _ _ ih1 ih2 =>
-    simp [Formula.swapTemporal, ExtFormula.swapTemporal, embedFormula, ih1, ih2]
-  | snce _ _ ih1 ih2 =>
-    simp [Formula.swapTemporal, ExtFormula.swapTemporal, embedFormula, ih1, ih2]
+  | untl _ _ ih2 ih1 =>
+    simp [Formula.swapTemporal, ExtFormula.swapTemporal, embedFormula, ih2, ih1]
+  | snce _ _ ih2 ih1 =>
+    simp [Formula.swapTemporal, ExtFormula.swapTemporal, embedFormula, ih2, ih1]
 
 /-!
 ## Injectivity
@@ -260,21 +260,21 @@ theorem embedFormula_injective : Function.Injective (embedFormula : Formula Atom
     | imp _ _ => simp [embedFormula] at h
     | untl _ _ => simp [embedFormula] at h
     | snce _ _ => simp [embedFormula] at h
-  | untl a b iha ihb =>
+  | untl b a ihb iha =>
     cases ψ with
-    | untl c d =>
+    | untl d c =>
       simp [embedFormula] at h
-      exact congrArg₂ Formula.untl (iha h.1) (ihb h.2)
+      exact congrArg₂ Formula.untl (ihb h.1) (iha h.2)
     | atom _ => simp [embedFormula] at h
     | bot => simp [embedFormula] at h
     | imp _ _ => simp [embedFormula] at h
     | box _ => simp [embedFormula] at h
     | snce _ _ => simp [embedFormula] at h
-  | snce a b iha ihb =>
+  | snce b a ihb iha =>
     cases ψ with
-    | snce c d =>
+    | snce d c =>
       simp [embedFormula] at h
-      exact congrArg₂ Formula.snce (iha h.1) (ihb h.2)
+      exact congrArg₂ Formula.snce (ihb h.1) (iha h.2)
     | atom _ => simp [embedFormula] at h
     | bot => simp [embedFormula] at h
     | imp _ _ => simp [embedFormula] at h
@@ -305,10 +305,10 @@ theorem fresh_not_in_embedFormula_atoms (φ : Formula Atom) :
   | box a ih =>
     simp [embedFormula, ExtFormula.atoms]
     exact ih
-  | untl a b iha ihb =>
+  | untl b a ihb iha =>
     simp [embedFormula, ExtFormula.atoms, Finset.mem_union]
     exact ⟨iha, ihb⟩
-  | snce a b iha ihb =>
+  | snce b a ihb iha =>
     simp [embedFormula, ExtFormula.atoms, Finset.mem_union]
     exact ⟨iha, ihb⟩
 
@@ -333,13 +333,13 @@ theorem embedFormula_atoms_subset_inl (φ : Formula Atom) :
     intro x hx
     simp [embedFormula, ExtFormula.atoms] at hx
     exact ih x hx
-  | untl a b iha ihb =>
+  | untl b a ihb iha =>
     intro x hx
     simp [embedFormula, ExtFormula.atoms, Finset.mem_union] at hx
     cases hx with
     | inl h => exact iha x h
     | inr h => exact ihb x h
-  | snce a b iha ihb =>
+  | snce b a ihb iha =>
     intro x hx
     simp [embedFormula, ExtFormula.atoms, Finset.mem_union] at hx
     cases hx with
@@ -358,9 +358,9 @@ theorem embedAtom_mem_embedFormula_atoms_iff (p : Atom) (φ : Formula Atom) :
     simp [embedFormula, ExtFormula.atoms, Formula.atoms, Finset.mem_union, iha, ihb]
   | box a ih =>
     simp [embedFormula, ExtFormula.atoms, Formula.atoms, ih]
-  | untl a b iha ihb =>
+  | untl b a ihb iha =>
     simp [embedFormula, ExtFormula.atoms, Formula.atoms, Finset.mem_union, iha, ihb]
-  | snce a b iha ihb =>
+  | snce b a ihb iha =>
     simp [embedFormula, ExtFormula.atoms, Formula.atoms, Finset.mem_union, iha, ihb]
 
 /-- Corollary: freshAtom is not in atoms of any formula in an embedded set. -/

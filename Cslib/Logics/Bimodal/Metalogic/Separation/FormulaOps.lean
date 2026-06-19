@@ -53,12 +53,12 @@ def substFormula [DecidableEq Atom]
       (substFormula psi2 target replacement)
   | .box psi =>
     .box (substFormula psi target replacement)
-  | .untl psi1 psi2 =>
-    .untl (substFormula psi1 target replacement)
-      (substFormula psi2 target replacement)
-  | .snce psi1 psi2 =>
-    .snce (substFormula psi1 target replacement)
-      (substFormula psi2 target replacement)
+  | .untl psi2 psi1 =>
+    .untl (substFormula psi2 target replacement)
+      (substFormula psi1 target replacement)
+  | .snce psi2 psi1 =>
+    .snce (substFormula psi2 target replacement)
+      (substFormula psi1 target replacement)
 
 /-- Modify an IntStructure's valuation at a single atom. -/
 def IntStructure.withAtom [DecidableEq Atom]
@@ -93,7 +93,7 @@ theorem subst_correctness [DecidableEq Atom]
     · intro h hp
       exact (ihq t).mpr (h ((ihp t).mp hp))
   | box p _ih => exact Iff.rfl
-  | untl p q ihp ihq =>
+  | untl q p ihq ihp =>
     constructor
     · rintro ⟨s, hts, hp, hq⟩
       exact ⟨s, hts, (ihp s).mp hp,
@@ -101,7 +101,7 @@ theorem subst_correctness [DecidableEq Atom]
     · rintro ⟨s, hts, hp, hq⟩
       exact ⟨s, hts, (ihp s).mpr hp,
         fun r hr1 hr2 => (ihq r).mpr (hq r hr1 hr2)⟩
-  | snce p q ihp ihq =>
+  | snce q p ihq ihp =>
     constructor
     · rintro ⟨s, hst, hp, hq⟩
       exact ⟨s, hst, (ihp s).mp hp,

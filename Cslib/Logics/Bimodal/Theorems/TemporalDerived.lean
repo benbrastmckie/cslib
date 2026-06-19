@@ -168,25 +168,25 @@ def gImpliesGId (a : Formula Atom) :
 /-- `⊢ (ψ U φ) → Fψ`: Until implies someFuture of the event (BX until_F axiom). -/
 def untilImpliesSomeFuture (φ ψ : Formula Atom) :
     DerivationTree FrameClass.Base []
-      ((Formula.untl ψ φ).imp (Formula.someFuture ψ)) :=
+      ((Formula.untl φ ψ).imp (Formula.someFuture ψ)) :=
   DerivationTree.axiom [] _ (Axiom.until_F φ ψ) trivial
 
 /-- `⊢ (ψ S φ) → Pψ`: Since implies somePast of the event (BX since_P axiom). -/
 def sinceImpliesSomePast (φ ψ : Formula Atom) :
     DerivationTree FrameClass.Base []
-      ((Formula.snce ψ φ).imp (Formula.somePast ψ)) :=
+      ((Formula.snce φ ψ).imp (Formula.somePast ψ)) :=
   DerivationTree.axiom [] _ (Axiom.since_P φ ψ) trivial
 
 /-- `⊢ (ψ U φ) → Fψ`: alias for `untilImpliesSomeFuture`. -/
 def untilImpF (φ ψ : Formula Atom) :
     DerivationTree FrameClass.Base []
-      ((Formula.untl ψ φ).imp (Formula.someFuture ψ)) :=
+      ((Formula.untl φ ψ).imp (Formula.someFuture ψ)) :=
   DerivationTree.axiom [] _ (Axiom.until_F φ ψ) trivial
 
 /-- `⊢ (ψ S φ) → Pψ`: alias for `sinceImpliesSomePast`. -/
 def sinceImpP (φ ψ : Formula Atom) :
     DerivationTree FrameClass.Base []
-      ((Formula.snce ψ φ).imp (Formula.somePast ψ)) :=
+      ((Formula.snce φ ψ).imp (Formula.somePast ψ)) :=
   DerivationTree.axiom [] _ (Axiom.since_P φ ψ) trivial
 
 /-- `⊢ (A → B) → (¬B → ¬A)`: contrapositive as a derivation. -/
@@ -252,25 +252,25 @@ section UntilSinceStructural
 /-- `⊢ G(φ → χ) → ((ψ U φ) → (ψ U χ))`: monotonicity in the guard of Until. -/
 def untilMonoGuard (φ χ ψ : Formula Atom) :
     DerivationTree FrameClass.Base []
-      ((φ.imp χ).allFuture.imp ((Formula.untl ψ φ).imp (Formula.untl ψ χ))) :=
+      ((φ.imp χ).allFuture.imp ((Formula.untl φ ψ).imp (Formula.untl χ ψ))) :=
   DerivationTree.axiom [] _ (Axiom.left_mono_until_G φ χ ψ) trivial
 
 /-- `⊢ H(φ → χ) → ((ψ S φ) → (ψ S χ))`: monotonicity in the guard of Since. -/
 def sinceMonoGuard (φ χ ψ : Formula Atom) :
     DerivationTree FrameClass.Base []
-      ((φ.imp χ).allPast.imp ((Formula.snce ψ φ).imp (Formula.snce ψ χ))) :=
+      ((φ.imp χ).allPast.imp ((Formula.snce φ ψ).imp (Formula.snce χ ψ))) :=
   DerivationTree.axiom [] _ (Axiom.left_mono_since_H φ χ ψ) trivial
 
 /-- `⊢ G(φ → ψ) → ((φ U χ) → (ψ U χ))`: monotonicity in the event of Until. -/
 def untilMonoEvent (φ ψ χ : Formula Atom) :
     DerivationTree FrameClass.Base []
-      ((φ.imp ψ).allFuture.imp ((Formula.untl φ χ).imp (Formula.untl ψ χ))) :=
+      ((φ.imp ψ).allFuture.imp ((Formula.untl χ φ).imp (Formula.untl χ ψ))) :=
   DerivationTree.axiom [] _ (Axiom.right_mono_until φ ψ χ) trivial
 
 /-- `⊢ H(φ → ψ) → ((φ S χ) → (ψ S χ))`: monotonicity in the event of Since. -/
 def sinceMonoEvent (φ ψ χ : Formula Atom) :
     DerivationTree FrameClass.Base []
-      ((φ.imp ψ).allPast.imp ((Formula.snce φ χ).imp (Formula.snce ψ χ))) :=
+      ((φ.imp ψ).allPast.imp ((Formula.snce χ φ).imp (Formula.snce χ ψ))) :=
   DerivationTree.axiom [] _ (Axiom.right_mono_since φ ψ χ) trivial
 
 end UntilSinceStructural

@@ -148,14 +148,14 @@ def Adjacent (dom : Finset Rat) (x y : Rat) : Prop :=
 /-- The r-relation holds between sets `A` and `B` if every until-formula in `A` is witnessed in `B` (Burgess Lemma 2.3). -/
 def rRelation (A B : Set (Formula Atom)) : Prop :=
   ∀ (gamma delta : Formula Atom),
-    Formula.untl delta gamma ∈ A →
-    delta ∈ B ∨ (gamma ∈ B ∧ Formula.untl delta gamma ∈ B)
+    Formula.untl gamma delta ∈ A →
+    delta ∈ B ∨ (gamma ∈ B ∧ Formula.untl gamma delta ∈ B)
 
 /-- The since-variant of the r-relation, witnessing since-formulas in `A` via `B`. -/
 def rRelationSince (A B : Set (Formula Atom)) : Prop :=
   ∀ (gamma delta : Formula Atom),
-    Formula.snce delta gamma ∈ A →
-    delta ∈ B ∨ (gamma ∈ B ∧ Formula.snce delta gamma ∈ B)
+    Formula.snce gamma delta ∈ A →
+    delta ∈ B ∨ (gamma ∈ B ∧ Formula.snce gamma delta ∈ B)
 
 /-- The combined r3-relation: `A` r-relates to `B` via until and `C` r-since-relates to `B`. -/
 def r3Relation (A B C : Set (Formula Atom)) : Prop :=
@@ -207,7 +207,7 @@ def R3MaximalSince (fc : FrameClass) (A B C : Set (Formula Atom)) : Prop :=
 
 /-- Content-based Burgess r-relation: every `gamma` in `C` satisfies `untl gamma beta ∈ A`. -/
 def burgessR (A : Set (Formula Atom)) (beta : Formula Atom) (C : Set (Formula Atom)) : Prop :=
-  ∀ gamma ∈ C, Formula.untl gamma beta ∈ A
+  ∀ gamma ∈ C, Formula.untl beta gamma ∈ A
 
 /-- Burgess r-relation lifted to a set of pivot formulas `B`. -/
 def burgessRSet (A B C : Set (Formula Atom)) : Prop :=
@@ -215,7 +215,7 @@ def burgessRSet (A B C : Set (Formula Atom)) : Prop :=
 
 /-- Since-variant of the content-based Burgess r-relation: every `gamma` in `C` satisfies `snce gamma beta ∈ A`. -/
 def burgessRSince (A : Set (Formula Atom)) (beta : Formula Atom) (C : Set (Formula Atom)) : Prop :=
-  ∀ gamma ∈ C, Formula.snce gamma beta ∈ A
+  ∀ gamma ∈ C, Formula.snce beta gamma ∈ A
 
 /-- Since-variant of `burgessRSet`: every pivot in `B` since-relates `A` to `C`. -/
 def burgessRSetSince (A B C : Set (Formula Atom)) : Prop :=
@@ -281,7 +281,7 @@ def Chronicle.c3 (chi : Chronicle Atom) : Prop :=
 def Chronicle.c4 (chi : Chronicle Atom) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → x < y →
     ∀ (gamma delta : Formula Atom),
-      (Formula.untl delta gamma).neg ∈ chi.f x →
+      (Formula.untl gamma delta).neg ∈ chi.f x →
       delta ∈ chi.f y →
       ∃ z ∈ chi.dom, x < z ∧ z < y ∧ gamma.neg ∈ chi.f z
 
@@ -290,7 +290,7 @@ def Chronicle.c4 (chi : Chronicle Atom) : Prop :=
 def Chronicle.c4' (chi : Chronicle Atom) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → y < x →
     ∀ (gamma delta : Formula Atom),
-      (Formula.snce delta gamma).neg ∈ chi.f x →
+      (Formula.snce gamma delta).neg ∈ chi.f x →
       delta ∈ chi.f y →
       ∃ z ∈ chi.dom, y < z ∧ z < x ∧ gamma.neg ∈ chi.f z
 
@@ -299,20 +299,20 @@ def Chronicle.c4' (chi : Chronicle Atom) : Prop :=
 def Chronicle.c5 (chi : Chronicle Atom) : Prop :=
   ∀ x ∈ chi.dom,
     ∀ (gamma delta : Formula Atom),
-      Formula.untl delta gamma ∈ chi.f x →
+      Formula.untl gamma delta ∈ chi.f x →
       ∃ y ∈ chi.dom, x < y ∧ delta ∈ chi.f y ∧
         ∀ z ∈ chi.dom, x < z → z < y →
-          gamma ∈ chi.f z ∧ Formula.untl delta gamma ∈ chi.f z
+          gamma ∈ chi.f z ∧ Formula.untl gamma delta ∈ chi.f z
 
 /-- Condition c5': the since-variant of c5, witnessing `delta` in the past with `gamma` at all intermediate points. -/
 @[nolint dupNamespace]
 def Chronicle.c5' (chi : Chronicle Atom) : Prop :=
   ∀ x ∈ chi.dom,
     ∀ (gamma delta : Formula Atom),
-      Formula.snce delta gamma ∈ chi.f x →
+      Formula.snce gamma delta ∈ chi.f x →
       ∃ y ∈ chi.dom, y < x ∧ delta ∈ chi.f y ∧
         ∀ z ∈ chi.dom, y < z → z < x →
-          gamma ∈ chi.f z ∧ Formula.snce delta gamma ∈ chi.f z
+          gamma ∈ chi.f z ∧ Formula.snce gamma delta ∈ chi.f z
 
 /-! ## Valid Chronicle -/
 

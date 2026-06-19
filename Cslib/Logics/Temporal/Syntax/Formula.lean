@@ -102,7 +102,7 @@ abbrev Formula.iff (φ₁ φ₂ : Formula Atom) : Formula Atom :=
     Note: uses Burgess convention where `untl event guard` — φ is the event (holds at witness),
     ⊤ is the trivial guard. Equivalent to standard LTL `F φ = ⊤ U φ` semantically. -/
 abbrev Formula.someFuture (φ : Formula Atom) : Formula Atom :=
-  .untl φ .top
+  .untl .top φ
 
 /-- All future (globally): G φ := ¬F ¬φ -/
 abbrev Formula.allFuture (φ : Formula Atom) : Formula Atom :=
@@ -112,7 +112,7 @@ abbrev Formula.allFuture (φ : Formula Atom) : Formula Atom :=
     Note: uses Burgess convention where `snce event guard` — φ is the event (holds at witness),
     ⊤ is the trivial guard. Equivalent to standard LTL `P φ = ⊤ S φ` semantically. -/
 abbrev Formula.somePast (φ : Formula Atom) : Formula Atom :=
-  .snce φ .top
+  .snce .top φ
 
 /-- All past (historically): H φ := ¬P ¬φ -/
 abbrev Formula.allPast (φ : Formula Atom) : Formula Atom :=
@@ -180,29 +180,29 @@ def complexity : Formula Atom → Nat
   | .atom _ => 1
   | .bot => 1
   -- G(φ) = imp (untl (imp φ bot) (imp bot bot)) bot  [¬(¬φ U ⊤) in Burgess]
-  | .imp (.untl (.imp φ .bot) (.imp .bot .bot)) .bot => 1 + complexity φ
+  | .imp (.untl (.imp .bot .bot) (.imp φ .bot)) .bot => 1 + complexity φ
   -- H(φ) = imp (snce (imp φ bot) (imp bot bot)) bot  [¬(¬φ S ⊤) in Burgess]
-  | .imp (.snce (.imp φ .bot) (.imp .bot .bot)) .bot => 1 + complexity φ
+  | .imp (.snce (.imp .bot .bot) (.imp φ .bot)) .bot => 1 + complexity φ
   -- R(φ, ψ) = release = imp (untl (imp ψ bot) (imp φ bot)) bot  [¬(¬ψ_event U ¬φ_guard)]
-  | .imp (.untl (.imp ψ .bot) (.imp φ .bot)) .bot =>
+  | .imp (.untl (.imp φ .bot) (.imp ψ .bot)) .bot =>
     1 + complexity φ + complexity ψ
   -- T(φ, ψ) = trigger = imp (snce (imp ψ bot) (imp φ bot)) bot  [¬(¬ψ_event S ¬φ_guard)]
-  | .imp (.snce (.imp ψ .bot) (.imp φ .bot)) .bot =>
+  | .imp (.snce (.imp φ .bot) (.imp ψ .bot)) .bot =>
     1 + complexity φ + complexity ψ
   -- generic imp
   | .imp φ ψ => 1 + complexity φ + complexity ψ
   -- F(φ) = untl φ (imp bot bot)  [φ U ⊤ in Burgess]
-  | .untl φ (.imp .bot .bot) => 1 + complexity φ
+  | .untl (.imp .bot .bot) φ => 1 + complexity φ
   -- next(φ) = untl φ bot  [φ U ⊥ in Burgess: guard ⊥ impossible, forces immediate step]
-  | .untl φ .bot => 1 + complexity φ
+  | .untl .bot φ => 1 + complexity φ
   -- generic untl
-  | .untl φ ψ => 1 + complexity φ + complexity ψ
+  | .untl ψ φ => 1 + complexity φ + complexity ψ
   -- P(φ) = snce φ (imp bot bot)  [φ S ⊤ in Burgess]
-  | .snce φ (.imp .bot .bot) => 1 + complexity φ
+  | .snce (.imp .bot .bot) φ => 1 + complexity φ
   -- prev(φ) = snce φ bot  [φ S ⊥ in Burgess: guard ⊥ impossible, forces immediate step]
-  | .snce φ .bot => 1 + complexity φ
+  | .snce .bot φ => 1 + complexity φ
   -- generic snce
-  | .snce φ ψ => 1 + complexity φ + complexity ψ
+  | .snce ψ φ => 1 + complexity φ + complexity ψ
 
 /-! ### Temporal Depth -/
 
@@ -215,8 +215,8 @@ def temporalDepth : Formula Atom → Nat
   | .atom _ => 0
   | .bot => 0
   | .imp φ ψ => max φ.temporalDepth ψ.temporalDepth
-  | .untl φ ψ => 1 + max φ.temporalDepth ψ.temporalDepth
-  | .snce φ ψ => 1 + max φ.temporalDepth ψ.temporalDepth
+  | .untl ψ φ => 1 + max φ.temporalDepth ψ.temporalDepth
+  | .snce ψ φ => 1 + max φ.temporalDepth ψ.temporalDepth
 
 /--
 Count implication operators in a formula.
@@ -227,20 +227,20 @@ def countImplications : Formula Atom → Nat
   | .atom _ => 0
   | .bot => 0
   | .imp φ ψ => 1 + φ.countImplications + ψ.countImplications
-  | .untl φ ψ => φ.countImplications + ψ.countImplications
-  | .snce φ ψ => φ.countImplications + ψ.countImplications
+  | .untl ψ φ => φ.countImplications + ψ.countImplications
+  | .snce ψ φ => φ.countImplications + ψ.countImplications
 
 /-! ### Additional Derived Temporal Operators -/
 
 /-- Next-step operator: X(φ) = φ U ⊥.
     X(φ) at t means φ holds at t+1. Uses Burgess convention: φ is the event,
     ⊥ is the guard (impossible), forcing the witness to be immediately next. -/
-def next (φ : Formula Atom) : Formula Atom := .untl φ .bot
+def next (φ : Formula Atom) : Formula Atom := .untl .bot φ
 
 /-- Previous-step operator: Y(φ) = φ S ⊥.
     Y(φ) at t means φ holds at t-1. Uses Burgess convention: φ is the event,
     ⊥ is the guard (impossible), forcing the witness to be immediately previous. -/
-def prev (φ : Formula Atom) : Formula Atom := .snce φ .bot
+def prev (φ : Formula Atom) : Formula Atom := .snce .bot φ
 
 /-- Derived reflexive future operator: G'φ := φ ∧ Gφ. -/
 def weakFuture (φ : Formula Atom) : Formula Atom :=
@@ -320,8 +320,8 @@ def swapTemporal : Formula Atom → Formula Atom
   | .atom s => .atom s
   | .bot => .bot
   | .imp φ ψ => .imp (swapTemporal φ) (swapTemporal ψ)
-  | .untl φ ψ => .snce (swapTemporal φ) (swapTemporal ψ)
-  | .snce φ ψ => .untl (swapTemporal φ) (swapTemporal ψ)
+  | .untl ψ φ => .snce (swapTemporal ψ) (swapTemporal φ)
+  | .snce ψ φ => .untl (swapTemporal ψ) (swapTemporal φ)
 
 /-- swapTemporal is an involution (applying it twice gives identity). -/
 theorem swapTemporal_involution (φ : Formula Atom) :
@@ -330,8 +330,8 @@ theorem swapTemporal_involution (φ : Formula Atom) :
   | atom _ => rfl
   | bot => rfl
   | imp _ _ ihp ihq => simp only [swapTemporal, ihp, ihq]
-  | untl _ _ ih1 ih2 => simp only [swapTemporal, ih1, ih2]
-  | snce _ _ ih1 ih2 => simp only [swapTemporal, ih1, ih2]
+  | untl _ _ ih2 ih1 => simp only [swapTemporal, ih1, ih2]
+  | snce _ _ ih2 ih1 => simp only [swapTemporal, ih1, ih2]
 
 /-- swapTemporal distributes over negation: swap(¬φ) = ¬(swap φ). -/
 theorem swapTemporal_neg (φ : Formula Atom) :
@@ -401,10 +401,10 @@ def needsPositiveHypotheses : Formula Atom → Bool
     (Formula.bot : Formula Atom).needsPositiveHypotheses = true := rfl
 
 @[simp] lemma needsPositiveHypotheses_untl (p q : Formula Atom) :
-    (Formula.untl p q).needsPositiveHypotheses = true := rfl
+    (Formula.untl q p).needsPositiveHypotheses = true := rfl
 
 @[simp] lemma needsPositiveHypotheses_snce (p q : Formula Atom) :
-    (Formula.snce p q).needsPositiveHypotheses = true := rfl
+    (Formula.snce q p).needsPositiveHypotheses = true := rfl
 
 @[simp] lemma needsPositiveHypotheses_imp (p q : Formula Atom) :
     (Formula.imp p q).needsPositiveHypotheses = false := rfl
@@ -420,8 +420,8 @@ def atoms : Formula Atom → Finset Atom
   | .atom s => {s}
   | .bot => ∅
   | .imp φ ψ => atoms φ ∪ atoms ψ
-  | .untl φ ψ => atoms φ ∪ atoms ψ
-  | .snce φ ψ => atoms φ ∪ atoms ψ
+  | .untl ψ φ => atoms φ ∪ atoms ψ
+  | .snce ψ φ => atoms φ ∪ atoms ψ
 
 /-- swapTemporal preserves atoms: swapping past/future does not change which atoms appear. -/
 theorem atoms_swapTemporal (φ : Formula Atom) :
@@ -430,8 +430,8 @@ theorem atoms_swapTemporal (φ : Formula Atom) :
   | atom _ => rfl
   | bot => rfl
   | imp _ _ ih1 ih2 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
-  | untl _ _ ih1 ih2 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
-  | snce _ _ ih1 ih2 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
+  | untl _ _ ih2 ih1 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
+  | snce _ _ ih2 ih1 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
 
 end Atoms
 

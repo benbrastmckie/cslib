@@ -70,7 +70,7 @@ lemma someFuture_allFuture_neg_absurd {fc : FrameClass} {M : Set (Formula Atom)}
   have h_G_dni : DerivationTree fc [] ((psi.imp psi.neg.neg).allFuture) :=
     DerivationTree.temporal_necessitation _ h_dni
   have h_bx3 : DerivationTree fc [] ((psi.imp psi.neg.neg).allFuture.imp
-      ((Formula.untl psi Formula.top).imp (Formula.untl psi.neg.neg Formula.top))) :=
+      ((Formula.untl Formula.top psi).imp (Formula.untl Formula.top psi.neg.neg))) :=
     DerivationTree.axiom [] _ (Axiom.right_mono_until psi psi.neg.neg Formula.top) (FrameClass.base_le fc)
   have hImpl : DerivationTree fc [] ((Formula.someFuture psi).imp (Formula.someFuture psi.neg.neg)) :=
     DerivationTree.modus_ponens [] _ _ h_bx3 h_G_dni
@@ -88,7 +88,7 @@ lemma somePast_allPast_neg_absurd {fc : FrameClass} {M : Set (Formula Atom)}
   have h_H_dni : DerivationTree fc [] ((psi.imp psi.neg.neg).allPast) :=
     Theorems.pastNecessitation _ h_dni
   have h_bx3 : DerivationTree fc [] ((psi.imp psi.neg.neg).allPast.imp
-      ((Formula.snce psi Formula.top).imp (Formula.snce psi.neg.neg Formula.top))) :=
+      ((Formula.snce Formula.top psi).imp (Formula.snce Formula.top psi.neg.neg))) :=
     DerivationTree.axiom [] _ (Axiom.right_mono_since psi psi.neg.neg Formula.top) (FrameClass.base_le fc)
   have hImpl : DerivationTree fc [] ((Formula.somePast psi).imp (Formula.somePast psi.neg.neg)) :=
     DerivationTree.modus_ponens [] _ _ h_bx3 h_H_dni
@@ -111,7 +111,7 @@ lemma neg_someFuture_to_allFuture_neg {fc : FrameClass} {M : Set (Formula Atom)}
   have h_nec : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allFuture) :=
     DerivationTree.temporal_necessitation _ h_dne
   have h_bx3 : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allFuture.imp
-      ((Formula.untl phi.neg.neg Formula.top).imp (Formula.untl phi Formula.top))) :=
+      ((Formula.untl Formula.top phi.neg.neg).imp (Formula.untl Formula.top phi))) :=
     DerivationTree.axiom [] _ (Axiom.right_mono_until phi.neg.neg phi Formula.top) trivial
   have h_F_mono : DerivationTree FrameClass.Base [] ((Formula.someFuture phi.neg.neg).imp (Formula.someFuture phi)) :=
     DerivationTree.modus_ponens [] _ _ h_bx3 h_nec
@@ -130,7 +130,7 @@ lemma neg_somePast_to_allPast_neg {fc : FrameClass} {M : Set (Formula Atom)}
   have h_nec : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allPast) :=
     Theorems.pastNecessitation _ h_dne
   have h_bx3 : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allPast.imp
-      ((Formula.snce phi.neg.neg Formula.top).imp (Formula.snce phi Formula.top))) :=
+      ((Formula.snce Formula.top phi.neg.neg).imp (Formula.snce Formula.top phi))) :=
     DerivationTree.axiom [] _ (Axiom.right_mono_since phi.neg.neg phi Formula.top) trivial
   have h_P_mono : DerivationTree FrameClass.Base [] ((Formula.somePast phi.neg.neg).imp (Formula.somePast phi)) :=
     DerivationTree.modus_ponens [] _ _ h_bx3 h_nec
@@ -396,7 +396,7 @@ Until witness seed consistency: If `φ U ψ ∈ M` and M is MCS, then
 `{ψ} ∪ gContent(M)` is consistent.
 -/
 theorem until_witness_seed_consistent (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
-    (φ ψ : Formula Atom) (h_U : Formula.untl ψ φ ∈ M) :
+    (φ ψ : Formula Atom) (h_U : Formula.untl φ ψ ∈ M) :
     SetConsistent FrameClass.Base (untilWitnessSeed M ψ) := by
   intro L hL_sub ⟨d⟩
 
@@ -472,7 +472,7 @@ Since witness seed consistency: If `φ S ψ ∈ M` and M is MCS, then
 `{ψ} ∪ hContent(M)` is consistent.
 -/
 theorem since_witness_seed_consistent (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
-    (φ ψ : Formula Atom) (h_S : Formula.snce ψ φ ∈ M) :
+    (φ ψ : Formula Atom) (h_S : Formula.snce φ ψ ∈ M) :
     SetConsistent FrameClass.Base (pastTemporalWitnessSeed M ψ) := by
   intro L hL_sub ⟨d⟩
 

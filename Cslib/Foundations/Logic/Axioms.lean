@@ -202,117 +202,117 @@ protected abbrev SerialPast : F :=
     G(φ → ψ) → (χ U φ → χ U ψ)
     where G(α) = ¬(⊤ U ¬α) -/
 protected abbrev LeftMonoUntilG (φ ψ χ : F) : F :=
-  let G_imp := HasImp.imp (HasUntil.untl (neg' (HasImp.imp φ ψ)) top') HasBot.bot
+  let G_imp := HasImp.imp (HasUntil.untl top' (neg' (HasImp.imp φ ψ))) HasBot.bot
   HasImp.imp G_imp
-    (HasImp.imp (HasUntil.untl χ φ) (HasUntil.untl χ ψ))
+    (HasImp.imp (HasUntil.untl φ χ) (HasUntil.untl ψ χ))
 
 /-- Guard monotonicity of Since under H (BX2H):
     H(φ → ψ) → (χ S φ → χ S ψ)
     where H(α) = ¬(⊤ S ¬α) -/
 protected abbrev LeftMonoSinceH (φ ψ χ : F) : F :=
-  let H_imp := HasImp.imp (HasSince.snce (neg' (HasImp.imp φ ψ)) top') HasBot.bot
+  let H_imp := HasImp.imp (HasSince.snce top' (neg' (HasImp.imp φ ψ))) HasBot.bot
   HasImp.imp H_imp
-    (HasImp.imp (HasSince.snce χ φ) (HasSince.snce χ ψ))
+    (HasImp.imp (HasSince.snce φ χ) (HasSince.snce ψ χ))
 
 /-- Event monotonicity of Until (BX3):
     G(φ → ψ) → (φ U χ → ψ U χ)
     where G(α) = ¬(⊤ U ¬α) -/
 protected abbrev RightMonoUntil (φ ψ χ : F) : F :=
-  let G_imp := HasImp.imp (HasUntil.untl (neg' (HasImp.imp φ ψ)) top') HasBot.bot
+  let G_imp := HasImp.imp (HasUntil.untl top' (neg' (HasImp.imp φ ψ))) HasBot.bot
   HasImp.imp G_imp
-    (HasImp.imp (HasUntil.untl φ χ) (HasUntil.untl ψ χ))
+    (HasImp.imp (HasUntil.untl χ φ) (HasUntil.untl χ ψ))
 
 /-- Event monotonicity of Since (BX3'):
     H(φ → ψ) → (φ S χ → ψ S χ)
     where H(α) = ¬(⊤ S ¬α) -/
 protected abbrev RightMonoSince (φ ψ χ : F) : F :=
-  let H_imp := HasImp.imp (HasSince.snce (neg' (HasImp.imp φ ψ)) top') HasBot.bot
+  let H_imp := HasImp.imp (HasSince.snce top' (neg' (HasImp.imp φ ψ))) HasBot.bot
   HasImp.imp H_imp
-    (HasImp.imp (HasSince.snce φ χ) (HasSince.snce ψ χ))
+    (HasImp.imp (HasSince.snce χ φ) (HasSince.snce χ ψ))
 
 /-- Temporal connectedness future (BX4): φ → G(P(φ))
     where P(α) = ⊤ S α, G(α) = ¬(⊤ U ¬α) -/
 protected abbrev ConnectFuture (φ : F) : F :=
-  let P_φ := HasSince.snce φ top'
-  let G_P_φ := HasImp.imp (HasUntil.untl (neg' P_φ) top') HasBot.bot
+  let P_φ := HasSince.snce top' φ
+  let G_P_φ := HasImp.imp (HasUntil.untl top' (neg' P_φ)) HasBot.bot
   HasImp.imp φ G_P_φ
 
 /-- Temporal connectedness past (BX4'): φ → H(F(φ))
     where F(α) = ⊤ U α, H(α) = ¬(⊤ S ¬α) -/
 protected abbrev ConnectPast (φ : F) : F :=
-  let F_φ := HasUntil.untl φ top'
-  let H_F_φ := HasImp.imp (HasSince.snce (neg' F_φ) top') HasBot.bot
+  let F_φ := HasUntil.untl top' φ
+  let H_F_φ := HasImp.imp (HasSince.snce top' (neg' F_φ)) HasBot.bot
   HasImp.imp φ H_F_φ
 
 /-- Until-Since enrichment (BX13):
     p ∧ (ψ U φ) → (ψ ∧ S(p, φ)) U φ
     where ∧ is Lukasiewicz conjunction -/
 protected abbrev EnrichmentUntil (φ ψ p : F) : F :=
-  HasImp.imp (conj' p (HasUntil.untl ψ φ))
-    (HasUntil.untl (conj' ψ (HasSince.snce p φ)) φ)
+  HasImp.imp (conj' p (HasUntil.untl φ ψ))
+    (HasUntil.untl φ (conj' ψ (HasSince.snce φ p)))
 
 /-- Since-Until enrichment (BX13'):
     p ∧ (ψ S φ) → (ψ ∧ U(p, φ)) S φ -/
 protected abbrev EnrichmentSince (φ ψ p : F) : F :=
-  HasImp.imp (conj' p (HasSince.snce ψ φ))
-    (HasSince.snce (conj' ψ (HasUntil.untl p φ)) φ)
+  HasImp.imp (conj' p (HasSince.snce φ ψ))
+    (HasSince.snce φ (conj' ψ (HasUntil.untl φ p)))
 
 /-- Self-accumulation of Until (BX5):
     U(ψ, φ) → U(ψ, φ ∧ U(ψ, φ)) -/
 protected abbrev SelfAccumUntil (φ ψ : F) : F :=
-  HasImp.imp (HasUntil.untl ψ φ)
-    (HasUntil.untl ψ (conj' φ (HasUntil.untl ψ φ)))
+  HasImp.imp (HasUntil.untl φ ψ)
+    (HasUntil.untl (conj' φ (HasUntil.untl φ ψ)) ψ)
 
 /-- Self-accumulation of Since (BX5'):
     S(ψ, φ) → S(ψ, φ ∧ S(ψ, φ)) -/
 protected abbrev SelfAccumSince (φ ψ : F) : F :=
-  HasImp.imp (HasSince.snce ψ φ)
-    (HasSince.snce ψ (conj' φ (HasSince.snce ψ φ)))
+  HasImp.imp (HasSince.snce φ ψ)
+    (HasSince.snce (conj' φ (HasSince.snce φ ψ)) ψ)
 
 /-- Absorption of Until (BX6):
     U(φ ∧ U(ψ, φ), φ) → U(ψ, φ) -/
 protected abbrev AbsorbUntil (φ ψ : F) : F :=
-  HasImp.imp (HasUntil.untl (conj' φ (HasUntil.untl ψ φ)) φ)
-    (HasUntil.untl ψ φ)
+  HasImp.imp (HasUntil.untl φ (conj' φ (HasUntil.untl φ ψ)))
+    (HasUntil.untl φ ψ)
 
 /-- Absorption of Since (BX6'):
     S(φ ∧ S(ψ, φ), φ) → S(ψ, φ) -/
 protected abbrev AbsorbSince (φ ψ : F) : F :=
-  HasImp.imp (HasSince.snce (conj' φ (HasSince.snce ψ φ)) φ)
-    (HasSince.snce ψ φ)
+  HasImp.imp (HasSince.snce φ (conj' φ (HasSince.snce φ ψ)))
+    (HasSince.snce φ ψ)
 
 /-- Linearity of Until (BX7):
     U(ψ,φ) ∧ U(θ,χ) → U(ψ∧θ, φ∧χ) ∨ U(ψ∧χ, φ∧χ) ∨ U(φ∧θ, φ∧χ) -/
 protected abbrev LinearUntil (φ ψ χ θ : F) : F :=
-  HasImp.imp (conj' (HasUntil.untl ψ φ) (HasUntil.untl θ χ))
-    (disj' (disj' (HasUntil.untl (conj' ψ θ) (conj' φ χ))
-                  (HasUntil.untl (conj' ψ χ) (conj' φ χ)))
-           (HasUntil.untl (conj' φ θ) (conj' φ χ)))
+  HasImp.imp (conj' (HasUntil.untl φ ψ) (HasUntil.untl χ θ))
+    (disj' (disj' (HasUntil.untl (conj' φ χ) (conj' ψ θ))
+                  (HasUntil.untl (conj' φ χ) (conj' ψ χ)))
+           (HasUntil.untl (conj' φ χ) (conj' φ θ)))
 
 /-- Linearity of Since (BX7'):
     S(ψ,φ) ∧ S(θ,χ) → S(ψ∧θ, φ∧χ) ∨ S(ψ∧χ, φ∧χ) ∨ S(φ∧θ, φ∧χ) -/
 protected abbrev LinearSince (φ ψ χ θ : F) : F :=
-  HasImp.imp (conj' (HasSince.snce ψ φ) (HasSince.snce θ χ))
-    (disj' (disj' (HasSince.snce (conj' ψ θ) (conj' φ χ))
-                  (HasSince.snce (conj' ψ χ) (conj' φ χ)))
-           (HasSince.snce (conj' φ θ) (conj' φ χ)))
+  HasImp.imp (conj' (HasSince.snce φ ψ) (HasSince.snce χ θ))
+    (disj' (disj' (HasSince.snce (conj' φ χ) (conj' ψ θ))
+                  (HasSince.snce (conj' φ χ) (conj' ψ χ)))
+           (HasSince.snce (conj' φ χ) (conj' φ θ)))
 
 /-- Until implies eventuality (BX10):
     U(ψ, φ) → F(ψ)
     where F(α) = ⊤ U α -/
 protected abbrev UntilF (φ ψ : F) : F :=
-  HasImp.imp (HasUntil.untl ψ φ) (HasUntil.untl ψ top')
+  HasImp.imp (HasUntil.untl φ ψ) (HasUntil.untl top' ψ)
 
 /-- Since implies past eventuality (BX10'):
     S(ψ, φ) → P(ψ)
     where P(α) = α S ⊤ -/
 protected abbrev SinceP (φ ψ : F) : F :=
-  HasImp.imp (HasSince.snce ψ φ) (HasSince.snce ψ top')
+  HasImp.imp (HasSince.snce φ ψ) (HasSince.snce top' ψ)
 
 /-- Temporal linearity (BX11):
     F(φ) ∧ F(ψ) → F(φ ∧ ψ) ∨ F(φ ∧ F(ψ)) ∨ F(F(φ) ∧ ψ) -/
 protected abbrev TempLinearity (φ ψ : F) : F :=
-  let F' := fun (x : F) => HasUntil.untl x top'
+  let F' := fun (x : F) => HasUntil.untl top' x
   HasImp.imp (conj' (F' φ) (F' ψ))
     (disj' (F' (conj' φ ψ))
       (disj' (F' (conj' φ (F' ψ)))
@@ -321,7 +321,7 @@ protected abbrev TempLinearity (φ ψ : F) : F :=
 /-- Temporal linearity past (BX11'):
     P(φ) ∧ P(ψ) → P(φ ∧ ψ) ∨ P(φ ∧ P(ψ)) ∨ P(P(φ) ∧ ψ) -/
 protected abbrev TempLinearityPast (φ ψ : F) : F :=
-  let P' := fun (x : F) => HasSince.snce x top'
+  let P' := fun (x : F) => HasSince.snce top' x
   HasImp.imp (conj' (P' φ) (P' ψ))
     (disj' (P' (conj' φ ψ))
       (disj' (P' (conj' φ (P' ψ)))
@@ -332,13 +332,13 @@ protected abbrev TempLinearityPast (φ ψ : F) : F :=
     where F(α) = ⊤ U α.
     Note: Under the Burgess 1982 convention, this is trivially F(φ) → F(φ). -/
 protected abbrev FUntilEquiv (φ : F) : F :=
-  HasImp.imp (HasUntil.untl φ top') (HasUntil.untl φ top')
+  HasImp.imp (HasUntil.untl top' φ) (HasUntil.untl top' φ)
 
 /-- P-Since equivalence (BX12'):
     P(φ) → S(φ, ⊤)
     Note: Under the Burgess 1982 convention, this is trivially P(φ) → P(φ). -/
 protected abbrev PSinceEquiv (φ : F) : F :=
-  HasImp.imp (HasSince.snce φ top') (HasSince.snce φ top')
+  HasImp.imp (HasSince.snce top' φ) (HasSince.snce top' φ)
 
 end Temporal
 
@@ -351,7 +351,7 @@ variable [HasBot F] [HasImp F] [HasBox F] [HasUntil F]
     where G φ = ¬F(¬φ) = ¬(⊤ U ¬φ)
     Necessary truths remain necessary in the future. -/
 protected abbrev ModalFuture (φ : F) : F :=
-  let G_φ := HasImp.imp (HasUntil.untl (neg' φ) top') HasBot.bot
+  let G_φ := HasImp.imp (HasUntil.untl top' (neg' φ)) HasBot.bot
   HasImp.imp (HasBox.box φ) (HasBox.box G_φ)
 
 end Interaction

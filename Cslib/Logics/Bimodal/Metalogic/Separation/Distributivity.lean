@@ -42,8 +42,8 @@ variable {Atom : Type*}
     U(A v B, C) <-> U(A,C) v U(B,C). -/
 theorem until_distrib_or_left
     (A B C : Formula Atom) :
-    intEquiv (.untl (Formula.or A B) C)
-      (Formula.or (.untl A C) (.untl B C)) := by
+    intEquiv (.untl C (Formula.or A B))
+      (Formula.or (.untl C A) (.untl C B)) := by
   intro M t
   simp only [intTruth]
   constructor
@@ -65,8 +65,8 @@ theorem until_distrib_or_left
     S(A v B, C) <-> S(A,C) v S(B,C). -/
 theorem since_distrib_or_left
     (A B C : Formula Atom) :
-    intEquiv (.snce (Formula.or A B) C)
-      (Formula.or (.snce A C) (.snce B C)) := by
+    intEquiv (.snce C (Formula.or A B))
+      (Formula.or (.snce C A) (.snce C B)) := by
   intro M t
   simp only [intTruth]
   constructor
@@ -91,8 +91,8 @@ theorem since_distrib_or_left
     Uses linearity of the time order. -/
 theorem until_distrib_and_right
     (A B C : Formula Atom) :
-    intEquiv (.untl A (Formula.and B C))
-      (Formula.and (.untl A B) (.untl A C)) := by
+    intEquiv (.untl (Formula.and B C) A)
+      (Formula.and (.untl B A) (.untl C A)) := by
   intro M t
   simp only [intTruth]
   constructor
@@ -132,8 +132,8 @@ theorem until_distrib_and_right
     S(A, B ^ C) <-> S(A,B) ^ S(A,C). -/
 theorem since_distrib_and_right
     (A B C : Formula Atom) :
-    intEquiv (.snce A (Formula.and B C))
-      (Formula.and (.snce A B) (.snce A C)) := by
+    intEquiv (.snce (Formula.and B C) A)
+      (Formula.and (.snce B A) (.snce C A)) := by
   intro M t
   simp only [intTruth]
   constructor

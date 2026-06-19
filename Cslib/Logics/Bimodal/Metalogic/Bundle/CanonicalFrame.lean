@@ -185,7 +185,7 @@ U-forward property: If `φ U ψ ∈ M` and `M` is MCS, then there exists an MCS 
 such that `ExistsTask M W` and `ψ ∈ W`.
 -/
 theorem canonical_forward_U (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
-    (φ ψ : Formula Atom) (h_U : Formula.untl ψ φ ∈ M) :
+    (φ ψ : Formula Atom) (h_U : Formula.untl φ ψ ∈ M) :
     ∃ W : Set (Formula Atom), SetMaximalConsistent FrameClass.Base W ∧ ExistsTask M W ∧ ψ ∈ W := by
   -- Step 1: {ψ} ∪ gContent(M) is consistent (uses until_induction)
   have h_seed_cons : SetConsistent (FrameClass.Base : FrameClass) (untilWitnessSeed M ψ) :=
@@ -205,7 +205,7 @@ S-backward property: If `φ S ψ ∈ M` and `M` is MCS, then there exists an MCS
 such that `ExistsTaskPast M W` and `ψ ∈ W`.
 -/
 theorem canonical_backward_S (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
-    (φ ψ : Formula Atom) (h_S : Formula.snce ψ φ ∈ M) :
+    (φ ψ : Formula Atom) (h_S : Formula.snce φ ψ ∈ M) :
     ∃ W : Set (Formula Atom), SetMaximalConsistent FrameClass.Base W ∧ ExistsTaskPast M W ∧ ψ ∈ W := by
   -- Step 1: {ψ} ∪ hContent(M) is consistent (uses since_induction)
   have h_seed_cons : SetConsistent (FrameClass.Base : FrameClass) (pastTemporalWitnessSeed M ψ) :=

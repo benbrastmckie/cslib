@@ -68,7 +68,7 @@ t < r < s. Then ⊥ at r, contradiction. -/
 theorem dense_indicator_sound {D : Type*} [LinearOrder D] [DenselyOrdered D]
     [NoMaxOrder D] [NoMinOrder D]
     (M : TemporalModel D Atom) (t : D) :
-    Satisfies M t (Formula.untl Formula.top Formula.bot).neg := by
+    Satisfies M t (Formula.untl Formula.bot Formula.top).neg := by
   rw [Satisfies.neg_iff]
   intro ⟨s, hts, _, h_guard⟩
   obtain ⟨r, htr, hrs⟩ := exists_between hts

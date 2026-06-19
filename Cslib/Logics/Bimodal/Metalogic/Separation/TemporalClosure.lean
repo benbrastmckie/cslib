@@ -47,8 +47,8 @@ def replaceBoxWithTop : Formula Atom -> Formula Atom
   | .bot => .bot
   | .imp phi psi => .imp (replaceBoxWithTop phi) (replaceBoxWithTop psi)
   | .box _ => .imp .bot .bot  -- top
-  | .untl phi psi => .untl (replaceBoxWithTop phi) (replaceBoxWithTop psi)
-  | .snce phi psi => .snce (replaceBoxWithTop phi) (replaceBoxWithTop psi)
+  | .untl psi phi => .untl (replaceBoxWithTop psi) (replaceBoxWithTop phi)
+  | .snce psi phi => .snce (replaceBoxWithTop psi) (replaceBoxWithTop phi)
 
 /-- Box-normalization preserves semantic equivalence over integer time. -/
 theorem replace_box_equiv (phi : Formula Atom) : intEquiv phi (replaceBoxWithTop phi) := by
@@ -61,14 +61,14 @@ theorem replace_box_equiv (phi : Formula Atom) : intEquiv phi (replaceBoxWithTop
     exact ⟨fun h hp => (ih2 t).mp (h ((ih1 t).mpr hp)),
            fun h hp => (ih2 t).mpr (h ((ih1 t).mp hp))⟩
   | box _ => simp [replaceBoxWithTop, intTruth]
-  | untl a b ih1 ih2 =>
+  | untl b a ih2 ih1 =>
     simp [replaceBoxWithTop, intTruth]
     constructor
     · rintro ⟨s, hs, h1, h2⟩
       exact ⟨s, hs, (ih1 s).mp h1, fun r hr1 hr2 => (ih2 r).mp (h2 r hr1 hr2)⟩
     · rintro ⟨s, hs, h1, h2⟩
       exact ⟨s, hs, (ih1 s).mpr h1, fun r hr1 hr2 => (ih2 r).mpr (h2 r hr1 hr2)⟩
-  | snce a b ih1 ih2 =>
+  | snce b a ih2 ih1 =>
     simp [replaceBoxWithTop, intTruth]
     constructor
     · rintro ⟨s, hs, h1, h2⟩
@@ -85,7 +85,7 @@ theorem replace_box_preserves_U_free (phi : Formula Atom) (h : isUFree phi = tru
   | imp a b ih1 ih2 => simp [isUFree] at h; simp [replaceBoxWithTop, isUFree, ih1 h.1, ih2 h.2]
   | box _ => simp [replaceBoxWithTop, isUFree]
   | untl _ _ => simp [isUFree] at h
-  | snce a b ih1 ih2 => simp [isUFree] at h; simp [replaceBoxWithTop, isUFree, ih1 h.1, ih2 h.2]
+  | snce b a ih2 ih1 => simp [isUFree] at h; simp [replaceBoxWithTop, isUFree, ih1 h.1, ih2 h.2]
 
 /-- Box-normalization preserves isSFree. -/
 theorem replace_box_preserves_S_free (phi : Formula Atom) (h : isSFree phi = true) :
@@ -95,7 +95,7 @@ theorem replace_box_preserves_S_free (phi : Formula Atom) (h : isSFree phi = tru
   | bot => rfl
   | imp a b ih1 ih2 => simp [isSFree] at h; simp [replaceBoxWithTop, isSFree, ih1 h.1, ih2 h.2]
   | box _ => simp [replaceBoxWithTop, isSFree]
-  | untl a b ih1 ih2 => simp [isSFree] at h; simp [replaceBoxWithTop, isSFree, ih1 h.1, ih2 h.2]
+  | untl b a ih2 ih1 => simp [isSFree] at h; simp [replaceBoxWithTop, isSFree, ih1 h.1, ih2 h.2]
   | snce _ _ => simp [isSFree] at h
 
 /-- Box-normalization preserves syntactic separation. -/
@@ -109,11 +109,11 @@ theorem replace_box_preserves_separated (phi : Formula Atom)
     simp [isSyntacticallySeparated] at h
     simp [replaceBoxWithTop, isSyntacticallySeparated, ih1 h.1, ih2 h.2]
   | box _ => simp [replaceBoxWithTop, isSyntacticallySeparated]
-  | untl a b _ih1 _ih2 =>
+  | untl b a _ih2 _ih1 =>
     simp [isSyntacticallySeparated] at h
     simp [replaceBoxWithTop, isSyntacticallySeparated,
           replace_box_preserves_S_free a h.1, replace_box_preserves_S_free b h.2]
-  | snce a b _ih1 _ih2 =>
+  | snce b a _ih2 _ih1 =>
     simp [isSyntacticallySeparated] at h
     simp [replaceBoxWithTop, isSyntacticallySeparated,
           replace_box_preserves_U_free a h.1, replace_box_preserves_U_free b h.2]
@@ -129,7 +129,7 @@ theorem u_free_no_S_nested (phi : Formula Atom) (h : isUFree phi = true) :
   | imp a b ih1 ih2 => simp [isUFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
   | box a ih => simp [isUFree] at h; exact ih h
   | untl _ _ => simp [isUFree] at h
-  | snce a b ih1 ih2 => simp [isUFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
+  | snce b a ih2 ih1 => simp [isUFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
 
 /-- S-free formulas satisfy noSNestedInU (untl args inherit S-freeness). -/
 theorem s_free_no_S_nested (phi : Formula Atom) (h : isSFree phi = true) :
@@ -139,7 +139,7 @@ theorem s_free_no_S_nested (phi : Formula Atom) (h : isSFree phi = true) :
   | bot => trivial
   | imp a b ih1 ih2 => simp [isSFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
   | box a ih => simp [isSFree] at h; exact ih h
-  | untl a b _ih1 _ih2 => simp [isSFree] at h; exact h
+  | untl b a _ih2 _ih1 => simp [isSFree] at h; exact h
   | snce _ _ => simp [isSFree] at h
 
 /-- A box-normalized separated formula satisfies noSNestedInU. -/
@@ -155,11 +155,11 @@ theorem replace_box_separated_no_S_nested (phi : Formula Atom)
     exact ⟨ih1 h.1, ih2 h.2⟩
   | box _ =>
     simp [replaceBoxWithTop, noSNestedInU]
-  | untl a b _ih1 _ih2 =>
+  | untl b a _ih2 _ih1 =>
     simp [isSyntacticallySeparated] at h
     simp [replaceBoxWithTop, noSNestedInU]
     exact ⟨replace_box_preserves_S_free a h.1, replace_box_preserves_S_free b h.2⟩
-  | snce a b _ih1 _ih2 =>
+  | snce b a _ih2 _ih1 =>
     simp [isSyntacticallySeparated] at h
     simp [replaceBoxWithTop, noSNestedInU]
     exact ⟨u_free_no_S_nested (replaceBoxWithTop a) (replace_box_preserves_U_free a h.1),
@@ -173,8 +173,8 @@ def noUNestedInS : Formula Atom -> Prop
   | .bot => True
   | .imp phi psi => noUNestedInS phi ∧ noUNestedInS psi
   | .box phi => noUNestedInS phi
-  | .untl phi psi => noUNestedInS phi ∧ noUNestedInS psi
-  | .snce phi psi => isUFree phi = true ∧ isUFree psi = true
+  | .untl psi phi => noUNestedInS phi ∧ noUNestedInS psi
+  | .snce psi phi => isUFree phi = true ∧ isUFree psi = true
 
 /-- swapTemporal converts noUNestedInS to noSNestedInU. -/
 theorem swap_no_U_nested_gives_no_S_nested (phi : Formula Atom)
@@ -184,9 +184,9 @@ theorem swap_no_U_nested_gives_no_S_nested (phi : Formula Atom)
   | bot => trivial
   | imp a b ih1 ih2 => exact ⟨ih1 h.1, ih2 h.2⟩
   | box a ih => exact ih h
-  | untl a b ih1 ih2 =>
+  | untl b a ih2 ih1 =>
     exact ⟨ih1 h.1, ih2 h.2⟩
-  | snce a b _ih1 _ih2 =>
+  | snce b a _ih2 _ih1 =>
     obtain ⟨ha, hb⟩ := h
     constructor
     · rw [dual_S_free_iff_U_free]; exact ha
@@ -200,12 +200,12 @@ theorem swap_no_S_nested_gives_no_U_nested (phi : Formula Atom)
   | bot => trivial
   | imp a b ih1 ih2 => exact ⟨ih1 h.1, ih2 h.2⟩
   | box a ih => exact ih h
-  | untl a b _ih1 _ih2 =>
+  | untl b a _ih2 _ih1 =>
     obtain ⟨ha, hb⟩ := h
     constructor
     · rw [dual_U_free_iff_S_free]; exact ha
     · rw [dual_U_free_iff_S_free]; exact hb
-  | snce a b ih1 ih2 =>
+  | snce b a ih2 ih1 =>
     exact ⟨ih1 h.1, ih2 h.2⟩
 
 /-- A box-normalized separated formula also satisfies noUNestedInS. -/
@@ -221,12 +221,12 @@ theorem replace_box_separated_no_U_nested (phi : Formula Atom)
     exact ⟨ih1 h.1, ih2 h.2⟩
   | box _ =>
     simp [replaceBoxWithTop, noUNestedInS]
-  | untl a b _ih1 _ih2 =>
+  | untl b a _ih2 _ih1 =>
     simp [isSyntacticallySeparated] at h
     simp [replaceBoxWithTop, noUNestedInS]
     exact ⟨s_free_no_U_nested (replaceBoxWithTop a) (replace_box_preserves_S_free a h.1),
            s_free_no_U_nested (replaceBoxWithTop b) (replace_box_preserves_S_free b h.2)⟩
-  | snce a b _ih1 _ih2 =>
+  | snce b a _ih2 _ih1 =>
     simp [isSyntacticallySeparated] at h
     simp [replaceBoxWithTop, noUNestedInS]
     exact ⟨replace_box_preserves_U_free a h.1, replace_box_preserves_U_free b h.2⟩
@@ -238,14 +238,14 @@ where
     | imp a b ih1 ih2 => simp [isUFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
     | box a ih => simp [isUFree] at h; exact ih h
     | untl _ _ => simp [isUFree] at h
-    | snce a b _ih1 _ih2 => simp [isUFree] at h; exact h
+    | snce b a _ih2 _ih1 => simp [isUFree] at h; exact h
   s_free_no_U_nested (phi : Formula Atom) (h : isSFree phi = true) : noUNestedInS phi := by
     induction phi with
     | atom _ => trivial
     | bot => trivial
     | imp a b ih1 ih2 => simp [isSFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
     | box a ih => simp [isSFree] at h; exact ih h
-    | untl a b ih1 ih2 => simp [isSFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
+    | untl b a ih2 ih1 => simp [isSFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
     | snce _ _ => simp [isSFree] at h
 
 /-! ## Key Structural Properties for Temporal Closure -/
@@ -254,7 +254,7 @@ where
 theorem snce_of_boxfree_sep_no_S_nested (phi psi : Formula Atom)
     (h1 : isSyntacticallySeparated phi = true)
     (h2 : isSyntacticallySeparated psi = true) :
-    noSNestedInU (.snce (replaceBoxWithTop phi) (replaceBoxWithTop psi)) := by
+    noSNestedInU (.snce (replaceBoxWithTop psi) (replaceBoxWithTop phi)) := by
   simp [noSNestedInU]
   exact ⟨replace_box_separated_no_S_nested phi h1,
          replace_box_separated_no_S_nested psi h2⟩
@@ -270,7 +270,7 @@ theorem allPast_of_boxfree_sep_no_S_nested (phi : Formula Atom)
 theorem untl_of_boxfree_sep_no_U_nested (phi psi : Formula Atom)
     (h1 : isSyntacticallySeparated phi = true)
     (h2 : isSyntacticallySeparated psi = true) :
-    noUNestedInS (.untl (replaceBoxWithTop phi) (replaceBoxWithTop psi)) := by
+    noUNestedInS (.untl (replaceBoxWithTop psi) (replaceBoxWithTop phi)) := by
   simp [noUNestedInS]
   exact ⟨replace_box_separated_no_U_nested phi h1,
          replace_box_separated_no_U_nested psi h2⟩
@@ -286,8 +286,8 @@ theorem allFuture_of_boxfree_sep_no_U_nested (phi : Formula Atom)
 
 /-- snce preserves intEquiv under box normalization of arguments. -/
 theorem snce_replace_box_equiv (phi psi : Formula Atom) :
-    intEquiv (.snce phi psi)
-      (.snce (replaceBoxWithTop phi) (replaceBoxWithTop psi)) := by
+    intEquiv (.snce psi phi)
+      (.snce (replaceBoxWithTop psi) (replaceBoxWithTop phi)) := by
   intro M t; constructor
   · rintro ⟨s, hst, h1, h2⟩
     exact ⟨s, hst, (replace_box_equiv phi M s).mp h1,
@@ -305,8 +305,8 @@ theorem allPast_replace_box_equiv (phi : Formula Atom) :
 
 /-- untl preserves intEquiv under box normalization of arguments. -/
 theorem untl_replace_box_equiv (phi psi : Formula Atom) :
-    intEquiv (.untl phi psi)
-      (.untl (replaceBoxWithTop phi) (replaceBoxWithTop psi)) := by
+    intEquiv (.untl psi phi)
+      (.untl (replaceBoxWithTop psi) (replaceBoxWithTop phi)) := by
   intro M t; constructor
   · rintro ⟨s, hts, h1, h2⟩
     exact ⟨s, hts, (replace_box_equiv phi M s).mp h1,
@@ -334,7 +334,7 @@ theorem junction_depth_S_zero_imp_U_free (phi : Formula Atom) (h : junctionDepth
     simp [junctionDepthS] at h; simp [isUFree, ih1 (by omega), ih2 (by omega)]
   | box a ih => simp [junctionDepthS] at h; simp [isUFree, ih h]
   | untl _ _ => simp [junctionDepthS] at h
-  | snce a b ih1 ih2 =>
+  | snce b a ih2 ih1 =>
     simp [junctionDepthS] at h; simp [isUFree, ih1 (by omega), ih2 (by omega)]
 
 /-- junctionDepthU = 0 implies S-free. -/
@@ -346,7 +346,7 @@ theorem junction_depth_U_zero_imp_S_free (phi : Formula Atom) (h : junctionDepth
   | imp a b ih1 ih2 =>
     simp [junctionDepthU] at h; simp [isSFree, ih1 (by omega), ih2 (by omega)]
   | box a ih => simp [junctionDepthU] at h; simp [isSFree, ih h]
-  | untl a b ih1 ih2 =>
+  | untl b a ih2 ih1 =>
     simp [junctionDepthU] at h; simp [isSFree, ih1 (by omega), ih2 (by omega)]
   | snce _ _ => simp [junctionDepthU] at h
 
@@ -359,7 +359,7 @@ theorem s_free_junction_depth_zero (phi : Formula Atom) (h : isSFree phi = true)
   | imp a b ih1 ih2 =>
     simp [isSFree] at h; simp [junctionDepth, ih1 h.1, ih2 h.2]
   | box a ih => simp [isSFree] at h; simp [junctionDepth, ih h]
-  | untl a b ih1 ih2 =>
+  | untl b a ih2 ih1 =>
     simp [isSFree] at h
     simp [junctionDepth]
     have : junctionDepthU a = 0 := s_free_junction_depth_U_zero a h.1
@@ -375,7 +375,7 @@ where
     | imp a b ih1 ih2 =>
       simp [isSFree] at h; simp [junctionDepthU, ih1 h.1, ih2 h.2]
     | box a ih => simp [isSFree] at h; simp [junctionDepthU, ih h]
-    | untl a b ih1 ih2 =>
+    | untl b a ih2 ih1 =>
       simp [isSFree] at h; simp [junctionDepthU, ih1 h.1, ih2 h.2]
     | snce _ _ => simp [isSFree] at h
 
@@ -389,7 +389,7 @@ theorem u_free_junction_depth_zero (phi : Formula Atom) (h : isUFree phi = true)
     simp [isUFree] at h; simp [junctionDepth, ih1 h.1, ih2 h.2]
   | box a ih => simp [isUFree] at h; simp [junctionDepth, ih h]
   | untl _ _ => simp [isUFree] at h
-  | snce a b ih1 ih2 =>
+  | snce b a ih2 ih1 =>
     simp [isUFree] at h
     simp [junctionDepth]
     have : junctionDepthS a = 0 := u_free_junction_depth_S_zero a h.1
@@ -405,14 +405,14 @@ where
       simp [isUFree] at h; simp [junctionDepthS, ih1 h.1, ih2 h.2]
     | box a ih => simp [isUFree] at h; simp [junctionDepthS, ih h]
     | untl _ _ => simp [isUFree] at h
-    | snce a b ih1 ih2 =>
+    | snce b a ih2 ih1 =>
       simp [isUFree] at h; simp [junctionDepthS, ih1 h.1, ih2 h.2]
 
 /-- The snce of two box-normalized separated formulas has junctionDepth ≤ 1. -/
 theorem snce_of_boxfree_sep_jd_le_one (phi psi : Formula Atom)
     (h1 : isSyntacticallySeparated phi = true)
     (h2 : isSyntacticallySeparated psi = true) :
-    junctionDepth (.snce (replaceBoxWithTop phi) (replaceBoxWithTop psi)) ≤ 1 := by
+    junctionDepth (.snce (replaceBoxWithTop psi) (replaceBoxWithTop phi)) ≤ 1 := by
   simp [junctionDepth]
   constructor
   · exact replace_box_jdS_le_one phi h1
@@ -429,13 +429,13 @@ where
       exact ⟨ih1 h.1, ih2 h.2⟩
     | box _ =>
       simp [replaceBoxWithTop, junctionDepthS]
-    | untl a b _ih1 _ih2 =>
+    | untl b a _ih2 _ih1 =>
       simp [isSyntacticallySeparated] at h
       simp [replaceBoxWithTop, junctionDepthS]
       have ha := s_free_junction_depth_zero (replaceBoxWithTop a) (replace_box_preserves_S_free a h.1)
       have hb := s_free_junction_depth_zero (replaceBoxWithTop b) (replace_box_preserves_S_free b h.2)
       omega
-    | snce a b _ih1 _ih2 =>
+    | snce b a _ih2 _ih1 =>
       simp [isSyntacticallySeparated] at h
       simp [replaceBoxWithTop, junctionDepthS]
       have ha := u_free_junction_depth_zero.u_free_junction_depth_S_zero
@@ -453,8 +453,8 @@ def expandTemporal : Formula Atom → Formula Atom
   | .bot => .bot
   | .imp φ ψ => .imp (expandTemporal φ) (expandTemporal ψ)
   | .box φ => .box φ
-  | .untl φ ψ => .untl (expandTemporal φ) (expandTemporal ψ)
-  | .snce φ ψ => .snce (expandTemporal φ) (expandTemporal ψ)
+  | .untl ψ φ => .untl (expandTemporal ψ) (expandTemporal φ)
+  | .snce ψ φ => .snce (expandTemporal ψ) (expandTemporal φ)
 
 /-- With 6-constructor Formula, expandTemporal is the identity function. -/
 @[simp] theorem expand_temporal_id (φ : Formula Atom) : expandTemporal φ = φ := by
@@ -463,8 +463,8 @@ def expandTemporal : Formula Atom → Formula Atom
   | bot => rfl
   | imp a b ih1 ih2 => simp only [expandTemporal, ih1, ih2]
   | box _ => simp only [expandTemporal]
-  | untl a b ih1 ih2 => simp only [expandTemporal, ih1, ih2]
-  | snce a b ih1 ih2 => simp only [expandTemporal, ih1, ih2]
+  | untl b a ih2 ih1 => simp only [expandTemporal, ih1, ih2]
+  | snce b a ih2 ih1 => simp only [expandTemporal, ih1, ih2]
 
 /-- expandTemporal preserves semantic equivalence. -/
 theorem expand_temporal_equiv (φ : Formula Atom) : intEquiv φ (expandTemporal φ) := by
@@ -476,8 +476,8 @@ def hasNoAllpastAllfuture : Formula Atom → Bool
   | .bot => true
   | .imp φ ψ => hasNoAllpastAllfuture φ && hasNoAllpastAllfuture ψ
   | .box _ => true
-  | .untl φ ψ => hasNoAllpastAllfuture φ && hasNoAllpastAllfuture ψ
-  | .snce φ ψ => hasNoAllpastAllfuture φ && hasNoAllpastAllfuture ψ
+  | .untl ψ φ => hasNoAllpastAllfuture φ && hasNoAllpastAllfuture ψ
+  | .snce ψ φ => hasNoAllpastAllfuture φ && hasNoAllpastAllfuture ψ
 
 /-- With 6-constructor Formula, hasNoAllpastAllfuture is trivially true. -/
 @[simp] theorem has_no_allpast_allfuture_true (φ : Formula Atom) :
@@ -487,8 +487,8 @@ def hasNoAllpastAllfuture : Formula Atom → Bool
   | bot => rfl
   | imp a b ih1 ih2 => simp only [hasNoAllpastAllfuture, ih1, ih2, Bool.and_self]
   | box _ => rfl
-  | untl a b ih1 ih2 => simp only [hasNoAllpastAllfuture, ih1, ih2, Bool.and_self]
-  | snce a b ih1 ih2 => simp only [hasNoAllpastAllfuture, ih1, ih2, Bool.and_self]
+  | untl b a ih2 ih1 => simp only [hasNoAllpastAllfuture, ih1, ih2, Bool.and_self]
+  | snce b a ih2 ih1 => simp only [hasNoAllpastAllfuture, ih1, ih2, Bool.and_self]
 
 /-- In the restricted fragment, JD=0 implies syntactically separated. -/
 theorem expanded_jd_zero_imp_separated (φ : Formula Atom)
@@ -504,12 +504,12 @@ theorem expanded_jd_zero_imp_separated (φ : Formula Atom)
       iha (has_no_allpast_allfuture_true a) (by omega),
       ihb (has_no_allpast_allfuture_true b) (by omega), Bool.and_self]
   | box _ => rfl
-  | untl a b _iha _ihb =>
+  | untl b a _ihb _iha =>
     simp [junctionDepth] at hjd
     have ha := junction_depth_U_zero_imp_S_free a (by omega)
     have hb := junction_depth_U_zero_imp_S_free b (by omega)
     simp [isSyntacticallySeparated, ha, hb]
-  | snce a b _iha _ihb =>
+  | snce b a _ihb _iha =>
     simp [junctionDepth] at hjd
     have ha := junction_depth_S_zero_imp_U_free a (by omega)
     have hb := junction_depth_S_zero_imp_U_free b (by omega)

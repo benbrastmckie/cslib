@@ -122,7 +122,7 @@ theorem until_witness_construction
     (hphi : intTruth M s phi)
     (hpsi : ∀ r : Int,
       t < r → r < s → intTruth M r psi) :
-    intTruth M t (.untl phi psi) :=
+    intTruth M t (.untl psi phi) :=
   ⟨s, hts, hphi, hpsi⟩
 
 /-- Dual: if phi holds at s and psi holds on (s,t),
@@ -133,7 +133,7 @@ theorem since_witness_construction
     (hphi : intTruth M s phi)
     (hpsi : ∀ r : Int,
       s < r → r < t → intTruth M r psi) :
-    intTruth M t (.snce phi psi) :=
+    intTruth M t (.snce psi phi) :=
   ⟨s, hst, hphi, hpsi⟩
 
 /-! ## Top/True Equivalences -/
@@ -146,13 +146,13 @@ theorem neg_bot_true
 
 /-- S(a, neg bot) iff somePast a. -/
 theorem since_top_is_past (a : Formula Atom) :
-    intEquiv (.snce a (Formula.neg .bot))
+    intEquiv (.snce (Formula.neg .bot) a)
       (Formula.somePast a) :=
   int_equiv_refl _
 
 /-- U(a, neg bot) iff someFuture a. -/
 theorem until_top_is_future (a : Formula Atom) :
-    intEquiv (.untl a (Formula.neg .bot))
+    intEquiv (.untl (Formula.neg .bot) a)
       (Formula.someFuture a) :=
   int_equiv_refl _
 

@@ -153,7 +153,7 @@ theorem restricted_parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
       exact B.modal_backward fam hfam ψ t (fun fam' hfam' =>
         (ih h_ψ_sub fam' hfam' t).mpr
           (h_all_σ (parametricToHistory fam') (parametricCanonicalOmega_subset_shiftClosed B ⟨fam', hfam', rfl⟩)))
-  | untl phi psi ih_phi ih_psi =>
+  | untl psi phi ih_psi ih_phi =>
     have h_phi_sub := closure_untl_left root phi psi h_sub
     have h_psi_sub := closure_untl_right root phi psi h_sub
     simp only [truthAt]
@@ -168,7 +168,7 @@ theorem restricted_parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
       exact h_bwd_U t phi psi ⟨s, h_ts,
         (ih_phi h_phi_sub fam hfam s).mpr h_truth_phi_s,
         fun r h_tr h_rs => (ih_psi h_psi_sub fam hfam r).mpr (h_truth_psi_guard r h_tr h_rs)⟩
-  | snce phi psi ih_phi ih_psi =>
+  | snce psi phi ih_psi ih_phi =>
     have h_phi_sub := closure_snce_left root phi psi h_sub
     have h_psi_sub := closure_snce_right root phi psi h_sub
     simp only [truthAt]
@@ -276,7 +276,7 @@ theorem fully_restricted_parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
       exact B.modal_backward fam hfam ψ t (fun fam' hfam' =>
         (ih h_ψ_sub fam' hfam' t).mpr
           (h_all_σ (parametricToHistory fam') (parametricCanonicalOmega_subset_shiftClosed B ⟨fam', hfam', rfl⟩)))
-  | untl phi psi ih_phi ih_psi =>
+  | untl psi phi ih_psi ih_phi =>
     have h_phi_sub := closure_untl_left root phi psi h_sub
     have h_psi_sub := closure_untl_right root phi psi h_sub
     simp only [truthAt]
@@ -291,7 +291,7 @@ theorem fully_restricted_parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
       exact h_bwd_U t phi psi h_sub ⟨s, h_ts,
         (ih_phi h_phi_sub fam hfam s).mpr h_truth_phi_s,
         fun r h_tr h_rs => (ih_psi h_psi_sub fam hfam r).mpr (h_truth_psi_guard r h_tr h_rs)⟩
-  | snce phi psi ih_phi ih_psi =>
+  | snce psi phi ih_psi ih_phi =>
     have h_phi_sub := closure_snce_left root phi psi h_sub
     have h_psi_sub := closure_snce_right root phi psi h_sub
     simp only [truthAt]

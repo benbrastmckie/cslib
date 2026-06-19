@@ -59,9 +59,9 @@ def intTruth (M : IntStructure Atom) (t : ℤ) : Formula Atom → Prop
   | .bot => False
   | .imp φ ψ => intTruth M t φ → intTruth M t ψ
   | .box _ => True
-  | .untl φ ψ => ∃ s : ℤ, t < s ∧ intTruth M s φ ∧
+  | .untl ψ φ => ∃ s : ℤ, t < s ∧ intTruth M s φ ∧
       ∀ r : ℤ, t < r → r < s → intTruth M r ψ
-  | .snce φ ψ => ∃ s : ℤ, s < t ∧ intTruth M s φ ∧
+  | .snce ψ φ => ∃ s : ℤ, s < t ∧ intTruth M s φ ∧
       ∀ r : ℤ, s < r → r < t → intTruth M r ψ
 
 /-! ## intTruth simp lemmas for derived temporal operators -/
@@ -141,8 +141,8 @@ def formulaAtoms : Formula Atom → Set Atom
   | .bot => ∅
   | .imp φ ψ => formulaAtoms φ ∪ formulaAtoms ψ
   | .box φ => formulaAtoms φ
-  | .untl φ ψ => formulaAtoms φ ∪ formulaAtoms ψ
-  | .snce φ ψ => formulaAtoms φ ∪ formulaAtoms ψ
+  | .untl ψ φ => formulaAtoms φ ∪ formulaAtoms ψ
+  | .snce ψ φ => formulaAtoms φ ∪ formulaAtoms ψ
 
 @[simp] theorem formula_atoms_allPast (φ : Formula Atom) :
     formulaAtoms (Formula.allPast φ) = formulaAtoms φ := by
@@ -209,7 +209,7 @@ def isUFree : Formula Atom → Bool
   | .imp φ ψ => isUFree φ && isUFree ψ
   | .box φ => isUFree φ
   | .untl _ _ => false
-  | .snce φ ψ => isUFree φ && isUFree ψ
+  | .snce ψ φ => isUFree φ && isUFree ψ
 
 /-- A formula is "syntactically S-free": no `snce` constructor. -/
 def isSFree : Formula Atom → Bool
@@ -217,7 +217,7 @@ def isSFree : Formula Atom → Bool
   | .bot => true
   | .imp φ ψ => isSFree φ && isSFree ψ
   | .box φ => isSFree φ
-  | .untl φ ψ => isSFree φ && isSFree ψ
+  | .untl ψ φ => isSFree φ && isSFree ψ
   | .snce _ _ => false
 
 /-! ### Simp lemmas for isUFree and isSFree -/
@@ -247,8 +247,8 @@ def isSyntacticallySeparated : Formula Atom → Bool
   | .imp φ ψ =>
     isSyntacticallySeparated φ && isSyntacticallySeparated ψ
   | .box _ => true
-  | .untl φ ψ => isSFree φ && isSFree ψ
-  | .snce φ ψ => isUFree φ && isUFree ψ
+  | .untl ψ φ => isSFree φ && isSFree ψ
+  | .snce ψ φ => isUFree φ && isUFree ψ
 
 @[simp] theorem is_syntactically_separated_allPast
     (φ : Formula Atom) :
@@ -276,7 +276,7 @@ def isFutureOnly : Formula Atom → Bool
   | .bot => true
   | .imp φ ψ => isFutureOnly φ && isFutureOnly ψ
   | .box φ => isFutureOnly φ
-  | .untl φ ψ => isFutureOnly φ && isFutureOnly ψ
+  | .untl ψ φ => isFutureOnly φ && isFutureOnly ψ
   | .snce _ _ => false
 
 @[simp] theorem is_future_only_allPast (φ : Formula Atom) :
@@ -294,7 +294,7 @@ def isPastOnly : Formula Atom → Bool
   | .imp φ ψ => isPastOnly φ && isPastOnly ψ
   | .box φ => isPastOnly φ
   | .untl _ _ => false
-  | .snce φ ψ => isPastOnly φ && isPastOnly ψ
+  | .snce ψ φ => isPastOnly φ && isPastOnly ψ
 
 @[simp] theorem is_past_only_allPast (φ : Formula Atom) :
     isPastOnly (Formula.allPast φ) = isPastOnly φ := by
@@ -313,8 +313,8 @@ def isProperlySeparated : Formula Atom → Bool
   | .imp φ ψ =>
     isProperlySeparated φ && isProperlySeparated ψ
   | .box _ => true
-  | .untl φ ψ => isFutureOnly φ && isFutureOnly ψ
-  | .snce φ ψ => isPastOnly φ && isPastOnly ψ
+  | .untl ψ φ => isFutureOnly φ && isFutureOnly ψ
+  | .snce ψ φ => isPastOnly φ && isPastOnly ψ
 
 @[simp] theorem is_properly_separated_allPast
     (φ : Formula Atom) :
@@ -344,9 +344,9 @@ def junctionDepth : Formula Atom -> Nat
   | .imp phi psi =>
     max (junctionDepth phi) (junctionDepth psi)
   | .box phi => junctionDepth phi
-  | .untl phi psi =>
+  | .untl psi phi =>
     max (junctionDepthU phi) (junctionDepthU psi)
-  | .snce phi psi =>
+  | .snce psi phi =>
     max (junctionDepthS phi) (junctionDepthS psi)
 
 /-- Junction depth for a formula in the context of a U-subterm: counts S-nesting as alternation. -/
@@ -356,9 +356,9 @@ def junctionDepthU : Formula Atom -> Nat
   | .imp phi psi =>
     max (junctionDepthU phi) (junctionDepthU psi)
   | .box phi => junctionDepthU phi
-  | .untl phi psi =>
+  | .untl psi phi =>
     max (junctionDepthU phi) (junctionDepthU psi)
-  | .snce phi psi =>
+  | .snce psi phi =>
     1 + max (junctionDepth phi) (junctionDepth psi)
 
 /-- Junction depth for a formula in the context of an S-subterm: counts U-nesting as alternation. -/
@@ -368,9 +368,9 @@ def junctionDepthS : Formula Atom -> Nat
   | .imp phi psi =>
     max (junctionDepthS phi) (junctionDepthS psi)
   | .box phi => junctionDepthS phi
-  | .untl phi psi =>
+  | .untl psi phi =>
     1 + max (junctionDepth phi) (junctionDepth psi)
-  | .snce phi psi =>
+  | .snce psi phi =>
     max (junctionDepthS phi) (junctionDepthS psi)
 end
 
@@ -392,7 +392,7 @@ def uDepthUnderS : Formula Atom → Nat
   | .bot => 0
   | .imp φ ψ => max (uDepthUnderS φ) (uDepthUnderS ψ)
   | .box φ => uDepthUnderS φ
-  | .untl φ ψ =>
+  | .untl ψ φ =>
     1 + max (uDepthUnderS φ) (uDepthUnderS ψ)
   | .snce _ _ => 0
 
@@ -404,17 +404,17 @@ def countUSubformulas : Formula Atom → Nat
     countUSubformulas φ + countUSubformulas ψ
   | .box φ => countUSubformulas φ
   | .untl _ _ => 1
-  | .snce φ ψ =>
+  | .snce ψ φ =>
     countUSubformulas φ + countUSubformulas ψ
 
-/-- Total count of ALL `.untl` nodes at ALL depths. -/
+/-- Total count of ALL `.untlnodes ` at ALL depths. -/
 def countUTotal : Formula Atom → Nat
   | .atom _ => 0
   | .bot => 0
   | .imp φ ψ => countUTotal φ + countUTotal ψ
   | .box φ => countUTotal φ
-  | .untl φ ψ => 1 + countUTotal φ + countUTotal ψ
-  | .snce φ ψ => countUTotal φ + countUTotal ψ
+  | .untl ψ φ => 1 + countUTotal φ + countUTotal ψ
+  | .snce ψ φ => countUTotal φ + countUTotal ψ
 
 /-- `countUTotal phi = 0` iff the formula is U-free. -/
 theorem count_U_total_zero_iff_U_free
@@ -431,7 +431,7 @@ theorem count_U_total_zero_iff_U_free
   | untl _ _ =>
     simp only [countUTotal, isUFree]
     exact iff_of_false (by omega) (by decide)
-  | snce a b ih1 ih2 =>
+  | snce b a ih2 ih1 =>
     simp only [countUTotal, isUFree,
       Nat.add_eq_zero_iff, Bool.and_eq_true, ih1, ih2]
 
@@ -443,7 +443,7 @@ def sNestingAboveU : Formula Atom → Nat
     max (sNestingAboveU φ) (sNestingAboveU ψ)
   | .box φ => sNestingAboveU φ
   | .untl _ _ => 0
-  | .snce φ ψ =>
+  | .snce ψ φ =>
     let sub := max (sNestingAboveUInner φ)
       (sNestingAboveUInner ψ)
     if sub > 0 then 1 + sub else 0
@@ -457,7 +457,7 @@ where
         (sNestingAboveUInner ψ)
     | .box φ => sNestingAboveUInner φ
     | .untl _ _ => 1
-    | .snce φ ψ =>
+    | .snce ψ φ =>
       let sub := max (sNestingAboveUInner φ)
         (sNestingAboveUInner ψ)
       if sub > 0 then 1 + sub else 0
@@ -474,8 +474,8 @@ def uAppearancesTopLevelOnly :
     uAppearancesTopLevelOnly φ A B ∧
       uAppearancesTopLevelOnly ψ A B
   | .box φ, A, B => uAppearancesTopLevelOnly φ A B
-  | .untl φ ψ, A, B => φ = A ∧ ψ = B
-  | .snce φ ψ, _, _ =>
+  | .untl ψ φ, A, B => φ = A ∧ ψ = B
+  | .snce ψ φ, _, _ =>
     isUFree φ = true ∧ isUFree ψ = true
 
 /-- Predicate: U(A,B) appears only at top level (not under S). -/
@@ -487,10 +487,10 @@ def uAppearsOnlyAsTopLevel :
     uAppearsOnlyAsTopLevel φ A B ∧
       uAppearsOnlyAsTopLevel ψ A B
   | .box φ, A, B => uAppearsOnlyAsTopLevel φ A B
-  | .untl φ ψ, A, B =>
+  | .untl ψ φ, A, B =>
     uAppearsOnlyAsTopLevel φ A B ∧
       uAppearsOnlyAsTopLevel ψ A B
-  | .snce φ ψ, _, _ =>
+  | .snce ψ φ, _, _ =>
     isUFree φ = true ∧ isUFree ψ = true
 
 /-- Predicate: the formula has no S nested within any U. -/
@@ -500,9 +500,9 @@ def noSNestedInU : Formula Atom -> Prop
   | .imp phi psi =>
     noSNestedInU phi ∧ noSNestedInU psi
   | .box phi => noSNestedInU phi
-  | .untl phi psi =>
+  | .untl psi phi =>
     isSFree phi = true ∧ isSFree psi = true
-  | .snce phi psi =>
+  | .snce psi phi =>
     noSNestedInU phi ∧ noSNestedInU psi
 
 @[simp] theorem no_S_nested_in_U_allPast
@@ -537,7 +537,7 @@ theorem int_truth_depends_only_on_atoms
       (ih2 t (fun a ha =>
         h a (Set.mem_union_right _ ha)))
   | box _ => rfl
-  | untl c d ih1 ih2 =>
+  | untl d c ih2 ih1 =>
     simp only [intTruth]; constructor
     · rintro ⟨s, hts, hc, hd⟩
       exact ⟨s, hts,
@@ -555,7 +555,7 @@ theorem int_truth_depends_only_on_atoms
           (ih2 r (fun a ha =>
             h a (Set.mem_union_right _ ha))).mpr
           (hd r hr1 hr2)⟩
-  | snce c d ih1 ih2 =>
+  | snce d c ih2 ih1 =>
     simp only [intTruth]; constructor
     · rintro ⟨s, hst, hc, hd⟩
       exact ⟨s, hst,
@@ -585,7 +585,7 @@ theorem s_free_eq_future_only (φ : Formula Atom) :
   | imp a b ih1 ih2 =>
     simp [isSFree, isFutureOnly, ih1, ih2]
   | box a ih => simp [isSFree, isFutureOnly, ih]
-  | untl a b ih1 ih2 =>
+  | untl b a ih2 ih1 =>
     simp [isSFree, isFutureOnly, ih1, ih2]
   | snce _ _ => rfl
 
@@ -599,7 +599,7 @@ theorem u_free_eq_past_only (φ : Formula Atom) :
     simp [isUFree, isPastOnly, ih1, ih2]
   | box a ih => simp [isUFree, isPastOnly, ih]
   | untl _ _ => rfl
-  | snce a b ih1 ih2 =>
+  | snce b a ih2 ih1 =>
     simp [isUFree, isPastOnly, ih1, ih2]
 
 /-- `isSyntacticallySeparated` and `isProperlySeparated`
@@ -614,10 +614,10 @@ theorem syn_sep_eq_proper_sep (φ : Formula Atom) :
     simp [isSyntacticallySeparated,
       isProperlySeparated, ih1, ih2]
   | box _ => rfl
-  | untl a b _ _ =>
+  | untl b a _ _ =>
     simp [isSyntacticallySeparated,
       isProperlySeparated, s_free_eq_future_only]
-  | snce a b _ _ =>
+  | snce b a _ _ =>
     simp [isSyntacticallySeparated,
       isProperlySeparated, u_free_eq_past_only]
 

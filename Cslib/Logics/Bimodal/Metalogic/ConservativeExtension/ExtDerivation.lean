@@ -68,53 +68,53 @@ inductive ExtAxiom : ExtFormula Atom → Type u where
   | serial_past :
       ExtAxiom (ExtFormula.top.imp (ExtFormula.somePast ExtFormula.top))
   | left_mono_until_G (φ χ ψ : ExtFormula Atom) :
-      ExtAxiom ((φ.imp χ).allFuture.imp ((ExtFormula.untl ψ φ).imp (ExtFormula.untl ψ χ)))
+      ExtAxiom ((φ.imp χ).allFuture.imp ((ExtFormula.untl φ ψ).imp (ExtFormula.untl χ ψ)))
   | left_mono_since_H (φ χ ψ : ExtFormula Atom) :
-      ExtAxiom ((φ.imp χ).allPast.imp ((ExtFormula.snce ψ φ).imp (ExtFormula.snce ψ χ)))
+      ExtAxiom ((φ.imp χ).allPast.imp ((ExtFormula.snce φ ψ).imp (ExtFormula.snce χ ψ)))
   | right_mono_until (φ ψ χ : ExtFormula Atom) :
-      ExtAxiom ((φ.imp ψ).allFuture.imp ((ExtFormula.untl φ χ).imp (ExtFormula.untl ψ χ)))
+      ExtAxiom ((φ.imp ψ).allFuture.imp ((ExtFormula.untl χ φ).imp (ExtFormula.untl χ ψ)))
   | right_mono_since (φ ψ χ : ExtFormula Atom) :
-      ExtAxiom ((φ.imp ψ).allPast.imp ((ExtFormula.snce φ χ).imp (ExtFormula.snce ψ χ)))
+      ExtAxiom ((φ.imp ψ).allPast.imp ((ExtFormula.snce χ φ).imp (ExtFormula.snce χ ψ)))
   | connect_future (φ : ExtFormula Atom) :
       ExtAxiom (φ.imp (φ.somePast.allFuture))
   | connect_past (φ : ExtFormula Atom) :
       ExtAxiom (φ.imp (φ.someFuture.allPast))
   | enrichment_until (φ ψ p : ExtFormula Atom) :
-      ExtAxiom (ExtFormula.and p (ExtFormula.untl ψ φ) |>.imp
-        (ExtFormula.untl (ExtFormula.and ψ (ExtFormula.snce p φ)) φ))
+      ExtAxiom (ExtFormula.and p (ExtFormula.untl φ ψ) |>.imp
+        (ExtFormula.untl φ (ExtFormula.and ψ (ExtFormula.snce φ p))))
   | enrichment_since (φ ψ p : ExtFormula Atom) :
-      ExtAxiom (ExtFormula.and p (ExtFormula.snce ψ φ) |>.imp
-        (ExtFormula.snce (ExtFormula.and ψ (ExtFormula.untl p φ)) φ))
+      ExtAxiom (ExtFormula.and p (ExtFormula.snce φ ψ) |>.imp
+        (ExtFormula.snce φ (ExtFormula.and ψ (ExtFormula.untl φ p))))
   | self_accum_until (φ ψ : ExtFormula Atom) :
-      ExtAxiom ((ExtFormula.untl ψ φ).imp
-        (ExtFormula.untl ψ (ExtFormula.and φ (ExtFormula.untl ψ φ))))
+      ExtAxiom ((ExtFormula.untl φ ψ).imp
+        (ExtFormula.untl (ExtFormula.and φ (ExtFormula.untl φ ψ)) ψ))
   | self_accum_since (φ ψ : ExtFormula Atom) :
-      ExtAxiom ((ExtFormula.snce ψ φ).imp
-        (ExtFormula.snce ψ (ExtFormula.and φ (ExtFormula.snce ψ φ))))
+      ExtAxiom ((ExtFormula.snce φ ψ).imp
+        (ExtFormula.snce (ExtFormula.and φ (ExtFormula.snce φ ψ)) ψ))
   | absorb_until (φ ψ : ExtFormula Atom) :
-      ExtAxiom ((ExtFormula.untl (ExtFormula.and φ (ExtFormula.untl ψ φ)) φ).imp
-        (ExtFormula.untl ψ φ))
+      ExtAxiom ((ExtFormula.untl φ (ExtFormula.and φ (ExtFormula.untl φ ψ))).imp
+        (ExtFormula.untl φ ψ))
   | absorb_since (φ ψ : ExtFormula Atom) :
-      ExtAxiom ((ExtFormula.snce (ExtFormula.and φ (ExtFormula.snce ψ φ)) φ).imp
-        (ExtFormula.snce ψ φ))
+      ExtAxiom ((ExtFormula.snce φ (ExtFormula.and φ (ExtFormula.snce φ ψ))).imp
+        (ExtFormula.snce φ ψ))
   | linear_until (φ ψ χ θ : ExtFormula Atom) :
-      ExtAxiom (ExtFormula.and (ExtFormula.untl ψ φ) (ExtFormula.untl θ χ)
+      ExtAxiom (ExtFormula.and (ExtFormula.untl φ ψ) (ExtFormula.untl χ θ)
         |>.imp (ExtFormula.or
           (ExtFormula.or
-            (ExtFormula.untl (ExtFormula.and ψ θ) (ExtFormula.and φ χ))
-            (ExtFormula.untl (ExtFormula.and ψ χ) (ExtFormula.and φ χ)))
-          (ExtFormula.untl (ExtFormula.and φ θ) (ExtFormula.and φ χ))))
+            (ExtFormula.untl (ExtFormula.and φ χ) (ExtFormula.and ψ θ))
+            (ExtFormula.untl (ExtFormula.and φ χ) (ExtFormula.and ψ χ)))
+          (ExtFormula.untl (ExtFormula.and φ χ) (ExtFormula.and φ θ))))
   | linear_since (φ ψ χ θ : ExtFormula Atom) :
-      ExtAxiom (ExtFormula.and (ExtFormula.snce ψ φ) (ExtFormula.snce θ χ)
+      ExtAxiom (ExtFormula.and (ExtFormula.snce φ ψ) (ExtFormula.snce χ θ)
         |>.imp (ExtFormula.or
           (ExtFormula.or
-            (ExtFormula.snce (ExtFormula.and ψ θ) (ExtFormula.and φ χ))
-            (ExtFormula.snce (ExtFormula.and ψ χ) (ExtFormula.and φ χ)))
-          (ExtFormula.snce (ExtFormula.and φ θ) (ExtFormula.and φ χ))))
+            (ExtFormula.snce (ExtFormula.and φ χ) (ExtFormula.and ψ θ))
+            (ExtFormula.snce (ExtFormula.and φ χ) (ExtFormula.and ψ χ)))
+          (ExtFormula.snce (ExtFormula.and φ χ) (ExtFormula.and φ θ))))
   | until_F (φ ψ : ExtFormula Atom) :
-      ExtAxiom ((ExtFormula.untl ψ φ).imp (ExtFormula.someFuture ψ))
+      ExtAxiom ((ExtFormula.untl φ ψ).imp (ExtFormula.someFuture ψ))
   | since_P (φ ψ : ExtFormula Atom) :
-      ExtAxiom ((ExtFormula.snce ψ φ).imp (ExtFormula.somePast ψ))
+      ExtAxiom ((ExtFormula.snce φ ψ).imp (ExtFormula.somePast ψ))
   | temp_linearity (φ ψ : ExtFormula Atom) :
       ExtAxiom (ExtFormula.and (ExtFormula.someFuture φ) (ExtFormula.someFuture ψ) |>.imp
         (ExtFormula.or (ExtFormula.someFuture (ExtFormula.and φ ψ))
@@ -126,9 +126,9 @@ inductive ExtAxiom : ExtFormula Atom → Type u where
           (ExtFormula.or (ExtFormula.somePast (ExtFormula.and φ (ExtFormula.somePast ψ)))
             (ExtFormula.somePast (ExtFormula.and (ExtFormula.somePast φ) ψ)))))
   | F_until_equiv (φ : ExtFormula Atom) :
-      ExtAxiom ((ExtFormula.someFuture φ).imp (ExtFormula.untl φ ExtFormula.top))
+      ExtAxiom ((ExtFormula.someFuture φ).imp (ExtFormula.untl ExtFormula.top φ))
   | P_since_equiv (φ : ExtFormula Atom) :
-      ExtAxiom ((ExtFormula.somePast φ).imp (ExtFormula.snce φ ExtFormula.top))
+      ExtAxiom ((ExtFormula.somePast φ).imp (ExtFormula.snce ExtFormula.top φ))
 
   -- Layer 4: Modal-Temporal Interaction (1)
   | modal_future (φ : ExtFormula Atom) :
@@ -136,26 +136,26 @@ inductive ExtAxiom : ExtFormula Atom → Type u where
 
   -- Layer 5: Uniformity Axioms (5)
   | discrete_symm_fwd :
-      ExtAxiom ((ExtFormula.untl ExtFormula.top ExtFormula.bot).imp
-        (ExtFormula.snce ExtFormula.top ExtFormula.bot))
+      ExtAxiom ((ExtFormula.untl ExtFormula.bot ExtFormula.top).imp
+        (ExtFormula.snce ExtFormula.bot ExtFormula.top))
   | discrete_symm_bwd :
-      ExtAxiom ((ExtFormula.snce ExtFormula.top ExtFormula.bot).imp
-        (ExtFormula.untl ExtFormula.top ExtFormula.bot))
+      ExtAxiom ((ExtFormula.snce ExtFormula.bot ExtFormula.top).imp
+        (ExtFormula.untl ExtFormula.bot ExtFormula.top))
   | discrete_propagate_fwd :
-      ExtAxiom ((ExtFormula.untl ExtFormula.top ExtFormula.bot).imp
-        (ExtFormula.allFuture (ExtFormula.untl ExtFormula.top ExtFormula.bot)))
+      ExtAxiom ((ExtFormula.untl ExtFormula.bot ExtFormula.top).imp
+        (ExtFormula.allFuture (ExtFormula.untl ExtFormula.bot ExtFormula.top)))
   | discrete_propagate_bwd :
-      ExtAxiom ((ExtFormula.untl ExtFormula.top ExtFormula.bot).imp
-        (ExtFormula.allPast (ExtFormula.untl ExtFormula.top ExtFormula.bot)))
+      ExtAxiom ((ExtFormula.untl ExtFormula.bot ExtFormula.top).imp
+        (ExtFormula.allPast (ExtFormula.untl ExtFormula.bot ExtFormula.top)))
   | discrete_box_necessity :
-      ExtAxiom ((ExtFormula.untl ExtFormula.top ExtFormula.bot).imp
-        (ExtFormula.box (ExtFormula.untl ExtFormula.top ExtFormula.bot)))
+      ExtAxiom ((ExtFormula.untl ExtFormula.bot ExtFormula.top).imp
+        (ExtFormula.box (ExtFormula.untl ExtFormula.bot ExtFormula.top)))
 
   -- Layer 6: Prior Axioms (2)
   | prior_UZ (φ : ExtFormula Atom) :
-      ExtAxiom (φ.someFuture.imp (ExtFormula.untl φ φ.neg))
+      ExtAxiom (φ.someFuture.imp (ExtFormula.untl φ.neg φ))
   | prior_SZ (φ : ExtFormula Atom) :
-      ExtAxiom (φ.somePast.imp (ExtFormula.snce φ φ.neg))
+      ExtAxiom (φ.somePast.imp (ExtFormula.snce φ.neg φ))
 
   -- Layer 7: Z1 (1)
   | z1 (φ : ExtFormula Atom) :
@@ -165,7 +165,7 @@ inductive ExtAxiom : ExtFormula Atom → Type u where
   | density (φ : ExtFormula Atom) :
       ExtAxiom ((φ.allFuture.allFuture).imp φ.allFuture)
   | dense_indicator :
-      ExtAxiom (ExtFormula.untl (ExtFormula.bot.imp ExtFormula.bot) ExtFormula.bot).neg
+      ExtAxiom (ExtFormula.untl ExtFormula.bot (ExtFormula.bot.imp ExtFormula.bot)).neg
 
 /-- Minimum frame class required by an extended axiom, mirroring `Axiom.minFrameClass`. -/
 def ExtAxiom.minFrameClass {φ : ExtFormula Atom} : ExtAxiom φ → FrameClass

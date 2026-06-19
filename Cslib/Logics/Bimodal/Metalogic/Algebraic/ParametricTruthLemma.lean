@@ -185,7 +185,7 @@ theorem parametric_canonical_truth_lemma
         have h_in_omega : parametricToHistory fam' ∈ ParametricCanonicalOmega B := ⟨fam', hfam', rfl⟩
         exact (ih fam' hfam' t).mpr (h_all (parametricToHistory fam') h_in_omega)
       exact B.modal_backward fam hfam psi t h_psi_all_mcs
-  | untl phi psi ih_phi ih_psi =>
+  | untl psi phi ih_psi ih_phi =>
     simp only [truthAt]
     obtain ⟨h_fwd_U, _⟩ := h_fuc fam hfam
     obtain ⟨h_bwd_U, _⟩ := h_buc fam hfam
@@ -199,7 +199,7 @@ theorem parametric_canonical_truth_lemma
       exact h_bwd_U t phi psi ⟨s, h_ts,
         (ih_phi fam hfam s).mpr h_truth_event_s,
         fun r h_tr h_rs => (ih_psi fam hfam r).mpr (h_truth_guard r h_tr h_rs)⟩
-  | snce phi psi ih_phi ih_psi =>
+  | snce psi phi ih_psi ih_phi =>
     simp only [truthAt]
     obtain ⟨_, h_fwd_S⟩ := h_fuc fam hfam
     obtain ⟨_, h_bwd_S⟩ := h_buc fam hfam
@@ -281,7 +281,7 @@ theorem parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
         have h_mem := parametricCanonicalOmega_subset_shiftClosed B ⟨fam', hfam', rfl⟩
         exact (ih fam' hfam' t).mpr (h_all_σ (parametricToHistory fam') h_mem)
       exact B.modal_backward fam hfam ψ t h_all_fam
-  | untl phi psi ih_phi ih_psi =>
+  | untl psi phi ih_psi ih_phi =>
     simp only [truthAt]
     obtain ⟨h_fwd_U, _⟩ := h_fuc fam hfam
     obtain ⟨h_bwd_U, _⟩ := h_buc fam hfam
@@ -295,7 +295,7 @@ theorem parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
       exact h_bwd_U t phi psi ⟨s, h_ts,
         (ih_phi fam hfam s).mpr h_truth_event_s,
         fun r h_tr h_rs => (ih_psi fam hfam r).mpr (h_truth_guard r h_tr h_rs)⟩
-  | snce phi psi ih_phi ih_psi =>
+  | snce psi phi ih_psi ih_phi =>
     simp only [truthAt]
     obtain ⟨_, h_fwd_S⟩ := h_fuc fam hfam
     obtain ⟨_, h_bwd_S⟩ := h_buc fam hfam

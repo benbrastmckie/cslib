@@ -39,8 +39,8 @@ def subformulas : Formula Atom → Finset (Formula Atom)
   | f@Formula.bot => {f}
   | f@(Formula.imp φ ψ) => insert f (subformulas φ ∪ subformulas ψ)
   | f@(Formula.box φ) => insert f (subformulas φ)
-  | f@(Formula.untl φ ψ) => insert f (subformulas φ ∪ subformulas ψ)
-  | f@(Formula.snce φ ψ) => insert f (subformulas φ ∪ subformulas ψ)
+  | f@(Formula.untl ψ φ) => insert f (subformulas φ ∪ subformulas ψ)
+  | f@(Formula.snce ψ φ) => insert f (subformulas φ ∪ subformulas ψ)
 
 theorem self_mem_subformulas (f : Formula Atom) : f ∈ subformulas f := by
   cases f <;> simp [subformulas]

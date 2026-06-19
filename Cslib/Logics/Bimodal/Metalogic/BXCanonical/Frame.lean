@@ -447,7 +447,7 @@ theorem bx_modal_equiv_of_bx_le {w v : BXPoint Atom} (h_le : bxLe w v) :
 
 lemma bxUntilEventualityResolution
     (w : BXPoint Atom) (φ ψ : Formula Atom)
-    (h_until : Formula.untl ψ φ ∈ w.formulas)
+    (h_until : Formula.untl φ ψ ∈ w.formulas)
     (_h_not_psi : ψ ∉ w.formulas) :
     ∃ v : BXPoint Atom, bxLe w v ∧ ψ ∈ v.formulas := by
   have h_F_psi : Formula.someFuture ψ ∈ w.formulas := by
@@ -458,7 +458,7 @@ lemma bxUntilEventualityResolution
 
 lemma bxSinceEventualityResolution
     (w : BXPoint Atom) (φ ψ : Formula Atom)
-    (h_since : Formula.snce ψ φ ∈ w.formulas)
+    (h_since : Formula.snce φ ψ ∈ w.formulas)
     (_h_not_psi : ψ ∉ w.formulas) :
     ∃ v : BXPoint Atom, bxLe v w ∧ ψ ∈ v.formulas := by
   have h_P_psi : Formula.somePast ψ ∈ w.formulas := by

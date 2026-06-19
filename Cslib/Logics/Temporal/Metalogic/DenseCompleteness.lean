@@ -53,14 +53,14 @@ attribute [local instance] Classical.propDecidable
 theorem dense_indicator_in_dense_mcs
     {A : Set (Formula Atom)}
     (h_mcs : Temporal.SetMaximalConsistentFc FrameClass.Dense A) :
-    (Formula.untl Formula.top Formula.bot).neg ∈ A :=
+    (Formula.untl Formula.bot Formula.top).neg ∈ A :=
   theoremInMcsFc h_mcs (.axiom [] _ .dense_indicator (le_refl _))
 
 /-- G(neg U(top, bot)) belongs to every Dense-MCS (temporal necessitation). -/
 theorem g_dense_indicator_in_dense_mcs
     {A : Set (Formula Atom)}
     (h_mcs : Temporal.SetMaximalConsistentFc FrameClass.Dense A) :
-    (Formula.untl Formula.top Formula.bot).neg.allFuture ∈ A :=
+    (Formula.untl Formula.bot Formula.top).neg.allFuture ∈ A :=
   theoremInMcsFc h_mcs
     (.temporal_necessitation _ (.axiom [] _ .dense_indicator (le_refl _)))
 
@@ -87,7 +87,7 @@ theorem dense_indicator_in_all_limit_points
     (h_dense_mcs : Temporal.SetMaximalConsistentFc FrameClass.Dense A)
     (h_base_mcs : Temporal.SetMaximalConsistent A)
     (x : Rat) (hx : x ∈ limitDom A h_base_mcs) :
-    (Formula.untl Formula.top Formula.bot).neg ∈ limitF A h_base_mcs x := by
+    (Formula.untl Formula.bot Formula.top).neg ∈ limitF A h_base_mcs x := by
   have h_mcs_x := limit_c0 A h_base_mcs x hx
   rcases lt_trichotomy x 0 with hx_neg | hx_zero | hx_pos
   · -- Case x < 0: Use truth lemma with H(neg U(top, bot)) in A.
@@ -97,7 +97,7 @@ theorem dense_indicator_in_all_limit_points
     -- By truth lemma at t0: Satisfies model t0 (H(neg U(top, bot))).
     -- Since x < 0 = t0.val, we get Satisfies model (x, hx) (neg U(top, bot)).
     -- By truth lemma: neg U(top, bot) in limitF(x).
-    let nub := (Formula.untl (Atom := Atom) Formula.top Formula.bot).neg
+    let nub := (Formula.untl Formula.top (Atom := Atom) Formula.bot).neg
     let model := chronicleModel A h_base_mcs
     let t₀ : ChronicleSubtype A h_base_mcs := chronicleZero A h_base_mcs
     -- H(neg U(top, bot)) in A
@@ -160,7 +160,7 @@ theorem dense_indicator_in_all_limit_points
     by_contra h_not_neg
     have h_until := (mcs_mem_iff_neg_not_mem h_mcs_x).mpr h_not_neg
     -- U(top, bot) in limitF(x). Derive neg neg U(top, bot) by DNI.
-    let utb := Formula.untl (Atom := Atom) Formula.top Formula.bot
+    let utb := Formula.untl Formula.top (Atom := Atom) Formula.bot
     have h_dblneg_until : utb.neg.neg ∈ limitF A h_base_mcs x := by
       have d_dni := deductionTheorem [] utb utb.neg.neg
         (deductionTheorem [utb] utb.neg Formula.bot

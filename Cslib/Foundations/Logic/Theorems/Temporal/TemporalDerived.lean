@@ -38,11 +38,11 @@ section TemporalDerived
 
 -- Abbreviations neg'/top' imported from Cslib.Logic.Axioms
 /-- Eventually in the future: `Fφ := φ U ⊤`. -/
-abbrev someFuture (φ : F) : F := HasUntil.untl φ top'
+abbrev someFuture (φ : F) : F := HasUntil.untl top' φ
 /-- Always in the future: `Gφ := ¬F¬φ`. -/
 abbrev allFuture (φ : F) : F := neg' (someFuture (neg' φ))
 /-- At some point in the past: `Pφ := φ S ⊤`. -/
-abbrev somePast (φ : F) : F := HasSince.snce φ top'
+abbrev somePast (φ : F) : F := HasSince.snce top' φ
 /-- Always in the past: `Hφ := ¬P¬φ`. -/
 abbrev allPast (φ : F) : F := neg' (somePast (neg' φ))
 

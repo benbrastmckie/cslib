@@ -44,7 +44,7 @@ theorem elim_case_1_dual (a q A B : Formula Atom)
     (_hA : isUFree A = true) (_hB : isUFree B = true)
     (_ha' : isSFree a = true) (_hq' : isSFree q = true)
     (_hA' : isSFree A = true) (_hB' : isSFree B = true) :
-    isSeparable (.untl (Formula.and a (.snce A B)) q) :=
+    isSeparable (.untl q (Formula.and a (.snce B A))) :=
   all_separable _
 
 /-- CASE 2 DUAL: U(a ^ not S(A,B), q). -/
@@ -53,7 +53,7 @@ theorem elim_case_2_dual (a q A B : Formula Atom)
     (_hA : isUFree A = true) (_hB : isUFree B = true)
     (_ha' : isSFree a = true) (_hq' : isSFree q = true)
     (_hA' : isSFree A = true) (_hB' : isSFree B = true) :
-    isSeparable (.untl (Formula.and a (Formula.neg (.snce A B))) q) :=
+    isSeparable (.untl q (Formula.and a (Formula.neg (.snce B A)))) :=
   all_separable _
 
 /-- CASE 3 DUAL: U(a, q v S(A,B)). -/
@@ -62,7 +62,7 @@ theorem elim_case_3_dual (a q A B : Formula Atom)
     (_hA : isUFree A = true) (_hB : isUFree B = true)
     (_ha' : isSFree a = true) (_hq' : isSFree q = true)
     (_hA' : isSFree A = true) (_hB' : isSFree B = true) :
-    isSeparable (.untl a (Formula.or q (.snce A B))) :=
+    isSeparable (.untl (Formula.or q (.snce B A)) a) :=
   all_separable _
 
 /-- CASE 4 DUAL: U(a, q v not S(A,B)). -/
@@ -71,7 +71,7 @@ theorem elim_case_4_dual (a q A B : Formula Atom)
     (_hA : isUFree A = true) (_hB : isUFree B = true)
     (_ha' : isSFree a = true) (_hq' : isSFree q = true)
     (_hA' : isSFree A = true) (_hB' : isSFree B = true) :
-    isSeparable (.untl a (Formula.or q (Formula.neg (.snce A B)))) :=
+    isSeparable (.untl (Formula.or q (Formula.neg (.snce B A))) a) :=
   all_separable _
 
 /-- CASE 5 DUAL: U(a ^ S(A,B), q v S(A,B)). -/
@@ -80,7 +80,7 @@ theorem elim_case_5_dual (a q A B : Formula Atom)
     (_hA : isUFree A = true) (_hB : isUFree B = true)
     (_ha' : isSFree a = true) (_hq' : isSFree q = true)
     (_hA' : isSFree A = true) (_hB' : isSFree B = true) :
-    isSeparable (.untl (Formula.and a (.snce A B)) (Formula.or q (.snce A B))) :=
+    isSeparable (.untl (Formula.or q (.snce B A)) (Formula.and a (.snce B A))) :=
   all_separable _
 
 /-- CASE 6 DUAL: U(a ^ not S(A,B), q v S(A,B)). -/
@@ -89,8 +89,8 @@ theorem elim_case_6_dual (a q A B : Formula Atom)
     (_hA : isUFree A = true) (_hB : isUFree B = true)
     (_ha' : isSFree a = true) (_hq' : isSFree q = true)
     (_hA' : isSFree A = true) (_hB' : isSFree B = true) :
-    isSeparable (.untl (Formula.and a (Formula.neg (.snce A B)))
-      (Formula.or q (.snce A B))) :=
+    isSeparable (.untl (Formula.or q (.snce B A))
+      (Formula.and a (Formula.neg (.snce B A)))) :=
   all_separable _
 
 /-- CASE 7 DUAL: U(a ^ S(A,B), q v not S(A,B)). -/
@@ -99,8 +99,8 @@ theorem elim_case_7_dual (a q A B : Formula Atom)
     (_hA : isUFree A = true) (_hB : isUFree B = true)
     (_ha' : isSFree a = true) (_hq' : isSFree q = true)
     (_hA' : isSFree A = true) (_hB' : isSFree B = true) :
-    isSeparable (.untl (Formula.and a (.snce A B))
-      (Formula.or q (Formula.neg (.snce A B)))) :=
+    isSeparable (.untl (Formula.or q (Formula.neg (.snce B A)))
+      (Formula.and a (.snce B A))) :=
   all_separable _
 
 /-- CASE 8 DUAL: U(a ^ not S(A,B), q v not S(A,B)). -/
@@ -109,8 +109,8 @@ theorem elim_case_8_dual (a q A B : Formula Atom)
     (_hA : isUFree A = true) (_hB : isUFree B = true)
     (_ha' : isSFree a = true) (_hq' : isSFree q = true)
     (_hA' : isSFree A = true) (_hB' : isSFree B = true) :
-    isSeparable (.untl (Formula.and a (Formula.neg (.snce A B)))
-      (Formula.or q (Formula.neg (.snce A B)))) :=
+    isSeparable (.untl (Formula.or q (Formula.neg (.snce B A)))
+      (Formula.and a (Formula.neg (.snce B A)))) :=
   all_separable _
 
 end Cslib.Logic.Bimodal.Metalogic.Separation

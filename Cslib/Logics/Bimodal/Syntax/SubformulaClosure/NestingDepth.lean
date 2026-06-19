@@ -32,14 +32,14 @@ variable {Atom : Type*} [DecidableEq Atom]
 
 /-- The F-nesting depth of a formula: counts nested someFuture (Until with ⊤) layers. -/
 def fNestingDepth : Formula Atom → Nat
-  | .untl inner (.imp .bot .bot) => 1 + fNestingDepth inner
+  | .untl (.imp .bot .bot) inner => 1 + fNestingDepth inner
   | _ => 0
 
 omit [DecidableEq Atom] in
 theorem f_nesting_depth_nonneg (phi : Formula Atom) : fNestingDepth phi ≥ 0 := Nat.zero_le _
 
 theorem someFuture_unfold (psi : Formula Atom) :
-    Formula.someFuture psi = Formula.untl psi Formula.top := by
+    Formula.someFuture psi = Formula.untl Formula.top psi := by
   rfl
 
 theorem f_nesting_depth_someFuture (psi : Formula Atom) :
@@ -73,13 +73,13 @@ theorem f_depth_le_max {phi psi : Formula Atom} (h : psi ∈ closureWithNeg phi)
 
 /-- The P-nesting depth of a formula: counts nested somePast (Since with ⊤) layers. -/
 def pNestingDepth : Formula Atom → Nat
-  | .snce inner (.imp .bot .bot) => 1 + pNestingDepth inner
+  | .snce (.imp .bot .bot) inner => 1 + pNestingDepth inner
   | _ => 0
 
 theorem p_nesting_depth_nonneg (phi : Formula Atom) : pNestingDepth phi ≥ 0 := Nat.zero_le _
 
 theorem somePast_unfold (psi : Formula Atom) :
-    Formula.somePast psi = Formula.snce psi Formula.top := by
+    Formula.somePast psi = Formula.snce Formula.top psi := by
   rfl
 
 theorem p_nesting_depth_somePast (psi : Formula Atom) :
@@ -113,12 +113,12 @@ theorem p_depth_le_max {phi psi : Formula Atom} (h : psi ∈ closureWithNeg phi)
 
 /-- Extract the inner formula from a someFuture (Until ⊤) formula, if present. -/
 def extractFutureInner : Formula Atom → Option (Formula Atom)
-  | .untl inner (.imp .bot .bot) => some inner
+  | .untl (.imp .bot .bot) inner => some inner
   | _ => none
 
 /-- Extract the inner formula from a somePast (Since ⊤) formula, if present. -/
 def extractPastInner : Formula Atom → Option (Formula Atom)
-  | .snce inner (.imp .bot .bot) => some inner
+  | .snce (.imp .bot .bot) inner => some inner
   | _ => none
 
 theorem extractFutureInner_someFuture (chi : Formula Atom) :

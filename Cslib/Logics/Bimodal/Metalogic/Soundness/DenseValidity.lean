@@ -111,7 +111,7 @@ theorem swap_axiom_tl_valid (φ : Formula Atom) :
 /-- Swap of F_until_equiv: `F(φ) → ⊤ U φ` swaps to `P(φ') → ⊤ S φ'`. -/
 theorem swap_axiom_F_until_equiv_valid (φ : Formula Atom) :
     isValid D ((Formula.someFuture φ).imp
-      (Formula.untl φ (Formula.bot.imp Formula.bot))).swapTemporal := by
+      (Formula.untl (Formula.bot.imp Formula.bot) φ)).swapTemporal := by
   intro ℱ M Omega _h_sc τ _h_mem t
   simp only [Formula.swapTemporal, truthAt]
   intro ⟨s, hst, h_φs, _⟩
@@ -120,7 +120,7 @@ theorem swap_axiom_F_until_equiv_valid (φ : Formula Atom) :
 /-- Swap of P_since_equiv: `P(φ) → ⊤ S φ` swaps to `F(φ') → ⊤ U φ'`. -/
 theorem swap_axiom_P_since_equiv_valid (φ : Formula Atom) :
     isValid D ((Formula.somePast φ).imp
-      (Formula.snce φ (Formula.bot.imp Formula.bot))).swapTemporal := by
+      (Formula.snce (Formula.bot.imp Formula.bot) φ)).swapTemporal := by
   intro ℱ M Omega _h_sc τ _h_mem t
   simp only [Formula.swapTemporal, truthAt]
   intro ⟨s, hts, h_φs, _⟩
@@ -703,7 +703,7 @@ theorem axiom_temp_linearity_past_valid (φ ψ : Formula Atom) :
 /-- F-Until equivalence axiom validity (BX12). -/
 theorem axiom_F_until_equiv_valid (φ : Formula Atom) :
     isValid D ((Formula.someFuture φ).imp
-      (Formula.untl φ (Formula.bot.imp Formula.bot))) := by
+      (Formula.untl (Formula.bot.imp Formula.bot) φ)) := by
   intro ℱ M Omega _h_sc τ _h_mem t
   simp only [truthAt]
   intro ⟨s, hts, h_φs, _⟩
@@ -712,7 +712,7 @@ theorem axiom_F_until_equiv_valid (φ : Formula Atom) :
 /-- P-Since equivalence axiom validity (BX12'). -/
 theorem axiom_P_since_equiv_valid (φ : Formula Atom) :
     isValid D ((Formula.somePast φ).imp
-      (Formula.snce φ (Formula.bot.imp Formula.bot))) := by
+      (Formula.snce (Formula.bot.imp Formula.bot) φ)) := by
   intro ℱ M Omega _h_sc τ _h_mem t
   simp only [truthAt]
   intro ⟨s, hst, h_φs, _⟩

@@ -143,48 +143,48 @@ theorem axiom_sound {D : Type*} [LinearOrder D] [NoMaxOrder D] [NoMinOrder D]
     obtain ⟨s, hst, hnF, _⟩ := hP_neg_F
     apply hnF; exact ⟨t, hst, hφ, fun _ _ _ h => h⟩
   | enrichment_until φ ψ p =>
-    -- p ∧ (ψ U φ) → (ψ ∧ S(p, φ)) U φ
-    -- Enrichment: from p and ψ U φ, enrich guard to carry the Since witness.
-    -- untl ψ φ: EVENT=ψ at s, GUARD=φ between t and s.
-    -- Goal: untl (and ψ (snce p φ)) φ: EVENT=(ψ∧(pSφ)) at s, GUARD=φ between.
+    -- p ∧ (φ U ψ) → (φ U (ψ ∧ (φ S p)))
+    -- GUARD=φ stays, EVENT enriched: ψ → ψ ∧ (φ S p)
     intro hconj
-    have ⟨hp, huntl⟩ := (sat_and_iff M t p (ψ U φ)).mp hconj
+    have ⟨hp, huntl⟩ := (sat_and_iff M t p (φ U ψ)).mp hconj
     obtain ⟨s, hts, hψs, hguard⟩ := huntl
-    -- EVENT at s: need ψ(s) ∧ (p S φ)(s). ψ(s) = hψs.
-    -- (p S φ)(s) = ∃ s' < s, p(s') ∧ ∀ r, s' < r → r < s → φ(r). Witness: t.
+    -- EVENT at s: need ψ(s) ∧ (φ S p)(s). ψ(s) = hψs.
+    -- (φ S p)(s) = ∃ s' < s, p(s') ∧ ∀ r, s' < r → r < s → φ(r). Witness: t.
     exact ⟨s, hts,
-      (sat_and_iff M s ψ (p S φ)).mpr
+      (sat_and_iff M s ψ (φ S p)).mpr
         ⟨hψs, t, hts, hp, fun r' hr1' hr2' => hguard r' hr1' hr2'⟩,
       hguard⟩
   | enrichment_since φ ψ p =>
+    -- p ∧ (φ S ψ) → (φ S (ψ ∧ (φ U p)))
     intro hconj
-    have ⟨hp, hsnce⟩ := (sat_and_iff M t p (ψ S φ)).mp hconj
+    have ⟨hp, hsnce⟩ := (sat_and_iff M t p (φ S ψ)).mp hconj
     obtain ⟨s, hst, hψs, hguard⟩ := hsnce
     exact ⟨s, hst,
-      (sat_and_iff M s ψ (p U φ)).mpr
+      (sat_and_iff M s ψ (φ U p)).mpr
         ⟨hψs, t, hst, hp, fun r' hr1' hr2' => hguard r' hr1' hr2'⟩,
       hguard⟩
   | self_accum_until φ ψ =>
-    -- U(ψ,φ) → U(ψ, φ ∧ U(ψ,φ))
+    -- (φ U ψ) → ((φ ∧ (φ U ψ)) U ψ)
     intro huntl
     obtain ⟨s, hts, hψs, hguard⟩ := huntl
     exact ⟨s, hts, hψs, fun r hr1 hr2 =>
-      (sat_and_iff M r φ (ψ U φ)).mpr
+      (sat_and_iff M r φ (φ U ψ)).mpr
         ⟨hguard r hr1 hr2,
          s, hr2, hψs, fun r' hr1' hr2' => hguard r' (lt_trans hr1 hr1') hr2'⟩⟩
   | self_accum_since φ ψ =>
+    -- (φ S ψ) → ((φ ∧ (φ S ψ)) S ψ)
     intro hsnce
     obtain ⟨s, hst, hψs, hguard⟩ := hsnce
     exact ⟨s, hst, hψs, fun r hr1 hr2 =>
-      (sat_and_iff M r φ (ψ S φ)).mpr
+      (sat_and_iff M r φ (φ S ψ)).mpr
         ⟨hguard r hr1 hr2,
          s, hr1, hψs, fun r' hr1' hr2' => hguard r' hr1' (lt_trans hr2' hr2)⟩⟩
   | absorb_until φ ψ =>
-    -- U(φ ∧ U(ψ,φ), φ) → U(ψ,φ)
+    -- (φ U (φ ∧ (φ U ψ))) → (φ U ψ)
     intro huntl
     obtain ⟨s, hts, hevent, hguard⟩ := huntl
     have ⟨hφs, s', hss', hψs', hguard'⟩ :=
-      (sat_and_iff M s φ (ψ U φ)).mp hevent
+      (sat_and_iff M s φ (φ U ψ)).mp hevent
     -- hψs' is the event at s', hguard' gives φ between s and s'
     exact ⟨s', lt_trans hts hss', hψs', fun r hr1 hr2 => by
       rcases lt_or_ge r s with h | h
@@ -193,10 +193,11 @@ theorem axiom_sound {D : Type*} [LinearOrder D] [NoMaxOrder D] [NoMinOrder D]
         · exact hφs
         · exact hguard' r h' hr2⟩
   | absorb_since φ ψ =>
+    -- (φ S (φ ∧ (φ S ψ))) → (φ S ψ)
     intro hsnce
     obtain ⟨s, hst, hevent, hguard⟩ := hsnce
     have ⟨hφs, s', hs's, hψs', hguard'⟩ :=
-      (sat_and_iff M s φ (ψ S φ)).mp hevent
+      (sat_and_iff M s φ (φ S ψ)).mp hevent
     exact ⟨s', lt_trans hs's hst, hψs', fun r hr1 hr2 => by
       rcases le_or_gt s r with h | h
       · rcases eq_or_lt_of_le h with rfl | h'
@@ -204,13 +205,13 @@ theorem axiom_sound {D : Type*} [LinearOrder D] [NoMaxOrder D] [NoMinOrder D]
         · exact hguard r h' hr2
       · exact hguard' r hr1 h⟩
   | linear_until φ ψ χ θ =>
-    -- U(ψ,φ) ∧ U(θ,χ) → U(ψ∧θ, φ∧χ) ∨ U(ψ∧χ, φ∧χ) ∨ U(φ∧θ, φ∧χ)
+    -- (φ U ψ) ∧ (χ U θ) → ((φ∧χ) U (ψ∧θ)) ∨ ((φ∧χ) U (ψ∧χ)) ∨ ((φ∧χ) U (φ∧θ))
     intro hconj
-    have ⟨h1, h2⟩ := (sat_and_iff M t (ψ U φ) (θ U χ)).mp hconj
+    have ⟨h1, h2⟩ := (sat_and_iff M t (φ U ψ) (χ U θ)).mp hconj
     obtain ⟨s₁, ht1, hψ1, hg1⟩ := h1
     obtain ⟨s₂, ht2, hθ2, hg2⟩ := h2
     rcases lt_trichotomy s₁ s₂ with h | h | h
-    · -- Use second disjunct: U(ψ∧χ, φ∧χ) with witness s₁
+    · -- s₁ < s₂: second disjunct (φ∧χ) U (ψ∧χ) with witness s₁
       exact (sat_or_iff M t _ _).mpr (Or.inl
         ((sat_or_iff M t _ _).mpr (Or.inr
           ⟨s₁, ht1,
@@ -218,39 +219,41 @@ theorem axiom_sound {D : Type*} [LinearOrder D] [NoMaxOrder D] [NoMinOrder D]
            fun r hr1 hr2 =>
              (sat_and_iff M r φ χ).mpr ⟨hg1 r hr1 hr2, hg2 r hr1 (lt_trans hr2 h)⟩⟩)))
     · subst h
+      -- s₁ = s₂: first disjunct (φ∧χ) U (ψ∧θ) with witness s₁
       exact (sat_or_iff M t _ _).mpr (Or.inl
         ((sat_or_iff M t _ _).mpr (Or.inl
           ⟨s₁, ht1,
            (sat_and_iff M s₁ ψ θ).mpr ⟨hψ1, hθ2⟩,
            fun r hr1 hr2 =>
              (sat_and_iff M r φ χ).mpr ⟨hg1 r hr1 hr2, hg2 r hr1 hr2⟩⟩)))
-    · -- Use third disjunct: U(φ∧θ, φ∧χ) with witness s₂
+    · -- s₂ < s₁: third disjunct (φ∧χ) U (φ∧θ) with witness s₂
       exact (sat_or_iff M t _ _).mpr (Or.inr
         ⟨s₂, ht2,
          (sat_and_iff M s₂ φ θ).mpr ⟨hg1 s₂ ht2 h, hθ2⟩,
          fun r hr1 hr2 =>
            (sat_and_iff M r φ χ).mpr ⟨hg1 r hr1 (lt_trans hr2 h), hg2 r hr1 hr2⟩⟩)
   | linear_since φ ψ χ θ =>
-    -- S(ψ,φ) ∧ S(θ,χ) → S(ψ∧θ, φ∧χ) ∨ S(ψ∧χ, φ∧χ) ∨ S(φ∧θ, φ∧χ)
+    -- (φ S ψ) ∧ (χ S θ) → ((φ∧χ) S (ψ∧θ)) ∨ ((φ∧χ) S (ψ∧χ)) ∨ ((φ∧χ) S (φ∧θ))
     intro hconj
-    have ⟨h1, h2⟩ := (sat_and_iff M t (ψ S φ) (θ S χ)).mp hconj
+    have ⟨h1, h2⟩ := (sat_and_iff M t (φ S ψ) (χ S θ)).mp hconj
     obtain ⟨s₁, h1t, hψ1, hg1⟩ := h1
     obtain ⟨s₂, h2t, hθ2, hg2⟩ := h2
     rcases lt_trichotomy s₁ s₂ with h | h | h
-    · -- s₁ < s₂: third disjunct (φ∧θ) S (φ∧χ), witness s₂
+    · -- s₁ < s₂: third disjunct (φ∧χ) S (φ∧θ), witness s₂
       exact (sat_or_iff M t _ _).mpr (Or.inr
         ⟨s₂, h2t,
          (sat_and_iff M s₂ φ θ).mpr ⟨hg1 s₂ h h2t, hθ2⟩,
          fun r hr1 hr2 =>
            (sat_and_iff M r φ χ).mpr ⟨hg1 r (lt_trans h hr1) hr2, hg2 r hr1 hr2⟩⟩)
     · subst h
+      -- s₁ = s₂: first disjunct (φ∧χ) S (ψ∧θ), witness s₁
       exact (sat_or_iff M t _ _).mpr (Or.inl
         ((sat_or_iff M t _ _).mpr (Or.inl
           ⟨s₁, h1t,
            (sat_and_iff M s₁ ψ θ).mpr ⟨hψ1, hθ2⟩,
            fun r hr1 hr2 =>
              (sat_and_iff M r φ χ).mpr ⟨hg1 r hr1 hr2, hg2 r hr1 hr2⟩⟩)))
-    · -- s₂ < s₁: second disjunct (ψ∧χ) S (φ∧χ), witness s₁
+    · -- s₂ < s₁: second disjunct (φ∧χ) S (ψ∧χ), witness s₁
       exact (sat_or_iff M t _ _).mpr (Or.inl
         ((sat_or_iff M t _ _).mpr (Or.inr
           ⟨s₁, h1t,
@@ -258,7 +261,7 @@ theorem axiom_sound {D : Type*} [LinearOrder D] [NoMaxOrder D] [NoMinOrder D]
            fun r hr1 hr2 =>
              (sat_and_iff M r φ χ).mpr ⟨hg1 r hr1 hr2, hg2 r (lt_trans h hr1) hr2⟩⟩)))
   | until_F φ ψ =>
-    -- U(ψ,φ) → F(ψ)
+    -- (φ U ψ) → F(ψ)
     intro huntl
     obtain ⟨s, hlt, hψ, _⟩ := huntl
     exact (Satisfies.someFuture_iff M t ψ).mpr ⟨s, hlt, hψ⟩
@@ -348,7 +351,7 @@ theorem swapTemporal_dual {D : Type*} [LinearOrder D]
     simp only [Formula.swapTemporal, Satisfies]
     exact ⟨fun h hα => (ihβ t).mp (h ((ihα t).mpr hα)),
            fun h hα => (ihβ t).mpr (h ((ihα t).mp hα))⟩
-  | untl α β ihα ihβ =>
+  | untl β α ihβ ihα =>
     simp only [Formula.swapTemporal, Satisfies]
     constructor
     · rintro ⟨s, hst, hα, hguard⟩
@@ -357,7 +360,7 @@ theorem swapTemporal_dual {D : Type*} [LinearOrder D]
     · rintro ⟨s, hst, hα, hguard⟩
       exact ⟨OrderDual.ofDual s, hst, (ihα (OrderDual.ofDual s)).mpr hα,
         fun r hr1 hr2 => (ihβ r).mpr (hguard (OrderDual.toDual r) hr2 hr1)⟩
-  | snce α β ihα ihβ =>
+  | snce β α ihβ ihα =>
     simp only [Formula.swapTemporal, Satisfies]
     constructor
     · rintro ⟨s, hts, hα, hguard⟩

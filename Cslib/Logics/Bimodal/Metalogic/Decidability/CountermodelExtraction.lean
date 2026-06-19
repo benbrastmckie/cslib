@@ -119,19 +119,19 @@ theorem Formula.beq_top_false_of_ne (guard : Formula Atom)
     intro b h; cases b with
     | box b => change (a == b) = true at h; exact congrArg _ (ih b h)
     | _ => cases h
-  | untl a1 a2 ih1 ih2 =>
+  | untl a2 a1 ih2 ih1 =>
     intro b h; cases b with
-    | untl b1 b2 =>
-      change (a1 == b1 && a2 == b2) = true at h
+    | untl b2 b1 =>
+      change (a2 == b2 && a1 == b1) = true at h
       simp only [Bool.and_eq_true] at h
-      exact congr (congrArg _ (ih1 b1 h.1)) (ih2 b2 h.2)
+      exact congr (congrArg _ (ih2 b2 h.1)) (ih1 b1 h.2)
     | _ => cases h
-  | snce a1 a2 ih1 ih2 =>
+  | snce a2 a1 ih2 ih1 =>
     intro b h; cases b with
-    | snce b1 b2 =>
-      change (a1 == b1 && a2 == b2) = true at h
+    | snce b2 b1 =>
+      change (a2 == b2 && a1 == b1) = true at h
       simp only [Bool.and_eq_true] at h
-      exact congr (congrArg _ (ih1 b1 h.1)) (ih2 b2 h.2)
+      exact congr (congrArg _ (ih2 b2 h.1)) (ih1 b1 h.2)
     | _ => cases h
 
 /-!
@@ -329,12 +329,12 @@ def branchTruth (cm : SemanticCountermodel Atom) (w : WorldIndex) (t : TimeIndex
   | .bot => False
   | .imp φ ψ => branchTruth cm w t φ → branchTruth cm w t ψ
   | .box φ => ∀ w' ∈ cm.worlds, branchTruth cm w' t φ
-  | .untl event guard =>
+  | .untl guard event =>
       -- Direct-successor semantics: there exists a direct future time where
       -- both event and guard hold.
       ∃ t' ∈ cm.timeOrdering.futureOf t,
         branchTruth cm w t' event ∧ branchTruth cm w t' guard
-  | .snce event guard =>
+  | .snce guard event =>
       -- Mirror of untl: direct-predecessor semantics for Since.
       ∃ t' ∈ cm.timeOrdering.pastOf t,
         branchTruth cm w t' event ∧ branchTruth cm w t' guard
@@ -603,7 +603,7 @@ If guard = top, someFuturePos applies (consumable). If guard != top, untlPos app
 Either way, the formula is consumed and removed from the branch during expansion.
 -/
 theorem untlPos_not_expanded (b : Branch Atom) (event guard : Formula Atom) (l : Label)
-    (timeOrd : TimeOrdering := .empty) : isExpanded ⟨.pos, .untl event guard, l⟩ b (timeOrd := timeOrd) = false := by
+    (timeOrd : TimeOrdering := .empty) : isExpanded ⟨.pos, .untl guard event, l⟩ b (timeOrd := timeOrd) = false := by
   simp only [isExpanded, Bool.eq_false_iff]
   intro h
   simp only [Option.isNone_iff_eq_none] at h
@@ -622,12 +622,12 @@ theorem untlPos_not_expanded (b : Branch Atom) (event guard : Formula Atom) (l :
 theorem sat_untl_pos (b : Branch Atom) (timeOrd : TimeOrdering)
     (hSat : findUnexpanded b (timeOrd := timeOrd) = none)
     (event guard : Formula Atom) (w : WorldIndex) (t : TimeIndex)
-    (hmem : ⟨.pos, .untl event guard, ⟨w, t⟩⟩ ∈ b) :
+    (hmem : ⟨.pos, .untl guard event, ⟨w, t⟩⟩ ∈ b) :
     ∃ t' ∈ b.knownTimes,
       (⟨.pos, event, ⟨w, t'⟩⟩ ∈ b) ∨
-      (⟨.pos, guard, ⟨w, t'⟩⟩ ∈ b ∧ ⟨.pos, .untl event guard, ⟨w, t'⟩⟩ ∈ b) := by
+      (⟨.pos, guard, ⟨w, t'⟩⟩ ∈ b ∧ ⟨.pos, .untl guard event, ⟨w, t'⟩⟩ ∈ b) := by
   exfalso
-  have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.pos, .untl event guard, ⟨w, t⟩⟩ hmem
+  have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.pos, .untl guard event, ⟨w, t⟩⟩ hmem
   simp [untlPos_not_expanded] at hExp
 
 set_option maxHeartbeats 800000 in
@@ -636,7 +636,7 @@ set_option maxHeartbeats 800000 in
 Helper: T(S(event, guard)) is never expanded in any branch (mirror of untlPos).
 -/
 theorem sncePos_not_expanded (b : Branch Atom) (event guard : Formula Atom) (l : Label)
-    (timeOrd : TimeOrdering := .empty) : isExpanded ⟨.pos, .snce event guard, l⟩ b (timeOrd := timeOrd) = false := by
+    (timeOrd : TimeOrdering := .empty) : isExpanded ⟨.pos, .snce guard event, l⟩ b (timeOrd := timeOrd) = false := by
   simp only [isExpanded, Bool.eq_false_iff]
   intro h
   simp only [Option.isNone_iff_eq_none] at h
@@ -655,12 +655,12 @@ theorem sncePos_not_expanded (b : Branch Atom) (event guard : Formula Atom) (l :
 theorem sat_snce_pos (b : Branch Atom) (timeOrd : TimeOrdering)
     (hSat : findUnexpanded b (timeOrd := timeOrd) = none)
     (event guard : Formula Atom) (w : WorldIndex) (t : TimeIndex)
-    (hmem : ⟨.pos, .snce event guard, ⟨w, t⟩⟩ ∈ b) :
+    (hmem : ⟨.pos, .snce guard event, ⟨w, t⟩⟩ ∈ b) :
     ∃ t' ∈ b.knownTimes,
       (⟨.pos, event, ⟨w, t'⟩⟩ ∈ b) ∨
-      (⟨.pos, guard, ⟨w, t'⟩⟩ ∈ b ∧ ⟨.pos, .snce event guard, ⟨w, t'⟩⟩ ∈ b) := by
+      (⟨.pos, guard, ⟨w, t'⟩⟩ ∈ b ∧ ⟨.pos, .snce guard event, ⟨w, t'⟩⟩ ∈ b) := by
   exfalso
-  have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.pos, .snce event guard, ⟨w, t⟩⟩ hmem
+  have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.pos, .snce guard event, ⟨w, t⟩⟩ hmem
   simp [sncePos_not_expanded] at hExp
 
 set_option maxHeartbeats 3200000 in
@@ -673,21 +673,21 @@ Here `F(FA) = F(U(A, top))`.
 theorem sat_someFuture_neg (b : Branch Atom) (timeOrd : TimeOrdering)
     (hSat : findUnexpanded b (timeOrd := timeOrd) = none)
     (event : Formula Atom) (w : WorldIndex) (t : TimeIndex)
-    (hmem : ⟨.neg, .untl event (.imp .bot .bot), ⟨w, t⟩⟩ ∈ b) :
+    (hmem : ⟨.neg, .untl (.imp .bot .bot) event, ⟨w, t⟩⟩ ∈ b) :
     ∀ t' ∈ timeOrd.futureOf t,
       ⟨.neg, event, ⟨w, t'⟩⟩ ∈ b := by
   have hExp := findUnexpanded_none_all_expanded b timeOrd hSat
-    ⟨.neg, .untl event (.imp .bot .bot), ⟨w, t⟩⟩ hmem
+    ⟨.neg, .untl (.imp .bot .bot) event, ⟨w, t⟩⟩ hmem
   simp only [isExpanded, Option.isNone_iff_eq_none] at hExp
   unfold findApplicableRule at hExp
   rw [List.findSome?_eq_none_iff] at hExp
   have hSFNeg := hExp (.someFutureNeg)
     (by simp [allRulesForFC, allRules, denseRules, discreteRules])
   simp only [isApplicable, asSomeFuture?] at hSFNeg
-  have hNA : (applyRule .someFutureNeg ⟨.neg, .untl event (.imp .bot .bot), ⟨w, t⟩⟩ b timeOrd).1 =
+  have hNA : (applyRule .someFutureNeg ⟨.neg, .untl (.imp .bot .bot) event, ⟨w, t⟩⟩ b timeOrd).1 =
       .notApplicable := by
     by_contra h
-    match hm : (applyRule .someFutureNeg ⟨.neg, .untl event (.imp .bot .bot), ⟨w, t⟩⟩ b timeOrd).1 with
+    match hm : (applyRule .someFutureNeg ⟨.neg, .untl (.imp .bot .bot) event, ⟨w, t⟩⟩ b timeOrd).1 with
     | .notApplicable => exact h hm
     | .linear fs => rw [hm] at hSFNeg; simp at hSFNeg
     | .branching bs => rw [hm] at hSFNeg; simp at hSFNeg
@@ -728,21 +728,21 @@ Here `F(PA) = F(S(A, top))`.
 theorem sat_somePast_neg (b : Branch Atom) (timeOrd : TimeOrdering)
     (hSat : findUnexpanded b (timeOrd := timeOrd) = none)
     (event : Formula Atom) (w : WorldIndex) (t : TimeIndex)
-    (hmem : ⟨.neg, .snce event (.imp .bot .bot), ⟨w, t⟩⟩ ∈ b) :
+    (hmem : ⟨.neg, .snce (.imp .bot .bot) event, ⟨w, t⟩⟩ ∈ b) :
     ∀ t' ∈ timeOrd.pastOf t,
       ⟨.neg, event, ⟨w, t'⟩⟩ ∈ b := by
   have hExp := findUnexpanded_none_all_expanded b timeOrd hSat
-    ⟨.neg, .snce event (.imp .bot .bot), ⟨w, t⟩⟩ hmem
+    ⟨.neg, .snce (.imp .bot .bot) event, ⟨w, t⟩⟩ hmem
   simp only [isExpanded, Option.isNone_iff_eq_none] at hExp
   unfold findApplicableRule at hExp
   rw [List.findSome?_eq_none_iff] at hExp
   have hSPNeg := hExp (.somePastNeg)
     (by simp [allRulesForFC, allRules, denseRules, discreteRules])
   simp only [isApplicable, asSomePast?] at hSPNeg
-  have hNA : (applyRule .somePastNeg ⟨.neg, .snce event (.imp .bot .bot), ⟨w, t⟩⟩ b timeOrd).1 =
+  have hNA : (applyRule .somePastNeg ⟨.neg, .snce (.imp .bot .bot) event, ⟨w, t⟩⟩ b timeOrd).1 =
       .notApplicable := by
     by_contra h
-    match hm : (applyRule .somePastNeg ⟨.neg, .snce event (.imp .bot .bot), ⟨w, t⟩⟩ b timeOrd).1 with
+    match hm : (applyRule .somePastNeg ⟨.neg, .snce (.imp .bot .bot) event, ⟨w, t⟩⟩ b timeOrd).1 with
     | .notApplicable => exact h hm
     | .linear fs => rw [hm] at hSPNeg; simp at hSPNeg
     | .branching bs => rw [hm] at hSPNeg; simp at hSPNeg
@@ -783,12 +783,12 @@ time `t'`, either `F(event)` at `(w, t')` or the negated guard condition holds.
 theorem sat_untl_neg (b : Branch Atom) (timeOrd : TimeOrdering)
     (hSat : findUnexpanded b (timeOrd := timeOrd) = none)
     (event guard : Formula Atom) (w : WorldIndex) (t : TimeIndex)
-    (hmem : ⟨.neg, .untl event guard, ⟨w, t⟩⟩ ∈ b)
+    (hmem : ⟨.neg, .untl guard event, ⟨w, t⟩⟩ ∈ b)
     (hguard : guard ≠ Formula.top) :
     ∀ t' ∈ timeOrd.futureOf t,
       ⟨.neg, event, ⟨w, t'⟩⟩ ∈ b ∨
       ⟨.neg, guard, ⟨w, t'⟩⟩ ∈ b := by
-  have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.neg, .untl event guard, ⟨w, t⟩⟩ hmem
+  have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.neg, .untl guard event, ⟨w, t⟩⟩ hmem
   simp only [isExpanded, Option.isNone_iff_eq_none] at hExp
   unfold findApplicableRule at hExp
   rw [List.findSome?_eq_none_iff] at hExp
@@ -796,9 +796,9 @@ theorem sat_untl_neg (b : Branch Atom) (timeOrd : TimeOrdering)
   simp only [isApplicable, asUntil?] at hUntlNeg
   have hg' : (guard == Formula.top) = false := Formula.beq_top_false_of_ne guard hguard
   simp only [hg'] at hUntlNeg
-  have hNA : (applyRule .untlNeg ⟨.neg, .untl event guard, ⟨w, t⟩⟩ b timeOrd).1 = .notApplicable := by
+  have hNA : (applyRule .untlNeg ⟨.neg, .untl guard event, ⟨w, t⟩⟩ b timeOrd).1 = .notApplicable := by
     by_contra h
-    match hm : (applyRule .untlNeg ⟨.neg, .untl event guard, ⟨w, t⟩⟩ b timeOrd).1 with
+    match hm : (applyRule .untlNeg ⟨.neg, .untl guard event, ⟨w, t⟩⟩ b timeOrd).1 with
     | .notApplicable => exact h hm
     | .linear fs => rw [hm] at hUntlNeg; simp at hUntlNeg
     | .branching bs => rw [hm] at hUntlNeg; simp at hUntlNeg
@@ -833,12 +833,12 @@ set_option maxHeartbeats 3200000 in
 theorem sat_snce_neg (b : Branch Atom) (timeOrd : TimeOrdering)
     (hSat : findUnexpanded b (timeOrd := timeOrd) = none)
     (event guard : Formula Atom) (w : WorldIndex) (t : TimeIndex)
-    (hmem : ⟨.neg, .snce event guard, ⟨w, t⟩⟩ ∈ b)
+    (hmem : ⟨.neg, .snce guard event, ⟨w, t⟩⟩ ∈ b)
     (hguard : guard ≠ Formula.top) :
     ∀ t' ∈ timeOrd.pastOf t,
       ⟨.neg, event, ⟨w, t'⟩⟩ ∈ b ∨
       ⟨.neg, guard, ⟨w, t'⟩⟩ ∈ b := by
-  have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.neg, .snce event guard, ⟨w, t⟩⟩ hmem
+  have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.neg, .snce guard event, ⟨w, t⟩⟩ hmem
   simp only [isExpanded, Option.isNone_iff_eq_none] at hExp
   unfold findApplicableRule at hExp
   rw [List.findSome?_eq_none_iff] at hExp
@@ -846,9 +846,9 @@ theorem sat_snce_neg (b : Branch Atom) (timeOrd : TimeOrdering)
   simp only [isApplicable, asSince?] at hSnceNeg
   have hg' : (guard == Formula.top) = false := Formula.beq_top_false_of_ne guard hguard
   simp only [hg'] at hSnceNeg
-  have hNA : (applyRule .snceNeg ⟨.neg, .snce event guard, ⟨w, t⟩⟩ b timeOrd).1 = .notApplicable := by
+  have hNA : (applyRule .snceNeg ⟨.neg, .snce guard event, ⟨w, t⟩⟩ b timeOrd).1 = .notApplicable := by
     by_contra h
-    match hm : (applyRule .snceNeg ⟨.neg, .snce event guard, ⟨w, t⟩⟩ b timeOrd).1 with
+    match hm : (applyRule .snceNeg ⟨.neg, .snce guard event, ⟨w, t⟩⟩ b timeOrd).1 with
     | .notApplicable => exact h hm
     | .linear fs => rw [hm] at hSnceNeg; simp at hSnceNeg
     | .branching bs => rw [hm] at hSnceNeg; simp at hSnceNeg
@@ -918,13 +918,13 @@ theorem truthLemma_pos (b : Branch Atom) (timeOrd : TimeOrdering)
     simp [extractSemanticCountermodel] at hw'
     have hbox := sat_box_pos b timeOrd hSat ψ w t hmem
     exact ih w' t (hbox w' hw')
-  | untl event guard _ih_event _ih_guard =>
+  | untl guard event _ih_guard _ih_event =>
     exfalso
-    have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.pos, .untl event guard, ⟨w, t⟩⟩ hmem
+    have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.pos, .untl guard event, ⟨w, t⟩⟩ hmem
     simp [untlPos_not_expanded] at hExp
-  | snce event guard _ih_event _ih_guard =>
+  | snce guard event _ih_guard _ih_event =>
     exfalso
-    have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.pos, .snce event guard, ⟨w, t⟩⟩ hmem
+    have hExp := findUnexpanded_none_all_expanded b timeOrd hSat ⟨.pos, .snce guard event, ⟨w, t⟩⟩ hmem
     simp [sncePos_not_expanded] at hExp
 
 /--
@@ -962,13 +962,13 @@ theorem truthLemma_neg (b : Branch Atom) (timeOrd : TimeOrdering)
     have hw'_in_cm : w' ∈ cm.worlds := by
       rw [hCm]; simp [extractSemanticCountermodel]; exact hw'mem
     exact this (h w' hw'_in_cm)
-  | untl event guard ih_event ih_guard =>
+  | untl guard event ih_guard ih_event =>
     simp only [branchTruth]
     intro ⟨t', ht', he, hg_true⟩
     rw [hOrd] at ht'
     by_cases hg : guard = Formula.imp Formula.bot Formula.bot
     · subst hg
-      have hmem' : ⟨.neg, .untl event (.imp .bot .bot), ⟨w, t⟩⟩ ∈ b := hmem
+      have hmem' : ⟨.neg, .untl (.imp .bot .bot) event, ⟨w, t⟩⟩ ∈ b := hmem
       have hfe := sat_someFuture_neg b timeOrd hSat event w t hmem' t' ht'
       exact ih_event w t' hfe he
     · have hguard : guard ≠ Formula.top := by
@@ -977,13 +977,13 @@ theorem truthLemma_neg (b : Branch Atom) (timeOrd : TimeOrdering)
       cases h with
       | inl hfe => exact ih_event w t' hfe he
       | inr hfg => exact ih_guard w t' hfg hg_true
-  | snce event guard ih_event ih_guard =>
+  | snce guard event ih_guard ih_event =>
     simp only [branchTruth]
     intro ⟨t', ht', he, hg_true⟩
     rw [hOrd] at ht'
     by_cases hg : guard = Formula.imp Formula.bot Formula.bot
     · subst hg
-      have hmem' : ⟨.neg, .snce event (.imp .bot .bot), ⟨w, t⟩⟩ ∈ b := hmem
+      have hmem' : ⟨.neg, .snce (.imp .bot .bot) event, ⟨w, t⟩⟩ ∈ b := hmem
       have hfe := sat_somePast_neg b timeOrd hSat event w t hmem' t' ht'
       exact ih_event w t' hfe he
     · have hguard : guard ≠ Formula.top := by

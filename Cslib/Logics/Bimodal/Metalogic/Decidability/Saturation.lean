@@ -118,12 +118,12 @@ def registerEventualities (b : Branch Atom) (tracker : EventualityTracker Atom)
     : EventualityTracker Atom :=
   b.foldl (fun acc sf =>
     match sf.sign, sf.formula with
-    | .pos, .untl event guard =>
+    | .pos, .untl guard event =>
       if guard != Formula.top then
         let e : Eventuality Atom := { formula := event, label := sf.label, isUntil := true }
         if acc.pending.any (· == e) then acc else acc.add e
       else acc
-    | .pos, .snce event guard =>
+    | .pos, .snce guard event =>
       if guard != Formula.top then
         let e : Eventuality Atom := { formula := event, label := sf.label, isUntil := false }
         if acc.pending.any (· == e) then acc else acc.add e
@@ -165,8 +165,8 @@ def temporalCount : Formula Atom → Nat
   | .bot => 0
   | .imp φ ψ => temporalCount φ + temporalCount ψ
   | .box φ => temporalCount φ
-  | .untl φ ψ => 1 + temporalCount φ + temporalCount ψ
-  | .snce φ ψ => 1 + temporalCount φ + temporalCount ψ
+  | .untl ψ φ => 1 + temporalCount φ + temporalCount ψ
+  | .snce ψ φ => 1 + temporalCount φ + temporalCount ψ
 
 /--
 Count modal operators (Box) in a formula.
@@ -177,8 +177,8 @@ def modalCount : Formula Atom → Nat
   | .bot => 0
   | .imp φ ψ => modalCount φ + modalCount ψ
   | .box φ => 1 + modalCount φ
-  | .untl φ ψ => modalCount φ + modalCount ψ
-  | .snce φ ψ => modalCount φ + modalCount ψ
+  | .untl ψ φ => modalCount φ + modalCount ψ
+  | .snce ψ φ => modalCount φ + modalCount ψ
 
 /--
 Estimate the difficulty of expanding a branch.

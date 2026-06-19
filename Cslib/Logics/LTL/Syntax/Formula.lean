@@ -100,7 +100,7 @@ abbrev Formula.iff (φ₁ φ₂ : Formula Atom) : Formula Atom :=
 /-- Some future (eventually): F φ := φ U ⊤.
     Uses Burgess convention: φ is the event (holds at witness), ⊤ is the trivial guard. -/
 abbrev Formula.someFuture (φ : Formula Atom) : Formula Atom :=
-  .untl φ .top
+  .untl .top φ
 
 /-- All future (globally): G φ := ¬F ¬φ -/
 abbrev Formula.allFuture (φ : Formula Atom) : Formula Atom :=
@@ -136,8 +136,8 @@ def Formula.toTemporal : Formula Atom → Temporal.Formula Atom
   | .atom p => .atom p
   | .bot => .bot
   | .imp φ ψ => .imp (toTemporal φ) (toTemporal ψ)
-  | .next φ => .untl (toTemporal φ) .bot
-  | .untl φ ψ => (toTemporal φ).reflexiveUntl (toTemporal ψ)
+  | .next φ => .untl .bot (toTemporal φ)
+  | .untl ψ φ => (toTemporal φ).reflexiveUntl (toTemporal ψ)
 
 end Cslib.Logic.LTL
 

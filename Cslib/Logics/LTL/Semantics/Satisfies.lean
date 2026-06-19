@@ -49,7 +49,7 @@ def Satisfies (v : ℕ → (Atom → Prop)) (i : ℕ) : Formula Atom → Prop
   | .bot => False
   | .imp φ ψ => Satisfies v i φ → Satisfies v i ψ
   | .next φ => Satisfies v (i + 1) φ
-  | .untl φ ψ => ∃ j ≥ i, Satisfies v j φ ∧ ∀ k, i ≤ k → k < j → Satisfies v k ψ
+  | .untl ψ φ => ∃ j ≥ i, Satisfies v j φ ∧ ∀ k, i ≤ k → k < j → Satisfies v k ψ
 
 /-- A formula holds at all time points in a given omega-word. -/
 def Valid (v : ℕ → (Atom → Prop)) (φ : Formula Atom) : Prop :=

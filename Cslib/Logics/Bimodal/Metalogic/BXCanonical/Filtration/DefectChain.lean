@@ -44,13 +44,13 @@ variable {Atom : Type*} [DecidableEq Atom]
 /-- Predicate for an Until-defect: an Until-formula in `Sigma` whose guard does not hold at `w`. -/
 def isUntilDefect (w : BXPoint Atom) (Sigma : Finset (Formula Atom)) (f : Formula Atom) : Prop :=
   f ∈ Sigma ∧ f ∈ w.formulas ∧
-  ∃ φ ψ : Formula Atom, f = Formula.untl ψ φ ∧ ψ ∉ w.formulas
+  ∃ φ ψ : Formula Atom, f = Formula.untl φ ψ ∧ ψ ∉ w.formulas
 
 /-- The number of Until-defects at `w` relative to `Sigma`. -/
 noncomputable def sigmaDefectCount (w : BXPoint Atom) (Sigma : Finset (Formula Atom)) : Nat :=
   (Sigma.filter (fun f =>
     f ∈ w.formulas ∧
-    ∃ φ ψ : Formula Atom, f = Formula.untl ψ φ ∧ ψ ∉ w.formulas)).card
+    ∃ φ ψ : Formula Atom, f = Formula.untl φ ψ ∧ ψ ∉ w.formulas)).card
 
 theorem sigma_defect_count_bounded (w : BXPoint Atom) (Sigma : Finset (Formula Atom)) :
     sigmaDefectCount w Sigma ≤ Sigma.card := by
@@ -60,22 +60,22 @@ theorem sigma_defect_count_bounded (w : BXPoint Atom) (Sigma : Finset (Formula A
 /-! ## Defect Step Properties -/
 
 theorem defect_step_F_psi {w : BXPoint Atom} {φ ψ : Formula Atom}
-    (h_until : Formula.untl ψ φ ∈ w.formulas) :
+    (h_until : Formula.untl φ ψ ∈ w.formulas) :
     Formula.someFuture ψ ∈ w.formulas := by
   have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.until_F φ ψ) trivial
   exact SetMaximalConsistent.implication_property w.is_mcs
     (theoremInMcsFc w.is_mcs h_ax) h_until
 
 theorem defect_step_connect {w : BXPoint Atom} {φ ψ : Formula Atom}
-    (h_until : Formula.untl ψ φ ∈ w.formulas) :
-    Formula.allFuture (Formula.somePast (Formula.untl ψ φ)) ∈ w.formulas := by
-  have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.connect_future (Formula.untl ψ φ)) trivial
+    (h_until : Formula.untl φ ψ ∈ w.formulas) :
+    Formula.allFuture (Formula.somePast (Formula.untl φ ψ)) ∈ w.formulas := by
+  have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.connect_future (Formula.untl φ ψ)) trivial
   exact SetMaximalConsistent.implication_property w.is_mcs
     (theoremInMcsFc w.is_mcs h_ax) h_until
 
 theorem defect_step_self_accum {w : BXPoint Atom} {φ ψ : Formula Atom}
-    (h_until : Formula.untl ψ φ ∈ w.formulas) :
-    Formula.untl ψ (Formula.and φ (Formula.untl ψ φ)) ∈ w.formulas := by
+    (h_until : Formula.untl φ ψ ∈ w.formulas) :
+    Formula.untl (Formula.and φ (Formula.untl φ ψ)) ψ ∈ w.formulas := by
   have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.self_accum_until φ ψ) trivial
   exact SetMaximalConsistent.implication_property w.is_mcs
     (theoremInMcsFc w.is_mcs h_ax) h_until
@@ -86,19 +86,19 @@ theorem defect_step_self_accum {w : BXPoint Atom} {φ ψ : Formula Atom}
 noncomputable def sigmaSinceDefectCount (w : BXPoint Atom) (Sigma : Finset (Formula Atom)) : Nat :=
   (Sigma.filter (fun f =>
     f ∈ w.formulas ∧
-    ∃ φ ψ : Formula Atom, f = Formula.snce ψ φ ∧ ψ ∉ w.formulas)).card
+    ∃ φ ψ : Formula Atom, f = Formula.snce φ ψ ∧ ψ ∉ w.formulas)).card
 
 theorem since_defect_step_P_psi {w : BXPoint Atom} {φ ψ : Formula Atom}
-    (h_since : Formula.snce ψ φ ∈ w.formulas) :
+    (h_since : Formula.snce φ ψ ∈ w.formulas) :
     Formula.somePast ψ ∈ w.formulas := by
   have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.since_P φ ψ) trivial
   exact SetMaximalConsistent.implication_property w.is_mcs
     (theoremInMcsFc w.is_mcs h_ax) h_since
 
 theorem since_defect_step_connect {w : BXPoint Atom} {φ ψ : Formula Atom}
-    (h_since : Formula.snce ψ φ ∈ w.formulas) :
-    Formula.allPast (Formula.someFuture (Formula.snce ψ φ)) ∈ w.formulas := by
-  have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.connect_past (Formula.snce ψ φ)) trivial
+    (h_since : Formula.snce φ ψ ∈ w.formulas) :
+    Formula.allPast (Formula.someFuture (Formula.snce φ ψ)) ∈ w.formulas := by
+  have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.connect_past (Formula.snce φ ψ)) trivial
   exact SetMaximalConsistent.implication_property w.is_mcs
     (theoremInMcsFc w.is_mcs h_ax) h_since
 

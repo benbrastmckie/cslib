@@ -46,8 +46,8 @@ def substFormula : ExtFormula Atom → ExtFormula Atom
   | ExtFormula.bot => ExtFormula.bot
   | ExtFormula.imp φ ψ => ExtFormula.imp (substFormula φ) (substFormula ψ)
   | ExtFormula.box φ => ExtFormula.box (substFormula φ)
-  | ExtFormula.untl φ ψ => ExtFormula.untl (substFormula φ) (substFormula ψ)
-  | ExtFormula.snce φ ψ => ExtFormula.snce (substFormula φ) (substFormula ψ)
+  | ExtFormula.untl ψ φ => ExtFormula.untl (substFormula ψ) (substFormula φ)
+  | ExtFormula.snce ψ φ => ExtFormula.snce (substFormula ψ) (substFormula φ)
 
 /-!
 ## Structural Lemmas
@@ -74,13 +74,13 @@ theorem substFormula_box (φ : ExtFormula Atom) :
 
 @[simp]
 theorem substFormula_untl (φ ψ : ExtFormula Atom) :
-    substFormula (ExtFormula.untl φ ψ) =
-      ExtFormula.untl (substFormula φ) (substFormula ψ) := rfl
+    substFormula (ExtFormula.untl ψ φ) =
+      ExtFormula.untl (substFormula ψ) (substFormula φ) := rfl
 
 @[simp]
 theorem substFormula_snce (φ ψ : ExtFormula Atom) :
-    substFormula (ExtFormula.snce φ ψ) =
-      ExtFormula.snce (substFormula φ) (substFormula ψ) := rfl
+    substFormula (ExtFormula.snce ψ φ) =
+      ExtFormula.snce (substFormula ψ) (substFormula φ) := rfl
 
 /-!
 ## Derived Operator Preservation
@@ -141,9 +141,9 @@ theorem substFormula_swapTemporal (φ : ExtFormula Atom) :
     simp [ExtFormula.swapTemporal, substFormula, ih1, ih2]
   | box _ ih =>
     simp [ExtFormula.swapTemporal, substFormula, ih]
-  | untl _ _ ih1 ih2 =>
+  | untl _ _ ih2 ih1 =>
     simp [ExtFormula.swapTemporal, substFormula, ih1, ih2]
-  | snce _ _ ih1 ih2 =>
+  | snce _ _ ih2 ih1 =>
     simp [ExtFormula.swapTemporal, substFormula, ih1, ih2]
 
 /-!
@@ -171,10 +171,10 @@ theorem substFormula_preserves_qfree (φ : ExtFormula Atom) (h : freshAtom ∉ �
   | box a ih =>
     simp [ExtFormula.atoms] at h
     simp [substFormula, ih h]
-  | untl a b iha ihb =>
+  | untl b a ihb iha =>
     simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
     simp [substFormula, iha h.1, ihb h.2]
-  | snce a b iha ihb =>
+  | snce b a ihb iha =>
     simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
     simp [substFormula, iha h.1, ihb h.2]
 
@@ -200,10 +200,10 @@ theorem freshAtom_not_in_substFormula_atoms (φ : ExtFormula Atom) :
     simp [substFormula, ExtFormula.atoms, Finset.mem_union]
     exact ⟨iha, ihb⟩
   | box a ih => simp [substFormula, ExtFormula.atoms]; exact ih
-  | untl a b iha ihb =>
+  | untl b a ihb iha =>
     simp [substFormula, ExtFormula.atoms, Finset.mem_union]
     exact ⟨iha, ihb⟩
-  | snce a b iha ihb =>
+  | snce b a ihb iha =>
     simp [substFormula, ExtFormula.atoms, Finset.mem_union]
     exact ⟨iha, ihb⟩
 

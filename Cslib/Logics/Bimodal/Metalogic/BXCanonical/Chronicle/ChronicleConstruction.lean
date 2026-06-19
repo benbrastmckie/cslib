@@ -412,7 +412,7 @@ between x and y. This guard is essential for the strong C5 (Burgess C5a).
 theorem omega_chain_c5_witness (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (n : Nat) (x : Rat) (ξ η : Formula Atom)
     (hx : x ∈ (omegaChainVal fc A h_mcs n).dom)
-    (h_until : Formula.untl η ξ ∈ (omegaChainVal fc A h_mcs n).f x)
+    (h_until : Formula.untl ξ η ∈ (omegaChainVal fc A h_mcs n).f x)
     (hn_eq : counterexampleEnum (Nat.unpair n).2 = ⟨x, 0, ξ, η, .c5_forward⟩) :
     ∃ y ∈ (omegaChainVal fc A h_mcs (n + 1)).dom,
       x < y ∧ η ∈ (omegaChainVal fc A h_mcs (n + 1)).f y ∧
@@ -429,7 +429,7 @@ theorem omega_chain_c5_witness (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs
     (show (counterexampleEnum (Nat.unpair n).2).kind = .c5_forward by rw [hn_eq])
     (show (counterexampleEnum (Nat.unpair n).2).x ∈ (omegaChainVal fc A h_mcs n).dom
       by rw [hn_eq]; exact hx)
-    (show Formula.untl (counterexampleEnum (Nat.unpair n).2).η
+    (show Formula.untl .η(counterexampleEnum (Nat.unpair n).2)
         (counterexampleEnum (Nat.unpair n).2).ξ ∈
         (omegaChainVal fc A h_mcs n).f (counterexampleEnum (Nat.unpair n).2).x
       by rw [hn_eq]; exact h_until)
@@ -451,7 +451,7 @@ C5' witness at step n+1 (mirror for Since), including the adjacent-pair guard.
 theorem omega_chain_c5'_witness (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (n : Nat) (x : Rat) (ξ η : Formula Atom)
     (hx : x ∈ (omegaChainVal fc A h_mcs n).dom)
-    (h_since : Formula.snce η ξ ∈ (omegaChainVal fc A h_mcs n).f x)
+    (h_since : Formula.snce ξ η ∈ (omegaChainVal fc A h_mcs n).f x)
     (hn_eq : counterexampleEnum (Nat.unpair n).2 = ⟨x, 0, ξ, η, .c5_backward⟩) :
     ∃ y ∈ (omegaChainVal fc A h_mcs (n + 1)).dom,
       y < x ∧ η ∈ (omegaChainVal fc A h_mcs (n + 1)).f y ∧
@@ -467,7 +467,7 @@ theorem omega_chain_c5'_witness (fc : FrameClass) (A : Set (Formula Atom)) (h_mc
     (show (counterexampleEnum (Nat.unpair n).2).kind = .c5_backward by rw [hn_eq])
     (show (counterexampleEnum (Nat.unpair n).2).x ∈ (omegaChainVal fc A h_mcs n).dom
       by rw [hn_eq]; exact hx)
-    (show Formula.snce (counterexampleEnum (Nat.unpair n).2).η
+    (show Formula.snce .η(counterexampleEnum (Nat.unpair n).2)
         (counterexampleEnum (Nat.unpair n).2).ξ ∈
         (omegaChainVal fc A h_mcs n).f (counterexampleEnum (Nat.unpair n).2).x
       by rw [hn_eq]; exact h_since)
@@ -491,7 +491,7 @@ theorem omega_chain_c4_witness (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs
     (hx : x ∈ (omegaChainVal fc A h_mcs n).dom)
     (hy : y ∈ (omegaChainVal fc A h_mcs n).dom)
     (hxy : x < y)
-    (h_neg_until : (Formula.untl η ξ).neg ∈ (omegaChainVal fc A h_mcs n).f x)
+    (h_neg_until : (Formula.untl ξ η).neg ∈ (omegaChainVal fc A h_mcs n).f x)
     (h_event : η ∈ (omegaChainVal fc A h_mcs n).f y)
     (hn_eq : counterexampleEnum (Nat.unpair n).2 = ⟨x, y, ξ, η, .c4_forward⟩) :
     ∃ z ∈ (omegaChainVal fc A h_mcs (n + 1)).dom,
@@ -505,7 +505,7 @@ theorem omega_chain_c4_witness (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs
       by rw [hn_eq]; exact hy)
     (show (counterexampleEnum (Nat.unpair n).2).x < (counterexampleEnum (Nat.unpair n).2).y
       by rw [hn_eq]; exact hxy)
-    (show (Formula.untl (counterexampleEnum (Nat.unpair n).2).η
+    (show (Formula.untl .η(counterexampleEnum (Nat.unpair n).2)
         (counterexampleEnum (Nat.unpair n).2).ξ).neg ∈
         (omegaChainVal fc A h_mcs n).f (counterexampleEnum (Nat.unpair n).2).x
       by rw [hn_eq]; exact h_neg_until)
@@ -526,7 +526,7 @@ theorem omega_chain_c4'_witness (fc : FrameClass) (A : Set (Formula Atom)) (h_mc
     (hx : x ∈ (omegaChainVal fc A h_mcs n).dom)
     (hy : y ∈ (omegaChainVal fc A h_mcs n).dom)
     (hyx : y < x)
-    (h_neg_since : (Formula.snce η ξ).neg ∈ (omegaChainVal fc A h_mcs n).f x)
+    (h_neg_since : (Formula.snce ξ η).neg ∈ (omegaChainVal fc A h_mcs n).f x)
     (h_event : η ∈ (omegaChainVal fc A h_mcs n).f y)
     (hn_eq : counterexampleEnum (Nat.unpair n).2 = ⟨x, y, ξ, η, .c4_backward⟩) :
     ∃ z ∈ (omegaChainVal fc A h_mcs (n + 1)).dom,
@@ -540,7 +540,7 @@ theorem omega_chain_c4'_witness (fc : FrameClass) (A : Set (Formula Atom)) (h_mc
       by rw [hn_eq]; exact hy)
     (show (counterexampleEnum (Nat.unpair n).2).y < (counterexampleEnum (Nat.unpair n).2).x
       by rw [hn_eq]; exact hyx)
-    (show (Formula.snce (counterexampleEnum (Nat.unpair n).2).η
+    (show (Formula.snce .η(counterexampleEnum (Nat.unpair n).2)
         (counterexampleEnum (Nat.unpair n).2).ξ).neg ∈
         (omegaChainVal fc A h_mcs n).f (counterexampleEnum (Nat.unpair n).2).x
       by rw [hn_eq]; exact h_neg_since)
@@ -657,14 +657,14 @@ weaker version: a witness y with eta in f(y) exists.
 theorem limit_satisfies_c5_weak (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (x : Rat) (hx : x ∈ limitDom fc A h_mcs)
     (ξ η : Formula Atom)
-    (h_until : Formula.untl η ξ ∈ limitF fc A h_mcs x) :
+    (h_until : Formula.untl ξ η ∈ limitF fc A h_mcs x) :
     ∃ y ∈ limitDom fc A h_mcs, x < y ∧ η ∈ limitF fc A h_mcs y := by
   obtain ⟨n₀, hn₀⟩ := hx
   obtain ⟨n, hn_ge, hn_eq⟩ := counterexample_enum_surjective_above
     ⟨x, 0, ξ, η, .c5_forward⟩ n₀
   have hx_n : x ∈ (omegaChainVal fc A h_mcs n).dom :=
     omega_chain_dom_mono_le fc A h_mcs hn_ge hn₀
-  have h_until_n : Formula.untl η ξ ∈ (omegaChainVal fc A h_mcs n).f x := by
+  have h_until_n : Formula.untl ξ η ∈ (omegaChainVal fc A h_mcs n).f x := by
     rw [omega_chain_f_agrees_le fc A h_mcs hn_ge x hn₀]
     rwa [← limit_f_eq fc A h_mcs x n₀ hn₀]
   obtain ⟨y, hy_dom, hy_lt, hy_η, _, _, _⟩ :=
@@ -678,14 +678,14 @@ Mirror: the limit chronicle satisfies C5' (Since witnesses).
 theorem limit_satisfies_c5'_weak (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (x : Rat) (hx : x ∈ limitDom fc A h_mcs)
     (ξ η : Formula Atom)
-    (h_since : Formula.snce η ξ ∈ limitF fc A h_mcs x) :
+    (h_since : Formula.snce ξ η ∈ limitF fc A h_mcs x) :
     ∃ y ∈ limitDom fc A h_mcs, y < x ∧ η ∈ limitF fc A h_mcs y := by
   obtain ⟨n₀, hn₀⟩ := hx
   obtain ⟨n, hn_ge, hn_eq⟩ := counterexample_enum_surjective_above
     ⟨x, 0, ξ, η, .c5_backward⟩ n₀
   have hx_n : x ∈ (omegaChainVal fc A h_mcs n).dom :=
     omega_chain_dom_mono_le fc A h_mcs hn_ge hn₀
-  have h_since_n : Formula.snce η ξ ∈ (omegaChainVal fc A h_mcs n).f x := by
+  have h_since_n : Formula.snce ξ η ∈ (omegaChainVal fc A h_mcs n).f x := by
     rw [omega_chain_f_agrees_le fc A h_mcs hn_ge x hn₀]
     rwa [← limit_f_eq fc A h_mcs x n₀ hn₀]
   obtain ⟨y, hy_dom, hy_lt, hy_η, _, _, _⟩ :=
@@ -714,9 +714,9 @@ theorem limit_F_resolution (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : S
     ∃ y ∈ limitDom fc A h_mcs, x < y ∧ φ ∈ limitF fc A h_mcs y := by
   have h_mcs_x := limit_c0 fc A h_mcs x hx
   have h_bx12 : DerivationTree fc [] ((Formula.someFuture φ).imp
-      (Formula.untl φ (Formula.bot.imp Formula.bot))) :=
+      (Formula.untl (Formula.bot.imp Formula.bot) φ)) :=
     DerivationTree.axiom [] _ (Axiom.F_until_equiv φ) trivial
-  have h_until : Formula.untl φ (Formula.bot.imp Formula.bot) ∈ limitF fc A h_mcs x :=
+  have h_until : Formula.untl (Formula.bot.imp Formula.bot) φ ∈ limitF fc A h_mcs x :=
     SetMaximalConsistent.implication_property h_mcs_x
       (theoremInMcsFc h_mcs_x h_bx12) h_F
   exact limit_satisfies_c5_weak fc A h_mcs x hx _ φ h_until
@@ -735,9 +735,9 @@ theorem limit_P_resolution (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : S
     ∃ y ∈ limitDom fc A h_mcs, y < x ∧ φ ∈ limitF fc A h_mcs y := by
   have h_mcs_x := limit_c0 fc A h_mcs x hx
   have h_bx12' : DerivationTree fc [] ((Formula.somePast φ).imp
-      (Formula.snce φ (Formula.bot.imp Formula.bot))) :=
+      (Formula.snce (Formula.bot.imp Formula.bot) φ)) :=
     DerivationTree.axiom [] _ (Axiom.P_since_equiv φ) trivial
-  have h_since : Formula.snce φ (Formula.bot.imp Formula.bot) ∈ limitF fc A h_mcs x :=
+  have h_since : Formula.snce (Formula.bot.imp Formula.bot) φ ∈ limitF fc A h_mcs x :=
     SetMaximalConsistent.implication_property h_mcs_x
       (theoremInMcsFc h_mcs_x h_bx12') h_P
   exact limit_satisfies_c5'_weak fc A h_mcs x hx _ φ h_since
@@ -762,7 +762,7 @@ exists z in limitDom with x < z < y and ξ.neg in limitF(z).
 theorem limit_satisfies_c4 (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (x y : Rat) (hx : x ∈ limitDom fc A h_mcs) (hy : y ∈ limitDom fc A h_mcs)
     (hxy : x < y) (ξ η : Formula Atom)
-    (h_neg_until : (Formula.untl η ξ).neg ∈ limitF fc A h_mcs x)
+    (h_neg_until : (Formula.untl ξ η).neg ∈ limitF fc A h_mcs x)
     (h_event : η ∈ limitF fc A h_mcs y) :
     ∃ z ∈ limitDom fc A h_mcs, x < z ∧ z < y ∧ ξ.neg ∈ limitF fc A h_mcs z := by
   obtain ⟨nx, hnx⟩ := hx
@@ -778,7 +778,7 @@ theorem limit_satisfies_c4 (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : S
     omega_chain_dom_mono_le fc A h_mcs hn_ge hx_n₀
   have hy_n : y ∈ (omegaChainVal fc A h_mcs n).dom :=
     omega_chain_dom_mono_le fc A h_mcs hn_ge hy_n₀
-  have h_nu_n : (Formula.untl η ξ).neg ∈ (omegaChainVal fc A h_mcs n).f x := by
+  have h_nu_n : (Formula.untl ξ η).neg ∈ (omegaChainVal fc A h_mcs n).f x := by
     rw [omega_chain_f_agrees_le fc A h_mcs hn_ge x hx_n₀]
     rw [omega_chain_f_agrees_le fc A h_mcs (le_max_left nx ny) x hnx]
     rwa [← limit_f_eq fc A h_mcs x nx hnx]
@@ -797,7 +797,7 @@ Mirror: the limit chronicle satisfies C4' (Since).
 theorem limit_satisfies_c4' (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (x y : Rat) (hx : x ∈ limitDom fc A h_mcs) (hy : y ∈ limitDom fc A h_mcs)
     (hyx : y < x) (ξ η : Formula Atom)
-    (h_neg_since : (Formula.snce η ξ).neg ∈ limitF fc A h_mcs x)
+    (h_neg_since : (Formula.snce ξ η).neg ∈ limitF fc A h_mcs x)
     (h_event : η ∈ limitF fc A h_mcs y) :
     ∃ z ∈ limitDom fc A h_mcs, y < z ∧ z < x ∧ ξ.neg ∈ limitF fc A h_mcs z := by
   obtain ⟨nx, hnx⟩ := hx
@@ -813,7 +813,7 @@ theorem limit_satisfies_c4' (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : 
     omega_chain_dom_mono_le fc A h_mcs hn_ge hx_n₀
   have hy_n : y ∈ (omegaChainVal fc A h_mcs n).dom :=
     omega_chain_dom_mono_le fc A h_mcs hn_ge hy_n₀
-  have h_ns_n : (Formula.snce η ξ).neg ∈ (omegaChainVal fc A h_mcs n).f x := by
+  have h_ns_n : (Formula.snce ξ η).neg ∈ (omegaChainVal fc A h_mcs n).f x := by
     rw [omega_chain_f_agrees_le fc A h_mcs hn_ge x hx_n₀]
     rw [omega_chain_f_agrees_le fc A h_mcs (le_max_left nx ny) x hnx]
     rwa [← limit_f_eq fc A h_mcs x nx hnx]
@@ -1073,14 +1073,14 @@ theorem limit_forward_G (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetM
     intro h_abs
     exact someFuture_allFuture_neg_absurd h_mcs_x φ.neg h_abs h_G_nn
   set top := Formula.bot.imp Formula.bot with htop_def
-  have h_bx10 : DerivationTree fc [] ((Formula.untl φ.neg top).imp (Formula.someFuture φ.neg)) :=
+  have h_bx10 : DerivationTree fc [] ((Formula.untl top φ.neg).imp (Formula.someFuture φ.neg)) :=
     DerivationTree.axiom [] _ (Axiom.until_F top φ.neg) trivial
-  have h_until_not : Formula.untl φ.neg top ∉ limitF fc A h_mcs x := by
+  have h_until_not : Formula.untl top φ.neg ∉ limitF fc A h_mcs x := by
     intro h_in
     exact h_F_not (SetMaximalConsistent.implication_property h_mcs_x
       (theoremInMcsFc h_mcs_x h_bx10) h_in)
-  have h_neg_until : (Formula.untl φ.neg top).neg ∈ limitF fc A h_mcs x := by
-    rcases SetMaximalConsistent.negation_complete h_mcs_x (Formula.untl φ.neg top) with h | h
+  have h_neg_until : (Formula.untl top φ.neg).neg ∈ limitF fc A h_mcs x := by
+    rcases SetMaximalConsistent.negation_complete h_mcs_x (Formula.untl top φ.neg) with h | h
     · exact absurd h h_until_not
     · exact h
   obtain ⟨z, hz_dom, _hxz, _hzy, h_top_neg⟩ :=
@@ -1126,14 +1126,14 @@ theorem limit_backward_H (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : Set
     intro h_abs
     exact somePast_allPast_neg_absurd h_mcs_x φ.neg h_abs h_H_nn
   set top := Formula.bot.imp Formula.bot with htop_def
-  have h_bx10' : DerivationTree fc [] ((Formula.snce φ.neg top).imp (Formula.somePast φ.neg)) :=
+  have h_bx10' : DerivationTree fc [] ((Formula.snce top φ.neg).imp (Formula.somePast φ.neg)) :=
     DerivationTree.axiom [] _ (Axiom.since_P top φ.neg) trivial
-  have h_since_not : Formula.snce φ.neg top ∉ limitF fc A h_mcs x := by
+  have h_since_not : Formula.snce top φ.neg ∉ limitF fc A h_mcs x := by
     intro h_in
     exact h_P_not (SetMaximalConsistent.implication_property h_mcs_x
       (theoremInMcsFc h_mcs_x h_bx10') h_in)
-  have h_neg_since : (Formula.snce φ.neg top).neg ∈ limitF fc A h_mcs x := by
-    rcases SetMaximalConsistent.negation_complete h_mcs_x (Formula.snce φ.neg top) with h | h
+  have h_neg_since : (Formula.snce top φ.neg).neg ∈ limitF fc A h_mcs x := by
+    rcases SetMaximalConsistent.negation_complete h_mcs_x (Formula.snce top φ.neg) with h | h
     · exact absurd h h_since_not
     · exact h
   obtain ⟨z, hz_dom, _hyz, _hzx, h_top_neg⟩ :=
@@ -1186,10 +1186,10 @@ theorem chronicle_model_exists (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs
       f 0 = A ∧
       (∀ x ∈ D, SetMaximalConsistent fc (f x)) ∧
       (∀ x ∈ D, ∀ ξ η : Formula Atom,
-        Formula.untl η ξ ∈ f x →
+        Formula.untl ξ η ∈ f x →
         ∃ y ∈ D, x < y ∧ η ∈ f y) ∧
       (∀ x ∈ D, ∀ ξ η : Formula Atom,
-        Formula.snce η ξ ∈ f x →
+        Formula.snce ξ η ∈ f x →
         ∃ y ∈ D, y < x ∧ η ∈ f y) :=
   ⟨limitDom fc A h_mcs,
    limitF fc A h_mcs,
@@ -1224,7 +1224,7 @@ theorem omega_chain_c5_forward_resolved_no_new (fc : FrameClass) (A : Set (Formu
     (n : Nat) (x : Rat) (ξ η : Formula Atom)
     (hn_eq : counterexampleEnum (Nat.unpair n).2 = ⟨x, 0, ξ, η, .c5_forward⟩)
     (hx : x ∈ (omegaChainVal fc A h_mcs n).dom)
-    (h_until : Formula.untl η ξ ∈ (omegaChainVal fc A h_mcs n).f x)
+    (h_until : Formula.untl ξ η ∈ (omegaChainVal fc A h_mcs n).f x)
     (h_wit : ∃ y ∈ (omegaChainVal fc A h_mcs n).dom, x < y ∧
       η ∈ (omegaChainVal fc A h_mcs n).f y ∧
       (∀ a b, Adjacent (omegaChainVal fc A h_mcs n).dom a b →
@@ -1238,7 +1238,7 @@ theorem omega_chain_c5_forward_resolved_no_new (fc : FrameClass) (A : Set (Formu
   exact (omegaChainElimResult fc A h_mcs n).c5_forward_resolved_no_new
     (show (counterexampleEnum (Nat.unpair n).2).kind = .c5_forward by rw [hn_eq])
     (show (counterexampleEnum (Nat.unpair n).2).x ∈ _ by rw [hn_eq]; exact hx)
-    (show Formula.untl (counterexampleEnum (Nat.unpair n).2).η
+    (show Formula.untl .η(counterexampleEnum (Nat.unpair n).2)
         (counterexampleEnum (Nat.unpair n).2).ξ ∈ _ by rw [hn_eq]; exact h_until)
     (by rw [hn_eq]; exact h_wit) u hu'
 
@@ -1247,7 +1247,7 @@ theorem omega_chain_c5_backward_resolved_no_new (fc : FrameClass) (A : Set (Form
     (n : Nat) (x : Rat) (ξ η : Formula Atom)
     (hn_eq : counterexampleEnum (Nat.unpair n).2 = ⟨x, 0, ξ, η, .c5_backward⟩)
     (hx : x ∈ (omegaChainVal fc A h_mcs n).dom)
-    (h_since : Formula.snce η ξ ∈ (omegaChainVal fc A h_mcs n).f x)
+    (h_since : Formula.snce ξ η ∈ (omegaChainVal fc A h_mcs n).f x)
     (h_wit : ∃ y ∈ (omegaChainVal fc A h_mcs n).dom, y < x ∧
       η ∈ (omegaChainVal fc A h_mcs n).f y ∧
       (∀ a b, Adjacent (omegaChainVal fc A h_mcs n).dom a b →
@@ -1261,7 +1261,7 @@ theorem omega_chain_c5_backward_resolved_no_new (fc : FrameClass) (A : Set (Form
   exact (omegaChainElimResult fc A h_mcs n).c5_backward_resolved_no_new
     (show (counterexampleEnum (Nat.unpair n).2).kind = .c5_backward by rw [hn_eq])
     (show (counterexampleEnum (Nat.unpair n).2).x ∈ _ by rw [hn_eq]; exact hx)
-    (show Formula.snce (counterexampleEnum (Nat.unpair n).2).η
+    (show Formula.snce .η(counterexampleEnum (Nat.unpair n).2)
         (counterexampleEnum (Nat.unpair n).2).ξ ∈ _ by rw [hn_eq]; exact h_since)
     (by rw [hn_eq]; exact h_wit) u hu'
 
@@ -1451,7 +1451,7 @@ for old domain points between x and y). For any w in limitDom between x and y:
 theorem limit_satisfies_c5_strong (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (x : Rat) (hx : x ∈ limitDom fc A h_mcs)
     (ξ η : Formula Atom)
-    (h_until : Formula.untl η ξ ∈ limitF fc A h_mcs x) :
+    (h_until : Formula.untl ξ η ∈ limitF fc A h_mcs x) :
     ∃ y ∈ limitDom fc A h_mcs, x < y ∧ η ∈ limitF fc A h_mcs y ∧
       ξ ∈ limitG fc A h_mcs x y := by
   obtain ⟨n₀, hn₀⟩ := hx
@@ -1459,7 +1459,7 @@ theorem limit_satisfies_c5_strong (fc : FrameClass) (A : Set (Formula Atom)) (h_
     ⟨x, 0, ξ, η, .c5_forward⟩ n₀
   have hx_n : x ∈ (omegaChainVal fc A h_mcs n).dom :=
     omega_chain_dom_mono_le fc A h_mcs hn_ge hn₀
-  have h_until_n : Formula.untl η ξ ∈ (omegaChainVal fc A h_mcs n).f x := by
+  have h_until_n : Formula.untl ξ η ∈ (omegaChainVal fc A h_mcs n).f x := by
     rw [omega_chain_f_agrees_le fc A h_mcs hn_ge x hn₀]
     rwa [← limit_f_eq fc A h_mcs x n₀ hn₀]
   obtain ⟨y, hy_dom_n1, hxy, hy_η_n1, h_adj_guard, h_dom_guard, h_new_or_id⟩ :=
@@ -1494,7 +1494,7 @@ theorem limit_satisfies_c5_strong (fc : FrameClass) (A : Set (Formula Atom)) (h_
 theorem limit_satisfies_c5'_strong (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (x : Rat) (hx : x ∈ limitDom fc A h_mcs)
     (ξ η : Formula Atom)
-    (h_since : Formula.snce η ξ ∈ limitF fc A h_mcs x) :
+    (h_since : Formula.snce ξ η ∈ limitF fc A h_mcs x) :
     ∃ y ∈ limitDom fc A h_mcs, y < x ∧ η ∈ limitF fc A h_mcs y ∧
       ξ ∈ limitG fc A h_mcs y x := by
   obtain ⟨n₀, hn₀⟩ := hx
@@ -1502,7 +1502,7 @@ theorem limit_satisfies_c5'_strong (fc : FrameClass) (A : Set (Formula Atom)) (h
     ⟨x, 0, ξ, η, .c5_backward⟩ n₀
   have hx_n : x ∈ (omegaChainVal fc A h_mcs n).dom :=
     omega_chain_dom_mono_le fc A h_mcs hn_ge hn₀
-  have h_since_n : Formula.snce η ξ ∈ (omegaChainVal fc A h_mcs n).f x := by
+  have h_since_n : Formula.snce ξ η ∈ (omegaChainVal fc A h_mcs n).f x := by
     rw [omega_chain_f_agrees_le fc A h_mcs hn_ge x hn₀]
     rwa [← limit_f_eq fc A h_mcs x n₀ hn₀]
   obtain ⟨y, hy_dom_n1, hyx, hy_η_n1, h_adj_guard, h_dom_guard, h_new_or_id⟩ :=

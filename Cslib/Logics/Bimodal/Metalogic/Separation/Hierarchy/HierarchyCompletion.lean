@@ -34,10 +34,10 @@ open Cslib.Logic.Bimodal
 
 /-- GHR94 Lemma 10.2.6 (parameterized): A formula with `noSNestedInU` and
     `hasNoAllpastAllfuture` is separable, given a callback for handling
-    the `.snce`/`.allPast` constituents produced by substitution.
+    the `.snceconstituents `/`.allPast` produced by substitution.
 
     The callback receives formulas with `noSNestedInU` that arise from
-    substituting `.untl A B` (S-free args) into U-free positions of a
+    substituting `.untl B` A (S-free args) into U-free positions of a
     separated formula. These callback formulas have single U-type U(A,B). -/
 theorem no_S_nested_in_U_separable_param (phi : Formula Atom)
     (hns : noSNestedInU phi)
@@ -71,14 +71,14 @@ theorem no_S_nested_in_U_separable_param (phi : Formula Atom)
     -- Get separated psi equivalent to phi'
     obtain ⟨psi, hpsi_sep, hpsi_equiv⟩ := h_phi'_sep
     -- phi = subst(phi', p, U(A,B)) by syntactic roundtrip
-    have hroundtrip : substFormula phi' p (.untl AB.1 AB.2) = phi :=
+    have hroundtrip : substFormula phi' p (.untl AB.2 AB.1) = phi :=
       abstract_subst_roundtrip phi AB.1 AB.2 p hfresh
     -- phi is equiv to subst(psi, p, U(A,B)) by congruence
-    have hphi_equiv : intEquiv phi (substFormula psi p (.untl AB.1 AB.2)) := by
+    have hphi_equiv : intEquiv phi (substFormula psi p (.untl AB.2 AB.1)) := by
       rw [← hroundtrip]
-      exact subst_formula_congr hpsi_equiv p (.untl AB.1 AB.2)
+      exact subst_formula_congr hpsi_equiv p (.untl AB.2 AB.1)
     -- subst(psi, p, U(A,B)) is separable via constituent substitution
-    have h_subst_sep : isSeparable (substFormula psi p (.untl AB.1 AB.2)) :=
+    have h_subst_sep : isSeparable (substFormula psi p (.untl AB.2 AB.1)) :=
       subst_in_separated_separable psi p AB.1 AB.2
         hAB_sf.1 hAB_sf.2 hpsi_sep callback
     exact is_separable_of_equiv hphi_equiv h_subst_sep
@@ -86,13 +86,13 @@ theorem no_S_nested_in_U_separable_param (phi : Formula Atom)
 /-! ### Step 5c': Single-U-Type Separability (GHR94 Lemma 10.2.5, axiom-free)
 
 The main inductive theorem: any formula with single-U-type is separable.
-Uses strong induction on snceDepthOfU. The key `.snce` case at depth >= 2
+Uses strong induction on snceDepthOfU. The key `.sncecase ` at depth >= 2
 recurses on children (strict depth decrease), producing separated witnesses
 WITH single-U-type preservation. Box-normalization + leaf case finishes it. -/
 
 /-- hasSingleUType with S-free A, B implies noSNestedInU.
-    This follows because noSNestedInU checks that .untl args are S-free,
-    and hasSingleUType forces every .untl to be .untl A B where A, B are S-free. -/
+    This follows because noSNestedInU checks that .untl are args S-free,
+    and hasSingleUType forces every .untl be to .untl B A where A, B are S-free. -/
 theorem has_single_U_type_gives_no_S_nested (phi A B : Formula Atom)
     (hA_sf : isSFree A = true) (hB_sf : isSFree B = true)
     (h_single : hasSingleUType phi A B) :
@@ -102,10 +102,10 @@ theorem has_single_U_type_gives_no_S_nested (phi A B : Formula Atom)
   | bot => trivial
   | imp a b ih1 ih2 => exact ⟨ih1 h_single.1, ih2 h_single.2⟩
   | box a ih => exact ih h_single
-  | untl a b _ _ =>
+  | untl b a _ _ =>
     have ⟨ha, hb⟩ := h_single; subst ha; subst hb
     exact ⟨hA_sf, hB_sf⟩
-  | snce a b ih1 ih2 => exact ⟨ih1 h_single.1, ih2 h_single.2⟩
+  | snce b a ih2 ih1 => exact ⟨ih1 h_single.1, ih2 h_single.2⟩
 
 /-- Box-normalization preserves hasSingleUType with box-normalized args:
     if hasSingleUType phi A B, then
@@ -120,24 +120,24 @@ theorem replace_box_preserves_single_U_type (phi A B : Formula Atom)
     exact ⟨ih1 h.1, ih2 h.2⟩
   | box _ => -- replaceBoxWithTop (.box _) = .imp .bot .bot
     simp only [replaceBoxWithTop, hasSingleUType]; trivial
-  | untl a b _ _ =>
+  | untl b a _ _ =>
     have ⟨ha, hb⟩ := h; subst ha; subst hb
     simp only [replaceBoxWithTop, hasSingleUType]; trivial
-  | snce a b ih1 ih2 =>
+  | snce b a ih2 ih1 =>
     exact ⟨ih1 h.1, ih2 h.2⟩
 
 /-- GHR94 Lemma 10.2.5 (oracle-parameterized):
     A formula with single U-type U(A,B) (where A, B are S-free and U-free)
     is separable, given an oracle for `noSNestedInU` formulas with JD ≤ 1.
 
-    The `.snce` case splits by snceDepthOfU:
+    The `.sncecase ` splits by snceDepthOfU:
     - **depth 0**: Both C, w are U-free. Already syntactically separated.
     - **depth 1** (leaf case): C, w at depth 0 have `hasSingleUType` and are
       already syntactically separated. Box-normalize preserves single-U-type.
       Apply `snce_single_U_depth_one_separable` (Lemma 10.2.4) directly.
       **The oracle is NOT invoked at depth 1.**
     - **depth >= 2**: IH on C, w (strict depth decrease). Box-normalize.
-      Apply oracle on the normalized `.snce C'' w''` (which has JD ≤ 1).
+      Apply oracle on the normalized `.snce w''` C'' (which has JD ≤ 1).
 
     GHR94 reference: Lemma 10.2.5, pp. 569. "By induction on the maximum
     number k of nested Ss above any U(A,B)."
@@ -167,12 +167,12 @@ theorem single_U_formula_separable_noax_param (phi A B : Formula Atom)
       have hle_b : snceDepthOfU b ≤ n := Nat.le_trans (snce_depth_of_U_le_imp_right a b) hdepth
       exact imp_separable (ih_a hle_a h_single_ψ.1) (ih_b hle_b h_single_ψ.2)
     | box _ => exact ⟨.box _, rfl, int_equiv_refl _⟩
-    | untl a b _ _ =>
+    | untl b a _ _ =>
       have ⟨ha, hb⟩ := h_single_ψ; subst ha; subst hb
       exact untl_s_free_separable hA_sf hB_sf
-    | snce C w ih_C ih_F =>
+    | snce w C ih_F ih_C =>
       by_cases huf : isUFree C = true ∧ isUFree w = true
-      · exact ⟨.snce C w, by simp [isSyntacticallySeparated, huf.1, huf.2], int_equiv_refl _⟩
+      · exact ⟨.snce w C, by simp [isSyntacticallySeparated, huf.1, huf.2], int_equiv_refl _⟩
       · -- snceDepthOfU >= 1
         have hlt_C := (snce_depth_of_U_lt_snce C w huf).1
         have hlt_F := (snce_depth_of_U_lt_snce C w huf).2
@@ -196,7 +196,7 @@ theorem single_U_formula_separable_noax_param (phi A B : Formula Atom)
           let w'' := replaceBoxWithTop w
           let A'' := replaceBoxWithTop A
           let B'' := replaceBoxWithTop B
-          have hequiv : intEquiv (.snce C w) (.snce C'' w'') :=
+          have hequiv : intEquiv (.snce w C) (.snce w'' C'') :=
             snce_congr (replace_box_equiv C) (replace_box_equiv w)
           have hsingle_C'' : hasSingleUType C'' A'' B'' :=
             replace_box_preserves_single_U_type C A B h_single_ψ.1
@@ -214,7 +214,7 @@ theorem single_U_formula_separable_noax_param (phi A B : Formula Atom)
               hA''_sf hB''_sf hA''_uf hB''_uf
               hsingle_C'' hsingle_F'' hdC'' hdF''
               (has_no_allpast_allfuture_true C'') (has_no_allpast_allfuture_true w''))
-        · -- Depth >= 2: IH on C, w, then apply oracle on .snce C'' w''
+        · -- Depth >= 2: IH on C, w, then apply oracle on .snce w'' C''
           push Not at hn_le1
           have hC_sep : isSeparable C := ih_C hle_C h_single_ψ.1
           have hF_sep : isSeparable w := ih_F hle_F h_single_ψ.2
@@ -222,15 +222,15 @@ theorem single_U_formula_separable_noax_param (phi A B : Formula Atom)
           obtain ⟨w', hF'_sep, hF'_equiv⟩ := hF_sep
           let C'' := replaceBoxWithTop C'
           let w'' := replaceBoxWithTop w'
-          have hequiv : intEquiv (.snce C w) (.snce C'' w'') :=
+          have hequiv : intEquiv (.snce w C) (.snce w'' C'') :=
             int_equiv_trans (snce_congr hC'_equiv hF'_equiv)
               (snce_congr (replace_box_equiv C') (replace_box_equiv w'))
-          have hns : noSNestedInU (.snce C'' w'') :=
+          have hns : noSNestedInU (.snce w'' C'') :=
             snce_of_boxfree_sep_no_S_nested C' w' hC'_sep hF'_sep
-          have hjd : junctionDepth (.snce C'' w'') ≤ 1 :=
+          have hjd : junctionDepth (.snce w'' C'') ≤ 1 :=
             snce_of_boxfree_sep_jd_le_one C' w' hC'_sep hF'_sep
           -- Apply oracle (depth >= 2, so oracle invocation is safe)
-          exact is_separable_of_equiv hequiv (oracle (.snce C'' w'') hns hjd)
+          exact is_separable_of_equiv hequiv (oracle (.snce w'' C'') hns hjd)
   exact this (snceDepthOfU phi) phi (Nat.le_refl _) h_single
 
 /-- GHR94 Lemma 10.2.5 (oracle-free, returning isSeparableWithUType):
@@ -241,9 +241,9 @@ theorem single_U_formula_separable_noax_param (phi A B : Formula Atom)
     - `.atom`, `.bot`, `.box`: trivial
     - `.imp`: combine via `imp_separable_with_type`
     - `.untl`: `hasSingleUType` forces args = (A, B)
-    - `.snce` at depth 0: U-free → `u_free_separable_with_type`
-    - `.snce` at depth 1: `snce_single_U_depth_one_sep_with_U_type` (Phase 2)
-    - `.snce` at depth >= 2: IH on children (strict depth decrease), box-normalize,
+    - `.snceat ` depth 0: U-free → `u_free_separable_with_type`
+    - `.snceat ` depth 1: `snce_single_U_depth_one_sep_with_U_type` (Phase 2)
+    - `.snceat ` depth >= 2: IH on children (strict depth decrease), box-normalize,
       apply `snce_single_U_depth_one_sep_with_U_type`. **NO ORACLE.** -/
 theorem single_U_formula_sep_with_U_type_no_oracle (phi A B : Formula Atom)
     (hA_sf : isSFree A = true) (hB_sf : isSFree B = true)
@@ -267,13 +267,13 @@ theorem single_U_formula_sep_with_U_type_no_oracle (phi A B : Formula Atom)
     | box _ =>
       -- .box on Z is equivalent to .imp .bot .bot (True), which is U-free
       exact ⟨.box _, rfl, int_equiv_refl _, h_single_ψ⟩
-    | untl a b _ _ =>
+    | untl b a _ _ =>
       have ⟨ha, hb⟩ := h_single_ψ; subst ha; subst hb
       exact untl_s_free_separable_with_type hA_sf hB_sf
-    | snce C w ih_C ih_F =>
+    | snce w C ih_F ih_C =>
       by_cases huf : isUFree C = true ∧ isUFree w = true
       · -- depth 0: U-free → separated directly
-        exact ⟨.snce C w, by simp [isSyntacticallySeparated, huf.1, huf.2], int_equiv_refl _,
+        exact ⟨.snce w C, by simp [isSyntacticallySeparated, huf.1, huf.2], int_equiv_refl _,
           ⟨u_free_has_single_U_type huf.1, u_free_has_single_U_type huf.2⟩⟩
       · -- snceDepthOfU >= 1
         have hlt_C := (snce_depth_of_U_lt_snce C w huf).1
@@ -296,7 +296,7 @@ theorem single_U_formula_sep_with_U_type_no_oracle (phi A B : Formula Atom)
           let w'' := replaceBoxWithTop w
           let A'' := replaceBoxWithTop A
           let B'' := replaceBoxWithTop B
-          have hequiv : intEquiv (.snce C w) (.snce C'' w'') :=
+          have hequiv : intEquiv (.snce w C) (.snce w'' C'') :=
             snce_congr (replace_box_equiv C) (replace_box_equiv w)
           have hsingle_C'' : hasSingleUType C'' A'' B'' :=
             replace_box_preserves_single_U_type C A B h_single_ψ.1
@@ -313,7 +313,7 @@ theorem single_U_formula_sep_with_U_type_no_oracle (phi A B : Formula Atom)
             snce_single_U_depth_one_sep_with_U_type C'' w'' A'' B''
               hA''_sf hB''_sf hA''_uf hB''_uf hsingle_C'' hsingle_F'' hdC'' hdF''
               (has_no_allpast_allfuture_true C'') (has_no_allpast_allfuture_true w'')
-          -- Transfer from C''.snce F'' to C.snce F via hequiv
+          -- Transfer from C''.snce to F'' C.snce via F hequiv
           have h_sep_CF_AB'' : isSeparableWithUType (C.snce w) A'' B'' :=
             is_separable_with_U_type_of_equiv hequiv h_sep_AB''
           -- Bridge from A'' B'' to A B
@@ -329,7 +329,7 @@ theorem single_U_formula_sep_with_U_type_no_oracle (phi A B : Formula Atom)
           let w'' := replaceBoxWithTop w'
           let A'' := replaceBoxWithTop A
           let B'' := replaceBoxWithTop B
-          have hequiv : intEquiv (.snce C w) (.snce C'' w'') :=
+          have hequiv : intEquiv (.snce w C) (.snce w'' C'') :=
             int_equiv_trans (snce_congr hC'_equiv hF'_equiv)
               (snce_congr (replace_box_equiv C') (replace_box_equiv w'))
           have hsingle_C'' : hasSingleUType C'' A'' B'' :=
@@ -347,7 +347,7 @@ theorem single_U_formula_sep_with_U_type_no_oracle (phi A B : Formula Atom)
             snce_single_U_depth_one_sep_with_U_type C'' w'' A'' B''
               hA''_sf hB''_sf hA''_uf hB''_uf hsingle_C'' hsingle_F'' hdC'' hdF''
               (has_no_allpast_allfuture_true C'') (has_no_allpast_allfuture_true w'')
-          -- Transfer from C''.snce F'' to C.snce F via hequiv
+          -- Transfer from C''.snce to F'' C.snce via F hequiv
           have h_sep_CF_AB'' : isSeparableWithUType (C.snce w) A'' B'' :=
             is_separable_with_U_type_of_equiv hequiv h_sep_AB''
           -- Bridge from A'' B'' to A B
@@ -379,7 +379,7 @@ Lemma 10.2.6: `noSNestedInU phi` and `uNestingDepth phi <= 1` implies separable.
 Lemma 10.2.7: `noSNestedInU phi` implies separable (by uNestingDepth induction). -/
 
 /-- Helper: `extractUType` returns U-free arguments when `uNestingDepth phi <= 1`.
-    At depth <= 1, every `.untl a b` has `uNestingDepth (.untl a b) <= 1`,
+    At depth <= 1, every `.untl b` a has `uNestingDepth (.untl b a) <= 1`,
     so `uNestingDepth a = 0` and `uNestingDepth b = 0`, meaning a and b are U-free. -/
 theorem extract_U_type_U_free (φ : Formula Atom) (h : isUFree φ = false)
     (hns : noSNestedInU φ) (hdepth : uNestingDepth φ ≤ 1) :
@@ -405,10 +405,10 @@ theorem extract_U_type_U_free (φ : Formula Atom) (h : isUFree φ = false)
     have hle : uNestingDepth c ≤ 1 := by
       simp only [uNestingDepth] at hdepth; exact hdepth
     exact ih h hns hle
-  | untl a b =>
+  | untl b a =>
     unfold extractUType
     exact U_nesting_depth_le_one_untl_args_U_free a b hdepth
-  | snce c d ih1 ih2 =>
+  | snce d c ih2 ih1 =>
     unfold extractUType
     by_cases hc : isUFree c = false
     · simp only [hc, ↓reduceDIte]
@@ -425,7 +425,7 @@ theorem extract_U_type_U_free (φ : Formula Atom) (h : isUFree φ = false)
     given an oracle for `noSNestedInU` formulas with JD ≤ 1.
 
     Proved by inlining the `no_S_nested_in_U_separable_param` logic with
-    `single_U_formula_separable_noax_param` as the callback for `.snce` nodes.
+    `single_U_formula_separable_noax_param` as the callback for `.sncenodes. `
     The oracle is threaded through to `single_U_formula_separable_noax_param`. -/
 theorem lemma_10_2_6_self_contained_param (phi : Formula Atom)
     (hns : noSNestedInU phi)
@@ -455,13 +455,13 @@ theorem lemma_10_2_6_self_contained_param (phi : Formula Atom)
       exact ih (countUSubformulas phi') (h ▸ hcount_lt) phi' hns'
         (abstract_untl_U_nesting_depth_le_of_le phi AB.1 AB.2 p 1 hd) rfl
     obtain ⟨psi, hpsi_sep, hpsi_equiv⟩ := h_phi'_sep
-    have hroundtrip : substFormula phi' p (.untl AB.1 AB.2) = phi :=
+    have hroundtrip : substFormula phi' p (.untl AB.2 AB.1) = phi :=
       abstract_subst_roundtrip phi AB.1 AB.2 p hfresh
-    have hphi_equiv : intEquiv phi (substFormula psi p (.untl AB.1 AB.2)) := by
+    have hphi_equiv : intEquiv phi (substFormula psi p (.untl AB.2 AB.1)) := by
       rw [← hroundtrip]
-      exact subst_formula_congr hpsi_equiv p (.untl AB.1 AB.2)
+      exact subst_formula_congr hpsi_equiv p (.untl AB.2 AB.1)
     -- Use single_U_formula_separable_noax_param with oracle (NOT all_separable)
-    have h_subst_sep : isSeparable (substFormula psi p (.untl AB.1 AB.2)) :=
+    have h_subst_sep : isSeparable (substFormula psi p (.untl AB.2 AB.1)) :=
       subst_in_separated_separable_typed psi p AB.1 AB.2
         hAB_sf.1 hAB_sf.2 hAB_uf.1 hAB_uf.2 hpsi_sep
         (fun χ _hns_χ hsingle_χ =>
@@ -497,13 +497,13 @@ theorem lemma_10_2_6_no_oracle (phi : Formula Atom)
       exact ih (countUSubformulas phi') (h ▸ hcount_lt) phi' hns'
         (abstract_untl_U_nesting_depth_le_of_le phi AB.1 AB.2 p 1 hd) rfl
     obtain ⟨psi, hpsi_sep, hpsi_equiv⟩ := h_phi'_sep
-    have hroundtrip : substFormula phi' p (.untl AB.1 AB.2) = phi :=
+    have hroundtrip : substFormula phi' p (.untl AB.2 AB.1) = phi :=
       abstract_subst_roundtrip phi AB.1 AB.2 p hfresh
-    have hphi_equiv : intEquiv phi (substFormula psi p (.untl AB.1 AB.2)) := by
+    have hphi_equiv : intEquiv phi (substFormula psi p (.untl AB.2 AB.1)) := by
       rw [← hroundtrip]
-      exact subst_formula_congr hpsi_equiv p (.untl AB.1 AB.2)
+      exact subst_formula_congr hpsi_equiv p (.untl AB.2 AB.1)
     -- Use single_U_formula_separable_no_oracle (NO ORACLE)
-    have h_subst_sep : isSeparable (substFormula psi p (.untl AB.1 AB.2)) :=
+    have h_subst_sep : isSeparable (substFormula psi p (.untl AB.2 AB.1)) :=
       subst_in_separated_separable_typed psi p AB.1 AB.2
         hAB_sf.1 hAB_sf.2 hAB_uf.1 hAB_uf.2 hpsi_sep
         (fun χ _hns_χ hsingle_χ =>
@@ -519,18 +519,18 @@ theorem lemma_10_2_6_self_contained (phi : Formula Atom)
     isSeparable phi :=
   lemma_10_2_6_no_oracle phi hns hd
 
-/-- Substituting `.untl A B` (with U-free A, B) into a U-free formula gives
-    `uNestingDepth <= 1`. Since the base formula has no `.untl` nodes, the only
-    `.untl` in the result comes from substituting `.untl A B` for atoms. Each such
+/-- Substituting `.untl B` A (with U-free A, B) into a U-free formula gives
+    `uNestingDepth <= 1`. Since the base formula has no `.untlnodes `, the only
+    `.untlin ` the result comes from substituting `.untl B` A for atoms. Each such
     occurrence has depth 1 (U-free args), and they don't nest inside each other. -/
 theorem subst_U_free_U_nesting_depth_le_one (ψ : Formula Atom) (p : Atom) (A B : Formula Atom)
     (hψ_uf : isUFree ψ = true) (hA_uf : isUFree A = true) (hB_uf : isUFree B = true) :
-    uNestingDepth (substFormula ψ p (.untl A B)) ≤ 1 := by
+    uNestingDepth (substFormula ψ p (.untl B A)) ≤ 1 := by
   induction ψ with
   | atom a =>
     simp only [substFormula]
     split
-    · -- a = p: result is .untl A B
+    · -- a = p: result is .untl B A
       simp only [uNestingDepth]
       have ha := U_nesting_depth_zero_of_U_free A hA_uf
       have hb := U_nesting_depth_zero_of_U_free B hB_uf
@@ -545,19 +545,19 @@ theorem subst_U_free_U_nesting_depth_le_one (ψ : Formula Atom) (p : Atom) (A B 
     simp only [isUFree] at hψ_uf
     simp only [substFormula, uNestingDepth]; exact ih hψ_uf
   | untl _ _ => simp only [isUFree] at hψ_uf; exact absurd hψ_uf (by decide)
-  | snce a b ih1 ih2 =>
+  | snce b a ih2 ih1 =>
     simp only [isUFree, Bool.and_eq_true] at hψ_uf
     simp only [substFormula, uNestingDepth]
     have := ih1 hψ_uf.1; have := ih2 hψ_uf.2; omega
 
 /-- Callback formulas from `subst_in_separated_separable_typed` have `uNestingDepth ≤ 1`
-    when A, B are U-free. The callback formula is `.snce (subst c p (.untl A B)) (subst d p (.untl A B))`
+    when A, B are U-free. The callback formula is `.snce (subst d p (.untl B A)) (subst c p (.untl B A))`
     where c, d are U-free. -/
 theorem callback_U_nesting_depth_le_one (c d : Formula Atom) (p : Atom) (A B : Formula Atom)
     (hc_uf : isUFree c = true) (hd_uf : isUFree d = true)
     (hA_uf : isUFree A = true) (hB_uf : isUFree B = true) :
-    uNestingDepth (.snce (substFormula c p (.untl A B))
-                           (substFormula d p (.untl A B))) ≤ 1 := by
+    uNestingDepth (.snce (substFormula d p (.untl B A))
+                           (substFormula c p (.untl B A))) ≤ 1 := by
   simp only [uNestingDepth]
   have h1 := subst_U_free_U_nesting_depth_le_one c p A B hc_uf hA_uf hB_uf
   have h2 := subst_U_free_U_nesting_depth_le_one d p A B hd_uf hA_uf hB_uf
@@ -573,34 +573,34 @@ theorem subst_in_separated_separable_depth (ψ : Formula Atom) (p : Atom) (A B :
     (hsep : isSyntacticallySeparated ψ = true)
     (ih_snce : ∀ (χ : Formula Atom), noSNestedInU χ →
         uNestingDepth χ ≤ 1 → isSeparable χ) :
-    isSeparable (substFormula ψ p (.untl A B)) := by
+    isSeparable (substFormula ψ p (.untl B A)) := by
   induction ψ with
   | atom a =>
     simp only [substFormula]; split
-    · exact ⟨.untl A B, by simp [isSyntacticallySeparated, hA_sf, hB_sf], int_equiv_refl _⟩
+    · exact ⟨.untl B A, by simp [isSyntacticallySeparated, hA_sf, hB_sf], int_equiv_refl _⟩
     · exact ⟨.atom a, rfl, int_equiv_refl _⟩
   | bot => exact ⟨.bot, rfl, int_equiv_refl _⟩
-  | box ψ => exact ⟨.box (substFormula ψ p (.untl A B)), rfl, int_equiv_refl _⟩
+  | box ψ => exact ⟨.box (substFormula ψ p (.untl B A)), rfl, int_equiv_refl _⟩
   | imp c d ih_c ih_d =>
     simp [isSyntacticallySeparated] at hsep
     exact imp_separable (ih_c hsep.1) (ih_d hsep.2)
-  | untl c d _ _ =>
+  | untl d c _ _ =>
     simp [isSyntacticallySeparated] at hsep
-    have hU_sf : isSFree (.untl A B) = true := by
+    have hU_sf : isSFree (.untl B A) = true := by
       simp only [isSFree, hA_sf, hB_sf, Bool.and_self]
-    exact ⟨.untl (substFormula c p (.untl A B)) (substFormula d p (.untl A B)),
+    exact ⟨.untl (substFormula d p (.untl B A)) (substFormula c p (.untl B A)),
            by simp [isSyntacticallySeparated,
                      subst_S_free_preserves_S_free c p _ hsep.1 hU_sf,
                      subst_S_free_preserves_S_free d p _ hsep.2 hU_sf],
            int_equiv_refl _⟩
-  | snce c d _ _ =>
+  | snce d c _ _ =>
     simp [isSyntacticallySeparated] at hsep
-    have hns : noSNestedInU (.snce (substFormula c p (.untl A B))
-        (substFormula d p (.untl A B))) :=
+    have hns : noSNestedInU (.snce (substFormula d p (.untl B A))
+        (substFormula c p (.untl B A))) :=
       ⟨subst_U_free_gives_no_S_nested c p A B hsep.1 hA_sf hB_sf,
        subst_U_free_gives_no_S_nested d p A B hsep.2 hA_sf hB_sf⟩
-    have hdepth : uNestingDepth (.snce (substFormula c p (.untl A B))
-        (substFormula d p (.untl A B))) ≤ 1 :=
+    have hdepth : uNestingDepth (.snce (substFormula d p (.untl B A))
+        (substFormula c p (.untl B A))) ≤ 1 :=
       callback_U_nesting_depth_le_one c d p A B hsep.1 hsep.2 hA_uf hB_uf
     exact ih_snce _ hns hdepth
 
@@ -616,28 +616,28 @@ theorem jd_zero_sep (φ : Formula Atom)
   separated_imp_separable φ (expanded_jd_zero_imp_separated φ hexp hjd)
 
 /-- Callback formulas from `subst_in_separated_separable` have junctionDepth ≤ 1.
-    This follows because: (1) the `.snce c d` branches c, d of a separated formula
-    are U-free, hence have junctionDepthS = 0; (2) substituting `.untl A B` (with
+    This follows because: (1) the `.snce d` c branches c, d of a separated formula
+    are U-free, hence have junctionDepthS = 0; (2) substituting `.untl B` A (with
     S-free A, B) into U-free formulas gives junctionDepthS ≤ 1; (3) the callback
-    `.snce (subst c p (.untl A B)) (subst d p (.untl A B))` has JD = max of these ≤ 1. -/
+    `.snce (subst d p (.untl B A)) (subst c p (.untl B A))` has JD = max of these ≤ 1. -/
 theorem callback_jd_le_one (c d : Formula Atom) (p : Atom) (A B : Formula Atom)
     (hc_uf : isUFree c = true) (hd_uf : isUFree d = true)
     (hA_sf : isSFree A = true) (hB_sf : isSFree B = true) :
-    junctionDepth (.snce (substFormula c p (.untl A B)) (substFormula d p (.untl A B))) ≤ 1 := by
+    junctionDepth (.snce (substFormula d p (.untl B A)) (substFormula c p (.untl B A))) ≤ 1 := by
   simp only [junctionDepth]
   have h1 := subst_u_free_jdS_le_one c p A B hc_uf hA_sf hB_sf
   have h2 := subst_u_free_jdS_le_one d p A B hd_uf hA_sf hB_sf
   omega
 where
-  /-- Substituting `.untl A B` (S-free args) into a U-free formula gives jdS ≤ 1. -/
+  /-- Substituting `.untl B` A (S-free args) into a U-free formula gives jdS ≤ 1. -/
   subst_u_free_jdS_le_one (φ : Formula Atom) (p : Atom) (A B : Formula Atom)
       (huf : isUFree φ = true) (hA : isSFree A = true) (hB : isSFree B = true) :
-      junctionDepthS (substFormula φ p (.untl A B)) ≤ 1 := by
+      junctionDepthS (substFormula φ p (.untl B A)) ≤ 1 := by
     induction φ with
     | atom a =>
       simp only [substFormula]
       split
-      · -- a = p: result is .untl A B
+      · -- a = p: result is .untl B A
         simp only [junctionDepthS]
         have hA0 := s_free_junction_depth_zero A hA
         have hB0 := s_free_junction_depth_zero B hB
@@ -651,14 +651,14 @@ where
       simp [isUFree] at huf
       simp [substFormula, junctionDepthS, ih huf]
     | untl _ _ => simp [isUFree] at huf
-    | snce a b ih1 ih2 =>
+    | snce b a ih2 ih1 =>
       simp [isUFree] at huf
       simp [substFormula, junctionDepthS, ih1 huf.1, ih2 huf.2]
 
 /-- Callback formulas from substitution into separated formulas have hasNoAllpastAllfuture. -/
 theorem callback_has_no_allpast_allfuture (c d : Formula Atom) (p : Atom) (A B : Formula Atom) :
     hasNoAllpastAllfuture
-      (.snce (substFormula c p (.untl A B)) (substFormula d p (.untl A B))) = true := by
+      (.snce (substFormula d p (.untl B A)) (substFormula c p (.untl B A))) = true := by
   exact has_no_allpast_allfuture_true _
 
 /-- Version of `subst_in_separated_separable` where the callback also receives a
@@ -667,34 +667,34 @@ theorem subst_in_separated_separable_jd (ψ : Formula Atom) (p : Atom) (A B : Fo
     (hA_sf : isSFree A = true) (hB_sf : isSFree B = true)
     (hsep : isSyntacticallySeparated ψ = true)
     (ih_snce : ∀ (χ : Formula Atom), noSNestedInU χ → junctionDepth χ ≤ 1 → isSeparable χ) :
-    isSeparable (substFormula ψ p (.untl A B)) := by
+    isSeparable (substFormula ψ p (.untl B A)) := by
   induction ψ with
   | atom a =>
     simp only [substFormula]; split
-    · exact ⟨.untl A B, by simp [isSyntacticallySeparated, hA_sf, hB_sf], int_equiv_refl _⟩
+    · exact ⟨.untl B A, by simp [isSyntacticallySeparated, hA_sf, hB_sf], int_equiv_refl _⟩
     · exact ⟨.atom a, rfl, int_equiv_refl _⟩
   | bot => exact ⟨.bot, rfl, int_equiv_refl _⟩
-  | box ψ => exact ⟨.box (substFormula ψ p (.untl A B)), rfl, int_equiv_refl _⟩
+  | box ψ => exact ⟨.box (substFormula ψ p (.untl B A)), rfl, int_equiv_refl _⟩
   | imp c d ih_c ih_d =>
     simp [isSyntacticallySeparated] at hsep
     exact imp_separable (ih_c hsep.1) (ih_d hsep.2)
-  | untl c d _ _ =>
+  | untl d c _ _ =>
     simp [isSyntacticallySeparated] at hsep
-    have hU_sf : isSFree (.untl A B) = true := by
+    have hU_sf : isSFree (.untl B A) = true := by
       simp only [isSFree, hA_sf, hB_sf, Bool.and_self]
-    exact ⟨.untl (substFormula c p (.untl A B)) (substFormula d p (.untl A B)),
+    exact ⟨.untl (substFormula d p (.untl B A)) (substFormula c p (.untl B A)),
            by simp [isSyntacticallySeparated,
                      subst_S_free_preserves_S_free c p _ hsep.1 hU_sf,
                      subst_S_free_preserves_S_free d p _ hsep.2 hU_sf],
            int_equiv_refl _⟩
-  | snce c d _ _ =>
+  | snce d c _ _ =>
     simp [isSyntacticallySeparated] at hsep
-    have hns : noSNestedInU (.snce (substFormula c p (.untl A B))
-        (substFormula d p (.untl A B))) :=
+    have hns : noSNestedInU (.snce (substFormula d p (.untl B A))
+        (substFormula c p (.untl B A))) :=
       ⟨subst_U_free_gives_no_S_nested c p A B hsep.1 hA_sf hB_sf,
        subst_U_free_gives_no_S_nested d p A B hsep.2 hA_sf hB_sf⟩
-    have hjd_bound : junctionDepth (.snce (substFormula c p (.untl A B))
-        (substFormula d p (.untl A B))) ≤ 1 :=
+    have hjd_bound : junctionDepth (.snce (substFormula d p (.untl B A))
+        (substFormula c p (.untl B A))) ≤ 1 :=
       callback_jd_le_one c d p A B hsep.1 hsep.2 hA_sf hB_sf
     exact ih_snce _ hns hjd_bound
 
@@ -704,7 +704,7 @@ theorem subst_in_separated_separable_jd (ψ : Formula Atom) (p : Atom) (A B : Fo
 
     Proved by strong induction on `uNestingDepth`.
     - Depth ≤ 1: `lemma_10_2_6_self_contained_param` with oracle.
-    - Depth ≥ 2: Abstract a surface `.untl A B`, prove abstracted formula
+    - Depth ≥ 2: Abstract a surface `.untl B` A, prove abstracted formula
       separable by inner `countUSubformulas` induction, then back-substitute
       using `subst_in_separated_separable_jd` with the oracle (callback
       formulas always have JD ≤ 1, regardless of whether A, B are U-free). -/
@@ -749,14 +749,14 @@ theorem no_S_nested_in_U_separable_direct_param (phi : Formula Atom)
           ih_count (countUSubformulas ψ') (hc ▸ hcount_lt) ψ' hdepth_le' hns' rfl
         -- Get separated form
         obtain ⟨psi, hpsi_sep, hpsi_equiv⟩ := h_psi'_sep
-        -- Roundtrip: subst(ψ', p, .untl AB.1 AB.2) = ψ
+        -- Roundtrip: subst(ψ', p, .untl AB.2 AB.1) = ψ
         have hroundtrip := abstract_subst_roundtrip ψ AB.1 AB.2 p hfresh
-        -- ψ ≡ subst(psi, p, .untl AB.1 AB.2)
-        have hphi_equiv : intEquiv ψ (substFormula psi p (.untl AB.1 AB.2)) := by
-          rw [← hroundtrip]; exact subst_formula_congr hpsi_equiv p (.untl AB.1 AB.2)
+        -- ψ ≡ subst(psi, p, .untl AB.2 AB.1)
+        have hphi_equiv : intEquiv ψ (substFormula psi p (.untl AB.2 AB.1)) := by
+          rw [← hroundtrip]; exact subst_formula_congr hpsi_equiv p (.untl AB.2 AB.1)
         -- Back-substitution via subst_in_separated_separable_jd with oracle
         -- Callback formulas always have JD ≤ 1 (via callback_jd_le_one)
-        have h_subst_sep : isSeparable (substFormula psi p (.untl AB.1 AB.2)) :=
+        have h_subst_sep : isSeparable (substFormula psi p (.untl AB.2 AB.1)) :=
           subst_in_separated_separable_jd psi p AB.1 AB.2
             hAB_sf.1 hAB_sf.2 hpsi_sep oracle
         exact is_separable_of_equiv hphi_equiv h_subst_sep
@@ -802,10 +802,10 @@ theorem no_S_nested_sep (phi : Formula Atom) (hns : noSNestedInU phi) :
           ih_c (countUTotal ψ') (by omega) ψ' h_und_le (le_refl _) hns'
         obtain ⟨psi, hpsi_sep, hpsi_equiv⟩ := h_psi'_sep
         have hroundtrip := abstract_subst_roundtrip ψ AB.1 AB.2 p hfresh
-        have hphi_equiv : intEquiv ψ (substFormula psi p (.untl AB.1 AB.2)) := by
-          rw [← hroundtrip]; exact subst_formula_congr hpsi_equiv p (.untl AB.1 AB.2)
+        have hphi_equiv : intEquiv ψ (substFormula psi p (.untl AB.2 AB.1)) := by
+          rw [← hroundtrip]; exact subst_formula_congr hpsi_equiv p (.untl AB.2 AB.1)
         -- Substitute back: callbacks have UND <= 1, so outer IH handles them
-        have h_subst_sep : isSeparable (substFormula psi p (.untl AB.1 AB.2)) :=
+        have h_subst_sep : isSeparable (substFormula psi p (.untl AB.2 AB.1)) :=
           subst_in_separated_separable_depth psi p AB.1 AB.2
             hAB_sf.1 hAB_sf.2 hAB_uf.1 hAB_uf.2 hpsi_sep
             (fun chi hns_chi hund_chi =>
@@ -851,26 +851,26 @@ theorem no_S_nested_in_U_separable_param_jd (phi : Formula Atom)
     -- Get separated psi equivalent to phi'
     obtain ⟨psi, hpsi_sep, hpsi_equiv⟩ := h_phi'_sep
     -- phi = subst(phi', p, U(A,B)) by syntactic roundtrip
-    have hroundtrip : substFormula phi' p (.untl AB.1 AB.2) = phi :=
+    have hroundtrip : substFormula phi' p (.untl AB.2 AB.1) = phi :=
       abstract_subst_roundtrip phi AB.1 AB.2 p hfresh
     -- phi is equiv to subst(psi, p, U(A,B)) by congruence
-    have hphi_equiv : intEquiv phi (substFormula psi p (.untl AB.1 AB.2)) := by
+    have hphi_equiv : intEquiv phi (substFormula psi p (.untl AB.2 AB.1)) := by
       rw [← hroundtrip]
-      exact subst_formula_congr hpsi_equiv p (.untl AB.1 AB.2)
+      exact subst_formula_congr hpsi_equiv p (.untl AB.2 AB.1)
     -- subst(psi, p, U(A,B)) is separable via constituent substitution with JD-bounded callback
-    have h_subst_sep : isSeparable (substFormula psi p (.untl AB.1 AB.2)) :=
+    have h_subst_sep : isSeparable (substFormula psi p (.untl AB.2 AB.1)) :=
       subst_in_separated_separable_jd psi p AB.1 AB.2
         hAB_sf.1 hAB_sf.2 hpsi_sep callback
     exact is_separable_of_equiv hphi_equiv h_subst_sep
 
 /-- Main hierarchy theorem: every expanded formula is separable.
-    Proved by strong induction on junctionDepth. The `.snce` case reduces to separated
+    Proved by strong induction on junctionDepth. The `.sncecase ` reduces to separated
     forms of sub-formulas, which satisfy `noSNestedInU` and have JD ≤ 1.
     For JD ≥ 2, the JD induction hypothesis serves as the callback for
     `no_S_nested_in_U_separable_param` (callback formulas have JD ≤ 1 < JD).
     For JD ≤ 1, `no_S_nested_in_U_separable_param` is applied with the JD = 0
     base case as callback (JD = 0 formulas are separated, so no further callbacks).
-    The `.untl` case follows by temporal duality.
+    The `.untlcase ` follows by temporal duality.
 
     GHR94 Lemma 10.2.8 + Theorem 10.2.9 (specialized to integer time). -/
 theorem all_formulas_separable_aux (φ : Formula Atom)
@@ -893,13 +893,13 @@ theorem all_formulas_separable_aux (φ : Formula Atom)
       have hle_b : junctionDepth b ≤ n := Nat.le_trans (jd_imp_le_right a b) hjd
       exact imp_separable (ih_a hle_a (has_no_allpast_allfuture_true a))
                           (ih_b hle_b (has_no_allpast_allfuture_true b))
-    | snce a b ih_a ih_b =>
+    | snce b a ih_b ih_a =>
       -- Sub-formulas a, b have JD ≤ n (same level), but are structurally smaller
       have hle_a : junctionDepth a ≤ n := Nat.le_trans (jd_snce_le_left a b) hjd
       have hle_b : junctionDepth b ≤ n := Nat.le_trans (jd_snce_le_right a b) hjd
       -- Quick exit: JD = 0 means formula is directly separated
-      by_cases hjd0 : junctionDepth (.snce a b) = 0
-      · exact jd_zero_sep (.snce a b) hψ_exp hjd0
+      by_cases hjd0 : junctionDepth (.snce b a) = 0
+      · exact jd_zero_sep (.snce b a) hψ_exp hjd0
       · -- JD ≥ 1: need the full separation/box-normalization path
         -- Step 1: By structural IH at same JD level, a and b are separable.
         have ha := ih_a hle_a (has_no_allpast_allfuture_true a)
@@ -910,19 +910,19 @@ theorem all_formulas_separable_aux (φ : Formula Atom)
         -- Step 3: Box-normalize.
         let χa := replaceBoxWithTop ψa
         let χb := replaceBoxWithTop ψb
-        -- Step 4: Build equivalence chain: .snce a b ≡ .snce χa χb
-        have hequiv : intEquiv (.snce a b) (.snce χa χb) :=
+        -- Step 4: Build equivalence chain: .snce b a ≡ .snce χb χa
+        have hequiv : intEquiv (.snce b a) (.snce χb χa) :=
           int_equiv_trans (snce_congr hψa_equiv hψb_equiv)
             (snce_congr (replace_box_equiv ψa) (replace_box_equiv ψb))
-        -- Step 5: .snce χa χb has noSNestedInU
-        have hns : noSNestedInU (.snce χa χb) :=
+        -- Step 5: .snce χb χa has noSNestedInU
+        have hns : noSNestedInU (.snce χb χa) :=
           snce_of_boxfree_sep_no_S_nested ψa ψb hψa_sep hψb_sep
-        -- Step 6: .snce χa χb has JD ≤ 1
-        have hjd_le_one : junctionDepth (.snce χa χb) ≤ 1 :=
+        -- Step 6: .snce χb χa has JD ≤ 1
+        have hjd_le_one : junctionDepth (.snce χb χa) ≤ 1 :=
           snce_of_boxfree_sep_jd_le_one ψa ψb hψa_sep hψb_sep
         -- Step 7: Apply no_S_nested_in_U_separable_direct_param with oracle from JD IH.
         -- Oracle formulas have JD ≤ 1, so we need 1 < n.
-        -- Since JD(.snce a b) ≥ 1 (quick exit handled JD = 0) and JD(.snce a b) ≤ n,
+        -- Since JD(.snce b a) ≥ 1 (quick exit handled JD = 0) and JD(.snce b a) ≤ n,
         -- we have n ≥ 1. For n = 1, the oracle may receive JD = 1 formulas.
         -- We handle this by using no_S_nested_in_U_separable_param_jd which
         -- threads the callback through its own countUSubformulas induction.
@@ -933,23 +933,23 @@ theorem all_formulas_separable_aux (φ : Formula Atom)
         --   JD = 1 callback formulas are handled by the n = 1 proof itself via
         --   the structural induction: the callback formula is generated internally
         --   by no_S_nested_in_U_separable_param_jd's own count induction.
-        have h_sep : isSeparable (.snce χa χb) := by
+        have h_sep : isSeparable (.snce χb χa) := by
           by_cases hn2 : n ≥ 2
           · -- n ≥ 2: oracle from JD IH (oracle formulas have JD ≤ 1 < 2 ≤ n)
-            exact no_S_nested_in_U_separable_direct_param (.snce χa χb) hns
+            exact no_S_nested_in_U_separable_direct_param (.snce χb χa) hns
               (fun chi hns_chi hjd_chi =>
                 ih_jd (junctionDepth chi) (by omega) chi
                   (le_refl _) (has_no_allpast_allfuture_true chi))
           · -- n = 1: use oracle-free no_S_nested_sep
-            exact no_S_nested_sep (.snce χa χb) hns
+            exact no_S_nested_sep (.snce χb χa) hns
         exact is_separable_of_equiv hequiv h_sep
-    | untl a b ih_a ih_b =>
+    | untl b a ih_b ih_a =>
       -- Sub-formulas have JD ≤ n
       have hle_a : junctionDepth a ≤ n := Nat.le_trans (jd_untl_le_left a b) hjd
       have hle_b : junctionDepth b ≤ n := Nat.le_trans (jd_untl_le_right a b) hjd
       -- Quick exit: JD = 0 means formula is directly separated
-      by_cases hjd0 : junctionDepth (.untl a b) = 0
-      · exact jd_zero_sep (.untl a b) hψ_exp hjd0
+      by_cases hjd0 : junctionDepth (.untl b a) = 0
+      · exact jd_zero_sep (.untl b a) hψ_exp hjd0
       · -- JD ≥ 1: need full path
         -- Step 1: By structural IH, a and b are separable.
         have ha := ih_a hle_a (has_no_allpast_allfuture_true a)
@@ -959,18 +959,18 @@ theorem all_formulas_separable_aux (φ : Formula Atom)
         -- Step 2: Box-normalize.
         let χa := replaceBoxWithTop ψa
         let χb := replaceBoxWithTop ψb
-        -- Step 3: .untl χa χb has noUNestedInS
-        have hns_U : noUNestedInS (.untl χa χb) :=
+        -- Step 3: .untl χb χa has noUNestedInS
+        have hns_U : noUNestedInS (.untl χb χa) :=
           untl_of_boxfree_sep_no_U_nested ψa ψb hψa_sep hψb_sep
-        -- Step 4: swap(.untl χa χb) has noSNestedInU
-        have hns_S : noSNestedInU (Formula.swapTemporal (.untl χa χb)) :=
-          swap_no_U_nested_gives_no_S_nested (.untl χa χb) hns_U
+        -- Step 4: swap(.untl χb χa) has noSNestedInU
+        have hns_S : noSNestedInU (Formula.swapTemporal (.untl χb χa)) :=
+          swap_no_U_nested_gives_no_S_nested (.untl χb χa) hns_U
         -- Step 5: swap is separable.
         -- For n ≥ 2: use _param variant with oracle from JD IH.
         -- For n = 1: fall back to existing path.
-        have h_swap_sep : isSeparable (Formula.swapTemporal (.untl χa χb)) := by
+        have h_swap_sep : isSeparable (Formula.swapTemporal (.untl χb χa)) := by
           have hn_pos : n ≥ 1 := by
-            have : junctionDepth (.untl a b) ≥ 1 := by omega
+            have : junctionDepth (.untl b a) ≥ 1 := by omega
             omega
           by_cases hn2 : n ≥ 2
           · exact no_S_nested_in_U_separable_direct_param _ hns_S
@@ -979,12 +979,12 @@ theorem all_formulas_separable_aux (φ : Formula Atom)
                   (le_refl _) (has_no_allpast_allfuture_true chi))
           · exact no_S_nested_sep _ hns_S
         -- Step 7: dual_separable
-        have h_untl_sep : isSeparable (.untl χa χb) := by
+        have h_untl_sep : isSeparable (.untl χb χa) := by
           have h := dual_separable _ h_swap_sep
           rw [Formula.swapTemporal_involution] at h
           exact h
         -- Step 8: Build equivalence chain
-        have hequiv : intEquiv (.untl a b) (.untl χa χb) :=
+        have hequiv : intEquiv (.untl b a) (.untl χb χa) :=
           int_equiv_trans (untl_congr hψa_equiv hψb_equiv)
             (untl_congr (replace_box_equiv ψa) (replace_box_equiv ψb))
         exact is_separable_of_equiv hequiv h_untl_sep

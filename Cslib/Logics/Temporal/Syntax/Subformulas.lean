@@ -47,8 +47,8 @@ def subformulas : Formula Atom → List (Formula Atom)
   | φ@(.atom _) => [φ]
   | φ@.bot => [φ]
   | φ@(.imp ψ χ) => φ :: (subformulas ψ ++ subformulas χ)
-  | φ@(.untl ψ χ) => φ :: (subformulas ψ ++ subformulas χ)
-  | φ@(.snce ψ χ) => φ :: (subformulas ψ ++ subformulas χ)
+  | φ@(.untl χ ψ) => φ :: (subformulas ψ ++ subformulas χ)
+  | φ@(.snce χ ψ) => φ :: (subformulas ψ ++ subformulas χ)
 
 /-- Count of distinct subformulas (used for termination). -/
 def subformulaCount [DecidableEq (Formula Atom)] (φ : Formula Atom) : Nat :=
@@ -118,7 +118,7 @@ theorem subformulas_trans {chi psi phi : Formula Atom}
     · simp only [subformulas, List.mem_cons, List.mem_append]
       right; right
       exact ihb hb
-  | untl a b iha ihb =>
+  | untl b a ihb iha =>
     simp only [subformulas, List.mem_cons, List.mem_append] at h2
     rcases h2 with rfl | ha | hb
     · exact h1
@@ -128,7 +128,7 @@ theorem subformulas_trans {chi psi phi : Formula Atom}
     · simp only [subformulas, List.mem_cons, List.mem_append]
       right; right
       exact ihb hb
-  | snce a b iha ihb =>
+  | snce b a ihb iha =>
     simp only [subformulas, List.mem_cons, List.mem_append] at h2
     rcases h2 with rfl | ha | hb
     · exact h1
@@ -169,28 +169,28 @@ theorem mem_subformulas_of_allFuture {ψ phi : Formula Atom}
 theorem untl_left_mem_subformulas (ψ χ : Formula Atom) :
     ψ ∈ subformulas (.untl ψ χ) := by
   simp only [subformulas, List.mem_cons, List.mem_append]
-  right; left
+  right; right
   exact self_mem_subformulas ψ
 
 /-- Subformulas of untl include the right component. -/
 theorem untl_right_mem_subformulas (ψ χ : Formula Atom) :
     χ ∈ subformulas (.untl ψ χ) := by
   simp only [subformulas, List.mem_cons, List.mem_append]
-  right; right
+  right; left
   exact self_mem_subformulas χ
 
 /-- Subformulas of snce include the left component. -/
 theorem snce_left_mem_subformulas (ψ χ : Formula Atom) :
     ψ ∈ subformulas (.snce ψ χ) := by
   simp only [subformulas, List.mem_cons, List.mem_append]
-  right; left
+  right; right
   exact self_mem_subformulas ψ
 
 /-- Subformulas of snce include the right component. -/
 theorem snce_right_mem_subformulas (ψ χ : Formula Atom) :
     χ ∈ subformulas (.snce ψ χ) := by
   simp only [subformulas, List.mem_cons, List.mem_append]
-  right; right
+  right; left
   exact self_mem_subformulas χ
 
 /-- Left of untl is in subformulas. -/

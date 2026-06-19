@@ -192,7 +192,7 @@ parameter, making density conditional rather than unconditional.
 def topFormula : Formula Atom := (Formula.bot : Formula Atom).imp Formula.bot
 
 /-- `U(⊤, ⊥)` — "next top", true iff there is an immediate successor. -/
-def nextTop : Formula Atom := Formula.untl topFormula (Formula.bot : Formula Atom)
+def nextTop : Formula Atom := Formula.untl (Formula.bot : Formula Atom) topFormula
 
 /--
 Density of `limitDom` from the hypothesis that `F'⊤ = neg(U(⊤,⊥))` is in
@@ -200,7 +200,7 @@ every domain MCS.
 
 Given `x < y` in `limitDom`, we invoke `limit_satisfies_c4` with `η = ⊤`
 (topFormula) and `ξ = ⊥`. The hypotheses are:
-- `(Formula.untl topFormula Formula.bot).neg ∈ limitF(x)` — this is exactly
+- `(Formula.untl Formula.bot topFormula).neg ∈ limitF(x)` — this is exactly
   `F'⊤ ∈ limitF(x)`, provided by `h_dense`.
 - `topFormula ∈ limitF(y)` — `⊤` is in every MCS.
 
@@ -213,7 +213,7 @@ theorem limit_dom_dense_from_F'T (fc : FrameClass) (A : Set (Formula Atom)) (h_m
     (x y : Rat) (hx : x ∈ limitDom fc A h_mcs) (hy : y ∈ limitDom fc A h_mcs)
     (hxy : x < y) :
     ∃ z ∈ limitDom fc A h_mcs, x < z ∧ z < y := by
-  have h_neg_until : (Formula.untl topFormula Formula.bot).neg ∈ limitF fc A h_mcs x :=
+  have h_neg_until : (Formula.untl Formula.bot topFormula).neg ∈ limitF fc A h_mcs x :=
     h_dense x hx
   have h_mcs_y := limit_c0 fc A h_mcs y hy
   have h_event : topFormula ∈ limitF fc A h_mcs y :=
@@ -679,9 +679,9 @@ theorem cantor_bfmcs_dense_restricted_buc (fc : FrameClass) (A : Set (Formula At
     intro t φ ψ _ ⟨u, htu, hφu, h_guard⟩
     by_contra h_not_until
     simp only [rootedCantorFmcsDense, shiftedCantorFmcsDense'] at h_not_until hφu h_guard
-    have h_neg_until : (Formula.untl φ ψ).neg ∈ cantorFDense fc N h_N h_dense_N (t + offset) := by
+    have h_neg_until : (Formula.untl ψ φ).neg ∈ cantorFDense fc N h_N h_dense_N (t + offset) := by
       rcases SetMaximalConsistent.negation_complete (cantor_f_dense_is_mcs fc N h_N h_dense_N (t + offset))
-        (Formula.untl φ ψ) with h | h
+        (Formula.untl ψ φ) with h | h
       · exact absurd h h_not_until
       · exact h
     set xt := iso.symm (t + offset); set xu := iso.symm (u + offset)
@@ -707,9 +707,9 @@ theorem cantor_bfmcs_dense_restricted_buc (fc : FrameClass) (A : Set (Formula At
     intro t φ ψ _ ⟨u, hut, hφu, h_guard⟩
     by_contra h_not_since
     simp only [rootedCantorFmcsDense, shiftedCantorFmcsDense'] at h_not_since hφu h_guard
-    have h_neg_since : (Formula.snce φ ψ).neg ∈ cantorFDense fc N h_N h_dense_N (t + offset) := by
+    have h_neg_since : (Formula.snce ψ φ).neg ∈ cantorFDense fc N h_N h_dense_N (t + offset) := by
       rcases SetMaximalConsistent.negation_complete (cantor_f_dense_is_mcs fc N h_N h_dense_N (t + offset))
-        (Formula.snce φ ψ) with h | h
+        (Formula.snce ψ φ) with h | h
       · exact absurd h h_not_since
       · exact h
     set xt := iso.symm (t + offset); set xu := iso.symm (u + offset)
@@ -888,7 +888,7 @@ exists `y ∈ limitDom` that is the immediate predecessor of `x`.
 -/
 theorem limit_dom_has_pred (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (x : Rat) (hx : x ∈ limitDom fc A h_mcs)
-    (h_since : Formula.snce topFormula Formula.bot ∈ limitF fc A h_mcs x) :
+    (h_since : Formula.snce Formula.bot topFormula ∈ limitF fc A h_mcs x) :
     ∃ y ∈ limitDom fc A h_mcs, y < x ∧
       ∀ w ∈ limitDom fc A h_mcs, y < w → w < x → False := by
   obtain ⟨y, hy, hyx, _, h_guard⟩ :=
@@ -904,7 +904,7 @@ From `U(⊤,⊥) ∈ limitF(x)`, derive `S(⊤,⊥) ∈ limitF(x)` using the
 theorem next_top_gives_since (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (x : Rat) (hx : x ∈ limitDom fc A h_mcs)
     (h_next : nextTop ∈ limitF fc A h_mcs x) :
-    Formula.snce topFormula Formula.bot ∈ limitF fc A h_mcs x := by
+    Formula.snce Formula.bot topFormula ∈ limitF fc A h_mcs x := by
   have h_mcs_x := limit_c0 fc A h_mcs x hx
   exact SetMaximalConsistent.implication_property h_mcs_x
     (theoremInMcsFc h_mcs_x (DerivationTree.axiom [] _ Axiom.discrete_symm_fwd trivial))

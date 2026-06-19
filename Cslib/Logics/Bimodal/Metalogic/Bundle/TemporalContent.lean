@@ -50,11 +50,11 @@ def pContent (M : Set (Formula Atom)) : Set (Formula Atom) :=
 
 /-- The set of pairs (φ, ψ) such that φ Until ψ belongs to M. -/
 def uContent (M : Set (Formula Atom)) : Set (Formula Atom × Formula Atom) :=
-  { p | Formula.untl p.1 p.2 ∈ M }
+  { p | Formula.untl p.2 p.1 ∈ M }
 
 /-- The set of pairs (φ, ψ) such that φ Since ψ belongs to M. -/
 def sContent (M : Set (Formula Atom)) : Set (Formula Atom × Formula Atom) :=
-  { p | Formula.snce p.1 p.2 ∈ M }
+  { p | Formula.snce p.2 p.1 ∈ M }
 
 /-! ## Membership Lemmas -/
 
@@ -76,11 +76,11 @@ lemma mem_p_content_iff {M : Set (Formula Atom)} {phi : Formula Atom} :
 
 @[simp]
 lemma mem_u_content_iff {M : Set (Formula Atom)} {p : Formula Atom × Formula Atom} :
-    p ∈ uContent M ↔ Formula.untl p.1 p.2 ∈ M := Iff.rfl
+    p ∈ uContent M ↔ Formula.untl p.2 p.1 ∈ M := Iff.rfl
 
 @[simp]
 lemma mem_s_content_iff {M : Set (Formula Atom)} {p : Formula Atom × Formula Atom} :
-    p ∈ sContent M ↔ Formula.snce p.1 p.2 ∈ M := Iff.rfl
+    p ∈ sContent M ↔ Formula.snce p.2 p.1 ∈ M := Iff.rfl
 
 /-! ## Duality Lemmas -/
 
@@ -102,7 +102,7 @@ theorem f_content_iff_not_neg_in_g_content {M : Set (Formula Atom)}
     have h_G_dni : DerivationTree FrameClass.Base [] ((phi.imp phi.neg.neg).allFuture) :=
       DerivationTree.temporal_necessitation _ h_dni
     have h_bx3 : DerivationTree FrameClass.Base [] ((phi.imp phi.neg.neg).allFuture.imp
-        ((Formula.untl phi Formula.top).imp (Formula.untl phi.neg.neg Formula.top))) :=
+        ((Formula.untl Formula.top phi).imp (Formula.untl Formula.top phi.neg.neg))) :=
       DerivationTree.axiom [] _ (Axiom.right_mono_until phi phi.neg.neg Formula.top) trivial
     have h_sf_impl : DerivationTree FrameClass.Base [] ((Formula.someFuture phi).imp (Formula.someFuture phi.neg.neg)) :=
       DerivationTree.modus_ponens [] _ _ h_bx3 h_G_dni
@@ -119,7 +119,7 @@ theorem f_content_iff_not_neg_in_g_content {M : Set (Formula Atom)}
       have h_G_dne : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allFuture) :=
         DerivationTree.temporal_necessitation _ h_dne
       have h_bx3 : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allFuture.imp
-          ((Formula.untl phi.neg.neg Formula.top).imp (Formula.untl phi Formula.top))) :=
+          ((Formula.untl Formula.top phi.neg.neg).imp (Formula.untl Formula.top phi))) :=
         DerivationTree.axiom [] _ (Axiom.right_mono_until phi.neg.neg phi Formula.top) trivial
       have h_sf_impl : DerivationTree FrameClass.Base [] ((Formula.someFuture phi.neg.neg).imp (Formula.someFuture phi)) :=
         DerivationTree.modus_ponens [] _ _ h_bx3 h_G_dne
@@ -145,7 +145,7 @@ theorem p_content_iff_not_neg_in_h_content {M : Set (Formula Atom)}
     have h_H_dni : DerivationTree FrameClass.Base [] ((phi.imp phi.neg.neg).allPast) :=
       Theorems.pastNecessitation _ h_dni
     have h_bx3p : DerivationTree FrameClass.Base [] ((phi.imp phi.neg.neg).allPast.imp
-        ((Formula.snce phi Formula.top).imp (Formula.snce phi.neg.neg Formula.top))) :=
+        ((Formula.snce Formula.top phi).imp (Formula.snce Formula.top phi.neg.neg))) :=
       DerivationTree.axiom [] _ (Axiom.right_mono_since phi phi.neg.neg Formula.top) trivial
     have h_sp_impl : DerivationTree FrameClass.Base [] ((Formula.somePast phi).imp (Formula.somePast phi.neg.neg)) :=
       DerivationTree.modus_ponens [] _ _ h_bx3p h_H_dni
@@ -162,7 +162,7 @@ theorem p_content_iff_not_neg_in_h_content {M : Set (Formula Atom)}
       have h_H_dne : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allPast) :=
         Theorems.pastNecessitation _ h_dne
       have h_bx3p : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allPast.imp
-          ((Formula.snce phi.neg.neg Formula.top).imp (Formula.snce phi Formula.top))) :=
+          ((Formula.snce Formula.top phi.neg.neg).imp (Formula.snce Formula.top phi))) :=
         DerivationTree.axiom [] _ (Axiom.right_mono_since phi.neg.neg phi Formula.top) trivial
       have h_sp_impl : DerivationTree FrameClass.Base [] ((Formula.somePast phi.neg.neg).imp (Formula.somePast phi)) :=
         DerivationTree.modus_ponens [] _ _ h_bx3p h_H_dne

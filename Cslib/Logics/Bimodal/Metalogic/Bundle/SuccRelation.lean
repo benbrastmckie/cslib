@@ -93,8 +93,8 @@ lemma neg_FF_implies_GG_neg_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalC
       DerivationTree.temporal_necessitation _ h_dne2_base
     have h_dne2_bx3 : DerivationTree FrameClass.Base [] (((Formula.someFuture phi.neg.neg).neg.neg.imp
         (Formula.someFuture phi.neg.neg)).allFuture.imp
-        ((Formula.untl (Formula.someFuture phi.neg.neg).neg.neg Formula.top).imp
-         (Formula.untl (Formula.someFuture phi.neg.neg) Formula.top))) :=
+        ((Formula.untl Formula.top (Formula.someFuture phi.neg.neg).neg.neg).imp
+         (Formula.untl Formula.top (Formula.someFuture phi.neg.neg)))) :=
       DerivationTree.axiom [] _
         (Axiom.right_mono_until
           (Formula.someFuture phi.neg.neg).neg.neg
@@ -109,7 +109,7 @@ lemma neg_FF_implies_GG_neg_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalC
     have h_dne3_nec : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allFuture) :=
       DerivationTree.temporal_necessitation _ h_dne3_base
     have h_dne3_bx3 : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allFuture.imp
-        ((Formula.untl phi.neg.neg Formula.top).imp (Formula.untl phi Formula.top))) :=
+        ((Formula.untl Formula.top phi.neg.neg).imp (Formula.untl Formula.top phi))) :=
       DerivationTree.axiom [] _
         (Axiom.right_mono_until phi.neg.neg phi Formula.top) trivial
     have h_F_dne3 : DerivationTree FrameClass.Base [] ((Formula.someFuture phi.neg.neg).imp (Formula.someFuture phi)) :=
@@ -117,8 +117,8 @@ lemma neg_FF_implies_GG_neg_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalC
     have h_lift_nec : DerivationTree FrameClass.Base [] (((Formula.someFuture phi.neg.neg).imp (Formula.someFuture phi)).allFuture) :=
       DerivationTree.temporal_necessitation _ h_F_dne3
     have h_lift_bx3 : DerivationTree FrameClass.Base [] (((Formula.someFuture phi.neg.neg).imp (Formula.someFuture phi)).allFuture.imp
-        ((Formula.untl (Formula.someFuture phi.neg.neg) Formula.top).imp
-         (Formula.untl (Formula.someFuture phi) Formula.top))) :=
+        ((Formula.untl Formula.top (Formula.someFuture phi.neg.neg)).imp
+         (Formula.untl Formula.top (Formula.someFuture phi)))) :=
       DerivationTree.axiom [] _
         (Axiom.right_mono_until
           (Formula.someFuture phi.neg.neg) (Formula.someFuture phi) Formula.top) trivial
@@ -183,8 +183,8 @@ lemma neg_PP_implies_HH_neg_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalC
       Theorems.pastNecessitation _ h_dne2_base
     have h_dne2_bx3 : DerivationTree FrameClass.Base [] (((Formula.somePast phi.neg.neg).neg.neg.imp
         (Formula.somePast phi.neg.neg)).allPast.imp
-        ((Formula.snce (Formula.somePast phi.neg.neg).neg.neg Formula.top).imp
-         (Formula.snce (Formula.somePast phi.neg.neg) Formula.top))) :=
+        ((Formula.snce Formula.top (Formula.somePast phi.neg.neg).neg.neg).imp
+         (Formula.snce Formula.top (Formula.somePast phi.neg.neg)))) :=
       DerivationTree.axiom [] _
         (Axiom.right_mono_since
           (Formula.somePast phi.neg.neg).neg.neg
@@ -199,7 +199,7 @@ lemma neg_PP_implies_HH_neg_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalC
     have h_dne3_nec : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allPast) :=
       Theorems.pastNecessitation _ h_dne3_base
     have h_dne3_bx3 : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allPast.imp
-        ((Formula.snce phi.neg.neg Formula.top).imp (Formula.snce phi Formula.top))) :=
+        ((Formula.snce Formula.top phi.neg.neg).imp (Formula.snce Formula.top phi))) :=
       DerivationTree.axiom [] _
         (Axiom.right_mono_since phi.neg.neg phi Formula.top) trivial
     have h_P_dne3 : DerivationTree FrameClass.Base [] ((Formula.somePast phi.neg.neg).imp (Formula.somePast phi)) :=
@@ -207,8 +207,8 @@ lemma neg_PP_implies_HH_neg_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalC
     have h_lift_nec : DerivationTree FrameClass.Base [] (((Formula.somePast phi.neg.neg).imp (Formula.somePast phi)).allPast) :=
       Theorems.pastNecessitation _ h_P_dne3
     have h_lift_bx3 : DerivationTree FrameClass.Base [] (((Formula.somePast phi.neg.neg).imp (Formula.somePast phi)).allPast.imp
-        ((Formula.snce (Formula.somePast phi.neg.neg) Formula.top).imp
-         (Formula.snce (Formula.somePast phi) Formula.top))) :=
+        ((Formula.snce Formula.top (Formula.somePast phi.neg.neg)).imp
+         (Formula.snce Formula.top (Formula.somePast phi)))) :=
       DerivationTree.axiom [] _
         (Axiom.right_mono_since
           (Formula.somePast phi.neg.neg) (Formula.somePast phi) Formula.top) trivial
@@ -251,31 +251,31 @@ theorem single_step_forcing_past
 -- Sorries from source (TOMBSTONE task 173; blocked on task 37)
 
 theorem until_unfold_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
-    (φ ψ : Formula Atom) (h_U : Formula.untl ψ φ ∈ M) :
-    Formula.untl (Formula.or ψ (Formula.and φ (Formula.untl ψ φ))) (Formula.bot : Formula Atom) ∈ M := by
+    (φ ψ : Formula Atom) (h_U : Formula.untl φ ψ ∈ M) :
+    Formula.untl (Formula.bot : Formula Atom) (Formula.or ψ (Formula.and φ (Formula.untl φ ψ))) ∈ M := by
   sorry  -- sorry: blocked on task 37
 
 theorem since_unfold_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
-    (φ ψ : Formula Atom) (h_S : Formula.snce ψ φ ∈ M) :
-    Formula.snce (Formula.or ψ (Formula.and φ (Formula.snce ψ φ))) (Formula.bot : Formula Atom) ∈ M := by
+    (φ ψ : Formula Atom) (h_S : Formula.snce φ ψ ∈ M) :
+    Formula.snce (Formula.bot : Formula Atom) (Formula.or ψ (Formula.and φ (Formula.snce φ ψ))) ∈ M := by
   sorry  -- sorry: blocked on task 37
 
 theorem until_persists_through_succ (u v : Set (Formula Atom))
     (h_mcs_u : SetMaximalConsistent (FrameClass.Base : FrameClass) u) (h_mcs_v : SetMaximalConsistent (FrameClass.Base : FrameClass) v) (h_succ : Succ u v)
-    (φ ψ : Formula Atom) (h_U : Formula.untl ψ φ ∈ u) (h_neg_psi : Formula.neg ψ ∈ u) :
-    Formula.untl ψ φ ∈ v := by
+    (φ ψ : Formula Atom) (h_U : Formula.untl φ ψ ∈ u) (h_neg_psi : Formula.neg ψ ∈ u) :
+    Formula.untl φ ψ ∈ v := by
   sorry  -- sorry: blocked on task 37
 
 theorem or_until_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
     (φ ψ : Formula Atom)
-    (h : Formula.or ψ (Formula.and φ (Formula.untl ψ φ)) ∈ M) :
-    Formula.untl ψ φ ∈ M := by
+    (h : Formula.or ψ (Formula.and φ (Formula.untl φ ψ)) ∈ M) :
+    Formula.untl φ ψ ∈ M := by
   sorry  -- sorry: blocked on task 37
 
 theorem or_since_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
     (φ ψ : Formula Atom)
-    (h : Formula.or ψ (Formula.and φ (Formula.snce ψ φ)) ∈ M) :
-    Formula.snce ψ φ ∈ M := by
+    (h : Formula.or ψ (Formula.and φ (Formula.snce φ ψ)) ∈ M) :
+    Formula.snce φ ψ ∈ M := by
   sorry  -- sorry: blocked on task 37
 
 theorem g_content_subset_mcs (u : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) u) :

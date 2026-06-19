@@ -80,7 +80,7 @@ theorem case1_sep_with_U_type_gen (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hx : isUFree x = true) (hy : isUFree y = true)
     (hx' : isSFree x = true) (hy' : isSFree y = true) :
-    isSeparableWithUType (.snce (Formula.and a (.untl x y)) q) x y := by
+    isSeparableWithUType (.snce q (Formula.and a (.untl y x))) x y := by
   have ⟨hequiv, hsep⟩ := case1_psi_properties a q x y ha hq hx hy hx' hy'
   exact ⟨case1Psi a q x y, hsep, hequiv,
     case1_psi_has_single_U_type a q x y ha hq hx hy⟩
@@ -91,7 +91,7 @@ theorem case2_sep_with_U_type_gen (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hx : isUFree x = true) (hy : isUFree y = true)
     (hx' : isSFree x = true) (hy' : isSFree y = true) :
-    isSeparableWithUType (.snce (Formula.and a (Formula.neg (.untl x y))) q) x y := by
+    isSeparableWithUType (.snce q (Formula.and a (Formula.neg (.untl y x)))) x y := by
   have ⟨hequiv, hsep⟩ := case2_psi_properties a q x y ha hq hx hy hx' hy'
   exact ⟨case2Psi a q x y, hsep, hequiv,
     case2_psi_has_single_U_type a q x y ha hq hx hy⟩
@@ -107,7 +107,7 @@ theorem snce_combined_U_sep_with_U_type
     (hx' : isSFree x = true) (hy' : isSFree y = true)
     (hg_uf : isUFree guard = true)
     (h_bool : untlUnderBoolOnly combined x y) :
-    isSeparableWithUType (.snce (Formula.and combined (.untl x y)) guard) x y := by
+    isSeparableWithUType (.snce guard (Formula.and combined (.untl y x))) x y := by
   let combined' := replaceUntlWithTop combined x y
   have h_uf : isUFree combined' = true := replace_U_free_of_bool combined x y h_bool
   have h_congr := snce_event_congr_with_U combined combined' guard x y
@@ -126,7 +126,7 @@ theorem snce_combined_notU_sep_with_U_type
     (hx' : isSFree x = true) (hy' : isSFree y = true)
     (hg_uf : isUFree guard = true)
     (h_bool : untlUnderBoolOnly combined x y) :
-    isSeparableWithUType (.snce (Formula.and combined (Formula.neg (.untl x y))) guard) x y := by
+    isSeparableWithUType (.snce guard (Formula.and combined (Formula.neg (.untl y x)))) x y := by
   let combined' := replaceUntlWithBot combined x y
   have h_uf : isUFree combined' = true := replace_bot_U_free_of_bool combined x y h_bool
   have h_congr := snce_event_congr_with_notU combined combined' guard x y
@@ -150,7 +150,7 @@ theorem and_left_congr_hier {φ₁ φ₂ ψ : Formula Atom} (h : intEquiv φ₁ 
 /-- snce preserves intEquiv (local copy). -/
 theorem snce_congr_local {φ₁ ψ₁ φ₂ ψ₂ : Formula Atom}
     (h1 : intEquiv φ₁ φ₂) (h2 : intEquiv ψ₁ ψ₂) :
-    intEquiv (.snce φ₁ ψ₁) (.snce φ₂ ψ₂) := by
+    intEquiv (.snce ψ₁ φ₁) (.snce ψ₂ φ₂) := by
   intro m t; constructor
   · rintro ⟨s, hst, hφ, hψ⟩
     exact ⟨s, hst, (h1 m s).mp hφ, fun r hr1 hr2 => (h2 m r).mp (hψ r hr1 hr2)⟩
@@ -159,7 +159,7 @@ theorem snce_congr_local {φ₁ ψ₁ φ₂ ψ₂ : Formula Atom}
 
 /-- Helper: snce_event_congr for intEquiv (event only). -/
 theorem snce_event_congr_hier {φ₁ φ₂ ψ : Formula Atom} (h : intEquiv φ₁ φ₂) :
-    intEquiv (.snce φ₁ ψ) (.snce φ₂ ψ) :=
+    intEquiv (.snce ψ φ₁) (.snce ψ φ₂) :=
   snce_congr_local h (int_equiv_refl ψ)
 
 /-! ### Cases 5-8 with U-type Preservation -/
@@ -170,8 +170,8 @@ theorem case5_sep_with_U_type_Z_gen (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hx : isUFree x = true) (hy : isUFree y = true)
     (hx' : isSFree x = true) (hy' : isSFree y = true) :
-    isSeparableWithUType (.snce (Formula.and a (.untl x y)) (Formula.or q (.untl x y))) x y := by
-  apply is_separable_with_U_type_of_equiv (case3_equiv_Z_general (Formula.and a (.untl x y)) q x y)
+    isSeparableWithUType (.snce (Formula.or q (.untl y x)) (Formula.and a (.untl y x))) x y := by
+  apply is_separable_with_U_type_of_equiv (case3_equiv_Z_general (Formula.and a (.untl y x)) q x y)
   simp only [case3Rhs]
   apply or_separable_with_U_type
   · apply or_separable_with_U_type
@@ -181,18 +181,18 @@ theorem case5_sep_with_U_type_Z_gen (a q x y : Formula Atom)
           (snce_event_congr_hier (case3_alpha_aU_factor a q x y))
         apply is_separable_with_U_type_of_equiv (int_equiv_trans
           (snce_event_congr_hier (and_or_distrib a
-            (Formula.and (Formula.neg q) (.snce (Formula.and a (.untl x y)) q))
-            (.untl x y)))
+            (Formula.and (Formula.neg q) (.snce q (Formula.and a (.untl y x))))
+            (.untl y x)))
           (since_distrib_or_left _ _ (qZ x y (Formula.neg q))))
         apply or_separable_with_U_type
         · exact snce_combined_U_sep_with_U_type a (qZ x y (Formula.neg q)) x y
             hx hy hx' hy' (Q_Z_neg_q_U_free x y q hx hy hq)
             (u_free_untl_under_bool a x y ha)
         · let σ := case1Psi a q x y
-          have hσ_equiv : intEquiv (.snce (Formula.and a (.untl x y)) q) σ :=
+          have hσ_equiv : intEquiv (.snce q (Formula.and a (.untl y x))) σ :=
             (case1_psi_properties a q x y ha hq hx hy hx' hy').1
           have hY_congr : intEquiv
-            (Formula.and (Formula.neg q) (.snce (Formula.and a (.untl x y)) q))
+            (Formula.and (Formula.neg q) (.snce q (Formula.and a (.untl y x))))
             (Formula.and (Formula.neg q) σ) := by
             intro m t; constructor
             · intro h; have ⟨hnq, hS⟩ := int_truth_and_iff.mp h
@@ -214,40 +214,40 @@ theorem case5_sep_with_U_type_Z_gen (a q x y : Formula Atom)
             (untl_s_free_separable_with_type hx' hy')
   · have h_d21 := d21_sep_equiv a q x y ha hq hx hy hx' hy'
     have h_event_congr : intEquiv
-      (Formula.and (Formula.and x (Formula.or q (.untl x y)))
-        (.snce (case3Alpha (Formula.and a (.untl x y)) q x y) (qZ x y (Formula.neg q))))
-      (Formula.and (Formula.and x (Formula.or q (.untl x y))) (d21Sep a q x y)) := by
+      (Formula.and (Formula.and x (Formula.or q (.untl y x)))
+        (.snce (qZ x y (Formula.neg q)) (case3Alpha (Formula.and a (.untl y x)) q x y)))
+      (Formula.and (Formula.and x (Formula.or q (.untl y x))) (d21Sep a q x y)) := by
       intro m t; constructor
       · intro h; have ⟨hAqU, hS⟩ := int_truth_and_iff.mp h
         exact int_truth_and_iff.mpr ⟨hAqU, (h_d21 m t).mp hS⟩
       · intro h; have ⟨hAqU, hd⟩ := int_truth_and_iff.mp h
         exact int_truth_and_iff.mpr ⟨hAqU, (h_d21 m t).mpr hd⟩
     apply is_separable_with_U_type_of_equiv (snce_event_congr_hier h_event_congr)
-    apply is_separable_with_U_type_of_equiv (since_event_split _ (.untl x y) q)
+    apply is_separable_with_U_type_of_equiv (since_event_split _ (.untl y x) q)
     apply or_separable_with_U_type
     · have h_event_bool : untlUnderBoolOnly
-          (Formula.and (Formula.and x (Formula.or q (.untl x y))) (d21Sep a q x y)) x y := by
-        show untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl x y)))
+          (Formula.and (Formula.and x (Formula.or q (.untl y x))) (d21Sep a q x y)) x y := by
+        show untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl y x)))
           (.imp (d21Sep a q x y) .bot)) .bot) x y
         refine ⟨⟨?_, d21_sep_bool_only a q x y ha hq hx hy, trivial⟩, trivial⟩
-        show untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl x y)) .bot)) .bot) x y
+        show untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl y x)) .bot)) .bot) x y
         refine ⟨⟨u_free_untl_under_bool x x y hx, ?_, trivial⟩, trivial⟩
-        show untlUnderBoolOnly (.imp (.imp q .bot) (.untl x y)) x y
+        show untlUnderBoolOnly (.imp (.imp q .bot) (.untl y x)) x y
         exact ⟨⟨u_free_untl_under_bool q x y hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
       exact snce_combined_U_sep_with_U_type
-        (Formula.and (Formula.and x (Formula.or q (.untl x y))) (d21Sep a q x y))
+        (Formula.and (Formula.and x (Formula.or q (.untl y x))) (d21Sep a q x y))
         q x y hx hy hx' hy' hq h_event_bool
     · have h_event_bool : untlUnderBoolOnly
-          (Formula.and (Formula.and x (Formula.or q (.untl x y))) (d21Sep a q x y)) x y := by
-        show untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl x y)))
+          (Formula.and (Formula.and x (Formula.or q (.untl y x))) (d21Sep a q x y)) x y := by
+        show untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl y x)))
           (.imp (d21Sep a q x y) .bot)) .bot) x y
         refine ⟨⟨?_, d21_sep_bool_only a q x y ha hq hx hy, trivial⟩, trivial⟩
-        show untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl x y)) .bot)) .bot) x y
+        show untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl y x)) .bot)) .bot) x y
         refine ⟨⟨u_free_untl_under_bool x x y hx, ?_, trivial⟩, trivial⟩
-        show untlUnderBoolOnly (.imp (.imp q .bot) (.untl x y)) x y
+        show untlUnderBoolOnly (.imp (.imp q .bot) (.untl y x)) x y
         exact ⟨⟨u_free_untl_under_bool q x y hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
       exact snce_combined_notU_sep_with_U_type
-        (Formula.and (Formula.and x (Formula.or q (.untl x y))) (d21Sep a q x y))
+        (Formula.and (Formula.and x (Formula.or q (.untl y x))) (d21Sep a q x y))
         q x y hx hy hx' hy' hq h_event_bool
 
 /-- Case 8 with U-type: S(a∧¬U, q∨¬U) is separable_with_U_type A B. -/
@@ -255,8 +255,8 @@ theorem case8_sep_with_U_type_Z_gen (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hx : isUFree x = true) (hy : isUFree y = true)
     (hx' : isSFree x = true) (hy' : isSFree y = true) :
-    isSeparableWithUType (.snce (Formula.and a (Formula.neg (.untl x y)))
-      (Formula.or q (Formula.neg (.untl x y)))) x y := by
+    isSeparableWithUType (.snce (Formula.or q (Formula.neg (.untl y x)))
+      (Formula.and a (Formula.neg (.untl y x)))) x y := by
   apply is_separable_with_U_type_of_equiv (case8_equiv_Z a q x y)
   apply and_separable_with_U_type
   · have hg : isUFree (Formula.neg (.bot : Formula Atom)) = true := by simp [isUFree]
@@ -272,32 +272,32 @@ theorem snce_Ufree_event_qU_guard_sep_with_U_type (ev q x y : Formula Atom)
     (hev_uf : isUFree ev = true) (hq : isUFree q = true)
     (hx : isUFree x = true) (hy : isUFree y = true)
     (hx' : isSFree x = true) (hy' : isSFree y = true) :
-    isSeparableWithUType (.snce ev (Formula.or q (.untl x y))) x y := by
+    isSeparableWithUType (.snce (Formula.or q (.untl y x)) ev) x y := by
   apply is_separable_with_U_type_of_equiv (case3_equiv_Z_general ev q x y)
   simp only [case3Rhs]
   apply or_separable_with_U_type
   · apply or_separable_with_U_type
-    · have hev_snce_sep : isSyntacticallySeparated (.snce ev q) = true := by
+    · have hev_snce_sep : isSyntacticallySeparated (.snce q ev) = true := by
         simp [isSyntacticallySeparated, hev_uf, hq]
-      exact ⟨.snce ev q, hev_snce_sep, int_equiv_refl _,
+      exact ⟨.snce q ev, hev_snce_sep, int_equiv_refl _,
         ⟨u_free_has_single_U_type hev_uf, u_free_has_single_U_type hq⟩⟩
     · apply and_separable_with_U_type
-      · have h_nqSev_uf : isUFree (Formula.and (Formula.neg q) (.snce ev q)) = true := by
+      · have h_nqSev_uf : isUFree (Formula.and (Formula.neg q) (.snce q ev)) = true := by
           simp [isUFree, hq, hev_uf]
         apply is_separable_with_U_type_of_equiv (since_distrib_or_left _ _ (qZ x y (Formula.neg q)))
         apply or_separable_with_U_type
         · have hQ_uf : isUFree (qZ x y (Formula.neg q)) = true :=
             Q_Z_neg_q_U_free x y q hx hy hq
-          exact ⟨.snce ev (qZ x y (Formula.neg q)),
+          exact ⟨.snce (qZ x y (Formula.neg q)) ev,
             by simp [isSyntacticallySeparated, hev_uf, hQ_uf], int_equiv_refl _,
             ⟨u_free_has_single_U_type hev_uf, u_free_has_single_U_type hQ_uf⟩⟩
         · apply is_separable_with_U_type_of_equiv
-            (since_event_split _ (.untl x y) (qZ x y (Formula.neg q)))
+            (since_event_split _ (.untl y x) (qZ x y (Formula.neg q)))
           apply or_separable_with_U_type
           · apply is_separable_with_U_type_of_equiv (snce_event_congr_with_U _ _ _ x y
               (fun m t hU => ⟨fun h => (int_truth_and_iff.mp h).1,
                 fun h => int_truth_and_iff.mpr ⟨h, int_truth_or_iff.mpr (Or.inr hU)⟩⟩))
-            exact snce_combined_U_sep_with_U_type (Formula.and (Formula.neg q) (.snce ev q))
+            exact snce_combined_U_sep_with_U_type (Formula.and (Formula.neg q) (.snce q ev))
               (qZ x y (Formula.neg q)) x y hx hy hx' hy' (Q_Z_neg_q_U_free x y q hx hy hq)
               (u_free_untl_under_bool _ x y h_nqSev_uf)
           · apply is_separable_with_U_type_of_equiv (by
@@ -316,12 +316,12 @@ theorem snce_Ufree_event_qU_guard_sep_with_U_type (ev q x y : Formula Atom)
         · exact and_separable_with_U_type
             (u_free_separable_with_type hy)
             (untl_s_free_separable_with_type hx' hy')
-  · have h_nqSev_uf_D3 : isUFree (Formula.and (Formula.neg q) (.snce ev q)) = true := by
+  · have h_nqSev_uf_D3 : isUFree (Formula.and (Formula.neg q) (.snce q ev)) = true := by
       simp [isUFree, hq, hev_uf]
     have hQ_uf_D3 : isUFree (qZ x y (Formula.neg q)) = true :=
       Q_Z_neg_q_U_free x y q hx hy hq
-    let d21_local := Formula.or (.snce ev (qZ x y (Formula.neg q)))
-      (case1Psi (Formula.and (Formula.neg q) (.snce ev q)) (qZ x y (Formula.neg q)) x y)
+    let d21_local := Formula.or (.snce (qZ x y (Formula.neg q)) ev)
+      (case1Psi (Formula.and (Formula.neg q) (.snce q ev)) (qZ x y (Formula.neg q)) x y)
     have h_d21_bool : untlUnderBoolOnly d21_local x y := by
       have h_or_bool : ∀ p q, untlUnderBoolOnly p x y → untlUnderBoolOnly q x y →
           untlUnderBoolOnly (Formula.or p q) x y := by
@@ -329,20 +329,20 @@ theorem snce_Ufree_event_qU_guard_sep_with_U_type (ev q x y : Formula Atom)
       apply h_or_bool
       · exact ⟨hev_uf, hQ_uf_D3⟩
       · exact case1_psi_bool_only _ _ x y h_nqSev_uf_D3 hQ_uf_D3 hx hy
-    have h_d21_equiv : intEquiv (.snce (case3Alpha ev q x y) (qZ x y (Formula.neg q))) d21_local := by
+    have h_d21_equiv : intEquiv (.snce (qZ x y (Formula.neg q)) (case3Alpha ev q x y)) d21_local := by
       have h_step1 := since_distrib_or_left ev
-        (Formula.and (Formula.and (Formula.neg q) (.snce ev q)) (Formula.or q (.untl x y)))
+        (Formula.and (Formula.and (Formula.neg q) (.snce q ev)) (Formula.or q (.untl y x)))
         (qZ x y (Formula.neg q))
       have h_step2 := since_event_split
-        (Formula.and (Formula.and (Formula.neg q) (.snce ev q)) (Formula.or q (.untl x y)))
-        (.untl x y) (qZ x y (Formula.neg q))
+        (Formula.and (Formula.and (Formula.neg q) (.snce q ev)) (Formula.or q (.untl y x)))
+        (.untl y x) (qZ x y (Formula.neg q))
       have h_congr_U := snce_event_congr_with_U
-        (Formula.and (Formula.and (Formula.neg q) (.snce ev q)) (Formula.or q (.untl x y)))
-        (Formula.and (Formula.neg q) (.snce ev q))
+        (Formula.and (Formula.and (Formula.neg q) (.snce q ev)) (Formula.or q (.untl y x)))
+        (Formula.and (Formula.neg q) (.snce q ev))
         (qZ x y (Formula.neg q)) x y
         (fun m t hU => ⟨fun h => (int_truth_and_iff.mp h).1,
           fun h => int_truth_and_iff.mpr ⟨h, int_truth_or_iff.mpr (Or.inr hU)⟩⟩)
-      have h_psi := (case1_psi_properties (Formula.and (Formula.neg q) (.snce ev q))
+      have h_psi := (case1_psi_properties (Formula.and (Formula.neg q) (.snce q ev))
         (qZ x y (Formula.neg q)) x y h_nqSev_uf_D3 hQ_uf_D3 hx hy hx' hy').1
       intro m t; constructor
       · intro h
@@ -366,40 +366,40 @@ theorem snce_Ufree_event_qU_guard_sep_with_U_type (ev q x y : Formula Atom)
           have h_unsplit := (h_step2 m t).mpr (int_truth_or_iff.mpr (Or.inl h_combined))
           exact (h_step1 m t).mpr (int_truth_or_iff.mpr (Or.inr h_unsplit))
     have h_event_congr : intEquiv
-      (Formula.and (Formula.and x (Formula.or q (.untl x y)))
-        (.snce (case3Alpha ev q x y) (qZ x y (Formula.neg q))))
-      (Formula.and (Formula.and x (Formula.or q (.untl x y))) d21_local) := by
+      (Formula.and (Formula.and x (Formula.or q (.untl y x)))
+        (.snce (qZ x y (Formula.neg q)) (case3Alpha ev q x y)))
+      (Formula.and (Formula.and x (Formula.or q (.untl y x))) d21_local) := by
       intro m t; constructor
       · intro h; have ⟨hAqU, hS⟩ := int_truth_and_iff.mp h
         exact int_truth_and_iff.mpr ⟨hAqU, (h_d21_equiv m t).mp hS⟩
       · intro h; have ⟨hAqU, hd⟩ := int_truth_and_iff.mp h
         exact int_truth_and_iff.mpr ⟨hAqU, (h_d21_equiv m t).mpr hd⟩
     apply is_separable_with_U_type_of_equiv (snce_event_congr_hier h_event_congr)
-    apply is_separable_with_U_type_of_equiv (since_event_split _ (.untl x y) q)
+    apply is_separable_with_U_type_of_equiv (since_event_split _ (.untl y x) q)
     apply or_separable_with_U_type
     · have h_event_bool : untlUnderBoolOnly
-          (Formula.and (Formula.and x (Formula.or q (.untl x y))) d21_local) x y := by
-        show untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl x y)))
+          (Formula.and (Formula.and x (Formula.or q (.untl y x))) d21_local) x y := by
+        show untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl y x)))
           (.imp d21_local .bot)) .bot) x y
         refine ⟨⟨?_, h_d21_bool, trivial⟩, trivial⟩
-        show untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl x y)) .bot)) .bot) x y
+        show untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl y x)) .bot)) .bot) x y
         refine ⟨⟨u_free_untl_under_bool x x y hx, ?_, trivial⟩, trivial⟩
-        show untlUnderBoolOnly (.imp (.imp q .bot) (.untl x y)) x y
+        show untlUnderBoolOnly (.imp (.imp q .bot) (.untl y x)) x y
         exact ⟨⟨u_free_untl_under_bool q x y hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
       exact snce_combined_U_sep_with_U_type
-        (Formula.and (Formula.and x (Formula.or q (.untl x y))) d21_local)
+        (Formula.and (Formula.and x (Formula.or q (.untl y x))) d21_local)
         q x y hx hy hx' hy' hq h_event_bool
     · have h_event_bool : untlUnderBoolOnly
-          (Formula.and (Formula.and x (Formula.or q (.untl x y))) d21_local) x y := by
-        show untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl x y)))
+          (Formula.and (Formula.and x (Formula.or q (.untl y x))) d21_local) x y := by
+        show untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl y x)))
           (.imp d21_local .bot)) .bot) x y
         refine ⟨⟨?_, h_d21_bool, trivial⟩, trivial⟩
-        show untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl x y)) .bot)) .bot) x y
+        show untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl y x)) .bot)) .bot) x y
         refine ⟨⟨u_free_untl_under_bool x x y hx, ?_, trivial⟩, trivial⟩
-        show untlUnderBoolOnly (.imp (.imp q .bot) (.untl x y)) x y
+        show untlUnderBoolOnly (.imp (.imp q .bot) (.untl y x)) x y
         exact ⟨⟨u_free_untl_under_bool q x y hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
       exact snce_combined_notU_sep_with_U_type
-        (Formula.and (Formula.and x (Formula.or q (.untl x y))) d21_local)
+        (Formula.and (Formula.and x (Formula.or q (.untl y x))) d21_local)
         q x y hx hy hx' hy' hq h_event_bool
 
 /-- Case 6 with U-type: S(a∧¬U, q∨U) is separable_with_U_type A B. -/
@@ -407,15 +407,15 @@ theorem case6_sep_with_U_type_Z_gen (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hx : isUFree x = true) (hy : isUFree y = true)
     (hx' : isSFree x = true) (hy' : isSFree y = true) :
-    isSeparableWithUType (.snce (Formula.and a (Formula.neg (.untl x y)))
-      (Formula.or q (.untl x y))) x y := by
+    isSeparableWithUType (.snce (Formula.or q (.untl y x))
+      (Formula.and a (Formula.neg (.untl y x)))) x y := by
   apply is_separable_with_U_type_of_equiv (case6_equiv_Z a q x y)
   apply or_separable_with_U_type
   · apply and_separable_with_U_type
     · apply and_separable_with_U_type
       · have hg_uf : isUFree (Formula.and q (Formula.neg x)) = true := by
           simp [isUFree, hq, hx]
-        exact ⟨.snce a (Formula.and q (Formula.neg x)),
+        exact ⟨.snce (Formula.and q (Formula.neg x)) a,
           by simp [isSyntacticallySeparated, ha, hg_uf], int_equiv_refl _,
           ⟨u_free_has_single_U_type ha, u_free_has_single_U_type hg_uf⟩⟩
       · exact u_free_separable_with_type (by simp [isUFree, hx])
@@ -425,11 +425,11 @@ theorem case6_sep_with_U_type_Z_gen (a q x y : Formula Atom)
         (untl_s_free_separable_with_type hx' hy')
   · have h_rearrange : intEquiv
       (Formula.and (Formula.and (Formula.and (Formula.neg y) (Formula.neg x))
-        (Formula.or q (.untl x y)))
-        (.snce a (Formula.and q (Formula.neg x))))
+        (Formula.or q (.untl y x)))
+        (.snce (Formula.and q (Formula.neg x)) a))
       (Formula.and (Formula.and (Formula.and (Formula.neg y) (Formula.neg x))
-        (.snce a (Formula.and q (Formula.neg x))))
-        (Formula.or q (.untl x y))) := by
+        (.snce (Formula.and q (Formula.neg x)) a))
+        (Formula.or q (.untl y x))) := by
       intro m t; constructor
       · intro h
         have ⟨h1, h2⟩ := int_truth_and_iff.mp h
@@ -442,13 +442,13 @@ theorem case6_sep_with_U_type_Z_gen (a q x y : Formula Atom)
     apply is_separable_with_U_type_of_equiv (snce_event_congr_hier h_rearrange)
     have h_distrib : intEquiv
       (Formula.and (Formula.and (Formula.and (Formula.neg y) (Formula.neg x))
-        (.snce a (Formula.and q (Formula.neg x))))
-        (Formula.or q (.untl x y)))
+        (.snce (Formula.and q (Formula.neg x)) a))
+        (Formula.or q (.untl y x)))
       (Formula.or
         (Formula.and (Formula.and (Formula.and (Formula.neg y) (Formula.neg x))
-          (.snce a (Formula.and q (Formula.neg x)))) q)
+          (.snce (Formula.and q (Formula.neg x)) a)) q)
         (Formula.and (Formula.and (Formula.and (Formula.neg y) (Formula.neg x))
-          (.snce a (Formula.and q (Formula.neg x)))) (.untl x y))) := by
+          (.snce (Formula.and q (Formula.neg x)) a)) (.untl y x))) := by
       intro m t; constructor
       · intro h
         have ⟨hc, hab⟩ := int_truth_and_iff.mp h
@@ -462,9 +462,9 @@ theorem case6_sep_with_U_type_Z_gen (a q x y : Formula Atom)
         · have ⟨hc, hb'⟩ := int_truth_and_iff.mp h2
           exact int_truth_and_iff.mpr ⟨hc, int_truth_or_iff.mpr (Or.inr hb')⟩
     apply is_separable_with_U_type_of_equiv (snce_event_congr_hier h_distrib)
-    apply is_separable_with_U_type_of_equiv (since_distrib_or_left _ _ (Formula.or q (.untl x y)))
+    apply is_separable_with_U_type_of_equiv (since_distrib_or_left _ _ (Formula.or q (.untl y x)))
     have hSTUFF_uf : isUFree (Formula.and (Formula.and (Formula.neg y) (Formula.neg x))
-        (.snce a (Formula.and q (Formula.neg x)))) = true := by
+        (.snce (Formula.and q (Formula.neg x)) a)) = true := by
       simp [isUFree, ha, hq, hx, hy]
     apply or_separable_with_U_type
     · have hev_uf : isUFree (((y.neg.and x.neg).and (a.snce (q.and x.neg))).and q) = true := by
@@ -477,7 +477,7 @@ theorem snce_Ufree_event_qNotU_guard_sep_with_U_type (ev q x y : Formula Atom)
     (hev_uf : isUFree ev = true) (hq : isUFree q = true)
     (hx : isUFree x = true) (hy : isUFree y = true)
     (hx' : isSFree x = true) (hy' : isSFree y = true) :
-    isSeparableWithUType (.snce ev (Formula.or q (Formula.neg (.untl x y)))) x y := by
+    isSeparableWithUType (.snce (Formula.or q (Formula.neg (.untl y x))) ev) x y := by
   have hna_uf : isUFree (Formula.neg ev) = true := by simp [isUFree, hev_uf]
   have hnq_uf : isUFree (Formula.neg q) = true := by simp [isUFree, hq]
   have hanq_uf : isUFree (Formula.and (Formula.neg ev) (Formula.neg q)) = true := by
@@ -521,17 +521,17 @@ theorem snce_Ufree_event_qNotU_guard_sep_with_U_type (ev q x y : Formula Atom)
       · exact (hguard1 s hss1 hst) hev_s
   · intro hand
     have ⟨hnotH, hnotPsi1⟩ := int_truth_and_iff.mp hand
-    have hnotS1 : ¬ intTruth m t (.snce (Formula.and (Formula.and (Formula.neg ev) (Formula.neg q))
-        (.untl x y)) (Formula.neg ev)) :=
+    have hnotS1 : ¬ intTruth m t (.snce (Formula.neg ev) (Formula.and (Formula.and (Formula.neg ev) (Formula.neg q))
+        (.untl y x))) :=
       fun hS1 => hnotPsi1 hS1
     by_contra hnotS
-    rcases int_truth_or_iff.mp ((neg_since_equiv ev (Formula.or q (Formula.neg (.untl x y))) m t).mp hnotS) with hH | hS_neg
+    rcases int_truth_or_iff.mp ((neg_since_equiv ev (Formula.or q (Formula.neg (.untl y x))) m t).mp hnotS) with hH | hS_neg
     · exact hnotH hH
     · obtain ⟨s, hst, hevent, hguard⟩ := hS_neg
       have ⟨hna_s, hnotQnU_s⟩ := int_truth_and_iff.mp hevent
       have hnotQ_s : ¬ intTruth m s q :=
         fun h => (int_truth_neg_iff.mp hnotQnU_s) (int_truth_or_iff.mpr (Or.inl h))
-      have hnotNotU_s : ¬ (¬ intTruth m s (.untl x y)) :=
+      have hnotNotU_s : ¬ (¬ intTruth m s (.untl y x)) :=
         fun h => (int_truth_neg_iff.mp hnotQnU_s) (int_truth_or_iff.mpr (Or.inr h))
       push Not at hnotNotU_s
       exact hnotS1 ⟨s, hst, int_truth_and_iff.mpr
@@ -543,18 +543,18 @@ theorem case7_sep_with_U_type_Z_gen (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hx : isUFree x = true) (hy : isUFree y = true)
     (hx' : isSFree x = true) (hy' : isSFree y = true) :
-    isSeparableWithUType (.snce (Formula.and a (.untl x y))
-      (Formula.or q (Formula.neg (.untl x y)))) x y := by
+    isSeparableWithUType (.snce (Formula.or q (Formula.neg (.untl y x)))
+      (Formula.and a (.untl y x))) x y := by
   apply is_separable_with_U_type_of_equiv (case7_equiv_Z a q x y)
   have hBq_uf : isUFree (Formula.and y q) = true := by
     simp only [isUFree, hy, hq, Bool.and_self]
   apply or_separable_with_U_type
   · apply or_separable_with_U_type
     · have h_rearrange : intEquiv
-        (Formula.and (Formula.and x (Formula.or q (Formula.neg (.untl x y))))
-          (.snce a (Formula.and y q)))
-        (Formula.and (Formula.and x (.snce a (Formula.and y q)))
-          (Formula.or q (Formula.neg (.untl x y)))) := by
+        (Formula.and (Formula.and x (Formula.or q (Formula.neg (.untl y x))))
+          (.snce (Formula.and y q) a))
+        (Formula.and (Formula.and x (.snce (Formula.and y q) a))
+          (Formula.or q (Formula.neg (.untl y x)))) := by
         intro m t; constructor
         · intro h
           have ⟨h1, h2⟩ := int_truth_and_iff.mp h
@@ -566,12 +566,12 @@ theorem case7_sep_with_U_type_Z_gen (a q x y : Formula Atom)
           exact int_truth_and_iff.mpr ⟨int_truth_and_iff.mpr ⟨h3, h2⟩, h4⟩
       apply is_separable_with_U_type_of_equiv (snce_event_congr_hier h_rearrange)
       have h_distrib : intEquiv
-        (Formula.and (Formula.and x (.snce a (Formula.and y q)))
-          (Formula.or q (Formula.neg (.untl x y))))
+        (Formula.and (Formula.and x (.snce (Formula.and y q) a))
+          (Formula.or q (Formula.neg (.untl y x))))
         (Formula.or
-          (Formula.and (Formula.and x (.snce a (Formula.and y q))) q)
-          (Formula.and (Formula.and x (.snce a (Formula.and y q)))
-            (Formula.neg (.untl x y)))) := by
+          (Formula.and (Formula.and x (.snce (Formula.and y q) a)) q)
+          (Formula.and (Formula.and x (.snce (Formula.and y q) a))
+            (Formula.neg (.untl y x)))) := by
         intro m t; constructor
         · intro h
           have ⟨hc, hab⟩ := int_truth_and_iff.mp h
@@ -586,26 +586,26 @@ theorem case7_sep_with_U_type_Z_gen (a q x y : Formula Atom)
             exact int_truth_and_iff.mpr ⟨hc, int_truth_or_iff.mpr (Or.inr hb')⟩
       apply is_separable_with_U_type_of_equiv (snce_event_congr_hier h_distrib)
       apply is_separable_with_U_type_of_equiv (since_distrib_or_left _ _
-        (Formula.or q (Formula.neg (.untl x y))))
-      have hSTUFF_uf : isUFree (Formula.and x (.snce a (Formula.and y q))) = true := by
+        (Formula.or q (Formula.neg (.untl y x))))
+      have hSTUFF_uf : isUFree (Formula.and x (.snce (Formula.and y q) a)) = true := by
         simp only [isUFree, hx, ha, hy, hq, Bool.and_self]
       apply or_separable_with_U_type
       · have hev_uf : isUFree (Formula.and (Formula.and x
-            (.snce a (Formula.and y q))) q) = true := by
+            (.snce (Formula.and y q) a)) q) = true := by
           simp only [isUFree, hx, ha, hy, hq, Bool.and_self]
         exact snce_Ufree_event_qNotU_guard_sep_with_U_type _ q x y hev_uf hq hx hy hx' hy'
       · exact case8_sep_with_U_type_Z_gen
-          (Formula.and x (.snce a (Formula.and y q)))
+          (Formula.and x (.snce (Formula.and y q) a))
           q x y hSTUFF_uf hq hx hy hx' hy'
     · apply and_separable_with_U_type
       · have hg_uf : isUFree (Formula.and y q) = true := hBq_uf
-        exact ⟨.snce a (Formula.and y q),
+        exact ⟨.snce (Formula.and y q) a,
           by simp [isSyntacticallySeparated, ha, hg_uf], int_equiv_refl _,
           ⟨u_free_has_single_U_type ha, u_free_has_single_U_type hBq_uf⟩⟩
       · exact u_free_separable_with_type hx
   · apply and_separable_with_U_type
     · exact and_separable_with_U_type
-        ⟨.snce a (Formula.and y q),
+        ⟨.snce (Formula.and y q) a,
           by simp [isSyntacticallySeparated, ha, hBq_uf], int_equiv_refl _,
           ⟨u_free_has_single_U_type ha, u_free_has_single_U_type hBq_uf⟩⟩
         (u_free_separable_with_type hy)

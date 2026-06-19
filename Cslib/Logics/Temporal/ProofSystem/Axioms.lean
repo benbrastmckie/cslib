@@ -100,22 +100,22 @@ inductive Axiom : Formula Atom → Type u where
   /-- BX2G: Guard monotonicity of Until under G:
       G(φ → ψ) → (χ U φ → χ U ψ) -/
   | left_mono_until_G (φ ψ χ : Formula Atom) :
-      Axiom ((φ.imp ψ).allFuture.imp ((Formula.untl χ φ).imp (Formula.untl χ ψ)))
+      Axiom ((φ.imp ψ).allFuture.imp ((Formula.untl φ χ).imp (Formula.untl ψ χ)))
 
   /-- BX2H: Guard monotonicity of Since under H:
       H(φ → ψ) → (χ S φ → χ S ψ) -/
   | left_mono_since_H (φ ψ χ : Formula Atom) :
-      Axiom ((φ.imp ψ).allPast.imp ((Formula.snce χ φ).imp (Formula.snce χ ψ)))
+      Axiom ((φ.imp ψ).allPast.imp ((Formula.snce φ χ).imp (Formula.snce ψ χ)))
 
   /-- BX3: Event monotonicity of Until:
       G(φ → ψ) → (φ U χ → ψ U χ) -/
   | right_mono_until (φ ψ χ : Formula Atom) :
-      Axiom ((φ.imp ψ).allFuture.imp ((Formula.untl φ χ).imp (Formula.untl ψ χ)))
+      Axiom ((φ.imp ψ).allFuture.imp ((Formula.untl χ φ).imp (Formula.untl χ ψ)))
 
   /-- BX3': Event monotonicity of Since:
       H(φ → ψ) → (φ S χ → ψ S χ) -/
   | right_mono_since (φ ψ χ : Formula Atom) :
-      Axiom ((φ.imp ψ).allPast.imp ((Formula.snce φ χ).imp (Formula.snce ψ χ)))
+      Axiom ((φ.imp ψ).allPast.imp ((Formula.snce χ φ).imp (Formula.snce χ ψ)))
 
   /-- BX4: Temporal connectedness future: φ → G(P(φ)) -/
   | connect_future (φ : Formula Atom) :
@@ -128,64 +128,64 @@ inductive Axiom : Formula Atom → Type u where
   /-- BX13: Until-Since enrichment:
       p ∧ (ψ U φ) → (ψ ∧ S(p, φ)) U φ -/
   | enrichment_until (φ ψ p : Formula Atom) :
-      Axiom (Formula.and p (Formula.untl ψ φ) |>.imp
-        (Formula.untl (Formula.and ψ (Formula.snce p φ)) φ))
+      Axiom (Formula.and p (Formula.untl φ ψ) |>.imp
+        (Formula.untl φ (Formula.and ψ (Formula.snce φ p))))
 
   /-- BX13': Since-Until enrichment:
       p ∧ (ψ S φ) → (ψ ∧ U(p, φ)) S φ -/
   | enrichment_since (φ ψ p : Formula Atom) :
-      Axiom (Formula.and p (Formula.snce ψ φ) |>.imp
-        (Formula.snce (Formula.and ψ (Formula.untl p φ)) φ))
+      Axiom (Formula.and p (Formula.snce φ ψ) |>.imp
+        (Formula.snce φ (Formula.and ψ (Formula.untl φ p))))
 
   /-- BX5: Self-accumulation of Until:
       U(ψ, φ) → U(ψ, φ ∧ U(ψ, φ)) -/
   | self_accum_until (φ ψ : Formula Atom) :
-      Axiom ((Formula.untl ψ φ).imp
-        (Formula.untl ψ (Formula.and φ (Formula.untl ψ φ))))
+      Axiom ((Formula.untl φ ψ).imp
+        (Formula.untl (Formula.and φ (Formula.untl φ ψ)) ψ))
 
   /-- BX5': Self-accumulation of Since:
       S(ψ, φ) → S(ψ, φ ∧ S(ψ, φ)) -/
   | self_accum_since (φ ψ : Formula Atom) :
-      Axiom ((Formula.snce ψ φ).imp
-        (Formula.snce ψ (Formula.and φ (Formula.snce ψ φ))))
+      Axiom ((Formula.snce φ ψ).imp
+        (Formula.snce (Formula.and φ (Formula.snce φ ψ)) ψ))
 
   /-- BX6: Absorption of Until:
       U(φ ∧ U(ψ, φ), φ) → U(ψ, φ) -/
   | absorb_until (φ ψ : Formula Atom) :
-      Axiom ((Formula.untl (Formula.and φ (Formula.untl ψ φ)) φ).imp (Formula.untl ψ φ))
+      Axiom ((Formula.untl φ (Formula.and φ (Formula.untl φ ψ))).imp (Formula.untl φ ψ))
 
   /-- BX6': Absorption of Since:
       S(φ ∧ S(ψ, φ), φ) → S(ψ, φ) -/
   | absorb_since (φ ψ : Formula Atom) :
-      Axiom ((Formula.snce (Formula.and φ (Formula.snce ψ φ)) φ).imp (Formula.snce ψ φ))
+      Axiom ((Formula.snce φ (Formula.and φ (Formula.snce φ ψ))).imp (Formula.snce φ ψ))
 
   /-- BX7: Linearity of Until:
       U(ψ,φ) ∧ U(θ,χ) → U(ψ∧θ, φ∧χ) ∨ U(ψ∧χ, φ∧χ) ∨ U(φ∧θ, φ∧χ) -/
   | linear_until (φ ψ χ θ : Formula Atom) :
-      Axiom (Formula.and (Formula.untl ψ φ) (Formula.untl θ χ)
+      Axiom (Formula.and (Formula.untl φ ψ) (Formula.untl χ θ)
         |>.imp (Formula.or
           (Formula.or
-            (Formula.untl (Formula.and ψ θ) (Formula.and φ χ))
-            (Formula.untl (Formula.and ψ χ) (Formula.and φ χ)))
-          (Formula.untl (Formula.and φ θ) (Formula.and φ χ))))
+            (Formula.untl (Formula.and φ χ) (Formula.and ψ θ))
+            (Formula.untl (Formula.and φ χ) (Formula.and ψ χ)))
+          (Formula.untl (Formula.and φ χ) (Formula.and φ θ))))
 
   /-- BX7': Linearity of Since:
       S(ψ,φ) ∧ S(θ,χ) → S(ψ∧θ, φ∧χ) ∨ S(ψ∧χ, φ∧χ) ∨ S(φ∧θ, φ∧χ) -/
   | linear_since (φ ψ χ θ : Formula Atom) :
-      Axiom (Formula.and (Formula.snce ψ φ) (Formula.snce θ χ)
+      Axiom (Formula.and (Formula.snce φ ψ) (Formula.snce χ θ)
         |>.imp (Formula.or
           (Formula.or
-            (Formula.snce (Formula.and ψ θ) (Formula.and φ χ))
-            (Formula.snce (Formula.and ψ χ) (Formula.and φ χ)))
-          (Formula.snce (Formula.and φ θ) (Formula.and φ χ))))
+            (Formula.snce (Formula.and φ χ) (Formula.and ψ θ))
+            (Formula.snce (Formula.and φ χ) (Formula.and ψ χ)))
+          (Formula.snce (Formula.and φ χ) (Formula.and φ θ))))
 
   /-- BX10: Until implies eventuality: U(ψ, φ) → F(ψ) -/
   | until_F (φ ψ : Formula Atom) :
-      Axiom ((Formula.untl ψ φ).imp (Formula.someFuture ψ))
+      Axiom ((Formula.untl φ ψ).imp (Formula.someFuture ψ))
 
   /-- BX10': Since implies past eventuality: S(ψ, φ) → P(ψ) -/
   | since_P (φ ψ : Formula Atom) :
-      Axiom ((Formula.snce ψ φ).imp (Formula.somePast ψ))
+      Axiom ((Formula.snce φ ψ).imp (Formula.somePast ψ))
 
   /-- BX11: Temporal linearity:
       F(φ) ∧ F(ψ) → F(φ ∧ ψ) ∨ F(φ ∧ F(ψ)) ∨ F(F(φ) ∧ ψ) -/
@@ -205,11 +205,11 @@ inductive Axiom : Formula Atom → Type u where
 
   /-- BX12: F-Until equivalence: F(φ) → U(φ, ⊤) -/
   | F_until_equiv (φ : Formula Atom) :
-      Axiom ((Formula.someFuture φ).imp (Formula.untl φ Formula.top))
+      Axiom ((Formula.someFuture φ).imp (Formula.untl Formula.top φ))
 
   /-- BX12': P-Since equivalence: P(φ) → S(φ, ⊤) -/
   | P_since_equiv (φ : Formula Atom) :
-      Axiom ((Formula.somePast φ).imp (Formula.snce φ Formula.top))
+      Axiom ((Formula.somePast φ).imp (Formula.snce Formula.top φ))
 
   -- Layer 3: Density (2)
 
@@ -220,7 +220,7 @@ inductive Axiom : Formula Atom → Type u where
   /-- Dense indicator: ¬U(⊤, ⊥). Asserts no immediate successor exists.
       Valid on densely ordered frames. -/
   | dense_indicator :
-      Axiom (Formula.untl Formula.top Formula.bot).neg
+      Axiom (Formula.untl Formula.bot Formula.top).neg
 
 set_option linter.dupNamespace false in
 /-- Minimum frame class for each axiom constructor. Base BX axioms

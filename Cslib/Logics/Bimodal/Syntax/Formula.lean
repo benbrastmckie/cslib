@@ -64,7 +64,7 @@ abbrev Formula.diamond (φ : Formula Atom) : Formula Atom :=
 
 /-- Some future (eventually): F φ := ⊤ U φ -/
 abbrev Formula.someFuture (φ : Formula Atom) : Formula Atom :=
-  .untl φ .top
+  .untl .top φ
 
 /-- All future (globally): G φ := ¬F ¬φ -/
 abbrev Formula.allFuture (φ : Formula Atom) : Formula Atom :=
@@ -72,7 +72,7 @@ abbrev Formula.allFuture (φ : Formula Atom) : Formula Atom :=
 
 /-- Some past: P φ := ⊤ S φ -/
 abbrev Formula.somePast (φ : Formula Atom) : Formula Atom :=
-  .snce φ .top
+  .snce .top φ
 
 /-- All past (historically): H φ := ¬P ¬φ -/
 abbrev Formula.allPast (φ : Formula Atom) : Formula Atom :=
@@ -129,8 +129,8 @@ def swapTemporal : Formula Atom -> Formula Atom
   | .bot => .bot
   | .imp phi psi => .imp (swapTemporal phi) (swapTemporal psi)
   | .box phi => .box (swapTemporal phi)
-  | .untl phi psi => .snce (swapTemporal phi) (swapTemporal psi)
-  | .snce phi psi => .untl (swapTemporal phi) (swapTemporal psi)
+  | .untl psi phi => .snce (swapTemporal psi) (swapTemporal phi)
+  | .snce psi phi => .untl (swapTemporal psi) (swapTemporal phi)
 
 /-- swapTemporal is an involution (applying it twice gives identity). -/
 theorem swapTemporal_involution (phi : Formula Atom) :
@@ -140,8 +140,8 @@ theorem swapTemporal_involution (phi : Formula Atom) :
   | bot => rfl
   | imp _ _ ihp ihq => simp only [swapTemporal, ihp, ihq]
   | box _ ih => simp only [swapTemporal, ih]
-  | untl _ _ ih1 ih2 => simp only [swapTemporal, ih1, ih2]
-  | snce _ _ ih1 ih2 => simp only [swapTemporal, ih1, ih2]
+  | untl _ _ ih2 ih1 => simp only [swapTemporal, ih1, ih2]
+  | snce _ _ ih2 ih1 => simp only [swapTemporal, ih1, ih2]
 
 /-- swapTemporal distributes over negation: swap(neg phi) = neg(swap phi). -/
 theorem swapTemporal_neg (phi : Formula Atom) :
@@ -189,8 +189,8 @@ def atoms : Formula Atom -> Finset Atom
   | .bot => {}
   | .imp phi psi => atoms phi ∪ atoms psi
   | .box phi => atoms phi
-  | .untl phi psi => atoms phi ∪ atoms psi
-  | .snce phi psi => atoms phi ∪ atoms psi
+  | .untl psi phi => atoms phi ∪ atoms psi
+  | .snce psi phi => atoms phi ∪ atoms psi
 
 /-- swapTemporal preserves atoms: swapping past/future does not change which atoms appear. -/
 theorem atoms_swapTemporal (phi : Formula Atom) :
@@ -200,8 +200,8 @@ theorem atoms_swapTemporal (phi : Formula Atom) :
   | bot => rfl
   | imp _ _ ih1 ih2 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
   | box _ ih => simp only [swapTemporal, atoms]; rw [ih]
-  | untl _ _ ih1 ih2 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
-  | snce _ _ ih1 ih2 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
+  | untl _ _ ih2 ih1 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
+  | snce _ _ ih2 ih1 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
 
 end Atoms
 

@@ -179,7 +179,7 @@ theorem closure_allFuture (phi psi : Formula Atom)
 Left component of Until is in closure.
 -/
 theorem closure_untl_left (phi psi chi : Formula Atom)
-    (h : Formula.untl psi chi ∈ subformulaClosure phi) :
+    (h : Formula.untl chi psi ∈ subformulaClosure phi) :
     psi ∈ subformulaClosure phi := by
   unfold subformulaClosure at h ⊢
   simp only [List.mem_toFinset] at h ⊢
@@ -189,7 +189,7 @@ theorem closure_untl_left (phi psi chi : Formula Atom)
 Right component of Until is in closure.
 -/
 theorem closure_untl_right (phi psi chi : Formula Atom)
-    (h : Formula.untl psi chi ∈ subformulaClosure phi) :
+    (h : Formula.untl chi psi ∈ subformulaClosure phi) :
     chi ∈ subformulaClosure phi := by
   unfold subformulaClosure at h ⊢
   simp only [List.mem_toFinset] at h ⊢
@@ -199,7 +199,7 @@ theorem closure_untl_right (phi psi chi : Formula Atom)
 Left component of Since is in closure.
 -/
 theorem closure_snce_left (phi psi chi : Formula Atom)
-    (h : Formula.snce psi chi ∈ subformulaClosure phi) :
+    (h : Formula.snce chi psi ∈ subformulaClosure phi) :
     psi ∈ subformulaClosure phi := by
   unfold subformulaClosure at h ⊢
   simp only [List.mem_toFinset] at h ⊢
@@ -209,7 +209,7 @@ theorem closure_snce_left (phi psi chi : Formula Atom)
 Right component of Since is in closure.
 -/
 theorem closure_snce_right (phi psi chi : Formula Atom)
-    (h : Formula.snce psi chi ∈ subformulaClosure phi) :
+    (h : Formula.snce chi psi ∈ subformulaClosure phi) :
     chi ∈ subformulaClosure phi := by
   unfold subformulaClosure at h ⊢
   simp only [List.mem_toFinset] at h ⊢

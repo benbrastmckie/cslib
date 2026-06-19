@@ -204,7 +204,7 @@ theorem P_from_witness {w v : BXPoint Atom} {ψ : Formula Atom}
 /-- Until truth in MCS (forward): (phi U psi) in w implies either psi in w (reflexive
     witness) or there exists v > w with psi in v. -/
 theorem until_forward_mcs (w : BXPoint Atom) (φ ψ : Formula Atom)
-    (h_until : Formula.untl φ ψ ∈ w.formulas) :
+    (h_until : Formula.untl ψ φ ∈ w.formulas) :
     φ ∈ w.formulas ∨
       (∃ v : BXPoint Atom, bxLe w v ∧ φ ∈ v.formulas) := by
   by_cases h_φ : φ ∈ w.formulas
@@ -214,7 +214,7 @@ theorem until_forward_mcs (w : BXPoint Atom) (φ ψ : Formula Atom)
 /-- Since forward: (phi S psi) in w implies either psi in w or there exists v < w
     with psi in v. Mirror of until_forward_mcs. -/
 theorem since_forward_mcs (w : BXPoint Atom) (φ ψ : Formula Atom)
-    (h_since : Formula.snce φ ψ ∈ w.formulas) :
+    (h_since : Formula.snce ψ φ ∈ w.formulas) :
     φ ∈ w.formulas ∨
       (∃ v : BXPoint Atom, bxLe v w ∧ φ ∈ v.formulas) := by
   by_cases h_φ : φ ∈ w.formulas

@@ -29,8 +29,8 @@ def Temporal.Formula.toBimodal : Temporal.Formula Atom → Bimodal.Formula Atom
   | .atom p => .atom p
   | .bot => .bot
   | .imp φ₁ φ₂ => .imp (φ₁.toBimodal) (φ₂.toBimodal)
-  | .untl φ₁ φ₂ => .untl (φ₁.toBimodal) (φ₂.toBimodal)
-  | .snce φ₁ φ₂ => .snce (φ₁.toBimodal) (φ₂.toBimodal)
+  | .untl φ₂ φ₁ => .untl (φ₂.toBimodal) (φ₁.toBimodal)
+  | .snce φ₂ φ₁ => .snce (φ₂.toBimodal) (φ₁.toBimodal)
 
 /-- Coercion from temporal to bimodal formulas. -/
 instance instCoeTemporalToBimodal : Coe (Temporal.Formula Atom) (Bimodal.Formula Atom) where
@@ -55,14 +55,14 @@ theorem Temporal.Formula.toBimodal_imp (φ₁ φ₂ : Temporal.Formula Atom) :
 /-- Embedding preserves untl. -/
 @[simp]
 theorem Temporal.Formula.toBimodal_untl (φ₁ φ₂ : Temporal.Formula Atom) :
-    (Temporal.Formula.untl φ₁ φ₂).toBimodal =
-      Bimodal.Formula.untl φ₁.toBimodal φ₂.toBimodal := rfl
+    (Temporal.Formula.untl φ₂ φ₁).toBimodal =
+      Bimodal.Formula.untl φ₂.toBimodal φ₁.toBimodal := rfl
 
 /-- Embedding preserves snce. -/
 @[simp]
 theorem Temporal.Formula.toBimodal_snce (φ₁ φ₂ : Temporal.Formula Atom) :
-    (Temporal.Formula.snce φ₁ φ₂).toBimodal =
-      Bimodal.Formula.snce φ₁.toBimodal φ₂.toBimodal := rfl
+    (Temporal.Formula.snce φ₂ φ₁).toBimodal =
+      Bimodal.Formula.snce φ₂.toBimodal φ₁.toBimodal := rfl
 
 /-- Embedding preserves neg. -/
 theorem Temporal.Formula.toBimodal_neg (φ : Temporal.Formula Atom) :

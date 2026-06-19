@@ -45,7 +45,7 @@ lemma someFuture_allFuture_neg_absurd {M : Set (Formula Atom)}
     (h_F : (𝐅psi) ∈ M)
     (h_G_neg : Formula.allFuture (Formula.neg psi) ∈ M) : False := by
   have h_bx3 : DerivationTree FrameClass.Base [] ((psi.imp psi.neg.neg).allFuture.imp
-      ((Formula.untl psi Formula.top).imp (Formula.untl psi.neg.neg Formula.top))) :=
+      ((Formula.untl Formula.top psi).imp (Formula.untl Formula.top psi.neg.neg))) :=
     DerivationTree.axiom [] _ (Axiom.right_mono_until psi psi.neg.neg Formula.top) trivial
   have hImpl := DerivationTree.modus_ponens [] _ _ h_bx3
     (DerivationTree.temporal_necessitation _ (dni psi))
@@ -57,7 +57,7 @@ lemma somePast_allPast_neg_absurd {M : Set (Formula Atom)}
     (h_P : (𝐏psi) ∈ M)
     (h_H_neg : Formula.allPast (Formula.neg psi) ∈ M) : False := by
   have h_bx3 : DerivationTree FrameClass.Base [] ((psi.imp psi.neg.neg).allPast.imp
-      ((Formula.snce psi Formula.top).imp (Formula.snce psi.neg.neg Formula.top))) :=
+      ((Formula.snce Formula.top psi).imp (Formula.snce Formula.top psi.neg.neg))) :=
     DerivationTree.axiom [] _ (Axiom.right_mono_since psi psi.neg.neg Formula.top) trivial
   have hImpl := DerivationTree.modus_ponens [] _ _ h_bx3
     (pastNecessitation _ (dni psi))
@@ -196,22 +196,22 @@ theorem past_temporal_witness_seed_consistent (M : Set (Formula Atom))
 
 theorem until_witness_seed_consistent (M : Set (Formula Atom))
     (h_mcs : Temporal.SetMaximalConsistent M)
-    (φ ψ : Formula Atom) (h_U : (ψ U φ) ∈ M) :
+    (φ ψ : Formula Atom) (h_U : (φ U ψ) ∈ M) :
     Temporal.SetConsistent (forwardTemporalWitnessSeed M ψ) := by
   intro L hL_sub ⟨d⟩
   have h_G_neg := extract_g_neg_from_seed h_mcs ψ hL_sub d
-  have h_ax : DerivationTree FrameClass.Base [] ((Formula.untl ψ φ).imp (Formula.someFuture ψ)) :=
+  have h_ax : DerivationTree FrameClass.Base [] ((Formula.untl φ ψ).imp (Formula.someFuture ψ)) :=
     DerivationTree.axiom [] _ (Axiom.until_F φ ψ) trivial
   have h_F := temporal_implication_property h_mcs (theoremInMcs h_mcs h_ax) h_U
   exact someFuture_allFuture_neg_absurd h_mcs ψ h_F h_G_neg
 
 theorem since_witness_seed_consistent (M : Set (Formula Atom))
     (h_mcs : Temporal.SetMaximalConsistent M)
-    (φ ψ : Formula Atom) (h_S : (ψ S φ) ∈ M) :
+    (φ ψ : Formula Atom) (h_S : (φ S ψ) ∈ M) :
     Temporal.SetConsistent (pastTemporalWitnessSeed M ψ) := by
   intro L hL_sub ⟨d⟩
   have h_H_neg := extract_h_neg_from_seed h_mcs ψ hL_sub d
-  have h_ax : DerivationTree FrameClass.Base [] ((Formula.snce ψ φ).imp (Formula.somePast ψ)) :=
+  have h_ax : DerivationTree FrameClass.Base [] ((Formula.snce φ ψ).imp (Formula.somePast ψ)) :=
     DerivationTree.axiom [] _ (Axiom.since_P φ ψ) trivial
   have h_P := temporal_implication_property h_mcs (theoremInMcs h_mcs h_ax) h_S
   exact somePast_allPast_neg_absurd h_mcs ψ h_P h_H_neg

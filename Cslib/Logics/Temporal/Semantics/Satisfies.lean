@@ -58,10 +58,10 @@ def Satisfies (M : TemporalModel D Atom) (t : D) : Formula Atom → Prop
   | .atom p => M.valuation t p
   | .bot => False
   | .imp φ ψ => Satisfies M t φ → Satisfies M t ψ
-  | .untl φ ψ =>
+  | .untl ψ φ =>
     ∃ s, t < s ∧ Satisfies M s φ ∧
       ∀ r, t < r → r < s → Satisfies M r ψ
-  | .snce φ ψ =>
+  | .snce ψ φ =>
     ∃ s, s < t ∧ Satisfies M s φ ∧
       ∀ r, s < r → r < t → Satisfies M r ψ
 
@@ -92,7 +92,7 @@ theorem imp_iff (M : TemporalModel D Atom) (t : D)
 @[simp]
 theorem untl_iff (M : TemporalModel D Atom) (t : D)
     (φ ψ : Formula Atom) :
-    Satisfies M t (.untl φ ψ) ↔
+    Satisfies M t (.untl ψ φ) ↔
       ∃ s, t < s ∧ Satisfies M s φ ∧
         ∀ r, t < r → r < s → Satisfies M r ψ :=
   Iff.rfl
@@ -101,7 +101,7 @@ theorem untl_iff (M : TemporalModel D Atom) (t : D)
 @[simp]
 theorem snce_iff (M : TemporalModel D Atom) (t : D)
     (φ ψ : Formula Atom) :
-    Satisfies M t (.snce φ ψ) ↔
+    Satisfies M t (.snce ψ φ) ↔
       ∃ s, s < t ∧ Satisfies M s φ ∧
         ∀ r, s < r → r < t → Satisfies M r ψ :=
   Iff.rfl

@@ -268,7 +268,7 @@ This filters out `someFuture phi = untl phi top` which is handled by someFutureP
 Burgess convention: first component = event, second = guard.
 -/
 def asUntil? : Formula Atom → Option (Formula Atom × Formula Atom)
-  | .untl event guard =>
+  | .untl guard event =>
     if guard == Formula.top then none
     else some (event, guard)
   | _ => none
@@ -280,7 +280,7 @@ This filters out `somePast phi = snce phi top` which is handled by somePastPos/s
 Burgess convention: first component = event, second = guard.
 -/
 def asSince? : Formula Atom → Option (Formula Atom × Formula Atom)
-  | .snce event guard =>
+  | .snce guard event =>
     if guard == Formula.top then none
     else some (event, guard)
   | _ => none
@@ -327,7 +327,7 @@ def isApplicable (rule : TableauRule) (sf : SignedFormula Atom)
   | .sncePos, .pos, φ => (asSince? φ).isSome
   | .snceNeg, .neg, φ => (asSince? φ).isSome
   -- Dense-specific rules (gated by fc >= .Dense)
-  | .denseIndicatorClosure, .pos, .untl (.imp .bot .bot) .bot =>
+  | .denseIndicatorClosure, .pos, .untl .bot (.imp .bot .bot) =>
       decide (FrameClass.Dense ≤ fc)
   | .densityRule, .pos, .allFuture _ =>
       decide (FrameClass.Dense ≤ fc)
@@ -695,7 +695,7 @@ def applyRule (rule : TableauRule) (sf : SignedFormula Atom) (branch : Branch At
         let branch1 := [SignedFormula.pos event freshLabel]
         -- Branch 2: guard holds at fresh time + Until continues from fresh time
         let branch2 := [SignedFormula.pos guard freshLabel,
-                         SignedFormula.pos (.untl event guard) freshLabel]
+                         SignedFormula.pos (.untl guard event) freshLabel]
         -- Auto-propagate all T(GA) formulas to freshTime
         let gProps := branch.allFuturePosFormulas.filterMap fun gsf =>
           match gsf.formula with
@@ -739,7 +739,7 @@ def applyRule (rule : TableauRule) (sf : SignedFormula Atom) (branch : Branch At
         let branch1 := [SignedFormula.pos event freshLabel]
         -- Branch 2: guard holds at fresh time + Since continues from fresh time
         let branch2 := [SignedFormula.pos guard freshLabel,
-                         SignedFormula.pos (.snce event guard) freshLabel]
+                         SignedFormula.pos (.snce guard event) freshLabel]
         -- Auto-propagate all T(HA) formulas to freshTime
         let hProps := branch.allPastPosFormulas.filterMap fun hsf =>
           match hsf.formula with
@@ -817,7 +817,7 @@ def applyRule (rule : TableauRule) (sf : SignedFormula Atom) (branch : Branch At
             -- Reynolds co-decomposition at the fresh time
             let branch1 := [SignedFormula.neg event freshLabel, sf] ++ autoProp
             let branch2 := [SignedFormula.neg guard freshLabel,
-                             SignedFormula.neg (.untl event guard) freshLabel, sf] ++ autoProp
+                             SignedFormula.neg (.untl guard event) freshLabel, sf] ++ autoProp
             (.branching [branch1, branch2], newOrd)
           else
             -- All existing future times processed, or depth limit reached
@@ -828,7 +828,7 @@ def applyRule (rule : TableauRule) (sf : SignedFormula Atom) (branch : Branch At
           let branch1 := [SignedFormula.neg event targetLabel, sf]
           -- Branch 2: guard fails at t' AND Until propagated to t', source re-included
           let branch2 := [SignedFormula.neg guard targetLabel,
-                           SignedFormula.neg (.untl event guard) targetLabel, sf]
+                           SignedFormula.neg (.untl guard event) targetLabel, sf]
           (.branching [branch1, branch2], timeOrd)
       | none => (.notApplicable, timeOrd)
   -- F(S(event, guard)) @ (w,t) -> Reynolds co-decomposition at past times
@@ -879,7 +879,7 @@ def applyRule (rule : TableauRule) (sf : SignedFormula Atom) (branch : Branch At
             -- Reynolds co-decomposition at the fresh time
             let branch1 := [SignedFormula.neg event freshLabel, sf] ++ autoProp
             let branch2 := [SignedFormula.neg guard freshLabel,
-                             SignedFormula.neg (.snce event guard) freshLabel, sf] ++ autoProp
+                             SignedFormula.neg (.snce guard event) freshLabel, sf] ++ autoProp
             (.branching [branch1, branch2], newOrd)
           else
             -- All existing past times processed, or depth limit reached
@@ -890,11 +890,11 @@ def applyRule (rule : TableauRule) (sf : SignedFormula Atom) (branch : Branch At
           let branch1 := [SignedFormula.neg event targetLabel, sf]
           -- Branch 2: guard fails at t' AND Since propagated to t', source re-included
           let branch2 := [SignedFormula.neg guard targetLabel,
-                           SignedFormula.neg (.snce event guard) targetLabel, sf]
+                           SignedFormula.neg (.snce guard event) targetLabel, sf]
           (.branching [branch1, branch2], timeOrd)
       | none => (.notApplicable, timeOrd)
   -- Dense: T(U(top,bot)) closes the branch on dense frames
-  | .denseIndicatorClosure, .pos, .untl (.imp .bot .bot) .bot =>
+  | .denseIndicatorClosure, .pos, .untl .bot (.imp .bot .bot) =>
       -- Close branch: T(U(top, bot)) contradicts density
       (.linear [], timeOrd)
   -- Dense: T(G(phi)) at (w,t) with known future time -> introduce intermediate point
@@ -929,7 +929,7 @@ def applyRule (rule : TableauRule) (sf : SignedFormula Atom) (branch : Branch At
   | .priorUZ, .pos, φ =>
       match asSomeFuture? φ with
       | some ψ =>
-        let untilFormula := Formula.untl ψ ψ.neg
+        let untilFormula := Formula.untl ψ.neg ψ
         let newSf := SignedFormula.pos untilFormula l
         if branch.contains newSf then (.notApplicable, timeOrd)
         else (.persistent [newSf], timeOrd)
@@ -938,7 +938,7 @@ def applyRule (rule : TableauRule) (sf : SignedFormula Atom) (branch : Branch At
   | .priorSZ, .pos, φ =>
       match asSomePast? φ with
       | some ψ =>
-        let sinceFormula := Formula.snce ψ ψ.neg
+        let sinceFormula := Formula.snce ψ.neg ψ
         let newSf := SignedFormula.pos sinceFormula l
         if branch.contains newSf then (.notApplicable, timeOrd)
         else (.persistent [newSf], timeOrd)
@@ -948,7 +948,7 @@ def applyRule (rule : TableauRule) (sf : SignedFormula Atom) (branch : Branch At
   | .z1Rule, .pos, .allFuture φ_inner =>
       -- Check if sf matches T(G(G(phi) -> phi)) pattern
       match φ_inner with
-      | .imp (.imp (.untl (.imp inner .bot) (.imp .bot .bot)) .bot) rhs =>
+      | .imp (.imp (.untl (.imp .bot .bot) (.imp inner .bot)) .bot) rhs =>
         -- This is G(G(inner) -> rhs) -- verify rhs = inner
         if inner == rhs then
           -- Look for T(F(G(inner))) on the branch at the same label

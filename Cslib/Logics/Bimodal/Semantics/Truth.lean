@@ -61,10 +61,10 @@ def truthAt (M : TaskModel Atom ℱ) (Omega : Set (WorldHistory ℱ))
   | Formula.box φ =>
     ∀ (σ : WorldHistory ℱ), σ ∈ Omega →
       truthAt M Omega σ t φ
-  | Formula.untl φ ψ =>
+  | Formula.untl ψ φ =>
     ∃ s : D, t < s ∧ truthAt M Omega τ s φ ∧
       ∀ r : D, t < r → r < s → truthAt M Omega τ r ψ
-  | Formula.snce φ ψ =>
+  | Formula.snce ψ φ =>
     ∃ s : D, s < t ∧ truthAt M Omega τ s φ ∧
       ∀ r : D, s < r → r < t → truthAt M Omega τ r ψ
 
@@ -319,7 +319,7 @@ theorem truth_double_shift_cancel (M : TaskModel Atom ℱ)
       exact (ih_χ t).mpr (h h_ψ)
   | box ψ ih =>
     simp only [truthAt]
-  | untl φ ψ ih_φ ih_ψ =>
+  | untl ψ φ ih_ψ ih_φ =>
     simp only [truthAt]
     constructor
     · intro ⟨s, h_le, h_event, h_guard⟩
@@ -328,7 +328,7 @@ theorem truth_double_shift_cancel (M : TaskModel Atom ℱ)
     · intro ⟨s, h_le, h_event, h_guard⟩
       exact ⟨s, h_le, (ih_φ s).mpr h_event,
         fun r hr1 hr2 => (ih_ψ r).mpr (h_guard r hr1 hr2)⟩
-  | snce φ ψ ih_φ ih_ψ =>
+  | snce ψ φ ih_ψ ih_φ =>
     simp only [truthAt]
     constructor
     · intro ⟨s, h_le, h_event, h_guard⟩
@@ -414,7 +414,7 @@ theorem time_shift_preserves_truth (M : TaskModel Atom ℱ)
         (truth_history_eq M Omega _ _ x h_hist_eq ψ).mp h2
       exact (truth_double_shift_cancel M Omega ρ
         (x - y) x ψ).mp h2'
-  | untl φ ψ ih_φ ih_ψ =>
+  | untl ψ φ ih_ψ ih_φ =>
     -- φ is event (at witness s), ψ is guard (between)
     simp only [truthAt]
     constructor
@@ -523,7 +523,7 @@ theorem time_shift_preserves_truth (M : TaskModel Atom ℱ)
           (ih_ψ σ r' (r' + (y - x))).mpr h_grd
         exact (truth_history_eq M Omega _ _ r'
           h_hist_eq ψ).mp h_conv
-  | snce φ ψ ih_φ ih_ψ =>
+  | snce ψ φ ih_ψ ih_φ =>
     -- φ is event (at witness s), ψ is guard (between)
     simp only [truthAt]
     constructor

@@ -63,8 +63,8 @@ def Formula.hashFormula [Hashable Atom] : Formula Atom → UInt64
   | .bot => 1
   | .imp φ₁ φ₂ => mixHash 2 (mixHash φ₁.hashFormula φ₂.hashFormula)
   | .box φ => mixHash 3 φ.hashFormula
-  | .untl φ₁ φ₂ => mixHash 4 (mixHash φ₁.hashFormula φ₂.hashFormula)
-  | .snce φ₁ φ₂ => mixHash 5 (mixHash φ₁.hashFormula φ₂.hashFormula)
+  | .untl φ₂ φ₁ => mixHash 4 (mixHash φ₁.hashFormula φ₂.hashFormula)
+  | .snce φ₂ φ₁ => mixHash 5 (mixHash φ₁.hashFormula φ₂.hashFormula)
 
 instance [Hashable Atom] : Hashable (Formula Atom) where
   hash := Formula.hashFormula
@@ -80,8 +80,8 @@ def Formula.complexity : Formula Atom → Nat
   | .bot => 1
   | .imp φ ψ => 1 + φ.complexity + ψ.complexity
   | .box φ => 1 + φ.complexity
-  | .untl φ ψ => 1 + φ.complexity + ψ.complexity
-  | .snce φ ψ => 1 + φ.complexity + ψ.complexity
+  | .untl ψ φ => 1 + φ.complexity + ψ.complexity
+  | .snce ψ φ => 1 + φ.complexity + ψ.complexity
 
 -- Subformulas, subformulaCount, and associated theorems are now defined in
 -- Cslib.Logics.Bimodal.Syntax.Subformulas (imported above)
@@ -448,7 +448,7 @@ formulas) where guard is NOT Formula.top (i.e., not someFuture).
 def untlNegFormulas (b : Branch Atom) : List (SignedFormula Atom) :=
   b.filter fun sf =>
     match sf.sign, sf.formula with
-    | .neg, .untl _ guard => guard != Formula.top
+    | .neg, .untl guard _ => guard != Formula.top
     | _, _ => false
 
 /--
@@ -458,7 +458,7 @@ formulas) where guard is NOT Formula.top (i.e., not somePast).
 def snceNegFormulas (b : Branch Atom) : List (SignedFormula Atom) :=
   b.filter fun sf =>
     match sf.sign, sf.formula with
-    | .neg, .snce _ guard => guard != Formula.top
+    | .neg, .snce guard _ => guard != Formula.top
     | _, _ => false
 
 /--
@@ -468,7 +468,7 @@ formulas) where guard is NOT Formula.top (i.e., not someFuture).
 def untlPosFormulas (b : Branch Atom) : List (SignedFormula Atom) :=
   b.filter fun sf =>
     match sf.sign, sf.formula with
-    | .pos, .untl _ guard => guard != Formula.top
+    | .pos, .untl guard _ => guard != Formula.top
     | _, _ => false
 
 /--
@@ -478,7 +478,7 @@ formulas) where guard is NOT Formula.top (i.e., not somePast).
 def sncePosFormulas (b : Branch Atom) : List (SignedFormula Atom) :=
   b.filter fun sf =>
     match sf.sign, sf.formula with
-    | .pos, .snce _ guard => guard != Formula.top
+    | .pos, .snce guard _ => guard != Formula.top
     | _, _ => false
 
 /--
@@ -530,7 +530,7 @@ def untlNegAtTime (b : Branch Atom) (t : TimeIndex) :
     List (SignedFormula Atom) :=
   b.filter fun sf =>
     match sf.sign, sf.formula with
-    | .neg, .untl _ guard =>
+    | .neg, .untl guard _ =>
       guard != Formula.top && sf.label.time == t
     | _, _ => false
 
@@ -542,7 +542,7 @@ def snceNegAtTime (b : Branch Atom) (t : TimeIndex) :
     List (SignedFormula Atom) :=
   b.filter fun sf =>
     match sf.sign, sf.formula with
-    | .neg, .snce _ guard =>
+    | .neg, .snce guard _ =>
       guard != Formula.top && sf.label.time == t
     | _, _ => false
 

@@ -1,7 +1,7 @@
 # Implementation Plan: Task #197
 
 - **Task**: 197 - Scope initial Modal/ upstream PR (~300 LOC)
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 3.5 hours
 - **Dependencies**: PR #647 (Propositional) status resolution; PR #607 coordination
 - **Research Inputs**: specs/197_modal_upstream_initial_pr/reports/01_modal-upstream-pr-scope.md, specs/197_modal_upstream_initial_pr/reports/02_literature-grounded-analysis.md

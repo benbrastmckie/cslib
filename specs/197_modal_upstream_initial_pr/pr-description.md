@@ -22,6 +22,17 @@ Semantically, box is universal quantification over accessible worlds and distrib
 
 This follows PR #648: bot and imp are the classical minimal signature. The key reason for primitive `bot` is substitution invariance — `⊥` as a nullary operation is fixed by every substitution, preserving the free algebra property. See the [Zulip discussion](https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/near/604219492) for the full argument. Propositional `and`/`or` are primitive in `PL.Proposition` (via `HasAnd`/`HasOr`); the Modal formula type uses Lukasiewicz encodings instead.
 
+### Extending to non-classical modal logics
+
+In classical modal logic, `and`, `or`, and `dia` are all derivable from `{bot, imp, box}`. Non-classical systems require these as primitives: `and`/`or` are not interdefinable via `imp`/`bot` without excluded middle, and `◇` is independent of `□`. The typeclass hierarchy accommodates this:
+
+| System | Primitives | Bundle |
+|--------|-----------|--------|
+| Classical modal (K, T, S4, S5) | `{atom, bot, imp, box}` | `ModalConnectives` |
+| Intuitionistic modal (IK, CK) | + `and`, `or`, `dia` | + `HasAnd`, `HasOr`, `HasDia` |
+
+`HasAnd` and `HasOr` already exist as standalone typeclasses (instantiated on `PL.Proposition`). Adding `HasDia` and instantiating all three on a non-classical modal formula type requires no changes to `ModalConnectives`. We recommend completing the classical metalogic (proof system, completeness, soundness) before adding these extensions.
+
 ## Main Definitions
 
 - `Proposition (Atom)` — inductive formula type with constructors `{atom, bot, imp, box}`
@@ -84,4 +95,4 @@ All notation is scoped to `Cslib.Logic.Modal`:
 
 ## AI Tools Used
 
-This PR was prepared with the assistance of Claude Code (Anthropic), used for drafting the PR description, analyzing the upstream PR landscape, running CI verification, and literature checking. The mathematical content, proof architecture, and design decisions were verified by the author. All Lean code compiles with no sorries.
+This PR was prepared with the assistance of Claude Code (Anthropic), used for drafting the PR description, analyzing the upstream PR landscape, running CI verification. The mathematical content, proof architecture, and design decisions were verified by the author. All Lean code compiles with no sorries.

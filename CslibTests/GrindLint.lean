@@ -70,6 +70,19 @@ open_scoped_all Cslib
 #grind_lint skip Cslib.Logic.HML.Satisfies.diamond
 #grind_lint skip Cslib.LambdaCalculus.LocallyNameless.Untyped.Term.step_multiApp_l
 #adaptation_note
+/-- sizeOf_spec auto-generated theorems from Chronicle/Quasimodel structures -/
+#grind_lint skip Cslib.Logic.Temporal.Metalogic.Chronicle.C5BackwardWalkResult.mk.sizeOf_spec
+#grind_lint skip Cslib.Logic.Temporal.Metalogic.Chronicle.C5ForwardWalkResult.mk.sizeOf_spec
+#grind_lint skip Cslib.Logic.Temporal.Metalogic.Chronicle.EliminationResult.mk.sizeOf_spec
+-- Identifiers below exceed 100 chars; `#grind_lint skip` does not allow line breaks.
+-- noqa linter.style.longLine
+#grind_lint skip Cslib.Logic.Bimodal.Metalogic.Algebraic.UltrafilterMCS.BoolAlgUltrafilter.mk.sizeOf_spec
+#grind_lint skip Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle.C5BackwardWalkResult.mk.sizeOf_spec
+#grind_lint skip Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle.C5ForwardWalkResult.mk.sizeOf_spec
+#grind_lint skip Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle.EliminationResult.mk.sizeOf_spec
+#grind_lint skip Cslib.Logic.Bimodal.Metalogic.BXCanonical.Quasimodel.HintikkaPoint.mk.sizeOf_spec
+
+#adaptation_note
 /-- (changes from lean#13166) -/
 #grind_lint skip Cslib.ωLanguage.map_id
 #grind_lint skip Cslib.LTS.Bisimilarity.gfp

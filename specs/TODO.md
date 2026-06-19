@@ -11,7 +11,7 @@ next_project_number: 254
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,236,241,242,243,245,248,250,252,253 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,226,236,241,242,243,245,248,250,252 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 2 | 39,40,181,215,251 | 36,37,180,248 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -28,10 +28,6 @@ next_project_number: 254
 ### Foundations
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
-
-### Project Management
-
-253 [NOT STARTED] — Gather PDFs for all 25 literature references cited across tasks 2
 
 ### Propositional Logic
 
@@ -55,11 +51,16 @@ next_project_number: 254
 ## Tasks
 
 ### 253. Gather automata literature
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: general
 - **Topic**: Project Management
 - **Dependencies**: None
-- **Research**: [253_gather_automata_literature/reports/01_reference-inventory.md]
+- **Research**:
+  - [253_gather_automata_literature/reports/01_reference-inventory.md]
+  - [253_gather_automata_literature/reports/02_source-availability.md]
+  - [253_gather_automata_literature/reports/03_acquisition-report.md]
+- **Plan**: [253_gather_automata_literature/plans/02_literature-gathering.md]
+- **Summary**: [253_gather_automata_literature/summaries/02_acquisition-summary.md]
 
 **Description**: Gather PDFs for all 25 literature references cited across tasks 241-252 (McNaughton, Vardi-Wolper, NBA emptiness, NBA complementation, product construction/model checking, acceptance conditions zoo). Search online repositories (arXiv, DBLP, Springer, IEEE, ACM DL, Semantic Scholar, author homepages) for each reference. Convert acquired PDFs to markdown via the literature pipeline and update the Literature index. Produce a final report listing all sources found and any that remain unlocated
 

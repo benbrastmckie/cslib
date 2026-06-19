@@ -4,20 +4,42 @@
     {
       "project_number": 253,
       "project_name": "gather_automata_literature",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "general",
       "description": "Gather PDFs for all 25 literature references cited across tasks 241-252 (McNaughton, Vardi-Wolper, NBA emptiness, NBA complementation, product construction/model checking, acceptance conditions zoo). Search online repositories (arXiv, DBLP, Springer, IEEE, ACM DL, Semantic Scholar, author homepages) for each reference. Convert acquired PDFs to markdown via the literature pipeline and update the Literature index. Produce a final report listing all sources found and any that remain unlocated",
       "topic": "Project Management",
       "created": "2026-06-19T20:38:05Z",
-      "last_updated": "2026-06-19T20:38:05Z",
-      "next_artifact_number": 2,
+      "last_updated": "2026-06-19T21:02:17Z",
+      "next_artifact_number": 3,
       "artifacts": [
         {
           "path": "specs/253_gather_automata_literature/reports/01_reference-inventory.md",
           "type": "report",
           "summary": "Complete inventory of 25 deduplicated literature references across tasks 241-252 with search guidance"
+        },
+        {
+          "path": "specs/253_gather_automata_literature/reports/02_source-availability.md",
+          "type": "report",
+          "summary": "Source availability research for 25 automata theory references with URLs and access types"
+        },
+        {
+          "path": "specs/253_gather_automata_literature/plans/02_literature-gathering.md",
+          "type": "plan",
+          "summary": "4-phase plan for downloading, converting, indexing, and reporting on 25 automata theory references"
+        },
+        {
+          "path": "specs/253_gather_automata_literature/reports/03_acquisition-report.md",
+          "type": "report",
+          "summary": "Final acquisition report for all 25 references"
+        },
+        {
+          "path": "specs/253_gather_automata_literature/summaries/02_acquisition-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary: 13 acquired, 12 paywall, 24 index entries"
         }
-      ]
+      ],
+      "session_id": "sess_1781901617_19c4bf",
+      "completion_summary": "Downloaded 13 of 25 automata theory PDFs (11 Tier 1 open-access + 2 Tier 2), converted all to markdown, added 24 enriched entries to Literature/index.json. 12 references remain behind IEEE/Springer/Elsevier/AMS paywalls with documented acquisition recommendations."
     },
     {
       "project_number": 241,

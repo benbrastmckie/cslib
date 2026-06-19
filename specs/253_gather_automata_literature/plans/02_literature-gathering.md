@@ -1,7 +1,7 @@
 # Implementation Plan: Task #253 — Gather Automata Theory Literature
 
 - **Task**: 253 - Gather PDFs for all 25 literature references cited across tasks 241-252
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 3 hours
 - **Dependencies**: None
 - **Research Inputs**: reports/01_reference-inventory.md, reports/02_source-availability.md

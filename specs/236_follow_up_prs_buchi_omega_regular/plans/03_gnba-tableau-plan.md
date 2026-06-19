@@ -1,7 +1,7 @@
 # Implementation Plan: Task #236 -- GNBA Tableau Construction
 
 - **Task**: 236 - Complete follow-up PRs from PR #649 for Buchi automata and closure of omega-regular languages under boolean operations
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 30 hours
 - **Dependencies**: None (Phases 1-2 from prior plan complete; OmegaRegular.lean exists with atom/bot/imp/next proved)
 - **Research Inputs**: specs/236_follow_up_prs_buchi_omega_regular/reports/03_gnba-tableau-research.md

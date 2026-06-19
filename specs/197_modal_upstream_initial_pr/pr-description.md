@@ -14,7 +14,7 @@ This PR stacks on PR #648 (`feat/propositional-v2`). PR #649 (temporal) is a sib
 
 ### Why box, not diamond?
 
-With box primitive, necessitation is a pure rule — `⊢ φ → ⊢ □φ` — mentioning only `box`. The K axiom `□(φ → ψ) → □φ → □ψ` uses only `box` and `imp`. With diamond primitive, necessitation becomes an interaction law: `⊢ φ → ⊢ ¬◇¬φ` (requiring `neg`), or expanding, `⊢ φ → ⊢ (◇(φ → ⊥)) → ⊥` (requiring `dia`, `imp`, and `bot`). The underlying reason is that `□` pairs naturally with `→` — both primitive in the `{bot, imp, box}` signature — while `◇` pairs with `∨`, which is derived from `→` and `⊥`. [ChagrovZakharyaschev1997] §3.1 adopts the box-first presentation; [Blackburn2001] Ch. 1 takes the diamond-first alternative; [Burgess1984] uses box throughout.
+With box primitive, necessitation is a pure rule — `⊢ φ → ⊢ □φ` — mentioning only `box`. The K axiom `□(φ → ψ) → □φ → □ψ` uses only `box` and `imp`. With diamond primitive, necessitation becomes an interaction law: `⊢ φ → ⊢ ¬◇¬φ` (requiring `neg`), or expanding, `⊢ φ → ⊢ (◇(φ → ⊥)) → ⊥` (requiring `dia`, `imp`, and `bot`). The underlying reason is that `□` pairs naturally with `→` — both primitive in the `{bot, imp, box}` signature — while `◇` pairs with `∨`, which is derived from `→` and `⊥`. [ChagrovZakharyaschev1997] §3.1 adopts the box-first presentation.
 
 Semantically, box is universal quantification over accessible worlds and distributes over implication (K). Diamond is derived as `◇φ := ¬□¬φ = (□(φ → ⊥)) → ⊥`, which requires excluded middle and is therefore specific to classical modal logic. `HasDia` should be added as a separate typeclass once non-classical modal logics (IK, CK) are formalized.
 
@@ -51,7 +51,7 @@ All notation is scoped to `Cslib.Logic.Modal`:
 
 **PRs #528 and #535 (foundation)**: This PR builds directly on @fmontesi's #528/#535, retaining the `Model`/`Satisfies`/`Judgement` structure unchanged.
 
-**PR #607 (coordination)**: PR #607 by @fmontesi introduces per-operator typeclass files. PR #607 is active as of 2026-06-16. The `imp` naming in this PR follows the convention across CSLib's Bimodal and Temporal types (`impI`/`impE`); PR #607 uses `impl`. Happy to align on whichever naming reviewers prefer. The constructor refactoring from `{not, and, diamond}` to `{bot, imp, box}` is structurally incompatible with #607's current instances and requires coordination — see the [comment on PR #607](https://github.com/leanprover/cslib/pull/607#issuecomment-4735753144).
+**PR #607 (coordination)**: PR #607 by @fmontesi introduces per-operator typeclass files. PR #607 is active as of 2026-06-16. The `imp` naming in this PR is #648's settled convention — it aligns with the `HasImp` typeclass name and the elimination rule `impE` across CSLib's Bimodal and Temporal types. PR #607 uses `impl`. Happy to align on whichever naming reviewers prefer. The constructor refactoring from `{not, and, diamond}` to `{bot, imp, box}` is structurally incompatible with #607's current instances and requires coordination — see the [comment on PR #607](https://github.com/leanprover/cslib/pull/607#issuecomment-4735753144).
 
 **PR #587 (coordination)**: PR #587 by @thomaskwaring (DRAFT) creates `Connectives.lean` with semantic typeclasses. PR #648 creates the same path with syntactic typeclasses. The content is complementary — see the [comment on PR #587](https://github.com/leanprover/cslib/pull/587#issuecomment-4735825910).
 
@@ -75,13 +75,12 @@ All notation is scoped to `Cslib.Logic.Modal`:
 1. **PR #648**: Connective typeclasses + five-primitive propositional formula type *(open)*
 2. **This PR**: Classical modal formula type with `{atom, bot, imp, box}` primitives
 3. **PR 3**: Modal proof system (Hilbert axiomatization, completeness for K) using the `InferenceSystem` API as @fmontesi [suggested](https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Modal.20Logic)
-4. **PR 4**: Modal Kripke semantics with soundness
+4. **PR 4**: S5 completeness — @Kyle_Miller has indicated he will port S5 completeness once the formula type is upstream
+5. **PR 5**: Modal Kripke semantics with soundness
 
 ## References
 
-* [P. Blackburn, M. de Rijke, Y. Venema, *Modal Logic*][Blackburn2001]
 * [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997]
-* [J. P. Burgess, *Basic Tense Logic*][Burgess1984]
 
 ## AI Tools Used
 

@@ -6,7 +6,7 @@ next_project_number: 235
 
 ## Task Order
 
-*Updated 2026-06-18. Generated from state.json dependency graph.*
+*Updated 2026-06-19. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
@@ -31,7 +31,7 @@ next_project_number: 235
 
 ### Modal Logic
 
-197 [RESEARCHED] — Review the ambition to contribute Modal/ to upstream, identifying
+197 [PR READY] — Review the ambition to contribute Modal/ to upstream, identifying
 
 ### Project Management
 
@@ -44,7 +44,7 @@ next_project_number: 235
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-234 [NOT STARTED] — Revise main branch to use standard LTL convention for untl and sn
+234 [IMPLEMENTING] — Revise main branch to use standard LTL convention for untl and sn
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -55,10 +55,12 @@ next_project_number: 235
 ## Tasks
 
 ### 234. Revise untl snce convention
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
+- **Research**: [234_revise_untl_snce_convention/reports/01_untl-snce-convention.md]
+- **Plan**: [234_revise_untl_snce_convention/plans/01_untl-snce-convention.md]
 
 **Description**: Revise main branch to use standard LTL convention for untl and snce: first argument is the guard (holds at intermediate points), second argument is the event (eventually holds at the witness point). Update all Lean code, docstrings, and comments that reference the Burgess convention to align with the standard temporal logic convention
 
@@ -79,6 +81,8 @@ next_project_number: 235
 - **Task Type**: cslib
 - **Topic**: pr
 - **Dependencies**: None
+- **Research**: [232_rebase_pr649_onto_pr648/reports/01_rebase-research.md]
+- **Plan**: [232_rebase_pr649_onto_pr648/plans/01_rebase-plan.md]
 
 **Description**: Rebase PR #649 (feat/temporal-formula-propositional) onto PR #648 base branch (feat/propositional-v2) and remove unrelated file changes per reviewer ctchou's request. Currently the branch is a single commit on main with many unrelated changes (HasFresh, LTS/Notation, CCS/Semantics, LambdaCalculus files, Modal logic files, Propositional/Defs.lean). Cherry-pick only the temporal-specific changes (Temporal/Syntax/Formula.lean, LTL/Syntax/Formula.lean, Connectives.lean temporal additions, Cslib.lean imports, references.bib) onto feat/propositional-v2 as the new base
 
@@ -120,13 +124,15 @@ Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completenes
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
+- **Research**: [209_lint_namespace_fixes/reports/01_namespace-research.md]
+- **Plan**: [209_lint_namespace_fixes/plans/01_namespace-plan.md]
 
 **Description**: Fix 298 namespace lint errors: 239 declarations not properly namespaced and 59 duplicate namespace components (Chronicle, Temporal, Bimodal repeated in names). Requires moving declarations into correct namespaces or renaming.
 
 ---
 
 ### 197. Scope initial Modal/ upstream PR (~300 LOC)
-- **Status**: [RESEARCHED]
+- **Status**: [PR READY]
 - **Task Type**: pr
 - **Topic**: Modal Logic
 - **Dependencies**: None

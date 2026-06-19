@@ -4,12 +4,25 @@
     {
       "project_number": 234,
       "project_name": "revise_untl_snce_convention",
-      "status": "not_started",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Revise main branch to use standard LTL convention for untl and snce: first argument is the guard (holds at intermediate points), second argument is the event (eventually holds at the witness point). Update all Lean code, docstrings, and comments that reference the Burgess convention to align with the standard temporal logic convention",
       "topic": "Temporal Logic",
       "created": "2026-06-18T23:50:25Z",
-      "last_updated": "2026-06-18T23:50:25Z"
+      "last_updated": "2026-06-19T00:00:22Z",
+      "session_id": "sess_1781826687_89c3ab",
+      "artifacts": [
+        {
+          "path": "specs/234_revise_untl_snce_convention/reports/01_untl-snce-convention.md",
+          "type": "report",
+          "summary": "01_untl-snce-convention.md"
+        },
+        {
+          "path": "specs/234_revise_untl_snce_convention/plans/01_untl-snce-convention.md",
+          "type": "plan",
+          "summary": "01_untl-snce-convention.md"
+        }
+      ]
     },
     {
       "project_number": 233,
@@ -33,7 +46,19 @@
       "created": "2026-06-17T23:31:47Z",
       "last_updated": "2026-06-17T23:46:03Z",
       "session_id": "sess_1781739720_c78268",
-      "completion_summary": "Rebased feat/temporal-formula-propositional onto feat/propositional-v2. Created clean single commit (2b2bb058) with only 5 temporal-specific files: 2 new (Temporal/Formula.lean, LTL/Formula.lean), 3 modified (Connectives.lean, Cslib.lean, references.bib). Removed all 11 unrelated shake/import cleanup files from the diff."
+      "completion_summary": "Rebased feat/temporal-formula-propositional onto feat/propositional-v2. Created clean single commit (2b2bb058) with only 5 temporal-specific files: 2 new (Temporal/Formula.lean, LTL/Formula.lean), 3 modified (Connectives.lean, Cslib.lean, references.bib). Removed all 11 unrelated shake/import cleanup files from the diff.",
+      "artifacts": [
+        {
+          "path": "specs/232_rebase_pr649_onto_pr648/reports/01_rebase-research.md",
+          "type": "report",
+          "summary": "01_rebase-research.md"
+        },
+        {
+          "path": "specs/232_rebase_pr649_onto_pr648/plans/01_rebase-plan.md",
+          "type": "plan",
+          "summary": "01_rebase-plan.md"
+        }
+      ]
     },
     {
       "project_number": 226,
@@ -69,7 +94,19 @@
       "description": "Fix 298 namespace lint errors: 239 declarations not properly namespaced and 59 duplicate namespace components (Chronicle, Temporal, Bimodal repeated in names). Requires moving declarations into correct namespaces or renaming.",
       "topic": "Project Management",
       "created": "2026-06-15T17:59:27Z",
-      "last_updated": "2026-06-15T17:59:27Z"
+      "last_updated": "2026-06-15T17:59:27Z",
+      "artifacts": [
+        {
+          "path": "specs/209_lint_namespace_fixes/reports/01_namespace-research.md",
+          "type": "report",
+          "summary": "01_namespace-research.md"
+        },
+        {
+          "path": "specs/209_lint_namespace_fixes/plans/01_namespace-plan.md",
+          "type": "plan",
+          "summary": "01_namespace-plan.md"
+        }
+      ]
     },
     {
       "project_number": 215,
@@ -91,14 +128,14 @@
     {
       "project_number": 197,
       "project_name": "modal_upstream_initial_pr",
-      "status": "researched",
+      "status": "pr_ready",
       "task_type": "pr",
       "title": "Scope initial Modal/ upstream PR (~300 LOC)",
       "description": "Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible",
       "topic": "Modal Logic",
       "created": "2026-06-14T19:08:07Z",
-      "last_updated": "2026-06-17T23:03:17Z",
-      "session_id": "sess_1781737198_8dd1bb",
+      "last_updated": "2026-06-19T00:07:55Z",
+      "session_id": "sess_1781827513_82dc87",
       "research_artifacts": [
         "specs/197_modal_upstream_initial_pr/reports/01_modal-upstream-pr-scope.md",
         "specs/197_modal_upstream_initial_pr/reports/02_literature-grounded-analysis.md",
@@ -218,7 +255,8 @@
           "summary": "Item-by-item verification of plan 10 action items against revised pr-description.md. 7/8 addressed; Kyle Miller S5 intentionally omitted. Recommends PR READY transition."
         }
       ],
-      "base_branch": "feat/propositional-v2"
+      "base_branch": "feat/propositional-v2",
+      "completion_summary": "Applied all 8 revision items from team research report 09 to pr-description.md. 6 items were already addressed; 2 applied: Kyle Miller S5 roadmap item and imp naming rationale strengthening."
     },
     {
       "project_number": 188,

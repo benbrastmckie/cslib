@@ -1,6 +1,16 @@
 {
-  "next_project_number": 246,
+  "next_project_number": 247,
   "active_projects": [
+    {
+      "project_number": 246,
+      "project_name": "modal_comment_cleanup_pr_description",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Clean up scratch-work inline comments inside Modal/ proof bodies, revise specs/archive/197_modal_upstream_initial_pr/pr-description.md to link exact line numbers for strong soundness and completeness results across all 15 systems, then update the description on GitHub PR #662 (leanprover/cslib)",
+      "topic": "Modal Logic",
+      "created": "2026-06-19T17:40:39Z",
+      "last_updated": "2026-06-19T17:40:39Z"
+    },
     {
       "project_number": 241,
       "project_name": "mcnaughton_theorem",

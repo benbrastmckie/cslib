@@ -1,5 +1,5 @@
 ---
-next_project_number: 246
+next_project_number: 247
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 246
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,236,241,242,243,244,245 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 1 | 36,37,180,226,236,241,242,243,244,245,246 | -- | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -28,6 +28,10 @@ next_project_number: 246
 ### Foundations
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
+
+### Modal Logic
+
+246 [NOT STARTED] — Clean up scratch-work inline comments inside Modal/ proof bodies,
 
 ### Propositional Logic
 
@@ -46,6 +50,16 @@ next_project_number: 246
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 246. Modal comment cleanup pr description
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Clean up scratch-work inline comments inside Modal/ proof bodies, revise specs/archive/197_modal_upstream_initial_pr/pr-description.md to link exact line numbers for strong soundness and completeness results across all 15 systems, then update the description on GitHub PR #662 (leanprover/cslib)
+
+---
 
 ### 245. Formula encodable countable instances
 - **Status**: [NOT STARTED]

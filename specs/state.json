@@ -1,5 +1,5 @@
 {
-  "next_project_number": 238,
+  "next_project_number": 241,
   "active_projects": [
     {
       "project_number": 237,
@@ -486,6 +486,41 @@
       ],
       "topic": "Bimodal Porting",
       "last_updated": "2026-06-14T17:54:05Z"
+    },
+    {
+      "project_number": 238,
+      "project_name": "modal_metalogic_stale_docstrings",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Fix stale module docstrings in Modal/Metalogic after task 237 theorem migration. (1) Core Completeness.lean: update /-! docstring to remove moved `completeness` theorem from Main Results, update description to reflect the file now provides generic completeness infrastructure (truth lemma, canonical model) but not the system-specific completeness theorems. (2) 8 empty-body Completeness.lean files (K4, K5, K45, KB5, D4, D5, D45, DB): replace stale 'This module proves completeness...' docstrings with short infrastructure docstrings matching the B/S4/S5 pattern — state the file exists for import chain stability and cross-reference StrongCompleteness.lean for the actual theorems. (3) K5/Completeness.lean has a contradictory hybrid docstring that both says 'proves completeness' and 'provides import infrastructure' — pick one (infrastructure).",
+      "topic": "Modal Logic",
+      "dependencies": [],
+      "created": "2026-06-19T04:00:00Z",
+      "last_updated": "2026-06-19T04:00:00Z"
+    },
+    {
+      "project_number": 239,
+      "project_name": "modal_metalogic_citation_standardization",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Standardize all citations in Modal/Metalogic to use Lean4Doc bib link format. (1) Convert ~20 Soundness.lean and Completeness.lean module docstrings from plain-text style ('Blackburn, de Rijke, Venema, \"Modal Logic\" (2002)') to the Lean4Doc link format ('* [P. Blackburn, M. de Rijke, Y. Venema, *Modal Logic*][Blackburn2001]') matching the StrongCompleteness.lean standard. (2) Replace undefined 'BRV' abbreviation in module docstrings with either spelled-out author names or bib key references; inline code comments may keep 'BRV' if the abbreviation is defined in the file's docstring. (3) Replace internal file references in Soundness.lean's References section ('* Cslib/Logics/Modal/Basic.lean') with proper bib citations or remove if no literature source applies. (4) Remove or convert cross-repo references to BimodalLogic/ project in DeductionTheorem.lean, MCS.lean, and DerivationTree.lean docstrings — replace with bib citations where a literature source exists, otherwise remove the stale path.",
+      "topic": "Modal Logic",
+      "dependencies": [],
+      "created": "2026-06-19T04:00:00Z",
+      "last_updated": "2026-06-19T04:00:00Z"
+    },
+    {
+      "project_number": 240,
+      "project_name": "modal_metalogic_naming_and_barrel_fixes",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Fix naming inconsistencies and barrel file issues in Modal/Metalogic. (1) Add missing 'public import Cslib.Logics.Modal.Metalogic.Systems.K.ConservativeExtension' to Metalogic.lean barrel file. (2) Normalize barrel import ordering so StrongCompleteness block follows the same system order as Soundness/Completeness block (K, T, D, S4, K4, B, K45, K5, D4, KB5, TB, D45, D5, DB, S5). (3) Rename S5/Soundness.lean theorem 'axiom_sound' to 's5_axiom_sound' for consistency with all other 14 systems. (4) Rename D/Completeness.lean theorems from suffix to prefix convention: 'derive_box_from_inconsistency_d' → 'd_derive_box_from_inconsistency', 'mcs_box_witness_d' → 'd_mcs_box_witness', 'canonical_serial' → 'd_canonical_serial', 'truth_lemma_d' → 'd_truth_lemma'. Verify no downstream consumers break (grep for old names in the codebase). (5) Reword K/Completeness.lean:111 comment from 'K-SPECIFIC FIX' to 'K-SPECIFIC CASE' to avoid triggering lint scanners. (6) Evaluate S5 alias 'alias completeness := s5_completeness' — if no downstream consumers use the bare 'completeness' name, remove it; otherwise add a deprecation docstring.",
+      "topic": "Modal Logic",
+      "dependencies": [
+        238
+      ],
+      "created": "2026-06-19T04:00:00Z",
+      "last_updated": "2026-06-19T04:00:00Z"
     }
   ],
   "repository_health": {

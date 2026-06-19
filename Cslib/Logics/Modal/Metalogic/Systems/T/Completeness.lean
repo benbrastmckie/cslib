@@ -7,8 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Modal.Metalogic.Completeness
-public import Cslib.Logics.Modal.Metalogic.MCS
-public import Cslib.Logics.Modal.Metalogic.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.T.Soundness
 public import Cslib.Logics.Modal.ProofSystem.Instances
 
@@ -43,37 +41,6 @@ open Cslib.Logic
 
 universe u
 variable {Atom : Type u}
-
-/-! ## T Canonical Frame Reflexivity (BRV Theorem 4.28, clause 1) -/
-
-/-- **T Canonical Frame Reflexivity** (BRV Theorem 4.28, clause 1):
-The canonical frame for T is reflexive. If `phi in w` and `w` is a T-MCS,
-then `phi -> diamond(phi) in w` (axiom T), so `diamond(phi) in w`, thus R^T ww. -/
-theorem t_canonical_refl
-    (S : CanonicalWorld (@TAxiom Atom)) :
-    (CanonicalModel (@TAxiom Atom)).r S S :=
-  canonical_refl
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .modalT φ)
-    S
-
-/-! ## T Truth Lemma (BRV Lemma 4.21 for T) -/
-
-/-- **T Truth Lemma** (BRV Lemma 4.21 for T):
-Reuses the existing parameterized `truth_lemma` instantiated at `TAxiom`. -/
-theorem t_truth_lemma
-    (S : CanonicalWorld (@TAxiom Atom))
-    (φ : Proposition Atom) :
-    (Satisfies (CanonicalModel (@TAxiom Atom)) S φ ↔ φ ∈ S.val) :=
-  truth_lemma
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    (fun φ ψ => .modalK φ ψ)
-    (fun φ => .modalT φ)
-    S φ
 
 /-! ## T Strong Soundness -/
 

@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-
 public import Cslib.Logics.Modal.Metalogic.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.D45.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.D.Completeness

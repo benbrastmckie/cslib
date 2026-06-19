@@ -48,49 +48,6 @@ open Cslib.Logic
 universe u
 variable {Atom : Type u}
 
-/-! ## TB Canonical Frame Properties (BRV Theorem 4.28) -/
-
-/-- **TB Canonical Frame Reflexivity** (BRV Theorem 4.28, clause 1):
-The canonical frame for TB is reflexive. -/
-theorem tb_canonical_refl
-    (S : CanonicalWorld (@TBAxiom Atom)) :
-    (CanonicalModel (@TBAxiom Atom)).r S S :=
-  canonical_refl
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .modalT φ)
-    S
-
-/-- **TB Canonical Frame Symmetry** (BRV Theorem 4.28, clause 2):
-The canonical frame for TB is symmetric. -/
-theorem tb_canonical_symm
-    (S T : CanonicalWorld (@TBAxiom Atom)) :
-    (CanonicalModel (@TBAxiom Atom)).r S T →
-    (CanonicalModel (@TBAxiom Atom)).r T S :=
-  canonical_symm
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ ψ => .modalK φ ψ)
-    (fun φ => .modalB φ)
-    S T
-
-/-! ## TB Truth Lemma (BRV Lemma 4.21 for TB) -/
-
-/-- **TB Truth Lemma** (BRV Lemma 4.21 for TB):
-Reuses the existing parameterized `truth_lemma` instantiated at `TBAxiom`. -/
-theorem tb_truth_lemma
-    (S : CanonicalWorld (@TBAxiom Atom))
-    (φ : Proposition Atom) :
-    (Satisfies (CanonicalModel (@TBAxiom Atom)) S φ ↔ φ ∈ S.val) :=
-  truth_lemma
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    (fun φ ψ => .modalK φ ψ)
-    (fun φ => .modalT φ)
-    S φ
-
 /-! ## TB Strong Soundness -/
 
 /-- **Strong Soundness for TB**: If `phi` is set-derivable from `Gamma` using `TBAxiom`,

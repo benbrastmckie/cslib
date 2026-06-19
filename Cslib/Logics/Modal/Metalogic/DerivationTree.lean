@@ -24,11 +24,6 @@ predicate `Axioms : Proposition Atom -> Prop`, enabling use for any normal modal
 - `Derivable Axioms`: Derivability from the empty context.
 - `modalDerivationSystem Axioms`: A `DerivationSystem (Proposition Atom)` instance.
 
-## Backward Compatibility
-
-Type aliases `S5DerivationTree`, `S5Deriv`, `S5Derivable`, and `s5DerivationSystem`
-instantiate the parameterized types at `ModalAxiom` for backward compatibility.
-
 ## Design
 
 `DerivationTree` is a `Type` (not a `Prop`) to enable pattern matching and computable
@@ -136,16 +131,19 @@ def height : DerivationTree Axioms Γ φ → Nat
 
 /-! ## Height Properties -/
 
+/-- The left premise of a modus ponens node is strictly shorter than the conclusion node. -/
 theorem height_modus_ponens_left {Γ : List (Proposition Atom)} {φ ψ : Proposition Atom}
     (d₁ : DerivationTree Axioms Γ (φ → ψ)) (d₂ : DerivationTree Axioms Γ φ) :
     d₁.height < (modus_ponens Γ φ ψ d₁ d₂).height := by
   simp [height]; omega
 
+/-- The right premise of a modus ponens node is strictly shorter than the conclusion node. -/
 theorem height_modus_ponens_right {Γ : List (Proposition Atom)} {φ ψ : Proposition Atom}
     (d₁ : DerivationTree Axioms Γ (φ → ψ)) (d₂ : DerivationTree Axioms Γ φ) :
     d₂.height < (modus_ponens Γ φ ψ d₁ d₂).height := by
   simp [height]; omega
 
+/-- The underlying derivation of a weakening node is strictly shorter than the weakening node. -/
 theorem height_weakening {Γ Δ : List (Proposition Atom)} {φ : Proposition Atom}
     (d : DerivationTree Axioms Γ φ) (h : ∀ x ∈ Γ, x ∈ Δ) :
     d.height < (weakening Γ Δ φ d h).height := by
@@ -169,18 +167,22 @@ def Derivable (Axioms : Proposition Atom → Prop) (φ : Proposition Atom) : Pro
 
 /-! ## Basic Combinators -/
 
+/-- Modus ponens lifts from derivation trees to `Deriv`. -/
 theorem mp_deriv {Axioms : Proposition Atom → Prop}
     {Γ : List (Proposition Atom)} {φ ψ : Proposition Atom}
     (h₁ : Deriv Axioms Γ (φ → ψ)) (h₂ : Deriv Axioms Γ φ) : Deriv Axioms Γ ψ := by
   obtain ⟨d₁⟩ := h₁; obtain ⟨d₂⟩ := h₂
   exact ⟨.modus_ponens Γ φ ψ d₁ d₂⟩
 
+/-- Weakening lifts from derivation trees to `Deriv`: if `φ` is derivable from `Γ` and
+`Γ ⊆ Δ` then `φ` is derivable from `Δ`. -/
 theorem weakening_deriv {Axioms : Proposition Atom → Prop}
     {Γ Δ : List (Proposition Atom)} {φ : Proposition Atom}
     (h : Deriv Axioms Γ φ) (hsub : ∀ x ∈ Γ, x ∈ Δ) : Deriv Axioms Δ φ := by
   obtain ⟨d⟩ := h
   exact ⟨.weakening Γ Δ φ d hsub⟩
 
+/-- Any assumption in the context is derivable. -/
 theorem assumption_deriv {Axioms : Proposition Atom → Prop}
     {Γ : List (Proposition Atom)} {φ : Proposition Atom}
     (h : φ ∈ Γ) : Deriv Axioms Γ φ :=
@@ -199,20 +201,5 @@ def modalDerivationSystem (Axioms : Proposition Atom → Prop) :
   weakening := fun hd hsub => weakening_deriv hd hsub
   assumption := fun hmem => assumption_deriv hmem
   mp := fun h₁ h₂ => mp_deriv h₁ h₂
-
-/-! ## Backward-Compatible Aliases -/
-
-/-- S5 derivation tree: `DerivationTree` instantiated at `ModalAxiom`. -/
-abbrev S5DerivationTree := @DerivationTree Atom ModalAxiom
-
-/-- S5 derivability from context: `Deriv` instantiated at `ModalAxiom`. -/
-abbrev S5Deriv := @Deriv Atom ModalAxiom
-
-/-- S5 derivability from empty context: `Derivable` instantiated at `ModalAxiom`. -/
-abbrev S5Derivable := @Derivable Atom ModalAxiom
-
-/-- S5 derivation system: `modalDerivationSystem` instantiated at `ModalAxiom`. -/
-def s5DerivationSystem : Metalogic.DerivationSystem (Proposition Atom) :=
-  modalDerivationSystem (@ModalAxiom Atom)
 
 end Cslib.Logic.Modal

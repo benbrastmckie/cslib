@@ -74,12 +74,4 @@ theorem b_soundness {World : Type*}
     (h_ctx : ∀ ψ ∈ Γ, Satisfies m w ψ) : Satisfies m w φ :=
   soundness d m (fun _ h_ax w => b_axiom_sound h_ax m h_symm w) w h_ctx
 
-/-- B soundness for derivable formulas (empty context). -/
-theorem b_soundness_derivable {World : Type*}
-    {φ : Proposition Atom} (h : Derivable (@BAxiom Atom) φ)
-    (m : Model World Atom)
-    (h_symm : ∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁)
-    (w : World) : Satisfies m w φ :=
-  soundness_derivable h m (fun _ h_ax w => b_axiom_sound h_ax m h_symm w) w
-
 end Cslib.Logic.Modal

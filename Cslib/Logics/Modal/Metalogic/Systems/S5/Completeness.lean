@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-
 public import Cslib.Logics.Modal.Metalogic.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.S5.Soundness
 public import Cslib.Logics.Modal.ProofSystem.Instances
@@ -112,7 +111,6 @@ theorem s5_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositi
     canonical_eucl
       (fun φ ψ => .implyK φ ψ)
       (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .modalT φ)
       (fun φ => .modalFour φ)
       (fun φ => .modalB φ)
       (fun φ ψ => .modalK φ ψ)

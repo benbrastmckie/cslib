@@ -145,8 +145,6 @@ theorem canonical_eucl
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_implyS : ∀ (φ ψ χ : Proposition Atom),
       Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (_h_T : ∀ (φ : Proposition Atom),
-      Axioms ((Proposition.box φ).imp φ))
     (h_4 : ∀ (φ : Proposition Atom),
       Axioms ((Proposition.box φ).imp (Proposition.box (Proposition.box φ))))
     (h_B : ∀ (φ : Proposition Atom),
@@ -433,25 +431,6 @@ def ModalSetDerivable (Axioms : Proposition Atom → Prop)
     (Gamma : Set (Proposition Atom)) (phi : Proposition Atom) : Prop :=
   ∃ L : List (Proposition Atom),
     (∀ x ∈ L, x ∈ Gamma) ∧ (modalDerivationSystem Axioms).Deriv L phi
-
-/-! ## Basic ModalSetDerivable Lemmas -/
-
-/-- Any member of `Gamma` is set-derivable from `Gamma`. -/
-theorem ModalSetDerivable_of_mem {Axioms : Proposition Atom → Prop}
-    {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
-    (h : phi ∈ Gamma) : ModalSetDerivable Axioms Gamma phi :=
-  ⟨[phi],
-   fun x hx => by simp only [List.mem_cons, List.not_mem_nil, or_false] at hx; exact hx ▸ h,
-   (modalDerivationSystem Axioms).assumption (List.mem_cons.mpr (Or.inl rfl))⟩
-
-/-- Set-derivability is monotone: if `Gamma ⊆ Delta` and `phi` is set-derivable
-from `Gamma`, then `phi` is set-derivable from `Delta`. -/
-theorem ModalSetDerivable_weakening {Axioms : Proposition Atom → Prop}
-    {Gamma Delta : Set (Proposition Atom)} (h_sub : Gamma ⊆ Delta)
-    {phi : Proposition Atom} (h : ModalSetDerivable Axioms Gamma phi) :
-    ModalSetDerivable Axioms Delta phi := by
-  obtain ⟨L, hL_sub, hL_deriv⟩ := h
-  exact ⟨L, fun x hx => h_sub (hL_sub x hx), hL_deriv⟩
 
 /-- Any theorem (derivable from the empty context) is set-derivable from any set. -/
 theorem ModalSetDerivable_of_Derivable {Axioms : Proposition Atom → Prop}

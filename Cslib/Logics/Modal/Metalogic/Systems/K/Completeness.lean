@@ -7,8 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Modal.Metalogic.Completeness
-public import Cslib.Logics.Modal.Metalogic.MCS
-public import Cslib.Logics.Modal.Metalogic.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.K.Soundness
 public import Cslib.Logics.Modal.ProofSystem.Instances
 
@@ -329,7 +327,6 @@ theorem k_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositio
 /-- **Strong Soundness and Completeness for K**:
 `phi` is a semantic consequence of `Gamma` over all frames iff `phi` is
 set-derivable from `Gamma` using `KAxiom`. -/
-@[simp]
 theorem k_strong_completeness_iff {Gamma : Set (Proposition Atom)} {phi : Proposition Atom} :
     ModalSemanticEntails (fun _ => True) Gamma phi ↔
     ModalSetDerivable (@KAxiom Atom) Gamma phi :=

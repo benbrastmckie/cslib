@@ -40,18 +40,6 @@ variable {Atom : Type*}
 
 attribute [local instance] Classical.propDecidable
 
-/-! ## HasHilbertTree Instance -/
-
-/-- `HasHilbertTree` instance for modal logic. Maps Modal's `.implyK`/`.implyS`
-axiom constructors to the generic typeclass fields. -/
-noncomputable instance : HasHilbertTree (Proposition Atom) where
-  Tree := fun Γ φ => DerivationTree ModalAxiom Γ φ
-  implyK := fun φ ψ => .ax [] _ (.implyK φ ψ)
-  implyS := fun φ ψ χ => .ax [] _ (.implyS φ ψ χ)
-  assumption := fun h => .assumption _ _ h
-  mp := fun d₁ d₂ => .modus_ponens _ _ _ d₁ d₂
-  weakening := fun d h => .weakening _ _ _ d h
-
 /-! ## Core: deductionWithMem (parameterized) -/
 
 /-- The key helper for the weakening case: if `Gamma' |- phi` and `A in Gamma'`, then

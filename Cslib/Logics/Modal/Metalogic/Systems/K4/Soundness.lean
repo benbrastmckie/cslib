@@ -84,14 +84,4 @@ theorem k4_soundness {World : Type*}
     (h_ctx : ∀ ψ ∈ Γ, Satisfies m w ψ) : Satisfies m w φ :=
   soundness d m (fun _ h_ax w => k4_axiom_sound h_ax m h_trans w) w h_ctx
 
-/-- **K4 Soundness for derivable formulas**: If `phi` is K4-derivable from the empty
-context, then `phi` is valid on all transitive frames. -/
-theorem k4_soundness_derivable {World : Type*}
-    {φ : Proposition Atom} (h : Derivable (@K4Axiom Atom) φ)
-    (m : Model World Atom)
-    (h_trans : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃)
-    (w : World) : Satisfies m w φ :=
-  soundness_derivable h m
-    (fun _ h_ax w => k4_axiom_sound h_ax m h_trans w) w
-
 end Cslib.Logic.Modal

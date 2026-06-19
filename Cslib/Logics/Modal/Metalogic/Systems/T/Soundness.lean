@@ -77,13 +77,4 @@ theorem t_soundness {World : Type*}
     (h_ctx : ∀ ψ ∈ Γ, Satisfies m w ψ) : Satisfies m w φ :=
   soundness d m (fun _ h_ax w => t_axiom_sound h_ax m h_refl w) w h_ctx
 
-/-- **T Soundness for derivable formulas**: If `phi` is T-derivable from the empty
-context, then `phi` is satisfied at every world of every reflexive model. -/
-theorem t_soundness_derivable {World : Type*}
-    {φ : Proposition Atom} (h : Derivable (@TAxiom Atom) φ)
-    (m : Model World Atom)
-    (h_refl : ∀ w, m.r w w)
-    (w : World) : Satisfies m w φ :=
-  soundness_derivable h m (fun _ h_ax w => t_axiom_sound h_ax m h_refl w) w
-
 end Cslib.Logic.Modal

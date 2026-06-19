@@ -103,6 +103,7 @@ abbrev Proposition.diamond (φ : Proposition Atom) : Proposition Atom :=
 abbrev Proposition.iff (φ₁ φ₂ : Proposition Atom) : Proposition Atom :=
   .and (.imp φ₁ φ₂) (.imp φ₂ φ₁)
 
+/-- Bottom element of `Proposition Atom`, registered as the canonical `⊥`. -/
 instance : Bot (Proposition Atom) := ⟨.bot⟩
 
 @[inherit_doc] scoped prefix:40 "¬" => Proposition.neg
@@ -184,10 +185,13 @@ structure Judgement World Atom where
 @[simp, scoped grind =]
 def Satisfies.Bundled (j : Judgement World Atom) : Prop := Satisfies j.m j.w j.φ
 
+/-- Register `Judgement` as a `HasInferenceSystem`, using `Satisfies.Bundled` as the
+satisfaction predicate. -/
 instance : HasInferenceSystem (Judgement World Atom) := ⟨Satisfies.Bundled⟩
 
 open scoped InferenceSystem Proposition
 
+/-- Unfolding lemma: the derivation notation `⇓Modal[m,w ⊨ φ]` equals `Satisfies m w φ`. -/
 @[scoped grind =]
 theorem derivation_def {m : Model World Atom} {w : World} {φ : Proposition Atom} :
   ⇓Modal[m,w ⊨ φ] = Satisfies m w φ := rfl
@@ -223,7 +227,7 @@ theorem Satisfies.diamond_iff_exists {m : Model World Atom} :
 theorem Satisfies.and_iff_and {m : Model World Atom} :
     ⇓Modal[m,w ⊨ φ₁ ∧ φ₂] ↔ ⇓Modal[m,w ⊨ φ₁] ∧ ⇓Modal[m,w ⊨ φ₂] := Satisfies.and_iff
 
-/-- The theory of a world in a model is the set of all propositions that it satifies. -/
+/-- The theory of a world in a model is the set of all propositions that it satisfies. -/
 abbrev theory (m : Model World Atom) (w : World) : Set (Proposition Atom) :=
   {φ | ⇓Modal[m,w ⊨ φ]}
 
@@ -231,6 +235,7 @@ abbrev theory (m : Model World Atom) (w : World) : Set (Proposition Atom) :=
 abbrev TheoryEq (m : Model World Atom) (w₁ w₂ : World) :=
   theory m w₁ = theory m w₂
 
+/-- Two worlds are theory-equivalent iff they satisfy the same propositions. -/
 theorem TheoryEq.ext_iff : TheoryEq m w₁ w₂ ↔ (∀ φ, φ ∈ theory m w₁ ↔ φ ∈ theory m w₂) :=
   Set.ext_iff
 

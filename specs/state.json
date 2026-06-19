@@ -1,6 +1,56 @@
 {
-  "next_project_number": 241,
+  "next_project_number": 246,
   "active_projects": [
+    {
+      "project_number": 241,
+      "project_name": "mcnaughton_theorem",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller) establishing equivalence between omega-regular languages and deterministic Muller automata",
+      "topic": "Temporal Logic",
+      "created": "2026-06-19T05:20:19Z",
+      "last_updated": "2026-06-19T05:20:19Z"
+    },
+    {
+      "project_number": 242,
+      "project_name": "vardi_wolper_tableau_construction",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Implement full Vardi-Wolper tableau construction for LTL-to-NBA translation using direct NBA construction approach",
+      "topic": "Temporal Logic",
+      "created": "2026-06-19T05:20:19Z",
+      "last_updated": "2026-06-19T05:20:19Z"
+    },
+    {
+      "project_number": 243,
+      "project_name": "deterministic_buchi_automata",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Implement deterministic Büchi automata constructions and related results",
+      "topic": "Temporal Logic",
+      "created": "2026-06-19T05:20:19Z",
+      "last_updated": "2026-06-19T05:20:19Z"
+    },
+    {
+      "project_number": 244,
+      "project_name": "optimize_nba_state_space",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Optimize NBA state space constructions prioritizing correctness over minimality",
+      "topic": "Temporal Logic",
+      "created": "2026-06-19T05:20:19Z",
+      "last_updated": "2026-06-19T05:20:19Z"
+    },
+    {
+      "project_number": 245,
+      "project_name": "formula_encodable_countable_instances",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Add Encodable, Countable, and Denumerable instances for LTL Formula type (deferred to completeness PRs)",
+      "topic": "Temporal Logic",
+      "created": "2026-06-19T05:20:19Z",
+      "last_updated": "2026-06-19T05:20:19Z"
+    },
     {
       "project_number": 236,
       "project_name": "follow_up_prs_buchi_omega_regular",
@@ -182,13 +232,13 @@
     {
       "project_number": 238,
       "project_name": "modal_metalogic_stale_docstrings",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Fix stale module docstrings in Modal/Metalogic after task 237 theorem migration. (1) Core Completeness.lean: update /-! docstring to remove moved `completeness` theorem from Main Results, update description to reflect the file now provides generic completeness infrastructure (truth lemma, canonical model) but not the system-specific completeness theorems. (2) 8 empty-body Completeness.lean files (K4, K5, K45, KB5, D4, D5, D45, DB): replace stale 'This module proves completeness...' docstrings with short infrastructure docstrings matching the B/S4/S5 pattern — state the file exists for import chain stability and cross-reference StrongCompleteness.lean for the actual theorems. (3) K5/Completeness.lean has a contradictory hybrid docstring that both says 'proves completeness' and 'provides import infrastructure' — pick one (infrastructure).",
       "topic": "Modal Logic",
       "dependencies": [],
       "created": "2026-06-19T04:00:00Z",
-      "last_updated": "2026-06-19T05:03:52Z",
+      "last_updated": "2026-06-19T05:17:43Z",
       "session_id": "sess_1750300800_multi_238",
       "artifacts": [
         {
@@ -200,19 +250,25 @@
           "path": "specs/238_modal_metalogic_stale_docstrings/plans/01_stale-docstrings.md",
           "type": "plan",
           "summary": "01_stale-docstrings.md"
+        },
+        {
+          "path": "specs/238_modal_metalogic_stale_docstrings/summaries/01_stale-docstrings-summary.md",
+          "type": "summary",
+          "summary": "01_stale-docstrings-summary.md"
         }
-      ]
+      ],
+      "completion_summary": "Fixed 9 stale module docstrings in Modal/Metalogic Completeness.lean files after task 237 theorem migration. Core file updated with accurate Main Results; 8 empty-body system files standardized to infrastructure pattern matching B/S4/S5."
     },
     {
       "project_number": 239,
       "project_name": "modal_metalogic_citation_standardization",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Standardize all citations in Modal/Metalogic to use Lean4Doc bib link format. (1) Convert ~20 Soundness.lean and Completeness.lean module docstrings from plain-text style ('Blackburn, de Rijke, Venema, \"Modal Logic\" (2002)') to the Lean4Doc link format ('* [P. Blackburn, M. de Rijke, Y. Venema, *Modal Logic*][Blackburn2001]') matching the StrongCompleteness.lean standard. (2) Replace undefined 'BRV' abbreviation in module docstrings with either spelled-out author names or bib key references; inline code comments may keep 'BRV' if the abbreviation is defined in the file's docstring. (3) Replace internal file references in Soundness.lean's References section ('* Cslib/Logics/Modal/Basic.lean') with proper bib citations or remove if no literature source applies. (4) Remove or convert cross-repo references to BimodalLogic/ project in DeductionTheorem.lean, MCS.lean, and DerivationTree.lean docstrings — replace with bib citations where a literature source exists, otherwise remove the stale path.",
       "topic": "Modal Logic",
       "dependencies": [],
       "created": "2026-06-19T04:00:00Z",
-      "last_updated": "2026-06-19T05:03:57Z",
+      "last_updated": "2026-06-19T05:17:45Z",
       "session_id": "sess_1750300800_multi_239",
       "artifacts": [
         {
@@ -224,8 +280,14 @@
           "path": "specs/239_modal_metalogic_citation_standardization/plans/01_citation-standardization.md",
           "type": "plan",
           "summary": "01_citation-standardization.md"
+        },
+        {
+          "path": "specs/239_modal_metalogic_citation_standardization/summaries/01_citation-standardization-summary.md",
+          "type": "summary",
+          "summary": "01_citation-standardization-summary.md"
         }
-      ]
+      ],
+      "completion_summary": "Standardized all citations across 48 Modal/Metalogic files to Lean4Doc [Blackburn2001] bib link format. Removed all BRV abbreviations, internal Cslib/ file references, and BimodalLogic/ cross-repo paths from docstrings."
     },
     {
       "project_number": 240,

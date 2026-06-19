@@ -1,16 +1,10 @@
 {
-  "status": "planned",
-  "summary": "4-phase plan to standardize ~50 Modal/Metalogic citation formats to Lean4Doc bib links, replace BRV abbreviations, and remove internal/cross-repo references",
+  "status": "implemented",
+  "summary": "Standardized all citations across 48 Modal/Metalogic files to Lean4Doc [Blackburn2001] bib link format, removed all BRV abbreviations, internal file references, and BimodalLogic cross-repo paths",
   "blockers": [],
   "continuation_context": null,
-  "next_action_hint": "implement",
-  "phases_completed": 0,
+  "next_action_hint": "complete",
+  "phases_completed": 4,
   "phases_total": 4,
-  "artifacts": [
-    {
-      "path": "specs/239_modal_metalogic_citation_standardization/plans/01_citation-standardization.md",
-      "type": "plan",
-      "summary": "Implementation plan: convert References sections (Phase 1), remove internal/cross-repo refs (Phase 2), replace BRV/inline Blackburn (Phase 3), build verification (Phase 4)"
-    }
-  ]
+  "artifacts": [{"path": "specs/239_modal_metalogic_citation_standardization/summaries/01_citation-standardization-summary.md", "type": "summary", "summary": "Citation standardization across 48 files, 88 Lean4Doc bib links, zero BRV/BimodalLogic/internal refs remaining"}]
 }

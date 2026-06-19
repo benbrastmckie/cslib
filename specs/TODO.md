@@ -1,5 +1,5 @@
 ---
-next_project_number: 241
+next_project_number: 246
 ---
 
 # TODO
@@ -11,8 +11,8 @@ next_project_number: 241
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,209,226,236,238,239 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
-| 2 | 39,40,181,215,240 | 36,37,180,238 | Bimodal Porting, Modal Logic, Temporal Logic |
+| 1 | 36,37,180,209,226,236,240,241,242,243,244,245 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -31,9 +31,7 @@ next_project_number: 241
 
 ### Modal Logic
 
-238 [PLANNED] — Fix stale module docstrings in Modal/Metalogic after task 237 the
-  └─ 240 [NOT STARTED] — Fix naming inconsistencies and barrel file issues in Modal/Metalo
-239 [PLANNED] — Standardize all citations in Modal/Metalogic to use Lean4Doc bib 
+240 [NOT STARTED] — Fix naming inconsistencies and barrel file issues in Modal/Metalo
 
 ### Project Management
 
@@ -47,10 +45,65 @@ next_project_number: 241
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 236 [IMPLEMENTING] — Complete follow-up PRs from PR #649 for Büchi automata and closur
+241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
+242 [NOT STARTED] — Implement full Vardi-Wolper tableau construction for LTL-to-NBA t
+243 [NOT STARTED] — Implement deterministic Büchi automata constructions and related 
+244 [NOT STARTED] — Optimize NBA state space constructions prioritizing correctness o
+245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 245. Formula encodable countable instances
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Add Encodable, Countable, and Denumerable instances for LTL Formula type (deferred to completeness PRs)
+
+---
+
+### 244. Optimize nba state space
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Optimize NBA state space constructions prioritizing correctness over minimality
+
+---
+
+### 243. Deterministic buchi automata
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Implement deterministic Büchi automata constructions and related results
+
+---
+
+### 242. Vardi wolper tableau construction
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Implement full Vardi-Wolper tableau construction for LTL-to-NBA translation using direct NBA construction approach
+
+---
+
+### 241. Mcnaughton theorem
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller) establishing equivalence between omega-regular languages and deterministic Muller automata
+
+---
 
 ### 240. Modal metalogic naming and barrel fixes
 - **Status**: [NOT STARTED]
@@ -63,24 +116,26 @@ next_project_number: 241
 ---
 
 ### 239. Modal metalogic citation standardization
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
 - **Research**: [239_modal_metalogic_citation_standardization/reports/01_citation-standardization.md]
 - **Plan**: [239_modal_metalogic_citation_standardization/plans/01_citation-standardization.md]
+- **Summary**: [239_modal_metalogic_citation_standardization/summaries/01_citation-standardization-summary.md]
 
 **Description**: Standardize all citations in Modal/Metalogic to use Lean4Doc bib link format. (1) Convert ~20 Soundness.lean and Completeness.lean module docstrings from plain-text style ('Blackburn, de Rijke, Venema, "Modal Logic" (2002)') to the Lean4Doc link format ('* [P. Blackburn, M. de Rijke, Y. Venema, *Modal Logic*][Blackburn2001]') matching the StrongCompleteness.lean standard. (2) Replace undefined 'BRV' abbreviation in module docstrings with either spelled-out author names or bib key references; inline code comments may keep 'BRV' if the abbreviation is defined in the file's docstring. (3) Replace internal file references in Soundness.lean's References section ('* Cslib/Logics/Modal/Basic.lean') with proper bib citations or remove if no literature source applies. (4) Remove or convert cross-repo references to BimodalLogic/ project in DeductionTheorem.lean, MCS.lean, and DerivationTree.lean docstrings — replace with bib citations where a literature source exists, otherwise remove the stale path.
 
 ---
 
 ### 238. Modal metalogic stale docstrings
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
 - **Research**: [238_modal_metalogic_stale_docstrings/reports/01_stale-docstrings.md]
 - **Plan**: [238_modal_metalogic_stale_docstrings/plans/01_stale-docstrings.md]
+- **Summary**: [238_modal_metalogic_stale_docstrings/summaries/01_stale-docstrings-summary.md]
 
 **Description**: Fix stale module docstrings in Modal/Metalogic after task 237 theorem migration. (1) Core Completeness.lean: update /-! docstring to remove moved `completeness` theorem from Main Results, update description to reflect the file now provides generic completeness infrastructure (truth lemma, canonical model) but not the system-specific completeness theorems. (2) 8 empty-body Completeness.lean files (K4, K5, K45, KB5, D4, D5, D45, DB): replace stale 'This module proves completeness...' docstrings with short infrastructure docstrings matching the B/S4/S5 pattern — state the file exists for import chain stability and cross-reference StrongCompleteness.lean for the actual theorems. (3) K5/Completeness.lean has a contradictory hybrid docstring that both says 'proves completeness' and 'provides import infrastructure' — pick one (infrastructure).
 

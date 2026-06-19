@@ -40,7 +40,7 @@ next_project_number: 254
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-236 [PLANNING] — Complete follow-up PRs from PR #649 for Büchi automata and closur
+236 [PLANNED] — Complete follow-up PRs from PR #649 for Büchi automata and closur
 241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 242 [NOT STARTED] — Implement full Vardi-Wolper tableau construction for LTL-to-NBA t
 243 [NOT STARTED] — Implement deterministic Büchi automata constructions and related 
@@ -161,12 +161,12 @@ next_project_number: 254
 ---
 
 ### 236. Follow up prs buchi omega regular
-- **Status**: [PLANNING]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
-- **Plan**: [236_follow_up_prs_buchi_omega_regular/plans/05_gnba-correctness-plan.md]
 - **Research**: [236_follow_up_prs_buchi_omega_regular/reports/06_team-research.md]
+- **Plan**: [236_follow_up_prs_buchi_omega_regular/plans/07_inline-counter-fix.md]
 
 **Description**: Complete follow-up PRs from PR #649 for Büchi automata and closure of omega-regular languages under boolean operations
 

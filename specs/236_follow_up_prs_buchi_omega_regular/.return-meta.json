@@ -1,10 +1,29 @@
 {
-  "status": "in_progress",
-  "agent_type": "planner-agent",
-  "delegation_path": ["orchestrator", "plan", "planner-agent"],
-  "session_id": "sess_1781901360_e3aafb",
-  "task_number": 236,
-  "task_name": "follow_up_prs_buchi_omega_regular",
-  "artifact_type": "plan",
-  "artifact_path": "specs/236_follow_up_prs_buchi_omega_regular/plans/07_inline-counter-fix.md"
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/236_follow_up_prs_buchi_omega_regular/plans/07_inline-counter-fix.md",
+      "summary": "Implementation plan with 2 phases to fill 3 sorry markers in GNBA.lean completeness counter cycling using inline unfold-and-split strategy"
+    }
+  ],
+  "next_steps": "Run /implement 236 to execute the plan",
+  "metadata": {
+    "session_id": "sess_1781901360_e3aafb",
+    "agent_type": "planner-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 2,
+    "estimated_hours": 1.5,
+    "dependency_waves": [[1], [2]]
+  },
+  "memory_candidates": [
+    {
+      "content": "In large Lean 4 files (1400+ lines), lean_goal and lean_hover_info may timeout. Use lake build for verification and lean_run_code with minimal reproductions for tactic testing. For Nat.rec-based definitions, simp only [..., Nat.rec_add_one] unfolds the recursion, after which split handles nested dite/ite chains. This pattern reliably resolves goals involving recursive counter definitions in omega-automata proofs.",
+      "category": "TECHNIQUE",
+      "source_artifact": "specs/236_follow_up_prs_buchi_omega_regular/plans/07_inline-counter-fix.md",
+      "confidence": 0.8,
+      "suggested_keywords": ["lean4", "Nat.rec_add_one", "simp-unfold", "large-file-timeout", "omega-automata", "counter-cycling"]
+    }
+  ]
 }

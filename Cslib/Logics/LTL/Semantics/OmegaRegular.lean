@@ -89,23 +89,21 @@ private theorem atomNBA_language_eq {Atom : Type*} (p : Atom) :
     let ss : ωSequence (Option Unit) := ⟨fun n => if n = 0 then none else some ()⟩
     refine ⟨ss, ⟨?_, ?_⟩, ?_⟩
     · -- ss 0 = none ∈ {none}
-      show (if (0 : ℕ) = 0 then none else some ()) ∈ ({none} : Set (Option Unit))
-      simp
+      simp [atomNBA, ss]
     · -- transitions
       intro i
-      simp only [atomNBA, ss, ωSequence.mk]
+      simp only [atomNBA, ss]
       by_cases hi : i = 0
       · -- i = 0: none →[xs 0] some () because p ∈ xs 0
-        simp only [hi, if_pos rfl, show 0 + 1 ≠ 0 from one_ne_zero, if_neg one_ne_zero]
-        exact Or.inl ⟨rfl, hp, rfl⟩
+        subst hi; exact Or.inl ⟨rfl, hp, rfl⟩
       · -- i ≠ 0: some () →[xs i] some ()
-        simp [if_neg hi]
+        simp [hi]
     · -- accept = {some ()} visited infinitely often
-      simp only [atomNBA, ss, ωSequence.mk]
+      simp only [atomNBA, ss]
       rw [frequently_atTop]
       intro k
       refine ⟨k + 1, Nat.le_add_right k 1, ?_⟩
-      simp [Nat.succ_ne_zero]
+      simp
 
 /-- The ω-language of an atomic formula is ω-regular. -/
 theorem Formula.isRegular_atom {Atom : Type*} (p : Atom) :
@@ -223,7 +221,7 @@ private theorem nextNBA_language_eq {State : Type*} (na : NA.Buchi State (Set At
     language (nextNBA na) = ⟨{ xs | xs.tail ∈ language na }⟩ := by
   apply ωLanguage.mem_ext
   intro xs
-  simp only [mem_language, ωLanguage.mem_def, Set.mem_setOf_eq]
+  simp only [ωLanguage.mem_def, Set.mem_setOf]
   constructor
   · rintro ⟨ss, ⟨h_start, h_trans⟩, h_acc⟩
     simp only [nextNBA, Set.mem_singleton_iff] at h_start
@@ -233,16 +231,16 @@ private theorem nextNBA_language_eq {State : Type*} (na : NA.Buchi State (Set At
       induction n with
       | zero =>
         have h_step := h_trans 0
-        simp only [nextNBA, h_start, LTS.OmegaExecution] at h_step
+        simp only [nextNBA, h_start] at h_step
         match h : ss 1 with
-        | none => simp [nextNBA, h] at h_step
+        | none => simp only [h] at h_step
         | some t => exact ⟨t, rfl⟩
       | succ n ih =>
         obtain ⟨s, hs⟩ := ih
         have h_step := h_trans (n + 1)
-        simp only [nextNBA, hs, LTS.OmegaExecution] at h_step
+        simp only [nextNBA, hs] at h_step
         match h : ss (n + 2) with
-        | none => simp [nextNBA, h] at h_step
+        | none => simp only [h] at h_step
         | some t => exact ⟨t, rfl⟩
     -- Define the projected inner run
     let inner : ωSequence State := ⟨fun n => (h_some n).choose⟩
@@ -252,15 +250,14 @@ private theorem nextNBA_language_eq {State : Type*} (na : NA.Buchi State (Set At
     refine ⟨⟨?_, ?_⟩, ?_⟩
     · -- inner 0 ∈ na.start
       have h_step := h_trans 0
-      simp only [nextNBA, h_start, LTS.OmegaExecution] at h_step
+      simp only [nextNBA, h_start] at h_step
       rw [h_inner 0] at h_step
-      simp only [nextNBA] at h_step
+      simp only [] at h_step
       exact h_step
     · -- na.OmegaExecution inner xs.tail
       intro i
       have h_step := h_trans (i + 1)
-      simp only [nextNBA, h_inner i, h_inner (i + 1), LTS.OmegaExecution] at h_step
-      simp only [ωSequence.tail, inner, ωSequence.mk]
+      simp only [nextNBA, h_inner i, h_inner (i + 1)] at h_step
       exact h_step
     · -- Accepting: na.accept visited infinitely often in inner
       simp only [nextNBA] at h_acc
@@ -286,26 +283,23 @@ private theorem nextNBA_language_eq {State : Type*} (na : NA.Buchi State (Set At
     refine ⟨⟨?_, ?_⟩, ?_⟩
     · simp [ss, nextNBA]
     · intro i
-      simp only [nextNBA, LTS.OmegaExecution, ss, ωSequence.mk]
+      unfold nextNBA; dsimp [ss]
       by_cases hi : i = 0
       · -- First step: none → some (inner 0)
-        simp only [hi, show ¬(1 = 0) from one_ne_zero]
+        subst hi; change inner 0 ∈ na.start
         exact h_start
       · -- Subsequent steps: some (inner (i-1)) → some (inner i)
-        simp only [hi, ite_false, show i + 1 ≠ 0 from Nat.succ_ne_zero i, Nat.add_sub_cancel]
+        simp [hi]
+        have hi' : 0 < i := Nat.pos_of_ne_zero hi
         have := h_trans (i - 1)
-        simp only [ωSequence.tail] at this
-        convert this using 1
-        omega
+        have h_eq : i - 1 + 1 = i := Nat.sub_add_cancel hi'
+        rwa [show xs.tail (i - 1) = xs i from congrArg xs h_eq, h_eq] at this
     · -- Accepting condition
       simp only [nextNBA]
       rw [frequently_atTop] at h_acc ⊢
       intro k
       obtain ⟨j, hj, h_acc_j⟩ := h_acc k
-      exact ⟨j + 1, by omega, by
-        simp only [ss, ωSequence.mk, show j + 1 ≠ 0 from Nat.succ_ne_zero j,
-          Nat.add_sub_cancel, ite_false, Set.mem_image]
-        exact ⟨inner j, h_acc_j, rfl⟩⟩
+      exact ⟨j + 1, by omega, by simp only [ss, Set.mem_image]; exact ⟨inner j, h_acc_j, rfl⟩⟩
 
 /-- `L(Xφ) = { xs | xs.tail ∈ L(φ) }`. -/
 private theorem omegaLanguage_next {Atom : Type*} (φ : Formula Atom) :
@@ -317,20 +311,7 @@ private theorem omegaLanguage_next {Atom : Type*} (φ : Formula Atom) :
   -- xs.tail ∈ φ.omegaLanguage: Satisfies (fun n p => p ∈ xs.tail n) 0 φ
   --   = Satisfies (fun n p => p ∈ xs (n+1)) 0 φ (since xs.tail n = xs (n+1))
   -- These are equal by satisfies_shift with k=1
-  have key : Satisfies (fun n p => p ∈ xs n) 1 φ ↔
-      Satisfies (fun n p => p ∈ xs.tail n) 0 φ := by
-    have h_shift := @satisfies_shift Atom (fun n p => p ∈ xs n) 1 0 φ
-    simp only [Nat.zero_add] at h_shift
-    constructor
-    · intro h
-      have := h_shift.mp h
-      convert this using 2
-      funext n p; simp [ωSequence.tail]
-    · intro h
-      apply h_shift.mpr
-      convert h using 2
-      funext n p; simp [ωSequence.tail]
-  exact key
+  exact satisfies_shift 1
 
 /-- The ω-language of `next φ` is ω-regular, given IH for `φ`. -/
 theorem Formula.isRegular_next {Atom : Type*} {φ : Formula Atom}

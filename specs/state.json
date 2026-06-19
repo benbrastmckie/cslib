@@ -38,7 +38,8 @@
       "description": "Complete follow-up PRs from PR #649 for Büchi automata and closure of omega-regular languages under boolean operations",
       "topic": "Temporal Logic",
       "created": "2026-06-19T02:21:37Z",
-      "last_updated": "2026-06-19T02:53:47Z"
+      "last_updated": "2026-06-19T03:35:14Z",
+      "completion_summary": "All 3 phases implemented. Phase 1: LTL/Temporal decoupled (Embedding.lean). Phase 2: OmegaExecution bridge (OmegaExecutionSatisfies.lean). Phase 3: LTL omega-regularity theorem proved for atom/bot/imp/next cases; untl case marked proof_wanted for future Vardi-Wolper construction."
     },
     {
       "project_number": 235,

@@ -2,44 +2,6 @@
   "next_project_number": 248,
   "active_projects": [
     {
-      "project_number": 247,
-      "project_name": "modal_compliance_dead_code_cleanup",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "Clean up Modal/ compliance issues and dead code: fix 17 missing docstrings, remove @[simp] from k_strong_completeness_iff, fix satifies typo in Basic.lean, remove 25 dead declarations (4 S5 aliases, 2 unused ModalSetDerivable lemmas, 5 dead per-system wrappers, 13 dead _soundness_derivable wrappers, 1 dead HasHilbertTree instance), remove unused _h_T param from canonical_eucl, clean up 2 redundant imports, normalize blank lines in 11 Completeness files",
-      "topic": "Modal Logic",
-      "created": "2026-06-19T18:30:11Z",
-      "last_updated": "2026-06-19T19:16:04Z",
-      "session_id": "sess_1781894936_35ff88",
-      "completion_summary": "Cleaned up Modal/ compliance issues and dead code: added 17 docstrings, removed @[simp] from k_strong_completeness_iff, fixed satifies typo, removed 26 dead declarations, removed unused _h_T param, cleaned up 2 redundant imports, normalized blank lines in 11 files, updated PR #662 line numbers",
-      "artifacts": [
-        {
-          "type": "plan",
-          "path": "specs/247_modal_compliance_dead_code_cleanup/plans/01_compliance-cleanup-plan.md"
-        },
-        {
-          "type": "pr_description",
-          "path": "specs/247_modal_compliance_dead_code_cleanup/pr-description.md"
-        },
-        {
-          "type": "report",
-          "path": "specs/247_modal_compliance_dead_code_cleanup/reports/02_verified-audit.md"
-        }
-      ]
-    },
-    {
-      "project_number": 246,
-      "project_name": "modal_comment_cleanup_pr_description",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "Clean up scratch-work inline comments inside Modal/ proof bodies, revise specs/archive/197_modal_upstream_initial_pr/pr-description.md to link exact line numbers for strong soundness and completeness results across all 15 systems, then update the description on GitHub PR #662 (leanprover/cslib)",
-      "topic": "Modal Logic",
-      "created": "2026-06-19T17:40:39Z",
-      "last_updated": "2026-06-19T17:52:21Z",
-      "session_id": "sess_1781890976_cc3df6",
-      "completion_summary": "Cleaned up ~157 scratch-work inline comments across 14 Modal/ files, revised PR description with exact line-number links for all 15 strong soundness/completeness biconditionals, and updated GitHub PR #662 body"
-    },
-    {
       "project_number": 241,
       "project_name": "mcnaughton_theorem",
       "status": "not_started",
@@ -92,15 +54,15 @@
     {
       "project_number": 236,
       "project_name": "follow_up_prs_buchi_omega_regular",
-      "status": "implementing",
+      "status": "researching",
       "task_type": "cslib",
       "description": "Complete follow-up PRs from PR #649 for Büchi automata and closure of omega-regular languages under boolean operations",
       "topic": "Temporal Logic",
       "created": "2026-06-19T02:21:37Z",
-      "last_updated": "2026-06-19T17:54:28Z",
+      "last_updated": "2026-06-19T20:09:59Z",
       "completion_summary": null,
-      "session_id": "sess_1781889786_46eb53",
-      "next_artifact_number": 5,
+      "session_id": "sess_1781899793_33c593",
+      "next_artifact_number": 6,
       "artifacts": [
         {
           "path": "specs/236_follow_up_prs_buchi_omega_regular/plans/05_gnba-correctness-plan.md",
@@ -133,36 +95,6 @@
         }
       ],
       "next_artifact_number": 3
-    },
-    {
-      "project_number": 209,
-      "project_name": "lint_namespace_fixes",
-      "status": "completed",
-      "task_type": "cslib",
-      "title": "Fix namespace lint errors (not namespaced + duplicate namespace)",
-      "description": "Fix 298 namespace lint errors: 239 declarations not properly namespaced and 59 duplicate namespace components (Chronicle, Temporal, Bimodal repeated in names). Requires moving declarations into correct namespaces or renaming.",
-      "topic": "Project Management",
-      "created": "2026-06-15T17:59:27Z",
-      "last_updated": "2026-06-19T05:54:03Z",
-      "artifacts": [
-        {
-          "path": "specs/209_lint_namespace_fixes/reports/01_namespace-research.md",
-          "type": "report",
-          "summary": "01_namespace-research.md"
-        },
-        {
-          "path": "specs/209_lint_namespace_fixes/plans/01_namespace-plan.md",
-          "type": "plan",
-          "summary": "01_namespace-plan.md"
-        },
-        {
-          "path": "specs/209_lint_namespace_fixes/summaries/01_namespace-summary.md",
-          "type": "summary",
-          "summary": "Task 209 complete: 298 namespace lint errors resolved (0 topNamespace, 0 dupNamespace remaining), GrindLint test fixed, CslibTests.lean format aligned with upstream"
-        }
-      ],
-      "session_id": "sess_1781845109_e0a99c",
-      "completion_summary": "All 298 namespace lint errors resolved (239 topNamespace + 59 dupNamespace). GrindLint test fixed with 8 grind_lint skip entries. CslibTests.lean format aligned with upstream. Full CI pipeline passes."
     },
     {
       "project_number": 215,
@@ -282,102 +214,10 @@
       ],
       "topic": "Bimodal Porting",
       "last_updated": "2026-06-14T17:54:05Z"
-    },
-    {
-      "project_number": 238,
-      "project_name": "modal_metalogic_stale_docstrings",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "Fix stale module docstrings in Modal/Metalogic after task 237 theorem migration. (1) Core Completeness.lean: update /-! docstring to remove moved `completeness` theorem from Main Results, update description to reflect the file now provides generic completeness infrastructure (truth lemma, canonical model) but not the system-specific completeness theorems. (2) 8 empty-body Completeness.lean files (K4, K5, K45, KB5, D4, D5, D45, DB): replace stale 'This module proves completeness...' docstrings with short infrastructure docstrings matching the B/S4/S5 pattern — state the file exists for import chain stability and cross-reference StrongCompleteness.lean for the actual theorems. (3) K5/Completeness.lean has a contradictory hybrid docstring that both says 'proves completeness' and 'provides import infrastructure' — pick one (infrastructure).",
-      "topic": "Modal Logic",
-      "dependencies": [],
-      "created": "2026-06-19T04:00:00Z",
-      "last_updated": "2026-06-19T05:17:43Z",
-      "session_id": "sess_1750300800_multi_238",
-      "artifacts": [
-        {
-          "path": "specs/238_modal_metalogic_stale_docstrings/reports/01_stale-docstrings.md",
-          "type": "report",
-          "summary": "01_stale-docstrings.md"
-        },
-        {
-          "path": "specs/238_modal_metalogic_stale_docstrings/plans/01_stale-docstrings.md",
-          "type": "plan",
-          "summary": "01_stale-docstrings.md"
-        },
-        {
-          "path": "specs/238_modal_metalogic_stale_docstrings/summaries/01_stale-docstrings-summary.md",
-          "type": "summary",
-          "summary": "01_stale-docstrings-summary.md"
-        }
-      ],
-      "completion_summary": "Fixed 9 stale module docstrings in Modal/Metalogic Completeness.lean files after task 237 theorem migration. Core file updated with accurate Main Results; 8 empty-body system files standardized to infrastructure pattern matching B/S4/S5."
-    },
-    {
-      "project_number": 239,
-      "project_name": "modal_metalogic_citation_standardization",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "Standardize all citations in Modal/Metalogic to use Lean4Doc bib link format. (1) Convert ~20 Soundness.lean and Completeness.lean module docstrings from plain-text style ('Blackburn, de Rijke, Venema, \"Modal Logic\" (2002)') to the Lean4Doc link format ('* [P. Blackburn, M. de Rijke, Y. Venema, *Modal Logic*][Blackburn2001]') matching the StrongCompleteness.lean standard. (2) Replace undefined 'BRV' abbreviation in module docstrings with either spelled-out author names or bib key references; inline code comments may keep 'BRV' if the abbreviation is defined in the file's docstring. (3) Replace internal file references in Soundness.lean's References section ('* Cslib/Logics/Modal/Basic.lean') with proper bib citations or remove if no literature source applies. (4) Remove or convert cross-repo references to BimodalLogic/ project in DeductionTheorem.lean, MCS.lean, and DerivationTree.lean docstrings — replace with bib citations where a literature source exists, otherwise remove the stale path.",
-      "topic": "Modal Logic",
-      "dependencies": [],
-      "created": "2026-06-19T04:00:00Z",
-      "last_updated": "2026-06-19T05:17:45Z",
-      "session_id": "sess_1750300800_multi_239",
-      "artifacts": [
-        {
-          "path": "specs/239_modal_metalogic_citation_standardization/reports/01_citation-standardization.md",
-          "type": "report",
-          "summary": "01_citation-standardization.md"
-        },
-        {
-          "path": "specs/239_modal_metalogic_citation_standardization/plans/01_citation-standardization.md",
-          "type": "plan",
-          "summary": "01_citation-standardization.md"
-        },
-        {
-          "path": "specs/239_modal_metalogic_citation_standardization/summaries/01_citation-standardization-summary.md",
-          "type": "summary",
-          "summary": "01_citation-standardization-summary.md"
-        }
-      ],
-      "completion_summary": "Standardized all citations across 48 Modal/Metalogic files to Lean4Doc [Blackburn2001] bib link format. Removed all BRV abbreviations, internal Cslib/ file references, and BimodalLogic/ cross-repo paths from docstrings."
-    },
-    {
-      "project_number": 240,
-      "project_name": "modal_metalogic_naming_and_barrel_fixes",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "Fix naming inconsistencies and barrel file issues in Modal/Metalogic. (1) Add missing 'public import Cslib.Logics.Modal.Metalogic.Systems.K.ConservativeExtension' to Metalogic.lean barrel file. (2) Normalize barrel import ordering so StrongCompleteness block follows the same system order as Soundness/Completeness block (K, T, D, S4, K4, B, K45, K5, D4, KB5, TB, D45, D5, DB, S5). (3) Rename S5/Soundness.lean theorem 'axiom_sound' to 's5_axiom_sound' for consistency with all other 14 systems. (4) Rename D/Completeness.lean theorems from suffix to prefix convention: 'derive_box_from_inconsistency_d' → 'd_derive_box_from_inconsistency', 'mcs_box_witness_d' → 'd_mcs_box_witness', 'canonical_serial' → 'd_canonical_serial', 'truth_lemma_d' → 'd_truth_lemma'. Verify no downstream consumers break (grep for old names in the codebase). (5) Reword K/Completeness.lean:111 comment from 'K-SPECIFIC FIX' to 'K-SPECIFIC CASE' to avoid triggering lint scanners. (6) Evaluate S5 alias 'alias completeness := s5_completeness' — if no downstream consumers use the bare 'completeness' name, remove it; otherwise add a deprecation docstring.",
-      "topic": "Modal Logic",
-      "dependencies": [
-        238
-      ],
-      "created": "2026-06-19T04:00:00Z",
-      "last_updated": "2026-06-19T05:42:09Z",
-      "session_id": "sess_1750300800_multi_240",
-      "artifacts": [
-        {
-          "path": "specs/240_modal_metalogic_naming_and_barrel_fixes/reports/01_naming-barrel-fixes.md",
-          "type": "report",
-          "summary": "Research confirming all 6 naming/barrel issues with downstream consumer analysis"
-        },
-        {
-          "path": "specs/240_modal_metalogic_naming_and_barrel_fixes/plans/01_naming-barrel-fixes.md",
-          "type": "plan",
-          "summary": "3-phase plan: safe mechanical, S5 rename, D renames with verification"
-        },
-        {
-          "path": "specs/240_modal_metalogic_naming_and_barrel_fixes/summaries/01_naming-barrel-fixes-summary.md",
-          "type": "summary",
-          "summary": "Implementation summary: 16 files modified, all CI checks pass"
-        }
-      ],
-      "completion_summary": "Fixed all 6 naming and barrel file issues: added missing ConservativeExtension import, normalized barrel ordering, renamed s5_axiom_sound and 4 D-system theorems to prefix convention (15 downstream refs updated), reworded K-SPECIFIC comment, removed unused S5 completeness alias. 746 jobs build clean."
     }
   ],
   "repository_health": {
-    "last_assessed": "2026-06-19T05:09:35Z",
+    "last_assessed": "2026-06-19T20:12:54Z",
     "status": "healthy"
   },
   "active_topics": [

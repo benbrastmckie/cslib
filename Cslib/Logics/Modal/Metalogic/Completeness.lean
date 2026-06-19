@@ -309,8 +309,8 @@ the axiom set and differing in which box-witness lemma they use:
   Uses a K-specific box witness (`mcs_box_witness_k`) that avoids axiom T.
   Used by: K, B, K4, K5, K45, KB5.
 
-- **`truth_lemma_d`** (DCompleteness.lean): For logics containing axiom D but
-  NOT axiom T. Uses a D-specific box witness (`mcs_box_witness_d`) that replaces
+- **`d_truth_lemma`** (DCompleteness.lean): For logics containing axiom D but
+  NOT axiom T. Uses a D-specific box witness (`d_mcs_box_witness`) that replaces
   axiom T with axiom D + necessitation for the seriality argument. Used by: D,
   D4, D5, D45, DB.
 

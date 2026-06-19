@@ -16,12 +16,12 @@ via the canonical model construction (completeness-via-canonicity).
 
 ## Main Results
 
-- `derive_box_from_inconsistency_d`: Box witness consistency using axiom D + NEC
+- `d_derive_box_from_inconsistency`: Box witness consistency using axiom D + NEC
   instead of axiom T.
-- `mcs_box_witness_d`: Box witness for D (K-style, without axiom T).
-- `canonical_serial`: The canonical model for any DAxiom-containing system is serial
+- `d_mcs_box_witness`: Box witness for D (K-style, without axiom T).
+- `d_canonical_serial`: The canonical model for any DAxiom-containing system is serial
   (Blackburn Theorem 4.28 clause 3).
-- `truth_lemma_d`: Truth lemma using D-style box witness.
+- `d_truth_lemma`: Truth lemma using D-style box witness.
 
 The weak completeness theorem `d_completeness` is located in
 `Cslib.Logics.Modal.Metalogic.Systems.D.StrongCompleteness`, where it is derived as a
@@ -55,7 +55,7 @@ This adapts `derive_box_from_inconsistency` from MCS.lean:
   derive box bot in S. Then axiom D gives diamond bot in S. Since top (= bot -> bot)
   is derivable, NEC gives box top in S. MP with diamond bot gives bot in S.
   Contradiction with MCS consistency. -/
-theorem derive_box_from_inconsistency_d
+theorem d_derive_box_from_inconsistency
     {Axioms : Proposition Atom → Prop}
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_implyS : ∀ (φ ψ χ : Proposition Atom),
@@ -166,7 +166,7 @@ theorem derive_box_from_inconsistency_d
 an MCS `T` such that `forall psi, box psi in S -> psi in T` and `phi not in T`.
 
 This uses axiom D instead of axiom T for the consistency argument. -/
-theorem mcs_box_witness_d
+theorem d_mcs_box_witness
     {Axioms : Proposition Atom → Prop}
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_implyS : ∀ (φ ψ χ : Proposition Atom),
@@ -189,7 +189,7 @@ theorem mcs_box_witness_d
     intro L hL
     unfold Metalogic.Consistent
     intro ⟨d_bot⟩
-    exact derive_box_from_inconsistency_d h_implyK h_implyS h_efq h_peirce h_K h_D
+    exact d_derive_box_from_inconsistency h_implyK h_implyS h_efq h_peirce h_K h_D
       h_mcs h_not_box hL d_bot
   obtain ⟨T, hWT, hT_mcs⟩ := modal_lindenbaum hW
   refine ⟨T, hT_mcs, ?_, ?_⟩
@@ -209,7 +209,7 @@ for KD is right-unbounded [serial]."
 
 The proof shows {psi | box psi in S} is consistent using a D+NEC contradiction argument,
 then extends to MCS via Lindenbaum. -/
-theorem canonical_serial
+theorem d_canonical_serial
     {Axioms : Proposition Atom → Prop}
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_implyS : ∀ (φ ψ χ : Proposition Atom),
@@ -267,9 +267,9 @@ theorem canonical_serial
 `Satisfies (CanonicalModel Axioms) S phi <-> phi in S.val`.
 
 This follows Blackburn Lemma 4.21. The only difference from the S5 truth lemma
-is the box case, which uses `mcs_box_witness_d` (axiom D) instead of
+is the box case, which uses `d_mcs_box_witness` (axiom D) instead of
 `mcs_box_witness` (axiom T). -/
-theorem truth_lemma_d
+theorem d_truth_lemma
     {Axioms : Proposition Atom → Prop}
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_implyS : ∀ (φ ψ χ : Proposition Atom),
@@ -325,9 +325,9 @@ theorem truth_lemma_d
             .weakening [] _ _ (.ax [] _ (h_peirce φ ψ)) (fun _ h => nomatch h)
           exact ⟨.modus_ponens _ _ _ d_peirce' d_dt⟩
         have h_sat_phi :=
-          (truth_lemma_d h_implyK h_implyS h_efq h_peirce h_K h_D S φ).mpr h_phi_S
+          (d_truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_D S φ).mpr h_phi_S
         have h_psi_S :=
-          (truth_lemma_d h_implyK h_implyS h_efq h_peirce h_K h_D S ψ).mp
+          (d_truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_D S ψ).mp
             (h_sat h_sat_phi)
         have h_neg_psi_S : (¬ψ) ∈ S.val := by
           apply modal_closed_under_derivation h_implyK h_implyS S.property
@@ -353,22 +353,22 @@ theorem truth_lemma_d
           (modal_implication_property h_implyK h_implyS S.property
             h_neg_psi_S h_psi_S)
     · intro h_mem h_sat_phi
-      exact (truth_lemma_d h_implyK h_implyS h_efq h_peirce h_K h_D S ψ).mpr
+      exact (d_truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_D S ψ).mpr
         (modal_implication_property h_implyK h_implyS S.property h_mem
-          ((truth_lemma_d h_implyK h_implyS h_efq h_peirce h_K h_D S φ).mp
+          ((d_truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_D S φ).mp
             h_sat_phi))
   | .box φ => by
     constructor
     · intro h_sat
       by_contra h_not_box
       obtain ⟨T, hT_mcs, hST, h_phi_not_T⟩ :=
-        mcs_box_witness_d h_implyK h_implyS h_efq h_peirce h_K h_D
+        d_mcs_box_witness h_implyK h_implyS h_efq h_peirce h_K h_D
           S.property h_not_box
       exact h_phi_not_T
-        ((truth_lemma_d h_implyK h_implyS h_efq h_peirce h_K h_D
+        ((d_truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_D
           ⟨T, hT_mcs⟩ φ).mp (h_sat ⟨T, hT_mcs⟩ hST))
     · intro h_box T hST
-      exact (truth_lemma_d h_implyK h_implyS h_efq h_peirce h_K h_D T φ).mpr
+      exact (d_truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_D T φ).mpr
         (hST φ h_box)
 
 end Cslib.Logic.Modal

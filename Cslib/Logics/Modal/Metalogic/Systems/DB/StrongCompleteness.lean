@@ -31,7 +31,7 @@ is equivalent to set-derivability using `DBAxiom`.
 
 * [Blackburn, de Rijke, Venema, *Modal Logic*][Blackburn2001], Ch. 4
 * Cslib/Logics/Modal/Metalogic/Systems/D/Completeness.lean -- D completeness
-  (canonical serial, truth_lemma_d)
+  (canonical serial, d_truth_lemma)
 -/
 
 @[expose] public section
@@ -67,7 +67,7 @@ over all serial, symmetric frames, then `phi` is set-derivable from `Gamma`
 using `DBAxiom`.
 
 Proof by contrapositive: if `phi` is not set-derivable, `Gamma ∪ {¬phi}` is
-consistent; extend to MCS, apply `truth_lemma_d` in the canonical serial, symmetric
+consistent; extend to MCS, apply `d_truth_lemma` in the canonical serial, symmetric
 frame, derive contradiction. -/
 theorem db_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
     (h : ∀ (World : Type u) (m : Model World Atom) (w : World),
@@ -92,7 +92,7 @@ theorem db_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositi
   have h_serial : Relation.Serial (CanonicalModel (@DBAxiom Atom)).r := by
     constructor
     intro S
-    exact canonical_serial
+    exact d_canonical_serial
       (fun φ ψ => .implyK φ ψ)
       (fun φ ψ χ => .implyS φ ψ χ)
       (fun φ => .efq φ)
@@ -108,7 +108,7 @@ theorem db_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositi
       (fun φ ψ => .modalK φ ψ)
       (fun φ => .modalB φ)
   have h_gamma_sat : ∀ γ ∈ Gamma, Satisfies (CanonicalModel (@DBAxiom Atom)) w γ :=
-    fun γ hγ => (truth_lemma_d
+    fun γ hγ => (d_truth_lemma
       (fun φ ψ => .implyK φ ψ)
       (fun φ ψ χ => .implyS φ ψ χ)
       (fun φ => .efq φ)
@@ -118,7 +118,7 @@ theorem db_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositi
       w γ).mpr (h_gamma_sub γ hγ)
   have h_phi_sat := h (CanonicalWorld (@DBAxiom Atom)) (CanonicalModel (@DBAxiom Atom))
     w h_serial (fun S T hST => h_symm S T hST) h_gamma_sat
-  have h_phi_M := (truth_lemma_d
+  have h_phi_M := (d_truth_lemma
     (fun φ ψ => .implyK φ ψ)
     (fun φ ψ χ => .implyS φ ψ χ)
     (fun φ => .efq φ)

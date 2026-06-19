@@ -16,8 +16,8 @@ Kripke frames via the canonical model construction (completeness-via-canonicity)
 
 DB = K + D + B contains axiom D (seriality) and axiom B (symmetry) but
 NOT axiom T (reflexivity). Therefore this proof uses:
-- `truth_lemma_d` (D-specific truth lemma, NOT `truth_lemma` which requires T)
-- `canonical_serial` (from DCompleteness.lean, using axiom D)
+- `d_truth_lemma` (D-specific truth lemma, NOT `truth_lemma` which requires T)
+- `d_canonical_serial` (from DCompleteness.lean, using axiom D)
 - `canonical_symm` (from Completeness.lean, using axiom B)
 
 ## Main Results

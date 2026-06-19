@@ -204,7 +204,4 @@ theorem s5_completeness (φ : Proposition Atom)
     (s5_strong_completeness (fun W m w hRefl hTrans hEucl _ =>
       h_valid W m hRefl hTrans hEucl w))
 
-/-- Backward-compatible alias for `s5_completeness`. -/
-alias completeness := s5_completeness
-
 end Cslib.Logic.Modal

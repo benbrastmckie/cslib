@@ -11,10 +11,9 @@ public import Cslib.Logics.Modal.Metalogic.DeductionTheorem
 public import Cslib.Logics.Modal.Metalogic.MCS
 public import Cslib.Logics.Modal.Metalogic.Soundness
 public import Cslib.Logics.Modal.Metalogic.Completeness
-public import Cslib.Logics.Modal.Metalogic.Systems.S5.Soundness
-public import Cslib.Logics.Modal.Metalogic.Systems.S5.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.K.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.K.Completeness
+public import Cslib.Logics.Modal.Metalogic.Systems.K.ConservativeExtension
 public import Cslib.Logics.Modal.Metalogic.Systems.T.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.T.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.D.Soundness
@@ -41,6 +40,8 @@ public import Cslib.Logics.Modal.Metalogic.Systems.D5.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.D5.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.DB.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.DB.Completeness
+public import Cslib.Logics.Modal.Metalogic.Systems.S5.Soundness
+public import Cslib.Logics.Modal.Metalogic.Systems.S5.Completeness
 public import Cslib.Logics.Modal.Metalogic.StrongCompleteness
 public import Cslib.Logics.Modal.Metalogic.Systems.K.StrongCompleteness
 public import Cslib.Logics.Modal.Metalogic.Systems.T.StrongCompleteness

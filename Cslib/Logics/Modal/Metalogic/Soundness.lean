@@ -17,16 +17,16 @@ S5-specific wrapper instantiates at `ModalAxiom`.
 
 ## Main Results
 
-- `axiom_sound`: Each of the 8 S5 axiom schemata is valid over S5 frames.
+- `s5_axiom_sound`: Each of the 8 S5 axiom schemata is valid over S5 frames.
 - `soundness`: Parameterized soundness -- if `Gamma |- phi` (via `DerivationTree Axioms`),
   then `phi` is satisfied at every world where all of `Gamma` is satisfied, given a
   soundness callback for `Axioms`.
-- `s5_soundness`: S5-specific wrapper combining `axiom_sound` with `soundness`.
+- `s5_soundness`: S5-specific wrapper combining `s5_axiom_sound` with `soundness`.
 
 ## Design
 
 The parameterized `soundness` theorem takes a callback `h_ax_sound` that proves
-each axiom of `Axioms` is valid in the given model. The S5-specific `axiom_sound`
+each axiom of `Axioms` is valid in the given model. The S5-specific `s5_axiom_sound`
 theorem handles the concrete `ModalAxiom` cases.
 
 ## References

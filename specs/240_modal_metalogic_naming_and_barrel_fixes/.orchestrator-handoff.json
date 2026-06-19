@@ -1,0 +1,16 @@
+{
+  "status": "planned",
+  "summary": "3-phase plan: (1) barrel file fixes + comment + alias removal, (2) S5 axiom_sound rename, (3) D theorem renames across 11 files with build verification",
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "implement",
+  "phases_completed": 0,
+  "phases_total": 3,
+  "artifacts": [
+    {
+      "path": "specs/240_modal_metalogic_naming_and_barrel_fixes/plans/01_naming-barrel-fixes.md",
+      "type": "plan",
+      "summary": "3-phase implementation plan for 6 naming/barrel fixes; phases 1-2 parallelizable, phase 3 sequential with build verification"
+    }
+  ]
+}

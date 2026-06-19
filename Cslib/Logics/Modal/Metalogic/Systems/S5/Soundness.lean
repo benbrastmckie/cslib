@@ -16,7 +16,7 @@ This module proves soundness for modal logic S5: every formula derivable from
 
 ## Main Results
 
-- `axiom_sound`: Each of the 8 S5 axiom schemata is valid over S5 frames.
+- `s5_axiom_sound`: Each of the 8 S5 axiom schemata is valid over S5 frames.
 - `s5_soundness`: If `Gamma |- phi` via `DerivationTree ModalAxiom`, then `phi` is
   satisfied at every world of every S5 model where all of `Gamma` is satisfied.
 - `s5_soundness_derivable`: If `phi` is S5-derivable, then `phi` is valid on all
@@ -39,7 +39,7 @@ variable {Atom : Type*}
 /-! ## S5 Axiom Soundness -/
 
 /-- Every axiom of S5 is valid over S5 frames (reflexive, transitive, Euclidean). -/
-theorem axiom_sound {World : Type*} {φ : Proposition Atom}
+theorem s5_axiom_sound {World : Type*} {φ : Proposition Atom}
     (h_ax : ModalAxiom φ) (m : Model World Atom)
     (h_refl : ∀ w, m.r w w)
     (h_trans : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃)
@@ -86,7 +86,7 @@ theorem s5_soundness {World : Type*}
     (h_eucl : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃)
     (w : World)
     (h_ctx : ∀ ψ ∈ Γ, Satisfies m w ψ) : Satisfies m w φ :=
-  soundness d m (fun _ h_ax w => axiom_sound h_ax m h_refl h_trans h_eucl w) w h_ctx
+  soundness d m (fun _ h_ax w => s5_axiom_sound h_ax m h_refl h_trans h_eucl w) w h_ctx
 
 /-- **S5 Soundness for derivable formulas**: If `phi` is S5-derivable from the empty
 context, then `phi` is satisfied at every world of every S5 model. -/
@@ -98,6 +98,6 @@ theorem s5_soundness_derivable {World : Type*}
     (h_eucl : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃)
     (w : World) : Satisfies m w φ :=
   soundness_derivable h m
-    (fun _ h_ax w => axiom_sound h_ax m h_refl h_trans h_eucl w) w
+    (fun _ h_ax w => s5_axiom_sound h_ax m h_refl h_trans h_eucl w) w
 
 end Cslib.Logic.Modal

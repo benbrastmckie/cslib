@@ -31,7 +31,7 @@ is equivalent to set-derivability using `D4Axiom`.
 
 * [Blackburn, de Rijke, Venema, *Modal Logic*][Blackburn2001], Ch. 4
 * Cslib/Logics/Modal/Metalogic/Systems/D/Completeness.lean -- D completeness
-  (canonical serial, truth_lemma_d)
+  (canonical serial, d_truth_lemma)
 -/
 
 @[expose] public section
@@ -67,7 +67,7 @@ over all serial, transitive frames, then `phi` is set-derivable from `Gamma`
 using `D4Axiom`.
 
 Proof by contrapositive: if `phi` is not set-derivable, `Gamma ∪ {¬phi}` is
-consistent; extend to MCS, apply `truth_lemma_d` in the canonical serial, transitive
+consistent; extend to MCS, apply `d_truth_lemma` in the canonical serial, transitive
 frame, derive contradiction. -/
 theorem d4_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
     (h : ∀ (World : Type u) (m : Model World Atom) (w : World),
@@ -92,7 +92,7 @@ theorem d4_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositi
   have h_serial : Relation.Serial (CanonicalModel (@D4Axiom Atom)).r := by
     constructor
     intro S
-    exact canonical_serial
+    exact d_canonical_serial
       (fun φ ψ => .implyK φ ψ)
       (fun φ ψ χ => .implyS φ ψ χ)
       (fun φ => .efq φ)
@@ -108,7 +108,7 @@ theorem d4_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositi
       (fun φ ψ χ => .implyS φ ψ χ)
       (fun φ => .modalFour φ)
   have h_gamma_sat : ∀ γ ∈ Gamma, Satisfies (CanonicalModel (@D4Axiom Atom)) w γ :=
-    fun γ hγ => (truth_lemma_d
+    fun γ hγ => (d_truth_lemma
       (fun φ ψ => .implyK φ ψ)
       (fun φ ψ χ => .implyS φ ψ χ)
       (fun φ => .efq φ)
@@ -118,7 +118,7 @@ theorem d4_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositi
       w γ).mpr (h_gamma_sub γ hγ)
   have h_phi_sat := h (CanonicalWorld (@D4Axiom Atom)) (CanonicalModel (@D4Axiom Atom))
     w h_serial (fun S T U hST hTU => h_trans S T U hST hTU) h_gamma_sat
-  have h_phi_M := (truth_lemma_d
+  have h_phi_M := (d_truth_lemma
     (fun φ ψ => .implyK φ ψ)
     (fun φ ψ χ => .implyS φ ψ χ)
     (fun φ => .efq φ)

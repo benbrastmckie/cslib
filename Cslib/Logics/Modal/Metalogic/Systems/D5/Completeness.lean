@@ -16,8 +16,8 @@ Kripke frames via the canonical model construction (completeness-via-canonicity)
 
 D5 = K + D + 5 contains axiom D (seriality) and axiom 5 (Euclideanness) but
 NOT axiom T (reflexivity). Therefore this proof uses:
-- `truth_lemma_d` (D-specific truth lemma, NOT `truth_lemma` which requires T)
-- `canonical_serial` (from DCompleteness.lean, using axiom D)
+- `d_truth_lemma` (D-specific truth lemma, NOT `truth_lemma` which requires T)
+- `d_canonical_serial` (from DCompleteness.lean, using axiom D)
 - `canonical_eucl_from_5` (from Completeness.lean, using axiom 5)
 
 ## Main Results

@@ -64,7 +64,7 @@ theorem d_strong_soundness {Gamma : Set (Proposition Atom)} {phi : Proposition A
 over all serial frames, then `phi` is set-derivable from `Gamma` using `DAxiom`.
 
 Proof by contrapositive: if `phi` is not set-derivable, `Gamma ∪ {¬phi}` is
-consistent; extend to MCS, apply `truth_lemma_d` in the canonical serial
+consistent; extend to MCS, apply `d_truth_lemma` in the canonical serial
 frame, derive contradiction. -/
 theorem d_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
     (h : ∀ (World : Type u) (m : Model World Atom) (w : World),
@@ -88,7 +88,7 @@ theorem d_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositio
   have h_serial : Relation.Serial (CanonicalModel (@DAxiom Atom)).r := by
     constructor
     intro S
-    exact canonical_serial
+    exact d_canonical_serial
       (fun φ ψ => .implyK φ ψ)
       (fun φ ψ χ => .implyS φ ψ χ)
       (fun φ => .efq φ)
@@ -96,7 +96,7 @@ theorem d_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositio
       (fun φ => .modalD φ)
       S
   have h_gamma_sat : ∀ γ ∈ Gamma, Satisfies (CanonicalModel (@DAxiom Atom)) w γ :=
-    fun γ hγ => (truth_lemma_d
+    fun γ hγ => (d_truth_lemma
       (fun φ ψ => .implyK φ ψ)
       (fun φ ψ χ => .implyS φ ψ χ)
       (fun φ => .efq φ)
@@ -106,7 +106,7 @@ theorem d_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositio
       w γ).mpr (h_gamma_sub γ hγ)
   have h_phi_sat := h (CanonicalWorld (@DAxiom Atom)) (CanonicalModel (@DAxiom Atom))
     w h_serial h_gamma_sat
-  have h_phi_M := (truth_lemma_d
+  have h_phi_M := (d_truth_lemma
     (fun φ ψ => .implyK φ ψ)
     (fun φ ψ χ => .implyS φ ψ χ)
     (fun φ => .efq φ)

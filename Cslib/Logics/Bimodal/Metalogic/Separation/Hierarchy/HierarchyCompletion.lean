@@ -309,12 +309,12 @@ theorem single_U_formula_sep_with_U_type_no_oracle (phi A B : Formula Atom)
           have hA''_uf : isUFree A'' = true := replace_box_preserves_U_free A hA_uf
           have hB''_uf : isUFree B'' = true := replace_box_preserves_U_free B hB_uf
           -- Apply snce_single_U_depth_one_sep_with_U_type on box-normalized args
-          have h_sep_AB'' : isSeparableWithUType (C''.snce w'') A'' B'' :=
+          have h_sep_AB'' : isSeparableWithUType (w''.snce C'') A'' B'' :=
             snce_single_U_depth_one_sep_with_U_type C'' w'' A'' B''
               hA''_sf hB''_sf hA''_uf hB''_uf hsingle_C'' hsingle_F'' hdC'' hdF''
               (has_no_allpast_allfuture_true C'') (has_no_allpast_allfuture_true w'')
-          -- Transfer from C''.snce to F'' C.snce via F hequiv
-          have h_sep_CF_AB'' : isSeparableWithUType (C.snce w) A'' B'' :=
+          -- Transfer from w''.snce C'' to w.snce C via hequiv
+          have h_sep_CF_AB'' : isSeparableWithUType (w.snce C) A'' B'' :=
             is_separable_with_U_type_of_equiv hequiv h_sep_AB''
           -- Bridge from A'' B'' to A B
           exact is_separable_with_U_type_replace_args h_sep_CF_AB''
@@ -343,12 +343,12 @@ theorem single_U_formula_sep_with_U_type_no_oracle (phi A B : Formula Atom)
           have hA''_uf : isUFree A'' = true := replace_box_preserves_U_free A hA_uf
           have hB''_uf : isUFree B'' = true := replace_box_preserves_U_free B hB_uf
           -- Apply snce_single_U_depth_one_sep_with_U_type on box-normalized args
-          have h_sep_AB'' : isSeparableWithUType (C''.snce w'') A'' B'' :=
+          have h_sep_AB'' : isSeparableWithUType (w''.snce C'') A'' B'' :=
             snce_single_U_depth_one_sep_with_U_type C'' w'' A'' B''
               hA''_sf hB''_sf hA''_uf hB''_uf hsingle_C'' hsingle_F'' hdC'' hdF''
               (has_no_allpast_allfuture_true C'') (has_no_allpast_allfuture_true w'')
-          -- Transfer from C''.snce to F'' C.snce via F hequiv
-          have h_sep_CF_AB'' : isSeparableWithUType (C.snce w) A'' B'' :=
+          -- Transfer from w''.snce C'' to w.snce C via hequiv
+          have h_sep_CF_AB'' : isSeparableWithUType (w.snce C) A'' B'' :=
             is_separable_with_U_type_of_equiv hequiv h_sep_AB''
           -- Bridge from A'' B'' to A B
           exact is_separable_with_U_type_replace_args h_sep_CF_AB''

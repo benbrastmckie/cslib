@@ -74,9 +74,9 @@ structure C5Counterexample (χ : Chronicle Atom) where
   ξ : Formula Atom
   /-- The event formula (the trigger of the Until). -/
   η : Formula Atom
-  until_mem : (η U ξ) ∈ χ.f x
+  until_mem : (ξ U η) ∈ χ.f x
   no_witness : ¬∃ y ∈ χ.dom, x < y ∧ η ∈ χ.f y ∧
-    ∀ z ∈ χ.dom, x < z → z < y → ξ ∈ χ.f z ∧ (η U ξ) ∈ χ.f z
+    ∀ z ∈ χ.dom, x < z → z < y → ξ ∈ χ.f z ∧ (ξ U η) ∈ χ.f z
 
 /--
 A **C5' counterexample** (Since direction): a point x and formulas xi, eta such that
@@ -90,9 +90,9 @@ structure C5'Counterexample (χ : Chronicle Atom) where
   ξ : Formula Atom
   /-- The event formula (the trigger of the Since). -/
   η : Formula Atom
-  since_mem : (η S ξ) ∈ χ.f x
+  since_mem : (ξ S η) ∈ χ.f x
   no_witness : ¬∃ y ∈ χ.dom, y < x ∧ η ∈ χ.f y ∧
-    ∀ z ∈ χ.dom, y < z → z < x → ξ ∈ χ.f z ∧ (η S ξ) ∈ χ.f z
+    ∀ z ∈ χ.dom, y < z → z < x → ξ ∈ χ.f z ∧ (ξ S η) ∈ χ.f z
 
 /-! ## Helper: Finding Fresh Rationals -/
 
@@ -527,7 +527,7 @@ noncomputable def c5ForwardWalk
     (χ : Chronicle Atom) (h_c0 : χ.c0) (h_c2' : χ.c2')
     (ξ η : Formula Atom) (pt : Rat)
     (h_start_mem : pt ∈ χ.dom)
-    (h_until_start : (η U ξ) ∈ χ.f pt)
+    (h_until_start : (ξ U η) ∈ χ.f pt)
     (h_no_wit : ¬∃ y ∈ χ.dom, pt < y ∧ η ∈ χ.f y ∧
       (∀ a b, Adjacent χ.dom a b → pt ≤ a → b ≤ y → ξ ∈ χ.g a b) ∧
       (∀ w ∈ χ.dom, pt < w → w < y → ξ ∈ χ.f w)) :
@@ -715,7 +715,7 @@ noncomputable def c5ForwardWalk
     -- Check condition (i): conj ∈ f(x') AND ξ ∈ g(pt, x')
     by_cases h_cond_i : Formula.and ξ (Formula.untl ξ η) ∈ χ.f x' ∧ ξ ∈ χ.g pt x'
     · -- **Condition (i)**: recurse at x'
-      have h_untl_x' : (η U ξ) ∈ χ.f x' :=
+      have h_untl_x' : (ξ U η) ∈ χ.f x' :=
         conj_right_mcs h_mcs_x' ξ (Formula.untl ξ η) h_cond_i.1
       -- Derive: h_no_wit at x'
       have h_no_wit_x' : ¬∃ y ∈ χ.dom, x' < y ∧ η ∈ χ.f y ∧
@@ -1068,7 +1068,7 @@ noncomputable def c5BackwardWalk
     (χ : Chronicle Atom) (h_c0 : χ.c0) (h_c2' : χ.c2')
     (ξ η : Formula Atom) (pt : Rat)
     (h_start_mem : pt ∈ χ.dom)
-    (h_since_start : (η S ξ) ∈ χ.f pt)
+    (h_since_start : (ξ S η) ∈ χ.f pt)
     (h_no_wit : ¬∃ y ∈ χ.dom, y < pt ∧ η ∈ χ.f y ∧
       (∀ a b, Adjacent χ.dom a b → y ≤ a → b ≤ pt → ξ ∈ χ.g a b) ∧
       (∀ w ∈ χ.dom, y < w → w < pt → ξ ∈ χ.f w)) :
@@ -1251,7 +1251,7 @@ noncomputable def c5BackwardWalk
     -- Check condition (i): conj ∈ f(x'') AND ξ ∈ g(x'', pt)
     by_cases h_cond_i : Formula.and ξ (Formula.snce ξ η) ∈ χ.f x'' ∧ ξ ∈ χ.g x'' pt
     · -- **Condition (i)**: recurse at x''
-      have h_snce_x'' : (η S ξ) ∈ χ.f x'' :=
+      have h_snce_x'' : (ξ S η) ∈ χ.f x'' :=
         conj_right_mcs h_mcs_x'' ξ (Formula.snce ξ η) h_cond_i.1
       -- Derive: h_no_wit at x''
       have h_no_wit_x'' : ¬∃ y ∈ χ.dom, y < x'' ∧ η ∈ χ.f y ∧

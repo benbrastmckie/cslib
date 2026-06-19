@@ -122,8 +122,8 @@ theorem truth_lemma_untl_forward (A : Set (Formula Atom)) (h_mcs : Temporal.SetM
       Satisfies (chronicleModel A h_mcs) s φ ↔ φ ∈ limitF A h_mcs s.val)
     (ih_ψ : ∀ s : ChronicleSubtype A h_mcs,
       Satisfies (chronicleModel A h_mcs) s ψ ↔ ψ ∈ limitF A h_mcs s.val)
-    (h_mem : (φ U ψ) ∈ limitF A h_mcs t.val) :
-    Satisfies (chronicleModel A h_mcs) t (φ U ψ) := by
+    (h_mem : (ψ U φ) ∈ limitF A h_mcs t.val) :
+    Satisfies (chronicleModel A h_mcs) t (ψ U φ) := by
   -- untl φ ψ ∈ f(t.val). By limit_satisfies_c5_strong, get witness y > t.val
   -- with φ ∈ f(y) and ψ ∈ limitG(t.val, y) (i.e., ψ ∈ f(w) for all w between t and y).
   obtain ⟨y, hy_dom, hty, hy_phi, hy_guard⟩ :=
@@ -143,8 +143,8 @@ theorem truth_lemma_untl_backward (A : Set (Formula Atom)) (h_mcs : Temporal.Set
       Satisfies (chronicleModel A h_mcs) s φ ↔ φ ∈ limitF A h_mcs s.val)
     (ih_ψ : ∀ s : ChronicleSubtype A h_mcs,
       Satisfies (chronicleModel A h_mcs) s ψ ↔ ψ ∈ limitF A h_mcs s.val)
-    (h_sat : Satisfies (chronicleModel A h_mcs) t (φ U ψ)) :
-    (φ U ψ) ∈ limitF A h_mcs t.val := by
+    (h_sat : Satisfies (chronicleModel A h_mcs) t (ψ U φ)) :
+    (ψ U φ) ∈ limitF A h_mcs t.val := by
   -- By contradiction: assume (φ U ψ) ∉ f(t).
   by_contra h_not_mem
   have h_mcs_t := limit_c0 A h_mcs t.val t.property
@@ -174,8 +174,8 @@ theorem truth_lemma_snce_forward (A : Set (Formula Atom)) (h_mcs : Temporal.SetM
       Satisfies (chronicleModel A h_mcs) s φ ↔ φ ∈ limitF A h_mcs s.val)
     (ih_ψ : ∀ s : ChronicleSubtype A h_mcs,
       Satisfies (chronicleModel A h_mcs) s ψ ↔ ψ ∈ limitF A h_mcs s.val)
-    (h_mem : (φ S ψ) ∈ limitF A h_mcs t.val) :
-    Satisfies (chronicleModel A h_mcs) t (φ S ψ) := by
+    (h_mem : (ψ S φ) ∈ limitF A h_mcs t.val) :
+    Satisfies (chronicleModel A h_mcs) t (ψ S φ) := by
   obtain ⟨y, hy_dom, hyt, hy_phi, hy_guard⟩ :=
     limit_satisfies_c5'_strong A h_mcs t.val t.property ψ φ h_mem
   let s : ChronicleSubtype A h_mcs := ⟨y, hy_dom⟩
@@ -191,8 +191,8 @@ theorem truth_lemma_snce_backward (A : Set (Formula Atom)) (h_mcs : Temporal.Set
       Satisfies (chronicleModel A h_mcs) s φ ↔ φ ∈ limitF A h_mcs s.val)
     (ih_ψ : ∀ s : ChronicleSubtype A h_mcs,
       Satisfies (chronicleModel A h_mcs) s ψ ↔ ψ ∈ limitF A h_mcs s.val)
-    (h_sat : Satisfies (chronicleModel A h_mcs) t (φ S ψ)) :
-    (φ S ψ) ∈ limitF A h_mcs t.val := by
+    (h_sat : Satisfies (chronicleModel A h_mcs) t (ψ S φ)) :
+    (ψ S φ) ∈ limitF A h_mcs t.val := by
   by_contra h_not_mem
   have h_mcs_t := limit_c0 A h_mcs t.val t.property
   have h_neg := mcs_neg_of_not_mem h_mcs_t h_not_mem

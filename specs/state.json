@@ -9,8 +9,8 @@
       "description": "Derive weak completeness as corollaries of strong completeness for all 15 modal cube systems. Move each {sys}_completeness theorem from Completeness.lean into StrongCompleteness.lean, replacing the direct ~30-line proof with a ~5-line corollary via ModalSetDerivable_empty_iff and {sys}_strong_completeness. Remove the original theorem from each Completeness.lean (keeping all supporting infrastructure like truth lemmas and canonical model construction). Update docstrings in both files accordingly. Systems: K, T, B, D, S4, S5, K4, K5, K45, KB5, D4, D5, D45, DB, TB",
       "topic": "Modal Logic",
       "created": "2026-06-19T02:53:37Z",
-      "last_updated": "2026-06-19T03:14:13Z",
-      "session_id": "sess_1781838284_8e3fef",
+      "last_updated": "2026-06-19T03:18:34Z",
+      "session_id": "sess_1750299600_orchestrate",
       "artifacts": [
         {
           "path": "specs/237_weak_completeness_corollaries_modal_cube/reports/01_weak-completeness-corollaries.md",
@@ -28,7 +28,7 @@
           "summary": "01_weak-completeness-corollaries-summary.md"
         }
       ],
-      "completion_summary": "Moved all 15 weak completeness theorems from Completeness.lean to StrongCompleteness.lean as corollaries of strong completeness via ModalSetDerivable_empty_iff. All 30 files build successfully. Zero sorries."
+      "completion_summary": "All 15 modal cube weak completeness theorems moved from Completeness.lean to StrongCompleteness.lean as corollaries of strong completeness via ModalSetDerivable_empty_iff. Each ~30-line direct proof replaced with ~5-line corollary. All CI checks pass."
     },
     {
       "project_number": 236,

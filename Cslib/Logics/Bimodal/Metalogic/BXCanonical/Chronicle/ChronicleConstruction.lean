@@ -429,8 +429,8 @@ theorem omega_chain_c5_witness (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs
     (show (counterexampleEnum (Nat.unpair n).2).kind = .c5_forward by rw [hn_eq])
     (show (counterexampleEnum (Nat.unpair n).2).x ∈ (omegaChainVal fc A h_mcs n).dom
       by rw [hn_eq]; exact hx)
-    (show Formula.untl .η(counterexampleEnum (Nat.unpair n).2)
-        (counterexampleEnum (Nat.unpair n).2).ξ ∈
+    (show Formula.untl (counterexampleEnum (Nat.unpair n).2).ξ
+        (counterexampleEnum (Nat.unpair n).2).η ∈
         (omegaChainVal fc A h_mcs n).f (counterexampleEnum (Nat.unpair n).2).x
       by rw [hn_eq]; exact h_until)
   obtain ⟨y, hy_dom, hy_lt, hy_η, hy_adj_guard, hy_dom_guard, hy_new_or_id⟩ := key
@@ -467,8 +467,8 @@ theorem omega_chain_c5'_witness (fc : FrameClass) (A : Set (Formula Atom)) (h_mc
     (show (counterexampleEnum (Nat.unpair n).2).kind = .c5_backward by rw [hn_eq])
     (show (counterexampleEnum (Nat.unpair n).2).x ∈ (omegaChainVal fc A h_mcs n).dom
       by rw [hn_eq]; exact hx)
-    (show Formula.snce .η(counterexampleEnum (Nat.unpair n).2)
-        (counterexampleEnum (Nat.unpair n).2).ξ ∈
+    (show Formula.snce (counterexampleEnum (Nat.unpair n).2).ξ
+        (counterexampleEnum (Nat.unpair n).2).η ∈
         (omegaChainVal fc A h_mcs n).f (counterexampleEnum (Nat.unpair n).2).x
       by rw [hn_eq]; exact h_since)
   obtain ⟨y, hy_dom, hy_lt, hy_η, hy_adj_guard, hy_dom_guard, hy_new_or_id⟩ := key
@@ -505,8 +505,8 @@ theorem omega_chain_c4_witness (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs
       by rw [hn_eq]; exact hy)
     (show (counterexampleEnum (Nat.unpair n).2).x < (counterexampleEnum (Nat.unpair n).2).y
       by rw [hn_eq]; exact hxy)
-    (show (Formula.untl .η(counterexampleEnum (Nat.unpair n).2)
-        (counterexampleEnum (Nat.unpair n).2).ξ).neg ∈
+    (show (Formula.untl (counterexampleEnum (Nat.unpair n).2).ξ
+        (counterexampleEnum (Nat.unpair n).2).η).neg ∈
         (omegaChainVal fc A h_mcs n).f (counterexampleEnum (Nat.unpair n).2).x
       by rw [hn_eq]; exact h_neg_until)
     (show (counterexampleEnum (Nat.unpair n).2).η ∈
@@ -540,8 +540,8 @@ theorem omega_chain_c4'_witness (fc : FrameClass) (A : Set (Formula Atom)) (h_mc
       by rw [hn_eq]; exact hy)
     (show (counterexampleEnum (Nat.unpair n).2).y < (counterexampleEnum (Nat.unpair n).2).x
       by rw [hn_eq]; exact hyx)
-    (show (Formula.snce .η(counterexampleEnum (Nat.unpair n).2)
-        (counterexampleEnum (Nat.unpair n).2).ξ).neg ∈
+    (show (Formula.snce (counterexampleEnum (Nat.unpair n).2).ξ
+        (counterexampleEnum (Nat.unpair n).2).η).neg ∈
         (omegaChainVal fc A h_mcs n).f (counterexampleEnum (Nat.unpair n).2).x
       by rw [hn_eq]; exact h_neg_since)
     (show (counterexampleEnum (Nat.unpair n).2).η ∈
@@ -1238,8 +1238,8 @@ theorem omega_chain_c5_forward_resolved_no_new (fc : FrameClass) (A : Set (Formu
   exact (omegaChainElimResult fc A h_mcs n).c5_forward_resolved_no_new
     (show (counterexampleEnum (Nat.unpair n).2).kind = .c5_forward by rw [hn_eq])
     (show (counterexampleEnum (Nat.unpair n).2).x ∈ _ by rw [hn_eq]; exact hx)
-    (show Formula.untl .η(counterexampleEnum (Nat.unpair n).2)
-        (counterexampleEnum (Nat.unpair n).2).ξ ∈ _ by rw [hn_eq]; exact h_until)
+    (show Formula.untl (counterexampleEnum (Nat.unpair n).2).ξ
+        (counterexampleEnum (Nat.unpair n).2).η ∈ _ by rw [hn_eq]; exact h_until)
     (by rw [hn_eq]; exact h_wit) u hu'
 
 /-- Mirror: when the C5 backward counterexample at step n is already resolved. -/
@@ -1261,8 +1261,8 @@ theorem omega_chain_c5_backward_resolved_no_new (fc : FrameClass) (A : Set (Form
   exact (omegaChainElimResult fc A h_mcs n).c5_backward_resolved_no_new
     (show (counterexampleEnum (Nat.unpair n).2).kind = .c5_backward by rw [hn_eq])
     (show (counterexampleEnum (Nat.unpair n).2).x ∈ _ by rw [hn_eq]; exact hx)
-    (show Formula.snce .η(counterexampleEnum (Nat.unpair n).2)
-        (counterexampleEnum (Nat.unpair n).2).ξ ∈ _ by rw [hn_eq]; exact h_since)
+    (show Formula.snce (counterexampleEnum (Nat.unpair n).2).ξ
+        (counterexampleEnum (Nat.unpair n).2).η ∈ _ by rw [hn_eq]; exact h_since)
     (by rw [hn_eq]; exact h_wit) u hu'
 
 /-! ## Omega Chain g-value Lifting

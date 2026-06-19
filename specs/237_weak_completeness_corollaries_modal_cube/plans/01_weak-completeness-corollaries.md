@@ -65,7 +65,7 @@ No ROADMAP.md found.
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Systems with remaining infrastructure (K, T, D, TB) [NOT STARTED]
+### Phase 1: Systems with remaining infrastructure (K, T, D, TB) [COMPLETED]
 
 **Goal**: Move the completeness theorem from `Completeness.lean` to `StrongCompleteness.lean` for the 4 systems that retain other declarations in `Completeness.lean`. These are the most complex edits because the surrounding infrastructure must be preserved.
 
@@ -97,7 +97,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Single-declaration systems, first batch (B, S4, S5, K4, K5) [NOT STARTED]
+### Phase 2: Single-declaration systems, first batch (B, S4, S5, K4, K5) [COMPLETED]
 
 **Goal**: Move the completeness theorem for 5 systems whose `Completeness.lean` has only the completeness theorem (plus imports and docstring). After removal, these files become empty module bodies with just imports and an updated docstring. S5 additionally requires moving the `alias completeness := s5_completeness`.
 
@@ -132,7 +132,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Single-declaration systems, second batch (K45, KB5, D4, D5, D45, DB) [NOT STARTED]
+### Phase 3: Single-declaration systems, second batch (K45, KB5, D4, D5, D45, DB) [COMPLETED]
 
 **Goal**: Move the completeness theorem for the remaining 6 systems. Same pattern as Phase 2.
 
@@ -169,7 +169,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: Full build verification and CI checks [NOT STARTED]
+### Phase 4: Full build verification and CI checks [COMPLETED]
 
 **Goal**: Run the complete CSLib CI verification pipeline to confirm the refactoring introduces no regressions.
 

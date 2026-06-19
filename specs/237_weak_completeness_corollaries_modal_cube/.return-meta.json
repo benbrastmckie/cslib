@@ -1,18 +1,36 @@
 {
   "status": "implemented",
-  "summary": "Moved all 15 weak completeness theorems from Completeness.lean to StrongCompleteness.lean as corollaries of strong completeness via ModalSetDerivable_empty_iff. All 30 files build successfully.",
+  "started_at": "2026-06-18T00:00:00Z",
+  "completed_at": "2026-06-18T00:00:00Z",
   "artifacts": [
     {
       "path": "specs/237_weak_completeness_corollaries_modal_cube/summaries/01_weak-completeness-corollaries-summary.md",
       "type": "summary",
-      "summary": "Implementation summary with change catalog and verification results"
+      "summary": "Summary of weak completeness corollary refactoring for all 15 modal cube systems"
     }
   ],
-  "phases_completed": 4,
-  "phases_total": 4,
-  "sorry_count": 0,
+  "partial_progress": {
+    "stage": "completed",
+    "details": "All 4 phases complete; implementation was done in commit 02eed914",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 4,
+    "last_completed_phase": "Full build verification and CI checks"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 12,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "notes": "lake test has pre-existing failures in LTL/OmegaRegular.lean (task 236 work-in-progress, untracked file with sorry); unrelated to task 237"
+  },
   "metadata": {
-    "session_id": "sess_1781838284_8e3fef",
-    "agent_type": "cslib-implementation-agent"
+    "session_id": "sess_1750299600_orchestrate_237",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

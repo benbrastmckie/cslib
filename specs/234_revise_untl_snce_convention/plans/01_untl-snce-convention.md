@@ -104,7 +104,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Temporal Logic Layer [PARTIAL]
+### Phase 2: Temporal Logic Layer [COMPLETED]
 
 **Goal**: Swap untl/snce in all Temporal Logic files (syntax, semantics, proof system, metalogic).
 
@@ -261,7 +261,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 6: Bimodal Metalogic -- BXCanonical, Separation, Decidability [PARTIAL]
+### Phase 6: Bimodal Metalogic -- BXCanonical, Separation, Decidability [COMPLETED]
 
 **Goal**: Swap untl/snce in the remaining Bimodal Metalogic subsystems. This is the largest phase by reference count, containing the densest proof files.
 
@@ -352,7 +352,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 7: Full Build Verification and Comment Cleanup [NOT STARTED]
+### Phase 7: Full Build Verification and Comment Cleanup [COMPLETED]
 
 **Goal**: Run full CI verification pipeline and clean up any remaining convention documentation.
 

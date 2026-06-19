@@ -117,14 +117,14 @@ theorem cud_not_mem_is_sdc {B : Set (Formula Atom)}
 /-- The r-relation: B is a right-successor of A for the Until operator (Burgess Lemma 2.3). -/
 def rRelation (A B : Set (Formula Atom)) : Prop :=
   ∀ (gamma delta : Formula Atom),
-    (delta U gamma) ∈ A →
-    delta ∈ B ∨ (gamma ∈ B ∧ (delta U gamma) ∈ B)
+    (gamma U delta) ∈ A →
+    delta ∈ B ∨ (gamma ∈ B ∧ (gamma U delta) ∈ B)
 
 /-- The r-relation for the Since operator: B is a left-successor of A. -/
 def rRelationSince (A B : Set (Formula Atom)) : Prop :=
   ∀ (gamma delta : Formula Atom),
-    (delta S gamma) ∈ A →
-    delta ∈ B ∨ (gamma ∈ B ∧ (delta S gamma) ∈ B)
+    (gamma S delta) ∈ A →
+    delta ∈ B ∨ (gamma ∈ B ∧ (gamma S delta) ∈ B)
 
 /-- The combined r3-relation: B is a successor of A (Until) and C (Since). -/
 def r3Relation (A B C : Set (Formula Atom)) : Prop :=
@@ -176,7 +176,7 @@ def R3MaximalSince (A B C : Set (Formula Atom)) : Prop :=
 
 /-- The Burgess r-relation: every formula in C appears as the left argument of `gamma U beta` in A. -/
 def burgessR (A : Set (Formula Atom)) (beta : Formula Atom) (C : Set (Formula Atom)) : Prop :=
-  ∀ gamma ∈ C, (gamma U beta) ∈ A
+  ∀ gamma ∈ C, (beta U gamma) ∈ A
 
 /-- Lifts `burgessR` to all beta in B: every pair `(beta, gamma)` with beta ∈ B, gamma ∈ C satisfies burgessR. -/
 def burgessRSet (A B C : Set (Formula Atom)) : Prop :=
@@ -184,7 +184,7 @@ def burgessRSet (A B C : Set (Formula Atom)) : Prop :=
 
 /-- The Burgess r-relation for Since: every formula in C appears as the left argument of `gamma S beta` in A. -/
 def burgessRSince (A : Set (Formula Atom)) (beta : Formula Atom) (C : Set (Formula Atom)) : Prop :=
-  ∀ gamma ∈ C, (gamma S beta) ∈ A
+  ∀ gamma ∈ C, (beta S gamma) ∈ A
 
 /-- Lifts `burgessRSince` to all beta in B. -/
 def burgessRSetSince (A B C : Set (Formula Atom)) : Prop :=
@@ -256,7 +256,7 @@ def Chronicle.c3 (chi : Chronicle Atom) : Prop :=
 def Chronicle.c4 (chi : Chronicle Atom) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → x < y →
     ∀ (gamma delta : Formula Atom),
-      (delta U gamma).neg ∈ chi.f x →
+      (gamma U delta).neg ∈ chi.f x →
       delta ∈ chi.f y →
       ∃ z ∈ chi.dom, x < z ∧ z < y ∧ gamma.neg ∈ chi.f z
 
@@ -265,7 +265,7 @@ def Chronicle.c4 (chi : Chronicle Atom) : Prop :=
 def Chronicle.c4' (chi : Chronicle Atom) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → y < x →
     ∀ (gamma delta : Formula Atom),
-      (delta S gamma).neg ∈ chi.f x →
+      (gamma S delta).neg ∈ chi.f x →
       delta ∈ chi.f y →
       ∃ z ∈ chi.dom, y < z ∧ z < x ∧ gamma.neg ∈ chi.f z
 
@@ -274,20 +274,20 @@ def Chronicle.c4' (chi : Chronicle Atom) : Prop :=
 def Chronicle.c5 (chi : Chronicle Atom) : Prop :=
   ∀ x ∈ chi.dom,
     ∀ (gamma delta : Formula Atom),
-      (delta U gamma) ∈ chi.f x →
+      (gamma U delta) ∈ chi.f x →
       ∃ y ∈ chi.dom, x < y ∧ delta ∈ chi.f y ∧
         ∀ z ∈ chi.dom, x < z → z < y →
-          gamma ∈ chi.f z ∧ (delta U gamma) ∈ chi.f z
+          gamma ∈ chi.f z ∧ (gamma U delta) ∈ chi.f z
 
 /-- Condition c5': the Since-dual of c5: past witness for δ S γ at x. -/
 @[nolint dupNamespace]
 def Chronicle.c5' (chi : Chronicle Atom) : Prop :=
   ∀ x ∈ chi.dom,
     ∀ (gamma delta : Formula Atom),
-      (delta S gamma) ∈ chi.f x →
+      (gamma S delta) ∈ chi.f x →
       ∃ y ∈ chi.dom, y < x ∧ delta ∈ chi.f y ∧
         ∀ z ∈ chi.dom, y < z → z < x →
-          gamma ∈ chi.f z ∧ (delta S gamma) ∈ chi.f z
+          gamma ∈ chi.f z ∧ (gamma S delta) ∈ chi.f z
 
 /-! ## Valid Chronicle -/
 

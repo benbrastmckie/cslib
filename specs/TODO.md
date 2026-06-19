@@ -11,7 +11,7 @@ next_project_number: 237
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,209,226,232,234,235,236 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,209,226,232,234,236 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -28,10 +28,6 @@ next_project_number: 237
 ### Foundations
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
-
-### Modal Logic
-
-235 [PR READY] — Upgrade weak completeness to strong completeness for all 15 modal
 
 ### Project Management
 
@@ -66,12 +62,13 @@ next_project_number: 237
 ---
 
 ### 235. Strong completeness modal cube
-- **Status**: [PR READY]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
 - **Research**: [235_strong_completeness_modal_cube/reports/01_strong-completeness-research.md]
 - **Plan**: [235_strong_completeness_modal_cube/plans/01_strong-completeness-plan.md]
+- **Summary**: [235_strong_completeness_modal_cube/summaries/01_implementation-summary.md]
 
 **Description**: Upgrade weak completeness to strong completeness for all 15 modal cube systems (K, T, B, D, S4, S5, K4, K5, K45, KB5, D4, D5, D45, DB, TB). The existing weak completeness results prove that validity implies derivability from the empty context. Strong completeness should prove that semantic entailment from a set of premises Γ implies syntactic entailment: Γ ⊨ φ → Γ ⊢ φ, matching the existing strong soundness signature Γ ⊢ φ → Γ ⊨ φ. Include clear documentation distinguishing strong vs weak versions and careful organization of parameterized and per-system files
 

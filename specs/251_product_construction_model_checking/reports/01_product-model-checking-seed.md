@@ -36,27 +36,31 @@ The proof has two directions:
 - **Completeness**: a path in M satisfying ¬φ lifts to an accepting run of M ⊗ A_¬φ
   (using the correctness of the LTL-to-NBA translation)
 
-## Kripke Structure Formalization
+## Existing CSLib Infrastructure
 
-CSLib may need a Kripke structure type. Options:
+CSLib already has rich LTS infrastructure that this task should build on:
 
-1. **Reuse Modal Kripke frames**: `Cslib/Logics/Modal/Basic.lean` has Kripke frame
-   infrastructure, but these are for modal logic (accessibility relations) not labeled
-   transition systems
-2. **New transition system type**: define `TransitionSystem` with labeled states and
-   a transition relation, matching the model checking literature
-3. **Generic approach**: parameterize over any type with a transition relation and
-   labeling function, avoiding commitment to a specific structure
+- `Cslib/Foundations/Semantics/LTS/Basic.lean` — `LTS State Label` with `Tr` relation,
+  multistep `MTr`, reachability, classes (image-finite, finitely branching, deterministic)
+- `Cslib/Foundations/Semantics/LTS/OmegaExecution.lean` — `OmegaExecution` for infinite
+  runs of an LTS (ω-sequence of states + labels)
+- `Cslib/Foundations/Semantics/FLTS/Basic.lean` — `FLTS` (functional/deterministic LTS),
+  used as base for DA
+- `Cslib/Foundations/Semantics/FLTS/Prod.lean` — FLTS product construction
+- `Cslib/Logics/LTL/Semantics/OmegaExecutionSatisfies.lean` — `SatisfiesExec` bridges
+  LTL satisfaction to LTS omega-executions via a labeling function `State → (Atom → Prop)`.
+  This is exactly the model checking connection.
 
-Option 3 is likely best for CSLib — keep the theorem general and let users instantiate
-with their preferred transition system type.
+No new transition system type is needed. The product construction should use `LTS` with
+a labeling function, matching the existing `SatisfiesExec` pattern.
 
 ## CSLib Integration Points
 
-- `Cslib/Computability/Automata/NA/Basic.lean` — NBA types
-- `Cslib/Computability/Automata/NA/Product.lean` — existing NBA product (for
-  intersection); the system × NBA product is different but related
-- `Cslib/Logics/LTL/Satisfies.lean` — LTL satisfaction over ω-words
+- `Cslib/Foundations/Semantics/LTS/` — LTS type, OmegaExecution (system side)
+- `Cslib/Logics/LTL/Semantics/OmegaExecutionSatisfies.lean` — SatisfiesExec bridge
+- `Cslib/Computability/Automata/NA/Basic.lean` — NBA types (automaton side)
+- `Cslib/Computability/Automata/NA/Prod.lean` — existing NBA × NBA product (for
+  intersection); the LTS × NBA product is structurally different
 - Task 242 (Vardi-Wolper) — provides LTL-to-NBA for ¬φ
 - Task 248 (emptiness) — emptiness of the product NBA
 

@@ -45,9 +45,12 @@ verify (subtle correctness argument involving DFS stack invariants).
 
 ## CSLib Integration Points
 
-- `Cslib/Computability/Automata/NA/Basic.lean` — NBA type definitions
+- `Cslib/Computability/Automata/NA/Basic.lean` — NBA type definitions, Büchi acceptance
+  via `∃ᶠ k in atTop, ss k ∈ a.accept` (Filter.Frequently/atTop formulation)
+- `Cslib/Foundations/Data/OmegaSequence/InfOcc.lean` — `infOcc` predicate for "infinitely
+  often", with StrictMono characterization and finite-type pigeonhole
 - `Cslib/Computability/Automata/NA/Equivalence.lean` — language equivalence
-- Product construction (task 251) will compose emptiness with system × property NBA
+- Product construction (task 251) will compose emptiness with LTS × NBA product
 - GNBA emptiness follows from NBA emptiness + GNBA-to-NBA translation (task 236)
 
 ## Literature

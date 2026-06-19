@@ -72,7 +72,13 @@ automaton with n states and k pairs.
 
 ## CSLib Integration Points
 
-- `Cslib/Computability/Automata/DA/Basic.lean` — existing DBA/DMA types
+- `Cslib/Computability/Automata/DA/Basic.lean` — existing DBA/DMA types with Büchi
+  acceptance (`∃ᶠ k in atTop`) and Muller acceptance (`infOcc ∈ accept`)
+- `Cslib/Foundations/Data/OmegaSequence/InfOcc.lean` — `infOcc` predicate providing
+  the "infinitely often" foundation that Rabin and parity acceptance will build on.
+  Includes StrictMono characterization and finite-type pigeonhole.
+- `Cslib/Computability/Automata/NA/Basic.lean` — nondeterministic Büchi/Muller for
+  comparison; Rabin/parity could also have nondeterministic variants
 - Task 241 (McNaughton) — produces DMA; Muller→Rabin→Parity gives DPA
 - Task 250 (complementation) — complement of DRA is DStreett (trivial)
 - Future: parity games, μ-calculus model checking

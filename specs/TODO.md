@@ -1,5 +1,5 @@
 ---
-next_project_number: 253
+next_project_number: 254
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 253
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,236,241,242,243,245,248,250,252 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 1 | 36,37,180,226,236,241,242,243,245,248,250,252,253 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181,215,251 | 36,37,180,248 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -29,6 +29,10 @@ next_project_number: 253
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
+### Project Management
+
+253 [NOT STARTED] — Gather PDFs for all 25 literature references cited across tasks 2
+
 ### Propositional Logic
 
 226 [RESEARCHED] — Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648
@@ -36,19 +40,29 @@ next_project_number: 253
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-236 [RESEARCHED] — Complete follow-up PRs from PR #649 for Büchi automata and closur
+236 [PLANNING] — Complete follow-up PRs from PR #649 for Büchi automata and closur
 241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 242 [NOT STARTED] — Implement full Vardi-Wolper tableau construction for LTL-to-NBA t
 243 [NOT STARTED] — Implement deterministic Büchi automata constructions and related 
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
 248 [NOT STARTED] — Implement NBA emptiness checking: decide whether a nondeterminist
-  └─ 251 [NOT STARTED] — Implement the synchronous product construction of a transition sy
+  └─ 251 [NOT STARTED] — Implement the synchronous product construction of an LTS (using e
 250 [NOT STARTED] — Implement NBA complementation: given an NBA A, construct an NBA a
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 253. Gather automata literature
+- **Status**: [NOT STARTED]
+- **Task Type**: general
+- **Topic**: Project Management
+- **Dependencies**: None
+
+**Description**: Gather PDFs for all 25 literature references cited across tasks 241-252 (McNaughton, Vardi-Wolper, NBA emptiness, NBA complementation, product construction/model checking, acceptance conditions zoo). Search online repositories (arXiv, DBLP, Springer, IEEE, ACM DL, Semantic Scholar, author homepages) for each reference. Convert acquired PDFs to markdown via the literature pipeline and update the Literature index. Produce a final report listing all sources found and any that remain unlocated
+
+---
 
 ### 252. Acceptance conditions zoo
 - **Status**: [NOT STARTED]
@@ -57,7 +71,7 @@ next_project_number: 253
 - **Dependencies**: None
 - **Research**: [252_acceptance_conditions_zoo/reports/01_acceptance-conditions-seed.md]
 
-**Description**: Formalize Rabin and parity acceptance conditions alongside the existing Muller acceptance (DMA) in CSLib, and prove the classical conversions between them. Scope: (1) Rabin acceptance — pairs of (E_i, F_i) sets, accepting if some pair has finitely many E_i visits and infinitely many F_i visits. (2) Parity acceptance — priority function coloring, accepting if the minimum (or maximum) infinitely-occurring priority is even. (3) Muller↔Rabin conversion. (4) Rabin↔parity conversion (Piterman 2007). (5) McNaughton-to-parity path if task 241 is completed first. Target: Cslib/Computability/Automata/DA/Rabin.lean, Parity.lean, Conversions.lean
+**Description**: Formalize Rabin and parity acceptance conditions alongside the existing Muller acceptance (DMA) and Büchi acceptance (DBA) in CSLib, and prove the classical conversions between them. Build on the existing infOcc predicate (Cslib/Foundations/Data/OmegaSequence/InfOcc.lean) which already provides the "infinitely often" foundation. Scope: (1) Rabin acceptance — pairs of (Eᵢ, Fᵢ) sets. (2) Parity acceptance — priority coloring. (3) Muller↔Rabin conversion. (4) Rabin↔parity conversion (Piterman 2007). Target: Cslib/Computability/Automata/DA/Rabin.lean, Parity.lean, Conversions.lean
 
 ---
 
@@ -68,7 +82,7 @@ next_project_number: 253
 - **Dependencies**: Task 248
 - **Research**: [251_product_construction_model_checking/reports/01_product-model-checking-seed.md]
 
-**Description**: Implement the synchronous product construction of a transition system (Kripke structure) with an NBA, and prove the model checking reduction: a Kripke structure M satisfies an LTL property φ iff the product of M with the NBA for ¬φ has an empty language. This is the core automata-theoretic model checking theorem (Vardi-Wolper 1986). Requires: transition system / Kripke structure type (or reuse existing), product NBA construction, correctness proof linking product acceptance to satisfaction. Target: Cslib/Computability/Automata/NA/Product.lean and Cslib/Logics/LTL/ModelChecking.lean
+**Description**: Implement the synchronous product construction of an LTS (using existing Cslib/Foundations/Semantics/LTS/ infrastructure) with an NBA, and prove the model checking reduction: an LTS M satisfies an LTL property φ iff the product of M with the NBA for ¬φ has an empty language. The existing OmegaExecution type and SatisfiesExec bridge (Cslib/Logics/LTL/Semantics/OmegaExecutionSatisfies.lean) already connect LTL satisfaction to LTS runs via a labeling function State → (Atom → Prop). The main new work is: (1) the system × NBA product construction (distinct from the existing automaton × automaton products in NA/Prod.lean), (2) the correctness proof linking product acceptance to LTL satisfaction. Target: Cslib/Computability/Automata/NA/LTSProduct.lean and Cslib/Logics/LTL/ModelChecking.lean
 
 ---
 
@@ -90,7 +104,7 @@ next_project_number: 253
 - **Dependencies**: None
 - **Research**: [248_nba_emptiness_checking/reports/01_nba-emptiness-seed.md]
 
-**Description**: Implement NBA emptiness checking: decide whether a nondeterministic Büchi automaton accepts any ω-word. Two approaches: (1) nested DFS (Courcoubetis-Vardi-Wolper-Yannakakis 1992) finding a reachable accepting cycle, or (2) SCC-based algorithm checking for accepting SCCs reachable from the initial state. This is the key building block connecting LTL-to-NBA translation to model checking: the model checking problem reduces to emptiness of a product automaton. Target: Cslib/Computability/Automata/NA/Emptiness.lean
+**Description**: Implement NBA emptiness checking: decide whether a nondeterministic Büchi automaton accepts any ω-word. Two approaches: (1) nested DFS (Courcoubetis-Vardi-Wolper-Yannakakis 1992) finding a reachable accepting cycle, or (2) SCC-based algorithm checking for accepting SCCs reachable from the initial state. The existing infOcc predicate (Cslib/Foundations/Data/OmegaSequence/InfOcc.lean) and NBA Büchi acceptance (NA/Basic.lean using Filter.Frequently/atTop) provide the acceptance-condition foundation. This is the key building block connecting LTL-to-NBA translation to model checking. Target: Cslib/Computability/Automata/NA/Emptiness.lean
 
 ---
 
@@ -146,7 +160,7 @@ next_project_number: 253
 ---
 
 ### 236. Follow up prs buchi omega regular
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None

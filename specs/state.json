@@ -1,5 +1,5 @@
 {
-  "next_project_number": 248,
+  "next_project_number": 253,
   "active_projects": [
     {
       "project_number": 241,
@@ -9,7 +9,10 @@
       "description": "Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller) establishing equivalence between omega-regular languages and deterministic Muller automata",
       "topic": "Temporal Logic",
       "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-19T05:20:19Z"
+      "last_updated": "2026-06-19T20:20:31Z",
+      "dependencies": [
+        249
+      ]
     },
     {
       "project_number": 242,
@@ -34,12 +37,13 @@
     {
       "project_number": 244,
       "project_name": "optimize_nba_state_space",
-      "status": "not_started",
+      "status": "abandoned",
       "task_type": "cslib",
       "description": "Optimize NBA state space constructions prioritizing correctness over minimality",
       "topic": "Temporal Logic",
       "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-19T05:20:19Z"
+      "last_updated": "2026-06-19T20:20:31Z",
+      "abandoned_reason": "Premature optimization — defer until correctness proofs are solid"
     },
     {
       "project_number": 245,
@@ -214,6 +218,99 @@
       ],
       "topic": "Bimodal Porting",
       "last_updated": "2026-06-14T17:54:05Z"
+    },
+    {
+      "project_number": 248,
+      "project_name": "nba_emptiness_checking",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Implement NBA emptiness checking: decide whether a nondeterministic Büchi automaton accepts any ω-word. Two approaches: (1) nested DFS (Courcoubetis-Vardi-Wolper-Yannakakis 1992) finding a reachable accepting cycle, or (2) SCC-based algorithm checking for accepting SCCs reachable from the initial state. This is the key building block connecting LTL-to-NBA translation to model checking: the model checking problem reduces to emptiness of a product automaton. Target: Cslib/Computability/Automata/NA/Emptiness.lean",
+      "topic": "Temporal Logic",
+      "created": "2026-06-19T20:20:31Z",
+      "last_updated": "2026-06-19T20:20:31Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/248_nba_emptiness_checking/reports/01_nba-emptiness-seed.md",
+          "type": "report",
+          "summary": "Seed report: NBA emptiness algorithms, literature references, formalization approach"
+        }
+      ]
+    },
+    {
+      "project_number": 249,
+      "project_name": "ctchou_automata_coordination",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Research task: evaluate ctchou/AutomataTheory (independent Lean 4 project) for coordination with CSLib. That project has McNaughton theorem proved, ω-regular closure (union, intersection, complementation, concatenation, Kleene star), and uses a uniform finite/infinite word framework. Assess: (1) architectural compatibility with CSLib (type definitions, Mathlib usage, naming conventions), (2) whether any proofs can be ported or adapted (especially McNaughton), (3) licensing and attribution requirements, (4) whether to coordinate upstream or develop independently. This research should inform task 241 (McNaughton) strategy.",
+      "topic": "Temporal Logic",
+      "created": "2026-06-19T20:20:31Z",
+      "last_updated": "2026-06-19T20:20:31Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/249_ctchou_automata_coordination/reports/01_ctchou-coordination-seed.md",
+          "type": "report",
+          "summary": "Seed report: ctchou/AutomataTheory overview, coordination questions, compatibility assessment outline"
+        }
+      ]
+    },
+    {
+      "project_number": 250,
+      "project_name": "nba_complementation",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Implement NBA complementation: given an NBA A, construct an NBA accepting the complement language Σ^ω \\ L(A). Two main approaches: (1) determinization-based — determinize via McNaughton/Safra then complement the deterministic automaton (depends on task 241), (2) direct rank-based construction (Kupferman-Vardi 2001, Schewe 2009) avoiding full determinization. CSLib already has ω-regular complementation at the language-theoretic level via Büchi congruence; this task provides the automata-level construction needed for algorithmic applications (language inclusion, model checking). Target: Cslib/Computability/Automata/NA/Complement.lean",
+      "topic": "Temporal Logic",
+      "created": "2026-06-19T20:20:31Z",
+      "last_updated": "2026-06-19T20:20:31Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/250_nba_complementation/reports/01_nba-complementation-seed.md",
+          "type": "report",
+          "summary": "Seed report: complementation approaches (determinization vs rank-based), complexity, literature references"
+        }
+      ]
+    },
+    {
+      "project_number": 251,
+      "project_name": "product_construction_model_checking",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Implement the synchronous product construction of a transition system (Kripke structure) with an NBA, and prove the model checking reduction: a Kripke structure M satisfies an LTL property φ iff the product of M with the NBA for ¬φ has an empty language. This is the core automata-theoretic model checking theorem (Vardi-Wolper 1986). Requires: transition system / Kripke structure type (or reuse existing), product NBA construction, correctness proof linking product acceptance to satisfaction. Target: Cslib/Computability/Automata/NA/Product.lean and Cslib/Logics/LTL/ModelChecking.lean",
+      "topic": "Temporal Logic",
+      "dependencies": [
+        248
+      ],
+      "created": "2026-06-19T20:20:31Z",
+      "last_updated": "2026-06-19T20:20:31Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/251_product_construction_model_checking/reports/01_product-model-checking-seed.md",
+          "type": "report",
+          "summary": "Seed report: automata-theoretic model checking, product construction, Vardi-Wolper reduction"
+        }
+      ]
+    },
+    {
+      "project_number": 252,
+      "project_name": "acceptance_conditions_zoo",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Formalize Rabin and parity acceptance conditions alongside the existing Muller acceptance (DMA) in CSLib, and prove the classical conversions between them. Scope: (1) Rabin acceptance — pairs of (E_i, F_i) sets, accepting if some pair has finitely many E_i visits and infinitely many F_i visits. (2) Parity acceptance — priority function coloring, accepting if the minimum (or maximum) infinitely-occurring priority is even. (3) Muller↔Rabin conversion. (4) Rabin↔parity conversion (Piterman 2007). (5) McNaughton-to-parity path if task 241 is completed first. Target: Cslib/Computability/Automata/DA/Rabin.lean, Parity.lean, Conversions.lean",
+      "topic": "Temporal Logic",
+      "created": "2026-06-19T20:20:31Z",
+      "last_updated": "2026-06-19T20:20:31Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/252_acceptance_conditions_zoo/reports/01_acceptance-conditions-seed.md",
+          "type": "report",
+          "summary": "Seed report: Rabin/parity acceptance, classical conversions, literature references"
+        }
+      ]
     }
   ],
   "repository_health": {

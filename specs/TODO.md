@@ -1,5 +1,5 @@
 ---
-next_project_number: 236
+next_project_number: 237
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 236
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,209,226,232,234,235 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,209,226,232,234,235,236 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -31,7 +31,7 @@ next_project_number: 236
 
 ### Modal Logic
 
-235 [NOT STARTED] — Upgrade weak completeness to strong completeness for all 15 modal
+235 [IMPLEMENTING] — Upgrade weak completeness to strong completeness for all 15 modal
 
 ### Project Management
 
@@ -45,6 +45,7 @@ next_project_number: 236
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 234 [IMPLEMENTING] — Revise main branch to use standard LTL convention for untl and sn
+236 [NOT STARTED] — Complete follow-up PRs from PR #649 for Büchi automata and closur
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -54,11 +55,23 @@ next_project_number: 236
 
 ## Tasks
 
-### 235. Strong completeness modal cube
+### 236. Follow up prs buchi omega regular
 - **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Complete follow-up PRs from PR #649 for Büchi automata and closure of omega-regular languages under boolean operations
+
+---
+
+### 235. Strong completeness modal cube
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
+- **Research**: [235_strong_completeness_modal_cube/reports/01_strong-completeness-research.md]
+- **Plan**: [235_strong_completeness_modal_cube/plans/01_strong-completeness-plan.md]
 
 **Description**: Upgrade weak completeness to strong completeness for all 15 modal cube systems (K, T, B, D, S4, S5, K4, K5, K45, KB5, D4, D5, D45, DB, TB). The existing weak completeness results prove that validity implies derivability from the empty context. Strong completeness should prove that semantic entailment from a set of premises Γ implies syntactic entailment: Γ ⊨ φ → Γ ⊢ φ, matching the existing strong soundness signature Γ ⊢ φ → Γ ⊨ φ. Include clear documentation distinguishing strong vs weak versions and careful organization of parameterized and per-system files
 

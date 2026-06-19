@@ -64,20 +64,25 @@
     {
       "project_number": 236,
       "project_name": "follow_up_prs_buchi_omega_regular",
-      "status": "researching",
+      "status": "researched",
       "task_type": "cslib",
       "description": "Complete follow-up PRs from PR #649 for Büchi automata and closure of omega-regular languages under boolean operations",
       "topic": "Temporal Logic",
       "created": "2026-06-19T02:21:37Z",
-      "last_updated": "2026-06-19T20:09:59Z",
+      "last_updated": "2026-06-19T20:34:39Z",
       "completion_summary": null,
       "session_id": "sess_1781899793_33c593",
-      "next_artifact_number": 6,
+      "next_artifact_number": 7,
       "artifacts": [
         {
           "path": "specs/236_follow_up_prs_buchi_omega_regular/plans/05_gnba-correctness-plan.md",
           "type": "plan",
           "summary": "Revised plan: fix gnbaNBA counter + prove completeness and soundness for gnba_language_eq"
+        },
+        {
+          "path": "specs/236_follow_up_prs_buchi_omega_regular/reports/06_team-research.md",
+          "type": "research",
+          "summary": "Team research: corrected diagnosis, verified inline fix for 3 sorry markers"
         }
       ]
     },
@@ -230,10 +235,10 @@
       "project_name": "nba_emptiness_checking",
       "status": "not_started",
       "task_type": "cslib",
-      "description": "Implement NBA emptiness checking: decide whether a nondeterministic Büchi automaton accepts any ω-word. Two approaches: (1) nested DFS (Courcoubetis-Vardi-Wolper-Yannakakis 1992) finding a reachable accepting cycle, or (2) SCC-based algorithm checking for accepting SCCs reachable from the initial state. This is the key building block connecting LTL-to-NBA translation to model checking: the model checking problem reduces to emptiness of a product automaton. Target: Cslib/Computability/Automata/NA/Emptiness.lean",
+      "description": "Implement NBA emptiness checking: decide whether a nondeterministic Büchi automaton accepts any ω-word. Two approaches: (1) nested DFS (Courcoubetis-Vardi-Wolper-Yannakakis 1992) finding a reachable accepting cycle, or (2) SCC-based algorithm checking for accepting SCCs reachable from the initial state. The existing infOcc predicate (Cslib/Foundations/Data/OmegaSequence/InfOcc.lean) and NBA Büchi acceptance (NA/Basic.lean using Filter.Frequently/atTop) provide the acceptance-condition foundation. This is the key building block connecting LTL-to-NBA translation to model checking. Target: Cslib/Computability/Automata/NA/Emptiness.lean",
       "topic": "Temporal Logic",
       "created": "2026-06-19T20:20:31Z",
-      "last_updated": "2026-06-19T20:20:31Z",
+      "last_updated": "2026-06-19T20:34:58Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
@@ -266,13 +271,13 @@
       "project_name": "product_construction_model_checking",
       "status": "not_started",
       "task_type": "cslib",
-      "description": "Implement the synchronous product construction of a transition system (Kripke structure) with an NBA, and prove the model checking reduction: a Kripke structure M satisfies an LTL property φ iff the product of M with the NBA for ¬φ has an empty language. This is the core automata-theoretic model checking theorem (Vardi-Wolper 1986). Requires: transition system / Kripke structure type (or reuse existing), product NBA construction, correctness proof linking product acceptance to satisfaction. Target: Cslib/Computability/Automata/NA/Product.lean and Cslib/Logics/LTL/ModelChecking.lean",
+      "description": "Implement the synchronous product construction of an LTS (using existing Cslib/Foundations/Semantics/LTS/ infrastructure) with an NBA, and prove the model checking reduction: an LTS M satisfies an LTL property φ iff the product of M with the NBA for ¬φ has an empty language. The existing OmegaExecution type and SatisfiesExec bridge (Cslib/Logics/LTL/Semantics/OmegaExecutionSatisfies.lean) already connect LTL satisfaction to LTS runs via a labeling function State → (Atom → Prop). The main new work is: (1) the system × NBA product construction (distinct from the existing automaton × automaton products in NA/Prod.lean), (2) the correctness proof linking product acceptance to LTL satisfaction. Target: Cslib/Computability/Automata/NA/LTSProduct.lean and Cslib/Logics/LTL/ModelChecking.lean",
       "topic": "Temporal Logic",
       "dependencies": [
         248
       ],
       "created": "2026-06-19T20:20:31Z",
-      "last_updated": "2026-06-19T20:20:31Z",
+      "last_updated": "2026-06-19T20:34:58Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
@@ -287,10 +292,10 @@
       "project_name": "acceptance_conditions_zoo",
       "status": "not_started",
       "task_type": "cslib",
-      "description": "Formalize Rabin and parity acceptance conditions alongside the existing Muller acceptance (DMA) in CSLib, and prove the classical conversions between them. Scope: (1) Rabin acceptance — pairs of (E_i, F_i) sets, accepting if some pair has finitely many E_i visits and infinitely many F_i visits. (2) Parity acceptance — priority function coloring, accepting if the minimum (or maximum) infinitely-occurring priority is even. (3) Muller↔Rabin conversion. (4) Rabin↔parity conversion (Piterman 2007). (5) McNaughton-to-parity path if task 241 is completed first. Target: Cslib/Computability/Automata/DA/Rabin.lean, Parity.lean, Conversions.lean",
+      "description": "Formalize Rabin and parity acceptance conditions alongside the existing Muller acceptance (DMA) and Büchi acceptance (DBA) in CSLib, and prove the classical conversions between them. Build on the existing infOcc predicate (Cslib/Foundations/Data/OmegaSequence/InfOcc.lean) which already provides the \"infinitely often\" foundation. Scope: (1) Rabin acceptance — pairs of (Eᵢ, Fᵢ) sets. (2) Parity acceptance — priority coloring. (3) Muller↔Rabin conversion. (4) Rabin↔parity conversion (Piterman 2007). Target: Cslib/Computability/Automata/DA/Rabin.lean, Parity.lean, Conversions.lean",
       "topic": "Temporal Logic",
       "created": "2026-06-19T20:20:31Z",
-      "last_updated": "2026-06-19T20:20:31Z",
+      "last_updated": "2026-06-19T20:34:58Z",
       "next_artifact_number": 2,
       "artifacts": [
         {

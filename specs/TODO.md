@@ -59,6 +59,7 @@ next_project_number: 254
 - **Task Type**: general
 - **Topic**: Project Management
 - **Dependencies**: None
+- **Research**: [253_gather_automata_literature/reports/01_reference-inventory.md]
 
 **Description**: Gather PDFs for all 25 literature references cited across tasks 241-252 (McNaughton, Vardi-Wolper, NBA emptiness, NBA complementation, product construction/model checking, acceptance conditions zoo). Search online repositories (arXiv, DBLP, Springer, IEEE, ACM DL, Semantic Scholar, author homepages) for each reference. Convert acquired PDFs to markdown via the literature pipeline and update the Literature index. Produce a final report listing all sources found and any that remain unlocated
 

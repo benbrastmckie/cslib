@@ -11,7 +11,7 @@ next_project_number: 235
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,197,209,226,232,234 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,209,226,232,234 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -28,10 +28,6 @@ next_project_number: 235
 ### Foundations
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
-
-### Modal Logic
-
-197 [PR READY] — Review the ambition to contribute Modal/ to upstream, identifying
 
 ### Project Management
 
@@ -132,7 +128,7 @@ Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completenes
 ---
 
 ### 197. Scope initial Modal/ upstream PR (~300 LOC)
-- **Status**: [PR READY]
+- **Status**: [COMPLETED]
 - **Task Type**: pr
 - **Topic**: Modal Logic
 - **Dependencies**: None

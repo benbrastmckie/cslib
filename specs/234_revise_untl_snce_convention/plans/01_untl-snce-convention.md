@@ -1,7 +1,7 @@
 # Implementation Plan: Revise untl/snce to Standard LTL Convention
 
 - **Task**: 234 - Revise main branch to use standard LTL convention for untl and snce
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 8 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/234_revise_untl_snce_convention/reports/01_untl-snce-convention.md

@@ -11,7 +11,7 @@ next_project_number: 238
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,209,226,232,234,236 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
+| 1 | 36,37,180,209,226,232,236 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -40,7 +40,6 @@ next_project_number: 238
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-234 [IMPLEMENTING] — Revise main branch to use standard LTL convention for untl and sn
 236 [IMPLEMENTING] — Complete follow-up PRs from PR #649 for Büchi automata and closur
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
@@ -88,7 +87,7 @@ next_project_number: 238
 ---
 
 ### 234. Revise untl snce convention
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None

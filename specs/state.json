@@ -72,13 +72,13 @@
     {
       "project_number": 234,
       "project_name": "revise_untl_snce_convention",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Revise main branch to use standard LTL convention for untl and snce: first argument is the guard (holds at intermediate points), second argument is the event (eventually holds at the witness point). Update all Lean code, docstrings, and comments that reference the Burgess convention to align with the standard temporal logic convention",
       "topic": "Temporal Logic",
       "created": "2026-06-18T23:50:25Z",
-      "last_updated": "2026-06-19T00:00:22Z",
-      "session_id": "sess_1781826687_89c3ab",
+      "last_updated": "2026-06-19T03:19:01Z",
+      "session_id": "sess_1750278946_c7a7e1",
       "artifacts": [
         {
           "path": "specs/234_revise_untl_snce_convention/reports/01_untl-snce-convention.md",
@@ -90,7 +90,8 @@
           "type": "plan",
           "summary": "01_untl-snce-convention.md"
         }
-      ]
+      ],
+      "completion_summary": "Swapped untl/snce arguments from Burgess convention (event, guard) to standard LTL convention (guard, event) across 84+ files. Fixed script-introduced errors: dot-notation corruption, missed infix swaps, selector order changes after injEq. All phases complete, full build passes."
     },
     {
       "project_number": 233,

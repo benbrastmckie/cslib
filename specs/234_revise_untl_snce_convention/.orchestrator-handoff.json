@@ -1,38 +1,16 @@
 {
-  "status": "partial",
-  "summary": "79 files script-swapped + 5 manual fixes. 3 files remain with errors: ChronicleConstruction.lean (16 errors, corrupted dot-notation), RRelation.lean Temporal (19 errors, selector swaps + corruption), HierarchyCompletion.lean (6 errors, cascading type mismatches).",
+  "status": "implemented",
+  "summary": "All 7 phases complete. Fixed remaining 3 error files (RRelation.lean, ChronicleConstruction.lean, HierarchyCompletion.lean) plus cascading errors in ChronicleTypes.lean, PointInsertion.lean, CounterexampleElimination.lean, TruthLemma.lean, and DenseCompleteness.lean. Root cause: script missed infix U/S notation swaps and corrupted dot-notation. Full build passes (only pre-existing OmegaRegular.lean errors remain, unrelated to this task).",
   "blockers": [],
-  "continuation_context": {
-    "completed_phases": [1, 3, 4, 5],
-    "partial_phases": [2, 6],
-    "next_phase": 7,
-    "notes": "Phases 2 and 6 have files with build errors. Pattern: script corrupted dot-notation chains (e.g., `.η(...)` instead of `(expr).η`), and `.left`/`.right` selectors need swapping after `injEq`/`inj` decomposition because arg positions flipped.",
-    "files_with_errors": [
-      "Cslib/Logics/Temporal/Metalogic/Chronicle/RRelation.lean",
-      "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleConstruction.lean",
-      "Cslib/Logics/Bimodal/Metalogic/Separation/Hierarchy/HierarchyCompletion.lean"
-    ],
-    "error_patterns": {
-      "selector_swap": "After injEq/inj on swapped constructors, .1/.2 and .left/.right need swapping",
-      "dot_notation_corruption": "Script broke `(expr).method` into `.method(expr)` — look for `Formula.η` errors",
-      "set_comprehension": "Script moved bound variables outside braces — look for `{φ | ...} α` patterns",
-      "infix_missed": "Some files using infix U/S notation were missed by script — swap infix args"
-    },
-    "files_manually_fixed": [
-      "Cslib/Logics/Temporal/Metalogic/Chronicle/Frame.lean",
-      "Cslib/Logics/Temporal/Metalogic/Chronicle/CanonicalChain.lean",
-      "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion.lean",
-      "Cslib/Logics/Bimodal/Metalogic/Separation/Hierarchy/HierarchyCaseSep.lean"
-    ]
-  },
-  "next_action_hint": "continue",
-  "phases_completed": 4,
+  "continuation_context": null,
+  "next_action_hint": "none",
+  "phases_completed": 7,
   "phases_total": 7,
   "artifacts": [
     {
       "path": "specs/234_revise_untl_snce_convention/plans/01_untl-snce-convention.md",
       "type": "plan",
-      "summary": "Updated plan: phases 1,3,4,5 complete; phases 2,6 partial with 3 files having build errors"
+      "summary": "All 7 phases completed — untl/snce convention swap from Burgess to standard LTL"
     }
   ]
 }

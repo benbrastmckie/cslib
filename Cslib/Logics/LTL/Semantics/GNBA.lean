@@ -662,6 +662,138 @@ noncomputable def Formula.gnbaNBA (φ : Formula Atom) :
   start := { s | s.1 ∈ Formula.gnbaStart φ ∧ s.2 = ⟨0, Nat.succ_pos _⟩ }
   accept := { s | s.2 = ⟨0, Nat.succ_pos _⟩ }
 
+/-! ## GNBA Correctness -/
+
+/-- The omega-language of a formula `φ`: the set of omega-sequences over `Set Atom` satisfying
+`φ` at position 0.
+
+This is defined here to state `gnba_language_eq` within `GNBA.lean` without importing
+`OmegaRegular.lean` (which would create a circular dependency in Phase 5 when
+`OmegaRegular.lean` imports `GNBA.lean`). The definition is equivalent to
+`Formula.omegaLanguage` in `OmegaRegular.lean`. -/
+def Formula.gnbaOmegaLanguage (φ : Formula Atom) : ωLanguage (Set Atom) :=
+  ⟨{ v | Satisfies (fun n p => p ∈ v n) 0 φ }⟩
+
+/-! ### Canonical run transitions -/
+
+/-- Helper: if `next ψ ∈ φ.subformulas` then `ψ ∈ φ.subformulas`.
+
+Subformulas are downward closed: the argument of `next` is itself a subformula. -/
+private lemma Formula.subformulas_next_sub {φ ψ : Formula Atom}
+    (h : Formula.next ψ ∈ Formula.subformulas φ) : ψ ∈ Formula.subformulas φ := by
+  induction φ with
+  | atom p => simp [Formula.subformulas] at h
+  | bot => simp [Formula.subformulas] at h
+  | imp φ₁ φ₂ ih₁ ih₂ =>
+    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff] at h
+    rcases h with (h | h₁) | h₂
+    · simp at h
+    · exact Set.mem_union_left _ (Set.mem_union_right _ (ih₁ h₁))
+    · exact Set.mem_union_right _ (ih₂ h₂)
+  | next φ₁ ih =>
+    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff] at h
+    rcases h with h | h₁
+    · exact Set.mem_union_right _ (Formula.next.inj h ▸ Formula.self_mem_subformulas φ₁)
+    · exact Set.mem_union_right _ (ih h₁)
+  | untl φ₁ φ₂ ih₁ ih₂ =>
+    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff] at h
+    rcases h with (h | h₁) | h₂
+    · simp at h
+    · exact Set.mem_union_left _ (Set.mem_union_right _ (ih₁ h₁))
+    · exact Set.mem_union_right _ (ih₂ h₂)
+
+/-- A helper lemma: `ψ` is in the closure of `φ` whenever `next ψ` is.
+
+If `next ψ ∈ φ.closure`, then by `mem_closure_cases`, either:
+- `next ψ ∈ subformulas φ`, so `ψ ∈ subformulas φ` (via `subformulas_next_sub`),
+- `next ψ = imp χ bot` for some χ (impossible),
+- `next ψ = next (untl χ₁ χ₂)` for some until subformula (so `ψ = untl χ₁ χ₂ ∈ subformulas φ`).
+In all valid cases, `ψ ∈ φ.closure`. -/
+private lemma Formula.next_sub_mem_closure {φ ψ : Formula Atom}
+    (hnext : Formula.next ψ ∈ Formula.closure φ) : ψ ∈ Formula.closure φ := by
+  rcases Formula.mem_closure_cases hnext with hsub | ⟨χ, _, heq⟩ | ⟨χ₁, χ₂, huntl_sub, heq⟩
+  · exact Formula.subformula_mem_closure (Formula.subformulas_next_sub hsub)
+  · simp at heq
+  · simp only [Formula.next.injEq] at heq
+    exact Formula.subformula_mem_closure (heq ▸ huntl_sub)
+
+/-- The canonical run `i ↦ canonicalAtom v i φ` satisfies the GNBA transition relation
+at every step.
+
+At each step `i`, the canonical atom at `i` transitions to the canonical atom at `i+1`
+via the input letter `v i`. The three transition conditions follow from:
+1. Letter consistency: `Satisfies v i (atom p) ↔ p ∈ v i` (by definition of `Satisfies`)
+2. Next-step consistency: `Satisfies v i (next ψ) ↔ Satisfies v (i+1) ψ` (by definition)
+3. Until expansion: the expansion law for `Satisfies v i (untl ψ₁ ψ₂)` -/
+private lemma Formula.canonicalAtom_gnbaTr (v : ℕ → Set Atom) (i : ℕ) (φ : Formula Atom) :
+    Formula.gnbaTr φ
+      ⟨Formula.canonicalAtom (fun n p => p ∈ v n) i φ,
+       Formula.canonicalAtom_isAtom (fun n p => p ∈ v n) i φ⟩
+      (v i)
+      ⟨Formula.canonicalAtom (fun n p => p ∈ v n) (i + 1) φ,
+       Formula.canonicalAtom_isAtom (fun n p => p ∈ v n) (i + 1) φ⟩ := by
+  refine ⟨?_, ?_, ?_⟩
+  · -- Letter consistency: atom p ∈ B_i ↔ p ∈ v i
+    intro p _hpAtom
+    constructor
+    · intro hmem
+      exact (Formula.canonicalAtom_mem_iff.mp hmem).2
+    · intro hp
+      exact Formula.canonicalAtom_mem_iff.mpr ⟨_hpAtom, hp⟩
+  · -- Next-step consistency: next ψ ∈ B_i ↔ ψ ∈ B_{i+1}
+    intro ψ hnext
+    simp only [Formula.canonicalAtom_mem_iff, Satisfies]
+    constructor
+    · rintro ⟨_, hsat⟩
+      exact ⟨Formula.next_sub_mem_closure hnext, hsat⟩
+    · rintro ⟨_hψcl, hsat⟩
+      exact ⟨hnext, hsat⟩
+  · -- Until expansion: untl ψ₁ ψ₂ ∈ B_i ↔ (ψ₂ ∈ B_i ∨ (ψ₁ ∈ B_i ∧ untl ψ₁ ψ₂ ∈ B_{i+1}))
+    intro ψ₁ ψ₂ huntl
+    simp only [Formula.canonicalAtom_mem_iff]
+    constructor
+    · -- untl ψ₁ ψ₂ ∈ B_i → ψ₂ ∈ B_i ∨ (ψ₁ ∈ B_i ∧ untl ψ₁ ψ₂ ∈ B_{i+1})
+      rintro ⟨_, hsat⟩
+      obtain ⟨j, hij, hjψ₂, hguard⟩ := hsat
+      by_cases hij' : j = i
+      · -- j = i: ψ₂ ∈ B_i
+        left
+        exact ⟨Formula.untl_right_mem_closure huntl, hij' ▸ hjψ₂⟩
+      · -- j > i: ψ₁ ∈ B_i and untl ψ₁ ψ₂ ∈ B_{i+1}
+        right
+        have hji : i < j := Nat.lt_of_le_of_ne hij (Ne.symm hij')
+        refine ⟨⟨Formula.untl_left_mem_closure huntl, hguard i (le_refl i) hji⟩,
+                huntl, j, by omega, hjψ₂, fun k hk1 hkj => hguard k (by omega) hkj⟩
+    · -- ψ₂ ∈ B_i ∨ (ψ₁ ∈ B_i ∧ untl ψ₁ ψ₂ ∈ B_{i+1}) → untl ψ₁ ψ₂ ∈ B_i
+      rintro (⟨_, hψ₂sat⟩ | ⟨⟨_, hψ₁sat⟩, _, j, hji1, hjψ₂, hguard⟩)
+      · -- ψ₂ ∈ B_i: take j = i
+        exact ⟨huntl, i, le_refl i, hψ₂sat, fun k hik hki => absurd hki (Nat.not_lt.mpr hik)⟩
+      · -- ψ₁ ∈ B_i and untl ψ₁ ψ₂ ∈ B_{i+1}: combine
+        exact ⟨huntl, j, by omega, hjψ₂,
+          fun k hik hkj =>
+            if h : k = i then h ▸ hψ₁sat else hguard k (by omega) hkj⟩
+
+/-! ### GNBA language equality -/
+
+/-- The language of the NBA built from the GNBA equals the omega-language of `φ`.
+
+This is the key correctness theorem (Baier-Katoen Theorem 5.39). The full proof
+requires:
+- **Completeness**: `φ.gnbaOmegaLanguage ⊆ language (gnbaNBA φ)`: given a satisfying
+  valuation `v`, the canonical run `i ↦ canonicalAtom (fun n p => p ∈ v n) i φ` is an
+  accepting run in the NBA. The GNBA transitions hold by `canonicalAtom_gnbaTr`. For
+  acceptance, for each Until subformula `χ = untl ψ₁ ψ₂` in the closure, the accepting
+  positions visit `i` with `χ ∉ B_i` or `ψ₂ ∈ B_i` infinitely often. The cycling counter
+  wraps through these acceptance sets.
+- **Soundness**: `language (gnbaNBA φ) ⊆ φ.gnbaOmegaLanguage`: given an accepting NBA run,
+  for each closure formula `ψ` and position `i`, `ψ ∈ B_i → Satisfies v i ψ`, proved by
+  structural induction on `ψ` using the transition conditions. Since `φ ∈ B_0` (start
+  condition), we get `Satisfies v 0 φ`. -/
+theorem Formula.gnba_language_eq (φ : Formula Atom) :
+    Cslib.Automata.ωAcceptor.language (Formula.gnbaNBA φ) =
+      Formula.gnbaOmegaLanguage φ := by
+  sorry
+
 end Cslib.Logic.LTL
 
 end

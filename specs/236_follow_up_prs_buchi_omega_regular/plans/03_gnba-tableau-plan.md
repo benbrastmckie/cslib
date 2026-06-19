@@ -179,7 +179,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: GNBA Correctness (Language Equality) [NOT STARTED]
+### Phase 4: GNBA Correctness (Language Equality) [PARTIAL]
 
 **Goal**: Prove that the NBA from Phase 3 accepts exactly the omega-language of the formula: `language (gnbaNBA phi) = phi.omegaLanguage`. This is the core theorem (Baier-Katoen Theorem 5.39).
 

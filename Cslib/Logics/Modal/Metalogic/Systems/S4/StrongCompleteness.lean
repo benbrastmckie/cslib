@@ -23,6 +23,7 @@ is equivalent to set-derivability using `S4Axiom`.
 - `s4_strong_completeness`: Semantic entailment over reflexive, transitive frames implies
   set-derivability from `Gamma`.
 - `s4_strong_completeness_iff`: Biconditional combining the above.
+- `s4_completeness`: Weak completeness (corollary of strong completeness).
 - `s4_compactness`: If `phi` is an S4-semantic consequence of `Gamma`, there exists
   a finite list `L ⊆ Gamma` such that `phi` is an S4-semantic consequence of `L`.
 
@@ -164,5 +165,22 @@ theorem s4_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   exact ⟨L, hL_sub, fun World m w h_refl h_trans h_sat =>
     s4_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
       World m w h_refl h_trans h_sat⟩
+
+/-! ## S4 Weak Completeness (Corollary) -/
+
+/-- **Completeness Theorem for S4 Modal Logic** (corollary of strong completeness):
+
+If `phi` is valid over all reflexive, transitive frames, then `phi` is S4-derivable
+from the empty context.
+
+This is a corollary of `s4_strong_completeness` instantiated at `Gamma = ∅`. -/
+theorem s4_completeness (φ : Proposition Atom)
+    (h_valid : ∀ (World : Type u) (m : Model World Atom),
+      (∀ w, m.r w w) →
+      (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃) →
+      ∀ w, Satisfies m w φ) :
+    Derivable (@S4Axiom Atom) φ :=
+  ModalSetDerivable_empty_iff.mp
+    (s4_strong_completeness (fun W m w hRefl hTrans _ => h_valid W m hRefl hTrans w))
 
 end Cslib.Logic.Modal

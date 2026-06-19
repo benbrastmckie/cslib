@@ -25,7 +25,10 @@ for T since `TAxiom` includes axiom T.
 
 - `t_canonical_refl`: The canonical frame for T is reflexive (BRV Thm 4.28 cl.1).
 - `t_truth_lemma`: T-specific Truth Lemma (reuses existing `truth_lemma`).
-- `t_completeness`: T completeness theorem (BRV Thm 4.28 cl.1 + Thm 4.22).
+
+The weak completeness theorem `t_completeness` is located in
+`Cslib.Logics.Modal.Metalogic.Systems.T.StrongCompleteness`, where it is derived as a
+corollary of strong completeness via `ModalSetDerivable_empty_iff`.
 
 ## References
 
@@ -71,35 +74,5 @@ theorem t_truth_lemma
     (fun φ ψ => .modalK φ ψ)
     (fun φ => .modalT φ)
     S φ
-
-/-! ## T Completeness Theorem (BRV Theorem 4.28 cl.1 + Theorem 4.22) -/
-
-/-- **Completeness Theorem for Modal Logic T** (BRV Thm 4.28 cl.1 + Thm 4.22):
-
-If `phi` is valid over all reflexive frames, then `phi` is T-derivable
-from the empty context. -/
-theorem t_completeness (φ : Proposition Atom)
-    (h_valid : ∀ (World : Type u) (m : Model World Atom),
-      (∀ w, m.r w w) →
-      ∀ w, Satisfies m w φ) :
-    Derivable (@TAxiom Atom) φ := by
-  by_contra h_not_deriv
-  have h_cons := neg_consistent_of_not_derivable
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    h_not_deriv
-  obtain ⟨M, hM_sup, hM_mcs⟩ := modal_lindenbaum h_cons
-  let w : CanonicalWorld (@TAxiom Atom) := ⟨M, hM_mcs⟩
-  exact mcs_not_mem_of_neg
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    hM_mcs (hM_sup (Set.mem_singleton _))
-    ((t_truth_lemma w φ).mp
-      (h_valid (CanonicalWorld (@TAxiom Atom))
-        (CanonicalModel (@TAxiom Atom))
-        t_canonical_refl
-        w))
 
 end Cslib.Logic.Modal

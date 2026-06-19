@@ -23,6 +23,7 @@ is equivalent to set-derivability using `DAxiom`.
 - `d_strong_completeness`: Semantic entailment over serial frames implies
   set-derivability from `Gamma`.
 - `d_strong_completeness_iff`: Biconditional combining the above.
+- `d_completeness`: Weak completeness (corollary of strong completeness).
 - `d_compactness`: If `phi` is a D-semantic consequence of `Gamma`, there exists
   a finite list `L ⊆ Gamma` such that `phi` is a D-semantic consequence of `L`.
 
@@ -153,5 +154,21 @@ theorem d_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   exact ⟨L, hL_sub, fun World m w h_serial h_sat =>
     d_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
       World m w h_serial h_sat⟩
+
+/-! ## D Weak Completeness (Corollary) -/
+
+/-- **Completeness Theorem for Modal Logic D** (corollary of strong completeness):
+
+If `phi` is valid over all serial frames, then `phi` is D-derivable
+from the empty context.
+
+This is a corollary of `d_strong_completeness` instantiated at `Gamma = ∅`. -/
+theorem d_completeness (φ : Proposition Atom)
+    (h_valid : ∀ (World : Type u) (m : Model World Atom),
+      Relation.Serial m.r →
+      ∀ w, Satisfies m w φ) :
+    Derivable (@DAxiom Atom) φ :=
+  ModalSetDerivable_empty_iff.mp
+    (d_strong_completeness (fun W m w hSer _ => h_valid W m hSer w))
 
 end Cslib.Logic.Modal

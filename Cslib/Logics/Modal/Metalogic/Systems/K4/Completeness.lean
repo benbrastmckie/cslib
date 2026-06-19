@@ -26,10 +26,12 @@ The key insight is that K4 lacks axiom T, so completeness must use `k_truth_lemm
 combined with `canonical_trans` (from `Completeness.lean`) for transitivity of
 the canonical frame.
 
-## Main Results
+This module provides import infrastructure for modal logic K4.
+The canonical model construction and supporting lemmas are imported transitively.
 
-- `k4_completeness`: If `phi` is valid over all transitive frames,
-  then `phi` is K4-derivable (Blackburn Theorem 4.27 + Theorem 4.22).
+The weak completeness theorem `k4_completeness` is located in
+`Cslib.Logics.Modal.Metalogic.Systems.K4.StrongCompleteness`, where it is derived as a
+corollary of strong completeness via `ModalSetDerivable_empty_iff`.
 
 ## References
 
@@ -46,62 +48,5 @@ open Cslib.Logic
 
 universe u
 variable {Atom : Type u}
-
-/-! ## K4 Completeness (Blackburn Theorem 4.27 + Theorem 4.22) -/
-
-/-- **Completeness Theorem for K4 Modal Logic** (Blackburn Theorem 4.27 + 4.22):
-
-If `phi` is valid over all transitive frames, then `phi` is derivable
-from the K4 axiom set.
-
-The proof is by contrapositive (Canonical Model Theorem, Blackburn Theorem 4.22):
-assume `phi` is not K4-derivable, then `{neg phi}` is K4-consistent, extend it to
-an MCS via Lindenbaum's Lemma (Lemma 4.17), and show `neg phi` is satisfied in the
-canonical model. The canonical frame is transitive (Theorem 4.27, from axiom 4),
-so `h_valid` applies and gives satisfaction of `phi` at the same world --
-contradiction.
-
-Note: K4 lacks axiom T, so we use `k_truth_lemma` (from KCompleteness.lean) which
-does not require axiom T, rather than `truth_lemma` (from Completeness.lean). -/
-theorem k4_completeness (φ : Proposition Atom)
-    (h_valid : ∀ (World : Type u) (m : Model World Atom),
-      (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃) →
-      ∀ w, Satisfies m w φ) :
-    Derivable (@K4Axiom Atom) φ := by
-  -- Step 1: Contrapositive setup
-  by_contra h_not_deriv
-  -- Step 2: Show {neg(phi)} is K4-consistent (prerequisite for Lindenbaum, Lemma 4.17)
-  have h_cons := neg_consistent_of_not_derivable
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    h_not_deriv
-  -- Step 3: Lindenbaum extension (Lemma 4.17)
-  obtain ⟨M, hM_sup, hM_mcs⟩ := modal_lindenbaum h_cons
-  -- Step 4: Canonical world
-  let w : CanonicalWorld (@K4Axiom Atom) := ⟨M, hM_mcs⟩
-  -- Steps 5-7: k_truth_lemma + canonical_trans + contradiction
-  -- Step 5: k_truth_lemma (no axiom T) instantiated at K4Axiom constructors
-  -- Step 6: canonical_trans from axiom 4 (Thm 4.27)
-  -- Step 7: Contradiction via mcs_not_mem_of_neg
-  exact mcs_not_mem_of_neg
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    hM_mcs (hM_sup (Set.mem_singleton _))
-    ((k_truth_lemma
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .efq φ)
-      (fun φ ψ => .peirce φ ψ)
-      (fun φ ψ => .modalK φ ψ)
-      w φ).mp
-      (h_valid (CanonicalWorld (@K4Axiom Atom))
-        (CanonicalModel (@K4Axiom Atom))
-        (canonical_trans
-          (fun φ ψ => .implyK φ ψ)
-          (fun φ ψ χ => .implyS φ ψ χ)
-          (fun φ => .modalFour φ))
-        w))
 
 end Cslib.Logic.Modal

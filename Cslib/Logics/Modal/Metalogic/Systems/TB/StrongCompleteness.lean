@@ -23,6 +23,7 @@ is equivalent to set-derivability using `TBAxiom`.
 - `tb_strong_completeness`: Semantic entailment over reflexive, symmetric frames implies
   set-derivability from `Gamma`.
 - `tb_strong_completeness_iff`: Biconditional combining the above.
+- `tb_completeness`: Weak completeness (corollary of strong completeness).
 - `tb_compactness`: If `phi` is a TB-semantic consequence of `Gamma`, there exists
   a finite list `L ⊆ Gamma` such that `phi` is a TB-semantic consequence of `L`.
 
@@ -164,5 +165,22 @@ theorem tb_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   exact ⟨L, hL_sub, fun World m w h_refl h_symm h_sat =>
     tb_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
       World m w h_refl h_symm h_sat⟩
+
+/-! ## TB Weak Completeness (Corollary) -/
+
+/-- **Completeness Theorem for TB Modal Logic** (corollary of strong completeness):
+
+If `phi` is valid over all reflexive, symmetric frames, then `phi` is TB-derivable
+from the empty context.
+
+This is a corollary of `tb_strong_completeness` instantiated at `Gamma = ∅`. -/
+theorem tb_completeness (φ : Proposition Atom)
+    (h_valid : ∀ (World : Type u) (m : Model World Atom),
+      (∀ w, m.r w w) →
+      (∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁) →
+      ∀ w, Satisfies m w φ) :
+    Derivable (@TBAxiom Atom) φ :=
+  ModalSetDerivable_empty_iff.mp
+    (tb_strong_completeness (fun W m w hRefl hSymm _ => h_valid W m hRefl hSymm w))
 
 end Cslib.Logic.Modal

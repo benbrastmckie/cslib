@@ -11,7 +11,7 @@ next_project_number: 238
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,209,226,232,234,236,237 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,209,226,232,234,236 | -- | Bimodal Porting, Project Management, Propositional Logic, ... |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -29,10 +29,6 @@ next_project_number: 238
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
-### Modal Logic
-
-237 [NOT STARTED] — Derive weak completeness as corollaries of strong completeness fo
-
 ### Project Management
 
 209 [IMPLEMENTING] — Fix 298 namespace lint errors: 239 declarations not properly name
@@ -45,7 +41,7 @@ next_project_number: 238
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 234 [IMPLEMENTING] — Revise main branch to use standard LTL convention for untl and sn
-236 [PLANNED] — Complete follow-up PRs from PR #649 for Büchi automata and closur
+236 [IMPLEMENTING] — Complete follow-up PRs from PR #649 for Büchi automata and closur
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -56,17 +52,20 @@ next_project_number: 238
 ## Tasks
 
 ### 237. Weak completeness corollaries modal cube
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
+- **Research**: [237_weak_completeness_corollaries_modal_cube/reports/01_weak-completeness-corollaries.md]
+- **Plan**: [237_weak_completeness_corollaries_modal_cube/plans/01_weak-completeness-corollaries.md]
+- **Summary**: [237_weak_completeness_corollaries_modal_cube/summaries/01_weak-completeness-corollaries-summary.md]
 
 **Description**: Derive weak completeness as corollaries of strong completeness for all 15 modal cube systems. Move each {sys}_completeness theorem from Completeness.lean into StrongCompleteness.lean, replacing the direct ~30-line proof with a ~5-line corollary via ModalSetDerivable_empty_iff and {sys}_strong_completeness. Remove the original theorem from each Completeness.lean (keeping all supporting infrastructure like truth lemmas and canonical model construction). Update docstrings in both files accordingly. Systems: K, T, B, D, S4, S5, K4, K5, K45, KB5, D4, D5, D45, DB, TB
 
 ---
 
 ### 236. Follow up prs buchi omega regular
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None

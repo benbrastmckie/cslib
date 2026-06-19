@@ -23,6 +23,7 @@ is equivalent to set-derivability using `D5Axiom`.
 - `d5_strong_completeness`: Semantic entailment over serial, Euclidean frames implies
   set-derivability from `Gamma`.
 - `d5_strong_completeness_iff`: Biconditional combining the above.
+- `d5_completeness`: Weak completeness (corollary of strong completeness).
 - `d5_compactness`: If `phi` is a D5-semantic consequence of `Gamma`, there exists
   a finite list `L ⊆ Gamma` such that `phi` is a D5-semantic consequence of `L`.
 
@@ -165,5 +166,22 @@ theorem d5_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   exact ⟨L, hL_sub, fun World m w h_serial h_eucl h_sat =>
     d5_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
       World m w h_serial h_eucl h_sat⟩
+
+/-! ## D5 Weak Completeness (Corollary) -/
+
+/-- **Completeness Theorem for Modal Logic D5** (corollary of strong completeness):
+
+If `phi` is valid over all serial, Euclidean frames, then `phi` is D5-derivable
+from the empty context.
+
+This is a corollary of `d5_strong_completeness` instantiated at `Gamma = ∅`. -/
+theorem d5_completeness (φ : Proposition Atom)
+    (h_valid : ∀ (World : Type u) (m : Model World Atom),
+      Relation.Serial m.r →
+      (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃) →
+      ∀ w, Satisfies m w φ) :
+    Derivable (@D5Axiom Atom) φ :=
+  ModalSetDerivable_empty_iff.mp
+    (d5_strong_completeness (fun W m w hSer hEucl _ => h_valid W m hSer hEucl w))
 
 end Cslib.Logic.Modal

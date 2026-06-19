@@ -23,6 +23,7 @@ equivalent to set-derivability using `KAxiom`.
 - `k_strong_completeness`: `ModalSemanticEntails (fun _ => True) Gamma phi →
   ModalSetDerivable KAxiom Gamma phi`
 - `k_strong_completeness_iff`: Biconditional combining the above.
+- `k_completeness`: Weak completeness (corollary of strong completeness).
 - `k_compactness`: If `phi` is a K-semantic consequence of `Gamma`, there exists
   a finite list `L ⊆ Gamma` such that `phi` is a K-semantic consequence of `L`.
 
@@ -139,5 +140,20 @@ theorem k_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   obtain ⟨L, hL_sub, hL_deriv⟩ := k_strong_completeness h
   exact ⟨L, hL_sub,
     k_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩⟩
+
+/-! ## K Weak Completeness (Corollary) -/
+
+/-- **Completeness Theorem for Modal Logic K** (corollary of strong completeness):
+
+If `phi` is valid over all frames (no frame conditions), then `phi`
+is K-derivable from the empty context.
+
+This is a corollary of `k_strong_completeness` instantiated at `Gamma = ∅`. -/
+theorem k_completeness (φ : Proposition Atom)
+    (h_valid : ∀ (World : Type u) (m : Model World Atom),
+      ∀ w, Satisfies m w φ) :
+    Derivable (@KAxiom Atom) φ :=
+  ModalSetDerivable_empty_iff.mp
+    (k_strong_completeness (ModalSemanticEntails_of_Valid (fun W m _ => h_valid W m) ∅))
 
 end Cslib.Logic.Modal

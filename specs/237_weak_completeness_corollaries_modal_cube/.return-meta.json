@@ -1,0 +1,18 @@
+{
+  "status": "implemented",
+  "summary": "Moved all 15 weak completeness theorems from Completeness.lean to StrongCompleteness.lean as corollaries of strong completeness via ModalSetDerivable_empty_iff. All 30 files build successfully.",
+  "artifacts": [
+    {
+      "path": "specs/237_weak_completeness_corollaries_modal_cube/summaries/01_weak-completeness-corollaries-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary with change catalog and verification results"
+    }
+  ],
+  "phases_completed": 4,
+  "phases_total": 4,
+  "sorry_count": 0,
+  "metadata": {
+    "session_id": "sess_1781838284_8e3fef",
+    "agent_type": "cslib-implementation-agent"
+  }
+}

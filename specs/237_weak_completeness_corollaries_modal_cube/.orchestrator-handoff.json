@@ -1,0 +1,16 @@
+{
+  "status": "planned",
+  "summary": "4-phase plan to move 15 weak completeness theorems from Completeness.lean to StrongCompleteness.lean as corollaries of strong completeness via ModalSetDerivable_empty_iff",
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "implement",
+  "phases_completed": 0,
+  "phases_total": 4,
+  "artifacts": [
+    {
+      "path": "specs/237_weak_completeness_corollaries_modal_cube/plans/01_weak-completeness-corollaries.md",
+      "type": "plan",
+      "summary": "Implementation plan with 4 sequential phases: (1) systems with remaining infrastructure (K,T,D,TB), (2) single-declaration systems batch 1 (B,S4,S5,K4,K5), (3) batch 2 (K45,KB5,D4,D5,D45,DB), (4) full CI verification"
+    }
+  ]
+}

@@ -23,6 +23,7 @@ is equivalent to set-derivability using `DBAxiom`.
 - `db_strong_completeness`: Semantic entailment over serial, symmetric frames implies
   set-derivability from `Gamma`.
 - `db_strong_completeness_iff`: Biconditional combining the above.
+- `db_completeness`: Weak completeness (corollary of strong completeness).
 - `db_compactness`: If `phi` is a DB-semantic consequence of `Gamma`, there exists
   a finite list `L ⊆ Gamma` such that `phi` is a DB-semantic consequence of `L`.
 
@@ -168,5 +169,22 @@ theorem db_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   exact ⟨L, hL_sub, fun World m w h_serial h_symm h_sat =>
     db_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
       World m w h_serial h_symm h_sat⟩
+
+/-! ## DB Weak Completeness (Corollary) -/
+
+/-- **Completeness Theorem for Modal Logic DB** (corollary of strong completeness):
+
+If `phi` is valid over all serial, symmetric frames, then `phi` is DB-derivable
+from the empty context.
+
+This is a corollary of `db_strong_completeness` instantiated at `Gamma = ∅`. -/
+theorem db_completeness (φ : Proposition Atom)
+    (h_valid : ∀ (World : Type u) (m : Model World Atom),
+      Relation.Serial m.r →
+      (∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁) →
+      ∀ w, Satisfies m w φ) :
+    Derivable (@DBAxiom Atom) φ :=
+  ModalSetDerivable_empty_iff.mp
+    (db_strong_completeness (fun W m w hSer hSymm _ => h_valid W m hSer hSymm w))
 
 end Cslib.Logic.Modal

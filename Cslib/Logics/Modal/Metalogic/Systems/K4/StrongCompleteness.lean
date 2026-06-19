@@ -21,6 +21,7 @@ is equivalent to set-derivability using `K4Axiom`.
 - `k4_strong_soundness`: Set-derivability from `Gamma` implies semantic entailment.
 - `k4_strong_completeness`: Semantic entailment implies set-derivability from `Gamma`.
 - `k4_strong_completeness_iff`: Biconditional combining the above.
+- `k4_completeness`: Weak completeness (corollary of strong completeness).
 - `k4_compactness`: Compactness for K4 semantics.
 
 ## References
@@ -138,5 +139,21 @@ theorem k4_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   exact ⟨L, hL_sub, fun World m w h_trans h_sat =>
     k4_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
       World m w h_trans h_sat⟩
+
+/-! ## K4 Weak Completeness (Corollary) -/
+
+/-- **Completeness Theorem for K4 Modal Logic** (corollary of strong completeness):
+
+If `phi` is valid over all transitive frames, then `phi` is K4-derivable
+from the empty context.
+
+This is a corollary of `k4_strong_completeness` instantiated at `Gamma = ∅`. -/
+theorem k4_completeness (φ : Proposition Atom)
+    (h_valid : ∀ (World : Type u) (m : Model World Atom),
+      (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃) →
+      ∀ w, Satisfies m w φ) :
+    Derivable (@K4Axiom Atom) φ :=
+  ModalSetDerivable_empty_iff.mp
+    (k4_strong_completeness (fun W m w hTrans _ => h_valid W m hTrans w))
 
 end Cslib.Logic.Modal

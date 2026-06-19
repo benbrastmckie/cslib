@@ -23,6 +23,7 @@ is equivalent to set-derivability using `TAxiom`.
 - `t_strong_completeness`: Semantic entailment over reflexive frames implies
   set-derivability from `Gamma`.
 - `t_strong_completeness_iff`: Biconditional combining the above.
+- `t_completeness`: Weak completeness (corollary of strong completeness).
 - `t_compactness`: If `phi` is a T-semantic consequence of `Gamma`, there exists
   a finite list `L ⊆ Gamma` such that `phi` is a T-semantic consequence of `L`.
 
@@ -150,5 +151,21 @@ theorem t_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   exact ⟨L, hL_sub, fun World m w h_refl h_sat =>
     t_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
       World m w h_refl h_sat⟩
+
+/-! ## T Weak Completeness (Corollary) -/
+
+/-- **Completeness Theorem for Modal Logic T** (corollary of strong completeness):
+
+If `phi` is valid over all reflexive frames, then `phi` is T-derivable
+from the empty context.
+
+This is a corollary of `t_strong_completeness` instantiated at `Gamma = ∅`. -/
+theorem t_completeness (φ : Proposition Atom)
+    (h_valid : ∀ (World : Type u) (m : Model World Atom),
+      (∀ w, m.r w w) →
+      ∀ w, Satisfies m w φ) :
+    Derivable (@TAxiom Atom) φ :=
+  ModalSetDerivable_empty_iff.mp
+    (t_strong_completeness (fun W m w hRefl _ => h_valid W m hRefl w))
 
 end Cslib.Logic.Modal

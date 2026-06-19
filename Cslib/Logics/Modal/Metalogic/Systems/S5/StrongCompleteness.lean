@@ -23,6 +23,7 @@ Euclidean frames) is equivalent to set-derivability using `ModalAxiom`.
 - `s5_strong_completeness`: Semantic entailment over S5 frames implies
   set-derivability from `Gamma`.
 - `s5_strong_completeness_iff`: Biconditional combining the above.
+- `s5_completeness`: Weak completeness (corollary of strong completeness).
 - `s5_compactness`: If `phi` is an S5-semantic consequence of `Gamma`, there exists
   a finite list `L ⊆ Gamma` such that `phi` is an S5-semantic consequence of `L`.
 
@@ -183,5 +184,27 @@ theorem s5_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   exact ⟨L, hL_sub, fun World m w h_refl h_trans h_eucl h_sat =>
     s5_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
       World m w h_refl h_trans h_eucl h_sat⟩
+
+/-! ## S5 Weak Completeness (Corollary) -/
+
+/-- **Completeness Theorem for S5 Modal Logic** (corollary of strong completeness):
+
+If `phi` is valid over all S5 frames (reflexive, transitive, Euclidean), then `phi`
+is S5-derivable from the empty context.
+
+This is a corollary of `s5_strong_completeness` instantiated at `Gamma = ∅`. -/
+theorem s5_completeness (φ : Proposition Atom)
+    (h_valid : ∀ (World : Type u) (m : Model World Atom),
+      (∀ w, m.r w w) →
+      (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃) →
+      (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃) →
+      ∀ w, Satisfies m w φ) :
+    Derivable (@ModalAxiom Atom) φ :=
+  ModalSetDerivable_empty_iff.mp
+    (s5_strong_completeness (fun W m w hRefl hTrans hEucl _ =>
+      h_valid W m hRefl hTrans hEucl w))
+
+/-- Backward-compatible alias for `s5_completeness`. -/
+alias completeness := s5_completeness
 
 end Cslib.Logic.Modal

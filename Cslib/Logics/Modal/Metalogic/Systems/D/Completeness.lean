@@ -22,7 +22,10 @@ via the canonical model construction (completeness-via-canonicity).
 - `canonical_serial`: The canonical model for any DAxiom-containing system is serial
   (Blackburn Theorem 4.28 clause 3).
 - `truth_lemma_d`: Truth lemma using D-style box witness.
-- `d_completeness`: Completeness for D over serial frames.
+
+The weak completeness theorem `d_completeness` is located in
+`Cslib.Logics.Modal.Metalogic.Systems.D.StrongCompleteness`, where it is derived as a
+corollary of strong completeness via `ModalSetDerivable_empty_iff`.
 
 ## References
 
@@ -367,62 +370,5 @@ theorem truth_lemma_d
     · intro h_box T hST
       exact (truth_lemma_d h_implyK h_implyS h_efq h_peirce h_K h_D T φ).mpr
         (hST φ h_box)
-
-/-! ## Completeness Theorem for D -/
-
-/-- **Completeness Theorem for Modal Logic D**:
-
-If `phi` is valid over all serial frames, then `phi` is derivable from the empty
-context in the D proof system.
-
-This follows Blackburn Proposition 4.12 + Theorem 4.28 clause 3:
-1. Assume phi is not derivable.
-2. Then {neg phi} is consistent.
-3. By Lindenbaum, extend to MCS M containing neg phi.
-4. The canonical model is serial (canonical_serial, Theorem 4.28 clause 3).
-5. By validity hypothesis, phi is satisfied at M in the canonical model.
-6. By truth lemma, phi in M.
-7. But neg phi in M, contradiction. -/
-theorem d_completeness (φ : Proposition Atom)
-    (h_valid : ∀ (World : Type u) (m : Model World Atom),
-      Relation.Serial m.r →
-      ∀ w, Satisfies m w φ) :
-    Derivable (@DAxiom Atom) φ := by
-  by_contra h_not_deriv
-  have h_cons := neg_consistent_of_not_derivable
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    h_not_deriv
-  obtain ⟨M, hM_sup, hM_mcs⟩ := modal_lindenbaum h_cons
-  let w : CanonicalWorld (@DAxiom Atom) := ⟨M, hM_mcs⟩
-  -- Show canonical model is serial
-  have h_serial : Relation.Serial (CanonicalModel (@DAxiom Atom)).r := by
-    constructor
-    intro S
-    exact canonical_serial
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .efq φ)
-      (fun φ ψ => .modalK φ ψ)
-      (fun φ => .modalD φ)
-      S
-  exact mcs_not_mem_of_neg
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    hM_mcs (hM_sup (Set.mem_singleton _))
-    ((truth_lemma_d
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .efq φ)
-      (fun φ ψ => .peirce φ ψ)
-      (fun φ ψ => .modalK φ ψ)
-      (fun φ => .modalD φ)
-      w φ).mp
-      (h_valid (CanonicalWorld (@DAxiom Atom))
-        (CanonicalModel (@DAxiom Atom))
-        h_serial
-        w))
 
 end Cslib.Logic.Modal

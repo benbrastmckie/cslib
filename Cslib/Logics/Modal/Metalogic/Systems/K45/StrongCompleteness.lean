@@ -21,6 +21,7 @@ frames) is equivalent to set-derivability using `K45Axiom`.
 - `k45_strong_soundness`: Set-derivability from `Gamma` implies semantic entailment.
 - `k45_strong_completeness`: Semantic entailment implies set-derivability from `Gamma`.
 - `k45_strong_completeness_iff`: Biconditional combining the above.
+- `k45_completeness`: Weak completeness (corollary of strong completeness).
 - `k45_compactness`: Compactness for K45 semantics.
 
 ## References
@@ -150,5 +151,22 @@ theorem k45_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom
   exact ⟨L, hL_sub, fun World m w h_trans h_eucl h_sat =>
     k45_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
       World m w h_trans h_eucl h_sat⟩
+
+/-! ## K45 Weak Completeness (Corollary) -/
+
+/-- **Completeness Theorem for K45 Modal Logic** (corollary of strong completeness):
+
+If `phi` is valid over all transitive, Euclidean frames, then `phi` is K45-derivable
+from the empty context.
+
+This is a corollary of `k45_strong_completeness` instantiated at `Gamma = ∅`. -/
+theorem k45_completeness (φ : Proposition Atom)
+    (h_valid : ∀ (World : Type u) (m : Model World Atom),
+      (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃) →
+      (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃) →
+      ∀ w, Satisfies m w φ) :
+    Derivable (@K45Axiom Atom) φ :=
+  ModalSetDerivable_empty_iff.mp
+    (k45_strong_completeness (fun W m w hTrans hEucl _ => h_valid W m hTrans hEucl w))
 
 end Cslib.Logic.Modal

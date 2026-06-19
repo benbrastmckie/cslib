@@ -23,6 +23,7 @@ is equivalent to set-derivability using `D4Axiom`.
 - `d4_strong_completeness`: Semantic entailment over serial, transitive frames implies
   set-derivability from `Gamma`.
 - `d4_strong_completeness_iff`: Biconditional combining the above.
+- `d4_completeness`: Weak completeness (corollary of strong completeness).
 - `d4_compactness`: If `phi` is a D4-semantic consequence of `Gamma`, there exists
   a finite list `L ⊆ Gamma` such that `phi` is a D4-semantic consequence of `L`.
 
@@ -168,5 +169,22 @@ theorem d4_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   exact ⟨L, hL_sub, fun World m w h_serial h_trans h_sat =>
     d4_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
       World m w h_serial h_trans h_sat⟩
+
+/-! ## D4 Weak Completeness (Corollary) -/
+
+/-- **Completeness Theorem for Modal Logic D4** (corollary of strong completeness):
+
+If `phi` is valid over all serial, transitive frames, then `phi` is D4-derivable
+from the empty context.
+
+This is a corollary of `d4_strong_completeness` instantiated at `Gamma = ∅`. -/
+theorem d4_completeness (φ : Proposition Atom)
+    (h_valid : ∀ (World : Type u) (m : Model World Atom),
+      Relation.Serial m.r →
+      (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃) →
+      ∀ w, Satisfies m w φ) :
+    Derivable (@D4Axiom Atom) φ :=
+  ModalSetDerivable_empty_iff.mp
+    (d4_strong_completeness (fun W m w hSer hTrans _ => h_valid W m hSer hTrans w))
 
 end Cslib.Logic.Modal

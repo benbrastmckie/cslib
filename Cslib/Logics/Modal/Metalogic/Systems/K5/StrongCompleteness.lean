@@ -21,6 +21,7 @@ is equivalent to set-derivability using `K5Axiom`.
 - `k5_strong_soundness`: Set-derivability from `Gamma` implies semantic entailment.
 - `k5_strong_completeness`: Semantic entailment implies set-derivability from `Gamma`.
 - `k5_strong_completeness_iff`: Biconditional combining the above.
+- `k5_completeness`: Weak completeness (corollary of strong completeness).
 - `k5_compactness`: Compactness for K5 semantics.
 
 ## References
@@ -139,5 +140,21 @@ theorem k5_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   exact ⟨L, hL_sub, fun World m w h_eucl h_sat =>
     k5_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
       World m w h_eucl h_sat⟩
+
+/-! ## K5 Weak Completeness (Corollary) -/
+
+/-- **Completeness Theorem for Modal Logic K5** (corollary of strong completeness):
+
+If `phi` is valid over all Euclidean frames, then `phi` is K5-derivable
+from the empty context.
+
+This is a corollary of `k5_strong_completeness` instantiated at `Gamma = ∅`. -/
+theorem k5_completeness (φ : Proposition Atom)
+    (h_valid : ∀ (World : Type u) (m : Model World Atom),
+      (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃) →
+      ∀ w, Satisfies m w φ) :
+    Derivable (@K5Axiom Atom) φ :=
+  ModalSetDerivable_empty_iff.mp
+    (k5_strong_completeness (fun W m w hEucl _ => h_valid W m hEucl w))
 
 end Cslib.Logic.Modal

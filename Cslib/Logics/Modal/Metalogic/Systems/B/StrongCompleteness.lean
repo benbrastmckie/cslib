@@ -23,6 +23,7 @@ is equivalent to set-derivability using `BAxiom`.
 - `b_strong_completeness`: Semantic entailment over symmetric frames implies
   set-derivability from `Gamma`.
 - `b_strong_completeness_iff`: Biconditional combining the above.
+- `b_completeness`: Weak completeness (corollary of strong completeness).
 - `b_compactness`: If `phi` is a B-semantic consequence of `Gamma`, there exists
   a finite list `L ⊆ Gamma` such that `phi` is a B-semantic consequence of `L`.
 
@@ -149,5 +150,20 @@ theorem b_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   exact ⟨L, hL_sub, fun World m w h_symm h_sat =>
     b_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
       World m w h_symm h_sat⟩
+
+/-! ## B Weak Completeness (Corollary) -/
+
+/-- **Completeness Theorem for Modal Logic B** (corollary of strong completeness):
+
+If `phi` is valid over all symmetric frames, then `phi` is B-derivable
+from the empty context.
+
+This is a corollary of `b_strong_completeness` instantiated at `Gamma = ∅`. -/
+theorem b_completeness (φ : Proposition Atom)
+    (h_valid : ∀ (World : Type u) (m : Model World Atom),
+      (∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁) → ∀ w, Satisfies m w φ) :
+    Derivable (@BAxiom Atom) φ :=
+  ModalSetDerivable_empty_iff.mp
+    (b_strong_completeness (fun W m w hSymm _ => h_valid W m hSymm w))
 
 end Cslib.Logic.Modal

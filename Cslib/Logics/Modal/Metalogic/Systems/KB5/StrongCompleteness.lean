@@ -23,6 +23,7 @@ frames) is equivalent to set-derivability using `KB5Axiom`.
 - `kb5_strong_completeness`: Semantic entailment over symmetric, Euclidean frames
   implies set-derivability from `Gamma`.
 - `kb5_strong_completeness_iff`: Biconditional combining the above.
+- `kb5_completeness`: Weak completeness (corollary of strong completeness).
 - `kb5_compactness`: Compactness for KB5 semantics.
 
 ## References
@@ -158,5 +159,22 @@ theorem kb5_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom
   exact ⟨L, hL_sub, fun World m w h_symm h_eucl h_sat =>
     kb5_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
       World m w h_symm h_eucl h_sat⟩
+
+/-! ## KB5 Weak Completeness (Corollary) -/
+
+/-- **Completeness Theorem for KB5 Modal Logic** (corollary of strong completeness):
+
+If `phi` is valid over all symmetric, Euclidean frames, then `phi` is KB5-derivable
+from the empty context.
+
+This is a corollary of `kb5_strong_completeness` instantiated at `Gamma = ∅`. -/
+theorem kb5_completeness (φ : Proposition Atom)
+    (h_valid : ∀ (World : Type u) (m : Model World Atom),
+      (∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁) →
+      (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃) →
+      ∀ w, Satisfies m w φ) :
+    Derivable (@KB5Axiom Atom) φ :=
+  ModalSetDerivable_empty_iff.mp
+    (kb5_strong_completeness (fun W m w hSymm hEucl _ => h_valid W m hSymm hEucl w))
 
 end Cslib.Logic.Modal

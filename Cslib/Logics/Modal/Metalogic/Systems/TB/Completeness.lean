@@ -28,8 +28,10 @@ The proof follows Blackburn, de Rijke, Venema "Modal Logic" (2002) Chapter 4:
 - `tb_canonical_refl`: The canonical frame for TB is reflexive (BRV Thm 4.28 cl.1).
 - `tb_canonical_symm`: The canonical frame for TB is symmetric (BRV Thm 4.28 cl.2).
 - `tb_truth_lemma`: TB-specific Truth Lemma (reuses existing `truth_lemma`).
-- `tb_completeness`: If `phi` is valid over all reflexive, symmetric frames,
-  then `phi` is TB-derivable (Blackburn Theorem 4.28 + Theorem 4.22).
+
+The weak completeness theorem `tb_completeness` is located in
+`Cslib.Logics.Modal.Metalogic.Systems.TB.StrongCompleteness`, where it is derived as a
+corollary of strong completeness via `ModalSetDerivable_empty_iff`.
 
 ## References
 
@@ -88,42 +90,5 @@ theorem tb_truth_lemma
     (fun φ ψ => .modalK φ ψ)
     (fun φ => .modalT φ)
     S φ
-
-/-! ## TB Completeness Theorem (BRV Theorem 4.28 + Theorem 4.22) -/
-
-/-- **Completeness Theorem for TB Modal Logic** (BRV Thm 4.28 + Thm 4.22):
-
-If `phi` is valid over all reflexive, symmetric frames, then `phi` is derivable
-from the TB axiom set. -/
-theorem tb_completeness (φ : Proposition Atom)
-    (h_valid : ∀ (World : Type u) (m : Model World Atom),
-      (∀ w, m.r w w) →
-      (∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁) →
-      ∀ w, Satisfies m w φ) :
-    Derivable (@TBAxiom Atom) φ := by
-  -- Step 1: Contrapositive setup
-  by_contra h_not_deriv
-  -- Step 2: Show {neg(phi)} is TB-consistent (prerequisite for Lindenbaum, Lemma 4.17)
-  have h_cons := neg_consistent_of_not_derivable
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    h_not_deriv
-  -- Step 3: Lindenbaum extension (Lemma 4.17)
-  obtain ⟨M, hM_sup, hM_mcs⟩ := modal_lindenbaum h_cons
-  -- Step 4: Canonical world
-  let w : CanonicalWorld (@TBAxiom Atom) := ⟨M, hM_mcs⟩
-  -- Steps 5-7: Truth Lemma + frame properties + contradiction
-  exact mcs_not_mem_of_neg
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    hM_mcs (hM_sup (Set.mem_singleton _))
-    ((tb_truth_lemma w φ).mp
-      (h_valid (CanonicalWorld (@TBAxiom Atom))
-        (CanonicalModel (@TBAxiom Atom))
-        tb_canonical_refl
-        (fun w₁ w₂ h => tb_canonical_symm w₁ w₂ h)
-        w))
 
 end Cslib.Logic.Modal

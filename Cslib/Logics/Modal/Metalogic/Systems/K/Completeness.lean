@@ -25,7 +25,9 @@ version `k_mcs_box_witness` that uses EFQ + `derive_box_from_box_context` instea
 - `k_derive_box_from_inconsistency`: K-specific consistency helper (no `h_T`).
 - `k_mcs_box_witness`: K-specific Existence Lemma (BRV Lemma 4.20 for K).
 - `k_truth_lemma`: K-specific Truth Lemma (BRV Lemma 4.21 for K).
-- `k_completeness`: K completeness theorem (BRV Theorem 4.23).
+The weak completeness theorem `k_completeness` is located in
+`Cslib.Logics.Modal.Metalogic.Systems.K.StrongCompleteness`, where it is derived as a
+corollary of strong completeness via `ModalSetDerivable_empty_iff`.
 
 ## References
 
@@ -263,39 +265,5 @@ theorem k_truth_lemma
     · intro h_box T hST
       exact (k_truth_lemma h_implyK h_implyS h_efq h_peirce h_K T φ).mpr
         (hST φ h_box)
-
-/-! ## K Completeness Theorem (BRV Theorem 4.23) -/
-
-/-- **Completeness Theorem for Modal Logic K** (BRV Theorem 4.23):
-
-If `phi` is valid over all frames (no frame conditions), then `phi`
-is K-derivable from the empty context. -/
-theorem k_completeness (φ : Proposition Atom)
-    (h_valid : ∀ (World : Type u) (m : Model World Atom),
-      ∀ w, Satisfies m w φ) :
-    Derivable (@KAxiom Atom) φ := by
-  by_contra h_not_deriv
-  have h_cons := neg_consistent_of_not_derivable
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    h_not_deriv
-  obtain ⟨M, hM_sup, hM_mcs⟩ := modal_lindenbaum h_cons
-  let w : CanonicalWorld (@KAxiom Atom) := ⟨M, hM_mcs⟩
-  exact mcs_not_mem_of_neg
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    hM_mcs (hM_sup (Set.mem_singleton _))
-    ((k_truth_lemma
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .efq φ)
-      (fun φ ψ => .peirce φ ψ)
-      (fun φ ψ => .modalK φ ψ)
-      w φ).mp
-      (h_valid (CanonicalWorld (@KAxiom Atom))
-        (CanonicalModel (@KAxiom Atom))
-        w))
 
 end Cslib.Logic.Modal

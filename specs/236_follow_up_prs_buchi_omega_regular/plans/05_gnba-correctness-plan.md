@@ -72,14 +72,17 @@ adding a reset transition from counter = K to 0. The hkey lemma must prove a bic
 **Goal**: Fix the gnbaNBA cycling counter to use conditional advancement per Baier-Katoen Lemma 4.56, then prove the completeness direction of gnba_language_eq: satisfaction implies NBA acceptance.
 
 **Tasks**:
-- [ ] Fix `Formula.gnbaNBA` definition (GNBA.lean:656-663): replace unconditional counter advance `(i.val + 1 = j.val ∨ (j = 0 ∧ i.val = gnbaK))` with conditional advance: if current state is in the acceptance set indexed by counter mod gnbaK, advance counter by 1 mod gnbaK; otherwise counter stays. When gnbaK = 0, counter stays at 0.
-- [ ] Prove `canonicalAtom_mem_start`: `canonicalAtom v 0 phi` is a start state when `Satisfies v 0 phi` (~5 lines)
-- [ ] Prove `canonicalAtom_gnba_acceptance`: for each Until subformula `chi` in closure, the canonical run visits `gnbaAcceptSet phi chi` infinitely often. Proof by contradiction: if not frequently, then eventually always `chi in B_i` and `psi2 not-in B_i`, but Until semantics gives a witness `j` with `psi2 in B_j`, contradiction. (~40-60 lines)
-- [ ] Define `gnbaCanonicalCounter`: the counter sequence for the canonical run, defined recursively with conditional advance based on acceptance set membership (~15-25 lines)
-- [ ] Prove counter progress: if counter = j at time n, then there exists m > n with counter = (j+1) mod K, using the fact that acceptance set F_j is visited infinitely often (~30-50 lines)
-- [ ] Prove counter returns to 0 infinitely often by iterating the progress lemma through all K acceptance sets (~20-40 lines)
-- [ ] Prove `gnba_completeness : gnbaOmegaLanguage phi <= language (gnbaNBA phi)` by combining canonical run, transitions (existing `canonicalAtom_gnbaTr`), start state, and counter cycling acceptance (~30-50 lines)
-- [ ] Verify: `lake build Cslib.Logics.LTL.Semantics.GNBA`
+- [x] Fix `Formula.gnbaNBA` definition: conditional counter advance with accept = {counter = K}, reset from K to 0. Uses `open Classical in` for `if B ∈ gnbaAcceptSet` decidability.
+- [x] Prove `canonicalAtom_mem_start`: inline in completeness branch via `canonicalAtom_mem_iff.mpr`
+- [x] Prove `canonicalAtom_gnba_acceptance`: by contradiction — if not frequently, canonicalAtom gives witness j with ψ₂ ∈ B_j, contradicting hall. (~25 lines, L1136-1161)
+- [x] Define `gnbaCanonicalCounter`: recursive via Nat.rec matching gnbaNBA Tr structure (~25 lines, L1169-1193)
+- [ ] **BLOCKED** Prove `hss_trans` (NBA transition): counter condition `ctr (n+1)` matches gnbaNBA Tr — sorry at L1205. Root cause: `open Classical in` on gnbaNBA uses `Classical.dec` for `if B ∈ gnbaAcceptSet`, but `ctr` in proof uses `Classical.propDecidable` from `classical` tactic. These are different `Decidable` instances, making terms non-definitionally equal. See handoff for 4 fix strategies.
+- [ ] **BLOCKED on hss_trans** Prove `hctr_stay_step`: counter stays at m when B ∉ acc(χ_m) — sorry at L1324. Needs counter condition extraction from hss_trans.
+- [ ] **BLOCKED on hss_trans** Prove `hctr_advance`: counter advances from m to m+1 when B ∈ acc(χ_m) — sorry at L1359. Needs counter condition extraction from hss_trans.
+- [x] Prove `hprogress`: from ctr t = m < K, ∃ t' ≥ t with ctr t' = m+1, using hctr_stays + Nat.find + hctr_advance (structure complete, depends on hctr_advance sorry)
+- [x] Prove `hreach_K`: iterate hprogress K times to reach counter = K from any starting value (~20 lines, L1401-1420)
+- [x] Prove acceptance: frequently_atTop via hreach_K (~10 lines, L1421-1432)
+- [ ] Verify: `lake build` succeeds but `lean_verify` shows sorryAx (3 sorry remaining)
 
 **Timing**: 8 hours
 
@@ -123,12 +126,14 @@ adding a reset transition from counter = K to 0. The hkey lemma must prove a bic
 
 ---
 
-### Phase 3: Language Equality and Final Verification [NOT STARTED]
+### Phase 3: Language Equality and Final Verification [BLOCKED]
 
-**Goal**: Combine completeness and soundness to prove `gnba_language_eq`, remove the sorry, and verify that `Formula.isRegular` is transitively sorry-free.
+**DEVIATION**: Proof is monolithic — both directions are in a single `gnba_language_eq` proof, not separate lemmas. Phase 3 verification blocked on Phase 1's 3 sorry markers.
+
+**Goal**: Resolve the Decidable instance mismatch, eliminate remaining sorry markers, verify sorry-free.
 
 **Tasks**:
-- [ ] Replace the sorry in `gnba_language_eq` (GNBA.lean:795) with the proof combining completeness and soundness: `ext v; exact ⟨gnba_soundness phi v, gnba_completeness phi v⟩` (or equivalent Set.ext formulation) (~5-10 lines)
+- [x] Replace the original sorry in `gnba_language_eq` with proof combining both directions *(done as monolithic proof)*
 - [ ] Run `lean_verify` on `Cslib.Logic.LTL.Formula.gnba_language_eq` to confirm no sorry/sorryAx
 - [ ] Run `lean_verify` on `Cslib.Logic.LTL.Formula.isRegular` to confirm transitively sorry-free
 - [ ] Run `lean_verify` on `Cslib.Logic.LTL.Formula.isRegular_untl` to confirm sorry-free

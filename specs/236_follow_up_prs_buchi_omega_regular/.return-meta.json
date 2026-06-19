@@ -1,18 +1,7 @@
 {
-  "status": "in_progress",
-  "started_at": "2026-06-18T00:00:00Z",
-  "artifacts": [],
-  "partial_progress": {
-    "stage": "initializing",
-    "details": "Agent started, parsing delegation context",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 0
-  },
+  "status": "partial",
   "metadata": {
-    "session_id": "sess_1781845064_ffa85c",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "cycles_used": 3,
+    "final_state": "implementing"
   }
 }

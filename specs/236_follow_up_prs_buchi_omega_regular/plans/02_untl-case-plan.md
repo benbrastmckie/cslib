@@ -158,6 +158,13 @@ The main theorem `Formula.isRegular` uses `sorry` only for the `untl` case (via 
 
 ### Phase 3b: Construct untlNBA and Prove Language Equality [BLOCKED]
 
+**BLOCKER** (Phase 3b):
+- **What failed**: No implementation was attempted — the problem complexity was assessed.
+- **What was tried**: Analyzed four NBA constructions (Approach A direct NBA, subset tracking, GNBA with toggle, fin_cover_saturates). All approaches have significant correctness issues that require either the subset/power-set construction (exponential state space, hundreds of lines of proof) or the full Vardi-Wolper formula closure construction.
+- **Why it's stuck**: The guard check "v.drop k ∈ L(φ) for all k < j" requires verifying MULTIPLE INDEPENDENT Büchi-accepting runs (one per position 0..j-1). Any single φ-run from position 0 cannot verify acceptance of all suffixes. The subset construction is the correct approach but is complex to formalize in Lean.
+- **What is needed**: Implement the subset-tracking NBA: state space `Finset S_φ × Finset S_φ × Option S_ψ × Bool` (tracking active and accepted guard runs), with a two-condition GNBA converted to NBA via interNA. Estimated effort: 8-15 hours.
+- **Prohibited workarounds**: Do NOT use `sorry`, `def X := True`, or any vacuous placeholder.
+
 **Goal**: Build a nondeterministic Buchi automaton `untlNBA` whose accepted language equals the until language `(Formula.untl phi psi).omegaLanguage`, following the direct NBA construction approach recommended by the research.
 
 **Tasks**:

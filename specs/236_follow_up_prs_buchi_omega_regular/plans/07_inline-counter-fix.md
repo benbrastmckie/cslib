@@ -69,7 +69,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Fill Sorry Markers [NOT STARTED]
+### Phase 1: Fill Sorry Markers [COMPLETED]
 
 **Goal**: Replace all 3 sorry markers in GNBA.lean with verified proofs, making `gnba_language_eq` sorry-free.
 

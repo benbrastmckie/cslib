@@ -104,14 +104,14 @@
     {
       "project_number": 236,
       "project_name": "follow_up_prs_buchi_omega_regular",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Complete follow-up PRs from PR #649 for Büchi automata and closure of omega-regular languages under boolean operations",
       "topic": "Temporal Logic",
       "created": "2026-06-19T02:21:37Z",
-      "last_updated": "2026-06-19T20:40:00Z",
+      "last_updated": "2026-06-19T21:30:00Z",
       "completion_summary": null,
-      "session_id": "sess_1781901360_e3aafb",
+      "session_id": "sess_1781901679_367023",
       "next_artifact_number": 7,
       "artifacts": [
         {
@@ -273,20 +273,47 @@
     {
       "project_number": 248,
       "project_name": "nba_emptiness_checking",
-      "status": "not_started",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Implement NBA emptiness checking: decide whether a nondeterministic Büchi automaton accepts any ω-word. Two approaches: (1) nested DFS (Courcoubetis-Vardi-Wolper-Yannakakis 1992) finding a reachable accepting cycle, or (2) SCC-based algorithm checking for accepting SCCs reachable from the initial state. The existing infOcc predicate (Cslib/Foundations/Data/OmegaSequence/InfOcc.lean) and NBA Büchi acceptance (NA/Basic.lean using Filter.Frequently/atTop) provide the acceptance-condition foundation. This is the key building block connecting LTL-to-NBA translation to model checking. Target: Cslib/Computability/Automata/NA/Emptiness.lean",
       "topic": "Temporal Logic",
       "created": "2026-06-19T20:20:31Z",
-      "last_updated": "2026-06-19T20:34:58Z",
+      "last_updated": "2026-06-19T21:15:00Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
           "path": "specs/248_nba_emptiness_checking/reports/01_nba-emptiness-seed.md",
           "type": "report",
           "summary": "Seed report: NBA emptiness algorithms, literature references, formalization approach"
+        },
+        {
+          "path": "specs/248_nba_emptiness_checking/plans/01_emptiness-plan.md",
+          "type": "plan",
+          "summary": "2-phase implementation plan for NBA emptiness characterization theorem (Baier-Katoen Lemma 4.41)"
         }
-      ]
+      ],
+      "plan_metadata": {
+        "phases": 2,
+        "total_effort_hours": 2.5,
+        "complexity": "simple",
+        "research_integrated": true,
+        "plan_version": 1,
+        "dependency_waves": [
+          [
+            1
+          ],
+          [
+            2
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/02_emptiness-research.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-06-19"
+          }
+        ]
+      }
     },
     {
       "project_number": 250,

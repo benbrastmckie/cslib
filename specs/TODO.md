@@ -41,7 +41,7 @@ next_project_number: 254
 242 [NOT STARTED] — Implement full Vardi-Wolper tableau construction for LTL-to-NBA t
 243 [NOT STARTED] — Implement deterministic Büchi automata constructions and related 
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
-248 [NOT STARTED] — Implement NBA emptiness checking: decide whether a nondeterminist
+248 [IMPLEMENTING] — Implement NBA emptiness checking: decide whether a nondeterminist
   └─ 251 [NOT STARTED] — Implement the synchronous product construction of an LTS (using e
 250 [NOT STARTED] — Implement NBA complementation: given an NBA A, construct an NBA a
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
@@ -100,11 +100,12 @@ next_project_number: 254
 ---
 
 ### 248. Nba emptiness checking
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
 - **Research**: [248_nba_emptiness_checking/reports/01_nba-emptiness-seed.md]
+- **Plan**: [248_nba_emptiness_checking/plans/01_emptiness-plan.md]
 
 **Description**: Implement NBA emptiness checking: decide whether a nondeterministic Büchi automaton accepts any ω-word. Two approaches: (1) nested DFS (Courcoubetis-Vardi-Wolper-Yannakakis 1992) finding a reachable accepting cycle, or (2) SCC-based algorithm checking for accepting SCCs reachable from the initial state. The existing infOcc predicate (Cslib/Foundations/Data/OmegaSequence/InfOcc.lean) and NBA Büchi acceptance (NA/Basic.lean using Filter.Frequently/atTop) provide the acceptance-condition foundation. This is the key building block connecting LTL-to-NBA translation to model checking. Target: Cslib/Computability/Automata/NA/Emptiness.lean
 

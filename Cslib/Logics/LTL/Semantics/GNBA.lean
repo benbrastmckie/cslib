@@ -793,6 +793,43 @@ private lemma Formula.canonicalAtom_gnbaTr (v : ℕ → Set Atom) (i : ℕ) (φ 
           fun k hik hkj =>
             if h : k = i then h ▸ hψ₁sat else hguard k (by omega) hkj⟩
 
+/-! ### Counter step function -/
+
+open Classical in
+private noncomputable def Formula.gnbaCtrStep (φ : Formula Atom)
+    (B : ℕ → Formula.GNBAState φ) (n : ℕ) (prev : Fin (Formula.gnbaK φ).succ) :
+    Fin (Formula.gnbaK φ).succ :=
+  if hK : Formula.gnbaK φ = 0 then ⟨0, by omega⟩
+  else if hlt : prev.val < Formula.gnbaK φ then
+    if B n ∈ Formula.gnbaAcceptSet φ ((Formula.untlFinset φ).toList.get
+        ⟨prev.val, by rwa [Finset.length_toList, ← Formula.gnbaK]⟩) then
+      ⟨prev.val + 1, by omega⟩
+    else prev
+  else ⟨0, Nat.succ_pos _⟩
+
+private noncomputable def Formula.gnbaCtrSeq (φ : Formula Atom)
+    (B : ℕ → Formula.GNBAState φ) : ℕ → Fin (Formula.gnbaK φ).succ
+  | 0 => ⟨0, Nat.succ_pos _⟩
+  | n + 1 => Formula.gnbaCtrStep φ B n (Formula.gnbaCtrSeq φ B n)
+
+private lemma Formula.gnbaCtrStep_not_mem (φ : Formula Atom) (B : ℕ → Formula.GNBAState φ)
+    (n : ℕ) (prev : Fin (Formula.gnbaK φ).succ) (hK : ¬Formula.gnbaK φ = 0)
+    (hlt : prev.val < Formula.gnbaK φ) (hnotmem : B n ∉ Formula.gnbaAcceptSet φ
+      ((Formula.untlFinset φ).toList.get ⟨prev.val,
+        by rwa [Finset.length_toList, ← Formula.gnbaK]⟩)) :
+    Formula.gnbaCtrStep φ B n prev = prev := by
+  unfold gnbaCtrStep
+  exact (dif_neg hK).trans ((dif_pos hlt).trans (if_neg hnotmem))
+
+private lemma Formula.gnbaCtrStep_mem (φ : Formula Atom) (B : ℕ → Formula.GNBAState φ)
+    (n : ℕ) (prev : Fin (Formula.gnbaK φ).succ) (hK : ¬Formula.gnbaK φ = 0)
+    (hlt : prev.val < Formula.gnbaK φ) (hmem : B n ∈ Formula.gnbaAcceptSet φ
+      ((Formula.untlFinset φ).toList.get ⟨prev.val,
+        by rwa [Finset.length_toList, ← Formula.gnbaK]⟩)) :
+    Formula.gnbaCtrStep φ B n prev = ⟨prev.val + 1, by omega⟩ := by
+  unfold gnbaCtrStep
+  exact (dif_neg hK).trans ((dif_pos hlt).trans (if_pos hmem))
+
 /-! ### GNBA language equality -/
 
 /-- The language of the NBA built from the GNBA equals the omega-language of `φ`.
@@ -1172,37 +1209,20 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
     -- When counter = K: reset to 0.
     -- This gives a valid NBA run where counter = K infinitely often.
     let K := Formula.gnbaK φ
-    -- Define ctr recursively
-    let ctr : ℕ → Fin K.succ := fun n =>
-      match n with
-      | 0 => ⟨0, Nat.succ_pos K⟩
-      | n + 1 => by
-          -- recursive definition via a Nat.rec
-          exact Nat.rec ⟨0, Nat.succ_pos K⟩
-            (fun k prev =>
-              if hK : K = 0 then ⟨0, by omega⟩
-              else if hlt : prev.val < K then
-                let idx : Fin K := ⟨prev.val, hlt⟩
-                let hlen_prev : idx.val < (Formula.untlFinset φ).toList.length :=
-                  Finset.length_toList (Formula.untlFinset φ) ▸ idx.isLt
-                let χ := (Formula.untlFinset φ).toList.get ⟨idx.val, hlen_prev⟩
-                if B k ∈ Formula.gnbaAcceptSet φ χ then
-                  ⟨prev.val + 1, by omega⟩
-                else prev
-              else ⟨0, Nat.succ_pos K⟩)
-            (n + 1)
-    -- Define the NBA run
+    let ctr : ℕ → Fin K.succ := Formula.gnbaCtrSeq φ B
     let ss : ℕ → Formula.GNBANBAState φ := fun k => (B k, ctr k)
-    -- Start condition
     have hss_start : ss 0 ∈ (Formula.gnbaNBA φ).start := by
       simp only [Formula.gnbaNBA, ss, Set.mem_setOf_eq]
       exact ⟨hstart, rfl⟩
-    -- Transitions
     have hss_trans : (Formula.gnbaNBA φ).OmegaExecution ss v := by
       intro n
       constructor
       · exact hgnbaTr n
-      · sorry
+      · -- ctr (n+1) = gnbaCtrStep φ B n (ctr n) by definition, matching gnbaNBA.Tr
+        have hctr_succ : ctr (n + 1) = Formula.gnbaCtrStep φ B n (ctr n) := rfl
+        rw [hctr_succ]
+        unfold Formula.gnbaCtrStep
+        split_ifs <;> first | rfl | simp_all
     -- Acceptance: ctr visits K infinitely often
     -- Proof: for any N, we find k ≥ N with ctr k = K by iterating through all K acceptance
     -- conditions. hgnbaAcc guarantees each acceptance set is visited infinitely often.
@@ -1308,7 +1328,7 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
                 hno_acc d' (Nat.lt_succ_self d')
               -- Counter transition at (t + d'):
               -- ctr (t + d' + 1) obtained from step function at n = (t+d'), prev = ctr (t+d')
-              show (ctr (t + d' + 1)).val = m
+              change (ctr (t + d' + 1)).val = m
               rw [show t + d' + 1 = t + (d' + 1) from by omega]
               -- The counter at t + d' has val = m, and since B(t+d') ∉ acc(χ_m),
               -- the counter stays at m.
@@ -1320,8 +1340,9 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
               -- The counter at (t+d'+1) satisfies: if ctr(t+d').val < K and
               -- B(t+d') ∉ acc(χ_m), then ctr(t+d'+1) = ctr(t+d').
               have hctr_stay_step : (ctr (t + d' + 1)).val = (ctr (t + d')).val := by
-                -- Needs hss_trans counter condition (blocked on hss_trans sorry)
-                sorry
+                have hfin_eq : ctr (t + d') = ⟨m, by omega⟩ := Fin.ext hctr_d'
+                change (Formula.gnbaCtrStep φ B (t + d') (ctr (t + d'))).val = _
+                rw [hfin_eq, gnbaCtrStep_not_mem φ B (t + d') ⟨m, by omega⟩ hK hm hno_acc_d']
               rw [show t + (d' + 1) = t + d' + 1 from by omega]
               omega
           -- Now use Nat.find to get the first t_acc ≥ t with B t_acc ∈ acc(χ_m)
@@ -1355,8 +1376,9 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
               (hd_min_minimal s hs)
           -- At t + d_min, B(t+d_min) ∈ acc(χ_m), so ctr(t+d_min+1) = m+1
           have hctr_advance : (ctr (t + d_min + 1)).val = m + 1 := by
-            -- Needs hss_trans counter condition (blocked on hss_trans sorry)
-            sorry
+            have hfin_eq : ctr (t + d_min) = ⟨m, by omega⟩ := Fin.ext hctr_t_d_min
+            change (Formula.gnbaCtrStep φ B (t + d_min) (ctr (t + d_min))).val = m + 1
+            rw [hfin_eq, gnbaCtrStep_mem φ B (t + d_min) ⟨m, by omega⟩ hK hm hd_min_mem]
           exact ⟨t + d_min + 1, by omega, hctr_advance⟩
         -- Now use hprogress to iterate K times from ctr = 0 to ctr = K
         -- Claim: from any t with ctr t = m, ∃ t' ≥ t with ctr t' = K.

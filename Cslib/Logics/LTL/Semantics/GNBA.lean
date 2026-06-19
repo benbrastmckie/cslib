@@ -7,9 +7,11 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.LTL.Semantics.Satisfies
+public import Cslib.Computability.Languages.OmegaRegularLanguage
 public import Mathlib.Data.Set.Finite.Basic
 public import Mathlib.Data.Set.Finite.Powerset
 public import Mathlib.Data.Set.Finite.Lattice
+public import Mathlib.Data.Fintype.Fin
 
 /-! # GNBA Tableau Construction for LTL Omega-Regularity
 
@@ -525,6 +527,140 @@ lemma Formula.canonicalAtom_isAtom (v : ℕ → (Atom → Prop)) (i : ℕ) (φ :
     -- Applying hguard at k = i: Satisfies v i ψ₁
     exact Formula.canonicalAtom_mem_iff.mpr
       ⟨Formula.untl_left_mem_closure huntl, hguard i (le_refl i) hij'⟩
+
+/-! ## GNBA Construction -/
+
+open Cslib.Automata NA
+
+/-! ### GNBA state type -/
+
+/-- The GNBA state type: the subtype of `Set (Formula Atom)` satisfying `Formula.IsAtom φ`.
+
+Atoms are maximally consistent subsets of the Fischer-Ladner closure, and they form the
+state space of the GNBA tableau construction for formula `φ`. -/
+def Formula.GNBAState (φ : Formula Atom) : Type _ :=
+  { B : Set (Formula Atom) // Formula.IsAtom φ B }
+
+/-- The GNBA state type is finite, since atoms are subsets of the finite closure of `φ`. -/
+instance Formula.gnbaStateFinite (φ : Formula Atom) : Finite (Formula.GNBAState φ) :=
+  Set.finite_coe_iff.mpr (Formula.atoms_finite φ)
+
+/-! ### GNBA transition relation -/
+
+/-- The GNBA transition relation for formula `φ`.
+
+`Formula.gnbaTr φ B a B'` holds when the atom `B'` is a valid one-step successor of `B`
+under input letter `a : Set Atom`. The three conditions are:
+1. **Letter consistency**: for each `atom p ∈ φ.closure`, `atom p ∈ B ↔ p ∈ a`.
+2. **Next-step consistency**: for each `next ψ ∈ φ.closure`, `next ψ ∈ B ↔ ψ ∈ B'`.
+3. **Until expansion**: for each `untl ψ₁ ψ₂ ∈ φ.closure`,
+   `untl ψ₁ ψ₂ ∈ B ↔ (ψ₂ ∈ B ∨ (ψ₁ ∈ B ∧ untl ψ₁ ψ₂ ∈ B'))`.
+
+Together these conditions encode that `B` and `B'` are atom states connected by a valid
+tableau transition step labelled by `a`. -/
+def Formula.gnbaTr (φ : Formula Atom) (B : Formula.GNBAState φ) (a : Set Atom)
+    (B' : Formula.GNBAState φ) : Prop :=
+  (∀ p : Atom, Formula.atom p ∈ Formula.closure φ →
+    (Formula.atom p ∈ B.val ↔ p ∈ a)) ∧
+  (∀ ψ : Formula Atom, Formula.next ψ ∈ Formula.closure φ →
+    (Formula.next ψ ∈ B.val ↔ ψ ∈ B'.val)) ∧
+  (∀ ψ₁ ψ₂ : Formula Atom, Formula.untl ψ₁ ψ₂ ∈ Formula.closure φ →
+    (Formula.untl ψ₁ ψ₂ ∈ B.val ↔
+      (ψ₂ ∈ B.val ∨ (ψ₁ ∈ B.val ∧ Formula.untl ψ₁ ψ₂ ∈ B'.val))))
+
+/-! ### GNBA initial states -/
+
+/-- The GNBA initial states: atoms `B` with `φ ∈ B.val`.
+
+A run is required to start in an atom that contains the formula `φ` itself.
+This encodes the requirement that the initial time-step satisfies `φ`. -/
+def Formula.gnbaStart (φ : Formula Atom) : Set (Formula.GNBAState φ) :=
+  { B | φ ∈ B.val }
+
+/-! ### Until subformulas and acceptance sets -/
+
+/-- The Until subformulas of `φ.closure`: formulas of the form `untl ψ₁ ψ₂` in the closure.
+
+These are exactly the subformulas whose acceptance must be tracked in the GNBA.
+For each such subformula, a separate acceptance set ensures that every Until obligation
+is eventually fulfilled. -/
+def Formula.untlSubformulas (φ : Formula Atom) : Set (Formula Atom) :=
+  { χ ∈ Formula.closure φ | ∃ ψ₁ ψ₂, χ = Formula.untl ψ₁ ψ₂ }
+
+/-- The Until subformulas form a finite set, being a subset of the finite closure. -/
+lemma Formula.untlSubformulas_finite (φ : Formula Atom) :
+    Set.Finite (Formula.untlSubformulas φ) :=
+  (Formula.closure_finite φ).subset (Set.sep_subset _ _)
+
+/-- The GNBA acceptance set for a given Until subformula `χ`.
+
+A state `B` is accepting for `χ` when either `χ ∉ B.val` (the Until formula is not
+"active" or "pending") or `χ = untl ψ₁ ψ₂` and `ψ₂ ∈ B.val` (the eventuality `ψ₂`
+has been fulfilled in this step).
+
+By including states where `χ ∉ B.val`, runs that eventually stop requiring `χ` are still
+accepted, ensuring progress for all active Until obligations. -/
+def Formula.gnbaAcceptSet (φ : Formula Atom) (χ : Formula Atom) :
+    Set (Formula.GNBAState φ) :=
+  { B | χ ∉ B.val ∨ ∃ ψ₁ ψ₂, χ = Formula.untl ψ₁ ψ₂ ∧ ψ₂ ∈ B.val }
+
+/-! ### Enumeration of Until subformulas -/
+
+/-- A `Finset` containing all Until subformulas of `φ.closure`.
+
+Converts the finite set `Formula.untlSubformulas φ` to a `Finset` for use in
+the cycling counter construction of the GNBA-to-NBA conversion. -/
+noncomputable def Formula.untlFinset (φ : Formula Atom) : Finset (Formula Atom) :=
+  (Formula.untlSubformulas_finite φ).toFinset
+
+/-- The number of Until subformulas (acceptance conditions) in `φ.closure`. -/
+noncomputable def Formula.gnbaK (φ : Formula Atom) : ℕ :=
+  (Formula.untlFinset φ).card
+
+/-! ### GNBA-to-NBA conversion -/
+
+/-- NBA state type for the cycling counter construction.
+
+The NBA state is a pair `(B, i)` where `B : GNBAState φ` is a GNBA state and
+`i : Fin (gnbaK φ).succ` is the cycling counter tracking which acceptance condition
+must be checked next. The counter ranges from `0` to `gnbaK φ` (inclusive). -/
+def Formula.GNBANBAState (φ : Formula Atom) : Type _ :=
+  Formula.GNBAState φ × Fin (Formula.gnbaK φ).succ
+
+/-- The NBA state type is finite: it is a product of two finite types. -/
+instance Formula.gnbaNBAStateFinite (φ : Formula Atom) :
+    Finite (Formula.GNBANBAState φ) := by
+  unfold Formula.GNBANBAState
+  haveI : Finite (Formula.GNBAState φ) :=
+    Set.finite_coe_iff.mpr (Formula.atoms_finite φ)
+  haveI : Finite (Fin (Formula.gnbaK φ).succ) := Finite.of_fintype _
+  exact Finite.instProd
+
+/-- The NBA for formula `φ`, obtained from the GNBA via the cycling counter construction.
+
+The NBA state type is `GNBANBAState φ = GNBAState φ × Fin (gnbaK φ).succ`. A run
+`(B₀, 0), (B₁, i₁), (B₂, i₂), ...` in the NBA corresponds to a run `B₀, B₁, B₂, ...`
+in the GNBA, with the counter advancing cyclically through positions `0` to `gnbaK φ`.
+
+The transition from `(B, i)` to `(B', j)` requires:
+- The GNBA transition `gnbaTr φ B a B'` holds.
+- The counter advances: either `j = i + 1` (if `i < gnbaK φ`) or `j = 0` (wrap-around
+  when `i = gnbaK φ`).
+
+Acceptance: a state `(B, i)` is accepting when `i = 0`. Since the counter wraps from
+`gnbaK φ` back to `0`, the accepting states are visited infinitely often in any infinite
+run, ensuring the Büchi acceptance condition is met for all Until subformulas.
+
+The correctness of this construction -- that the NBA language equals `Formula.omegaLanguage φ` --
+is proved in Phase 4 (`Formula.gnba_language_eq`). -/
+noncomputable def Formula.gnbaNBA (φ : Formula Atom) :
+    NA.Buchi (Formula.GNBANBAState φ) (Set Atom) where
+  Tr := fun ⟨B, i⟩ a ⟨B', j⟩ =>
+    Formula.gnbaTr φ B a B' ∧
+    (i.val + 1 = j.val ∨
+     (j = ⟨0, Nat.succ_pos _⟩ ∧ i.val = Formula.gnbaK φ))
+  start := { s | s.1 ∈ Formula.gnbaStart φ ∧ s.2 = ⟨0, Nat.succ_pos _⟩ }
+  accept := { s | s.2 = ⟨0, Nat.succ_pos _⟩ }
 
 end Cslib.Logic.LTL
 

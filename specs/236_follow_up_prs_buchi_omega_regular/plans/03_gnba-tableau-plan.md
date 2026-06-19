@@ -112,7 +112,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Canonical Atoms and Semantic Properties [NOT STARTED]
+### Phase 2: Canonical Atoms and Semantic Properties [COMPLETED]
 
 **Goal**: Define canonical atoms from semantic valuations and prove they satisfy the atom predicate. This establishes the key bridge between LTL semantics and the GNBA state space.
 
@@ -143,7 +143,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: GNBA Construction and NBA Conversion [NOT STARTED]
+### Phase 3: GNBA Construction and NBA Conversion [IN PROGRESS]
 
 **Goal**: Define the GNBA for an LTL formula (transition relation, initial states, acceptance sets) and convert it to an NBA using the cycling counter construction. Prove the state space is finite.
 

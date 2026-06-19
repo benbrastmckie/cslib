@@ -1,0 +1,16 @@
+{
+  "status": "planned",
+  "summary": "3-phase plan created: Phase 1 decouples LTL/Temporal (1h), Phase 2 bridges LTL to OmegaExecution (2h), Phase 3 proves LTL formulas define omega-regular languages (7h)",
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "implement",
+  "phases_completed": 0,
+  "phases_total": 3,
+  "artifacts": [
+    {
+      "path": "specs/236_follow_up_prs_buchi_omega_regular/plans/01_follow-up-prs-plan.md",
+      "type": "plan",
+      "summary": "Implementation plan with 3 sequential phases: LTL/Temporal decoupling, OmegaExecution satisfaction bridge, and LTL omega-regularity theorem via structural induction"
+    }
+  ]
+}

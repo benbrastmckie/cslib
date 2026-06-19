@@ -8,7 +8,7 @@ module
 
 public import Cslib.Init
 public import Cslib.Foundations.Logic.Connectives
-public import Cslib.Logics.Temporal.Syntax.Formula
+public import Mathlib.Order.Notation
 
 /-! # LTL Formula Type
 
@@ -24,7 +24,6 @@ discreteness and non-triviality). An independent primitive `next` avoids this co
   `atom`, `bot`, `imp`, `next`, `untl`
 - `Formula.someFuture` (𝐅): `φ U ⊤` — φ holds at some future point
 - `Formula.allFuture` (𝐆): `¬𝐅¬φ` — φ holds at all future points
-- `Formula.toTemporal` : Embedding of `LTL.Formula` into `Temporal.Formula`
 
 ## Notation
 
@@ -125,19 +124,6 @@ instance : LTLConnectives (Formula Atom) where
 
 instance : Bot (Formula Atom) := ⟨.bot⟩
 instance : Top (Formula Atom) := ⟨.top⟩
-
-/-- Embed `LTL.Formula` into `Temporal.Formula`.
-
-`LTL.Satisfies` uses reflexive (non-strict) until: `∃ j ≥ i, ...`. The BX tense logic
-uses strict until: `∃ s > t, ...`. To preserve semantics, `untl` maps to
-`reflexiveUntl` (the derived non-strict operator), while `next` maps to the strict
-`untl · bot` which forces the witness to be the immediate successor on ℕ. -/
-def Formula.toTemporal : Formula Atom → Temporal.Formula Atom
-  | .atom p => .atom p
-  | .bot => .bot
-  | .imp φ ψ => .imp (toTemporal φ) (toTemporal ψ)
-  | .next φ => .untl .bot (toTemporal φ)
-  | .untl ψ φ => (toTemporal φ).reflexiveUntl (toTemporal ψ)
 
 end Cslib.Logic.LTL
 

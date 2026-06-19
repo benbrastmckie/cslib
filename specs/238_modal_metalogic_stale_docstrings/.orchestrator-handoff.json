@@ -1,0 +1,16 @@
+{
+  "status": "implemented",
+  "summary": "Fixed 9 stale module docstrings in Modal/Metalogic after task 237 theorem migration — all comment-only changes, all 9 modules build successfully",
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "complete",
+  "phases_completed": 2,
+  "phases_total": 2,
+  "artifacts": [
+    {
+      "path": "specs/238_modal_metalogic_stale_docstrings/summaries/01_stale-docstrings-summary.md",
+      "type": "summary",
+      "summary": "Two-phase implementation: updated core Completeness.lean title/Main Results, and replaced 8 empty-body system docstrings with the infrastructure pattern from B/S4/S5"
+    }
+  ]
+}

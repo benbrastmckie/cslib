@@ -70,11 +70,11 @@ Phases within the same wave can execute in parallel.
 **Goal**: Move the completeness theorem from `Completeness.lean` to `StrongCompleteness.lean` for the 4 systems that retain other declarations in `Completeness.lean`. These are the most complex edits because the surrounding infrastructure must be preserved.
 
 **Tasks**:
-- [ ] **K**: Remove `k_completeness` theorem and its section header/docstring (lines ~267-301) from `K/Completeness.lean`. Add K weak completeness corollary (Pattern 1, using `ModalSemanticEntails_of_Valid`) to `K/StrongCompleteness.lean` before `end Cslib.Logic.Modal`. Update module docstrings in both files.
-- [ ] **T**: Remove `t_completeness` theorem and its section header/docstring from `T/Completeness.lean`. Add T weak completeness corollary to `T/StrongCompleteness.lean`. Update module docstrings in both files.
-- [ ] **D**: Remove `d_completeness` theorem and its section header/docstring from `D/Completeness.lean`. Add D weak completeness corollary to `D/StrongCompleteness.lean`. Update module docstrings in both files.
-- [ ] **TB**: Remove `tb_completeness` theorem and its section header/docstring from `TB/Completeness.lean`. Add TB weak completeness corollary to `TB/StrongCompleteness.lean`. Update module docstrings in both files.
-- [ ] Run `lake build` on the 8 modified modules to verify
+- [x] **K**: Remove `k_completeness` theorem and its section header/docstring (lines ~267-301) from `K/Completeness.lean`. Add K weak completeness corollary (Pattern 1, using `ModalSemanticEntails_of_Valid`) to `K/StrongCompleteness.lean` before `end Cslib.Logic.Modal`. Update module docstrings in both files.
+- [x] **T**: Remove `t_completeness` theorem and its section header/docstring from `T/Completeness.lean`. Add T weak completeness corollary to `T/StrongCompleteness.lean`. Update module docstrings in both files.
+- [x] **D**: Remove `d_completeness` theorem and its section header/docstring from `D/Completeness.lean`. Add D weak completeness corollary to `D/StrongCompleteness.lean`. Update module docstrings in both files.
+- [x] **TB**: Remove `tb_completeness` theorem and its section header/docstring from `TB/Completeness.lean`. Add TB weak completeness corollary to `TB/StrongCompleteness.lean`. Update module docstrings in both files.
+- [x] Run `lake build` on the 8 modified modules to verify
 
 **Timing**: 1 hour
 
@@ -102,12 +102,12 @@ Phases within the same wave can execute in parallel.
 **Goal**: Move the completeness theorem for 5 systems whose `Completeness.lean` has only the completeness theorem (plus imports and docstring). After removal, these files become empty module bodies with just imports and an updated docstring. S5 additionally requires moving the `alias completeness := s5_completeness`.
 
 **Tasks**:
-- [ ] **B**: Remove `b_completeness` theorem from `B/Completeness.lean`. Replace module body with updated docstring noting infrastructure import role. Add corollary to `B/StrongCompleteness.lean`.
-- [ ] **S4**: Same pattern for `s4_completeness`.
-- [ ] **S5**: Remove `s5_completeness` theorem AND `alias completeness := s5_completeness` from `S5/Completeness.lean`. Add both to `S5/StrongCompleteness.lean`.
-- [ ] **K4**: Same pattern for `k4_completeness`.
-- [ ] **K5**: Same pattern for `k5_completeness`.
-- [ ] Run `lake build` on the 10 modified modules to verify
+- [x] **B**: Remove `b_completeness` theorem from `B/Completeness.lean`. Replace module body with updated docstring noting infrastructure import role. Add corollary to `B/StrongCompleteness.lean`.
+- [x] **S4**: Same pattern for `s4_completeness`.
+- [x] **S5**: Remove `s5_completeness` theorem AND `alias completeness := s5_completeness` from `S5/Completeness.lean`. Add both to `S5/StrongCompleteness.lean`.
+- [x] **K4**: Same pattern for `k4_completeness`.
+- [x] **K5**: Same pattern for `k5_completeness`.
+- [x] Run `lake build` on the 10 modified modules to verify
 
 **Timing**: 45 minutes
 
@@ -137,13 +137,13 @@ Phases within the same wave can execute in parallel.
 **Goal**: Move the completeness theorem for the remaining 6 systems. Same pattern as Phase 2.
 
 **Tasks**:
-- [ ] **K45**: Remove `k45_completeness` from `K45/Completeness.lean`. Add corollary to `K45/StrongCompleteness.lean`. Update docstrings.
-- [ ] **KB5**: Same pattern for `kb5_completeness`.
-- [ ] **D4**: Same pattern for `d4_completeness`.
-- [ ] **D5**: Same pattern for `d5_completeness`.
-- [ ] **D45**: Same pattern for `d45_completeness`.
-- [ ] **DB**: Same pattern for `db_completeness`.
-- [ ] Run `lake build` on the 12 modified modules to verify
+- [x] **K45**: Remove `k45_completeness` from `K45/Completeness.lean`. Add corollary to `K45/StrongCompleteness.lean`. Update docstrings.
+- [x] **KB5**: Same pattern for `kb5_completeness`.
+- [x] **D4**: Same pattern for `d4_completeness`.
+- [x] **D5**: Same pattern for `d5_completeness`.
+- [x] **D45**: Same pattern for `d45_completeness`.
+- [x] **DB**: Same pattern for `db_completeness`.
+- [x] Run `lake build` on the 12 modified modules to verify
 
 **Timing**: 45 minutes
 
@@ -174,10 +174,10 @@ Phases within the same wave can execute in parallel.
 **Goal**: Run the complete CSLib CI verification pipeline to confirm the refactoring introduces no regressions.
 
 **Tasks**:
-- [ ] Run `lake build` (full project) to verify all 30 files and all downstream dependents compile
-- [ ] Run `lake exe checkInitImports` to verify import structure
-- [ ] Run `lake exe lint-style` to verify style compliance
-- [ ] Run `lake test` to verify test suite passes
+- [x] Run `lake build` (full project) to verify all 30 files and all downstream dependents compile
+- [x] Run `lake exe checkInitImports` to verify import structure
+- [x] Run `lake exe lint-style` to verify style compliance
+- [x] Run `lake test` to verify test suite passes
 
 **Timing**: 30 minutes
 
@@ -193,14 +193,14 @@ Phases within the same wave can execute in parallel.
 
 ## Testing & Validation
 
-- [ ] All 15 corollary proofs compile as term-mode expressions (no `sorry`, no `by` blocks)
-- [ ] All 15 Completeness.lean files compile (those with remaining infrastructure and those with empty bodies)
-- [ ] Full `lake build` passes with no new errors
-- [ ] `lake exe checkInitImports` passes
-- [ ] `lake exe lint-style` passes
-- [ ] `lake test` passes
-- [ ] Theorem names are preserved: `{sys}_completeness` for all 15 systems
-- [ ] S5 `alias completeness := s5_completeness` is functional in new location
+- [x] All 15 corollary proofs compile as term-mode expressions (no `sorry`, no `by` blocks)
+- [x] All 15 Completeness.lean files compile (those with remaining infrastructure and those with empty bodies)
+- [x] Full `lake build` passes with no new errors
+- [x] `lake exe checkInitImports` passes
+- [x] `lake exe lint-style` passes
+- [x] `lake test` passes
+- [x] Theorem names are preserved: `{sys}_completeness` for all 15 systems
+- [x] S5 `alias completeness := s5_completeness` is functional in new location
 
 ## Artifacts & Outputs
 

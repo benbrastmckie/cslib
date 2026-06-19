@@ -11,7 +11,7 @@ next_project_number: 241
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,209,226,232,236,238,239 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,209,226,236,238,239 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181,215,240 | 36,37,180,238 | Bimodal Porting, Modal Logic, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -31,9 +31,9 @@ next_project_number: 241
 
 ### Modal Logic
 
-238 [NOT STARTED] — Fix stale module docstrings in Modal/Metalogic after task 237 the
+238 [PLANNED] — Fix stale module docstrings in Modal/Metalogic after task 237 the
   └─ 240 [NOT STARTED] — Fix naming inconsistencies and barrel file issues in Modal/Metalo
-239 [NOT STARTED] — Standardize all citations in Modal/Metalogic to use Lean4Doc bib 
+239 [PLANNED] — Standardize all citations in Modal/Metalogic to use Lean4Doc bib 
 
 ### Project Management
 
@@ -50,10 +50,6 @@ next_project_number: 241
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
-### Pr
-
-232 [IMPLEMENTING] — Rebase PR #649 (feat/temporal-formula-propositional) onto PR #648
-
 ## Tasks
 
 ### 240. Modal metalogic naming and barrel fixes
@@ -67,35 +63,26 @@ next_project_number: 241
 ---
 
 ### 239. Modal metalogic citation standardization
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
+- **Research**: [239_modal_metalogic_citation_standardization/reports/01_citation-standardization.md]
+- **Plan**: [239_modal_metalogic_citation_standardization/plans/01_citation-standardization.md]
 
 **Description**: Standardize all citations in Modal/Metalogic to use Lean4Doc bib link format. (1) Convert ~20 Soundness.lean and Completeness.lean module docstrings from plain-text style ('Blackburn, de Rijke, Venema, "Modal Logic" (2002)') to the Lean4Doc link format ('* [P. Blackburn, M. de Rijke, Y. Venema, *Modal Logic*][Blackburn2001]') matching the StrongCompleteness.lean standard. (2) Replace undefined 'BRV' abbreviation in module docstrings with either spelled-out author names or bib key references; inline code comments may keep 'BRV' if the abbreviation is defined in the file's docstring. (3) Replace internal file references in Soundness.lean's References section ('* Cslib/Logics/Modal/Basic.lean') with proper bib citations or remove if no literature source applies. (4) Remove or convert cross-repo references to BimodalLogic/ project in DeductionTheorem.lean, MCS.lean, and DerivationTree.lean docstrings — replace with bib citations where a literature source exists, otherwise remove the stale path.
 
 ---
 
 ### 238. Modal metalogic stale docstrings
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
+- **Research**: [238_modal_metalogic_stale_docstrings/reports/01_stale-docstrings.md]
+- **Plan**: [238_modal_metalogic_stale_docstrings/plans/01_stale-docstrings.md]
 
 **Description**: Fix stale module docstrings in Modal/Metalogic after task 237 theorem migration. (1) Core Completeness.lean: update /-! docstring to remove moved `completeness` theorem from Main Results, update description to reflect the file now provides generic completeness infrastructure (truth lemma, canonical model) but not the system-specific completeness theorems. (2) 8 empty-body Completeness.lean files (K4, K5, K45, KB5, D4, D5, D45, DB): replace stale 'This module proves completeness...' docstrings with short infrastructure docstrings matching the B/S4/S5 pattern — state the file exists for import chain stability and cross-reference StrongCompleteness.lean for the actual theorems. (3) K5/Completeness.lean has a contradictory hybrid docstring that both says 'proves completeness' and 'provides import infrastructure' — pick one (infrastructure).
-
----
-
-### 237. Weak completeness corollaries modal cube
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Modal Logic
-- **Dependencies**: None
-- **Research**: [237_weak_completeness_corollaries_modal_cube/reports/01_weak-completeness-corollaries.md]
-- **Plan**: [237_weak_completeness_corollaries_modal_cube/plans/01_weak-completeness-corollaries.md]
-- **Summary**: [237_weak_completeness_corollaries_modal_cube/summaries/01_weak-completeness-corollaries-summary.md]
-
-**Description**: Derive weak completeness as corollaries of strong completeness for all 15 modal cube systems. Move each {sys}_completeness theorem from Completeness.lean into StrongCompleteness.lean, replacing the direct ~30-line proof with a ~5-line corollary via ModalSetDerivable_empty_iff and {sys}_strong_completeness. Remove the original theorem from each Completeness.lean (keeping all supporting infrastructure like truth lemmas and canonical model construction). Update docstrings in both files accordingly. Systems: K, T, B, D, S4, S5, K4, K5, K45, KB5, D4, D5, D45, DB, TB
 
 ---
 
@@ -106,53 +93,6 @@ next_project_number: 241
 - **Dependencies**: None
 
 **Description**: Complete follow-up PRs from PR #649 for Büchi automata and closure of omega-regular languages under boolean operations
-
----
-
-### 235. Strong completeness modal cube
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Modal Logic
-- **Dependencies**: None
-- **Research**: [235_strong_completeness_modal_cube/reports/01_strong-completeness-research.md]
-- **Plan**: [235_strong_completeness_modal_cube/plans/01_strong-completeness-plan.md]
-- **Summary**: [235_strong_completeness_modal_cube/summaries/01_implementation-summary.md]
-
-**Description**: Upgrade weak completeness to strong completeness for all 15 modal cube systems (K, T, B, D, S4, S5, K4, K5, K45, KB5, D4, D5, D45, DB, TB). The existing weak completeness results prove that validity implies derivability from the empty context. Strong completeness should prove that semantic entailment from a set of premises Γ implies syntactic entailment: Γ ⊨ φ → Γ ⊢ φ, matching the existing strong soundness signature Γ ⊢ φ → Γ ⊨ φ. Include clear documentation distinguishing strong vs weak versions and careful organization of parameterized and per-system files
-
----
-
-### 234. Revise untl snce convention
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: None
-- **Research**: [234_revise_untl_snce_convention/reports/01_untl-snce-convention.md]
-- **Plan**: [234_revise_untl_snce_convention/plans/01_untl-snce-convention.md]
-
-**Description**: Revise main branch to use standard LTL convention for untl and snce: first argument is the guard (holds at intermediate points), second argument is the event (eventually holds at the witness point). Update all Lean code, docstrings, and comments that reference the Burgess convention to align with the standard temporal logic convention
-
----
-
-### 233. Revise pr649 ltl only
-- **Status**: [COMPLETED]
-- **Task Type**: pr
-- **Topic**: Temporal Logic
-- **Dependencies**: None
-
-**Description**: Revise PR #649 on branch feat/temporal-formula-propositional to include LTL only per reviewer comment (pullrequestreview-4528240645), add LTL semantics if space permits (~300LOC), and update pr-description accordingly
-
----
-
-### 232. Rebase pr649 onto pr648
-- **Status**: [IMPLEMENTING]
-- **Task Type**: cslib
-- **Topic**: pr
-- **Dependencies**: None
-- **Research**: [232_rebase_pr649_onto_pr648/reports/01_rebase-research.md]
-- **Plan**: [232_rebase_pr649_onto_pr648/plans/01_rebase-plan.md]
-
-**Description**: Rebase PR #649 (feat/temporal-formula-propositional) onto PR #648 base branch (feat/propositional-v2) and remove unrelated file changes per reviewer ctchou's request. Currently the branch is a single commit on main with many unrelated changes (HasFresh, LTS/Notation, CCS/Semantics, LambdaCalculus files, Modal logic files, Propositional/Defs.lean). Cherry-pick only the temporal-specific changes (Temporal/Syntax/Formula.lean, LTL/Syntax/Formula.lean, Connectives.lean temporal additions, Cslib.lean imports, references.bib) onto feat/propositional-v2 as the new base
 
 ---
 
@@ -196,48 +136,6 @@ Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completenes
 - **Plan**: [209_lint_namespace_fixes/plans/01_namespace-plan.md]
 
 **Description**: Fix 298 namespace lint errors: 239 declarations not properly namespaced and 59 duplicate namespace components (Chronicle, Temporal, Bimodal repeated in names). Requires moving declarations into correct namespaces or renaming.
-
----
-
-### 197. Scope initial Modal/ upstream PR (~300 LOC)
-- **Status**: [COMPLETED]
-- **Task Type**: pr
-- **Topic**: Modal Logic
-- **Dependencies**: None
-- **Research**:
-  - [197_modal_upstream_initial_pr/reports/06_modal-pr-landscape.md]
-  - [197_modal_upstream_initial_pr/reports/09_team-research.md]
-  - [197_modal_upstream_initial_pr/reports/10_plan-review.md]
-- **Pr_description**: [197_modal_upstream_initial_pr/pr-description.md]
-- **Plan**: [197_modal_upstream_initial_pr/plans/10_modal-pr-revision.md]
-
-**Description**: Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible
-
----
-
-### 192. Research verify literature refs pr 188
-- **Status**: [ABANDONED]
-- **Task Type**: general
-- **Topic**: Propositional Logic
-- **Dependencies**: None
-- **Research**:
-  - [192_research_verify_literature_refs_pr_188/reports/01_team-research.md]
-  - [192_research_verify_literature_refs_pr_188/reports/02_team-research.md]
-
-**Description**: Draw on sources in specs/literature/ to verify and improve citations throughout the files within scope of the task 188 PR, update references.bib following CONTRIBUTING.md conventions, and improve literature claims in specs/archive/188_first_propositional_upstream_pr/pr-description.md while maintaining a clear and concise style for reviewers
-
----
-
-### 188. First propositional upstream pr
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: None
-- **Research**: [188_first_propositional_upstream_pr/reports/01_team-research.md]
-- **Plan**: [188_first_propositional_upstream_pr/plans/01_implementation-plan.md]
-- **Summary**: [188_first_propositional_upstream_pr/summaries/01_execution-summary.md]
-
-**Description**: Design and prepare a first upstream PR (~300 LOC) contributing propositional logic foundations to CSLib.
 
 ---
 

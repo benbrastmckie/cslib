@@ -79,18 +79,18 @@ Phases within the same wave can execute in parallel.
 **Goal**: Create the shared `StrongCompleteness.lean` file with `ModalSetDerivable`, `ModalSemanticEntails`, basic lemmas, DNE helper, and the key consistency lemma.
 
 **Tasks**:
-- [ ] Create `Cslib/Logics/Modal/Metalogic/StrongCompleteness.lean`
-- [ ] Define `ModalSetDerivable Axioms Gamma phi` using `modalDerivationSystem`
-- [ ] Define `ModalSemanticEntails FC Gamma phi` parameterized over frame class predicate `FC`
-- [ ] Prove `ModalSetDerivable_of_mem` (membership implies set-derivability)
-- [ ] Prove `ModalSetDerivable_weakening` (monotonicity in premise set)
-- [ ] Prove `ModalSetDerivable_of_Derivable` (theorems are set-derivable from any set)
-- [ ] Prove `ModalSetDerivable_empty_iff` (empty set equivalence with `Derivable`)
-- [ ] Prove `ModalSemanticEntails_of_Valid` (validity implies semantic entailment from any set, parameterized over frame class)
-- [ ] Implement `modal_dne_from_neg_neg` (DNE helper adapting propositional version to modal `DerivationTree`)
-- [ ] Prove `modal_not_SetDerivable_union_neg_consistent` (key consistency lemma: if phi not set-derivable from Gamma, then Gamma union {neg phi} is `SetConsistent Axioms`)
-- [ ] Add docstrings to all declarations
-- [ ] Verify: `lake build Cslib.Logics.Modal.Metalogic.StrongCompleteness`
+- [x] Create `Cslib/Logics/Modal/Metalogic/StrongCompleteness.lean`
+- [x] Define `ModalSetDerivable Axioms Gamma phi` using `modalDerivationSystem`
+- [x] Define `ModalSemanticEntails FC Gamma phi` parameterized over frame class predicate `FC`
+- [x] Prove `ModalSetDerivable_of_mem` (membership implies set-derivability)
+- [x] Prove `ModalSetDerivable_weakening` (monotonicity in premise set)
+- [x] Prove `ModalSetDerivable_of_Derivable` (theorems are set-derivable from any set)
+- [x] Prove `ModalSetDerivable_empty_iff` (empty set equivalence with `Derivable`)
+- [x] Prove `ModalSemanticEntails_of_Valid` (validity implies semantic entailment from any set, parameterized over frame class)
+- [x] Implement `modal_dne_from_neg_neg` (DNE helper adapting propositional version to modal `DerivationTree`)
+- [x] Prove `modal_not_SetDerivable_union_neg_consistent` (key consistency lemma: if phi not set-derivable from Gamma, then Gamma union {neg phi} is `SetConsistent Axioms`)
+- [x] Add docstrings to all declarations
+- [x] Verify: `lake build Cslib.Logics.Modal.Metalogic.StrongCompleteness`
 
 **Timing**: 2 hours
 
@@ -105,33 +105,33 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: K-Group Strong Completeness (K, B, K4, K5, K45, KB5) [IN PROGRESS]
+### Phase 2: K-Group Strong Completeness (K, B, K4, K5, K45, KB5) [COMPLETED]
 
 **Goal**: Create `StrongCompleteness.lean` for the 6 systems that use `k_truth_lemma` (systems without axiom T or D).
 
 **Tasks**:
-- [ ] Create `Cslib/Logics/Modal/Metalogic/Systems/K/StrongCompleteness.lean`
-  - [ ] `k_strong_soundness`: unfold `ModalSetDerivable`, apply `k_soundness`
-  - [ ] `k_strong_completeness`: contrapositive via `modal_not_SetDerivable_union_neg_consistent` + `modal_lindenbaum` + `k_truth_lemma`
-  - [ ] `k_strong_completeness_iff`: biconditional wrapper
-  - [ ] `k_compactness`: corollary from strong soundness + completeness
-- [ ] Create `Cslib/Logics/Modal/Metalogic/Systems/B/StrongCompleteness.lean`
-  - [ ] `b_strong_soundness`, `b_strong_completeness`, `b_strong_completeness_iff`, `b_compactness`
-  - [ ] Frame condition: `∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁` (symmetric)
-- [ ] Create `Cslib/Logics/Modal/Metalogic/Systems/K4/StrongCompleteness.lean`
-  - [ ] `k4_strong_soundness`, `k4_strong_completeness`, `k4_strong_completeness_iff`, `k4_compactness`
-  - [ ] Frame condition: `∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃` (transitive)
-- [ ] Create `Cslib/Logics/Modal/Metalogic/Systems/K5/StrongCompleteness.lean`
-  - [ ] `k5_strong_soundness`, `k5_strong_completeness`, `k5_strong_completeness_iff`, `k5_compactness`
-  - [ ] Frame condition: `∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃` (Euclidean)
-- [ ] Create `Cslib/Logics/Modal/Metalogic/Systems/K45/StrongCompleteness.lean`
-  - [ ] `k45_strong_soundness`, `k45_strong_completeness`, `k45_strong_completeness_iff`, `k45_compactness`
-  - [ ] Frame conditions: transitive + Euclidean
-- [ ] Create `Cslib/Logics/Modal/Metalogic/Systems/KB5/StrongCompleteness.lean`
-  - [ ] `kb5_strong_soundness`, `kb5_strong_completeness`, `kb5_strong_completeness_iff`, `kb5_compactness`
-  - [ ] Frame conditions: symmetric + Euclidean
-- [ ] Add docstrings to all declarations in all 6 files
-- [ ] Verify: `lake build` for each new module
+- [x] Create `Cslib/Logics/Modal/Metalogic/Systems/K/StrongCompleteness.lean`
+  - [x] `k_strong_soundness`: unfold `ModalSetDerivable`, apply `k_soundness`
+  - [x] `k_strong_completeness`: contrapositive via `modal_not_SetDerivable_union_neg_consistent` + `modal_lindenbaum` + `k_truth_lemma`
+  - [x] `k_strong_completeness_iff`: biconditional wrapper
+  - [x] `k_compactness`: corollary from strong soundness + completeness
+- [x] Create `Cslib/Logics/Modal/Metalogic/Systems/B/StrongCompleteness.lean`
+  - [x] `b_strong_soundness`, `b_strong_completeness`, `b_strong_completeness_iff`, `b_compactness`
+  - [x] Frame condition: `∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁` (symmetric)
+- [x] Create `Cslib/Logics/Modal/Metalogic/Systems/K4/StrongCompleteness.lean`
+  - [x] `k4_strong_soundness`, `k4_strong_completeness`, `k4_strong_completeness_iff`, `k4_compactness`
+  - [x] Frame condition: `∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃` (transitive)
+- [x] Create `Cslib/Logics/Modal/Metalogic/Systems/K5/StrongCompleteness.lean`
+  - [x] `k5_strong_soundness`, `k5_strong_completeness`, `k5_strong_completeness_iff`, `k5_compactness`
+  - [x] Frame condition: `∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃` (Euclidean)
+- [x] Create `Cslib/Logics/Modal/Metalogic/Systems/K45/StrongCompleteness.lean`
+  - [x] `k45_strong_soundness`, `k45_strong_completeness`, `k45_strong_completeness_iff`, `k45_compactness`
+  - [x] Frame conditions: transitive + Euclidean
+- [x] Create `Cslib/Logics/Modal/Metalogic/Systems/KB5/StrongCompleteness.lean`
+  - [x] `kb5_strong_soundness`, `kb5_strong_completeness`, `kb5_strong_completeness_iff`, `kb5_compactness`
+  - [x] Frame conditions: symmetric + Euclidean
+- [x] Add docstrings to all declarations in all 6 files
+- [x] Verify: `lake build` for each new module
 
 **Timing**: 2 hours
 
@@ -157,27 +157,27 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: T-Group Strong Completeness (T, S4, S5, TB) [NOT STARTED]
+### Phase 3: T-Group Strong Completeness (T, S4, S5, TB) [COMPLETED]
 
 **Goal**: Create `StrongCompleteness.lean` for the 4 systems that use `truth_lemma` (systems with axiom T, which provides reflexivity).
 
 **Tasks**:
-- [ ] Create `Cslib/Logics/Modal/Metalogic/Systems/T/StrongCompleteness.lean`
-  - [ ] `t_strong_soundness`, `t_strong_completeness`, `t_strong_completeness_iff`, `t_compactness`
-  - [ ] Frame condition: `∀ w, m.r w w` (reflexive)
-  - [ ] Uses `truth_lemma` (not `k_truth_lemma`), via `t_truth_lemma` wrapper
-- [ ] Create `Cslib/Logics/Modal/Metalogic/Systems/S4/StrongCompleteness.lean`
-  - [ ] `s4_strong_soundness`, `s4_strong_completeness`, `s4_strong_completeness_iff`, `s4_compactness`
-  - [ ] Frame conditions: reflexive + transitive
-- [ ] Create `Cslib/Logics/Modal/Metalogic/Systems/S5/StrongCompleteness.lean`
-  - [ ] `s5_strong_soundness`, `s5_strong_completeness`, `s5_strong_completeness_iff`, `s5_compactness`
-  - [ ] Frame conditions: reflexive + transitive + Euclidean
-  - [ ] Uses `ModalAxiom` (the S5 axiom predicate)
-- [ ] Create `Cslib/Logics/Modal/Metalogic/Systems/TB/StrongCompleteness.lean`
-  - [ ] `tb_strong_soundness`, `tb_strong_completeness`, `tb_strong_completeness_iff`, `tb_compactness`
-  - [ ] Frame conditions: reflexive + symmetric
-- [ ] Add docstrings to all declarations in all 4 files
-- [ ] Verify: `lake build` for each new module
+- [x] Create `Cslib/Logics/Modal/Metalogic/Systems/T/StrongCompleteness.lean`
+  - [x] `t_strong_soundness`, `t_strong_completeness`, `t_strong_completeness_iff`, `t_compactness`
+  - [x] Frame condition: `∀ w, m.r w w` (reflexive)
+  - [x] Uses `truth_lemma` (not `k_truth_lemma`), via `t_truth_lemma` wrapper
+- [x] Create `Cslib/Logics/Modal/Metalogic/Systems/S4/StrongCompleteness.lean`
+  - [x] `s4_strong_soundness`, `s4_strong_completeness`, `s4_strong_completeness_iff`, `s4_compactness`
+  - [x] Frame conditions: reflexive + transitive
+- [x] Create `Cslib/Logics/Modal/Metalogic/Systems/S5/StrongCompleteness.lean`
+  - [x] `s5_strong_soundness`, `s5_strong_completeness`, `s5_strong_completeness_iff`, `s5_compactness`
+  - [x] Frame conditions: reflexive + transitive + Euclidean
+  - [x] Uses `ModalAxiom` (the S5 axiom predicate)
+- [x] Create `Cslib/Logics/Modal/Metalogic/Systems/TB/StrongCompleteness.lean`
+  - [x] `tb_strong_soundness`, `tb_strong_completeness`, `tb_strong_completeness_iff`, `tb_compactness`
+  - [x] Frame conditions: reflexive + symmetric
+- [x] Add docstrings to all declarations in all 4 files
+- [x] Verify: `lake build` for each new module
 
 **Timing**: 1.5 hours
 
@@ -200,29 +200,29 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: D-Group Strong Completeness (D, D4, D5, D45, DB) [NOT STARTED]
+### Phase 4: D-Group Strong Completeness (D, D4, D5, D45, DB) [COMPLETED]
 
 **Goal**: Create `StrongCompleteness.lean` for the 5 systems that use `truth_lemma_d` (systems with axiom D but not T, providing seriality).
 
 **Tasks**:
-- [ ] Create `Cslib/Logics/Modal/Metalogic/Systems/D/StrongCompleteness.lean`
-  - [ ] `d_strong_soundness`, `d_strong_completeness`, `d_strong_completeness_iff`, `d_compactness`
-  - [ ] Frame condition: `Relation.Serial m.r`
-  - [ ] Uses `truth_lemma_d` + `canonical_serial`
-- [ ] Create `Cslib/Logics/Modal/Metalogic/Systems/D4/StrongCompleteness.lean`
-  - [ ] `d4_strong_soundness`, `d4_strong_completeness`, `d4_strong_completeness_iff`, `d4_compactness`
-  - [ ] Frame conditions: serial + transitive
-- [ ] Create `Cslib/Logics/Modal/Metalogic/Systems/D5/StrongCompleteness.lean`
-  - [ ] `d5_strong_soundness`, `d5_strong_completeness`, `d5_strong_completeness_iff`, `d5_compactness`
-  - [ ] Frame conditions: serial + Euclidean
-- [ ] Create `Cslib/Logics/Modal/Metalogic/Systems/D45/StrongCompleteness.lean`
-  - [ ] `d45_strong_soundness`, `d45_strong_completeness`, `d45_strong_completeness_iff`, `d45_compactness`
-  - [ ] Frame conditions: serial + transitive + Euclidean
-- [ ] Create `Cslib/Logics/Modal/Metalogic/Systems/DB/StrongCompleteness.lean`
-  - [ ] `db_strong_soundness`, `db_strong_completeness`, `db_strong_completeness_iff`, `db_compactness`
-  - [ ] Frame conditions: serial + symmetric
-- [ ] Add docstrings to all declarations in all 5 files
-- [ ] Verify: `lake build` for each new module
+- [x] Create `Cslib/Logics/Modal/Metalogic/Systems/D/StrongCompleteness.lean`
+  - [x] `d_strong_soundness`, `d_strong_completeness`, `d_strong_completeness_iff`, `d_compactness`
+  - [x] Frame condition: `Relation.Serial m.r`
+  - [x] Uses `truth_lemma_d` + `canonical_serial`
+- [x] Create `Cslib/Logics/Modal/Metalogic/Systems/D4/StrongCompleteness.lean`
+  - [x] `d4_strong_soundness`, `d4_strong_completeness`, `d4_strong_completeness_iff`, `d4_compactness`
+  - [x] Frame conditions: serial + transitive
+- [x] Create `Cslib/Logics/Modal/Metalogic/Systems/D5/StrongCompleteness.lean`
+  - [x] `d5_strong_soundness`, `d5_strong_completeness`, `d5_strong_completeness_iff`, `d5_compactness`
+  - [x] Frame conditions: serial + Euclidean
+- [x] Create `Cslib/Logics/Modal/Metalogic/Systems/D45/StrongCompleteness.lean`
+  - [x] `d45_strong_soundness`, `d45_strong_completeness`, `d45_strong_completeness_iff`, `d45_compactness`
+  - [x] Frame conditions: serial + transitive + Euclidean
+- [x] Create `Cslib/Logics/Modal/Metalogic/Systems/DB/StrongCompleteness.lean`
+  - [x] `db_strong_soundness`, `db_strong_completeness`, `db_strong_completeness_iff`, `db_compactness`
+  - [x] Frame conditions: serial + symmetric
+- [x] Add docstrings to all declarations in all 5 files
+- [x] Verify: `lake build` for each new module
 
 **Timing**: 1.5 hours
 
@@ -246,17 +246,17 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 5: Module Updates and Final Verification [NOT STARTED]
+### Phase 5: Module Updates and Final Verification [COMPLETED]
 
 **Goal**: Update barrel import file, run CI verification pipeline, ensure all 16 new files are registered.
 
 **Tasks**:
-- [ ] Update `Cslib/Logics/Modal/Metalogic.lean` to add 16 new `public import` lines (1 shared + 15 per-system `StrongCompleteness`)
-- [ ] Run `lake exe mk_all --module` to update `Cslib.lean` barrel import
-- [ ] Run `lake build` (full project build)
-- [ ] Run `lake exe checkInitImports` (verify all files import `Cslib.Init`)
-- [ ] Run `lake exe lint-style` (style linting)
-- [ ] Verify no `sorry` in any new file: `grep -r "sorry" Cslib/Logics/Modal/Metalogic/StrongCompleteness.lean Cslib/Logics/Modal/Metalogic/Systems/*/StrongCompleteness.lean`
+- [x] Update `Cslib/Logics/Modal/Metalogic.lean` to add 16 new `public import` lines (1 shared + 15 per-system `StrongCompleteness`)
+- [x] Run `lake exe mk_all --module` to update `Cslib.lean` barrel import
+- [x] Run `lake build` (full project build)
+- [x] Run `lake exe checkInitImports` (verify all files import `Cslib.Init`)
+- [x] Run `lake exe lint-style` (style linting)
+- [x] Verify no `sorry` in any new file: `grep -r "sorry" Cslib/Logics/Modal/Metalogic/StrongCompleteness.lean Cslib/Logics/Modal/Metalogic/Systems/*/StrongCompleteness.lean`
 
 **Timing**: 1 hour
 
@@ -275,14 +275,14 @@ Phases within the same wave can execute in parallel.
 
 ## Testing & Validation
 
-- [ ] `lake build Cslib.Logics.Modal.Metalogic.StrongCompleteness` compiles (shared infrastructure)
-- [ ] All 15 per-system `StrongCompleteness.lean` files compile individually
-- [ ] `lake build` (full project) succeeds
-- [ ] `lake exe checkInitImports` passes
-- [ ] `lake exe lint-style` passes
-- [ ] No `sorry` in any new file
-- [ ] All declarations have docstrings (docBlame compliance)
-- [ ] Strong completeness theorems have correct type signatures matching strong soundness duals
+- [x] `lake build Cslib.Logics.Modal.Metalogic.StrongCompleteness` compiles (shared infrastructure)
+- [x] All 15 per-system `StrongCompleteness.lean` files compile individually
+- [x] `lake build` (full project) succeeds
+- [x] `lake exe checkInitImports` passes
+- [x] `lake exe lint-style` passes
+- [x] No `sorry` in any new file
+- [x] All declarations have docstrings (docBlame compliance)
+- [x] Strong completeness theorems have correct type signatures matching strong soundness duals
 
 ## Artifacts & Outputs
 

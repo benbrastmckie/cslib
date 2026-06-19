@@ -2,35 +2,6 @@
   "next_project_number": 241,
   "active_projects": [
     {
-      "project_number": 237,
-      "project_name": "weak_completeness_corollaries_modal_cube",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "Derive weak completeness as corollaries of strong completeness for all 15 modal cube systems. Move each {sys}_completeness theorem from Completeness.lean into StrongCompleteness.lean, replacing the direct ~30-line proof with a ~5-line corollary via ModalSetDerivable_empty_iff and {sys}_strong_completeness. Remove the original theorem from each Completeness.lean (keeping all supporting infrastructure like truth lemmas and canonical model construction). Update docstrings in both files accordingly. Systems: K, T, B, D, S4, S5, K4, K5, K45, KB5, D4, D5, D45, DB, TB",
-      "topic": "Modal Logic",
-      "created": "2026-06-19T02:53:37Z",
-      "last_updated": "2026-06-19T03:18:34Z",
-      "session_id": "sess_1750299600_orchestrate",
-      "artifacts": [
-        {
-          "path": "specs/237_weak_completeness_corollaries_modal_cube/reports/01_weak-completeness-corollaries.md",
-          "type": "report",
-          "summary": "01_weak-completeness-corollaries.md"
-        },
-        {
-          "path": "specs/237_weak_completeness_corollaries_modal_cube/plans/01_weak-completeness-corollaries.md",
-          "type": "plan",
-          "summary": "01_weak-completeness-corollaries.md"
-        },
-        {
-          "path": "specs/237_weak_completeness_corollaries_modal_cube/summaries/01_weak-completeness-corollaries-summary.md",
-          "type": "summary",
-          "summary": "01_weak-completeness-corollaries-summary.md"
-        }
-      ],
-      "completion_summary": "All 15 modal cube weak completeness theorems moved from Completeness.lean to StrongCompleteness.lean as corollaries of strong completeness via ModalSetDerivable_empty_iff. Each ~30-line direct proof replaced with ~5-line corollary. All CI checks pass."
-    },
-    {
       "project_number": 236,
       "project_name": "follow_up_prs_buchi_omega_regular",
       "status": "implementing",
@@ -40,95 +11,6 @@
       "created": "2026-06-19T02:21:37Z",
       "last_updated": "2026-06-19T03:35:14Z",
       "completion_summary": "All 3 phases implemented. Phase 1: LTL/Temporal decoupled (Embedding.lean). Phase 2: OmegaExecution bridge (OmegaExecutionSatisfies.lean). Phase 3: LTL omega-regularity theorem proved for atom/bot/imp/next cases; untl case marked proof_wanted for future Vardi-Wolper construction."
-    },
-    {
-      "project_number": 235,
-      "project_name": "strong_completeness_modal_cube",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "Upgrade weak completeness to strong completeness for all 15 modal cube systems (K, T, B, D, S4, S5, K4, K5, K45, KB5, D4, D5, D45, DB, TB). The existing weak completeness results prove that validity implies derivability from the empty context. Strong completeness should prove that semantic entailment from a set of premises Γ implies syntactic entailment: Γ ⊨ φ → Γ ⊢ φ, matching the existing strong soundness signature Γ ⊢ φ → Γ ⊨ φ. Include clear documentation distinguishing strong vs weak versions and careful organization of parameterized and per-system files",
-      "topic": "Modal Logic",
-      "created": "2026-06-19T02:05:48Z",
-      "last_updated": "2026-06-19T02:46:25Z",
-      "session_id": "sess_1781834791_c4c530",
-      "artifacts": [
-        {
-          "path": "specs/235_strong_completeness_modal_cube/reports/01_strong-completeness-research.md",
-          "type": "report",
-          "summary": "01_strong-completeness-research.md"
-        },
-        {
-          "path": "specs/235_strong_completeness_modal_cube/plans/01_strong-completeness-plan.md",
-          "type": "plan",
-          "summary": "01_strong-completeness-plan.md"
-        },
-        {
-          "path": "specs/235_strong_completeness_modal_cube/summaries/01_implementation-summary.md",
-          "type": "summary",
-          "summary": "01_implementation-summary.md"
-        }
-      ],
-      "completion_summary": "Strong completeness proved for all 15 modal cube systems (K, T, B, D, S4, S5, K4, K5, K45, KB5, D4, D5, D45, DB, TB). Created 16 new Lean files: shared infrastructure (ModalSetDerivable, ModalSemanticEntails, consistency lemma) plus per-system StrongCompleteness.lean with strong_soundness, strong_completeness, strong_completeness_iff, and compactness theorems. Zero sorries, lake build passes."
-    },
-    {
-      "project_number": 234,
-      "project_name": "revise_untl_snce_convention",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "Revise main branch to use standard LTL convention for untl and snce: first argument is the guard (holds at intermediate points), second argument is the event (eventually holds at the witness point). Update all Lean code, docstrings, and comments that reference the Burgess convention to align with the standard temporal logic convention",
-      "topic": "Temporal Logic",
-      "created": "2026-06-18T23:50:25Z",
-      "last_updated": "2026-06-19T03:19:01Z",
-      "session_id": "sess_1750278946_c7a7e1",
-      "artifacts": [
-        {
-          "path": "specs/234_revise_untl_snce_convention/reports/01_untl-snce-convention.md",
-          "type": "report",
-          "summary": "01_untl-snce-convention.md"
-        },
-        {
-          "path": "specs/234_revise_untl_snce_convention/plans/01_untl-snce-convention.md",
-          "type": "plan",
-          "summary": "01_untl-snce-convention.md"
-        }
-      ],
-      "completion_summary": "Swapped untl/snce arguments from Burgess convention (event, guard) to standard LTL convention (guard, event) across 84+ files. Fixed script-introduced errors: dot-notation corruption, missed infix swaps, selector order changes after injEq. All phases complete, full build passes."
-    },
-    {
-      "project_number": 233,
-      "project_name": "revise_pr649_ltl_only",
-      "status": "completed",
-      "task_type": "pr",
-      "description": "Revise PR #649 on branch feat/temporal-formula-propositional to include LTL only per reviewer comment (pullrequestreview-4528240645), add LTL semantics if space permits (~300LOC), and update pr-description accordingly",
-      "topic": "Temporal Logic",
-      "created": "2026-06-18T23:05:27Z",
-      "last_updated": "2026-06-18T23:44:58Z",
-      "session_id": "sess_1781823963_4f9f03",
-      "completion_summary": "Revised PR #649 to LTL-only: removed Temporal content, updated notation to standard LTL unicode symbols, switched to standard LTL convention (guard U event), added leadsto abbreviation, included LTL semantics, and updated PR description on GitHub."
-    },
-    {
-      "project_number": 232,
-      "project_name": "rebase_pr649_onto_pr648",
-      "status": "implementing",
-      "task_type": "cslib",
-      "description": "Rebase PR #649 (feat/temporal-formula-propositional) onto PR #648 base branch (feat/propositional-v2) and remove unrelated file changes per reviewer ctchou's request. Currently the branch is a single commit on main with many unrelated changes (HasFresh, LTS/Notation, CCS/Semantics, LambdaCalculus files, Modal logic files, Propositional/Defs.lean). Cherry-pick only the temporal-specific changes (Temporal/Syntax/Formula.lean, LTL/Syntax/Formula.lean, Connectives.lean temporal additions, Cslib.lean imports, references.bib) onto feat/propositional-v2 as the new base",
-      "topic": "pr",
-      "created": "2026-06-17T23:31:47Z",
-      "last_updated": "2026-06-17T23:46:03Z",
-      "session_id": "sess_1781739720_c78268",
-      "completion_summary": "Rebased feat/temporal-formula-propositional onto feat/propositional-v2. Created clean single commit (2b2bb058) with only 5 temporal-specific files: 2 new (Temporal/Formula.lean, LTL/Formula.lean), 3 modified (Connectives.lean, Cslib.lean, references.bib). Removed all 11 unrelated shake/import cleanup files from the diff.",
-      "artifacts": [
-        {
-          "path": "specs/232_rebase_pr649_onto_pr648/reports/01_rebase-research.md",
-          "type": "report",
-          "summary": "01_rebase-research.md"
-        },
-        {
-          "path": "specs/232_rebase_pr649_onto_pr648/plans/01_rebase-plan.md",
-          "type": "plan",
-          "summary": "01_rebase-plan.md"
-        }
-      ]
     },
     {
       "project_number": 226,
@@ -194,196 +76,6 @@
         37
       ],
       "blockers": "9 sorries require axioms removed as unsound (task 37 strict Until/Since); 11 sorries require unported discrete completeness infrastructure (task 36)."
-    },
-    {
-      "project_number": 197,
-      "project_name": "modal_upstream_initial_pr",
-      "status": "completed",
-      "task_type": "pr",
-      "title": "Scope initial Modal/ upstream PR (~300 LOC)",
-      "description": "Review the ambition to contribute Modal/ to upstream, identifying an appropriate ~300 LOC initial PR to submit that builds on the first PR described in specs/188_first_propositional_upstream_pr/pr-description.md for the Foundations/ and Propositional/ logic while making this PR maintain independence wherever possible",
-      "topic": "Modal Logic",
-      "created": "2026-06-14T19:08:07Z",
-      "last_updated": "2026-06-19T01:40:42Z",
-      "session_id": "sess_1781827964_e1154d",
-      "research_artifacts": [
-        "specs/197_modal_upstream_initial_pr/reports/01_modal-upstream-pr-scope.md",
-        "specs/197_modal_upstream_initial_pr/reports/02_literature-grounded-analysis.md",
-        "specs/197_modal_upstream_initial_pr/reports/03_team-research.md",
-        "specs/197_modal_upstream_initial_pr/reports/04_pr649-comparison-classical-signature.md"
-      ],
-      "next_artifact_number": 11,
-      "plan_artifacts": [
-        "specs/197_modal_upstream_initial_pr/plans/02_modal-upstream-pr-plan.md",
-        "specs/197_modal_upstream_initial_pr/plans/05_modal-upstream-pr-plan.md"
-      ],
-      "plan_metadata": {
-        "phases": 2,
-        "total_effort_hours": 1,
-        "complexity": "simple",
-        "research_integrated": true,
-        "plan_version": 6,
-        "dependency_waves": [
-          [
-            1
-          ],
-          [
-            2
-          ]
-        ],
-        "reports_integrated": [
-          {
-            "path": "reports/09_team-research.md",
-            "integrated_in_plan_version": 6,
-            "integrated_date": "2026-06-17"
-          }
-        ]
-      },
-      "researched": "2026-06-17T19:11:31Z",
-      "memory_candidates": [
-        {
-          "content": "CSLib PR quality conventions require a fix-up commit pattern: after initial submission, a quality convention fixes commit is typically needed to add ## Main definitions, ## Notation, and ## References docstring sections, convert prose references to Mathlib BibKey format, and polish derived operator docs with Unicode notation. Apply these proactively to avoid post-submission fix commits.",
-          "category": "WORKFLOW",
-          "confidence": 0.85,
-          "suggested_keywords": [
-            "cslib",
-            "pr",
-            "quality",
-            "conventions",
-            "docstring",
-            "bibkey",
-            "module-docstring"
-          ]
-        },
-        {
-          "content": "PR #649 (feat/temporal-formula-propositional, OPEN 2026-06-14) added Connectives.lean with {HasBot, HasImp, HasAnd, HasOr, HasUntil, HasSince, PropositionalConnectives, TemporalConnectives} but NOT HasBox or ModalConnectives. The Modal PR must add HasBox (~10 LOC) and ModalConnectives (~15 LOC) to Connectives.lean as a modification, stacked on PR #649.",
-          "category": "PATTERN",
-          "confidence": 0.9,
-          "suggested_keywords": [
-            "cslib",
-            "connectives",
-            "hasbox",
-            "modalconnectives",
-            "pr649",
-            "temporal",
-            "stacking"
-          ]
-        },
-        {
-          "content": "CSLib upstream PR #607 (fmontesi/connectives, OPEN as of 2026-06-15): proposes 8 separate operator typeclass files under Foundations/Logic/Operators/ with class names HasAnd, HasBox, HasDiamond, HasIff, HasImpl, HasNot, HasOr, HasTensor. CHANGES_REQUESTED by chenson2018. HasBox naming-compatible with ours. Conflict: HasImpl (PR #607) vs HasImp (our PRs). Keeps existing {not, and, diamond} Modal primitives.",
-          "category": "INSIGHT",
-          "confidence": 0.9,
-          "suggested_keywords": [
-            "cslib",
-            "upstream",
-            "PR607",
-            "HasImpl",
-            "HasBox",
-            "connectives",
-            "typeclass"
-          ]
-        },
-        {
-          "content": "CSLib upstream stacking pattern: PR #649 (feat/temporal-formula-propositional) carries all PR #648 Connectives.lean changes plus temporal additions. Neither has reviews as of 2026-06-15. Modal PR should branch from feat/temporal-formula-propositional.",
-          "category": "PATTERN",
-          "confidence": 0.85,
-          "suggested_keywords": [
-            "cslib",
-            "stacking",
-            "PR648",
-            "PR649",
-            "propositional",
-            "temporal",
-            "Connectives"
-          ]
-        }
-      ],
-      "artifacts": [
-        {
-          "path": "specs/197_modal_upstream_initial_pr/reports/06_modal-pr-landscape.md",
-          "type": "research",
-          "summary": "Upstream PR landscape audit: no competing Modal/ signature PRs, PR #607 stalled, recommends stacking on PR #649"
-        },
-        {
-          "path": "specs/197_modal_upstream_initial_pr/pr-description.md",
-          "type": "pr_description",
-          "summary": "PR description for Modal/ formula primitives refactoring, stacking on PR #648"
-        },
-        {
-          "path": "specs/197_modal_upstream_initial_pr/reports/09_team-research.md",
-          "type": "research",
-          "summary": "Team research with 4 teammates — revision assessment, alternative stacking strategies, gaps/blind spots, strategic horizons"
-        },
-        {
-          "path": "specs/197_modal_upstream_initial_pr/plans/10_modal-pr-revision.md",
-          "type": "plan",
-          "summary": "Revision plan with 2 phases addressing 8 research action items for pr-description.md"
-        },
-        {
-          "path": "specs/197_modal_upstream_initial_pr/reports/10_plan-review.md",
-          "type": "research",
-          "summary": "Item-by-item verification of plan 10 action items against revised pr-description.md. 7/8 addressed; Kyle Miller S5 intentionally omitted. Recommends PR READY transition."
-        }
-      ],
-      "base_branch": "feat/propositional-v2",
-      "completion_summary": "Applied all 8 revision items from team research report 09 to pr-description.md. 6 items were already addressed; 2 applied: Kyle Miller S5 roadmap item and imp naming rationale strengthening."
-    },
-    {
-      "project_number": 188,
-      "project_name": "first_propositional_upstream_pr",
-      "status": "completed",
-      "task_type": "cslib",
-      "topic": "Propositional Logic",
-      "description": "Design and prepare a first upstream PR (~300 LOC) contributing propositional logic foundations to CSLib.",
-      "dependencies": [],
-      "created": "2026-06-14T10:49:41Z",
-      "last_updated": "2026-06-14T17:50:06Z",
-      "session_id": "sess_1781436581_3d124a",
-      "researched": "2026-06-14T11:03:04Z",
-      "next_artifact_number": 2,
-      "artifacts": [
-        {
-          "path": "specs/188_first_propositional_upstream_pr/reports/01_team-research.md",
-          "type": "research",
-          "summary": "Team research: upstream inventory, PR scoping, risks"
-        },
-        {
-          "path": "specs/188_first_propositional_upstream_pr/plans/01_implementation-plan.md",
-          "type": "plan",
-          "summary": "5-phase implementation plan for first upstream PR"
-        },
-        {
-          "path": "specs/188_first_propositional_upstream_pr/summaries/01_execution-summary.md",
-          "type": "summary",
-          "summary": "Implementation summary"
-        }
-      ],
-      "completion_summary": "Created feature branch feat/propositional-five-primitive (1 commit, 259 ins/84 del across 4 files). Added Connectives.lean (96 LOC), refactored Defs.lean to 5-primitive {atom,bot,imp,and,or} type, updated NaturalDeduction/Basic.lean. All CI passed. PR description drafted with ctchou resolution, literature justification, roadmap, AI disclosure. Ready for Zulip discussion then PR submission."
-    },
-    {
-      "project_number": 192,
-      "project_name": "research_verify_literature_refs_pr_188",
-      "status": "abandoned",
-      "task_type": "general",
-      "topic": "Propositional Logic",
-      "created": "2026-06-14T17:18:44Z",
-      "last_updated": "2026-06-14T17:52:56Z",
-      "session_id": "sess_1781459348_05ef55",
-      "researched": "2026-06-14T17:42:51Z",
-      "next_artifact_number": 3,
-      "artifacts": [
-        {
-          "path": "specs/192_research_verify_literature_refs_pr_188/reports/01_team-research.md",
-          "type": "research",
-          "summary": "Team research with 4 teammates — literature claim verification"
-        },
-        {
-          "path": "specs/192_research_verify_literature_refs_pr_188/reports/02_team-research.md",
-          "type": "research",
-          "summary": "Round 2: primary source verification, BibTeX drafts, concrete PR revisions"
-        }
-      ],
-      "description": "Draw on sources in specs/literature/ to verify and improve citations throughout the files within scope of the task 188 PR, update references.bib following CONTRIBUTING.md conventions, and improve literature claims in specs/archive/188_first_propositional_upstream_pr/pr-description.md while maintaining a clear and concise style for reviewers"
     },
     {
       "project_number": 39,
@@ -490,24 +182,50 @@
     {
       "project_number": 238,
       "project_name": "modal_metalogic_stale_docstrings",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Fix stale module docstrings in Modal/Metalogic after task 237 theorem migration. (1) Core Completeness.lean: update /-! docstring to remove moved `completeness` theorem from Main Results, update description to reflect the file now provides generic completeness infrastructure (truth lemma, canonical model) but not the system-specific completeness theorems. (2) 8 empty-body Completeness.lean files (K4, K5, K45, KB5, D4, D5, D45, DB): replace stale 'This module proves completeness...' docstrings with short infrastructure docstrings matching the B/S4/S5 pattern — state the file exists for import chain stability and cross-reference StrongCompleteness.lean for the actual theorems. (3) K5/Completeness.lean has a contradictory hybrid docstring that both says 'proves completeness' and 'provides import infrastructure' — pick one (infrastructure).",
       "topic": "Modal Logic",
       "dependencies": [],
       "created": "2026-06-19T04:00:00Z",
-      "last_updated": "2026-06-19T04:00:00Z"
+      "last_updated": "2026-06-19T05:03:52Z",
+      "session_id": "sess_1750300800_multi_238",
+      "artifacts": [
+        {
+          "path": "specs/238_modal_metalogic_stale_docstrings/reports/01_stale-docstrings.md",
+          "type": "report",
+          "summary": "01_stale-docstrings.md"
+        },
+        {
+          "path": "specs/238_modal_metalogic_stale_docstrings/plans/01_stale-docstrings.md",
+          "type": "plan",
+          "summary": "01_stale-docstrings.md"
+        }
+      ]
     },
     {
       "project_number": 239,
       "project_name": "modal_metalogic_citation_standardization",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Standardize all citations in Modal/Metalogic to use Lean4Doc bib link format. (1) Convert ~20 Soundness.lean and Completeness.lean module docstrings from plain-text style ('Blackburn, de Rijke, Venema, \"Modal Logic\" (2002)') to the Lean4Doc link format ('* [P. Blackburn, M. de Rijke, Y. Venema, *Modal Logic*][Blackburn2001]') matching the StrongCompleteness.lean standard. (2) Replace undefined 'BRV' abbreviation in module docstrings with either spelled-out author names or bib key references; inline code comments may keep 'BRV' if the abbreviation is defined in the file's docstring. (3) Replace internal file references in Soundness.lean's References section ('* Cslib/Logics/Modal/Basic.lean') with proper bib citations or remove if no literature source applies. (4) Remove or convert cross-repo references to BimodalLogic/ project in DeductionTheorem.lean, MCS.lean, and DerivationTree.lean docstrings — replace with bib citations where a literature source exists, otherwise remove the stale path.",
       "topic": "Modal Logic",
       "dependencies": [],
       "created": "2026-06-19T04:00:00Z",
-      "last_updated": "2026-06-19T04:00:00Z"
+      "last_updated": "2026-06-19T05:03:57Z",
+      "session_id": "sess_1750300800_multi_239",
+      "artifacts": [
+        {
+          "path": "specs/239_modal_metalogic_citation_standardization/reports/01_citation-standardization.md",
+          "type": "report",
+          "summary": "01_citation-standardization.md"
+        },
+        {
+          "path": "specs/239_modal_metalogic_citation_standardization/plans/01_citation-standardization.md",
+          "type": "plan",
+          "summary": "01_citation-standardization.md"
+        }
+      ]
     },
     {
       "project_number": 240,
@@ -524,7 +242,7 @@
     }
   ],
   "repository_health": {
-    "last_assessed": "2026-06-17T08:49:13Z",
+    "last_assessed": "2026-06-19T05:09:35Z",
     "status": "healthy"
   },
   "active_topics": [

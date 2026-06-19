@@ -9,7 +9,6 @@ module
 public import Cslib.Logics.Modal.Metalogic.Completeness
 public import Cslib.Logics.Modal.Metalogic.MCS
 public import Cslib.Logics.Modal.Metalogic.Soundness
-public import Cslib.Logics.Modal.Metalogic.StrongCompleteness
 public import Cslib.Logics.Modal.Metalogic.Systems.T.Soundness
 public import Cslib.Logics.Modal.ProofSystem.Instances
 

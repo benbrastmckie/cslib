@@ -8,7 +8,6 @@ module
 
 
 public import Cslib.Logics.Modal.Metalogic.Completeness
-public import Cslib.Logics.Modal.Metalogic.StrongCompleteness
 public import Cslib.Logics.Modal.Metalogic.Systems.DB.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.D.Completeness
 

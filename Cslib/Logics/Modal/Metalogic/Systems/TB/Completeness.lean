@@ -7,7 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Modal.Metalogic.Completeness
-public import Cslib.Logics.Modal.Metalogic.StrongCompleteness
 public import Cslib.Logics.Modal.Metalogic.Systems.TB.Soundness
 public import Cslib.Logics.Modal.ProofSystem.Instances
 

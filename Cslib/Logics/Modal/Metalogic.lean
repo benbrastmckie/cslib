@@ -42,7 +42,6 @@ public import Cslib.Logics.Modal.Metalogic.Systems.DB.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.DB.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.S5.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.S5.Completeness
-public import Cslib.Logics.Modal.Metalogic.StrongCompleteness
 public import Cslib.Logics.Modal.ProofSystem.Instances
 
 /-! # Modal Metalogic Module

@@ -306,7 +306,6 @@ public import Cslib.Logics.Modal.Metalogic.DeductionTheorem
 public import Cslib.Logics.Modal.Metalogic.DerivationTree
 public import Cslib.Logics.Modal.Metalogic.MCS
 public import Cslib.Logics.Modal.Metalogic.Soundness
-public import Cslib.Logics.Modal.Metalogic.StrongCompleteness
 public import Cslib.Logics.Modal.Metalogic.Systems.B.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.B.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.D.Completeness

@@ -143,7 +143,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: GNBA Construction and NBA Conversion [IN PROGRESS]
+### Phase 3: GNBA Construction and NBA Conversion [COMPLETED]
 
 **Goal**: Define the GNBA for an LTL formula (transition relation, initial states, acceptance sets) and convert it to an NBA using the cycling counter construction. Prove the state space is finite.
 

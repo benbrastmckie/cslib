@@ -1,34 +1,24 @@
 {
   "status": "partial",
-  "summary": "Phase 3a complete: proved mem_omegaLanguage_drop and omegaLanguage_untl (semantic equation for the Until language via Stream.drop). Phase 3b blocked: direct NBA construction for isRegular_untl requires subset/power-set construction tracking multiple simultaneous Büchi-accepting runs. No progress on Phase 3c. The proof_wanted Formula.isRegular_untl remains unchanged.",
-  "blockers": [
-    {
-      "phase": "3b",
-      "description": "The guard check 'v.drop k in L(phi) for all k < j' requires verifying multiple independent Büchi-accepting runs (one per position 0..j-1). The correct NBA construction tracks the set of all active phi-runs (subset construction, state space Finset S_phi). The correctness proof requires showing: (1) completeness via constructing the subset-tracking run from any accepting configuration, and (2) soundness via extracting per-position accepting runs from the accumulated subset state. This is 8-15 hours of implementation work."
-    }
-  ],
+  "summary": "Phase 3 complete: GNBA state type, transition relation, acceptance sets, and NBA type via cycling counter all defined and compiling without sorry",
+  "phases_completed": 3,
+  "phases_total": 5,
+  "blockers": [],
   "continuation_context": {
-    "proved_lemmas": [
-      "mem_omegaLanguage_drop: v.drop k ∈ φ.omegaLanguage ↔ Satisfies (fun n p => p ∈ v n) k φ",
-      "omegaLanguage_untl: (Formula.untl φ ψ).omegaLanguage = ⟨{ v | ∃ j, v.drop j ∈ ψ.omegaLanguage ∧ ∀ k < j, v.drop k ∈ φ.omegaLanguage }⟩"
+    "next_phase": 4,
+    "description": "GNBA correctness: language equality proof (gnba_language_eq)",
+    "file": "Cslib/Logics/LTL/Semantics/GNBA.lean",
+    "key_definitions": [
+      "Formula.GNBAState",
+      "Formula.gnbaTr",
+      "Formula.gnbaStart",
+      "Formula.gnbaAcceptSet",
+      "Formula.untlSubformulas",
+      "Formula.untlFinset",
+      "Formula.gnbaK",
+      "Formula.GNBANBAState",
+      "Formula.gnbaNBA"
     ],
-    "remaining_work": "Phase 3b: implement untlNBA (direct NBA with subset-tracking state space Finset S_phi × Option S_psi × Bool) and prove untlNBA_language_eq. Then Phase 3c: prove Formula.isRegular_untl using the NBA, replace sorry in Formula.isRegular.",
-    "key_file": "Cslib/Logics/LTL/Semantics/OmegaRegular.lean",
-    "approach": "Subset-tracking NBA: states = (active: Finset S_phi) × (accepted: Finset S_phi) × (ψ-state: Option S_psi) × (mode: Bool). Guard mode: advance phi-copies and add fresh starts. Event mode: track psi. Acceptance: GNBA with F_phi = (active ⊆ accepted AND in event mode) and F_psi = (psi in accept AND in event mode). Convert GNBA to NBA via interNA toggle."
-  },
-  "next_action_hint": "implement",
-  "phases_completed": 1,
-  "phases_total": 3,
-  "artifacts": [
-    {
-      "path": "Cslib/Logics/LTL/Semantics/OmegaRegular.lean",
-      "type": "implementation",
-      "summary": "mem_omegaLanguage_drop + omegaLanguage_untl proved (sorry-free). proof_wanted isRegular_untl unchanged."
-    },
-    {
-      "path": "specs/236_follow_up_prs_buchi_omega_regular/plans/02_untl-case-plan.md",
-      "type": "plan",
-      "summary": "Phase 3a [COMPLETED], Phase 3b [BLOCKED] with blocker description."
-    }
-  ]
+    "note": "NBA uses simplified cycling counter (counter always advances by 1 or wraps). Phase 4 must prove language(gnbaNBA phi) = phi.omegaLanguage. Phase 5 uses that to remove sorry from Formula.isRegular."
+  }
 }

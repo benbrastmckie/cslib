@@ -292,7 +292,7 @@
     {
       "project_number": 240,
       "project_name": "modal_metalogic_naming_and_barrel_fixes",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Fix naming inconsistencies and barrel file issues in Modal/Metalogic. (1) Add missing 'public import Cslib.Logics.Modal.Metalogic.Systems.K.ConservativeExtension' to Metalogic.lean barrel file. (2) Normalize barrel import ordering so StrongCompleteness block follows the same system order as Soundness/Completeness block (K, T, D, S4, K4, B, K45, K5, D4, KB5, TB, D45, D5, DB, S5). (3) Rename S5/Soundness.lean theorem 'axiom_sound' to 's5_axiom_sound' for consistency with all other 14 systems. (4) Rename D/Completeness.lean theorems from suffix to prefix convention: 'derive_box_from_inconsistency_d' → 'd_derive_box_from_inconsistency', 'mcs_box_witness_d' → 'd_mcs_box_witness', 'canonical_serial' → 'd_canonical_serial', 'truth_lemma_d' → 'd_truth_lemma'. Verify no downstream consumers break (grep for old names in the codebase). (5) Reword K/Completeness.lean:111 comment from 'K-SPECIFIC FIX' to 'K-SPECIFIC CASE' to avoid triggering lint scanners. (6) Evaluate S5 alias 'alias completeness := s5_completeness' — if no downstream consumers use the bare 'completeness' name, remove it; otherwise add a deprecation docstring.",
       "topic": "Modal Logic",
@@ -300,15 +300,26 @@
         238
       ],
       "created": "2026-06-19T04:00:00Z",
-      "last_updated": "2026-06-19T05:27:06Z",
+      "last_updated": "2026-06-19T05:42:09Z",
       "session_id": "sess_1750300800_multi_240",
       "artifacts": [
         {
           "path": "specs/240_modal_metalogic_naming_and_barrel_fixes/reports/01_naming-barrel-fixes.md",
           "type": "report",
-          "summary": "01_naming-barrel-fixes.md"
+          "summary": "Research confirming all 6 naming/barrel issues with downstream consumer analysis"
+        },
+        {
+          "path": "specs/240_modal_metalogic_naming_and_barrel_fixes/plans/01_naming-barrel-fixes.md",
+          "type": "plan",
+          "summary": "3-phase plan: safe mechanical, S5 rename, D renames with verification"
+        },
+        {
+          "path": "specs/240_modal_metalogic_naming_and_barrel_fixes/summaries/01_naming-barrel-fixes-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary: 16 files modified, all CI checks pass"
         }
-      ]
+      ],
+      "completion_summary": "Fixed 6 naming/barrel inconsistencies across 16 Modal/Metalogic files: added missing ConservativeExtension barrel import, normalized import ordering, renamed S5 axiom_sound to s5_axiom_sound, renamed 4 D/Completeness theorems to prefix convention (15 downstream refs updated), fixed K-SPECIFIC FIX comment, removed unused S5 completeness alias. Build verified (746 jobs, 0 sorries)."
     }
   ],
   "repository_health": {

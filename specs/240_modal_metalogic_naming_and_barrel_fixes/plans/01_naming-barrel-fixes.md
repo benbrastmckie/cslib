@@ -1,7 +1,7 @@
 # Implementation Plan: Fix Naming Inconsistencies and Barrel File Issues in Modal/Metalogic
 
 - **Task**: 240 - Fix naming inconsistencies and barrel file issues in Modal/Metalogic
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 1.5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/240_modal_metalogic_naming_and_barrel_fixes/reports/01_naming-barrel-fixes.md

@@ -4,17 +4,17 @@
     {
       "project_number": 236,
       "project_name": "follow_up_prs_buchi_omega_regular",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Complete follow-up PRs from PR #649 for Büchi automata and closure of omega-regular languages under boolean operations",
       "topic": "Temporal Logic",
       "created": "2026-06-19T02:21:37Z",
-      "last_updated": "2026-06-19T02:21:37Z"
+      "last_updated": "2026-06-19T02:31:28Z"
     },
     {
       "project_number": 235,
       "project_name": "strong_completeness_modal_cube",
-      "status": "implementing",
+      "status": "pr_ready",
       "task_type": "cslib",
       "description": "Upgrade weak completeness to strong completeness for all 15 modal cube systems (K, T, B, D, S4, S5, K4, K5, K45, KB5, D4, D5, D45, DB, TB). The existing weak completeness results prove that validity implies derivability from the empty context. Strong completeness should prove that semantic entailment from a set of premises Γ implies syntactic entailment: Γ ⊨ φ → Γ ⊢ φ, matching the existing strong soundness signature Γ ⊢ φ → Γ ⊨ φ. Include clear documentation distinguishing strong vs weak versions and careful organization of parameterized and per-system files",
       "topic": "Modal Logic",

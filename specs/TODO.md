@@ -31,7 +31,7 @@ next_project_number: 237
 
 ### Modal Logic
 
-235 [IMPLEMENTING] — Upgrade weak completeness to strong completeness for all 15 modal
+235 [PR READY] — Upgrade weak completeness to strong completeness for all 15 modal
 
 ### Project Management
 
@@ -45,7 +45,7 @@ next_project_number: 237
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 234 [IMPLEMENTING] — Revise main branch to use standard LTL convention for untl and sn
-236 [NOT STARTED] — Complete follow-up PRs from PR #649 for Büchi automata and closur
+236 [PLANNED] — Complete follow-up PRs from PR #649 for Büchi automata and closur
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -56,7 +56,7 @@ next_project_number: 237
 ## Tasks
 
 ### 236. Follow up prs buchi omega regular
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -66,7 +66,7 @@ next_project_number: 237
 ---
 
 ### 235. Strong completeness modal cube
-- **Status**: [IMPLEMENTING]
+- **Status**: [PR READY]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

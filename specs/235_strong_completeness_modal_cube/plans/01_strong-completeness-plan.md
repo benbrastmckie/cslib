@@ -74,7 +74,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Shared Infrastructure [IN PROGRESS]
+### Phase 1: Shared Infrastructure [COMPLETED]
 
 **Goal**: Create the shared `StrongCompleteness.lean` file with `ModalSetDerivable`, `ModalSemanticEntails`, basic lemmas, DNE helper, and the key consistency lemma.
 
@@ -105,7 +105,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: K-Group Strong Completeness (K, B, K4, K5, K45, KB5) [NOT STARTED]
+### Phase 2: K-Group Strong Completeness (K, B, K4, K5, K45, KB5) [IN PROGRESS]
 
 **Goal**: Create `StrongCompleteness.lean` for the 6 systems that use `k_truth_lemma` (systems without axiom T or D).
 

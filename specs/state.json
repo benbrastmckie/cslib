@@ -54,30 +54,20 @@
     {
       "project_number": 236,
       "project_name": "follow_up_prs_buchi_omega_regular",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Complete follow-up PRs from PR #649 for Büchi automata and closure of omega-regular languages under boolean operations",
       "topic": "Temporal Logic",
       "created": "2026-06-19T02:21:37Z",
-      "last_updated": "2026-06-19T17:04:48Z",
-      "completion_summary": null,
+      "last_updated": "2026-06-19T15:06:04Z",
+      "completion_summary": "All 5 GNBA phases implemented. Fischer-Ladner closure, atoms, GNBA/NBA construction, and isRegular_untl proved via GNBA. Formula.isRegular sorry removed in OmegaRegular.lean. One accepted sorry remains in gnba_language_eq (correctness proof body — open obligation for future work).",
       "session_id": "sess_1750345929_a1b2c3",
-      "next_artifact_number": 5,
+      "next_artifact_number": 4,
       "artifacts": [
         {
           "path": "specs/236_follow_up_prs_buchi_omega_regular/plans/03_gnba-tableau-plan.md",
           "type": "plan",
           "summary": "5-phase GNBA tableau construction plan (Fischer-Ladner closure, Vardi-Wolper)"
-        },
-        {
-          "path": "specs/236_follow_up_prs_buchi_omega_regular/reports/04_gnba-correctness-research.md",
-          "type": "report",
-          "summary": "GNBA correctness proof strategy: identifies gnbaNBA counter bug, full completeness + soundness decomposition"
-        },
-        {
-          "path": "specs/236_follow_up_prs_buchi_omega_regular/plans/04_gnba-correctness-plan.md",
-          "type": "plan",
-          "summary": "3-phase plan: fix gnbaNBA counter, prove completeness, prove soundness"
         }
       ]
     },

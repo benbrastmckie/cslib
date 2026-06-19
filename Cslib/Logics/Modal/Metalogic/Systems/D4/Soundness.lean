@@ -22,8 +22,6 @@ axiom (4), but without axiom T.
 - `d4_soundness`: If `Gamma |- phi` via `DerivationTree D4Axiom`, then `phi` is
   satisfied at every world of every serial, transitive model where `Gamma` is
   satisfied.
-- `d4_soundness_derivable`: Soundness for derivable formulas (empty context).
-
 ## References
 
 * Blackburn, de Rijke, Venema, "Modal Logic" (2002), Definition 4.9, Table 4.1

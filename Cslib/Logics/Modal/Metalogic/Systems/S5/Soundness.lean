@@ -19,9 +19,6 @@ This module proves soundness for modal logic S5: every formula derivable from
 - `s5_axiom_sound`: Each of the 8 S5 axiom schemata is valid over S5 frames.
 - `s5_soundness`: If `Gamma |- phi` via `DerivationTree ModalAxiom`, then `phi` is
   satisfied at every world of every S5 model where all of `Gamma` is satisfied.
-- `s5_soundness_derivable`: If `phi` is S5-derivable, then `phi` is valid on all
-  S5 frames.
-
 ## References
 
 * Blackburn, de Rijke, Venema - Modal Logic (Ch. 4, Definition 4.9)

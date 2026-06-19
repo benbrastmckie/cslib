@@ -22,8 +22,12 @@ for T since `TAxiom` includes axiom T.
 
 ## Main Results
 
-- `t_canonical_refl`: The canonical frame for T is reflexive (BRV Thm 4.28 cl.1).
-- `t_truth_lemma`: T-specific Truth Lemma (reuses existing `truth_lemma`).
+- `t_strong_soundness`: If `phi` is T-derivable from `Gamma`, then `phi` is a semantic
+  consequence of `Gamma` over all reflexive frames.
+- `t_strong_completeness`: If `phi` is a semantic consequence of `Gamma` over all reflexive
+  frames, then `phi` is T-derivable from `Gamma`.
+- `t_strong_completeness_iff`: Biconditional combining soundness and completeness.
+- `t_completeness`: Weak completeness (valid iff derivable).
 
 The weak completeness theorem `t_completeness` is derived below as a
 corollary of strong completeness via `ModalSetDerivable_empty_iff`.

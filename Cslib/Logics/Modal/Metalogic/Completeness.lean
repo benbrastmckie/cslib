@@ -21,8 +21,8 @@ This module provides the shared infrastructure for proving completeness
 
 2. **Set-based derivability and semantic entailment**:
    `ModalSetDerivable`, `ModalSemanticEntails`, and supporting lemmas
-   (`ModalSetDerivable_of_mem`, `ModalSetDerivable_weakening`,
-   `ModalSetDerivable_empty_iff`, `ModalSemanticEntails_of_Valid`,
+   (`ModalSetDerivable_of_Derivable`, `ModalSetDerivable_empty_iff`,
+   `ModalSemanticEntails_of_Valid`,
    `modal_not_SetDerivable_union_neg_consistent`).
 
 ## Design

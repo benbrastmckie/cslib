@@ -18,8 +18,6 @@ This module proves soundness for modal logic B over symmetric Kripke frames.
 - `b_axiom_sound`: Each of the 6 BAxiom schemata is valid over symmetric frames.
 - `b_soundness`: If `Gamma |- phi` via `DerivationTree BAxiom`, then `phi` is
   satisfied at every world of every symmetric model where `Gamma` is satisfied.
-- `b_soundness_derivable`: Soundness for derivable formulas (empty context).
-
 ## References
 
 * Blackburn, de Rijke, Venema, "Modal Logic" (2002), Definition 4.9, Table 4.1

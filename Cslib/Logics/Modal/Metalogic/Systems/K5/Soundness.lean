@@ -19,8 +19,6 @@ Kripke frames.
 - `k5_axiom_sound`: Each of the 6 K5Axiom schemata is valid over Euclidean frames.
 - `k5_soundness`: If `Gamma |- phi` via `DerivationTree K5Axiom`, then `phi` is
   satisfied at every world of every Euclidean model where `Gamma` is satisfied.
-- `k5_soundness_derivable`: Soundness for derivable formulas (empty context).
-
 ## References
 
 * Blackburn, de Rijke, Venema, "Modal Logic" (2002), Definition 4.9, Table 4.1

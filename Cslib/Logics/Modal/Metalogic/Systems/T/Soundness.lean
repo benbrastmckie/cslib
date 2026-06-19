@@ -19,9 +19,6 @@ This module proves soundness for modal logic T: every formula derivable from
 - `t_axiom_sound`: Each of the 6 T axiom schemata is valid over reflexive frames.
 - `t_soundness`: If `Gamma |- phi` via `DerivationTree TAxiom`, then `phi` is
   satisfied at every world of every reflexive model where all of `Gamma` is satisfied.
-- `t_soundness_derivable`: If `phi` is T-derivable, then `phi` is valid on all
-  reflexive frames.
-
 ## References
 
 * Blackburn, de Rijke, Venema - Modal Logic (Ch. 4, Definition 4.9, Table 4.1)

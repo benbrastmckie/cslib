@@ -23,8 +23,6 @@ axiom T.
 - `d45_soundness`: If `Gamma |- phi` via `DerivationTree D45Axiom`, then `phi` is
   satisfied at every world of every serial, transitive, Euclidean model where
   `Gamma` is satisfied.
-- `d45_soundness_derivable`: Soundness for derivable formulas (empty context).
-
 ## References
 
 * Blackburn, de Rijke, Venema, "Modal Logic" (2002), Definition 4.9, Table 4.1

@@ -26,9 +26,12 @@ The proof follows Blackburn, de Rijke, Venema "Modal Logic" (2002) Chapter 4:
 
 ## Main Results
 
-- `tb_canonical_refl`: The canonical frame for TB is reflexive (BRV Thm 4.28 cl.1).
-- `tb_canonical_symm`: The canonical frame for TB is symmetric (BRV Thm 4.28 cl.2).
-- `tb_truth_lemma`: TB-specific Truth Lemma (reuses existing `truth_lemma`).
+- `tb_strong_soundness`: If `phi` is TB-derivable from `Gamma`, then `phi` is a semantic
+  consequence of `Gamma` over all reflexive, symmetric frames.
+- `tb_strong_completeness`: If `phi` is a semantic consequence of `Gamma` over all reflexive,
+  symmetric frames, then `phi` is TB-derivable from `Gamma`.
+- `tb_strong_completeness_iff`: Biconditional combining soundness and completeness.
+- `tb_completeness`: Weak completeness (valid iff derivable).
 
 The weak completeness theorem `tb_completeness` is derived below as a
 corollary of strong completeness via `ModalSetDerivable_empty_iff`.

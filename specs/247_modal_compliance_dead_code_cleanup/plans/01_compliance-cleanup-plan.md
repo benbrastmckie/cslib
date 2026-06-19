@@ -1,7 +1,7 @@
 # Implementation Plan: Task #247 -- Modal/ Compliance and Dead Code Cleanup
 
 - **Task**: 247 - Modal/ compliance and dead code cleanup
-- **Status**: [COMPLETED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 3.5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/247_modal_compliance_dead_code_cleanup/reports/02_verified-audit.md

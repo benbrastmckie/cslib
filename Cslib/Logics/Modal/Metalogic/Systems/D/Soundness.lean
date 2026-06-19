@@ -18,8 +18,6 @@ This module proves soundness for modal logic D over serial Kripke frames.
 - `d_axiom_sound`: Each of the 6 DAxiom schemata is valid over serial frames.
 - `d_soundness`: If `Gamma |- phi` via `DerivationTree DAxiom`, then `phi` is
   satisfied at every world of every serial model where `Gamma` is satisfied.
-- `d_soundness_derivable`: Soundness for derivable formulas (empty context).
-
 ## References
 
 * Blackburn, de Rijke, Venema, "Modal Logic" (2002), Definition 4.9, Table 4.1

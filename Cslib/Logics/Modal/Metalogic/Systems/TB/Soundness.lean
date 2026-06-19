@@ -25,9 +25,6 @@ axiom 4 (`□φ → □□φ`). The frame class for TB is reflexive + symmetric
 - `tb_soundness`: If `Gamma |- phi` via `DerivationTree TBAxiom`, then `phi` is
   satisfied at every world where all of `Gamma` is satisfied, on reflexive,
   symmetric frames.
-- `tb_soundness_derivable`: If `phi` is TB-derivable, then `phi` is valid on all
-  reflexive, symmetric frames.
-
 ## References
 
 * Blackburn, de Rijke, Venema - Modal Logic (Ch. 4, Definition 4.9, Table 4.1)

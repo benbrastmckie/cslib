@@ -22,8 +22,6 @@ axiom (5), but without axiom T.
 - `d5_soundness`: If `Gamma |- phi` via `DerivationTree D5Axiom`, then `phi` is
   satisfied at every world of every serial, Euclidean model where `Gamma` is
   satisfied.
-- `d5_soundness_derivable`: Soundness for derivable formulas (empty context).
-
 ## References
 
 * Blackburn, de Rijke, Venema, "Modal Logic" (2002), Definition 4.9, Table 4.1

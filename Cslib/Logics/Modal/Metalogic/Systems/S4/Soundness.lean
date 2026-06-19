@@ -24,9 +24,6 @@ The frame class for S4 is reflexive + transitive (Blackburn et al. Table 4.1, p.
 - `s4_soundness`: If `Gamma |- phi` via `DerivationTree S4Axiom`, then `phi` is
   satisfied at every world where all of `Gamma` is satisfied, on reflexive,
   transitive frames.
-- `s4_soundness_derivable`: If `phi` is S4-derivable, then `phi` is valid on all
-  reflexive, transitive frames.
-
 ## References
 
 * Blackburn, de Rijke, Venema - Modal Logic (Ch. 4, Definition 4.9, Table 4.1)

@@ -25,9 +25,6 @@ axiom T (`□φ → φ`). The frame class for K45 is transitive + Euclidean
 - `k45_soundness`: If `Gamma |- phi` via `DerivationTree K45Axiom`, then `phi` is
   satisfied at every world where all of `Gamma` is satisfied, on transitive,
   Euclidean frames.
-- `k45_soundness_derivable`: If `phi` is K45-derivable, then `phi` is valid on all
-  transitive, Euclidean frames.
-
 ## References
 
 * Blackburn, de Rijke, Venema - Modal Logic (Ch. 4, Definition 4.9, Table 4.1)

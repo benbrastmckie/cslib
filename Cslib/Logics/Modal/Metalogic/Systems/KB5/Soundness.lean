@@ -25,9 +25,6 @@ The frame class for KB5 is symmetric + Euclidean.
 - `kb5_soundness`: If `Gamma |- phi` via `DerivationTree KB5Axiom`, then `phi` is
   satisfied at every world where all of `Gamma` is satisfied, on symmetric,
   Euclidean frames.
-- `kb5_soundness_derivable`: If `phi` is KB5-derivable, then `phi` is valid on all
-  symmetric, Euclidean frames.
-
 ## References
 
 * Blackburn, de Rijke, Venema - Modal Logic (Ch. 4, Definition 4.9)

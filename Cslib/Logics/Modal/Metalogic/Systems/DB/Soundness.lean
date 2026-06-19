@@ -22,8 +22,6 @@ axiom (B), but without axiom T.
 - `db_soundness`: If `Gamma |- phi` via `DerivationTree DBAxiom`, then `phi` is
   satisfied at every world of every serial, symmetric model where `Gamma` is
   satisfied.
-- `db_soundness_derivable`: Soundness for derivable formulas (empty context).
-
 ## References
 
 * Blackburn, de Rijke, Venema, "Modal Logic" (2002), Definition 4.9, Table 4.1

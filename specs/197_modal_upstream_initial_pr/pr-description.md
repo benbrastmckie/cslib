@@ -74,10 +74,10 @@ All notation is scoped to `Cslib.Logic.Modal`:
 
 ## Changed Files
 
-- [`Connectives.lean`](Cslib/Foundations/Logic/Connectives.lean) — added `HasBox` + `ModalConnectives` (stacks on #648)
-- [`Basic.lean`](Cslib/Logics/Modal/Basic.lean) — refactored `Proposition` type, derived connectives, `ModalConnectives` instance, `Satisfies` cases
-- [`Denotation.lean`](Cslib/Logics/Modal/Denotation.lean) — match cases updated for new primitives
-- [`LogicalEquivalence.lean`](Cslib/Logics/Modal/LogicalEquivalence.lean) — `Context` constructors and `congruence` proof updated
+- `Cslib/Foundations/Logic/Connectives.lean` — added `HasBox` + `ModalConnectives` (stacks on #648)
+- `Cslib/Logics/Modal/Basic.lean` — refactored `Proposition` type, derived connectives, `ModalConnectives` instance, `Satisfies` cases
+- `Cslib/Logics/Modal/Denotation.lean` — match cases updated for new primitives
+- `Cslib/Logics/Modal/LogicalEquivalence.lean` — `Context` constructors and `congruence` proof updated
 
 **Excluded**: `FromPropositional.lean` (depends on deferred `Semantics.Bool`), `ProofSystem/`, `Metalogic/`, `Cube.lean` (scoped to subsequent PRs).
 
@@ -85,9 +85,8 @@ All notation is scoped to `Cslib.Logic.Modal`:
 
 1. **PR #648**: Connective typeclasses + five-primitive propositional formula type *(open)*
 2. **This PR**: Classical modal formula type with `{atom, bot, imp, box}` primitives
-3. **PR 3**: Modal proof system (Hilbert axiomatization, completeness for K) using the `InferenceSystem` API as @fmontesi [suggested](https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Modal.20Logic)
-4. **PR 4**: S5 completeness — @Kyle_Miller has indicated he will port S5 completeness once the formula type is upstream
-5. **PR 5**: Modal Kripke semantics with soundness
+3. **PR 3**: [Hilbert proof systems](https://github.com/benbrastmckie/cslib/tree/main/Cslib/Logics/Modal/ProofSystem) for the 15 modal cube logics (K, T, B, D, S4, S5, K4, K5, K45, KB5, D4, D5, D45, DB, TB) using the `InferenceSystem` API as @fmontesi [suggested](https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Modal.20Logic)
+4. **PR 4**: Kripke semantics with [strong soundness](https://github.com/benbrastmckie/cslib/tree/main/Cslib/Logics/Modal/Metalogic/Soundness.lean) and [strong completeness](https://github.com/benbrastmckie/cslib/tree/main/Cslib/Logics/Modal/Metalogic/Completeness.lean) for all [15 systems](https://github.com/benbrastmckie/cslib/tree/main/Cslib/Logics/Modal/Metalogic/Systems) (canonical model construction via [maximal consistent sets](https://github.com/benbrastmckie/cslib/tree/main/Cslib/Logics/Modal/Metalogic/MCS.lean))
 
 ## References
 

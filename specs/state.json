@@ -1,6 +1,16 @@
 {
-  "next_project_number": 235,
+  "next_project_number": 236,
   "active_projects": [
+    {
+      "project_number": 235,
+      "project_name": "strong_completeness_modal_cube",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Upgrade weak completeness to strong completeness for all 15 modal cube systems (K, T, B, D, S4, S5, K4, K5, K45, KB5, D4, D5, D45, DB, TB). The existing weak completeness results prove that validity implies derivability from the empty context. Strong completeness should prove that semantic entailment from a set of premises Γ implies syntactic entailment: Γ ⊨ φ → Γ ⊢ φ, matching the existing strong soundness signature Γ ⊢ φ → Γ ⊨ φ. Include clear documentation distinguishing strong vs weak versions and careful organization of parameterized and per-system files",
+      "topic": "Modal Logic",
+      "created": "2026-06-19T02:05:48Z",
+      "last_updated": "2026-06-19T02:05:48Z"
+    },
     {
       "project_number": 234,
       "project_name": "revise_untl_snce_convention",

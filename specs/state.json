@@ -6,12 +6,18 @@
       "project_name": "mcnaughton_theorem",
       "status": "not_started",
       "task_type": "cslib",
-      "description": "Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller) establishing equivalence between omega-regular languages and deterministic Muller automata",
+      "description": "Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller) establishing equivalence between omega-regular languages and deterministic Muller automata. Research phase should evaluate ctchou/AutomataTheory (independent Lean 4 project that claims McNaughton already proved) for architectural compatibility, portability, and licensing before deciding whether to port, adapt, or develop independently.",
       "topic": "Temporal Logic",
       "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-19T20:20:31Z",
-      "dependencies": [
-        249
+      "last_updated": "2026-06-19T20:26:23Z",
+      "dependencies": [],
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/241_mcnaughton_theorem/reports/01_ctchou-coordination-seed.md",
+          "type": "report",
+          "summary": "Seed report: ctchou/AutomataTheory coordination assessment for McNaughton theorem"
+        }
       ]
     },
     {
@@ -234,24 +240,6 @@
           "path": "specs/248_nba_emptiness_checking/reports/01_nba-emptiness-seed.md",
           "type": "report",
           "summary": "Seed report: NBA emptiness algorithms, literature references, formalization approach"
-        }
-      ]
-    },
-    {
-      "project_number": 249,
-      "project_name": "ctchou_automata_coordination",
-      "status": "not_started",
-      "task_type": "cslib",
-      "description": "Research task: evaluate ctchou/AutomataTheory (independent Lean 4 project) for coordination with CSLib. That project has McNaughton theorem proved, ω-regular closure (union, intersection, complementation, concatenation, Kleene star), and uses a uniform finite/infinite word framework. Assess: (1) architectural compatibility with CSLib (type definitions, Mathlib usage, naming conventions), (2) whether any proofs can be ported or adapted (especially McNaughton), (3) licensing and attribution requirements, (4) whether to coordinate upstream or develop independently. This research should inform task 241 (McNaughton) strategy.",
-      "topic": "Temporal Logic",
-      "created": "2026-06-19T20:20:31Z",
-      "last_updated": "2026-06-19T20:20:31Z",
-      "next_artifact_number": 2,
-      "artifacts": [
-        {
-          "path": "specs/249_ctchou_automata_coordination/reports/01_ctchou-coordination-seed.md",
-          "type": "report",
-          "summary": "Seed report: ctchou/AutomataTheory overview, coordination questions, compatibility assessment outline"
         }
       ]
     },

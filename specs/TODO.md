@@ -11,8 +11,8 @@ next_project_number: 253
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,236,242,243,245,248,249,250,252 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
-| 2 | 39,40,181,215,241,251 | 36,37,180,248,249 | Bimodal Porting, Temporal Logic |
+| 1 | 36,37,180,226,236,241,242,243,245,248,250,252 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 2 | 39,40,181,215,251 | 36,37,180,248 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -37,13 +37,12 @@ next_project_number: 253
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 236 [RESEARCHING] — Complete follow-up PRs from PR #649 for Büchi automata and closur
+241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 242 [NOT STARTED] — Implement full Vardi-Wolper tableau construction for LTL-to-NBA t
 243 [NOT STARTED] — Implement deterministic Büchi automata constructions and related 
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
 248 [NOT STARTED] — Implement NBA emptiness checking: decide whether a nondeterminist
   └─ 251 [NOT STARTED] — Implement the synchronous product construction of a transition sy
-249 [NOT STARTED] — Research task: evaluate ctchou/AutomataTheory (independent Lean 4
-  └─ 241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 250 [NOT STARTED] — Implement NBA complementation: given an NBA A, construct an NBA a
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
@@ -81,17 +80,6 @@ next_project_number: 253
 - **Research**: [250_nba_complementation/reports/01_nba-complementation-seed.md]
 
 **Description**: Implement NBA complementation: given an NBA A, construct an NBA accepting the complement language Σ^ω \ L(A). Two main approaches: (1) determinization-based — determinize via McNaughton/Safra then complement the deterministic automaton (depends on task 241), (2) direct rank-based construction (Kupferman-Vardi 2001, Schewe 2009) avoiding full determinization. CSLib already has ω-regular complementation at the language-theoretic level via Büchi congruence; this task provides the automata-level construction needed for algorithmic applications (language inclusion, model checking). Target: Cslib/Computability/Automata/NA/Complement.lean
-
----
-
-### 249. Ctchou automata coordination
-- **Status**: [NOT STARTED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: None
-- **Research**: [249_ctchou_automata_coordination/reports/01_ctchou-coordination-seed.md]
-
-**Description**: Research task: evaluate ctchou/AutomataTheory (independent Lean 4 project) for coordination with CSLib. That project has McNaughton theorem proved, ω-regular closure (union, intersection, complementation, concatenation, Kleene star), and uses a uniform finite/infinite word framework. Assess: (1) architectural compatibility with CSLib (type definitions, Mathlib usage, naming conventions), (2) whether any proofs can be ported or adapted (especially McNaughton), (3) licensing and attribution requirements, (4) whether to coordinate upstream or develop independently. This research should inform task 241 (McNaughton) strategy.
 
 ---
 
@@ -150,9 +138,10 @@ next_project_number: 253
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: Task 249
+- **Dependencies**: None
+- **Research**: [241_mcnaughton_theorem/reports/01_ctchou-coordination-seed.md]
 
-**Description**: Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller) establishing equivalence between omega-regular languages and deterministic Muller automata
+**Description**: Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller) establishing equivalence between omega-regular languages and deterministic Muller automata. Research phase should evaluate ctchou/AutomataTheory (independent Lean 4 project that claims McNaughton already proved) for architectural compatibility, portability, and licensing before deciding whether to port, adapt, or develop independently.
 
 ---
 

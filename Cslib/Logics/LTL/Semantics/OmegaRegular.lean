@@ -8,6 +8,7 @@ module
 
 public import Cslib.Logics.LTL.Semantics.Satisfies
 public import Cslib.Computability.Languages.OmegaRegularLanguage
+public import Cslib.Logics.LTL.Semantics.GNBA
 
 /-! # Omega-Regularity of LTL Languages
 
@@ -22,8 +23,8 @@ with `[Fintype Atom]`, and the membership relation bridges `Atom → Prop` valua
 
 ## Main theorems
 
-- `Formula.isRegular` : the ω-language of every LTL formula is ω-regular (atom, bot, imp,
-  next cases proved; `untl` case left as `proof_wanted`)
+- `Formula.isRegular` : the ω-language of every LTL formula is ω-regular (all cases proved,
+  including `untl` via the GNBA construction in `GNBA.lean`)
 
 ## Design
 
@@ -355,27 +356,40 @@ private theorem omegaLanguage_untl {Atom : Type*} (φ ψ : Formula Atom) :
     exact ⟨j, Nat.zero_le j, mem_omegaLanguage_drop.mp hj_psi,
       fun k _ hkj => mem_omegaLanguage_drop.mp (hguard k hkj)⟩
 
+/-- The ω-language of any LTL formula over a finite atom set is ω-regular.
+
+Proved by exhibiting the NBA `gnbaNBA φ` (from `GNBA.lean`) with finite state type
+`GNBANBAState φ`, whose language equals `φ.gnbaOmegaLanguage` by `gnba_language_eq`.
+Since `gnbaOmegaLanguage` is definitionally equal to `omegaLanguage`, the result follows. -/
+theorem Formula.isRegular' {Atom : Type} [Finite Atom] (φ : Formula Atom) :
+    φ.omegaLanguage.IsRegular :=
+  ⟨Formula.GNBANBAState φ, inferInstance, Formula.gnbaNBA φ, Formula.gnba_language_eq φ⟩
+
 /-- The ω-language of `φ U ψ` (guard `φ`, event `ψ` in Burgess convention) is ω-regular,
 given IH for both subformulas.
 
-This is the main technical step of the LTL-to-Büchi translation (Vardi-Wolper 1986). -/
-proof_wanted Formula.isRegular_untl {Atom : Type} [Finite Atom] {φ ψ : Formula Atom}
-    (hφ : φ.omegaLanguage.IsRegular) (hψ : ψ.omegaLanguage.IsRegular) :
-    (Formula.untl φ ψ).omegaLanguage.IsRegular
+Proved via the global GNBA construction (Baier-Katoen / Vardi-Wolper 1986). The hypotheses
+`hφ` and `hψ` are not needed by this approach — the GNBA for `untl φ ψ` handles all
+subformulas simultaneously — but the signature matches the original `proof_wanted`. -/
+theorem Formula.isRegular_untl {Atom : Type} [Finite Atom] {φ ψ : Formula Atom}
+    (_hφ : φ.omegaLanguage.IsRegular) (_hψ : ψ.omegaLanguage.IsRegular) :
+    (Formula.untl φ ψ).omegaLanguage.IsRegular :=
+  Formula.isRegular' (Formula.untl φ ψ)
 
 /-! ## Main theorem -/
 
 /-- Every LTL formula over a finite atom set defines an ω-regular language.
 
-The proof is by structural induction on `φ`. All cases except `untl` are proved:
+The proof is by structural induction on `φ`:
 - `atom p`: 2-state NBA checking first symbol membership
 - `bot`: empty language (`IsRegular.bot`)
 - `imp φ ψ`: `L(φ → ψ) = L(φ)ᶜ ⊔ L(ψ)` via complement and union closure
 - `next φ`: NBA reading and discarding the first symbol, then simulating `φ`'s NBA
-- `untl φ ψ`: deferred (see `Formula.isRegular_untl` `proof_wanted`)
+- `untl φ ψ`: via `Formula.isRegular_untl`, which uses the GNBA construction from `GNBA.lean`
 
-The `untl` case requires the Vardi-Wolper Fischer-Ladner closure construction and is tracked
-separately as a `proof_wanted`. -/
+The `untl` case uses the global GNBA tableau construction (Baier-Katoen / Vardi-Wolper 1986):
+the GNBA for `untl φ ψ` has finite state type `GNBANBAState (untl φ ψ)` and is converted to
+an NBA via the cycling counter construction. -/
 theorem Formula.isRegular {Atom : Type} [Finite Atom] (φ : Formula Atom) :
     φ.omegaLanguage.IsRegular := by
   induction φ with
@@ -383,10 +397,7 @@ theorem Formula.isRegular {Atom : Type} [Finite Atom] (φ : Formula Atom) :
   | bot => exact Formula.isRegular_bot
   | imp φ ψ hφ hψ => exact Formula.isRegular_imp hφ hψ
   | next φ hφ => exact Formula.isRegular_next hφ
-  | untl φ ψ hφ hψ =>
-    -- The `untl` case is deferred to a follow-up PR implementing the Vardi-Wolper
-    -- Fischer-Ladner closure construction; see `Formula.isRegular_untl` proof_wanted.
-    exact sorry
+  | untl φ ψ hφ hψ => exact Formula.isRegular_untl hφ hψ
 
 end Cslib.Logic.LTL
 

@@ -222,7 +222,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 5: Derive isRegular_untl and Final Integration [NOT STARTED]
+### Phase 5: Derive isRegular_untl and Final Integration [COMPLETED]
 
 **Goal**: Prove `Formula.isRegular_untl` using the GNBA construction, remove the `sorry` from `Formula.isRegular`, update imports, and run full CI verification.
 

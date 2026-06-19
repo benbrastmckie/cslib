@@ -1,5 +1,5 @@
 ---
-next_project_number: 247
+next_project_number: 248
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 247
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,236,241,242,243,244,245 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 1 | 36,37,180,226,236,241,242,243,244,245,247 | -- | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -28,6 +28,10 @@ next_project_number: 247
 ### Foundations
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
+
+### Modal Logic
+
+247 [NOT STARTED] — Clean up Modal/ compliance issues and dead code: fix 17 missing d
 
 ### Propositional Logic
 
@@ -46,6 +50,16 @@ next_project_number: 247
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 247. Modal compliance dead code cleanup
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Clean up Modal/ compliance issues and dead code: fix 17 missing docstrings, remove @[simp] from k_strong_completeness_iff, fix satifies typo in Basic.lean, remove 25 dead declarations (4 S5 aliases, 2 unused ModalSetDerivable lemmas, 5 dead per-system wrappers, 13 dead _soundness_derivable wrappers, 1 dead HasHilbertTree instance), remove unused _h_T param from canonical_eucl, clean up 2 redundant imports, normalize blank lines in 11 Completeness files
+
+---
 
 ### 246. Modal comment cleanup pr description
 - **Status**: [COMPLETED]

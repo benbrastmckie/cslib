@@ -1,0 +1,15 @@
+{
+  "status": "partial",
+  "summary": "hkey biconditional fully proven (all formula cases). 4 sorry markers remain, all in counter cycling: soundness degeneralization forward (L857 counter monotone, L910 acceptance set visit), completeness (L1118 NBA transitions, L1122 counter acceptance).",
+  "phases_completed": 0,
+  "phases_total": 3,
+  "blockers": [],
+  "continuation_context": {
+    "current_phase": 1,
+    "sorry_locations": [857, 910, 1118, 1122],
+    "key_insight": "All remaining sorry markers are about the counter cycling construction, not structural formula induction. Soundness needs counter monotonicity between K-visits + intermediate value to show each acceptance set is visited. Completeness needs to prove the canonical run + counter form a valid NBA execution.",
+    "handoff_path": "specs/236_follow_up_prs_buchi_omega_regular/.orchestrator-handoff.json"
+  },
+  "next_action_hint": "continue_implementation",
+  "artifacts": []
+}

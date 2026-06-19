@@ -1,20 +1,16 @@
 {
-  "status": "planned",
-  "artifacts": [
-    {
-      "path": "specs/236_follow_up_prs_buchi_omega_regular/plans/05_gnba-correctness-plan.md",
-      "type": "plan",
-      "summary": "Revised plan: fix gnbaNBA counter + prove completeness and soundness for gnba_language_eq"
-    }
-  ],
-  "next_steps": "Run /implement 236 to execute the revised plan",
+  "status": "in_progress",
+  "started_at": "2026-06-19T00:00:00Z",
+  "artifacts": [],
+  "partial_progress": {
+    "stage": "initializing",
+    "details": "Agent started, reading GNBA.lean to find 4 sorry markers",
+    "phases_completed": 0
+  },
   "metadata": {
-    "session_id": "sess_1781889380_5d817d",
-    "agent_type": "reviser-agent",
-    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
-    "phase_count": 3,
-    "estimated_hours": 18,
-    "reports_integrated": ["04_gnba-correctness-research.md"],
-    "plan_version": 5
+    "session_id": "sess_1781889786_46eb53",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
   }
 }

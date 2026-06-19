@@ -1,7 +1,7 @@
 # Implementation Plan: Task #236 -- GNBA Correctness (gnba_language_eq)
 
 - **Task**: 236 - Complete follow-up PRs from PR #649 for Buchi automata and closure of omega-regular languages under boolean operations
-- **Status**: [IN PROGRESS]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 18 hours
 - **Dependencies**: None (Phases 1-3 and 5 from plan v03 are complete; GNBA.lean has closure, atoms, canonical atoms, GNBA construction, and integration scaffolding in place; only `gnba_language_eq` at line 795 remains as sorry)
 - **Research Inputs**: specs/236_follow_up_prs_buchi_omega_regular/reports/03_gnba-tableau-research.md, specs/236_follow_up_prs_buchi_omega_regular/reports/04_gnba-correctness-research.md
@@ -60,7 +60,14 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Fix gnbaNBA Counter + Completeness Direction [NOT STARTED]
+### Phase 1: Fix gnbaNBA Counter + Completeness Direction [IN PROGRESS]
+
+**DEVIATION**: gnbaNBA definition requires additional fix beyond conditional advance: the accept
+state must be counter = K (not counter = 0) to avoid the "stuck at 0" soundness bug. When counter
+= 0 is the accept state and counter can stay at 0 when B ∉ acc_0, the NBA accepts runs that
+the GNBA rejects (acceptance set 0 never visited). Fixed by using accept = {counter = K} and
+adding a reset transition from counter = K to 0. The hkey lemma must prove a biconditional
+(ψ ∈ B_i ↔ Satisfies ψ at i) to handle the imp case backward direction.
 
 **Goal**: Fix the gnbaNBA cycling counter to use conditional advancement per Baier-Katoen Lemma 4.56, then prove the completeness direction of gnba_language_eq: satisfaction implies NBA acceptance.
 
@@ -87,7 +94,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Soundness Direction [NOT STARTED]
+### Phase 2: Soundness Direction [IN PROGRESS]
 
 **Goal**: Prove the soundness direction of gnba_language_eq: NBA acceptance implies satisfaction. This is the harder direction, requiring structural induction on formula constructors with careful handling of the Until and imp cases.
 

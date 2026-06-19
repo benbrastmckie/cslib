@@ -120,10 +120,9 @@ Phases within the same wave can execute in parallel.
 - [x] Swap in `Temporal/Metalogic/Chronicle/ChronicleConstruction.lean` (24 references)
 - [x] Swap in `Temporal/Metalogic/Chronicle/CounterexampleElimination.lean` (104 references)
 - [x] Swap in `Temporal/Metalogic/Chronicle/PointInsertion.lean` (244 references)
-- [x] Swap in `Temporal/Metalogic/Chronicle/RRelation.lean` (33 references)
+- [ ] **FIX**: `Temporal/Metalogic/Chronicle/RRelation.lean` — script applied but 19 errors remain (corrupted expressions: `unexpected token`, `Application type mismatch`). Likely `.left`/`.right` selector swaps needed after `injEq`, plus corrupted dot-notation chains.
 - [x] **FIXED**: `Temporal/Metalogic/Chronicle/Frame.lean` — swapped infix `(ψ U φ)` → `(φ U ψ)` (file was missed by script)
 - [x] **FIXED**: `Temporal/Metalogic/Chronicle/CanonicalChain.lean` — swapped infix expressions and axiom calls (file was missed by script)
-- [ ] **FIX**: `Temporal/Metalogic/Chronicle/RRelation.lean` — 19 errors (script corrupted some expressions: `unexpected token`, `Application type mismatch`). Likely `.left`/`.right` selector swaps needed after `injEq`, plus possibly corrupted dot-notation chains.
 - [ ] Update convention-related comments/docstrings across all Temporal files
 
 **Note**: All files swapped via automated script. Manual fixes applied to Frame.lean, CanonicalChain.lean. RRelation.lean has remaining errors from incorrect script swaps in proof terms.
@@ -274,7 +273,7 @@ Phases within the same wave can execute in parallel.
 - [x] Swap in `BXCanonical/Quasimodel/Construction.lean` (35 references)
 - [x] Swap in `BXCanonical/Quasimodel/SubformulaClosure.lean` (2 references)
 - [x] Swap in `BXCanonical/Chronicle/ChronicleTypes.lean` (12 references)
-- [x] Swap in `BXCanonical/Chronicle/ChronicleConstruction.lean` (38 references)
+- [ ] **FIX**: `BXCanonical/Chronicle/ChronicleConstruction.lean` — script applied (38 references) but 16 errors remain ("Unknown constant `Formula.η`" corrupted dot-notation, "unsolved goals", "unexpected syntax" at lines 425-543, 1241, 1264)
 - [x] Swap in `BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean` (9 references)
 - [x] Swap in `BXCanonical/Chronicle/CounterexampleElimination.lean` (116 references)
 - [x] Swap in `BXCanonical/Chronicle/PointInsertion.lean` (340 references)
@@ -291,7 +290,7 @@ Phases within the same wave can execute in parallel.
 - [x] Swap in `Separation/SeparationThm.lean` (7 references)
 - [x] Swap in `Separation/Hierarchy/HierarchyDefs.lean` (51 references)
 - [x] Swap in `Separation/Hierarchy/HierarchyCaseSep.lean` (95 references)
-- [x] Swap in `Separation/Hierarchy/HierarchyCompletion.lean` (113 references)
+- [ ] **FIX**: `Separation/Hierarchy/HierarchyCompletion.lean` — script applied (113 references) but 6 errors remain ("Type mismatch", "Application type mismatch" at lines 313-354)
 - [x] Swap in `Separation/Hierarchy/HierarchyInduction.lean` (174 references)
 - [x] Swap in `Separation/DedekindZ/Cases.lean` (221 references)
 - [x] Swap in `Separation/DedekindZ/QLemma.lean` (40 references)
@@ -303,11 +302,9 @@ Phases within the same wave can execute in parallel.
 - [x] Swap in `Decidability/TraceCertificate.lean` (4 references)
 - [x] **FIXED**: `BXCanonical/Chronicle/PointInsertion.lean` — fixed `.1`/`.2` selector swaps after `injEq`, fixed set comprehension syntax corruption (`{φ | ...} α` → `{φ | ... α}`)
 - [x] **FIXED**: `Separation/Hierarchy/HierarchyCaseSep.lean` — fixed `.snce` dot-notation argument swap in `have` declaration
-- [ ] **FIX**: `BXCanonical/Chronicle/ChronicleConstruction.lean` — 16 errors including "Unknown constant `Formula.η`" (corrupted dot-notation), "unsolved goals", "unexpected syntax" at lines 425-543, 1241, 1264
-- [ ] **FIX**: `Separation/Hierarchy/HierarchyCompletion.lean` — 6 errors: "Type mismatch" and "Application type mismatch" at lines 313-354 (cascading from upstream fixes)
 - [ ] Update convention-related comments/docstrings across all files
 
-**Note**: All 34 files swapped via automated script. Manual fixes resolved PointInsertion.lean (selector swaps, set comprehension syntax), HierarchyCaseSep.lean (dot-notation swap). ChronicleConstruction.lean and HierarchyCompletion.lean have remaining errors.
+**Note**: All 34 files swapped via automated script. Manual fixes resolved PointInsertion.lean (selector swaps, set comprehension syntax), HierarchyCaseSep.lean (dot-notation swap). ChronicleConstruction.lean (16 errors) and HierarchyCompletion.lean (6 errors) have remaining errors from script corruption and cascading type mismatches.
 
 **Timing**: 2 hours
 

@@ -1970,7 +1970,7 @@ theorem l27_guard_snce_xi_val (fc : FrameClass) {A B C : Set (Formula Atom)}
     have h_spec := Classical.choose_spec h_exists
     obtain ⟨hβ_B, α'', hα'', h_eq⟩ := h_spec
     rw [Formula.snce.injEq] at h_eq
-    have h_β_eq := (formula_and_left_cancel fc h_eq.2).symm
+    have h_β_eq := (formula_and_left_cancel fc h_eq.1).symm
     convert h_β_eq using 1; simp
   · next h =>
     exfalso; exact h ⟨hβ', hα'⟩
@@ -2012,7 +2012,7 @@ theorem l27_a_event_list_α_mem_xi (fc : FrameClass) {A B C : Set (Formula Atom)
   congr 1
   have h_spec := Classical.choose_spec (Classical.choose_spec h_ex).2
   rw [Formula.snce.injEq] at h_spec
-  exact h_spec.2.1.symm
+  exact h_spec.2.2.symm
 
 
 /-- Consistency of the Lemma 2.7 D0 seed (Burgess 1982 p.372), simplified via Xu 3.2.1.
@@ -2671,7 +2671,7 @@ theorem l27s_c5_γ_mem {B C : Set (Formula Atom)} {xi : Formula Atom}
       Formula.untl (Formula.and β'' xi) γ'' := ⟨β', hβ', γ', hγ', rfl⟩
   simp only [h, ↓reduceDIte]
   have h_spec := (Classical.choose_spec (Classical.choose_spec h).2)
-  exact congr_arg some (Formula.untl.inj h_spec.2).1.symm
+  exact congr_arg some (Formula.untl.inj h_spec.2).2.symm
 
 /-- For a component 3 element untl(γ', β'∧xi) in L, the extracted β' is in b5_guard_list. -/
 theorem l27s_b5_β_mem {B C : Set (Formula Atom)} {xi : Formula Atom}
@@ -2689,7 +2689,7 @@ theorem l27s_b5_β_mem {B C : Set (Formula Atom)} {xi : Formula Atom}
   obtain ⟨_, γ'', _, h_formula_eq⟩ := h_spec
   have h_inj := Formula.untl.inj h_formula_eq
   simp only [Formula.and, Formula.neg] at h_inj
-  exact congr_arg some ((Formula.imp.inj (Formula.imp.inj h_inj.2).1).1).symm
+  exact congr_arg some ((Formula.imp.inj (Formula.imp.inj h_inj.1).1).1).symm
 
 /-- Since-direction seed consistency (simplified via Xu 3.2.1):
 Given BurgessR3Maximal(A, B, C) with snce(xi, eta) ∈ C and xi ∉ B,
@@ -3276,7 +3276,7 @@ contradicting forward_temporal_witness_seed_consistent. -/
 theorem until_witness_enriched_seed_consistent (fc : FrameClass) {A : Set (Formula Atom)}
     (h_mcs : SetMaximalConsistent fc A) (γ β : Formula Atom)
     (h_until : Formula.untl γ β ∈ A) :
-    SetConsistent fc ({β} ∪ gContent A ∪ {φ | ∃ α ∈ A, φ = Formula.snce γ} α) := by
+    SetConsistent fc ({β} ∪ gContent A ∪ {φ | ∃ α ∈ A, φ = Formula.snce γ α}) := by
   intro L hL ⟨d⟩
   have h_extract : ∀ φ ∈ L, (φ ∈ {β} ∪ gContent A) ∨ (∃ α ∈ A, φ = Formula.snce γ α) := by
     intro φ hφ
@@ -3432,7 +3432,7 @@ contradicting past_temporal_witness_seed_consistent. -/
 theorem since_witness_enriched_seed_consistent (fc : FrameClass) {A : Set (Formula Atom)}
     (h_mcs : SetMaximalConsistent fc A) (γ β : Formula Atom)
     (h_since : Formula.snce γ β ∈ A) :
-    SetConsistent fc ({β} ∪ hContent A ∪ {φ | ∃ α ∈ A, φ = Formula.untl γ} α) := by
+    SetConsistent fc ({β} ∪ hContent A ∪ {φ | ∃ α ∈ A, φ = Formula.untl γ α}) := by
   intro L hL ⟨d⟩
   have h_extract : ∀ φ ∈ L, (φ ∈ {β} ∪ hContent A) ∨ (∃ α ∈ A, φ = Formula.untl γ α) := by
     intro φ hφ

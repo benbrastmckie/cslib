@@ -121,10 +121,12 @@ Phases within the same wave can execute in parallel.
 - [x] Swap in `Temporal/Metalogic/Chronicle/CounterexampleElimination.lean` (104 references)
 - [x] Swap in `Temporal/Metalogic/Chronicle/PointInsertion.lean` (244 references)
 - [x] Swap in `Temporal/Metalogic/Chronicle/RRelation.lean` (33 references)
-- [ ] **FIX**: `Temporal/Metalogic/Chronicle/Frame.lean` — 2 "Application type mismatch" errors at lines 239, 249 (script produced incorrect swap)
+- [x] **FIXED**: `Temporal/Metalogic/Chronicle/Frame.lean` — swapped infix `(ψ U φ)` → `(φ U ψ)` (file was missed by script)
+- [x] **FIXED**: `Temporal/Metalogic/Chronicle/CanonicalChain.lean` — swapped infix expressions and axiom calls (file was missed by script)
+- [ ] **FIX**: `Temporal/Metalogic/Chronicle/RRelation.lean` — 19 errors (script corrupted some expressions: `unexpected token`, `Application type mismatch`). Likely `.left`/`.right` selector swaps needed after `injEq`, plus possibly corrupted dot-notation chains.
 - [ ] Update convention-related comments/docstrings across all Temporal files
 
-**Note**: All files swapped via automated script. Frame.lean has 2 remaining build errors where the script incorrectly handled argument expressions.
+**Note**: All files swapped via automated script. Manual fixes applied to Frame.lean, CanonicalChain.lean. RRelation.lean has remaining errors from incorrect script swaps in proof terms.
 
 **Timing**: 1.5 hours
 
@@ -299,11 +301,13 @@ Phases within the same wave can execute in parallel.
 - [x] Swap in `Decidability/AxiomMatcher.lean` (32 references)
 - [x] Swap in `Decidability/CountermodelExtraction.lean` (34 references)
 - [x] Swap in `Decidability/TraceCertificate.lean` (4 references)
-- [ ] **FIX**: `BXCanonical/Chronicle/PointInsertion.lean` — 10 build errors (Application type mismatch, unsolved goals, implicit argument synthesis failures at lines 1973, 2015, 2674, 2681, 2692, 3279, 3389, 3390, 3435, 3548, 3549)
-- [ ] **FIX**: `Separation/Hierarchy/HierarchyCaseSep.lean` — 1 "Application type mismatch" error at line 472
+- [x] **FIXED**: `BXCanonical/Chronicle/PointInsertion.lean` — fixed `.1`/`.2` selector swaps after `injEq`, fixed set comprehension syntax corruption (`{φ | ...} α` → `{φ | ... α}`)
+- [x] **FIXED**: `Separation/Hierarchy/HierarchyCaseSep.lean` — fixed `.snce` dot-notation argument swap in `have` declaration
+- [ ] **FIX**: `BXCanonical/Chronicle/ChronicleConstruction.lean` — 16 errors including "Unknown constant `Formula.η`" (corrupted dot-notation), "unsolved goals", "unexpected syntax" at lines 425-543, 1241, 1264
+- [ ] **FIX**: `Separation/Hierarchy/HierarchyCompletion.lean` — 6 errors: "Type mismatch" and "Application type mismatch" at lines 313-354 (cascading from upstream fixes)
 - [ ] Update convention-related comments/docstrings across all files
 
-**Note**: All 34 files swapped via automated script. Fix agent corrected `change` tactic and RRelation.lean errors. Two files remain with build errors from incorrect script swaps in complex proof terms.
+**Note**: All 34 files swapped via automated script. Manual fixes resolved PointInsertion.lean (selector swaps, set comprehension syntax), HierarchyCaseSep.lean (dot-notation swap). ChronicleConstruction.lean and HierarchyCompletion.lean have remaining errors.
 
 **Timing**: 2 hours
 

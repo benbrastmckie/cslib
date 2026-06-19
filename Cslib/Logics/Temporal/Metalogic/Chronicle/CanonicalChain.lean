@@ -33,27 +33,27 @@ variable {Atom : Type*}
 
 theorem F_imp_top_until_mcs {w : TPoint Atom} {ψ : Formula Atom}
     (h : (𝐅ψ) ∈ w.formulas) :
-    (ψ U ⊤) ∈ w.formulas :=
+    (⊤ U ψ) ∈ w.formulas :=
   temporal_implication_property w.is_mcs
     (theoremInMcs w.is_mcs (DerivationTree.axiom [] _ (Axiom.F_until_equiv ψ) trivial)) h
 
 theorem P_imp_top_since_mcs {w : TPoint Atom} {ψ : Formula Atom}
     (h : (𝐏ψ) ∈ w.formulas) :
-    (ψ S ⊤) ∈ w.formulas :=
+    (⊤ S ψ) ∈ w.formulas :=
   temporal_implication_property w.is_mcs
     (theoremInMcs w.is_mcs (DerivationTree.axiom [] _ (Axiom.P_since_equiv ψ) trivial)) h
 
 /-! ## BX6 at MCS level -/
 
 theorem absorb_until_mcs {w : TPoint Atom} {φ ψ : Formula Atom}
-    (h : ((φ ∧ (ψ U φ)) U φ) ∈ w.formulas) :
-    (ψ U φ) ∈ w.formulas :=
+    (h : (φ U (φ ∧ (φ U ψ))) ∈ w.formulas) :
+    (φ U ψ) ∈ w.formulas :=
   temporal_implication_property w.is_mcs
     (theoremInMcs w.is_mcs (DerivationTree.axiom [] _ (Axiom.absorb_until φ ψ) trivial)) h
 
 theorem absorb_since_mcs {w : TPoint Atom} {φ ψ : Formula Atom}
-    (h : ((φ ∧ (ψ S φ)) S φ) ∈ w.formulas) :
-    (ψ S φ) ∈ w.formulas :=
+    (h : (φ S (φ ∧ (φ S ψ))) ∈ w.formulas) :
+    (φ S ψ) ∈ w.formulas :=
   temporal_implication_property w.is_mcs
     (theoremInMcs w.is_mcs (DerivationTree.axiom [] _ (Axiom.absorb_since φ ψ) trivial)) h
 
@@ -61,14 +61,14 @@ theorem absorb_since_mcs {w : TPoint Atom} {φ ψ : Formula Atom}
 
 theorem delegation_until_eventuality
     (w : TPoint Atom) (φ ψ : Formula Atom)
-    (h_until : (ψ U φ) ∈ w.formulas)
+    (h_until : (φ U ψ) ∈ w.formulas)
     (h_not_psi : ψ ∉ w.formulas) :
     ∃ v : TPoint Atom, tLe w v ∧ ψ ∈ v.formulas :=
   tUntilEventualityResolution w φ ψ h_until h_not_psi
 
 theorem delegation_since_eventuality
     (w : TPoint Atom) (φ ψ : Formula Atom)
-    (h_since : (ψ S φ) ∈ w.formulas)
+    (h_since : (φ S ψ) ∈ w.formulas)
     (h_not_psi : ψ ∉ w.formulas) :
     ∃ v : TPoint Atom, tLe v w ∧ ψ ∈ v.formulas :=
   tSinceEventualityResolution w φ ψ h_since h_not_psi

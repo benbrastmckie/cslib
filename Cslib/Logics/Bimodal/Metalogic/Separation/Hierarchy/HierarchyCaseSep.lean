@@ -467,7 +467,7 @@ theorem case6_sep_with_U_type_Z_gen (a q x y : Formula Atom)
         (.snce (Formula.and q (Formula.neg x)) a)) = true := by
       simp [isUFree, ha, hq, hx, hy]
     apply or_separable_with_U_type
-    · have hev_uf : isUFree (((y.neg.and x.neg).and (a.snce (q.and x.neg))).and q) = true := by
+    · have hev_uf : isUFree (((y.neg.and x.neg).and ((q.and x.neg).snce a)).and q) = true := by
         simp [isUFree, ha, hq, hx, hy]
       exact snce_Ufree_event_qU_guard_sep_with_U_type _ q x y hev_uf hq hx hy hx' hy'
     · exact case5_sep_with_U_type_Z_gen _ q x y hSTUFF_uf hq hx hy hx' hy'

@@ -65,14 +65,10 @@ theorem d5_axiom_sound {World : Type*} {φ : Proposition Atom}
     intro h_box_imp h_box_phi w' hr
     exact h_box_imp w' hr (h_box_phi w' hr)
   | modalD φ =>
-    -- D axiom: □φ → ◇φ where ◇φ = (□(φ → ⊥)) → ⊥
-    -- By seriality, obtain witness w' with m.r w w'
     intro h_box h_box_neg
     obtain ⟨w', hr⟩ := h_serial.serial w
     exact h_box_neg w' hr (h_box w' hr)
   | modalFive φ =>
-    -- Axiom 5: ◇φ → □◇φ
-    -- Unfolded: ((□(φ → ⊥)) → ⊥) → □((□(φ → ⊥)) → ⊥)
     intro h_diam w' hr h_box_neg_w'
     exact h_diam (fun w'' hr' h_phi =>
       h_box_neg_w' w'' (h_eucl w w' w'' hr hr') h_phi)

@@ -59,11 +59,6 @@ theorem b_axiom_sound {World : Type*} {φ : Proposition Atom}
     intro h_box_imp h_box_phi w' hr
     exact h_box_imp w' hr (h_box_phi w' hr)
   | modalB φ =>
-    -- B axiom: φ → □◇φ where ◇φ = (□(φ → ⊥)) → ⊥
-    -- Given hφ : Satisfies m w φ
-    -- Need: ∀ w', m.r w w' → Satisfies m w' (◇φ)
-    -- Unfolded: ∀ w', m.r w w' → (∀ w'', m.r w' w'' → Satisfies m w'' φ → False) → False
-    -- By symmetry, m.r w' w, so h_box_neg w (h_symm w w' hr) hφ gives False
     intro hφ w' hr h_box_neg
     exact h_box_neg w (h_symm w w' hr) hφ
 

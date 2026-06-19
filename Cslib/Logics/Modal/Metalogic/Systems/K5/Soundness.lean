@@ -60,10 +60,6 @@ theorem k5_axiom_sound {World : Type*} {φ : Proposition Atom}
     intro h_box_imp h_box_phi w' hr
     exact h_box_imp w' hr (h_box_phi w' hr)
   | modalFive φ =>
-    -- Axiom 5: ◇φ → □◇φ
-    -- Unfolded: ((□(φ → ⊥)) → ⊥) → □((□(φ → ⊥)) → ⊥)
-    -- h_diam : (∀ w', m.r w w' → Satisfies m w' φ → False) → False
-    -- Goal: ∀ w', m.r w w' → (∀ w'', m.r w' w'' → Satisfies m w'' φ → False) → False
     intro h_diam w' hr h_box_neg_w'
     exact h_diam (fun w'' hr' h_phi =>
       h_box_neg_w' w'' (h_eucl w w' w'' hr hr') h_phi)

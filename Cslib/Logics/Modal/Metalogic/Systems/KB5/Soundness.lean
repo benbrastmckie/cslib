@@ -72,16 +72,9 @@ theorem kb5_axiom_sound {World : Type*} {φ : Proposition Atom}
     intro h_box_imp h_box_phi w' hr
     exact h_box_imp w' hr (h_box_phi w' hr)
   | modalB φ =>
-    -- Goal: φ → □◇φ
-    -- Satisfies: Satisfies m w φ → ∀ w', m.r w w' → Satisfies m w' (◇φ)
-    -- ◇φ at w' means: (∀ v, m.r w' v → Satisfies m v φ → False) → False
     intro h_phi w' hr h_box_neg
     exact h_box_neg w (h_symm w w' hr) h_phi
   | modalFive φ =>
-    -- Goal: ◇φ → □◇φ
-    -- ◇φ at w means: (∀ v, m.r w v → Satisfies m v φ → False) → False
-    -- □◇φ at w means: ∀ w', m.r w w' → ◇φ at w'
-    -- ◇φ at w' means: (∀ v, m.r w' v → Satisfies m v φ → False) → False
     intro h_diam w' hr h_box_neg_w'
     apply h_diam
     intro w'' hr'' h_phi

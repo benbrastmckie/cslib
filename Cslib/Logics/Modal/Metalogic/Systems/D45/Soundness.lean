@@ -68,19 +68,13 @@ theorem d45_axiom_sound {World : Type*} {φ : Proposition Atom}
     intro h_box_imp h_box_phi w' hr
     exact h_box_imp w' hr (h_box_phi w' hr)
   | modalD φ =>
-    -- D axiom: □φ → ◇φ where ◇φ = (□(φ → ⊥)) → ⊥
-    -- By seriality, obtain witness w' with m.r w w'
     intro h_box h_box_neg
     obtain ⟨w', hr⟩ := h_serial.serial w
     exact h_box_neg w' hr (h_box w' hr)
   | modalFour φ =>
-    -- 4 axiom: □φ → □□φ
-    -- By transitivity
     intro h_box w₁ hr₁ w₂ hr₂
     exact h_box w₂ (h_trans w w₁ w₂ hr₁ hr₂)
   | modalFive φ =>
-    -- 5 axiom: ◇φ → □◇φ
-    -- By Euclideanness
     intro hdiam v hrv hbox_neg_v
     apply hdiam
     intro u hru hsat

@@ -147,31 +147,23 @@ private noncomputable def modal_dne_from_neg_neg
     {ctx : List (Proposition Atom)}
     (d_neg_neg : DerivationTree Axioms ctx ((¬phi).imp Proposition.bot)) :
     DerivationTree Axioms ctx phi :=
-  -- EFQ: ctx ⊢ ⊥ → phi
   let d_efq : DerivationTree Axioms ctx (Proposition.bot.imp phi) :=
     .weakening [] ctx _ (.ax [] _ (h_efq phi)) (fun _ h => nomatch h)
-  -- implyK: ctx ⊢ (⊥ → phi) → (¬phi → (⊥ → phi))
   let d_k : DerivationTree Axioms ctx
       ((Proposition.bot.imp phi).imp ((¬phi).imp (Proposition.bot.imp phi))) :=
     .weakening [] ctx _ (.ax [] _ (h_implyK (Proposition.bot.imp phi) (¬phi)))
       (fun _ h => nomatch h)
-  -- Combine: ctx ⊢ ¬phi → (⊥ → phi)
   let d_step2 := DerivationTree.modus_ponens ctx _ _ d_k d_efq
-  -- implyS: ctx ⊢ (¬phi → (⊥ → phi)) → ((¬phi → ⊥) → (¬phi → phi))
   let d_s2 : DerivationTree Axioms ctx
       (((¬phi).imp (Proposition.bot.imp phi)).imp
         (((¬phi).imp Proposition.bot).imp ((¬phi).imp phi))) :=
     .weakening [] ctx _ (.ax [] _ (h_implyS (¬phi) Proposition.bot phi))
       (fun _ h => nomatch h)
-  -- ctx ⊢ (¬phi → ⊥) → (¬phi → phi)
   let d_step3 := DerivationTree.modus_ponens ctx _ _ d_s2 d_step2
-  -- ctx ⊢ ¬phi → phi
   let d_neg_to_phi : DerivationTree Axioms ctx ((¬phi).imp phi) :=
     DerivationTree.modus_ponens ctx _ _ d_step3 d_neg_neg
-  -- Peirce: ctx ⊢ (¬phi → phi) → phi
   let d_peirce : DerivationTree Axioms ctx (((¬phi).imp phi).imp phi) :=
     .weakening [] ctx _ (.ax [] _ (h_peirce phi Proposition.bot)) (fun _ h => nomatch h)
-  -- ctx ⊢ phi
   DerivationTree.modus_ponens ctx _ _ d_peirce d_neg_to_phi
 
 /-! ## Key Consistency Lemma -/
@@ -197,12 +189,9 @@ theorem modal_not_SetDerivable_union_neg_consistent
   intro L hL
   unfold Metalogic.Consistent
   intro ⟨d_bot⟩
-  -- Case split: is ¬phi in L?
   by_cases h_neg_in_L : (¬phi) ∈ L
-  · -- ¬phi ∈ L: use deductionWithMem to eliminate ¬phi from L
-    have d_neg_neg := deductionWithMem
+  · have d_neg_neg := deductionWithMem
         h_implyK h_implyS L (¬phi) Proposition.bot d_bot h_neg_in_L
-    -- removeAll L (¬phi) ⊆ Gamma
     have h_rem_sub : ∀ x ∈ removeAll L (¬phi), x ∈ Gamma := by
       intro x hx
       simp only [removeAll, ne_eq, decide_not, List.mem_filter,
@@ -212,23 +201,18 @@ theorem modal_not_SetDerivable_union_neg_consistent
       · exact h
       · exact absurd (Set.mem_singleton_iff.mp h) hx_ne
     let ctx := removeAll L (¬phi)
-    -- DNE: ctx ⊢ (¬phi) → ⊥ gives ctx ⊢ phi via EFQ + Peirce
     exact h_not ⟨ctx, h_rem_sub,
       ⟨modal_dne_from_neg_neg h_implyK h_implyS h_efq h_peirce d_neg_neg⟩⟩
-  · -- ¬phi ∉ L: all elements of L are already in Gamma
-    have hL_Gamma : ∀ x ∈ L, x ∈ Gamma := by
+  · have hL_Gamma : ∀ x ∈ L, x ∈ Gamma := by
       intro x hx
       rcases hL x hx with h | h
       · exact h
       · exact absurd (Set.mem_singleton_iff.mp h ▸ hx) h_neg_in_L
-    -- Apply deduction theorem on ¬phi:
     have d_ext : DerivationTree Axioms ((¬phi) :: L) Proposition.bot :=
       .weakening L ((¬phi) :: L) _ d_bot
         (fun x hx => List.mem_cons.mpr (Or.inr hx))
     have d_dt := deductionTheorem h_implyK h_implyS L (¬phi)
         Proposition.bot d_ext
-    -- d_dt : L ⊢ (¬phi) → ⊥
-    -- DNE: L ⊢ (¬phi) → ⊥ gives L ⊢ phi via EFQ + Peirce
     exact h_not ⟨L, hL_Gamma,
       ⟨modal_dne_from_neg_neg h_implyK h_implyS h_efq h_peirce d_dt⟩⟩
 

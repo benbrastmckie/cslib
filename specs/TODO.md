@@ -11,7 +11,7 @@ next_project_number: 247
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,236,241,242,243,244,245,246 | -- | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 1 | 36,37,180,226,236,241,242,243,244,245 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -28,10 +28,6 @@ next_project_number: 247
 ### Foundations
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
-
-### Modal Logic
-
-246 [NOT STARTED] — Clean up scratch-work inline comments inside Modal/ proof bodies,
 
 ### Propositional Logic
 
@@ -52,7 +48,7 @@ next_project_number: 247
 ## Tasks
 
 ### 246. Modal comment cleanup pr description
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

@@ -108,8 +108,6 @@ theorem modal_satisfies_toModal_iff_evaluate
     exact ⟨fun h he => ih2.mp (h (ih1.mpr he)),
            fun h hm => ih2.mpr (h (ih1.mp hm))⟩
   | and φ ψ ih1 ih2 =>
-    -- Lukasiewicz: φ ∧ ψ := ¬(φ → ¬ψ) = (φ → ψ → ⊥) → ⊥
-    -- Classical equivalence: ¬(A → ¬B) ↔ A ∧ B
     simp only [PL.Proposition.toModal, PL.Evaluate]
     constructor
     · intro h
@@ -121,8 +119,6 @@ theorem modal_satisfies_toModal_iff_evaluate
       simp only [Modal.Satisfies]
       intro h; exact h (ih1.mpr ha) (ih2.mpr hb)
   | or φ ψ ih1 ih2 =>
-    -- Lukasiewicz: φ ∨ ψ := ¬φ → ψ = (φ → ⊥) → ψ
-    -- Classical equivalence: (¬A → B) ↔ A ∨ B
     simp only [PL.Proposition.toModal, PL.Evaluate]
     constructor
     · intro h

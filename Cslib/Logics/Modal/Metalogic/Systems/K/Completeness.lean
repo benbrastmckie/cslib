@@ -108,20 +108,15 @@ theorem k_derive_box_from_inconsistency
     have d_phi := DerivationTree.modus_ponens L' _ _ peirce_ax step3
     exact h_not_box (derive_box_from_box_context h_implyK h_implyS h_K h_mcs
       d_phi h_L'_box)
-  · -- Case: neg phi NOT in L -- K-SPECIFIC CASE (BRV Lemma 4.20)
-    -- All elements of L have box-versions in S.
-    -- From L |- bot, derive L |- phi via EFQ, then box-lift to get box phi in S.
-    have h_all_box : ∀ x ∈ L, (□x) ∈ S := by
+  · have h_all_box : ∀ x ∈ L, (□x) ∈ S := by
       intro x hx
       rcases hL x hx with h | h
       · exact h
       · exact absurd (h ▸ hx) h_neg_in_L
-    -- Build L |- phi from L |- bot via EFQ
     have efq_ax : DerivationTree Axioms L (Proposition.bot.imp φ) :=
       .weakening [] L _ (.ax [] _ (h_efq φ)) (fun _ h => nomatch h)
     have d_phi : DerivationTree Axioms L φ :=
       .modus_ponens L .bot φ efq_ax d_bot
-    -- derive_box_from_box_context: from L |- phi with all box x in S, get box phi in S
     exact h_not_box (derive_box_from_box_context h_implyK h_implyS h_K h_mcs
       d_phi h_all_box)
 

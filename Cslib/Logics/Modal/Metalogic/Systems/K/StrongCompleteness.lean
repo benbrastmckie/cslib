@@ -70,23 +70,18 @@ theorem k_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositio
     (h : ModalSemanticEntails (fun _ => True) Gamma phi) :
     ModalSetDerivable (@KAxiom Atom) Gamma phi := by
   by_contra h_not
-  -- Gamma ∪ {¬phi} is consistent
   have h_cons := modal_not_SetDerivable_union_neg_consistent
     (fun φ ψ => .implyK φ ψ)
     (fun φ ψ χ => .implyS φ ψ χ)
     (fun φ => .efq φ)
     (fun φ ψ => .peirce φ ψ)
     h_not
-  -- Extend to MCS M ⊇ Gamma ∪ {¬phi}
   obtain ⟨M, hM_sup, hM_mcs⟩ := modal_lindenbaum h_cons
   let w : CanonicalWorld (@KAxiom Atom) := ⟨M, hM_mcs⟩
-  -- ¬phi ∈ M
   have h_neg_phi : (¬phi) ∈ M :=
     hM_sup (Set.mem_union_right Gamma (Set.mem_singleton_iff.mpr rfl))
-  -- All of Gamma ⊆ M
   have h_gamma_sub : ∀ ψ ∈ Gamma, ψ ∈ M :=
     fun ψ hψ => hM_sup (Set.mem_union_left _ hψ)
-  -- All of Gamma is satisfied in the canonical model at w
   have h_gamma_sat : ∀ γ ∈ Gamma, Satisfies (CanonicalModel (@KAxiom Atom)) w γ :=
     fun γ hγ => (k_truth_lemma
       (fun φ ψ => .implyK φ ψ)
@@ -95,10 +90,8 @@ theorem k_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositio
       (fun φ ψ => .peirce φ ψ)
       (fun φ ψ => .modalK φ ψ)
       w γ).mpr (h_gamma_sub γ hγ)
-  -- By semantic entailment: phi is satisfied at w
   have h_phi_sat := h (CanonicalWorld (@KAxiom Atom)) (CanonicalModel (@KAxiom Atom)) w
     True.intro h_gamma_sat
-  -- k_truth_lemma: phi ∈ M
   have h_phi_M := (k_truth_lemma
     (fun φ ψ => .implyK φ ψ)
     (fun φ ψ χ => .implyS φ ψ χ)
@@ -106,7 +99,6 @@ theorem k_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositio
     (fun φ ψ => .peirce φ ψ)
     (fun φ ψ => .modalK φ ψ)
     w phi).mp h_phi_sat
-  -- ¬phi ∈ M and phi ∈ M gives contradiction
   exact mcs_bot_not_mem hM_mcs
     (modal_implication_property
       (fun φ ψ => .implyK φ ψ)

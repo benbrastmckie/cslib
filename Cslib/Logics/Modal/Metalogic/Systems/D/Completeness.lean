@@ -116,48 +116,24 @@ theorem d_derive_box_from_inconsistency
     have d_phi := DerivationTree.modus_ponens L' _ _ peirce_ax step3
     exact h_not_box (derive_box_from_box_context h_implyK h_implyS h_K h_mcs
       d_phi h_L'_box)
-  · -- Case 2: neg phi not in L -- D-specific argument (replaces T fallback)
-    -- All elements of L have box versions in S
-    have h_all_box : ∀ x ∈ L, (□x) ∈ S := by
+  · have h_all_box : ∀ x ∈ L, (□x) ∈ S := by
       intro x hx
       rcases hL x hx with h | h
       · exact h
       · exact absurd (h ▸ hx) h_neg_in_L
-    -- From L |- bot and all box x in S, derive box bot in S
     have h_box_bot : (□⊥) ∈ S :=
       derive_box_from_box_context h_implyK h_implyS h_K h_mcs d_bot h_all_box
-    -- Axiom D at bot: box bot -> diamond bot = box bot -> (box top) -> bot
-    -- where top = bot -> bot and diamond bot = (box (bot -> bot)) -> bot
     have h_diamond_bot : (◇⊥) ∈ S :=
       mcs_mp_axiom h_implyK h_implyS h_mcs h_box_bot (h_D ⊥)
-    -- top = bot -> bot is derivable: from implyK bot bot we get bot -> (bot -> bot)
-    -- which gives us bot -> bot after simplification. Actually, let's build it directly.
-    -- We need: [] |- bot -> bot
-    -- This is immediate from implyK: K gives φ → (ψ → φ), instantiate at bot, bot
-    -- to get bot -> (bot -> bot). But we need bot -> bot.
-    -- Actually, from efq: bot -> (bot -> bot), and from implyK: bot -> ((bot -> bot) -> bot)...
-    -- Simpler: use the identity derivation via implyK + implyS
-    -- I (φ) = S φ (K φ) K = ((φ→((ψ→φ)→φ))→((φ→(ψ→φ))→(φ→φ)))
-    -- Let's just construct it step by step:
-    -- efq gives bot -> bot directly? No, efq gives bot -> phi for any phi.
-    -- So efq bot gives bot -> bot. Wait: h_efq (Proposition.bot) gives
-    -- Axioms (Proposition.bot.imp Proposition.bot). Yes! That's bot -> bot.
     have d_top : DerivationTree Axioms [] (Proposition.imp .bot .bot) :=
       .ax [] _ (h_efq Proposition.bot)
-    -- NEC: box top is derivable from empty context
     have d_box_top : DerivationTree Axioms [] (Proposition.box (Proposition.imp .bot .bot)) :=
       .necessitation _ d_top
-    -- box top in S (derivable formula in MCS)
     have h_box_top : (□(⊥ → ⊥)) ∈ S :=
       modal_closed_under_derivation h_implyK h_implyS h_mcs
         (L := []) (fun _ h => nomatch h) ⟨d_box_top⟩
-    -- diamond bot = (box(bot -> bot)) -> bot = (box top) -> bot
-    -- h_diamond_bot : (box(bot -> bot)).imp bot ∈ S
-    -- h_box_top : box(bot -> bot) ∈ S
-    -- By MP: bot in S
     have h_bot : ⊥ ∈ S :=
       modal_implication_property h_implyK h_implyS h_mcs h_diamond_bot h_box_top
-    -- Contradiction: bot not in MCS
     exact mcs_bot_not_mem h_mcs h_bot
 
 /-! ## Box Witness for D -/
@@ -223,22 +199,16 @@ theorem d_canonical_serial
         ((Proposition.box (φ.imp .bot)).imp .bot)))
     (S : CanonicalWorld Axioms) :
     ∃ T : CanonicalWorld Axioms, (CanonicalModel Axioms).r S T := by
-  -- Let W = {psi | box psi in S.val}
   let W := {ψ : Proposition Atom | (□ψ) ∈ S.val}
-  -- Show W is consistent
   have hW : SetConsistent Axioms W := by
     intro L hL
     unfold Metalogic.Consistent
     intro ⟨d_bot⟩
-    -- All elements of L have box versions in S
     have h_all_box : ∀ x ∈ L, (□x) ∈ S.val := fun x hx => hL x hx
-    -- From L |- bot, derive box bot in S
     have h_box_bot : (□⊥) ∈ S.val :=
       derive_box_from_box_context h_implyK h_implyS h_K S.property d_bot h_all_box
-    -- Axiom D at bot: box bot -> diamond bot
     have h_diamond_bot : (◇⊥) ∈ S.val :=
       mcs_mp_axiom h_implyK h_implyS S.property h_box_bot (h_D ⊥)
-    -- top = bot -> bot is derivable via efq
     have d_top : DerivationTree Axioms [] (Proposition.imp .bot .bot) :=
       .ax [] _ (h_efq Proposition.bot)
     have d_box_top : DerivationTree Axioms []
@@ -247,17 +217,13 @@ theorem d_canonical_serial
     have h_box_top : (□(⊥ → ⊥)) ∈ S.val :=
       modal_closed_under_derivation h_implyK h_implyS S.property
         (L := []) (fun _ h => nomatch h) ⟨d_box_top⟩
-    -- diamond bot = (box top) -> bot; MP with box top gives bot in S
     have h_bot : ⊥ ∈ S.val :=
       modal_implication_property h_implyK h_implyS S.property
         h_diamond_bot h_box_top
     exact mcs_bot_not_mem S.property h_bot
-  -- Extend W to MCS T via Lindenbaum
   obtain ⟨T, hWT, hT_mcs⟩ := modal_lindenbaum hW
-  -- Construct CanonicalWorld from T
   let T' : CanonicalWorld Axioms := ⟨T, hT_mcs⟩
   refine ⟨T', ?_⟩
-  -- Show (CanonicalModel Axioms).r S T': for any phi, box phi in S -> phi in T
   intro φ h_box
   exact hWT h_box
 

@@ -65,14 +65,10 @@ theorem db_axiom_sound {World : Type*} {φ : Proposition Atom}
     intro h_box_imp h_box_phi w' hr
     exact h_box_imp w' hr (h_box_phi w' hr)
   | modalD φ =>
-    -- D axiom: □φ → ◇φ where ◇φ = (□(φ → ⊥)) → ⊥
-    -- By seriality, obtain witness w' with m.r w w'
     intro h_box h_box_neg
     obtain ⟨w', hr⟩ := h_serial.serial w
     exact h_box_neg w' hr (h_box w' hr)
   | modalB φ =>
-    -- B axiom: φ → □◇φ where ◇φ = (□(φ → ⊥)) → ⊥
-    -- By symmetry, m.r w' w, so h_box_neg w (h_symm w w' hr) hφ gives False
     intro hφ w' hr h_box_neg
     exact h_box_neg w (h_symm w w' hr) hφ
 

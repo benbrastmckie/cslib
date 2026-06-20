@@ -13,13 +13,13 @@ public import Cslib.Logics.LTL.Semantics.GNBA
 /-! # Omega-Regularity of LTL Languages
 
 This module proves that for every LTL formula `φ` over a finite atom set, the set of
-ω-words satisfying `φ` at position 0 is an ω-regular language. The alphabet is `Set Atom`
-with `[Fintype Atom]`, and the membership relation bridges `Atom → Prop` valuations to
-`Set Atom`-valued ω-sequences via `(p ∈ v n) ↔ v n p`.
+ω-words satisfying `φ` at the initial state is an ω-regular language. The alphabet is
+`Set Atom` with `[Fintype Atom]`, and the valuation used is `fun p s => p ∈ s`,
+interpreting each element of the sequence as the set of atoms that hold at that state.
 
 ## Main definitions
 
-- `Formula.omegaLanguage φ` : the ω-language over `Set Atom` of ω-words satisfying `φ` at 0
+- `Formula.omegaLanguage φ` : the ω-language over `Set Atom` of ω-words satisfying `φ`
 
 ## Main theorems
 
@@ -30,7 +30,8 @@ with `[Fintype Atom]`, and the membership relation bridges `Atom → Prop` valua
 
 The alphabet `Set Atom` is used rather than `Atom → Prop` because `Set Atom` is finite when
 `Atom` is finite (`[Fintype Atom]`), matching the finite-state requirement of `IsRegular`.
-The conversion `p ∈ s ↔ (fun p => p ∈ s) p` bridges the two representations.
+The valuation `fun p s => p ∈ s` bridges the `Set Atom`-valued sequence to the
+`Atom → State → Prop` signature of `Satisfies`.
 
 ## References
 
@@ -49,15 +50,15 @@ open scoped Computability
 
 /-- The ω-language of an LTL formula over `Set Atom`.
 
-`v : ωSequence (Set Atom)` is interpreted as a valuation `fun n p => p ∈ v n`, and
-the membership relation checks `Satisfies` at position 0. -/
+`v : ωSequence (Set Atom)` is interpreted as a valuation `fun p s => p ∈ s`, and
+the membership relation checks `Satisfies` at the initial state (head of `v`). -/
 def Formula.omegaLanguage {Atom : Type*} (φ : Formula Atom) : ωLanguage (Set Atom) :=
-  ⟨{ v | Satisfies (fun n p => p ∈ v n) 0 φ }⟩
+  ⟨{ v | Satisfies (fun p s => p ∈ s) v φ }⟩
 
 /-- Membership in `Formula.omegaLanguage`: unfolds the set membership. -/
 @[simp]
 theorem mem_omegaLanguage {Atom : Type*} {φ : Formula Atom} {v : ωSequence (Set Atom)} :
-    v ∈ φ.omegaLanguage ↔ Satisfies (fun n p => p ∈ v n) 0 φ :=
+    v ∈ φ.omegaLanguage ↔ Satisfies (fun p s => p ∈ s) v φ :=
   Iff.rfl
 
 /-! ## Atom case -/
@@ -148,53 +149,6 @@ theorem Formula.isRegular_imp {Atom : Type} {φ ψ : Formula Atom}
     (Formula.imp φ ψ).omegaLanguage.IsRegular := by
   rw [omegaLanguage_imp]
   exact Cslib.ωLanguage.IsRegular.sup (Cslib.ωLanguage.IsRegular.compl hφ) hψ
-
-/-! ## Shift lemma -/
-
-/-- Shifting the time index in a valuation commutes with satisfaction.
-
-`Satisfies v (i + k) φ ↔ Satisfies (fun n => v (n + k)) i φ` for all `k`. -/
-private theorem satisfies_shift {Atom : Type*} {v : ℕ → (Atom → Prop)} (k : ℕ) {i : ℕ}
-    {φ : Formula Atom} :
-    Satisfies v (i + k) φ ↔ Satisfies (fun n => v (n + k)) i φ := by
-  induction φ generalizing i with
-  | atom p => simp [Satisfies]
-  | bot => simp [Satisfies]
-  | imp φ ψ ihφ ihψ =>
-    simp only [Satisfies]
-    exact ⟨fun h a => (ihψ.mp (h (ihφ.mpr a))),
-           fun h a => ihψ.mpr (h (ihφ.mp a))⟩
-  | next φ ihφ =>
-    simp only [Satisfies]
-    have h_comm : i + 1 + k = i + k + 1 := by omega
-    rw [← h_comm]
-    exact ihφ (i := i + 1)
-  | untl ψ φ ihψ ihφ =>
-    -- untl ψ φ: ∃ j ≥ i+k, v j satisfies φ (event) ∧ ∀ m ∈ [i+k, j), v m satisfies ψ (guard)
-    -- Note: Burgess convention: untl ψ φ means ψ is the guard, φ is the event
-    simp only [Satisfies]
-    constructor
-    · rintro ⟨j, hj, hj_phi, hguard⟩
-      -- j ≥ i + k; witness j - k in the shifted version
-      refine ⟨j - k, by omega, ?_, ?_⟩
-      · -- Convert: ihφ(j-k) says Satisfies v (j-k+k) φ ↔ Satisfies (fun n => v(n+k)) (j-k) φ
-        have h1 : j - k + k = j := Nat.sub_add_cancel (by omega)
-        have := (ihφ (i := j - k)).mp
-        rw [h1] at this
-        exact this hj_phi
-      · intro m him him_j
-        have := (ihψ (i := m)).mp
-        exact this (hguard (m + k) (by omega) (by omega))
-    · rintro ⟨j, hj, hj_phi, hguard⟩
-      -- j ≥ i; witness j + k in the unshifted version
-      refine ⟨j + k, by omega, ?_, ?_⟩
-      · -- Convert: ihφ(j) says Satisfies v (j+k) φ ↔ Satisfies (fun n => v(n+k)) j φ
-        exact (ihφ (i := j)).mpr hj_phi
-      · intro m him him_j
-        have h1 : m - k + k = m := Nat.sub_add_cancel (by omega)
-        have := (ihψ (i := m - k)).mpr
-        rw [h1] at this
-        exact this (hguard (m - k) (by omega) (by omega))
 
 /-! ## Next case -/
 
@@ -302,17 +256,12 @@ private theorem nextNBA_language_eq {State : Type*} (na : NA.Buchi State (Set At
       obtain ⟨j, hj, h_acc_j⟩ := h_acc k
       exact ⟨j + 1, by omega, by simp only [ss, Set.mem_image]; exact ⟨inner j, h_acc_j, rfl⟩⟩
 
-/-- `L(Xφ) = { xs | xs.tail ∈ L(φ) }`. -/
+/-- `L(◯φ) = { xs | xs.tail ∈ L(φ) }`. -/
 private theorem omegaLanguage_next {Atom : Type*} (φ : Formula Atom) :
     (Formula.next φ).omegaLanguage = ⟨{ xs | xs.tail ∈ φ.omegaLanguage }⟩ := by
   apply ωLanguage.mem_ext
   intro xs
-  simp only [ωLanguage.mem_def, Set.mem_setOf_eq]
-  -- (next φ).omegaLanguage: Satisfies (fun n p => p ∈ xs n) 1 φ
-  -- xs.tail ∈ φ.omegaLanguage: Satisfies (fun n p => p ∈ xs.tail n) 0 φ
-  --   = Satisfies (fun n p => p ∈ xs (n+1)) 0 φ (since xs.tail n = xs (n+1))
-  -- These are equal by satisfies_shift with k=1
-  exact satisfies_shift 1
+  simp only [Formula.omegaLanguage, ωLanguage.mem_def, Set.mem_setOf_eq, Satisfies]
 
 /-- The ω-language of `next φ` is ω-regular, given IH for `φ`. -/
 theorem Formula.isRegular_next {Atom : Type*} {φ : Formula Atom}
@@ -326,35 +275,23 @@ theorem Formula.isRegular_next {Atom : Type*} {φ : Formula Atom}
 
 /-! ## Until case -/
 
-/-- Membership in `φ.omegaLanguage` at a shifted index: `v.drop k ∈ φ.omegaLanguage` iff
-`φ` is satisfied at position `k` in the canonical valuation `fun n p => p ∈ v n`. -/
+/-- Membership in `φ.omegaLanguage` at a shifted sequence: `v.drop k ∈ φ.omegaLanguage` iff
+`φ` is satisfied at the initial state of `v.drop k`. -/
 private theorem mem_omegaLanguage_drop {Atom : Type*} {φ : Formula Atom}
     {v : ωSequence (Set Atom)} {k : ℕ} :
-    v.drop k ∈ φ.omegaLanguage ↔ Satisfies (fun n p => p ∈ v n) k φ := by
-  simp only [mem_omegaLanguage, ωSequence.drop]
-  -- LHS: Satisfies (fun n p => p ∈ v (n + k)) 0 φ
-  -- RHS: Satisfies (fun n p => p ∈ v n) k φ  =  Satisfies (fun n p => p ∈ v n) (0 + k) φ
-  -- Use satisfies_shift k (i := 0): Satisfies val (0 + k) φ ↔ Satisfies (fun n => val (n+k)) 0 φ
-  have h := @satisfies_shift Atom (fun n p => p ∈ v n) k 0 φ
-  simpa using h.symm
+    v.drop k ∈ φ.omegaLanguage ↔ Satisfies (fun p s => p ∈ s) (v.drop k) φ :=
+  Iff.rfl
 
-/-- The ω-language of `φ U ψ` (guard `φ`, event `ψ`) expressed via `Stream.drop`.
+/-- The ω-language of `φ U ψ` (guard `φ`, event `ψ`) expressed via `drop`.
 
-`v ∈ L(untl φ ψ)` iff there exists a position `j` such that `ψ` holds at `j` (the event)
-and `φ` holds at every position `k < j` (the guard). -/
+`v ∈ L(untl φ ψ)` iff there exists a position `j` such that `ψ` holds at `v.drop j`
+(the event) and `φ` holds at every `v.drop k` for `k < j` (the guard). -/
 private theorem omegaLanguage_untl {Atom : Type*} (φ ψ : Formula Atom) :
     (Formula.untl φ ψ).omegaLanguage =
       ⟨{ v | ∃ j, v.drop j ∈ ψ.omegaLanguage ∧ ∀ k < j, v.drop k ∈ φ.omegaLanguage }⟩ := by
   apply ωLanguage.mem_ext
   intro v
-  simp only [ωLanguage.mem_def, Set.mem_setOf_eq]
-  constructor
-  · rintro ⟨j, -, hj_psi, hguard⟩
-    exact ⟨j, mem_omegaLanguage_drop.mpr hj_psi,
-      fun k hkj => mem_omegaLanguage_drop.mpr (hguard k (Nat.zero_le k) hkj)⟩
-  · rintro ⟨j, hj_psi, hguard⟩
-    exact ⟨j, Nat.zero_le j, mem_omegaLanguage_drop.mp hj_psi,
-      fun k _ hkj => mem_omegaLanguage_drop.mp (hguard k hkj)⟩
+  simp only [Formula.omegaLanguage, ωLanguage.mem_def, Set.mem_setOf_eq, Satisfies]
 
 /-- The ω-language of any LTL formula over a finite atom set is ω-regular.
 
@@ -365,7 +302,7 @@ theorem Formula.isRegular' {Atom : Type} [Finite Atom] (φ : Formula Atom) :
     φ.omegaLanguage.IsRegular :=
   ⟨Formula.GNBANBAState φ, inferInstance, Formula.gnbaNBA φ, Formula.gnba_language_eq φ⟩
 
-/-- The ω-language of `φ U ψ` (guard `φ`, event `ψ` in Burgess convention) is ω-regular,
+/-- The ω-language of `φ U ψ` (guard `φ`, event `ψ`) is ω-regular,
 given IH for both subformulas.
 
 Proved via the global GNBA construction (Baier-Katoen / Vardi-Wolper 1986). The hypotheses

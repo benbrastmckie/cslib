@@ -399,21 +399,22 @@ lemma Formula.subformulas_subset_closure (φ : Formula Atom) :
 
 /-- The canonical atom at position `i` in valuation `v` for formula `φ`.
 
-Given a valuation `v : ℕ → (Atom → Prop)` and position `i : ℕ`, the canonical atom
-collects all closure formulas satisfied at `(v, i)`:
+Given an ω-sequence of letter sets `v : ωSequence (Set Atom)` and position `i : ℕ`,
+the canonical atom collects all closure formulas satisfied at the `i`-th position:
 
-  `canonicalAtom v i φ = { ψ ∈ φ.closure | v, i ⊨ ψ }`
+  `canonicalAtom v i φ = { ψ ∈ φ.closure | v.drop i, ⊨ ψ }`
 
 This is the key bridge between LTL semantics and the GNBA state space: the canonical
 atom is a valid atom (satisfies `Formula.IsAtom`), enabling the completeness direction
 of the GNBA correctness proof. -/
-def Formula.canonicalAtom (v : ℕ → (Atom → Prop)) (i : ℕ) (φ : Formula Atom) :
+def Formula.canonicalAtom (v : ωSequence (Set Atom)) (i : ℕ) (φ : Formula Atom) :
     Set (Formula Atom) :=
-  { ψ ∈ Formula.closure φ | Satisfies v i ψ }
+  { ψ ∈ Formula.closure φ | Satisfies (fun p s => p ∈ s) (v.drop i) ψ }
 
 /-- Membership characterization for the canonical atom. -/
-lemma Formula.canonicalAtom_mem_iff {v : ℕ → (Atom → Prop)} {i : ℕ} {φ ψ : Formula Atom} :
-    ψ ∈ Formula.canonicalAtom v i φ ↔ (ψ ∈ Formula.closure φ ∧ Satisfies v i ψ) := by
+lemma Formula.canonicalAtom_mem_iff {v : ωSequence (Set Atom)} {i : ℕ} {φ ψ : Formula Atom} :
+    ψ ∈ Formula.canonicalAtom v i φ ↔
+    (ψ ∈ Formula.closure φ ∧ Satisfies (fun p s => p ∈ s) (v.drop i) ψ) := by
   simp [Formula.canonicalAtom]
 
 /-! ### Canonical atom is an atom -/
@@ -441,12 +442,13 @@ private lemma Formula.imp_sub_right_mem_closure {φ ψ₁ ψ₂ : Formula Atom}
 
 All six conditions of `IsAtom` hold for sets defined by semantic satisfaction:
 1. Subset: by definition, elements of `canonicalAtom v i φ` are in `φ.closure`.
-2. Propositional consistency: `Satisfies v i ψ ↔ ¬Satisfies v i (imp ψ bot)` (classical).
-3. Bot consistency: `¬Satisfies v i bot` (since `Satisfies v i bot = False`).
-4. Imp closure: `Satisfies v i (imp ψ₁ ψ₂) ↔ ¬Satisfies v i ψ₁ ∨ Satisfies v i ψ₂`.
-5. Until right: `Satisfies v i ψ₂ → Satisfies v i (untl ψ₁ ψ₂)` (take `j = i`).
+2. Propositional consistency: satisfaction of ψ and ¬ψ cannot both hold.
+3. Bot consistency: `Satisfies val (v.drop i) bot = False`.
+4. Imp closure: unfolding `Satisfies` for `imp`.
+5. Until right: `Satisfies val (v.drop i) ψ₂ → Satisfies val (v.drop i) (untl ψ₁ ψ₂)`
+   (take `j = 0`, the guard condition is vacuous).
 6. Until left: expansion law of Until. -/
-lemma Formula.canonicalAtom_isAtom (v : ℕ → (Atom → Prop)) (i : ℕ) (φ : Formula Atom) :
+lemma Formula.canonicalAtom_isAtom (v : ωSequence (Set Atom)) (i : ℕ) (φ : Formula Atom) :
     Formula.IsAtom φ (Formula.canonicalAtom v i φ) := by
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
   · -- subset: canonicalAtom ⊆ closure φ
@@ -480,10 +482,10 @@ lemma Formula.canonicalAtom_isAtom (v : ℕ → (Atom → Prop)) (i : ℕ) (φ :
     intro ψ₁ ψ₂ himp
     constructor
     · intro hmem
-      -- hmem : imp ψ₁ ψ₂ ∈ closure φ ∧ Satisfies v i (imp ψ₁ ψ₂)
-      -- Satisfies v i (imp ψ₁ ψ₂) = Satisfies v i ψ₁ → Satisfies v i ψ₂
+      -- hmem : imp ψ₁ ψ₂ ∈ closure φ ∧ Satisfies val (v.drop i) (imp ψ₁ ψ₂)
+      -- = Satisfies val (v.drop i) ψ₁ → Satisfies val (v.drop i) ψ₂
       have hsat := (Formula.canonicalAtom_mem_iff.mp hmem).2
-      by_cases h1 : Satisfies v i ψ₁
+      by_cases h1 : Satisfies (fun p s => p ∈ s) (v.drop i) ψ₁
       · right
         by_cases hbot : ψ₂ = Formula.bot
         · exact (hbot ▸ hsat h1).elim
@@ -504,29 +506,37 @@ lemma Formula.canonicalAtom_isAtom (v : ℕ → (Atom → Prop)) (i : ℕ) (φ :
     intro ψ₁ ψ₂ huntl hψ2
     rw [Formula.canonicalAtom_mem_iff]
     refine ⟨huntl, ?_⟩
-    -- Satisfies v i (untl ψ₁ ψ₂): take j = i, guard is vacuous since no k with i ≤ k < i
+    -- Satisfies val (v.drop i) (untl ψ₁ ψ₂): take j = 0, guard is vacuous (∀ k < 0)
     have hψ2sat := (Formula.canonicalAtom_mem_iff.mp hψ2).2
-    exact ⟨i, le_refl i, hψ2sat, fun k hik hki => absurd hki (Nat.not_lt.mpr hik)⟩
+    simp only [Satisfies, ωSequence.drop_zero]
+    exact ⟨0, by simpa using hψ2sat, fun k hk => absurd hk (Nat.not_lt.mpr (Nat.zero_le k))⟩
   · -- untlLeft: untl ψ₁ ψ₂ ∈ canonicalAtom → ψ₂ ∉ canonicalAtom → ψ₁ ∈ canonicalAtom
     intro ψ₁ ψ₂ huntl hmem hnotψ2
     -- hmem : untl ψ₁ ψ₂ ∈ canonicalAtom
     -- huntl : untl ψ₁ ψ₂ ∈ closure φ (the condition from IsAtom.untlLeft)
     have hmem' := Formula.canonicalAtom_mem_iff.mp hmem
-    -- hmem'.2 : Satisfies v i (untl ψ₁ ψ₂)
-    obtain ⟨j, hij, hjψ2, hguard⟩ := hmem'.2
-    -- Since ψ₂ ∉ canonicalAtom and ψ₂ ∈ closure (by untl_right_mem_closure), ¬Satisfies v i ψ₂
-    have hnotψ2sat : ¬Satisfies v i ψ₂ := by
+    -- hmem'.2 : Satisfies val (v.drop i) (untl ψ₁ ψ₂)
+    -- = ∃ j', Satisfies val (v.drop (i+j')) ψ₂ ∧ ∀ k < j', Satisfies val (v.drop (i+k)) ψ₁
+    simp only [Satisfies, ωSequence.drop_drop] at hmem'
+    obtain ⟨j', hj'ψ2, hguard⟩ := hmem'.2
+    -- Since ψ₂ ∉ canonicalAtom and ψ₂ ∈ closure (by untl_right_mem_closure),
+    -- ¬Satisfies val (v.drop i) ψ₂
+    have hnotψ2sat : ¬Satisfies (fun p s => p ∈ s) (v.drop i) ψ₂ := by
       intro h
       exact hnotψ2 (Formula.canonicalAtom_mem_iff.mpr
         ⟨Formula.untl_right_mem_closure huntl, h⟩)
-    -- So j > i strictly (otherwise j = i and hjψ2 : Satisfies v i ψ₂, contradiction)
-    have hij' : i < j := by
-      rcases Nat.lt_or_eq_of_le hij with h | h
-      · exact h
-      · exact absurd (h ▸ hjψ2) hnotψ2sat
-    -- Applying hguard at k = i: Satisfies v i ψ₁
+    -- So j' > 0 strictly (otherwise j' = 0 and hj'ψ2 : Satisfies val (v.drop i) ψ₂)
+    have hj'_pos : 0 < j' := by
+      by_contra h0
+      push_neg at h0
+      have hj'0 : j' = 0 := Nat.le_zero.mp h0
+      simp only [hj'0, Nat.add_zero] at hj'ψ2
+      exact absurd hj'ψ2 hnotψ2sat
+    -- Applying hguard at k = 0: Satisfies val (v.drop (i+0)) ψ₁ = Satisfies val (v.drop i) ψ₁
+    have h0_sat := hguard 0 hj'_pos
+    simp only [Nat.add_zero] at h0_sat
     exact Formula.canonicalAtom_mem_iff.mpr
-      ⟨Formula.untl_left_mem_closure huntl, hguard i (le_refl i) hij'⟩
+      ⟨Formula.untl_left_mem_closure huntl, h0_sat⟩
 
 /-! ## GNBA Construction -/
 
@@ -692,7 +702,7 @@ This is defined here to state `gnba_language_eq` within `GNBA.lean` without impo
 `OmegaRegular.lean` imports `GNBA.lean`). The definition is equivalent to
 `Formula.omegaLanguage` in `OmegaRegular.lean`. -/
 def Formula.gnbaOmegaLanguage (φ : Formula Atom) : ωLanguage (Set Atom) :=
-  ⟨{ v | Satisfies (fun n p => p ∈ v n) 0 φ }⟩
+  ⟨{ v | Satisfies (fun p s => p ∈ s) v φ }⟩
 
 /-! ### Canonical run transitions -/
 
@@ -742,56 +752,83 @@ at every step.
 
 At each step `i`, the canonical atom at `i` transitions to the canonical atom at `i+1`
 via the input letter `v i`. The three transition conditions follow from:
-1. Letter consistency: `Satisfies v i (atom p) ↔ p ∈ v i` (by definition of `Satisfies`)
-2. Next-step consistency: `Satisfies v i (next ψ) ↔ Satisfies v (i+1) ψ` (by definition)
-3. Until expansion: the expansion law for `Satisfies v i (untl ψ₁ ψ₂)` -/
-private lemma Formula.canonicalAtom_gnbaTr (v : ℕ → Set Atom) (i : ℕ) (φ : Formula Atom) :
+1. Letter consistency: `Satisfies val (v.drop i) (atom p) ↔ p ∈ v.head` (by `Satisfies`)
+2. Next-step consistency: `Satisfies val (v.drop i) (next ψ) ↔ Satisfies val (v.drop (i+1)) ψ`
+3. Until expansion: the expansion law for `Satisfies val (v.drop i) (untl ψ₁ ψ₂)` -/
+private lemma Formula.canonicalAtom_gnbaTr (v : ωSequence (Set Atom)) (i : ℕ) (φ : Formula Atom) :
     Formula.gnbaTr φ
-      ⟨Formula.canonicalAtom (fun n p => p ∈ v n) i φ,
-       Formula.canonicalAtom_isAtom (fun n p => p ∈ v n) i φ⟩
+      ⟨Formula.canonicalAtom v i φ,
+       Formula.canonicalAtom_isAtom v i φ⟩
       (v i)
-      ⟨Formula.canonicalAtom (fun n p => p ∈ v n) (i + 1) φ,
-       Formula.canonicalAtom_isAtom (fun n p => p ∈ v n) (i + 1) φ⟩ := by
+      ⟨Formula.canonicalAtom v (i + 1) φ,
+       Formula.canonicalAtom_isAtom v (i + 1) φ⟩ := by
   refine ⟨?_, ?_, ?_⟩
   · -- Letter consistency: atom p ∈ B_i ↔ p ∈ v i
+    -- `Satisfies val (v.drop i) (atom p) = p ∈ (v.drop i).head = p ∈ v i`
     intro p _hpAtom
+    simp only [Formula.canonicalAtom_mem_iff, Satisfies, ωSequence.head_drop]
     constructor
-    · intro hmem
-      exact (Formula.canonicalAtom_mem_iff.mp hmem).2
-    · intro hp
-      exact Formula.canonicalAtom_mem_iff.mpr ⟨_hpAtom, hp⟩
+    · rintro ⟨_, hp⟩; exact hp
+    · intro hp; exact ⟨_hpAtom, hp⟩
   · -- Next-step consistency: next ψ ∈ B_i ↔ ψ ∈ B_{i+1}
+    -- Satisfies val (v.drop i) (next ψ) = Satisfies val (v.drop i).tail ψ
+    --   = Satisfies val (v.drop (i+1)) ψ
     intro ψ hnext
-    simp only [Formula.canonicalAtom_mem_iff, Satisfies]
-    constructor
-    · rintro ⟨_, hsat⟩
-      exact ⟨Formula.next_sub_mem_closure hnext, hsat⟩
-    · rintro ⟨_hψcl, hsat⟩
-      exact ⟨hnext, hsat⟩
-  · -- Until expansion: untl ψ₁ ψ₂ ∈ B_i ↔ (ψ₂ ∈ B_i ∨ (ψ₁ ∈ B_i ∧ untl ψ₁ ψ₂ ∈ B_{i+1}))
-    intro ψ₁ ψ₂ huntl
     simp only [Formula.canonicalAtom_mem_iff]
     constructor
+    · rintro ⟨_, hsat⟩
+      refine ⟨Formula.next_sub_mem_closure hnext, ?_⟩
+      -- hsat : Satisfies (fun p s => p ∈ s) (v.drop i) (next ψ) = Satisfies ... (v.drop i).tail ψ
+      -- (v.drop i).tail = v.drop (i+1) by tail_drop'
+      simp only [Satisfies] at hsat
+      rwa [ωSequence.tail_drop'] at hsat
+    · rintro ⟨_hψcl, hsat⟩
+      refine ⟨hnext, ?_⟩
+      simp only [Satisfies]
+      rwa [ωSequence.tail_drop']
+  · -- Until expansion: untl ψ₁ ψ₂ ∈ B_i ↔ (ψ₂ ∈ B_i ∨ (ψ₁ ∈ B_i ∧ untl ψ₁ ψ₂ ∈ B_{i+1}))
+    -- New untl: ∃ j', Satisfies val (v.drop (i+j')) ψ₂ ∧ ∀ k < j', Satisfies val (v.drop (i+k)) ψ₁
+    intro ψ₁ ψ₂ huntl
+    simp only [Formula.canonicalAtom_mem_iff, Satisfies, ωSequence.drop_drop]
+    constructor
     · -- untl ψ₁ ψ₂ ∈ B_i → ψ₂ ∈ B_i ∨ (ψ₁ ∈ B_i ∧ untl ψ₁ ψ₂ ∈ B_{i+1})
-      rintro ⟨_, hsat⟩
-      obtain ⟨j, hij, hjψ₂, hguard⟩ := hsat
-      by_cases hij' : j = i
-      · -- j = i: ψ₂ ∈ B_i
+      rintro ⟨_, j', hjψ₂, hguard⟩
+      by_cases hj'0 : j' = 0
+      · -- j' = 0: ψ₂ ∈ B_i (since v.drop (i+0) = v.drop i)
         left
-        exact ⟨Formula.untl_right_mem_closure huntl, hij' ▸ hjψ₂⟩
-      · -- j > i: ψ₁ ∈ B_i and untl ψ₁ ψ₂ ∈ B_{i+1}
+        simp only [hj'0, Nat.add_zero] at hjψ₂
+        exact ⟨Formula.untl_right_mem_closure huntl, hjψ₂⟩
+      · -- j' > 0: ψ₁ ∈ B_i and untl ψ₁ ψ₂ ∈ B_{i+1}
         right
-        have hji : i < j := Nat.lt_of_le_of_ne hij (Ne.symm hij')
-        refine ⟨⟨Formula.untl_left_mem_closure huntl, hguard i (le_refl i) hji⟩,
-                huntl, j, by omega, hjψ₂, fun k hk1 hkj => hguard k (by omega) hkj⟩
+        have hj'_pos : 0 < j' := Nat.pos_of_ne_zero hj'0
+        -- ψ₁ ∈ B_i: guard at k=0 gives Satisfies val (v.drop (i+0)) ψ₁
+        have hψ₁_at_i : Satisfies (fun p s => p ∈ s) (v.drop (i + 0)) ψ₁ :=
+          hguard 0 hj'_pos
+        simp only [Nat.add_zero] at hψ₁_at_i
+        refine ⟨⟨Formula.untl_left_mem_closure huntl, hψ₁_at_i⟩, huntl, ?_⟩
+        -- untl ψ₁ ψ₂ ∈ B_{i+1}: use j' - 1 as the witness
+        -- v.drop ((i+1) + (j'-1)) = v.drop (i + j') by omega
+        have hj'_pred : j' - 1 + 1 = j' := Nat.sub_add_cancel hj'_pos
+        refine ⟨j' - 1, ?_, ?_⟩
+        · -- Satisfies val (v.drop ((i+1) + (j'-1))) ψ₂
+          convert hjψ₂ using 2; omega
+        · -- ∀ k < j'-1, Satisfies val (v.drop ((i+1)+k)) ψ₁
+          intro k hk
+          have := hguard (k + 1) (by omega)
+          convert this using 2; omega
     · -- ψ₂ ∈ B_i ∨ (ψ₁ ∈ B_i ∧ untl ψ₁ ψ₂ ∈ B_{i+1}) → untl ψ₁ ψ₂ ∈ B_i
-      rintro (⟨_, hψ₂sat⟩ | ⟨⟨_, hψ₁sat⟩, _, j, hji1, hjψ₂, hguard⟩)
-      · -- ψ₂ ∈ B_i: take j = i
-        exact ⟨huntl, i, le_refl i, hψ₂sat, fun k hik hki => absurd hki (Nat.not_lt.mpr hik)⟩
-      · -- ψ₁ ∈ B_i and untl ψ₁ ψ₂ ∈ B_{i+1}: combine
-        exact ⟨huntl, j, by omega, hjψ₂,
-          fun k hik hkj =>
-            if h : k = i then h ▸ hψ₁sat else hguard k (by omega) hkj⟩
+      rintro (⟨_, hψ₂sat⟩ | ⟨⟨_, hψ₁sat⟩, _, j', hjψ₂, hguard⟩)
+      · -- ψ₂ ∈ B_i: take j' = 0, v.drop (i+0) = v.drop i
+        exact ⟨huntl, 0, by simpa, fun k hk => absurd hk (Nat.not_lt.mpr (Nat.zero_le k))⟩
+      · -- ψ₁ ∈ B_i and untl ψ₁ ψ₂ ∈ B_{i+1}: combine with j' + 1
+        -- v.drop (i + (j'+1)) = v.drop ((i+1) + j')
+        refine ⟨huntl, j' + 1, ?_, ?_⟩
+        · convert hjψ₂ using 2; omega
+        · intro k hk
+          by_cases hk0 : k = 0
+          · simp only [hk0, Nat.add_zero]; exact hψ₁sat
+          · have := hguard (k - 1) (by omega)
+            convert this using 2; omega
 
 /-! ### Counter step function -/
 
@@ -1018,20 +1055,23 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
           omega
       -- Conclude: t₀+1+(d_first-1) ≥ N (since t₀ ≥ N and d_first-1 ≥ 0)
       exact ⟨t₀ + 1 + (d_first - 1), by omega, hmem_acc⟩
-    -- Key biconditional lemma: ψ ∈ B_i ↔ Satisfies v' i ψ (for all ψ ∈ closure φ)
+    -- Key biconditional lemma: ψ ∈ B_i ↔ Satisfies val (v.drop i) ψ (for all ψ ∈ closure φ)
     have hkey : ∀ (ψ : Formula Atom), ψ ∈ Formula.closure φ →
-        ∀ i, (ψ ∈ (B i).val ↔ Satisfies (fun n p => p ∈ v n) i ψ) := by
+        ∀ i, (ψ ∈ (B i).val ↔ Satisfies (fun p s => p ∈ s) (v.drop i) ψ) := by
       intro ψ hψcl
       induction ψ with
       | atom p =>
         intro i
+        simp only [Satisfies, ωSequence.head_drop]
         exact ⟨fun hmem => (hgnbaTr i).1 p hψcl |>.mp hmem,
                fun hp => (hgnbaTr i).1 p hψcl |>.mpr hp⟩
       | bot =>
         intro i
+        simp only [Satisfies]
         exact ⟨fun hmem => absurd hmem (B i).property.botConsistent, False.elim⟩
       | imp ψ₁ ψ₂ ih₁ ih₂ =>
         intro i
+        simp only [Satisfies]
         have hψ₁cl : ψ₁ ∈ Formula.closure φ := Formula.imp_sub_left_mem_closure hψcl
         rw [(B i).property.impClosure ψ₁ ψ₂ hψcl]
         constructor
@@ -1056,15 +1096,19 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
           · right
             have hψ₁sat := (ih₁ hψ₁cl i).mp h
             rcases Formula.mem_closure_cases hψcl with hsub | ⟨χ, _, heq⟩ | ⟨_, _, _, heq⟩
-            · have hψ₂ne : ψ₂ ≠ Formula.bot :=
-                fun hbot => by simp [Satisfies, hbot] at hsat; exact absurd (hsat hψ₁sat) id
+            · have hψ₂ne : ψ₂ ≠ Formula.bot := by
+                intro hbot
+                simp only [hbot, Satisfies] at hsat
+                exact absurd (hsat hψ₁sat) id
               exact (ih₂ (Formula.imp_sub_right_mem_closure hψcl hψ₂ne) i).mpr (hsat hψ₁sat)
             · simp only [Formula.imp.injEq] at heq
-              simp [Satisfies, heq.2] at hsat; exact absurd (hsat hψ₁sat) id
+              simp only [heq.2, Satisfies] at hsat
+              exact absurd (hsat hψ₁sat) id
             · simp at heq
           · exact Or.inl h
       | next ψ ih =>
         intro i
+        simp only [Satisfies, ωSequence.tail_drop']
         have hψcl' : ψ ∈ Formula.closure φ := Formula.next_sub_mem_closure hψcl
         constructor
         · intro hmem
@@ -1073,10 +1117,11 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
           exact (hgnbaTr i).2.1 ψ hψcl |>.mpr ((ih hψcl' (i + 1)).mpr hsat)
       | untl ψ₁ ψ₂ ih₁ ih₂ =>
         intro i
+        simp only [Satisfies, ωSequence.drop_drop]
         have hψ₁cl : ψ₁ ∈ Formula.closure φ := Formula.untl_left_mem_closure hψcl
         have hψ₂cl : ψ₂ ∈ Formula.closure φ := Formula.untl_right_mem_closure hψcl
         constructor
-        · -- Forward: untl ψ₁ ψ₂ ∈ B_i → Satisfies (untl ψ₁ ψ₂) at i
+        · -- Forward: untl ψ₁ ψ₂ ∈ B_i → ∃ j', Satisfies val (v.drop (i+j')) ψ₂ ∧ ...
           intro hmem
           -- Use hgnbaAcc to find acceptance set visit after i
           have huntl_sub : Formula.untl ψ₁ ψ₂ ∈ Formula.untlSubformulas φ :=
@@ -1126,55 +1171,69 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
               · exact absurd hψ₂ hnotψ₂_jm1
               · have : j - 1 + 1 = j := Nat.succ_pred_eq_of_pos hj_pos
                 exact absurd (this ▸ huntl_j) huntl_not
-          · -- ψ₂ ∈ B_j: build the Until witness
+          · -- ψ₂ ∈ B_j: build the Until witness with offset j' = j - i
             have hψ₁_path : ∀ k, i ≤ k → k < j → ψ₁ ∈ (B k).val := by
               intro k hik hkj
               obtain ⟨huntl_k, hnotψ₂_k⟩ := hpath k hik hkj
               exact (B k).property.untlLeft ψ₁ ψ₂ hψcl huntl_k hnotψ₂_k
-            exact ⟨j, hji,
-                   (ih₂ hψ₂cl j).mp hψ₂j,
-                   fun k hik hkj => (ih₁ hψ₁cl k).mp (hψ₁_path k hik hkj)⟩
-        · -- Backward: Satisfies (untl ψ₁ ψ₂) at i → untl ψ₁ ψ₂ ∈ B_i
-          intro ⟨j, hji, hψ₂j, hψ₁k⟩
-          -- Induction on j - i
+            -- Use j' = j - i as witness
+            refine ⟨j - i, ?_, ?_⟩
+            · -- Satisfies val (v.drop (i + (j-i))) ψ₂ = Satisfies val (v.drop j) ψ₂
+              have hconv : i + (j - i) = j := Nat.add_sub_cancel' hji
+              rw [hconv]
+              exact (ih₂ hψ₂cl j).mp hψ₂j
+            · -- ∀ k < j-i, Satisfies val (v.drop (i+k)) ψ₁
+              intro k hk
+              exact (ih₁ hψ₁cl (i + k)).mp (hψ₁_path (i + k) (Nat.le_add_right i k) (by omega))
+        · -- Backward: ∃ j', Satisfies val (v.drop (i+j')) ψ₂ ∧ ... → untl ψ₁ ψ₂ ∈ B_i
+          intro ⟨j', hj'ψ₂, hψ₁k⟩
+          -- Induction on j'
           suffices aux_back : ∀ (d : ℕ) (start : ℕ),
-              Satisfies (fun n p => p ∈ v n) (start + d) ψ₂ →
-              (∀ k, start ≤ k → k < start + d → Satisfies (fun n p => p ∈ v n) k ψ₁) →
+              Satisfies (fun p s => p ∈ s) (v.drop (start + d)) ψ₂ →
+              (∀ k < d, Satisfies (fun p s => p ∈ s) (v.drop (start + k)) ψ₁) →
               Formula.untl ψ₁ ψ₂ ∈ (B start).val from by
-            exact aux_back (j - i) i (by rw [Nat.add_sub_cancel' hji]; exact hψ₂j)
-              (fun k hki hkj => hψ₁k k hki (by omega))
+            exact aux_back j' i hj'ψ₂ hψ₁k
           intro d
           induction d with
           | zero =>
             intro start hψ₂ _
-            have hψ₂_mem : ψ₂ ∈ (B start).val := (ih₂ hψ₂cl start).mpr (by simpa using hψ₂)
+            simp only [Nat.add_zero] at hψ₂
+            have hψ₂_mem : ψ₂ ∈ (B start).val := (ih₂ hψ₂cl start).mpr hψ₂
             exact (B start).property.untlRight ψ₁ ψ₂ hψcl hψ₂_mem
           | succ d' ihd' =>
             intro start hψ₂ hψ₁k'
-            have hψ₁start : Satisfies (fun n p => p ∈ v n) start ψ₁ :=
-              hψ₁k' start (le_refl _) (by omega)
-            have huntl_succ : Formula.untl ψ₁ ψ₂ ∈ (B (start + 1)).val :=
-              ihd' (start + 1) (by rw [show start + 1 + d' = start + (d' + 1) from by omega]; exact hψ₂)
-                (fun k hk1 hkd' => hψ₁k' k (by omega) (by omega))
+            -- hψ₂ : Satisfies val (v.drop (start + (d'+1))) ψ₂
+            -- hψ₁k' : ∀ k < d'+1, Satisfies val (v.drop (start + k)) ψ₁
+            have hψ₁start : Satisfies (fun p s => p ∈ s) (v.drop (start + 0)) ψ₁ :=
+              hψ₁k' 0 (Nat.succ_pos d')
+            simp only [Nat.add_zero] at hψ₁start
+            have huntl_succ : Formula.untl ψ₁ ψ₂ ∈ (B (start + 1)).val := by
+              apply ihd' (start + 1)
+              · convert hψ₂ using 2; omega
+              · intro k hk
+                have := hψ₁k' (k + 1) (by omega)
+                convert this using 2; omega
             have hψ₁mem : ψ₁ ∈ (B start).val := (ih₁ hψ₁cl start).mpr hψ₁start
             exact ((hgnbaTr start).2.2 ψ₁ ψ₂ hψcl).mpr (Or.inr ⟨hψ₁mem, huntl_succ⟩)
-    -- Conclude: φ ∈ B_0 (from start condition) → Satisfies φ
+    -- Conclude: φ ∈ B_0 (from start condition) → Satisfies val v φ
     have hstart_gnba : (ss 0).1 ∈ Formula.gnbaStart φ := hstart.1
     simp only [Formula.gnbaStart, Set.mem_setOf_eq] at hstart_gnba
-    exact (hkey φ (Formula.self_mem_closure φ) 0).mp hstart_gnba
+    have hphi_sat := (hkey φ (Formula.self_mem_closure φ) 0).mp hstart_gnba
+    simpa using hphi_sat
   · -- Completeness: satisfaction → NBA accepting run
     classical
     intro hsat
     -- Construct the canonical GNBA run
-    let v' : ℕ → (Atom → Prop) := fun n p => p ∈ v n
+    -- `v : ωSequence (Set Atom)`, use directly as the sequence for canonicalAtom
     let B : ℕ → Formula.GNBAState φ := fun i =>
-      ⟨Formula.canonicalAtom v' i φ, Formula.canonicalAtom_isAtom v' i φ⟩
+      ⟨Formula.canonicalAtom v i φ, Formula.canonicalAtom_isAtom v i φ⟩
     -- B transitions satisfy gnbaTr
     have hgnbaTr : ∀ i, Formula.gnbaTr φ (B i) (v i) (B (i + 1)) :=
       fun i => Formula.canonicalAtom_gnbaTr v i φ
     -- φ ∈ B 0 (start state)
-    have hstart : φ ∈ (B 0).val :=
-      Formula.canonicalAtom_mem_iff.mpr ⟨Formula.self_mem_closure φ, hsat⟩
+    have hstart : φ ∈ (B 0).val := by
+      apply Formula.canonicalAtom_mem_iff.mpr
+      exact ⟨Formula.self_mem_closure φ, by simpa using hsat⟩
     -- B visits each GNBA acceptance set infinitely often
     have hgnbaAcc : ∀ χ ∈ Formula.untlSubformulas φ, ∃ᶠ k in Filter.atTop,
         B k ∈ Formula.gnbaAcceptSet φ χ := by
@@ -1190,18 +1249,19 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
       -- hall : ∀ b ≥ N, (ψ₁ U ψ₂) ∈ B_b ∧ ∀ x x', (ψ₁ U ψ₂) = (x U x') → x' ∉ B_b
       -- From hall N: (ψ₁ U ψ₂) ∈ B_N
       obtain ⟨huntl_N, hnotψ₂_N⟩ := hall N (le_refl N)
-      -- B_N = canonicalAtom, so Satisfies (ψ₁ U ψ₂) at N
-      have huntl_N_sat : Satisfies v' N (Formula.untl ψ₁ ψ₂) :=
+      -- B_N = canonicalAtom, so Satisfies val (v.drop N) (ψ₁ U ψ₂)
+      have huntl_N_sat : Satisfies (fun p s => p ∈ s) (v.drop N) (Formula.untl ψ₁ ψ₂) :=
         (Formula.canonicalAtom_mem_iff.mp huntl_N).2
-      -- Get witness j ≥ N with Satisfies ψ₂ at j
-      obtain ⟨j, hjN, hjψ₂, _⟩ := huntl_N_sat
+      -- Get witness j' with Satisfies val (v.drop (N+j')) ψ₂
+      simp only [Satisfies, ωSequence.drop_drop] at huntl_N_sat
+      obtain ⟨j', hj'ψ₂, _⟩ := huntl_N_sat
       -- ψ₂ ∈ closure φ
       have hψ₂cl : ψ₂ ∈ Formula.closure φ := Formula.untl_right_mem_closure hχcl
-      -- ψ₂ ∈ B j
-      have hψ₂_in_Bj : ψ₂ ∈ (B j).val :=
-        Formula.canonicalAtom_mem_iff.mpr ⟨hψ₂cl, hjψ₂⟩
-      -- But hall j hjN says ψ₂ ∉ B j
-      obtain ⟨_, hnotψ₂_j⟩ := hall j hjN
+      -- ψ₂ ∈ B (N + j')
+      have hψ₂_in_Bj : ψ₂ ∈ (B (N + j')).val :=
+        Formula.canonicalAtom_mem_iff.mpr ⟨hψ₂cl, hj'ψ₂⟩
+      -- But hall (N + j') (by omega) says ψ₂ ∉ B (N + j')
+      obtain ⟨_, hnotψ₂_j⟩ := hall (N + j') (Nat.le_add_right N j')
       exact absurd hψ₂_in_Bj (hnotψ₂_j ψ₁ ψ₂ rfl)
     -- Define the cycling counter sequence for the NBA run.
     -- Counter starts at 0 and advances through {0, ..., K-1, K} where K = gnbaK φ.

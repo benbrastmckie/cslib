@@ -4,15 +4,16 @@
     {
       "project_number": 254,
       "project_name": "revise_ltl_conventions_standard_semantics",
-      "status": "researched",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Revise LTL conventions on main to conform to the standard semantic definitions adopted in feat/temporal-formula-propositional (commit 3e147123). Specifically: (1) In Formula.lean, change notation from Burgess convention (event U guard) to standard convention (guard U event) — update untl argument order, someFuture from φ U ⊤ to ⊤ U φ, notation symbols from X/U/𝐅/𝐆 to ◯/𝓤/◇/□, add leadsto (⇝) abbreviation, update all docstrings. (2) In Connectives.lean, remove HasSince/TemporalConnectives/BimodalConnectives and Burgess references — keep only HasUntil/HasNext/FutureTemporalConnectives/LTLConnectives as in the feature branch. (3) In Satisfies.lean, rewrite to use ωSequence State with valuation v : Atom → State → Prop instead of ℕ → (Atom → Prop) with parameter i. (4) Update Cslib.lean barrel imports accordingly. The feature branch commit 3e147123 serves as the reference for all target definitions",
       "topic": "Temporal Logic",
       "created": "2026-06-20T01:49:05Z",
-      "last_updated": "2026-06-20T02:03:14Z",
+      "last_updated": "2026-06-20T03:04:08Z",
       "session_id": "sess_1750383000_a7c3e1",
       "researched": "2026-06-20T02:03:14Z",
-      "next_artifact_number": 2
+      "next_artifact_number": 2,
+      "completion_summary": "Revised all LTL conventions on main to standard semantics: updated notation symbols (◯/𝓤/◇/□), rewrote Satisfies.lean to ωSequence State with valuation, updated all downstream files (GNBA, OmegaRegular, OmegaExecutionSatisfies, Embedding). Build passes cleanly (3009 jobs)."
     },
     {
       "project_number": 253,

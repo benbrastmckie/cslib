@@ -45,14 +45,14 @@ next_project_number: 255
   └─ 251 [NOT STARTED] — Implement the synchronous product construction of an LTS (using e
 250 [NOT STARTED] — Implement NBA complementation: given an NBA A, construct an NBA a
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
-254 [NOT STARTED] — Revise LTL conventions on main to conform to the standard semanti
+254 [RESEARCHED] — Revise LTL conventions on main to conform to the standard semanti
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
 
 ### 254. Revise ltl conventions standard semantics
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None

@@ -1,17 +1,17 @@
 ---
-next_project_number: 254
+next_project_number: 255
 ---
 
 # TODO
 
 ## Task Order
 
-*Updated 2026-06-19. Generated from state.json dependency graph.*
+*Updated 2026-06-20. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,236,241,242,243,245,248,250,252 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 1 | 36,37,180,226,236,241,242,243,245,248,250,252,254 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 2 | 39,40,181,215,251 | 36,37,180,248 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -36,7 +36,7 @@ next_project_number: 254
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-236 [PLANNED] — Complete follow-up PRs from PR #649 for Büchi automata and closur
+236 [IMPLEMENTING] — Complete follow-up PRs from PR #649 for Büchi automata and closur
 241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 242 [NOT STARTED] — Implement full Vardi-Wolper tableau construction for LTL-to-NBA t
 243 [NOT STARTED] — Implement deterministic Büchi automata constructions and related 
@@ -45,10 +45,21 @@ next_project_number: 254
   └─ 251 [NOT STARTED] — Implement the synchronous product construction of an LTS (using e
 250 [NOT STARTED] — Implement NBA complementation: given an NBA A, construct an NBA a
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
+254 [NOT STARTED] — Revise LTL conventions on main to conform to the standard semanti
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 254. Revise ltl conventions standard semantics
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Revise LTL conventions on main to conform to the standard semantic definitions adopted in feat/temporal-formula-propositional (commit 3e147123). Specifically: (1) In Formula.lean, change notation from Burgess convention (event U guard) to standard convention (guard U event) — update untl argument order, someFuture from φ U ⊤ to ⊤ U φ, notation symbols from X/U/𝐅/𝐆 to ◯/𝓤/◇/□, add leadsto (⇝) abbreviation, update all docstrings. (2) In Connectives.lean, remove HasSince/TemporalConnectives/BimodalConnectives and Burgess references — keep only HasUntil/HasNext/FutureTemporalConnectives/LTLConnectives as in the feature branch. (3) In Satisfies.lean, rewrite to use ωSequence State with valuation v : Atom → State → Prop instead of ℕ → (Atom → Prop) with parameter i. (4) Update Cslib.lean barrel imports accordingly. The feature branch commit 3e147123 serves as the reference for all target definitions
+
+---
 
 ### 253. Gather automata literature
 - **Status**: [COMPLETED]
@@ -163,7 +174,7 @@ next_project_number: 254
 ---
 
 ### 236. Follow up prs buchi omega regular
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None

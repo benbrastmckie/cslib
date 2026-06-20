@@ -1,6 +1,16 @@
 {
-  "next_project_number": 254,
+  "next_project_number": 255,
   "active_projects": [
+    {
+      "project_number": 254,
+      "project_name": "revise_ltl_conventions_standard_semantics",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Revise LTL conventions on main to conform to the standard semantic definitions adopted in feat/temporal-formula-propositional (commit 3e147123). Specifically: (1) In Formula.lean, change notation from Burgess convention (event U guard) to standard convention (guard U event) — update untl argument order, someFuture from φ U ⊤ to ⊤ U φ, notation symbols from X/U/𝐅/𝐆 to ◯/𝓤/◇/□, add leadsto (⇝) abbreviation, update all docstrings. (2) In Connectives.lean, remove HasSince/TemporalConnectives/BimodalConnectives and Burgess references — keep only HasUntil/HasNext/FutureTemporalConnectives/LTLConnectives as in the feature branch. (3) In Satisfies.lean, rewrite to use ωSequence State with valuation v : Atom → State → Prop instead of ℕ → (Atom → Prop) with parameter i. (4) Update Cslib.lean barrel imports accordingly. The feature branch commit 3e147123 serves as the reference for all target definitions",
+      "topic": "Temporal Logic",
+      "created": "2026-06-20T01:49:05Z",
+      "last_updated": "2026-06-20T01:49:05Z"
+    },
     {
       "project_number": 253,
       "project_name": "gather_automata_literature",

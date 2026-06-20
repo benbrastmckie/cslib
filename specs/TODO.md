@@ -1,5 +1,5 @@
 ---
-next_project_number: 255
+next_project_number: 261
 ---
 
 # TODO
@@ -11,9 +11,9 @@ next_project_number: 255
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,236,241,242,243,245,248,250,252 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
-| 2 | 39,40,181,215,251 | 36,37,180,248 | Bimodal Porting, Temporal Logic |
-| 3 | 41 | 39,40 | Foundations |
+| 1 | 36,37,180,226,236,241,242,243,245,248,250,252,255,256,259 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 2 | 39,40,181,215,251,257,260 | 36,37,180,248,255,256 | Bimodal Porting, Temporal Logic |
+| 3 | 41,258 | 39,40,257 | Foundations, Temporal Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -45,10 +45,76 @@ next_project_number: 255
   └─ 251 [NOT STARTED] — Implement the synchronous product construction of an LTS (using e
 250 [NOT STARTED] — Implement NBA complementation: given an NBA A, construct an NBA a
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
+255 [NOT STARTED] — Fix stale docstrings and comments left over from the task-254 LTL
+  └─ 260 [NOT STARTED] — Add module-level documentation contrasting the LTL and Temporal c
+256 [NOT STARTED] — Add @[simp] unfold lemmas for LTL.Satisfies to match the pattern 
+  └─ 257 [NOT STARTED] — Fix style issues in GNBA.lean: (1) Break 7 lines exceeding 100 ch
+    └─ 258 [NOT STARTED] — Refactor duplicated proof patterns in GNBA.lean. Currently subfor
+259 [NOT STARTED] — Narrow file-wide linter suppressions in Temporal/Metalogic/ to de
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 260. Add ltl temporal convention contrast docs
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: Task 255
+
+**Description**: Add module-level documentation contrasting the LTL and Temporal convention differences. (1) In the LTL module docstring (Formula.lean or a new LTL.lean barrel file header), add a note explaining that LTL uses standard convention (guard U event, notation ◯/𝓤/◇/□) while Temporal uses Burgess convention (event U guard, notation X/U/𝐅/𝐆), and that Embedding.lean bridges the two via reflexiveUntl. (2) In Temporal/Syntax/Formula.lean module docstring, add a cross-reference noting the convention difference from LTL. (3) In Connectives.lean, add a brief note that HasSince/TemporalConnectives/BimodalConnectives serve Temporal and Bimodal modules while HasUntil/HasNext/FutureTemporalConnectives/LTLConnectives serve LTL.
+
+---
+
+### 259. Narrow temporal metalogic linter suppressions
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Narrow file-wide linter suppressions in Temporal/Metalogic/ to declaration-level scope. Currently 13 file-wide set_option linter.* suppressions exist across 4 files: CompletenessHelpers.lean (3: style.setOption, unusedSimpArgs, flexible), DenseCompleteness.lean (4: unusedSectionVars, unusedSimpArgs, style.setOption, dupNamespace), GeneralizedNecessitation.lean (4: unusedSimpArgs, style.setOption, flexible, style.emptyLine), TemporalContent.lean (2: style.emptyLine, style.longLine). For each suppression: (a) try removing it and see which declarations fail, (b) move the set_option to just those declarations using `set_option ... in`, (c) where possible, fix the underlying issue (remove unused simp args, fix empty lines, break long lines) instead of suppressing. Goal: zero file-wide suppressions, or document why any remaining ones are unavoidable.
+
+---
+
+### 258. Refactor gnba duplicated subformula proofs
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: Task 257
+
+**Description**: Refactor duplicated proof patterns in GNBA.lean. Currently subformulas_untl_left, subformulas_untl_right, subformulas_imp_left, subformulas_imp_right (lines ~236-333) are four near-identical inductive proofs. Similarly untl_left_mem_closure, untl_right_mem_closure, imp_left_mem_closure, imp_right_mem_closure, subformulas_subset_closure (lines ~358-396) follow the same pattern. Refactor each group into a single parameterized lemma with a case dispatch or a shared helper, reducing code duplication while preserving all downstream usage sites. Ensure lake build passes.
+
+---
+
+### 257. Fix gnba long lines and style
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: Task 256
+
+**Description**: Fix style issues in GNBA.lean: (1) Break 7 lines exceeding 100 characters (lines 912, 929, 1023, 1352, 1421, 1427, 1435) — these involve deeply nested gnbaAcceptSet expressions that can be split with let bindings or intermediate names. (2) Rename instInhabitedSetAtom in OmegaRegular.lean:142 to follow Mathlib instance naming conventions (anonymous instance or Set.instInhabited pattern). Ensure lake build passes after all changes.
+
+---
+
+### 256. Add ltl satisfies simp lemmas
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Add @[simp] unfold lemmas for LTL.Satisfies to match the pattern in Temporal/Semantics/Satisfies.lean. Currently LTL's Satisfies is a bare def with no simp lemmas, while Temporal has atom_iff, imp_iff, bot_iff, etc. Add analogous @[simp] lemmas for each constructor: atom, bot, imp, next, untl, plus derived operators someFuture, allFuture, and the leadsto abbreviation. This improves proof automation so downstream files (GNBA, OmegaRegular) can use `simp [Satisfies]` more effectively.
+
+---
+
+### 255. Fix stale ltl docstrings post task254
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Fix stale docstrings and comments left over from the task-254 LTL convention revision. (1) Embedding.lean:15 — module docstring says "Burgess-temporal counterparts"; rewrite to explain that LTL uses standard convention while Temporal uses Burgess, and the embedding bridges the two. (2) Formula.lean:75 — next constructor docstring says "Xφ holds at t"; change to "◯φ holds at t". (3) Embedding.lean:49 — parameter names ψ/φ in the untl match arm are swapped relative to LTL's standard convention (guard=φ₁, event=φ₂); rename for clarity or add an inline comment explaining the swap is intentional due to Temporal's Burgess order. (4) OmegaRegular.lean:310 — docstring says "matches the original proof_wanted"; the proof is now complete, so remove or rephrase the reference.
+
+---
 
 ### 254. Revise ltl conventions standard semantics
 - **Status**: [COMPLETED]

@@ -25,11 +25,6 @@ circular import: Frame.lean -> Completeness.lean -> TruthLemma.lean -> ... -> Fr
 - G/H truth lemma forward/reverse for canonical model
 -/
 
-set_option linter.style.setOption false
-set_option linter.unusedSimpArgs false
-set_option linter.flexible false
-set_option maxHeartbeats 3200000
-
 @[expose] public section
 
 namespace Cslib.Logic.Temporal
@@ -76,6 +71,9 @@ theorem mcs_h_bot_not_mem
   intro h_h_bot
   exact mcs_bot_not_mem h_mcs (temporal_implication_property h_mcs h_h_bot (mcs_p_top_mem h_mcs))
 
+set_option linter.unusedSimpArgs false in
+set_option maxHeartbeats 3200000 in
+-- Extended heartbeats: large derivation tree construction
 /-- Derive double negation elimination: ⊢ ¬¬X → X. -/
 noncomputable def deriveDne (X : Formula Atom) :
     DerivationTree FrameClass.Base [] ((Formula.neg (Formula.neg X)).imp X) := by
@@ -95,6 +93,10 @@ noncomputable def deriveDne (X : Formula Atom) :
   exact deductionTheorem [] (Formula.neg (Formula.neg X)) X
     (DerivationTree.modus_ponens ctx _ _ d_peirce d_imp)
 
+set_option linter.unusedSimpArgs false in
+set_option linter.flexible false in
+set_option maxHeartbeats 3200000 in
+-- Extended heartbeats: temporal duality chain for H-necessitation
 /-- H-necessitation: from ⊢ φ derive ⊢ H(φ). -/
 noncomputable def deriveHNec (φ : Formula Atom)
     (d : DerivationTree FrameClass.Base [] φ) :
@@ -109,6 +111,9 @@ noncomputable def deriveHNec (φ : Formula Atom)
   rw [Formula.swapTemporal_involution] at h_eq
   exact h_eq ▸ d_h
 
+set_option linter.unusedSimpArgs false in
+set_option maxHeartbeats 3200000 in
+-- Extended heartbeats: derivation tree for and-top-intro
 /-- Derive ⊢ φ → ⊤ ∧ φ. -/
 noncomputable def deriveAndTopIntro (φ : Formula Atom) :
     DerivationTree FrameClass.Base [] (φ.imp (Formula.and Formula.top φ)) := by
@@ -125,6 +130,10 @@ noncomputable def deriveAndTopIntro (φ : Formula Atom) :
   have d1 := deductionTheorem [φ] (Formula.imp Formula.top (Formula.neg φ)) Formula.bot d_bot
   exact deductionTheorem [] φ (Formula.and Formula.top φ) d1
 
+set_option linter.unusedSimpArgs false in
+set_option linter.flexible false in
+set_option maxHeartbeats 3200000 in
+-- Extended heartbeats: simp calls in both directions of the iff
 /-- ¬¬X ∈ Ω ↔ X ∈ Ω in MCS. -/
 theorem mcs_dne
     {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistent Ω)
@@ -143,6 +152,8 @@ theorem mcs_dne
       fun hn => mcs_bot_not_mem h_mcs (temporal_implication_property h_mcs hn h)
     exact mcs_neg_of_not_mem h_mcs h_neg_not
 
+set_option maxHeartbeats 3200000 in
+-- Extended heartbeats: multi-step BX6+BX3 combination
 /-- F(F(ψ)) → F(ψ) in MCS (via BX6 + BX3). -/
 theorem mcs_ff_imp_f
     {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistent Ω)
@@ -165,6 +176,8 @@ theorem mcs_ff_imp_f
     exact ⟨.axiom [] _ (.absorb_until Formula.top ψ) trivial⟩
   exact temporal_implication_property h_mcs h_absorb h_f_and
 
+set_option maxHeartbeats 3200000 in
+-- Extended heartbeats: multi-step BX6'+BX3' combination
 /-- P(P(ψ)) → P(ψ) in MCS (via BX6' + BX3'). -/
 theorem mcs_pp_imp_p
     {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistent Ω)
@@ -187,6 +200,8 @@ theorem mcs_pp_imp_p
     exact ⟨.axiom [] _ (.absorb_since Formula.top ψ) trivial⟩
   exact temporal_implication_property h_mcs h_absorb h_p_and
 
+set_option maxHeartbeats 3200000 in
+-- Extended heartbeats: by_contra + contradiction via F-idempotency
 /-- G(ψ) → G(G(ψ)) in MCS (G-transitivity via F-idempotency). -/
 theorem mcs_g_trans
     {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistent Ω)
@@ -209,6 +224,8 @@ theorem mcs_g_trans
   have h_ff := temporal_implication_property h_mcs h_bx3 h_f_neg_g
   exact mcs_not_mem_of_neg h_mcs h_g (mcs_ff_imp_f h_mcs h_ff)
 
+set_option maxHeartbeats 3200000 in
+-- Extended heartbeats: by_contra + contradiction via P-idempotency
 /-- H(ψ) → H(H(ψ)) in MCS (H-transitivity via P-idempotency). -/
 theorem mcs_h_trans
     {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistent Ω)

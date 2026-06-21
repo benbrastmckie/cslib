@@ -72,7 +72,7 @@ inductive Formula (Atom : Type u) : Type u where
   | bot
   /-- Implication. -/
   | imp (φ₁ φ₂ : Formula Atom)
-  /-- Next-step operator: Xφ holds at t iff φ holds at t+1. -/
+  /-- Next-step operator: ◯φ holds at t iff φ holds at t+1. -/
   | next (φ : Formula Atom)
   /-- Until temporal operator: φ₁ U φ₂ (guard U event: φ₁ holds until φ₂). -/
   | untl (φ₁ φ₂ : Formula Atom)

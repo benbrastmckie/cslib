@@ -1,0 +1,11 @@
+{
+  "status": "planned",
+  "summary": "Created 4-phase plan for LTS x NBA product construction and LTL model checking reduction theorem",
+  "artifacts": [
+    {
+      "path": "specs/251_product_construction_model_checking/plans/01_product-model-checking.md",
+      "type": "plan",
+      "summary": "Implementation plan: Phase 1 product definition, Phase 2 soundness/completeness, Phase 3 LTL bridge and generic theorem, Phase 4 unconditional corollary and CI"
+    }
+  ]
+}

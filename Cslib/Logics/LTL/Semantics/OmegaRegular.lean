@@ -307,7 +307,8 @@ given IH for both subformulas.
 
 Proved via the global GNBA construction (Baier-Katoen / Vardi-Wolper 1986). The hypotheses
 `hφ` and `hψ` are not needed by this approach — the GNBA for `untl φ ψ` handles all
-subformulas simultaneously — but the signature matches the original `proof_wanted`. -/
+subformulas simultaneously — but the signature retains them for uniformity with the
+inductive cases in `Formula.isRegular`. -/
 theorem Formula.isRegular_untl {Atom : Type} [Finite Atom] {φ ψ : Formula Atom}
     (_hφ : φ.omegaLanguage.IsRegular) (_hψ : ψ.omegaLanguage.IsRegular) :
     (Formula.untl φ ψ).omegaLanguage.IsRegular :=

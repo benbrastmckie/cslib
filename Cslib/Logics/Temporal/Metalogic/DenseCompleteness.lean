@@ -29,12 +29,6 @@ which by the truth lemma gives membership.
 - `completeness_dense`: ValidDense phi -> ThDerivableFc .Dense phi.
 -/
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedSimpArgs false
-set_option linter.style.setOption false
-set_option linter.dupNamespace false
-set_option maxHeartbeats 3200000
-
 @[expose] public section
 
 namespace Cslib.Logic.Temporal
@@ -64,10 +58,44 @@ theorem g_dense_indicator_in_dense_mcs
   theoremInMcsFc h_mcs
     (.temporal_necessitation _ (.axiom [] _ .dense_indicator (le_refl _)))
 
+set_option linter.unusedSimpArgs false in
+/-- If phi is not Dense-derivable, then {neg phi} is Dense-consistent. -/
+theorem neg_consistent_of_not_derivable_dense
+    {φ : Formula Atom} (h_not : ¬ Temporal.ThDerivableFc FrameClass.Dense φ) :
+    Temporal.SetConsistentFc FrameClass.Dense ({Formula.neg φ} : Set (Formula Atom)) := by
+  intro L hL
+  unfold Metalogic.Consistent
+  intro ⟨d⟩
+  have d_weak : DerivationTree FrameClass.Dense [Formula.neg φ] Formula.bot :=
+    .weakening L [Formula.neg φ] .bot d (fun x hx => by
+      have := hL x hx; simp only [Set.mem_singleton_iff] at this
+      exact List.mem_cons.mpr (Or.inl this))
+  have d_dne := deductionTheoremFc [] (Formula.neg φ) .bot d_weak
+  let neg_phi := Formula.neg φ
+  have efq : DerivationTree (Atom := Atom) FrameClass.Dense []
+      (Formula.bot.imp φ) := .axiom [] _ (.efq φ) (FrameClass.base_le _)
+  have ik : DerivationTree (Atom := Atom) FrameClass.Dense []
+      ((Formula.bot.imp φ).imp (neg_phi.imp (Formula.bot.imp φ))) :=
+    .axiom [] _ (.imp_s (Formula.bot.imp φ) neg_phi) (FrameClass.base_le _)
+  have step_k := DerivationTree.modus_ponens [] _ _ ik efq
+  have is_ax : DerivationTree (Atom := Atom) FrameClass.Dense []
+      ((neg_phi.imp (Formula.bot.imp φ)).imp
+       ((neg_phi.imp Formula.bot).imp (neg_phi.imp φ))) :=
+    .axiom [] _ (.imp_k neg_phi Formula.bot φ) (FrameClass.base_le _)
+  have step_s := DerivationTree.modus_ponens [] _ _ is_ax step_k
+  have step3 := DerivationTree.modus_ponens [] _ _ step_s d_dne
+  have peirce_ax : DerivationTree (Atom := Atom) FrameClass.Dense []
+      (((φ.imp Formula.bot).imp φ).imp φ) :=
+    .axiom [] _ (.peirce φ Formula.bot) (FrameClass.base_le _)
+  exact h_not ⟨DerivationTree.modus_ponens [] _ _ peirce_ax step3⟩
+
 /-! ## Propagation of neg U(top, bot) to All Limit Points -/
 
 variable [Denumerable (Formula Atom)]
 
+set_option linter.unusedSimpArgs false in
+set_option maxHeartbeats 3200000 in
+-- Extended heartbeats: three-branch proof over rational chronicle domain
 /-- neg U(top, bot) in limitF(x) for all x in the limit domain.
 
 For x = 0: limitF(0) = A is Dense-MCS containing neg U(top, bot).
@@ -212,36 +240,6 @@ lemma chronicleDenselyOrderedDense
     exact ⟨⟨z, hz_dom⟩, hxz, hzy⟩
 
 /-! ## Dense Completeness Theorem -/
-
-/-- If phi is not Dense-derivable, then {neg phi} is Dense-consistent. -/
-theorem neg_consistent_of_not_derivable_dense
-    {φ : Formula Atom} (h_not : ¬ Temporal.ThDerivableFc FrameClass.Dense φ) :
-    Temporal.SetConsistentFc FrameClass.Dense ({Formula.neg φ} : Set (Formula Atom)) := by
-  intro L hL
-  unfold Metalogic.Consistent
-  intro ⟨d⟩
-  have d_weak : DerivationTree FrameClass.Dense [Formula.neg φ] Formula.bot :=
-    .weakening L [Formula.neg φ] .bot d (fun x hx => by
-      have := hL x hx; simp only [Set.mem_singleton_iff] at this
-      exact List.mem_cons.mpr (Or.inl this))
-  have d_dne := deductionTheoremFc [] (Formula.neg φ) .bot d_weak
-  let neg_phi := Formula.neg φ
-  have efq : DerivationTree (Atom := Atom) FrameClass.Dense []
-      (Formula.bot.imp φ) := .axiom [] _ (.efq φ) (FrameClass.base_le _)
-  have ik : DerivationTree (Atom := Atom) FrameClass.Dense []
-      ((Formula.bot.imp φ).imp (neg_phi.imp (Formula.bot.imp φ))) :=
-    .axiom [] _ (.imp_s (Formula.bot.imp φ) neg_phi) (FrameClass.base_le _)
-  have step_k := DerivationTree.modus_ponens [] _ _ ik efq
-  have is_ax : DerivationTree (Atom := Atom) FrameClass.Dense []
-      ((neg_phi.imp (Formula.bot.imp φ)).imp
-       ((neg_phi.imp Formula.bot).imp (neg_phi.imp φ))) :=
-    .axiom [] _ (.imp_k neg_phi Formula.bot φ) (FrameClass.base_le _)
-  have step_s := DerivationTree.modus_ponens [] _ _ is_ax step_k
-  have step3 := DerivationTree.modus_ponens [] _ _ step_s d_dne
-  have peirce_ax : DerivationTree (Atom := Atom) FrameClass.Dense []
-      (((φ.imp Formula.bot).imp φ).imp φ) :=
-    .axiom [] _ (.peirce φ Formula.bot) (FrameClass.base_le _)
-  exact h_not ⟨DerivationTree.modus_ponens [] _ _ peirce_ax step3⟩
 
 /-- **Dense Completeness Theorem for Temporal Logic**:
 

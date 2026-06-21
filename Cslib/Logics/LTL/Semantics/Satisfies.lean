@@ -65,6 +65,94 @@ def Valid (v : Atom → State → Prop) (φ : Formula Atom) : Prop :=
 def Satisfiable (φ : Formula Atom) : Prop :=
   ∃ (v : Atom → State → Prop) (w : ωSequence State), Satisfies v w φ
 
+namespace Satisfies
+
+/-! ## Constructor Lemmas -/
+
+/-- Truth of an atom is determined by the valuation at the first state of the word. -/
+@[simp]
+theorem atom_iff (v : Atom → State → Prop) (w : ωSequence State) (p : Atom) :
+    Satisfies v w (.atom p) ↔ v p w.head :=
+  Iff.rfl
+
+/-- Bot (⊥) is false everywhere. -/
+@[simp]
+theorem bot_iff (v : Atom → State → Prop) (w : ωSequence State) :
+    Satisfies v w .bot ↔ False :=
+  Iff.rfl
+
+/-- Truth of implication is material conditional. -/
+@[simp]
+theorem imp_iff (v : Atom → State → Prop) (w : ωSequence State)
+    (φ ψ : Formula Atom) :
+    Satisfies v w (.imp φ ψ) ↔
+      (Satisfies v w φ → Satisfies v w ψ) :=
+  Iff.rfl
+
+/-- Next: φ holds at the next state (the tail of the omega-word). -/
+@[simp]
+theorem next_iff (v : Atom → State → Prop) (w : ωSequence State)
+    (φ : Formula Atom) :
+    Satisfies v w (.next φ) ↔ Satisfies v w.tail φ :=
+  Iff.rfl
+
+/-- Until: φ U ψ holds iff ψ eventually holds, with φ as the guard at all intermediate steps.
+
+  In `untl φ ψ`, `φ` is the guard (holds at all intermediate positions k < j) and
+  `ψ` is the event (holds at witness position j). -/
+@[simp]
+theorem untl_iff (v : Atom → State → Prop) (w : ωSequence State)
+    (φ ψ : Formula Atom) :
+    Satisfies v w (.untl φ ψ) ↔
+      ∃ j, Satisfies v (w.drop j) ψ ∧ ∀ k < j, Satisfies v (w.drop k) φ :=
+  Iff.rfl
+
+/-! ## Derived Connective Lemmas -/
+
+/-- Bot (⊥) is not satisfiable at any word. -/
+theorem bot_false (v : Atom → State → Prop) (w : ωSequence State) :
+    ¬ Satisfies v w .bot :=
+  id
+
+/-- Negation: ¬φ holds iff φ does not hold. -/
+theorem neg_iff (v : Atom → State → Prop) (w : ωSequence State)
+    (φ : Formula Atom) :
+    Satisfies v w (¬φ) ↔ ¬ Satisfies v w φ := by
+  simp only [Satisfies]
+
+/-- Top (⊤) is satisfiable everywhere. -/
+theorem top_true (v : Atom → State → Prop) (w : ωSequence State) :
+    Satisfies v w Formula.top := by
+  intro h
+  exact h
+
+/-! ## Temporal Operator Lemmas -/
+
+/-- Some future (◇φ): φ eventually holds at some future position. -/
+theorem someFuture_iff (v : Atom → State → Prop) (w : ωSequence State)
+    (φ : Formula Atom) :
+    Satisfies v w (◇φ) ↔ ∃ j, Satisfies v (w.drop j) φ := by
+  simp only [Satisfies]
+  constructor
+  · rintro ⟨j, hevent, _⟩
+    exact ⟨j, hevent⟩
+  · rintro ⟨j, hj⟩
+    exact ⟨j, hj, fun _ _ => id⟩
+
+/-- All future (□φ): φ holds at every future position. -/
+theorem allFuture_iff (v : Atom → State → Prop) (w : ωSequence State)
+    (φ : Formula Atom) :
+    Satisfies v w (□φ) ↔ ∀ j, Satisfies v (w.drop j) φ := by
+  simp only [Satisfies]
+  constructor
+  · intro h j
+    by_contra hns
+    exact h ⟨j, hns, fun _ _ => id⟩
+  · intro h ⟨j, hevent, _⟩
+    exact hevent (h j)
+
+end Satisfies
+
 end Cslib.Logic.LTL
 
 end

@@ -1,0 +1,14 @@
+{
+  "status": "implemented",
+  "summary": "All four stale docstring/comment issues fixed across three LTL files. Embedding.lean module docstring now correctly explains LTL uses standard convention and Temporal uses Burgess convention. Formula.lean next constructor docstring updated from ASCII Xφ to Unicode ◯φ. Embedding.lean untl match arm pattern variables renamed from ψ φ to φ₁ φ₂ for consistency with constructor parameters. OmegaRegular.lean stale proof_wanted reference replaced with accurate explanation.",
+  "blockers": [],
+  "phases_completed": 2,
+  "phases_total": 2,
+  "artifacts": [
+    "Cslib/Logics/LTL/Embedding.lean",
+    "Cslib/Logics/LTL/Syntax/Formula.lean",
+    "Cslib/Logics/LTL/Semantics/OmegaRegular.lean",
+    "specs/255_fix_stale_ltl_docstrings_post_task254/summaries/01_stale-docstrings-summary.md"
+  ],
+  "continuation_context": null
+}

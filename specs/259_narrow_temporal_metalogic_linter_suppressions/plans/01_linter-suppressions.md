@@ -65,7 +65,7 @@ This task supports the Temporal module cleanup effort in the broader CSLib porti
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: TemporalContent.lean -- Fix Long Lines and Remove Suppressions [NOT STARTED]
+### Phase 1: TemporalContent.lean -- Fix Long Lines and Remove Suppressions [COMPLETED]
 
 **Goal**: Eliminate both file-wide suppressions in TemporalContent.lean by fixing the underlying issues.
 
@@ -92,7 +92,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: DenseCompleteness.lean -- Remove, Fix, and Narrow Suppressions [NOT STARTED]
+### Phase 2: DenseCompleteness.lean -- Remove, Fix, and Narrow Suppressions [COMPLETED]
 
 **Goal**: Eliminate all 4 file-wide suppressions in DenseCompleteness.lean through removal, structural fix, and declaration-level scoping.
 
@@ -121,7 +121,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: CompletenessHelpers.lean -- Narrow All Suppressions to Declaration Scope [NOT STARTED]
+### Phase 3: CompletenessHelpers.lean -- Narrow All Suppressions to Declaration Scope [COMPLETED]
 
 **Goal**: Eliminate all 3 file-wide suppressions in CompletenessHelpers.lean by scoping `unusedSimpArgs`, `flexible`, and `maxHeartbeats` to individual declarations.
 
@@ -158,7 +158,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: GeneralizedNecessitation.lean -- Narrow and Document Suppressions [NOT STARTED]
+### Phase 4: GeneralizedNecessitation.lean -- Narrow and Document Suppressions [COMPLETED]
 
 **Goal**: Narrow `unusedSimpArgs` and `flexible` to declaration scope, document the structural `emptyLine` suppression, and remove the meta-suppression.
 

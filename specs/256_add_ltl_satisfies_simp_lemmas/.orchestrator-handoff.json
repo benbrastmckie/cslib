@@ -1,0 +1,29 @@
+{
+  "status": "implemented",
+  "summary": "Added 10 lemmas to Cslib/Logics/LTL/Semantics/Satisfies.lean in a new namespace Satisfies block. Phase 1 adds 5 @[simp] constructor lemmas (atom_iff, bot_iff, imp_iff, next_iff, untl_iff) all proved by Iff.rfl. Phase 2 adds 5 non-simp derived lemmas (bot_false, neg_iff, top_true, someFuture_iff, allFuture_iff). Full CI pipeline passed: lake build (3009 jobs), lake exe checkInitImports, lake exe lint-style. Zero sorries, zero axioms, no new warnings.",
+  "blockers": [],
+  "phases_completed": 2,
+  "phases_total": 2,
+  "artifacts": [
+    "Cslib/Logics/LTL/Semantics/Satisfies.lean",
+    "specs/256_add_ltl_satisfies_simp_lemmas/summaries/01_satisfies-simp-lemmas-summary.md",
+    "specs/256_add_ltl_satisfies_simp_lemmas/plans/01_satisfies-simp-lemmas.md"
+  ],
+  "continuation_context": {
+    "files_modified": ["Cslib/Logics/LTL/Semantics/Satisfies.lean"],
+    "lemmas_added": [
+      "Cslib.Logic.LTL.Satisfies.atom_iff",
+      "Cslib.Logic.LTL.Satisfies.bot_iff",
+      "Cslib.Logic.LTL.Satisfies.imp_iff",
+      "Cslib.Logic.LTL.Satisfies.next_iff",
+      "Cslib.Logic.LTL.Satisfies.untl_iff",
+      "Cslib.Logic.LTL.Satisfies.bot_false",
+      "Cslib.Logic.LTL.Satisfies.neg_iff",
+      "Cslib.Logic.LTL.Satisfies.top_true",
+      "Cslib.Logic.LTL.Satisfies.someFuture_iff",
+      "Cslib.Logic.LTL.Satisfies.allFuture_iff"
+    ],
+    "downstream_impact": "14 existing simp only [Satisfies] calls in GNBA.lean and OmegaRegular.lean continue to work unchanged. New @[simp] lemmas provide more targeted alternatives.",
+    "stretch_goal_deferred": "leadsto_iff was not implemented (optional per plan); allFuture_iff and someFuture_iff give it immediately"
+  }
+}

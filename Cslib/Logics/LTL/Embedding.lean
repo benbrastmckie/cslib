@@ -11,8 +11,9 @@ public import Cslib.Logics.Temporal.Syntax.Formula
 
 /-! # LTL-to-Temporal Embedding
 
-This module defines the canonical embedding of `LTL.Formula` into `Temporal.Formula`,
-mapping LTL's five primitives to their Burgess-temporal counterparts.
+This module defines the canonical embedding of `LTL.Formula` into `Temporal.Formula`.
+LTL uses the standard convention `untl guard event`, while Temporal uses the Burgess
+convention `untl event guard`. The embedding bridges the two by swapping arguments.
 
 ## Main definitions
 
@@ -46,7 +47,7 @@ def Formula.toTemporal : Formula Atom → Temporal.Formula Atom
   | .bot => .bot
   | .imp φ ψ => .imp (toTemporal φ) (toTemporal ψ)
   | .next φ => .untl .bot (toTemporal φ)
-  | .untl ψ φ => (toTemporal φ).reflexiveUntl (toTemporal ψ)
+  | .untl φ₁ φ₂ => (toTemporal φ₂).reflexiveUntl (toTemporal φ₁)
 
 end Cslib.Logic.LTL
 

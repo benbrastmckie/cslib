@@ -20,11 +20,8 @@ tempKDistDerived, and pastKDist at the DerivationTree level.
 * Ported from Cslib/Logics/Bimodal/Theorems/GeneralizedNecessitation.lean
 -/
 
-set_option linter.unusedSimpArgs false
-set_option linter.style.setOption false
-set_option linter.flexible false
 set_option linter.style.emptyLine false
-set_option maxHeartbeats 400000
+-- Structural: blank lines between declarations inside @[expose] public section
 
 @[expose] public section
 
@@ -44,6 +41,9 @@ noncomputable abbrev impTransBase {A B C : Formula Atom}
     DerivationTree FrameClass.Base [] (A → C) :=
   impTrans h1 h2
 
+set_option linter.flexible false in
+set_option maxHeartbeats 400000 in
+-- Extended heartbeats: weakening + assumption combination in by block
 /-- Reverse deduction: from Γ ⊢ A → B derive A :: Γ ⊢ B. -/
 noncomputable def reverseDeduction {Γ : Context Atom} {A B : Formula Atom}
     (h : DerivationTree FrameClass.Base Γ (A → B)) :
@@ -73,6 +73,9 @@ noncomputable def contraposition {A B : Formula Atom}
 
 /-! ## Past Necessitation -/
 
+set_option linter.unusedSimpArgs false in
+set_option maxHeartbeats 400000 in
+-- Extended heartbeats: simp-based swapTemporal rewrite chain
 /-- Past necessitation: from ⊢ φ derive ⊢ H(φ). -/
 noncomputable def pastNecessitation (φ : Formula Atom)
     (d : DerivationTree FrameClass.Base [] φ) :
@@ -108,6 +111,9 @@ noncomputable def tempKDistDerived (φ ψ : Formula Atom) :
     (contraposeImp (Formula.someFuture ψ.neg) (Formula.someFuture φ.neg))
   exact impTransBase G_contra G_to_GK
 
+set_option linter.unusedSimpArgs false in
+set_option maxHeartbeats 400000 in
+-- Extended heartbeats: swapTemporal simp chain for H-distribution
 /-- H-distribution at DerivationTree level: ⊢ H(φ→ψ) → (H(φ) → H(ψ)). -/
 noncomputable def pastKDist (A B : Formula Atom) :
     DerivationTree FrameClass.Base [] ((A.imp B).allPast.imp (A.allPast.imp B.allPast)) := by

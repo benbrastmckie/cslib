@@ -59,7 +59,7 @@ No ROADMAP.md items are directly advanced by this documentation cleanup task. Th
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Apply All Four Docstring/Comment Fixes [NOT STARTED]
+### Phase 1: Apply All Four Docstring/Comment Fixes [COMPLETED]
 
 **Goal**: Edit the three source files to fix all four stale documentation issues.
 
@@ -84,7 +84,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Build Verification [NOT STARTED]
+### Phase 2: Build Verification [COMPLETED]
 
 **Goal**: Confirm that all edits are safe and the project builds without errors.
 

@@ -20,7 +20,7 @@ for temporal logic. These are the foundational definitions used by all Chronicle
 -/
 
 set_option linter.style.emptyLine false
-set_option linter.style.longLine false
+-- Structural: blank lines between declarations inside @[expose] public section
 
 @[expose] public section
 
@@ -110,7 +110,8 @@ theorem f_content_iff_not_neg_in_g_content {M : Set (Formula Atom)}
     have h_bx3 : DerivationTree FrameClass.Base [] ((phi.imp phi.neg.neg).allFuture.imp
         ((Formula.untl Formula.top phi).imp (Formula.untl Formula.top phi.neg.neg))) :=
       DerivationTree.axiom [] _ (Axiom.right_mono_until phi phi.neg.neg Formula.top) trivial
-    have h_sf_impl : DerivationTree FrameClass.Base [] ((Formula.someFuture phi).imp (Formula.someFuture phi.neg.neg)) :=
+    have h_sf_impl : DerivationTree FrameClass.Base []
+        ((Formula.someFuture phi).imp (Formula.someFuture phi.neg.neg)) :=
       DerivationTree.modus_ponens [] _ _ h_bx3 h_G_dni
     have h_sf_nn_in : Formula.someFuture phi.neg.neg ∈ M :=
       temporal_implication_property h_mcs (theoremInMcs h_mcs h_sf_impl) h_sf_in
@@ -124,7 +125,8 @@ theorem f_content_iff_not_neg_in_g_content {M : Set (Formula Atom)}
       (mcs_mem_iff_neg_not_mem h_mcs).mpr h_af_not_in
     have h_dne : DerivationTree FrameClass.Base [] (phi.neg.neg.imp phi) := by
       let ctx := [Formula.neg (Formula.neg phi)]
-      have d_peirce : DerivationTree FrameClass.Base ctx (((phi.imp Formula.bot).imp phi).imp phi) :=
+      have d_peirce : DerivationTree FrameClass.Base ctx
+          (((phi.imp Formula.bot).imp phi).imp phi) :=
         .weakening [] ctx _ (.axiom [] _ (.peirce phi Formula.bot) trivial) (fun _ h => nomatch h)
       let ctx2 := [phi.imp Formula.bot, Formula.neg (Formula.neg phi)]
       have d_bot : DerivationTree FrameClass.Base ctx2 Formula.bot :=
@@ -143,7 +145,8 @@ theorem f_content_iff_not_neg_in_g_content {M : Set (Formula Atom)}
     have h_bx3 : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allFuture.imp
         ((Formula.untl Formula.top phi.neg.neg).imp (Formula.untl Formula.top phi))) :=
       DerivationTree.axiom [] _ (Axiom.right_mono_until phi.neg.neg phi Formula.top) trivial
-    have h_sf_impl : DerivationTree FrameClass.Base [] ((Formula.someFuture phi.neg.neg).imp (Formula.someFuture phi)) :=
+    have h_sf_impl : DerivationTree FrameClass.Base []
+        ((Formula.someFuture phi.neg.neg).imp (Formula.someFuture phi)) :=
       DerivationTree.modus_ponens [] _ _ h_bx3 h_G_dne
     exact temporal_implication_property h_mcs (theoremInMcs h_mcs h_sf_impl) h_F_nn
 
@@ -181,7 +184,8 @@ theorem p_content_iff_not_neg_in_h_content {M : Set (Formula Atom)}
     have h_bx3p : DerivationTree FrameClass.Base [] ((phi.imp phi.neg.neg).allPast.imp
         ((Formula.snce Formula.top phi).imp (Formula.snce Formula.top phi.neg.neg))) :=
       DerivationTree.axiom [] _ (Axiom.right_mono_since phi phi.neg.neg Formula.top) trivial
-    have h_sp_impl : DerivationTree FrameClass.Base [] ((Formula.somePast phi).imp (Formula.somePast phi.neg.neg)) :=
+    have h_sp_impl : DerivationTree FrameClass.Base []
+        ((Formula.somePast phi).imp (Formula.somePast phi.neg.neg)) :=
       DerivationTree.modus_ponens [] _ _ h_bx3p h_H_dni
     have h_sp_nn_in : Formula.somePast phi.neg.neg ∈ M :=
       temporal_implication_property h_mcs (theoremInMcs h_mcs h_sp_impl) h_sp_in
@@ -191,7 +195,8 @@ theorem p_content_iff_not_neg_in_h_content {M : Set (Formula Atom)}
       (mcs_mem_iff_neg_not_mem h_mcs).mpr h_ap_not_in
     have h_dne : DerivationTree FrameClass.Base [] (phi.neg.neg.imp phi) := by
       let ctx := [Formula.neg (Formula.neg phi)]
-      have d_peirce : DerivationTree FrameClass.Base ctx (((phi.imp Formula.bot).imp phi).imp phi) :=
+      have d_peirce : DerivationTree FrameClass.Base ctx
+          (((phi.imp Formula.bot).imp phi).imp phi) :=
         .weakening [] ctx _ (.axiom [] _ (.peirce phi Formula.bot) trivial) (fun _ h => nomatch h)
       let ctx2 := [phi.imp Formula.bot, Formula.neg (Formula.neg phi)]
       have d_bot : DerivationTree FrameClass.Base ctx2 Formula.bot :=
@@ -219,7 +224,8 @@ theorem p_content_iff_not_neg_in_h_content {M : Set (Formula Atom)}
     have h_bx3p : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allPast.imp
         ((Formula.snce Formula.top phi.neg.neg).imp (Formula.snce Formula.top phi))) :=
       DerivationTree.axiom [] _ (Axiom.right_mono_since phi.neg.neg phi Formula.top) trivial
-    have h_sp_impl : DerivationTree FrameClass.Base [] ((Formula.somePast phi.neg.neg).imp (Formula.somePast phi)) :=
+    have h_sp_impl : DerivationTree FrameClass.Base []
+        ((Formula.somePast phi.neg.neg).imp (Formula.somePast phi)) :=
       DerivationTree.modus_ponens [] _ _ h_bx3p h_H_dne
     exact temporal_implication_property h_mcs (theoremInMcs h_mcs h_sp_impl) h_P_nn
 

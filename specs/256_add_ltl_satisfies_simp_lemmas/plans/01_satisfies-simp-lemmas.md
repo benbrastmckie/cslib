@@ -64,7 +64,7 @@ No ROADMAP.md items explicitly reference this task. This is a cleanup/automation
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Core @[simp] Constructor Lemmas [NOT STARTED]
+### Phase 1: Core @[simp] Constructor Lemmas [COMPLETED]
 
 **Goal**: Add five @[simp] theorem declarations inside a `namespace Satisfies` block, all proved by `Iff.rfl`.
 
@@ -91,7 +91,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Derived Lemmas and Verification [NOT STARTED]
+### Phase 2: Derived Lemmas and Verification [COMPLETED]
 
 **Goal**: Add non-simp derived lemmas for `bot_false`, `neg_iff`, `top_true`, `someFuture_iff`, `allFuture_iff`, and optionally `leadsto_iff`. Run full build to confirm no downstream breakage.
 

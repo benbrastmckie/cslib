@@ -39,15 +39,15 @@ next_project_number: 261
 241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 243 [RESEARCHED] — Implement deterministic Büchi automata constructions and related 
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
-250 [RESEARCHED] — Implement NBA complementation: given an NBA A, construct an NBA a
-251 [RESEARCHED] — Implement the synchronous product construction of an LTS (using e
+250 [IMPLEMENTING] — Implement NBA complementation: given an NBA A, construct an NBA a
+251 [IMPLEMENTING] — Implement the synchronous product construction of an LTS (using e
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
-255 [PLANNED] — Fix stale docstrings and comments left over from the task-254 LTL
+255 [IMPLEMENTED] — Fix stale docstrings and comments left over from the task-254 LTL
   └─ 260 [NOT STARTED] — Add module-level documentation contrasting the LTL and Temporal c
-256 [PLANNED] — Add @[simp] unfold lemmas for LTL.Satisfies to match the pattern 
+256 [IMPLEMENTED] — Add @[simp] unfold lemmas for LTL.Satisfies to match the pattern 
   └─ 257 [NOT STARTED] — Fix style issues in GNBA.lean: (1) Break 7 lines exceeding 100 ch
     └─ 258 [NOT STARTED] — Refactor duplicated proof patterns in GNBA.lean. Currently subfor
-259 [PLANNED] — Narrow file-wide linter suppressions in Temporal/Metalogic/ to de
+259 [IMPLEMENTED] — Narrow file-wide linter suppressions in Temporal/Metalogic/ to de
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -64,7 +64,7 @@ next_project_number: 261
 ---
 
 ### 259. Narrow temporal metalogic linter suppressions
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -94,7 +94,7 @@ next_project_number: 261
 ---
 
 ### 256. Add ltl satisfies simp lemmas
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -104,7 +104,7 @@ next_project_number: 261
 ---
 
 ### 255. Fix stale ltl docstrings post task254
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -125,7 +125,7 @@ next_project_number: 261
 ---
 
 ### 251. Product construction model checking
-- **Status**: [RESEARCHED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 248
@@ -139,7 +139,7 @@ next_project_number: 261
 ---
 
 ### 250. Nba complementation
-- **Status**: [RESEARCHED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None

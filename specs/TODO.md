@@ -11,7 +11,7 @@ next_project_number: 261
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,242,243,245,250,251,252,255,256,259 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 1 | 36,37,180,226,241,243,245,250,251,252,255,256,259 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 2 | 39,40,181,215,257,260 | 36,37,180,255,256 | Bimodal Porting, Temporal Logic |
 | 3 | 41,258 | 39,40,257 | Foundations, Temporal Logic |
 
@@ -37,18 +37,17 @@ next_project_number: 261
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
-242 [NOT STARTED] — Implement full Vardi-Wolper tableau construction for LTL-to-NBA t
 243 [NOT STARTED] — Implement deterministic Büchi automata constructions and related 
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
-250 [NOT STARTED] — Implement NBA complementation: given an NBA A, construct an NBA a
-251 [NOT STARTED] — Implement the synchronous product construction of an LTS (using e
+250 [RESEARCHING] — Implement NBA complementation: given an NBA A, construct an NBA a
+251 [RESEARCHING] — Implement the synchronous product construction of an LTS (using e
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
-255 [RESEARCHED] — Fix stale docstrings and comments left over from the task-254 LTL
+255 [PLANNED] — Fix stale docstrings and comments left over from the task-254 LTL
   └─ 260 [NOT STARTED] — Add module-level documentation contrasting the LTL and Temporal c
-256 [RESEARCHED] — Add @[simp] unfold lemmas for LTL.Satisfies to match the pattern 
+256 [PLANNED] — Add @[simp] unfold lemmas for LTL.Satisfies to match the pattern 
   └─ 257 [NOT STARTED] — Fix style issues in GNBA.lean: (1) Break 7 lines exceeding 100 ch
     └─ 258 [NOT STARTED] — Refactor duplicated proof patterns in GNBA.lean. Currently subfor
-259 [RESEARCHED] — Narrow file-wide linter suppressions in Temporal/Metalogic/ to de
+259 [PLANNED] — Narrow file-wide linter suppressions in Temporal/Metalogic/ to de
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -65,7 +64,7 @@ next_project_number: 261
 ---
 
 ### 259. Narrow temporal metalogic linter suppressions
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -95,7 +94,7 @@ next_project_number: 261
 ---
 
 ### 256. Add ltl satisfies simp lemmas
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -105,7 +104,7 @@ next_project_number: 261
 ---
 
 ### 255. Fix stale ltl docstrings post task254
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -126,7 +125,7 @@ next_project_number: 261
 ---
 
 ### 251. Product construction model checking
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 248
@@ -139,7 +138,7 @@ next_project_number: 261
 ---
 
 ### 250. Nba complementation
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -184,7 +183,7 @@ next_project_number: 261
 ---
 
 ### 242. Vardi wolper tableau construction
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None

@@ -6,6 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
+public import Cslib.Computability.Automata.DA.Buchi
 public import Cslib.Computability.Automata.DA.Prod
 public import Cslib.Computability.Languages.ExampleEventuallyZero
 
@@ -28,10 +29,10 @@ This file establishes the closure properties of deterministic Büchi automata (D
 
 @[expose] public section
 
-open Set Filter Cslib.ωSequence Cslib.Automata ωAcceptor ωLanguage
-open scoped FLTS Buchi FinAcc
-
 namespace Cslib.Automata.DA
+
+open Set Filter Cslib.ωSequence ωLanguage ωAcceptor
+open scoped Cslib.FLTS Automata.DA.Buchi Automata.DA.FinAcc
 
 variable {State1 State2 Symbol : Type*}
 
@@ -54,21 +55,20 @@ theorem Buchi.union_language_eq (a1 : Buchi State1 Symbol) (a2 : Buchi State2 Sy
     language (a1.union a2) = language a1 ⊔ language a2 := by
   apply mem_ext
   intro xs
-  simp only [mem_language, ωAcceptor.Accepts, mem_sup]
+  rw [Cslib.ωLanguage.mem_sup, mem_language, mem_language, mem_language]
+  simp only [ωAcceptor.Accepts, Buchi.union]
+  rw [← frequently_or_distrib]
   constructor
   · intro h
-    rw [← frequently_or_distrib]
     apply Frequently.mono h
     intro k hk
-    simp only [Buchi.union, Buchi.mk, mem_union, mem_setOf_eq] at hk
-    rw [prod_run_eq] at hk
-    exact hk.imp id id
+    simp only [mem_union, mem_setOf_eq, prod_run_eq] at hk
+    exact hk
   · intro h
-    rw [← frequently_or_distrib] at h
     apply Frequently.mono h
     intro k hk
-    simp only [Buchi.union, Buchi.mk, mem_union, mem_setOf_eq, prod_run_eq]
-    exact hk.imp id id
+    simp only [mem_union, mem_setOf_eq, prod_run_eq]
+    exact hk
 
 /-! ## DBA Complement Non-Closure -/
 
@@ -92,14 +92,11 @@ private lemma infOftenOne_run_succ (xs : ωSequence (Fin 2)) (n : ℕ) :
     Buchi.infOftenOne.run xs (n + 1) = xs n := by
   simp [run, run', Buchi.infOftenOne]
 
-/-- The language of `DA.Buchi.infOftenOne` is exactly the set of ω-words containing
-infinitely many 1s. -/
+/-- Membership in the language of `DA.Buchi.infOftenOne`: accepts iff infinitely many 1s. -/
 @[simp, scoped grind =]
-theorem Buchi.infOftenOne_language_eq :
-    language Buchi.infOftenOne =
-    { xs : ωSequence (Fin 2) | ∃ᶠ k in atTop, xs k = 1 } := by
-  ext xs
-  simp only [mem_language, ωAcceptor.Accepts, mem_setOf_eq]
+theorem Buchi.mem_infOftenOne_language (xs : ωSequence (Fin 2)) :
+    xs ∈ language Buchi.infOftenOne ↔ ∃ᶠ k in atTop, xs k = 1 := by
+  simp only [mem_language, ωAcceptor.Accepts]
   constructor
   · intro h
     rw [frequently_atTop] at h ⊢
@@ -109,13 +106,24 @@ theorem Buchi.infOftenOne_language_eq :
     cases m with
     | zero => simp [run, run'] at hval
     | succ m' =>
-      rw [infOftenOne_run_succ] at hval
+      change xs m' = 1 at hval
       exact ⟨m', by omega, hval⟩
   · intro h
     rw [frequently_atTop] at h ⊢
     intro n
     obtain ⟨m, hm, hval⟩ := h n
-    exact ⟨m + 1, by omega, by simp [infOftenOne_run_succ, hval, Buchi.infOftenOne]⟩
+    exact ⟨m + 1, by omega, by rw [infOftenOne_run_succ]; simp [Buchi.infOftenOne, hval]⟩
+
+/-- The language of `DA.Buchi.infOftenOne` is exactly the set of ω-words containing
+infinitely many 1s. -/
+@[simp, scoped grind =]
+theorem Buchi.infOftenOne_language_eq :
+    language Buchi.infOftenOne =
+    { xs : ωSequence (Fin 2) | ∃ᶠ k in atTop, xs k = 1 } := by
+  apply mem_ext
+  intro xs
+  rw [Buchi.mem_infOftenOne_language]
+  rfl
 
 /-- Deterministic Büchi automata are **not** closed under complementation.
 
@@ -131,27 +139,24 @@ theorem Buchi.not_closed_complement :
   refine ⟨language Buchi.infOftenOne, ⟨Buchi.infOftenOne, rfl⟩, ?_⟩
   intro ⟨da, hda⟩
   apply Cslib.ωLanguage.Example.eventuallyZero_not_omegaLim
-  -- Show that eventuallyZero = language da = l↗ω for some regular language l
-  -- First: (language infOftenOne)ᶜ = eventuallyZero
+  -- (language infOftenOne)ᶜ = eventuallyZero
   have h_compl : (language Buchi.infOftenOne)ᶜ =
       Cslib.ωLanguage.Example.eventuallyZero := by
-    ext xs
-    simp only [mem_compl_iff, infOftenOne_language_eq, mem_setOf_eq,
-      Cslib.ωLanguage.Example.eventuallyZero, mem_setOf_eq, not_frequently]
+    apply mem_ext
+    intro xs
+    rw [Cslib.ωLanguage.mem_compl, mem_infOftenOne_language,
+      Cslib.ωLanguage.mem_def]
+    simp only [Cslib.ωLanguage.Example.eventuallyZero, Set.mem_setOf_eq]
+    rw [not_frequently]
     constructor
     · intro h
-      rw [eventually_atTop] at h ⊢
-      obtain ⟨N, hN⟩ := h
-      refine ⟨N, fun m hm => ?_⟩
-      have := hN m hm
-      simp only [not_eq] at this
-      fin_cases (xs m) <;> simp_all
+      exact h.mono (fun k hk => by simp_all; omega)
     · intro h
-      rw [eventually_atTop] at h ⊢
-      obtain ⟨N, hN⟩ := h
-      refine ⟨N, fun m hm => ?_⟩
-      simp [hN m hm]
-  rw [← h_compl, ← hda, buchi_eq_finAcc_omegaLim]
+      exact h.mono (fun k hk => by omega)
+  -- eventuallyZero = language da = finAcc l↗ω for some l
+  rw [← h_compl, ← hda]
+  open Acceptor ωAcceptor ωLanguage in
+  rw [buchi_eq_finAcc_omegaLim]
   exact ⟨_, rfl⟩
 
 /-! ## DBA Intersection -/
@@ -159,8 +164,8 @@ theorem Buchi.not_closed_complement :
 /-- The counter transition for DBA intersection tracks progress through both accepting conditions.
 The counter `c : Fin 3` represents:
 - `0`: waiting to see a state from `acc1`;
-- `1`: `acc1` was visited (at some step), now waiting for `acc2`;
-- `2`: both `acc1` and `acc2` have been visited since the last reset (the accepting value).
+- `1`: `acc1` was visited, now waiting for `acc2`;
+- `2`: both `acc1` and `acc2` have been visited since last reset (accepting value).
 
 Transitions computed using NEW states `s1'`, `s2'` after reading a symbol:
 - `c = 0`: if `s1' ∈ acc1` advance to `1`, else stay at `0`;
@@ -168,6 +173,7 @@ Transitions computed using NEW states `s1'`, `s2'` after reading a symbol:
 - `c = 2`: reset — if `s1' ∈ acc1` go to `1`, else go to `0`. -/
 noncomputable def interCounter (acc1 : Set State1) (acc2 : Set State2)
     (s1' : State1) (s2' : State2) (c : Fin 3) : Fin 3 :=
+  open Classical in
   if c = 0 then (if s1' ∈ acc1 then 1 else 0)
   else if c = 1 then (if s2' ∈ acc2 then 2 else 1)
   else (if s1' ∈ acc1 then 1 else 0)
@@ -178,9 +184,7 @@ The state space is `State1 × State2 × Fin 3`. The counter in the third compone
 which accepting conditions have been visited:
 - `0` → waiting for `a1.accept`;
 - `1` → `a1.accept` seen, waiting for `a2.accept`;
-- `2` → both seen (the accepting states of the intersection automaton).
-
-The automaton accepts when counter value `2` is visited infinitely often. -/
+- `2` → both seen (accepting states of the intersection automaton). -/
 @[scoped grind =]
 noncomputable def Buchi.inter (a1 : Buchi State1 Symbol) (a2 : Buchi State2 Symbol) :
     Buchi (State1 × State2 × Fin 3) Symbol where
@@ -200,92 +204,126 @@ lemma inter_run_fst (a1 : Buchi State1 Symbol) (a2 : Buchi State2 Symbol)
     ((a1.inter a2).run xs n).1 = a1.run xs n := by
   induction n with
   | zero => simp [run, run', Buchi.inter]
-  | succ n ih => simp [run, run', Buchi.inter, ih]
+  | succ n ih => simp [run, run', Buchi.inter]; congr 1
 
-/-- The second component (first part) of the intersection run equals the `a2` run. -/
+/-- The second.first component of the intersection run equals the `a2` run. -/
 @[simp]
 lemma inter_run_snd_fst (a1 : Buchi State1 Symbol) (a2 : Buchi State2 Symbol)
     (xs : ωSequence Symbol) (n : ℕ) :
     ((a1.inter a2).run xs n).2.1 = a2.run xs n := by
   induction n with
   | zero => simp [run, run', Buchi.inter]
-  | succ n ih => simp [run, run', Buchi.inter, ih]
+  | succ n ih => simp [run, run', Buchi.inter]; congr 1
 
-/-- The counter step: the counter at step `n+1` is determined by the current states and
-the counter at step `n`. -/
+/-- The counter at step `n+1` is computed from the new states and old counter. -/
 @[simp]
 lemma inter_run_counter_succ (a1 : Buchi State1 Symbol) (a2 : Buchi State2 Symbol)
     (xs : ωSequence Symbol) (n : ℕ) :
     ((a1.inter a2).run xs (n + 1)).2.2 =
     interCounter a1.accept a2.accept (a1.run xs (n + 1)) (a2.run xs (n + 1))
       ((a1.inter a2).run xs n).2.2 := by
-  simp [run, run', Buchi.inter, inter_run_fst, inter_run_snd_fst]
+  change interCounter a1.accept a2.accept
+    (a1.tr ((a1.inter a2).run xs n).1 (xs n))
+    (a2.tr ((a1.inter a2).run xs n).2.1 (xs n))
+    ((a1.inter a2).run xs n).2.2 = _
+  simp only [inter_run_fst, inter_run_snd_fst, run_succ]
 
-/-- The counter starts at `0`. -/
+/-- The initial counter is `0`. -/
 @[simp]
 lemma inter_run_counter_zero (a1 : Buchi State1 Symbol) (a2 : Buchi State2 Symbol)
     (xs : ωSequence Symbol) :
     ((a1.inter a2).run xs 0).2.2 = 0 := by
   simp [run, run', Buchi.inter]
 
-/-- Key property of `interCounter`: if the previous counter was `2` or `0`, then
-the new counter is `1` iff the new state visits `acc1`. -/
-private lemma interCounter_of_not_one {acc1 : Set State1} {acc2 : Set State2}
+open Classical in
+/-- `interCounter` from non-1 state: result depends only on whether `s1' ∈ acc1`. -/
+private lemma interCounter_ne_one {acc1 : Set State1} {acc2 : Set State2}
     {s1' : State1} {s2' : State2} {c : Fin 3} (hc : c ≠ 1) :
     interCounter acc1 acc2 s1' s2' c = if s1' ∈ acc1 then 1 else 0 := by
-  simp [interCounter]
-  fin_cases c <;> simp_all
+  simp only [interCounter]; split_ifs <;> simp_all
 
-/-- Key property: if the current counter is `1`, the new counter is `2` iff `s2' ∈ acc2`. -/
-private lemma interCounter_of_one {acc1 : Set State1} {acc2 : Set State2}
+open Classical in
+/-- `interCounter` from state 1: result depends only on whether `s2' ∈ acc2`. -/
+private lemma interCounter_eq_one {acc1 : Set State1} {acc2 : Set State2}
     {s1' : State1} {s2' : State2} :
     interCounter acc1 acc2 s1' s2' 1 = if s2' ∈ acc2 then 2 else 1 := by
   simp [interCounter]
 
-/-- Key property: if the counter advances to `2`, the previous counter must have been `1`
-and the new state visited `acc2`. -/
+/-- If counter becomes 2 at step n+1, then counter was 1 at step n and a2.accept visited. -/
 private lemma counter_two_of_succ {a1 : Buchi State1 Symbol} {a2 : Buchi State2 Symbol}
     {xs : ωSequence Symbol} {n : ℕ}
     (h : ((a1.inter a2).run xs (n + 1)).2.2 = 2) :
     ((a1.inter a2).run xs n).2.2 = 1 ∧ a2.run xs (n + 1) ∈ a2.accept := by
   rw [inter_run_counter_succ] at h
-  simp only [interCounter] at h
-  set c := ((a1.inter a2).run xs n).2.2
-  by_cases hc0 : c = 0
-  · simp [hc0] at h; split_ifs at h <;> simp_all
+  set c := ((a1.inter a2).run xs n).2.2 with hc_def
   by_cases hc1 : c = 1
-  · simp [hc0, hc1] at h
+  · rw [hc1, interCounter_eq_one] at h
     split_ifs at h with h2
     · exact ⟨hc1, h2⟩
-    · simp at h
-  · have hc2 : c = 2 := by fin_cases c <;> simp_all
-    simp [hc0, hc1, hc2] at h
-    split_ifs at h <;> simp_all
+    · exact absurd h (by decide)
+  · rw [interCounter_ne_one hc1] at h
+    split_ifs at h <;> exact absurd h (by decide)
 
-/-- Key property: if the counter advances to `1` from a non-`1` state, the new state
-visited `acc1`. -/
-private lemma counter_one_of_not_one_succ {a1 : Buchi State1 Symbol} {a2 : Buchi State2 Symbol}
+/-- Counter transitions from a non-1 state to 1 iff a1.accept was visited. -/
+private lemma counter_one_via_ne_one {a1 : Buchi State1 Symbol} {a2 : Buchi State2 Symbol}
     {xs : ωSequence Symbol} {n : ℕ}
     (hprev : ((a1.inter a2).run xs n).2.2 ≠ 1)
-    (h : ((a1.inter a2).run xs (n + 1)).2.2 = 1) :
+    (hnext : ((a1.inter a2).run xs (n + 1)).2.2 = 1) :
     a1.run xs (n + 1) ∈ a1.accept := by
-  rw [inter_run_counter_succ] at h
-  rw [interCounter_of_not_one hprev] at h
-  split_ifs at h with h1
+  rw [inter_run_counter_succ, interCounter_ne_one hprev] at hnext
+  split_ifs at hnext with h1
   · exact h1
-  · simp at h
+  · exact absurd hnext (by decide)
 
-/-- Key property: if the counter is `1` and the next state is not in `acc2`, counter stays `1`. -/
+/-- Counter stays at 1 when a2.accept is not visited. -/
 private lemma counter_stays_one {a1 : Buchi State1 Symbol} {a2 : Buchi State2 Symbol}
     {xs : ωSequence Symbol} {n : ℕ}
-    (hprev : ((a1.inter a2).run xs n).2.2 = 1)
-    (hna2 : a2.run xs (n + 1) ∉ a2.accept) :
+    (h1 : ((a1.inter a2).run xs n).2.2 = 1)
+    (h2 : a2.run xs (n + 1) ∉ a2.accept) :
     ((a1.inter a2).run xs (n + 1)).2.2 = 1 := by
-  rw [inter_run_counter_succ, hprev, interCounter_of_one]
-  simp [hna2]
+  rw [inter_run_counter_succ, h1, interCounter_eq_one]; split_ifs; simp_all
 
-/-- If the counter reaches `2` infinitely often, then `a2.accept` is visited infinitely often.
-Each time the counter becomes `2`, the previous counter was `1` and `a2.accept` was visited. -/
+/-- If counter = 2 at step k, then there exists j < k with counter[j] ≠ 1 and counter[j+1] = 1
+and a1.accept visited at j+1. -/
+private lemma counter_two_implies_fresh_one {a1 : Buchi State1 Symbol} {a2 : Buchi State2 Symbol}
+    {xs : ωSequence Symbol} (k : ℕ)
+    (hk : ((a1.inter a2).run xs k).2.2 = 2) :
+    ∃ j, j < k ∧ ((a1.inter a2).run xs j).2.2 ≠ 1 ∧
+         ((a1.inter a2).run xs (j + 1)).2.2 = 1 ∧
+         a1.run xs (j + 1) ∈ a1.accept ∧
+         ∀ m, j < m → m < k → ((a1.inter a2).run xs m).2.2 = 1 := by
+  cases k with
+  | zero => simp [Buchi.inter] at hk
+  | succ k' =>
+    obtain ⟨hprev_one, _⟩ := counter_two_of_succ hk
+    classical
+    set j := Nat.findGreatest (fun j => ((a1.inter a2).run xs j).2.2 ≠ 1) k' with hj_def
+    have hj_le : j ≤ k' := Nat.findGreatest_le k'
+    have h0_ne_one : ((a1.inter a2).run xs 0).2.2 ≠ 1 := by
+      simp [Buchi.inter, run_zero]
+    have hj_ne_one : ((a1.inter a2).run xs j).2.2 ≠ 1 := by
+      by_cases hj0 : j = 0
+      · rw [hj0]; exact h0_ne_one
+      · exact Nat.findGreatest_spec
+          (P := fun j => ((a1.inter a2).run xs j).2.2 ≠ 1) (Nat.zero_le k') h0_ne_one
+    have hafter : ∀ m, j < m → m ≤ k' → ((a1.inter a2).run xs m).2.2 = 1 := by
+      intro m hjm hmk'
+      by_contra hm_ne1
+      have := Nat.le_findGreatest (P := fun j => ((a1.inter a2).run xs j).2.2 ≠ 1)
+        hmk' hm_ne1
+      omega
+    have hjk' : j < k' := by
+      by_contra h
+      push Not at h
+      have : j = k' := Nat.le_antisymm hj_le h
+      rw [this] at hj_ne_one
+      exact hj_ne_one hprev_one
+    have hjnext : ((a1.inter a2).run xs (j + 1)).2.2 = 1 :=
+      hafter (j + 1) (by omega) hjk'
+    have ha1 := counter_one_via_ne_one hj_ne_one hjnext
+    exact ⟨j, by omega, hj_ne_one, hjnext, ha1, fun m hjm hmk => hafter m hjm (by omega)⟩
+
+/-- If the counter reaches `2` infinitely often, then `a2.accept` is visited infinitely often. -/
 private lemma inter_counter_two_implies_a2_inf
     {a1 : Buchi State1 Symbol} {a2 : Buchi State2 Symbol}
     {xs : ωSequence Symbol}
@@ -295,85 +333,38 @@ private lemma inter_counter_two_implies_a2_inf
   intro n
   obtain ⟨m, hm, hm_val⟩ := h (n + 1)
   cases m with
-  | zero => simp at hm_val
+  | zero => omega
   | succ m' =>
     obtain ⟨_, hm'_a2⟩ := counter_two_of_succ hm_val
     exact ⟨m' + 1, by omega, hm'_a2⟩
 
 /-- If the counter reaches `2` infinitely often, then `a1.accept` is visited infinitely often.
 
-Each "cycle" through the counter ends with a transition to `2`. Each such cycle must start
-with a fresh visit to `a1.accept` (from counter `0` or `2` transitioning to `1`). Since there
-are infinitely many cycles, there are infinitely many such `a1.accept` visits. -/
+Each occurrence of counter=2 at step `k` produces a "fresh" step `j < k` where the counter
+transitions from ≠1 to 1, requiring an `a1.accept` visit at `j+1`. For two distinct counter=2
+occurrences at `k₁ < k₂`, the respective fresh steps satisfy `j₂ ≥ k₁` (since `counter(k₁) = 2 ≠ 1`
+is the last non-1 step before `k₂`). Hence the sequence of fresh steps is unbounded, giving
+infinitely many `a1.accept` visits. -/
 private lemma inter_counter_two_implies_a1_inf
     {a1 : Buchi State1 Symbol} {a2 : Buchi State2 Symbol}
     {xs : ωSequence Symbol}
     (h : ∃ᶠ k in atTop, ((a1.inter a2).run xs k).2.2 = 2) :
     ∃ᶠ k in atTop, a1.run xs k ∈ a1.accept := by
-  -- The counter visits 2 infinitely often. Between each pair of consecutive 2-visits,
-  -- there must be a step where counter transitions from non-1 to 1 (via a1.accept).
-  -- This is because after each 2, the counter resets to 0 or 1.
-  -- If it resets to 0, then the next visit to 2 requires passing through 1 from 0,
-  -- hence a1.accept must be visited.
-  -- If it resets to 1 (because a1.accept is visited at the reset step), that visit to a1.accept
-  -- counts as the fresh visit.
-  -- In either case, between each 2 and the NEXT 2, at least one a1.accept visit occurs
-  -- that brings counter to 1. So infinitely many 2s → infinitely many a1.accept visits.
-  --
-  -- Formally: let k₁ < k₂ be consecutive 2-occurrences. We show ∃ k₁ < k ≤ k₂ with a1.accept at k.
-  -- The counter goes from 2 (at k₁) to eventually 2 again (at k₂).
-  -- After k₁: counter is NOT 2 for k₁ < k < k₂ (assuming k₂ is the NEXT 2 after k₁).
-  -- Hmm, we don't have "consecutive" easily.
-  --
-  -- Alternative: show that each time counter = 2, at some PREVIOUS step (between the LAST 2 and now)
-  -- a1.accept was visited. Since 2s are infinite, a1.accept visits are infinite.
-  --
-  -- Actually let me use a more direct argument:
-  -- Define f(k) = the most recent step ≤ k where counter became 1 from non-1.
-  -- Show ∃ᶠ such steps by proving that between any two 2-occurrences, there is at least one.
-  --
-  -- For the proof to work cleanly, I'll use the following:
-  -- CLAIM: ∀ k, if counter at k = 2, then ∃ j ≤ k, a1.run xs j ∈ a1.accept ∧
-  --             counter was 1 at some step in (j, k].
-  -- This is true because to reach 2 from any state, you need to pass through 1 (from non-1),
-  -- and passing through 1 from non-1 requires a1.accept.
-  --
-  -- Let me try: show that counter transitions 2→2 require passing through 1 with a1.accept.
-  -- Since counter at 2 next step = 0 or 1 (interCounter_of_not_one 2 ≠ 1),
-  -- after a 2-step, counter is NOT 2 unless another step brings it to 2 via 1.
-  -- So between any two consecutive 2-occurrences, counter visits 1 (fresh from non-1).
-  -- At that fresh 1-visit, a1.accept was visited.
-  --
-  -- Let me implement this:
   rw [frequently_atTop] at h ⊢
   intro N
-  obtain ⟨k₂, hk₂N, hk₂⟩ := h (N + 1)
-  -- Find the "latest" step before k₂ where counter ≠ 1
-  -- (or the first time counter = 1 after the last non-1 before k₂)
-  -- Since counter at k₂ = 2, by counter_two_of_succ (applied to k₂-1):
-  cases k₂ with
-  | zero => simp at hk₂
-  | succ k₂' =>
-    obtain ⟨hprev_one, ha2⟩ := counter_two_of_succ hk₂
-    -- counter at k₂' = 1. Find when this 1 was first established.
-    -- We look for the largest j ≤ k₂' such that counter at j ≠ 1.
-    -- If no such j exists (counter was always 1 up to k₂'), then counter was 1 at 0.
-    -- But counter at 0 = 0 ≠ 1. So there exists such j.
-    -- Let j = largest index ≤ k₂' with counter ≠ 1.
-    -- Then counter at j+1 = 1 (from non-1), so a1.accept visited at j+1.
-    -- Use Classical.choice to find j.
-    -- Find the last step ≤ k₂' where counter is NOT 1.
-    -- Since counter at 0 = 0 ≠ 1, there's at least one such step.
-    have h0 : ((a1.inter a2).run xs 0).2.2 ≠ 1 := by
-      simp [inter_run_counter_zero]
-    -- The set of steps ≤ k₂' with counter ≠ 1 is nonempty.
-    let S := { j | j ≤ k₂' ∧ ((a1.inter a2).run xs j).2.2 ≠ 1 }
-    have hS_nonempty : S.Nonempty := ⟨0, Nat.zero_le _, h0⟩
-    let j := Nat.find (hS_nonempty.bddAbove.exists_isGreatest (by use k₂'; constructor; omega; simp [S]))
-    sorry
+  obtain ⟨k₁, hk₁, hk₁_val⟩ := h (N + 2)
+  obtain ⟨k₂, hk₂, hk₂_val⟩ := h (k₁ + 1)
+  obtain ⟨j₂, hj₂k₂, hj₂_ne1, -, hj₂_a1, hj₂_max⟩ := counter_two_implies_fresh_one k₂ hk₂_val
+  have hj₂_ge_k₁ : j₂ ≥ k₁ := by
+    by_contra h
+    push Not at h
+    have hk₁_one := hj₂_max k₁ (by omega) (by omega)
+    rw [hk₁_val] at hk₁_one
+    exact absurd hk₁_one (by decide)
+  exact ⟨j₂ + 1, by omega, hj₂_a1⟩
 
 /-- If both component accepting conditions are visited infinitely often, then the counter
-reaches `2` infinitely often (backward direction of `Buchi.inter_language_eq`). -/
+reaches `2` infinitely often. -/
 private lemma counter_reaches_two_of_both_inf
     (a1 : Buchi State1 Symbol) (a2 : Buchi State2 Symbol)
     (xs : ωSequence Symbol)
@@ -383,198 +374,70 @@ private lemma counter_reaches_two_of_both_inf
   rw [frequently_atTop]
   intro N
   rw [frequently_atTop] at h1 h2
-  -- Find n₁ ≥ N+1 with a1.accept
-  obtain ⟨n₁, hn₁N, hn₁acc⟩ := h1 (N + 1)
-  -- The counter at n₁ might be anything; but it can be made to be 1 by choosing n₁ carefully.
-  -- Strategy: find step where counter transitions from non-1 to 1.
-  -- First: find m₁ ≥ N with counter ≠ 1 (exists since counter starts at 0)
-  -- Actually let's just directly construct: pick n₁ such that counter at n₁-1 ≠ 1.
-  -- We use: counter at n₁ = interCounter ... (counter at n₁-1)
-  --   if counter at n₁-1 ≠ 1: counter at n₁ ∈ {0, 1}
-  --   if counter at n₁-1 = 1: counter at n₁ ∈ {1, 2}
-  -- In either case, if we find n₁ with a1.accept AND counter at n₁-1 ≠ 1 → counter at n₁ = 1
-  -- Then find n₂ > n₁ with a2.accept. Show counter at n₂ = 2.
-  -- But we might not be able to force counter at n₁-1 ≠ 1.
-  --
-  -- Alternative simpler approach: just show ∃ counter = 1 with a2.accept ahead.
-  -- The key claim: once counter = 1, the next step with a2.accept gives counter = 2.
-  --
-  -- Step 1: Show counter reaches 1 at or after N.
-  -- Counter starts at 0. On any step with a1.accept and counter = 0, counter → 1.
-  -- If ∃ n ≥ N with counter = 0 and a1.accept at n+1: then counter at n+1 = 1.
-  -- But what if counter ≥ 1 always after N? Then either always 1 or passes through 2.
-  -- If always 1: then any a2.accept visit gives counter = 2.
-  -- If passes through 2: counter → 0 or 1. If → 0, back to case above.
-  --
-  -- Here's the key: counter stays 1 until a2.accept or a1.accept (in case c=1, a2.accept→2).
-  -- From c=1, a1.accept has no effect (counter stays at 1). So:
-  --   c=1, a2.accept → counter=2 → then resets.
-  --   c=1, no a2.accept → stays at 1.
-  --
-  -- So if counter is ever at 1 at time n, and we wait for the next a2.accept,
-  -- we get counter = 2 (since counter stays at 1 until a2.accept is seen).
-  -- Wait, that's only true if no a2.accept is seen strictly between n and the next occurrence.
-  -- Since counter at 1 only moves to 2 via a2.accept, and we want the FIRST a2.accept after n,
-  -- counter stays at 1 until then, and becomes 2 at that first occurrence.
-  --
-  -- More precisely: if counter = 1 at time n₁, and n₂ is the FIRST time after n₁ with a2.accept,
-  -- then counter stays 1 from n₁ to n₂-1, and counter = 2 at n₂.
-  -- But we don't need FIRST a2.accept; we just need SOME a2.accept after n₁ while counter = 1.
-  --
-  -- Algorithm:
-  -- 1. Find n₀ ≥ N where counter = 0 or counter = 2 (exists: initially counter = 0).
-  -- 2. Find n₁ > n₀ with a1.accept (exists by h1).
-  --    Counter at n₁ transitions from previous counter.
-  --    If previous (n₁-1) counter was 0 or 2: counter at n₁ = 1 (by interCounter and a1.accept).
-  --    If previous counter was 1: counter at n₁ stays at 1 or goes to 2 (if also a2.accept).
-  -- 3. In all cases, counter at n₁ ∈ {1, 2}.
-  --    If counter at n₁ = 2: done.
-  --    If counter at n₁ = 1: find n₂ > n₁ with a2.accept (by h2).
-  --       Counter stays at 1 between n₁ and n₂ (by induction on counter_stays_one).
-  --       Actually we need: for all j with n₁ ≤ j < n₂, counter at j = 1.
-  --       This is by induction: counter at n₁ = 1, counter at j+1 = 1 if a2 not visited at j+1.
-  --       For j+1 ≤ n₂-1: we DON'T know a2 not visited there; h2 just gives ∃ some n₂.
-  --       We need the FIRST a2 occurrence after n₁.
-  --
-  -- Let me use well-founded recursion / Nat.find.
-  --
-  -- Alternatively, let me use a simpler claim:
-  -- CLAIM: ∀ n₁, if counter at n₁ = 1, then ∃ n₂ ≥ n₁, counter at n₂ = 2.
-  -- Proof: since h2 gives infinitely many a2 visits, there exists n₂ ≥ n₁ with a2.accept.
-  --   Let n₂ be the FIRST such (use Nat.find).
-  --   For all n₁ ≤ j < n₂: counter at j = 1 (by induction using counter_stays_one).
-  --   At n₂: counter = 2.
-  --
-  -- Let me implement this more carefully.
-  --
-  -- First: claim about first occurrence of a2 after n₁.
-  suffices ∃ n₁ ≥ N + 1, ((a1.inter a2).run xs n₁).2.2 = 1 by
-    obtain ⟨n₁, hn₁, hc1⟩ := this
-    -- Counter = 1 at n₁. Find first a2 visit after n₁.
-    have h2' := h2 n₁
-    obtain ⟨n₂, hn₂, hn₂acc⟩ := h2'
-    -- Find FIRST a2 visit after n₁
-    have h_first : ∃ n₂ ≥ n₁, a2.run xs n₂ ∈ a2.accept ∧
-        ∀ j, n₁ ≤ j → j < n₂ → a2.run xs j ∉ a2.accept := by
-      classical
-      let n₂₀ := Nat.find ⟨n₂, hn₂, hn₂acc⟩
-      exact ⟨n₂₀, (Nat.find_spec ⟨n₂, hn₂, hn₂acc⟩).1,
-             (Nat.find_spec ⟨n₂, hn₂, hn₂acc⟩).2,
-             fun j hj₁ hj₂ => by
-               intro h_contra
-               exact absurd (Nat.find_min ⟨n₂, hn₂, hn₂acc⟩ (show j < n₂₀ from hj₂) |>.mt
-                 (not_not.mpr ⟨hj₁, h_contra⟩)) (not_not.mpr rfl)⟩
-    obtain ⟨n₂, hn₂n₁, hn₂acc, hn₂first⟩ := h_first
-    -- Counter stays 1 from n₁ to n₂-1
-    have counter_stays : ∀ j, n₁ ≤ j → j ≤ n₂ - 1 → ((a1.inter a2).run xs j).2.2 = 1 := by
-      intro j hj₁ hj₂
-      obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hj₁
-      induction d with
-      | zero => simpa using hc1
-      | succ d ih =>
-        apply counter_stays_one (ih (by omega))
-        exact hn₂first (n₁ + d) (by omega) (by omega)
-    -- counter at n₂ = 2
-    cases Nat.eq_or_lt_of_le hn₂n₁ with
-    | inl h => subst h; simp at hc1
-    | inr h =>
-      have h_prev1 : ((a1.inter a2).run xs (n₂ - 1)).2.2 = 1 :=
-        counter_stays (n₂ - 1) (by omega) (by omega)
-      have h_n₂_eq : n₂ - 1 + 1 = n₂ := Nat.sub_add_cancel (by omega)
-      have counter_at_n₂ : ((a1.inter a2).run xs n₂).2.2 = 2 := by
-        rw [← h_n₂_eq, inter_run_counter_succ, h_prev1, interCounter_of_one]
-        simp [hn₂acc]
-      exact ⟨n₂, by omega, counter_at_n₂⟩
-  -- Prove: ∃ n₁ ≥ N + 1 with counter = 1.
-  -- Use a1.accept infinitely often.
-  -- Find any n₁ ≥ N + 1 with a1.accept.
-  obtain ⟨n₁, hn₁N, hn₁acc⟩ := h1 (N + 1)
-  -- Counter at n₁: it's at least 1 (could be 1 or 2 or 0 depending on previous).
-  -- Case 1: counter at n₁ = 2 → find next step and eventually reach 1.
-  -- Case 2: counter at n₁ = 1 → done.
-  -- Case 3: counter at n₁ = 0 → a1.accept → counter transitions to 1. Wait, n₁ is the new state.
-  --   Actually: counter at n₁ = interCounter ... (counter at n₁-1).
-  --   With a1.accept at n₁ and prev_counter ≠ 1: counter at n₁ = 1.
-  --   With prev_counter = 1: counter at n₁ = if a2 then 2 else 1.
-  -- So in any case, counter at n₁ ∈ {1, 2}.
-  have h_1_or_2 : ((a1.inter a2).run xs n₁).2.2 = 1 ∨
-                  ((a1.inter a2).run xs n₁).2.2 = 2 := by
-    cases n₁ with
-    | zero => left; simp [run, run', Buchi.inter] at hn₁acc
-    | succ n₁' =>
-      set prev_c := ((a1.inter a2).run xs n₁').2.2 with h_prev
+  -- The counter is not eventually always 1: if it were, a2.accept visits would give counter=2.
+  have h_inf_ne_one : ∃ᶠ k in atTop, ((a1.inter a2).run xs k).2.2 ≠ 1 := by
+    by_contra h_ev_one
+    rw [not_frequently, eventually_atTop] at h_ev_one
+    obtain ⟨N₀, hN₀⟩ := h_ev_one
+    obtain ⟨m, hm, hm_a2⟩ := h2 (N₀ + 1)
+    cases m with
+    | zero => omega
+    | succ m' =>
+      have hm_prev_one : ((a1.inter a2).run xs m').2.2 = 1 :=
+        not_not.mp (hN₀ m' (by omega))
+      have hm_two : ((a1.inter a2).run xs (m' + 1)).2.2 = 2 := by
+        rw [inter_run_counter_succ, hm_prev_one, interCounter_eq_one]
+        exact if_pos hm_a2
+      exact absurd (hN₀ (m' + 1) (by omega)) (hm_two ▸ by decide)
+  rw [frequently_atTop] at h_inf_ne_one
+  obtain ⟨n₀, hn₀, hn₀_ne1⟩ := h_inf_ne_one (N + 1)
+  obtain ⟨n₁, hn₁, hn₁_a1⟩ := h1 (n₀ + 1)
+  -- Counter at n₁ ∈ {1, 2} (since a1.accept visited)
+  cases n₁ with
+  | zero => omega
+  | succ n₁' =>
+    have hc_n₁ : ((a1.inter a2).run xs (n₁' + 1)).2.2 = 1 ∨
+                 ((a1.inter a2).run xs (n₁' + 1)).2.2 = 2 := by
       rw [inter_run_counter_succ]
-      simp only [interCounter]
-      have h_s1' : a1.run xs (n₁' + 1) ∈ a1.accept := hn₁acc
+      set prev_c := ((a1.inter a2).run xs n₁').2.2
       by_cases hprev1 : prev_c = 1
-      · simp [hprev1, h_s1']
+      · rw [hprev1, interCounter_eq_one]
         split_ifs with h2acc
         · right; rfl
         · left; rfl
-      · simp [hprev1]
-        by_cases hprev0 : prev_c = 0
-        · simp [hprev0, h_s1']
-        · have hprev2 : prev_c = 2 := by fin_cases prev_c <;> simp_all
-          simp [hprev2, hprev0, h_s1']
-  cases h_1_or_2 with
-  | inl h => exact ⟨n₁, hn₁N, h⟩
-  | inr h =>
-    -- counter at n₁ = 2. Next step, counter resets to 0 or 1.
-    -- If it resets to 1 (a1.accept at n₁+1), we're done.
-    -- Otherwise, it goes to 0, and we need another a1.accept visit.
-    -- Since a1.accept is infinite, we'll find another one.
-    -- Let's find the next a1.accept after n₁ and repeat.
-    -- In fact: after counter=2, next counter = interCounter _ _ s1' s2' 2
-    --   = if s1' ∈ a1.accept then 1 else 0.
-    -- So there exists n₁+1 where counter = 0 or 1 (actually one step after n₁=2).
-    -- If counter at n₁+1 = 1: use ⟨n₁+1, by omega, h⟩.
-    -- If counter at n₁+1 = 0: find next a1.accept after n₁+1 and get counter = 1.
-    -- This requires induction, but let's use well-founded recursion via h1 again.
-    obtain ⟨n₁', hn₁'N, hn₁'acc⟩ := h1 (n₁ + 1)
-    -- n₁' > n₁ and counter at n₁ = 2.
-    -- We need a step between n₁ and n₁' where counter = 1 from non-1.
-    -- At some step after n₁ (before counter reaches 1 again), counter = 0 (after reset).
-    -- Specifically: at n₁+1, counter = interCounter ... 2 = if a1 then 1 else 0.
-    have hc_n₁_next : ((a1.inter a2).run xs (n₁ + 1)).2.2 = 0 ∨
-                      ((a1.inter a2).run xs (n₁ + 1)).2.2 = 1 := by
-      rw [inter_run_counter_succ, h]
-      simp [interCounter_of_not_one (by decide : (2 : Fin 3) ≠ 1)]
-      split_ifs <;> simp
-    cases hc_n₁_next with
-    | inr h1 => exact ⟨n₁ + 1, by omega, h1⟩
-    | inl h0 =>
-      -- counter at n₁+1 = 0. Find first a1.accept after n₁+1.
-      -- Use Nat.find on h1 to get the first a1.accept at or after n₁+1.
-      obtain ⟨n₁'', hn₁''n, hn₁''acc⟩ := h1 (n₁ + 1)
-      -- n₁'' ≥ n₁+1 and a1.accept at n₁''. Counter at n₁+1 = 0.
-      -- Counter at n₁'' ≥ 1 (from a1.accept with counter ≥ 0).
-      have : ((a1.inter a2).run xs n₁'').2.2 = 1 ∨
-             ((a1.inter a2).run xs n₁'').2.2 = 2 := by
-        cases n₁'' with
-        | zero => left; simp [run, run', Buchi.inter] at hn₁''acc
-        | succ n'' =>
-          rw [inter_run_counter_succ]
-          simp only [interCounter]
-          have h_s1' := hn₁''acc
-          set prev_c := ((a1.inter a2).run xs n'').2.2
-          by_cases hprev1 : prev_c = 1
-          · simp [hprev1, h_s1']
-            split_ifs with h2acc
-            · right; rfl
-            · left; rfl
-          · simp [hprev1, h_s1']
-            by_cases hprev0 : prev_c = 0
-            · simp [hprev0]; left; rfl
-            · have hprev2 : prev_c = 2 := by fin_cases prev_c <;> simp_all
-              simp [hprev0, hprev2]; left; rfl
-      cases this with
-      | inl h => exact ⟨n₁'', by omega, h⟩
-      | inr h =>
-        obtain ⟨_, ha2⟩ := counter_two_of_succ (n := n₁'' - 1) (by
-          rw [Nat.sub_add_cancel (by cases n₁'' with | zero => omega | succ n => omega)]
-          exact h)
-        -- hmm, this gets complicated. Let me use a different approach.
-        sorry
+      · rw [interCounter_ne_one hprev1, if_pos hn₁_a1]; left; rfl
+    cases hc_n₁ with
+    | inr h2 => exact ⟨n₁' + 1, by omega, h2⟩
+    | inl h1' =>
+      obtain ⟨n₂_cand, hn₂_ge, hn₂_a2⟩ := h2 (n₁' + 2)
+      classical
+      let hex : ∃ m, m ≥ n₁' + 2 ∧ a2.run xs m ∈ a2.accept :=
+        ⟨n₂_cand, hn₂_ge, hn₂_a2⟩
+      let n₂ := Nat.find hex
+      have hn₂_spec : n₂ ≥ n₁' + 2 ∧ a2.run xs n₂ ∈ a2.accept :=
+        Nat.find_spec hex
+      have hn₂_min :
+          ∀ m, m < n₂ → ¬(m ≥ n₁' + 2 ∧ a2.run xs m ∈ a2.accept) :=
+        fun m hm => Nat.find_min hex hm
+      have counter_stays : ∀ j, n₁' + 1 ≤ j → j ≤ n₂ - 1 →
+          ((a1.inter a2).run xs j).2.2 = 1 := by
+        intro j hj₁ hj₂
+        obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hj₁
+        induction d with
+        | zero => simpa using h1'
+        | succ d ih =>
+          exact counter_stays_one (ih (by omega) (by omega))
+            (fun h_a2 =>
+              absurd ⟨(by omega : n₁' + 1 + d + 1 ≥ n₁' + 2), h_a2⟩
+                (hn₂_min (n₁' + 1 + d + 1) (by omega)))
+      have h_prev : ((a1.inter a2).run xs (n₂ - 1)).2.2 = 1 :=
+        counter_stays (n₂ - 1) (by omega) (by omega)
+      have hn₂_two : ((a1.inter a2).run xs n₂).2.2 = 2 := by
+        conv_lhs => rw [show n₂ = n₂ - 1 + 1 from by omega]
+        rw [inter_run_counter_succ, h_prev, interCounter_eq_one,
+          show n₂ - 1 + 1 = n₂ from by omega]
+        exact if_pos hn₂_spec.2
+      exact ⟨n₂, by omega, hn₂_two⟩
 
 /-- The language of the DBA intersection equals the intersection of the component languages. -/
 @[simp, scoped grind =]
@@ -582,7 +445,7 @@ theorem Buchi.inter_language_eq (a1 : Buchi State1 Symbol) (a2 : Buchi State2 Sy
     language (a1.inter a2) = language a1 ⊓ language a2 := by
   apply mem_ext
   intro xs
-  simp only [mem_language, ωAcceptor.Accepts, mem_inf_iff]
+  simp only [mem_language, ωAcceptor.Accepts]
   constructor
   · intro h
     exact ⟨inter_counter_two_implies_a1_inf h, inter_counter_two_implies_a2_inf h⟩

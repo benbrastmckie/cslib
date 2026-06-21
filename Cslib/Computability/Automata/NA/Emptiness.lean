@@ -102,7 +102,7 @@ theorem nonempty_of_hasReachableAcceptingCycle [Inhabited Symbol]
     fun k => by simp [μls, ωSequence.const, List.length_pos_iff.mpr h_ne]
   -- Build the infinite state sequence from the repeated MTr transitions
   have h_mtr : ∀ k, a.toLTS.MTr (ωSequence.const q k) (μls k) (ωSequence.const q (k + 1)) :=
-    fun k => by simp [μls, ωSequence.const]; exact h_cycle
+    fun k => by simp only [μls, get_const]; exact h_cycle
   obtain ⟨ss_cycle, h_ωexec_cycle, h_cycle_pos⟩ :=
     LTS.OmegaExecution.flatten_mTr h_mtr h_pos
   -- Compute cumLen for const μs_cycle: cumLen k = k * |μs_cycle|
@@ -120,7 +120,7 @@ theorem nonempty_of_hasReachableAcceptingCycle [Inhabited Symbol]
   -- and the corresponding state sequence starting at s₀
   have h_cycle_start : ss_cycle 0 = q := by
     have := h_cycle_q 0
-    simp [ωSequence.cumLen_zero] at this
+    simp only [ωSequence.cumLen_zero] at this
     exact this
   obtain ⟨ss, h_ωexec, h_ss0, h_ss_reach, h_drop⟩ :=
     LTS.OmegaExecution.append h_reach h_ωexec_cycle h_cycle_start
@@ -156,7 +156,7 @@ theorem language_eq_bot_iff [Finite State] [Inhabited Symbol] (a : Buchi State S
   · intro h hrac
     have hne : (ωAcceptor.language a).toSet.Nonempty :=
       nonempty_of_hasReachableAcceptingCycle a hrac
-    simp [ωLanguage.bot_def] at h
+    simp only [ωLanguage.bot_def] at h
     exact hne.ne_empty (by simp [h])
   · intro h
     by_contra hbot

@@ -4,7 +4,7 @@
     {
       "project_number": 255,
       "project_name": "fix_stale_ltl_docstrings_post_task254",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "description": "Fix stale docstrings and comments left over from the task-254 LTL convention revision. (1) Embedding.lean:15 — module docstring says \"Burgess-temporal counterparts\"; rewrite to explain that LTL uses standard convention while Temporal uses Burgess, and the embedding bridges the two. (2) Formula.lean:75 — next constructor docstring says \"Xφ holds at t\"; change to \"◯φ holds at t\". (3) Embedding.lean:49 — parameter names ψ/φ in the untl match arm are swapped relative to LTL's standard convention (guard=φ₁, event=φ₂); rename for clarity or add an inline comment explaining the swap is intentional due to Temporal's Burgess order. (4) OmegaRegular.lean:310 — docstring says \"matches the original proof_wanted\"; the proof is now complete, so remove or rephrase the reference.",
       "topic": "Temporal Logic",
@@ -14,7 +14,7 @@
     {
       "project_number": 256,
       "project_name": "add_ltl_satisfies_simp_lemmas",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "description": "Add @[simp] unfold lemmas for LTL.Satisfies to match the pattern in Temporal/Semantics/Satisfies.lean. Currently LTL's Satisfies is a bare def with no simp lemmas, while Temporal has atom_iff, imp_iff, bot_iff, etc. Add analogous @[simp] lemmas for each constructor: atom, bot, imp, next, untl, plus derived operators someFuture, allFuture, and the leadsto abbreviation. This improves proof automation so downstream files (GNBA, OmegaRegular) can use `simp [Satisfies]` more effectively.",
       "topic": "Temporal Logic",
@@ -50,7 +50,7 @@
     {
       "project_number": 259,
       "project_name": "narrow_temporal_metalogic_linter_suppressions",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "description": "Narrow file-wide linter suppressions in Temporal/Metalogic/ to declaration-level scope. Currently 13 file-wide set_option linter.* suppressions exist across 4 files: CompletenessHelpers.lean (3: style.setOption, unusedSimpArgs, flexible), DenseCompleteness.lean (4: unusedSectionVars, unusedSimpArgs, style.setOption, dupNamespace), GeneralizedNecessitation.lean (4: unusedSimpArgs, style.setOption, flexible, style.emptyLine), TemporalContent.lean (2: style.emptyLine, style.longLine). For each suppression: (a) try removing it and see which declarations fail, (b) move the set_option to just those declarations using `set_option ... in`, (c) where possible, fix the underlying issue (remove unused simp args, fix empty lines, break long lines) instead of suppressing. Goal: zero file-wide suppressions, or document why any remaining ones are unavoidable.",
       "topic": "Temporal Logic",
@@ -187,13 +187,13 @@
     {
       "project_number": 236,
       "project_name": "follow_up_prs_buchi_omega_regular",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Complete follow-up PRs from PR #649 for Büchi automata and closure of omega-regular languages under boolean operations",
       "topic": "Temporal Logic",
       "created": "2026-06-19T02:21:37Z",
-      "last_updated": "2026-06-19T21:30:00Z",
-      "completion_summary": null,
+      "last_updated": "2026-06-20T00:15:00Z",
+      "completion_summary": "All 3 sorry markers filled in GNBA.lean using gnbaCtrStep/gnbaCtrSeq helper lemmas. gnba_language_eq, isRegular, isRegular_untl verified sorry-free. Full CI passes.",
       "session_id": "sess_1781901679_367023",
       "next_artifact_number": 7,
       "artifacts": [
@@ -356,7 +356,7 @@
     {
       "project_number": 248,
       "project_name": "nba_emptiness_checking",
-      "status": "implementing",
+      "status": "implemented",
       "task_type": "cslib",
       "description": "Implement NBA emptiness checking: decide whether a nondeterministic Büchi automaton accepts any ω-word. Two approaches: (1) nested DFS (Courcoubetis-Vardi-Wolper-Yannakakis 1992) finding a reachable accepting cycle, or (2) SCC-based algorithm checking for accepting SCCs reachable from the initial state. The existing infOcc predicate (Cslib/Foundations/Data/OmegaSequence/InfOcc.lean) and NBA Büchi acceptance (NA/Basic.lean using Filter.Frequently/atTop) provide the acceptance-condition foundation. This is the key building block connecting LTL-to-NBA translation to model checking. Target: Cslib/Computability/Automata/NA/Emptiness.lean",
       "topic": "Temporal Logic",
@@ -396,7 +396,8 @@
             "integrated_date": "2026-06-19"
           }
         ]
-      }
+      },
+      "completion_summary": "Implemented NBA emptiness characterization (Baier-Katoen Lemma 4.41) in Cslib/Computability/Automata/NA/Emptiness.lean. Four theorems: HasReachableAcceptingCycle definition, forward direction (pigeonhole via frequently_in_finite_type), backward direction (cycle pumping via flatten_mTr), combined iff, and emptiness-as-bot dual. All proofs sorry-free, axiom-sound, CI clean."
     },
     {
       "project_number": 250,

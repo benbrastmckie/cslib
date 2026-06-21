@@ -6,12 +6,12 @@ next_project_number: 261
 
 ## Task Order
 
-*Updated 2026-06-20. Generated from state.json dependency graph.*
+*Updated 2026-06-21. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,236,241,242,243,245,248,250,252,255,256,259 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 1 | 36,37,180,226,241,242,243,245,248,250,252,255,256,259 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 2 | 39,40,181,215,251,257,260 | 36,37,180,248,255,256 | Bimodal Porting, Temporal Logic |
 | 3 | 41,258 | 39,40,257 | Foundations, Temporal Logic |
 
@@ -36,21 +36,20 @@ next_project_number: 261
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-236 [IMPLEMENTING] — Complete follow-up PRs from PR #649 for Büchi automata and closur
 241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 242 [NOT STARTED] — Implement full Vardi-Wolper tableau construction for LTL-to-NBA t
 243 [NOT STARTED] — Implement deterministic Büchi automata constructions and related 
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
-248 [IMPLEMENTING] — Implement NBA emptiness checking: decide whether a nondeterminist
+248 [IMPLEMENTED] — Implement NBA emptiness checking: decide whether a nondeterminist
   └─ 251 [NOT STARTED] — Implement the synchronous product construction of an LTS (using e
 250 [NOT STARTED] — Implement NBA complementation: given an NBA A, construct an NBA a
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
-255 [NOT STARTED] — Fix stale docstrings and comments left over from the task-254 LTL
+255 [RESEARCHED] — Fix stale docstrings and comments left over from the task-254 LTL
   └─ 260 [NOT STARTED] — Add module-level documentation contrasting the LTL and Temporal c
-256 [NOT STARTED] — Add @[simp] unfold lemmas for LTL.Satisfies to match the pattern 
+256 [RESEARCHED] — Add @[simp] unfold lemmas for LTL.Satisfies to match the pattern 
   └─ 257 [NOT STARTED] — Fix style issues in GNBA.lean: (1) Break 7 lines exceeding 100 ch
     └─ 258 [NOT STARTED] — Refactor duplicated proof patterns in GNBA.lean. Currently subfor
-259 [NOT STARTED] — Narrow file-wide linter suppressions in Temporal/Metalogic/ to de
+259 [RESEARCHED] — Narrow file-wide linter suppressions in Temporal/Metalogic/ to de
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -67,7 +66,7 @@ next_project_number: 261
 ---
 
 ### 259. Narrow temporal metalogic linter suppressions
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -97,7 +96,7 @@ next_project_number: 261
 ---
 
 ### 256. Add ltl satisfies simp lemmas
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -107,7 +106,7 @@ next_project_number: 261
 ---
 
 ### 255. Fix stale ltl docstrings post task254
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -176,7 +175,7 @@ next_project_number: 261
 ---
 
 ### 248. Nba emptiness checking
-- **Status**: [IMPLEMENTING]
+- **Status**: [IMPLEMENTED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -239,7 +238,7 @@ next_project_number: 261
 ---
 
 ### 236. Follow up prs buchi omega regular
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None

@@ -69,7 +69,7 @@ The ROADMAP.md covers porting BimodalLogic to CSLib and does not contain items r
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Product Definition and Basic Infrastructure [IN PROGRESS]
+### Phase 1: Product Definition and Basic Infrastructure [COMPLETED]
 
 **Goal**: Define the LTS x NBA synchronous product in `NAProd.lean` with run characterization lemmas.
 
@@ -100,7 +100,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Soundness Direction (Product to LTL) [NOT STARTED]
+### Phase 2: Soundness Direction (Product to LTL) [COMPLETED] *(deviation: merged into Phase 1 -- all Phase 2 theorems implemented in NAProd.lean)*
 
 **Goal**: Prove the soundness (forward) direction: if the product language is non-empty, then there exists an LTS execution not satisfying phi.
 
@@ -128,7 +128,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: LTL Model Checking Reduction [NOT STARTED]
+### Phase 3: LTL Model Checking Reduction [COMPLETED]
 
 **Goal**: Prove the LTL model checking theorem connecting product emptiness to LTL satisfaction, in `ModelChecking.lean`.
 
@@ -158,7 +158,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: LTL Corollary and CI Verification [NOT STARTED]
+### Phase 4: LTL Corollary and CI Verification [COMPLETED]
 
 **Goal**: Prove the unconditional LTL model checking corollary using `gnbaNBA` and pass full CI.
 

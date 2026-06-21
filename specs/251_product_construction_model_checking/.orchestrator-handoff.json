@@ -1,11 +1,31 @@
 {
-  "status": "planned",
-  "summary": "Created 4-phase plan for LTS x NBA product construction and LTL model checking reduction theorem",
+  "task_number": 251,
+  "session_id": "sess_1782004472_6dbf2d_251",
+  "status": "implemented",
+  "last_completed_phase": "Phase 4: LTL Corollary and CI Verification",
+  "phases_completed": 4,
+  "phases_total": 4,
+  "sorry_inventory": [],
   "artifacts": [
     {
-      "path": "specs/251_product_construction_model_checking/plans/01_product-model-checking.md",
-      "type": "plan",
-      "summary": "Implementation plan: Phase 1 product definition, Phase 2 soundness/completeness, Phase 3 LTL bridge and generic theorem, Phase 4 unconditional corollary and CI"
+      "path": "Cslib/Foundations/Semantics/LTS/NAProd.lean",
+      "type": "lean_file"
+    },
+    {
+      "path": "Cslib/Logics/LTL/ModelChecking.lean",
+      "type": "lean_file"
+    },
+    {
+      "path": "specs/251_product_construction_model_checking/summaries/01_implementation-summary.md",
+      "type": "summary"
     }
-  ]
+  ],
+  "verification": {
+    "build_passed": true,
+    "lint_style_passed": true,
+    "check_init_imports_passed": true,
+    "sorry_count": 0,
+    "axiom_count_delta": 0
+  },
+  "notes": "Two build errors fixed in ModelChecking.lean: ωLanguage.toSet_def does not exist (use ωAcceptor.language for simp unfolding), and Buchi.instωAcceptor is not a valid name (rw ωAcceptor.language + simp Set.mem_setOf_eq works). lake test has a pre-existing failure in CslibTests.Bisimulation (non-module import) unrelated to task 251."
 }

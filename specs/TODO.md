@@ -11,9 +11,9 @@ next_project_number: 261
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,243,245,250,251,252,255,256,259 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
-| 2 | 39,40,181,215,257,260 | 36,37,180,255,256 | Bimodal Porting, Temporal Logic |
-| 3 | 41,258 | 39,40,257 | Foundations, Temporal Logic |
+| 1 | 36,37,180,226,241,243,245,250,251,252,255,256,258,259 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 2 | 39,40,181,215,260 | 36,37,180,255 | Bimodal Porting, Temporal Logic |
+| 3 | 41 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -37,16 +37,15 @@ next_project_number: 261
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
-243 [RESEARCHED] — Implement deterministic Büchi automata constructions and related 
+243 [RESEARCHING] — Implement deterministic Büchi automata constructions and related 
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
 250 [IMPLEMENTING] — Implement NBA complementation: given an NBA A, construct an NBA a
 251 [IMPLEMENTING] — Implement the synchronous product construction of an LTS (using e
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
 255 [IMPLEMENTED] — Fix stale docstrings and comments left over from the task-254 LTL
-  └─ 260 [NOT STARTED] — Add module-level documentation contrasting the LTL and Temporal c
+  └─ 260 [RESEARCHED] — Add module-level documentation contrasting the LTL and Temporal c
 256 [IMPLEMENTED] — Add @[simp] unfold lemmas for LTL.Satisfies to match the pattern 
-  └─ 257 [NOT STARTED] — Fix style issues in GNBA.lean: (1) Break 7 lines exceeding 100 ch
-    └─ 258 [NOT STARTED] — Refactor duplicated proof patterns in GNBA.lean. Currently subfor
+258 [NOT STARTED] — Refactor duplicated proof patterns in GNBA.lean. Currently subfor
 259 [IMPLEMENTED] — Narrow file-wide linter suppressions in Temporal/Metalogic/ to de
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
@@ -54,7 +53,7 @@ next_project_number: 261
 ## Tasks
 
 ### 260. Add ltl temporal convention contrast docs
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 255
@@ -84,10 +83,11 @@ next_project_number: 261
 ---
 
 ### 257. Fix gnba long lines and style
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 256
+- **Summary**: [257_fix_gnba_long_lines_and_style/summaries/01_gnba-style-summary.md]
 
 **Description**: Fix style issues in GNBA.lean: (1) Break 7 lines exceeding 100 characters (lines 912, 929, 1023, 1352, 1421, 1427, 1435) — these involve deeply nested gnbaAcceptSet expressions that can be split with let bindings or intermediate names. (2) Rename instInhabitedSetAtom in OmegaRegular.lean:142 to follow Mathlib instance naming conventions (anonymous instance or Set.instInhabited pattern). Ensure lake build passes after all changes.
 
@@ -175,7 +175,7 @@ next_project_number: 261
 ---
 
 ### 243. Deterministic buchi automata
-- **Status**: [RESEARCHED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None

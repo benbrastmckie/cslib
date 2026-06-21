@@ -138,9 +138,6 @@ private theorem omegaLanguage_imp {Atom : Type*} (φ ψ : Formula Atom) :
     Set.mem_compl_iff]
   tauto
 
-/-- `Set Atom` is inhabited by the empty set. -/
-instance instInhabitedSetAtom {Atom : Type*} : Inhabited (Set Atom) := ⟨∅⟩
-
 /-- The ω-language of `imp φ ψ` is ω-regular, given IH for both subformulas.
 
 Requires `Atom : Type` (not `Type*`) because `IsRegular.compl` requires `Symbol : Type`. -/

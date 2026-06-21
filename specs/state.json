@@ -24,14 +24,23 @@
     {
       "project_number": 257,
       "project_name": "fix_gnba_long_lines_and_style",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Fix style issues in GNBA.lean: (1) Break 7 lines exceeding 100 characters (lines 912, 929, 1023, 1352, 1421, 1427, 1435) — these involve deeply nested gnbaAcceptSet expressions that can be split with let bindings or intermediate names. (2) Rename instInhabitedSetAtom in OmegaRegular.lean:142 to follow Mathlib instance naming conventions (anonymous instance or Set.instInhabited pattern). Ensure lake build passes after all changes.",
       "topic": "Temporal Logic",
       "created": "2026-06-20T03:00:00Z",
-      "last_updated": "2026-06-20T03:00:00Z",
+      "last_updated": "2026-06-21T01:40:04Z",
       "dependencies": [
         256
+      ],
+      "session_id": "sess_1781994910_0cdf2d_257",
+      "completion_summary": "Fixed 7 lines exceeding 100 characters in GNBA.lean (line breaks, one let binding) and removed redundant instInhabitedSetAtom instance from OmegaRegular.lean. All changes cosmetic; lake build and lint pass.",
+      "artifacts": [
+        {
+          "type": "summary",
+          "path": "specs/257_fix_gnba_long_lines_and_style/summaries/01_gnba-style-summary.md",
+          "description": "Implementation summary for GNBA style fixes"
+        }
       ]
     },
     {
@@ -60,7 +69,7 @@
     {
       "project_number": 260,
       "project_name": "add_ltl_temporal_convention_contrast_docs",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "description": "Add module-level documentation contrasting the LTL and Temporal convention differences. (1) In the LTL module docstring (Formula.lean or a new LTL.lean barrel file header), add a note explaining that LTL uses standard convention (guard U event, notation ◯/𝓤/◇/□) while Temporal uses Burgess convention (event U guard, notation X/U/𝐅/𝐆), and that Embedding.lean bridges the two via reflexiveUntl. (2) In Temporal/Syntax/Formula.lean module docstring, add a cross-reference noting the convention difference from LTL. (3) In Connectives.lean, add a brief note that HasSince/TemporalConnectives/BimodalConnectives serve Temporal and Bimodal modules while HasUntil/HasNext/FutureTemporalConnectives/LTLConnectives serve LTL.",
       "topic": "Temporal Logic",
@@ -104,13 +113,13 @@
     {
       "project_number": 243,
       "project_name": "deterministic_buchi_automata",
-      "status": "researched",
+      "status": "researching",
       "task_type": "cslib",
       "description": "Implement deterministic Büchi automata constructions and related results",
       "topic": "Temporal Logic",
       "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-21T01:13:59Z",
-      "session_id": "sess_1750430400_research243"
+      "last_updated": "2026-06-21T01:29:04Z",
+      "session_id": "sess_1782005330_8eb0e3"
     },
     {
       "project_number": 245,

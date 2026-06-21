@@ -909,7 +909,8 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
           let idx : Fin (Formula.gnbaK φ) := ⟨(ctr i).val, hi⟩
           let hlen_i : idx.val < (Formula.untlFinset φ).toList.length :=
             Finset.length_toList (Formula.untlFinset φ) ▸ idx.isLt
-          if B i ∈ Formula.gnbaAcceptSet φ ((Formula.untlFinset φ).toList.get ⟨idx.val, hlen_i⟩) then
+          let χ_i := (Formula.untlFinset φ).toList.get ⟨idx.val, hlen_i⟩
+          if B i ∈ Formula.gnbaAcceptSet φ χ_i then
             (ctr (i + 1)).val = (ctr i).val + 1
           else ctr (i + 1) = ctr i
         else (ctr (i + 1)).val = 0 := by
@@ -926,7 +927,8 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
         (ctr (t + 1)).val = (ctr t).val ∨ (ctr (t + 1)).val = (ctr t).val + 1 := by
       intro t hlt
       have htrans_t := hctr_trans t
-      have hK_ne : Formula.gnbaK φ ≠ 0 := Nat.pos_iff_ne_zero.mp (Nat.lt_of_le_of_lt (Nat.zero_le _) hlt)
+      have hK_ne : Formula.gnbaK φ ≠ 0 :=
+          Nat.pos_iff_ne_zero.mp (Nat.lt_of_le_of_lt (Nat.zero_le _) hlt)
       simp only [dif_neg hK_ne, dif_pos hlt] at htrans_t
       split_ifs at htrans_t with hacc
       · right; exact htrans_t
@@ -1020,7 +1022,8 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
       rw [hsucc_eq] at hstep
       -- Counter advances: must be prev+1 = (ctr t).val at d_first position
       -- Since prev ≤ m < m+1 ≤ ctr at d_first, must have ctr at d_first = prev+1 ≥ m+1
-      have hprev_advance : (ctr (t₀ + 1 + d_first)).val = (ctr (t₀ + 1 + (d_first - 1))).val + 1 := by
+      have hprev_advance :
+          (ctr (t₀ + 1 + d_first)).val = (ctr (t₀ + 1 + (d_first - 1))).val + 1 := by
         rcases hstep with hstay | hadvance
         · -- Stay: contradiction since ctr at d_first ≥ m+1 > prev ≤ m
           omega
@@ -1349,7 +1352,8 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
           -- some step s' ∈ [t, t_acc), which required B s' ∈ acc(χ_m) with ctr s' = m.
           -- But t_acc was supposed to be the first visit! So we need minimality.
           -- Use the minimal such t_acc:
-          have hP_min_exists : ∃ t_min : ℕ, (fun s => s ≥ t ∧ B s ∈ Formula.gnbaAcceptSet φ χ_m) t_min := by
+          have hP_min_exists :
+              ∃ t_min : ℕ, t_min ≥ t ∧ B t_min ∈ Formula.gnbaAcceptSet φ χ_m := by
             exact ⟨t_acc, ht_acc_ge, ht_acc_mem⟩
           -- Lean doesn't automatically give a Decidable instance for B s ∈ gnbaAcceptSet
           -- So we use a different approach: prove ctr t_acc ≥ m and ctr t_acc ≤ m
@@ -1418,13 +1422,15 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
           -- Get the minimal d:
           have hd_P : ∃ d : ℕ, d ≤ d_acc ∧ B (t + d) ∈ Formula.gnbaAcceptSet φ χ_m :=
             ⟨d_acc, le_refl _, ht_acc_eq ▸ ht_acc_mem⟩
-          haveI hd_P_dec : DecidablePred (fun d : ℕ => d ≤ d_acc ∧ B (t + d) ∈ Formula.gnbaAcceptSet φ χ_m) :=
+          haveI hd_P_dec :
+              DecidablePred (fun d : ℕ => d ≤ d_acc ∧ B (t + d) ∈ Formula.gnbaAcceptSet φ χ_m) :=
             fun d => Classical.propDecidable _
           let d_min := Nat.find hd_P
           have hd_min_spec := Nat.find_spec hd_P
           have hd_min_bound : d_min ≤ d_acc := hd_min_spec.1
           have hd_min_mem : B (t + d_min) ∈ Formula.gnbaAcceptSet φ χ_m := hd_min_spec.2
-          have hd_min_minimal : ∀ d' < d_min, ¬(d' ≤ d_acc ∧ B (t + d') ∈ Formula.gnbaAcceptSet φ χ_m) :=
+          have hd_min_minimal :
+              ∀ d' < d_min, ¬(d' ≤ d_acc ∧ B (t + d') ∈ Formula.gnbaAcceptSet φ χ_m) :=
             fun d' hd' => Nat.find_min hd_P hd'
           -- At t + d_min, ctr = m (by minimality: no earlier visit to acc(χ_m))
           have hctr_t_d_min : (ctr (t + d_min)).val = m := by
@@ -1432,7 +1438,9 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
             intro s hs
             -- B(t+s) ∉ acc(χ_m) for s < d_min
             intro hmem
-            exact absurd ⟨Nat.le_of_lt_succ (Nat.lt_succ_of_le (le_trans (Nat.le_of_lt hs) hd_min_bound)), hmem⟩
+            exact absurd
+              ⟨Nat.le_of_lt_succ
+                (Nat.lt_succ_of_le (le_trans (Nat.le_of_lt hs) hd_min_bound)), hmem⟩
               (hd_min_minimal s hs)
           -- At t + d_min, B(t+d_min) ∈ acc(χ_m), so ctr(t+d_min+1) = m+1
           have hctr_advance : (ctr (t + d_min + 1)).val = m + 1 := by

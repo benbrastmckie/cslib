@@ -266,7 +266,7 @@
     {
       "project_number": 248,
       "project_name": "nba_emptiness_checking",
-      "status": "implemented",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Implement NBA emptiness checking: decide whether a nondeterministic Büchi automaton accepts any ω-word. Two approaches: (1) nested DFS (Courcoubetis-Vardi-Wolper-Yannakakis 1992) finding a reachable accepting cycle, or (2) SCC-based algorithm checking for accepting SCCs reachable from the initial state. The existing infOcc predicate (Cslib/Foundations/Data/OmegaSequence/InfOcc.lean) and NBA Büchi acceptance (NA/Basic.lean using Filter.Frequently/atTop) provide the acceptance-condition foundation. This is the key building block connecting LTL-to-NBA translation to model checking. Target: Cslib/Computability/Automata/NA/Emptiness.lean",
       "topic": "Temporal Logic",
@@ -318,12 +318,17 @@
       "topic": "Temporal Logic",
       "created": "2026-06-19T20:20:31Z",
       "last_updated": "2026-06-19T20:20:31Z",
-      "next_artifact_number": 2,
+      "next_artifact_number": 3,
       "artifacts": [
         {
           "path": "specs/250_nba_complementation/reports/01_nba-complementation-seed.md",
           "type": "report",
           "summary": "Seed report: complementation approaches (determinization vs rank-based), complexity, literature references"
+        },
+        {
+          "path": "specs/250_nba_complementation/reports/02_literature-sources.md",
+          "type": "report",
+          "summary": "Literature source paths for NBA complementation: Kupferman-Vardi 2001, Schewe 2009, Piterman 2007, Yan 2008, Thomas 1997, Baier-Katoen Ch.4"
         }
       ]
     },
@@ -339,12 +344,17 @@
       ],
       "created": "2026-06-19T20:20:31Z",
       "last_updated": "2026-06-19T20:34:58Z",
-      "next_artifact_number": 2,
+      "next_artifact_number": 3,
       "artifacts": [
         {
           "path": "specs/251_product_construction_model_checking/reports/01_product-model-checking-seed.md",
           "type": "report",
           "summary": "Seed report: automata-theoretic model checking, product construction, Vardi-Wolper reduction"
+        },
+        {
+          "path": "specs/251_product_construction_model_checking/reports/02_literature-sources.md",
+          "type": "report",
+          "summary": "Literature source paths for product construction: Vardi 1996, Baier-Katoen Ch.4-5, Gerth 1995, Courcoubetis 1992, Schwoon-Esparza 2005"
         }
       ]
     },

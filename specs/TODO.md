@@ -11,8 +11,8 @@ next_project_number: 261
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,242,243,245,248,250,252,255,256,259 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
-| 2 | 39,40,181,215,251,257,260 | 36,37,180,248,255,256 | Bimodal Porting, Temporal Logic |
+| 1 | 36,37,180,226,241,242,243,245,250,251,252,255,256,259 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 2 | 39,40,181,215,257,260 | 36,37,180,255,256 | Bimodal Porting, Temporal Logic |
 | 3 | 41,258 | 39,40,257 | Foundations, Temporal Logic |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -40,9 +40,8 @@ next_project_number: 261
 242 [NOT STARTED] — Implement full Vardi-Wolper tableau construction for LTL-to-NBA t
 243 [NOT STARTED] — Implement deterministic Büchi automata constructions and related 
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
-248 [IMPLEMENTED] — Implement NBA emptiness checking: decide whether a nondeterminist
-  └─ 251 [NOT STARTED] — Implement the synchronous product construction of an LTS (using e
 250 [NOT STARTED] — Implement NBA complementation: given an NBA A, construct an NBA a
+251 [NOT STARTED] — Implement the synchronous product construction of an LTS (using e
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
 255 [RESEARCHED] — Fix stale docstrings and comments left over from the task-254 LTL
   └─ 260 [NOT STARTED] — Add module-level documentation contrasting the LTL and Temporal c
@@ -131,7 +130,9 @@ next_project_number: 261
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 248
-- **Research**: [251_product_construction_model_checking/reports/01_product-model-checking-seed.md]
+- **Research**:
+  - [251_product_construction_model_checking/reports/01_product-model-checking-seed.md]
+  - [251_product_construction_model_checking/reports/02_literature-sources.md]
 
 **Description**: Implement the synchronous product construction of an LTS (using existing Cslib/Foundations/Semantics/LTS/ infrastructure) with an NBA, and prove the model checking reduction: an LTS M satisfies an LTL property φ iff the product of M with the NBA for ¬φ has an empty language. The existing OmegaExecution type and SatisfiesExec bridge (Cslib/Logics/LTL/Semantics/OmegaExecutionSatisfies.lean) already connect LTL satisfaction to LTS runs via a labeling function State → (Atom → Prop). The main new work is: (1) the system × NBA product construction (distinct from the existing automaton × automaton products in NA/Prod.lean), (2) the correctness proof linking product acceptance to LTL satisfaction. Target: Cslib/Computability/Automata/NA/LTSProduct.lean and Cslib/Logics/LTL/ModelChecking.lean
 
@@ -142,14 +143,16 @@ next_project_number: 261
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
-- **Research**: [250_nba_complementation/reports/01_nba-complementation-seed.md]
+- **Research**:
+  - [250_nba_complementation/reports/01_nba-complementation-seed.md]
+  - [250_nba_complementation/reports/02_literature-sources.md]
 
 **Description**: Implement NBA complementation: given an NBA A, construct an NBA accepting the complement language Σ^ω \ L(A). Two main approaches: (1) determinization-based — determinize via McNaughton/Safra then complement the deterministic automaton (depends on task 241), (2) direct rank-based construction (Kupferman-Vardi 2001, Schewe 2009) avoiding full determinization. CSLib already has ω-regular complementation at the language-theoretic level via Büchi congruence; this task provides the automata-level construction needed for algorithmic applications (language inclusion, model checking). Target: Cslib/Computability/Automata/NA/Complement.lean
 
 ---
 
 ### 248. Nba emptiness checking
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None

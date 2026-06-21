@@ -109,12 +109,12 @@
     {
       "project_number": 243,
       "project_name": "deterministic_buchi_automata",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Implement deterministic Büchi automata constructions and related results",
       "topic": "Temporal Logic",
       "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-21T01:52:07Z",
+      "last_updated": "2026-06-21T03:25:03Z",
       "session_id": "sess_1750459200_orchestrate",
       "next_artifact_number": 3,
       "artifacts": [
@@ -133,7 +133,8 @@
           "type": "plan",
           "summary": "5-phase implementation plan"
         }
-      ]
+      ],
+      "completion_summary": "All 5 phases implemented: DBA union, complement non-closure, intersection (sorry-free), Landweber theorem (proof_wanted per CSLib convention), DBA-to-DMA conversion (sorry-free). 0 sorries, CI passed."
     },
     {
       "project_number": 245,

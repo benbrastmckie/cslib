@@ -415,7 +415,7 @@
           "summary": "Full implementation summary: product construction, model checking reduction, CI verification"
         }
       ],
-      "completion_summary": "Implemented LTS x NBA synchronous product construction (NAProd.lean) and LTL model checking reduction theorem (ModelChecking.lean). All 4 phases completed. Zero sorries, builds cleanly, CI passes."
+      "completion_summary": "LTS×NBA product construction and LTL model checking reduction: NAProd.lean (product definition + soundness/completeness) and ModelChecking.lean (bridge lemmas + main theorem). 0 sorrys, all CI passes."
     },
     {
       "project_number": 252,

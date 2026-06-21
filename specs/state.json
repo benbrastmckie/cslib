@@ -104,12 +104,12 @@
     {
       "project_number": 243,
       "project_name": "deterministic_buchi_automata",
-      "status": "researching",
+      "status": "researched",
       "task_type": "cslib",
       "description": "Implement deterministic Büchi automata constructions and related results",
       "topic": "Temporal Logic",
       "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-21T01:11:40Z",
+      "last_updated": "2026-06-21T01:13:59Z",
       "session_id": "sess_1750430400_research243"
     },
     {

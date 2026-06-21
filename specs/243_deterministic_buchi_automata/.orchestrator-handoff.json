@@ -1,0 +1,16 @@
+{
+  "status": "researched",
+  "summary": "DBA definition and key results (DBA⊂ω-regular, DBA<NBA limitation, DBA→NBA embedding) already implemented. Recommended scope: non-closure results, DBA intersection, Landweber characterization. Literature adequate for --lit (Thomas 1997 + Piterman 2007 + Baier-Katoen 2008).",
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "plan",
+  "phases_completed": 0,
+  "phases_total": 0,
+  "artifacts": [
+    {
+      "path": "specs/243_deterministic_buchi_automata/reports/01_dba-constructions-survey.md",
+      "type": "report",
+      "summary": "Survey of existing CSLib DBA infrastructure, literature source assessment, and recommended 3-phase scope (non-closure results, DBA intersection, Landweber characterization)"
+    }
+  ]
+}

@@ -37,7 +37,7 @@ next_project_number: 261
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
-243 [RESEARCHING] — Implement deterministic Büchi automata constructions and related 
+243 [RESEARCHED] — Implement deterministic Büchi automata constructions and related 
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
 250 [RESEARCHED] — Implement NBA complementation: given an NBA A, construct an NBA a
 251 [RESEARCHED] — Implement the synchronous product construction of an LTS (using e
@@ -175,7 +175,7 @@ next_project_number: 261
 ---
 
 ### 243. Deterministic buchi automata
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None

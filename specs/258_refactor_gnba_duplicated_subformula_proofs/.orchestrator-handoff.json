@@ -1,0 +1,12 @@
+{
+  "status": "implemented",
+  "summary": "Refactored GNBA.lean by introducing Formula.subformulas_trans and converting 5 inductive proofs to one-liner wrappers. Removed 2 dead-code closure lemmas. Net reduction: 87 lines (126 deletions, 39 insertions). All CI checks pass.",
+  "blockers": [],
+  "phases_completed": 3,
+  "phases_total": 3,
+  "artifacts": [
+    "Cslib/Logics/LTL/Semantics/GNBA.lean",
+    "specs/258_refactor_gnba_duplicated_subformula_proofs/summaries/01_gnba-refactor-summary.md"
+  ],
+  "continuation_context": null
+}

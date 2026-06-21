@@ -46,7 +46,7 @@
     {
       "project_number": 258,
       "project_name": "refactor_gnba_duplicated_subformula_proofs",
-      "status": "planned",
+      "status": "implemented",
       "task_type": "cslib",
       "description": "Refactor duplicated proof patterns in GNBA.lean. Currently subformulas_untl_left, subformulas_untl_right, subformulas_imp_left, subformulas_imp_right (lines ~236-333) are four near-identical inductive proofs. Similarly untl_left_mem_closure, untl_right_mem_closure, imp_left_mem_closure, imp_right_mem_closure, subformulas_subset_closure (lines ~358-396) follow the same pattern. Refactor each group into a single parameterized lemma with a case dispatch or a shared helper, reducing code duplication while preserving all downstream usage sites. Ensure lake build passes.",
       "topic": "Temporal Logic",

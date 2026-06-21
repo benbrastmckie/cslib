@@ -36,6 +36,15 @@ theorem prod_mtr_eq (da1 : DA State1 Symbol) (da2 : DA State2 Symbol)
     (da1.prod da2).mtr s xs = (da1.mtr s.fst xs, da2.mtr s.snd xs) :=
   FLTS.prod_mtr_eq da1.toFLTS da2.toFLTS s xs
 
+/-- The run of the product automaton decomposes into the pair of component runs. -/
+@[simp, scoped grind =]
+theorem prod_run_eq (da1 : DA State1 Symbol) (da2 : DA State2 Symbol)
+    (xs : ωSequence Symbol) (n : ℕ) :
+    (da1.prod da2).run xs n = (da1.run xs n, da2.run xs n) := by
+  induction n with
+  | zero => grind
+  | succ n ih => grind
+
 end DA
 
 end Cslib.Automata

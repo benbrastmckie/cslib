@@ -232,105 +232,55 @@ lemma Formula.atoms_finite (φ : Formula Atom) :
 
 /-! ## Closure-subformula relationship -/
 
+/-- Subformula membership is transitive: if `χ` is a subformula of `ψ` and `ψ` is a
+subformula of `φ`, then `χ` is a subformula of `φ`. -/
+lemma Formula.subformulas_trans {χ ψ φ : Formula Atom}
+    (h1 : χ ∈ Formula.subformulas ψ) (h2 : ψ ∈ Formula.subformulas φ) :
+    χ ∈ Formula.subformulas φ := by
+  induction φ with
+  | atom p => simp only [Formula.subformulas, Set.mem_singleton_iff] at h2; subst h2; exact h1
+  | bot => simp only [Formula.subformulas, Set.mem_singleton_iff] at h2; subst h2; exact h1
+  | imp φ₁ φ₂ ih₁ ih₂ =>
+    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff] at h2 ⊢
+    rcases h2 with (rfl | h₁) | h₂
+    · exact h1
+    · exact Or.inl (Or.inr (ih₁ h₁))
+    · exact Or.inr (ih₂ h₂)
+  | next φ₁ ih =>
+    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff] at h2 ⊢
+    rcases h2 with rfl | h₁
+    · exact h1
+    · exact Or.inr (ih h₁)
+  | untl φ₁ φ₂ ih₁ ih₂ =>
+    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff] at h2 ⊢
+    rcases h2 with (rfl | h₁) | h₂
+    · exact h1
+    · exact Or.inl (Or.inr (ih₁ h₁))
+    · exact Or.inr (ih₂ h₂)
+
 /-- Subformulas are downward-closed: left component of an `untl` subformula. -/
 private lemma Formula.subformulas_untl_left {φ ψ₁ ψ₂ : Formula Atom}
-    (h : Formula.untl ψ₁ ψ₂ ∈ Formula.subformulas φ) : ψ₁ ∈ Formula.subformulas φ := by
-  induction φ with
-  | atom p => simp [Formula.subformulas] at h
-  | bot => simp [Formula.subformulas] at h
-  | imp φ₁ φ₂ ih₁ ih₂ =>
-    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff] at h
-    rcases h with (h | h₁) | h₂
-    · simp at h
-    · exact Set.mem_union_left _ (Set.mem_union_right _ (ih₁ h₁))
-    · exact Set.mem_union_right _ (ih₂ h₂)
-  | next φ ih =>
-    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff] at h
-    rcases h with h | h
-    · simp at h
-    · exact Set.mem_union_right _ (ih h)
-  | untl φ₁ φ₂ ih₁ ih₂ =>
-    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff,
-               Formula.untl.injEq] at h
-    rcases h with ((⟨rfl, rfl⟩ | h₁) | h₂)
-    · exact Set.mem_union_left _ (Set.mem_union_right _ (Formula.self_mem_subformulas _))
-    · exact Set.mem_union_left _ (Set.mem_union_right _ (ih₁ h₁))
-    · exact Set.mem_union_right _ (ih₂ h₂)
+    (h : Formula.untl ψ₁ ψ₂ ∈ Formula.subformulas φ) : ψ₁ ∈ Formula.subformulas φ :=
+  Formula.subformulas_trans
+    (Set.mem_union_left _ (Set.mem_union_right _ (Formula.self_mem_subformulas _))) h
 
 /-- Subformulas are downward-closed: right component of an `untl` subformula. -/
 private lemma Formula.subformulas_untl_right {φ ψ₁ ψ₂ : Formula Atom}
-    (h : Formula.untl ψ₁ ψ₂ ∈ Formula.subformulas φ) : ψ₂ ∈ Formula.subformulas φ := by
-  induction φ with
-  | atom p => simp [Formula.subformulas] at h
-  | bot => simp [Formula.subformulas] at h
-  | imp φ₁ φ₂ ih₁ ih₂ =>
-    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff] at h
-    rcases h with (h | h₁) | h₂
-    · simp at h
-    · exact Set.mem_union_left _ (Set.mem_union_right _ (ih₁ h₁))
-    · exact Set.mem_union_right _ (ih₂ h₂)
-  | next φ ih =>
-    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff] at h
-    rcases h with h | h
-    · simp at h
-    · exact Set.mem_union_right _ (ih h)
-  | untl φ₁ φ₂ ih₁ ih₂ =>
-    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff,
-               Formula.untl.injEq] at h
-    rcases h with ((⟨rfl, rfl⟩ | h₁) | h₂)
-    · exact Set.mem_union_right _ (Formula.self_mem_subformulas _)
-    · exact Set.mem_union_left _ (Set.mem_union_right _ (ih₁ h₁))
-    · exact Set.mem_union_right _ (ih₂ h₂)
+    (h : Formula.untl ψ₁ ψ₂ ∈ Formula.subformulas φ) : ψ₂ ∈ Formula.subformulas φ :=
+  Formula.subformulas_trans
+    (Set.mem_union_right _ (Formula.self_mem_subformulas _)) h
 
 /-- Subformulas are downward-closed: left component of an `imp` subformula. -/
 private lemma Formula.subformulas_imp_left {φ ψ₁ ψ₂ : Formula Atom}
-    (h : Formula.imp ψ₁ ψ₂ ∈ Formula.subformulas φ) : ψ₁ ∈ Formula.subformulas φ := by
-  induction φ with
-  | atom p => simp [Formula.subformulas] at h
-  | bot => simp [Formula.subformulas] at h
-  | imp φ₁ φ₂ ih₁ ih₂ =>
-    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff,
-               Formula.imp.injEq] at h
-    rcases h with ((⟨rfl, rfl⟩ | h₁) | h₂)
-    · exact Set.mem_union_left _ (Set.mem_union_right _ (Formula.self_mem_subformulas _))
-    · exact Set.mem_union_left _ (Set.mem_union_right _ (ih₁ h₁))
-    · exact Set.mem_union_right _ (ih₂ h₂)
-  | next φ ih =>
-    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff] at h
-    rcases h with h | h
-    · simp at h
-    · exact Set.mem_union_right _ (ih h)
-  | untl φ₁ φ₂ ih₁ ih₂ =>
-    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff] at h
-    rcases h with (h | h₁) | h₂
-    · simp at h
-    · exact Set.mem_union_left _ (Set.mem_union_right _ (ih₁ h₁))
-    · exact Set.mem_union_right _ (ih₂ h₂)
+    (h : Formula.imp ψ₁ ψ₂ ∈ Formula.subformulas φ) : ψ₁ ∈ Formula.subformulas φ :=
+  Formula.subformulas_trans
+    (Set.mem_union_left _ (Set.mem_union_right _ (Formula.self_mem_subformulas _))) h
 
 /-- Subformulas are downward-closed: right component of an `imp` subformula. -/
 private lemma Formula.subformulas_imp_right {φ ψ₁ ψ₂ : Formula Atom}
-    (h : Formula.imp ψ₁ ψ₂ ∈ Formula.subformulas φ) : ψ₂ ∈ Formula.subformulas φ := by
-  induction φ with
-  | atom p => simp [Formula.subformulas] at h
-  | bot => simp [Formula.subformulas] at h
-  | imp φ₁ φ₂ ih₁ ih₂ =>
-    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff,
-               Formula.imp.injEq] at h
-    rcases h with ((⟨rfl, rfl⟩ | h₁) | h₂)
-    · exact Set.mem_union_right _ (Formula.self_mem_subformulas _)
-    · exact Set.mem_union_left _ (Set.mem_union_right _ (ih₁ h₁))
-    · exact Set.mem_union_right _ (ih₂ h₂)
-  | next φ ih =>
-    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff] at h
-    rcases h with h | h
-    · simp at h
-    · exact Set.mem_union_right _ (ih h)
-  | untl φ₁ φ₂ ih₁ ih₂ =>
-    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff] at h
-    rcases h with (h | h₁) | h₂
-    · simp at h
-    · exact Set.mem_union_left _ (Set.mem_union_right _ (ih₁ h₁))
-    · exact Set.mem_union_right _ (ih₂ h₂)
+    (h : Formula.imp ψ₁ ψ₂ ∈ Formula.subformulas φ) : ψ₂ ∈ Formula.subformulas φ :=
+  Formula.subformulas_trans
+    (Set.mem_union_right _ (Formula.self_mem_subformulas _)) h
 
 /-! ### Closure membership lemmas -/
 
@@ -371,24 +321,6 @@ lemma Formula.untl_right_mem_closure {φ ψ₁ ψ₂ : Formula Atom}
   · simp at heq
   · simp at heq
 
-/-- If `imp ψ₁ ψ₂` is in `φ.closure` and `ψ₂ ≠ bot`, then `ψ₁ ∈ φ.closure`. -/
-lemma Formula.imp_left_mem_closure {φ ψ₁ ψ₂ : Formula Atom}
-    (h : Formula.imp ψ₁ ψ₂ ∈ Formula.closure φ) (hne : ψ₂ ≠ Formula.bot) :
-    ψ₁ ∈ Formula.closure φ := by
-  rcases Formula.mem_closure_cases h with hsub | ⟨χ, _, heq⟩ | ⟨χ₁, χ₂, _, heq⟩
-  · exact Formula.subformula_mem_closure (Formula.subformulas_imp_left hsub)
-  · -- heq : imp ψ₁ ψ₂ = imp χ bot, so ψ₂ = bot -- contradiction
-    simp only [Formula.imp.injEq] at heq; exact absurd heq.2 hne
-  · simp at heq
-
-/-- If `imp ψ₁ ψ₂` is in `φ.closure` and `ψ₂ ≠ bot`, then `ψ₂ ∈ φ.closure`. -/
-lemma Formula.imp_right_mem_closure {φ ψ₁ ψ₂ : Formula Atom}
-    (h : Formula.imp ψ₁ ψ₂ ∈ Formula.closure φ) (hne : ψ₂ ≠ Formula.bot) :
-    ψ₂ ∈ Formula.closure φ := by
-  rcases Formula.mem_closure_cases h with hsub | ⟨χ, _, heq⟩ | ⟨χ₁, χ₂, _, heq⟩
-  · exact Formula.subformula_mem_closure (Formula.subformulas_imp_right hsub)
-  · simp only [Formula.imp.injEq] at heq; exact absurd heq.2 hne
-  · simp at heq
 
 /-- Every subformula of `φ` is in `φ.closure`. (Alias for `subformula_mem_closure`) -/
 lemma Formula.subformulas_subset_closure (φ : Formula Atom) :
@@ -710,27 +642,8 @@ def Formula.gnbaOmegaLanguage (φ : Formula Atom) : ωLanguage (Set Atom) :=
 
 Subformulas are downward closed: the argument of `next` is itself a subformula. -/
 private lemma Formula.subformulas_next_sub {φ ψ : Formula Atom}
-    (h : Formula.next ψ ∈ Formula.subformulas φ) : ψ ∈ Formula.subformulas φ := by
-  induction φ with
-  | atom p => simp [Formula.subformulas] at h
-  | bot => simp [Formula.subformulas] at h
-  | imp φ₁ φ₂ ih₁ ih₂ =>
-    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff] at h
-    rcases h with (h | h₁) | h₂
-    · simp at h
-    · exact Set.mem_union_left _ (Set.mem_union_right _ (ih₁ h₁))
-    · exact Set.mem_union_right _ (ih₂ h₂)
-  | next φ₁ ih =>
-    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff] at h
-    rcases h with h | h₁
-    · exact Set.mem_union_right _ (Formula.next.inj h ▸ Formula.self_mem_subformulas φ₁)
-    · exact Set.mem_union_right _ (ih h₁)
-  | untl φ₁ φ₂ ih₁ ih₂ =>
-    simp only [Formula.subformulas, Set.mem_union, Set.mem_singleton_iff] at h
-    rcases h with (h | h₁) | h₂
-    · simp at h
-    · exact Set.mem_union_left _ (Set.mem_union_right _ (ih₁ h₁))
-    · exact Set.mem_union_right _ (ih₂ h₂)
+    (h : Formula.next ψ ∈ Formula.subformulas φ) : ψ ∈ Formula.subformulas φ :=
+  Formula.subformulas_trans (Set.mem_union_right _ (Formula.self_mem_subformulas _)) h
 
 /-- A helper lemma: `ψ` is in the closure of `φ` whenever `next ψ` is.
 

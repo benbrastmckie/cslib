@@ -1,16 +1,16 @@
 {
-  "status": "researched",
-  "summary": "DBA definition and key results (DBA⊂ω-regular, DBA<NBA limitation, DBA→NBA embedding) already implemented. Recommended scope: non-closure results, DBA intersection, Landweber characterization. Literature adequate for --lit (Thomas 1997 + Piterman 2007 + Baier-Katoen 2008).",
+  "status": "planned",
+  "summary": "Created 5-phase implementation plan: (1) prerequisites/prod_run_eq, (2) DBA union + complement non-closure, (3) DBA intersection with 3-state counter, (4) Landweber theorem (superloop characterization), (5) DBA-to-DMA conversion + CI. Estimated 10 hours, ~800-1100 lines across 2 new files and 2 modified files.",
   "blockers": [],
   "continuation_context": null,
-  "next_action_hint": "plan",
+  "next_action_hint": "implement",
   "phases_completed": 0,
-  "phases_total": 0,
+  "phases_total": 5,
   "artifacts": [
     {
-      "path": "specs/243_deterministic_buchi_automata/reports/01_dba-constructions-survey.md",
-      "type": "report",
-      "summary": "Survey of existing CSLib DBA infrastructure, literature source assessment, and recommended 3-phase scope (non-closure results, DBA intersection, Landweber characterization)"
+      "path": "specs/243_deterministic_buchi_automata/plans/03_implementation-plan.md",
+      "type": "plan",
+      "summary": "5-phase plan: prerequisites, DBA union/complement non-closure, DBA intersection, Landweber theorem, DBA-to-DMA + CI verification"
     }
   ]
 }

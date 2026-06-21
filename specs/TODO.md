@@ -45,7 +45,7 @@ next_project_number: 261
   └─ 260 [IMPLEMENTED] — Add module-level documentation contrasting the LTL and Temporal c
 256 [IMPLEMENTED] — Add @[simp] unfold lemmas for LTL.Satisfies to match the pattern 
   └─ 257 [IMPLEMENTED] — Fix style issues in GNBA.lean: (1) Break 7 lines exceeding 100 ch
-    └─ 258 [PLANNED] — Refactor duplicated proof patterns in GNBA.lean. Currently subfor
+    └─ 258 [IMPLEMENTED] — Refactor duplicated proof patterns in GNBA.lean. Currently subfor
 259 [IMPLEMENTED] — Narrow file-wide linter suppressions in Temporal/Metalogic/ to de
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
@@ -74,7 +74,7 @@ next_project_number: 261
 ---
 
 ### 258. Refactor gnba duplicated subformula proofs
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 257

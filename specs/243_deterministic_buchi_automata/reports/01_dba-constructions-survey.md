@@ -59,164 +59,209 @@ results that are **not yet formalized**. The candidates, ordered by significance
 
 ### 2.1 DBA Closure Properties
 
-**DBA intersection** (product construction):
-- Given two DBAs, construct a DBA accepting the intersection.
-- For DBAs (unlike NBAs), intersection is straightforward: product automaton with
-  `accept = accept₁ ∩ accept₂` does NOT work (need both to be visited infinitely often).
-- Standard construction: product with 3-state counter (similar to NBA intersection but
-  deterministic). Alternatively, since `DA.prod` already exists, the DBA intersection uses
-  the same toggling trick as NBA intersection but deterministically.
-- **Note**: `IsRegular.inf` already proves ω-regular languages are closed under intersection
-  via the NBA route. A direct DBA intersection would show which languages are closed under
-  intersection *within* the DBA class.
+**DBA union** (product construction):
+- DBAs ARE closed under union (Baier & Katoen Exercise 4.23).
+- Construction: product automaton with `accept = F₁ × Q₂ ∪ Q₁ × F₂`. A state visits this
+  set infinitely often iff it visits F₁ × Q₂ infinitely often OR Q₁ × F₂ infinitely often
+  (by pigeonhole, since the union is visited infinitely often implies at least one component is).
+- Size: O(|A₁| · |A₂|). Since `DA.prod` already exists, the construction is straightforward.
+- **Note**: `IsRegular.sup` already proves ω-regular closure under union via the NBA route.
+  A direct DBA union proves closure *within* the DBA class.
 
-**DBA union**:
-- DBAs are NOT closed under union in general (standard result).
-- Could formalize: the union of two DBA languages is ω-regular (trivial from `of_da_buchi` + `IsRegular.sup`).
-- The interesting result: DBA languages are NOT closed under union — construct a witness.
+**DBA intersection** (product construction with counter):
+- DBAs are also closed under intersection, but the naive `accept = F₁ × F₂` does NOT work
+  (visiting F₁ × F₂ infinitely often ≠ visiting F₁ and F₂ each infinitely often).
+- Standard construction: product with 3-state counter (wait for F₁ → wait for F₂ → reset),
+  same toggling trick as NBA intersection in `BuchiInter.lean` but deterministic.
 
 **DBA complement**:
-- DBAs are NOT closed under complement (follows from `not_da_buchi`: the complement of
-  "infinitely many a's" is "eventually zero" which is not DBA-recognizable).
-- Could state and prove this as a clean theorem.
+- DBAs are NOT closed under complement (Baier & Katoen Exercise 4.22).
+- Proof: "infinitely many a's" is DBA-recognizable, but its complement "eventually zero"
+  is not (already proved as `IsRegular.not_da_buchi` + `eventuallyZero_not_omegaLim`).
 
-### 2.2 DBA Characterization
+### 2.2 DBA Characterization (Landweber's Theorem)
 
-**Characterizing DBA-recognizable languages**:
-- A language is DBA-recognizable iff it is a Gδ set in the Cantor topology (countable
-  intersection of open sets) — equivalently, it is a "limit language" (ω-limit of a regular
-  language, which `buchi_eq_finAcc_omegaLim` already connects).
-- The key characterization theorem: an ω-regular language is DBA-recognizable iff it equals
-  its ω-limit closure. This is the Landweber characterization.
-- This would be a substantial and valuable addition.
+**Characterizing DBA-recognizable languages** (Theorem 3.32 in Thomas 2003):
+- An ω-regular language L (given by a Muller automaton A) is DBA-recognizable iff the
+  acceptance family F is closed under superloops.
+- A loop S ⊆ Q is a nonempty set where every state can reach every other state.
+- F is closed under superloops iff for every F-loop S and every superloop S' ⊇ S,
+  also S' ∈ F.
+- This is equivalent to: L is the ω-limit of a regular language (connecting to
+  `buchi_eq_finAcc_omegaLim`).
+- Thomas 2003 Ch. 3 has the COMPLETE PROOF in both directions.
 
 ### 2.3 DBA Minimization / Canonical Form
 
-- Right congruence for DBA: already have `RightCongruence.toDA` and `BuchiCongruence`.
-- Could develop a Myhill-Nerode-style characterization for DBA languages.
+- DBA minimization is NP-complete (unlike DFA minimization which is polynomial).
+- Weak DBA minimization reduces to DFA minimization (Löding 2001).
+- Löding 2001 paper behind paywall; construction available in outline from other sources.
 
-### 2.4 DBA ⊆ DMA / DBA ⊆ DPA
+### 2.4 DBA ⊆ DMA / DBA ⊆ DPA Conversions
 
-- Every DBA is trivially a DMA (with accept = {F | F ∩ accept ≠ ∅}).
-- Every DBA is a DPA with priorities {1, 2} (accepting = priority 2, non-accepting = priority 1).
+- Every DBA is trivially a DMA: accept family F = {S ⊆ Q | S ∩ accept ≠ ∅}.
+- Every DBA is a DPA with priorities {1, 2}: accepting states get priority 2 (even = good),
+  non-accepting get priority 1 (odd = bad).
 - These conversions are relevant to task 252 (acceptance conditions zoo).
+
+### 2.5 Classification Hierarchy
+
+Thomas 2003 §3.6 proves the strict hierarchy of deterministic ω-automata:
+
+```
+det. E ⊊ det. Büchi ⊊ det. co-Büchi ⊊ det. Muller (= all ω-regular)
+det. A ⊊ det. co-Büchi ⊊ det. Muller
+```
+
+with concrete separating examples for each pair.
 
 ## 3. Literature Source Assessment
 
 ### 3.1 Available in Centralized Literature (LITERATURE_DIR)
 
-| Source | Tokens | DBA Coverage | Quality |
+| Source | Tokens | DBA Coverage | Proofs? |
 |--------|--------|-------------|---------|
-| **Thomas 1997** — "Languages, Automata, and Logic" | 45,129 | DBA definition, DBA < NBA limitation, McNaughton/Safra determinization, star-free connection, Wagner hierarchy. §5.2 covers determinization in detail. | **Excellent** — comprehensive handbook reference |
-| **Piterman 2007** — "From NBA/Streett to Deterministic Parity" | 18,501 | Detailed determinization constructions (Safra trees → parity). DBA as special case. Explicit state complexity bounds. | **Good** — relevant for DBA→DPA conversion |
-| **Vardi 1996** — "Automata-Theoretic Approach to LTL" | 21,667 | DBA mentioned peripherally. Focus is NBA for LTL. Büchi-Landweber reference in bibliography. | **Peripheral** |
-| **Schewe 2009** — "Büchi Complementation Made Tight" | 10,312 | Complementation bounds for NBA. DBA as contrast case (complement is easy when deterministic). | **Peripheral** |
-| **Kupferman & Vardi 2001** — "Weak Alternating Automata" | 16,468 | Alternation hierarchy. Weak DBA ≡ DBA for co-Büchi. | **Tangential** |
-| **Baier & Katoen 2008** — *Principles of Model Checking* (12 parts) | ~480,000 | Textbook treatment of DBA limitations and constructions. Chapter 4 covers ω-automata, DBA expressiveness. | **Good** — clear textbook exposition |
-| **Courcoubetis et al. 1992** — Memory-efficient verification | 8,348 | Nested DFS for emptiness checking. Not DBA-specific. | **Not relevant** |
-| **Schwoon & Esparza 2005** — On-the-fly algorithms | 11,342 | Verification algorithms. Not DBA-specific. | **Not relevant** |
+| **Thomas 2003** — "Automata and Reactive Systems" Ch. 3 | 10,514 | **Primary**: DBA def, classification hierarchy, Landweber's theorem (Thm 3.32) with FULL PROOF, Staiger-Wagner, exercises on DBA closure | **YES — complete proofs** |
+| **Thomas 2003** — Ch. 1 | 6,056 | NBA basics, product intersection construction (with counter trick), closure properties | **YES** |
+| **Thomas 1997** — "Languages, Automata, and Logic" | 45,129 | Comprehensive: DBA def, DBA < NBA limitation, Safra construction, star-free connection | **YES** (Safra proof complete) |
+| **Baier & Katoen 2008** — *Principles of Model Checking* | ~480,000 | Textbook: DBA definition (4.48), Theorem 4.50 (NBA > DBA with full proof), Exercises 4.22-4.23 (closure) | **Theorem 4.50 YES; exercises NO** |
+| **Piterman 2007** — "From NBA/Streett to Deterministic Parity" | 18,501 | Determinization constructions, DBA→DPA conversion | **YES** |
+| **Schewe 2009** — "Büchi Complementation Made Tight" | 10,312 | Complementation bounds. DBA peripheral. | Peripheral |
+| **Kupferman & Vardi 2001** — "Weak Alternating Automata" | 16,468 | Alternation hierarchy, weak DBA. | Tangential |
 
 ### 3.2 Available in specs/literature/
 
-No DBA-specific entries. The existing temporal logic sources (Burgess, Gabbay, Reynolds) are
-not relevant to DBA constructions.
+No DBA-specific entries. The temporal logic sources (Burgess, Gabbay, Reynolds) are not
+relevant to DBA constructions.
 
-### 3.3 Assessment for `--lit` Flag
+### 3.3 Newly Acquired Source
 
-**Adequate for research and basic implementation**: Thomas 1997 alone provides the theoretical
-foundation. Piterman 2007 adds determinization detail. Baier & Katoen provides textbook backup.
+**Thomas 2003 — "Automata and Reactive Systems" lecture notes (RWTH Aachen)**:
+- Downloaded from CMI teaching repository.
+- By Wolfgang Thomas (with contributions from Christof Löding).
+- Chapters 1 and 3 converted and added to Literature index.
+- **This is the key source**: Chapter 3 contains Landweber's Theorem (Thm 3.32) with
+  complete proof in both directions, the classification hierarchy with all separating examples,
+  and the Staiger-Wagner framework.
 
-**Gap**: No dedicated DBA-focused source. The standard references that would strengthen
-coverage are:
+### 3.4 Sources NOT Available (Behind Paywalls)
 
-### 3.4 Recommended Additional Sources
+| Source | Status | Impact |
+|--------|--------|--------|
+| **Landweber 1969** — "Decision problems for ω-automata" (Math. Systems Theory) | Springer paywall | Low — Thomas 2003 covers Landweber's theorem with proof |
+| **Löding 2001** — "Efficient minimization of deterministic weak ω-automata" (IPL) | ScienceDirect paywall | Medium — needed only for DBA minimization (§2.3) |
+| **Perrin & Pin 2004** — *Infinite Words* (Elsevier book) | Commercial book, no free PDF | Low — Thomas 2003 + Thomas 1997 cover the needed material |
 
-| Source | Why | Priority |
-|--------|-----|----------|
-| **Löding 2001** — "Efficient minimization of deterministic weak ω-automata" (IPL) | DBA minimization, canonical form, decidability of DBA-recognizability | High — directly relevant to §2.3 |
-| **Landweber 1969** — "Decision problems for ω-automata" (Math. Systems Theory) | Original DBA characterization: DBA = Gδ ∩ ω-regular. Foundation for §2.2 | Medium — Thomas 1997 covers the result |
-| **Calbrix, Nivat & Podelski 1993** — "Ultimately periodic words of rational ω-languages" | Characterization via ultimately periodic words, relevant to DBA decidability | Low |
-| **Krishnan, Puri & Brayton 1995** — "Deterministic ω-automata vis-a-vis deterministic Büchi automata" (Tech report) | DBA closure properties, systematic treatment | Low |
-| **Safra 1988** — "On the complexity of ω-automata" (FOCS) | Original Safra construction. Already covered by Thomas 1997 and Piterman 2007 in the Literature. | Low — already covered indirectly |
+### 3.5 Assessment for `--lit` Flag
 
-**Recommendation**: Thomas 1997 is sufficient for implementation. If pursuing the Landweber
-characterization (§2.2), having Landweber 1969 would be ideal but Thomas 1997 §5 covers the
-essential content. Löding 2001 is the only source that would substantially expand what can be
-formalized beyond the existing literature.
+**Now adequate for all recommended phases.** Thomas 2003 Ch. 3 provides complete proofs
+for the Landweber characterization and classification hierarchy. Baier & Katoen provides the
+DBA < NBA proof. Thomas 2003 Ch. 1 provides the intersection construction template.
+
+The only gap is DBA minimization (Löding 2001 behind paywall), which is NP-complete
+anyway and probably not a good formalization target.
 
 ## 4. Recommended Scope for Task 243
 
-Given the existing infrastructure, the task should focus on results that complement the
-already-proved theorems. Recommended phased approach:
+Given the existing infrastructure and available literature, the task should focus on results
+that complement the already-proved theorems.
 
-### Phase 1: DBA Non-Closure Results (Small, Clean)
+### Phase 1: DBA Closure Properties (~200–300 lines)
 
-- `DA.Buchi.not_closed_complement`: DBA languages are not closed under complement.
-  Proof: `not_da_buchi` already provides the witness; wrap as a clean statement.
-- `DA.Buchi.not_closed_union`: DBA languages are not closed under union.
-  Proof: complement of (eventually zero) = (infinitely many a's), which IS DBA-recognizable;
-  if DBA were closed under union, then complement(L) = Σω \ L would be DBA (since DBA is
-  closed under intersection via product), contradicting `not_da_buchi`.
-- Target: `Cslib/Computability/Automata/DA/BuchiClosure.lean`, ~100–150 lines.
+**DBA union** (positive closure):
+```lean
+def DA.Buchi.union (a₁ : DA.Buchi S₁ Σ) (a₂ : DA.Buchi S₂ Σ) :
+    DA.Buchi (S₁ × S₂) Σ
 
-### Phase 2: DBA Intersection (Product Construction)
-
-- `DA.Buchi.inter`: product DBA for intersection, with correctness proof.
-- The construction uses `DA.prod` (already exists) with a 3-state acceptance tracking counter.
-- Target: `Cslib/Computability/Automata/DA/BuchiInter.lean`, ~150–200 lines.
-
-### Phase 3: DBA Characterization (Landweber)
-
-- `DA.Buchi.language_iff_omegaLim`: an ω-regular language L is DBA-recognizable iff
-  L = (L↓fin)↗ω where L↓fin is the set of finite prefixes that can be extended to an
-  accepting run.
-- Builds on `buchi_eq_finAcc_omegaLim`.
-- Target: `Cslib/Computability/Automata/DA/BuchiChar.lean`, ~200–300 lines.
-- This is the most substantial and valuable contribution.
-
-### Phase 4: DBA → DMA / DBA → DPA Conversions
-
-- Trivial conversions linking DBA acceptance to Muller and parity acceptance.
-- Better suited as part of task 252 (acceptance conditions zoo).
-- Defer unless task 252 is not planned.
-
-### Estimated Total Scope
-
-Phases 1–3: ~450–650 lines of new Lean code across 2–3 new files.
-
-## 5. Key Definitions and Theorems to Formalize
-
+theorem DA.Buchi.union_language_eq :
+    language (a₁.union a₂) = language a₁ ⊔ language a₂
 ```
--- Phase 1: Non-closure
-theorem DA.Buchi.not_closed_complement :
-  ∃ (Symbol : Type) (L : ωLanguage Symbol),
-    (∃ S (da : DA.Buchi S Symbol), language da = L) ∧
-    ¬ ∃ S (da : DA.Buchi S Symbol), language da = Lᶜ
+- Construction: product automaton, accept = F₁ × Q₂ ∪ Q₁ × F₂.
+- Proof: pigeonhole — visiting the union infinitely often implies at least one component
+  visited infinitely often.
+- Source: Baier & Katoen Exercise 4.23 (construction hint), Thomas 2003 Ch. 1 (product
+  construction template).
 
-theorem DA.Buchi.not_closed_union :
-  ∃ (Symbol : Type) (L₁ L₂ : ωLanguage Symbol),
-    (∃ S (da : DA.Buchi S Symbol), language da = L₁) ∧
-    (∃ S (da : DA.Buchi S Symbol), language da = L₂) ∧
-    ¬ ∃ S (da : DA.Buchi S Symbol), language da = L₁ ⊔ L₂
-
--- Phase 2: Intersection
+**DBA intersection** (positive closure with counter):
+```lean
 def DA.Buchi.inter (a₁ : DA.Buchi S₁ Σ) (a₂ : DA.Buchi S₂ Σ) :
     DA.Buchi (S₁ × S₂ × Fin 3) Σ
 
 theorem DA.Buchi.inter_language_eq :
     language (a₁.inter a₂) = language a₁ ⊓ language a₂
-
--- Phase 3: Characterization
-theorem DA.Buchi.language_eq_omegaLim (da : DA.Buchi S Σ) :
-    language da = (language (DA.FinAcc.mk da.toDA da.accept))↗ω
--- (This is already `buchi_eq_finAcc_omegaLim` — build characterization on top)
 ```
+- Construction: product with 3-state counter tracking which accepting set was last seen.
+- Source: Thomas 2003 Ch. 1 §1.3 (NBA intersection with counter), adapted deterministically.
+
+**DBA non-closure under complement**:
+```lean
+theorem DA.Buchi.not_closed_complement :
+  ∃ (Symbol : Type) (L : ωLanguage Symbol),
+    (∃ S (da : DA.Buchi S Symbol), language da = L) ∧
+    ¬ ∃ S (da : DA.Buchi S Symbol), language da = Lᶜ
+```
+- Proof: "infinitely many a's" is DBA-recognizable; its complement "eventually zero" is
+  not (`IsRegular.not_da_buchi` already provides the witness).
+- Source: Baier & Katoen Theorem 4.50 + Exercise 4.22.
+
+Target: `Cslib/Computability/Automata/DA/BuchiClosure.lean`
+
+### Phase 2: DBA Characterization — Landweber's Theorem (~300–400 lines)
+
+```lean
+def DA.Muller.IsLoop (a : DA.Muller S Σ) (S : Set S) : Prop
+
+def DA.Muller.ClosedUnderSuperloops (a : DA.Muller S Σ) : Prop
+
+theorem DA.Muller.dba_recognizable_iff_closed_superloops
+    [Finite S] (a : DA.Muller S Σ) :
+    (∃ (acc : Set S), language (DA.Buchi.mk a.toDA acc) = language a) ↔
+    a.ClosedUnderSuperloops
+```
+
+- This is the core characterization: an ω-regular language (given by a DMA) is
+  DBA-recognizable iff the acceptance family is closed under superloops.
+- Source: Thomas 2003 Theorem 3.32 — **complete proof in both directions**.
+- Forward direction: construct DBA from DMA with superloop-closed F by accumulating
+  visited states and resetting when an F-loop is hit.
+- Backward direction: given a DBA recognizing L, show any superloop of an F-loop is
+  also in F using the deterministic pumping argument.
+
+Target: `Cslib/Computability/Automata/DA/BuchiChar.lean`
+
+### Phase 3: DBA → DMA / DBA → DPA Conversions (~100–150 lines)
+
+```lean
+def DA.Buchi.toMuller (a : DA.Buchi S Σ) : DA.Muller S Σ
+
+theorem DA.Buchi.toMuller_language_eq :
+    language a.toMuller = language a
+```
+- Trivial: F_muller = {S ⊆ Q | S ∩ F_buchi ≠ ∅}.
+- Defer to task 252 if parity acceptance is defined there.
+
+### Estimated Total Scope
+
+Phases 1–2: ~500–700 lines of new Lean code across 2 new files.
+Phase 3: ~100–150 lines (can be deferred to task 252).
+
+## 5. Proof Source Coverage Matrix
+
+| Result | Source with Proof | Status |
+|--------|-------------------|--------|
+| DBA < NBA (∃ ω-regular not DBA-recognizable) | Baier & Katoen Thm 4.50 (full proof) | **Already in CSLib** |
+| DBA language = ω-limit of DFA language | — | **Already in CSLib** (`buchi_eq_finAcc_omegaLim`) |
+| DBA closed under union | Baier & Katoen Ex 4.23 (hint only); standard pigeonhole | **Construction clear, no full proof in lit** |
+| DBA closed under intersection | Thomas 2003 Ch. 1 §1.3 (NBA version with counter) | **Template available, adapt to deterministic** |
+| DBA not closed under complement | Baier & Katoen Ex 4.22 (follows from Thm 4.50) | **Follows from existing CSLib result** |
+| DBA-recognizable ↔ superloop-closed | Thomas 2003 Thm 3.32 (FULL PROOF both directions) | **Complete proof available** |
+| Classification hierarchy (E ⊊ Büchi ⊊ co-Büchi ⊊ Muller) | Thomas 2003 §3.6 (with separating examples) | **Complete with witnesses** |
 
 ## 6. Relationship to Other Tasks
 
 | Task | Relationship |
 |------|-------------|
-| 241 (McNaughton's theorem) | McNaughton = DMA ↔ NBA. DBA → DMA conversion (Phase 4) is a prerequisite step. |
+| 241 (McNaughton's theorem) | McNaughton = DMA ↔ NBA. DBA → DMA conversion (Phase 3) is a prerequisite step. |
 | 245 (Formula Encodable/Countable) | Independent. |
 | 248 (NBA emptiness) | Completed. DBA emptiness is simpler (reachability in deterministic graph). |
 | 250 (NBA complementation) | NBA complement uses determinization. DBA complement is trivial (swap accept). |
@@ -224,12 +269,19 @@ theorem DA.Buchi.language_eq_omegaLim (da : DA.Buchi S Σ) :
 
 ## 7. Conclusion
 
-The existing CSLib infrastructure already covers the DBA definition, DBA → NBA embedding,
-DBA language ⊂ ω-regular, and the DBA expressiveness limitation. The available literature
-(Thomas 1997 + Piterman 2007 + Baier & Katoen 2008) is **adequate for `--lit` usage**.
+The literature is now sufficient for all recommended phases:
 
-The recommended scope focuses on: (1) non-closure results as clean corollaries of existing
-theorems, (2) direct DBA intersection via product construction, and (3) the Landweber
-characterization connecting DBA-recognizability to ω-limits. The Löding 2001 paper would
-be the single most valuable addition to the literature if the Landweber characterization
-or DBA minimization is pursued.
+- **Thomas 2003 Ch. 3** (newly acquired) provides the Landweber Theorem with complete
+  proof — the most valuable missing piece.
+- **Thomas 2003 Ch. 1** provides the intersection construction template.
+- **Baier & Katoen 2008** provides the NBA > DBA proof (already in CSLib) and closure
+  property hints.
+
+The recommended scope focuses on: (1) DBA closure under union and intersection (positive
+results with explicit constructions), (2) DBA non-closure under complement (clean corollary
+of existing CSLib results), and (3) the Landweber characterization (superloop closure ↔
+DBA-recognizability) which is the most substantial and valuable contribution.
+
+**Correction from v1**: The initial report incorrectly stated DBAs are NOT closed under
+union. DBAs ARE closed under union (Baier & Katoen Exercise 4.23) via the product
+construction with accept = F₁ × Q₂ ∪ Q₁ × F₂.

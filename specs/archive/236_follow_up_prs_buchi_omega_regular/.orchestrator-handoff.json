@@ -1,0 +1,10 @@
+{
+  "status": "implemented",
+  "summary": "All 3 sorry markers filled in GNBA.lean. Refactored ctr to use gnbaCtrSeq/gnbaCtrStep with helper lemmas gnbaCtrStep_not_mem and gnbaCtrStep_mem. lean_verify confirms gnba_language_eq, isRegular, isRegular_untl are sorry-free. Full CI passes (lake build, checkInitImports, lint-style). lake test has pre-existing unrelated failure.",
+  "phases_completed": 2,
+  "phases_total": 2,
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "complete",
+  "artifacts": []
+}

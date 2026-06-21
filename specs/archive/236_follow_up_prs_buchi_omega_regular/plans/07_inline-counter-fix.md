@@ -91,20 +91,20 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Verification and CI [NOT STARTED]
+### Phase 2: Verification and CI [COMPLETED]
 
 **Goal**: Confirm sorry-free status of `gnba_language_eq` and `isRegular`, and pass the full CI pipeline.
 
 **Tasks**:
-- [ ] Run `lean_verify` on `Cslib.Logic.LTL.Formula.gnba_language_eq` -- confirm no `sorryAx`
-- [ ] Run `lean_verify` on `Cslib.Logic.LTL.Formula.isRegular` -- confirm transitively sorry-free
-- [ ] Run `lean_verify` on `Cslib.Logic.LTL.Formula.isRegular_untl` -- confirm sorry-free
-- [ ] Run full CI pipeline:
-  - `lake build` (full project)
-  - `lake test`
-  - `lake exe checkInitImports`
-  - `lake exe lint-style`
-- [ ] Grep GNBA.lean for remaining `sorry` or `proof_wanted` -- confirm none
+- [x] Run `lean_verify` on `Cslib.Logic.LTL.Formula.gnba_language_eq` -- no `sorryAx`
+- [x] Run `lean_verify` on `Cslib.Logic.LTL.Formula.isRegular` -- no `sorryAx`
+- [x] Run `lean_verify` on `Cslib.Logic.LTL.Formula.isRegular_untl` -- no `sorryAx`
+- [x] Run full CI pipeline:
+  - `lake build` (full project) -- pass
+  - `lake test` -- pre-existing failure (CslibTests.Bisimulation import, unrelated)
+  - `lake exe checkInitImports` -- pass
+  - `lake exe lint-style` -- pass
+- [x] Grep GNBA.lean for remaining `sorry` or `proof_wanted` -- none found
 
 **Timing**: 0.5 hours
 

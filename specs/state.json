@@ -71,60 +71,6 @@
       ]
     },
     {
-      "project_number": 254,
-      "project_name": "revise_ltl_conventions_standard_semantics",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "Revise LTL conventions on main to conform to the standard semantic definitions adopted in feat/temporal-formula-propositional (commit 3e147123). Specifically: (1) In Formula.lean, change notation from Burgess convention (event U guard) to standard convention (guard U event) — update untl argument order, someFuture from φ U ⊤ to ⊤ U φ, notation symbols from X/U/𝐅/𝐆 to ◯/𝓤/◇/□, add leadsto (⇝) abbreviation, update all docstrings. (2) In Connectives.lean, remove HasSince/TemporalConnectives/BimodalConnectives and Burgess references — keep only HasUntil/HasNext/FutureTemporalConnectives/LTLConnectives as in the feature branch. (3) In Satisfies.lean, rewrite to use ωSequence State with valuation v : Atom → State → Prop instead of ℕ → (Atom → Prop) with parameter i. (4) Update Cslib.lean barrel imports accordingly. The feature branch commit 3e147123 serves as the reference for all target definitions",
-      "topic": "Temporal Logic",
-      "created": "2026-06-20T01:49:05Z",
-      "last_updated": "2026-06-20T03:04:08Z",
-      "session_id": "sess_1750383000_a7c3e1",
-      "researched": "2026-06-20T02:03:14Z",
-      "next_artifact_number": 2,
-      "completion_summary": "Revised all LTL conventions on main to standard semantics: updated notation symbols (◯/𝓤/◇/□), rewrote Satisfies.lean to ωSequence State with valuation, updated all downstream files (GNBA, OmegaRegular, OmegaExecutionSatisfies, Embedding). Build passes cleanly (3009 jobs)."
-    },
-    {
-      "project_number": 253,
-      "project_name": "gather_automata_literature",
-      "status": "completed",
-      "task_type": "general",
-      "description": "Gather PDFs for all 25 literature references cited across tasks 241-252 (McNaughton, Vardi-Wolper, NBA emptiness, NBA complementation, product construction/model checking, acceptance conditions zoo). Search online repositories (arXiv, DBLP, Springer, IEEE, ACM DL, Semantic Scholar, author homepages) for each reference. Convert acquired PDFs to markdown via the literature pipeline and update the Literature index. Produce a final report listing all sources found and any that remain unlocated",
-      "topic": "Project Management",
-      "created": "2026-06-19T20:38:05Z",
-      "last_updated": "2026-06-19T21:02:17Z",
-      "next_artifact_number": 3,
-      "artifacts": [
-        {
-          "path": "specs/253_gather_automata_literature/reports/01_reference-inventory.md",
-          "type": "report",
-          "summary": "Complete inventory of 25 deduplicated literature references across tasks 241-252 with search guidance"
-        },
-        {
-          "path": "specs/253_gather_automata_literature/reports/02_source-availability.md",
-          "type": "report",
-          "summary": "Source availability research for 25 automata theory references with URLs and access types"
-        },
-        {
-          "path": "specs/253_gather_automata_literature/plans/02_literature-gathering.md",
-          "type": "plan",
-          "summary": "4-phase plan for downloading, converting, indexing, and reporting on 25 automata theory references"
-        },
-        {
-          "path": "specs/253_gather_automata_literature/reports/03_acquisition-report.md",
-          "type": "report",
-          "summary": "Final acquisition report for all 25 references"
-        },
-        {
-          "path": "specs/253_gather_automata_literature/summaries/02_acquisition-summary.md",
-          "type": "summary",
-          "summary": "Implementation summary: 13 acquired, 12 paywall, 24 index entries"
-        }
-      ],
-      "session_id": "sess_1781901617_19c4bf",
-      "completion_summary": "Downloaded 13 of 25 automata theory PDFs (11 Tier 1 open-access + 2 Tier 2), converted all to markdown, added 24 enriched entries to Literature/index.json. 12 references remain behind IEEE/Springer/Elsevier/AMS paywalls with documented acquisition recommendations."
-    },
-    {
       "project_number": 241,
       "project_name": "mcnaughton_theorem",
       "status": "not_started",
@@ -164,17 +110,6 @@
       "last_updated": "2026-06-19T05:20:19Z"
     },
     {
-      "project_number": 244,
-      "project_name": "optimize_nba_state_space",
-      "status": "abandoned",
-      "task_type": "cslib",
-      "description": "Optimize NBA state space constructions prioritizing correctness over minimality",
-      "topic": "Temporal Logic",
-      "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-19T20:20:31Z",
-      "abandoned_reason": "Premature optimization — defer until correctness proofs are solid"
-    },
-    {
       "project_number": 245,
       "project_name": "formula_encodable_countable_instances",
       "status": "not_started",
@@ -183,31 +118,6 @@
       "topic": "Temporal Logic",
       "created": "2026-06-19T05:20:19Z",
       "last_updated": "2026-06-19T05:20:19Z"
-    },
-    {
-      "project_number": 236,
-      "project_name": "follow_up_prs_buchi_omega_regular",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "Complete follow-up PRs from PR #649 for Büchi automata and closure of omega-regular languages under boolean operations",
-      "topic": "Temporal Logic",
-      "created": "2026-06-19T02:21:37Z",
-      "last_updated": "2026-06-20T00:15:00Z",
-      "completion_summary": "All 3 sorry markers filled in GNBA.lean using gnbaCtrStep/gnbaCtrSeq helper lemmas. gnba_language_eq, isRegular, isRegular_untl verified sorry-free. Full CI passes.",
-      "session_id": "sess_1781901679_367023",
-      "next_artifact_number": 7,
-      "artifacts": [
-        {
-          "path": "specs/236_follow_up_prs_buchi_omega_regular/reports/06_team-research.md",
-          "type": "research",
-          "summary": "Team research: corrected diagnosis, verified inline fix for 3 sorry markers"
-        },
-        {
-          "path": "specs/236_follow_up_prs_buchi_omega_regular/plans/07_inline-counter-fix.md",
-          "type": "plan",
-          "summary": "Implementation plan with 2 phases to fill 3 sorry markers using inline unfold-and-split strategy"
-        }
-      ]
     },
     {
       "project_number": 226,
@@ -458,7 +368,10 @@
     }
   ],
   "repository_health": {
-    "last_assessed": "2026-06-19T20:12:54Z",
+    "last_assessed": "2026-06-21T00:35:39Z",
+    "todo_count": 25,
+    "fixme_count": 0,
+    "build_errors": 0,
     "status": "healthy"
   },
   "active_topics": [

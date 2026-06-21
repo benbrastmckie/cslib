@@ -115,32 +115,6 @@ next_project_number: 261
 
 ---
 
-### 254. Revise ltl conventions standard semantics
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: None
-
-**Description**: Revise LTL conventions on main to conform to the standard semantic definitions adopted in feat/temporal-formula-propositional (commit 3e147123). Specifically: (1) In Formula.lean, change notation from Burgess convention (event U guard) to standard convention (guard U event) — update untl argument order, someFuture from φ U ⊤ to ⊤ U φ, notation symbols from X/U/𝐅/𝐆 to ◯/𝓤/◇/□, add leadsto (⇝) abbreviation, update all docstrings. (2) In Connectives.lean, remove HasSince/TemporalConnectives/BimodalConnectives and Burgess references — keep only HasUntil/HasNext/FutureTemporalConnectives/LTLConnectives as in the feature branch. (3) In Satisfies.lean, rewrite to use ωSequence State with valuation v : Atom → State → Prop instead of ℕ → (Atom → Prop) with parameter i. (4) Update Cslib.lean barrel imports accordingly. The feature branch commit 3e147123 serves as the reference for all target definitions
-
----
-
-### 253. Gather automata literature
-- **Status**: [COMPLETED]
-- **Task Type**: general
-- **Topic**: Project Management
-- **Dependencies**: None
-- **Research**:
-  - [253_gather_automata_literature/reports/01_reference-inventory.md]
-  - [253_gather_automata_literature/reports/02_source-availability.md]
-  - [253_gather_automata_literature/reports/03_acquisition-report.md]
-- **Plan**: [253_gather_automata_literature/plans/02_literature-gathering.md]
-- **Summary**: [253_gather_automata_literature/summaries/02_acquisition-summary.md]
-
-**Description**: Gather PDFs for all 25 literature references cited across tasks 241-252 (McNaughton, Vardi-Wolper, NBA emptiness, NBA complementation, product construction/model checking, acceptance conditions zoo). Search online repositories (arXiv, DBLP, Springer, IEEE, ACM DL, Semantic Scholar, author homepages) for each reference. Convert acquired PDFs to markdown via the literature pipeline and update the Literature index. Produce a final report listing all sources found and any that remain unlocated
-
----
-
 ### 252. Acceptance conditions zoo
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
@@ -196,16 +170,6 @@ next_project_number: 261
 
 ---
 
-### 244. Optimize nba state space
-- **Status**: [ABANDONED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: None
-
-**Description**: Optimize NBA state space constructions prioritizing correctness over minimality
-
----
-
 ### 243. Deterministic buchi automata
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
@@ -234,18 +198,6 @@ next_project_number: 261
 - **Research**: [241_mcnaughton_theorem/reports/01_ctchou-coordination-seed.md]
 
 **Description**: Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller) establishing equivalence between omega-regular languages and deterministic Muller automata. Research phase should evaluate ctchou/AutomataTheory (independent Lean 4 project that claims McNaughton already proved) for architectural compatibility, portability, and licensing before deciding whether to port, adapt, or develop independently.
-
----
-
-### 236. Follow up prs buchi omega regular
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: None
-- **Research**: [236_follow_up_prs_buchi_omega_regular/reports/06_team-research.md]
-- **Plan**: [236_follow_up_prs_buchi_omega_regular/plans/07_inline-counter-fix.md]
-
-**Description**: Complete follow-up PRs from PR #649 for Büchi automata and closure of omega-regular languages under boolean operations
 
 ---
 

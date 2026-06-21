@@ -1,0 +1,21 @@
+{
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/256_add_ltl_satisfies_simp_lemmas/plans/01_satisfies-simp-lemmas.md",
+      "summary": "Implementation plan with 2 phases: core @[simp] constructor lemmas (Iff.rfl) and derived non-simp lemmas"
+    }
+  ],
+  "next_steps": "Run /implement 256 to execute the plan",
+  "metadata": {
+    "session_id": "sess_1781994910_0cdf2d_256",
+    "agent_type": "planner-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 2,
+    "estimated_hours": 1.5,
+    "dependency_waves": [[1], [2]]
+  },
+  "memory_candidates": []
+}

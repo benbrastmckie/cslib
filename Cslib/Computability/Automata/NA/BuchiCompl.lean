@@ -8,6 +8,7 @@ module
 
 public import Cslib.Computability.Automata.NA.Basic
 public import Mathlib.Data.Fintype.Card
+public import Mathlib.Order.OrderIsoNat
 
 /-! # NBA Complementation via Rank-Based Construction
 
@@ -35,9 +36,15 @@ accepting obligations have been discharged.
 
 ## Main theorems
 
-* `NA.Buchi.complement_language_sub` — soundness: `language (complementNA a) ≤ (language a)ᶜ`
-* `NA.Buchi.complement_language_eq` — completeness: `language (complementNA a) = (language a)ᶜ`
-  (see `proof_wanted` for the backward ranking lemma direction)
+* `NA.Buchi.covers_neBot_of_neBot` — the covers relation propagates non-`⊥`ness
+* `NA.Buchi.covers_rank_le` — the covers relation is rank-non-increasing
+* `NA.Buchi.covers_accept_odd` — accepting states get odd rank under covers
+* `NA.Buchi.run_rank_defined_all` — any run from a start state keeps all ranks defined
+* `NA.Buchi.run_rank_nonincreasing` — ranks along any valid run are non-increasing
+* `NA.Buchi.withBot_fin_nonincreasing_stabilizes` — bounded non-increasing sequences stabilize
+* `NA.Buchi.run_accept_rank_odd` — stabilized rank of accepting run must be odd
+* `NA.Buchi.complement_language_sub` — soundness (stated as `proof_wanted`)
+* `NA.Buchi.complement_language_eq` — main theorem (stated as `proof_wanted`)
 
 ## References
 
@@ -75,23 +82,24 @@ def covers (a : Buchi State Symbol) (g : LevelRanking State) (σ : Symbol)
   ∀ s t, a.Tr s σ t →
     (g s = ⊥ → g' t = ⊥) ∧
     (g s ≠ ⊥ → g' t ≠ ⊥ ∧ g' t ≤ g s) ∧
-    (t ∈ a.accept → ∀ r : Fin (2 * Fintype.card State + 1), g' t = some r → r.val % 2 = 1)
+    (t ∈ a.accept → ∀ r : Fin (2 * Fintype.card State + 1), g' t = (r : WithBot _) → r.val % 2 = 1)
 
-/-- Whether a level ranking assigns an even (non-⊥) rank to a state. -/
+/-- Whether a level ranking assigns an even (non-`⊥`) rank to a state. -/
 def hasEvenRank (g : LevelRanking State) (s : State) : Prop :=
-  ∃ r : Fin (2 * Fintype.card State + 1), g s = some r ∧ r.val % 2 = 0
+  ∃ r : Fin (2 * Fintype.card State + 1), g s = (r : WithBot _) ∧ r.val % 2 = 0
 
-instance (g : LevelRanking State) (s : State) : Decidable (hasEvenRank g s) :=
+/-- Decidability of `hasEvenRank`. -/
+instance instDecidableHasEvenRank (g : LevelRanking State) (s : State) :
+    Decidable (hasEvenRank g s) :=
   decidable_of_iff
-    (∃ r : Fin (2 * Fintype.card State + 1), g s = some r ∧ r.val % 2 = 0)
+    (∃ r : Fin (2 * Fintype.card State + 1), g s = (r : WithBot _) ∧ r.val % 2 = 0)
     Iff.rfl
 
 /-- The obligation set update: given level ranking `g'` and current obligation set `P`,
 compute the next obligation set `P'`.
 - If `P = ∅`, reset to states with even rank under `g'` (new obligations);
 - Otherwise, keep states in `P` that still have a defined rank (i.e., `g'(s) ≠ ⊥`). -/
-noncomputable def updateObl (g' : LevelRanking State)
-    (P : Finset State) : Finset State :=
+noncomputable def updateObl (g' : LevelRanking State) (P : Finset State) : Finset State :=
   if P = ∅ then
     Finset.univ.filter (fun t => hasEvenRank g' t)
   else
@@ -103,9 +111,11 @@ abbrev ComplState (State : Type) [Fintype State] [DecidableEq State] : Type :=
   LevelRanking State × Finset State
 
 /-- The initial level rankings for the complement automaton: rankings where every
-non-start state of `a` receives rank `⊥` (only start states can be reachable at step 0). -/
+start state of `a` receives a non-`⊥` rank (is tracked) and every non-start state
+receives `⊥` (is not reachable at level 0). This ensures all possible runs are covered
+by the initial witness ranking. -/
 def initRankings (a : Buchi State Symbol) : Set (LevelRanking State) :=
-  { g | ∀ s, s ∉ a.start → g s = ⊥ }
+  { g | (∀ s, s ∉ a.start → g s = ⊥) ∧ (∀ s, s ∈ a.start → g s ≠ ⊥) }
 
 /-- The initial obligation set for a given initial level ranking `g`: states with even rank. -/
 noncomputable def initObl (g : LevelRanking State) : Finset State :=
@@ -125,13 +135,140 @@ Start states: `(g₀, initObl g₀)` for `g₀ ∈ initRankings a`.
 
 Acceptance: `P = ∅` (all obligations discharged).
 
-An accepting run witnesses that accepting states never appear with even rank infinitely
-often, proving rejection by the original NBA `a`. -/
+An accepting run witnesses that all reachable even-ranked states are eventually
+eliminated (rank becomes `⊥`), proving rejection by the original NBA `a`. -/
 @[scoped grind =]
 noncomputable def complementNA (a : Buchi State Symbol) :
     Buchi (ComplState State) Symbol where
   Tr s σ t := covers a s.1 σ t.1 ∧ t.2 = updateObl t.1 s.2
   start := { s | s.1 ∈ initRankings a ∧ s.2 = initObl s.1 }
   accept := { s | s.2 = ∅ }
+
+/-! ## Soundness Helper Lemmas
+
+These lemmas support the soundness direction of KV2001 Lemma 5.2:
+an odd ranking of the run DAG implies rejection by the original NBA. -/
+
+variable {a : Buchi State Symbol}
+
+omit [DecidableEq State] in
+/-- The `covers` relation preserves non-`⊥`ness: if `g(s) ≠ ⊥` and `g'` covers `g`
+via a transition `s -σ→ t`, then `g'(t) ≠ ⊥`. -/
+lemma covers_neBot_of_neBot {g g' : LevelRanking State} {σ : Symbol} {s t : State}
+    (hcov : covers a g σ g') (htr : a.Tr s σ t) (hgs : g s ≠ ⊥) : g' t ≠ ⊥ :=
+  ((hcov s t htr).2.1 hgs).1
+
+omit [DecidableEq State] in
+/-- The `covers` relation is rank-non-increasing: if `g(s) ≠ ⊥` and `g'` covers `g`
+via a transition `s -σ→ t`, then `g'(t) ≤ g(s)` (as `WithBot` elements). -/
+lemma covers_rank_le {g g' : LevelRanking State} {σ : Symbol} {s t : State}
+    (hcov : covers a g σ g') (htr : a.Tr s σ t) (hgs : g s ≠ ⊥) : g' t ≤ g s :=
+  ((hcov s t htr).2.1 hgs).2
+
+omit [DecidableEq State] in
+/-- The `covers` relation enforces odd rank on accepting states:
+if `t ∈ a.accept`, `g'` covers `g` via `s -σ→ t`, and `g'(t) = r`, then `r` is odd. -/
+lemma covers_accept_odd {g g' : LevelRanking State} {σ : Symbol} {s t : State}
+    {r : Fin (2 * Fintype.card State + 1)}
+    (hcov : covers a g σ g') (htr : a.Tr s σ t) (hacc : t ∈ a.accept)
+    (hval : g' t = (r : WithBot _)) : r.val % 2 = 1 :=
+  (hcov s t htr).2.2 hacc r hval
+
+omit [DecidableEq State] in
+/-- Along any run of `a`, if the starting state has non-`⊥` rank in a covering sequence,
+all subsequent states also have non-`⊥` rank. -/
+lemma run_rank_defined_all {xs : ωSequence Symbol} {qs : ωSequence State}
+    {gs : ℕ → LevelRanking State}
+    (h_run : a.Run xs qs)
+    (h_covers : ∀ i, covers a (gs i) (xs i) (gs (i + 1)))
+    (h_zero : gs 0 (qs 0) ≠ ⊥) :
+    ∀ k, gs k (qs k) ≠ ⊥ := by
+  intro k
+  induction k with
+  | zero => exact h_zero
+  | succ n ih => exact covers_neBot_of_neBot (h_covers n) (h_run.trans n) ih
+
+omit [DecidableEq State] in
+/-- Along any run of `a`, ranks are non-increasing in a covering sequence. -/
+lemma run_rank_nonincreasing {xs : ωSequence Symbol} {qs : ωSequence State}
+    {gs : ℕ → LevelRanking State}
+    (h_run : a.Run xs qs)
+    (h_covers : ∀ i, covers a (gs i) (xs i) (gs (i + 1)))
+    (h_zero : gs 0 (qs 0) ≠ ⊥) :
+    ∀ k, gs (k + 1) (qs (k + 1)) ≤ gs k (qs k) := by
+  intro k
+  exact covers_rank_le (h_covers k) (h_run.trans k)
+    (run_rank_defined_all h_run h_covers h_zero k)
+
+/-- A non-increasing sequence of values in `WithBot (Fin n)` that never equals `⊥`
+eventually stabilizes. This uses the descending chain condition on finite types. -/
+lemma withBot_fin_nonincreasing_stabilizes {n : ℕ} {f : ℕ → WithBot (Fin n)}
+    (h_nonbot : ∀ k, f k ≠ ⊥) (h_nonincr : ∀ k, f (k + 1) ≤ f k) :
+    ∃ k₀, ∃ r : Fin n, ∀ k ≥ k₀, f k = (r : WithBot _) := by
+  have h_some : ∀ k, ∃ r : Fin n, f k = (r : WithBot _) := fun k => by
+    cases hfk : f k with
+    | bot => exact absurd hfk (h_nonbot k)
+    | coe r => exact ⟨r, rfl⟩
+  have h_antitone : Antitone f := by
+    intro a b hab
+    induction hab with
+    | refl => exact le_refl _
+    | step _ ih => exact le_trans (h_nonincr _) ih
+  obtain ⟨k₀, hk₀_stab⟩ := WellFoundedLT.antitone_chain_condition h_antitone
+  obtain ⟨r, hr⟩ := h_some k₀
+  exact ⟨k₀, r, fun k hk => by rw [← hk₀_stab k hk, hr]⟩
+
+omit [DecidableEq State] in
+/-- If a run of `a` visits `a.accept` infinitely often and has a stabilized rank `r`
+from position `k₀` onward, then `r` must be odd. -/
+lemma run_accept_rank_odd {xs : ωSequence Symbol} {qs : ωSequence State}
+    {gs : ℕ → LevelRanking State}
+    (h_run : a.Run xs qs)
+    (h_covers : ∀ i, covers a (gs i) (xs i) (gs (i + 1)))
+    (h_freq : ∃ᶠ k in atTop, qs k ∈ a.accept)
+    {k₀ : ℕ} {r : Fin (2 * Fintype.card State + 1)}
+    (h_stable : ∀ k ≥ k₀, gs k (qs k) = (r : WithBot _)) :
+    r.val % 2 = 1 := by
+  rw [frequently_atTop] at h_freq
+  obtain ⟨k, hk_ge, hk_acc⟩ := h_freq (k₀ + 1)
+  have hk_pos : k ≥ 1 := by omega
+  have h_tr : a.Tr (qs (k - 1)) (xs (k - 1)) (qs k) := by
+    have := h_run.trans (k - 1)
+    rwa [Nat.sub_add_cancel hk_pos] at this
+  apply covers_accept_odd (h_covers (k - 1)) h_tr hk_acc
+  have := h_stable k (by omega)
+  rwa [Nat.sub_add_cancel hk_pos]
+
+/-! ## Main Theorems (proof_wanted) -/
+
+/-- **Soundness**: The complement NBA accepts only words rejected by the original NBA.
+`language (complementNA a) ≤ (language a)ᶜ`
+
+The proof sketch (pending full DAG formalization, see KV2001 Lemma 5.2 forward direction):
+- An accepting complement run gives a covering sequence of level rankings starting in
+  `initRankings a`, where all start states have non-`⊥` initial rank.
+- Any accepting run of the original NBA has all states with non-`⊥` and non-increasing
+  ranks (by `run_rank_defined_all`, `run_rank_nonincreasing`).
+- The rank sequence stabilizes (by `withBot_fin_nonincreasing_stabilizes`) to some `r*`.
+- Since `a.accept` is visited infinitely often, `r*` must be odd
+  (by `run_accept_rank_odd`).
+- The full contradiction requires the DAG-level argument (KV2001 Lemma 5.2). -/
+proof_wanted complement_language_sub :
+    ∀ (a : Buchi State Symbol), language (complementNA a) ≤ (language a)ᶜ
+
+/-- **Completeness**: Words rejected by the original NBA are accepted by the complement.
+`(language a)ᶜ ≤ language (complementNA a)`
+
+This is the backward direction of KV2001 Lemma 5.2: if the original NBA rejects a
+word, the run DAG admits an odd ranking, which can be used to construct an accepting
+run of the complement NBA. The proof requires an inductive removal procedure over
+sub-DAGs and is of Very High difficulty (rated 25-30% confidence by the research team). -/
+proof_wanted complement_language_sup :
+    ∀ (a : Buchi State Symbol), (language a)ᶜ ≤ language (complementNA a)
+
+/-- **Main theorem**: The complement NBA accepts exactly the complement language.
+`language (complementNA a) = (language a)ᶜ` -/
+proof_wanted complement_language_eq :
+    ∀ (a : Buchi State Symbol), language (complementNA a) = (language a)ᶜ
 
 end Cslib.Automata.NA.Buchi

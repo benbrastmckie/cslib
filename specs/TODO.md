@@ -12,7 +12,7 @@ next_project_number: 261
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,180,226,241,243,245,250,251,252,255,256,259 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
-| 2 | 39,40,181,215,257 | 36,37,180,256 | Bimodal Porting, Temporal Logic |
+| 2 | 39,40,181,215,257,260 | 36,37,180,255,256 | Bimodal Porting, Temporal Logic |
 | 3 | 41,258 | 39,40,257 | Foundations, Temporal Logic |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -43,6 +43,7 @@ next_project_number: 261
 251 [IMPLEMENTED] — Implement the synchronous product construction of an LTS (using e
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
 255 [IMPLEMENTED] — Fix stale docstrings and comments left over from the task-254 LTL
+  └─ 260 [IMPLEMENTED] — Add module-level documentation contrasting the LTL and Temporal c
 256 [IMPLEMENTED] — Add @[simp] unfold lemmas for LTL.Satisfies to match the pattern 
   └─ 257 [IMPLEMENTED] — Fix style issues in GNBA.lean: (1) Break 7 lines exceeding 100 ch
     └─ 258 [NOT STARTED] — Refactor duplicated proof patterns in GNBA.lean. Currently subfor
@@ -53,7 +54,7 @@ next_project_number: 261
 ## Tasks
 
 ### 260. Add ltl temporal convention contrast docs
-- **Status**: [COMPLETED]
+- **Status**: [IMPLEMENTED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 255

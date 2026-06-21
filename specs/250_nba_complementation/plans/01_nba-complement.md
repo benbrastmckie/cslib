@@ -74,7 +74,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Complement Construction and Infrastructure [IN PROGRESS]
+### Phase 1: Complement Construction and Infrastructure [COMPLETED]
 
 **Goal**: Define the complement NBA state type, transition relation, acceptance condition, and the top-level `complementNA` definition. Establish the run DAG and level ranking vocabulary needed for correctness proofs.
 
@@ -106,7 +106,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Soundness Helper Lemmas [NOT STARTED]
+### Phase 2: Soundness Helper Lemmas [IN PROGRESS]
 
 **Goal**: Prove helper lemmas relating the complement automaton's behavior to run DAG properties, and establish the forward direction of the ranking lemma: if an odd ranking exists, the original NBA rejects the word.
 

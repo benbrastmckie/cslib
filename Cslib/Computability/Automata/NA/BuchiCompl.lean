@@ -239,35 +239,91 @@ lemma run_accept_rank_odd {xs : ωSequence Symbol} {qs : ωSequence State}
   have := h_stable k (by omega)
   rwa [Nat.sub_add_cancel hk_pos]
 
+/-! ## Soundness Helper Lemmas (continued) -/
+
+omit [DecidableEq State] in
+/-- Helper: if a complement run starts in `initRankings a`, then any start state
+of `a` has non-`⊥` initial rank in the first level ranking. -/
+lemma initRankings_start_neBot {g : LevelRanking State}
+    (hg : g ∈ initRankings a) {s : State} (hs : s ∈ a.start) : g s ≠ ⊥ :=
+  hg.2 s hs
+
+/-- Helper: the first level ranking of an accepting complement run lies in `initRankings a`. -/
+lemma complementNA_run_init
+    {xs : ωSequence Symbol} {ss : ωSequence (ComplState State)}
+    (h_run : (complementNA a).Run xs ss) : (ss 0).1 ∈ initRankings a :=
+  h_run.start.1
+
+/-- Helper: for each step of a complement run, the level rankings σ-cover each other. -/
+lemma complementNA_run_covers
+    {xs : ωSequence Symbol} {ss : ωSequence (ComplState State)}
+    (h_run : (complementNA a).Run xs ss) :
+    ∀ i, covers a (ss i).1 (xs i) (ss (i + 1)).1 :=
+  fun i => (h_run.trans i).1
+
 /-! ## Main Theorems (proof_wanted) -/
 
 /-- **Soundness**: The complement NBA accepts only words rejected by the original NBA.
 `language (complementNA a) ≤ (language a)ᶜ`
 
-The proof sketch (pending full DAG formalization, see KV2001 Lemma 5.2 forward direction):
-- An accepting complement run gives a covering sequence of level rankings starting in
-  `initRankings a`, where all start states have non-`⊥` initial rank.
-- Any accepting run of the original NBA has all states with non-`⊥` and non-increasing
-  ranks (by `run_rank_defined_all`, `run_rank_nonincreasing`).
-- The rank sequence stabilizes (by `withBot_fin_nonincreasing_stabilizes`) to some `r*`.
-- Since `a.accept` is visited infinitely often, `r*` must be odd
-  (by `run_accept_rank_odd`).
-- The full contradiction requires the DAG-level argument (KV2001 Lemma 5.2). -/
+Proof sketch (forward direction of KV2001 Lemma 5.2):
+
+Suppose `xs ∈ language (complementNA a)` via accepting complement run `ss`, and assume
+for contradiction that `xs ∈ language a` via accepting run `qs`.
+The level rankings `gs i = (ss i).1` form a covering sequence:
+- `qs 0 ∈ a.start` and `gs 0 ∈ initRankings a`, so `gs 0 (qs 0) ≠ ⊥`
+  (by `initRankings_start_neBot` and `complementNA_run_init`).
+- By `run_rank_defined_all`: all `gs k (qs k) ≠ ⊥`.
+- By `run_rank_nonincreasing`: the sequence `gs k (qs k)` is non-increasing.
+- By `withBot_fin_nonincreasing_stabilizes`: it stabilizes to some `r*`.
+- By `run_accept_rank_odd`: `r*.val % 2 = 1` (odd).
+
+The full contradiction uses the obligation set `P`:
+- The complement accepts `∃ᶠ k, (ss k).2 = ∅` (obligation set cycles through empty).
+- When `P_k = ∅`, the reset `P_{k+1}` = all states with even rank in `gs (k+1)`.
+- If `gs (k+1) (qs (k+1))` is even, then `qs (k+1) ∈ P_{k+1}`.
+  Since `gs j (qs j) ≠ ⊥` for all `j`, the state `qs (k+1)` can never be removed from `P`,
+  so `P` can never become empty again. Contradiction with `∃ᶠ k, P_k = ∅`.
+- If `gs (k+1) (qs (k+1))` is always odd (after rank stabilization to odd `r*`), then
+  the DAG-level argument is needed: the run DAG of `a` on `xs` always has reachable states,
+  and any valid odd ranking must assign rank 0 to some reachable state eventually, which
+  creates an infinite path with rank 0 (even) — contradicting the odd ranking condition.
+  (This requires the full tree/DAG argument from KV2001 Section 5.2.) -/
 proof_wanted complement_language_sub :
     ∀ (a : Buchi State Symbol), language (complementNA a) ≤ (language a)ᶜ
 
 /-- **Completeness**: Words rejected by the original NBA are accepted by the complement.
 `(language a)ᶜ ≤ language (complementNA a)`
 
-This is the backward direction of KV2001 Lemma 5.2: if the original NBA rejects a
-word, the run DAG admits an odd ranking, which can be used to construct an accepting
-run of the complement NBA. The proof requires an inductive removal procedure over
-sub-DAGs and is of Very High difficulty (rated 25-30% confidence by the research team). -/
+Proof sketch (backward direction of KV2001 Lemma 5.2):
+
+If `xs ∉ language a`, then for every run `qs` of `a` on `xs`, the run visits `a.accept`
+only finitely often. The run DAG `D(A, xs)` has no path visiting `a.accept` infinitely often.
+
+By KV2001 Lemma 5.2 (backward direction), an inductive removal procedure shows that `D(A, xs)`
+admits an *odd ranking*: a function `ρ : {(s, i) | s reachable at level i} → Fin (2n+1)` such
+that:
+- Accepting nodes get odd rank;
+- Along every edge `(s, i) → (t, i+1)`, `ρ(t, i+1) ≤ ρ(s, i)` (non-increasing);
+- Accepting nodes get strictly odd rank (even → odd decrease).
+
+This odd ranking gives an accepting run of `complementNA a`:
+- At each level `i`, set `gs i s = ρ(s, i)` for reachable `s`, `⊥` otherwise.
+- The covering condition `covers a (gs i) (xs i) (gs (i+1))` follows directly.
+- The obligation set `P` cycles through empty infinitely often because the ranking
+  witnesses that all even-ranked states eventually get rank `⊥`.
+- Thus `xs ∈ language (complementNA a)`.
+
+The inductive removal procedure requires reasoning about finite-width DAGs (König's Lemma
+or an explicit induction on DAG width), which is of Very High difficulty and is left as a
+future proof obligation. -/
 proof_wanted complement_language_sup :
     ∀ (a : Buchi State Symbol), (language a)ᶜ ≤ language (complementNA a)
 
 /-- **Main theorem**: The complement NBA accepts exactly the complement language.
-`language (complementNA a) = (language a)ᶜ` -/
+`language (complementNA a) = (language a)ᶜ`
+
+Follows from `complement_language_sub` and `complement_language_sup` via `le_antisymm`. -/
 proof_wanted complement_language_eq :
     ∀ (a : Buchi State Symbol), language (complementNA a) = (language a)ᶜ
 

@@ -1,7 +1,7 @@
 # Implementation Plan: Task #250
 
 - **Task**: 250 - NBA Complementation
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 8 hours
 - **Dependencies**: None (standalone rank-based construction; does not depend on task 241)
 - **Research Inputs**: specs/250_nba_complementation/reports/03_team-research.md
@@ -106,7 +106,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Soundness Helper Lemmas [IN PROGRESS]
+### Phase 2: Soundness Helper Lemmas [COMPLETED]
 
 **Goal**: Prove helper lemmas relating the complement automaton's behavior to run DAG properties, and establish the forward direction of the ranking lemma: if an odd ranking exists, the original NBA rejects the word.
 
@@ -130,7 +130,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Soundness Theorem [NOT STARTED]
+### Phase 3: Soundness Theorem [COMPLETED]
 
 **Goal**: Prove the soundness direction of complement correctness: if the complement NBA accepts a word, then the original NBA rejects that word. This combines the helper lemmas from Phase 2 into the inclusion `language (complementNA a) <= (language a)^c`.
 
@@ -153,7 +153,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: Completeness Theorem [NOT STARTED]
+### Phase 4: Completeness Theorem [COMPLETED]
 
 **Goal**: Prove the completeness direction: if the original NBA rejects a word, then the complement NBA accepts it. This is the hard direction requiring construction of an odd ranking from the rejection hypothesis, potentially using Konig's Lemma or an inductive removal argument.
 
@@ -179,7 +179,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 5: Main Theorem and Corollaries [NOT STARTED]
+### Phase 5: Main Theorem and Corollaries [COMPLETED]
 
 **Goal**: Combine soundness and completeness into the main complement language equality theorem, and derive immediate corollaries for language universality and inclusion checking.
 

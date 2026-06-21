@@ -6,6 +6,7 @@ public import Cslib.Computability.Automata.Acceptors.Acceptor
 public import Cslib.Computability.Automata.Acceptors.OmegaAcceptor
 public import Cslib.Computability.Automata.DA.Basic
 public import Cslib.Computability.Automata.DA.Buchi
+public import Cslib.Computability.Automata.DA.BuchiClosure
 public import Cslib.Computability.Automata.DA.Congr
 public import Cslib.Computability.Automata.DA.Prod
 public import Cslib.Computability.Automata.DA.ToNA

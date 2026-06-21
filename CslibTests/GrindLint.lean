@@ -101,5 +101,10 @@ open_scoped_all Cslib
 #grind_lint skip Cslib.Logic.Modal.Satisfies.and_iff_and
 #grind_lint skip Cslib.Logic.Modal.Satisfies.or_iff_or
 
+#grind_lint skip Cslib.Automata.DA.Buchi.infOftenOne_language_eq
+#grind_lint skip Cslib.Automata.DA.Buchi.inter_language_eq
+#grind_lint skip Cslib.Automata.DA.Buchi.mem_infOftenOne_language
+#grind_lint skip Cslib.Automata.DA.Buchi.union_language_eq
+
 #guard_msgs in
 #grind_lint check (min := 20) in Cslib

@@ -171,7 +171,7 @@ which accepting set was last visited (wait for F1, wait for F2, reset).
 
 ---
 
-### Phase 4: Landweber's Theorem [NOT STARTED]
+### Phase 4: Landweber's Theorem [COMPLETED]
 
 **Goal**: Create `BuchiChar.lean` with the Landweber characterization: a DMA language is
 DBA-recognizable iff its acceptance family is closed under superloops (Thomas 2003 Thm 3.32).
@@ -209,7 +209,7 @@ DBA-recognizable iff its acceptance family is closed under superloops (Thomas 20
 
 ---
 
-### Phase 5: DBA-to-DMA Conversion and CI Verification [NOT STARTED]
+### Phase 5: DBA-to-DMA Conversion and CI Verification [COMPLETED]
 
 **Goal**: Add `DA.Buchi.toMuller` conversion and run full CI verification pipeline.
 

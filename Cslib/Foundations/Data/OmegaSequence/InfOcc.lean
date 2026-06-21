@@ -83,6 +83,30 @@ theorem strictMono_of_infinite {ns : Set ℕ} (h : ns.Infinite) :
     ∃ φ : ℕ → ℕ, StrictMono φ ∧ range φ = ns :=
   ⟨nth (· ∈ ns), nth_strictMono h, range_nth_of_infinite h⟩
 
+/-- Membership in `infOcc`: `x ∈ xs.infOcc` iff `x` appears infinitely often in `xs`. -/
+@[simp]
+theorem mem_infOcc {xs : ωSequence α} {x : α} :
+    x ∈ xs.infOcc ↔ ∃ᶠ k in atTop, xs k = x :=
+  Iff.rfl
+
+/-- In a type with finitely many inhabitants, the infOcc set is finite. -/
+theorem infOcc_finite [Finite α] (xs : ωSequence α) : xs.infOcc.Finite :=
+  Set.toFinite _
+
+/-- In a type with finitely many inhabitants, the infOcc set is nonempty
+(by pigeonhole: some element must repeat infinitely often). -/
+theorem infOcc_nonempty [Finite α] (xs : ωSequence α) : xs.infOcc.Nonempty := by
+  have h : ∃ x : α, ∃ᶠ k in atTop, xs k = x := by
+    have hinf : ∃ᶠ k in atTop, xs k ∈ Set.univ := by
+      rw [frequently_atTop]
+      intro n
+      exact ⟨n, le_refl n, Set.mem_univ _⟩
+    rw [frequently_in_finite_type] at hinf
+    obtain ⟨x, _, hx⟩ := hinf
+    exact ⟨x, hx⟩
+  obtain ⟨x, hx⟩ := h
+  exact ⟨x, hx⟩
+
 end ωSequence
 
 end Cslib

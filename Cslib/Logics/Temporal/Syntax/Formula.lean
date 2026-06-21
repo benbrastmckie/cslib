@@ -56,6 +56,23 @@ the first argument is the **event** (holds at the witness point) and the second 
 - `somePast φ` (𝐏 φ): `φ S ⊤` — φ held at some past point (Burgess: `snce φ ⊤`)
 - `allPast φ` (𝐇 φ): `¬𝐏¬φ` — φ held at all past points
 
+## Convention Note
+
+This module uses the **Burgess convention** for `untl` and `snce`: `untl event guard`,
+where the **event** (holds at the witness point) comes first and the **guard** (holds
+at all intermediate points) comes second. This matches [Burgess1984] and the axiom
+expansion in `Axioms.lean`:
+
+- `someFuture φ = untl φ ⊤` (φ is the event, ⊤ is the trivial guard).
+- `somePast φ = snce φ ⊤` (φ is the event, ⊤ is the trivial guard).
+
+`Cslib.Logics.LTL` uses the **standard (Pnueli) convention** instead: `untl guard event`,
+with the guard and event arguments swapped. Semantic equivalence holds:
+`untl_Burgess event guard = untl_standard guard event`.
+
+The module `Cslib.Logics.LTL.Embedding` bridges the two conventions explicitly via
+`reflexiveUntl` and documents the argument-order swap in detail.
+
 ## References
 
 * [H. Kamp, *Tense Logic and the Theory of Linear Order*][Kamp1968]

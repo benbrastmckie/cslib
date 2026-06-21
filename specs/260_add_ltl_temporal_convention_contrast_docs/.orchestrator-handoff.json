@@ -1,0 +1,19 @@
+{
+  "status": "implemented",
+  "summary": "Added Convention Note sections to LTL/Syntax/Formula.lean and Temporal/Syntax/Formula.lean cross-referencing each other's argument-order convention, and added a Module Routing table to Foundations/Logic/Connectives.lean. All three modules build cleanly; checkInitImports and lint-style pass.",
+  "blockers": [],
+  "phases_completed": 2,
+  "phases_total": 2,
+  "artifacts": [
+    "specs/260_add_ltl_temporal_convention_contrast_docs/summaries/01_convention-docs-summary.md",
+    "Cslib/Logics/LTL/Syntax/Formula.lean",
+    "Cslib/Logics/Temporal/Syntax/Formula.lean",
+    "Cslib/Foundations/Logic/Connectives.lean"
+  ],
+  "continuation_context": {
+    "task_number": 260,
+    "session_id": "sess_1781994910_0cdf2d_260",
+    "all_phases_complete": true,
+    "deviations": ["Module Routing table in Connectives.lean lost Convention column to stay within 100-char line limit; info moved to prose paragraph"]
+  }
+}

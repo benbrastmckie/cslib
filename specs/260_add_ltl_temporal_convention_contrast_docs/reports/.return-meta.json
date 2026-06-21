@@ -1,0 +1,17 @@
+{
+  "status": "report_ready",
+  "started_at": "2026-06-20T12:00:00Z",
+  "artifacts": [
+    "specs/260_add_ltl_temporal_convention_contrast_docs/reports/01_convention-docs.md"
+  ],
+  "partial_progress": {
+    "stage": "report_written",
+    "details": "Research report written with 3 proposed edits to docstrings"
+  },
+  "metadata": {
+    "session_id": "sess_1781994910_0cdf2d_260",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  }
+}

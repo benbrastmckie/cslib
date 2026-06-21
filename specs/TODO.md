@@ -11,9 +11,9 @@ next_project_number: 261
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,243,245,250,251,252,255,256,258,259 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
-| 2 | 39,40,181,215,260 | 36,37,180,255 | Bimodal Porting, Temporal Logic |
-| 3 | 41 | 39,40 | Foundations |
+| 1 | 36,37,180,226,241,243,245,250,251,252,255,256,259 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 2 | 39,40,181,215,257 | 36,37,180,256 | Bimodal Porting, Temporal Logic |
+| 3 | 41,258 | 39,40,257 | Foundations, Temporal Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -37,15 +37,15 @@ next_project_number: 261
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
-243 [RESEARCHING] — Implement deterministic Büchi automata constructions and related 
+243 [RESEARCHED] — Implement deterministic Büchi automata constructions and related 
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
-250 [IMPLEMENTING] — Implement NBA complementation: given an NBA A, construct an NBA a
-251 [IMPLEMENTING] — Implement the synchronous product construction of an LTS (using e
+250 [PARTIAL] — Implement NBA complementation: given an NBA A, construct an NBA a
+251 [IMPLEMENTED] — Implement the synchronous product construction of an LTS (using e
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
 255 [IMPLEMENTED] — Fix stale docstrings and comments left over from the task-254 LTL
-  └─ 260 [RESEARCHED] — Add module-level documentation contrasting the LTL and Temporal c
 256 [IMPLEMENTED] — Add @[simp] unfold lemmas for LTL.Satisfies to match the pattern 
-258 [NOT STARTED] — Refactor duplicated proof patterns in GNBA.lean. Currently subfor
+  └─ 257 [IMPLEMENTED] — Fix style issues in GNBA.lean: (1) Break 7 lines exceeding 100 ch
+    └─ 258 [NOT STARTED] — Refactor duplicated proof patterns in GNBA.lean. Currently subfor
 259 [IMPLEMENTED] — Narrow file-wide linter suppressions in Temporal/Metalogic/ to de
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
@@ -53,10 +53,11 @@ next_project_number: 261
 ## Tasks
 
 ### 260. Add ltl temporal convention contrast docs
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 255
+- **Summary**: [260_add_ltl_temporal_convention_contrast_docs/summaries/01_convention-docs-summary.md]
 
 **Description**: Add module-level documentation contrasting the LTL and Temporal convention differences. (1) In the LTL module docstring (Formula.lean or a new LTL.lean barrel file header), add a note explaining that LTL uses standard convention (guard U event, notation ◯/𝓤/◇/□) while Temporal uses Burgess convention (event U guard, notation X/U/𝐅/𝐆), and that Embedding.lean bridges the two via reflexiveUntl. (2) In Temporal/Syntax/Formula.lean module docstring, add a cross-reference noting the convention difference from LTL. (3) In Connectives.lean, add a brief note that HasSince/TemporalConnectives/BimodalConnectives serve Temporal and Bimodal modules while HasUntil/HasNext/FutureTemporalConnectives/LTLConnectives serve LTL.
 
@@ -83,7 +84,7 @@ next_project_number: 261
 ---
 
 ### 257. Fix gnba long lines and style
-- **Status**: [COMPLETED]
+- **Status**: [IMPLEMENTED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 256
@@ -125,7 +126,7 @@ next_project_number: 261
 ---
 
 ### 251. Product construction model checking
-- **Status**: [IMPLEMENTING]
+- **Status**: [IMPLEMENTED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 248
@@ -133,13 +134,17 @@ next_project_number: 261
   - [251_product_construction_model_checking/reports/01_product-model-checking-seed.md]
   - [251_product_construction_model_checking/reports/02_literature-sources.md]
   - [251_product_construction_model_checking/reports/03_team-research.md]
+- **Lean_file**:
+  - [Cslib/Foundations/Semantics/LTS/NAProd.lean]
+  - [Cslib/Logics/LTL/ModelChecking.lean]
+- **Summary**: [251_product_construction_model_checking/summaries/01_implementation-summary.md]
 
 **Description**: Implement the synchronous product construction of an LTS (using existing Cslib/Foundations/Semantics/LTS/ infrastructure) with an NBA, and prove the model checking reduction: an LTS M satisfies an LTL property φ iff the product of M with the NBA for ¬φ has an empty language. The existing OmegaExecution type and SatisfiesExec bridge (Cslib/Logics/LTL/Semantics/OmegaExecutionSatisfies.lean) already connect LTL satisfaction to LTS runs via a labeling function State → (Atom → Prop). The main new work is: (1) the system × NBA product construction (distinct from the existing automaton × automaton products in NA/Prod.lean), (2) the correctness proof linking product acceptance to LTL satisfaction. Target: Cslib/Computability/Automata/NA/LTSProduct.lean and Cslib/Logics/LTL/ModelChecking.lean
 
 ---
 
 ### 250. Nba complementation
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -175,10 +180,13 @@ next_project_number: 261
 ---
 
 ### 243. Deterministic buchi automata
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
+- **Research**:
+  - [243_deterministic_buchi_automata/reports/01_dba-constructions-survey.md]
+  - [243_deterministic_buchi_automata/reports/02_team-research.md]
 
 **Description**: Implement deterministic Büchi automata constructions and related results
 

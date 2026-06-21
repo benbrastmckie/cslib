@@ -6,7 +6,7 @@
       "project_name": "fix_stale_ltl_docstrings_post_task254",
       "status": "implemented",
       "task_type": "cslib",
-      "description": "Fix stale docstrings and comments left over from the task-254 LTL convention revision. (1) Embedding.lean:15 — module docstring says \"Burgess-temporal counterparts\"; rewrite to explain that LTL uses standard convention while Temporal uses Burgess, and the embedding bridges the two. (2) Formula.lean:75 — next constructor docstring says \"Xφ holds at t\"; change to \"◯φ holds at t\". (3) Embedding.lean:49 — parameter names ψ/φ in the untl match arm are swapped relative to LTL's standard convention (guard=φ₁, event=φ₂); rename for clarity or add an inline comment explaining the swap is intentional due to Temporal's Burgess order. (4) OmegaRegular.lean:310 — docstring says \"matches the original proof_wanted\"; the proof is now complete, so remove or rephrase the reference.",
+      "description": "Fix stale docstrings and comments left over from the task-254 LTL convention revision. (1) Embedding.lean:15 \u2014 module docstring says \"Burgess-temporal counterparts\"; rewrite to explain that LTL uses standard convention while Temporal uses Burgess, and the embedding bridges the two. (2) Formula.lean:75 \u2014 next constructor docstring says \"X\u03c6 holds at t\"; change to \"\u25ef\u03c6 holds at t\". (3) Embedding.lean:49 \u2014 parameter names \u03c8/\u03c6 in the untl match arm are swapped relative to LTL's standard convention (guard=\u03c6\u2081, event=\u03c6\u2082); rename for clarity or add an inline comment explaining the swap is intentional due to Temporal's Burgess order. (4) OmegaRegular.lean:310 \u2014 docstring says \"matches the original proof_wanted\"; the proof is now complete, so remove or rephrase the reference.",
       "topic": "Temporal Logic",
       "created": "2026-06-20T03:00:00Z",
       "last_updated": "2026-06-20T03:00:00Z"
@@ -24,9 +24,9 @@
     {
       "project_number": 257,
       "project_name": "fix_gnba_long_lines_and_style",
-      "status": "completed",
+      "status": "implemented",
       "task_type": "cslib",
-      "description": "Fix style issues in GNBA.lean: (1) Break 7 lines exceeding 100 characters (lines 912, 929, 1023, 1352, 1421, 1427, 1435) — these involve deeply nested gnbaAcceptSet expressions that can be split with let bindings or intermediate names. (2) Rename instInhabitedSetAtom in OmegaRegular.lean:142 to follow Mathlib instance naming conventions (anonymous instance or Set.instInhabited pattern). Ensure lake build passes after all changes.",
+      "description": "Fix style issues in GNBA.lean: (1) Break 7 lines exceeding 100 characters (lines 912, 929, 1023, 1352, 1421, 1427, 1435) \u2014 these involve deeply nested gnbaAcceptSet expressions that can be split with let bindings or intermediate names. (2) Rename instInhabitedSetAtom in OmegaRegular.lean:142 to follow Mathlib instance naming conventions (anonymous instance or Set.instInhabited pattern). Ensure lake build passes after all changes.",
       "topic": "Temporal Logic",
       "created": "2026-06-20T03:00:00Z",
       "last_updated": "2026-06-21T01:40:04Z",
@@ -69,15 +69,23 @@
     {
       "project_number": 260,
       "project_name": "add_ltl_temporal_convention_contrast_docs",
-      "status": "researched",
+      "status": "completed",
       "task_type": "cslib",
-      "description": "Add module-level documentation contrasting the LTL and Temporal convention differences. (1) In the LTL module docstring (Formula.lean or a new LTL.lean barrel file header), add a note explaining that LTL uses standard convention (guard U event, notation ◯/𝓤/◇/□) while Temporal uses Burgess convention (event U guard, notation X/U/𝐅/𝐆), and that Embedding.lean bridges the two via reflexiveUntl. (2) In Temporal/Syntax/Formula.lean module docstring, add a cross-reference noting the convention difference from LTL. (3) In Connectives.lean, add a brief note that HasSince/TemporalConnectives/BimodalConnectives serve Temporal and Bimodal modules while HasUntil/HasNext/FutureTemporalConnectives/LTLConnectives serve LTL.",
+      "description": "Add module-level documentation contrasting the LTL and Temporal convention differences. (1) In the LTL module docstring (Formula.lean or a new LTL.lean barrel file header), add a note explaining that LTL uses standard convention (guard U event, notation \u25ef/\ud835\udce4/\u25c7/\u25a1) while Temporal uses Burgess convention (event U guard, notation X/U/\ud835\udc05/\ud835\udc06), and that Embedding.lean bridges the two via reflexiveUntl. (2) In Temporal/Syntax/Formula.lean module docstring, add a cross-reference noting the convention difference from LTL. (3) In Connectives.lean, add a brief note that HasSince/TemporalConnectives/BimodalConnectives serve Temporal and Bimodal modules while HasUntil/HasNext/FutureTemporalConnectives/LTLConnectives serve LTL.",
       "topic": "Temporal Logic",
       "created": "2026-06-20T03:00:00Z",
-      "last_updated": "2026-06-20T03:00:00Z",
+      "last_updated": "2026-06-21T01:45:02Z",
       "dependencies": [
         255
-      ]
+      ],
+      "session_id": "sess_1781994910_0cdf2d_260",
+      "artifacts": [
+        {
+          "type": "summary",
+          "path": "specs/260_add_ltl_temporal_convention_contrast_docs/summaries/01_convention-docs-summary.md"
+        }
+      ],
+      "completion_summary": "Added Convention Note cross-references to LTL/Syntax/Formula.lean, Temporal/Syntax/Formula.lean, and Module Routing table to Foundations/Logic/Connectives.lean. All three modules build cleanly; checkInitImports and lint-style pass."
     },
     {
       "project_number": 241,
@@ -113,13 +121,26 @@
     {
       "project_number": 243,
       "project_name": "deterministic_buchi_automata",
-      "status": "researching",
+      "status": "researched",
       "task_type": "cslib",
-      "description": "Implement deterministic Büchi automata constructions and related results",
+      "description": "Implement deterministic B\u00fcchi automata constructions and related results",
       "topic": "Temporal Logic",
       "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-21T01:29:04Z",
-      "session_id": "sess_1782005330_8eb0e3"
+      "last_updated": "2026-06-21T01:45:15Z",
+      "session_id": "sess_1782005330_8eb0e3",
+      "next_artifact_number": 3,
+      "artifacts": [
+        {
+          "path": "specs/243_deterministic_buchi_automata/reports/01_dba-constructions-survey.md",
+          "type": "report",
+          "summary": "Initial DBA survey"
+        },
+        {
+          "path": "specs/243_deterministic_buchi_automata/reports/02_team-research.md",
+          "type": "report",
+          "summary": "Team research synthesis (4 teammates)"
+        }
+      ]
     },
     {
       "project_number": 245,
@@ -136,7 +157,7 @@
       "project_name": "propositional_semantics_upstream_pr",
       "status": "researched",
       "task_type": "cslib",
-      "description": "Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648, contributing propositional semantics to CSLib. Scope: (1) Semantics/Algebra.lean — GHA evaluation with bot_val parameter for minimal/intuitionistic/classical logic, following Thomas Waring's GeneralizedHeytingAlgebra direction from the Zulip thread. (2) Semantics/Bool.lean — BoolEvaluate with bridge lemma to AlgEvaluate for computable procedures (DPLL/SAT). (3) Semantics/SemanticConsequence.lean — semantic consequence and tautology definitions. (4) Possibly Semantics/Kripke.lean — Kripke semantics with botForces for minimal logic if LOC budget permits. Soundness proofs deferred to a subsequent Hilbert systems + metalogic PR. Ensure lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake all pass. Write PR description referencing the Zulip Propositional Logic thread discussion with Thomas Waring and Matthew Doty on GHA semantics and bot_val design.",
+      "description": "Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648, contributing propositional semantics to CSLib. Scope: (1) Semantics/Algebra.lean \u2014 GHA evaluation with bot_val parameter for minimal/intuitionistic/classical logic, following Thomas Waring's GeneralizedHeytingAlgebra direction from the Zulip thread. (2) Semantics/Bool.lean \u2014 BoolEvaluate with bridge lemma to AlgEvaluate for computable procedures (DPLL/SAT). (3) Semantics/SemanticConsequence.lean \u2014 semantic consequence and tautology definitions. (4) Possibly Semantics/Kripke.lean \u2014 Kripke semantics with botForces for minimal logic if LOC budget permits. Soundness proofs deferred to a subsequent Hilbert systems + metalogic PR. Ensure lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake all pass. Write PR description referencing the Zulip Propositional Logic thread discussion with Thomas Waring and Matthew Doty on GHA semantics and bot_val design.",
       "topic": "Propositional Logic",
       "dependencies": [],
       "created": "2026-06-16T23:00:00Z",
@@ -183,7 +204,7 @@
       "dependencies": [
         36
       ],
-      "description": "Discrete temporal completeness: prove that every formula valid on all discrete serial linear orders is derivable in the Discrete temporal proof system.\n\nScope:\n1. Add discrete-specific axioms to Temporal.Axiom: `prior_UZ` (F(φ) → U(φ,¬φ)), `prior_SZ` (P(φ) → S(φ,¬φ)), `z1` (G(Gφ→φ) → (F(Gφ)→Gφ)), and discrete uniformity axioms (discrete_symm_fwd/bwd, discrete_propagate_fwd/bwd), gated to FrameClass.Discrete via minFrameClass.\n2. Prove discrete soundness: each discrete axiom valid on SuccOrder+PredOrder+IsSuccArchimedean.\n3. Prove discrete completeness via contrapositive + MCS + canonical model on Int. The non-discrete branch is eliminated by deriving U(⊤,⊥) as a Discrete theorem.\n\nNew development (not a port). The canonical model specializes the base temporal canonical order to Int. The discrete uniformity axioms (minus discrete_box_necessity which is bimodal-only) ensure U(⊤,⊥) propagates uniformly.\n\nTarget: Cslib/Logics/Temporal/Metalogic/DiscreteCompleteness.lean + axiom additions to Axioms.lean\nEstimated scope: ~500-700 lines (new axioms + discrete soundness + discrete completeness)",
+      "description": "Discrete temporal completeness: prove that every formula valid on all discrete serial linear orders is derivable in the Discrete temporal proof system.\n\nScope:\n1. Add discrete-specific axioms to Temporal.Axiom: `prior_UZ` (F(\u03c6) \u2192 U(\u03c6,\u00ac\u03c6)), `prior_SZ` (P(\u03c6) \u2192 S(\u03c6,\u00ac\u03c6)), `z1` (G(G\u03c6\u2192\u03c6) \u2192 (F(G\u03c6)\u2192G\u03c6)), and discrete uniformity axioms (discrete_symm_fwd/bwd, discrete_propagate_fwd/bwd), gated to FrameClass.Discrete via minFrameClass.\n2. Prove discrete soundness: each discrete axiom valid on SuccOrder+PredOrder+IsSuccArchimedean.\n3. Prove discrete completeness via contrapositive + MCS + canonical model on Int. The non-discrete branch is eliminated by deriving U(\u22a4,\u22a5) as a Discrete theorem.\n\nNew development (not a port). The canonical model specializes the base temporal canonical order to Int. The discrete uniformity axioms (minus discrete_box_necessity which is bimodal-only) ensure U(\u22a4,\u22a5) propagates uniformly.\n\nTarget: Cslib/Logics/Temporal/Metalogic/DiscreteCompleteness.lean + axiom additions to Axioms.lean\nEstimated scope: ~500-700 lines (new axioms + discrete soundness + discrete completeness)",
       "topic": "Temporal Logic"
     },
     {
@@ -196,7 +217,7 @@
       "dependencies": [
         37
       ],
-      "description": "Continuous temporal completeness: completeness for temporal logic over Dedekind-complete (continuous) linear orders, e.g. the reals.\n\nScope: Define a Continuous frame class extending Dense, add any required axioms (e.g., Dedekind completeness schema or equivalent), prove soundness over conditionally complete linear orders, prove completeness via canonical model on Real or equivalent.\n\nBlocked: The continuous case has not been developed for either the temporal or bimodal logic upstream. Requires foundational research into which additional axioms (if any) are needed beyond density to characterize continuous time. The standard result (Burgess 1982) is that the Until/Since temporal logic over the reals has the same theorems as over the rationals (density suffices), which would make this task trivial — but this equivalence itself needs to be formalized.\n\nTarget: Cslib/Logics/Temporal/Metalogic/ContinuousCompleteness.lean\nBlocker: Research needed on whether continuous frames require additional axioms beyond density",
+      "description": "Continuous temporal completeness: completeness for temporal logic over Dedekind-complete (continuous) linear orders, e.g. the reals.\n\nScope: Define a Continuous frame class extending Dense, add any required axioms (e.g., Dedekind completeness schema or equivalent), prove soundness over conditionally complete linear orders, prove completeness via canonical model on Real or equivalent.\n\nBlocked: The continuous case has not been developed for either the temporal or bimodal logic upstream. Requires foundational research into which additional axioms (if any) are needed beyond density to characterize continuous time. The standard result (Burgess 1982) is that the Until/Since temporal logic over the reals has the same theorems as over the rationals (density suffices), which would make this task trivial \u2014 but this equivalence itself needs to be formalized.\n\nTarget: Cslib/Logics/Temporal/Metalogic/ContinuousCompleteness.lean\nBlocker: Research needed on whether continuous frames require additional axioms beyond density",
       "topic": "Temporal Logic"
     },
     {
@@ -210,7 +231,7 @@
         39,
         40
       ],
-      "description": "Abstract shared completeness infrastructure between temporal and bimodal logic once concrete completeness proofs are finished for both.\n\nThe temporal (tasks 31, 38, 39) and bimodal (tasks 34, 35) completeness proofs share structural patterns that can be factored into a generic completeness scaffold in Cslib/Foundations/Logic/Metalogic/, extending the existing generic MCS framework (Task 29).\n\nCandidate abstractions (to be confirmed once concrete implementations exist):\n1. Generic neg_consistent_of_not_derivable: if φ is not derivable then {¬φ} is consistent — identical structure in both logics, parameterized over DerivationSystem\n2. Generic completeness contrapositive skeleton: not derivable → consistent → Lindenbaum → MCS → canonical model → countermodel — the overall proof shape is shared\n3. Dense/discrete case split pattern: the three-way case split on □(F'T) / □(U(T,⊥)) / mixed is structurally similar (temporal uses G/H instead of □)\n4. Canonical order construction patterns: both define canonical_lt via G-sets (temporal) or box-sets (bimodal); the linearity/irreflexivity/transitivity proofs follow parallel structures\n5. Dense indicator elimination: both dense completeness proofs eliminate the non-dense branch by showing the dense indicator axiom is a theorem — identical pattern\n\nScope: Identify which abstractions yield genuine code savings vs. premature generalization, implement those that do, and refactor both temporal and bimodal completeness to use the shared infrastructure.\n\nTarget: Cslib/Foundations/Logic/Metalogic/Completeness.lean (or similar)\nDepends on: Tasks 35 (dense bimodal), 38 (dense temporal), 39 (discrete temporal) — transitively includes 31 (base temporal) and 34 (base bimodal MCS)",
+      "description": "Abstract shared completeness infrastructure between temporal and bimodal logic once concrete completeness proofs are finished for both.\n\nThe temporal (tasks 31, 38, 39) and bimodal (tasks 34, 35) completeness proofs share structural patterns that can be factored into a generic completeness scaffold in Cslib/Foundations/Logic/Metalogic/, extending the existing generic MCS framework (Task 29).\n\nCandidate abstractions (to be confirmed once concrete implementations exist):\n1. Generic neg_consistent_of_not_derivable: if \u03c6 is not derivable then {\u00ac\u03c6} is consistent \u2014 identical structure in both logics, parameterized over DerivationSystem\n2. Generic completeness contrapositive skeleton: not derivable \u2192 consistent \u2192 Lindenbaum \u2192 MCS \u2192 canonical model \u2192 countermodel \u2014 the overall proof shape is shared\n3. Dense/discrete case split pattern: the three-way case split on \u25a1(F'T) / \u25a1(U(T,\u22a5)) / mixed is structurally similar (temporal uses G/H instead of \u25a1)\n4. Canonical order construction patterns: both define canonical_lt via G-sets (temporal) or box-sets (bimodal); the linearity/irreflexivity/transitivity proofs follow parallel structures\n5. Dense indicator elimination: both dense completeness proofs eliminate the non-dense branch by showing the dense indicator axiom is a theorem \u2014 identical pattern\n\nScope: Identify which abstractions yield genuine code savings vs. premature generalization, implement those that do, and refactor both temporal and bimodal completeness to use the shared infrastructure.\n\nTarget: Cslib/Foundations/Logic/Metalogic/Completeness.lean (or similar)\nDepends on: Tasks 35 (dense bimodal), 38 (dense temporal), 39 (discrete temporal) \u2014 transitively includes 31 (base temporal) and 34 (base bimodal MCS)",
       "topic": "Foundations"
     },
     {
@@ -223,7 +244,7 @@
       "dependencies": [
         "BimodalLogic:discrete_sorry_elimination"
       ],
-      "description": "Port discrete completeness (completeness_discrete theorem) and WeakCanonical/IntegerModel/ infrastructure (~6 files). The discrete branch constructs countermodels on Int via the Reynolds pipeline. Currently blocked: upstream BimodalLogic has sorryAx tracing through chronicle_gap_contradiction → succ_cofinal → limitDomSubtype_isSuccArchimedean → succ_embed_surjective. Port after upstream sorry elimination completes.\n\n**Source**: BimodalLogic/Theories/Bimodal/Metalogic/WeakCanonical/IntegerModel/ (~6 files), discrete branch of BXCanonical/Completeness.lean\n**Target**: Cslib/Logics/Bimodal/Metalogic/\n**Blocker**: Upstream BimodalLogic discrete completeness sorry elimination (36 sorries across IntegerModel/)\n**Parent task**: 8 (expanded)",
+      "description": "Port discrete completeness (completeness_discrete theorem) and WeakCanonical/IntegerModel/ infrastructure (~6 files). The discrete branch constructs countermodels on Int via the Reynolds pipeline. Currently blocked: upstream BimodalLogic has sorryAx tracing through chronicle_gap_contradiction \u2192 succ_cofinal \u2192 limitDomSubtype_isSuccArchimedean \u2192 succ_embed_surjective. Port after upstream sorry elimination completes.\n\n**Source**: BimodalLogic/Theories/Bimodal/Metalogic/WeakCanonical/IntegerModel/ (~6 files), discrete branch of BXCanonical/Completeness.lean\n**Target**: Cslib/Logics/Bimodal/Metalogic/\n**Blocker**: Upstream BimodalLogic discrete completeness sorry elimination (36 sorries across IntegerModel/)\n**Parent task**: 8 (expanded)",
       "topic": "Bimodal Porting"
     },
     {
@@ -280,7 +301,7 @@
       "project_name": "nba_emptiness_checking",
       "status": "completed",
       "task_type": "cslib",
-      "description": "Implement NBA emptiness checking: decide whether a nondeterministic Büchi automaton accepts any ω-word. Two approaches: (1) nested DFS (Courcoubetis-Vardi-Wolper-Yannakakis 1992) finding a reachable accepting cycle, or (2) SCC-based algorithm checking for accepting SCCs reachable from the initial state. The existing infOcc predicate (Cslib/Foundations/Data/OmegaSequence/InfOcc.lean) and NBA Büchi acceptance (NA/Basic.lean using Filter.Frequently/atTop) provide the acceptance-condition foundation. This is the key building block connecting LTL-to-NBA translation to model checking. Target: Cslib/Computability/Automata/NA/Emptiness.lean",
+      "description": "Implement NBA emptiness checking: decide whether a nondeterministic B\u00fcchi automaton accepts any \u03c9-word. Two approaches: (1) nested DFS (Courcoubetis-Vardi-Wolper-Yannakakis 1992) finding a reachable accepting cycle, or (2) SCC-based algorithm checking for accepting SCCs reachable from the initial state. The existing infOcc predicate (Cslib/Foundations/Data/OmegaSequence/InfOcc.lean) and NBA B\u00fcchi acceptance (NA/Basic.lean using Filter.Frequently/atTop) provide the acceptance-condition foundation. This is the key building block connecting LTL-to-NBA translation to model checking. Target: Cslib/Computability/Automata/NA/Emptiness.lean",
       "topic": "Temporal Logic",
       "created": "2026-06-19T20:20:31Z",
       "last_updated": "2026-06-19T21:15:00Z",
@@ -324,9 +345,9 @@
     {
       "project_number": 250,
       "project_name": "nba_complementation",
-      "status": "implementing",
+      "status": "partial",
       "task_type": "cslib",
-      "description": "Implement NBA complementation: given an NBA A, construct an NBA accepting the complement language Σ^ω \\ L(A). Two main approaches: (1) determinization-based — determinize via McNaughton/Safra then complement the deterministic automaton (depends on task 241), (2) direct rank-based construction (Kupferman-Vardi 2001, Schewe 2009) avoiding full determinization. CSLib already has ω-regular complementation at the language-theoretic level via Büchi congruence; this task provides the automata-level construction needed for algorithmic applications (language inclusion, model checking). Target: Cslib/Computability/Automata/NA/Complement.lean",
+      "description": "Implement NBA complementation: given an NBA A, construct an NBA accepting the complement language \u03a3^\u03c9 \\ L(A). Two main approaches: (1) determinization-based \u2014 determinize via McNaughton/Safra then complement the deterministic automaton (depends on task 241), (2) direct rank-based construction (Kupferman-Vardi 2001, Schewe 2009) avoiding full determinization. CSLib already has \u03c9-regular complementation at the language-theoretic level via B\u00fcchi congruence; this task provides the automata-level construction needed for algorithmic applications (language inclusion, model checking). Target: Cslib/Computability/Automata/NA/Complement.lean",
       "topic": "Temporal Logic",
       "created": "2026-06-19T20:20:31Z",
       "last_updated": "2026-06-21T01:13:17Z",
@@ -352,16 +373,16 @@
     {
       "project_number": 251,
       "project_name": "product_construction_model_checking",
-      "status": "implementing",
+      "status": "implemented",
       "task_type": "cslib",
-      "description": "Implement the synchronous product construction of an LTS (using existing Cslib/Foundations/Semantics/LTS/ infrastructure) with an NBA, and prove the model checking reduction: an LTS M satisfies an LTL property φ iff the product of M with the NBA for ¬φ has an empty language. The existing OmegaExecution type and SatisfiesExec bridge (Cslib/Logics/LTL/Semantics/OmegaExecutionSatisfies.lean) already connect LTL satisfaction to LTS runs via a labeling function State → (Atom → Prop). The main new work is: (1) the system × NBA product construction (distinct from the existing automaton × automaton products in NA/Prod.lean), (2) the correctness proof linking product acceptance to LTL satisfaction. Target: Cslib/Computability/Automata/NA/LTSProduct.lean and Cslib/Logics/LTL/ModelChecking.lean",
+      "description": "Implement the synchronous product construction of an LTS (using existing Cslib/Foundations/Semantics/LTS/ infrastructure) with an NBA, and prove the model checking reduction: an LTS M satisfies an LTL property \u03c6 iff the product of M with the NBA for \u00ac\u03c6 has an empty language. The existing OmegaExecution type and SatisfiesExec bridge (Cslib/Logics/LTL/Semantics/OmegaExecutionSatisfies.lean) already connect LTL satisfaction to LTS runs via a labeling function State \u2192 (Atom \u2192 Prop). The main new work is: (1) the system \u00d7 NBA product construction (distinct from the existing automaton \u00d7 automaton products in NA/Prod.lean), (2) the correctness proof linking product acceptance to LTL satisfaction. Target: Cslib/Computability/Automata/NA/LTSProduct.lean and Cslib/Logics/LTL/ModelChecking.lean",
       "topic": "Temporal Logic",
       "dependencies": [
         248
       ],
       "created": "2026-06-19T20:20:31Z",
-      "last_updated": "2026-06-21T01:13:17Z",
-      "next_artifact_number": 4,
+      "last_updated": "2026-06-21T01:45:35Z",
+      "next_artifact_number": 7,
       "artifacts": [
         {
           "path": "specs/251_product_construction_model_checking/reports/01_product-model-checking-seed.md",
@@ -376,16 +397,32 @@
         {
           "path": "specs/251_product_construction_model_checking/reports/03_team-research.md",
           "type": "report",
-          "summary": "Team research (4 teammates): LTS×NBA product, model checking reduction, critical gap analysis"
+          "summary": "Team research (4 teammates): LTS\u00d7NBA product, model checking reduction, critical gap analysis"
+        },
+        {
+          "path": "Cslib/Foundations/Semantics/LTS/NAProd.lean",
+          "type": "lean_file",
+          "summary": "LTS x NBA synchronous product construction with run characterization theorems"
+        },
+        {
+          "path": "Cslib/Logics/LTL/ModelChecking.lean",
+          "type": "lean_file",
+          "summary": "LTL model checking reduction: LTS satisfies phi iff product with NBA for neg phi has empty language"
+        },
+        {
+          "path": "specs/251_product_construction_model_checking/summaries/01_implementation-summary.md",
+          "type": "summary",
+          "summary": "Full implementation summary: product construction, model checking reduction, CI verification"
         }
-      ]
+      ],
+      "completion_summary": "Implemented LTS x NBA synchronous product construction (NAProd.lean) and LTL model checking reduction theorem (ModelChecking.lean). All 4 phases completed. Zero sorries, builds cleanly, CI passes."
     },
     {
       "project_number": 252,
       "project_name": "acceptance_conditions_zoo",
       "status": "not_started",
       "task_type": "cslib",
-      "description": "Formalize Rabin and parity acceptance conditions alongside the existing Muller acceptance (DMA) and Büchi acceptance (DBA) in CSLib, and prove the classical conversions between them. Build on the existing infOcc predicate (Cslib/Foundations/Data/OmegaSequence/InfOcc.lean) which already provides the \"infinitely often\" foundation. Scope: (1) Rabin acceptance — pairs of (Eᵢ, Fᵢ) sets. (2) Parity acceptance — priority coloring. (3) Muller↔Rabin conversion. (4) Rabin↔parity conversion (Piterman 2007). Target: Cslib/Computability/Automata/DA/Rabin.lean, Parity.lean, Conversions.lean",
+      "description": "Formalize Rabin and parity acceptance conditions alongside the existing Muller acceptance (DMA) and B\u00fcchi acceptance (DBA) in CSLib, and prove the classical conversions between them. Build on the existing infOcc predicate (Cslib/Foundations/Data/OmegaSequence/InfOcc.lean) which already provides the \"infinitely often\" foundation. Scope: (1) Rabin acceptance \u2014 pairs of (E\u1d62, F\u1d62) sets. (2) Parity acceptance \u2014 priority coloring. (3) Muller\u2194Rabin conversion. (4) Rabin\u2194parity conversion (Piterman 2007). Target: Cslib/Computability/Automata/DA/Rabin.lean, Parity.lean, Conversions.lean",
       "topic": "Temporal Logic",
       "created": "2026-06-19T20:20:31Z",
       "last_updated": "2026-06-19T20:34:58Z",

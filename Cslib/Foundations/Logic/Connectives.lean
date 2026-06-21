@@ -38,6 +38,23 @@ Negation and verum stay derived: each concrete formula type defines `neg φ := �
 alike, so no typeclass machinery is needed for them. Biconditional (`iff`) is deferred to
 task 173 after `HasAnd` is instantiated on the formula types.
 
+## Module Routing
+
+The bundled connective classes serve different logic modules:
+
+| Class | Primitive operators | Logic module |
+|-------|---------------------|--------------|
+| `FutureTemporalConnectives` | `bot`, `imp`, `untl` | LTL future fragment |
+| `LTLConnectives` | `bot`, `imp`, `untl`, `next` | `Cslib.Logics.LTL` |
+| `TemporalConnectives` | `bot`, `imp`, `untl`, `snce` | `Cslib.Logics.Temporal` |
+| `BimodalConnectives` | `bot`, `imp`, `untl`, `snce`, `box` | `Cslib.Logics.Bimodal` |
+| `ModalConnectives` | `bot`, `imp`, `box` | `Cslib.Logics.Modal` |
+
+`HasUntil` is shared across all temporal classes, but the argument order of `untl` differs
+by convention: `LTLConnectives` uses `untl guard event` (standard/Pnueli convention), while
+`TemporalConnectives` and `BimodalConnectives` use `untl event guard` (Burgess convention).
+See `Cslib.Logics.LTL.Embedding` for the explicit bridge between the two conventions.
+
 ## References
 
 * [I. Johansson, *Der Minimalkalkül, ein reduzierter intuitionistischer Formalismus*][Johansson1937]

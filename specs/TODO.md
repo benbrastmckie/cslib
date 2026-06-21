@@ -37,10 +37,10 @@ next_project_number: 261
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
-243 [NOT STARTED] — Implement deterministic Büchi automata constructions and related 
+243 [RESEARCHING] — Implement deterministic Büchi automata constructions and related 
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
-250 [RESEARCHING] — Implement NBA complementation: given an NBA A, construct an NBA a
-251 [RESEARCHING] — Implement the synchronous product construction of an LTS (using e
+250 [RESEARCHED] — Implement NBA complementation: given an NBA A, construct an NBA a
+251 [RESEARCHED] — Implement the synchronous product construction of an LTS (using e
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
 255 [PLANNED] — Fix stale docstrings and comments left over from the task-254 LTL
   └─ 260 [NOT STARTED] — Add module-level documentation contrasting the LTL and Temporal c
@@ -125,26 +125,28 @@ next_project_number: 261
 ---
 
 ### 251. Product construction model checking
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 248
 - **Research**:
   - [251_product_construction_model_checking/reports/01_product-model-checking-seed.md]
   - [251_product_construction_model_checking/reports/02_literature-sources.md]
+  - [251_product_construction_model_checking/reports/03_team-research.md]
 
 **Description**: Implement the synchronous product construction of an LTS (using existing Cslib/Foundations/Semantics/LTS/ infrastructure) with an NBA, and prove the model checking reduction: an LTS M satisfies an LTL property φ iff the product of M with the NBA for ¬φ has an empty language. The existing OmegaExecution type and SatisfiesExec bridge (Cslib/Logics/LTL/Semantics/OmegaExecutionSatisfies.lean) already connect LTL satisfaction to LTS runs via a labeling function State → (Atom → Prop). The main new work is: (1) the system × NBA product construction (distinct from the existing automaton × automaton products in NA/Prod.lean), (2) the correctness proof linking product acceptance to LTL satisfaction. Target: Cslib/Computability/Automata/NA/LTSProduct.lean and Cslib/Logics/LTL/ModelChecking.lean
 
 ---
 
 ### 250. Nba complementation
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
 - **Research**:
   - [250_nba_complementation/reports/01_nba-complementation-seed.md]
   - [250_nba_complementation/reports/02_literature-sources.md]
+  - [250_nba_complementation/reports/03_team-research.md]
 
 **Description**: Implement NBA complementation: given an NBA A, construct an NBA accepting the complement language Σ^ω \ L(A). Two main approaches: (1) determinization-based — determinize via McNaughton/Safra then complement the deterministic automaton (depends on task 241), (2) direct rank-based construction (Kupferman-Vardi 2001, Schewe 2009) avoiding full determinization. CSLib already has ω-regular complementation at the language-theoretic level via Büchi congruence; this task provides the automata-level construction needed for algorithmic applications (language inclusion, model checking). Target: Cslib/Computability/Automata/NA/Complement.lean
 
@@ -173,7 +175,7 @@ next_project_number: 261
 ---
 
 ### 243. Deterministic buchi automata
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None

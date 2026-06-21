@@ -143,33 +143,6 @@ next_project_number: 261
 
 ---
 
-### 250. Nba complementation
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: None
-- **Research**:
-  - [250_nba_complementation/reports/01_nba-complementation-seed.md]
-  - [250_nba_complementation/reports/02_literature-sources.md]
-  - [250_nba_complementation/reports/03_team-research.md]
-- **Summary**: [250_nba_complementation/summaries/01_nba-complement-summary.md]
-
-**Description**: Implement NBA complementation: given an NBA A, construct an NBA accepting the complement language Σ^ω \ L(A). Two main approaches: (1) determinization-based — determinize via McNaughton/Safra then complement the deterministic automaton (depends on task 241), (2) direct rank-based construction (Kupferman-Vardi 2001, Schewe 2009) avoiding full determinization. CSLib already has ω-regular complementation at the language-theoretic level via Büchi congruence; this task provides the automata-level construction needed for algorithmic applications (language inclusion, model checking). Target: Cslib/Computability/Automata/NA/Complement.lean
-
----
-
-### 248. Nba emptiness checking
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: None
-- **Research**: [248_nba_emptiness_checking/reports/01_nba-emptiness-seed.md]
-- **Plan**: [248_nba_emptiness_checking/plans/01_emptiness-plan.md]
-
-**Description**: Implement NBA emptiness checking: decide whether a nondeterministic Büchi automaton accepts any ω-word. Two approaches: (1) nested DFS (Courcoubetis-Vardi-Wolper-Yannakakis 1992) finding a reachable accepting cycle, or (2) SCC-based algorithm checking for accepting SCCs reachable from the initial state. The existing infOcc predicate (Cslib/Foundations/Data/OmegaSequence/InfOcc.lean) and NBA Büchi acceptance (NA/Basic.lean using Filter.Frequently/atTop) provide the acceptance-condition foundation. This is the key building block connecting LTL-to-NBA translation to model checking. Target: Cslib/Computability/Automata/NA/Emptiness.lean
-
----
-
 ### 245. Formula encodable countable instances
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
@@ -191,16 +164,6 @@ next_project_number: 261
 - **Plan**: [243_deterministic_buchi_automata/plans/03_implementation-plan.md]
 
 **Description**: Implement deterministic Büchi automata constructions and related results
-
----
-
-### 242. Vardi wolper tableau construction
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: None
-
-**Description**: Implement full Vardi-Wolper tableau construction for LTL-to-NBA translation using direct NBA construction approach
 
 ---
 

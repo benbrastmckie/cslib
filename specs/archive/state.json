@@ -4790,6 +4790,102 @@
         "reports/",
         "plans/"
       ]
+    },
+    {
+      "project_number": 242,
+      "project_name": "vardi_wolper_tableau_construction",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "Implement full Vardi-Wolper tableau construction for LTL-to-NBA translation using direct NBA construction approach",
+      "topic": "Temporal Logic",
+      "created": "2026-06-19T05:20:19Z",
+      "last_updated": "2026-06-21T01:02:11Z",
+      "session_id": "sess_1750430400_orchestrate",
+      "completion_summary": "Already implemented: Vardi-Wolper tableau construction in GNBA.lean (1483 lines) and OmegaRegular.lean (342 lines). All phases sorry-free: Fischer-Ladner closure, atom predicate, GNBA construction, GNBA-to-NBA conversion, language correctness theorem (soundness + completeness).",
+      "archived": "2026-06-21T03:07:30Z"
+    },
+    {
+      "project_number": 248,
+      "project_name": "nba_emptiness_checking",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "Implement NBA emptiness checking: decide whether a nondeterministic Büchi automaton accepts any ω-word. Two approaches: (1) nested DFS (Courcoubetis-Vardi-Wolper-Yannakakis 1992) finding a reachable accepting cycle, or (2) SCC-based algorithm checking for accepting SCCs reachable from the initial state. The existing infOcc predicate (Cslib/Foundations/Data/OmegaSequence/InfOcc.lean) and NBA Büchi acceptance (NA/Basic.lean using Filter.Frequently/atTop) provide the acceptance-condition foundation. This is the key building block connecting LTL-to-NBA translation to model checking. Target: Cslib/Computability/Automata/NA/Emptiness.lean",
+      "topic": "Temporal Logic",
+      "created": "2026-06-19T20:20:31Z",
+      "last_updated": "2026-06-19T21:15:00Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/248_nba_emptiness_checking/reports/01_nba-emptiness-seed.md",
+          "type": "report",
+          "summary": "Seed report: NBA emptiness algorithms, literature references, formalization approach"
+        },
+        {
+          "path": "specs/248_nba_emptiness_checking/plans/01_emptiness-plan.md",
+          "type": "plan",
+          "summary": "2-phase implementation plan for NBA emptiness characterization theorem (Baier-Katoen Lemma 4.41)"
+        }
+      ],
+      "plan_metadata": {
+        "phases": 2,
+        "total_effort_hours": 2.5,
+        "complexity": "simple",
+        "research_integrated": true,
+        "plan_version": 1,
+        "dependency_waves": [
+          [
+            1
+          ],
+          [
+            2
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/02_emptiness-research.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-06-19"
+          }
+        ]
+      },
+      "completion_summary": "Implemented NBA emptiness characterization (Baier-Katoen Lemma 4.41) in Cslib/Computability/Automata/NA/Emptiness.lean. Four theorems: HasReachableAcceptingCycle definition, forward direction (pigeonhole via frequently_in_finite_type), backward direction (cycle pumping via flatten_mTr), combined iff, and emptiness-as-bot dual. All proofs sorry-free, axiom-sound, CI clean.",
+      "archived": "2026-06-21T03:07:30Z"
+    },
+    {
+      "project_number": 250,
+      "project_name": "nba_complementation",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "Implement NBA complementation: given an NBA A, construct an NBA accepting the complement language Σ^ω \\ L(A). Two main approaches: (1) determinization-based — determinize via McNaughton/Safra then complement the deterministic automaton (depends on task 241), (2) direct rank-based construction (Kupferman-Vardi 2001, Schewe 2009) avoiding full determinization. CSLib already has ω-regular complementation at the language-theoretic level via Büchi congruence; this task provides the automata-level construction needed for algorithmic applications (language inclusion, model checking). Target: Cslib/Computability/Automata/NA/Complement.lean",
+      "topic": "Temporal Logic",
+      "created": "2026-06-19T20:20:31Z",
+      "last_updated": "2026-06-21T02:02:03Z",
+      "next_artifact_number": 4,
+      "artifacts": [
+        {
+          "path": "specs/250_nba_complementation/reports/01_nba-complementation-seed.md",
+          "type": "report",
+          "summary": "Seed report: complementation approaches (determinization vs rank-based), complexity, literature references"
+        },
+        {
+          "path": "specs/250_nba_complementation/reports/02_literature-sources.md",
+          "type": "report",
+          "summary": "Literature source paths for NBA complementation: Kupferman-Vardi 2001, Schewe 2009, Piterman 2007, Yan 2008, Thomas 1997, Baier-Katoen Ch.4"
+        },
+        {
+          "path": "specs/250_nba_complementation/reports/03_team-research.md",
+          "type": "report",
+          "summary": "Team research (4 teammates): rank-based KV2001 complement, phased implementation, risk analysis"
+        },
+        {
+          "path": "specs/250_nba_complementation/summaries/01_nba-complement-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary: rank-based NBA complementation, 330 lines, 0 sorries, CI passes"
+        }
+      ],
+      "session_id": "sess_1782006599_594254",
+      "completion_summary": "NBA complementation (KV2001 rank-based) implemented in BuchiCompl.lean: 330 lines, 0 sorries, 0 axioms. Construction + 10 helper lemmas fully proved. Soundness/completeness theorems stated as proof_wanted (require DAG-level arguments). CI passes.",
+      "archived": "2026-06-21T03:07:31Z"
     }
   ],
   "archived_projects": [

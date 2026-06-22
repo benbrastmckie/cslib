@@ -47,16 +47,16 @@ next_project_number: 277
 
 ### Uncategorized
 
-272 [NOT STARTED] — Prove Glivenko's theorem: if CPL proves A then IPL proves ¬¬A. Th
-273 [NOT STARTED] — Prove conservative extension of all 14 remaining modal systems (T
-274 [NOT STARTED] — Prove that Bimodal TM is conservative over Modal K for the modal 
-275 [NOT STARTED] — Prove that Bimodal TM is conservative over Temporal BX for tempor
-276 [NOT STARTED] — Prove inter-system conservative extension results within the moda
+272 [RESEARCHED] — Prove Glivenko's theorem: if CPL proves A then IPL proves ¬¬A. Th
+273 [RESEARCHED] — Prove conservative extension of all 14 remaining modal systems (T
+274 [RESEARCHED] — Prove that Bimodal TM is conservative over Modal S5 for the modal
+275 [RESEARCHED] — Prove that Bimodal TM is conservative over Temporal BX for tempor
+276 [RESEARCHED] — Prove inter-system conservative extension results within the moda
 
 ## Tasks
 
 ### 276. Modal cube inter system conservativity
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -65,7 +65,7 @@ next_project_number: 277
 ---
 
 ### 275. Bimodal tm conservative over temporal bx
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -73,17 +73,17 @@ next_project_number: 277
 
 ---
 
-### 274. Bimodal tm conservative over modal k
-- **Status**: [NOT STARTED]
+### 274. Bimodal tm conservative over modal s5
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
-**Description**: Prove that Bimodal TM is conservative over Modal K for the modal fragment: if φ.toBimodal is TM-derivable then φ is K-derivable. The Modal.Proposition.toBimodal embedding and the lift_derivation_qfree infrastructure in Bimodal/Metalogic/ConservativeExtension/ already do the heavy syntactic lifting work.
+**Description**: Prove that Bimodal TM is conservative over Modal S5 for the modal fragment: if φ.toBimodal is TM-derivable then φ is S5-derivable. (Original statement "over K" was FALSE — TM includes full S5 modal axioms for box.) Proof via semantic bridge: TM soundness + Kripke-to-TaskModel adapter + S5 completeness. ~150-250 lines.
 
 ---
 
 ### 273. All modal systems conservative over cpl
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -92,7 +92,7 @@ next_project_number: 277
 ---
 
 ### 272. Glivenko theorem
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Dependencies**: None
 

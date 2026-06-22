@@ -1,0 +1,17 @@
+{
+  "status": "report_written",
+  "started_at": "2026-06-22T00:00:00Z",
+  "artifacts": [
+    "specs/274_bimodal_tm_conservative_over_modal_k/reports/01_tm-over-k-conservativity.md"
+  ],
+  "partial_progress": {
+    "stage": "research_done",
+    "details": "Research reveals stated conservativity (TM over K) is false. Corrected statement (TM over S5) is provable. Full report with proof strategy and counterexample written."
+  },
+  "metadata": {
+    "session_id": "sess_1782161605_f646ec_274",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  }
+}

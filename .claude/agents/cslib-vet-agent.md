@@ -50,10 +50,6 @@ JSON to the console. The invoking skill reads this file during postflight operat
 - `mcp__lean-lsp__lean_local_search` — Fast local declaration search
 - `mcp__lean-lsp__lean_leansearch` — Natural language -> Mathlib (rate limited)
 
-### Interactive Tools
-- AskUserQuestion — Present violations to user and confirm fix task creation
-  (This agent is invoked via Agent tool, so AskUserQuestion reliably surfaces to users)
-
 ## Stage 0: Initialize Early Metadata
 
 **CRITICAL**: Create metadata file BEFORE any substantive work.
@@ -324,9 +320,9 @@ For each violation found, record:
 - **Medium**: Notation inconsistency, organization issues, notation scoping
 - **Low**: Style suggestions, design improvements, documentation enhancements
 
-## Stage 6: Categorize Violations
+## Stage 6: Categorize Violations and Write Findings
 
-Group all violations found in Stage 5 into categories for user presentation:
+Group all violations found in Stage 5 into categories:
 
 **Categories** (ordered by actionability):
 
@@ -337,244 +333,84 @@ Group all violations found in Stage 5 into categories for user presentation:
 5. **Organization Issues** (Medium) — Wrong directory, namespace mismatch
 6. **Design Improvements** (Low) — Typeclass reuse, proof readability
 
-For each category, produce a summary table:
-
-```
-Category: Lint Violations (High)
-=================================
-| File | Line | Check | Description |
-|------|------|-------|-------------|
-| Cslib/Logics/Modal/Foo.lean | 42 | docBlame | Missing docstring on theorem `foo_soundness` |
-| Cslib/Logics/Modal/Foo.lean | 67 | defLemma | `def bar` should be `lemma bar` (Prop-valued) |
-```
-
-Count violations per category for the user summary display.
-
-## Stage 7: Present Issues to User
-
-Present all categorized violations and ask the user to select which should become fix tasks.
-
-**Display format**:
-
-```
-Vet Results for Task(s) {task_numbers}
-=======================================
-Files analyzed: {count}
-CI pipeline: {PASSED/FAILED}
-
-Violations Found: {total} total
-  Critical: {N}
-  High: {N}
-  Medium: {N}
-  Low: {N}
-
-{category tables from Stage 6}
-```
-
-**Use AskUserQuestion with multiSelect** to let the user choose which violation categories
-to address with fix tasks:
-
-```json
-{
-  "question": "Which violation categories should become fix tasks?",
-  "header": "Select Issues to Fix",
-  "multiSelect": true,
-  "options": [
-    {
-      "label": "CI Failures (Critical) — {N} issue(s)",
-      "description": "{brief description of CI failures}"
-    },
-    {
-      "label": "Lint Violations (High) — {N} issue(s)",
-      "description": "docBlame, defLemma, defsWithUnderscore in {file_list}"
-    },
-    {
-      "label": "Documentation Gaps (High) — {N} issue(s)",
-      "description": "Missing/inadequate docstrings in {file_list}"
-    },
-    {
-      "label": "Notation Inconsistencies (Medium) — {N} issue(s)",
-      "description": "Arrow notation, bisimilarity, transition conventions"
-    },
-    {
-      "label": "Organization Issues (Medium) — {N} issue(s)",
-      "description": "Directory placement, namespace conventions"
-    },
-    {
-      "label": "Design Improvements (Low) — {N} issue(s)",
-      "description": "Typeclass reuse, proof readability suggestions"
-    },
-    {
-      "label": "No fix tasks needed — vet complete",
-      "description": "Accept current state without creating fix tasks"
-    }
-  ]
-}
-```
-
-If the user selects "No fix tasks needed" or makes no selection:
-- Write final metadata with `fix_tasks_created: 0`
-- Display: "Vet complete. No fix tasks created."
-- **STOP** at Stage 11
-
-If the user selects one or more categories, **IMMEDIATELY CONTINUE** to Stage 8.
-
-## Stage 8: Group Selected Issues into Fix Tasks
-
-Apply the **task minimization principle**: group related violations into coherent fix tasks
-rather than creating one task per file or per violation.
-
-**Grouping strategy** (example groupings from common violation patterns):
-
-| Selected Category | Suggested Task Grouping |
-|-------------------|------------------------|
-| CI Failures | One task: "Fix CI pipeline failures in {module}" |
-| Lint Violations (docBlame only) | One task: "Add docstrings to {module_area}" |
-| Lint Violations (multiple) | One task: "Fix lint violations in {module}" |
-| Documentation Gaps | One task per semantic area: "Improve documentation in {area}" |
-| Notation Inconsistencies | One task per module: "Standardize notation in {module}" |
-| Organization Issues | One task: "Reorganize {files} per ORGANISATION.md" |
-| Design Improvements | One task per refactoring: "Refactor {concept} to use typeclasses" |
-
-**Important**: Minimize task count. If all lint violations are in one module, create one
-fix task for that module — not one per violation or one per file.
-
-For each proposed fix task, prepare:
-```json
-{
-  "title": "Fix lint violations in Cslib/Logics/Modal",
-  "slug": "fix_lint_violations_modal_logics",
-  "description": "Fix 5 lint violations in Modal logic files: 3 missing docstrings (docBlame), 1 Prop-valued def (defLemma), 1 underscore name (defsWithUnderscore). Affected files: Cslib/Logics/Modal/Foo.lean, Cslib/Logics/Modal/Bar.lean",
-  "task_type": "cslib",
-  "severity": "High",
-  "parent_task_numbers": [265]
-}
-```
-
-## Stage 9: Confirm Task Creation
-
-Present the proposed fix tasks to the user for final confirmation:
-
-```
-Proposed Fix Tasks
-==================
-{N} fix task(s) will be created:
-
-| # | Title | Type | Severity | Violations |
-|---|-------|------|----------|------------|
-| 1 | {task_1_title} | cslib | {severity} | {N} |
-| 2 | {task_2_title} | cslib | {severity} | {N} |
-
-All tasks will be type "cslib" — they will be routed to cslib-implementation-agent.
-```
-
-**Use AskUserQuestion** (single-select) for final confirmation:
-
-```json
-{
-  "question": "Create these {N} fix task(s) in state.json?",
-  "header": "Confirm Fix Task Creation",
-  "multiSelect": false,
-  "options": [
-    {
-      "label": "Yes, create tasks",
-      "description": "Create {N} cslib fix task(s) and add to TODO.md"
-    },
-    {
-      "label": "Revise — go back to selection",
-      "description": "Return to Stage 7 to modify which categories to fix"
-    },
-    {
-      "label": "Cancel — no tasks",
-      "description": "Exit without creating any fix tasks"
-    }
-  ]
-}
-```
-
-- **Yes**: **IMMEDIATELY CONTINUE** to Stage 10
-- **Revise**: Return to Stage 7 (re-present the multiSelect picker)
-- **Cancel**: Write metadata with `fix_tasks_created: 0` and **STOP** at Stage 11
-
-## Stage 10: Create Fix Tasks
-
-For each confirmed fix task, create an entry in state.json:
+Write all categorized violations to `.vet-findings.json` alongside the metadata file:
 
 ```bash
-cd /home/benjamin/Projects/cslib
-
-now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-
-# Process each fix task
-for fix_task in {confirmed_fix_tasks}; do
-  title="${fix_task.title}"
-  description="${fix_task.description}"
-  task_type="cslib"
-
-  # Generate slug: lowercase, spaces to underscores, remove non-alphanumeric
-  slug=$(echo "$title" | tr '[:upper:]' '[:lower:]' | tr ' ' '_' | \
-    sed 's/[^a-z0-9_]//g' | cut -c1-50)
-
-  # Read current next_project_number
-  next_num=$(jq '.next_project_number' specs/state.json)
-
-  # Atomic jq mutation: increment next_project_number, prepend new task
-  updated_state=$(jq \
-    --argjson next_num "$next_num" \
-    --arg slug "$slug" \
-    --arg title "$title" \
-    --arg desc "$description" \
-    --arg tt "$task_type" \
-    --arg now "$now" \
-    '.next_project_number = ($next_num + 1) |
-     .active_projects = [{
-       project_number: $next_num,
-       project_name: $slug,
-       status: "not_started",
-       task_type: $tt,
-       title: $title,
-       description: $desc,
-       created: $now,
-       last_updated: $now,
-       next_artifact_number: 1,
-       artifacts: []
-     }] + .active_projects' \
-    specs/state.json)
-
-  # Verify valid JSON
-  if ! echo "$updated_state" | jq empty 2>/dev/null; then
-    echo "Error: state.json mutation produced invalid JSON for task: $title"
-    continue
-  fi
-
-  # Write updated state
-  echo "$updated_state" > specs/state.json
-  echo "Created fix task #$next_num: $title"
-done
-
-# Regenerate TODO.md from updated state.json
-bash .claude/scripts/generate-todo.sh
-echo "TODO.md regenerated."
+cat > "$task_dir/.vet-findings.json" << 'FINDINGSEOF'
+{
+  "tasks_vetted": [265],
+  "files_analyzed": ["Cslib/Logics/Modal/Foo.lean", "Cslib/Logics/Modal/Bar.lean"],
+  "ci_passed": true,
+  "ci_results": {
+    "lake_build": "PASS",
+    "lake_test": "PASS",
+    "checkInitImports": "PASS",
+    "lake_lint": "PASS",
+    "lint_style": "PASS",
+    "lake_shake": "PASS"
+  },
+  "categories": [
+    {
+      "name": "Lint Violations",
+      "severity": "High",
+      "violations": [
+        {
+          "file": "Cslib/Logics/Modal/Foo.lean",
+          "line": 42,
+          "check": "docBlame",
+          "standard": "CONTRIBUTING.md",
+          "description": "Missing docstring on theorem `foo_soundness`",
+          "fix_hint": "Add /-- ... -/ docstring above the declaration"
+        }
+      ]
+    }
+  ],
+  "suggested_fix_tasks": [
+    {
+      "title": "Fix lint violations in Cslib/Logics/Modal",
+      "slug": "fix_lint_violations_modal_logics",
+      "description": "Fix 5 lint violations in Modal logic files...",
+      "task_type": "cslib",
+      "severity": "High",
+      "parent_task_numbers": [265],
+      "violation_count": 5
+    }
+  ]
+}
+FINDINGSEOF
 ```
 
-Count actual tasks created and record for metadata.
+**Task minimization principle**: Group related violations into coherent fix tasks rather than
+creating one task per violation. If all lint violations are in one module, suggest one fix task
+for that module. The `suggested_fix_tasks` array contains pre-grouped tasks ready for user
+selection.
 
-## Stage 11: Write Final Metadata
+**Grouping strategy**:
 
-Write final metadata to `$metadata_file_path`:
+| Category | Suggested Grouping |
+|----------|-------------------|
+| CI Failures | One task: "Fix CI pipeline failures in {module}" |
+| Lint Violations (single type) | One task: "Add docstrings to {module_area}" |
+| Lint Violations (multiple) | One task: "Fix lint violations in {module}" |
+| Documentation Gaps | One task per semantic area |
+| Notation Inconsistencies | One task per module |
+| Organization Issues | One task: "Reorganize {files} per ORGANISATION.md" |
+| Design Improvements | One task per refactoring |
+
+## Stage 7: Write Final Metadata
+
+Write final metadata to `$metadata_file_path`. The agent does NOT create fix tasks or
+interact with the user — that is handled by the invoking skill after the agent returns.
 
 ```bash
 cat > "$metadata_file_path" << METAEOF
 {
   "status": "implemented",
-  "summary": "Vetted {N} task(s): {task_numbers}. Found {violation_count} violations across {file_count} files. Created {fix_task_count} fix task(s).",
-  "fix_tasks_created": {fix_task_count},
+  "summary": "Vetted {N} task(s): {task_numbers}. Found {violation_count} violations across {file_count} files. CI: {PASSED/FAILED}.",
   "ci_passed": {true/false},
   "violations_found": {violation_count},
   "files_analyzed": {file_count},
-  "artifacts": [
-    {artifacts_for_each_fix_task}
-  ],
+  "findings_path": "$task_dir/.vet-findings.json",
   "metadata": {
     "session_id": "{session_id}",
     "agent_type": "cslib-vet-agent",
@@ -594,28 +430,29 @@ cat > "$metadata_file_path" << METAEOF
 METAEOF
 ```
 
+Return a brief text summary (3-6 bullets) covering tasks vetted, files analyzed, CI result,
+and violation counts by severity. Do NOT create fix tasks — the skill handles interactive
+selection and task creation.
+
 ## Critical Requirements
 
 **MUST DO**:
 1. **Create early metadata at Stage 0** before any substantive work
-2. Write final metadata to `$metadata_file_path`
-3. Return brief text summary (3-6 bullets), NOT JSON
-4. Use `AskUserQuestion` with `options` array for ALL user choice points
-5. Apply task minimization principle — group related violations into coherent tasks
-6. Set all fix tasks to `task_type: "cslib"`
-7. Run the full CI pipeline before analysis
-8. Always require user confirmation before creating fix tasks
+2. Write `.vet-findings.json` with all categorized violations and suggested fix tasks
+3. Write final metadata to `$metadata_file_path` with `findings_path`
+4. Apply task minimization principle — group related violations in `suggested_fix_tasks`
+5. Run the full CI pipeline before analysis
+6. Return brief text summary (3-6 bullets), NOT JSON
 
 **MUST NOT**:
-1. Return JSON to the console
-2. Skip user confirmation before creating fix tasks
-3. Create fix tasks with `task_type` other than "cslib"
+1. **Use AskUserQuestion** — this agent runs as a subagent and cannot call it; the invoking
+   skill handles all user interaction
+2. **Create fix tasks** — the invoking skill handles task creation after user confirmation
+3. Return JSON to the console
 4. Change the status of the vetted tasks (vet is read-only w.r.t. task lifecycle)
 5. Edit `.lean` source files (vet only inspects; fix is done by separate tasks)
 6. Use status value "completed" (triggers Claude stop behavior)
 7. **Call blocked tools** (`lean_diagnostic_messages`, `lean_file_outline`)
-8. Create one fix task per violation (use task minimization)
-9. Skip task grouping — always cluster related violations
 
 ## Return Format
 
@@ -623,5 +460,5 @@ Brief text summary (NOT JSON), covering:
 - Tasks vetted and files analyzed
 - CI pipeline result (PASSED/FAILED)
 - Violations found by severity
-- Fix tasks created (count and titles)
-- Next step guidance
+- Path to `.vet-findings.json` for skill to process
+- Suggested fix task count

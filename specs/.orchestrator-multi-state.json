@@ -1,35 +1,16 @@
 {
-  "session_id": "sess_1782160165_820753",
-  "task_numbers": [
-    270,
-    271
-  ],
-  "waves": [
-    [
-      270
-    ],
-    [
-      271
-    ]
-  ],
-  "dependency_graph": {
-    "270": [],
-    "271": [
-      270
-    ]
-  },
-  "cycle_count": 3,
-  "max_cycles": 10,
+  "session_id": "sess_1782161605_f646ec",
+  "task_numbers": [272, 273, 274, 275, 276],
+  "waves": [[272, 273, 274, 275, 276]],
+  "cycle_count": 0,
+  "max_cycles": 25,
   "failed_tasks": [],
-  "completed_tasks": [
-    270
-  ],
-  "task_types": {
-    "270": "meta",
-    "271": "meta"
-  },
+  "completed_tasks": [],
   "current_statuses": {
-    "270": "completed",
-    "271": "not_started"
+    "272": "not_started",
+    "273": "not_started",
+    "274": "not_started",
+    "275": "not_started",
+    "276": "not_started"
   }
 }

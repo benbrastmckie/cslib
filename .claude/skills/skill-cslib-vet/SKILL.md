@@ -1,7 +1,7 @@
 ---
 name: skill-cslib-vet
 description: Vet completed CSLib tasks against library standards. Invoke for /vet command.
-allowed-tools: Agent, Bash, Edit, Read, Write
+allowed-tools: Agent, AskUserQuestion, Bash, Edit, Read, Write
 ---
 
 # CSLib Vet Skill
@@ -177,31 +177,188 @@ If you DID use the Agent tool, skip this stage — the subagent already wrote th
 The following stages MUST execute after work is complete, whether done by a subagent or inline.
 Do NOT skip these stages for any reason.
 
-### Stage 5: Parse Subagent Return
+### Stage 5: Parse Subagent Return and Read Findings
 
-Read the metadata file from the path set in Stage 3:
+Read the metadata and findings files from the paths set in Stage 3:
 
 ```bash
 if [ -f "$task_dir/.vet-meta.json" ]; then
   return_status=$(jq -r '.status' "$task_dir/.vet-meta.json" 2>/dev/null)
-  fix_tasks_created=$(jq -r '.fix_tasks_created // 0' "$task_dir/.vet-meta.json" 2>/dev/null)
+  violations_found=$(jq -r '.violations_found // 0' "$task_dir/.vet-meta.json" 2>/dev/null)
+  files_analyzed=$(jq -r '.files_analyzed // 0' "$task_dir/.vet-meta.json" 2>/dev/null)
+  ci_passed=$(jq -r '.ci_passed // false' "$task_dir/.vet-meta.json" 2>/dev/null)
   summary=$(jq -r '.summary // "Vet completed"' "$task_dir/.vet-meta.json" 2>/dev/null)
   echo "Vet status: $return_status"
-  echo "Fix tasks created: $fix_tasks_created"
+  echo "Violations found: $violations_found"
 else
   echo "Warning: Metadata file not found at $task_dir/.vet-meta.json"
   return_status="partial"
 fi
 ```
 
-### Stage 6: Git Commit (if fix tasks were created)
+Read the findings file written by the agent:
+
+```bash
+findings_file="$task_dir/.vet-findings.json"
+if [ -f "$findings_file" ]; then
+  echo "Findings file found at $findings_file"
+  # Read using the Read tool for structured access
+else
+  echo "Warning: Findings file not found — agent may have been interrupted"
+  # Skip interactive stages, go to Stage 9
+fi
+```
+
+If no violations were found (`violations_found == 0`), display:
+```
+Vet complete: No violations found. CI pipeline PASSED.
+```
+Skip to Stage 9.
+
+### Stage 6: Present Violations to User
+
+**Use AskUserQuestion** to present the categorized violations and let the user select which
+categories should become fix tasks.
+
+First, display a summary of findings:
+
+```
+Vet Results for Task(s) {task_numbers}
+=======================================
+Files analyzed: {count}
+CI pipeline: {PASSED/FAILED}
+
+Violations Found: {total} total
+  Critical: {N}
+  High: {N}
+  Medium: {N}
+  Low: {N}
+```
+
+Then use `AskUserQuestion` with `multiSelect: true`. Build options dynamically from the
+`categories` array in `.vet-findings.json`. Only include categories that have at least one
+violation:
+
+```json
+{
+  "question": "Which violation categories should become fix tasks?",
+  "header": "Fix",
+  "multiSelect": true,
+  "options": [
+    {
+      "label": "{category_name} ({severity}) -- {N} issue(s)",
+      "description": "{brief description of violations in this category}"
+    }
+  ]
+}
+```
+
+Always include a final option:
+```json
+{
+  "label": "No fix tasks needed",
+  "description": "Accept current state without creating fix tasks"
+}
+```
+
+If the user selects "No fix tasks needed" or selects nothing:
+- Display: "Vet complete. No fix tasks created."
+- Skip to Stage 9.
+
+If the user selects one or more categories, **IMMEDIATELY CONTINUE** to Stage 7.
+
+### Stage 7: Confirm Fix Task Creation
+
+Read the `suggested_fix_tasks` from `.vet-findings.json`. Filter to only those whose violations
+belong to user-selected categories. Present the proposed fix tasks:
+
+```
+Proposed Fix Tasks
+==================
+{N} fix task(s) will be created:
+
+| # | Title | Type | Severity | Violations |
+|---|-------|------|----------|------------|
+| 1 | {task_1_title} | cslib | {severity} | {N} |
+```
+
+**Use AskUserQuestion** (single-select) for final confirmation:
+
+```json
+{
+  "question": "Create these {N} fix task(s) in state.json?",
+  "header": "Confirm",
+  "multiSelect": false,
+  "options": [
+    {
+      "label": "Yes, create tasks",
+      "description": "Create {N} cslib fix task(s) and add to TODO.md"
+    },
+    {
+      "label": "Revise -- go back to selection",
+      "description": "Return to Stage 6 to modify which categories to fix"
+    },
+    {
+      "label": "Cancel -- no tasks",
+      "description": "Exit without creating any fix tasks"
+    }
+  ]
+}
+```
+
+- **Yes**: **IMMEDIATELY CONTINUE** to Stage 8
+- **Revise**: Return to Stage 6 (re-present the multiSelect picker)
+- **Cancel**: Skip to Stage 9
+
+### Stage 8: Create Fix Tasks
+
+For each confirmed fix task from the filtered `suggested_fix_tasks`, create an entry in
+state.json:
+
+```bash
+cd /home/benjamin/Projects/cslib
+
+now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+# For each fix task:
+next_num=$(jq '.next_project_number' specs/state.json)
+
+jq \
+  --argjson next_num "$next_num" \
+  --arg slug "$slug" \
+  --arg title "$title" \
+  --arg desc "$description" \
+  --arg tt "cslib" \
+  --arg now "$now" \
+  '.next_project_number = ($next_num + 1) |
+   .active_projects = [{
+     project_number: $next_num,
+     project_name: $slug,
+     status: "not_started",
+     task_type: $tt,
+     title: $title,
+     description: $desc,
+     created: $now,
+     last_updated: $now,
+     next_artifact_number: 1,
+     artifacts: []
+   }] + .active_projects' \
+  specs/state.json > specs/state.json.tmp && mv specs/state.json.tmp specs/state.json
+
+echo "Created fix task #$next_num: $title"
+
+# After all tasks created:
+bash .claude/scripts/generate-todo.sh
+echo "TODO.md regenerated."
+```
+
+### Stage 9: Git Commit and Summary
 
 If any fix tasks were created, commit the state changes:
 
 ```bash
 cd /home/benjamin/Projects/cslib
 
-# Check if there are any state changes from fix task creation
 if git status --porcelain specs/state.json specs/TODO.md | grep -q .; then
   git add specs/state.json specs/TODO.md
   git commit -m "vet task(s) $TASK_NUMBERS: create fix tasks
@@ -212,8 +369,6 @@ else
   echo "No state changes to commit (no fix tasks created)."
 fi
 ```
-
-### Stage 7: Return Brief Summary
 
 Return a brief text summary (3-6 bullets):
 
@@ -235,8 +390,9 @@ After the agent returns, this skill MUST NOT:
 5. **Change vetted task status** — Vet is orthogonal to task lifecycle
 
 The postflight phase is LIMITED TO:
-- Reading agent metadata file
-- Committing fix task state changes (if any)
+- Reading agent metadata and findings files
+- Presenting violations to user via AskUserQuestion
+- Creating fix tasks in state.json after user confirmation
 - Git commit of state.json/TODO.md updates
 - Returning brief summary
 

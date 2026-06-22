@@ -1,3 +1,5 @@
+module
+
 import Cslib.Foundations.Data.HasFresh
 
 namespace CslibTests

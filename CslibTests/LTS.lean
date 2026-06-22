@@ -4,11 +4,15 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Fabrizio Montesi
 -/
 
+module
+
 import Cslib.Foundations.Semantics.LTS.Divergence
 import Cslib.Foundations.Semantics.LTS.Bisimulation
 import Mathlib.Algebra.Group.Even
 import Mathlib.Algebra.Ring.Parity
 import Cslib.Foundations.Semantics.LTS.Notation
+public import Batteries.Tactic.Lint.Misc
+public import Lean.PrettyPrinter.Delaborator.Basic
 
 namespace CslibTests
 
@@ -127,11 +131,11 @@ example (a b : Term) (μ : Label) : a [μ]⭢ b := by
 
 -- check that delaborators work, including with variables
 
-/-- info: ∀ (a b : Term) (μ : Label), a[μ]⭢β b : Prop -/
+/-- info: ∀ (a b : Term) (μ : Label), Tr.toRelation lts μ a b : Prop -/
 #guard_msgs in
 #check ∀ (a b : Term) (μ : Label), a [μ]⭢β b
 
-/-- info: ∀ (a b : Term) (μ : Label), a[[μ]]↠β b : Prop -/
+/-- info: ∀ (a b : Term) (μ : Label), MTr.toRelation lts [μ] a b : Prop -/
 #guard_msgs in
 #check ∀ (a b : Term) (μ : Label), a [[μ]]↠β b
 

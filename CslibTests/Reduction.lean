@@ -1,4 +1,8 @@
+module
+
 import Cslib.Foundations.Relation.Attr
+public import Batteries.Tactic.Lint.Misc
+public import Lean.PrettyPrinter.Delaborator.Basic
 
 namespace CslibTests
 
@@ -46,19 +50,19 @@ example : 5 ⭢ 4 := by
 
 -- check that delaborators work, including with variables
 
-/-- info: ∀ (a b : ℕ), a ⭢ₙ b : Prop -/
+/-- info: ∀ (a b : ℕ), PredReduction a b : Prop -/
 #guard_msgs in
 #check ∀ (a b : ℕ), a ⭢ₙ b
 
-/-- info: ∀ (a b : ℕ), a ↠ₙ b : Prop -/
+/-- info: ∀ (a b : ℕ), Relation.ReflTransGen PredReduction a b : Prop -/
 #guard_msgs in
 #check ∀ (a b : ℕ), a ↠ₙ b
 
-/-- info: ∀ (a b : Term Var), a ⭢β b : Prop -/
+/-- info: ∀ (a b : Term Var), term_rel a b : Prop -/
 #guard_msgs in
 #check ∀ (a b : Term Var), a ⭢β b
 
-/-- info: ∀ (a b : Term Var), a ↠β b : Prop -/
+/-- info: ∀ (a b : Term Var), Relation.ReflTransGen term_rel a b : Prop -/
 #guard_msgs in
 #check ∀ (a b : Term Var), a ↠β b
 

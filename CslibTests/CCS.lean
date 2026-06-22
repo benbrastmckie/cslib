@@ -4,7 +4,11 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Fabrizio Montesi
 -/
 
+module
+
 import Cslib.Languages.CCS.Semantics
+public import Batteries.Tactic.Lint.Misc
+public import Lean.PrettyPrinter.Delaborator.Basic
 
 namespace CslibTests
 

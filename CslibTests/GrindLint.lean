@@ -1,4 +1,7 @@
+module
+
 import Cslib
+public meta import Lean.Elab.Command
 
 set_option linter.hashCommand false
 -- Long identifiers in `#grind_lint skip` cannot be line-wrapped; suppress long-line warnings.

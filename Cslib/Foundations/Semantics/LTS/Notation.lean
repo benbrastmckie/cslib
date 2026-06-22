@@ -7,6 +7,8 @@ Authors: Fabrizio Montesi, Chris Henson
 module
 
 public import Cslib.Foundations.Semantics.LTS.Relation
+public import Batteries.Tactic.Lint.Misc
+public import Lean.PrettyPrinter.Delaborator.Basic
 
 /-!
 # Notations about LTS

@@ -4,46 +4,46 @@
     {
       "project_number": 276,
       "project_name": "modal_cube_inter_system_conservativity",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Prove inter-system conservative extension results within the modal cube: stronger systems (e.g., S5, S4, T) are conservative over weaker systems (e.g., K, D) for the shared formula fragment. Requires derivation embedding between systems. Soundness/completeness infrastructure exists for all 15 systems. Lower priority — establish after per-system CPL conservativity is done.",
-      "last_updated": "2026-06-22T21:00:38Z",
+      "last_updated": "2026-06-22T21:15:04Z",
       "session_id": "sess_1782161605_f646ec"
     },
     {
       "project_number": 275,
       "project_name": "bimodal_tm_conservative_over_temporal_bx",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Prove that Bimodal TM is conservative over Temporal BX for temporal formulas (those using only until/since, no box). The Temporal.Formula.toBimodal embedding exists. The lift_derivation_qfree infrastructure in Bimodal/Metalogic/ConservativeExtension/ partially supports this. Requires verifying the lifting extends to temporal connectives.",
-      "last_updated": "2026-06-22T21:02:14Z",
+      "last_updated": "2026-06-22T21:18:55Z",
       "session_id": "sess_1782161605_f646ec"
     },
     {
       "project_number": 274,
       "project_name": "bimodal_tm_conservative_over_modal_s5",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Prove that Bimodal TM is conservative over Modal S5 for the modal fragment: if φ.toBimodal is TM-derivable then φ is S5-derivable. (Original statement \"over K\" was FALSE — TM includes full S5 modal axioms for box.) Proof via semantic bridge: TM soundness + Kripke-to-TaskModel adapter + S5 completeness. ~150-250 lines.",
-      "last_updated": "2026-06-22T21:03:50Z",
+      "last_updated": "2026-06-22T21:15:09Z",
       "session_id": "sess_1782161605_f646ec"
     },
     {
       "project_number": 273,
       "project_name": "all_modal_systems_conservative_over_cpl",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Prove conservative extension of all 14 remaining modal systems (T, B, D, K4, K5, K45, D4, D5, D45, DB, TB, KB5, S4, S5) over CPL for propositional formulas. The proof pattern is identical to Modal K (already proved): system soundness (proved for all 14) + toModal_valid_implies_tautology (system-independent, already proved). Each system needs a _soundness_derivable wrapper to connect the pieces. Mechanical — create ConservativeExtension.lean files per system following the K pattern.",
-      "last_updated": "2026-06-22T21:01:44Z",
+      "last_updated": "2026-06-22T21:14:23Z",
       "session_id": "sess_1782161605_f646ec"
     },
     {
       "project_number": 272,
       "project_name": "glivenko_theorem",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Prove Glivenko's theorem: if CPL proves A then IPL proves ¬¬A. This is the standard characterization of the CPL/IPL relationship, complementing the IPL-over-MPL conservative extension (task 265). Proof strategy: algebraic argument via Boolean algebras being Heyting algebras with ¬¬a = a, or syntactic double-negation translation. Place in Cslib/Logics/Propositional/Semantics/Algebra/ alongside Conservative.lean.",
-      "last_updated": "2026-06-22T21:10:26Z",
+      "last_updated": "2026-06-22T21:13:02Z",
       "session_id": "sess_1782161605_f646ec"
     },
     {

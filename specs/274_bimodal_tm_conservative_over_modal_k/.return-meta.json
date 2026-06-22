@@ -1,17 +1,29 @@
 {
-  "status": "report_written",
-  "started_at": "2026-06-22T00:00:00Z",
+  "status": "planned",
   "artifacts": [
-    "specs/274_bimodal_tm_conservative_over_modal_k/reports/01_tm-over-k-conservativity.md"
+    {
+      "type": "plan",
+      "path": "specs/274_bimodal_tm_conservative_over_modal_k/plans/01_tm-over-s5-plan.md",
+      "summary": "Implementation plan for TM conservative over S5: 3 phases, semantic bridge approach"
+    }
   ],
-  "partial_progress": {
-    "stage": "research_done",
-    "details": "Research reveals stated conservativity (TM over K) is false. Corrected statement (TM over S5) is provable. Full report with proof strategy and counterexample written."
-  },
+  "next_steps": "Run /implement 274 to execute the plan",
   "metadata": {
     "session_id": "sess_1782161605_f646ec_274",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 3,
+    "estimated_hours": 3,
+    "dependency_waves": [[1], [2], [3]]
+  },
+  "memory_candidates": [
+    {
+      "content": "When proving conservativity of a richer logic (with temporal operators) over a simpler modal logic, the semantic bridge approach works well: (1) use soundness of the richer logic to get truth in all models, (2) construct an adapter that embeds simpler models into the richer model class, (3) prove a bridge lemma by induction on formulas relating the two satisfaction relations, (4) apply completeness of the simpler logic. The critical challenge for modal conservativity (vs propositional) is that the box case requires the set Omega of world histories to be stable under the accessibility relation -- this works when the simpler logic is S5 because equivalence classes are self-stable, but fails for weaker modal logics like K.",
+      "category": "PATTERN",
+      "source_artifact": "specs/274_bimodal_tm_conservative_over_modal_k/plans/01_tm-over-s5-plan.md",
+      "confidence": 0.85,
+      "suggested_keywords": ["conservativity", "semantic-bridge", "modal-logic", "S5", "Kripke-adapter", "task-model"]
+    }
+  ]
 }

@@ -1,17 +1,21 @@
 {
-  "status": "done",
-  "started_at": "2026-06-22T20:54:52Z",
+  "status": "planned",
   "artifacts": [
-    "specs/272_glivenko_theorem/reports/01_glivenko-proof.md"
+    {
+      "type": "plan",
+      "path": "specs/272_glivenko_theorem/plans/01_glivenko-plan.md",
+      "summary": "Single-phase implementation plan for Glivenko's theorem via Heyting.Regular algebraic approach"
+    }
   ],
-  "partial_progress": {
-    "stage": "report_written",
-    "details": "Research report written with verified proof code"
-  },
+  "next_steps": "Run /implement 272 to execute the plan",
   "metadata": {
     "session_id": "sess_1782161605_f646ec_272",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 1,
+    "estimated_hours": 1,
+    "dependency_waves": [[1]]
+  },
+  "memory_candidates": []
 }

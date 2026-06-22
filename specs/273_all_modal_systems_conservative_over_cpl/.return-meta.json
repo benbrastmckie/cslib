@@ -1,17 +1,21 @@
 {
-  "status": "done",
-  "started_at": "2026-06-22T00:00:00Z",
+  "status": "planned",
   "artifacts": [
-    "specs/273_all_modal_systems_conservative_over_cpl/reports/01_modal-conservativity-survey.md"
+    {
+      "type": "plan",
+      "path": "specs/273_all_modal_systems_conservative_over_cpl/plans/01_modal-conservativity-plan.md",
+      "summary": "Implementation plan with 3 phases to create 14 ConservativeExtension.lean files for all remaining modal systems"
+    }
   ],
-  "partial_progress": {
-    "stage": "research_done",
-    "details": "All 14 systems analyzed, proof pattern verified via lean_run_code for all 14"
-  },
+  "next_steps": "Run /implement 273 to execute the plan",
   "metadata": {
     "session_id": "sess_1782161605_f646ec_273",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 3,
+    "estimated_hours": 3,
+    "dependency_waves": [[1, 2], [3]]
+  },
+  "memory_candidates": []
 }

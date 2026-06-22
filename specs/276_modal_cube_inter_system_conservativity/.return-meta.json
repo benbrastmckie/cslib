@@ -1,17 +1,21 @@
 {
-  "status": "report_written",
-  "started_at": "2026-06-22T00:00:00Z",
+  "status": "planned",
   "artifacts": [
-    "specs/276_modal_cube_inter_system_conservativity/reports/01_modal-cube-conservativity.md"
+    {
+      "type": "plan",
+      "path": "specs/276_modal_cube_inter_system_conservativity/plans/01_modal-cube-plan.md",
+      "summary": "Implementation plan with 3 phases: generic lifting lemma, 24+3 axiom subsumption lemmas, instantiated conservativity theorems"
+    }
   ],
-  "partial_progress": {
-    "stage": "report_written",
-    "details": "Full research report written covering modal cube hierarchy, proof approaches, and implementation plan"
-  },
+  "next_steps": "Run /implement 276 to execute the plan",
   "metadata": {
     "session_id": "sess_1782161605_f646ec_276",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 3,
+    "estimated_hours": 3,
+    "dependency_waves": [[1], [2], [3]]
+  },
+  "memory_candidates": []
 }

@@ -55,7 +55,7 @@ theorem satisfiesExec_iff_satisfies_setWord (labeling : State → (Atom → Prop
       Satisfies (fun p s => p ∈ s) (ss.map (fun s => {p | labeling s p})) phi := by
   induction phi generalizing ss with
   | atom p =>
-    simp [SatisfiesExec, Satisfies, head_map]
+    simp [SatisfiesExec, Satisfies]
   | bot =>
     simp [SatisfiesExec, Satisfies]
   | imp phi1 phi2 ih1 ih2 =>

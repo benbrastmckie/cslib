@@ -1,9 +1,35 @@
 {
-  "session_id": "sess_1782152871_5ff682",
-  "task_numbers": [263, 264, 265],
-  "waves": [[263, 264, 265]],
-  "completed_tasks": [263, 264],
-  "failed_tasks": [{"task": 265, "reason": "Blocked: requires GHA-to-HA embedding (Dedekind-MacNeille completion) not available in Mathlib"}],
-  "cycle_count": 1,
-  "max_cycles": 25
+  "session_id": "sess_1782160165_820753",
+  "task_numbers": [
+    270,
+    271
+  ],
+  "waves": [
+    [
+      270
+    ],
+    [
+      271
+    ]
+  ],
+  "dependency_graph": {
+    "270": [],
+    "271": [
+      270
+    ]
+  },
+  "cycle_count": 3,
+  "max_cycles": 10,
+  "failed_tasks": [],
+  "completed_tasks": [
+    270
+  ],
+  "task_types": {
+    "270": "meta",
+    "271": "meta"
+  },
+  "current_statuses": {
+    "270": "completed",
+    "271": "not_started"
+  }
 }

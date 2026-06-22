@@ -1,5 +1,5 @@
 ---
-next_project_number: 272
+next_project_number: 277
 ---
 
 # TODO
@@ -11,8 +11,8 @@ next_project_number: 272
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,266,268,270 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215,269,271 | 36,37,180,268,270 | Bimodal Porting, Foundations, Temporal Logic, ... |
+| 1 | 36,37,180,226,241,245,252,266,268,271,272,273,274,275,276 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 2 | 39,40,181,215,269 | 36,37,180,268 | Bimodal Porting, Foundations, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -47,13 +47,65 @@ next_project_number: 272
 
 ### Agent System
 
-270 [NOT STARTED] — Create /vet command-skill-agent triplet for the cslib extension t
-  └─ 271 [NOT STARTED] — Register the /vet command-skill-agent in the cslib extension mani
+271 [RESEARCHING] — Register the /vet command-skill-agent in the cslib extension mani
+
+### Uncategorized
+
+272 [NOT STARTED] — Prove Glivenko's theorem: if CPL proves A then IPL proves ¬¬A. Th
+273 [NOT STARTED] — Prove conservative extension of all 14 remaining modal systems (T
+274 [NOT STARTED] — Prove that Bimodal TM is conservative over Modal K for the modal 
+275 [NOT STARTED] — Prove that Bimodal TM is conservative over Temporal BX for tempor
+276 [NOT STARTED] — Prove inter-system conservative extension results within the moda
 
 ## Tasks
 
-### 271. Register vet in manifest and claudemd
+### 276. Modal cube inter system conservativity
 - **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Prove inter-system conservative extension results within the modal cube: stronger systems (e.g., S5, S4, T) are conservative over weaker systems (e.g., K, D) for the shared formula fragment. Requires derivation embedding between systems. Soundness/completeness infrastructure exists for all 15 systems. Lower priority — establish after per-system CPL conservativity is done.
+
+---
+
+### 275. Bimodal tm conservative over temporal bx
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Prove that Bimodal TM is conservative over Temporal BX for temporal formulas (those using only until/since, no box). The Temporal.Formula.toBimodal embedding exists. The lift_derivation_qfree infrastructure in Bimodal/Metalogic/ConservativeExtension/ partially supports this. Requires verifying the lifting extends to temporal connectives.
+
+---
+
+### 274. Bimodal tm conservative over modal k
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Prove that Bimodal TM is conservative over Modal K for the modal fragment: if φ.toBimodal is TM-derivable then φ is K-derivable. The Modal.Proposition.toBimodal embedding and the lift_derivation_qfree infrastructure in Bimodal/Metalogic/ConservativeExtension/ already do the heavy syntactic lifting work.
+
+---
+
+### 273. All modal systems conservative over cpl
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Prove conservative extension of all 14 remaining modal systems (T, B, D, K4, K5, K45, D4, D5, D45, DB, TB, KB5, S4, S5) over CPL for propositional formulas. The proof pattern is identical to Modal K (already proved): system soundness (proved for all 14) + toModal_valid_implies_tautology (system-independent, already proved). Each system needs a _soundness_derivable wrapper to connect the pieces. Mechanical — create ConservativeExtension.lean files per system following the K pattern.
+
+---
+
+### 272. Glivenko theorem
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Prove Glivenko's theorem: if CPL proves A then IPL proves ¬¬A. This is the standard characterization of the CPL/IPL relationship, complementing the IPL-over-MPL conservative extension (task 265). Proof strategy: algebraic argument via Boolean algebras being Heyting algebras with ¬¬a = a, or syntactic double-negation translation. Place in Cslib/Logics/Propositional/Semantics/Algebra/ alongside Conservative.lean.
+
+---
+
+### 271. Register vet in manifest and claudemd
+- **Status**: [RESEARCHING]
 - **Task Type**: meta
 - **Topic**: agent-system
 - **Dependencies**: Task 270
@@ -63,10 +115,13 @@ next_project_number: 272
 ---
 
 ### 270. Create vet command skill agent
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: meta
 - **Topic**: agent-system
 - **Dependencies**: None
+- **Research**: [270_create_vet_command_skill_agent/reports/01_vet-command-patterns.md]
+- **Plan**: [270_create_vet_command_skill_agent/plans/01_vet-triplet-plan.md]
+- **Summary**: [270_create_vet_command_skill_agent/summaries/01_vet-triplet-summary.md]
 
 **Description**: Create /vet command-skill-agent triplet for the cslib extension that vets completed CSLib tasks against library standards. Three files to create: (1) .claude/commands/vet.md -- command accepting task numbers (single, comma-separated, ranges) with optional focus prompt, parsing arguments, validating task existence, and delegating to skill-cslib-vet. (2) .claude/skills/skill-cslib-vet/SKILL.md -- thin wrapper skill that validates task inputs, identifies files changed by the task(s) via git history and task artifacts, prepares delegation context with references to CONTRIBUTING.md, NOTATION.md, ORGANISATION.md, CODE_OF_CONDUCT.md standards, and delegates to cslib-vet-agent. (3) .claude/agents/cslib-vet-agent.md -- agent that reads the changed/created files, checks against all four standards documents precisely, runs the full CSLib CI pipeline (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake), identifies violations/issues categorized by standard, and creates appropriately scoped fix tasks (few tasks, none too large) using the multi-task creation standard with interactive user confirmation. The agent should use AskUserQuestion for issue selection and task confirmation. Follow existing patterns from pr.md (command), skill-cslib-implementation (skill), cslib-implementation-agent (agent).
 

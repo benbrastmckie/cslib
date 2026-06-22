@@ -39,8 +39,7 @@ theorem case1_psi_has_single_U_type (a q x y : Formula Atom)
     hasSingleUType (case1Psi a q x y) x y := by
   simp only [case1Psi, Formula.or, Formula.and, hasSingleUType]
   refine ⟨⟨⟨⟨⟨⟨⟨⟨?_, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩
-  all_goals simp_all [hasSingleUType,
-    u_free_has_single_U_type ha, u_free_has_single_U_type hq,
+  all_goals simp_all [u_free_has_single_U_type ha, u_free_has_single_U_type hq,
     u_free_has_single_U_type hx, u_free_has_single_U_type hy]
 
 /-- hasSingleUType for case2Psi when a, q, A, B are U-free. -/
@@ -51,8 +50,7 @@ theorem case2_psi_has_single_U_type (a q x y : Formula Atom)
   delta case2Psi
   simp only [hasSingleUType]
   refine ⟨⟨⟨⟨⟨⟨⟨⟨?_, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩
-  all_goals simp_all [hasSingleUType,
-    u_free_has_single_U_type ha, u_free_has_single_U_type hq,
+  all_goals simp_all [u_free_has_single_U_type ha, u_free_has_single_U_type hq,
     u_free_has_single_U_type hx, u_free_has_single_U_type hy]
 
 /-! ### Case-specific isSeparableWithUType -/
@@ -254,8 +252,8 @@ theorem case8_sep_with_U_type_Z_gen (a q x y : Formula Atom)
     have hna_uf : isUFree (Formula.neg a) = true := by simp [isUFree, ha]
     exact case5_sep_with_U_type_Z_gen (Formula.neg q) (Formula.neg a) x y hnq_uf hna_uf hx hy hx' hy'
 
--- Deep recursive separability proof with distribution, case splitting, and vacuous elimination.
 set_option maxHeartbeats 3200000 in
+-- Deep recursive separability proof with distribution, case splitting, and vacuous elimination.
 /-- S(ev, q∨U(A,B)) is separable_with_U_type A B when ev is U-free. -/
 theorem snce_Ufree_event_qU_guard_sep_with_U_type (ev q x y : Formula Atom)
     (hev_uf : isUFree ev = true) (hq : isUFree q = true)
@@ -526,8 +524,8 @@ theorem snce_Ufree_event_qNotU_guard_sep_with_U_type (ev q x y : Formula Atom)
       exact hnotS1 ⟨s, hst, int_truth_and_iff.mpr
         ⟨int_truth_and_iff.mpr ⟨hna_s, hnotQ_s⟩, hnotNotU_s⟩, hguard⟩
 
--- Deep recursive separability proof with rearrangement, distribution, and case 8 subcase.
 set_option maxHeartbeats 1600000 in
+-- Deep recursive separability proof with rearrangement, distribution, and case 8 subcase.
 /-- Case 7 with U-type: S(a∧U, q∨¬U) is separable_with_U_type A B. -/
 theorem case7_sep_with_U_type_Z_gen (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)

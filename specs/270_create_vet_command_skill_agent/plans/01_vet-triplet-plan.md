@@ -1,7 +1,7 @@
 # Implementation Plan: Create /vet Command-Skill-Agent Triplet
 
 - **Task**: 270 - Create /vet command-skill-agent triplet for the cslib extension
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 2.5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/270_create_vet_command_skill_agent/reports/01_vet-command-patterns.md

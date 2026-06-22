@@ -1,20 +1,74 @@
 {
-  "next_project_number": 272,
+  "next_project_number": 277,
   "active_projects": [
+    {
+      "project_number": 276,
+      "project_name": "modal_cube_inter_system_conservativity",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Prove inter-system conservative extension results within the modal cube: stronger systems (e.g., S5, S4, T) are conservative over weaker systems (e.g., K, D) for the shared formula fragment. Requires derivation embedding between systems. Soundness/completeness infrastructure exists for all 15 systems. Lower priority — establish after per-system CPL conservativity is done."
+    },
+    {
+      "project_number": 275,
+      "project_name": "bimodal_tm_conservative_over_temporal_bx",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Prove that Bimodal TM is conservative over Temporal BX for temporal formulas (those using only until/since, no box). The Temporal.Formula.toBimodal embedding exists. The lift_derivation_qfree infrastructure in Bimodal/Metalogic/ConservativeExtension/ partially supports this. Requires verifying the lifting extends to temporal connectives."
+    },
+    {
+      "project_number": 274,
+      "project_name": "bimodal_tm_conservative_over_modal_k",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Prove that Bimodal TM is conservative over Modal K for the modal fragment: if φ.toBimodal is TM-derivable then φ is K-derivable. The Modal.Proposition.toBimodal embedding and the lift_derivation_qfree infrastructure in Bimodal/Metalogic/ConservativeExtension/ already do the heavy syntactic lifting work."
+    },
+    {
+      "project_number": 273,
+      "project_name": "all_modal_systems_conservative_over_cpl",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Prove conservative extension of all 14 remaining modal systems (T, B, D, K4, K5, K45, D4, D5, D45, DB, TB, KB5, S4, S5) over CPL for propositional formulas. The proof pattern is identical to Modal K (already proved): system soundness (proved for all 14) + toModal_valid_implies_tautology (system-independent, already proved). Each system needs a _soundness_derivable wrapper to connect the pieces. Mechanical — create ConservativeExtension.lean files per system following the K pattern."
+    },
+    {
+      "project_number": 272,
+      "project_name": "glivenko_theorem",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Prove Glivenko's theorem: if CPL proves A then IPL proves ¬¬A. This is the standard characterization of the CPL/IPL relationship, complementing the IPL-over-MPL conservative extension (task 265). Proof strategy: algebraic argument via Boolean algebras being Heyting algebras with ¬¬a = a, or syntactic double-negation translation. Place in Cslib/Logics/Propositional/Semantics/Algebra/ alongside Conservative.lean."
+    },
     {
       "project_number": 270,
       "project_name": "create_vet_command_skill_agent",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "meta",
       "topic": "agent-system",
       "description": "Create /vet command-skill-agent triplet for the cslib extension that vets completed CSLib tasks against library standards. Three files to create: (1) .claude/commands/vet.md -- command accepting task numbers (single, comma-separated, ranges) with optional focus prompt, parsing arguments, validating task existence, and delegating to skill-cslib-vet. (2) .claude/skills/skill-cslib-vet/SKILL.md -- thin wrapper skill that validates task inputs, identifies files changed by the task(s) via git history and task artifacts, prepares delegation context with references to CONTRIBUTING.md, NOTATION.md, ORGANISATION.md, CODE_OF_CONDUCT.md standards, and delegates to cslib-vet-agent. (3) .claude/agents/cslib-vet-agent.md -- agent that reads the changed/created files, checks against all four standards documents precisely, runs the full CSLib CI pipeline (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake), identifies violations/issues categorized by standard, and creates appropriately scoped fix tasks (few tasks, none too large) using the multi-task creation standard with interactive user confirmation. The agent should use AskUserQuestion for issue selection and task confirmation. Follow existing patterns from pr.md (command), skill-cslib-implementation (skill), cslib-implementation-agent (agent).",
       "created": "2026-06-22T21:00:00Z",
-      "last_updated": "2026-06-22T21:00:00Z"
+      "last_updated": "2026-06-22T20:44:07Z",
+      "session_id": "sess_1782160165_820753_270",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/270_create_vet_command_skill_agent/reports/01_vet-command-patterns.md",
+          "summary": "Research report on command/skill/agent patterns for /vet triplet"
+        },
+        {
+          "type": "plan",
+          "path": "specs/270_create_vet_command_skill_agent/plans/01_vet-triplet-plan.md",
+          "summary": "3-phase plan: command, skill, agent creation"
+        },
+        {
+          "type": "summary",
+          "path": "specs/270_create_vet_command_skill_agent/summaries/01_vet-triplet-summary.md",
+          "summary": "Implementation summary for /vet command-skill-agent triplet"
+        }
+      ],
+      "completion_summary": "Created /vet command-skill-agent triplet: vet.md command with multi-task parsing, skill-cslib-vet thin wrapper with git history extraction, cslib-vet-agent with CI pipeline and standards checking"
     },
     {
       "project_number": 271,
       "project_name": "register_vet_in_manifest_and_claudemd",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "meta",
       "topic": "agent-system",
       "description": "Register the /vet command-skill-agent in the cslib extension manifest and CLAUDE.md. Updates: (1) .claude/extensions/cslib/manifest.json -- add cslib-vet-agent.md to provides.agents, skill-cslib-vet to provides.skills, vet.md to provides.commands. No routing entry needed since /vet is a standalone command (not routed through /research, /plan, /implement). (2) CLAUDE.md CSLib Extension section -- add /vet to the Commands table with usage syntax and description. Add skill-cslib-vet and cslib-vet-agent to the Skill-Agent Mapping table. Depends on task 270 (needs actual file names and command syntax from the implemented triplet).",
@@ -22,7 +76,8 @@
         270
       ],
       "created": "2026-06-22T21:00:00Z",
-      "last_updated": "2026-06-22T21:00:00Z"
+      "last_updated": "2026-06-22T20:44:25Z",
+      "session_id": "sess_1782160165_820753_271"
     },
     {
       "project_number": 268,

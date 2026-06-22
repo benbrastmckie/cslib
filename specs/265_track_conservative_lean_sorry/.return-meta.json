@@ -1,10 +1,21 @@
 {
-  "status": "success",
-  "operation": "research",
-  "task_number": 265,
-  "session_id": "sess_1782155556_ff49bc",
+  "status": "planned",
   "artifacts": [
-    "specs/265_track_conservative_lean_sorry/reports/01_conservative-extension-proof.md"
+    {
+      "type": "plan",
+      "path": "specs/265_track_conservative_lean_sorry/plans/01_conservative-extension-plan.md",
+      "summary": "3-phase implementation plan for ipl_conservative_over_mpl using WithBot embedding strategy"
+    }
   ],
-  "summary": "Identified WithBot embedding as the recommended proof strategy. The standard proof adjoins a bottom element to any GHA to get an HA, uses IPL.alg_complete in the HA, then transfers back via bot-free independence. All Mathlib prerequisites exist; estimated 55-70 lines of new code with very low risk."
+  "next_steps": "Run /implement 265 to execute the plan",
+  "metadata": {
+    "session_id": "sess_1782156550_e8f4d6",
+    "agent_type": "planner-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "skill-planner"],
+    "phase_count": 3,
+    "estimated_hours": 1,
+    "dependency_waves": [[1], [2], [3]]
+  },
+  "memory_candidates": []
 }

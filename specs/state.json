@@ -269,20 +269,43 @@
     {
       "project_number": 265,
       "project_name": "track_conservative_lean_sorry",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Conservative.lean:99 (ipl_conservative_over_mpl). This is the only untracked sorry in the codebase — the theorem states that intuitionistic propositional logic is a conservative extension of minimal propositional logic. Research the proof strategy (likely via Kripke model or algebraic argument) and implement.",
       "topic": "Propositional Logic",
       "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-22T19:25:23Z",
-      "session_id": "sess_1782155556_ff49bc",
+      "last_updated": "2026-06-22T19:32:37Z",
+      "session_id": "sess_1782156550_e8f4d6",
       "artifacts": [
         {
           "path": "specs/265_track_conservative_lean_sorry/reports/01_conservative-extension-proof.md",
           "type": "research",
           "summary": "WithBot embedding approach for conservative extension proof. 55-70 lines, all Mathlib prereqs available."
+        },
+        {
+          "path": "specs/265_track_conservative_lean_sorry/plans/01_conservative-extension-plan.md",
+          "type": "plan",
+          "summary": "3-phase implementation plan for ipl_conservative_over_mpl using WithBot embedding strategy"
         }
-      ]
+      ],
+      "plan_metadata": {
+        "phases": 3,
+        "total_effort_hours": 1,
+        "complexity": "simple",
+        "research_integrated": true,
+        "plan_version": 1,
+        "dependency_waves": [
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ]
+        ]
+      }
     }
   ],
   "repository_health": {

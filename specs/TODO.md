@@ -34,7 +34,7 @@ next_project_number: 267
 226 [RESEARCHED] — Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648
 263 [IMPLEMENTING] — Run lake shake --add-public --keep-implied --keep-prefix and appl
 265 [RESEARCHING] — Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Co
-266 [RESEARCHED] — Research the Propositional/ logic and Foundations/ in this repo, 
+266 [PLANNED] — Research the Propositional/ logic and Foundations/ in this repo, 
 
 ### Temporal Logic
 
@@ -48,11 +48,12 @@ next_project_number: 267
 ## Tasks
 
 ### 266. Research propositional and foundations improvements
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: formal
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [266_research_propositional_and_foundations_improvements/reports/01_team-research.md]
+- **Plan**: [266_research_propositional_and_foundations_improvements/plans/01_propositional-foundations-plan.md]
 
 **Description**: Research the Propositional/ logic and Foundations/ in this repo, the supporting roles these play, and what else remains to be done to improve these elements of this library. Compare with /home/benjamin/Projects/BimodalLogic/specs/305_rabinovich_ea_formula_implementation/reports/16_witness-count-restructure.md and the tableau system included there, in addition to researching what other additions make sense to include such as a sequent calculus
 

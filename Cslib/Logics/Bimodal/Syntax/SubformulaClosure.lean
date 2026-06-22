@@ -9,8 +9,8 @@ module
 public import Cslib.Logics.Bimodal.Syntax.Formula
 public import Cslib.Logics.Bimodal.Syntax.Subformulas
 public import Mathlib.Data.Finset.Basic
-public import Mathlib.Data.Finset.Lattice.Fold
 public import Mathlib.Data.List.Basic
+public import Mathlib.Data.Finset.Card
 
 /-!
 # Core Subformula Closure: Finset-Based Closure, Negation Closure, and Membership Lemmas

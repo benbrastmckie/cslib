@@ -7,7 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Frame
-public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.OrderedSeedConsistency
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.ChronicleTypes
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.RRelation
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.CanonicalModel

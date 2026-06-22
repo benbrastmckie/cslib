@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Bimodal.Syntax.SubformulaClosure
+public import Mathlib.Data.Finset.Lattice.Fold
 
 /-!
 # F/P-Nesting Depth Computation and Maximum Depth Within Closure Sets

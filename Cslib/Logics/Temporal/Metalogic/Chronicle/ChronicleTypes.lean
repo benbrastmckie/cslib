@@ -6,8 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Temporal.Metalogic.TemporalContent
-public import Cslib.Logics.Temporal.Metalogic.GeneralizedNecessitation
 public import Cslib.Logics.Temporal.Metalogic.PropositionalHelpers
 public import Cslib.Logics.Temporal.Metalogic.MCS
 

@@ -7,11 +7,11 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.LTL.Semantics.Satisfies
-public import Cslib.Computability.Languages.OmegaRegularLanguage
 public import Mathlib.Data.Set.Finite.Basic
 public import Mathlib.Data.Set.Finite.Powerset
 public import Mathlib.Data.Set.Finite.Lattice
-public import Mathlib.Data.Fintype.Fin
+public import Cslib.Computability.Automata.NA.Basic
+public import Mathlib.Tactic.NormNum
 
 /-! # GNBA Tableau Construction for LTL Omega-Regularity
 

@@ -5,8 +5,8 @@ Authors: Benjamin Brast-McKie
 -/
 
 module
-public import Cslib.Logics.Bimodal.ProofSystem.Derivable
 public import Cslib.Foundations.Logic.ProofSystem
+public import Cslib.Logics.Bimodal.ProofSystem.Derivation
 
 /-! # Instance Registration for Bimodal.HilbertTM
 

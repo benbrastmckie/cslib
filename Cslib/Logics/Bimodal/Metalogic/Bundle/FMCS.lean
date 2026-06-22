@@ -6,7 +6,10 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Bimodal.Metalogic.Bundle.FMCSDef
+public import Cslib.Init
+public import Mathlib.Data.Finset.Attr
+public import Mathlib.Tactic.Finiteness.Attr
+public import Mathlib.Tactic.SetLike
 
 /-!
 # FMCS: Family of Maximal Consistent Sets (Re-export)

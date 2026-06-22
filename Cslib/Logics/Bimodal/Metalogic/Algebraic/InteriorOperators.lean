@@ -7,7 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Bimodal.Metalogic.Algebraic.BooleanStructure
-public import Cslib.Logics.Bimodal.Metalogic.Core.MCSProperties
 public import Cslib.Logics.Bimodal.Theorems.Perpetuity.Bridge
 
 /-!

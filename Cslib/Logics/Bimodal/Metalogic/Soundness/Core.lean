@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 public import Cslib.Logics.Bimodal.Semantics.Truth
-public import Cslib.Logics.Bimodal.ProofSystem.Derivation
 
 /-!
 # Core Validity Definitions and Swap Infrastructure for Soundness Proofs

@@ -6,8 +6,9 @@ Authors: Maximiliano Onofre Martínez, Yijun Leng
 
 module
 
-public import Cslib.Languages.LambdaCalculus.LocallyNameless.Untyped.FullBetaConfluence
-public import Cslib.Languages.LambdaCalculus.LocallyNameless.Untyped.FullEtaConfluence
+public import Cslib.Foundations.Relation.Confluence
+public import Cslib.Languages.LambdaCalculus.LocallyNameless.Untyped.FullBeta
+public import Cslib.Languages.LambdaCalculus.LocallyNameless.Untyped.FullEta
 
 /-! # βη-Confluence for the λ-calculus
 

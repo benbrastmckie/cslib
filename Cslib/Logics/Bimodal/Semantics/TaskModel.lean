@@ -7,7 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Bimodal.Semantics.TaskFrame
-public import Cslib.Logics.Bimodal.Semantics.WorldHistory
 public import Cslib.Logics.Bimodal.Syntax.Formula
 
 /-!

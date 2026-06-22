@@ -8,16 +8,18 @@ module
 
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.ChronicleConstruction
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.CanonicalModel
-public import Cslib.Logics.Bimodal.Metalogic.Bundle.UntilSinceCoherence
-public import Cslib.Logics.Bimodal.Metalogic.Algebraic.ParametricCompleteness
+public import Cslib.Logics.Bimodal.Metalogic.Bundle.UntilSinceCoherence -- shake: keep
+public import Cslib.Logics.Bimodal.Metalogic.Algebraic.ParametricCompleteness -- shake: keep
 public import Cslib.Logics.Bimodal.Metalogic.Algebraic.RestrictedParametricTruthLemma
 public import Mathlib.Algebra.Order.Ring.Rat
 public import Mathlib.Algebra.Order.Archimedean.Basic
 public import Mathlib.Order.CountableDenseLinearOrder
-public import Mathlib.Order.SuccPred.LinearLocallyFinite
-public import Mathlib.Topology.Instances.Real.Lemmas
-public import Mathlib.Topology.Instances.NNReal.Lemmas
 public import Mathlib.Data.Rat.Cast.Order
+public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.TruthLemma
+public import Mathlib.Algebra.Order.Module.Field
+public import Mathlib.Data.EReal.Operations
+public import Mathlib.Topology.Algebra.InfiniteSum.Order
+public import Mathlib.Topology.MetricSpace.Bounded
 /-!
 # Chronicle-to-Countermodel Integration
 

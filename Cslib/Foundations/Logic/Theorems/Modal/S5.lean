@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Foundations.Logic.Theorems.Modal.Basic
 
 /-! # S5-Level Modal Theorems

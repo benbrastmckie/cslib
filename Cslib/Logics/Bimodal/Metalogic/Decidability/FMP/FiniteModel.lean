@@ -9,7 +9,6 @@ module
 public import Cslib.Logics.Bimodal.Metalogic.Decidability.FMP.Filtration
 public import Mathlib.Data.Fintype.Card
 public import Mathlib.Data.Fintype.Powerset
-public import Mathlib.Data.Set.Finite.Basic
 
 /-!
 # Finiteness Theorem for Filtered Models

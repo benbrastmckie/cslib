@@ -11,7 +11,8 @@ public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.RRelation
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.PointInsertion
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.CounterexampleElimination
 public import Mathlib.Data.Rat.Defs
-public import Mathlib.Data.Rat.Denumerable
+public import Mathlib.Algebra.CharZero.Infinite
+public import Mathlib.Data.Rat.Encodable
 
 /-!
 # Chronicle Construction (Omega-Chain and Claim 2.11)

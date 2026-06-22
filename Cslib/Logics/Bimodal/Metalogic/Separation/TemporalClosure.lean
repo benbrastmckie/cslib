@@ -8,6 +8,7 @@ module
 
 public import Cslib.Logics.Bimodal.Metalogic.Separation.Defs
 public import Cslib.Logics.Bimodal.Metalogic.Separation.Duality
+public import Mathlib.Algebra.Order.ZeroLEOne
 
 /-!
 # Temporal Closure Infrastructure

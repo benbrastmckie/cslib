@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Bimodal.Semantics.TaskFrame
+public import Mathlib.Algebra.Order.Group.Defs
 
 /-!
 # WorldHistory - World Histories for Task Semantics

@@ -7,7 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Bimodal.Syntax.Formula
-public import Mathlib.Algebra.Order.Group.Int
+public import Mathlib.Tactic.ToAdditive
 
 /-!
 # Separation Definitions: Integer Temporal Semantics

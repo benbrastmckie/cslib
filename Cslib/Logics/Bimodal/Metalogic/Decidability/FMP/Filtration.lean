@@ -7,10 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Bimodal.Metalogic.Decidability.FMP.ClosureMCS
-public import Cslib.Logics.Bimodal.Semantics.Validity
-public import Cslib.Logics.Bimodal.Semantics.Truth
-public import Mathlib.Data.Setoid.Basic
-public import Mathlib.Data.Fintype.Quotient
+public import Cslib.Logics.Bimodal.Semantics.TaskFrame
 
 /-!
 # Filtration Construction for FMP

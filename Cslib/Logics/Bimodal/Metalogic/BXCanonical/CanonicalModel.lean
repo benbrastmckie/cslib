@@ -6,14 +6,13 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.CanonicalChain
-public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.TruthLemma
 public import Cslib.Logics.Bimodal.Metalogic.Bundle.FMCSDef
 public import Cslib.Logics.Bimodal.Metalogic.Bundle.BFMCS
 public import Cslib.Logics.Bimodal.Metalogic.Bundle.CanonicalFrame
 public import Cslib.Logics.Bimodal.Metalogic.Bundle.ModalSaturation
 public import Cslib.Logics.Bimodal.Theorems.GeneralizedNecessitation
 public import Mathlib.Logic.Denumerable
+public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Frame
 
 /-!
 # BXCanonical Canonical Model Construction

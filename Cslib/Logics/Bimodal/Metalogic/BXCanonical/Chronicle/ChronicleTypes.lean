@@ -8,11 +8,12 @@ module
 
 public import Cslib.Logics.Bimodal.Metalogic.Core.MaximalConsistent
 public import Cslib.Logics.Bimodal.Metalogic.Core.MCSProperties
-public import Cslib.Logics.Bimodal.Metalogic.Bundle.TemporalContent
-public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Frame
-public import Cslib.Logics.Bimodal.Theorems.GeneralizedNecessitation
-public import Cslib.Logics.Bimodal.Metalogic.Bundle.ModalSaturation
-public import Mathlib.Data.Rat.Defs
+public import Cslib.Logics.Bimodal.Theorems.Propositional.Core
+public import Cslib.Logics.Bimodal.Metalogic.Bundle.TemporalContent -- shake: keep
+public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Frame -- shake: keep
+public import Cslib.Logics.Bimodal.Theorems.GeneralizedNecessitation -- shake: keep
+public import Cslib.Logics.Bimodal.Metalogic.Bundle.ModalSaturation -- shake: keep
+public import Mathlib.Data.Rat.Defs -- shake: keep
 
 /-!
 # Chronicle Types for Burgess 1982 Construction

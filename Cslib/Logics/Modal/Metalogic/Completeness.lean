@@ -7,7 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Modal.Metalogic.MCS
-public import Cslib.Logics.Modal.Metalogic.Soundness
 
 /-! # Completeness for Normal Modal Logics
 

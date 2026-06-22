@@ -7,8 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Frame
-public import Cslib.Logics.Bimodal.Semantics.Truth
-public import Cslib.Logics.Bimodal.Semantics.Validity
 
 /-!
 # BX Truth Lemma

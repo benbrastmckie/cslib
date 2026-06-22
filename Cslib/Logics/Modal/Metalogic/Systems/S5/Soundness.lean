@@ -7,7 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Modal.Metalogic.Soundness
-public import Cslib.Logics.Modal.ProofSystem.Instances
 
 /-! # Soundness Theorem for Modal Logic S5
 

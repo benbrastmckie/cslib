@@ -5,8 +5,10 @@ Authors: Benjamin Brast-McKie
 -/
 
 module
-public import Cslib.Foundations.Logic.Theorems.Temporal.TemporalDerived
-public import Cslib.Foundations.Logic.Theorems.Temporal.FrameConditions
+public import Cslib.Init
+public import Mathlib.Tactic.Bound.Init
+public import Mathlib.Tactic.Finiteness.Attr
+public import Mathlib.Tactic.SetLike
 
 /-! # Temporal Theorems
 

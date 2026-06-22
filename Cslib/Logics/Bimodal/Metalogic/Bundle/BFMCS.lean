@@ -6,10 +6,10 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Bimodal.Metalogic.Bundle.FMCS
 public import Cslib.Logics.Bimodal.Metalogic.Core.MaximalConsistent
 public import Cslib.Logics.Bimodal.Metalogic.Core.MCSProperties
 public import Cslib.Logics.Bimodal.Syntax.Formula
+public import Cslib.Logics.Bimodal.Metalogic.Bundle.FMCSDef
 
 /-!
 # Bundle of Maximal Consistent Sets (BFMCS)

@@ -7,7 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Bimodal.ProofSystem.Derivation
-public import Cslib.Logics.Bimodal.Metalogic.Core.MaximalConsistent
 public import Cslib.Logics.Bimodal.Theorems.Propositional.Connectives
 public import Cslib.Logics.Bimodal.Theorems.Combinators
 public import Cslib.Logics.Bimodal.Theorems.Perpetuity.Bridge

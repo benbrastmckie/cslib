@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.ChronicleToCountermodelBasic
+public import Mathlib.Data.Int.ConditionallyCompleteOrder
 -- WeakCanonical.IntegerModel.GoodStructuresModelSurgery not yet ported (task 36)
 
 /-!

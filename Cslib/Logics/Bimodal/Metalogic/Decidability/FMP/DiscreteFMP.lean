@@ -7,7 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Bimodal.Metalogic.Decidability.FMP.FMP
-public import Mathlib.Order.SuccPred.Basic
 
 /-!
 # Discrete FMP - Finite Model Property for Discrete Time

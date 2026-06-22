@@ -9,7 +9,6 @@ module
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.ChronicleTypes
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.RRelation
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.PointInsertion
-public import Cslib.Logics.Temporal.Metalogic.Chronicle.Frame
 public import Mathlib.Data.Rat.Defs
 public import Mathlib.Algebra.Order.Ring.Rat
 public import Mathlib.Data.Finset.Max

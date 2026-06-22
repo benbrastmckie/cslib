@@ -8,7 +8,6 @@ module
 
 public import Cslib.Logics.Modal.Metalogic.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.S5.Soundness
-public import Cslib.Logics.Modal.ProofSystem.Instances
 
 /-! # Strong Completeness for Modal Logic S5
 

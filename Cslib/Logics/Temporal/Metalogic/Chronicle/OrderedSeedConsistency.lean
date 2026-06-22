@@ -6,8 +6,8 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Temporal.Metalogic.Chronicle.Frame
-public import Cslib.Logics.Temporal.Metalogic.Chronicle.CanonicalChain
+public import Cslib.Logics.Temporal.Metalogic.CompletenessHelpers
+public import Cslib.Logics.Temporal.Metalogic.WitnessSeed
 
 /-!
 # Ordered Seed Consistency

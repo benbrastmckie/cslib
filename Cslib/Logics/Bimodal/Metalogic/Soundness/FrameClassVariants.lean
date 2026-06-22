@@ -8,6 +8,7 @@ module
 public import Cslib.Logics.Bimodal.Metalogic.Soundness.DenseValidity
 public import Mathlib.Order.SuccPred.Basic
 public import Mathlib.Order.SuccPred.Archimedean
+public import Mathlib.Data.Nat.Find
 
 /-!
 # Soundness Lemmas for General and Discrete Frame Classes

@@ -7,7 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Bimodal.Metalogic.Separation.Defs
-public import Cslib.Logics.Bimodal.Metalogic.Separation.Duality
 public import Cslib.Logics.Bimodal.Metalogic.Separation.IntHelpers
 
 /-!

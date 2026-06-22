@@ -7,7 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Temporal.Metalogic.MCS
-public import Cslib.Logics.Temporal.Metalogic.Soundness
 
 /-! # Completeness Helpers for Temporal Logic BX
 

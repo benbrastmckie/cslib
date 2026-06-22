@@ -7,7 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.LTL.Semantics.Satisfies
-public import Cslib.Foundations.Semantics.LTS.OmegaExecution
 
 /-! # LTL Satisfaction over LTS OmegaExecutions
 

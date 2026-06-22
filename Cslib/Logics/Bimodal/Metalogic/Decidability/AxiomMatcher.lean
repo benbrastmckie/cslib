@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Bimodal.Metalogic.Decidability.Tableau
 public import Cslib.Logics.Bimodal.ProofSystem.Derivation
 
 /-!

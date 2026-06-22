@@ -7,7 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Bimodal.Syntax.Formula
-public import Mathlib.Data.Finset.Basic
 public import Mathlib.Data.Finset.Image
 
 /-!

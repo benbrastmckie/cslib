@@ -6,9 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Bimodal.Metalogic.Bundle.TemporalCoherence
-public import Cslib.Logics.Bimodal.Metalogic.Bundle.SuccRelation
-public import Cslib.Logics.Bimodal.Theorems.TemporalDerived
+public import Cslib.Logics.Bimodal.Metalogic.Bundle.BFMCS
 
 /-!
 # Until/Since Coherence: Backward Direction

@@ -6,9 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Bimodal.Metalogic.Bundle.BFMCS
 public import Cslib.Logics.Bimodal.Metalogic.Bundle.CanonicalFrame
-public import Cslib.Logics.Bimodal.Metalogic.Bundle.ModalSaturation
 public import Cslib.Logics.Bimodal.Metalogic.Core.MaximalConsistent
 public import Cslib.Logics.Bimodal.Metalogic.Core.MCSProperties
 public import Cslib.Logics.Bimodal.Metalogic.Core.DeductionTheorem

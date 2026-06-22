@@ -7,8 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Bimodal.Metalogic.Separation.Defs
-public import Cslib.Logics.Bimodal.Metalogic.Separation.Eliminations
-public import Cslib.Logics.Bimodal.Metalogic.Separation.NegationEquiv
+public import Cslib.Logics.Bimodal.Metalogic.Separation.IntHelpers
 
 /-!
 # K+/K- Operators and Q-Lemma for Dedekind-Complete Integer Orders

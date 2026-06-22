@@ -7,8 +7,12 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
-public import Mathlib.Algebra.Order.Group.Defs
-public import Mathlib.Data.Fintype.Basic
+public import Mathlib.Algebra.Order.Group.Unbundled.Basic
+public import Mathlib.Algebra.Order.Monoid.Defs
+public import Mathlib.Data.Finite.Defs
+public import Mathlib.Data.Finset.Attr
+public import Mathlib.Tactic.Attr.Core
+public import Mathlib.Tactic.SetLike
 
 /-!
 # TaskFrame - Task Frame Structure for TM Semantics

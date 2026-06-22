@@ -6,10 +6,8 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 
 public import Cslib.Logics.Propositional.NaturalDeduction.DerivedRules
-public import Cslib.Logics.Propositional.Semantics.Algebra
 public import Mathlib.Order.Heyting.Regular
 
 /-! # Lindenbaum Quotient Algebra

@@ -7,6 +7,7 @@ Authors: Fabrizio Montesi, Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Modal.Basic
+public import Mathlib.Data.Set.Basic
 
 /-! # Denotational semantics for Modal Logic
 

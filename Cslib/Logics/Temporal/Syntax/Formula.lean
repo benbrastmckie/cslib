@@ -8,7 +8,8 @@ module
 
 public import Cslib.Init
 public import Cslib.Foundations.Logic.Connectives
-public import Mathlib.Data.Finset.Basic
+public import Mathlib.Data.Finset.Insert
+public import Mathlib.Data.Finset.Lattice.Basic
 
 /-! # Temporal Logic Formula
 

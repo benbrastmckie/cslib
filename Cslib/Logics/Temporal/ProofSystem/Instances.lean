@@ -5,8 +5,8 @@ Authors: Benjamin Brast-McKie
 -/
 
 module
-public import Cslib.Logics.Temporal.ProofSystem.Derivable
 public import Cslib.Foundations.Logic.ProofSystem
+public import Cslib.Logics.Temporal.ProofSystem.Derivation
 
 /-! # Instance Registration for Temporal.HilbertBX
 

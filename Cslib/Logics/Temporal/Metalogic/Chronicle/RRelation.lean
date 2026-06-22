@@ -7,9 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.ChronicleTypes
-public import Cslib.Logics.Temporal.Metalogic.Chronicle.Frame
-public import Cslib.Logics.Temporal.Metalogic.Chronicle.CanonicalChain
-public import Cslib.Logics.Temporal.Metalogic.Chronicle.OrderedSeedConsistency
 public import Cslib.Logics.Temporal.Metalogic.WitnessSeed
 public import Mathlib.Order.Zorn
 

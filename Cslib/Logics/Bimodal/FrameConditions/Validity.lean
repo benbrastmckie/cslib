@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 public import Cslib.Logics.Bimodal.FrameConditions.FrameClass
 public import Cslib.Logics.Bimodal.Semantics.Validity
+public import Mathlib.Order.SuccPred.LinearLocallyFinite
 
 /-!
 # Parameterized Validity

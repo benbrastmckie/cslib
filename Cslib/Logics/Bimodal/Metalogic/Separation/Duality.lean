@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Bimodal.Metalogic.Separation.Defs
+public import Mathlib.Algebra.Group.Int.Defs
 
 /-!
 # Temporal Duality for Integer Semantics

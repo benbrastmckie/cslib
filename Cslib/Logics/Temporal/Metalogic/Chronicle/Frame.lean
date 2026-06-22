@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Temporal.Metalogic.Chronicle.ChronicleTypes
 public import Cslib.Logics.Temporal.Metalogic.WitnessSeed
 public import Cslib.Logics.Temporal.Metalogic.CompletenessHelpers
 

@@ -6,6 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 public import Cslib.Logics.Bimodal.Metalogic.Soundness.Core
+public import Cslib.Logics.Bimodal.ProofSystem.Derivation
 
 /-!
 # Axiom and Rule Validity for the Dense Frame Class

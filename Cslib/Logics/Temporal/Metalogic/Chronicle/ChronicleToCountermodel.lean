@@ -7,7 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.ChronicleConstruction
-public import Cslib.Logics.Temporal.Semantics.Satisfies
+public import Cslib.Logics.Temporal.Semantics.Model
 
 /-!
 # Chronicle-to-Countermodel Extraction

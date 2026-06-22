@@ -9,7 +9,7 @@ module
 public import Cslib.Init
 public import Lean.Elab.Command
 public import Mathlib.Util.Notation3
-public import Mathlib.Logic.Relation
+public import Mathlib.Logic.Relation -- shake: keep
 public import Batteries.Tactic.Lint.Misc
 
 /-! # Relations: Attributes

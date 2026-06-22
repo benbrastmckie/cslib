@@ -6,8 +6,8 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Temporal.Metalogic.Chronicle.Frame
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.RRelation
+public import Cslib.Logics.Temporal.Metalogic.CompletenessHelpers
 
 /-!
 # Point Insertion Lemmas (Burgess 2.4-2.8)

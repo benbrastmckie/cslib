@@ -6,8 +6,8 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Temporal.Metalogic.MCS
 public import Cslib.Logics.Temporal.Metalogic.PropositionalHelpers
+public import Cslib.Logics.Temporal.Metalogic.DeductionTheorem
 
 /-!
 # Generalized Necessitation for Temporal Logic

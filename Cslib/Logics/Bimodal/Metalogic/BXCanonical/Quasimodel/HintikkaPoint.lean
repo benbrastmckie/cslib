@@ -6,8 +6,8 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Quasimodel.SubformulaClosure
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Frame
+public import Mathlib.Data.Finset.Filter
 
 /-!
 # Hintikka Points

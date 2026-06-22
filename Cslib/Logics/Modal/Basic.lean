@@ -9,10 +9,14 @@ module
 public import Cslib.Init
 public import Cslib.Foundations.Logic.Connectives
 public import Cslib.Foundations.Logic.InferenceSystem
-public import Mathlib.Data.Set.Basic
 public import Mathlib.Order.Defs.Unbundled
-public import Cslib.Foundations.Relation.Euclidean
 public import Mathlib.Logic.Nonempty
+public import Cslib.Foundations.Relation.Defs
+public import Mathlib.Data.Finset.Attr
+public import Mathlib.Tactic.Attr.Core
+public import Mathlib.Tactic.Finiteness.Attr
+public import Mathlib.Tactic.SetLike
+public import Mathlib.Tactic.ToAdditive
 
 /-! # Modal Logic
 

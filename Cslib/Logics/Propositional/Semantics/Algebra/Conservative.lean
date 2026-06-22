@@ -6,9 +6,9 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
-
-public import Cslib.Logics.Propositional.Semantics.Algebra.Completeness
+public import Cslib.Logics.Propositional.Semantics.Algebra
+public import Cslib.Logics.Propositional.NaturalDeduction.Basic
+public import Mathlib.Tactic.ToAdditive
 
 /-! # Bot-Free Analysis and Validity Subsumption
 

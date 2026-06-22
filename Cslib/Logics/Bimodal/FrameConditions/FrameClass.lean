@@ -9,7 +9,7 @@ public import Cslib.Init
 public import Mathlib.Algebra.Order.Group.Defs
 public import Mathlib.Algebra.Order.Group.Int
 public import Mathlib.Data.Int.SuccPred
-public import Mathlib.Order.SuccPred.LinearLocallyFinite
+public import Mathlib.Data.Finset.Attr
 
 /-!
 # Frame Condition Typeclasses

@@ -7,8 +7,8 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Bimodal.Metalogic.Decidability.FMP.TruthPreservation
-public import Cslib.Logics.Bimodal.Semantics.Validity
 public import Cslib.Logics.Bimodal.Theorems.Propositional.Core
+public import Cslib.Logics.Bimodal.Metalogic.Decidability.FMP.FiniteModel
 
 /-!
 # Finite Model Property for TM Bimodal Logic

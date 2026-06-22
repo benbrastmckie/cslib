@@ -7,8 +7,8 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Temporal.Metalogic.DerivationTree
-public import Cslib.Logics.Temporal.Semantics.Validity
 public import Mathlib.Order.Max
+public import Cslib.Logics.Temporal.Semantics.Satisfies
 
 /-! # Soundness Theorem for Temporal Logic BX
 

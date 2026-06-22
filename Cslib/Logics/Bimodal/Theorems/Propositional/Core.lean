@@ -10,7 +10,6 @@ public import Cslib.Logics.Bimodal.ProofSystem.Derivation
 public import Cslib.Logics.Bimodal.ProofSystem.Instances
 public import Cslib.Logics.Bimodal.Syntax.Formula
 public import Cslib.Logics.Bimodal.Theorems.Combinators
-public import Cslib.Logics.Bimodal.Metalogic.Core.DeductionTheorem
 public import Cslib.Foundations.Logic.Theorems.Propositional.Core
 
 /-!

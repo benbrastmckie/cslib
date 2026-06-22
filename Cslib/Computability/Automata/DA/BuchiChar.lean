@@ -6,8 +6,8 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Computability.Automata.DA.BuchiClosure
 public import Cslib.Foundations.Data.OmegaSequence.Flatten
+public import Cslib.Computability.Automata.DA.Basic
 
 /-! # Landweber's theorem and DBA-to-DMA conversion
 

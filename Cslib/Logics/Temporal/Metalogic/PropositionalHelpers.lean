@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Temporal.Metalogic.MCS
 public import Cslib.Logics.Temporal.ProofSystem.Instances
 public import Cslib.Foundations.Logic.Theorems.Propositional.Core
 public import Cslib.Foundations.Logic.Theorems.Propositional.Connectives

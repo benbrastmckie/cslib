@@ -10,7 +10,9 @@ public import Cslib.Logics.Bimodal.Embedding.PropositionalEmbedding
 public import Cslib.Logics.Bimodal.Metalogic.Core.DerivationTree
 public import Cslib.Logics.Bimodal.Metalogic.Soundness.Soundness
 public import Cslib.Logics.Propositional.Metalogic.StrongCompleteness
-public import Mathlib.Algebra.Order.Ring.Int
+public import Mathlib.Algebra.Order.Group.Int
+public import Mathlib.Data.Int.Basic
+public import Mathlib.Tactic.Bound.Init
 
 /-! # Bimodal TM as a Conservative Extension of Classical Propositional Logic
 

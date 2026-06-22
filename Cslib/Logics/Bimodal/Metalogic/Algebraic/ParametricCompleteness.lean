@@ -7,7 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Bimodal.Metalogic.Algebraic.ParametricTruthLemma
-public import Cslib.Logics.Bimodal.Metalogic.Bundle.Construction
 public import Cslib.Logics.Bimodal.Metalogic.Bundle.ModalSaturation
 
 /-!

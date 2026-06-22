@@ -7,7 +7,12 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.LTL.Syntax.Formula
-public import Cslib.Foundations.Data.OmegaSequence.Init
+public import Cslib.Foundations.Data.OmegaSequence.Defs
+public import Mathlib.Data.Finset.Attr
+public import Mathlib.Tactic.Attr.Core
+public import Mathlib.Tactic.Finiteness.Attr
+public import Mathlib.Tactic.SetLike
+public import Mathlib.Tactic.ToAdditive
 
 /-! # LTL Satisfaction over Omega-Words
 

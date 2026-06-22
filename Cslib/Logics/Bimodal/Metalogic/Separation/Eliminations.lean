@@ -8,7 +8,6 @@ module
 
 public import Cslib.Logics.Bimodal.Metalogic.Separation.Defs
 public import Cslib.Logics.Bimodal.Metalogic.Separation.NegationEquiv
-public import Cslib.Logics.Bimodal.Metalogic.Separation.Distributivity
 public import Cslib.Logics.Bimodal.Metalogic.Separation.IntHelpers
 
 /-!

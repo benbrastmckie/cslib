@@ -6,9 +6,9 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 
 public import Cslib.Logics.Propositional.Semantics.Algebra.Lindenbaum
+public import Cslib.Logics.Propositional.Semantics.Algebra
 
 /-! # Algebraic Completeness for Propositional Logic
 

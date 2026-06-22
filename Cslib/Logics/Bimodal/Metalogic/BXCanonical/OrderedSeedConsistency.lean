@@ -6,8 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Frame
-public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.CanonicalChain
+public import Cslib.Logics.Bimodal.Metalogic.Bundle.CanonicalFrame
 
 /-!
 # Ordered Seed Consistency

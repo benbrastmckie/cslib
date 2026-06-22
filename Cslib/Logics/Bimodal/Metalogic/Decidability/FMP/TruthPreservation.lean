@@ -6,9 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Bimodal.Metalogic.Decidability.FMP.FiniteModel
-public import Cslib.Logics.Bimodal.Semantics.Truth
-public import Cslib.Logics.Bimodal.Semantics.Validity
+public import Cslib.Logics.Bimodal.Metalogic.Decidability.FMP.Filtration
 
 /-!
 # Truth Preservation (Filtration Lemma) - Infrastructure

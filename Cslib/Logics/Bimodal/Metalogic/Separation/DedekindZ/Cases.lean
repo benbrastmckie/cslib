@@ -7,6 +7,8 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Bimodal.Metalogic.Separation.DedekindZ.QLemma
+public import Cslib.Logics.Bimodal.Metalogic.Separation.Distributivity
+public import Cslib.Logics.Bimodal.Metalogic.Separation.Eliminations
 
 /-!
 # Cases 5-8 Separability on Z via Replacement and Direct-Formula Construction

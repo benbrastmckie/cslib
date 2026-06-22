@@ -6,8 +6,8 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Bimodal.Metalogic.Algebraic.InteriorOperators
 public import Cslib.Logics.Bimodal.Metalogic.Core.MCSProperties
+public import Cslib.Logics.Bimodal.Metalogic.Algebraic.BooleanStructure
 
 /-!
 # Ultrafilter-MCS Correspondence

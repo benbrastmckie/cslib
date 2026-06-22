@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.ChronicleToCountermodel
+public import Cslib.Logics.Temporal.Semantics.Satisfies
 
 /-!
 # Chronicle Truth Lemma

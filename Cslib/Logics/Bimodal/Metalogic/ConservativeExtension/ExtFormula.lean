@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 public import Cslib.Logics.Bimodal.Syntax.Formula
-public import Mathlib.Data.Finset.Basic
 
 /-!
 # Extended Formula Type for Conservative Extension

@@ -8,6 +8,7 @@ module
 
 public import Cslib.Logics.Bimodal.Metalogic.Core.DeductionTheorem
 public import Cslib.Logics.Bimodal.Metalogic.Core.MaximalConsistent
+public import Cslib.Logics.Bimodal.Theorems.Perpetuity.Helpers
 
 /-!
 # MCS Properties for Canonical Model Construction

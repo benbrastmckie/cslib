@@ -7,7 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Temporal.Syntax.Formula
-import Mathlib.Data.List.Basic
 
 /-!
 # Subformula Definitions for Temporal Logic

@@ -6,9 +6,10 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Bimodal.Metalogic.Algebraic.UltrafilterMCS
 public import Cslib.Logics.Bimodal.Metalogic.Bundle.CanonicalFrame
+public import Cslib.Logics.Bimodal.Metalogic.Algebraic.UltrafilterMCS -- shake: keep
 public import Cslib.Logics.Bimodal.Semantics.TaskFrame
+public import Mathlib.Algebra.Order.Group.Defs
 
 /-!
 # D-Parametric Canonical TaskFrame

@@ -1,6 +1,16 @@
 {
-  "next_project_number": 266,
+  "next_project_number": 267,
   "active_projects": [
+    {
+      "project_number": 266,
+      "project_name": "research_propositional_and_foundations_improvements",
+      "status": "not_started",
+      "task_type": "formal",
+      "description": "Research the Propositional/ logic and Foundations/ in this repo, the supporting roles these play, and what else remains to be done to improve these elements of this library. Compare with /home/benjamin/Projects/BimodalLogic/specs/305_rabinovich_ea_formula_implementation/reports/16_witness-count-restructure.md and the tableau system included there, in addition to researching what other additions make sense to include such as a sequent calculus",
+      "topic": "Propositional Logic",
+      "created": "2026-06-22T18:25:59Z",
+      "last_updated": "2026-06-22T18:25:59Z"
+    },
     {
       "project_number": 241,
       "project_name": "mcnaughton_theorem",
@@ -198,7 +208,7 @@
       "status": "not_started",
       "task_type": "cslib",
       "description": "Run lake shake --add-public --keep-implied --keep-prefix and apply its recommendations across 107 files. Focus on the Temporal Metalogic Chronicle cluster (5 files) first, then work outward. Ensure lake build passes after each batch of changes.",
-      "topic": "Temporal Logic",
+      "topic": "Propositional Logic",
       "created": "2026-06-19T05:20:19Z",
       "last_updated": "2026-06-22T18:25:35Z"
     },

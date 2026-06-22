@@ -1,5 +1,5 @@
 ---
-next_project_number: 266
+next_project_number: 267
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 266
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,263,264,265 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 1 | 36,37,180,226,241,245,252,263,264,265,266 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -32,7 +32,9 @@ next_project_number: 266
 ### Propositional Logic
 
 226 [RESEARCHED] — Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648
+263 [NOT STARTED] — Run lake shake --add-public --keep-implied --keep-prefix and appl
 265 [NOT STARTED] — Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Co
+266 [NOT STARTED] — Research the Propositional/ logic and Foundations/ in this repo, 
 
 ### Temporal Logic
 
@@ -40,12 +42,21 @@ next_project_number: 266
 241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
-263 [NOT STARTED] — Run lake shake --add-public --keep-implied --keep-prefix and appl
 264 [NOT STARTED] — Review and commit the 15 uncommitted files: Cslib/Foundations/Rel
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 266. Research propositional and foundations improvements
+- **Status**: [NOT STARTED]
+- **Task Type**: formal
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Research the Propositional/ logic and Foundations/ in this repo, the supporting roles these play, and what else remains to be done to improve these elements of this library. Compare with /home/benjamin/Projects/BimodalLogic/specs/305_rabinovich_ea_formula_implementation/reports/16_witness-count-restructure.md and the tableau system included there, in addition to researching what other additions make sense to include such as a sequent calculus
+
+---
 
 ### 265. Track conservative lean sorry
 - **Status**: [NOT STARTED]
@@ -70,7 +81,7 @@ next_project_number: 266
 ### 263. Lake shake import cleanup
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
-- **Topic**: Temporal Logic
+- **Topic**: Propositional Logic
 - **Dependencies**: None
 
 **Description**: Run lake shake --add-public --keep-implied --keep-prefix and apply its recommendations across 107 files. Focus on the Temporal Metalogic Chronicle cluster (5 files) first, then work outward. Ensure lake build passes after each batch of changes.

@@ -1,17 +1,17 @@
 ---
-next_project_number: 261
+next_project_number: 262
 ---
 
 # TODO
 
 ## Task Order
 
-*Updated 2026-06-21. Generated from state.json dependency graph.*
+*Updated 2026-06-22. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,251,252,255,256,259 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 1 | 36,37,180,226,241,245,251,252,255,256,259,261 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 2 | 39,40,181,215,257,260 | 36,37,180,255,256 | Bimodal Porting, Temporal Logic |
 | 3 | 41,258 | 39,40,257 | Foundations, Temporal Logic |
 
@@ -32,6 +32,7 @@ next_project_number: 261
 ### Propositional Logic
 
 226 [RESEARCHED] — Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648
+261 [NOT STARTED] — Review Zulip thread on propositional logic setup in CSLib, study 
 
 ### Temporal Logic
 
@@ -50,6 +51,16 @@ next_project_number: 261
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 261. Review propositional logic zulip thread
+- **Status**: [NOT STARTED]
+- **Task Type**: general
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Review Zulip thread on propositional logic setup in CSLib, study all desiderata and conflicts, and craft a balanced response that satisfies all parties
+
+---
 
 ### 260. Add ltl temporal convention contrast docs
 - **Status**: [IMPLEMENTED]

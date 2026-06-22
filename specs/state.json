@@ -1,6 +1,16 @@
 {
-  "next_project_number": 261,
+  "next_project_number": 262,
   "active_projects": [
+    {
+      "project_number": 261,
+      "project_name": "review_propositional_logic_zulip_thread",
+      "status": "not_started",
+      "task_type": "general",
+      "topic": "Propositional Logic",
+      "description": "Review Zulip thread on propositional logic setup in CSLib, study all desiderata and conflicts, and craft a balanced response that satisfies all parties",
+      "created": "2026-06-22T06:34:05Z",
+      "last_updated": "2026-06-22T06:34:05Z"
+    },
     {
       "project_number": 255,
       "project_name": "fix_stale_ltl_docstrings_post_task254",

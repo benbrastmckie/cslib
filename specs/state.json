@@ -4,12 +4,12 @@
     {
       "project_number": 266,
       "project_name": "research_propositional_and_foundations_improvements",
-      "status": "planned",
+      "status": "abandoned",
       "task_type": "formal",
       "description": "Research the Propositional/ logic and Foundations/ in this repo, the supporting roles these play, and what else remains to be done to improve these elements of this library. Compare with /home/benjamin/Projects/BimodalLogic/specs/305_rabinovich_ea_formula_implementation/reports/16_witness-count-restructure.md and the tableau system included there, in addition to researching what other additions make sense to include such as a sequent calculus",
       "topic": "Propositional Logic",
       "created": "2026-06-22T18:25:59Z",
-      "last_updated": "2026-06-22T18:51:16Z",
+      "last_updated": "2026-06-22T18:57:15Z",
       "session_id": "sess_1782153956_2603d8",
       "researched": "2026-06-22T18:36:32Z",
       "next_artifact_number": 2,
@@ -24,7 +24,8 @@
           "type": "plan",
           "summary": "6-phase implementation plan covering algebraic-Hilbert bridge, ND capture-avoidance fix, ProofSystem documentation and instances, abstract completeness extraction, and test coverage"
         }
-      ]
+      ],
+      "abandoned_reason": "Created erroneously by task-265 agent during orchestration. Not a requested task."
     },
     {
       "project_number": 241,
@@ -220,13 +221,14 @@
     {
       "project_number": 263,
       "project_name": "lake_shake_import_cleanup",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Run lake shake --add-public --keep-implied --keep-prefix and apply its recommendations across 107 files. Focus on the Temporal Metalogic Chronicle cluster (5 files) first, then work outward. Ensure lake build passes after each batch of changes.",
       "topic": "Propositional Logic",
       "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-22T18:29:43Z",
-      "session_id": "sess_1782152871_5ff682"
+      "last_updated": "2026-06-22T18:57:15Z",
+      "session_id": "sess_1782152871_5ff682",
+      "completion_summary": "Applied lake shake recommendations across 107 files: 159 imports removed, 121 added. 7 imports restored with shake:keep annotations for macro/open dependencies. All CI passes, 0 remaining shake recommendations."
     },
     {
       "project_number": 264,
@@ -243,13 +245,14 @@
     {
       "project_number": 265,
       "project_name": "track_conservative_lean_sorry",
-      "status": "researching",
+      "status": "blocked",
       "task_type": "cslib",
       "description": "Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Conservative.lean:99 (ipl_conservative_over_mpl). This is the only untracked sorry in the codebase — the theorem states that intuitionistic propositional logic is a conservative extension of minimal propositional logic. Research the proof strategy (likely via Kripke model or algebraic argument) and implement.",
       "topic": "Propositional Logic",
       "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-22T18:29:44Z",
-      "session_id": "sess_1782152871_5ff682"
+      "last_updated": "2026-06-22T18:55:44Z",
+      "session_id": "sess_1782152871_5ff682",
+      "blockers": "Proof requires embedding GHA into HA (Dedekind-MacNeille completion or WithBot HA instance). Neither exists in Mathlib."
     }
   ],
   "repository_health": {

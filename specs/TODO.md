@@ -11,7 +11,7 @@ next_project_number: 267
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,263,265,266 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 1 | 36,37,180,226,241,245,252,265 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -32,9 +32,7 @@ next_project_number: 267
 ### Propositional Logic
 
 226 [RESEARCHED] — Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648
-263 [IMPLEMENTING] — Run lake shake --add-public --keep-implied --keep-prefix and appl
-265 [RESEARCHING] — Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Co
-266 [PLANNED] — Research the Propositional/ logic and Foundations/ in this repo, 
+265 [BLOCKED] — Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Co
 
 ### Temporal Logic
 
@@ -48,7 +46,7 @@ next_project_number: 267
 ## Tasks
 
 ### 266. Research propositional and foundations improvements
-- **Status**: [PLANNED]
+- **Status**: [ABANDONED]
 - **Task Type**: formal
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -60,7 +58,7 @@ next_project_number: 267
 ---
 
 ### 265. Track conservative lean sorry
-- **Status**: [RESEARCHING]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -80,7 +78,7 @@ next_project_number: 267
 ---
 
 ### 263. Lake shake import cleanup
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

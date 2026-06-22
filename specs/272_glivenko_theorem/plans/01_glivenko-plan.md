@@ -1,7 +1,7 @@
 # Implementation Plan: Glivenko's Theorem
 
 - **Task**: 272 - glivenko_theorem
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 1 hour
 - **Dependencies**: None (all required infrastructure exists in CSLib and Mathlib)
 - **Research Inputs**: specs/272_glivenko_theorem/reports/01_glivenko-proof.md
@@ -71,7 +71,7 @@ No ROADMAP.md found.
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Implement Glivenko.lean and Register Import [NOT STARTED]
+### Phase 1: Implement Glivenko.lean and Register Import [COMPLETED]
 
 **Goal**: Create the Glivenko.lean file with all 6 declarations, register the barrel import,
 and verify CI compliance.

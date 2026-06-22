@@ -54,7 +54,7 @@ next_project_number: 262
 
 ### 261. Review propositional logic zulip thread
 - **Status**: [NOT STARTED]
-- **Task Type**: general
+- **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 

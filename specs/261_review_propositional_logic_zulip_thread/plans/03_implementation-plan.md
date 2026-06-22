@@ -12,7 +12,7 @@
 
 ## Overview
 
-This task produces a comprehensive Zulip response to the propositional logic thread (CSLib > Propositional Logic, MSG 602336739--605341190) and fills documentation gaps in the codebase. Two rounds of research identified that the codebase already resolves all substantive technical disputes (bridge lemmas exist, theory parameter handles MPL/IPL/CPL, AlgEvaluate with bot_val is implemented). The remaining work is: (1) restore Thomas's deleted docstring framing in `NaturalDeduction/Basic.lean` and enhance with explicit design rationale, (2) add classically-scoped warnings to `FromPropositional.lean`, and (3) craft the Zulip response including an apology for the premature docstring rewrite. Done when the response file is written and all documentation edits compile.
+This task produces a comprehensive Zulip response to the propositional logic thread (CSLib > Propositional Logic, MSG 602336739--605341190) and fills documentation gaps in the codebase. Two rounds of research identified that the codebase already resolves all substantive technical disputes (bridge lemmas exist, theory parameter handles MPL/IPL/CPL, AlgEvaluate with bot_val is implemented). The remaining work is: (1) rewrite the `NaturalDeduction/Basic.lean` docstring with a neutral framing that states the efq trade-off factually and restores Thomas's references, (2) add classically-scoped warnings to `FromPropositional.lean`, and (3) craft the Zulip response acknowledging the docstring rewrite and the neutral replacement. Done when the response file is written and all documentation edits compile.
 
 ### Research Integration
 
@@ -31,7 +31,7 @@ This task does not directly advance any ROADMAP.md remaining items. It supports 
 ## Goals & Non-Goals
 
 **Goals**:
-- Restore Thomas's original "ongoing discussion" docstring framing in `NaturalDeduction/Basic.lean` (deleted in commit `7cc09612`), and enhance with explicit design rationale for the efq-as-derived-rule choice
+- Rewrite `NaturalDeduction/Basic.lean` docstring with a neutral framing: state the efq trade-off factually, restore Thomas's references, link to the Zulip thread — without characterizing the design as settled or ongoing
 - Add classically-scoped limitation warning to `FromPropositional.lean` module-level documentation
 - Write a Zulip response that addresses each participant's concerns, follows a natural narrative arc, and invites continued collaboration
 - Acknowledge Thomas's contributions (GHA idea, `v models T` pattern, original ND system) explicitly
@@ -64,15 +64,14 @@ Phases within the same wave can execute in parallel.
 
 ### Phase 1: Restore Thomas's Docstring and Enhance ND Documentation [NOT STARTED]
 
-**Goal**: Restore the "ongoing discussion" framing and design-choice acknowledgment from Thomas's original docstring (deleted in commit `7cc09612`), then enhance with explicit design rationale.
+**Goal**: Replace the current docstring with a neutral framing that states the efq trade-off factually without taking sides, restores Thomas's references, and links to the Zulip thread.
 
 **Investigation Result** (completed pre-plan): Thomas's original docstring from PR #91 contained a paragraph explaining that the efq-as-axiom design "differs from many on-paper presentations" and framed the choice as **ongoing discussion**, with a link to the Zulip thread. Commit `7cc09612` (Jun 16, "five-primitive formula type with primitive bot") replaced this with the current text that presents the design as settled, removing the discussion framing, the Zulip link, and Thomas's original references (Prawitz prose citation, Sorensen & Urzyczyn).
 
 **Tasks**:
-- [ ] Read current docstring in `NaturalDeduction/Basic.lean` and Thomas's original version from `git show 7cc09612~1:Cslib/Logics/Propositional/NaturalDeduction/Basic.lean`
-- [ ] Restore the key content from Thomas's original docstring: (a) acknowledgment that the design differs from standard on-paper ND presentations, (b) explanation that efq is modeled as a theory axiom rather than a deduction rule, (c) link to the Zulip discussion thread
-- [ ] Restore Thomas's original reference citations (Prawitz, Sorensen & Urzyczyn) alongside the current BibKey references
-- [ ] Add a "Design Decisions" subsection explaining: (a) why efq is theory-dependent rather than a primitive rule, (b) that this breaks the constructor-rule correspondence (acknowledging Thomas's ND symmetry point as a genuine trade-off), (c) that this is a deliberate choice enabling MPL-first design via the theory parameter
+- [ ] Read current docstring in `NaturalDeduction/Basic.lean`
+- [ ] Replace the "Implementation notes" section with a neutral framing that: (a) states that efq is not among the 10 primitive rules and enters as a theory axiom via `[IsIntuitionistic T]`, (b) notes factually that this differs from standard on-paper ND presentations which include bottom elimination as a primitive rule, (c) names the trade-off: treating logic strength as a parameter keeps substitution closure uniform but breaks the constructor-rule correspondence characteristic of Gentzen-style ND, (d) links to the Zulip Propositional Logic thread for further context on the trade-off — without characterizing the discussion as "ongoing" or "settled"
+- [ ] Restore Thomas's reference citations (Prawitz, Sorensen & Urzyczyn) alongside the current BibKey references
 - [ ] Run `lake build Cslib.Logics.Propositional.NaturalDeduction.Basic` to verify
 
 **Timing**: 40 minutes
@@ -83,9 +82,10 @@ Phases within the same wave can execute in parallel.
 - `Cslib/Logics/Propositional/NaturalDeduction/Basic.lean` -- restore + enhance docstring
 
 **Verification**:
-- Docstring restores Thomas's "differs from standard presentations" framing
-- Docstring includes link to the Zulip Propositional Logic discussion
-- Docstring includes explicit design rationale for efq-as-axiom trade-off
+- Docstring states the efq design choice and trade-off factually without taking sides
+- Docstring notes it differs from standard on-paper ND presentations
+- Docstring includes link to the Zulip Propositional Logic thread
+- Docstring includes Thomas's references (Prawitz, Sorensen & Urzyczyn) alongside current BibKeys
 - `lake build` passes for the module
 
 ---
@@ -128,7 +128,7 @@ Phases within the same wave can execute in parallel.
   5. Parametric completeness: Thomas's `v models T` pattern adopted as `AlgTValid` (credit Thomas)
   6. Prop vs. Bool: resolved by dual evaluator + bridge lemmas (all exist)
   7. Thomas's IProposition compromise: thank for proof-of-concept, explain why dual types are impractical for multi-logic architecture
-  8. Answer Thomas's docstring question: acknowledge the deletion was premature, explain that the "ongoing discussion" framing and his references have been restored
+  8. Answer Thomas's docstring question: acknowledge the rewrite was hasty, explain the new neutral framing that states the trade-off factually and restores his references
   9. PR strategy: offer to split PR #648 for easier review
   10. Closing: credit Thomas's contributions, invite continued collaboration
 - [ ] Review tone for balance: firm on technical decisions, gracious on contributions, honest about trade-offs

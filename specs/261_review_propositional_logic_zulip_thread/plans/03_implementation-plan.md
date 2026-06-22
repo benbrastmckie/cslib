@@ -4,7 +4,7 @@
 - **Status**: [NOT STARTED]
 - **Effort**: 2.5 hours
 - **Dependencies**: None
-- **Research Inputs**: reports/01_team-research.md, reports/02_nd-vs-hilbert-analysis.md
+- **Research Inputs**: reports/01_team-research.md, reports/02_nd-vs-hilbert-analysis.md, reports/03_typeclass-split-analysis.md
 - **Artifacts**: plans/03_implementation-plan.md (this file)
 - **Standards**: plan-format.md, status-markers.md, artifact-management.md, tasks.md
 - **Type**: cslib
@@ -19,6 +19,8 @@ This task produces a comprehensive Zulip response to the propositional logic thr
 Round 1 (01_team-research.md) mapped all 23 thread messages, identified 4 participants and 3 design disputes, and found that all disputes are resolved in code. Key finding: the research flagged a missing `Evaluate`-to-`AlgEvaluate` bridge lemma, but codebase examination reveals this already exists as `propEvaluateEq` in `Semantics/Algebra/Bridge.lean`, along with `boolEvaluateEq`. The gaps that remain are documentation-only.
 
 Round 2 (02_nd-vs-hilbert-analysis.md) retrieved Thomas's full final message (MSG 605341190, not truncated), performed deep ND-vs-Hilbert paradigm analysis, assessed Thomas's `IProposition`/`IDerivation` compromise proposal, and confirmed via adversarial verification that CSLib's design is defensible while acknowledging Thomas's ND symmetry point is a genuine trade-off.
+
+Round 3 (03_typeclass-split-analysis.md) investigated whether a typeclass split can avoid the hybrid ND. Conclusion: **no** — Lean 4's inductive type system does not support conditionally-available constructors. Three approaches were analyzed (split at formula level, split at Derivation level, typeclass on connectives); all either collapse back to the current design or require Thomas's full dual-type duplication. The hybrid reflects a genuine logical asymmetry (`⊥` has no introduction rule). The duplication cost of the dual-type approach compounds across the entire downstream API (monad, substitution, evaluation, bridge lemmas, FromPropositional embeddings). Matthew Doty (MSG 605712144) endorses class-based approaches but flags conservative extension proof difficulty.
 
 ### Prior Plan Reference
 
@@ -37,7 +39,7 @@ This task does not directly advance any ROADMAP.md remaining items. It supports 
 - Acknowledge Thomas's contributions (GHA idea, `v models T` pattern, original ND system) explicitly
 
 **Non-Goals**:
-- Implementing Thomas's `IProposition`/`IDerivation` compromise (decided against per research)
+- Implementing Thomas's `IProposition`/`IDerivation` compromise (decided against per round 3 analysis — duplication cost prohibitive for multi-logic architecture)
 - Writing new bridge lemmas (already exist in `Semantics/Algebra/Bridge.lean`)
 - Changing the `bot`-as-primitive-constructor design (architecturally settled)
 - Adding sequent calculus formalization
@@ -70,7 +72,7 @@ Phases within the same wave can execute in parallel.
 
 **Tasks**:
 - [ ] Read current docstring in `NaturalDeduction/Basic.lean`
-- [ ] Replace the "Implementation notes" section with a neutral framing that: (a) states that efq is not among the 10 primitive rules and enters as a theory axiom via `[IsIntuitionistic T]`, (b) notes factually that this differs from standard on-paper ND presentations which include bottom elimination as a primitive rule, (c) names the trade-off: treating logic strength as a parameter keeps substitution closure uniform but breaks the constructor-rule correspondence characteristic of Gentzen-style ND, (d) links to the Zulip Propositional Logic thread for further context on the trade-off — without characterizing the discussion as "ongoing" or "settled"
+- [ ] Replace the "Implementation notes" section with a neutral framing that: (a) states that efq is not among the 10 primitive rules and enters as a theory axiom via `[IsIntuitionistic T]`, (b) notes factually that this differs from standard on-paper ND presentations which include bottom elimination as a primitive rule, (c) names the specific trade-off: API uniformity and zero duplication across the multi-logic hierarchy (Modal, Temporal, Bimodal) vs. constructor-rule correspondence characteristic of Gentzen-style ND, (d) notes that `⊥` is genuinely asymmetric — it has no introduction rule in any proof system, so the "broken symmetry" reflects logical reality, (e) links to the Zulip Propositional Logic thread for further context — without characterizing the discussion as "ongoing" or "settled"
 - [ ] Restore Thomas's reference citations (Prawitz, Sorensen & Urzyczyn) alongside the current BibKey references
 - [ ] Run `lake build Cslib.Logics.Propositional.NaturalDeduction.Basic` to verify
 
@@ -127,7 +129,7 @@ Phases within the same wave can execute in parallel.
   4. bot_val reframing: Johansson designated constant, not a patch
   5. Parametric completeness: Thomas's `v models T` pattern adopted as `AlgTValid` (credit Thomas)
   6. Prop vs. Bool: resolved by dual evaluator + bridge lemmas (all exist)
-  7. Thomas's IProposition compromise: thank for proof-of-concept, explain why dual types are impractical for multi-logic architecture
+  7. Thomas's IProposition compromise and the typeclass question: thank for proof-of-concept, explain the duplication cost table (monad, substitution, evaluation, bridge lemmas, FromPropositional all doubled), note that typeclass splits were investigated and cannot avoid duplication due to Lean 4 inductive constraints, acknowledge Matthew's conservative extension concern (MSG 605712144), explain that `⊥`'s asymmetry (no intro rule) means the hybrid reflects logical reality
   8. Answer Thomas's docstring question: acknowledge the rewrite was hasty, explain the new neutral framing that states the trade-off factually and restores his references
   9. PR strategy: offer to split PR #648 for easier review
   10. Closing: credit Thomas's contributions, invite continued collaboration

@@ -32,7 +32,7 @@ next_project_number: 263
 ### Propositional Logic
 
 226 [RESEARCHED] — Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648
-262 [NOT STARTED] — Implement Kripke-algebraic bridge: prove that upsets of a Kripke 
+262 [IMPLEMENTED] — Implement Kripke-algebraic bridge: prove that upsets of a Kripke 
 
 ### Temporal Logic
 
@@ -53,10 +53,12 @@ next_project_number: 263
 ## Tasks
 
 ### 262. Kripke algebraic bridge
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Plan**: [262_kripke_algebraic_bridge/plans/01_kripke-algebraic-bridge.md]
+- **Summary**: [262_kripke_algebraic_bridge/summaries/01_kripke-algebraic-bridge-summary.md]
 
 **Description**: Implement Kripke-algebraic bridge: prove that upsets of a Kripke frame's preorder form a Heyting algebra, and connect IForces to AlgEvaluate via this construction. This establishes the well-known duality between Kripke semantics and algebraic semantics for intuitionistic propositional logic
 

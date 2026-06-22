@@ -11,9 +11,9 @@ next_project_number: 263
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,251,252,255,256,259 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
-| 2 | 39,40,181,215,257,260 | 36,37,180,255,256 | Bimodal Porting, Temporal Logic |
-| 3 | 41,258 | 39,40,257 | Foundations, Temporal Logic |
+| 1 | 36,37,180,226,241,245,252 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
+| 3 | 41 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -38,21 +38,14 @@ next_project_number: 263
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
-251 [IMPLEMENTED] — Implement the synchronous product construction of an LTS (using e
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
-255 [IMPLEMENTED] — Fix stale docstrings and comments left over from the task-254 LTL
-  └─ 260 [IMPLEMENTED] — Add module-level documentation contrasting the LTL and Temporal c
-256 [IMPLEMENTED] — Add @[simp] unfold lemmas for LTL.Satisfies to match the pattern 
-  └─ 257 [IMPLEMENTED] — Fix style issues in GNBA.lean: (1) Break 7 lines exceeding 100 ch
-    └─ 258 [IMPLEMENTED] — Refactor duplicated proof patterns in GNBA.lean. Currently subfor
-259 [IMPLEMENTED] — Narrow file-wide linter suppressions in Temporal/Metalogic/ to de
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
 
 ### 260. Add ltl temporal convention contrast docs
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 255
@@ -63,7 +56,7 @@ next_project_number: 263
 ---
 
 ### 259. Narrow temporal metalogic linter suppressions
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -73,7 +66,7 @@ next_project_number: 263
 ---
 
 ### 258. Refactor gnba duplicated subformula proofs
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 257
@@ -83,7 +76,7 @@ next_project_number: 263
 ---
 
 ### 257. Fix gnba long lines and style
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 256
@@ -94,7 +87,7 @@ next_project_number: 263
 ---
 
 ### 256. Add ltl satisfies simp lemmas
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -104,7 +97,7 @@ next_project_number: 263
 ---
 
 ### 255. Fix stale ltl docstrings post task254
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -125,7 +118,7 @@ next_project_number: 263
 ---
 
 ### 251. Product construction model checking
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 248

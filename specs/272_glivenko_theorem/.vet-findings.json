@@ -1,0 +1,60 @@
+{
+  "tasks_vetted": [272, 273, 274, 276],
+  "files_analyzed": 21,
+  "ci_passed": false,
+  "ci_notes": "Full 'lake build' fails due to TemporalConservativity.lean (task 275, PARTIAL, not vetted). All 21 vetted files build successfully in isolation. Full CI failure is pre-existing and unrelated to tasks 272/273/274/276.",
+  "ci_results": {
+    "lake_build_scoped": "PASS (all 21 vetted files build individually)",
+    "lake_build_full": "FAIL (TemporalConservativity.lean from task 275 causes error; unrelated to vetted tasks)",
+    "lake_exe_checkInitImports": "UNABLE TO RUN (requires Cslib.olean which cannot build due to task 275 failure; transitive import analysis confirmed all vetted files inherit Cslib.Init via their dependency chains)",
+    "lake_lint": "PASS (no warnings or errors in any of the 21 vetted files)",
+    "lake_exe_lint_style": "PASS (exit 0, no style violations in any vetted file)",
+    "lake_shake": "PASS (no shake warnings for any vetted file; only TemporalConservativity error is unrelated)",
+    "lake_test": "FAIL (same root cause as lake build: TemporalConservativity.lean from task 275)"
+  },
+  "violations": [
+    {
+      "task": 272,
+      "file": "Cslib/Logics/Propositional/Semantics/Algebra/Glivenko.lean",
+      "line": 28,
+      "severity": "Medium",
+      "category": "documentation",
+      "standard": "CONTRIBUTING.md",
+      "description": "Citation key [Glivenko1929] appears in the ## References docstring section but is not present in references.bib. The key [Rasiowa1974] on line 29 IS in references.bib. CSLib follows Mathlib citation conventions and bibliography keys must exist in references.bib.",
+      "suggestion": "Add a @article{Glivenko1929, ...} entry to references.bib for Glivenko's 1929 paper 'Sur quelques points de la Logique de M. Brouwer' in Bulletin de l'Academie des Sciences de Belgique."
+    }
+  ],
+  "categories": [
+    {
+      "name": "Missing Bibliography Entry",
+      "severity": "Medium",
+      "count": 1,
+      "description": "Citation key [Glivenko1929] used in Glivenko.lean docstring is absent from references.bib. All other citation keys ([Rasiowa1974], [Blackburn2001]) are present and correctly formatted."
+    }
+  ],
+  "suggested_fix_tasks": [
+    {
+      "title": "Add Glivenko1929 entry to references.bib",
+      "slug": "add_glivenko1929_bibentry",
+      "description": "The file Cslib/Logics/Propositional/Semantics/Algebra/Glivenko.lean cites [Glivenko1929] in its ## References section, but this key does not exist in references.bib. Add a @article{Glivenko1929, ...} entry for: V. I. Glivenko, 'Sur quelques points de la Logique de M. Brouwer', Bulletin de l'Academie royale des Sciences, des Lettres et des Beaux-Arts de Belgique, 15:183-188, 1929. This ensures the citation is resolvable and follows CSLib/Mathlib bibliography conventions.",
+      "severity": "Medium",
+      "violation_count": 1,
+      "categories": ["documentation", "bibliography"]
+    }
+  ],
+  "clean_checks": {
+    "docstrings": "PASS — all public declarations in all 21 files have /-- ... -/ docstrings",
+    "defLemma": "PASS — no Prop-valued declarations use 'def' instead of 'lemma' or 'theorem'",
+    "defsWithUnderscore": "PASS — underscore names (glivenko_algebraic, KAxiom_implies_TAxiom, etc.) follow established CSLib convention; lake lint generates no defsWithUnderscore warnings",
+    "simpNF": "PASS — no @[simp] attributes in vetted files",
+    "unusedSectionVars": "PASS — no unused section variables flagged",
+    "topNamespace": "PASS — anonymous instances are inside explicit namespace Cslib.Logic.PL",
+    "dupNamespace": "PASS — no namespace prefix repetition",
+    "notation": "PASS — no notation declarations; existing typeclasses used",
+    "organisation": "PASS — files placed in correct directories per ORGANISATION.md hierarchy; namespace Cslib.Logic.Modal, Cslib.Logic.PL, Cslib.Logic are consistent with directory structure",
+    "init_import": "PASS (transitive) — all vetted files transitively import Cslib.Init via Modal.Basic, Propositional.Defs, or Bimodal.Syntax.Formula upstream dependencies",
+    "barrel_import": "PASS — all 21 new files are listed in Cslib.lean",
+    "code_of_conduct": "PASS — no problematic language in comments or docstrings",
+    "references_bib": "PARTIAL — [Rasiowa1974] and [Blackburn2001] present; [Glivenko1929] absent"
+  }
+}

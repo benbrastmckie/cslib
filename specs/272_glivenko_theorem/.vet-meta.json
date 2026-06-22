@@ -1,0 +1,27 @@
+{
+  "status": "completed",
+  "violations_found": 1,
+  "files_analyzed": 21,
+  "ci_passed": false,
+  "ci_notes": "CI failures are caused exclusively by TemporalConservativity.lean (task 275, PARTIAL, not vetted here). All 21 vetted files build cleanly in isolation.",
+  "summary": "Vetted 4 tasks (272, 273, 274, 276) across 21 files. Found 1 Medium violation: missing [Glivenko1929] bibliography entry in references.bib. All lint checks pass; CI failure is pre-existing from unrelated task 275.",
+  "findings_path": "/home/benjamin/Projects/cslib/specs/272_glivenko_theorem/.vet-findings.json",
+  "metadata": {
+    "session_id": "sess_1782165070_94a60e",
+    "agent_type": "cslib-vet-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "vet", "skill-cslib-vet"],
+    "tasks_vetted": [272, 273, 274, 276],
+    "verification": {
+      "ci_pipeline_passed": false,
+      "ci_pipeline_notes": "Failure in TemporalConservativity.lean (task 275, not vetted) blocks lake build, lake test, lake exe checkInitImports. Vetted files pass all individual checks.",
+      "lake_build_scoped": "PASS",
+      "lake_build_full": "FAIL (task 275)",
+      "lake_exe_checkInitImports": "UNABLE (blocked by task 275 build failure; transitive imports verified manually)",
+      "lake_lint": "PASS",
+      "lake_exe_lint_style": "PASS",
+      "lake_shake": "PASS",
+      "lake_test": "FAIL (task 275)"
+    }
+  }
+}

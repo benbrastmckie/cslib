@@ -1,6 +1,16 @@
 {
-  "next_project_number": 277,
+  "next_project_number": 278,
   "active_projects": [
+    {
+      "project_number": 277,
+      "project_name": "fix_ci_workflow_failures",
+      "status": "not_started",
+      "task_type": "general",
+      "description": "Fix recurring CI workflow failures in GitHub Actions (runs 27986662089, 27984755605, 27983889592)",
+      "topic": "Project Management",
+      "created": "2026-06-22T22:13:41Z",
+      "last_updated": "2026-06-22T22:13:41Z"
+    },
     {
       "project_number": 276,
       "project_name": "modal_cube_inter_system_conservativity",

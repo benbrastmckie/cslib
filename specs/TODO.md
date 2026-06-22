@@ -1,5 +1,5 @@
 ---
-next_project_number: 277
+next_project_number: 278
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 277
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,266,268,275 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,252,266,268,275,277 | -- | Bimodal Porting, Foundations, Project Management, ... |
 | 2 | 39,40,181,215,269 | 36,37,180,268 | Bimodal Porting, Foundations, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -30,6 +30,10 @@ next_project_number: 277
 268 [NOT STARTED] — Add @[simp, scoped grind =] normalization tags to Hilbert system 
   └─ 269 [NOT STARTED] — Build generic bounded proof-search tactic for InferenceSystem. Cr
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
+
+### Project Management
+
+277 [NOT STARTED] — Fix recurring CI workflow failures in GitHub Actions (runs 279866
 
 ### Propositional Logic
 
@@ -50,6 +54,16 @@ next_project_number: 277
 275 [RESEARCHED] — Prove that Bimodal TM is conservative over Temporal BX for tempor
 
 ## Tasks
+
+### 277. Fix ci workflow failures
+- **Status**: [NOT STARTED]
+- **Task Type**: general
+- **Topic**: Project Management
+- **Dependencies**: None
+
+**Description**: Fix recurring CI workflow failures in GitHub Actions (runs 27986662089, 27984755605, 27983889592)
+
+---
 
 ### 276. Modal cube inter system conservativity
 - **Status**: [COMPLETED]

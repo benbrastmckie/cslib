@@ -28,7 +28,8 @@ theorem density_sound_dense (φ : Formula Atom) :
   density_valid φ
 
 /-- All axioms with `minFrameClass ≤ .Dense` are valid over dense temporal orders. -/
-theorem axiom_dense_valid' {φ : Formula Atom} (h : Axiom φ) (h_fc : h.minFrameClass ≤ FrameClass.Dense) :
+theorem axiom_dense_valid' {φ : Formula Atom}
+    (h : Axiom φ) (h_fc : h.minFrameClass ≤ FrameClass.Dense) :
     validDense φ :=
   axiom_dense_valid h h_fc
 

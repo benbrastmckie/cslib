@@ -520,6 +520,8 @@ structure C5BackwardWalkResult (χ : Chronicle Atom) (ξ η : Formula Atom) (sta
 
 /-! ## Recursive Walks -/
 
+-- The recursive walk with well-founded termination on chronicle domain size requires
+-- extended heartbeats due to large case splits over counterexample witness insertion.
 set_option maxHeartbeats 3200000 in
 /-- Recursive walk that eliminates a C5 forward (Until) counterexample by inserting a new witness point. -/
 noncomputable def c5ForwardWalk
@@ -1061,6 +1063,8 @@ decreasing_by
      This yields a single WF goal closed by simp_all + exact h_term. -/
   all_goals simp_all only [gt_iff_lt]
   all_goals exact h_term
+-- The recursive walk with well-founded termination on chronicle domain size requires
+-- extended heartbeats due to large case splits over counterexample witness insertion.
 set_option maxHeartbeats 3200000 in
 /-- Recursive walk that eliminates a C5 backward (Since) counterexample by inserting a new witness point. -/
 noncomputable def c5BackwardWalk
@@ -1609,6 +1613,8 @@ decreasing_by
 
 /-! ## Main Elimination Function -/
 
+-- Dispatches across all counterexample kinds (C5 forward/backward, C6 forward/backward)
+-- and chains the corresponding recursive walks, requiring extended heartbeats.
 set_option maxHeartbeats 6400000 in
 /-- Eliminates a single potential counterexample from a chronicle, returning an extended chronicle with the counterexample resolved. -/
 noncomputable def eliminatePotentialCounterexample

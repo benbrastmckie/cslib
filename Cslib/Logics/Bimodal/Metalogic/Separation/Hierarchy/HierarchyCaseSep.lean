@@ -39,13 +39,6 @@ theorem case1_psi_has_single_U_type (a q x y : Formula Atom)
     hasSingleUType (case1Psi a q x y) x y := by
   simp only [case1Psi, Formula.or, Formula.and, hasSingleUType]
   refine ⟨⟨⟨⟨⟨⟨⟨⟨?_, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩
-  all_goals (try exact u_free_has_single_U_type ha)
-  all_goals (try exact u_free_has_single_U_type hq)
-  all_goals (try exact u_free_has_single_U_type hx)
-  all_goals (try exact u_free_has_single_U_type hy)
-  all_goals (try trivial)
-  all_goals (try exact ⟨rfl, rfl⟩)
-  all_goals (try exact ⟨trivial, trivial⟩)
   all_goals simp_all [hasSingleUType,
     u_free_has_single_U_type ha, u_free_has_single_U_type hq,
     u_free_has_single_U_type hx, u_free_has_single_U_type hy]
@@ -56,18 +49,8 @@ theorem case2_psi_has_single_U_type (a q x y : Formula Atom)
     (hx : isUFree x = true) (hy : isUFree y = true) :
     hasSingleUType (case2Psi a q x y) x y := by
   delta case2Psi
-  simp only [Formula.or, hasSingleUType]
+  simp only [hasSingleUType]
   refine ⟨⟨⟨⟨⟨⟨⟨⟨?_, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩
-  all_goals (try exact u_free_has_single_U_type ha)
-  all_goals (try exact u_free_has_single_U_type hq)
-  all_goals (try exact u_free_has_single_U_type hx)
-  all_goals (try exact u_free_has_single_U_type hy)
-  all_goals (try trivial)
-  all_goals (try exact ⟨trivial, trivial⟩)
-  all_goals (try exact ⟨⟨trivial, trivial⟩, trivial⟩)
-  all_goals (try exact ⟨u_free_has_single_U_type hx, trivial⟩)
-  all_goals (try exact ⟨u_free_has_single_U_type hq, trivial⟩)
-  all_goals (try exact ⟨u_free_has_single_U_type hy, trivial⟩)
   all_goals simp_all [hasSingleUType,
     u_free_has_single_U_type ha, u_free_has_single_U_type hq,
     u_free_has_single_U_type hx, u_free_has_single_U_type hy]
@@ -75,6 +58,7 @@ theorem case2_psi_has_single_U_type (a q x y : Formula Atom)
 /-! ### Case-specific isSeparableWithUType -/
 
 set_option maxHeartbeats 800000 in
+-- Unfolding case1Psi properties requires extended heartbeats due to nested formula structure.
 /-- Case 1 with U-type preservation: S(a∧U(A,B), q) is separable_with_U_type. -/
 theorem case1_sep_with_U_type_gen (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
@@ -86,6 +70,7 @@ theorem case1_sep_with_U_type_gen (a q x y : Formula Atom)
     case1_psi_has_single_U_type a q x y ha hq hx hy⟩
 
 set_option maxHeartbeats 3200000 in
+-- Unfolding case2Psi properties requires extended heartbeats due to nested formula structure.
 /-- Case 2 with U-type preservation: S(a∧¬U(A,B), q) is separable_with_U_type. -/
 theorem case2_sep_with_U_type_gen (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
@@ -99,6 +84,7 @@ theorem case2_sep_with_U_type_gen (a q x y : Formula Atom)
 /-! ### Combined Helpers with U-type Preservation -/
 
 set_option maxHeartbeats 800000 in
+-- Replacement and equivalence chain through snce_event_congr requires extended heartbeats.
 /-- S(COMBINED ∧ U(A,B), guard) is separable_with_U_type A B when COMBINED
     satisfies untlUnderBoolOnly and guard is U-free. -/
 theorem snce_combined_U_sep_with_U_type
@@ -118,6 +104,7 @@ theorem snce_combined_U_sep_with_U_type
     case1_psi_has_single_U_type combined' guard x y h_uf hg_uf hx hy⟩
 
 set_option maxHeartbeats 3200000 in
+-- Replacement and equivalence chain through snce_event_congr requires extended heartbeats.
 /-- S(COMBINED ∧ ¬U(A,B), guard) is separable_with_U_type A B when COMBINED
     satisfies untlUnderBoolOnly and guard is U-free. -/
 theorem snce_combined_notU_sep_with_U_type
@@ -165,6 +152,7 @@ theorem snce_event_congr_hier {φ₁ φ₂ ψ : Formula Atom} (h : intEquiv φ�
 /-! ### Cases 5-8 with U-type Preservation -/
 
 set_option maxHeartbeats 1600000 in
+-- Deep recursive separability proof with multiple equivalence and distribution steps.
 /-- Case 5 with U-type: S(a∧U(A,B), q∨U(A,B)) is separable_with_U_type A B. -/
 theorem case5_sep_with_U_type_Z_gen (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
@@ -201,7 +189,7 @@ theorem case5_sep_with_U_type_Z_gen (a q x y : Formula Atom)
               exact int_truth_and_iff.mpr ⟨hnq, (hσ_equiv m t).mpr hσ'⟩
           apply is_separable_with_U_type_of_equiv (snce_event_congr_hier (and_left_congr_hier hY_congr))
           have h_nqσ_bool : untlUnderBoolOnly (Formula.and (Formula.neg q) σ) x y := by
-            show untlUnderBoolOnly (.imp (.imp (Formula.neg q) (.imp σ .bot)) .bot) x y
+            change untlUnderBoolOnly (.imp (.imp (Formula.neg q) (.imp σ .bot)) .bot) x y
             refine ⟨⟨?_, case1_psi_bool_only a q x y ha hq hx hy, trivial⟩, trivial⟩
             exact ⟨u_free_untl_under_bool q x y hq, trivial⟩
           exact snce_combined_U_sep_with_U_type (Formula.and (Formula.neg q) σ)
@@ -227,24 +215,24 @@ theorem case5_sep_with_U_type_Z_gen (a q x y : Formula Atom)
     apply or_separable_with_U_type
     · have h_event_bool : untlUnderBoolOnly
           (Formula.and (Formula.and x (Formula.or q (.untl y x))) (d21Sep a q x y)) x y := by
-        show untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl y x)))
+        change untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl y x)))
           (.imp (d21Sep a q x y) .bot)) .bot) x y
         refine ⟨⟨?_, d21_sep_bool_only a q x y ha hq hx hy, trivial⟩, trivial⟩
-        show untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl y x)) .bot)) .bot) x y
+        change untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl y x)) .bot)) .bot) x y
         refine ⟨⟨u_free_untl_under_bool x x y hx, ?_, trivial⟩, trivial⟩
-        show untlUnderBoolOnly (.imp (.imp q .bot) (.untl y x)) x y
+        change untlUnderBoolOnly (.imp (.imp q .bot) (.untl y x)) x y
         exact ⟨⟨u_free_untl_under_bool q x y hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
       exact snce_combined_U_sep_with_U_type
         (Formula.and (Formula.and x (Formula.or q (.untl y x))) (d21Sep a q x y))
         q x y hx hy hx' hy' hq h_event_bool
     · have h_event_bool : untlUnderBoolOnly
           (Formula.and (Formula.and x (Formula.or q (.untl y x))) (d21Sep a q x y)) x y := by
-        show untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl y x)))
+        change untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl y x)))
           (.imp (d21Sep a q x y) .bot)) .bot) x y
         refine ⟨⟨?_, d21_sep_bool_only a q x y ha hq hx hy, trivial⟩, trivial⟩
-        show untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl y x)) .bot)) .bot) x y
+        change untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl y x)) .bot)) .bot) x y
         refine ⟨⟨u_free_untl_under_bool x x y hx, ?_, trivial⟩, trivial⟩
-        show untlUnderBoolOnly (.imp (.imp q .bot) (.untl y x)) x y
+        change untlUnderBoolOnly (.imp (.imp q .bot) (.untl y x)) x y
         exact ⟨⟨u_free_untl_under_bool q x y hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
       exact snce_combined_notU_sep_with_U_type
         (Formula.and (Formula.and x (Formula.or q (.untl y x))) (d21Sep a q x y))
@@ -266,6 +254,7 @@ theorem case8_sep_with_U_type_Z_gen (a q x y : Formula Atom)
     have hna_uf : isUFree (Formula.neg a) = true := by simp [isUFree, ha]
     exact case5_sep_with_U_type_Z_gen (Formula.neg q) (Formula.neg a) x y hnq_uf hna_uf hx hy hx' hy'
 
+-- Deep recursive separability proof with distribution, case splitting, and vacuous elimination.
 set_option maxHeartbeats 3200000 in
 /-- S(ev, q∨U(A,B)) is separable_with_U_type A B when ev is U-free. -/
 theorem snce_Ufree_event_qU_guard_sep_with_U_type (ev q x y : Formula Atom)
@@ -379,24 +368,24 @@ theorem snce_Ufree_event_qU_guard_sep_with_U_type (ev q x y : Formula Atom)
     apply or_separable_with_U_type
     · have h_event_bool : untlUnderBoolOnly
           (Formula.and (Formula.and x (Formula.or q (.untl y x))) d21_local) x y := by
-        show untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl y x)))
+        change untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl y x)))
           (.imp d21_local .bot)) .bot) x y
         refine ⟨⟨?_, h_d21_bool, trivial⟩, trivial⟩
-        show untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl y x)) .bot)) .bot) x y
+        change untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl y x)) .bot)) .bot) x y
         refine ⟨⟨u_free_untl_under_bool x x y hx, ?_, trivial⟩, trivial⟩
-        show untlUnderBoolOnly (.imp (.imp q .bot) (.untl y x)) x y
+        change untlUnderBoolOnly (.imp (.imp q .bot) (.untl y x)) x y
         exact ⟨⟨u_free_untl_under_bool q x y hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
       exact snce_combined_U_sep_with_U_type
         (Formula.and (Formula.and x (Formula.or q (.untl y x))) d21_local)
         q x y hx hy hx' hy' hq h_event_bool
     · have h_event_bool : untlUnderBoolOnly
           (Formula.and (Formula.and x (Formula.or q (.untl y x))) d21_local) x y := by
-        show untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl y x)))
+        change untlUnderBoolOnly (.imp (.imp (Formula.and x (Formula.or q (.untl y x)))
           (.imp d21_local .bot)) .bot) x y
         refine ⟨⟨?_, h_d21_bool, trivial⟩, trivial⟩
-        show untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl y x)) .bot)) .bot) x y
+        change untlUnderBoolOnly (.imp (.imp x (.imp (Formula.or q (.untl y x)) .bot)) .bot) x y
         refine ⟨⟨u_free_untl_under_bool x x y hx, ?_, trivial⟩, trivial⟩
-        show untlUnderBoolOnly (.imp (.imp q .bot) (.untl y x)) x y
+        change untlUnderBoolOnly (.imp (.imp q .bot) (.untl y x)) x y
         exact ⟨⟨u_free_untl_under_bool q x y hq, trivial⟩, Or.inl ⟨rfl, rfl⟩⟩
       exact snce_combined_notU_sep_with_U_type
         (Formula.and (Formula.and x (Formula.or q (.untl y x))) d21_local)
@@ -537,6 +526,7 @@ theorem snce_Ufree_event_qNotU_guard_sep_with_U_type (ev q x y : Formula Atom)
       exact hnotS1 ⟨s, hst, int_truth_and_iff.mpr
         ⟨int_truth_and_iff.mpr ⟨hna_s, hnotQ_s⟩, hnotNotU_s⟩, hguard⟩
 
+-- Deep recursive separability proof with rearrangement, distribution, and case 8 subcase.
 set_option maxHeartbeats 1600000 in
 /-- Case 7 with U-type: S(a∧U, q∨¬U) is separable_with_U_type A B. -/
 theorem case7_sep_with_U_type_Z_gen (a q x y : Formula Atom)

@@ -267,12 +267,12 @@
     {
       "project_number": 265,
       "project_name": "track_conservative_lean_sorry",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Conservative.lean:99 (ipl_conservative_over_mpl). This is the only untracked sorry in the codebase — the theorem states that intuitionistic propositional logic is a conservative extension of minimal propositional logic. Research the proof strategy (likely via Kripke model or algebraic argument) and implement.",
       "topic": "Propositional Logic",
       "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-22T19:57:25Z",
+      "last_updated": "2026-06-22T20:27:31Z",
       "session_id": "sess_1782158218_753573",
       "artifacts": [
         {
@@ -289,6 +289,10 @@
           "path": "specs/265_track_conservative_lean_sorry/reports/02_zulip-benefit-cost.md",
           "type": "research",
           "summary": "Zulip thread benefit/cost analysis: strongly recommended, validates bot_val design, fulfills explicit community request"
+        },
+        {
+          "type": "summary",
+          "path": "specs/265_track_conservative_lean_sorry/summaries/01_conservative-extension-summary.md"
         }
       ],
       "plan_metadata": {
@@ -309,7 +313,8 @@
           ]
         ]
       },
-      "next_artifact_number": 3
+      "next_artifact_number": 3,
+      "completion_summary": "Filled the sorry in ipl_conservative_over_mpl using WithBot embedding: defined HeytingAlgebra (WithBot G) instance, proved coe_AlgEvaluate embedding lemma, chained IPL/MPL algebraic completeness. 0 sorries, all CI checks pass."
     }
   ],
   "repository_health": {

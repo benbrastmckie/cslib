@@ -229,7 +229,6 @@ theorem proper_separation_theorem_int (phi : Formula Atom) :
   all_properly_separable phi
 
 section AtomRestriction
-open Classical
 
 /-! ## Atom-Preserving Separation via Atom Restriction
 
@@ -239,6 +238,7 @@ original formula. Atoms outside `formulaAtoms φ` cannot affect the truth of φ
 (by `int_truth_depends_only_on_atoms`), so replacing them with ⊤ preserves the
 equivalence while ensuring atom containment. -/
 
+open Classical in
 /-- Replace all atoms NOT in the allowed set with ⊤ (imp bot bot).
     This removes "extra" atoms from a formula while preserving its structure. -/
 noncomputable def restrictAtoms (φ : Formula Atom) (allowed : Set Atom) : Formula Atom :=
@@ -250,6 +250,7 @@ noncomputable def restrictAtoms (φ : Formula Atom) (allowed : Set Atom) : Formu
   | .untl ψ₂ ψ₁ => .untl (restrictAtoms ψ₂ allowed) (restrictAtoms ψ₁ allowed)
   | .snce ψ₂ ψ₁ => .snce (restrictAtoms ψ₂ allowed) (restrictAtoms ψ₁ allowed)
 
+open Classical in
 /-- Atoms of `restrictAtoms` are contained in the allowed set. -/
 theorem formula_atoms_restrict_subset (φ : Formula Atom) (allowed : Set Atom) :
     formulaAtoms (restrictAtoms φ allowed) ⊆ allowed := by
@@ -265,6 +266,7 @@ theorem formula_atoms_restrict_subset (φ : Formula Atom) (allowed : Set Atom) :
   | untl ψ₂ ψ₁ ih2 ih1 => unfold restrictAtoms; simp only [formulaAtoms]; exact Set.union_subset ih1 ih2
   | snce ψ₂ ψ₁ ih2 ih1 => unfold restrictAtoms; simp only [formulaAtoms]; exact Set.union_subset ih1 ih2
 
+open Classical in
 theorem restrict_atoms_S_free (φ : Formula Atom) (allowed : Set Atom)
     (h : isSFree φ = true) : isSFree (restrictAtoms φ allowed) = true := by
   induction φ with
@@ -279,6 +281,7 @@ theorem restrict_atoms_S_free (φ : Formula Atom) (allowed : Set Atom)
     simp [isSFree] at h; unfold restrictAtoms; simp [isSFree, ih1 h.1, ih2 h.2]
   | snce _ _ => simp [isSFree] at h
 
+open Classical in
 theorem restrict_atoms_U_free (φ : Formula Atom) (allowed : Set Atom)
     (h : isUFree φ = true) : isUFree (restrictAtoms φ allowed) = true := by
   induction φ with
@@ -293,6 +296,7 @@ theorem restrict_atoms_U_free (φ : Formula Atom) (allowed : Set Atom)
   | snce ψ₂ ψ₁ ih2 ih1 =>
     simp [isUFree] at h; unfold restrictAtoms; simp [isUFree, ih1 h.1, ih2 h.2]
 
+open Classical in
 /-- `restrictAtoms` preserves `isProperlySeparated`. -/
 theorem restrict_atoms_preserves_properly_separated (φ : Formula Atom) (allowed : Set Atom)
     (h : isProperlySeparated φ = true) :
@@ -318,6 +322,7 @@ theorem restrict_atoms_preserves_properly_separated (φ : Formula Atom) (allowed
     rw [← u_free_eq_past_only, ← u_free_eq_past_only] at h
     exact ⟨restrict_atoms_U_free ψ₁ allowed h.1, restrict_atoms_U_free ψ₂ allowed h.2⟩
 
+open Classical in
 /-- In a model where all non-allowed atoms are universally true,
     `restrictAtoms` agrees semantically with the original formula. -/
 theorem restrict_atoms_truth (ψ : Formula Atom) (allowed : Set Atom)
@@ -345,6 +350,7 @@ theorem restrict_atoms_truth (ψ : Formula Atom) (allowed : Set Atom)
     · rintro ⟨s, hst, hc, hd⟩
       exact ⟨s, hst, (ih1 s).mpr hc, fun r hr1 hr2 => (ih2 r).mpr (hd r hr1 hr2)⟩
 
+open Classical in
 /-- Restricting atoms of ψ to the allowed set preserves `intEquiv` with φ,
     provided φ's atoms are contained in the allowed set.
 
@@ -369,6 +375,7 @@ theorem int_equiv_restrict_atoms {φ ψ : Formula Atom} (hequiv : intEquiv φ ψ
     restrict_atoms_truth ψ allowed M' t h_true
   exact h_phi.trans ((hequiv M' t).trans (h_restrict.symm.trans h_restrict_models.symm))
 
+open Classical in
 /-- Atom-preserving proper separation: the separated equivalent uses only atoms
     from the original formula. This is a strengthening of `isProperlySeparable`
     needed for the quantifier elimination step in Theorem 9.3.1.

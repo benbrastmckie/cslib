@@ -107,6 +107,7 @@ noncomputable def updateObl (g' : LevelRanking State) (P : Finset State) : Finse
 
 /-- The state type of the complement automaton: pairs `(g, P)` of a level ranking and
 an obligation set tracking states that must eventually be discharged (receive odd rank). -/
+@[nolint unusedArguments]
 abbrev ComplState (State : Type) [Fintype State] [DecidableEq State] : Type :=
   LevelRanking State × Finset State
 

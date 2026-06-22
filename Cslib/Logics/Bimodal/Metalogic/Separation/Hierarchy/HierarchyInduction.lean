@@ -866,8 +866,8 @@ self-contained depth-1 case in Lemma 10.2.5 (axiom-free). -/
 theorem subst_U_free_gives_single_U_type (c : Formula Atom) (p : Atom)
     (A B : Formula Atom)
     (hc_U_free : isUFree c = true)
-    (hA_U_free : isUFree A = true)
-    (hB_U_free : isUFree B = true) :
+    (_hA_U_free : isUFree A = true)
+    (_hB_U_free : isUFree B = true) :
     hasSingleUType (substFormula c p (.untl B A)) A B := by
   induction c with
   | atom a =>

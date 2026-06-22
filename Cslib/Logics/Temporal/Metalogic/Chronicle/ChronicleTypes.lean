@@ -134,7 +134,8 @@ def r3RelationSince (A B C : Set (Formula Atom)) : Prop :=
 
 /-! ## R-Maximality -/
 
-/-- A set B is r-maximal over A if it is deductively closed, satisfies rRelation, and no proper superset does. -/
+/-- A set B is r-maximal over A if it is deductively closed,
+satisfies rRelation, and no proper superset does. -/
 def rMaximal (A B : Set (Formula Atom)) : Prop :=
   SetDeductivelyClosed B ∧
   rRelation A B ∧
@@ -143,7 +144,8 @@ def rMaximal (A B : Set (Formula Atom)) : Prop :=
     B ⊂ C →
     ¬rRelation A C
 
-/-- A set B is r-maximal over A for Since if it is deductively closed, satisfies rRelationSince, and no proper superset does. -/
+/-- A set B is r-maximal over A for Since if it is deductively closed,
+satisfies rRelationSince, and no proper superset does. -/
 def rMaximalSince (A B : Set (Formula Atom)) : Prop :=
   SetDeductivelyClosed B ∧
   rRelationSince A B ∧
@@ -161,7 +163,8 @@ def R3Maximal (A B C : Set (Formula Atom)) : Prop :=
     B ⊂ D →
     ¬r3Relation A D C
 
-/-- A set B is R3-maximal (Since variant) over A and C if it satisfies r3RelationSince and no proper superset does. -/
+/-- A set B is R3-maximal (Since variant) over A and C if it satisfies
+r3RelationSince and no proper superset does. -/
 def R3MaximalSince (A B C : Set (Formula Atom)) : Prop :=
   SetDeductivelyClosed B ∧
   r3RelationSince A B C ∧
@@ -172,15 +175,18 @@ def R3MaximalSince (A B C : Set (Formula Atom)) : Prop :=
 
 /-! ## Burgess r-Relation (Content-Based) -/
 
-/-- The Burgess r-relation: every formula in C appears as the left argument of `gamma U beta` in A. -/
+/-- The Burgess r-relation: every formula in C appears as the left
+argument of `gamma U beta` in A. -/
 def burgessR (A : Set (Formula Atom)) (beta : Formula Atom) (C : Set (Formula Atom)) : Prop :=
   ∀ gamma ∈ C, (beta U gamma) ∈ A
 
-/-- Lifts `burgessR` to all beta in B: every pair `(beta, gamma)` with beta ∈ B, gamma ∈ C satisfies burgessR. -/
+/-- Lifts `burgessR` to all beta in B: every pair `(beta, gamma)` with
+beta ∈ B, gamma ∈ C satisfies burgessR. -/
 def burgessRSet (A B C : Set (Formula Atom)) : Prop :=
   ∀ beta ∈ B, burgessR A beta C
 
-/-- The Burgess r-relation for Since: every formula in C appears as the left argument of `gamma S beta` in A. -/
+/-- The Burgess r-relation for Since: every formula in C appears as
+the left argument of `gamma S beta` in A. -/
 def burgessRSince (A : Set (Formula Atom)) (beta : Formula Atom) (C : Set (Formula Atom)) : Prop :=
   ∀ gamma ∈ C, (beta S gamma) ∈ A
 
@@ -188,11 +194,13 @@ def burgessRSince (A : Set (Formula Atom)) (beta : Formula Atom) (C : Set (Formu
 def burgessRSetSince (A B C : Set (Formula Atom)) : Prop :=
   ∀ beta ∈ B, burgessRSince A beta C
 
-/-- The combined Burgess r3-relation: combines burgessRSet for Until and burgessRSetSince for Since. -/
+/-- The combined Burgess r3-relation: combines burgessRSet for Until
+and burgessRSetSince for Since. -/
 def burgessR3 (A B C : Set (Formula Atom)) : Prop :=
   burgessRSet A B C ∧ burgessRSetSince C B A
 
-/-- B is a Burgess R3-maximal set over A and C: deductively closed, satisfies burgessR3, and no proper superset does. -/
+/-- B is a Burgess R3-maximal set over A and C: deductively closed,
+satisfies burgessR3, and no proper superset does. -/
 def BurgessR3Maximal (A B C : Set (Formula Atom)) : Prop :=
   ClosedUnderDerivation B ∧
   burgessR3 A B C ∧
@@ -267,7 +275,8 @@ def Chronicle.c4' (chi : Chronicle Atom) : Prop :=
       delta ∈ chi.f y →
       ∃ z ∈ chi.dom, y < z ∧ z < x ∧ gamma.neg ∈ chi.f z
 
-/-- Condition c5: if δ U γ holds at x, there is a future witness y where δ holds and γ U δ holds between. -/
+/-- Condition c5: if δ U γ holds at x, there is a future witness y
+where δ holds and γ U δ holds between. -/
 @[nolint dupNamespace]
 def Chronicle.c5 (chi : Chronicle Atom) : Prop :=
   ∀ x ∈ chi.dom,
@@ -323,7 +332,8 @@ theorem c3_interval_subset_right (chi : Chronicle Atom) (h_c3 : chi.c3)
 
 /-! ## ChronicleInvariant Bundle -/
 
-/-- Bundles the chronicle invariants c0, c1, c2', and c3 needed for the canonical model construction. -/
+/-- Bundles the chronicle invariants c0, c1, c2', and c3 needed for
+the canonical model construction. -/
 structure ChronicleInvariant (chi : Chronicle Atom) : Prop where
   hc0 : chi.c0
   hc1 : chi.c1

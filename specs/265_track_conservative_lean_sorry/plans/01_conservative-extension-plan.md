@@ -1,7 +1,7 @@
 # Implementation Plan: Conservative Extension of IPL over MPL
 
 - **Task**: 265 - track_conservative_lean_sorry
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 1 hour
 - **Dependencies**: None
 - **Research Inputs**: specs/265_track_conservative_lean_sorry/reports/01_conservative-extension-proof.md

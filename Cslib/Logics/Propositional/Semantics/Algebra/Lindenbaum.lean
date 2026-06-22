@@ -321,6 +321,7 @@ theorem lindenbaumTop (T : Theory Atom) :
 /-! ## Heyting Algebra (Intuitionistic Theories) -/
 
 /-- Bottom: `⊥ = [⊥]T` (only for intuitionistic theories). -/
+@[nolint unusedArguments]
 instance [IsIntuitionistic T] : Bot (LindenbaumAlgebra T) where
   bot := lindenbaumMk T .bot
 

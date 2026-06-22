@@ -440,7 +440,7 @@ lemma Formula.canonicalAtom_isAtom (v : ωSequence (Set Atom)) (i : ℕ) (φ : F
     refine ⟨huntl, ?_⟩
     -- Satisfies val (v.drop i) (untl ψ₁ ψ₂): take j = 0, guard is vacuous (∀ k < 0)
     have hψ2sat := (Formula.canonicalAtom_mem_iff.mp hψ2).2
-    simp only [Satisfies, ωSequence.drop_zero]
+    simp only [Satisfies]
     exact ⟨0, by simpa using hψ2sat, fun k hk => absurd hk (Nat.not_lt.mpr (Nat.zero_le k))⟩
   · -- untlLeft: untl ψ₁ ψ₂ ∈ canonicalAtom → ψ₂ ∉ canonicalAtom → ψ₁ ∈ canonicalAtom
     intro ψ₁ ψ₂ huntl hmem hnotψ2
@@ -460,7 +460,7 @@ lemma Formula.canonicalAtom_isAtom (v : ωSequence (Set Atom)) (i : ℕ) (φ : F
     -- So j' > 0 strictly (otherwise j' = 0 and hj'ψ2 : Satisfies val (v.drop i) ψ₂)
     have hj'_pos : 0 < j' := by
       by_contra h0
-      push_neg at h0
+      push Not at h0
       have hj'0 : j' = 0 := Nat.le_zero.mp h0
       simp only [hj'0, Nat.add_zero] at hj'ψ2
       exact absurd hj'ψ2 hnotψ2sat
@@ -806,7 +806,7 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
     have hgnbaTr : ∀ i, Formula.gnbaTr φ (B i) (v i) (B (i + 1)) := by
       intro i
       have := htrans i
-      simp only [Formula.gnbaNBA, NA.Buchi.mk.injEq] at this
+      simp only [Formula.gnbaNBA] at this
       exact this.1
     -- NBA acceptance means counter = gnbaK φ infinitely often
     have haccK : ∃ᶠ k in Filter.atTop, (ctr k).val = Formula.gnbaK φ := by
@@ -851,7 +851,7 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
       intro t heqK
       have htrans_t := hctr_trans t
       by_cases hK : Formula.gnbaK φ = 0
-      · simp only [hK, dif_pos rfl] at htrans_t; exact htrans_t
+      · simp only [hK] at htrans_t; exact htrans_t
       · have hlt_false : ¬ (ctr t).val < Formula.gnbaK φ := by omega
         simp only [dif_neg hK, dif_neg hlt_false] at htrans_t
         exact htrans_t
@@ -915,14 +915,14 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
       -- d_first ≥ 1 since (ctr (t₀+1)).val = 0 < m+1
       have hd_first_pos : 0 < d_first := by
         by_contra h0
-        push_neg at h0
+        push Not at h0
         have hd0 : d_first = 0 := Nat.le_zero.mp h0
         simp only [hd0, Nat.add_zero] at hd_first_ge
         omega
       -- At t₀+1+(d_first-1): counter ≤ m (by minimality of d_first)
       have hprev_lt : (ctr (t₀ + 1 + (d_first - 1))).val ≤ m := by
         by_contra hcontra
-        push_neg at hcontra
+        push Not at hcontra
         have hd_pred_lt : d_first - 1 < d_first := Nat.sub_lt hd_first_pos Nat.one_pos
         have hd_pred_gap : d_first - 1 ≤ gap := by omega
         exact absurd ⟨hd_pred_gap, by omega⟩ (Nat.find_min hd_exists hd_pred_lt)
@@ -1067,7 +1067,7 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
               Formula.untl ψ₁ ψ₂ ∈ (B k).val ∧ ψ₂ ∉ (B k).val := by
             intro k hik hkj
             by_contra hc
-            push_neg at hc
+            push Not at hc
             have hPk : P k := ⟨hik, by
               by_cases hmemk : (Formula.untl ψ₁ ψ₂) ∈ (B k).val
               · exact Or.inr (hc hmemk)
@@ -1159,7 +1159,7 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
       rw [Filter.frequently_atTop]
       intro N
       by_contra hall
-      push_neg at hall
+      push Not at hall
       simp only [Formula.gnbaAcceptSet, Set.mem_setOf_eq, not_or, not_not,
         not_exists, not_and] at hall
       -- hall : ∀ b ≥ N, (ψ₁ U ψ₂) ∈ B_b ∧ ∀ x x', (ψ₁ U ψ₂) = (x U x') → x' ∉ B_b
@@ -1348,9 +1348,7 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
           -- At t + d_min, ctr = m (by minimality: no earlier visit to acc(χ_m))
           have hctr_t_d_min : (ctr (t + d_min)).val = m := by
             apply hctr_stays
-            intro s hs
-            -- B(t+s) ∉ acc(χ_m) for s < d_min
-            intro hmem
+            intro s hs hmem
             exact absurd
               ⟨Nat.le_of_lt_succ
                 (Nat.lt_succ_of_le (le_trans (Nat.le_of_lt hs) hd_min_bound)), hmem⟩

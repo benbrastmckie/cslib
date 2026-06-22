@@ -87,13 +87,13 @@ def Buchi.infOftenOne : Buchi (Fin 2) (Fin 2) where
   accept := {1}
 
 /-- For `DA.Buchi.infOftenOne`, the run satisfies `run xs (n+1) = xs n`. -/
-@[simp]
+@[simp, nolint simpNF]
 private lemma infOftenOne_run_succ (xs : ωSequence (Fin 2)) (n : ℕ) :
     Buchi.infOftenOne.run xs (n + 1) = xs n := by
   simp [run, run', Buchi.infOftenOne]
 
 /-- Membership in the language of `DA.Buchi.infOftenOne`: accepts iff infinitely many 1s. -/
-@[simp, scoped grind =]
+@[simp, nolint simpNF, scoped grind =]
 theorem Buchi.mem_infOftenOne_language (xs : ωSequence (Fin 2)) :
     xs ∈ language Buchi.infOftenOne ↔ ∃ᶠ k in atTop, xs k = 1 := by
   simp only [mem_language, ωAcceptor.Accepts]
@@ -216,7 +216,7 @@ lemma inter_run_snd_fst (a1 : Buchi State1 Symbol) (a2 : Buchi State2 Symbol)
   | succ n ih => simp [run, run', Buchi.inter]; congr 1
 
 /-- The counter at step `n+1` is computed from the new states and old counter. -/
-@[simp]
+@[simp, nolint simpNF]
 lemma inter_run_counter_succ (a1 : Buchi State1 Symbol) (a2 : Buchi State2 Symbol)
     (xs : ωSequence Symbol) (n : ℕ) :
     ((a1.inter a2).run xs (n + 1)).2.2 =
@@ -229,7 +229,7 @@ lemma inter_run_counter_succ (a1 : Buchi State1 Symbol) (a2 : Buchi State2 Symbo
   simp only [inter_run_fst, inter_run_snd_fst, run_succ]
 
 /-- The initial counter is `0`. -/
-@[simp]
+@[simp, nolint simpNF]
 lemma inter_run_counter_zero (a1 : Buchi State1 Symbol) (a2 : Buchi State2 Symbol)
     (xs : ωSequence Symbol) :
     ((a1.inter a2).run xs 0).2.2 = 0 := by

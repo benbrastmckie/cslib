@@ -11,7 +11,7 @@ next_project_number: 270
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,265,266,268 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,252,266,268 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,269 | 36,37,180,268 | Bimodal Porting, Foundations, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -34,7 +34,6 @@ next_project_number: 270
 ### Propositional Logic
 
 226 [RESEARCHED] — Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648
-265 [IMPLEMENTING] — Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Co
 266 [PLANNED] — Research the Propositional/ logic and Foundations/ in this repo, 
 
 ### Temporal Logic
@@ -81,7 +80,7 @@ next_project_number: 270
 ---
 
 ### 265. Track conservative lean sorry
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -89,6 +88,7 @@ next_project_number: 270
   - [265_track_conservative_lean_sorry/reports/01_conservative-extension-proof.md]
   - [265_track_conservative_lean_sorry/reports/02_zulip-benefit-cost.md]
 - **Plan**: [265_track_conservative_lean_sorry/plans/01_conservative-extension-plan.md]
+- **Summary**: [265_track_conservative_lean_sorry/summaries/01_conservative-extension-summary.md]
 
 **Description**: Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Conservative.lean:99 (ipl_conservative_over_mpl). This is the only untracked sorry in the codebase — the theorem states that intuitionistic propositional logic is a conservative extension of minimal propositional logic. Research the proof strategy (likely via Kripke model or algebraic argument) and implement.
 

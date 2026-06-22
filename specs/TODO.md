@@ -1,5 +1,5 @@
 ---
-next_project_number: 263
+next_project_number: 266
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 263
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 1 | 36,37,180,226,241,245,252,263,264,265 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -32,6 +32,7 @@ next_project_number: 263
 ### Propositional Logic
 
 226 [RESEARCHED] — Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648
+265 [NOT STARTED] — Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Co
 
 ### Temporal Logic
 
@@ -39,10 +40,42 @@ next_project_number: 263
 241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
+263 [NOT STARTED] — Run lake shake --add-public --keep-implied --keep-prefix and appl
+264 [NOT STARTED] — Review and commit the 15 uncommitted files: Cslib/Foundations/Rel
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 265. Track conservative lean sorry
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Conservative.lean:99 (ipl_conservative_over_mpl). This is the only untracked sorry in the codebase — the theorem states that intuitionistic propositional logic is a conservative extension of minimal propositional logic. Research the proof strategy (likely via Kripke model or algebraic argument) and implement.
+
+---
+
+### 264. Commit uncommitted test import changes
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Review and commit the 15 uncommitted files: Cslib/Foundations/Relation/Attr.lean (adds Batteries.Tactic.Lint.Misc import), Cslib/Foundations/Semantics/LTS/Notation.lean (adds Batteries.Tactic.Lint.Misc and Lean.PrettyPrinter.Delaborator.Basic imports), and 13 CslibTests files with test updates. Verify lake build and lake test pass, then commit.
+
+---
+
+### 263. Lake shake import cleanup
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Run lake shake --add-public --keep-implied --keep-prefix and apply its recommendations across 107 files. Focus on the Temporal Metalogic Chronicle cluster (5 files) first, then work outward. Ensure lake build passes after each batch of changes.
+
+---
 
 ### 252. Acceptance conditions zoo
 - **Status**: [NOT STARTED]

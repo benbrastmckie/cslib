@@ -1,5 +1,5 @@
 {
-  "next_project_number": 263,
+  "next_project_number": 266,
   "active_projects": [
     {
       "project_number": 241,
@@ -191,6 +191,36 @@
           "summary": "Seed report: Rabin/parity acceptance, classical conversions, literature references"
         }
       ]
+    },
+    {
+      "project_number": 263,
+      "project_name": "lake_shake_import_cleanup",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Run lake shake --add-public --keep-implied --keep-prefix and apply its recommendations across 107 files. Focus on the Temporal Metalogic Chronicle cluster (5 files) first, then work outward. Ensure lake build passes after each batch of changes.",
+      "topic": "Temporal Logic",
+      "created": "2026-06-19T05:20:19Z",
+      "last_updated": "2026-06-22T18:25:35Z"
+    },
+    {
+      "project_number": 264,
+      "project_name": "commit_uncommitted_test_import_changes",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Review and commit the 15 uncommitted files: Cslib/Foundations/Relation/Attr.lean (adds Batteries.Tactic.Lint.Misc import), Cslib/Foundations/Semantics/LTS/Notation.lean (adds Batteries.Tactic.Lint.Misc and Lean.PrettyPrinter.Delaborator.Basic imports), and 13 CslibTests files with test updates. Verify lake build and lake test pass, then commit.",
+      "topic": "Temporal Logic",
+      "created": "2026-06-19T05:20:19Z",
+      "last_updated": "2026-06-22T18:25:35Z"
+    },
+    {
+      "project_number": 265,
+      "project_name": "track_conservative_lean_sorry",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Conservative.lean:99 (ipl_conservative_over_mpl). This is the only untracked sorry in the codebase — the theorem states that intuitionistic propositional logic is a conservative extension of minimal propositional logic. Research the proof strategy (likely via Kripke model or algebraic argument) and implement.",
+      "topic": "Propositional Logic",
+      "created": "2026-06-19T05:20:19Z",
+      "last_updated": "2026-06-22T18:25:35Z"
     }
   ],
   "repository_health": {

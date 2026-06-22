@@ -10,7 +10,21 @@
       "topic": "Temporal Logic",
       "created": "2026-06-20T03:00:00Z",
       "last_updated": "2026-06-20T03:00:00Z",
-      "completion_summary": "Fixed 4 stale docstrings/comments in LTL files left over from task-254 convention revision. lake build and lint-style pass."
+      "completion_summary": "Fixed 4 stale docstrings/comments in LTL files left over from task-254 convention revision. lake build and lint-style pass.",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/255_fix_stale_ltl_docstrings_post_task254/reports/01_stale-docstrings.md"
+        },
+        {
+          "type": "plan",
+          "path": "specs/255_fix_stale_ltl_docstrings_post_task254/plans/01_stale-docstrings.md"
+        },
+        {
+          "type": "summary",
+          "path": "specs/255_fix_stale_ltl_docstrings_post_task254/summaries/01_stale-docstrings-summary.md"
+        }
+      ]
     },
     {
       "project_number": 256,
@@ -21,7 +35,21 @@
       "topic": "Temporal Logic",
       "created": "2026-06-20T03:00:00Z",
       "last_updated": "2026-06-20T03:00:00Z",
-      "completion_summary": "Added 10 @[simp] lemmas to LTL/Semantics/Satisfies.lean for constructor-level Satisfies reasoning. lake build passes."
+      "completion_summary": "Added 10 @[simp] lemmas to LTL/Semantics/Satisfies.lean for constructor-level Satisfies reasoning. lake build passes.",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/256_add_ltl_satisfies_simp_lemmas/reports/01_satisfies-simp-lemmas.md"
+        },
+        {
+          "type": "plan",
+          "path": "specs/256_add_ltl_satisfies_simp_lemmas/plans/01_satisfies-simp-lemmas.md"
+        },
+        {
+          "type": "summary",
+          "path": "specs/256_add_ltl_satisfies_simp_lemmas/summaries/01_satisfies-simp-lemmas-summary.md"
+        }
+      ]
     },
     {
       "project_number": 257,
@@ -38,6 +66,14 @@
       "session_id": "sess_1781994910_0cdf2d_257",
       "completion_summary": "Fixed 7 lines exceeding 100 characters in GNBA.lean (line breaks, one let binding) and removed redundant instInhabitedSetAtom instance from OmegaRegular.lean. All changes cosmetic; lake build and lint pass.",
       "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/257_fix_gnba_long_lines_and_style/reports/01_gnba-style.md"
+        },
+        {
+          "type": "plan",
+          "path": "specs/257_fix_gnba_long_lines_and_style/plans/01_gnba-style.md"
+        },
         {
           "type": "summary",
           "path": "specs/257_fix_gnba_long_lines_and_style/summaries/01_gnba-style-summary.md",
@@ -57,7 +93,21 @@
       "dependencies": [
         257
       ],
-      "completion_summary": "Refactored duplicated subformula proofs in GNBA.lean: introduced Formula.subformulas_trans, replaced 4 inductive proofs with 2-line wrappers. Net 87-line reduction. lake build passes."
+      "completion_summary": "Refactored duplicated subformula proofs in GNBA.lean: introduced Formula.subformulas_trans, replaced 4 inductive proofs with 2-line wrappers. Net 87-line reduction. lake build passes.",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/258_refactor_gnba_duplicated_subformula_proofs/reports/01_gnba-refactor.md"
+        },
+        {
+          "type": "plan",
+          "path": "specs/258_refactor_gnba_duplicated_subformula_proofs/plans/01_gnba-refactor.md"
+        },
+        {
+          "type": "summary",
+          "path": "specs/258_refactor_gnba_duplicated_subformula_proofs/summaries/01_gnba-refactor-summary.md"
+        }
+      ]
     },
     {
       "project_number": 259,
@@ -68,7 +118,21 @@
       "topic": "Temporal Logic",
       "created": "2026-06-20T03:00:00Z",
       "last_updated": "2026-06-20T03:00:00Z",
-      "completion_summary": "Narrowed 13 file-wide linter suppressions across 4 Temporal/Metalogic files to declaration-level scope. Zero file-wide suppressions remain except 2 structurally required emptyLine suppressions. lake build and lint pass."
+      "completion_summary": "Narrowed 13 file-wide linter suppressions across 4 Temporal/Metalogic files to declaration-level scope. Zero file-wide suppressions remain except 2 structurally required emptyLine suppressions. lake build and lint pass.",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/259_narrow_temporal_metalogic_linter_suppressions/reports/01_linter-suppressions.md"
+        },
+        {
+          "type": "plan",
+          "path": "specs/259_narrow_temporal_metalogic_linter_suppressions/plans/01_linter-suppressions.md"
+        },
+        {
+          "type": "summary",
+          "path": "specs/259_narrow_temporal_metalogic_linter_suppressions/summaries/01_linter-suppressions-summary.md"
+        }
+      ]
     },
     {
       "project_number": 260,
@@ -84,6 +148,14 @@
       ],
       "session_id": "sess_1781994910_0cdf2d_260",
       "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/260_add_ltl_temporal_convention_contrast_docs/reports/01_convention-docs.md"
+        },
+        {
+          "type": "plan",
+          "path": "specs/260_add_ltl_temporal_convention_contrast_docs/plans/01_convention-docs.md"
+        },
         {
           "type": "summary",
           "path": "specs/260_add_ltl_temporal_convention_contrast_docs/summaries/01_convention-docs-summary.md"

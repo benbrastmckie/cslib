@@ -49,6 +49,8 @@ next_project_number: 263
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 255
+- **Research**: [260_add_ltl_temporal_convention_contrast_docs/reports/01_convention-docs.md]
+- **Plan**: [260_add_ltl_temporal_convention_contrast_docs/plans/01_convention-docs.md]
 - **Summary**: [260_add_ltl_temporal_convention_contrast_docs/summaries/01_convention-docs-summary.md]
 
 **Description**: Add module-level documentation contrasting the LTL and Temporal convention differences. (1) In the LTL module docstring (Formula.lean or a new LTL.lean barrel file header), add a note explaining that LTL uses standard convention (guard U event, notation ◯/𝓤/◇/□) while Temporal uses Burgess convention (event U guard, notation X/U/𝐅/𝐆), and that Embedding.lean bridges the two via reflexiveUntl. (2) In Temporal/Syntax/Formula.lean module docstring, add a cross-reference noting the convention difference from LTL. (3) In Connectives.lean, add a brief note that HasSince/TemporalConnectives/BimodalConnectives serve Temporal and Bimodal modules while HasUntil/HasNext/FutureTemporalConnectives/LTLConnectives serve LTL.
@@ -60,6 +62,9 @@ next_project_number: 263
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
+- **Research**: [259_narrow_temporal_metalogic_linter_suppressions/reports/01_linter-suppressions.md]
+- **Plan**: [259_narrow_temporal_metalogic_linter_suppressions/plans/01_linter-suppressions.md]
+- **Summary**: [259_narrow_temporal_metalogic_linter_suppressions/summaries/01_linter-suppressions-summary.md]
 
 **Description**: Narrow file-wide linter suppressions in Temporal/Metalogic/ to declaration-level scope. Currently 13 file-wide set_option linter.* suppressions exist across 4 files: CompletenessHelpers.lean (3: style.setOption, unusedSimpArgs, flexible), DenseCompleteness.lean (4: unusedSectionVars, unusedSimpArgs, style.setOption, dupNamespace), GeneralizedNecessitation.lean (4: unusedSimpArgs, style.setOption, flexible, style.emptyLine), TemporalContent.lean (2: style.emptyLine, style.longLine). For each suppression: (a) try removing it and see which declarations fail, (b) move the set_option to just those declarations using `set_option ... in`, (c) where possible, fix the underlying issue (remove unused simp args, fix empty lines, break long lines) instead of suppressing. Goal: zero file-wide suppressions, or document why any remaining ones are unavoidable.
 
@@ -70,6 +75,9 @@ next_project_number: 263
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 257
+- **Research**: [258_refactor_gnba_duplicated_subformula_proofs/reports/01_gnba-refactor.md]
+- **Plan**: [258_refactor_gnba_duplicated_subformula_proofs/plans/01_gnba-refactor.md]
+- **Summary**: [258_refactor_gnba_duplicated_subformula_proofs/summaries/01_gnba-refactor-summary.md]
 
 **Description**: Refactor duplicated proof patterns in GNBA.lean. Currently subformulas_untl_left, subformulas_untl_right, subformulas_imp_left, subformulas_imp_right (lines ~236-333) are four near-identical inductive proofs. Similarly untl_left_mem_closure, untl_right_mem_closure, imp_left_mem_closure, imp_right_mem_closure, subformulas_subset_closure (lines ~358-396) follow the same pattern. Refactor each group into a single parameterized lemma with a case dispatch or a shared helper, reducing code duplication while preserving all downstream usage sites. Ensure lake build passes.
 
@@ -80,6 +88,8 @@ next_project_number: 263
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 256
+- **Research**: [257_fix_gnba_long_lines_and_style/reports/01_gnba-style.md]
+- **Plan**: [257_fix_gnba_long_lines_and_style/plans/01_gnba-style.md]
 - **Summary**: [257_fix_gnba_long_lines_and_style/summaries/01_gnba-style-summary.md]
 
 **Description**: Fix style issues in GNBA.lean: (1) Break 7 lines exceeding 100 characters (lines 912, 929, 1023, 1352, 1421, 1427, 1435) — these involve deeply nested gnbaAcceptSet expressions that can be split with let bindings or intermediate names. (2) Rename instInhabitedSetAtom in OmegaRegular.lean:142 to follow Mathlib instance naming conventions (anonymous instance or Set.instInhabited pattern). Ensure lake build passes after all changes.
@@ -91,6 +101,9 @@ next_project_number: 263
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
+- **Research**: [256_add_ltl_satisfies_simp_lemmas/reports/01_satisfies-simp-lemmas.md]
+- **Plan**: [256_add_ltl_satisfies_simp_lemmas/plans/01_satisfies-simp-lemmas.md]
+- **Summary**: [256_add_ltl_satisfies_simp_lemmas/summaries/01_satisfies-simp-lemmas-summary.md]
 
 **Description**: Add @[simp] unfold lemmas for LTL.Satisfies to match the pattern in Temporal/Semantics/Satisfies.lean. Currently LTL's Satisfies is a bare def with no simp lemmas, while Temporal has atom_iff, imp_iff, bot_iff, etc. Add analogous @[simp] lemmas for each constructor: atom, bot, imp, next, untl, plus derived operators someFuture, allFuture, and the leadsto abbreviation. This improves proof automation so downstream files (GNBA, OmegaRegular) can use `simp [Satisfies]` more effectively.
 
@@ -101,6 +114,9 @@ next_project_number: 263
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
+- **Research**: [255_fix_stale_ltl_docstrings_post_task254/reports/01_stale-docstrings.md]
+- **Plan**: [255_fix_stale_ltl_docstrings_post_task254/plans/01_stale-docstrings.md]
+- **Summary**: [255_fix_stale_ltl_docstrings_post_task254/summaries/01_stale-docstrings-summary.md]
 
 **Description**: Fix stale docstrings and comments left over from the task-254 LTL convention revision. (1) Embedding.lean:15 — module docstring says "Burgess-temporal counterparts"; rewrite to explain that LTL uses standard convention while Temporal uses Burgess, and the embedding bridges the two. (2) Formula.lean:75 — next constructor docstring says "Xφ holds at t"; change to "◯φ holds at t". (3) Embedding.lean:49 — parameter names ψ/φ in the untl match arm are swapped relative to LTL's standard convention (guard=φ₁, event=φ₂); rename for clarity or add an inline comment explaining the swap is intentional due to Temporal's Burgess order. (4) OmegaRegular.lean:310 — docstring says "matches the original proof_wanted"; the proof is now complete, so remove or rephrase the reference.
 

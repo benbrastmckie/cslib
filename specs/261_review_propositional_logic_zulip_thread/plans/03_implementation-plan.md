@@ -125,7 +125,7 @@ Phases within the same wave can execute in parallel.
 - [ ] Structure the response with the following narrative arc:
   1. Opening: gratitude for the discussion, acknowledgment of time elapsed
   2. Core design decision: bot-as-primitive, substitution invariance argument, free-monad structure
-  3. Acknowledgment of Thomas's ND symmetry concern: genuine trade-off, not an oversight, documented
+  3. Acknowledgment of Thomas's ND symmetry concern, then the counter-argument: `⊥` is the only connective with no introduction rule in any proof system — every other connective has symmetric intro/elim, but `⊥` has only elimination. This means the "broken symmetry" reflects a genuine logical asymmetry, not a design flaw. Making efq a theory axiom is the natural way to express that `⊥`-elimination is the only logic-dependent rule (absent in MPL, present in IPL/CPL).
   4. bot_val reframing: Johansson designated constant, not a patch
   5. Parametric completeness: Thomas's `v models T` pattern adopted as `AlgTValid` (credit Thomas)
   6. Prop vs. Bool: resolved by dual evaluator + bridge lemmas (all exist)

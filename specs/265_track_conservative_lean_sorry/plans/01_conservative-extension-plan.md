@@ -68,7 +68,7 @@ No ROADMAP.md items directly correspond to this propositional-level conservative
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: WithBot HeytingAlgebra Instance [IN PROGRESS]
+### Phase 1: WithBot HeytingAlgebra Instance [COMPLETED]
 
 **Goal**: Define `withBotHimp` and prove the `HeytingAlgebra (WithBot G)` instance for any GeneralizedHeytingAlgebra G.
 
@@ -93,7 +93,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Embedding Lemma [NOT STARTED]
+### Phase 2: Embedding Lemma [COMPLETED]
 
 **Goal**: Prove `coe_AlgEvaluate`: for bot-free formulas, evaluation in `WithBot G` via the lifted valuation equals the coe of evaluation in G.
 
@@ -116,7 +116,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Main Theorem and Cleanup [NOT STARTED]
+### Phase 3: Main Theorem and Cleanup [COMPLETED]
 
 **Goal**: Fill the `sorry` in `ipl_conservative_over_mpl` and verify the entire file.
 

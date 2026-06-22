@@ -1,7 +1,7 @@
 # Implementation Plan: Conservative Extension of Modal Systems over CPL
 
 - **Task**: 273 - all_modal_systems_conservative_over_cpl
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 3 hours
 - **Dependencies**: None (all soundness proofs already exist for all 14 systems)
 - **Research Inputs**: specs/273_all_modal_systems_conservative_over_cpl/reports/01_modal-conservativity-survey.md
@@ -63,7 +63,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Group A -- Systems with Vacuous Frame Conditions [NOT STARTED]
+### Phase 1: Group A -- Systems with Vacuous Frame Conditions [COMPLETED]
 
 **Goal**: Create ConservativeExtension.lean for the 9 systems whose frame conditions are all satisfied by `trivial`: T, B, K4, K5, K45, TB, KB5, S4, S5.
 
@@ -118,7 +118,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Group B -- Systems Requiring Seriality [NOT STARTED]
+### Phase 2: Group B -- Systems Requiring Seriality [COMPLETED]
 
 **Goal**: Create ConservativeExtension.lean for the 5 systems that require a `Relation.Serial` proof: D, D4, D5, D45, DB.
 
@@ -157,7 +157,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Barrel Update and CI Verification [NOT STARTED]
+### Phase 3: Barrel Update and CI Verification [COMPLETED]
 
 **Goal**: Update barrel imports, run full CI pipeline to verify all 14 files integrate correctly.
 

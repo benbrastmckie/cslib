@@ -383,6 +383,7 @@ public import Cslib.Logics.Propositional.Semantics.Algebra
 public import Cslib.Logics.Propositional.Semantics.Algebra.Bridge
 public import Cslib.Logics.Propositional.Semantics.Algebra.Completeness
 public import Cslib.Logics.Propositional.Semantics.Algebra.Conservative
+public import Cslib.Logics.Propositional.Semantics.Algebra.KripkeBridge
 public import Cslib.Logics.Propositional.Semantics.Algebra.Lindenbaum
 public import Cslib.Logics.Propositional.Semantics.Algebra.Soundness
 public import Cslib.Logics.Propositional.Semantics.Bool

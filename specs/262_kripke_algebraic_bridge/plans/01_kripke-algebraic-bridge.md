@@ -121,7 +121,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Corollaries, Registration, and CI Verification [IN PROGRESS]
+### Phase 3: Corollaries, Registration, and CI Verification [COMPLETED]
 
 **Goal**: Prove the validity corollaries connecting IValid/MValid to HAValid/GHAValid, update barrel imports, and pass full CI.
 

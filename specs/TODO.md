@@ -11,7 +11,7 @@ next_project_number: 277
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,266,268,271,272,273,274,275,276 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,252,266,268,272,273,274,275,276 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,269 | 36,37,180,268 | Bimodal Porting, Foundations, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -44,10 +44,6 @@ next_project_number: 277
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
-
-### Agent System
-
-271 [RESEARCHING] — Register the /vet command-skill-agent in the cslib extension mani
 
 ### Uncategorized
 
@@ -105,10 +101,13 @@ next_project_number: 277
 ---
 
 ### 271. Register vet in manifest and claudemd
-- **Status**: [RESEARCHING]
+- **Status**: [COMPLETED]
 - **Task Type**: meta
 - **Topic**: agent-system
 - **Dependencies**: Task 270
+- **Research**: [271_register_vet_in_manifest_and_claudemd/reports/01_manifest-registration.md]
+- **Plan**: [271_register_vet_in_manifest_and_claudemd/plans/01_register-vet-plan.md]
+- **Summary**: [271_register_vet_in_manifest_and_claudemd/summaries/01_register-vet-summary.md]
 
 **Description**: Register the /vet command-skill-agent in the cslib extension manifest and CLAUDE.md. Updates: (1) .claude/extensions/cslib/manifest.json -- add cslib-vet-agent.md to provides.agents, skill-cslib-vet to provides.skills, vet.md to provides.commands. No routing entry needed since /vet is a standalone command (not routed through /research, /plan, /implement). (2) CLAUDE.md CSLib Extension section -- add /vet to the Commands table with usage syntax and description. Add skill-cslib-vet and cslib-vet-agent to the Skill-Agent Mapping table. Depends on task 270 (needs actual file names and command syntax from the implemented triplet).
 

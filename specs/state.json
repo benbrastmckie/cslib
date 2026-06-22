@@ -68,7 +68,7 @@
     {
       "project_number": 271,
       "project_name": "register_vet_in_manifest_and_claudemd",
-      "status": "researching",
+      "status": "completed",
       "task_type": "meta",
       "topic": "agent-system",
       "description": "Register the /vet command-skill-agent in the cslib extension manifest and CLAUDE.md. Updates: (1) .claude/extensions/cslib/manifest.json -- add cslib-vet-agent.md to provides.agents, skill-cslib-vet to provides.skills, vet.md to provides.commands. No routing entry needed since /vet is a standalone command (not routed through /research, /plan, /implement). (2) CLAUDE.md CSLib Extension section -- add /vet to the Commands table with usage syntax and description. Add skill-cslib-vet and cslib-vet-agent to the Skill-Agent Mapping table. Depends on task 270 (needs actual file names and command syntax from the implemented triplet).",
@@ -76,8 +76,26 @@
         270
       ],
       "created": "2026-06-22T21:00:00Z",
-      "last_updated": "2026-06-22T20:44:25Z",
-      "session_id": "sess_1782160165_820753_271"
+      "last_updated": "2026-06-22T20:50:30Z",
+      "session_id": "sess_1782160165_820753_271",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/271_register_vet_in_manifest_and_claudemd/reports/01_manifest-registration.md",
+          "summary": "Research: insertion points"
+        },
+        {
+          "type": "plan",
+          "path": "specs/271_register_vet_in_manifest_and_claudemd/plans/01_register-vet-plan.md",
+          "summary": "1-phase plan: 5 edits to manifest.json and CLAUDE.md"
+        },
+        {
+          "type": "summary",
+          "path": "specs/271_register_vet_in_manifest_and_claudemd/summaries/01_register-vet-summary.md",
+          "summary": "Registration summary"
+        }
+      ],
+      "completion_summary": "Registered /vet in cslib manifest.json (agents, skills, commands arrays) and CLAUDE.md (Skill-Agent Mapping and Commands tables)"
     },
     {
       "project_number": 268,

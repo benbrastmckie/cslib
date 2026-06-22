@@ -4,12 +4,22 @@
     {
       "project_number": 277,
       "project_name": "fix_ci_workflow_failures",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "general",
       "description": "Fix recurring CI workflow failures in GitHub Actions (runs 27986662089, 27984755605, 27983889592)",
       "topic": "Project Management",
       "created": "2026-06-22T22:13:41Z",
-      "last_updated": "2026-06-22T22:13:41Z"
+      "last_updated": "2026-06-22T22:27:21Z",
+      "session_id": "sess_1782166847_002e9d",
+      "researched": "2026-06-22T22:27:21Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/277_fix_ci_workflow_failures/reports/01_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates: CI failure root cause analysis"
+        }
+      ]
     },
     {
       "project_number": 276,

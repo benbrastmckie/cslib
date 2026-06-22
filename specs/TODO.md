@@ -33,7 +33,7 @@ next_project_number: 278
 
 ### Project Management
 
-277 [NOT STARTED] — Fix recurring CI workflow failures in GitHub Actions (runs 279866
+277 [RESEARCHED] — Fix recurring CI workflow failures in GitHub Actions (runs 279866
 
 ### Propositional Logic
 
@@ -56,10 +56,11 @@ next_project_number: 278
 ## Tasks
 
 ### 277. Fix ci workflow failures
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: general
 - **Topic**: Project Management
 - **Dependencies**: None
+- **Research**: [277_fix_ci_workflow_failures/reports/01_team-research.md]
 
 **Description**: Fix recurring CI workflow failures in GitHub Actions (runs 27986662089, 27984755605, 27983889592)
 

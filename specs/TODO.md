@@ -1,5 +1,5 @@
 ---
-next_project_number: 270
+next_project_number: 272
 ---
 
 # TODO
@@ -11,8 +11,8 @@ next_project_number: 270
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,266,268 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215,269 | 36,37,180,268 | Bimodal Porting, Foundations, Temporal Logic |
+| 1 | 36,37,180,226,241,245,252,266,268,270 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 2 | 39,40,181,215,269,271 | 36,37,180,268,270 | Bimodal Porting, Foundations, Temporal Logic, ... |
 | 3 | 41 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -45,7 +45,32 @@ next_project_number: 270
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
+### Agent System
+
+270 [NOT STARTED] — Create /vet command-skill-agent triplet for the cslib extension t
+  └─ 271 [NOT STARTED] — Register the /vet command-skill-agent in the cslib extension mani
+
 ## Tasks
+
+### 271. Register vet in manifest and claudemd
+- **Status**: [NOT STARTED]
+- **Task Type**: meta
+- **Topic**: agent-system
+- **Dependencies**: Task 270
+
+**Description**: Register the /vet command-skill-agent in the cslib extension manifest and CLAUDE.md. Updates: (1) .claude/extensions/cslib/manifest.json -- add cslib-vet-agent.md to provides.agents, skill-cslib-vet to provides.skills, vet.md to provides.commands. No routing entry needed since /vet is a standalone command (not routed through /research, /plan, /implement). (2) CLAUDE.md CSLib Extension section -- add /vet to the Commands table with usage syntax and description. Add skill-cslib-vet and cslib-vet-agent to the Skill-Agent Mapping table. Depends on task 270 (needs actual file names and command syntax from the implemented triplet).
+
+---
+
+### 270. Create vet command skill agent
+- **Status**: [NOT STARTED]
+- **Task Type**: meta
+- **Topic**: agent-system
+- **Dependencies**: None
+
+**Description**: Create /vet command-skill-agent triplet for the cslib extension that vets completed CSLib tasks against library standards. Three files to create: (1) .claude/commands/vet.md -- command accepting task numbers (single, comma-separated, ranges) with optional focus prompt, parsing arguments, validating task existence, and delegating to skill-cslib-vet. (2) .claude/skills/skill-cslib-vet/SKILL.md -- thin wrapper skill that validates task inputs, identifies files changed by the task(s) via git history and task artifacts, prepares delegation context with references to CONTRIBUTING.md, NOTATION.md, ORGANISATION.md, CODE_OF_CONDUCT.md standards, and delegates to cslib-vet-agent. (3) .claude/agents/cslib-vet-agent.md -- agent that reads the changed/created files, checks against all four standards documents precisely, runs the full CSLib CI pipeline (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake), identifies violations/issues categorized by standard, and creates appropriately scoped fix tasks (few tasks, none too large) using the multi-task creation standard with interactive user confirmation. The agent should use AskUserQuestion for issue selection and task confirmation. Follow existing patterns from pr.md (command), skill-cslib-implementation (skill), cslib-implementation-agent (agent).
+
+---
 
 ### 269. Hilbert search tactic
 - **Status**: [NOT STARTED]

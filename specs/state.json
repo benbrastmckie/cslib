@@ -1,6 +1,29 @@
 {
-  "next_project_number": 268,
+  "next_project_number": 270,
   "active_projects": [
+    {
+      "project_number": 268,
+      "project_name": "simp_grind_normalization_tags",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Foundations",
+      "description": "Add @[simp, scoped grind =] normalization tags to Hilbert system definitional lemmas. Add tags to the normalization/definitional layer across Propositional/, Modal/, Temporal/, and Bimodal/ Hilbert systems. Target: derived connective unfoldings, context manipulation lemmas, listImp equalities, and similar structural/characterization lemmas. Do NOT tag derivability constructors (Derivable.ax, Derivable.mp, etc.) — those are for the proof-search tactic. Follow cslib existing co-tagging convention. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake",
+      "created": "2026-06-22T20:12:59Z",
+      "last_updated": "2026-06-22T20:12:59Z"
+    },
+    {
+      "project_number": 269,
+      "project_name": "hilbert_search_tactic",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Foundations",
+      "description": "Build generic bounded proof-search tactic for InferenceSystem. Create a bounded DFS proof-search tactic (e.g., hilbert_search) that works generically over the InferenceSystem typeclass. Inspired by BimodalLogic modal_search (~700 lines) but adapted to cslib polymorphic architecture. Search strategies: axiom matching, assumption lookup, modus ponens decomposition, necessitation + K rules, temporal rules. Must handle the InferenceSystem S α typeclass generically (not hardcoded to a specific DerivationTree). Configurable search depth. Should work across Propositional, Modal, Temporal, and Bimodal systems. Depends on task 268 (normalization tags help the tactic work on clean goals). Needs Zulip discussion before PR since this is novel cross-cutting infrastructure for cslib. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake",
+      "dependencies": [
+        268
+      ],
+      "created": "2026-06-22T20:12:59Z",
+      "last_updated": "2026-06-22T20:12:59Z"
+    },
     {
       "project_number": 266,
       "project_name": "research_propositional_and_foundations_improvements",
@@ -244,13 +267,13 @@
     {
       "project_number": 265,
       "project_name": "track_conservative_lean_sorry",
-      "status": "researched",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Conservative.lean:99 (ipl_conservative_over_mpl). This is the only untracked sorry in the codebase — the theorem states that intuitionistic propositional logic is a conservative extension of minimal propositional logic. Research the proof strategy (likely via Kripke model or algebraic argument) and implement.",
       "topic": "Propositional Logic",
       "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-22T19:51:49Z",
-      "session_id": "sess_1782157692_280fc8",
+      "last_updated": "2026-06-22T19:57:25Z",
+      "session_id": "sess_1782158218_753573",
       "artifacts": [
         {
           "path": "specs/265_track_conservative_lean_sorry/reports/01_conservative-extension-proof.md",

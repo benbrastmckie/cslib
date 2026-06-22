@@ -1,7 +1,7 @@
 # Implementation Plan: Conservative Extension of IPL over MPL
 
 - **Task**: 265 - track_conservative_lean_sorry
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 1 hour
 - **Dependencies**: None
 - **Research Inputs**: specs/265_track_conservative_lean_sorry/reports/01_conservative-extension-proof.md
@@ -68,7 +68,7 @@ No ROADMAP.md items directly correspond to this propositional-level conservative
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: WithBot HeytingAlgebra Instance [NOT STARTED]
+### Phase 1: WithBot HeytingAlgebra Instance [IN PROGRESS]
 
 **Goal**: Define `withBotHimp` and prove the `HeytingAlgebra (WithBot G)` instance for any GeneralizedHeytingAlgebra G.
 

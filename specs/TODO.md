@@ -1,5 +1,5 @@
 ---
-next_project_number: 268
+next_project_number: 270
 ---
 
 # TODO
@@ -11,8 +11,8 @@ next_project_number: 268
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,265,266 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
-| 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
+| 1 | 36,37,180,226,241,245,252,265,266,268 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 2 | 39,40,181,215,269 | 36,37,180,268 | Bimodal Porting, Foundations, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -27,12 +27,14 @@ next_project_number: 268
 
 ### Foundations
 
+268 [NOT STARTED] — Add @[simp, scoped grind =] normalization tags to Hilbert system 
+  └─ 269 [NOT STARTED] — Build generic bounded proof-search tactic for InferenceSystem. Cr
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Propositional Logic
 
 226 [RESEARCHED] — Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648
-265 [RESEARCHED] — Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Co
+265 [IMPLEMENTING] — Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Co
 266 [PLANNED] — Research the Propositional/ logic and Foundations/ in this repo, 
 
 ### Temporal Logic
@@ -45,6 +47,26 @@ next_project_number: 268
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
+
+### 269. Hilbert search tactic
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Foundations
+- **Dependencies**: Task 268
+
+**Description**: Build generic bounded proof-search tactic for InferenceSystem. Create a bounded DFS proof-search tactic (e.g., hilbert_search) that works generically over the InferenceSystem typeclass. Inspired by BimodalLogic modal_search (~700 lines) but adapted to cslib polymorphic architecture. Search strategies: axiom matching, assumption lookup, modus ponens decomposition, necessitation + K rules, temporal rules. Must handle the InferenceSystem S α typeclass generically (not hardcoded to a specific DerivationTree). Configurable search depth. Should work across Propositional, Modal, Temporal, and Bimodal systems. Depends on task 268 (normalization tags help the tactic work on clean goals). Needs Zulip discussion before PR since this is novel cross-cutting infrastructure for cslib. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake
+
+---
+
+### 268. Simp grind normalization tags
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Foundations
+- **Dependencies**: None
+
+**Description**: Add @[simp, scoped grind =] normalization tags to Hilbert system definitional lemmas. Add tags to the normalization/definitional layer across Propositional/, Modal/, Temporal/, and Bimodal/ Hilbert systems. Target: derived connective unfoldings, context manipulation lemmas, listImp equalities, and similar structural/characterization lemmas. Do NOT tag derivability constructors (Derivable.ax, Derivable.mp, etc.) — those are for the proof-search tactic. Follow cslib existing co-tagging convention. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake
+
+---
 
 ### 266. Research propositional and foundations improvements
 - **Status**: [PLANNED]
@@ -59,7 +81,7 @@ next_project_number: 268
 ---
 
 ### 265. Track conservative lean sorry
-- **Status**: [RESEARCHED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

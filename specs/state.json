@@ -4,12 +4,22 @@
     {
       "project_number": 261,
       "project_name": "review_propositional_logic_zulip_thread",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Review Zulip thread on propositional logic setup in CSLib, study all desiderata and conflicts, and craft a balanced response that satisfies all parties",
       "created": "2026-06-22T06:34:05Z",
-      "last_updated": "2026-06-22T06:34:05Z"
+      "last_updated": "2026-06-22T06:42:50Z",
+      "session_id": "sess_1782110150_129397",
+      "researched": "2026-06-22T06:42:50Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/261_review_propositional_logic_zulip_thread/reports/01_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates: thread analysis, prior art, critique, strategic horizons"
+        }
+      ]
     },
     {
       "project_number": 255,

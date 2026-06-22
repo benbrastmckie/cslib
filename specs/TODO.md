@@ -32,7 +32,7 @@ next_project_number: 262
 ### Propositional Logic
 
 226 [RESEARCHED] — Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648
-261 [NOT STARTED] — Review Zulip thread on propositional logic setup in CSLib, study 
+261 [RESEARCHED] — Review Zulip thread on propositional logic setup in CSLib, study 
 
 ### Temporal Logic
 
@@ -53,10 +53,11 @@ next_project_number: 262
 ## Tasks
 
 ### 261. Review propositional logic zulip thread
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [261_review_propositional_logic_zulip_thread/reports/01_team-research.md]
 
 **Description**: Review Zulip thread on propositional logic setup in CSLib, study all desiderata and conflicts, and craft a balanced response that satisfies all parties
 

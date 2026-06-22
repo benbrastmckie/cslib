@@ -1,6 +1,16 @@
 {
-  "next_project_number": 262,
+  "next_project_number": 263,
   "active_projects": [
+    {
+      "project_number": 262,
+      "project_name": "kripke_algebraic_bridge",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Implement Kripke-algebraic bridge: prove that upsets of a Kripke frame's preorder form a Heyting algebra, and connect IForces to AlgEvaluate via this construction. This establishes the well-known duality between Kripke semantics and algebraic semantics for intuitionistic propositional logic",
+      "created": "2026-06-22T14:53:38Z",
+      "last_updated": "2026-06-22T14:53:38Z"
+    },
     {
       "project_number": 261,
       "project_name": "review_propositional_logic_zulip_thread",

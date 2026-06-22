@@ -11,7 +11,7 @@ next_project_number: 268
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,265,267 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 1 | 36,37,180,226,241,245,252,265,266,267 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -33,7 +33,8 @@ next_project_number: 268
 
 226 [RESEARCHED] — Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648
 265 [BLOCKED] — Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Co
-267 [NOT STARTED] — Read https://leanprover.zulipchat.com/#narrow/channel/513188-CSLi
+266 [PLANNED] — Research the Propositional/ logic and Foundations/ in this repo, 
+267 [RESEARCHING] — Read https://leanprover.zulipchat.com/#narrow/channel/513188-CSLi
 
 ### Temporal Logic
 
@@ -47,7 +48,7 @@ next_project_number: 268
 ## Tasks
 
 ### 267. Verify zulip propositional logic claims
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -57,7 +58,7 @@ next_project_number: 268
 ---
 
 ### 266. Research propositional and foundations improvements
-- **Status**: [ABANDONED]
+- **Status**: [PLANNED]
 - **Task Type**: formal
 - **Topic**: Propositional Logic
 - **Dependencies**: None

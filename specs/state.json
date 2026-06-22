@@ -4,22 +4,23 @@
     {
       "project_number": 267,
       "project_name": "verify_zulip_propositional_logic_claims",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "description": "Read https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/near/605813681 to rigorously check that all claims are accurate",
       "topic": "Propositional Logic",
       "created": "2026-06-22T19:00:01Z",
-      "last_updated": "2026-06-22T19:00:01Z"
+      "last_updated": "2026-06-22T19:02:49Z",
+      "session_id": "sess_1782154953_a78bf2"
     },
     {
       "project_number": 266,
       "project_name": "research_propositional_and_foundations_improvements",
-      "status": "abandoned",
+      "status": "planned",
       "task_type": "formal",
       "description": "Research the Propositional/ logic and Foundations/ in this repo, the supporting roles these play, and what else remains to be done to improve these elements of this library. Compare with /home/benjamin/Projects/BimodalLogic/specs/305_rabinovich_ea_formula_implementation/reports/16_witness-count-restructure.md and the tableau system included there, in addition to researching what other additions make sense to include such as a sequent calculus",
       "topic": "Propositional Logic",
       "created": "2026-06-22T18:25:59Z",
-      "last_updated": "2026-06-22T18:57:15Z",
+      "last_updated": "2026-06-22T19:07:25Z",
       "session_id": "sess_1782153956_2603d8",
       "researched": "2026-06-22T18:36:32Z",
       "next_artifact_number": 2,
@@ -34,8 +35,7 @@
           "type": "plan",
           "summary": "6-phase implementation plan covering algebraic-Hilbert bridge, ND capture-avoidance fix, ProofSystem documentation and instances, abstract completeness extraction, and test coverage"
         }
-      ],
-      "abandoned_reason": "Created erroneously by task-265 agent during orchestration. Not a requested task."
+      ]
     },
     {
       "project_number": 241,

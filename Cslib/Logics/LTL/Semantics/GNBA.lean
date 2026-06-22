@@ -792,8 +792,7 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
       Formula.gnbaOmegaLanguage φ := by
   apply Cslib.ωLanguage.mem_ext
   intro v
-  simp only [Cslib.Automata.ωAcceptor.mem_language, NA.Buchi.instωAcceptor,
-    Formula.gnbaOmegaLanguage, Cslib.ωLanguage.mem_def, Set.mem_setOf_eq]
+  simp only [Formula.gnbaOmegaLanguage, Cslib.ωLanguage.mem_def, Set.mem_setOf_eq]
   constructor
   · -- Soundness: NBA accepting run → satisfaction
     -- Use Classical for Decidability of B ∈ gnbaAcceptSet throughout

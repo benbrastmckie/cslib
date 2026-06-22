@@ -24,6 +24,7 @@ on:
 
 jobs:
   bump:
+    if: github.repository == 'leanprover/cslib'
     runs-on: ubuntu-latest
     steps:
       - name: Generate app token
@@ -51,6 +52,7 @@ jobs:
           git-user-email: mathlib-nightly-testing[bot]@users.noreply.github.com
 
   open-issue:
+    if: github.repository == 'leanprover/cslib'
     runs-on: ubuntu-latest
     permissions:
       issues: write

@@ -4,12 +4,12 @@
     {
       "project_number": 277,
       "project_name": "fix_ci_workflow_failures",
-      "status": "researched",
+      "status": "implemented",
       "task_type": "general",
       "description": "Fix recurring CI workflow failures in GitHub Actions (runs 27986662089, 27984755605, 27983889592)",
       "topic": "Project Management",
       "created": "2026-06-22T22:13:41Z",
-      "last_updated": "2026-06-22T22:27:21Z",
+      "last_updated": "2026-06-22T00:00:00Z",
       "session_id": "sess_1782166847_002e9d",
       "researched": "2026-06-22T22:27:21Z",
       "next_artifact_number": 2,
@@ -18,8 +18,41 @@
           "path": "specs/277_fix_ci_workflow_failures/reports/01_team-research.md",
           "type": "research",
           "summary": "Team research with 4 teammates: CI failure root cause analysis"
+        },
+        {
+          "path": "specs/277_fix_ci_workflow_failures/plans/01_implementation-plan.md",
+          "type": "plan",
+          "summary": "3-phase plan: repository guard, build warning fixes, pre-pr-check expansion"
+        },
+        {
+          "path": "specs/277_fix_ci_workflow_failures/summaries/01_execution-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary for CI fix: 3 phases completed"
         }
-      ]
+      ],
+      "plan_metadata": {
+        "phases": 3,
+        "total_effort_hours": 1.5,
+        "complexity": "medium",
+        "research_integrated": true,
+        "plan_version": 1,
+        "dependency_waves": [
+          [
+            1,
+            2
+          ],
+          [
+            3
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/01_team-research.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-06-22"
+          }
+        ]
+      }
     },
     {
       "project_number": 276,

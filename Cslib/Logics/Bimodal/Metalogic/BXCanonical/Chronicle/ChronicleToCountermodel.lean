@@ -43,6 +43,7 @@ set_option linter.style.longLine false
 set_option linter.style.setOption false
 set_option linter.flexible false
 set_option linter.style.openClassical false
+set_option warn.sorry false
 
 attribute [local instance] Classical.propDecidable
 

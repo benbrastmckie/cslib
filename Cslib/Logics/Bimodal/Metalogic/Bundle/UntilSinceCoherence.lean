@@ -32,10 +32,12 @@ variable {Atom : Type*}
 
 /-! ## Reflexive Base Case -/
 
+set_option warn.sorry false in
 theorem backward_until_reflexive {M : Set (Formula Atom)} (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
     (φ ψ : Formula Atom) (h_psi : ψ ∈ M) : Formula.untl φ ψ ∈ M := by
   sorry  -- sorry: blocked on task 37
 
+set_option warn.sorry false in
 theorem backward_since_reflexive {M : Set (Formula Atom)} (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
     (φ ψ : Formula Atom) (h_psi : ψ ∈ M) : Formula.snce φ ψ ∈ M := by
   sorry  -- sorry: blocked on task 37

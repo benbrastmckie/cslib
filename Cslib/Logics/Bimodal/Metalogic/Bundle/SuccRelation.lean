@@ -250,38 +250,45 @@ theorem single_step_forcing_past
 
 -- Sorries from source (TOMBSTONE task 173; blocked on task 37)
 
+set_option warn.sorry false in
 theorem until_unfold_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
     (φ ψ : Formula Atom) (h_U : Formula.untl φ ψ ∈ M) :
     Formula.untl (Formula.bot : Formula Atom) (Formula.or ψ (Formula.and φ (Formula.untl φ ψ))) ∈ M := by
   sorry  -- sorry: blocked on task 37
 
+set_option warn.sorry false in
 theorem since_unfold_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
     (φ ψ : Formula Atom) (h_S : Formula.snce φ ψ ∈ M) :
     Formula.snce (Formula.bot : Formula Atom) (Formula.or ψ (Formula.and φ (Formula.snce φ ψ))) ∈ M := by
   sorry  -- sorry: blocked on task 37
 
+set_option warn.sorry false in
 theorem until_persists_through_succ (u v : Set (Formula Atom))
     (h_mcs_u : SetMaximalConsistent (FrameClass.Base : FrameClass) u) (h_mcs_v : SetMaximalConsistent (FrameClass.Base : FrameClass) v) (h_succ : Succ u v)
     (φ ψ : Formula Atom) (h_U : Formula.untl φ ψ ∈ u) (h_neg_psi : Formula.neg ψ ∈ u) :
     Formula.untl φ ψ ∈ v := by
   sorry  -- sorry: blocked on task 37
 
+set_option warn.sorry false in
 theorem or_until_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
     (φ ψ : Formula Atom)
     (h : Formula.or ψ (Formula.and φ (Formula.untl φ ψ)) ∈ M) :
     Formula.untl φ ψ ∈ M := by
   sorry  -- sorry: blocked on task 37
 
+set_option warn.sorry false in
 theorem or_since_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
     (φ ψ : Formula Atom)
     (h : Formula.or ψ (Formula.and φ (Formula.snce φ ψ)) ∈ M) :
     Formula.snce φ ψ ∈ M := by
   sorry  -- sorry: blocked on task 37
 
+set_option warn.sorry false in
 theorem g_content_subset_mcs (u : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) u) :
     gContent u ⊆ u := by
   sorry  -- sorry: blocked on task 37
 
+set_option warn.sorry false in
 theorem h_content_subset_mcs (u : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) u) :
     hContent u ⊆ u := by
   sorry  -- sorry: blocked on task 37

@@ -1,7 +1,7 @@
 # Implementation Plan: Modal Cube Inter-System Conservativity
 
 - **Task**: 276 - modal_cube_inter_system_conservativity
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 3 hours
 - **Dependencies**: None (axiom predicates and DerivationTree already exist for all 15 systems)
 - **Research Inputs**: specs/276_modal_cube_inter_system_conservativity/reports/01_modal-cube-conservativity.md
@@ -64,7 +64,7 @@ No ROADMAP.md found.
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Generic Lifting Lemma [NOT STARTED]
+### Phase 1: Generic Lifting Lemma [COMPLETED]
 
 **Goal**: Create the `Lifting.lean` file with the generic `lift_derivation` and `Derivable_mono` lemmas.
 
@@ -87,7 +87,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Axiom Subsumption Lemmas [NOT STARTED]
+### Phase 2: Axiom Subsumption Lemmas [COMPLETED]
 
 **Goal**: Prove all 24 direct-edge axiom subsumption lemmas establishing that the weaker system's axiom predicate implies the stronger system's axiom predicate.
 
@@ -154,7 +154,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Conservativity Theorems and CI [NOT STARTED]
+### Phase 3: Conservativity Theorems and CI [COMPLETED]
 
 **Goal**: Instantiate all 24+3 conservativity theorems using `Derivable_mono` + subsumption lemmas, update barrel imports, and pass full CI.
 

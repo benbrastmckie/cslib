@@ -11,7 +11,7 @@ next_project_number: 267
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,263,264,265,266 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 1 | 36,37,180,226,241,245,252,263,265,266 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -32,9 +32,9 @@ next_project_number: 267
 ### Propositional Logic
 
 226 [RESEARCHED] — Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648
-263 [NOT STARTED] — Run lake shake --add-public --keep-implied --keep-prefix and appl
-265 [NOT STARTED] — Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Co
-266 [NOT STARTED] — Research the Propositional/ logic and Foundations/ in this repo, 
+263 [IMPLEMENTING] — Run lake shake --add-public --keep-implied --keep-prefix and appl
+265 [RESEARCHING] — Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Co
+266 [RESEARCHED] — Research the Propositional/ logic and Foundations/ in this repo, 
 
 ### Temporal Logic
 
@@ -42,24 +42,24 @@ next_project_number: 267
 241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
-264 [NOT STARTED] — Review and commit the 15 uncommitted files: Cslib/Foundations/Rel
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
 
 ### 266. Research propositional and foundations improvements
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: formal
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [266_research_propositional_and_foundations_improvements/reports/01_team-research.md]
 
 **Description**: Research the Propositional/ logic and Foundations/ in this repo, the supporting roles these play, and what else remains to be done to improve these elements of this library. Compare with /home/benjamin/Projects/BimodalLogic/specs/305_rabinovich_ea_formula_implementation/reports/16_witness-count-restructure.md and the tableau system included there, in addition to researching what other additions make sense to include such as a sequent calculus
 
 ---
 
 ### 265. Track conservative lean sorry
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -69,7 +69,7 @@ next_project_number: 267
 ---
 
 ### 264. Commit uncommitted test import changes
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -79,7 +79,7 @@ next_project_number: 267
 ---
 
 ### 263. Lake shake import cleanup
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

@@ -1,6 +1,32 @@
 {
   "completed_projects": [
     {
+      "project_number": 267,
+      "project_name": "verify_zulip_propositional_logic_claims",
+      "status": "abandoned",
+      "task_type": "cslib",
+      "description": "Read https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/near/605813681 to rigorously check that all claims are accurate",
+      "topic": "Propositional Logic",
+      "created": "2026-06-22T19:00:01Z",
+      "last_updated": "2026-06-22T19:19:00Z",
+      "session_id": "sess_1782155940_pIuU3o",
+      "researched": "2026-06-22T19:12:28Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/267_verify_zulip_propositional_logic_claims/reports/01_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates: verified 17/20 claims accurate, 1 overstated, 2 unverifiable"
+        },
+        {
+          "type": "report",
+          "path": "specs/267_verify_zulip_propositional_logic_claims/reports/02_branch-analysis.md",
+          "description": "Branch analysis: Thomas Waring intuitionistic ND vs CSLib main"
+        }
+      ],
+      "abandoned": "2026-06-22T19:48:44Z"
+    },
+    {
       "project_number": 217,
       "project_name": "push_generic_metalogic_to_pr649",
       "status": "abandoned",

@@ -11,7 +11,7 @@ next_project_number: 268
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,265,266,267 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 1 | 36,37,180,226,241,245,252,265,266 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -32,9 +32,8 @@ next_project_number: 268
 ### Propositional Logic
 
 226 [RESEARCHED] — Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648
-265 [PLANNED] — Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Co
+265 [RESEARCHING] — Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Co
 266 [PLANNED] — Research the Propositional/ logic and Foundations/ in this repo, 
-267 [RESEARCHED] — Read https://leanprover.zulipchat.com/#narrow/channel/513188-CSLi
 
 ### Temporal Logic
 
@@ -46,19 +45,6 @@ next_project_number: 268
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ## Tasks
-
-### 267. Verify zulip propositional logic claims
-- **Status**: [RESEARCHED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: None
-- **Research**:
-  - [267_verify_zulip_propositional_logic_claims/reports/01_team-research.md]
-  - [267_verify_zulip_propositional_logic_claims/reports/02_branch-analysis.md]
-
-**Description**: Read https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/near/605813681 to rigorously check that all claims are accurate
-
----
 
 ### 266. Research propositional and foundations improvements
 - **Status**: [PLANNED]
@@ -73,7 +59,7 @@ next_project_number: 268
 ---
 
 ### 265. Track conservative lean sorry
-- **Status**: [PLANNED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

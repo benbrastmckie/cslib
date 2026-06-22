@@ -2,7 +2,7 @@
 
 - **Task**: 261 - Review Zulip thread on propositional logic setup in CSLib, study all desiderata and conflicts, and craft a balanced response that satisfies all parties
 - **Status**: [NOT STARTED]
-- **Effort**: 3 hours
+- **Effort**: 2.5 hours
 - **Dependencies**: None
 - **Research Inputs**: reports/01_team-research.md, reports/02_nd-vs-hilbert-analysis.md
 - **Artifacts**: plans/03_implementation-plan.md (this file)
@@ -12,7 +12,7 @@
 
 ## Overview
 
-This task produces a comprehensive Zulip response to the propositional logic thread (CSLib > Propositional Logic, MSG 602336739--605341190) and fills documentation gaps in the codebase. Two rounds of research identified that the codebase already resolves all substantive technical disputes (bridge lemmas exist, theory parameter handles MPL/IPL/CPL, AlgEvaluate with bot_val is implemented). The remaining work is: (1) enhance documentation at three specific locations to pre-empt future design re-litigation, (2) investigate and answer Thomas's docstring question, and (3) craft the Zulip response. Done when the response file is written and all documentation edits compile.
+This task produces a comprehensive Zulip response to the propositional logic thread (CSLib > Propositional Logic, MSG 602336739--605341190) and fills documentation gaps in the codebase. Two rounds of research identified that the codebase already resolves all substantive technical disputes (bridge lemmas exist, theory parameter handles MPL/IPL/CPL, AlgEvaluate with bot_val is implemented). The remaining work is: (1) restore Thomas's deleted docstring framing in `NaturalDeduction/Basic.lean` and enhance with explicit design rationale, (2) add classically-scoped warnings to `FromPropositional.lean`, and (3) craft the Zulip response including an apology for the premature docstring rewrite. Done when the response file is written and all documentation edits compile.
 
 ### Research Integration
 
@@ -31,9 +31,8 @@ This task does not directly advance any ROADMAP.md remaining items. It supports 
 ## Goals & Non-Goals
 
 **Goals**:
-- Investigate Thomas's docstring question via git history and document findings
+- Restore Thomas's original "ongoing discussion" docstring framing in `NaturalDeduction/Basic.lean` (deleted in commit `7cc09612`), and enhance with explicit design rationale for the efq-as-derived-rule choice
 - Add classically-scoped limitation warning to `FromPropositional.lean` module-level documentation
-- Add design rationale documentation to `NaturalDeduction/Basic.lean` explaining the efq-as-derived-rule choice
 - Write a Zulip response that addresses each participant's concerns, follows a natural narrative arc, and invites continued collaboration
 - Acknowledge Thomas's contributions (GHA idea, `v models T` pattern, original ND system) explicitly
 
@@ -48,7 +47,7 @@ This task does not directly advance any ROADMAP.md remaining items. It supports 
 
 | Risk | Impact | Likelihood | Mitigation |
 |------|--------|------------|------------|
-| Thomas's docstring question refers to content not recoverable from git | M | L | Check git log with --follow; if content is not found, acknowledge uncertainty in the response |
+| Restored docstring wording doesn't match Thomas's expectations | M | L | Restore his original framing verbatim where possible; the Zulip response explains the restoration and invites further edits |
 | Response tone perceived as dismissive of Thomas's position | H | L | Explicitly acknowledge ND symmetry as a genuine trade-off, credit Thomas's contributions, and frame CSLib's choice as a design decision rather than a correctness claim |
 | Documentation additions fail lake build | L | L | Run scoped `lake build` after each edit to verify |
 | Zulip response too long for thread format | M | M | Keep response under 2000 words; use headers for scanability |
@@ -58,55 +57,40 @@ This task does not directly advance any ROADMAP.md remaining items. It supports 
 **Dependency Analysis**:
 | Wave | Phases | Blocked by |
 |------|--------|------------|
-| 1 | 1 | -- |
-| 2 | 2, 3 | 1 |
-| 3 | 4 | 2, 3 |
+| 1 | 1, 2 | -- |
+| 2 | 3 | 1, 2 |
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Investigate Docstring Deletion [NOT STARTED]
+### Phase 1: Restore Thomas's Docstring and Enhance ND Documentation [NOT STARTED]
 
-**Goal**: Determine what docstring content Thomas is asking about in MSG 605341190 ("btw Benjamin, why did you delete that part of the docstring in `NaturalDeduction/Basic`?") by examining git history.
+**Goal**: Restore the "ongoing discussion" framing and design-choice acknowledgment from Thomas's original docstring (deleted in commit `7cc09612`), then enhance with explicit design rationale.
+
+**Investigation Result** (completed pre-plan): Thomas's original docstring from PR #91 contained a paragraph explaining that the efq-as-axiom design "differs from many on-paper presentations" and framed the choice as **ongoing discussion**, with a link to the Zulip thread. Commit `7cc09612` (Jun 16, "five-primitive formula type with primitive bot") replaced this with the current text that presents the design as settled, removing the discussion framing, the Zulip link, and Thomas's original references (Prawitz prose citation, Sorensen & Urzyczyn).
 
 **Tasks**:
-- [ ] Run `git log --follow -p -- Cslib/Logics/Propositional/NaturalDeduction/Basic.lean` to find docstring changes
-- [ ] Identify what was removed or modified and when
-- [ ] Record the finding for use in the Zulip response (Phase 4)
+- [ ] Read current docstring in `NaturalDeduction/Basic.lean` and Thomas's original version from `git show 7cc09612~1:Cslib/Logics/Propositional/NaturalDeduction/Basic.lean`
+- [ ] Restore the key content from Thomas's original docstring: (a) acknowledgment that the design differs from standard on-paper ND presentations, (b) explanation that efq is modeled as a theory axiom rather than a deduction rule, (c) link to the Zulip discussion thread
+- [ ] Restore Thomas's original reference citations (Prawitz, Sorensen & Urzyczyn) alongside the current BibKey references
+- [ ] Add a "Design Decisions" subsection explaining: (a) why efq is theory-dependent rather than a primitive rule, (b) that this breaks the constructor-rule correspondence (acknowledging Thomas's ND symmetry point as a genuine trade-off), (c) that this is a deliberate choice enabling MPL-first design via the theory parameter
+- [ ] Run `lake build Cslib.Logics.Propositional.NaturalDeduction.Basic` to verify
 
-**Timing**: 20 minutes
+**Timing**: 40 minutes
 
 **Depends on**: none
 
-**Files to modify**: None (read-only investigation)
-
-**Verification**:
-- The specific deletion is identified, or it is confirmed that no deletion occurred (in which case the response will ask Thomas for clarification)
-
----
-
-### Phase 2: Enhance NaturalDeduction/Basic.lean Documentation [NOT STARTED]
-
-**Goal**: Add or enhance documentation in `NaturalDeduction/Basic.lean` making the efq-as-derived-rule design choice explicit, addressing Thomas's ND symmetry concern proactively.
-
-**Tasks**:
-- [ ] Review the existing docstring (lines 14-64) to determine what is already documented
-- [ ] If not already present, add a "Design Decisions" subsection explaining: (a) why efq is theory-dependent rather than a primitive constructor, (b) that this breaks the constructor-rule correspondence (acknowledging Thomas's point), (c) that this is a deliberate trade-off enabling MPL-first design with theory parameter
-- [ ] Run `lake build Cslib.Logics.Propositional.NaturalDeduction.Basic` to verify
-
-**Timing**: 30 minutes
-
-**Depends on**: 1
-
 **Files to modify**:
-- `Cslib/Logics/Propositional/NaturalDeduction/Basic.lean` -- docstring enhancement
+- `Cslib/Logics/Propositional/NaturalDeduction/Basic.lean` -- restore + enhance docstring
 
 **Verification**:
-- Documentation includes explicit mention of the efq design choice and its trade-offs
+- Docstring restores Thomas's "differs from standard presentations" framing
+- Docstring includes link to the Zulip Propositional Logic discussion
+- Docstring includes explicit design rationale for efq-as-axiom trade-off
 - `lake build` passes for the module
 
 ---
 
-### Phase 3: Add Classically-Scoped Warning to FromPropositional.lean [NOT STARTED]
+### Phase 2: Add Classically-Scoped Warning to FromPropositional.lean [NOT STARTED]
 
 **Goal**: Add a prominent module-level documentation note in `FromPropositional.lean` (both Modal and Temporal versions) warning that the Lukasiewicz encoding of `and`/`or` is valid only for classical modal logic.
 
@@ -118,7 +102,7 @@ Phases within the same wave can execute in parallel.
 
 **Timing**: 30 minutes
 
-**Depends on**: 1
+**Depends on**: none
 
 **Files to modify**:
 - `Cslib/Logics/Modal/FromPropositional.lean` -- enhanced limitation warning
@@ -130,7 +114,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: Draft and Write Zulip Response [NOT STARTED]
+### Phase 3: Draft and Write Zulip Response [NOT STARTED]
 
 **Goal**: Write a carefully crafted Zulip response that addresses each participant's concerns, presents the synthesis from both research rounds, follows a natural narrative arc, and invites continued collaboration.
 
@@ -144,7 +128,7 @@ Phases within the same wave can execute in parallel.
   5. Parametric completeness: Thomas's `v models T` pattern adopted as `AlgTValid` (credit Thomas)
   6. Prop vs. Bool: resolved by dual evaluator + bridge lemmas (all exist)
   7. Thomas's IProposition compromise: thank for proof-of-concept, explain why dual types are impractical for multi-logic architecture
-  8. Answer Thomas's docstring question (using findings from Phase 1)
+  8. Answer Thomas's docstring question: acknowledge the deletion was premature, explain that the "ongoing discussion" framing and his references have been restored
   9. PR strategy: offer to split PR #648 for easier review
   10. Closing: credit Thomas's contributions, invite continued collaboration
 - [ ] Review tone for balance: firm on technical decisions, gracious on contributions, honest about trade-offs
@@ -152,7 +136,7 @@ Phases within the same wave can execute in parallel.
 
 **Timing**: 1.5 hours
 
-**Depends on**: 2, 3
+**Depends on**: 1, 2
 
 **Files to modify**:
 - `specs/261_review_propositional_logic_zulip_thread/zulip-response.md` -- new file, the Zulip response draft

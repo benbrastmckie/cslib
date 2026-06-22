@@ -32,7 +32,7 @@ next_project_number: 268
 ### Propositional Logic
 
 226 [RESEARCHED] — Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648
-265 [BLOCKED] — Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Co
+265 [RESEARCHING] — Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Co
 266 [PLANNED] — Research the Propositional/ logic and Foundations/ in this repo, 
 267 [RESEARCHED] — Read https://leanprover.zulipchat.com/#narrow/channel/513188-CSLi
 
@@ -52,7 +52,9 @@ next_project_number: 268
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
-- **Research**: [267_verify_zulip_propositional_logic_claims/reports/01_team-research.md]
+- **Research**:
+  - [267_verify_zulip_propositional_logic_claims/reports/01_team-research.md]
+  - [267_verify_zulip_propositional_logic_claims/reports/02_branch-analysis.md]
 
 **Description**: Read https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/near/605813681 to rigorously check that all claims are accurate
 
@@ -71,7 +73,7 @@ next_project_number: 268
 ---
 
 ### 265. Track conservative lean sorry
-- **Status**: [BLOCKED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

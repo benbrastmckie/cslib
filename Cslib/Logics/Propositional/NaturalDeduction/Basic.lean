@@ -48,10 +48,32 @@ and implication introduction and elimination — 10 constructors in total. Ex fa
 (bottom elimination) is a derived rule requiring `[IsIntuitionistic T]`.
 
 Logic strength is controlled by the theory parameter:
-- `MPL` (minimal propositional logic, Johansson 1937 [Johansson1937]): no axioms beyond the
-  10 primitive rules; bottom has no special status.
+- `MPL` (minimal propositional logic [Johansson1937]): no axioms beyond the 10 primitive rules.
 - `IPL` (intuitionistic propositional logic): adds the principle of explosion `⊥ → A`.
 - `CPL` (classical propositional logic): adds double negation elimination `¬¬A → A`.
+
+**Design trade-off.** `⊥` is a primitive constructor of `Proposition` (a nullary connective), but
+ex falso quodlibet (`⊥ → A`) is not a primitive rule — it enters as a theory axiom via
+`[IsIntuitionistic T]`. This differs from many on-paper natural deduction presentations
+([Prawitz1965], §10.4 of [TroelstraVanDalen1988], §2.2 of Sorensen & Urzyczyn's
+*Lectures on the Curry-Howard Isomorphism*), which include bottom elimination as a primitive rule.
+
+The trade-off is between two valid design goals:
+- **API uniformity and zero duplication** across the multi-logic hierarchy (Modal, Temporal,
+  Bimodal): a single `Proposition` type with primitive `⊥` lets MPL, IPL, and CPL share one
+  substitution monad and one set of bridge lemmas, and the `FromPropositional` embeddings use
+  the direct map `| .bot => .bot`.
+- **Constructor-rule correspondence** characteristic of Gentzen-style ND: with `⊥` as a
+  primitive constructor, ND symmetry would demand that its elimination rule (`efq`) also be a
+  primitive constructor of `Derivation`.
+
+Note that `⊥` is the one connective with **no introduction rule** in any proof system; the
+asymmetry (0 intro rules, 1 elim rule) is a property of `⊥` itself, not a defect of this design.
+Making `efq` a theory axiom rather than a derivation constructor reflects this asymmetry directly:
+it is absent in MPL and present in IPL/CPL as a logic-dependent rule.
+
+This design choice and its trade-offs are discussed further in the
+[CSLib Zulip thread on Propositional Logic](https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic).
 
 ## References
 

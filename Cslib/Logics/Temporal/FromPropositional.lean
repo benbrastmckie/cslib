@@ -30,6 +30,14 @@ sound and are used here because this embedding targets classical temporal logic 
 Note: This differs from the propositional level, where `and`/`or` are native constructors
 with `HasAnd`/`HasOr` instances. The embedding necessarily uses Lukasiewicz because
 `Temporal.Formula` lacks native `and`/`or` constructors.
+
+## Limitations
+
+**Classical scope only.** The Lukasiewicz encodings `¬(φ → ¬ψ)` for `∧` and `¬φ → ψ` for `∨`
+are classically valid but not intuitionistically valid. This embedding is therefore sound for
+classical temporal logics (e.g., BX) but **not** for intuitionistic temporal logics. If CSLib
+adds intuitionistic temporal logic in the future, a separate embedding respecting the native
+`and`/`or` constructors will be required.
 -/
 
 @[expose] public section

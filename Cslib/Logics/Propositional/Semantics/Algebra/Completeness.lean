@@ -45,18 +45,28 @@ variable {Atom : Type u} [DecidableEq Atom] {T : Theory Atom}
 
 /-! ## Canonical Valuation -/
 
+/-- The canonical valuation for the Lindenbaum algebra: maps each atom `x` to the equivalence
+class of the atomic formula `atom x` in the Lindenbaum–Tarski algebra of `T`. -/
 def Theory.canonicalV (T : Theory Atom) : Atom → LindenbaumAlgebra T :=
   fun x => lindenbaumMk T (.atom x)
 
+/-- The canonical bottom value for the Lindenbaum algebra: the equivalence class of `⊥`.
+For intuitionistic and classical theories (`[IsIntuitionistic T]`), this equals the
+algebraic bottom element `⊥` of the Heyting algebra (see `canonicalBotVal_eq`). -/
 def Theory.canonicalBotVal (T : Theory Atom) : LindenbaumAlgebra T :=
   lindenbaumMk T .bot
 
+/-- For intuitionistic theories, the canonical bottom value equals the Heyting algebra bottom `⊥`.
+This relies on `lindenbaumBot`, which identifies `[⊥]` with `⊥` when `[IsIntuitionistic T]`. -/
 theorem Theory.canonicalBotVal_eq [IsIntuitionistic T] :
     T.canonicalBotVal = (⊥ : LindenbaumAlgebra T) := by
   simp [Theory.canonicalBotVal, lindenbaumBot]
 
 /-! ## Truth Lemma -/
 
+/-- Truth lemma: evaluating any formula `A` under the canonical valuation and canonical bottom value
+gives exactly the equivalence class `[A]` in the Lindenbaum algebra.
+This is the key fact linking syntax and semantics in the completeness proof. -/
 theorem Theory.canonicalV_spec (T : Theory Atom) (A : Proposition Atom) :
     AlgEvaluate (T.canonicalV) (T.canonicalBotVal) A = lindenbaumMk T A := by
   induction A with
@@ -71,6 +81,9 @@ theorem Theory.canonicalV_spec (T : Theory Atom) (A : Proposition Atom) :
 
 /-! ## Canonical Valuation Models the Theory -/
 
+/-- The canonical valuation models the theory `T`: every axiom `B ∈ T` evaluates to the top
+element `⊤` of the Lindenbaum algebra under the canonical valuation and canonical bottom value.
+This ensures the canonical model is a valid algebraic model of `T`. -/
 theorem Theory.tValid_canonicalV (T : Theory Atom) :
     AlgTValid T (T.canonicalV) (T.canonicalBotVal) := by
   intro B hB
@@ -81,6 +94,12 @@ theorem Theory.tValid_canonicalV (T : Theory Atom) :
 
 /-! ## ND-Level Soundness (Meet Formulation) -/
 
+/-- Auxiliary soundness lemma (meet / universal-lower-bound formulation). Given a derivation `d`
+of `Γ ⊢ A` and a lower bound `Φ` below each formula in `Γ`, we have `Φ ≤ eval A`.
+
+This "meet formulation" of soundness handles the `orE` case cleanly: distributivity of
+`GeneralizedHeytingAlgebra` (`inf_sup_left`) gives `Φ ⊓ (a ⊔ b) ≤ c` from
+`Φ ⊓ a ≤ c` and `Φ ⊓ b ≤ c`. -/
 theorem nd_alg_sound_aux
     {H : Type*} [GeneralizedHeytingAlgebra H]
     (v : Atom → H) (bot_val : H)
@@ -153,6 +172,9 @@ theorem nd_alg_sound_aux
 
 /-! ## ND-Level Soundness (Consequence Form) -/
 
+/-- ND-level algebraic soundness (consequence form). If `A` is derivable in `T` then for every
+`GeneralizedHeytingAlgebra H`, every valuation `v : Atom → H`, and every `bot_val : H` such that
+`AlgTValid T v bot_val` holds, we have `AlgEvaluate v bot_val A = ⊤`. -/
 theorem nd_alg_sound {A : Proposition Atom}
     (h : DerivableIn T A)
     {H : Type*} [GeneralizedHeytingAlgebra H]
@@ -167,6 +189,8 @@ theorem nd_alg_sound {A : Proposition Atom}
 
 /-! ## General Algebraic Completeness -/
 
+/-- A formula `A` maps to `⊤` in the Lindenbaum algebra if and only if `A` is derivable in `T`.
+This is the central algebraic characterization of derivability used in the completeness proof. -/
 theorem lindenbaumMk_eq_top_iff {A : Proposition Atom} :
     lindenbaumMk T A = ⊤ ↔ DerivableIn T A := by
   rw [lindenbaumTop]
@@ -182,6 +206,12 @@ theorem lindenbaumMk_eq_top_iff {A : Proposition Atom} :
       ⟨Theory.derivationTop.weakCtx (by grind)⟩,
       ⟨d.weakCtx (by grind)⟩⟩)
 
+/-- General algebraic completeness for propositional logic. A formula `A` is derivable in `T`
+(w.r.t. the natural deduction system) if and only if it evaluates to `⊤` in every
+`GeneralizedHeytingAlgebra` under every valuation that models `T`.
+
+The completeness direction uses the Lindenbaum algebra as a canonical countermodel:
+if `A` is not derivable then `[A] ≠ ⊤` in `LindenbaumAlgebra T`. -/
 theorem Theory.alg_complete {A : Proposition Atom} :
     DerivableIn T A ↔
       ∀ {H : Type u} [GeneralizedHeytingAlgebra H] (v : Atom → H) (bot_val : H),
@@ -197,6 +227,10 @@ theorem Theory.alg_complete {A : Proposition Atom} :
 
 /-! ## Tier-Specific Completeness -/
 
+/-- MPL algebraic completeness: a formula `A` is derivable in MPL (empty theory) if and only if
+`AlgEvaluate v bot_val A = ⊤` for every `GeneralizedHeytingAlgebra`, every valuation `v`, and
+every `bot_val`. In MPL there are no theory axioms to satisfy, so no `AlgTValid` hypothesis
+is needed. -/
 theorem MPL.alg_complete {Atom : Type u} [DecidableEq Atom] {A : Proposition Atom} :
     DerivableIn (∅ : Theory Atom) A ↔
       ∀ {H : Type u} [GeneralizedHeytingAlgebra H] (v : Atom → H) (bot_val : H),
@@ -208,6 +242,10 @@ theorem MPL.alg_complete {Atom : Type u} [DecidableEq Atom] {A : Proposition Ato
     exact Theory.alg_complete.mpr fun v bot_val _ =>
       hValid v bot_val
 
+/-- IPL algebraic completeness: a formula `A` is derivable in IPL if and only if
+`AlgEvaluate v ⊥ A = ⊤` for every `HeytingAlgebra H` and every valuation `v`.
+The `bot_val` is fixed to `⊥ : H` because IPL requires that the interpretation of `⊥`
+is the bottom element (the efq axiom forces this). -/
 theorem IPL.alg_complete {Atom : Type u} [DecidableEq Atom] {A : Proposition Atom} :
     DerivableIn (IPL : Theory Atom) A ↔
       ∀ {H : Type u} [HeytingAlgebra H] (v : Atom → H),
@@ -225,6 +263,10 @@ theorem IPL.alg_complete {Atom : Type u} [DecidableEq Atom] {A : Proposition Ato
         canonicalV_spec, lindenbaumMk_eq_top_iff] at h
     exact h
 
+/-- Algebraic completeness for classical theories: if `T` is both intuitionistic
+(`[IsIntuitionistic T]`) and classical (`[IsClassical T]`, i.e., includes DNE), then `A` is
+derivable in `T` if and only if `AlgEvaluate v ⊥ A = ⊤` for every `BooleanAlgebra H` and every
+valuation `v` that models `T`. This covers CPL as the canonical instance. -/
 theorem alg_complete_classical [IsIntuitionistic T] [IsClassical T] {A : Proposition Atom} :
     DerivableIn T A ↔
       ∀ {H : Type u} [BooleanAlgebra H] (v : Atom → H),

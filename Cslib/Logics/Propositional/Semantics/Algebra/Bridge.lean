@@ -36,6 +36,13 @@ equal to `Evaluate`'s `imp` case).
 `bool_evaluate_eq` is a `Bool` equality. Note that `Bool`'s Heyting implication is
 `a ⇨ b = b || !a` while `BoolEvaluate` uses `!a || b`; these are propositionally equal by
 `Bool.or_comm` but not definitionally. The proof uses `simp` with `himp_eq` and commutativity.
+
+## References
+
+* [A. Rasiowa, *An Algebraic Approach to Non-Classical Logics*][Rasiowa1974] — the algebraic
+  framework for propositional logic over generalized Heyting algebras
+* [A. Rasiowa, R. Sikorski, *The Mathematics of Metamathematics*][RasiowaSikorski1963] — the
+  Lindenbaum-Tarski algebra construction and its use in completeness proofs
 -/
 
 @[expose] public section

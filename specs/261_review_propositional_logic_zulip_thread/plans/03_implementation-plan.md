@@ -1,7 +1,7 @@
 # Implementation Plan: Task #261 -- Propositional Logic Zulip Response
 
 - **Task**: 261 - Review Zulip thread on propositional logic setup in CSLib, study all desiderata and conflicts, and craft a balanced response that satisfies all parties
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 3 hours
 - **Dependencies**: None
 - **Research Inputs**: reports/01_team-research.md, reports/02_nd-vs-hilbert-analysis.md, reports/03_typeclass-split-analysis.md
@@ -64,7 +64,7 @@ This task does not directly advance any ROADMAP.md remaining items. It supports 
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Restore Thomas's Docstring and Enhance ND Documentation [NOT STARTED]
+### Phase 1: Restore Thomas's Docstring and Enhance ND Documentation [COMPLETED]
 
 **Goal**: Replace the current docstring with a neutral framing that states the efq trade-off factually without taking sides, restores Thomas's references, and links to the Zulip thread.
 
@@ -92,7 +92,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Add Classically-Scoped Warning to FromPropositional.lean [NOT STARTED]
+### Phase 2: Add Classically-Scoped Warning to FromPropositional.lean [COMPLETED]
 
 **Goal**: Add a prominent module-level documentation note in `FromPropositional.lean` (both Modal and Temporal versions) warning that the Lukasiewicz encoding of `and`/`or` is valid only for classical modal logic.
 
@@ -116,7 +116,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Document Completeness.lean and Add Bridge.lean References [NOT STARTED]
+### Phase 3: Document Completeness.lean and Add Bridge.lean References [COMPLETED]
 
 **Goal**: Add docstrings to all 12 definitions in `Semantics/Algebra/Completeness.lean` (currently zero docstrings on the most important file in the module) and add a References section to `Semantics/Algebra/Bridge.lean`.
 
@@ -140,7 +140,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: Draft and Write Zulip Response [NOT STARTED]
+### Phase 4: Draft and Write Zulip Response [COMPLETED]
 
 **Goal**: Write a carefully crafted Zulip response that addresses each participant's concerns, presents the synthesis from both research rounds, follows a natural narrative arc, and invites continued collaboration.
 

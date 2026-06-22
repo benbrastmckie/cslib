@@ -31,6 +31,14 @@ are used here because this embedding targets classical modal logic.
 Note: This differs from the propositional level, where `and`/`or` are native constructors
 with `HasAnd`/`HasOr` instances. The embedding necessarily uses Lukasiewicz because
 `Modal.Proposition` lacks native `and`/`or` constructors.
+
+## Limitations
+
+**Classical scope only.** The Lukasiewicz encodings `¬(φ → ¬ψ)` for `∧` and `¬φ → ψ` for `∨`
+are classically valid but not intuitionistically valid. This embedding is therefore sound for
+classical modal logics (e.g., K, S4, S5) but **not** for intuitionistic modal logics. If CSLib
+adds intuitionistic modal logic in the future, a separate embedding respecting the native
+`and`/`or` constructors will be required.
 -/
 
 @[expose] public section

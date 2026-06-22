@@ -51,32 +51,6 @@ next_project_number: 263
 
 ## Tasks
 
-### 262. Kripke algebraic bridge
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: None
-- **Plan**: [262_kripke_algebraic_bridge/plans/01_kripke-algebraic-bridge.md]
-- **Summary**: [262_kripke_algebraic_bridge/summaries/01_kripke-algebraic-bridge-summary.md]
-
-**Description**: Implement Kripke-algebraic bridge: prove that upsets of a Kripke frame's preorder form a Heyting algebra, and connect IForces to AlgEvaluate via this construction. This establishes the well-known duality between Kripke semantics and algebraic semantics for intuitionistic propositional logic
-
----
-
-### 261. Review propositional logic zulip thread
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: None
-- **Research**:
-  - [261_review_propositional_logic_zulip_thread/reports/01_team-research.md]
-  - [261_review_propositional_logic_zulip_thread/reports/02_nd-vs-hilbert-analysis.md]
-- **Plan**: [261_review_propositional_logic_zulip_thread/plans/03_implementation-plan.md]
-
-**Description**: Review Zulip thread on propositional logic setup in CSLib, study all desiderata and conflicts, and craft a balanced response that satisfies all parties
-
----
-
 ### 260. Add ltl temporal convention contrast docs
 - **Status**: [IMPLEMENTED]
 - **Task Type**: cslib
@@ -175,20 +149,6 @@ next_project_number: 263
 - **Dependencies**: None
 
 **Description**: Add Encodable, Countable, and Denumerable instances for LTL Formula type (deferred to completeness PRs)
-
----
-
-### 243. Deterministic buchi automata
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: None
-- **Research**:
-  - [243_deterministic_buchi_automata/reports/01_dba-constructions-survey.md]
-  - [243_deterministic_buchi_automata/reports/02_team-research.md]
-- **Plan**: [243_deterministic_buchi_automata/plans/03_implementation-plan.md]
-
-**Description**: Implement deterministic Büchi automata constructions and related results
 
 ---
 

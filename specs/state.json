@@ -2,86 +2,6 @@
   "next_project_number": 263,
   "active_projects": [
     {
-      "project_number": 262,
-      "project_name": "kripke_algebraic_bridge",
-      "status": "completed",
-      "task_type": "cslib",
-      "topic": "Propositional Logic",
-      "description": "Implement Kripke-algebraic bridge: prove that upsets of a Kripke frame's preorder form a Heyting algebra, and connect IForces to AlgEvaluate via this construction. This establishes the well-known duality between Kripke semantics and algebraic semantics for intuitionistic propositional logic",
-      "created": "2026-06-22T14:53:38Z",
-      "last_updated": "2026-06-22T16:47:27Z",
-      "artifacts": [
-        {
-          "type": "plan",
-          "path": "specs/262_kripke_algebraic_bridge/plans/01_kripke-algebraic-bridge.md",
-          "summary": "3-phase implementation plan for Kripke-algebraic bridge"
-        },
-        {
-          "type": "summary",
-          "path": "specs/262_kripke_algebraic_bridge/summaries/01_kripke-algebraic-bridge-summary.md",
-          "summary": "Implementation summary: KripkeBridge.lean (~310 lines), all CI checks pass, zero sorries"
-        }
-      ],
-      "plan_metadata": {
-        "phases": 3,
-        "total_effort_hours": 3,
-        "complexity": "medium",
-        "research_integrated": true,
-        "plan_version": 1,
-        "dependency_waves": [
-          [
-            1
-          ],
-          [
-            2
-          ],
-          [
-            3
-          ]
-        ],
-        "reports_integrated": [
-          {
-            "path": "reports/01_kripke-algebraic-bridge.md",
-            "integrated_in_plan_version": 1,
-            "integrated_date": "2026-06-22"
-          }
-        ]
-      },
-      "session_id": "sess_1782145977_f2ba80",
-      "completion_summary": "Implemented Kripke-algebraic bridge: UpsetAlgebra via LowerSet(OrderDual World), kripkeAlgBridge theorem connecting IForces to AlgEvaluate by structural induction, plus iValidOfHAValid and mValidOfGHAValid corollaries. ~310 lines, zero sorries, all CI passing."
-    },
-    {
-      "project_number": 261,
-      "project_name": "review_propositional_logic_zulip_thread",
-      "status": "completed",
-      "task_type": "cslib",
-      "topic": "Propositional Logic",
-      "description": "Review Zulip thread on propositional logic setup in CSLib, study all desiderata and conflicts, and craft a balanced response that satisfies all parties",
-      "created": "2026-06-22T06:34:05Z",
-      "last_updated": "2026-06-22T15:16:08Z",
-      "session_id": "sess_1782140748_60bbad",
-      "researched": "2026-06-22T06:42:50Z",
-      "next_artifact_number": 3,
-      "artifacts": [
-        {
-          "path": "specs/261_review_propositional_logic_zulip_thread/reports/01_team-research.md",
-          "type": "research",
-          "summary": "Team research with 4 teammates: thread analysis, prior art, critique, strategic horizons"
-        },
-        {
-          "path": "specs/261_review_propositional_logic_zulip_thread/reports/02_nd-vs-hilbert-analysis.md",
-          "type": "research",
-          "summary": "Hard-mode analysis: ND vs Hilbert vs sequent calculus, Thomas full message, IProposition compromise, adversarial verification"
-        },
-        {
-          "path": "specs/261_review_propositional_logic_zulip_thread/plans/03_implementation-plan.md",
-          "type": "plan",
-          "summary": "4-phase plan: investigate docstring deletion, enhance ND and FromPropositional docs, draft Zulip response"
-        }
-      ],
-      "completion_summary": "Documentation-only task: rewrote NaturalDeduction/Basic.lean docstring with neutral trade-off framing and restored Thomas's references; added classical-scope warnings to Modal and Temporal FromPropositional.lean; added docstrings to all definitions in Completeness.lean and a References section to Bridge.lean; wrote the Zulip response draft (1218 words) addressing all four of Thomas's paragraphs and answering the docstring deletion question."
-    },
-    {
       "project_number": 255,
       "project_name": "fix_stale_ltl_docstrings_post_task254",
       "status": "implemented",
@@ -185,36 +105,6 @@
           "summary": "Seed report: ctchou/AutomataTheory coordination assessment for McNaughton theorem"
         }
       ]
-    },
-    {
-      "project_number": 243,
-      "project_name": "deterministic_buchi_automata",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "Implement deterministic Büchi automata constructions and related results",
-      "topic": "Temporal Logic",
-      "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-21T03:25:03Z",
-      "session_id": "sess_1750459200_orchestrate",
-      "next_artifact_number": 3,
-      "artifacts": [
-        {
-          "path": "specs/243_deterministic_buchi_automata/reports/01_dba-constructions-survey.md",
-          "type": "report",
-          "summary": "Initial DBA survey"
-        },
-        {
-          "path": "specs/243_deterministic_buchi_automata/reports/02_team-research.md",
-          "type": "report",
-          "summary": "Team research synthesis (4 teammates)"
-        },
-        {
-          "path": "specs/243_deterministic_buchi_automata/plans/03_implementation-plan.md",
-          "type": "plan",
-          "summary": "5-phase implementation plan"
-        }
-      ],
-      "completion_summary": "All 5 phases implemented: DBA union, complement non-closure, intersection (sorry-free), Landweber theorem (proof_wanted per CSLib convention), DBA-to-DMA conversion (sorry-free). 0 sorries, CI passed."
     },
     {
       "project_number": 245,
@@ -437,8 +327,8 @@
     }
   ],
   "repository_health": {
-    "last_assessed": "2026-06-21T03:07:50Z",
-    "todo_count": 25,
+    "last_assessed": "2026-06-22T18:08:51Z",
+    "todo_count": 19,
     "fixme_count": 0,
     "build_errors": 0,
     "status": "healthy"

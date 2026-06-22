@@ -55,8 +55,8 @@ Logic strength is controlled by the theory parameter:
 **Design trade-off.** `⊥` is a primitive constructor of `Proposition` (a nullary connective), but
 ex falso quodlibet (`⊥ → A`) is not a primitive rule — it enters as a theory axiom via
 `[IsIntuitionistic T]`. This differs from many on-paper natural deduction presentations
-([Prawitz1965], §10.4 of [TroelstraVanDalen1988], §2.2 of Sorensen & Urzyczyn's
-*Lectures on the Curry-Howard Isomorphism*), which include bottom elimination as a primitive rule.
+([Prawitz1965], §10.4 of [TroelstraVanDalen1988], §2.2 of [SorensenUrzyczyn2006]),
+which include bottom elimination as a primitive rule.
 
 The trade-off is between two valid design goals:
 - **API uniformity and zero duplication** across the multi-logic hierarchy (Modal, Temporal,
@@ -83,6 +83,8 @@ This design choice and its trade-offs are discussed further in the
   *Constructivism in Mathematics: An Introduction*][TroelstraVanDalen1988], Section 10.4
 * [G. Gentzen,
   *Untersuchungen über das logische Schließen*][Gentzen1935]
+* [M. H. B. Sørensen, P. Urzyczyn,
+  *Lectures on the Curry-Howard Isomorphism*][SorensenUrzyczyn2006], Section 2.2
 -/
 
 @[expose] public section

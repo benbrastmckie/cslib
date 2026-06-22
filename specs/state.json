@@ -4,7 +4,7 @@
     {
       "project_number": 262,
       "project_name": "kripke_algebraic_bridge",
-      "status": "implemented",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Implement Kripke-algebraic bridge: prove that upsets of a Kripke frame's preorder form a Heyting algebra, and connect IForces to AlgEvaluate via this construction. This establishes the well-known duality between Kripke semantics and algebraic semantics for intuitionistic propositional logic",
@@ -48,7 +48,7 @@
         ]
       },
       "session_id": "sess_1782145977_f2ba80",
-      "completion_summary": "Implemented Kripke-algebraic bridge: UpsetAlgebra type alias, mkUpset/upsetVal/upsetBotVal constructors, upsetHimpChar helper lemma, and kripkeAlgBridge main bridge theorem connecting IForces to AlgEvaluate. Proved iValidOfHAValid and mValidOfGHAValid corollaries. All CI checks pass; zero sorries; standard axioms only."
+      "completion_summary": "Implemented Kripke-algebraic bridge: UpsetAlgebra via LowerSet(OrderDual World), kripkeAlgBridge theorem connecting IForces to AlgEvaluate by structural induction, plus iValidOfHAValid and mValidOfGHAValid corollaries. ~310 lines, zero sorries, all CI passing."
     },
     {
       "project_number": 261,

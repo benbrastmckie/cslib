@@ -17,6 +17,9 @@ This module proves algebraic completeness for propositional logic across three t
 - **IPL** (Intuitionistic Propositional Logic) is complete w.r.t. `HeytingAlgebra`.
 - **CPL** (Classical Propositional Logic) is complete w.r.t. `BooleanAlgebra`.
 
+The completeness theorems are stated using `AlgTValid` (Thomas Waring's `v ⊨ T` parametric
+completeness style), which quantifies over all valuations that model the theory.
+
 The soundness proof uses the "universal lower bound" formulation:
 `T ⊢ Γ ⊢ A → ∀ Φ, (∀ B ∈ Γ, Φ ≤ eval B) → Φ ≤ eval A`
 

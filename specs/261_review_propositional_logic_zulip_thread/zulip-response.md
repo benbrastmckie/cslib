@@ -6,15 +6,15 @@
 
 ---
 
-Thanks for the thoughtful discussion, Thomas and Matthew — and apologies for the delayed reply. I've taken time to work through all the points carefully, study Thomas's `intuitionistic` branch, and investigate whether a typeclass-based split could avoid the hybrid ND design. Here is where things stand.
+Thanks for the thoughtful discussion, Thomas and Matthew. I've worked through Thomas's `intuitionistic` branch and investigated whether a typeclass-based split could avoid the hybrid ND design. Here are my conclusions so far.
 
 ## On `⊥` as a primitive constructor
 
-I remain convinced that primitive `⊥` is correct, and I think the thread has substantially converged on this. The decisive argument is substitution invariance. `⊥` is a nullary connective — like `→`, `∧`, `∨` — not a propositional variable. With `⊥`-as-atom, every substitution theorem acquires a `σ(⊥) = ⊥` side condition. With `⊥`-as-constructor, this is automatic: the monad bind case `| .bot => .bot` requires no condition. CSLib's substitution results — `subst_preserves_axiom`, `subst_preserves_intAxiom`, `hilbertSubstitution`, `Theory.Derivation.substAtom` — all work cleanly because of this. The `FromPropositional` embeddings to Modal and Temporal logic also benefit: the map `| .bot => .bot` is direct, with no special-case handling.
+I remain convinced that primitive `⊥` is correct, and I think the thread has substantially converged on this. The decisive argument is substitution invariance. `⊥` is a nullary connective rather than a propositional variable. With `⊥`-as-atom, every substitution theorem acquires a `σ(⊥) = ⊥` side condition. With `⊥`-as-constructor, this is automatic: the monad bind case `| .bot => .bot` requires no condition. CSLib's substitution results — `subst_preserves_axiom`, `subst_preserves_intAxiom`, `hilbertSubstitution`, `Theory.Derivation.substAtom` — all work cleanly because of this. The `FromPropositional` embeddings to Modal and Temporal logic also benefit: the map `| .bot => .bot` is direct, with no special-case handling.
 
 ## Acknowledging the ND symmetry trade-off
 
-Thomas, your ND symmetry point is correct and I want to acknowledge it directly. Natural deduction's appeal — as Gentzen articulated it — is that each connective's meaning is given by its introduction and elimination rules. With `⊥` in the syntax, pure ND symmetry would demand that its elimination rule (`efq`) be a primitive constructor of `Derivation`. CSLib's current design breaks this: `⊥` has a syntax constructor but no derivation constructor.
+Thomas, your ND symmetry point makes sense. Natural deduction's appeal — as Gentzen articulated it — is that each connective's meaning is given by its introduction and elimination rules. With `⊥` in the syntax, pure ND symmetry would demand that its elimination rule (`efq`) be a primitive constructor of `Derivation`. CSLib's current design breaks this: `⊥` has a syntax constructor but no derivation constructor.
 
 This is a genuine trade-off, not an oversight. The cost of preserving ND symmetry (your `IProposition`/`IDerivation` design) is that it duplicates the entire formula API — monad instance, substitution lemmas, `DecidableEq`, three evaluation functions, two bridge lemmas, and the two `FromPropositional` embeddings. For a library building upward through Modal, Temporal, and Bimodal logics that all share `Proposition`, that is a permanent maintenance multiplier.
 
@@ -38,26 +38,16 @@ The dual-evaluator approach resolves this. `Evaluate` (Prop-valued) is needed fo
 
 I investigated three approaches to avoid the hybrid ND using typeclasses. None can eliminate it without duplicating the formula type. Lean 4's inductive type system does not support conditionally-available constructors: you cannot make `efq` a constructor of `Derivation` only when a typeclass is satisfied. Options B (split at `Derivation` level) and C (typeclass on connectives) both collapse back to either the current design or Thomas's Option A (separate `IDerivation`). Matthew, your concern about conservative extension proofs is well-founded: with separate formula types, `IPL is conservative over MPL` becomes a theorem about a translation function rather than a subset relation on derivations, which is harder to state cleanly.
 
-Thomas, your `IProposition`/`IDerivation` branch demonstrates that the translation is mechanically possible — `propEquiv`, `toDerivation`, and `toIDerivation` all compile, and the translations are proved correct. This is valuable as a reference. But the `noncomputable toIDerivation` direction (which uses `Classical.choose`) means you cannot compute with intuitionistic derivations built by translation, and the maintenance cost of the duplication table above is prohibitive for CSLib's architecture. I hope this explanation is more satisfying than the cost discussion in the thread.
+Thomas, your `IProposition`/`IDerivation` branch demonstrates that the translation is mechanically possible — `propEquiv`, `toDerivation`, and `toIDerivation` all compile, and the translations are proved correct. This is valuable as a reference. But the `noncomputable toIDerivation` direction (which uses `Classical.choose`) means you cannot compute with intuitionistic derivations built by translation, and the maintenance cost of the duplication table above is prohibitive for CSLib's architecture.
 
 ## On the docstring deletion — and a direct apology
 
 You asked: "btw Benjamin, why did you delete that part of the docstring in `NaturalDeduction/Basic`?"
 
-The deletion was a mistake. During the ND overhaul (commit `80f54485`, task 173), which removed the `botE` constructor and added six rules, the agent rewrote the `## Implementation notes` section and dropped your original framing: the Zulip link, the observation that this "differs from many on-paper presentations," and your references (Prawitz, Troelstra & Van Dalen, Sorensen & Urzyczyn). This was not intentional — the agent prioritized the structural changes and treated the docstring as a clean-slate rewrite. I should have caught it in review. I'm sorry.
-
-The `## Implementation notes` section has been restored with your original framing (plus an expanded explanation of the trade-off). All four of your original references are back, along with a link to this thread.
-
-## On PR strategy
-
-I'm happy to split PR #648 into smaller pieces if that makes review easier. A natural split would be: (1) `Defs.lean` + `Theory` definitions (where the `⊥`-as-primitive decision lives), (2) `ProofSystem/`, (3) `NaturalDeduction/`, (4) `Semantics/`, (5) `Metalogic/`. Settling the definitions PR first would unblock everything else.
+The deletion was a mistake during the ND overhaul (commit `80f54485`, task 173) which removed the `botE` constructor and added six rules and treated the docstring as a clean-slate rewrite. The `## Implementation notes` section has been restored with your original framing (plus an expanded explanation of the trade-off). All four of your original references are back, along with a link to this thread.
 
 ## Closing
 
-Thomas, CSLib's propositional logic foundation builds directly on your work. The `Theory.Derivation` type originated in your PR #91, `AlgEvaluate` with `bot_val` came from your GHA suggestion, and `AlgTValid` implements your `v models T` parametric completeness style by name. That foundation is strong and I'm grateful for it.
+Thomas, CSLib's propositional logic foundation builds directly on your work. The `Theory.Derivation` type originated in your PR #91, `AlgEvaluate` was inspired by your GHA evaluation suggestion, and `AlgTValid` implements your `v models T` parametric completeness style by name. That foundation is strong and I'm grateful for it.
 
 I recognize you've held off PRs from your branches while this discussion was unresolved. I'd very much like to continue the collaboration — whether through reviewing specific parts of PR #648, merging something from your `kripke` or `hilbert` branches, or working through the DPLL layer with Matthew. Thank you both for the patience and care you've put into this thread.
-
----
-
-*Word count: approximately 1300 words*

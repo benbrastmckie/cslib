@@ -11,7 +11,7 @@ next_project_number: 263
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,251,252,255,256,259,262 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 1 | 36,37,180,226,241,245,251,252,255,256,259 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 2 | 39,40,181,215,257,260 | 36,37,180,255,256 | Bimodal Porting, Temporal Logic |
 | 3 | 41,258 | 39,40,257 | Foundations, Temporal Logic |
 
@@ -32,7 +32,6 @@ next_project_number: 263
 ### Propositional Logic
 
 226 [RESEARCHED] — Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648
-262 [IMPLEMENTED] — Implement Kripke-algebraic bridge: prove that upsets of a Kripke 
 
 ### Temporal Logic
 
@@ -53,7 +52,7 @@ next_project_number: 263
 ## Tasks
 
 ### 262. Kripke algebraic bridge
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

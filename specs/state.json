@@ -1,6 +1,16 @@
 {
-  "next_project_number": 267,
+  "next_project_number": 268,
   "active_projects": [
+    {
+      "project_number": 267,
+      "project_name": "verify_zulip_propositional_logic_claims",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Read https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/near/605813681 to rigorously check that all claims are accurate",
+      "topic": "Propositional Logic",
+      "created": "2026-06-22T19:00:01Z",
+      "last_updated": "2026-06-22T19:00:01Z"
+    },
     {
       "project_number": 266,
       "project_name": "research_propositional_and_foundations_improvements",

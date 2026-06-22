@@ -32,7 +32,7 @@ next_project_number: 268
 ### Propositional Logic
 
 226 [RESEARCHED] — Prepare a follow-up upstream PR (~400-500 LOC) stacked on PR #648
-265 [RESEARCHING] — Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Co
+265 [RESEARCHED] — Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Co
 266 [PLANNED] — Research the Propositional/ logic and Foundations/ in this repo, 
 
 ### Temporal Logic
@@ -59,11 +59,13 @@ next_project_number: 268
 ---
 
 ### 265. Track conservative lean sorry
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
-- **Research**: [265_track_conservative_lean_sorry/reports/01_conservative-extension-proof.md]
+- **Research**:
+  - [265_track_conservative_lean_sorry/reports/01_conservative-extension-proof.md]
+  - [265_track_conservative_lean_sorry/reports/02_zulip-benefit-cost.md]
 - **Plan**: [265_track_conservative_lean_sorry/plans/01_conservative-extension-plan.md]
 
 **Description**: Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Conservative.lean:99 (ipl_conservative_over_mpl). This is the only untracked sorry in the codebase — the theorem states that intuitionistic propositional logic is a conservative extension of minimal propositional logic. Research the proof strategy (likely via Kripke model or algebraic argument) and implement.

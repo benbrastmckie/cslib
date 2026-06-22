@@ -244,12 +244,12 @@
     {
       "project_number": 265,
       "project_name": "track_conservative_lean_sorry",
-      "status": "researching",
+      "status": "researched",
       "task_type": "cslib",
       "description": "Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Conservative.lean:99 (ipl_conservative_over_mpl). This is the only untracked sorry in the codebase — the theorem states that intuitionistic propositional logic is a conservative extension of minimal propositional logic. Research the proof strategy (likely via Kripke model or algebraic argument) and implement.",
       "topic": "Propositional Logic",
       "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-22T19:48:23Z",
+      "last_updated": "2026-06-22T19:51:49Z",
       "session_id": "sess_1782157692_280fc8",
       "artifacts": [
         {
@@ -261,6 +261,11 @@
           "path": "specs/265_track_conservative_lean_sorry/plans/01_conservative-extension-plan.md",
           "type": "plan",
           "summary": "3-phase implementation plan for ipl_conservative_over_mpl using WithBot embedding strategy"
+        },
+        {
+          "path": "specs/265_track_conservative_lean_sorry/reports/02_zulip-benefit-cost.md",
+          "type": "research",
+          "summary": "Zulip thread benefit/cost analysis: strongly recommended, validates bot_val design, fulfills explicit community request"
         }
       ],
       "plan_metadata": {
@@ -280,7 +285,8 @@
             3
           ]
         ]
-      }
+      },
+      "next_artifact_number": 3
     }
   ],
   "repository_health": {

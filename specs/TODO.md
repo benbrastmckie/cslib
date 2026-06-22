@@ -11,7 +11,7 @@ next_project_number: 277
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,266,268,272,273,274,275,276 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,252,266,268,275 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,269 | 36,37,180,268 | Bimodal Porting, Foundations, Temporal Logic |
 | 3 | 41 | 39,40 | Foundations |
 
@@ -47,16 +47,12 @@ next_project_number: 277
 
 ### Uncategorized
 
-272 [PLANNED] — Prove Glivenko's theorem: if CPL proves A then IPL proves ¬¬A. Th
-273 [PLANNED] — Prove conservative extension of all 14 remaining modal systems (T
-274 [PLANNED] — Prove that Bimodal TM is conservative over Modal S5 for the modal
-275 [PLANNED] — Prove that Bimodal TM is conservative over Temporal BX for tempor
-276 [PLANNED] — Prove inter-system conservative extension results within the moda
+275 [PARTIAL] — Prove that Bimodal TM is conservative over Temporal BX for tempor
 
 ## Tasks
 
 ### 276. Modal cube inter system conservativity
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -65,7 +61,7 @@ next_project_number: 277
 ---
 
 ### 275. Bimodal tm conservative over temporal bx
-- **Status**: [PLANNED]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -74,7 +70,7 @@ next_project_number: 277
 ---
 
 ### 274. Bimodal tm conservative over modal s5
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -83,7 +79,7 @@ next_project_number: 277
 ---
 
 ### 273. All modal systems conservative over cpl
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -92,7 +88,7 @@ next_project_number: 277
 ---
 
 ### 272. Glivenko theorem
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 

@@ -1,7 +1,7 @@
 # Implementation Plan: Task #275 -- Bimodal TM Conservative over Temporal BX
 
 - **Task**: 275 - bimodal_tm_conservative_over_temporal_bx
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 6 hours
 - **Dependencies**: None (soundness and completeness infrastructure exists)
 - **Research Inputs**: specs/275_bimodal_tm_conservative_over_temporal_bx/reports/01_tm-over-bx-conservativity.md
@@ -82,7 +82,7 @@ extending it from propositional conservativity to temporal conservativity.
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Semantic Bridge Lemma [NOT STARTED]
+### Phase 1: Semantic Bridge Lemma [IN PROGRESS]
 
 **Goal**: Prove that for temporal formulas, bimodal `truthAt` in a constructed task model
 is equivalent to temporal `Satisfies`.

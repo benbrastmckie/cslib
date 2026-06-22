@@ -1,7 +1,7 @@
 # Implementation Plan: Glivenko's Theorem
 
 - **Task**: 272 - glivenko_theorem
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 1 hour
 - **Dependencies**: None (all required infrastructure exists in CSLib and Mathlib)
 - **Research Inputs**: specs/272_glivenko_theorem/reports/01_glivenko-proof.md

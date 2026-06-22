@@ -1,7 +1,7 @@
 # Implementation Plan: Conservative Extension of Modal Systems over CPL
 
 - **Task**: 273 - all_modal_systems_conservative_over_cpl
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 3 hours
 - **Dependencies**: None (all soundness proofs already exist for all 14 systems)
 - **Research Inputs**: specs/273_all_modal_systems_conservative_over_cpl/reports/01_modal-conservativity-survey.md

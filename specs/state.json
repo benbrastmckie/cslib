@@ -4,47 +4,51 @@
     {
       "project_number": 276,
       "project_name": "modal_cube_inter_system_conservativity",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Prove inter-system conservative extension results within the modal cube: stronger systems (e.g., S5, S4, T) are conservative over weaker systems (e.g., K, D) for the shared formula fragment. Requires derivation embedding between systems. Soundness/completeness infrastructure exists for all 15 systems. Lower priority — establish after per-system CPL conservativity is done.",
-      "last_updated": "2026-06-22T21:15:04Z",
-      "session_id": "sess_1782161605_f646ec"
+      "last_updated": "2026-06-22T21:36:52Z",
+      "session_id": "sess_1782161605_f646ec",
+      "completion_summary": "Proved modal cube inter-system conservativity: generic lift_derivation lemma + 24 axiom subsumption edges + 3 transitive chains. ~645 lines across 3 files, zero sorries."
     },
     {
       "project_number": 275,
       "project_name": "bimodal_tm_conservative_over_temporal_bx",
-      "status": "planned",
+      "status": "partial",
       "task_type": "cslib",
       "description": "Prove that Bimodal TM is conservative over Temporal BX for temporal formulas (those using only until/since, no box). The Temporal.Formula.toBimodal embedding exists. The lift_derivation_qfree infrastructure in Bimodal/Metalogic/ConservativeExtension/ partially supports this. Requires verifying the lifting extends to temporal connectives.",
-      "last_updated": "2026-06-22T21:18:55Z",
+      "last_updated": "2026-06-22T21:19:15Z",
       "session_id": "sess_1782161605_f646ec"
     },
     {
       "project_number": 274,
       "project_name": "bimodal_tm_conservative_over_modal_s5",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Prove that Bimodal TM is conservative over Modal S5 for the modal fragment: if φ.toBimodal is TM-derivable then φ is S5-derivable. (Original statement \"over K\" was FALSE — TM includes full S5 modal axioms for box.) Proof via semantic bridge: TM soundness + Kripke-to-TaskModel adapter + S5 completeness. ~150-250 lines.",
-      "last_updated": "2026-06-22T21:15:09Z",
-      "session_id": "sess_1782161605_f646ec"
+      "last_updated": "2026-06-22T21:36:12Z",
+      "session_id": "sess_1782161605_f646ec",
+      "completion_summary": "Proved Bimodal TM conservative over Modal S5 via Kripke adapter + semantic bridge. 230 lines, zero sorries."
     },
     {
       "project_number": 273,
       "project_name": "all_modal_systems_conservative_over_cpl",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Prove conservative extension of all 14 remaining modal systems (T, B, D, K4, K5, K45, D4, D5, D45, DB, TB, KB5, S4, S5) over CPL for propositional formulas. The proof pattern is identical to Modal K (already proved): system soundness (proved for all 14) + toModal_valid_implies_tautology (system-independent, already proved). Each system needs a _soundness_derivable wrapper to connect the pieces. Mechanical — create ConservativeExtension.lean files per system following the K pattern.",
-      "last_updated": "2026-06-22T21:14:23Z",
-      "session_id": "sess_1782161605_f646ec"
+      "last_updated": "2026-06-22T21:27:50Z",
+      "session_id": "sess_1782161605_f646ec",
+      "completion_summary": "Proved conservative extension over CPL for all 14 modal systems (T, B, D, K4, K5, K45, D4, D5, D45, DB, TB, KB5, S4, S5). 14 new files, ~800 lines, zero sorries."
     },
     {
       "project_number": 272,
       "project_name": "glivenko_theorem",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Prove Glivenko's theorem: if CPL proves A then IPL proves ¬¬A. This is the standard characterization of the CPL/IPL relationship, complementing the IPL-over-MPL conservative extension (task 265). Proof strategy: algebraic argument via Boolean algebras being Heyting algebras with ¬¬a = a, or syntactic double-negation translation. Place in Cslib/Logics/Propositional/Semantics/Algebra/ alongside Conservative.lean.",
-      "last_updated": "2026-06-22T21:13:02Z",
-      "session_id": "sess_1782161605_f646ec"
+      "last_updated": "2026-06-22T21:28:48Z",
+      "session_id": "sess_1782161605_f646ec",
+      "completion_summary": "Proved Glivenko theorem via Heyting.Regular algebraic approach. 142 lines, 6 declarations, zero sorries."
     },
     {
       "project_number": 270,

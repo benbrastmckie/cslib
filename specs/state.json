@@ -14,11 +14,20 @@
     {
       "project_number": 275,
       "project_name": "bimodal_tm_conservative_over_temporal_bx",
-      "status": "partial",
+      "status": "researched",
       "task_type": "cslib",
       "description": "Prove that Bimodal TM is conservative over Temporal BX for temporal formulas (those using only until/since, no box). The Temporal.Formula.toBimodal embedding exists. The lift_derivation_qfree infrastructure in Bimodal/Metalogic/ConservativeExtension/ partially supports this. Requires verifying the lifting extends to temporal connectives.",
-      "last_updated": "2026-06-22T21:19:15Z",
-      "session_id": "sess_1782161605_f646ec"
+      "last_updated": "2026-06-22T21:56:28Z",
+      "session_id": "sess_1782164778_60175c",
+      "next_artifact_number": 3,
+      "researched": "2026-06-22T21:56:28Z",
+      "artifacts": [
+        {
+          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/02_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates — domain mismatch analysis and resolution strategies"
+        }
+      ]
     },
     {
       "project_number": 274,

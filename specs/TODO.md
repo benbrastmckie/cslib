@@ -47,7 +47,7 @@ next_project_number: 277
 
 ### Uncategorized
 
-275 [PARTIAL] — Prove that Bimodal TM is conservative over Temporal BX for tempor
+275 [RESEARCHED] — Prove that Bimodal TM is conservative over Temporal BX for tempor
 
 ## Tasks
 
@@ -61,9 +61,10 @@ next_project_number: 277
 ---
 
 ### 275. Bimodal tm conservative over temporal bx
-- **Status**: [PARTIAL]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Dependencies**: None
+- **Research**: [275_bimodal_tm_conservative_over_temporal_bx/reports/02_team-research.md]
 
 **Description**: Prove that Bimodal TM is conservative over Temporal BX for temporal formulas (those using only until/since, no box). The Temporal.Formula.toBimodal embedding exists. The lift_derivation_qfree infrastructure in Bimodal/Metalogic/ConservativeExtension/ partially supports this. Requires verifying the lifting extends to temporal connectives.
 

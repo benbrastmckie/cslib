@@ -72,7 +72,7 @@ No ROADMAP.md found.
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Kripke Adapter Frame and History Construction [NOT STARTED]
+### Phase 1: Kripke Adapter Frame and History Construction [COMPLETED]
 
 **Goal**: Define the `kripkeAdapterFrame` task frame and the constant-state world history constructor, plus prove ShiftClosed for the adapter's Omega.
 
@@ -98,7 +98,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Semantic Bridge Lemma [NOT STARTED]
+### Phase 2: Semantic Bridge Lemma [COMPLETED]
 
 **Goal**: Prove the bridge lemma relating bimodal `truthAt` on the adapter model to modal `Satisfies` on the Kripke model.
 
@@ -128,7 +128,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Main Conservativity Theorem and CI [NOT STARTED]
+### Phase 3: Main Conservativity Theorem and CI [COMPLETED]
 
 **Goal**: Compose soundness + bridge + completeness into the main theorem and pass CI verification.
 

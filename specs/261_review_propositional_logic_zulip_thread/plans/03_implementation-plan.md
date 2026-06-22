@@ -2,7 +2,7 @@
 
 - **Task**: 261 - Review Zulip thread on propositional logic setup in CSLib, study all desiderata and conflicts, and craft a balanced response that satisfies all parties
 - **Status**: [NOT STARTED]
-- **Effort**: 2.5 hours
+- **Effort**: 3 hours
 - **Dependencies**: None
 - **Research Inputs**: reports/01_team-research.md, reports/02_nd-vs-hilbert-analysis.md, reports/03_typeclass-split-analysis.md
 - **Artifacts**: plans/03_implementation-plan.md (this file)
@@ -59,8 +59,8 @@ This task does not directly advance any ROADMAP.md remaining items. It supports 
 **Dependency Analysis**:
 | Wave | Phases | Blocked by |
 |------|--------|------------|
-| 1 | 1, 2 | -- |
-| 2 | 3 | 1, 2 |
+| 1 | 1, 2, 3 | -- |
+| 2 | 4 | 1, 2, 3 |
 
 Phases within the same wave can execute in parallel.
 
@@ -116,7 +116,31 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Draft and Write Zulip Response [NOT STARTED]
+### Phase 3: Document Completeness.lean and Add Bridge.lean References [NOT STARTED]
+
+**Goal**: Add docstrings to all 12 definitions in `Semantics/Algebra/Completeness.lean` (currently zero docstrings on the most important file in the module) and add a References section to `Semantics/Algebra/Bridge.lean`.
+
+**Tasks**:
+- [ ] Read `Cslib/Logics/Propositional/Semantics/Algebra/Completeness.lean` and add docstrings to all key definitions: `canonicalV`, `canonicalBotVal`, `canonicalV_spec`, `tValid_canonicalV`, `nd_alg_sound`, `Theory.alg_complete`, `MPL.alg_complete`, `IPL.alg_complete`, `alg_complete_classical`, and any others
+- [ ] Read `Cslib/Logics/Propositional/Semantics/Algebra/Bridge.lean` and add a References section citing `Rasiowa1974` and/or `RasiowaSikorski1963` for consistency with `Algebra.lean`
+- [ ] Run scoped `lake build` for both modules
+
+**Timing**: 30 minutes
+
+**Depends on**: none
+
+**Files to modify**:
+- `Cslib/Logics/Propositional/Semantics/Algebra/Completeness.lean` -- add docstrings to all definitions
+- `Cslib/Logics/Propositional/Semantics/Algebra/Bridge.lean` -- add References section
+
+**Verification**:
+- Every public definition in `Completeness.lean` has a docstring
+- `Bridge.lean` module docstring includes a References section with BibKeys
+- `lake build` passes for both modules
+
+---
+
+### Phase 4: Draft and Write Zulip Response [NOT STARTED]
 
 **Goal**: Write a carefully crafted Zulip response that addresses each participant's concerns, presents the synthesis from both research rounds, follows a natural narrative arc, and invites continued collaboration.
 
@@ -138,7 +162,7 @@ Phases within the same wave can execute in parallel.
 
 **Timing**: 1.5 hours
 
-**Depends on**: 1, 2
+**Depends on**: 1, 2, 3
 
 **Files to modify**:
 - `specs/261_review_propositional_logic_zulip_thread/zulip-response.md` -- new file, the Zulip response draft
@@ -163,9 +187,11 @@ Phases within the same wave can execute in parallel.
 
 - `specs/261_review_propositional_logic_zulip_thread/plans/03_implementation-plan.md` -- this plan
 - `specs/261_review_propositional_logic_zulip_thread/zulip-response.md` -- the Zulip response draft
-- `Cslib/Logics/Propositional/NaturalDeduction/Basic.lean` -- enhanced docstring (Phase 2)
-- `Cslib/Logics/Modal/FromPropositional.lean` -- enhanced warning (Phase 3)
-- `Cslib/Logics/Temporal/FromPropositional.lean` -- enhanced warning if needed (Phase 3)
+- `Cslib/Logics/Propositional/NaturalDeduction/Basic.lean` -- neutral docstring with trade-off framing (Phase 1)
+- `Cslib/Logics/Modal/FromPropositional.lean` -- verify/enhance limitation warning (Phase 2)
+- `Cslib/Logics/Temporal/FromPropositional.lean` -- verify/enhance limitation warning (Phase 2)
+- `Cslib/Logics/Propositional/Semantics/Algebra/Completeness.lean` -- docstrings for all definitions (Phase 3)
+- `Cslib/Logics/Propositional/Semantics/Algebra/Bridge.lean` -- References section (Phase 3)
 
 ## Rollback/Contingency
 

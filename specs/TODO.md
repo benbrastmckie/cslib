@@ -28,14 +28,14 @@ next_project_number: 286
 ### Foundations
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
-269 [PLANNED] — Build generic bounded proof-search tactic for InferenceSystem. Cr
+269 [RESEARCHING] — Build generic bounded proof-search tactic for InferenceSystem. Cr
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
-  └─ 269 [PLANNED] — Build generic bounded proof-search tactic for InferenceSystem. Cr (see above)
+  └─ 269 [RESEARCHING] — Build generic bounded proof-search tactic for InferenceSystem. Cr (see above)
 
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-266 [RESEARCHED] — Research improvements to Propositional/ and Foundations/Logic/ in
+266 [PR READY] — Research improvements to Propositional/ and Foundations/Logic/ in
   └─ 280 [NOT STARTED] — Research the current state of propositional proof systems in CSLi
     └─ 279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
 
@@ -44,7 +44,7 @@ next_project_number: 286
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
-252 [RESEARCHED] — Formalize Rabin and parity acceptance conditions alongside the ex
+252 [IMPLEMENTING] — Formalize Rabin and parity acceptance conditions alongside the ex
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
   └─ 275 [BLOCKED] — Prove that Bimodal TM is conservative over Temporal BX for tempor
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
@@ -149,7 +149,7 @@ next_project_number: 286
 ---
 
 ### 269. Hilbert search tactic
-- **Status**: [PLANNED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: Task 268, Task 278
@@ -174,21 +174,24 @@ next_project_number: 286
 ---
 
 ### 266. Research propositional and foundations improvements
-- **Status**: [RESEARCHED]
+- **Status**: [PR READY]
 - **Task Type**: formal
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**:
   - [266_research_propositional_and_foundations_improvements/reports/01_team-research.md]
   - [266_research_propositional_and_foundations_improvements/reports/02_team-research.md]
-- **Plan**: [266_research_propositional_and_foundations_improvements/plans/03_propositional-foundations-plan.md]
+- **Plan**:
+  - [266_research_propositional_and_foundations_improvements/plans/03_propositional-foundations-plan.md]
+  - [266_research_propositional_and_foundations_improvements/plans/04_propositional-foundations-plan.md]
+- **Summary**: [266_research_propositional_and_foundations_improvements/summaries/01_propositional-foundations-summary.md]
 
 **Description**: Research improvements to Propositional/ and Foundations/Logic/ in this repo: compose the Hilbert-ND bridge with algebraic completeness for Hilbert-tier corollaries, fix stale ProofSystem.lean documentation, add propositional test coverage, concretize modal/temporal/bimodal ProofSystem tag instances to unlock GenericMCS reuse, extract propositional tableau rules from the bimodal tableau to Foundations/, add HasDia primitive, and assemble a Decidable (Tautology φ) instance. Excludes sequent calculus (split to task 279).
 
 ---
 
 ### 252. Acceptance conditions zoo
-- **Status**: [RESEARCHED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None

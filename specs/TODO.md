@@ -11,11 +11,10 @@ next_project_number: 318
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,302,303,304,313,314,316 | -- | Bimodal Porting, Foundations, Project Management, ... |
-| 2 | 39,40,181,215,293,300,305,307,310,315,317 | 36,37,180,290,299,302,303,304,314,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
-| 3 | 41,275,291,292,306,309 | 39,40,303,304,305,315 | Foundations, Propositional Logic, Algebraic Semantics |
-| 4 | 308,311 | 306,307,309,310 | Algebraic Semantics |
-| 5 | 312 | 308,311 | Algebraic Semantics |
+| 1 | 36,37,180,226,241,245,278,290,299,301,304,313,314,316 | -- | Bimodal Porting, Foundations, Project Management, ... |
+| 2 | 39,40,181,215,293,300,309,310,315,317 | 36,37,180,290,299,304,314,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 3 | 41,275,291,292,311 | 39,40,309,310,315 | Foundations, Propositional Logic, Algebraic Semantics |
+| 4 | 312 | 311 | Algebraic Semantics |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -65,21 +64,10 @@ next_project_number: 318
 
 ### Algebraic Semantics
 
-302 [IMPLEMENTED] — Define syntactic fragment predicates on Proposition analogous to 
-  └─ 305 [IMPLEMENTED] — Define fragment-specific Hilbert axiom predicates for the two sub
-    └─ 306 [IMPLEMENTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian 
-      └─ 308 [IMPLEMENTED] — Prove the conservative extension theorem: IPL is conservative ove
-        └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified 
-    └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb
-      └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
-        └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified  (see above)
-  └─ 307 [IMPLEMENTED] — Construct a HeytingAlgebra from any BrouwerianSemilattice via a f
-    └─ 308 [IMPLEMENTED] — Prove the conservative extension theorem: IPL is conservative ove (see above)
-303 [IMPLEMENTED] — Define the BrouwerianSemilattice typeclass: SemilatticeInf + Orde
-  └─ 306 [IMPLEMENTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian  (see above)
-  └─ 307 [IMPLEMENTED] — Construct a HeytingAlgebra from any BrouwerianSemilattice via a f (see above)
 304 [NOT STARTED] — Define the HilbertAlgebra typeclass: a structure (H, ⇨, ⊤) satisf
-  └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb (see above)
+  └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb
+    └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
+      └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified 
   └─ 310 [NOT STARTED] — Formalize the Diego embedding theorem (Diego 1966): every Hilbert
     └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove (see above)
 
@@ -198,7 +186,7 @@ Literature sources:
 ---
 
 ### 308. Ipl conservative over conj imp
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 306, Task 307
@@ -211,7 +199,7 @@ Literature sources:
 ---
 
 ### 307. Free join completion
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 302, Task 303
@@ -223,7 +211,7 @@ Literature sources:
 ---
 
 ### 306. Brouwerian soundness completeness
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 302, Task 303, Task 305
@@ -235,7 +223,7 @@ Literature sources:
 ---
 
 ### 305. Fragment hilbert proof systems
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 302
@@ -257,7 +245,7 @@ Literature sources:
 ---
 
 ### 303. Brouwerian semilattice typeclass
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: None
@@ -270,7 +258,7 @@ Literature sources:
 ---
 
 ### 302. Fragment syntactic predicates
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: None

@@ -451,7 +451,7 @@
     {
       "project_number": 302,
       "project_name": "fragment_syntactic_predicates",
-      "status": "implemented",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Define syntactic fragment predicates on Proposition analogous to the existing IsBotFree: (1) IsOrFree — no disjunction, (2) IsOrBotFree — no disjunction or falsum, (3) IsImpTopOnly — only implication and atoms (no conjunction, disjunction, or falsum). Prove AlgEvaluate independence lemmas for each: or-free evaluation is independent of the join operation, imp-top-only evaluation is independent of join, meet, and bot_val. These predicates and lemmas form the syntactic foundation for all fragment conservative extension results. Also prove closure properties (conjunction/substitution preservation) needed by downstream proof system tasks. File: Cslib/Logics/Propositional/Semantics/Algebra/FragmentPredicates.lean. Extends the pattern established by IsBotFree in Conservative.lean.",
@@ -471,12 +471,13 @@
         }
       ],
       "dependencies": [],
-      "session_id": "sess_1750704037_impl302"
+      "session_id": "sess_1750704037_impl302",
+      "completion_summary": "Created FragmentPredicates.lean with 3 syntactic predicates (IsOrFree, IsOrBotFree, IsImpTopOnly) and 4 subsumption lemmas. All CI passes."
     },
     {
       "project_number": 303,
       "project_name": "brouwerian_semilattice_typeclass",
-      "status": "implemented",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Define the BrouwerianSemilattice typeclass: SemilatticeInf + OrderTop + HImp with the adjunction a ≤ b ⇨ c ↔ a ⊓ b ≤ c. This is the algebraic semantics for IPL⟨∧,→,⊤⟩ — the conjunction-implication-verum fragment of intuitionistic logic. Mathlib has no such class; this fills the gap between SemilatticeInf and GeneralizedHeytingAlgebra (which additionally requires SemilatticeSup). Provide the forgetful instance from GeneralizedHeytingAlgebra. Define BrouwerianEvaluate mapping or-bot-free Propositions to elements of a BrouwerianSemilattice using only ⊓ and ⇨ (no ⊔ or ⊥). Prove basic algebraic identities (e.g., a ⇨ a = ⊤, monotonicity of ⇨ in the second argument). Reference: Rasiowa (1974), Köhler (1981). File: Cslib/Foundations/Order/BrouwerianSemilattice.lean.",
@@ -501,7 +502,8 @@
         }
       ],
       "dependencies": [],
-      "session_id": "sess_1750636800_303abc"
+      "session_id": "sess_1750636800_303abc",
+      "completion_summary": "Created BrouwerianSemilattice typeclass with adjunction axiom, algebraic theory, and Brouwerian.lean with Lindenbaum-Tarski BrouwerianSemilattice instance for IPL conjunctive-implicational fragment. All CI passes."
     },
     {
       "project_number": 304,
@@ -519,7 +521,7 @@
     {
       "project_number": 305,
       "project_name": "fragment_hilbert_proof_systems",
-      "status": "implemented",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Define fragment-specific Hilbert axiom predicates for the two sub-IPL proof systems: (1) ConjImpAxiom for IPL⟨∧,→,⊤⟩ — the implicational and conjunctive axiom schemes from IntPropAxiom restricted to or-bot-free formulas: K (φ → ψ → φ), S ((φ → ψ → χ) → (φ → ψ) → φ → χ), conjunction intro (φ → ψ → φ ∧ ψ), conjunction elim left/right (φ ∧ ψ → φ, φ ∧ ψ → ψ). No efq, no disjunction axioms. (2) ImpAxiom for IPL⟨→,⊤⟩ — only K and S with modus ponens. Prove for each: substitution closure (subst_preserves_conjImpAxiom, subst_preserves_impAxiom), that modus ponens is the sole rule, and the deduction theorem for each fragment. These axiom predicates are the proof-theoretic counterparts to BrouwerianSemilattice and HilbertAlgebra. File: Cslib/Logics/Propositional/ProofSystem/FragmentAxioms.lean.",
@@ -541,12 +543,13 @@
       "dependencies": [
         302
       ],
-      "session_id": "sess_1750636800_a1b2c3"
+      "session_id": "sess_1750636800_a1b2c3",
+      "completion_summary": "Created fragment Hilbert proof systems for IPL conjunctive-implicational and implicational fragments with tag types, axiom predicates, and derivation instances. All CI passes."
     },
     {
       "project_number": 306,
       "project_name": "brouwerian_soundness_completeness",
-      "status": "implemented",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian semilattices. Soundness: if Derivable ConjImpAxiom φ then BrouwerianEvaluate v φ = ⊤ in every BrouwerianSemilattice. Completeness via the Lindenbaum-Tarski algebra: construct the quotient Proposition Atom / ≈ where φ ≈ ψ iff Derivable ConjImpAxiom (φ ↔ ψ), show it is a BrouwerianSemilattice, and prove the truth lemma (BrouwerianEvaluate [φ] = ⊤ ↔ Derivable ConjImpAxiom φ). The Lindenbaum construction parallels HilbertLindenbaumGHA but quotients by ConjImpAxiom-derivability; the key difference is that the quotient need not have joins (⊔). Reference: Rasiowa (1974) Chapters IV-V for the general algebraic completeness pattern. File: Cslib/Logics/Propositional/Semantics/Algebra/BrouwerianCompleteness.lean.",
@@ -570,12 +573,13 @@
         303,
         305
       ],
-      "session_id": "sess_1782239228_7ea60f_306"
+      "session_id": "sess_1782239228_7ea60f_306",
+      "completion_summary": "Proved soundness and completeness of IPL conjunctive-implicational fragment with respect to Brouwerian semilattices (~430 lines). Zero sorry, all CI passes."
     },
     {
       "project_number": 307,
       "project_name": "free_join_completion",
-      "status": "implemented",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Construct a HeytingAlgebra from any BrouwerianSemilattice via a free join completion, and prove the embedding lemma for or-bot-free formulas. The construction adjoins formal joins (and a bottom element) to a BrouwerianSemilattice while preserving meets and Heyting implication. Candidate construction: the lattice of downward-closed subsets (downsets/order ideals) of B ordered by inclusion, which forms a complete Heyting algebra with an order-embedding ι : B → Downsets(B) via principal downsets ι(b) = ↓b. Prove: (1) Downsets(B) is a HeytingAlgebra, (2) ι preserves ⊓ (ι(a ⊓ b) = ι(a) ⊓ ι(b)), (3) ι preserves ⇨ (ι(a ⇨ b) = ι(a) ⇨ ι(b)), (4) ι preserves ⊤, (5) the embedding lemma: for or-bot-free formulas, BrouwerianEvaluate v φ = ⊤ ↔ AlgEvaluate (ι ∘ v) ⊥ φ = ⊤. This is the algebraic bridge for the ∧→⊤ conservative extension, analogous to WithBot for MPL→IPL. File: Cslib/Logics/Propositional/Semantics/Algebra/FreeJoinCompletion.lean.",
@@ -604,7 +608,7 @@
     {
       "project_number": 308,
       "project_name": "ipl_conservative_over_conj_imp",
-      "status": "implemented",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Prove the conservative extension theorem: IPL is conservative over IPL⟨∧,→,⊤⟩ for or-bot-free formulas. Statement: if Derivable IntPropAxiom φ and φ.IsOrBotFree = true, then Derivable ConjImpAxiom φ. Proof route: (1) IPL.hilbert_alg_complete.mp converts to HA-validity, (2) for any BrouwerianSemilattice B and valuation v, instantiate HA-validity at the free join completion of B, (3) the embedding lemma from FreeJoinCompletion.lean rewrites back to BrouwerianEvaluate v φ = ⊤ in B, (4) Brouwerian completeness converts back to Derivable ConjImpAxiom φ. Derive the ND corollary via algebraic bridges. This shows that disjunction and falsum are genuinely independent extensions — no theorem in the ∧-→-⊤ language gains a new proof by adding ∨ and ⊥. File: Cslib/Logics/Propositional/Semantics/Algebra/ConjImpConservative.lean.",

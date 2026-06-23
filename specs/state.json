@@ -4,26 +4,82 @@
     {
       "project_number": 294,
       "project_name": "fix_missing_docstrings_nd_inference",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Add missing docstrings to 6 declarations identified by /vet 266: two anonymous Coe instances in Cslib/Foundations/Logic/InferenceSystem.lean (lines 74, 81), and four declarations in Cslib/Logics/Propositional/NaturalDeduction/Basic.lean (emptySequent_eq line 158, iff_derivableIn_empty line 160, derivableIn_top line 335, equiv.refl line 361). Follow CONTRIBUTING.md docstring conventions for consistency with surrounding code.",
       "created": "2026-06-23T17:07:28Z",
-      "last_updated": "2026-06-23T17:07:28Z",
+      "last_updated": "2026-06-23T17:10:00Z",
       "next_artifact_number": 1,
-      "artifacts": [],
-      "parent_task": 266
+      "artifacts": [
+        {
+          "path": "specs/294_fix_missing_docstrings_nd_inference/reports/01_docstring-research.md",
+          "type": "research",
+          "summary": "Research report for 6 missing docstrings in InferenceSystem.lean and NaturalDeduction/Basic.lean"
+        },
+        {
+          "path": "specs/294_fix_missing_docstrings_nd_inference/plans/01_docstring-fix-plan.md",
+          "type": "plan",
+          "summary": "Single-phase plan to add 5-6 missing docstrings across 2 Lean files"
+        }
+      ],
+      "parent_task": 266,
+      "session_id": "sess_1782234537_0aa56b_294",
+      "plan_metadata": {
+        "phases": 1,
+        "total_effort_hours": 0.5,
+        "complexity": "simple",
+        "research_integrated": true,
+        "plan_version": 1,
+        "dependency_waves": [
+          [
+            1
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/01_docstring-research.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-06-23"
+          }
+        ]
+      }
     },
     {
       "project_number": 295,
       "project_name": "fix_dia_duality_axiom_typeclasses",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Add HasAxiomDiaDualityFwd and HasAxiomDiaDualityBack typeclasses to Cslib/Foundations/Logic/ProofSystem.lean to complete the axiom-typeclass pairing pattern. AxiomDiaDualityFwd and AxiomDiaDualityBack are defined in Axioms.lean but lack corresponding Has* typeclasses in ProofSystem.lean, unlike every other axiom. Add two class declarations in a new DiaDualityAxiomClasses section following the existing pattern.",
       "created": "2026-06-23T17:07:28Z",
-      "last_updated": "2026-06-23T17:07:28Z",
+      "last_updated": "2026-06-23T17:10:30Z",
       "next_artifact_number": 1,
-      "artifacts": [],
-      "parent_task": 266
+      "artifacts": [
+        {
+          "type": "plan",
+          "path": "specs/295_fix_dia_duality_axiom_typeclasses/plans/01_axiom-typeclass-plan.md",
+          "summary": "1-phase plan to add DiaDuality axiom typeclasses"
+        }
+      ],
+      "parent_task": 266,
+      "plan_metadata": {
+        "phases": 1,
+        "total_effort_hours": 0.5,
+        "complexity": "simple",
+        "research_integrated": true,
+        "plan_version": 1,
+        "dependency_waves": [
+          [
+            1
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/01_axiom-typeclass-research.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-06-23"
+          }
+        ]
+      }
     },
     {
       "project_number": 288,
@@ -337,7 +393,7 @@
     {
       "project_number": 252,
       "project_name": "acceptance_conditions_zoo",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Formalize Rabin and parity acceptance conditions alongside the existing Muller acceptance (DMA) and Büchi acceptance (DBA) in CSLib, and prove the classical conversions between them. Build on the existing infOcc predicate (Cslib/Foundations/Data/OmegaSequence/InfOcc.lean) which already provides the \"infinitely often\" foundation. Scope: (1) Rabin acceptance — pairs of (Eᵢ, Fᵢ) sets. (2) Parity acceptance — priority coloring. (3) Muller↔Rabin conversion. (4) Rabin↔parity conversion (Piterman 2007). Target: Cslib/Computability/Automata/DA/Rabin.lean, Parity.lean, Conversions.lean",
       "topic": "Temporal Logic",

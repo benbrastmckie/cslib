@@ -11,7 +11,7 @@ next_project_number: 296
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,278,279,288,289,290,294,295 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,278,279,288,289,290,294,295 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,291,292,293 | 36,37,180,279,290 | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 3 | 41,275 | 39,40 | Foundations |
 
@@ -46,31 +46,33 @@ next_project_number: 296
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
-252 [IMPLEMENTING] — Formalize Rabin and parity acceptance conditions alongside the ex
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
   └─ 275 [BLOCKED] — Prove that Bimodal TM is conservative over Temporal BX for tempor
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ### Uncategorized
 
-294 [NOT STARTED] — Add missing docstrings to 6 declarations identified by /vet 266: 
-295 [NOT STARTED] — Add HasAxiomDiaDualityFwd and HasAxiomDiaDualityBack typeclasses 
+294 [PLANNED] — Add missing docstrings to 6 declarations identified by /vet 266: 
+295 [PLANNED] — Add HasAxiomDiaDualityFwd and HasAxiomDiaDualityBack typeclasses 
 
 ## Tasks
 
 ### 295. Fix dia duality axiom typeclasses
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Dependencies**: None
+- **Plan**: [295_fix_dia_duality_axiom_typeclasses/plans/01_axiom-typeclass-plan.md]
 
 **Description**: Add HasAxiomDiaDualityFwd and HasAxiomDiaDualityBack typeclasses to Cslib/Foundations/Logic/ProofSystem.lean to complete the axiom-typeclass pairing pattern. AxiomDiaDualityFwd and AxiomDiaDualityBack are defined in Axioms.lean but lack corresponding Has* typeclasses in ProofSystem.lean, unlike every other axiom. Add two class declarations in a new DiaDualityAxiomClasses section following the existing pattern.
 
 ---
 
 ### 294. Fix missing docstrings nd inference
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Dependencies**: None
+- **Research**: [294_fix_missing_docstrings_nd_inference/reports/01_docstring-research.md]
+- **Plan**: [294_fix_missing_docstrings_nd_inference/plans/01_docstring-fix-plan.md]
 
 **Description**: Add missing docstrings to 6 declarations identified by /vet 266: two anonymous Coe instances in Cslib/Foundations/Logic/InferenceSystem.lean (lines 74, 81), and four declarations in Cslib/Logics/Propositional/NaturalDeduction/Basic.lean (emptySequent_eq line 158, iff_derivableIn_empty line 160, derivableIn_top line 335, equiv.refl line 361). Follow CONTRIBUTING.md docstring conventions for consistency with surrounding code.
 
@@ -169,7 +171,7 @@ next_project_number: 296
 ---
 
 ### 252. Acceptance conditions zoo
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None

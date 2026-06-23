@@ -11,10 +11,9 @@ next_project_number: 286
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,266,269,278,279,280,282 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215,283 | 36,37,180,282 | Bimodal Porting, Propositional Logic, Temporal Logic |
-| 3 | 41,275,284 | 39,40,283 | Foundations, Propositional Logic |
-| 4 | 285 | 284 | Propositional Logic |
+| 1 | 36,37,180,226,241,245,252,266,269,278,279,280,283 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 2 | 39,40,181,215,284 | 36,37,180,283 | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 3 | 41,275,285 | 39,40,284 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -38,10 +37,9 @@ next_project_number: 286
 266 [IMPLEMENTING] — Research improvements to Propositional/ and Foundations/Logic/ in
 279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
 280 [NOT STARTED] — Research the current state of propositional proof systems in CSLi
-282 [NOT STARTED] — Rebuild the Lindenbaum algebra construction over Hilbert derivati
-  └─ 283 [NOT STARTED] — Restate algebraic completeness as Hilbert-primary using the Hilbe
-    └─ 284 [NOT STARTED] — Restate ipl_conservative_over_mpl and glivenko as Hilbert-primary
-      └─ 285 [NOT STARTED] — Refactor the ND metalogical API so that all ND-level results (alg
+283 [NOT STARTED] — Restate algebraic completeness as Hilbert-primary using the Hilbe
+  └─ 284 [NOT STARTED] — Restate ipl_conservative_over_mpl and glivenko as Hilbert-primary
+    └─ 285 [NOT STARTED] — Refactor the ND metalogical API so that all ND-level results (alg
 
 ### Temporal Logic
 
@@ -88,7 +86,7 @@ next_project_number: 286
 ---
 
 ### 282. Lindenbaum algebra over hilbert
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 281

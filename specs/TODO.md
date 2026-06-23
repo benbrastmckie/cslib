@@ -12,10 +12,9 @@ next_project_number: 318
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,180,226,241,245,278,290,299,301,302,303,304,313,314,316 | -- | Bimodal Porting, Foundations, Project Management, ... |
-| 2 | 39,40,181,215,293,300,305,310,315,317 | 36,37,180,290,299,302,304,314,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
-| 3 | 41,275,291,292,306,309 | 39,40,303,304,305,315 | Foundations, Propositional Logic, Algebraic Semantics |
-| 4 | 308,311 | 306,309,310 | Algebraic Semantics |
-| 5 | 312 | 308,311 | Algebraic Semantics |
+| 2 | 39,40,181,215,293,300,306,307,309,310,315,317 | 36,37,180,290,299,302,303,304,314,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 3 | 41,275,291,292,308,311 | 39,40,306,307,309,310,315 | Foundations, Propositional Logic, Algebraic Semantics |
+| 4 | 312 | 308,311 | Algebraic Semantics |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -66,15 +65,17 @@ next_project_number: 318
 ### Algebraic Semantics
 
 302 [IMPLEMENTED] — Define syntactic fragment predicates on Proposition analogous to 
-  └─ 305 [RESEARCHED] — Define fragment-specific Hilbert axiom predicates for the two sub
-    └─ 306 [NOT STARTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian 
-      └─ 308 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
-        └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified 
-    └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb
-      └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
-        └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified  (see above)
+  └─ 306 [NOT STARTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian 
+    └─ 308 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
+      └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified 
+  └─ 307 [IMPLEMENTED] — Construct a HeytingAlgebra from any BrouwerianSemilattice via a f
+    └─ 308 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove (see above)
+  └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb
+    └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
+      └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified  (see above)
 303 [IMPLEMENTED] — Define the BrouwerianSemilattice typeclass: SemilatticeInf + Orde
   └─ 306 [NOT STARTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian  (see above)
+  └─ 307 [IMPLEMENTED] — Construct a HeytingAlgebra from any BrouwerianSemilattice via a f (see above)
 304 [NOT STARTED] — Define the HilbertAlgebra typeclass: a structure (H, ⇨, ⊤) satisf
   └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb (see above)
   └─ 310 [NOT STARTED] — Formalize the Diego embedding theorem (Diego 1966): every Hilbert
@@ -205,13 +206,12 @@ Literature sources:
 ---
 
 ### 307. Free join completion
-- **Status**: [COMPLETED]
+- **Status**: [IMPLEMENTED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 302, Task 303
 - **Research**: [307_free_join_completion/reports/01_free-join-completion-research.md]
 - **Plan**: [307_free_join_completion/plans/01_free-join-completion-plan.md]
-- **Summary**: [307_free_join_completion/summaries/01_free-join-completion-summary.md]
 
 **Description**: Construct a HeytingAlgebra from any BrouwerianSemilattice via a free join completion, and prove the embedding lemma for or-bot-free formulas. The construction adjoins formal joins (and a bottom element) to a BrouwerianSemilattice while preserving meets and Heyting implication. Candidate construction: the lattice of downward-closed subsets (downsets/order ideals) of B ordered by inclusion, which forms a complete Heyting algebra with an order-embedding ι : B → Downsets(B) via principal downsets ι(b) = ↓b. Prove: (1) Downsets(B) is a HeytingAlgebra, (2) ι preserves ⊓ (ι(a ⊓ b) = ι(a) ⊓ ι(b)), (3) ι preserves ⇨ (ι(a ⇨ b) = ι(a) ⇨ ι(b)), (4) ι preserves ⊤, (5) the embedding lemma: for or-bot-free formulas, BrouwerianEvaluate v φ = ⊤ ↔ AlgEvaluate (ι ∘ v) ⊥ φ = ⊤. This is the algebraic bridge for the ∧→⊤ conservative extension, analogous to WithBot for MPL→IPL. File: Cslib/Logics/Propositional/Semantics/Algebra/FreeJoinCompletion.lean.
 
@@ -228,11 +228,12 @@ Literature sources:
 ---
 
 ### 305. Fragment hilbert proof systems
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 302
 - **Research**: [305_fragment_hilbert_proof_systems/reports/01_fragment-proof-systems-research.md]
+- **Plan**: [305_fragment_hilbert_proof_systems/plans/01_fragment-proof-systems-plan.md]
 
 **Description**: Define fragment-specific Hilbert axiom predicates for the two sub-IPL proof systems: (1) ConjImpAxiom for IPL⟨∧,→,⊤⟩ — the implicational and conjunctive axiom schemes from IntPropAxiom restricted to or-bot-free formulas: K (φ → ψ → φ), S ((φ → ψ → χ) → (φ → ψ) → φ → χ), conjunction intro (φ → ψ → φ ∧ ψ), conjunction elim left/right (φ ∧ ψ → φ, φ ∧ ψ → ψ). No efq, no disjunction axioms. (2) ImpAxiom for IPL⟨→,⊤⟩ — only K and S with modus ponens. Prove for each: substitution closure (subst_preserves_conjImpAxiom, subst_preserves_impAxiom), that modus ponens is the sole rule, and the deduction theorem for each fragment. These axiom predicates are the proof-theoretic counterparts to BrouwerianSemilattice and HilbertAlgebra. File: Cslib/Logics/Propositional/ProofSystem/FragmentAxioms.lean.
 

@@ -1,0 +1,31 @@
+{
+  "status": "implemented",
+  "summary": "Task 305 complete. Defined ConjImpAxiom (5 constructors: K, S, andI, andE1, andE2) and ImpAxiom (2 constructors: K, S) in FragmentAxioms.lean. Proved subsumption ImpAxiom→ConjImpAxiom→MinPropAxiom, substitution closure, per-constructor fragment predicate compatibility (using imp_isOrBotFree/and_isOrBotFree/imp_isImpTopOnly from FragmentPredicates.lean), and deduction theorem instances. Added HilbertConjImp/HilbertImp tag types to ProofSystem.lean and registered all typeclass instances (InferenceSystem, ModusPonens, HasAxiom*, MinimalHilbert) in FragmentInstances.lean. All 3 files build cleanly; mk_all updated Cslib.lean.",
+  "artifacts": [
+    {
+      "path": "Cslib/Foundations/Logic/ProofSystem.lean",
+      "type": "modified",
+      "summary": "Added HilbertConjImp and HilbertImp opaque tag types"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/ProofSystem/FragmentAxioms.lean",
+      "type": "new",
+      "summary": "Fragment axiom predicates, subsumption, substitution, fragment compat, deduction theorem instances"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/ProofSystem/FragmentInstances.lean",
+      "type": "new",
+      "summary": "Typeclass instances for HilbertConjImp and HilbertImp"
+    },
+    {
+      "path": "specs/305_fragment_hilbert_proof_systems/summaries/01_fragment-proof-systems-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary"
+    }
+  ],
+  "blockers": [],
+  "continuation_context": null,
+  "phases_completed": 1,
+  "phases_total": 1,
+  "next_action_hint": "complete"
+}

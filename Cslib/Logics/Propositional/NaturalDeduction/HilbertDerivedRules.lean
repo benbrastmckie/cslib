@@ -465,4 +465,70 @@ theorem hilbertIffE2Deriv
     Deriv Axioms Γ (B → A) := by
   obtain ⟨d⟩ := h; exact ⟨hilbertIffE2 h_andE2 d⟩
 
+/-! ## Naming Consistency Wrappers
+
+The following definitions provide `hilbert`-prefixed aliases for rules
+originally defined in `FromHilbert.lean` (`impI`, `impE`, `botEDeriv`),
+ensuring a uniform naming convention across the Hilbert derived rules API. -/
+
+/-- **Implication Introduction** (impI): From `A :: Gamma |- B`, derive `Gamma |- A -> B`.
+Alias for `impI` (the deduction theorem). Requires K and S axioms. -/
+noncomputable def hilbertImpI
+    {Axioms : PL.Proposition Atom → Prop}
+    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    {Γ : List (PL.Proposition Atom)}
+    {A B : PL.Proposition Atom}
+    (d : DerivationTree Axioms (A :: Γ) B) :
+    DerivationTree Axioms Γ (A → B) :=
+  impI h_K h_S d
+
+/-- **Implication Elimination** (impE / Modus Ponens):
+From `Gamma |- A -> B` and `Gamma |- A`, derive `Gamma |- B`.
+Alias for `impE`. -/
+def hilbertImpE
+    {Axioms : PL.Proposition Atom → Prop}
+    {Γ : List (PL.Proposition Atom)}
+    {A B : PL.Proposition Atom}
+    (d₁ : DerivationTree Axioms Γ (A → B))
+    (d₂ : DerivationTree Axioms Γ A) :
+    DerivationTree Axioms Γ B :=
+  impE d₁ d₂
+
+/-- Implication introduction at the `Deriv` level.
+Alias for `impIDeriv`. -/
+theorem hilbertImpIDeriv
+    {Axioms : PL.Proposition Atom → Prop}
+    (h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_S : ∀ (φ ψ χ : PL.Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    {Γ : List (PL.Proposition Atom)}
+    {A B : PL.Proposition Atom}
+    (h : Deriv Axioms (A :: Γ) B) :
+    Deriv Axioms Γ (A → B) :=
+  impIDeriv h_K h_S h
+
+/-- Implication elimination at the `Deriv` level.
+Alias for `impEDeriv`. -/
+theorem hilbertImpEDeriv
+    {Axioms : PL.Proposition Atom → Prop}
+    {Γ : List (PL.Proposition Atom)}
+    {A B : PL.Proposition Atom}
+    (h₁ : Deriv Axioms Γ (A → B))
+    (h₂ : Deriv Axioms Γ A) :
+    Deriv Axioms Γ B :=
+  impEDeriv h₁ h₂
+
+/-- Ex falso quodlibet at the `Deriv` level.
+Alias for `botEDeriv`. -/
+theorem hilbertBotEDeriv
+    {Axioms : PL.Proposition Atom → Prop}
+    (h_EFQ : ∀ (φ : PL.Proposition Atom), Axioms (Proposition.bot.imp φ))
+    {Γ : List (PL.Proposition Atom)}
+    {A : PL.Proposition Atom}
+    (h : Deriv Axioms Γ ⊥) :
+    Deriv Axioms Γ A :=
+  botEDeriv h_EFQ h
+
 end Cslib.Logic.PL

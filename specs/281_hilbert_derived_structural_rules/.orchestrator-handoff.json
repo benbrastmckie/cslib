@@ -1,0 +1,16 @@
+{
+  "status": "planned",
+  "summary": "Single-phase plan to add 5 hilbert-prefixed naming wrappers (hilbertImpI, hilbertImpE, hilbertImpIDeriv, hilbertImpEDeriv, hilbertBotEDeriv) to HilbertDerivedRules.lean for API consistency",
+  "blockers": [],
+  "continuation_context": null,
+  "artifacts": [
+    {
+      "path": "specs/281_hilbert_derived_structural_rules/plans/01_hilbert-derived-rules-plan.md",
+      "type": "plan",
+      "summary": "Implementation plan: 1 phase, 0.5 hours, adds 5 thin wrapper definitions to HilbertDerivedRules.lean"
+    }
+  ],
+  "phases_completed": 0,
+  "phases_total": 1,
+  "next_action_hint": "implement"
+}

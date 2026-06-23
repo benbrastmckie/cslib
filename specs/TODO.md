@@ -12,9 +12,9 @@ next_project_number: 318
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,180,226,241,245,278,290,299,301,302,303,304,313,314,316 | -- | Bimodal Porting, Foundations, Project Management, ... |
-| 2 | 39,40,181,215,293,300,305,307,310,315,317 | 36,37,180,290,299,302,303,304,314,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 2 | 39,40,181,215,293,300,305,310,315,317 | 36,37,180,290,299,302,304,314,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
 | 3 | 41,275,291,292,306,309 | 39,40,303,304,305,315 | Foundations, Propositional Logic, Algebraic Semantics |
-| 4 | 308,311 | 306,307,309,310 | Algebraic Semantics |
+| 4 | 308,311 | 306,309,310 | Algebraic Semantics |
 | 5 | 312 | 308,311 | Algebraic Semantics |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -41,33 +41,27 @@ next_project_number: 318
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 290 [NOT STARTED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
   └─ 293 [NOT STARTED] — Establish the formal Curry-Howard isomorphism between Theory.Deri
-314 [NOT STARTED] — Implement the classical sequent calculus LK for propositional log
+314 [IMPLEMENTING] — Implement the classical sequent calculus LK for propositional log
   └─ 315 [NOT STARTED] — Implement the intuitionistic sequent calculus LJ for propositiona
     └─ 291 [NOT STARTED] — After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a un
     └─ 292 [NOT STARTED] — After task 279 delivers LJ with cut elimination, formalize the co
+316 [IMPLEMENTING] — Fill the 6 sorry instances in propositional tableau soundness pro
+  └─ 317 [NOT STARTED] — Fill the 8 sorry instances in propositional tableau completeness 
 
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
+301 [NOT STARTED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
   └─ 275 [BLOCKED] — Prove that Bimodal TM is conservative over Temporal BX for tempor
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
-
-### Propositional
-
-316 [NOT STARTED] — Fill the 6 sorry instances in propositional tableau soundness pro
-  └─ 317 [NOT STARTED] — Fill the 8 sorry instances in propositional tableau completeness 
 
 ### Modal
 
 299 [NOT STARTED] — Implement tableau decision procedure for basic modal logic K with
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
-
-### Temporal
-
-301 [NOT STARTED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 
 ### Algebraic Semantics
 
@@ -79,11 +73,8 @@ next_project_number: 318
     └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb
       └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
         └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified  (see above)
-  └─ 307 [RESEARCHED] — Construct a HeytingAlgebra from any BrouwerianSemilattice via a f
-    └─ 308 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove (see above)
 303 [IMPLEMENTED] — Define the BrouwerianSemilattice typeclass: SemilatticeInf + Orde
   └─ 306 [NOT STARTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian  (see above)
-  └─ 307 [RESEARCHED] — Construct a HeytingAlgebra from any BrouwerianSemilattice via a f (see above)
 304 [NOT STARTED] — Define the HilbertAlgebra typeclass: a structure (H, ⇨, ⊤) satisf
   └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb (see above)
   └─ 310 [NOT STARTED] — Formalize the Diego embedding theorem (Diego 1966): every Hilbert
@@ -96,7 +87,7 @@ next_project_number: 318
 ### 317. Propositional tableau completeness
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
-- **Topic**: Propositional
+- **Topic**: Propositional Logic
 - **Dependencies**: Task 316
 
 **Description**: Fill the 8 sorry instances in propositional tableau completeness proofs across all three logics. Classical (Classical/Completeness.lean): prove classicalOpenBranch_countermodel (open saturated branch yields a Boolean valuation falsifying phi) and classicalTableau_complete (if phi is not a Tautology then the tableau has an open branch), plus one helper — by constructing a valuation from the positive atoms in the saturated branch and proving a truth lemma by formula induction. Intuitionistic (Intuitionistic/Completeness.lean): prove intuitionisticOpenBranch_countermodel (open saturated branch yields a finite Kripke model refuting phi) and intuitionisticTableau_complete — by constructing worlds from the branch world indices, accessibility from the expansion record, valuation from positive atoms, and proving a truth lemma showing forced/not-forced matches signed formulas at each world. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_complete (if phi is not MValid then the tableau has an open branch) — adapts intuitionistic proof with MinimalClosure and botForces=false. Core technique: Hintikka-set argument — saturated branches satisfy Hintikka conditions, from which countermodels are extracted.
@@ -104,10 +95,12 @@ next_project_number: 318
 ---
 
 ### 316. Propositional tableau soundness
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
-- **Topic**: Propositional
+- **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [316_propositional_tableau_soundness/reports/01_soundness-research.md]
+- **Plan**: [316_propositional_tableau_soundness/plans/01_soundness-plan.md]
 
 **Description**: Fill the 6 sorry instances in propositional tableau soundness proofs across all three logics. Classical (Classical/Soundness.lean): prove classically_closed_unsatisfiable (closed branch is unsatisfiable under any Boolean valuation) and classicalTableau_sound (closed tableau implies Tautology phi), plus one helper lemma — by induction on rule applications showing each propositional rule preserves satisfiability. Intuitionistic (Intuitionistic/Soundness.lean): prove intuitionisticTableau_sound (closed tableau implies IValid phi) plus two helper lemmas — by showing each rule (including world-creating F(imp) and persistent T(imp)) preserves forcing at Kripke worlds. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_sound (closed tableau implies MValid phi) — adapts intuitionistic proof with MinimalClosure (complementary atoms only, no ex falso). Core technique: induction on expansion steps showing each rule application preserves the semantic invariant for the respective logic.
 
@@ -133,7 +126,7 @@ Literature sources:
 ---
 
 ### 314. Lk classical sequent calculus
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -212,11 +205,13 @@ Literature sources:
 ---
 
 ### 307. Free join completion
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 302, Task 303
 - **Research**: [307_free_join_completion/reports/01_free-join-completion-research.md]
+- **Plan**: [307_free_join_completion/plans/01_free-join-completion-plan.md]
+- **Summary**: [307_free_join_completion/summaries/01_free-join-completion-summary.md]
 
 **Description**: Construct a HeytingAlgebra from any BrouwerianSemilattice via a free join completion, and prove the embedding lemma for or-bot-free formulas. The construction adjoins formal joins (and a bottom element) to a BrouwerianSemilattice while preserving meets and Heyting implication. Candidate construction: the lattice of downward-closed subsets (downsets/order ideals) of B ordered by inclusion, which forms a complete Heyting algebra with an order-embedding ι : B → Downsets(B) via principal downsets ι(b) = ↓b. Prove: (1) Downsets(B) is a HeytingAlgebra, (2) ι preserves ⊓ (ι(a ⊓ b) = ι(a) ⊓ ι(b)), (3) ι preserves ⇨ (ι(a ⇨ b) = ι(a) ⇨ ι(b)), (4) ι preserves ⊤, (5) the embedding lemma: for or-bot-free formulas, BrouwerianEvaluate v φ = ⊤ ↔ AlgEvaluate (ι ∘ v) ⊥ φ = ⊤. This is the algebraic bridge for the ∧→⊤ conservative extension, analogous to WithBot for MPL→IPL. File: Cslib/Logics/Propositional/Semantics/Algebra/FreeJoinCompletion.lean.
 
@@ -281,7 +276,7 @@ Literature sources:
 ### 301. Temporal tableau
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
-- **Topic**: Temporal
+- **Topic**: Temporal Logic
 - **Dependencies**: Task 297, Task 298
 
 **Description**: Implement tableau decision procedure for temporal logic (Cslib.Logic.Temporal.Formula) with until/since decomposition rules, time labels, and temporal ordering tracking. Most complex new tableau: until/since rules have no modal analogue, requiring branching decomposition with event-witness and guard-continue alternatives. Adapt patterns from bimodal decidability system (TimeOrdering, temporal rule structure, frame-class rules) but build fresh implementations on shared Foundations infrastructure. Include density and discreteness frame-class rules. Formula type has atom, bot, imp, untl, snce primitives using Lukasiewicz encoding. Files under Cslib/Logics/Temporal/Tableau/: Defs.lean, Rules.lean, TimeOrdering.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 2,000-2,500 lines.

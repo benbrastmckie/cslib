@@ -419,6 +419,7 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.Brouwerian
 public import Cslib.Logics.Propositional.Semantics.Algebra.Completeness
 public import Cslib.Logics.Propositional.Semantics.Algebra.Conservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentPredicates
+public import Cslib.Logics.Propositional.Semantics.Algebra.FreeJoinCompletion
 public import Cslib.Logics.Propositional.Semantics.Algebra.Glivenko
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertConservativeGlivenko

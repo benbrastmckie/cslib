@@ -4,23 +4,35 @@
     {
       "project_number": 316,
       "project_name": "propositional_tableau_soundness",
-      "status": "not_started",
+      "status": "implementing",
       "task_type": "cslib",
-      "topic": "Propositional",
+      "topic": "Propositional Logic",
       "description": "Fill the 6 sorry instances in propositional tableau soundness proofs across all three logics. Classical (Classical/Soundness.lean): prove classically_closed_unsatisfiable (closed branch is unsatisfiable under any Boolean valuation) and classicalTableau_sound (closed tableau implies Tautology phi), plus one helper lemma — by induction on rule applications showing each propositional rule preserves satisfiability. Intuitionistic (Intuitionistic/Soundness.lean): prove intuitionisticTableau_sound (closed tableau implies IValid phi) plus two helper lemmas — by showing each rule (including world-creating F(imp) and persistent T(imp)) preserves forcing at Kripke worlds. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_sound (closed tableau implies MValid phi) — adapts intuitionistic proof with MinimalClosure (complementary atoms only, no ex falso). Core technique: induction on expansion steps showing each rule application preserves the semantic invariant for the respective logic.",
       "created": "2026-06-23T19:55:52Z",
-      "last_updated": "2026-06-23T19:55:52Z",
+      "last_updated": "2026-06-23T20:24:41Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/316_propositional_tableau_soundness/reports/01_soundness-research.md",
+          "summary": "Research: 8 sorry instances, proof strategies, 2 potential blockers"
+        },
+        {
+          "type": "plan",
+          "path": "specs/316_propositional_tableau_soundness/plans/01_soundness-plan.md",
+          "summary": "4-phase plan: closure lemmas, rule preservation, classical main, intuitionistic+minimal main"
+        }
+      ],
       "dependencies": [],
-      "parent_task": 298
+      "parent_task": 298,
+      "session_id": "sess_1782245478_79171e_316"
     },
     {
       "project_number": 317,
       "project_name": "propositional_tableau_completeness",
       "status": "not_started",
       "task_type": "cslib",
-      "topic": "Propositional",
+      "topic": "Propositional Logic",
       "description": "Fill the 8 sorry instances in propositional tableau completeness proofs across all three logics. Classical (Classical/Completeness.lean): prove classicalOpenBranch_countermodel (open saturated branch yields a Boolean valuation falsifying phi) and classicalTableau_complete (if phi is not a Tautology then the tableau has an open branch), plus one helper — by constructing a valuation from the positive atoms in the saturated branch and proving a truth lemma by formula induction. Intuitionistic (Intuitionistic/Completeness.lean): prove intuitionisticOpenBranch_countermodel (open saturated branch yields a finite Kripke model refuting phi) and intuitionisticTableau_complete — by constructing worlds from the branch world indices, accessibility from the expansion record, valuation from positive atoms, and proving a truth lemma showing forced/not-forced matches signed formulas at each world. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_complete (if phi is not MValid then the tableau has an open branch) — adapts intuitionistic proof with MinimalClosure and botForces=false. Core technique: Hintikka-set argument — saturated branches satisfy Hintikka conditions, from which countermodels are extracted.",
       "created": "2026-06-23T19:55:52Z",
       "last_updated": "2026-06-23T19:55:52Z",
@@ -155,7 +167,7 @@
       "project_name": "temporal_tableau",
       "status": "not_started",
       "task_type": "cslib",
-      "topic": "Temporal",
+      "topic": "Temporal Logic",
       "description": "Implement tableau decision procedure for temporal logic (Cslib.Logic.Temporal.Formula) with until/since decomposition rules, time labels, and temporal ordering tracking. Most complex new tableau: until/since rules have no modal analogue, requiring branching decomposition with event-witness and guard-continue alternatives. Adapt patterns from bimodal decidability system (TimeOrdering, temporal rule structure, frame-class rules) but build fresh implementations on shared Foundations infrastructure. Include density and discreteness frame-class rules. Formula type has atom, bot, imp, untl, snce primitives using Lukasiewicz encoding. Files under Cslib/Logics/Temporal/Tableau/: Defs.lean, Rules.lean, TimeOrdering.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 2,000-2,500 lines.",
       "created": "2026-06-23T17:47:17Z",
       "last_updated": "2026-06-23T17:47:17Z",
@@ -742,25 +754,36 @@
     {
       "project_number": 307,
       "project_name": "free_join_completion",
-      "status": "researched",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Construct a HeytingAlgebra from any BrouwerianSemilattice via a free join completion, and prove the embedding lemma for or-bot-free formulas. The construction adjoins formal joins (and a bottom element) to a BrouwerianSemilattice while preserving meets and Heyting implication. Candidate construction: the lattice of downward-closed subsets (downsets/order ideals) of B ordered by inclusion, which forms a complete Heyting algebra with an order-embedding ι : B → Downsets(B) via principal downsets ι(b) = ↓b. Prove: (1) Downsets(B) is a HeytingAlgebra, (2) ι preserves ⊓ (ι(a ⊓ b) = ι(a) ⊓ ι(b)), (3) ι preserves ⇨ (ι(a ⇨ b) = ι(a) ⇨ ι(b)), (4) ι preserves ⊤, (5) the embedding lemma: for or-bot-free formulas, BrouwerianEvaluate v φ = ⊤ ↔ AlgEvaluate (ι ∘ v) ⊥ φ = ⊤. This is the algebraic bridge for the ∧→⊤ conservative extension, analogous to WithBot for MPL→IPL. File: Cslib/Logics/Propositional/Semantics/Algebra/FreeJoinCompletion.lean.",
       "created": "2026-06-23T22:00:00Z",
-      "last_updated": "2026-06-24T00:30:00Z",
+      "last_updated": "2026-06-23T20:24:29Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
           "path": "specs/307_free_join_completion/reports/01_free-join-completion-research.md",
           "type": "report",
-          "summary": "LowerSet completion: Mathlib HeytingAlgebra on LowerSet, Iic embedding preserves inf/himp/top, ~70-90 lines"
+          "summary": "Research report: LowerSet construction, Mathlib reuse, verified proof sketches"
+        },
+        {
+          "path": "specs/307_free_join_completion/plans/01_free-join-completion-plan.md",
+          "type": "plan",
+          "summary": "Implementation plan: single phase, 70-90 lines"
+        },
+        {
+          "path": "specs/307_free_join_completion/summaries/01_free-join-completion-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary: 4 theorems, zero sorry, CI passed"
         }
       ],
       "dependencies": [
         302,
         303
       ],
-      "session_id": "sess_1782239228_7ea60f_307"
+      "session_id": "sess_1782245416_c1351b",
+      "completion_summary": "Created FreeJoinCompletion.lean with four theorems: iicHimp (LowerSet.Iic preserves Heyting implication), iicEqTopIff, commutation lemma, and embedding lemma for or-bot-free formulas. All proofs zero-sorry, CI passes."
     },
     {
       "project_number": 308,
@@ -845,12 +868,12 @@
     {
       "project_number": 314,
       "project_name": "lk_classical_sequent_calculus",
-      "status": "not_started",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Implement the classical sequent calculus LK for propositional logic. Create shared definitions (Defs.lean with LKSequent type, scoped notation), LK proof inductive with all-additive Finset-based presentation (LK/Basic.lean), structural admissibility lemmas (weakening, monotone contexts), soundness (LK/Soundness.lean), cut elimination / Hauptsatz (LK/CutElimination.lean) via lexicographic induction on (formula complexity, height sum), and equivalence bridges hilbert_iff_lk and nd_iff_lk composed through existing ND bridge. Completeness follows as corollary via Hilbert bridge. File layout: Cslib/Logics/Propositional/SequentCalculus/{Defs,LK/Basic,LK/Soundness,LK/CutElimination,LK/Completeness}.lean. Reuse Proposition type, Proposition.complexity, InferenceSystem typeclass, and existing hilbert_iff_nd_ctx bridge. Parent task: 279.\n\nLiterature sources:\n- specs/literature/sources/negri_von_plato_2001/section04_ch3-classical-sequent-calculus.md — G3cp rules, admissibility of structural rules, completeness (primary reference for LK design)\n- specs/literature/sources/troelstra_schwichtenberg_2000/section04_ch3-gentzen-systems.md — LK/LJ definitions, G3-style systems, structural rules\n- specs/literature/sources/troelstra_schwichtenberg_2000/section05_ch4-cut-elimination.md — Hauptsatz proof structure, subformula property, termination argument\n- specs/literature/sources/negri_von_plato_2001/section06_ch5-variant-sequent-calculi.md — Alternative calculus designs, independent contexts\n- specs/literature/sources/negri_von_plato_2001/section07_ch6-8-extensions-translations.md — ND-SC translations for bridge proofs\n- specs/literature/sources/gentzen_1935/gentzen_1935_sec03.md — Original LK/LJ definitions and Hauptsatz",
       "topic": "Propositional Logic",
       "created": "2026-06-23T19:33:42Z",
-      "last_updated": "2026-06-23T19:33:42Z",
+      "last_updated": "2026-06-23T20:22:38Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "dependencies": [],
@@ -872,7 +895,8 @@
             3
           ]
         ]
-      }
+      },
+      "session_id": "sess_1782245580_188995_314"
     },
     {
       "project_number": 315,

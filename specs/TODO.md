@@ -41,7 +41,7 @@ next_project_number: 318
 290 [NOT STARTED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
   └─ 293 [NOT STARTED] — Establish the formal Curry-Howard isomorphism between Theory.Deri
 314 [IMPLEMENTING] — Implement the classical sequent calculus LK for propositional log
-  └─ 315 [RESEARCHING] — Implement the intuitionistic sequent calculus LJ for propositiona
+  └─ 315 [RESEARCHED] — Implement the intuitionistic sequent calculus LJ for propositiona
     └─ 291 [NOT STARTED] — After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a un
     └─ 292 [NOT STARTED] — After task 279 delivers LJ with cut elimination, formalize the co
 316 [IMPLEMENTING] — Fill the 6 sorry instances in propositional tableau soundness pro
@@ -98,7 +98,7 @@ next_project_number: 318
 ---
 
 ### 315. Lj intuitionistic sequent calculus
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 314
@@ -149,7 +149,7 @@ Literature sources:
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
-- **Dependencies**: Task 308, Task 311
+- **Dependencies**: Task 311
 
 **Description**: Consolidate the full conservative extension chain into a unified module: IPL⟨→,⊤⟩ ⊂ IPL⟨∧,→,⊤⟩ ⊂ MPL ⊂ IPL ⊂ CPL, where each ⊂ denotes conservative extension for the smaller fragments language. State the chain theorem and derive inter-fragment conservativity as corollaries — e.g., IPL⟨∧,→,⊤⟩ conservative over IPL⟨→,⊤⟩ by composing the two embeddings through IPL. Include the algebraic validity subsumption chain: HilbertAlgValid → BrouwerianValid → GHAValid → HAValid → BAValid. Provide the full picture connecting all five levels of algebraic semantics (Hilbert algebras, Brouwerian semilattices, GHAs, HAs, BAs) to their proof systems (ImpAxiom, ConjImpAxiom, MinPropAxiom, IntPropAxiom, PropositionalAxiom). This is the capstone module demonstrating the algebraic method for propositional logic — each connective extension is genuinely conservative, each algebra class has sound and complete proof theory, and each completion construction provides the bridge. File: Cslib/Logics/Propositional/Semantics/Algebra/ConservativeChain.lean.
 
@@ -179,7 +179,7 @@ Literature sources:
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
-- **Dependencies**: Task 302, Task 304, Task 305
+- **Dependencies**: Task 304
 
 **Description**: Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algebras. Soundness: if Derivable ImpAxiom φ then HilbertEvaluate v φ = ⊤ in every HilbertAlgebra. Completeness via the Lindenbaum-Tarski algebra: the quotient Proposition Atom / ≈ where φ ≈ ψ iff Derivable ImpAxiom (φ → ψ) and Derivable ImpAxiom (ψ → φ). Define [φ] ⇨ [ψ] := [φ → ψ] and show this is well-defined and satisfies the Hilbert algebra axioms K, S, and antisymmetry. Prove the truth lemma: HilbertEvaluate [·] φ = ⊤ ↔ Derivable ImpAxiom φ. This is the simplest Lindenbaum construction in the chain — no lattice operations needed, just the implication operation on equivalence classes. Reference: Diego (1966) Chapter 2, Rasiowa (1974) Chapter V. File: Cslib/Logics/Propositional/Semantics/Algebra/HilbertAlgCompleteness.lean.
 
@@ -199,7 +199,7 @@ Literature sources:
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: Task 297, Task 298
+- **Dependencies**: None
 
 **Description**: Implement tableau decision procedure for temporal logic (Cslib.Logic.Temporal.Formula) with until/since decomposition rules, time labels, and temporal ordering tracking. Most complex new tableau: until/since rules have no modal analogue, requiring branching decomposition with event-witness and guard-continue alternatives. Adapt patterns from bimodal decidability system (TimeOrdering, temporal rule structure, frame-class rules) but build fresh implementations on shared Foundations infrastructure. Include density and discreteness frame-class rules. Formula type has atom, bot, imp, untl, snce primitives using Lukasiewicz encoding. Files under Cslib/Logics/Temporal/Tableau/: Defs.lean, Rules.lean, TimeOrdering.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 2,000-2,500 lines.
 
@@ -219,7 +219,7 @@ Literature sources:
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Modal
-- **Dependencies**: Task 297, Task 298
+- **Dependencies**: None
 
 **Description**: Implement tableau decision procedure for basic modal logic K with world labels, box/diamond rules on top of propositional rules from shared infrastructure. Introduces world labels (accessibility relation tracking) and fundamental modal rule pattern: box-positive is universal/persistent, diamond-positive is existential (fresh accessible world). Use Lukasiewicz encoding for and/or. Prove soundness against Kripke semantics and completeness by extracting finite Kripke countermodels. Modal formula type: Cslib.Logic.Modal.Formula with atom, bot, imp, box primitives. Files under Cslib/Logics/Modal/Tableau/: Defs.lean, Rules.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 1,500-2,000 lines.
 
@@ -271,7 +271,7 @@ Literature sources:
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: Task 266
+- **Dependencies**: None
 
 **Description**: Formalize Prawitz-style normalization for CSLib Theory.Derivation (propositional IPL and MPL). Define Derivation.isNormal predicate (no maximal formula -- i.e., no introduction rule immediately followed by the corresponding elimination on the same formula). Prove a normalization function normalize that transforms any derivation into a normal form. Derive the subformula property as a corollary: every formula in a normal derivation is a subformula of the conclusion or a hypothesis. The Theory.Derivation type is Type u (not Prop), enabling a computable normalization function. Reference: [Prawitz1965] Ch. IV-V. Consider starting with the implicational fragment ({arrow} only) as a milestone, then extending to full IPL connectives. Files: new module Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean. Depends on 266.
 
@@ -281,7 +281,7 @@ Literature sources:
 - **Status**: [EXPANDED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: Task 280
+- **Dependencies**: None
 - **Research**:
   - [279_propositional_sequent_calculus_lk_lj/reports/01_teammate-a-findings.md]
   - [279_propositional_sequent_calculus_lk_lj/reports/01_team-research.md]
@@ -295,7 +295,7 @@ Literature sources:
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Foundations
-- **Dependencies**: Task 266
+- **Dependencies**: None
 
 **Description**: Simplify proofs using new simp/grind normalization tags. After task 268 adds @[simp, scoped grind =] tags to Hilbert system definitional lemmas, audit all proofs in Propositional/, Modal/, Temporal/, and Bimodal/ that use manual `simp only [listImp_nil, listImp_cons, bigconj_nil, ...]` or verbose tactic chains involving these normalization lemmas. Replace with `grind` or `simp` where the new tags make the explicit lemma lists redundant. Also check Foundations/Logic/ proofs. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake
 

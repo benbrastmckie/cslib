@@ -1,14 +1,21 @@
 {
-  "status": "planned",
-  "summary": "Created single-phase implementation plan for task 302. Defines three fragment predicates (IsOrFree, IsOrBotFree, IsImpTopOnly), subsumption hierarchy, closure properties, and AlgEvaluate independence lemmas using two-GHA-instance formulation. All in one new file FragmentPredicates.lean (~150-200 lines).",
+  "status": "implemented",
+  "summary": "Created Cslib/Logics/Propositional/Semantics/Algebra/FragmentPredicates.lean with three fragment predicates (IsOrFree, IsOrBotFree, IsImpTopOnly), subsumption hierarchy, connective/substitution closure, and three morphism-form independence lemmas (coe_AlgEvaluate_orFree, coe_AlgEvaluate_orBotFree, coe_AlgEvaluate_impTopOnly). All build cleanly, zero sorry, no new axioms.",
   "artifacts": [
     {
-      "path": "specs/302_fragment_syntactic_predicates/plans/01_fragment-predicates-plan.md",
-      "type": "plan",
-      "summary": "Single-phase plan: 3 predicates, 4 subsumption lemmas, 5 closure lemmas, 3 substitution theorems, 3 independence theorems"
+      "path": "Cslib/Logics/Propositional/Semantics/Algebra/FragmentPredicates.lean",
+      "type": "implementation",
+      "summary": "New file: 3 predicates, 4 subsumption lemmas, 5 connective closure lemmas, 3 substitution theorems, 3 independence (morphism) theorems"
+    },
+    {
+      "path": "specs/302_fragment_syntactic_predicates/summaries/01_fragment-predicates-summary.md",
+      "type": "summary",
+      "summary": "Execution summary with plan deviations and verification results"
     }
   ],
   "blockers": [],
   "continuation_context": null,
-  "next_action_hint": "implement"
+  "phases_completed": 1,
+  "phases_total": 1,
+  "next_action_hint": "complete"
 }

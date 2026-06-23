@@ -11,11 +11,10 @@ next_project_number: 314
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,279,290,298,302,303,304,313 | -- | Bimodal Porting, Foundations, Project Management, ... |
-| 2 | 39,40,181,215,291,292,293,299,301,305,307,310 | 36,37,180,279,290,298,302,303,304 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
-| 3 | 41,275,300,306,309 | 39,40,299,303,304,305 | Foundations, Modal, Algebraic Semantics |
-| 4 | 308,311 | 306,307,309,310 | Algebraic Semantics |
-| 5 | 312 | 308,311 | Algebraic Semantics |
+| 1 | 36,37,180,226,241,245,278,279,290,298,303,304,305,313 | -- | Bimodal Porting, Foundations, Project Management, ... |
+| 2 | 39,40,181,215,291,292,293,299,301,306,307,309,310 | 36,37,180,279,290,298,303,304,305 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 3 | 41,275,300,308,311 | 39,40,299,306,307,309,310 | Foundations, Modal, Algebraic Semantics |
+| 4 | 312 | 308,311 | Algebraic Semantics |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -56,7 +55,7 @@ next_project_number: 314
 
 ### Propositional
 
-298 [NOT STARTED] — Implement propositional tableau systems for all three proposition
+298 [RESEARCHING] — Implement propositional tableau systems for all three proposition
 
 ### Modal
 
@@ -69,23 +68,21 @@ next_project_number: 314
 
 ### Algebraic Semantics
 
-302 [PLANNED] — Define syntactic fragment predicates on Proposition analogous to 
-  └─ 305 [NOT STARTED] — Define fragment-specific Hilbert axiom predicates for the two sub
-    └─ 306 [NOT STARTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian 
-      └─ 308 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
-        └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified 
-    └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb
-      └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
-        └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified  (see above)
+303 [PLANNED] — Define the BrouwerianSemilattice typeclass: SemilatticeInf + Orde
+  └─ 306 [NOT STARTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian 
+    └─ 308 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
+      └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified 
   └─ 307 [NOT STARTED] — Construct a HeytingAlgebra from any BrouwerianSemilattice via a f
     └─ 308 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove (see above)
-303 [PLANNED] — Define the BrouwerianSemilattice typeclass: SemilatticeInf + Orde
-  └─ 306 [NOT STARTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian  (see above)
-  └─ 307 [NOT STARTED] — Construct a HeytingAlgebra from any BrouwerianSemilattice via a f (see above)
 304 [NOT STARTED] — Define the HilbertAlgebra typeclass: a structure (H, ⇨, ⊤) satisf
-  └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb (see above)
+  └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb
+    └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
+      └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified  (see above)
   └─ 310 [NOT STARTED] — Formalize the Diego embedding theorem (Diego 1966): every Hilbert
     └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove (see above)
+305 [NOT STARTED] — Define fragment-specific Hilbert axiom predicates for the two sub
+  └─ 306 [NOT STARTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian  (see above)
+  └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb (see above)
 
 ### Uncategorized
 
@@ -205,7 +202,7 @@ next_project_number: 314
 ---
 
 ### 302. Fragment syntactic predicates
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: None
@@ -247,7 +244,7 @@ next_project_number: 314
 ---
 
 ### 298. Propositional tableau decidability
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Propositional
 - **Dependencies**: Task 297

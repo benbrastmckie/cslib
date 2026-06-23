@@ -1,7 +1,7 @@
 # Implementation Plan: Fragment Syntactic Predicates and Independence Lemmas
 
 - **Task**: 302 - Fragment Syntactic Predicates and Independence Lemmas
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 1.5 hours
 - **Dependencies**: None (IsBotFree and AlgEvaluate already exist in Conservative.lean and Algebra.lean)
 - **Research Inputs**: specs/302_fragment_syntactic_predicates/reports/01_fragment-predicates-research.md
@@ -64,7 +64,7 @@ No ROADMAP.md consultation needed for this task.
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Full Implementation [IN PROGRESS]
+### Phase 1: Full Implementation [COMPLETED]
 
 **Goal**: Create `FragmentPredicates.lean` with all predicate definitions, subsumption hierarchy, closure properties, and independence lemmas. Run CI verification.
 

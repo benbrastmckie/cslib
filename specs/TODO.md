@@ -46,7 +46,6 @@ next_project_number: 319
     └─ 292 [NOT STARTED] — After task 279 delivers LJ with cut elimination, formalize the co
 316 [IMPLEMENTING] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [NOT STARTED] — Fill the 8 sorry instances in propositional tableau completeness 
-318 [NOT STARTED] — IPL conservative over IPL⟨∧,→,⊥,⊤⟩ for or-free formulas. Define p
 
 ### Temporal Logic
 
@@ -71,6 +70,7 @@ next_project_number: 319
       └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified 
   └─ 310 [NOT STARTED] — Formalize the Diego embedding theorem (Diego 1966): every Hilbert
     └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove (see above)
+318 [NOT STARTED] — IPL conservative over IPL⟨∧,→,⊥,⊤⟩ for or-free formulas. Define p
 
 ### Uncategorized
 
@@ -79,7 +79,7 @@ next_project_number: 319
 ### 318. Ipl conservative over conj imp bot
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
-- **Topic**: Propositional Logic
+- **Topic**: Algebraic Semantics
 - **Dependencies**: None
 
 **Description**: IPL conservative over IPL⟨∧,→,⊥,⊤⟩ for or-free formulas. Define pointed Brouwerian semilattice (BrouwerianSemilattice + OrderBot), prove soundness/completeness of the conjunctive-implicational-bot fragment, and prove IPL conservative over this fragment via the existing free join completion embedding (which already preserves ⊥ as bot). Extends tasks 303/306/307 with the EFQ axiom.

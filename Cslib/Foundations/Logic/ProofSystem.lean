@@ -203,6 +203,22 @@ class HasAxiomMF where
 
 end ModalAxiomClasses
 
+/-! ### Diamond Duality Axiom Typeclasses -/
+
+section DiaDualityAxiomClasses
+
+variable (S : Type*) [HasBot F] [HasImp F] [HasBox F] [HasDia F] [InferenceSystem S F]
+
+/-- The proof system proves diamond duality, forward direction: `◇φ → ¬□¬φ`. -/
+class HasAxiomDiaDualityFwd where
+  diaDualityFwd {φ : F} : InferenceSystem.DerivableIn S (Axioms.AxiomDiaDualityFwd φ)
+
+/-- The proof system proves diamond duality, backward direction: `¬□¬φ → ◇φ`. -/
+class HasAxiomDiaDualityBack where
+  diaDualityBack {φ : F} : InferenceSystem.DerivableIn S (Axioms.AxiomDiaDualityBack φ)
+
+end DiaDualityAxiomClasses
+
 /-! ### Temporal Axiom Typeclasses -/
 
 section TemporalAxiomClasses

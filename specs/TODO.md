@@ -11,7 +11,7 @@ next_project_number: 297
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,279,288,289,290,294,295,296 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,278,279,288,289,290,294,296 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,291,292,293 | 36,37,180,279,290 | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 3 | 41,275 | 39,40 | Foundations |
 
@@ -54,7 +54,6 @@ next_project_number: 297
 ### Uncategorized
 
 294 [PLANNED] — Add missing docstrings to 6 declarations identified by /vet 266: 
-295 [PLANNED] — Add HasAxiomDiaDualityFwd and HasAxiomDiaDualityBack typeclasses 
 
 ## Tasks
 
@@ -69,7 +68,7 @@ next_project_number: 297
 ---
 
 ### 295. Fix dia duality axiom typeclasses
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 - **Plan**: [295_fix_dia_duality_axiom_typeclasses/plans/01_axiom-typeclass-plan.md]

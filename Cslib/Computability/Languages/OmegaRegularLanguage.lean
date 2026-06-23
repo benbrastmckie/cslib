@@ -263,4 +263,13 @@ proof_wanted IsRegular.iff_da_muller {p : ωLanguage Symbol} :
     p.IsRegular ↔
     ∃ (State : Type) (_ : Finite State) (da : DA.Muller State Symbol), language da = p
 
+-- Once McNaughton's theorem is proved (task 241), the following corollaries follow from the
+-- conversion chain in `Cslib.Computability.Automata.DA.Conversions`:
+--
+--   `IsRegular.iff_da_rabin`: ω-regularity ↔ recognizable by a finite-state DRA.
+--   Proof: `IsRegular.iff_da_muller` + `Muller.toRabin_exists` (exponential pairs, proof_wanted).
+--
+--   `IsRegular.iff_da_parity`: ω-regularity ↔ recognizable by a finite-state DPA.
+--   Proof: `IsRegular.iff_da_rabin` + `Rabin.toParity_exists` (LAR construction, proof_wanted).
+
 end Cslib.ωLanguage

@@ -1,14 +1,13 @@
 {
-  "status": "partial",
-  "summary": "Phase 1 HilbertCompleteness.lean created but has 3 build errors: universe mismatch in MPL/CPL proofs, wrong method on IPL derivation type",
+  "status": "planned",
+  "summary": "Created 6-phase implementation plan (v4) for task 266 integrating all 3 rounds of team research. Phase 1 (doc fixes, 0.5h), Phase 2 (HasDia, 1h), Phase 3 (Decidable Tautology, 1h), Phase 4 (tableau extraction, 1.5h), Phase 5 (GenericMCS bridge, 1.5h), Phase 6 (test coverage, 0.5h). Total 6h. Phases 1-3 are independent (Wave 1), Phases 4-5 depend on Phase 1 (Wave 2), Phase 6 depends on Phase 3 (Wave 3).",
+  "artifacts": [
+    {
+      "path": "specs/266_research_propositional_and_foundations_improvements/plans/04_propositional-foundations-plan.md",
+      "type": "plan",
+      "summary": "Revised 6-phase plan (v4) for Propositional/ and Foundations/Logic/ improvements post-Hilbert-primary refactor"
+    }
+  ],
   "phases_completed": 0,
-  "phases_total": 7,
-  "blockers": [],
-  "continuation_context": {
-    "next_phase": 1,
-    "handoff_path": "specs/266_research_propositional_and_foundations_improvements/.orchestrator-handoff.json",
-    "notes": "HilbertCompleteness.lean exists but does not compile. Fix 3 errors: (1) line 90 universe mismatch on @h H, (2) line 116 Nonempty.weakTheory not a valid field, (3) line 133 Bool universe mismatch. Also remove unused DecidableEq hypotheses on lines 82 and 105."
-  },
-  "next_action_hint": "continue_implement",
-  "artifacts": []
+  "phases_total": 6
 }

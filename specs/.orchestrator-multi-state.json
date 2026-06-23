@@ -1,0 +1,40 @@
+{
+  "session_id": "sess_1782207443_50e0cd",
+  "task_numbers": [
+    252,
+    266
+  ],
+  "task_types": {
+    "252": "cslib",
+    "266": "formal"
+  },
+  "task_dirs": {
+    "252": "specs/252_acceptance_conditions_zoo",
+    "266": "specs/266_research_propositional_and_foundations_improvements"
+  },
+  "current_statuses": {
+    "252": "implementing",
+    "266": "implementing"
+  },
+  "research_agents": {
+    "252": "cslib-research-agent",
+    "266": "formal-research-agent"
+  },
+  "implement_agents": {
+    "252": "cslib-implementation-agent",
+    "266": "general-implementation-agent"
+  },
+  "cycle_count": 2,
+  "max_cycles": 10,
+  "failed_tasks": [],
+  "completed_tasks": [
+    252,
+    266
+  ],
+  "waves": [
+    [
+      252,
+      266
+    ]
+  ]
+}

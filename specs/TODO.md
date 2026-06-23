@@ -35,7 +35,7 @@ next_project_number: 286
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-266 [PR READY] — Research improvements to Propositional/ and Foundations/Logic/ in
+266 [IMPLEMENTING] — Research improvements to Propositional/ and Foundations/Logic/ in
   └─ 280 [NOT STARTED] — Research the current state of propositional proof systems in CSLi
     └─ 279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
 
@@ -174,7 +174,7 @@ next_project_number: 286
 ---
 
 ### 266. Research propositional and foundations improvements
-- **Status**: [PR READY]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: formal
 - **Topic**: Propositional Logic
 - **Dependencies**: None

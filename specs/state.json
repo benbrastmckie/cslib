@@ -4,14 +4,15 @@
     {
       "project_number": 296,
       "project_name": "tableau_calculi_architecture",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "formal",
       "topic": "Foundations",
       "description": "Research and design a unified tableau calculi architecture for CSLib spanning propositional, modal, temporal, and bimodal logics. The existing PropositionalTableau.lean provides generic rule infrastructure (PropSign, PropSignedFormula, PropTableauRule, applyPropRule) already consumed by the bimodal decidability system (~5,900 lines). The goal is to determine how to build a complete propositional tableau system (branch construction, closure, termination, soundness, completeness, decision procedure) that naturally extends to modal and temporal tableau systems, sharing resources with and relating cleanly to the existing bimodal tableau. Investigate: (1) what generic tableau infrastructure should live in Foundations/ vs logic-specific modules, (2) how modal tableau rules (box/diamond) and temporal rules (until/since) layer on top of propositional rules, (3) whether the bimodal tableau can be refactored to consume shared infrastructure or whether it should remain standalone, (4) what the dependency chain should be between propositional, modal, temporal tableau tasks, (5) how tableau completeness relates to the existing MCS-based completeness proofs and the planned sequent calculus (task 279). Output: a set of precisely scoped implementation tasks with dependency graph covering the full tableau pipeline from propositional through bimodal.",
       "created": "2026-06-23T17:34:47Z",
-      "last_updated": "2026-06-23T17:34:47Z",
+      "last_updated": "2026-06-23T17:36:24Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [],
+      "session_id": "sess_1782236153_394da2"
     },
     {
       "project_number": 294,
@@ -96,7 +97,7 @@
     {
       "project_number": 288,
       "project_name": "lindenbaum_tarski_algebra_instances",
-      "status": "implementing",
+      "status": "implemented",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Export named abbrev or instance declarations making explicit that the Lindenbaum-Tarski algebra of MPL is a GeneralizedHeytingAlgebra, IPL is a HeytingAlgebra, and CPL is a BooleanAlgebra. These are currently implicit in algebraic completeness proofs but not exported as standalone usable facts. Optionally prove the free Boolean algebra universal property for CPL. Files: new module Cslib/Logics/Propositional/Semantics/Algebra/LindenbaumInstances.lean. Depends on 266.",
@@ -104,7 +105,8 @@
         266
       ],
       "created": "2026-06-23T12:00:00Z",
-      "last_updated": "2026-06-23T12:00:00Z"
+      "last_updated": "2026-06-23T00:30:00Z",
+      "completion_summary": "Created LindenbaumInstances.lean with named type abbreviations and instances for MPL (GeneralizedHeytingAlgebra), IPL (HeytingAlgebra), and CPL (BooleanAlgebra); all CI checks pass"
     },
     {
       "project_number": 289,

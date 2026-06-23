@@ -28,7 +28,7 @@ next_project_number: 297
 ### Foundations
 
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
-296 [NOT STARTED] — Research and design a unified tableau calculi architecture for CS
+296 [RESEARCHING] — Research and design a unified tableau calculi architecture for CS
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Propositional Logic
@@ -37,7 +37,7 @@ next_project_number: 297
 279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
   └─ 291 [NOT STARTED] — After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a un
   └─ 292 [NOT STARTED] — After task 279 delivers LJ with cut elimination, formalize the co
-288 [IMPLEMENTING] — Export named abbrev or instance declarations making explicit that
+288 [IMPLEMENTED] — Export named abbrev or instance declarations making explicit that
 289 [IMPLEMENTING] — Compose instDecidableTautology with prop_completeness_iff_tautolo
 290 [NOT STARTED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
   └─ 293 [NOT STARTED] — Establish the formal Curry-Howard isomorphism between Theory.Deri
@@ -59,7 +59,7 @@ next_project_number: 297
 ## Tasks
 
 ### 296. Tableau calculi architecture
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: formal
 - **Topic**: Foundations
 - **Dependencies**: None
@@ -140,7 +140,7 @@ next_project_number: 297
 ---
 
 ### 288. Lindenbaum tarski algebra instances
-- **Status**: [IMPLEMENTING]
+- **Status**: [IMPLEMENTED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 266

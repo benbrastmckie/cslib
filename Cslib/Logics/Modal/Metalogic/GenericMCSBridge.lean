@@ -92,7 +92,7 @@ To fully unify the two systems, a future task should:
    for normal modal logics
 3. Retire `modalDerivationSystem` in favor of the unified algebraic path
 
-This follow-up has been filed as task 287 (or should be created).
+A future task should extend `ListDeriv` with a necessitation rule and prove equivalence.
 
 ## Using GenericMCS with Modal Logics Today
 

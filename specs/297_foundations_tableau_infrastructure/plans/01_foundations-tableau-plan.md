@@ -1,7 +1,7 @@
 # Implementation Plan: Task #297
 
 - **Task**: 297 - Build shared tableau infrastructure in Foundations/Logic/Tableau/
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 8 hours
 - **Dependencies**: None (parent metatask 296 is expanded; this is the root of the tableau dependency chain)
 - **Research Inputs**: specs/297_foundations_tableau_infrastructure/reports/01_foundations-tableau-research.md

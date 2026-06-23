@@ -1,21 +1,21 @@
 {
-  "status": "planned",
-  "summary": "5-phase plan for 7+1 new Lean files under Cslib/Foundations/Logic/Tableau/ totaling ~790 lines: Sign, SignedFormula, RuleResult, Branch, Closure, ClosureCondition (classical/intuitionistic/minimal instances), PropositionalRules, module root",
+  "status": "implemented",
+  "summary": "Built 7 lean files + module root providing logic-neutral tableau infrastructure: Sign, SignedFormula F L, RuleResult (4-variant), Branch (label-generic), ClosureReason, ClosureCondition typeclass (classical/intuitionistic/minimal instances), and classical PropositionalRules",
   "blockers": [],
   "continuation_context": null,
-  "next_action_hint": "implement",
-  "phases_completed": 0,
+  "next_action_hint": "none",
+  "phases_completed": 5,
   "phases_total": 5,
   "artifacts": [
     {
-      "path": "specs/297_foundations_tableau_infrastructure/reports/01_foundations-tableau-research.md",
-      "type": "report",
-      "summary": "Comprehensive research on existing tableau infrastructure, Sign unification, generic SignedFormula F L design, ClosureCondition typeclass, file structure recommendations"
+      "path": "specs/297_foundations_tableau_infrastructure/summaries/01_foundations-tableau-summary.md",
+      "type": "summary",
+      "summary": "Full implementation summary with design decisions, CI results, and plan deviations"
     },
     {
-      "path": "specs/297_foundations_tableau_infrastructure/plans/01_foundations-tableau-plan.md",
-      "type": "plan",
-      "summary": "5-phase implementation plan with 4 dependency waves; creates unified Sign, generic SignedFormula F L, RuleResult with persistent variant, Branch with label-generic ops, ClosureCondition typeclass with 3 logic-strength instances, refactored classical propositional rules"
+      "path": "Cslib/Foundations/Logic/Tableau.lean",
+      "type": "lean_source",
+      "summary": "Module root re-exporting all 7 tableau sub-modules"
     }
   ]
 }

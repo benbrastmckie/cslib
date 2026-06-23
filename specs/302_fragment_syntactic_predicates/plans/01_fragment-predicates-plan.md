@@ -64,7 +64,7 @@ No ROADMAP.md consultation needed for this task.
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Full Implementation [NOT STARTED]
+### Phase 1: Full Implementation [IN PROGRESS]
 
 **Goal**: Create `FragmentPredicates.lean` with all predicate definitions, subsumption hierarchy, closure properties, and independence lemmas. Run CI verification.
 

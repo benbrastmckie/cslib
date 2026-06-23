@@ -70,7 +70,7 @@ This task does not directly correspond to a specific ROADMAP.md item but strengt
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Typeclass definition, instances, and algebraic lemmas [NOT STARTED]
+### Phase 1: Typeclass definition, instances, and algebraic lemmas [IN PROGRESS]
 
 **Goal**: Create the `BrouwerianSemilattice` typeclass file with full algebraic theory and instances.
 

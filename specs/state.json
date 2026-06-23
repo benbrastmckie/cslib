@@ -24,12 +24,12 @@
     {
       "project_number": 297,
       "project_name": "foundations_tableau_infrastructure",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Foundations",
       "description": "Build shared tableau infrastructure in Foundations/Logic/Tableau/. Refactor and extend the existing PropositionalTableau.lean (210 lines) into a proper module directory. Unify the PropSign type (from Foundations) with the bimodal Sign type into a single canonical sign type. Create generic signed formula (parameterized over formula type F and label type L), rule result, and branch types. Crucially, the foundation must be logic-neutral to support classical, intuitionistic, and minimal tableaux: (1) Closure must be parameterized via a ClosureCondition typeclass — classical uses complementary signed pairs at the same label, intuitionistic uses only F(⊥), minimal uses only complementary atoms T(p)/F(p). (2) Rule application must be configurable via a RuleConfig or LogicKind parameter — the T(φ→ψ) rule behaves differently in classical (branch into F(φ) or T(ψ)) vs intuitionistic (create successor world w' with T(φ), F(ψ)) vs minimal (same as intuitionistic). (3) Branch needs world-awareness even at propositional level (L = Unit for classical, L = WorldIndex for intuitionistic/minimal). CSLib already has Kripke semantics for propositional logic with IValid (intuitionistic) and MValid (minimal) via botForces parameterization, and algebraic semantics via GeneralizedHeytingAlgebra/HeytingAlgebra/BooleanAlgebra. Files to create: Sign.lean, SignedFormula.lean, PropositionalRules.lean, RuleResult.lean, Branch.lean, Closure.lean, ClosureCondition.lean under Cslib/Foundations/Logic/Tableau/. Estimated: 800-1,100 lines.",
       "created": "2026-06-23T17:47:17Z",
-      "last_updated": "2026-06-23T18:23:36Z",
+      "last_updated": "2026-06-23T18:53:40Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
@@ -41,11 +41,17 @@
           "path": "specs/297_foundations_tableau_infrastructure/plans/01_foundations-tableau-plan.md",
           "type": "plan",
           "summary": "5-phase implementation plan for Foundations tableau"
+        },
+        {
+          "path": "specs/297_foundations_tableau_infrastructure/summaries/01_foundations-tableau-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary: 774 lines, 8 files, all CI passing"
         }
       ],
       "dependencies": [],
       "parent_task": 296,
-      "session_id": "sess_1782238418_d0d7dd"
+      "session_id": "sess_1782238418_d0d7dd",
+      "completion_summary": "Built 8 Lean files (774 lines) under Cslib/Foundations/Logic/Tableau/: unified Sign type, generic SignedFormula F L, 4-variant RuleResult, label-generic Branch, ClosureReason, ClosureCondition typeclass with classical/intuitionistic/minimal instances, classical PropositionalRules with 8 rules. All CI checks pass, zero sorries."
     },
     {
       "project_number": 298,

@@ -11,10 +11,10 @@ next_project_number: 314
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,279,290,297,302,303,304,313 | -- | Bimodal Porting, Foundations, Project Management, ... |
-| 2 | 39,40,181,215,291,292,293,298,305,307,310 | 36,37,180,279,290,297,302,303,304 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
-| 3 | 41,275,299,301,306,309 | 39,40,298,303,304,305 | Foundations, Temporal, Modal, ... |
-| 4 | 300,308,311 | 299,306,307,309,310 | Modal, Algebraic Semantics |
+| 1 | 36,37,180,226,241,245,278,279,290,298,302,303,304,313 | -- | Bimodal Porting, Foundations, Project Management, ... |
+| 2 | 39,40,181,215,291,292,293,299,301,305,307,310 | 36,37,180,279,290,298,302,303,304 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 3 | 41,275,300,306,309 | 39,40,299,303,304,305 | Foundations, Modal, Algebraic Semantics |
+| 4 | 308,311 | 306,307,309,310 | Algebraic Semantics |
 | 5 | 312 | 308,311 | Algebraic Semantics |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -30,7 +30,6 @@ next_project_number: 314
 ### Foundations
 
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
-297 [IMPLEMENTING] — Build shared tableau infrastructure in Foundations/Logic/Tableau/
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Project Management
@@ -258,12 +257,13 @@ next_project_number: 314
 ---
 
 ### 297. Foundations tableau infrastructure
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
 - **Research**: [297_foundations_tableau_infrastructure/reports/01_foundations-tableau-research.md]
 - **Plan**: [297_foundations_tableau_infrastructure/plans/01_foundations-tableau-plan.md]
+- **Summary**: [297_foundations_tableau_infrastructure/summaries/01_foundations-tableau-summary.md]
 
 **Description**: Build shared tableau infrastructure in Foundations/Logic/Tableau/. Refactor and extend the existing PropositionalTableau.lean (210 lines) into a proper module directory. Unify the PropSign type (from Foundations) with the bimodal Sign type into a single canonical sign type. Create generic signed formula (parameterized over formula type F and label type L), rule result, and branch types. Crucially, the foundation must be logic-neutral to support classical, intuitionistic, and minimal tableaux: (1) Closure must be parameterized via a ClosureCondition typeclass — classical uses complementary signed pairs at the same label, intuitionistic uses only F(⊥), minimal uses only complementary atoms T(p)/F(p). (2) Rule application must be configurable via a RuleConfig or LogicKind parameter — the T(φ→ψ) rule behaves differently in classical (branch into F(φ) or T(ψ)) vs intuitionistic (create successor world w' with T(φ), F(ψ)) vs minimal (same as intuitionistic). (3) Branch needs world-awareness even at propositional level (L = Unit for classical, L = WorldIndex for intuitionistic/minimal). CSLib already has Kripke semantics for propositional logic with IValid (intuitionistic) and MValid (minimal) via botForces parameterization, and algebraic semantics via GeneralizedHeytingAlgebra/HeytingAlgebra/BooleanAlgebra. Files to create: Sign.lean, SignedFormula.lean, PropositionalRules.lean, RuleResult.lean, Branch.lean, Closure.lean, ClosureCondition.lean under Cslib/Foundations/Logic/Tableau/. Estimated: 800-1,100 lines.
 

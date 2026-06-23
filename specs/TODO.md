@@ -11,9 +11,9 @@ next_project_number: 286
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,266,269,278,279,280 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
-| 3 | 41,275 | 39,40 | Foundations |
+| 1 | 36,37,180,226,241,245,252,266 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 2 | 39,40,181,215,278,280 | 36,37,180,266 | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 3 | 41,269,275,279 | 39,40,278,280 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -27,23 +27,24 @@ next_project_number: 286
 
 ### Foundations
 
+41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 269 [PLANNED] — Build generic bounded proof-search tactic for InferenceSystem. Cr
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
-41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
+  └─ 269 [PLANNED] — Build generic bounded proof-search tactic for InferenceSystem. Cr (see above)
 
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-266 [IMPLEMENTING] — Research improvements to Propositional/ and Foundations/Logic/ in
-279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
-280 [NOT STARTED] — Research the current state of propositional proof systems in CSLi
+266 [RESEARCHED] — Research improvements to Propositional/ and Foundations/Logic/ in
+  └─ 280 [NOT STARTED] — Research the current state of propositional proof systems in CSLi
+    └─ 279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
 
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
-252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
+252 [RESEARCHED] — Formalize Rabin and parity acceptance conditions alongside the ex
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
   └─ 275 [BLOCKED] — Prove that Bimodal TM is conservative over Temporal BX for tempor
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
@@ -109,7 +110,7 @@ next_project_number: 286
 - **Status**: [NOT STARTED]
 - **Task Type**: formal
 - **Topic**: Propositional Logic
-- **Dependencies**: None
+- **Dependencies**: Task 266
 
 **Description**: Research the current state of propositional proof systems in CSLib and create tasks to fill all gaps needed to provide: (1) Hilbert systems for algebraic completeness and MCS, (2) natural deduction for the Curry-Howard correspondence, (3) sequent calculus for cut elimination and decidability. Audit what exists (Hilbert + ND + algebraic semantics + Kripke semantics + equivalence bridges), identify what is missing for each proof system to fully serve its metatheoretic purpose (e.g., Hilbert-algebraic bridge corollaries, ND normalization/Curry-Howard, LK/LJ cut elimination, decidability instances, proof-system equivalence bridges), and create appropriately scoped implementation tasks with dependencies. Account for existing tasks 266 and 279 to avoid overlap. This is a metatask: the deliverable is a set of new tasks, not implementation.
 
@@ -119,7 +120,7 @@ next_project_number: 286
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: None
+- **Dependencies**: Task 280
 
 **Description**: Implement a two-sided Gentzen-style sequent calculus (LK for classical, LJ for intuitionistic) for propositional logic with cut elimination. Use Finset-based contexts on both sides, following the CLL sequent calculus in Cslib/Logics/LinearLogic/CLL/Basic.lean as a template. Prove soundness, completeness, cut elimination (Hauptsatz), and equivalence bridges to the existing Hilbert and natural deduction systems (hilbert_iff_lk, nd_iff_lk). This completes the proof-system triad (Hilbert + ND + SC) for propositional logic and would be the first LK/LJ formalization in Lean 4.
 
@@ -129,7 +130,7 @@ next_project_number: 286
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Foundations
-- **Dependencies**: None
+- **Dependencies**: Task 266
 
 **Description**: Simplify proofs using new simp/grind normalization tags. After task 268 adds @[simp, scoped grind =] tags to Hilbert system definitional lemmas, audit all proofs in Propositional/, Modal/, Temporal/, and Bimodal/ that use manual `simp only [listImp_nil, listImp_cons, bigconj_nil, ...]` or verbose tactic chains involving these normalization lemmas. Replace with `grind` or `simp` where the new tags make the explicit lemma lists redundant. Also check Foundations/Logic/ proofs. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake
 
@@ -151,7 +152,7 @@ next_project_number: 286
 - **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Foundations
-- **Dependencies**: Task 268
+- **Dependencies**: Task 268, Task 278
 - **Research**: [269_hilbert_search_tactic/reports/01_team-research.md]
 - **Plan**: [269_hilbert_search_tactic/plans/02_hilbert-search-plan.md]
 
@@ -173,7 +174,7 @@ next_project_number: 286
 ---
 
 ### 266. Research propositional and foundations improvements
-- **Status**: [IMPLEMENTING]
+- **Status**: [RESEARCHED]
 - **Task Type**: formal
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -187,7 +188,7 @@ next_project_number: 286
 ---
 
 ### 252. Acceptance conditions zoo
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None

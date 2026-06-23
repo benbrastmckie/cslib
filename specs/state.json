@@ -11,7 +11,10 @@
       "created": "2026-06-23T03:04:01Z",
       "last_updated": "2026-06-23T03:04:01Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [],
+      "dependencies": [
+        266
+      ]
     },
     {
       "project_number": 279,
@@ -23,7 +26,10 @@
       "created": "2026-06-23T02:57:39Z",
       "last_updated": "2026-06-23T02:57:39Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [],
+      "dependencies": [
+        280
+      ]
     },
     {
       "project_number": 278,
@@ -36,7 +42,10 @@
         268
       ],
       "created": "2026-06-23T02:51:28Z",
-      "last_updated": "2026-06-23T02:51:28Z"
+      "last_updated": "2026-06-23T02:51:28Z",
+      "dependencies": [
+        266
+      ]
     },
     {
       "project_number": 275,
@@ -131,7 +140,8 @@
       "topic": "Foundations",
       "description": "Build generic bounded proof-search tactic for InferenceSystem. Create a bounded DFS proof-search tactic (e.g., hilbert_search) that works generically over the InferenceSystem typeclass. Inspired by BimodalLogic modal_search (~700 lines) but adapted to cslib polymorphic architecture. Search strategies: axiom matching, assumption lookup, modus ponens decomposition, necessitation + K rules, temporal rules. Must handle the InferenceSystem S α typeclass generically (not hardcoded to a specific DerivationTree). Configurable search depth. Should work across Propositional, Modal, Temporal, and Bimodal systems. Depends on task 268 (normalization tags help the tactic work on clean goals). Needs Zulip discussion before PR since this is novel cross-cutting infrastructure for cslib. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake",
       "dependencies": [
-        268
+        268,
+        278
       ],
       "created": "2026-06-22T20:12:59Z",
       "last_updated": "2026-06-23T04:02:52Z",
@@ -154,13 +164,13 @@
     {
       "project_number": 266,
       "project_name": "research_propositional_and_foundations_improvements",
-      "status": "implementing",
+      "status": "researched",
       "task_type": "formal",
       "description": "Research improvements to Propositional/ and Foundations/Logic/ in this repo: compose the Hilbert-ND bridge with algebraic completeness for Hilbert-tier corollaries, fix stale ProofSystem.lean documentation, add propositional test coverage, concretize modal/temporal/bimodal ProofSystem tag instances to unlock GenericMCS reuse, extract propositional tableau rules from the bimodal tableau to Foundations/, add HasDia primitive, and assemble a Decidable (Tautology φ) instance. Excludes sequent calculus (split to task 279).",
       "topic": "Propositional Logic",
       "created": "2026-06-22T18:25:59Z",
-      "last_updated": "2026-06-23T03:15:56Z",
-      "session_id": "sess_1782184470_e10ce0",
+      "last_updated": "2026-06-23T09:32:17Z",
+      "session_id": "sess_1782205549_fc895f_266",
       "researched": "2026-06-23T02:51:36Z",
       "next_artifact_number": 3,
       "artifacts": [
@@ -357,12 +367,12 @@
     {
       "project_number": 252,
       "project_name": "acceptance_conditions_zoo",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "description": "Formalize Rabin and parity acceptance conditions alongside the existing Muller acceptance (DMA) and Büchi acceptance (DBA) in CSLib, and prove the classical conversions between them. Build on the existing infOcc predicate (Cslib/Foundations/Data/OmegaSequence/InfOcc.lean) which already provides the \"infinitely often\" foundation. Scope: (1) Rabin acceptance — pairs of (Eᵢ, Fᵢ) sets. (2) Parity acceptance — priority coloring. (3) Muller↔Rabin conversion. (4) Rabin↔parity conversion (Piterman 2007). Target: Cslib/Computability/Automata/DA/Rabin.lean, Parity.lean, Conversions.lean",
       "topic": "Temporal Logic",
       "created": "2026-06-19T20:20:31Z",
-      "last_updated": "2026-06-19T20:34:58Z",
+      "last_updated": "2026-06-23T09:32:16Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
@@ -370,7 +380,8 @@
           "type": "report",
           "summary": "Seed report: Rabin/parity acceptance, classical conversions, literature references"
         }
-      ]
+      ],
+      "session_id": "sess_1782205549_fc895f_252"
     },
     {
       "project_number": 281,

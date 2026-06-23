@@ -1,5 +1,5 @@
 ---
-next_project_number: 302
+next_project_number: 313
 ---
 
 # TODO
@@ -11,10 +11,11 @@ next_project_number: 302
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,279,288,289,290,297 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215,291,292,293,298 | 36,37,180,279,290,297 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
-| 3 | 41,275,299,301 | 39,40,298 | Foundations, Temporal, Modal |
-| 4 | 300 | 299 | Modal |
+| 1 | 36,37,180,226,241,245,278,279,288,289,290,297,302,303,304 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 2 | 39,40,181,215,291,292,293,298,305,307,310 | 36,37,180,279,290,297,302,303,304 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 3 | 41,275,299,301,306,309 | 39,40,298,303,304,305 | Foundations, Temporal, Modal, ... |
+| 4 | 300,308,311 | 299,306,307,309,310 | Modal, Algebraic Semantics |
+| 5 | 312 | 308,311 | Algebraic Semantics |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -65,9 +66,139 @@ next_project_number: 302
 
 301 [NOT STARTED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 
+### Algebraic Semantics
+
+302 [NOT STARTED] — Define syntactic fragment predicates on Proposition analogous to 
+  └─ 305 [NOT STARTED] — Define fragment-specific Hilbert axiom predicates for the two sub
+    └─ 306 [NOT STARTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian 
+      └─ 308 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
+        └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified 
+    └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb
+      └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
+        └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified  (see above)
+  └─ 307 [NOT STARTED] — Construct a HeytingAlgebra from any BrouwerianSemilattice via a f
+    └─ 308 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove (see above)
+303 [NOT STARTED] — Define the BrouwerianSemilattice typeclass: SemilatticeInf + Orde
+  └─ 306 [NOT STARTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian  (see above)
+  └─ 307 [NOT STARTED] — Construct a HeytingAlgebra from any BrouwerianSemilattice via a f (see above)
+304 [NOT STARTED] — Define the HilbertAlgebra typeclass: a structure (H, ⇨, ⊤) satisf
+  └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb (see above)
+  └─ 310 [NOT STARTED] — Formalize the Diego embedding theorem (Diego 1966): every Hilbert
+    └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove (see above)
+
 ### Uncategorized
 
 ## Tasks
+
+### 312. Unified conservative extension chain
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Algebraic Semantics
+- **Dependencies**: Task 308, Task 311
+
+**Description**: Consolidate the full conservative extension chain into a unified module: IPL⟨→,⊤⟩ ⊂ IPL⟨∧,→,⊤⟩ ⊂ MPL ⊂ IPL ⊂ CPL, where each ⊂ denotes conservative extension for the smaller fragments language. State the chain theorem and derive inter-fragment conservativity as corollaries — e.g., IPL⟨∧,→,⊤⟩ conservative over IPL⟨→,⊤⟩ by composing the two embeddings through IPL. Include the algebraic validity subsumption chain: HilbertAlgValid → BrouwerianValid → GHAValid → HAValid → BAValid. Provide the full picture connecting all five levels of algebraic semantics (Hilbert algebras, Brouwerian semilattices, GHAs, HAs, BAs) to their proof systems (ImpAxiom, ConjImpAxiom, MinPropAxiom, IntPropAxiom, PropositionalAxiom). This is the capstone module demonstrating the algebraic method for propositional logic — each connective extension is genuinely conservative, each algebra class has sound and complete proof theory, and each completion construction provides the bridge. File: Cslib/Logics/Propositional/Semantics/Algebra/ConservativeChain.lean.
+
+---
+
+### 311. Ipl conservative over imp
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Algebraic Semantics
+- **Dependencies**: Task 309, Task 310
+
+**Description**: Prove the conservative extension theorem: IPL is conservative over IPL⟨→,⊤⟩ for imp-top-only formulas. Statement: if Derivable IntPropAxiom φ and φ.IsImpTopOnly = true, then Derivable ImpAxiom φ. Proof route: (1) IPL.hilbert_alg_complete.mp converts to HA-validity, (2) for any HilbertAlgebra H and valuation v, instantiate HA-validity at the Diego embedding HA(H), (3) the Diego embedding lemma rewrites back to HilbertEvaluate v φ = ⊤ in H, (4) Hilbert algebra completeness converts back to Derivable ImpAxiom φ. Derive the ND corollary. This is the deepest result in the chain, showing that conjunction, disjunction, and falsum are all independent of the pure implication fragment. Connects to typed SKI combinators: the derivable imp-top-only formulas are exactly the types inhabited by typed combinatory terms. File: Cslib/Logics/Propositional/Semantics/Algebra/ImpConservative.lean.
+
+---
+
+### 310. Diego embedding
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Algebraic Semantics
+- **Dependencies**: Task 304
+
+**Description**: Formalize the Diego embedding theorem (Diego 1966): every Hilbert algebra embeds into a Heyting algebra preserving the implication operation and top element. Given a HilbertAlgebra H, construct a HeytingAlgebra HA(H) and an order-embedding ι : H → HA(H) such that ι(a ⇨ b) = ι(a) ⇨ ι(b) and ι(⊤) = ⊤. The classical construction uses the lattice of filters of H: a filter F ⊆ H is a non-empty upward-closed set closed under ⇨-detachment (a ∈ F and a ⇨ b ∈ F implies b ∈ F). The filter lattice ordered by inclusion forms a Heyting algebra, and ι(a) = {F | a ∈ F} is the embedding. Prove: (1) the filter lattice is a HeytingAlgebra, (2) ι preserves ⇨ and ⊤, (3) ι is injective (order-embedding), (4) the embedding lemma: for imp-top-only formulas, HilbertEvaluate v φ = ⊤ ↔ AlgEvaluate (ι ∘ v) ⊥ φ = ⊤. This is the most technically demanding algebraic construction in the chain. References: Diego (1966), Köhler (1981), Celani-Jansana (2012). File: Cslib/Foundations/Order/HilbertAlgebra/DiegoEmbedding.lean.
+
+---
+
+### 309. Hilbert algebra soundness completeness
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Algebraic Semantics
+- **Dependencies**: Task 302, Task 304, Task 305
+
+**Description**: Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algebras. Soundness: if Derivable ImpAxiom φ then HilbertEvaluate v φ = ⊤ in every HilbertAlgebra. Completeness via the Lindenbaum-Tarski algebra: the quotient Proposition Atom / ≈ where φ ≈ ψ iff Derivable ImpAxiom (φ → ψ) and Derivable ImpAxiom (ψ → φ). Define [φ] ⇨ [ψ] := [φ → ψ] and show this is well-defined and satisfies the Hilbert algebra axioms K, S, and antisymmetry. Prove the truth lemma: HilbertEvaluate [·] φ = ⊤ ↔ Derivable ImpAxiom φ. This is the simplest Lindenbaum construction in the chain — no lattice operations needed, just the implication operation on equivalence classes. Reference: Diego (1966) Chapter 2, Rasiowa (1974) Chapter V. File: Cslib/Logics/Propositional/Semantics/Algebra/HilbertAlgCompleteness.lean.
+
+---
+
+### 308. Ipl conservative over conj imp
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Algebraic Semantics
+- **Dependencies**: Task 306, Task 307
+
+**Description**: Prove the conservative extension theorem: IPL is conservative over IPL⟨∧,→,⊤⟩ for or-bot-free formulas. Statement: if Derivable IntPropAxiom φ and φ.IsOrBotFree = true, then Derivable ConjImpAxiom φ. Proof route: (1) IPL.hilbert_alg_complete.mp converts to HA-validity, (2) for any BrouwerianSemilattice B and valuation v, instantiate HA-validity at the free join completion of B, (3) the embedding lemma from FreeJoinCompletion.lean rewrites back to BrouwerianEvaluate v φ = ⊤ in B, (4) Brouwerian completeness converts back to Derivable ConjImpAxiom φ. Derive the ND corollary via algebraic bridges. This shows that disjunction and falsum are genuinely independent extensions — no theorem in the ∧-→-⊤ language gains a new proof by adding ∨ and ⊥. File: Cslib/Logics/Propositional/Semantics/Algebra/ConjImpConservative.lean.
+
+---
+
+### 307. Free join completion
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Algebraic Semantics
+- **Dependencies**: Task 302, Task 303
+
+**Description**: Construct a HeytingAlgebra from any BrouwerianSemilattice via a free join completion, and prove the embedding lemma for or-bot-free formulas. The construction adjoins formal joins (and a bottom element) to a BrouwerianSemilattice while preserving meets and Heyting implication. Candidate construction: the lattice of downward-closed subsets (downsets/order ideals) of B ordered by inclusion, which forms a complete Heyting algebra with an order-embedding ι : B → Downsets(B) via principal downsets ι(b) = ↓b. Prove: (1) Downsets(B) is a HeytingAlgebra, (2) ι preserves ⊓ (ι(a ⊓ b) = ι(a) ⊓ ι(b)), (3) ι preserves ⇨ (ι(a ⇨ b) = ι(a) ⇨ ι(b)), (4) ι preserves ⊤, (5) the embedding lemma: for or-bot-free formulas, BrouwerianEvaluate v φ = ⊤ ↔ AlgEvaluate (ι ∘ v) ⊥ φ = ⊤. This is the algebraic bridge for the ∧→⊤ conservative extension, analogous to WithBot for MPL→IPL. File: Cslib/Logics/Propositional/Semantics/Algebra/FreeJoinCompletion.lean.
+
+---
+
+### 306. Brouwerian soundness completeness
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Algebraic Semantics
+- **Dependencies**: Task 302, Task 303, Task 305
+
+**Description**: Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian semilattices. Soundness: if Derivable ConjImpAxiom φ then BrouwerianEvaluate v φ = ⊤ in every BrouwerianSemilattice. Completeness via the Lindenbaum-Tarski algebra: construct the quotient Proposition Atom / ≈ where φ ≈ ψ iff Derivable ConjImpAxiom (φ ↔ ψ), show it is a BrouwerianSemilattice, and prove the truth lemma (BrouwerianEvaluate [φ] = ⊤ ↔ Derivable ConjImpAxiom φ). The Lindenbaum construction parallels HilbertLindenbaumGHA but quotients by ConjImpAxiom-derivability; the key difference is that the quotient need not have joins (⊔). Reference: Rasiowa (1974) Chapters IV-V for the general algebraic completeness pattern. File: Cslib/Logics/Propositional/Semantics/Algebra/BrouwerianCompleteness.lean.
+
+---
+
+### 305. Fragment hilbert proof systems
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Algebraic Semantics
+- **Dependencies**: Task 302
+
+**Description**: Define fragment-specific Hilbert axiom predicates for the two sub-IPL proof systems: (1) ConjImpAxiom for IPL⟨∧,→,⊤⟩ — the implicational and conjunctive axiom schemes from IntPropAxiom restricted to or-bot-free formulas: K (φ → ψ → φ), S ((φ → ψ → χ) → (φ → ψ) → φ → χ), conjunction intro (φ → ψ → φ ∧ ψ), conjunction elim left/right (φ ∧ ψ → φ, φ ∧ ψ → ψ). No efq, no disjunction axioms. (2) ImpAxiom for IPL⟨→,⊤⟩ — only K and S with modus ponens. Prove for each: substitution closure (subst_preserves_conjImpAxiom, subst_preserves_impAxiom), that modus ponens is the sole rule, and the deduction theorem for each fragment. These axiom predicates are the proof-theoretic counterparts to BrouwerianSemilattice and HilbertAlgebra. File: Cslib/Logics/Propositional/ProofSystem/FragmentAxioms.lean.
+
+---
+
+### 304. Hilbert algebra typeclass
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Algebraic Semantics
+- **Dependencies**: None
+
+**Description**: Define the HilbertAlgebra typeclass: a structure (H, ⇨, ⊤) satisfying (K) a ⇨ (b ⇨ a) = ⊤, (S) (a ⇨ (b ⇨ c)) ⇨ ((a ⇨ b) ⇨ (a ⇨ c)) = ⊤, and antisymmetry (a ⇨ b = ⊤ ∧ b ⇨ a = ⊤ → a = b). Derive the induced partial order a ≤ b ↔ a ⇨ b = ⊤ and prove it is a PartialOrder. Provide forgetful instances from BrouwerianSemilattice and GeneralizedHeytingAlgebra. Define HilbertEvaluate mapping imp-top-only Propositions to elements of a HilbertAlgebra using only ⇨. This captures the algebraic semantics of IPL⟨→,⊤⟩ — the pure implication fragment corresponding to typed SKI combinators via Curry-Howard. Mathlib has no such class. References: Diego (1966), Monteiro (1955), Rasiowa (1974) Ch. V. File: Cslib/Foundations/Order/HilbertAlgebra.lean.
+
+---
+
+### 303. Brouwerian semilattice typeclass
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Algebraic Semantics
+- **Dependencies**: None
+
+**Description**: Define the BrouwerianSemilattice typeclass: SemilatticeInf + OrderTop + HImp with the adjunction a ≤ b ⇨ c ↔ a ⊓ b ≤ c. This is the algebraic semantics for IPL⟨∧,→,⊤⟩ — the conjunction-implication-verum fragment of intuitionistic logic. Mathlib has no such class; this fills the gap between SemilatticeInf and GeneralizedHeytingAlgebra (which additionally requires SemilatticeSup). Provide the forgetful instance from GeneralizedHeytingAlgebra. Define BrouwerianEvaluate mapping or-bot-free Propositions to elements of a BrouwerianSemilattice using only ⊓ and ⇨ (no ⊔ or ⊥). Prove basic algebraic identities (e.g., a ⇨ a = ⊤, monotonicity of ⇨ in the second argument). Reference: Rasiowa (1974), Köhler (1981). File: Cslib/Foundations/Order/BrouwerianSemilattice.lean.
+
+---
+
+### 302. Fragment syntactic predicates
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Algebraic Semantics
+- **Dependencies**: None
+
+**Description**: Define syntactic fragment predicates on Proposition analogous to the existing IsBotFree: (1) IsOrFree — no disjunction, (2) IsOrBotFree — no disjunction or falsum, (3) IsImpTopOnly — only implication and atoms (no conjunction, disjunction, or falsum). Prove AlgEvaluate independence lemmas for each: or-free evaluation is independent of the join operation, imp-top-only evaluation is independent of join, meet, and bot_val. These predicates and lemmas form the syntactic foundation for all fragment conservative extension results. Also prove closure properties (conjunction/substitution preservation) needed by downstream proof system tasks. File: Cslib/Logics/Propositional/Semantics/Algebra/FragmentPredicates.lean. Extends the pattern established by IsBotFree in Conservative.lean.
+
+---
 
 ### 301. Temporal tableau
 - **Status**: [NOT STARTED]

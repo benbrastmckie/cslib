@@ -1,5 +1,5 @@
 {
-  "next_project_number": 314,
+  "next_project_number": 316,
   "active_projects": [
     {
       "project_number": 313,
@@ -294,7 +294,8 @@
       "topic": "Propositional Logic",
       "description": "After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a unifying module stating the three-way equivalence as List.TFAE theorems. For each of MPL, IPL, and CPL, prove that Hilbert derivability, ND derivability, and SC derivability are equivalent. The pairwise bridges are: Hilbert-ND from task 266, Hilbert-SC and ND-SC from task 279. This is purely compositional. File: Cslib/Logics/Propositional/ProofSystemEquivalence.lean. Depends on 279.",
       "dependencies": [
-        279
+        314,
+        315
       ],
       "created": "2026-06-23T12:00:00Z",
       "last_updated": "2026-06-23T12:00:00Z"
@@ -307,7 +308,7 @@
       "topic": "Propositional Logic",
       "description": "After task 279 delivers LJ with cut elimination, formalize the connection between cut-free proof search and decidability. Define a bounded backward proof search procedure over cut-free LJ: the search space is finite because all formulas in a cut-free proof are subformulas of the sequent. Prove termination via a well-founded measure. Produce Decidable (LJDerivable (Gamma |- A)) and lift via nd_iff_lk to Decidable (DerivableIn IPL (Gamma |- A)). File: Cslib/Logics/Propositional/SequentCalculus/Decidability.lean. Depends on 279.",
       "dependencies": [
-        279
+        315
       ],
       "created": "2026-06-23T12:00:00Z",
       "last_updated": "2026-06-23T12:00:00Z"
@@ -328,12 +329,12 @@
     {
       "project_number": 279,
       "project_name": "propositional_sequent_calculus_lk_lj",
-      "status": "planned",
+      "status": "expanded",
       "task_type": "cslib",
       "description": "Implement a two-sided Gentzen-style sequent calculus (LK for classical, LJ for intuitionistic) for propositional logic with cut elimination. Use Finset-based contexts on both sides, following the CLL sequent calculus in Cslib/Logics/LinearLogic/CLL/Basic.lean as a template. Prove soundness, completeness, cut elimination (Hauptsatz), and equivalence bridges to the existing Hilbert and natural deduction systems (hilbert_iff_lk, nd_iff_lk). This completes the proof-system triad (Hilbert + ND + SC) for propositional logic and would be the first LK/LJ formalization in Lean 4.",
       "topic": "Propositional Logic",
       "created": "2026-06-23T02:57:39Z",
-      "last_updated": "2026-06-23T19:30:31Z",
+      "last_updated": "2026-06-23T19:33:50Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
@@ -356,7 +357,8 @@
         280
       ],
       "session_id": "sess_1782242736_cac36e",
-      "researched": "2026-06-23T19:23:07Z"
+      "researched": "2026-06-23T19:23:07Z",
+      "completion_summary": "Expanded into task 314 (LK classical sequent calculus) and task 315 (LJ intuitionistic sequent calculus). Research and plan artifacts preserved for subtasks."
     },
     {
       "project_number": 278,
@@ -789,6 +791,72 @@
         308,
         311
       ]
+    },
+    {
+      "project_number": 314,
+      "project_name": "lk_classical_sequent_calculus",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Implement the classical sequent calculus LK for propositional logic. Create shared definitions (Defs.lean with LKSequent type, scoped notation), LK proof inductive with all-additive Finset-based presentation (LK/Basic.lean), structural admissibility lemmas (weakening, monotone contexts), soundness (LK/Soundness.lean), cut elimination / Hauptsatz (LK/CutElimination.lean) via lexicographic induction on (formula complexity, height sum), and equivalence bridges hilbert_iff_lk and nd_iff_lk composed through existing ND bridge. Completeness follows as corollary via Hilbert bridge. File layout: Cslib/Logics/Propositional/SequentCalculus/{Defs,LK/Basic,LK/Soundness,LK/CutElimination,LK/Completeness}.lean. Reuse Proposition type, Proposition.complexity, InferenceSystem typeclass, and existing hilbert_iff_nd_ctx bridge. Parent task: 279.",
+      "topic": "Propositional Logic",
+      "created": "2026-06-23T19:33:42Z",
+      "last_updated": "2026-06-23T19:33:42Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "dependencies": [],
+      "parent_task": 279,
+      "plan_metadata": {
+        "phases": 3,
+        "total_effort_hours": 10,
+        "complexity": "complex",
+        "research_integrated": true,
+        "plan_version": 1,
+        "dependency_waves": [
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ]
+        ]
+      }
+    },
+    {
+      "project_number": 315,
+      "project_name": "lj_intuitionistic_sequent_calculus",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Implement the intuitionistic sequent calculus LJ for propositional logic. Use single-conclusion sequents (Finset antecedent, single Proposition succedent) matching the existing ND Sequent type. Create LJ proof inductive (LJ/Basic.lean), structural admissibility lemmas, soundness (LJ/Soundness.lean), cut elimination / Hauptsatz (LJ/CutElimination.lean), and equivalence bridges hilbert_iff_lj and nd_iff_lj. The nd_iff_lj bridge should be near-definitional given matching sequent shapes. File layout: Cslib/Logics/Propositional/SequentCalculus/{LJ/Basic,LJ/Soundness,LJ/CutElimination}.lean plus additions to Equivalence.lean. Depends on task 314 for shared Defs.lean and notation infrastructure. Parent task: 279.",
+      "topic": "Propositional Logic",
+      "created": "2026-06-23T19:33:42Z",
+      "last_updated": "2026-06-23T19:33:42Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "dependencies": [
+        314
+      ],
+      "parent_task": 279,
+      "plan_metadata": {
+        "phases": 3,
+        "total_effort_hours": 8,
+        "complexity": "complex",
+        "research_integrated": true,
+        "plan_version": 1,
+        "dependency_waves": [
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ]
+        ]
+      }
     }
   ],
   "repository_health": {

@@ -1,5 +1,5 @@
 ---
-next_project_number: 314
+next_project_number: 316
 ---
 
 # TODO
@@ -11,9 +11,9 @@ next_project_number: 314
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,279,290,298,304,305,307,313 | -- | Bimodal Porting, Foundations, Project Management, ... |
-| 2 | 39,40,181,215,291,292,293,299,301,306,309,310 | 36,37,180,279,290,298,304,305 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
-| 3 | 41,275,300,308,311 | 39,40,299,306,307,309,310 | Foundations, Modal, Algebraic Semantics |
+| 1 | 36,37,180,226,241,245,278,290,298,304,305,307,313,314 | -- | Bimodal Porting, Foundations, Project Management, ... |
+| 2 | 39,40,181,215,293,299,301,306,309,310,315 | 36,37,180,290,298,304,305,314 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 3 | 41,275,291,292,300,308,311 | 39,40,299,306,307,309,310,315 | Foundations, Propositional Logic, Modal, ... |
 | 4 | 312 | 308,311 | Algebraic Semantics |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -38,11 +38,12 @@ next_project_number: 314
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-279 [PLANNED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
-  └─ 291 [NOT STARTED] — After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a un
-  └─ 292 [NOT STARTED] — After task 279 delivers LJ with cut elimination, formalize the co
 290 [NOT STARTED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
   └─ 293 [NOT STARTED] — Establish the formal Curry-Howard isomorphism between Theory.Deri
+314 [NOT STARTED] — Implement the classical sequent calculus LK for propositional log
+  └─ 315 [NOT STARTED] — Implement the intuitionistic sequent calculus LJ for propositiona
+    └─ 291 [NOT STARTED] — After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a un
+    └─ 292 [NOT STARTED] — After task 279 delivers LJ with cut elimination, formalize the co
 
 ### Temporal Logic
 
@@ -85,6 +86,26 @@ next_project_number: 314
 ### Uncategorized
 
 ## Tasks
+
+### 315. Lj intuitionistic sequent calculus
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 314
+
+**Description**: Implement the intuitionistic sequent calculus LJ for propositional logic. Use single-conclusion sequents (Finset antecedent, single Proposition succedent) matching the existing ND Sequent type. Create LJ proof inductive (LJ/Basic.lean), structural admissibility lemmas, soundness (LJ/Soundness.lean), cut elimination / Hauptsatz (LJ/CutElimination.lean), and equivalence bridges hilbert_iff_lj and nd_iff_lj. The nd_iff_lj bridge should be near-definitional given matching sequent shapes. File layout: Cslib/Logics/Propositional/SequentCalculus/{LJ/Basic,LJ/Soundness,LJ/CutElimination}.lean plus additions to Equivalence.lean. Depends on task 314 for shared Defs.lean and notation infrastructure. Parent task: 279.
+
+---
+
+### 314. Lk classical sequent calculus
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Implement the classical sequent calculus LK for propositional logic. Create shared definitions (Defs.lean with LKSequent type, scoped notation), LK proof inductive with all-additive Finset-based presentation (LK/Basic.lean), structural admissibility lemmas (weakening, monotone contexts), soundness (LK/Soundness.lean), cut elimination / Hauptsatz (LK/CutElimination.lean) via lexicographic induction on (formula complexity, height sum), and equivalence bridges hilbert_iff_lk and nd_iff_lk composed through existing ND bridge. Completeness follows as corollary via Hilbert bridge. File layout: Cslib/Logics/Propositional/SequentCalculus/{Defs,LK/Basic,LK/Soundness,LK/CutElimination,LK/Completeness}.lean. Reuse Proposition type, Proposition.complexity, InferenceSystem typeclass, and existing hilbert_iff_nd_ctx bridge. Parent task: 279.
+
+---
 
 ### 313. Zulip propositional logic proof systems overview
 - **Status**: [RESEARCHED]
@@ -314,7 +335,7 @@ next_project_number: 314
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: Task 279
+- **Dependencies**: Task 315
 
 **Description**: After task 279 delivers LJ with cut elimination, formalize the connection between cut-free proof search and decidability. Define a bounded backward proof search procedure over cut-free LJ: the search space is finite because all formulas in a cut-free proof are subformulas of the sequent. Prove termination via a well-founded measure. Produce Decidable (LJDerivable (Gamma |- A)) and lift via nd_iff_lk to Decidable (DerivableIn IPL (Gamma |- A)). File: Cslib/Logics/Propositional/SequentCalculus/Decidability.lean. Depends on 279.
 
@@ -324,7 +345,7 @@ next_project_number: 314
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: Task 279
+- **Dependencies**: Task 314, Task 315
 
 **Description**: After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a unifying module stating the three-way equivalence as List.TFAE theorems. For each of MPL, IPL, and CPL, prove that Hilbert derivability, ND derivability, and SC derivability are equivalent. The pairwise bridges are: Hilbert-ND from task 266, Hilbert-SC and ND-SC from task 279. This is purely compositional. File: Cslib/Logics/Propositional/ProofSystemEquivalence.lean. Depends on 279.
 
@@ -361,7 +382,7 @@ next_project_number: 314
 ---
 
 ### 279. Propositional sequent calculus lk lj
-- **Status**: [PLANNED]
+- **Status**: [EXPANDED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 280

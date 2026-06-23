@@ -11,7 +11,7 @@ next_project_number: 313
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,279,288,289,290,297,302,303,304 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,278,279,290,297,302,303,304 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,291,292,293,298,305,307,310 | 36,37,180,279,290,297,302,303,304 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
 | 3 | 41,275,299,301,306,309 | 39,40,298,303,304,305 | Foundations, Temporal, Modal, ... |
 | 4 | 300,308,311 | 299,306,307,309,310 | Modal, Algebraic Semantics |
@@ -30,7 +30,7 @@ next_project_number: 313
 ### Foundations
 
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
-297 [NOT STARTED] — Build shared tableau infrastructure in Foundations/Logic/Tableau/
+297 [IMPLEMENTING] — Build shared tableau infrastructure in Foundations/Logic/Tableau/
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Propositional Logic
@@ -39,8 +39,6 @@ next_project_number: 313
 279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
   └─ 291 [NOT STARTED] — After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a un
   └─ 292 [NOT STARTED] — After task 279 delivers LJ with cut elimination, formalize the co
-288 [IMPLEMENTED] — Export named abbrev or instance declarations making explicit that
-289 [IMPLEMENTING] — Compose instDecidableTautology with prop_completeness_iff_tautolo
 290 [NOT STARTED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
   └─ 293 [NOT STARTED] — Establish the formal Curry-Howard isomorphism between Theory.Deri
 
@@ -241,10 +239,12 @@ next_project_number: 313
 ---
 
 ### 297. Foundations tableau infrastructure
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
+- **Research**: [297_foundations_tableau_infrastructure/reports/01_foundations-tableau-research.md]
+- **Plan**: [297_foundations_tableau_infrastructure/plans/01_foundations-tableau-plan.md]
 
 **Description**: Build shared tableau infrastructure in Foundations/Logic/Tableau/. Refactor and extend the existing PropositionalTableau.lean (210 lines) into a proper module directory. Unify the PropSign type (from Foundations) with the bimodal Sign type into a single canonical sign type. Create generic signed formula (parameterized over formula type F and label type L), rule result, and branch types. Crucially, the foundation must be logic-neutral to support classical, intuitionistic, and minimal tableaux: (1) Closure must be parameterized via a ClosureCondition typeclass — classical uses complementary signed pairs at the same label, intuitionistic uses only F(⊥), minimal uses only complementary atoms T(p)/F(p). (2) Rule application must be configurable via a RuleConfig or LogicKind parameter — the T(φ→ψ) rule behaves differently in classical (branch into F(φ) or T(ψ)) vs intuitionistic (create successor world w' with T(φ), F(ψ)) vs minimal (same as intuitionistic). (3) Branch needs world-awareness even at propositional level (L = Unit for classical, L = WorldIndex for intuitionistic/minimal). CSLib already has Kripke semantics for propositional logic with IValid (intuitionistic) and MValid (minimal) via botForces parameterization, and algebraic semantics via GeneralizedHeytingAlgebra/HeytingAlgebra/BooleanAlgebra. Files to create: Sign.lean, SignedFormula.lean, PropositionalRules.lean, RuleResult.lean, Branch.lean, Closure.lean, ClosureCondition.lean under Cslib/Foundations/Logic/Tableau/. Estimated: 800-1,100 lines.
 
@@ -324,7 +324,7 @@ next_project_number: 313
 ---
 
 ### 289. Decidable derivable propositional instance
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 266
@@ -334,7 +334,7 @@ next_project_number: 313
 ---
 
 ### 288. Lindenbaum tarski algebra instances
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 266

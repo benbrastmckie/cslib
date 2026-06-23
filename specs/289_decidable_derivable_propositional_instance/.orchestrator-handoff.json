@@ -1,16 +1,16 @@
 {
-  "status": "planned",
-  "summary": "Single-phase plan: add instDecidableDerivablePropositionalAxiom to StrongCompleteness.lean via decidable_of_iff composition, 0.5h effort",
+  "status": "implemented",
+  "summary": "Added instDecidableDerivablePropositionalAxiom instance to StrongCompleteness.lean by composing instDecidableTautology with prop_completeness_iff_tautology via decidable_of_iff; all CI checks pass",
   "blockers": [],
   "continuation_context": null,
-  "next_action_hint": "implement",
-  "phases_completed": 0,
+  "next_action_hint": "complete",
+  "phases_completed": 1,
   "phases_total": 1,
   "artifacts": [
     {
-      "path": "specs/289_decidable_derivable_propositional_instance/plans/01_implementation-plan.md",
-      "type": "plan",
-      "summary": "One-phase implementation plan to register Decidable (Derivable PropositionalAxiom phi) instance inline in StrongCompleteness.lean"
+      "path": "specs/289_decidable_derivable_propositional_instance/summaries/01_implementation-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary with CI verification results; all 7 CI pipeline steps passed"
     }
   ]
 }

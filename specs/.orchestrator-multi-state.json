@@ -1,0 +1,88 @@
+{
+  "session_id": "sess_1782239228_7ea60f",
+  "task_numbers": [
+    302,
+    303,
+    305,
+    306,
+    307,
+    308
+  ],
+  "waves": [
+    [
+      302,
+      303
+    ],
+    [
+      305,
+      307
+    ],
+    [
+      306
+    ],
+    [
+      308
+    ]
+  ],
+  "dependency_graph": {
+    "302": [],
+    "303": [],
+    "305": [
+      302
+    ],
+    "306": [
+      302,
+      303,
+      305
+    ],
+    "307": [
+      302,
+      303
+    ],
+    "308": [
+      306,
+      307
+    ]
+  },
+  "cycle_count": 3,
+  "max_cycles": 25,
+  "failed_tasks": [],
+  "completed_tasks": [
+    288,
+    289
+  ],
+  "current_statuses": {
+    "302": "not_started",
+    "303": "not_started",
+    "305": "not_started",
+    "306": "not_started",
+    "307": "not_started",
+    "308": "not_started",
+    "288": "completed",
+    "289": "completed"
+  },
+  "task_types": {
+    "302": "cslib",
+    "303": "cslib",
+    "305": "cslib",
+    "306": "cslib",
+    "307": "cslib",
+    "308": "cslib"
+  },
+  "research_agents": {
+    "302": "cslib-research-agent",
+    "303": "cslib-research-agent",
+    "305": "cslib-research-agent",
+    "306": "cslib-research-agent",
+    "307": "cslib-research-agent",
+    "308": "cslib-research-agent"
+  },
+  "implement_agents": {
+    "302": "cslib-implementation-agent",
+    "303": "cslib-implementation-agent",
+    "305": "cslib-implementation-agent",
+    "306": "cslib-implementation-agent",
+    "307": "cslib-implementation-agent",
+    "308": "cslib-implementation-agent"
+  }
+}

@@ -126,7 +126,7 @@
     {
       "project_number": 269,
       "project_name": "hilbert_search_tactic",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "topic": "Foundations",
       "description": "Build generic bounded proof-search tactic for InferenceSystem. Create a bounded DFS proof-search tactic (e.g., hilbert_search) that works generically over the InferenceSystem typeclass. Inspired by BimodalLogic modal_search (~700 lines) but adapted to cslib polymorphic architecture. Search strategies: axiom matching, assumption lookup, modus ponens decomposition, necessitation + K rules, temporal rules. Must handle the InferenceSystem S α typeclass generically (not hardcoded to a specific DerivationTree). Configurable search depth. Should work across Propositional, Modal, Temporal, and Bimodal systems. Depends on task 268 (normalization tags help the tactic work on clean goals). Needs Zulip discussion before PR since this is novel cross-cutting infrastructure for cslib. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake",
@@ -134,17 +134,18 @@
         268
       ],
       "created": "2026-06-22T20:12:59Z",
-      "last_updated": "2026-06-22T20:12:59Z"
+      "last_updated": "2026-06-23T03:12:55Z",
+      "session_id": "sess_1750654800_a3b2c1"
     },
     {
       "project_number": 266,
       "project_name": "research_propositional_and_foundations_improvements",
-      "status": "planning",
+      "status": "planned",
       "task_type": "formal",
       "description": "Research improvements to Propositional/ and Foundations/Logic/ in this repo: compose the Hilbert-ND bridge with algebraic completeness for Hilbert-tier corollaries, fix stale ProofSystem.lean documentation, add propositional test coverage, concretize modal/temporal/bimodal ProofSystem tag instances to unlock GenericMCS reuse, extract propositional tableau rules from the bimodal tableau to Foundations/, add HasDia primitive, and assemble a Decidable (Tautology φ) instance. Excludes sequent calculus (split to task 279).",
       "topic": "Propositional Logic",
       "created": "2026-06-22T18:25:59Z",
-      "last_updated": "2026-06-23T03:05:24Z",
+      "last_updated": "2026-06-23T03:12:38Z",
       "session_id": "sess_1782183904_48c885",
       "researched": "2026-06-23T02:51:36Z",
       "next_artifact_number": 3,
@@ -155,14 +156,14 @@
           "summary": "Team research with 4 teammates: Propositional/ and Foundations/ analysis"
         },
         {
-          "path": "specs/266_research_propositional_and_foundations_improvements/plans/01_propositional-foundations-plan.md",
-          "type": "plan",
-          "summary": "6-phase implementation plan covering algebraic-Hilbert bridge, ND capture-avoidance fix, ProofSystem documentation and instances, abstract completeness extraction, and test coverage"
-        },
-        {
           "path": "specs/266_research_propositional_and_foundations_improvements/reports/02_team-research.md",
           "type": "research",
           "summary": "Team research with 4 teammates: Propositional/ and Foundations/ analysis (round 2)"
+        },
+        {
+          "path": "specs/266_research_propositional_and_foundations_improvements/plans/03_propositional-foundations-plan.md",
+          "type": "plan",
+          "summary": "Revised 7-phase plan integrating round-2 research: Hilbert-algebraic bridge, doc fixes, HasDia, Decidable Tautology, GenericMCS concretization scoping, tableau extraction, test coverage"
         }
       ]
     },

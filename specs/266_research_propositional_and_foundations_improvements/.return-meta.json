@@ -1,0 +1,38 @@
+{
+  "status": "planned",
+  "artifacts": [
+    {
+      "path": "specs/266_research_propositional_and_foundations_improvements/plans/03_propositional-foundations-plan.md",
+      "type": "plan",
+      "summary": "Revised 7-phase plan integrating round-2 research: Hilbert-algebraic bridge, doc fixes, HasDia, Decidable Tautology, GenericMCS concretization scoping, tableau extraction, test coverage"
+    }
+  ],
+  "next_steps": "Run /implement 266 to execute the plan",
+  "plan_metadata": {
+    "phases": 7,
+    "total_effort_hours": 7,
+    "complexity": "medium",
+    "research_integrated": true,
+    "plan_version": 2,
+    "dependency_waves": [[1, 2, 3, 4], [5, 6], [7]],
+    "reports_integrated": [
+      {
+        "path": "reports/01_team-research.md",
+        "integrated_in_plan_version": 1,
+        "integrated_date": "2026-06-22"
+      },
+      {
+        "path": "reports/02_team-research.md",
+        "integrated_in_plan_version": 2,
+        "integrated_date": "2026-06-22"
+      }
+    ]
+  },
+  "memory_candidates": [],
+  "metadata": {
+    "session_id": "sess_1782183904_48c885",
+    "agent_type": "planner-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-agent"]
+  }
+}

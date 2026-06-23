@@ -27,14 +27,14 @@ next_project_number: 281
 
 ### Foundations
 
-269 [NOT STARTED] — Build generic bounded proof-search tactic for InferenceSystem. Cr
+269 [RESEARCHING] — Build generic bounded proof-search tactic for InferenceSystem. Cr
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-266 [PLANNING] — Research improvements to Propositional/ and Foundations/Logic/ in
+266 [PLANNED] — Research improvements to Propositional/ and Foundations/Logic/ in
 279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
 280 [NOT STARTED] — Research the current state of propositional proof systems in CSLi
 
@@ -95,7 +95,7 @@ next_project_number: 281
 ---
 
 ### 269. Hilbert search tactic
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: Task 268
@@ -118,14 +118,14 @@ next_project_number: 281
 ---
 
 ### 266. Research propositional and foundations improvements
-- **Status**: [PLANNING]
+- **Status**: [PLANNED]
 - **Task Type**: formal
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**:
   - [266_research_propositional_and_foundations_improvements/reports/01_team-research.md]
   - [266_research_propositional_and_foundations_improvements/reports/02_team-research.md]
-- **Plan**: [266_research_propositional_and_foundations_improvements/plans/01_propositional-foundations-plan.md]
+- **Plan**: [266_research_propositional_and_foundations_improvements/plans/03_propositional-foundations-plan.md]
 
 **Description**: Research improvements to Propositional/ and Foundations/Logic/ in this repo: compose the Hilbert-ND bridge with algebraic completeness for Hilbert-tier corollaries, fix stale ProofSystem.lean documentation, add propositional test coverage, concretize modal/temporal/bimodal ProofSystem tag instances to unlock GenericMCS reuse, extract propositional tableau rules from the bimodal tableau to Foundations/, add HasDia primitive, and assemble a Decidable (Tautology φ) instance. Excludes sequent calculus (split to task 279).
 

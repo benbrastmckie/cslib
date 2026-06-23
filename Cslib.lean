@@ -414,6 +414,7 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertConservativeGl
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertLindenbaum
 public import Cslib.Logics.Propositional.Semantics.Algebra.KripkeBridge
 public import Cslib.Logics.Propositional.Semantics.Algebra.Lindenbaum
+public import Cslib.Logics.Propositional.Semantics.Algebra.LindenbaumInstances
 public import Cslib.Logics.Propositional.Semantics.Algebra.Soundness
 public import Cslib.Logics.Propositional.Semantics.Bool
 public import Cslib.Logics.Propositional.Semantics.Kripke

@@ -1,0 +1,21 @@
+{
+  "status": "implemented",
+  "summary": "Created LindenbaumInstances.lean with named type abbreviations and instances for MPL (GHA), IPL (HA), and CPL (BA); all CI checks pass",
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "complete",
+  "phases_completed": 2,
+  "phases_total": 2,
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/Semantics/Algebra/LindenbaumInstances.lean",
+      "type": "lean_module",
+      "summary": "Facade module with MPL.LindenbaumAlgebra, IPL.LindenbaumAlgebra, CPL.LindenbaumAlgebra type abbreviations and named instances MPL.instGHA, IPL.instHA, CPL.instBA"
+    },
+    {
+      "path": "specs/288_lindenbaum_tarski_algebra_instances/summaries/01_implementation-summary.md",
+      "type": "summary",
+      "summary": "Full implementation summary with CI verification table and plan deviations"
+    }
+  ]
+}

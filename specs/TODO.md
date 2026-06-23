@@ -1,5 +1,5 @@
 ---
-next_project_number: 296
+next_project_number: 297
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 296
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,279,288,289,290,294,295 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,278,279,288,289,290,294,295,296 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,291,292,293 | 36,37,180,279,290 | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 3 | 41,275 | 39,40 | Foundations |
 
@@ -28,6 +28,7 @@ next_project_number: 296
 ### Foundations
 
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
+296 [NOT STARTED] — Research and design a unified tableau calculi architecture for CS
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Propositional Logic
@@ -36,8 +37,8 @@ next_project_number: 296
 279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
   └─ 291 [NOT STARTED] — After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a un
   └─ 292 [NOT STARTED] — After task 279 delivers LJ with cut elimination, formalize the co
-288 [NOT STARTED] — Export named abbrev or instance declarations making explicit that
-289 [NOT STARTED] — Compose instDecidableTautology with prop_completeness_iff_tautolo
+288 [IMPLEMENTING] — Export named abbrev or instance declarations making explicit that
+289 [IMPLEMENTING] — Compose instDecidableTautology with prop_completeness_iff_tautolo
 290 [NOT STARTED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
   └─ 293 [NOT STARTED] — Establish the formal Curry-Howard isomorphism between Theory.Deri
 
@@ -56,6 +57,16 @@ next_project_number: 296
 295 [PLANNED] — Add HasAxiomDiaDualityFwd and HasAxiomDiaDualityBack typeclasses 
 
 ## Tasks
+
+### 296. Tableau calculi architecture
+- **Status**: [NOT STARTED]
+- **Task Type**: formal
+- **Topic**: Foundations
+- **Dependencies**: None
+
+**Description**: Research and design a unified tableau calculi architecture for CSLib spanning propositional, modal, temporal, and bimodal logics. The existing PropositionalTableau.lean provides generic rule infrastructure (PropSign, PropSignedFormula, PropTableauRule, applyPropRule) already consumed by the bimodal decidability system (~5,900 lines). The goal is to determine how to build a complete propositional tableau system (branch construction, closure, termination, soundness, completeness, decision procedure) that naturally extends to modal and temporal tableau systems, sharing resources with and relating cleanly to the existing bimodal tableau. Investigate: (1) what generic tableau infrastructure should live in Foundations/ vs logic-specific modules, (2) how modal tableau rules (box/diamond) and temporal rules (until/since) layer on top of propositional rules, (3) whether the bimodal tableau can be refactored to consume shared infrastructure or whether it should remain standalone, (4) what the dependency chain should be between propositional, modal, temporal tableau tasks, (5) how tableau completeness relates to the existing MCS-based completeness proofs and the planned sequent calculus (task 279). Output: a set of precisely scoped implementation tasks with dependency graph covering the full tableau pipeline from propositional through bimodal.
+
+---
 
 ### 295. Fix dia duality axiom typeclasses
 - **Status**: [PLANNED]
@@ -119,7 +130,7 @@ next_project_number: 296
 ---
 
 ### 289. Decidable derivable propositional instance
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 266
@@ -129,7 +140,7 @@ next_project_number: 296
 ---
 
 ### 288. Lindenbaum tarski algebra instances
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 266

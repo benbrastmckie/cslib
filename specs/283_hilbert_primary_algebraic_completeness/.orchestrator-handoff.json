@@ -1,10 +1,27 @@
 {
-  "status": "planned",
-  "summary": "4-phase plan to make Hilbert completeness primary: foundation lemmas in HilbertLindenbaum.lean, rewrite HilbertCompleteness.lean proofs to use Hilbert Lindenbaum directly, downstream verification, full CI",
+  "status": "implemented",
+  "summary": "Rewrote algebraic completeness as Hilbert-primary using the Hilbert Lindenbaum algebra; all CI checks pass",
   "blockers": [],
   "continuation_context": null,
-  "artifacts": [{"path": "specs/283_hilbert_primary_algebraic_completeness/plans/01_hilbert-completeness-plan.md", "type": "plan", "summary": "4-phase implementation plan for Hilbert-primary algebraic completeness"}],
-  "phases_completed": 0,
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/Semantics/Algebra/HilbertLindenbaum.lean",
+      "type": "implementation",
+      "summary": "Added hilbertLindenbaumMk_eq_top_iff, canonicalV, canonicalBotVal, canonicalV_spec, canonicalV_axiom_top"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Semantics/Algebra/HilbertCompleteness.lean",
+      "type": "implementation",
+      "summary": "MPL/IPL/CPL completeness now uses Hilbert Lindenbaum algebra directly; removed ND routing"
+    }
+  ],
+  "phases_completed": 4,
   "phases_total": 4,
-  "next_action_hint": "implement"
+  "next_action_hint": "complete",
+  "deviations": [
+    "Theorem signatures use GHAValid.{u,u}/HAValid.{u,u}/BAValid.{u,u} with explicit universe annotation (both levels set to u) instead of GHAValid φ with implicit universe. This was necessary to instantiate the quantifier at the Hilbert Lindenbaum algebra in Type u. No downstream files use these theorems directly, so the restriction is safe.",
+    "Removed [DecidableEq Atom] from all three theorem signatures since it is not used by the new Hilbert-direct proofs (no linter error).",
+    "Added import Cslib.Logics.Propositional.Semantics.Algebra to HilbertLindenbaum.lean (for AlgEvaluate used in canonical valuation and truth lemma).",
+    "Removed redundant import Cslib.Init from HilbertCompleteness.lean per lake shake suggestion (Cslib.Init still reachable transitively)."
+  ]
 }

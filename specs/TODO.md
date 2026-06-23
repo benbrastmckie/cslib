@@ -1,5 +1,5 @@
 ---
-next_project_number: 281
+next_project_number: 286
 ---
 
 # TODO
@@ -11,9 +11,11 @@ next_project_number: 281
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,266,269,278,279,280 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
-| 3 | 41,275 | 39,40 | Foundations |
+| 1 | 36,37,180,226,241,245,252,266,269,278,279,280,281 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 2 | 39,40,181,215,282 | 36,37,180,281 | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 3 | 41,275,283 | 39,40,282 | Foundations, Propositional Logic |
+| 4 | 284 | 283 | Propositional Logic |
+| 5 | 285 | 284 | Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -27,7 +29,7 @@ next_project_number: 281
 
 ### Foundations
 
-269 [RESEARCHED] — Build generic bounded proof-search tactic for InferenceSystem. Cr
+269 [PLANNED] — Build generic bounded proof-search tactic for InferenceSystem. Cr
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
@@ -37,6 +39,11 @@ next_project_number: 281
 266 [IMPLEMENTING] — Research improvements to Propositional/ and Foundations/Logic/ in
 279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
 280 [NOT STARTED] — Research the current state of propositional proof systems in CSLi
+281 [RESEARCHING] — Complete the set of Hilbert derived structural rules needed for t
+  └─ 282 [NOT STARTED] — Rebuild the Lindenbaum algebra construction over Hilbert derivati
+    └─ 283 [NOT STARTED] — Restate algebraic completeness as Hilbert-primary using the Hilbe
+      └─ 284 [NOT STARTED] — Restate ipl_conservative_over_mpl and glivenko as Hilbert-primary
+        └─ 285 [NOT STARTED] — Refactor the ND metalogical API so that all ND-level results (alg
 
 ### Temporal Logic
 
@@ -51,6 +58,56 @@ next_project_number: 281
 ### Uncategorized
 
 ## Tasks
+
+### 285. Nd metalogic as hilbert corollaries
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 283, Task 284
+
+**Description**: Refactor the ND metalogical API so that all ND-level results (algebraic completeness, conservative extension, Glivenko) are derived as corollaries of the Hilbert-primary versions via the hilbert_iff_nd bridge theorems. Remove the old ND-primary proofs (or move to a Legacy/ module if needed for transition). Ensure all downstream imports and dependent modules (modal, temporal, bimodal) still compile. Update ProofSystem.lean documentation to reflect the Hilbert-primary architecture. Run full CI pipeline (lake build, lake test, lake lint, lake exe checkInitImports).
+
+---
+
+### 284. Hilbert primary conservative glivenko
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 283
+
+**Description**: Restate ipl_conservative_over_mpl and glivenko as Hilbert-primary using the Hilbert algebraic completeness from task 283. Conservative extension becomes: Derivable IntPropAxiom φ → Derivable MinPropAxiom φ (for bot-free φ), routed through Hilbert alg_complete and the GHA/HA embedding. Glivenko becomes: Derivable PropositionalAxiom φ → Derivable IntPropAxiom (¬¬φ), routed through Hilbert alg_complete and the Heyting.Regular subalgebra argument. Derive ND versions as corollaries via the bridge.
+
+---
+
+### 283. Hilbert primary algebraic completeness
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 282
+
+**Description**: Restate algebraic completeness as Hilbert-primary using the Hilbert Lindenbaum algebra from task 282. Replace MPL.alg_complete, IPL.alg_complete, and Theory.alg_complete with versions stated for Derivable/SetDerivable (Hilbert) rather than DerivableIn (ND). The algebraic soundness theorems (min_alg_soundness_derivable etc.) are already Hilbert-primary and can be kept. The completeness direction uses the new Hilbert Lindenbaum algebra directly. Derive ND versions as corollaries via the hilbert_iff_nd bridge.
+
+---
+
+### 282. Lindenbaum algebra over hilbert
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 281
+
+**Description**: Rebuild the Lindenbaum algebra construction over Hilbert derivations instead of ND. Currently Lindenbaum.lean defines the quotient ordering via DerivableIn T ({A} ⊢ B) (ND) and builds GHA/HA/BA instances using ND structural rules. Redefine using Hilbert SetDerivable/Deriv with the derived structural rules from task 281. The lattice operations (sup, inf, himp, compl) and their GHA/HA/BA instances must all be restated and proven using Hilbert derivations. The existing ND Lindenbaum can be kept temporarily as internal machinery but the new Hilbert version becomes primary.
+
+---
+
+### 281. Hilbert derived structural rules
+- **Status**: [RESEARCHING]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Complete the set of Hilbert derived structural rules needed for the Lindenbaum algebra construction. HilbertDerivedRules.lean already has some derived rules; extend it to include all ND structural rules as Hilbert-derived theorems for each tier (MPL/IPL/CPL): andI, andE1, andE2, orI1, orI2, orE, impI, impE, botE (IPL+CPL), dne (CPL). Each rule must be stated as a Hilbert DerivationTree derivation using only ax, assumption, modus_ponens, and weakening. This is the prerequisite for rebuilding the Lindenbaum algebra over Hilbert.
+
+---
 
 ### 280. Proof system triad gap analysis
 - **Status**: [NOT STARTED]
@@ -95,11 +152,12 @@ next_project_number: 281
 ---
 
 ### 269. Hilbert search tactic
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: Task 268
 - **Research**: [269_hilbert_search_tactic/reports/01_team-research.md]
+- **Plan**: [269_hilbert_search_tactic/plans/02_hilbert-search-plan.md]
 
 **Description**: Build generic bounded proof-search tactic for InferenceSystem. Create a bounded DFS proof-search tactic (e.g., hilbert_search) that works generically over the InferenceSystem typeclass. Inspired by BimodalLogic modal_search (~700 lines) but adapted to cslib polymorphic architecture. Search strategies: axiom matching, assumption lookup, modus ponens decomposition, necessitation + K rules, temporal rules. Must handle the InferenceSystem S α typeclass generically (not hardcoded to a specific DerivationTree). Configurable search depth. Should work across Propositional, Modal, Temporal, and Bimodal systems. Depends on task 268 (normalization tags help the tactic work on clean goals). Needs Zulip discussion before PR since this is novel cross-cutting infrastructure for cslib. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake
 

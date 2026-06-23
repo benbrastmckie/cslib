@@ -20,7 +20,7 @@
     {
       "id": "johansson_1937",
       "bib_key": "Johansson1937",
-      "title": "Der Minimalkalk\u00fcl, ein reduzierter intuitionistischer Formalismus",
+      "title": "Der Minimalkalkül, ein reduzierter intuitionistischer Formalismus",
       "authors": "Ingebrigt Johansson",
       "year": 1937,
       "section": null,
@@ -37,7 +37,7 @@
         "MinPropAxiom",
         "Heyting calculus"
       ],
-      "summary": "Defines minimal logic by removing ex falso quodlibet from Heyting's intuitionistic system, retaining falsum as a primitive and negation defined as A\u2192\u22a5."
+      "summary": "Defines minimal logic by removing ex falso quodlibet from Heyting's intuitionistic system, retaining falsum as a primitive and negation defined as A→⊥."
     },
     {
       "id": "henkin_1949",
@@ -109,7 +109,7 @@
       "id": "from_2022",
       "bib_key": null,
       "title": "SeCaV: A Sequent Calculus Verifier in Isabelle/HOL",
-      "authors": "Asta Halkj\u00e6r From, Frederik Krogsdal Jacobsen, J\u00f8rgen Villadsen",
+      "authors": "Asta Halkjær From, Frederik Krogsdal Jacobsen, Jørgen Villadsen",
       "year": 2022,
       "section": null,
       "path": "sources/from_2022/from_2022.md",
@@ -152,7 +152,7 @@
     {
       "id": "gentzen_1935_sec00",
       "bib_key": "Gentzen1935",
-      "title": "Investigations into Logical Deduction \u2014 Synopsis and Notation",
+      "title": "Investigations into Logical Deduction — Synopsis and Notation",
       "authors": "Gerhard Gentzen",
       "year": 1935,
       "section": "Synopsis and Section I: Terminology and Notation",
@@ -172,7 +172,7 @@
     {
       "id": "gentzen_1935_sec02",
       "bib_key": "Gentzen1935",
-      "title": "Investigations into Logical Deduction \u2014 Section II: Natural Deduction",
+      "title": "Investigations into Logical Deduction — Section II: Natural Deduction",
       "authors": "Gerhard Gentzen",
       "year": 1935,
       "section": "Section II: The Calculus of Natural Deduction",
@@ -194,7 +194,7 @@
     {
       "id": "gentzen_1935_sec03",
       "bib_key": "Gentzen1935",
-      "title": "Investigations into Logical Deduction \u2014 Section III: LJ, LK and Hauptsatz",
+      "title": "Investigations into Logical Deduction — Section III: LJ, LK and Hauptsatz",
       "authors": "Gerhard Gentzen",
       "year": 1935,
       "section": "Section III: The Deductive Calculi LJ, LK and Proof of the Hauptsatz",
@@ -216,7 +216,7 @@
     {
       "id": "gentzen_1935_sec04",
       "bib_key": "Gentzen1935",
-      "title": "Investigations into Logical Deduction \u2014 Section IV: Applications",
+      "title": "Investigations into Logical Deduction — Section IV: Applications",
       "authors": "Gerhard Gentzen",
       "year": 1935,
       "section": "Section IV: Some Applications of the Hauptsatz",
@@ -235,7 +235,7 @@
     {
       "id": "gentzen_1935_sec05",
       "bib_key": "Gentzen1935",
-      "title": "Investigations into Logical Deduction \u2014 Section V: Equivalence",
+      "title": "Investigations into Logical Deduction — Section V: Equivalence",
       "authors": "Gerhard Gentzen",
       "year": 1935,
       "section": "Section V: Equivalence of NJ, NK with LJ, LK",
@@ -254,7 +254,7 @@
     {
       "id": "hughes_1996_p00",
       "bib_key": null,
-      "title": "A New Introduction to Modal Logic \u2014 Preface and Contents",
+      "title": "A New Introduction to Modal Logic — Preface and Contents",
       "authors": "G. E. Hughes, M. J. Cresswell",
       "year": 1996,
       "section": "Preface and Table of Contents",
@@ -274,7 +274,7 @@
     {
       "id": "hughes_1996_p01",
       "bib_key": null,
-      "title": "A New Introduction to Modal Logic \u2014 Part I: Basic Modal Propositional Logic",
+      "title": "A New Introduction to Modal Logic — Part I: Basic Modal Propositional Logic",
       "authors": "G. E. Hughes, M. J. Cresswell",
       "year": 1996,
       "section": "Part I: Basic Modal Propositional Logic (Ch 1-6, pages 3-130)",
@@ -298,7 +298,7 @@
     {
       "id": "hughes_1996_p02",
       "bib_key": null,
-      "title": "A New Introduction to Modal Logic \u2014 Part II: Normal Modal Systems",
+      "title": "A New Introduction to Modal Logic — Part II: Normal Modal Systems",
       "authors": "G. E. Hughes, M. J. Cresswell",
       "year": 1996,
       "section": "Part II: Normal Modal Systems (Ch 7-12, pages 133-230)",
@@ -321,7 +321,7 @@
     {
       "id": "hughes_1996_p03",
       "bib_key": null,
-      "title": "A New Introduction to Modal Logic \u2014 Part III: Modal Predicate Logic",
+      "title": "A New Introduction to Modal Logic — Part III: Modal Predicate Logic",
       "authors": "G. E. Hughes, M. J. Cresswell",
       "year": 1996,
       "section": "Part III: Modal Predicate Logic (Ch 13-19, pages 233-408)",
@@ -342,7 +342,7 @@
     {
       "id": "mendelson_2016_ch00",
       "bib_key": null,
-      "title": "Introduction to Mathematical Logic (6th ed.) \u2014 Front Matter",
+      "title": "Introduction to Mathematical Logic (6th ed.) — Front Matter",
       "authors": "Elliott Mendelson",
       "year": 2016,
       "section": "Front Matter (Contents, Preface, Introduction)",
@@ -361,7 +361,7 @@
     {
       "id": "mendelson_2016_ch01",
       "bib_key": null,
-      "title": "Introduction to Mathematical Logic \u2014 Chapter 1: The Propositional Calculus",
+      "title": "Introduction to Mathematical Logic — Chapter 1: The Propositional Calculus",
       "authors": "Elliott Mendelson",
       "year": 2016,
       "section": "Chapter 1: The Propositional Calculus (pages 1-44)",
@@ -383,7 +383,7 @@
     {
       "id": "mendelson_2016_ch02",
       "bib_key": null,
-      "title": "Introduction to Mathematical Logic \u2014 Chapter 2: First-Order Logic",
+      "title": "Introduction to Mathematical Logic — Chapter 2: First-Order Logic",
       "authors": "Elliott Mendelson",
       "year": 2016,
       "section": "Chapter 2: First-Order Logic and Model Theory (pages 45-152)",
@@ -405,7 +405,7 @@
     {
       "id": "mendelson_2016_ch03",
       "bib_key": null,
-      "title": "Introduction to Mathematical Logic \u2014 Chapter 3: Formal Number Theory",
+      "title": "Introduction to Mathematical Logic — Chapter 3: Formal Number Theory",
       "authors": "Elliott Mendelson",
       "year": 2016,
       "section": "Chapter 3: Formal Number Theory (pages 153-230)",
@@ -425,7 +425,7 @@
     {
       "id": "mendelson_2016_ch04",
       "bib_key": null,
-      "title": "Introduction to Mathematical Logic \u2014 Chapter 4: Axiomatic Set Theory",
+      "title": "Introduction to Mathematical Logic — Chapter 4: Axiomatic Set Theory",
       "authors": "Elliott Mendelson",
       "year": 2016,
       "section": "Chapter 4: Axiomatic Set Theory (pages 231-310)",
@@ -445,7 +445,7 @@
     {
       "id": "mendelson_2016_ch05",
       "bib_key": null,
-      "title": "Introduction to Mathematical Logic \u2014 Chapter 5: Computability",
+      "title": "Introduction to Mathematical Logic — Chapter 5: Computability",
       "authors": "Elliott Mendelson",
       "year": 2016,
       "section": "Chapter 5: Computability (pages 311-443)",
@@ -465,7 +465,7 @@
     {
       "id": "chagrov_1997_p00",
       "bib_key": "ChagrovZakharyaschev1997",
-      "title": "Modal Logic (CZ) \u2014 Front Matter",
+      "title": "Modal Logic (CZ) — Front Matter",
       "authors": "Alexander Chagrov, Michael Zakharyaschev",
       "year": 1997,
       "section": "Front Matter (Contents, Preface)",
@@ -483,10 +483,10 @@
     {
       "id": "chagrov_1997_p01",
       "bib_key": "ChagrovZakharyaschev1997",
-      "title": "Modal Logic (CZ) \u2014 Part I: Introduction",
+      "title": "Modal Logic (CZ) — Part I: Introduction",
       "authors": "Alexander Chagrov, Michael Zakharyaschev",
       "year": 1997,
-      "section": "Part I: Introduction \u2014 Classical Logic, Intuitionistic Logic, Modal Logics (Ch 1-4)",
+      "section": "Part I: Introduction — Classical Logic, Intuitionistic Logic, Modal Logics (Ch 1-4)",
       "path": "sources/chagrov_1997/p01_introduction.md",
       "page_range": "3-128",
       "token_count": 70202,
@@ -507,10 +507,10 @@
     {
       "id": "chagrov_1997_p02",
       "bib_key": "ChagrovZakharyaschev1997",
-      "title": "Modal Logic (CZ) \u2014 Part II: Kripke Semantics",
+      "title": "Modal Logic (CZ) — Part II: Kripke Semantics",
       "authors": "Alexander Chagrov, Michael Zakharyaschev",
       "year": 1997,
-      "section": "Part II: Kripke Semantics \u2014 Canonical Models, Filtration, Incompleteness (Ch 5-6)",
+      "section": "Part II: Kripke Semantics — Canonical Models, Filtration, Incompleteness (Ch 5-6)",
       "path": "sources/chagrov_1997/p02_kripke-semantics.md",
       "page_range": "131-191",
       "token_count": 33248,
@@ -529,10 +529,10 @@
     {
       "id": "chagrov_1997_p03",
       "bib_key": "ChagrovZakharyaschev1997",
-      "title": "Modal Logic (CZ) \u2014 Part III: Adequate Semantics",
+      "title": "Modal Logic (CZ) — Part III: Adequate Semantics",
       "authors": "Alexander Chagrov, Michael Zakharyaschev",
       "year": 1997,
-      "section": "Part III: Adequate Semantics \u2014 Algebraic and Relational Semantics, Canonical Formulas (Ch 7-9)",
+      "section": "Part III: Adequate Semantics — Algebraic and Relational Semantics, Canonical Formulas (Ch 7-9)",
       "path": "sources/chagrov_1997/p03_adequate-semantics.md",
       "page_range": "193-336",
       "token_count": 80241,
@@ -551,10 +551,10 @@
     {
       "id": "chagrov_1997_p04",
       "bib_key": "ChagrovZakharyaschev1997",
-      "title": "Modal Logic (CZ) \u2014 Part IV: Properties of Logics",
+      "title": "Modal Logic (CZ) — Part IV: Properties of Logics",
       "authors": "Alexander Chagrov, Michael Zakharyaschev",
       "year": 1997,
-      "section": "Part IV: Properties of Logics \u2014 Kripke Completeness, Finite Approximability, etc. (Ch 10-15)",
+      "section": "Part IV: Properties of Logics — Kripke Completeness, Finite Approximability, etc. (Ch 10-15)",
       "path": "sources/chagrov_1997/p04_properties-of-logics.md",
       "page_range": "337-489",
       "token_count": 85664,
@@ -573,7 +573,7 @@
     {
       "id": "chagrov_1997_p05",
       "bib_key": "ChagrovZakharyaschev1997",
-      "title": "Modal Logic (CZ) \u2014 Part V: Algorithmic Problems",
+      "title": "Modal Logic (CZ) — Part V: Algorithmic Problems",
       "authors": "Alexander Chagrov, Michael Zakharyaschev",
       "year": 1997,
       "section": "Part V: Algorithmic Problems (Ch 16+)",
@@ -592,7 +592,7 @@
     {
       "id": "church_1956_ch00",
       "bib_key": "Church1956",
-      "title": "Introduction to Mathematical Logic \u2014 Front Matter",
+      "title": "Introduction to Mathematical Logic — Front Matter",
       "authors": "Alonzo Church",
       "year": 1956,
       "section": "Front Matter",
@@ -608,7 +608,7 @@
     {
       "id": "church_1956_ch00b",
       "bib_key": "Church1956",
-      "title": "Introduction to Mathematical Logic \u2014 Introduction",
+      "title": "Introduction to Mathematical Logic — Introduction",
       "authors": "Alonzo Church",
       "year": 1956,
       "section": "Introduction (pages 1-68)",
@@ -630,7 +630,7 @@
     {
       "id": "church_1956_ch01",
       "bib_key": "Church1956",
-      "title": "Introduction to Mathematical Logic \u2014 Chapter I: The Propositional Calculus",
+      "title": "Introduction to Mathematical Logic — Chapter I: The Propositional Calculus",
       "authors": "Alonzo Church",
       "year": 1956,
       "section": "Chapter I: The Propositional Calculus (pages 69-118)",
@@ -652,7 +652,7 @@
     {
       "id": "church_1956_ch02",
       "bib_key": "Church1956",
-      "title": "Introduction to Mathematical Logic \u2014 Chapter II: Propositional Calculus (Continued)",
+      "title": "Introduction to Mathematical Logic — Chapter II: Propositional Calculus (Continued)",
       "authors": "Alonzo Church",
       "year": 1956,
       "section": "Chapter II: The Propositional Calculus (Continued, pages 119-179)",
@@ -672,7 +672,7 @@
     {
       "id": "church_1956_ch03",
       "bib_key": "Church1956",
-      "title": "Introduction to Mathematical Logic \u2014 Chapter III: Functional Calculi of First Order",
+      "title": "Introduction to Mathematical Logic — Chapter III: Functional Calculi of First Order",
       "authors": "Alonzo Church",
       "year": 1956,
       "section": "Chapter III: Functional Calculi of First Order (pages 180-225)",
@@ -691,7 +691,7 @@
     {
       "id": "church_1956_ch04",
       "bib_key": "Church1956",
-      "title": "Introduction to Mathematical Logic \u2014 Chapter IV: Pure Functional Calculus of First Order",
+      "title": "Introduction to Mathematical Logic — Chapter IV: Pure Functional Calculus of First Order",
       "authors": "Alonzo Church",
       "year": 1956,
       "section": "Chapter IV: The Pure Functional Calculus of First Order (pages 226-307)",
@@ -709,7 +709,7 @@
     {
       "id": "church_1956_ch05",
       "bib_key": "Church1956",
-      "title": "Introduction to Mathematical Logic \u2014 Chapter V: Functional Calculi of Second Order",
+      "title": "Introduction to Mathematical Logic — Chapter V: Functional Calculi of Second Order",
       "authors": "Alonzo Church",
       "year": 1956,
       "section": "Chapter V: Functional Calculi of Second Order (pages 308+)",
@@ -728,7 +728,7 @@
     {
       "id": "zakharyaschev_2001_sec00",
       "bib_key": null,
-      "title": "Advanced Modal Logic \u2014 Introduction",
+      "title": "Advanced Modal Logic — Introduction",
       "authors": "Michael Zakharyaschev, Frank Wolter, Alexander Chagrov",
       "year": 2001,
       "section": "Section 0: Introduction",
@@ -748,7 +748,7 @@
     {
       "id": "zakharyaschev_2001_sec01",
       "bib_key": null,
-      "title": "Advanced Modal Logic \u2014 Section 1: Unimodal Logics",
+      "title": "Advanced Modal Logic — Section 1: Unimodal Logics",
       "authors": "Michael Zakharyaschev, Frank Wolter, Alexander Chagrov",
       "year": 2001,
       "section": "Section 1: Unimodal Logics",
@@ -770,7 +770,7 @@
     {
       "id": "zakharyaschev_2001_sec02",
       "bib_key": null,
-      "title": "Advanced Modal Logic \u2014 Section 2: Polymodal Logics",
+      "title": "Advanced Modal Logic — Section 2: Polymodal Logics",
       "authors": "Michael Zakharyaschev, Frank Wolter, Alexander Chagrov",
       "year": 2001,
       "section": "Section 2: Polymodal Logics",
@@ -789,7 +789,7 @@
     {
       "id": "zakharyaschev_2001_sec03",
       "bib_key": null,
-      "title": "Advanced Modal Logic \u2014 Section 3: Superintuitionistic Logics",
+      "title": "Advanced Modal Logic — Section 3: Superintuitionistic Logics",
       "authors": "Michael Zakharyaschev, Frank Wolter, Alexander Chagrov",
       "year": 2001,
       "section": "Section 3: Superintuitionistic Logics",
@@ -880,7 +880,7 @@
     {
       "id": "gabbay_1994_ch10",
       "bib_key": "GHR94",
-      "title": "Temporal Logic: Mathematical Foundations \u2014 Chapter 10: Temporal Logic over the Integers",
+      "title": "Temporal Logic: Mathematical Foundations — Chapter 10: Temporal Logic over the Integers",
       "authors": "Dov Gabbay, Ian Hodkinson, Mark Reynolds",
       "year": 1994,
       "section": "Chapter 10: Temporal Logic over the Integers (pp. 562-640)",
@@ -899,7 +899,7 @@
         "BX system",
         "canonical model"
       ],
-      "summary": "Chapter 10 of GHR94: Separation Theorem for temporal logic over integers (Theorem 10.2.9) and completeness proof for the Until-Since tense logic over \u2124; basis for CSLib's bimodal separation proof."
+      "summary": "Chapter 10 of GHR94: Separation Theorem for temporal logic over integers (Theorem 10.2.9) and completeness proof for the Until-Since tense logic over ℤ; basis for CSLib's bimodal separation proof."
     },
     {
       "id": "reynolds_1992",
@@ -924,6 +924,326 @@
         "integer time"
       ],
       "summary": "Sound and complete axiom system for first-order temporal logic with Until and Since over linear orders; the canonical MCS construction methodology parallels CSLib's chronicle-based completeness proof."
+    },
+    {
+      "id": "troelstra_schwichtenberg_2000_section01_front-matter",
+      "bib_key": null,
+      "title": "Basic Proof Theory",
+      "authors": "Anne Sjerp Troelstra, Helmut Schwichtenberg",
+      "year": 2000,
+      "section": "Front matter: preface, table of contents, notation",
+      "path": "sources/troelstra_schwichtenberg_2000/section01_front-matter.md",
+      "page_range": null,
+      "token_count": 4375,
+      "keywords": [
+        "proof-theory",
+        "textbook",
+        "front-matter",
+        "notation"
+      ],
+      "summary": "Front matter: preface, table of contents, notation",
+      "doc_type": "section",
+      "source_format": "pdf",
+      "parent_doc": "troelstra_schwichtenberg_2000"
+    },
+    {
+      "id": "troelstra_schwichtenberg_2000_section02_ch1-introduction",
+      "bib_key": null,
+      "title": "Basic Proof Theory",
+      "authors": "Anne Sjerp Troelstra, Helmut Schwichtenberg",
+      "year": 2000,
+      "section": "Ch.1 Introduction: logical systems, formal languages, propositional logic",
+      "path": "sources/troelstra_schwichtenberg_2000/section02_ch1-introduction.md",
+      "page_range": null,
+      "token_count": 19987,
+      "keywords": [
+        "introduction",
+        "logical-systems",
+        "propositional-logic",
+        "formal-language"
+      ],
+      "summary": "Ch.1 Introduction: logical systems, formal languages, propositional logic",
+      "doc_type": "section",
+      "source_format": "pdf",
+      "parent_doc": "troelstra_schwichtenberg_2000"
+    },
+    {
+      "id": "troelstra_schwichtenberg_2000_section03_ch2-n-h-systems",
+      "bib_key": null,
+      "title": "Basic Proof Theory",
+      "authors": "Anne Sjerp Troelstra, Helmut Schwichtenberg",
+      "year": 2000,
+      "section": "Ch.2 N-systems (natural deduction) and H-systems (Hilbert): equivalence, deduction theorem",
+      "path": "sources/troelstra_schwichtenberg_2000/section03_ch2-n-h-systems.md",
+      "page_range": null,
+      "token_count": 14660,
+      "keywords": [
+        "natural-deduction",
+        "hilbert-system",
+        "deduction-theorem",
+        "N-system",
+        "H-system",
+        "equivalence"
+      ],
+      "summary": "Ch.2 N-systems (natural deduction) and H-systems (Hilbert): equivalence, deduction theorem",
+      "doc_type": "section",
+      "source_format": "pdf",
+      "parent_doc": "troelstra_schwichtenberg_2000"
+    },
+    {
+      "id": "troelstra_schwichtenberg_2000_section04_ch3-gentzen-systems",
+      "bib_key": null,
+      "title": "Basic Proof Theory",
+      "authors": "Anne Sjerp Troelstra, Helmut Schwichtenberg",
+      "year": 2000,
+      "section": "Ch.3 Gentzen systems: sequent calculus LK/LJ, structural rules, G3-style systems",
+      "path": "sources/troelstra_schwichtenberg_2000/section04_ch3-gentzen-systems.md",
+      "page_range": null,
+      "token_count": 19390,
+      "keywords": [
+        "sequent-calculus",
+        "gentzen",
+        "LK",
+        "LJ",
+        "structural-rules",
+        "G3",
+        "inference-rules"
+      ],
+      "summary": "Ch.3 Gentzen systems: sequent calculus LK/LJ, structural rules, G3-style systems",
+      "doc_type": "section",
+      "source_format": "pdf",
+      "parent_doc": "troelstra_schwichtenberg_2000"
+    },
+    {
+      "id": "troelstra_schwichtenberg_2000_section05_ch4-cut-elimination",
+      "bib_key": null,
+      "title": "Basic Proof Theory",
+      "authors": "Anne Sjerp Troelstra, Helmut Schwichtenberg",
+      "year": 2000,
+      "section": "Ch.4 Cut elimination with applications: Hauptsatz, subformula property, Herbrand theorem, interpolation",
+      "path": "sources/troelstra_schwichtenberg_2000/section05_ch4-cut-elimination.md",
+      "page_range": null,
+      "token_count": 31086,
+      "keywords": [
+        "cut-elimination",
+        "hauptsatz",
+        "subformula-property",
+        "herbrand",
+        "interpolation",
+        "admissibility",
+        "termination"
+      ],
+      "summary": "Ch.4 Cut elimination with applications: Hauptsatz, subformula property, Herbrand theorem, interpolation",
+      "doc_type": "section",
+      "source_format": "pdf",
+      "parent_doc": "troelstra_schwichtenberg_2000"
+    },
+    {
+      "id": "troelstra_schwichtenberg_2000_section06_ch5-bounds-permutations",
+      "bib_key": null,
+      "title": "Basic Proof Theory",
+      "authors": "Anne Sjerp Troelstra, Helmut Schwichtenberg",
+      "year": 2000,
+      "section": "Ch.5 Bounds and permutations: proof complexity bounds, permutation of inferences",
+      "path": "sources/troelstra_schwichtenberg_2000/section06_ch5-bounds-permutations.md",
+      "page_range": null,
+      "token_count": 17833,
+      "keywords": [
+        "proof-complexity",
+        "bounds",
+        "permutations",
+        "proof-length",
+        "speed-up"
+      ],
+      "summary": "Ch.5 Bounds and permutations: proof complexity bounds, permutation of inferences",
+      "doc_type": "section",
+      "source_format": "pdf",
+      "parent_doc": "troelstra_schwichtenberg_2000"
+    },
+    {
+      "id": "troelstra_schwichtenberg_2000_section07_ch6-11-advanced-topics",
+      "bib_key": null,
+      "title": "Basic Proof Theory",
+      "authors": "Anne Sjerp Troelstra, Helmut Schwichtenberg",
+      "year": 2000,
+      "section": "Ch.6-11: normalization, resolution, categorical logic, modal/linear logic, second-order logic",
+      "path": "sources/troelstra_schwichtenberg_2000/section07_ch6-11-advanced-topics.md",
+      "page_range": null,
+      "token_count": 136607,
+      "keywords": [
+        "normalization",
+        "resolution",
+        "categorical-logic",
+        "modal-logic",
+        "linear-logic",
+        "second-order"
+      ],
+      "summary": "Ch.6-11: normalization, resolution, categorical logic, modal/linear logic, second-order logic",
+      "doc_type": "section",
+      "source_format": "pdf",
+      "parent_doc": "troelstra_schwichtenberg_2000"
+    },
+    {
+      "id": "negri_von_plato_2001_section01_front-matter",
+      "bib_key": null,
+      "title": "Structural Proof Theory",
+      "authors": "Sara Negri, Jan von Plato",
+      "year": 2001,
+      "section": "Front matter: preface, table of contents, overview",
+      "path": "sources/negri_von_plato_2001/section01_front-matter.md",
+      "page_range": null,
+      "token_count": 7884,
+      "keywords": [
+        "proof-theory",
+        "structural",
+        "textbook",
+        "front-matter"
+      ],
+      "summary": "Front matter: preface, table of contents, overview",
+      "doc_type": "section",
+      "source_format": "pdf",
+      "parent_doc": "negri_von_plato_2001"
+    },
+    {
+      "id": "negri_von_plato_2001_section02_ch1-general-introduction",
+      "bib_key": null,
+      "title": "Structural Proof Theory",
+      "authors": "Sara Negri, Jan von Plato",
+      "year": 2001,
+      "section": "Ch.1 General introduction: logical systems, natural deduction, from ND to sequent calculus",
+      "path": "sources/negri_von_plato_2001/section02_ch1-general-introduction.md",
+      "page_range": null,
+      "token_count": 15722,
+      "keywords": [
+        "logical-systems",
+        "natural-deduction",
+        "sequent-calculus",
+        "introduction",
+        "proof-structure"
+      ],
+      "summary": "Ch.1 General introduction: logical systems, natural deduction, from ND to sequent calculus",
+      "doc_type": "section",
+      "source_format": "pdf",
+      "parent_doc": "negri_von_plato_2001"
+    },
+    {
+      "id": "negri_von_plato_2001_section03_ch2-intuitionistic-cut-elimination",
+      "bib_key": null,
+      "title": "Structural Proof Theory",
+      "authors": "Sara Negri, Jan von Plato",
+      "year": 2001,
+      "section": "Ch.2 Intuitionistic sequent calculus G3ip: cut elimination, admissibility of contraction and cut",
+      "path": "sources/negri_von_plato_2001/section03_ch2-intuitionistic-cut-elimination.md",
+      "page_range": null,
+      "token_count": 13463,
+      "keywords": [
+        "intuitionistic",
+        "G3ip",
+        "cut-elimination",
+        "contraction",
+        "admissibility",
+        "constructive",
+        "LJ",
+        "sequent-calculus"
+      ],
+      "summary": "Ch.2 Intuitionistic sequent calculus G3ip: cut elimination, admissibility of contraction and cut",
+      "doc_type": "section",
+      "source_format": "pdf",
+      "parent_doc": "negri_von_plato_2001"
+    },
+    {
+      "id": "negri_von_plato_2001_section04_ch3-classical-sequent-calculus",
+      "bib_key": null,
+      "title": "Structural Proof Theory",
+      "authors": "Sara Negri, Jan von Plato",
+      "year": 2001,
+      "section": "Ch.3 Classical sequent calculus G3cp: invertible rules, admissibility, completeness",
+      "path": "sources/negri_von_plato_2001/section04_ch3-classical-sequent-calculus.md",
+      "page_range": null,
+      "token_count": 7432,
+      "keywords": [
+        "classical",
+        "G3cp",
+        "invertible",
+        "structural-rules",
+        "admissibility",
+        "completeness",
+        "LK",
+        "sequent-calculus"
+      ],
+      "summary": "Ch.3 Classical sequent calculus G3cp: invertible rules, admissibility, completeness",
+      "doc_type": "section",
+      "source_format": "pdf",
+      "parent_doc": "negri_von_plato_2001"
+    },
+    {
+      "id": "negri_von_plato_2001_section05_ch4-quantifier-rules",
+      "bib_key": null,
+      "title": "Structural Proof Theory",
+      "authors": "Sara Negri, Jan von Plato",
+      "year": 2001,
+      "section": "Ch.4 Quantifier rules in sequent calculus: predicate logic cut elimination and completeness",
+      "path": "sources/negri_von_plato_2001/section05_ch4-quantifier-rules.md",
+      "page_range": null,
+      "token_count": 14730,
+      "keywords": [
+        "quantifiers",
+        "predicate-logic",
+        "cut-elimination",
+        "completeness",
+        "first-order"
+      ],
+      "summary": "Ch.4 Quantifier rules in sequent calculus: predicate logic cut elimination and completeness",
+      "doc_type": "section",
+      "source_format": "pdf",
+      "parent_doc": "negri_von_plato_2001"
+    },
+    {
+      "id": "negri_von_plato_2001_section06_ch5-variant-sequent-calculi",
+      "bib_key": null,
+      "title": "Structural Proof Theory",
+      "authors": "Sara Negri, Jan von Plato",
+      "year": 2001,
+      "section": "Ch.5 Variant sequent calculi: independent contexts, multisuccedent, single-succedent, terminating calculi",
+      "path": "sources/negri_von_plato_2001/section06_ch5-variant-sequent-calculi.md",
+      "page_range": null,
+      "token_count": 21919,
+      "keywords": [
+        "variant-calculi",
+        "independent-contexts",
+        "multisuccedent",
+        "single-succedent",
+        "terminating",
+        "G3i",
+        "sequent-calculus"
+      ],
+      "summary": "Ch.5 Variant sequent calculi: independent contexts, multisuccedent, single-succedent, terminating calculi",
+      "doc_type": "section",
+      "source_format": "pdf",
+      "parent_doc": "negri_von_plato_2001"
+    },
+    {
+      "id": "negri_von_plato_2001_section07_ch6-8-extensions-translations",
+      "bib_key": null,
+      "title": "Structural Proof Theory",
+      "authors": "Sara Negri, Jan von Plato",
+      "year": 2001,
+      "section": "Ch.6-8: Extensions by axioms, intermediate logics, ND-SC translations, normal derivations",
+      "path": "sources/negri_von_plato_2001/section07_ch6-8-extensions-translations.md",
+      "page_range": null,
+      "token_count": 75219,
+      "keywords": [
+        "extensions",
+        "axioms",
+        "intermediate-logics",
+        "translations",
+        "normal-derivations",
+        "ND-SC-equivalence"
+      ],
+      "summary": "Ch.6-8: Extensions by axioms, intermediate logics, ND-SC translations, normal derivations",
+      "doc_type": "section",
+      "source_format": "pdf",
+      "parent_doc": "negri_von_plato_2001"
     }
   ]
 }

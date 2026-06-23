@@ -1,14 +1,26 @@
 {
-  "status": "needs_postflight",
+  "status": "planned",
   "artifacts": [
     {
-      "path": "specs/269_hilbert_search_tactic/reports/03_teammate-a-findings.md",
-      "type": "research",
-      "summary": "Teammate A: Lean 4 tactic implementation patterns for hilbert_search"
+      "type": "plan",
+      "path": "specs/269_hilbert_search_tactic/plans/04_hilbert-search-plan-v2.md",
+      "summary": "Revised plan (v2) replacing term-mode two-layer architecture with MetaM-only apply-based proof search using observing? backtracking and four-priority rule stratification"
     }
   ],
+  "next_steps": "Run /implement 269 to execute the revised plan",
   "metadata": {
-    "session_id": "sess_1750656000_e5f6g7",
-    "agent_type": "cslib-research-agent"
+    "session_id": "sess_1750657200_h8i9j0",
+    "agent_type": "reviser-agent",
+    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
+    "phase_count": 4,
+    "estimated_hours": 8,
+    "plan_version": 2,
+    "reports_integrated": [
+      "03_team-research.md",
+      "03_teammate-a-findings.md",
+      "03_teammate-b-findings.md",
+      "03_teammate-c-findings.md",
+      "03_teammate-d-findings.md"
+    ]
   }
 }

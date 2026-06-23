@@ -161,7 +161,7 @@ next_project_number: 286
   - [269_hilbert_search_tactic/reports/03_teammate-a-findings.md]
   - [269_hilbert_search_tactic/reports/03_team-research.md]
   - [269_hilbert_search_tactic/reports/03_team-research.md]
-- **Plan**: [269_hilbert_search_tactic/plans/02_hilbert-search-plan.md]
+- **Plan**: [269_hilbert_search_tactic/plans/04_hilbert-search-plan-v2.md]
 
 **Description**: Build generic bounded proof-search tactic for InferenceSystem. Create a bounded DFS proof-search tactic (e.g., hilbert_search) that works generically over the InferenceSystem typeclass. Inspired by BimodalLogic modal_search (~700 lines) but adapted to cslib polymorphic architecture. Search strategies: axiom matching, assumption lookup, modus ponens decomposition, necessitation + K rules, temporal rules. Must handle the InferenceSystem S α typeclass generically (not hardcoded to a specific DerivationTree). Configurable search depth. Should work across Propositional, Modal, Temporal, and Bimodal systems. Depends on task 268 (normalization tags help the tactic work on clean goals). Needs Zulip discussion before PR since this is novel cross-cutting infrastructure for cslib. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake
 

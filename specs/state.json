@@ -160,17 +160,12 @@
       "last_updated": "2026-06-23T10:53:05Z",
       "session_id": "sess_1750656000_e5f6g7",
       "researched": "2026-06-23T11:15:00Z",
-      "next_artifact_number": 4,
+      "next_artifact_number": 5,
       "artifacts": [
         {
           "path": "specs/269_hilbert_search_tactic/reports/01_team-research.md",
           "type": "research",
           "summary": "Team research with 4 teammates (4 completed)"
-        },
-        {
-          "path": "specs/269_hilbert_search_tactic/plans/02_hilbert-search-plan.md",
-          "type": "plan",
-          "summary": "6-phase plan: term-mode search core, Zulip discussion, modal extension, TacticM wrapper, tests, CI verification"
         },
         {
           "path": "specs/269_hilbert_search_tactic/reports/03_teammate-a-findings.md",
@@ -186,6 +181,11 @@
           "path": "specs/269_hilbert_search_tactic/reports/03_team-research.md",
           "type": "research",
           "summary": "Round 2 team research: tactic design deep dive (4 teammates, replaces Zulip discussion)"
+        },
+        {
+          "path": "specs/269_hilbert_search_tactic/plans/04_hilbert-search-plan-v2.md",
+          "type": "plan",
+          "summary": "Revised plan v2: MetaM-only architecture, 4 phases, 8 hours"
         }
       ]
     },

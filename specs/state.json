@@ -635,12 +635,12 @@
     {
       "project_number": 302,
       "project_name": "fragment_syntactic_predicates",
-      "status": "completed",
+      "status": "implemented",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Define syntactic fragment predicates on Proposition analogous to the existing IsBotFree: (1) IsOrFree — no disjunction, (2) IsOrBotFree — no disjunction or falsum, (3) IsImpTopOnly — only implication and atoms (no conjunction, disjunction, or falsum). Prove AlgEvaluate independence lemmas for each: or-free evaluation is independent of the join operation, imp-top-only evaluation is independent of join, meet, and bot_val. These predicates and lemmas form the syntactic foundation for all fragment conservative extension results. Also prove closure properties (conjunction/substitution preservation) needed by downstream proof system tasks. File: Cslib/Logics/Propositional/Semantics/Algebra/FragmentPredicates.lean. Extends the pattern established by IsBotFree in Conservative.lean.",
       "created": "2026-06-23T22:00:00Z",
-      "last_updated": "2026-06-23T18:56:31Z",
+      "last_updated": "2026-06-23T23:50:00Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
@@ -660,12 +660,12 @@
     {
       "project_number": 303,
       "project_name": "brouwerian_semilattice_typeclass",
-      "status": "completed",
+      "status": "implemented",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Define the BrouwerianSemilattice typeclass: SemilatticeInf + OrderTop + HImp with the adjunction a ≤ b ⇨ c ↔ a ⊓ b ≤ c. This is the algebraic semantics for IPL⟨∧,→,⊤⟩ — the conjunction-implication-verum fragment of intuitionistic logic. Mathlib has no such class; this fills the gap between SemilatticeInf and GeneralizedHeytingAlgebra (which additionally requires SemilatticeSup). Provide the forgetful instance from GeneralizedHeytingAlgebra. Define BrouwerianEvaluate mapping or-bot-free Propositions to elements of a BrouwerianSemilattice using only ⊓ and ⇨ (no ⊔ or ⊥). Prove basic algebraic identities (e.g., a ⇨ a = ⊤, monotonicity of ⇨ in the second argument). Reference: Rasiowa (1974), Köhler (1981). File: Cslib/Foundations/Order/BrouwerianSemilattice.lean.",
       "created": "2026-06-23T22:00:00Z",
-      "last_updated": "2026-06-23T19:00:36Z",
+      "last_updated": "2026-06-23T23:50:00Z",
       "next_artifact_number": 2,
       "artifacts": [
         {

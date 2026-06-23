@@ -800,28 +800,28 @@
     {
       "project_number": 308,
       "project_name": "ipl_conservative_over_conj_imp",
-      "status": "completed",
+      "status": "implemented",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Prove the conservative extension theorem: IPL is conservative over IPL⟨∧,→,⊤⟩ for or-bot-free formulas. Statement: if Derivable IntPropAxiom φ and φ.IsOrBotFree = true, then Derivable ConjImpAxiom φ. Proof route: (1) IPL.hilbert_alg_complete.mp converts to HA-validity, (2) for any BrouwerianSemilattice B and valuation v, instantiate HA-validity at the free join completion of B, (3) the embedding lemma from FreeJoinCompletion.lean rewrites back to BrouwerianEvaluate v φ = ⊤ in B, (4) Brouwerian completeness converts back to Derivable ConjImpAxiom φ. Derive the ND corollary via algebraic bridges. This shows that disjunction and falsum are genuinely independent extensions — no theorem in the ∧-→-⊤ language gains a new proof by adding ∨ and ⊥. File: Cslib/Logics/Propositional/Semantics/Algebra/ConjImpConservative.lean.",
       "created": "2026-06-23T22:00:00Z",
-      "last_updated": "2026-06-23T21:22:18Z",
+      "last_updated": "2026-06-24T03:30:00Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
           "path": "specs/308_ipl_conservative_over_conj_imp/reports/01_conservative-extension-research.md",
           "type": "report",
-          "summary": "Conservative extension proof chain: ~70-80 lines, all deps verified"
-        },
-        {
-          "path": "specs/308_ipl_conservative_over_conj_imp/summaries/01_conservative-extension-summary.md",
-          "type": "summary",
-          "summary": "Implementation summary: 4 theorems, build passes, lint clean"
+          "summary": "Conservative extension proof chain research"
         },
         {
           "path": "specs/308_ipl_conservative_over_conj_imp/plans/01_conservative-extension-plan.md",
           "type": "plan",
-          "summary": "Single-phase plan: create ConjImpConservative.lean with 4 theorems + liftDerivationTree combinator"
+          "summary": "Single-phase plan for conservative extension theorem"
+        },
+        {
+          "path": "specs/308_ipl_conservative_over_conj_imp/summaries/01_conservative-extension-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary with 4 theorems"
         }
       ],
       "dependencies": [

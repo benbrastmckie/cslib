@@ -28,15 +28,15 @@ next_project_number: 286
 ### Foundations
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
-269 [RESEARCHED] — Build generic bounded proof-search tactic for InferenceSystem. Cr
+269 [PLANNED] — Build generic bounded proof-search tactic for InferenceSystem. Cr
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
-  └─ 269 [RESEARCHED] — Build generic bounded proof-search tactic for InferenceSystem. Cr (see above)
+  └─ 269 [PLANNED] — Build generic bounded proof-search tactic for InferenceSystem. Cr (see above)
 
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 266 [IMPLEMENTING] — Research improvements to Propositional/ and Foundations/Logic/ in
-  └─ 280 [NOT STARTED] — Research the current state of propositional proof systems in CSLi
+  └─ 280 [RESEARCHING] — Research the current state of propositional proof systems in CSLi
     └─ 279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
 
 ### Temporal Logic
@@ -107,7 +107,7 @@ next_project_number: 286
 ---
 
 ### 280. Proof system triad gap analysis
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: formal
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 266
@@ -149,13 +149,14 @@ next_project_number: 286
 ---
 
 ### 269. Hilbert search tactic
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: Task 268, Task 278
 - **Research**:
   - [269_hilbert_search_tactic/reports/01_team-research.md]
   - [269_hilbert_search_tactic/reports/03_teammate-a-findings.md]
+  - [269_hilbert_search_tactic/reports/03_team-research.md]
   - [269_hilbert_search_tactic/reports/03_team-research.md]
 - **Plan**: [269_hilbert_search_tactic/plans/02_hilbert-search-plan.md]
 

@@ -43,7 +43,7 @@ next_project_number: 320
   └─ 315 [PLANNED] — Implement the intuitionistic sequent calculus LJ for propositiona
     └─ 291 [NOT STARTED] — After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a un
     └─ 292 [NOT STARTED] — After task 279 delivers LJ with cut elimination, formalize the co
-316 [IMPLEMENTING] — Fill the 6 sorry instances in propositional tableau soundness pro
+316 [RESEARCHED] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [NOT STARTED] — Fill the 8 sorry instances in propositional tableau completeness 
     └─ 319 [NOT STARTED] — Build dedicated Soundness and Completeness modules for the minima
 
@@ -103,7 +103,7 @@ next_project_number: 320
 ---
 
 ### 316. Propositional tableau soundness
-- **Status**: [IMPLEMENTING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

@@ -91,6 +91,14 @@ public import Cslib.Foundations.Logic.Metalogic.MCSProperties
 public import Cslib.Foundations.Logic.Metalogic.SetDeduction
 public import Cslib.Foundations.Logic.ProofSystem
 public import Cslib.Foundations.Logic.PropositionalTableau
+public import Cslib.Foundations.Logic.Tableau
+public import Cslib.Foundations.Logic.Tableau.Branch
+public import Cslib.Foundations.Logic.Tableau.Closure
+public import Cslib.Foundations.Logic.Tableau.ClosureCondition
+public import Cslib.Foundations.Logic.Tableau.PropositionalRules
+public import Cslib.Foundations.Logic.Tableau.RuleResult
+public import Cslib.Foundations.Logic.Tableau.Sign
+public import Cslib.Foundations.Logic.Tableau.SignedFormula
 public import Cslib.Foundations.Logic.Theorems
 public import Cslib.Foundations.Logic.Theorems.BigConj
 public import Cslib.Foundations.Logic.Theorems.Combinators
@@ -100,6 +108,7 @@ public import Cslib.Foundations.Logic.Theorems.Propositional.Connectives
 public import Cslib.Foundations.Logic.Theorems.Propositional.Core
 public import Cslib.Foundations.Logic.Theorems.Temporal.FrameConditions
 public import Cslib.Foundations.Logic.Theorems.Temporal.TemporalDerived
+public import Cslib.Foundations.Order.BrouwerianSemilattice
 public import Cslib.Foundations.Relation.Attr
 public import Cslib.Foundations.Relation.Confluence
 public import Cslib.Foundations.Relation.Defs
@@ -408,6 +417,7 @@ public import Cslib.Logics.Propositional.Semantics.Algebra
 public import Cslib.Logics.Propositional.Semantics.Algebra.Bridge
 public import Cslib.Logics.Propositional.Semantics.Algebra.Completeness
 public import Cslib.Logics.Propositional.Semantics.Algebra.Conservative
+public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentPredicates
 public import Cslib.Logics.Propositional.Semantics.Algebra.Glivenko
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertConservativeGlivenko

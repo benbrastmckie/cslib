@@ -251,7 +251,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 5: Module Root and Build Integration [IN PROGRESS]
+### Phase 5: Module Root and Build Integration [COMPLETED]
 
 **Goal**: Wire the new module into the CSLib build system. Create the module root import file, update `Cslib.lean` barrel import, add deprecation notice to `PropositionalTableau.lean`, and run the full CI verification pipeline.
 

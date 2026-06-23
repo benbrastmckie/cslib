@@ -53,7 +53,7 @@ structure SignedFormula (F : Type*) (L : Type*) where
   formula : F
   /-- The label (world index, prefix, etc.) associated with this formula. -/
   label : L
-  deriving DecidableEq, BEq, Hashable, Repr
+  deriving DecidableEq, BEq, Hashable
 
 namespace SignedFormula
 

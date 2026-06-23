@@ -1,0 +1,74 @@
+{
+  "status": "in_progress",
+  "started_at": "2026-06-23T00:00:00Z",
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Defs.lean",
+      "type": "lean_file",
+      "summary": "Shared decomposers, Hashable/IsAtomic instances, complexity measure"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Classical/Expansion.lean",
+      "type": "lean_file",
+      "summary": "Classical tableau expansion loop (fuel-based, sorry-free)"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Classical/Soundness.lean",
+      "type": "lean_file",
+      "summary": "Classical soundness statement (expansion sorry, architecture complete)"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean",
+      "type": "lean_file",
+      "summary": "Classical completeness statement (proof sorry, architecture complete)"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Classical/DecisionProcedure.lean",
+      "type": "lean_file",
+      "summary": "Decidable Tautology and Derivable PropositionalAxiom via tableau"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Rules.lean",
+      "type": "lean_file",
+      "summary": "World-creating F(imp) rule, persistent T(imp) rule, persistence propagation"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+      "type": "lean_file",
+      "summary": "Intuitionistic expansion loop with world creation and persistence fixpoint"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
+      "type": "lean_file",
+      "summary": "Intuitionistic Kripke soundness statement (proof sorry, architecture complete)"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+      "type": "lean_file",
+      "summary": "Intuitionistic completeness via truth lemma (proof sorry, architecture complete)"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/DecisionProcedure.lean",
+      "type": "lean_file",
+      "summary": "Decidable IValid and Derivable IntPropAxiom (NEW to CSLib)"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Minimal/DecisionProcedure.lean",
+      "type": "lean_file",
+      "summary": "Decidable MValid and Derivable MinPropAxiom (NEW to CSLib)"
+    }
+  ],
+  "partial_progress": {
+    "stage": "phase_6",
+    "details": "Running CI pipeline",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 5
+  },
+  "metadata": {
+    "session_id": "sess_1782238418_d0d7dd",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+  }
+}

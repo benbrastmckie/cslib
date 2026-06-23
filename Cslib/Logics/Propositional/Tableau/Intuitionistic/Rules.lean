@@ -1,0 +1,226 @@
+/-
+Copyright (c) 2026 Benjamin Brast-McKie. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Benjamin Brast-McKie
+-/
+
+module
+
+import Cslib.Init
+public import Cslib.Logics.Propositional.Tableau.Defs
+
+/-! # Intuitionistic Propositional Tableau Rules
+
+This module defines the world-creating and world-persistent rules specific to the
+intuitionistic propositional tableau, where `L = Nat` (labels index Kripke worlds).
+
+## Intuitionistic Rules
+
+The standard classical propositional rules apply at each world for `and`, `or`,
+and the `T`-signed `bot`. The key differences from classical tableau are:
+
+1. **F(φ → ψ) at world w**: World-creating rule. Creates a fresh world `w'` with:
+   - `T(φ)` at `w'` (the antecedent is forced at the new world)
+   - `F(ψ)` at `w'` (the consequent fails at the new world)
+   - All `T(α)` formulas from world `w` propagated to `w'` (by persistence)
+
+2. **T(φ → ψ) at world w**: Persistent rule. For each world `w'` accessible from `w`
+   with `T(φ)` at `w'`, add `T(ψ)` at `w'`. This rule must be re-applied whenever
+   new worlds are created.
+
+3. **Closure**: Only `T(⊥)` at any label closes a branch (not complementary pairs).
+
+## World Management
+
+The world counter starts at 0 and increases by 1 for each new world created.
+Accessibility is modeled as: world `w'` is accessible from world `w` if `w < w'`
+(i.e., `w'` was created after `w`). Reflexivity must be added explicitly.
+
+## References
+
+* [M. Fitting, *Proof Methods for Modal and Intuitionistic Logics*][Fitting1983], Chapter 4
+* [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Section 2.2
+-/
+
+@[expose] public section
+
+namespace Cslib.Logic.PL
+
+open Cslib.Logic.Tableau
+
+variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
+
+/-! ## World-Labeled Signed Formulas -/
+
+/-- A signed formula labeled with a natural number (Kripke world index). -/
+abbrev ISF (Atom : Type*) := SignedFormula (Proposition Atom) Nat
+
+/-- A labeled branch for intuitionistic/minimal tableau. -/
+abbrev IBranch (Atom : Type*) := List (ISF Atom)
+
+/-! ## Intuitionistic Tableau State -/
+
+/-- The state of the intuitionistic tableau expansion loop.
+
+Tracks:
+- `branch`: The current list of signed formulas with world labels.
+- `nextWorld`: The next fresh world index to use when creating new worlds.
+- `expanded`: The set of signed formulas already processed (to avoid re-expansion).
+
+The accessibility relation is implicit: world `w'` is accessible from world `w` iff
+`w ≤ w'` (using the natural ordering, with worlds created in increasing order).
+Reflexivity is enforced by the persistence rule. -/
+structure IntTableauState (Atom : Type*) where
+  /-- The current branch with world-labeled signed formulas. -/
+  branch : IBranch Atom
+  /-- The next fresh world counter (0-indexed). -/
+  nextWorld : Nat
+  /-- The set of already-expanded signed formulas (to avoid re-expansion). -/
+  expanded : List (ISF Atom)
+
+/-! ## Persistence Propagation -/
+
+/-- Collect all T-signed formulas at world `w` on the branch (for persistence propagation). -/
+def posFormulasAt (b : IBranch Atom) (w : Nat) : List (Proposition Atom) :=
+  b.filterMap fun sf =>
+    if sf.sign == .pos && sf.label == w then some sf.formula else none
+
+/-- Propagate all T(α) formulas from world `w` to fresh world `w'`.
+
+By the intuitionistic persistence lemma, if T(α) holds at world `w` and `w ≤ w'`,
+then T(α) must hold at `w'`. We propagate atoms and implications (not disjunctions,
+since intuitionistic disjunction does not persist -- only the split forces persistence
+at each branch). Actually, ALL positive formulas persist in the Kripke model. We
+propagate all of them to ensure correctness.
+
+The propagated formulas are added to the branch with label `w'`. -/
+def propagatePersistence (b : IBranch Atom) (fromWorld toWorld : Nat) : IBranch Atom :=
+  let tFormulas := posFormulasAt b fromWorld
+  tFormulas.map fun φ => ⟨.pos, φ, toWorld⟩
+
+/-! ## World-Creating Rules -/
+
+/-- Apply the F(φ → ψ) world-creating rule at world `w`.
+
+Creates a fresh world `w' = nextWorld` and adds:
+- `T(φ)` at `w'` (antecedent forced at new world)
+- `F(ψ)` at `w'` (consequent fails at new world)
+- Propagation of all T(α) from `w` to `w'` (persistence from `w` to successor `w'`)
+
+Returns the new signed formulas to add to the branch and the next world counter. -/
+def intFImpRule (φ ψ : Proposition Atom) (w nextWorld : Nat) (b : IBranch Atom) :
+    List (ISF Atom) × Nat :=
+  let w' := nextWorld
+  let newForms : List (ISF Atom) := [⟨.pos, φ, w'⟩, ⟨.neg, ψ, w'⟩]
+  let persistent := propagatePersistence b w w'
+  (newForms ++ persistent, nextWorld + 1)
+
+/-! ## Persistent T(φ → ψ) Handling -/
+
+/-- Apply T(φ → ψ) at world `w` for all accessible worlds `w' ≥ w`.
+
+For each world label `w'` on the branch with `w' ≥ w` and `T(φ)` at `w'`,
+if `T(ψ)` is not yet on the branch at `w'`, add `T(ψ)` at `w'`.
+
+This implements the intuitionistic truth condition for implication:
+  `⊩_w (φ → ψ)` iff `∀ w' ≥ w, ⊩_{w'} φ → ⊩_{w'} ψ`
+
+The rule fires at all accessible worlds. -/
+def intTImpRule (φ ψ : Proposition Atom) (w : Nat) (b : IBranch Atom) :
+    List (ISF Atom) :=
+  -- Get all worlds w' ≥ w that appear on the branch
+  let worldsAbove := (b.map (·.label)).filter (· ≥ w) |>.eraseDups
+  worldsAbove.filterMap fun w' =>
+    -- If T(φ) is at w' and T(ψ) is not yet at w', add T(ψ) at w'
+    if b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w') then
+      if b.any (fun sf => sf.sign == .pos && sf.formula == ψ && sf.label == w') then
+        none  -- T(ψ) already present
+      else
+        some ⟨.pos, ψ, w'⟩
+    else
+      none  -- T(φ) not present at w', rule doesn't fire
+
+/-! ## Intuitionistic Rule Application -/
+
+/-- Apply intuitionistic propositional rules to a single signed formula.
+
+For `T`-signed and `F`-signed formulas, applies the appropriate rule:
+- `T(φ ∧ ψ)`: alpha-rule (linear) -- add T(φ) and T(ψ)
+- `F(φ ∧ ψ)`: beta-rule (branching) -- branch to F(φ) or F(ψ)
+- `T(φ ∨ ψ)`: beta-rule (branching) -- branch to T(φ) or T(ψ)
+- `F(φ ∨ ψ)`: alpha-rule (linear) -- add F(φ) and F(ψ)
+- `F(φ → ψ)`: world-creating (linear, increments world counter)
+- `T(φ → ψ)`: persistent rule (handled separately via `intTImpRule`)
+- `F(¬φ)` = `F(φ → ⊥)`: same as `F(φ → ψ)` with ψ = ⊥
+- `T(¬φ)` = `T(φ → ⊥)`: same as `T(φ → ψ)` with ψ = ⊥
+
+For intuitionistic tableau, ALL implications (including negation) use the implication rules.
+We use `propImpOrNegOf?` which treats negation as implication to ⊥. -/
+def intApplyRule (sf : ISF Atom) (nextWorld : Nat) (b : IBranch Atom) :
+    Option (List (ISF Atom) × Nat) :=
+  let l := sf.label
+  match sf.sign, sf.formula with
+  -- T(φ ∧ ψ): add T(φ), T(ψ) at same world
+  | .pos, .and φ ψ =>
+    some ([⟨.pos, φ, l⟩, ⟨.pos, ψ, l⟩], nextWorld)
+  -- F(φ ∧ ψ): branching -- but we handle by picking one branch (linearized)
+  -- Actually the tableau branches; we return the list of options
+  -- For the expansion loop, we need to handle branching separately
+  -- T(φ ∨ ψ): branching
+  -- F(φ ∨ ψ): add F(φ), F(ψ)
+  | .neg, .or φ ψ =>
+    some ([⟨.neg, φ, l⟩, ⟨.neg, ψ, l⟩], nextWorld)
+  -- F(φ → ψ) including F(¬φ) = F(φ → ⊥): world-creating
+  | .neg, .imp φ ψ =>
+    let (newForms, nextWorld') := intFImpRule φ ψ l nextWorld b
+    some (newForms, nextWorld')
+  -- T(φ → ψ) including T(¬φ): persistent, handled by intTImpRule
+  -- F(⊥): never fires (bot is always false in classical/int/min)
+  -- Default: not applicable
+  | _, _ => none
+
+/-! ## Branching Rule Result -/
+
+/-- Result of an intuitionistic expansion step.
+
+- `linearResult newForms nextWorld'`: The rule added formulas linearly (alpha-rule or
+  world-creation).
+- `branchingResult branches nextWorld'`: The rule branched (beta-rule for ∧F or ∨T).
+- `notApplicable`: No rule fired. -/
+inductive IntRuleResult (Atom : Type*) : Type _ where
+  /-- Linear rule: add formulas to current branch. -/
+  | linearResult : List (ISF Atom) → Nat → IntRuleResult Atom
+  /-- Branching rule: split into multiple branches. -/
+  | branchingResult : List (List (ISF Atom)) → Nat → IntRuleResult Atom
+  /-- No rule applies. -/
+  | notApplicable : IntRuleResult Atom
+
+/-- Apply intuitionistic rules to a signed formula, handling both linear and branching cases. -/
+def intApplyRuleFull (sf : ISF Atom) (nextWorld : Nat) (b : IBranch Atom) :
+    IntRuleResult Atom :=
+  let l := sf.label
+  match sf.sign, sf.formula with
+  -- T(φ ∧ ψ): alpha-rule
+  | .pos, .and φ ψ =>
+    .linearResult [⟨.pos, φ, l⟩, ⟨.pos, ψ, l⟩] nextWorld
+  -- F(φ ∧ ψ): beta-rule (branch to F(φ) or F(ψ))
+  | .neg, .and φ ψ =>
+    .branchingResult [[⟨.neg, φ, l⟩], [⟨.neg, ψ, l⟩]] nextWorld
+  -- T(φ ∨ ψ): beta-rule (branch to T(φ) or T(ψ))
+  | .pos, .or φ ψ =>
+    .branchingResult [[⟨.pos, φ, l⟩], [⟨.pos, ψ, l⟩]] nextWorld
+  -- F(φ ∨ ψ): alpha-rule
+  | .neg, .or φ ψ =>
+    .linearResult [⟨.neg, φ, l⟩, ⟨.neg, ψ, l⟩] nextWorld
+  -- F(φ → ψ) and F(¬φ) = F(φ → ⊥): world-creating alpha-rule
+  | .neg, .imp φ ψ =>
+    let (newForms, nextWorld') := intFImpRule φ ψ l nextWorld b
+    .linearResult newForms nextWorld'
+  -- T(φ → ψ) and T(¬φ): handled separately (persistent rule, not a standard step)
+  -- T(⊥): closed by IntuitionisticClosure -- not expanded
+  -- All others: atoms, bot, etc.
+  | _, _ => .notApplicable
+
+end Cslib.Logic.PL
+
+end

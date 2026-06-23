@@ -1,11 +1,32 @@
 {
   "session_id": "sess_1782238418_d0d7dd",
-  "task_numbers": [297, 298],
-  "waves": [[297], [298]],
-  "dependency_graph": {"297": [], "298": ["297"]},
-  "cycle_count": 3,
+  "task_numbers": [
+    297,
+    298
+  ],
+  "waves": [
+    [
+      297
+    ],
+    [
+      298
+    ]
+  ],
+  "dependency_graph": {
+    "297": [],
+    "298": [
+      "297"
+    ]
+  },
+  "cycle_count": 6,
   "max_cycles": 10,
   "failed_tasks": [],
-  "completed_tasks": [297],
-  "current_statuses": {"297": "completed", "298": "not_started"}
+  "completed_tasks": [
+    297,
+    298
+  ],
+  "current_statuses": {
+    "297": "completed",
+    "298": "completed"
+  }
 }

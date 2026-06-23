@@ -430,6 +430,17 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.Soundness
 public import Cslib.Logics.Propositional.Semantics.Bool
 public import Cslib.Logics.Propositional.Semantics.Kripke
 public import Cslib.Logics.Propositional.Semantics.SemanticConsequence
+public import Cslib.Logics.Propositional.Tableau.Classical.Completeness
+public import Cslib.Logics.Propositional.Tableau.Classical.DecisionProcedure
+public import Cslib.Logics.Propositional.Tableau.Classical.Expansion
+public import Cslib.Logics.Propositional.Tableau.Classical.Soundness
+public import Cslib.Logics.Propositional.Tableau.Defs
+public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Completeness
+public import Cslib.Logics.Propositional.Tableau.Intuitionistic.DecisionProcedure
+public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Expansion
+public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Rules
+public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Soundness
+public import Cslib.Logics.Propositional.Tableau.Minimal.DecisionProcedure
 public import Cslib.Logics.Temporal.ConservativeExtension
 public import Cslib.Logics.Temporal.FromPropositional
 public import Cslib.Logics.Temporal.Metalogic

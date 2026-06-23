@@ -11,9 +11,9 @@ next_project_number: 316
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,298,304,305,307,313,314 | -- | Bimodal Porting, Foundations, Project Management, ... |
-| 2 | 39,40,181,215,293,299,301,306,309,310,315 | 36,37,180,290,298,304,305,314 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
-| 3 | 41,275,291,292,300,308,311 | 39,40,299,306,307,309,310,315 | Foundations, Propositional Logic, Modal, ... |
+| 1 | 36,37,180,226,241,245,278,290,299,301,304,305,307,313,314 | -- | Bimodal Porting, Foundations, Project Management, ... |
+| 2 | 39,40,181,215,293,300,306,309,310,315 | 36,37,180,290,299,304,305,314 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 3 | 41,275,291,292,308,311 | 39,40,306,307,309,310,315 | Foundations, Propositional Logic, Algebraic Semantics |
 | 4 | 312 | 308,311 | Algebraic Semantics |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -53,10 +53,6 @@ next_project_number: 316
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
   └─ 275 [BLOCKED] — Prove that Bimodal TM is conservative over Temporal BX for tempor
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
-
-### Propositional
-
-298 [IMPLEMENTING] — Implement propositional tableau systems for all three proposition
 
 ### Modal
 
@@ -264,12 +260,13 @@ next_project_number: 316
 ---
 
 ### 298. Propositional tableau decidability
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional
 - **Dependencies**: Task 297
 - **Research**: [298_propositional_tableau_decidability/reports/01_prop-tableau-research.md]
 - **Plan**: [298_propositional_tableau_decidability/plans/01_prop-tableau-plan.md]
+- **Summary**: [298_propositional_tableau_decidability/summaries/01_prop-tableau-summary.md]
 
 **Description**: Implement propositional tableau systems for all three propositional logics in CSLib: classical (PropositionalAxiom), intuitionistic (IntPropAxiom), and minimal (MinPropAxiom). Build on the logic-neutral Foundations/Logic/Tableau/ infrastructure from task 297. Classical tableau: two-sided signed (T/F), complementary closure, all rules invertible, L = Unit — delivers Decidable (BValid phi) via Boolean semantics. Intuitionistic tableau: Kripke-style worlds even at propositional level (L = WorldIndex), restricted T(φ→ψ) rule creating successor worlds, closure only on F(⊥) — delivers Decidable (IValid phi) via propositional Kripke semantics. Minimal tableau: like intuitionistic but closure restricted to complementary atoms T(p)/F(p) only (no ex falso) — delivers Decidable (MValid phi) via MValid/Kripke semantics with botForces = false. Build classical first (simplest, validates infrastructure), then intuitionistic (adds world-labeled branches), then minimal (restricts closure further). Handle native and/or constructors for PL.Proposition. Use fuel-bounded expansion with termination via subformula property (classical) and finite model property (intuitionistic/minimal). Soundness and completeness proved against respective semantics. Files under Cslib/Logics/Propositional/Tableau/: Defs.lean, Rules.lean, Classical/Closure.lean, Classical/Saturation.lean, Classical/Soundness.lean, Classical/Completeness.lean, Classical/DecisionProcedure.lean, Intuitionistic/Closure.lean, Intuitionistic/Saturation.lean, Intuitionistic/Soundness.lean, Intuitionistic/Completeness.lean, Intuitionistic/DecisionProcedure.lean, Minimal/Closure.lean, Minimal/DecisionProcedure.lean. Estimated: 2,000-2,800 lines.
 

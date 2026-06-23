@@ -402,7 +402,7 @@
     {
       "project_number": 283,
       "project_name": "hilbert_primary_algebraic_completeness",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Restate algebraic completeness as Hilbert-primary using the Hilbert Lindenbaum algebra from task 282. Replace MPL.alg_complete, IPL.alg_complete, and Theory.alg_complete with versions stated for Derivable/SetDerivable (Hilbert) rather than DerivableIn (ND). The algebraic soundness theorems (min_alg_soundness_derivable etc.) are already Hilbert-primary and can be kept. The completeness direction uses the new Hilbert Lindenbaum algebra directly. Derive ND versions as corollaries via the hilbert_iff_nd bridge.",
       "topic": "Propositional Logic",
@@ -410,7 +410,8 @@
         282
       ],
       "created": "2026-06-23T04:00:00Z",
-      "last_updated": "2026-06-23T04:00:00Z"
+      "last_updated": "2026-06-23T05:11:37Z",
+      "session_id": "sess_1782187168_2b1b69_283"
     },
     {
       "project_number": 284,

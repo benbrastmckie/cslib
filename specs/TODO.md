@@ -11,7 +11,7 @@ next_project_number: 294
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,266,279,286,287 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 1 | 36,37,180,226,241,245,252,266,279 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 2 | 39,40,181,215,278,288,289,290,291,292 | 36,37,180,266,279 | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 3 | 41,275,293 | 39,40,290 | Foundations, Propositional Logic |
 
@@ -53,9 +53,6 @@ next_project_number: 294
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ### Uncategorized
-
-286 [NOT STARTED] — Investigate whether the set_option backward.isDefEq.respectTransp
-287 [NOT STARTED] — Convert block comments in Cslib/Logics/Modal/Metalogic/GenericMCS
 
 ## Tasks
 
@@ -120,7 +117,7 @@ next_project_number: 294
 ---
 
 ### 287. Fix generic mcs bridge docstrings
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -129,7 +126,7 @@ next_project_number: 294
 ---
 
 ### 286. Fix omega regular todo workaround
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 

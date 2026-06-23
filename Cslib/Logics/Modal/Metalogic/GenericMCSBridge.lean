@@ -112,7 +112,7 @@ works without any new code, since `Modal.HilbertK` satisfies `MinimalHilbert`:
 The comment in `GenericMCS.lean` notes this directly.
 -/
 
-/- NOTE: This file contains no Lean code (only documentation).
+/-! NOTE: This file contains no Lean code (only documentation).
    The gap analysis above explains why no bridge theorem is proved here.
    The two derivation systems are architecturally distinct:
    - `algebraicDerivationSystem` captures propositional contextual derivability

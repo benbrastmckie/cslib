@@ -11,8 +11,8 @@ next_project_number: 314
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,279,290,298,303,304,305,313 | -- | Bimodal Porting, Foundations, Project Management, ... |
-| 2 | 39,40,181,215,291,292,293,299,301,306,307,309,310 | 36,37,180,279,290,298,303,304,305 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,241,245,278,279,290,298,304,305,307,313 | -- | Bimodal Porting, Foundations, Project Management, ... |
+| 2 | 39,40,181,215,291,292,293,299,301,306,309,310 | 36,37,180,279,290,298,304,305 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
 | 3 | 41,275,300,308,311 | 39,40,299,306,307,309,310 | Foundations, Modal, Algebraic Semantics |
 | 4 | 312 | 308,311 | Algebraic Semantics |
 
@@ -55,7 +55,7 @@ next_project_number: 314
 
 ### Propositional
 
-298 [RESEARCHING] — Implement propositional tableau systems for all three proposition
+298 [PLANNING] — Implement propositional tableau systems for all three proposition
 
 ### Modal
 
@@ -68,21 +68,19 @@ next_project_number: 314
 
 ### Algebraic Semantics
 
-303 [PLANNED] — Define the BrouwerianSemilattice typeclass: SemilatticeInf + Orde
-  └─ 306 [NOT STARTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian 
-    └─ 308 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
-      └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified 
-  └─ 307 [NOT STARTED] — Construct a HeytingAlgebra from any BrouwerianSemilattice via a f
-    └─ 308 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove (see above)
 304 [NOT STARTED] — Define the HilbertAlgebra typeclass: a structure (H, ⇨, ⊤) satisf
   └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb
     └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
-      └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified  (see above)
+      └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified 
   └─ 310 [NOT STARTED] — Formalize the Diego embedding theorem (Diego 1966): every Hilbert
     └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove (see above)
 305 [NOT STARTED] — Define fragment-specific Hilbert axiom predicates for the two sub
-  └─ 306 [NOT STARTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian  (see above)
+  └─ 306 [NOT STARTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian 
+    └─ 308 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
+      └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified  (see above)
   └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb (see above)
+307 [NOT STARTED] — Construct a HeytingAlgebra from any BrouwerianSemilattice via a f
+  └─ 308 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove (see above)
 
 ### Uncategorized
 
@@ -190,12 +188,13 @@ next_project_number: 314
 ---
 
 ### 303. Brouwerian semilattice typeclass
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: None
 - **Research**: [303_brouwerian_semilattice_typeclass/reports/01_brouwerian-semilattice-research.md]
 - **Plan**: [303_brouwerian_semilattice_typeclass/plans/01_brouwerian-semilattice-plan.md]
+- **Summary**: [303_brouwerian_semilattice_typeclass/summaries/01_brouwerian-semilattice-summary.md]
 
 **Description**: Define the BrouwerianSemilattice typeclass: SemilatticeInf + OrderTop + HImp with the adjunction a ≤ b ⇨ c ↔ a ⊓ b ≤ c. This is the algebraic semantics for IPL⟨∧,→,⊤⟩ — the conjunction-implication-verum fragment of intuitionistic logic. Mathlib has no such class; this fills the gap between SemilatticeInf and GeneralizedHeytingAlgebra (which additionally requires SemilatticeSup). Provide the forgetful instance from GeneralizedHeytingAlgebra. Define BrouwerianEvaluate mapping or-bot-free Propositions to elements of a BrouwerianSemilattice using only ⊓ and ⇨ (no ⊔ or ⊥). Prove basic algebraic identities (e.g., a ⇨ a = ⊤, monotonicity of ⇨ in the second argument). Reference: Rasiowa (1974), Köhler (1981). File: Cslib/Foundations/Order/BrouwerianSemilattice.lean.
 
@@ -244,10 +243,11 @@ next_project_number: 314
 ---
 
 ### 298. Propositional tableau decidability
-- **Status**: [RESEARCHING]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Propositional
 - **Dependencies**: Task 297
+- **Research**: [298_propositional_tableau_decidability/reports/01_prop-tableau-research.md]
 
 **Description**: Implement propositional tableau systems for all three propositional logics in CSLib: classical (PropositionalAxiom), intuitionistic (IntPropAxiom), and minimal (MinPropAxiom). Build on the logic-neutral Foundations/Logic/Tableau/ infrastructure from task 297. Classical tableau: two-sided signed (T/F), complementary closure, all rules invertible, L = Unit — delivers Decidable (BValid phi) via Boolean semantics. Intuitionistic tableau: Kripke-style worlds even at propositional level (L = WorldIndex), restricted T(φ→ψ) rule creating successor worlds, closure only on F(⊥) — delivers Decidable (IValid phi) via propositional Kripke semantics. Minimal tableau: like intuitionistic but closure restricted to complementary atoms T(p)/F(p) only (no ex falso) — delivers Decidable (MValid phi) via MValid/Kripke semantics with botForces = false. Build classical first (simplest, validates infrastructure), then intuitionistic (adds world-labeled branches), then minimal (restricts closure further). Handle native and/or constructors for PL.Proposition. Use fuel-bounded expansion with termination via subformula property (classical) and finite model property (intuitionistic/minimal). Soundness and completeness proved against respective semantics. Files under Cslib/Logics/Propositional/Tableau/: Defs.lean, Rules.lean, Classical/Closure.lean, Classical/Saturation.lean, Classical/Soundness.lean, Classical/Completeness.lean, Classical/DecisionProcedure.lean, Intuitionistic/Closure.lean, Intuitionistic/Saturation.lean, Intuitionistic/Soundness.lean, Intuitionistic/Completeness.lean, Intuitionistic/DecisionProcedure.lean, Minimal/Closure.lean, Minimal/DecisionProcedure.lean. Estimated: 2,000-2,800 lines.
 

@@ -121,7 +121,7 @@ theorem himp_top (a : α) : a ⇨ ⊤ = ⊤ := by
 theorem himp_eq_top_iff : a ⇨ b = ⊤ ↔ a ≤ b := by
   constructor
   · intro h
-    have h₁ := (BrouwerianSemilattice.le_himp_iff ⊤ a b).mp (h ▸ le_top)
+    have h₁ := (BrouwerianSemilattice.le_himp_iff ⊤ a b).mp (h.symm ▸ le_rfl)
     simpa using h₁
   · intro h
     apply le_antisymm le_top
@@ -141,8 +141,7 @@ theorem le_himp_iff_left : a ≤ a ⇨ b ↔ a ≤ b := by
 
 /-- Modus ponens: `(a ⇨ b) ⊓ a ≤ b`. -/
 theorem himp_inf_le : (a ⇨ b) ⊓ a ≤ b := by
-  have h := (BrouwerianSemilattice.le_himp_iff (a ⇨ b) a b).mp le_rfl
-  rwa [inf_comm] at h
+  exact (BrouwerianSemilattice.le_himp_iff (a ⇨ b) a b).mp le_rfl
 
 /-- Modus ponens, commutativity variant: `a ⊓ (a ⇨ b) ≤ b`. -/
 theorem inf_himp_le : a ⊓ (a ⇨ b) ≤ b := by
@@ -167,12 +166,24 @@ theorem himp_inf_self : (a ⇨ b) ⊓ a = b ⊓ a := by
 theorem himp_himp (a b c : α) : a ⇨ b ⇨ c = (a ⊓ b) ⇨ c := by
   apply le_antisymm
   · rw [BrouwerianSemilattice.le_himp_iff]
-    have h1 := (BrouwerianSemilattice.le_himp_iff (a ⇨ b ⇨ c) a (b ⇨ c)).mp le_rfl
-    rw [inf_assoc]
-    exact le_trans (inf_le_inf_right b h1) himp_inf_le
-  · rw [BrouwerianSemilattice.le_himp_iff, BrouwerianSemilattice.le_himp_iff]
-    rw [← inf_assoc]
-    exact le_rfl
+    -- Goal: (a ⇨ b ⇨ c) ⊓ (a ⊓ b) ≤ c
+    -- Use: (a ⇨ b ⇨ c) ⊓ a ≤ b ⇨ c, then ((a ⇨ b ⇨ c) ⊓ a) ⊓ b ≤ c
+    have h1 : (a ⇨ b ⇨ c) ⊓ a ≤ b ⇨ c :=
+      (BrouwerianSemilattice.le_himp_iff (a ⇨ b ⇨ c) a (b ⇨ c)).mp le_rfl
+    have h2 : ((a ⇨ b ⇨ c) ⊓ a) ⊓ b ≤ c :=
+      (BrouwerianSemilattice.le_himp_iff _ b c).mp h1
+    calc (a ⇨ b ⇨ c) ⊓ (a ⊓ b)
+        = (a ⇨ b ⇨ c) ⊓ a ⊓ b := by rw [← inf_assoc]
+      _ ≤ c := h2
+  · rw [BrouwerianSemilattice.le_himp_iff]
+    -- Goal: (a ⊓ b ⇨ c) ⊓ a ≤ b ⇨ c
+    rw [BrouwerianSemilattice.le_himp_iff]
+    -- Goal: (a ⊓ b ⇨ c) ⊓ a ⊓ b ≤ c
+    have h3 : (a ⊓ b ⇨ c) ⊓ (a ⊓ b) ≤ c :=
+      (BrouwerianSemilattice.le_himp_iff (a ⊓ b ⇨ c) (a ⊓ b) c).mp le_rfl
+    calc (a ⊓ b ⇨ c) ⊓ a ⊓ b
+        = (a ⊓ b ⇨ c) ⊓ (a ⊓ b) := by rw [inf_assoc]
+      _ ≤ c := h3
 
 /-- Commutativity of currying: `a ⇨ b ⇨ c = b ⇨ a ⇨ c`. -/
 theorem himp_left_comm (a b c : α) : a ⇨ b ⇨ c = b ⇨ a ⇨ c := by
@@ -189,8 +200,8 @@ theorem himp_triangle : (a ⇨ b) ⊓ (b ⇨ c) ≤ a ⇨ c := by
     apply inf_le_inf_right; exact inf_le_left
   have step2 : (a ⇨ b) ⊓ a ≤ b := himp_inf_le
   have step3 : b ≤ b := le_rfl
-  have step4 : (a ⇨ b) ⊓ (b ⇨ c) ⊓ a ≤ b ⇨ c := by
-    apply inf_le_inf_right; exact inf_le_right
+  have step4 : (a ⇨ b) ⊓ (b ⇨ c) ⊓ a ≤ b ⇨ c :=
+    le_trans inf_le_left inf_le_right
   have step5 : b ⊓ (b ⇨ c) ≤ c := inf_himp_le
   calc (a ⇨ b) ⊓ (b ⇨ c) ⊓ a
       ≤ b ⊓ (b ⇨ c) := le_inf (le_trans step1 step2) step4
@@ -211,7 +222,7 @@ theorem himp_le_himp_left (h : a ≤ b) : c ⇨ a ≤ c ⇨ b := by
 /-- `⇨` is antitone in the first argument. -/
 theorem himp_le_himp_right (h : a ≤ b) : b ⇨ c ≤ a ⇨ c := by
   rw [BrouwerianSemilattice.le_himp_iff]
-  exact le_trans (inf_le_inf_right (b ⇨ c) h) himp_inf_le
+  exact le_trans (inf_le_inf_left (b ⇨ c) h) himp_inf_le
 
 /-- `⇨` is monotone in the second argument and antitone in the first.
 

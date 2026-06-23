@@ -1,7 +1,7 @@
 {
   "_schema_version": "1.0.0",
   "_comment": "Review state tracking",
-  "_last_updated": "2026-06-22T18:24:41Z",
+  "_last_updated": "2026-06-23T02:11:35Z",
   "reviews": [
     {
       "review_id": "review-20260608",
@@ -131,12 +131,26 @@
         264,
         265
       ]
+    },
+    {
+      "review_id": "review-20260622",
+      "date": "2026-06-22",
+      "scope": "all",
+      "report_path": "specs/reviews/review-20260622.md",
+      "summary": {
+        "files_reviewed": 452,
+        "critical_issues": 0,
+        "high_issues": 1,
+        "medium_issues": 3,
+        "low_issues": 2
+      },
+      "tasks_created": []
     }
   ],
   "statistics": {
-    "total_reviews": 8,
+    "total_reviews": 9,
     "last_review": "2026-06-22",
-    "total_issues_found": 53,
+    "total_issues_found": 59,
     "total_tasks_created": 8
   }
 }

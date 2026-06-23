@@ -6,7 +6,7 @@ next_project_number: 278
 
 ## Task Order
 
-*Updated 2026-06-22. Generated from state.json dependency graph.*
+*Updated 2026-06-23. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
@@ -51,28 +51,6 @@ next_project_number: 278
 
 ## Tasks
 
-### 277. Fix ci workflow failures
-- **Status**: [COMPLETED]
-- **Task Type**: general
-- **Topic**: Project Management
-- **Dependencies**: None
-- **Research**: [277_fix_ci_workflow_failures/reports/01_team-research.md]
-- **Plan**: [277_fix_ci_workflow_failures/plans/01_implementation-plan.md]
-- **Summary**: [277_fix_ci_workflow_failures/summaries/01_execution-summary.md]
-
-**Description**: Fix recurring CI workflow failures in GitHub Actions (runs 27986662089, 27984755605, 27983889592)
-
----
-
-### 276. Modal cube inter system conservativity
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Dependencies**: None
-
-**Description**: Prove inter-system conservative extension results within the modal cube: stronger systems (e.g., S5, S4, T) are conservative over weaker systems (e.g., K, D) for the shared formula fragment. Requires derivation embedding between systems. Soundness/completeness infrastructure exists for all 15 systems. Lower priority — establish after per-system CPL conservativity is done.
-
----
-
 ### 275. Bimodal tm conservative over temporal bx
 - **Status**: [RESEARCHED]
 - **Task Type**: cslib
@@ -80,59 +58,6 @@ next_project_number: 278
 - **Research**: [275_bimodal_tm_conservative_over_temporal_bx/reports/02_team-research.md]
 
 **Description**: Prove that Bimodal TM is conservative over Temporal BX for temporal formulas (those using only until/since, no box). The Temporal.Formula.toBimodal embedding exists. The lift_derivation_qfree infrastructure in Bimodal/Metalogic/ConservativeExtension/ partially supports this. Requires verifying the lifting extends to temporal connectives.
-
----
-
-### 274. Bimodal tm conservative over modal s5
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Dependencies**: None
-
-**Description**: Prove that Bimodal TM is conservative over Modal S5 for the modal fragment: if φ.toBimodal is TM-derivable then φ is S5-derivable. (Original statement "over K" was FALSE — TM includes full S5 modal axioms for box.) Proof via semantic bridge: TM soundness + Kripke-to-TaskModel adapter + S5 completeness. ~150-250 lines.
-
----
-
-### 273. All modal systems conservative over cpl
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Dependencies**: None
-
-**Description**: Prove conservative extension of all 14 remaining modal systems (T, B, D, K4, K5, K45, D4, D5, D45, DB, TB, KB5, S4, S5) over CPL for propositional formulas. The proof pattern is identical to Modal K (already proved): system soundness (proved for all 14) + toModal_valid_implies_tautology (system-independent, already proved). Each system needs a _soundness_derivable wrapper to connect the pieces. Mechanical — create ConservativeExtension.lean files per system following the K pattern.
-
----
-
-### 272. Glivenko theorem
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Dependencies**: None
-
-**Description**: Prove Glivenko's theorem: if CPL proves A then IPL proves ¬¬A. This is the standard characterization of the CPL/IPL relationship, complementing the IPL-over-MPL conservative extension (task 265). Proof strategy: algebraic argument via Boolean algebras being Heyting algebras with ¬¬a = a, or syntactic double-negation translation. Place in Cslib/Logics/Propositional/Semantics/Algebra/ alongside Conservative.lean.
-
----
-
-### 271. Register vet in manifest and claudemd
-- **Status**: [COMPLETED]
-- **Task Type**: meta
-- **Topic**: agent-system
-- **Dependencies**: Task 270
-- **Research**: [271_register_vet_in_manifest_and_claudemd/reports/01_manifest-registration.md]
-- **Plan**: [271_register_vet_in_manifest_and_claudemd/plans/01_register-vet-plan.md]
-- **Summary**: [271_register_vet_in_manifest_and_claudemd/summaries/01_register-vet-summary.md]
-
-**Description**: Register the /vet command-skill-agent in the cslib extension manifest and CLAUDE.md. Updates: (1) .claude/extensions/cslib/manifest.json -- add cslib-vet-agent.md to provides.agents, skill-cslib-vet to provides.skills, vet.md to provides.commands. No routing entry needed since /vet is a standalone command (not routed through /research, /plan, /implement). (2) CLAUDE.md CSLib Extension section -- add /vet to the Commands table with usage syntax and description. Add skill-cslib-vet and cslib-vet-agent to the Skill-Agent Mapping table. Depends on task 270 (needs actual file names and command syntax from the implemented triplet).
-
----
-
-### 270. Create vet command skill agent
-- **Status**: [COMPLETED]
-- **Task Type**: meta
-- **Topic**: agent-system
-- **Dependencies**: None
-- **Research**: [270_create_vet_command_skill_agent/reports/01_vet-command-patterns.md]
-- **Plan**: [270_create_vet_command_skill_agent/plans/01_vet-triplet-plan.md]
-- **Summary**: [270_create_vet_command_skill_agent/summaries/01_vet-triplet-summary.md]
-
-**Description**: Create /vet command-skill-agent triplet for the cslib extension that vets completed CSLib tasks against library standards. Three files to create: (1) .claude/commands/vet.md -- command accepting task numbers (single, comma-separated, ranges) with optional focus prompt, parsing arguments, validating task existence, and delegating to skill-cslib-vet. (2) .claude/skills/skill-cslib-vet/SKILL.md -- thin wrapper skill that validates task inputs, identifies files changed by the task(s) via git history and task artifacts, prepares delegation context with references to CONTRIBUTING.md, NOTATION.md, ORGANISATION.md, CODE_OF_CONDUCT.md standards, and delegates to cslib-vet-agent. (3) .claude/agents/cslib-vet-agent.md -- agent that reads the changed/created files, checks against all four standards documents precisely, runs the full CSLib CI pipeline (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake), identifies violations/issues categorized by standard, and creates appropriately scoped fix tasks (few tasks, none too large) using the multi-task creation standard with interactive user confirmation. The agent should use AskUserQuestion for issue selection and task confirmation. Follow existing patterns from pr.md (command), skill-cslib-implementation (skill), cslib-implementation-agent (agent).
 
 ---
 
@@ -165,41 +90,6 @@ next_project_number: 278
 - **Plan**: [266_research_propositional_and_foundations_improvements/plans/01_propositional-foundations-plan.md]
 
 **Description**: Research the Propositional/ logic and Foundations/ in this repo, the supporting roles these play, and what else remains to be done to improve these elements of this library. Compare with /home/benjamin/Projects/BimodalLogic/specs/305_rabinovich_ea_formula_implementation/reports/16_witness-count-restructure.md and the tableau system included there, in addition to researching what other additions make sense to include such as a sequent calculus
-
----
-
-### 265. Track conservative lean sorry
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: None
-- **Research**:
-  - [265_track_conservative_lean_sorry/reports/01_conservative-extension-proof.md]
-  - [265_track_conservative_lean_sorry/reports/02_zulip-benefit-cost.md]
-- **Plan**: [265_track_conservative_lean_sorry/plans/01_conservative-extension-plan.md]
-- **Summary**: [265_track_conservative_lean_sorry/summaries/01_conservative-extension-summary.md]
-
-**Description**: Fill the sorry in Cslib/Logics/Propositional/Semantics/Algebra/Conservative.lean:99 (ipl_conservative_over_mpl). This is the only untracked sorry in the codebase — the theorem states that intuitionistic propositional logic is a conservative extension of minimal propositional logic. Research the proof strategy (likely via Kripke model or algebraic argument) and implement.
-
----
-
-### 264. Commit uncommitted test import changes
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: None
-
-**Description**: Review and commit the 15 uncommitted files: Cslib/Foundations/Relation/Attr.lean (adds Batteries.Tactic.Lint.Misc import), Cslib/Foundations/Semantics/LTS/Notation.lean (adds Batteries.Tactic.Lint.Misc and Lean.PrettyPrinter.Delaborator.Basic imports), and 13 CslibTests files with test updates. Verify lake build and lake test pass, then commit.
-
----
-
-### 263. Lake shake import cleanup
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: None
-
-**Description**: Run lake shake --add-public --keep-implied --keep-prefix and apply its recommendations across 107 files. Focus on the Temporal Metalogic Chronicle cluster (5 files) first, then work outward. Ensure lake build passes after each batch of changes.
 
 ---
 

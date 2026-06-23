@@ -311,32 +311,6 @@ Literature sources:
 
 ---
 
-### 298. Propositional tableau decidability
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional
-- **Dependencies**: Task 297
-- **Research**: [298_propositional_tableau_decidability/reports/01_prop-tableau-research.md]
-- **Plan**: [298_propositional_tableau_decidability/plans/01_prop-tableau-plan.md]
-- **Summary**: [298_propositional_tableau_decidability/summaries/01_prop-tableau-summary.md]
-
-**Description**: Implement propositional tableau systems for all three propositional logics in CSLib: classical (PropositionalAxiom), intuitionistic (IntPropAxiom), and minimal (MinPropAxiom). Build on the logic-neutral Foundations/Logic/Tableau/ infrastructure from task 297. Classical tableau: two-sided signed (T/F), complementary closure, all rules invertible, L = Unit — delivers Decidable (BValid phi) via Boolean semantics. Intuitionistic tableau: Kripke-style worlds even at propositional level (L = WorldIndex), restricted T(φ→ψ) rule creating successor worlds, closure only on F(⊥) — delivers Decidable (IValid phi) via propositional Kripke semantics. Minimal tableau: like intuitionistic but closure restricted to complementary atoms T(p)/F(p) only (no ex falso) — delivers Decidable (MValid phi) via MValid/Kripke semantics with botForces = false. Build classical first (simplest, validates infrastructure), then intuitionistic (adds world-labeled branches), then minimal (restricts closure further). Handle native and/or constructors for PL.Proposition. Use fuel-bounded expansion with termination via subformula property (classical) and finite model property (intuitionistic/minimal). Soundness and completeness proved against respective semantics. Files under Cslib/Logics/Propositional/Tableau/: Defs.lean, Rules.lean, Classical/Closure.lean, Classical/Saturation.lean, Classical/Soundness.lean, Classical/Completeness.lean, Classical/DecisionProcedure.lean, Intuitionistic/Closure.lean, Intuitionistic/Saturation.lean, Intuitionistic/Soundness.lean, Intuitionistic/Completeness.lean, Intuitionistic/DecisionProcedure.lean, Minimal/Closure.lean, Minimal/DecisionProcedure.lean. Estimated: 2,000-2,800 lines.
-
----
-
-### 297. Foundations tableau infrastructure
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Foundations
-- **Dependencies**: None
-- **Research**: [297_foundations_tableau_infrastructure/reports/01_foundations-tableau-research.md]
-- **Plan**: [297_foundations_tableau_infrastructure/plans/01_foundations-tableau-plan.md]
-- **Summary**: [297_foundations_tableau_infrastructure/summaries/01_foundations-tableau-summary.md]
-
-**Description**: Build shared tableau infrastructure in Foundations/Logic/Tableau/. Refactor and extend the existing PropositionalTableau.lean (210 lines) into a proper module directory. Unify the PropSign type (from Foundations) with the bimodal Sign type into a single canonical sign type. Create generic signed formula (parameterized over formula type F and label type L), rule result, and branch types. Crucially, the foundation must be logic-neutral to support classical, intuitionistic, and minimal tableaux: (1) Closure must be parameterized via a ClosureCondition typeclass — classical uses complementary signed pairs at the same label, intuitionistic uses only F(⊥), minimal uses only complementary atoms T(p)/F(p). (2) Rule application must be configurable via a RuleConfig or LogicKind parameter — the T(φ→ψ) rule behaves differently in classical (branch into F(φ) or T(ψ)) vs intuitionistic (create successor world w' with T(φ), F(ψ)) vs minimal (same as intuitionistic). (3) Branch needs world-awareness even at propositional level (L = Unit for classical, L = WorldIndex for intuitionistic/minimal). CSLib already has Kripke semantics for propositional logic with IValid (intuitionistic) and MValid (minimal) via botForces parameterization, and algebraic semantics via GeneralizedHeytingAlgebra/HeytingAlgebra/BooleanAlgebra. Files to create: Sign.lean, SignedFormula.lean, PropositionalRules.lean, RuleResult.lean, Branch.lean, Closure.lean, ClosureCondition.lean under Cslib/Foundations/Logic/Tableau/. Estimated: 800-1,100 lines.
-
----
-
 ### 296. Tableau calculi architecture
 - **Status**: [EXPANDED]
 - **Task Type**: formal
@@ -346,27 +320,6 @@ Literature sources:
 - **Plan**: [296_tableau_calculi_architecture/plans/01_tableau-arch-plan.md]
 
 **Description**: Research and design a unified tableau calculi architecture for CSLib spanning propositional, modal, temporal, and bimodal logics. The existing PropositionalTableau.lean provides generic rule infrastructure (PropSign, PropSignedFormula, PropTableauRule, applyPropRule) already consumed by the bimodal decidability system (~5,900 lines). The goal is to determine how to build a complete propositional tableau system (branch construction, closure, termination, soundness, completeness, decision procedure) that naturally extends to modal and temporal tableau systems, sharing resources with and relating cleanly to the existing bimodal tableau. Investigate: (1) what generic tableau infrastructure should live in Foundations/ vs logic-specific modules, (2) how modal tableau rules (box/diamond) and temporal rules (until/since) layer on top of propositional rules, (3) whether the bimodal tableau can be refactored to consume shared infrastructure or whether it should remain standalone, (4) what the dependency chain should be between propositional, modal, temporal tableau tasks, (5) how tableau completeness relates to the existing MCS-based completeness proofs and the planned sequent calculus (task 279). Output: a set of precisely scoped implementation tasks with dependency graph covering the full tableau pipeline from propositional through bimodal.
-
----
-
-### 295. Fix dia duality axiom typeclasses
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Dependencies**: None
-- **Plan**: [295_fix_dia_duality_axiom_typeclasses/plans/01_axiom-typeclass-plan.md]
-
-**Description**: Add HasAxiomDiaDualityFwd and HasAxiomDiaDualityBack typeclasses to Cslib/Foundations/Logic/ProofSystem.lean to complete the axiom-typeclass pairing pattern. AxiomDiaDualityFwd and AxiomDiaDualityBack are defined in Axioms.lean but lack corresponding Has* typeclasses in ProofSystem.lean, unlike every other axiom. Add two class declarations in a new DiaDualityAxiomClasses section following the existing pattern.
-
----
-
-### 294. Fix missing docstrings nd inference
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Dependencies**: None
-- **Research**: [294_fix_missing_docstrings_nd_inference/reports/01_docstring-research.md]
-- **Plan**: [294_fix_missing_docstrings_nd_inference/plans/01_docstring-fix-plan.md]
-
-**Description**: Add missing docstrings to 6 declarations identified by /vet 266: two anonymous Coe instances in Cslib/Foundations/Logic/InferenceSystem.lean (lines 74, 81), and four declarations in Cslib/Logics/Propositional/NaturalDeduction/Basic.lean (emptySequent_eq line 158, iff_derivableIn_empty line 160, derivableIn_top line 335, equiv.refl line 361). Follow CONTRIBUTING.md docstring conventions for consistency with surrounding code.
 
 ---
 
@@ -410,26 +363,6 @@ Literature sources:
 
 ---
 
-### 289. Decidable derivable propositional instance
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 266
-
-**Description**: Compose instDecidableTautology with prop_completeness_iff_tautology to produce a Decidable (Derivable PropositionalAxiom phi) instance for [Fintype Atom] [DecidableEq Atom]. This is a one-liner composition gap: the bridge Tautology phi <-> Derivable PropositionalAxiom phi exists, and Decidable (Tautology phi) exists, but the composed Decidable instance is not registered. File: Cslib/Logics/Propositional/Metalogic/Decidability.lean or inline in StrongCompleteness.lean. Depends on 266.
-
----
-
-### 288. Lindenbaum tarski algebra instances
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 266
-
-**Description**: Export named abbrev or instance declarations making explicit that the Lindenbaum-Tarski algebra of MPL is a GeneralizedHeytingAlgebra, IPL is a HeytingAlgebra, and CPL is a BooleanAlgebra. These are currently implicit in algebraic completeness proofs but not exported as standalone usable facts. Optionally prove the free Boolean algebra universal property for CPL. Files: new module Cslib/Logics/Propositional/Semantics/Algebra/LindenbaumInstances.lean. Depends on 266.
-
----
-
 ### 279. Propositional sequent calculus lk lj
 - **Status**: [EXPANDED]
 - **Task Type**: cslib
@@ -463,17 +396,6 @@ Literature sources:
   - [275_bimodal_tm_conservative_over_temporal_bx/reports/03_team-research.md]
 
 **Description**: Prove that Bimodal TM is conservative over Temporal BX for temporal formulas (those using only until/since, no box). The Temporal.Formula.toBimodal embedding exists. The lift_derivation_qfree infrastructure in Bimodal/Metalogic/ConservativeExtension/ partially supports this. Requires verifying the lifting extends to temporal connectives.
-
----
-
-### 252. Acceptance conditions zoo
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: None
-- **Research**: [252_acceptance_conditions_zoo/reports/01_acceptance-conditions-seed.md]
-
-**Description**: Formalize Rabin and parity acceptance conditions alongside the existing Muller acceptance (DMA) and Büchi acceptance (DBA) in CSLib, and prove the classical conversions between them. Build on the existing infOcc predicate (Cslib/Foundations/Data/OmegaSequence/InfOcc.lean) which already provides the "infinitely often" foundation. Scope: (1) Rabin acceptance — pairs of (Eᵢ, Fᵢ) sets. (2) Parity acceptance — priority coloring. (3) Muller↔Rabin conversion. (4) Rabin↔parity conversion (Piterman 2007). Target: Cslib/Computability/Automata/DA/Rabin.lean, Parity.lean, Conversions.lean
 
 ---
 

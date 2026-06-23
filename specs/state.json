@@ -68,12 +68,12 @@
     {
       "project_number": 268,
       "project_name": "simp_grind_normalization_tags",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Foundations",
       "description": "Add @[simp, scoped grind =] normalization tags to Hilbert system definitional lemmas. Add tags to the normalization/definitional layer across Propositional/, Modal/, Temporal/, and Bimodal/ Hilbert systems. Target: derived connective unfoldings, context manipulation lemmas, listImp equalities, and similar structural/characterization lemmas. Do NOT tag derivability constructors (Derivable.ax, Derivable.mp, etc.) — those are for the proof-search tactic. Follow cslib existing co-tagging convention. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake",
       "created": "2026-06-22T20:12:59Z",
-      "last_updated": "2026-06-23T03:00:00Z",
+      "last_updated": "2026-06-23T03:15:00Z",
       "session_id": "sess_1782181825_5220e2",
       "researched": "2026-06-23T02:44:43Z",
       "next_artifact_number": 3,
@@ -87,6 +87,11 @@
           "path": "specs/268_simp_grind_normalization_tags/plans/02_normalization-tags-plan.md",
           "type": "plan",
           "summary": "5-phase plan for adding simp/grind normalization tags across 4 source files"
+        },
+        {
+          "path": "specs/268_simp_grind_normalization_tags/summaries/02_normalization-tags-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary: 16 lemmas tagged @[simp, scoped grind =], GrindLint skip entry added, all CI passes"
         }
       ],
       "plan_metadata": {
@@ -115,7 +120,8 @@
             "integrated_date": "2026-06-23"
           }
         ]
-      }
+      },
+      "completion_summary": "Added @[simp, scoped grind =] co-tags to 16 definitional/structural lemmas across ListImplication.lean, BigConj.lean, FromPropositional.lean, and TemporalEmbedding.lean. Added GrindLint skip entry for bigconj_cons_cons. All CI steps pass: lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake."
     },
     {
       "project_number": 269,
@@ -133,13 +139,13 @@
     {
       "project_number": 266,
       "project_name": "research_propositional_and_foundations_improvements",
-      "status": "researched",
+      "status": "planning",
       "task_type": "formal",
       "description": "Research improvements to Propositional/ and Foundations/Logic/ in this repo: compose the Hilbert-ND bridge with algebraic completeness for Hilbert-tier corollaries, fix stale ProofSystem.lean documentation, add propositional test coverage, concretize modal/temporal/bimodal ProofSystem tag instances to unlock GenericMCS reuse, extract propositional tableau rules from the bimodal tableau to Foundations/, add HasDia primitive, and assemble a Decidable (Tautology φ) instance. Excludes sequent calculus (split to task 279).",
       "topic": "Propositional Logic",
       "created": "2026-06-22T18:25:59Z",
-      "last_updated": "2026-06-23T02:57:39Z",
-      "session_id": "sess_1782181780_55aebb",
+      "last_updated": "2026-06-23T03:05:24Z",
+      "session_id": "sess_1782183904_48c885",
       "researched": "2026-06-23T02:51:36Z",
       "next_artifact_number": 3,
       "artifacts": [

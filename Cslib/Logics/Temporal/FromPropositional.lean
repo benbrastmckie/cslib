@@ -66,28 +66,28 @@ instance instCoePLToTemporal : Coe (PL.Proposition Atom) (Temporal.Formula Atom)
   coe := PL.Proposition.toTemporal
 
 /-- Embedding preserves atom. -/
-@[simp]
+@[simp, scoped grind =]
 theorem PL.Proposition.toTemporal_atom (p : Atom) :
     (PL.Proposition.atom p : PL.Proposition Atom).toTemporal = Temporal.Formula.atom p := rfl
 
 /-- Embedding preserves bot. -/
-@[simp]
+@[simp, scoped grind =]
 theorem PL.Proposition.toTemporal_bot :
     (PL.Proposition.bot : PL.Proposition Atom).toTemporal = Temporal.Formula.bot := rfl
 
 /-- Embedding preserves imp. -/
-@[simp]
+@[simp, scoped grind =]
 theorem PL.Proposition.toTemporal_imp (φ₁ φ₂ : PL.Proposition Atom) :
     (PL.Proposition.imp φ₁ φ₂).toTemporal = Temporal.Formula.imp φ₁.toTemporal φ₂.toTemporal := rfl
 
 /-- Embedding preserves and (Lukasiewicz encoding). -/
-@[simp]
+@[simp, scoped grind =]
 theorem PL.Proposition.toTemporal_and (φ₁ φ₂ : PL.Proposition Atom) :
     (PL.Proposition.and φ₁ φ₂).toTemporal =
     .imp (.imp φ₁.toTemporal (.imp φ₂.toTemporal .bot)) .bot := rfl
 
 /-- Embedding preserves or (Lukasiewicz encoding). -/
-@[simp]
+@[simp, scoped grind =]
 theorem PL.Proposition.toTemporal_or (φ₁ φ₂ : PL.Proposition Atom) :
     (PL.Proposition.or φ₁ φ₂).toTemporal =
     .imp (.imp φ₁.toTemporal .bot) φ₂.toTemporal := rfl

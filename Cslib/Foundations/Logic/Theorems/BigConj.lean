@@ -69,14 +69,14 @@ def bigconj : List F → F
 def negBigconj (L : List F) : F :=
   HasImp.imp (bigconj L) HasBot.bot
 
-@[simp] theorem bigconj_nil :
+@[simp, scoped grind =] theorem bigconj_nil :
     bigconj (F := F) [] =
       HasImp.imp HasBot.bot HasBot.bot := rfl
 
-@[simp] theorem bigconj_singleton (φ : F) :
+@[simp, scoped grind =] theorem bigconj_singleton (φ : F) :
     bigconj [φ] = φ := rfl
 
-@[simp] theorem bigconj_cons_cons (φ ψ : F)
+@[simp, scoped grind =] theorem bigconj_cons_cons (φ ψ : F)
     (rest : List F) :
     bigconj (φ :: ψ :: rest) =
       HasImp.imp
@@ -84,7 +84,7 @@ def negBigconj (L : List F) : F :=
           (HasImp.imp (bigconj (ψ :: rest)) HasBot.bot))
         HasBot.bot := rfl
 
-@[simp] theorem negBigconj_def (L : List F) :
+@[simp, scoped grind =] theorem negBigconj_def (L : List F) :
     negBigconj L = HasImp.imp (bigconj L) HasBot.bot :=
   rfl
 

@@ -109,5 +109,7 @@ open_scoped_all Cslib
 #grind_lint skip Cslib.Automata.DA.Buchi.mem_infOftenOne_language
 #grind_lint skip Cslib.Automata.DA.Buchi.union_language_eq
 
+#grind_lint skip Cslib.Logic.Theorems.BigConj.bigconj_cons_cons
+
 #guard_msgs in
 #grind_lint check (min := 20) in Cslib

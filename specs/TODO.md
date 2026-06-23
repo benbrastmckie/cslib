@@ -11,8 +11,8 @@ next_project_number: 281
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,266,268,278,279,280 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215,269 | 36,37,180,268 | Bimodal Porting, Foundations, Temporal Logic |
+| 1 | 36,37,180,226,241,245,252,266,269,278,279,280 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41,275 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -27,15 +27,14 @@ next_project_number: 281
 
 ### Foundations
 
-268 [PLANNED] — Add @[simp, scoped grind =] normalization tags to Hilbert system 
-  └─ 269 [NOT STARTED] — Build generic bounded proof-search tactic for InferenceSystem. Cr
+269 [NOT STARTED] — Build generic bounded proof-search tactic for InferenceSystem. Cr
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-266 [RESEARCHED] — Research improvements to Propositional/ and Foundations/Logic/ in
+266 [PLANNING] — Research improvements to Propositional/ and Foundations/Logic/ in
 279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
 280 [NOT STARTED] — Research the current state of propositional proof systems in CSLi
 
@@ -106,19 +105,20 @@ next_project_number: 281
 ---
 
 ### 268. Simp grind normalization tags
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
 - **Research**: [268_simp_grind_normalization_tags/reports/01_team-research.md]
 - **Plan**: [268_simp_grind_normalization_tags/plans/02_normalization-tags-plan.md]
+- **Summary**: [268_simp_grind_normalization_tags/summaries/02_normalization-tags-summary.md]
 
 **Description**: Add @[simp, scoped grind =] normalization tags to Hilbert system definitional lemmas. Add tags to the normalization/definitional layer across Propositional/, Modal/, Temporal/, and Bimodal/ Hilbert systems. Target: derived connective unfoldings, context manipulation lemmas, listImp equalities, and similar structural/characterization lemmas. Do NOT tag derivability constructors (Derivable.ax, Derivable.mp, etc.) — those are for the proof-search tactic. Follow cslib existing co-tagging convention. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake
 
 ---
 
 ### 266. Research propositional and foundations improvements
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: formal
 - **Topic**: Propositional Logic
 - **Dependencies**: None

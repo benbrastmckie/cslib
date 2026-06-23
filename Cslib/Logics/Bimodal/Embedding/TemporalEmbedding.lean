@@ -37,29 +37,29 @@ instance instCoeTemporalToBimodal : Coe (Temporal.Formula Atom) (Bimodal.Formula
   coe := Temporal.Formula.toBimodal
 
 /-- Embedding preserves atom. -/
-@[simp]
+@[simp, scoped grind =]
 theorem Temporal.Formula.toBimodal_atom (p : Atom) :
     (Temporal.Formula.atom p : Temporal.Formula Atom).toBimodal = Bimodal.Formula.atom p := rfl
 
 /-- Embedding preserves bot. -/
-@[simp]
+@[simp, scoped grind =]
 theorem Temporal.Formula.toBimodal_bot :
     (Temporal.Formula.bot : Temporal.Formula Atom).toBimodal = Bimodal.Formula.bot := rfl
 
 /-- Embedding preserves imp. -/
-@[simp]
+@[simp, scoped grind =]
 theorem Temporal.Formula.toBimodal_imp (φ₁ φ₂ : Temporal.Formula Atom) :
     (Temporal.Formula.imp φ₁ φ₂).toBimodal =
       Bimodal.Formula.imp φ₁.toBimodal φ₂.toBimodal := rfl
 
 /-- Embedding preserves untl. -/
-@[simp]
+@[simp, scoped grind =]
 theorem Temporal.Formula.toBimodal_untl (φ₁ φ₂ : Temporal.Formula Atom) :
     (Temporal.Formula.untl φ₂ φ₁).toBimodal =
       Bimodal.Formula.untl φ₂.toBimodal φ₁.toBimodal := rfl
 
 /-- Embedding preserves snce. -/
-@[simp]
+@[simp, scoped grind =]
 theorem Temporal.Formula.toBimodal_snce (φ₁ φ₂ : Temporal.Formula Atom) :
     (Temporal.Formula.snce φ₂ φ₁).toBimodal =
       Bimodal.Formula.snce φ₂.toBimodal φ₁.toBimodal := rfl

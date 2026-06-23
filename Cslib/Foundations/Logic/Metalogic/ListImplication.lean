@@ -48,10 +48,10 @@ def listImp : List F → F → F
   | (ψ :: Ψ), φ => HasImp.imp ψ (listImp Ψ φ)
 
 omit [HasBot F] in
-@[simp] theorem listImp_nil (φ : F) : listImp ([] : List F) φ = φ := rfl
+@[simp, scoped grind =] theorem listImp_nil (φ : F) : listImp ([] : List F) φ = φ := rfl
 
 omit [HasBot F] in
-@[simp] theorem listImp_cons (ψ : F) (Ψ : List F) (φ : F) :
+@[simp, scoped grind =] theorem listImp_cons (ψ : F) (Ψ : List F) (φ : F) :
     listImp (ψ :: Ψ) φ = HasImp.imp ψ (listImp Ψ φ) := rfl
 
 /-! ## listImp Preserves K -/

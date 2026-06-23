@@ -11,10 +11,9 @@ next_project_number: 319
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,304,313,314,316,318 | -- | Bimodal Porting, Foundations, Project Management, ... |
-| 2 | 39,40,181,215,293,300,309,310,315,317 | 36,37,180,290,299,304,314,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
-| 3 | 41,275,291,292,311 | 39,40,309,310,315 | Foundations, Propositional Logic, Algebraic Semantics |
-| 4 | 312 | 311 | Algebraic Semantics |
+| 1 | 36,37,180,226,241,245,278,290,299,301,309,310,313,314,316 | -- | Bimodal Porting, Foundations, Project Management, ... |
+| 2 | 39,40,181,215,293,300,311,315,317 | 36,37,180,290,299,309,310,314,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 3 | 41,275,291,292,312 | 39,40,311,315 | Foundations, Propositional Logic, Algebraic Semantics |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -64,20 +63,18 @@ next_project_number: 319
 
 ### Algebraic Semantics
 
-304 [NOT STARTED] — Define the HilbertAlgebra typeclass: a structure (H, ⇨, ⊤) satisf
-  └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb
-    └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
-      └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified 
-  └─ 310 [NOT STARTED] — Formalize the Diego embedding theorem (Diego 1966): every Hilbert
-    └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove (see above)
-318 [NOT STARTED] — IPL conservative over IPL⟨∧,→,⊥,⊤⟩ for or-free formulas. Define p
+309 [RESEARCHED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb
+  └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
+    └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified 
+310 [RESEARCHING] — Formalize the Diego embedding theorem (Diego 1966): every Hilbert
+  └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove (see above)
 
 ### Uncategorized
 
 ## Tasks
 
 ### 318. Ipl conservative over conj imp bot
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: None
@@ -179,7 +176,7 @@ Literature sources:
 ---
 
 ### 310. Diego embedding
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 304
@@ -189,7 +186,7 @@ Literature sources:
 ---
 
 ### 309. Hilbert algebra soundness completeness
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 304
@@ -199,7 +196,7 @@ Literature sources:
 ---
 
 ### 304. Hilbert algebra typeclass
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: None

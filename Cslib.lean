@@ -421,6 +421,7 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.Bridge
 public import Cslib.Logics.Propositional.Semantics.Algebra.Brouwerian
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.Completeness
+public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpBotConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.Conservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentPredicates
@@ -449,7 +450,7 @@ public import Cslib.Logics.Propositional.SequentCalculus.LJ.Soundness
 public import Cslib.Logics.Propositional.SequentCalculus.LK
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Basic
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Completeness
-public import Cslib.Logics.Propositional.SequentCalculus.LK.CutElimination
+-- public import Cslib.Logics.Propositional.SequentCalculus.LK.CutElimination
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Soundness
 public import Cslib.Logics.Propositional.Tableau
 public import Cslib.Logics.Propositional.Tableau.Classical

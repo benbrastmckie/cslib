@@ -1,0 +1,143 @@
+/-
+Copyright (c) 2026 Benjamin Brast-McKie. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Benjamin Brast-McKie
+-/
+
+module
+
+import Cslib.Init
+
+public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertCompleteness
+public import Cslib.Logics.Propositional.Semantics.Algebra.PointedBrouwerianCompleteness
+public import Cslib.Logics.Propositional.Semantics.Algebra.NonemptyLowerSet
+public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertConservativeGlivenko
+public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative
+
+/-! # Conservative Extension: IPL over IPL⟨∧,→,⊥,⊤⟩
+
+This module proves that IPL is a conservative extension of the conjunctive-implicational-bot
+fragment IPL⟨∧,→,⊥,⊤⟩ for or-free formulas.
+
+## Main Results
+
+- `hilbertIplConservativeOverConjImpBot`: IPL is a conservative extension of IPL⟨∧,→,⊥,⊤⟩
+  for or-free formulas, stated in terms of `Derivable IntPropAxiom` and
+  `Derivable ConjImpBotAxiom`.
+- `derivableConjImpBotOfDerivableInt`: Every `ConjImpBotAxiom`-derivable formula is
+  `IntPropAxiom`-derivable (subsumption).
+- `hilbertIplConservativeOverConjImpBot_iff`: For or-free formulas, IPL Hilbert derivability
+  and IPL⟨∧,→,⊥,⊤⟩ derivability coincide.
+- `ipl_conservative_over_conjImpBot`: ND corollary of the conservative extension theorem.
+
+## Proof Strategy
+
+The main theorem routes through pointed Brouwerian validity via the `NonemptyLowerSet`
+Heyting algebra construction:
+1. `IPL.hilbert_alg_complete.mp h` converts `Derivable IntPropAxiom φ` to `HAValid φ`.
+2. Instantiate at `H := NonemptyLowerSet B` (a `HeytingAlgebra`) with valuation
+   `iicNonemptyLowerSet ∘ v`. This gives
+   `AlgEvaluate (iicNonemptyLowerSet ∘ v) ⊥ φ = ⊤`.
+3. `nonemptyLowerSet_evaluate_commutes` rewrites this to
+   `iicNonemptyLowerSet (PointedBrouwerianEvaluate v φ) = ⊤`.
+4. `iicNonemptyLowerSet_eq_top_iff` extracts `PointedBrouwerianEvaluate v φ = ⊤`.
+5. So `PointedBrouwerianValid φ`, and `conjImpBot_pointedBrouwerian_complete` gives
+   `Derivable ConjImpBotAxiom φ`.
+
+The key improvement over `ConjImpConservative.lean`: the `NonemptyLowerSet` embedding
+preserves `⊥` (unlike the plain `LowerSet` embedding), enabling the bot case in the
+commutation lemma and extending the result from or-bot-free to or-free formulas.
+
+## References
+
+* [A. Rasiowa, *An Algebraic Approach to Non-Classical Logics*][Rasiowa1974]
+* [W. Nemitz, *Implicative semi-lattices*][Nemitz1965]
+* [P. Köhler, *Brouwerian semilattices*][Kohler1981]
+-/
+
+@[expose] public section
+
+noncomputable section
+
+namespace Cslib.Logic.PL
+
+open Proposition Theory InferenceSystem DerivableIn
+open NonemptyLowerSet
+
+universe u
+
+/-! ## Hilbert-Primary Conservative Extension -/
+
+/-- **Hilbert-primary conservative extension theorem**: IPL is a conservative extension of
+IPL⟨∧,→,⊥,⊤⟩ for or-free formulas. If `φ` is derivable in the intuitionistic Hilbert
+system and `φ` contains no `∨`, then `φ` is already derivable in the
+conjunctive-implicational-bot Hilbert system.
+
+The proof routes through pointed Brouwerian validity via the `NonemptyLowerSet` Heyting algebra:
+1. `IPL.hilbert_alg_complete.mp h` converts `Derivable IntPropAxiom φ` to `HAValid φ`.
+2. For any `BrouwerianSemilattice B` with `OrderBot` and `v : Atom → B`, instantiate `HAValid φ`
+   at `H := NonemptyLowerSet B` with valuation `iicNonemptyLowerSet ∘ v`. This gives
+   `AlgEvaluate (iicNonemptyLowerSet ∘ v) ⊥ φ = ⊤`.
+3. `nonemptyLowerSet_evaluate_commutes` rewrites this to
+   `iicNonemptyLowerSet (PointedBrouwerianEvaluate v φ) = ⊤`.
+4. `iicNonemptyLowerSet_eq_top_iff` extracts `PointedBrouwerianEvaluate v φ = ⊤`.
+5. Since `v` and `B` were arbitrary, `PointedBrouwerianValid φ`.
+6. `conjImpBot_pointedBrouwerian_complete hOF` gives `Derivable ConjImpBotAxiom φ`.
+
+The key distinction from `hilbertIplConservativeOverConjImp` (the or-bot-free version):
+`NonemptyLowerSet` preserves `⊥` via `iicNonemptyLowerSet_bot`, while the plain `LowerSet`
+embedding does not (since `LowerSet.Iic ⊥ ≠ ⊥ : LowerSet B`). This enables handling
+formulas with `⊥`, extending the result to all or-free (not just or-bot-free) formulas. -/
+theorem hilbertIplConservativeOverConjImpBot {Atom : Type u} {φ : PL.Proposition Atom}
+    (hOF : φ.IsOrFree = true) (h : Derivable (@IntPropAxiom Atom) φ) :
+    Derivable (@ConjImpBotAxiom Atom) φ := by
+  apply conjImpBot_pointedBrouwerian_complete hOF
+  intro B _ _ v
+  have hHA := IPL.hilbert_alg_complete.mp h
+    (H := NonemptyLowerSet B) (iicNonemptyLowerSet ∘ v)
+  rw [← nonemptyLowerSet_evaluate_commutes v φ hOF] at hHA
+  exact iicNonemptyLowerSet_eq_top_iff.mp hHA
+
+/-! ## Subsumption Direction -/
+
+/-- **Subsumption**: every formula derivable in the conjunctive-implicational-bot Hilbert
+system is derivable in the full intuitionistic Hilbert system.
+
+Uses `liftDerivationTree` with the axiom subsumption chain
+`ConjImpBotAxiom → IntPropAxiom`. -/
+theorem derivableConjImpBotOfDerivableInt {Atom : Type u} {φ : PL.Proposition Atom}
+    (h : Derivable (@ConjImpBotAxiom Atom) φ) :
+    Derivable (@IntPropAxiom Atom) φ := by
+  obtain ⟨d⟩ := h
+  exact ⟨liftDerivationTree
+    (fun ψ hψ => hψ.toIntPropAxiom) d⟩
+
+/-! ## Biconditional -/
+
+/-- **Biconditional**: for or-free formulas, derivability in the intuitionistic Hilbert
+system and derivability in the conjunctive-implicational-bot Hilbert system coincide. -/
+theorem hilbertIplConservativeOverConjImpBot_iff {Atom : Type u} {φ : PL.Proposition Atom}
+    (hOF : φ.IsOrFree = true) :
+    Derivable (@IntPropAxiom Atom) φ ↔ Derivable (@ConjImpBotAxiom Atom) φ :=
+  ⟨hilbertIplConservativeOverConjImpBot hOF, derivableConjImpBotOfDerivableInt⟩
+
+/-! ## ND Corollary -/
+
+variable {Atom : Type u} [DecidableEq Atom]
+
+/-- **ND conservative extension**: IPL is a conservative extension of IPL⟨∧,→,⊥,⊤⟩ for
+or-free formulas. If a formula containing no `∨` is derivable in the ND system for IPL,
+then it is derivable in the conjunctive-implicational-bot Hilbert system.
+
+This is derived as a corollary of `hilbertIplConservativeOverConjImpBot` via the algebraic
+bridge `derivableInIplIffDerivableInt`. -/
+theorem ipl_conservative_over_conjImpBot {A : PL.Proposition Atom}
+    (hOF : A.IsOrFree = true) (h : DerivableIn (IPL (Atom := Atom)) A) :
+    Derivable (@ConjImpBotAxiom Atom) A :=
+  hilbertIplConservativeOverConjImpBot hOF (derivableInIplIffDerivableInt.mp h)
+
+end Cslib.Logic.PL
+
+end
+
+end

@@ -439,45 +439,49 @@
     {
       "project_number": 304,
       "project_name": "hilbert_algebra_typeclass",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Define the HilbertAlgebra typeclass: a structure (H, ⇨, ⊤) satisfying (K) a ⇨ (b ⇨ a) = ⊤, (S) (a ⇨ (b ⇨ c)) ⇨ ((a ⇨ b) ⇨ (a ⇨ c)) = ⊤, and antisymmetry (a ⇨ b = ⊤ ∧ b ⇨ a = ⊤ → a = b). Derive the induced partial order a ≤ b ↔ a ⇨ b = ⊤ and prove it is a PartialOrder. Provide forgetful instances from BrouwerianSemilattice and GeneralizedHeytingAlgebra. Define HilbertEvaluate mapping imp-top-only Propositions to elements of a HilbertAlgebra using only ⇨. This captures the algebraic semantics of IPL⟨→,⊤⟩ — the pure implication fragment corresponding to typed SKI combinators via Curry-Howard. Mathlib has no such class. References: Diego (1966), Monteiro (1955), Rasiowa (1974) Ch. V. File: Cslib/Foundations/Order/HilbertAlgebra.lean.",
       "created": "2026-06-23T22:00:00Z",
-      "last_updated": "2026-06-23T22:00:00Z",
+      "last_updated": "2026-06-23T22:40:15Z",
       "next_artifact_number": 1,
       "artifacts": [],
-      "dependencies": []
+      "dependencies": [],
+      "session_id": "sess_1782252559_952370_304",
+      "completion_summary": "Defined HilbertAlgebra typeclass (HImp+Top, K/S/antisymmetry/himp_self), derived PartialOrder+OrderTop, BrouwerianSemilattice forgetful instance, HilbertEvaluate+HilbertValid"
     },
     {
       "project_number": 309,
       "project_name": "hilbert_algebra_soundness_completeness",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algebras. Soundness: if Derivable ImpAxiom φ then HilbertEvaluate v φ = ⊤ in every HilbertAlgebra. Completeness via the Lindenbaum-Tarski algebra: the quotient Proposition Atom / ≈ where φ ≈ ψ iff Derivable ImpAxiom (φ → ψ) and Derivable ImpAxiom (ψ → φ). Define [φ] ⇨ [ψ] := [φ → ψ] and show this is well-defined and satisfies the Hilbert algebra axioms K, S, and antisymmetry. Prove the truth lemma: HilbertEvaluate [·] φ = ⊤ ↔ Derivable ImpAxiom φ. This is the simplest Lindenbaum construction in the chain — no lattice operations needed, just the implication operation on equivalence classes. Reference: Diego (1966) Chapter 2, Rasiowa (1974) Chapter V. File: Cslib/Logics/Propositional/Semantics/Algebra/HilbertAlgCompleteness.lean.",
       "created": "2026-06-23T22:00:00Z",
-      "last_updated": "2026-06-23T22:00:00Z",
+      "last_updated": "2026-06-23T22:46:10Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "dependencies": [
         304
-      ]
+      ],
+      "session_id": "sess_1782252559_952370_309"
     },
     {
       "project_number": 310,
       "project_name": "diego_embedding",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Formalize the Diego embedding theorem (Diego 1966): every Hilbert algebra embeds into a Heyting algebra preserving the implication operation and top element. Given a HilbertAlgebra H, construct a HeytingAlgebra HA(H) and an order-embedding ι : H → HA(H) such that ι(a ⇨ b) = ι(a) ⇨ ι(b) and ι(⊤) = ⊤. The classical construction uses the lattice of filters of H: a filter F ⊆ H is a non-empty upward-closed set closed under ⇨-detachment (a ∈ F and a ⇨ b ∈ F implies b ∈ F). The filter lattice ordered by inclusion forms a Heyting algebra, and ι(a) = {F | a ∈ F} is the embedding. Prove: (1) the filter lattice is a HeytingAlgebra, (2) ι preserves ⇨ and ⊤, (3) ι is injective (order-embedding), (4) the embedding lemma: for imp-top-only formulas, HilbertEvaluate v φ = ⊤ ↔ AlgEvaluate (ι ∘ v) ⊥ φ = ⊤. This is the most technically demanding algebraic construction in the chain. References: Diego (1966), Köhler (1981), Celani-Jansana (2012). File: Cslib/Foundations/Order/HilbertAlgebra/DiegoEmbedding.lean.",
       "created": "2026-06-23T22:00:00Z",
-      "last_updated": "2026-06-23T22:00:00Z",
+      "last_updated": "2026-06-23T22:40:30Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "dependencies": [
         304
-      ]
+      ],
+      "session_id": "sess_1782252559_952370_310"
     },
     {
       "project_number": 311,
@@ -594,15 +598,16 @@
     {
       "project_number": 318,
       "project_name": "ipl_conservative_over_conj_imp_bot",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "description": "IPL conservative over IPL⟨∧,→,⊥,⊤⟩ for or-free formulas. Define pointed Brouwerian semilattice (BrouwerianSemilattice + OrderBot), prove soundness/completeness of the conjunctive-implicational-bot fragment, and prove IPL conservative over this fragment via the existing free join completion embedding (which already preserves ⊥ as bot). Extends tasks 303/306/307 with the EFQ axiom.",
       "topic": "Algebraic Semantics",
       "dependencies": [],
       "created": "2026-06-23T22:01:51Z",
-      "last_updated": "2026-06-23T22:01:51Z",
+      "last_updated": "2026-06-23T22:54:37Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [],
+      "session_id": "sess_1782252559_952370_318"
     }
   ],
   "repository_health": {

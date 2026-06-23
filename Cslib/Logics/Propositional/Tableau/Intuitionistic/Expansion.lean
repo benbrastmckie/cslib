@@ -65,8 +65,7 @@ inductive IntTableauResult (Atom : Type*) : Type _ where
 Uses the `IntuitionisticClosure` instance, which closes only when T(⊥) appears
 at any label. Unlike classical closure, complementary pairs do NOT close a branch. -/
 def isIntuitionisticallyClosed (b : IBranch Atom) : Bool :=
-  open IntuitionisticClosure in
-  ClosureCondition.isClosed b
+  @ClosureCondition.isClosed _ _ IntuitionisticClosure.instClosureConditionOfBEqOfHasBot b
 
 /-- Check whether a minimal branch is closed.
 
@@ -74,8 +73,7 @@ Uses the `MinimalClosure` instance, which closes when T(p) and F(p) appear at th
 world for an atomic formula p. This is weaker than classical but stronger than intuitionistic
 in the sense that it allows atom contradictions but NOT T(⊥). -/
 def isMinimallyClosed (b : IBranch Atom) : Bool :=
-  open MinimalClosure in
-  ClosureCondition.isClosed b
+  @ClosureCondition.isClosed _ _ MinimalClosure.instClosureConditionOfBEqOfIsAtomic b
 
 /-! ## Persistence Application -/
 

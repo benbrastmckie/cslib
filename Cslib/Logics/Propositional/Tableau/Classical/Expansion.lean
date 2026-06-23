@@ -72,8 +72,7 @@ def classicalApplyOne (sf : SignedFormula (Proposition Atom) Unit) :
 Uses the `ClassicalClosure` instance (anonymous), which closes when T(⊥) is present
 or when both T(φ) and F(φ) appear at the same label. -/
 def isClassicallyClosed (b : Branch (Proposition Atom) Unit) : Bool :=
-  open ClassicalClosure in
-  ClosureCondition.isClosed b
+  @ClosureCondition.isClosed _ _ ClassicalClosure.instClosureConditionOfBEqOfHasBot b
 
 /-! ## Branch Expansion -/
 

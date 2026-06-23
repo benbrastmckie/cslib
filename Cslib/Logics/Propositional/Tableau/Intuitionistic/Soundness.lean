@@ -86,7 +86,7 @@ lemma intRule_preserves_sat {World : Type*} [Preorder World]
     (worldOf : Nat → World)
     (b : IBranch Atom)
     (sf : ISF Atom)
-    (_ : sf ∈ b)
+    (hmem_sf : sf ∈ b)
     (hsat : intBranchSatisfied val botForces worldOf b)
     (nw : Nat) :
     match intApplyRuleFull sf nw b with
@@ -96,7 +96,97 @@ lemma intRule_preserves_sat {World : Type*} [Preorder World]
       ∃ br ∈ branches,
         intBranchSatisfied val botForces worldOf (Branch.extendMany b br)
     | .notApplicable => True := by
-  sorry
+  obtain ⟨sign, form, label⟩ := sf
+  -- Helper: extending b with formulas the model already satisfies preserves satisfaction
+  have extend_sat : ∀ (newForms : List (ISF Atom)),
+      (∀ sf' ∈ newForms,
+        (sf'.sign = .pos → IForces val botForces (worldOf sf'.label) sf'.formula) ∧
+        (sf'.sign = .neg → ¬ IForces val botForces (worldOf sf'.label) sf'.formula)) →
+      intBranchSatisfied val botForces worldOf (Branch.extendMany b newForms) := by
+    intro newForms hnew sf' hmem'
+    simp only [Branch.extendMany, List.mem_append] at hmem'
+    rcases hmem' with h | h
+    · exact hnew sf' h
+    · exact hsat sf' h
+  -- sf is in b, so hsat gives us information about sf
+  have hsf_info := hsat ⟨sign, form, label⟩ hmem_sf
+  simp only at hsf_info
+  -- Case split on sign
+  cases sign with
+  | pos =>
+    have hpos := hsf_info.1 rfl
+    -- Case split on formula
+    cases form with
+    | atom x => trivial
+    | bot => trivial
+    | imp φ ψ =>
+      -- T(φ → ψ): intApplyRuleFull returns .notApplicable (persistent rule, handled separately)
+      trivial
+    | and φ ψ =>
+      -- T(φ ∧ ψ): .linearResult [T(φ), T(ψ)] nw
+      simp only [show intApplyRuleFull (⟨.pos, φ ∧ ψ, label⟩ : ISF Atom) nw b =
+        .linearResult [⟨.pos, φ, label⟩, ⟨.pos, ψ, label⟩] nw from rfl]
+      rw [IForces_and] at hpos
+      apply extend_sat
+      intro sf' hmem'
+      simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+      rcases hmem' with rfl | rfl
+      · exact ⟨fun _ => hpos.1, fun h => absurd h (Sign.noConfusion)⟩
+      · exact ⟨fun _ => hpos.2, fun h => absurd h (Sign.noConfusion)⟩
+    | or φ ψ =>
+      -- T(φ ∨ ψ): .branchingResult [[T(φ)], [T(ψ)]] nw
+      simp only [show intApplyRuleFull (⟨.pos, φ ∨ ψ, label⟩ : ISF Atom) nw b =
+        .branchingResult [[⟨.pos, φ, label⟩], [⟨.pos, ψ, label⟩]] nw from rfl]
+      rw [IForces_or] at hpos
+      rcases hpos with hφ | hψ
+      · exact ⟨[⟨.pos, φ, label⟩], List.mem_cons_self,
+          extend_sat _ (fun sf' hmem' => by
+            simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+            subst hmem'
+            exact ⟨fun _ => hφ, fun h => absurd h (Sign.noConfusion)⟩)⟩
+      · exact ⟨[⟨.pos, ψ, label⟩], by simp,
+          extend_sat _ (fun sf' hmem' => by
+            simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+            subst hmem'
+            exact ⟨fun _ => hψ, fun h => absurd h (Sign.noConfusion)⟩)⟩
+  | neg =>
+    have hneg := hsf_info.2 rfl
+    cases form with
+    | atom x => trivial
+    | bot => trivial
+    | imp φ ψ =>
+      -- F(φ → ψ): world-creating rule. The lemma as stated is too strong for this case,
+      -- since worldOf nw is fixed and may not equal the witness world from ¬IForces.
+      -- This case is handled in the main soundness theorem (S6) where worldOf is constructed.
+      -- See the plan (task 316, Phase 2) for the resolution strategy.
+      sorry
+    | and φ ψ =>
+      -- F(φ ∧ ψ): .branchingResult [[F(φ)], [F(ψ)]] nw
+      simp only [show intApplyRuleFull (⟨.neg, φ ∧ ψ, label⟩ : ISF Atom) nw b =
+        .branchingResult [[⟨.neg, φ, label⟩], [⟨.neg, ψ, label⟩]] nw from rfl]
+      rw [IForces_and, not_and_or] at hneg
+      rcases hneg with hφ | hψ
+      · exact ⟨[⟨.neg, φ, label⟩], List.mem_cons_self,
+          extend_sat _ (fun sf' hmem' => by
+            simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+            subst hmem'
+            exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hφ⟩)⟩
+      · exact ⟨[⟨.neg, ψ, label⟩], by simp,
+          extend_sat _ (fun sf' hmem' => by
+            simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+            subst hmem'
+            exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hψ⟩)⟩
+    | or φ ψ =>
+      -- F(φ ∨ ψ): .linearResult [F(φ), F(ψ)] nw
+      simp only [show intApplyRuleFull (⟨.neg, φ ∨ ψ, label⟩ : ISF Atom) nw b =
+        .linearResult [⟨.neg, φ, label⟩, ⟨.neg, ψ, label⟩] nw from rfl]
+      rw [IForces_or, not_or] at hneg
+      apply extend_sat
+      intro sf' hmem'
+      simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+      rcases hmem' with rfl | rfl
+      · exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hneg.1⟩
+      · exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hneg.2⟩
 
 /-- An intuitionistically closed branch (containing T(⊥)) is unsatisfiable in any
 Kripke model with `botForces = fun _ => False`.
@@ -109,7 +199,31 @@ lemma intClosed_unsatisfiable {World : Type*} [Preorder World]
     (b : IBranch Atom)
     (hclosed : isIntuitionisticallyClosed b = true) :
     ¬ intBranchSatisfied val (fun _ => False) worldOf b := by
-  sorry
+  intro hsat
+  have hbp : ∃ sf ∈ b, (SignedFormula.isPos sf &&
+      (sf.formula == (HasBot.bot : Proposition Atom))) = true := by
+    rw [← List.find?_isSome]
+    have key : isIntuitionisticallyClosed b = (List.find? (fun (sf : ISF Atom) =>
+        sf.isPos && (sf.formula == (HasBot.bot : Proposition Atom))) b).isSome := by
+      simp only [isIntuitionisticallyClosed, ClosureCondition.isClosed, ClosureCondition.findClosure]
+      cases b.find? (fun (sf : ISF Atom) =>
+        sf.isPos && (sf.formula == (HasBot.bot : Proposition Atom))) <;> rfl
+    rw [← key]; exact hclosed
+  obtain ⟨sf, hmem, hcond⟩ := hbp
+  simp only [Bool.and_eq_true, SignedFormula.isPos, Sign.isPos] at hcond
+  obtain ⟨hpos_b, hbot_form⟩ := hcond
+  have hssign : sf.sign = .pos := by
+    rcases sf with ⟨sign, _, _⟩; cases sign <;> simp_all
+  cases hf : sf.formula with
+  | bot =>
+    have hsf := hsat sf hmem
+    rw [hssign] at hsf
+    rw [hf, IForces_bot] at hsf
+    exact hsf.1 rfl
+  | atom x => simp [hf, BEq.beq, instBEqProposition.beq] at hbot_form
+  | imp a c => simp [hf, BEq.beq, instBEqProposition.beq] at hbot_form
+  | and a c => simp [hf, BEq.beq, instBEqProposition.beq] at hbot_form
+  | or a c => simp [hf, BEq.beq, instBEqProposition.beq] at hbot_form
 
 /-! ## Main Soundness Theorem -/
 

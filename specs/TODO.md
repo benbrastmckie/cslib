@@ -1,5 +1,5 @@
 ---
-next_project_number: 319
+next_project_number: 320
 ---
 
 # TODO
@@ -11,9 +11,9 @@ next_project_number: 319
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,309,310,313,314,316 | -- | Bimodal Porting, Foundations, Project Management, ... |
-| 2 | 39,40,181,215,293,300,311,315,317 | 36,37,180,290,299,309,310,314,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
-| 3 | 41,275,291,292,312 | 39,40,311,315 | Foundations, Propositional Logic, Algebraic Semantics |
+| 1 | 36,37,180,226,241,245,278,290,299,301,310,313,314,316 | -- | Bimodal Porting, Foundations, Project Management, ... |
+| 2 | 39,40,181,215,293,300,311,315,317 | 36,37,180,290,299,310,314,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 3 | 41,275,291,292,312,319 | 39,40,311,315,317 | Foundations, Propositional Logic, Algebraic Semantics |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -45,6 +45,7 @@ next_project_number: 319
     └─ 292 [NOT STARTED] — After task 279 delivers LJ with cut elimination, formalize the co
 316 [IMPLEMENTING] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [NOT STARTED] — Fill the 8 sorry instances in propositional tableau completeness 
+    └─ 319 [NOT STARTED] — Build dedicated Soundness and Completeness modules for the minima
 
 ### Temporal Logic
 
@@ -63,15 +64,23 @@ next_project_number: 319
 
 ### Algebraic Semantics
 
-309 [RESEARCHED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb
+310 [IMPLEMENTING] — Formalize the Diego embedding theorem (Diego 1966): every Hilbert
   └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
     └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified 
-310 [RESEARCHING] — Formalize the Diego embedding theorem (Diego 1966): every Hilbert
-  └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove (see above)
 
 ### Uncategorized
 
 ## Tasks
+
+### 319. Minimal tableau infrastructure
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 316, Task 317
+
+**Description**: Build dedicated Soundness and Completeness modules for the minimal propositional tableau, matching the structure of the classical and intuitionistic systems. Currently the minimal system has only DecisionProcedure.lean (135 lines) with sorry-marked theorems, while classical has 4 modules (795 lines) and intuitionistic has 5 modules (908 lines). The minimal tableau shares the intuitionistic rules and expansion loop (intExpandBranches with isMinimallyClosed), so no separate Rules.lean or Expansion.lean is needed. Create: (1) Minimal/Soundness.lean — define minRule_preserves_sat (each rule preserves branch satisfiability in any Kripke model with arbitrary botForces, not just fun _ => False), minClosed_unsatisfiable (MinimalClosure T(p)/F(p) contradiction is unsatisfiable since val w p ↔ ¬val w p), and prove minimalTableau_sound. Key difference from intuitionistic: closure is on complementary atoms only, and botForces is unconstrained. (2) Minimal/Completeness.lean — construct countermodel from open saturated branch with botForces w = (T(⊥) at w on branch), prove truth lemma by formula induction, and prove minimalTableau_complete. Key difference from intuitionistic: the countermodel allows bot to be forced at some worlds. (3) Refactor DecisionProcedure.lean to import the new modules, keeping only the Decidable instances and the minimalTableau_decides bridge theorem. (4) Update Cslib.lean barrel imports via lake exe mk_all.
+
+---
 
 ### 318. Ipl conservative over conj imp bot
 - **Status**: [COMPLETED]
@@ -176,7 +185,7 @@ Literature sources:
 ---
 
 ### 310. Diego embedding
-- **Status**: [RESEARCHING]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 304
@@ -186,7 +195,7 @@ Literature sources:
 ---
 
 ### 309. Hilbert algebra soundness completeness
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 304

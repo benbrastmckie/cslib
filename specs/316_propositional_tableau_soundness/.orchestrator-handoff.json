@@ -1,0 +1,38 @@
+{
+  "status": "partial",
+  "summary": "Resolved 3/6 in-scope sorry instances, fixed all compilation errors (6 errors across 3 files), fixed critical ClosureCondition instance resolution bug in Expansion.lean. Remaining 3 sorry are structural blockers requiring infrastructure changes (loop induction over let rec, worldOf architecture redesign).",
+  "phases_completed": 2,
+  "phases_total": 4,
+  "sorry_inventory": {
+    "Cslib/Logics/Propositional/Tableau/Classical/Soundness.lean": [
+      "classicalTableau_sound (line 515) — loop induction over fuel-based let rec expansion"
+    ],
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean": [
+      "intRule_preserves_sat F(imp) case (line 162) — worldOf architecture: lemma requires fixed worldOf but F(imp) creates new world needing existential witness",
+      "intuitionisticTableau_sound (line 244) — loop induction over fuel-based let rec expansion"
+    ]
+  },
+  "blockers": [
+    {
+      "id": "B1",
+      "description": "Main soundness theorems (classicalTableau_sound, intuitionisticTableau_sound) require induction over fuel-based expansion loops implemented as let rec inside intExpandBranches/classicalExpandBranches. Lean 4 structural recursion on let rec is non-trivial.",
+      "severity": "high",
+      "resolution": "Extract expansion loop as top-level well-founded recursive function, or prove a loop invariant lemma separately"
+    },
+    {
+      "id": "B2",
+      "description": "intRule_preserves_sat F(imp) case: the lemma quantifies over all worldOf functions, but the F(imp) rule creates world nw whose image worldOf(nw) must equal the existential witness w' from ¬IForces(φ→ψ). The lemma signature is too strong for this case.",
+      "severity": "high",
+      "resolution": "Either (a) change lemma to return ∃ worldOf', ... allowing worldOf update, or (b) fold F(imp) handling into the main soundness theorem where the model construction controls worldOf, or (c) add hypothesis that worldOf is updatable"
+    }
+  ],
+  "continuation_context": {
+    "completed_sorries": [
+      "classicalRule_preserves_sat — full case analysis on 10 classical rule cases",
+      "classically_closed_unsatisfiable — T(⊥) and T(φ)/F(φ) contradiction via branchConsistent",
+      "intClosed_unsatisfiable — T(⊥) contradiction via IForces_bot"
+    ],
+    "critical_fix": "isClassicallyClosed and isIntuitionisticallyClosed were using wrong ClosureCondition instances (MinimalClosure instead of ClassicalClosure/IntuitionisticClosure) due to open namespace not affecting instance resolution. Fixed to explicit @ClosureCondition.isClosed with named instances."
+  },
+  "artifacts": []
+}

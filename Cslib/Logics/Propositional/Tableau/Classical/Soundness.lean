@@ -125,6 +125,37 @@ private lemma classicalApplyOne_neg_neg (l : Unit) (a : Proposition Atom) :
     classicalApplyOne (SignedFormula.neg (.imp a .bot) l) =
     .linear [SignedFormula.pos a l] := rfl
 
+private lemma prop_beq_eq :
+    ∀ (a b : Proposition Atom), (a == b) = true → a = b := by
+  intro a b h
+  induction a generalizing b with
+  | bot =>
+    cases b <;> first
+      | rfl
+      | (change false = true at h; exact absurd h Bool.false_ne_true)
+  | atom x => cases b with
+    | atom y =>
+      change (x == y) = true at h; exact congrArg _ (eq_of_beq h)
+    | _ => change false = true at h; exact absurd h Bool.false_ne_true
+  | and a1 a2 ih1 ih2 => cases b with
+    | and c d =>
+      change (a1 == c && a2 == d) = true at h
+      simp only [Bool.and_eq_true] at h
+      exact congrArg₂ _ (ih1 _ h.1) (ih2 _ h.2)
+    | _ => change false = true at h; exact absurd h Bool.false_ne_true
+  | or a1 a2 ih1 ih2 => cases b with
+    | or c d =>
+      change (a1 == c && a2 == d) = true at h
+      simp only [Bool.and_eq_true] at h
+      exact congrArg₂ _ (ih1 _ h.1) (ih2 _ h.2)
+    | _ => change false = true at h; exact absurd h Bool.false_ne_true
+  | imp a1 a2 ih1 ih2 => cases b with
+    | imp c d =>
+      change (a1 == c && a2 == d) = true at h
+      simp only [Bool.and_eq_true] at h
+      exact congrArg₂ _ (ih1 _ h.1) (ih2 _ h.2)
+    | _ => change false = true at h; exact absurd h Bool.false_ne_true
+
 /-! ## Key Lemmas -/
 
 /-- Each classical rule application preserves branch satisfiability.
@@ -345,7 +376,54 @@ lemma classicalRule_preserves_sat (b : Branch (Proposition Atom) Unit)
         simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
         subst hmem'
         exact ⟨fun _ => ha, fun h => absurd h (by simp [SignedFormula.pos])⟩
-      · sorry
+      · -- classicalApplyOne ⟨.neg, .imp a b, l⟩ = .linear [T(a), F(b)]  (negImp rule)
+        -- Case split on b_form to reduce classicalApplyOne (abstract b_form won't reduce)
+        cases b_form with
+        | bot => exact absurd rfl hbot
+        | atom x =>
+          change classicalBranchSatisfiable (Branch.extendMany b
+            [SignedFormula.pos a label, SignedFormula.neg (.atom x) label])
+          rw [BoolEvaluate_imp] at hfalse; rw [Bool.or_eq_false_iff] at hfalse
+          obtain ⟨h1, h2⟩ := hfalse
+          have ha : BoolEvaluate v a = true := (Bool.not_eq_false' _).mp h1
+          apply extend_sat; intro sf' hmem'
+          simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+          rcases hmem' with rfl | rfl
+          · exact ⟨fun _ => ha, fun h => absurd h (Sign.noConfusion)⟩
+          · exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => h2⟩
+        | imp c d =>
+          change classicalBranchSatisfiable (Branch.extendMany b
+            [SignedFormula.pos a label, SignedFormula.neg (.imp c d) label])
+          rw [BoolEvaluate_imp] at hfalse; rw [Bool.or_eq_false_iff] at hfalse
+          obtain ⟨h1, h2⟩ := hfalse
+          have ha : BoolEvaluate v a = true := (Bool.not_eq_false' _).mp h1
+          apply extend_sat; intro sf' hmem'
+          simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+          rcases hmem' with rfl | rfl
+          · exact ⟨fun _ => ha, fun h => absurd h (Sign.noConfusion)⟩
+          · exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => h2⟩
+        | and c d =>
+          change classicalBranchSatisfiable (Branch.extendMany b
+            [SignedFormula.pos a label, SignedFormula.neg (.and c d) label])
+          rw [BoolEvaluate_imp] at hfalse; rw [Bool.or_eq_false_iff] at hfalse
+          obtain ⟨h1, h2⟩ := hfalse
+          have ha : BoolEvaluate v a = true := (Bool.not_eq_false' _).mp h1
+          apply extend_sat; intro sf' hmem'
+          simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+          rcases hmem' with rfl | rfl
+          · exact ⟨fun _ => ha, fun h => absurd h (Sign.noConfusion)⟩
+          · exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => h2⟩
+        | or c d =>
+          change classicalBranchSatisfiable (Branch.extendMany b
+            [SignedFormula.pos a label, SignedFormula.neg (.or c d) label])
+          rw [BoolEvaluate_imp] at hfalse; rw [Bool.or_eq_false_iff] at hfalse
+          obtain ⟨h1, h2⟩ := hfalse
+          have ha : BoolEvaluate v a = true := (Bool.not_eq_false' _).mp h1
+          apply extend_sat; intro sf' hmem'
+          simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+          rcases hmem' with rfl | rfl
+          · exact ⟨fun _ => ha, fun h => absurd h (Sign.noConfusion)⟩
+          · exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => h2⟩
 
 /-- A classically closed branch is unsatisfiable.
 
@@ -354,131 +432,70 @@ T(φ) and F(φ) coexist (which forces `BoolEvaluate v φ = true` and `= false` s
 lemma classically_closed_unsatisfiable (b : Branch (Proposition Atom) Unit)
     (hclosed : isClassicallyClosed b = true) :
     ¬ classicalBranchSatisfiable b := by
-  sorry
-  /-  intro ⟨v, hv⟩
-  -- isClassicallyClosed b is definitionally equal to b.hasBotPos || b.hasContradiction
-  -- because isClassicallyClosed uses ClassicalClosure which checks find? then findContradiction
-  -- Extract the closure condition: either T(bot) present or T(phi)/F(phi) pair
-  -- isClassicallyClosed uses ClassicalClosure, which checks hasBotPos then hasContradiction
-  -- Use by_cases on hasBotPos to avoid typeclass instance resolution issues
-  have hkey : b.hasBotPos ∨ b.hasContradiction := by
-    by_cases hbf : b.hasBotPos = true
-    · exact Or.inl hbf
-    · right
-      -- b.hasBotPos = false, so b.find? (...bot...) = none
-      simp only [Branch.hasBotPos, Bool.not_eq_true] at hbf
-      -- findContradiction must be some (otherwise ClassicalClosure returns false, contradiction)
-      by_contra hcontra
-      simp only [Branch.hasContradiction, Bool.not_eq_true, Option.not_isSome_iff_eq_none] at hcontra
-      -- Both conditions false: isClassicallyClosed b should be false
-      -- The definition: isClassicallyClosed = open ClassicalClosure in ClosureCondition.isClosed
-      -- ClassicalClosure.isClosed = (ClassicalClosure.findClosure b).isSome
-      -- ClassicalClosure.findClosure b = match b.find? (...bot...) with | some sf => ... | none =>
-      --   match b.findContradiction with | some ... => ... | none => none
-      -- With hbf (b.any (...bot...) = false → b.find? (...) = none) and hcontra (findContradiction = none)
-      -- ClassicalClosure.findClosure b = none, so isClassicallyClosed b = false
-      -- Contradiction with hclosed
-      -- We use: the match structure of ClassicalClosure.findClosure with simp + the list.find? none condition
-      simp only [Bool.not_eq_true] at hbf
-      have hfind_none : b.find? (fun sf => sf.isPos && sf.formula == (HasBot.bot : Proposition Atom)) = none := by
-        rwa [List.find?_eq_none]
-        intro sf hmem hcond
-        simp only [Bool.and_eq_true] at hcond
-        simp only [List.any_eq_false] at hbf
-        exact absurd hcond.1 (by
-          have := hbf sf hmem
-          simp only [Bool.and_eq_true, Bool.not_and_eq_true_iff_not_left_or_not_right] at this
-          -- this says: NOT (sf.isPos && sf.formula == bot)
-          rcases this with h | h
-          · simp [h] at hcond
-          · simp [hcond.2] at h)
-      -- Now ClassicalClosure.findClosure b = none
-      -- isClassicallyClosed b = false, contradiction
-      have : isClassicallyClosed b = false := by
-        simp only [isClassicallyClosed, ClosureCondition.isClosed, Option.isSome]
-        -- ClassicalClosure.findClosure b, with explicit instance, returns none
-        -- We avoid using ClosureCondition.findClosure (wrong instance) by using hfind_none and hcontra
-        -- Prove: (ClassicalClosure.findClosure b).isSome = false
-        -- The match structure: ... hfind_none ... hcontra => none
-        -- Use that isClassicallyClosed b = b.hasBotPos || b.hasContradiction via the ClassicalClosure def
-        -- isClassicallyClosed b defined as: open ClassicalClosure in ClosureCondition.isClosed b
-        -- ClassicalClosure.isClosed b = (ClassicalClosure.findClosure b).isSome
-        -- ClassicalClosure.findClosure b = match b.find? ... with ... | none => match findContradiction with | none => none
-        -- So isSome = false when both are none
-        -- We can't directly use ClosureCondition.findClosure (wrong instance resolution)
-        -- But we CAN convert: isClassicallyClosed b uses ClassicalClosure's isClosed
-        -- After `simp only [isClassicallyClosed, ClosureCondition.isClosed, Option.isSome]`,
-        -- we get the exact match expression from ClassicalClosure (not MinimalClosure)
-        -- because ClosureCondition.isClosed was inlined from ClassicalClosure at def time.
-        -- Let's try to prove it's false using split:
-        split
-        · rename_i cr hcr
-          -- hcr : ClosureCondition.findClosure b = some cr
-          -- This should be ClassicalClosure's (since we unfolded isClassicallyClosed)
-          -- We now split on hfind_none vs hcontra:
-          -- ClassicalClosure.findClosure matches b.find? (...) first
-          -- With hfind_none, it goes to the none arm -> matches findContradiction = hcontra = none
-          -- So findClosure = none, but hcr says some. Contradiction.
-          -- Unfortunately the instance issue makes this hard. Let's just show False
-          -- by deriving that isClassicallyClosed b = false from an indirect argument:
-          -- We just need to show hcr leads to contradiction with hfind_none and hcontra
-          -- The ONLY way hcr can hold is if b.find? (...) ≠ none OR b.findContradiction ≠ none
-          -- Since we know both are none (hfind_none, hcontra), hcr must be false
-          -- Use the contrapositive computation:
-          -- hcr is the ClassicalClosure findClosure result. If we could unfold it here...
-          -- Try: directly show None = some cr is absurd by extracting the structure
-          -- After split, hcr is from the match on ClassicalClosure's findClosure
-          -- match b.find? (...) with | some sf => some (.botPos sf.label) | none =>
-          --   match b.findContradiction with | some (phi, l) => some (.contradiction phi l) | none => none
-          -- = some cr
-          -- We know b.find? (...) = none (from hfind_none)
-          -- And b.findContradiction = none (from hcontra)
-          -- So the match reduces to: none = some cr. But wait...
-          -- The split is on the COMPUTED value of ClosureCondition.findClosure b
-          -- After simp only [isClassicallyClosed, ClosureCondition.isClosed, Option.isSome],
-          -- the exact ClassicalClosure match expression appears in hclosed.
-          -- The split at this point splits this exact ClassicalClosure match.
-          -- So hcr : (ClassicalClosure's findClosure logic) = some cr
-          -- We can now directly use hfind_none and hcontra:
-          simp only [hfind_none, hcontra] at hcr
-          -- After rewriting hfind_none (b.find? = none) and hcontra (findContradiction = none)
-          -- in hcr, we should get none = some cr which simp closes
-        · rfl
-      simp [this] at hclosed
-  rcases hkey with hbot | hcontra
-  · -- Case 1: T(bot) is present on the branch
-    simp only [Branch.hasBotPos] at hbot
-    obtain ⟨sf, hmem, hcond⟩ := List.any_eq_true.mp hbot
-    simp only [Bool.and_eq_true, SignedFormula.isPos, Sign.isPos] at hcond
-    obtain ⟨hpos, hbot_form⟩ := hcond
-    have hssign : sf.sign = .pos := by cases sf.sign <;> simp_all
-    have hformbot : sf.formula = .bot := by simp only [beq_iff_eq] at hbot_form; exact hbot_form
-    have hvc := hv sf hmem
-    rw [hssign] at hvc
-    have htrue := hvc.1 rfl
-    rw [hformbot] at htrue
-    simp [BoolEvaluate_bot] at htrue
-  · -- Case 2: T(phi) and F(phi) are both on the branch
-    simp only [Branch.hasContradiction, Option.isSome_eq_true] at hcontra
-    rw [Option.isSome_iff_exists] at hcontra
-    obtain ⟨⟨phi, l⟩, hpair⟩ := hcontra
+  intro ⟨v, hv⟩
+  have hrewrite : isClassicallyClosed b =
+      (match b.find? (fun sf => sf.isPos &&
+        sf.formula == (HasBot.bot : Proposition Atom)) with
+      | some _ => true
+      | none => b.hasContradiction) := by
+    simp only [isClassicallyClosed, ClosureCondition.isClosed, ClosureCondition.findClosure]
+    cases b.find? (fun sf => sf.isPos &&
+        sf.formula == (HasBot.bot : Proposition Atom)) with
+    | some sf => rfl
+    | none => simp only [Branch.hasContradiction]; cases b.findContradiction <;> rfl
+  rw [hrewrite] at hclosed
+  cases hfind : b.find? (fun sf =>
+      sf.isPos && sf.formula == (HasBot.bot : Proposition Atom)) with
+  | some sf =>
+    have hmem := List.mem_of_find?_eq_some hfind
+    have hpred := List.find?_some hfind
+    simp only [Bool.and_eq_true] at hpred
+    obtain ⟨hpos, hbot_eq⟩ := hpred
+    obtain ⟨sign, form, label⟩ := sf
+    simp only [SignedFormula.isPos, Sign.isPos] at hpos
+    cases sign with
+    | neg => contradiction
+    | pos =>
+      have hvc := hv ⟨.pos, form, label⟩ hmem
+      have htrue := hvc.1 rfl
+      have hfb := prop_beq_eq _ _ hbot_eq
+      simp only [SignedFormula.formula] at hfb
+      rw [hfb] at htrue
+      rw [show (HasBot.bot : Proposition Atom) = .bot from rfl,
+        BoolEvaluate_bot] at htrue
+      exact absurd htrue Bool.false_ne_true
+  | none =>
+    simp [hfind] at hclosed
+    simp only [Branch.hasContradiction, Option.isSome_iff_exists] at hclosed
+    obtain ⟨⟨phi, l⟩, hpair⟩ := hclosed
     simp only [Branch.findContradiction] at hpair
-    obtain ⟨sf, hsfmem, hsfcond⟩ := List.findSome?_some hpair
-    simp only [ite_some_none_eq_some] at hsfcond
-    obtain ⟨hpos, hany, _⟩ := hsfcond
-    simp only [Bool.and_eq_true, SignedFormula.isPos, Sign.isPos] at hpos
-    obtain ⟨sf', hsfmem', hsfcond'⟩ := List.any_eq_true.mp hany
-    simp only [Bool.and_eq_true, beq_iff_eq] at hsfcond'
-    obtain ⟨⟨hsneg, hformEq⟩, _⟩ := hsfcond'
-    have hssign : sf.sign = .pos := by cases sf.sign <;> simp_all
-    have hTphi := hv sf hsfmem
-    have hFphi := hv sf' hsfmem'
-    rw [hssign] at hTphi
-    rw [hsneg] at hFphi
-    have htrue := hTphi.1 rfl
-    have hfalse := hFphi.2 rfl
-    rw [hformEq] at hfalse
-    simp_all  -/
+    obtain ⟨sf, hsfmem, hsfcond⟩ :=
+      List.exists_of_findSome?_eq_some hpair
+    have hpos : sf.isPos = true := by
+      by_contra h; simp only [Bool.not_eq_true] at h; simp [h] at hsfcond
+    simp only [hpos, ite_true, Option.ite_some_none_eq_some] at hsfcond
+    obtain ⟨hany, hphi_eq⟩ := hsfcond
+    obtain ⟨sign, form, label⟩ := sf
+    simp only [SignedFormula.isPos, Sign.isPos] at hpos
+    have hsign : sign = .pos := by cases sign <;> simp_all
+    subst hsign
+    have htrue := (hv ⟨.pos, form, label⟩ hsfmem).1 rfl
+    obtain ⟨sf_neg, hsfneg_mem, hsfneg_cond⟩ :=
+      List.any_eq_true.mp hany
+    simp only [Bool.and_eq_true, Bool.and_eq_true] at hsfneg_cond
+    obtain ⟨⟨hsneg, hformEq⟩, _⟩ := hsfneg_cond
+    have hfeq := prop_beq_eq _ _ hformEq
+    obtain ⟨sign', form', label'⟩ := sf_neg
+    simp only at hfeq
+    have hsn : sign' = .neg := by
+      change (sign' == .neg) = true at hsneg
+      cases sign' with
+      | neg => rfl
+      | pos => change false = true at hsneg; exact absurd hsneg Bool.false_ne_true
+    have hfalse := (hv ⟨sign', form', label'⟩ hsfneg_mem).2
+      (by rw [hsn])
+    rw [hfeq] at hfalse
+    exact absurd htrue (Bool.eq_false_iff.mp hfalse)
 
 /-! ## Main Soundness Theorem -/
 

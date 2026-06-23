@@ -121,7 +121,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: RuleResult and Branch Types [IN PROGRESS]
+### Phase 2: RuleResult and Branch Types [COMPLETED]
 
 **Goal**: Define the generic `RuleResult F L` (4-variant inductive) and `Branch F L` (list alias with namespace helpers). These depend on `SignedFormula` and are needed by both the rule application (Phase 3) and closure detection (Phase 4).
 
@@ -166,7 +166,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Closure Infrastructure [NOT STARTED]
+### Phase 3: Closure Infrastructure [COMPLETED]
 
 **Goal**: Define `ClosureReason`, the `ClosureCondition` typeclass, and three logic-strength instances (classical, intuitionistic, minimal). This is the key abstraction enabling logic-neutral tableau algorithms.
 
@@ -213,7 +213,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: Propositional Rules [NOT STARTED]
+### Phase 4: Propositional Rules [COMPLETED]
 
 **Goal**: Refactor the 8 classical propositional rules from `PropositionalTableau.lean` into the new generic framework, parameterized over `SignedFormula F L` and returning `RuleResult F L`. Preserve the decomposition-function approach.
 
@@ -251,7 +251,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 5: Module Root and Build Integration [NOT STARTED]
+### Phase 5: Module Root and Build Integration [IN PROGRESS]
 
 **Goal**: Wire the new module into the CSLib build system. Create the module root import file, update `Cslib.lean` barrel import, add deprecation notice to `PropositionalTableau.lean`, and run the full CI verification pipeline.
 

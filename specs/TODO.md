@@ -1,5 +1,5 @@
 ---
-next_project_number: 313
+next_project_number: 314
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 313
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,279,290,297,302,303,304 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,278,279,290,297,302,303,304,313 | -- | Bimodal Porting, Foundations, Project Management, ... |
 | 2 | 39,40,181,215,291,292,293,298,305,307,310 | 36,37,180,279,290,297,302,303,304 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
 | 3 | 41,275,299,301,306,309 | 39,40,298,303,304,305 | Foundations, Temporal, Modal, ... |
 | 4 | 300,308,311 | 299,306,307,309,310 | Modal, Algebraic Semantics |
@@ -32,6 +32,10 @@ next_project_number: 313
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
 297 [IMPLEMENTING] — Build shared tableau infrastructure in Foundations/Logic/Tableau/
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
+
+### Project Management
+
+313 [NOT STARTED] — Research and compose a Zulip comment for the CSLib Propositional 
 
 ### Propositional Logic
 
@@ -66,7 +70,7 @@ next_project_number: 313
 
 ### Algebraic Semantics
 
-302 [NOT STARTED] — Define syntactic fragment predicates on Proposition analogous to 
+302 [RESEARCHED] — Define syntactic fragment predicates on Proposition analogous to 
   └─ 305 [NOT STARTED] — Define fragment-specific Hilbert axiom predicates for the two sub
     └─ 306 [NOT STARTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian 
       └─ 308 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
@@ -76,7 +80,7 @@ next_project_number: 313
         └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified  (see above)
   └─ 307 [NOT STARTED] — Construct a HeytingAlgebra from any BrouwerianSemilattice via a f
     └─ 308 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove (see above)
-303 [NOT STARTED] — Define the BrouwerianSemilattice typeclass: SemilatticeInf + Orde
+303 [RESEARCHED] — Define the BrouwerianSemilattice typeclass: SemilatticeInf + Orde
   └─ 306 [NOT STARTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian  (see above)
   └─ 307 [NOT STARTED] — Construct a HeytingAlgebra from any BrouwerianSemilattice via a f (see above)
 304 [NOT STARTED] — Define the HilbertAlgebra typeclass: a structure (H, ⇨, ⊤) satisf
@@ -87,6 +91,16 @@ next_project_number: 313
 ### Uncategorized
 
 ## Tasks
+
+### 313. Zulip propositional logic proof systems overview
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Project Management
+- **Dependencies**: None
+
+**Description**: Research and compose a Zulip comment for the CSLib Propositional Logic topic (https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/) that briefly outlines the three proof systems for propositional logic in CSLib (Hilbert, Natural Deduction, Sequent Calculus), indicating what each system is best equipped to establish (e.g., Hilbert for algebraic completeness, ND for constructive reasoning, Sequent for cut-elimination and decidability), and summarizing what has been completed so far in each. The comment should be concise, informative, and suitable for the Lean community audience
+
+---
 
 ### 312. Unified conservative extension chain
 - **Status**: [NOT STARTED]
@@ -179,20 +193,22 @@ next_project_number: 313
 ---
 
 ### 303. Brouwerian semilattice typeclass
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: None
+- **Research**: [303_brouwerian_semilattice_typeclass/reports/01_brouwerian-semilattice-research.md]
 
 **Description**: Define the BrouwerianSemilattice typeclass: SemilatticeInf + OrderTop + HImp with the adjunction a ≤ b ⇨ c ↔ a ⊓ b ≤ c. This is the algebraic semantics for IPL⟨∧,→,⊤⟩ — the conjunction-implication-verum fragment of intuitionistic logic. Mathlib has no such class; this fills the gap between SemilatticeInf and GeneralizedHeytingAlgebra (which additionally requires SemilatticeSup). Provide the forgetful instance from GeneralizedHeytingAlgebra. Define BrouwerianEvaluate mapping or-bot-free Propositions to elements of a BrouwerianSemilattice using only ⊓ and ⇨ (no ⊔ or ⊥). Prove basic algebraic identities (e.g., a ⇨ a = ⊤, monotonicity of ⇨ in the second argument). Reference: Rasiowa (1974), Köhler (1981). File: Cslib/Foundations/Order/BrouwerianSemilattice.lean.
 
 ---
 
 ### 302. Fragment syntactic predicates
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: None
+- **Research**: [302_fragment_syntactic_predicates/reports/01_fragment-predicates-research.md]
 
 **Description**: Define syntactic fragment predicates on Proposition analogous to the existing IsBotFree: (1) IsOrFree — no disjunction, (2) IsOrBotFree — no disjunction or falsum, (3) IsImpTopOnly — only implication and atoms (no conjunction, disjunction, or falsum). Prove AlgEvaluate independence lemmas for each: or-free evaluation is independent of the join operation, imp-top-only evaluation is independent of join, meet, and bot_val. These predicates and lemmas form the syntactic foundation for all fragment conservative extension results. Also prove closure properties (conjunction/substitution preservation) needed by downstream proof system tasks. File: Cslib/Logics/Propositional/Semantics/Algebra/FragmentPredicates.lean. Extends the pattern established by IsBotFree in Conservative.lean.
 

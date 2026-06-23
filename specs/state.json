@@ -1,6 +1,16 @@
 {
-  "next_project_number": 313,
+  "next_project_number": 314,
   "active_projects": [
+    {
+      "project_number": 313,
+      "project_name": "zulip_propositional_logic_proof_systems_overview",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Research and compose a Zulip comment for the CSLib Propositional Logic topic (https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/) that briefly outlines the three proof systems for propositional logic in CSLib (Hilbert, Natural Deduction, Sequent Calculus), indicating what each system is best equipped to establish (e.g., Hilbert for algebraic completeness, ND for constructive reasoning, Sequent for cut-elimination and decidability), and summarizing what has been completed so far in each. The comment should be concise, informative, and suitable for the Lean community audience",
+      "topic": "Project Management",
+      "created": "2026-06-23T18:39:13Z",
+      "last_updated": "2026-06-23T18:39:13Z"
+    },
     {
       "project_number": 297,
       "project_name": "foundations_tableau_infrastructure",
@@ -541,28 +551,42 @@
     {
       "project_number": 302,
       "project_name": "fragment_syntactic_predicates",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Define syntactic fragment predicates on Proposition analogous to the existing IsBotFree: (1) IsOrFree — no disjunction, (2) IsOrBotFree — no disjunction or falsum, (3) IsImpTopOnly — only implication and atoms (no conjunction, disjunction, or falsum). Prove AlgEvaluate independence lemmas for each: or-free evaluation is independent of the join operation, imp-top-only evaluation is independent of join, meet, and bot_val. These predicates and lemmas form the syntactic foundation for all fragment conservative extension results. Also prove closure properties (conjunction/substitution preservation) needed by downstream proof system tasks. File: Cslib/Logics/Propositional/Semantics/Algebra/FragmentPredicates.lean. Extends the pattern established by IsBotFree in Conservative.lean.",
       "created": "2026-06-23T22:00:00Z",
-      "last_updated": "2026-06-23T22:00:00Z",
-      "next_artifact_number": 1,
-      "artifacts": [],
-      "dependencies": []
+      "last_updated": "2026-06-23T22:30:00Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/302_fragment_syntactic_predicates/reports/01_fragment-predicates-research.md",
+          "type": "report",
+          "summary": "Fragment predicates research: IsOrFree, IsOrBotFree, IsImpTopOnly patterns and independence lemmas"
+        }
+      ],
+      "dependencies": [],
+      "session_id": "sess_1782239228_7ea60f_302"
     },
     {
       "project_number": 303,
       "project_name": "brouwerian_semilattice_typeclass",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Define the BrouwerianSemilattice typeclass: SemilatticeInf + OrderTop + HImp with the adjunction a ≤ b ⇨ c ↔ a ⊓ b ≤ c. This is the algebraic semantics for IPL⟨∧,→,⊤⟩ — the conjunction-implication-verum fragment of intuitionistic logic. Mathlib has no such class; this fills the gap between SemilatticeInf and GeneralizedHeytingAlgebra (which additionally requires SemilatticeSup). Provide the forgetful instance from GeneralizedHeytingAlgebra. Define BrouwerianEvaluate mapping or-bot-free Propositions to elements of a BrouwerianSemilattice using only ⊓ and ⇨ (no ⊔ or ⊥). Prove basic algebraic identities (e.g., a ⇨ a = ⊤, monotonicity of ⇨ in the second argument). Reference: Rasiowa (1974), Köhler (1981). File: Cslib/Foundations/Order/BrouwerianSemilattice.lean.",
       "created": "2026-06-23T22:00:00Z",
-      "last_updated": "2026-06-23T22:00:00Z",
-      "next_artifact_number": 1,
-      "artifacts": [],
-      "dependencies": []
+      "last_updated": "2026-06-23T22:30:00Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/303_brouwerian_semilattice_typeclass/reports/01_brouwerian-semilattice-research.md",
+          "type": "report",
+          "summary": "Brouwerian semilattice research: class definition, ~20 algebraic lemmas, forgetful instance from GHA"
+        }
+      ],
+      "dependencies": [],
+      "session_id": "sess_1782239228_7ea60f_303"
     },
     {
       "project_number": 304,

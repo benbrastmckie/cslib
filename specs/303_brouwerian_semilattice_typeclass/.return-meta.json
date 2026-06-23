@@ -1,14 +1,15 @@
 {
   "status": "in_progress",
-  "started_at": "2026-06-23T00:00:00Z",
+  "started_at": "2026-06-23T23:00:00Z",
   "artifacts": [],
   "partial_progress": {
     "stage": "initializing",
-    "details": "Agent started, parsing delegation context"
+    "details": "Planner agent started, parsing delegation context"
   },
   "metadata": {
-    "agent_type": "cslib-research-agent",
+    "session_id": "sess_1782239228_7ea60f_303",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+    "delegation_path": ["orchestrator", "plan", "planner-agent"]
   }
 }

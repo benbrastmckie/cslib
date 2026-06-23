@@ -27,14 +27,14 @@ next_project_number: 281
 
 ### Foundations
 
-269 [RESEARCHING] — Build generic bounded proof-search tactic for InferenceSystem. Cr
+269 [RESEARCHED] — Build generic bounded proof-search tactic for InferenceSystem. Cr
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-266 [PLANNED] — Research improvements to Propositional/ and Foundations/Logic/ in
+266 [IMPLEMENTING] — Research improvements to Propositional/ and Foundations/Logic/ in
 279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
 280 [NOT STARTED] — Research the current state of propositional proof systems in CSLi
 
@@ -95,10 +95,11 @@ next_project_number: 281
 ---
 
 ### 269. Hilbert search tactic
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: Task 268
+- **Research**: [269_hilbert_search_tactic/reports/01_team-research.md]
 
 **Description**: Build generic bounded proof-search tactic for InferenceSystem. Create a bounded DFS proof-search tactic (e.g., hilbert_search) that works generically over the InferenceSystem typeclass. Inspired by BimodalLogic modal_search (~700 lines) but adapted to cslib polymorphic architecture. Search strategies: axiom matching, assumption lookup, modus ponens decomposition, necessitation + K rules, temporal rules. Must handle the InferenceSystem S α typeclass generically (not hardcoded to a specific DerivationTree). Configurable search depth. Should work across Propositional, Modal, Temporal, and Bimodal systems. Depends on task 268 (normalization tags help the tactic work on clean goals). Needs Zulip discussion before PR since this is novel cross-cutting infrastructure for cslib. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake
 
@@ -118,7 +119,7 @@ next_project_number: 281
 ---
 
 ### 266. Research propositional and foundations improvements
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: formal
 - **Topic**: Propositional Logic
 - **Dependencies**: None

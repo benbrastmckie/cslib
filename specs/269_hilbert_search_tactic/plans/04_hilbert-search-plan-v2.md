@@ -121,7 +121,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: MetaM Search Core and Tactic Wrapper [NOT STARTED]
+### Phase 1: MetaM Search Core and Tactic Wrapper [COMPLETED]
 
 **Goal**: Implement the complete MetaM-based bounded DFS search function and the tactic
 wrapper in a single file, covering propositional and modal axioms.
@@ -166,7 +166,7 @@ wrapper in a single file, covering propositional and modal axioms.
 
 ---
 
-### Phase 2: Comprehensive Test Suite [NOT STARTED]
+### Phase 2: Comprehensive Test Suite [COMPLETED]
 
 **Goal**: Create the test file with all golden test cases from the research, covering
 positive tests (Tier 1 and Tier 2), negative tests, and depth-sensitive tests.
@@ -211,7 +211,7 @@ positive tests (Tier 1 and Tier 2), negative tests, and depth-sensitive tests.
 
 ---
 
-### Phase 3: Temporal and Extended Axiom Coverage [NOT STARTED]
+### Phase 3: Temporal and Extended Axiom Coverage [COMPLETED]
 
 **Goal**: Extend the axiom table to cover temporal axioms and additional connective axioms,
 ensuring the tactic works across the full CSLib proof system hierarchy.
@@ -248,7 +248,7 @@ ensuring the tactic works across the full CSLib proof system hierarchy.
 
 ---
 
-### Phase 4: CI Verification and Cleanup [NOT STARTED]
+### Phase 4: CI Verification and Cleanup [COMPLETED]
 
 **Goal**: Pass the full CSLib CI pipeline and finalize for PR submission.
 

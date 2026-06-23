@@ -77,6 +77,7 @@ public import Cslib.Foundations.Data.RelatesInSteps
 public import Cslib.Foundations.Data.Set.Saturation
 public import Cslib.Foundations.Data.StackTape
 public import Cslib.Foundations.Lint.Basic
+public import Cslib.Foundations.Logic.Automation.HilbertSearch
 public import Cslib.Foundations.Logic.Axioms
 public import Cslib.Foundations.Logic.Connectives
 public import Cslib.Foundations.Logic.InferenceSystem

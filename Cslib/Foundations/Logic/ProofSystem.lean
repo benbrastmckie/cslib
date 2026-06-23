@@ -44,10 +44,17 @@ Opaque tag types (`Propositional.HilbertCl`, `Propositional.HilbertMin`,
 identifiers. Concrete `InferenceSystem` and `HasAxiom*` instances will be
 registered when derivation trees are defined.
 
-## Note
+## Metalogic
 
-This module defines the **interface** only. Concrete instances require
-derivation trees (not yet ported) and are future work.
+Hilbert-level algebraic completeness, conservative extension, and Glivenko theorems are
+established in `Cslib.Logics.Propositional.Semantics.Algebra.*`:
+- `MPL.hilbert_alg_complete`, `IPL.hilbert_alg_complete`, `CPL.hilbert_alg_complete`
+  (Hilbert completeness, no `[DecidableEq Atom]` required)
+- `hilbertIplConservativeOverMpl`, `hilbertGlivenko` (Hilbert-primary)
+- `ipl_conservative_over_mpl`, `glivenko` (ND corollaries via algebraic bridges)
+
+The Hilbert system is primary: ND-level results are derived as corollaries through algebraic
+bridges that connect `DerivableIn` and `Derivable` via validity in the appropriate algebra class.
 -/
 
 @[expose] public section

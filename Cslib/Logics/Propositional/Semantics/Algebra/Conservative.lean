@@ -7,8 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Propositional.Semantics.Algebra
-public import Cslib.Logics.Propositional.Semantics.Algebra.Completeness
-public import Cslib.Logics.Propositional.NaturalDeduction.Basic
 public import Mathlib.Tactic.ToAdditive
 public import Mathlib.Order.WithBot
 
@@ -16,13 +14,12 @@ public import Mathlib.Order.WithBot
 
 This module defines the `IsBotFree` predicate for propositions that do not mention `⊥`,
 proves that algebraic evaluation of bot-free formulas is independent of `bot_val`,
-and establishes validity subsumption: `GHAValid → HAValid → BAValid`.
+establishes validity subsumption (`GHAValid → HAValid → BAValid`), and provides the
+`WithBot` Heyting algebra construction with its embedding lemma.
 
-The conservative extension theorem (`ipl_conservative_over_mpl`) states that IPL is a
-conservative extension of MPL for bot-free formulas: any bot-free formula derivable in IPL
-is already derivable in MPL. The proof uses the `WithBot` embedding: given any
-`GeneralizedHeytingAlgebra G`, adjoining a fresh bottom element yields a `HeytingAlgebra
-(WithBot G)`, and bot-free evaluation commutes with the coercion `G → WithBot G`.
+These algebraic building blocks are used by the Hilbert-primary conservative extension theorem
+`hilbertIplConservativeOverMpl` in `HilbertConservativeGlivenko.lean`. The ND corollary
+`ipl_conservative_over_mpl` is also located there, derived via algebraic bridges.
 
 ## References
 
@@ -35,7 +32,7 @@ universe u v
 
 namespace Cslib.Logic.PL
 
-open Proposition Theory InferenceSystem DerivableIn
+open Proposition
 
 /-! ## Bot-Free Predicate -/
 
@@ -148,26 +145,5 @@ theorem coe_AlgEvaluate {Atom : Type*} {G : Type*} [GeneralizedHeytingAlgebra G]
   | or a b iha ihb =>
     simp [Proposition.IsBotFree] at hBF
     simp only [AlgEvaluate_or, iha hBF.1, ihb hBF.2, ← WithBot.coe_sup]
-
-/-! ## Conservative Extension -/
-
-variable {Atom : Type u} [DecidableEq Atom]
-
-/-- IPL is a conservative extension of MPL for bot-free formulas: if a bot-free formula is
-derivable in IPL, then it is already derivable in MPL.
-
-The proof proceeds via the `WithBot` embedding: given any `GeneralizedHeytingAlgebra G` and
-valuation `v`, instantiate IPL algebraic completeness at `WithBot G` with the lifted valuation
-`↑∘v`. The embedding lemma `coe_AlgEvaluate` rewrites the resulting statement back to `G`,
-and injectivity of `↑ : G → WithBot G` closes the goal. -/
-theorem ipl_conservative_over_mpl {A : Proposition Atom}
-    (hBF : A.IsBotFree = true) (h : DerivableIn (IPL (Atom := Atom)) A) :
-    DerivableIn (MPL (Atom := Atom)) A := by
-  rw [_root_.Cslib.Logic.PL.MPL.alg_complete]
-  intro G _ v bot_val
-  have hIPL := _root_.Cslib.Logic.PL.IPL.alg_complete.mp h (H := WithBot G)
-                 (fun x => (v x : WithBot G))
-  rw [coe_AlgEvaluate v bot_val A hBF] at hIPL
-  exact WithBot.coe_eq_coe.mp hIPL
 
 end Cslib.Logic.PL

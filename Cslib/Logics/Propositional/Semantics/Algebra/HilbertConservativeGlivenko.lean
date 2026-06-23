@@ -13,17 +13,18 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.Completeness
 
 /-! # Hilbert-Primary Conservative Extension and Glivenko Theorems
 
-This module provides Hilbert-primary restatements of the conservative extension theorem and
-Glivenko's theorem, algebraic bridges between the ND (`DerivableIn`) and Hilbert (`Derivable`)
-derivability predicates for MPL, IPL, and CPL, and ND corollaries derived via those bridges.
+This module is the canonical source for the conservative extension theorem and Glivenko's
+theorem. The Hilbert-primary versions are proved directly; the ND versions are derived as
+corollaries via algebraic bridges.
 
 ## Hilbert-Primary Theorems
 
 - `hilbertIplConservativeOverMpl`: IPL is a conservative extension of MPL for bot-free formulas
   stated directly in terms of `Derivable IntPropAxiom` and `Derivable MinPropAxiom`.
+  Does not require `[DecidableEq Atom]`.
 - `hilbertGlivenko`: Glivenko's theorem for the Hilbert system: CPL derivability of `φ` implies
   IPL derivability of `¬¬φ`, stated in terms of `Derivable PropositionalAxiom` and
-  `Derivable IntPropAxiom`.
+  `Derivable IntPropAxiom`. Does not require `[DecidableEq Atom]`.
 
 ## Algebraic Bridges
 
@@ -34,21 +35,18 @@ Three equivalences connecting the ND and Hilbert systems via algebraic completen
 - `derivableInCplIffDerivableProp`: `DerivableIn (IPL ∪ CPL : Theory Atom) φ ↔`
   `Derivable PropositionalAxiom φ`
 
-## ND Corollaries
+## ND Corollaries (Canonical Names)
 
-- `iplConservativeOverMpl'`: ND conservative extension as a corollary of
-  `hilbertIplConservativeOverMpl`.
-- `glivenko'`: ND Glivenko as a corollary of `hilbertGlivenko`.
+- `ipl_conservative_over_mpl`: ND conservative extension, derived as a corollary of
+  `hilbertIplConservativeOverMpl` via the algebraic bridges.
+- `glivenko`: ND Glivenko, derived as a corollary of `hilbertGlivenko` via the algebraic bridges.
 
-## Proof Strategy
+## Architecture
 
-Each Hilbert-primary theorem routes through algebraic validity:
-1. Apply Hilbert completeness (`.mp`) to convert `Derivable Axioms φ` to algebraic validity.
-2. Apply the algebraic core (`coe_AlgEvaluate` or `glivenko_algebraic`).
-3. Apply Hilbert completeness (`.mpr`) to recover `Derivable Axioms' φ`.
-
-Each algebraic bridge routes through both ND completeness (`alg_complete`) and Hilbert
-completeness (`hilbert_alg_complete`), with the algebra as the common intermediate.
+The Hilbert system is primary: theorems are proved directly using Hilbert algebraic completeness
+(`hilbert_alg_complete`) and algebraic infrastructure (`coe_AlgEvaluate`, `glivenko_algebraic`).
+The ND system results are derived as corollaries through the algebraic bridges, which route
+through both ND completeness (`alg_complete`) and Hilbert completeness as the common intermediate.
 
 ## References
 
@@ -78,8 +76,8 @@ The proof routes through algebraic validity:
    the coercion `G → WithBot G`).
 3. `MPL.hilbert_alg_complete.mpr` converts `GHAValid φ` back to `Derivable MinPropAxiom φ`.
 
-This mirrors the algebraic core of `ipl_conservative_over_mpl` in `Conservative.lean`,
-but stated directly in the Hilbert setting without the `[DecidableEq Atom]` constraint. -/
+This is the primary version, stated directly in the Hilbert setting without the
+`[DecidableEq Atom]` constraint. The ND corollary `ipl_conservative_over_mpl` is below. -/
 theorem hilbertIplConservativeOverMpl {Atom : Type u} {φ : PL.Proposition Atom}
     (hBF : φ.IsBotFree = true) (h : Derivable (@IntPropAxiom Atom) φ) :
     Derivable (@MinPropAxiom Atom) φ := by
@@ -99,8 +97,8 @@ The proof routes through algebraic validity:
 2. `glivenko_algebraic` lifts `BAValid φ` to `HAValid (¬¬φ)`.
 3. `IPL.hilbert_alg_complete.mpr` converts `HAValid (¬¬φ)` back to `Derivable IntPropAxiom (¬¬φ)`.
 
-This mirrors the algebraic core of `glivenko` in `Glivenko.lean`, but stated directly in the
-Hilbert setting without the `[DecidableEq Atom]` constraint. -/
+This is the primary version, stated directly in the Hilbert setting without the
+`[DecidableEq Atom]` constraint. The ND corollary `glivenko` is below. -/
 theorem hilbertGlivenko {Atom : Type u} {φ : PL.Proposition Atom}
     (h : Derivable (@PropositionalAxiom Atom) φ) :
     Derivable (@IntPropAxiom Atom) (¬¬φ) := by
@@ -181,19 +179,25 @@ theorem derivableInCplIffDerivableProp {φ : PL.Proposition Atom} :
 
 /-! ## ND Corollaries via Bridges -/
 
-/-- **ND conservative extension (bridge corollary)**: IPL is a conservative extension of MPL
-for bot-free formulas, in the ND setting. This is a corollary of `hilbertIplConservativeOverMpl`
-via the algebraic bridges `derivableInIplIffDerivableInt` and `derivableInMplIffDerivableMin`. -/
-theorem iplConservativeOverMpl' {A : PL.Proposition Atom}
+/-- **ND conservative extension**: IPL is a conservative extension of MPL for bot-free formulas.
+If a bot-free formula is derivable in IPL, then it is already derivable in MPL.
+
+This is the canonical ND version, derived as a corollary of the Hilbert-primary theorem
+`hilbertIplConservativeOverMpl` via the algebraic bridges `derivableInIplIffDerivableInt`
+and `derivableInMplIffDerivableMin`. -/
+theorem ipl_conservative_over_mpl {A : PL.Proposition Atom}
     (hBF : A.IsBotFree = true) (h : DerivableIn (IPL (Atom := Atom)) A) :
     DerivableIn (∅ : Theory Atom) A :=
   derivableInMplIffDerivableMin.mpr
     (hilbertIplConservativeOverMpl hBF (derivableInIplIffDerivableInt.mp h))
 
-/-- **ND Glivenko (bridge corollary)**: if `A` is derivable in `IPL ∪ CPL`, then `¬¬A` is
-derivable in IPL. This is a corollary of `hilbertGlivenko` via the algebraic bridges
-`derivableInCplIffDerivableProp` and `derivableInIplIffDerivableInt`. -/
-theorem glivenko' {A : PL.Proposition Atom}
+/-- **Glivenko's theorem**: if `A` is derivable in CPL (`IPL ∪ CPL`), then `¬¬A` is derivable
+in IPL.
+
+This is the canonical ND version, derived as a corollary of the Hilbert-primary theorem
+`hilbertGlivenko` via the algebraic bridges `derivableInCplIffDerivableProp` and
+`derivableInIplIffDerivableInt`. -/
+theorem glivenko {A : PL.Proposition Atom}
     (h : DerivableIn (IPL ∪ CPL : Theory Atom) A) :
     DerivableIn (IPL : Theory Atom) (¬¬A) :=
   derivableInIplIffDerivableInt.mpr

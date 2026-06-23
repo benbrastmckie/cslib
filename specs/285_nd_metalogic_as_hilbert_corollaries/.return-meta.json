@@ -1,0 +1,36 @@
+{
+  "status": "implemented",
+  "started_at": "2026-06-22T00:00:00Z",
+  "artifacts": [
+    {
+      "path": "specs/285_nd_metalogic_as_hilbert_corollaries/reports/01_nd-metalogic-corollaries.md",
+      "type": "report",
+      "summary": "Full dependency analysis and replacement strategy for ND metalogic refactoring"
+    },
+    {
+      "path": "specs/285_nd_metalogic_as_hilbert_corollaries/plans/01_nd-metalogic-plan.md",
+      "type": "plan",
+      "summary": "3-phase implementation plan: remove ND proofs, update docs, CI verification"
+    },
+    {
+      "path": "specs/285_nd_metalogic_as_hilbert_corollaries/summaries/01_nd-metalogic-summary.md",
+      "type": "summary",
+      "summary": "Execution summary: all 3 phases complete, full CI passes"
+    }
+  ],
+  "partial_progress": {
+    "stage": "all_phases_complete",
+    "details": "All 3 phases complete. Full CI passes: lake build, lake test, checkInitImports, lint-style."
+  },
+  "verification": {
+    "build_passed": true,
+    "tests_passed": true,
+    "debt_free": true
+  },
+  "metadata": {
+    "session_id": "sess_1782187168_2b1b69_285",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+  }
+}

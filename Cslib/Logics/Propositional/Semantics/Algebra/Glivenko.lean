@@ -6,22 +6,25 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Propositional.Semantics.Algebra.Completeness
-public import Cslib.Logics.Propositional.NaturalDeduction.Basic
+public import Cslib.Logics.Propositional.Semantics.Algebra
 public import Mathlib.Order.Heyting.Regular
 
-/-! # Glivenko's Theorem
+/-! # Algebraic Glivenko Lemma
 
-This module proves Glivenko's theorem: if a formula `A` is derivable in CPL (classical
-propositional logic), then `¬¬A` is derivable in IPL (intuitionistic propositional logic).
+This module proves the algebraic core of Glivenko's theorem: if a formula `A` is valid in every
+BooleanAlgebra, then `¬¬A` is valid in every HeytingAlgebra.
 
-The proof uses the algebraic approach via the regular elements of a Heyting algebra.
-The **regular elements** of a HeytingAlgebra `H` (those `a` satisfying `a^cc = a`) form a
-BooleanAlgebra (Mathlib's `Heyting.Regular.instBooleanAlgebra`). By lifting a valuation
-`v : Atom → H` to `v' : Atom → Heyting.Regular H` via the double-complement map, BA-validity
-of `A` in `Heyting.Regular H` implies HA-validity of `¬¬A` in `H`.
+The proof uses the regular elements of a Heyting algebra. The **regular elements** of a
+HeytingAlgebra `H` (those `a` satisfying `a^cc = a`) form a BooleanAlgebra (Mathlib's
+`Heyting.Regular.instBooleanAlgebra`). By lifting a valuation `v : Atom → H` to
+`v' : Atom → Heyting.Regular H` via the double-complement map, BA-validity of `A` in
+`Heyting.Regular H` implies HA-validity of `¬¬A` in `H`.
 
-The algebraic core is `glivenko_algebraic`, and the proof-theoretic result is `glivenko`.
+The main result is `glivenko_algebraic`. The proof-theoretic results (both Hilbert-primary
+`hilbertGlivenko` and ND corollary `glivenko`) are in `HilbertConservativeGlivenko.lean`.
+
+This module also provides theory instances `IsIntuitionistic (IPL ∪ CPL)` and
+`IsClassical (IPL ∪ CPL)`.
 
 ## References
 
@@ -35,7 +38,7 @@ universe u
 
 namespace Cslib.Logic.PL
 
-open Proposition Theory Cslib.Logic.InferenceSystem Cslib.Logic.InferenceSystem.DerivableIn
+open Proposition Theory
 
 /-! ## Embedding into Regular Subalgebra -/
 
@@ -106,37 +109,5 @@ instance : IsIntuitionistic (IPL ∪ CPL : Theory Atom) where
 /-- `IPL ∪ CPL` is a classical theory: the DNE axiom `¬¬A → A` is in `CPL ⊆ IPL ∪ CPL`. -/
 instance : IsClassical (IPL ∪ CPL : Theory Atom) where
   dne A := Set.mem_union_right _ (Set.mem_range.mpr ⟨A, rfl⟩)
-
-/-! ## Proof-Theoretic Glivenko -/
-
-/-- Glivenko's theorem: if `A` is derivable in `IPL ∪ CPL` (classical propositional logic),
-then `¬¬A` is derivable in IPL (intuitionistic propositional logic).
-
-The proof uses algebraic completeness:
-1. Convert the CPL derivability hypothesis via `alg_complete_classical` to BA-validity
-   (with the theory hypothesis that `IPL ∪ CPL` axioms evaluate to `⊤`).
-2. Apply `glivenko_algebraic` to get HA-validity of `¬¬A`.
-3. Convert back via `IPL.alg_complete`.
-
-The theory hypothesis for `IPL ∪ CPL` is discharged by case analysis:
-- `IPL` axioms `⊥ → C` evaluate to `⊤` by `simp [AlgEvaluate]`.
-- `CPL` axioms `¬¬C → C` evaluate to `⊤` because in any `BooleanAlgebra`,
-  `compl_compl` gives `C^cc = C`, so `(C^c ⇨ ⊥)^c ⇨ ⊥ ⇨ C = ⊤` reduces to `C ⇨ C = ⊤`. -/
-theorem glivenko {A : Proposition Atom}
-    (h : DerivableIn (IPL ∪ CPL : Theory Atom) A) :
-    DerivableIn (IPL : Theory Atom) (¬¬A) := by
-  rw [alg_complete_classical] at h
-  rw [IPL.alg_complete]
-  intro H _ v
-  apply glivenko_algebraic
-  intro H' _ v'
-  apply h v'
-  intro B hB
-  rcases (Set.mem_union B IPL CPL).mp hB with hIPL | hCPL
-  · obtain ⟨C, rfl⟩ := Set.mem_range.mp hIPL
-    simp [AlgEvaluate]
-  · obtain ⟨C, rfl⟩ := Set.mem_range.mp hCPL
-    simp only [Proposition.neg, AlgEvaluate_imp, AlgEvaluate_bot]
-    rw [himp_eq_top_iff, HeytingAlgebra.himp_bot, HeytingAlgebra.himp_bot, compl_compl]
 
 end Cslib.Logic.PL

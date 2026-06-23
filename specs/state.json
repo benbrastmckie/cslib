@@ -430,7 +430,7 @@
     {
       "project_number": 285,
       "project_name": "nd_metalogic_as_hilbert_corollaries",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Refactor the ND metalogical API so that all ND-level results (algebraic completeness, conservative extension, Glivenko) are derived as corollaries of the Hilbert-primary versions via the hilbert_iff_nd bridge theorems. Remove the old ND-primary proofs (or move to a Legacy/ module if needed for transition). Ensure all downstream imports and dependent modules (modal, temporal, bimodal) still compile. Update ProofSystem.lean documentation to reflect the Hilbert-primary architecture. Run full CI pipeline (lake build, lake test, lake lint, lake exe checkInitImports).",
       "topic": "Propositional Logic",
@@ -439,7 +439,26 @@
         284
       ],
       "created": "2026-06-23T04:00:00Z",
-      "last_updated": "2026-06-23T04:00:00Z"
+      "last_updated": "2026-06-23T05:49:00Z",
+      "session_id": "sess_1782187168_2b1b69_285",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/285_nd_metalogic_as_hilbert_corollaries/reports/01_nd-metalogic-corollaries.md",
+          "summary": "Dependency analysis and replacement strategy"
+        },
+        {
+          "type": "plan",
+          "path": "specs/285_nd_metalogic_as_hilbert_corollaries/plans/01_nd-metalogic-plan.md",
+          "summary": "3-phase implementation plan"
+        },
+        {
+          "type": "summary",
+          "path": "specs/285_nd_metalogic_as_hilbert_corollaries/summaries/01_nd-metalogic-summary.md",
+          "summary": "Execution summary: all phases complete, CI passes"
+        }
+      ],
+      "completion_summary": "Refactored ND metalogic API: removed ND-primary proofs from Conservative.lean and Glivenko.lean, renamed corollaries to canonical names in HilbertConservativeGlivenko.lean, updated documentation in ProofSystem.lean and Algebra.lean. Full CI passes."
     }
   ],
   "repository_health": {

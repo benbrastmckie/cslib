@@ -1,0 +1,21 @@
+{
+  "status": "planned",
+  "summary": "3-phase plan: refactor ND-primary proofs to Hilbert corollaries, update documentation, verify CI pipeline",
+  "blockers": [],
+  "continuation_context": null,
+  "artifacts": [
+    {
+      "path": "specs/285_nd_metalogic_as_hilbert_corollaries/reports/01_nd-metalogic-corollaries.md",
+      "type": "report",
+      "summary": "Full dependency analysis of ND metalogic files, bridge availability, replacement strategy with revised module layout, and CI verification plan"
+    },
+    {
+      "path": "specs/285_nd_metalogic_as_hilbert_corollaries/plans/01_nd-metalogic-plan.md",
+      "type": "plan",
+      "summary": "3-phase implementation plan: remove ND-primary proofs, rename corollaries, update documentation, run CI"
+    }
+  ],
+  "phases_completed": 0,
+  "phases_total": 3,
+  "next_action_hint": "implement"
+}

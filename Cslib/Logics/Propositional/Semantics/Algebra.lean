@@ -46,11 +46,18 @@ it can be any element of the algebra. At the `HeytingAlgebra` and `BooleanAlgebr
 `bot_val = ⊥` is the unique canonical choice (and `HAValid`/`BAValid` hardcode it, eliminating
 the parameter entirely).
 
-The general completeness theorem `Theory.alg_complete` unifies the three validity predicates:
+The ND completeness theorem `Theory.alg_complete` unifies the three validity predicates:
 a formula `A` is derivable in theory `T` iff `AlgEvaluate v bot_val A = ⊤` for every GHA,
 every valuation `v`, every `bot_val`, and every `T`-valid assignment (via `AlgTValid`). The
-tier-specific results (`MPL.alg_complete`, `IPL.alg_complete`, `alg_complete_classical`)
+tier-specific ND results (`MPL.alg_complete`, `IPL.alg_complete`, `alg_complete_classical`)
 specialize this by fixing the algebra class and (for HA/BA) setting `bot_val = ⊥`.
+
+The Hilbert-primary completeness theorems (`MPL.hilbert_alg_complete`, `IPL.hilbert_alg_complete`,
+`CPL.hilbert_alg_complete`) are proved independently via the Hilbert Lindenbaum algebra and
+do not require `[DecidableEq Atom]`. Conservative extension (`hilbertIplConservativeOverMpl`)
+and Glivenko (`hilbertGlivenko`) are proved directly in the Hilbert setting, with their ND
+counterparts (`ipl_conservative_over_mpl`, `glivenko`) derived as corollaries via algebraic
+bridges. See `HilbertConservativeGlivenko.lean` for the unified Hilbert-primary module.
 
 ## References
 

@@ -11,7 +11,7 @@ next_project_number: 286
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,266,269,278,279,280,285 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,252,266,269,278,279,280 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41,275 | 39,40 | Foundations |
 
@@ -37,7 +37,6 @@ next_project_number: 286
 266 [IMPLEMENTING] — Research improvements to Propositional/ and Foundations/Logic/ in
 279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
 280 [NOT STARTED] — Research the current state of propositional proof systems in CSLi
-285 [NOT STARTED] — Refactor the ND metalogical API so that all ND-level results (alg
 
 ### Temporal Logic
 
@@ -54,10 +53,13 @@ next_project_number: 286
 ## Tasks
 
 ### 285. Nd metalogic as hilbert corollaries
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 283, Task 284
+- **Research**: [285_nd_metalogic_as_hilbert_corollaries/reports/01_nd-metalogic-corollaries.md]
+- **Plan**: [285_nd_metalogic_as_hilbert_corollaries/plans/01_nd-metalogic-plan.md]
+- **Summary**: [285_nd_metalogic_as_hilbert_corollaries/summaries/01_nd-metalogic-summary.md]
 
 **Description**: Refactor the ND metalogical API so that all ND-level results (algebraic completeness, conservative extension, Glivenko) are derived as corollaries of the Hilbert-primary versions via the hilbert_iff_nd bridge theorems. Remove the old ND-primary proofs (or move to a Legacy/ module if needed for transition). Ensure all downstream imports and dependent modules (modal, temporal, bimodal) still compile. Update ProofSystem.lean documentation to reflect the Hilbert-primary architecture. Run full CI pipeline (lake build, lake test, lake lint, lake exe checkInitImports).
 

@@ -22,7 +22,7 @@ to F derivations via the substitution sigma[q -> bot].
 - `embed_unembed_qfree`: embedFormula is left-inverse of unembedFormula for q-free formulas
 - `substFreshWith`: Parameterized substitution replacing freshAtom with atom (Sum.inl a)
 - `substAxiomFresh`: Axiom closure under parameterized substitution
-- `lift_derivation_qfree`: Main conservative extension theorem
+- `liftDerivationQfree`: Main conservative extension theorem
 
 ## Key Insight
 
@@ -688,7 +688,7 @@ This is the key result enabling the irreflexivity proof. The proof works by:
 2. Choosing a fresh atom a not among them
 3. Applying liftDerivationWith a to convert the ExtDerivationTree to a DerivationTree
 4. Using liftFormula_embed to simplify the context and conclusion -/
-theorem lift_derivation_qfree [Infinite Atom]
+theorem liftDerivationQfree [Infinite Atom]
     {fc : FrameClass} (L : List (Formula Atom)) (phi : Formula Atom)
     (d : ExtDerivationTree fc (L.map embedFormula) (embedFormula phi)) :
     Nonempty (DerivationTree fc L phi) := by

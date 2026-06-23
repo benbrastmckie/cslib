@@ -48,7 +48,7 @@ are provided for key paths through the cube.
 ## References
 
 See `AxiomSubsumption.lean` for the per-edge subsumption lemmas and `Lifting.lean`
-for the generic `lift_derivation` and `Derivable_mono` foundations.
+for the generic `liftDerivation` and `Derivable_mono` foundations.
 -/
 
 @[expose] public section

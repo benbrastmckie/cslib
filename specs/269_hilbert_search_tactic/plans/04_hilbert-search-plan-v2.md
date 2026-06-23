@@ -1,7 +1,7 @@
 # Implementation Plan: Generic Hilbert Proof-Search Tactic (v2)
 
 - **Task**: 269 - hilbert_search_tactic
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 8 hours
 - **Dependencies**: Task 268 (normalization tags -- completed)
 - **Research Inputs**: specs/269_hilbert_search_tactic/reports/01_team-research.md, specs/269_hilbert_search_tactic/reports/03_team-research.md

@@ -13,7 +13,7 @@ next_project_number: 294
 |------|-------|------------|--------|
 | 1 | 36,37,180,226,241,245,252,266,279,286,287 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 2 | 39,40,181,215,278,288,289,290,291,292 | 36,37,180,266,279 | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 3 | 41,269,275,293 | 39,40,278,290 | Foundations, Propositional Logic |
+| 3 | 41,275,293 | 39,40,290 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -28,9 +28,7 @@ next_project_number: 294
 ### Foundations
 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
-269 [PLANNED] — Build generic bounded proof-search tactic for InferenceSystem. Cr
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
-  └─ 269 [PLANNED] — Build generic bounded proof-search tactic for InferenceSystem. Cr (see above)
 
 ### Propositional Logic
 
@@ -238,7 +236,7 @@ next_project_number: 294
 ---
 
 ### 269. Hilbert search tactic
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: Task 268, Task 278

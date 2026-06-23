@@ -1,0 +1,35 @@
+{
+  "name": "literature",
+  "version": "1.0.0",
+  "description": "Manage specs/literature/ — scan, convert PDFs/DJVUs, maintain index.json, and search/import from Zotero",
+  "dependencies": [
+    "core",
+    "filetypes"
+  ],
+  "routing_exempt": true,
+  "provides": {
+    "agents": [
+      "literature-agent.md"
+    ],
+    "commands": [
+      "literature.md",
+      "cite.md"
+    ],
+    "skills": [
+      "skill-literature",
+      "skill-cite"
+    ],
+    "scripts": [
+      "scripts/zotero-search.sh",
+      "scripts/cite-extract.sh"
+    ]
+  },
+  "merge_targets": {
+    "claudemd": {
+      "source": "EXTENSION.md",
+      "target": ".claude/CLAUDE.md",
+      "section_id": "extension_literature"
+    }
+  },
+  "hooks": {}
+}

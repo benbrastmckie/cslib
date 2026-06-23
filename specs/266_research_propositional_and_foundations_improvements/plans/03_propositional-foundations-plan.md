@@ -1,7 +1,7 @@
 # Implementation Plan: Propositional and Foundations Improvements
 
 - **Task**: 266 - Research Propositional and Foundations Improvements
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 7 hours
 - **Dependencies**: None (Task 265 already resolved ipl_conservative_over_mpl sorry)
 - **Research Inputs**: reports/01_team-research.md, reports/02_team-research.md
@@ -70,7 +70,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Bridge Algebraic Completeness to Hilbert [NOT STARTED]
+### Phase 1: Bridge Algebraic Completeness to Hilbert [IN PROGRESS]
 
 **Goal**: Compose the existing `alg_complete` theorems (ND-level) with the `hilbert_iff_nd` bridge to produce Hilbert-level algebraic completeness corollaries.
 

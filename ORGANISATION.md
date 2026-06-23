@@ -41,9 +41,11 @@ Foundations/
 │   │   │   └── S5.lean        -- S5-specific derived theorems
 │   │   └── Temporal/          -- Temporal logic theorems
 │   │       └── TemporalDerived.lean -- G/H distribution, transitivity
-│   └── Metalogic/
-│       ├── Consistency.lean       -- Consistency and maximal consistency
-│       └── DeductionHelpers.lean  -- Deduction theorem helpers
+│   ├── Metalogic/
+│   │   ├── Consistency.lean       -- Consistency and maximal consistency
+│   │   └── DeductionHelpers.lean  -- Deduction theorem helpers
+│   └── Automation/
+│       └── HilbertSearch.lean     -- Bounded DFS proof-search tactic for InferenceSystem
 ├── Data/                      -- General-purpose data structures
 │   ├── HasFresh.lean          -- Fresh name generation
 │   ├── Relation.lean          -- Relation utilities
@@ -217,6 +219,7 @@ Bimodal/
 
 The `Cslib.Logic` namespace spans both `Foundations/Logic/` and `Logics/`:
 - `Cslib.Logic.Axioms` -- from `Foundations/Logic/Axioms.lean`
+- `Cslib.Logic.Automation` -- from `Foundations/Logic/Automation/`
 - `Cslib.Logic.Propositional` -- from `Logics/Propositional/`
 - `Cslib.Logic.Modal` -- from `Logics/Modal/`
 - `Cslib.Logic.Temporal` -- from `Logics/Temporal/`

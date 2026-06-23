@@ -155,8 +155,11 @@ instance (T : Theory Atom) : InferenceSystem T (Proposition Atom) where
 
 variable {T : Theory Atom}
 
+/-- A derivation `T⇓A` is definitionally equal to a derivation of the empty sequent `T⇓(∅ ⊢ A)`. -/
 theorem Theory.Derivation.emptySequent_eq {A : Proposition Atom} : T⇓A = T⇓(∅ ⊢ A) := rfl
 
+/-- Derivability `DerivableIn T A` is equivalent to derivability of the empty sequent
+`DerivableIn T (∅ ⊢ A)`. -/
 theorem DerivableIn.iff_derivableIn_empty {A : Proposition Atom} :
     DerivableIn T A ↔ DerivableIn T (∅ ⊢ A) := by rfl
 
@@ -332,6 +335,7 @@ theorem DerivableIn.substAtom {Atom Atom' : Type u} [DecidableEq Atom] [Decidabl
 def Theory.derivationTop : T⇓(⊤ : Proposition Atom) :=
   impI ∅ <| ass <| by grind
 
+/-- The verum `⊤` is derivable in any theory. -/
 theorem derivableIn_top : DerivableIn T (⊤ : Proposition Atom) := ⟨derivationTop⟩
 
 theorem derivable_iff_equiv_top (A : Proposition Atom) :

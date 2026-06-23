@@ -1,0 +1,15 @@
+{
+  "status": "implemented",
+  "summary": "Added docstrings to 5 declarations (2 in InferenceSystem.lean, 3 in NaturalDeduction/Basic.lean); equiv.refl already documented; both modules build cleanly",
+  "blockers": [],
+  "continuation_context": null,
+  "phases_completed": 1,
+  "phases_total": 1,
+  "artifacts": [
+    {
+      "type": "summary",
+      "path": "specs/294_fix_missing_docstrings_nd_inference/summaries/01_docstring-fix-summary.md",
+      "summary": "Implementation summary: 5 docstrings added across InferenceSystem.lean and NaturalDeduction/Basic.lean, all builds passing"
+    }
+  ]
+}

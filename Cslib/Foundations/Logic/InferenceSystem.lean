@@ -71,6 +71,7 @@ abbrev Derivable [InferenceSystem Default α] := DerivableIn Default (α := α)
 theorem DerivableIn.fromDerivation [InferenceSystem S α] {a : α} (d : S⇓a) : DerivableIn S a :=
   Nonempty.intro d
 
+/-- Coercion from a derivation `S⇓a` to `DerivableIn S a`. Wraps `DerivableIn.fromDerivation`. -/
 instance [InferenceSystem S α] {a : α} : Coe (S⇓a) (DerivableIn S a) := ⟨DerivableIn.fromDerivation⟩
 
 /-- Extracts (noncomputably) a derivation from the fact that a conclusion is derivable. -/
@@ -78,6 +79,8 @@ noncomputable def DerivableIn.toDerivation [InferenceSystem S α] {a : α} (d : 
     S⇓a :=
   Classical.choice d
 
+/-- Noncomputable coercion from `DerivableIn S a` to `S⇓a`, extracting a derivation via
+`Classical.choice`. Wraps `DerivableIn.toDerivation`. -/
 noncomputable instance [InferenceSystem S α] {a : α} : Coe (DerivableIn S a) (S⇓a) :=
   ⟨DerivableIn.toDerivation⟩
 

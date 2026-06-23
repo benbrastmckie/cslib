@@ -36,7 +36,7 @@ next_project_number: 286
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 266 [IMPLEMENTING] — Research improvements to Propositional/ and Foundations/Logic/ in
-  └─ 280 [RESEARCHING] — Research the current state of propositional proof systems in CSLi
+  └─ 280 [RESEARCHED] — Research the current state of propositional proof systems in CSLi
     └─ 279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
 
 ### Temporal Logic
@@ -107,10 +107,13 @@ next_project_number: 286
 ---
 
 ### 280. Proof system triad gap analysis
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: formal
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 266
+- **Research**:
+  - [280_proof_system_triad_gap_analysis/reports/01_teammate-c-findings.md]
+  - [280_proof_system_triad_gap_analysis/reports/01_team-research.md]
 
 **Description**: Research the current state of propositional proof systems in CSLib and create tasks to fill all gaps needed to provide: (1) Hilbert systems for algebraic completeness and MCS, (2) natural deduction for the Curry-Howard correspondence, (3) sequent calculus for cut elimination and decidability. Audit what exists (Hilbert + ND + algebraic semantics + Kripke semantics + equivalence bridges), identify what is missing for each proof system to fully serve its metatheoretic purpose (e.g., Hilbert-algebraic bridge corollaries, ND normalization/Curry-Howard, LK/LJ cut elimination, decidability instances, proof-system equivalence bridges), and create appropriately scoped implementation tasks with dependencies. Account for existing tasks 266 and 279 to avoid overlap. This is a metatask: the deliverable is a set of new tasks, not implementation.
 

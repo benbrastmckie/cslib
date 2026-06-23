@@ -1,5 +1,5 @@
 ---
-next_project_number: 280
+next_project_number: 281
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 280
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,266,268,278,279 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,252,266,268,278,279,280 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,269 | 36,37,180,268 | Bimodal Porting, Foundations, Temporal Logic |
 | 3 | 41,275 | 39,40 | Foundations |
 
@@ -37,6 +37,7 @@ next_project_number: 280
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 266 [RESEARCHED] — Research improvements to Propositional/ and Foundations/Logic/ in
 279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
+280 [NOT STARTED] — Research the current state of propositional proof systems in CSLi
 
 ### Temporal Logic
 
@@ -51,6 +52,16 @@ next_project_number: 280
 ### Uncategorized
 
 ## Tasks
+
+### 280. Proof system triad gap analysis
+- **Status**: [NOT STARTED]
+- **Task Type**: formal
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Research the current state of propositional proof systems in CSLib and create tasks to fill all gaps needed to provide: (1) Hilbert systems for algebraic completeness and MCS, (2) natural deduction for the Curry-Howard correspondence, (3) sequent calculus for cut elimination and decidability. Audit what exists (Hilbert + ND + algebraic semantics + Kripke semantics + equivalence bridges), identify what is missing for each proof system to fully serve its metatheoretic purpose (e.g., Hilbert-algebraic bridge corollaries, ND normalization/Curry-Howard, LK/LJ cut elimination, decidability instances, proof-system equivalence bridges), and create appropriately scoped implementation tasks with dependencies. Account for existing tasks 266 and 279 to avoid overlap. This is a metatask: the deliverable is a set of new tasks, not implementation.
+
+---
 
 ### 279. Propositional sequent calculus lk lj
 - **Status**: [NOT STARTED]

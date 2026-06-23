@@ -10,26 +10,16 @@ module
 public import Cslib.Logics.Propositional.Semantics.Algebra.Lindenbaum
 public import Cslib.Logics.Propositional.Semantics.Algebra
 
-/-! # Algebraic Completeness for Propositional Logic
+/-! # ND Algebraic Completeness for Propositional Logic
 
-This module proves algebraic completeness for propositional logic across three tiers:
+This module proves algebraic completeness for the natural-deduction system across three tiers:
 - **MPL** (Minimal Propositional Logic) is complete w.r.t. `GeneralizedHeytingAlgebra`.
 - **IPL** (Intuitionistic Propositional Logic) is complete w.r.t. `HeytingAlgebra`.
 - **CPL** (Classical Propositional Logic) is complete w.r.t. `BooleanAlgebra`.
 
-The completeness theorems are stated using `AlgTValid` (Thomas Waring's `v ⊨ T` parametric
-completeness style), which quantifies over all valuations that model the theory.
-
-The soundness proof uses the "universal lower bound" formulation:
-`T ⊢ Γ ⊢ A → ∀ Φ, (∀ B ∈ Γ, Φ ≤ eval B) → Φ ≤ eval A`
-
-This handles the `orE` case via distributivity of `GeneralizedHeytingAlgebra`.
-
-## Future Work
-
-Hilbert-level corollaries (`Derivable MinPropAxiom φ ↔ GHAValid φ`, etc.) require bridging
-the Hilbert axiomatic system (`DerivationTree`/`Derivable`) with the natural deduction system
-(`Theory.Derivation`/`DerivableIn`). This equivalence is nontrivial and deferred.
+The Hilbert-primary versions of these results are in `HilbertCompleteness.lean`, which proves
+completeness directly via the Hilbert Lindenbaum algebra. The ND results here serve as
+infrastructure for the algebraic bridges in `HilbertConservativeGlivenko.lean`.
 
 ## References
 

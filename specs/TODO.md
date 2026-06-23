@@ -11,9 +11,9 @@ next_project_number: 278
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,266,268,275 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,252,266,268 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,269 | 36,37,180,268 | Bimodal Porting, Foundations, Temporal Logic |
-| 3 | 41 | 39,40 | Foundations |
+| 3 | 41,275 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -43,18 +43,17 @@ next_project_number: 278
 245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
 252 [NOT STARTED] — Formalize Rabin and parity acceptance conditions alongside the ex
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
+  └─ 275 [BLOCKED] — Prove that Bimodal TM is conservative over Temporal BX for tempor
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ### Uncategorized
 
-275 [RESEARCHED] — Prove that Bimodal TM is conservative over Temporal BX for tempor
-
 ## Tasks
 
 ### 275. Bimodal tm conservative over temporal bx
-- **Status**: [RESEARCHED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
-- **Dependencies**: None
+- **Dependencies**: Task 36, Task 39
 - **Research**:
   - [275_bimodal_tm_conservative_over_temporal_bx/reports/02_team-research.md]
   - [275_bimodal_tm_conservative_over_temporal_bx/reports/03_team-research.md]

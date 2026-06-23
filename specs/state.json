@@ -4,10 +4,10 @@
     {
       "project_number": 275,
       "project_name": "bimodal_tm_conservative_over_temporal_bx",
-      "status": "researched",
+      "status": "blocked",
       "task_type": "cslib",
       "description": "Prove that Bimodal TM is conservative over Temporal BX for temporal formulas (those using only until/since, no box). The Temporal.Formula.toBimodal embedding exists. The lift_derivation_qfree infrastructure in Bimodal/Metalogic/ConservativeExtension/ partially supports this. Requires verifying the lifting extends to temporal connectives.",
-      "last_updated": "2026-06-23T02:34:30Z",
+      "last_updated": "2026-06-23T02:45:44Z",
       "session_id": "sess_1782164778_60175c",
       "next_artifact_number": 4,
       "researched": "2026-06-23T02:34:30Z",
@@ -22,6 +22,10 @@
           "type": "research",
           "summary": "Team research with 4 teammates: semantic transfer via order isomorphism identified as correct approach; base BX ChronicleSubtype density is the critical open question"
         }
+      ],
+      "dependencies": [
+        36,
+        39
       ]
     },
     {

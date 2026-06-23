@@ -77,15 +77,15 @@
     {
       "project_number": 266,
       "project_name": "research_propositional_and_foundations_improvements",
-      "status": "researching",
+      "status": "researched",
       "task_type": "formal",
       "description": "Research the Propositional/ logic and Foundations/ in this repo, the supporting roles these play, and what else remains to be done to improve these elements of this library. Compare with /home/benjamin/Projects/BimodalLogic/specs/305_rabinovich_ea_formula_implementation/reports/16_witness-count-restructure.md and the tableau system included there, in addition to researching what other additions make sense to include such as a sequent calculus",
       "topic": "Propositional Logic",
       "created": "2026-06-22T18:25:59Z",
-      "last_updated": "2026-06-23T02:30:06Z",
+      "last_updated": "2026-06-23T02:51:36Z",
       "session_id": "sess_1782181780_55aebb",
-      "researched": "2026-06-22T18:36:32Z",
-      "next_artifact_number": 2,
+      "researched": "2026-06-23T02:51:36Z",
+      "next_artifact_number": 3,
       "artifacts": [
         {
           "path": "specs/266_research_propositional_and_foundations_improvements/reports/01_team-research.md",
@@ -96,6 +96,11 @@
           "path": "specs/266_research_propositional_and_foundations_improvements/plans/01_propositional-foundations-plan.md",
           "type": "plan",
           "summary": "6-phase implementation plan covering algebraic-Hilbert bridge, ND capture-avoidance fix, ProofSystem documentation and instances, abstract completeness extraction, and test coverage"
+        },
+        {
+          "path": "specs/266_research_propositional_and_foundations_improvements/reports/02_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates: Propositional/ and Foundations/ analysis (round 2)"
         }
       ]
     },

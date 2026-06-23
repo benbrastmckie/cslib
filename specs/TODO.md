@@ -1,5 +1,5 @@
 ---
-next_project_number: 279
+next_project_number: 280
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 279
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,266,268,278 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,252,266,268,278,279 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,269 | 36,37,180,268 | Bimodal Porting, Foundations, Temporal Logic |
 | 3 | 41,275 | 39,40 | Foundations |
 
@@ -27,7 +27,7 @@ next_project_number: 279
 
 ### Foundations
 
-268 [RESEARCHED] — Add @[simp, scoped grind =] normalization tags to Hilbert system 
+268 [PLANNED] — Add @[simp, scoped grind =] normalization tags to Hilbert system 
   └─ 269 [NOT STARTED] — Build generic bounded proof-search tactic for InferenceSystem. Cr
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
@@ -35,7 +35,8 @@ next_project_number: 279
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-266 [RESEARCHED] — Research the Propositional/ logic and Foundations/ in this repo, 
+266 [RESEARCHED] — Research improvements to Propositional/ and Foundations/Logic/ in
+279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
 
 ### Temporal Logic
 
@@ -50,6 +51,16 @@ next_project_number: 279
 ### Uncategorized
 
 ## Tasks
+
+### 279. Propositional sequent calculus lk lj
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Implement a two-sided Gentzen-style sequent calculus (LK for classical, LJ for intuitionistic) for propositional logic with cut elimination. Use Finset-based contexts on both sides, following the CLL sequent calculus in Cslib/Logics/LinearLogic/CLL/Basic.lean as a template. Prove soundness, completeness, cut elimination (Hauptsatz), and equivalence bridges to the existing Hilbert and natural deduction systems (hilbert_iff_lk, nd_iff_lk). This completes the proof-system triad (Hilbert + ND + SC) for propositional logic and would be the first LK/LJ formalization in Lean 4.
+
+---
 
 ### 278. Simplify proofs with normalization tags
 - **Status**: [NOT STARTED]
@@ -84,11 +95,12 @@ next_project_number: 279
 ---
 
 ### 268. Simp grind normalization tags
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
 - **Research**: [268_simp_grind_normalization_tags/reports/01_team-research.md]
+- **Plan**: [268_simp_grind_normalization_tags/plans/02_normalization-tags-plan.md]
 
 **Description**: Add @[simp, scoped grind =] normalization tags to Hilbert system definitional lemmas. Add tags to the normalization/definitional layer across Propositional/, Modal/, Temporal/, and Bimodal/ Hilbert systems. Target: derived connective unfoldings, context manipulation lemmas, listImp equalities, and similar structural/characterization lemmas. Do NOT tag derivability constructors (Derivable.ax, Derivable.mp, etc.) — those are for the proof-search tactic. Follow cslib existing co-tagging convention. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake
 
@@ -104,7 +116,7 @@ next_project_number: 279
   - [266_research_propositional_and_foundations_improvements/reports/02_team-research.md]
 - **Plan**: [266_research_propositional_and_foundations_improvements/plans/01_propositional-foundations-plan.md]
 
-**Description**: Research the Propositional/ logic and Foundations/ in this repo, the supporting roles these play, and what else remains to be done to improve these elements of this library. Compare with /home/benjamin/Projects/BimodalLogic/specs/305_rabinovich_ea_formula_implementation/reports/16_witness-count-restructure.md and the tableau system included there, in addition to researching what other additions make sense to include such as a sequent calculus
+**Description**: Research improvements to Propositional/ and Foundations/Logic/ in this repo: compose the Hilbert-ND bridge with algebraic completeness for Hilbert-tier corollaries, fix stale ProofSystem.lean documentation, add propositional test coverage, concretize modal/temporal/bimodal ProofSystem tag instances to unlock GenericMCS reuse, extract propositional tableau rules from the bimodal tableau to Foundations/, add HasDia primitive, and assemble a Decidable (Tautology φ) instance. Excludes sequent calculus (split to task 279).
 
 ---
 

@@ -1,6 +1,84 @@
 {
-  "next_project_number": 288,
+  "next_project_number": 294,
   "active_projects": [
+    {
+      "project_number": 288,
+      "project_name": "lindenbaum_tarski_algebra_instances",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Export named abbrev or instance declarations making explicit that the Lindenbaum-Tarski algebra of MPL is a GeneralizedHeytingAlgebra, IPL is a HeytingAlgebra, and CPL is a BooleanAlgebra. These are currently implicit in algebraic completeness proofs but not exported as standalone usable facts. Optionally prove the free Boolean algebra universal property for CPL. Files: new module Cslib/Logics/Propositional/Semantics/Algebra/LindenbaumInstances.lean. Depends on 266.",
+      "dependencies": [
+        266
+      ],
+      "created": "2026-06-23T12:00:00Z",
+      "last_updated": "2026-06-23T12:00:00Z"
+    },
+    {
+      "project_number": 289,
+      "project_name": "decidable_derivable_propositional_instance",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Compose instDecidableTautology with prop_completeness_iff_tautology to produce a Decidable (Derivable PropositionalAxiom phi) instance for [Fintype Atom] [DecidableEq Atom]. This is a one-liner composition gap: the bridge Tautology phi <-> Derivable PropositionalAxiom phi exists, and Decidable (Tautology phi) exists, but the composed Decidable instance is not registered. File: Cslib/Logics/Propositional/Metalogic/Decidability.lean or inline in StrongCompleteness.lean. Depends on 266.",
+      "dependencies": [
+        266
+      ],
+      "created": "2026-06-23T12:00:00Z",
+      "last_updated": "2026-06-23T12:00:00Z"
+    },
+    {
+      "project_number": 290,
+      "project_name": "nd_normalization_subformula_property",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Formalize Prawitz-style normalization for CSLib Theory.Derivation (propositional IPL and MPL). Define Derivation.isNormal predicate (no maximal formula -- i.e., no introduction rule immediately followed by the corresponding elimination on the same formula). Prove a normalization function normalize that transforms any derivation into a normal form. Derive the subformula property as a corollary: every formula in a normal derivation is a subformula of the conclusion or a hypothesis. The Theory.Derivation type is Type u (not Prop), enabling a computable normalization function. Reference: [Prawitz1965] Ch. IV-V. Consider starting with the implicational fragment ({arrow} only) as a milestone, then extending to full IPL connectives. Files: new module Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean. Depends on 266.",
+      "dependencies": [
+        266
+      ],
+      "created": "2026-06-23T12:00:00Z",
+      "last_updated": "2026-06-23T12:00:00Z"
+    },
+    {
+      "project_number": 291,
+      "project_name": "three_way_proof_system_equivalence",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a unifying module stating the three-way equivalence as List.TFAE theorems. For each of MPL, IPL, and CPL, prove that Hilbert derivability, ND derivability, and SC derivability are equivalent. The pairwise bridges are: Hilbert-ND from task 266, Hilbert-SC and ND-SC from task 279. This is purely compositional. File: Cslib/Logics/Propositional/ProofSystemEquivalence.lean. Depends on 279.",
+      "dependencies": [
+        279
+      ],
+      "created": "2026-06-23T12:00:00Z",
+      "last_updated": "2026-06-23T12:00:00Z"
+    },
+    {
+      "project_number": 292,
+      "project_name": "ipl_decidability_cutfree_lj",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "After task 279 delivers LJ with cut elimination, formalize the connection between cut-free proof search and decidability. Define a bounded backward proof search procedure over cut-free LJ: the search space is finite because all formulas in a cut-free proof are subformulas of the sequent. Prove termination via a well-founded measure. Produce Decidable (LJDerivable (Gamma |- A)) and lift via nd_iff_lk to Decidable (DerivableIn IPL (Gamma |- A)). File: Cslib/Logics/Propositional/SequentCalculus/Decidability.lean. Depends on 279.",
+      "dependencies": [
+        279
+      ],
+      "created": "2026-06-23T12:00:00Z",
+      "last_updated": "2026-06-23T12:00:00Z"
+    },
+    {
+      "project_number": 293,
+      "project_name": "curry_howard_nd_typed_lambda",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Establish the formal Curry-Howard isomorphism between Theory.Derivation Gamma A (propositional ND proofs) and well-typed lambda terms. Define a purpose-built simply-typed term language over PL.Proposition as the type language. Formalize: (1) curry_howard_forward extracting a well-typed term from a derivation, (2) curry_howard_backward extracting a derivation from a well-typed term, (3) roundtrip properties showing the maps are mutually inverse. Map ND constructors to term constructors: impI to lambda, impE to application, andI to pair, andE1/2 to projections, orI1/2 to injections, orE to case. As a reduced-scope fallback, the {arrow, and} fragment is a self-contained milestone. Normal derivations correspond to beta-normal terms. Files: new directory Cslib/Logics/Propositional/CurryHoward/. Depends on the normalization task (290).",
+      "dependencies": [
+        290
+      ],
+      "created": "2026-06-23T12:00:00Z",
+      "last_updated": "2026-06-23T12:00:00Z"
+    },
     {
       "project_number": 287,
       "project_name": "fix_generic_mcs_bridge_docstrings",
@@ -22,12 +100,12 @@
     {
       "project_number": 280,
       "project_name": "proof_system_triad_gap_analysis",
-      "status": "researched",
+      "status": "completed",
       "task_type": "formal",
       "description": "Research the current state of propositional proof systems in CSLib and create tasks to fill all gaps needed to provide: (1) Hilbert systems for algebraic completeness and MCS, (2) natural deduction for the Curry-Howard correspondence, (3) sequent calculus for cut elimination and decidability. Audit what exists (Hilbert + ND + algebraic semantics + Kripke semantics + equivalence bridges), identify what is missing for each proof system to fully serve its metatheoretic purpose (e.g., Hilbert-algebraic bridge corollaries, ND normalization/Curry-Howard, LK/LJ cut elimination, decidability instances, proof-system equivalence bridges), and create appropriately scoped implementation tasks with dependencies. Account for existing tasks 266 and 279 to avoid overlap. This is a metatask: the deliverable is a set of new tasks, not implementation.",
       "topic": "Propositional Logic",
       "created": "2026-06-23T03:04:01Z",
-      "last_updated": "2026-06-23T11:03:14Z",
+      "last_updated": "2026-06-23T12:00:00Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
@@ -44,8 +122,9 @@
       "dependencies": [
         266
       ],
-      "session_id": "sess_1782211952_f819aa",
-      "researched": "2026-06-23T11:03:14Z"
+      "session_id": "sess_1782213188_39530e",
+      "researched": "2026-06-23T11:03:14Z",
+      "completion_summary": "Created 6 new tasks (288-293) to fill propositional proof system triad gaps: Named Lindenbaum-Tarski algebra instances (T1), Decidable Derivable instance (T2), ND normalization and subformula property (T3), three-way proof system equivalence (T4, depends on 279), IPL decidability via cut-free LJ (T5, depends on 279), and Curry-Howard correspondence (T6, depends on T3). Dependency graph validated: T4/T5 blocked on 279; T6 blocked on T3 (290); T1/T2/T3 independent and can start immediately."
     },
     {
       "project_number": 279,

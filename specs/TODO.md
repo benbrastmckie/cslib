@@ -1,5 +1,5 @@
 ---
-next_project_number: 288
+next_project_number: 294
 ---
 
 # TODO
@@ -11,9 +11,9 @@ next_project_number: 288
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,266,286,287 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
-| 2 | 39,40,181,215,278,280 | 36,37,180,266 | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 3 | 41,269,275,279 | 39,40,278,280 | Foundations, Propositional Logic |
+| 1 | 36,37,180,226,241,245,252,266,279,286,287 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 2 | 39,40,181,215,278,288,289,290,291,292 | 36,37,180,266,279 | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 3 | 41,269,275,293 | 39,40,278,290 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -36,8 +36,13 @@ next_project_number: 288
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 266 [IMPLEMENTING] — Research improvements to Propositional/ and Foundations/Logic/ in
-  └─ 280 [RESEARCHED] — Research the current state of propositional proof systems in CSLi
-    └─ 279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
+  └─ 288 [NOT STARTED] — Export named abbrev or instance declarations making explicit that
+  └─ 289 [NOT STARTED] — Compose instDecidableTautology with prop_completeness_iff_tautolo
+  └─ 290 [NOT STARTED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
+    └─ 293 [NOT STARTED] — Establish the formal Curry-Howard isomorphism between Theory.Deri
+279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
+  └─ 291 [NOT STARTED] — After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a un
+  └─ 292 [NOT STARTED] — After task 279 delivers LJ with cut elimination, formalize the co
 
 ### Temporal Logic
 
@@ -55,6 +60,66 @@ next_project_number: 288
 287 [NOT STARTED] — Convert block comments in Cslib/Logics/Modal/Metalogic/GenericMCS
 
 ## Tasks
+
+### 293. Curry howard nd typed lambda
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 290
+
+**Description**: Establish the formal Curry-Howard isomorphism between Theory.Derivation Gamma A (propositional ND proofs) and well-typed lambda terms. Define a purpose-built simply-typed term language over PL.Proposition as the type language. Formalize: (1) curry_howard_forward extracting a well-typed term from a derivation, (2) curry_howard_backward extracting a derivation from a well-typed term, (3) roundtrip properties showing the maps are mutually inverse. Map ND constructors to term constructors: impI to lambda, impE to application, andI to pair, andE1/2 to projections, orI1/2 to injections, orE to case. As a reduced-scope fallback, the {arrow, and} fragment is a self-contained milestone. Normal derivations correspond to beta-normal terms. Files: new directory Cslib/Logics/Propositional/CurryHoward/. Depends on the normalization task (290).
+
+---
+
+### 292. Ipl decidability cutfree lj
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 279
+
+**Description**: After task 279 delivers LJ with cut elimination, formalize the connection between cut-free proof search and decidability. Define a bounded backward proof search procedure over cut-free LJ: the search space is finite because all formulas in a cut-free proof are subformulas of the sequent. Prove termination via a well-founded measure. Produce Decidable (LJDerivable (Gamma |- A)) and lift via nd_iff_lk to Decidable (DerivableIn IPL (Gamma |- A)). File: Cslib/Logics/Propositional/SequentCalculus/Decidability.lean. Depends on 279.
+
+---
+
+### 291. Three way proof system equivalence
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 279
+
+**Description**: After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a unifying module stating the three-way equivalence as List.TFAE theorems. For each of MPL, IPL, and CPL, prove that Hilbert derivability, ND derivability, and SC derivability are equivalent. The pairwise bridges are: Hilbert-ND from task 266, Hilbert-SC and ND-SC from task 279. This is purely compositional. File: Cslib/Logics/Propositional/ProofSystemEquivalence.lean. Depends on 279.
+
+---
+
+### 290. Nd normalization subformula property
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 266
+
+**Description**: Formalize Prawitz-style normalization for CSLib Theory.Derivation (propositional IPL and MPL). Define Derivation.isNormal predicate (no maximal formula -- i.e., no introduction rule immediately followed by the corresponding elimination on the same formula). Prove a normalization function normalize that transforms any derivation into a normal form. Derive the subformula property as a corollary: every formula in a normal derivation is a subformula of the conclusion or a hypothesis. The Theory.Derivation type is Type u (not Prop), enabling a computable normalization function. Reference: [Prawitz1965] Ch. IV-V. Consider starting with the implicational fragment ({arrow} only) as a milestone, then extending to full IPL connectives. Files: new module Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean. Depends on 266.
+
+---
+
+### 289. Decidable derivable propositional instance
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 266
+
+**Description**: Compose instDecidableTautology with prop_completeness_iff_tautology to produce a Decidable (Derivable PropositionalAxiom phi) instance for [Fintype Atom] [DecidableEq Atom]. This is a one-liner composition gap: the bridge Tautology phi <-> Derivable PropositionalAxiom phi exists, and Decidable (Tautology phi) exists, but the composed Decidable instance is not registered. File: Cslib/Logics/Propositional/Metalogic/Decidability.lean or inline in StrongCompleteness.lean. Depends on 266.
+
+---
+
+### 288. Lindenbaum tarski algebra instances
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 266
+
+**Description**: Export named abbrev or instance declarations making explicit that the Lindenbaum-Tarski algebra of MPL is a GeneralizedHeytingAlgebra, IPL is a HeytingAlgebra, and CPL is a BooleanAlgebra. These are currently implicit in algebraic completeness proofs but not exported as standalone usable facts. Optionally prove the free Boolean algebra universal property for CPL. Files: new module Cslib/Logics/Propositional/Semantics/Algebra/LindenbaumInstances.lean. Depends on 266.
+
+---
 
 ### 287. Fix generic mcs bridge docstrings
 - **Status**: [NOT STARTED]
@@ -128,7 +193,7 @@ next_project_number: 288
 ---
 
 ### 280. Proof system triad gap analysis
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: formal
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 266

@@ -7,7 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Propositional.Semantics.Algebra
-public import Mathlib.Tactic.ToAdditive
 public import Mathlib.Order.WithBot
 
 /-! # Bot-Free Analysis and Validity Subsumption

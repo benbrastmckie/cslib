@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Propositional.Defs
+public import Mathlib.Data.Fintype.Pi
 
 /-! # Bivalent and Boolean Evaluators for Propositional Logic
 
@@ -145,5 +146,35 @@ theorem Evaluate_eq_BoolEvaluate (v : Valuation Atom) [∀ a, Decidable (v a)]
 instance instDecidableBoolEvaluate (v : BoolValuation Atom) (φ : PL.Proposition Atom) :
     Decidable (Evaluate (fun a => v a = true) φ) :=
   decidable_of_iff _ (BoolEvaluate_eq_iff v φ)
+
+/-! ## Decidability of Tautology -/
+
+/-- Bridge lemma: `Tautology φ` iff `BoolEvaluate v φ = true` for all Boolean valuations.
+
+The forward direction applies `Tautology` to the Boolean-induced valuation `fun a => v a = true`.
+The backward direction uses `Evaluate_eq_BoolEvaluate` to reduce any classical valuation
+to a Boolean one, which requires `[∀ a, Decidable (v a)]`; we satisfy this via classical choice. -/
+theorem tautology_iff_boolEvaluate_true (φ : PL.Proposition Atom) :
+    Tautology φ ↔ ∀ (v : BoolValuation Atom), BoolEvaluate v φ = true := by
+  constructor
+  · intro hT v
+    rw [BoolEvaluate_eq_iff]
+    exact hT (fun a => v a = true)
+  · intro hB v
+    -- Use classical decidability to convert any valuation to a Boolean one
+    haveI : ∀ a, Decidable (v a) := fun a => Classical.propDecidable (v a)
+    rw [Evaluate_eq_BoolEvaluate v φ]
+    exact hB (fun a => decide (v a))
+
+/-- `Tautology φ` is decidable when `Atom` is a `Fintype` with `DecidableEq`.
+
+The decision procedure enumerates all `2^n` Boolean valuations (where `n = |Atom|`) and
+checks whether `BoolEvaluate v φ = true` for all of them. This is constructive:
+`BoolValuation Atom = Atom → Bool` is a `Fintype` via `Pi.instFintype` (which requires
+`DecidableEq Atom` to build the enumeration), and `BoolEvaluate` is computable. -/
+instance instDecidableTautology [Fintype Atom] [DecidableEq Atom] (φ : PL.Proposition Atom) :
+    Decidable (Tautology φ) :=
+  decidable_of_iff (∀ v : BoolValuation Atom, BoolEvaluate v φ = true)
+    (tautology_iff_boolEvaluate_true φ).symm
 
 end Cslib.Logic.PL

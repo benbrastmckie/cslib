@@ -90,7 +90,12 @@ protected abbrev Peirce (φ ψ : F) : F :=
   HasImp.imp (HasImp.imp (HasImp.imp φ ψ) φ) φ
 
 /-- Double negation elimination: ¬¬φ → φ
-    where ¬φ = φ → ⊥ -/
+    where ¬φ = φ → ⊥.
+
+    Note: `DNE` is defined here as a formula for completeness of the axiom inventory.
+    However, it is not separately axiomatized in `ClassicalHilbert`: it is derived from
+    Peirce's law via modus ponens. That is, `ClassicalHilbert` takes Peirce as the classical
+    axiom, and DNE follows as a theorem rather than an additional axiom. -/
 protected abbrev DNE (φ : F) : F :=
   HasImp.imp (HasImp.imp (HasImp.imp φ HasBot.bot) HasBot.bot) φ
 
@@ -149,22 +154,24 @@ protected abbrev Axiom4 (φ : F) : F :=
 
 /-- Symmetry axiom B: `φ → □◇φ`.
 
-Diamond is encoded classically as `◇φ = ¬□¬φ = (□(φ → ⊥)) → ⊥`, since `HasDia` is not yet
-a primitive in `ModalConnectives`. The encoding relies on excluded middle and is equivalent to
-the standard `φ → □◇φ` only in classical logic. Corresponds to symmetry of the accessibility
-relation: `r w v → r v w`. See [Blackburn2001] Section 1.4, [ChagrovZakharyaschev1997]
-Section 3.2. -/
+Diamond is encoded classically as `◇φ = ¬□¬φ = (□(φ → ⊥)) → ⊥`, since `ModalConnectives`
+does not include `HasDia`. For proof systems with a primitive `HasDia`, the conjunction of
+`AxiomDiaDualityFwd` and `AxiomDiaDualityBack` establishes the duality. The encoding here
+relies on excluded middle and is equivalent to the standard `φ → □◇φ` only in classical logic.
+Corresponds to symmetry of the accessibility relation: `r w v → r v w`. See [Blackburn2001]
+Section 1.4, [ChagrovZakharyaschev1997] Section 3.2. -/
 protected abbrev AxiomB (φ : F) : F :=
   HasImp.imp φ (HasBox.box
     (HasImp.imp (HasBox.box (HasImp.imp φ HasBot.bot)) HasBot.bot))
 
 /-- Euclidean axiom 5: `◇φ → □◇φ`.
 
-Diamond is encoded classically as `◇φ = ¬□¬φ = (□(φ → ⊥)) → ⊥`, since `HasDia` is not yet
-a primitive in `ModalConnectives`. The encoding relies on excluded middle and is equivalent to
-the standard `◇φ → □◇φ` only in classical logic. Corresponds to right-Euclideanness of the
-accessibility relation: `r w v → r w u → r v u`. See [Blackburn2001] Section 1.4,
-[ChagrovZakharyaschev1997] Section 3.2. -/
+Diamond is encoded classically as `◇φ = ¬□¬φ = (□(φ → ⊥)) → ⊥`, since `ModalConnectives`
+does not include `HasDia`. For proof systems with a primitive `HasDia`, the conjunction of
+`AxiomDiaDualityFwd` and `AxiomDiaDualityBack` establishes the duality. The encoding here
+relies on excluded middle and is equivalent to the standard `◇φ → □◇φ` only in classical logic.
+Corresponds to right-Euclideanness of the accessibility relation: `r w v → r w u → r v u`.
+See [Blackburn2001] Section 1.4, [ChagrovZakharyaschev1997] Section 3.2. -/
 protected abbrev Axiom5 (φ : F) : F :=
   HasImp.imp
     (HasImp.imp (HasBox.box (HasImp.imp φ HasBot.bot)) HasBot.bot)
@@ -172,16 +179,44 @@ protected abbrev Axiom5 (φ : F) : F :=
 
 /-- Seriality axiom D: `□φ → ◇φ`.
 
-Diamond is encoded classically as `◇φ = ¬□¬φ = (□(φ → ⊥)) → ⊥`, since `HasDia` is not yet
-a primitive in `ModalConnectives`. The encoding relies on excluded middle and is equivalent to
-the standard `□φ → ◇φ` only in classical logic. Corresponds to seriality of the accessibility
-relation: `∀ w, ∃ v, r w v`. See [Blackburn2001] Section 1.4,
-[ChagrovZakharyaschev1997] Section 3.2. -/
+Diamond is encoded classically as `◇φ = ¬□¬φ = (□(φ → ⊥)) → ⊥`, since `ModalConnectives`
+does not include `HasDia`. For proof systems with a primitive `HasDia`, the conjunction of
+`AxiomDiaDualityFwd` and `AxiomDiaDualityBack` establishes the duality. The encoding here
+relies on excluded middle and is equivalent to the standard `□φ → ◇φ` only in classical logic.
+Corresponds to seriality of the accessibility relation: `∀ w, ∃ v, r w v`. See [Blackburn2001]
+Section 1.4, [ChagrovZakharyaschev1997] Section 3.2. -/
 protected abbrev AxiomD (φ : F) : F :=
   HasImp.imp (HasBox.box φ)
     (HasImp.imp (HasBox.box (HasImp.imp φ HasBot.bot)) HasBot.bot)
 
 end Modal
+
+/-! ### Diamond Duality Axiom -/
+
+section DiaDuality
+variable [HasBot F] [HasImp F] [HasBox F] [HasDia F]
+
+/-- Diamond duality, forward direction: `◇φ → ¬□¬φ`.
+
+In classical modal logic, possibility is defined as `◇φ := ¬□¬φ`. When `HasDia` is a
+separate primitive, this axiom asserts that `◇φ` implies the classical encoding.
+Together with `AxiomDiaDualityBack`, it establishes full duality. See `AxiomDiaDualityBack`
+for the converse. -/
+protected abbrev AxiomDiaDualityFwd (φ : F) : F :=
+  HasImp.imp (HasDia.dia φ)
+    (HasImp.imp (HasBox.box (HasImp.imp φ HasBot.bot)) HasBot.bot)
+
+/-- Diamond duality, backward direction: `¬□¬φ → ◇φ`.
+
+Together with `AxiomDiaDualityFwd`, establishes that `◇φ ↔ ¬□¬φ`. In classical systems
+the two axioms are needed to reduce a primitive diamond to the derived classical encoding.
+See [Blackburn2001] Section 1.1 for discussion of diamond-first vs box-first presentations. -/
+protected abbrev AxiomDiaDualityBack (φ : F) : F :=
+  HasImp.imp
+    (HasImp.imp (HasBox.box (HasImp.imp φ HasBot.bot)) HasBot.bot)
+    (HasDia.dia φ)
+
+end DiaDuality
 
 /-! ### Temporal Axioms -/
 

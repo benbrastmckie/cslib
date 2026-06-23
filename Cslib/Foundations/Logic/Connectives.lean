@@ -99,6 +99,18 @@ class HasBox (F : Type*) where
   /-- The necessity/box modality. -/
   box : F → F
 
+/-- A type has a diamond (possibility) modality.
+
+In classical modal logic, diamond is derived from box via `◇φ := ¬□¬φ`. However, in
+non-classical (intuitionistic or minimal) modal logics, `□` and `◇` become independent
+operators that do not satisfy the classical duality. This typeclass provides a primitive
+diamond for systems where this duality fails or where diamond is taken as a separate
+primitive alongside box. See `Axioms.AxiomDiaDuality` for the optional duality axiom
+connecting `HasBox` and `HasDia` instances. -/
+class HasDia (F : Type*) where
+  /-- The possibility/diamond modality. -/
+  dia : F → F
+
 /-- A type has an until temporal operator. -/
 class HasUntil (F : Type*) where
   /-- The until temporal operator. -/

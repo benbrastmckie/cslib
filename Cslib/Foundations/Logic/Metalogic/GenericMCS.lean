@@ -42,7 +42,15 @@ variable [MinimalHilbert S (F := F)]
 
 /-- The algebraic derivation system: contextual derivation defined via `ListDeriv`
 (i.e., provability of the list-implication). This construction works for ANY
-`MinimalHilbert` proof system, giving a `DerivationSystem` for free. -/
+`MinimalHilbert` proof system, giving a `DerivationSystem` for free.
+
+**Modal logics note**: Modal logics satisfying `MinimalHilbert` (e.g., `Modal.HilbertK`,
+`Modal.HilbertS5`) can use this algebraic path directly for all propositional MCS reasoning
+(lindenbaum, implication_property, negation_complete, closed_under_derivation). For
+reasoning that requires the necessitation rule (e.g., box closure in canonical models),
+the modal-specific `modalDerivationSystem` from
+`Cslib.Logics.Modal.Metalogic.DerivationTree` must still be used, since `ListDeriv`
+does not include necessitation. See `GenericMCSBridge.lean` for the full gap analysis. -/
 def algebraicDerivationSystem : DerivationSystem F where
   Deriv := ListDeriv (S := S)
   weakening := fun hd hsub => list_deriv_monotonic hsub hd

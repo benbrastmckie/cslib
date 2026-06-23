@@ -8,7 +8,27 @@ module
 
 public import Cslib.Init
 
-/-! -/
+/-! # Inference Systems
+
+This module defines the core abstractions for inference systems in CSLib.
+
+## Key Definitions
+
+- `InferenceSystem S α`: A typeclass that associates a tag type `S` with a derivation functor
+  over a value type `α`. The notation `S⇓a` represents a derivation of `a` in system `S`.
+- `InferenceSystem.Default`: An opaque tag used as the canonical inference system for types
+  that carry a single natural notion of derivability.
+- `HasInferenceSystem`: An abbreviation for `InferenceSystem Default`, enabling the shorthand
+  notation `⇓a` when only one inference system is in scope.
+- `DerivableIn S a`: A proposition asserting that `a` is derivable in `S`; defined as
+  `Nonempty (S⇓a)` to avoid computational content in proof terms.
+- `Derivable a`: Shorthand for `DerivableIn Default a`.
+
+## Notation
+
+- `S⇓a`: A derivation of `a` in system `S` (scoped notation).
+- `⇓a`: A derivation of `a` in the default system (scoped notation).
+-/
 
 @[expose] public section
 

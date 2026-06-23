@@ -272,8 +272,9 @@ theorem DerivableIn.cut_away {Γ Γ' : Ctx Atom} {B : Proposition Atom}
       · exact hΔ A <| Finset.mem_insert_self A Δ
       · rwa [← Finset.union_insert A Γ Δ]
 
-/-- Substitution of a family of derivations `D` for hypotheses in the context `Γ` of `E`. TODO:
-this implementation is not capture avoiding. -/
+/-- Substitution of a family of derivations `D` for hypotheses in the context `Γ` of `E`.
+Note: propositional logic has no binding operators, so capture avoidance does not apply here.
+This substitution is straightforward replacement without any variable renaming concerns. -/
 def Theory.Derivation.subs {Γ Γ' Δ : Ctx Atom} {B : Proposition Atom}
     (Ds : ∀ A ∈ Γ', T⇓(Δ ⊢ A)) :
       T.Derivation Γ B → T.Derivation (Γ \ Γ' ∪ Δ) B

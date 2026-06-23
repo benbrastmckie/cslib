@@ -41,8 +41,12 @@ Extensions: `ModalHilbert`, `ModalS5Hilbert`, `TemporalBXHilbert`,
 
 Opaque tag types (`Propositional.HilbertCl`, `Propositional.HilbertMin`,
 `Propositional.HilbertInt`, `Modal.HilbertK`, etc.) serve as proof system
-identifiers. Concrete `InferenceSystem` and `HasAxiom*` instances will be
-registered when derivation trees are defined.
+identifiers. Concrete `InferenceSystem` and `HasAxiom*` instances are
+registered in their respective `Instances.lean` files. Modal, temporal, and
+bimodal tag types have full instances (see
+`Cslib.Logics.Modal.Metalogic.Instances`,
+`Cslib.Logics.Temporal.Metalogic.Instances`, and
+`Cslib.Logics.Bimodal.Metalogic.Instances`).
 
 ## Metalogic
 

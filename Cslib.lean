@@ -9,7 +9,10 @@ public import Cslib.Computability.Automata.DA.Buchi
 public import Cslib.Computability.Automata.DA.BuchiChar
 public import Cslib.Computability.Automata.DA.BuchiClosure
 public import Cslib.Computability.Automata.DA.Congr
+public import Cslib.Computability.Automata.DA.Conversions
+public import Cslib.Computability.Automata.DA.Parity
 public import Cslib.Computability.Automata.DA.Prod
+public import Cslib.Computability.Automata.DA.Rabin
 public import Cslib.Computability.Automata.DA.ToNA
 public import Cslib.Computability.Automata.EpsilonNA.Basic
 public import Cslib.Computability.Automata.EpsilonNA.ToNA
@@ -86,6 +89,7 @@ public import Cslib.Foundations.Logic.Metalogic.ListImplication
 public import Cslib.Foundations.Logic.Metalogic.MCSProperties
 public import Cslib.Foundations.Logic.Metalogic.SetDeduction
 public import Cslib.Foundations.Logic.ProofSystem
+public import Cslib.Foundations.Logic.PropositionalTableau
 public import Cslib.Foundations.Logic.Theorems
 public import Cslib.Foundations.Logic.Theorems.BigConj
 public import Cslib.Foundations.Logic.Theorems.Combinators
@@ -312,6 +316,7 @@ public import Cslib.Logics.Modal.Metalogic
 public import Cslib.Logics.Modal.Metalogic.Completeness
 public import Cslib.Logics.Modal.Metalogic.DeductionTheorem
 public import Cslib.Logics.Modal.Metalogic.DerivationTree
+public import Cslib.Logics.Modal.Metalogic.GenericMCSBridge
 public import Cslib.Logics.Modal.Metalogic.InterSystem.AxiomSubsumption
 public import Cslib.Logics.Modal.Metalogic.InterSystem.Conservativity
 public import Cslib.Logics.Modal.Metalogic.InterSystem.Lifting

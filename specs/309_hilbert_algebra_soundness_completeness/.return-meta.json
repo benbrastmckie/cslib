@@ -1,0 +1,21 @@
+{
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/309_hilbert_algebra_soundness_completeness/plans/01_hilbert-soundness-completeness-plan.md",
+      "summary": "3-phase implementation plan for HilbertAlgebra soundness/completeness via ImpAxiom Lindenbaum construction (3 hours, 350-400 lines)"
+    }
+  ],
+  "next_steps": "Run /implement 309 to execute the plan",
+  "metadata": {
+    "session_id": "sess_1782252559_952370_309",
+    "agent_type": "planner-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 3,
+    "estimated_hours": 3,
+    "dependency_waves": [[1], [2], [3]]
+  },
+  "memory_candidates": []
+}

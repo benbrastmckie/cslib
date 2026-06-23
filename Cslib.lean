@@ -110,6 +110,7 @@ public import Cslib.Foundations.Logic.Theorems.Temporal.FrameConditions
 public import Cslib.Foundations.Logic.Theorems.Temporal.TemporalDerived
 public import Cslib.Foundations.Order.BrouwerianSemilattice
 public import Cslib.Foundations.Order.HilbertAlgebra
+public import Cslib.Foundations.Order.HilbertAlgebra.DiegoEmbedding
 public import Cslib.Foundations.Relation.Attr
 public import Cslib.Foundations.Relation.Confluence
 public import Cslib.Foundations.Relation.Defs
@@ -428,6 +429,7 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentPredicates
 public import Cslib.Logics.Propositional.Semantics.Algebra.FreeJoinCompletion
 public import Cslib.Logics.Propositional.Semantics.Algebra.Glivenko
 public import Cslib.Logics.Propositional.Semantics.Algebra.Hilbert
+public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertAlgCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertConservativeGlivenko
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertLindenbaum
@@ -450,7 +452,7 @@ public import Cslib.Logics.Propositional.SequentCalculus.LJ.Soundness
 public import Cslib.Logics.Propositional.SequentCalculus.LK
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Basic
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Completeness
--- public import Cslib.Logics.Propositional.SequentCalculus.LK.CutElimination
+public import Cslib.Logics.Propositional.SequentCalculus.LK.CutElimination
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Soundness
 public import Cslib.Logics.Propositional.Tableau
 public import Cslib.Logics.Propositional.Tableau.Classical

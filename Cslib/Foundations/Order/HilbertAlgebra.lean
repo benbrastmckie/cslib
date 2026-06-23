@@ -168,6 +168,48 @@ instance instOrderTop : OrderTop H where
 
 end
 
+section
+
+variable {H : Type*} [HilbertAlgebra H]
+
+/-! ### Monotonicity and idempotence of himp -/
+
+/-- Monotonicity of `⇨` in the second argument: if `b ≤ c` then `a ⇨ b ≤ a ⇨ c`.
+
+Proof: From `b ≤ c` (i.e., `b ⇨ c = ⊤`) and K, we get `a ≤ b ⇨ c = ⊤`. From S:
+`(a ⇨ (b ⇨ c)) ⇨ ((a ⇨ b) ⇨ (a ⇨ c)) = ⊤`. Since `b ⇨ c = ⊤`, `a ⇨ (b ⇨ c) = ⊤`
+(by himp_top). Then MP gives `(a ⇨ b) ⇨ (a ⇨ c) = ⊤`, i.e., `a ⇨ b ≤ a ⇨ c`. -/
+theorem himp_le_himp_left {a b c : H} (h : b ≤ c) : a ⇨ b ≤ a ⇨ c := by
+  have hbc : b ⇨ c = ⊤ := h
+  have habc : a ⇨ (b ⇨ c) = ⊤ := by rw [hbc]; exact himp_top a
+  have hS := himp_S a b c
+  exact top_himp_extract (habc ▸ hS)
+
+/-- Right weakening: `b ≤ a ⇨ b`.
+
+From K: `b ⇨ (a ⇨ b) = ⊤`, i.e., `b ≤ a ⇨ b`. -/
+theorem le_himp {a b : H} : b ≤ a ⇨ b :=
+  himp_K b a
+
+/-- Idempotence of himp in the first argument: `a ⇨ (a ⇨ b) = a ⇨ b`.
+
+The inequality `a ⇨ b ≤ a ⇨ (a ⇨ b)` follows from K. The inequality
+`a ⇨ (a ⇨ b) ≤ a ⇨ b` follows from S applied to `(a, a, b)` and `himp_self a`. -/
+theorem himp_idem {a b : H} : a ⇨ (a ⇨ b) = a ⇨ b := by
+  apply himp_antisymm
+  · -- a ⇨ (a ⇨ b) ≤ a ⇨ b
+    -- S(a,a,b): (a ⇨ (a ⇨ b)) ⇨ ((a ⇨ a) ⇨ (a ⇨ b)) = ⊤
+    -- himp_self: a ⇨ a = ⊤, so (a ⇨ (a ⇨ b)) ⇨ (⊤ ⇨ (a ⇨ b)) = ⊤
+    -- top_himp: ⊤ ⇨ (a ⇨ b) = a ⇨ b
+    -- So (a ⇨ (a ⇨ b)) ⇨ (a ⇨ b) = ⊤, meaning a ⇨ (a ⇨ b) ≤ a ⇨ b.
+    have hS := himp_S a a b
+    rw [himp_self, top_himp] at hS
+    exact hS
+  · -- a ⇨ b ≤ a ⇨ (a ⇨ b) by K
+    exact le_himp (a := a)
+
+end
+
 end HilbertAlgebra
 
 /-! ## Forgetful instance from BrouwerianSemilattice -/

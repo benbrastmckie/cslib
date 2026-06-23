@@ -1,0 +1,116 @@
+{
+  "task_numbers": [266],
+  "files_analyzed": 11,
+  "ci_results": {
+    "lake_build": "passed",
+    "lake_test": "passed",
+    "check_init_imports": "passed",
+    "lake_lint": "passed",
+    "lake_exe_lint_style": "passed",
+    "lake_shake": "passed"
+  },
+  "notes": {
+    "lake_build": "One unrelated warning about Cslib.Computability.Automata.DA.Conversions (private module, not part of task 266).",
+    "lake_test": "Two unrelated warnings: FreeMonad.lean private access (backward.privateInPublic) and DA.Conversions (private module). No test failures.",
+    "lake_shake": "One unrelated warning about DA.Conversions. No import minimization issues in changed files."
+  },
+  "categories": [
+    {
+      "name": "Missing Docstrings",
+      "severity": "medium",
+      "violations": [
+        {
+          "file": "Cslib/Foundations/Logic/InferenceSystem.lean",
+          "line": 74,
+          "description": "Anonymous `Coe` instance from `S⇓a` to `DerivableIn S a` has no docstring. The linter did not fire (anonymous instances may be excluded from docBlame), but a short docstring or @[inherit_doc] attribute would align with the existing pattern in this file (e.g., the noncomputable Coe at line 81 also lacks one).",
+          "standard": "CONTRIBUTING.md",
+          "suggestion": "Add a /-- Coercion from a derivation to derivability. -/ docstring, or annotate with `@[inherit_doc DerivableIn.fromDerivation]`."
+        },
+        {
+          "file": "Cslib/Foundations/Logic/InferenceSystem.lean",
+          "line": 81,
+          "description": "Anonymous `noncomputable Coe` instance from `DerivableIn S a` to `S⇓a` has no docstring. Counterpart of the Coe at line 74.",
+          "standard": "CONTRIBUTING.md",
+          "suggestion": "Add a /-- Coercion from derivability to a derivation (noncomputable). -/ docstring, or annotate with `@[inherit_doc DerivableIn.toDerivation]`."
+        },
+        {
+          "file": "Cslib/Logics/Propositional/NaturalDeduction/Basic.lean",
+          "line": 158,
+          "description": "Theorem `Theory.Derivation.emptySequent_eq` has no docstring. Small proof-rfl lemma, but the pattern in this file is to document everything.",
+          "standard": "CONTRIBUTING.md",
+          "suggestion": "Add /-- Derivation of `A` in the empty context equals derivation of the empty sequent `∅ ⊢ A`. -/ above line 158."
+        },
+        {
+          "file": "Cslib/Logics/Propositional/NaturalDeduction/Basic.lean",
+          "line": 160,
+          "description": "Theorem `DerivableIn.iff_derivableIn_empty` has no docstring. Companion to `emptySequent_eq`.",
+          "standard": "CONTRIBUTING.md",
+          "suggestion": "Add /-- `DerivableIn T A` is equivalent to `DerivableIn T (∅ ⊢ A)`. -/ above line 160."
+        },
+        {
+          "file": "Cslib/Logics/Propositional/NaturalDeduction/Basic.lean",
+          "line": 335,
+          "description": "Theorem `derivableIn_top` has no docstring. Adjacent `Theory.derivationTop` at line 332 is documented but its propositional counterpart is not.",
+          "standard": "CONTRIBUTING.md",
+          "suggestion": "Add /-- `⊤` is derivable in any theory. -/ above line 335."
+        },
+        {
+          "file": "Cslib/Logics/Propositional/NaturalDeduction/Basic.lean",
+          "line": 361,
+          "description": "`equiv.refl` has no docstring. Its companions `equiv.symm` (line 366) and `equiv.trans` (line 370) both have docstrings, creating an inconsistency.",
+          "standard": "CONTRIBUTING.md",
+          "suggestion": "Add /-- An equivalence of a proposition with itself. -/ above line 361."
+        }
+      ]
+    },
+    {
+      "name": "Incomplete Axiom-Typeclass Pairing",
+      "severity": "low",
+      "violations": [
+        {
+          "file": "Cslib/Foundations/Logic/Axioms.lean",
+          "line": 197,
+          "description": "Diamond duality axiom formulas `AxiomDiaDualityFwd` and `AxiomDiaDualityBack` are defined in `Axioms.lean` (section `DiaDuality`, lines 197-218) but no corresponding `HasAxiomDiaDualityFwd` / `HasAxiomDiaDualityBack` typeclasses exist in `ProofSystem.lean`. Every other axiom defined in `Axioms.lean` has a matching typeclass in `ProofSystem.lean`. This leaves the diamond duality axioms orphaned from the proof-system hierarchy.",
+          "standard": "CONTRIBUTING.md (Design principles: reuse and consistency)",
+          "suggestion": "Add `class HasAxiomDiaDualityFwd` and `class HasAxiomDiaDualityBack` in `ProofSystem.lean` under a new `DiaDualityAxiomClasses` section, following the existing pattern. These would be used by any future intuitionistic or minimal modal logic proof system that takes `HasDia` as a primitive."
+        }
+      ]
+    }
+  ],
+  "no_violations_found": [
+    "lake build: no errors",
+    "lake exe checkInitImports: all 11 files import Cslib.Init",
+    "lake lint: no docBlame, defLemma, defsWithUnderscore, simpNF, unusedSectionVars, topNamespace, or dupNamespace violations",
+    "lake exe lint-style: no style linting errors",
+    "lake shake: no unnecessary imports",
+    "lake test: all tests pass",
+    "NOTATION.md: no arrow notation or bisimilarity notation used in changed files",
+    "ORGANISATION.md: all files correctly placed; namespaces follow Cslib.Logic convention",
+    "CODE_OF_CONDUCT.md: no problematic language found in comments or docstrings",
+    "No sorry or vacuous definitions found in any file",
+    "All @[simp] lemmas have normal-form LHS",
+    "All instances with names are in appropriate namespaces",
+    "GenericMCSBridge.lean is correctly marked as documentation-only with shake: keep-all",
+    "CslibTests/Propositional.lean covers decidable tautology, BoolEvaluate bridge, and soundness round-trip"
+  ],
+  "suggested_fix_tasks": [
+    {
+      "title": "Fix: Add missing docstrings in NaturalDeduction/Basic.lean and InferenceSystem.lean",
+      "slug": "fix_missing_docstrings_nd_and_inference",
+      "description": "Add /-- ... -/ docstrings to 6 declarations that are missing them: (1) `Theory.Derivation.emptySequent_eq` and `DerivableIn.iff_derivableIn_empty` (NaturalDeduction/Basic.lean lines 158, 160); (2) `derivableIn_top` (NaturalDeduction/Basic.lean line 335); (3) `equiv.refl` (NaturalDeduction/Basic.lean line 361); (4) the two anonymous Coe instances in InferenceSystem.lean (lines 74, 81). All are small one-line docstrings following the file's existing documentation pattern.",
+      "severity": "medium",
+      "violation_count": 6,
+      "category": "Missing Docstrings",
+      "parent_task": 266
+    },
+    {
+      "title": "Fix: Add HasAxiomDiaDualityFwd/Back typeclasses to ProofSystem.lean",
+      "slug": "fix_dia_duality_axiom_typeclasses",
+      "description": "Add `class HasAxiomDiaDualityFwd` and `class HasAxiomDiaDualityBack` to `Cslib/Foundations/Logic/ProofSystem.lean` following the `HasAxiomK`, `HasAxiomT` pattern. These correspond to `Axioms.AxiomDiaDualityFwd` and `Axioms.AxiomDiaDualityBack` already defined in `Axioms.lean` but currently without proof-system typeclass counterparts. Place them in a new `DiaDualityAxiomClasses` section after the existing `ModalAxiomClasses` section (around line 204).",
+      "severity": "low",
+      "violation_count": 1,
+      "category": "Incomplete Axiom-Typeclass Pairing",
+      "parent_task": 266
+    }
+  ]
+}

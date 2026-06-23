@@ -11,9 +11,9 @@ next_project_number: 294
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,266,279 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
-| 2 | 39,40,181,215,278,288,289,290,291,292 | 36,37,180,266,279 | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 3 | 41,275,293 | 39,40,290 | Foundations, Propositional Logic |
+| 1 | 36,37,180,226,241,245,252,278,279,288,289,290 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 2 | 39,40,181,215,291,292,293 | 36,37,180,279,290 | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 3 | 41,275 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -27,20 +27,19 @@ next_project_number: 294
 
 ### Foundations
 
-41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
+41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-266 [IMPLEMENTING] — Research improvements to Propositional/ and Foundations/Logic/ in
-  └─ 288 [NOT STARTED] — Export named abbrev or instance declarations making explicit that
-  └─ 289 [NOT STARTED] — Compose instDecidableTautology with prop_completeness_iff_tautolo
-  └─ 290 [NOT STARTED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
-    └─ 293 [NOT STARTED] — Establish the formal Curry-Howard isomorphism between Theory.Deri
 279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
   └─ 291 [NOT STARTED] — After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a un
   └─ 292 [NOT STARTED] — After task 279 delivers LJ with cut elimination, formalize the co
+288 [NOT STARTED] — Export named abbrev or instance declarations making explicit that
+289 [NOT STARTED] — Compose instDecidableTautology with prop_completeness_iff_tautolo
+290 [NOT STARTED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
+  └─ 293 [NOT STARTED] — Establish the formal Curry-Howard isomorphism between Theory.Deri
 
 ### Temporal Logic
 
@@ -116,90 +115,6 @@ next_project_number: 294
 
 ---
 
-### 287. Fix generic mcs bridge docstrings
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Dependencies**: None
-
-**Description**: Convert block comments in Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean to /-! -/ module docstrings for consistency with CSLib documentation conventions. The file is a documentation-only analysis file (gap analysis for the algebraicDerivationSystem / modalDerivationSystem bridge) and should use standard module docstring format.
-
----
-
-### 286. Fix omega regular todo workaround
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Dependencies**: None
-
-**Description**: Investigate whether the set_option backward.isDefEq.respectTransparency false workaround in Cslib/Computability/Languages/OmegaRegularLanguage.lean (line 194) can be removed or improved. The TODO comment indicates this is a known Lean elaboration issue. Either fix the proof to work without the option or document why the option is permanently needed.
-
----
-
-### 285. Nd metalogic as hilbert corollaries
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 283, Task 284
-- **Research**: [285_nd_metalogic_as_hilbert_corollaries/reports/01_nd-metalogic-corollaries.md]
-- **Plan**: [285_nd_metalogic_as_hilbert_corollaries/plans/01_nd-metalogic-plan.md]
-- **Summary**: [285_nd_metalogic_as_hilbert_corollaries/summaries/01_nd-metalogic-summary.md]
-
-**Description**: Refactor the ND metalogical API so that all ND-level results (algebraic completeness, conservative extension, Glivenko) are derived as corollaries of the Hilbert-primary versions via the hilbert_iff_nd bridge theorems. Remove the old ND-primary proofs (or move to a Legacy/ module if needed for transition). Ensure all downstream imports and dependent modules (modal, temporal, bimodal) still compile. Update ProofSystem.lean documentation to reflect the Hilbert-primary architecture. Run full CI pipeline (lake build, lake test, lake lint, lake exe checkInitImports).
-
----
-
-### 284. Hilbert primary conservative glivenko
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 283
-
-**Description**: Restate ipl_conservative_over_mpl and glivenko as Hilbert-primary using the Hilbert algebraic completeness from task 283. Conservative extension becomes: Derivable IntPropAxiom φ → Derivable MinPropAxiom φ (for bot-free φ), routed through Hilbert alg_complete and the GHA/HA embedding. Glivenko becomes: Derivable PropositionalAxiom φ → Derivable IntPropAxiom (¬¬φ), routed through Hilbert alg_complete and the Heyting.Regular subalgebra argument. Derive ND versions as corollaries via the bridge.
-
----
-
-### 283. Hilbert primary algebraic completeness
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 282
-
-**Description**: Restate algebraic completeness as Hilbert-primary using the Hilbert Lindenbaum algebra from task 282. Replace MPL.alg_complete, IPL.alg_complete, and Theory.alg_complete with versions stated for Derivable/SetDerivable (Hilbert) rather than DerivableIn (ND). The algebraic soundness theorems (min_alg_soundness_derivable etc.) are already Hilbert-primary and can be kept. The completeness direction uses the new Hilbert Lindenbaum algebra directly. Derive ND versions as corollaries via the hilbert_iff_nd bridge.
-
----
-
-### 282. Lindenbaum algebra over hilbert
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 281
-
-**Description**: Rebuild the Lindenbaum algebra construction over Hilbert derivations instead of ND. Currently Lindenbaum.lean defines the quotient ordering via DerivableIn T ({A} ⊢ B) (ND) and builds GHA/HA/BA instances using ND structural rules. Redefine using Hilbert SetDerivable/Deriv with the derived structural rules from task 281. The lattice operations (sup, inf, himp, compl) and their GHA/HA/BA instances must all be restated and proven using Hilbert derivations. The existing ND Lindenbaum can be kept temporarily as internal machinery but the new Hilbert version becomes primary.
-
----
-
-### 281. Hilbert derived structural rules
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: None
-
-**Description**: Complete the set of Hilbert derived structural rules needed for the Lindenbaum algebra construction. HilbertDerivedRules.lean already has some derived rules; extend it to include all ND structural rules as Hilbert-derived theorems for each tier (MPL/IPL/CPL): andI, andE1, andE2, orI1, orI2, orE, impI, impE, botE (IPL+CPL), dne (CPL). Each rule must be stated as a Hilbert DerivationTree derivation using only ax, assumption, modus_ponens, and weakening. This is the prerequisite for rebuilding the Lindenbaum algebra over Hilbert.
-
----
-
-### 280. Proof system triad gap analysis
-- **Status**: [COMPLETED]
-- **Task Type**: formal
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 266
-- **Research**:
-  - [280_proof_system_triad_gap_analysis/reports/01_teammate-c-findings.md]
-  - [280_proof_system_triad_gap_analysis/reports/01_team-research.md]
-
-**Description**: Research the current state of propositional proof systems in CSLib and create tasks to fill all gaps needed to provide: (1) Hilbert systems for algebraic completeness and MCS, (2) natural deduction for the Curry-Howard correspondence, (3) sequent calculus for cut elimination and decidability. Audit what exists (Hilbert + ND + algebraic semantics + Kripke semantics + equivalence bridges), identify what is missing for each proof system to fully serve its metatheoretic purpose (e.g., Hilbert-algebraic bridge corollaries, ND normalization/Curry-Howard, LK/LJ cut elimination, decidability instances, proof-system equivalence bridges), and create appropriately scoped implementation tasks with dependencies. Account for existing tasks 266 and 279 to avoid overlap. This is a metatask: the deliverable is a set of new tasks, not implementation.
-
----
-
 ### 279. Propositional sequent calculus lk lj
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
@@ -229,52 +144,6 @@ next_project_number: 294
   - [275_bimodal_tm_conservative_over_temporal_bx/reports/03_team-research.md]
 
 **Description**: Prove that Bimodal TM is conservative over Temporal BX for temporal formulas (those using only until/since, no box). The Temporal.Formula.toBimodal embedding exists. The lift_derivation_qfree infrastructure in Bimodal/Metalogic/ConservativeExtension/ partially supports this. Requires verifying the lifting extends to temporal connectives.
-
----
-
-### 269. Hilbert search tactic
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Foundations
-- **Dependencies**: Task 268, Task 278
-- **Research**:
-  - [269_hilbert_search_tactic/reports/01_team-research.md]
-  - [269_hilbert_search_tactic/reports/03_teammate-a-findings.md]
-  - [269_hilbert_search_tactic/reports/03_team-research.md]
-  - [269_hilbert_search_tactic/reports/03_team-research.md]
-- **Plan**: [269_hilbert_search_tactic/plans/04_hilbert-search-plan-v2.md]
-
-**Description**: Build generic bounded proof-search tactic for InferenceSystem. Create a bounded DFS proof-search tactic (e.g., hilbert_search) that works generically over the InferenceSystem typeclass. Inspired by BimodalLogic modal_search (~700 lines) but adapted to cslib polymorphic architecture. Search strategies: axiom matching, assumption lookup, modus ponens decomposition, necessitation + K rules, temporal rules. Must handle the InferenceSystem S α typeclass generically (not hardcoded to a specific DerivationTree). Configurable search depth. Should work across Propositional, Modal, Temporal, and Bimodal systems. Depends on task 268 (normalization tags help the tactic work on clean goals). Needs Zulip discussion before PR since this is novel cross-cutting infrastructure for cslib. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake
-
----
-
-### 268. Simp grind normalization tags
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Foundations
-- **Dependencies**: None
-- **Research**: [268_simp_grind_normalization_tags/reports/01_team-research.md]
-- **Plan**: [268_simp_grind_normalization_tags/plans/02_normalization-tags-plan.md]
-- **Summary**: [268_simp_grind_normalization_tags/summaries/02_normalization-tags-summary.md]
-
-**Description**: Add @[simp, scoped grind =] normalization tags to Hilbert system definitional lemmas. Add tags to the normalization/definitional layer across Propositional/, Modal/, Temporal/, and Bimodal/ Hilbert systems. Target: derived connective unfoldings, context manipulation lemmas, listImp equalities, and similar structural/characterization lemmas. Do NOT tag derivability constructors (Derivable.ax, Derivable.mp, etc.) — those are for the proof-search tactic. Follow cslib existing co-tagging convention. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake
-
----
-
-### 266. Research propositional and foundations improvements
-- **Status**: [IMPLEMENTING]
-- **Task Type**: formal
-- **Topic**: Propositional Logic
-- **Dependencies**: None
-- **Research**:
-  - [266_research_propositional_and_foundations_improvements/reports/01_team-research.md]
-  - [266_research_propositional_and_foundations_improvements/reports/02_team-research.md]
-- **Plan**:
-  - [266_research_propositional_and_foundations_improvements/plans/03_propositional-foundations-plan.md]
-  - [266_research_propositional_and_foundations_improvements/plans/04_propositional-foundations-plan.md]
-- **Summary**: [266_research_propositional_and_foundations_improvements/summaries/01_propositional-foundations-summary.md]
-
-**Description**: Research improvements to Propositional/ and Foundations/Logic/ in this repo: compose the Hilbert-ND bridge with algebraic completeness for Hilbert-tier corollaries, fix stale ProofSystem.lean documentation, add propositional test coverage, concretize modal/temporal/bimodal ProofSystem tag instances to unlock GenericMCS reuse, extract propositional tableau rules from the bimodal tableau to Foundations/, add HasDia primitive, and assemble a Decidable (Tautology φ) instance. Excludes sequent calculus (split to task 279).
 
 ---
 

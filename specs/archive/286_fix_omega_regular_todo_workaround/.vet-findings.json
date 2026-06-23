@@ -1,0 +1,40 @@
+{
+  "tasks_vetted": [286, 287],
+  "files_analyzed": ["Cslib/Computability/Languages/OmegaRegularLanguage.lean", "Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean"],
+  "ci_passed": true,
+  "ci_results": {
+    "scoped_builds": "PASS",
+    "lake_build": "PASS",
+    "lake_exe_checkInitImports": "PASS",
+    "lake_lint": "PASS",
+    "lake_exe_lint_style": "PASS",
+    "lake_shake": "PASS",
+    "lake_test": "PASS"
+  },
+  "categories": [
+    {
+      "name": "Documentation Inconsistency",
+      "severity": "Low",
+      "violations": [
+        {
+          "file": "Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean",
+          "line": 95,
+          "task_number": 287,
+          "description": "Line 95 reads 'This follow-up has been filed as task 287 (or should be created).' Task 287 was actually the docstring-conversion task that created this file in its current form, not the future extension task described (extending ListDeriv with necessitation). The internal task reference is stale and misleading.",
+          "standard": "CONTRIBUTING.md",
+          "fix_suggestion": "Update line 95 to remove the task number reference or clarify that a separate future task should be created for extending ListDeriv with necessitation. E.g., 'A future task should extend ListDeriv with a necessitation rule and prove equivalence.'"
+        }
+      ]
+    }
+  ],
+  "suggested_fix_tasks": [
+    {
+      "title": "Fix stale task reference in GenericMCSBridge.lean",
+      "slug": "fix_generic_mcs_bridge_task_ref",
+      "description": "Update line 95 of Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean to remove the stale 'task 287' reference. Task 287 was the docstring conversion task, not the follow-up extension task described. The line should either remove the task number or create a new task for extending ListDeriv with necessitation.",
+      "severity": "Low",
+      "category": "Documentation Inconsistency",
+      "violation_count": 1
+    }
+  ]
+}

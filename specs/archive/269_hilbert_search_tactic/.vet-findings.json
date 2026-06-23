@@ -1,0 +1,58 @@
+{
+  "task_numbers": [269],
+  "files_analyzed": [
+    "Cslib/Foundations/Logic/Automation/HilbertSearch.lean",
+    "CslibTests/HilbertSearch.lean"
+  ],
+  "ci_results": {
+    "lake_build": {
+      "passed": true,
+      "output": "Build completed successfully (3044 jobs). One pre-existing warning in Cslib/Computability/Automata/DA/Conversions.lean (privateModule linter, unrelated to task 269)."
+    },
+    "lake_test": {
+      "passed": true,
+      "output": "Build and test completed (exit code 0). Two pre-existing warnings in CslibTests/FreeMonad.lean and Cslib/Computability/Automata/DA/Conversions.lean, both unrelated to task 269."
+    },
+    "check_init_imports": {
+      "passed": true,
+      "output": "No output (exit code 0). HilbertSearch.lean imports Cslib.Foundations.Logic.ProofSystem which transitively carries public import Cslib.Init via InferenceSystem.lean."
+    },
+    "lint_style": {
+      "passed": true,
+      "output": "No output (exit code 0)."
+    },
+    "lake_shake": {
+      "passed": true,
+      "output": "Exit code 0. One pre-existing warning in Cslib/Computability/Automata/DA/Conversions.lean, unrelated to task 269."
+    },
+    "lake_lint": {
+      "passed": true,
+      "output": "Automatically detecting modules to lint. Default modules: #[Cslib]. -- Linting passed for Cslib."
+    }
+  },
+  "categories": [
+    {
+      "name": "Organization Documentation",
+      "severity": "Low",
+      "violations": [
+        {
+          "file": "Cslib/Foundations/Logic/Automation/HilbertSearch.lean",
+          "line": null,
+          "description": "The Automation/ subdirectory under Cslib/Foundations/Logic/ is not documented in ORGANISATION.md. The directory was newly created by task 269 and is the only file in it. ORGANISATION.md lists the Foundations/Logic/ tree structure but does not include an Automation/ entry.",
+          "standard": "ORGANISATION.md",
+          "fix": "Add an Automation/ entry under the Foundations/Logic/ tree in ORGANISATION.md, describing it as 'Proof automation tactics for Hilbert-style proof systems'."
+        }
+      ]
+    }
+  ],
+  "suggested_fix_tasks": [
+    {
+      "title": "Document Automation/ directory in ORGANISATION.md",
+      "slug": "document-automation-dir-organisation",
+      "description": "Add a documentation entry for the newly created Cslib/Foundations/Logic/Automation/ directory in ORGANISATION.md. The directory was created by task 269 (hilbert_search tactic) and is not yet reflected in the module tree. The entry should appear under the Foundations/Logic/ tree section and describe the Automation/ subdirectory as housing proof automation tactics for Hilbert-style proof systems, with HilbertSearch.lean as its first entry.",
+      "severity": "Low",
+      "category": "Organization Documentation",
+      "violation_count": 1
+    }
+  ]
+}

@@ -416,7 +416,7 @@
     {
       "project_number": 284,
       "project_name": "hilbert_primary_conservative_glivenko",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Restate ipl_conservative_over_mpl and glivenko as Hilbert-primary using the Hilbert algebraic completeness from task 283. Conservative extension becomes: Derivable IntPropAxiom φ → Derivable MinPropAxiom φ (for bot-free φ), routed through Hilbert alg_complete and the GHA/HA embedding. Glivenko becomes: Derivable PropositionalAxiom φ → Derivable IntPropAxiom (¬¬φ), routed through Hilbert alg_complete and the Heyting.Regular subalgebra argument. Derive ND versions as corollaries via the bridge.",
       "topic": "Propositional Logic",
@@ -424,7 +424,8 @@
         283
       ],
       "created": "2026-06-23T04:00:00Z",
-      "last_updated": "2026-06-23T04:00:00Z"
+      "last_updated": "2026-06-23T05:32:09Z",
+      "session_id": "sess_1782187168_2b1b69_284"
     },
     {
       "project_number": 285,

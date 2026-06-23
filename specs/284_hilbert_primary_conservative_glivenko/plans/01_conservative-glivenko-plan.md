@@ -1,7 +1,7 @@
 # Implementation Plan: Task #284
 
 - **Task**: 284 - Restate ipl_conservative_over_mpl and glivenko as Hilbert-primary
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 2 hours
 - **Dependencies**: Task 283 (Hilbert algebraic completeness)
 - **Research Inputs**: specs/284_hilbert_primary_conservative_glivenko/reports/01_conservative-glivenko.md

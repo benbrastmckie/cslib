@@ -11,8 +11,8 @@ next_project_number: 286
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,266,269,278,279,280,284 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215,285 | 36,37,180,284 | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 1 | 36,37,180,226,241,245,252,266,269,278,279,280,285 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 2 | 39,40,181,215 | 36,37,180 | Bimodal Porting, Temporal Logic |
 | 3 | 41,275 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -37,8 +37,7 @@ next_project_number: 286
 266 [IMPLEMENTING] — Research improvements to Propositional/ and Foundations/Logic/ in
 279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
 280 [NOT STARTED] — Research the current state of propositional proof systems in CSLi
-284 [NOT STARTED] — Restate ipl_conservative_over_mpl and glivenko as Hilbert-primary
-  └─ 285 [NOT STARTED] — Refactor the ND metalogical API so that all ND-level results (alg
+285 [NOT STARTED] — Refactor the ND metalogical API so that all ND-level results (alg
 
 ### Temporal Logic
 
@@ -65,7 +64,7 @@ next_project_number: 286
 ---
 
 ### 284. Hilbert primary conservative glivenko
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 283

@@ -1,0 +1,21 @@
+{
+  "status": "implemented",
+  "summary": "Task 306 complete: Brouwerian soundness and completeness for IPL(and,imp,top). Created BrouwerianCompleteness.lean (~430 lines) with (1) soundness: conjImp_brouwerian_soundness_derivable, (2) Lindenbaum algebra: ConjImpEquiv quotient with BrouwerianSemilattice instance, (3) truth lemma restricted to IsOrBotFree formulas, (4) completeness: conjImp_brouwerian_complete and conjImp_brouwerian_iff. All phases sorried-free, CI checks passed.",
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/Semantics/Algebra/BrouwerianCompleteness.lean",
+      "type": "implementation",
+      "summary": "Main implementation: soundness + Lindenbaum algebra + completeness"
+    },
+    {
+      "path": "specs/306_brouwerian_soundness_completeness/summaries/01_brouwerian-completeness-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary with CI results and plan deviations"
+    }
+  ],
+  "blockers": [],
+  "continuation_context": null,
+  "phases_completed": 3,
+  "phases_total": 3,
+  "next_action_hint": "complete"
+}

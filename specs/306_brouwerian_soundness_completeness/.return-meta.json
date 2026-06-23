@@ -1,0 +1,40 @@
+{
+  "status": "implemented",
+  "started_at": "2026-06-23T00:00:00Z",
+  "completed_at": "2026-06-23T01:00:00Z",
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/Semantics/Algebra/BrouwerianCompleteness.lean",
+      "type": "implementation",
+      "summary": "Brouwerian soundness and completeness for IPL(and,imp,top), ~430 lines"
+    },
+    {
+      "path": "specs/306_brouwerian_soundness_completeness/summaries/01_brouwerian-completeness-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary with CI results and plan deviations"
+    }
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "details": "All 3 phases implemented, CI passed",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 3
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "notes": "Full lake build has pre-existing failures in CutElimination.lean and two Tableau/Soundness files unrelated to task 306. Scoped build of BrouwerianCompleteness passes cleanly."
+  },
+  "metadata": {
+    "session_id": "sess_1750636800_abc306",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
+}

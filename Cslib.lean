@@ -418,6 +418,7 @@ public import Cslib.Logics.Propositional.ProofSystem.IntMinInstances
 public import Cslib.Logics.Propositional.Semantics.Algebra
 public import Cslib.Logics.Propositional.Semantics.Algebra.Bridge
 public import Cslib.Logics.Propositional.Semantics.Algebra.Brouwerian
+public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.Completeness
 public import Cslib.Logics.Propositional.Semantics.Algebra.Conservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentPredicates

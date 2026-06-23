@@ -1,5 +1,5 @@
 ---
-next_project_number: 294
+next_project_number: 296
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 294
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,278,279,288,289,290 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,252,278,279,288,289,290,294,295 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,291,292,293 | 36,37,180,279,290 | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 3 | 41,275 | 39,40 | Foundations |
 
@@ -53,7 +53,28 @@ next_project_number: 294
 
 ### Uncategorized
 
+294 [NOT STARTED] — Add missing docstrings to 6 declarations identified by /vet 266: 
+295 [NOT STARTED] — Add HasAxiomDiaDualityFwd and HasAxiomDiaDualityBack typeclasses 
+
 ## Tasks
+
+### 295. Fix dia duality axiom typeclasses
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Add HasAxiomDiaDualityFwd and HasAxiomDiaDualityBack typeclasses to Cslib/Foundations/Logic/ProofSystem.lean to complete the axiom-typeclass pairing pattern. AxiomDiaDualityFwd and AxiomDiaDualityBack are defined in Axioms.lean but lack corresponding Has* typeclasses in ProofSystem.lean, unlike every other axiom. Add two class declarations in a new DiaDualityAxiomClasses section following the existing pattern.
+
+---
+
+### 294. Fix missing docstrings nd inference
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Add missing docstrings to 6 declarations identified by /vet 266: two anonymous Coe instances in Cslib/Foundations/Logic/InferenceSystem.lean (lines 74, 81), and four declarations in Cslib/Logics/Propositional/NaturalDeduction/Basic.lean (emptySequent_eq line 158, iff_derivableIn_empty line 160, derivableIn_top line 335, equiv.refl line 361). Follow CONTRIBUTING.md docstring conventions for consistency with surrounding code.
+
+---
 
 ### 293. Curry howard nd typed lambda
 - **Status**: [NOT STARTED]

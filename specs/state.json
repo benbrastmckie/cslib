@@ -1,6 +1,30 @@
 {
-  "next_project_number": 294,
+  "next_project_number": 296,
   "active_projects": [
+    {
+      "project_number": 294,
+      "project_name": "fix_missing_docstrings_nd_inference",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Add missing docstrings to 6 declarations identified by /vet 266: two anonymous Coe instances in Cslib/Foundations/Logic/InferenceSystem.lean (lines 74, 81), and four declarations in Cslib/Logics/Propositional/NaturalDeduction/Basic.lean (emptySequent_eq line 158, iff_derivableIn_empty line 160, derivableIn_top line 335, equiv.refl line 361). Follow CONTRIBUTING.md docstring conventions for consistency with surrounding code.",
+      "created": "2026-06-23T17:07:28Z",
+      "last_updated": "2026-06-23T17:07:28Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "parent_task": 266
+    },
+    {
+      "project_number": 295,
+      "project_name": "fix_dia_duality_axiom_typeclasses",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Add HasAxiomDiaDualityFwd and HasAxiomDiaDualityBack typeclasses to Cslib/Foundations/Logic/ProofSystem.lean to complete the axiom-typeclass pairing pattern. AxiomDiaDualityFwd and AxiomDiaDualityBack are defined in Axioms.lean but lack corresponding Has* typeclasses in ProofSystem.lean, unlike every other axiom. Add two class declarations in a new DiaDualityAxiomClasses section following the existing pattern.",
+      "created": "2026-06-23T17:07:28Z",
+      "last_updated": "2026-06-23T17:07:28Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "parent_task": 266
+    },
     {
       "project_number": 288,
       "project_name": "lindenbaum_tarski_algebra_instances",

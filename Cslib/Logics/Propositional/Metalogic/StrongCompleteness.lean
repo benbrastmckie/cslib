@@ -559,4 +559,12 @@ This is a corollary of `prop_strong_completeness_iff` obtained by instantiating 
     Tautology φ ↔ Derivable PropositionalAxiom φ :=
   ⟨prop_completeness, prop_soundness_tautology⟩
 
+/-- Derivability from `PropositionalAxiom` is decidable when `Atom` is a `Fintype` with
+`DecidableEq`. The decision procedure reduces derivability to tautology-checking via
+`prop_completeness_iff_tautology`, then uses `instDecidableTautology` to enumerate all
+Boolean valuations. -/
+instance instDecidableDerivablePropositionalAxiom [Fintype Atom] [DecidableEq Atom]
+    (phi : PL.Proposition Atom) : Decidable (Derivable PropositionalAxiom phi) :=
+  decidable_of_iff (Tautology phi) prop_completeness_iff_tautology
+
 end Cslib.Logic.PL

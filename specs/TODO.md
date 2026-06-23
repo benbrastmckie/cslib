@@ -1,5 +1,5 @@
 ---
-next_project_number: 278
+next_project_number: 279
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 278
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,266,268 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,252,266,268,278 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,269 | 36,37,180,268 | Bimodal Porting, Foundations, Temporal Logic |
 | 3 | 41,275 | 39,40 | Foundations |
 
@@ -29,6 +29,7 @@ next_project_number: 278
 
 268 [RESEARCHED] — Add @[simp, scoped grind =] normalization tags to Hilbert system 
   └─ 269 [NOT STARTED] — Build generic bounded proof-search tactic for InferenceSystem. Cr
+278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Propositional Logic
@@ -49,6 +50,16 @@ next_project_number: 278
 ### Uncategorized
 
 ## Tasks
+
+### 278. Simplify proofs with normalization tags
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Foundations
+- **Dependencies**: None
+
+**Description**: Simplify proofs using new simp/grind normalization tags. After task 268 adds @[simp, scoped grind =] tags to Hilbert system definitional lemmas, audit all proofs in Propositional/, Modal/, Temporal/, and Bimodal/ that use manual `simp only [listImp_nil, listImp_cons, bigconj_nil, ...]` or verbose tactic chains involving these normalization lemmas. Replace with `grind` or `simp` where the new tags make the explicit lemma lists redundant. Also check Foundations/Logic/ proofs. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake
+
+---
 
 ### 275. Bimodal tm conservative over temporal bx
 - **Status**: [BLOCKED]

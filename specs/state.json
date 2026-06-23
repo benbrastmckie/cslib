@@ -328,12 +328,12 @@
     {
       "project_number": 279,
       "project_name": "propositional_sequent_calculus_lk_lj",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Implement a two-sided Gentzen-style sequent calculus (LK for classical, LJ for intuitionistic) for propositional logic with cut elimination. Use Finset-based contexts on both sides, following the CLL sequent calculus in Cslib/Logics/LinearLogic/CLL/Basic.lean as a template. Prove soundness, completeness, cut elimination (Hauptsatz), and equivalence bridges to the existing Hilbert and natural deduction systems (hilbert_iff_lk, nd_iff_lk). This completes the proof-system triad (Hilbert + ND + SC) for propositional logic and would be the first LK/LJ formalization in Lean 4.",
       "topic": "Propositional Logic",
       "created": "2026-06-23T02:57:39Z",
-      "last_updated": "2026-06-23T19:23:07Z",
+      "last_updated": "2026-06-23T19:30:31Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
@@ -345,12 +345,17 @@
           "path": "specs/279_propositional_sequent_calculus_lk_lj/reports/01_team-research.md",
           "type": "research",
           "summary": "Team research with 4 teammates: LK/LJ sequent calculus design, CLL template analysis, Mathlib prior art, scope assessment, strategic alignment"
+        },
+        {
+          "path": "specs/279_propositional_sequent_calculus_lk_lj/plans/02_sequent-calculus-plan.md",
+          "type": "plan",
+          "summary": "6-phase implementation plan for LK/LJ sequent calculi with cut elimination and equivalence bridges"
         }
       ],
       "dependencies": [
         280
       ],
-      "session_id": "sess_1750730000_a7b3c1",
+      "session_id": "sess_1782242736_cac36e",
       "researched": "2026-06-23T19:23:07Z"
     },
     {

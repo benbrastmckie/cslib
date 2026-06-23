@@ -38,7 +38,7 @@ next_project_number: 314
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-279 [RESEARCHED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
+279 [PLANNED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
   └─ 291 [NOT STARTED] — After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a un
   └─ 292 [NOT STARTED] — After task 279 delivers LJ with cut elimination, formalize the co
 290 [NOT STARTED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
@@ -361,13 +361,14 @@ next_project_number: 314
 ---
 
 ### 279. Propositional sequent calculus lk lj
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 280
 - **Research**:
   - [279_propositional_sequent_calculus_lk_lj/reports/01_teammate-a-findings.md]
   - [279_propositional_sequent_calculus_lk_lj/reports/01_team-research.md]
+- **Plan**: [279_propositional_sequent_calculus_lk_lj/plans/02_sequent-calculus-plan.md]
 
 **Description**: Implement a two-sided Gentzen-style sequent calculus (LK for classical, LJ for intuitionistic) for propositional logic with cut elimination. Use Finset-based contexts on both sides, following the CLL sequent calculus in Cslib/Logics/LinearLogic/CLL/Basic.lean as a template. Prove soundness, completeness, cut elimination (Hauptsatz), and equivalence bridges to the existing Hilbert and natural deduction systems (hilbert_iff_lk, nd_iff_lk). This completes the proof-system triad (Hilbert + ND + SC) for propositional logic and would be the first LK/LJ formalization in Lean 4.
 

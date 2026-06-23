@@ -1,5 +1,5 @@
 {
-  "next_project_number": 318,
+  "next_project_number": 319,
   "active_projects": [
     {
       "project_number": 316,
@@ -546,21 +546,30 @@
     {
       "project_number": 315,
       "project_name": "lj_intuitionistic_sequent_calculus",
-      "status": "planning",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Implement the intuitionistic sequent calculus LJ for propositional logic. Use single-conclusion sequents (Finset antecedent, single Proposition succedent) matching the existing ND Sequent type. Create LJ proof inductive (LJ/Basic.lean), structural admissibility lemmas, soundness (LJ/Soundness.lean), cut elimination / Hauptsatz (LJ/CutElimination.lean), and equivalence bridges hilbert_iff_lj and nd_iff_lj. The nd_iff_lj bridge should be near-definitional given matching sequent shapes. File layout: Cslib/Logics/Propositional/SequentCalculus/{LJ/Basic,LJ/Soundness,LJ/CutElimination}.lean plus additions to Equivalence.lean. Depends on task 314 for shared Defs.lean and notation infrastructure. Parent task: 279.\n\nLiterature sources:\n- specs/literature/sources/negri_von_plato_2001/section03_ch2-intuitionistic-cut-elimination.md — G3ip rules, admissibility of contraction and cut for intuitionistic SC (primary reference for LJ design)\n- specs/literature/sources/troelstra_schwichtenberg_2000/section04_ch3-gentzen-systems.md — LJ definitions, G3-style systems, structural rules\n- specs/literature/sources/troelstra_schwichtenberg_2000/section05_ch4-cut-elimination.md — Hauptsatz for intuitionistic logic, termination argument\n- specs/literature/sources/negri_von_plato_2001/section06_ch5-variant-sequent-calculi.md — Multisuccedent intuitionistic calculus, terminating intuitionistic calculus (G3i variants)\n- specs/literature/sources/negri_von_plato_2001/section07_ch6-8-extensions-translations.md — ND-SC translations for bridge proofs\n- specs/literature/sources/gentzen_1935/gentzen_1935_sec03.md — Original LJ definitions and Hauptsatz\n- specs/literature/sources/gentzen_1935/gentzen_1935_sec05.md — NJ/LJ equivalence (bridge proof reference)",
       "topic": "Propositional Logic",
       "created": "2026-06-23T19:33:42Z",
-      "last_updated": "2026-06-23T21:56:34Z",
-      "next_artifact_number": 1,
-      "artifacts": [],
+      "last_updated": "2026-06-23T22:00:00Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/315_lj_intuitionistic_sequent_calculus/reports/01_lj-research.md",
+          "type": "report"
+        },
+        {
+          "path": "specs/315_lj_intuitionistic_sequent_calculus/plans/01_lj-plan.md",
+          "type": "plan"
+        }
+      ],
       "dependencies": [
         314
       ],
       "parent_task": 279,
       "plan_metadata": {
-        "phases": 3,
-        "total_effort_hours": 8,
+        "phases": 5,
+        "total_effort_hours": 16,
         "complexity": "complex",
         "research_integrated": true,
         "plan_version": 1,
@@ -569,14 +578,31 @@
             1
           ],
           [
-            2
+            2,
+            3
           ],
           [
-            3
+            4
+          ],
+          [
+            5
           ]
         ]
       },
       "session_id": "sess_1782245580_188995_315"
+    },
+    {
+      "project_number": 318,
+      "project_name": "ipl_conservative_over_conj_imp_bot",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "IPL conservative over IPL⟨∧,→,⊥,⊤⟩ for or-free formulas. Define pointed Brouwerian semilattice (BrouwerianSemilattice + OrderBot), prove soundness/completeness of the conjunctive-implicational-bot fragment, and prove IPL conservative over this fragment via the existing free join completion embedding (which already preserves ⊥ as bot). Extends tasks 303/306/307 with the EFQ axiom.",
+      "topic": "Propositional Logic",
+      "dependencies": [
+        306,
+        307
+      ],
+      "created": "2026-06-23T22:01:51Z"
     }
   ],
   "repository_health": {

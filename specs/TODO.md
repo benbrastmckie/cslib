@@ -1,5 +1,5 @@
 ---
-next_project_number: 318
+next_project_number: 319
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 318
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,304,313,314,316 | -- | Bimodal Porting, Foundations, Project Management, ... |
+| 1 | 36,37,180,226,241,245,278,290,299,301,304,313,314,316,318 | -- | Bimodal Porting, Foundations, Project Management, ... |
 | 2 | 39,40,181,215,293,300,309,310,315,317 | 36,37,180,290,299,304,314,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
 | 3 | 41,275,291,292,311 | 39,40,309,310,315 | Foundations, Propositional Logic, Algebraic Semantics |
 | 4 | 312 | 311 | Algebraic Semantics |
@@ -41,11 +41,12 @@ next_project_number: 318
 290 [NOT STARTED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
   └─ 293 [NOT STARTED] — Establish the formal Curry-Howard isomorphism between Theory.Deri
 314 [IMPLEMENTING] — Implement the classical sequent calculus LK for propositional log
-  └─ 315 [RESEARCHED] — Implement the intuitionistic sequent calculus LJ for propositiona
+  └─ 315 [PLANNED] — Implement the intuitionistic sequent calculus LJ for propositiona
     └─ 291 [NOT STARTED] — After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a un
     └─ 292 [NOT STARTED] — After task 279 delivers LJ with cut elimination, formalize the co
 316 [IMPLEMENTING] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [NOT STARTED] — Fill the 8 sorry instances in propositional tableau completeness 
+318 [NOT STARTED] — IPL conservative over IPL⟨∧,→,⊥,⊤⟩ for or-free formulas. Define p
 
 ### Temporal Logic
 
@@ -75,6 +76,16 @@ next_project_number: 318
 
 ## Tasks
 
+### 318. Ipl conservative over conj imp bot
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 306, Task 307
+
+**Description**: IPL conservative over IPL⟨∧,→,⊥,⊤⟩ for or-free formulas. Define pointed Brouwerian semilattice (BrouwerianSemilattice + OrderBot), prove soundness/completeness of the conjunctive-implicational-bot fragment, and prove IPL conservative over this fragment via the existing free join completion embedding (which already preserves ⊥ as bot). Extends tasks 303/306/307 with the EFQ axiom.
+
+---
+
 ### 317. Propositional tableau completeness
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
@@ -98,10 +109,12 @@ next_project_number: 318
 ---
 
 ### 315. Lj intuitionistic sequent calculus
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 314
+- **Research**: [315_lj_intuitionistic_sequent_calculus/reports/01_lj-research.md]
+- **Plan**: [315_lj_intuitionistic_sequent_calculus/plans/01_lj-plan.md]
 
 **Description**: Implement the intuitionistic sequent calculus LJ for propositional logic. Use single-conclusion sequents (Finset antecedent, single Proposition succedent) matching the existing ND Sequent type. Create LJ proof inductive (LJ/Basic.lean), structural admissibility lemmas, soundness (LJ/Soundness.lean), cut elimination / Hauptsatz (LJ/CutElimination.lean), and equivalence bridges hilbert_iff_lj and nd_iff_lj. The nd_iff_lj bridge should be near-definitional given matching sequent shapes. File layout: Cslib/Logics/Propositional/SequentCalculus/{LJ/Basic,LJ/Soundness,LJ/CutElimination}.lean plus additions to Equivalence.lean. Depends on task 314 for shared Defs.lean and notation infrastructure. Parent task: 279.
 

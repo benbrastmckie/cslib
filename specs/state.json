@@ -56,18 +56,23 @@
     {
       "project_number": 298,
       "project_name": "propositional_tableau_decidability",
-      "status": "planning",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Propositional",
       "description": "Implement propositional tableau systems for all three propositional logics in CSLib: classical (PropositionalAxiom), intuitionistic (IntPropAxiom), and minimal (MinPropAxiom). Build on the logic-neutral Foundations/Logic/Tableau/ infrastructure from task 297. Classical tableau: two-sided signed (T/F), complementary closure, all rules invertible, L = Unit — delivers Decidable (BValid phi) via Boolean semantics. Intuitionistic tableau: Kripke-style worlds even at propositional level (L = WorldIndex), restricted T(φ→ψ) rule creating successor worlds, closure only on F(⊥) — delivers Decidable (IValid phi) via propositional Kripke semantics. Minimal tableau: like intuitionistic but closure restricted to complementary atoms T(p)/F(p) only (no ex falso) — delivers Decidable (MValid phi) via MValid/Kripke semantics with botForces = false. Build classical first (simplest, validates infrastructure), then intuitionistic (adds world-labeled branches), then minimal (restricts closure further). Handle native and/or constructors for PL.Proposition. Use fuel-bounded expansion with termination via subformula property (classical) and finite model property (intuitionistic/minimal). Soundness and completeness proved against respective semantics. Files under Cslib/Logics/Propositional/Tableau/: Defs.lean, Rules.lean, Classical/Closure.lean, Classical/Saturation.lean, Classical/Soundness.lean, Classical/Completeness.lean, Classical/DecisionProcedure.lean, Intuitionistic/Closure.lean, Intuitionistic/Saturation.lean, Intuitionistic/Soundness.lean, Intuitionistic/Completeness.lean, Intuitionistic/DecisionProcedure.lean, Minimal/Closure.lean, Minimal/DecisionProcedure.lean. Estimated: 2,000-2,800 lines.",
       "created": "2026-06-23T17:47:17Z",
-      "last_updated": "2026-06-23T19:00:26Z",
+      "last_updated": "2026-06-23T19:05:16Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
           "path": "specs/298_propositional_tableau_decidability/reports/01_prop-tableau-research.md",
           "type": "report",
           "summary": "Propositional tableau research: 3 logics, foundations API analysis, file organization"
+        },
+        {
+          "path": "specs/298_propositional_tableau_decidability/plans/01_prop-tableau-plan.md",
+          "type": "plan",
+          "summary": "6-phase plan: classical/intuitionistic/minimal tableau systems"
         }
       ],
       "dependencies": [
@@ -323,17 +328,30 @@
     {
       "project_number": 279,
       "project_name": "propositional_sequent_calculus_lk_lj",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "description": "Implement a two-sided Gentzen-style sequent calculus (LK for classical, LJ for intuitionistic) for propositional logic with cut elimination. Use Finset-based contexts on both sides, following the CLL sequent calculus in Cslib/Logics/LinearLogic/CLL/Basic.lean as a template. Prove soundness, completeness, cut elimination (Hauptsatz), and equivalence bridges to the existing Hilbert and natural deduction systems (hilbert_iff_lk, nd_iff_lk). This completes the proof-system triad (Hilbert + ND + SC) for propositional logic and would be the first LK/LJ formalization in Lean 4.",
       "topic": "Propositional Logic",
       "created": "2026-06-23T02:57:39Z",
-      "last_updated": "2026-06-23T02:57:39Z",
-      "next_artifact_number": 1,
-      "artifacts": [],
+      "last_updated": "2026-06-23T19:23:07Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/279_propositional_sequent_calculus_lk_lj/reports/01_teammate-a-findings.md",
+          "description": "Teammate A primary research: CLL template, propositional infrastructure, LK/LJ design, cut elimination strategy, bridge proofs"
+        },
+        {
+          "path": "specs/279_propositional_sequent_calculus_lk_lj/reports/01_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates: LK/LJ sequent calculus design, CLL template analysis, Mathlib prior art, scope assessment, strategic alignment"
+        }
+      ],
       "dependencies": [
         280
-      ]
+      ],
+      "session_id": "sess_1750730000_a7b3c1",
+      "researched": "2026-06-23T19:23:07Z"
     },
     {
       "project_number": 278,

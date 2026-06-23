@@ -38,7 +38,7 @@ next_project_number: 314
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-279 [NOT STARTED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
+279 [RESEARCHED] — Implement a two-sided Gentzen-style sequent calculus (LK for clas
   └─ 291 [NOT STARTED] — After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a un
   └─ 292 [NOT STARTED] — After task 279 delivers LJ with cut elimination, formalize the co
 290 [NOT STARTED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
@@ -55,7 +55,7 @@ next_project_number: 314
 
 ### Propositional
 
-298 [PLANNING] — Implement propositional tableau systems for all three proposition
+298 [IMPLEMENTING] — Implement propositional tableau systems for all three proposition
 
 ### Modal
 
@@ -243,11 +243,12 @@ next_project_number: 314
 ---
 
 ### 298. Propositional tableau decidability
-- **Status**: [PLANNING]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional
 - **Dependencies**: Task 297
 - **Research**: [298_propositional_tableau_decidability/reports/01_prop-tableau-research.md]
+- **Plan**: [298_propositional_tableau_decidability/plans/01_prop-tableau-plan.md]
 
 **Description**: Implement propositional tableau systems for all three propositional logics in CSLib: classical (PropositionalAxiom), intuitionistic (IntPropAxiom), and minimal (MinPropAxiom). Build on the logic-neutral Foundations/Logic/Tableau/ infrastructure from task 297. Classical tableau: two-sided signed (T/F), complementary closure, all rules invertible, L = Unit — delivers Decidable (BValid phi) via Boolean semantics. Intuitionistic tableau: Kripke-style worlds even at propositional level (L = WorldIndex), restricted T(φ→ψ) rule creating successor worlds, closure only on F(⊥) — delivers Decidable (IValid phi) via propositional Kripke semantics. Minimal tableau: like intuitionistic but closure restricted to complementary atoms T(p)/F(p) only (no ex falso) — delivers Decidable (MValid phi) via MValid/Kripke semantics with botForces = false. Build classical first (simplest, validates infrastructure), then intuitionistic (adds world-labeled branches), then minimal (restricts closure further). Handle native and/or constructors for PL.Proposition. Use fuel-bounded expansion with termination via subformula property (classical) and finite model property (intuitionistic/minimal). Soundness and completeness proved against respective semantics. Files under Cslib/Logics/Propositional/Tableau/: Defs.lean, Rules.lean, Classical/Closure.lean, Classical/Saturation.lean, Classical/Soundness.lean, Classical/Completeness.lean, Classical/DecisionProcedure.lean, Intuitionistic/Closure.lean, Intuitionistic/Saturation.lean, Intuitionistic/Soundness.lean, Intuitionistic/Completeness.lean, Intuitionistic/DecisionProcedure.lean, Minimal/Closure.lean, Minimal/DecisionProcedure.lean. Estimated: 2,000-2,800 lines.
 
@@ -360,10 +361,13 @@ next_project_number: 314
 ---
 
 ### 279. Propositional sequent calculus lk lj
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 280
+- **Research**:
+  - [279_propositional_sequent_calculus_lk_lj/reports/01_teammate-a-findings.md]
+  - [279_propositional_sequent_calculus_lk_lj/reports/01_team-research.md]
 
 **Description**: Implement a two-sided Gentzen-style sequent calculus (LK for classical, LJ for intuitionistic) for propositional logic with cut elimination. Use Finset-based contexts on both sides, following the CLL sequent calculus in Cslib/Logics/LinearLogic/CLL/Basic.lean as a template. Prove soundness, completeness, cut elimination (Hauptsatz), and equivalence bridges to the existing Hilbert and natural deduction systems (hilbert_iff_lk, nd_iff_lk). This completes the proof-system triad (Hilbert + ND + SC) for propositional logic and would be the first LK/LJ formalization in Lean 4.
 

@@ -814,14 +814,14 @@
           "summary": "Conservative extension proof chain: ~70-80 lines, all deps verified"
         },
         {
-          "path": "specs/308_ipl_conservative_over_conj_imp/plans/01_conservative-extension-plan.md",
-          "type": "plan",
-          "summary": "Implementation plan (Phase 1 COMPLETED)"
-        },
-        {
           "path": "specs/308_ipl_conservative_over_conj_imp/summaries/01_conservative-extension-summary.md",
           "type": "summary",
           "summary": "Implementation summary: 4 theorems, build passes, lint clean"
+        },
+        {
+          "path": "specs/308_ipl_conservative_over_conj_imp/plans/01_conservative-extension-plan.md",
+          "type": "plan",
+          "summary": "Single-phase plan: create ConjImpConservative.lean with 4 theorems + liftDerivationTree combinator"
         }
       ],
       "dependencies": [

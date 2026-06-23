@@ -200,8 +200,8 @@ Literature sources:
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 306, Task 307
 - **Research**: [308_ipl_conservative_over_conj_imp/reports/01_conservative-extension-research.md]
-- **Plan**: [308_ipl_conservative_over_conj_imp/plans/01_conservative-extension-plan.md]
 - **Summary**: [308_ipl_conservative_over_conj_imp/summaries/01_conservative-extension-summary.md]
+- **Plan**: [308_ipl_conservative_over_conj_imp/plans/01_conservative-extension-plan.md]
 
 **Description**: Prove the conservative extension theorem: IPL is conservative over IPL⟨∧,→,⊤⟩ for or-bot-free formulas. Statement: if Derivable IntPropAxiom φ and φ.IsOrBotFree = true, then Derivable ConjImpAxiom φ. Proof route: (1) IPL.hilbert_alg_complete.mp converts to HA-validity, (2) for any BrouwerianSemilattice B and valuation v, instantiate HA-validity at the free join completion of B, (3) the embedding lemma from FreeJoinCompletion.lean rewrites back to BrouwerianEvaluate v φ = ⊤ in B, (4) Brouwerian completeness converts back to Derivable ConjImpAxiom φ. Derive the ND corollary via algebraic bridges. This shows that disjunction and falsum are genuinely independent extensions — no theorem in the ∧-→-⊤ language gains a new proof by adding ∨ and ⊥. File: Cslib/Logics/Propositional/Semantics/Algebra/ConjImpConservative.lean.
 

@@ -1,57 +1,84 @@
 # Implementation Plan: IPL Conservative over IPL⟨∧,→,⊤⟩
 
-## Task
+- **Task**: 308 - IPL Conservative over IPL⟨∧,→,⊤⟩
+- **Status**: [NOT STARTED]
+- **Effort**: 1 hour
+- **Dependencies**: 306 (Brouwerian completeness), 307 (free join completion) -- both complete
+- **Research Inputs**: specs/308_ipl_conservative_over_conj_imp/reports/01_conservative-extension-research.md
+- **Artifacts**: plans/01_conservative-extension-plan.md (this file)
+- **Standards**:
+  - .claude/rules/artifact-formats.md
+  - .claude/rules/state-management.md
+- **Type**: cslib
 
-Prove the conservative extension theorem: IPL is conservative over IPL⟨∧,→,⊤⟩ for or-bot-free
-formulas. File: `Cslib/Logics/Propositional/Semantics/Algebra/ConjImpConservative.lean`.
+## Overview
 
-## Phase 1: Write and verify the implementation [COMPLETED]
+Prove the conservative extension theorem: IPL is conservative over IPL⟨∧,→,⊤⟩ for or-bot-free formulas. The proof chains existing algebraic completeness infrastructure through the free join completion (LowerSet embedding). All building blocks exist; this task assembles them into a single new file with four theorems plus one utility combinator. Definition of done: `ConjImpConservative.lean` builds without sorry, passes lint, and is registered in `Cslib.lean`.
 
-### Overview
+### Research Integration
 
-Create `ConjImpConservative.lean` with four theorems:
+- Report `01_conservative-extension-research.md` (integrated): Full proof chain analysis, template comparison with `hilbertIplConservativeOverMpl`, universe verification, import analysis, and estimated complexity (~70-80 lines).
 
-1. `hilbertIplConservativeOverConjImp` (main theorem)
-2. `derivableConjImpOfDerivableInt` (subsumption direction)
-3. `hilbertIplConservativeOverConjImp_iff` (biconditional)
-4. `ipl_conservative_over_conjImp` (ND corollary)
+## Goals & Non-Goals
 
-### Proof strategy
+- **Goals**:
+  - Prove `hilbertIplConservativeOverConjImp`: main conservative extension theorem
+  - Prove `derivableConjImpOfDerivableInt`: subsumption direction via axiom monotonicity
+  - Prove `hilbertIplConservativeOverConjImp_iff`: biconditional combining both directions
+  - Prove `ipl_conservative_over_conjImp`: ND corollary via algebraic bridge
+  - Define `liftDerivationTree`: generic axiom-monotonicity combinator for PL derivation trees
+  - Register the module in `Cslib.lean` barrel imports
+- **Non-Goals**:
+  - Proving conservative extension for the purely implicational fragment (IPL over IPL⟨→,⊤⟩)
+  - Adding new Mathlib dependencies beyond what is already imported
+  - Modifying existing proof infrastructure files
 
-**Main theorem** mirrors `hilbertIplConservativeOverMpl` from HilbertConservativeGlivenko.lean:
-- `conjImp_brouwerian_complete hOBF` reduces to showing `BrouwerianValid φ`
-- `intro B _ v` introduces a Brouwerian semilattice `B` and valuation
-- `IPL.hilbert_alg_complete.mp h (H := LowerSet B) (LowerSet.Iic ∘ v)` applies IPL Heyting
-  completeness at `LowerSet B`
-- `brouwerianEmbeddingLemma v φ hOBF` bridges Brouwerian and Heyting semantics
+## Risks & Mitigations
 
-**Subsumption direction** needs a generic axiom-monotonicity combinator `liftDerivation` on
-PL derivation trees (4 constructors: ax, assumption, modus_ponens, weakening). The function
-maps `ConjImpAxiom → IntPropAxiom` via `ConjImpAxiom.toMinPropAxiom.toIntPropAxiom`.
+- **Risk**: `LowerSet B` HeytingAlgebra instance not inferred automatically. **Mitigation**: The existing `FreeJoinCompletion.lean` already uses `AlgEvaluate` over `LowerSet B` without issues, confirming typeclass inference works.
+- **Risk**: Universe mismatch between `HAValid.{u,u}` and `BrouwerianValid.{u,u}`. **Mitigation**: Research verified `LowerSet B : Type u` when `B : Type u`, preserving universe level.
+- **Risk**: Noncomputability propagation from `conjImp_brouwerian_complete`. **Mitigation**: Wrap theorems in `noncomputable section`.
 
-**Biconditional** is a direct 2-line combination.
+## Implementation Phases
 
-**ND corollary** uses `derivableInIplIffDerivableInt` bridge (requires `[DecidableEq Atom]`).
+**Dependency Analysis**:
+| Wave | Phases | Blocked by |
+|------|--------|------------|
+| 1 | 1 | -- |
 
-### Imports needed
+Phases within the same wave can execute in parallel.
 
-```
-public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertCompleteness
-public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianCompleteness
-public import Cslib.Logics.Propositional.Semantics.Algebra.FreeJoinCompletion
-public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertConservativeGlivenko
-```
+### Phase 1: Create ConjImpConservative.lean and register module [NOT STARTED]
 
-### Barrel import update
+- **Goal:** Create the complete `ConjImpConservative.lean` file with all theorems and register it in barrel imports.
+- **Tasks:**
+  - [ ] Create `Cslib/Logics/Propositional/Semantics/Algebra/ConjImpConservative.lean` with module header and imports (`HilbertCompleteness`, `BrouwerianCompleteness`, `FreeJoinCompletion`, `HilbertConservativeGlivenko`)
+  - [ ] Define `liftDerivationTree` combinator: structural recursion on `DerivationTree` with 4 constructors (ax, assumption, modus_ponens, weakening), mapping axioms via a subsumption callback
+  - [ ] Prove `hilbertIplConservativeOverConjImp`: chain `IPL.hilbert_alg_complete.mp` -> instantiate at `LowerSet B` -> `brouwerianEmbeddingLemma.mpr` -> `conjImp_brouwerian_complete`
+  - [ ] Prove `derivableConjImpOfDerivableInt`: apply `liftDerivationTree` with `ConjImpAxiom.toMinPropAxiom.toIntPropAxiom`
+  - [ ] Prove `hilbertIplConservativeOverConjImp_iff`: combine both directions
+  - [ ] Prove `ipl_conservative_over_conjImp`: apply `derivableInIplIffDerivableInt.mp` then main theorem
+  - [ ] Add `ConjImpConservative` to `Cslib.lean` barrel import
+  - [ ] Run `lake build Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative`
+  - [ ] Run `lake exe checkInitImports` and `lake exe lint-style`
+  - [ ] Add docstrings to all public declarations (docBlame compliance)
+- **Timing:** 45 minutes
+- **Depends on:** none
 
-Add `ConjImpConservative` entry to `Cslib.lean` after `HilbertConservativeGlivenko`.
+## Testing & Validation
 
-### Verification steps
+- [ ] `lake build Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative` passes
+- [ ] `lake exe checkInitImports` passes (barrel import registered)
+- [ ] `lake exe lint-style` passes (no style violations)
+- [ ] No `sorry` in the file
+- [ ] All public declarations have docstrings
 
-1. `lake build Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative`
-2. `lake exe checkInitImports`
-3. `lake exe lint-style`
+## Artifacts & Outputs
 
-### Estimated size
+- `Cslib/Logics/Propositional/Semantics/Algebra/ConjImpConservative.lean` (new file, ~75-85 lines)
+- `plans/01_conservative-extension-plan.md` (this file)
+- `summaries/01_conservative-extension-summary.md` (post-implementation)
 
-~75-85 lines total.
+## Rollback/Contingency
+
+- Delete `ConjImpConservative.lean` and revert the `Cslib.lean` barrel import entry. No other files are modified by this task.

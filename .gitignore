@@ -15,4 +15,5 @@
 /docs/Std-manifest.json.trace
 **/specs/tmp/
 .DS_Store
-.claude
+# .claude tracked files are allowed; ignore only generated/local state
+.claude/settings.local.json

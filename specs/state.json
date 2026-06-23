@@ -7,27 +7,33 @@
       "status": "researched",
       "task_type": "cslib",
       "description": "Prove that Bimodal TM is conservative over Temporal BX for temporal formulas (those using only until/since, no box). The Temporal.Formula.toBimodal embedding exists. The lift_derivation_qfree infrastructure in Bimodal/Metalogic/ConservativeExtension/ partially supports this. Requires verifying the lifting extends to temporal connectives.",
-      "last_updated": "2026-06-22T21:56:28Z",
+      "last_updated": "2026-06-23T02:34:30Z",
       "session_id": "sess_1782164778_60175c",
-      "next_artifact_number": 3,
-      "researched": "2026-06-22T21:56:28Z",
+      "next_artifact_number": 4,
+      "researched": "2026-06-23T02:34:30Z",
       "artifacts": [
         {
           "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/02_team-research.md",
           "type": "research",
           "summary": "Team research with 4 teammates — domain mismatch analysis and resolution strategies"
+        },
+        {
+          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/03_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates: semantic transfer via order isomorphism identified as correct approach; base BX ChronicleSubtype density is the critical open question"
         }
       ]
     },
     {
       "project_number": 268,
       "project_name": "simp_grind_normalization_tags",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "topic": "Foundations",
       "description": "Add @[simp, scoped grind =] normalization tags to Hilbert system definitional lemmas. Add tags to the normalization/definitional layer across Propositional/, Modal/, Temporal/, and Bimodal/ Hilbert systems. Target: derived connective unfoldings, context manipulation lemmas, listImp equalities, and similar structural/characterization lemmas. Do NOT tag derivability constructors (Derivable.ax, Derivable.mp, etc.) — those are for the proof-search tactic. Follow cslib existing co-tagging convention. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake",
       "created": "2026-06-22T20:12:59Z",
-      "last_updated": "2026-06-22T20:12:59Z"
+      "last_updated": "2026-06-23T02:30:42Z",
+      "session_id": "sess_1782181825_5220e2"
     },
     {
       "project_number": 269,
@@ -45,13 +51,13 @@
     {
       "project_number": 266,
       "project_name": "research_propositional_and_foundations_improvements",
-      "status": "planned",
+      "status": "researching",
       "task_type": "formal",
       "description": "Research the Propositional/ logic and Foundations/ in this repo, the supporting roles these play, and what else remains to be done to improve these elements of this library. Compare with /home/benjamin/Projects/BimodalLogic/specs/305_rabinovich_ea_formula_implementation/reports/16_witness-count-restructure.md and the tableau system included there, in addition to researching what other additions make sense to include such as a sequent calculus",
       "topic": "Propositional Logic",
       "created": "2026-06-22T18:25:59Z",
-      "last_updated": "2026-06-22T19:07:25Z",
-      "session_id": "sess_1782153956_2603d8",
+      "last_updated": "2026-06-23T02:30:06Z",
+      "session_id": "sess_1782181780_55aebb",
       "researched": "2026-06-22T18:36:32Z",
       "next_artifact_number": 2,
       "artifacts": [

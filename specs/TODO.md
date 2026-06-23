@@ -27,14 +27,14 @@ next_project_number: 278
 
 ### Foundations
 
-268 [NOT STARTED] — Add @[simp, scoped grind =] normalization tags to Hilbert system 
+268 [RESEARCHING] — Add @[simp, scoped grind =] normalization tags to Hilbert system 
   └─ 269 [NOT STARTED] — Build generic bounded proof-search tactic for InferenceSystem. Cr
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-266 [PLANNED] — Research the Propositional/ logic and Foundations/ in this repo, 
+266 [RESEARCHING] — Research the Propositional/ logic and Foundations/ in this repo, 
 
 ### Temporal Logic
 
@@ -55,7 +55,9 @@ next_project_number: 278
 - **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Dependencies**: None
-- **Research**: [275_bimodal_tm_conservative_over_temporal_bx/reports/02_team-research.md]
+- **Research**:
+  - [275_bimodal_tm_conservative_over_temporal_bx/reports/02_team-research.md]
+  - [275_bimodal_tm_conservative_over_temporal_bx/reports/03_team-research.md]
 
 **Description**: Prove that Bimodal TM is conservative over Temporal BX for temporal formulas (those using only until/since, no box). The Temporal.Formula.toBimodal embedding exists. The lift_derivation_qfree infrastructure in Bimodal/Metalogic/ConservativeExtension/ partially supports this. Requires verifying the lifting extends to temporal connectives.
 
@@ -72,7 +74,7 @@ next_project_number: 278
 ---
 
 ### 268. Simp grind normalization tags
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
@@ -82,7 +84,7 @@ next_project_number: 278
 ---
 
 ### 266. Research propositional and foundations improvements
-- **Status**: [PLANNED]
+- **Status**: [RESEARCHING]
 - **Task Type**: formal
 - **Topic**: Propositional Logic
 - **Dependencies**: None

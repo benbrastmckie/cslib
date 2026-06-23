@@ -17,7 +17,7 @@ else
 fi
 
 echo "3. Checking for missing copyright headers..."
-for f in $(find Cslib/Foundations/Logic/ Cslib/Logics/Modal/ Cslib/Logics/Temporal/ Cslib/Logics/Bimodal/ -name "*.lean"); do
+find Cslib/Foundations/Logic/ Cslib/Logics/Modal/ Cslib/Logics/Temporal/ Cslib/Logics/Bimodal/ -name "*.lean" -print0 | while IFS= read -r -d '' f; do
   if ! head -1 "$f" | grep -q "^/-"; then
     echo "  WARNING: Missing header in $f"
   fi

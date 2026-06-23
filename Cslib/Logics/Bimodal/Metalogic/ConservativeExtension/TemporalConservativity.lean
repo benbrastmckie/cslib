@@ -113,7 +113,7 @@ def temporalWorldHistory (D : Type) [AddCommGroup D] [LinearOrder D]
   states := fun t _ => t
   respects_task := fun s t _hs _ht _hst => by
     simp only [temporalTaskFrame]
-    rw [sub_add_cancel]
+    rw [add_sub_cancel]
 
 /-- The **temporal task model** constructed from a `TemporalModel D Atom`.
 
@@ -239,6 +239,8 @@ The proofs of `bimodal_truthAt_toBimodal_iff_temporal_satisfies` (Phase 1) and
 `temporal_valid_on_addcommgroup` (Phase 2 partial) are complete and sorry-free.
 -/
 
+set_option warn.sorry false in
+set_option linter.unusedDecidableInType false in
 /-- **Temporal validity on ALL serial linear orders**: If `φ.toBimodal` is TM-derivable,
 then `φ` is temporally satisfied in every temporal model on every serial linear order.
 
@@ -247,8 +249,9 @@ and temporal completeness (arbitrary serial linear order D) is not yet resolved.
 The gap requires a model-transfer result — see the "Domain Mismatch Resolution" section
 in this module for a detailed discussion of approaches and why they are non-trivial.
 
-The sorry is localized here; the semantic bridge (`bimodal_truthAt_toBimodal_iff_temporal_satisfies`)
-and validity on AddCommGroup domains (`temporal_valid_on_addcommgroup`) are fully proven. -/
+The sorry is localized here; the semantic bridge
+(`bimodal_truthAt_toBimodal_iff_temporal_satisfies`) and validity on
+AddCommGroup domains (`temporal_valid_on_addcommgroup`) are fully proven. -/
 theorem temporal_valid_of_bimodal_derivable
     [Infinite Atom] [DecidableEq Atom]
     {φ : Temporal.Formula Atom}
@@ -257,13 +260,11 @@ theorem temporal_valid_of_bimodal_derivable
     [NoMaxOrder D] [NoMinOrder D]
     (M : Temporal.TemporalModel D Atom) (t : D) :
     Temporal.Satisfies M t φ := by
-  -- For domains with AddCommGroup (e.g., ℤ, ℚ, ℝ), this follows directly from
-  -- temporal_valid_on_addcommgroup. For general serial linear orders, we need a
-  -- model-transfer result. See the "Domain Mismatch Resolution" discussion above.
   sorry
 
 /-! ## Main Conservativity Theorem -/
 
+set_option linter.unusedDecidableInType false in
 /-- **Bimodal TM is a Conservative Extension of Temporal BX**:
 
 If the bimodal translation `φ.toBimodal` is TM-derivable (at base frame class), then

@@ -1,0 +1,26 @@
+{
+  "status": "implemented",
+  "summary": "Created ConjImpConservative.lean with 4 theorems: hilbertIplConservativeOverConjImp (main), derivableConjImpOfDerivableInt (subsumption via new liftDerivationTree combinator), hilbertIplConservativeOverConjImp_iff (biconditional), ipl_conservative_over_conjImp (ND corollary). Added to Cslib.lean barrel. Build passes; lint-style clean; axiom check shows only standard Lean axioms.",
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/Semantics/Algebra/ConjImpConservative.lean",
+      "type": "implementation",
+      "summary": "Conservative extension theorem: IPL over IPL⟨∧,→,⊤⟩ for or-bot-free formulas, with subsumption, biconditional, and ND corollary."
+    },
+    {
+      "path": "specs/308_ipl_conservative_over_conj_imp/plans/01_conservative-extension-plan.md",
+      "type": "plan",
+      "summary": "Brief implementation plan (Phase 1 COMPLETED)."
+    },
+    {
+      "path": "specs/308_ipl_conservative_over_conj_imp/summaries/01_conservative-extension-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary with verification results."
+    }
+  ],
+  "blockers": [],
+  "continuation_context": null,
+  "phases_completed": 1,
+  "phases_total": 1,
+  "next_action_hint": "complete"
+}

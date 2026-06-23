@@ -12,9 +12,10 @@ next_project_number: 318
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,180,226,241,245,278,290,299,301,302,303,304,313,314,316 | -- | Bimodal Porting, Foundations, Project Management, ... |
-| 2 | 39,40,181,215,293,300,306,307,309,310,315,317 | 36,37,180,290,299,302,303,304,314,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
-| 3 | 41,275,291,292,308,311 | 39,40,306,307,309,310,315 | Foundations, Propositional Logic, Algebraic Semantics |
-| 4 | 312 | 308,311 | Algebraic Semantics |
+| 2 | 39,40,181,215,293,300,305,307,310,315,317 | 36,37,180,290,299,302,303,304,314,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 3 | 41,275,291,292,306,309 | 39,40,303,304,305,315 | Foundations, Propositional Logic, Algebraic Semantics |
+| 4 | 311 | 309,310 | Algebraic Semantics |
+| 5 | 312 | 311 | Algebraic Semantics |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -65,16 +66,14 @@ next_project_number: 318
 ### Algebraic Semantics
 
 302 [IMPLEMENTED] — Define syntactic fragment predicates on Proposition analogous to 
-  └─ 306 [NOT STARTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian 
-    └─ 308 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
-      └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified 
+  └─ 305 [IMPLEMENTED] — Define fragment-specific Hilbert axiom predicates for the two sub
+    └─ 306 [IMPLEMENTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian 
+    └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb
+      └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
+        └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified 
   └─ 307 [IMPLEMENTED] — Construct a HeytingAlgebra from any BrouwerianSemilattice via a f
-    └─ 308 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove (see above)
-  └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb
-    └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
-      └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified  (see above)
 303 [IMPLEMENTED] — Define the BrouwerianSemilattice typeclass: SemilatticeInf + Orde
-  └─ 306 [NOT STARTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian  (see above)
+  └─ 306 [IMPLEMENTED] — Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian  (see above)
   └─ 307 [IMPLEMENTED] — Construct a HeytingAlgebra from any BrouwerianSemilattice via a f (see above)
 304 [NOT STARTED] — Define the HilbertAlgebra typeclass: a structure (H, ⇨, ⊤) satisf
   └─ 309 [NOT STARTED] — Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algeb (see above)
@@ -196,10 +195,13 @@ Literature sources:
 ---
 
 ### 308. Ipl conservative over conj imp
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 306, Task 307
+- **Research**: [308_ipl_conservative_over_conj_imp/reports/01_conservative-extension-research.md]
+- **Plan**: [308_ipl_conservative_over_conj_imp/plans/01_conservative-extension-plan.md]
+- **Summary**: [308_ipl_conservative_over_conj_imp/summaries/01_conservative-extension-summary.md]
 
 **Description**: Prove the conservative extension theorem: IPL is conservative over IPL⟨∧,→,⊤⟩ for or-bot-free formulas. Statement: if Derivable IntPropAxiom φ and φ.IsOrBotFree = true, then Derivable ConjImpAxiom φ. Proof route: (1) IPL.hilbert_alg_complete.mp converts to HA-validity, (2) for any BrouwerianSemilattice B and valuation v, instantiate HA-validity at the free join completion of B, (3) the embedding lemma from FreeJoinCompletion.lean rewrites back to BrouwerianEvaluate v φ = ⊤ in B, (4) Brouwerian completeness converts back to Derivable ConjImpAxiom φ. Derive the ND corollary via algebraic bridges. This shows that disjunction and falsum are genuinely independent extensions — no theorem in the ∧-→-⊤ language gains a new proof by adding ∨ and ⊥. File: Cslib/Logics/Propositional/Semantics/Algebra/ConjImpConservative.lean.
 
@@ -218,17 +220,19 @@ Literature sources:
 ---
 
 ### 306. Brouwerian soundness completeness
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 302, Task 303, Task 305
+- **Research**: [306_brouwerian_soundness_completeness/reports/01_brouwerian-completeness-research.md]
+- **Plan**: [306_brouwerian_soundness_completeness/plans/01_brouwerian-completeness-plan.md]
 
 **Description**: Prove soundness and completeness of IPL⟨∧,→,⊤⟩ w.r.t. Brouwerian semilattices. Soundness: if Derivable ConjImpAxiom φ then BrouwerianEvaluate v φ = ⊤ in every BrouwerianSemilattice. Completeness via the Lindenbaum-Tarski algebra: construct the quotient Proposition Atom / ≈ where φ ≈ ψ iff Derivable ConjImpAxiom (φ ↔ ψ), show it is a BrouwerianSemilattice, and prove the truth lemma (BrouwerianEvaluate [φ] = ⊤ ↔ Derivable ConjImpAxiom φ). The Lindenbaum construction parallels HilbertLindenbaumGHA but quotients by ConjImpAxiom-derivability; the key difference is that the quotient need not have joins (⊔). Reference: Rasiowa (1974) Chapters IV-V for the general algebraic completeness pattern. File: Cslib/Logics/Propositional/Semantics/Algebra/BrouwerianCompleteness.lean.
 
 ---
 
 ### 305. Fragment hilbert proof systems
-- **Status**: [COMPLETED]
+- **Status**: [IMPLEMENTED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 302

@@ -1,5 +1,5 @@
 ---
-next_project_number: 316
+next_project_number: 318
 ---
 
 # TODO
@@ -11,8 +11,8 @@ next_project_number: 316
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,304,305,307,313,314 | -- | Bimodal Porting, Foundations, Project Management, ... |
-| 2 | 39,40,181,215,293,300,306,309,310,315 | 36,37,180,290,299,304,305,314 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,241,245,278,290,299,301,304,305,307,313,314,316 | -- | Bimodal Porting, Foundations, Project Management, ... |
+| 2 | 39,40,181,215,293,300,306,309,310,315,317 | 36,37,180,290,299,304,305,314,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
 | 3 | 41,275,291,292,308,311 | 39,40,306,307,309,310,315 | Foundations, Propositional Logic, Algebraic Semantics |
 | 4 | 312 | 308,311 | Algebraic Semantics |
 
@@ -54,6 +54,11 @@ next_project_number: 316
   └─ 275 [BLOCKED] — Prove that Bimodal TM is conservative over Temporal BX for tempor
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
+### Propositional
+
+316 [NOT STARTED] — Fill the 6 sorry instances in propositional tableau soundness pro
+  └─ 317 [NOT STARTED] — Fill the 8 sorry instances in propositional tableau completeness 
+
 ### Modal
 
 299 [NOT STARTED] — Implement tableau decision procedure for basic modal logic K with
@@ -82,6 +87,26 @@ next_project_number: 316
 ### Uncategorized
 
 ## Tasks
+
+### 317. Propositional tableau completeness
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional
+- **Dependencies**: Task 316
+
+**Description**: Fill the 8 sorry instances in propositional tableau completeness proofs across all three logics. Classical (Classical/Completeness.lean): prove classicalOpenBranch_countermodel (open saturated branch yields a Boolean valuation falsifying phi) and classicalTableau_complete (if phi is not a Tautology then the tableau has an open branch), plus one helper — by constructing a valuation from the positive atoms in the saturated branch and proving a truth lemma by formula induction. Intuitionistic (Intuitionistic/Completeness.lean): prove intuitionisticOpenBranch_countermodel (open saturated branch yields a finite Kripke model refuting phi) and intuitionisticTableau_complete — by constructing worlds from the branch world indices, accessibility from the expansion record, valuation from positive atoms, and proving a truth lemma showing forced/not-forced matches signed formulas at each world. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_complete (if phi is not MValid then the tableau has an open branch) — adapts intuitionistic proof with MinimalClosure and botForces=false. Core technique: Hintikka-set argument — saturated branches satisfy Hintikka conditions, from which countermodels are extracted.
+
+---
+
+### 316. Propositional tableau soundness
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional
+- **Dependencies**: None
+
+**Description**: Fill the 6 sorry instances in propositional tableau soundness proofs across all three logics. Classical (Classical/Soundness.lean): prove classically_closed_unsatisfiable (closed branch is unsatisfiable under any Boolean valuation) and classicalTableau_sound (closed tableau implies Tautology phi), plus one helper lemma — by induction on rule applications showing each propositional rule preserves satisfiability. Intuitionistic (Intuitionistic/Soundness.lean): prove intuitionisticTableau_sound (closed tableau implies IValid phi) plus two helper lemmas — by showing each rule (including world-creating F(imp) and persistent T(imp)) preserves forcing at Kripke worlds. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_sound (closed tableau implies MValid phi) — adapts intuitionistic proof with MinimalClosure (complementary atoms only, no ex falso). Core technique: induction on expansion steps showing each rule application preserves the semantic invariant for the respective logic.
+
+---
 
 ### 315. Lj intuitionistic sequent calculus
 - **Status**: [NOT STARTED]

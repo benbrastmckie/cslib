@@ -1,6 +1,36 @@
 {
-  "next_project_number": 316,
+  "next_project_number": 318,
   "active_projects": [
+    {
+      "project_number": 316,
+      "project_name": "propositional_tableau_soundness",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional",
+      "description": "Fill the 6 sorry instances in propositional tableau soundness proofs across all three logics. Classical (Classical/Soundness.lean): prove classically_closed_unsatisfiable (closed branch is unsatisfiable under any Boolean valuation) and classicalTableau_sound (closed tableau implies Tautology phi), plus one helper lemma — by induction on rule applications showing each propositional rule preserves satisfiability. Intuitionistic (Intuitionistic/Soundness.lean): prove intuitionisticTableau_sound (closed tableau implies IValid phi) plus two helper lemmas — by showing each rule (including world-creating F(imp) and persistent T(imp)) preserves forcing at Kripke worlds. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_sound (closed tableau implies MValid phi) — adapts intuitionistic proof with MinimalClosure (complementary atoms only, no ex falso). Core technique: induction on expansion steps showing each rule application preserves the semantic invariant for the respective logic.",
+      "created": "2026-06-23T19:55:52Z",
+      "last_updated": "2026-06-23T19:55:52Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "dependencies": [],
+      "parent_task": 298
+    },
+    {
+      "project_number": 317,
+      "project_name": "propositional_tableau_completeness",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional",
+      "description": "Fill the 8 sorry instances in propositional tableau completeness proofs across all three logics. Classical (Classical/Completeness.lean): prove classicalOpenBranch_countermodel (open saturated branch yields a Boolean valuation falsifying phi) and classicalTableau_complete (if phi is not a Tautology then the tableau has an open branch), plus one helper — by constructing a valuation from the positive atoms in the saturated branch and proving a truth lemma by formula induction. Intuitionistic (Intuitionistic/Completeness.lean): prove intuitionisticOpenBranch_countermodel (open saturated branch yields a finite Kripke model refuting phi) and intuitionisticTableau_complete — by constructing worlds from the branch world indices, accessibility from the expansion record, valuation from positive atoms, and proving a truth lemma showing forced/not-forced matches signed formulas at each world. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_complete (if phi is not MValid then the tableau has an open branch) — adapts intuitionistic proof with MinimalClosure and botForces=false. Core technique: Hintikka-set argument — saturated branches satisfy Hintikka conditions, from which countermodels are extracted.",
+      "created": "2026-06-23T19:55:52Z",
+      "last_updated": "2026-06-23T19:55:52Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "dependencies": [
+        316
+      ],
+      "parent_task": 298
+    },
     {
       "project_number": 313,
       "project_name": "zulip_propositional_logic_proof_systems_overview",

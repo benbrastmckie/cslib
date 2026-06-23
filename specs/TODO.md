@@ -1,5 +1,5 @@
 ---
-next_project_number: 297
+next_project_number: 302
 ---
 
 # TODO
@@ -11,9 +11,10 @@ next_project_number: 297
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,279,288,289,290,296 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215,291,292,293 | 36,37,180,279,290 | Bimodal Porting, Propositional Logic, Temporal Logic |
-| 3 | 41,275 | 39,40 | Foundations |
+| 1 | 36,37,180,226,241,245,278,279,288,289,290,297 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 2 | 39,40,181,215,291,292,293,298 | 36,37,180,279,290,297 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 3 | 41,275,299,301 | 39,40,298 | Foundations, Temporal, Modal |
+| 4 | 300 | 299 | Modal |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -28,7 +29,7 @@ next_project_number: 297
 ### Foundations
 
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
-296 [RESEARCHING] — Research and design a unified tableau calculi architecture for CS
+297 [NOT STARTED] — Build shared tableau infrastructure in Foundations/Logic/Tableau/
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Propositional Logic
@@ -51,15 +52,80 @@ next_project_number: 297
   └─ 275 [BLOCKED] — Prove that Bimodal TM is conservative over Temporal BX for tempor
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
+### Propositional
+
+298 [NOT STARTED] — Implement complete propositional tableau decision procedure with 
+
+### Modal
+
+299 [NOT STARTED] — Implement tableau decision procedure for basic modal logic K with
+  └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
+
+### Temporal
+
+301 [NOT STARTED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
+
 ### Uncategorized
 
 ## Tasks
 
+### 301. Temporal tableau
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal
+- **Dependencies**: Task 297, Task 298
+
+**Description**: Implement tableau decision procedure for temporal logic (Cslib.Logic.Temporal.Formula) with until/since decomposition rules, time labels, and temporal ordering tracking. Most complex new tableau: until/since rules have no modal analogue, requiring branching decomposition with event-witness and guard-continue alternatives. Adapt patterns from bimodal decidability system (TimeOrdering, temporal rule structure, frame-class rules) but build fresh implementations on shared Foundations infrastructure. Include density and discreteness frame-class rules. Formula type has atom, bot, imp, untl, snce primitives using Lukasiewicz encoding. Files under Cslib/Logics/Temporal/Tableau/: Defs.lean, Rules.lean, TimeOrdering.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 2,000-2,500 lines.
+
+---
+
+### 300. Modal extensions t s4 s5
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal
+- **Dependencies**: Task 299
+
+**Description**: Extend modal K tableau (task 299) with frame-specific rules for reflexive (T), transitive (S4), and equivalence-relation (S5) frames. T: reflexivity rule (box phi at w implies phi at w). S4: transitivity-aware propagation with loop-checking for termination. S5: equivalence-class simplification (mirrors bimodal approach). Include rules for B (symmetric) and 5 (Euclidean) to cover full modal cube. Each extension needs own completeness proof showing extracted countermodel satisfies frame condition. Files: FrameRules.lean, LoopChecking.lean, S5Simplification.lean, FrameSoundness.lean, FrameCompleteness.lean. Estimated: 1,200-1,800 lines.
+
+---
+
+### 299. Modal k tableau
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal
+- **Dependencies**: Task 297, Task 298
+
+**Description**: Implement tableau decision procedure for basic modal logic K with world labels, box/diamond rules on top of propositional rules from shared infrastructure. Introduces world labels (accessibility relation tracking) and fundamental modal rule pattern: box-positive is universal/persistent, diamond-positive is existential (fresh accessible world). Use Lukasiewicz encoding for and/or. Prove soundness against Kripke semantics and completeness by extracting finite Kripke countermodels. Modal formula type: Cslib.Logic.Modal.Formula with atom, bot, imp, box primitives. Files under Cslib/Logics/Modal/Tableau/: Defs.lean, Rules.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 1,500-2,000 lines.
+
+---
+
+### 298. Propositional tableau decidability
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional
+- **Dependencies**: Task 297
+
+**Description**: Implement complete propositional tableau decision procedure with soundness, completeness, and Decidable (Valid phi) for PL.Proposition. First logic to consume shared Foundations/Logic/Tableau/ infrastructure. Handle native and/or constructors (unlike modal/temporal which use Lukasiewicz encodings). Use fuel-bounded expansion with termination via subformula property. Extract valuations from open saturated branches for countermodels. Files under Cslib/Logics/Propositional/Tableau/: Defs.lean, Rules.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean, DecisionProcedure.lean. Estimated: 1,200-1,600 lines.
+
+---
+
+### 297. Foundations tableau infrastructure
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Foundations
+- **Dependencies**: None
+
+**Description**: Build shared tableau infrastructure in Foundations/Logic/Tableau/. Refactor and extend the existing PropositionalTableau.lean (210 lines) into a proper module directory. Unify the PropSign type (from Foundations) with the bimodal Sign type into a single canonical sign type. Create generic signed formula, rule result, branch, and closure types parameterized to work across all logics. Files to create: Sign.lean, SignedFormula.lean, PropositionalRules.lean, RuleResult.lean, Branch.lean, Closure.lean under Cslib/Foundations/Logic/Tableau/. Estimated: 600-800 lines.
+
+---
+
 ### 296. Tableau calculi architecture
-- **Status**: [RESEARCHING]
+- **Status**: [EXPANDED]
 - **Task Type**: formal
 - **Topic**: Foundations
 - **Dependencies**: None
+- **Research**: [296_tableau_calculi_architecture/reports/01_tableau-arch-research.md]
+- **Plan**: [296_tableau_calculi_architecture/plans/01_tableau-arch-plan.md]
 
 **Description**: Research and design a unified tableau calculi architecture for CSLib spanning propositional, modal, temporal, and bimodal logics. The existing PropositionalTableau.lean provides generic rule infrastructure (PropSign, PropSignedFormula, PropTableauRule, applyPropRule) already consumed by the bimodal decidability system (~5,900 lines). The goal is to determine how to build a complete propositional tableau system (branch construction, closure, termination, soundness, completeness, decision procedure) that naturally extends to modal and temporal tableau systems, sharing resources with and relating cleanly to the existing bimodal tableau. Investigate: (1) what generic tableau infrastructure should live in Foundations/ vs logic-specific modules, (2) how modal tableau rules (box/diamond) and temporal rules (until/since) layer on top of propositional rules, (3) whether the bimodal tableau can be refactored to consume shared infrastructure or whether it should remain standalone, (4) what the dependency chain should be between propositional, modal, temporal tableau tasks, (5) how tableau completeness relates to the existing MCS-based completeness proofs and the planned sequent calculus (task 279). Output: a set of precisely scoped implementation tasks with dependency graph covering the full tableau pipeline from propositional through bimodal.
 

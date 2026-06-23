@@ -27,7 +27,7 @@ next_project_number: 278
 
 ### Foundations
 
-268 [RESEARCHING] — Add @[simp, scoped grind =] normalization tags to Hilbert system 
+268 [RESEARCHED] — Add @[simp, scoped grind =] normalization tags to Hilbert system 
   └─ 269 [NOT STARTED] — Build generic bounded proof-search tactic for InferenceSystem. Cr
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
@@ -74,10 +74,11 @@ next_project_number: 278
 ---
 
 ### 268. Simp grind normalization tags
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
+- **Research**: [268_simp_grind_normalization_tags/reports/01_team-research.md]
 
 **Description**: Add @[simp, scoped grind =] normalization tags to Hilbert system definitional lemmas. Add tags to the normalization/definitional layer across Propositional/, Modal/, Temporal/, and Bimodal/ Hilbert systems. Target: derived connective unfoldings, context manipulation lemmas, listImp equalities, and similar structural/characterization lemmas. Do NOT tag derivability constructors (Derivable.ax, Derivable.mp, etc.) — those are for the proof-search tactic. Follow cslib existing co-tagging convention. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake
 

@@ -1,0 +1,10 @@
+{
+  "status": "planned",
+  "summary": "4-phase plan to make Hilbert completeness primary: foundation lemmas in HilbertLindenbaum.lean, rewrite HilbertCompleteness.lean proofs to use Hilbert Lindenbaum directly, downstream verification, full CI",
+  "blockers": [],
+  "continuation_context": null,
+  "artifacts": [{"path": "specs/283_hilbert_primary_algebraic_completeness/plans/01_hilbert-completeness-plan.md", "type": "plan", "summary": "4-phase implementation plan for Hilbert-primary algebraic completeness"}],
+  "phases_completed": 0,
+  "phases_total": 4,
+  "next_action_hint": "implement"
+}

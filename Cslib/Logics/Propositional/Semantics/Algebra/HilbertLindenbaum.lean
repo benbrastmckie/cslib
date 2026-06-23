@@ -6,6 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
+public import Cslib.Logics.Propositional.Semantics.Algebra
 public import Cslib.Logics.Propositional.NaturalDeduction.HilbertDerivedRules
 public import Cslib.Logics.Propositional.NaturalDeduction.Equivalence
 public import Mathlib.Order.Heyting.Regular
@@ -548,6 +549,85 @@ theorem hilbertLindenbaumTop
     [MinimalAxioms Axioms] :
     (⊤ : HilbertLindenbaumAlgebra Axioms) =
     hilbertLindenbaumMk (bot.imp bot) := rfl
+
+/-! ## Top Characterization -/
+
+/-- `[A] = ⊤` in the Hilbert Lindenbaum algebra iff `A` is Hilbert-derivable from the
+empty context, i.e., `Derivable Axioms A`. -/
+theorem hilbertLindenbaumMk_eq_top_iff
+    {Axioms : Proposition Atom → Prop} [inst : MinimalAxioms Axioms]
+    {A : Proposition Atom} :
+    hilbertLindenbaumMk (Axioms := Axioms) A = ⊤ ↔ Derivable Axioms A := by
+  rw [hilbertLindenbaumTop]
+  constructor
+  · -- Forward: [A] = [⊥ → ⊥] → Derivable A
+    -- Quotient equality gives HilbertEquiv A (bot.imp bot)
+    intro h
+    have heq : @hilbertPropositionSetoid _ Axioms _ |>.r A (bot.imp bot) :=
+      Quotient.exact h
+    -- heq : HilbertEquiv Axioms A (bot.imp bot), i.e., Deriv [A] (bot → bot) ∧ Deriv [bot → bot] A
+    -- From heq.2 : Deriv [bot → bot] A, and Deriv [] (bot → bot), cut gives Deriv [] A
+    have hBotBot : Derivable Axioms (bot.imp bot) := by
+      -- Prove [] ⊢ ⊥ → ⊥ using impI: Deriv [bot] bot via assumption
+      apply hilbertImpIDeriv inst.h_K inst.h_S
+      exact assumption_deriv List.mem_cons_self
+    -- Cut hBotBot (Deriv [] (bot → bot)) with heq.2 (Deriv [bot → bot] A)
+    exact hilbertCutListDeriv inst.h_K inst.h_S hBotBot heq.2
+  · -- Backward: Derivable A → [A] = [⊥ → ⊥]
+    -- Use Quotient.sound with HilbertEquiv A (bot.imp bot)
+    intro hA
+    apply Quotient.sound
+    constructor
+    · -- Deriv [A] (bot → bot): use impI on Deriv [bot, A] bot (assumption)
+      apply hilbertImpIDeriv inst.h_K inst.h_S
+      exact assumption_deriv (by simp)
+    · -- Deriv [bot → bot] A: weaken Deriv [] A to Deriv [bot.imp bot] A
+      exact weakening_deriv hA (fun _ h => nomatch h)
+
+/-! ## Canonical Valuation and Truth Lemma -/
+
+/-- The canonical variable assignment into the Hilbert Lindenbaum algebra:
+sends each atom `x` to its equivalence class `[x]`. -/
+def canonicalV (Axioms : Proposition Atom → Prop) [MinimalAxioms Axioms] :
+    Atom → HilbertLindenbaumAlgebra Axioms :=
+  fun x => hilbertLindenbaumMk (.atom x)
+
+/-- The canonical bottom value in the Hilbert Lindenbaum algebra: the class `[⊥]`. -/
+def canonicalBotVal (Axioms : Proposition Atom → Prop) [MinimalAxioms Axioms] :
+    HilbertLindenbaumAlgebra Axioms :=
+  hilbertLindenbaumMk .bot
+
+/-- **Truth Lemma**: evaluating any proposition under the canonical valuation and
+bottom value gives exactly its equivalence class.
+
+`AlgEvaluate (canonicalV Axioms) (canonicalBotVal Axioms) A = [A]`
+
+This is proved by structural induction on `A`, using the simp lemmas
+`hilbertLindenbaumMk_himp`, `hilbertLindenbaumMk_inf`, `hilbertLindenbaumMk_sup`. -/
+theorem canonicalV_spec
+    (Axioms : Proposition Atom → Prop) [MinimalAxioms Axioms]
+    (A : Proposition Atom) :
+    AlgEvaluate (canonicalV Axioms) (canonicalBotVal Axioms) A =
+    hilbertLindenbaumMk (Axioms := Axioms) A := by
+  induction A with
+  | atom x => rfl
+  | bot => rfl
+  | imp a b iha ihb =>
+    simp only [AlgEvaluate, iha, ihb, hilbertLindenbaumMk_himp]
+  | and a b iha ihb =>
+    simp only [AlgEvaluate, iha, ihb, hilbertLindenbaumMk_inf]
+  | or a b iha ihb =>
+    simp only [AlgEvaluate, iha, ihb, hilbertLindenbaumMk_sup]
+
+/-- Any axiom `φ` evaluates to `⊤` under the canonical valuation.
+This is used in the completeness proof to instantiate the Hilbert Lindenbaum algebra. -/
+theorem canonicalV_axiom_top
+    (Axioms : Proposition Atom → Prop) [inst : MinimalAxioms Axioms]
+    (φ : Proposition Atom) (h : Axioms φ) :
+    AlgEvaluate (canonicalV Axioms) (canonicalBotVal Axioms) φ = ⊤ := by
+  rw [canonicalV_spec]
+  rw [hilbertLindenbaumMk_eq_top_iff]
+  exact ⟨.ax [] φ h⟩
 
 /-! ## Heyting Algebra (EFQ) -/
 

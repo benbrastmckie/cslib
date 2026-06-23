@@ -1,6 +1,24 @@
 {
-  "next_project_number": 286,
+  "next_project_number": 288,
   "active_projects": [
+    {
+      "project_number": 287,
+      "project_name": "fix_generic_mcs_bridge_docstrings",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Convert block comments in Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean to /-! -/ module docstrings for consistency with CSLib documentation conventions. The file is a documentation-only analysis file (gap analysis for the algebraicDerivationSystem / modalDerivationSystem bridge) and should use standard module docstring format.",
+      "created": "2026-06-23T11:13:29Z",
+      "last_updated": "2026-06-23T11:13:29Z"
+    },
+    {
+      "project_number": 286,
+      "project_name": "fix_omega_regular_todo_workaround",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Investigate whether the set_option backward.isDefEq.respectTransparency false workaround in Cslib/Computability/Languages/OmegaRegularLanguage.lean (line 194) can be removed or improved. The TODO comment indicates this is a known Lean elaboration issue. Either fix the proof to work without the option or document why the option is permanently needed.",
+      "created": "2026-06-23T11:13:29Z",
+      "last_updated": "2026-06-23T11:13:29Z"
+    },
     {
       "project_number": 280,
       "project_name": "proof_system_triad_gap_analysis",

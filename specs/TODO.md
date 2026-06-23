@@ -1,5 +1,5 @@
 ---
-next_project_number: 286
+next_project_number: 288
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 286
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,252,266 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
+| 1 | 36,37,180,226,241,245,252,266,286,287 | -- | Bimodal Porting, Propositional Logic, Temporal Logic |
 | 2 | 39,40,181,215,278,280 | 36,37,180,266 | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 3 | 41,269,275,279 | 39,40,278,280 | Foundations, Propositional Logic |
 
@@ -51,7 +51,28 @@ next_project_number: 286
 
 ### Uncategorized
 
+286 [NOT STARTED] — Investigate whether the set_option backward.isDefEq.respectTransp
+287 [NOT STARTED] — Convert block comments in Cslib/Logics/Modal/Metalogic/GenericMCS
+
 ## Tasks
+
+### 287. Fix generic mcs bridge docstrings
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Convert block comments in Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean to /-! -/ module docstrings for consistency with CSLib documentation conventions. The file is a documentation-only analysis file (gap analysis for the algebraicDerivationSystem / modalDerivationSystem bridge) and should use standard module docstring format.
+
+---
+
+### 286. Fix omega regular todo workaround
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Investigate whether the set_option backward.isDefEq.respectTransparency false workaround in Cslib/Computability/Languages/OmegaRegularLanguage.lean (line 194) can be removed or improved. The TODO comment indicates this is a known Lean elaboration issue. Either fix the proof to work without the option or document why the option is permanently needed.
+
+---
 
 ### 285. Nd metalogic as hilbert corollaries
 - **Status**: [COMPLETED]

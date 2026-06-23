@@ -121,7 +121,7 @@
           }
         ]
       },
-      "completion_summary": "Added @[simp, scoped grind =] co-tags to 16 definitional/structural lemmas across ListImplication.lean, BigConj.lean, FromPropositional.lean, and TemporalEmbedding.lean. Added GrindLint skip entry for bigconj_cons_cons. All CI steps pass: lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake."
+      "completion_summary": "Added @[simp, scoped grind =] co-tags to 16 definitional/structural lemmas across 4 Hilbert system files (ListImplication, BigConj, FromPropositional, TemporalEmbedding). Added GrindLint skip for bigconj_cons_cons. All CI passes."
     },
     {
       "project_number": 269,

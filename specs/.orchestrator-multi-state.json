@@ -1,16 +1,43 @@
 {
   "session_id": "sess_1782300192_f99803",
-  "task_numbers": [324, 325, 326],
-  "waves": [[324], [325], [326]],
-  "dependency_graph": {"324": [], "325": [324], "326": [324, 325]},
+  "task_numbers": [
+    324,
+    325,
+    326
+  ],
+  "waves": [
+    [
+      324
+    ],
+    [
+      325
+    ],
+    [
+      326
+    ]
+  ],
+  "dependency_graph": {
+    "324": [],
+    "325": [
+      324
+    ],
+    "326": [
+      324,
+      325
+    ]
+  },
   "max_cycles": 15,
-  "cycle_count": 0,
+  "cycle_count": 8,
   "failed_tasks": [],
-  "completed_tasks": [],
+  "completed_tasks": [
+    324,
+    325,
+    326
+  ],
   "current_statuses": {
     "324": "not_started",
     "325": "not_started",
-    "326": "not_started"
+    "326": "completed"
   },
   "task_dirs": {
     "324": "specs/324_lawfulbeq_proposition_signedformula",

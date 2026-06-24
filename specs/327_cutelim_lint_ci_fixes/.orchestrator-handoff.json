@@ -1,0 +1,16 @@
+{
+  "status": "implemented",
+  "summary": "Applied 10 mechanical lint fixes to CutElimination.lean: added maxHeartbeats comment, broke 8 long lines (>100 chars) into continuation-point style, renamed unused hB to _. Scoped build passed with zero warnings.",
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "complete",
+  "phases_completed": 1,
+  "phases_total": 1,
+  "artifacts": [
+    {
+      "path": "specs/327_cutelim_lint_ci_fixes/summaries/01_lint-ci-fixes-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary for task 327 lint CI fixes"
+    }
+  ]
+}

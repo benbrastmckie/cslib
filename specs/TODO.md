@@ -34,7 +34,7 @@ next_project_number: 334
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
-  └─ 332 [RESEARCHED] — Prove the normalization termination theorem for CSLib Theory.Deri
+  └─ 332 [PLANNING] — Prove the normalization termination theorem for CSLib Theory.Deri
     └─ 333 [NOT STARTED] — Refactor and split the 1099-line Normalization.lean into well-org
 316 [IMPLEMENTING] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
@@ -75,7 +75,7 @@ next_project_number: 334
 ---
 
 ### 332. Normalization termination proof
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Dependencies**: Task 290
 

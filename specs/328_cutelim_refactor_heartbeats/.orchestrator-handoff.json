@@ -1,0 +1,16 @@
+{
+  "status": "planned",
+  "summary": "Created 4-phase implementation plan to reduce CutElimination.lean heartbeats from 800000 to 200000-400000. Phase 1 adds shared Finset helpers, Phase 2 extracts 3 self-recursive helpers from mutual block, Phase 3 replaces ~100 duplicated patterns, Phase 4 measures and adjusts heartbeat setting.",
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "implement",
+  "phases_completed": 0,
+  "phases_total": 4,
+  "artifacts": [
+    {
+      "path": "specs/328_cutelim_refactor_heartbeats/plans/01_refactor-heartbeats.md",
+      "type": "plan",
+      "summary": "Implementation plan for heartbeats refactoring"
+    }
+  ]
+}

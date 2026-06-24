@@ -107,10 +107,41 @@ theorem mem_of_ne_head {α : Type*} [DecidableEq α] {a x : α} {s : Finset α}
     (hx : x ∈ insert a s) (hne : x ≠ a) : x ∈ s :=
   Finset.mem_of_mem_insert_of_ne hx hne
 
-/-! ### Mutual recursion block -/
+/-! ### Shared Finset subset helpers -/
 
-set_option maxHeartbeats 800000 in
-mutual
+/-- `s ⊆ insert a (insert b s)` by double application of `Finset.subset_insert`. -/
+private theorem subset_insert₂ {α : Type*} [DecidableEq α] (a b : α) (s : Finset α) :
+    s ⊆ insert a (insert b s) :=
+  (Finset.subset_insert b s).trans (Finset.subset_insert a _)
+
+/-- Transport a subset through an outer insert: from `s ⊆ insert c t` derive
+`insert a s ⊆ insert c (insert a t)`. -/
+private theorem insert_subset_swap {α : Type*} [DecidableEq α]
+    {c a : α} {s t : Finset α}
+    (h : s ⊆ insert c t) : insert a s ⊆ insert c (insert a t) :=
+  Finset.insert_subset
+    (Finset.mem_insert_of_mem (Finset.mem_insert_self a _))
+    (fun _ hx => (Finset.insert_subset_insert c (Finset.subset_insert a _)) (h hx))
+
+/-- Left-side weakening for cut-free proofs: weaken the antecedent while preserving
+the succedent unchanged. -/
+private def CutFreeLKProof.monoL {Γ Δ Γ' : Finset (Proposition Atom)}
+    (h : Γ ⊆ Γ') (d : CutFreeLKProof (Γ ⊢ₛ Δ)) :
+    CutFreeLKProof (Γ' ⊢ₛ Δ) :=
+  d.mono h (Finset.Subset.refl _)
+
+/-- Right-side weakening for cut-free proofs: weaken the succedent while preserving
+the antecedent unchanged. -/
+private def CutFreeLKProof.monoR {Γ Δ Δ' : Finset (Proposition Atom)}
+    (h : Δ ⊆ Δ') (d : CutFreeLKProof (Γ ⊢ₛ Δ)) :
+    CutFreeLKProof (Γ ⊢ₛ Δ') :=
+  d.mono (Finset.Subset.refl _) h
+
+/-! ### Principal-case helpers (self-recursive, extracted from mutual block)
+
+Each helper performs structural recursion on the right proof `d₂` for one specific
+connective-principal interaction. They are self-recursive only and do not call
+`cutAdm_right` or `cutAdm_left`, so they can live outside the mutual block. -/
 
 /-- Principal andR/andL case: structural recursion on `d₂` given
 `d₁a : Γ₀ ⊢ₛ insert A Δ₀` and `d₁b : Γ₀ ⊢ₛ insert B Δ₀` from the andR side. -/
@@ -541,6 +572,15 @@ noncomputable def cutAdm_right_impR
   | .weakR A' d', hcf' =>
     cutAdm_right_impR A B Γ₀ Δ₀ d₁' ih d' hcf' hant ((Finset.subset_insert A' _).trans hsuc)
   | .cut _ _ _, hcf' => absurd hcf' id
+
+/-! ### Mutual recursion block
+
+Only `cutAdm_right` and `cutAdm_left` are mutually recursive. The three principal-case
+helpers above are self-recursive and called one-way by `cutAdm_left`. -/
+
+set_option maxHeartbeats 400000 in
+-- Mutual block requires extended heartbeats for case analysis in cutAdm_right/cutAdm_left
+mutual
 
 /-- General right-side helper: structural recursion on `d₂` for non-principal cases in d₁.
 When C appears as ⊥ in d₂, uses cutAdm_left (mutual recursion). -/

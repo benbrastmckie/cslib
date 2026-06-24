@@ -128,28 +128,38 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Measure Decrease Lemmas [IN PROGRESS]
+### Phase 2: Measure Decrease Lemmas [PARTIAL]
 
 **Goal**: Prove that `reduceRoot` strictly decreases the combined measure. This is the
 mathematical heart of the termination argument.
 
 **Tasks**:
-- [ ] Prove `subsOne_new_redex_complexity_lt`: when `subsOne` creates a new beta-redex, its
+- [ ] **Task 2.1**: Prove `subsOne_new_redex_complexity_lt`: when `subsOne` creates a new beta-redex, its
       maximal formula complexity is strictly less than the original cut formula's complexity.
       Key insight: new redexes involve proper subformulas of the cut formula.
       Requires induction on derivation structure, tracking where substituted terms land.
-- [ ] Prove `reduceRoot_beta_maxFormulas_lt`: for each of the 5 beta-redex patterns, the
+      *(deviation: deferred -- subsOne goes through subs which uses tactic blocks, making structural induction technically challenging)*
+- [x] **Task 2.2**: Prove `reduceRoot_beta_maxFormulas_lt`: for the 2 conjunction beta-redex patterns, the
       `maximalFormulas` multiset strictly decreases in the Dershowitz-Manna ordering.
-      One element of rank `k` is removed; zero or more elements of rank `< k` may be added.
-- [ ] Prove `reduceRoot_commuting_commutingSum_lt`: for each of the 3 commuting conversion
+      *(deviation: altered -- split into `reduceRoot_andE_maxFormulas_lt` and `reduceRoot_andE2_maxFormulas_lt`; substitution beta cases (impE/orE) deferred pending Task 2.1)*
+- [ ] **Task 2.3**: Prove `reduceRoot_commuting_commutingSum_lt`: for each of the 3 commuting conversion
       patterns, `maximalFormulas` is unchanged and `commutingSum` strictly decreases.
-      Key: the original site contributes `|D| + |DA| + |DB| + 2`, new sites contribute at
-      most `|DA| + |DB| + 2`, and `|D| >= 1`.
-- [ ] Prove `reduceRoot_commuting_maxFormulas_eq`: commuting conversions do not create or
+      *(deviation: deferred -- commuting conversions can increase maximalFormulas when subterms are not SN; requires strengthening h_allSubsSN hypothesis)*
+- [ ] **Task 2.4**: Prove `reduceRoot_commuting_maxFormulas_eq`: commuting conversions do not create or
       destroy maximal formulas (they just rearrange sub-derivation structure).
-- [ ] Combine into `reduceRoot_decreases_measure`: if `d.reduceRoot = some d'` and `d` has
+      *(deviation: deferred -- only true when subterms are SN; requires isStronglyNormal hypotheses on DA/DB)*
+- [x] **Task 2.5**: Combine into `reduceRoot_decreases_measure`: if `d.reduceRoot = some d'` and `d` has
       strongly normal subterms, then `normMeasure d' < normMeasure d` in the lex ordering.
-- [ ] Run `lake build Cslib.Logics.Propositional.NaturalDeduction.Normalization` to verify
+      *(deviation: altered -- structure in place with conjunction cases proved; 6 of 8 cases remain as sorry pending Tasks 2.1, 2.3, 2.4)*
+- [ ] **Task 2.6**: Run `lake build Cslib.Logics.Propositional.NaturalDeduction.Normalization` to verify
+      *(deviation: skipped -- build blocked by remaining sorries)*
+
+**BLOCKER** (Phase 2):
+- **What failed**: 6 of 8 `reduceRoot` pattern cases in `reduceRoot_decreases_normMeasure`
+- **What was tried**: Direct DM witness construction for conjunction cases (succeeded for h_2, h_3). Analysis of substitution cases (blocked on `subsOne` going through `subs` with tactic blocks). Analysis of commuting conversion cases (blocked on `maximalFormulas` not being preserved without SN hypotheses).
+- **Why it's stuck**: Two root causes: (1) `subsOne` defined via `subs` with `by grind`/`weakCtx` rewrites makes induction on output infeasible. (2) Commuting conversions can create new maximal formulas when subterms are not SN, requiring `h_allSubsSN` to be non-vacuous.
+- **What is needed**: (1) Either prove `subsOne_maximalFormulas_complexity_bound` by induction through `subs`, or refactor `subsOne` to use pattern matching. (2) Strengthen `h_allSubsSN` from `True` to actual SN predicate on immediate subterms, then show SN rules out introduction forms at redex positions.
+- **Prohibited workarounds**: Do NOT use `sorry`, `def X := True`, or any vacuous placeholder
 
 **Timing**: 3 hours
 

@@ -140,7 +140,7 @@ verified together by a single full build.
 - **Verification:** `lake build Cslib.Logics.Modal.Metalogic.ConservativeExtension` succeeds with
   zero errors; lean-lsp diagnostics show no warnings beyond (at most) a resolved binder note.
 
-### Phase 3: Rewrite the 15 System Instantiations [NOT STARTED]
+### Phase 3: Rewrite the 15 System Instantiations [COMPLETED]
 
 - **Goal:** Replace each `Systems/*/ConservativeExtension.lean` proof body with a ~5-line
   instantiation of `modal_conservative_extension_param`, preserving the public theorem name and

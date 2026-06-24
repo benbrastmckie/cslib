@@ -194,7 +194,7 @@ verified together by a single full build.
 - **Verification:** Each rewritten file builds; theorem names and statements unchanged
   (`grep -oh "theorem [a-z_0-9]*conservative_extension"` matches the recorded name map from Phase 1).
 
-### Phase 4: Barrel Update, Full CI, and Reduction Check [NOT STARTED]
+### Phase 4: Barrel Update, Full CI, and Reduction Check [COMPLETED]
 
 - **Goal:** Register the new file in the barrel, run the full CSLib CI pipeline green, and confirm
   the line-reduction target.

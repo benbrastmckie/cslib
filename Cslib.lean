@@ -327,6 +327,7 @@ public import Cslib.Logics.Modal.FromPropositional
 public import Cslib.Logics.Modal.LogicalEquivalence
 public import Cslib.Logics.Modal.Metalogic
 public import Cslib.Logics.Modal.Metalogic.Completeness
+public import Cslib.Logics.Modal.Metalogic.ConservativeExtension
 public import Cslib.Logics.Modal.Metalogic.DeductionTheorem
 public import Cslib.Logics.Modal.Metalogic.DerivationTree
 public import Cslib.Logics.Modal.Metalogic.GenericMCSBridge
@@ -502,6 +503,7 @@ public import Cslib.Logics.Temporal.Metalogic.DenseMCS
 public import Cslib.Logics.Temporal.Metalogic.DenseSoundness
 public import Cslib.Logics.Temporal.Metalogic.DerivationTree
 public import Cslib.Logics.Temporal.Metalogic.GeneralizedNecessitation
+public import Cslib.Logics.Temporal.Metalogic.GenericMCSBridge
 public import Cslib.Logics.Temporal.Metalogic.MCS
 public import Cslib.Logics.Temporal.Metalogic.PropositionalHelpers
 public import Cslib.Logics.Temporal.Metalogic.Soundness

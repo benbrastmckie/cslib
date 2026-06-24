@@ -1,21 +1,23 @@
 {
   "status": "partial",
-  "phases_completed": 1,
+  "phases_completed": 2,
   "phases_total": 6,
-  "session_id": "sess_1782319118_5be8e3_336",
-  "summary": "Phase 1 complete. Added two parametric theorems to Cslib/Logics/Modal/Metalogic/Completeness.lean after ModalSemanticEntails_of_Valid: (1) strong_soundness — takes a DerivationTree-level soundness callback and ModalSetDerivable, returns ModalSemanticEntails FC; (2) strong_completeness — takes four propositional axiom callbacks, a pre-applied truthLemma, canonical_FC, and ModalSemanticEntails FC, returns ModalSetDerivable. Both use 'theorem' (not lemma), have docstrings, mirror section-variable discipline, and use universe u with variable {Atom : Type u}. Sanity-checked by instantiating against K (scratch file, not committed). lake build Cslib.Logics.Modal.Metalogic.Completeness succeeded; lake exe lint-style clean; zero sorry.",
+  "summary": "Phase 2 complete: three parametric wrappers (strong_completeness_iff, compactness, weak_completeness) added to Metalogic/Completeness.lean; K cascade tail replaced with thin delegations to parametric cascade using named-argument syntax (FC := fun _ => True) to fix universe inference; all 5 K public theorem names preserved; lake build green, lint-style clean, zero sorry.",
   "blockers": [],
+  "key_insight": "Named-argument syntax (Axioms := @KAxiom Atom) (FC := fun _ => True) required when passing trivial as canonical_FC — Lean cannot infer FC from trivial : True alone when FC is an implicit (∀ {World}, Model World Atom → Prop). All T/K-family/D-family phases should use the same pattern.",
   "continuation_context": {
-    "next_phase": 2,
-    "next_phase_name": "Parametric wrappers + K instantiation",
-    "what_phase_2_does": "Add three thin wrapper theorems (strong_completeness_iff, compactness, weak_completeness) to Metalogic/Completeness.lean. Then convert K's cascade tail (Systems/K/Completeness.lean lines ~262-367) to delegate to the parametric cascade: define kFC := fun _ => True, k_canonical_FC : kFC (CanonicalModel KAxiom) := trivial, pre-apply k_truth_lemma to its axiom callbacks, thread k_soundness via the adapter. Preserve K's five public theorem names (k_strong_soundness, k_strong_completeness, k_strong_completeness_iff, k_compactness, k_completeness) and their signatures — bodies become one-line delegations.",
-    "files_modified_so_far": [
-      "Cslib/Logics/Modal/Metalogic/Completeness.lean"
+    "next_phase": 3,
+    "next_phase_name": "Refactor T-family (T, S4, S5, TB)",
+    "files_to_modify": [
+      "Cslib/Logics/Modal/Metalogic/Systems/T/Completeness.lean",
+      "Cslib/Logics/Modal/Metalogic/Systems/S4/Completeness.lean",
+      "Cslib/Logics/Modal/Metalogic/Systems/S5/Completeness.lean",
+      "Cslib/Logics/Modal/Metalogic/Systems/TB/Completeness.lean"
     ],
-    "key_signatures": {
-      "strong_soundness": "theorem strong_soundness {Axioms} {FC} {Gamma} {phi} (sound : ∀ {World : Type u} (m : Model World Atom) (w : World) (L : List (Proposition Atom)), FC m → DerivationTree Axioms L phi → (∀ γ ∈ L, Satisfies m w γ) → Satisfies m w phi) (h : ModalSetDerivable Axioms Gamma phi) : ModalSemanticEntails FC Gamma phi",
-      "strong_completeness": "theorem strong_completeness {Axioms} {FC} {Gamma} {phi} (h_implyK) (h_implyS) (h_efq) (h_peirce) (truthLemma : ∀ (S : CanonicalWorld Axioms) (φ), Satisfies (CanonicalModel Axioms) S φ ↔ φ ∈ S.val) (canonical_FC : FC (CanonicalModel Axioms)) (h : ModalSemanticEntails FC Gamma phi) : ModalSetDerivable Axioms Gamma phi"
-    },
-    "scope_note": "Do NOT touch Propositional/* files — concurrent session has unrelated uncommitted edits there. Build with lake build Cslib.Logics.Modal.Metalogic.Systems.K.Completeness for Phase 2 verification."
+    "truth_lemma_family": "truth_lemma (from Metalogic/Completeness.lean, no K-specific infra)",
+    "s5_signature_warning": "s5_completeness is consumed by Bimodal/Metalogic/ConservativeExtension/ModalConservativity.lean:209 — preserve its inlined-forall signature",
+    "pattern_for_FC_inference": "Use (Axioms := @<Sys>Axiom Atom) (FC := <sys>FC) named arguments; always use named FC to avoid trivial/True inference failure",
+    "private_helpers_template": "Define k_truth_lemma_applied + k_sound_cb pattern; for T-family use truth_lemma_applied + <sys>_sound_cb",
+    "phases_34_can_be_parallel": "Phases 3, 4, 5 (T-family, K-family, D-family) are independent of each other once Phase 2 is done"
   }
 }

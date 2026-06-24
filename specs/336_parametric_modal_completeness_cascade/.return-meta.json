@@ -1,16 +1,17 @@
 {
-  "status": "in_progress",
-  "started_at": "2026-06-24T00:00:00Z",
+  "status": "partial",
+  "started_at": "2026-06-24T18:00:00Z",
   "artifacts": [
-    "Cslib/Logics/Modal/Metalogic/Completeness.lean"
+    "Cslib/Logics/Modal/Metalogic/Completeness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/K/Completeness.lean"
   ],
   "partial_progress": {
-    "stage": "phase_1_complete",
-    "details": "Added strong_soundness and strong_completeness parametric theorems; K sanity check passed",
+    "stage": "phase_2_complete",
+    "details": "Phase 2 done: 3 parametric wrappers added, K tail replaced with thin delegations",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 1,
-    "last_completed_phase": "Parametric core — strong_soundness + strong_completeness"
+    "phases_completed": 2,
+    "last_completed_phase": "Parametric wrappers + K instantiation"
   },
   "metadata": {
     "session_id": "sess_1782319118_5be8e3_336",

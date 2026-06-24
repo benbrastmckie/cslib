@@ -131,7 +131,7 @@ and prove them by re-instantiating against K (in-place sanity, not yet replacing
 
 ---
 
-### Phase 2: Parametric wrappers + K instantiation [NOT STARTED]
+### Phase 2: Parametric wrappers + K instantiation [COMPLETED]
 
 **Goal**: Add the three thin parametric wrappers and convert K's cascade tail to the
 parametric instantiation, proving the full pattern end-to-end on K.

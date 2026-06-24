@@ -635,4 +635,89 @@ theorem strong_completeness
   exact mcs_bot_not_mem hM_mcs
     (modal_implication_property h_implyK h_implyS hM_mcs h_neg_phi h_phi_M)
 
+/-- **Parametric Biconditional Wrapper**: `phi` is a semantic consequence of `Gamma`
+over all `FC`-frames iff `phi` is set-derivable from `Gamma`.
+
+This combines `strong_soundness` and `strong_completeness` into a single iff, given
+the same propositional axiom callbacks, truth lemma, and canonical frame-condition proof
+used by `strong_completeness`. Instantiate at each system by providing system-specific
+arguments to recover the system's biconditional completeness theorem. -/
+theorem strong_completeness_iff
+    {Axioms : Proposition Atom → Prop}
+    {FC : ∀ {World : Type u}, Model World Atom → Prop}
+    {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
+    (sound : ∀ {World : Type u} (m : Model World Atom) (w : World)
+             (L : List (Proposition Atom)),
+             FC m → DerivationTree Axioms L phi →
+             (∀ γ ∈ L, Satisfies m w γ) → Satisfies m w phi)
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_efq : ∀ (φ : Proposition Atom), Axioms (Proposition.bot.imp φ))
+    (h_peirce : ∀ (φ ψ : Proposition Atom),
+      Axioms (((φ.imp ψ).imp φ).imp φ))
+    (truthLemma : ∀ (S : CanonicalWorld Axioms) (φ : Proposition Atom),
+      Satisfies (CanonicalModel Axioms) S φ ↔ φ ∈ S.val)
+    (canonical_FC : FC (CanonicalModel Axioms)) :
+    ModalSemanticEntails FC Gamma phi ↔ ModalSetDerivable Axioms Gamma phi :=
+  ⟨strong_completeness h_implyK h_implyS h_efq h_peirce truthLemma canonical_FC,
+   strong_soundness sound⟩
+
+/-- **Parametric Compactness**: If `phi` is a semantic consequence of `Gamma` over all
+`FC`-frames, there exists a finite list `L ⊆ Gamma` such that `phi` is a semantic
+consequence of (members of) `L` over all `FC`-frames.
+
+Proof: `strong_completeness` produces a finite derivation witness; `strong_soundness`
+lifts it back to semantic entailment restricted to the finite list. -/
+theorem compactness
+    {Axioms : Proposition Atom → Prop}
+    {FC : ∀ {World : Type u}, Model World Atom → Prop}
+    {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
+    (sound : ∀ {World : Type u} (m : Model World Atom) (w : World)
+             (L : List (Proposition Atom)),
+             FC m → DerivationTree Axioms L phi →
+             (∀ γ ∈ L, Satisfies m w γ) → Satisfies m w phi)
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_efq : ∀ (φ : Proposition Atom), Axioms (Proposition.bot.imp φ))
+    (h_peirce : ∀ (φ ψ : Proposition Atom),
+      Axioms (((φ.imp ψ).imp φ).imp φ))
+    (truthLemma : ∀ (S : CanonicalWorld Axioms) (φ : Proposition Atom),
+      Satisfies (CanonicalModel Axioms) S φ ↔ φ ∈ S.val)
+    (canonical_FC : FC (CanonicalModel Axioms))
+    (h : ModalSemanticEntails FC Gamma phi) :
+    ∃ L : List (Proposition Atom),
+      (∀ x ∈ L, x ∈ Gamma) ∧
+      ModalSemanticEntails FC {ψ | ψ ∈ L} phi := by
+  obtain ⟨L, hL_sub, hL_deriv⟩ :=
+    strong_completeness h_implyK h_implyS h_efq h_peirce truthLemma canonical_FC h
+  exact ⟨L, hL_sub,
+    strong_soundness sound ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩⟩
+
+/-- **Parametric Weak Completeness**: If `phi` is valid over all `FC`-frames
+(satisfies at every world of every model satisfying `FC`), then `phi` is derivable
+from the empty context.
+
+This is a corollary of `strong_completeness` instantiated at `Gamma = ∅`, lifting
+validity (universally quantified satisfaction) to derivability. -/
+theorem weak_completeness
+    {Axioms : Proposition Atom → Prop}
+    {FC : ∀ {World : Type u}, Model World Atom → Prop}
+    {phi : Proposition Atom}
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_efq : ∀ (φ : Proposition Atom), Axioms (Proposition.bot.imp φ))
+    (h_peirce : ∀ (φ ψ : Proposition Atom),
+      Axioms (((φ.imp ψ).imp φ).imp φ))
+    (truthLemma : ∀ (S : CanonicalWorld Axioms) (φ : Proposition Atom),
+      Satisfies (CanonicalModel Axioms) S φ ↔ φ ∈ S.val)
+    (canonical_FC : FC (CanonicalModel Axioms))
+    (h_valid : ∀ (World : Type u) (m : Model World Atom), FC m → ∀ w, Satisfies m w phi) :
+    Derivable Axioms phi :=
+  ModalSetDerivable_empty_iff.mp
+    (strong_completeness h_implyK h_implyS h_efq h_peirce truthLemma canonical_FC
+      (ModalSemanticEntails_of_Valid h_valid ∅))
+
 end Cslib.Logic.Modal

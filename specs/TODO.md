@@ -1,5 +1,5 @@
 ---
-next_project_number: 324
+next_project_number: 327
 ---
 
 # TODO
@@ -11,9 +11,9 @@ next_project_number: 324
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,314,321,322,323 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215,300,316 | 36,37,180,299,323 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
-| 3 | 41,275,317 | 39,40,316 | Foundations, Propositional Logic |
+| 1 | 36,37,180,226,241,245,278,290,299,301,314,321,322,323,324 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 2 | 39,40,181,215,300,316,325 | 36,37,180,299,323,324 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 3 | 41,275,317,326 | 39,40,316,325 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -38,6 +38,9 @@ next_project_number: 324
 323 [NOT STARTED] — Fix two intuitionistic tableau implementation bugs: (1) isIntuiti
   └─ 316 [BLOCKED] — Fill the 6 sorry instances in propositional tableau soundness pro
     └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
+324 [NOT STARTED] — Add LawfulBEq instances for Proposition Atom and SignedFormula F 
+  └─ 325 [NOT STARTED] — Deduplicate identical definitions across minimal/intuitionistic t
+    └─ 326 [NOT STARTED] — Fix ~35 linter warnings across the propositional tableau soundnes
 
 ### Temporal Logic
 
@@ -55,7 +58,7 @@ next_project_number: 324
 
 ### Algebraic Semantics
 
-322 [PLANNING] — Establish the MPL conservative extension chain as standalone resu
+322 [RESEARCHING] — Establish the MPL conservative extension chain as standalone resu
 
 ### Modal
 
@@ -65,6 +68,36 @@ next_project_number: 324
 ### Uncategorized
 
 ## Tasks
+
+### 326. Tableau lint cleanup
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 324, Task 325
+
+**Description**: Fix ~35 linter warnings across the propositional tableau soundness and completeness modules. By file: (1) Classical/Soundness.lean (~20 warnings): 14 unused section variables ([DecidableEq Atom] and/or [Hashable Atom] on private lemmas and classicalRule_preserves_sat) — add omit annotations; 1 deprecated push_neg at line 639 — replace with push Not; 3 show tactic misuses at lines 207/210/334/336; 3 flexible simp calls at line 468 — replace with simp only. (2) Classical/Completeness.lean (~13 warnings): 8 unused simp arguments at lines 110/111/160/254/326/343/366/387 — remove; 3 dead tactic blocks at lines 468-479 — remove; 2 unused section variables on mem_extendMany_of_mem and hintikka_inv_mono — add omit. (3) Intuitionistic/Soundness.lean (4 warnings): 2 unused section variables on intRule_preserves_sat and intClosed_unsatisfiable — add omit; 2 long lines at 207/281 — break. (4) Minimal/Soundness.lean (1 warning): unused [Hashable Atom] on minClosed_unsatisfiable — add omit. All fixes are mechanical and should not change proof semantics.
+
+---
+
+### 325. Tableau dedup dead code cleanup
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 324
+
+**Description**: Deduplicate identical definitions across minimal/intuitionistic tableau modules and remove dead code from the MinimalClosure bug fix. (A) Deduplication: (1) Delete minBranchSatisfied from Minimal/Soundness.lean:71-78 — it is character-for-character identical to intBranchSatisfied in Intuitionistic/Soundness.lean:55-62 (the docstring even says so). Use intBranchSatisfied everywhere since the botForces parameter already distinguishes minimal from intuitionistic semantics. (2) Delete minExtractValuation from Minimal/Completeness.lean:72-73 — verbatim copy of intExtractValuation in Intuitionistic/Completeness.lean:57-58. Valuation extraction is logic-independent. (3) Standardize naming: extractValuation (classical) has no prefix while int/min versions do. After dedup, only classical extractValuation and intExtractValuation remain, which is consistent enough. (B) Dead code removal: (4) Remove MinimalClosure instance from ClosureCondition.lean:124-134 — isMinimallyClosed now uses Branch.hasContradiction, making this instance dead code. (5) Check if IsAtomic typeclass (ClosureCondition.lean:76-78) and instIsAtomicProposition (Tableau/Defs.lean:113-117) are used anywhere besides MinimalClosure. If not, remove both. (6) Check if atomContradiction constructor in ClosureReason (Closure.lean:60) is used anywhere besides MinimalClosure. If not, remove. Verify no downstream consumers before removing.
+
+---
+
+### 324. Lawfulbeq proposition signedformula
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Add LawfulBEq instances for Proposition Atom and SignedFormula F L, then remove workaround lemmas. Currently Proposition derives BEq independently from DecidableEq (Defs.lean:92), so the derived BEq uses structural matching rather than decide (a = b). This means eq_of_beq, beq_iff_eq, and all standard BEq<->Eq lemmas fail, forcing custom workaround lemmas: prop_beq_eq (Classical/Soundness.lean:128, private, ~30 lines) and proposition_beq_eq (Minimal/Soundness.lean:87, public, ~30 lines). Fix: (1) In Defs.lean, either derive BEq from DecidableEq via instBEq or keep the derived BEq and prove a LawfulBEq instance. (2) Add conditional LawfulBEq instance for SignedFormula F L when F and L have LawfulBEq. (3) Delete prop_beq_eq from Classical/Soundness.lean and proposition_beq_eq from Minimal/Soundness.lean. (4) Replace all call sites with eq_of_beq or beq_iff_eq: Classical/Soundness.lean callers, Minimal/Completeness.lean:111-113 (currently uses full qualification Cslib.Logic.PL.proposition_beq_eq). (5) Optionally add Repr to Proposition deriving clause for debugging. Eliminates ~60 lines of workaround code across 3 files.
+
+---
 
 ### 323. Fix intuitionistic tableau bugs
 - **Status**: [NOT STARTED]
@@ -77,7 +110,7 @@ next_project_number: 324
 ---
 
 ### 322. Mpl conservative extension chain
-- **Status**: [PLANNING]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 311, Task 312

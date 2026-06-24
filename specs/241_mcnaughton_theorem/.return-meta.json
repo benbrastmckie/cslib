@@ -1,0 +1,19 @@
+{
+  "status": "researched",
+  "started_at": "2026-06-24T21:42:04Z",
+  "completed_at": "2026-06-24T21:55:00Z",
+  "summary": "ctchou (Ching-Tsun Chou) is already a core CSLib contributor and authored the automata/omega-language stack underlying task 241; CSLib's code is his in-flight port of AutomataTheory. McNaughton's theorem (proof_wanted IsRegular.iff_da_muller in OmegaRegularLanguage.lean:260) is the last unported piece. Recommended path: adapt/complete the first-party port using the Choueka congruence-based proof, reusing CSLib's already-proved BuchiCongruence saturation machinery (same infrastructure that proves IsRegular.compl). Both projects are Apache 2.0, same author, identical types, so licensing/translation are non-issues. The hard (forward) determinization direction leverages existing lemmas (eq_fin_iSup_hmul_omegaPow, buchiFamily saturation, regular_omegaLim, Buchi.toMuller); the easy reverse direction needs a small Muller-to-NBA construction. Coordinate with Chou before independent reproof since his completed Lean proof exists.",
+  "artifacts": [
+    "specs/241_mcnaughton_theorem/reports/02_mcnaughton-ctchou-port-path.md"
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "details": "Report written; CSLib types, proof_wanted statement, existing congruence infrastructure, and ctchou licensing/architecture all documented"
+  },
+  "metadata": {
+    "session_id": "sess_1782337264_0e4361",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  }
+}

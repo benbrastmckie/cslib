@@ -389,16 +389,23 @@
     {
       "project_number": 301,
       "project_name": "temporal_tableau",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Temporal Logic",
       "description": "Implement tableau decision procedure for temporal logic (Cslib.Logic.Temporal.Formula) with until/since decomposition rules, time labels, and temporal ordering tracking. Most complex new tableau: until/since rules have no modal analogue, requiring branching decomposition with event-witness and guard-continue alternatives. Adapt patterns from bimodal decidability system (TimeOrdering, temporal rule structure, frame-class rules) but build fresh implementations on shared Foundations infrastructure. Include density and discreteness frame-class rules. Formula type has atom, bot, imp, untl, snce primitives using Lukasiewicz encoding. Files under Cslib/Logics/Temporal/Tableau/: Defs.lean, Rules.lean, TimeOrdering.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 2,000-2,500 lines.",
       "created": "2026-06-23T17:47:17Z",
-      "last_updated": "2026-06-23T17:47:17Z",
-      "next_artifact_number": 1,
-      "artifacts": [],
+      "last_updated": "2026-06-24T21:49:28Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/301_temporal_tableau/reports/01_temporal-tableau-decision-procedure.md",
+          "summary": "Build on Foundations tableau kernel (Cslib.Logic.Tableau) at F=Temporal.Formula, L=Nat; port algorithms (not types) from ~6000-line bimodal Decidability system. Temporal Formula/model/frame-class hierarchy already proven. Until/since event-witness vs guard-continue branching + density/discreteness rules mapped. 8-file phased breakdown (~2350 lines); riskiest obligation is until/since completeness via eventuality fulfilment. Zero-debt: mark BLOCKED rather than sorry/axiom if completeness cannot close."
+        }
+      ],
       "dependencies": [],
-      "parent_task": 296
+      "parent_task": 296,
+      "session_id": "sess_1782337264_0e4361"
     },
     {
       "project_number": 296,
@@ -656,31 +663,46 @@
     {
       "project_number": 241,
       "project_name": "mcnaughton_theorem",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "description": "Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller) establishing equivalence between omega-regular languages and deterministic Muller automata. Research phase should evaluate ctchou/AutomataTheory (independent Lean 4 project that claims McNaughton already proved) for architectural compatibility, portability, and licensing before deciding whether to port, adapt, or develop independently.",
       "topic": "Temporal Logic",
       "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-19T20:26:23Z",
+      "last_updated": "2026-06-24T21:45:19Z",
       "dependencies": [],
-      "next_artifact_number": 2,
+      "next_artifact_number": 3,
       "artifacts": [
         {
           "path": "specs/241_mcnaughton_theorem/reports/01_ctchou-coordination-seed.md",
           "type": "report",
           "summary": "Seed report: ctchou/AutomataTheory coordination assessment for McNaughton theorem"
+        },
+        {
+          "type": "report",
+          "path": "specs/241_mcnaughton_theorem/reports/02_mcnaughton-ctchou-port-path.md",
+          "summary": "ctchou=Chou is core CSLib contributor; CSLib automata stack is his AutomataTheory port. Recommend completing first-party port via Choueka congruence machinery (reuses IsRegular.compl infra). Apache↔Apache, same author. Forward dir leverages existing saturation lemmas; reverse needs small Muller-to-NBA construction."
         }
-      ]
+      ],
+      "session_id": "sess_1782337264_0e4361"
     },
     {
       "project_number": 245,
       "project_name": "formula_encodable_countable_instances",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "description": "Add Encodable, Countable, and Denumerable instances for LTL Formula type (deferred to completeness PRs)",
       "topic": "Temporal Logic",
       "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-19T05:20:19Z"
+      "last_updated": "2026-06-24T21:45:43Z",
+      "session_id": "sess_1782337264_0e4361",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/245_formula_encodable_countable_instances/reports/01_encodable-countable-denumerable-instances.md",
+          "summary": "All three instances (Encodable via Mathlib deriving handler, Countable via Encodable.countable, Denumerable via ofEncodableOfInfinite) are zero-debt achievable; compiled end-to-end. Needs [Encodable Atom]; Infinite holds unconditionally via iterated next. No noncomputable required. Sets precedent for Denumerable consumers in Temporal/Bimodal completeness."
+        }
+      ],
+      "next_artifact_number": 2
     },
     {
       "project_number": 226,

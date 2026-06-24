@@ -215,7 +215,7 @@ accessibility-edge tracking that makes box-positive propagation K-sound (not S5)
 
 ---
 
-### Phase 4: Soundness [NOT STARTED]
+### Phase 4: Soundness [IN PROGRESS]
 
 **Goal**: Prove `modalTableau_sound` against Kripke semantics over all models.
 

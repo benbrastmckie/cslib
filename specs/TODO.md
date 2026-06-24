@@ -47,9 +47,9 @@ next_project_number: 341
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-241 [NOT STARTED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
-245 [NOT STARTED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
-301 [NOT STARTED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
+241 [RESEARCHED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
+245 [RESEARCHED] — Add Encodable, Countable, and Denumerable instances for LTL Formu
+301 [RESEARCHED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
   └─ 275 [BLOCKED] — Prove that Bimodal TM is conservative over Temporal BX for tempor
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
@@ -391,10 +391,11 @@ Literature sources:
 ---
 
 ### 301. Temporal tableau
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
+- **Research**: [301_temporal_tableau/reports/01_temporal-tableau-decision-procedure.md]
 
 **Description**: Implement tableau decision procedure for temporal logic (Cslib.Logic.Temporal.Formula) with until/since decomposition rules, time labels, and temporal ordering tracking. Most complex new tableau: until/since rules have no modal analogue, requiring branching decomposition with event-witness and guard-continue alternatives. Adapt patterns from bimodal decidability system (TimeOrdering, temporal rule structure, frame-class rules) but build fresh implementations on shared Foundations infrastructure. Include density and discreteness frame-class rules. Formula type has atom, bot, imp, untl, snce primitives using Lukasiewicz encoding. Files under Cslib/Logics/Temporal/Tableau/: Defs.lean, Rules.lean, TimeOrdering.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 2,000-2,500 lines.
 
@@ -530,21 +531,24 @@ Literature sources:
 ---
 
 ### 245. Formula encodable countable instances
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
+- **Research**: [245_formula_encodable_countable_instances/reports/01_encodable-countable-denumerable-instances.md]
 
 **Description**: Add Encodable, Countable, and Denumerable instances for LTL Formula type (deferred to completeness PRs)
 
 ---
 
 ### 241. Mcnaughton theorem
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
-- **Research**: [241_mcnaughton_theorem/reports/01_ctchou-coordination-seed.md]
+- **Research**:
+  - [241_mcnaughton_theorem/reports/01_ctchou-coordination-seed.md]
+  - [241_mcnaughton_theorem/reports/02_mcnaughton-ctchou-port-path.md]
 
 **Description**: Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller) establishing equivalence between omega-regular languages and deterministic Muller automata. Research phase should evaluate ctchou/AutomataTheory (independent Lean 4 project that claims McNaughton already proved) for architectural compatibility, portability, and licensing before deciding whether to port, adapt, or develop independently.
 

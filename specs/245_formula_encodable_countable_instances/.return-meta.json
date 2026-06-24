@@ -1,0 +1,19 @@
+{
+  "status": "researched",
+  "started_at": "2026-06-24T00:00:00Z",
+  "completed_at": "2026-06-24T00:00:00Z",
+  "summary": "Researched Encodable/Countable/Denumerable instances for the LTL Formula type (Cslib/Logics/LTL/Syntax/Formula.lean, constructors atom/bot/imp/next/untl). All three instances are achievable zero-debt with existing Mathlib API: Encodable via the Mathlib 'deriving Encodable' handler (verified to succeed on the recursive Formula despite its docstring saying non-reflexive), Countable free via Encodable.countable, Denumerable via Denumerable.ofEncodableOfInfinite which additionally needs Infinite (Formula Atom). Formula is infinite unconditionally (iterated next on bot injects Nat, holds even for Atom=Empty), so only [Encodable Atom] is required. Full code sketch compiled successfully via lean_run_code with success:true and noncomputable NOT required.",
+  "artifacts": [
+    "specs/245_formula_encodable_countable_instances/reports/01_encodable-countable-denumerable-instances.md"
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "details": "Report written with verified, compiling code sketches for all three instances."
+  },
+  "metadata": {
+    "session_id": "sess_1782337264_0e4361",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  }
+}

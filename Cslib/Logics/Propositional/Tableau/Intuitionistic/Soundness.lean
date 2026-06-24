@@ -335,8 +335,9 @@ lemma intClosed_unsatisfiable {World : Type*} [Preorder World]
 
 /-! ## Loop Induction Lemma -/
 
-/-- Shorthand: `worldOf` is monotone with respect to an edge list `edges`. -/
-private def MonotoneEdges {World : Type*} [Preorder World]
+/-- `worldOf` is monotone with respect to an edge list `edges`: accessibility implies
+order. Used in the soundness invariant to ensure persistence rules are sound. -/
+def MonotoneEdges {World : Type*} [Preorder World]
     (worldOf : Nat → World) (edges : IEdges) : Prop :=
   ∀ w w', isAccessible edges w w' = true → worldOf w ≤ worldOf w'
 
@@ -789,15 +790,15 @@ lemma intExpandBranches_closed_unsat
       (edgeSets : List IEdges),
       expandedSets.length = branches.length →
       nextWorlds.length = branches.length →
+      edgeSets.length = branches.length →
       intExpandBranches branches expandedSets nextWorlds edgeSets fuel closurePred = .closed →
-      ∀ b ∈ branches, ∀ (worldOf : Nat → World),
+      ∀ (b : IBranch Atom) (edges : IEdges),
+          (b, edges) ∈ branches.zip edgeSets →
+          ∀ (worldOf : Nat → World),
+          MonotoneEdges worldOf edges →
           ¬ intBranchSatisfied val botForces worldOf b := by
-  -- The proof uses a stronger inner invariant that tracks MonotoneEdges per branch.
-  -- We prove a stronger statement by induction on fuel, then the conclusion follows.
-  -- Inner claim: for each branch b_i with edge set edges_i in the go-loop,
-  -- for any worldOf monotone for edges_i, b_i is unsatisfiable.
-  -- The outer lemma follows since the calling sites always use constant worldOf
-  -- (trivially monotone for any edges).
+  -- Prove the conclusion by induction on fuel, tracking edgeSets and MonotoneEdges per branch.
+  -- The inner induction on the go-loop is captured by the `key` suffices inside succ case.
   suffices hcore : ∀ (fuel' : Nat)
       (branches : List (IBranch Atom))
       (expandedSets : List (List (ISF Atom)))
@@ -812,11 +813,10 @@ lemma intExpandBranches_closed_unsat
           ∀ (worldOf : Nat → World),
           MonotoneEdges worldOf edges →
           ¬ intBranchSatisfied val botForces worldOf b by
-    intro branches expandedSets nextWorlds edgeSets hlength_exp hlength_nw h b hb worldOf hsat
-    -- The full proof requires threading MonotoneEdges through the expansion loop.
-    -- This is deferred; the outer lemma conclusion follows from hcore once edge-tracking
-    -- is established (the calling sites use constant worldOf, monotone for any edges).
-    sorry
+    intro branches expandedSets nextWorlds edgeSets hlength_exp hlength_nw hlength_edges h
+        b edges hbe worldOf hmono hsat
+    exact hcore fuel branches expandedSets nextWorlds edgeSets
+        hlength_exp hlength_nw hlength_edges h b edges hbe worldOf hmono hsat
   -- Prove hcore by induction on fuel'
   intro fuel'
   induction fuel' with
@@ -919,7 +919,25 @@ lemma intExpandBranches_closed_unsat
                 -- Extract sf witness from intStepBranch result (deferred to sorry)
                 obtain ⟨sf, hsf_mem, hresult_sf⟩ :
                     ∃ sf ∈ bPers, intApplyRuleFull sf nwH bPers = result := by
-                  sorry
+                  simp only [intStepBranch] at hstep
+                  obtain ⟨sf, hmem, hval⟩ := List.exists_of_findSome?_eq_some hstep
+                  refine ⟨sf, hmem, ?_⟩
+                  cases h : intApplyRuleFull sf nwH bPers with
+                  | notApplicable => simp [h] at hval
+                  | linearResult a b c =>
+                    simp only [h] at hval
+                    by_cases hexp : (eH.any fun x => x == sf) = true
+                    · simp [hexp] at hval
+                    · simp only [hexp, Bool.false_eq_true, ite_false, Option.some.injEq,
+                          Prod.mk.injEq] at hval
+                      exact hval.1
+                  | branchingResult a b =>
+                    simp only [h] at hval
+                    by_cases hexp : (eH.any fun x => x == sf) = true
+                    · simp [hexp] at hval
+                    · simp only [hexp, Bool.false_eq_true, ite_false, Option.some.injEq,
+                          Prod.mk.injEq] at hval
+                      exact hval.1
                 cases hresult : result with
                 | linearResult newForms nw' newEdge =>
                   rw [hresult] at hgo hstep hresult_sf
@@ -930,13 +948,53 @@ lemma intExpandBranches_closed_unsat
                       with hedges'_def
                   rcases hzip_p with ⟨rfl, rfl⟩ | hmem_rest
                   · sorry -- linearResult bp=bh case: apply intRule_preserves_sat + ih
-                  · sorry -- linearResult bp∈bt case: membership in new_branches + ih
+                  · -- linearResult bp∈bt case: bp is in the tail bt with edges edgesT;
+                    -- after expanding, bp is still in the new branch list at the same position.
+                    simp only [] at hgo
+                    refine ih _ _ _ _ (by simp [hdlength_exp, hlength_exp])
+                        (by simp [hdlength_nw, hlength_nw]) (by simp [hdlength_edges, hlength_edges])
+                        hgo bp edgesP ?_ wo hmono_p hsat_p
+                    rw [List.zip_append (by simp [hdlength_edges]), List.mem_append]
+                    exact Or.inr hmem_rest
                 | branchingResult branches' nw' =>
                   rw [hresult] at hgo hstep hresult_sf
                   have hfresh : ∀ sf' ∈ bPers, sf'.label ≠ nwH := by sorry
                   rcases hzip_p with ⟨rfl, rfl⟩ | hmem_rest
-                  · sorry -- branchingResult bp=bh case: apply intRule_preserves_sat + ih
-                  · sorry -- branchingResult bp∈bt case: membership in new_branches + ih
+                  · -- branchingResult bp=bh case: apply intRule_preserves_sat + ih
+                    simp only [] at hgo
+                    have hsat_pers : intBranchSatisfied val botForces wo bPers :=
+                      applyPersistenceFixpoint_sat val botForces v_uc bf_uc wo bh edgesP (fuel'' + 1)
+                        hsat_p hmono_p
+                    have hpres := intRule_preserves_sat val botForces v_uc bf_uc wo bPers sf
+                        hsf_mem hsat_pers nwH hfresh
+                    rw [hresult_sf] at hpres
+                    obtain ⟨br, hbr_mem, hsat_br⟩ := hpres
+                    have hmem : (Branch.extendMany bPers br, edgesP) ∈
+                        (done ++ branches'.map (Branch.extendMany bPers ·) ++ bt).zip
+                        (doneEdges ++ branches'.map (fun _ => edgesP) ++ edgesT) := by
+                      rw [List.zip_append (by simp [hdlength_edges])]
+                      simp only [List.mem_append]
+                      refine Or.inl ?_
+                      rw [List.zip_append (by exact hdlength_edges)]
+                      simp only [List.mem_append]
+                      refine Or.inr ?_
+                      -- membership in zip of two maps of same list:
+                      -- (branches'.map f).zip (branches'.map g) ∋ (f br, g br) from br ∈ branches'
+                      obtain ⟨i, hi_lt, hi_eq⟩ := List.mem_iff_getElem.mp hbr_mem
+                      apply List.mem_iff_getElem.mpr
+                      exact ⟨i, by simp [hi_lt], by simp [List.getElem_zip, List.getElem_map, hi_lt, hi_eq]⟩
+                    exact ih _ _ _ _ (by simp [hdlength_exp, hlength_exp])
+                        (by simp [hdlength_nw, hlength_nw])
+                        (by simp [hdlength_edges, hlength_edges])
+                        hgo (Branch.extendMany bPers br) edgesP hmem wo hmono_p hsat_br
+                  · -- branchingResult bp∈bt case: bp is in the tail bt with edges edgesT;
+                    -- after expanding, bp is still in the new branch list at the same position.
+                    simp only [] at hgo
+                    refine ih _ _ _ _ (by simp [hdlength_exp, hlength_exp])
+                        (by simp [hdlength_nw, hlength_nw]) (by simp [hdlength_edges, hlength_edges])
+                        hgo bp edgesP ?_ wo hmono_p hsat_p
+                    rw [List.zip_append (by simp [hdlength_edges]), List.mem_append]
+                    exact Or.inr hmem_rest
                 | notApplicable =>
                   rw [hresult] at hgo; simp [intExpandBranches.go] at hgo
 
@@ -961,12 +1019,24 @@ theorem intuitionisticTableau_sound (φ : Proposition Atom)
     subst hmem
     exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hneg⟩
   simp only [intuitionisticTableau] at h
-  exact intExpandBranches_closed_unsat val (fun _ => False) v_uc
+  -- Apply the closed unsat lemma with the initial single-branch configuration.
+  -- edgeSets = [[]] (one empty edge set, matching the one branch).
+  -- worldOf = fun _ => w₀ is monotone for [] trivially (only constraint: w = w').
+  apply intExpandBranches_closed_unsat val (fun _ => False) v_uc
     (fun {_ _} _ hf => absurd hf id) _
     isIntuitionisticallyClosed
     (fun worldOf' b hcl => intClosed_unsatisfiable val worldOf' b hcl)
-    _ _ _ _ (by rfl) (by rfl) h
-    [⟨.neg, φ, 0⟩] (by simp) worldOf hsat
+    [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] (by rfl) (by rfl) (by rfl) h
+    [⟨.neg, φ, 0⟩] []
+  · simp [List.zip_cons_cons, List.zip_nil_right]
+  · exact fun w w' hacc => by
+      simp only [isAccessible] at hacc
+      split_ifs at hacc with heq
+      · -- heq : w == w' = true, so w = w' and worldOf w ≤ worldOf w' by reflexivity
+        have hw : w = w' := by exact_mod_cast beq_iff_eq.mp heq
+        exact le_of_eq (congrArg worldOf hw)
+      · simp [isAccessible.go] at hacc
+  · exact hsat
 
 end Cslib.Logic.PL
 

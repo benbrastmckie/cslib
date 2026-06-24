@@ -127,14 +127,14 @@
     {
       "project_number": 290,
       "project_name": "nd_normalization_subformula_property",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Formalize Prawitz-style normalization for CSLib Theory.Derivation (propositional IPL and MPL). Define Derivation.isNormal predicate (no maximal formula -- i.e., no introduction rule immediately followed by the corresponding elimination on the same formula). Prove a normalization function normalize that transforms any derivation into a normal form. Derive the subformula property as a corollary: every formula in a normal derivation is a subformula of the conclusion or a hypothesis. The Theory.Derivation type is Type u (not Prop), enabling a computable normalization function. Reference: [Prawitz1965] Ch. IV-V. Consider starting with the implicational fragment ({arrow} only) as a milestone, then extending to full IPL connectives. Files: new module Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean. Depends on 266.",
       "dependencies": [],
       "created": "2026-06-23T12:00:00Z",
-      "last_updated": "2026-06-24T10:24:51Z",
-      "session_id": "sess_1782296192_f489df",
+      "last_updated": "2026-06-24T10:36:01Z",
+      "session_id": "sess_1782297086_8d104d",
       "artifacts": [
         {
           "path": "specs/290_nd_normalization_subformula_property/summaries/01_nd-normalization-summary.md",
@@ -150,8 +150,13 @@
           "path": "specs/290_nd_normalization_subformula_property/reports/03_termination-measure-research.md",
           "type": "report",
           "description": "Termination measure research: redexWeight approach for normalize_isStronglyNormal + conclusion_grounded_or_intro fix"
+        },
+        {
+          "path": "specs/290_nd_normalization_subformula_property/plans/04_nd-normalization-plan-v3.md",
+          "type": "plan"
         }
-      ]
+      ],
+      "next_artifact_number": 5
     },
     {
       "project_number": 292,
@@ -655,19 +660,25 @@
     {
       "project_number": 319,
       "project_name": "minimal_tableau_infrastructure",
-      "status": "planning",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Build dedicated Soundness and Completeness modules for the minimal propositional tableau, matching the structure of the classical and intuitionistic systems. Currently the minimal system has only DecisionProcedure.lean (135 lines) with sorry-marked theorems, while classical has 4 modules (795 lines) and intuitionistic has 5 modules (908 lines). The minimal tableau shares the intuitionistic rules and expansion loop (intExpandBranches with isMinimallyClosed), so no separate Rules.lean or Expansion.lean is needed. Create: (1) Minimal/Soundness.lean — define minRule_preserves_sat (each rule preserves branch satisfiability in any Kripke model with arbitrary botForces, not just fun _ => False), minClosed_unsatisfiable (MinimalClosure T(p)/F(p) contradiction is unsatisfiable since val w p ↔ ¬val w p), and prove minimalTableau_sound. Key difference from intuitionistic: closure is on complementary atoms only, and botForces is unconstrained. (2) Minimal/Completeness.lean — construct countermodel from open saturated branch with botForces w = (T(⊥) at w on branch), prove truth lemma by formula induction, and prove minimalTableau_complete. Key difference from intuitionistic: the countermodel allows bot to be forced at some worlds. (3) Refactor DecisionProcedure.lean to import the new modules, keeping only the Decidable instances and the minimalTableau_decides bridge theorem. (4) Update Cslib.lean barrel imports via lake exe mk_all.",
       "created": "2026-06-23T23:12:42Z",
-      "last_updated": "2026-06-24T10:21:48Z",
-      "next_artifact_number": 2,
+      "last_updated": "2026-06-24T10:25:55Z",
+      "next_artifact_number": 3,
       "artifacts": [
         {
           "artifact_number": 1,
           "path": "specs/319_minimal_tableau_infrastructure/reports/01_minimal-tableau-research.md",
           "type": "report",
           "summary": "Research report covering existing code analysis, reusability of intuitionistic proofs, closure bug discovery and empirical verification, proof strategies for Soundness.lean and Completeness.lean"
+        },
+        {
+          "artifact_number": 2,
+          "path": "specs/319_minimal_tableau_infrastructure/plans/02_implementation-plan.md",
+          "type": "plan",
+          "summary": "4-phase implementation plan for minimal tableau soundness and completeness modules"
         }
       ],
       "dependencies": [

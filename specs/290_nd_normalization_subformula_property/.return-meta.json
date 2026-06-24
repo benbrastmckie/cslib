@@ -1,17 +1,24 @@
 {
-  "status": "partial",
-  "started_at": "2026-06-24T00:00:00Z",
+  "status": "planned",
   "artifacts": [
-    "specs/290_nd_normalization_subformula_property/reports/03_termination-measure-research.md"
+    {
+      "type": "plan",
+      "path": "specs/290_nd_normalization_subformula_property/plans/04_nd-normalization-plan-v3.md",
+      "summary": "Revised plan v3 integrating report 03: fix conclusion_grounded_or_intro with 3-way disjunction (Phase 5) and prove normalize_isStronglyNormal termination (Phase 6)"
+    }
   ],
-  "partial_progress": {
-    "stage": "report_written",
-    "details": "Research report on termination measure and sorry fixes written. Covers: (1) analysis of 3 sorry in conclusion_grounded_or_intro (theorem is false as stated, fix identified), (2) termination measure for normalize_isStronglyNormal (redexWeight approach recommended), (3) Mathlib API for well-founded recursion identified."
-  },
+  "next_steps": "Run /implement 290 to execute the revised plan starting from Phase 5",
   "metadata": {
-    "session_id": "sess_1782296192_f489df",
-    "agent_type": "cslib-research-agent",
+    "session_id": "sess_1782297086_8d104d",
+    "agent_type": "reviser-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
+    "phase_count": 6,
+    "estimated_hours": 16,
+    "reports_integrated": [
+      "01_nd-normalization-research.md",
+      "02_blocker-hard-research.md",
+      "03_termination-measure-research.md"
+    ]
   }
 }

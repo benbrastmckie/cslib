@@ -33,11 +33,11 @@ next_project_number: 321
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-290 [RESEARCHED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
+290 [PLANNED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
 314 [IMPLEMENTING] — Implement the classical sequent calculus LK for propositional log
 316 [PARTIAL] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [PLANNED] — Fill the 8 sorry instances in propositional tableau completeness 
-    └─ 319 [PLANNING] — Build dedicated Soundness and Completeness modules for the minima
+    └─ 319 [IMPLEMENTING] — Build dedicated Soundness and Completeness modules for the minima
 
 ### Temporal Logic
 
@@ -74,11 +74,12 @@ next_project_number: 321
 ---
 
 ### 319. Minimal tableau infrastructure
-- **Status**: [PLANNING]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 316, Task 317
 - **Research**: [319_minimal_tableau_infrastructure/reports/01_minimal-tableau-research.md]
+- **Plan**: [319_minimal_tableau_infrastructure/plans/02_implementation-plan.md]
 
 **Description**: Build dedicated Soundness and Completeness modules for the minimal propositional tableau, matching the structure of the classical and intuitionistic systems. Currently the minimal system has only DecisionProcedure.lean (135 lines) with sorry-marked theorems, while classical has 4 modules (795 lines) and intuitionistic has 5 modules (908 lines). The minimal tableau shares the intuitionistic rules and expansion loop (intExpandBranches with isMinimallyClosed), so no separate Rules.lean or Expansion.lean is needed. Create: (1) Minimal/Soundness.lean — define minRule_preserves_sat (each rule preserves branch satisfiability in any Kripke model with arbitrary botForces, not just fun _ => False), minClosed_unsatisfiable (MinimalClosure T(p)/F(p) contradiction is unsatisfiable since val w p ↔ ¬val w p), and prove minimalTableau_sound. Key difference from intuitionistic: closure is on complementary atoms only, and botForces is unconstrained. (2) Minimal/Completeness.lean — construct countermodel from open saturated branch with botForces w = (T(⊥) at w on branch), prove truth lemma by formula induction, and prove minimalTableau_complete. Key difference from intuitionistic: the countermodel allows bot to be forced at some worlds. (3) Refactor DecisionProcedure.lean to import the new modules, keeping only the Decidable instances and the minimalTableau_decides bridge theorem. (4) Update Cslib.lean barrel imports via lake exe mk_all.
 
@@ -251,13 +252,14 @@ Literature sources:
 ---
 
 ### 290. Nd normalization subformula property
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Summary**: [290_nd_normalization_subformula_property/summaries/01_nd-normalization-summary.md]
 - **Lean**: [Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean]
 - **Research**: [290_nd_normalization_subformula_property/reports/03_termination-measure-research.md]
+- **Plan**: [290_nd_normalization_subformula_property/plans/04_nd-normalization-plan-v3.md]
 
 **Description**: Formalize Prawitz-style normalization for CSLib Theory.Derivation (propositional IPL and MPL). Define Derivation.isNormal predicate (no maximal formula -- i.e., no introduction rule immediately followed by the corresponding elimination on the same formula). Prove a normalization function normalize that transforms any derivation into a normal form. Derive the subformula property as a corollary: every formula in a normal derivation is a subformula of the conclusion or a hypothesis. The Theory.Derivation type is Type u (not Prop), enabling a computable normalization function. Reference: [Prawitz1965] Ch. IV-V. Consider starting with the implicational fragment ({arrow} only) as a milestone, then extending to full IPL connectives. Files: new module Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean. Depends on 266.
 

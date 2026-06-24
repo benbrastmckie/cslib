@@ -33,17 +33,19 @@
     "340": []
   },
   "max_cycles": 25,
-  "cycle_count": 5,
+  "cycle_count": 6,
   "failed_tasks": [],
   "completed_tasks": [
     335,
     338,
-    339
+    339,
+    340
   ],
   "current_statuses": {
     "316": "partial",
     "317": "blocked",
-    "339": "completed"
+    "339": "completed",
+    "340": "completed"
   },
   "task_dirs": {
     "335": "specs/335_parametric_modal_soundness",
@@ -70,5 +72,5 @@
     "340": "cslib-implementation-agent"
   },
   "serialization_note": "Implementation dispatches serialized to avoid concurrent lake build contention and 339/340 file-territory conflict on Temporal/Bimodal Formula.lean",
-  "notes": "Halted at cycle 2: task 316 standard implementer diverged (2 consecutive context overflows, sorry count 4->1->7). Work preserved as patch; repo reset to building HEAD. 317 never eligible (predecessor 316 non-terminal). Recommend /implement 316 --hard."
+  "notes": "Resuming from preserved WIP (restored via patch): 7 granular sorries + ~7 build errors. Strategy change: incremental bounded dispatches. Cycle3: fix ONLY build errors -> committable green-modulo-sorries checkpoint, then close sorries one at a time."
 }

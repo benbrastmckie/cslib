@@ -41,6 +41,49 @@ open Cslib.Logic
 universe u
 variable {Atom : Type u}
 
+/-! ## KB5 Frame Condition and Canonical Witness -/
+
+/-- The KB5 frame condition: every model whose accessibility relation is symmetric and
+Euclidean. -/
+def kb5FC : ∀ {World : Type u}, Model World Atom → Prop :=
+  fun m => (∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁) ∧
+           (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃)
+
+/-- The canonical KB5 model satisfies `kb5FC`: its accessibility relation is symmetric
+and Euclidean (from axioms B and 5). -/
+private theorem kb5_canonical_FC : kb5FC (CanonicalModel (@KB5Axiom Atom)) :=
+  ⟨canonical_symm
+      (fun φ ψ => .implyK φ ψ)
+      (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ ψ => .modalK φ ψ)
+      (fun φ => .modalB φ),
+   canonical_eucl_from_5
+      (fun φ ψ => .implyK φ ψ)
+      (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ ψ => .modalK φ ψ)
+      (fun φ => .modalFive φ)⟩
+
+/-- Pre-applied KB5 truth lemma: satisfaction at world `S` iff membership in `S.val`. -/
+private theorem kb5_truth_lemma_applied (S : CanonicalWorld (@KB5Axiom Atom))
+    (φ : Proposition Atom) :
+    Satisfies (CanonicalModel (@KB5Axiom Atom)) S φ ↔ φ ∈ S.val :=
+  k_truth_lemma
+    (fun φ ψ => .implyK φ ψ)
+    (fun φ ψ χ => .implyS φ ψ χ)
+    (fun φ => .efq φ)
+    (fun φ ψ => .peirce φ ψ)
+    (fun φ ψ => .modalK φ ψ)
+    S φ
+
+/-- KB5 soundness adapter matching the `strong_soundness` callback shape.
+The frame condition for KB5 is `kb5FC m = (symm) ∧ (eucl)`. -/
+private theorem kb5_sound_cb {World : Type u} (m : Model World Atom) (w : World)
+    (L : List (Proposition Atom))
+    (hFC : kb5FC m)
+    (d : DerivationTree (@KB5Axiom Atom) L phi)
+    (h_ctx : ∀ γ ∈ L, Satisfies m w γ) : Satisfies m w phi :=
+  kb5_soundness d m hFC.1 hFC.2 w h_ctx
+
 /-! ## KB5 Strong Soundness -/
 
 /-- **Strong Soundness for KB5**: If `phi` is set-derivable from `Gamma` using `KB5Axiom`,
@@ -53,10 +96,9 @@ theorem kb5_strong_soundness {Gamma : Set (Proposition Atom)} {phi : Proposition
     (World : Type u) (m : Model World Atom) (w : World)
     (h_symm : ∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁)
     (h_eucl : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃)
-    (h_sat : ∀ γ ∈ Gamma, Satisfies m w γ) : Satisfies m w phi := by
-  obtain ⟨L, hL_sub, hL_deriv⟩ := h
-  obtain ⟨d⟩ := hL_deriv
-  exact kb5_soundness d m h_symm h_eucl w (fun ψ hψ => h_sat ψ (hL_sub ψ hψ))
+    (h_sat : ∀ γ ∈ Gamma, Satisfies m w γ) : Satisfies m w phi :=
+  strong_soundness (Axioms := @KB5Axiom Atom) (FC := kb5FC)
+    kb5_sound_cb h World m w ⟨h_symm, h_eucl⟩ h_sat
 
 /-! ## KB5 Strong Completeness -/
 
@@ -64,62 +106,23 @@ theorem kb5_strong_soundness {Gamma : Set (Proposition Atom)} {phi : Proposition
 over all symmetric, Euclidean frames, then `phi` is set-derivable from `Gamma`
 using `KB5Axiom`.
 
-Proof by contrapositive: if `phi` is not set-derivable, `Gamma ∪ {¬phi}` is
-consistent; extend to MCS, apply `k_truth_lemma` in the canonical symmetric,
-Euclidean frame, derive contradiction. -/
+Delegates to the parametric `strong_completeness` with `k_truth_lemma_applied`
+and `kb5_canonical_FC`. -/
 theorem kb5_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
     (h : ∀ (World : Type u) (m : Model World Atom) (w : World),
         (∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁) →
         (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃) →
         (∀ γ ∈ Gamma, Satisfies m w γ) →
         Satisfies m w phi) :
-    ModalSetDerivable (@KB5Axiom Atom) Gamma phi := by
-  by_contra h_not
-  have h_cons := modal_not_SetDerivable_union_neg_consistent
+    ModalSetDerivable (@KB5Axiom Atom) Gamma phi :=
+  strong_completeness (Axioms := @KB5Axiom Atom) (FC := kb5FC)
     (fun φ ψ => .implyK φ ψ)
     (fun φ ψ χ => .implyS φ ψ χ)
     (fun φ => .efq φ)
     (fun φ ψ => .peirce φ ψ)
-    h_not
-  obtain ⟨M, hM_sup, hM_mcs⟩ := modal_lindenbaum h_cons
-  let w : CanonicalWorld (@KB5Axiom Atom) := ⟨M, hM_mcs⟩
-  have h_neg_phi : (¬phi) ∈ M :=
-    hM_sup (Set.mem_union_right Gamma (Set.mem_singleton_iff.mpr rfl))
-  have h_gamma_sub : ∀ ψ ∈ Gamma, ψ ∈ M :=
-    fun ψ hψ => hM_sup (Set.mem_union_left _ hψ)
-  have h_symm := @canonical_symm Atom (@KB5Axiom Atom)
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ ψ => .modalK φ ψ)
-    (fun φ => .modalB φ)
-  have h_eucl := @canonical_eucl_from_5 Atom (@KB5Axiom Atom)
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ ψ => .modalK φ ψ)
-    (fun φ => .modalFive φ)
-  have h_gamma_sat : ∀ γ ∈ Gamma, Satisfies (CanonicalModel (@KB5Axiom Atom)) w γ :=
-    fun γ hγ => (k_truth_lemma
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .efq φ)
-      (fun φ ψ => .peirce φ ψ)
-      (fun φ ψ => .modalK φ ψ)
-      w γ).mpr (h_gamma_sub γ hγ)
-  have h_phi_sat := h (CanonicalWorld (@KB5Axiom Atom)) (CanonicalModel (@KB5Axiom Atom))
-    w (fun S T hST => h_symm S T hST) (fun S T U hST hSU => h_eucl S T U hST hSU)
-    h_gamma_sat
-  have h_phi_M := (k_truth_lemma
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    (fun φ ψ => .modalK φ ψ)
-    w phi).mp h_phi_sat
-  exact mcs_bot_not_mem hM_mcs
-    (modal_implication_property
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      hM_mcs h_neg_phi h_phi_M)
+    kb5_truth_lemma_applied
+    kb5_canonical_FC
+    (fun World m w ⟨hSymm, hEucl⟩ h_sat => h World m w hSymm hEucl h_sat)
 
 /-! ## KB5 Biconditional Wrapper -/
 
@@ -155,10 +158,18 @@ theorem kb5_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom
         (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃) →
         (∀ γ ∈ {ψ | ψ ∈ L}, Satisfies m w γ) →
         Satisfies m w phi := by
-  obtain ⟨L, hL_sub, hL_deriv⟩ := kb5_strong_completeness h
+  obtain ⟨L, hL_sub, hL_sem⟩ :=
+    compactness (Axioms := @KB5Axiom Atom) (FC := kb5FC)
+      kb5_sound_cb
+      (fun φ ψ => .implyK φ ψ)
+      (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ => .efq φ)
+      (fun φ ψ => .peirce φ ψ)
+      kb5_truth_lemma_applied
+      kb5_canonical_FC
+      (fun World m w ⟨hSymm, hEucl⟩ h_sat => h World m w hSymm hEucl h_sat)
   exact ⟨L, hL_sub, fun World m w h_symm h_eucl h_sat =>
-    kb5_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
-      World m w h_symm h_eucl h_sat⟩
+    hL_sem World m w ⟨h_symm, h_eucl⟩ h_sat⟩
 
 /-! ## KB5 Weak Completeness (Corollary) -/
 

@@ -39,6 +39,48 @@ open Cslib.Logic
 universe u
 variable {Atom : Type u}
 
+/-! ## K45 Frame Condition and Canonical Witness -/
+
+/-- The K45 frame condition: every model whose accessibility relation is transitive and
+Euclidean. -/
+def k45FC : ∀ {World : Type u}, Model World Atom → Prop :=
+  fun m => (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃) ∧
+           (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃)
+
+/-- The canonical K45 model satisfies `k45FC`: its accessibility relation is transitive
+and Euclidean (from axioms 4 and 5). -/
+private theorem k45_canonical_FC : k45FC (CanonicalModel (@K45Axiom Atom)) :=
+  ⟨canonical_trans
+      (fun φ ψ => .implyK φ ψ)
+      (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ => .modalFour φ),
+   canonical_eucl_from_5
+      (fun φ ψ => .implyK φ ψ)
+      (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ ψ => .modalK φ ψ)
+      (fun φ => .modalFive φ)⟩
+
+/-- Pre-applied K45 truth lemma: satisfaction at world `S` iff membership in `S.val`. -/
+private theorem k45_truth_lemma_applied (S : CanonicalWorld (@K45Axiom Atom))
+    (φ : Proposition Atom) :
+    Satisfies (CanonicalModel (@K45Axiom Atom)) S φ ↔ φ ∈ S.val :=
+  k_truth_lemma
+    (fun φ ψ => .implyK φ ψ)
+    (fun φ ψ χ => .implyS φ ψ χ)
+    (fun φ => .efq φ)
+    (fun φ ψ => .peirce φ ψ)
+    (fun φ ψ => .modalK φ ψ)
+    S φ
+
+/-- K45 soundness adapter matching the `strong_soundness` callback shape.
+The frame condition for K45 is `k45FC m = (trans) ∧ (eucl)`. -/
+private theorem k45_sound_cb {World : Type u} (m : Model World Atom) (w : World)
+    (L : List (Proposition Atom))
+    (hFC : k45FC m)
+    (d : DerivationTree (@K45Axiom Atom) L phi)
+    (h_ctx : ∀ γ ∈ L, Satisfies m w γ) : Satisfies m w phi :=
+  k45_soundness d m hFC.1 hFC.2 w h_ctx
+
 /-! ## K45 Strong Soundness -/
 
 /-- **Strong Soundness for K45**: If `phi` is set-derivable from `Gamma` using `K45Axiom`,
@@ -51,67 +93,33 @@ theorem k45_strong_soundness {Gamma : Set (Proposition Atom)} {phi : Proposition
     (World : Type u) (m : Model World Atom) (w : World)
     (h_trans : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃)
     (h_eucl : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃)
-    (h_sat : ∀ γ ∈ Gamma, Satisfies m w γ) : Satisfies m w phi := by
-  obtain ⟨L, hL_sub, hL_deriv⟩ := h
-  obtain ⟨d⟩ := hL_deriv
-  exact k45_soundness d m h_trans h_eucl w (fun ψ hψ => h_sat ψ (hL_sub ψ hψ))
+    (h_sat : ∀ γ ∈ Gamma, Satisfies m w γ) : Satisfies m w phi :=
+  strong_soundness (Axioms := @K45Axiom Atom) (FC := k45FC)
+    k45_sound_cb h World m w ⟨h_trans, h_eucl⟩ h_sat
 
 /-! ## K45 Strong Completeness -/
 
 /-- **Strong Completeness for K45**: If `phi` is a semantic consequence of `Gamma`
 over all transitive, Euclidean frames, then `phi` is set-derivable from `Gamma`
-using `K45Axiom`. -/
+using `K45Axiom`.
+
+Delegates to the parametric `strong_completeness` with `k_truth_lemma_applied`
+and `k45_canonical_FC`. -/
 theorem k45_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
     (h : ∀ (World : Type u) (m : Model World Atom) (w : World),
         (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃) →
         (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃) →
         (∀ γ ∈ Gamma, Satisfies m w γ) →
         Satisfies m w phi) :
-    ModalSetDerivable (@K45Axiom Atom) Gamma phi := by
-  by_contra h_not
-  have h_cons := modal_not_SetDerivable_union_neg_consistent
+    ModalSetDerivable (@K45Axiom Atom) Gamma phi :=
+  strong_completeness (Axioms := @K45Axiom Atom) (FC := k45FC)
     (fun φ ψ => .implyK φ ψ)
     (fun φ ψ χ => .implyS φ ψ χ)
     (fun φ => .efq φ)
     (fun φ ψ => .peirce φ ψ)
-    h_not
-  obtain ⟨M, hM_sup, hM_mcs⟩ := modal_lindenbaum h_cons
-  let w : CanonicalWorld (@K45Axiom Atom) := ⟨M, hM_mcs⟩
-  have h_neg_phi : (¬phi) ∈ M :=
-    hM_sup (Set.mem_union_right Gamma (Set.mem_singleton_iff.mpr rfl))
-  have h_gamma_sub : ∀ ψ ∈ Gamma, ψ ∈ M :=
-    fun ψ hψ => hM_sup (Set.mem_union_left _ hψ)
-  have h_trans := @canonical_trans Atom (@K45Axiom Atom)
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .modalFour φ)
-  have h_eucl := @canonical_eucl_from_5 Atom (@K45Axiom Atom)
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ ψ => .modalK φ ψ)
-    (fun φ => .modalFive φ)
-  have h_gamma_sat : ∀ γ ∈ Gamma, Satisfies (CanonicalModel (@K45Axiom Atom)) w γ :=
-    fun γ hγ => (k_truth_lemma
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .efq φ)
-      (fun φ ψ => .peirce φ ψ)
-      (fun φ ψ => .modalK φ ψ)
-      w γ).mpr (h_gamma_sub γ hγ)
-  have h_phi_sat := h (CanonicalWorld (@K45Axiom Atom)) (CanonicalModel (@K45Axiom Atom))
-    w h_trans h_eucl h_gamma_sat
-  have h_phi_M := (k_truth_lemma
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    (fun φ ψ => .modalK φ ψ)
-    w phi).mp h_phi_sat
-  exact mcs_bot_not_mem hM_mcs
-    (modal_implication_property
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      hM_mcs h_neg_phi h_phi_M)
+    k45_truth_lemma_applied
+    k45_canonical_FC
+    (fun World m w ⟨hTrans, hEucl⟩ h_sat => h World m w hTrans hEucl h_sat)
 
 /-! ## K45 Biconditional Wrapper -/
 
@@ -147,10 +155,18 @@ theorem k45_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom
         (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃) →
         (∀ γ ∈ {ψ | ψ ∈ L}, Satisfies m w γ) →
         Satisfies m w phi := by
-  obtain ⟨L, hL_sub, hL_deriv⟩ := k45_strong_completeness h
+  obtain ⟨L, hL_sub, hL_sem⟩ :=
+    compactness (Axioms := @K45Axiom Atom) (FC := k45FC)
+      k45_sound_cb
+      (fun φ ψ => .implyK φ ψ)
+      (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ => .efq φ)
+      (fun φ ψ => .peirce φ ψ)
+      k45_truth_lemma_applied
+      k45_canonical_FC
+      (fun World m w ⟨hTrans, hEucl⟩ h_sat => h World m w hTrans hEucl h_sat)
   exact ⟨L, hL_sub, fun World m w h_trans h_eucl h_sat =>
-    k45_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
-      World m w h_trans h_eucl h_sat⟩
+    hL_sem World m w ⟨h_trans, h_eucl⟩ h_sat⟩
 
 /-! ## K45 Weak Completeness (Corollary) -/
 

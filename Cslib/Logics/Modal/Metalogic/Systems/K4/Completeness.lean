@@ -39,6 +39,40 @@ open Cslib.Logic
 universe u
 variable {Atom : Type u}
 
+/-! ## K4 Frame Condition and Canonical Witness -/
+
+/-- The K4 frame condition: every model whose accessibility relation is transitive. -/
+def k4FC : ∀ {World : Type u}, Model World Atom → Prop :=
+  fun m => ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃
+
+/-- The canonical K4 model satisfies `k4FC`: its accessibility relation is transitive. -/
+private theorem k4_canonical_FC : k4FC (CanonicalModel (@K4Axiom Atom)) :=
+  canonical_trans
+    (fun φ ψ => .implyK φ ψ)
+    (fun φ ψ χ => .implyS φ ψ χ)
+    (fun φ => .modalFour φ)
+
+/-- Pre-applied K4 truth lemma: satisfaction at world `S` iff membership in `S.val`. -/
+private theorem k4_truth_lemma_applied (S : CanonicalWorld (@K4Axiom Atom))
+    (φ : Proposition Atom) :
+    Satisfies (CanonicalModel (@K4Axiom Atom)) S φ ↔ φ ∈ S.val :=
+  k_truth_lemma
+    (fun φ ψ => .implyK φ ψ)
+    (fun φ ψ χ => .implyS φ ψ χ)
+    (fun φ => .efq φ)
+    (fun φ ψ => .peirce φ ψ)
+    (fun φ ψ => .modalK φ ψ)
+    S φ
+
+/-- K4 soundness adapter matching the `strong_soundness` callback shape.
+The frame condition for K4 is `k4FC m = ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃`. -/
+private theorem k4_sound_cb {World : Type u} (m : Model World Atom) (w : World)
+    (L : List (Proposition Atom))
+    (hFC : k4FC m)
+    (d : DerivationTree (@K4Axiom Atom) L phi)
+    (h_ctx : ∀ γ ∈ L, Satisfies m w γ) : Satisfies m w phi :=
+  k4_soundness d m hFC w h_ctx
+
 /-! ## K4 Strong Soundness -/
 
 /-- **Strong Soundness for K4**: If `phi` is set-derivable from `Gamma` using `K4Axiom`,
@@ -50,60 +84,31 @@ theorem k4_strong_soundness {Gamma : Set (Proposition Atom)} {phi : Proposition 
     (h : ModalSetDerivable (@K4Axiom Atom) Gamma phi)
     (World : Type u) (m : Model World Atom) (w : World)
     (h_trans : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃)
-    (h_sat : ∀ γ ∈ Gamma, Satisfies m w γ) : Satisfies m w phi := by
-  obtain ⟨L, hL_sub, hL_deriv⟩ := h
-  obtain ⟨d⟩ := hL_deriv
-  exact k4_soundness d m h_trans w (fun ψ hψ => h_sat ψ (hL_sub ψ hψ))
+    (h_sat : ∀ γ ∈ Gamma, Satisfies m w γ) : Satisfies m w phi :=
+  strong_soundness (Axioms := @K4Axiom Atom) (FC := k4FC)
+    k4_sound_cb h World m w h_trans h_sat
 
 /-! ## K4 Strong Completeness -/
 
 /-- **Strong Completeness for K4**: If `phi` is a semantic consequence of `Gamma`
-over all transitive frames, then `phi` is set-derivable from `Gamma` using `K4Axiom`. -/
+over all transitive frames, then `phi` is set-derivable from `Gamma` using `K4Axiom`.
+
+Delegates to the parametric `strong_completeness` with `k_truth_lemma_applied`
+and `k4_canonical_FC`. -/
 theorem k4_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
     (h : ∀ (World : Type u) (m : Model World Atom) (w : World),
         (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃) →
         (∀ γ ∈ Gamma, Satisfies m w γ) →
         Satisfies m w phi) :
-    ModalSetDerivable (@K4Axiom Atom) Gamma phi := by
-  by_contra h_not
-  have h_cons := modal_not_SetDerivable_union_neg_consistent
+    ModalSetDerivable (@K4Axiom Atom) Gamma phi :=
+  strong_completeness (Axioms := @K4Axiom Atom) (FC := k4FC)
     (fun φ ψ => .implyK φ ψ)
     (fun φ ψ χ => .implyS φ ψ χ)
     (fun φ => .efq φ)
     (fun φ ψ => .peirce φ ψ)
-    h_not
-  obtain ⟨M, hM_sup, hM_mcs⟩ := modal_lindenbaum h_cons
-  let w : CanonicalWorld (@K4Axiom Atom) := ⟨M, hM_mcs⟩
-  have h_neg_phi : (¬phi) ∈ M :=
-    hM_sup (Set.mem_union_right Gamma (Set.mem_singleton_iff.mpr rfl))
-  have h_gamma_sub : ∀ ψ ∈ Gamma, ψ ∈ M :=
-    fun ψ hψ => hM_sup (Set.mem_union_left _ hψ)
-  have h_trans := @canonical_trans Atom (@K4Axiom Atom)
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .modalFour φ)
-  have h_gamma_sat : ∀ γ ∈ Gamma, Satisfies (CanonicalModel (@K4Axiom Atom)) w γ :=
-    fun γ hγ => (k_truth_lemma
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .efq φ)
-      (fun φ ψ => .peirce φ ψ)
-      (fun φ ψ => .modalK φ ψ)
-      w γ).mpr (h_gamma_sub γ hγ)
-  have h_phi_sat := h (CanonicalWorld (@K4Axiom Atom)) (CanonicalModel (@K4Axiom Atom))
-    w h_trans h_gamma_sat
-  have h_phi_M := (k_truth_lemma
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    (fun φ ψ => .modalK φ ψ)
-    w phi).mp h_phi_sat
-  exact mcs_bot_not_mem hM_mcs
-    (modal_implication_property
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      hM_mcs h_neg_phi h_phi_M)
+    k4_truth_lemma_applied
+    k4_canonical_FC
+    (fun World m w hFC h_sat => h World m w hFC h_sat)
 
 /-! ## K4 Biconditional Wrapper -/
 
@@ -135,10 +140,17 @@ theorem k4_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
         (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃) →
         (∀ γ ∈ {ψ | ψ ∈ L}, Satisfies m w γ) →
         Satisfies m w phi := by
-  obtain ⟨L, hL_sub, hL_deriv⟩ := k4_strong_completeness h
-  exact ⟨L, hL_sub, fun World m w h_trans h_sat =>
-    k4_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
-      World m w h_trans h_sat⟩
+  obtain ⟨L, hL_sub, hL_sem⟩ :=
+    compactness (Axioms := @K4Axiom Atom) (FC := k4FC)
+      k4_sound_cb
+      (fun φ ψ => .implyK φ ψ)
+      (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ => .efq φ)
+      (fun φ ψ => .peirce φ ψ)
+      k4_truth_lemma_applied
+      k4_canonical_FC
+      (fun World m w hFC h_sat => h World m w hFC h_sat)
+  exact ⟨L, hL_sub, fun World m w h_trans h_sat => hL_sem World m w h_trans h_sat⟩
 
 /-! ## K4 Weak Completeness (Corollary) -/
 

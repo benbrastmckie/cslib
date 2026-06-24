@@ -199,7 +199,7 @@ signatures.
 
 ---
 
-### Phase 4: Refactor K-family (B, K4, K5, K45, KB5) [NOT STARTED]
+### Phase 4: Refactor K-family (B, K4, K5, K45, KB5) [COMPLETED]
 
 **Goal**: Instantiate the parametric cascade for the five K-family systems using
 `k_truth_lemma` (imported from `Systems/K`).

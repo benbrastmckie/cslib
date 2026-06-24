@@ -259,8 +259,11 @@ theorem k_truth_lemma
       exact (k_truth_lemma h_implyK h_implyS h_efq h_peirce h_K T φ).mpr
         (hST φ h_box)
 
-/-- Pre-applied K truth lemma: satisfaction at world `S` iff membership in `S.val`. -/
-private theorem k_truth_lemma_applied (S : CanonicalWorld (@KAxiom Atom))
+/-- Pre-applied K truth lemma: satisfaction at world `S` iff membership in `S.val`.
+
+Used by K-family systems (B, K4, K5, K45, KB5) to delegate completeness proofs to
+the parametric `strong_completeness` via this shared pre-applied truth lemma. -/
+theorem k_truth_lemma_applied (S : CanonicalWorld (@KAxiom Atom))
     (φ : Proposition Atom) :
     Satisfies (CanonicalModel (@KAxiom Atom)) S φ ↔ φ ∈ S.val :=
   k_truth_lemma

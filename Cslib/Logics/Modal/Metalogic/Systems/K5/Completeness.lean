@@ -38,6 +38,42 @@ open Cslib.Logic
 universe u
 variable {Atom : Type u}
 
+/-! ## K5 Frame Condition and Canonical Witness -/
+
+/-- The K5 frame condition: every model whose accessibility relation is Euclidean. -/
+def k5FC : ∀ {World : Type u}, Model World Atom → Prop :=
+  fun m => ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃
+
+/-- The canonical K5 model satisfies `k5FC`: its accessibility relation is Euclidean
+(from axiom 5). -/
+private theorem k5_canonical_FC : k5FC (CanonicalModel (@K5Axiom Atom)) :=
+  canonical_eucl_from_5
+    (fun φ ψ => .implyK φ ψ)
+    (fun φ ψ χ => .implyS φ ψ χ)
+    (fun φ ψ => .modalK φ ψ)
+    (fun φ => .modalFive φ)
+
+/-- Pre-applied K5 truth lemma: satisfaction at world `S` iff membership in `S.val`. -/
+private theorem k5_truth_lemma_applied (S : CanonicalWorld (@K5Axiom Atom))
+    (φ : Proposition Atom) :
+    Satisfies (CanonicalModel (@K5Axiom Atom)) S φ ↔ φ ∈ S.val :=
+  k_truth_lemma
+    (fun φ ψ => .implyK φ ψ)
+    (fun φ ψ χ => .implyS φ ψ χ)
+    (fun φ => .efq φ)
+    (fun φ ψ => .peirce φ ψ)
+    (fun φ ψ => .modalK φ ψ)
+    S φ
+
+/-- K5 soundness adapter matching the `strong_soundness` callback shape.
+The frame condition for K5 is `k5FC m = ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃`. -/
+private theorem k5_sound_cb {World : Type u} (m : Model World Atom) (w : World)
+    (L : List (Proposition Atom))
+    (hFC : k5FC m)
+    (d : DerivationTree (@K5Axiom Atom) L phi)
+    (h_ctx : ∀ γ ∈ L, Satisfies m w γ) : Satisfies m w phi :=
+  k5_soundness d m hFC w h_ctx
+
 /-! ## K5 Strong Soundness -/
 
 /-- **Strong Soundness for K5**: If `phi` is set-derivable from `Gamma` using `K5Axiom`,
@@ -49,61 +85,31 @@ theorem k5_strong_soundness {Gamma : Set (Proposition Atom)} {phi : Proposition 
     (h : ModalSetDerivable (@K5Axiom Atom) Gamma phi)
     (World : Type u) (m : Model World Atom) (w : World)
     (h_eucl : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃)
-    (h_sat : ∀ γ ∈ Gamma, Satisfies m w γ) : Satisfies m w phi := by
-  obtain ⟨L, hL_sub, hL_deriv⟩ := h
-  obtain ⟨d⟩ := hL_deriv
-  exact k5_soundness d m h_eucl w (fun ψ hψ => h_sat ψ (hL_sub ψ hψ))
+    (h_sat : ∀ γ ∈ Gamma, Satisfies m w γ) : Satisfies m w phi :=
+  strong_soundness (Axioms := @K5Axiom Atom) (FC := k5FC)
+    k5_sound_cb h World m w h_eucl h_sat
 
 /-! ## K5 Strong Completeness -/
 
 /-- **Strong Completeness for K5**: If `phi` is a semantic consequence of `Gamma`
-over all Euclidean frames, then `phi` is set-derivable from `Gamma` using `K5Axiom`. -/
+over all Euclidean frames, then `phi` is set-derivable from `Gamma` using `K5Axiom`.
+
+Delegates to the parametric `strong_completeness` with `k_truth_lemma_applied`
+and `k5_canonical_FC`. -/
 theorem k5_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
     (h : ∀ (World : Type u) (m : Model World Atom) (w : World),
         (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃) →
         (∀ γ ∈ Gamma, Satisfies m w γ) →
         Satisfies m w phi) :
-    ModalSetDerivable (@K5Axiom Atom) Gamma phi := by
-  by_contra h_not
-  have h_cons := modal_not_SetDerivable_union_neg_consistent
+    ModalSetDerivable (@K5Axiom Atom) Gamma phi :=
+  strong_completeness (Axioms := @K5Axiom Atom) (FC := k5FC)
     (fun φ ψ => .implyK φ ψ)
     (fun φ ψ χ => .implyS φ ψ χ)
     (fun φ => .efq φ)
     (fun φ ψ => .peirce φ ψ)
-    h_not
-  obtain ⟨M, hM_sup, hM_mcs⟩ := modal_lindenbaum h_cons
-  let w : CanonicalWorld (@K5Axiom Atom) := ⟨M, hM_mcs⟩
-  have h_neg_phi : (¬phi) ∈ M :=
-    hM_sup (Set.mem_union_right Gamma (Set.mem_singleton_iff.mpr rfl))
-  have h_gamma_sub : ∀ ψ ∈ Gamma, ψ ∈ M :=
-    fun ψ hψ => hM_sup (Set.mem_union_left _ hψ)
-  have h_eucl := @canonical_eucl_from_5 Atom (@K5Axiom Atom)
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ ψ => .modalK φ ψ)
-    (fun φ => .modalFive φ)
-  have h_gamma_sat : ∀ γ ∈ Gamma, Satisfies (CanonicalModel (@K5Axiom Atom)) w γ :=
-    fun γ hγ => (k_truth_lemma
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .efq φ)
-      (fun φ ψ => .peirce φ ψ)
-      (fun φ ψ => .modalK φ ψ)
-      w γ).mpr (h_gamma_sub γ hγ)
-  have h_phi_sat := h (CanonicalWorld (@K5Axiom Atom)) (CanonicalModel (@K5Axiom Atom))
-    w h_eucl h_gamma_sat
-  have h_phi_M := (k_truth_lemma
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    (fun φ ψ => .modalK φ ψ)
-    w phi).mp h_phi_sat
-  exact mcs_bot_not_mem hM_mcs
-    (modal_implication_property
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      hM_mcs h_neg_phi h_phi_M)
+    k5_truth_lemma_applied
+    k5_canonical_FC
+    (fun World m w hFC h_sat => h World m w hFC h_sat)
 
 /-! ## K5 Biconditional Wrapper -/
 
@@ -135,10 +141,17 @@ theorem k5_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
         (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃) →
         (∀ γ ∈ {ψ | ψ ∈ L}, Satisfies m w γ) →
         Satisfies m w phi := by
-  obtain ⟨L, hL_sub, hL_deriv⟩ := k5_strong_completeness h
-  exact ⟨L, hL_sub, fun World m w h_eucl h_sat =>
-    k5_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
-      World m w h_eucl h_sat⟩
+  obtain ⟨L, hL_sub, hL_sem⟩ :=
+    compactness (Axioms := @K5Axiom Atom) (FC := k5FC)
+      k5_sound_cb
+      (fun φ ψ => .implyK φ ψ)
+      (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ => .efq φ)
+      (fun φ ψ => .peirce φ ψ)
+      k5_truth_lemma_applied
+      k5_canonical_FC
+      (fun World m w hFC h_sat => h World m w hFC h_sat)
+  exact ⟨L, hL_sub, fun World m w h_eucl h_sat => hL_sem World m w h_eucl h_sat⟩
 
 /-! ## K5 Weak Completeness (Corollary) -/
 

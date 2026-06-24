@@ -13,7 +13,9 @@
     },
     "key_finding": "The main lemma needs MonotoneEdges as a hypothesis. The proof must thread MonotoneEdges alongside intBranchSatisfied through the induction. The initial worldOf (fun _ => w0) satisfies MonotoneEdges trivially for empty edge sets.",
     "plan_path": "specs/316_propositional_tableau_soundness/plans/05_soundness-plan.md",
-    "approach": "Contrapositive + Nat.strongRecOn, factor inner go loop, set_option maxHeartbeats 3200000"
+    "approach": "Contrapositive + Nat.strongRecOn, factor inner go loop, set_option maxHeartbeats 3200000",
+    "verified_state": "git-clean: 4 live sorries in Intuitionistic/Soundness.lean lines 547,548,573,607; Classical/Soundness.lean and Minimal/DecisionProcedure.lean are sorry-free in committed state",
+    "last_session_note": "impl-316 dispatch on 2026-06-24 was a no-op (idle, no edits). Resume crux unchanged: thread MonotoneEdges through intExpandBranches_closed_unsat induction."
   },
   "artifacts": [
     {

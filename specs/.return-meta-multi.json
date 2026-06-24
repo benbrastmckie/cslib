@@ -3,12 +3,13 @@
   "metadata": {
     "tasks_completed": [],
     "tasks_failed": [],
-    "tasks_researched": [335, 338, 339, 340],
-    "tasks_pending": [336, 337],
+    "tasks_remaining": [
+      316,
+      317
+    ],
     "cycles_used": 1,
     "multi_task_mode": true,
-    "paused": true,
-    "paused_reason": "User requested pause after research phase",
-    "resume_command": "/orchestrate 335-340"
+    "exit_reason": "Dispatched impl-316 returned idle with no work; paused at user request for clean session close.",
+    "resume_command": "/orchestrate 316-317"
   }
 }

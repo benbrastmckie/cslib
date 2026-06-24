@@ -1,0 +1,16 @@
+{
+  "status": "implemented",
+  "summary": "Deleted minBranchSatisfied, replaced minExtractValuation with intExtractValuation, removed MinimalClosure/IsAtomic/instIsAtomicProposition/atomContradiction dead code chain",
+  "blockers": [],
+  "continuation_context": null,
+  "artifacts": [
+    {
+      "path": "specs/325_tableau_dedup_dead_code_cleanup/summaries/01_tableau-dedup-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary: all 6 items removed across 5 files, build passes, zero code references to deleted items"
+    }
+  ],
+  "next_action_hint": "complete",
+  "phases_completed": 2,
+  "phases_total": 2
+}

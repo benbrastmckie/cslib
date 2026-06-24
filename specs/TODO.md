@@ -1,5 +1,5 @@
 ---
-next_project_number: 330
+next_project_number: 332
 ---
 
 # TODO
@@ -11,9 +11,9 @@ next_project_number: 330
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,321,323,325,328 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215,300,316,326,329 | 36,37,180,299,323,325,328 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
-| 3 | 41,275,317 | 39,40,316 | Foundations, Propositional Logic |
+| 1 | 36,37,180,226,241,245,278,290,299,301,316,321,326,328,330,331 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 2 | 39,40,181,215,300,317,329 | 36,37,180,299,316,328 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 3 | 41,275 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -33,14 +33,13 @@ next_project_number: 330
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-290 [PLANNED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
-323 [IMPLEMENTED] — Fix two intuitionistic tableau implementation bugs: (1) isIntuiti
-  └─ 316 [BLOCKED] — Fill the 6 sorry instances in propositional tableau soundness pro
-    └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
-325 [PLANNED] — Deduplicate identical definitions across minimal/intuitionistic t
-  └─ 326 [NOT STARTED] — Fix ~35 linter warnings across the propositional tableau soundnes
+290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
+316 [IMPLEMENTING] — Fill the 6 sorry instances in propositional tableau soundness pro
+  └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
+326 [NOT STARTED] — Fix ~35 linter warnings across the propositional tableau soundnes
 328 [IMPLEMENTING] — Refactor CutElimination.lean to reduce or eliminate the maxHeartb
   └─ 329 [NOT STARTED] — Prove the subformula property as a corollary of cut elimination: 
+330 [NOT STARTED] — Fill the sorry in LJ cutAdmissibility (Cslib/Logics/Propositional
 
 ### Temporal Logic
 
@@ -56,6 +55,10 @@ next_project_number: 330
 
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
 
+### Code Quality
+
+331 [NOT STARTED] — Polish code from recently completed tasks (310, 312, 322). Three 
+
 ### Modal
 
 299 [NOT STARTED] — Implement tableau decision procedure for basic modal logic K with
@@ -64,6 +67,26 @@ next_project_number: 330
 ### Uncategorized
 
 ## Tasks
+
+### 331. Completed tasks code polish
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Code Quality
+- **Dependencies**: None
+
+**Description**: Polish code from recently completed tasks (310, 312, 322). Three items: (1) Add cross-reference docstrings between ConservativeExtensionChain.lean and MplConservativeChain.lean — the IPL-routed proofs (hilbertMplConservativeOverConjImp, hilbertMplConservativeOverImp) and their direct-algebraic counterparts (_direct variants in MplConservativeChain) prove the same statements via different paths but neither file mentions the other. Add See also references in both directions. (2) Evaluate the thin alias hilbertConjImpConservativeOverImp_direct in ConservativeExtensionChain.lean — it is literally hilbertConjImpConservativeOverImp hITO h with no independent content; add a docstring noting it exists for API symmetry, or inline it. (3) Remove the unused _hφ parameter from hilbertEmbeddingLemma in DiegoEmbedding.lean, or if it is needed for API stability, document why it is retained.
+
+---
+
+### 330. Lj cut admissibility sorry
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Fill the sorry in LJ cutAdmissibility (Cslib/Logics/Propositional/SequentCalculus/LJ/CutElimination.lean:103). This is the only sorry in the LJ sequent calculus module (task 315) and it voids the cutElim theorem that depends on it. The proof requires showing that cuts on any formula can be eliminated from cut-free LJ proofs — the standard approach is double induction on cut-formula complexity and proof height, mirroring the LK cut elimination strategy in LK/CutElimination.lean but restricted to the intuitionistic single-succedent constraint. Once filled, LJProof.cutElim becomes fully proven and the LJ subformula property becomes available.
+
+---
 
 ### 329. Cutelim subformula property
 - **Status**: [NOT STARTED]
@@ -108,7 +131,7 @@ next_project_number: 330
 ---
 
 ### 325. Tableau dedup dead code cleanup
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 324
@@ -131,7 +154,7 @@ next_project_number: 330
 ---
 
 ### 323. Fix intuitionistic tableau bugs
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -200,7 +223,7 @@ next_project_number: 330
 ---
 
 ### 316. Propositional tableau soundness
-- **Status**: [BLOCKED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 323
@@ -356,7 +379,7 @@ Literature sources:
 ---
 
 ### 290. Nd normalization subformula property
-- **Status**: [PLANNED]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

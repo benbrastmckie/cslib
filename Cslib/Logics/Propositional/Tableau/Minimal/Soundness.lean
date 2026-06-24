@@ -16,8 +16,6 @@ closes on `φ` (starting from `F(φ)` at world 0), then `φ` is minimally valid.
 
 ## Main Results
 
-- `minBranchSatisfied`: A Kripke model satisfies a labeled branch when the forcing
-  relation agrees with every signed formula on the branch.
 - `minClosed_unsatisfiable`: A minimally closed branch is unsatisfiable in any Kripke model.
 - `minimalTableau_sound`: If `minimalTableau φ = closed`, then `MValid φ`.
 
@@ -35,9 +33,10 @@ Soundness proceeds by contrapositive, reusing the intuitionistic infrastructure:
 
 ## Design
 
-`minBranchSatisfied` is definitionally equal to `intBranchSatisfied` -- both are
+Branch satisfiability for minimal logic reuses `intBranchSatisfied` from
+`Intuitionistic.Soundness` directly -- both use
 `∀ sf ∈ b, (sf.sign = .pos → IForces ... sf.formula) ∧ (sf.sign = .neg → ¬ IForces ...)`.
-The difference is only in how `botForces` is instantiated at use sites.
+The difference lies only in how `botForces` is instantiated at use sites.
 
 ## Notes on sorry
 
@@ -56,26 +55,6 @@ namespace Cslib.Logic.PL
 open Cslib.Logic.Tableau
 
 variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
-
-/-! ## Minimal Branch Satisfiability -/
-
-/-- A Kripke model satisfies a labeled branch when the forcing relation is consistent
-with every signed formula on the branch.
-
-For each signed formula `⟨sign, φ, w⟩` on the branch:
-- If `sign = T`, then `IForces val botForces w φ` holds.
-- If `sign = F`, then `¬ IForces val botForces w φ` holds.
-
-This definition is identical to `intBranchSatisfied`: the difference between minimal and
-intuitionistic satisfiability lies only in the choice of `botForces` at use sites. -/
-def minBranchSatisfied {World : Type*} [Preorder World]
-    (val : World → Atom → Prop)
-    (botForces : World → Prop)
-    (worldOf : Nat → World)
-    (b : IBranch Atom) : Prop :=
-  ∀ sf ∈ b,
-    (sf.sign = .pos → IForces val botForces (worldOf sf.label) sf.formula) ∧
-    (sf.sign = .neg → ¬ IForces val botForces (worldOf sf.label) sf.formula)
 
 /-! ## Closure Unsatisfiability -/
 

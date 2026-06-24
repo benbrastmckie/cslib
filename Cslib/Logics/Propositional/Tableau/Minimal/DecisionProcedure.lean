@@ -29,7 +29,7 @@ tableau and connects it to derivability via `min_soundness_completeness`.
 
 The minimal tableau reuses the intuitionistic expansion (`intExpandBranches`) but
 substitutes `isMinimallyClosed` (all complementary T(φ)/F(φ) pairs) instead of the
-atom-only `MinimalClosure` instance. This ensures that branches with T(⊥)/F(⊥) also close.
+intuitionistic T(⊥)-only closure. This ensures that branches with T(⊥)/F(⊥) also close.
 
 The key difference between intuitionistic and minimal:
 - **Intuitionistic**: `botForces = fun _ => False` (⊥ never holds).

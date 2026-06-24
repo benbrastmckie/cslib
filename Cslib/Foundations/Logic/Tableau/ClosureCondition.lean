@@ -15,13 +15,12 @@ public import Cslib.Foundations.Logic.Tableau.Closure
 This module defines the `ClosureCondition F L` typeclass, which abstracts the closure
 criterion for a tableau calculus over formula type `F` with label type `L`.
 
-Three instances are provided, corresponding to classical, intuitionistic, and minimal logic:
+Two instances are provided, corresponding to classical and intuitionistic/minimal logic:
 
 | Instance | Logic | Closes when |
 |----------|-------|-------------|
 | `ClassicalClosure` | Classical | T(bot) at any label, OR T(phi)/F(phi) at the same label |
-| `IntuitionisticClosure` | Intuitionistic | T(bot) at any label only |
-| `MinimalClosure` | Minimal | T(p)/F(p) for atomic p at the same label |
+| `IntuitionisticClosure` | Intuitionistic/Minimal | T(bot) at any label only |
 
 ## Design
 
@@ -29,8 +28,9 @@ The key method `findClosure` returns `Option (ClosureReason F L)` rather than `B
 callers can extract the reason for closure (needed for proof extraction and countermodel
 construction).
 
-For the minimal closure instance, atomicity is a property of the formula type. The `IsAtomic`
-class provides the `isAtom` predicate required by minimal closure.
+The minimal tableau uses the same closure criterion as the intuitionistic tableau
+(`isMinimallyClosed = Branch.hasContradiction`), computed directly without going through
+this typeclass.
 
 ## References
 
@@ -67,16 +67,6 @@ def isOpen [ClosureCondition F L] (b : Branch F L) : Bool :=
 
 end ClosureCondition
 
-/-! ## Atomicity Typeclass -/
-
-/-- Typeclass providing an atomicity predicate for formula type `F`.
-
-Instances of this class identify which formulas count as atomic for the purpose of
-minimal closure: a branch closes when it contains T(p) and F(p) for an atomic `p`. -/
-class IsAtomic (F : Type*) where
-  /-- `true` when the formula is atomic (i.e., has no proper subformulas). -/
-  isAtom : F → Bool
-
 /-! ## Classical Closure -/
 
 namespace ClassicalClosure
@@ -112,27 +102,6 @@ instance [BEq F] [HasBot F] : ClosureCondition F L where
     | none => none
 
 end IntuitionisticClosure
-
-/-! ## Minimal Closure -/
-
-namespace MinimalClosure
-
-/-- The minimal closure condition for tableau calculi.
-
-A branch is minimally closed when it contains T(p) and F(p) at the same label for
-an atomic formula p. The `IsAtomic F` typeclass provides the atomicity predicate. -/
-instance [BEq F] [BEq L] [IsAtomic F] : ClosureCondition F L where
-  findClosure b :=
-    b.findSome? fun sf =>
-      if sf.isPos && IsAtomic.isAtom sf.formula then
-        if b.any fun sf' =>
-          sf'.sign == .neg && sf'.formula == sf.formula && sf'.label == sf.label
-        then some (.atomContradiction sf.formula sf.label)
-        else none
-      else
-        none
-
-end MinimalClosure
 
 end Cslib.Logic.Tableau
 

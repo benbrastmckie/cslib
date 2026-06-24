@@ -8,6 +8,7 @@ module
 
 import Cslib.Init
 public import Cslib.Logics.Propositional.Tableau.Minimal.Soundness
+public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Completeness
 
 /-! # Minimal Tableau Completeness
 
@@ -16,10 +17,12 @@ valid, then the tableau closes on `φ`.
 
 ## Main Results
 
-- `minExtractValuation`: Valuation extracted from an open saturated branch.
 - `minBranchBotForces`: The `botForces` predicate for the minimal countermodel.
 - `minTruthLemma`: The extracted model satisfies/falsifies each signed formula on the branch.
 - `minimalTableau_complete`: If `MValid φ`, then `minimalTableau φ = closed`.
+
+The valuation extracted from an open saturated branch reuses `intExtractValuation` from
+`Intuitionistic.Completeness` -- both use `v(w, p) = T(atom p) ∈ b at label w`.
 
 ## Countermodel Construction
 
@@ -64,13 +67,6 @@ open Cslib.Logic.Tableau
 variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 
 /-! ## Countermodel Extraction -/
-
-/-- The valuation extracted from an open saturated branch.
-
-Atom `p` is assigned true at world `w` iff T(atom p) appears at label `w` on the branch.
-This is identical to `intExtractValuation` -- the difference lies in `minBranchBotForces`. -/
-def minExtractValuation (b : IBranch Atom) (w : Nat) (p : Atom) : Prop :=
-  b.any (fun sf => sf.sign == .pos && sf.formula == .atom p && sf.label == w)
 
 /-- The `botForces` predicate for the minimal countermodel.
 
@@ -148,11 +144,11 @@ lemma minOpen_no_contradiction (b : IBranch Atom)
 /-- The truth lemma for the minimal tableau.
 
 If `b` is an open saturated branch (after persistence fixpoint), then for every signed
-formula on `b`, the extracted model (`minExtractValuation b`, `minBranchBotForces b`) satisfies
+formula on `b`, the extracted model (`intExtractValuation b`, `minBranchBotForces b`) satisfies
 positive formulas and falsifies negative formulas.
 
 The proof is by induction on `φ`:
-- **atom p**: T(p) at w iff `minExtractValuation b w p` by definition.
+- **atom p**: T(p) at w iff `intExtractValuation b w p` by definition.
 - **bot**: T(⊥) at w iff `minBranchBotForces b w` by definition. F(⊥) at w implies
   `¬ minBranchBotForces b w` because T(⊥) and F(⊥) cannot coexist at the same label
   on an open branch (by `minOpen_no_contradiction`).
@@ -166,20 +162,20 @@ lemma minTruthLemma (b : IBranch Atom)
     (hsat : ∀ sf ∈ b, intStepBranch b [] 0 = none) -- simplified saturation
     (φ : Proposition Atom) (w : Nat) :
     (b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w) →
-      IForces (minExtractValuation b) (minBranchBotForces b) w φ) ∧
+      IForces (intExtractValuation b) (minBranchBotForces b) w φ) ∧
     (b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) →
-      ¬ IForces (minExtractValuation b) (minBranchBotForces b) w φ) := by
+      ¬ IForces (intExtractValuation b) (minBranchBotForces b) w φ) := by
   sorry
 
 /-! ## Completeness Theorems -/
 
 /-- An open saturated branch from the minimal tableau yields a Kripke countermodel.
 
-If `minimalTableau φ = openBranch b`, then `minExtractValuation b` and `minBranchBotForces b`
+If `minimalTableau φ = openBranch b`, then `intExtractValuation b` and `minBranchBotForces b`
 define a minimal Kripke model that falsifies `φ` at world 0. -/
 lemma minOpenBranch_countermodel (φ : Proposition Atom)
     (h : minimalTableau φ = .openBranch b) :
-    ¬ IForces (minExtractValuation b) (minBranchBotForces b) 0 φ := by
+    ¬ IForces (intExtractValuation b) (minBranchBotForces b) 0 φ := by
   sorry
 
 /-- **Minimal Tableau Completeness**: If `φ` is minimally valid, then the minimal

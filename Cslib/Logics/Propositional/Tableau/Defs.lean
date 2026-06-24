@@ -21,8 +21,6 @@ systems: classical, intuitionistic, and minimal.
 - `propAndOf?`, `propOrOf?`, `propImpOf?`, `propNegOf?`: Decomposition functions
   for `Proposition Atom` connectives, needed by `applyPropRule`.
 - `instHashableProposition`: `Hashable (Proposition Atom)` instance via hash mixing.
-- `instIsAtomicProposition`: `IsAtomic (Proposition Atom)` instance, recognizing
-  only `Proposition.atom _` as atomic.
 - `Proposition.complexity`: Size measure for fuel computation in the expansion loop.
   Bounds the number of expansion steps needed.
 
@@ -102,19 +100,6 @@ def propHash [Hashable Atom] : Proposition Atom → UInt64
 when the formula type is `Proposition Atom`. -/
 instance instHashableProposition [Hashable Atom] : Hashable (Proposition Atom) where
   hash := propHash
-
-/-! ## IsAtomic Instance -/
-
-/-- `IsAtomic` instance for `Proposition Atom`: only `atom _` constructors are atomic.
-
-This is used by the `MinimalClosure` instance to identify atomic formulas, which are
-the only formulas that can close a minimally tableau branch (T(p) and F(p) at the same
-world, for atomic p). -/
-instance instIsAtomicProposition : IsAtomic (Proposition Atom) where
-  isAtom φ :=
-    match φ with
-    | .atom _ => true
-    | _ => false
 
 /-! ## Complexity Measure -/
 

@@ -11,15 +11,14 @@ import Cslib.Init
 /-! # Closure Reason Type
 
 This module defines `ClosureReason F L`, which explains why a tableau branch is closed.
-The three constructors correspond to three different closure criteria used in classical,
-intuitionistic, and minimal logics.
+The two constructors correspond to the two closure criteria used in classical and
+intuitionistic logics.
 
 ## Main Definitions
 
-- `ClosureReason F L`: Inductive type with three closure modes.
+- `ClosureReason F L`: Inductive type with two closure modes.
   - `botPos l`: Branch contains T(bot) at label `l` (classical and intuitionistic).
   - `contradiction phi l`: Branch contains both T(phi) and F(phi) at label `l` (classical).
-  - `atomContradiction p l`: Branch contains T(p) and F(p) for atom `p` at `l` (minimal).
 
 ## Closure Modes
 
@@ -27,7 +26,7 @@ intuitionistic, and minimal logics.
 |-------|-----------|
 | Classical | T(bot) OR T(phi)/F(phi) for any phi |
 | Intuitionistic | T(bot) only |
-| Minimal | T(p)/F(p) for atomic p only |
+| Minimal | T(phi)/F(phi) at the same label (via `Branch.hasContradiction`, not this type) |
 
 ## References
 
@@ -43,21 +42,20 @@ namespace Cslib.Logic.Tableau
 
 /-- An explanation of why a tableau branch is closed.
 
-Three closure modes are supported, corresponding to different logic strengths:
+Two closure modes are supported, corresponding to different logic strengths:
 
 - `botPos l`: The branch contains the positively signed falsum T(bot) at label `l`.
   Valid in classical and intuitionistic logic.
 - `contradiction phi l`: The branch contains both T(phi) and F(phi) at label `l`.
   Valid in classical logic only.
-- `atomContradiction p l`: The branch contains T(p) and F(p) for an atomic formula `p`
-  at label `l`. Valid in minimal logic (the weakest supported closure criterion). -/
+
+The minimal closure criterion (T(phi)/F(phi) at the same label) is computed directly
+via `Branch.hasContradiction` rather than through this type. -/
 inductive ClosureReason (F : Type*) (L : Type*) where
   /-- Branch contains T(bot) at label `l`. -/
   | botPos (l : L) : ClosureReason F L
   /-- Branch contains both T(phi) and F(phi) at the same label `l`. -/
   | contradiction (phi : F) (l : L) : ClosureReason F L
-  /-- Branch contains T(p) and F(p) for an atomic formula `p` at label `l`. -/
-  | atomContradiction (p : F) (l : L) : ClosureReason F L
 
 end Cslib.Logic.Tableau
 

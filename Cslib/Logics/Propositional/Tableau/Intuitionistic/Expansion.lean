@@ -83,9 +83,9 @@ ANY formula φ. This uses `Branch.hasContradiction`, which checks all complement
 (not just atomic formulas). This is equivalent to classical closure minus the T(⊥) rule:
 minimal logic does not close on T(⊥) alone, but it does close on any T(φ)/F(φ) pair.
 
-NOTE: The weaker `MinimalClosure` instance (atom-only) was previously used, but this
-is insufficient for correctness -- for example, `⊥ → ⊥` is minimally valid but the
-atom-only closure fails to close the branch containing T(⊥)/F(⊥) at the created world. -/
+NOTE: An atom-only closure criterion was previously used, but this is insufficient for
+correctness -- for example, `⊥ → ⊥` is minimally valid but the atom-only criterion fails
+to close the branch containing T(⊥)/F(⊥) at the created world. -/
 def isMinimallyClosed (b : IBranch Atom) : Bool :=
   Branch.hasContradiction b
 
@@ -235,8 +235,9 @@ def intuitionisticTableau (φ : Proposition Atom) : IntTableauResult Atom :=
 
 /-- The minimal propositional tableau decision procedure.
 
-Identical to the intuitionistic tableau but uses `MinimalClosure` instead:
-a branch closes only when T(p) and F(p) coexist at the same world for atomic p.
+Identical to the intuitionistic tableau but uses `isMinimallyClosed` instead of
+`isIntuitionisticallyClosed`: a branch closes when T(φ) and F(φ) coexist at the same
+world for any formula φ (not only T(⊥)).
 
 - Returns `closed` iff `φ` is minimally valid (MValid).
 - Returns `openBranch b` iff `φ` is not minimally valid. -/

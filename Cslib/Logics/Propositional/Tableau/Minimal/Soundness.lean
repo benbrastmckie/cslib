@@ -148,7 +148,7 @@ theorem minimalTableau_sound (φ : Proposition Atom)
   exact intExpandBranches_closed_unsat val botForces v_uc bf_uc _
     isMinimallyClosed
     (fun worldOf' b hcl => minClosed_unsatisfiable val botForces worldOf' b hcl)
-    _ _ _ (by rfl) (by rfl) h
+    _ _ _ _ (by rfl) (by rfl) h
     [⟨.neg, φ, 0⟩] (by simp) worldOf hsat
 
 end Cslib.Logic.PL

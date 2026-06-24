@@ -13,7 +13,8 @@ public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Rules
 
 This module implements the expansion loop for the intuitionistic propositional tableau.
 The intuitionistic tableau uses `L = Nat` (Kripke world indices) and the
-`IntuitionisticClosure` instance (closes only on T(⊥) at any label).
+`IntuitionisticClosure` instance (closes on T(⊥) at any label, or on complementary
+T(φ)/F(φ) pairs at the same label).
 
 ## Main Definitions
 
@@ -26,8 +27,10 @@ The intuitionistic tableau uses `L = Nat` (Kripke world indices) and the
 The expansion loop processes one branch at a time. Within each branch:
 1. First apply the persistent T(φ → ψ) rule for all T-implication formulas on the branch.
 2. Then pick the first unexpanded formula and apply the appropriate rule.
-3. For world-creating rules, add the new world's formulas and update the world counter.
-4. For branching rules, split the current branch into sub-branches.
+3. For world-creating rules, add the new world's formulas, update the world counter,
+   and extend the edge list with the new parent-child edge.
+4. For branching rules, split the current branch into sub-branches (each inheriting
+   the current edge list).
 
 The fuel bound uses `2^(2 * complexity φ)` to account for the exponential blowup
 possible in intuitionistic tableaux (due to world creation and persistence propagation).
@@ -62,10 +65,16 @@ inductive IntTableauResult (Atom : Type*) : Type _ where
 
 /-- Check whether an intuitionistic branch is closed.
 
-Uses the `IntuitionisticClosure` instance, which closes only when T(⊥) appears
-at any label. Unlike classical closure, complementary pairs do NOT close a branch. -/
+A branch is intuitionistically closed when either:
+1. T(⊥) appears at any label (via the `IntuitionisticClosure` instance), or
+2. T(φ) and F(φ) appear at the same label for some formula φ (complementary pair).
+
+Note: complementary pairs DO close an intuitionistic branch. Although the intuitionistic
+semantics does not close on complementary pairs for non-atomic formulas at the semantic
+level, the tableau calculus uses both closure conditions for completeness. -/
 def isIntuitionisticallyClosed (b : IBranch Atom) : Bool :=
-  @ClosureCondition.isClosed _ _ IntuitionisticClosure.instClosureConditionOfBEqOfHasBot b
+  @ClosureCondition.isClosed _ _ IntuitionisticClosure.instClosureConditionOfBEqOfHasBot b ||
+  Branch.hasContradiction b
 
 /-- Check whether a minimal branch is closed.
 
@@ -85,16 +94,17 @@ def isMinimallyClosed (b : IBranch Atom) : Bool :=
 /-- Apply all pending T(φ → ψ) rules to the current branch state.
 
 For each T(φ → ψ) formula at world w on the branch, and for each accessible world
-w' ≥ w with T(φ) at w', if T(ψ) is not yet at w', add T(ψ) at w'.
+w' (reachable via the edge list from w) with T(φ) at w', if T(ψ) is not yet at w',
+add T(ψ) at w'.
 
 Returns the updated branch with all pending persistence applications. -/
-def applyAllTImpRules (b : IBranch Atom) : IBranch Atom :=
+def applyAllTImpRules (b : IBranch Atom) (edges : IEdges) : IBranch Atom :=
   let newForms :=
     b.filterMap fun sf =>
       match sf.sign, sf.formula with
       | .pos, .imp φ ψ =>
-        -- Get all worlds w' ≥ sf.label with T(φ) at w' but not yet T(ψ)
-        let toAdd := intTImpRule φ ψ sf.label b
+        -- Get all accessible worlds w' with T(φ) at w' but not yet T(ψ)
+        let toAdd := intTImpRule φ ψ sf.label edges b
         if toAdd.isEmpty then none else some toAdd
       | _, _ => none
   b ++ newForms.flatten
@@ -103,13 +113,13 @@ def applyAllTImpRules (b : IBranch Atom) : IBranch Atom :=
 
 Since each application can create new T-formulas that may trigger more applications,
 we iterate until no new formulas are added. Uses fuel to guarantee termination. -/
-def applyPersistenceFixpoint (b : IBranch Atom) (fuel : Nat) : IBranch Atom :=
+def applyPersistenceFixpoint (b : IBranch Atom) (edges : IEdges) (fuel : Nat) : IBranch Atom :=
   match fuel with
   | 0 => b
   | fuel' + 1 =>
-    let b' := applyAllTImpRules b
+    let b' := applyAllTImpRules b edges
     if b'.length == b.length then b  -- No new formulas added; fixpoint reached
-    else applyPersistenceFixpoint b' fuel'
+    else applyPersistenceFixpoint b' edges fuel'
 
 /-! ## One-Step Expansion -/
 
@@ -134,11 +144,17 @@ def intStepBranch (b : IBranch Atom) (expanded : List (ISF Atom)) (nextWorld : N
 /-- Expand a list of intuitionistic tableau branches with a fuel counter.
 
 For each open branch, applies persistence and then one expansion step.
-Branches are processed sequentially; branching rules create new sub-branches. -/
+Branches are processed sequentially; branching rules create new sub-branches.
+
+The `edgeSets` parameter is a parallel list (one per branch) of parent-child edge lists
+tracking the Kripke accessibility relation for each branch. When a world-creating rule
+fires, the new edge is added to the current branch's edge set. When a branching rule
+fires, both sub-branches inherit the current edge set. -/
 def intExpandBranches
     (branches : List (IBranch Atom))
     (expandedSets : List (List (ISF Atom)))
     (nextWorlds : List Nat)
+    (edgeSets : List IEdges)
     (fuel : Nat)
     (closurePred : IBranch Atom → Bool) :
     IntTableauResult Atom :=
@@ -153,45 +169,53 @@ def intExpandBranches
     let rec go (pending : List (IBranch Atom))
         (pendingExp : List (List (ISF Atom)))
         (pendingNW : List Nat)
+        (pendingEdges : List IEdges)
         (done : List (IBranch Atom))
         (doneExp : List (List (ISF Atom)))
         (doneNW : List Nat)
+        (doneEdges : List IEdges)
         : IntTableauResult Atom :=
-      match pending, pendingExp, pendingNW with
-      | [], _, _ => .closed  -- All branches closed
-      | b :: restBs, e :: restEs, nw :: restNW =>
+      match pending, pendingExp, pendingNW, pendingEdges with
+      | [], _, _, _ => .closed  -- All branches closed
+      | b :: restBs, e :: restEs, nw :: restNW, edges :: restEdges =>
         -- First apply persistence to get all T(φ → ψ) consequences
-        let bPers := applyPersistenceFixpoint b (fuel' + 1)
+        let bPers := applyPersistenceFixpoint b edges (fuel' + 1)
         if closurePred bPers then
           -- Branch is closed
-          go restBs restEs restNW (done ++ [bPers]) (doneExp ++ [e]) (doneNW ++ [nw])
+          go restBs restEs restNW restEdges
+            (done ++ [bPers]) (doneExp ++ [e]) (doneNW ++ [nw]) (doneEdges ++ [edges])
         else
           match intStepBranch bPers e nw with
           | none =>
             -- Branch is saturated and open: countermodel
             .openBranch bPers
-          | some (.linearResult newForms nw', newExp) =>
+          | some (.linearResult newForms nw' newEdge, newExp) =>
             -- Alpha-rule or world-creation: extend branch
+            let edges' := match newEdge with
+              | none => edges
+              | some e => edges ++ [e]
             intExpandBranches
               (done ++ [Branch.extendMany bPers newForms] ++ restBs)
               (doneExp ++ [newExp] ++ restEs)
               (doneNW ++ [nw'] ++ restNW)
+              (doneEdges ++ [edges'] ++ restEdges)
               fuel'
               closurePred
           | some (.branchingResult branches' nw', newExp) =>
-            -- Beta-rule: split into sub-branches
+            -- Beta-rule: split into sub-branches (each inherits current edge set)
             intExpandBranches
               (done ++ branches'.map (Branch.extendMany bPers ·) ++ restBs)
               (doneExp ++ branches'.map (fun _ => newExp) ++ restEs)
               (doneNW ++ branches'.map (fun _ => nw') ++ restNW)
+              (doneEdges ++ branches'.map (fun _ => edges) ++ restEdges)
               fuel'
               closurePred
           | some (.notApplicable, _) =>
             -- This case shouldn't happen (intStepBranch filters notApplicable)
             .openBranch bPers
-      | _ :: restBs, _, _ =>
-        go restBs [] [] done doneExp doneNW
-    go branches expandedSets nextWorlds [] [] []
+      | _ :: restBs, _, _, _ =>
+        go restBs [] [] [] done doneExp doneNW doneEdges
+    go branches expandedSets nextWorlds edgeSets [] [] [] []
 
 /-! ## Decision Procedures -/
 
@@ -207,7 +231,7 @@ possible in intuitionistic proofs (finite model property gives this bound). -/
 def intuitionisticTableau (φ : Proposition Atom) : IntTableauResult Atom :=
   let initialBranch : IBranch Atom := [⟨.neg, φ, 0⟩]
   let fuel := 2 ^ (2 * φ.complexity + 2)
-  intExpandBranches [initialBranch] [[]] [1] fuel isIntuitionisticallyClosed
+  intExpandBranches [initialBranch] [[]] [1] [[]] fuel isIntuitionisticallyClosed
 
 /-- The minimal propositional tableau decision procedure.
 
@@ -219,7 +243,7 @@ a branch closes only when T(p) and F(p) coexist at the same world for atomic p.
 def minimalTableau (φ : Proposition Atom) : IntTableauResult Atom :=
   let initialBranch : IBranch Atom := [⟨.neg, φ, 0⟩]
   let fuel := 2 ^ (2 * φ.complexity + 2)
-  intExpandBranches [initialBranch] [[]] [1] fuel isMinimallyClosed
+  intExpandBranches [initialBranch] [[]] [1] [[]] fuel isMinimallyClosed
 
 end Cslib.Logic.PL
 

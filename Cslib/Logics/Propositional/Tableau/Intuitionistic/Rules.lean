@@ -28,13 +28,25 @@ and the `T`-signed `bot`. The key differences from classical tableau are:
    with `T(φ)` at `w'`, add `T(ψ)` at `w'`. This rule must be re-applied whenever
    new worlds are created.
 
-3. **Closure**: Only `T(⊥)` at any label closes a branch (not complementary pairs).
+3. **Closure**: A branch closes when it contains T(⊥) at any label, or when it contains
+   T(φ) and F(φ) at the same label for some formula φ (complementary pair).
 
 ## World Management
 
 The world counter starts at 0 and increases by 1 for each new world created.
-Accessibility is modeled as: world `w'` is accessible from world `w` if `w < w'`
-(i.e., `w'` was created after `w`). Reflexivity must be added explicitly.
+Accessibility is tracked via explicit parent-child edges: world `w'` is accessible
+from world `w` if there is a path `w = w₀ → w₁ → … → wₙ = w'` in the edge list,
+or `w = w'` (reflexivity). Explicit edge tracking prevents sibling worlds from being
+treated as accessible to one another.
+
+## Accessibility Edges
+
+Parent-child edges are stored as `List (Nat × Nat)` where each pair `(child, parent)`
+records that `parent` is the direct parent of `child`. The reflexive-transitive closure
+of these edges gives the Kripke accessibility relation. This explicit representation
+replaces the earlier approximate proxy `w' ≥ w` which was incorrect for branching
+formulas: at a branch point, two sibling worlds `w₁` and `w₂` both satisfy `wᵢ ≥ w`
+for their common ancestor `w`, but `w₁` is NOT accessible from `w₂` or vice versa.
 
 ## References
 
@@ -58,6 +70,36 @@ abbrev ISF (Atom : Type*) := SignedFormula (Proposition Atom) Nat
 /-- A labeled branch for intuitionistic/minimal tableau. -/
 abbrev IBranch (Atom : Type*) := List (ISF Atom)
 
+/-! ## Accessibility Infrastructure -/
+
+/-- Parent-child edge list for tracking Kripke accessibility.
+
+Each pair `(child, parent)` records that `parent` is the direct predecessor of `child`
+in the Kripke tree. The reflexive-transitive closure of these edges gives the actual
+Kripke accessibility relation used by `T(φ → ψ)`. -/
+abbrev IEdges := List (Nat × Nat)
+
+/-- Check whether world `w'` is accessible from world `w` using a parent-child edge list.
+
+Accessibility is the reflexive-transitive closure of the parent-child relation. This
+function traverses the edge list to check reachability with a fuel bound to ensure
+termination. The fuel equals the number of edges, which bounds the longest possible path. -/
+def isAccessible (edges : IEdges) (w w' : Nat) : Bool :=
+  if w == w' then true
+  else
+    -- DFS over the reverse edge graph: from w, which children can be reached?
+    let rec go (current : Nat) (fuel : Nat) : Bool :=
+      match fuel with
+      | 0 => false
+      | fuel' + 1 =>
+        -- Find all direct children of current
+        let children := edges.filterMap fun (child, parent) =>
+          if parent == current then some child else none
+        children.any fun child =>
+          if child == w' then true
+          else go child fuel'
+    go w edges.length
+
 /-! ## Intuitionistic Tableau State -/
 
 /-- The state of the intuitionistic tableau expansion loop.
@@ -67,9 +109,8 @@ Tracks:
 - `nextWorld`: The next fresh world index to use when creating new worlds.
 - `expanded`: The set of signed formulas already processed (to avoid re-expansion).
 
-The accessibility relation is implicit: world `w'` is accessible from world `w` iff
-`w ≤ w'` (using the natural ordering, with worlds created in increasing order).
-Reflexivity is enforced by the persistence rule. -/
+The accessibility relation is maintained by explicit parent-child edges threaded
+through the expansion loop. -/
 structure IntTableauState (Atom : Type*) where
   /-- The current branch with world-labeled signed formulas. -/
   branch : IBranch Atom
@@ -107,30 +148,33 @@ Creates a fresh world `w' = nextWorld` and adds:
 - `F(ψ)` at `w'` (consequent fails at new world)
 - Propagation of all T(α) from `w` to `w'` (persistence from `w` to successor `w'`)
 
-Returns the new signed formulas to add to the branch and the next world counter. -/
+Returns the new signed formulas to add to the branch, the next world counter, and
+the new parent-child edge `(w', w)` recording that `w` is the direct parent of `w'`. -/
 def intFImpRule (φ ψ : Proposition Atom) (w nextWorld : Nat) (b : IBranch Atom) :
-    List (ISF Atom) × Nat :=
+    List (ISF Atom) × Nat × (Nat × Nat) :=
   let w' := nextWorld
   let newForms : List (ISF Atom) := [⟨.pos, φ, w'⟩, ⟨.neg, ψ, w'⟩]
   let persistent := propagatePersistence b w w'
-  (newForms ++ persistent, nextWorld + 1)
+  (newForms ++ persistent, nextWorld + 1, (w', w))
 
 /-! ## Persistent T(φ → ψ) Handling -/
 
-/-- Apply T(φ → ψ) at world `w` for all accessible worlds `w' ≥ w`.
+/-- Apply T(φ → ψ) at world `w` for all worlds `w'` accessible from `w`.
 
-For each world label `w'` on the branch with `w' ≥ w` and `T(φ)` at `w'`,
-if `T(ψ)` is not yet on the branch at `w'`, add `T(ψ)` at `w'`.
+For each world label `w'` on the branch accessible from `w` (via the explicit edge list),
+if `T(φ)` is at `w'` and `T(ψ)` is not yet at `w'`, add `T(ψ)` at `w'`.
 
 This implements the intuitionistic truth condition for implication:
-  `⊩_w (φ → ψ)` iff `∀ w' ≥ w, ⊩_{w'} φ → ⊩_{w'} ψ`
+  `⊩_w (φ → ψ)` iff `∀ w' accessible from w, ⊩_{w'} φ → ⊩_{w'} ψ`
 
-The rule fires at all accessible worlds. -/
-def intTImpRule (φ ψ : Proposition Atom) (w : Nat) (b : IBranch Atom) :
+The rule fires at all worlds accessible via the parent-child edge list, including `w`
+itself (reflexivity). This replaces the earlier `>= w` proxy which treated sibling
+worlds as accessible to one another. -/
+def intTImpRule (φ ψ : Proposition Atom) (w : Nat) (edges : IEdges) (b : IBranch Atom) :
     List (ISF Atom) :=
-  -- Get all worlds w' ≥ w that appear on the branch
-  let worldsAbove := (b.map (·.label)).filter (· ≥ w) |>.eraseDups
-  worldsAbove.filterMap fun w' =>
+  -- Get all worlds w' on the branch that are accessible from w (including w itself)
+  let accessibleWorlds := (b.map (·.label)).eraseDups.filter (isAccessible edges w ·)
+  accessibleWorlds.filterMap fun w' =>
     -- If T(φ) is at w' and T(ψ) is not yet at w', add T(ψ) at w'
     if b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w') then
       if b.any (fun sf => sf.sign == .pos && sf.formula == ψ && sf.label == w') then
@@ -172,7 +216,7 @@ def intApplyRule (sf : ISF Atom) (nextWorld : Nat) (b : IBranch Atom) :
     some ([⟨.neg, φ, l⟩, ⟨.neg, ψ, l⟩], nextWorld)
   -- F(φ → ψ) including F(¬φ) = F(φ → ⊥): world-creating
   | .neg, .imp φ ψ =>
-    let (newForms, nextWorld') := intFImpRule φ ψ l nextWorld b
+    let (newForms, nextWorld', _edge) := intFImpRule φ ψ l nextWorld b
     some (newForms, nextWorld')
   -- T(φ → ψ) including T(¬φ): persistent, handled by intTImpRule
   -- F(⊥): never fires (bot is always false in classical/int/min)
@@ -183,13 +227,14 @@ def intApplyRule (sf : ISF Atom) (nextWorld : Nat) (b : IBranch Atom) :
 
 /-- Result of an intuitionistic expansion step.
 
-- `linearResult newForms nextWorld'`: The rule added formulas linearly (alpha-rule or
-  world-creation).
+- `linearResult newForms nextWorld' newEdge`: The rule added formulas linearly (alpha-rule
+  or world-creation). `newEdge` carries the new parent-child edge from `intFImpRule`, or
+  `none` for non-world-creating alpha rules.
 - `branchingResult branches nextWorld'`: The rule branched (beta-rule for ∧F or ∨T).
 - `notApplicable`: No rule fired. -/
 inductive IntRuleResult (Atom : Type*) : Type _ where
-  /-- Linear rule: add formulas to current branch. -/
-  | linearResult : List (ISF Atom) → Nat → IntRuleResult Atom
+  /-- Linear rule: add formulas to current branch. Optional new edge from world-creation. -/
+  | linearResult : List (ISF Atom) → Nat → Option (Nat × Nat) → IntRuleResult Atom
   /-- Branching rule: split into multiple branches. -/
   | branchingResult : List (List (ISF Atom)) → Nat → IntRuleResult Atom
   /-- No rule applies. -/
@@ -202,7 +247,7 @@ def intApplyRuleFull (sf : ISF Atom) (nextWorld : Nat) (b : IBranch Atom) :
   match sf.sign, sf.formula with
   -- T(φ ∧ ψ): alpha-rule
   | .pos, .and φ ψ =>
-    .linearResult [⟨.pos, φ, l⟩, ⟨.pos, ψ, l⟩] nextWorld
+    .linearResult [⟨.pos, φ, l⟩, ⟨.pos, ψ, l⟩] nextWorld none
   -- F(φ ∧ ψ): beta-rule (branch to F(φ) or F(ψ))
   | .neg, .and φ ψ =>
     .branchingResult [[⟨.neg, φ, l⟩], [⟨.neg, ψ, l⟩]] nextWorld
@@ -211,11 +256,11 @@ def intApplyRuleFull (sf : ISF Atom) (nextWorld : Nat) (b : IBranch Atom) :
     .branchingResult [[⟨.pos, φ, l⟩], [⟨.pos, ψ, l⟩]] nextWorld
   -- F(φ ∨ ψ): alpha-rule
   | .neg, .or φ ψ =>
-    .linearResult [⟨.neg, φ, l⟩, ⟨.neg, ψ, l⟩] nextWorld
+    .linearResult [⟨.neg, φ, l⟩, ⟨.neg, ψ, l⟩] nextWorld none
   -- F(φ → ψ) and F(¬φ) = F(φ → ⊥): world-creating alpha-rule
   | .neg, .imp φ ψ =>
-    let (newForms, nextWorld') := intFImpRule φ ψ l nextWorld b
-    .linearResult newForms nextWorld'
+    let (newForms, nextWorld', edge) := intFImpRule φ ψ l nextWorld b
+    .linearResult newForms nextWorld' (some edge)
   -- T(φ → ψ) and T(¬φ): handled separately (persistent rule, not a standard step)
   -- T(⊥): closed by IntuitionisticClosure -- not expanded
   -- All others: atoms, bot, etc.

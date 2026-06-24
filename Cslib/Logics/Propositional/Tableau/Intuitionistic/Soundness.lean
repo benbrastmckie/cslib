@@ -26,8 +26,9 @@ closes on `φ` (starting from `F(φ)` at world 0), then `φ` is intuitionistical
 Soundness proceeds by contrapositive:
 1. Define `intBranchSatisfied` relating Kripke model forcing to signed branch content.
 2. Show each intuitionistic rule preserves branch satisfiability in the Kripke sense.
-3. Show an intuitionistically closed branch (containing T(⊥)) is unsatisfiable
-   since `IForces ... .bot = False` for any intuitionistic model.
+3. Show an intuitionistically closed branch (containing T(⊥), or a T(φ)/F(φ) pair) is
+   unsatisfiable since `IForces ... .bot = False` for any intuitionistic model, and
+   complementary pairs contradict satisfiability directly.
 4. Conclude: if the tableau closes, the initial branch was unsatisfiable, meaning
    every Kripke model satisfies `φ`.
 
@@ -73,7 +74,7 @@ The key cases:
   `IForces_{w'} φ` and `¬ IForces_{w'} ψ`. The new world label `nw` maps to `w'`
   via `Function.update worldOf nw w'`.
 
-For `linearResult newForms _`, the conclusion provides an existential `worldOf'` so that
+For `linearResult newForms _ _`, the conclusion provides an existential `worldOf'` so that
 the F(imp) world-creating case can update the `worldOf` mapping at the fresh label `nw`.
 
 The freshness hypothesis `hnw : ∀ sf' ∈ b, sf'.label ≠ nw` ensures that `nw` is not
@@ -91,7 +92,7 @@ lemma intRule_preserves_sat {World : Type*} [Preorder World]
     (nw : Nat)
     (hnw : ∀ sf' ∈ b, sf'.label ≠ nw) :
     match intApplyRuleFull sf nw b with
-    | .linearResult newForms _ =>
+    | .linearResult newForms _ _ =>
       ∃ worldOf' : Nat → World,
         (∀ k, k ≠ nw → worldOf' k = worldOf k) ∧
         intBranchSatisfied val botForces worldOf' (Branch.extendMany b newForms)
@@ -137,9 +138,9 @@ lemma intRule_preserves_sat {World : Type*} [Preorder World]
       -- T(φ → ψ): intApplyRuleFull returns .notApplicable
       trivial
     | and φ ψ =>
-      -- T(φ ∧ ψ): .linearResult [T(φ), T(ψ)] nw; worldOf unchanged
+      -- T(φ ∧ ψ): .linearResult [T(φ), T(ψ)] nw none; worldOf unchanged
       simp only [show intApplyRuleFull (⟨.pos, φ ∧ ψ, label⟩ : ISF Atom) nw b =
-        .linearResult [⟨.pos, φ, label⟩, ⟨.pos, ψ, label⟩] nw from rfl]
+        .linearResult [⟨.pos, φ, label⟩, ⟨.pos, ψ, label⟩] nw none from rfl]
       refine ⟨worldOf, fun _ _ => rfl, ?_⟩
       rw [IForces_and] at hpos
       apply extend_sat _ worldOf
@@ -176,7 +177,7 @@ lemma intRule_preserves_sat {World : Type*} [Preorder World]
     | bot => trivial
     | imp φ ψ =>
       -- F(φ → ψ): world-creating rule.
-      -- intApplyRuleFull returns .linearResult (newForms ++ persistent) (nw + 1)
+      -- intApplyRuleFull returns .linearResult (newForms ++ persistent) (nw + 1) (some (nw, label))
       -- where newForms = [T(φ, nw), F(ψ, nw)] ++ propagatePersistence b label nw
       simp only [intApplyRuleFull, intFImpRule]
       -- hneg : ¬ IForces val botForces (worldOf label) (φ → ψ)
@@ -204,7 +205,8 @@ lemma intRule_preserves_sat {World : Type*} [Preorder World]
             exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hw'_ψ⟩
           · -- Propagated T-formulas: propagatePersistence b label nw
             -- These are of the form T(α, nw) where α ∈ posFormulasAt b label
-            simp only [propagatePersistence, posFormulasAt, List.mem_map, List.mem_filterMap] at hmem_pers
+            simp only [propagatePersistence, posFormulasAt, List.mem_map,
+              List.mem_filterMap] at hmem_pers
             obtain ⟨α, ⟨sf_b, hsf_b_mem, hsf_b_val⟩, rfl⟩ := hmem_pers
             -- sf' is now ⟨.pos, α, nw⟩; worldOf' nw = w' by Function.update
             simp only [Function.update_self]
@@ -248,9 +250,9 @@ lemma intRule_preserves_sat {World : Type*} [Preorder World]
               exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hψ⟩)
             hsat⟩
     | or φ ψ =>
-      -- F(φ ∨ ψ): .linearResult [F(φ), F(ψ)] nw; worldOf unchanged
+      -- F(φ ∨ ψ): .linearResult [F(φ), F(ψ)] nw none; worldOf unchanged
       simp only [show intApplyRuleFull (⟨.neg, φ ∨ ψ, label⟩ : ISF Atom) nw b =
-        .linearResult [⟨.neg, φ, label⟩, ⟨.neg, ψ, label⟩] nw from rfl]
+        .linearResult [⟨.neg, φ, label⟩, ⟨.neg, ψ, label⟩] nw none from rfl]
       refine ⟨worldOf, fun _ _ => rfl, ?_⟩
       rw [IForces_or, not_or] at hneg
       apply extend_sat _ worldOf
@@ -261,11 +263,16 @@ lemma intRule_preserves_sat {World : Type*} [Preorder World]
         · exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hneg.2⟩
       · exact hsat
 
-/-- An intuitionistically closed branch (containing T(⊥)) is unsatisfiable in any
-Kripke model with `botForces = fun _ => False`.
+/-- An intuitionistically closed branch is unsatisfiable in any Kripke model with
+`botForces = fun _ => False`.
 
-In an intuitionistic Kripke model, `IForces val (fun _ => False) w .bot = False`,
-so T(⊥) on the branch forces `IForces ... .bot` which is always false. -/
+`isIntuitionisticallyClosed b = true` iff either:
+1. T(⊥) appears at some label (`IntuitionisticClosure` fires), or
+2. T(φ) and F(φ) coexist at the same label for some φ (`Branch.hasContradiction` fires).
+
+Case 1: `IForces val (fun _ => False) w .bot = False`, so T(⊥) forces a contradiction.
+Case 2: The branch satisfier provides both `IForces ... φ` and `¬ IForces ... φ`,
+a direct contradiction. -/
 lemma intClosed_unsatisfiable {World : Type*} [Preorder World]
     (val : World → Atom → Prop)
     (worldOf : Nat → World)
@@ -273,30 +280,56 @@ lemma intClosed_unsatisfiable {World : Type*} [Preorder World]
     (hclosed : isIntuitionisticallyClosed b = true) :
     ¬ intBranchSatisfied val (fun _ => False) worldOf b := by
   intro hsat
-  have hbp : ∃ sf ∈ b, (SignedFormula.isPos sf &&
-      (sf.formula == (HasBot.bot : Proposition Atom))) = true := by
-    rw [← List.find?_isSome]
-    have key : isIntuitionisticallyClosed b = (List.find? (fun (sf : ISF Atom) =>
-        sf.isPos && (sf.formula == (HasBot.bot : Proposition Atom))) b).isSome := by
-      simp only [isIntuitionisticallyClosed, ClosureCondition.isClosed, ClosureCondition.findClosure]
-      cases b.find? (fun (sf : ISF Atom) =>
-        sf.isPos && (sf.formula == (HasBot.bot : Proposition Atom))) <;> rfl
-    rw [← key]; exact hclosed
-  obtain ⟨sf, hmem, hcond⟩ := hbp
-  simp only [Bool.and_eq_true, SignedFormula.isPos, Sign.isPos] at hcond
-  obtain ⟨hpos_b, hbot_form⟩ := hcond
-  have hssign : sf.sign = .pos := by
-    rcases sf with ⟨sign, _, _⟩; cases sign <;> simp_all
-  cases hf : sf.formula with
-  | bot =>
-    have hsf := hsat sf hmem
-    rw [hssign] at hsf
-    rw [hf, IForces_bot] at hsf
-    exact hsf.1 rfl
-  | atom x => simp [beq_iff_eq, hf] at hbot_form
-  | imp a c => simp [beq_iff_eq, hf] at hbot_form
-  | and a c => simp [beq_iff_eq, hf] at hbot_form
-  | or a c => simp [beq_iff_eq, hf] at hbot_form
+  simp only [isIntuitionisticallyClosed, Bool.or_eq_true] at hclosed
+  rcases hclosed with hbot | hcontra
+  · -- Case 1: T(⊥) is on the branch
+    have hbp : ∃ sf ∈ b, (SignedFormula.isPos sf &&
+        (sf.formula == (HasBot.bot : Proposition Atom))) = true := by
+      rw [← List.find?_isSome]
+      have key : @ClosureCondition.isClosed _ _
+          IntuitionisticClosure.instClosureConditionOfBEqOfHasBot b =
+          (List.find? (fun (sf : ISF Atom) =>
+          sf.isPos && (sf.formula == (HasBot.bot : Proposition Atom))) b).isSome := by
+        simp only [ClosureCondition.isClosed, ClosureCondition.findClosure]
+        cases b.find? (fun (sf : ISF Atom) =>
+          sf.isPos && (sf.formula == (HasBot.bot : Proposition Atom))) <;> rfl
+      rw [← key]; exact hbot
+    obtain ⟨sf, hmem, hcond⟩ := hbp
+    simp only [Bool.and_eq_true, SignedFormula.isPos, Sign.isPos] at hcond
+    obtain ⟨hpos_b, hbot_form⟩ := hcond
+    have hssign : sf.sign = .pos := by
+      rcases sf with ⟨sign, _, _⟩; cases sign <;> simp_all
+    cases hf : sf.formula with
+    | bot =>
+      have hsf := hsat sf hmem
+      rw [hssign] at hsf
+      rw [hf, IForces_bot] at hsf
+      exact hsf.1 rfl
+    | atom x => simp [beq_iff_eq, hf] at hbot_form
+    | imp a c => simp [beq_iff_eq, hf] at hbot_form
+    | and a c => simp [beq_iff_eq, hf] at hbot_form
+    | or a c => simp [beq_iff_eq, hf] at hbot_form
+  · -- Case 2: complementary pair T(φ)/F(φ) at same label
+    simp only [Branch.hasContradiction, Branch.findContradiction] at hcontra
+    rw [List.findSome?_isSome_iff] at hcontra
+    obtain ⟨sf_pos, hsf_pos_mem, hcond⟩ := hcontra
+    split_ifs at hcond with hispos hneg
+    · rw [List.any_eq_true] at hneg
+      obtain ⟨sf_neg, hsf_neg_mem, hneg_cond⟩ := hneg
+      simp only [Bool.and_eq_true] at hneg_cond
+      obtain ⟨⟨hneg_sign_b, hneg_form_b⟩, hneg_label_b⟩ := hneg_cond
+      simp only [beq_iff_eq] at hneg_sign_b hneg_label_b
+      have hneg_form_eq : sf_neg.formula = sf_pos.formula := eq_of_beq hneg_form_b
+      simp only [SignedFormula.isPos, Sign.isPos] at hispos
+      have hpos_sign : sf_pos.sign = .pos := by
+        rcases sf_pos with ⟨sign, _, _⟩; cases sign <;> simp_all
+      have hsat_pos := hsat sf_pos hsf_pos_mem
+      have hsat_neg := hsat sf_neg hsf_neg_mem
+      rw [hpos_sign] at hsat_pos
+      rw [hneg_sign_b, hneg_label_b, hneg_form_eq] at hsat_neg
+      exact hsat_neg.2 rfl (hsat_pos.1 rfl)
+    · simp at hcond
+    · simp at hcond
 
 /-! ## Loop Induction Lemma -/
 
@@ -308,6 +341,7 @@ This is the core loop invariant for the soundness proof. The proof requires:
 3. Closed branches are unsatisfiable (via `closed_unsat`)
 
 The `closed_unsat` parameter generalizes over closure predicates (intuitionistic vs minimal).
+The `edgeSets` parameter tracks parent-child accessibility edges, one set per branch.
 
 The proof requires showing persistence preserves satisfiability (which needs monotone
 `worldOf`: `n ≤ m → worldOf n ≤ worldOf m`), step expansion preserves satisfiability
@@ -324,10 +358,11 @@ lemma intExpandBranches_closed_unsat
         closurePred b = true → ¬ intBranchSatisfied val botForces worldOf b) :
     ∀ (branches : List (IBranch Atom))
       (expandedSets : List (List (ISF Atom)))
-      (nextWorlds : List Nat),
+      (nextWorlds : List Nat)
+      (edgeSets : List IEdges),
       expandedSets.length = branches.length →
       nextWorlds.length = branches.length →
-      intExpandBranches branches expandedSets nextWorlds fuel closurePred = .closed →
+      intExpandBranches branches expandedSets nextWorlds edgeSets fuel closurePred = .closed →
       ∀ b ∈ branches, ∀ (worldOf : Nat → World),
           ¬ intBranchSatisfied val botForces worldOf b := by
   sorry
@@ -357,7 +392,7 @@ theorem intuitionisticTableau_sound (φ : Proposition Atom)
     (fun {_ _} _ hf => absurd hf id) _
     isIntuitionisticallyClosed
     (fun worldOf' b hcl => intClosed_unsatisfiable val worldOf' b hcl)
-    _ _ _ (by rfl) (by rfl) h
+    _ _ _ _ (by rfl) (by rfl) h
     [⟨.neg, φ, 0⟩] (by simp) worldOf hsat
 
 end Cslib.Logic.PL

@@ -1,30 +1,26 @@
 {
   "status": "partial",
-  "summary": "Soundness proof skeleton compiles with 5 sorries. Helper infrastructure built. Key finding: intExpandBranches_closed_unsat needs MonotoneEdges hypothesis in its signature.",
+  "summary": "Standard implementer DIVERGED across 3 dispatches (no-op, then two consecutive context overflows at 92 and 115 tool uses). Sorry count oscillated 4->1->7 — the latest attempt regressed by adding sorry fallbacks. Working tree was left non-building both times. Restored to building HEAD baseline (4 sorries). 547-line work-in-progress preserved as a patch.",
   "blockers": [
-    "intExpandBranches_closed_unsat signature must be extended to include MonotoneEdges hypothesis for worldOf w.r.t. edgeSets, then calling site in intuitionisticTableau_sound must supply the proof that the initial constant worldOf is monotone for empty edges"
+    "The standard cslib-implementation-agent cannot complete this proof within its context window — it overflowed (\"Prompt is too long\") twice in a row. This proof requires hard-mode (per-phase dispatch with tight read budget) or manual intervention, not repeated standard dispatches."
   ],
   "continuation_context": {
-    "sorry_inventory": {
-      "applyAllTImpRules_sat": "line 355, persistence step preserves sat",
-      "isAccessible_go_reach_nw sub-goals": "lines 502-503, fuel arithmetic",
-      "monotoneEdges_update": "line 528, worldOf update preserves edge monotonicity",
-      "intExpandBranches_closed_unsat": "line 562, main expansion loop invariant"
-    },
-    "key_finding": "The main lemma needs MonotoneEdges as a hypothesis. The proof must thread MonotoneEdges alongside intBranchSatisfied through the induction. The initial worldOf (fun _ => w0) satisfies MonotoneEdges trivially for empty edge sets.",
+    "build_state": "HEAD (committed) builds with 4 sorries in Intuitionistic/Soundness.lean lines 547,548,573,607. Working tree reset to HEAD = green.",
+    "preserved_work": "specs/316_propositional_tableau_soundness/working-progress-c2.patch (547 lines). Contains the MonotoneEdges-threaded restructure but with 7 sorries and build errors; mine it selectively, do not apply blindly.",
+    "key_finding": "intExpandBranches_closed_unsat needs MonotoneEdges threaded through the induction (Contrapositive + Nat.strongRecOn, factored go loop). The mechanical sub-fixes identified: Function.update_noteq -> Function.update_of_ne; List.Mem proofs need List.mem_cons not anon-constructor; reconcile nw/w2 binder rename.",
     "plan_path": "specs/316_propositional_tableau_soundness/plans/05_soundness-plan.md",
-    "approach": "Contrapositive + Nat.strongRecOn, factor inner go loop, set_option maxHeartbeats 3200000",
-    "verified_state": "git-clean: 4 live sorries in Intuitionistic/Soundness.lean lines 547,548,573,607; Classical/Soundness.lean and Minimal/DecisionProcedure.lean are sorry-free in committed state",
-    "last_session_note": "impl-316 dispatch on 2026-06-24 was a no-op (idle, no edits). Resume crux unchanged: thread MonotoneEdges through intExpandBranches_closed_unsat induction."
+    "approach": "RECOMMEND --hard: per-phase dispatch closing ONE sorry per agent run to stay within context budget. Phase order: monotoneEdges_update (line 528 region) -> isAccessible fuel lemmas -> applyAllTImpRules_sat -> intExpandBranches_closed_unsat main loop.",
+    "verified_state": "HEAD builds with exactly 4 sorries; Classical/Soundness.lean and Minimal/DecisionProcedure.lean sorry-free. Working tree clean (reset).",
+    "last_session_note": "Two context overflows in one orchestrate run. Orchestrator halted standard dispatch to avoid further divergence."
   },
   "artifacts": [
     {
       "path": "specs/316_propositional_tableau_soundness/plans/05_soundness-plan.md",
       "type": "plan",
-      "summary": "4-phase plan for filling soundness sorries"
+      "summary": "4-phase soundness plan"
     }
   ],
   "phases_completed": 0,
   "phases_total": 4,
-  "next_action_hint": "implement"
+  "next_action_hint": "implement-hard"
 }

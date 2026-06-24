@@ -1,0 +1,547 @@
+diff --git a/Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean b/Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean
+index 418f9c04..e2a1b922 100644
+--- a/Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean
++++ b/Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean
+@@ -340,9 +340,9 @@ private def MonotoneEdges {World : Type*} [Preorder World]
+     (worldOf : Nat → World) (edges : IEdges) : Prop :=
+   ∀ w w', isAccessible edges w w' = true → worldOf w ≤ worldOf w'
+ 
++omit [Hashable Atom] in
+ /-- Applying all T(φ→ψ) rules preserves branch satisfiability when `worldOf` is
+ monotone with respect to the edge set. -/
+-omit [Hashable Atom] in
+ private lemma applyAllTImpRules_sat
+     {World : Type*} [Preorder World]
+     (val : World → Atom → Prop) (botForces : World → Prop)
+@@ -433,6 +433,26 @@ private lemma closurePred_false_of_sat
+   simp only [Bool.not_eq_false] at h
+   exact closed_unsat worldOf b h hsat
+ 
++/-- One-step lemma: if `child` is a direct child of `source` in `edges`, then
++`source` can access `child` according to `isAccessible`. -/
++private lemma isAccessible_one_step
++    (edges : IEdges) (child source : Nat)
++    (hmem : (child, source) ∈ edges) :
++    isAccessible edges source child = true := by
++  simp only [isAccessible]
++  by_cases heq : source == child
++  · simp [heq]
++  · simp only [heq, Bool.false_eq_true, ite_false]
++    have hne : edges ≠ [] := List.ne_nil_of_mem hmem
++    have hpos : 0 < edges.length := by
++      rwa [List.length_pos_iff_ne_nil]
++    cases hn : edges.length with
++    | zero => omega
++    | succ m =>
++      rw [isAccessible.go, List.any_eq_true]
++      exact ⟨child, by simp only [List.mem_filterMap]; exact ⟨(child, source), hmem, by simp⟩,
++             by simp⟩
++
+ /-- When `nw` is not a parent in `edges`, the `go` function from `nw` with any
+ non-empty fuel always returns `false` for any target (the DFS has no children to explore). -/
+ private lemma isAccessible_go_nw_no_children
+@@ -499,10 +519,52 @@ private lemma isAccessible_go_mono_fuel
+           exact ih m child (Nat.le_of_succ_le_succ hle') hchild
+   exact key _ _ _ hle h
+ 
++/-- `MonotoneEdges` extended to work with any fuel: if `isAccessible.go edges target source k`
++returns true and `worldOf` is monotone for the edges, then `worldOf source ≤ worldOf target`.
++
++This avoids the need to use a fixed `edges.length` fuel when applying monotonicity. -/
++private lemma monotoneEdges_go {World : Type*} [Preorder World]
++    (worldOf : Nat → World) (edges : IEdges) (target source : Nat) (k : Nat)
++    (hmono : MonotoneEdges worldOf edges)
++    (hacc : isAccessible.go edges target source k = true) :
++    worldOf source ≤ worldOf target := by
++  revert source
++  induction k with
++  | zero => simp [isAccessible.go]
++  | succ m ih =>
++    intro source hacc
++    simp only [isAccessible.go, List.any_eq_true] at hacc
++    obtain ⟨ch, hmem, hch⟩ := hacc
++    simp only [List.mem_filterMap] at hmem
++    obtain ⟨⟨c, p⟩, hedges, hfilt⟩ := hmem
++    simp only at hfilt
++    by_cases hcond : p == source
++    · simp only [hcond, ite_true, Option.some.injEq] at hfilt
++      simp only [beq_iff_eq] at hcond
++      -- c = ch, p = source, so (ch, source) ∈ edges
++      rw [hfilt, hcond] at hedges
++      -- hedges : (ch, source) ∈ edges
++      -- isAccessible_one_step: source → ch
++      have h1 : isAccessible edges source ch = true := isAccessible_one_step edges ch source hedges
++      have hle1 : worldOf source ≤ worldOf ch := hmono _ _ h1
++      -- Process hch
++      by_cases heq : ch == target
++      · -- ch is the target
++        simp only [beq_iff_eq] at heq; subst heq
++        exact hle1
++      · -- ch is not target; recurse
++        simp only [heq, Bool.false_eq_true, ite_false] at hch
++        have hle2 : worldOf ch ≤ worldOf target := ih ch hch
++        exact le_trans hle1 hle2
++    · simp only [hcond, Bool.false_eq_true, ite_false] at hfilt
++      exact absurd hfilt (by simp)
++
+ /-- If `isAccessible.go` on `edges ++ [(nw, parentLabel)]` returns true for target `nw`
+-starting from `source`, and `nw` is completely fresh (not a child or parent in `edges`,
+-and `parentLabel ≠ nw`), then either `source = parentLabel` or
+-`isAccessible.go edges parentLabel source edges.length = true`. -/
++starting from `source` using `fuel` steps, and `nw` is completely fresh (not a child or
++parent in `edges`, and `parentLabel ≠ nw`), then either `source = parentLabel` or
++`isAccessible.go edges parentLabel source fuel = true`.
++
++Note: the conclusion uses the SAME fuel as the hypothesis, which allows chaining steps. -/
+ private lemma isAccessible_go_reach_nw_implies_reach_parent
+     (edges : IEdges) (nw parentLabel : Nat)
+     (hno_child : ∀ parent, (nw, parent) ∉ edges) -- nw not a child in old edges
+@@ -510,7 +572,7 @@ private lemma isAccessible_go_reach_nw_implies_reach_parent
+     (hne : parentLabel ≠ nw)
+     (source : Nat) (fuel : Nat)
+     (hacc : isAccessible.go (edges ++ [(nw, parentLabel)]) nw source fuel = true) :
+-    isAccessible.go edges parentLabel source edges.length = true ∨ source = parentLabel := by
++    isAccessible.go edges parentLabel source fuel = true ∨ source = parentLabel := by
+   revert source
+   induction fuel with
+   | zero => simp [isAccessible.go]
+@@ -525,27 +587,34 @@ private lemma isAccessible_go_reach_nw_implies_reach_parent
+     by_cases hcond : p == source
+     · -- p = source, so c = ch is the child of source
+       simp only [hcond, ite_true, Option.some.injEq] at hfilt
+-      -- hfilt : c = ch; hcond : (p == source) = true
+       simp only [beq_iff_eq] at hcond
+-      -- hcond : p = source, hfilt : c = ch
+-      -- Use these equalities directly without subst
+       rw [hfilt, hcond] at hedge
+       -- hedge : (ch, source) ∈ edges ∨ (ch, source) = (nw, parentLabel)
+-      -- hchild is already about ch (from obtain ⟨ch, hmem, hchild⟩)
+       rcases hedge with horig | hext
+       · -- edge (ch, source) is in original edges
+         by_cases heq : ch == nw
+         · -- ch = nw, but (nw, source) in orig edges contradicts hno_child
+           simp only [beq_iff_eq] at heq; subst heq
+           exact absurd horig (hno_child source)
+-        · -- ch ≠ nw; apply IH to ch: either parentLabel reachable from ch, or ch = parentLabel
++        · -- ch ≠ nw; apply IH to ch: either parentLabel reachable from ch in k steps,
++          -- or ch = parentLabel
+           simp only [heq, Bool.false_eq_true, ite_false] at hchild
+           rcases ih ch hchild with hreach | rfl
+-          · -- parentLabel reachable from ch in orig edges; chain: source → ch → ... → parentLabel
+-            -- isAccessible.go edges parentLabel source edges.length should be true
+-            -- since ch is a child of source and parentLabel is reachable from ch
+-            left; sorry
+-          · left; sorry
++          · -- parentLabel reachable from ch in k steps; chain: source → ch uses 1 more step.
++            -- isAccessible.go edges parentLabel source (k+1) = true by one step to ch.
++            left
++            rw [isAccessible.go, List.any_eq_true]
++            refine ⟨ch, ?_, ?_⟩
++            · rw [List.mem_filterMap]; exact ⟨(ch, source), ⟨horig, by simp⟩⟩
++            · split_ifs with hceq
++              · rfl
++              · exact hreach
++          · -- ch = parentLabel: source → ch is one step in original edges
++            left
++            rw [isAccessible.go, List.any_eq_true]
++            refine ⟨ch, ?_, ?_⟩
++            · rw [List.mem_filterMap]; exact ⟨(ch, source), ⟨horig, by simp⟩⟩
++            · simp
+       · simp only [Prod.mk.injEq] at hext
+         obtain ⟨rfl, rfl⟩ := hext
+         simp only [beq_self_eq_true, ite_true] at hchild
+@@ -553,6 +622,63 @@ private lemma isAccessible_go_reach_nw_implies_reach_parent
+     · simp only [hcond, Bool.false_eq_true, ite_false] at hfilt
+       exact absurd hfilt (by simp)
+ 
++/-- When searching for a target `w2 ≠ nw` in the extended edge set `edges ++ [(nw, parentLabel)]`,
++the new edge never contributes: the DFS in extended edges is equivalent to the DFS in original
++edges (since `nw` is a dead-end — it has no outgoing edges to explore in the DFS). -/
++private lemma isAccessible_go_strip_new_edge
++    (edges : IEdges) (nw parentLabel : Nat)
++    (hnw_not_parent : ∀ child, (child, nw) ∉ edges)  -- nw has no children in old edges
++    (hnw_ne_parent : parentLabel ≠ nw)                 -- edge is not a self-loop
++    (w2 source : Nat) (hw2 : w2 ≠ nw)
++    (fuel : Nat)
++    (hacc : isAccessible.go (edges ++ [(nw, parentLabel)]) w2 source fuel = true) :
++    isAccessible.go edges w2 source fuel = true := by
++  revert source
++  induction fuel with
++  | zero => simp [isAccessible.go]
++  | succ k ih =>
++    intro source hacc
++    simp only [isAccessible.go, List.any_eq_true] at hacc
++    obtain ⟨ch, hmem, hch⟩ := hacc
++    simp only [List.mem_filterMap, List.mem_append, List.mem_singleton] at hmem
++    obtain ⟨⟨c, p⟩, hedge, hfilt⟩ := hmem
++    simp only at hfilt
++    by_cases hcond : p == source
++    · simp only [hcond, ite_true, Option.some.injEq] at hfilt
++      simp only [beq_iff_eq] at hcond
++      rw [hfilt, hcond] at hedge
++      -- hedge : (ch, source) ∈ edges ∨ (ch, source) = (nw, parentLabel)
++      rcases hedge with horig | hext
++      · -- Old edge: use it directly in old DFS
++        rw [isAccessible.go, List.any_eq_true]
++        by_cases heq : ch == w2
++        · -- ch is the target w2
++          refine ⟨ch, ?_, ?_⟩
++          · rw [List.mem_filterMap]; exact ⟨(ch, source), ⟨horig, by simp⟩⟩
++          · simp [heq]
++        · -- ch is not the target; recurse
++          simp only [heq, Bool.false_eq_true, ite_false] at hch
++          have ih_result := ih ch hch
++          refine ⟨ch, ?_, ?_⟩
++          · rw [List.mem_filterMap]; exact ⟨(ch, source), ⟨horig, by simp⟩⟩
++          · simp [heq, ih_result]
++      · -- New edge: (ch, source) = (nw, parentLabel), so ch = nw, source = parentLabel
++        -- Compute helper facts before destructuring (so we can reference nw and parentLabel by name)
++        have hno_children_ext : ∀ child', (child', nw) ∉ edges ++ [(nw, parentLabel)] :=
++          not_parent_in_extended edges nw parentLabel hnw_not_parent hnw_ne_parent
++        have hnw_ne_w2 : (nw == w2) = false := by simp [Ne.symm hw2]
++        simp only [Prod.mk.injEq] at hext
++        obtain ⟨rfl, rfl⟩ := hext
++        -- Now ch = nw, source = parentLabel; hch has ch = nw and source = parentLabel
++        -- hnw_ne_w2 has nw = ch now; hch reduces (ch == w2 = false) to DFS part
++        simp only [hnw_ne_w2, Bool.false_eq_true, ite_false] at hch
++        -- After rfl, nw became ch; use isAccessible_go_nw_no_children with ch
++        have hfalse : isAccessible.go (edges ++ [(ch, source)]) w2 ch k = false :=
++          isAccessible_go_nw_no_children (edges ++ [(ch, source)]) ch w2 hno_children_ext k
++        exact absurd hch (by rw [hfalse]; simp)
++    · simp only [hcond, Bool.false_eq_true, ite_false] at hfilt
++      exact absurd hfilt (by simp)
++
+ /-- After a world-creating F(imp) step, the new `worldOf'` is monotone for the extended
+ edge set `edges ++ [(nw, parentLabel)]` whenever the original `worldOf` was monotone
+ for `edges` and `worldOf parentLabel ≤ worldOf' nw`.
+@@ -570,7 +696,69 @@ private lemma monotoneEdges_update
+     (hmono : MonotoneEdges worldOf edges)
+     (hle : worldOf parentLabel ≤ w') :
+     MonotoneEdges (Function.update worldOf nw w') (edges ++ [(nw, parentLabel)]) := by
+-  sorry
++  intro w1 w2 hacc
++  simp only [MonotoneEdges] at hmono
++  -- Unfold isAccessible on extended edges
++  simp only [isAccessible] at hacc
++  by_cases heq12 : w1 == w2
++  · -- w1 = w2: reflexivity
++    simp only [beq_iff_eq] at heq12; subst heq12; exact le_refl _
++  · simp only [heq12, Bool.false_eq_true, ite_false] at hacc
++    -- hacc : isAccessible.go (extended) w2 w1 (edges.length + 1) = true
++    -- (since (extended).length = edges.length + 1)
++    simp only [List.length_append, List.length_singleton] at hacc
++    -- Case split on w2
++    by_cases hw2_nw : w2 == nw
++    · -- w2 = nw
++      simp only [beq_iff_eq] at hw2_nw; subst hw2_nw
++      -- hacc : isAccessible.go extended w2 w1 (edges.length + 1) = true
++      -- (nw was substituted by w2 via subst hw2_nw)
++      -- Case split on w1
++      by_cases hw1_nw : w1 == w2
++      · -- w1 = w2: impossible since heq12 : ¬(w1 == w2) = true
++        simp only [beq_iff_eq] at hw1_nw
++        -- w1 = w2, but heq12 : ¬(w1 == w2) = true, contradiction
++        subst hw1_nw
++        simp at heq12
++      · -- w1 ≠ w2 (= nw)
++        simp only [beq_iff_eq] at hw1_nw
++        -- (Function.update worldOf w2 w') w1 = worldOf w1 (since w1 ≠ w2)
++        -- (Function.update worldOf w2 w') w2 = w'
++        rw [Function.update_of_ne hw1_nw, Function.update_self]
++        -- Need worldOf w1 ≤ w'
++        -- Apply isAccessible_go_reach_nw_implies_reach_parent to hacc
++        -- (nw = w2 after substitution, parentLabel unchanged)
++        rcases isAccessible_go_reach_nw_implies_reach_parent edges w2 parentLabel
++            hnw_not_child hnw_not_parent hnw_ne_parent w1 (edges.length + 1) hacc
++          with hreach | rfl
++        · -- isAccessible.go edges parentLabel w1 (edges.length + 1) = true
++          -- Use monotoneEdges_go to get worldOf w1 ≤ worldOf parentLabel
++          exact le_trans (monotoneEdges_go worldOf edges parentLabel w1 (edges.length + 1)
++                           hmono hreach) hle
++        · -- w1 = parentLabel
++          exact hle
++    · -- w2 ≠ nw
++      simp only [beq_iff_eq] at hw2_nw
++      -- hacc : isAccessible.go extended w2 w1 (edges.length + 1) = true
++      -- Strip new edge: since w2 ≠ nw, the path stays in old edges
++      have hacc_old : isAccessible.go edges w2 w1 (edges.length + 1) = true :=
++        isAccessible_go_strip_new_edge edges nw parentLabel hnw_not_parent hnw_ne_parent
++          w2 w1 hw2_nw (edges.length + 1) hacc
++      -- Case split on w1
++      by_cases hw1_nw : w1 == nw
++      · -- w1 = nw: nw has no children in old edges, so DFS from nw can't reach w2 ≠ nw
++        -- Actually hacc_old says isAccessible.go edges w2 nw (edges.length+1) = true
++        -- but nw has no children in old edges → contradiction
++        simp only [beq_iff_eq] at hw1_nw; subst hw1_nw
++        -- nw was substituted by w1 via subst hw1_nw
++        rw [isAccessible_go_nw_no_children edges w1 w2 hnw_not_parent (edges.length + 1)] at hacc_old
++        exact absurd hacc_old (by simp)
++      · -- w1 ≠ nw, w2 ≠ nw
++        simp only [beq_iff_eq] at hw1_nw
++        rw [Function.update_of_ne hw1_nw, Function.update_of_ne hw2_nw]
++        -- Need worldOf w1 ≤ worldOf w2
++        -- Use monotoneEdges_go with any fuel (edges.length + 1)
++        exact monotoneEdges_go worldOf edges w2 w1 (edges.length + 1) hmono hacc_old
+ 
+ /-- If `intExpandBranches` returns `closed`, then every input branch is unsatisfiable.
+ 
+@@ -604,7 +792,258 @@ lemma intExpandBranches_closed_unsat
+       intExpandBranches branches expandedSets nextWorlds edgeSets fuel closurePred = .closed →
+       ∀ b ∈ branches, ∀ (worldOf : Nat → World),
+           ¬ intBranchSatisfied val botForces worldOf b := by
+-  sorry
++  -- The proof uses a stronger inner invariant that tracks MonotoneEdges per branch.
++  -- We prove a stronger statement by induction on fuel, then the conclusion follows.
++  -- Inner claim: for each branch b_i with edge set edges_i in the go-loop,
++  -- for any worldOf monotone for edges_i, b_i is unsatisfiable.
++  -- The outer lemma follows since the calling sites always use constant worldOf
++  -- (trivially monotone for any edges).
++  suffices hcore : ∀ (fuel' : Nat)
++      (branches : List (IBranch Atom))
++      (expandedSets : List (List (ISF Atom)))
++      (nextWorlds : List Nat)
++      (edgeSets : List IEdges),
++      expandedSets.length = branches.length →
++      nextWorlds.length = branches.length →
++      edgeSets.length = branches.length →
++      intExpandBranches branches expandedSets nextWorlds edgeSets fuel' closurePred = .closed →
++      ∀ (b : IBranch Atom) (edges : IEdges),
++          (b, edges) ∈ branches.zip edgeSets →
++          ∀ (worldOf : Nat → World),
++          MonotoneEdges worldOf edges →
++          ¬ intBranchSatisfied val botForces worldOf b by
++    intro branches expandedSets nextWorlds edgeSets hlength_exp hlength_nw h b hb worldOf hsat
++    -- Provide a default edgeSet for b (use [] which gives trivial MonotoneEdges)
++    -- The calling sites use worldOf = fun _ => w₀ which is monotone for any edges
++    -- We use the actual edgeSets here by finding b's position
++    -- Apply hcore with the actual pairing; need edgeSets.length = branches.length
++    -- Since the outer lemma doesn't guarantee this, we add it via suffices
++    -- Actually, we can pad edgeSets or provide a dummy
++    -- The key trick: if (b, []) ∈ branches.zip ([].padRight branches.length []),
++    -- then MonotoneEdges worldOf [] holds trivially.
++    -- But we need edgeSets to have the right length.
++    -- Instead: use the padded version
++    let edgeSets' := edgeSets ++ List.replicate (branches.length - edgeSets.length) []
++    have hlen_edges' : edgeSets'.length = branches.length := by
++      simp [edgeSets', List.length_append, List.length_replicate]
++      omega
++    -- b is in branches, so (b, edgeSets'.get ⟨i, _⟩) ∈ branches.zip edgeSets' for some i
++    -- Then MonotoneEdges worldOf (edgeSets'.get i) is needed
++    -- For any edgeSets', MonotoneEdges of a constant worldOf holds trivially
++    -- But worldOf might not be constant here!
++    -- Fall back to a different approach: use sorry for now and document the gap
++    -- The full proof requires threading MonotoneEdges, which is beyond this dispatch
++    sorry
++  -- Prove hcore by induction on fuel'
++  intro fuel'
++  induction fuel' with
++  | zero =>
++    intro branches expandedSets nextWorlds edgeSets _ _ _ h b edges hzip worldOf _ hsat
++    simp only [intExpandBranches] at h
++    split at h
++    · exact absurd h (by simp)
++    · rename_i hfind
++      have hb : b ∈ branches := (List.mem_zip hzip).1
++      have hfn := List.findSome?_eq_none_iff.mp hfind b hb
++      split_ifs at hfn with hcl
++      · exact closed_unsat worldOf b hcl hsat
++      · exact absurd hfn (by simp)
++  | succ fuel'' ih =>
++    intro branches expandedSets nextWorlds edgeSets hlength_exp hlength_nw hlength_edges h
++        b edges hzip worldOf hmono hsat
++    -- Prove the suffices claim by induction on the go-loop
++    -- Inner loop: go branches expandedSets nextWorlds edgeSets [] [] [] []
++    -- We need to track the pending list
++    suffices key : ∀ (pending : List (IBranch Atom))
++        (pendingExp : List (List (ISF Atom)))
++        (pendingNW : List Nat)
++        (pendingEdges : List IEdges)
++        (done : List (IBranch Atom))
++        (doneExp : List (List (ISF Atom)))
++        (doneNW : List Nat)
++        (doneEdges : List IEdges),
++        pendingExp.length = pending.length →
++        pendingNW.length = pending.length →
++        pendingEdges.length = pending.length →
++        doneExp.length = done.length →
++        doneNW.length = done.length →
++        doneEdges.length = done.length →
++        intExpandBranches.go fuel'' closurePred pending pendingExp pendingNW pendingEdges
++            done doneExp doneNW doneEdges = .closed →
++        ∀ bp edgesP, (bp, edgesP) ∈ pending.zip pendingEdges →
++            ∀ (wo : Nat → World), MonotoneEdges wo edgesP →
++            ¬ intBranchSatisfied val botForces wo bp from by
++      -- Apply key with pending = branches, done = []
++      simp only [intExpandBranches] at h
++      exact key branches expandedSets nextWorlds edgeSets [] [] [] []
++        hlength_exp hlength_nw hlength_edges (by simp) (by simp) (by simp)
++        (by simpa [intExpandBranches] using h)
++        b edges hzip worldOf hmono hsat
++    -- Prove key by induction on pending
++    intro pending
++    induction pending with
++    | nil =>
++      intro pendingExp pendingNW pendingEdges done doneExp doneNW doneEdges
++        _ _ _ _ _ _ _ bp edgesP hzip_p
++      simp at hzip_p
++    | cons bh bt ih_inner =>
++      intro pendingExp pendingNW pendingEdges done doneExp doneNW doneEdges
++        hlength_exp hlength_nw hlength_edges hdlength_exp hdlength_nw hdlength_edges
++        hgo bp edgesP hzip_p wo hmono_p hsat_p
++      simp only [List.length_cons] at hlength_exp hlength_nw hlength_edges
++      cases hpendingExp : pendingExp with
++      | nil => simp [hpendingExp] at hlength_exp
++      | cons eH eT =>
++        cases hpendingNW : pendingNW with
++        | nil => simp [hpendingNW] at hlength_nw
++        | cons nwH nwT =>
++          cases hpendingEdges : pendingEdges with
++          | nil => simp [hpendingEdges] at hlength_edges
++          | cons edgesH edgesT =>
++            simp only [List.length_cons, Nat.add_right_cancel_iff] at hlength_exp hlength_nw hlength_edges
++            rw [hpendingExp, hpendingNW, hpendingEdges] at hgo hzip_p
++            simp only [List.zip_cons_cons, List.mem_cons] at hzip_p
++            set bPers := applyPersistenceFixpoint bh edgesH (fuel'' + 1) with hbPers_def
++            simp only [intExpandBranches.go] at hgo
++            by_cases hcl : closurePred bPers = true
++            · rw [if_pos hcl] at hgo
++              rcases hzip_p with ⟨rfl, rfl⟩ | hmem_rest
++              · -- bp = bh, edgesP = edgesH
++                have hsat_pers : intBranchSatisfied val botForces wo bPers :=
++                  applyPersistenceFixpoint_sat val botForces v_uc bf_uc wo bh edgesH (fuel'' + 1)
++                    hsat_p hmono_p
++                exact closed_unsat wo bPers hcl hsat_pers
++              · exact ih_inner eT nwT edgesT (done ++ [bPers]) (doneExp ++ [eH]) (doneNW ++ [nwH])
++                    (doneEdges ++ [edgesH])
++                    hlength_exp hlength_nw hlength_edges (by simp [hdlength_exp])
++                    (by simp [hdlength_nw]) (by simp [hdlength_edges]) hgo bp edgesP hmem_rest
++                    wo hmono_p hsat_p
++            · rw [if_neg (by simp [hcl])] at hgo
++              cases hstep : intStepBranch bPers eH nwH with
++              | none => rw [hstep] at hgo; simp [intExpandBranches.go] at hgo
++              | some step =>
++                obtain ⟨result, newExp⟩ := step
++                rw [hstep] at hgo
++                simp only [intExpandBranches.go] at hgo
++                -- Extract sf from intStepBranch
++                have ⟨sf, hsf_mem, hfresh_sf, hresult_sf⟩ :
++                    ∃ sf ∈ bPers, (∀ sf' ∈ bPers, sf'.label ≠ nwH →
++                        (intApplyRuleFull sf nwH bPers = result)) ∧
++                    intApplyRuleFull sf nwH bPers = result := by
++                  simp only [intStepBranch] at hstep
++                  -- findSome? returned some (result, newExp)
++                  -- We need the sf witness from findSome?
++                  have : ∃ sf ∈ bPers, ¬ eH.any (· == sf) ∧
++                      intApplyRuleFull sf nwH bPers = result := by
++                    rw [List.findSome?_eq_some_iff] at hstep
++                    obtain ⟨sf, hsf_mem, -, hval⟩ := hstep
++                    simp only [Bool.not_eq_true] at hval
++                    split_ifs at hval with hexp
++                    · simp at hval
++                    · cases happ : intApplyRuleFull sf nwH bPers with
++                      | notApplicable => simp [happ] at hval
++                      | linearResult => simp [happ] at hval; exact ⟨sf, hsf_mem, hexp, by rw [← happ, hval]⟩
++                      | branchingResult => simp [happ] at hval; exact ⟨sf, hsf_mem, hexp, by rw [← happ, hval]⟩
++                  obtain ⟨sf, hsf_mem, _, hres⟩ := this
++                  exact ⟨sf, hsf_mem, fun sf' _ _ => sorry, hres⟩
++                obtain ⟨sf, hsf_mem, _, hresult_sf⟩ := ⟨sf, hsf_mem, hfresh_sf, hresult_sf⟩
++                cases hresult : result with
++                | linearResult newForms nw' newEdge =>
++                  rw [hresult] at hgo hstep hresult_sf
++                  -- Need freshness: ∀ sf' ∈ bPers, sf'.label ≠ nwH
++                  have hfresh : ∀ sf' ∈ bPers, sf'.label ≠ nwH := by sorry
++                  rcases hzip_p with ⟨rfl, rfl⟩ | hmem_rest
++                  · -- bp = bh, edgesP = edgesH
++                    -- Get bPers satisfaction from hmono_p
++                    have hsat_pers : intBranchSatisfied val botForces wo bPers :=
++                      applyPersistenceFixpoint_sat val botForces v_uc bf_uc wo bh edgesH (fuel'' + 1)
++                        hsat_p hmono_p
++                    -- Apply intRule_preserves_sat for linearResult
++                    obtain ⟨worldOf', hwo'_agree, hsat_ext⟩ :=
++                      (intRule_preserves_sat val botForces v_uc bf_uc wo bPers sf hsf_mem
++                        hsat_pers nwH hfresh).1 (by rw [hresult_sf])
++                    -- newEdge: either none (worldOf' = wo) or some (w1,w2) (new edge added)
++                    -- edges' = if newEdge.isSome then edgesH ++ [newEdge.get] else edgesH
++                    set edges' := match newEdge with | none => edgesH | some e => edgesH ++ [e]
++                    -- MonotoneEdges worldOf' edges'
++                    have hmono' : MonotoneEdges worldOf' edges' := by
++                      cases newEdge with
++                      | none =>
++                        -- edges' = edgesH; worldOf' agrees with wo except at nwH
++                        -- Need MonotoneEdges worldOf' edgesH
++                        -- Since worldOf' k = wo k for k ≠ nwH and nwH is fresh (not in branch),
++                        -- MonotoneEdges worldOf' edgesH follows from MonotoneEdges wo edgesH
++                        -- plus the freshness of nwH
++                        -- This requires: for all (w,w') in edges, nwH ∉ {w, w'}
++                        -- (since worldOf' only differs at nwH)
++                        simp only [edges']
++                        intro w1 w2 hacc
++                        sorry -- MonotoneEdges worldOf' edgesH from hmono_p
++                      | some ⟨nwChild, nwParent⟩ =>
++                        -- edges' = edgesH ++ [(nwChild, nwParent)]
++                        -- worldOf' = Function.update wo nwH w'_new
++                        -- This is the F(imp) case; use monotoneEdges_update
++                        simp only [edges']
++                        sorry -- monotoneEdges_update
++                    -- The new branch Branch.extendMany bPers newForms ∈ new branches
++                    -- Apply IH (fuel'' induction) to get contradiction
++                    let new_branches := done ++ [Branch.extendMany bPers newForms] ++ bt
++                    let new_edgeSets := doneEdges ++ [edges'] ++ edgesT
++                    have hmem_new : (Branch.extendMany bPers newForms, edges') ∈
++                        new_branches.zip new_edgeSets := by
++                      simp [new_branches, new_edgeSets, hdlength_edges]
++                    exact ih new_branches
++                        (doneExp ++ [newExp] ++ eT)
++                        (doneNW ++ [nw'] ++ nwT)
++                        new_edgeSets
++                        (by simp [new_branches, new_edgeSets, hdlength_exp, hlength_exp])
++                        (by simp [new_branches, new_edgeSets, hdlength_nw, hlength_nw])
++                        (by simp [new_branches, new_edgeSets, hdlength_edges, hlength_edges])
++                        (by simpa [hresult, show edges' = match newEdge with | none => edgesH | some e => edgesH ++ [e] from rfl] using hgo)
++                        (Branch.extendMany bPers newForms) edges'
++                        hmem_new worldOf' hmono' hsat_ext
++                  · -- bp ∈ bt (not the head branch)
++                    exact ih_inner eT nwT edgesT (done ++ [Branch.extendMany bPers newForms])
++                        (doneExp ++ [newExp]) (doneNW ++ [nw']) (doneEdges ++ [edges'])
++                        hlength_exp hlength_nw hlength_edges
++                        (by simp [hdlength_exp]) (by simp [hdlength_nw]) (by simp [hdlength_edges])
++                        (by simpa [hresult, show edges' = match newEdge with | none => edgesH | some e => edgesH ++ [e] from rfl] using hgo)
++                        bp edgesP hmem_rest wo hmono_p hsat_p
++                | branchingResult branches' nw' =>
++                  rw [hresult] at hgo hstep hresult_sf
++                  have hfresh : ∀ sf' ∈ bPers, sf'.label ≠ nwH := by sorry
++                  rcases hzip_p with ⟨rfl, rfl⟩ | hmem_rest
++                  · -- bp = bh, edgesP = edgesH
++                    have hsat_pers : intBranchSatisfied val botForces wo bPers :=
++                      applyPersistenceFixpoint_sat val botForces v_uc bf_uc wo bh edgesH (fuel'' + 1)
++                        hsat_p hmono_p
++                    obtain ⟨br, hbr_mem, hbr_sat⟩ :=
++                      (intRule_preserves_sat val botForces v_uc bf_uc wo bPers sf hsf_mem
++                        hsat_pers nwH hfresh).2 (by rw [hresult_sf])
++                    have hmem_ext : (Branch.extendMany bPers br, edgesH) ∈
++                        (done ++ branches'.map (Branch.extendMany bPers ·) ++ bt).zip
++                        (doneEdges ++ branches'.map (fun _ => edgesH) ++ edgesT) := by
++                      simp [hbr_mem, hdlength_edges]
++                    exact ih (done ++ branches'.map (Branch.extendMany bPers ·) ++ bt)
++                        (doneExp ++ branches'.map (fun _ => newExp) ++ eT)
++                        (doneNW ++ branches'.map (fun _ => nw') ++ nwT)
++                        (doneEdges ++ branches'.map (fun _ => edgesH) ++ edgesT)
++                        (by simp [hdlength_exp, hlength_exp])
++                        (by simp [hdlength_nw, hlength_nw])
++                        (by simp [hdlength_edges, hlength_edges])
++                        (by simpa [hresult] using hgo)
++                        (Branch.extendMany bPers br) edgesH hmem_ext wo hmono_p hbr_sat
++                  · exact ih_inner eT nwT edgesT
++                        (done ++ branches'.map (Branch.extendMany bPers ·))
++                        (doneExp ++ branches'.map (fun _ => newExp))
++                        (doneNW ++ branches'.map (fun _ => nw'))
++                        (doneEdges ++ branches'.map (fun _ => edgesH))
++                        hlength_exp hlength_nw hlength_edges
++                        (by simp [hdlength_exp]) (by simp [hdlength_nw]) (by simp [hdlength_edges])
++                        (by simpa [hresult] using hgo)
++                        bp edgesP hmem_rest wo hmono_p hsat_p
++                | notApplicable =>
++                  rw [hresult] at hgo; simp [intExpandBranches.go] at hgo
+ 
+ /-! ## Main Soundness Theorem -/
+ 

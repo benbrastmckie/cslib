@@ -3,13 +3,14 @@
   "metadata": {
     "tasks_completed": [],
     "tasks_failed": [],
-    "tasks_remaining": [
-      316,
+    "tasks_partial": [
+      316
+    ],
+    "tasks_blocked": [
       317
     ],
-    "cycles_used": 1,
+    "cycles_used": 2,
     "multi_task_mode": true,
-    "exit_reason": "Dispatched impl-316 returned idle with no work; paused at user request for clean session close.",
-    "resume_command": "/orchestrate 316-317"
+    "halt_reason": "divergence: 316 standard implementer overflowed context twice; halted to avoid further regression"
   }
 }

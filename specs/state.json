@@ -4,12 +4,12 @@
     {
       "project_number": 316,
       "project_name": "propositional_tableau_soundness",
-      "status": "planned",
+      "status": "partial",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Fill the 6 sorry instances in propositional tableau soundness proofs across all three logics. Classical (Classical/Soundness.lean): prove classically_closed_unsatisfiable (closed branch is unsatisfiable under any Boolean valuation) and classicalTableau_sound (closed tableau implies Tautology phi), plus one helper lemma — by induction on rule applications showing each propositional rule preserves satisfiability. Intuitionistic (Intuitionistic/Soundness.lean): prove intuitionisticTableau_sound (closed tableau implies IValid phi) plus two helper lemmas — by showing each rule (including world-creating F(imp) and persistent T(imp)) preserves forcing at Kripke worlds. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_sound (closed tableau implies MValid phi) — adapts intuitionistic proof with MinimalClosure (complementary atoms only, no ex falso). Core technique: induction on expansion steps showing each rule application preserves the semantic invariant for the respective logic.",
       "created": "2026-06-23T19:55:52Z",
-      "last_updated": "2026-06-24T00:35:00Z",
+      "last_updated": "2026-06-24T02:30:00Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
@@ -127,14 +127,14 @@
     {
       "project_number": 290,
       "project_name": "nd_normalization_subformula_property",
-      "status": "partial",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Formalize Prawitz-style normalization for CSLib Theory.Derivation (propositional IPL and MPL). Define Derivation.isNormal predicate (no maximal formula -- i.e., no introduction rule immediately followed by the corresponding elimination on the same formula). Prove a normalization function normalize that transforms any derivation into a normal form. Derive the subformula property as a corollary: every formula in a normal derivation is a subformula of the conclusion or a hypothesis. The Theory.Derivation type is Type u (not Prop), enabling a computable normalization function. Reference: [Prawitz1965] Ch. IV-V. Consider starting with the implicational fragment ({arrow} only) as a milestone, then extending to full IPL connectives. Files: new module Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean. Depends on 266.",
       "dependencies": [],
       "created": "2026-06-23T12:00:00Z",
-      "last_updated": "2026-06-24T01:30:00Z",
-      "session_id": "sess_1782270872_494beb",
+      "last_updated": "2026-06-24T04:51:22Z",
+      "session_id": "sess_1782276580_d046e8",
       "artifacts": [
         {
           "path": "specs/290_nd_normalization_subformula_property/summaries/01_nd-normalization-summary.md",
@@ -546,19 +546,41 @@
     {
       "project_number": 311,
       "project_name": "ipl_conservative_over_imp",
-      "status": "blocked",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Prove the conservative extension theorem: IPL is conservative over IPL⟨→,⊤⟩ for imp-top-only formulas. Statement: if Derivable IntPropAxiom φ and φ.IsImpTopOnly = true, then Derivable ImpAxiom φ. Proof route: (1) IPL.hilbert_alg_complete.mp converts to HA-validity, (2) for any HilbertAlgebra H and valuation v, instantiate HA-validity at the Diego embedding HA(H), (3) the Diego embedding lemma rewrites back to HilbertEvaluate v φ = ⊤ in H, (4) Hilbert algebra completeness converts back to Derivable ImpAxiom φ. Derive the ND corollary. This is the deepest result in the chain, showing that conjunction, disjunction, and falsum are all independent of the pure implication fragment. Connects to typed SKI combinators: the derivable imp-top-only formulas are exactly the types inhabited by typed combinatory terms. File: Cslib/Logics/Propositional/Semantics/Algebra/ImpConservative.lean.",
       "created": "2026-06-23T22:00:00Z",
-      "last_updated": "2026-06-23T22:00:00Z",
-      "next_artifact_number": 1,
-      "artifacts": [],
+      "last_updated": "2026-06-24T09:42:57Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/311_ipl_conservative_over_imp/reports/01_conservative-extension-research.md",
+          "summary": "Initial conservative extension research"
+        },
+        {
+          "type": "report",
+          "path": "specs/311_ipl_conservative_over_imp/reports/02_dual-ordering-research.md",
+          "summary": "Dual ordering research"
+        },
+        {
+          "type": "report",
+          "path": "specs/311_ipl_conservative_over_imp/reports/03_blocker-unblock-research.md",
+          "summary": "Blocker resolution: free BSL construction approach"
+        },
+        {
+          "type": "plan",
+          "path": "specs/311_ipl_conservative_over_imp/plans/01_conservative-imp-plan.md",
+          "summary": "Implementation plan: Free BSL construction + conservativity theorem"
+        }
+      ],
       "dependencies": [
         309,
         310
       ],
-      "blockers": "Requires himp-preserving embedding from HilbertAlgebra to HeytingAlgebra (equality, not just ≤). The existing principal filter map gives only principal(a ⇨ b) ≤ himpFilter(principal a)(principal b), and the reverse is provably false. A Dedekind-MacNeille completion or proof-theoretic approach is needed."
+      "blockers": null,
+      "session_id": "sess_1782276788_0c858f"
     },
     {
       "project_number": 312,
@@ -645,17 +667,17 @@
     {
       "project_number": 320,
       "project_name": "remove_nd_metalogic_cleanup",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Remove ND-level metalogic that has been superseded by Hilbert-primary results. The Hilbert systems now prove deduction theorem, strong completeness, compactness, decidability, and the algebraic conservativity/Glivenko chain directly. ND should keep soundness and the extensional equivalence to Hilbert, but no longer needs standalone completeness theorems or the duplicate Lindenbaum infrastructure used only to derive them. Clean up: (1) Deprecate or remove `Theory.alg_complete`, `MPL.alg_complete`, `IPL.alg_complete`, and `alg_complete_classical` in `Semantics/Algebra/Completeness.lean`; replace downstream uses with the Hilbert-primary theorems (`MPL.hilbert_alg_complete`, `IPL.hilbert_alg_complete`, `CPL.hilbert_alg_complete`) composed through `hilbert_iff_nd_ctx` equivalences. (2) Simplify or remove `HilbertConservativeGlivenko.lean` algebraic bridges if they are no longer needed for ND corollaries; keep only the equivalences required by other modules. (3) Remove or consolidate duplicate ND Lindenbaum algebra material that is only used for ND completeness. (4) Update module docstrings in `Semantics/Algebra.lean`, `Semantics/Algebra/Completeness.lean`, and related files to state that Hilbert is the primary proof system and ND inherits results via equivalence. (5) Fix imports and barrel files affected by deletions. (6) Ensure the build is `sorry`-free and all downstream modules (sequent calculus, tableau, modal/temporal embeddings) still compile.",
       "created": "2026-06-24T00:00:00Z",
-      "last_updated": "2026-06-24T01:05:00Z",
+      "last_updated": "2026-06-23T21:00:00Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "dependencies": [],
       "parent_task": null,
-      "completion_summary": "Removed 847 lines of ND algebraic completeness infrastructure, replaced bridges with syntactic proofs via new AxiomAdmissibility.lean (326 lines)"
+      "completion_summary": "Removed ND-level metalogic superseded by Hilbert-primary results: deleted Completeness.lean, Lindenbaum.lean, LindenbaumInstances.lean (847 lines); created AxiomAdmissibility.lean (326 lines) with syntactic axiom admissibility proofs; simplified HilbertConservativeGlivenko.lean bridges. All task-owned files compile error-free."
     },
     {
       "project_number": 291,

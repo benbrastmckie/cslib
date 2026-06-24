@@ -11,7 +11,7 @@ next_project_number: 321
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,311,314,316,320 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,278,290,299,301,311,314,316 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,300,312,317 | 36,37,180,299,311,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
 | 3 | 41,275,319 | 39,40,317 | Foundations, Propositional Logic |
 
@@ -33,12 +33,11 @@ next_project_number: 321
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
+290 [IMPLEMENTING] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
 314 [IMPLEMENTING] — Implement the classical sequent calculus LK for propositional log
-316 [PLANNED] — Fill the 6 sorry instances in propositional tableau soundness pro
+316 [PARTIAL] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [PLANNED] — Fill the 8 sorry instances in propositional tableau completeness 
     └─ 319 [NOT STARTED] — Build dedicated Soundness and Completeness modules for the minima
-320 [IMPLEMENTING] — Remove ND-level metalogic that has been superseded by Hilbert-pri
 
 ### Temporal Logic
 
@@ -57,7 +56,7 @@ next_project_number: 321
 
 ### Algebraic Semantics
 
-311 [BLOCKED] — Prove the conservative extension theorem: IPL is conservative ove
+311 [PLANNED] — Prove the conservative extension theorem: IPL is conservative ove
   └─ 312 [BLOCKED] — Consolidate the full conservative extension chain into a unified 
 
 ### Uncategorized
@@ -65,7 +64,7 @@ next_project_number: 321
 ## Tasks
 
 ### 320. Remove nd metalogic cleanup
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -95,7 +94,7 @@ next_project_number: 321
 ---
 
 ### 316. Propositional tableau soundness
-- **Status**: [PLANNED]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -150,10 +149,15 @@ Literature sources:
 ---
 
 ### 311. Ipl conservative over imp
-- **Status**: [BLOCKED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 309, Task 310
+- **Research**:
+  - [311_ipl_conservative_over_imp/reports/01_conservative-extension-research.md]
+  - [311_ipl_conservative_over_imp/reports/02_dual-ordering-research.md]
+  - [311_ipl_conservative_over_imp/reports/03_blocker-unblock-research.md]
+- **Plan**: [311_ipl_conservative_over_imp/plans/01_conservative-imp-plan.md]
 
 **Description**: Prove the conservative extension theorem: IPL is conservative over IPL⟨→,⊤⟩ for imp-top-only formulas. Statement: if Derivable IntPropAxiom φ and φ.IsImpTopOnly = true, then Derivable ImpAxiom φ. Proof route: (1) IPL.hilbert_alg_complete.mp converts to HA-validity, (2) for any HilbertAlgebra H and valuation v, instantiate HA-validity at the Diego embedding HA(H), (3) the Diego embedding lemma rewrites back to HilbertEvaluate v φ = ⊤ in H, (4) Hilbert algebra completeness converts back to Derivable ImpAxiom φ. Derive the ND corollary. This is the deepest result in the chain, showing that conjunction, disjunction, and falsum are all independent of the pure implication fragment. Connects to typed SKI combinators: the derivable imp-top-only formulas are exactly the types inhabited by typed combinatory terms. File: Cslib/Logics/Propositional/Semantics/Algebra/ImpConservative.lean.
 
@@ -246,7 +250,7 @@ Literature sources:
 ---
 
 ### 290. Nd normalization subformula property
-- **Status**: [PARTIAL]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

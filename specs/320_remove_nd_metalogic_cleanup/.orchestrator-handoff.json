@@ -1,0 +1,20 @@
+{
+  "status": "implemented",
+  "summary": "Task 320 complete: removed 847 lines of ND algebraic completeness (Completeness.lean, Lindenbaum.lean, LindenbaumInstances.lean), replaced bridge theorems with syntactic proofs in HilbertConservativeGlivenko.lean via new AxiomAdmissibility.lean (326 lines). All task-owned files compile error-free. Errors in Normalization.lean and Tableau/Classical/Completeness.lean are from tasks 290 and 316/317 respectively, not caused by task 320 changes.",
+  "blockers": [],
+  "continuation_context": null,
+  "artifacts": [
+    {
+      "path": "specs/320_remove_nd_metalogic_cleanup/summaries/01_nd-metalogic-cleanup-summary.md",
+      "type": "summary",
+      "summary": "Full implementation summary for task 320"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/NaturalDeduction/AxiomAdmissibility.lean",
+      "type": "lean",
+      "summary": "New axiom admissibility module (326 lines)"
+    }
+  ],
+  "phases_completed": 5,
+  "phases_total": 5
+}

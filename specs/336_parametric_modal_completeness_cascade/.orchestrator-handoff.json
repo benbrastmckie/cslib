@@ -1,19 +1,21 @@
 {
-  "task_number": 336,
+  "status": "partial",
+  "phases_completed": 1,
+  "phases_total": 6,
   "session_id": "sess_1782319118_5be8e3_336",
-  "status": "planned",
-  "summary": "Created 6-phase implementation plan for the parametric modal completeness cascade. Phases 1-2 add 5 generic cascade theorems to Metalogic/Completeness.lean (parameterized over Axioms, FC via ModalSemanticEntails, the 4 axiom callbacks, a pre-applied truthLemma, and canonical_FC) and prove the pattern end-to-end on K (the ready-made template at K/Completeness.lean:268-365). Phases 3-5 refactor the T-family (truth_lemma), K-family (k_truth_lemma), and D-family (d_truth_lemma) — independent and parallelizable per family with file-ownership territory. Phase 6 runs the full CI pipeline and audits line reduction. Key constraint confirmed during planning: weak *_completeness public signatures must be preserved (inlined-forall frame hypotheses) because Bimodal/Metalogic/ConservativeExtension/ModalConservativity.lean:209 applies s5_completeness; no InterSystem/ consumers reference the cascade theorems. K and D keep their unique truth-lemma infra; only their cascade tails are replaced. Estimated 9 hours, target ~1,200-1,500 lines reduced, zero sorry risk.",
-  "artifacts": [
-    {
-      "path": "specs/336_parametric_modal_completeness_cascade/plans/01_parametric-completeness-cascade.md",
-      "type": "plan"
-    }
-  ],
-  "artifact_path": "specs/336_parametric_modal_completeness_cascade/plans/01_parametric-completeness-cascade.md",
-  "artifact_type": "plan",
-  "phase_count": 6,
-  "estimated_hours": 9,
-  "dependency_waves": [[1], [2], [3, 4, 5], [6]],
-  "next_recommended": "implement",
-  "next_steps": "Run /implement 336 to execute the plan"
+  "summary": "Phase 1 complete. Added two parametric theorems to Cslib/Logics/Modal/Metalogic/Completeness.lean after ModalSemanticEntails_of_Valid: (1) strong_soundness — takes a DerivationTree-level soundness callback and ModalSetDerivable, returns ModalSemanticEntails FC; (2) strong_completeness — takes four propositional axiom callbacks, a pre-applied truthLemma, canonical_FC, and ModalSemanticEntails FC, returns ModalSetDerivable. Both use 'theorem' (not lemma), have docstrings, mirror section-variable discipline, and use universe u with variable {Atom : Type u}. Sanity-checked by instantiating against K (scratch file, not committed). lake build Cslib.Logics.Modal.Metalogic.Completeness succeeded; lake exe lint-style clean; zero sorry.",
+  "blockers": [],
+  "continuation_context": {
+    "next_phase": 2,
+    "next_phase_name": "Parametric wrappers + K instantiation",
+    "what_phase_2_does": "Add three thin wrapper theorems (strong_completeness_iff, compactness, weak_completeness) to Metalogic/Completeness.lean. Then convert K's cascade tail (Systems/K/Completeness.lean lines ~262-367) to delegate to the parametric cascade: define kFC := fun _ => True, k_canonical_FC : kFC (CanonicalModel KAxiom) := trivial, pre-apply k_truth_lemma to its axiom callbacks, thread k_soundness via the adapter. Preserve K's five public theorem names (k_strong_soundness, k_strong_completeness, k_strong_completeness_iff, k_compactness, k_completeness) and their signatures — bodies become one-line delegations.",
+    "files_modified_so_far": [
+      "Cslib/Logics/Modal/Metalogic/Completeness.lean"
+    ],
+    "key_signatures": {
+      "strong_soundness": "theorem strong_soundness {Axioms} {FC} {Gamma} {phi} (sound : ∀ {World : Type u} (m : Model World Atom) (w : World) (L : List (Proposition Atom)), FC m → DerivationTree Axioms L phi → (∀ γ ∈ L, Satisfies m w γ) → Satisfies m w phi) (h : ModalSetDerivable Axioms Gamma phi) : ModalSemanticEntails FC Gamma phi",
+      "strong_completeness": "theorem strong_completeness {Axioms} {FC} {Gamma} {phi} (h_implyK) (h_implyS) (h_efq) (h_peirce) (truthLemma : ∀ (S : CanonicalWorld Axioms) (φ), Satisfies (CanonicalModel Axioms) S φ ↔ φ ∈ S.val) (canonical_FC : FC (CanonicalModel Axioms)) (h : ModalSemanticEntails FC Gamma phi) : ModalSetDerivable Axioms Gamma phi"
+    },
+    "scope_note": "Do NOT touch Propositional/* files — concurrent session has unrelated uncommitted edits there. Build with lake build Cslib.Logics.Modal.Metalogic.Systems.K.Completeness for Phase 2 verification."
+  }
 }

@@ -69,20 +69,25 @@ def classicalBranchSatisfiable (b : Branch (Proposition Atom) Unit) : Prop :=
 
 /-! ## Helper simp lemmas for classicalApplyOne -/
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma classicalApplyOne_pos_atom (l : Unit) (x : Atom) :
     classicalApplyOne (SignedFormula.pos (.atom x) l) = .notApplicable := rfl
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma classicalApplyOne_pos_bot (l : Unit) :
     classicalApplyOne (SignedFormula.pos (Proposition.bot (Atom := Atom)) l) = .notApplicable := rfl
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma classicalApplyOne_pos_and (l : Unit) (a b : Proposition Atom) :
     classicalApplyOne (SignedFormula.pos (.and a b) l) =
     .linear [SignedFormula.pos a l, SignedFormula.pos b l] := rfl
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma classicalApplyOne_pos_or (l : Unit) (a b : Proposition Atom) :
     classicalApplyOne (SignedFormula.pos (.or a b) l) =
     .branching [[SignedFormula.pos a l], [SignedFormula.pos b l]] := rfl
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma classicalApplyOne_pos_imp (l : Unit) (a b : Proposition Atom) (h : b ≠ .bot) :
     classicalApplyOne (SignedFormula.pos (.imp a b) l) =
     .branching [[SignedFormula.neg a l], [SignedFormula.pos b l]] := by
@@ -93,24 +98,30 @@ private lemma classicalApplyOne_pos_imp (l : Unit) (a b : Proposition Atom) (h :
   | and c d => rfl
   | or c d => rfl
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma classicalApplyOne_pos_neg (l : Unit) (a : Proposition Atom) :
     classicalApplyOne (SignedFormula.pos (.imp a .bot) l) =
     .linear [SignedFormula.neg a l] := rfl
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma classicalApplyOne_neg_atom (l : Unit) (x : Atom) :
     classicalApplyOne (SignedFormula.neg (.atom x) l) = .notApplicable := rfl
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma classicalApplyOne_neg_bot (l : Unit) :
     classicalApplyOne (SignedFormula.neg (Proposition.bot (Atom := Atom)) l) = .notApplicable := rfl
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma classicalApplyOne_neg_and (l : Unit) (a b : Proposition Atom) :
     classicalApplyOne (SignedFormula.neg (.and a b) l) =
     .branching [[SignedFormula.neg a l], [SignedFormula.neg b l]] := rfl
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma classicalApplyOne_neg_or (l : Unit) (a b : Proposition Atom) :
     classicalApplyOne (SignedFormula.neg (.or a b) l) =
     .linear [SignedFormula.neg a l, SignedFormula.neg b l] := rfl
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma classicalApplyOne_neg_imp (l : Unit) (a b : Proposition Atom) (h : b ≠ .bot) :
     classicalApplyOne (SignedFormula.neg (.imp a b) l) =
     .linear [SignedFormula.pos a l, SignedFormula.neg b l] := by
@@ -121,12 +132,14 @@ private lemma classicalApplyOne_neg_imp (l : Unit) (a b : Proposition Atom) (h :
   | and c d => rfl
   | or c d => rfl
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma classicalApplyOne_neg_neg (l : Unit) (a : Proposition Atom) :
     classicalApplyOne (SignedFormula.neg (.imp a .bot) l) =
     .linear [SignedFormula.pos a l] := rfl
 
 /-! ## Key Lemmas -/
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- Each classical rule application preserves branch satisfiability.
 
 If branch `b` is satisfiable and a rule applied to `sf ∈ b` gives sub-branches,
@@ -173,10 +186,10 @@ lemma classicalRule_preserves_sat (b : Branch (Proposition Atom) Unit)
     cases form with
     | atom x =>
       -- classicalApplyOne ⟨.pos, .atom x, l⟩ = .notApplicable (by rfl on pos_atom lemma)
-      show True; trivial
+      change True; trivial
     | bot =>
       -- classicalApplyOne ⟨.pos, .bot, l⟩ = .notApplicable (by rfl on pos_bot lemma)
-      show True; trivial
+      change True; trivial
     | and a b_form =>
       -- classicalApplyOne ⟨.pos, .and a b, l⟩ = .linear [T(a), T(b)] (pos_and: rfl)
       simp only [show classicalApplyOne (⟨Sign.pos, a ∧ b_form, label⟩ :
@@ -300,9 +313,9 @@ lemma classicalRule_preserves_sat (b : Branch (Proposition Atom) Unit)
     -- Case split on formula structure
     cases form with
     | atom x =>
-      show True; trivial
+      change True; trivial
     | bot =>
-      show True; trivial
+      change True; trivial
     | and a b_form =>
       -- classicalApplyOne ⟨.neg, .and a b, l⟩ = .branching [[F(a)], [F(b)]]
       change ∃ br ∈ [[SignedFormula.neg a label], [SignedFormula.neg b_form label]],
@@ -394,6 +407,7 @@ lemma classicalRule_preserves_sat (b : Branch (Proposition Atom) Unit)
           · exact ⟨fun _ => ha, fun h => absurd h (Sign.noConfusion)⟩
           · exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => h2⟩
 
+omit [Hashable Atom] in
 /-- A classically closed branch is unsatisfiable.
 
 Classical closure holds when T(⊥) is present (which is never satisfiable) or when
@@ -428,13 +442,12 @@ lemma classically_closed_unsatisfiable (b : Branch (Proposition Atom) Unit)
       have hvc := hv ⟨.pos, form, label⟩ hmem
       have htrue := hvc.1 rfl
       have hfb := eq_of_beq hbot_eq
-      simp only [SignedFormula.formula] at hfb
       rw [hfb] at htrue
       rw [show (HasBot.bot : Proposition Atom) = .bot from rfl,
         BoolEvaluate_bot] at htrue
       exact absurd htrue Bool.false_ne_true
   | none =>
-    simp [hfind] at hclosed
+    simp only [hfind] at hclosed
     simp only [Branch.hasContradiction, Option.isSome_iff_exists] at hclosed
     obtain ⟨⟨phi, l⟩, hpair⟩ := hclosed
     simp only [Branch.findContradiction] at hpair
@@ -468,6 +481,7 @@ lemma classically_closed_unsatisfiable (b : Branch (Proposition Atom) Unit)
 
 /-! ## Loop Invariant and Main Soundness Theorem -/
 
+omit [Hashable Atom] in
 /-- Helper: if a branch in the list is satisfiable, it is not classically closed. -/
 private lemma classicalBranchSatisfiable_not_closed
     (b : Branch (Proposition Atom) Unit)
@@ -477,6 +491,7 @@ private lemma classicalBranchSatisfiable_not_closed
   simp only [Bool.not_eq_false] at h
   exact classically_closed_unsatisfiable b h hsat
 
+omit [Hashable Atom] in
 /-- Helper for extracting a satisfiable sub-branch from a classicalStepBranch step. -/
 private lemma classicalStepBranch_preserves_sat
     (b : Branch (Proposition Atom) Unit)
@@ -511,6 +526,7 @@ private lemma classicalStepBranch_preserves_sat
       rw [hca] at hpreserve
       exact ⟨Branch.extendMany b newForms, List.mem_cons_self, hpreserve⟩
 
+omit [Hashable Atom] in
 /-- **Classical expansion closed implies all unsatisfiable**: If
 `classicalExpandBranches branches expandedSets fuel = .closed` where the inputs have the
 same length, then every branch in `branches` is unsatisfiable.
@@ -593,6 +609,7 @@ private lemma classicalExpandBranches_closed_unsat
             · exact ih (done ++ newBs ++ bt) (doneExp ++ newBs.map (fun _ => newExp) ++ es)
                 hlen_rec hinner bp (by simp [hmem_rest])
 
+omit [Hashable Atom] in
 /-- **Classical Tableau Soundness**: If the classical tableau closes on `φ`,
 then `φ` is a classical tautology.
 
@@ -605,7 +622,7 @@ theorem classicalTableau_sound (φ : Proposition Atom)
     (h : classicalTableau φ = .closed) : Tautology φ := by
   rw [tautology_iff_boolEvaluate_true]
   by_contra hnt
-  push_neg at hnt
+  push Not at hnt
   obtain ⟨v, hv⟩ := hnt
   -- The initial branch [F(φ)] is satisfiable via v
   have hsat : classicalBranchSatisfiable [⟨.neg, φ, ()⟩] :=

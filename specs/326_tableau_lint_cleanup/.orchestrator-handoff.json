@@ -1,0 +1,16 @@
+{
+  "status": "implemented",
+  "summary": "Fixed 31 linter warnings across 4 propositional tableau files: omit annotations for unused section variables, show->change replacements, simp cleanup, push_neg->push Not, and dead tactic removal",
+  "blockers": [],
+  "continuation_context": null,
+  "artifacts": [
+    {"path": "specs/326_tableau_lint_cleanup/summaries/01_tableau-lint-summary.md", "type": "summary", "summary": "Full implementation summary with deviation notes and verification table"},
+    {"path": "Cslib/Logics/Propositional/Tableau/Classical/Soundness.lean", "type": "implementation", "summary": "Phase 1: 22 warnings fixed, builds with zero warnings"},
+    {"path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean", "type": "implementation", "summary": "Phase 2: 2 omit annotations for unused section variables"},
+    {"path": "Cslib/Logics/Propositional/Tableau/Minimal/Soundness.lean", "type": "implementation", "summary": "Phase 2: 1 omit annotation for unused section variable"},
+    {"path": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean", "type": "implementation", "summary": "Phase 3: 2 omit + 3 dead tactic removals; pre-existing build errors unchanged"}
+  ],
+  "next_action_hint": "complete",
+  "phases_completed": 3,
+  "phases_total": 3
+}

@@ -64,6 +64,7 @@ def intBranchSatisfied {World : Type*} [Preorder World]
 
 /-! ## Rule Soundness -/
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- Each intuitionistic rule application preserves branch satisfiability.
 
 The key cases:
@@ -263,6 +264,7 @@ lemma intRule_preserves_sat {World : Type*} [Preorder World]
         · exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hneg.2⟩
       · exact hsat
 
+omit [Hashable Atom] in
 /-- An intuitionistically closed branch is unsatisfiable in any Kripke model with
 `botForces = fun _ => False`.
 

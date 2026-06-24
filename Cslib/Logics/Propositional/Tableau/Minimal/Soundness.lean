@@ -58,6 +58,7 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 
 /-! ## Closure Unsatisfiability -/
 
+omit [Hashable Atom] in
 /-- A minimally closed branch is unsatisfiable in any Kripke model.
 
 `isMinimallyClosed b = true` means `Branch.hasContradiction b = true`, i.e., there

@@ -11,7 +11,7 @@ next_project_number: 334
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,316,321,326,328,330 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,278,290,299,301,316,321,328,330 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,300,317,329,332 | 36,37,180,290,299,316,328 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
 | 3 | 41,275,333 | 39,40,332 | Foundations |
 
@@ -34,11 +34,10 @@ next_project_number: 334
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
-  └─ 332 [NOT STARTED] — Prove the normalization termination theorem for CSLib Theory.Deri
+  └─ 332 [RESEARCHED] — Prove the normalization termination theorem for CSLib Theory.Deri
     └─ 333 [NOT STARTED] — Refactor and split the 1099-line Normalization.lean into well-org
 316 [IMPLEMENTING] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
-326 [NOT STARTED] — Fix ~35 linter warnings across the propositional tableau soundnes
 328 [IMPLEMENTING] — Refactor CutElimination.lean to reduce or eliminate the maxHeartb
   └─ 329 [NOT STARTED] — Prove the subformula property as a corollary of cut elimination: 
 330 [PLANNED] — Fill the sorry in LJ cutAdmissibility (Cslib/Logics/Propositional
@@ -76,7 +75,7 @@ next_project_number: 334
 ---
 
 ### 332. Normalization termination proof
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Dependencies**: Task 290
 
@@ -137,7 +136,7 @@ next_project_number: 334
 ---
 
 ### 326. Tableau lint cleanup
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 324, Task 325

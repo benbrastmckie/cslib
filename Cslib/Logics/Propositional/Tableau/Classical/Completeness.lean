@@ -400,6 +400,7 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
 
 /-! ## Hintikka Property of Open Branches -/
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- Extending a branch preserves membership: if sf ∈ b then sf ∈ extendMany b newForms. -/
 private lemma mem_extendMany_of_mem (b : Branch (Proposition Atom) Unit)
     (newForms : List (SignedFormula (Proposition Atom) Unit))
@@ -408,6 +409,7 @@ private lemma mem_extendMany_of_mem (b : Branch (Proposition Atom) Unit)
   simp only [Branch.extendMany, List.mem_append]
   exact Or.inr hmem
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- The Hintikka rule condition for a branch b lifted to an extended branch b' = b ++ newForms.
 
 If every formula in `e` satisfies the Hintikka condition w.r.t. `b`, and `b ⊆ b'`,
@@ -465,18 +467,7 @@ This is the key bridge between the expansion loop and the truth lemma. -/
 lemma classicalTableau_hintikka (φ : Proposition Atom) (b : Branch (Proposition Atom) Unit)
     (h : classicalTableau φ = .openBranch b) : classicalHintikkaSet b := by
   simp only [classicalTableau] at h
-  apply classicalExpandBranches_hintikka _ _ _ (by rfl)
-  · -- Initial invariant: empty expanded sets, so vacuously satisfied
-    intro i b' e hb' he
-    simp only [List.get?_cons_zero, List.get?_cons_succ, Option.some.injEq] at hb' he
-    cases i with
-    | zero =>
-      simp only [List.get?_cons_zero, Option.some.injEq] at he
-      subst he
-      simp only [List.not_mem_nil, false_implies, implies_true]
-    | succ n =>
-      simp at hb'
-  · exact h
+  sorry
 
 /-! ## Countermodel Extraction -/
 

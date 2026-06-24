@@ -71,7 +71,8 @@
           "path": "specs/327_cutelim_lint_ci_fixes/plans/01_lint-ci-fixes.md",
           "summary": "Single-phase implementation plan for 10 mechanical lint fixes"
         }
-      ]
+      ],
+      "completion_summary": "Applied 10 mechanical lint fixes to CutElimination.lean: added maxHeartbeats comment, broke 8 long lines, renamed unused variable hB to _. CI passes."
     },
     {
       "project_number": 328,
@@ -85,7 +86,8 @@
       "dependencies": [
         327
       ],
-      "session_id": "sess_1782300531_c471d6_328"
+      "session_id": "sess_1782300531_c471d6_328",
+      "completion_summary": "Reduced maxHeartbeats from 800000 to 210000 (74% reduction) via eta-reduction, shared Finset helpers, and monoL/monoR usage. Public API unchanged."
     },
     {
       "project_number": 329,
@@ -99,7 +101,8 @@
       "dependencies": [
         328
       ],
-      "session_id": "sess_1782300531_c471d6_329"
+      "session_id": "sess_1782300531_c471d6_329",
+      "completion_summary": "Proved subformula property as corollary of cut elimination. Created SubformulaProperty.lean with LKProof.formulas, CutFreeLKProof.subformula_property, and LKProof.subformula_property. Zero sorries."
     },
     {
       "project_number": 323,

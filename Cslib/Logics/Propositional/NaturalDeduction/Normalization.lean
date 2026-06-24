@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Propositional.NaturalDeduction.Basic
+public import Mathlib.Data.Multiset.DershowitzManna
 
 /-! # Normalization for Propositional Natural Deduction
 
@@ -1065,6 +1066,87 @@ private theorem Theory.Derivation.redexWeight_zero_sn {G : Ctx Atom} {A : Propos
       simp only [redexWeight] at h
       simp only [isStronglyNormal, Bool.and_eq_true]
       simp_all [redexWeight, isStronglyNormal, conclusionComplexity]
+
+/-! ### Well-Founded Normalization Measure -/
+
+/-- Total node count of a derivation tree. -/
+private def Theory.Derivation.nodeCount : T.Derivation G A → Nat
+  | ax _ | ass _ => 1
+  | andI _ D₁ D₂ => 1 + D₁.nodeCount + D₂.nodeCount
+  | andE1 _ D => 1 + D.nodeCount
+  | andE2 _ D => 1 + D.nodeCount
+  | orI1 _ D => 1 + D.nodeCount
+  | orI2 _ D => 1 + D.nodeCount
+  | orE _ D DA DB => 1 + D.nodeCount + DA.nodeCount + DB.nodeCount
+  | impI _ D => 1 + D.nodeCount
+  | impE D E => 1 + D.nodeCount + E.nodeCount
+
+/-- The multiset of cut-formula complexities at beta-redex sites.
+Each beta-redex contributes the complexity of the eliminated formula to this multiset.
+Used as the primary component of the Dershowitz-Manna termination measure. -/
+private def Theory.Derivation.maximalFormulas : T.Derivation G A → Multiset Nat
+  | ax _ | ass _ => ∅
+  | andI _ D₁ D₂ => D₁.maximalFormulas + D₂.maximalFormulas
+  | andE1 _ D =>
+    match D with
+    | andI _ _ _ => {D.conclusionComplexity} + D.maximalFormulas
+    | _ => D.maximalFormulas
+  | andE2 _ D =>
+    match D with
+    | andI _ _ _ => {D.conclusionComplexity} + D.maximalFormulas
+    | _ => D.maximalFormulas
+  | orI1 _ D => D.maximalFormulas
+  | orI2 _ D => D.maximalFormulas
+  | orE _ D DA DB =>
+    match D with
+    | orI1 _ _ | orI2 _ _ =>
+      {D.conclusionComplexity} + D.maximalFormulas + DA.maximalFormulas + DB.maximalFormulas
+    | _ => D.maximalFormulas + DA.maximalFormulas + DB.maximalFormulas
+  | impI _ D => D.maximalFormulas
+  | impE D E =>
+    match D with
+    | impI _ _ => {D.conclusionComplexity} + D.maximalFormulas + E.maximalFormulas
+    | _ => D.maximalFormulas + E.maximalFormulas
+
+/-- Sum of the `nodeCount` of each sub-derivation rooted at a commuting conversion site.
+A commuting conversion occurs when an elimination is applied to the result of `orE`.
+Used as the secondary component of the termination measure. -/
+private def Theory.Derivation.commutingSum : T.Derivation G A → Nat
+  | ax _ | ass _ => 0
+  | andI _ D₁ D₂ => D₁.commutingSum + D₂.commutingSum
+  | andE1 _ D =>
+    match D with
+    | orE _ _ _ _ => D.nodeCount + D.commutingSum
+    | _ => D.commutingSum
+  | andE2 _ D =>
+    match D with
+    | orE _ _ _ _ => D.nodeCount + D.commutingSum
+    | _ => D.commutingSum
+  | orI1 _ D => D.commutingSum
+  | orI2 _ D => D.commutingSum
+  | orE _ D DA DB =>
+    match D with
+    | orE _ _ _ _ => D.nodeCount + D.commutingSum + DA.commutingSum + DB.commutingSum
+    | _ => D.commutingSum + DA.commutingSum + DB.commutingSum
+  | impI _ D => D.commutingSum
+  | impE D E =>
+    match D with
+    | orE _ _ _ _ => D.nodeCount + D.commutingSum + E.commutingSum
+    | _ => D.commutingSum + E.commutingSum
+
+/-- The combined termination measure for normalization:
+the pair `(maximalFormulas d, commutingSum d)` ordered by the lexicographic product of
+the Dershowitz-Manna multiset ordering and the natural number ordering. -/
+private def Theory.Derivation.normMeasure (d : T.Derivation G A) : Multiset Nat × Nat :=
+  (d.maximalFormulas, d.commutingSum)
+
+/-- The combined normalization measure is well-founded. -/
+private theorem normMeasure_wf :
+    WellFounded (InvImage (Prod.Lex Multiset.IsDershowitzMannaLT (· < ·))
+      (@Theory.Derivation.normMeasure Atom _ T G A)) :=
+  InvImage.wf _ (WellFounded.prod_lex
+    Multiset.wellFounded_isDershowitzMannaLT
+    Nat.lt_wfRel.wf)
 
 /-- `normalize` produces strongly normal derivations.
 

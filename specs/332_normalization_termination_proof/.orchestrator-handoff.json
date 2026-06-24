@@ -1,20 +1,10 @@
 {
   "status": "partial",
-  "summary": "weak_isStronglyNormal regression fixed (induction generalizing Δ + correct weakening proofs in binder cases); that proof now compiles cleanly with zero errors. However the file still does NOT build: ~20 pre-existing hard errors remain in the Phase 2 region (lines 1097-1292), independent of weak_isStronglyNormal and outside the stated scope.",
-  "blockers": [
-    "Normalization.lean has ~20 pre-existing hard errors in the Phase 2 region (lines 1097, 1116, 1122, 1148, 1150, 1154, 1156, 1168, 1176, 1180, 1198, 1204, 1217, 1229, 1278, 1281, 1282, 1288, 1291, 1292). These are NOT sorry warnings and NOT weak_isStronglyNormal. Confirmed present in the committed baseline by stashing the weak_isStronglyNormal fix and rebuilding. They include: normTriple def LCNF/sizeOf codegen failure (1097), maximalFormulas_le_andI_left/right simp proof failures (1116/1122), subsOne-related application type mismatches and unsolved goals (1148-1229), and andE1/andE2 maxFormulas_lt term-mode proofs whose subderivations elaborate to sorry-typed placeholders (1278-1292).",
-    "Task scope said 'make the file build with the 8 tracked sorrys present' and 'do NOT touch the Phase 2 region'. But the Phase 2 region contains hard errors (not just sorrys), so zero-build-errors is unreachable without modifying out-of-scope declarations. This is a broader regression than the task description anticipated."
-  ],
-  "continuation_context": {
-    "completed_phases": [1],
-    "next_phase": 2,
-    "build_status": "weak_isStronglyNormal_fixed_but_file_does_not_build",
-    "weak_isStronglyNormal_status": "compiles cleanly, zero errors in lines 837-879",
-    "phase2_hard_error_lines": [1097, 1116, 1122, 1148, 1150, 1154, 1156, 1168, 1176, 1180, 1198, 1204, 1217, 1229, 1278, 1281, 1282, 1288, 1291, 1292],
-    "tracked_sorry_lines": [1262, 1323, 1339, 1341, 1343, 1345, 1347, 1363]
-  },
-  "next_action_hint": "revise",
+  "summary": "Phase 1 (v2) complete: pair measure (maximalFormulas, commutingSum) + normMeasure_wf added; file builds with 1 sorry, 0 errors",
+  "blockers": [],
+  "continuation_context": {"completed_phases": [0,1], "next_phase": "2a"},
+  "next_action_hint": "continue",
   "phases_completed": 1,
-  "phases_total": 5,
+  "phases_total": 7,
   "artifacts": []
 }

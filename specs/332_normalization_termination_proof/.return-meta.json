@@ -3,8 +3,8 @@
   "started_at": "2026-06-24T15:50:13Z",
   "artifacts": [],
   "partial_progress": {
-    "stage": "phase_1_completed",
-    "details": "Phase 1 complete: all termination measure definitions already existed and verified axiom-clean via lean_verify. Fixed 3 syntax errors in later phases.",
+    "stage": "phase_2_starting",
+    "details": "Phase 2 starting: measure decrease lemmas",
     "phases_completed": 1
   },
   "metadata": {

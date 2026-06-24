@@ -1,0 +1,26 @@
+{
+  "status": "report_ready",
+  "started_at": "2026-06-24T12:00:00Z",
+  "artifacts": [
+    {
+      "path": "specs/338_mcs_generic_migration/reports/01_mcs-generic-migration.md",
+      "type": "research_report",
+      "summary": "Full analysis of MCS migration feasibility, architecture gap, line counts, downstream API surface, and phased recommendation"
+    },
+    {
+      "path": "specs/338_mcs_generic_migration/.orchestrator-handoff.json",
+      "type": "handoff",
+      "summary": "Orchestrator handoff with status, summary, and next action hint"
+    }
+  ],
+  "partial_progress": {
+    "stage": "report_written",
+    "details": "Research report and orchestrator handoff written to disk"
+  },
+  "metadata": {
+    "session_id": "sess_1750832400_multi_338",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "status": "researched",
+  "summary": "Migration of Propositional and Temporal MCS to GenericMCS faces a structural blocker: the algebraicDerivationSystem (ListDeriv-based) and tree-based derivation systems are not proven equivalent. GenericMCSBridge.lean documents this gap but provides no bridge theorem. Temporal migration is feasible (~76 lines saved) if a propositional fragment equivalence proof is written first. Propositional migration is more complex due to parameterization over arbitrary axiom predicates. Temporal-specific properties (342 lines: g_mp, h_mp, g_witness, h_witness) must remain unchanged as they use DerivationTree.temporal_necessitation/temporal_duality.",
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "Plan should decompose into: Phase 1 (prerequisite equivalence proof between tree-based and algebraic derivation systems on propositional fragment, ~30-50 lines new code), Phase 2 (Temporal MCS migration using equivalence, ~76 lines eliminated), Phase 3 (Propositional MCS migration, higher risk due to Axioms parameterization, ~98 lines). Consider deferring Phase 3 to a follow-up task.",
+  "phases_completed": 0,
+  "phases_total": 0,
+  "artifacts": [
+    {
+      "path": "specs/338_mcs_generic_migration/reports/01_mcs-generic-migration.md",
+      "type": "research_report",
+      "summary": "Full analysis of MCS migration feasibility, architecture gap between derivation systems, line counts, downstream API surface, and phased recommendation"
+    }
+  ]
+}

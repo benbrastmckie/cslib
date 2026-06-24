@@ -85,7 +85,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Prove `applyAllTImpRules_sat` [NOT STARTED]
+### Phase 1: Prove `applyAllTImpRules_sat` [COMPLETED]
 
 **Goal**: Fill the sorry at line 355 -- prove that applying all T(imp) persistence rules
 preserves branch satisfiability when `worldOf` is monotone with respect to the edge set.
@@ -111,7 +111,7 @@ preserves branch satisfiability when `worldOf` is monotone with respect to the e
 
 ---
 
-### Phase 2: Prove DFS helper lemmas and `monotoneEdges_update` [NOT STARTED]
+### Phase 2: Prove DFS helper lemmas and `monotoneEdges_update` [IN PROGRESS]
 
 **Goal**: Fill the 3 sorries in DFS fuel arithmetic (lines 502-503) and edge monotonicity
 (line 528). These are prerequisites for threading `MonotoneEdges` through the main loop.

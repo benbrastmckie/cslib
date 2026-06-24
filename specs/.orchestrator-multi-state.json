@@ -1,0 +1,65 @@
+{
+  "session_id": "sess_1750832400_multi",
+  "task_numbers": [
+    335,
+    336,
+    337,
+    338,
+    339,
+    340
+  ],
+  "waves": [
+    [
+      335,
+      338,
+      339,
+      340
+    ],
+    [
+      336,
+      337
+    ]
+  ],
+  "dependency_graph": {
+    "335": [],
+    "336": [
+      335
+    ],
+    "337": [
+      335
+    ],
+    "338": [],
+    "339": [],
+    "340": []
+  },
+  "max_cycles": 25,
+  "cycle_count": 1,
+  "failed_tasks": [],
+  "completed_tasks": [],
+  "current_statuses": {
+    "335": "researched",
+    "336": "not_started",
+    "337": "not_started",
+    "338": "researched",
+    "339": "researched",
+    "340": "researched"
+  },
+  "research_agents": {
+    "335": "cslib-research-agent",
+    "336": "cslib-research-agent",
+    "337": "cslib-research-agent",
+    "338": "cslib-research-agent",
+    "339": "cslib-research-agent",
+    "340": "cslib-research-agent"
+  },
+  "implement_agents": {
+    "335": "cslib-implementation-agent",
+    "336": "cslib-implementation-agent",
+    "337": "cslib-implementation-agent",
+    "338": "cslib-implementation-agent",
+    "339": "cslib-implementation-agent",
+    "340": "cslib-implementation-agent"
+  },
+  "paused": true,
+  "paused_reason": "User requested pause after research phase; resume with /orchestrate 335-340"
+}

@@ -1,0 +1,16 @@
+{
+  "status": "researched",
+  "summary": "Identified 240 duplicated lines across 15 system Soundness.lean files (16 lines each for 5 identical propositional+K axiom soundness cases). Recommended approach: add 5 standalone Satisfies.*_axiom lemmas to the shared Soundness.lean (~25 new lines), then refactor all 15 system files to delegate base cases via one-liners. Net reduction ~140 lines. Zero sorry risk, zero import changes, zero API changes.",
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "Plan should define 2 phases: (1) add 5 shared lemmas to Soundness.lean, (2) refactor all 15 system files. Phase 2 can batch all 15 files since changes are mechanical. Verify with lake build Cslib.Logics.Modal.Metalogic.",
+  "phases_completed": 0,
+  "phases_total": 0,
+  "artifacts": [
+    {
+      "path": "specs/335_modal_soundness_refactor/reports/01_parametric-modal-soundness.md",
+      "type": "research_report",
+      "summary": "Complete analysis of duplicated propositional+K axiom soundness across 15 modal systems with recommended refactoring approach (5 standalone Satisfies lemmas), line count analysis, rejected alternatives, and implementation plan sketch."
+    }
+  ]
+}

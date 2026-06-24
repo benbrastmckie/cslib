@@ -128,7 +128,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Measure Decrease Lemmas [NOT STARTED]
+### Phase 2: Measure Decrease Lemmas [IN PROGRESS]
 
 **Goal**: Prove that `reduceRoot` strictly decreases the combined measure. This is the
 mathematical heart of the termination argument.

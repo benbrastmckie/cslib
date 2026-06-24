@@ -342,17 +342,62 @@ private def MonotoneEdges {World : Type*} [Preorder World]
 
 /-- Applying all T(φ→ψ) rules preserves branch satisfiability when `worldOf` is
 monotone with respect to the edge set. -/
+omit [Hashable Atom] in
 private lemma applyAllTImpRules_sat
     {World : Type*} [Preorder World]
     (val : World → Atom → Prop) (botForces : World → Prop)
-    (v_uc : ∀ {w w' : World} (p : Atom), w ≤ w' → val w p → val w' p)
-    (bf_uc : ∀ {w w' : World}, w ≤ w' → botForces w → botForces w')
+    (_v_uc : ∀ {w w' : World} (p : Atom), w ≤ w' → val w p → val w' p)
+    (_bf_uc : ∀ {w w' : World}, w ≤ w' → botForces w → botForces w')
     (worldOf : Nat → World)
     (b : IBranch Atom) (edges : IEdges)
     (hsat : intBranchSatisfied val botForces worldOf b)
     (hmono : MonotoneEdges worldOf edges) :
     intBranchSatisfied val botForces worldOf (applyAllTImpRules b edges) := by
-  sorry
+  intro sf hmem
+  simp only [applyAllTImpRules, List.mem_append] at hmem
+  rcases hmem with h | h
+  · exact hsat sf h
+  · simp only [List.mem_flatten, List.mem_filterMap] at h
+    obtain ⟨newForms, ⟨⟨sign_o, form_o, label_o⟩, hmem_outer, houter⟩, hmem_inner⟩ := h
+    cases sign_o with
+    | neg => simp only at houter; exact absurd houter (by simp)
+    | pos =>
+      cases form_o with
+      | atom _ => simp only at houter; exact absurd houter (by simp)
+      | bot => simp only at houter; exact absurd houter (by simp)
+      | and _ _ => simp only at houter; exact absurd houter (by simp)
+      | or _ _ => simp only at houter; exact absurd houter (by simp)
+      | imp φ ψ =>
+        simp only [] at houter
+        by_cases hemp : (intTImpRule φ ψ label_o edges b).isEmpty = true
+        · simp only [hemp, ite_true] at houter; exact absurd houter (by simp)
+        · simp only [Bool.false_eq_true, hemp, ite_false, Option.some.injEq] at houter
+          rw [← houter] at hmem_inner
+          simp only [intTImpRule, List.mem_filterMap] at hmem_inner
+          obtain ⟨w', hw'_acc, hw'_sf⟩ := hmem_inner
+          simp only [List.mem_filter, List.mem_eraseDups, List.mem_map] at hw'_acc
+          obtain ⟨_, hw'_access⟩ := hw'_acc
+          by_cases hphi : (b.any fun sf =>
+              sf.sign == .pos && sf.formula == φ && sf.label == w') = true
+          · by_cases hpsi : (b.any fun sf =>
+                sf.sign == .pos && sf.formula == ψ && sf.label == w') = true
+            · simp [hphi, hpsi] at hw'_sf
+            · simp [hphi, hpsi] at hw'_sf
+              -- hw'_sf : ⟨.pos, ψ, w'⟩ = sf
+              rw [← hw'_sf]
+              have himpimp := (hsat ⟨.pos, .imp φ ψ, label_o⟩ hmem_outer).1 rfl
+              simp only [IForces_imp] at himpimp
+              have hle : worldOf label_o ≤ worldOf w' := hmono _ _ hw'_access
+              have hphi_forces : IForces val botForces (worldOf w') φ := by
+                rw [List.any_eq_true] at hphi
+                obtain ⟨sf', hmem', hcond⟩ := hphi
+                simp only [Bool.and_eq_true, beq_iff_eq] at hcond
+                obtain ⟨⟨hsign, hform⟩, hlabel⟩ := hcond
+                have := (hsat sf' hmem').1 hsign
+                rw [hform, hlabel] at this; exact this
+              exact ⟨fun _ => himpimp (worldOf w') hle hphi_forces,
+                    fun h => by simp at h⟩
+          · simp [hphi] at hw'_sf
 
 /-- Persistence fixpoint preserves satisfiability when `worldOf` is monotone. -/
 private lemma applyPersistenceFixpoint_sat
@@ -460,8 +505,8 @@ and `parentLabel ≠ nw`), then either `source = parentLabel` or
 `isAccessible.go edges parentLabel source edges.length = true`. -/
 private lemma isAccessible_go_reach_nw_implies_reach_parent
     (edges : IEdges) (nw parentLabel : Nat)
-    (hno_child : ∀ parent, (nw, parent) ∉ edges)  -- nw not a child in old edges
-    (hno_parent : ∀ child, (child, nw) ∉ edges)   -- nw not a parent in old edges
+    (hno_child : ∀ parent, (nw, parent) ∉ edges) -- nw not a child in old edges
+    (hno_parent : ∀ child, (child, nw) ∉ edges) -- nw not a parent in old edges
     (hne : parentLabel ≠ nw)
     (source : Nat) (fuel : Nat)
     (hacc : isAccessible.go (edges ++ [(nw, parentLabel)]) nw source fuel = true) :

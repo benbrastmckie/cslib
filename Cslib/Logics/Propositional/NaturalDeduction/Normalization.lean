@@ -1235,7 +1235,24 @@ private theorem Theory.Derivation.sn_commutingSum_zero
 
 /-- After `subsOne`, new maximal formulas have complexity strictly less than the cut formula.
 This is the key property: substitution only introduces redexes involving proper subformulas
-of the substituted formula's type. -/
+of the substituted formula's type.
+
+**Proof sketch** (Prawitz, Ch. III-IV): When `subsOne` substitutes `arg` (of type `A`) for
+assumptions of type `A` in `body`, the substitution `subs` recurses structurally on `body`.
+At each `ass` node of type `A`, it inserts `arg`. New beta-redexes can only arise when `arg`
+(an introduction form) lands under an elimination of type `A`. Since the cut formula there is `A`
+(not a larger formula), and `A.complexity < A.complexity.succ`, all new maximal formula
+complexities are bounded by `A.complexity`, hence strictly less than `A.complexity.succ`.
+
+The formal proof requires structural induction on `body`, tracking through `subs` (which uses
+tactic blocks for `orE`, `impI` branches with `weakCtx` rewrites). Each case must show that
+the `maximalFormulas` of the `subs` result only contain elements ≤ the `maximalFormulas` of
+`body` or ≤ `A.complexity`. This is the mathematical heart of the substitution complexity
+argument but requires approximately 100 lines of case analysis over the 10 constructors.
+
+TODO: Complete the structural induction proof. The mathematical argument is sound but the
+Lean formalization through `subs` (which uses `by` blocks at `ass`, `orE`, `impI` cases)
+makes the induction technically challenging. -/
 private theorem Theory.Derivation.subsOne_maximalFormulas_complexity_bound
     {G : Ctx Atom} {A B : Proposition Atom}
     (body : T.Derivation (insert A G) B)
@@ -1243,27 +1260,54 @@ private theorem Theory.Derivation.subsOne_maximalFormulas_complexity_bound
     (harg : arg.isStronglyNormal = true)
     (k : Nat) (hk : k ∈ (body.subsOne arg).maximalFormulas) :
     k < A.complexity.succ := by
-  -- The key insight: maximalFormulas tracks beta-redex sites.
-  -- When subsOne substitutes arg (SN) into body, new beta-redexes can only arise
-  -- where an assumption of type A is immediately used in an elimination that matches
-  -- arg's top-level constructor. Since arg is SN and has conclusionComplexity = A.complexity,
-  -- any such new redex involves A (not a larger formula). But A < A.succ, so k < A.complexity.succ.
-  -- We prove this by cases on body; the full inductive proof is deferred to Phase 2.
   sorry
 
-/-- For a beta-redex, `reduceRoot` produces a derivation with strictly smaller `maximalFormulas`
-in the Dershowitz-Manna ordering. The hypothesis `hSN_subs` provides that strongly normal
-subterms have empty maximal formula multisets (via `sn_maximalFormulas_empty`). -/
-private theorem Theory.Derivation.reduceRoot_beta_maxFormulas_lt
-    {G : Ctx Atom} {A : Proposition Atom}
-    (d : T.Derivation G A)
-    (hSN_subs : ∀ {G' A'} (D : T.Derivation G' A'), D.isStronglyNormal = true →
-      D.maximalFormulas = ∅)
-    (d' : T.Derivation G A) (hd' : d.reduceRoot = some d') :
-    Multiset.IsDershowitzMannaLT d'.maximalFormulas d.maximalFormulas := by
-  sorry
+/-- For a conjunction beta-redex, `reduceRoot` produces a derivation with strictly smaller
+`maximalFormulas` in the Dershowitz-Manna ordering.
 
-/-- The `reduceRoot` step strictly decreases the normalization measure. -/
+This handles the two conjunction projection cases:
+- `andE1 _ (andI _ D₁ D₂)` reduces to `D₁`
+- `andE2 _ (andI _ D₁ D₂)` reduces to `D₂`
+
+In both cases, `D_i.maximalFormulas` is a sub-multiset of the original
+`{conclusionComplexity} + D₁.maximalFormulas + D₂.maximalFormulas`, with at least the
+singleton `{conclusionComplexity}` removed. -/
+private theorem Theory.Derivation.reduceRoot_andE_maxFormulas_lt
+    {G : Ctx Atom} {A B : Proposition Atom}
+    {D₁ : T.Derivation G A} {D₂ : T.Derivation G B} (G' : Ctx Atom) :
+    Multiset.IsDershowitzMannaLT D₁.maximalFormulas
+      (andE1 G' (andI G' D₁ D₂)).maximalFormulas := by
+  simp only [maximalFormulas]
+  exact ⟨D₁.maximalFormulas, ∅,
+    {(andI G' D₁ D₂ : T.Derivation G' _).conclusionComplexity} + D₂.maximalFormulas,
+    by simp, by simp, by simp [add_comm], by simp⟩
+
+private theorem Theory.Derivation.reduceRoot_andE2_maxFormulas_lt
+    {G : Ctx Atom} {A B : Proposition Atom}
+    {D₁ : T.Derivation G A} {D₂ : T.Derivation G B} (G' : Ctx Atom) :
+    Multiset.IsDershowitzMannaLT D₂.maximalFormulas
+      (andE2 G' (andI G' D₁ D₂)).maximalFormulas := by
+  simp only [maximalFormulas]
+  exact ⟨D₂.maximalFormulas, ∅,
+    {(andI G' D₁ D₂ : T.Derivation G' _).conclusionComplexity} + D₁.maximalFormulas,
+    by simp, by simp, by simp [add_comm, add_left_comm], by simp⟩
+
+/-- The `reduceRoot` step strictly decreases the normalization measure.
+
+For conjunction beta-redexes (`andE1`/`andE2` of `andI`), the `maximalFormulas` multiset
+strictly decreases in the Dershowitz-Manna ordering (first component of the lex pair).
+
+For substitution beta-redexes (`impE` of `impI`, `orE` of `orI1`/`orI2`), the decrease
+follows from `subsOne_maximalFormulas_complexity_bound`: the cut formula is removed and any
+new maximal formulas have strictly smaller complexity.
+
+For commuting conversions (`andE1`/`andE2`/`impE` of `orE`), the `maximalFormulas` multiset
+is preserved and `commutingSum` strictly decreases (second component).
+
+TODO: The substitution and commuting conversion cases require:
+1. `subsOne_maximalFormulas_complexity_bound` for the substitution cases
+2. A `commutingSum` decrease lemma for the commuting conversion cases
+3. A proof that commuting conversions preserve `maximalFormulas` when subterms are SN -/
 private theorem Theory.Derivation.reduceRoot_decreases_normMeasure
     {G : Ctx Atom} {A : Proposition Atom}
     (d : T.Derivation G A)
@@ -1273,7 +1317,35 @@ private theorem Theory.Derivation.reduceRoot_decreases_normMeasure
     (d' : T.Derivation G A) (hd' : d.reduceRoot = some d') :
     Prod.Lex Multiset.IsDershowitzMannaLT (· < ·)
       (d'.normMeasure) (d.normMeasure) := by
-  sorry
+  unfold reduceRoot at hd'
+  split at hd' <;>
+    first | (injection hd' with hd'; subst hd') | (exact absurd hd' (by simp))
+  -- Case 1: impE (impI _ D) E => D.subsOne E (substitution beta-redex)
+  case h_1 => apply Prod.Lex.left; sorry
+  -- Case 2: andE1 _ (andI _ D₁ _) => D₁ (conjunction projection)
+  case h_2 D₁ D₂ =>
+    apply Prod.Lex.left
+    simp only [normMeasure, maximalFormulas]
+    exact ⟨D₁.maximalFormulas, ∅,
+      {(andI G D₁ D₂ : T.Derivation G _).conclusionComplexity} + D₂.maximalFormulas,
+      by simp, by simp, by simp [add_comm], by simp⟩
+  -- Case 3: andE2 _ (andI _ _ D₂) => D₂ (conjunction projection)
+  case h_3 D₁ D₂ =>
+    apply Prod.Lex.left
+    simp only [normMeasure, maximalFormulas]
+    exact ⟨D₂.maximalFormulas, ∅,
+      {(andI G D₁ D₂ : T.Derivation G _).conclusionComplexity} + D₁.maximalFormulas,
+      by simp, by simp, by simp [add_comm, add_left_comm], by simp⟩
+  -- Case 4: orE _ (orI1 _ D) DA _ => DA.subsOne D (substitution beta-redex)
+  case h_4 => apply Prod.Lex.left; sorry
+  -- Case 5: orE _ (orI2 _ D) _ DB => DB.subsOne D (substitution beta-redex)
+  case h_5 => apply Prod.Lex.left; sorry
+  -- Case 6: andE1 G (orE _ D DA DB) => orE G D (andE1 _ DA) (andE1 _ DB) (commuting)
+  case h_6 => sorry
+  -- Case 7: andE2 G (orE _ D DA DB) => orE G D (andE2 _ DA) (andE2 _ DB) (commuting)
+  case h_7 => sorry
+  -- Case 8: impE (orE G D DA DB) E => orE G D (impE DA E') (impE DB E') (commuting)
+  case h_8 => sorry
 
 /-- `normalize` produces strongly normal derivations.
 

@@ -1,15 +1,15 @@
 {
   "status": "partial",
-  "started_at": "2026-06-24T15:50:13Z",
+  "started_at": "2026-06-24T16:48:06Z",
   "requires_user_review": true,
   "blocked_phase": 2,
-  "review_reason": "Phase 2 partial: 2 of 8 reduceRoot cases proved (conjunction beta-redexes). Remaining 6 cases blocked on subsOne structural induction and commuting conversion SN hypotheses.",
+  "review_reason": "weak_isStronglyNormal regression fixed and compiles cleanly, but the file still does not build due to ~20 pre-existing hard errors in the Phase 2 region (lines 1097-1292) that are outside the stated scope (not sorrys, not weak_isStronglyNormal).",
   "artifacts": [
     "specs/332_normalization_termination_proof/handoffs/phase-2-handoff-20260624T163704Z.md"
   ],
   "partial_progress": {
-    "stage": "phase_2_partial",
-    "details": "Phase 2 partial: proved reduceRoot_andE_maxFormulas_lt, reduceRoot_andE2_maxFormulas_lt, and cases h_2/h_3 in reduceRoot_decreases_normMeasure. 6 sorry cases remain.",
+    "stage": "weak_isStronglyNormal_fixed",
+    "details": "Fixed weak_isStronglyNormal via 'induction d generalizing Δ' (root cause: IHs were too weak for binder-introducing rules orE/impI) and supplied correct weakening proofs (Finset.insert_subset_insert _ hCtx) plus congrArg2 for the recursive catch-all cases. Zero errors now in lines 837-879. The remaining ~20 hard errors are pre-existing and in the Phase 2 region (1097-1292).",
     "phases_completed": 1,
     "phases_total": 5
   },
@@ -19,7 +19,7 @@
     "vacuous_count": 0,
     "axiom_count": 14,
     "build_passed": false,
-    "build_output": "Not run - sorries remain"
+    "build_output": "weak_isStronglyNormal (lines 837-879) compiles cleanly. File still fails to build: ~20 pre-existing hard errors at lines 1097, 1116, 1122, 1148, 1150, 1154, 1156, 1168, 1176, 1180, 1198, 1204, 1217, 1229, 1278, 1281, 1282, 1288, 1291, 1292 (Phase 2 region, outside scope)."
   },
   "metadata": {
     "session_id": "sess_1782302542_261dfa_332",

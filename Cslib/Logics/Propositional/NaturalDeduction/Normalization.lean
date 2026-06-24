@@ -838,7 +838,7 @@ private theorem Theory.Derivation.weak_isStronglyNormal
     {T T' : Theory Atom} {Γ Δ : Ctx Atom} {A : Proposition Atom}
     (hTheory : T ⊆ T') (hCtx : Γ ⊆ Δ) (d : T.Derivation Γ A) :
     (d.weak hTheory hCtx).isStronglyNormal = d.isStronglyNormal := by
-  induction d with
+  induction d generalizing Δ with
   | ax _ | ass _ => rfl
   | andI _ D₁ D₂ ih₁ ih₂ =>
     simp only [weak, isStronglyNormal, ih₁, ih₂]
@@ -846,26 +846,25 @@ private theorem Theory.Derivation.weak_isStronglyNormal
     cases D with
     | andI _ _ _ => simp [weak, isStronglyNormal]
     | orE _ _ _ _ => simp [weak, isStronglyNormal]
-    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ =>
-      simp only [weak, isStronglyNormal]; exact ih
+    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => exact ih hCtx
   | andE2 _ D ih =>
     cases D with
     | andI _ _ _ => simp [weak, isStronglyNormal]
     | orE _ _ _ _ => simp [weak, isStronglyNormal]
-    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ =>
-      simp only [weak, isStronglyNormal]; exact ih
-  | orI1 _ D ih => simp only [weak, isStronglyNormal]; exact ih
-  | orI2 _ D ih => simp only [weak, isStronglyNormal]; exact ih
+    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => exact ih hCtx
+  | orI1 _ D ih => exact ih hCtx
+  | orI2 _ D ih => exact ih hCtx
   | orE _ D DA DB ih ihA ihB =>
     cases D with
     | orI1 _ _ => simp [weak, isStronglyNormal]
     | orI2 _ _ => simp [weak, isStronglyNormal]
     | orE _ _ _ _ => simp [weak, isStronglyNormal]
     | ax _ | ass _ =>
-      simp only [weak, isStronglyNormal, Bool.true_and, Bool.and_eq_true, ihA, ihB]
+      simp only [weak, isStronglyNormal, Bool.true_and, ihA, ihB]
     | andE1 _ _ | andE2 _ _ | impE _ _ =>
-      simp only [weak, isStronglyNormal, Bool.and_eq_true, ih, ihA, ihB]
-  | impI _ D ih => simp only [weak, isStronglyNormal]; exact ih
+      exact congrArg₂ (· && ·) (congrArg₂ (· && ·) (ih hCtx)
+        (ihA (Finset.insert_subset_insert _ hCtx))) (ihB (Finset.insert_subset_insert _ hCtx))
+  | impI _ D ih => exact ih (Finset.insert_subset_insert _ hCtx)
   | impE D E ih ihE =>
     cases D with
     | impI _ _ => simp [weak, isStronglyNormal]
@@ -873,7 +872,7 @@ private theorem Theory.Derivation.weak_isStronglyNormal
     | ax _ | ass _ =>
       simp only [weak, isStronglyNormal, Bool.true_and, ihE]
     | andE1 _ _ | andE2 _ _ | impE _ _ =>
-      simp only [weak, isStronglyNormal, Bool.and_eq_true, ih, ihE]
+      exact congrArg₂ (· && ·) (ih hCtx) (ihE hCtx)
 
 /-- Context weakening preserves strong normality. -/
 private theorem Theory.Derivation.weakCtx_isStronglyNormal

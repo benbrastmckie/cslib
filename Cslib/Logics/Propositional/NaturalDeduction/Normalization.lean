@@ -7,8 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Propositional.NaturalDeduction.Basic
-public import Cslib.Logics.Propositional.Subformula
-public import Mathlib.Data.Multiset.DershowitzManna
 
 /-! # Normalization for Propositional Natural Deduction
 
@@ -54,6 +52,105 @@ namespace Cslib.Logic.PL
 open Proposition Theory InferenceSystem DerivableIn
 
 variable {Atom : Type u} [DecidableEq Atom]
+
+/-! ## Subformula Infrastructure -/
+
+/-- All subformulas of a proposition, including itself.
+
+This is used to state the subformula property: every formula occurring in a normal
+derivation is a subformula of the conclusion or a hypothesis. -/
+def Proposition.subformulas : Proposition Atom → Finset (Proposition Atom)
+  | φ@(.atom _) => {φ}
+  | φ@.bot => {φ}
+  | φ@(.imp A B) => insert φ (A.subformulas ∪ B.subformulas)
+  | φ@(.and A B) => insert φ (A.subformulas ∪ B.subformulas)
+  | φ@(.or A B) => insert φ (A.subformulas ∪ B.subformulas)
+
+/-- A proposition `A` is a subformula of `B` if `A` occurs in the subformula set of `B`. -/
+def Proposition.IsSubformula (A B : Proposition Atom) : Prop :=
+  A ∈ B.subformulas
+
+/-- Every proposition is a subformula of itself. -/
+theorem Proposition.self_mem_subformulas (A : Proposition Atom) : A ∈ A.subformulas := by
+  cases A <;> simp [subformulas]
+
+/-- Every proposition is a subformula of itself. -/
+theorem Proposition.IsSubformula.refl (A : Proposition Atom) : A.IsSubformula A :=
+  Proposition.self_mem_subformulas A
+
+/-- If `A` is a subformula of `B` and `B` is a subformula of `C`,
+then `A` is a subformula of `C`. -/
+theorem Proposition.IsSubformula.trans {A B C : Proposition Atom}
+    (h1 : A.IsSubformula B) (h2 : B.IsSubformula C) : A.IsSubformula C := by
+  unfold IsSubformula at *
+  induction C with
+  | atom _ =>
+    simp only [subformulas, Finset.mem_singleton] at h2; subst h2; exact h1
+  | bot =>
+    simp only [subformulas, Finset.mem_singleton] at h2; subst h2; exact h1
+  | imp P Q ihP ihQ =>
+    simp only [subformulas, Finset.mem_insert, Finset.mem_union] at h2
+    rcases h2 with rfl | hP | hQ
+    · exact h1
+    · exact Finset.mem_insert.mpr (Or.inr (Finset.mem_union.mpr (Or.inl (ihP hP))))
+    · exact Finset.mem_insert.mpr (Or.inr (Finset.mem_union.mpr (Or.inr (ihQ hQ))))
+  | and P Q ihP ihQ =>
+    simp only [subformulas, Finset.mem_insert, Finset.mem_union] at h2
+    rcases h2 with rfl | hP | hQ
+    · exact h1
+    · exact Finset.mem_insert.mpr (Or.inr (Finset.mem_union.mpr (Or.inl (ihP hP))))
+    · exact Finset.mem_insert.mpr (Or.inr (Finset.mem_union.mpr (Or.inr (ihQ hQ))))
+  | or P Q ihP ihQ =>
+    simp only [subformulas, Finset.mem_insert, Finset.mem_union] at h2
+    rcases h2 with rfl | hP | hQ
+    · exact h1
+    · exact Finset.mem_insert.mpr (Or.inr (Finset.mem_union.mpr (Or.inl (ihP hP))))
+    · exact Finset.mem_insert.mpr (Or.inr (Finset.mem_union.mpr (Or.inr (ihQ hQ))))
+
+/-- Left component of a conjunction is a subformula of the conjunction. -/
+theorem Proposition.IsSubformula.and_left {A B : Proposition Atom} :
+    A.IsSubformula (A.and B) := by
+  simp only [IsSubformula, subformulas, Finset.mem_insert, Finset.mem_union]
+  right; left; exact self_mem_subformulas A
+
+/-- Right component of a conjunction is a subformula of the conjunction. -/
+theorem Proposition.IsSubformula.and_right {A B : Proposition Atom} :
+    B.IsSubformula (A.and B) := by
+  simp only [IsSubformula, subformulas, Finset.mem_insert, Finset.mem_union]
+  right; right; exact self_mem_subformulas B
+
+/-- Left component of a disjunction is a subformula of the disjunction. -/
+theorem Proposition.IsSubformula.or_left {A B : Proposition Atom} :
+    A.IsSubformula (A.or B) := by
+  simp only [IsSubformula, subformulas, Finset.mem_insert, Finset.mem_union]
+  right; left; exact self_mem_subformulas A
+
+/-- Right component of a disjunction is a subformula of the disjunction. -/
+theorem Proposition.IsSubformula.or_right {A B : Proposition Atom} :
+    B.IsSubformula (A.or B) := by
+  simp only [IsSubformula, subformulas, Finset.mem_insert, Finset.mem_union]
+  right; right; exact self_mem_subformulas B
+
+/-- Antecedent of an implication is a subformula of the implication. -/
+theorem Proposition.IsSubformula.imp_left {A B : Proposition Atom} :
+    A.IsSubformula (A.imp B) := by
+  simp only [IsSubformula, subformulas, Finset.mem_insert, Finset.mem_union]
+  right; left; exact self_mem_subformulas A
+
+/-- Consequent of an implication is a subformula of the implication. -/
+theorem Proposition.IsSubformula.imp_right {A B : Proposition Atom} :
+    B.IsSubformula (A.imp B) := by
+  simp only [IsSubformula, subformulas, Finset.mem_insert, Finset.mem_union]
+  right; right; exact self_mem_subformulas B
+
+/-- The complexity (size) of a proposition. Atoms and `⊥` have complexity 0;
+connectives add 1 plus the sum of their children's complexities. -/
+def Proposition.complexity : Proposition Atom → Nat
+  | .atom _ => 0
+  | .bot => 0
+  | .imp A B => 1 + A.complexity + B.complexity
+  | .and A B => 1 + A.complexity + B.complexity
+  | .or A B => 1 + A.complexity + B.complexity
 
 /-! ## Derivation Definitions -/
 
@@ -830,58 +927,16 @@ theorem Theory.Derivation.normalizeAux_fixpoint {G : Ctx Atom} {A : Proposition 
 
 /-! ## Normalization Produces Strongly Normal Derivations -/
 
-/-! ### Structure-Preserving Properties of Weakening -/
+/-
+The normalization termination proof requires a two-level induction:
+1. Outer induction on formula complexity of the maximal formula being reduced
+   (handles proper β-redexes via substitution)
+2. Inner induction on fuel (handles commuting conversions)
 
-/-- Weakening preserves strong normality: the proof tree structure (constructors) is identical,
-only context/theory membership witnesses change. -/
-private theorem Theory.Derivation.weak_isStronglyNormal
-    {T T' : Theory Atom} {Γ Δ : Ctx Atom} {A : Proposition Atom}
-    (hTheory : T ⊆ T') (hCtx : Γ ⊆ Δ) (d : T.Derivation Γ A) :
-    (d.weak hTheory hCtx).isStronglyNormal = d.isStronglyNormal := by
-  induction d generalizing Δ with
-  | ax _ | ass _ => rfl
-  | andI _ D₁ D₂ ih₁ ih₂ =>
-    simp only [weak, isStronglyNormal, ih₁, ih₂]
-  | andE1 _ D ih =>
-    cases D with
-    | andI _ _ _ => simp [weak, isStronglyNormal]
-    | orE _ _ _ _ => simp [weak, isStronglyNormal]
-    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => exact ih hCtx
-  | andE2 _ D ih =>
-    cases D with
-    | andI _ _ _ => simp [weak, isStronglyNormal]
-    | orE _ _ _ _ => simp [weak, isStronglyNormal]
-    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => exact ih hCtx
-  | orI1 _ D ih => exact ih hCtx
-  | orI2 _ D ih => exact ih hCtx
-  | orE _ D DA DB ih ihA ihB =>
-    cases D with
-    | orI1 _ _ => simp [weak, isStronglyNormal]
-    | orI2 _ _ => simp [weak, isStronglyNormal]
-    | orE _ _ _ _ => simp [weak, isStronglyNormal]
-    | ax _ | ass _ =>
-      simp only [weak, isStronglyNormal, Bool.true_and, ihA, ihB]
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
-      exact congrArg₂ (· && ·) (congrArg₂ (· && ·) (ih hCtx)
-        (ihA (Finset.insert_subset_insert _ hCtx))) (ihB (Finset.insert_subset_insert _ hCtx))
-  | impI _ D ih => exact ih (Finset.insert_subset_insert _ hCtx)
-  | impE D E ih ihE =>
-    cases D with
-    | impI _ _ => simp [weak, isStronglyNormal]
-    | orE _ _ _ _ => simp [weak, isStronglyNormal]
-    | ax _ | ass _ =>
-      simp only [weak, isStronglyNormal, Bool.true_and, ihE]
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
-      exact congrArg₂ (· && ·) (ih hCtx) (ihE hCtx)
-
-/-- Context weakening preserves strong normality. -/
-private theorem Theory.Derivation.weakCtx_isStronglyNormal
-    {T : Theory Atom} {Γ Δ : Ctx Atom} {A : Proposition Atom}
-    (hCtx : Γ ⊆ Δ) (d : T.Derivation Γ A) :
-    (d.weakCtx hCtx).isStronglyNormal = d.isStronglyNormal :=
-  d.weak_isStronglyNormal Set.Subset.rfl hCtx
-
-/-! ### Termination Measure for Normalization -/
+Key insight (Prawitz 1965, Ch. IV): substituting `arg : G ⊢ A` into `body : G,A ⊢ B`
+only creates new redexes involving `arg`. Since `arg` derives `A` (a proper subformula
+of `A → B`), any new maximal formula has strictly lower complexity.
+-/
 
 private def Theory.Derivation.conclusionComplexity (_ : T.Derivation G A) : Nat := A.complexity
 
@@ -1010,341 +1065,6 @@ private theorem Theory.Derivation.redexWeight_zero_sn {G : Ctx Atom} {A : Propos
       simp only [redexWeight] at h
       simp only [isStronglyNormal, Bool.and_eq_true]
       simp_all [redexWeight, isStronglyNormal, conclusionComplexity]
-
-/-! ### Well-Founded Normalization -/
-
-/-- Total node count of a derivation tree. -/
-private def Theory.Derivation.nodeCount : T.Derivation G A → Nat
-  | ax _ | ass _ => 1
-  | andI _ D₁ D₂ => 1 + D₁.nodeCount + D₂.nodeCount
-  | andE1 _ D => 1 + D.nodeCount
-  | andE2 _ D => 1 + D.nodeCount
-  | orI1 _ D => 1 + D.nodeCount
-  | orI2 _ D => 1 + D.nodeCount
-  | orE _ D DA DB => 1 + D.nodeCount + DA.nodeCount + DB.nodeCount
-  | impI _ D => 1 + D.nodeCount
-  | impE D E => 1 + D.nodeCount + E.nodeCount
-
-/-- The multiset of cut-formula complexities at beta-redex sites.
-Each beta-redex contributes the complexity of the eliminated formula to this multiset.
-Used as the primary component of the Dershowitz-Manna termination measure. -/
-private def Theory.Derivation.maximalFormulas : T.Derivation G A → Multiset Nat
-  | ax _ | ass _ => ∅
-  | andI _ D₁ D₂ => D₁.maximalFormulas + D₂.maximalFormulas
-  | andE1 _ D =>
-    match D with
-    | andI _ _ _ => {D.conclusionComplexity} + D.maximalFormulas
-    | _ => D.maximalFormulas
-  | andE2 _ D =>
-    match D with
-    | andI _ _ _ => {D.conclusionComplexity} + D.maximalFormulas
-    | _ => D.maximalFormulas
-  | orI1 _ D => D.maximalFormulas
-  | orI2 _ D => D.maximalFormulas
-  | orE _ D DA DB =>
-    match D with
-    | orI1 _ _ | orI2 _ _ =>
-      {D.conclusionComplexity} + D.maximalFormulas + DA.maximalFormulas + DB.maximalFormulas
-    | _ => D.maximalFormulas + DA.maximalFormulas + DB.maximalFormulas
-  | impI _ D => D.maximalFormulas
-  | impE D E =>
-    match D with
-    | impI _ _ => {D.conclusionComplexity} + D.maximalFormulas + E.maximalFormulas
-    | _ => D.maximalFormulas + E.maximalFormulas
-
-/-- Sum of the `nodeCount` of each sub-derivation rooted at a commuting conversion site.
-A commuting conversion occurs when an elimination is applied to the result of `orE`.
-Used as the secondary component of the termination measure. -/
-private def Theory.Derivation.commutingSum : T.Derivation G A → Nat
-  | ax _ | ass _ => 0
-  | andI _ D₁ D₂ => D₁.commutingSum + D₂.commutingSum
-  | andE1 _ D =>
-    match D with
-    | orE _ _ _ _ => D.nodeCount + D.commutingSum
-    | _ => D.commutingSum
-  | andE2 _ D =>
-    match D with
-    | orE _ _ _ _ => D.nodeCount + D.commutingSum
-    | _ => D.commutingSum
-  | orI1 _ D => D.commutingSum
-  | orI2 _ D => D.commutingSum
-  | orE _ D DA DB =>
-    match D with
-    | orE _ _ _ _ => D.nodeCount + D.commutingSum + DA.commutingSum + DB.commutingSum
-    | _ => D.commutingSum + DA.commutingSum + DB.commutingSum
-  | impI _ D => D.commutingSum
-  | impE D E =>
-    match D with
-    | orE _ _ _ _ => D.nodeCount + D.commutingSum + E.commutingSum
-    | _ => D.commutingSum + E.commutingSum
-
-/-- The combined termination measure for normalization:
-the pair `(maximalFormulas d, commutingSum d)` ordered by the lexicographic product of
-the Dershowitz-Manna multiset ordering and the natural number ordering. -/
-private def Theory.Derivation.normMeasure (d : T.Derivation G A) : Multiset Nat × Nat :=
-  (d.maximalFormulas, d.commutingSum)
-
-/-- The combined normalization measure is well-founded. -/
-private theorem normMeasure_wf :
-    WellFounded (InvImage (Prod.Lex Multiset.IsDershowitzMannaLT (· < ·))
-      (@Theory.Derivation.normMeasure Atom _ T G A)) :=
-  InvImage.wf _ (WellFounded.prod_lex
-    Multiset.wellFounded_isDershowitzMannaLT
-    Nat.lt_wfRel.wf)
-
-/-- The triple measure for well-founded normalization: `(maximalFormulas, commutingSum, sizeOf)`.
-The `sizeOf` component handles the structural recursive calls on subterms. -/
-private def Theory.Derivation.normTriple (d : T.Derivation G A) : Multiset Nat × Nat × Nat :=
-  (d.maximalFormulas, d.commutingSum, sizeOf d)
-
-/-- The triple measure is well-founded. -/
-private theorem normTriple_wf :
-    WellFounded (InvImage
-      (Prod.Lex Multiset.IsDershowitzMannaLT (Prod.Lex (· < ·) (· < ·)))
-      (@Theory.Derivation.normTriple Atom _ T G A)) :=
-  InvImage.wf _ (WellFounded.prod_lex
-    Multiset.wellFounded_isDershowitzMannaLT
-    (WellFounded.prod_lex Nat.lt_wfRel.wf Nat.lt_wfRel.wf))
-
-/-! ### Key Properties of the Termination Measure -/
-
-/-- Immediate subterms have `maximalFormulas ≤ maximalFormulas d` as multisets.
-This is the key monotonicity property enabling the lex-decrease argument. -/
-private theorem Theory.Derivation.maximalFormulas_le_andI_left
-    {G : Ctx Atom} {A B : Proposition Atom}
-    {D₁ : T.Derivation G A} {D₂ : T.Derivation G B} (G' : Ctx Atom) :
-    D₁.maximalFormulas ≤ (andI G' D₁ D₂).maximalFormulas := by
-  simp [maximalFormulas, Multiset.le_add_right]
-
-private theorem Theory.Derivation.maximalFormulas_le_andI_right
-    {G : Ctx Atom} {A B : Proposition Atom}
-    {D₁ : T.Derivation G A} {D₂ : T.Derivation G B} (G' : Ctx Atom) :
-    D₂.maximalFormulas ≤ (andI G' D₁ D₂).maximalFormulas := by
-  simp [maximalFormulas, Multiset.le_add_left]
-
-/-- `maximalFormulas` for `impE (impI _ body) E` is `{complexity(A→B)} + ...`.
-Beta-redex removal strictly decreases the multiset. -/
-private theorem Theory.Derivation.maximalFormulas_impE_impI
-    {G : Ctx Atom} {A B : Proposition Atom}
-    {body : T.Derivation (insert A G) B} {E : T.Derivation G A} :
-    (impE (impI G body) E).maximalFormulas =
-      {(impI G body : T.Derivation G (A.imp B)).conclusionComplexity} +
-        (impI G body).maximalFormulas + E.maximalFormulas := by
-  simp [maximalFormulas]
-
-/-- Strongly normal derivations have no redexes: `maximalFormulas = ∅`. -/
-private theorem Theory.Derivation.sn_maximalFormulas_empty
-    {G : Ctx Atom} {A : Proposition Atom}
-    (d : T.Derivation G A) (h : d.isStronglyNormal = true) :
-    d.maximalFormulas = ∅ := by
-  induction d with
-  | ax _ | ass _ => rfl
-  | andI _ D₁ D₂ ih₁ ih₂ =>
-    simp only [isStronglyNormal, Bool.and_eq_true] at h
-    simp [maximalFormulas, ih₁ h.1, ih₂ h.2]
-  | andE1 _ D ih =>
-    cases D with
-    | andI _ _ _ => simp [isStronglyNormal] at h
-    | orE _ _ _ _ => simp only [maximalFormulas]; exact ih h
-    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ =>
-      simp only [maximalFormulas]; exact ih h
-  | andE2 _ D ih =>
-    cases D with
-    | andI _ _ _ => simp [isStronglyNormal] at h
-    | orE _ _ _ _ => simp only [maximalFormulas]; exact ih h
-    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ =>
-      simp only [maximalFormulas]; exact ih h
-  | orI1 _ D ih =>
-    simp only [isStronglyNormal] at h; simp [maximalFormulas, ih h]
-  | orI2 _ D ih =>
-    simp only [isStronglyNormal] at h; simp [maximalFormulas, ih h]
-  | orE _ D DA DB ih ihA ihB =>
-    cases D with
-    | orI1 _ _ | orI2 _ _ => simp [isStronglyNormal] at h
-    | orE _ _ _ _ => simp [isStronglyNormal] at h
-    | ax _ | ass _ =>
-      simp only [isStronglyNormal, Bool.true_and, Bool.and_eq_true] at h
-      simp [maximalFormulas, ihA h.1, ihB h.2]
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
-      simp only [isStronglyNormal, Bool.and_eq_true] at h
-      simp [maximalFormulas, ih h.1.1, ihA h.1.2, ihB h.2]
-  | impI _ D ih =>
-    simp only [isStronglyNormal] at h; simp [maximalFormulas, ih h]
-  | impE D E ih ihE =>
-    cases D with
-    | impI _ _ => simp [isStronglyNormal] at h
-    | orE _ _ _ _ => simp only [maximalFormulas]; exact Nat.add_eq_zero_iff.mpr ⟨ih h, ihE h⟩
-    | ax _ | ass _ =>
-      simp only [isStronglyNormal, Bool.true_and] at h
-      simp [maximalFormulas, ihE h]
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
-      simp only [isStronglyNormal, Bool.and_eq_true] at h
-      simp [maximalFormulas, ih h.1, ihE h.2]
-
-/-- Strongly normal derivations have no commuting conversions: `commutingSum = 0`. -/
-private theorem Theory.Derivation.sn_commutingSum_zero
-    {G : Ctx Atom} {A : Proposition Atom}
-    (d : T.Derivation G A) (h : d.isStronglyNormal = true) :
-    d.commutingSum = 0 := by
-  induction d with
-  | ax _ | ass _ => rfl
-  | andI _ D₁ D₂ ih₁ ih₂ =>
-    simp only [isStronglyNormal, Bool.and_eq_true] at h
-    simp [commutingSum, ih₁ h.1, ih₂ h.2]
-  | andE1 _ D ih =>
-    cases D with
-    | andI _ _ _ => simp [isStronglyNormal] at h
-    | orE _ _ _ _ => simp [isStronglyNormal] at h
-    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ =>
-      simp [commutingSum, ih h]
-  | andE2 _ D ih =>
-    cases D with
-    | andI _ _ _ => simp [isStronglyNormal] at h
-    | orE _ _ _ _ => simp [isStronglyNormal] at h
-    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ =>
-      simp [commutingSum, ih h]
-  | orI1 _ D ih =>
-    simp only [isStronglyNormal] at h; simp [commutingSum, ih h]
-  | orI2 _ D ih =>
-    simp only [isStronglyNormal] at h; simp [commutingSum, ih h]
-  | orE _ D DA DB ih ihA ihB =>
-    cases D with
-    | orI1 _ _ | orI2 _ _ => simp [isStronglyNormal] at h
-    | orE _ _ _ _ => simp [isStronglyNormal] at h
-    | ax _ | ass _ =>
-      simp only [isStronglyNormal, Bool.true_and, Bool.and_eq_true] at h
-      simp [commutingSum, ihA h.1, ihB h.2]
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
-      simp only [isStronglyNormal, Bool.and_eq_true] at h
-      simp [commutingSum, ih h.1.1, ihA h.1.2, ihB h.2]
-  | impI _ D ih =>
-    simp only [isStronglyNormal] at h; simp [commutingSum, ih h]
-  | impE D E ih ihE =>
-    cases D with
-    | impI _ _ => simp [isStronglyNormal] at h
-    | orE _ _ _ _ => simp [isStronglyNormal] at h
-    | ax _ | ass _ =>
-      simp only [isStronglyNormal, Bool.true_and] at h
-      simp [commutingSum, ihE h]
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
-      simp only [isStronglyNormal, Bool.and_eq_true] at h
-      simp [commutingSum, ih h.1, ihE h.2]
-
-/-! ### Measure Decrease Under Root Reduction -/
-
-/-- After `subsOne`, new maximal formulas have complexity strictly less than the cut formula.
-This is the key property: substitution only introduces redexes involving proper subformulas
-of the substituted formula's type.
-
-**Proof sketch** (Prawitz, Ch. III-IV): When `subsOne` substitutes `arg` (of type `A`) for
-assumptions of type `A` in `body`, the substitution `subs` recurses structurally on `body`.
-At each `ass` node of type `A`, it inserts `arg`. New beta-redexes can only arise when `arg`
-(an introduction form) lands under an elimination of type `A`. Since the cut formula there is `A`
-(not a larger formula), and `A.complexity < A.complexity.succ`, all new maximal formula
-complexities are bounded by `A.complexity`, hence strictly less than `A.complexity.succ`.
-
-The formal proof requires structural induction on `body`, tracking through `subs` (which uses
-tactic blocks for `orE`, `impI` branches with `weakCtx` rewrites). Each case must show that
-the `maximalFormulas` of the `subs` result only contain elements ≤ the `maximalFormulas` of
-`body` or ≤ `A.complexity`. This is the mathematical heart of the substitution complexity
-argument but requires approximately 100 lines of case analysis over the 10 constructors.
-
-TODO: Complete the structural induction proof. The mathematical argument is sound but the
-Lean formalization through `subs` (which uses `by` blocks at `ass`, `orE`, `impI` cases)
-makes the induction technically challenging. -/
-private theorem Theory.Derivation.subsOne_maximalFormulas_complexity_bound
-    {G : Ctx Atom} {A B : Proposition Atom}
-    (body : T.Derivation (insert A G) B)
-    (arg : T.Derivation G A)
-    (harg : arg.isStronglyNormal = true)
-    (k : Nat) (hk : k ∈ (body.subsOne arg).maximalFormulas) :
-    k < A.complexity.succ := by
-  sorry
-
-/-- For a conjunction beta-redex, `reduceRoot` produces a derivation with strictly smaller
-`maximalFormulas` in the Dershowitz-Manna ordering.
-
-This handles the two conjunction projection cases:
-- `andE1 _ (andI _ D₁ D₂)` reduces to `D₁`
-- `andE2 _ (andI _ D₁ D₂)` reduces to `D₂`
-
-In both cases, `D_i.maximalFormulas` is a sub-multiset of the original
-`{conclusionComplexity} + D₁.maximalFormulas + D₂.maximalFormulas`, with at least the
-singleton `{conclusionComplexity}` removed. -/
-private theorem Theory.Derivation.reduceRoot_andE_maxFormulas_lt
-    {G : Ctx Atom} {A B : Proposition Atom}
-    {D₁ : T.Derivation G A} {D₂ : T.Derivation G B} (G' : Ctx Atom) :
-    Multiset.IsDershowitzMannaLT D₁.maximalFormulas
-      (andE1 G' (andI G' D₁ D₂)).maximalFormulas := by
-  simp only [maximalFormulas]
-  exact ⟨D₁.maximalFormulas, ∅,
-    {(andI G' D₁ D₂ : T.Derivation G' _).conclusionComplexity} + D₂.maximalFormulas,
-    by simp, by simp, by simp [add_comm], by simp⟩
-
-private theorem Theory.Derivation.reduceRoot_andE2_maxFormulas_lt
-    {G : Ctx Atom} {A B : Proposition Atom}
-    {D₁ : T.Derivation G A} {D₂ : T.Derivation G B} (G' : Ctx Atom) :
-    Multiset.IsDershowitzMannaLT D₂.maximalFormulas
-      (andE2 G' (andI G' D₁ D₂)).maximalFormulas := by
-  simp only [maximalFormulas]
-  exact ⟨D₂.maximalFormulas, ∅,
-    {(andI G' D₁ D₂ : T.Derivation G' _).conclusionComplexity} + D₁.maximalFormulas,
-    by simp, by simp, by simp [add_comm, add_left_comm], by simp⟩
-
-/-- The `reduceRoot` step strictly decreases the normalization measure.
-
-For conjunction beta-redexes (`andE1`/`andE2` of `andI`), the `maximalFormulas` multiset
-strictly decreases in the Dershowitz-Manna ordering (first component of the lex pair).
-
-For substitution beta-redexes (`impE` of `impI`, `orE` of `orI1`/`orI2`), the decrease
-follows from `subsOne_maximalFormulas_complexity_bound`: the cut formula is removed and any
-new maximal formulas have strictly smaller complexity.
-
-For commuting conversions (`andE1`/`andE2`/`impE` of `orE`), the `maximalFormulas` multiset
-is preserved and `commutingSum` strictly decreases (second component).
-
-TODO: The substitution and commuting conversion cases require:
-1. `subsOne_maximalFormulas_complexity_bound` for the substitution cases
-2. A `commutingSum` decrease lemma for the commuting conversion cases
-3. A proof that commuting conversions preserve `maximalFormulas` when subterms are SN -/
-private theorem Theory.Derivation.reduceRoot_decreases_normMeasure
-    {G : Ctx Atom} {A : Proposition Atom}
-    (d : T.Derivation G A)
-    (h_allSubsSN : ∀ {G' A'} (D : T.Derivation G' A'),
-      -- D is an immediate subterm of d AND D is SN
-      True)
-    (d' : T.Derivation G A) (hd' : d.reduceRoot = some d') :
-    Prod.Lex Multiset.IsDershowitzMannaLT (· < ·)
-      (d'.normMeasure) (d.normMeasure) := by
-  unfold reduceRoot at hd'
-  split at hd' <;>
-    first | (injection hd' with hd'; subst hd') | (exact absurd hd' (by simp))
-  -- Case 1: impE (impI _ D) E => D.subsOne E (substitution beta-redex)
-  case h_1 => apply Prod.Lex.left; sorry
-  -- Case 2: andE1 _ (andI _ D₁ _) => D₁ (conjunction projection)
-  case h_2 D₁ D₂ =>
-    apply Prod.Lex.left
-    simp only [normMeasure, maximalFormulas]
-    exact ⟨D₁.maximalFormulas, ∅,
-      {(andI G D₁ D₂ : T.Derivation G _).conclusionComplexity} + D₂.maximalFormulas,
-      by simp, by simp, by simp [add_comm], by simp⟩
-  -- Case 3: andE2 _ (andI _ _ D₂) => D₂ (conjunction projection)
-  case h_3 D₁ D₂ =>
-    apply Prod.Lex.left
-    simp only [normMeasure, maximalFormulas]
-    exact ⟨D₂.maximalFormulas, ∅,
-      {(andI G D₁ D₂ : T.Derivation G _).conclusionComplexity} + D₁.maximalFormulas,
-      by simp, by simp, by simp [add_comm, add_left_comm], by simp⟩
-  -- Case 4: orE _ (orI1 _ D) DA _ => DA.subsOne D (substitution beta-redex)
-  case h_4 => apply Prod.Lex.left; sorry
-  -- Case 5: orE _ (orI2 _ D) _ DB => DB.subsOne D (substitution beta-redex)
-  case h_5 => apply Prod.Lex.left; sorry
-  -- Case 6: andE1 G (orE _ D DA DB) => orE G D (andE1 _ DA) (andE1 _ DB) (commuting)
-  case h_6 => sorry
-  -- Case 7: andE2 G (orE _ D DA DB) => orE G D (andE2 _ DA) (andE2 _ DB) (commuting)
-  case h_7 => sorry
-  -- Case 8: impE (orE G D DA DB) E => orE G D (impE DA E') (impE DB E') (commuting)
-  case h_8 => sorry
 
 /-- `normalize` produces strongly normal derivations.
 

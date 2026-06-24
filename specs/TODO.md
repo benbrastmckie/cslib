@@ -1,5 +1,5 @@
 ---
-next_project_number: 321
+next_project_number: 322
 ---
 
 # TODO
@@ -11,8 +11,8 @@ next_project_number: 321
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,311,314,316 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215,300,312,317 | 36,37,180,299,311,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,241,245,278,290,299,301,312,314,316,321 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 2 | 39,40,181,215,300,317 | 36,37,180,299,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
 | 3 | 41,275,319 | 39,40,317 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -49,6 +49,10 @@ next_project_number: 321
   └─ 275 [BLOCKED] — Prove that Bimodal TM is conservative over Temporal BX for tempor
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
+### Code Hygiene
+
+321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
+
 ### Modal
 
 299 [NOT STARTED] — Implement tableau decision procedure for basic modal logic K with
@@ -56,12 +60,21 @@ next_project_number: 321
 
 ### Algebraic Semantics
 
-311 [PLANNED] — Prove the conservative extension theorem: IPL is conservative ove
-  └─ 312 [BLOCKED] — Consolidate the full conservative extension chain into a unified 
+312 [IMPLEMENTING] — Consolidate the full conservative extension chain into a unified 
 
 ### Uncategorized
 
 ## Tasks
+
+### 321. Code hygiene logics foundations
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Code Hygiene
+- **Dependencies**: None
+
+**Description**: Review file size and structure throughout Logics/ and Foundations/ to identify and refactor files that are too long or poorly structured. Abstract and expose all and only what should be abstracted/exposed, maintaining the highest standards for code hygiene. Survey file lengths, identify candidates over ~400 lines, check for proper module boundaries, unnecessary public exports, missing abstraction barriers, and violations of single-responsibility principle. Produce a refactoring plan with prioritized actions
+
+---
 
 ### 320. Remove nd metalogic cleanup
 - **Status**: [COMPLETED]
@@ -141,7 +154,7 @@ Literature sources:
 ---
 
 ### 312. Unified conservative extension chain
-- **Status**: [BLOCKED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 311
@@ -151,7 +164,7 @@ Literature sources:
 ---
 
 ### 311. Ipl conservative over imp
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 309, Task 310

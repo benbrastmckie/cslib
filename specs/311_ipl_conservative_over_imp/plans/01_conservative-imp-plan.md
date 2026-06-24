@@ -1,7 +1,7 @@
 # Implementation Plan: IPL Conservative over IPL(->,%top)
 
 - **Task**: 311 - IPL conservative over IPL(->,%top) for imp-top-only formulas
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 8 hours
 - **Dependencies**: 309, 310
 - **Research Inputs**: specs/311_ipl_conservative_over_imp/reports/03_blocker-unblock-research.md

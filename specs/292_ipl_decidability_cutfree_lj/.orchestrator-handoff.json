@@ -1,0 +1,12 @@
+{
+  "status": "implemented",
+  "summary": "Task 292 complete. Created Cslib/Logics/Propositional/SequentCalculus/LJ/Decidability.lean (zero sorries, ~220 lines) delivering: (1) listToImp/ctxToImp encoding of finite contexts as nested implications; (2) LJ deduction theorem (ljListDeductionFwd/Bwd, ljProofDeductionFwd/Bwd); (3) instDecidableLJDerivable: Decidable (Nonempty (LJProof (Γ ⊢ A))); (4) instDecidableDerivableInIPL: Decidable (DerivableIn (AxiomTheory IntPropAxiom) (Γ ⊢ A)). Strategy: deduction theorem reduction to IValid (ctxToImp Γ A) via lj_iff_ivalid + instDecidableIValid (existing tableau). All CI checks pass. Cslib.lean barrel updated.",
+  "blockers": [],
+  "artifacts": [
+    "Cslib/Logics/Propositional/SequentCalculus/LJ/Decidability.lean",
+    "specs/292_ipl_decidability_cutfree_lj/summaries/01_decidability-summary.md"
+  ],
+  "phases_completed": 3,
+  "phases_total": 3,
+  "continuation_context": null
+}

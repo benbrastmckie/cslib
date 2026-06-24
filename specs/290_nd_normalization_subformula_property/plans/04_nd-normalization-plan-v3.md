@@ -138,7 +138,7 @@ CI passes (`lake build`, `checkInitImports`, `lint-style`). 5 sorry remain.
 
 ---
 
-### Phase 5: Fix conclusion_grounded_or_intro with 3-Way Disjunction [NOT STARTED]
+### Phase 5: Fix conclusion_grounded_or_intro with 3-Way Disjunction [COMPLETED]
 
 **Goal**: Eliminate the 3 sorry in `conclusion_grounded_or_intro` by adding `isOrERoot` and
 changing the theorem to a 3-way disjunction. Update all callsites in
@@ -218,7 +218,7 @@ and `orE` is not intro-headed. The fix is to add a third disjunct: `d.isOrERoot 
 
 ---
 
-### Phase 6: Prove normalize_isStronglyNormal [NOT STARTED]
+### Phase 6: Prove normalize_isStronglyNormal [IN PROGRESS]
 
 **Goal**: Prove that `normalize` (equivalently `normalizeAux (2^height)`) produces a strongly
 normal derivation. Eliminate the final 2 sorry and achieve zero sorry in the file.

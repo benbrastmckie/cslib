@@ -1,0 +1,29 @@
+{
+  "status": "partial",
+  "summary": "CutElimination.lean rewritten from 873 broken lines to 246 compiling lines (4 sorry). Generic-sequent helper pattern works: CutFree.mono, CutFreeLKProof.mono, cutAdm_left structural cases, cutAdmissibility, cutElim all build. 4 sorry remain: 3 principal cases + weakL context shrinking.",
+  "blockers": [
+    "cutAdm_left weakL case needs restructuring: use (Γ₀, hL : Γ ⊆ Γ₀) pattern with fixed target antecedent",
+    "3 principal cases (andR/orR/impR) need subformula IH via continuation parameter"
+  ],
+  "artifacts": [
+    {
+      "type": "code",
+      "path": "Cslib/Logics/Propositional/SequentCalculus/LK/CutElimination.lean",
+      "summary": "Cut elimination rewrite: 246 lines, builds with 4 sorry"
+    }
+  ],
+  "phases_completed": 4,
+  "phases_total": 5,
+  "sorry_inventory": [
+    {"file": "Cslib/Logics/Propositional/SequentCalculus/LK/CutElimination.lean", "line": 103, "description": "andR principal case"},
+    {"file": "Cslib/Logics/Propositional/SequentCalculus/LK/CutElimination.lean", "line": 138, "description": "orR principal case"},
+    {"file": "Cslib/Logics/Propositional/SequentCalculus/LK/CutElimination.lean", "line": 174, "description": "impR principal case"},
+    {"file": "Cslib/Logics/Propositional/SequentCalculus/LK/CutElimination.lean", "line": 193, "description": "weakL d₂ context shrinking"}
+  ],
+  "continuation_context": {
+    "resume_from": "phase_3_cutelim_sorry_elimination",
+    "completed_phases": ["phase_1", "phase_2", "phase_4", "phase_5_partial"],
+    "architecture_note": "cutAdm_left needs restructuring: add Γ₀ as fixed target with hL : Γ ⊆ Γ₀. Fixes weakL (Γ shrinks via hL, Γ₀/d₂ unchanged) and andL (Γ₀ expands to insert A (insert B Γ₀), wrap result with .andL). Principal cases need compound formula IH via continuation.",
+    "files_with_errors": []
+  }
+}

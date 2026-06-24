@@ -1,6 +1,16 @@
 {
-  "next_project_number": 321,
+  "next_project_number": 322,
   "active_projects": [
+    {
+      "project_number": 321,
+      "project_name": "code_hygiene_logics_foundations",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Review file size and structure throughout Logics/ and Foundations/ to identify and refactor files that are too long or poorly structured. Abstract and expose all and only what should be abstracted/exposed, maintaining the highest standards for code hygiene. Survey file lengths, identify candidates over ~400 lines, check for proper module boundaries, unnecessary public exports, missing abstraction barriers, and violations of single-responsibility principle. Produce a refactoring plan with prioritized actions",
+      "topic": "Code Hygiene",
+      "created": "2026-06-24T10:46:01Z",
+      "last_updated": "2026-06-24T10:46:01Z"
+    },
     {
       "project_number": 316,
       "project_name": "propositional_tableau_soundness",
@@ -556,12 +566,12 @@
     {
       "project_number": 311,
       "project_name": "ipl_conservative_over_imp",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Prove the conservative extension theorem: IPL is conservative over IPL⟨→,⊤⟩ for imp-top-only formulas. Statement: if Derivable IntPropAxiom φ and φ.IsImpTopOnly = true, then Derivable ImpAxiom φ. Proof route: (1) IPL.hilbert_alg_complete.mp converts to HA-validity, (2) for any HilbertAlgebra H and valuation v, instantiate HA-validity at the Diego embedding HA(H), (3) the Diego embedding lemma rewrites back to HilbertEvaluate v φ = ⊤ in H, (4) Hilbert algebra completeness converts back to Derivable ImpAxiom φ. Derive the ND corollary. This is the deepest result in the chain, showing that conjunction, disjunction, and falsum are all independent of the pure implication fragment. Connects to typed SKI combinators: the derivable imp-top-only formulas are exactly the types inhabited by typed combinatory terms. File: Cslib/Logics/Propositional/Semantics/Algebra/ImpConservative.lean.",
       "created": "2026-06-23T22:00:00Z",
-      "last_updated": "2026-06-24T09:42:57Z",
+      "last_updated": "2026-06-24T10:43:32Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
@@ -590,23 +600,25 @@
         310
       ],
       "blockers": null,
-      "session_id": "sess_1782276788_0c858f"
+      "session_id": "sess_1782276788_0c858f",
+      "completion_summary": "Proved IPL conservative over IPL(→,⊤) for imp-top-only formulas via free BrouwerianSemilattice construction (FreeMeetExtension). Two new files: FreeMeetExtension.lean (279 lines, BSL instance) and ImpConservative.lean (conservativity theorem + ND corollary). All sorry-free."
     },
     {
       "project_number": 312,
       "project_name": "unified_conservative_extension_chain",
-      "status": "blocked",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Consolidate the full conservative extension chain into a unified module: IPL⟨→,⊤⟩ ⊂ IPL⟨∧,→,⊤⟩ ⊂ MPL ⊂ IPL ⊂ CPL, where each ⊂ denotes conservative extension for the smaller fragments language. State the chain theorem and derive inter-fragment conservativity as corollaries — e.g., IPL⟨∧,→,⊤⟩ conservative over IPL⟨→,⊤⟩ by composing the two embeddings through IPL. Include the algebraic validity subsumption chain: HilbertAlgValid → BrouwerianValid → GHAValid → HAValid → BAValid. Provide the full picture connecting all five levels of algebraic semantics (Hilbert algebras, Brouwerian semilattices, GHAs, HAs, BAs) to their proof systems (ImpAxiom, ConjImpAxiom, MinPropAxiom, IntPropAxiom, PropositionalAxiom). This is the capstone module demonstrating the algebraic method for propositional logic — each connective extension is genuinely conservative, each algebra class has sound and complete proof theory, and each completion construction provides the bridge. File: Cslib/Logics/Propositional/Semantics/Algebra/ConservativeChain.lean.",
       "created": "2026-06-23T22:00:00Z",
-      "last_updated": "2026-06-23T22:00:00Z",
+      "last_updated": "2026-06-24T10:45:32Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "dependencies": [
         311
       ],
-      "blockers": "Depends on task 311 which is blocked."
+      "blockers": null,
+      "session_id": "sess_1782276788_0c858f"
     },
     {
       "project_number": 314,
@@ -739,7 +751,8 @@
     "Propositional Logic",
     "Temporal Logic",
     "pr",
-    "agent-system"
+    "agent-system",
+    "Code Hygiene"
   ],
   "_last_updated": "2026-06-24T02:00:00Z"
 }

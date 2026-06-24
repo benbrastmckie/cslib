@@ -11,7 +11,7 @@ next_project_number: 330
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,321,322,323,324,327 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,278,290,299,301,321,323,324,327 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,300,316,325,328 | 36,37,180,299,323,324,327 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
 | 3 | 41,275,317,326,329 | 39,40,316,325,328 | Foundations, Propositional Logic |
 
@@ -34,13 +34,13 @@ next_project_number: 330
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 290 [PLANNED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
-323 [NOT STARTED] — Fix two intuitionistic tableau implementation bugs: (1) isIntuiti
+323 [IMPLEMENTING] — Fix two intuitionistic tableau implementation bugs: (1) isIntuiti
   └─ 316 [BLOCKED] — Fill the 6 sorry instances in propositional tableau soundness pro
     └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
-324 [NOT STARTED] — Add LawfulBEq instances for Proposition Atom and SignedFormula F 
+324 [IMPLEMENTING] — Add LawfulBEq instances for Proposition Atom and SignedFormula F 
   └─ 325 [NOT STARTED] — Deduplicate identical definitions across minimal/intuitionistic t
     └─ 326 [NOT STARTED] — Fix ~35 linter warnings across the propositional tableau soundnes
-327 [NOT STARTED] — Fix CI lint warnings in CutElimination.lean: add required comment
+327 [PLANNED] — Fix CI lint warnings in CutElimination.lean: add required comment
   └─ 328 [NOT STARTED] — Refactor CutElimination.lean to reduce or eliminate the maxHeartb
     └─ 329 [NOT STARTED] — Prove the subformula property as a corollary of cut elimination: 
 
@@ -57,10 +57,6 @@ next_project_number: 330
 ### Code Hygiene
 
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
-
-### Algebraic Semantics
-
-322 [PLANNING] — Establish the MPL conservative extension chain as standalone resu
 
 ### Modal
 
@@ -92,10 +88,12 @@ next_project_number: 330
 ---
 
 ### 327. Cutelim lint ci fixes
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [327_cutelim_lint_ci_fixes/reports/01_lint-ci-fixes.md]
+- **Plan**: [327_cutelim_lint_ci_fixes/plans/01_lint-ci-fixes.md]
 
 **Description**: Fix CI lint warnings in CutElimination.lean: add required comment to maxHeartbeats 800000 override, fix 8 long-line warnings (>100 chars), remove unused variable hB. All mechanical fixes required for CI to pass
 
@@ -122,7 +120,7 @@ next_project_number: 330
 ---
 
 ### 324. Lawfulbeq proposition signedformula
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -132,21 +130,24 @@ next_project_number: 330
 ---
 
 ### 323. Fix intuitionistic tableau bugs
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [323_fix_intuitionistic_tableau_bugs/reports/01_bug-analysis.md]
+- **Plan**: [323_fix_intuitionistic_tableau_bugs/plans/01_bug-fix-plan.md]
 
 **Description**: Fix two intuitionistic tableau implementation bugs: (1) isIntuitionisticallyClosed missing complementary-pair closure check — only checks T(⊥) but should also check Branch.hasContradiction, causing valid formulas like p→p to return .openBranch; (2) intTImpRule uses Nat ordering (· ≥ w) as Kripke accessibility proxy, but this fires at sibling worlds that are NOT accessible, causing invalid formula ((p→⊥)→q)∨(p→r) to incorrectly close. Fix requires: (a) add || Branch.hasContradiction b to isIntuitionisticallyClosed in Expansion.lean:67, (b) track parent-child accessibility in expansion state and restrict intTImpRule in Rules.lean:129 to fire only along actual accessibility paths. Both bugs verified by #eval. See specs/316_propositional_tableau_soundness/reports/04_b4-hard-research.md and .orchestrator-handoff.json for detailed analysis and counterexamples
 
 ---
 
 ### 322. Mpl conservative extension chain
-- **Status**: [PLANNING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 311, Task 312
 - **Research**: [322_mpl_conservative_extension_chain/reports/01_mpl-chain-research.md]
+- **Plan**: [322_mpl_conservative_extension_chain/plans/01_mpl-chain-plan.md]
 
 **Description**: Establish the MPL conservative extension chain as standalone results and organize the relationship between the IPL and MPL chains. Specifically: (1) Prove MPL → ConjImp conservativity for or-free formulas (GHAValid → BrouwerianValid, requiring a free join/distributive lattice completion of BrouwerianSemilattices to GHAs). (2) Prove MPL → Imp conservativity for imp-top-only formulas as a composition. (3) Organize the full algebraic picture: state the MPL chain (ImpAxiom ⊂ ConjImpAxiom ⊂ MinPropAxiom) with its own conservativity results independent of IPL, and relate it to the IPL chain via the IPL → MPL conservativity bridge. File: Cslib/Logics/Propositional/Semantics/Algebra/MplConservativeChain.lean
 

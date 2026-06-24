@@ -76,6 +76,10 @@ MPL fragment and its subalgebras, avoiding any dependency on IPL conservativity 
 - `hilbertMplConservativeOverImp_direct`: MPL is conservative over ImpAxiom for
   imp-top-only formulas, by composing the two direct steps.
 - `mplAxiom_iff_impAxiom`: Biconditional: MinPropAxiom ↔ ImpAxiom for imp-top-only.
+- `derivableMinOfDerivableConjImp`: Axiom subsumption: ConjImpAxiom ⊆ MinPropAxiom
+  (inclusion direction).
+- `derivableMinOfDerivableImp`: Axiom subsumption: ImpAxiom ⊆ MinPropAxiom (inclusion
+  direction, via the ConjImp intermediate step).
 
 ## Algebraic Hierarchy
 
@@ -107,23 +111,8 @@ universe u
 
 /-! ## Direct MPL→ConjImp Conservativity -/
 
-/-- **Direct MPL-to-ConjImp conservative extension theorem**: MPL is a conservative extension
-of IPL⟨∧,→,⊤⟩ for or-bot-free formulas, proved via a direct algebraic route without IPL.
-
-The proof composes three steps without routing through IPL derivability:
-1. `MPL.hilbert_alg_complete.mp h` converts `Derivable MinPropAxiom φ` to `GHAValid φ`.
-2. For any Brouwerian semilattice `B` and assignment `v : Atom → B`, instantiate `GHAValid φ`
-   at `H := LowerSet B` with valuation `LowerSet.Iic ∘ v` and bottom value `⊥`, giving
-   `AlgEvaluate (LowerSet.Iic ∘ v) ⊥ φ = ⊤`. (`LowerSet B` is a `HeytingAlgebra`, hence a
-   `GeneralizedHeytingAlgebra`, via Mathlib's `CompletelyDistribLattice (LowerSet B)`.)
-3. `brouwerianEmbeddingLemma` converts this to `BrouwerianEvaluate v φ = ⊤`.
-4. `conjImp_brouwerian_complete hOBF` converts `BrouwerianValid φ` to `Derivable ConjImpAxiom φ`.
-
-Contrast with `hilbertMplConservativeOverConjImp` in `ConservativeChain.lean`, which routes
-through `derivableMinOfDerivableInt` (MPL→IPL subsumption) followed by
-`hilbertIplConservativeOverConjImp` (IPL→ConjImp conservativity). -/
--- Suppress the `BrouwerianSemilattice.toHilbertAlgebra` forgetful instance temporarily.
--- Without this, importing `ImpConservative` (transitively via `FreeMeetExtension` →
+-- Suppress the `BrouwerianSemilattice.toHilbertAlgebra` forgetful instance for the next
+-- theorem. Without this, importing `ImpConservative` (transitively via `FreeMeetExtension` →
 -- `HilbertAlgebra`) creates a typeclass diamond for `Preorder B` in `LowerSet.Iic`,
 -- causing `MPL.hilbert_alg_complete.mp h (LowerSet B) ...` to return a term with
 -- `HilbertAlgebra.instPartialOrder` that is rejected by `brouwerianEmbeddingLemma` which
@@ -131,13 +120,42 @@ through `derivableMinOfDerivableInt` (MPL→IPL subsumption) followed by
 -- unique BSL-derived PartialOrder path.
 attribute [-instance] BrouwerianSemilattice.toHilbertAlgebra
 
+/-- **GHA-to-Brouwerian validity bridge**: GHA-validity implies Brouwerian semilattice
+validity for or-bot-free formulas, proved by a direct algebraic route without IPL.
+
+The proof instantiates `GHAValid φ` at the free join completion `LowerSet B` (a Heyting
+algebra, hence a GHA) with the principal downset embedding `LowerSet.Iic ∘ v : Atom → LowerSet B`
+and bottom value `⊥`, then applies `brouwerianEmbeddingLemma` to convert the resulting
+`AlgEvaluate (LowerSet.Iic ∘ v) ⊥ φ = ⊤` to `BrouwerianEvaluate v φ = ⊤`.
+
+This is the algebraic core of `hilbertMplConservativeOverConjImp_direct`, extracted as a
+standalone lemma. Compare with `GHAValid_implies_BrouwerianValid_orBotFree` in
+`ConservativeChain.lean`, which routes through IPL derivability.
+
+References: [Nemitz1965], [Kohler1981]. -/
+theorem GHAValid_implies_BrouwerianValid_direct {Atom : Type u} {φ : PL.Proposition Atom}
+    (hOBF : φ.IsOrBotFree = true) (h : GHAValid.{u, u} φ) : BrouwerianValid.{u, u} φ := by
+  intro B _ v
+  exact (brouwerianEmbeddingLemma v φ hOBF).mpr (h (H := LowerSet B) (LowerSet.Iic ∘ v) ⊥)
+
+/-- **Direct MPL-to-ConjImp conservative extension theorem**: MPL is a conservative extension
+of IPL⟨∧,→,⊤⟩ for or-bot-free formulas, proved via a direct algebraic route without IPL.
+
+The proof composes:
+1. `MPL.hilbert_alg_complete.mp h` converts `Derivable MinPropAxiom φ` to `GHAValid φ`.
+2. `GHAValid_implies_BrouwerianValid_direct` converts `GHAValid φ` to `BrouwerianValid φ` by
+   instantiating at `LowerSet B` (a `HeytingAlgebra`, hence a `GeneralizedHeytingAlgebra`)
+   and applying `brouwerianEmbeddingLemma`.
+3. `conjImp_brouwerian_complete hOBF` converts `BrouwerianValid φ` to `Derivable ConjImpAxiom φ`.
+
+Contrast with `hilbertMplConservativeOverConjImp` in `ConservativeChain.lean`, which routes
+through `derivableMinOfDerivableInt` (MPL→IPL subsumption) followed by
+`hilbertIplConservativeOverConjImp` (IPL→ConjImp conservativity). -/
 theorem hilbertMplConservativeOverConjImp_direct {Atom : Type u} {φ : PL.Proposition Atom}
     (hOBF : φ.IsOrBotFree = true) (h : Derivable (@MinPropAxiom Atom) φ) :
-    Derivable (@ConjImpAxiom Atom) φ := by
-  apply conjImp_brouwerian_complete hOBF
-  intro B _ v
-  have hGHA := MPL.hilbert_alg_complete.mp h (H := LowerSet B) (LowerSet.Iic ∘ v) ⊥
-  exact (brouwerianEmbeddingLemma v φ hOBF).mpr hGHA
+    Derivable (@ConjImpAxiom Atom) φ :=
+  conjImp_brouwerian_complete hOBF
+    (GHAValid_implies_BrouwerianValid_direct hOBF (MPL.hilbert_alg_complete.mp h))
 
 attribute [instance] BrouwerianSemilattice.toHilbertAlgebra
 
@@ -186,6 +204,31 @@ theorem mplAxiom_iff_impAxiom {Atom : Type u} {φ : PL.Proposition Atom}
     Derivable (@MinPropAxiom Atom) φ ↔ Derivable (@ImpAxiom Atom) φ :=
   ⟨hilbertMplConservativeOverImp_direct hITO, fun ⟨d⟩ =>
     ⟨liftDerivationTree (fun _ hψ => hψ.toConjImpAxiom.toMinPropAxiom) d⟩⟩
+
+/-! ## Axiom Subsumption: MPL contains ConjImp and Imp -/
+
+/-- **Axiom subsumption**: ConjImpAxiom is contained in MinPropAxiom.
+
+Any formula derivable in IPL⟨∧,→,⊤⟩ (ConjImpAxiom) is also derivable in MPL
+(MinPropAxiom), since every ConjImp axiom is a MinProp axiom via `ConjImpAxiom.toMinPropAxiom`.
+
+This is the inclusion direction `ConjImpAxiom ⊆ MinPropAxiom` in the chain
+`ImpAxiom ⊆ ConjImpAxiom ⊆ MinPropAxiom`. -/
+theorem derivableMinOfDerivableConjImp {Atom : Type u} {φ : PL.Proposition Atom}
+    (h : Derivable (@ConjImpAxiom Atom) φ) : Derivable (@MinPropAxiom Atom) φ :=
+  let ⟨d⟩ := h; ⟨liftDerivationTree (fun _ hψ => hψ.toMinPropAxiom) d⟩
+
+/-- **Axiom subsumption**: ImpAxiom is contained in MinPropAxiom.
+
+Any formula derivable in IPL⟨→,⊤⟩ (ImpAxiom) is also derivable in MPL (MinPropAxiom),
+since every Imp axiom lifts to a ConjImp axiom via `ImpAxiom.toConjImpAxiom` and then
+to a MinProp axiom via `ConjImpAxiom.toMinPropAxiom`.
+
+This is the inclusion direction `ImpAxiom ⊆ MinPropAxiom` in the chain
+`ImpAxiom ⊆ ConjImpAxiom ⊆ MinPropAxiom`. -/
+theorem derivableMinOfDerivableImp {Atom : Type u} {φ : PL.Proposition Atom}
+    (h : Derivable (@ImpAxiom Atom) φ) : Derivable (@MinPropAxiom Atom) φ :=
+  let ⟨d⟩ := h; ⟨liftDerivationTree (fun _ hψ => hψ.toConjImpAxiom.toMinPropAxiom) d⟩
 
 end Cslib.Logic.PL
 

@@ -4,13 +4,26 @@
     {
       "project_number": 327,
       "project_name": "cutelim_lint_ci_fixes",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Fix CI lint warnings in CutElimination.lean: add required comment to maxHeartbeats 800000 override, fix 8 long-line warnings (>100 chars), remove unused variable hB. All mechanical fixes required for CI to pass",
       "topic": "Propositional Logic",
       "created": "2026-06-24T11:27:09Z",
-      "last_updated": "2026-06-24T11:27:09Z",
-      "dependencies": []
+      "last_updated": "2026-06-24T11:35:03Z",
+      "dependencies": [],
+      "session_id": "sess_1782300531_c471d6_327",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/327_cutelim_lint_ci_fixes/reports/01_lint-ci-fixes.md",
+          "summary": "Research report documenting all 10 CI lint issues with exact fixes"
+        },
+        {
+          "type": "plan",
+          "path": "specs/327_cutelim_lint_ci_fixes/plans/01_lint-ci-fixes.md",
+          "summary": "Single-phase implementation plan for 10 mechanical lint fixes"
+        }
+      ]
     },
     {
       "project_number": 328,
@@ -41,35 +54,51 @@
     {
       "project_number": 323,
       "project_name": "fix_intuitionistic_tableau_bugs",
-      "status": "not_started",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Fix two intuitionistic tableau implementation bugs: (1) isIntuitionisticallyClosed missing complementary-pair closure check — only checks T(⊥) but should also check Branch.hasContradiction, causing valid formulas like p→p to return .openBranch; (2) intTImpRule uses Nat ordering (· ≥ w) as Kripke accessibility proxy, but this fires at sibling worlds that are NOT accessible, causing invalid formula ((p→⊥)→q)∨(p→r) to incorrectly close. Fix requires: (a) add || Branch.hasContradiction b to isIntuitionisticallyClosed in Expansion.lean:67, (b) track parent-child accessibility in expansion state and restrict intTImpRule in Rules.lean:129 to fire only along actual accessibility paths. Both bugs verified by #eval. See specs/316_propositional_tableau_soundness/reports/04_b4-hard-research.md and .orchestrator-handoff.json for detailed analysis and counterexamples",
       "created": "2026-06-24T11:17:53Z",
-      "last_updated": "2026-06-24T11:17:53Z"
+      "last_updated": "2026-06-24T11:17:53Z",
+      "artifacts": [
+        {
+          "path": "specs/323_fix_intuitionistic_tableau_bugs/reports/01_bug-analysis.md",
+          "type": "report"
+        },
+        {
+          "type": "plan",
+          "path": "specs/323_fix_intuitionistic_tableau_bugs/plans/01_bug-fix-plan.md",
+          "summary": "4-phase plan: fix closure check, add accessibility tracking, update proofs, verify"
+        }
+      ]
     },
     {
       "project_number": 322,
       "project_name": "mpl_conservative_extension_chain",
-      "status": "planning",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Establish the MPL conservative extension chain as standalone results and organize the relationship between the IPL and MPL chains. Specifically: (1) Prove MPL → ConjImp conservativity for or-free formulas (GHAValid → BrouwerianValid, requiring a free join/distributive lattice completion of BrouwerianSemilattices to GHAs). (2) Prove MPL → Imp conservativity for imp-top-only formulas as a composition. (3) Organize the full algebraic picture: state the MPL chain (ImpAxiom ⊂ ConjImpAxiom ⊂ MinPropAxiom) with its own conservativity results independent of IPL, and relate it to the IPL chain via the IPL → MPL conservativity bridge. File: Cslib/Logics/Propositional/Semantics/Algebra/MplConservativeChain.lean",
       "created": "2026-06-24T10:51:42Z",
-      "last_updated": "2026-06-24T11:25:46Z",
+      "last_updated": "2026-06-24T11:38:35Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
           "type": "report",
           "path": "specs/322_mpl_conservative_extension_chain/reports/01_mpl-chain-research.md",
           "summary": "Hard-mode research: typeclass diamond blocker, fix approaches, building block verification"
+        },
+        {
+          "type": "plan",
+          "path": "specs/322_mpl_conservative_extension_chain/plans/01_mpl-chain-plan.md",
+          "summary": "Hard-mode plan: 3 phases, fix diamond + add theorems + CI verification"
         }
       ],
       "dependencies": [
         311,
         312
       ],
-      "session_id": "sess_1782299634_bd3b50"
+      "session_id": "sess_1782300589_36988b"
     },
     {
       "project_number": 321,
@@ -829,16 +858,17 @@
     {
       "project_number": 324,
       "project_name": "lawfulbeq_proposition_signedformula",
-      "status": "not_started",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Add LawfulBEq instances for Proposition Atom and SignedFormula F L, then remove workaround lemmas. Currently Proposition derives BEq independently from DecidableEq (Defs.lean:92), so the derived BEq uses structural matching rather than decide (a = b). This means eq_of_beq, beq_iff_eq, and all standard BEq<->Eq lemmas fail, forcing custom workaround lemmas: prop_beq_eq (Classical/Soundness.lean:128, private, ~30 lines) and proposition_beq_eq (Minimal/Soundness.lean:87, public, ~30 lines). Fix: (1) In Defs.lean, either derive BEq from DecidableEq via instBEq or keep the derived BEq and prove a LawfulBEq instance. (2) Add conditional LawfulBEq instance for SignedFormula F L when F and L have LawfulBEq. (3) Delete prop_beq_eq from Classical/Soundness.lean and proposition_beq_eq from Minimal/Soundness.lean. (4) Replace all call sites with eq_of_beq or beq_iff_eq: Classical/Soundness.lean callers, Minimal/Completeness.lean:111-113 (currently uses full qualification Cslib.Logic.PL.proposition_beq_eq). (5) Optionally add Repr to Proposition deriving clause for debugging. Eliminates ~60 lines of workaround code across 3 files.",
       "created": "2026-06-24T11:00:00Z",
-      "last_updated": "2026-06-24T11:00:00Z",
+      "last_updated": "2026-06-24T11:33:38Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "dependencies": [],
-      "parent_task": null
+      "parent_task": null,
+      "session_id": "sess_1782300804_8503e4"
     },
     {
       "project_number": 325,

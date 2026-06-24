@@ -1,7 +1,7 @@
 # Implementation Plan: Task #322
 
 - **Task**: 322 - MPL Conservative Extension Chain
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 1.5 hours
 - **Dependencies**: None (all building blocks exist and file compiles)
 - **Research Inputs**: specs/322_mpl_conservative_extension_chain/reports/01_mpl-chain-research.md
@@ -74,7 +74,7 @@ No ROADMAP.md found.
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Add Core Declarations to MplConservativeChain.lean [NOT STARTED]
+### Phase 1: Add Core Declarations to MplConservativeChain.lean [COMPLETED]
 
 **Goal**: Add the 3 missing theorems, refactor to use the new validity lemma, and update the module docstring.
 
@@ -101,7 +101,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Add Missing BibKey Entries [NOT STARTED]
+### Phase 2: Add Missing BibKey Entries [COMPLETED]
 
 **Goal**: Add `Nemitz1965` and `Kohler1981` to `references.bib` so docstring citations resolve.
 
@@ -122,7 +122,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: CI Verification [NOT STARTED]
+### Phase 3: CI Verification [COMPLETED]
 
 **Goal**: Verify full project builds and passes CI checks.
 

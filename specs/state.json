@@ -1,5 +1,5 @@
 {
-  "next_project_number": 320,
+  "next_project_number": 321,
   "active_projects": [
     {
       "project_number": 316,
@@ -7,7 +7,7 @@
       "status": "researched",
       "task_type": "cslib",
       "topic": "Propositional Logic",
-      "description": "Fill the 6 sorry instances in propositional tableau soundness proofs across all three logics. Classical (Classical/Soundness.lean): prove classically_closed_unsatisfiable (closed branch is unsatisfiable under any Boolean valuation) and classicalTableau_sound (closed tableau implies Tautology phi), plus one helper lemma — by induction on rule applications showing each propositional rule preserves satisfiability. Intuitionistic (Intuitionistic/Soundness.lean): prove intuitionisticTableau_sound (closed tableau implies IValid phi) plus two helper lemmas — by showing each rule (including world-creating F(imp) and persistent T(imp)) preserves forcing at Kripke worlds. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_sound (closed tableau implies MValid phi) — adapts intuitionistic proof with MinimalClosure (complementary atoms only, no ex falso). Core technique: induction on expansion steps showing each rule application preserves the semantic invariant for the respective logic.",
+      "description": "Fill the 6 sorry instances in propositional tableau soundness proofs across all three logics. Classical (Classical/Soundness.lean): prove classically_closed_unsatisfiable (closed branch is unsatisfiable under any Boolean valuation) and classicalTableau_sound (closed tableau implies Tautology phi), plus one helper lemma \u2014 by induction on rule applications showing each propositional rule preserves satisfiability. Intuitionistic (Intuitionistic/Soundness.lean): prove intuitionisticTableau_sound (closed tableau implies IValid phi) plus two helper lemmas \u2014 by showing each rule (including world-creating F(imp) and persistent T(imp)) preserves forcing at Kripke worlds. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_sound (closed tableau implies MValid phi) \u2014 adapts intuitionistic proof with MinimalClosure (complementary atoms only, no ex falso). Core technique: induction on expansion steps showing each rule application preserves the semantic invariant for the respective logic.",
       "created": "2026-06-23T19:55:52Z",
       "last_updated": "2026-06-23T23:43:54Z",
       "next_artifact_number": 2,
@@ -38,7 +38,7 @@
       "status": "not_started",
       "task_type": "cslib",
       "topic": "Propositional Logic",
-      "description": "Fill the 8 sorry instances in propositional tableau completeness proofs across all three logics. Classical (Classical/Completeness.lean): prove classicalOpenBranch_countermodel (open saturated branch yields a Boolean valuation falsifying phi) and classicalTableau_complete (if phi is not a Tautology then the tableau has an open branch), plus one helper — by constructing a valuation from the positive atoms in the saturated branch and proving a truth lemma by formula induction. Intuitionistic (Intuitionistic/Completeness.lean): prove intuitionisticOpenBranch_countermodel (open saturated branch yields a finite Kripke model refuting phi) and intuitionisticTableau_complete — by constructing worlds from the branch world indices, accessibility from the expansion record, valuation from positive atoms, and proving a truth lemma showing forced/not-forced matches signed formulas at each world. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_complete (if phi is not MValid then the tableau has an open branch) — adapts intuitionistic proof with MinimalClosure and botForces=false. Core technique: Hintikka-set argument — saturated branches satisfy Hintikka conditions, from which countermodels are extracted.",
+      "description": "Fill the 8 sorry instances in propositional tableau completeness proofs across all three logics. Classical (Classical/Completeness.lean): prove classicalOpenBranch_countermodel (open saturated branch yields a Boolean valuation falsifying phi) and classicalTableau_complete (if phi is not a Tautology then the tableau has an open branch), plus one helper \u2014 by constructing a valuation from the positive atoms in the saturated branch and proving a truth lemma by formula induction. Intuitionistic (Intuitionistic/Completeness.lean): prove intuitionisticOpenBranch_countermodel (open saturated branch yields a finite Kripke model refuting phi) and intuitionisticTableau_complete \u2014 by constructing worlds from the branch world indices, accessibility from the expansion record, valuation from positive atoms, and proving a truth lemma showing forced/not-forced matches signed formulas at each world. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_complete (if phi is not MValid then the tableau has an open branch) \u2014 adapts intuitionistic proof with MinimalClosure and botForces=false. Core technique: Hintikka-set argument \u2014 saturated branches satisfy Hintikka conditions, from which countermodels are extracted.",
       "created": "2026-06-23T19:55:52Z",
       "last_updated": "2026-06-23T19:55:52Z",
       "next_artifact_number": 1,
@@ -47,31 +47,6 @@
         316
       ],
       "parent_task": 298
-    },
-    {
-      "project_number": 313,
-      "project_name": "zulip_propositional_logic_proof_systems_overview",
-      "status": "researched",
-      "task_type": "cslib",
-      "description": "Research and compose a Zulip comment for the CSLib Propositional Logic topic (https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/) that briefly outlines the three proof systems for propositional logic in CSLib (Hilbert, Natural Deduction, Sequent Calculus), indicating what each system is best equipped to establish (e.g., Hilbert for algebraic completeness, ND for constructive reasoning, Sequent for cut-elimination and decidability), and summarizing what has been completed so far in each. The comment should be concise, informative, and suitable for the Lean community audience",
-      "topic": "Project Management",
-      "created": "2026-06-23T18:39:13Z",
-      "last_updated": "2026-06-23T23:59:55Z",
-      "session_id": "sess_1782258653_a3d2a2",
-      "researched": "2026-06-23T23:59:55Z",
-      "next_artifact_number": 3,
-      "artifacts": [
-        {
-          "path": "specs/313_zulip_propositional_logic_proof_systems_overview/reports/01_team-research.md",
-          "type": "research",
-          "summary": "Team research with 4 teammates"
-        },
-        {
-          "path": "specs/313_zulip_propositional_logic_proof_systems_overview/reports/02_team-research.md",
-          "type": "research",
-          "summary": "Team research with 4 teammates"
-        }
-      ]
     },
     {
       "project_number": 299,
@@ -161,22 +136,6 @@
       "last_updated": "2026-06-23T12:00:00Z"
     },
     {
-      "project_number": 291,
-      "project_name": "three_way_proof_system_equivalence",
-      "status": "completed",
-      "task_type": "cslib",
-      "topic": "Propositional Logic",
-      "description": "After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a unifying module stating the three-way equivalence as List.TFAE theorems. For each of MPL, IPL, and CPL, prove that Hilbert derivability, ND derivability, and SC derivability are equivalent. The pairwise bridges are: Hilbert-ND from task 266, Hilbert-SC and ND-SC from task 279. This is purely compositional. File: Cslib/Logics/Propositional/ProofSystemEquivalence.lean. Depends on 279.",
-      "dependencies": [
-        314,
-        315
-      ],
-      "created": "2026-06-23T12:00:00Z",
-      "last_updated": "2026-06-23T23:58:42Z",
-      "session_id": "sess_1782245580_188995_291",
-      "completion_summary": "Three-way proof system equivalence: CPL TFAE (Hilbert/ND/LK), IPL TFAE (Hilbert/ND/LJ), MPL two-way iff (Hilbert/ND). 126 lines, 0 sorry, all CI passes."
-    },
-    {
       "project_number": 292,
       "project_name": "ipl_decidability_cutfree_lj",
       "status": "implementing",
@@ -263,7 +222,7 @@
         {
           "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/02_team-research.md",
           "type": "research",
-          "summary": "Team research with 4 teammates — domain mismatch analysis and resolution strategies"
+          "summary": "Team research with 4 teammates \u2014 domain mismatch analysis and resolution strategies"
         },
         {
           "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/03_team-research.md",
@@ -310,7 +269,7 @@
       "project_name": "propositional_semantics_upstream_pr",
       "status": "researched",
       "task_type": "cslib",
-      "description": "Cherry-pick propositional semantics from the local codebase into a <500 LOC follow-up PR stacked on PR #648. PR #648 contributes the formula type and natural deduction; this follow-up adds the semantics layer. Scope: (1) Semantics/Algebra.lean — GHA evaluation with bot_val parameter for minimal/intuitionistic/classical logic. (2) Semantics/Bool.lean — BoolEvaluate with bridge to AlgEvaluate. (3) Semantics/SemanticConsequence.lean — semantic consequence and tautology definitions. (4) Semantics/Kripke.lean — Kripke semantics with botForces for minimal logic (include if LOC budget permits). All four files already exist locally with full implementations. Task is to select, trim, and package for upstream submission. Ensure lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake all pass on the PR branch. Write PR description referencing the Zulip Propositional Logic thread.",
+      "description": "Cherry-pick propositional semantics from the local codebase into a <500 LOC follow-up PR stacked on PR #648. PR #648 contributes the formula type and natural deduction; this follow-up adds the semantics layer. Scope: (1) Semantics/Algebra.lean \u2014 GHA evaluation with bot_val parameter for minimal/intuitionistic/classical logic. (2) Semantics/Bool.lean \u2014 BoolEvaluate with bridge to AlgEvaluate. (3) Semantics/SemanticConsequence.lean \u2014 semantic consequence and tautology definitions. (4) Semantics/Kripke.lean \u2014 Kripke semantics with botForces for minimal logic (include if LOC budget permits). All four files already exist locally with full implementations. Task is to select, trim, and package for upstream submission. Ensure lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake all pass on the PR branch. Write PR description referencing the Zulip Propositional Logic thread.",
       "topic": "Propositional Logic",
       "dependencies": [],
       "created": "2026-06-16T23:00:00Z",
@@ -357,7 +316,7 @@
       "dependencies": [
         36
       ],
-      "description": "Discrete temporal completeness: prove that every formula valid on all discrete serial linear orders is derivable in the Discrete temporal proof system.\n\nScope:\n1. Add discrete-specific axioms to Temporal.Axiom: `prior_UZ` (F(φ) → U(φ,¬φ)), `prior_SZ` (P(φ) → S(φ,¬φ)), `z1` (G(Gφ→φ) → (F(Gφ)→Gφ)), and discrete uniformity axioms (discrete_symm_fwd/bwd, discrete_propagate_fwd/bwd), gated to FrameClass.Discrete via minFrameClass.\n2. Prove discrete soundness: each discrete axiom valid on SuccOrder+PredOrder+IsSuccArchimedean.\n3. Prove discrete completeness via contrapositive + MCS + canonical model on Int. The non-discrete branch is eliminated by deriving U(⊤,⊥) as a Discrete theorem.\n\nNew development (not a port). The canonical model specializes the base temporal canonical order to Int. The discrete uniformity axioms (minus discrete_box_necessity which is bimodal-only) ensure U(⊤,⊥) propagates uniformly.\n\nTarget: Cslib/Logics/Temporal/Metalogic/DiscreteCompleteness.lean + axiom additions to Axioms.lean\nEstimated scope: ~500-700 lines (new axioms + discrete soundness + discrete completeness)",
+      "description": "Discrete temporal completeness: prove that every formula valid on all discrete serial linear orders is derivable in the Discrete temporal proof system.\n\nScope:\n1. Add discrete-specific axioms to Temporal.Axiom: `prior_UZ` (F(\u03c6) \u2192 U(\u03c6,\u00ac\u03c6)), `prior_SZ` (P(\u03c6) \u2192 S(\u03c6,\u00ac\u03c6)), `z1` (G(G\u03c6\u2192\u03c6) \u2192 (F(G\u03c6)\u2192G\u03c6)), and discrete uniformity axioms (discrete_symm_fwd/bwd, discrete_propagate_fwd/bwd), gated to FrameClass.Discrete via minFrameClass.\n2. Prove discrete soundness: each discrete axiom valid on SuccOrder+PredOrder+IsSuccArchimedean.\n3. Prove discrete completeness via contrapositive + MCS + canonical model on Int. The non-discrete branch is eliminated by deriving U(\u22a4,\u22a5) as a Discrete theorem.\n\nNew development (not a port). The canonical model specializes the base temporal canonical order to Int. The discrete uniformity axioms (minus discrete_box_necessity which is bimodal-only) ensure U(\u22a4,\u22a5) propagates uniformly.\n\nTarget: Cslib/Logics/Temporal/Metalogic/DiscreteCompleteness.lean + axiom additions to Axioms.lean\nEstimated scope: ~500-700 lines (new axioms + discrete soundness + discrete completeness)",
       "topic": "Temporal Logic"
     },
     {
@@ -370,7 +329,7 @@
       "dependencies": [
         37
       ],
-      "description": "Continuous temporal completeness: completeness for temporal logic over Dedekind-complete (continuous) linear orders, e.g. the reals.\n\nScope: Define a Continuous frame class extending Dense, add any required axioms (e.g., Dedekind completeness schema or equivalent), prove soundness over conditionally complete linear orders, prove completeness via canonical model on Real or equivalent.\n\nBlocked: The continuous case has not been developed for either the temporal or bimodal logic upstream. Requires foundational research into which additional axioms (if any) are needed beyond density to characterize continuous time. The standard result (Burgess 1982) is that the Until/Since temporal logic over the reals has the same theorems as over the rationals (density suffices), which would make this task trivial — but this equivalence itself needs to be formalized.\n\nTarget: Cslib/Logics/Temporal/Metalogic/ContinuousCompleteness.lean\nBlocker: Research needed on whether continuous frames require additional axioms beyond density",
+      "description": "Continuous temporal completeness: completeness for temporal logic over Dedekind-complete (continuous) linear orders, e.g. the reals.\n\nScope: Define a Continuous frame class extending Dense, add any required axioms (e.g., Dedekind completeness schema or equivalent), prove soundness over conditionally complete linear orders, prove completeness via canonical model on Real or equivalent.\n\nBlocked: The continuous case has not been developed for either the temporal or bimodal logic upstream. Requires foundational research into which additional axioms (if any) are needed beyond density to characterize continuous time. The standard result (Burgess 1982) is that the Until/Since temporal logic over the reals has the same theorems as over the rationals (density suffices), which would make this task trivial \u2014 but this equivalence itself needs to be formalized.\n\nTarget: Cslib/Logics/Temporal/Metalogic/ContinuousCompleteness.lean\nBlocker: Research needed on whether continuous frames require additional axioms beyond density",
       "topic": "Temporal Logic"
     },
     {
@@ -384,7 +343,7 @@
         39,
         40
       ],
-      "description": "Abstract shared completeness infrastructure between temporal and bimodal logic once concrete completeness proofs are finished for both.\n\nThe temporal (tasks 31, 38, 39) and bimodal (tasks 34, 35) completeness proofs share structural patterns that can be factored into a generic completeness scaffold in Cslib/Foundations/Logic/Metalogic/, extending the existing generic MCS framework (Task 29).\n\nCandidate abstractions (to be confirmed once concrete implementations exist):\n1. Generic neg_consistent_of_not_derivable: if φ is not derivable then {¬φ} is consistent — identical structure in both logics, parameterized over DerivationSystem\n2. Generic completeness contrapositive skeleton: not derivable → consistent → Lindenbaum → MCS → canonical model → countermodel — the overall proof shape is shared\n3. Dense/discrete case split pattern: the three-way case split on □(F'T) / □(U(T,⊥)) / mixed is structurally similar (temporal uses G/H instead of □)\n4. Canonical order construction patterns: both define canonical_lt via G-sets (temporal) or box-sets (bimodal); the linearity/irreflexivity/transitivity proofs follow parallel structures\n5. Dense indicator elimination: both dense completeness proofs eliminate the non-dense branch by showing the dense indicator axiom is a theorem — identical pattern\n\nScope: Identify which abstractions yield genuine code savings vs. premature generalization, implement those that do, and refactor both temporal and bimodal completeness to use the shared infrastructure.\n\nTarget: Cslib/Foundations/Logic/Metalogic/Completeness.lean (or similar)\nDepends on: Tasks 35 (dense bimodal), 38 (dense temporal), 39 (discrete temporal) — transitively includes 31 (base temporal) and 34 (base bimodal MCS)",
+      "description": "Abstract shared completeness infrastructure between temporal and bimodal logic once concrete completeness proofs are finished for both.\n\nThe temporal (tasks 31, 38, 39) and bimodal (tasks 34, 35) completeness proofs share structural patterns that can be factored into a generic completeness scaffold in Cslib/Foundations/Logic/Metalogic/, extending the existing generic MCS framework (Task 29).\n\nCandidate abstractions (to be confirmed once concrete implementations exist):\n1. Generic neg_consistent_of_not_derivable: if \u03c6 is not derivable then {\u00ac\u03c6} is consistent \u2014 identical structure in both logics, parameterized over DerivationSystem\n2. Generic completeness contrapositive skeleton: not derivable \u2192 consistent \u2192 Lindenbaum \u2192 MCS \u2192 canonical model \u2192 countermodel \u2014 the overall proof shape is shared\n3. Dense/discrete case split pattern: the three-way case split on \u25a1(F'T) / \u25a1(U(T,\u22a5)) / mixed is structurally similar (temporal uses G/H instead of \u25a1)\n4. Canonical order construction patterns: both define canonical_lt via G-sets (temporal) or box-sets (bimodal); the linearity/irreflexivity/transitivity proofs follow parallel structures\n5. Dense indicator elimination: both dense completeness proofs eliminate the non-dense branch by showing the dense indicator axiom is a theorem \u2014 identical pattern\n\nScope: Identify which abstractions yield genuine code savings vs. premature generalization, implement those that do, and refactor both temporal and bimodal completeness to use the shared infrastructure.\n\nTarget: Cslib/Foundations/Logic/Metalogic/Completeness.lean (or similar)\nDepends on: Tasks 35 (dense bimodal), 38 (dense temporal), 39 (discrete temporal) \u2014 transitively includes 31 (base temporal) and 34 (base bimodal MCS)",
       "topic": "Foundations"
     },
     {
@@ -397,7 +356,7 @@
       "dependencies": [
         "BimodalLogic:discrete_sorry_elimination"
       ],
-      "description": "Port discrete completeness (completeness_discrete theorem) and WeakCanonical/IntegerModel/ infrastructure (~6 files). The discrete branch constructs countermodels on Int via the Reynolds pipeline. Currently blocked: upstream BimodalLogic has sorryAx tracing through chronicle_gap_contradiction → succ_cofinal → limitDomSubtype_isSuccArchimedean → succ_embed_surjective. Port after upstream sorry elimination completes.\n\n**Source**: BimodalLogic/Theories/Bimodal/Metalogic/WeakCanonical/IntegerModel/ (~6 files), discrete branch of BXCanonical/Completeness.lean\n**Target**: Cslib/Logics/Bimodal/Metalogic/\n**Blocker**: Upstream BimodalLogic discrete completeness sorry elimination (36 sorries across IntegerModel/)\n**Parent task**: 8 (expanded)",
+      "description": "Port discrete completeness (completeness_discrete theorem) and WeakCanonical/IntegerModel/ infrastructure (~6 files). The discrete branch constructs countermodels on Int via the Reynolds pipeline. Currently blocked: upstream BimodalLogic has sorryAx tracing through chronicle_gap_contradiction \u2192 succ_cofinal \u2192 limitDomSubtype_isSuccArchimedean \u2192 succ_embed_surjective. Port after upstream sorry elimination completes.\n\n**Source**: BimodalLogic/Theories/Bimodal/Metalogic/WeakCanonical/IntegerModel/ (~6 files), discrete branch of BXCanonical/Completeness.lean\n**Target**: Cslib/Logics/Bimodal/Metalogic/\n**Blocker**: Upstream BimodalLogic discrete completeness sorry elimination (36 sorries across IntegerModel/)\n**Parent task**: 8 (expanded)",
       "topic": "Bimodal Porting"
     },
     {
@@ -450,44 +409,12 @@
       "last_updated": "2026-06-14T17:54:05Z"
     },
     {
-      "project_number": 304,
-      "project_name": "hilbert_algebra_typeclass",
-      "status": "completed",
-      "task_type": "cslib",
-      "topic": "Algebraic Semantics",
-      "description": "Define the HilbertAlgebra typeclass: a structure (H, ⇨, ⊤) satisfying (K) a ⇨ (b ⇨ a) = ⊤, (S) (a ⇨ (b ⇨ c)) ⇨ ((a ⇨ b) ⇨ (a ⇨ c)) = ⊤, and antisymmetry (a ⇨ b = ⊤ ∧ b ⇨ a = ⊤ → a = b). Derive the induced partial order a ≤ b ↔ a ⇨ b = ⊤ and prove it is a PartialOrder. Provide forgetful instances from BrouwerianSemilattice and GeneralizedHeytingAlgebra. Define HilbertEvaluate mapping imp-top-only Propositions to elements of a HilbertAlgebra using only ⇨. This captures the algebraic semantics of IPL⟨→,⊤⟩ — the pure implication fragment corresponding to typed SKI combinators via Curry-Howard. Mathlib has no such class. References: Diego (1966), Monteiro (1955), Rasiowa (1974) Ch. V. File: Cslib/Foundations/Order/HilbertAlgebra.lean.",
-      "created": "2026-06-23T22:00:00Z",
-      "last_updated": "2026-06-23T22:40:15Z",
-      "next_artifact_number": 1,
-      "artifacts": [],
-      "dependencies": [],
-      "session_id": "sess_1782252559_952370_304",
-      "completion_summary": "Defined HilbertAlgebra typeclass (HImp+Top, K/S/antisymmetry/himp_self), derived PartialOrder+OrderTop, BrouwerianSemilattice forgetful instance, HilbertEvaluate+HilbertValid"
-    },
-    {
-      "project_number": 309,
-      "project_name": "hilbert_algebra_soundness_completeness",
-      "status": "completed",
-      "task_type": "cslib",
-      "topic": "Algebraic Semantics",
-      "description": "Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algebras. Soundness: if Derivable ImpAxiom φ then HilbertEvaluate v φ = ⊤ in every HilbertAlgebra. Completeness via the Lindenbaum-Tarski algebra: the quotient Proposition Atom / ≈ where φ ≈ ψ iff Derivable ImpAxiom (φ → ψ) and Derivable ImpAxiom (ψ → φ). Define [φ] ⇨ [ψ] := [φ → ψ] and show this is well-defined and satisfies the Hilbert algebra axioms K, S, and antisymmetry. Prove the truth lemma: HilbertEvaluate [·] φ = ⊤ ↔ Derivable ImpAxiom φ. This is the simplest Lindenbaum construction in the chain — no lattice operations needed, just the implication operation on equivalence classes. Reference: Diego (1966) Chapter 2, Rasiowa (1974) Chapter V. File: Cslib/Logics/Propositional/Semantics/Algebra/HilbertAlgCompleteness.lean.",
-      "created": "2026-06-23T22:00:00Z",
-      "last_updated": "2026-06-23T23:16:45Z",
-      "next_artifact_number": 1,
-      "artifacts": [],
-      "dependencies": [
-        304
-      ],
-      "session_id": "sess_1782252559_952370_309",
-      "completion_summary": "Soundness+completeness of IPL⟨→,⊤⟩ w.r.t. HilbertAlgebras: ImpLindenbaumAlgebra quotient construction, truth lemma for IsImpTopOnly, biconditional (499 lines, 0 sorries)"
-    },
-    {
       "project_number": 310,
       "project_name": "diego_embedding",
       "status": "implementing",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
-      "description": "Formalize the Diego embedding theorem (Diego 1966): every Hilbert algebra embeds into a Heyting algebra preserving the implication operation and top element. Given a HilbertAlgebra H, construct a HeytingAlgebra HA(H) and an order-embedding ι : H → HA(H) such that ι(a ⇨ b) = ι(a) ⇨ ι(b) and ι(⊤) = ⊤. The classical construction uses the lattice of filters of H: a filter F ⊆ H is a non-empty upward-closed set closed under ⇨-detachment (a ∈ F and a ⇨ b ∈ F implies b ∈ F). The filter lattice ordered by inclusion forms a Heyting algebra, and ι(a) = {F | a ∈ F} is the embedding. Prove: (1) the filter lattice is a HeytingAlgebra, (2) ι preserves ⇨ and ⊤, (3) ι is injective (order-embedding), (4) the embedding lemma: for imp-top-only formulas, HilbertEvaluate v φ = ⊤ ↔ AlgEvaluate (ι ∘ v) ⊥ φ = ⊤. This is the most technically demanding algebraic construction in the chain. References: Diego (1966), Köhler (1981), Celani-Jansana (2012). File: Cslib/Foundations/Order/HilbertAlgebra/DiegoEmbedding.lean.",
+      "description": "Formalize the Diego embedding theorem (Diego 1966): every Hilbert algebra embeds into a Heyting algebra preserving the implication operation and top element. Given a HilbertAlgebra H, construct a HeytingAlgebra HA(H) and an order-embedding \u03b9 : H \u2192 HA(H) such that \u03b9(a \u21e8 b) = \u03b9(a) \u21e8 \u03b9(b) and \u03b9(\u22a4) = \u22a4. The classical construction uses the lattice of filters of H: a filter F \u2286 H is a non-empty upward-closed set closed under \u21e8-detachment (a \u2208 F and a \u21e8 b \u2208 F implies b \u2208 F). The filter lattice ordered by inclusion forms a Heyting algebra, and \u03b9(a) = {F | a \u2208 F} is the embedding. Prove: (1) the filter lattice is a HeytingAlgebra, (2) \u03b9 preserves \u21e8 and \u22a4, (3) \u03b9 is injective (order-embedding), (4) the embedding lemma: for imp-top-only formulas, HilbertEvaluate v \u03c6 = \u22a4 \u2194 AlgEvaluate (\u03b9 \u2218 v) \u22a5 \u03c6 = \u22a4. This is the most technically demanding algebraic construction in the chain. References: Diego (1966), K\u00f6hler (1981), Celani-Jansana (2012). File: Cslib/Foundations/Order/HilbertAlgebra/DiegoEmbedding.lean.",
       "created": "2026-06-23T22:00:00Z",
       "last_updated": "2026-06-23T23:00:07Z",
       "next_artifact_number": 1,
@@ -503,7 +430,7 @@
       "status": "not_started",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
-      "description": "Prove the conservative extension theorem: IPL is conservative over IPL⟨→,⊤⟩ for imp-top-only formulas. Statement: if Derivable IntPropAxiom φ and φ.IsImpTopOnly = true, then Derivable ImpAxiom φ. Proof route: (1) IPL.hilbert_alg_complete.mp converts to HA-validity, (2) for any HilbertAlgebra H and valuation v, instantiate HA-validity at the Diego embedding HA(H), (3) the Diego embedding lemma rewrites back to HilbertEvaluate v φ = ⊤ in H, (4) Hilbert algebra completeness converts back to Derivable ImpAxiom φ. Derive the ND corollary. This is the deepest result in the chain, showing that conjunction, disjunction, and falsum are all independent of the pure implication fragment. Connects to typed SKI combinators: the derivable imp-top-only formulas are exactly the types inhabited by typed combinatory terms. File: Cslib/Logics/Propositional/Semantics/Algebra/ImpConservative.lean.",
+      "description": "Prove the conservative extension theorem: IPL is conservative over IPL\u27e8\u2192,\u22a4\u27e9 for imp-top-only formulas. Statement: if Derivable IntPropAxiom \u03c6 and \u03c6.IsImpTopOnly = true, then Derivable ImpAxiom \u03c6. Proof route: (1) IPL.hilbert_alg_complete.mp converts to HA-validity, (2) for any HilbertAlgebra H and valuation v, instantiate HA-validity at the Diego embedding HA(H), (3) the Diego embedding lemma rewrites back to HilbertEvaluate v \u03c6 = \u22a4 in H, (4) Hilbert algebra completeness converts back to Derivable ImpAxiom \u03c6. Derive the ND corollary. This is the deepest result in the chain, showing that conjunction, disjunction, and falsum are all independent of the pure implication fragment. Connects to typed SKI combinators: the derivable imp-top-only formulas are exactly the types inhabited by typed combinatory terms. File: Cslib/Logics/Propositional/Semantics/Algebra/ImpConservative.lean.",
       "created": "2026-06-23T22:00:00Z",
       "last_updated": "2026-06-23T22:00:00Z",
       "next_artifact_number": 1,
@@ -519,7 +446,7 @@
       "status": "not_started",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
-      "description": "Consolidate the full conservative extension chain into a unified module: IPL⟨→,⊤⟩ ⊂ IPL⟨∧,→,⊤⟩ ⊂ MPL ⊂ IPL ⊂ CPL, where each ⊂ denotes conservative extension for the smaller fragments language. State the chain theorem and derive inter-fragment conservativity as corollaries — e.g., IPL⟨∧,→,⊤⟩ conservative over IPL⟨→,⊤⟩ by composing the two embeddings through IPL. Include the algebraic validity subsumption chain: HilbertAlgValid → BrouwerianValid → GHAValid → HAValid → BAValid. Provide the full picture connecting all five levels of algebraic semantics (Hilbert algebras, Brouwerian semilattices, GHAs, HAs, BAs) to their proof systems (ImpAxiom, ConjImpAxiom, MinPropAxiom, IntPropAxiom, PropositionalAxiom). This is the capstone module demonstrating the algebraic method for propositional logic — each connective extension is genuinely conservative, each algebra class has sound and complete proof theory, and each completion construction provides the bridge. File: Cslib/Logics/Propositional/Semantics/Algebra/ConservativeChain.lean.",
+      "description": "Consolidate the full conservative extension chain into a unified module: IPL\u27e8\u2192,\u22a4\u27e9 \u2282 IPL\u27e8\u2227,\u2192,\u22a4\u27e9 \u2282 MPL \u2282 IPL \u2282 CPL, where each \u2282 denotes conservative extension for the smaller fragments language. State the chain theorem and derive inter-fragment conservativity as corollaries \u2014 e.g., IPL\u27e8\u2227,\u2192,\u22a4\u27e9 conservative over IPL\u27e8\u2192,\u22a4\u27e9 by composing the two embeddings through IPL. Include the algebraic validity subsumption chain: HilbertAlgValid \u2192 BrouwerianValid \u2192 GHAValid \u2192 HAValid \u2192 BAValid. Provide the full picture connecting all five levels of algebraic semantics (Hilbert algebras, Brouwerian semilattices, GHAs, HAs, BAs) to their proof systems (ImpAxiom, ConjImpAxiom, MinPropAxiom, IntPropAxiom, PropositionalAxiom). This is the capstone module demonstrating the algebraic method for propositional logic \u2014 each connective extension is genuinely conservative, each algebra class has sound and complete proof theory, and each completion construction provides the bridge. File: Cslib/Logics/Propositional/Semantics/Algebra/ConservativeChain.lean.",
       "created": "2026-06-23T22:00:00Z",
       "last_updated": "2026-06-23T22:00:00Z",
       "next_artifact_number": 1,
@@ -533,7 +460,7 @@
       "project_name": "lk_classical_sequent_calculus",
       "status": "implementing",
       "task_type": "cslib",
-      "description": "Implement the classical sequent calculus LK for propositional logic. Create shared definitions (Defs.lean with LKSequent type, scoped notation), LK proof inductive with all-additive Finset-based presentation (LK/Basic.lean), structural admissibility lemmas (weakening, monotone contexts), soundness (LK/Soundness.lean), cut elimination / Hauptsatz (LK/CutElimination.lean) via lexicographic induction on (formula complexity, height sum), and equivalence bridges hilbert_iff_lk and nd_iff_lk composed through existing ND bridge. Completeness follows as corollary via Hilbert bridge. File layout: Cslib/Logics/Propositional/SequentCalculus/{Defs,LK/Basic,LK/Soundness,LK/CutElimination,LK/Completeness}.lean. Reuse Proposition type, Proposition.complexity, InferenceSystem typeclass, and existing hilbert_iff_nd_ctx bridge. Parent task: 279.\n\nLiterature sources:\n- specs/literature/sources/negri_von_plato_2001/section04_ch3-classical-sequent-calculus.md — G3cp rules, admissibility of structural rules, completeness (primary reference for LK design)\n- specs/literature/sources/troelstra_schwichtenberg_2000/section04_ch3-gentzen-systems.md — LK/LJ definitions, G3-style systems, structural rules\n- specs/literature/sources/troelstra_schwichtenberg_2000/section05_ch4-cut-elimination.md — Hauptsatz proof structure, subformula property, termination argument\n- specs/literature/sources/negri_von_plato_2001/section06_ch5-variant-sequent-calculi.md — Alternative calculus designs, independent contexts\n- specs/literature/sources/negri_von_plato_2001/section07_ch6-8-extensions-translations.md — ND-SC translations for bridge proofs\n- specs/literature/sources/gentzen_1935/gentzen_1935_sec03.md — Original LK/LJ definitions and Hauptsatz",
+      "description": "Implement the classical sequent calculus LK for propositional logic. Create shared definitions (Defs.lean with LKSequent type, scoped notation), LK proof inductive with all-additive Finset-based presentation (LK/Basic.lean), structural admissibility lemmas (weakening, monotone contexts), soundness (LK/Soundness.lean), cut elimination / Hauptsatz (LK/CutElimination.lean) via lexicographic induction on (formula complexity, height sum), and equivalence bridges hilbert_iff_lk and nd_iff_lk composed through existing ND bridge. Completeness follows as corollary via Hilbert bridge. File layout: Cslib/Logics/Propositional/SequentCalculus/{Defs,LK/Basic,LK/Soundness,LK/CutElimination,LK/Completeness}.lean. Reuse Proposition type, Proposition.complexity, InferenceSystem typeclass, and existing hilbert_iff_nd_ctx bridge. Parent task: 279.\n\nLiterature sources:\n- specs/literature/sources/negri_von_plato_2001/section04_ch3-classical-sequent-calculus.md \u2014 G3cp rules, admissibility of structural rules, completeness (primary reference for LK design)\n- specs/literature/sources/troelstra_schwichtenberg_2000/section04_ch3-gentzen-systems.md \u2014 LK/LJ definitions, G3-style systems, structural rules\n- specs/literature/sources/troelstra_schwichtenberg_2000/section05_ch4-cut-elimination.md \u2014 Hauptsatz proof structure, subformula property, termination argument\n- specs/literature/sources/negri_von_plato_2001/section06_ch5-variant-sequent-calculi.md \u2014 Alternative calculus designs, independent contexts\n- specs/literature/sources/negri_von_plato_2001/section07_ch6-8-extensions-translations.md \u2014 ND-SC translations for bridge proofs\n- specs/literature/sources/gentzen_1935/gentzen_1935_sec03.md \u2014 Original LK/LJ definitions and Hauptsatz",
       "topic": "Propositional Logic",
       "created": "2026-06-23T19:33:42Z",
       "last_updated": "2026-06-23T20:22:38Z",
@@ -562,76 +489,12 @@
       "session_id": "sess_1782245580_188995_314"
     },
     {
-      "project_number": 315,
-      "project_name": "lj_intuitionistic_sequent_calculus",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "Implement the intuitionistic sequent calculus LJ for propositional logic. Use single-conclusion sequents (Finset antecedent, single Proposition succedent) matching the existing ND Sequent type. Create LJ proof inductive (LJ/Basic.lean), structural admissibility lemmas, soundness (LJ/Soundness.lean), cut elimination / Hauptsatz (LJ/CutElimination.lean), and equivalence bridges hilbert_iff_lj and nd_iff_lj. The nd_iff_lj bridge should be near-definitional given matching sequent shapes. File layout: Cslib/Logics/Propositional/SequentCalculus/{LJ/Basic,LJ/Soundness,LJ/CutElimination}.lean plus additions to Equivalence.lean. Depends on task 314 for shared Defs.lean and notation infrastructure. Parent task: 279.\n\nLiterature sources:\n- specs/literature/sources/negri_von_plato_2001/section03_ch2-intuitionistic-cut-elimination.md — G3ip rules, admissibility of contraction and cut for intuitionistic SC (primary reference for LJ design)\n- specs/literature/sources/troelstra_schwichtenberg_2000/section04_ch3-gentzen-systems.md — LJ definitions, G3-style systems, structural rules\n- specs/literature/sources/troelstra_schwichtenberg_2000/section05_ch4-cut-elimination.md — Hauptsatz for intuitionistic logic, termination argument\n- specs/literature/sources/negri_von_plato_2001/section06_ch5-variant-sequent-calculi.md — Multisuccedent intuitionistic calculus, terminating intuitionistic calculus (G3i variants)\n- specs/literature/sources/negri_von_plato_2001/section07_ch6-8-extensions-translations.md — ND-SC translations for bridge proofs\n- specs/literature/sources/gentzen_1935/gentzen_1935_sec03.md — Original LJ definitions and Hauptsatz\n- specs/literature/sources/gentzen_1935/gentzen_1935_sec05.md — NJ/LJ equivalence (bridge proof reference)",
-      "topic": "Propositional Logic",
-      "created": "2026-06-23T19:33:42Z",
-      "last_updated": "2026-06-23T23:45:49Z",
-      "next_artifact_number": 2,
-      "artifacts": [
-        {
-          "path": "specs/315_lj_intuitionistic_sequent_calculus/reports/01_lj-research.md",
-          "type": "report"
-        },
-        {
-          "path": "specs/315_lj_intuitionistic_sequent_calculus/plans/01_lj-plan.md",
-          "type": "plan"
-        }
-      ],
-      "dependencies": [
-        314
-      ],
-      "parent_task": 279,
-      "plan_metadata": {
-        "phases": 5,
-        "total_effort_hours": 16,
-        "complexity": "complex",
-        "research_integrated": true,
-        "plan_version": 1,
-        "dependency_waves": [
-          [
-            1
-          ],
-          [
-            2,
-            3
-          ],
-          [
-            4
-          ],
-          [
-            5
-          ]
-        ]
-      },
-      "session_id": "sess_1782245580_188995_315",
-      "completion_summary": "LJ intuitionistic sequent calculus fully implemented: Basic.lean (214 lines, LJProof inductive with 11 constructors), Soundness.lean (156 lines, Kripke soundness), CutElimination.lean (151 lines, 1 sorry in cutAdmissibility), Completeness.lean (307 lines, nd_iff_lj and hilbert_iff_lj bridges). All files build successfully."
-    },
-    {
-      "project_number": 318,
-      "project_name": "ipl_conservative_over_conj_imp_bot",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "IPL conservative over IPL⟨∧,→,⊥,⊤⟩ for or-free formulas. Define pointed Brouwerian semilattice (BrouwerianSemilattice + OrderBot), prove soundness/completeness of the conjunctive-implicational-bot fragment, and prove IPL conservative over this fragment via the existing free join completion embedding (which already preserves ⊥ as bot). Extends tasks 303/306/307 with the EFQ axiom.",
-      "topic": "Algebraic Semantics",
-      "dependencies": [],
-      "created": "2026-06-23T22:01:51Z",
-      "last_updated": "2026-06-23T22:54:37Z",
-      "next_artifact_number": 1,
-      "artifacts": [],
-      "session_id": "sess_1782252559_952370_318",
-      "completion_summary": "IPL conservative over IPL⟨∧,→,⊥,⊤⟩ for or-free formulas: ConjImpBotAxiom, PointedBrouwerianEvaluate, Lindenbaum+completeness, NonemptyLowerSet HA construction, conservative extension theorem (5 files, 0 sorries)"
-    },
-    {
       "project_number": 319,
       "project_name": "minimal_tableau_infrastructure",
       "status": "not_started",
       "task_type": "cslib",
       "topic": "Propositional Logic",
-      "description": "Build dedicated Soundness and Completeness modules for the minimal propositional tableau, matching the structure of the classical and intuitionistic systems. Currently the minimal system has only DecisionProcedure.lean (135 lines) with sorry-marked theorems, while classical has 4 modules (795 lines) and intuitionistic has 5 modules (908 lines). The minimal tableau shares the intuitionistic rules and expansion loop (intExpandBranches with isMinimallyClosed), so no separate Rules.lean or Expansion.lean is needed. Create: (1) Minimal/Soundness.lean — define minRule_preserves_sat (each rule preserves branch satisfiability in any Kripke model with arbitrary botForces, not just fun _ => False), minClosed_unsatisfiable (MinimalClosure T(p)/F(p) contradiction is unsatisfiable since val w p ↔ ¬val w p), and prove minimalTableau_sound. Key difference from intuitionistic: closure is on complementary atoms only, and botForces is unconstrained. (2) Minimal/Completeness.lean — construct countermodel from open saturated branch with botForces w = (T(⊥) at w on branch), prove truth lemma by formula induction, and prove minimalTableau_complete. Key difference from intuitionistic: the countermodel allows bot to be forced at some worlds. (3) Refactor DecisionProcedure.lean to import the new modules, keeping only the Decidable instances and the minimalTableau_decides bridge theorem. (4) Update Cslib.lean barrel imports via lake exe mk_all.",
+      "description": "Build dedicated Soundness and Completeness modules for the minimal propositional tableau, matching the structure of the classical and intuitionistic systems. Currently the minimal system has only DecisionProcedure.lean (135 lines) with sorry-marked theorems, while classical has 4 modules (795 lines) and intuitionistic has 5 modules (908 lines). The minimal tableau shares the intuitionistic rules and expansion loop (intExpandBranches with isMinimallyClosed), so no separate Rules.lean or Expansion.lean is needed. Create: (1) Minimal/Soundness.lean \u2014 define minRule_preserves_sat (each rule preserves branch satisfiability in any Kripke model with arbitrary botForces, not just fun _ => False), minClosed_unsatisfiable (MinimalClosure T(p)/F(p) contradiction is unsatisfiable since val w p \u2194 \u00acval w p), and prove minimalTableau_sound. Key difference from intuitionistic: closure is on complementary atoms only, and botForces is unconstrained. (2) Minimal/Completeness.lean \u2014 construct countermodel from open saturated branch with botForces w = (T(\u22a5) at w on branch), prove truth lemma by formula induction, and prove minimalTableau_complete. Key difference from intuitionistic: the countermodel allows bot to be forced at some worlds. (3) Refactor DecisionProcedure.lean to import the new modules, keeping only the Decidable instances and the minimalTableau_decides bridge theorem. (4) Update Cslib.lean barrel imports via lake exe mk_all.",
       "created": "2026-06-23T23:12:42Z",
       "last_updated": "2026-06-23T23:12:42Z",
       "next_artifact_number": 1,
@@ -641,6 +504,20 @@
         317
       ],
       "parent_task": 296
+    },
+    {
+      "project_number": 320,
+      "project_name": "remove_nd_metalogic_cleanup",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Remove ND-level metalogic that has been superseded by Hilbert-primary results. The Hilbert systems now prove deduction theorem, strong completeness, compactness, decidability, and the algebraic conservativity/Glivenko chain directly. ND should keep soundness and the extensional equivalence to Hilbert, but no longer needs standalone completeness theorems or the duplicate Lindenbaum infrastructure used only to derive them. Clean up: (1) Deprecate or remove `Theory.alg_complete`, `MPL.alg_complete`, `IPL.alg_complete`, and `alg_complete_classical` in `Semantics/Algebra/Completeness.lean`; replace downstream uses with the Hilbert-primary theorems (`MPL.hilbert_alg_complete`, `IPL.hilbert_alg_complete`, `CPL.hilbert_alg_complete`) composed through `hilbert_iff_nd_ctx` equivalences. (2) Simplify or remove `HilbertConservativeGlivenko.lean` algebraic bridges if they are no longer needed for ND corollaries; keep only the equivalences required by other modules. (3) Remove or consolidate duplicate ND Lindenbaum algebra material that is only used for ND completeness. (4) Update module docstrings in `Semantics/Algebra.lean`, `Semantics/Algebra/Completeness.lean`, and related files to state that Hilbert is the primary proof system and ND inherits results via equivalence. (5) Fix imports and barrel files affected by deletions. (6) Ensure the build is `sorry`-free and all downstream modules (sequent calculus, tableau, modal/temporal embeddings) still compile.",
+      "created": "2026-06-24T00:00:00Z",
+      "last_updated": "2026-06-24T00:00:00Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "dependencies": [],
+      "parent_task": null
     }
   ],
   "repository_health": {

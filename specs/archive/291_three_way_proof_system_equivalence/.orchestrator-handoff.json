@@ -1,0 +1,15 @@
+{
+  "status": "implemented",
+  "summary": "Created Cslib/Logics/Propositional/ProofSystemEquivalence.lean with 5 theorems composing existing bridges into TFAE and iff forms. CPL and IPL get 3-way TFAE (Hilbert, ND, LK/LJ); MPL gets 2-way iff (no minimal SC in CSLib). Build passes; module added to Cslib.lean barrel. CI steps 1-6 pass; lake test fails on pre-existing errors unrelated to this module.",
+  "blockers": [],
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/ProofSystemEquivalence.lean",
+      "type": "implementation",
+      "summary": "New unifying module: cplProofSystemsTfae, cplProofSystemsTfaeClosed, iplProofSystemsTfae, iplProofSystemsTfaeClosed (all List.TFAE), mplHilbertIffNd (iff). All proofs are 3-line compositions of bridge theorems."
+    }
+  ],
+  "phases_completed": 1,
+  "phases_total": 1,
+  "continuation_context": null
+}

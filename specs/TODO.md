@@ -1,5 +1,5 @@
 ---
-next_project_number: 320
+next_project_number: 321
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 320
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,292,299,301,310,313,314,316 | -- | Bimodal Porting, Foundations, Project Management, ... |
+| 1 | 36,37,180,226,241,245,278,290,292,299,301,310,313,314,316,320 | -- | Bimodal Porting, Foundations, Project Management, ... |
 | 2 | 39,40,181,215,293,300,311,317 | 36,37,180,290,299,310,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
 | 3 | 41,275,312,319 | 39,40,311,317 | Foundations, Propositional Logic, Algebraic Semantics |
 
@@ -32,7 +32,7 @@ next_project_number: 320
 
 ### Project Management
 
-313 [RESEARCHED] — Research and compose a Zulip comment for the CSLib Propositional 
+313 [PLANNED] — Research and compose a Zulip comment for the CSLib Propositional 
 
 ### Propositional Logic
 
@@ -44,6 +44,7 @@ next_project_number: 320
 316 [RESEARCHED] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [NOT STARTED] — Fill the 8 sorry instances in propositional tableau completeness 
     └─ 319 [NOT STARTED] — Build dedicated Soundness and Completeness modules for the minima
+320 [NOT STARTED] — Remove ND-level metalogic that has been superseded by Hilbert-pri
 
 ### Temporal Logic
 
@@ -70,6 +71,16 @@ next_project_number: 320
 
 ## Tasks
 
+### 320. Remove nd metalogic cleanup
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Remove ND-level metalogic that has been superseded by Hilbert-primary results. The Hilbert systems now prove deduction theorem, strong completeness, compactness, decidability, and the algebraic conservativity/Glivenko chain directly. ND should keep soundness and the extensional equivalence to Hilbert, but no longer needs standalone completeness theorems or the duplicate Lindenbaum infrastructure used only to derive them. Clean up: (1) Deprecate or remove `Theory.alg_complete`, `MPL.alg_complete`, `IPL.alg_complete`, and `alg_complete_classical` in `Semantics/Algebra/Completeness.lean`; replace downstream uses with the Hilbert-primary theorems (`MPL.hilbert_alg_complete`, `IPL.hilbert_alg_complete`, `CPL.hilbert_alg_complete`) composed through `hilbert_iff_nd_ctx` equivalences. (2) Simplify or remove `HilbertConservativeGlivenko.lean` algebraic bridges if they are no longer needed for ND corollaries; keep only the equivalences required by other modules. (3) Remove or consolidate duplicate ND Lindenbaum algebra material that is only used for ND completeness. (4) Update module docstrings in `Semantics/Algebra.lean`, `Semantics/Algebra/Completeness.lean`, and related files to state that Hilbert is the primary proof system and ND inherits results via equivalence. (5) Fix imports and barrel files affected by deletions. (6) Ensure the build is `sorry`-free and all downstream modules (sequent calculus, tableau, modal/temporal embeddings) still compile.
+
+---
+
 ### 319. Minimal tableau infrastructure
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
@@ -80,15 +91,6 @@ next_project_number: 320
 
 ---
 
-### 318. Ipl conservative over conj imp bot
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Algebraic Semantics
-- **Dependencies**: None
-
-**Description**: IPL conservative over IPL⟨∧,→,⊥,⊤⟩ for or-free formulas. Define pointed Brouwerian semilattice (BrouwerianSemilattice + OrderBot), prove soundness/completeness of the conjunctive-implicational-bot fragment, and prove IPL conservative over this fragment via the existing free join completion embedding (which already preserves ⊥ as bot). Extends tasks 303/306/307 with the EFQ axiom.
-
----
 
 ### 317. Propositional tableau completeness
 - **Status**: [NOT STARTED]
@@ -114,26 +116,6 @@ next_project_number: 320
 
 ---
 
-### 315. Lj intuitionistic sequent calculus
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 314
-- **Research**: [315_lj_intuitionistic_sequent_calculus/reports/01_lj-research.md]
-- **Plan**: [315_lj_intuitionistic_sequent_calculus/plans/01_lj-plan.md]
-
-**Description**: Implement the intuitionistic sequent calculus LJ for propositional logic. Use single-conclusion sequents (Finset antecedent, single Proposition succedent) matching the existing ND Sequent type. Create LJ proof inductive (LJ/Basic.lean), structural admissibility lemmas, soundness (LJ/Soundness.lean), cut elimination / Hauptsatz (LJ/CutElimination.lean), and equivalence bridges hilbert_iff_lj and nd_iff_lj. The nd_iff_lj bridge should be near-definitional given matching sequent shapes. File layout: Cslib/Logics/Propositional/SequentCalculus/{LJ/Basic,LJ/Soundness,LJ/CutElimination}.lean plus additions to Equivalence.lean. Depends on task 314 for shared Defs.lean and notation infrastructure. Parent task: 279.
-
-Literature sources:
-- specs/literature/sources/negri_von_plato_2001/section03_ch2-intuitionistic-cut-elimination.md — G3ip rules, admissibility of contraction and cut for intuitionistic SC (primary reference for LJ design)
-- specs/literature/sources/troelstra_schwichtenberg_2000/section04_ch3-gentzen-systems.md — LJ definitions, G3-style systems, structural rules
-- specs/literature/sources/troelstra_schwichtenberg_2000/section05_ch4-cut-elimination.md — Hauptsatz for intuitionistic logic, termination argument
-- specs/literature/sources/negri_von_plato_2001/section06_ch5-variant-sequent-calculi.md — Multisuccedent intuitionistic calculus, terminating intuitionistic calculus (G3i variants)
-- specs/literature/sources/negri_von_plato_2001/section07_ch6-8-extensions-translations.md — ND-SC translations for bridge proofs
-- specs/literature/sources/gentzen_1935/gentzen_1935_sec03.md — Original LJ definitions and Hauptsatz
-- specs/literature/sources/gentzen_1935/gentzen_1935_sec05.md — NJ/LJ equivalence (bridge proof reference)
-
----
 
 ### 314. Lk classical sequent calculus
 - **Status**: [IMPLEMENTING]
@@ -153,18 +135,6 @@ Literature sources:
 
 ---
 
-### 313. Zulip propositional logic proof systems overview
-- **Status**: [RESEARCHED]
-- **Task Type**: cslib
-- **Topic**: Project Management
-- **Dependencies**: None
-- **Research**:
-  - [313_zulip_propositional_logic_proof_systems_overview/reports/01_team-research.md]
-  - [313_zulip_propositional_logic_proof_systems_overview/reports/02_team-research.md]
-
-**Description**: Research and compose a Zulip comment for the CSLib Propositional Logic topic (https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/) that briefly outlines the three proof systems for propositional logic in CSLib (Hilbert, Natural Deduction, Sequent Calculus), indicating what each system is best equipped to establish (e.g., Hilbert for algebraic completeness, ND for constructive reasoning, Sequent for cut-elimination and decidability), and summarizing what has been completed so far in each. The comment should be concise, informative, and suitable for the Lean community audience
-
----
 
 ### 312. Unified conservative extension chain
 - **Status**: [NOT STARTED]
@@ -196,25 +166,7 @@ Literature sources:
 
 ---
 
-### 309. Hilbert algebra soundness completeness
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Algebraic Semantics
-- **Dependencies**: Task 304
 
-**Description**: Prove soundness and completeness of IPL⟨→,⊤⟩ w.r.t. Hilbert algebras. Soundness: if Derivable ImpAxiom φ then HilbertEvaluate v φ = ⊤ in every HilbertAlgebra. Completeness via the Lindenbaum-Tarski algebra: the quotient Proposition Atom / ≈ where φ ≈ ψ iff Derivable ImpAxiom (φ → ψ) and Derivable ImpAxiom (ψ → φ). Define [φ] ⇨ [ψ] := [φ → ψ] and show this is well-defined and satisfies the Hilbert algebra axioms K, S, and antisymmetry. Prove the truth lemma: HilbertEvaluate [·] φ = ⊤ ↔ Derivable ImpAxiom φ. This is the simplest Lindenbaum construction in the chain — no lattice operations needed, just the implication operation on equivalence classes. Reference: Diego (1966) Chapter 2, Rasiowa (1974) Chapter V. File: Cslib/Logics/Propositional/Semantics/Algebra/HilbertAlgCompleteness.lean.
-
----
-
-### 304. Hilbert algebra typeclass
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Algebraic Semantics
-- **Dependencies**: None
-
-**Description**: Define the HilbertAlgebra typeclass: a structure (H, ⇨, ⊤) satisfying (K) a ⇨ (b ⇨ a) = ⊤, (S) (a ⇨ (b ⇨ c)) ⇨ ((a ⇨ b) ⇨ (a ⇨ c)) = ⊤, and antisymmetry (a ⇨ b = ⊤ ∧ b ⇨ a = ⊤ → a = b). Derive the induced partial order a ≤ b ↔ a ⇨ b = ⊤ and prove it is a PartialOrder. Provide forgetful instances from BrouwerianSemilattice and GeneralizedHeytingAlgebra. Define HilbertEvaluate mapping imp-top-only Propositions to elements of a HilbertAlgebra using only ⇨. This captures the algebraic semantics of IPL⟨→,⊤⟩ — the pure implication fragment corresponding to typed SKI combinators via Curry-Howard. Mathlib has no such class. References: Diego (1966), Monteiro (1955), Rasiowa (1974) Ch. V. File: Cslib/Foundations/Order/HilbertAlgebra.lean.
-
----
 
 ### 301. Temporal tableau
 - **Status**: [NOT STARTED]
@@ -278,15 +230,6 @@ Literature sources:
 
 ---
 
-### 291. Three way proof system equivalence
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 314, Task 315
-
-**Description**: After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a unifying module stating the three-way equivalence as List.TFAE theorems. For each of MPL, IPL, and CPL, prove that Hilbert derivability, ND derivability, and SC derivability are equivalent. The pairwise bridges are: Hilbert-ND from task 266, Hilbert-SC and ND-SC from task 279. This is purely compositional. File: Cslib/Logics/Propositional/ProofSystemEquivalence.lean. Depends on 279.
-
----
 
 ### 290. Nd normalization subformula property
 - **Status**: [NOT STARTED]

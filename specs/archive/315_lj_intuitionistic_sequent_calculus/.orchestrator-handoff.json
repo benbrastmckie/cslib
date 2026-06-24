@@ -1,0 +1,15 @@
+{
+  "status": "planned",
+  "summary": "5-phase implementation plan for LJ intuitionistic sequent calculus. Phase 1: LJProof inductive with 11 constructors, height, mono, CutFree (2h). Phase 2: Kripke soundness via IForces (2.5h). Phase 3: Cut elimination / Hauptsatz (5h). Phase 4: ND-LJ and Hilbert-LJ equivalence bridges (4h). Phase 5: Barrel files and CI verification (1.5h). Total: 16h. Phases 2 and 3 can execute in parallel (Wave 2).",
+  "blockers": [],
+  "artifacts": [
+    {
+      "path": "specs/315_lj_intuitionistic_sequent_calculus/plans/01_lj-plan.md",
+      "type": "plan",
+      "summary": "Phased implementation plan with dependency analysis, file-level task breakdown, and verification criteria for each phase"
+    }
+  ],
+  "phases_completed": 0,
+  "phases_total": 5,
+  "continuation_context": null
+}

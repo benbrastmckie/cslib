@@ -1,0 +1,29 @@
+{
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/318_ipl_conservative_over_conj_imp_bot/plans/01_conj-imp-bot-plan.md",
+      "summary": "5-phase implementation plan for IPL conservative over ConjImpBot with NonemptyLowerSet HA construction"
+    }
+  ],
+  "next_steps": "Run /implement 318 to execute the plan",
+  "metadata": {
+    "session_id": "sess_1782252559_952370_318",
+    "agent_type": "planner-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 5,
+    "estimated_hours": 8,
+    "dependency_waves": [[1, 2], [3], [4], [5]]
+  },
+  "memory_candidates": [
+    {
+      "content": "For conservative extension proofs in the conj-imp-bot fragment: the LowerSet.Iic embedding does NOT preserve bot (LowerSet.Iic bot = {bot} vs bot : LowerSet B = empty). Use NonemptyLowerSet B = {S : LowerSet B // bot in S} as a subtype. This IS a HeytingAlgebra where Iic preserves all four operations {inf, top, himp, bot}. The construction generalizes: any pointed BSL embeds bot-preservingly into NonemptyLowerSet(B).",
+      "category": "PATTERN",
+      "source_artifact": "specs/318_ipl_conservative_over_conj_imp_bot/plans/01_conj-imp-bot-plan.md",
+      "confidence": 0.9,
+      "suggested_keywords": ["NonemptyLowerSet", "LowerSet", "bot-preservation", "HeytingAlgebra", "conservative-extension", "BrouwerianSemilattice"]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "status": "implemented",
+  "summary": "IPL conservative over IPL⟨∧,→,⊥,⊤⟩ for or-free formulas: all 5 phases complete, 5 files created/fixed, 0 sorries",
+  "phases_completed": 5,
+  "phases_total": 5,
+  "sorry_inventory": [],
+  "blockers": [],
+  "continuation_context": null,
+  "artifacts": [
+    {
+      "path": "specs/318_ipl_conservative_over_conj_imp_bot/summaries/01_conj-imp-bot-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary for task 318: ConjImpBotAxiom, PointedBrouwerianEvaluate, soundness/completeness, NonemptyLowerSet HA, and conservative extension theorem"
+    }
+  ]
+}

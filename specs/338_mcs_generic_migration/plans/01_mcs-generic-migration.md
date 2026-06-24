@@ -141,7 +141,7 @@ excluded). This is the critical-path gate for the entire migration.
 
 ---
 
-### Phase 2: Rewire Temporal MCS Wrappers to MCSProperties [IN PROGRESS]
+### Phase 2: Rewire Temporal MCS Wrappers to MCSProperties [COMPLETED]
 
 **Goal**: Replace the generic + basic MCS wrappers in `Temporal/Metalogic/MCS.lean`
 (lines ~50-140: `SetConsistent`, `SetMaximalConsistent`, `temporal_lindenbaum`,
@@ -180,7 +180,7 @@ systems must be reconciled.
 
 ---
 
-### Phase 3: Downstream Consumer Verification [NOT STARTED]
+### Phase 3: Downstream Consumer Verification [COMPLETED]
 
 **Goal**: Confirm all Temporal MCS downstream consumers still build with the rewired
 definitions, fixing only type-compatibility issues (e.g., needed `rw`/`convert` if a

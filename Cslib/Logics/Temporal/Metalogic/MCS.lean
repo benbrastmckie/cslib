@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Temporal.Metalogic.DeductionTheorem
+public import Cslib.Logics.Temporal.Metalogic.GenericMCSBridge
 
 /-! # Maximal Consistent Sets for Temporal Logic BX
 
@@ -40,6 +41,10 @@ set_option maxHeartbeats 1600000
 namespace Cslib.Logic.Temporal
 
 open Cslib.Logic
+open Cslib.Logic.Metalogic
+open Cslib.Logic.Metalogic.ListImplication
+open Cslib.Logic.Metalogic.ListDeduction
+open Cslib.Logic.Metalogic.GenericMCS
 
 variable {Atom : Type*}
 
@@ -92,51 +97,39 @@ context list, used throughout the Temporal metalogic modules.
 lemma theoremInMcs {M : Set (Formula Atom)} {phi : Formula Atom}
     (h_mcs : Temporal.SetMaximalConsistent M)
     (h_deriv : DerivationTree FrameClass.Base [] phi) : phi ∈ M :=
-  temporal_closed_under_derivation h_mcs (L := []) (fun _ h => by simp at h) ⟨h_deriv⟩
+  MCSProperties.mcs_theorem_in_mcs
+    (temporal_setMaxConsistent_iff_algebraic.mp h_mcs) ⟨h_deriv⟩
 
 /-! ## Basic MCS Properties -/
 
 theorem mcs_mp_axiom
     {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistent Ω)
     {φ ψ : Formula Atom} (h_mem : φ ∈ Ω) (h_ax : Axiom (φ.imp ψ))
-    (h_fc : h_ax.minFrameClass ≤ .Base := by trivial) : ψ ∈ Ω := by
-  apply temporal_closed_under_derivation h_mcs (L := [φ]) (fun x hx => by
-    simp [List.mem_cons] at hx; exact hx ▸ h_mem)
-  unfold temporalDerivationSystem Temporal.Deriv
-  exact ⟨.modus_ponens [φ] φ ψ
-    (.weakening [] [φ] (φ.imp ψ) (.axiom [] _ h_ax h_fc) (fun _ h => nomatch h))
-    (.assumption [φ] φ (List.mem_cons.mpr (Or.inl rfl)))⟩
+    (h_fc : h_ax.minFrameClass ≤ .Base := by trivial) : ψ ∈ Ω :=
+  MCSProperties.mcs_mp_axiom
+    (temporal_setMaxConsistent_iff_algebraic.mp h_mcs)
+    h_mem
+    ⟨DerivationTree.axiom [] (φ.imp ψ) h_ax h_fc⟩
 
 theorem mcs_bot_not_mem
     {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistent Ω) :
-    Formula.bot ∉ Ω := by
-  intro h_bot
-  exact h_mcs.1 [Formula.bot]
-    (fun x hx => by simp [List.mem_cons] at hx; exact hx ▸ h_bot)
-    (by simp [temporalDerivationSystem, Temporal.Deriv]
-        exact ⟨.assumption _ _ (List.mem_cons.mpr (Or.inl rfl))⟩)
+    Formula.bot ∉ Ω :=
+  MCSProperties.mcs_bot_not_mem (temporal_setMaxConsistent_iff_algebraic.mp h_mcs)
 
 theorem mcs_neg_of_not_mem
     {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistent Ω)
-    {φ : Formula Atom} (h_not : φ ∉ Ω) : (¬φ) ∈ Ω := by
-  rcases temporal_negation_complete h_mcs φ with h | h
-  · exact absurd h h_not
-  · exact h
+    {φ : Formula Atom} (h_not : φ ∉ Ω) : (¬φ) ∈ Ω :=
+  MCSProperties.mcs_neg_of_not_mem (temporal_setMaxConsistent_iff_algebraic.mp h_mcs) h_not
 
 theorem mcs_not_mem_of_neg
     {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistent Ω)
-    {φ : Formula Atom} (h_neg : (¬φ) ∈ Ω) : φ ∉ Ω := by
-  intro h_phi
-  exact mcs_bot_not_mem h_mcs (temporal_implication_property h_mcs h_neg h_phi)
+    {φ : Formula Atom} (h_neg : (¬φ) ∈ Ω) : φ ∉ Ω :=
+  MCSProperties.mcs_not_mem_of_neg (temporal_setMaxConsistent_iff_algebraic.mp h_mcs) h_neg
 
 theorem mcs_mem_iff_neg_not_mem
     {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistent Ω)
-    {φ : Formula Atom} : φ ∈ Ω ↔ (¬φ) ∉ Ω := by
-  constructor
-  · intro h hn; exact mcs_bot_not_mem h_mcs (temporal_implication_property h_mcs hn h)
-  · intro h; rcases temporal_negation_complete h_mcs φ with h' | h'
-    · exact h'
-    · exact absurd h' h
+    {φ : Formula Atom} : φ ∈ Ω ↔ (¬φ) ∉ Ω :=
+  MCSProperties.mcs_mem_iff_neg_not_mem (temporal_setMaxConsistent_iff_algebraic.mp h_mcs)
 
 /-! ## G-distribution (key lemma) -/
 

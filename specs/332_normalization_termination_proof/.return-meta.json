@@ -1,16 +1,31 @@
 {
-  "status": "in_progress",
+  "status": "partial",
   "started_at": "2026-06-24T15:50:13Z",
-  "artifacts": [],
+  "requires_user_review": true,
+  "blocked_phase": 2,
+  "review_reason": "Phase 2 partial: 2 of 8 reduceRoot cases proved (conjunction beta-redexes). Remaining 6 cases blocked on subsOne structural induction and commuting conversion SN hypotheses.",
+  "artifacts": [
+    "specs/332_normalization_termination_proof/handoffs/phase-2-handoff-20260624T163704Z.md"
+  ],
   "partial_progress": {
-    "stage": "phase_2_starting",
-    "details": "Phase 2 starting: measure decrease lemmas",
-    "phases_completed": 1
+    "stage": "phase_2_partial",
+    "details": "Phase 2 partial: proved reduceRoot_andE_maxFormulas_lt, reduceRoot_andE2_maxFormulas_lt, and cases h_2/h_3 in reduceRoot_decreases_normMeasure. 6 sorry cases remain.",
+    "phases_completed": 1,
+    "phases_total": 5
+  },
+  "verification": {
+    "verification_passed": false,
+    "sorry_count": 8,
+    "vacuous_count": 0,
+    "axiom_count": 14,
+    "build_passed": false,
+    "build_output": "Not run - sorries remain"
   },
   "metadata": {
     "session_id": "sess_1782302542_261dfa_332",
     "agent_type": "lean-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-lean-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-lean-implementation"],
+    "compliance_check": "skipped"
   }
 }

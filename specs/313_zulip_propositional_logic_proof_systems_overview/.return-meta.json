@@ -1,7 +1,0 @@
-{
-  "status": "researched",
-  "summary": "Team research completed with 4 teammates",
-  "artifacts": [{"type": "research", "path": "specs/313_zulip_propositional_logic_proof_systems_overview/reports/01_team-research.md", "summary": "Synthesized research from 4 teammates"}],
-  "team_execution": {"enabled": true, "wave_count": 1, "teammates_spawned": 4, "teammates_completed": 4, "teammates_failed": 0, "degraded_to_single": false},
-  "metadata": {"session_id": "sess_1782240089_557c47", "agent_type": "skill-team-research"}
-}

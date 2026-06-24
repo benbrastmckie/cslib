@@ -11,7 +11,7 @@ next_project_number: 321
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,292,299,301,310,313,314,316,320 | -- | Bimodal Porting, Foundations, Project Management, ... |
+| 1 | 36,37,180,226,241,245,278,290,292,299,301,310,314,316,320 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,293,300,311,317 | 36,37,180,290,299,310,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
 | 3 | 41,275,312,319 | 39,40,311,317 | Foundations, Propositional Logic, Algebraic Semantics |
 
@@ -29,10 +29,6 @@ next_project_number: 321
 
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
-
-### Project Management
-
-313 [PLANNED] — Research and compose a Zulip comment for the CSLib Propositional 
 
 ### Propositional Logic
 
@@ -91,7 +87,6 @@ next_project_number: 321
 
 ---
 
-
 ### 317. Propositional tableau completeness
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
@@ -116,7 +111,6 @@ next_project_number: 321
 
 ---
 
-
 ### 314. Lk classical sequent calculus
 - **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
@@ -134,7 +128,6 @@ Literature sources:
 - specs/literature/sources/gentzen_1935/gentzen_1935_sec03.md — Original LK/LJ definitions and Hauptsatz
 
 ---
-
 
 ### 312. Unified conservative extension chain
 - **Status**: [NOT STARTED]
@@ -165,8 +158,6 @@ Literature sources:
 **Description**: Formalize the Diego embedding theorem (Diego 1966): every Hilbert algebra embeds into a Heyting algebra preserving the implication operation and top element. Given a HilbertAlgebra H, construct a HeytingAlgebra HA(H) and an order-embedding ι : H → HA(H) such that ι(a ⇨ b) = ι(a) ⇨ ι(b) and ι(⊤) = ⊤. The classical construction uses the lattice of filters of H: a filter F ⊆ H is a non-empty upward-closed set closed under ⇨-detachment (a ∈ F and a ⇨ b ∈ F implies b ∈ F). The filter lattice ordered by inclusion forms a Heyting algebra, and ι(a) = {F | a ∈ F} is the embedding. Prove: (1) the filter lattice is a HeytingAlgebra, (2) ι preserves ⇨ and ⊤, (3) ι is injective (order-embedding), (4) the embedding lemma: for imp-top-only formulas, HilbertEvaluate v φ = ⊤ ↔ AlgEvaluate (ι ∘ v) ⊥ φ = ⊤. This is the most technically demanding algebraic construction in the chain. References: Diego (1966), Köhler (1981), Celani-Jansana (2012). File: Cslib/Foundations/Order/HilbertAlgebra/DiegoEmbedding.lean.
 
 ---
-
-
 
 ### 301. Temporal tableau
 - **Status**: [NOT STARTED]
@@ -229,7 +220,6 @@ Literature sources:
 **Description**: After task 279 delivers LJ with cut elimination, formalize the connection between cut-free proof search and decidability. Define a bounded backward proof search procedure over cut-free LJ: the search space is finite because all formulas in a cut-free proof are subformulas of the sequent. Prove termination via a well-founded measure. Produce Decidable (LJDerivable (Gamma |- A)) and lift via nd_iff_lk to Decidable (DerivableIn IPL (Gamma |- A)). File: Cslib/Logics/Propositional/SequentCalculus/Decidability.lean. Depends on 279.
 
 ---
-
 
 ### 290. Nd normalization subformula property
 - **Status**: [NOT STARTED]

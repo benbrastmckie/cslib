@@ -1,16 +1,16 @@
 {
-  "status": "researched",
-  "summary": "Feasibility confirmed: adding neg/top/and/or/iff as defaulted fields on PropositionalConnectives preserves definitional equality, simp unfolding, and change tactic behavior. Each formula file replaces inline Lukasiewicz abbrevs with thin delegates to the typeclass fields. PL.Proposition can override defaults with native constructors. Net ~25-30 lines reduced, plus consistency guarantee that all four logics share identical encodings. Low risk, no sorry needed, backwards compatible.",
+  "status": "planned",
+  "summary": "5-phase implementation plan created for consolidating derived connectives. Scope reconciled against the live Connectives.lean design: only neg and top become PropositionalConnectives default fields; and/or stay primitive (HasAnd/HasOr) and iff stays deferred to task 173, diverging from the research report which had recommended Lukasiewicz defaults for and/or/iff. Phase 1 adds neg/top defaults + docstring; Phases 2-4 migrate Modal, Temporal/LTL, and Bimodal neg/top abbrevs to thin delegates; Phase 5 runs the full CSLib CI pipeline (lake build/checkInitImports/lint/lint-style/test/shake). Pure refactor, no sorry, fully reversible per-file.",
   "blockers": [],
   "continuation_context": null,
-  "next_action_hint": "Plan implementation: Phase 1 adds 5 default fields to PropositionalConnectives in Connectives.lean; Phase 2 replaces abbrev bodies in 4 formula files with delegates; Phase 3 adds missing iff to Bimodal; Phase 4 runs lake build for verification.",
+  "next_action_hint": "Run /implement 340 to execute the plan. Note the scope change vs research: only neg/top are consolidated into the typeclass; and/or/iff intentionally excluded per task-173 design.",
   "phases_completed": 0,
-  "phases_total": 0,
+  "phases_total": 5,
   "artifacts": [
     {
-      "path": "specs/340_derived_connective_defaults/reports/01_derived-connective-defaults.md",
-      "type": "research_report",
-      "summary": "Full feasibility analysis with lean_run_code verification, downstream impact mapping, implementation plan, and reuse check."
+      "path": "specs/340_derived_connective_defaults/plans/01_derived-connective-defaults.md",
+      "type": "implementation_plan",
+      "summary": "5-phase plan: neg/top typeclass defaults + per-file delegates across Modal/Temporal/Bimodal/LTL, with full CI verification."
     }
   ]
 }

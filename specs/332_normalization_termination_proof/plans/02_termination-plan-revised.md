@@ -300,7 +300,7 @@ output.
 
 ---
 
-### Phase 2b: Measure Decrease Lemma (with real SN hypothesis) [NOT STARTED]
+### Phase 2b: Measure Decrease Lemma (with real SN hypothesis) [IN PROGRESS]
 
 **Goal**: Resolve **Blocker 2**. Prove `reduceRoot_decreases_normMeasure` with a **non-vacuous**
 SN-subterm hypothesis, covering all 8 `reduceRoot` patterns.

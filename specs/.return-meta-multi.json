@@ -1,16 +1,12 @@
 {
-  "status": "partial",
+  "status": "completed",
   "metadata": {
-    "tasks_completed": [],
+    "tasks_completed": [
+      336,
+      337
+    ],
     "tasks_failed": [],
-    "tasks_partial": [
-      316
-    ],
-    "tasks_blocked": [
-      317
-    ],
     "cycles_used": 2,
-    "multi_task_mode": true,
-    "halt_reason": "divergence: 316 standard implementer overflowed context twice; halted to avoid further regression"
+    "multi_task_mode": true
   }
 }

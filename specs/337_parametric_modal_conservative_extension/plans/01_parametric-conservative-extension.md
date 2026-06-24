@@ -1,7 +1,7 @@
 # Implementation Plan: Parametric Modal Conservative Extension
 
 - **Task**: 337 - parametric_modal_conservative_extension
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 2.5 hours
 - **Dependencies**: Task 335 (soundness refactor, complete) — provides the `*_soundness` wrappers reused as callbacks
 - **Research Inputs**: specs/337_parametric_modal_conservative_extension/reports/01_parametric-conservative-extension.md

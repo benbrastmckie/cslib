@@ -1,7 +1,7 @@
 # Implementation Plan: Task #336 - Parametric Modal Completeness Cascade
 
 - **Task**: 336 - Parametric modal completeness cascade
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 9 hours
 - **Dependencies**: Task 335 (soundness refactor) — complete
 - **Research Inputs**: specs/336_parametric_modal_completeness_cascade/reports/01_parametric-completeness-cascade.md

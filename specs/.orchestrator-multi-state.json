@@ -1,76 +1,49 @@
 {
-  "session_id": "sess_1782319118_5be8e3",
+  "session_id": "sess_1782335770_b2cbfa",
   "task_numbers": [
-    335,
-    336,
-    337,
-    338,
-    339,
-    340
+    299,
+    300
   ],
   "waves": [
     [
-      335,
-      338,
-      339,
-      340
+      299
     ],
     [
-      336,
-      337
+      300
     ]
   ],
   "dependency_graph": {
-    "335": [],
-    "336": [
-      335
-    ],
-    "337": [
-      335
-    ],
-    "338": [],
-    "339": [],
-    "340": []
+    "299": [],
+    "300": [
+      "299"
+    ]
   },
-  "max_cycles": 25,
-  "cycle_count": 6,
+  "max_cycles": 10,
+  "cycle_count": 2,
   "failed_tasks": [],
   "completed_tasks": [
-    335,
-    338,
-    339,
-    340
+    336,
+    337
   ],
   "current_statuses": {
-    "316": "partial",
-    "317": "blocked",
-    "339": "completed",
-    "340": "completed"
+    "299": "planned",
+    "300": "not_started",
+    "336": "completed",
+    "337": "completed"
   },
   "task_dirs": {
-    "335": "specs/335_parametric_modal_soundness",
-    "336": "specs/336_parametric_modal_completeness_cascade",
-    "337": "specs/337_parametric_modal_conservative_extension",
-    "338": "specs/338_mcs_generic_migration",
-    "339": "specs/339_unify_swap_temporal",
-    "340": "specs/340_derived_connective_defaults"
+    "299": "specs/299_modal_k_tableau",
+    "300": "specs/300_modal_extensions_t_s4_s5"
   },
   "research_agents": {
-    "335": "cslib-research-agent",
-    "336": "cslib-research-agent",
-    "337": "cslib-research-agent",
-    "338": "cslib-research-agent",
-    "339": "cslib-research-agent",
-    "340": "cslib-research-agent"
+    "299": "cslib-research-agent",
+    "300": "cslib-research-agent"
   },
   "implement_agents": {
-    "335": "cslib-implementation-agent",
-    "336": "cslib-implementation-agent",
-    "337": "cslib-implementation-agent",
-    "338": "cslib-implementation-agent",
-    "339": "cslib-implementation-agent",
-    "340": "cslib-implementation-agent"
+    "299": "cslib-implementation-agent",
+    "300": "cslib-implementation-agent"
   },
-  "serialization_note": "Implementation dispatches serialized to avoid concurrent lake build contention and 339/340 file-territory conflict on Temporal/Bimodal Formula.lean",
-  "notes": "Resuming from preserved WIP (restored via patch): 7 granular sorries + ~7 build errors. Strategy change: incremental bounded dispatches. Cycle3: fix ONLY build errors -> committable green-modulo-sorries checkpoint, then close sorries one at a time."
+  "notes": {
+    "336": "cycle2 resume: D green(uncommitted); D4 broken(line57 syntax); D5/D45/DB not started; phase6 pending"
+  }
 }

@@ -24,26 +24,28 @@
     {
       "project_number": 330,
       "project_name": "lj_cut_admissibility_sorry",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Fill the sorry in LJ cutAdmissibility (Cslib/Logics/Propositional/SequentCalculus/LJ/CutElimination.lean:103). This is the only sorry in the LJ sequent calculus module (task 315) and it voids the cutElim theorem that depends on it. The proof requires showing that cuts on any formula can be eliminated from cut-free LJ proofs — the standard approach is double induction on cut-formula complexity and proof height, mirroring the LK cut elimination strategy in LK/CutElimination.lean but restricted to the intuitionistic single-succedent constraint. Once filled, LJProof.cutElim becomes fully proven and the LJ subformula property becomes available.",
       "created": "2026-06-24T11:57:57Z",
-      "last_updated": "2026-06-24T11:57:57Z",
+      "last_updated": "2026-06-24T12:12:26Z",
       "dependencies": [],
-      "artifacts": []
+      "artifacts": [],
+      "session_id": "sess_1750817400_a3b7c1_330"
     },
     {
       "project_number": 331,
       "project_name": "completed_tasks_code_polish",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Code Quality",
       "description": "Polish code from recently completed tasks (310, 312, 322). Three items: (1) Add cross-reference docstrings between ConservativeExtensionChain.lean and MplConservativeChain.lean — the IPL-routed proofs (hilbertMplConservativeOverConjImp, hilbertMplConservativeOverImp) and their direct-algebraic counterparts (_direct variants in MplConservativeChain) prove the same statements via different paths but neither file mentions the other. Add See also references in both directions. (2) Evaluate the thin alias hilbertConjImpConservativeOverImp_direct in ConservativeExtensionChain.lean — it is literally hilbertConjImpConservativeOverImp hITO h with no independent content; add a docstring noting it exists for API symmetry, or inline it. (3) Remove the unused _hφ parameter from hilbertEmbeddingLemma in DiegoEmbedding.lean, or if it is needed for API stability, document why it is retained.",
       "created": "2026-06-24T11:57:57Z",
-      "last_updated": "2026-06-24T11:57:57Z",
+      "last_updated": "2026-06-24T12:17:16Z",
       "dependencies": [],
-      "artifacts": []
+      "artifacts": [],
+      "session_id": "sess_1750817400_a3b7c1_331"
     },
     {
       "project_number": 327,

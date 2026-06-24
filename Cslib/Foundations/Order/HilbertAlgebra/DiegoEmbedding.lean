@@ -46,8 +46,9 @@ Given a Hilbert algebra `(H, ⇨, ⊤)`, we construct:
 - `HilbertFilter.principal_top`: `principal ⊤ = ⊥` (the principal filter of top is the bottom).
 - `HilbertFilter.principal_injective`: The principal filter map is injective.
 - `HilbertFilter.principal_le_himp`: `principal (a ⇨ b) ≤ principal a ⇨ principal b`.
-- `hilbertEmbeddingLemma`: For `IsImpTopOnly` formulas `φ`, `HilbertEvaluate v φ = ⊤` iff
-  the evaluation at every filter is valid.
+- `hilbertEmbeddingLemma`: `HilbertEvaluate v φ = ⊤` iff the principal filter of the
+  evaluation is the bottom of the filter lattice (holds for all formulas, primarily
+  applied to `IsImpTopOnly` formulas in the Diego embedding context).
 
 ## References
 
@@ -407,16 +408,19 @@ theorem principal_le_algEvaluate {Atom : Type*} {H : Type*} [HilbertAlgebra H]
   | and _ _ _ _ => simp [Proposition.IsImpTopOnly] at hφ
   | or _ _ _ _ => simp [Proposition.IsImpTopOnly] at hφ
 
-/-- **Diego Embedding Theorem**: For `IsImpTopOnly` formulas `φ`, `HilbertEvaluate v φ = ⊤`
-iff `principal (HilbertEvaluate v φ) = ⊥` (the principal filter of the evaluation is the
+/-- **Diego Embedding Theorem**: `HilbertEvaluate v φ = ⊤` iff
+`principal (HilbertEvaluate v φ) = ⊥` (the principal filter of the evaluation is the
 bottom of the filter lattice).
 
 This characterizes validity in the Hilbert algebra H as validity in the filter lattice:
-the evaluation equals the top iff the principal filter of the evaluation is the minimum filter.
+the evaluation equals the top iff the principal filter of the evaluation is the minimum
+filter. The biconditional holds for all formulas, but it is primarily applied to
+`IsImpTopOnly` formulas in the Diego embedding context, where `principal_le_algEvaluate`
+provides the additional direction needed for the full conservativity argument.
 
 References: [Rasiowa1974], Theorem V.3.6; [Diego1966]. -/
 theorem hilbertEmbeddingLemma {Atom : Type*} {H : Type*} [HilbertAlgebra H]
-    (v : Atom → H) (φ : Proposition Atom) (_hφ : φ.IsImpTopOnly = true) :
+    (v : Atom → H) (φ : Proposition Atom) :
     HilbertEvaluate v φ = ⊤ ↔ principal (HilbertEvaluate v φ) = (⊥ : HilbertFilter H) := by
   constructor
   · intro h

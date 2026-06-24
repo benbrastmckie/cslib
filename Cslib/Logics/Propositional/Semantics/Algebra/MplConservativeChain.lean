@@ -129,8 +129,8 @@ and bottom value `⊥`, then applies `brouwerianEmbeddingLemma` to convert the r
 `AlgEvaluate (LowerSet.Iic ∘ v) ⊥ φ = ⊤` to `BrouwerianEvaluate v φ = ⊤`.
 
 This is the algebraic core of `hilbertMplConservativeOverConjImp_direct`, extracted as a
-standalone lemma. Compare with `GHAValid_implies_BrouwerianValid_orBotFree` in
-`ConservativeChain.lean`, which routes through IPL derivability.
+standalone lemma. See also `GHAValid_implies_BrouwerianValid_orBotFree` in
+`ConservativeChain.lean`, which proves the same result by routing through IPL derivability.
 
 References: [Nemitz1965], [Kohler1981]. -/
 theorem GHAValid_implies_BrouwerianValid_direct {Atom : Type u} {φ : PL.Proposition Atom}
@@ -148,9 +148,9 @@ The proof composes:
    and applying `brouwerianEmbeddingLemma`.
 3. `conjImp_brouwerian_complete hOBF` converts `BrouwerianValid φ` to `Derivable ConjImpAxiom φ`.
 
-Contrast with `hilbertMplConservativeOverConjImp` in `ConservativeChain.lean`, which routes
-through `derivableMinOfDerivableInt` (MPL→IPL subsumption) followed by
-`hilbertIplConservativeOverConjImp` (IPL→ConjImp conservativity). -/
+See also `hilbertMplConservativeOverConjImp` in `ConservativeChain.lean`, which proves the
+same result by routing through `derivableMinOfDerivableInt` (MPL→IPL subsumption) followed
+by `hilbertIplConservativeOverConjImp` (IPL→ConjImp conservativity). -/
 theorem hilbertMplConservativeOverConjImp_direct {Atom : Type u} {φ : PL.Proposition Atom}
     (hOBF : φ.IsOrBotFree = true) (h : Derivable (@MinPropAxiom Atom) φ) :
     Derivable (@ConjImpAxiom Atom) φ :=
@@ -183,8 +183,8 @@ The proof composes:
    imp-top-only implies or-bot-free via `IsImpTopOnly_implies_IsOrBotFree`).
 2. `hilbertConjImpConservativeOverImp` (ConjImp → Imp for imp-top-only).
 
-This avoids the IPL-routing path used in `hilbertMplConservativeOverImp` (in
-`ConservativeChain.lean`), which goes: MPL → IPL (subsumption) → Imp (conservativity). -/
+See also `hilbertMplConservativeOverImp` in `ConservativeChain.lean`, which proves the same
+result via the IPL-routing path: MPL → IPL (subsumption) → Imp (conservativity). -/
 theorem hilbertMplConservativeOverImp_direct {Atom : Type u} {φ : PL.Proposition Atom}
     (hITO : φ.IsImpTopOnly = true) (h : Derivable (@MinPropAxiom Atom) φ) :
     Derivable (@ImpAxiom Atom) φ :=

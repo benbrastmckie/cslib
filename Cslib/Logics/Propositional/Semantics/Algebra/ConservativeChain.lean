@@ -76,6 +76,13 @@ Each inclusion holds by the respective `.toConjImpAxiom`, `.toMinPropAxiom`,
 `.toIntPropAxiom`, `.toPropositionalAxiom` coercions (from `Axioms.lean` and
 `FragmentAxioms.lean`).
 
+## See Also
+
+`MplConservativeChain.lean` provides alternative direct-algebraic proofs of the MPL
+conservativity steps (`hilbertMplConservativeOverConjImp`, `hilbertMplConservativeOverImp`,
+`GHAValid_implies_BrouwerianValid_orBotFree`) that stay entirely within GHA semantics
+without routing through IPL derivability. Compare the `_direct` suffixed counterparts there.
+
 ## References
 
 * [A. Rasiowa, *An Algebraic Approach to Non-Classical Logics*][Rasiowa1974]
@@ -152,7 +159,10 @@ The proof routes through derivability using completeness:
 1. `MPL.hilbert_alg_complete.mpr h` converts `GHAValid φ` to `Derivable MinPropAxiom φ`.
 2. `derivableMinOfDerivableInt` lifts to `Derivable IntPropAxiom φ` (subsumption).
 3. `hilbertIplConservativeOverConjImp hOBF` reduces to `Derivable ConjImpAxiom φ`.
-4. `conjImp_brouwerian_soundness_derivable` gives `BrouwerianValid φ`. -/
+4. `conjImp_brouwerian_soundness_derivable` gives `BrouwerianValid φ`.
+
+See also `GHAValid_implies_BrouwerianValid_direct` in `MplConservativeChain.lean` for a
+direct algebraic proof that stays within GHA semantics without routing through IPL. -/
 theorem GHAValid_implies_BrouwerianValid_orBotFree {Atom : Type u}
     {φ : PL.Proposition Atom} (hOBF : φ.IsOrBotFree = true) (h : GHAValid.{u, u} φ) :
     BrouwerianValid φ :=
@@ -188,14 +198,14 @@ theorem HAValid_implies_GHAValid {Atom : Type u} {φ : PL.Proposition Atom}
 
 /-! ## Inter-Fragment Conservativity Corollaries -/
 
-/-- **Inter-fragment conservativity**: IPL⟨∧,→,⊤⟩ is conservative over IPL⟨→,⊤⟩ for
-imp-top-only formulas. If `φ` (imp-top-only) is derivable in `ConjImpAxiom`, then it is
-already derivable in `ImpAxiom`.
+/-- **API naming-convention alias** for `hilbertConjImpConservativeOverImp`.
 
-This is the reverse of `derivableConjImpOfDerivableInt`; it is the proper conservativity
-direction. The proof composes `hilbertConjImpConservativeOverImp` (already proved in
-`ImpConservative.lean`). This corollary makes the `ConjImp ⊂ IPL` step in the full
-chain explicit. -/
+This definition exists solely to provide a `_direct` suffixed name that mirrors
+`hilbertConjImpConservativeOverImp_viaIpl`, giving callers a symmetric pair of names
+for the two proof routes (direct vs. via IPL). The body is literally
+`hilbertConjImpConservativeOverImp hITO h` with no independent content.
+
+See also `hilbertConjImpConservativeOverImp_viaIpl` for the alternative route through IPL. -/
 theorem hilbertConjImpConservativeOverImp_direct {Atom : Type u} {φ : PL.Proposition Atom}
     (hITO : φ.IsImpTopOnly = true) (h : Derivable (@ConjImpAxiom Atom) φ) :
     Derivable (@ImpAxiom Atom) φ :=
@@ -212,7 +222,10 @@ The proof composes two conservative extension steps:
    (subsumption), and then by the IplConservativeOverImp it's derivable in Imp.
 
 Formally: `derivableMinOfDerivableInt` (Mpl → IPL) composed with
-`hilbertIplConservativeOverImp` (IPL → Imp for imp-top-only). -/
+`hilbertIplConservativeOverImp` (IPL → Imp for imp-top-only).
+
+See also `hilbertMplConservativeOverImp_direct` in `MplConservativeChain.lean` for a
+direct algebraic proof that avoids routing through IPL. -/
 theorem hilbertMplConservativeOverImp {Atom : Type u} {φ : PL.Proposition Atom}
     (hITO : φ.IsImpTopOnly = true) (h : Derivable (@MinPropAxiom Atom) φ) :
     Derivable (@ImpAxiom Atom) φ :=
@@ -233,7 +246,10 @@ theorem hilbertConjImpConservativeOverImp_viaIpl {Atom : Type u} {φ : PL.Propos
 implies ConjImpAxiom derivability.
 
 The proof composes: `derivableMinOfDerivableInt` (Mpl → IPL subsumption) followed by
-`hilbertIplConservativeOverConjImp` (IPL → ConjImp for or-bot-free formulas). -/
+`hilbertIplConservativeOverConjImp` (IPL → ConjImp for or-bot-free formulas).
+
+See also `hilbertMplConservativeOverConjImp_direct` in `MplConservativeChain.lean` for a
+direct algebraic proof via the GHA→BSL bridge that avoids routing through IPL. -/
 theorem hilbertMplConservativeOverConjImp {Atom : Type u} {φ : PL.Proposition Atom}
     (hOBF : φ.IsOrBotFree = true) (h : Derivable (@MinPropAxiom Atom) φ) :
     Derivable (@ConjImpAxiom Atom) φ :=

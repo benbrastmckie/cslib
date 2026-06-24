@@ -179,7 +179,7 @@ accessibility-edge tracking that makes box-positive propagation K-sound (not S5)
 
 ---
 
-### Phase 3: Closure + Saturation — fuel loop and entry point [IN PROGRESS]
+### Phase 3: Closure + Saturation — fuel loop and entry point [COMPLETED]
 
 **Goal**: Wire closure and the fuel-based saturation loop, producing the runnable
 `modalTableau φ` entry point and the Hintikka predicate completeness will need.

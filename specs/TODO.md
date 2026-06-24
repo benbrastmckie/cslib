@@ -1,5 +1,5 @@
 ---
-next_project_number: 335
+next_project_number: 341
 ---
 
 # TODO
@@ -11,8 +11,8 @@ next_project_number: 335
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,316,321,334 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215,300,317,332 | 36,37,180,290,299,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,241,245,278,290,299,301,316,321,334,335,338,339,340 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,317,332,336,337 | 36,37,180,290,299,316,335 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275,333 | 39,40,332 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -28,7 +28,16 @@ next_project_number: 335
 ### Foundations
 
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
+338 [NOT STARTED] — Migrate Propositional/Metalogic/MCS.lean and Temporal/Metalogic/M
+339 [NOT STARTED] — Unify the swapTemporal function and its associated theorems betwe
+340 [NOT STARTED] — Investigate and consolidate derived connective definitions (neg, 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
+
+### Modal Logic
+
+335 [NOT STARTED] — Extract a shared propositional axiom soundness lemma in Modal/Met
+  └─ 336 [NOT STARTED] — Extract parametric completeness cascade theorems (strong_soundnes
+  └─ 337 [NOT STARTED] — Extract a single parametric conservative extension theorem taking
 
 ### Propositional Logic
 
@@ -62,6 +71,66 @@ next_project_number: 335
 ### Uncategorized
 
 ## Tasks
+
+### 340. Derived connective defaults
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Foundations
+- **Dependencies**: None
+
+**Description**: Investigate and consolidate derived connective definitions (neg, top, conj/and, disj/or, iff) that use the same Lukasiewicz encoding across Modal, Temporal, Bimodal, and LTL formula types. All four use identical encodings: neg phi := phi imp bot, top := neg bot, and phi psi := neg(phi imp neg psi), or phi psi := neg phi imp psi, iff phi psi := and (phi imp psi) (psi imp phi). Determine whether Foundations/Logic/Connectives.lean can provide default implementations via the existing HasBot/HasImp typeclasses (e.g., a class DerivedNeg extending HasBot+HasImp with a default neg field), so that formula types automatically get these derived connectives by registering PropositionalConnectives. If feasible, migrate Modal/Basic.lean, Temporal/Syntax/Formula.lean, Bimodal/Syntax/Formula.lean, and LTL/Syntax/Formula.lean to use the defaults. Must verify that simp lemmas, pattern matching, and reducibility are preserved — the current definitions may rely on being definitionally equal to specific terms. Files: Cslib/Foundations/Logic/Connectives.lean, plus the 4 formula files. Target: ~80 lines reduced, improved consistency guarantee that all logics share the same encodings.
+
+---
+
+### 339. Unify swap temporal
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Foundations
+- **Dependencies**: None
+
+**Description**: Unify the swapTemporal function and its associated theorems between Temporal/Syntax/Formula.lean (lines 335-452, ~117 lines) and Bimodal/Syntax/Formula.lean (lines 124-205, ~81 lines). The shared core (definition, involution, neg distribution, someFuture/somePast exchange, allFuture/allPast exchange, atoms preservation) is near-verbatim duplicated. Bimodal adds a box/diamond case and swapTemporal_diamond. Temporal has additional theorems for next/prev and strongRelease/strongTrigger that Bimodal lacks (those constructors are not in bimodal syntax). The cleanest approach is likely: Bimodal.Formula.swapTemporal delegates to or mirrors Temporal.Formula.swapTemporal for the shared constructors, with Bimodal adding only the box case. Alternatively, a shared typeclass in Foundations/Logic/ could define swapTemporal generically for any type with HasUntil+HasSince. Must preserve all downstream consumers in Metalogic/Separation/ and Metalogic/Decidability/. Files: Cslib/Logics/Temporal/Syntax/Formula.lean, Cslib/Logics/Bimodal/Syntax/Formula.lean. Target: ~70 lines of exact duplication eliminated.
+
+---
+
+### 338. Mcs generic migration
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Foundations
+- **Dependencies**: None
+
+**Description**: Migrate Propositional/Metalogic/MCS.lean and Temporal/Metalogic/MCS.lean to use Foundations/Logic/Metalogic/GenericMCS.lean, following the pattern established by Modal/Metalogic/GenericMCSBridge.lean. Currently Propositional and Temporal each maintain ~80 lines of MCS wrapper boilerplate that re-abbreviates generic Metalogic.SetConsistent/SetMaximalConsistent and re-invokes set_lindenbaum/closed_under_derivation. GenericMCS.lean already provides algebraicDerivationSystem for any MinimalHilbert, giving free deduction theorem and all MCS properties. Modal adopted this via GenericMCSBridge.lean. Temporal/Metalogic/MCS.lean has additional temporal-specific properties (g_witness, h_witness, temporal content) that must be preserved — only the generic boilerplate should be replaced. Files: Cslib/Logics/Propositional/Metalogic/MCS.lean, Cslib/Logics/Temporal/Metalogic/MCS.lean, potentially Cslib/Foundations/Logic/Metalogic/GenericMCS.lean (if the interface needs minor extension). Target: ~160 lines of boilerplate eliminated while preserving all downstream API.
+
+---
+
+### 337. Parametric modal conservative extension
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: Task 335
+
+**Description**: Extract a single parametric conservative extension theorem taking frame condition hypotheses and a universal model constructor as parameters, replacing 15 near-identical Systems/*/ConservativeExtension.lean files. Currently 15 files (55-61 lines each, 896 total) that all compose: soundness -> toModal_valid_implies_tautology -> CPL completeness, differing only in which frame conditions (reflexivity, transitivity, symmetry, seriality, euclideanness) are discharged and which model is constructed. A parametric theorem in Modal/Metalogic/ would let each system instantiate in ~5 lines. Files: new theorem in Cslib/Logics/Modal/Metalogic/ (possibly ConservativeExtension.lean), all 15 Systems/*/ConservativeExtension.lean. Target: ~400 lines reduced. Depends on task 335 (to avoid conflicting edits in the same system directories).
+
+---
+
+### 336. Parametric modal completeness cascade
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: Task 335
+
+**Description**: Extract parametric completeness cascade theorems (strong_soundness, strong_completeness, strong_completeness_iff, compactness, weak completeness) in Modal/Metalogic/Completeness.lean, parameterized by truth lemma variant and frame conditions. Refactor the per-system completeness files to use the parametric cascade. The 15 Systems/*/Completeness.lean files total 3,205 lines. The cascade pattern (strong_soundness via unfold+soundness, strong_completeness via contrapositive+Lindenbaum+truth-lemma, then iff/compactness/weak wrappers) is mechanically identical across systems, differing only in: (a) which truth lemma variant is used (K-family, T-family, D-family), (b) which frame condition hypotheses are stated. K (367 lines) and D (468 lines) have unique truth lemma infrastructure; the remaining 13 systems (159-205 lines each) are near-identical. Files: Cslib/Logics/Modal/Metalogic/Completeness.lean (add parametric cascade), all 15 Systems/*/Completeness.lean. Target: ~1,200-1,500 lines reduced. Depends on task 335 (soundness refactor must land first since strong_soundness wraps per-system soundness).
+
+---
+
+### 335. Parametric modal soundness
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Extract a shared propositional axiom soundness lemma in Modal/Metalogic/Soundness.lean handling the 5 cases identical across all 15 modal systems (implyK, implyS, efq, peirce, modalK). Then refactor all 15 Systems/*/Soundness.lean files to call the shared lemma, keeping only system-specific modal axiom cases (modalT, modalFour, modalB, modal5, modalD). Currently 15 files totaling 1,291 lines with ~40 lines of identical propositional case-splits in each. Files: Cslib/Logics/Modal/Metalogic/Soundness.lean (add shared lemma), Cslib/Logics/Modal/Metalogic/Systems/{K,T,B,D,S4,S5,K4,K5,K45,KB5,DB,D4,D5,D45,TB}/Soundness.lean (refactor to use it). Target: ~600 lines reduced.
+
+---
 
 ### 334. Propositional refactoring audit
 - **Status**: [NOT STARTED]

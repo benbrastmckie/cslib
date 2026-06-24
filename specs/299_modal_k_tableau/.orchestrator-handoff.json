@@ -1,0 +1,13 @@
+{
+  "status": "planned",
+  "next_artifact_number": 2,
+  "plan_path": "specs/299_modal_k_tableau/plans/01_modal-k-tableau-plan.md",
+  "phase_count": 7,
+  "estimated_hours": 14,
+  "dependency_waves": [[1], [2], [3], [4, 5], [6], [7]],
+  "session_id": "sess_1782335770_b2cbfa_299",
+  "task_number": 299,
+  "next_action": "implement",
+  "hard_constraints": ["zero-sorry", "zero-new-axiom"],
+  "high_risk_phase": 6
+}

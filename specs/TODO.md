@@ -11,8 +11,8 @@ next_project_number: 341
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,316,321,335,338,339,340 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,317,332,336,337 | 36,37,180,290,299,316,335 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,278,290,299,301,316,321,336,337,338,339,340 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,317,332 | 36,37,180,290,299,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
 | 3 | 41,275,333 | 39,40,332 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -28,16 +28,15 @@ next_project_number: 341
 ### Foundations
 
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
-338 [RESEARCHED] — Migrate Propositional/Metalogic/MCS.lean and Temporal/Metalogic/M
-339 [RESEARCHED] — Unify the swapTemporal function and its associated theorems betwe
-340 [RESEARCHED] — Investigate and consolidate derived connective definitions (neg, 
+338 [PLANNED] — Migrate Propositional/Metalogic/MCS.lean and Temporal/Metalogic/M
+339 [PLANNED] — Unify the swapTemporal function and its associated theorems betwe
+340 [PLANNED] — Investigate and consolidate derived connective definitions (neg, 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Modal Logic
 
-335 [RESEARCHED] — Extract a shared propositional axiom soundness lemma in Modal/Met
-  └─ 336 [NOT STARTED] — Extract parametric completeness cascade theorems (strong_soundnes
-  └─ 337 [NOT STARTED] — Extract a single parametric conservative extension theorem taking
+336 [NOT STARTED] — Extract parametric completeness cascade theorems (strong_soundnes
+337 [NOT STARTED] — Extract a single parametric conservative extension theorem taking
 
 ### Propositional Logic
 
@@ -72,7 +71,7 @@ next_project_number: 341
 ## Tasks
 
 ### 340. Derived connective defaults
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: Task 334
@@ -83,7 +82,7 @@ next_project_number: 341
 ---
 
 ### 339. Unify swap temporal
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
@@ -94,7 +93,7 @@ next_project_number: 341
 ---
 
 ### 338. Mcs generic migration
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
@@ -125,11 +124,11 @@ next_project_number: 341
 ---
 
 ### 335. Parametric modal soundness
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
-- **Research**: [335_modal_soundness_refactor/reports/01_parametric-modal-soundness.md]
+- **Research**: [335_parametric_modal_soundness/reports/01_parametric-modal-soundness.md]
 
 **Description**: Extract a shared propositional axiom soundness lemma in Modal/Metalogic/Soundness.lean handling the 5 cases identical across all 15 modal systems (implyK, implyS, efq, peirce, modalK). Then refactor all 15 Systems/*/Soundness.lean files to call the shared lemma, keeping only system-specific modal axiom cases (modalT, modalFour, modalB, modal5, modalD). Currently 15 files totaling 1,291 lines with ~40 lines of identical propositional case-splits in each. Files: Cslib/Logics/Modal/Metalogic/Soundness.lean (add shared lemma), Cslib/Logics/Modal/Metalogic/Systems/{K,T,B,D,S4,S5,K4,K5,K45,KB5,DB,D4,D5,D45,TB}/Soundness.lean (refactor to use it). Target: ~600 lines reduced.
 

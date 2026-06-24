@@ -1,7 +1,7 @@
 # Implementation Plan: Task #335
 
 - **Task**: 335 - Parametric Modal Soundness Refactor (parametric_modal_soundness)
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 2.5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/335_parametric_modal_soundness/reports/01_parametric-modal-soundness.md

@@ -6,14 +6,14 @@ next_project_number: 320
 
 ## Task Order
 
-*Updated 2026-06-23. Generated from state.json dependency graph.*
+*Updated 2026-06-24. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,310,313,314,316 | -- | Bimodal Porting, Foundations, Project Management, ... |
-| 2 | 39,40,181,215,293,300,311,315,317 | 36,37,180,290,299,310,314,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
-| 3 | 41,275,291,292,312,319 | 39,40,311,315,317 | Foundations, Propositional Logic, Algebraic Semantics |
+| 1 | 36,37,180,226,241,245,278,290,292,299,301,310,313,314,316 | -- | Bimodal Porting, Foundations, Project Management, ... |
+| 2 | 39,40,181,215,293,300,311,317 | 36,37,180,290,299,310,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 3 | 41,275,312,319 | 39,40,311,317 | Foundations, Propositional Logic, Algebraic Semantics |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -39,10 +39,8 @@ next_project_number: 320
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 290 [NOT STARTED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
   └─ 293 [NOT STARTED] — Establish the formal Curry-Howard isomorphism between Theory.Deri
+292 [IMPLEMENTING] — After task 279 delivers LJ with cut elimination, formalize the co
 314 [IMPLEMENTING] — Implement the classical sequent calculus LK for propositional log
-  └─ 315 [PLANNED] — Implement the intuitionistic sequent calculus LJ for propositiona
-    └─ 291 [NOT STARTED] — After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a un
-    └─ 292 [NOT STARTED] — After task 279 delivers LJ with cut elimination, formalize the co
 316 [RESEARCHED] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [NOT STARTED] — Fill the 8 sorry instances in propositional tableau completeness 
     └─ 319 [NOT STARTED] — Build dedicated Soundness and Completeness modules for the minima
@@ -107,7 +105,9 @@ next_project_number: 320
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
-- **Research**: [316_propositional_tableau_soundness/reports/01_soundness-research.md]
+- **Research**:
+  - [316_propositional_tableau_soundness/reports/01_soundness-research.md]
+  - [316_propositional_tableau_soundness/reports/02_blockers-resolution.md]
 - **Plan**: [316_propositional_tableau_soundness/plans/01_soundness-plan.md]
 
 **Description**: Fill the 6 sorry instances in propositional tableau soundness proofs across all three logics. Classical (Classical/Soundness.lean): prove classically_closed_unsatisfiable (closed branch is unsatisfiable under any Boolean valuation) and classicalTableau_sound (closed tableau implies Tautology phi), plus one helper lemma — by induction on rule applications showing each propositional rule preserves satisfiability. Intuitionistic (Intuitionistic/Soundness.lean): prove intuitionisticTableau_sound (closed tableau implies IValid phi) plus two helper lemmas — by showing each rule (including world-creating F(imp) and persistent T(imp)) preserves forcing at Kripke worlds. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_sound (closed tableau implies MValid phi) — adapts intuitionistic proof with MinimalClosure (complementary atoms only, no ex falso). Core technique: induction on expansion steps showing each rule application preserves the semantic invariant for the respective logic.
@@ -115,7 +115,7 @@ next_project_number: 320
 ---
 
 ### 315. Lj intuitionistic sequent calculus
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 314
@@ -158,7 +158,9 @@ Literature sources:
 - **Task Type**: cslib
 - **Topic**: Project Management
 - **Dependencies**: None
-- **Research**: [313_zulip_propositional_logic_proof_systems_overview/reports/01_team-research.md]
+- **Research**:
+  - [313_zulip_propositional_logic_proof_systems_overview/reports/01_team-research.md]
+  - [313_zulip_propositional_logic_proof_systems_overview/reports/02_team-research.md]
 
 **Description**: Research and compose a Zulip comment for the CSLib Propositional Logic topic (https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/) that briefly outlines the three proof systems for propositional logic in CSLib (Hilbert, Natural Deduction, Sequent Calculus), indicating what each system is best equipped to establish (e.g., Hilbert for algebraic completeness, ND for constructive reasoning, Sequent for cut-elimination and decidability), and summarizing what has been completed so far in each. The comment should be concise, informative, and suitable for the Lean community audience
 
@@ -267,7 +269,7 @@ Literature sources:
 ---
 
 ### 292. Ipl decidability cutfree lj
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 315
@@ -277,7 +279,7 @@ Literature sources:
 ---
 
 ### 291. Three way proof system equivalence
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 314, Task 315

@@ -56,13 +56,18 @@
       "description": "Research and compose a Zulip comment for the CSLib Propositional Logic topic (https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/) that briefly outlines the three proof systems for propositional logic in CSLib (Hilbert, Natural Deduction, Sequent Calculus), indicating what each system is best equipped to establish (e.g., Hilbert for algebraic completeness, ND for constructive reasoning, Sequent for cut-elimination and decidability), and summarizing what has been completed so far in each. The comment should be concise, informative, and suitable for the Lean community audience",
       "topic": "Project Management",
       "created": "2026-06-23T18:39:13Z",
-      "last_updated": "2026-06-23T18:47:14Z",
-      "session_id": "sess_1782240089_557c47",
-      "researched": "2026-06-23T18:47:14Z",
-      "next_artifact_number": 2,
+      "last_updated": "2026-06-23T23:59:55Z",
+      "session_id": "sess_1782258653_a3d2a2",
+      "researched": "2026-06-23T23:59:55Z",
+      "next_artifact_number": 3,
       "artifacts": [
         {
           "path": "specs/313_zulip_propositional_logic_proof_systems_overview/reports/01_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates"
+        },
+        {
+          "path": "specs/313_zulip_propositional_logic_proof_systems_overview/reports/02_team-research.md",
           "type": "research",
           "summary": "Team research with 4 teammates"
         }
@@ -158,7 +163,7 @@
     {
       "project_number": 291,
       "project_name": "three_way_proof_system_equivalence",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "After task 279 delivers hilbert_iff_lk and nd_iff_lk, create a unifying module stating the three-way equivalence as List.TFAE theorems. For each of MPL, IPL, and CPL, prove that Hilbert derivability, ND derivability, and SC derivability are equivalent. The pairwise bridges are: Hilbert-ND from task 266, Hilbert-SC and ND-SC from task 279. This is purely compositional. File: Cslib/Logics/Propositional/ProofSystemEquivalence.lean. Depends on 279.",
@@ -167,12 +172,14 @@
         315
       ],
       "created": "2026-06-23T12:00:00Z",
-      "last_updated": "2026-06-23T12:00:00Z"
+      "last_updated": "2026-06-23T23:58:42Z",
+      "session_id": "sess_1782245580_188995_291",
+      "completion_summary": "Three-way proof system equivalence: CPL TFAE (Hilbert/ND/LK), IPL TFAE (Hilbert/ND/LJ), MPL two-way iff (Hilbert/ND). 126 lines, 0 sorry, all CI passes."
     },
     {
       "project_number": 292,
       "project_name": "ipl_decidability_cutfree_lj",
-      "status": "not_started",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "After task 279 delivers LJ with cut elimination, formalize the connection between cut-free proof search and decidability. Define a bounded backward proof search procedure over cut-free LJ: the search space is finite because all formulas in a cut-free proof are subformulas of the sequent. Prove termination via a well-founded measure. Produce Decidable (LJDerivable (Gamma |- A)) and lift via nd_iff_lk to Decidable (DerivableIn IPL (Gamma |- A)). File: Cslib/Logics/Propositional/SequentCalculus/Decidability.lean. Depends on 279.",
@@ -180,7 +187,8 @@
         315
       ],
       "created": "2026-06-23T12:00:00Z",
-      "last_updated": "2026-06-23T12:00:00Z"
+      "last_updated": "2026-06-23T23:56:17Z",
+      "session_id": "sess_1782245580_188995_292"
     },
     {
       "project_number": 293,
@@ -556,12 +564,12 @@
     {
       "project_number": 315,
       "project_name": "lj_intuitionistic_sequent_calculus",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Implement the intuitionistic sequent calculus LJ for propositional logic. Use single-conclusion sequents (Finset antecedent, single Proposition succedent) matching the existing ND Sequent type. Create LJ proof inductive (LJ/Basic.lean), structural admissibility lemmas, soundness (LJ/Soundness.lean), cut elimination / Hauptsatz (LJ/CutElimination.lean), and equivalence bridges hilbert_iff_lj and nd_iff_lj. The nd_iff_lj bridge should be near-definitional given matching sequent shapes. File layout: Cslib/Logics/Propositional/SequentCalculus/{LJ/Basic,LJ/Soundness,LJ/CutElimination}.lean plus additions to Equivalence.lean. Depends on task 314 for shared Defs.lean and notation infrastructure. Parent task: 279.\n\nLiterature sources:\n- specs/literature/sources/negri_von_plato_2001/section03_ch2-intuitionistic-cut-elimination.md — G3ip rules, admissibility of contraction and cut for intuitionistic SC (primary reference for LJ design)\n- specs/literature/sources/troelstra_schwichtenberg_2000/section04_ch3-gentzen-systems.md — LJ definitions, G3-style systems, structural rules\n- specs/literature/sources/troelstra_schwichtenberg_2000/section05_ch4-cut-elimination.md — Hauptsatz for intuitionistic logic, termination argument\n- specs/literature/sources/negri_von_plato_2001/section06_ch5-variant-sequent-calculi.md — Multisuccedent intuitionistic calculus, terminating intuitionistic calculus (G3i variants)\n- specs/literature/sources/negri_von_plato_2001/section07_ch6-8-extensions-translations.md — ND-SC translations for bridge proofs\n- specs/literature/sources/gentzen_1935/gentzen_1935_sec03.md — Original LJ definitions and Hauptsatz\n- specs/literature/sources/gentzen_1935/gentzen_1935_sec05.md — NJ/LJ equivalence (bridge proof reference)",
       "topic": "Propositional Logic",
       "created": "2026-06-23T19:33:42Z",
-      "last_updated": "2026-06-23T22:00:00Z",
+      "last_updated": "2026-06-23T23:45:49Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
@@ -599,7 +607,8 @@
           ]
         ]
       },
-      "session_id": "sess_1782245580_188995_315"
+      "session_id": "sess_1782245580_188995_315",
+      "completion_summary": "LJ intuitionistic sequent calculus fully implemented: Basic.lean (214 lines, LJProof inductive with 11 constructors), Soundness.lean (156 lines, Kripke soundness), CutElimination.lean (151 lines, 1 sorry in cutAdmissibility), Completeness.lean (307 lines, nd_iff_lj and hilbert_iff_lj bridges). All files build successfully."
     },
     {
       "project_number": 318,

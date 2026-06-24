@@ -1,5 +1,5 @@
 ---
-next_project_number: 322
+next_project_number: 323
 ---
 
 # TODO
@@ -12,7 +12,7 @@ next_project_number: 322
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,180,226,241,245,278,290,299,301,312,314,316,321 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215,300,317 | 36,37,180,299,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 2 | 39,40,181,215,300,317,322 | 36,37,180,299,312,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
 | 3 | 41,275,319 | 39,40,317 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -53,18 +53,29 @@ next_project_number: 322
 
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
 
+### Algebraic Semantics
+
+312 [IMPLEMENTING] — Consolidate the full conservative extension chain into a unified 
+  └─ 322 [NOT STARTED] — Establish the MPL conservative extension chain as standalone resu
+
 ### Modal
 
 299 [NOT STARTED] — Implement tableau decision procedure for basic modal logic K with
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
 
-### Algebraic Semantics
-
-312 [IMPLEMENTING] — Consolidate the full conservative extension chain into a unified 
-
 ### Uncategorized
 
 ## Tasks
+
+### 322. Mpl conservative extension chain
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Algebraic Semantics
+- **Dependencies**: Task 311, Task 312
+
+**Description**: Establish the MPL conservative extension chain as standalone results and organize the relationship between the IPL and MPL chains. Specifically: (1) Prove MPL → ConjImp conservativity for or-free formulas (GHAValid → BrouwerianValid, requiring a free join/distributive lattice completion of BrouwerianSemilattices to GHAs). (2) Prove MPL → Imp conservativity for imp-top-only formulas as a composition. (3) Organize the full algebraic picture: state the MPL chain (ImpAxiom ⊂ ConjImpAxiom ⊂ MinPropAxiom) with its own conservativity results independent of IPL, and relate it to the IPL chain via the IPL → MPL conservativity bridge. File: Cslib/Logics/Propositional/Semantics/Algebra/MplConservativeChain.lean
+
+---
 
 ### 321. Code hygiene logics foundations
 - **Status**: [NOT STARTED]

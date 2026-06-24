@@ -1,6 +1,22 @@
 {
-  "next_project_number": 322,
+  "next_project_number": 323,
   "active_projects": [
+    {
+      "project_number": 322,
+      "project_name": "mpl_conservative_extension_chain",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Algebraic Semantics",
+      "description": "Establish the MPL conservative extension chain as standalone results and organize the relationship between the IPL and MPL chains. Specifically: (1) Prove MPL → ConjImp conservativity for or-free formulas (GHAValid → BrouwerianValid, requiring a free join/distributive lattice completion of BrouwerianSemilattices to GHAs). (2) Prove MPL → Imp conservativity for imp-top-only formulas as a composition. (3) Organize the full algebraic picture: state the MPL chain (ImpAxiom ⊂ ConjImpAxiom ⊂ MinPropAxiom) with its own conservativity results independent of IPL, and relate it to the IPL chain via the IPL → MPL conservativity bridge. File: Cslib/Logics/Propositional/Semantics/Algebra/MplConservativeChain.lean",
+      "created": "2026-06-24T10:51:42Z",
+      "last_updated": "2026-06-24T10:51:42Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "dependencies": [
+        311,
+        312
+      ]
+    },
     {
       "project_number": 321,
       "project_name": "code_hygiene_logics_foundations",
@@ -752,7 +768,8 @@
     "Temporal Logic",
     "pr",
     "agent-system",
-    "Code Hygiene"
+    "Code Hygiene",
+    "Algebraic Semantics"
   ],
   "_last_updated": "2026-06-24T02:00:00Z"
 }

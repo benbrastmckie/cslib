@@ -635,7 +635,7 @@
       ],
       "blockers": null,
       "session_id": "sess_1782276788_0c858f",
-      "completion_summary": "Created ConservativeChain.lean: capstone module composing the full conservative extension chain (IPL⟨→,⊤⟩ ⊂ IPL⟨∧,→,⊤⟩ ⊂ MPL ⊂ IPL ⊂ CPL) with 15 sorry-free theorems. Includes derivability subsumption chain, algebraic validity subsumption chain (HilbertValid → BrouwerianValid → GHAValid → HAValid → BAValid), inter-fragment conservativity corollaries, and ND corollaries. All proofs are 1-5 line compositions of existing results. Builds cleanly with only standard axioms.",
+      "completion_summary": "Capstone conservative extension chain module: 15 theorems connecting all 5 algebraic levels (HilbertAlg/BSL/GHA/HA/BA) with derivability subsumption, validity subsumption, inter-fragment conservativity, biconditional chains, and ND corollaries. All sorry-free.",
       "memory_candidates": [
         "ConservativeChain.lean uses liftDerivationTree as the key combinator to compose Derivable proofs across the axiom subsumption chain",
         "HilbertValid → BrouwerianValid (imp-top-only): route through derivability via imp_hilbert_complete then conjImp_brouwerian_soundness_derivable",

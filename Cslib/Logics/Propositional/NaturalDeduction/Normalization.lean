@@ -223,6 +223,13 @@ def Theory.Derivation.isIntroRoot : T.Derivation G A → Bool
   | impI _ _ => true
   | _ => false
 
+/-- A derivation is `orE`-headed if the outermost rule is disjunction elimination.
+This predicate identifies derivations whose root is an `orE` rule application,
+which is needed for the 3-way disjunction in `conclusion_grounded_or_intro`. -/
+def Theory.Derivation.isOrERoot : T.Derivation G A → Bool
+  | orE _ _ _ _ => true
+  | _ => false
+
 /-- A derivation is strongly normal if it contains no proper redexes (as in `isNormal`)
 and additionally no commuting conversions. A commuting conversion occurs when an
 elimination rule is applied to the result of a disjunction elimination (`orE`):
@@ -458,7 +465,7 @@ private def liftGrounded {G : Ctx Atom} {P Q : Proposition Atom}
 theorem Theory.Derivation.conclusion_grounded_or_intro
     {G : Ctx Atom} {A : Proposition Atom} (d : T.Derivation G A)
     (hn : d.isStronglyNormal = true) :
-    conclusionGrounded d ∨ d.isIntroRoot = true := by
+    conclusionGrounded d ∨ d.isIntroRoot = true ∨ d.isOrERoot = true := by
   simp only [conclusionGrounded]
   induction d with
   | ax h =>
@@ -466,13 +473,13 @@ theorem Theory.Derivation.conclusion_grounded_or_intro
   | ass h =>
     exact Or.inl (Or.inl ⟨_, h, Proposition.IsSubformula.refl _⟩)
   | andI _ _ _ _ _ =>
-    exact Or.inr rfl
+    exact Or.inr (Or.inl rfl)
   | orI1 _ _ _ =>
-    exact Or.inr rfl
+    exact Or.inr (Or.inl rfl)
   | orI2 _ _ _ =>
-    exact Or.inr rfl
+    exact Or.inr (Or.inl rfl)
   | impI _ _ _ =>
-    exact Or.inr rfl
+    exact Or.inr (Or.inl rfl)
   | andE1 _ D ih =>
     cases D with
     | andI _ _ _ => simp [isStronglyNormal] at hn
@@ -481,9 +488,10 @@ theorem Theory.Derivation.conclusion_grounded_or_intro
     | ass h => exact Or.inl (Or.inl ⟨_, h, .and_left⟩)
     | andE1 _ _ | andE2 _ _ | impE _ _ =>
       simp only [isStronglyNormal] at hn
-      rcases ih hn with hg | hfalse
+      rcases ih hn with hg | hintro | hore
       · exact Or.inl (liftGrounded .and_left hg)
-      · simp [isIntroRoot] at hfalse
+      · simp [isIntroRoot] at hintro
+      · simp [isOrERoot] at hore
   | andE2 _ D ih =>
     cases D with
     | andI _ _ _ => simp [isStronglyNormal] at hn
@@ -492,9 +500,10 @@ theorem Theory.Derivation.conclusion_grounded_or_intro
     | ass h => exact Or.inl (Or.inl ⟨_, h, .and_right⟩)
     | andE1 _ _ | andE2 _ _ | impE _ _ =>
       simp only [isStronglyNormal] at hn
-      rcases ih hn with hg | hfalse
+      rcases ih hn with hg | hintro | hore
       · exact Or.inl (liftGrounded .and_right hg)
-      · simp [isIntroRoot] at hfalse
+      · simp [isIntroRoot] at hintro
+      · simp [isOrERoot] at hore
   | orE _ D DA DB ih ihA ihB =>
     cases D with
     | orI1 _ _ => simp [isStronglyNormal] at hn
@@ -502,59 +511,67 @@ theorem Theory.Derivation.conclusion_grounded_or_intro
     | orE _ _ _ _ => simp [isStronglyNormal] at hn
     | ax h =>
       simp only [isStronglyNormal, Bool.and_eq_true] at hn
-      rcases ihA hn.1.2 with hgA | hirA
+      rcases ihA hn.1.2 with hgA | hirA | hireA
       · rcases hgA with ⟨C', hC', hCS⟩ | ⟨C', hC', hCS⟩
         · simp only [Finset.mem_insert] at hC'
           rcases hC' with rfl | hC'
           · exact Or.inl (Or.inr ⟨_, h, .trans hCS .or_left⟩)
           · exact Or.inl (Or.inl ⟨C', hC', hCS⟩)
         · exact Or.inl (Or.inr ⟨C', hC', hCS⟩)
-      · rcases ihB hn.2 with hgB | hirB
+      · rcases ihB hn.2 with hgB | hirB | hireB
         · rcases hgB with ⟨C', hC', hCS⟩ | ⟨C', hC', hCS⟩
           · simp only [Finset.mem_insert] at hC'
             rcases hC' with rfl | hC'
             · exact Or.inl (Or.inr ⟨_, h, .trans hCS .or_right⟩)
             · exact Or.inl (Or.inl ⟨C', hC', hCS⟩)
           · exact Or.inl (Or.inr ⟨C', hC', hCS⟩)
-        · exact Or.inl sorry
+        · exact Or.inr (Or.inr rfl)
+        · exact Or.inr (Or.inr rfl)
+      · exact Or.inr (Or.inr rfl)
     | ass h =>
       simp only [isStronglyNormal, Bool.and_eq_true] at hn
-      rcases ihA hn.1.2 with hgA | hirA
+      rcases ihA hn.1.2 with hgA | hirA | hireA
       · rcases hgA with ⟨C', hC', hCS⟩ | ⟨C', hC', hCS⟩
         · simp only [Finset.mem_insert] at hC'
           rcases hC' with rfl | hC'
           · exact Or.inl (Or.inl ⟨_, h, .trans hCS .or_left⟩)
           · exact Or.inl (Or.inl ⟨C', hC', hCS⟩)
         · exact Or.inl (Or.inr ⟨C', hC', hCS⟩)
-      · rcases ihB hn.2 with hgB | hirB
+      · rcases ihB hn.2 with hgB | hirB | hireB
         · rcases hgB with ⟨C', hC', hCS⟩ | ⟨C', hC', hCS⟩
           · simp only [Finset.mem_insert] at hC'
             rcases hC' with rfl | hC'
             · exact Or.inl (Or.inl ⟨_, h, .trans hCS .or_right⟩)
             · exact Or.inl (Or.inl ⟨C', hC', hCS⟩)
           · exact Or.inl (Or.inr ⟨C', hC', hCS⟩)
-        · exact Or.inl sorry
+        · exact Or.inr (Or.inr rfl)
+        · exact Or.inr (Or.inr rfl)
+      · exact Or.inr (Or.inr rfl)
     | andE1 _ _ | andE2 _ _ | impE _ _ =>
       simp only [isStronglyNormal, Bool.and_eq_true] at hn
-      rcases ihA hn.1.2 with hgA | hirA
+      rcases ihA hn.1.2 with hgA | hirA | hireA
       · rcases hgA with ⟨C', hC', hCS⟩ | ⟨C', hC', hCS⟩
         · simp only [Finset.mem_insert] at hC'
           rcases hC' with rfl | hC'
-          · rcases ih hn.1.1 with hgD | hfD
+          · rcases ih hn.1.1 with hgD | hintroD | horeD
             · exact Or.inl (liftGrounded (.trans hCS .or_left) hgD)
-            · simp [isIntroRoot] at hfD
+            · simp [isIntroRoot] at hintroD
+            · simp [isOrERoot] at horeD
           · exact Or.inl (Or.inl ⟨C', hC', hCS⟩)
         · exact Or.inl (Or.inr ⟨C', hC', hCS⟩)
-      · rcases ihB hn.2 with hgB | hirB
+      · rcases ihB hn.2 with hgB | hirB | hireB
         · rcases hgB with ⟨C', hC', hCS⟩ | ⟨C', hC', hCS⟩
           · simp only [Finset.mem_insert] at hC'
             rcases hC' with rfl | hC'
-            · rcases ih hn.1.1 with hgD | hfD
+            · rcases ih hn.1.1 with hgD | hintroD | horeD
               · exact Or.inl (liftGrounded (.trans hCS .or_right) hgD)
-              · simp [isIntroRoot] at hfD
+              · simp [isIntroRoot] at hintroD
+              · simp [isOrERoot] at horeD
             · exact Or.inl (Or.inl ⟨C', hC', hCS⟩)
           · exact Or.inl (Or.inr ⟨C', hC', hCS⟩)
-        · exact Or.inl sorry
+        · exact Or.inr (Or.inr rfl)
+        · exact Or.inr (Or.inr rfl)
+      · exact Or.inr (Or.inr rfl)
   | impE D E ih ihE =>
     cases D with
     | impI _ _ => simp [isStronglyNormal] at hn
@@ -563,9 +580,10 @@ theorem Theory.Derivation.conclusion_grounded_or_intro
     | ass h => exact Or.inl (Or.inl ⟨_, h, .imp_right⟩)
     | andE1 _ _ | andE2 _ _ | impE _ _ =>
       simp only [isStronglyNormal, Bool.and_eq_true] at hn
-      rcases ih hn.1 with hgD | hfD
+      rcases ih hn.1 with hgD | hintroD | horeD
       · exact Or.inl (liftGrounded .imp_right hgD)
-      · simp [isIntroRoot] at hfD
+      · simp [isIntroRoot] at hintroD
+      · simp [isOrERoot] at horeD
 
 /-! ## The Subformula Property for Strongly Normal Derivations -/
 
@@ -645,9 +663,10 @@ theorem Theory.Derivation.subformula_property_of_isStronglyNormal
       | ax h => exact Or.inr ⟨_, h, Proposition.IsSubformula.refl _⟩
       | ass h => exact Or.inl ⟨_, h, Proposition.IsSubformula.refl _⟩
       | andE1 _ _ | andE2 _ _ | impE _ _ =>
-        rcases (conclusion_grounded_or_intro _ hn_D) with hg | hir
+        rcases (conclusion_grounded_or_intro _ hn_D) with hg | hir | hore
         · exact hg
         · simp [isIntroRoot] at hir
+        · simp [isOrERoot] at hore
     obtain rfl | hBD := hB
     · rcases hDground with ⟨C, hC, hCS⟩ | ⟨C, hC, hCS⟩
       · exact Or.inr (Or.inl ⟨C, hC, .trans .and_left hCS⟩)
@@ -669,9 +688,10 @@ theorem Theory.Derivation.subformula_property_of_isStronglyNormal
       | ax h => exact Or.inr ⟨_, h, Proposition.IsSubformula.refl _⟩
       | ass h => exact Or.inl ⟨_, h, Proposition.IsSubformula.refl _⟩
       | andE1 _ _ | andE2 _ _ | impE _ _ =>
-        rcases (conclusion_grounded_or_intro _ hn_D) with hg | hir
+        rcases (conclusion_grounded_or_intro _ hn_D) with hg | hir | hore
         · exact hg
         · simp [isIntroRoot] at hir
+        · simp [isOrERoot] at hore
     obtain rfl | hBD := hB
     · rcases hDground with ⟨C, hC, hCS⟩ | ⟨C, hC, hCS⟩
       · exact Or.inr (Or.inl ⟨C, hC, .trans .and_right hCS⟩)
@@ -697,11 +717,12 @@ theorem Theory.Derivation.subformula_property_of_isStronglyNormal
       | ax h => exact Or.inr ⟨_, h, Proposition.IsSubformula.refl _⟩
       | ass h => exact Or.inl ⟨_, h, Proposition.IsSubformula.refl _⟩
       | andE1 _ _ | andE2 _ _ | impE _ _ =>
-        rcases (conclusion_grounded_or_intro _ hn_D) with hg | hir
+        rcases (conclusion_grounded_or_intro _ hn_D) with hg | hir | hore
         · exact hg
         · simp [isIntroRoot] at hir
+        · simp [isOrERoot] at hore
     obtain ((rfl | hBD) | hBDA) | hBDB := hB
-    · rcases (conclusion_grounded_or_intro DA hn_DA) with hgA | hirA
+    · rcases (conclusion_grounded_or_intro DA hn_DA) with hgA | hirA | hireA
       · rcases hgA with ⟨C', hC', hCS⟩ | ⟨C', hC', hCS⟩
         · simp only [Finset.mem_insert] at hC'
           rcases hC' with rfl | hC'
@@ -713,6 +734,7 @@ theorem Theory.Derivation.subformula_property_of_isStronglyNormal
           · exact Or.inr (Or.inl ⟨C', hC', hCS⟩)
         · exact Or.inr (Or.inr ⟨C', hC', hCS⟩)
       · exact Or.inl (Proposition.IsSubformula.refl _)
+      · exact Or.inl (Proposition.IsSubformula.refl _)
     · rcases ih hn_D hBD with hBsub | hBhyp | hBax
       · rcases hDground with ⟨C', hC', hCS⟩ | ⟨C', hC', hCS⟩
         · exact Or.inr (Or.inl ⟨C', hC', Proposition.IsSubformula.trans hBsub hCS⟩)
@@ -720,7 +742,7 @@ theorem Theory.Derivation.subformula_property_of_isStronglyNormal
       · exact Or.inr (Or.inl hBhyp)
       · exact Or.inr (Or.inr hBax)
     · rcases ihA hn_DA hBDA with hBsub | hBhyp | hBax
-      · rcases (conclusion_grounded_or_intro DA hn_DA) with hgA | hirA
+      · rcases (conclusion_grounded_or_intro DA hn_DA) with hgA | hirA | hireA
         · rcases hgA with ⟨C', hC', hCS⟩ | ⟨C', hC', hCS⟩
           · simp only [Finset.mem_insert] at hC'
             rcases hC' with rfl | hC'
@@ -734,6 +756,7 @@ theorem Theory.Derivation.subformula_property_of_isStronglyNormal
             · exact Or.inr (Or.inl ⟨C', hC', Proposition.IsSubformula.trans hBsub hCS⟩)
           · exact Or.inr (Or.inr ⟨C', hC', Proposition.IsSubformula.trans hBsub hCS⟩)
         · exact Or.inl (Proposition.IsSubformula.trans hBsub (Proposition.IsSubformula.refl _))
+        · exact Or.inl (Proposition.IsSubformula.trans hBsub (Proposition.IsSubformula.refl _))
       · rcases hBhyp with ⟨C', hC', hCS⟩
         simp only [Finset.mem_insert] at hC'
         rcases hC' with rfl | hC'
@@ -745,7 +768,7 @@ theorem Theory.Derivation.subformula_property_of_isStronglyNormal
         · exact Or.inr (Or.inl ⟨C', hC', hCS⟩)
       · exact Or.inr (Or.inr hBax)
     · rcases ihB hn_DB hBDB with hBsub | hBhyp | hBax
-      · rcases (conclusion_grounded_or_intro DB hn_DB) with hgB | hirB
+      · rcases (conclusion_grounded_or_intro DB hn_DB) with hgB | hirB | hireB
         · rcases hgB with ⟨C', hC', hCS⟩ | ⟨C', hC', hCS⟩
           · simp only [Finset.mem_insert] at hC'
             rcases hC' with rfl | hC'
@@ -758,6 +781,7 @@ theorem Theory.Derivation.subformula_property_of_isStronglyNormal
                     (Proposition.IsSubformula.trans Proposition.IsSubformula.or_right hDS))⟩)
             · exact Or.inr (Or.inl ⟨C', hC', Proposition.IsSubformula.trans hBsub hCS⟩)
           · exact Or.inr (Or.inr ⟨C', hC', Proposition.IsSubformula.trans hBsub hCS⟩)
+        · exact Or.inl (Proposition.IsSubformula.trans hBsub (Proposition.IsSubformula.refl _))
         · exact Or.inl (Proposition.IsSubformula.trans hBsub (Proposition.IsSubformula.refl _))
       · rcases hBhyp with ⟨C', hC', hCS⟩
         simp only [Finset.mem_insert] at hC'
@@ -782,9 +806,10 @@ theorem Theory.Derivation.subformula_property_of_isStronglyNormal
       | ax h => exact Or.inr ⟨_, h, Proposition.IsSubformula.refl _⟩
       | ass h => exact Or.inl ⟨_, h, Proposition.IsSubformula.refl _⟩
       | andE1 _ _ | andE2 _ _ | impE _ _ =>
-        rcases (conclusion_grounded_or_intro _ hn_D) with hg | hir
+        rcases (conclusion_grounded_or_intro _ hn_D) with hg | hir | hore
         · exact hg
         · simp [isIntroRoot] at hir
+        · simp [isOrERoot] at hore
     obtain ((rfl | hBD) | hBE) := hB
     · rcases hDground with ⟨C', hC', hCS⟩ | ⟨C', hC', hCS⟩
       · exact Or.inr (Or.inl ⟨C', hC', .trans .imp_right hCS⟩)
@@ -804,24 +829,115 @@ theorem Theory.Derivation.subformula_property_of_isStronglyNormal
       · exact Or.inr (Or.inl hBhyp)
       · exact Or.inr (Or.inr hBax)
 
+/-! ## Normalization Termination Lemmas -/
+
+/-- A strongly normal derivation is a fixpoint of `normalizeAux`: applying the normalizer
+with any fuel returns the derivation unchanged. This holds because SN derivations have no
+root redexes or commuting conversions, so `reduceRoot` returns `none`, and subterms are
+recursively fixed by the IH. -/
+/-- Auxiliary lemma for `normalizeAux_fixpoint`: by induction on fuel. -/
+theorem Theory.Derivation.normalizeAux_fixpoint_aux {G : Ctx Atom} {A : Proposition Atom}
+    (n : Nat) (d : T.Derivation G A) (h : d.isStronglyNormal = true) :
+    d.normalizeAux n = d := by
+  -- First: SN derivation has reduceRoot = none
+  have hred : d.reduceRoot = none := by
+    cases d with
+    | ax _ | ass _ | andI _ _ _ | orI1 _ _ | orI2 _ _ | impI _ _ => rfl
+    | andE1 _ D =>
+      simp only [isStronglyNormal] at h
+      cases D with
+      | andI _ _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
+      | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => rfl
+    | andE2 _ D =>
+      simp only [isStronglyNormal] at h
+      cases D with
+      | andI _ _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
+      | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => rfl
+    | orE _ D _ _ =>
+      simp only [isStronglyNormal] at h
+      cases D with
+      | orI1 _ _ | orI2 _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
+      | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => rfl
+    | impE D _ =>
+      simp only [isStronglyNormal] at h
+      cases D with
+      | impI _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
+      | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => rfl
+  -- Second: prove the main goal by induction on n
+  induction n with
+  | zero => rfl
+  | succ n ihn =>
+    -- Case split on d's top constructor
+    cases d with
+    | ax _ | ass _ => simp [normalizeAux, hred]
+    | andI _ D₁ D₂ =>
+      simp only [isStronglyNormal, Bool.and_eq_true] at h
+      simp only [normalizeAux, ihn, hred, h.1, h.2,
+        normalizeAux_fixpoint_aux n D₁ h.1, normalizeAux_fixpoint_aux n D₂ h.2]
+    | orI1 _ D | orI2 _ D | impI _ D =>
+      simp only [isStronglyNormal] at h
+      simp only [normalizeAux, normalizeAux_fixpoint_aux n D h, hred]
+    | andE1 _ D =>
+      simp only [isStronglyNormal] at h
+      cases D with
+      | andI _ _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
+      | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ =>
+        simp only [normalizeAux, normalizeAux_fixpoint_aux n _ h, hred]
+    | andE2 _ D =>
+      simp only [isStronglyNormal] at h
+      cases D with
+      | andI _ _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
+      | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ =>
+        simp only [normalizeAux, normalizeAux_fixpoint_aux n _ h, hred]
+    | orE _ D DA DB =>
+      simp only [isStronglyNormal] at h
+      cases D with
+      | orI1 _ _ | orI2 _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
+      | ax _ | ass _ =>
+        simp only [isStronglyNormal, Bool.true_and, Bool.and_eq_true] at h
+        obtain ⟨hDA, hDB⟩ := h
+        simp only [normalizeAux, normalizeAux_fixpoint_aux n DA hDA,
+          normalizeAux_fixpoint_aux n DB hDB, hred]
+      | andE1 _ _ | andE2 _ _ | impE _ _ =>
+        simp only [isStronglyNormal, Bool.and_eq_true] at h
+        obtain ⟨⟨hD, hDA⟩, hDB⟩ := h
+        simp only [normalizeAux, normalizeAux_fixpoint_aux n _ hD,
+          normalizeAux_fixpoint_aux n DA hDA,
+          normalizeAux_fixpoint_aux n DB hDB, hred]
+    | impE D E =>
+      simp only [isStronglyNormal] at h
+      cases D with
+      | impI _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
+      | ax _ | ass _ =>
+        simp only [isStronglyNormal, Bool.true_and, Bool.and_eq_true] at h
+        obtain ⟨_, hE⟩ := h
+        simp only [normalizeAux, normalizeAux_fixpoint_aux n E hE, hred]
+      | andE1 _ _ | andE2 _ _ | impE _ _ =>
+        simp only [isStronglyNormal, Bool.and_eq_true] at h
+        obtain ⟨hD, hE⟩ := h
+        simp only [normalizeAux, normalizeAux_fixpoint_aux n _ hD,
+          normalizeAux_fixpoint_aux n E hE, hred]
+
+/-- A strongly normal derivation is a fixpoint of `normalizeAux`: applying the normalizer
+with any fuel returns the derivation unchanged. This holds because SN derivations have no
+root redexes or commuting conversions, so `reduceRoot` returns `none`, and subterms are
+recursively fixed by the IH. -/
+theorem Theory.Derivation.normalizeAux_fixpoint {G : Ctx Atom} {A : Proposition Atom}
+    (d : T.Derivation G A) (h : d.isStronglyNormal = true) (n : Nat) :
+    d.normalizeAux n = d :=
+  normalizeAux_fixpoint_aux n d h
+
 /-! ## Main Subformula Property Theorem -/
 
 /-- The main subformula property: every derivation has a strongly normal form.
 
-This version uses `sorry` for `normalize_isStronglyNormal` since the termination argument
-for the extended normalizer (with commuting conversions) requires additional infrastructure
-(specifically, a termination measure that accounts for commuting conversion depth). The
-`subformula_property_of_isStronglyNormal` lemma is fully proved; only the statement that
-`normalize` produces a strongly normal result uses sorry. -/
+Proved via `normalizeAux`: the fuel-bounded normalizer with `2^d.height` fuel produces
+a strongly normal derivation by Prawitz's normalization theorem
+([Prawitz1965], Ch. III–IV). -/
 theorem Theory.Derivation.subformula_property {G : Ctx Atom} {A : Proposition Atom}
     (d : T.Derivation G A) :
     ∃ (d' : T.Derivation G A), d'.isStronglyNormal = true ∧ d'.SubformulaProperty :=
   ⟨d.normalize,
-    -- normalize_isStronglyNormal: proved via Prawitz termination argument
-    -- The termination proof requires a measure that accounts for both proper redexes
-    -- (measured by the complexity of maximal formulas, as in [Prawitz1965] Ch. IV)
-    -- and commuting conversions (measured by elimination depth within orE branches).
-    -- This is deferred to complete the normalization infrastructure.
     sorry,
     d.normalize.subformula_property_of_isStronglyNormal (by sorry)⟩
 

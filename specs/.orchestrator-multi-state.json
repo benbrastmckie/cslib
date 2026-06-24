@@ -3,12 +3,12 @@
   "task_numbers": [311, 312],
   "waves": [[311], [312]],
   "max_cycles": 10,
-  "cycle_count": 3,
-  "completed_tasks": [311],
+  "cycle_count": 4,
+  "completed_tasks": [311, 312],
   "failed_tasks": [],
   "current_statuses": {
     "311": "completed",
-    "312": "blocked"
+    "312": "completed"
   },
   "task_dirs": {
     "311": "specs/311_ipl_conservative_over_imp",

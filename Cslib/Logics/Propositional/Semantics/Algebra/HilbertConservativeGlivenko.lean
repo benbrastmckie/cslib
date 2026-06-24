@@ -9,13 +9,13 @@ module
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.Conservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.Glivenko
-public import Cslib.Logics.Propositional.Semantics.Algebra.Completeness
+public import Cslib.Logics.Propositional.NaturalDeduction.AxiomAdmissibility
 
 /-! # Hilbert-Primary Conservative Extension and Glivenko Theorems
 
 This module is the canonical source for the conservative extension theorem and Glivenko's
 theorem. The Hilbert-primary versions are proved directly; the ND versions are derived as
-corollaries via algebraic bridges.
+corollaries via syntactic bridges.
 
 ## Hilbert-Primary Theorems
 
@@ -26,27 +26,34 @@ corollaries via algebraic bridges.
   IPL derivability of `¬¬φ`, stated in terms of `Derivable PropositionalAxiom` and
   `Derivable IntPropAxiom`. Does not require `[DecidableEq Atom]`.
 
-## Algebraic Bridges
+## Syntactic Bridges
 
-Three equivalences connecting the ND and Hilbert systems via algebraic completeness:
+Three equivalences connecting the ND and Hilbert systems via proof-theoretic composition:
 
 - `derivableInMplIffDerivableMin`: `DerivableIn (∅ : Theory Atom) φ ↔ Derivable MinPropAxiom φ`
 - `derivableInIplIffDerivableInt`: `DerivableIn (IPL : Theory Atom) φ ↔ Derivable IntPropAxiom φ`
 - `derivableInCplIffDerivableProp`: `DerivableIn (IPL ∪ CPL : Theory Atom) φ ↔`
   `Derivable PropositionalAxiom φ`
 
+Each bridge is proved by composing `axiomTheory_*_iff_*` (from `AxiomAdmissibility.lean`)
+with `hilbert_iff_nd_*` (from `Equivalence.lean`). The `axiomTheory_*` equivalences show that
+ND derivability with a concrete theory (MPL/IPL/IPL∪CPL) is equivalent to ND derivability
+under the corresponding `AxiomTheory`. The `hilbert_iff_nd_*` equivalences then connect
+`AxiomTheory` ND derivability to Hilbert derivability.
+
 ## ND Corollaries (Canonical Names)
 
 - `ipl_conservative_over_mpl`: ND conservative extension, derived as a corollary of
-  `hilbertIplConservativeOverMpl` via the algebraic bridges.
-- `glivenko`: ND Glivenko, derived as a corollary of `hilbertGlivenko` via the algebraic bridges.
+  `hilbertIplConservativeOverMpl` via the syntactic bridges.
+- `glivenko`: ND Glivenko, derived as a corollary of `hilbertGlivenko` via the syntactic bridges.
 
 ## Architecture
 
 The Hilbert system is primary: theorems are proved directly using Hilbert algebraic completeness
 (`hilbert_alg_complete`) and algebraic infrastructure (`coe_AlgEvaluate`, `glivenko_algebraic`).
-The ND system results are derived as corollaries through the algebraic bridges, which route
-through both ND completeness (`alg_complete`) and Hilbert completeness as the common intermediate.
+The ND system results are derived as corollaries through the syntactic bridges, which compose
+`hilbert_iff_nd` (the Hilbert/ND equivalence via `AxiomTheory`) with the axiom admissibility
+equivalences from `AxiomAdmissibility.lean`.
 
 ## References
 
@@ -108,74 +115,39 @@ theorem hilbertGlivenko {Atom : Type u} {φ : PL.Proposition Atom}
   intro H' _ v'
   exact CPL.hilbert_alg_complete.mp h H' v'
 
-/-! ## Algebraic Bridges (DerivableIn ↔ Derivable) -/
+/-! ## Syntactic Bridges (DerivableIn ↔ Derivable) -/
 
 variable {Atom : Type u} [DecidableEq Atom]
 
 /-- **MPL bridge**: ND derivability in MPL (the empty theory) is equivalent to Hilbert derivability
-with `MinPropAxiom`. Both are equivalent to `GHAValid`, giving the bridge via algebra.
+with `MinPropAxiom`.
 
-Forward: `MPL.alg_complete.mp` converts ND derivability to GHA-validity for all `H : Type u`,
-then `MPL.hilbert_alg_complete.mpr` converts GHA-validity to Hilbert derivability.
-Backward: `MPL.hilbert_alg_complete.mp` → GHA-validity → `MPL.alg_complete.mpr`. -/
+Proof: compose `axiomTheory_min_iff_mpl` with `hilbert_iff_nd_min.symm`. The former connects
+`DerivableIn (∅)` with `DerivableIn (AxiomTheory MinPropAxiom)`; the latter connects
+`DerivableIn (AxiomTheory MinPropAxiom)` with `Derivable MinPropAxiom`. -/
 theorem derivableInMplIffDerivableMin {φ : PL.Proposition Atom} :
-    DerivableIn (∅ : Theory Atom) φ ↔ Derivable (@MinPropAxiom Atom) φ := by
-  constructor
-  · intro h
-    rw [MPL.hilbert_alg_complete]
-    intro H _ v bot_val
-    exact MPL.alg_complete.mp h v bot_val
-  · intro h
-    rw [MPL.alg_complete]
-    intro H _ v bot_val
-    exact MPL.hilbert_alg_complete.mp h H v bot_val
+    DerivableIn (∅ : Theory Atom) φ ↔ Derivable (@MinPropAxiom Atom) φ :=
+  axiomTheory_min_iff_mpl.trans hilbert_iff_nd_min.symm
 
 /-- **IPL bridge**: ND derivability in IPL is equivalent to Hilbert derivability with
-`IntPropAxiom`. Both are equivalent to `HAValid`, giving the bridge via algebra.
+`IntPropAxiom`.
 
-Forward: `IPL.alg_complete.mp` converts ND derivability to HA-validity for all `H : Type u`,
-then `IPL.hilbert_alg_complete.mpr` converts HA-validity to Hilbert derivability.
-Backward: `IPL.hilbert_alg_complete.mp` → HA-validity → `IPL.alg_complete.mpr`. -/
+Proof: compose `axiomTheory_int_iff_ipl` with `hilbert_iff_nd_int.symm`. The former connects
+`DerivableIn (IPL)` with `DerivableIn (AxiomTheory IntPropAxiom)`; the latter connects
+`DerivableIn (AxiomTheory IntPropAxiom)` with `Derivable IntPropAxiom`. -/
 theorem derivableInIplIffDerivableInt {φ : PL.Proposition Atom} :
-    DerivableIn (IPL : Theory Atom) φ ↔ Derivable (@IntPropAxiom Atom) φ := by
-  constructor
-  · intro h
-    rw [IPL.hilbert_alg_complete]
-    intro H _ v
-    exact IPL.alg_complete.mp h v
-  · intro h
-    rw [IPL.alg_complete]
-    intro H _ v
-    exact IPL.hilbert_alg_complete.mp h H v
+    DerivableIn (IPL : Theory Atom) φ ↔ Derivable (@IntPropAxiom Atom) φ :=
+  axiomTheory_int_iff_ipl.trans hilbert_iff_nd_int.symm
 
 /-- **CPL bridge**: ND derivability in `IPL ∪ CPL` is equivalent to Hilbert derivability with
-`PropositionalAxiom`. Both are equivalent to `BAValid` (with appropriate theory hypotheses),
-giving the bridge via algebra.
+`PropositionalAxiom`.
 
-Forward: `alg_complete_classical.mp` converts ND derivability to BA-validity, then
-`CPL.hilbert_alg_complete.mpr` converts BA-validity to Hilbert derivability. The theory
-hypothesis for `IPL ∪ CPL` is discharged by case analysis: IPL axioms `⊥ → C` evaluate to `⊤`
-by `simp`, and CPL axioms `¬¬C → C` evaluate to `⊤` via `compl_compl` in any BooleanAlgebra.
-Backward: `CPL.hilbert_alg_complete.mp` → `BAValid` → `alg_complete_classical.mpr`. -/
+Proof: compose `axiomTheory_cl_iff_cpl` with `hilbert_iff_nd_cl.symm`. The former connects
+`DerivableIn (IPL ∪ CPL)` with `DerivableIn (AxiomTheory PropositionalAxiom)`; the latter
+connects `DerivableIn (AxiomTheory PropositionalAxiom)` with `Derivable PropositionalAxiom`. -/
 theorem derivableInCplIffDerivableProp {φ : PL.Proposition Atom} :
-    DerivableIn (IPL ∪ CPL : Theory Atom) φ ↔ Derivable (@PropositionalAxiom Atom) φ := by
-  constructor
-  · intro h
-    rw [CPL.hilbert_alg_complete]
-    rw [alg_complete_classical] at h
-    intro H _ v
-    apply h v
-    intro B hB
-    rcases (Set.mem_union B IPL CPL).mp hB with hIPL | hCPL
-    · obtain ⟨C, rfl⟩ := Set.mem_range.mp hIPL
-      simp [AlgEvaluate]
-    · obtain ⟨C, rfl⟩ := Set.mem_range.mp hCPL
-      simp only [Proposition.neg, AlgEvaluate_imp, AlgEvaluate_bot]
-      rw [himp_eq_top_iff, HeytingAlgebra.himp_bot, HeytingAlgebra.himp_bot, compl_compl]
-  · intro h
-    rw [alg_complete_classical]
-    intro H _ v hT
-    exact CPL.hilbert_alg_complete.mp h H v
+    DerivableIn (IPL ∪ CPL : Theory Atom) φ ↔ Derivable (@PropositionalAxiom Atom) φ :=
+  axiomTheory_cl_iff_cpl.trans hilbert_iff_nd_cl.symm
 
 /-! ## ND Corollaries via Bridges -/
 

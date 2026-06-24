@@ -69,11 +69,16 @@ def isIntuitionisticallyClosed (b : IBranch Atom) : Bool :=
 
 /-- Check whether a minimal branch is closed.
 
-Uses the `MinimalClosure` instance, which closes when T(p) and F(p) appear at the same
-world for an atomic formula p. This is weaker than classical but stronger than intuitionistic
-in the sense that it allows atom contradictions but NOT T(⊥). -/
+A branch is minimally closed when it contains T(φ) and F(φ) at the same world for
+ANY formula φ. This uses `Branch.hasContradiction`, which checks all complementary pairs
+(not just atomic formulas). This is equivalent to classical closure minus the T(⊥) rule:
+minimal logic does not close on T(⊥) alone, but it does close on any T(φ)/F(φ) pair.
+
+NOTE: The weaker `MinimalClosure` instance (atom-only) was previously used, but this
+is insufficient for correctness -- for example, `⊥ → ⊥` is minimally valid but the
+atom-only closure fails to close the branch containing T(⊥)/F(⊥) at the created world. -/
 def isMinimallyClosed (b : IBranch Atom) : Bool :=
-  @ClosureCondition.isClosed _ _ MinimalClosure.instClosureConditionOfBEqOfIsAtomic b
+  Branch.hasContradiction b
 
 /-! ## Persistence Application -/
 

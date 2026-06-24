@@ -313,7 +313,7 @@ The proof requires showing persistence preserves satisfiability (which needs mon
 `worldOf`: `n ≤ m → worldOf n ≤ worldOf m`), step expansion preserves satisfiability
 (which needs `intRule_preserves_sat`), and threading the existential `worldOf'` from
 world-creating steps through the induction. -/
-private lemma intExpandBranches_closed_unsat
+lemma intExpandBranches_closed_unsat
     {World : Type*} [Preorder World]
     (val : World → Atom → Prop) (botForces : World → Prop)
     (v_uc : ∀ {w w' : World} (p : Atom), w ≤ w' → val w p → val w' p)

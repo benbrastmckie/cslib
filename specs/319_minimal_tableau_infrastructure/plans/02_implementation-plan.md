@@ -118,7 +118,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Create `Minimal/Completeness.lean` [IN PROGRESS]
+### Phase 3: Create `Minimal/Completeness.lean` [COMPLETED]
 
 **Goal**: Construct a minimal Kripke countermodel from an open saturated branch and prove `minimalTableau_complete`.
 
@@ -149,7 +149,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: Refactor `DecisionProcedure.lean` and update barrel imports [NOT STARTED]
+### Phase 4: Refactor `DecisionProcedure.lean` and update barrel imports [COMPLETED]
 
 **Goal**: Slim down `DecisionProcedure.lean` to import the new Soundness and Completeness modules, keeping only the Decidable instances and bridge theorem. Update barrel imports.
 

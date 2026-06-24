@@ -497,7 +497,132 @@ lemma classically_closed_unsatisfiable (b : Branch (Proposition Atom) Unit)
     rw [hfeq] at hfalse
     exact absurd htrue (Bool.eq_false_iff.mp hfalse)
 
-/-! ## Main Soundness Theorem -/
+/-! ## Loop Invariant and Main Soundness Theorem -/
+
+/-- Helper: if a branch in the list is satisfiable, it is not classically closed. -/
+private lemma classicalBranchSatisfiable_not_closed
+    (b : Branch (Proposition Atom) Unit)
+    (hsat : classicalBranchSatisfiable b) :
+    isClassicallyClosed b = false := by
+  by_contra h
+  simp only [Bool.not_eq_false] at h
+  exact classically_closed_unsatisfiable b h hsat
+
+/-- Helper for extracting a satisfiable sub-branch from a classicalStepBranch step. -/
+private lemma classicalStepBranch_preserves_sat
+    (b : Branch (Proposition Atom) Unit)
+    (e : List (SignedFormula (Proposition Atom) Unit))
+    (newBs : List (Branch (Proposition Atom) Unit))
+    (newExp : List (SignedFormula (Proposition Atom) Unit))
+    (hstep : classicalStepBranch b e = some (newBs, newExp))
+    (hsat : classicalBranchSatisfiable b) :
+    ∃ b' ∈ newBs, classicalBranchSatisfiable b' := by
+  simp only [classicalStepBranch] at hstep
+  obtain ⟨sf, hsfmem, hsfeq⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsfeq with hexp
+  cases hca : classicalApplyOne sf with
+    | notApplicable => simp [hca] at hsfeq
+    | linear newForms =>
+      simp only [hca, Option.some.injEq, Prod.mk.injEq] at hsfeq
+      obtain ⟨hnew, _⟩ := hsfeq; subst hnew
+      have hpreserve := classicalRule_preserves_sat b sf hsfmem hsat
+      rw [hca] at hpreserve
+      exact ⟨Branch.extendMany b newForms, List.mem_cons_self, hpreserve⟩
+    | branching branches_sf =>
+      simp only [hca, Option.some.injEq, Prod.mk.injEq] at hsfeq
+      obtain ⟨hnew, _⟩ := hsfeq; subst hnew
+      have hpreserve := classicalRule_preserves_sat b sf hsfmem hsat
+      rw [hca] at hpreserve
+      obtain ⟨br, hbr_mem, hbr_sat⟩ := hpreserve
+      exact ⟨Branch.extendMany b br, List.mem_map.mpr ⟨br, hbr_mem, rfl⟩, hbr_sat⟩
+    | persistent newForms =>
+      simp only [hca, Option.some.injEq, Prod.mk.injEq] at hsfeq
+      obtain ⟨hnew, _⟩ := hsfeq; subst hnew
+      have hpreserve := classicalRule_preserves_sat b sf hsfmem hsat
+      rw [hca] at hpreserve
+      exact ⟨Branch.extendMany b newForms, List.mem_cons_self, hpreserve⟩
+
+/-- **Classical expansion closed implies all unsatisfiable**: If
+`classicalExpandBranches branches expandedSets fuel = .closed` where the inputs have the
+same length, then every branch in `branches` is unsatisfiable.
+
+Proved by induction on `fuel` with inner induction on the `pending` list for `processNext`.
+The length invariant ensures the default branch of `processNext` (`| _ :: _, [] =>`) is
+never reached for well-formed inputs. -/
+private lemma classicalExpandBranches_closed_unsat
+    (fuel : Nat) :
+    ∀ (branches : List (Branch (Proposition Atom) Unit))
+      (expandedSets : List (List (SignedFormula (Proposition Atom) Unit))),
+      expandedSets.length = branches.length →
+      classicalExpandBranches branches expandedSets fuel = .closed →
+      ∀ b ∈ branches, ¬ classicalBranchSatisfiable b := by
+  induction fuel with
+  | zero =>
+    intro branches expandedSets _ h b hb hsat
+    simp only [classicalExpandBranches] at h
+    split at h
+    · simp at h
+    · rename_i hfind
+      have hfn := List.findSome?_eq_none_iff.mp hfind b hb
+      split_ifs at hfn with hcl
+      exact classically_closed_unsatisfiable b hcl hsat
+  | succ fuel' ih =>
+    intro branches expandedSets hlength h b hb hsat
+    -- Inner lemma about processNext with length invariant
+    suffices key : ∀ (pending : List (Branch (Proposition Atom) Unit))
+        (pendingExp : List (List (SignedFormula (Proposition Atom) Unit)))
+        (done : List (Branch (Proposition Atom) Unit))
+        (doneExp : List (List (SignedFormula (Proposition Atom) Unit))),
+        pendingExp.length = pending.length →
+        doneExp.length = done.length →
+        classicalExpandBranches.processNext fuel' pending pendingExp done doneExp = .closed →
+        ∀ bp ∈ pending, ¬ classicalBranchSatisfiable bp from
+      key branches expandedSets [] [] hlength rfl
+        (by simpa [classicalExpandBranches] using h) b hb hsat
+    intro pending
+    induction pending with
+    | nil =>
+      intro pendingExp done doneExp _ _ _ bp hmem
+      simp at hmem
+    | cons bh bt ih_inner =>
+      intro pendingExp done doneExp hlength hdlength hinner bp hbp
+      simp only [List.length_cons] at hlength
+      cases hpendingExp : pendingExp with
+      | nil =>
+        simp only [hpendingExp, List.length_nil] at hlength
+        omega
+      | cons e es =>
+        simp only [hpendingExp, List.length_cons, Nat.add_right_cancel_iff] at hlength
+        rw [hpendingExp] at hinner
+        simp only [classicalExpandBranches.processNext] at hinner
+        simp only [List.mem_cons] at hbp
+        by_cases hcl : isClassicallyClosed bh = true
+        · rw [if_pos hcl] at hinner
+          rcases hbp with rfl | hmem_rest
+          · exact classically_closed_unsatisfiable bp hcl
+          · exact ih_inner es (done ++ [bh]) (doneExp ++ [e]) hlength
+              (by simp [hdlength]) hinner bp hmem_rest
+        · simp only [Bool.not_eq_true] at hcl
+          rw [if_neg (by simp [hcl])] at hinner
+          cases hstep : classicalStepBranch bh e with
+          | none =>
+            rw [hstep] at hinner
+            simp at hinner
+          | some step =>
+            obtain ⟨newBs, newExp⟩ := step
+            rw [hstep] at hinner
+            -- Lengths: branches_new = done ++ newBs ++ bt, expandedSets_new = doneExp ++ ... ++ es
+            -- |done| = |doneExp| (hdlength), |bt| = |es| (hlength)
+            have hlen_rec : (doneExp ++ newBs.map (fun _ => newExp) ++ es).length =
+                (done ++ newBs ++ bt).length := by simp [hdlength, hlength]
+            rcases hbp with rfl | hmem_rest
+            · intro hbp_sat
+              obtain ⟨b', hb'_mem, hb'_sat⟩ :=
+                classicalStepBranch_preserves_sat bp e newBs newExp hstep hbp_sat
+              exact ih (done ++ newBs ++ bt) (doneExp ++ newBs.map (fun _ => newExp) ++ es)
+                hlen_rec hinner b' (by simp [hb'_mem]) hb'_sat
+            · exact ih (done ++ newBs ++ bt) (doneExp ++ newBs.map (fun _ => newExp) ++ es)
+                hlen_rec hinner bp (by simp [hmem_rest])
 
 /-- **Classical Tableau Soundness**: If the classical tableau closes on `φ`,
 then `φ` is a classical tautology.
@@ -506,13 +631,22 @@ The proof proceeds by contrapositive: if `φ` is not a tautology, there is a Boo
 valuation `v` with `BoolEvaluate v φ = false`. The initial branch `[F(φ)]` is satisfiable
 via `v`. By `classicalRule_preserves_sat`, no branch can become unsatisfiable through rule
 applications. By `classically_closed_unsatisfiable`, no satisfiable branch can close.
-Hence the tableau cannot return `closed`, contradiction.
-
-NOTE: The formal loop induction is marked sorry; the `Decidable` instance in
-`DecisionProcedure.lean` uses the existing Boolean enumeration for classical logic. -/
+Hence the tableau cannot return `closed`, contradiction. -/
 theorem classicalTableau_sound (φ : Proposition Atom)
     (h : classicalTableau φ = .closed) : Tautology φ := by
-  sorry
+  rw [tautology_iff_boolEvaluate_true]
+  by_contra hnt
+  push_neg at hnt
+  obtain ⟨v, hv⟩ := hnt
+  -- The initial branch [F(φ)] is satisfiable via v
+  have hsat : classicalBranchSatisfiable [⟨.neg, φ, ()⟩] :=
+    ⟨v, fun sf hmem => by
+      simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem
+      subst hmem
+      exact ⟨fun h => by simp at h, fun _ => Bool.eq_false_iff.mpr hv⟩⟩
+  -- Apply the loop invariant: the expansion cannot close if the initial branch is satisfiable
+  simp only [classicalTableau] at h
+  exact classicalExpandBranches_closed_unsat _ _ _ (by rfl) h _ (by simp) hsat
 
 end Cslib.Logic.PL
 

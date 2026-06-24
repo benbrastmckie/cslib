@@ -36,7 +36,7 @@ to minimal logic was established by Rasiowa and Sikorski.
 - `HAValid`: Validity in all Heyting Algebras (uses canonical `⊥`).
 - `BAValid`: Validity in all Boolean Algebras (uses canonical `⊥`).
 - `AlgTValid`: Theory validity — a valuation models a theory `T` if every axiom evaluates
-  to `⊤`. Used to state general algebraic completeness via `Theory.alg_complete`.
+  to `⊤`. Used as a helper predicate for algebraic completeness statements.
 
 ## Design Notes
 
@@ -46,18 +46,19 @@ it can be any element of the algebra. At the `HeytingAlgebra` and `BooleanAlgebr
 `bot_val = ⊥` is the unique canonical choice (and `HAValid`/`BAValid` hardcode it, eliminating
 the parameter entirely).
 
-The ND completeness theorem `Theory.alg_complete` unifies the three validity predicates:
-a formula `A` is derivable in theory `T` iff `AlgEvaluate v bot_val A = ⊤` for every GHA,
-every valuation `v`, every `bot_val`, and every `T`-valid assignment (via `AlgTValid`). The
-tier-specific ND results (`MPL.alg_complete`, `IPL.alg_complete`, `alg_complete_classical`)
-specialize this by fixing the algebra class and (for HA/BA) setting `bot_val = ⊥`.
+## Hilbert-Primary Architecture
 
-The Hilbert-primary completeness theorems (`MPL.hilbert_alg_complete`, `IPL.hilbert_alg_complete`,
-`CPL.hilbert_alg_complete`) are proved independently via the Hilbert Lindenbaum algebra and
-do not require `[DecidableEq Atom]`. Conservative extension (`hilbertIplConservativeOverMpl`)
-and Glivenko (`hilbertGlivenko`) are proved directly in the Hilbert setting, with their ND
-counterparts (`ipl_conservative_over_mpl`, `glivenko`) derived as corollaries via algebraic
-bridges. See `HilbertConservativeGlivenko.lean` for the unified Hilbert-primary module.
+The Hilbert system is the primary proof system for this algebraic semantics module. Completeness
+theorems (`MPL.hilbert_alg_complete`, `IPL.hilbert_alg_complete`, `CPL.hilbert_alg_complete`)
+are proved directly via the Hilbert Lindenbaum algebra and do not require `[DecidableEq Atom]`.
+
+The ND system inherits results via syntactic bridges. Conservative extension
+(`hilbertIplConservativeOverMpl`) and Glivenko (`hilbertGlivenko`) are proved directly in the
+Hilbert setting. Their ND counterparts (`ipl_conservative_over_mpl`, `glivenko`) are derived as
+corollaries via syntactic bridges from `HilbertConservativeGlivenko.lean`. Those bridges compose
+`hilbert_iff_nd` (from `Equivalence.lean`) with axiom admissibility equivalences (from
+`AxiomAdmissibility.lean`), providing a purely proof-theoretic connection between the Hilbert
+and ND systems.
 
 ## References
 

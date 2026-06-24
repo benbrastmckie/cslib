@@ -33,10 +33,12 @@ only propositionally equivalent to `∧` and `∨` in classical logic ([Wajsberg
 primitives via `HasAnd`/`HasOr` supports all three logic strengths with a single typeclass
 hierarchy.
 
-Negation and verum stay derived: each concrete formula type defines `neg φ := φ → ⊥` and
-`top := ⊥ → ⊥` as `abbrev`s, which are valid in minimal, intuitionistic, and classical logic
-alike, so no typeclass machinery is needed for them. Biconditional (`iff`) is deferred to
-task 173 after `HasAnd` is instantiated on the formula types.
+Negation and verum are shared derived connectives: `neg φ := φ → ⊥` and `top := ⊥ → ⊥`
+are valid in minimal, intuitionistic, and classical logic alike ([Johansson1937], [Prawitz1965]).
+These are now provided as **defaulted fields** on `PropositionalConnectives` (task 340), giving
+a single canonical source for the Lukasiewicz encodings. Each concrete formula type delegates
+its local `abbrev`s (`Proposition.neg`, `Formula.neg`, etc.) to these defaults.
+Biconditional (`iff`) is deferred to task 173 after `HasAnd` is instantiated on the formula types.
 
 ## Module Routing
 
@@ -136,13 +138,25 @@ class HasOr (F : Type*) where
   /-- The disjunction connective. -/
   or : F → F → F
 
-/-- Propositional connectives: falsum and implication.
+/-- Propositional connectives: falsum and implication, with derived negation and verum.
 
 `HasAnd` and `HasOr` are defined as standalone atomic classes in this module.
 Extending `PropositionalConnectives` to include them is deferred to task 173,
 when the four concrete formula types will be updated to provide `and`/`or`
-explicitly in their instances. -/
-class PropositionalConnectives (F : Type*) extends HasBot F, HasImp F
+explicitly in their instances.
+
+The fields `neg` and `top` carry Lukasiewicz defaults valid in minimal, intuitionistic,
+and classical logic ([Johansson1937], [Prawitz1965]). Concrete formula types may delegate
+their local `neg`/`top` `abbrev`s to these defaults to avoid copy-pasting the encodings. -/
+class PropositionalConnectives (F : Type*) extends HasBot F, HasImp F where
+  /-- Negation as Lukasiewicz encoding: ¬φ := φ → ⊥.
+
+  Valid in minimal, intuitionistic, and classical logic ([Johansson1937]). -/
+  neg : F → F := fun φ => HasImp.imp φ HasBot.bot
+  /-- Verum / top as Lukasiewicz encoding: ⊤ := ⊥ → ⊥.
+
+  Valid in minimal, intuitionistic, and classical logic ([Johansson1937], [Prawitz1965]). -/
+  top : F := HasImp.imp (HasBot.bot : F) HasBot.bot
 
 /-- Modal connectives: propositional connectives plus necessity.
 

@@ -11,9 +11,9 @@ next_project_number: 330
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,321,323,324,327 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215,300,316,325,328 | 36,37,180,299,323,324,327 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
-| 3 | 41,275,317,326,329 | 39,40,316,325,328 | Foundations, Propositional Logic |
+| 1 | 36,37,180,226,241,245,278,290,299,301,321,323,325,328 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 2 | 39,40,181,215,300,316,326,329 | 36,37,180,299,323,325,328 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 3 | 41,275,317 | 39,40,316 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -37,12 +37,10 @@ next_project_number: 330
 323 [IMPLEMENTING] — Fix two intuitionistic tableau implementation bugs: (1) isIntuiti
   └─ 316 [BLOCKED] — Fill the 6 sorry instances in propositional tableau soundness pro
     └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
-324 [IMPLEMENTING] — Add LawfulBEq instances for Proposition Atom and SignedFormula F 
-  └─ 325 [NOT STARTED] — Deduplicate identical definitions across minimal/intuitionistic t
-    └─ 326 [NOT STARTED] — Fix ~35 linter warnings across the propositional tableau soundnes
-327 [PLANNED] — Fix CI lint warnings in CutElimination.lean: add required comment
-  └─ 328 [NOT STARTED] — Refactor CutElimination.lean to reduce or eliminate the maxHeartb
-    └─ 329 [NOT STARTED] — Prove the subformula property as a corollary of cut elimination: 
+325 [NOT STARTED] — Deduplicate identical definitions across minimal/intuitionistic t
+  └─ 326 [NOT STARTED] — Fix ~35 linter warnings across the propositional tableau soundnes
+328 [NOT STARTED] — Refactor CutElimination.lean to reduce or eliminate the maxHeartb
+  └─ 329 [NOT STARTED] — Prove the subformula property as a corollary of cut elimination: 
 
 ### Temporal Logic
 
@@ -88,7 +86,7 @@ next_project_number: 330
 ---
 
 ### 327. Cutelim lint ci fixes
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -120,10 +118,13 @@ next_project_number: 330
 ---
 
 ### 324. Lawfulbeq proposition signedformula
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [324_lawfulbeq_proposition_signedformula/reports/01_lawfulbeq-research.md]
+- **Plan**: [324_lawfulbeq_proposition_signedformula/plans/01_lawfulbeq-plan.md]
+- **Summary**: [324_lawfulbeq_proposition_signedformula/summaries/01_lawfulbeq-summary.md]
 
 **Description**: Add LawfulBEq instances for Proposition Atom and SignedFormula F L, then remove workaround lemmas. Currently Proposition derives BEq independently from DecidableEq (Defs.lean:92), so the derived BEq uses structural matching rather than decide (a = b). This means eq_of_beq, beq_iff_eq, and all standard BEq<->Eq lemmas fail, forcing custom workaround lemmas: prop_beq_eq (Classical/Soundness.lean:128, private, ~30 lines) and proposition_beq_eq (Minimal/Soundness.lean:87, public, ~30 lines). Fix: (1) In Defs.lean, either derive BEq from DecidableEq via instBEq or keep the derived BEq and prove a LawfulBEq instance. (2) Add conditional LawfulBEq instance for SignedFormula F L when F and L have LawfulBEq. (3) Delete prop_beq_eq from Classical/Soundness.lean and proposition_beq_eq from Minimal/Soundness.lean. (4) Replace all call sites with eq_of_beq or beq_iff_eq: Classical/Soundness.lean callers, Minimal/Completeness.lean:111-113 (currently uses full qualification Cslib.Logic.PL.proposition_beq_eq). (5) Optionally add Repr to Proposition deriving clause for debugging. Eliminates ~60 lines of workaround code across 3 files.
 
@@ -148,6 +149,7 @@ next_project_number: 330
 - **Dependencies**: Task 311, Task 312
 - **Research**: [322_mpl_conservative_extension_chain/reports/01_mpl-chain-research.md]
 - **Plan**: [322_mpl_conservative_extension_chain/plans/01_mpl-chain-plan.md]
+- **Summary**: [322_mpl_conservative_extension_chain/summaries/01_mpl-chain-summary.md]
 
 **Description**: Establish the MPL conservative extension chain as standalone results and organize the relationship between the IPL and MPL chains. Specifically: (1) Prove MPL → ConjImp conservativity for or-free formulas (GHAValid → BrouwerianValid, requiring a free join/distributive lattice completion of BrouwerianSemilattices to GHAs). (2) Prove MPL → Imp conservativity for imp-top-only formulas as a composition. (3) Organize the full algebraic picture: state the MPL chain (ImpAxiom ⊂ ConjImpAxiom ⊂ MinPropAxiom) with its own conservativity results independent of IPL, and relate it to the IPL chain via the IPL → MPL conservativity bridge. File: Cslib/Logics/Propositional/Semantics/Algebra/MplConservativeChain.lean
 

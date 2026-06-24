@@ -1,0 +1,16 @@
+{
+  "status": "planned",
+  "summary": "2-phase plan: modify deriving clauses for Proposition/SignedFormula, then replace 15 call sites with eq_of_beq/beq_iff_eq and delete ~60 lines of workarounds",
+  "blockers": [],
+  "continuation_context": null,
+  "artifacts": [
+    {
+      "path": "specs/324_lawfulbeq_proposition_signedformula/plans/01_lawfulbeq-plan.md",
+      "type": "plan",
+      "summary": "Implementation plan with 2 phases: core type changes + call site replacement across 7 files"
+    }
+  ],
+  "next_action_hint": "implement",
+  "phases_completed": 0,
+  "phases_total": 2
+}

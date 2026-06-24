@@ -1,7 +1,7 @@
 # Implementation Plan: LawfulBEq for Proposition and SignedFormula
 
 - **Task**: 324 - Add LawfulBEq instances for Proposition Atom and SignedFormula F L, then remove workaround lemmas
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 1 hour
 - **Dependencies**: None
 - **Research Inputs**: reports/01_lawfulbeq-research.md

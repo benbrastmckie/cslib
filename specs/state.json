@@ -4,12 +4,12 @@
     {
       "project_number": 327,
       "project_name": "cutelim_lint_ci_fixes",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Fix CI lint warnings in CutElimination.lean: add required comment to maxHeartbeats 800000 override, fix 8 long-line warnings (>100 chars), remove unused variable hB. All mechanical fixes required for CI to pass",
       "topic": "Propositional Logic",
       "created": "2026-06-24T11:27:09Z",
-      "last_updated": "2026-06-24T11:35:03Z",
+      "last_updated": "2026-06-24T11:39:02Z",
       "dependencies": [],
       "session_id": "sess_1782300531_c471d6_327",
       "artifacts": [
@@ -92,13 +92,19 @@
           "type": "plan",
           "path": "specs/322_mpl_conservative_extension_chain/plans/01_mpl-chain-plan.md",
           "summary": "Hard-mode plan: 3 phases, fix diamond + add theorems + CI verification"
+        },
+        {
+          "type": "summary",
+          "path": "specs/322_mpl_conservative_extension_chain/summaries/01_mpl-chain-summary.md",
+          "summary": "Full implementation summary with plan deviations noted"
         }
       ],
       "dependencies": [
         311,
         312
       ],
-      "session_id": "sess_1782300589_36988b"
+      "session_id": "sess_1782300589_36988b",
+      "completion_summary": "Added 3 new theorems to MplConservativeChain.lean (GHAValid_implies_BrouwerianValid_direct, derivableMinOfDerivableConjImp, derivableMinOfDerivableImp), refactored hilbertMplConservativeOverConjImp_direct, added Nemitz1965/Kohler1981 BibTeX entries. All 7 theorems sorry-free, module builds clean."
     },
     {
       "project_number": 321,
@@ -858,17 +864,34 @@
     {
       "project_number": 324,
       "project_name": "lawfulbeq_proposition_signedformula",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Add LawfulBEq instances for Proposition Atom and SignedFormula F L, then remove workaround lemmas. Currently Proposition derives BEq independently from DecidableEq (Defs.lean:92), so the derived BEq uses structural matching rather than decide (a = b). This means eq_of_beq, beq_iff_eq, and all standard BEq<->Eq lemmas fail, forcing custom workaround lemmas: prop_beq_eq (Classical/Soundness.lean:128, private, ~30 lines) and proposition_beq_eq (Minimal/Soundness.lean:87, public, ~30 lines). Fix: (1) In Defs.lean, either derive BEq from DecidableEq via instBEq or keep the derived BEq and prove a LawfulBEq instance. (2) Add conditional LawfulBEq instance for SignedFormula F L when F and L have LawfulBEq. (3) Delete prop_beq_eq from Classical/Soundness.lean and proposition_beq_eq from Minimal/Soundness.lean. (4) Replace all call sites with eq_of_beq or beq_iff_eq: Classical/Soundness.lean callers, Minimal/Completeness.lean:111-113 (currently uses full qualification Cslib.Logic.PL.proposition_beq_eq). (5) Optionally add Repr to Proposition deriving clause for debugging. Eliminates ~60 lines of workaround code across 3 files.",
       "created": "2026-06-24T11:00:00Z",
-      "last_updated": "2026-06-24T11:33:38Z",
+      "last_updated": "2026-06-24T11:44:26Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/324_lawfulbeq_proposition_signedformula/reports/01_lawfulbeq-research.md",
+          "summary": "Research report: root cause, approach, exact change catalog for 7 files"
+        },
+        {
+          "type": "plan",
+          "path": "specs/324_lawfulbeq_proposition_signedformula/plans/01_lawfulbeq-plan.md",
+          "summary": "2-phase implementation plan for LawfulBEq refactoring"
+        },
+        {
+          "type": "summary",
+          "path": "specs/324_lawfulbeq_proposition_signedformula/summaries/01_lawfulbeq-summary.md",
+          "summary": "Implementation summary: removed ~60 lines of workaround, fixed 15 call sites"
+        }
+      ],
       "dependencies": [],
       "parent_task": null,
-      "session_id": "sess_1782300804_8503e4"
+      "session_id": "sess_1782300804_8503e4",
+      "completion_summary": "Removed BEq from deriving clauses of Proposition and SignedFormula; LawfulBEq now resolves automatically via instBEqOfDecidableEq. Deleted ~60 lines of workaround lemmas (prop_beq_eq, proposition_beq_eq) and replaced 15 call sites with eq_of_beq/beq_iff_eq across 7 files."
     },
     {
       "project_number": 325,

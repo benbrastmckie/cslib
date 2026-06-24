@@ -1,0 +1,42 @@
+{
+  "status": "implemented",
+  "summary": "Added Encodable, Countable, Infinite, and Denumerable instances to Cslib/Logics/LTL/Syntax/Formula.lean. The plan's deriving Encodable approach failed in the CSLib module context (known handler bug); replaced with a WType-based manual encoding using Encodable.ofLeftInverse. All four instances resolve for Formula ℕ and Infinite resolves for Formula Empty. Zero sorries, no new axioms (only standard propext/Classical.choice/Quot.sound). Lake build passes; lint, lint-style, and shake all clean for the modified file.",
+  "artifacts": [
+    {
+      "path": "specs/245_formula_encodable_countable_instances/summaries/01_encodable-countable-denumerable-instances-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary: WType-based Encodable instance plus Countable, Infinite, Denumerable instances for LTL Formula type"
+    }
+  ],
+  "phases_completed": 2,
+  "phases_total": 2,
+  "sorry_inventory": [],
+  "next_action_hint": "Update task status to [IMPLEMENTING] -> [PR READY] and create a PR. The instance block is complete and CI-clean. Downstream: Temporal/Bimodal completeness machinery can now discharge [Denumerable (Formula Atom)] via inferInstance given [Encodable Atom].",
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "instances_verified": [
+      "Encodable (Formula ℕ)",
+      "Countable (Formula ℕ)",
+      "Infinite (Formula ℕ)",
+      "Infinite (Formula Empty)",
+      "Denumerable (Formula ℕ)"
+    ]
+  },
+  "deviations": [
+    {
+      "item": "deriving Encodable approach",
+      "deviation": "Replaced with WType-based manual Encodable instance using Encodable.ofLeftInverse",
+      "reason": "The deriving Encodable handler fails in the CSLib module/@[expose] public section context due to internal private declaration visibility bug"
+    },
+    {
+      "item": "Mathlib.Tactic.DeriveEncodable import",
+      "deviation": "Replaced with Mathlib.Data.W.Basic import",
+      "reason": "WType approach requires Data.W.Basic; DeriveEncodable is not needed"
+    }
+  ]
+}

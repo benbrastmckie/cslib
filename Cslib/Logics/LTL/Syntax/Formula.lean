@@ -9,6 +9,8 @@ module
 public import Cslib.Init
 public import Cslib.Foundations.Logic.Connectives
 public import Mathlib.Order.Notation
+public import Mathlib.Data.W.Basic
+public import Mathlib.Logic.Denumerable
 
 /-! # LTL Formula Type
 
@@ -94,6 +96,67 @@ inductive Formula (Atom : Type u) : Type u where
   | untl (φ₁ φ₂ : Formula Atom)
 deriving DecidableEq, BEq
 
+-- W-type encoding helpers for the `Encodable (Formula Atom)` instance (internal use only).
+
+/-- Constructor tag type for the W-type encoding: atom tags carry the atom value;
+tags `0`–`3` represent `bot`, `imp`, `next`, `untl` respectively. -/
+abbrev Formula.wTag (Atom : Type u) := Atom ⊕ Fin 4
+
+/-- Arity function: number of `Formula` sub-formulas for each W-type constructor tag. -/
+def Formula.wArity {Atom : Type u} : Formula.wTag Atom → Type
+  | .inl _ => Empty  -- atom: zero Formula sub-formulas
+  | .inr 0  => Empty  -- bot: zero sub-formulas
+  | .inr 1  => Fin 2  -- imp: two sub-formulas
+  | .inr 2  => Fin 1  -- next: one sub-formula
+  | .inr 3  => Fin 2  -- untl: two sub-formulas
+
+instance {Atom : Type u} (a : Formula.wTag Atom) : Fintype (Formula.wArity a) := by
+  match a with
+  | .inl _     => exact (show Fintype Empty from inferInstance)
+  | .inr ⟨0,_⟩ => exact (show Fintype Empty from inferInstance)
+  | .inr ⟨1,_⟩ => exact (show Fintype (Fin 2) from inferInstance)
+  | .inr ⟨2,_⟩ => exact (show Fintype (Fin 1) from inferInstance)
+  | .inr ⟨3,_⟩ => exact (show Fintype (Fin 2) from inferInstance)
+
+instance {Atom : Type u} (a : Formula.wTag Atom) : Encodable (Formula.wArity a) := by
+  match a with
+  | .inl _     => exact (show Encodable Empty from inferInstance)
+  | .inr ⟨0,_⟩ => exact (show Encodable Empty from inferInstance)
+  | .inr ⟨1,_⟩ => exact (show Encodable (Fin 2) from inferInstance)
+  | .inr ⟨2,_⟩ => exact (show Encodable (Fin 1) from inferInstance)
+  | .inr ⟨3,_⟩ => exact (show Encodable (Fin 2) from inferInstance)
+
+/-- Embed a `Formula` into its W-type representation. -/
+def Formula.toW {Atom : Type u} : Formula Atom → WType (Formula.wArity (Atom := Atom))
+  | .atom p  => ⟨.inl p, Empty.elim⟩
+  | .bot     => ⟨.inr ⟨0, by omega⟩, Empty.elim⟩
+  | .imp a b => ⟨.inr ⟨1, by omega⟩, fun i => i.cases (Formula.toW a) (fun _ => Formula.toW b)⟩
+  | .next a  => ⟨.inr ⟨2, by omega⟩, fun _ => Formula.toW a⟩
+  | .untl a b => ⟨.inr ⟨3, by omega⟩, fun i => i.cases (Formula.toW a) (fun _ => Formula.toW b)⟩
+
+/-- Decode a W-type element back into a `Formula`. Left inverse of `Formula.toW`. -/
+def Formula.fromW {Atom : Type u} : WType (Formula.wArity (Atom := Atom)) → Formula Atom
+  | ⟨.inl p, _⟩       => .atom p
+  | ⟨.inr ⟨0,_⟩, _⟩   => .bot
+  | ⟨.inr ⟨1,_⟩, f⟩   => .imp  (Formula.fromW (f ⟨0, by omega⟩)) (Formula.fromW (f ⟨1, by omega⟩))
+  | ⟨.inr ⟨2,_⟩, f⟩   => .next (Formula.fromW (f ⟨0, by omega⟩))
+  | ⟨.inr ⟨3,_⟩, f⟩   => .untl (Formula.fromW (f ⟨0, by omega⟩)) (Formula.fromW (f ⟨1, by omega⟩))
+  | ⟨.inr ⟨n+4,h⟩, _⟩ => absurd h (by omega)
+
+/-- `Formula.fromW` is a left inverse of `Formula.toW`. -/
+theorem Formula.fromW_toW {Atom : Type u} (x : Formula Atom) :
+    Formula.fromW (Formula.toW x) = x := by
+  induction x with
+  | atom p    => rfl
+  | bot       => rfl
+  | imp a b iha ihb   => exact congrArg₂ Formula.imp iha ihb
+  | next a ih         => exact congrArg Formula.next ih
+  | untl a b iha ihb  => exact congrArg₂ Formula.untl iha ihb
+
+/-- LTL formulas are encodable whenever the atoms are encodable. -/
+instance {Atom : Type u} [Encodable Atom] : Encodable (Formula Atom) :=
+  Encodable.ofLeftInverse Formula.toW Formula.fromW Formula.fromW_toW
+
 /-- Register `LTL.Formula` as an instance of `LTLConnectives`.
 
 Registered before the derived-connective `abbrev`s so that the
@@ -154,6 +217,31 @@ abbrev Formula.leadsto (p q : Formula Atom) : Formula Atom :=
 
 instance : Bot (Formula Atom) := ⟨.bot⟩
 instance : Top (Formula Atom) := ⟨.top⟩
+
+/-- LTL formulas are countable whenever the atoms are encodable. -/
+instance {Atom : Type u} [Encodable Atom] : Countable (Formula Atom) :=
+  Encodable.countable
+
+/-- Iterate `next` on `bot` `n` times, witnessing an injection `ℕ ↪ Formula Atom`. -/
+private def iterNext {Atom : Type u} : Nat → Formula Atom
+  | 0 => Formula.bot
+  | n + 1 => Formula.next (iterNext n)
+
+/-- `Formula Atom` is infinite for every `Atom` (no constraint on `Atom`). -/
+instance {Atom : Type u} : Infinite (Formula Atom) :=
+  Infinite.of_injective iterNext (by
+    intro a b h
+    induction a generalizing b with
+    | zero => cases b with
+      | zero => rfl
+      | succ b => simp [iterNext] at h
+    | succ a ih => cases b with
+      | zero => simp [iterNext] at h
+      | succ b => exact congrArg Nat.succ (ih (by simpa [iterNext] using h)))
+
+/-- LTL formulas are denumerable whenever the atoms are encodable. -/
+instance {Atom : Type u} [Encodable Atom] : Denumerable (Formula Atom) :=
+  Denumerable.ofEncodableOfInfinite (Formula Atom)
 
 end Cslib.Logic.LTL
 

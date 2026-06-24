@@ -1,19 +1,35 @@
 {
-  "status": "researched",
-  "started_at": "2026-06-24T00:00:00Z",
-  "completed_at": "2026-06-24T00:00:00Z",
-  "summary": "Researched Encodable/Countable/Denumerable instances for the LTL Formula type (Cslib/Logics/LTL/Syntax/Formula.lean, constructors atom/bot/imp/next/untl). All three instances are achievable zero-debt with existing Mathlib API: Encodable via the Mathlib 'deriving Encodable' handler (verified to succeed on the recursive Formula despite its docstring saying non-reflexive), Countable free via Encodable.countable, Denumerable via Denumerable.ofEncodableOfInfinite which additionally needs Infinite (Formula Atom). Formula is infinite unconditionally (iterated next on bot injects Nat, holds even for Atom=Empty), so only [Encodable Atom] is required. Full code sketch compiled successfully via lean_run_code with success:true and noncomputable NOT required.",
+  "status": "implemented",
+  "started_at": "2026-06-24T21:56:47Z",
+  "completed_at": "2026-06-24T22:15:00Z",
   "artifacts": [
-    "specs/245_formula_encodable_countable_instances/reports/01_encodable-countable-denumerable-instances.md"
+    {
+      "path": "specs/245_formula_encodable_countable_instances/summaries/01_encodable-countable-denumerable-instances-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary: WType-based Encodable instance plus Countable, Infinite, Denumerable instances for LTL Formula type"
+    }
   ],
   "partial_progress": {
     "stage": "complete",
-    "details": "Report written with verified, compiling code sketches for all three instances."
+    "details": "Both phases completed. WType-based Encodable + Countable + Infinite + Denumerable instances added. CI green for LTL module.",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 2,
+    "last_completed_phase": "Run the CSLib CI pipeline"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true
   },
   "metadata": {
-    "session_id": "sess_1782337264_0e4361",
-    "agent_type": "cslib-research-agent",
+    "session_id": "sess_1782337917_d3406f_245",
+    "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

@@ -35,12 +35,12 @@
     {
       "project_number": 317,
       "project_name": "propositional_tableau_completeness",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Fill the 8 sorry instances in propositional tableau completeness proofs across all three logics. Classical (Classical/Completeness.lean): prove classicalOpenBranch_countermodel (open saturated branch yields a Boolean valuation falsifying phi) and classicalTableau_complete (if phi is not a Tautology then the tableau has an open branch), plus one helper — by constructing a valuation from the positive atoms in the saturated branch and proving a truth lemma by formula induction. Intuitionistic (Intuitionistic/Completeness.lean): prove intuitionisticOpenBranch_countermodel (open saturated branch yields a finite Kripke model refuting phi) and intuitionisticTableau_complete — by constructing worlds from the branch world indices, accessibility from the expansion record, valuation from positive atoms, and proving a truth lemma showing forced/not-forced matches signed formulas at each world. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_complete (if phi is not MValid then the tableau has an open branch) — adapts intuitionistic proof with MinimalClosure and botForces=false. Core technique: Hintikka-set argument — saturated branches satisfy Hintikka conditions, from which countermodels are extracted.",
       "created": "2026-06-23T19:55:52Z",
-      "last_updated": "2026-06-24T00:45:00Z",
+      "last_updated": "2026-06-24T01:45:00Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "dependencies": [
@@ -133,7 +133,7 @@
       "description": "Formalize Prawitz-style normalization for CSLib Theory.Derivation (propositional IPL and MPL). Define Derivation.isNormal predicate (no maximal formula -- i.e., no introduction rule immediately followed by the corresponding elimination on the same formula). Prove a normalization function normalize that transforms any derivation into a normal form. Derive the subformula property as a corollary: every formula in a normal derivation is a subformula of the conclusion or a hypothesis. The Theory.Derivation type is Type u (not Prop), enabling a computable normalization function. Reference: [Prawitz1965] Ch. IV-V. Consider starting with the implicational fragment ({arrow} only) as a milestone, then extending to full IPL connectives. Files: new module Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean. Depends on 266.",
       "dependencies": [],
       "created": "2026-06-23T12:00:00Z",
-      "last_updated": "2026-06-24T03:45:45Z",
+      "last_updated": "2026-06-24T01:30:00Z",
       "session_id": "sess_1782270872_494beb",
       "artifacts": [
         {
@@ -178,7 +178,7 @@
     {
       "project_number": 293,
       "project_name": "curry_howard_nd_typed_lambda",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Establish the formal Curry-Howard isomorphism between Theory.Derivation Gamma A (propositional ND proofs) and well-typed lambda terms. Define a purpose-built simply-typed term language over PL.Proposition as the type language. Formalize: (1) curry_howard_forward extracting a well-typed term from a derivation, (2) curry_howard_backward extracting a derivation from a well-typed term, (3) roundtrip properties showing the maps are mutually inverse. Map ND constructors to term constructors: impI to lambda, impE to application, andI to pair, andE1/2 to projections, orI1/2 to injections, orE to case. As a reduced-scope fallback, the {arrow, and} fragment is a self-contained milestone. Normal derivations correspond to beta-normal terms. Files: new directory Cslib/Logics/Propositional/CurryHoward/. Depends on the normalization task (290).",
@@ -186,7 +186,7 @@
         290
       ],
       "created": "2026-06-23T12:00:00Z",
-      "last_updated": "2026-06-24T00:40:00Z"
+      "last_updated": "2026-06-24T01:40:00Z"
     },
     {
       "project_number": 279,
@@ -537,7 +537,7 @@
     {
       "project_number": 311,
       "project_name": "ipl_conservative_over_imp",
-      "status": "not_started",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Prove the conservative extension theorem: IPL is conservative over IPL⟨→,⊤⟩ for imp-top-only formulas. Statement: if Derivable IntPropAxiom φ and φ.IsImpTopOnly = true, then Derivable ImpAxiom φ. Proof route: (1) IPL.hilbert_alg_complete.mp converts to HA-validity, (2) for any HilbertAlgebra H and valuation v, instantiate HA-validity at the Diego embedding HA(H), (3) the Diego embedding lemma rewrites back to HilbertEvaluate v φ = ⊤ in H, (4) Hilbert algebra completeness converts back to Derivable ImpAxiom φ. Derive the ND corollary. This is the deepest result in the chain, showing that conjunction, disjunction, and falsum are all independent of the pure implication fragment. Connects to typed SKI combinators: the derivable imp-top-only formulas are exactly the types inhabited by typed combinatory terms. File: Cslib/Logics/Propositional/Semantics/Algebra/ImpConservative.lean.",
@@ -548,12 +548,13 @@
       "dependencies": [
         309,
         310
-      ]
+      ],
+      "blockers": "Requires himp-preserving embedding from HilbertAlgebra to HeytingAlgebra (equality, not just ≤). The existing principal filter map gives only principal(a ⇨ b) ≤ himpFilter(principal a)(principal b), and the reverse is provably false. A Dedekind-MacNeille completion or proof-theoretic approach is needed."
     },
     {
       "project_number": 312,
       "project_name": "unified_conservative_extension_chain",
-      "status": "not_started",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Consolidate the full conservative extension chain into a unified module: IPL⟨→,⊤⟩ ⊂ IPL⟨∧,→,⊤⟩ ⊂ MPL ⊂ IPL ⊂ CPL, where each ⊂ denotes conservative extension for the smaller fragments language. State the chain theorem and derive inter-fragment conservativity as corollaries — e.g., IPL⟨∧,→,⊤⟩ conservative over IPL⟨→,⊤⟩ by composing the two embeddings through IPL. Include the algebraic validity subsumption chain: HilbertAlgValid → BrouwerianValid → GHAValid → HAValid → BAValid. Provide the full picture connecting all five levels of algebraic semantics (Hilbert algebras, Brouwerian semilattices, GHAs, HAs, BAs) to their proof systems (ImpAxiom, ConjImpAxiom, MinPropAxiom, IntPropAxiom, PropositionalAxiom). This is the capstone module demonstrating the algebraic method for propositional logic — each connective extension is genuinely conservative, each algebra class has sound and complete proof theory, and each completion construction provides the bridge. File: Cslib/Logics/Propositional/Semantics/Algebra/ConservativeChain.lean.",
@@ -563,7 +564,8 @@
       "artifacts": [],
       "dependencies": [
         311
-      ]
+      ],
+      "blockers": "Depends on task 311 which is blocked."
     },
     {
       "project_number": 314,

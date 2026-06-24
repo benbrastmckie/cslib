@@ -34,10 +34,10 @@ next_project_number: 321
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
-  └─ 293 [RESEARCHED] — Establish the formal Curry-Howard isomorphism between Theory.Deri
+  └─ 293 [PLANNED] — Establish the formal Curry-Howard isomorphism between Theory.Deri
 314 [IMPLEMENTING] — Implement the classical sequent calculus LK for propositional log
 316 [PLANNED] — Fill the 6 sorry instances in propositional tableau soundness pro
-  └─ 317 [RESEARCHED] — Fill the 8 sorry instances in propositional tableau completeness 
+  └─ 317 [PLANNED] — Fill the 8 sorry instances in propositional tableau completeness 
     └─ 319 [NOT STARTED] — Build dedicated Soundness and Completeness modules for the minima
 320 [IMPLEMENTING] — Remove ND-level metalogic that has been superseded by Hilbert-pri
 
@@ -58,8 +58,8 @@ next_project_number: 321
 
 ### Algebraic Semantics
 
-311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
-  └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified 
+311 [BLOCKED] — Prove the conservative extension theorem: IPL is conservative ove
+  └─ 312 [BLOCKED] — Consolidate the full conservative extension chain into a unified 
 
 ### Uncategorized
 
@@ -86,7 +86,7 @@ next_project_number: 321
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 316
@@ -141,7 +141,7 @@ Literature sources:
 ---
 
 ### 312. Unified conservative extension chain
-- **Status**: [NOT STARTED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 311
@@ -151,7 +151,7 @@ Literature sources:
 ---
 
 ### 311. Ipl conservative over imp
-- **Status**: [NOT STARTED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 309, Task 310
@@ -215,7 +215,7 @@ Literature sources:
 ---
 
 ### 293. Curry howard nd typed lambda
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 290

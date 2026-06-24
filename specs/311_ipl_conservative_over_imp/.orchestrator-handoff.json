@@ -1,0 +1,9 @@
+{
+  "status": "blocked",
+  "summary": "Research found fundamental gap: principal filter map gives only ≤ direction (not equality) for himp preservation. Reverse inequality is provably false. Conservative extension proof requires new algebraic infrastructure (himp-preserving embedding via Dedekind-MacNeille completion or ideal completion).",
+  "blockers": ["Requires himp-preserving embedding: e(a ⇨ b) = e(a) ⇨ e(b) (equality). The existing principal map gives only ≤. New task needed for Dedekind-MacNeille completion or proof-theoretic approach."],
+  "artifacts": [{"path": "specs/311_ipl_conservative_over_imp/reports/01_conservative-extension-research.md", "type": "report", "summary": "Exhaustive analysis of 8 proof routes, all blocked by same fundamental gap"}],
+  "phases_completed": 0,
+  "phases_total": 0,
+  "continuation_context": null
+}

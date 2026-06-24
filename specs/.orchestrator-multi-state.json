@@ -25,21 +25,24 @@
       311
     ]
   },
-  "cycle_count": 1,
+  "cycle_count": 2,
   "max_cycles": 15,
   "completed_tasks": [
     310
   ],
-  "failed_tasks": [],
+  "failed_tasks": [
+    311,
+    312
+  ],
   "current_statuses": {
     "310": "completed",
-    "311": "not_started",
-    "312": "not_started",
+    "311": "blocked",
+    "312": "blocked",
     "320": "implementing",
-    "290": "planned",
+    "290": "partial",
     "316": "planned",
-    "293": "researched",
-    "317": "researched"
+    "293": "planned",
+    "317": "planned"
   },
   "task_types": {
     "310": "cslib",

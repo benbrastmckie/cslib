@@ -565,4 +565,74 @@ theorem modal_not_SetDerivable_union_neg_consistent
     exact h_not ⟨L, hL_Gamma,
       ⟨modal_dne_from_neg_neg h_implyK h_implyS h_efq h_peirce d_dt⟩⟩
 
+/-! ## Parametric Strong Soundness and Completeness -/
+
+/-- **Parametric Strong Soundness**: Given a soundness callback for the axiom
+system `Axioms` over the frame class `FC`, lift set-derivability to semantic
+entailment over `FC`.
+
+The callback `sound` takes any list-derivation `L ⊢ phi` and a satisfaction
+witness for all of `L`, and returns satisfaction of `phi`. This decouples the
+parametric infrastructure from any particular axiom system.
+
+Instantiate at K with `k_soundness`; at T/S4/S5/TB/B/K4/K5/K45/KB5/D/D4/D5/D45/DB
+with the respective per-system soundness theorem. -/
+theorem strong_soundness
+    {Axioms : Proposition Atom → Prop}
+    {FC : ∀ {World : Type u}, Model World Atom → Prop}
+    {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
+    (sound : ∀ {World : Type u} (m : Model World Atom) (w : World)
+             (L : List (Proposition Atom)),
+             FC m → DerivationTree Axioms L phi →
+             (∀ γ ∈ L, Satisfies m w γ) → Satisfies m w phi)
+    (h : ModalSetDerivable Axioms Gamma phi) :
+    ModalSemanticEntails FC Gamma phi := by
+  obtain ⟨L, hL_sub, hL_deriv⟩ := h
+  obtain ⟨d⟩ := hL_deriv
+  intro World m w hFC h_sat
+  exact sound m w L hFC d (fun γ hγ => h_sat γ (hL_sub γ hγ))
+
+/-- **Parametric Strong Completeness**: Given the four propositional axiom
+callbacks, a pre-applied truth lemma for the canonical model, and a proof
+that the canonical model satisfies the frame condition `FC`, derive
+set-derivability from semantic entailment.
+
+Proof by contrapositive: if `phi` is not set-derivable from `Gamma`, then
+`Gamma ∪ {¬phi}` is consistent by `modal_not_SetDerivable_union_neg_consistent`.
+By `modal_lindenbaum`, extend to an MCS `M ⊇ Gamma ∪ {¬phi}`. The truth lemma
+witnesses that all of `Gamma` is satisfied at `M` in the canonical model but
+`phi` is not (since `¬phi ∈ M`). This contradicts the semantic entailment
+hypothesis instantiated at the canonical model. -/
+theorem strong_completeness
+    {Axioms : Proposition Atom → Prop}
+    {FC : ∀ {World : Type u}, Model World Atom → Prop}
+    {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_efq : ∀ (φ : Proposition Atom), Axioms (Proposition.bot.imp φ))
+    (h_peirce : ∀ (φ ψ : Proposition Atom),
+      Axioms (((φ.imp ψ).imp φ).imp φ))
+    (truthLemma : ∀ (S : CanonicalWorld Axioms) (φ : Proposition Atom),
+      Satisfies (CanonicalModel Axioms) S φ ↔ φ ∈ S.val)
+    (canonical_FC : FC (CanonicalModel Axioms))
+    (h : ModalSemanticEntails FC Gamma phi) :
+    ModalSetDerivable Axioms Gamma phi := by
+  by_contra h_not
+  have h_cons := modal_not_SetDerivable_union_neg_consistent
+    h_implyK h_implyS h_efq h_peirce h_not
+  obtain ⟨M, hM_sup, hM_mcs⟩ := modal_lindenbaum h_cons
+  let w : CanonicalWorld Axioms := ⟨M, hM_mcs⟩
+  have h_neg_phi : (¬phi) ∈ M :=
+    hM_sup (Set.mem_union_right Gamma (Set.mem_singleton_iff.mpr rfl))
+  have h_gamma_sub : ∀ ψ ∈ Gamma, ψ ∈ M :=
+    fun ψ hψ => hM_sup (Set.mem_union_left _ hψ)
+  have h_gamma_sat : ∀ γ ∈ Gamma, Satisfies (CanonicalModel Axioms) w γ :=
+    fun γ hγ => (truthLemma w γ).mpr (h_gamma_sub γ hγ)
+  have h_phi_sat := h (CanonicalWorld Axioms) (CanonicalModel Axioms) w
+    canonical_FC h_gamma_sat
+  have h_phi_M := (truthLemma w phi).mp h_phi_sat
+  exact mcs_bot_not_mem hM_mcs
+    (modal_implication_property h_implyK h_implyS hM_mcs h_neg_phi h_phi_M)
+
 end Cslib.Logic.Modal

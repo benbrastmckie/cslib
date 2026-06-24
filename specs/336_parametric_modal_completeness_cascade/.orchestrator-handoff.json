@@ -1,0 +1,19 @@
+{
+  "task_number": 336,
+  "session_id": "sess_1782319118_5be8e3_336",
+  "status": "planned",
+  "summary": "Created 6-phase implementation plan for the parametric modal completeness cascade. Phases 1-2 add 5 generic cascade theorems to Metalogic/Completeness.lean (parameterized over Axioms, FC via ModalSemanticEntails, the 4 axiom callbacks, a pre-applied truthLemma, and canonical_FC) and prove the pattern end-to-end on K (the ready-made template at K/Completeness.lean:268-365). Phases 3-5 refactor the T-family (truth_lemma), K-family (k_truth_lemma), and D-family (d_truth_lemma) — independent and parallelizable per family with file-ownership territory. Phase 6 runs the full CI pipeline and audits line reduction. Key constraint confirmed during planning: weak *_completeness public signatures must be preserved (inlined-forall frame hypotheses) because Bimodal/Metalogic/ConservativeExtension/ModalConservativity.lean:209 applies s5_completeness; no InterSystem/ consumers reference the cascade theorems. K and D keep their unique truth-lemma infra; only their cascade tails are replaced. Estimated 9 hours, target ~1,200-1,500 lines reduced, zero sorry risk.",
+  "artifacts": [
+    {
+      "path": "specs/336_parametric_modal_completeness_cascade/plans/01_parametric-completeness-cascade.md",
+      "type": "plan"
+    }
+  ],
+  "artifact_path": "specs/336_parametric_modal_completeness_cascade/plans/01_parametric-completeness-cascade.md",
+  "artifact_type": "plan",
+  "phase_count": 6,
+  "estimated_hours": 9,
+  "dependency_waves": [[1], [2], [3, 4, 5], [6]],
+  "next_recommended": "implement",
+  "next_steps": "Run /implement 336 to execute the plan"
+}

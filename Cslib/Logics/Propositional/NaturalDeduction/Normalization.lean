@@ -1606,6 +1606,73 @@ private theorem Theory.Derivation.maximalFormulas_sn_eq_zero
       have h1 := ih hd.1; have h2 := ihE hd.2
       simp only [maximalFormulas] at h1 ⊢; rw [h2]; simpa using h1
 
+/-- The strong-normality invariant on the *immediate* sub-derivations consumed by
+`reduceRoot`. This is the genuine side condition under which a single root reduction strictly
+decreases `normMeasure`:
+
+* For the proper β-redexes (`impE (impI D) E`, `andEᵢ (andI ..)`, `orE (orIᵢ D) DA ..`):
+  **all** derivations involved in the substitution must be strongly normal.
+  - `impE (impI D) E → D.subsOne E`: both the body `D` and the argument `E` must be strongly
+    normal.  Since `D.maximalFormulas = ∅`, every element of `(D.subsOne E).maximalFormulas` is
+    either in `E.maximalFormulas = ∅` or has complexity `A.complexity` (where `A` is the
+    hypothesis type), which is strictly less than `(A → B).complexity`.
+  - `orE (orI₁ D) DA _`: both `D` (the injected proof) and `DA` (the body) must be strongly
+    normal, for the same reason: `DA.maximalFormulas = ∅` and `D.maximalFormulas = ∅`, so every
+    new redex created by `DA.subsOne D` has complexity `A.complexity < (A ∨ B).complexity`.
+  - Similarly for `orE (orI₂ D) _ DB`.
+  - For `andEᵢ (andI ..)` the result is the sibling sub-derivation; no substitution occurs, so
+    only the *other* sub-derivation (which is discarded) must be strongly normal — it contributes
+    `D₂.maximalFormulas` to the source multiset, which is removed by the reduction.
+* For the commuting conversions (`andEᵢ (orE ..)`, `impE (orE ..) ..`) the two branch
+  derivations of the inner `orE` must be strongly normal, which guarantees that pushing the
+  elimination inside the branches creates no new maximal formula (the branch is not an
+  introduction at the eliminated connective), so `maximalFormulas` is preserved and the strictly
+  smaller `commutingSum` drives the decrease.
+
+For all derivations that are *not* `reduceRoot`-redexes the invariant is vacuously `True`, since
+`reduceRoot` returns `none` there and the theorem's hypothesis `d.reduceRoot = some d'` is
+unsatisfiable. -/
+private def Theory.Derivation.reduceRootSubSN : T.Derivation G A → Prop
+  | impE (impI _ D) E => D.isStronglyNormal = true ∧ E.isStronglyNormal = true
+  | andE1 _ (andI _ _ D₂) => D₂.isStronglyNormal = true
+  | andE2 _ (andI _ D₁ _) => D₁.isStronglyNormal = true
+  | orE _ (orI1 _ D) DA _ => D.isStronglyNormal = true ∧ DA.isStronglyNormal = true
+  | orE _ (orI2 _ D) _ DB => D.isStronglyNormal = true ∧ DB.isStronglyNormal = true
+  | andE1 _ (orE _ _ DA DB) =>
+    (andE1 _ DA).isStronglyNormal = true ∧ (andE1 _ DB).isStronglyNormal = true
+  | andE2 _ (orE _ _ DA DB) =>
+    (andE2 _ DA).isStronglyNormal = true ∧ (andE2 _ DB).isStronglyNormal = true
+  | impE (orE _ _ DA DB) E =>
+    (impE DA (E.weakCtx (Finset.subset_insert _ _))).isStronglyNormal = true ∧
+      (impE DB (E.weakCtx (Finset.subset_insert _ _))).isStronglyNormal = true
+  | _ => True
+
+/-- Strictly enlarging a multiset by a nonempty multiset gives a Dershowitz–Manna-larger
+multiset: with `Y = ∅` the side condition on `Y` is vacuous, so `X < X + Z` whenever `Z ≠ ∅`. -/
+private theorem Multiset.isDershowitzMannaLT_add_right {X Z : Multiset ℕ} (hZ : Z ≠ ∅) :
+    Multiset.IsDershowitzMannaLT X (X + Z) :=
+  ⟨X, ∅, Z, hZ, by simp, rfl, by simp⟩
+
+/-- Adding a fresh element `c` on top of `M + N` is Dershowitz–Manna-larger than `M`: the
+removed multiset `Z = c ::ₘ N` is nonempty and the added multiset `Y` is empty. This is the
+exact shape of the primary-component decrease in the conjunction β-reduction cases. -/
+private theorem Multiset.isDershowitzMannaLT_cons_add {c : ℕ} {M N : Multiset ℕ} :
+    Multiset.IsDershowitzMannaLT M (c ::ₘ (M + N)) :=
+  ⟨M, ∅, c ::ₘ N, by simp, by simp, by rw [Multiset.add_cons], by simp⟩
+
+/-- The right-hand companion of `isDershowitzMannaLT_cons_add`: `N < c ::ₘ (M + N)`. -/
+private theorem Multiset.isDershowitzMannaLT_cons_add' {c : ℕ} {M N : Multiset ℕ} :
+    Multiset.IsDershowitzMannaLT N (c ::ₘ (M + N)) := by
+  rw [add_comm]; exact Multiset.isDershowitzMannaLT_cons_add
+
+/-- A single-cut Dershowitz–Manna step: removing one element `a` from `N = X + {a}` and replacing
+it by a multiset `Y` all of whose elements are `< a` yields a strictly smaller multiset
+`M = X + Y`. -/
+private theorem Multiset.isDershowitzMannaLT_remove_add_lt {a : ℕ} {X Y : Multiset ℕ}
+    (hY : ∀ y ∈ Y, y < a) :
+    Multiset.IsDershowitzMannaLT (X + Y) (X + {a}) :=
+  ⟨X, Y, {a}, by simp, rfl, rfl, fun y hy => ⟨a, by simp, hY y hy⟩⟩
+
 /-- The combined termination measure for normalization:
 the pair `(maximalFormulas d, commutingSum d)` ordered by the lexicographic product of
 the Dershowitz-Manna multiset ordering and the natural number ordering. -/
@@ -1619,6 +1686,50 @@ private theorem normMeasure_wf :
   InvImage.wf _ (WellFounded.prod_lex
     Multiset.wellFounded_isDershowitzMannaLT
     Nat.lt_wfRel.wf)
+
+/-- A single root reduction strictly decreases the `normMeasure` in the lexicographic
+Dershowitz–Manna × `<` order, provided the immediate sub-derivations consumed by the reduction
+satisfy the strong-normality invariant `reduceRootSubSN`.
+
+* β-redexes (`impE (impI ..) E`, `andEᵢ (andI ..)`, `orE (orIᵢ ..) ..`) decrease the primary
+  `maximalFormulas` component: the eliminated cut formula is removed and any redex newly created
+  by the substitution is strictly smaller (`subsOne_new_redex_complexity_lt`), so `Prod.Lex.left`
+  applies.
+* Commuting conversions (`andEᵢ (orE ..)`, `impE (orE ..) ..`) keep `maximalFormulas` fixed
+  (the branches are not introductions at the eliminated connective, by the invariant) and strictly
+  decrease the secondary `commutingSum` component (the `orE` site is no longer directly below an
+  elimination), so `Prod.Lex.right` applies. ([Prawitz1965], Ch. III–IV.) -/
+private theorem Theory.Derivation.reduceRoot_decreases_normMeasure
+    {G : Ctx Atom} {A : Proposition Atom} (d : T.Derivation G A)
+    (h_subsSN : d.reduceRootSubSN)
+    (d' : T.Derivation G A) (hd' : d.reduceRoot = some d') :
+    Prod.Lex Multiset.IsDershowitzMannaLT (· < ·) (normMeasure d') (normMeasure d) := by
+  unfold reduceRoot at hd'
+  split at hd' <;>
+    [skip; skip; skip; skip; skip; skip; skip; skip; (exact absurd hd' (by simp))]
+  · -- h_1: impE (impI _ D) E  →  D.subsOne E   (substitution β)
+    sorry
+  · -- h_2: andE1 _ (andI _ D₁ D₂)  →  D₁   (conjunction β)
+    rw [Option.some.injEq] at hd'; subst hd'
+    refine Prod.Lex.left _ _ ?_
+    simp only [normMeasure, maximalFormulas, conclusionComplexity]
+    exact Multiset.isDershowitzMannaLT_cons_add
+  · -- h_3: andE2 _ (andI _ D₁ D₂)  →  D₂   (conjunction β, right projection)
+    rw [Option.some.injEq] at hd'; subst hd'
+    refine Prod.Lex.left _ _ ?_
+    simp only [normMeasure, maximalFormulas, conclusionComplexity]
+    rw [add_comm]
+    exact Multiset.isDershowitzMannaLT_cons_add
+  · -- h_4: orE _ (orI1 _ D) DA _  →  DA.subsOne D   (disjunction β)
+    sorry
+  · -- h_5: orE _ (orI2 _ D) _ DB  →  DB.subsOne D
+    sorry
+  · -- h_6: andE1 G (orE _ D DA DB)  →  orE G D (andE1 DA) (andE1 DB)   (commuting)
+    sorry
+  · -- h_7: andE2 G (orE _ D DA DB)  →  orE G D (andE2 DA) (andE2 DB)
+    sorry
+  · -- h_8: impE (orE _ D DA DB) E  →  orE G D (impE DA E') (impE DB E')
+    sorry
 
 /-- `normalize` produces strongly normal derivations.
 

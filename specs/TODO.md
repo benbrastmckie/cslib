@@ -11,8 +11,8 @@ next_project_number: 323
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,312,314,316,321 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215,300,317,322 | 36,37,180,299,312,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,241,245,278,290,299,301,314,316,321,322 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 2 | 39,40,181,215,300,317 | 36,37,180,299,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
 | 3 | 41,275,319 | 39,40,317 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -55,8 +55,7 @@ next_project_number: 323
 
 ### Algebraic Semantics
 
-312 [IMPLEMENTING] — Consolidate the full conservative extension chain into a unified 
-  └─ 322 [NOT STARTED] — Establish the MPL conservative extension chain as standalone resu
+322 [NOT STARTED] — Establish the MPL conservative extension chain as standalone resu
 
 ### Modal
 
@@ -165,7 +164,7 @@ Literature sources:
 ---
 
 ### 312. Unified conservative extension chain
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 311

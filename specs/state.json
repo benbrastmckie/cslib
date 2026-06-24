@@ -622,19 +622,26 @@
     {
       "project_number": 312,
       "project_name": "unified_conservative_extension_chain",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Consolidate the full conservative extension chain into a unified module: IPL⟨→,⊤⟩ ⊂ IPL⟨∧,→,⊤⟩ ⊂ MPL ⊂ IPL ⊂ CPL, where each ⊂ denotes conservative extension for the smaller fragments language. State the chain theorem and derive inter-fragment conservativity as corollaries — e.g., IPL⟨∧,→,⊤⟩ conservative over IPL⟨→,⊤⟩ by composing the two embeddings through IPL. Include the algebraic validity subsumption chain: HilbertAlgValid → BrouwerianValid → GHAValid → HAValid → BAValid. Provide the full picture connecting all five levels of algebraic semantics (Hilbert algebras, Brouwerian semilattices, GHAs, HAs, BAs) to their proof systems (ImpAxiom, ConjImpAxiom, MinPropAxiom, IntPropAxiom, PropositionalAxiom). This is the capstone module demonstrating the algebraic method for propositional logic — each connective extension is genuinely conservative, each algebra class has sound and complete proof theory, and each completion construction provides the bridge. File: Cslib/Logics/Propositional/Semantics/Algebra/ConservativeChain.lean.",
       "created": "2026-06-23T22:00:00Z",
-      "last_updated": "2026-06-24T10:45:32Z",
+      "last_updated": "2026-06-24T10:54:57Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "dependencies": [
         311
       ],
       "blockers": null,
-      "session_id": "sess_1782276788_0c858f"
+      "session_id": "sess_1782276788_0c858f",
+      "completion_summary": "Created ConservativeChain.lean: capstone module composing the full conservative extension chain (IPL⟨→,⊤⟩ ⊂ IPL⟨∧,→,⊤⟩ ⊂ MPL ⊂ IPL ⊂ CPL) with 15 sorry-free theorems. Includes derivability subsumption chain, algebraic validity subsumption chain (HilbertValid → BrouwerianValid → GHAValid → HAValid → BAValid), inter-fragment conservativity corollaries, and ND corollaries. All proofs are 1-5 line compositions of existing results. Builds cleanly with only standard axioms.",
+      "memory_candidates": [
+        "ConservativeChain.lean uses liftDerivationTree as the key combinator to compose Derivable proofs across the axiom subsumption chain",
+        "HilbertValid → BrouwerianValid (imp-top-only): route through derivability via imp_hilbert_complete then conjImp_brouwerian_soundness_derivable",
+        "HAValid → GHAValid (bot-free): use WithBot construction and coe_AlgEvaluate to project back from WithBot G to G",
+        "GHAValid → BrouwerianValid (or-bot-free): route MPL.hilbert_alg_complete.mpr → hilbertIplConservativeOverConjImp → conjImp_brouwerian_soundness_derivable"
+      ]
     },
     {
       "project_number": 314,

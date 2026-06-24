@@ -256,8 +256,103 @@ theorem IsRegular.compl {Symbol : Type} [Inhabited Symbol] {p : ωLanguage Symbo
   have := Language.IsRegular.congr_fin_index (c := na.BuchiCongruence)
   grind [buchiFamily, IsRegular.hmul, IsRegular.omegaPow]
 
-/-- McNaughton's Theorem. -/
-proof_wanted IsRegular.iff_da_muller {p : ωLanguage Symbol} :
+/-- The ω-language recognized by a finite-state deterministic Muller automaton is ω-regular.
+
+**Proof**: For each state `q`, the DBA built from the DMA's transition system with accept
+set `{q}` recognizes exactly `{xs | q ∈ infOcc(da.run xs)}`. For each finite set
+`F ⊆ State`, the language `{xs | infOcc(da.run xs) = F}` is a finite intersection of
+such DBA languages and their complements (ω-regularity closed under complement by
+`IsRegular.compl`). Since `[Finite State]` implies there are only finitely many subsets
+`F`, and `da.accept` indexes exactly those F that are accepting, the DMA language is a
+finite union of ω-regular languages and hence ω-regular. -/
+theorem IsRegular.of_da_muller {State : Type} [Finite State]
+    {Symbol : Type} [Inhabited Symbol]
+    (da : DA.Muller State Symbol) : (language da).IsRegular := by
+  -- Use classical decidability for Finset constructions
+  haveI hde : DecidableEq State := Classical.decEq State
+  haveI h_ft : Fintype State := Fintype.ofFinite State
+  haveI h1 : Fintype (Finset State) := Finset.fintype
+  -- For each state q, define the DBA that accepts iff q appears infinitely often
+  let ba : State → DA.Buchi State Symbol := fun q => DA.Buchi.mk da.toDA {q}
+  -- The DBA language: q ∈ infOcc iff q appears infinitely often
+  have ba_lang : ∀ q (xs : ωSequence Symbol),
+      xs ∈ language (ba q) ↔ q ∈ (da.run xs).infOcc := by
+    intro q xs
+    simp [ba, mem_language, Accepts, ωSequence.mem_infOcc]
+  -- Each DBA language is ω-regular
+  have ba_reg : ∀ q, (language (ba q)).IsRegular := fun q => IsRegular.of_da_buchi (ba q)
+  -- Complement of each DBA language is ω-regular
+  have ba_compl_reg : ∀ q, ((language (ba q))ᶜ).IsRegular :=
+    fun q => IsRegular.compl (ba_reg q)
+  -- For conciseness, name the per-F language
+  let langF (F : Finset State) : ωLanguage Symbol :=
+    {xs : ωSequence Symbol | (da.run xs).infOcc = (F : Set State)}
+  have langF_reg : ∀ F : Finset State, (langF F).IsRegular := by
+    intro F
+    -- langF F = (⋂ q ∈ F, lang(ba q)) ∩ (⋂ q ∉ F, (lang(ba q))ᶜ)
+    suffices h : langF F =
+        (⨅ q ∈ F, language (ba q)) ⊓ ⨅ q ∈ Finset.univ \ F, (language (ba q))ᶜ by
+      rw [h]
+      apply IsRegular.inf
+      · apply IsRegular.iInf; intro q _; exact ba_reg q
+      · apply IsRegular.iInf; intro q _; exact ba_compl_reg q
+    apply mem_ext
+    intro xs
+    simp only [mem_iInf, mem_inf, mem_compl, Finset.mem_sdiff, Finset.mem_univ, true_and]
+    constructor
+    · intro h_eq
+      -- h_eq : xs ∈ {xs | (da.run xs).infOcc = ↑F}, i.e., (da.run xs).infOcc = ↑F
+      have h_eq' : (da.run xs).infOcc = (F : Set State) := h_eq
+      exact ⟨fun q hq => (ba_lang q xs).mpr (h_eq' ▸ Finset.mem_coe.mpr hq),
+             fun q hqF hq => hqF (Finset.mem_coe.mp (h_eq' ▸ (ba_lang q xs).mp hq))⟩
+    · intro ⟨h_in, h_out⟩
+      -- Goal: xs ∈ langF F, i.e., (da.run xs).infOcc = ↑F
+      change (da.run xs).infOcc = (F : Set State)
+      ext q
+      simp only [Finset.mem_coe]
+      constructor
+      · intro hq
+        by_contra hqF
+        exact h_out q hqF ((ba_lang q xs).mpr hq)
+      · intro hq
+        exact (ba_lang q xs).mp (h_in q hq)
+  -- The DMA language equals the union over accepting finsets
+  have lang_decomp : language da =
+      ⨆ F ∈ {F : Finset State | (F : Set State) ∈ da.accept}, langF F := by
+    apply mem_ext
+    intro xs
+    simp only [mem_language, Accepts, mem_iSup, Set.mem_setOf_eq]
+    constructor
+    · intro h_acc
+      -- infOcc is finite (since State is finite)
+      have h_fin_infOcc : (da.run xs).infOcc.Finite := ωSequence.infOcc_finite _
+      -- Convert to Finset; its coercion back equals infOcc
+      refine ⟨h_fin_infOcc.toFinset, ?_, ?_⟩
+      · -- prove ↑h_fin_infOcc.toFinset ∈ da.accept
+        rw [h_fin_infOcc.coe_toFinset]; exact h_acc
+      · -- prove xs ∈ langF h_fin_infOcc.toFinset
+        change (da.run xs).infOcc = ↑h_fin_infOcc.toFinset
+        rw [h_fin_infOcc.coe_toFinset]
+    · rintro ⟨F, h_F_acc, h_eq⟩
+      have h_eq' : (da.run xs).infOcc = (F : Set State) := h_eq
+      rw [h_eq']
+      exact h_F_acc
+  -- The DMA language is ω-regular as a finite union of ω-regular languages
+  rw [lang_decomp]
+  apply IsRegular.iSup
+  intro F _
+  exact langF_reg F
+
+/-- McNaughton's Theorem: an ω-language is ω-regular (recognized by a finite-state NBA)
+if and only if it is recognized by a finite-state deterministic Muller automaton.
+
+**Proof**: The backward direction `(⇐)` follows from `IsRegular.of_da_muller`. The
+forward direction `(⇒)` is the genuine determinization content of McNaughton's theorem.
+
+**Status**: The forward direction `(⇒)` requires the Choueka congruence-based DMA
+construction and is deferred (task 241, phase 3). The proof stub is left with
+`proof_wanted` for this direction. -/
+proof_wanted IsRegular.iff_da_muller [Inhabited Symbol] {p : ωLanguage Symbol} :
     p.IsRegular ↔
     ∃ (State : Type) (_ : Finite State) (da : DA.Muller State Symbol), language da = p
 

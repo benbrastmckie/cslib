@@ -99,6 +99,12 @@ abbrev Proposition.neg (φ : Proposition Atom) : Proposition Atom :=
 Delegates to the canonical `PropositionalConnectives.top` default (task 340). -/
 abbrev Proposition.top : Proposition Atom := PropositionalConnectives.top
 
+/-- Reduction lemma: `neg φ` unfolds to `.imp φ .bot`. -/
+@[simp] lemma Proposition.neg_def (φ : Proposition Atom) : Proposition.neg φ = .imp φ .bot := rfl
+
+/-- Reduction lemma: `top` unfolds to `.imp .bot .bot`. -/
+@[simp] lemma Proposition.top_def : (Proposition.top : Proposition Atom) = .imp .bot .bot := rfl
+
 /-- Disjunction: φ₁ ∨ φ₂ := ¬φ₁ → φ₂ -/
 abbrev Proposition.or (φ₁ φ₂ : Proposition Atom) : Proposition Atom :=
   .imp (.imp φ₁ .bot) φ₂

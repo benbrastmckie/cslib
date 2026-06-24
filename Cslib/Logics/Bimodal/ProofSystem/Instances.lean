@@ -161,10 +161,10 @@ instance :
     have h_eq :
         phi.swapTemporal.allFuture.swapTemporal =
           phi.allPast := by
-      simp only [Bimodal.Formula.allPast,
-        Bimodal.Formula.somePast,
-        Bimodal.Formula.neg,
-        Bimodal.Formula.top,
+      simp only [Bimodal.Formula.allFuture, Bimodal.Formula.allPast,
+        Bimodal.Formula.someFuture, Bimodal.Formula.somePast,
+        Bimodal.Formula.neg, PropositionalConnectives.neg,
+        Bimodal.Formula.top, PropositionalConnectives.top,
         Bimodal.Formula.swapTemporal,
         Bimodal.Formula.swapTemporal_involution]
     exact ⟨InferenceSystem.rwConclusion h_eq d_final⟩

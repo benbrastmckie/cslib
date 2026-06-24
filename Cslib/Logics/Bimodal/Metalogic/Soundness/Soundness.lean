@@ -694,7 +694,8 @@ theorem soundness (Γ : Context Atom) (φ : Formula Atom)
     simp only [truthAt]
     intro σ h_σ_mem; exact ih σ h_σ_mem t (by simp)
   | temporal_necessitation φ' _ ih =>
-    simp only [truthAt]
+    simp only [Formula.allFuture, Formula.neg, PropositionalConnectives.neg,
+      Formula.someFuture, Formula.top, PropositionalConnectives.top, truthAt]
     intro ⟨s, _hts, h_neg, _⟩; exact h_neg (ih τ h_mem s (by simp))
   | temporal_duality φ' d' ih =>
     exact SoundnessLemmas.derivable_implies_swap_valid_general d' ℱ M Omega h_sc τ h_mem t
@@ -722,7 +723,8 @@ theorem soundness_dense_valid {φ : Formula Atom}
   | .temporal_necessitation ψ' d' =>
     have h := soundness_dense_valid d'
     intro D _ _ _ _ _ ℱ M Omega h_sc τ h_mem t
-    simp only [truthAt]
+    simp only [Formula.allFuture, Formula.neg, PropositionalConnectives.neg,
+      Formula.someFuture, Formula.top, PropositionalConnectives.top, truthAt]
     intro ⟨s, _hts, h_neg, _⟩; exact h_neg (h D ℱ M Omega h_sc τ h_mem s)
   | .temporal_duality ψ' d' =>
     intro D _ _ _ _ _ ℱ M Omega h_sc τ h_mem t
@@ -761,7 +763,8 @@ theorem soundness_dense (Γ : Context Atom) (φ : Formula Atom)
     simp only [truthAt]
     intro σ h_σ_mem; exact ih σ h_σ_mem t (by simp)
   | temporal_necessitation φ' _ ih =>
-    simp only [truthAt]
+    simp only [Formula.allFuture, Formula.neg, PropositionalConnectives.neg,
+      Formula.someFuture, Formula.top, PropositionalConnectives.top, truthAt]
     intro ⟨s, _hts, h_neg, _⟩; exact h_neg (ih τ h_mem s (by simp))
   | temporal_duality φ' d' ih =>
     exact SoundnessLemmas.derivable_implies_swap_valid d' ℱ M Omega h_sc τ h_mem t
@@ -791,7 +794,8 @@ theorem soundness_discrete_valid {φ : Formula Atom}
   | .temporal_necessitation ψ' d' =>
     have h := soundness_discrete_valid d'
     intro D _ _ _ _ _ _ _ _ ℱ M Omega h_sc τ h_mem t
-    simp only [truthAt]
+    simp only [Formula.allFuture, Formula.neg, PropositionalConnectives.neg,
+      Formula.someFuture, Formula.top, PropositionalConnectives.top, truthAt]
     intro ⟨s, _hts, h_neg, _⟩; exact h_neg (h D ℱ M Omega h_sc τ h_mem s)
   | .temporal_duality ψ' d' =>
     intro D _ _ _ _ _ _ _ _ ℱ M Omega h_sc τ h_mem t
@@ -830,7 +834,8 @@ theorem soundness_discrete (Γ : Context Atom) (φ : Formula Atom)
     simp only [truthAt]
     intro σ h_σ_mem; exact ih σ h_σ_mem t (by simp)
   | temporal_necessitation φ' _ ih =>
-    simp only [truthAt]
+    simp only [Formula.allFuture, Formula.neg, PropositionalConnectives.neg,
+      Formula.someFuture, Formula.top, PropositionalConnectives.top, truthAt]
     intro ⟨s, _hts, h_neg, _⟩; exact h_neg (ih τ h_mem s (by simp))
   | temporal_duality φ' d' ih =>
     exact SoundnessLemmas.derivable_implies_swap_valid_discrete d' ℱ M Omega h_sc τ h_mem t

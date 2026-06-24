@@ -114,7 +114,8 @@ def boxToFuture (φ : Bimodal.Formula Atom) : ⊢ φ.box.imp φ.allFuture :=
 def boxToPast (φ : Bimodal.Formula Atom) : ⊢ φ.box.imp φ.allPast := by
   have h1 := boxToFuture φ.swapTemporal
   have h2 := Bimodal.DerivationTree.temporal_duality _ h1
-  simp only [Bimodal.Formula.swapTemporal, Bimodal.Formula.swapTemporal_involution] at h2
+  simp only [Bimodal.Formula.swapTemporal, Bimodal.Formula.swapTemporal_involution,
+    Bimodal.Formula.swapTemporal_allFuture] at h2
   exact h2
 
 /-- Box implies present: `⊢ □φ → φ` (MT axiom). -/

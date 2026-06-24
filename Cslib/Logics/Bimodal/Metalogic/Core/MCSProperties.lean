@@ -379,7 +379,7 @@ def temp4Past (phi : Formula Atom) :
   -- Step 3: Simplify via swapTemporal involution
   have h3 : (psi.allFuture.imp psi.allFuture.allFuture).swapTemporal =
       phi.allPast.imp phi.allPast.allPast := by
-    simp only [Formula.swapTemporal]
+    simp only [Formula.swapTemporal, Formula.swapTemporal_allFuture]
     have h_inv : psi.swapTemporal = phi := Formula.swapTemporal_involution phi
     rw [h_inv]
   rw [h3] at h2

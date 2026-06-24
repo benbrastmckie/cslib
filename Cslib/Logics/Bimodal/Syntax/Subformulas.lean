@@ -82,14 +82,16 @@ theorem box_inner_mem_subformulas (ψ : Formula Atom) : ψ ∈ subformulas (.box
 /-- Subformulas of allPast include the inner formula. -/
 theorem allPast_inner_mem_subformulas (ψ : Formula Atom) :
     ψ ∈ subformulas (allPast ψ) := by
-  simp only [somePast, neg, top, subformulas, List.mem_cons, List.mem_append]
+  change ψ ∈ subformulas (.imp (.snce (.imp .bot .bot) (.imp ψ .bot)) .bot)
+  simp only [subformulas, List.mem_cons, List.mem_append]
   right; left; right; left; right; left
   exact self_mem_subformulas ψ
 
 /-- Subformulas of allFuture include the inner formula. -/
 theorem allFuture_inner_mem_subformulas (ψ : Formula Atom) :
     ψ ∈ subformulas (allFuture ψ) := by
-  simp only [someFuture, neg, top, subformulas, List.mem_cons, List.mem_append]
+  change ψ ∈ subformulas (.imp (.untl (.imp .bot .bot) (.imp ψ .bot)) .bot)
+  simp only [subformulas, List.mem_cons, List.mem_append]
   right; left; right; left; right; left
   exact self_mem_subformulas ψ
 

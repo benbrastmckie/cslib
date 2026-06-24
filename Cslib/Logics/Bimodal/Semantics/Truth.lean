@@ -206,7 +206,8 @@ Truth of allFuture: universal future operator.
     truthAt M Omega τ t φ.allFuture ↔
       ∀ (s : D), t < s →
         truthAt M Omega τ s φ := by
-  simp only [truthAt]
+  simp only [Formula.allFuture, Formula.neg, PropositionalConnectives.neg,
+    Formula.someFuture, Formula.top, PropositionalConnectives.top, truthAt]
   constructor
   · intro h s hlt
     by_contra hns
@@ -229,7 +230,8 @@ Truth of allPast: universal past operator.
     truthAt M Omega τ t φ.allPast ↔
       ∀ (s : D), s < t →
         truthAt M Omega τ s φ := by
-  simp only [truthAt]
+  simp only [Formula.allPast, Formula.neg, PropositionalConnectives.neg,
+    Formula.somePast, Formula.top, PropositionalConnectives.top, truthAt]
   constructor
   · intro h s hlt
     by_contra hns

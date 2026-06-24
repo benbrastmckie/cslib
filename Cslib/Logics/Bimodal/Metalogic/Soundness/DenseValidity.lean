@@ -538,7 +538,8 @@ theorem axiom_swap_valid (φ : Formula Atom) (h : Axiom φ) [DenselyOrdered D] [
   | z1 _ => exact absurd h_fc (by simp [Axiom.minFrameClass, LE.le])
   | dense_indicator =>
     intro ℱ M Omega _h_sc τ _h_mem t
-    simp only [Formula.swapTemporal, truthAt]
+    simp only [Formula.neg, PropositionalConnectives.neg, Formula.top, PropositionalConnectives.top,
+      Formula.swapTemporal, truthAt]
     intro ⟨s, hst, _h_top, h_guard⟩
     obtain ⟨r, hsr, hrt⟩ := exists_between hst
     exact h_guard r hsr hrt
@@ -1008,7 +1009,8 @@ theorem axiom_locally_valid [DenselyOrdered D] [Nontrivial D] {φ : Formula Atom
   | density φ => exact axiom_density_valid φ
   | dense_indicator =>
     intro ℱ M Omega _h_sc τ _h_mem t
-    simp only [truthAt]
+    simp only [Formula.neg, PropositionalConnectives.neg, Formula.top, PropositionalConnectives.top,
+      truthAt]
     intro ⟨s, hts, _h_top, h_guard⟩
     obtain ⟨r, htr, hrs⟩ := exists_between hts
     exact h_guard r htr hrs

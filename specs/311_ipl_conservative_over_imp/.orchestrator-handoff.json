@@ -1,9 +1,24 @@
 {
+  "task_number": 311,
+  "session_id": "sess_1750723200_a3b1c2_311_dual",
+  "phase": "research",
   "status": "blocked",
-  "summary": "Research found fundamental gap: principal filter map gives only ≤ direction (not equality) for himp preservation. Reverse inequality is provably false. Conservative extension proof requires new algebraic infrastructure (himp-preserving embedding via Dedekind-MacNeille completion or ideal completion).",
-  "blockers": ["Requires himp-preserving embedding: e(a ⇨ b) = e(a) ⇨ e(b) (equality). The existing principal map gives only ≤. New task needed for Dedekind-MacNeille completion or proof-theoretic approach."],
-  "artifacts": [{"path": "specs/311_ipl_conservative_over_imp/reports/01_conservative-extension-research.md", "type": "report", "summary": "Exhaustive analysis of 8 proof routes, all blocked by same fundamental gap"}],
-  "phases_completed": 0,
-  "phases_total": 0,
-  "continuation_context": null
+  "blocking_reason": "The reverse-inclusion ordering on HilbertFilter does NOT fix the himp-preservation gap. The reverse-inclusion lattice is not a GHA in general (only for finite Hilbert algebras), so HAValid cannot be instantiated at it. Two viable routes exist: (1) proof-theoretic via LJ cut-elimination (blocked on task 292 sorry in cutAdmissibility), (2) algebraic Hilbert-to-Heyting completion (new task needed). Task remains [BLOCKED].",
+  "dependencies": [292],
+  "artifacts": [
+    "specs/311_ipl_conservative_over_imp/reports/01_conservative-extension-research.md",
+    "specs/311_ipl_conservative_over_imp/reports/02_dual-ordering-research.md"
+  ],
+  "key_findings": {
+    "reverse_ordering_fixes_himp": true,
+    "reverse_lattice_is_gha": false,
+    "deduction_theorem_holds": true,
+    "dual_frame_property_for_principal": true,
+    "dual_frame_property_general": false,
+    "proof_theoretic_route_viable": true,
+    "proof_theoretic_route_blocked_by": "sorry in cutAdmissibility (task 292)",
+    "algebraic_route_viable": true,
+    "algebraic_route_requires": "new Hilbert-to-Heyting completion construction"
+  },
+  "next_steps": "Either (1) complete task 292 (LJ cut-elimination) to unblock the proof-theoretic route, or (2) create a new task for the algebraic Hilbert-to-Heyting completion."
 }

@@ -22,38 +22,40 @@
     {
       "project_number": 336,
       "project_name": "parametric_modal_completeness_cascade",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Extract parametric completeness cascade theorems (strong_soundness, strong_completeness, strong_completeness_iff, compactness, weak completeness) in Modal/Metalogic/Completeness.lean, parameterized by truth lemma variant and frame conditions. Refactor the per-system completeness files to use the parametric cascade. The 15 Systems/*/Completeness.lean files total 3,205 lines. The cascade pattern (strong_soundness via unfold+soundness, strong_completeness via contrapositive+Lindenbaum+truth-lemma, then iff/compactness/weak wrappers) is mechanically identical across systems, differing only in: (a) which truth lemma variant is used (K-family, T-family, D-family), (b) which frame condition hypotheses are stated. K (367 lines) and D (468 lines) have unique truth lemma infrastructure; the remaining 13 systems (159-205 lines each) are near-identical. Files: Cslib/Logics/Modal/Metalogic/Completeness.lean (add parametric cascade), all 15 Systems/*/Completeness.lean. Target: ~1,200-1,500 lines reduced. Depends on task 335 (soundness refactor must land first since strong_soundness wraps per-system soundness).",
       "created": "2026-06-24T19:00:00Z",
-      "last_updated": "2026-06-24T19:00:00Z",
+      "last_updated": "2026-06-24T21:37:53Z",
       "dependencies": [
         335
-      ]
+      ],
+      "session_id": "sess_1782337073_336done"
     },
     {
       "project_number": 337,
       "project_name": "parametric_modal_conservative_extension",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Extract a single parametric conservative extension theorem taking frame condition hypotheses and a universal model constructor as parameters, replacing 15 near-identical Systems/*/ConservativeExtension.lean files. Currently 15 files (55-61 lines each, 896 total) that all compose: soundness -> toModal_valid_implies_tautology -> CPL completeness, differing only in which frame conditions (reflexivity, transitivity, symmetry, seriality, euclideanness) are discharged and which model is constructed. A parametric theorem in Modal/Metalogic/ would let each system instantiate in ~5 lines. Files: new theorem in Cslib/Logics/Modal/Metalogic/ (possibly ConservativeExtension.lean), all 15 Systems/*/ConservativeExtension.lean. Target: ~400 lines reduced. Depends on task 335 (to avoid conflicting edits in the same system directories).",
       "created": "2026-06-24T19:00:00Z",
-      "last_updated": "2026-06-24T19:00:00Z",
+      "last_updated": "2026-06-24T21:22:27Z",
       "dependencies": [
         335
-      ]
+      ],
+      "session_id": "sess_1782335235_723469_337"
     },
     {
       "project_number": 338,
       "project_name": "mcs_generic_migration",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Foundations",
       "description": "Migrate Propositional/Metalogic/MCS.lean and Temporal/Metalogic/MCS.lean to use Foundations/Logic/Metalogic/GenericMCS.lean, following the pattern established by Modal/Metalogic/GenericMCSBridge.lean. Currently Propositional and Temporal each maintain ~80 lines of MCS wrapper boilerplate that re-abbreviates generic Metalogic.SetConsistent/SetMaximalConsistent and re-invokes set_lindenbaum/closed_under_derivation. GenericMCS.lean already provides algebraicDerivationSystem for any MinimalHilbert, giving free deduction theorem and all MCS properties. Modal adopted this via GenericMCSBridge.lean. Temporal/Metalogic/MCS.lean has additional temporal-specific properties (g_witness, h_witness, temporal content) that must be preserved — only the generic boilerplate should be replaced. Files: Cslib/Logics/Propositional/Metalogic/MCS.lean, Cslib/Logics/Temporal/Metalogic/MCS.lean, potentially Cslib/Foundations/Logic/Metalogic/GenericMCS.lean (if the interface needs minor extension). Target: ~160 lines of boilerplate eliminated while preserving all downstream API.",
       "created": "2026-06-24T19:00:00Z",
-      "last_updated": "2026-06-24T16:44:22Z",
+      "last_updated": "2026-06-24T17:19:35Z",
       "artifacts": [
         {
           "type": "report",
@@ -61,17 +63,21 @@
           "summary": "Full analysis of MCS migration feasibility, architecture gap between derivation systems, line counts, downstream API surface, and phased recommendation"
         }
       ],
-      "session_id": "sess_1782319118_5be8e3_338"
+      "session_id": "sess_1782319118_5be8e3_338",
+      "completion_summary": "Migrated Temporal/Metalogic/MCS.lean to generic MCS infrastructure via new GenericMCSBridge.lean (propositional-fragment equivalence). 6 wrappers rewired to MCSProperties forwarders (-29 lines); all 3 downstream consumers build unmodified; scoped CI green, zero sorry. Propositional MCS migration deferred (blocked by arbitrary Axioms parameterization).",
+      "roadmap_items": [
+        "Migrate Propositional/Metalogic/MCS.lean to generic MCS infrastructure (deferred from task 338; blocked by arbitrary Axioms parameterization vs. fixed algebraicDerivationSystem bridge)"
+      ]
     },
     {
       "project_number": 339,
       "project_name": "unify_swap_temporal",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Foundations",
       "description": "Unify the swapTemporal function and its associated theorems between Temporal/Syntax/Formula.lean (lines 335-452, ~117 lines) and Bimodal/Syntax/Formula.lean (lines 124-205, ~81 lines). The shared core (definition, involution, neg distribution, someFuture/somePast exchange, allFuture/allPast exchange, atoms preservation) is near-verbatim duplicated. Bimodal adds a box/diamond case and swapTemporal_diamond. Temporal has additional theorems for next/prev and strongRelease/strongTrigger that Bimodal lacks (those constructors are not in bimodal syntax). The cleanest approach is likely: Bimodal.Formula.swapTemporal delegates to or mirrors Temporal.Formula.swapTemporal for the shared constructors, with Bimodal adding only the box case. Alternatively, a shared typeclass in Foundations/Logic/ could define swapTemporal generically for any type with HasUntil+HasSince. Must preserve all downstream consumers in Metalogic/Separation/ and Metalogic/Decidability/. Files: Cslib/Logics/Temporal/Syntax/Formula.lean, Cslib/Logics/Bimodal/Syntax/Formula.lean. Target: ~70 lines of exact duplication eliminated.",
       "created": "2026-06-24T19:00:00Z",
-      "last_updated": "2026-06-24T16:44:24Z",
+      "last_updated": "2026-06-24T17:26:45Z",
       "artifacts": [
         {
           "type": "report",
@@ -79,17 +85,18 @@
           "summary": "Research found ~38 lines of true duplication (not ~70 as estimated). Structural duplication inherent to distinct inductive types."
         }
       ],
-      "session_id": "sess_1782319118_5be8e3_339"
+      "session_id": "sess_1782319118_5be8e3_339",
+      "completion_summary": "Phase 0 feasibility gate determined HasSwapTemporal abstraction would cost +27 net LOC with no semantic benefit (distinct inductives: Bimodal adds box case). Took documented-mirror fallback per plan: added cross-reference doc comments to swapTemporal in Temporal and Bimodal Formula.lean explaining the intentional structural duplication. Scoped builds green, zero sorry. Commit 642de403."
     },
     {
       "project_number": 340,
       "project_name": "derived_connective_defaults",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Foundations",
       "description": "Investigate and consolidate derived connective definitions (neg, top, conj/and, disj/or, iff) that use the same Lukasiewicz encoding across Modal, Temporal, Bimodal, and LTL formula types. All four use identical encodings: neg phi := phi imp bot, top := neg bot, and phi psi := neg(phi imp neg psi), or phi psi := neg phi imp psi, iff phi psi := and (phi imp psi) (psi imp phi). Determine whether Foundations/Logic/Connectives.lean can provide default implementations via the existing HasBot/HasImp typeclasses (e.g., a class DerivedNeg extending HasBot+HasImp with a default neg field), so that formula types automatically get these derived connectives by registering PropositionalConnectives. If feasible, migrate Modal/Basic.lean, Temporal/Syntax/Formula.lean, Bimodal/Syntax/Formula.lean, and LTL/Syntax/Formula.lean to use the defaults. Must verify that simp lemmas, pattern matching, and reducibility are preserved — the current definitions may rely on being definitionally equal to specific terms. Files: Cslib/Foundations/Logic/Connectives.lean, plus the 4 formula files. Target: ~80 lines reduced, improved consistency guarantee that all logics share the same encodings.",
       "created": "2026-06-24T19:00:00Z",
-      "last_updated": "2026-06-24T16:44:25Z",
+      "last_updated": "2026-06-24T17:50:21Z",
       "dependencies": [
         334
       ],
@@ -100,7 +107,8 @@
           "summary": "Full feasibility analysis with lean_run_code verification, downstream impact mapping, implementation plan, and reuse check."
         }
       ],
-      "session_id": "sess_1782319118_5be8e3_340"
+      "session_id": "sess_1782319118_5be8e3_340",
+      "completion_summary": "Consolidated neg/top derived connectives as defaulted fields on PropositionalConnectives; migrated Modal/Temporal/LTL/Bimodal to thin delegates (commits 670a3c5d,b5407168,c520724e,71b51b5b). and/or/iff deliberately excluded per task-173 design. Bimodal migration cascaded into 8 downstream files. Scoped builds green, zero sorry. Implementation agent overflowed context during Phase 4; orchestrator verified build, committed, and finalized."
     },
     {
       "project_number": 334,
@@ -339,23 +347,35 @@
     {
       "project_number": 299,
       "project_name": "modal_k_tableau",
-      "status": "not_started",
+      "status": "implementing",
       "task_type": "cslib",
-      "topic": "Modal",
+      "topic": "Modal Logic",
       "description": "Implement tableau decision procedure for basic modal logic K with world labels, box/diamond rules on top of propositional rules from shared infrastructure. Introduces world labels (accessibility relation tracking) and fundamental modal rule pattern: box-positive is universal/persistent, diamond-positive is existential (fresh accessible world). Use Lukasiewicz encoding for and/or. Prove soundness against Kripke semantics and completeness by extracting finite Kripke countermodels. Modal formula type: Cslib.Logic.Modal.Formula with atom, bot, imp, box primitives. Files under Cslib/Logics/Modal/Tableau/: Defs.lean, Rules.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 1,500-2,000 lines.",
       "created": "2026-06-23T17:47:17Z",
-      "last_updated": "2026-06-23T17:47:17Z",
+      "last_updated": "2026-06-24T21:27:32Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/299_modal_k_tableau/reports/01_modal-k-tableau-research.md",
+          "type": "report",
+          "summary": "Modal-K tableau research: reuse-first CSLib Foundations tableau layer"
+        },
+        {
+          "path": "specs/299_modal_k_tableau/plans/01_modal-k-tableau-plan.md",
+          "type": "plan",
+          "summary": "Modal-K tableau 7-phase implementation plan"
+        }
+      ],
       "dependencies": [],
-      "parent_task": 296
+      "parent_task": 296,
+      "session_id": "sess_1782335770_b2cbfa_299"
     },
     {
       "project_number": 300,
       "project_name": "modal_extensions_t_s4_s5",
       "status": "not_started",
       "task_type": "cslib",
-      "topic": "Modal",
+      "topic": "Modal Logic",
       "description": "Extend modal K tableau (task 299) with frame-specific rules for reflexive (T), transitive (S4), and equivalence-relation (S5) frames. T: reflexivity rule (box phi at w implies phi at w). S4: transitivity-aware propagation with loop-checking for termination. S5: equivalence-class simplification (mirrors bimodal approach). Include rules for B (symmetric) and 5 (Euclidean) to cover full modal cube. Each extension needs own completeness proof showing extracted countermodel satisfies frame condition. Files: FrameRules.lean, LoopChecking.lean, S5Simplification.lean, FrameSoundness.lean, FrameCompleteness.lean. Estimated: 1,200-1,800 lines.",
       "created": "2026-06-23T17:47:17Z",
       "last_updated": "2026-06-23T17:47:17Z",

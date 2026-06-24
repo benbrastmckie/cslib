@@ -11,8 +11,8 @@ next_project_number: 341
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,316,321,336,337,338,339,340 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,317,332 | 36,37,180,290,299,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,241,245,278,290,299,301,316,321 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,317,332 | 36,37,180,290,299,316 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275,333 | 39,40,332 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -28,15 +28,12 @@ next_project_number: 341
 ### Foundations
 
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
-338 [PLANNED] — Migrate Propositional/Metalogic/MCS.lean and Temporal/Metalogic/M
-339 [PLANNED] — Unify the swapTemporal function and its associated theorems betwe
-340 [PLANNED] — Investigate and consolidate derived connective definitions (neg, 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Modal Logic
 
-336 [NOT STARTED] — Extract parametric completeness cascade theorems (strong_soundnes
-337 [NOT STARTED] — Extract a single parametric conservative extension theorem taking
+299 [IMPLEMENTING] — Implement tableau decision procedure for basic modal logic K with
+  └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
 
 ### Propositional Logic
 
@@ -61,17 +58,12 @@ next_project_number: 341
 
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
 
-### Modal
-
-299 [NOT STARTED] — Implement tableau decision procedure for basic modal logic K with
-  └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
-
 ### Uncategorized
 
 ## Tasks
 
 ### 340. Derived connective defaults
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: Task 334
@@ -82,7 +74,7 @@ next_project_number: 341
 ---
 
 ### 339. Unify swap temporal
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
@@ -93,7 +85,7 @@ next_project_number: 341
 ---
 
 ### 338. Mcs generic migration
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
@@ -104,7 +96,7 @@ next_project_number: 341
 ---
 
 ### 337. Parametric modal conservative extension
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 335
@@ -114,7 +106,7 @@ next_project_number: 341
 ---
 
 ### 336. Parametric modal completeness cascade
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 335
@@ -411,7 +403,7 @@ Literature sources:
 ### 300. Modal extensions t s4 s5
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
-- **Topic**: Modal
+- **Topic**: Modal Logic
 - **Dependencies**: Task 299
 
 **Description**: Extend modal K tableau (task 299) with frame-specific rules for reflexive (T), transitive (S4), and equivalence-relation (S5) frames. T: reflexivity rule (box phi at w implies phi at w). S4: transitivity-aware propagation with loop-checking for termination. S5: equivalence-class simplification (mirrors bimodal approach). Include rules for B (symmetric) and 5 (Euclidean) to cover full modal cube. Each extension needs own completeness proof showing extracted countermodel satisfies frame condition. Files: FrameRules.lean, LoopChecking.lean, S5Simplification.lean, FrameSoundness.lean, FrameCompleteness.lean. Estimated: 1,200-1,800 lines.
@@ -419,10 +411,12 @@ Literature sources:
 ---
 
 ### 299. Modal k tableau
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
-- **Topic**: Modal
+- **Topic**: Modal Logic
 - **Dependencies**: None
+- **Research**: [299_modal_k_tableau/reports/01_modal-k-tableau-research.md]
+- **Plan**: [299_modal_k_tableau/plans/01_modal-k-tableau-plan.md]
 
 **Description**: Implement tableau decision procedure for basic modal logic K with world labels, box/diamond rules on top of propositional rules from shared infrastructure. Introduces world labels (accessibility relation tracking) and fundamental modal rule pattern: box-positive is universal/persistent, diamond-positive is existential (fresh accessible world). Use Lukasiewicz encoding for and/or. Prove soundness against Kripke semantics and completeness by extracting finite Kripke countermodels. Modal formula type: Cslib.Logic.Modal.Formula with atom, bot, imp, box primitives. Files under Cslib/Logics/Modal/Tableau/: Defs.lean, Rules.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 1,500-2,000 lines.
 

@@ -1,16 +1,16 @@
 {
-  "status": "researched",
-  "summary": "Audit found 7 issues (2 high, 3 medium, 2 low). The primary finding: Proposition.subformulas/IsSubformula are duplicated between Normalization.lean and SubformulaProperty.lean (135 lines copy-paste with lk- prefix renaming), caused by a phantom Tableau.Defs import in CutElimination.lean that creates a Proposition.complexity name collision. Proposition.complexity is also duplicated (Tableau/Defs.lean line 110 vs Normalization.lean line 149, identical definitions). Fix: create shared Subformula.lean module, remove phantom import, update 3 consumer files. No other cross-module duplication found in the 77-file subtree. Additional medium issues: Normalization.lean at 1143 lines, generic Finset helpers misplaced in CutElimination.lean, mixed concerns in Tableau/Defs.lean. Low issues: barrel import inconsistency, sorry inventory (13 active sorries across 5 tableau/normalization files).",
+  "status": "planned",
+  "summary": "5-phase plan to extract shared Subformula.lean module, remove phantom Tableau.Defs import, consolidate subformula/complexity definitions, eliminate lk-prefixed duplicates, and run full CI verification. Estimated 3 hours.",
   "blockers": [],
   "continuation_context": null,
-  "next_action_hint": "plan",
+  "next_action_hint": "implement",
   "phases_completed": 0,
-  "phases_total": 0,
+  "phases_total": 5,
   "artifacts": [
     {
-      "path": "specs/334_propositional_refactoring_audit/reports/01_refactoring-audit.md",
-      "type": "report",
-      "summary": "Full refactoring audit report with 7 issues, dependency graph analysis, and 8-step implementation plan"
+      "path": "specs/334_propositional_refactoring_audit/plans/01_refactoring-audit.md",
+      "type": "plan",
+      "summary": "Implementation plan for propositional refactoring audit: 5 phases, 3 hours, 4 dependency waves"
     }
   ]
 }

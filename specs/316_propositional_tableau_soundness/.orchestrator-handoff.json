@@ -1,55 +1,28 @@
 {
-  "status": "blocked",
-  "summary": "Soundness proof blocked by two implementation bugs: (1) isIntuitionisticallyClosed missing complementary-pair closure check (p→p returns open), (2) intTImpRule persistence over-fires at sibling worlds via Nat ordering (invalid formula ((¬p)→q)∨(p→r) incorrectly closes). Both verified by #eval. Sorry cannot be filled until implementation is fixed.",
+  "status": "partial",
+  "summary": "Soundness proof skeleton compiles with 5 sorries. Helper infrastructure built. Key finding: intExpandBranches_closed_unsat needs MonotoneEdges hypothesis in its signature.",
   "blockers": [
-    "BUG 1: isIntuitionisticallyClosed only checks T(⊥), missing T(φ)/F(φ) complementary pair closure. Consequence: known tautologies like p→p and S-combinator return .openBranch. Fix: add Branch.hasContradiction check to IntuitionisticClosure.",
-    "BUG 2: intTImpRule (Rules.lean:129) uses Nat ordering (filter (· ≥ w)) as accessibility proxy. This fires T-implications at sibling worlds that are NOT accessible in the Kripke model. Consequence: ((p→⊥)→q)∨(p→r) incorrectly closes (T(⊥) added at sibling via T(p→⊥,1) + T(p,2)). Fix: track actual parent-child accessibility in expansion state, or restrict intTImpRule to only fire at labels created as descendants."
+    "intExpandBranches_closed_unsat signature must be extended to include MonotoneEdges hypothesis for worldOf w.r.t. edgeSets, then calling site in intuitionisticTableau_sound must supply the proof that the initial constant worldOf is monotone for empty edges"
   ],
   "continuation_context": {
-    "files_status": {
-      "Classical/Soundness.lean": "sorry-free, builds clean (654 lines)",
-      "Intuitionistic/Soundness.lean": "1 sorry (line 333), BLOCKED by implementation bugs",
-      "Intuitionistic/Expansion.lean": "contains isIntuitionisticallyClosed bug",
-      "Intuitionistic/Rules.lean": "contains intTImpRule definition (line 129)",
-      "Minimal/Soundness.lean": "1 sorry (inherits from intuitionistic), otherwise correct",
-      "Minimal/DecisionProcedure.lean": "1 sorry (completeness, task 317 scope)"
+    "sorry_inventory": {
+      "applyAllTImpRules_sat": "line 355, persistence step preserves sat",
+      "isAccessible_go_reach_nw sub-goals": "lines 502-503, fuel arithmetic",
+      "monotoneEdges_update": "line 528, worldOf update preserves edge monotonicity",
+      "intExpandBranches_closed_unsat": "line 562, main expansion loop invariant"
     },
-    "bugs_identified": {
-      "bug1_closure": {
-        "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
-        "location": "isIntuitionisticallyClosed (line 67)",
-        "issue": "Only checks T(⊥), should also check Branch.hasContradiction",
-        "counterexample": "p → p returns .openBranch",
-        "fix": "Add || Branch.hasContradiction b to the definition"
-      },
-      "bug2_persistence": {
-        "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Rules.lean",
-        "location": "intTImpRule (line 129)",
-        "issue": "Uses (· ≥ w) Nat filter as accessibility proxy, but Nat ordering does not match tree-shaped Kripke accessibility for sibling worlds",
-        "counterexample": "((p→⊥)→q)∨(p→r) incorrectly closes via T(p→⊥,1) firing at sibling world 2",
-        "fix": "Track parent-child relationships in expansion state and restrict intTImpRule to fire only along actual accessibility paths"
-      }
-    },
-    "phases_status": {
-      "phase1_closure_lemmas": "COMPLETED",
-      "phase2_rule_preservation": "COMPLETED",
-      "phase3_classical_soundness": "COMPLETED",
-      "phase4_fimp_refactor": "COMPLETED (sorry-free intRule_preserves_sat)",
-      "phase5_loop_invariant": "BLOCKED (bugs prevent correct proof)"
-    }
+    "key_finding": "The main lemma needs MonotoneEdges as a hypothesis. The proof must thread MonotoneEdges alongside intBranchSatisfied through the induction. The initial worldOf (fun _ => w0) satisfies MonotoneEdges trivially for empty edge sets.",
+    "plan_path": "specs/316_propositional_tableau_soundness/plans/05_soundness-plan.md",
+    "approach": "Contrapositive + Nat.strongRecOn, factor inner go loop, set_option maxHeartbeats 3200000"
   },
   "artifacts": [
     {
-      "path": "specs/316_propositional_tableau_soundness/reports/04_b4-hard-research.md",
-      "type": "report",
-      "summary": "Detailed analysis of worldOf/ordering blocker with concrete counterexamples"
+      "path": "specs/316_propositional_tableau_soundness/plans/05_soundness-plan.md",
+      "type": "plan",
+      "summary": "4-phase plan for filling soundness sorries"
     }
   ],
-  "phases_completed": 4,
-  "phases_total": 5,
-  "sorry_inventory": {
-    "Intuitionistic/Soundness.lean": 1,
-    "Minimal/Soundness.lean": 1,
-    "Minimal/DecisionProcedure.lean": 1
-  }
+  "phases_completed": 0,
+  "phases_total": 4,
+  "next_action_hint": "implement"
 }

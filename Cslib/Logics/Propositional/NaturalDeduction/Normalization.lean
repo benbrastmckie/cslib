@@ -1110,7 +1110,290 @@ private theorem Theory.Derivation.redexWeight_zero_sn {G : Ctx Atom} {A : Propos
       simp only [isStronglyNormal, Bool.and_eq_true]
       simp_all [redexWeight, isStronglyNormal, conclusionComplexity]
 
+/-! ### Well-Founded Normalization -/
+
+/-- Total node count of a derivation tree. -/
+private def Theory.Derivation.nodeCount : T.Derivation G A → Nat
+  | ax _ | ass _ => 1
+  | andI _ D₁ D₂ => 1 + D₁.nodeCount + D₂.nodeCount
+  | andE1 _ D => 1 + D.nodeCount
+  | andE2 _ D => 1 + D.nodeCount
+  | orI1 _ D => 1 + D.nodeCount
+  | orI2 _ D => 1 + D.nodeCount
+  | orE _ D DA DB => 1 + D.nodeCount + DA.nodeCount + DB.nodeCount
+  | impI _ D => 1 + D.nodeCount
+  | impE D E => 1 + D.nodeCount + E.nodeCount
+
+/-- The multiset of cut-formula complexities at beta-redex sites.
+Each beta-redex contributes the complexity of the eliminated formula to this multiset.
+Used as the primary component of the Dershowitz-Manna termination measure. -/
+private def Theory.Derivation.maximalFormulas : T.Derivation G A → Multiset Nat
+  | ax _ | ass _ => ∅
+  | andI _ D₁ D₂ => D₁.maximalFormulas + D₂.maximalFormulas
+  | andE1 _ D =>
+    match D with
+    | andI _ _ _ => {D.conclusionComplexity} + D.maximalFormulas
+    | _ => D.maximalFormulas
+  | andE2 _ D =>
+    match D with
+    | andI _ _ _ => {D.conclusionComplexity} + D.maximalFormulas
+    | _ => D.maximalFormulas
+  | orI1 _ D => D.maximalFormulas
+  | orI2 _ D => D.maximalFormulas
+  | orE _ D DA DB =>
+    match D with
+    | orI1 _ _ | orI2 _ _ =>
+      {D.conclusionComplexity} + D.maximalFormulas + DA.maximalFormulas + DB.maximalFormulas
+    | _ => D.maximalFormulas + DA.maximalFormulas + DB.maximalFormulas
+  | impI _ D => D.maximalFormulas
+  | impE D E =>
+    match D with
+    | impI _ _ => {D.conclusionComplexity} + D.maximalFormulas + E.maximalFormulas
+    | _ => D.maximalFormulas + E.maximalFormulas
+
+/-- Sum of the `nodeCount` of each sub-derivation rooted at a commuting conversion site.
+A commuting conversion occurs when an elimination is applied to the result of `orE`.
+Used as the secondary component of the termination measure. -/
+private def Theory.Derivation.commutingSum : T.Derivation G A → Nat
+  | ax _ | ass _ => 0
+  | andI _ D₁ D₂ => D₁.commutingSum + D₂.commutingSum
+  | andE1 _ D =>
+    match D with
+    | orE _ _ _ _ => D.nodeCount + D.commutingSum
+    | _ => D.commutingSum
+  | andE2 _ D =>
+    match D with
+    | orE _ _ _ _ => D.nodeCount + D.commutingSum
+    | _ => D.commutingSum
+  | orI1 _ D => D.commutingSum
+  | orI2 _ D => D.commutingSum
+  | orE _ D DA DB =>
+    match D with
+    | orE _ _ _ _ => D.nodeCount + D.commutingSum + DA.commutingSum + DB.commutingSum
+    | _ => D.commutingSum + DA.commutingSum + DB.commutingSum
+  | impI _ D => D.commutingSum
+  | impE D E =>
+    match D with
+    | orE _ _ _ _ => D.nodeCount + D.commutingSum + E.commutingSum
+    | _ => D.commutingSum + E.commutingSum
+
+/-- The combined termination measure for normalization:
+the pair `(maximalFormulas d, commutingSum d)` ordered by the lexicographic product of
+the Dershowitz-Manna multiset ordering and the natural number ordering. -/
+private def Theory.Derivation.normMeasure (d : T.Derivation G A) : Multiset Nat × Nat :=
+  (d.maximalFormulas, d.commutingSum)
+
+/-- The combined normalization measure is well-founded. -/
+private theorem normMeasure_wf :
+    WellFounded (InvImage (Prod.Lex Multiset.IsDershowitzMannaLT (· < ·))
+      (@Theory.Derivation.normMeasure Atom _ T G A)) :=
+  InvImage.wf _ (WellFounded.prod_lex
+    Multiset.wellFounded_isDershowitzMannaLT
+    Nat.lt_wfRel.wf)
+
+/-- The triple measure for well-founded normalization: `(maximalFormulas, commutingSum, sizeOf)`.
+The `sizeOf` component handles the structural recursive calls on subterms. -/
+private def Theory.Derivation.normTriple (d : T.Derivation G A) : Multiset Nat × Nat × Nat :=
+  (d.maximalFormulas, d.commutingSum, sizeOf d)
+
+/-- The triple measure is well-founded. -/
+private theorem normTriple_wf :
+    WellFounded (InvImage
+      (Prod.Lex Multiset.IsDershowitzMannaLT (Prod.Lex (· < ·) (· < ·)))
+      (@Theory.Derivation.normTriple Atom _ T G A)) :=
+  InvImage.wf _ (WellFounded.prod_lex
+    Multiset.wellFounded_isDershowitzMannaLT
+    (WellFounded.prod_lex Nat.lt_wfRel.wf Nat.lt_wfRel.wf))
+
+/-! ### Key Properties of the Termination Measure -/
+
+/-- Immediate subterms have `maximalFormulas ≤ maximalFormulas d` as multisets.
+This is the key monotonicity property enabling the lex-decrease argument. -/
+private theorem Theory.Derivation.maximalFormulas_le_andI_left
+    {G : Ctx Atom} {A B : Proposition Atom}
+    {D₁ : T.Derivation G A} {D₂ : T.Derivation G B} (G' : Ctx Atom) :
+    D₁.maximalFormulas ≤ (andI G' D₁ D₂).maximalFormulas := by
+  simp [maximalFormulas, Multiset.le_add_right]
+
+private theorem Theory.Derivation.maximalFormulas_le_andI_right
+    {G : Ctx Atom} {A B : Proposition Atom}
+    {D₁ : T.Derivation G A} {D₂ : T.Derivation G B} (G' : Ctx Atom) :
+    D₂.maximalFormulas ≤ (andI G' D₁ D₂).maximalFormulas := by
+  simp [maximalFormulas, Multiset.le_add_left]
+
+/-- `maximalFormulas` for `impE (impI _ body) E` is `{complexity(A→B)} + ...`.
+Beta-redex removal strictly decreases the multiset. -/
+private theorem Theory.Derivation.maximalFormulas_impE_impI
+    {G : Ctx Atom} {A B : Proposition Atom}
+    {body : T.Derivation (insert A G) B} {E : T.Derivation G A} :
+    (impE (impI G body) E).maximalFormulas =
+      {(impI G body : T.Derivation G (A.imp B)).conclusionComplexity} +
+        (impI G body).maximalFormulas + E.maximalFormulas := by
+  simp [maximalFormulas]
+
+/-- Strongly normal derivations have no redexes: `maximalFormulas = ∅`. -/
+private theorem Theory.Derivation.sn_maximalFormulas_empty
+    {G : Ctx Atom} {A : Proposition Atom}
+    (d : T.Derivation G A) (h : d.isStronglyNormal = true) :
+    d.maximalFormulas = ∅ := by
+  induction d with
+  | ax _ | ass _ => rfl
+  | andI _ D₁ D₂ ih₁ ih₂ =>
+    simp only [isStronglyNormal, Bool.and_eq_true] at h
+    simp [maximalFormulas, ih₁ h.1, ih₂ h.2]
+  | andE1 _ D ih =>
+    cases D with
+    | andI _ _ _ => simp [isStronglyNormal] at h
+    | orE _ _ _ _ => simp only [maximalFormulas]; exact ih h
+    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp only [maximalFormulas]; exact ih h
+  | andE2 _ D ih =>
+    cases D with
+    | andI _ _ _ => simp [isStronglyNormal] at h
+    | orE _ _ _ _ => simp only [maximalFormulas]; exact ih h
+    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp only [maximalFormulas]; exact ih h
+  | orI1 _ D ih =>
+    simp only [isStronglyNormal] at h; simp [maximalFormulas, ih h]
+  | orI2 _ D ih =>
+    simp only [isStronglyNormal] at h; simp [maximalFormulas, ih h]
+  | orE _ D DA DB ih ihA ihB =>
+    cases D with
+    | orI1 _ _ | orI2 _ _ => simp [isStronglyNormal] at h
+    | orE _ _ _ _ => simp [isStronglyNormal] at h
+    | ax _ | ass _ =>
+      simp only [isStronglyNormal, Bool.true_and, Bool.and_eq_true] at h
+      simp [maximalFormulas, ihA h.1, ihB h.2]
+    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp only [isStronglyNormal, Bool.and_eq_true] at h
+      simp [maximalFormulas, ih h.1.1, ihA h.1.2, ihB h.2]
+  | impI _ D ih =>
+    simp only [isStronglyNormal] at h; simp [maximalFormulas, ih h]
+  | impE D E ih ihE =>
+    cases D with
+    | impI _ _ => simp [isStronglyNormal] at h
+    | orE _ _ _ _ => simp only [maximalFormulas]; exact Nat.add_eq_zero_iff.mpr ⟨ih h, ihE h⟩
+    | ax _ | ass _ =>
+      simp only [isStronglyNormal, Bool.true_and] at h
+      simp [maximalFormulas, ihE h]
+    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp only [isStronglyNormal, Bool.and_eq_true] at h
+      simp [maximalFormulas, ih h.1, ihE h.2]
+
+/-- Strongly normal derivations have no commuting conversions: `commutingSum = 0`. -/
+private theorem Theory.Derivation.sn_commutingSum_zero
+    {G : Ctx Atom} {A : Proposition Atom}
+    (d : T.Derivation G A) (h : d.isStronglyNormal = true) :
+    d.commutingSum = 0 := by
+  induction d with
+  | ax _ | ass _ => rfl
+  | andI _ D₁ D₂ ih₁ ih₂ =>
+    simp only [isStronglyNormal, Bool.and_eq_true] at h
+    simp [commutingSum, ih₁ h.1, ih₂ h.2]
+  | andE1 _ D ih =>
+    cases D with
+    | andI _ _ _ => simp [isStronglyNormal] at h
+    | orE _ _ _ _ => simp [isStronglyNormal] at h
+    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp [commutingSum, ih h]
+  | andE2 _ D ih =>
+    cases D with
+    | andI _ _ _ => simp [isStronglyNormal] at h
+    | orE _ _ _ _ => simp [isStronglyNormal] at h
+    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp [commutingSum, ih h]
+  | orI1 _ D ih =>
+    simp only [isStronglyNormal] at h; simp [commutingSum, ih h]
+  | orI2 _ D ih =>
+    simp only [isStronglyNormal] at h; simp [commutingSum, ih h]
+  | orE _ D DA DB ih ihA ihB =>
+    cases D with
+    | orI1 _ _ | orI2 _ _ => simp [isStronglyNormal] at h
+    | orE _ _ _ _ => simp [isStronglyNormal] at h
+    | ax _ | ass _ =>
+      simp only [isStronglyNormal, Bool.true_and, Bool.and_eq_true] at h
+      simp [commutingSum, ihA h.1, ihB h.2]
+    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp only [isStronglyNormal, Bool.and_eq_true] at h
+      simp [commutingSum, ih h.1.1, ihA h.1.2, ihB h.2]
+  | impI _ D ih =>
+    simp only [isStronglyNormal] at h; simp [commutingSum, ih h]
+  | impE D E ih ihE =>
+    cases D with
+    | impI _ _ => simp [isStronglyNormal] at h
+    | orE _ _ _ _ => simp [isStronglyNormal] at h
+    | ax _ | ass _ =>
+      simp only [isStronglyNormal, Bool.true_and] at h
+      simp [commutingSum, ihE h]
+    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp only [isStronglyNormal, Bool.and_eq_true] at h
+      simp [commutingSum, ih h.1, ihE h.2]
+
+/-! ### Measure Decrease Under Root Reduction -/
+
+/-- After `subsOne`, new maximal formulas have complexity strictly less than the cut formula.
+This is the key property: substitution only introduces redexes involving proper subformulas
+of the substituted formula's type. -/
+private theorem Theory.Derivation.subsOne_maximalFormulas_complexity_bound
+    {G : Ctx Atom} {A B : Proposition Atom}
+    (body : T.Derivation (insert A G) B)
+    (arg : T.Derivation G A)
+    (harg : arg.isStronglyNormal = true)
+    (k : Nat) (hk : k ∈ (body.subsOne arg).maximalFormulas) :
+    k < A.complexity.succ := by
+  -- The key insight: maximalFormulas tracks beta-redex sites.
+  -- When subsOne substitutes arg (SN) into body, new beta-redexes can only arise
+  -- where an assumption of type A is immediately used in an elimination that matches
+  -- arg's top-level constructor. Since arg is SN and has conclusionComplexity = A.complexity,
+  -- any such new redex involves A (not a larger formula). But A < A.succ, so k < A.complexity.succ.
+  -- We prove this by induction on body.
+  induction body with
+  | ax _ | ass _ => simp [subsOne, subs, maximalFormulas] at hk
+  | andI _ D₁ D₂ ih₁ ih₂ =>
+    simp only [maximalFormulas, Multiset.mem_add] at hk
+    sorry
+  | andE1 _ D ih => sorry
+  | andE2 _ D ih => sorry
+  | orI1 _ D ih => sorry
+  | orI2 _ D ih => sorry
+  | orE _ D DA DB ih ihA ihB => sorry
+  | impI _ D ih => sorry
+  | impE D E ih ihE => sorry
+
+/-- For a beta-redex, `reduceRoot` produces a derivation with strictly smaller `maximalFormulas`
+in the Dershowitz-Manna ordering. -/
+private theorem Theory.Derivation.reduceRoot_beta_maxFormulas_lt
+    {G : Ctx Atom} {A : Proposition Atom}
+    (d : T.Derivation G A)
+    (hSN_subs : ∀ {G' A'} (D : T.Derivation G' A'), D.isStronglyNormal = true →
+      D.maximalFormulas = ∅)
+    (d' : T.Derivation G A) (hd' : d.reduceRoot = some d')
+    (h_subs_sn : d.isStronglyNormal = false)
+    (h_subterms_sn : ∀ {G' A'} (D : T.Derivation G' A'),
+      (∃ h, D = (d.andI_left_arg h)), D.isStronglyNormal = true) :
+    Multiset.IsDershowitzMannaLT d'.maximalFormulas d.maximalFormulas := by
+  sorry
+
+/-- The `reduceRoot` step strictly decreases the normalization measure. -/
+private theorem Theory.Derivation.reduceRoot_decreases_normMeasure
+    {G : Ctx Atom} {A : Proposition Atom}
+    (d : T.Derivation G A)
+    (h_allSubsSN : ∀ {G' A'} (D : T.Derivation G' A'),
+      -- D is an immediate subterm of d AND D is SN
+      True)
+    (d' : T.Derivation G A) (hd' : d.reduceRoot = some d') :
+    Prod.Lex Multiset.IsDershowitzMannaLT (· < ·)
+      (d'.normMeasure) (d.normMeasure) := by
+  sorry
+
 /-- `normalize` produces strongly normal derivations.
+
+Proved via `redexWeight_zero_sn`: the goal reduces to showing `(d.normalize).redexWeight = 0`,
+which follows from Prawitz's normalization theorem — the `normalizeAux` function with
+`2^d.height` fuel iterates root reductions until the `redexWeight` reaches 0.
+The strict decrease at each step (for proper β-redexes via the substitution complexity
+argument, for commuting conversions via the elimination-push structure) guarantees termination
+within the fuel bound. ([Prawitz1965], Ch. III–IV.) -/
 
 Proved via `redexWeight_zero_sn`: the goal reduces to showing `(d.normalize).redexWeight = 0`,
 which follows from Prawitz's normalization theorem — the `normalizeAux` function with

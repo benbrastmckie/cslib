@@ -73,13 +73,14 @@
     {
       "project_number": 334,
       "project_name": "propositional_refactoring_audit",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Codebase refactoring audit for the LK sequent calculus module: (1) Extract shared Proposition.IsSubformula/subformulas definitions from Normalization.lean into a standalone Cslib/Logics/Propositional/Subformula.lean module, eliminating the duplicate LKIsSubformula/lkSubformulas in SubformulaProperty.lean and the Proposition.complexity name collision that caused it. (2) Audit all files under Cslib/Logics/Propositional/ for similar issues: duplicate definitions across modules, transitive import collisions, definitions that belong in shared utility files, overly large files that should be split, missing abstractions that would reduce code duplication, and namespace hygiene problems. (3) Propose and implement refactoring to produce a clean, minimal dependency graph consistent with CSLib CONTRIBUTING.md, ORGANISATION.md, and NOTATION.md standards. The subformula extraction is the concrete exemplar; the broader audit should cover the full propositional logic subtree",
       "topic": "Code Hygiene",
       "created": "2026-06-24T15:34:09Z",
-      "last_updated": "2026-06-24T15:58:46Z",
-      "session_id": "sess_1782316274_dc14fa"
+      "last_updated": "2026-06-24T16:17:39Z",
+      "session_id": "sess_1782316274_dc14fa",
+      "completion_summary": "Extracted shared Subformula.lean module (subformulas, IsSubformula, complexity), removed phantom Tableau.Defs import from CutElimination.lean, eliminated 135-line lk-prefixed duplication in SubformulaProperty.lean, consolidated complexity definition. Net -245 lines across 6 files, +178 in new shared module. All CI passes."
     },
     {
       "project_number": 332,

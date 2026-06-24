@@ -1,7 +1,7 @@
 # Implementation Plan: Propositional Refactoring Audit
 
 - **Task**: 334 - Propositional refactoring audit
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 3 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/334_propositional_refactoring_audit/reports/01_refactoring-audit.md
@@ -76,7 +76,7 @@ and unblocks future consumers of the subformula API.
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Create Subformula.lean shared module [NOT STARTED]
+### Phase 1: Create Subformula.lean shared module [COMPLETED]
 
 **Goal**: Create a new standalone module containing the canonical subformula infrastructure
 and complexity definitions, importing only from `Cslib/Logics/Propositional/Defs.lean`.
@@ -104,16 +104,16 @@ and complexity definitions, importing only from `Cslib/Logics/Propositional/Defs
 
 ---
 
-### Phase 2: Remove phantom import and update CutElimination.lean [NOT STARTED]
+### Phase 2: Remove phantom import and update CutElimination.lean [COMPLETED]
 
 **Goal**: Delete the phantom `Tableau.Defs` import from CutElimination.lean and mark the
 three generic Finset helpers as private.
 
 **Tasks**:
 - [ ] Delete `public import Cslib.Logics.Propositional.Tableau.Defs` from CutElimination.lean line 11
-- [ ] Add `private` keyword to `mem_of_ne_head` (line 106)
-- [ ] Add `private` keyword to `subset_insert2` (line 113)
-- [ ] Add `private` keyword to `insert_subset_swap` (line 119)
+- [ ] Add `private` keyword to `mem_of_ne_head` (line 106) *(deviation: skipped -- private helpers inside @[expose] public section cannot be referenced from mutual block; Lean 4 access error)*
+- [ ] Add `private` keyword to `subset_insert2` (line 113) *(deviation: skipped -- same reason as above)*
+- [ ] Add `private` keyword to `insert_subset_swap` (line 119) *(deviation: skipped -- same reason as above)*
 - [ ] Verify with `lake build Cslib.Logics.Propositional.SequentCalculus.LK.CutElimination`
 
 **Timing**: 15 minutes
@@ -129,7 +129,7 @@ three generic Finset helpers as private.
 
 ---
 
-### Phase 3: Update Normalization.lean and Tableau/Defs.lean [NOT STARTED]
+### Phase 3: Update Normalization.lean and Tableau/Defs.lean [COMPLETED]
 
 **Goal**: Replace local subformula/complexity definitions with imports from the new shared
 module, and remove the duplicate definitions from both files.
@@ -159,7 +159,7 @@ module, and remove the duplicate definitions from both files.
 
 ---
 
-### Phase 4: Update SubformulaProperty.lean [NOT STARTED]
+### Phase 4: Update SubformulaProperty.lean [COMPLETED]
 
 **Goal**: Replace the `lk`-prefixed subformula duplicates with imports from the shared
 module, rewriting all proof references from `lkSubformulas`/`LKIsSubformula` to
@@ -186,7 +186,7 @@ module, rewriting all proof references from `lkSubformulas`/`LKIsSubformula` to
 
 ---
 
-### Phase 5: Barrel imports, mk_all, and full CI verification [NOT STARTED]
+### Phase 5: Barrel imports, mk_all, and full CI verification [IN PROGRESS]
 
 **Goal**: Update barrel imports, register the new module, and run the complete CI pipeline.
 

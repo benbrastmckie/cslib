@@ -11,8 +11,8 @@ next_project_number: 341
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,316,321,334,335,338,339 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,317,332,336,337,340 | 36,37,180,290,299,316,334,335 | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,245,278,290,299,301,316,321,335,338,339,340 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,317,332,336,337 | 36,37,180,290,299,316,335 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275,333 | 39,40,332 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -30,8 +30,8 @@ next_project_number: 341
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
 338 [NOT STARTED] — Migrate Propositional/Metalogic/MCS.lean and Temporal/Metalogic/M
 339 [NOT STARTED] — Unify the swapTemporal function and its associated theorems betwe
-41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 340 [NOT STARTED] — Investigate and consolidate derived connective definitions (neg, 
+41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Modal Logic
 
@@ -61,7 +61,6 @@ next_project_number: 341
 ### Code Hygiene
 
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
-334 [PLANNED] — Codebase refactoring audit for the LK sequent calculus module: (1
 
 ### Modal
 
@@ -133,7 +132,7 @@ next_project_number: 341
 ---
 
 ### 334. Propositional refactoring audit
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None

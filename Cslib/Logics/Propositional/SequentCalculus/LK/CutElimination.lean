@@ -8,7 +8,6 @@ module
 
 import Cslib.Init
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Basic
-public import Cslib.Logics.Propositional.Tableau.Defs
 
 /-! # Cut Elimination for LK (Hauptsatz)
 

@@ -7,7 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
-public import Cslib.Logics.Propositional.Defs
+public import Cslib.Logics.Propositional.Subformula
 public import Cslib.Foundations.Logic.Tableau.ClosureCondition
 public import Cslib.Foundations.Logic.Tableau.PropositionalRules
 
@@ -21,8 +21,8 @@ systems: classical, intuitionistic, and minimal.
 - `propAndOf?`, `propOrOf?`, `propImpOf?`, `propNegOf?`: Decomposition functions
   for `Proposition Atom` connectives, needed by `applyPropRule`.
 - `instHashableProposition`: `Hashable (Proposition Atom)` instance via hash mixing.
-- `Proposition.complexity`: Size measure for fuel computation in the expansion loop.
-  Bounds the number of expansion steps needed.
+- `Proposition.complexity`: Imported from `Cslib.Logics.Propositional.Subformula`.
+  Size measure for fuel computation in the expansion loop.
 
 ## Design
 
@@ -101,19 +101,6 @@ when the formula type is `Proposition Atom`. -/
 instance instHashableProposition [Hashable Atom] : Hashable (Proposition Atom) where
   hash := propHash
 
-/-! ## Complexity Measure -/
-
-/-- The complexity of a proposition, defined as the number of connective occurrences.
-
-Used to compute the fuel bound for the tableau expansion loop. Each rule application
-strictly reduces the complexity of the formulas on the branch, ensuring termination. -/
-def Proposition.complexity : Proposition Atom → Nat
-  | .atom _ => 0
-  | .bot => 0
-  | .imp a b => 1 + a.complexity + b.complexity
-  | .and a b => 1 + a.complexity + b.complexity
-  | .or a b => 1 + a.complexity + b.complexity
-
 /-! ## HasBot Instance -/
 
 -- HasBot is already defined for Proposition via PropositionalConnectives in Defs.lean
@@ -148,29 +135,6 @@ lemma propImpOf?_neg (a : Proposition Atom) : propImpOf? (.imp a .bot) = none :=
 /-- `propNegOf?` decomposes negation `a → ⊥`. -/
 @[simp]
 lemma propNegOf?_neg (a : Proposition Atom) : propNegOf? (.imp a .bot) = some a := rfl
-
-/-- Complexity is additive over subformulas. -/
-@[simp]
-lemma complexity_imp (a b : Proposition Atom) :
-    (Proposition.imp a b).complexity = 1 + a.complexity + b.complexity := rfl
-
-/-- Complexity is additive over conjunctions. -/
-@[simp]
-lemma complexity_and (a b : Proposition Atom) :
-    (Proposition.and a b).complexity = 1 + a.complexity + b.complexity := rfl
-
-/-- Complexity is additive over disjunctions. -/
-@[simp]
-lemma complexity_or (a b : Proposition Atom) :
-    (Proposition.or a b).complexity = 1 + a.complexity + b.complexity := rfl
-
-/-- Atoms have complexity 0. -/
-@[simp]
-lemma complexity_atom (x : Atom) : (Proposition.atom x : Proposition Atom).complexity = 0 := rfl
-
-/-- Bot has complexity 0. -/
-@[simp]
-lemma complexity_bot : (Proposition.bot : Proposition Atom).complexity = 0 := rfl
 
 end Cslib.Logic.PL
 

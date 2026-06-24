@@ -8,6 +8,7 @@ module
 
 import Cslib.Init
 public import Cslib.Logics.Propositional.SequentCalculus.LK.CutElimination
+public import Cslib.Logics.Propositional.Subformula
 
 /-! # Subformula Property for LK (Corollary of Cut Elimination)
 
@@ -43,96 +44,6 @@ open Proposition LKSequent
 
 variable {Atom : Type u} [DecidableEq Atom]
 
-/-! ## Subformula Infrastructure -/
-
-/-- All subformulas of a proposition, including itself.
-
-Used to state the subformula property: every formula occurring in a cut-free LK proof
-is a subformula of some formula in the conclusion sequent. -/
-def Proposition.lkSubformulas : Proposition Atom → Finset (Proposition Atom)
-  | φ@(.atom _) => {φ}
-  | φ@.bot => {φ}
-  | φ@(.imp A B) => insert φ (A.lkSubformulas ∪ B.lkSubformulas)
-  | φ@(.and A B) => insert φ (A.lkSubformulas ∪ B.lkSubformulas)
-  | φ@(.or A B) => insert φ (A.lkSubformulas ∪ B.lkSubformulas)
-
-/-- A proposition `A` is a subformula of `B` if `A ∈ B.lkSubformulas`. -/
-def Proposition.LKIsSubformula (A B : Proposition Atom) : Prop :=
-  A ∈ B.lkSubformulas
-
-/-- Every proposition is a subformula of itself. -/
-lemma Proposition.self_mem_lkSubformulas (A : Proposition Atom) : A ∈ A.lkSubformulas := by
-  cases A <;> simp [lkSubformulas]
-
-/-- Reflexivity of `LKIsSubformula`: every proposition is a subformula of itself. -/
-lemma Proposition.LKIsSubformula.refl (A : Proposition Atom) : A.LKIsSubformula A :=
-  Proposition.self_mem_lkSubformulas A
-
-/-- Transitivity of `LKIsSubformula`: if `A` is a subformula of `B` and `B` is a subformula
-of `C`, then `A` is a subformula of `C`. -/
-lemma Proposition.LKIsSubformula.trans {A B C : Proposition Atom}
-    (h1 : A.LKIsSubformula B) (h2 : B.LKIsSubformula C) : A.LKIsSubformula C := by
-  unfold LKIsSubformula at *
-  induction C with
-  | atom _ =>
-    simp only [lkSubformulas, Finset.mem_singleton] at h2; subst h2; exact h1
-  | bot =>
-    simp only [lkSubformulas, Finset.mem_singleton] at h2; subst h2; exact h1
-  | imp P Q ihP ihQ =>
-    simp only [lkSubformulas, Finset.mem_insert, Finset.mem_union] at h2
-    rcases h2 with rfl | hP | hQ
-    · exact h1
-    · exact Finset.mem_insert.mpr (Or.inr (Finset.mem_union.mpr (Or.inl (ihP hP))))
-    · exact Finset.mem_insert.mpr (Or.inr (Finset.mem_union.mpr (Or.inr (ihQ hQ))))
-  | and P Q ihP ihQ =>
-    simp only [lkSubformulas, Finset.mem_insert, Finset.mem_union] at h2
-    rcases h2 with rfl | hP | hQ
-    · exact h1
-    · exact Finset.mem_insert.mpr (Or.inr (Finset.mem_union.mpr (Or.inl (ihP hP))))
-    · exact Finset.mem_insert.mpr (Or.inr (Finset.mem_union.mpr (Or.inr (ihQ hQ))))
-  | or P Q ihP ihQ =>
-    simp only [lkSubformulas, Finset.mem_insert, Finset.mem_union] at h2
-    rcases h2 with rfl | hP | hQ
-    · exact h1
-    · exact Finset.mem_insert.mpr (Or.inr (Finset.mem_union.mpr (Or.inl (ihP hP))))
-    · exact Finset.mem_insert.mpr (Or.inr (Finset.mem_union.mpr (Or.inr (ihQ hQ))))
-
-/-- Left component of a conjunction is a subformula of the conjunction. -/
-lemma Proposition.LKIsSubformula.and_left {A B : Proposition Atom} :
-    A.LKIsSubformula (A.and B) := by
-  simp only [LKIsSubformula, lkSubformulas, Finset.mem_insert, Finset.mem_union]
-  right; left; exact self_mem_lkSubformulas A
-
-/-- Right component of a conjunction is a subformula of the conjunction. -/
-lemma Proposition.LKIsSubformula.and_right {A B : Proposition Atom} :
-    B.LKIsSubformula (A.and B) := by
-  simp only [LKIsSubformula, lkSubformulas, Finset.mem_insert, Finset.mem_union]
-  right; right; exact self_mem_lkSubformulas B
-
-/-- Left component of a disjunction is a subformula of the disjunction. -/
-lemma Proposition.LKIsSubformula.or_left {A B : Proposition Atom} :
-    A.LKIsSubformula (A.or B) := by
-  simp only [LKIsSubformula, lkSubformulas, Finset.mem_insert, Finset.mem_union]
-  right; left; exact self_mem_lkSubformulas A
-
-/-- Right component of a disjunction is a subformula of the disjunction. -/
-lemma Proposition.LKIsSubformula.or_right {A B : Proposition Atom} :
-    B.LKIsSubformula (A.or B) := by
-  simp only [LKIsSubformula, lkSubformulas, Finset.mem_insert, Finset.mem_union]
-  right; right; exact self_mem_lkSubformulas B
-
-/-- Antecedent of an implication is a subformula of the implication. -/
-lemma Proposition.LKIsSubformula.imp_left {A B : Proposition Atom} :
-    A.LKIsSubformula (A.imp B) := by
-  simp only [LKIsSubformula, lkSubformulas, Finset.mem_insert, Finset.mem_union]
-  right; left; exact self_mem_lkSubformulas A
-
-/-- Consequent of an implication is a subformula of the implication. -/
-lemma Proposition.LKIsSubformula.imp_right {A B : Proposition Atom} :
-    B.LKIsSubformula (A.imp B) := by
-  simp only [LKIsSubformula, lkSubformulas, Finset.mem_insert, Finset.mem_union]
-  right; right; exact self_mem_lkSubformulas B
-
 /-! ## Formula Collection -/
 
 /-- The set of all formula occurrences in an LK proof tree: every node contributes
@@ -152,20 +63,20 @@ def LKProof.formulas {seq : LKSequent Atom} : LKProof seq → Finset (Propositio
 
 /-! ## Membership Helpers -/
 
-/-- Lift an `LKIsSubformula` witness to the left component of a union membership. -/
+/-- Lift an `IsSubformula` witness to the left component of a union membership. -/
 private lemma liftSubformulaLeft
     {B C : Proposition Atom}
     {Γ' Δ' : Finset (Proposition Atom)}
-    (hmem : C ∈ Γ') (hsub : B.LKIsSubformula C) :
-    ∃ D ∈ Γ' ∪ Δ', B.LKIsSubformula D :=
+    (hmem : C ∈ Γ') (hsub : B.IsSubformula C) :
+    ∃ D ∈ Γ' ∪ Δ', B.IsSubformula D :=
   ⟨C, Finset.mem_union_left _ hmem, hsub⟩
 
-/-- Lift an `LKIsSubformula` witness to the right component of a union membership. -/
+/-- Lift an `IsSubformula` witness to the right component of a union membership. -/
 private lemma liftSubformulaRight
     {B C : Proposition Atom}
     {Γ' Δ' : Finset (Proposition Atom)}
-    (hmem : C ∈ Δ') (hsub : B.LKIsSubformula C) :
-    ∃ D ∈ Γ' ∪ Δ', B.LKIsSubformula D :=
+    (hmem : C ∈ Δ') (hsub : B.IsSubformula C) :
+    ∃ D ∈ Γ' ∪ Δ', B.IsSubformula D :=
   ⟨C, Finset.mem_union_right _ hmem, hsub⟩
 
 /-! ## Subformula Property for Cut-Free Proofs (Core) -/
@@ -178,16 +89,16 @@ This helper takes `(d : LKProof seq)` and `(hcf : CutFree d)` separately so that
 The `cut` case is vacuous since `CutFree` is `False` for `cut` steps. -/
 private lemma cutFreeSubformulaProp {seq : LKSequent Atom}
     (d : LKProof seq) (hcf : CutFree d) :
-    ∀ B ∈ d.formulas, ∃ C ∈ seq.ant ∪ seq.suc, B.LKIsSubformula C := by
+    ∀ B ∈ d.formulas, ∃ C ∈ seq.ant ∪ seq.suc, B.IsSubformula C := by
   induction d with
   | ax A Γ Δ hL hR =>
     intro B hB
     simp only [LKProof.formulas] at hB
-    exact ⟨B, hB, Proposition.LKIsSubformula.refl B⟩
+    exact ⟨B, hB, Proposition.IsSubformula.refl B⟩
   | botL Γ Δ hbot =>
     intro B hB
     simp only [LKProof.formulas] at hB
-    exact ⟨B, hB, Proposition.LKIsSubformula.refl B⟩
+    exact ⟨B, hB, Proposition.IsSubformula.refl B⟩
   | andL A B hAB d' ih =>
     -- Conclusion sequent: Γ ⊢ₛ Δ where Γ contains A ∧ B.
     -- Premise sequent: insert A (insert B Γ) ⊢ₛ Δ.
@@ -200,10 +111,10 @@ private lemma cutFreeSubformulaProp {seq : LKSequent Atom}
     rcases hC with (rfl | (rfl | hC)) | hC
     · -- C = A, and A is a subformula of A ∧ B ∈ seq.ant
       exact liftSubformulaLeft hAB
-        (Proposition.LKIsSubformula.trans hCS Proposition.LKIsSubformula.and_left)
+        (Proposition.IsSubformula.trans hCS Proposition.IsSubformula.and_left)
     · -- C = B, and B is a subformula of A ∧ B ∈ seq.ant
       exact liftSubformulaLeft hAB
-        (Proposition.LKIsSubformula.trans hCS Proposition.LKIsSubformula.and_right)
+        (Proposition.IsSubformula.trans hCS Proposition.IsSubformula.and_right)
     · exact liftSubformulaLeft hC hCS
     · exact liftSubformulaRight hC hCS
   | andR A B hAB d₁ d₂ ih₁ ih₂ =>
@@ -219,7 +130,7 @@ private lemma cutFreeSubformulaProp {seq : LKSequent Atom}
       · exact liftSubformulaLeft hC hCS
       · -- C = A, and A is a subformula of A ∧ B ∈ seq.suc
         exact liftSubformulaRight hAB
-          (Proposition.LKIsSubformula.trans hCS Proposition.LKIsSubformula.and_left)
+          (Proposition.IsSubformula.trans hCS Proposition.IsSubformula.and_left)
       · exact liftSubformulaRight hC hCS
     · obtain ⟨C, hC, hCS⟩ := ih₂ hcf.2 B' hB₂
       simp only [Finset.mem_union, Finset.mem_insert] at hC
@@ -227,7 +138,7 @@ private lemma cutFreeSubformulaProp {seq : LKSequent Atom}
       · exact liftSubformulaLeft hC hCS
       · -- C = B, and B is a subformula of A ∧ B ∈ seq.suc
         exact liftSubformulaRight hAB
-          (Proposition.LKIsSubformula.trans hCS Proposition.LKIsSubformula.and_right)
+          (Proposition.IsSubformula.trans hCS Proposition.IsSubformula.and_right)
       · exact liftSubformulaRight hC hCS
   | orL A B hAB d₁ d₂ ih₁ ih₂ =>
     -- Conclusion sequent: Γ ⊢ₛ Δ where Γ contains A ∨ B.
@@ -240,7 +151,7 @@ private lemma cutFreeSubformulaProp {seq : LKSequent Atom}
       rcases hC with (rfl | hC) | hC
       · -- C = A, and A is a subformula of A ∨ B ∈ seq.ant
         exact liftSubformulaLeft hAB
-          (Proposition.LKIsSubformula.trans hCS Proposition.LKIsSubformula.or_left)
+          (Proposition.IsSubformula.trans hCS Proposition.IsSubformula.or_left)
       · exact liftSubformulaLeft hC hCS
       · exact liftSubformulaRight hC hCS
     · obtain ⟨C, hC, hCS⟩ := ih₂ hcf.2 B' hB₂
@@ -248,7 +159,7 @@ private lemma cutFreeSubformulaProp {seq : LKSequent Atom}
       rcases hC with (rfl | hC) | hC
       · -- C = B, and B is a subformula of A ∨ B ∈ seq.ant
         exact liftSubformulaLeft hAB
-          (Proposition.LKIsSubformula.trans hCS Proposition.LKIsSubformula.or_right)
+          (Proposition.IsSubformula.trans hCS Proposition.IsSubformula.or_right)
       · exact liftSubformulaLeft hC hCS
       · exact liftSubformulaRight hC hCS
   | orR A B hAB d' ih =>
@@ -262,10 +173,10 @@ private lemma cutFreeSubformulaProp {seq : LKSequent Atom}
     · exact liftSubformulaLeft hC hCS
     · -- C = A, and A is a subformula of A ∨ B ∈ seq.suc
       exact liftSubformulaRight hAB
-        (Proposition.LKIsSubformula.trans hCS Proposition.LKIsSubformula.or_left)
+        (Proposition.IsSubformula.trans hCS Proposition.IsSubformula.or_left)
     · -- C = B, and B is a subformula of A ∨ B ∈ seq.suc
       exact liftSubformulaRight hAB
-        (Proposition.LKIsSubformula.trans hCS Proposition.LKIsSubformula.or_right)
+        (Proposition.IsSubformula.trans hCS Proposition.IsSubformula.or_right)
     · exact liftSubformulaRight hC hCS
   | impL A B hAB d₁ d₂ ih₁ ih₂ =>
     -- Conclusion sequent: Γ ⊢ₛ Δ where Γ contains A → B.
@@ -279,14 +190,14 @@ private lemma cutFreeSubformulaProp {seq : LKSequent Atom}
       · exact liftSubformulaLeft hC hCS
       · -- C = A, and A is a subformula of A → B ∈ seq.ant
         exact liftSubformulaLeft hAB
-          (Proposition.LKIsSubformula.trans hCS Proposition.LKIsSubformula.imp_left)
+          (Proposition.IsSubformula.trans hCS Proposition.IsSubformula.imp_left)
       · exact liftSubformulaRight hC hCS
     · obtain ⟨C, hC, hCS⟩ := ih₂ hcf.2 B' hB₂
       simp only [Finset.mem_union, Finset.mem_insert] at hC
       rcases hC with (rfl | hC) | hC
       · -- C = B, and B is a subformula of A → B ∈ seq.ant
         exact liftSubformulaLeft hAB
-          (Proposition.LKIsSubformula.trans hCS Proposition.LKIsSubformula.imp_right)
+          (Proposition.IsSubformula.trans hCS Proposition.IsSubformula.imp_right)
       · exact liftSubformulaLeft hC hCS
       · exact liftSubformulaRight hC hCS
   | impR A B hAB d' ih =>
@@ -299,11 +210,11 @@ private lemma cutFreeSubformulaProp {seq : LKSequent Atom}
     rcases hC with (rfl | hC) | (rfl | hC)
     · -- C = A, and A is a subformula of A → B ∈ seq.suc
       exact liftSubformulaRight hAB
-        (Proposition.LKIsSubformula.trans hCS Proposition.LKIsSubformula.imp_left)
+        (Proposition.IsSubformula.trans hCS Proposition.IsSubformula.imp_left)
     · exact liftSubformulaLeft hC hCS
     · -- C = B, and B is a subformula of A → B ∈ seq.suc
       exact liftSubformulaRight hAB
-        (Proposition.LKIsSubformula.trans hCS Proposition.LKIsSubformula.imp_right)
+        (Proposition.IsSubformula.trans hCS Proposition.IsSubformula.imp_right)
     · exact liftSubformulaRight hC hCS
   | weakL A d' ih =>
     -- Conclusion sequent: insert A Γ ⊢ₛ Δ.
@@ -345,7 +256,7 @@ lemma CutFreeLKProof.subformula_property
     {Γ Δ : Finset (Proposition Atom)}
     (d : CutFreeLKProof (Γ ⊢ₛ Δ)) :
     ∀ B ∈ d.val.formulas,
-      ∃ C ∈ Γ ∪ Δ, B.LKIsSubformula C :=
+      ∃ C ∈ Γ ∪ Δ, B.IsSubformula C :=
   cutFreeSubformulaProp d.val d.property
 
 /-! ## Subformula Property for General LK Proofs -/
@@ -360,7 +271,7 @@ theorem LKProof.subformula_property
     {seq : LKSequent Atom} (d : LKProof seq) :
     ∃ d' : CutFreeLKProof seq,
       ∀ B ∈ d'.val.formulas,
-        ∃ C ∈ seq.ant ∪ seq.suc, B.LKIsSubformula C := by
+        ∃ C ∈ seq.ant ∪ seq.suc, B.IsSubformula C := by
   obtain ⟨d'⟩ := d.cutElim
   exact ⟨d', cutFreeSubformulaProp d'.val d'.property⟩
 

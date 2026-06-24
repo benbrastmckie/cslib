@@ -1,7 +1,17 @@
 {
   "status": "partial",
+  "started_at": "2026-06-24T00:00:00Z",
+  "artifacts": [
+    "specs/290_nd_normalization_subformula_property/reports/03_termination-measure-research.md"
+  ],
+  "partial_progress": {
+    "stage": "report_written",
+    "details": "Research report on termination measure and sorry fixes written. Covers: (1) analysis of 3 sorry in conclusion_grounded_or_intro (theorem is false as stated, fix identified), (2) termination measure for normalize_isStronglyNormal (redexWeight approach recommended), (3) Mathlib API for well-founded recursion identified."
+  },
   "metadata": {
-    "cycles_used": 1,
-    "final_state": "partial"
+    "session_id": "sess_1782296192_f489df",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
   }
 }

@@ -89,7 +89,7 @@ inductive Proposition (Atom : Type u) : Type u where
   | and (a b : Proposition Atom)
   /-- Disjunction -/
   | or (a b : Proposition Atom)
-deriving DecidableEq, BEq
+deriving DecidableEq, Repr
 
 /-- Negation as a derived connective: ¬A := A → ⊥ -/
 abbrev Proposition.neg : Proposition Atom → Proposition Atom := (Proposition.imp · .bot)

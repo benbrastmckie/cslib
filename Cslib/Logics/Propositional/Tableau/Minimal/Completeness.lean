@@ -106,11 +106,10 @@ lemma minOpen_no_contradiction (b : IBranch Atom)
     obtain ⟨⟨hneg_sign_b, hneg_form_b⟩, hneg_label_b⟩ := hneg_cond
     simp only [beq_iff_eq] at hpos_sign_b hneg_sign_b hpos_label_b hneg_label_b
     -- Convert formula BEq to propositional equality
-    -- instBEqProposition.beq a b = decide (a = b), so `= true` means `a = b`
     have hpos_form_eq : sf_pos.formula = φ :=
-      Cslib.Logic.PL.proposition_beq_eq _ _ hpos_form_b
+      eq_of_beq hpos_form_b
     have hneg_form_eq : sf_neg.formula = φ :=
-      Cslib.Logic.PL.proposition_beq_eq _ _ hneg_form_b
+      eq_of_beq hneg_form_b
     -- Show findContradiction.isSome via cases on the findSome? result
     simp only [Branch.findContradiction, Option.isSome]
     cases hfind : List.findSome? (fun sf =>
@@ -136,7 +135,7 @@ lemma minOpen_no_contradiction (b : IBranch Atom)
         refine ⟨⟨?_, ?_⟩, ?_⟩
         · -- (sf_neg.sign == .neg) = true
           exact hneg_sign_b ▸ beq_self_eq_true _
-        · -- instBEqProposition.beq sf_neg.formula sf_pos.formula = true
+        · -- (sf_neg.formula == sf_pos.formula) = true
           -- We know sf_neg.formula = φ = sf_pos.formula
           rw [hpos_form_eq]; exact hneg_form_b
         · -- (sf_neg.label == sf_pos.label) = true

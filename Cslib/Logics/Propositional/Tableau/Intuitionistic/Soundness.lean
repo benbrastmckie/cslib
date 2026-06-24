@@ -293,10 +293,10 @@ lemma intClosed_unsatisfiable {World : Type*} [Preorder World]
     rw [hssign] at hsf
     rw [hf, IForces_bot] at hsf
     exact hsf.1 rfl
-  | atom x => simp [hf, BEq.beq, instBEqProposition.beq] at hbot_form
-  | imp a c => simp [hf, BEq.beq, instBEqProposition.beq] at hbot_form
-  | and a c => simp [hf, BEq.beq, instBEqProposition.beq] at hbot_form
-  | or a c => simp [hf, BEq.beq, instBEqProposition.beq] at hbot_form
+  | atom x => simp [beq_iff_eq, hf] at hbot_form
+  | imp a c => simp [beq_iff_eq, hf] at hbot_form
+  | and a c => simp [beq_iff_eq, hf] at hbot_form
+  | or a c => simp [beq_iff_eq, hf] at hbot_form
 
 /-! ## Loop Induction Lemma -/
 

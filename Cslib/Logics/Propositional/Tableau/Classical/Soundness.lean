@@ -125,37 +125,6 @@ private lemma classicalApplyOne_neg_neg (l : Unit) (a : Proposition Atom) :
     classicalApplyOne (SignedFormula.neg (.imp a .bot) l) =
     .linear [SignedFormula.pos a l] := rfl
 
-private lemma prop_beq_eq :
-    ∀ (a b : Proposition Atom), (a == b) = true → a = b := by
-  intro a b h
-  induction a generalizing b with
-  | bot =>
-    cases b <;> first
-      | rfl
-      | (change false = true at h; exact absurd h Bool.false_ne_true)
-  | atom x => cases b with
-    | atom y =>
-      change (x == y) = true at h; exact congrArg _ (eq_of_beq h)
-    | _ => change false = true at h; exact absurd h Bool.false_ne_true
-  | and a1 a2 ih1 ih2 => cases b with
-    | and c d =>
-      change (a1 == c && a2 == d) = true at h
-      simp only [Bool.and_eq_true] at h
-      exact congrArg₂ _ (ih1 _ h.1) (ih2 _ h.2)
-    | _ => change false = true at h; exact absurd h Bool.false_ne_true
-  | or a1 a2 ih1 ih2 => cases b with
-    | or c d =>
-      change (a1 == c && a2 == d) = true at h
-      simp only [Bool.and_eq_true] at h
-      exact congrArg₂ _ (ih1 _ h.1) (ih2 _ h.2)
-    | _ => change false = true at h; exact absurd h Bool.false_ne_true
-  | imp a1 a2 ih1 ih2 => cases b with
-    | imp c d =>
-      change (a1 == c && a2 == d) = true at h
-      simp only [Bool.and_eq_true] at h
-      exact congrArg₂ _ (ih1 _ h.1) (ih2 _ h.2)
-    | _ => change false = true at h; exact absurd h Bool.false_ne_true
-
 /-! ## Key Lemmas -/
 
 /-- Each classical rule application preserves branch satisfiability.
@@ -458,7 +427,7 @@ lemma classically_closed_unsatisfiable (b : Branch (Proposition Atom) Unit)
     | pos =>
       have hvc := hv ⟨.pos, form, label⟩ hmem
       have htrue := hvc.1 rfl
-      have hfb := prop_beq_eq _ _ hbot_eq
+      have hfb := eq_of_beq hbot_eq
       simp only [SignedFormula.formula] at hfb
       rw [hfb] at htrue
       rw [show (HasBot.bot : Proposition Atom) = .bot from rfl,
@@ -484,7 +453,7 @@ lemma classically_closed_unsatisfiable (b : Branch (Proposition Atom) Unit)
       List.any_eq_true.mp hany
     simp only [Bool.and_eq_true, Bool.and_eq_true] at hsfneg_cond
     obtain ⟨⟨hsneg, hformEq⟩, _⟩ := hsfneg_cond
-    have hfeq := prop_beq_eq _ _ hformEq
+    have hfeq := eq_of_beq hformEq
     obtain ⟨sign', form', label'⟩ := sf_neg
     simp only at hfeq
     have hsn : sign' = .neg := by

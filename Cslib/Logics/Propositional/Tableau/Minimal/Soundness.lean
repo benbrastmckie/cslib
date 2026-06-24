@@ -77,44 +77,6 @@ def minBranchSatisfied {World : Type*} [Preorder World]
     (sf.sign = .pos → IForces val botForces (worldOf sf.label) sf.formula) ∧
     (sf.sign = .neg → ¬ IForces val botForces (worldOf sf.label) sf.formula)
 
-/-! ## Helper: BEq to Eq for Proposition -/
-
-/-- Convert a `BEq` equality `(a == b) = true` for `Proposition Atom` to propositional equality.
-
-The `BEq` instance for `Proposition Atom` is derived from `DecidableEq`, so `(a == b) = true`
-is equivalent to `a = b`. -/
-omit [Hashable Atom] in
-lemma proposition_beq_eq :
-    ∀ (a b : Proposition Atom), (a == b) = true → a = b := by
-  intro a b h
-  induction a generalizing b with
-  | bot =>
-    cases b <;> first
-      | rfl
-      | (change false = true at h; exact absurd h Bool.false_ne_true)
-  | atom x => cases b with
-    | atom y =>
-      change (x == y) = true at h; exact congrArg _ (eq_of_beq h)
-    | _ => change false = true at h; exact absurd h Bool.false_ne_true
-  | imp a1 a2 ih1 ih2 => cases b with
-    | imp c d =>
-      change (a1 == c && a2 == d) = true at h
-      simp only [Bool.and_eq_true] at h
-      exact congrArg₂ _ (ih1 _ h.1) (ih2 _ h.2)
-    | _ => change false = true at h; exact absurd h Bool.false_ne_true
-  | and a1 a2 ih1 ih2 => cases b with
-    | and c d =>
-      change (a1 == c && a2 == d) = true at h
-      simp only [Bool.and_eq_true] at h
-      exact congrArg₂ _ (ih1 _ h.1) (ih2 _ h.2)
-    | _ => change false = true at h; exact absurd h Bool.false_ne_true
-  | or a1 a2 ih1 ih2 => cases b with
-    | or c d =>
-      change (a1 == c && a2 == d) = true at h
-      simp only [Bool.and_eq_true] at h
-      exact congrArg₂ _ (ih1 _ h.1) (ih2 _ h.2)
-    | _ => change false = true at h; exact absurd h Bool.false_ne_true
-
 /-! ## Closure Unsatisfiability -/
 
 /-- A minimally closed branch is unsatisfiable in any Kripke model.
@@ -144,10 +106,10 @@ lemma minClosed_unsatisfiable {World : Type*} [Preorder World]
     obtain ⟨sf_neg, hsf_neg_mem, hneg_cond⟩ := hneg
     simp only [Bool.and_eq_true] at hneg_cond
     obtain ⟨⟨hneg_sign_b, hneg_form_b⟩, hneg_label_b⟩ := hneg_cond
-    -- Convert BEq results to = (sign and label have LawfulBEq, formula uses proposition_beq_eq)
+    -- Convert BEq results to =
     simp only [beq_iff_eq] at hneg_sign_b hneg_label_b
     have hneg_form_eq : sf_neg.formula = sf_pos.formula :=
-      proposition_beq_eq _ _ hneg_form_b
+      eq_of_beq hneg_form_b
     -- sf_pos.sign = .pos from isPos
     simp only [SignedFormula.isPos, Sign.isPos] at hispos
     have hpos_sign : sf_pos.sign = .pos := by

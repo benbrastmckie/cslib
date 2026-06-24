@@ -1,0 +1,51 @@
+{
+  "status": "implemented",
+  "started_at": "2026-06-24T16:45:59Z",
+  "completed_at": "2026-06-24T17:05:00Z",
+  "artifacts": [
+    "specs/335_parametric_modal_soundness/summaries/01_shared-axiom-soundness-summary.md",
+    "Cslib/Logics/Modal/Metalogic/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/K/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/T/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/B/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/D/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/S4/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/S5/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/K4/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/K5/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/K45/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/KB5/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/D4/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/D5/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/D45/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/DB/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/TB/Soundness.lean"
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "details": "All 3 phases complete; CI passed for modal metalogic subtree",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 3
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "scoped_build_passed": true,
+    "lint_style_passed": true,
+    "shake_passed": true,
+    "full_build_note": "Pre-existing failures in task 332 (NaturalDeduction/Normalization sorry) and tasks 316/317 (Tableau/SequentCalculus); not introduced by this task",
+    "net_line_reduction": -131
+  },
+  "metadata": {
+    "session_id": "sess_1782319118_5be8e3_335",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
+}

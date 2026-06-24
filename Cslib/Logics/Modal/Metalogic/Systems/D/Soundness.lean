@@ -40,22 +40,11 @@ theorem d_axiom_sound {World : Type*} {φ : Proposition Atom}
     (h_serial : Relation.Serial m.r)
     (w : World) : Satisfies m w φ := by
   cases h_ax with
-  | implyK φ ψ =>
-    intro hφ _
-    exact hφ
-  | implyS φ ψ χ =>
-    intro h₁ h₂ h₃
-    exact h₁ h₃ (h₂ h₃)
-  | efq φ =>
-    intro h
-    exact absurd h id
-  | peirce φ ψ =>
-    intro h
-    by_contra h_not
-    exact h_not (h (fun hφ => absurd hφ h_not))
-  | modalK φ ψ =>
-    intro h_box_imp h_box_phi w' hr
-    exact h_box_imp w' hr (h_box_phi w' hr)
+  | implyK φ ψ => exact Satisfies.implyK_axiom m w φ ψ
+  | implyS φ ψ χ => exact Satisfies.implyS_axiom m w φ ψ χ
+  | efq φ => exact Satisfies.efq_axiom m w φ
+  | peirce φ ψ => exact Satisfies.peirce_axiom m w φ ψ
+  | modalK φ ψ => exact Satisfies.modalK_axiom m w φ ψ
   | modalD φ =>
     intro h_box h_box_neg
     obtain ⟨w', hr⟩ := h_serial.serial w

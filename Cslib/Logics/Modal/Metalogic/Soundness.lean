@@ -42,6 +42,40 @@ open Cslib.Logic
 
 variable {Atom : Type*}
 
+/-! ## Shared Propositional and Modal K Axiom Soundness Lemmas -/
+
+/-- Propositional axiom K (weakening) is valid on all frames. -/
+lemma Satisfies.implyK_axiom {World : Type*} (m : Model World Atom) (w : World)
+    (φ ψ : Proposition Atom) :
+    Satisfies m w (Proposition.imp φ (Proposition.imp ψ φ)) := by
+  intro hφ _; exact hφ
+
+/-- Propositional axiom S (distribution) is valid on all frames. -/
+lemma Satisfies.implyS_axiom {World : Type*} (m : Model World Atom) (w : World)
+    (φ ψ χ : Proposition Atom) :
+    Satisfies m w (Proposition.imp (Proposition.imp φ (Proposition.imp ψ χ))
+      (Proposition.imp (Proposition.imp φ ψ) (Proposition.imp φ χ))) := by
+  intro h₁ h₂ h₃; exact h₁ h₃ (h₂ h₃)
+
+/-- Ex falso quodlibet is valid on all frames. -/
+lemma Satisfies.efq_axiom {World : Type*} (m : Model World Atom) (w : World)
+    (φ : Proposition Atom) :
+    Satisfies m w (Proposition.imp Proposition.bot φ) := by
+  intro h; exact absurd h id
+
+/-- Peirce's law / double negation elimination is valid on all frames. -/
+lemma Satisfies.peirce_axiom {World : Type*} (m : Model World Atom) (w : World)
+    (φ ψ : Proposition Atom) :
+    Satisfies m w (Proposition.imp (Proposition.imp (Proposition.imp φ ψ) φ) φ) := by
+  intro h; by_contra h_not; exact h_not (h (fun hφ => absurd hφ h_not))
+
+/-- Modal axiom K (distribution) is valid on all frames. -/
+lemma Satisfies.modalK_axiom {World : Type*} (m : Model World Atom) (w : World)
+    (φ ψ : Proposition Atom) :
+    Satisfies m w (Proposition.imp (Proposition.box (Proposition.imp φ ψ))
+      (Proposition.imp (Proposition.box φ) (Proposition.box ψ))) := by
+  intro h_box_imp h_box_phi w' hr; exact h_box_imp w' hr (h_box_phi w' hr)
+
 /-! ## Parameterized Soundness Theorem -/
 
 /-- **Parameterized Soundness**: If `Gamma |- phi` (via `DerivationTree Axioms`), then

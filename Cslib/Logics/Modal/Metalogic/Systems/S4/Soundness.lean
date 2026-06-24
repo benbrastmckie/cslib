@@ -51,22 +51,11 @@ theorem s4_axiom_sound {World : Type*} {φ : Proposition Atom}
     (h_trans : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃)
     (w : World) : Satisfies m w φ := by
   cases h_ax with
-  | implyK φ ψ =>
-    intro hφ _
-    exact hφ
-  | implyS φ ψ χ =>
-    intro h₁ h₂ h₃
-    exact h₁ h₃ (h₂ h₃)
-  | efq φ =>
-    intro h
-    exact absurd h id
-  | peirce φ ψ =>
-    intro h
-    by_contra h_not
-    exact h_not (h (fun hφ => absurd hφ h_not))
-  | modalK φ ψ =>
-    intro h_box_imp h_box_phi w' hr
-    exact h_box_imp w' hr (h_box_phi w' hr)
+  | implyK φ ψ => exact Satisfies.implyK_axiom m w φ ψ
+  | implyS φ ψ χ => exact Satisfies.implyS_axiom m w φ ψ χ
+  | efq φ => exact Satisfies.efq_axiom m w φ
+  | peirce φ ψ => exact Satisfies.peirce_axiom m w φ ψ
+  | modalK φ ψ => exact Satisfies.modalK_axiom m w φ ψ
   | modalT φ =>
     intro h_box
     exact h_box w (h_refl w)

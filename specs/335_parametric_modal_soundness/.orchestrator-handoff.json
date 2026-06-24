@@ -1,0 +1,20 @@
+{
+  "status": "implemented",
+  "summary": "Task 335 complete: 5 shared Satisfies.*_axiom lemmas added to shared Soundness.lean; all 15 system Soundness.lean files refactored to delegate the 5 propositional+K cases with one-liners. Net reduction -131 lines. Scoped build, lint-style, and shake all pass. No sorries or new axioms introduced.",
+  "phases_completed": 3,
+  "phases_total": 3,
+  "blockers": [],
+  "continuation_context": null,
+  "artifacts": [
+    "specs/335_parametric_modal_soundness/summaries/01_shared-axiom-soundness-summary.md"
+  ],
+  "verification": {
+    "scoped_build": "PASS",
+    "lint_style": "PASS",
+    "shake": "PASS",
+    "sorry_count": 0,
+    "axiom_count": 0,
+    "net_line_reduction": -131,
+    "pre_existing_failures_note": "Full lake build and lake test have pre-existing failures in task 332 (NaturalDeduction/Normalization sorry) and tasks 316/317 (Tableau/SequentCalculus). These are not from this task."
+  }
+}

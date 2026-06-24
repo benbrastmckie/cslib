@@ -1,16 +1,21 @@
 {
-  "status": "planned",
-  "summary": "Created 4-phase implementation plan to reduce CutElimination.lean heartbeats from 800000 to 200000-400000. Phase 1 adds shared Finset helpers, Phase 2 extracts 3 self-recursive helpers from mutual block, Phase 3 replaces ~100 duplicated patterns, Phase 4 measures and adjusts heartbeat setting.",
+  "status": "implemented",
+  "summary": "Reduced maxHeartbeats from 800000 to 210000 (74% reduction). Extracted 44 eta-reducible lambdas, applied insert_subset_swap and subset_insert₂ helpers throughout, replaced mono calls with monoL/monoR. Made shared helpers non-private for mutual-block visibility. All CI checks pass except pre-existing Tableau.Classical.Completeness failure.",
   "blockers": [],
   "continuation_context": null,
-  "next_action_hint": "implement",
-  "phases_completed": 0,
+  "next_action_hint": "complete",
+  "phases_completed": 4,
   "phases_total": 4,
   "artifacts": [
     {
-      "path": "specs/328_cutelim_refactor_heartbeats/plans/01_refactor-heartbeats.md",
-      "type": "plan",
-      "summary": "Implementation plan for heartbeats refactoring"
+      "path": "specs/328_cutelim_refactor_heartbeats/summaries/01_refactor-heartbeats-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary with CI verification results and plan deviations"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/SequentCalculus/LK/CutElimination.lean",
+      "type": "modified_file",
+      "summary": "maxHeartbeats reduced from 800000 to 210000 via eta-reduction, helper application, and monoL/monoR usage"
     }
   ]
 }

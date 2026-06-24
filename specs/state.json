@@ -76,12 +76,12 @@
     {
       "project_number": 328,
       "project_name": "cutelim_refactor_heartbeats",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Refactor CutElimination.lean to reduce or eliminate the maxHeartbeats 800000 override. Extract shared Finset subset-proof helpers (insert membership transport, multi-level weakening combinators) to reduce elaboration cost in the mutual block. Consider splitting the 902-line file: move the four cutAdm_right_* helpers into a CutAdmRight.lean module and keep cutAdmissibility + cutElim in CutElimination.lean. Target: default heartbeats (200000) or at most 400000. Ensure the public API (cutAdmissibility, LKProof.cutElim, CutFreeLKProof.mono) remains unchanged",
       "topic": "Propositional Logic",
       "created": "2026-06-24T11:27:09Z",
-      "last_updated": "2026-06-24T11:52:34Z",
+      "last_updated": "2026-06-24T15:03:55Z",
       "dependencies": [
         327
       ],

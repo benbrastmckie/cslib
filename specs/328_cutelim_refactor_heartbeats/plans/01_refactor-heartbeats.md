@@ -1,7 +1,7 @@
 # Implementation Plan: Task #328
 
 - **Task**: 328 - Refactor CutElimination.lean to reduce or eliminate the maxHeartbeats 800000 override
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 4 hours
 - **Dependencies**: 327 (completed)
 - **Research Inputs**: specs/328_cutelim_refactor_heartbeats/reports/01_refactor-heartbeats.md

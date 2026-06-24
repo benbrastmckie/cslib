@@ -34,12 +34,12 @@ next_project_number: 330
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 290 [PLANNED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
-323 [IMPLEMENTING] — Fix two intuitionistic tableau implementation bugs: (1) isIntuiti
+323 [IMPLEMENTED] — Fix two intuitionistic tableau implementation bugs: (1) isIntuiti
   └─ 316 [BLOCKED] — Fill the 6 sorry instances in propositional tableau soundness pro
     └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
-325 [NOT STARTED] — Deduplicate identical definitions across minimal/intuitionistic t
+325 [PLANNED] — Deduplicate identical definitions across minimal/intuitionistic t
   └─ 326 [NOT STARTED] — Fix ~35 linter warnings across the propositional tableau soundnes
-328 [NOT STARTED] — Refactor CutElimination.lean to reduce or eliminate the maxHeartb
+328 [IMPLEMENTING] — Refactor CutElimination.lean to reduce or eliminate the maxHeartb
   └─ 329 [NOT STARTED] — Prove the subformula property as a corollary of cut elimination: 
 
 ### Temporal Logic
@@ -76,7 +76,7 @@ next_project_number: 330
 ---
 
 ### 328. Cutelim refactor heartbeats
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 327
@@ -108,7 +108,7 @@ next_project_number: 330
 ---
 
 ### 325. Tableau dedup dead code cleanup
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 324
@@ -131,12 +131,13 @@ next_project_number: 330
 ---
 
 ### 323. Fix intuitionistic tableau bugs
-- **Status**: [IMPLEMENTING]
+- **Status**: [IMPLEMENTED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [323_fix_intuitionistic_tableau_bugs/reports/01_bug-analysis.md]
 - **Plan**: [323_fix_intuitionistic_tableau_bugs/plans/01_bug-fix-plan.md]
+- **Summary**: [323_fix_intuitionistic_tableau_bugs/summaries/01_bug-fix-summary.md]
 
 **Description**: Fix two intuitionistic tableau implementation bugs: (1) isIntuitionisticallyClosed missing complementary-pair closure check — only checks T(⊥) but should also check Branch.hasContradiction, causing valid formulas like p→p to return .openBranch; (2) intTImpRule uses Nat ordering (· ≥ w) as Kripke accessibility proxy, but this fires at sibling worlds that are NOT accessible, causing invalid formula ((p→⊥)→q)∨(p→r) to incorrectly close. Fix requires: (a) add || Branch.hasContradiction b to isIntuitionisticallyClosed in Expansion.lean:67, (b) track parent-child accessibility in expansion state and restrict intTImpRule in Rules.lean:129 to fire only along actual accessibility paths. Both bugs verified by #eval. See specs/316_propositional_tableau_soundness/reports/04_b4-hard-research.md and .orchestrator-handoff.json for detailed analysis and counterexamples
 

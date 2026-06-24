@@ -1,0 +1,16 @@
+{
+  "status": "planned",
+  "summary": "4-phase plan created: fix closure check (Bug 1), add accessibility tracking (Bug 2), update soundness/completeness proofs, verify with #eval test suite",
+  "blockers": [],
+  "continuation_context": null,
+  "artifacts": [
+    {
+      "path": "specs/323_fix_intuitionistic_tableau_bugs/plans/01_bug-fix-plan.md",
+      "type": "plan",
+      "summary": "Implementation plan with 4 sequential phases covering both bug fixes, proof updates, and verification"
+    }
+  ],
+  "phases_completed": 0,
+  "phases_total": 4,
+  "next_action_hint": "implement"
+}

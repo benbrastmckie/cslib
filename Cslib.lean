@@ -111,6 +111,7 @@ public import Cslib.Foundations.Logic.Theorems.Temporal.TemporalDerived
 public import Cslib.Foundations.Order.BrouwerianSemilattice
 public import Cslib.Foundations.Order.HilbertAlgebra
 public import Cslib.Foundations.Order.HilbertAlgebra.DiegoEmbedding
+public import Cslib.Foundations.Order.HilbertAlgebra.FreeMeetExtension
 public import Cslib.Foundations.Relation.Attr
 public import Cslib.Foundations.Relation.Confluence
 public import Cslib.Foundations.Relation.Defs
@@ -437,6 +438,7 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertAlgCompletenes
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertConservativeGlivenko
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertLindenbaum
+public import Cslib.Logics.Propositional.Semantics.Algebra.ImpConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.KripkeBridge
 public import Cslib.Logics.Propositional.Semantics.Algebra.NonemptyLowerSet
 public import Cslib.Logics.Propositional.Semantics.Algebra.PointedBrouwerian
@@ -472,7 +474,9 @@ public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Expansion
 public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Rules
 public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Soundness
 public import Cslib.Logics.Propositional.Tableau.Minimal
+public import Cslib.Logics.Propositional.Tableau.Minimal.Completeness
 public import Cslib.Logics.Propositional.Tableau.Minimal.DecisionProcedure
+public import Cslib.Logics.Propositional.Tableau.Minimal.Soundness
 public import Cslib.Logics.Temporal.ConservativeExtension
 public import Cslib.Logics.Temporal.FromPropositional
 public import Cslib.Logics.Temporal.Metalogic

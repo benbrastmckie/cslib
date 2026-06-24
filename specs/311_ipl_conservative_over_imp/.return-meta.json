@@ -1,49 +1,15 @@
 {
-  "status": "researched",
-  "artifacts": [
-    {
-      "type": "report",
-      "path": "specs/311_ipl_conservative_over_imp/reports/02_dual-ordering-research.md",
-      "summary": "Definitive analysis of reverse-inclusion ordering on HilbertFilter: fixes himp-preservation but target is not a GHA, so approach fails for general case"
-    },
-    {
-      "type": "handoff",
-      "path": "specs/311_ipl_conservative_over_imp/.orchestrator-handoff.json",
-      "summary": "Orchestrator handoff with blocking status and two viable alternative routes"
-    }
-  ],
-  "next_steps": "Task remains [BLOCKED]. Either complete task 292 (LJ cut-elimination) for proof-theoretic route, or create new task for Hilbert-to-Heyting algebraic completion.",
-  "metadata": {
-    "session_id": "sess_1750723200_a3b1c2_311_dual",
-    "agent_type": "cslib-research-hard-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-hard-agent"],
-    "findings_count": 7,
-    "adversarial_verification_triggered": true,
-    "reference_grounding_tier": 1,
-    "bibkey_verification_status": "Rasiowa1974 verified; Diego1966 not in references.bib"
+  "status": "in_progress",
+  "started_at": "2026-06-24T00:00:00Z",
+  "artifacts": [],
+  "partial_progress": {
+    "stage": "initializing",
+    "details": "Agent started, implementing phases 3 and 4"
   },
-  "memory_candidates": [
-    {
-      "content": "The Deduction Theorem for Hilbert filters states: c in K \\/ principal(a) iff a himp c in K, where \\/ is the join in the inclusion-ordered filter lattice. Proof uses the K and S axioms of Hilbert algebras by induction on the derivation of c from gen(K union principal(a)). The forward direction for the MP step uses S: from a himp (c1 himp c) in K and a himp c1 in K, derive (a himp c1) himp (a himp c) in K, then a himp c in K by MP. This theorem characterizes the join of a filter with a principal filter and is key to understanding the filter lattice structure.",
-      "category": "TECHNIQUE",
-      "source_artifact": "specs/311_ipl_conservative_over_imp/reports/02_dual-ordering-research.md",
-      "confidence": 0.9,
-      "suggested_keywords": ["Hilbert-algebra", "filter", "deduction-theorem", "principal-filter", "join", "himp"]
-    },
-    {
-      "content": "The reverse-inclusion ordering on HilbertFilter makes principal order-preserving and gives principal(a himp b) = principal(a) himp_rev principal(b). However, the reverse-inclusion filter lattice is NOT a GHA in general because the dual frame property (join distributes over arbitrary intersection) fails for non-principal filters. It IS a GHA for finite Hilbert algebras. This means HAValid cannot be instantiated at the reverse-inclusion lattice for infinite algebras, blocking the conservative extension proof via this route.",
-      "category": "INSIGHT",
-      "source_artifact": "specs/311_ipl_conservative_over_imp/reports/02_dual-ordering-research.md",
-      "confidence": 0.95,
-      "suggested_keywords": ["HilbertFilter", "reverse-inclusion", "dual-frame", "GHA", "conservative-extension", "Diego-embedding"]
-    },
-    {
-      "content": "Pattern for working conservative extension proofs in CSLib: all three existing theorems (IPL over MPL, IPL over ConjImp, ConjImpBot over ConjImp) follow the same pattern: (1) convert Derivable to algebraic validity via completeness, (2) instantiate at a COMPLETION of the target algebra that is a HeytingAlgebra, (3) use a himp-preserving embedding map to transfer back. The embedding MUST preserve himp as EQUALITY (not just <=). WithBot.some, LowerSet.Iic, and iicNonemptyLowerSet all satisfy this. The principal filter map does NOT.",
-      "category": "PATTERN",
-      "source_artifact": "specs/311_ipl_conservative_over_imp/reports/02_dual-ordering-research.md",
-      "confidence": 0.95,
-      "suggested_keywords": ["conservative-extension", "algebraic-validity", "completion", "embedding", "himp-morphism", "CSLib-pattern"]
-    }
-  ]
+  "metadata": {
+    "session_id": "sess_1782276788_0c858f",
+    "agent_type": "cslib-implementation-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
+  }
 }

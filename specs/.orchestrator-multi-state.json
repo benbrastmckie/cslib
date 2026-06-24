@@ -1,32 +1,54 @@
 {
-  "session_id": "sess_1782238418_d0d7dd",
+  "session_id": "sess_1750723200_a3b1c2",
   "task_numbers": [
-    297,
-    298
+    310,
+    311,
+    312
   ],
   "waves": [
     [
-      297
+      310
     ],
     [
-      298
+      311
+    ],
+    [
+      312
     ]
   ],
   "dependency_graph": {
-    "297": [],
-    "298": [
-      "297"
+    "310": [],
+    "311": [
+      310
+    ],
+    "312": [
+      311
     ]
   },
-  "cycle_count": 6,
-  "max_cycles": 10,
-  "failed_tasks": [],
+  "cycle_count": 1,
+  "max_cycles": 15,
   "completed_tasks": [
-    297,
-    298
+    310
   ],
+  "failed_tasks": [],
   "current_statuses": {
-    "297": "completed",
-    "298": "completed"
+    "310": "completed",
+    "311": "not_started",
+    "312": "not_started",
+    "320": "implementing",
+    "290": "planned",
+    "316": "planned",
+    "293": "researched",
+    "317": "researched"
+  },
+  "task_types": {
+    "310": "cslib",
+    "311": "cslib",
+    "312": "cslib"
+  },
+  "agents": {
+    "research": "cslib-research-hard-agent",
+    "plan": "planner-hard-agent",
+    "implement": "cslib-implementation-hard-agent"
   }
 }

@@ -11,9 +11,9 @@ next_project_number: 321
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,292,299,301,310,314,316,320 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215,293,300,311,317 | 36,37,180,290,299,310,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
-| 3 | 41,275,312,319 | 39,40,311,317 | Foundations, Propositional Logic, Algebraic Semantics |
+| 1 | 36,37,180,226,241,245,278,290,299,301,311,314,316,320 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 2 | 39,40,181,215,293,300,312,317 | 36,37,180,290,299,311,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 3 | 41,275,319 | 39,40,317 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -33,14 +33,13 @@ next_project_number: 321
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-290 [NOT STARTED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
-  └─ 293 [NOT STARTED] — Establish the formal Curry-Howard isomorphism between Theory.Deri
-292 [IMPLEMENTING] — After task 279 delivers LJ with cut elimination, formalize the co
+290 [IMPLEMENTING] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
+  └─ 293 [RESEARCHED] — Establish the formal Curry-Howard isomorphism between Theory.Deri
 314 [IMPLEMENTING] — Implement the classical sequent calculus LK for propositional log
-316 [RESEARCHED] — Fill the 6 sorry instances in propositional tableau soundness pro
-  └─ 317 [NOT STARTED] — Fill the 8 sorry instances in propositional tableau completeness 
+316 [PLANNED] — Fill the 6 sorry instances in propositional tableau soundness pro
+  └─ 317 [RESEARCHED] — Fill the 8 sorry instances in propositional tableau completeness 
     └─ 319 [NOT STARTED] — Build dedicated Soundness and Completeness modules for the minima
-320 [NOT STARTED] — Remove ND-level metalogic that has been superseded by Hilbert-pri
+320 [IMPLEMENTING] — Remove ND-level metalogic that has been superseded by Hilbert-pri
 
 ### Temporal Logic
 
@@ -59,16 +58,15 @@ next_project_number: 321
 
 ### Algebraic Semantics
 
-310 [IMPLEMENTING] — Formalize the Diego embedding theorem (Diego 1966): every Hilbert
-  └─ 311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
-    └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified 
+311 [NOT STARTED] — Prove the conservative extension theorem: IPL is conservative ove
+  └─ 312 [NOT STARTED] — Consolidate the full conservative extension chain into a unified 
 
 ### Uncategorized
 
 ## Tasks
 
 ### 320. Remove nd metalogic cleanup
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -88,7 +86,7 @@ next_project_number: 321
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 316
@@ -98,7 +96,7 @@ next_project_number: 321
 ---
 
 ### 316. Propositional tableau soundness
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -111,12 +109,23 @@ next_project_number: 321
 
 ---
 
+### 315. Lj intuitionistic sequent calculus
+- **Status**: [COMPLETED]
+- **Task Type**: cslib
+- **Dependencies**: Task 314
+
+**Description**: Implement the intuitionistic sequent calculus LJ for propositional logic.
+
+---
+
 ### 314. Lk classical sequent calculus
 - **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
-- **Research**: [314_lk_classical_sequent_calculus/reports/01_lk-research.md]
+- **Research**:
+  - [314_lk_classical_sequent_calculus/reports/01_lk-research.md]
+  - [314_lk_classical_sequent_calculus/reports/02_cutelim-rewrite-research.md]
 - **Plan**: [314_lk_classical_sequent_calculus/plans/01_lk-plan.md]
 
 **Description**: Implement the classical sequent calculus LK for propositional logic. Create shared definitions (Defs.lean with LKSequent type, scoped notation), LK proof inductive with all-additive Finset-based presentation (LK/Basic.lean), structural admissibility lemmas (weakening, monotone contexts), soundness (LK/Soundness.lean), cut elimination / Hauptsatz (LK/CutElimination.lean) via lexicographic induction on (formula complexity, height sum), and equivalence bridges hilbert_iff_lk and nd_iff_lk composed through existing ND bridge. Completeness follows as corollary via Hilbert bridge. File layout: Cslib/Logics/Propositional/SequentCalculus/{Defs,LK/Basic,LK/Soundness,LK/CutElimination,LK/Completeness}.lean. Reuse Proposition type, Proposition.complexity, InferenceSystem typeclass, and existing hilbert_iff_nd_ctx bridge. Parent task: 279.
@@ -152,7 +161,7 @@ Literature sources:
 ---
 
 ### 310. Diego embedding
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 304
@@ -206,7 +215,7 @@ Literature sources:
 ---
 
 ### 293. Curry howard nd typed lambda
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 290
@@ -216,7 +225,7 @@ Literature sources:
 ---
 
 ### 292. Ipl decidability cutfree lj
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 315
@@ -227,8 +236,17 @@ Literature sources:
 
 ---
 
+### 291. Three way proof system equivalence
+- **Status**: [COMPLETED]
+- **Task Type**: cslib
+- **Dependencies**: Task 314, Task 315
+
+**Description**: Three-way proof system equivalence as TFAE theorems for CPL, IPL, and MPL.
+
+---
+
 ### 290. Nd normalization subformula property
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

@@ -11,7 +11,7 @@ next_project_number: 327
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,314,321,322,323,324 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,278,290,299,301,321,322,323,324 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,300,316,325 | 36,37,180,299,323,324 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
 | 3 | 41,275,317,326 | 39,40,316,325 | Foundations, Propositional Logic |
 
@@ -34,7 +34,6 @@ next_project_number: 327
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 290 [PLANNED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
-314 [IMPLEMENTING] — Implement the classical sequent calculus LK for propositional log
 323 [NOT STARTED] — Fix two intuitionistic tableau implementation bugs: (1) isIntuiti
   └─ 316 [BLOCKED] — Fill the 6 sorry instances in propositional tableau soundness pro
     └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
@@ -187,7 +186,7 @@ next_project_number: 327
 ---
 
 ### 314. Lk classical sequent calculus
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

@@ -666,12 +666,12 @@
     {
       "project_number": 314,
       "project_name": "lk_classical_sequent_calculus",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Implement the classical sequent calculus LK for propositional logic. Create shared definitions (Defs.lean with LKSequent type, scoped notation), LK proof inductive with all-additive Finset-based presentation (LK/Basic.lean), structural admissibility lemmas (weakening, monotone contexts), soundness (LK/Soundness.lean), cut elimination / Hauptsatz (LK/CutElimination.lean) via lexicographic induction on (formula complexity, height sum), and equivalence bridges hilbert_iff_lk and nd_iff_lk composed through existing ND bridge. Completeness follows as corollary via Hilbert bridge. File layout: Cslib/Logics/Propositional/SequentCalculus/{Defs,LK/Basic,LK/Soundness,LK/CutElimination,LK/Completeness}.lean. Reuse Proposition type, Proposition.complexity, InferenceSystem typeclass, and existing hilbert_iff_nd_ctx bridge. Parent task: 279.\n\nLiterature sources:\n- specs/literature/sources/negri_von_plato_2001/section04_ch3-classical-sequent-calculus.md — G3cp rules, admissibility of structural rules, completeness (primary reference for LK design)\n- specs/literature/sources/troelstra_schwichtenberg_2000/section04_ch3-gentzen-systems.md — LK/LJ definitions, G3-style systems, structural rules\n- specs/literature/sources/troelstra_schwichtenberg_2000/section05_ch4-cut-elimination.md — Hauptsatz proof structure, subformula property, termination argument\n- specs/literature/sources/negri_von_plato_2001/section06_ch5-variant-sequent-calculi.md — Alternative calculus designs, independent contexts\n- specs/literature/sources/negri_von_plato_2001/section07_ch6-8-extensions-translations.md — ND-SC translations for bridge proofs\n- specs/literature/sources/gentzen_1935/gentzen_1935_sec03.md — Original LK/LJ definitions and Hauptsatz",
       "topic": "Propositional Logic",
       "created": "2026-06-23T19:33:42Z",
-      "last_updated": "2026-06-24T03:33:09Z",
+      "last_updated": "2026-06-24T11:22:45Z",
       "next_artifact_number": 1,
       "artifacts": [
         {
@@ -710,7 +710,8 @@
           ]
         ]
       },
-      "session_id": "sess_1782245580_188995_314"
+      "session_id": "sess_1782245580_188995_314",
+      "completion_summary": "Implemented cut elimination (Hauptsatz) for classical sequent calculus LK. CutElimination.lean compiles with 0 sorry and clean axioms (propext, Classical.choice, Quot.sound). Contains cutAdmissibility (cut on any formula can be eliminated from cut-free proofs) and LKProof.cutElim (every LK proof has a cut-free equivalent)."
     },
     {
       "project_number": 319,

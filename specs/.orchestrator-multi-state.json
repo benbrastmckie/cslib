@@ -1,26 +1,30 @@
 {
-  "session_id": "sess_1750809600_a3b2c1",
-  "task_numbers": [316, 317],
-  "waves": [[316], [317]],
-  "max_cycles": 10,
-  "cycle_count": 1,
+  "session_id": "sess_1750824000_orchestrate",
+  "task_numbers": [323, 316, 317],
+  "waves": [[323], [316], [317]],
+  "dependency_graph": {"323": [], "316": [323], "317": [316, 323]},
+  "max_cycles": 15,
+  "cycle_count": 0,
+  "failed_tasks": [],
   "completed_tasks": [],
-  "failed_tasks": [316, 317],
   "current_statuses": {
+    "323": "not_started",
     "316": "blocked",
     "317": "blocked"
   },
   "task_dirs": {
+    "323": "specs/323_fix_intuitionistic_tableau_bugs",
     "316": "specs/316_propositional_tableau_soundness",
     "317": "specs/317_propositional_tableau_completeness"
   },
   "research_agents": {
+    "323": "cslib-research-agent",
     "316": "cslib-research-agent",
     "317": "cslib-research-agent"
   },
   "implement_agents": {
+    "323": "cslib-implementation-agent",
     "316": "cslib-implementation-agent",
     "317": "cslib-implementation-agent"
-  },
-  "lit_flag": true
+  }
 }

@@ -1,7 +1,7 @@
 # Implementation Plan: Task #290 (v3)
 
 - **Task**: 290 - ND Normalization and Subformula Property
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 16 hours (10 hours completed + 6 hours remaining)
 - **Dependencies**: None (task 266 completed and archived; Derivation type and subs already in place)
 - **Research Inputs**:

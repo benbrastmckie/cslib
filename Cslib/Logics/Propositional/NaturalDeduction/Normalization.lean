@@ -831,95 +831,99 @@ theorem Theory.Derivation.subformula_property_of_isStronglyNormal
 
 /-! ## Normalization Termination Lemmas -/
 
-/-- A strongly normal derivation is a fixpoint of `normalizeAux`: applying the normalizer
-with any fuel returns the derivation unchanged. This holds because SN derivations have no
-root redexes or commuting conversions, so `reduceRoot` returns `none`, and subterms are
-recursively fixed by structural induction. -/
-theorem Theory.Derivation.normalizeAux_fixpoint {G : Ctx Atom} {A : Proposition Atom}
-    (d : T.Derivation G A) (h : d.isStronglyNormal = true) (n : Nat) :
-    d.normalizeAux n = d := by
-  -- Show reduceRoot on SN derivation is none
-  have hred : d.reduceRoot = none := by
-    cases d with
-    | ax _ | ass _ | andI _ _ _ | orI1 _ _ | orI2 _ _ | impI _ _ => rfl
-    | andE1 _ D =>
-      simp only [isStronglyNormal] at h
-      cases D with
-      | andI _ _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
-      | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => rfl
-    | andE2 _ D =>
-      simp only [isStronglyNormal] at h
-      cases D with
-      | andI _ _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
-      | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => rfl
-    | orE _ D _ _ =>
-      simp only [isStronglyNormal] at h
-      cases D with
-      | orI1 _ _ | orI2 _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
-      | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => rfl
-    | impE D _ =>
-      simp only [isStronglyNormal] at h
-      cases D with
-      | impI _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
-      | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => rfl
-  -- Main proof by induction on n, case split on d
-  induction n with
+@[simp] private theorem Theory.Derivation.normalizeAux_ax {h : A ∈ T}
+    (n : Nat) : (ax h : T.Derivation G A).normalizeAux n = ax h := by
+  cases n with
   | zero => rfl
-  | succ n _ =>
-    -- For each constructor, normalize subterms by structural recursion (normalizeAux_fixpoint on subterms)
-    -- and use hred to close the reduceRoot match
+  | succ n => simp [normalizeAux, reduceRoot]
+
+@[simp] private theorem Theory.Derivation.normalizeAux_ass {h : A ∈ G}
+    (n : Nat) : (ass h : T.Derivation G A).normalizeAux n = ass h := by
+  cases n with
+  | zero => rfl
+  | succ n => simp [normalizeAux, reduceRoot]
+
+private theorem Theory.Derivation.normalizeAux_fixpoint_aux (n : Nat) :
+    ∀ {G : Ctx Atom} {A : Proposition Atom} (d : T.Derivation G A),
+    d.isStronglyNormal = true → d.normalizeAux n = d := by
+  induction n with
+  | zero => intros; rfl
+  | succ n ihn =>
+    intro G A d h
+    have hred : d.reduceRoot = none := by
+      cases d with
+      | ax _ | ass _ | andI _ _ _ | orI1 _ _ | orI2 _ _ | impI _ _ => rfl
+      | andE1 _ D =>
+        simp only [isStronglyNormal] at h; cases D with
+        | andI _ _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
+        | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => rfl
+      | andE2 _ D =>
+        simp only [isStronglyNormal] at h; cases D with
+        | andI _ _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
+        | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => rfl
+      | orE _ D _ _ =>
+        simp only [isStronglyNormal] at h; cases D with
+        | orI1 _ _ | orI2 _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
+        | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => rfl
+      | impE D _ =>
+        simp only [isStronglyNormal] at h; cases D with
+        | impI _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
+        | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => rfl
     cases d with
     | ax _ | ass _ => simp [normalizeAux, hred]
     | andI _ D₁ D₂ =>
       simp only [isStronglyNormal, Bool.and_eq_true] at h
-      simp only [normalizeAux, D₁.normalizeAux_fixpoint h.1, D₂.normalizeAux_fixpoint h.2, hred]
-    | orI1 _ D =>
-      simp only [isStronglyNormal] at h
-      simp only [normalizeAux, D.normalizeAux_fixpoint h, hred]
-    | orI2 _ D =>
-      simp only [isStronglyNormal] at h
-      simp only [normalizeAux, D.normalizeAux_fixpoint h, hred]
-    | impI _ D =>
-      simp only [isStronglyNormal] at h
-      simp only [normalizeAux, D.normalizeAux_fixpoint h, hred]
-    | andE1 _ D =>
-      simp only [isStronglyNormal] at h
-      cases D with
+      simp only [normalizeAux, ihn _ h.1, ihn _ h.2, hred]
+    | orI1 _ D | orI2 _ D | impI _ D =>
+      simp only [isStronglyNormal] at h; simp only [normalizeAux, ihn _ h, hred]
+    | andE1 _ D | andE2 _ D =>
+      simp only [isStronglyNormal] at h; cases D with
       | andI _ _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
       | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ =>
-        simp only [normalizeAux, normalizeAux_fixpoint _ h, hred]
-    | andE2 _ D =>
-      simp only [isStronglyNormal] at h
-      cases D with
-      | andI _ _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
-      | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ =>
-        simp only [normalizeAux, normalizeAux_fixpoint _ h, hred]
+        simp only [normalizeAux, ihn _ h, hred]
     | orE _ D DA DB =>
-      simp only [isStronglyNormal] at h
-      cases D with
+      simp only [isStronglyNormal] at h; cases D with
       | orI1 _ _ | orI2 _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
       | ax _ | ass _ =>
         simp only [isStronglyNormal, Bool.true_and, Bool.and_eq_true] at h
-        obtain ⟨hDA, hDB⟩ := h
-        simp only [normalizeAux, DA.normalizeAux_fixpoint hDA,
-          DB.normalizeAux_fixpoint hDB, hred]
-      | andE1 _ _ | andE2 _ _ | impE _ _ =>
+        simp only [normalizeAux, normalizeAux_ax, normalizeAux_ass,
+          ihn _ h.1, ihn _ h.2, hred]
+      | andE1 _ D' =>
         simp only [isStronglyNormal, Bool.and_eq_true] at h
         obtain ⟨⟨hD, hDA⟩, hDB⟩ := h
-        simp only [normalizeAux, normalizeAux_fixpoint _ hD,
-          DA.normalizeAux_fixpoint hDA, DB.normalizeAux_fixpoint hDB, hred]
+        simp only [normalizeAux, ihn (andE1 _ D') hD, ihn DA hDA, ihn DB hDB, hred]
+      | andE2 _ D' =>
+        simp only [isStronglyNormal, Bool.and_eq_true] at h
+        obtain ⟨⟨hD, hDA⟩, hDB⟩ := h
+        simp only [normalizeAux, ihn (andE2 _ D') hD, ihn DA hDA, ihn DB hDB, hred]
+      | impE D' E' =>
+        simp only [isStronglyNormal, Bool.and_eq_true] at h
+        obtain ⟨⟨hD, hDA⟩, hDB⟩ := h
+        simp only [normalizeAux, ihn (impE D' E') hD, ihn DA hDA, ihn DB hDB, hred]
     | impE D E =>
-      simp only [isStronglyNormal] at h
-      cases D with
+      simp only [isStronglyNormal] at h; cases D with
       | impI _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
       | ax _ | ass _ =>
         simp only [isStronglyNormal, Bool.true_and, Bool.and_eq_true] at h
-        obtain ⟨_, hE⟩ := h
-        simp only [normalizeAux, E.normalizeAux_fixpoint hE, hred]
-      | andE1 _ _ | andE2 _ _ | impE _ _ =>
+        simp only [normalizeAux, normalizeAux_ax, normalizeAux_ass, ihn _ h, hred]
+      | andE1 _ D' =>
         simp only [isStronglyNormal, Bool.and_eq_true] at h
         obtain ⟨hD, hE⟩ := h
-        simp only [normalizeAux, normalizeAux_fixpoint _ hD, E.normalizeAux_fixpoint hE, hred]
+        simp only [normalizeAux, ihn (andE1 _ D') hD, ihn E hE, hred]
+      | andE2 _ D' =>
+        simp only [isStronglyNormal, Bool.and_eq_true] at h
+        obtain ⟨hD, hE⟩ := h
+        simp only [normalizeAux, ihn (andE2 _ D') hD, ihn E hE, hred]
+      | impE D' E' =>
+        simp only [isStronglyNormal, Bool.and_eq_true] at h
+        obtain ⟨hD, hE⟩ := h
+        simp only [normalizeAux, ihn (impE D' E') hD, ihn E hE, hred]
+
+/-- A strongly normal derivation is a fixpoint of `normalizeAux`. -/
+theorem Theory.Derivation.normalizeAux_fixpoint {G : Ctx Atom} {A : Proposition Atom}
+    (d : T.Derivation G A) (h : d.isStronglyNormal = true) (n : Nat) :
+    d.normalizeAux n = d :=
+  normalizeAux_fixpoint_aux n d h
 
 /-! ## Normalization Produces Strongly Normal Derivations -/
 
@@ -934,6 +938,8 @@ only creates new redexes involving `arg`. Since `arg` derives `A` (a proper subf
 of `A → B`), any new maximal formula has strictly lower complexity.
 -/
 
+private def Theory.Derivation.conclusionComplexity (_ : T.Derivation G A) : Nat := A.complexity
+
 /-- Weight of a derivation for the termination measure. Counts redexes weighted by
 formula complexity for proper β-redexes, and by 1 for commuting conversions. -/
 private def Theory.Derivation.redexWeight : T.Derivation G A → Nat
@@ -941,26 +947,26 @@ private def Theory.Derivation.redexWeight : T.Derivation G A → Nat
   | andI _ D₁ D₂ => D₁.redexWeight + D₂.redexWeight
   | andE1 _ D =>
     match D with
-    | andI _ D₁ _ => D₁.conclusion.complexity + 1 + D.redexWeight
+    | andI _ D₁ _ => D₁.conclusionComplexity + 1 + D.redexWeight
     | orE _ _ _ _ => 1 + D.redexWeight
     | _ => D.redexWeight
   | andE2 _ D =>
     match D with
-    | andI _ _ D₂ => D₂.conclusion.complexity + 1 + D.redexWeight
+    | andI _ _ D₂ => D₂.conclusionComplexity + 1 + D.redexWeight
     | orE _ _ _ _ => 1 + D.redexWeight
     | _ => D.redexWeight
   | orI1 _ D => D.redexWeight
   | orI2 _ D => D.redexWeight
   | orE _ D DA DB =>
     match D with
-    | orI1 _ D0 => D0.conclusion.complexity + 1 + D.redexWeight + DA.redexWeight + DB.redexWeight
-    | orI2 _ D0 => D0.conclusion.complexity + 1 + D.redexWeight + DA.redexWeight + DB.redexWeight
+    | orI1 _ D0 => D0.conclusionComplexity + 1 + D.redexWeight + DA.redexWeight + DB.redexWeight
+    | orI2 _ D0 => D0.conclusionComplexity + 1 + D.redexWeight + DA.redexWeight + DB.redexWeight
     | orE _ _ _ _ => 1 + D.redexWeight + DA.redexWeight + DB.redexWeight
     | _ => D.redexWeight + DA.redexWeight + DB.redexWeight
   | impI _ D => D.redexWeight
   | impE D E =>
     match D with
-    | impI _ _ => E.conclusion.complexity + 1 + D.redexWeight + E.redexWeight
+    | impI _ _ => E.conclusionComplexity + 1 + D.redexWeight + E.redexWeight
     | orE _ _ _ _ => 1 + D.redexWeight + E.redexWeight
     | _ => D.redexWeight + E.redexWeight
 
@@ -973,15 +979,13 @@ private theorem Theory.Derivation.sn_redexWeight_zero {G : Ctx Atom} {A : Propos
     simp only [isStronglyNormal, Bool.and_eq_true] at h
     simp only [redexWeight, ih₁ h.1, ih₂ h.2]
   | andE1 _ D ih =>
-    simp only [isStronglyNormal] at h
     cases D with
     | andI _ _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
-    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => simp only [redexWeight, ih h]
+    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => exact ih h
   | andE2 _ D ih =>
-    simp only [isStronglyNormal] at h
     cases D with
     | andI _ _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
-    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => simp only [redexWeight, ih h]
+    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => exact ih h
   | orI1 _ D ih =>
     simp only [isStronglyNormal] at h; simp only [redexWeight, ih h]
   | orI2 _ D ih =>
@@ -995,19 +999,18 @@ private theorem Theory.Derivation.sn_redexWeight_zero {G : Ctx Atom} {A : Propos
       simp only [redexWeight, ihA h.1, ihB h.2]
     | andE1 _ _ | andE2 _ _ | impE _ _ =>
       simp only [isStronglyNormal, Bool.and_eq_true] at h
-      simp only [redexWeight, ih h.1.1, ihA h.1.2, ihB h.2]
+      exact Nat.add_eq_zero_iff.mpr ⟨Nat.add_eq_zero_iff.mpr ⟨ih h.1.1, ihA h.1.2⟩, ihB h.2⟩
   | impI _ D ih =>
     simp only [isStronglyNormal] at h; simp only [redexWeight, ih h]
   | impE D E ih ihE =>
-    simp only [isStronglyNormal] at h
     cases D with
     | impI _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
     | ax _ | ass _ =>
-      simp only [isStronglyNormal, Bool.true_and, Bool.and_eq_true] at h
-      simp only [redexWeight, ihE h.2]
+      simp only [isStronglyNormal, Bool.true_and] at h
+      simp only [redexWeight, Nat.zero_add]; exact ihE h
     | andE1 _ _ | andE2 _ _ | impE _ _ =>
       simp only [isStronglyNormal, Bool.and_eq_true] at h
-      simp only [redexWeight, ih h.1, ihE h.2]
+      exact Nat.add_eq_zero_iff.mpr ⟨ih h.1, ihE h.2⟩
 
 /-- `redexWeight = 0` implies strongly normal: no root redex or commuting conversion
 at any level means `isStronglyNormal` returns `true`. -/
@@ -1023,14 +1026,14 @@ private theorem Theory.Derivation.redexWeight_zero_sn {G : Ctx Atom} {A : Propos
     cases D with
     | andI _ D₁ _ => simp only [redexWeight] at h; omega
     | orE _ _ _ _ => simp only [redexWeight] at h; omega
-    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ =>
-      simp only [redexWeight] at h; simp only [isStronglyNormal, ih h]
+    | ax _ | ass _ => simp [isStronglyNormal]
+    | andE1 _ _ | andE2 _ _ | impE _ _ => exact ih h
   | andE2 _ D ih =>
     cases D with
     | andI _ _ D₂ => simp only [redexWeight] at h; omega
     | orE _ _ _ _ => simp only [redexWeight] at h; omega
-    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ =>
-      simp only [redexWeight] at h; simp only [isStronglyNormal, ih h]
+    | ax _ | ass _ => simp [isStronglyNormal]
+    | andE1 _ _ | andE2 _ _ | impE _ _ => exact ih h
   | orI1 _ D ih =>
     simp only [redexWeight] at h; simp only [isStronglyNormal, ih h]
   | orI2 _ D ih =>
@@ -1047,7 +1050,7 @@ private theorem Theory.Derivation.redexWeight_zero_sn {G : Ctx Atom} {A : Propos
     | andE1 _ _ | andE2 _ _ | impE _ _ =>
       simp only [redexWeight] at h
       simp only [isStronglyNormal, Bool.and_eq_true]
-      exact ⟨⟨ih (by omega), ihA (by omega)⟩, ihB (by omega)⟩
+      simp_all [redexWeight, isStronglyNormal, conclusionComplexity]
   | impI _ D ih =>
     simp only [redexWeight] at h; simp only [isStronglyNormal, ih h]
   | impE D E ih ihE =>
@@ -1057,11 +1060,11 @@ private theorem Theory.Derivation.redexWeight_zero_sn {G : Ctx Atom} {A : Propos
     | ax _ | ass _ =>
       simp only [redexWeight] at h
       simp only [isStronglyNormal, Bool.and_eq_true, Bool.true_and]
-      exact ⟨trivial, ihE (by omega)⟩
+      exact ihE (by omega)
     | andE1 _ _ | andE2 _ _ | impE _ _ =>
       simp only [redexWeight] at h
       simp only [isStronglyNormal, Bool.and_eq_true]
-      exact ⟨ih (by omega), ihE (by omega)⟩
+      simp_all [redexWeight, isStronglyNormal, conclusionComplexity]
 
 /-- `normalize` produces strongly normal derivations.
 

@@ -1,5 +1,5 @@
 ---
-next_project_number: 332
+next_project_number: 334
 ---
 
 # TODO
@@ -12,8 +12,8 @@ next_project_number: 332
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,180,226,241,245,278,290,299,301,316,321,326,328,330,331 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215,300,317,329 | 36,37,180,299,316,328 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
-| 3 | 41,275 | 39,40 | Foundations |
+| 2 | 39,40,181,215,300,317,329,332 | 36,37,180,290,299,316,328 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 3 | 41,275,333 | 39,40,332 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -34,6 +34,8 @@ next_project_number: 332
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
+  └─ 332 [NOT STARTED] — Prove the normalization termination theorem for CSLib Theory.Deri
+    └─ 333 [NOT STARTED] — Refactor and split the 1099-line Normalization.lean into well-org
 316 [IMPLEMENTING] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
 326 [NOT STARTED] — Fix ~35 linter warnings across the propositional tableau soundnes
@@ -67,6 +69,24 @@ next_project_number: 332
 ### Uncategorized
 
 ## Tasks
+
+### 333. Normalization module refactor
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: Task 332
+
+**Description**: Refactor and split the 1099-line Normalization.lean into well-organized submodules following CSLib conventions. Proposed split: (1) Cslib/Logics/Propositional/NaturalDeduction/Normalization/Basic.lean — isNormal, isStronglyNormal predicates, SubformulaProperty; (2) Normalization/Reduction.lean — reduceRoot, normalizeAux, normalize; (3) Normalization/Termination.lean — redexWeight, sn_redexWeight_zero, redexWeight_zero_sn, normalizeAux_fixpoint, normalize_isStronglyNormal; (4) Normalization/SubformulaProperty.lean — subformula_property_of_isStronglyNormal, subformula_property. Clean up API: review private vs public visibility, ensure naming follows CSLib NOTATION.md and CONTRIBUTING.md conventions. Depends on 332.
+
+---
+
+### 332. Normalization termination proof
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: Task 290
+
+**Description**: Prove the normalization termination theorem for CSLib Theory.Derivation: d.normalize.redexWeight = 0 (the 1 sorry remaining in Normalization.lean line 1083). The proof requires well-founded induction on a (cutrank, total_cut_length) lexicographic measure following Prawitz 1965, Ch. III-IV. Key obstacle: subsOne can increase derivation height, breaking fuel-sufficiency arguments. Needs ~200-300 lines of infrastructure: cutrank definition, cut_length measure, strict decrease lemma for reduceRoot, and the main induction. File: Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean. Depends on 290.
+
+---
 
 ### 331. Completed tasks code polish
 - **Status**: [NOT STARTED]

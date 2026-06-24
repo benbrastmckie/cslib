@@ -1,23 +1,23 @@
 {
   "status": "partial",
-  "summary": "Major progress: redexWeight infrastructure complete (redexWeight, sn_redexWeight_zero, redexWeight_zero_sn all proven). normalize_isStronglyNormal structured via redexWeight_zero_sn. subformula_property fully connected. 1 sorry remains at line 1080: d.normalize.redexWeight = 0.",
+  "summary": "All infrastructure proven except core termination argument. 1 sorry remains at line 1083: d.normalize.redexWeight = 0. Complete infrastructure: isNormal, isStronglyNormal, reduceRoot, normalizeAux, normalize, SubformulaProperty, redexWeight, sn_redexWeight_zero, redexWeight_zero_sn, normalizeAux_fixpoint, subformula_property_of_isStronglyNormal. The sorry requires well-founded recursion on (cutrank, total_cut_length) lexicographic measure — estimated 200-300 lines of new infrastructure.",
   "blockers": [
-    "normalize_isStronglyNormal line 1080: proving d.normalize.redexWeight = 0 — the core termination argument that normalizeAux with 2^height fuel eliminates all redexes"
+    "normalize_isStronglyNormal (line 1083): proving d.normalize.redexWeight = 0 requires well-founded induction on a (cutrank, cut_length) lexicographic measure. subsOne can increase height, breaking fuel-sufficiency arguments. Standard Prawitz approach needs ~200-300 lines of infrastructure."
   ],
   "continuation_context": {
-    "completed_steps": ["5a", "5b", "5c", "5d", "normalizeAux_fixpoint", "redexWeight", "sn_redexWeight_zero", "redexWeight_zero_sn"],
+    "completed_steps": ["5a", "5b", "5c", "5d", "normalizeAux_fixpoint", "redexWeight", "sn_redexWeight_zero", "redexWeight_zero_sn", "subformula_property_connection"],
     "incomplete_steps": ["normalize_redexWeight_zero"],
     "sorry_locations": {
-      "normalize_isStronglyNormal_line1080": "sorry — need d.normalize.redexWeight = 0"
+      "normalize_isStronglyNormal_line1083": "sorry — need d.normalize.redexWeight = 0 (termination argument)"
     },
     "file": "Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean",
-    "line_count": 1096
+    "line_count": 1099
   },
   "artifacts": [
     {
       "path": "Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean",
       "type": "lean",
-      "summary": "1 sorry remains: normalize_isStronglyNormal needs d.normalize.redexWeight = 0"
+      "summary": "1099 lines, 1 sorry. All infrastructure proven. Missing: normalize termination proof."
     }
   ],
   "phases_completed": 0,

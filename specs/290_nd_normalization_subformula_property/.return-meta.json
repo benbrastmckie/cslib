@@ -1,18 +1,7 @@
 {
-  "status": "in_progress",
-  "started_at": "2026-06-24T00:00:00Z",
-  "artifacts": [],
-  "partial_progress": {
-    "stage": "initializing",
-    "details": "Agent started, reading plan and source files",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 0
-  },
+  "status": "partial",
   "metadata": {
-    "session_id": "sess_1782297437_564838",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "cycles_used": 4,
+    "final_state": "partial"
   }
 }

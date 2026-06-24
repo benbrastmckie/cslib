@@ -116,6 +116,8 @@ next_project_number: 321
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [314_lk_classical_sequent_calculus/reports/01_lk-research.md]
+- **Plan**: [314_lk_classical_sequent_calculus/plans/01_lk-plan.md]
 
 **Description**: Implement the classical sequent calculus LK for propositional logic. Create shared definitions (Defs.lean with LKSequent type, scoped notation), LK proof inductive with all-additive Finset-based presentation (LK/Basic.lean), structural admissibility lemmas (weakening, monotone contexts), soundness (LK/Soundness.lean), cut elimination / Hauptsatz (LK/CutElimination.lean) via lexicographic induction on (formula complexity, height sum), and equivalence bridges hilbert_iff_lk and nd_iff_lk composed through existing ND bridge. Completeness follows as corollary via Hilbert bridge. File layout: Cslib/Logics/Propositional/SequentCalculus/{Defs,LK/Basic,LK/Soundness,LK/CutElimination,LK/Completeness}.lean. Reuse Proposition type, Proposition.complexity, InferenceSystem typeclass, and existing hilbert_iff_nd_ctx bridge. Parent task: 279.
 
@@ -154,6 +156,8 @@ Literature sources:
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 304
+- **Research**: [310_diego_embedding/reports/01_diego-embedding-research.md]
+- **Plan**: [310_diego_embedding/plans/01_diego-embedding-plan.md]
 
 **Description**: Formalize the Diego embedding theorem (Diego 1966): every Hilbert algebra embeds into a Heyting algebra preserving the implication operation and top element. Given a HilbertAlgebra H, construct a HeytingAlgebra HA(H) and an order-embedding ι : H → HA(H) such that ι(a ⇨ b) = ι(a) ⇨ ι(b) and ι(⊤) = ⊤. The classical construction uses the lattice of filters of H: a filter F ⊆ H is a non-empty upward-closed set closed under ⇨-detachment (a ∈ F and a ⇨ b ∈ F implies b ∈ F). The filter lattice ordered by inclusion forms a Heyting algebra, and ι(a) = {F | a ∈ F} is the embedding. Prove: (1) the filter lattice is a HeytingAlgebra, (2) ι preserves ⇨ and ⊤, (3) ι is injective (order-embedding), (4) the embedding lemma: for imp-top-only formulas, HilbertEvaluate v φ = ⊤ ↔ AlgEvaluate (ι ∘ v) ⊥ φ = ⊤. This is the most technically demanding algebraic construction in the chain. References: Diego (1966), Köhler (1981), Celani-Jansana (2012). File: Cslib/Foundations/Order/HilbertAlgebra/DiegoEmbedding.lean.
 
@@ -216,6 +220,8 @@ Literature sources:
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 315
+- **Research**: [292_ipl_decidability_cutfree_lj/reports/01_decidability-research.md]
+- **Plan**: [292_ipl_decidability_cutfree_lj/plans/01_decidability-plan.md]
 
 **Description**: After task 279 delivers LJ with cut elimination, formalize the connection between cut-free proof search and decidability. Define a bounded backward proof search procedure over cut-free LJ: the search space is finite because all formulas in a cut-free proof are subformulas of the sequent. Prove termination via a well-founded measure. Produce Decidable (LJDerivable (Gamma |- A)) and lift via nd_iff_lk to Decidable (DerivableIn IPL (Gamma |- A)). File: Cslib/Logics/Propositional/SequentCalculus/Decidability.lean. Depends on 279.
 
@@ -239,6 +245,9 @@ Literature sources:
 - **Research**:
   - [279_propositional_sequent_calculus_lk_lj/reports/01_teammate-a-findings.md]
   - [279_propositional_sequent_calculus_lk_lj/reports/01_team-research.md]
+  - [279_propositional_sequent_calculus_lk_lj/reports/01_teammate-b-findings.md]
+  - [279_propositional_sequent_calculus_lk_lj/reports/01_teammate-c-findings.md]
+  - [279_propositional_sequent_calculus_lk_lj/reports/01_teammate-d-findings.md]
 - **Plan**: [279_propositional_sequent_calculus_lk_lj/plans/02_sequent-calculus-plan.md]
 
 **Description**: Implement a two-sided Gentzen-style sequent calculus (LK for classical, LJ for intuitionistic) for propositional logic with cut elimination. Use Finset-based contexts on both sides, following the CLL sequent calculus in Cslib/Logics/LinearLogic/CLL/Basic.lean as a template. Prove soundness, completeness, cut elimination (Hauptsatz), and equivalence bridges to the existing Hilbert and natural deduction systems (hilbert_iff_lk, nd_iff_lk). This completes the proof-system triad (Hilbert + ND + SC) for propositional logic and would be the first LK/LJ formalization in Lean 4.
@@ -262,6 +271,16 @@ Literature sources:
 - **Research**:
   - [275_bimodal_tm_conservative_over_temporal_bx/reports/02_team-research.md]
   - [275_bimodal_tm_conservative_over_temporal_bx/reports/03_team-research.md]
+  - [275_bimodal_tm_conservative_over_temporal_bx/reports/01_tm-over-bx-conservativity.md]
+  - [275_bimodal_tm_conservative_over_temporal_bx/reports/02_teammate-a-findings.md]
+  - [275_bimodal_tm_conservative_over_temporal_bx/reports/02_teammate-b-findings.md]
+  - [275_bimodal_tm_conservative_over_temporal_bx/reports/02_teammate-c-findings.md]
+  - [275_bimodal_tm_conservative_over_temporal_bx/reports/02_teammate-d-findings.md]
+  - [275_bimodal_tm_conservative_over_temporal_bx/reports/03_teammate-a-findings.md]
+  - [275_bimodal_tm_conservative_over_temporal_bx/reports/03_teammate-b-findings.md]
+  - [275_bimodal_tm_conservative_over_temporal_bx/reports/03_teammate-c-findings.md]
+  - [275_bimodal_tm_conservative_over_temporal_bx/reports/03_teammate-d-findings.md]
+- **Plan**: [275_bimodal_tm_conservative_over_temporal_bx/plans/01_tm-over-bx-plan.md]
 
 **Description**: Prove that Bimodal TM is conservative over Temporal BX for temporal formulas (those using only until/since, no box). The Temporal.Formula.toBimodal embedding exists. The lift_derivation_qfree infrastructure in Bimodal/Metalogic/ConservativeExtension/ partially supports this. Requires verifying the lifting extends to temporal connectives.
 
@@ -306,6 +325,7 @@ Literature sources:
 - **Task Type**: cslib
 - **Topic**: Bimodal Porting
 - **Dependencies**: Task 36, Task 37
+- **Research**: [215_fill_bimodal_sorries/reports/01_sorry-analysis.md]
 
 **Description**: Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal/Metalogic/:
 - Bundle/SuccRelation.lean: 7 sorries (lines 253, 258, 263, 269, 275, 281, 285)

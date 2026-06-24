@@ -147,7 +147,19 @@
       ],
       "created": "2026-06-23T12:00:00Z",
       "last_updated": "2026-06-23T23:56:17Z",
-      "session_id": "sess_1782245580_188995_292"
+      "session_id": "sess_1782245580_188995_292",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/292_ipl_decidability_cutfree_lj/reports/01_decidability-research.md",
+          "summary": "Research Report: IPL Decidability via Cut-Free LJ Proof Search"
+        },
+        {
+          "type": "plan",
+          "path": "specs/292_ipl_decidability_cutfree_lj/plans/01_decidability-plan.md",
+          "summary": "Implementation Plan: Task #292"
+        }
+      ]
     },
     {
       "project_number": 293,
@@ -187,6 +199,21 @@
           "path": "specs/279_propositional_sequent_calculus_lk_lj/plans/02_sequent-calculus-plan.md",
           "type": "plan",
           "summary": "6-phase implementation plan for LK/LJ sequent calculi with cut elimination and equivalence bridges"
+        },
+        {
+          "type": "report",
+          "path": "specs/279_propositional_sequent_calculus_lk_lj/reports/01_teammate-b-findings.md",
+          "summary": "Task 279: Teammate-B Findings \u2014 Alternatives Research"
+        },
+        {
+          "type": "report",
+          "path": "specs/279_propositional_sequent_calculus_lk_lj/reports/01_teammate-c-findings.md",
+          "summary": "Teammate C Findings: Critic \u2014 Gaps, Risks, and Problems"
+        },
+        {
+          "type": "report",
+          "path": "specs/279_propositional_sequent_calculus_lk_lj/reports/01_teammate-d-findings.md",
+          "summary": "Task 279: Horizons Research \u2014 Strategic Alignment and Long-Term Direction"
         }
       ],
       "dependencies": [],
@@ -228,6 +255,56 @@
           "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/03_team-research.md",
           "type": "research",
           "summary": "Team research with 4 teammates: semantic transfer via order isomorphism identified as correct approach; base BX ChronicleSubtype density is the critical open question"
+        },
+        {
+          "type": "report",
+          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/01_tm-over-bx-conservativity.md",
+          "summary": "Research Report: Bimodal TM Conservative over Temporal BX"
+        },
+        {
+          "type": "report",
+          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/02_teammate-a-findings.md",
+          "summary": "Task 275 Research: Contrapositive Approach via Completeness Internals"
+        },
+        {
+          "type": "report",
+          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/02_teammate-b-findings.md",
+          "summary": "Teammate B Research Findings: Alternative Strategies for Task 275"
+        },
+        {
+          "type": "report",
+          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/02_teammate-c-findings.md",
+          "summary": "Task 275: Critic Findings \u2014 Bimodal TM Conservative over Temporal BX"
+        },
+        {
+          "type": "report",
+          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/02_teammate-d-findings.md",
+          "summary": "Horizons Research: Task 275 Strategic Context"
+        },
+        {
+          "type": "report",
+          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/03_teammate-a-findings.md",
+          "summary": "Teammate A Findings: Primary Approach for Temporal Conservativity"
+        },
+        {
+          "type": "report",
+          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/03_teammate-b-findings.md",
+          "summary": "Task 275 Teammate B Findings: Alternative Approaches to Temporal Conservativity"
+        },
+        {
+          "type": "report",
+          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/03_teammate-c-findings.md",
+          "summary": "Critic Findings: Task 275 \u2014 Bimodal TM Conservative over Temporal BX"
+        },
+        {
+          "type": "report",
+          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/03_teammate-d-findings.md",
+          "summary": "Strategic Horizons: Task 275 \u2014 Bimodal TM Conservative over Temporal BX"
+        },
+        {
+          "type": "plan",
+          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/plans/01_tm-over-bx-plan.md",
+          "summary": "Implementation Plan: Task #275 -- Bimodal TM Conservative over Temporal BX"
         }
       ],
       "dependencies": [
@@ -304,7 +381,14 @@
         36,
         37
       ],
-      "blockers": "9 sorries require axioms removed as unsound (task 37 strict Until/Since); 11 sorries require unported discrete completeness infrastructure (task 36)."
+      "blockers": "9 sorries require axioms removed as unsound (task 37 strict Until/Since); 11 sorries require unported discrete completeness infrastructure (task 36).",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/215_fill_bimodal_sorries/reports/01_sorry-analysis.md",
+          "summary": "Sorry Analysis: Task 215 \u2014 Fill Bimodal Sorry Declarations"
+        }
+      ]
     },
     {
       "project_number": 39,
@@ -418,7 +502,18 @@
       "created": "2026-06-23T22:00:00Z",
       "last_updated": "2026-06-23T23:00:07Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/310_diego_embedding/reports/01_diego-embedding-research.md",
+          "summary": "Research Report: Diego Embedding Theorem"
+        },
+        {
+          "type": "plan",
+          "path": "specs/310_diego_embedding/plans/01_diego-embedding-plan.md",
+          "summary": "Implementation Plan: Task #310"
+        }
+      ],
       "dependencies": [
         304
       ],
@@ -465,7 +560,18 @@
       "created": "2026-06-23T19:33:42Z",
       "last_updated": "2026-06-23T20:22:38Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/314_lk_classical_sequent_calculus/reports/01_lk-research.md",
+          "summary": "Research Report: Task #314 -- LK Classical Sequent Calculus"
+        },
+        {
+          "type": "plan",
+          "path": "specs/314_lk_classical_sequent_calculus/plans/01_lk-plan.md",
+          "summary": "Implementation Plan: Task #314 -- LK Classical Sequent Calculus"
+        }
+      ],
       "dependencies": [],
       "parent_task": 279,
       "plan_metadata": {
@@ -533,5 +639,6 @@
     "Temporal Logic",
     "pr",
     "agent-system"
-  ]
+  ],
+  "_last_updated": "2026-06-24T02:00:00Z"
 }

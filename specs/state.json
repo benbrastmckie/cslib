@@ -4,18 +4,25 @@
     {
       "project_number": 322,
       "project_name": "mpl_conservative_extension_chain",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Establish the MPL conservative extension chain as standalone results and organize the relationship between the IPL and MPL chains. Specifically: (1) Prove MPL → ConjImp conservativity for or-free formulas (GHAValid → BrouwerianValid, requiring a free join/distributive lattice completion of BrouwerianSemilattices to GHAs). (2) Prove MPL → Imp conservativity for imp-top-only formulas as a composition. (3) Organize the full algebraic picture: state the MPL chain (ImpAxiom ⊂ ConjImpAxiom ⊂ MinPropAxiom) with its own conservativity results independent of IPL, and relate it to the IPL chain via the IPL → MPL conservativity bridge. File: Cslib/Logics/Propositional/Semantics/Algebra/MplConservativeChain.lean",
       "created": "2026-06-24T10:51:42Z",
-      "last_updated": "2026-06-24T10:51:42Z",
+      "last_updated": "2026-06-24T11:03:37Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/322_mpl_conservative_extension_chain/reports/01_mpl-chain-research.md",
+          "summary": "MPL chain research: direct proofs via LowerSet embedding, ~80-120 lines"
+        }
+      ],
       "dependencies": [
         311,
         312
-      ]
+      ],
+      "session_id": "sess_1782298715_668374"
     },
     {
       "project_number": 321,
@@ -30,7 +37,7 @@
     {
       "project_number": 316,
       "project_name": "propositional_tableau_soundness",
-      "status": "partial",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Fill the 6 sorry instances in propositional tableau soundness proofs across all three logics. Classical (Classical/Soundness.lean): prove classically_closed_unsatisfiable (closed branch is unsatisfiable under any Boolean valuation) and classicalTableau_sound (closed tableau implies Tautology phi), plus one helper lemma — by induction on rule applications showing each propositional rule preserves satisfiability. Intuitionistic (Intuitionistic/Soundness.lean): prove intuitionisticTableau_sound (closed tableau implies IValid phi) plus two helper lemmas — by showing each rule (including world-creating F(imp) and persistent T(imp)) preserves forcing at Kripke worlds. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_sound (closed tableau implies MValid phi) — adapts intuitionistic proof with MinimalClosure (complementary atoms only, no ex falso). Core technique: induction on expansion steps showing each rule application preserves the semantic invariant for the respective logic.",
@@ -61,7 +68,7 @@
     {
       "project_number": 317,
       "project_name": "propositional_tableau_completeness",
-      "status": "planned",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Fill the 8 sorry instances in propositional tableau completeness proofs across all three logics. Classical (Classical/Completeness.lean): prove classicalOpenBranch_countermodel (open saturated branch yields a Boolean valuation falsifying phi) and classicalTableau_complete (if phi is not a Tautology then the tableau has an open branch), plus one helper — by constructing a valuation from the positive atoms in the saturated branch and proving a truth lemma by formula induction. Intuitionistic (Intuitionistic/Completeness.lean): prove intuitionisticOpenBranch_countermodel (open saturated branch yields a finite Kripke model refuting phi) and intuitionisticTableau_complete — by constructing worlds from the branch world indices, accessibility from the expansion record, valuation from positive atoms, and proving a truth lemma showing forced/not-forced matches signed formulas at each world. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_complete (if phi is not MValid then the tableau has an open branch) — adapts intuitionistic proof with MinimalClosure and botForces=false. Core technique: Hintikka-set argument — saturated branches satisfy Hintikka conditions, from which countermodels are extracted.",

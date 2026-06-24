@@ -35,8 +35,8 @@ next_project_number: 323
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 290 [PLANNED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
 314 [IMPLEMENTING] — Implement the classical sequent calculus LK for propositional log
-316 [PARTIAL] — Fill the 6 sorry instances in propositional tableau soundness pro
-  └─ 317 [PLANNED] — Fill the 8 sorry instances in propositional tableau completeness 
+316 [BLOCKED] — Fill the 6 sorry instances in propositional tableau soundness pro
+  └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
 
 ### Temporal Logic
 
@@ -54,7 +54,7 @@ next_project_number: 323
 
 ### Algebraic Semantics
 
-322 [NOT STARTED] — Establish the MPL conservative extension chain as standalone resu
+322 [RESEARCHED] — Establish the MPL conservative extension chain as standalone resu
 
 ### Modal
 
@@ -66,10 +66,11 @@ next_project_number: 323
 ## Tasks
 
 ### 322. Mpl conservative extension chain
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 311, Task 312
+- **Research**: [322_mpl_conservative_extension_chain/reports/01_mpl-chain-research.md]
 
 **Description**: Establish the MPL conservative extension chain as standalone results and organize the relationship between the IPL and MPL chains. Specifically: (1) Prove MPL → ConjImp conservativity for or-free formulas (GHAValid → BrouwerianValid, requiring a free join/distributive lattice completion of BrouwerianSemilattices to GHAs). (2) Prove MPL → Imp conservativity for imp-top-only formulas as a composition. (3) Organize the full algebraic picture: state the MPL chain (ImpAxiom ⊂ ConjImpAxiom ⊂ MinPropAxiom) with its own conservativity results independent of IPL, and relate it to the IPL chain via the IPL → MPL conservativity bridge. File: Cslib/Logics/Propositional/Semantics/Algebra/MplConservativeChain.lean
 
@@ -109,7 +110,7 @@ next_project_number: 323
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [PLANNED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 316
@@ -119,7 +120,7 @@ next_project_number: 323
 ---
 
 ### 316. Propositional tableau soundness
-- **Status**: [PARTIAL]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

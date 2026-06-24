@@ -1,27 +1,26 @@
 {
-  "session_id": "sess_1782276788_0c858f",
-  "task_numbers": [311, 312],
-  "waves": [[311], [312]],
+  "session_id": "sess_1750809600_a3b2c1",
+  "task_numbers": [316, 317],
+  "waves": [[316], [317]],
   "max_cycles": 10,
-  "cycle_count": 4,
-  "completed_tasks": [311, 312],
-  "failed_tasks": [],
+  "cycle_count": 1,
+  "completed_tasks": [],
+  "failed_tasks": [316, 317],
   "current_statuses": {
-    "311": "completed",
-    "312": "completed"
+    "316": "blocked",
+    "317": "blocked"
   },
   "task_dirs": {
-    "311": "specs/311_ipl_conservative_over_imp",
-    "312": "specs/312_unified_conservative_extension_chain"
+    "316": "specs/316_propositional_tableau_soundness",
+    "317": "specs/317_propositional_tableau_completeness"
   },
   "research_agents": {
-    "311": "cslib-research-hard-agent",
-    "312": "cslib-research-hard-agent"
+    "316": "cslib-research-agent",
+    "317": "cslib-research-agent"
   },
   "implement_agents": {
-    "311": "cslib-implementation-hard-agent",
-    "312": "cslib-implementation-hard-agent"
+    "316": "cslib-implementation-agent",
+    "317": "cslib-implementation-agent"
   },
-  "effort_flag": "hard",
   "lit_flag": true
 }

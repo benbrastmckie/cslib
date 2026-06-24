@@ -1,0 +1,9 @@
+{
+  "status": "partial",
+  "metadata": {
+    "tasks_completed": [],
+    "tasks_failed": [316, 317],
+    "cycles_used": 1,
+    "multi_task_mode": true
+  }
+}

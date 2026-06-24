@@ -1,38 +1,55 @@
 {
-  "status": "partial",
-  "summary": "F(imp) world-creation sorry fixed via existential worldOf'/Function.update. Main theorem structured. Blocked on loop induction lemma (intExpandBranches_closed_unsat) which requires persistence preservation with monotone worldOf invariant.",
+  "status": "blocked",
+  "summary": "Soundness proof blocked by two implementation bugs: (1) isIntuitionisticallyClosed missing complementary-pair closure check (p→p returns open), (2) intTImpRule persistence over-fires at sibling worlds via Nat ordering (invalid formula ((¬p)→q)∨(p→r) incorrectly closes). Both verified by #eval. Sorry cannot be filled until implementation is fixed.",
   "blockers": [
-    "intExpandBranches_closed_unsat requires proving: (1) applyPersistenceFixpoint preserves satisfiability with monotone worldOf, (2) intStepBranch preserves satisfiability, (3) inner induction on the go helper function"
+    "BUG 1: isIntuitionisticallyClosed only checks T(⊥), missing T(φ)/F(φ) complementary pair closure. Consequence: known tautologies like p→p and S-combinator return .openBranch. Fix: add Branch.hasContradiction check to IntuitionisticClosure.",
+    "BUG 2: intTImpRule (Rules.lean:129) uses Nat ordering (filter (· ≥ w)) as accessibility proxy. This fires T-implications at sibling worlds that are NOT accessible in the Kripke model. Consequence: ((p→⊥)→q)∨(p→r) incorrectly closes (T(⊥) added at sibling via T(p→⊥,1) + T(p,2)). Fix: track actual parent-child accessibility in expansion state, or restrict intTImpRule to only fire at labels created as descendants."
   ],
   "continuation_context": {
     "files_status": {
-      "Classical/Soundness.lean": "sorry-free, builds clean (654 lines) - reference for loop induction pattern",
-      "Intuitionistic/Soundness.lean": "1 sorry (loop induction line 333), builds clean (365 lines)",
-      "Minimal/DecisionProcedure.lean": "2 sorry (soundness line 88 in scope, completeness line 105 out of scope), unchanged"
+      "Classical/Soundness.lean": "sorry-free, builds clean (654 lines)",
+      "Intuitionistic/Soundness.lean": "1 sorry (line 333), BLOCKED by implementation bugs",
+      "Intuitionistic/Expansion.lean": "contains isIntuitionisticallyClosed bug",
+      "Intuitionistic/Rules.lean": "contains intTImpRule definition (line 129)",
+      "Minimal/Soundness.lean": "1 sorry (inherits from intuitionistic), otherwise correct",
+      "Minimal/DecisionProcedure.lean": "1 sorry (completeness, task 317 scope)"
     },
-    "completed_work": {
-      "F_imp_fix": "intRule_preserves_sat refactored with existential worldOf' for linearResult. F(imp) case uses Function.update worldOf nw w' where w' is witness from neg IForces. Persistence propagation proved via iforces_persistence.",
-      "main_theorem": "intuitionisticTableau_sound structurally complete - uses intExpandBranches_closed_unsat (sorry) with intClosed_unsatisfiable as closure callback."
-    },
-    "remaining_sorry": {
-      "intExpandBranches_closed_unsat": {
-        "location": "Intuitionistic/Soundness.lean line 333",
-        "difficulty": "high",
-        "approach": "Follow classicalExpandBranches_closed_unsat pattern. Need persistence preservation (monotone worldOf), step preservation, inner go induction."
+    "bugs_identified": {
+      "bug1_closure": {
+        "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+        "location": "isIntuitionisticallyClosed (line 67)",
+        "issue": "Only checks T(⊥), should also check Branch.hasContradiction",
+        "counterexample": "p → p returns .openBranch",
+        "fix": "Add || Branch.hasContradiction b to the definition"
+      },
+      "bug2_persistence": {
+        "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Rules.lean",
+        "location": "intTImpRule (line 129)",
+        "issue": "Uses (· ≥ w) Nat filter as accessibility proxy, but Nat ordering does not match tree-shaped Kripke accessibility for sibling worlds",
+        "counterexample": "((p→⊥)→q)∨(p→r) incorrectly closes via T(p→⊥,1) firing at sibling world 2",
+        "fix": "Track parent-child relationships in expansion state and restrict intTImpRule to fire only along actual accessibility paths"
       }
+    },
+    "phases_status": {
+      "phase1_closure_lemmas": "COMPLETED",
+      "phase2_rule_preservation": "COMPLETED",
+      "phase3_classical_soundness": "COMPLETED",
+      "phase4_fimp_refactor": "COMPLETED (sorry-free intRule_preserves_sat)",
+      "phase5_loop_invariant": "BLOCKED (bugs prevent correct proof)"
     }
   },
   "artifacts": [
     {
-      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
-      "type": "implementation",
-      "summary": "F(imp) fixed, main theorem structured, 1 sorry on loop induction"
+      "path": "specs/316_propositional_tableau_soundness/reports/04_b4-hard-research.md",
+      "type": "report",
+      "summary": "Detailed analysis of worldOf/ordering blocker with concrete counterexamples"
     }
   ],
   "phases_completed": 4,
   "phases_total": 5,
   "sorry_inventory": {
     "Intuitionistic/Soundness.lean": 1,
-    "Minimal/DecisionProcedure.lean": 2
+    "Minimal/Soundness.lean": 1,
+    "Minimal/DecisionProcedure.lean": 1
   }
 }

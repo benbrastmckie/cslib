@@ -11,7 +11,7 @@ next_project_number: 334
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,316,321,329 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,278,290,299,301,316,321 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,300,317,332 | 36,37,180,290,299,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
 | 3 | 41,275,333 | 39,40,332 | Foundations |
 
@@ -38,7 +38,6 @@ next_project_number: 334
     └─ 333 [NOT STARTED] — Refactor and split the 1099-line Normalization.lean into well-org
 316 [IMPLEMENTING] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
-329 [NOT STARTED] — Prove the subformula property as a corollary of cut elimination: 
 
 ### Temporal Logic
 
@@ -102,7 +101,7 @@ next_project_number: 334
 ---
 
 ### 329. Cutelim subformula property
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 328

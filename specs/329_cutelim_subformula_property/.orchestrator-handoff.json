@@ -1,0 +1,25 @@
+{
+  "status": "implemented",
+  "summary": "Proved the subformula property for LK as a corollary of cut elimination. Created SubformulaProperty.lean with LKProof.formulas (recursive Finset collector), CutFreeLKProof.subformula_property (structural induction over 11 constructors), and LKProof.subformula_property (corollary via cutElim). Registered in LK barrel file and Cslib.lean.",
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "complete",
+  "phases_completed": 2,
+  "phases_total": 2,
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/SequentCalculus/LK/SubformulaProperty.lean",
+      "type": "lean_file",
+      "summary": "New file with 3 main declarations and supporting subformula infrastructure"
+    },
+    {
+      "path": "specs/329_cutelim_subformula_property/summaries/01_subformula-property-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary including plan deviations and verification results"
+    }
+  ],
+  "deviations": [
+    "Normalization.lean import replaced by local definitions (lkSubformulas, LKIsSubformula) due to Proposition.complexity conflict between Normalization.lean and Tableau.Defs",
+    "Core proof uses private helper cutFreeSubformulaProp to avoid sequent-index variable error in induction"
+  ]
+}

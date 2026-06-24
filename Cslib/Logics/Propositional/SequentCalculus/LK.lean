@@ -12,6 +12,8 @@ public import Cslib.Logics.Propositional.SequentCalculus.LK.Completeness
 -- CutElimination excluded: has build errors requiring dedicated proof rewrite
 -- public import Cslib.Logics.Propositional.SequentCalculus.LK.CutElimination
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Soundness
+-- SubformulaProperty imports CutElimination directly (CutElimination itself is not in barrel)
+public import Cslib.Logics.Propositional.SequentCalculus.LK.SubformulaProperty
 
 /-! # LK Classical Propositional Sequent Calculus
 

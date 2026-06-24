@@ -90,15 +90,16 @@
     {
       "project_number": 329,
       "project_name": "cutelim_subformula_property",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Prove the subformula property as a corollary of cut elimination: every formula appearing in a cut-free LK proof is a subformula of some formula in the conclusion sequent. Define Proposition.isSubformula, prove CutFreeLKProof.subformula_property, and derive LKProof.subformula_property via cutElim. Place in a new file Cslib/Logics/Propositional/SequentCalculus/LK/SubformulaProperty.lean. This is a standard textbook result that follows directly from the Hauptsatz",
       "topic": "Propositional Logic",
       "created": "2026-06-24T11:27:09Z",
-      "last_updated": "2026-06-24T11:27:09Z",
+      "last_updated": "2026-06-24T15:24:41Z",
       "dependencies": [
         328
-      ]
+      ],
+      "session_id": "sess_1782300531_c471d6_329"
     },
     {
       "project_number": 323,

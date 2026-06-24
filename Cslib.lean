@@ -462,6 +462,7 @@ public import Cslib.Logics.Propositional.SequentCalculus.LK.Basic
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Completeness
 public import Cslib.Logics.Propositional.SequentCalculus.LK.CutElimination
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Soundness
+public import Cslib.Logics.Propositional.SequentCalculus.LK.SubformulaProperty
 public import Cslib.Logics.Propositional.Tableau
 public import Cslib.Logics.Propositional.Tableau.Classical
 public import Cslib.Logics.Propositional.Tableau.Classical.Completeness

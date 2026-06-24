@@ -1,7 +1,7 @@
 # Implementation Plan: Task #330
 
 - **Task**: 330 - Fill the sorry in LJ cutAdmissibility
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 6 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/330_lj_cut_admissibility_sorry/reports/01_lj-cut-admissibility.md
@@ -76,7 +76,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: LJCutIH type alias and Finset helper lemmas [IN PROGRESS]
+### Phase 1: LJCutIH type alias and Finset helper lemmas [COMPLETED]
 
 **Goal**: Define the induction hypothesis type alias and any shared Finset helper lemmas needed
 by the cut admissibility proof, establishing the foundation for all subsequent phases.

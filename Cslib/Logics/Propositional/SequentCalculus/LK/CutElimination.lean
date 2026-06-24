@@ -110,13 +110,13 @@ theorem mem_of_ne_head {α : Type*} [DecidableEq α] {a x : α} {s : Finset α}
 /-! ### Shared Finset subset helpers -/
 
 /-- `s ⊆ insert a (insert b s)` by double application of `Finset.subset_insert`. -/
-private theorem subset_insert₂ {α : Type*} [DecidableEq α] (a b : α) (s : Finset α) :
+theorem subset_insert₂ {α : Type*} [DecidableEq α] (a b : α) (s : Finset α) :
     s ⊆ insert a (insert b s) :=
   (Finset.subset_insert b s).trans (Finset.subset_insert a _)
 
 /-- Transport a subset through an outer insert: from `s ⊆ insert c t` derive
 `insert a s ⊆ insert c (insert a t)`. -/
-private theorem insert_subset_swap {α : Type*} [DecidableEq α]
+theorem insert_subset_swap {α : Type*} [DecidableEq α]
     {c a : α} {s t : Finset α}
     (h : s ⊆ insert c t) : insert a s ⊆ insert c (insert a t) :=
   Finset.insert_subset
@@ -125,14 +125,14 @@ private theorem insert_subset_swap {α : Type*} [DecidableEq α]
 
 /-- Left-side weakening for cut-free proofs: weaken the antecedent while preserving
 the succedent unchanged. -/
-private def CutFreeLKProof.monoL {Γ Δ Γ' : Finset (Proposition Atom)}
+def CutFreeLKProof.monoL {Γ Δ Γ' : Finset (Proposition Atom)}
     (h : Γ ⊆ Γ') (d : CutFreeLKProof (Γ ⊢ₛ Δ)) :
     CutFreeLKProof (Γ' ⊢ₛ Δ) :=
   d.mono h (Finset.Subset.refl _)
 
 /-- Right-side weakening for cut-free proofs: weaken the succedent while preserving
 the antecedent unchanged. -/
-private def CutFreeLKProof.monoR {Γ Δ Δ' : Finset (Proposition Atom)}
+def CutFreeLKProof.monoR {Γ Δ Δ' : Finset (Proposition Atom)}
     (h : Δ ⊆ Δ') (d : CutFreeLKProof (Γ ⊢ₛ Δ)) :
     CutFreeLKProof (Γ ⊢ₛ Δ') :=
   d.mono (Finset.Subset.refl _) h
@@ -175,8 +175,10 @@ noncomputable def cutAdm_right_andR
     if h1 : A' = A ∧ B' = B then
       -- PRINCIPAL CASE: d₂ = andL A B, C = A ∧ B.
       -- Recurse on d' (structurally smaller) with widened Γ₀, then use ih A, ih B.
-      have hA : sizeOf A < sizeOf (Proposition.and A B) := by rw [Proposition.and.sizeOf_spec]; omega
-      have hB : sizeOf B < sizeOf (Proposition.and A B) := by rw [Proposition.and.sizeOf_spec]; omega
+      have hA : sizeOf A < sizeOf (Proposition.and A B) := by
+        rw [Proposition.and.sizeOf_spec]; omega
+      have hB : sizeOf B < sizeOf (Proposition.and A B) := by
+        rw [Proposition.and.sizeOf_spec]; omega
       let wk : Γ₀ ⊆ insert A (insert B Γ₀) :=
         (Finset.subset_insert B Γ₀).trans (Finset.subset_insert A _)
       let hant' : insert A' (insert B' Γ) ⊆ insert (A ∧ B) (insert A (insert B Γ₀)) :=
@@ -189,7 +191,7 @@ noncomputable def cutAdm_right_andR
       let d₂' := cutAdm_right_andR A B (insert A (insert B Γ₀)) Δ₀
         (d₁a.mono wk (Finset.Subset.refl _))
         (d₁b.mono wk (Finset.Subset.refl _))
-        ih d' hcf' hant' (fun x hx => hsuc hx)
+        ih d' hcf' hant' hsuc
       let d₁a_w := d₁a.mono (Finset.subset_insert B _) (Finset.Subset.refl _)
       let r₁ := ih A hA (insert B Γ₀) Δ₀ d₁a_w d₂'
       ih B hB Γ₀ Δ₀ d₁b r₁
@@ -207,7 +209,7 @@ noncomputable def cutAdm_right_andR
       let ⟨r, hr⟩ := cutAdm_right_andR A B (insert A' (insert B' Γ₀)) Δ₀
         (d₁a.mono wk2 (Finset.Subset.refl _))
         (d₁b.mono wk2 (Finset.Subset.refl _))
-        ih d' hcf' hant' (fun x hx => hsuc hx)
+        ih d' hcf' hant' hsuc
       ⟨.andL A' B' hAB₀ r, hr⟩
   | .andR A' B' hAB d₂a d₂b, hcf_ab =>
     let hAB₀ : (A' ∧ B') ∈ Δ₀ := hsuc hAB
@@ -215,12 +217,12 @@ noncomputable def cutAdm_right_andR
       (d₁a.mono (Finset.Subset.refl _) (Finset.insert_subset_insert _ (Finset.subset_insert _ _)))
       (d₁b.mono (Finset.Subset.refl _) (Finset.insert_subset_insert _ (Finset.subset_insert _ _)))
       ih d₂a hcf_ab.1 hant
-      (Finset.insert_subset_insert _ (fun x hx => hsuc hx))
+      (Finset.insert_subset_insert _ hsuc)
     let ⟨rb, hrb⟩ := cutAdm_right_andR A B Γ₀ (insert B' Δ₀)
       (d₁a.mono (Finset.Subset.refl _) (Finset.insert_subset_insert _ (Finset.subset_insert _ _)))
       (d₁b.mono (Finset.Subset.refl _) (Finset.insert_subset_insert _ (Finset.subset_insert _ _)))
       ih d₂b hcf_ab.2 hant
-      (Finset.insert_subset_insert _ (fun x hx => hsuc hx))
+      (Finset.insert_subset_insert _ hsuc)
     ⟨.andR A' B' hAB₀ ra rb, And.intro hra hrb⟩
   | .orL A' B' hAB d₂a d₂b, hcf_ab =>
     let hAB₀ : (A' ∨ B') ∈ Γ₀ := mem_of_ne_head (hant hAB)
@@ -236,11 +238,11 @@ noncomputable def cutAdm_right_andR
     let ⟨ra, hra⟩ := cutAdm_right_andR A B (insert A' Γ₀) Δ₀
       (d₁a.mono (Finset.subset_insert _ _) (Finset.Subset.refl _))
       (d₁b.mono (Finset.subset_insert _ _) (Finset.Subset.refl _))
-      ih d₂a hcf_ab.1 hant_a (fun x hx => hsuc hx)
+      ih d₂a hcf_ab.1 hant_a hsuc
     let ⟨rb, hrb⟩ := cutAdm_right_andR A B (insert B' Γ₀) Δ₀
       (d₁a.mono (Finset.subset_insert _ _) (Finset.Subset.refl _))
       (d₁b.mono (Finset.subset_insert _ _) (Finset.Subset.refl _))
-      ih d₂b hcf_ab.2 hant_b (fun x hx => hsuc hx)
+      ih d₂b hcf_ab.2 hant_b hsuc
     ⟨.orL A' B' hAB₀ ra rb, And.intro hra hrb⟩
   | .orR A' B' hAB d', hcf' =>
     let hAB₀ : (A' ∨ B') ∈ Δ₀ := hsuc hAB
@@ -252,7 +254,7 @@ noncomputable def cutAdm_right_andR
       (d₁b.mono (Finset.Subset.refl _)
         (Finset.insert_subset_insert _ wkR))
       ih d' hcf' hant
-      (Finset.insert_subset_insert _ (Finset.insert_subset_insert _ (fun x hx => hsuc hx)))
+      (Finset.insert_subset_insert _ (Finset.insert_subset_insert _ hsuc))
     ⟨.orR A' B' hAB₀ r, hr⟩
   | .impL A' B' hAB d₂a d₂b, hcf_ab =>
     let hAB₀ : (A' → B') ∈ Γ₀ := mem_of_ne_head (hant hAB)
@@ -265,27 +267,26 @@ noncomputable def cutAdm_right_andR
       (d₁a.mono (Finset.Subset.refl _) (Finset.insert_subset_insert _ (Finset.subset_insert _ _)))
       (d₁b.mono (Finset.Subset.refl _) (Finset.insert_subset_insert _ (Finset.subset_insert _ _)))
       ih d₂a hcf_ab.1 hant
-      (Finset.insert_subset_insert _ (fun x hx => hsuc hx))
+      (Finset.insert_subset_insert _ hsuc)
     let ⟨rb, hrb⟩ := cutAdm_right_andR A B (insert B' Γ₀) Δ₀
       (d₁a.mono (Finset.subset_insert _ _) (Finset.Subset.refl _))
       (d₁b.mono (Finset.subset_insert _ _) (Finset.Subset.refl _))
-      ih d₂b hcf_ab.2 hant_b (fun x hx => hsuc hx)
+      ih d₂b hcf_ab.2 hant_b hsuc
     ⟨.impL A' B' hAB₀ ra rb, And.intro hra hrb⟩
   | .impR A' B' hAB d', hcf' =>
     let hAB₀ : (A' → B') ∈ Δ₀ := hsuc hAB
-    let hant' : insert A' Γ ⊆ insert (A ∧ B) (insert A' Γ₀) :=
-      Finset.insert_subset
-        (Finset.mem_insert_of_mem (Finset.mem_insert_self A' _))
-        (fun x hx => (Finset.insert_subset_insert _ (Finset.subset_insert A' _)) (hant hx))
+    let hant' : insert A' Γ ⊆ insert (A ∧ B) (insert A' Γ₀) := insert_subset_swap hant
     let ⟨r, hr⟩ := cutAdm_right_andR A B (insert A' Γ₀) (insert B' Δ₀)
-      (d₁a.mono (Finset.subset_insert _ _) (Finset.insert_subset_insert _ (Finset.subset_insert _ _)))
-      (d₁b.mono (Finset.subset_insert _ _) (Finset.insert_subset_insert _ (Finset.subset_insert _ _)))
+      (d₁a.mono (Finset.subset_insert A' _)
+        (Finset.insert_subset_insert _ (Finset.subset_insert B' _)))
+      (d₁b.mono (Finset.subset_insert A' _)
+        (Finset.insert_subset_insert _ (Finset.subset_insert B' _)))
       ih d' hcf' hant'
-      (Finset.insert_subset_insert _ (fun x hx => hsuc hx))
+      (Finset.insert_subset_insert _ hsuc)
     ⟨.impR A' B' hAB₀ r, hr⟩
   | .weakL A' d', hcf' =>
     cutAdm_right_andR A B Γ₀ Δ₀ d₁a d₁b ih d' hcf'
-      (fun x hx => hant (Finset.mem_insert_of_mem hx)) (fun x hx => hsuc hx)
+      (fun x hx => hant (Finset.mem_insert_of_mem hx)) hsuc
   | .weakR A' d', hcf' =>
     cutAdm_right_andR A B Γ₀ Δ₀ d₁a d₁b ih d' hcf' hant ((Finset.subset_insert A' _).trans hsuc)
   | .cut _ _ _, hcf' => absurd hcf' id
@@ -329,7 +330,7 @@ noncomputable def cutAdm_right_orR
           (fun x hx => (Finset.insert_subset_insert _ wk2) (hant hx)))
     let ⟨r, hr⟩ := cutAdm_right_orR A B (insert A' (insert B' Γ₀)) Δ₀
       (d₁'.mono wk2 (Finset.Subset.refl _))
-      ih d' hcf' hant' (fun x hx => hsuc hx)
+      ih d' hcf' hant' hsuc
     ⟨.andL A' B' hAB₀ r, hr⟩
   | .andR A' B' hAB d₂a d₂b, hcf_ab =>
     let hAB₀ : (A' ∧ B') ∈ Δ₀ := hsuc hAB
@@ -337,12 +338,12 @@ noncomputable def cutAdm_right_orR
       (d₁'.mono (Finset.Subset.refl _)
         (Finset.insert_subset_insert _ (Finset.insert_subset_insert _ (Finset.subset_insert _ _))))
       ih d₂a hcf_ab.1 hant
-      (Finset.insert_subset_insert _ (fun x hx => hsuc hx))
+      (Finset.insert_subset_insert _ hsuc)
     let ⟨rb, hrb⟩ := cutAdm_right_orR A B Γ₀ (insert B' Δ₀)
       (d₁'.mono (Finset.Subset.refl _)
         (Finset.insert_subset_insert _ (Finset.insert_subset_insert _ (Finset.subset_insert _ _))))
       ih d₂b hcf_ab.2 hant
-      (Finset.insert_subset_insert _ (fun x hx => hsuc hx))
+      (Finset.insert_subset_insert _ hsuc)
     ⟨.andR A' B' hAB₀ ra rb, And.intro hra hrb⟩
   | .orL A' B' hAB d₂a d₂b, hcf_ab =>
     if h1 : A' = A ∧ B' = B then
@@ -362,10 +363,10 @@ noncomputable def cutAdm_right_orR
           (fun x hx => (Finset.insert_subset_insert (A ∨ B) wk_b) (hant hx))
       let d₂a' := cutAdm_right_orR A B (insert A Γ₀) Δ₀
         (d₁'.mono wk_a (Finset.Subset.refl _))
-        ih d₂a hcf_ab.1 hant_a (fun x hx => hsuc hx)
+        ih d₂a hcf_ab.1 hant_a hsuc
       let d₂b' := cutAdm_right_orR A B (insert B Γ₀) Δ₀
         (d₁'.mono wk_b (Finset.Subset.refl _))
-        ih d₂b hcf_ab.2 hant_b (fun x hx => hsuc hx)
+        ih d₂b hcf_ab.2 hant_b hsuc
       let d₂a_w := d₂a'.mono (Finset.Subset.refl _) (Finset.subset_insert B _)
       let r₁ := ih A hA Γ₀ (insert B Δ₀) d₁' d₂a_w
       ih B hB Γ₀ Δ₀ r₁ d₂b'
@@ -382,10 +383,10 @@ noncomputable def cutAdm_right_orR
           (fun x hx => (Finset.insert_subset_insert _ (Finset.subset_insert B' _)) (hant hx))
       let ⟨ra, hra⟩ := cutAdm_right_orR A B (insert A' Γ₀) Δ₀
         (d₁'.mono (Finset.subset_insert _ _) (Finset.Subset.refl _))
-        ih d₂a hcf_ab.1 hant_a (fun x hx => hsuc hx)
+        ih d₂a hcf_ab.1 hant_a hsuc
       let ⟨rb, hrb⟩ := cutAdm_right_orR A B (insert B' Γ₀) Δ₀
         (d₁'.mono (Finset.subset_insert _ _) (Finset.Subset.refl _))
-        ih d₂b hcf_ab.2 hant_b (fun x hx => hsuc hx)
+        ih d₂b hcf_ab.2 hant_b hsuc
       ⟨.orL A' B' hAB₀ ra rb, And.intro hra hrb⟩
   | .orR A' B' hAB d', hcf' =>
     let hAB₀ : (A' ∨ B') ∈ Δ₀ := hsuc hAB
@@ -395,7 +396,7 @@ noncomputable def cutAdm_right_orR
       (d₁'.mono (Finset.Subset.refl _)
         (Finset.insert_subset_insert _ (Finset.insert_subset_insert _ wkR)))
       ih d' hcf' hant
-      (Finset.insert_subset_insert _ (Finset.insert_subset_insert _ (fun x hx => hsuc hx)))
+      (Finset.insert_subset_insert _ (Finset.insert_subset_insert _ hsuc))
     ⟨.orR A' B' hAB₀ r, hr⟩
   | .impL A' B' hAB d₂a d₂b, hcf_ab =>
     let hAB₀ : (A' → B') ∈ Γ₀ := mem_of_ne_head (hant hAB) (by intro h; cases h)
@@ -408,10 +409,10 @@ noncomputable def cutAdm_right_orR
     let ⟨ra, hra⟩ := cutAdm_right_orR A B Γ₀ (insert A' Δ₀)
       (d₁'.mono (Finset.Subset.refl _) wkR_a)
       ih d₂a hcf_ab.1 hant
-      (Finset.insert_subset_insert _ (fun x hx => hsuc hx))
+      (Finset.insert_subset_insert _ hsuc)
     let ⟨rb, hrb⟩ := cutAdm_right_orR A B (insert B' Γ₀) Δ₀
       (d₁'.mono (Finset.subset_insert _ _) (Finset.Subset.refl _))
-      ih d₂b hcf_ab.2 hant_b (fun x hx => hsuc hx)
+      ih d₂b hcf_ab.2 hant_b hsuc
     ⟨.impL A' B' hAB₀ ra rb, And.intro hra hrb⟩
   | .impR A' B' hAB d', hcf' =>
     let hAB₀ : (A' → B') ∈ Δ₀ := hsuc hAB
@@ -425,11 +426,11 @@ noncomputable def cutAdm_right_orR
     let ⟨r, hr⟩ := cutAdm_right_orR A B (insert A' Γ₀) (insert B' Δ₀)
       (d₁'.mono (Finset.subset_insert _ _) wkR_imp)
       ih d' hcf' hant'
-      (Finset.insert_subset_insert _ (fun x hx => hsuc hx))
+      (Finset.insert_subset_insert _ hsuc)
     ⟨.impR A' B' hAB₀ r, hr⟩
   | .weakL A' d', hcf' =>
     cutAdm_right_orR A B Γ₀ Δ₀ d₁' ih d' hcf'
-      (fun x hx => hant (Finset.mem_insert_of_mem hx)) (fun x hx => hsuc hx)
+      (fun x hx => hant (Finset.mem_insert_of_mem hx)) hsuc
   | .weakR A' d', hcf' =>
     cutAdm_right_orR A B Γ₀ Δ₀ d₁' ih d' hcf' hant ((Finset.subset_insert A' _).trans hsuc)
   | .cut _ _ _, hcf' => absurd hcf' id
@@ -472,18 +473,18 @@ noncomputable def cutAdm_right_impR
           (fun x hx => (Finset.insert_subset_insert (Proposition.imp A B) wk2) (hant hx)))
     let ⟨r, hr⟩ := cutAdm_right_impR A B (insert A' (insert B' Γ₀)) Δ₀
       (d₁'.mono (Finset.insert_subset_insert _ wk2) (Finset.Subset.refl _))
-      ih d' hcf' hant' (fun x hx => hsuc hx)
+      ih d' hcf' hant' hsuc
     ⟨.andL A' B' hAB₀ r, hr⟩
   | .andR A' B' hAB d₂a d₂b, hcf_ab =>
     let hAB₀ : (A' ∧ B') ∈ Δ₀ := hsuc hAB
     let ⟨ra, hra⟩ := cutAdm_right_impR A B Γ₀ (insert A' Δ₀)
       (d₁'.mono (Finset.Subset.refl _) (Finset.insert_subset_insert _ (Finset.subset_insert A' _)))
       ih d₂a hcf_ab.1 hant
-      (Finset.insert_subset_insert _ (fun x hx => hsuc hx))
+      (Finset.insert_subset_insert _ hsuc)
     let ⟨rb, hrb⟩ := cutAdm_right_impR A B Γ₀ (insert B' Δ₀)
       (d₁'.mono (Finset.Subset.refl _) (Finset.insert_subset_insert _ (Finset.subset_insert B' _)))
       ih d₂b hcf_ab.2 hant
-      (Finset.insert_subset_insert _ (fun x hx => hsuc hx))
+      (Finset.insert_subset_insert _ hsuc)
     ⟨.andR A' B' hAB₀ ra rb, And.intro hra hrb⟩
   | .orL A' B' hAB d₂a d₂b, hcf_ab =>
     let hAB₀ : (A' ∨ B') ∈ Γ₀ := mem_of_ne_head (hant hAB) nofun
@@ -497,10 +498,10 @@ noncomputable def cutAdm_right_impR
         (fun x hx => (Finset.insert_subset_insert _ (Finset.subset_insert B' _)) (hant hx))
     let ⟨ra, hra⟩ := cutAdm_right_impR A B (insert A' Γ₀) Δ₀
       (d₁'.mono (Finset.insert_subset_insert _ (Finset.subset_insert A' _)) (Finset.Subset.refl _))
-      ih d₂a hcf_ab.1 hant_a (fun x hx => hsuc hx)
+      ih d₂a hcf_ab.1 hant_a hsuc
     let ⟨rb, hrb⟩ := cutAdm_right_impR A B (insert B' Γ₀) Δ₀
       (d₁'.mono (Finset.insert_subset_insert _ (Finset.subset_insert B' _)) (Finset.Subset.refl _))
-      ih d₂b hcf_ab.2 hant_b (fun x hx => hsuc hx)
+      ih d₂b hcf_ab.2 hant_b hsuc
     ⟨.orL A' B' hAB₀ ra rb, And.intro hra hrb⟩
   | .orR A' B' hAB d', hcf' =>
     let hAB₀ : (A' ∨ B') ∈ Δ₀ := hsuc hAB
@@ -510,7 +511,7 @@ noncomputable def cutAdm_right_impR
     let ⟨r, hr⟩ := cutAdm_right_impR A B Γ₀ (insert A' (insert B' Δ₀))
       (d₁'.mono (Finset.Subset.refl _) wkR_or)
       ih d' hcf' hant
-      (Finset.insert_subset_insert _ (Finset.insert_subset_insert _ (fun x hx => hsuc hx)))
+      (Finset.insert_subset_insert _ (Finset.insert_subset_insert _ hsuc))
     ⟨.orR A' B' hAB₀ r, hr⟩
   | .impR A' B' hAB d', hcf' =>
     let hAB₀ : (A' → B') ∈ Δ₀ := hsuc hAB
@@ -523,14 +524,16 @@ noncomputable def cutAdm_right_impR
     let ⟨r, hr⟩ := cutAdm_right_impR A B (insert A' Γ₀) (insert B' Δ₀)
       (d₁'.mono (Finset.insert_subset_insert _ (Finset.subset_insert A' _)) wkR_impR)
       ih d' hcf' hant'
-      (Finset.insert_subset_insert _ (fun x hx => hsuc hx))
+      (Finset.insert_subset_insert _ hsuc)
     ⟨.impR A' B' hAB₀ r, hr⟩
   | .impL A' B' hAB d₂a d₂b, hcf_ab =>
     if h1 : A' = A ∧ B' = B then
       -- PRINCIPAL CASE: d₂ = impL A B, C = A → B.
       -- Recurse on d₂a, d₂b (structurally smaller), then use ih A, ih B.
-      have hA : sizeOf A < sizeOf (Proposition.imp A B) := by rw [Proposition.imp.sizeOf_spec]; omega
-      have hB : sizeOf B < sizeOf (Proposition.imp A B) := by rw [Proposition.imp.sizeOf_spec]; omega
+      have hA : sizeOf A < sizeOf (Proposition.imp A B) := by
+        rw [Proposition.imp.sizeOf_spec]; omega
+      have hB : sizeOf B < sizeOf (Proposition.imp A B) := by
+        rw [Proposition.imp.sizeOf_spec]; omega
       let wk_b : Γ₀ ⊆ insert B Γ₀ := Finset.subset_insert B _
       let hsuc_a : insert A' Δ ⊆ insert A Δ₀ :=
         Finset.insert_subset
@@ -546,7 +549,7 @@ noncomputable def cutAdm_right_impR
           (fun x hx => (Finset.insert_subset_insert (A → B) wk_b) (hant hx))
       let d₂b' := cutAdm_right_impR A B (insert B Γ₀) Δ₀
         (d₁'.mono (Finset.insert_subset_insert _ wk_b) (Finset.Subset.refl _))
-        ih d₂b hcf_ab.2 hant_b (fun x hx => hsuc hx)
+        ih d₂b hcf_ab.2 hant_b hsuc
       let d₂a_w := d₂a_result.mono (Finset.Subset.refl _)
         (Finset.insert_subset_insert _ (Finset.subset_insert B _))
       let r₁ := ih A hA Γ₀ (insert B Δ₀) d₂a_w d₁'
@@ -555,20 +558,18 @@ noncomputable def cutAdm_right_impR
       let hAB₀ : (A' → B') ∈ Γ₀ := mem_of_ne_head (hant hAB)
         (by intro heq; injection heq with h1a h1b; exact h1 ⟨h1a, h1b⟩)
       let ⟨ra, hra⟩ := cutAdm_right_impR A B Γ₀ (insert A' Δ₀)
-        (d₁'.mono (Finset.Subset.refl _) (Finset.insert_subset_insert _ (Finset.subset_insert A' _)))
+        (d₁'.monoR (Finset.insert_subset_insert _ (Finset.subset_insert A' _)))
         ih d₂a hcf_ab.1 hant
-        (Finset.insert_subset_insert _ (fun x hx => hsuc hx))
+        (Finset.insert_subset_insert _ hsuc)
       let hant_b : insert B' Γ ⊆ insert (A → B) (insert B' Γ₀) :=
-        Finset.insert_subset
-          (Finset.mem_insert_of_mem (Finset.mem_insert_self B' _))
-          (fun x hx => (Finset.insert_subset_insert _ (Finset.subset_insert B' _)) (hant hx))
+        insert_subset_swap hant
       let ⟨rb, hrb⟩ := cutAdm_right_impR A B (insert B' Γ₀) Δ₀
-        (d₁'.mono (Finset.insert_subset_insert _ (Finset.subset_insert B' _)) (Finset.Subset.refl _))
-        ih d₂b hcf_ab.2 hant_b (fun x hx => hsuc hx)
+        (d₁'.monoL (Finset.insert_subset_insert _ (Finset.subset_insert B' _)))
+        ih d₂b hcf_ab.2 hant_b hsuc
       ⟨.impL A' B' hAB₀ ra rb, And.intro hra hrb⟩
   | .weakL A' d', hcf' =>
     cutAdm_right_impR A B Γ₀ Δ₀ d₁' ih d' hcf'
-      (fun x hx => hant (Finset.mem_insert_of_mem hx)) (fun x hx => hsuc hx)
+      (fun x hx => hant (Finset.mem_insert_of_mem hx)) hsuc
   | .weakR A' d', hcf' =>
     cutAdm_right_impR A B Γ₀ Δ₀ d₁' ih d' hcf' hant ((Finset.subset_insert A' _).trans hsuc)
   | .cut _ _ _, hcf' => absurd hcf' id
@@ -578,8 +579,9 @@ noncomputable def cutAdm_right_impR
 Only `cutAdm_right` and `cutAdm_left` are mutually recursive. The three principal-case
 helpers above are self-recursive and called one-way by `cutAdm_left`. -/
 
-set_option maxHeartbeats 400000 in
--- Mutual block requires extended heartbeats for case analysis in cutAdm_right/cutAdm_left
+set_option maxHeartbeats 210000 in
+-- The mutual block elaboration cost exceeds the default 200000 heartbeats because
+-- Lean re-checks all mutual definitions together; individual definitions are fast.
 mutual
 
 /-- General right-side helper: structural recursion on `d₂` for non-principal cases in d₁.
@@ -606,18 +608,16 @@ noncomputable def cutAdm_right
     else
       ⟨.botL Γ₀ Δ₀ (mem_of_ne_head (hant hbot) heq), by unfold CutFree; trivial⟩
   | .andL A B hAB d', hcf' =>
-    let wk2 : Γ₀ ⊆ insert A (insert B Γ₀) :=
-      (Finset.subset_insert B Γ₀).trans (Finset.subset_insert A _)
+    let wk2 : Γ₀ ⊆ insert A (insert B Γ₀) := subset_insert₂ A B Γ₀
     let hant' : insert A (insert B Γ) ⊆ insert C (insert A (insert B Γ₀)) :=
       Finset.insert_subset
         (Finset.mem_insert_of_mem (Finset.mem_insert_self A _))
         (Finset.insert_subset
           (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_self B _)))
-          (fun x hx => (Finset.insert_subset_insert C wk2) (hant hx)))
+          (hant.trans (Finset.insert_subset_insert C wk2)))
     let ⟨r, hr⟩ := cutAdm_right C (insert A (insert B Γ₀)) Δ₀
-      (d₁.mono (fun x hx => Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hx))
-               (Finset.Subset.refl _))
-      ih d' hcf' hant' (fun x hx => hsuc hx)
+      (d₁.monoL (subset_insert₂ A B Γ₀))
+      ih d' hcf' hant' hsuc
     if heq : Proposition.and A B = C then
       let wk_ab : insert A (insert B Γ₀) ⊆ insert A (insert B (insert (A ∧ B) Γ₀)) :=
         Finset.insert_subset_insert _
@@ -632,29 +632,23 @@ noncomputable def cutAdm_right
   | .andR A B hAB d₂a d₂b, hcf_ab =>
     let hAB₀ : (A ∧ B) ∈ Δ₀ := hsuc hAB
     let ⟨ra, hra⟩ := cutAdm_right C Γ₀ (insert A Δ₀)
-      (d₁.mono (Finset.Subset.refl _) (Finset.insert_subset_insert C (Finset.subset_insert A _)))
+      (d₁.monoR (Finset.insert_subset_insert C (Finset.subset_insert A _)))
       ih d₂a hcf_ab.1 hant
-      (Finset.insert_subset_insert _ (fun x hx => hsuc hx))
+      (Finset.insert_subset_insert _ hsuc)
     let ⟨rb, hrb⟩ := cutAdm_right C Γ₀ (insert B Δ₀)
-      (d₁.mono (Finset.Subset.refl _) (Finset.insert_subset_insert C (Finset.subset_insert B _)))
+      (d₁.monoR (Finset.insert_subset_insert C (Finset.subset_insert B _)))
       ih d₂b hcf_ab.2 hant
-      (Finset.insert_subset_insert _ (fun x hx => hsuc hx))
+      (Finset.insert_subset_insert _ hsuc)
     ⟨.andR A B hAB₀ ra rb, And.intro hra hrb⟩
   | .orL A B hAB d₂a d₂b, hcf_ab =>
-    let hant_a : insert A Γ ⊆ insert C (insert A Γ₀) :=
-      Finset.insert_subset
-        (Finset.mem_insert_of_mem (Finset.mem_insert_self A _))
-        (fun x hx => (Finset.insert_subset_insert C (Finset.subset_insert A _)) (hant hx))
-    let hant_b : insert B Γ ⊆ insert C (insert B Γ₀) :=
-      Finset.insert_subset
-        (Finset.mem_insert_of_mem (Finset.mem_insert_self B _))
-        (fun x hx => (Finset.insert_subset_insert C (Finset.subset_insert B _)) (hant hx))
+    let hant_a : insert A Γ ⊆ insert C (insert A Γ₀) := insert_subset_swap hant
+    let hant_b : insert B Γ ⊆ insert C (insert B Γ₀) := insert_subset_swap hant
     let ⟨ra, hra⟩ := cutAdm_right C (insert A Γ₀) Δ₀
-      (d₁.mono (fun x hx => Finset.mem_insert_of_mem hx) (Finset.Subset.refl _))
-      ih d₂a hcf_ab.1 hant_a (fun x hx => hsuc hx)
+      (d₁.monoL (Finset.subset_insert A _))
+      ih d₂a hcf_ab.1 hant_a hsuc
     let ⟨rb, hrb⟩ := cutAdm_right C (insert B Γ₀) Δ₀
-      (d₁.mono (fun x hx => Finset.mem_insert_of_mem hx) (Finset.Subset.refl _))
-      ih d₂b hcf_ab.2 hant_b (fun x hx => hsuc hx)
+      (d₁.monoL (Finset.subset_insert B _))
+      ih d₂b hcf_ab.2 hant_b hsuc
     if heq : Proposition.or A B = C then
       let wk_a := Finset.insert_subset_insert A (Finset.subset_insert (A ∨ B) Γ₀)
       let wk_b := Finset.insert_subset_insert B (Finset.subset_insert (A ∨ B) Γ₀)
@@ -671,24 +665,19 @@ noncomputable def cutAdm_right
   | .orR A B hAB d', hcf' =>
     let hAB₀ : (A ∨ B) ∈ Δ₀ := hsuc hAB
     let ⟨r, hr⟩ := cutAdm_right C Γ₀ (insert A (insert B Δ₀))
-      (d₁.mono (Finset.Subset.refl _)
-        (Finset.insert_subset_insert C
-          ((Finset.subset_insert B Δ₀).trans (Finset.subset_insert A _))))
+      (d₁.monoR (Finset.insert_subset_insert C (subset_insert₂ A B Δ₀)))
       ih d' hcf' hant
-      (Finset.insert_subset_insert _ (Finset.insert_subset_insert _ (fun x hx => hsuc hx)))
+      (Finset.insert_subset_insert _ (Finset.insert_subset_insert _ hsuc))
     ⟨.orR A B hAB₀ r, hr⟩
   | .impL A B hAB d₂a d₂b, hcf_ab =>
-    let hant_b : insert B Γ ⊆ insert C (insert B Γ₀) :=
-      Finset.insert_subset
-        (Finset.mem_insert_of_mem (Finset.mem_insert_self B _))
-        (fun x hx => (Finset.insert_subset_insert C (Finset.subset_insert B _)) (hant hx))
+    let hant_b : insert B Γ ⊆ insert C (insert B Γ₀) := insert_subset_swap hant
     let ⟨ra, hra⟩ := cutAdm_right C Γ₀ (insert A Δ₀)
-      (d₁.mono (Finset.Subset.refl _) (Finset.insert_subset_insert C (Finset.subset_insert A _)))
+      (d₁.monoR (Finset.insert_subset_insert C (Finset.subset_insert A _)))
       ih d₂a hcf_ab.1 hant
-      (Finset.insert_subset_insert _ (fun x hx => hsuc hx))
+      (Finset.insert_subset_insert _ hsuc)
     let ⟨rb, hrb⟩ := cutAdm_right C (insert B Γ₀) Δ₀
-      (d₁.mono (fun x hx => Finset.mem_insert_of_mem hx) (Finset.Subset.refl _))
-      ih d₂b hcf_ab.2 hant_b (fun x hx => hsuc hx)
+      (d₁.monoL (Finset.subset_insert B _))
+      ih d₂b hcf_ab.2 hant_b hsuc
     if heq : Proposition.imp A B = C then
       let wk_ra := Finset.subset_insert (Proposition.imp A B) Γ₀
       let wk_rb := Finset.insert_subset_insert B (Finset.subset_insert (Proposition.imp A B) Γ₀)
@@ -704,19 +693,15 @@ noncomputable def cutAdm_right
       ⟨.impL A B (mem_of_ne_head (hant hAB) heq) ra rb, And.intro hra hrb⟩
   | .impR A B hAB d', hcf' =>
     let hAB₀ : (A → B) ∈ Δ₀ := hsuc hAB
-    let hant' : insert A Γ ⊆ insert C (insert A Γ₀) :=
-      Finset.insert_subset
-        (Finset.mem_insert_of_mem (Finset.mem_insert_self A _))
-        (fun x hx => (Finset.insert_subset_insert C (Finset.subset_insert A _)) (hant hx))
+    let hant' : insert A Γ ⊆ insert C (insert A Γ₀) := insert_subset_swap hant
     let ⟨r, hr⟩ := cutAdm_right C (insert A Γ₀) (insert B Δ₀)
-      (d₁.mono (fun x hx => Finset.mem_insert_of_mem hx)
+      (d₁.mono (Finset.subset_insert A _)
         (Finset.insert_subset_insert C (Finset.subset_insert B _)))
       ih d' hcf' hant'
-      (Finset.insert_subset_insert _ (fun x hx => hsuc hx))
+      (Finset.insert_subset_insert _ hsuc)
     ⟨.impR A B hAB₀ r, hr⟩
   | .weakL A d', hcf' =>
-    cutAdm_right C Γ₀ Δ₀ d₁ ih d' hcf'
-      (fun x hx => hant (Finset.mem_insert_of_mem hx)) (fun x hx => hsuc hx)
+    cutAdm_right C Γ₀ Δ₀ d₁ ih d' hcf' ((Finset.subset_insert A _).trans hant) hsuc
   | .weakR A d', hcf' =>
     cutAdm_right C Γ₀ Δ₀ d₁ ih d' hcf' hant ((Finset.subset_insert A _).trans hsuc)
   | .cut _ _ _, hcf' => absurd hcf' id
@@ -741,10 +726,7 @@ noncomputable def cutAdm_left
   | .botL _ _ hbot, _ =>
     ⟨.botL Γ₀ Δ₀ (hant hbot), trivial⟩
   | .andL A B hAB d', hcf' =>
-    let d₂' := d₂.mono
-      (Finset.insert_subset_insert C
-        ((Finset.subset_insert B Γ₀).trans (Finset.subset_insert A _)))
-      (Finset.Subset.refl _)
+    let d₂' := d₂.monoL (Finset.insert_subset_insert C (subset_insert₂ A B Γ₀))
     let hant' : insert A (insert B Γ) ⊆ insert A (insert B Γ₀) :=
       Finset.insert_subset_insert _ (Finset.insert_subset_insert _ hant)
     let ⟨r, hr⟩ := cutAdm_left C (insert A (insert B Γ₀)) Δ₀ d₂' ih d' hcf' hant' hsuc
@@ -752,20 +734,12 @@ noncomputable def cutAdm_left
   | .andR A B hAB d₁a d₁b, hcf_ab =>
     if heq : Proposition.and A B = C then
       -- PRINCIPAL CASE: C = A ∧ B. Clean up C from d₁a and d₁b's succedents.
-      let hR_a : insert A Δ ⊆ insert C (insert A Δ₀) :=
-        Finset.insert_subset
-          (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
-          (fun x hx => (Finset.insert_subset_insert C (Finset.subset_insert _ _)) (hsuc hx))
-      let hR_b : insert B Δ ⊆ insert C (insert B Δ₀) :=
-        Finset.insert_subset
-          (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
-          (fun x hx => (Finset.insert_subset_insert C (Finset.subset_insert _ _)) (hsuc hx))
       let d₁a_clean := cutAdm_left C Γ₀ (insert A Δ₀)
-        (d₂.mono (Finset.Subset.refl _) (Finset.subset_insert A _))
-        ih d₁a hcf_ab.1 hant hR_a
+        (d₂.monoR (Finset.subset_insert A _))
+        ih d₁a hcf_ab.1 hant (insert_subset_swap hsuc)
       let d₁b_clean := cutAdm_left C Γ₀ (insert B Δ₀)
-        (d₂.mono (Finset.Subset.refl _) (Finset.subset_insert B _))
-        ih d₁b hcf_ab.2 hant hR_b
+        (d₂.monoR (Finset.subset_insert B _))
+        ih d₁b hcf_ab.2 hant (insert_subset_swap hsuc)
       cutAdm_right_andR A B Γ₀ Δ₀ d₁a_clean d₁b_clean
         (heq ▸ ih)
         d₂.1 d₂.2
@@ -774,44 +748,30 @@ noncomputable def cutAdm_left
     else
       -- Non-principal: A∧B ≠ C so A∧B ∈ Δ₀.
       have hAB₀ : (A ∧ B) ∈ Δ₀ := mem_of_ne_head (hsuc hAB) heq
-      let hR_a : insert A Δ ⊆ insert C (insert A Δ₀) :=
-        Finset.insert_subset
-          (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
-          (fun x hx => (Finset.insert_subset_insert C (Finset.subset_insert _ _)) (hsuc hx))
-      let hR_b : insert B Δ ⊆ insert C (insert B Δ₀) :=
-        Finset.insert_subset
-          (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
-          (fun x hx => (Finset.insert_subset_insert C (Finset.subset_insert _ _)) (hsuc hx))
       let ⟨ra, hra⟩ := cutAdm_left C Γ₀ (insert A Δ₀)
-        (d₂.mono (Finset.Subset.refl _) (Finset.subset_insert A _)) ih d₁a hcf_ab.1 hant hR_a
+        (d₂.monoR (Finset.subset_insert A _)) ih d₁a hcf_ab.1 hant (insert_subset_swap hsuc)
       let ⟨rb, hrb⟩ := cutAdm_left C Γ₀ (insert B Δ₀)
-        (d₂.mono (Finset.Subset.refl _) (Finset.subset_insert B _)) ih d₁b hcf_ab.2 hant hR_b
+        (d₂.monoR (Finset.subset_insert B _)) ih d₁b hcf_ab.2 hant (insert_subset_swap hsuc)
       ⟨.andR A B hAB₀ ra rb, And.intro hra hrb⟩
   | .orL A B hAB d₁a d₁b, hcf_ab =>
-    let d₂_a := d₂.mono
-      (Finset.insert_subset_insert C (Finset.subset_insert A _))
-      (Finset.Subset.refl _)
-    let d₂_b := d₂.mono
-      (Finset.insert_subset_insert C (Finset.subset_insert B _))
-      (Finset.Subset.refl _)
-    let hant_a : insert A Γ ⊆ insert A Γ₀ := Finset.insert_subset_insert _ hant
-    let hant_b : insert B Γ ⊆ insert B Γ₀ := Finset.insert_subset_insert _ hant
-    let ⟨ra, hra⟩ := cutAdm_left C (insert A Γ₀) Δ₀ d₂_a ih d₁a hcf_ab.1 hant_a hsuc
-    let ⟨rb, hrb⟩ := cutAdm_left C (insert B Γ₀) Δ₀ d₂_b ih d₁b hcf_ab.2 hant_b hsuc
+    let d₂_a := d₂.monoL (Finset.insert_subset_insert C (Finset.subset_insert A _))
+    let d₂_b := d₂.monoL (Finset.insert_subset_insert C (Finset.subset_insert B _))
+    let ⟨ra, hra⟩ := cutAdm_left C (insert A Γ₀) Δ₀ d₂_a ih d₁a hcf_ab.1
+      (Finset.insert_subset_insert _ hant) hsuc
+    let ⟨rb, hrb⟩ := cutAdm_left C (insert B Γ₀) Δ₀ d₂_b ih d₁b hcf_ab.2
+      (Finset.insert_subset_insert _ hant) hsuc
     ⟨.orL A B (hant hAB) ra rb, And.intro hra hrb⟩
   | .orR A B hAB d', hcf' =>
+    let hR' : insert A (insert B Δ) ⊆ insert C (insert A (insert B Δ₀)) :=
+      Finset.insert_subset
+        (Finset.mem_insert_of_mem (Finset.mem_insert_self A _))
+        (Finset.insert_subset
+          (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_self B _)))
+          (hsuc.trans (Finset.insert_subset_insert C (subset_insert₂ A B Δ₀))))
     if heq : Proposition.or A B = C then
       -- PRINCIPAL CASE: C = A ∨ B. Clean up C from d''s succedent.
-      let hR' : insert A (insert B Δ) ⊆ insert C (insert A (insert B Δ₀)) :=
-        Finset.insert_subset
-          (Finset.mem_insert_of_mem (Finset.mem_insert_self A _))
-          (Finset.insert_subset
-            (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_self B _)))
-            (fun x hx => (Finset.insert_subset_insert C
-              ((Finset.subset_insert B Δ₀).trans (Finset.subset_insert A _))) (hsuc hx)))
       let d₁'_clean := cutAdm_left C Γ₀ (insert A (insert B Δ₀))
-        (d₂.mono (Finset.Subset.refl _)
-          ((Finset.subset_insert B Δ₀).trans (Finset.subset_insert A (insert B Δ₀))))
+        (d₂.monoR (subset_insert₂ A B Δ₀))
         ih d' hcf' hant hR'
       cutAdm_right_orR A B Γ₀ Δ₀ d₁'_clean
         (heq ▸ ih)
@@ -821,42 +781,24 @@ noncomputable def cutAdm_left
     else
       -- Non-principal: A∨B ≠ C so A∨B ∈ Δ₀.
       have hAB₀ : (A ∨ B) ∈ Δ₀ := mem_of_ne_head (hsuc hAB) heq
-      let hR' : insert A (insert B Δ) ⊆ insert C (insert A (insert B Δ₀)) :=
-        Finset.insert_subset
-          (Finset.mem_insert_of_mem (Finset.mem_insert_self A _))
-          (Finset.insert_subset
-            (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_self B _)))
-            (fun x hx => (Finset.insert_subset_insert C
-              ((Finset.subset_insert B Δ₀).trans (Finset.subset_insert A _))) (hsuc hx)))
-      let d₂' := d₂.mono (Finset.Subset.refl _)
-        ((Finset.subset_insert B Δ₀).trans (Finset.subset_insert A (insert B Δ₀)))
-      let ⟨r, hr⟩ := cutAdm_left C Γ₀ (insert A (insert B Δ₀)) d₂' ih d' hcf' hant hR'
+      let ⟨r, hr⟩ := cutAdm_left C Γ₀ (insert A (insert B Δ₀))
+        (d₂.monoR (subset_insert₂ A B Δ₀)) ih d' hcf' hant hR'
       ⟨.orR A B hAB₀ r, hr⟩
   | .impL A B hAB d₁a d₁b, hcf_ab =>
-    let hR_a : insert A Δ ⊆ insert C (insert A Δ₀) :=
-      Finset.insert_subset
-        (Finset.mem_insert_of_mem (Finset.mem_insert_self A _))
-        (fun x hx => (Finset.insert_subset_insert C (Finset.subset_insert A _)) (hsuc hx))
-    let d₂_a := d₂.mono (Finset.Subset.refl _) (Finset.subset_insert A _)
-    let ⟨ra, hra⟩ := cutAdm_left C Γ₀ (insert A Δ₀) d₂_a ih d₁a hcf_ab.1 hant hR_a
-    let d₂_b := d₂.mono
-      (Finset.insert_subset_insert C (Finset.subset_insert B _))
-      (Finset.Subset.refl _)
-    let hant_b : insert B Γ ⊆ insert B Γ₀ := Finset.insert_subset_insert _ hant
-    let ⟨rb, hrb⟩ := cutAdm_left C (insert B Γ₀) Δ₀ d₂_b ih d₁b hcf_ab.2 hant_b hsuc
+    let ⟨ra, hra⟩ := cutAdm_left C Γ₀ (insert A Δ₀)
+      (d₂.monoR (Finset.subset_insert A _)) ih d₁a hcf_ab.1 hant (insert_subset_swap hsuc)
+    let ⟨rb, hrb⟩ := cutAdm_left C (insert B Γ₀) Δ₀
+      (d₂.monoL (Finset.insert_subset_insert C (Finset.subset_insert B _)))
+      ih d₁b hcf_ab.2 (Finset.insert_subset_insert _ hant) hsuc
     ⟨.impL A B (hant hAB) ra rb, And.intro hra hrb⟩
   | .impR A B hAB d', hcf' =>
+    let hR' : insert B Δ ⊆ insert C (insert B Δ₀) := insert_subset_swap hsuc
+    let d₂' := d₂.mono (Finset.insert_subset_insert C (Finset.subset_insert A _))
+                       (Finset.subset_insert B _)
     if heq : Proposition.imp A B = C then
       -- PRINCIPAL CASE: C = A → B. Clean up C from d''s succedent.
-      let hL' : insert A Γ ⊆ insert A Γ₀ := Finset.insert_subset_insert _ hant
-      let hR' : insert B Δ ⊆ insert C (insert B Δ₀) :=
-        Finset.insert_subset
-          (Finset.mem_insert_of_mem (Finset.mem_insert_self B _))
-          (fun x hx => (Finset.insert_subset_insert C (Finset.subset_insert B _)) (hsuc hx))
-      let d₁'_clean := cutAdm_left C (insert A Γ₀) (insert B Δ₀)
-        (d₂.mono (Finset.insert_subset_insert C (Finset.subset_insert A _))
-                 (Finset.subset_insert B _))
-        ih d' hcf' hL' hR'
+      let d₁'_clean := cutAdm_left C (insert A Γ₀) (insert B Δ₀) d₂'
+        ih d' hcf' (Finset.insert_subset_insert _ hant) hR'
       cutAdm_right_impR A B Γ₀ Δ₀ d₁'_clean
         (heq ▸ ih)
         d₂.1 d₂.2
@@ -865,15 +807,8 @@ noncomputable def cutAdm_left
     else
       -- Non-principal: A→B ≠ C so A→B ∈ Δ₀.
       have hAB₀ : (A → B) ∈ Δ₀ := mem_of_ne_head (hsuc hAB) heq
-      let hL' : insert A Γ ⊆ insert A Γ₀ := Finset.insert_subset_insert _ hant
-      let hR' : insert B Δ ⊆ insert C (insert B Δ₀) :=
-        Finset.insert_subset
-          (Finset.mem_insert_of_mem (Finset.mem_insert_self B _))
-          (fun x hx => (Finset.insert_subset_insert C (Finset.subset_insert B _)) (hsuc hx))
-      let d₂' := d₂.mono
-        (Finset.insert_subset_insert C (Finset.subset_insert A _))
-        (Finset.subset_insert B _)
-      let ⟨r, hr⟩ := cutAdm_left C (insert A Γ₀) (insert B Δ₀) d₂' ih d' hcf' hL' hR'
+      let ⟨r, hr⟩ := cutAdm_left C (insert A Γ₀) (insert B Δ₀) d₂'
+        ih d' hcf' (Finset.insert_subset_insert _ hant) hR'
       ⟨.impR A B hAB₀ r, hr⟩
   | .weakL A d', hcf' =>
     cutAdm_left C Γ₀ Δ₀ d₂ ih d' hcf' ((Finset.subset_insert A _).trans hant) hsuc
@@ -894,7 +829,7 @@ noncomputable def cutAdmissibility
     (d₂ : CutFreeLKProof (insert C Γ ⊢ₛ Δ)) :
     CutFreeLKProof (Γ ⊢ₛ Δ) :=
   cutAdm_left C Γ Δ d₂
-    (fun B hB Γ' Δ' d₁' d₂' => cutAdmissibility B Γ' Δ' d₁' d₂')
+    (fun B _ Γ' Δ' d₁' d₂' => cutAdmissibility B Γ' Δ' d₁' d₂')
     d₁.1 d₁.2 (Finset.Subset.refl _) (Finset.Subset.refl _)
 termination_by sizeOf C
 

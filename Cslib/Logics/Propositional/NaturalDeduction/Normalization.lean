@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Propositional.NaturalDeduction.Basic
+public import Mathlib.Data.Multiset.DershowitzManna
 
 /-! # Normalization for Propositional Natural Deduction
 
@@ -926,17 +927,6 @@ theorem Theory.Derivation.normalizeAux_fixpoint {G : Ctx Atom} {A : Proposition 
   normalizeAux_fixpoint_aux n d h
 
 /-! ## Normalization Produces Strongly Normal Derivations -/
-
-/-
-The normalization termination proof requires a two-level induction:
-1. Outer induction on formula complexity of the maximal formula being reduced
-   (handles proper β-redexes via substitution)
-2. Inner induction on fuel (handles commuting conversions)
-
-Key insight (Prawitz 1965, Ch. IV): substituting `arg : G ⊢ A` into `body : G,A ⊢ B`
-only creates new redexes involving `arg`. Since `arg` derives `A` (a proper subformula
-of `A → B`), any new maximal formula has strictly lower complexity.
--/
 
 private def Theory.Derivation.conclusionComplexity (_ : T.Derivation G A) : Nat := A.complexity
 

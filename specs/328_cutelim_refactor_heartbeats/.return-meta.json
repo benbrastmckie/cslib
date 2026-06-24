@@ -3,12 +3,11 @@
   "started_at": "2026-06-24T00:00:00Z",
   "artifacts": [],
   "partial_progress": {
-    "stage": "phase_3",
-    "details": "Phases 1 and 2 complete. Three helpers extracted from mutual block. maxHeartbeats reduced from 800000 to 400000. Starting pattern replacement phase.",
+    "stage": "initializing",
+    "details": "Agent started. Phases 1 and 2 already done in file. Phase 3 (eta-reduction) and Phase 4 (heartbeats) need completion.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 2,
-    "last_completed_phase": "Extract cutAdm_right_* from mutual block"
+    "phases_completed": 2
   },
   "metadata": {
     "session_id": "sess_1782300531_c471d6_328",

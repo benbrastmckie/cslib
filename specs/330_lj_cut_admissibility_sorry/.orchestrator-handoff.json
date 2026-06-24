@@ -1,16 +1,10 @@
 {
-  "status": "planned",
-  "summary": "5-phase plan for LJ cut admissibility: type aliases + 3 standalone principal helpers + mutual block + WF top-level + CI verification, estimated 6 hours",
+  "status": "implemented",
+  "summary": "LJ cutAdmissibility fully proved (0 sorries), cutElim verified with standard axioms only",
   "blockers": [],
   "continuation_context": null,
-  "phases_completed": 0,
+  "phases_completed": 5,
   "phases_total": 5,
-  "artifacts": [
-    {
-      "path": "specs/330_lj_cut_admissibility_sorry/plans/01_lj-cut-admissibility-plan.md",
-      "type": "plan",
-      "summary": "5-phase implementation plan for LJ cut admissibility proof adapting LK architecture to single-conclusion sequents"
-    }
-  ],
-  "next_action_hint": "implement"
+  "artifacts": [],
+  "next_action_hint": "complete"
 }

@@ -441,6 +441,7 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertConservativeGl
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertLindenbaum
 public import Cslib.Logics.Propositional.Semantics.Algebra.ImpConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.KripkeBridge
+public import Cslib.Logics.Propositional.Semantics.Algebra.MplConservativeChain
 public import Cslib.Logics.Propositional.Semantics.Algebra.NonemptyLowerSet
 public import Cslib.Logics.Propositional.Semantics.Algebra.PointedBrouwerian
 public import Cslib.Logics.Propositional.Semantics.Algebra.PointedBrouwerianCompleteness

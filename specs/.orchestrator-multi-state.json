@@ -27,17 +27,15 @@
     ]
   },
   "max_cycles": 15,
-  "cycle_count": 8,
+  "cycle_count": 4,
   "failed_tasks": [],
   "completed_tasks": [
-    324,
-    325,
-    326
+    330,
+    331
   ],
   "current_statuses": {
-    "324": "not_started",
-    "325": "not_started",
-    "326": "completed"
+    "330": "completed",
+    "331": "completed"
   },
   "task_dirs": {
     "324": "specs/324_lawfulbeq_proposition_signedformula",

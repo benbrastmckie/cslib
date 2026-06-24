@@ -25,11 +25,17 @@ into a cut-free derivation of the same sequent.
 ## Proof Strategy
 
 The key theorem `cutAdmissibility` takes **cut-free** inputs and produces a **cut-free**
-output. It proceeds by well-founded induction on the pair `(sizeOf A, d₁.height + d₂.height)`
-under lexicographic ordering. The atom and `⊥` base cases are handled by case analysis on `d₁`.
-The compound formula cases (`imp`, `and`, `or`) handle non-principal subcases structurally
-(decreasing height sum), and handle the principal case (where `A` is introduced on both sides)
-using the induction hypotheses for subformulas (decreasing formula size).
+output. It proceeds by well-founded induction on `sizeOf A` (formula complexity), with
+structural recursion on proof trees for the fixed-formula case. The atom and `⊥` base cases
+are handled by case analysis on `d₁`. The compound formula cases (`and`, `or`, `imp`) handle
+non-principal subcases structurally (decreasing proof size), and handle the principal case
+(where `A` is introduced on both sides) using the induction hypothesis for subformulas
+(decreasing formula size).
+
+The proof is decomposed following the LK cut elimination architecture:
+1. Three standalone self-recursive helpers for principal connective cases
+2. A mutual recursion block (`ljCutAdm_right` / `ljCutAdm_left`)
+3. A top-level WF wrapper (`cutAdmissibility`)
 
 ## References
 
@@ -84,23 +90,577 @@ def CutFreeLJProof.mono {seq : @Sequent Atom} {Γ' : Ctx Atom}
     CutFreeLJProof (Γ', seq.2) :=
   ⟨d.1.mono hL, LJCutFree.mono hL d.1 d.2⟩
 
-/-! ## Cut Admissibility -/
+/-! ## Cut Admissibility
+
+### Helper type alias -/
+
+/-- The induction hypothesis type for subformula induction in cut admissibility.
+For each formula `B` strictly smaller than `A`, we can eliminate a cut on `B`
+from cut-free proofs. -/
+noncomputable abbrev LJCutIH (A : Proposition Atom) : Type u :=
+  ∀ (B : Proposition Atom), sizeOf B < sizeOf A →
+    ∀ (Γ : Ctx Atom) (C : Proposition Atom),
+    CutFreeLJProof (Γ ⊢ B) →
+    CutFreeLJProof (insert B Γ ⊢ C) →
+    CutFreeLJProof (Γ ⊢ C)
+
+/-! ### Helper: insert membership branching -/
+
+/-- From `x ∈ insert a s` and `x ≠ a`, extract `x ∈ s`. -/
+theorem ljMem_of_ne_head {α : Type*} [DecidableEq α] {a x : α} {s : Finset α}
+    (hx : x ∈ insert a s) (hne : x ≠ a) : x ∈ s :=
+  Finset.mem_of_mem_insert_of_ne hx hne
+
+/-! ### Standalone self-recursive helpers -/
+
+/-- Principal `andR`/`andL` case: structural recursion on `d₂` given
+`d₁p : CutFreeLJProof (Γ₀ ⊢ P)` and `d₁q : CutFreeLJProof (Γ₀ ⊢ Q)` from the `andR`
+side. When `d₂` decomposes `P ∧ Q` via `andL`, the principal case uses `ih` to cut on the
+subformulas `P` and `Q`. All other `d₂` cases reconstruct the rule with a recursive call. -/
+noncomputable def ljCutAdm_principal_andR
+    (P Q : Proposition Atom) (Γ₀ : Ctx Atom)
+    (d₁p : CutFreeLJProof (Γ₀ ⊢ P))
+    (d₁q : CutFreeLJProof (Γ₀ ⊢ Q))
+    (ih : LJCutIH (P ∧ Q))
+    {Γ : Ctx Atom} {C : Proposition Atom}
+    (d₂ : LJProof (Γ ⊢ C)) (hcf₂ : LJCutFree d₂)
+    (hant : Γ ⊆ insert (P ∧ Q) Γ₀) :
+    CutFreeLJProof (Γ₀ ⊢ C) :=
+  match d₂, hcf₂ with
+  | .ax phi _ hphiL, _ =>
+    if heq : phi = Proposition.and P Q then
+      if h : phi ∈ Γ₀ then ⟨.ax phi Γ₀ h, trivial⟩
+      else
+        (heq ▸ ⟨.andR P Q d₁p.1 d₁q.1, ⟨d₁p.2, d₁q.2⟩⟩ :
+          CutFreeLJProof (Γ₀ ⊢ phi))
+    else ⟨.ax phi Γ₀ (ljMem_of_ne_head (hant hphiL) heq), trivial⟩
+  | .botL _ _ hbot, _ =>
+    ⟨.botL Γ₀ _ (ljMem_of_ne_head (hant hbot) nofun), by unfold LJCutFree; trivial⟩
+  | .andL A' B' hAB d', hcf' =>
+    if h1 : A' = P ∧ B' = Q then
+      have hP : sizeOf P < sizeOf (Proposition.and P Q) := by
+        rw [Proposition.and.sizeOf_spec]; omega
+      have hQ : sizeOf Q < sizeOf (Proposition.and P Q) := by
+        rw [Proposition.and.sizeOf_spec]; omega
+      let wk : Γ₀ ⊆ insert P (insert Q Γ₀) :=
+        (Finset.subset_insert Q Γ₀).trans (Finset.subset_insert P _)
+      let hant' : insert A' (insert B' Γ) ⊆ insert (P ∧ Q) (insert P (insert Q Γ₀)) :=
+        Finset.insert_subset
+          (Finset.mem_insert_of_mem (Finset.mem_insert.mpr (Or.inl h1.1)))
+          (Finset.insert_subset
+            (Finset.mem_insert_of_mem
+              (Finset.mem_insert_of_mem (Finset.mem_insert.mpr (Or.inl h1.2))))
+            (fun x hx => (Finset.insert_subset_insert (P ∧ Q) wk) (hant hx)))
+      let d₂' := ljCutAdm_principal_andR P Q (insert P (insert Q Γ₀))
+        (d₁p.mono wk) (d₁q.mono wk) ih d' hcf' hant'
+      let r₁ := ih P hP (insert Q Γ₀) C (d₁p.mono (Finset.subset_insert Q _)) d₂'
+      ih Q hQ Γ₀ C d₁q r₁
+    else
+      let hAB₀ := ljMem_of_ne_head (hant hAB)
+        (by intro heq; injection heq with h1a h1b; exact h1 ⟨h1a, h1b⟩)
+      let wk2 : Γ₀ ⊆ insert A' (insert B' Γ₀) :=
+        (Finset.subset_insert B' Γ₀).trans (Finset.subset_insert A' _)
+      let hant' : insert A' (insert B' Γ) ⊆ insert (P ∧ Q) (insert A' (insert B' Γ₀)) :=
+        Finset.insert_subset
+          (Finset.mem_insert_of_mem (Finset.mem_insert_self A' _))
+          (Finset.insert_subset
+            (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_self B' _)))
+            (fun x hx => (Finset.insert_subset_insert _ wk2) (hant hx)))
+      let ⟨r, hr⟩ := ljCutAdm_principal_andR P Q (insert A' (insert B' Γ₀))
+        (d₁p.mono wk2) (d₁q.mono wk2) ih d' hcf' hant'
+      ⟨.andL A' B' hAB₀ r, hr⟩
+  | .andR A' B' d₂a d₂b, hcf_ab =>
+    let ⟨ra, hra⟩ := ljCutAdm_principal_andR P Q Γ₀ d₁p d₁q ih d₂a hcf_ab.1 hant
+    let ⟨rb, hrb⟩ := ljCutAdm_principal_andR P Q Γ₀ d₁p d₁q ih d₂b hcf_ab.2 hant
+    ⟨.andR A' B' ra rb, ⟨hra, hrb⟩⟩
+  | .orL A' B' hAB d₂a d₂b, hcf_ab =>
+    let hAB₀ := ljMem_of_ne_head (hant hAB) nofun
+    let hant_a : insert A' Γ ⊆ insert (P ∧ Q) (insert A' Γ₀) :=
+      Finset.insert_subset
+        (Finset.mem_insert_of_mem (Finset.mem_insert_self A' _))
+        (fun x hx => (Finset.insert_subset_insert _ (Finset.subset_insert A' _)) (hant hx))
+    let hant_b : insert B' Γ ⊆ insert (P ∧ Q) (insert B' Γ₀) :=
+      Finset.insert_subset
+        (Finset.mem_insert_of_mem (Finset.mem_insert_self B' _))
+        (fun x hx => (Finset.insert_subset_insert _ (Finset.subset_insert B' _)) (hant hx))
+    let ⟨ra, hra⟩ := ljCutAdm_principal_andR P Q (insert A' Γ₀)
+      (d₁p.mono (Finset.subset_insert _ _)) (d₁q.mono (Finset.subset_insert _ _))
+      ih d₂a hcf_ab.1 hant_a
+    let ⟨rb, hrb⟩ := ljCutAdm_principal_andR P Q (insert B' Γ₀)
+      (d₁p.mono (Finset.subset_insert _ _)) (d₁q.mono (Finset.subset_insert _ _))
+      ih d₂b hcf_ab.2 hant_b
+    ⟨.orL A' B' hAB₀ ra rb, ⟨hra, hrb⟩⟩
+  | .orR1 A' B' d', hcf' =>
+    let ⟨r, hr⟩ := ljCutAdm_principal_andR P Q Γ₀ d₁p d₁q ih d' hcf' hant
+    ⟨.orR1 A' B' r, hr⟩
+  | .orR2 A' B' d', hcf' =>
+    let ⟨r, hr⟩ := ljCutAdm_principal_andR P Q Γ₀ d₁p d₁q ih d' hcf' hant
+    ⟨.orR2 A' B' r, hr⟩
+  | .impL A' B' hAB d₂a d₂b, hcf_ab =>
+    let hAB₀ := ljMem_of_ne_head (hant hAB) nofun
+    let hant_b : insert B' Γ ⊆ insert (P ∧ Q) (insert B' Γ₀) :=
+      Finset.insert_subset
+        (Finset.mem_insert_of_mem (Finset.mem_insert_self B' _))
+        (fun x hx => (Finset.insert_subset_insert _ (Finset.subset_insert B' _)) (hant hx))
+    let ⟨ra, hra⟩ := ljCutAdm_principal_andR P Q Γ₀ d₁p d₁q ih d₂a hcf_ab.1 hant
+    let ⟨rb, hrb⟩ := ljCutAdm_principal_andR P Q (insert B' Γ₀)
+      (d₁p.mono (Finset.subset_insert _ _)) (d₁q.mono (Finset.subset_insert _ _))
+      ih d₂b hcf_ab.2 hant_b
+    ⟨.impL A' B' hAB₀ ra rb, ⟨hra, hrb⟩⟩
+  | .impR A' B' d', hcf' =>
+    let hant' : insert A' Γ ⊆ insert (P ∧ Q) (insert A' Γ₀) :=
+      Finset.insert_subset
+        (Finset.mem_insert_of_mem (Finset.mem_insert_self A' _))
+        (fun x hx => (Finset.insert_subset_insert _ (Finset.subset_insert A' _)) (hant hx))
+    let ⟨r, hr⟩ := ljCutAdm_principal_andR P Q (insert A' Γ₀)
+      (d₁p.mono (Finset.subset_insert _ _)) (d₁q.mono (Finset.subset_insert _ _))
+      ih d' hcf' hant'
+    ⟨.impR A' B' r, hr⟩
+  | .weakL A' d', hcf' =>
+    ljCutAdm_principal_andR P Q Γ₀ d₁p d₁q ih d' hcf'
+      (fun x hx => hant (Finset.mem_insert_of_mem hx))
+  | .cut _ _ _, hcf' => absurd hcf' id
+termination_by sizeOf d₂
+
+/-- Principal `orR`/`orL` case: structural recursion on `d₂` given a sub-proof
+`d₁sub : CutFreeLJProof (Γ₀ ⊢ X)` where `X` is the chosen disjunct. The parameter
+`hXeq` certifies `X = P` or `X = Q`, allowing selection of the correct `orL` branch
+in the principal case. The `rebuild` function lifts `(Γ' ⊢ X)` to `(Γ' ⊢ P ∨ Q)` for
+the `ax` base case. -/
+noncomputable def ljCutAdm_principal_orR
+    (P Q : Proposition Atom) (Γ₀ : Ctx Atom)
+    {X : Proposition Atom} (d₁sub : CutFreeLJProof (Γ₀ ⊢ X))
+    (hXsz : sizeOf X < sizeOf (P ∨ Q))
+    (hXeq : X = P ∨ X = Q)
+    (rebuild : ∀ {Γ' : Ctx Atom}, CutFreeLJProof (Γ' ⊢ X) → CutFreeLJProof (Γ' ⊢ P ∨ Q))
+    (ih : LJCutIH (P ∨ Q))
+    {Γ : Ctx Atom} {C : Proposition Atom}
+    (d₂ : LJProof (Γ ⊢ C)) (hcf₂ : LJCutFree d₂)
+    (hant : Γ ⊆ insert (P ∨ Q) Γ₀) :
+    CutFreeLJProof (Γ₀ ⊢ C) :=
+  match d₂, hcf₂ with
+  | .ax phi _ hphiL, _ =>
+    if heq : phi = Proposition.or P Q then
+      if h : phi ∈ Γ₀ then ⟨.ax phi Γ₀ h, trivial⟩
+      else
+        (heq ▸ rebuild d₁sub : CutFreeLJProof (Γ₀ ⊢ phi))
+    else ⟨.ax phi Γ₀ (ljMem_of_ne_head (hant hphiL) heq), trivial⟩
+  | .botL _ _ hbot, _ =>
+    ⟨.botL Γ₀ _ (ljMem_of_ne_head (hant hbot) nofun), by unfold LJCutFree; trivial⟩
+  | .andL A' B' hAB d', hcf' =>
+    let hAB₀ := ljMem_of_ne_head (hant hAB) nofun
+    let wk2 : Γ₀ ⊆ insert A' (insert B' Γ₀) :=
+      (Finset.subset_insert B' Γ₀).trans (Finset.subset_insert A' _)
+    let hant' : insert A' (insert B' Γ) ⊆ insert (P ∨ Q) (insert A' (insert B' Γ₀)) :=
+      Finset.insert_subset
+        (Finset.mem_insert_of_mem (Finset.mem_insert_self A' _))
+        (Finset.insert_subset
+          (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_self B' _)))
+          (fun x hx => (Finset.insert_subset_insert _ wk2) (hant hx)))
+    let ⟨r, hr⟩ := ljCutAdm_principal_orR P Q (insert A' (insert B' Γ₀))
+      (d₁sub.mono wk2) hXsz hXeq rebuild ih d' hcf' hant'
+    ⟨.andL A' B' hAB₀ r, hr⟩
+  | .andR A' B' d₂a d₂b, hcf_ab =>
+    let ⟨ra, hra⟩ := ljCutAdm_principal_orR P Q Γ₀ d₁sub hXsz hXeq rebuild
+      ih d₂a hcf_ab.1 hant
+    let ⟨rb, hrb⟩ := ljCutAdm_principal_orR P Q Γ₀ d₁sub hXsz hXeq rebuild
+      ih d₂b hcf_ab.2 hant
+    ⟨.andR A' B' ra rb, ⟨hra, hrb⟩⟩
+  | .orL A' B' hAB d₂a d₂b, hcf_ab =>
+    if h1 : A' = P ∧ B' = Q then
+      -- PRINCIPAL CASE: d₂ = orL P Q, cut formula = P ∨ Q
+      let wk_a : Γ₀ ⊆ insert A' Γ₀ := Finset.subset_insert A' _
+      let wk_b : Γ₀ ⊆ insert B' Γ₀ := Finset.subset_insert B' _
+      let hant_a : insert A' Γ ⊆ insert (P ∨ Q) (insert A' Γ₀) :=
+        Finset.insert_subset
+          (Finset.mem_insert_of_mem (Finset.mem_insert_self A' Γ₀))
+          (fun x hx => (Finset.insert_subset_insert (P ∨ Q) wk_a) (hant hx))
+      let hant_b : insert B' Γ ⊆ insert (P ∨ Q) (insert B' Γ₀) :=
+        Finset.insert_subset
+          (Finset.mem_insert_of_mem (Finset.mem_insert_self B' Γ₀))
+          (fun x hx => (Finset.insert_subset_insert (P ∨ Q) wk_b) (hant hx))
+      let d₂a' := ljCutAdm_principal_orR P Q (insert A' Γ₀)
+        (d₁sub.mono wk_a) hXsz hXeq rebuild ih d₂a hcf_ab.1 hant_a
+      let d₂b' := ljCutAdm_principal_orR P Q (insert B' Γ₀)
+        (d₁sub.mono wk_b) hXsz hXeq rebuild ih d₂b hcf_ab.2 hant_b
+      -- Select the branch matching X and cut via ih
+      if hxp : X = P then
+        have hA' : A' = X := h1.1.symm ▸ hxp.symm
+        ih X hXsz Γ₀ C d₁sub (hA' ▸ d₂a')
+      else
+        have hxq : X = Q := by
+          rcases hXeq with h | h
+          · exact absurd h hxp
+          · exact h
+        have hB' : B' = X := h1.2.symm ▸ hxq.symm
+        ih X hXsz Γ₀ C d₁sub (hB' ▸ d₂b')
+    else
+      let hAB₀ := ljMem_of_ne_head (hant hAB)
+        (by intro heq; injection heq with h1a h1b; exact h1 ⟨h1a, h1b⟩)
+      let hant_a : insert A' Γ ⊆ insert (P ∨ Q) (insert A' Γ₀) :=
+        Finset.insert_subset
+          (Finset.mem_insert_of_mem (Finset.mem_insert_self A' _))
+          (fun x hx => (Finset.insert_subset_insert _ (Finset.subset_insert A' _)) (hant hx))
+      let hant_b : insert B' Γ ⊆ insert (P ∨ Q) (insert B' Γ₀) :=
+        Finset.insert_subset
+          (Finset.mem_insert_of_mem (Finset.mem_insert_self B' _))
+          (fun x hx => (Finset.insert_subset_insert _ (Finset.subset_insert B' _)) (hant hx))
+      let ⟨ra, hra⟩ := ljCutAdm_principal_orR P Q (insert A' Γ₀)
+        (d₁sub.mono (Finset.subset_insert _ _)) hXsz hXeq rebuild
+        ih d₂a hcf_ab.1 hant_a
+      let ⟨rb, hrb⟩ := ljCutAdm_principal_orR P Q (insert B' Γ₀)
+        (d₁sub.mono (Finset.subset_insert _ _)) hXsz hXeq rebuild
+        ih d₂b hcf_ab.2 hant_b
+      ⟨.orL A' B' hAB₀ ra rb, ⟨hra, hrb⟩⟩
+  | .orR1 A' B' d', hcf' =>
+    let ⟨r, hr⟩ := ljCutAdm_principal_orR P Q Γ₀ d₁sub hXsz hXeq rebuild
+      ih d' hcf' hant
+    ⟨.orR1 A' B' r, hr⟩
+  | .orR2 A' B' d', hcf' =>
+    let ⟨r, hr⟩ := ljCutAdm_principal_orR P Q Γ₀ d₁sub hXsz hXeq rebuild
+      ih d' hcf' hant
+    ⟨.orR2 A' B' r, hr⟩
+  | .impL A' B' hAB d₂a d₂b, hcf_ab =>
+    let hAB₀ := ljMem_of_ne_head (hant hAB) nofun
+    let hant_b : insert B' Γ ⊆ insert (P ∨ Q) (insert B' Γ₀) :=
+      Finset.insert_subset
+        (Finset.mem_insert_of_mem (Finset.mem_insert_self B' _))
+        (fun x hx => (Finset.insert_subset_insert _ (Finset.subset_insert B' _)) (hant hx))
+    let ⟨ra, hra⟩ := ljCutAdm_principal_orR P Q Γ₀ d₁sub hXsz hXeq rebuild
+      ih d₂a hcf_ab.1 hant
+    let ⟨rb, hrb⟩ := ljCutAdm_principal_orR P Q (insert B' Γ₀)
+      (d₁sub.mono (Finset.subset_insert _ _)) hXsz hXeq rebuild
+      ih d₂b hcf_ab.2 hant_b
+    ⟨.impL A' B' hAB₀ ra rb, ⟨hra, hrb⟩⟩
+  | .impR A' B' d', hcf' =>
+    let hant' : insert A' Γ ⊆ insert (P ∨ Q) (insert A' Γ₀) :=
+      Finset.insert_subset
+        (Finset.mem_insert_of_mem (Finset.mem_insert_self A' _))
+        (fun x hx => (Finset.insert_subset_insert _ (Finset.subset_insert A' _)) (hant hx))
+    let ⟨r, hr⟩ := ljCutAdm_principal_orR P Q (insert A' Γ₀)
+      (d₁sub.mono (Finset.subset_insert _ _)) hXsz hXeq rebuild
+      ih d' hcf' hant'
+    ⟨.impR A' B' r, hr⟩
+  | .weakL A' d', hcf' =>
+    ljCutAdm_principal_orR P Q Γ₀ d₁sub hXsz hXeq rebuild ih d' hcf'
+      (fun x hx => hant (Finset.mem_insert_of_mem hx))
+  | .cut _ _ _, hcf' => absurd hcf' id
+termination_by sizeOf d₂
+
+/-- Principal `impR`/`impL` case: structural recursion on `d₂` given
+`d₁' : CutFreeLJProof (insert P Γ₀ ⊢ Q)` from the `impR` side. When `d₂` decomposes
+`P → Q` via `impL`, the principal case uses `ih` to cut on `P` and `Q`. -/
+noncomputable def ljCutAdm_principal_impR
+    (P Q : Proposition Atom) (Γ₀ : Ctx Atom)
+    (d₁' : CutFreeLJProof (insert P Γ₀ ⊢ Q))
+    (ih : LJCutIH (P → Q))
+    {Γ : Ctx Atom} {C : Proposition Atom}
+    (d₂ : LJProof (Γ ⊢ C)) (hcf₂ : LJCutFree d₂)
+    (hant : Γ ⊆ insert (P → Q) Γ₀) :
+    CutFreeLJProof (Γ₀ ⊢ C) :=
+  match d₂, hcf₂ with
+  | .ax phi _ hphiL, _ =>
+    if heq : phi = Proposition.imp P Q then
+      if h : phi ∈ Γ₀ then ⟨.ax phi Γ₀ h, trivial⟩
+      else
+        (heq ▸ ⟨.impR P Q d₁'.1, d₁'.2⟩ : CutFreeLJProof (Γ₀ ⊢ phi))
+    else ⟨.ax phi Γ₀ (ljMem_of_ne_head (hant hphiL) heq), trivial⟩
+  | .botL _ _ hbot, _ =>
+    ⟨.botL Γ₀ _ (ljMem_of_ne_head (hant hbot) nofun), by unfold LJCutFree; trivial⟩
+  | .andL A' B' hAB d', hcf' =>
+    let hAB₀ := ljMem_of_ne_head (hant hAB) nofun
+    let wk2 : Γ₀ ⊆ insert A' (insert B' Γ₀) :=
+      (Finset.subset_insert B' Γ₀).trans (Finset.subset_insert A' _)
+    let hant' : insert A' (insert B' Γ) ⊆ insert (P → Q) (insert A' (insert B' Γ₀)) :=
+      Finset.insert_subset
+        (Finset.mem_insert_of_mem (Finset.mem_insert_self A' _))
+        (Finset.insert_subset
+          (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_self B' _)))
+          (fun x hx => (Finset.insert_subset_insert _ wk2) (hant hx)))
+    let ⟨r, hr⟩ := ljCutAdm_principal_impR P Q (insert A' (insert B' Γ₀))
+      (d₁'.mono (Finset.insert_subset_insert _ wk2)) ih d' hcf' hant'
+    ⟨.andL A' B' hAB₀ r, hr⟩
+  | .andR A' B' d₂a d₂b, hcf_ab =>
+    let ⟨ra, hra⟩ := ljCutAdm_principal_impR P Q Γ₀ d₁' ih d₂a hcf_ab.1 hant
+    let ⟨rb, hrb⟩ := ljCutAdm_principal_impR P Q Γ₀ d₁' ih d₂b hcf_ab.2 hant
+    ⟨.andR A' B' ra rb, ⟨hra, hrb⟩⟩
+  | .orL A' B' hAB d₂a d₂b, hcf_ab =>
+    let hAB₀ := ljMem_of_ne_head (hant hAB) nofun
+    let hant_a : insert A' Γ ⊆ insert (P → Q) (insert A' Γ₀) :=
+      Finset.insert_subset
+        (Finset.mem_insert_of_mem (Finset.mem_insert_self A' _))
+        (fun x hx => (Finset.insert_subset_insert _ (Finset.subset_insert A' _)) (hant hx))
+    let hant_b : insert B' Γ ⊆ insert (P → Q) (insert B' Γ₀) :=
+      Finset.insert_subset
+        (Finset.mem_insert_of_mem (Finset.mem_insert_self B' _))
+        (fun x hx => (Finset.insert_subset_insert _ (Finset.subset_insert B' _)) (hant hx))
+    let ⟨ra, hra⟩ := ljCutAdm_principal_impR P Q (insert A' Γ₀)
+      (d₁'.mono (Finset.insert_subset_insert _ (Finset.subset_insert A' _)))
+      ih d₂a hcf_ab.1 hant_a
+    let ⟨rb, hrb⟩ := ljCutAdm_principal_impR P Q (insert B' Γ₀)
+      (d₁'.mono (Finset.insert_subset_insert _ (Finset.subset_insert B' _)))
+      ih d₂b hcf_ab.2 hant_b
+    ⟨.orL A' B' hAB₀ ra rb, ⟨hra, hrb⟩⟩
+  | .orR1 A' B' d', hcf' =>
+    let ⟨r, hr⟩ := ljCutAdm_principal_impR P Q Γ₀ d₁' ih d' hcf' hant
+    ⟨.orR1 A' B' r, hr⟩
+  | .orR2 A' B' d', hcf' =>
+    let ⟨r, hr⟩ := ljCutAdm_principal_impR P Q Γ₀ d₁' ih d' hcf' hant
+    ⟨.orR2 A' B' r, hr⟩
+  | .impL A' B' hAB d₂a d₂b, hcf_ab =>
+    if h1 : A' = P ∧ B' = Q then
+      -- PRINCIPAL CASE: d₂ = impL P Q, cut formula = P → Q
+      have hP : sizeOf P < sizeOf (Proposition.imp P Q) := by
+        rw [Proposition.imp.sizeOf_spec]; omega
+      have hQ : sizeOf Q < sizeOf (Proposition.imp P Q) := by
+        rw [Proposition.imp.sizeOf_spec]; omega
+      -- d₂a : (Γ, A') -- recurse to get (Γ₀, A'), then cast A' = P
+      let d₂a_result := ljCutAdm_principal_impR P Q Γ₀ d₁' ih d₂a hcf_ab.1 hant
+      let d₂a_P : CutFreeLJProof (Γ₀ ⊢ P) := h1.1 ▸ d₂a_result
+      -- d₂b : (insert B' Γ, C) -- recurse to get (insert Q Γ₀, C)
+      let wk_b : Γ₀ ⊆ insert B' Γ₀ := Finset.subset_insert B' _
+      let hant_b : insert B' Γ ⊆ insert (P → Q) (insert B' Γ₀) :=
+        Finset.insert_subset
+          (Finset.mem_insert_of_mem (Finset.mem_insert_self B' Γ₀))
+          (fun x hx => (Finset.insert_subset_insert (P → Q) wk_b) (hant hx))
+      let d₂b' := ljCutAdm_principal_impR P Q (insert B' Γ₀)
+        (d₁'.mono (Finset.insert_subset_insert _ wk_b)) ih d₂b hcf_ab.2 hant_b
+      let d₂b_Q : CutFreeLJProof (insert Q Γ₀ ⊢ C) := h1.2 ▸ d₂b'
+      -- Cut on P: d₂a_P : (Γ₀, P), d₁' : (insert P Γ₀, Q) → (Γ₀, Q) via ih P
+      let r₁ := ih P hP Γ₀ Q d₂a_P d₁'
+      -- Cut on Q: r₁ : (Γ₀, Q), d₂b_Q : (insert Q Γ₀, C) → (Γ₀, C) via ih Q
+      ih Q hQ Γ₀ C r₁ d₂b_Q
+    else
+      let hAB₀ := ljMem_of_ne_head (hant hAB)
+        (by intro heq; injection heq with h1a h1b; exact h1 ⟨h1a, h1b⟩)
+      let hant_b : insert B' Γ ⊆ insert (P → Q) (insert B' Γ₀) :=
+        Finset.insert_subset
+          (Finset.mem_insert_of_mem (Finset.mem_insert_self B' _))
+          (fun x hx => (Finset.insert_subset_insert _ (Finset.subset_insert B' _)) (hant hx))
+      let ⟨ra, hra⟩ := ljCutAdm_principal_impR P Q Γ₀ d₁' ih d₂a hcf_ab.1 hant
+      let ⟨rb, hrb⟩ := ljCutAdm_principal_impR P Q (insert B' Γ₀)
+        (d₁'.mono (Finset.insert_subset_insert _ (Finset.subset_insert B' _)))
+        ih d₂b hcf_ab.2 hant_b
+      ⟨.impL A' B' hAB₀ ra rb, ⟨hra, hrb⟩⟩
+  | .impR A' B' d', hcf' =>
+    let hant' : insert A' Γ ⊆ insert (P → Q) (insert A' Γ₀) :=
+      Finset.insert_subset
+        (Finset.mem_insert_of_mem (Finset.mem_insert_self A' _))
+        (fun x hx => (Finset.insert_subset_insert _ (Finset.subset_insert A' _)) (hant hx))
+    let ⟨r, hr⟩ := ljCutAdm_principal_impR P Q (insert A' Γ₀)
+      (d₁'.mono (Finset.insert_subset_insert _ (Finset.subset_insert A' _)))
+      ih d' hcf' hant'
+    ⟨.impR A' B' r, hr⟩
+  | .weakL A' d', hcf' =>
+    ljCutAdm_principal_impR P Q Γ₀ d₁' ih d' hcf'
+      (fun x hx => hant (Finset.mem_insert_of_mem hx))
+  | .cut _ _ _, hcf' => absurd hcf' id
+termination_by sizeOf d₂
+
+/-! ### ljCutAdm_left: structural recursion on d₁ -/
+
+/-- Left-side structural recursion on `d₁`: eliminate the cut formula `A` from the left
+proof. Non-principal cases push the cut deeper. Principal cases (where `d₁` introduces `A`
+on the right) delegate to the appropriate standalone helper. -/
+noncomputable def ljCutAdm_left
+    (A : Proposition Atom) (Γ₀ : Ctx Atom) (C₀ : Proposition Atom)
+    (d₂ : CutFreeLJProof (insert A Γ₀ ⊢ C₀)) (ih : LJCutIH A)
+    {Γ : Ctx Atom}
+    (d₁ : LJProof (Γ ⊢ A)) (hcf₁ : LJCutFree d₁)
+    (hant : Γ ⊆ Γ₀) :
+    CutFreeLJProof (Γ₀ ⊢ C₀) :=
+  match d₁, hcf₁ with
+  | .ax _ _ hphiL, _ =>
+    d₂.mono (Finset.insert_subset (hant hphiL) (Finset.Subset.refl _))
+  | .botL _ _ hbot, _ =>
+    ⟨.botL Γ₀ C₀ (hant hbot), trivial⟩
+  | .andL A' B' hAB d', hcf' =>
+    let d₂' := d₂.mono
+      (Finset.insert_subset_insert A
+        ((Finset.subset_insert B' Γ₀).trans (Finset.subset_insert A' _)))
+    let hant' : insert A' (insert B' Γ) ⊆ insert A' (insert B' Γ₀) :=
+      Finset.insert_subset_insert _ (Finset.insert_subset_insert _ hant)
+    let ⟨r, hr⟩ := ljCutAdm_left A (insert A' (insert B' Γ₀)) C₀ d₂' ih d' hcf' hant'
+    ⟨.andL A' B' (hant hAB) r, hr⟩
+  | .andR P Q d₁a d₁b, hcf_ab =>
+    -- PRINCIPAL: A = P ∧ Q, delegate to ljCutAdm_principal_andR
+    let d₁p : CutFreeLJProof (Γ₀ ⊢ P) :=
+      ⟨d₁a.mono hant, LJCutFree.mono hant d₁a hcf_ab.1⟩
+    let d₁q : CutFreeLJProof (Γ₀ ⊢ Q) :=
+      ⟨d₁b.mono hant, LJCutFree.mono hant d₁b hcf_ab.2⟩
+    ljCutAdm_principal_andR P Q Γ₀ d₁p d₁q (by exact ih)
+      d₂.1 d₂.2 (fun x hx => hx)
+  | .orL A' B' hAB d₁a d₁b, hcf_ab =>
+    let d₂_a := d₂.mono (Finset.insert_subset_insert A (Finset.subset_insert A' _))
+    let d₂_b := d₂.mono (Finset.insert_subset_insert A (Finset.subset_insert B' _))
+    let ⟨ra, hra⟩ := ljCutAdm_left A (insert A' Γ₀) C₀ d₂_a ih d₁a hcf_ab.1
+      (Finset.insert_subset_insert _ hant)
+    let ⟨rb, hrb⟩ := ljCutAdm_left A (insert B' Γ₀) C₀ d₂_b ih d₁b hcf_ab.2
+      (Finset.insert_subset_insert _ hant)
+    ⟨.orL A' B' (hant hAB) ra rb, ⟨hra, hrb⟩⟩
+  | .orR1 P Q d', hcf' =>
+    -- PRINCIPAL: A = P ∨ Q, d' : (Γ, P). Delegate to ljCutAdm_principal_orR.
+    let d₁sub : CutFreeLJProof (Γ₀ ⊢ P) :=
+      ⟨d'.mono hant, LJCutFree.mono hant d' hcf'⟩
+    have hPsz : sizeOf P < sizeOf (Proposition.or P Q) := by
+      rw [Proposition.or.sizeOf_spec]; omega
+    ljCutAdm_principal_orR P Q Γ₀ d₁sub hPsz (Or.inl rfl)
+      (fun d => ⟨.orR1 P Q d.1, d.2⟩) (by exact ih)
+      d₂.1 d₂.2 (fun x hx => hx)
+  | .orR2 P Q d', hcf' =>
+    -- PRINCIPAL: A = P ∨ Q, d' : (Γ, Q). Delegate to ljCutAdm_principal_orR.
+    let d₁sub : CutFreeLJProof (Γ₀ ⊢ Q) :=
+      ⟨d'.mono hant, LJCutFree.mono hant d' hcf'⟩
+    have hQsz : sizeOf Q < sizeOf (Proposition.or P Q) := by
+      rw [Proposition.or.sizeOf_spec]; omega
+    ljCutAdm_principal_orR P Q Γ₀ d₁sub hQsz (Or.inr rfl)
+      (fun d => ⟨.orR2 P Q d.1, d.2⟩) (by exact ih)
+      d₂.1 d₂.2 (fun x hx => hx)
+  | .impL A' B' hAB d₁a d₁b, hcf_ab =>
+    -- Non-principal left rule: impL. d₁a : (Γ, A'), d₁b : (insert B' Γ, A)
+    let d₂_b := d₂.mono (Finset.insert_subset_insert A (Finset.subset_insert B' _))
+    let ⟨rb, hrb⟩ := ljCutAdm_left A (insert B' Γ₀) C₀ d₂_b ih d₁b hcf_ab.2
+      (Finset.insert_subset_insert _ hant)
+    let ra : CutFreeLJProof (Γ₀ ⊢ A') :=
+      ⟨d₁a.mono hant, LJCutFree.mono hant d₁a hcf_ab.1⟩
+    ⟨.impL A' B' (hant hAB) ra.1 rb, ⟨ra.2, hrb⟩⟩
+  | .impR P Q d', hcf' =>
+    -- PRINCIPAL: A = P → Q. d' : (insert P Γ, Q). Delegate to ljCutAdm_principal_impR.
+    let d₁' : CutFreeLJProof (insert P Γ₀ ⊢ Q) :=
+      ⟨d'.mono (Finset.insert_subset_insert _ hant),
+       LJCutFree.mono (Finset.insert_subset_insert _ hant) d' hcf'⟩
+    ljCutAdm_principal_impR P Q Γ₀ d₁' (by exact ih)
+      d₂.1 d₂.2 (fun x hx => hx)
+  | .weakL A' d', hcf' =>
+    ljCutAdm_left A Γ₀ C₀ d₂ ih d' hcf' ((Finset.subset_insert A' _).trans hant)
+  | .cut _ _ _, hcf' => absurd hcf' id
+termination_by sizeOf d₁
+
+/-! ### ljCutAdm_right: structural recursion on d₂ -/
+
+set_option maxHeartbeats 400000 in
+-- The right-side helper has many cases with Finset subset obligations.
+/-- Right-side structural recursion on `d₂`: eliminate the cut formula `A` from a proof
+whose context contains `A`. For left-rule cases where `A` is the decomposed formula,
+builds a reconstructed `d₂_new` and delegates to `ljCutAdm_left`. -/
+noncomputable def ljCutAdm_right
+    (A : Proposition Atom) (Γ₀ : Ctx Atom)
+    (d₁ : CutFreeLJProof (Γ₀ ⊢ A)) (ih : LJCutIH A)
+    {Γ : Ctx Atom} {C : Proposition Atom}
+    (d₂ : LJProof (Γ ⊢ C)) (hcf₂ : LJCutFree d₂)
+    (hant : Γ ⊆ insert A Γ₀) :
+    CutFreeLJProof (Γ₀ ⊢ C) :=
+  match d₂, hcf₂ with
+  | .ax phi _ hphiL, _ =>
+    if heq : phi = A then
+      (heq ▸ d₁ : CutFreeLJProof (Γ₀ ⊢ phi))
+    else ⟨.ax phi Γ₀ (ljMem_of_ne_head (hant hphiL) heq), trivial⟩
+  | .botL _ _ hbot, _ =>
+    if heq : (⊥ : Proposition Atom) = A then
+      ljCutAdm_left A Γ₀ _
+        ⟨.botL (insert A Γ₀) _ (heq ▸ Finset.mem_insert_self _ _),
+         by unfold LJCutFree; trivial⟩
+        ih d₁.1 d₁.2 (Finset.Subset.refl _)
+    else ⟨.botL Γ₀ _ (ljMem_of_ne_head (hant hbot) heq), by unfold LJCutFree; trivial⟩
+  | .andL A' B' hAB d', hcf' =>
+    let wk2 : Γ₀ ⊆ insert A' (insert B' Γ₀) :=
+      (Finset.subset_insert B' Γ₀).trans (Finset.subset_insert A' _)
+    let hant' : insert A' (insert B' Γ) ⊆ insert A (insert A' (insert B' Γ₀)) :=
+      Finset.insert_subset
+        (Finset.mem_insert_of_mem (Finset.mem_insert_self A' _))
+        (Finset.insert_subset
+          (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_self B' _)))
+          (fun x hx => (Finset.insert_subset_insert A wk2) (hant hx)))
+    let ⟨r, hr⟩ := ljCutAdm_right A (insert A' (insert B' Γ₀))
+      (d₁.mono wk2) ih d' hcf' hant'
+    if heq : Proposition.and A' B' = A then
+      let wk_ab : insert A' (insert B' Γ₀) ⊆ insert A' (insert B' (insert (A' ∧ B') Γ₀)) :=
+        Finset.insert_subset_insert _
+          (Finset.insert_subset_insert _ (Finset.subset_insert _ _))
+      let d₂_new : CutFreeLJProof (insert (A' ∧ B') Γ₀ ⊢ C) :=
+        ⟨.andL A' B' (Finset.mem_insert_self _ _) (r.mono wk_ab),
+         LJCutFree.mono wk_ab r hr⟩
+      ljCutAdm_left A Γ₀ C (heq ▸ d₂_new) ih d₁.1 d₁.2 (Finset.Subset.refl _)
+    else ⟨.andL A' B' (ljMem_of_ne_head (hant hAB) heq) r, hr⟩
+  | .andR A' B' d₂a d₂b, hcf_ab =>
+    let ⟨ra, hra⟩ := ljCutAdm_right A Γ₀ d₁ ih d₂a hcf_ab.1 hant
+    let ⟨rb, hrb⟩ := ljCutAdm_right A Γ₀ d₁ ih d₂b hcf_ab.2 hant
+    ⟨.andR A' B' ra rb, ⟨hra, hrb⟩⟩
+  | .orL A' B' hAB d₂a d₂b, hcf_ab =>
+    let hant_a : insert A' Γ ⊆ insert A (insert A' Γ₀) :=
+      Finset.insert_subset
+        (Finset.mem_insert_of_mem (Finset.mem_insert_self A' _))
+        (fun x hx => (Finset.insert_subset_insert A (Finset.subset_insert A' _)) (hant hx))
+    let hant_b : insert B' Γ ⊆ insert A (insert B' Γ₀) :=
+      Finset.insert_subset
+        (Finset.mem_insert_of_mem (Finset.mem_insert_self B' _))
+        (fun x hx => (Finset.insert_subset_insert A (Finset.subset_insert B' _)) (hant hx))
+    let ⟨ra, hra⟩ := ljCutAdm_right A (insert A' Γ₀)
+      (d₁.mono (Finset.subset_insert _ _)) ih d₂a hcf_ab.1 hant_a
+    let ⟨rb, hrb⟩ := ljCutAdm_right A (insert B' Γ₀)
+      (d₁.mono (Finset.subset_insert _ _)) ih d₂b hcf_ab.2 hant_b
+    if heq : Proposition.or A' B' = A then
+      let wk_a := Finset.insert_subset_insert A' (Finset.subset_insert (A' ∨ B') Γ₀)
+      let wk_b := Finset.insert_subset_insert B' (Finset.subset_insert (A' ∨ B') Γ₀)
+      let d₂_new : CutFreeLJProof (insert (A' ∨ B') Γ₀ ⊢ C) :=
+        ⟨.orL A' B' (Finset.mem_insert_self _ _) (ra.mono wk_a) (rb.mono wk_b),
+         ⟨LJCutFree.mono wk_a ra hra, LJCutFree.mono wk_b rb hrb⟩⟩
+      ljCutAdm_left A Γ₀ C (heq ▸ d₂_new) ih d₁.1 d₁.2 (Finset.Subset.refl _)
+    else ⟨.orL A' B' (ljMem_of_ne_head (hant hAB) heq) ra rb, ⟨hra, hrb⟩⟩
+  | .orR1 A' B' d', hcf' =>
+    let ⟨r, hr⟩ := ljCutAdm_right A Γ₀ d₁ ih d' hcf' hant
+    ⟨.orR1 A' B' r, hr⟩
+  | .orR2 A' B' d', hcf' =>
+    let ⟨r, hr⟩ := ljCutAdm_right A Γ₀ d₁ ih d' hcf' hant
+    ⟨.orR2 A' B' r, hr⟩
+  | .impL A' B' hAB d₂a d₂b, hcf_ab =>
+    let hant_b : insert B' Γ ⊆ insert A (insert B' Γ₀) :=
+      Finset.insert_subset
+        (Finset.mem_insert_of_mem (Finset.mem_insert_self B' _))
+        (fun x hx => (Finset.insert_subset_insert A (Finset.subset_insert B' _)) (hant hx))
+    let ⟨ra, hra⟩ := ljCutAdm_right A Γ₀ d₁ ih d₂a hcf_ab.1 hant
+    let ⟨rb, hrb⟩ := ljCutAdm_right A (insert B' Γ₀)
+      (d₁.mono (Finset.subset_insert _ _)) ih d₂b hcf_ab.2 hant_b
+    if heq : Proposition.imp A' B' = A then
+      let wk_ra := Finset.subset_insert (Proposition.imp A' B') Γ₀
+      let wk_rb := Finset.insert_subset_insert B'
+        (Finset.subset_insert (Proposition.imp A' B') Γ₀)
+      let d₂_new : CutFreeLJProof (insert (A' → B') Γ₀ ⊢ C) :=
+        ⟨.impL A' B' (Finset.mem_insert_self _ _) (ra.mono wk_ra) (rb.mono wk_rb),
+         ⟨LJCutFree.mono wk_ra ra hra, LJCutFree.mono wk_rb rb hrb⟩⟩
+      ljCutAdm_left A Γ₀ C (heq ▸ d₂_new) ih d₁.1 d₁.2 (Finset.Subset.refl _)
+    else ⟨.impL A' B' (ljMem_of_ne_head (hant hAB) heq) ra rb, ⟨hra, hrb⟩⟩
+  | .impR A' B' d', hcf' =>
+    let hant' : insert A' Γ ⊆ insert A (insert A' Γ₀) :=
+      Finset.insert_subset
+        (Finset.mem_insert_of_mem (Finset.mem_insert_self A' _))
+        (fun x hx => (Finset.insert_subset_insert A (Finset.subset_insert A' _)) (hant hx))
+    let ⟨r, hr⟩ := ljCutAdm_right A (insert A' Γ₀)
+      (d₁.mono (Finset.subset_insert _ _)) ih d' hcf' hant'
+    ⟨.impR A' B' r, hr⟩
+  | .weakL A' d', hcf' =>
+    ljCutAdm_right A Γ₀ d₁ ih d' hcf'
+      (fun x hx => hant (Finset.mem_insert_of_mem hx))
+  | .cut _ _ _, hcf' => absurd hcf' id
+termination_by sizeOf d₂
+
+/-! ## Top-Level Cut Admissibility and Cut Elimination -/
 
 /-- Cut admissibility for LJ (Hauptsatz): from cut-free proofs of `Γ ⊢ A` and
 `insert A Γ ⊢ C`, we can derive a cut-free proof of `Γ ⊢ C`.
 
-The proof uses well-founded induction on formula complexity (primary) and proof height
-sum (secondary), following Negri and von Plato (2001), Theorem 2.4.3.
-
-**Status**: This theorem is stated but not yet proved. The proof requires nested
-well-founded induction that is technically challenging to express with Lean 4's
-pair-indexed inductive type `LJProof`. A follow-up task will complete this proof. -/
+The proof uses well-founded induction on formula complexity (`sizeOf A`).
+Following [TroelstraSchwichtenberg2000] Theorem 4.1.1 and
+[NegriVonPlato2001] Theorem 2.4.3. -/
 noncomputable def cutAdmissibility (A : Proposition Atom) (Γ : Ctx Atom)
     (C : Proposition Atom)
     (d₁ : CutFreeLJProof (Γ ⊢ A))
     (d₂ : CutFreeLJProof (insert A Γ ⊢ C)) :
-    CutFreeLJProof (Γ ⊢ C) := by
-  sorry
+    CutFreeLJProof (Γ ⊢ C) :=
+  ljCutAdm_left A Γ C d₂
+    (fun B _hB Γ' C' d₁' d₂' => cutAdmissibility B Γ' C' d₁' d₂')
+    d₁.1 d₁.2 (Finset.Subset.refl _)
+termination_by sizeOf A
 
 /-! ## Cut Elimination -/
 

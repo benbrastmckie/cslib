@@ -1108,6 +1108,423 @@ private def Theory.Derivation.maximalFormulas : T.Derivation G A → Multiset Na
     | impI _ _ => {D.conclusionComplexity} + D.maximalFormulas + E.maximalFormulas
     | _ => D.maximalFormulas + E.maximalFormulas
 
+/-- `maximalFormulas` is invariant under weakening: it depends only on the type indices at
+beta-redex sites, never on the contexts or theory. -/
+private theorem Theory.Derivation.maximalFormulas_weak {T T' : Theory Atom} {Γ Δ : Ctx Atom}
+    {A : Proposition Atom} (hTheory : T ⊆ T') (hCtx : Γ ⊆ Δ) (D : T.Derivation Γ A) :
+    (D.weak hTheory hCtx).maximalFormulas = D.maximalFormulas := by
+  induction D generalizing T' Δ with
+  | ax => rfl
+  | ass => rfl
+  | andI G D₁ D₂ ih₁ ih₂ =>
+    simp only [Theory.Derivation.weak, maximalFormulas, ih₁, ih₂]
+  | andE1 G D ih =>
+    simp only [maximalFormulas] at ih ⊢
+    cases D <;> simp_all [Theory.Derivation.weak, maximalFormulas, conclusionComplexity]
+  | andE2 G D ih =>
+    simp only [maximalFormulas] at ih ⊢
+    cases D <;> simp_all [Theory.Derivation.weak, maximalFormulas, conclusionComplexity]
+  | orI1 G D ih => simp only [Theory.Derivation.weak, maximalFormulas, ih]
+  | orI2 G D ih => simp only [Theory.Derivation.weak, maximalFormulas, ih]
+  | orE G D DA DB ih ihA ihB =>
+    simp only [maximalFormulas] at ih ⊢
+    cases D <;>
+      simp_all [Theory.Derivation.weak, maximalFormulas, conclusionComplexity]
+  | impI G D ih => simp only [Theory.Derivation.weak, maximalFormulas, ih]
+  | impE D E ih ihE =>
+    simp only [maximalFormulas] at ih ⊢
+    cases D <;> simp_all [Theory.Derivation.weak, maximalFormulas, conclusionComplexity]
+
+/-- Context weakening preserves `maximalFormulas` (corollary of `maximalFormulas_weak`). -/
+private theorem Theory.Derivation.maximalFormulas_weakCtx {Γ Δ : Ctx Atom}
+    {A : Proposition Atom} (hCtx : Γ ⊆ Δ) (D : T.Derivation Γ A) :
+    (D.weakCtx hCtx).maximalFormulas = D.maximalFormulas :=
+  D.maximalFormulas_weak Set.Subset.rfl hCtx
+
+/-- Casting a derivation along a context equality preserves `maximalFormulas`
+(it depends only on the conclusion type indices, not on the context). -/
+private theorem Theory.Derivation.maximalFormulas_cast {Γ Γ₂ : Ctx Atom}
+    {A : Proposition Atom} (h : Γ = Γ₂) (D : T.Derivation Γ A) :
+    (h ▸ D).maximalFormulas = D.maximalFormulas := by
+  subst h; rfl
+
+/-- `maximalFormulas` respects heterogeneous equality of derivations whose conclusion types
+agree: since it depends only on type indices, casting the context cannot change it. -/
+private theorem Theory.Derivation.maximalFormulas_heq {Γ Γ₂ : Ctx Atom}
+    {A : Proposition Atom} {D₁ : T.Derivation Γ A} {D₂ : T.Derivation Γ₂ A}
+    (hΓ : Γ = Γ₂) (hD : HEq D₁ D₂) : D₁.maximalFormulas = D₂.maximalFormulas := by
+  subst hΓ; rw [eq_of_heq hD]
+
+/-- `cast`-form: casting a derivation along an equality of derivation types preserves
+`maximalFormulas`. -/
+private theorem Theory.Derivation.maximalFormulas_castType {Γ Γ₂ : Ctx Atom}
+    {A : Proposition Atom} (h : T.Derivation Γ A = T.Derivation Γ₂ A)
+    (hΓ : Γ = Γ₂) (D : T.Derivation Γ A) :
+    (cast h D).maximalFormulas = D.maximalFormulas :=
+  maximalFormulas_heq hΓ.symm (cast_heq h D)
+
+/-- `maximalFormulas` of an `andE1` elimination is bounded by the singleton of its premise's
+conclusion complexity plus the premise's own `maximalFormulas` (the `{cc}` is present only at a
+redex). -/
+private theorem Theory.Derivation.maximalFormulas_andE1_le {G : Ctx Atom}
+    {A B : Proposition Atom} (X : T.Derivation G (A ∧ B)) :
+    (andE1 G X).maximalFormulas ≤ {X.conclusionComplexity} + X.maximalFormulas := by
+  cases X <;> simp only [maximalFormulas] <;>
+    (rw [Multiset.le_iff_count]; intro a; simp only [Multiset.count_add]; omega)
+
+private theorem Theory.Derivation.maximalFormulas_andE2_le {G : Ctx Atom}
+    {A B : Proposition Atom} (X : T.Derivation G (A ∧ B)) :
+    (andE2 G X).maximalFormulas ≤ {X.conclusionComplexity} + X.maximalFormulas := by
+  cases X <;> simp only [maximalFormulas] <;>
+    (rw [Multiset.le_iff_count]; intro a; simp only [Multiset.count_add]; omega)
+
+private theorem Theory.Derivation.maximalFormulas_impE_le {G : Ctx Atom}
+    {A B : Proposition Atom} (X : T.Derivation G (A → B)) (Y : T.Derivation G A) :
+    (impE X Y).maximalFormulas ≤
+      {X.conclusionComplexity} + X.maximalFormulas + Y.maximalFormulas := by
+  cases X <;> simp only [maximalFormulas] <;>
+    (rw [Multiset.le_iff_count]; intro a; simp only [Multiset.count_add]; omega)
+
+private theorem Theory.Derivation.maximalFormulas_orE_le {G : Ctx Atom}
+    {A B C : Proposition Atom} (X : T.Derivation G (A ∨ B))
+    (Y : T.Derivation (insert A G) C) (Z : T.Derivation (insert B G) C) :
+    (orE G X Y Z).maximalFormulas ≤
+      {X.conclusionComplexity} + X.maximalFormulas + Y.maximalFormulas + Z.maximalFormulas := by
+  cases X <;> simp only [maximalFormulas] <;>
+    (rw [Multiset.le_iff_count]; intro a; simp only [Multiset.count_add]; omega)
+
+/-- `maximalFormulas` of a derivation cast (along a context equality) from a context-weakened
+derivation equals that of the original. Used to strip the `cast (weakCtx …)` wrappers that
+`subs` inserts on the branches of an `orE` (and the premise of an `impI`). -/
+private theorem Theory.Derivation.maximalFormulas_cast_weakCtx {Γ Γ₂ Δ : Ctx Atom}
+    {A : Proposition Atom} (h : T.Derivation Δ A = T.Derivation Γ₂ A) (hΓ : Δ = Γ₂) (hc : Γ ⊆ Δ)
+    (D : T.Derivation Γ A) :
+    (cast h (D.weakCtx hc)).maximalFormulas = D.maximalFormulas := by
+  rw [maximalFormulas_heq (Γ := Γ₂) (Γ₂ := Δ) hΓ.symm (cast_heq h _), maximalFormulas_weakCtx]
+
+/-- The two branch derivations of a substituted `orE` contribute exactly
+`(subs Ds DA).maximalFormulas` and `(subs Ds DB).maximalFormulas`; the principal premise's
+contribution is whatever `maximalFormulas` assigns to `andE`-style elimination of `subs Ds D`.
+Concretely, `maximalFormulas (subs Ds (orE …))` equals the principal-premise multiset plus the
+two (cast/weakened) branch multisets, with the casts stripped. -/
+private theorem Theory.Derivation.maximalFormulas_subs_orE {Γ Γ' Δ : Ctx Atom}
+    {A B C : Proposition Atom} (Ds : ∀ A ∈ Γ', T⇓(Δ ⊢ A)) (D : T.Derivation Γ (A ∨ B))
+    (DA : T.Derivation (insert A Γ) C) (DB : T.Derivation (insert B Γ) C) :
+    (subs Ds (orE Γ D DA DB)).maximalFormulas =
+      (match subs Ds D with
+        | orI1 _ _ | orI2 _ _ =>
+          {(subs Ds D).conclusionComplexity} + (subs Ds D).maximalFormulas
+        | _ => (subs Ds D).maximalFormulas) +
+        (subs Ds DA).maximalFormulas + (subs Ds DB).maximalFormulas := by
+  have hA : ((insert A Γ \ Γ') ∪ insert A Δ) = insert A (Γ \ Γ' ∪ Δ) := by grind
+  have hB : ((insert B Γ \ Γ') ∪ insert B Δ) = insert B (Γ \ Γ' ∪ Δ) := by grind
+  simp only [subs, eq_mpr_eq_cast]
+  cases subs Ds D <;>
+    simp only [maximalFormulas, maximalFormulas_cast_weakCtx _ hA,
+      maximalFormulas_cast_weakCtx _ hB, conclusionComplexity]
+
+/-- Membership characterization of `maximalFormulas` after substitution.
+Every beta-redex complexity appearing in `subs Ds body` is one of:
+- a complexity already present in `body.maximalFormulas`, or
+- a complexity contributed by one of the substituted derivations `Ds A' h`, or
+- the complexity of a substituted hypothesis `A' ∈ Γ'` (a *new* redex created where a
+  substituted introduction meets an elimination at a former `ass A'` leaf).
+Proved by induction on the structural *input* `body`, never on `subs`'s output. -/
+private theorem Theory.Derivation.subs_maximalFormulas_mem {Γ Γ' Δ : Ctx Atom}
+    {B : Proposition Atom} (Ds : ∀ A ∈ Γ', T⇓(Δ ⊢ A)) (body : T.Derivation Γ B)
+    {k : ℕ} (hk : k ∈ (body.subs Ds).maximalFormulas) :
+    k ∈ body.maximalFormulas ∨
+      (∃ A', ∃ (h : A' ∈ Γ'), k ∈ (Ds A' h).maximalFormulas) ∨
+      (∃ A', A' ∈ Γ' ∧ k = A'.complexity) := by
+  induction body generalizing k with
+  | ax hB => simp only [subs, maximalFormulas] at hk; exact absurd hk (by simp)
+  | @ass Γ₀ C hC =>
+    unfold subs at hk
+    by_cases hmem : C ∈ Γ'
+    · simp only [hmem, dif_pos] at hk
+      rw [maximalFormulas_weakCtx] at hk
+      exact Or.inr (Or.inl ⟨C, hmem, hk⟩)
+    · simp only [hmem, dif_neg, not_false_iff] at hk
+      simp only [maximalFormulas] at hk
+      exact absurd hk (by simp)
+  | andI G D₁ D₂ ih₁ ih₂ =>
+    simp only [subs, maximalFormulas, Multiset.mem_add] at hk
+    rcases hk with h | h
+    · rcases ih₁ h with h' | h' | h'
+      · exact Or.inl (by simp only [maximalFormulas, Multiset.mem_add]; exact Or.inl h')
+      · exact Or.inr (Or.inl h')
+      · exact Or.inr (Or.inr h')
+    · rcases ih₂ h with h' | h' | h'
+      · exact Or.inl (by simp only [maximalFormulas, Multiset.mem_add]; exact Or.inr h')
+      · exact Or.inr (Or.inl h')
+      · exact Or.inr (Or.inr h')
+  | orI1 G D ih =>
+    simp only [subs, maximalFormulas] at hk
+    rcases ih hk with h' | h' | h'
+    · exact Or.inl (by simp only [maximalFormulas]; exact h')
+    · exact Or.inr (Or.inl h')
+    · exact Or.inr (Or.inr h')
+  | orI2 G D ih =>
+    simp only [subs, maximalFormulas] at hk
+    rcases ih hk with h' | h' | h'
+    · exact Or.inl (by simp only [maximalFormulas]; exact h')
+    · exact Or.inr (Or.inl h')
+    · exact Or.inr (Or.inr h')
+  | @impI A' B' G D ih =>
+    unfold subs at hk
+    simp only [maximalFormulas, eq_mpr_eq_cast] at hk
+    rw [maximalFormulas_castType _ (by grind), maximalFormulas_weakCtx] at hk
+    rcases ih hk with h' | h' | h'
+    · exact Or.inl (by simp only [maximalFormulas]; exact h')
+    · exact Or.inr (Or.inl h')
+    · exact Or.inr (Or.inr h')
+  | @andE1 A' B' G D ih =>
+    cases D with
+    | ass hmem =>
+      -- `D = ass (A' ∧ B')`; substitution may turn it into an introduction (a new redex).
+      simp only [subs] at hk
+      by_cases hΓ' : (A' ∧ B') ∈ Γ'
+      · simp only [hΓ', dif_pos] at hk
+        have hbound := maximalFormulas_andE1_le (G := G \ Γ' ∪ Δ)
+          (weakCtx (Δ := G \ Γ' ∪ Δ) Finset.subset_union_right (Ds (A' ∧ B') hΓ'))
+        rcases Multiset.mem_add.1 (Multiset.mem_of_le hbound hk) with hcc | hmf
+        · rw [Multiset.mem_singleton, conclusionComplexity] at hcc
+          exact Or.inr (Or.inr ⟨A' ∧ B', hΓ', hcc⟩)
+        · rw [maximalFormulas_weakCtx] at hmf
+          exact Or.inr (Or.inl ⟨A' ∧ B', hΓ', hmf⟩)
+      · simp only [hΓ', dif_neg, not_false_iff, maximalFormulas] at hk
+        exact absurd hk (by simp)
+    | andI G' D₁ D₂ =>
+      -- redex already present in `body`
+      simp only [subs, maximalFormulas, conclusionComplexity, Multiset.mem_add,
+        Multiset.mem_singleton] at hk ⊢
+      rcases hk with hcc | h | h
+      · exact Or.inl (Or.inl hcc)
+      · rcases ih (by simp only [subs, maximalFormulas, Multiset.mem_add]; exact Or.inl h)
+          with h' | h' | h'
+        · exact Or.inl (Or.inr (by simpa only [maximalFormulas, Multiset.mem_add] using h'))
+        · exact Or.inr (Or.inl h')
+        · exact Or.inr (Or.inr h')
+      · rcases ih (by simp only [subs, maximalFormulas, Multiset.mem_add]; exact Or.inr h)
+          with h' | h' | h'
+        · exact Or.inl (Or.inr (by simpa only [maximalFormulas, Multiset.mem_add] using h'))
+        · exact Or.inr (Or.inl h')
+        · exact Or.inr (Or.inr h')
+    | _ =>
+      -- subs preserves the head (not an introduction): no new redex here
+      first
+      | (rcases ih hk with h' | h' | h'
+         · exact Or.inl h'
+         · exact Or.inr (Or.inl h')
+         · exact Or.inr (Or.inr h'))
+  | @andE2 A' B' G D ih =>
+    cases D with
+    | ass hmem =>
+      simp only [subs] at hk
+      by_cases hΓ' : (A' ∧ B') ∈ Γ'
+      · simp only [hΓ', dif_pos] at hk
+        have hbound := maximalFormulas_andE2_le (G := G \ Γ' ∪ Δ)
+          (weakCtx (Δ := G \ Γ' ∪ Δ) Finset.subset_union_right (Ds (A' ∧ B') hΓ'))
+        rcases Multiset.mem_add.1 (Multiset.mem_of_le hbound hk) with hcc | hmf
+        · rw [Multiset.mem_singleton, conclusionComplexity] at hcc
+          exact Or.inr (Or.inr ⟨A' ∧ B', hΓ', hcc⟩)
+        · rw [maximalFormulas_weakCtx] at hmf
+          exact Or.inr (Or.inl ⟨A' ∧ B', hΓ', hmf⟩)
+      · simp only [hΓ', dif_neg, not_false_iff, maximalFormulas] at hk
+        exact absurd hk (by simp)
+    | andI G' D₁ D₂ =>
+      simp only [subs, maximalFormulas, conclusionComplexity, Multiset.mem_add,
+        Multiset.mem_singleton] at hk ⊢
+      rcases hk with hcc | h | h
+      · exact Or.inl (Or.inl hcc)
+      · rcases ih (by simp only [subs, maximalFormulas, Multiset.mem_add]; exact Or.inl h)
+          with h' | h' | h'
+        · exact Or.inl (Or.inr (by simpa only [maximalFormulas, Multiset.mem_add] using h'))
+        · exact Or.inr (Or.inl h')
+        · exact Or.inr (Or.inr h')
+      · rcases ih (by simp only [subs, maximalFormulas, Multiset.mem_add]; exact Or.inr h)
+          with h' | h' | h'
+        · exact Or.inl (Or.inr (by simpa only [maximalFormulas, Multiset.mem_add] using h'))
+        · exact Or.inr (Or.inl h')
+        · exact Or.inr (Or.inr h')
+    | _ =>
+      rcases ih hk with h' | h' | h'
+      · exact Or.inl h'
+      · exact Or.inr (Or.inl h')
+      · exact Or.inr (Or.inr h')
+  | @orE A' B' C' G D DA DB ih ihA ihB =>
+    -- route members of the branch derivations, mapping the first disjunct into
+    -- `(orE G D DA DB).maximalFormulas` (the `DA`/`DB` summands).
+    have routeA : ∀ {m : ℕ}, m ∈ (subs Ds DA).maximalFormulas →
+        m ∈ (orE G D DA DB).maximalFormulas ∨
+          (∃ A'', ∃ (h : A'' ∈ Γ'), m ∈ maximalFormulas (Ds A'' h)) ∨
+          (∃ A'', A'' ∈ Γ' ∧ m = A''.complexity) := by
+      intro m hm
+      rcases ihA hm with h' | h' | h'
+      · refine Or.inl ?_
+        cases D <;> simp only [maximalFormulas, Multiset.mem_add] <;>
+          first
+          | exact Or.inl (Or.inr h')
+          | exact Or.inl (Or.inl (Or.inr h'))
+      · exact Or.inr (Or.inl h')
+      · exact Or.inr (Or.inr h')
+    have routeB : ∀ {m : ℕ}, m ∈ (subs Ds DB).maximalFormulas →
+        m ∈ (orE G D DA DB).maximalFormulas ∨
+          (∃ A'', ∃ (h : A'' ∈ Γ'), m ∈ maximalFormulas (Ds A'' h)) ∨
+          (∃ A'', A'' ∈ Γ' ∧ m = A''.complexity) := by
+      intro m hm
+      rcases ihB hm with h' | h' | h'
+      · refine Or.inl ?_
+        cases D <;> simp only [maximalFormulas, Multiset.mem_add] <;> exact Or.inr h'
+      · exact Or.inr (Or.inl h')
+      · exact Or.inr (Or.inr h')
+    -- The two branches always reduce (after stripping casts/weakenings) to `(subs Ds DA/DB).mf`.
+    rw [maximalFormulas_subs_orE] at hk
+    cases D with
+    | ass hmem =>
+      simp only [subs] at hk
+      by_cases hΓ' : (A' ∨ B') ∈ Γ'
+      · simp only [hΓ', dif_pos] at hk
+        rw [Multiset.add_assoc] at hk
+        rcases Multiset.mem_add.1 hk with hPP | hBr
+        · -- principal premise side; case on whether the substituted derivation is an `orI` redex.
+          have hmem' : k ∈ {(Ds (A' ∨ B') hΓ').conclusionComplexity} +
+              (Ds (A' ∨ B') hΓ').maximalFormulas := by
+            revert hPP
+            split <;> intro hPP <;>
+              simp only [maximalFormulas_weakCtx, conclusionComplexity, Multiset.mem_add,
+                Multiset.mem_singleton] at hPP ⊢ <;>
+              tauto
+          rcases Multiset.mem_add.1 hmem' with hcc | hmf
+          · rw [Multiset.mem_singleton, conclusionComplexity] at hcc
+            exact Or.inr (Or.inr ⟨A' ∨ B', hΓ', hcc⟩)
+          · exact Or.inr (Or.inl ⟨A' ∨ B', hΓ', hmf⟩)
+        · rcases Multiset.mem_add.1 hBr with hA | hB
+          · exact routeA hA
+          · exact routeB hB
+      · simp only [hΓ', dif_neg, not_false_iff, maximalFormulas, Multiset.mem_add] at hk
+        rcases hk with (hk | hA) | hB
+        · exact absurd hk (by simp)
+        · exact routeA hA
+        · exact routeB hB
+    | orI1 G' D₀ =>
+      simp only [subs, maximalFormulas, conclusionComplexity, Multiset.mem_add,
+        Multiset.mem_singleton] at hk ⊢
+      rcases hk with ((hcc | hD) | hA) | hB
+      · exact Or.inl (Or.inl (Or.inl (Or.inl hcc)))
+      · rcases ih (by simp only [subs, maximalFormulas]; exact hD) with h' | h' | h'
+        · exact Or.inl (Or.inl (Or.inl (Or.inr (by simpa only [maximalFormulas] using h'))))
+        · exact Or.inr (Or.inl h')
+        · exact Or.inr (Or.inr h')
+      · simpa only [maximalFormulas, conclusionComplexity, Multiset.mem_add,
+          Multiset.mem_singleton] using routeA hA
+      · simpa only [maximalFormulas, conclusionComplexity, Multiset.mem_add,
+          Multiset.mem_singleton] using routeB hB
+    | orI2 G' D₀ =>
+      simp only [subs, maximalFormulas, conclusionComplexity, Multiset.mem_add,
+        Multiset.mem_singleton] at hk ⊢
+      rcases hk with ((hcc | hD) | hA) | hB
+      · exact Or.inl (Or.inl (Or.inl (Or.inl hcc)))
+      · rcases ih (by simp only [subs, maximalFormulas]; exact hD) with h' | h' | h'
+        · exact Or.inl (Or.inl (Or.inl (Or.inr (by simpa only [maximalFormulas] using h'))))
+        · exact Or.inr (Or.inl h')
+        · exact Or.inr (Or.inr h')
+      · simpa only [maximalFormulas, conclusionComplexity, Multiset.mem_add,
+          Multiset.mem_singleton] using routeA hA
+      · simpa only [maximalFormulas, conclusionComplexity, Multiset.mem_add,
+          Multiset.mem_singleton] using routeB hB
+    | _ =>
+      simp only [subs, maximalFormulas, Multiset.mem_add] at hk
+      rcases hk with (hD | hA) | hB
+      · rcases ih (by simp only [subs, maximalFormulas]; exact hD) with h' | h' | h'
+        · exact Or.inl (by
+            simp only [maximalFormulas, Multiset.mem_add]; exact Or.inl (Or.inl h'))
+        · exact Or.inr (Or.inl h')
+        · exact Or.inr (Or.inr h')
+      · exact routeA hA
+      · exact routeB hB
+  | @impE G A' B' D E ih ihE =>
+    -- helper: route a member of `(subs Ds E).maximalFormulas` (the argument side).
+    have routeE : ∀ {m : ℕ}, m ∈ (subs Ds E).maximalFormulas →
+        m ∈ E.maximalFormulas ∨
+          (∃ A'', ∃ (h : A'' ∈ Γ'), m ∈ maximalFormulas (Ds A'' h)) ∨
+          (∃ A'', A'' ∈ Γ' ∧ m = A''.complexity) := fun hm => ihE hm
+    cases D with
+    | ass hmem =>
+      simp only [subs, maximalFormulas] at hk
+      by_cases hΓ' : (A' → B') ∈ Γ'
+      · simp only [hΓ', dif_pos] at hk
+        have hbound := maximalFormulas_impE_le (G := G \ Γ' ∪ Δ)
+          (weakCtx (Δ := G \ Γ' ∪ Δ) Finset.subset_union_right (Ds (A' → B') hΓ'))
+          (subs Ds E)
+        rcases Multiset.mem_add.1 (Multiset.mem_of_le hbound hk) with hL | hE
+        · rcases Multiset.mem_add.1 hL with hcc | hmf
+          · rw [Multiset.mem_singleton, conclusionComplexity] at hcc
+            exact Or.inr (Or.inr ⟨A' → B', hΓ', hcc⟩)
+          · rw [maximalFormulas_weakCtx] at hmf
+            exact Or.inr (Or.inl ⟨A' → B', hΓ', hmf⟩)
+        · rcases routeE hE with h' | h' | h'
+          · exact Or.inl (by simp only [maximalFormulas]; exact Multiset.mem_add.2 (Or.inr h'))
+          · exact Or.inr (Or.inl h')
+          · exact Or.inr (Or.inr h')
+      · simp only [hΓ', dif_neg, not_false_iff, maximalFormulas, Multiset.mem_add] at hk
+        rcases hk with hk | hE
+        · exact absurd hk (by simp)
+        · rcases routeE hE with h' | h' | h'
+          · exact Or.inl (by simp only [maximalFormulas]; exact Multiset.mem_add.2 (Or.inr h'))
+          · exact Or.inr (Or.inl h')
+          · exact Or.inr (Or.inr h')
+    | impI G' D₀ =>
+      simp only [subs, maximalFormulas, conclusionComplexity, Multiset.mem_add,
+        Multiset.mem_singleton] at hk ⊢
+      rcases hk with (hcc | hD) | hE
+      · exact Or.inl (Or.inl (Or.inl hcc))
+      · rcases ih (by simp only [subs, maximalFormulas]; exact hD) with h' | h' | h'
+        · exact Or.inl (Or.inl (Or.inr (by
+            simpa only [maximalFormulas, conclusionComplexity] using h')))
+        · exact Or.inr (Or.inl h')
+        · exact Or.inr (Or.inr h')
+      · rcases routeE hE with h' | h' | h'
+        · exact Or.inl (Or.inr h')
+        · exact Or.inr (Or.inl h')
+        · exact Or.inr (Or.inr h')
+    | _ =>
+      simp only [subs, maximalFormulas, Multiset.mem_add] at hk
+      rcases hk with hD | hE
+      · rcases ih (by simp only [subs, maximalFormulas]; exact hD) with h' | h' | h'
+        · exact Or.inl (by simp only [maximalFormulas, Multiset.mem_add]; exact Or.inl h')
+        · exact Or.inr (Or.inl h')
+        · exact Or.inr (Or.inr h')
+      · rcases routeE hE with h' | h' | h'
+        · exact Or.inl (by simp only [maximalFormulas, Multiset.mem_add]; exact Or.inr h')
+        · exact Or.inr (Or.inl h')
+        · exact Or.inr (Or.inr h')
+
+/-- Specialization of `subs_maximalFormulas_mem` to single-hypothesis substitution `subsOne`.
+Every beta-redex complexity in `D.subsOne E` that is *new* (not already present in `D`) is either
+contributed by the substituted derivation `E` (which derives the hypothesis `A`), or is exactly
+`A.complexity` — the complexity of the substituted hypothesis. In the β-reduction cases that drive
+normalization, `A` is a *proper subformula* of the eliminated cut formula, so each new redex is
+strictly smaller; under the strong-normality invariant of Phase 2b, `E.maximalFormulas = ∅`, so the
+only new redexes have complexity `A.complexity`. ([Prawitz1965], Ch. III–IV.) -/
+private theorem Theory.Derivation.subsOne_new_redex_complexity_lt {A B : Proposition Atom}
+    {Γ : Ctx Atom} (D : T.Derivation (insert A Γ) B) (E : T.Derivation Γ A) {k : ℕ}
+    (hk : k ∈ (D.subsOne E).maximalFormulas) (hnew : k ∉ D.maximalFormulas) :
+    k ∈ E.maximalFormulas ∨ k = A.complexity := by
+  -- `subsOne` is `subs` with `Γ' = {A}`, `Δ = Γ`, and the substituted family sending `A ↦ E`.
+  unfold subsOne at hk
+  rw [maximalFormulas_cast (h := by ext x; simp; tauto)] at hk
+  rcases subs_maximalFormulas_mem _ D hk with h | ⟨A', hA', hmem⟩ | ⟨A', hA', heq⟩
+  · exact absurd h hnew
+  · -- `A' ∈ {A}` forces `A' = A`, and the substituted derivation is `E` (up to a cast).
+    rw [Finset.mem_singleton] at hA'
+    subst hA'
+    left
+    simpa using hmem
+  · rw [Finset.mem_singleton] at hA'
+    subst hA'
+    exact Or.inr heq
+
 /-- Sum of the `nodeCount` of each sub-derivation rooted at a commuting conversion site.
 A commuting conversion occurs when an elimination is applied to the result of `orE`.
 Used as the secondary component of the termination measure. -/

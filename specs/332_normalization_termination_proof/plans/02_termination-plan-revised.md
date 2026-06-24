@@ -262,23 +262,30 @@ well-foundedness. Deliberately omit the broken `normTriple`/`sizeOf` triple.
 
 ---
 
-### Phase 2a: subsOne Subformula-Complexity Lemma [NOT STARTED]
+### Phase 2a: subsOne Subformula-Complexity Lemma [COMPLETED]
 
 **Goal**: Resolve **Blocker 1**. Prove that any new beta-redex created by `subsOne` has cut-formula
 complexity strictly less than the original cut formula's complexity, WITHOUT inducting on `subsOne`'s
 output.
 
 **Tasks**:
-- [ ] State the lemma over the structural input `body` (and generalized over `subs`, not `subsOne`):
+- [x] State the lemma over the structural input `body` (and generalized over `subs`, not `subsOne`):
       every maximal formula appearing in `subs σ body` that is not already present in `body` has
       complexity `< complexity C`, where `C` is the type being substituted. The induction motive is
-      on the structure of `body`.
-- [ ] Prove by induction on `body`. For the `ass`/`orE`/`impI` branches where `subs` uses
-      `weakCtx`/`by grind`, rely on `subs`'s **recursion/definitional equations** (not its internal
-      tactics) so the IH covers them. If the equations are not directly available, introduce a
-      `subs_maxFormula_mem` helper characterizing membership in `(subs σ body).maximalFormulas`.
-- [ ] Specialize to `subsOne` to obtain `subsOne_new_redex_complexity_lt`.
-- [ ] Run `lake build Cslib.Logics.Propositional.NaturalDeduction.Normalization`.
+      on the structure of `body`. *(completed — `subs_maximalFormulas_mem`: characterizes membership
+      as `∈ body.mf ∨ (∃ A'∈Γ', ∈ (Ds A').mf) ∨ (∃ A'∈Γ', k = A'.complexity)`, proved by induction
+      on `body`)*
+- [x] Prove by induction on `body`. For the `ass`/`orE`/`impI` branches where `subs` uses
+      `weakCtx`/`by grind`, rely on `subs`'s recursion equations so the IH covers them.
+      *(altered — introduced the `subs_maxFormula_mem`-style helper as planned, plus supporting
+      lemmas `maximalFormulas_weak/_weakCtx/_cast/_castType/_heq/_cast_weakCtx` to strip the
+      `weakCtx`/`cast` wrappers `subs` inserts; bounds `maximalFormulas_andE1_le/_andE2_le/_impE_le/
+      _orE_le` and decomposition `maximalFormulas_subs_orE` handle the elimination cases)*
+- [x] Specialize to `subsOne` to obtain `subsOne_new_redex_complexity_lt`. *(completed — yields
+      `k ∈ E.maximalFormulas ∨ k = A.complexity` for new redexes; Phase 2b discharges the
+      `E.maximalFormulas` disjunct via the SN invariant and notes `A.complexity < complexity(cut)`)*
+- [x] Run `lake build Cslib.Logics.Propositional.NaturalDeduction.Normalization`. *(completed —
+      builds with exactly 1 (pre-existing) sorry; new lemmas verified axiom-free via `lean_verify`)*
 
 **Timing**: 3 hours
 

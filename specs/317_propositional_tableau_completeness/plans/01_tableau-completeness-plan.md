@@ -1,14 +1,38 @@
 # Implementation Plan: Task #317
 
 - **Task**: 317 - Fill sorry instances in propositional tableau completeness proofs
-- **Status**: [NOT STARTED]
-- **Effort**: 11 hours
-- **Dependencies**: None (task 316 soundness is independent for completeness direction)
+- **Status**: [IN PROGRESS] — classical phase partially attempted; `Classical/Completeness.lean` is build-RED (see "Current State")
+- **Effort**: 11 hours (classical phase largely consumed; ~8h remaining incl. fixing the red build)
+- **Dependencies**: None (task 316 soundness is independent for completeness direction). M1 (`minimalTableau_sound`) is DEFERRED to task 316 — it lives in `Minimal/Soundness.lean`, which is 316's territory (see Phase 4).
 - **Research Inputs**: specs/317_propositional_tableau_completeness/reports/01_tableau-completeness-research.md
-- **Artifacts**: plans/01_tableau-completeness-plan.md (this file)
+- **Artifacts**: plans/01_tableau-completeness-plan.md (this file); classical-easy-attempt.patch (saved attempt, see below)
 - **Standards**: plan-format.md, status-markers.md, artifact-management.md, tasks.md
 - **Type**: cslib
 - **Lean Intent**: false
+
+## Current State (updated 2026-06-24)
+
+**`Classical/Completeness.lean` does NOT build** — it carries **~54 build errors** (≈51 of which are
+**pre-existing at the committed HEAD**, in the `classicalTruthLemma` / Hintikka-helper region around
+lines 110–229: unknown constants like `List.findSome?_of_mem`/`List.find?_of_mem`, unsolved goals,
+failed rewrites, "function expected"). This longstanding red state — not the sorry count — is the real
+blocker for the classical phase. **Restoring a green build must precede any further sorry work.**
+
+Sorry progress (misleading without the build context): the file is at **1 live sorry**,
+`classicalExpandBranches_hintikka` (~L462) — the **deep loop-invariant induction** (induction on fuel +
+inner induction on the pending list proving the open branch is a Hintikka set). This is the classical
+analog of task 316's intuitionistic induction crux and will likely need the same focused, possibly
+research-informed treatment rather than a single broad dispatch.
+
+An agent attempted the two *easy* classical sorries (the `classicalTableau_hintikka` bridge ~L470 and
+the F(φ)-membership in `classicalOpenBranch_countermodel` ~L486), reducing 3→1 sorry, but introduced
+broken helper lemmas and left the file red. That attempt is preserved in
+`specs/317_propositional_tableau_completeness/classical-easy-attempt.patch` (NOT yet build-clean; treat
+as a starting point, not a finished proof).
+
+**Other files (untouched, still at baseline)**: `Intuitionistic/Completeness.lean` (7 sorries, B1/B2
+unresolved), `Minimal/Completeness.lean` (8 sorries), the `DecisionProcedure.lean` files. The
+intuitionistic and minimal completeness phases have NOT been started.
 
 ## Overview
 
@@ -88,10 +112,18 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Classical Truth Lemma and Helpers [IN PROGRESS] *(deviation: altered -- also fixing 73 pre-existing build errors in classicalTruthLemma proof)*
+### Phase 1: Classical Truth Lemma and Helpers [IN PROGRESS] *(deviation: the implemented file uses a `classicalHintikkaSet` decomposition — `classicalExpandBranches_hintikka` + `classicalTableau_hintikka` — not present in the original C1/C2/C3 framing)*
 
-**Goal**: Prove `classicalTruthLemma` (C1) and any auxiliary lemmas needed for the classical
-Hintikka-set argument.
+**STATUS NOTE (2026-06-24)**: ~54 build errors remain (≈51 pre-existing at HEAD) in the helper region
+(~L110–229). **Priority 0 for this phase: get `Classical/Completeness.lean` to a green build** before
+any sorry work — fix the unknown-constant references (`List.findSome?_of_mem`, `List.find?_of_mem` are
+not real Mathlib lemmas; find the correct `List.find?`/`List.findSome?` membership lemmas via
+`lean_loogle`/`lean_leansearch`), the unsolved goals, and the failed rewrites. Only then is the file's
+sorry count meaningful. The single remaining sorry, `classicalExpandBranches_hintikka` (~L462), is the
+**deep loop-invariant induction** and should be treated as its own focused sub-task (see Phase 2 note).
+
+**Goal**: Prove `classicalTruthLemma` (C1) and the Hintikka-bridge lemmas needed for the classical
+Hintikka-set argument; restore a green build for the module.
 
 **Tasks**:
 - [ ] Inspect `classicalApplyOne` and `classicalStepBranch` behavior via lean_goal to understand
@@ -123,9 +155,22 @@ Hintikka-set argument.
 
 ---
 
-### Phase 2: Classical Countermodel and Completeness [NOT STARTED]
+### Phase 2: Classical Countermodel and Completeness [IN PROGRESS]
 
-**Goal**: Prove `classicalOpenBranch_countermodel` (C2) and `classicalTableau_complete` (C3).
+**STATUS NOTE (2026-06-24)**: The bridge `classicalTableau_hintikka` (~L470) and the F(φ)-membership
+sorry in `classicalOpenBranch_countermodel` (~L486) were ATTEMPTED (reduced 3→1 sorry) but the
+supporting helper lemmas are build-red — see `classical-easy-attempt.patch`. The remaining structural
+piece is `classicalExpandBranches_hintikka` (~L462), the **deep loop-invariant induction** (induction
+on fuel + inner induction on the pending list). Recommended approach (mirroring the successful 316
+intuitionistic path): a dedicated research/decomposition pass to break this induction into a stated
+loop invariant + small helper lemmas, then a tightly-scoped, commit-after-each-step implementation —
+do NOT attempt it in a single broad dispatch (such attempts overflowed repeatedly on the analogous 316
+proof). Once `classicalExpandBranches_hintikka` is proved and the helper region builds green, the
+bridge and `classicalTableau_complete` follow mechanically.
+
+**Goal**: Prove `classicalOpenBranch_countermodel` (C2), `classicalTableau_complete` (C3), and the
+underlying `classicalExpandBranches_hintikka` loop invariant; reach a green, sorry-free
+`Classical/Completeness.lean`.
 
 **Tasks**:
 - [ ] Prove `classicalOpenBranch_countermodel`:
@@ -222,13 +267,24 @@ Hintikka-set argument.
 
 ---
 
-### Phase 4: Minimal Soundness and Completeness [NOT STARTED]
+### Phase 4: Minimal Completeness [NOT STARTED]
 
-**Goal**: Prove `minimalTableau_sound` (M1) and `minimalTableau_complete` (M2).
+**STATUS NOTE (2026-06-24) — territory correction**: `minimalTableau_sound` (M1) lives in
+`Cslib/Logics/Propositional/Tableau/Minimal/Soundness.lean`, which is **task 316's territory** (all
+`*/Soundness.lean` files belong to 316). Under the active 316/317 territory contract, **317 does NOT
+fill M1** — it uses `minimalTableau_sound` as-is (a lemma with an internal `sorry` still type-checks, so
+M2 and the `Decidable` instances can be made sorry-free independently; M1's residual sorry is 316's to
+discharge). The original file mapping below (M1+M2 in `Minimal/DecisionProcedure.lean`) is STALE: M2
+(`minimalTableau_complete`) is in `Minimal/Completeness.lean`; the `Decidable` instances are in
+`Minimal/DecisionProcedure.lean`. This phase's scope is **M2 + the minimal `Decidable` instances only**.
+
+**Goal**: Prove `minimalTableau_complete` (M2) and make the minimal `Decidable` instances sorry-free,
+using `minimalTableau_sound` (M1) as a black box owned by task 316.
 
 **Tasks**:
-- [ ] **Check task 316 status**: If task 316 has filled `minimalTableau_sound` (M1), skip
-  that sorry and focus on M2 only. If 316 is still planned/in-progress, fill M1 here.
+- [ ] **Do NOT edit `Minimal/Soundness.lean`** (M1 / `minimalTableau_sound` is 316's). If M2 or a
+  `Decidable` instance genuinely cannot be made sorry-free without M1 being sorry-free, record it as a
+  dependency-on-316 blocker rather than crossing territory.
 - [ ] **Prove `minimalTableau_sound` (M1)** (if not already filled by task 316):
   - Follows same pattern as intuitionistic soundness but with `MinimalClosure`
   - Closure unsatisfiability: if T(atom p) and F(atom p) at same world w, then
@@ -265,8 +321,10 @@ Hintikka-set argument.
 
 **Depends on**: 3
 
-**Files to modify**:
-- `Cslib/Logics/Propositional/Tableau/Minimal/DecisionProcedure.lean` - Fill `minimalTableau_sound` and `minimalTableau_complete`; add helper lemmas (minimal truth lemma, minimal countermodel extraction)
+**Files to modify** (corrected 2026-06-24):
+- `Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean` - Fill `minimalTableau_complete` (M2) + helper lemmas (minimal truth lemma, minimal countermodel extraction)
+- `Cslib/Logics/Propositional/Tableau/Minimal/DecisionProcedure.lean` - Make the minimal `Decidable` instances sorry-free
+- **NOT** `Cslib/Logics/Propositional/Tableau/Minimal/Soundness.lean` — M1 (`minimalTableau_sound`) is task 316's territory; use it as-is
 
 **Verification**:
 - `lean_verify` clean for both declarations

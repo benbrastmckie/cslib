@@ -1,0 +1,36 @@
+{
+  "status": "recovery_complete",
+  "task_number": 316,
+  "session_id": "sess_1782335183_8462da_316recovery",
+  "completed_at": "2026-06-24T00:00:00Z",
+  "summary": "Reconstructed FreshAbove freshness-invariant machinery (8 declarations + threading + call-site snippet) from agent transcripts a3a08e7 and a9309a1; 5 sorry-free, 3 had sorry; 2 artifacts written",
+  "declarations_recovered": 8,
+  "sorry_free_count": 6,
+  "had_sorry_count": 2,
+  "incomplete_count": 0,
+  "artifacts": [
+    "specs/316_propositional_tableau_soundness/recovered/freshabove-machinery.lean",
+    "specs/316_propositional_tableau_soundness/reports/07_freshabove-recovery.md"
+  ],
+  "source_transcripts": [
+    "a3a08e73a2f1aa90c",
+    "a9309a15c559f4aea"
+  ],
+  "notes": {
+    "sorry_free_declarations": [
+      "def FreshAbove",
+      "freshAbove_applyAllTImpRules",
+      "freshAbove_applyPersistenceFixpoint",
+      "freshAbove_extendMany (formerly freshAbove_extendMany_none)",
+      "freshAbove_world_create (formerly freshAbove_extendMany_some)",
+      "monotoneEdges_of_agree"
+    ],
+    "had_sorry_declarations": [
+      "Threading: linearResult bp=bh case (2 sub-sorries: FreshAbove for expanded branches + MonotoneEdges wo' edges' for F-arrow arm)",
+      "Threading: branchingResult/linearResult bp-in-bt FreshAbove recursion (all had sorry -- FreshAbove for expanded branches deferred)"
+    ],
+    "key_remaining_work": "Phase B (plan 06): assemble linearResult bp=bh using monotoneEdges_of_agree (none arm) + monotoneEdges_update (some arm) + freshAbove_extendMany/freshAbove_world_create for FreshAbove threading. The intRule_preserves_sat F-arrow witness access (hle) may require extending its existential.",
+    "insertion_order": "Insert FreshAbove def + 6 lemmas between monotoneEdges_update (L762) and intExpandBranches_closed_unsat (L764). Then modify intExpandBranches_closed_unsat signature and body per recovery report Section 'Re-Application Recipe'.",
+    "build_baseline": "Baseline file has 4 sorries: L919 (comment), L945 (hfresh linearResult), L950 (linearResult bp=bh), L961 (hfresh branchingResult). Also has build error at L978:46 (List.zip_append orientation, fix with hdlength_edges.symm)."
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "status": "planned",
+  "summary": "8-phase plan (one phase per file, each ~150-400 lines) for a tableau decision procedure over Cslib.Logic.Temporal.Formula. Built by instantiating the proven Foundations tableau kernel (SignedFormula F L / Branch F L / RuleResult.persistent) at F = Temporal.Formula Atom, L = Nat, porting until/since/TimeOrdering/frame-class algorithms (not types) from the bimodal Decidability system, imitating Modal/Tableau for label introduction, and following Propositional Classical for the proof skeleton. Foundational files (Defs, TimeOrdering, Rules, Branch, Closure, Saturation) precede Soundness, with Completeness last to surface the highest-risk eventuality-fulfilment obligations. Zero-debt: no sorry, no new axioms; if completeness is intractable in scope, mark [BLOCKED] rather than defer.",
+  "artifacts": [
+    {
+      "path": "specs/301_temporal_tableau/plans/01_temporal-tableau-decision-procedure.md",
+      "type": "plan",
+      "summary": "8-phase CSLib implementation plan with explicit proof obligations, reuse mapping to bimodal/Foundations/Modal/Propositional templates, per-phase CI verification, dependency wave table, and a zero-debt BLOCKED contingency for completeness."
+    }
+  ],
+  "phases_total": 8,
+  "next_action_hint": "Run /implement 301 to execute the plan. Critical path is 1 -> 3 -> 6 -> 7 -> 8; phases 1+2 are parallelizable foundations, as are 3+4. Phase 8 (completeness eventuality fulfilment) is the highest-risk obligation with a [BLOCKED] zero-debt fallback."
+}

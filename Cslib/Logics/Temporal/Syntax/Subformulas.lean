@@ -76,7 +76,9 @@ theorem imp_right_mem_subformulas (ψ χ : Formula Atom) :
 /-- Subformulas of allPast include the inner formula. -/
 theorem allPast_inner_mem_subformulas (ψ : Formula Atom) :
     ψ ∈ subformulas (𝐇ψ) := by
-  -- allPast ψ = imp (snce (imp ψ bot) (imp bot bot)) bot  [¬P(¬ψ) = ¬(¬ψ S ⊤) in Burgess]
+  -- allPast ψ = imp (snce (.imp .bot .bot) (.imp ψ .bot)) .bot  [¬(¬ψ S ⊤) in Burgess]
+  change ψ ∈ subformulas (Formula.imp (Formula.snce (Formula.imp Formula.bot Formula.bot)
+      (Formula.imp ψ Formula.bot)) Formula.bot)
   simp only [subformulas, List.mem_cons, List.mem_append]
   right; left; right; left; right; left
   exact self_mem_subformulas ψ
@@ -84,7 +86,9 @@ theorem allPast_inner_mem_subformulas (ψ : Formula Atom) :
 /-- Subformulas of allFuture include the inner formula. -/
 theorem allFuture_inner_mem_subformulas (ψ : Formula Atom) :
     ψ ∈ subformulas (𝐆ψ) := by
-  -- allFuture ψ = imp (untl (imp ψ bot) (imp bot bot)) bot  [¬F(¬ψ) = ¬(¬ψ U ⊤) in Burgess]
+  -- allFuture ψ = imp (untl (.imp .bot .bot) (.imp ψ .bot)) .bot  [¬(¬ψ U ⊤) in Burgess]
+  change ψ ∈ subformulas (Formula.imp (Formula.untl (Formula.imp Formula.bot Formula.bot)
+      (Formula.imp ψ Formula.bot)) Formula.bot)
   simp only [subformulas, List.mem_cons, List.mem_append]
   right; left; right; left; right; left
   exact self_mem_subformulas ψ

@@ -1680,6 +1680,13 @@ private theorem Multiset.isDershowitzMannaLT_all_lt {a : ℕ} {Y : Multiset ℕ}
     Multiset.IsDershowitzMannaLT Y {a} :=
   ⟨∅, Y, {a}, by simp, by simp, by simp, fun y hy => ⟨a, by simp, hY y hy⟩⟩
 
+/-- A multiset `Y` is Dershowitz–Manna strictly smaller than `X + {a}` when every element of
+`Y` is strictly less than `a` (regardless of the common prefix `X`). -/
+private theorem Multiset.isDershowitzMannaLT_all_lt_add {a : ℕ} {X Y : Multiset ℕ}
+    (hY : ∀ y ∈ Y, y < a) :
+    Multiset.IsDershowitzMannaLT Y (X + {a}) :=
+  ⟨∅, Y, X + {a}, by simp, by simp, by simp, fun y hy => ⟨a, by simp, hY y hy⟩⟩
+
 /-- The combined termination measure for normalization:
 the pair `(maximalFormulas d, commutingSum d)` ordered by the lexicographic product of
 the Dershowitz-Manna multiset ordering and the natural number ordering. -/
@@ -1728,7 +1735,7 @@ private theorem Theory.Derivation.reduceRoot_decreases_normMeasure
     have hynew : y ∉ Dbody.maximalFormulas := by simp [hD_mf]
     rcases subsOne_new_redex_complexity_lt Dbody Earg hy hynew with h | h
     · simp [hE_mf] at h
-    · rw [h]; simp [Proposition.complexity]
+    · rw [h]; simp only [Proposition.complexity]; omega
   · -- h_2: andE1 _ (andI _ D₁ D₂)  →  D₁   (conjunction β)
     rw [Option.some.injEq] at hd'; subst hd'
     refine Prod.Lex.left _ _ ?_
@@ -1738,31 +1745,91 @@ private theorem Theory.Derivation.reduceRoot_decreases_normMeasure
     rw [Option.some.injEq] at hd'; subst hd'
     refine Prod.Lex.left _ _ ?_
     simp only [normMeasure, maximalFormulas, conclusionComplexity]
-    rw [add_comm]
-    exact Multiset.isDershowitzMannaLT_cons_add
+    exact Multiset.isDershowitzMannaLT_cons_add'
   · -- h_4: orE _ (orI1 _ D) DA _  →  DA.subsOne D   (disjunction β)
-    rename_i _ _ A1 _ Dinj DAb DBc
+    rename_i _ _ A1 B1 Dinj DAb DBc
     rw [Option.some.injEq] at hd'; subst hd'
     rcases h_subsSN with ⟨hD_sn, hDA_sn⟩
     have hD_mf := maximalFormulas_sn_eq_zero _ hD_sn
     have hDA_mf := maximalFormulas_sn_eq_zero _ hDA_sn
     refine Prod.Lex.left _ _ ?_
-    simp only [normMeasure, maximalFormulas, conclusionComplexity, hD_mf, hDA_mf,
-      Multiset.add_zero, Multiset.zero_add]
-    apply Multiset.isDershowitzMannaLT_remove_add_lt (X := DBc.maximalFormulas)
+    simp only [normMeasure, maximalFormulas, conclusionComplexity, hD_mf, hDA_mf]
+    simp only [Multiset.add_zero, Multiset.zero_add, Multiset.empty_eq_zero]
+    apply Multiset.isDershowitzMannaLT_all_lt_add
     intro y hy
     have hynew : y ∉ DAb.maximalFormulas := by simp [hDA_mf]
     rcases subsOne_new_redex_complexity_lt DAb Dinj hy hynew with h | h
     · simp [hD_mf] at h
-    · rw [h]; simp [Proposition.complexity]
+    · rw [h]; simp only [Proposition.complexity]; omega
   · -- h_5: orE _ (orI2 _ D) _ DB  →  DB.subsOne D
-    sorry
+    rename_i _ _ A1 B1 Dinj DAc DBb
+    rw [Option.some.injEq] at hd'; subst hd'
+    rcases h_subsSN with ⟨hD_sn, hDB_sn⟩
+    have hD_mf := maximalFormulas_sn_eq_zero _ hD_sn
+    have hDB_mf := maximalFormulas_sn_eq_zero _ hDB_sn
+    refine Prod.Lex.left _ _ ?_
+    simp only [normMeasure, maximalFormulas, conclusionComplexity, hD_mf, hDB_mf]
+    simp only [Multiset.add_zero, Multiset.zero_add, Multiset.empty_eq_zero]
+    rw [Multiset.add_comm]
+    apply Multiset.isDershowitzMannaLT_all_lt_add
+    intro y hy
+    have hynew : y ∉ DBb.maximalFormulas := by simp [hDB_mf]
+    rcases subsOne_new_redex_complexity_lt DBb Dinj hy hynew with h | h
+    · simp [hD_mf] at h
+    · rw [h]; simp only [Proposition.complexity]; omega
   · -- h_6: andE1 G (orE _ D DA DB)  →  orE G D (andE1 DA) (andE1 DB)   (commuting)
-    sorry
+    rename_i _ _ D' DA' DB'
+    rw [Option.some.injEq] at hd'; subst hd'
+    rcases h_subsSN with ⟨hA, hB⟩
+    -- After substitution, show normMeasure as pairs and apply Prod.Lex.right.
+    -- maximalFormulas equality: DA' and DB' are not andI (excluded by the SN side condition).
+    show Prod.Lex Multiset.IsDershowitzMannaLT (· < ·)
+      ((orE _ D' (andE1 _ DA') (andE1 _ DB')).maximalFormulas,
+       (orE _ D' (andE1 _ DA') (andE1 _ DB')).commutingSum)
+      ((andE1 _ (orE _ D' DA' DB')).maximalFormulas,
+       (andE1 _ (orE _ D' DA' DB')).commutingSum)
+    rw [show (orE _ D' (andE1 _ DA') (andE1 _ DB')).maximalFormulas =
+           (andE1 _ (orE _ D' DA' DB')).maximalFormulas from by
+      cases DA' <;> cases DB' <;> simp_all [maximalFormulas, isStronglyNormal,
+        conclusionComplexity]]
+    refine Prod.Lex.right _ ?_
+    cases D' <;> simp_all [commutingSum, nodeCount, isStronglyNormal] <;> omega
   · -- h_7: andE2 G (orE _ D DA DB)  →  orE G D (andE2 DA) (andE2 DB)
-    sorry
+    rename_i _ _ D' DA' DB'
+    rw [Option.some.injEq] at hd'; subst hd'
+    rcases h_subsSN with ⟨hA, hB⟩
+    show Prod.Lex Multiset.IsDershowitzMannaLT (· < ·)
+      ((orE _ D' (andE2 _ DA') (andE2 _ DB')).maximalFormulas,
+       (orE _ D' (andE2 _ DA') (andE2 _ DB')).commutingSum)
+      ((andE2 _ (orE _ D' DA' DB')).maximalFormulas,
+       (andE2 _ (orE _ D' DA' DB')).commutingSum)
+    rw [show (orE _ D' (andE2 _ DA') (andE2 _ DB')).maximalFormulas =
+           (andE2 _ (orE _ D' DA' DB')).maximalFormulas from by
+      cases DA' <;> cases DB' <;> simp_all [maximalFormulas, isStronglyNormal,
+        conclusionComplexity]]
+    refine Prod.Lex.right _ ?_
+    cases D' <;> simp_all [commutingSum, nodeCount, isStronglyNormal] <;> omega
   · -- h_8: impE (orE _ D DA DB) E  →  orE G D (impE DA E') (impE DB E')
-    sorry
+    rename_i _ _ D' DA' DB' E'
+    rw [Option.some.injEq] at hd'; subst hd'
+    rcases h_subsSN with ⟨hA, hB⟩
+    -- E' is SN (from hA/hB), so E'.maximalFormulas = ∅.
+    have hE'_sn : E'.isStronglyNormal = true := by
+      simp only [isStronglyNormal] at hA
+      split at hA <;> simp_all [isStronglyNormal, Bool.and_eq_true]
+    have hE'_mf : E'.maximalFormulas = ∅ := maximalFormulas_sn_eq_zero _ hE'_sn
+    show Prod.Lex Multiset.IsDershowitzMannaLT (· < ·)
+      ((orE _ D' (DA'.impE (weakCtx _ E')) (DB'.impE (weakCtx _ E'))).maximalFormulas,
+       (orE _ D' (DA'.impE (weakCtx _ E')) (DB'.impE (weakCtx _ E'))).commutingSum)
+      (((orE _ D' DA' DB').impE E').maximalFormulas,
+       ((orE _ D' DA' DB').impE E').commutingSum)
+    rw [show (orE _ D' (DA'.impE (weakCtx _ E')) (DB'.impE (weakCtx _ E'))).maximalFormulas =
+           ((orE _ D' DA' DB').impE E').maximalFormulas from by
+      cases DA' <;> cases DB' <;>
+        simp_all [maximalFormulas, isStronglyNormal, conclusionComplexity,
+          maximalFormulas_weakCtx, hE'_mf]]
+    refine Prod.Lex.right _ ?_
+    cases D' <;> simp_all [commutingSum, nodeCount, isStronglyNormal] <;> omega
 
 /-- `normalize` produces strongly normal derivations.
 

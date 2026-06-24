@@ -143,7 +143,7 @@ the rest of the procedure consumes, building cleanly against the Foundations lay
 
 ---
 
-### Phase 2: Rules — K modal rules + accessibility edges [IN PROGRESS]
+### Phase 2: Rules — K modal rules + accessibility edges [COMPLETED]
 
 **Goal**: Define the K rule application in `Rules.lean` and `Branch.lean`, with explicit
 accessibility-edge tracking that makes box-positive propagation K-sound (not S5).
@@ -179,7 +179,7 @@ accessibility-edge tracking that makes box-positive propagation K-sound (not S5)
 
 ---
 
-### Phase 3: Closure + Saturation — fuel loop and entry point [NOT STARTED]
+### Phase 3: Closure + Saturation — fuel loop and entry point [IN PROGRESS]
 
 **Goal**: Wire closure and the fuel-based saturation loop, producing the runnable
 `modalTableau φ` entry point and the Hintikka predicate completeness will need.

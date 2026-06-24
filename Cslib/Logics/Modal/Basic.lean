@@ -78,11 +78,26 @@ inductive Proposition (Atom : Type u) : Type u where
   | box (φ : Proposition Atom)
   deriving DecidableEq, BEq
 
-/-- Negation as derived connective: ¬φ := φ → ⊥ -/
-abbrev Proposition.neg (φ : Proposition Atom) : Proposition Atom := .imp φ .bot
+/-- Register `Modal.Proposition` as an instance of `ModalConnectives`.
 
-/-- Verum / top: ⊤ := ⊥ → ⊥ -/
-abbrev Proposition.top : Proposition Atom := .imp .bot .bot
+Registered before the derived-connective `abbrev`s so that the
+`PropositionalConnectives.neg` / `.top` defaults are in scope
+when `Proposition.neg` and `Proposition.top` are elaborated. -/
+instance : ModalConnectives (Proposition Atom) where
+  bot := .bot
+  imp := .imp
+  box := .box
+
+/-- Negation as derived connective: ¬φ := φ → ⊥.
+
+Delegates to the canonical `PropositionalConnectives.neg` default (task 340). -/
+abbrev Proposition.neg (φ : Proposition Atom) : Proposition Atom :=
+  PropositionalConnectives.neg φ
+
+/-- Verum / top: ⊤ := ⊥ → ⊥.
+
+Delegates to the canonical `PropositionalConnectives.top` default (task 340). -/
+abbrev Proposition.top : Proposition Atom := PropositionalConnectives.top
 
 /-- Disjunction: φ₁ ∨ φ₂ := ¬φ₁ → φ₂ -/
 abbrev Proposition.or (φ₁ φ₂ : Proposition Atom) : Proposition Atom :=
@@ -118,12 +133,6 @@ instance : Bot (Proposition Atom) := ⟨.bot⟩
 @[inherit_doc] scoped prefix:40 "◇" => Proposition.diamond
 @[inherit_doc] scoped infix:30 " ↔ " => Proposition.iff
 
-/-- Register `Modal.Proposition` as an instance of `ModalConnectives`. -/
-instance : ModalConnectives (Proposition Atom) where
-  bot := .bot
-  imp := .imp
-  box := .box
-
 /-- Satisfaction relation. `Satisfies m w φ` means that, in the model `m`, the world `w` satisfies
 the proposition `φ`. -/
 @[scoped grind]
@@ -139,7 +148,7 @@ theorem Satisfies.neg_iff : Satisfies m w (¬φ) ↔ ¬Satisfies m w φ :=
 
 /-- Satisfaction of diamond. -/
 theorem Satisfies.diamond_iff : Satisfies m w (◇φ) ↔ ∃ w', m.r w w' ∧ Satisfies m w' φ := by
-  unfold Proposition.diamond Proposition.neg
+  change (Satisfies m w (.imp (.box (.imp φ .bot)) .bot)) ↔ ∃ w', m.r w w' ∧ Satisfies m w' φ
   simp only [Satisfies]
   constructor
   · intro h

@@ -129,7 +129,7 @@ then add `neg`/`top` as defaulted fields to `PropositionalConnectives`.
 
 ---
 
-### Phase 2: Migrate Modal/Basic.lean neg/top Delegates [NOT STARTED]
+### Phase 2: Migrate Modal/Basic.lean neg/top Delegates [COMPLETED]
 
 **Goal**: Replace the inline Lukasiewicz bodies of `Proposition.neg` and `Proposition.top` with
 delegates to the `PropositionalConnectives` defaults, leaving `and`/`or`/`iff`/`diamond` untouched.

@@ -1,7 +1,7 @@
 # Implementation Plan: Curry-Howard Isomorphism for ND Proofs
 
 - **Task**: 293 - Curry-Howard Isomorphism between ND Proofs and Typed Lambda Terms
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 4 hours
 - **Dependencies**: None (core isomorphism independent of task 290; Reduction.lean deferred)
 - **Research Inputs**: specs/293_curry_howard_nd_typed_lambda/reports/01_curry-howard-research.md

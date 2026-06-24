@@ -12,7 +12,7 @@ next_project_number: 321
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,180,226,241,245,278,290,299,301,311,314,316,320 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215,293,300,312,317 | 36,37,180,290,299,311,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 2 | 39,40,181,215,300,312,317 | 36,37,180,299,311,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
 | 3 | 41,275,319 | 39,40,317 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -34,7 +34,6 @@ next_project_number: 321
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
-  └─ 293 [PLANNED] — Establish the formal Curry-Howard isomorphism between Theory.Deri
 314 [IMPLEMENTING] — Implement the classical sequent calculus LK for propositional log
 316 [PLANNED] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [PLANNED] — Fill the 8 sorry instances in propositional tableau completeness 
@@ -215,10 +214,11 @@ Literature sources:
 ---
 
 ### 293. Curry howard nd typed lambda
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 290
+- **Summary**: [293_curry_howard_nd_typed_lambda/summaries/01_curry-howard-summary.md]
 
 **Description**: Establish the formal Curry-Howard isomorphism between Theory.Derivation Gamma A (propositional ND proofs) and well-typed lambda terms. Define a purpose-built simply-typed term language over PL.Proposition as the type language. Formalize: (1) curry_howard_forward extracting a well-typed term from a derivation, (2) curry_howard_backward extracting a derivation from a well-typed term, (3) roundtrip properties showing the maps are mutually inverse. Map ND constructors to term constructors: impI to lambda, impE to application, andI to pair, andE1/2 to projections, orI1/2 to injections, orE to case. As a reduced-scope fallback, the {arrow, and} fragment is a self-contained milestone. Normal derivations correspond to beta-normal terms. Files: new directory Cslib/Logics/Propositional/CurryHoward/. Depends on the normalization task (290).
 

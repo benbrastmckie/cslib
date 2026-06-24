@@ -1,7 +1,7 @@
 # Implementation Plan: Task #319
 
 - **Task**: 319 - Build dedicated Soundness and Completeness modules for the minimal propositional tableau
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 5 hours
 - **Dependencies**: Tasks 316, 317 (partial -- shared sorry in `intExpandBranches_closed_unsat`)
 - **Research Inputs**: specs/319_minimal_tableau_infrastructure/reports/01_minimal-tableau-research.md

@@ -108,9 +108,9 @@ lemma minOpen_no_contradiction (b : IBranch Atom)
     -- Convert formula BEq to propositional equality
     -- instBEqProposition.beq a b = decide (a = b), so `= true` means `a = b`
     have hpos_form_eq : sf_pos.formula = φ :=
-      proposition_beq_eq _ _ hpos_form_b
+      Cslib.Logic.PL.proposition_beq_eq _ _ hpos_form_b
     have hneg_form_eq : sf_neg.formula = φ :=
-      proposition_beq_eq _ _ hneg_form_b
+      Cslib.Logic.PL.proposition_beq_eq _ _ hneg_form_b
     -- Show findContradiction.isSome via cases on the findSome? result
     simp only [Branch.findContradiction, Option.isSome]
     cases hfind : List.findSome? (fun sf =>

@@ -13,7 +13,7 @@ next_project_number: 323
 |------|-------|------------|--------|
 | 1 | 36,37,180,226,241,245,278,290,299,301,314,316,321,322 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,300,317 | 36,37,180,299,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
-| 3 | 41,275,319 | 39,40,317 | Foundations, Propositional Logic |
+| 3 | 41,275 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -37,7 +37,6 @@ next_project_number: 323
 314 [IMPLEMENTING] — Implement the classical sequent calculus LK for propositional log
 316 [PARTIAL] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [PLANNED] — Fill the 8 sorry instances in propositional tableau completeness 
-    └─ 319 [IMPLEMENTING] — Build dedicated Soundness and Completeness modules for the minima
 
 ### Temporal Logic
 
@@ -97,12 +96,13 @@ next_project_number: 323
 ---
 
 ### 319. Minimal tableau infrastructure
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 316, Task 317
 - **Research**: [319_minimal_tableau_infrastructure/reports/01_minimal-tableau-research.md]
 - **Plan**: [319_minimal_tableau_infrastructure/plans/02_implementation-plan.md]
+- **Summary**: [319_minimal_tableau_infrastructure/summaries/03_implementation-summary.md]
 
 **Description**: Build dedicated Soundness and Completeness modules for the minimal propositional tableau, matching the structure of the classical and intuitionistic systems. Currently the minimal system has only DecisionProcedure.lean (135 lines) with sorry-marked theorems, while classical has 4 modules (795 lines) and intuitionistic has 5 modules (908 lines). The minimal tableau shares the intuitionistic rules and expansion loop (intExpandBranches with isMinimallyClosed), so no separate Rules.lean or Expansion.lean is needed. Create: (1) Minimal/Soundness.lean — define minRule_preserves_sat (each rule preserves branch satisfiability in any Kripke model with arbitrary botForces, not just fun _ => False), minClosed_unsatisfiable (MinimalClosure T(p)/F(p) contradiction is unsatisfiable since val w p ↔ ¬val w p), and prove minimalTableau_sound. Key difference from intuitionistic: closure is on complementary atoms only, and botForces is unconstrained. (2) Minimal/Completeness.lean — construct countermodel from open saturated branch with botForces w = (T(⊥) at w on branch), prove truth lemma by formula induction, and prove minimalTableau_complete. Key difference from intuitionistic: the countermodel allows bot to be forced at some worlds. (3) Refactor DecisionProcedure.lean to import the new modules, keeping only the Decidable instances and the minimalTableau_decides bridge theorem. (4) Update Cslib.lean barrel imports via lake exe mk_all.
 

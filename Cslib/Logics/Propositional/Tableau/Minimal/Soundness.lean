@@ -83,6 +83,7 @@ def minBranchSatisfied {World : Type*} [Preorder World]
 
 The `BEq` instance for `Proposition Atom` is derived from `DecidableEq`, so `(a == b) = true`
 is equivalent to `a = b`. -/
+omit [Hashable Atom] in
 lemma proposition_beq_eq :
     ∀ (a b : Proposition Atom), (a == b) = true → a = b := by
   intro a b h

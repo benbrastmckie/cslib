@@ -51,6 +51,49 @@ open Cslib.Logic
 universe u
 variable {Atom : Type u}
 
+/-! ## TB Frame Condition and Canonical Witness -/
+
+/-- The TB frame condition: every model whose accessibility relation is reflexive and
+symmetric. -/
+def tbFC : ∀ {World : Type u}, Model World Atom → Prop :=
+  fun m => (∀ w, m.r w w) ∧ (∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁)
+
+/-- The canonical TB model satisfies `tbFC`: its accessibility relation is reflexive
+and symmetric. -/
+private theorem tb_canonical_FC : tbFC (CanonicalModel (@TBAxiom Atom)) :=
+  ⟨fun S => canonical_refl
+      (fun φ ψ => .implyK φ ψ)
+      (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ => .modalT φ)
+      S,
+   canonical_symm
+      (fun φ ψ => .implyK φ ψ)
+      (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ ψ => .modalK φ ψ)
+      (fun φ => .modalB φ)⟩
+
+/-- Pre-applied TB truth lemma: satisfaction at world `S` iff membership in `S.val`. -/
+private theorem tb_truth_lemma_applied (S : CanonicalWorld (@TBAxiom Atom))
+    (φ : Proposition Atom) :
+    Satisfies (CanonicalModel (@TBAxiom Atom)) S φ ↔ φ ∈ S.val :=
+  truth_lemma
+    (fun φ ψ => .implyK φ ψ)
+    (fun φ ψ χ => .implyS φ ψ χ)
+    (fun φ => .efq φ)
+    (fun φ ψ => .peirce φ ψ)
+    (fun φ ψ => .modalK φ ψ)
+    (fun φ => .modalT φ)
+    S φ
+
+/-- TB soundness adapter matching the `strong_soundness` callback shape.
+The frame condition for TB is `tbFC m = (∀ w, m.r w w) ∧ (∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁)`. -/
+private theorem tb_sound_cb {World : Type u} (m : Model World Atom) (w : World)
+    (L : List (Proposition Atom))
+    (hFC : tbFC m)
+    (d : DerivationTree (@TBAxiom Atom) L phi)
+    (h_ctx : ∀ γ ∈ L, Satisfies m w γ) : Satisfies m w phi :=
+  tb_soundness d m hFC.1 hFC.2 w h_ctx
+
 /-! ## TB Strong Soundness -/
 
 /-- **Strong Soundness for TB**: If `phi` is set-derivable from `Gamma` using `TBAxiom`,
@@ -63,10 +106,9 @@ theorem tb_strong_soundness {Gamma : Set (Proposition Atom)} {phi : Proposition 
     (World : Type u) (m : Model World Atom) (w : World)
     (h_refl : ∀ w, m.r w w)
     (h_symm : ∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁)
-    (h_sat : ∀ γ ∈ Gamma, Satisfies m w γ) : Satisfies m w phi := by
-  obtain ⟨L, hL_sub, hL_deriv⟩ := h
-  obtain ⟨d⟩ := hL_deriv
-  exact tb_soundness d m h_refl h_symm w (fun ψ hψ => h_sat ψ (hL_sub ψ hψ))
+    (h_sat : ∀ γ ∈ Gamma, Satisfies m w γ) : Satisfies m w phi :=
+  strong_soundness (Axioms := @TBAxiom Atom) (FC := tbFC)
+    tb_sound_cb h World m w ⟨h_refl, h_symm⟩ h_sat
 
 /-! ## TB Strong Completeness -/
 
@@ -74,68 +116,23 @@ theorem tb_strong_soundness {Gamma : Set (Proposition Atom)} {phi : Proposition 
 over all reflexive, symmetric frames, then `phi` is set-derivable from `Gamma`
 using `TBAxiom`.
 
-Proof by contrapositive: if `phi` is not set-derivable, `Gamma ∪ {¬phi}` is
-consistent; extend to MCS, apply `truth_lemma` in the canonical reflexive, symmetric
-frame, derive contradiction. -/
+Delegates to the parametric `strong_completeness` with `tb_truth_lemma_applied`
+and `tb_canonical_FC`. -/
 theorem tb_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
     (h : ∀ (World : Type u) (m : Model World Atom) (w : World),
         (∀ w, m.r w w) →
         (∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁) →
         (∀ γ ∈ Gamma, Satisfies m w γ) →
         Satisfies m w phi) :
-    ModalSetDerivable (@TBAxiom Atom) Gamma phi := by
-  by_contra h_not
-  have h_cons := modal_not_SetDerivable_union_neg_consistent
+    ModalSetDerivable (@TBAxiom Atom) Gamma phi :=
+  strong_completeness (Axioms := @TBAxiom Atom) (FC := tbFC)
     (fun φ ψ => .implyK φ ψ)
     (fun φ ψ χ => .implyS φ ψ χ)
     (fun φ => .efq φ)
     (fun φ ψ => .peirce φ ψ)
-    h_not
-  obtain ⟨M, hM_sup, hM_mcs⟩ := modal_lindenbaum h_cons
-  let w : CanonicalWorld (@TBAxiom Atom) := ⟨M, hM_mcs⟩
-  have h_neg_phi : (¬phi) ∈ M :=
-    hM_sup (Set.mem_union_right Gamma (Set.mem_singleton_iff.mpr rfl))
-  have h_gamma_sub : ∀ ψ ∈ Gamma, ψ ∈ M :=
-    fun ψ hψ => hM_sup (Set.mem_union_left _ hψ)
-  have h_refl : ∀ (S : CanonicalWorld (@TBAxiom Atom)),
-      (CanonicalModel (@TBAxiom Atom)).r S S :=
-    fun S => canonical_refl
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .modalT φ)
-      S
-  have h_symm : ∀ (S T : CanonicalWorld (@TBAxiom Atom)),
-      (CanonicalModel (@TBAxiom Atom)).r S T →
-      (CanonicalModel (@TBAxiom Atom)).r T S :=
-    canonical_symm
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ ψ => .modalK φ ψ)
-      (fun φ => .modalB φ)
-  have h_gamma_sat : ∀ γ ∈ Gamma, Satisfies (CanonicalModel (@TBAxiom Atom)) w γ :=
-    fun γ hγ => (truth_lemma
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .efq φ)
-      (fun φ ψ => .peirce φ ψ)
-      (fun φ ψ => .modalK φ ψ)
-      (fun φ => .modalT φ)
-      w γ).mpr (h_gamma_sub γ hγ)
-  have h_phi_sat := h (CanonicalWorld (@TBAxiom Atom)) (CanonicalModel (@TBAxiom Atom))
-    w (fun S => h_refl S) (fun S T hST => h_symm S T hST) h_gamma_sat
-  have h_phi_M := (truth_lemma
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    (fun φ ψ => .modalK φ ψ)
-    (fun φ => .modalT φ)
-    w phi).mp h_phi_sat
-  exact mcs_bot_not_mem hM_mcs
-    (modal_implication_property
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      hM_mcs h_neg_phi h_phi_M)
+    tb_truth_lemma_applied
+    tb_canonical_FC
+    (fun World m w ⟨hRefl, hSymm⟩ h_sat => h World m w hRefl hSymm h_sat)
 
 /-! ## TB Biconditional Wrapper -/
 
@@ -170,10 +167,18 @@ theorem tb_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
         (∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁) →
         (∀ γ ∈ {ψ | ψ ∈ L}, Satisfies m w γ) →
         Satisfies m w phi := by
-  obtain ⟨L, hL_sub, hL_deriv⟩ := tb_strong_completeness h
+  obtain ⟨L, hL_sub, hL_sem⟩ :=
+    compactness (Axioms := @TBAxiom Atom) (FC := tbFC)
+      tb_sound_cb
+      (fun φ ψ => .implyK φ ψ)
+      (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ => .efq φ)
+      (fun φ ψ => .peirce φ ψ)
+      tb_truth_lemma_applied
+      tb_canonical_FC
+      (fun World m w ⟨hRefl, hSymm⟩ h_sat => h World m w hRefl hSymm h_sat)
   exact ⟨L, hL_sub, fun World m w h_refl h_symm h_sat =>
-    tb_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
-      World m w h_refl h_symm h_sat⟩
+    hL_sem World m w ⟨h_refl, h_symm⟩ h_sat⟩
 
 /-! ## TB Weak Completeness (Corollary) -/
 

@@ -165,7 +165,7 @@ parametric instantiation, proving the full pattern end-to-end on K.
 
 ---
 
-### Phase 3: Refactor T-family (T, S4, S5, TB) [NOT STARTED]
+### Phase 3: Refactor T-family (T, S4, S5, TB) [COMPLETED]
 
 **Goal**: Instantiate the parametric cascade for the four T-family systems using
 `truth_lemma` (from `Metalogic/Completeness.lean`), preserving public weak-completeness

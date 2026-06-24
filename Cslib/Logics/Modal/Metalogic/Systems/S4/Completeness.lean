@@ -41,6 +41,48 @@ open Cslib.Logic
 universe u
 variable {Atom : Type u}
 
+/-! ## S4 Frame Condition and Canonical Witness -/
+
+/-- The S4 frame condition: every model whose accessibility relation is reflexive and
+transitive. -/
+def s4FC : ∀ {World : Type u}, Model World Atom → Prop :=
+  fun m => (∀ w, m.r w w) ∧ (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃)
+
+/-- The canonical S4 model satisfies `s4FC`: its accessibility relation is reflexive
+and transitive. -/
+private theorem s4_canonical_FC : s4FC (CanonicalModel (@S4Axiom Atom)) :=
+  ⟨fun S => canonical_refl
+      (fun φ ψ => .implyK φ ψ)
+      (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ => .modalT φ)
+      S,
+   canonical_trans
+      (fun φ ψ => .implyK φ ψ)
+      (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ => .modalFour φ)⟩
+
+/-- Pre-applied S4 truth lemma: satisfaction at world `S` iff membership in `S.val`. -/
+private theorem s4_truth_lemma_applied (S : CanonicalWorld (@S4Axiom Atom))
+    (φ : Proposition Atom) :
+    Satisfies (CanonicalModel (@S4Axiom Atom)) S φ ↔ φ ∈ S.val :=
+  truth_lemma
+    (fun φ ψ => .implyK φ ψ)
+    (fun φ ψ χ => .implyS φ ψ χ)
+    (fun φ => .efq φ)
+    (fun φ ψ => .peirce φ ψ)
+    (fun φ ψ => .modalK φ ψ)
+    (fun φ => .modalT φ)
+    S φ
+
+/-- S4 soundness adapter matching the `strong_soundness` callback shape.
+The frame condition for S4 is `s4FC m = (∀ w, m.r w w) ∧ (∀ w₁ w₂ w₃, ...)`. -/
+private theorem s4_sound_cb {World : Type u} (m : Model World Atom) (w : World)
+    (L : List (Proposition Atom))
+    (hFC : s4FC m)
+    (d : DerivationTree (@S4Axiom Atom) L phi)
+    (h_ctx : ∀ γ ∈ L, Satisfies m w γ) : Satisfies m w phi :=
+  s4_soundness d m hFC.1 hFC.2 w h_ctx
+
 /-! ## S4 Strong Soundness -/
 
 /-- **Strong Soundness for S4**: If `phi` is set-derivable from `Gamma` using `S4Axiom`,
@@ -53,10 +95,9 @@ theorem s4_strong_soundness {Gamma : Set (Proposition Atom)} {phi : Proposition 
     (World : Type u) (m : Model World Atom) (w : World)
     (h_refl : ∀ w, m.r w w)
     (h_trans : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃)
-    (h_sat : ∀ γ ∈ Gamma, Satisfies m w γ) : Satisfies m w phi := by
-  obtain ⟨L, hL_sub, hL_deriv⟩ := h
-  obtain ⟨d⟩ := hL_deriv
-  exact s4_soundness d m h_refl h_trans w (fun ψ hψ => h_sat ψ (hL_sub ψ hψ))
+    (h_sat : ∀ γ ∈ Gamma, Satisfies m w γ) : Satisfies m w phi :=
+  strong_soundness (Axioms := @S4Axiom Atom) (FC := s4FC)
+    s4_sound_cb h World m w ⟨h_refl, h_trans⟩ h_sat
 
 /-! ## S4 Strong Completeness -/
 
@@ -64,68 +105,23 @@ theorem s4_strong_soundness {Gamma : Set (Proposition Atom)} {phi : Proposition 
 over all reflexive, transitive frames, then `phi` is set-derivable from `Gamma`
 using `S4Axiom`.
 
-Proof by contrapositive: if `phi` is not set-derivable, `Gamma ∪ {¬phi}` is
-consistent; extend to MCS, apply `truth_lemma` in the canonical reflexive, transitive
-frame, derive contradiction. -/
+Delegates to the parametric `strong_completeness` with `s4_truth_lemma_applied`
+and `s4_canonical_FC`. -/
 theorem s4_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
     (h : ∀ (World : Type u) (m : Model World Atom) (w : World),
         (∀ w, m.r w w) →
         (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃) →
         (∀ γ ∈ Gamma, Satisfies m w γ) →
         Satisfies m w phi) :
-    ModalSetDerivable (@S4Axiom Atom) Gamma phi := by
-  by_contra h_not
-  have h_cons := modal_not_SetDerivable_union_neg_consistent
+    ModalSetDerivable (@S4Axiom Atom) Gamma phi :=
+  strong_completeness (Axioms := @S4Axiom Atom) (FC := s4FC)
     (fun φ ψ => .implyK φ ψ)
     (fun φ ψ χ => .implyS φ ψ χ)
     (fun φ => .efq φ)
     (fun φ ψ => .peirce φ ψ)
-    h_not
-  obtain ⟨M, hM_sup, hM_mcs⟩ := modal_lindenbaum h_cons
-  let w : CanonicalWorld (@S4Axiom Atom) := ⟨M, hM_mcs⟩
-  have h_neg_phi : (¬phi) ∈ M :=
-    hM_sup (Set.mem_union_right Gamma (Set.mem_singleton_iff.mpr rfl))
-  have h_gamma_sub : ∀ ψ ∈ Gamma, ψ ∈ M :=
-    fun ψ hψ => hM_sup (Set.mem_union_left _ hψ)
-  have h_refl : ∀ (S : CanonicalWorld (@S4Axiom Atom)),
-      (CanonicalModel (@S4Axiom Atom)).r S S :=
-    fun S => canonical_refl
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .modalT φ)
-      S
-  have h_trans : ∀ (S T U : CanonicalWorld (@S4Axiom Atom)),
-      (CanonicalModel (@S4Axiom Atom)).r S T →
-      (CanonicalModel (@S4Axiom Atom)).r T U →
-      (CanonicalModel (@S4Axiom Atom)).r S U :=
-    canonical_trans
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .modalFour φ)
-  have h_gamma_sat : ∀ γ ∈ Gamma, Satisfies (CanonicalModel (@S4Axiom Atom)) w γ :=
-    fun γ hγ => (truth_lemma
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .efq φ)
-      (fun φ ψ => .peirce φ ψ)
-      (fun φ ψ => .modalK φ ψ)
-      (fun φ => .modalT φ)
-      w γ).mpr (h_gamma_sub γ hγ)
-  have h_phi_sat := h (CanonicalWorld (@S4Axiom Atom)) (CanonicalModel (@S4Axiom Atom))
-    w (fun S => h_refl S) (fun S T U hST hTU => h_trans S T U hST hTU) h_gamma_sat
-  have h_phi_M := (truth_lemma
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    (fun φ ψ => .modalK φ ψ)
-    (fun φ => .modalT φ)
-    w phi).mp h_phi_sat
-  exact mcs_bot_not_mem hM_mcs
-    (modal_implication_property
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      hM_mcs h_neg_phi h_phi_M)
+    s4_truth_lemma_applied
+    s4_canonical_FC
+    (fun World m w ⟨hRefl, hTrans⟩ h_sat => h World m w hRefl hTrans h_sat)
 
 /-! ## S4 Biconditional Wrapper -/
 
@@ -160,10 +156,18 @@ theorem s4_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
         (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃) →
         (∀ γ ∈ {ψ | ψ ∈ L}, Satisfies m w γ) →
         Satisfies m w phi := by
-  obtain ⟨L, hL_sub, hL_deriv⟩ := s4_strong_completeness h
+  obtain ⟨L, hL_sub, hL_sem⟩ :=
+    compactness (Axioms := @S4Axiom Atom) (FC := s4FC)
+      s4_sound_cb
+      (fun φ ψ => .implyK φ ψ)
+      (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ => .efq φ)
+      (fun φ ψ => .peirce φ ψ)
+      s4_truth_lemma_applied
+      s4_canonical_FC
+      (fun World m w ⟨hRefl, hTrans⟩ h_sat => h World m w hRefl hTrans h_sat)
   exact ⟨L, hL_sub, fun World m w h_refl h_trans h_sat =>
-    s4_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
-      World m w h_refl h_trans h_sat⟩
+    hL_sem World m w ⟨h_refl, h_trans⟩ h_sat⟩
 
 /-! ## S4 Weak Completeness (Corollary) -/
 

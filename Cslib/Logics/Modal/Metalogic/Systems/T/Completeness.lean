@@ -46,6 +46,42 @@ open Cslib.Logic
 universe u
 variable {Atom : Type u}
 
+/-! ## T Frame Condition and Canonical Witness -/
+
+/-- The T frame condition: every model whose accessibility relation is reflexive. -/
+def tFC : ∀ {World : Type u}, Model World Atom → Prop :=
+  fun m => ∀ w, m.r w w
+
+/-- The canonical T model satisfies `tFC`: its accessibility relation is reflexive. -/
+private theorem t_canonical_FC : tFC (CanonicalModel (@TAxiom Atom)) :=
+  fun S => canonical_refl
+    (fun φ ψ => .implyK φ ψ)
+    (fun φ ψ χ => .implyS φ ψ χ)
+    (fun φ => .modalT φ)
+    S
+
+/-- Pre-applied T truth lemma: satisfaction at world `S` iff membership in `S.val`. -/
+private theorem t_truth_lemma_applied (S : CanonicalWorld (@TAxiom Atom))
+    (φ : Proposition Atom) :
+    Satisfies (CanonicalModel (@TAxiom Atom)) S φ ↔ φ ∈ S.val :=
+  truth_lemma
+    (fun φ ψ => .implyK φ ψ)
+    (fun φ ψ χ => .implyS φ ψ χ)
+    (fun φ => .efq φ)
+    (fun φ ψ => .peirce φ ψ)
+    (fun φ ψ => .modalK φ ψ)
+    (fun φ => .modalT φ)
+    S φ
+
+/-- T soundness adapter matching the `strong_soundness` callback shape.
+The frame condition for T is `tFC m = ∀ w, m.r w w`. -/
+private theorem t_sound_cb {World : Type u} (m : Model World Atom) (w : World)
+    (L : List (Proposition Atom))
+    (hFC : tFC m)
+    (d : DerivationTree (@TAxiom Atom) L phi)
+    (h_ctx : ∀ γ ∈ L, Satisfies m w γ) : Satisfies m w phi :=
+  t_soundness d m hFC w h_ctx
+
 /-! ## T Strong Soundness -/
 
 /-- **Strong Soundness for T**: If `phi` is set-derivable from `Gamma` using `TAxiom`,
@@ -57,69 +93,31 @@ theorem t_strong_soundness {Gamma : Set (Proposition Atom)} {phi : Proposition A
     (h : ModalSetDerivable (@TAxiom Atom) Gamma phi)
     (World : Type u) (m : Model World Atom) (w : World)
     (h_refl : ∀ w, m.r w w)
-    (h_sat : ∀ γ ∈ Gamma, Satisfies m w γ) : Satisfies m w phi := by
-  obtain ⟨L, hL_sub, hL_deriv⟩ := h
-  obtain ⟨d⟩ := hL_deriv
-  exact t_soundness d m h_refl w (fun ψ hψ => h_sat ψ (hL_sub ψ hψ))
+    (h_sat : ∀ γ ∈ Gamma, Satisfies m w γ) : Satisfies m w phi :=
+  strong_soundness (Axioms := @TAxiom Atom) (FC := tFC)
+    t_sound_cb h World m w h_refl h_sat
 
 /-! ## T Strong Completeness -/
 
 /-- **Strong Completeness for T**: If `phi` is a semantic consequence of `Gamma`
 over all reflexive frames, then `phi` is set-derivable from `Gamma` using `TAxiom`.
 
-Proof by contrapositive: if `phi` is not set-derivable, `Gamma ∪ {¬phi}` is
-consistent; extend to MCS, apply `truth_lemma` in the canonical reflexive
-frame, derive contradiction. -/
+Delegates to the parametric `strong_completeness` with `t_truth_lemma_applied`
+and `t_canonical_FC`. -/
 theorem t_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
     (h : ∀ (World : Type u) (m : Model World Atom) (w : World),
         (∀ w, m.r w w) →
         (∀ γ ∈ Gamma, Satisfies m w γ) →
         Satisfies m w phi) :
-    ModalSetDerivable (@TAxiom Atom) Gamma phi := by
-  by_contra h_not
-  have h_cons := modal_not_SetDerivable_union_neg_consistent
+    ModalSetDerivable (@TAxiom Atom) Gamma phi :=
+  strong_completeness (Axioms := @TAxiom Atom) (FC := tFC)
     (fun φ ψ => .implyK φ ψ)
     (fun φ ψ χ => .implyS φ ψ χ)
     (fun φ => .efq φ)
     (fun φ ψ => .peirce φ ψ)
-    h_not
-  obtain ⟨M, hM_sup, hM_mcs⟩ := modal_lindenbaum h_cons
-  let w : CanonicalWorld (@TAxiom Atom) := ⟨M, hM_mcs⟩
-  have h_neg_phi : (¬phi) ∈ M :=
-    hM_sup (Set.mem_union_right Gamma (Set.mem_singleton_iff.mpr rfl))
-  have h_gamma_sub : ∀ ψ ∈ Gamma, ψ ∈ M :=
-    fun ψ hψ => hM_sup (Set.mem_union_left _ hψ)
-  have h_refl : ∀ (S : CanonicalWorld (@TAxiom Atom)),
-      (CanonicalModel (@TAxiom Atom)).r S S :=
-    fun S => canonical_refl
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .modalT φ)
-      S
-  have h_gamma_sat : ∀ γ ∈ Gamma, Satisfies (CanonicalModel (@TAxiom Atom)) w γ :=
-    fun γ hγ => (truth_lemma
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .efq φ)
-      (fun φ ψ => .peirce φ ψ)
-      (fun φ ψ => .modalK φ ψ)
-      (fun φ => .modalT φ)
-      w γ).mpr (h_gamma_sub γ hγ)
-  have h_phi_sat := h (CanonicalWorld (@TAxiom Atom)) (CanonicalModel (@TAxiom Atom))
-    w (fun S => h_refl S) h_gamma_sat
-  have h_phi_M := (truth_lemma
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    (fun φ ψ => .modalK φ ψ)
-    (fun φ => .modalT φ)
-    w phi).mp h_phi_sat
-  exact mcs_bot_not_mem hM_mcs
-    (modal_implication_property
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      hM_mcs h_neg_phi h_phi_M)
+    t_truth_lemma_applied
+    t_canonical_FC
+    (fun World m w hFC h_sat => h World m w hFC h_sat)
 
 /-! ## T Biconditional Wrapper -/
 
@@ -151,10 +149,17 @@ theorem t_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
         (∀ w, m.r w w) →
         (∀ γ ∈ {ψ | ψ ∈ L}, Satisfies m w γ) →
         Satisfies m w phi := by
-  obtain ⟨L, hL_sub, hL_deriv⟩ := t_strong_completeness h
-  exact ⟨L, hL_sub, fun World m w h_refl h_sat =>
-    t_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
-      World m w h_refl h_sat⟩
+  obtain ⟨L, hL_sub, hL_sem⟩ :=
+    compactness (Axioms := @TAxiom Atom) (FC := tFC)
+      t_sound_cb
+      (fun φ ψ => .implyK φ ψ)
+      (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ => .efq φ)
+      (fun φ ψ => .peirce φ ψ)
+      t_truth_lemma_applied
+      t_canonical_FC
+      (fun World m w hFC h_sat => h World m w hFC h_sat)
+  exact ⟨L, hL_sub, fun World m w h_refl h_sat => hL_sem World m w h_refl h_sat⟩
 
 /-! ## T Weak Completeness (Corollary) -/
 

@@ -40,6 +40,56 @@ open Cslib.Logic
 universe u
 variable {Atom : Type u}
 
+/-! ## S5 Frame Condition and Canonical Witness -/
+
+/-- The S5 frame condition: every model whose accessibility relation is reflexive,
+transitive, and Euclidean. -/
+def s5FC : ∀ {World : Type u}, Model World Atom → Prop :=
+  fun m => (∀ w, m.r w w) ∧
+           (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃) ∧
+           (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃)
+
+/-- The canonical S5 model satisfies `s5FC`: its accessibility relation is reflexive,
+transitive, and Euclidean. -/
+private theorem s5_canonical_FC : s5FC (CanonicalModel (@ModalAxiom Atom)) :=
+  ⟨fun S => canonical_refl
+      (fun φ ψ => .implyK φ ψ)
+      (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ => .modalT φ)
+      S,
+   canonical_trans
+      (fun φ ψ => .implyK φ ψ)
+      (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ => .modalFour φ),
+   canonical_eucl
+      (fun φ ψ => .implyK φ ψ)
+      (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ => .modalFour φ)
+      (fun φ => .modalB φ)
+      (fun φ ψ => .modalK φ ψ)⟩
+
+/-- Pre-applied S5 truth lemma: satisfaction at world `S` iff membership in `S.val`. -/
+private theorem s5_truth_lemma_applied (S : CanonicalWorld (@ModalAxiom Atom))
+    (φ : Proposition Atom) :
+    Satisfies (CanonicalModel (@ModalAxiom Atom)) S φ ↔ φ ∈ S.val :=
+  truth_lemma
+    (fun φ ψ => .implyK φ ψ)
+    (fun φ ψ χ => .implyS φ ψ χ)
+    (fun φ => .efq φ)
+    (fun φ ψ => .peirce φ ψ)
+    (fun φ ψ => .modalK φ ψ)
+    (fun φ => .modalT φ)
+    S φ
+
+/-- S5 soundness adapter matching the `strong_soundness` callback shape.
+The frame condition for S5 is `s5FC m = (∀ w, m.r w w) ∧ (∀ ..., trans) ∧ (∀ ..., eucl)`. -/
+private theorem s5_sound_cb {World : Type u} (m : Model World Atom) (w : World)
+    (L : List (Proposition Atom))
+    (hFC : s5FC m)
+    (d : DerivationTree (@ModalAxiom Atom) L phi)
+    (h_ctx : ∀ γ ∈ L, Satisfies m w γ) : Satisfies m w phi :=
+  s5_soundness d m hFC.1 hFC.2.1 hFC.2.2 w h_ctx
+
 /-! ## S5 Strong Soundness -/
 
 /-- **Strong Soundness for S5**: If `phi` is set-derivable from `Gamma` using `ModalAxiom`,
@@ -53,20 +103,17 @@ theorem s5_strong_soundness {Gamma : Set (Proposition Atom)} {phi : Proposition 
     (h_refl : ∀ w, m.r w w)
     (h_trans : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃)
     (h_eucl : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃)
-    (h_sat : ∀ γ ∈ Gamma, Satisfies m w γ) : Satisfies m w phi := by
-  obtain ⟨L, hL_sub, hL_deriv⟩ := h
-  obtain ⟨d⟩ := hL_deriv
-  exact s5_soundness d m h_refl h_trans h_eucl w (fun ψ hψ => h_sat ψ (hL_sub ψ hψ))
+    (h_sat : ∀ γ ∈ Gamma, Satisfies m w γ) : Satisfies m w phi :=
+  strong_soundness (Axioms := @ModalAxiom Atom) (FC := s5FC)
+    s5_sound_cb h World m w ⟨h_refl, h_trans, h_eucl⟩ h_sat
 
 /-! ## S5 Strong Completeness -/
 
 /-- **Strong Completeness for S5**: If `phi` is a semantic consequence of `Gamma`
 over all S5 frames, then `phi` is set-derivable from `Gamma` using `ModalAxiom`.
 
-Proof by contrapositive: if `phi` is not set-derivable, `Gamma ∪ {¬phi}` is
-consistent; extend to MCS, apply `truth_lemma` in the canonical S5 frame
-(reflexive via `canonical_refl`, transitive via `canonical_trans`, Euclidean via
-`canonical_eucl`), derive contradiction. -/
+Delegates to the parametric `strong_completeness` with `s5_truth_lemma_applied`
+and `s5_canonical_FC`. -/
 theorem s5_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
     (h : ∀ (World : Type u) (m : Model World Atom) (w : World),
         (∀ w, m.r w w) →
@@ -74,72 +121,15 @@ theorem s5_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositi
         (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃) →
         (∀ γ ∈ Gamma, Satisfies m w γ) →
         Satisfies m w phi) :
-    ModalSetDerivable (@ModalAxiom Atom) Gamma phi := by
-  by_contra h_not
-  have h_cons := modal_not_SetDerivable_union_neg_consistent
+    ModalSetDerivable (@ModalAxiom Atom) Gamma phi :=
+  strong_completeness (Axioms := @ModalAxiom Atom) (FC := s5FC)
     (fun φ ψ => .implyK φ ψ)
     (fun φ ψ χ => .implyS φ ψ χ)
     (fun φ => .efq φ)
     (fun φ ψ => .peirce φ ψ)
-    h_not
-  obtain ⟨M, hM_sup, hM_mcs⟩ := modal_lindenbaum h_cons
-  let w : CanonicalWorld (@ModalAxiom Atom) := ⟨M, hM_mcs⟩
-  have h_neg_phi : (¬phi) ∈ M :=
-    hM_sup (Set.mem_union_right Gamma (Set.mem_singleton_iff.mpr rfl))
-  have h_gamma_sub : ∀ ψ ∈ Gamma, ψ ∈ M :=
-    fun ψ hψ => hM_sup (Set.mem_union_left _ hψ)
-  have h_refl : ∀ (S : CanonicalWorld (@ModalAxiom Atom)),
-      (CanonicalModel (@ModalAxiom Atom)).r S S :=
-    fun S => canonical_refl
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .modalT φ)
-      S
-  have h_trans : ∀ (S T U : CanonicalWorld (@ModalAxiom Atom)),
-      (CanonicalModel (@ModalAxiom Atom)).r S T →
-      (CanonicalModel (@ModalAxiom Atom)).r T U →
-      (CanonicalModel (@ModalAxiom Atom)).r S U :=
-    canonical_trans
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .modalFour φ)
-  have h_eucl : ∀ (S T U : CanonicalWorld (@ModalAxiom Atom)),
-      (CanonicalModel (@ModalAxiom Atom)).r S T →
-      (CanonicalModel (@ModalAxiom Atom)).r S U →
-      (CanonicalModel (@ModalAxiom Atom)).r T U :=
-    canonical_eucl
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .modalFour φ)
-      (fun φ => .modalB φ)
-      (fun φ ψ => .modalK φ ψ)
-  have h_gamma_sat : ∀ γ ∈ Gamma, Satisfies (CanonicalModel (@ModalAxiom Atom)) w γ :=
-    fun γ hγ => (truth_lemma
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .efq φ)
-      (fun φ ψ => .peirce φ ψ)
-      (fun φ ψ => .modalK φ ψ)
-      (fun φ => .modalT φ)
-      w γ).mpr (h_gamma_sub γ hγ)
-  have h_phi_sat := h (CanonicalWorld (@ModalAxiom Atom)) (CanonicalModel (@ModalAxiom Atom))
-    w (fun S => h_refl S)
-    (fun S T U hST hTU => h_trans S T U hST hTU)
-    (fun S T U hST hSU => h_eucl S T U hST hSU)
-    h_gamma_sat
-  have h_phi_M := (truth_lemma
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    (fun φ ψ => .modalK φ ψ)
-    (fun φ => .modalT φ)
-    w phi).mp h_phi_sat
-  exact mcs_bot_not_mem hM_mcs
-    (modal_implication_property
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      hM_mcs h_neg_phi h_phi_M)
+    s5_truth_lemma_applied
+    s5_canonical_FC
+    (fun World m w ⟨hRefl, hTrans, hEucl⟩ h_sat => h World m w hRefl hTrans hEucl h_sat)
 
 /-! ## S5 Biconditional Wrapper -/
 
@@ -177,10 +167,18 @@ theorem s5_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
         (∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃) →
         (∀ γ ∈ {ψ | ψ ∈ L}, Satisfies m w γ) →
         Satisfies m w phi := by
-  obtain ⟨L, hL_sub, hL_deriv⟩ := s5_strong_completeness h
+  obtain ⟨L, hL_sub, hL_sem⟩ :=
+    compactness (Axioms := @ModalAxiom Atom) (FC := s5FC)
+      s5_sound_cb
+      (fun φ ψ => .implyK φ ψ)
+      (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ => .efq φ)
+      (fun φ ψ => .peirce φ ψ)
+      s5_truth_lemma_applied
+      s5_canonical_FC
+      (fun World m w ⟨hRefl, hTrans, hEucl⟩ h_sat => h World m w hRefl hTrans hEucl h_sat)
   exact ⟨L, hL_sub, fun World m w h_refl h_trans h_eucl h_sat =>
-    s5_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
-      World m w h_refl h_trans h_eucl h_sat⟩
+    hL_sem World m w ⟨h_refl, h_trans, h_eucl⟩ h_sat⟩
 
 /-! ## S5 Weak Completeness (Corollary) -/
 

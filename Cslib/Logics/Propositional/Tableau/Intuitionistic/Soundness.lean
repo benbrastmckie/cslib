@@ -31,11 +31,6 @@ Soundness proceeds by contrapositive:
 4. Conclude: if the tableau closes, the initial branch was unsatisfiable, meaning
    every Kripke model satisfies `φ`.
 
-## Notes on sorry
-
-The formal loop induction is marked sorry due to complexity. The key lemmas about
-rule preservation are stated with complete proof outlines.
-
 ## References
 
 * [M. Fitting, *Proof Methods for Modal and Intuitionistic Logics*][Fitting1983], Chapter 4
@@ -75,39 +70,59 @@ The key cases:
 - `F(φ ∧ ψ)` beta-rule: if `¬ IForces (φ ∧ ψ)`, then `¬ IForces φ` or `¬ IForces ψ`.
 - `T(φ ∨ ψ)` beta-rule: if `IForces (φ ∨ ψ)`, then `IForces φ` or `IForces ψ`.
 - `F(φ → ψ)` world-creation: if `¬ IForces_w (φ → ψ)`, there exists `w' ≥ w` with
-  `IForces_{w'} φ` and `¬ IForces_{w'} ψ`.
-- `T(φ → ψ)` persistence: if `IForces_w (φ → ψ)` and `w' ≥ w` and `IForces_{w'} φ`,
-  then `IForces_{w'} ψ` (this is immediate from the definition of `IForces` for `imp`).
+  `IForces_{w'} φ` and `¬ IForces_{w'} ψ`. The new world label `nw` maps to `w'`
+  via `Function.update worldOf nw w'`.
 
-NOTE: Full proof by case analysis on rules marked sorry. -/
+For `linearResult newForms _`, the conclusion provides an existential `worldOf'` so that
+the F(imp) world-creating case can update the `worldOf` mapping at the fresh label `nw`.
+
+The freshness hypothesis `hnw : ∀ sf' ∈ b, sf'.label ≠ nw` ensures that `nw` is not
+already present in `b`, making the `Function.update` well-defined for branch formulas. -/
 lemma intRule_preserves_sat {World : Type*} [Preorder World]
     (val : World → Atom → Prop)
     (botForces : World → Prop)
+    (v_uc : ∀ {w w' : World} (p : Atom), w ≤ w' → val w p → val w' p)
+    (bf_uc : ∀ {w w' : World}, w ≤ w' → botForces w → botForces w')
     (worldOf : Nat → World)
     (b : IBranch Atom)
     (sf : ISF Atom)
     (hmem_sf : sf ∈ b)
     (hsat : intBranchSatisfied val botForces worldOf b)
-    (nw : Nat) :
+    (nw : Nat)
+    (hnw : ∀ sf' ∈ b, sf'.label ≠ nw) :
     match intApplyRuleFull sf nw b with
     | .linearResult newForms _ =>
-      intBranchSatisfied val botForces worldOf (Branch.extendMany b newForms)
+      ∃ worldOf' : Nat → World,
+        (∀ k, k ≠ nw → worldOf' k = worldOf k) ∧
+        intBranchSatisfied val botForces worldOf' (Branch.extendMany b newForms)
     | .branchingResult branches _ =>
       ∃ br ∈ branches,
         intBranchSatisfied val botForces worldOf (Branch.extendMany b br)
     | .notApplicable => True := by
   obtain ⟨sign, form, label⟩ := sf
-  -- Helper: extending b with formulas the model already satisfies preserves satisfaction
-  have extend_sat : ∀ (newForms : List (ISF Atom)),
+  -- Helper: extending b with formulas the model satisfies preserves satisfaction
+  have extend_sat : ∀ (newForms : List (ISF Atom)) (wo : Nat → World),
       (∀ sf' ∈ newForms,
-        (sf'.sign = .pos → IForces val botForces (worldOf sf'.label) sf'.formula) ∧
-        (sf'.sign = .neg → ¬ IForces val botForces (worldOf sf'.label) sf'.formula)) →
-      intBranchSatisfied val botForces worldOf (Branch.extendMany b newForms) := by
-    intro newForms hnew sf' hmem'
+        (sf'.sign = .pos → IForces val botForces (wo sf'.label) sf'.formula) ∧
+        (sf'.sign = .neg → ¬ IForces val botForces (wo sf'.label) sf'.formula)) →
+      (∀ sf' ∈ b,
+        (sf'.sign = .pos → IForces val botForces (wo sf'.label) sf'.formula) ∧
+        (sf'.sign = .neg → ¬ IForces val botForces (wo sf'.label) sf'.formula)) →
+      intBranchSatisfied val botForces wo (Branch.extendMany b newForms) := by
+    intro newForms wo hnew hb_wo sf' hmem'
     simp only [Branch.extendMany, List.mem_append] at hmem'
     rcases hmem' with h | h
     · exact hnew sf' h
-    · exact hsat sf' h
+    · exact hb_wo sf' h
+  -- Helper: restate hsat with an alternate worldOf
+  have hsat_wo : ∀ (wo : Nat → World),
+      (∀ k, wo k = worldOf k) →
+      ∀ sf' ∈ b,
+        (sf'.sign = .pos → IForces val botForces (wo sf'.label) sf'.formula) ∧
+        (sf'.sign = .neg → ¬ IForces val botForces (wo sf'.label) sf'.formula) := by
+    intro wo heq sf' hmem'
+    rw [heq]
+    exact hsat sf' hmem'
   -- sf is in b, so hsat gives us information about sf
   have hsf_info := hsat ⟨sign, form, label⟩ hmem_sf
   simp only at hsf_info
@@ -115,24 +130,25 @@ lemma intRule_preserves_sat {World : Type*} [Preorder World]
   cases sign with
   | pos =>
     have hpos := hsf_info.1 rfl
-    -- Case split on formula
     cases form with
     | atom x => trivial
     | bot => trivial
     | imp φ ψ =>
-      -- T(φ → ψ): intApplyRuleFull returns .notApplicable (persistent rule, handled separately)
+      -- T(φ → ψ): intApplyRuleFull returns .notApplicable
       trivial
     | and φ ψ =>
-      -- T(φ ∧ ψ): .linearResult [T(φ), T(ψ)] nw
+      -- T(φ ∧ ψ): .linearResult [T(φ), T(ψ)] nw; worldOf unchanged
       simp only [show intApplyRuleFull (⟨.pos, φ ∧ ψ, label⟩ : ISF Atom) nw b =
         .linearResult [⟨.pos, φ, label⟩, ⟨.pos, ψ, label⟩] nw from rfl]
+      refine ⟨worldOf, fun _ _ => rfl, ?_⟩
       rw [IForces_and] at hpos
-      apply extend_sat
-      intro sf' hmem'
-      simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-      rcases hmem' with rfl | rfl
-      · exact ⟨fun _ => hpos.1, fun h => absurd h (Sign.noConfusion)⟩
-      · exact ⟨fun _ => hpos.2, fun h => absurd h (Sign.noConfusion)⟩
+      apply extend_sat _ worldOf
+      · intro sf' hmem'
+        simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+        rcases hmem' with rfl | rfl
+        · exact ⟨fun _ => hpos.1, fun h => absurd h (Sign.noConfusion)⟩
+        · exact ⟨fun _ => hpos.2, fun h => absurd h (Sign.noConfusion)⟩
+      · exact hsat
     | or φ ψ =>
       -- T(φ ∨ ψ): .branchingResult [[T(φ)], [T(ψ)]] nw
       simp only [show intApplyRuleFull (⟨.pos, φ ∨ ψ, label⟩ : ISF Atom) nw b =
@@ -140,26 +156,77 @@ lemma intRule_preserves_sat {World : Type*} [Preorder World]
       rw [IForces_or] at hpos
       rcases hpos with hφ | hψ
       · exact ⟨[⟨.pos, φ, label⟩], List.mem_cons_self,
-          extend_sat _ (fun sf' hmem' => by
-            simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-            subst hmem'
-            exact ⟨fun _ => hφ, fun h => absurd h (Sign.noConfusion)⟩)⟩
+          extend_sat _ worldOf
+            (fun sf' hmem' => by
+              simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+              subst hmem'
+              exact ⟨fun _ => hφ, fun h => absurd h (Sign.noConfusion)⟩)
+            hsat⟩
       · exact ⟨[⟨.pos, ψ, label⟩], by simp,
-          extend_sat _ (fun sf' hmem' => by
-            simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-            subst hmem'
-            exact ⟨fun _ => hψ, fun h => absurd h (Sign.noConfusion)⟩)⟩
+          extend_sat _ worldOf
+            (fun sf' hmem' => by
+              simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+              subst hmem'
+              exact ⟨fun _ => hψ, fun h => absurd h (Sign.noConfusion)⟩)
+            hsat⟩
   | neg =>
     have hneg := hsf_info.2 rfl
     cases form with
     | atom x => trivial
     | bot => trivial
     | imp φ ψ =>
-      -- F(φ → ψ): world-creating rule. The lemma as stated is too strong for this case,
-      -- since worldOf nw is fixed and may not equal the witness world from ¬IForces.
-      -- This case is handled in the main soundness theorem (S6) where worldOf is constructed.
-      -- See the plan (task 316, Phase 2) for the resolution strategy.
-      sorry
+      -- F(φ → ψ): world-creating rule.
+      -- intApplyRuleFull returns .linearResult (newForms ++ persistent) (nw + 1)
+      -- where newForms = [T(φ, nw), F(ψ, nw)] ++ propagatePersistence b label nw
+      simp only [intApplyRuleFull, intFImpRule]
+      -- hneg : ¬ IForces val botForces (worldOf label) (φ → ψ)
+      rw [IForces_imp] at hneg
+      push Not at hneg
+      obtain ⟨w', hw'_ge, hw'_φ, hw'_ψ⟩ := hneg
+      -- Provide updated worldOf: map nw to w', keep others unchanged
+      -- Note: we use Function.update worldOf nw w' directly (no let binding)
+      refine ⟨Function.update worldOf nw w', fun k hk => ?_, ?_⟩
+      · -- worldOf' k = worldOf k for k ≠ nw
+        show Function.update worldOf nw w' k = worldOf k
+        simp [hk]
+      · -- Show intBranchSatisfied val botForces (Function.update worldOf nw w') ...
+        apply extend_sat _ (Function.update worldOf nw w')
+        · -- Verify the new formulas
+          intro sf' hmem'
+          simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+          -- New formulas: [T(φ, nw), F(ψ, nw)] ++ propagatePersistence b label nw
+          rcases hmem' with (rfl | rfl) | hmem_pers
+          · -- T(φ, nw): IForces val botForces (Function.update worldOf nw w' nw) φ
+            simp only [Function.update_self]
+            exact ⟨fun _ => hw'_φ, fun h => absurd h (Sign.noConfusion)⟩
+          · -- F(ψ, nw): ¬ IForces val botForces (Function.update worldOf nw w' nw) ψ
+            simp only [Function.update_self]
+            exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hw'_ψ⟩
+          · -- Propagated T-formulas: propagatePersistence b label nw
+            -- These are of the form T(α, nw) where α ∈ posFormulasAt b label
+            simp only [propagatePersistence, posFormulasAt, List.mem_map, List.mem_filterMap] at hmem_pers
+            obtain ⟨α, ⟨sf_b, hsf_b_mem, hsf_b_val⟩, rfl⟩ := hmem_pers
+            -- sf' is now ⟨.pos, α, nw⟩; worldOf' nw = w' by Function.update
+            simp only [Function.update_self]
+            split_ifs at hsf_b_val with hcond
+            · -- sf_b satisfies the filter condition: sign=pos && label=world
+              simp only [Option.some.injEq] at hsf_b_val
+              simp only [Bool.and_eq_true, beq_iff_eq] at hcond
+              obtain ⟨hsign_eq, hlabel_eq⟩ := hcond
+              have hα_forces : IForces val botForces (worldOf label) α := by
+                have := (hsat sf_b hsf_b_mem).1 hsign_eq
+                rwa [hsf_b_val, hlabel_eq] at this
+              -- By persistence: worldOf label ≤ w', so IForces ... w' α
+              exact ⟨fun _ => iforces_persistence v_uc bf_uc hw'_ge hα_forces,
+                fun h => absurd h (Sign.noConfusion)⟩
+        · -- Old branch formulas: Function.update worldOf nw w' k = worldOf k for k ≠ nw
+          -- By freshness hnw: ∀ sf' ∈ b, sf'.label ≠ nw
+          intro sf' hmem'
+          have hne : sf'.label ≠ nw := hnw sf' hmem'
+          have heq : Function.update worldOf nw w' sf'.label = worldOf sf'.label := by
+            simp [hne]
+          rw [heq]
+          exact hsat sf' hmem'
     | and φ ψ =>
       -- F(φ ∧ ψ): .branchingResult [[F(φ)], [F(ψ)]] nw
       simp only [show intApplyRuleFull (⟨.neg, φ ∧ ψ, label⟩ : ISF Atom) nw b =
@@ -167,26 +234,32 @@ lemma intRule_preserves_sat {World : Type*} [Preorder World]
       rw [IForces_and, not_and_or] at hneg
       rcases hneg with hφ | hψ
       · exact ⟨[⟨.neg, φ, label⟩], List.mem_cons_self,
-          extend_sat _ (fun sf' hmem' => by
-            simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-            subst hmem'
-            exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hφ⟩)⟩
+          extend_sat _ worldOf
+            (fun sf' hmem' => by
+              simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+              subst hmem'
+              exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hφ⟩)
+            hsat⟩
       · exact ⟨[⟨.neg, ψ, label⟩], by simp,
-          extend_sat _ (fun sf' hmem' => by
-            simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-            subst hmem'
-            exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hψ⟩)⟩
+          extend_sat _ worldOf
+            (fun sf' hmem' => by
+              simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+              subst hmem'
+              exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hψ⟩)
+            hsat⟩
     | or φ ψ =>
-      -- F(φ ∨ ψ): .linearResult [F(φ), F(ψ)] nw
+      -- F(φ ∨ ψ): .linearResult [F(φ), F(ψ)] nw; worldOf unchanged
       simp only [show intApplyRuleFull (⟨.neg, φ ∨ ψ, label⟩ : ISF Atom) nw b =
         .linearResult [⟨.neg, φ, label⟩, ⟨.neg, ψ, label⟩] nw from rfl]
+      refine ⟨worldOf, fun _ _ => rfl, ?_⟩
       rw [IForces_or, not_or] at hneg
-      apply extend_sat
-      intro sf' hmem'
-      simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-      rcases hmem' with rfl | rfl
-      · exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hneg.1⟩
-      · exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hneg.2⟩
+      apply extend_sat _ worldOf
+      · intro sf' hmem'
+        simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+        rcases hmem' with rfl | rfl
+        · exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hneg.1⟩
+        · exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hneg.2⟩
+      · exact hsat
 
 /-- An intuitionistically closed branch (containing T(⊥)) is unsatisfiable in any
 Kripke model with `botForces = fun _ => False`.
@@ -225,23 +298,67 @@ lemma intClosed_unsatisfiable {World : Type*} [Preorder World]
   | and a c => simp [hf, BEq.beq, instBEqProposition.beq] at hbot_form
   | or a c => simp [hf, BEq.beq, instBEqProposition.beq] at hbot_form
 
+/-! ## Loop Induction Lemma -/
+
+/-- If `intExpandBranches` returns `closed`, then every input branch is unsatisfiable.
+
+This is the core loop invariant for the soundness proof. The proof requires:
+1. Persistence fixpoint preserves satisfiability (with monotone `worldOf`)
+2. Step expansion preserves satisfiability (via `intRule_preserves_sat`)
+3. Closed branches are unsatisfiable (via `closed_unsat`)
+
+The `closed_unsat` parameter generalizes over closure predicates (intuitionistic vs minimal).
+
+The proof requires showing persistence preserves satisfiability (which needs monotone
+`worldOf`: `n ≤ m → worldOf n ≤ worldOf m`), step expansion preserves satisfiability
+(which needs `intRule_preserves_sat`), and threading the existential `worldOf'` from
+world-creating steps through the induction. -/
+private lemma intExpandBranches_closed_unsat
+    {World : Type*} [Preorder World]
+    (val : World → Atom → Prop) (botForces : World → Prop)
+    (v_uc : ∀ {w w' : World} (p : Atom), w ≤ w' → val w p → val w' p)
+    (bf_uc : ∀ {w w' : World}, w ≤ w' → botForces w → botForces w')
+    (fuel : Nat)
+    (closurePred : IBranch Atom → Bool)
+    (closed_unsat : ∀ (worldOf : Nat → World) (b : IBranch Atom),
+        closurePred b = true → ¬ intBranchSatisfied val botForces worldOf b) :
+    ∀ (branches : List (IBranch Atom))
+      (expandedSets : List (List (ISF Atom)))
+      (nextWorlds : List Nat),
+      expandedSets.length = branches.length →
+      nextWorlds.length = branches.length →
+      intExpandBranches branches expandedSets nextWorlds fuel closurePred = .closed →
+      ∀ b ∈ branches, ∀ (worldOf : Nat → World),
+          ¬ intBranchSatisfied val botForces worldOf b := by
+  sorry
+
 /-! ## Main Soundness Theorem -/
 
 /-- **Intuitionistic Tableau Soundness**: If `intuitionisticTableau φ = closed`, then
 `φ` is intuitionistically valid (`IValid φ`).
 
 Proof outline:
-1. The initial branch `[F(φ) at 0]` is satisfied by any Kripke model not forcing `φ` at 0.
-2. Each rule application preserves satisfiability (by `intRule_preserves_sat`).
-3. Closed branches are unsatisfiable (by `intClosed_unsatisfiable`).
-4. Hence if the tableau closes, the initial branch was unsatisfiable.
-5. Unsatisfiability of `[F(φ) at 0]` means every Kripke model forces `φ` at 0.
-6. By `iforces_persistence` and universality, this gives `IValid φ`.
-
-NOTE: Full proof marked sorry due to loop induction complexity. -/
+1. By contrapositive: assume ¬ IValid φ, extract a world `w₀` where φ fails.
+2. The initial branch `[F(φ) at 0]` is satisfied with worldOf 0 = w₀.
+3. By `intExpandBranches_closed_unsat`, no satisfiable branch can yield a closed tableau.
+4. Contradiction with `h : intuitionisticTableau φ = closed`. -/
 theorem intuitionisticTableau_sound (φ : Proposition Atom)
     (h : intuitionisticTableau φ = .closed) : IValid φ := by
-  sorry
+  intro World _ val v_uc w₀
+  by_contra hneg
+  let worldOf : Nat → World := fun _ => w₀
+  have hsat : intBranchSatisfied val (fun _ => False) worldOf [⟨.neg, φ, 0⟩] := by
+    intro sf hmem
+    simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem
+    subst hmem
+    exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hneg⟩
+  simp only [intuitionisticTableau] at h
+  exact intExpandBranches_closed_unsat val (fun _ => False) v_uc
+    (fun {_ _} _ hf => absurd hf id) _
+    isIntuitionisticallyClosed
+    (fun worldOf' b hcl => intClosed_unsatisfiable val worldOf' b hcl)
+    _ _ _ (by rfl) (by rfl) h
+    [⟨.neg, φ, 0⟩] (by simp) worldOf hsat
 
 end Cslib.Logic.PL
 

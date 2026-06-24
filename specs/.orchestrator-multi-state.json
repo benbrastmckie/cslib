@@ -1,57 +1,16 @@
 {
-  "session_id": "sess_1750723200_a3b1c2",
-  "task_numbers": [
-    310,
-    311,
-    312
-  ],
-  "waves": [
-    [
-      310
-    ],
-    [
-      311
-    ],
-    [
-      312
-    ]
-  ],
-  "dependency_graph": {
-    "310": [],
-    "311": [
-      310
-    ],
-    "312": [
-      311
-    ]
-  },
-  "cycle_count": 2,
+  "session_id": "sess_1750690800_a7c3e1",
+  "task_numbers": [316, 317, 319],
+  "waves": [[316], [317], [319]],
   "max_cycles": 15,
-  "completed_tasks": [
-    310
-  ],
-  "failed_tasks": [
-    311,
-    312
-  ],
+  "cycle_count": 3,
+  "completed_tasks": [],
+  "failed_tasks": [{"task": 316, "status": "partial", "reason": "Loop induction sorry remaining"}],
   "current_statuses": {
-    "310": "completed",
-    "311": "blocked",
-    "312": "blocked",
-    "320": "implementing",
-    "290": "partial",
-    "316": "planned",
-    "293": "planned",
-    "317": "planned"
+    "316": "partial",
+    "317": "planned",
+    "319": "not_started"
   },
-  "task_types": {
-    "310": "cslib",
-    "311": "cslib",
-    "312": "cslib"
-  },
-  "agents": {
-    "research": "cslib-research-hard-agent",
-    "plan": "planner-hard-agent",
-    "implement": "cslib-implementation-hard-agent"
-  }
+  "effort_flag": "hard",
+  "lit_flag": true
 }

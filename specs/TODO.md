@@ -1,5 +1,5 @@
 ---
-next_project_number: 327
+next_project_number: 330
 ---
 
 # TODO
@@ -11,9 +11,9 @@ next_project_number: 327
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,321,322,323,324 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215,300,316,325 | 36,37,180,299,323,324 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
-| 3 | 41,275,317,326 | 39,40,316,325 | Foundations, Propositional Logic |
+| 1 | 36,37,180,226,241,245,278,290,299,301,321,322,323,324,327 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 2 | 39,40,181,215,300,316,325,328 | 36,37,180,299,323,324,327 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 3 | 41,275,317,326,329 | 39,40,316,325,328 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -40,6 +40,9 @@ next_project_number: 327
 324 [NOT STARTED] — Add LawfulBEq instances for Proposition Atom and SignedFormula F 
   └─ 325 [NOT STARTED] — Deduplicate identical definitions across minimal/intuitionistic t
     └─ 326 [NOT STARTED] — Fix ~35 linter warnings across the propositional tableau soundnes
+327 [NOT STARTED] — Fix CI lint warnings in CutElimination.lean: add required comment
+  └─ 328 [NOT STARTED] — Refactor CutElimination.lean to reduce or eliminate the maxHeartb
+    └─ 329 [NOT STARTED] — Prove the subformula property as a corollary of cut elimination: 
 
 ### Temporal Logic
 
@@ -57,7 +60,7 @@ next_project_number: 327
 
 ### Algebraic Semantics
 
-322 [RESEARCHING] — Establish the MPL conservative extension chain as standalone resu
+322 [PLANNING] — Establish the MPL conservative extension chain as standalone resu
 
 ### Modal
 
@@ -67,6 +70,36 @@ next_project_number: 327
 ### Uncategorized
 
 ## Tasks
+
+### 329. Cutelim subformula property
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 328
+
+**Description**: Prove the subformula property as a corollary of cut elimination: every formula appearing in a cut-free LK proof is a subformula of some formula in the conclusion sequent. Define Proposition.isSubformula, prove CutFreeLKProof.subformula_property, and derive LKProof.subformula_property via cutElim. Place in a new file Cslib/Logics/Propositional/SequentCalculus/LK/SubformulaProperty.lean. This is a standard textbook result that follows directly from the Hauptsatz
+
+---
+
+### 328. Cutelim refactor heartbeats
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 327
+
+**Description**: Refactor CutElimination.lean to reduce or eliminate the maxHeartbeats 800000 override. Extract shared Finset subset-proof helpers (insert membership transport, multi-level weakening combinators) to reduce elaboration cost in the mutual block. Consider splitting the 902-line file: move the four cutAdm_right_* helpers into a CutAdmRight.lean module and keep cutAdmissibility + cutElim in CutElimination.lean. Target: default heartbeats (200000) or at most 400000. Ensure the public API (cutAdmissibility, LKProof.cutElim, CutFreeLKProof.mono) remains unchanged
+
+---
+
+### 327. Cutelim lint ci fixes
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Fix CI lint warnings in CutElimination.lean: add required comment to maxHeartbeats 800000 override, fix 8 long-line warnings (>100 chars), remove unused variable hB. All mechanical fixes required for CI to pass
+
+---
 
 ### 326. Tableau lint cleanup
 - **Status**: [NOT STARTED]
@@ -109,7 +142,7 @@ next_project_number: 327
 ---
 
 ### 322. Mpl conservative extension chain
-- **Status**: [RESEARCHING]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 311, Task 312

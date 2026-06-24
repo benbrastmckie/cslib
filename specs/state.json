@@ -1,6 +1,43 @@
 {
-  "next_project_number": 327,
+  "next_project_number": 330,
   "active_projects": [
+    {
+      "project_number": 327,
+      "project_name": "cutelim_lint_ci_fixes",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Fix CI lint warnings in CutElimination.lean: add required comment to maxHeartbeats 800000 override, fix 8 long-line warnings (>100 chars), remove unused variable hB. All mechanical fixes required for CI to pass",
+      "topic": "Propositional Logic",
+      "created": "2026-06-24T11:27:09Z",
+      "last_updated": "2026-06-24T11:27:09Z",
+      "dependencies": []
+    },
+    {
+      "project_number": 328,
+      "project_name": "cutelim_refactor_heartbeats",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Refactor CutElimination.lean to reduce or eliminate the maxHeartbeats 800000 override. Extract shared Finset subset-proof helpers (insert membership transport, multi-level weakening combinators) to reduce elaboration cost in the mutual block. Consider splitting the 902-line file: move the four cutAdm_right_* helpers into a CutAdmRight.lean module and keep cutAdmissibility + cutElim in CutElimination.lean. Target: default heartbeats (200000) or at most 400000. Ensure the public API (cutAdmissibility, LKProof.cutElim, CutFreeLKProof.mono) remains unchanged",
+      "topic": "Propositional Logic",
+      "created": "2026-06-24T11:27:09Z",
+      "last_updated": "2026-06-24T11:27:09Z",
+      "dependencies": [
+        327
+      ]
+    },
+    {
+      "project_number": 329,
+      "project_name": "cutelim_subformula_property",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Prove the subformula property as a corollary of cut elimination: every formula appearing in a cut-free LK proof is a subformula of some formula in the conclusion sequent. Define Proposition.isSubformula, prove CutFreeLKProof.subformula_property, and derive LKProof.subformula_property via cutElim. Place in a new file Cslib/Logics/Propositional/SequentCalculus/LK/SubformulaProperty.lean. This is a standard textbook result that follows directly from the Hauptsatz",
+      "topic": "Propositional Logic",
+      "created": "2026-06-24T11:27:09Z",
+      "last_updated": "2026-06-24T11:27:09Z",
+      "dependencies": [
+        328
+      ]
+    },
     {
       "project_number": 323,
       "project_name": "fix_intuitionistic_tableau_bugs",
@@ -14,18 +51,18 @@
     {
       "project_number": 322,
       "project_name": "mpl_conservative_extension_chain",
-      "status": "researching",
+      "status": "planning",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Establish the MPL conservative extension chain as standalone results and organize the relationship between the IPL and MPL chains. Specifically: (1) Prove MPL → ConjImp conservativity for or-free formulas (GHAValid → BrouwerianValid, requiring a free join/distributive lattice completion of BrouwerianSemilattices to GHAs). (2) Prove MPL → Imp conservativity for imp-top-only formulas as a composition. (3) Organize the full algebraic picture: state the MPL chain (ImpAxiom ⊂ ConjImpAxiom ⊂ MinPropAxiom) with its own conservativity results independent of IPL, and relate it to the IPL chain via the IPL → MPL conservativity bridge. File: Cslib/Logics/Propositional/Semantics/Algebra/MplConservativeChain.lean",
       "created": "2026-06-24T10:51:42Z",
-      "last_updated": "2026-06-24T11:19:29Z",
-      "next_artifact_number": 1,
+      "last_updated": "2026-06-24T11:25:46Z",
+      "next_artifact_number": 2,
       "artifacts": [
         {
           "type": "report",
           "path": "specs/322_mpl_conservative_extension_chain/reports/01_mpl-chain-research.md",
-          "summary": "MPL chain research: direct proofs via LowerSet embedding, ~80-120 lines"
+          "summary": "Hard-mode research: typeclass diamond blocker, fix approaches, building block verification"
         }
       ],
       "dependencies": [

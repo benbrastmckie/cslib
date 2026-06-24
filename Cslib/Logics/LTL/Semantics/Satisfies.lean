@@ -123,6 +123,7 @@ theorem bot_false (v : Atom → State → Prop) (w : ωSequence State) :
 theorem neg_iff (v : Atom → State → Prop) (w : ωSequence State)
     (φ : Formula Atom) :
     Satisfies v w (¬φ) ↔ ¬ Satisfies v w φ := by
+  change (Satisfies v w (.imp φ .bot)) ↔ ¬ Satisfies v w φ
   simp only [Satisfies]
 
 /-- Top (⊤) is satisfiable everywhere. -/
@@ -148,7 +149,8 @@ theorem someFuture_iff (v : Atom → State → Prop) (w : ωSequence State)
 theorem allFuture_iff (v : Atom → State → Prop) (w : ωSequence State)
     (φ : Formula Atom) :
     Satisfies v w (□φ) ↔ ∀ j, Satisfies v (w.drop j) φ := by
-  simp only [Satisfies]
+  simp only [Formula.allFuture, Formula.neg, PropositionalConnectives.neg,
+    Formula.someFuture, Formula.top, PropositionalConnectives.top, Satisfies]
   constructor
   · intro h j
     by_contra hns

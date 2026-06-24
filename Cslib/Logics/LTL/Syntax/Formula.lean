@@ -94,11 +94,26 @@ inductive Formula (Atom : Type u) : Type u where
   | untl (φ₁ φ₂ : Formula Atom)
 deriving DecidableEq, BEq
 
-/-- Negation: ¬φ := φ → ⊥ -/
-abbrev Formula.neg (φ : Formula Atom) : Formula Atom := .imp φ .bot
+/-- Register `LTL.Formula` as an instance of `LTLConnectives`.
 
-/-- Verum / top: ⊤ := ⊥ → ⊥ -/
-abbrev Formula.top : Formula Atom := .imp .bot .bot
+Registered before the derived-connective `abbrev`s so that the
+`PropositionalConnectives.neg` / `.top` defaults are in scope
+when `Formula.neg` and `Formula.top` are elaborated. -/
+instance : LTLConnectives (Formula Atom) where
+  bot := .bot
+  imp := .imp
+  untl := .untl
+  next := .next
+
+/-- Negation: ¬φ := φ → ⊥.
+
+Delegates to the canonical `PropositionalConnectives.neg` default (task 340). -/
+abbrev Formula.neg (φ : Formula Atom) : Formula Atom := PropositionalConnectives.neg φ
+
+/-- Verum / top: ⊤ := ⊥ → ⊥.
+
+Delegates to the canonical `PropositionalConnectives.top` default (task 340). -/
+abbrev Formula.top : Formula Atom := PropositionalConnectives.top
 
 /-- Disjunction: φ₁ ∨ φ₂ := ¬φ₁ → φ₂ -/
 abbrev Formula.or (φ₁ φ₂ : Formula Atom) : Formula Atom :=
@@ -136,13 +151,6 @@ abbrev Formula.leadsto (p q : Formula Atom) : Formula Atom :=
 @[inherit_doc] scoped prefix:40 "◇" => Formula.someFuture
 @[inherit_doc] scoped prefix:40 "□" => Formula.allFuture
 @[inherit_doc] scoped infix:20 " ⇝ " => Formula.leadsto
-
-/-- Register `LTL.Formula` as an instance of `LTLConnectives`. -/
-instance : LTLConnectives (Formula Atom) where
-  bot := .bot
-  imp := .imp
-  untl := .untl
-  next := .next
 
 instance : Bot (Formula Atom) := ⟨.bot⟩
 instance : Top (Formula Atom) := ⟨.top⟩

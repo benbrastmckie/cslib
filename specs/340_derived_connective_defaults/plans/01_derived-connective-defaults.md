@@ -157,7 +157,7 @@ delegates to the `PropositionalConnectives` defaults, leaving `and`/`or`/`iff`/`
 
 ---
 
-### Phase 3: Migrate Temporal and LTL neg/top Delegates [NOT STARTED]
+### Phase 3: Migrate Temporal and LTL neg/top Delegates [COMPLETED]
 
 **Goal**: Apply the same `neg`/`top` delegation to Temporal and LTL formula files.
 

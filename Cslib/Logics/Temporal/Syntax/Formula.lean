@@ -98,11 +98,26 @@ inductive Formula (Atom : Type u) : Type u where
   | snce (φ₁ φ₂ : Formula Atom)
 deriving DecidableEq
 
-/-- Negation: ¬φ := φ → ⊥ -/
-abbrev Formula.neg (φ : Formula Atom) : Formula Atom := .imp φ .bot
+/-- Register `Temporal.Formula` as an instance of `TemporalConnectives`.
 
-/-- Verum / top: ⊤ := ⊥ → ⊥ -/
-abbrev Formula.top : Formula Atom := .imp .bot .bot
+Registered before the derived-connective `abbrev`s so that the
+`PropositionalConnectives.neg` / `.top` defaults are in scope
+when `Formula.neg` and `Formula.top` are elaborated. -/
+instance : TemporalConnectives (Formula Atom) where
+  bot := .bot
+  imp := .imp
+  untl := .untl
+  snce := .snce
+
+/-- Negation: ¬φ := φ → ⊥.
+
+Delegates to the canonical `PropositionalConnectives.neg` default (task 340). -/
+abbrev Formula.neg (φ : Formula Atom) : Formula Atom := PropositionalConnectives.neg φ
+
+/-- Verum / top: ⊤ := ⊥ → ⊥.
+
+Delegates to the canonical `PropositionalConnectives.top` default (task 340). -/
+abbrev Formula.top : Formula Atom := PropositionalConnectives.top
 
 /-- Disjunction: φ₁ ∨ φ₂ := ¬φ₁ → φ₂ -/
 abbrev Formula.or (φ₁ φ₂ : Formula Atom) : Formula Atom :=
@@ -147,13 +162,6 @@ abbrev Formula.allPast (φ : Formula Atom) : Formula Atom :=
 @[inherit_doc] scoped prefix:40 "𝐆" => Formula.allFuture
 @[inherit_doc] scoped prefix:40 "𝐏" => Formula.somePast
 @[inherit_doc] scoped prefix:40 "𝐇" => Formula.allPast
-
-/-- Register `Temporal.Formula` as an instance of `TemporalConnectives`. -/
-instance : TemporalConnectives (Formula Atom) where
-  bot := .bot
-  imp := .imp
-  untl := .untl
-  snce := .snce
 
 instance : Bot (Formula Atom) := ⟨.bot⟩
 instance : Top (Formula Atom) := ⟨.top⟩
@@ -362,31 +370,35 @@ theorem swapTemporal_involution (φ : Formula Atom) :
 /-- swapTemporal distributes over negation: swap(¬φ) = ¬(swap φ). -/
 theorem swapTemporal_neg (φ : Formula Atom) :
     (Formula.neg φ).swapTemporal = Formula.neg φ.swapTemporal := by
-  simp only [Formula.neg, swapTemporal]
+  simp only [Formula.neg, PropositionalConnectives.neg, swapTemporal]
 
 /-- swapTemporal exchanges someFuture and somePast: swap(Fφ) = P(swap φ). -/
 @[simp]
 theorem swapTemporal_someFuture (φ : Formula Atom) :
     (Formula.someFuture φ).swapTemporal = Formula.somePast φ.swapTemporal := by
-  simp only [Formula.somePast, Formula.top, swapTemporal]
+  simp only [Formula.somePast, Formula.top, PropositionalConnectives.top, swapTemporal]
 
 /-- swapTemporal exchanges somePast and someFuture: swap(Pφ) = F(swap φ). -/
 @[simp]
 theorem swapTemporal_somePast (φ : Formula Atom) :
     (Formula.somePast φ).swapTemporal = Formula.someFuture φ.swapTemporal := by
-  simp only [Formula.someFuture, Formula.top, swapTemporal]
+  simp only [Formula.someFuture, Formula.top, PropositionalConnectives.top, swapTemporal]
 
 /-- swapTemporal exchanges allFuture and allPast: swap(Gφ) = H(swap φ). -/
 @[simp]
 theorem swapTemporal_allFuture (φ : Formula Atom) :
     (Formula.allFuture φ).swapTemporal = Formula.allPast φ.swapTemporal := by
-  simp only [Formula.allPast, swapTemporal]
+  simp only [Formula.allFuture, Formula.allPast, Formula.someFuture, Formula.somePast,
+    Formula.neg, PropositionalConnectives.neg, Formula.top, PropositionalConnectives.top,
+    swapTemporal]
 
 /-- swapTemporal exchanges allPast and allFuture: swap(Hφ) = G(swap φ). -/
 @[simp]
 theorem swapTemporal_allPast (φ : Formula Atom) :
     (Formula.allPast φ).swapTemporal = Formula.allFuture φ.swapTemporal := by
-  simp only [Formula.allFuture, swapTemporal]
+  simp only [Formula.allFuture, Formula.allPast, Formula.someFuture, Formula.somePast,
+    Formula.neg, PropositionalConnectives.neg, Formula.top, PropositionalConnectives.top,
+    swapTemporal]
 
 /-- swapTemporal distributes over next/prev: swap(X(φ)) = Y(swap(φ)). -/
 theorem swapTemporal_next (φ : Formula Atom) :

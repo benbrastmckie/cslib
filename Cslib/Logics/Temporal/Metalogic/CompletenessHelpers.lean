@@ -106,7 +106,8 @@ noncomputable def deriveHNec (φ : Formula Atom)
   have h_eq : (Formula.allFuture φ.swapTemporal).swapTemporal =
       Formula.allPast (φ.swapTemporal.swapTemporal) := by
     simp only [Formula.allFuture, Formula.allPast, Formula.someFuture, Formula.somePast,
-      Formula.neg, Formula.top, Formula.swapTemporal]
+      Formula.neg, PropositionalConnectives.neg, Formula.top, PropositionalConnectives.top,
+      Formula.swapTemporal]
   rw [Formula.swapTemporal_involution] at h_eq
   exact h_eq ▸ d_h
 

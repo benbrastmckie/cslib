@@ -255,7 +255,8 @@ theorem mcs_h_mp
     have h_eq : (Formula.allFuture X.swapTemporal).swapTemporal =
         Formula.allPast (X.swapTemporal.swapTemporal) := by
       simp only [Formula.allFuture, Formula.allPast, Formula.someFuture, Formula.somePast,
-        Formula.neg, Formula.top, Formula.swapTemporal]
+        Formula.neg, PropositionalConnectives.neg, Formula.top, PropositionalConnectives.top,
+        Formula.swapTemporal]
     rw [Formula.swapTemporal_involution] at h_eq
     exact ⟨h_eq ▸ d_h_swap2⟩
   -- BX3' (right_mono_since): H(α→β) → P(α) → P(β)
@@ -391,7 +392,8 @@ theorem derive_h_contradiction
     have d_swap := DerivationTree.temporal_duality _ d_g
     have h_eq : (Formula.allFuture φ).swapTemporal = Formula.allPast φ.swapTemporal := by
       simp only [Formula.allFuture, Formula.allPast, Formula.someFuture, Formula.somePast,
-        Formula.neg, Formula.top, Formula.swapTemporal]
+        Formula.neg, PropositionalConnectives.neg, Formula.top, PropositionalConnectives.top,
+        Formula.swapTemporal]
     -- Double-swap: duality(d) gives ⊢ swap(φ); necessitation; duality gives H(φ) by involution.
     have d_swap_phi := DerivationTree.temporal_duality φ d
     have d_g_swap := DerivationTree.temporal_necessitation _ d_swap_phi
@@ -399,7 +401,8 @@ theorem derive_h_contradiction
     have h_eq2 : (Formula.allFuture φ.swapTemporal).swapTemporal =
         Formula.allPast (φ.swapTemporal.swapTemporal) := by
       simp only [Formula.allFuture, Formula.allPast, Formula.someFuture, Formula.somePast,
-        Formula.neg, Formula.top, Formula.swapTemporal]
+        Formula.neg, PropositionalConnectives.neg, Formula.top, PropositionalConnectives.top,
+        Formula.swapTemporal]
     rw [Formula.swapTemporal_involution] at h_eq2
     exact ⟨h_eq2 ▸ d_h⟩
   | cons a L' ih =>

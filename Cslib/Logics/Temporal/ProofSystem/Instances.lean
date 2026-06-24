@@ -92,7 +92,9 @@ instance :
     -- We need to cast this to the InferenceSystem goal type
     have h_eq : φ.swapTemporal.allFuture.swapTemporal = φ.allPast := by
       simp only [Temporal.Formula.allPast, Temporal.Formula.somePast,
-                 Temporal.Formula.neg, Temporal.Formula.top,
+                 Temporal.Formula.allFuture, Temporal.Formula.someFuture,
+                 Temporal.Formula.neg, PropositionalConnectives.neg,
+                 Temporal.Formula.top, PropositionalConnectives.top,
                  Temporal.Formula.swapTemporal,
                  Temporal.Formula.swapTemporal_involution]
     exact ⟨InferenceSystem.rwConclusion h_eq d_final⟩

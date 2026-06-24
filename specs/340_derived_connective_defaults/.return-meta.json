@@ -3,11 +3,11 @@
   "started_at": "2026-06-24T00:00:00Z",
   "artifacts": [],
   "partial_progress": {
-    "stage": "phase_2_complete",
-    "details": "Modal/Basic.lean neg/top delegates work; ModalConnectives instance moved before abbrevs to provide typeclass context; diamond_iff proof updated to use change tactic",
+    "stage": "phase_3_complete",
+    "details": "Temporal and LTL neg/top delegates migrated; 7 downstream files patched (Satisfies.lean x2, swapTemporal proofs, MCS.lean, CompletenessHelpers.lean, TemporalContent.lean, ProofSystem/Instances.lean); all simp only calls updated with PropositionalConnectives.neg/top",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 2
+    "phases_completed": 3
   },
   "metadata": {
     "session_id": "sess_1782319118_5be8e3_340",

@@ -112,6 +112,7 @@ theorem snce_iff (M : TemporalModel D Atom) (t : D)
 theorem neg_iff (M : TemporalModel D Atom) (t : D)
     (φ : Formula Atom) :
     Satisfies M t (¬φ) ↔ ¬ Satisfies M t φ := by
+  change (Satisfies M t (.imp φ .bot)) ↔ ¬ Satisfies M t φ
   simp only [Satisfies]
 
 /-- Top (⊤) is true everywhere. -/
@@ -151,7 +152,8 @@ theorem allFuture_iff (M : TemporalModel D Atom) (t : D)
     (φ : Formula Atom) :
     Satisfies M t (𝐆φ) ↔
       ∀ s, t < s → Satisfies M s φ := by
-  simp only [Satisfies]
+  simp only [Formula.allFuture, Formula.neg, PropositionalConnectives.neg,
+    Formula.someFuture, Formula.top, PropositionalConnectives.top, Satisfies]
   constructor
   · intro h s hlt
     by_contra hns
@@ -164,7 +166,8 @@ theorem allPast_iff (M : TemporalModel D Atom) (t : D)
     (φ : Formula Atom) :
     Satisfies M t (𝐇φ) ↔
       ∀ s, s < t → Satisfies M s φ := by
-  simp only [Satisfies]
+  simp only [Formula.allPast, Formula.neg, PropositionalConnectives.neg,
+    Formula.somePast, Formula.top, PropositionalConnectives.top, Satisfies]
   constructor
   · intro h s hlt
     by_contra hns

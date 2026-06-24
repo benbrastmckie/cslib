@@ -1551,6 +1551,61 @@ private def Theory.Derivation.commutingSum : T.Derivation G A → Nat
     | orE _ _ _ _ => D.nodeCount + D.commutingSum + E.commutingSum
     | _ => D.commutingSum + E.commutingSum
 
+/-- A strongly normal derivation contains no beta-redexes, hence its `maximalFormulas`
+multiset is empty: the `{cc}` summand is contributed exactly at the proper-redex positions
+(`andE1`/`andE2` of `andI`, `orE` of `orI1`/`orI2`, `impE` of `impI`) that `isStronglyNormal`
+forbids. -/
+private theorem Theory.Derivation.maximalFormulas_sn_eq_zero
+    {G : Ctx Atom} {A : Proposition Atom} (d : T.Derivation G A)
+    (hd : d.isStronglyNormal = true) : d.maximalFormulas = ∅ := by
+  induction d with
+  | ax _ | ass _ => rfl
+  | andI _ D₁ D₂ ih₁ ih₂ =>
+    simp only [isStronglyNormal, Bool.and_eq_true] at hd
+    simp [maximalFormulas, ih₁ hd.1, ih₂ hd.2]
+  | andE1 _ D ih =>
+    cases D with
+    | andI _ _ _ => simp [isStronglyNormal] at hd
+    | orE _ _ _ _ => simp [isStronglyNormal] at hd
+    | ax _ | ass _ => simp only [maximalFormulas]
+    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp only [isStronglyNormal] at hd
+      simpa only [maximalFormulas] using ih hd
+  | andE2 _ D ih =>
+    cases D with
+    | andI _ _ _ => simp [isStronglyNormal] at hd
+    | orE _ _ _ _ => simp [isStronglyNormal] at hd
+    | ax _ | ass _ => simp only [maximalFormulas]
+    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp only [isStronglyNormal] at hd
+      simpa only [maximalFormulas] using ih hd
+  | orI1 _ D ih => simp only [isStronglyNormal] at hd; simpa only [maximalFormulas] using ih hd
+  | orI2 _ D ih => simp only [isStronglyNormal] at hd; simpa only [maximalFormulas] using ih hd
+  | orE _ D DA DB ih ihA ihB =>
+    cases D with
+    | orI1 _ _ => simp [isStronglyNormal] at hd
+    | orI2 _ _ => simp [isStronglyNormal] at hd
+    | orE _ _ _ _ => simp [isStronglyNormal] at hd
+    | ax _ | ass _ =>
+      simp only [isStronglyNormal, Bool.and_eq_true] at hd
+      simp [maximalFormulas, ihA hd.1.2, ihB hd.2]
+    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp only [isStronglyNormal, Bool.and_eq_true] at hd
+      have h1 := ih hd.1.1; have h2 := ihA hd.1.2; have h3 := ihB hd.2
+      simp only [maximalFormulas] at h1 ⊢; rw [h2, h3]; simpa using h1
+  | impI _ D ih => simp only [isStronglyNormal] at hd; simpa only [maximalFormulas] using ih hd
+  | impE D E ih ihE =>
+    cases D with
+    | impI _ _ => simp [isStronglyNormal] at hd
+    | orE _ _ _ _ => simp [isStronglyNormal] at hd
+    | ax _ | ass _ =>
+      simp only [isStronglyNormal, Bool.and_eq_true] at hd
+      simp [maximalFormulas, ihE hd.2]
+    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp only [isStronglyNormal, Bool.and_eq_true] at hd
+      have h1 := ih hd.1; have h2 := ihE hd.2
+      simp only [maximalFormulas] at h1 ⊢; rw [h2]; simpa using h1
+
 /-- The combined termination measure for normalization:
 the pair `(maximalFormulas d, commutingSum d)` ordered by the lexicographic product of
 the Dershowitz-Manna multiset ordering and the natural number ordering. -/

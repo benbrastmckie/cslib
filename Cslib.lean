@@ -395,6 +395,8 @@ public import Cslib.Logics.Modal.ProofSystem.Instances.S4
 public import Cslib.Logics.Modal.ProofSystem.Instances.S5
 public import Cslib.Logics.Modal.ProofSystem.Instances.T
 public import Cslib.Logics.Modal.ProofSystem.Instances.TB
+public import Cslib.Logics.Propositional.CurryHoward.Defs
+public import Cslib.Logics.Propositional.CurryHoward.Isomorphism
 public import Cslib.Logics.Propositional.Defs
 public import Cslib.Logics.Propositional.Metalogic.DeductionTheorem
 public import Cslib.Logics.Propositional.Metalogic.IntLindenbaum

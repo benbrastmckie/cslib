@@ -1,0 +1,25 @@
+{
+  "status": "implemented",
+  "summary": "Curry-Howard isomorphism implemented in 2 new files. Theory.Term (10-constructor intrinsically-typed lambda calculus) defined in CurryHoward/Defs.lean. Forward/backward maps, both roundtrip proofs, and curryHowardEquiv defined in CurryHoward/Isomorphism.lean. All three declarations verified with zero sorry, zero new axioms. Task-scoped CI passes; pre-existing failures in Tableau/Intuitionistic/Soundness (task 316) and SequentCalculus modules are unrelated to this task.",
+  "blockers": [],
+  "continuation_context": null,
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/CurryHoward/Defs.lean",
+      "type": "implementation",
+      "summary": "Intrinsically-typed Theory.Term inductive with 10 constructors mirroring Theory.Derivation"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/CurryHoward/Isomorphism.lean",
+      "type": "implementation",
+      "summary": "curryHowardForward, curryHowardBackward, both roundtrip theorems, curryHowardEquiv"
+    },
+    {
+      "path": "specs/293_curry_howard_nd_typed_lambda/summaries/01_curry-howard-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary with design decisions and plan deviations"
+    }
+  ],
+  "phases_completed": 3,
+  "phases_total": 3
+}

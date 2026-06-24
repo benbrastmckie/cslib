@@ -70,12 +70,13 @@
     {
       "project_number": 334,
       "project_name": "propositional_refactoring_audit",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "description": "Codebase refactoring audit for the LK sequent calculus module: (1) Extract shared Proposition.IsSubformula/subformulas definitions from Normalization.lean into a standalone Cslib/Logics/Propositional/Subformula.lean module, eliminating the duplicate LKIsSubformula/lkSubformulas in SubformulaProperty.lean and the Proposition.complexity name collision that caused it. (2) Audit all files under Cslib/Logics/Propositional/ for similar issues: duplicate definitions across modules, transitive import collisions, definitions that belong in shared utility files, overly large files that should be split, missing abstractions that would reduce code duplication, and namespace hygiene problems. (3) Propose and implement refactoring to produce a clean, minimal dependency graph consistent with CSLib CONTRIBUTING.md, ORGANISATION.md, and NOTATION.md standards. The subformula extraction is the concrete exemplar; the broader audit should cover the full propositional logic subtree",
       "topic": "Code Hygiene",
       "created": "2026-06-24T15:34:09Z",
-      "last_updated": "2026-06-24T15:34:09Z"
+      "last_updated": "2026-06-24T15:55:39Z",
+      "session_id": "sess_1782316274_dc14fa"
     },
     {
       "project_number": 332,
@@ -252,12 +253,12 @@
     {
       "project_number": 316,
       "project_name": "propositional_tableau_soundness",
-      "status": "implementing",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Fill the 6 sorry instances in propositional tableau soundness proofs across all three logics. Classical (Classical/Soundness.lean): prove classically_closed_unsatisfiable (closed branch is unsatisfiable under any Boolean valuation) and classicalTableau_sound (closed tableau implies Tautology phi), plus one helper lemma — by induction on rule applications showing each propositional rule preserves satisfiability. Intuitionistic (Intuitionistic/Soundness.lean): prove intuitionisticTableau_sound (closed tableau implies IValid phi) plus two helper lemmas — by showing each rule (including world-creating F(imp) and persistent T(imp)) preserves forcing at Kripke worlds. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_sound (closed tableau implies MValid phi) — adapts intuitionistic proof with MinimalClosure (complementary atoms only, no ex falso). Core technique: induction on expansion steps showing each rule application preserves the semantic invariant for the respective logic.",
       "created": "2026-06-23T19:55:52Z",
-      "last_updated": "2026-06-24T02:30:00Z",
+      "last_updated": "2026-06-24T15:57:24Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
@@ -266,21 +267,21 @@
           "summary": "Research: 8 sorry instances, proof strategies, 2 potential blockers"
         },
         {
-          "type": "plan",
-          "path": "specs/316_propositional_tableau_soundness/plans/01_soundness-plan.md",
-          "summary": "4-phase plan: closure lemmas, rule preservation, classical main, intuitionistic+minimal main"
-        },
-        {
           "type": "report",
           "path": "specs/316_propositional_tableau_soundness/reports/02_blockers-resolution.md",
           "summary": "Hard-mode blocker resolution: F(imp) worldOf existential restructuring, fuel-based loop invariant induction, persistence fixpoint soundness"
+        },
+        {
+          "path": "specs/316_propositional_tableau_soundness/plans/05_soundness-plan.md",
+          "type": "plan",
+          "summary": "4-phase soundness plan: helper lemma proofs, DFS fuel arithmetic, main expansion loop invariant, CI verification"
         }
       ],
       "dependencies": [
         323
       ],
       "parent_task": 298,
-      "session_id": "sess_1782257494_eef5e5_316"
+      "session_id": "sess_1750830000_plan316"
     },
     {
       "project_number": 317,

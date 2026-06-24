@@ -91,6 +91,7 @@ Phases within the same wave can execute in parallel.
 ---
 
 ### Phase 1: Termination Measure Infrastructure [IN PROGRESS]
+<!-- Agent: cslib-implementation-agent, started 2026-06-24 -->
 <!-- Started: 2026-06-24 -->
 
 **Goal**: Define the two components of the termination measure (`maximalFormulas` and

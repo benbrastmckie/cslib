@@ -928,6 +928,60 @@ theorem Theory.Derivation.normalizeAux_fixpoint {G : Ctx Atom} {A : Proposition 
 
 /-! ## Normalization Produces Strongly Normal Derivations -/
 
+/-! ### Structure-Preserving Properties of Weakening -/
+
+/-- Weakening preserves strong normality: the proof tree structure (constructors) is identical,
+only context/theory membership witnesses change. -/
+private theorem Theory.Derivation.weak_isStronglyNormal
+    {T T' : Theory Atom} {Γ Δ : Ctx Atom} {A : Proposition Atom}
+    (hTheory : T ⊆ T') (hCtx : Γ ⊆ Δ) (d : T.Derivation Γ A) :
+    (d.weak hTheory hCtx).isStronglyNormal = d.isStronglyNormal := by
+  induction d with
+  | ax _ | ass _ => rfl
+  | andI _ D₁ D₂ ih₁ ih₂ =>
+    simp only [weak, isStronglyNormal, ih₁, ih₂]
+  | andE1 _ D ih =>
+    cases D with
+    | andI _ _ _ => simp [weak, isStronglyNormal]
+    | orE _ _ _ _ => simp [weak, isStronglyNormal]
+    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp only [weak, isStronglyNormal]; exact ih
+  | andE2 _ D ih =>
+    cases D with
+    | andI _ _ _ => simp [weak, isStronglyNormal]
+    | orE _ _ _ _ => simp [weak, isStronglyNormal]
+    | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp only [weak, isStronglyNormal]; exact ih
+  | orI1 _ D ih => simp only [weak, isStronglyNormal]; exact ih
+  | orI2 _ D ih => simp only [weak, isStronglyNormal]; exact ih
+  | orE _ D DA DB ih ihA ihB =>
+    cases D with
+    | orI1 _ _ => simp [weak, isStronglyNormal]
+    | orI2 _ _ => simp [weak, isStronglyNormal]
+    | orE _ _ _ _ => simp [weak, isStronglyNormal]
+    | ax _ | ass _ =>
+      simp only [weak, isStronglyNormal, Bool.true_and, Bool.and_eq_true, ihA, ihB]
+    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp only [weak, isStronglyNormal, Bool.and_eq_true, ih, ihA, ihB]
+  | impI _ D ih => simp only [weak, isStronglyNormal]; exact ih
+  | impE D E ih ihE =>
+    cases D with
+    | impI _ _ => simp [weak, isStronglyNormal]
+    | orE _ _ _ _ => simp [weak, isStronglyNormal]
+    | ax _ | ass _ =>
+      simp only [weak, isStronglyNormal, Bool.true_and, ihE]
+    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp only [weak, isStronglyNormal, Bool.and_eq_true, ih, ihE]
+
+/-- Context weakening preserves strong normality. -/
+private theorem Theory.Derivation.weakCtx_isStronglyNormal
+    {T : Theory Atom} {Γ Δ : Ctx Atom} {A : Proposition Atom}
+    (hCtx : Γ ⊆ Δ) (d : T.Derivation Γ A) :
+    (d.weakCtx hCtx).isStronglyNormal = d.isStronglyNormal :=
+  d.weak_isStronglyNormal Set.Subset.rfl hCtx
+
+/-! ### Termination Measure for Normalization -/
+
 private def Theory.Derivation.conclusionComplexity (_ : T.Derivation G A) : Nat := A.complexity
 
 /-- Weight of a derivation for the termination measure. Counts redexes weighted by

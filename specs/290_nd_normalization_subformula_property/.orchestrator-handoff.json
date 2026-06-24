@@ -1,24 +1,23 @@
 {
   "status": "partial",
-  "summary": "Phase 5 substantially implemented. Steps 5a-5d complete: isStronglyNormal, isIntroRoot, reduceRoot commuting conversions, conclusion_grounded_or_intro (with 3 sorry in unreachable orE case), subformula_property_of_isStronglyNormal (sorry-free). Steps 5e-5f incomplete: normalize_isStronglyNormal requires termination measure for commuting conversions (2 sorry). Total: 5 sorry remaining (3 dead code + 2 for normalize termination).",
+  "summary": "Major progress: redexWeight infrastructure complete (redexWeight, sn_redexWeight_zero, redexWeight_zero_sn all proven). normalize_isStronglyNormal structured via redexWeight_zero_sn. subformula_property fully connected. 1 sorry remains at line 1080: d.normalize.redexWeight = 0.",
   "blockers": [
-    "normalize_isStronglyNormal: proving that normalize (with commuting conversions) produces strongly normal output requires a termination measure accounting for both proper redex complexity and elimination depth within orE branches"
+    "normalize_isStronglyNormal line 1080: proving d.normalize.redexWeight = 0 — the core termination argument that normalizeAux with 2^height fuel eliminates all redexes"
   ],
   "continuation_context": {
-    "completed_steps": ["5a", "5b", "5c", "5d"],
-    "incomplete_steps": ["5e", "5f"],
+    "completed_steps": ["5a", "5b", "5c", "5d", "normalizeAux_fixpoint", "redexWeight", "sn_redexWeight_zero", "redexWeight_zero_sn"],
+    "incomplete_steps": ["normalize_redexWeight_zero"],
     "sorry_locations": {
-      "conclusion_grounded_or_intro_orE": "3 sorry at lines 519,536,557 — dead code (orE case unreachable from all call sites)",
-      "normalize_isStronglyNormal": "2 sorry at lines 825-826 — requires termination proof"
+      "normalize_isStronglyNormal_line1080": "sorry — need d.normalize.redexWeight = 0"
     },
     "file": "Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean",
-    "line_count": 828
+    "line_count": 1096
   },
   "artifacts": [
     {
       "path": "Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean",
       "type": "lean",
-      "summary": "Phase 5 partial: isStronglyNormal + commuting conversions + subformula property proof (sorry-free). normalize_isStronglyNormal deferred."
+      "summary": "1 sorry remains: normalize_isStronglyNormal needs d.normalize.redexWeight = 0"
     }
   ],
   "phases_completed": 0,

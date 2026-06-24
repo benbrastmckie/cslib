@@ -1,5 +1,5 @@
 ---
-next_project_number: 323
+next_project_number: 324
 ---
 
 # TODO
@@ -11,9 +11,9 @@ next_project_number: 323
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,314,316,321,322 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
-| 2 | 39,40,181,215,300,317 | 36,37,180,299,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
-| 3 | 41,275 | 39,40 | Foundations |
+| 1 | 36,37,180,226,241,245,278,290,299,301,314,321,322,323 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 2 | 39,40,181,215,300,316 | 36,37,180,299,323 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
+| 3 | 41,275,317 | 39,40,316 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -35,8 +35,9 @@ next_project_number: 323
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 290 [PLANNED] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
 314 [IMPLEMENTING] — Implement the classical sequent calculus LK for propositional log
-316 [BLOCKED] — Fill the 6 sorry instances in propositional tableau soundness pro
-  └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
+323 [NOT STARTED] — Fix two intuitionistic tableau implementation bugs: (1) isIntuiti
+  └─ 316 [BLOCKED] — Fill the 6 sorry instances in propositional tableau soundness pro
+    └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
 
 ### Temporal Logic
 
@@ -54,7 +55,7 @@ next_project_number: 323
 
 ### Algebraic Semantics
 
-322 [RESEARCHED] — Establish the MPL conservative extension chain as standalone resu
+322 [PLANNING] — Establish the MPL conservative extension chain as standalone resu
 
 ### Modal
 
@@ -65,8 +66,18 @@ next_project_number: 323
 
 ## Tasks
 
+### 323. Fix intuitionistic tableau bugs
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Fix two intuitionistic tableau implementation bugs: (1) isIntuitionisticallyClosed missing complementary-pair closure check — only checks T(⊥) but should also check Branch.hasContradiction, causing valid formulas like p→p to return .openBranch; (2) intTImpRule uses Nat ordering (· ≥ w) as Kripke accessibility proxy, but this fires at sibling worlds that are NOT accessible, causing invalid formula ((p→⊥)→q)∨(p→r) to incorrectly close. Fix requires: (a) add || Branch.hasContradiction b to isIntuitionisticallyClosed in Expansion.lean:67, (b) track parent-child accessibility in expansion state and restrict intTImpRule in Rules.lean:129 to fire only along actual accessibility paths. Both bugs verified by #eval. See specs/316_propositional_tableau_soundness/reports/04_b4-hard-research.md and .orchestrator-handoff.json for detailed analysis and counterexamples
+
+---
+
 ### 322. Mpl conservative extension chain
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 311, Task 312
@@ -113,7 +124,7 @@ next_project_number: 323
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: Task 316
+- **Dependencies**: Task 316, Task 323
 
 **Description**: Fill the 8 sorry instances in propositional tableau completeness proofs across all three logics. Classical (Classical/Completeness.lean): prove classicalOpenBranch_countermodel (open saturated branch yields a Boolean valuation falsifying phi) and classicalTableau_complete (if phi is not a Tautology then the tableau has an open branch), plus one helper — by constructing a valuation from the positive atoms in the saturated branch and proving a truth lemma by formula induction. Intuitionistic (Intuitionistic/Completeness.lean): prove intuitionisticOpenBranch_countermodel (open saturated branch yields a finite Kripke model refuting phi) and intuitionisticTableau_complete — by constructing worlds from the branch world indices, accessibility from the expansion record, valuation from positive atoms, and proving a truth lemma showing forced/not-forced matches signed formulas at each world. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_complete (if phi is not MValid then the tableau has an open branch) — adapts intuitionistic proof with MinimalClosure and botForces=false. Core technique: Hintikka-set argument — saturated branches satisfy Hintikka conditions, from which countermodels are extracted.
 
@@ -123,7 +134,7 @@ next_project_number: 323
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: None
+- **Dependencies**: Task 323
 - **Research**:
   - [316_propositional_tableau_soundness/reports/01_soundness-research.md]
   - [316_propositional_tableau_soundness/reports/02_blockers-resolution.md]

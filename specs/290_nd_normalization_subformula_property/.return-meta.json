@@ -1,0 +1,43 @@
+{
+  "status": "partial",
+  "started_at": "2026-06-24T03:15:32Z",
+  "completed_at": "2026-06-24T04:15:00Z",
+  "requires_user_review": true,
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean",
+      "type": "lean",
+      "summary": "New file: subformula infrastructure, isNormal predicate, reduceRoot, fuel-bounded normalize; subformula property theorems partial (sorry in elimination cases)"
+    },
+    {
+      "path": "specs/290_nd_normalization_subformula_property/summaries/01_nd-normalization-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary: phases 1-4 complete, phase 5 blocked on Prawitz main-branch lemma"
+    }
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "phases_completed": 4,
+    "last_completed_phase": "Full connective verification and cleanup",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "blocked_phase": "Phase 5: Subformula Property"
+  },
+  "verification": {
+    "verification_passed": false,
+    "sorry_count": 2,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": false,
+    "mode": "partial",
+    "note": "2 sorries in subformula property theorems (main-branch argument and normalize_isNormal); all other CI checks pass"
+  },
+  "review_reason": "Phases 1-4 complete (subformulas, isNormal, reduceRoot, normalize). Phase 5 blocked: elimination cases of subformula_property_of_isNormal and normalize_isNormal require the Prawitz main-branch lemma (Ch. III, Thm. 1), which is a substantial additional development.",
+  "metadata": {
+    "session_id": "sess_1782270872_494beb",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+  }
+}

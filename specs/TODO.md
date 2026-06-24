@@ -33,7 +33,7 @@ next_project_number: 321
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-290 [IMPLEMENTING] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
+290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
   └─ 293 [RESEARCHED] — Establish the formal Curry-Howard isomorphism between Theory.Deri
 314 [IMPLEMENTING] — Implement the classical sequent calculus LK for propositional log
 316 [PLANNED] — Fill the 6 sorry instances in propositional tableau soundness pro
@@ -246,10 +246,12 @@ Literature sources:
 ---
 
 ### 290. Nd normalization subformula property
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Summary**: [290_nd_normalization_subformula_property/summaries/01_nd-normalization-summary.md]
+- **Lean**: [Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean]
 
 **Description**: Formalize Prawitz-style normalization for CSLib Theory.Derivation (propositional IPL and MPL). Define Derivation.isNormal predicate (no maximal formula -- i.e., no introduction rule immediately followed by the corresponding elimination on the same formula). Prove a normalization function normalize that transforms any derivation into a normal form. Derive the subformula property as a corollary: every formula in a normal derivation is a subformula of the conclusion or a hypothesis. The Theory.Derivation type is Type u (not Prop), enabling a computable normalization function. Reference: [Prawitz1965] Ch. IV-V. Consider starting with the implicational fragment ({arrow} only) as a milestone, then extending to full IPL connectives. Files: new module Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean. Depends on 266.
 

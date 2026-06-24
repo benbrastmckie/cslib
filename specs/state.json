@@ -127,14 +127,26 @@
     {
       "project_number": 290,
       "project_name": "nd_normalization_subformula_property",
-      "status": "implementing",
+      "status": "partial",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Formalize Prawitz-style normalization for CSLib Theory.Derivation (propositional IPL and MPL). Define Derivation.isNormal predicate (no maximal formula -- i.e., no introduction rule immediately followed by the corresponding elimination on the same formula). Prove a normalization function normalize that transforms any derivation into a normal form. Derive the subformula property as a corollary: every formula in a normal derivation is a subformula of the conclusion or a hypothesis. The Theory.Derivation type is Type u (not Prop), enabling a computable normalization function. Reference: [Prawitz1965] Ch. IV-V. Consider starting with the implicational fragment ({arrow} only) as a milestone, then extending to full IPL connectives. Files: new module Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean. Depends on 266.",
       "dependencies": [],
       "created": "2026-06-23T12:00:00Z",
-      "last_updated": "2026-06-24T03:14:32Z",
-      "session_id": "sess_1782270872_494beb"
+      "last_updated": "2026-06-24T03:45:45Z",
+      "session_id": "sess_1782270872_494beb",
+      "artifacts": [
+        {
+          "path": "specs/290_nd_normalization_subformula_property/summaries/01_nd-normalization-summary.md",
+          "type": "summary",
+          "description": "Partial implementation summary: phases 1-4 complete, phase 5 blocked on Prawitz main-branch lemma"
+        },
+        {
+          "path": "Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean",
+          "type": "lean",
+          "description": "New file: subformula infrastructure, isNormal, reduceRoot, normalize; subformula property partial"
+        }
+      ]
     },
     {
       "project_number": 292,

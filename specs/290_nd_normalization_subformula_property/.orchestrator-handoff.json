@@ -1,0 +1,32 @@
+{
+  "status": "partial",
+  "summary": "Phases 1-4 complete: Proposition.subformulas, isNormal, reduceRoot, fuel-bounded normalize all implemented; Phase 5 blocked on Prawitz main-branch lemma for elimination cases of subformula_property_of_isNormal",
+  "blockers": [
+    "Elimination cases (andE1, andE2, orE, impE) of subformula_property_of_isNormal require Prawitz main-branch lemma (Ch. III, Thm. 1 of Natural Deduction: A Proof-Theoretical Study)",
+    "normalize_isNormal requires Prawitz measure-decrease termination argument"
+  ],
+  "continuation_context": {
+    "file": "Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean",
+    "sorry_lines": [351, 364, 365],
+    "next_step": "Define Theory.Derivation.mainBranch and prove mainBranch_subformula lemma, then use it to complete elimination cases"
+  },
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean",
+      "type": "lean",
+      "summary": "New file with subformula infrastructure, isNormal predicate, reduceRoot, fuel-bounded normalize, partial subformula property"
+    },
+    {
+      "path": "specs/290_nd_normalization_subformula_property/summaries/01_nd-normalization-summary.md",
+      "type": "summary",
+      "summary": "Detailed implementation summary with phase status, blockers, and follow-up recommendations"
+    },
+    {
+      "path": "specs/290_nd_normalization_subformula_property/plans/01_nd-normalization-plan.md",
+      "type": "plan",
+      "summary": "Updated plan with Phase 4 COMPLETED and Phase 5 BLOCKED with detailed blocker documentation"
+    }
+  ],
+  "phases_completed": 4,
+  "phases_total": 5
+}

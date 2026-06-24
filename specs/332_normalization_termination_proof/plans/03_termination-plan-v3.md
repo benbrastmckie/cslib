@@ -149,7 +149,7 @@ axiom-clean.
 
 ---
 
-### Phase 2b: Close the 6 Strict-Decrease Sorries [IN PROGRESS]
+### Phase 2b: Close the 6 Strict-Decrease Sorries [COMPLETED]
 
 **Goal**: Discharge the 6 remaining sorries in `reduceRoot_decreases_normMeasure` (lines 1711,
 1724, 1726, 1728, 1730, 1732) using report 02 §4's named lemmas. The `reduceRootSubSN`

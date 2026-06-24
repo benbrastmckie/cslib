@@ -19,7 +19,7 @@
     ]
   },
   "max_cycles": 10,
-  "cycle_count": 2,
+  "cycle_count": 3,
   "failed_tasks": [],
   "completed_tasks": [
     336,
@@ -30,7 +30,9 @@
     "300": "not_started",
     "336": "completed",
     "337": "completed",
-    "316": "partial"
+    "316": "partial",
+    "241": "implementing",
+    "301": "implementing"
   },
   "task_dirs": {
     "299": "specs/299_modal_k_tableau",

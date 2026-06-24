@@ -1,13 +1,14 @@
 {
-  "status": "planned",
-  "summary": "8-phase plan (one phase per file, each ~150-400 lines) for a tableau decision procedure over Cslib.Logic.Temporal.Formula. Built by instantiating the proven Foundations tableau kernel (SignedFormula F L / Branch F L / RuleResult.persistent) at F = Temporal.Formula Atom, L = Nat, porting until/since/TimeOrdering/frame-class algorithms (not types) from the bimodal Decidability system, imitating Modal/Tableau for label introduction, and following Propositional Classical for the proof skeleton. Foundational files (Defs, TimeOrdering, Rules, Branch, Closure, Saturation) precede Soundness, with Completeness last to surface the highest-risk eventuality-fulfilment obligations. Zero-debt: no sorry, no new axioms; if completeness is intractable in scope, mark [BLOCKED] rather than defer.",
-  "artifacts": [
-    {
-      "path": "specs/301_temporal_tableau/plans/01_temporal-tableau-decision-procedure.md",
-      "type": "plan",
-      "summary": "8-phase CSLib implementation plan with explicit proof obligations, reuse mapping to bimodal/Foundations/Modal/Propositional templates, per-phase CI verification, dependency wave table, and a zero-debt BLOCKED contingency for completeness."
-    }
-  ],
+  "status": "partial",
+  "summary": "Cycle 3: phases 1-6 committed sorry-free and CI-green (Defs, TimeOrdering, Rules, Branch, Closure, Saturation). Phase 7 Soundness.lean written (~190 lines) but does NOT build (agent hit context limit mid-phase); preserved as .wip-Soundness.lean and moved out of the source tree so the committed tree stays green. Phase 8 Completeness not started. No sorries anywhere.",
+  "phases_completed": 6,
   "phases_total": 8,
-  "next_action_hint": "Run /implement 301 to execute the plan. Critical path is 1 -> 3 -> 6 -> 7 -> 8; phases 1+2 are parallelizable foundations, as are 3+4. Phase 8 (completeness eventuality fulfilment) is the highest-risk obligation with a [BLOCKED] zero-debt fallback."
+  "sorry_inventory": [],
+  "continuation_context": {
+    "next_phase": "Fix + commit Soundness.lean (phase 7) from specs/301_temporal_tableau/.wip-Soundness.lean, then Completeness.lean (phase 8)",
+    "files_completed": ["Defs.lean", "TimeOrdering.lean", "Rules.lean", "Branch.lean", "Closure.lean", "Saturation.lean"],
+    "files_wip": ["specs/301_temporal_tableau/.wip-Soundness.lean (broken, needs repair)"],
+    "files_remaining": ["Soundness.lean", "Completeness.lean"]
+  },
+  "next_action_hint": "Resume implementation: repair .wip-Soundness.lean (build errors, no sorries), move back to Cslib/Logics/Temporal/Tableau/Soundness.lean, commit phase 7, then implement Completeness phase 8 (highest-risk: eventuality-fulfilment). Zero-debt: BLOCKED rather than sorry if completeness cannot close."
 }

@@ -129,7 +129,7 @@ Phases within the same wave can execute in parallel. Phases 1 and 2 are independ
 
 ---
 
-### Phase 3: Rules.lean — temporalApplyOne (propositional, G/H/F/P, until/since, frame-class) [NOT STARTED]
+### Phase 3: Rules.lean — temporalApplyOne (propositional, G/H/F/P, until/since, frame-class) [COMPLETED]
 
 **Goal**: Implement `temporalApplyOne : SignedFormula → Branch → TimeOrdering → RuleResult × TimeOrdering` — the procedural core, including the highest-risk until/since branching. (Modal `modalApplyOne` pair signature is the structural template.)
 
@@ -155,7 +155,7 @@ Phases within the same wave can execute in parallel. Phases 1 and 2 are independ
 
 ---
 
-### Phase 4: Branch.lean — collectors, Eventuality tracking, blocking [NOT STARTED]
+### Phase 4: Branch.lean — collectors, Eventuality tracking, blocking [COMPLETED]
 
 **Goal**: Temporal `Branch` collectors plus the eventuality-tracking and time-blocking machinery that termination and the new closure mode depend on.
 
@@ -178,7 +178,7 @@ Phases within the same wave can execute in parallel. Phases 1 and 2 are independ
 
 ---
 
-### Phase 5: Closure.lean — classical + eventuality-defect closure, monotonicity [NOT STARTED]
+### Phase 5: Closure.lean — classical + eventuality-defect closure, monotonicity [COMPLETED]
 
 **Goal**: Closure conditions = Foundations `ClassicalClosure` (`T(⊥)` + same-label `T(φ)/F(φ)`) **extended with the genuinely new eventuality-defect closure**, plus the monotonicity suite the soundness loop invariant needs.
 
@@ -200,7 +200,7 @@ Phases within the same wave can execute in parallel. Phases 1 and 2 are independ
 
 ---
 
-### Phase 6: Saturation.lean — worklist, fuel, blocking, Hintikka, subformula property [NOT STARTED]
+### Phase 6: Saturation.lean — worklist, fuel, blocking, Hintikka, subformula property [COMPLETED]
 
 **Goal**: Drive `temporalApplyOne` to a fixpoint with terminating fuel and time-subset blocking, build the Hintikka set, and prove the subformula property — establishing termination/blocking soundness.
 
@@ -225,7 +225,7 @@ Phases within the same wave can execute in parallel. Phases 1 and 2 are independ
 
 ---
 
-### Phase 7: Soundness.lean — per-rule preservation, frame-class soundness, main theorem [NOT STARTED]
+### Phase 7: Soundness.lean — per-rule preservation, frame-class soundness, main theorem [IN PROGRESS]
 
 **Goal**: Prove the tableau sound against `Satisfies`: closed ⇒ valid in the targeted frame class, including density/discreteness rule soundness. Follow the Propositional Classical soundness template.
 

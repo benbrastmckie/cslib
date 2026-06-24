@@ -1,0 +1,51 @@
+{
+  "status": "partial",
+  "summary": "Phase 1 (reverse direction IsRegular.of_da_muller: DMA → ω-regular) implemented, committed green at c4d3869d. The proof_wanted IsRegular.iff_da_muller remains (forward direction not attempted). Build is clean: zero sorries, zero new axioms, lake lint clean.",
+  "artifacts": [
+    {
+      "path": "specs/241_mcnaughton_theorem/plans/01_mcnaughton-da-muller.md",
+      "type": "plan",
+      "summary": "Implementation plan; Phase 0 and Phase 1 marked COMPLETED"
+    },
+    {
+      "path": "specs/241_mcnaughton_theorem/summaries/01_mcnaughton-da-muller-summary.md",
+      "type": "summary",
+      "summary": "Phase 1 implementation summary with continuation context for forward direction"
+    },
+    {
+      "path": "Cslib/Computability/Languages/OmegaRegularLanguage.lean",
+      "type": "lean_file",
+      "summary": "Added theorem IsRegular.of_da_muller (lines 259-345); proof_wanted IsRegular.iff_da_muller remains"
+    }
+  ],
+  "phases_completed": 1,
+  "phases_total": 6,
+  "sorry_inventory": [],
+  "requires_user_review": true,
+  "blocked_phase": null,
+  "continuation_context": {
+    "what_is_done": "theorem IsRegular.of_da_muller committed at c4d3869d; reverse direction (DMA → ω-regular) is complete and CI green",
+    "what_remains": "proof_wanted IsRegular.iff_da_muller (forward direction: ω-regular → DMA via Choueka saturation)",
+    "forward_direction_approach": {
+      "step1": "obtain NBA na from h : p.IsRegular via destruct",
+      "step2": "have : Finite (Quotient na.BuchiCongruence.eq) := buchiCongruence_fin_index",
+      "step3": "have h_sat := buchiFamily_saturation (na := na); have h_cov := buchiFamily_cover (na := na)",
+      "step4": "build DA.Muller with State = Quotient na.BuchiCongruence.eq and accept = {S | S ∈ Image of buchiFamily on Quotient}",
+      "step5": "prove language of assembled DMA = p using buchiFamily_saturation + buchiFamily_cover",
+      "template": "IsRegular.compl proof (lines 246-257 of OmegaRegularLanguage.lean) is the exact structural template",
+      "key_challenge": "constructing the explicit DA.Muller record with the correct accept : Set (Set State) type from the Choueka machinery"
+    },
+    "relevant_lemmas": [
+      "buchiCongruence_fin_index (BuchiCongruence.lean)",
+      "buchiFamily_saturation (BuchiCongruence.lean:181)",
+      "buchiFamily_cover (BuchiCongruence.lean)",
+      "IsRegular.eq_fin_iSup_hmul_omegaPow (OmegaRegularLanguage.lean:195)",
+      "IsRegular.fin_cover_saturates (OmegaRegularLanguage.lean:224)",
+      "Buchi.toMuller_language_eq (BuchiChar.lean:88)",
+      "IsRegular.of_da_muller (OmegaRegularLanguage.lean:268, newly added)"
+    ],
+    "file_to_edit": "Cslib/Computability/Languages/OmegaRegularLanguage.lean",
+    "target_declaration": "proof_wanted IsRegular.iff_da_muller at line 357"
+  },
+  "next_action_hint": "Implement Phase 2 (forward decomposition scaffold) by studying how IsRegular.compl uses buchiFamily_saturation and adapt it to produce a DA.Muller. Start by checking buchiFamily's exact type and the Quotient state space structure in BuchiCongruence.lean."
+}

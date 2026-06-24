@@ -333,6 +333,14 @@ Swap temporal operators (past ↔ future) in a formula.
 
 This transformation is used in the temporal duality inference rule (TD):
 if `⊢ φ` then `⊢ swapTemporal φ`.
+
+**Why this definition is not shared with `Bimodal.Formula.swapTemporal`**:
+`Temporal.Formula` and `Bimodal.Formula` are distinct inductive types (Lean 4 cannot extend
+inductives), so `swapTemporal` must pattern-match on each type's own constructors separately.
+`Bimodal.Formula` adds a `box` case (`swap (box φ) = box (swap φ)`) that does not appear here.
+The derived-operator exchange theorems below (`swapTemporal_neg`, `swapTemporal_someFuture`, etc.)
+are intentionally mirrored in `Bimodal.Syntax.Formula`; this structural duplication is inherent
+to the distinct inductive types and is not an abstraction opportunity.
 -/
 def swapTemporal : Formula Atom → Formula Atom
   | .atom s => .atom s

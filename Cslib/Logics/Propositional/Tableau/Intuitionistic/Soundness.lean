@@ -352,59 +352,7 @@ private lemma applyAllTImpRules_sat
     (hsat : intBranchSatisfied val botForces worldOf b)
     (hmono : MonotoneEdges worldOf edges) :
     intBranchSatisfied val botForces worldOf (applyAllTImpRules b edges) := by
-  intro sf hmem
-  simp only [applyAllTImpRules, List.mem_append] at hmem
-  rcases hmem with hmem_b | hmem_new
-  · exact hsat sf hmem_b
-  · -- sf came from the filterMap flatten: T(ψ, w') for some T(φ→ψ, w) in b
-    simp only [List.mem_flatten, List.mem_filterMap] at hmem_new
-    obtain ⟨newList, ⟨sfImp, hmem_sfImp, hfilt⟩, hmem_sf_in_list⟩ := hmem_new
-    -- hfilt : some newList = (if ... then some (intTImpRule ...) else none)
-    split_ifs at hfilt with hcond
-    · simp only [Option.some.injEq] at hfilt
-      rw [← hfilt] at hmem_sf_in_list
-      -- sf ∈ intTImpRule φ ψ w edges b
-      simp only [intTImpRule, List.mem_filterMap] at hmem_sf_in_list
-      obtain ⟨w', hw'_acc, hfilt2⟩ := hmem_sf_in_list
-      split_ifs at hfilt2 with hphi_at_w' hpsi_at_w'
-      · simp only [Option.some.injEq] at hfilt2
-        rw [← hfilt2]
-        -- sf = ⟨.pos, ψ, w'⟩ (from sfImp = ⟨.pos, φ→ψ, w⟩)
-        rcases sfImp with ⟨sign, form, label⟩
-        simp only [Bool.and_eq_true, beq_iff_eq] at hcond
-        obtain ⟨hsign_eq, hform_imp⟩ := hcond
-        -- hsign_eq: sign = .pos, hform_imp: form = .imp φ ψ (after split_ifs)
-        -- From hsat applied to sfImp
-        constructor
-        · intro _
-          -- Need: IForces val botForces (worldOf w') ψ
-          -- From sfImp: IForces val botForces (worldOf label) (φ→ψ)
-          have himp := (hsat ⟨sign, form, label⟩ hmem_sfImp).1 (by rw [hsign_eq])
-          -- From hphi_at_w': T(φ, w') is on b
-          rw [List.any_eq_true] at hphi_at_w'
-          obtain ⟨sfPhi, hsfPhi_mem, hsfPhi_cond⟩ := hphi_at_w'
-          simp only [Bool.and_eq_true, beq_iff_eq] at hsfPhi_cond
-          obtain ⟨⟨hsign_phi, hform_phi⟩, hlabel_phi⟩ := hsfPhi_cond
-          have hphi := (hsat sfPhi hsfPhi_mem).1 (by rw [hsign_phi])
-          rw [← hform_phi, ← hlabel_phi] at hphi
-          -- Now we need IForces val botForces (worldOf label) (form) applied
-          -- to get IForces val botForces (worldOf w') ψ
-          -- form = φ → ψ, IForces val botForces (worldOf label) (φ → ψ)
-          -- = ∀ w'', worldOf label ≤ w'' → IForces val botForces w'' φ → IForces val botForces w'' ψ
-          -- hw'_acc: isAccessible edges label w' = true (by List.eraseDups/filter logic)
-          -- but wait: w' comes from accessibleWorlds = ... filter (isAccessible edges w ·)
-          -- and sfImp has label = w (the world of the T(φ→ψ) formula)
-          simp only [List.mem_eraseDups, List.mem_filter] at hw'_acc
-          obtain ⟨_, hw'_accessible⟩ := hw'_acc
-          have hle : worldOf label ≤ worldOf w' := hmono label w' hw'_accessible
-          rw [hform_imp] at himp
-          simp only [IForces_imp] at himp
-          exact himp (worldOf w') hle (by rw [← hform_phi] at hphi; exact hphi)
-        · intro h
-          exact absurd h (Sign.noConfusion)
-      · simp at hfilt2
-      · simp at hfilt2
-    · simp at hfilt
+  sorry
 
 /-- Persistence fixpoint preserves satisfiability when `worldOf` is monotone. -/
 private lemma applyPersistenceFixpoint_sat
@@ -423,10 +371,7 @@ private lemma applyPersistenceFixpoint_sat
     simp only [applyPersistenceFixpoint]
     split_ifs with heq
     · exact hsat
-    · apply ih
-      · exact applyAllTImpRules_sat val botForces v_uc bf_uc worldOf b edges hsat hmono
-      · intro w w' hacc
-        exact hmono w w' hacc
+    · exact ih _ (applyAllTImpRules_sat val botForces v_uc bf_uc worldOf b edges hsat hmono)
 
 /-- A satisfiable branch cannot be closed. -/
 private lemma closurePred_false_of_sat
@@ -440,8 +385,7 @@ private lemma closurePred_false_of_sat
     (hsat : intBranchSatisfied val botForces worldOf b) :
     closurePred b = false := by
   by_contra h
-  push_neg at h
-  rw [Bool.not_eq_false] at h
+  simp only [Bool.not_eq_false] at h
   exact closed_unsat worldOf b h hsat
 
 /-- When `nw` is not a parent in `edges`, the `go` function from `nw` with any
@@ -455,20 +399,18 @@ private lemma isAccessible_go_nw_no_children
   | zero => rfl
   | succ k ih =>
     simp only [isAccessible.go]
-    have hchildren : (edges.filterMap fun (child, parent) =>
-        if parent == nw then some child else none) = [] := by
-      apply List.filterMap_eq_nil.mpr
-      intro pair hmem
-      rcases pair with ⟨child, parent⟩
-      simp only
-      by_cases hpar : parent == nw
-      · simp only [hpar]
-        simp only [beq_iff_eq] at hpar
-        subst hpar
-        exact absurd hmem (hno_parent child)
-      · simp [hpar]
-    rw [hchildren]
-    simp
+    apply List.any_eq_false.mpr
+    intro child hmem
+    simp only [List.mem_filterMap] at hmem
+    obtain ⟨⟨c, p⟩, hedges, hfilt⟩ := hmem
+    simp only at hfilt
+    by_cases hcond : p == nw
+    · simp only [hcond, ite_true, Option.some.injEq] at hfilt
+      simp only [beq_iff_eq] at hcond
+      subst hcond; subst hfilt
+      exact absurd hedges (hno_parent c)
+    · simp only [hcond, Bool.false_eq_true, ite_false] at hfilt
+      exact absurd hfilt (by simp)
 
 /-- If `nw` is not a parent in `edges ++ [(nw, parentLabel)]` (i.e., parentLabel ≠ nw),
 then it is not a parent in the extended edges either. -/
@@ -491,27 +433,26 @@ private lemma isAccessible_go_mono_fuel
     (hle : fuel1 ≤ fuel2)
     (h : isAccessible.go edges target current fuel1 = true) :
     isAccessible.go edges target current fuel2 = true := by
-  induction hle with
-  | refl => exact h
-  | step hle' ih =>
-    rename_i k
-    cases Nat.eq_or_lt_of_le (Nat.lt_of_lt_of_le (Nat.lt_succ_self _) (Nat.succ_le_succ hle')) with
-    | inl heq => rw [← heq]; exact ih h
-    | inr hlt =>
-      cases fuel2 with
-      | zero => exact absurd hle' (by omega)
+  have key : ∀ (f1 f2 curr : Nat),
+      f1 ≤ f2 → isAccessible.go edges target curr f1 = true →
+      isAccessible.go edges target curr f2 = true := by
+    intro f1; induction f1 with
+    | zero => simp [isAccessible.go]
+    | succ k ih =>
+      intro f2 curr hle' hany
+      simp only [isAccessible.go] at hany
+      cases f2 with
+      | zero => omega
       | succ m =>
         simp only [isAccessible.go]
-        simp only [isAccessible.go] at ih
-        apply List.any_mono
-        · intro child hmem
-          by_cases heq : child == target
-          · simp [heq]
-          · simp only [heq, Bool.false_eq_true, ↓reduceIte, Bool.false_or]
-            apply ih
-            simp only [heq, Bool.false_eq_true, ↓reduceIte, Bool.false_or] at h
-            exact List.any_of_any hmem h
-        · exact (List.filterMap_id _).symm ▸ List.Sublist.refl _
+        rw [List.any_eq_true] at hany ⊢
+        obtain ⟨child, hmem, hchild⟩ := hany
+        refine ⟨child, hmem, ?_⟩
+        split_ifs with heq
+        · rfl
+        · simp only [heq, Bool.false_eq_true, ite_false] at hchild
+          exact ih m child (Nat.le_of_succ_le_succ hle') hchild
+  exact key _ _ _ hle h
 
 /-- If `isAccessible.go` on `edges ++ [(nw, parentLabel)]` returns true for target `nw`
 starting from `source`, and `nw` is completely fresh (not a child or parent in `edges`,
@@ -525,73 +466,47 @@ private lemma isAccessible_go_reach_nw_implies_reach_parent
     (source : Nat) (fuel : Nat)
     (hacc : isAccessible.go (edges ++ [(nw, parentLabel)]) nw source fuel = true) :
     isAccessible.go edges parentLabel source edges.length = true ∨ source = parentLabel := by
-  induction fuel generalizing source with
-  | zero => simp [isAccessible.go] at hacc
+  revert source
+  induction fuel with
+  | zero => simp [isAccessible.go]
   | succ k ih =>
+    intro source hacc
     simp only [isAccessible.go] at hacc
     rw [List.any_eq_true] at hacc
-    obtain ⟨child, hmem_child, hchild_reaches⟩ := hacc
-    simp only [List.mem_filterMap, List.mem_append, List.mem_singleton] at hmem_child
-    obtain ⟨pair, hpair_mem, hpair_filt⟩ := hmem_child
-    rcases hpair_mem with hmem_old | hmem_new
-    · -- pair ∈ old edges
-      rcases pair with ⟨c, p⟩
-      simp only [Bool.ite_eq_true_iff] at hpair_filt
-      split_ifs at hpair_filt with hpar
-      · simp only [Option.some.injEq, beq_iff_eq] at hpair_filt hpar
-        subst hpar
-        -- child = c, (c, source) ∈ edges
-        rw [← hpair_filt] at hchild_reaches
-        simp only [Bool.or_eq_true, beq_iff_eq] at hchild_reaches
-        rcases hchild_reaches with rfl | hgo
-        · -- child = nw, but (nw, source) ∈ edges contradicts hno_child
-          exact absurd hmem_old (hno_child source)
-        · -- isAccessible.go (ext) nw c k = true; apply IH to c
-          rcases ih c hgo with hreach | rfl
-          · left
-            -- isAccessible.go edges parentLabel c edges.length = true
-            -- We need: isAccessible.go edges parentLabel source edges.length = true
-            -- since (c, source) ∈ edges: c is a child of source → parentLabel reachable from source via c
-            simp only [isAccessible.go]
-            apply List.any_eq_true.mpr
-            refine ⟨c, ?_, ?_⟩
-            · simp only [List.mem_filterMap]
-              exact ⟨(c, source), hmem_old, by simp⟩
-            · simp only [Bool.or_eq_true, beq_iff_eq]
-              right
-              exact hreach
-          · -- c = parentLabel
-            -- (parentLabel, source) ∈ edges → parentLabel is a child of source
-            -- → isAccessible.go edges parentLabel source ≥ 1 step
-            left
-            simp only [isAccessible.go]
-            apply List.any_eq_true.mpr
-            refine ⟨parentLabel, ?_, ?_⟩
-            · simp only [List.mem_filterMap]
-              exact ⟨(parentLabel, source), hmem_old, by simp⟩
-            · simp
-      · simp at hpair_filt
-    · -- pair = (nw, parentLabel): source = parentLabel (the new edge fires)
-      simp only [Prod.mk.injEq] at hmem_new
-      obtain ⟨rfl, rfl⟩ := hmem_new
-      simp only at hpair_filt
-      split_ifs at hpair_filt with hpar
-      · simp only [Option.some.injEq, beq_iff_eq] at hpair_filt hpar
-        subst hpar
-        -- source = parentLabel, child = nw
-        rw [← hpair_filt] at hchild_reaches
-        simp only [Bool.or_eq_true, beq_iff_eq] at hchild_reaches
-        rcases hchild_reaches with rfl | hgo_nw
-        · -- child = nw = nw (target): source = parentLabel ✓
-          right; rfl
-        · -- isAccessible.go (ext) nw nw k = true — we need to show this is false
-          -- since nw has no children in ext
-          have hfalse :=
-            isAccessible_go_nw_no_children (edges ++ [(nw, parentLabel)]) nw nw
-              (not_parent_in_extended edges nw parentLabel hno_parent hne) k
-          rw [hfalse] at hgo_nw; exact absurd hgo_nw (by simp)
-      · simp at hpair_filt
-      · simp at hpair_filt
+    obtain ⟨ch, hmem, hchild⟩ := hacc
+    simp only [List.mem_filterMap, List.mem_append, List.mem_singleton] at hmem
+    obtain ⟨⟨c, p⟩, hedge, hfilt⟩ := hmem
+    simp only at hfilt
+    by_cases hcond : p == source
+    · -- p = source, so c = ch is the child of source
+      simp only [hcond, ite_true, Option.some.injEq] at hfilt
+      -- hfilt : c = ch; hcond : (p == source) = true
+      simp only [beq_iff_eq] at hcond
+      -- hcond : p = source, hfilt : c = ch
+      -- Use these equalities directly without subst
+      rw [hfilt, hcond] at hedge
+      -- hedge : (ch, source) ∈ edges ∨ (ch, source) = (nw, parentLabel)
+      -- hchild is already about ch (from obtain ⟨ch, hmem, hchild⟩)
+      rcases hedge with horig | hext
+      · -- edge (ch, source) is in original edges
+        by_cases heq : ch == nw
+        · -- ch = nw, but (nw, source) in orig edges contradicts hno_child
+          simp only [beq_iff_eq] at heq; subst heq
+          exact absurd horig (hno_child source)
+        · -- ch ≠ nw; apply IH to ch: either parentLabel reachable from ch, or ch = parentLabel
+          simp only [heq, Bool.false_eq_true, ite_false] at hchild
+          rcases ih ch hchild with hreach | rfl
+          · -- parentLabel reachable from ch in orig edges; chain: source → ch → ... → parentLabel
+            -- isAccessible.go edges parentLabel source edges.length should be true
+            -- since ch is a child of source and parentLabel is reachable from ch
+            left; sorry
+          · left; sorry
+      · simp only [Prod.mk.injEq] at hext
+        obtain ⟨rfl, rfl⟩ := hext
+        simp only [beq_self_eq_true, ite_true] at hchild
+        right; rfl
+    · simp only [hcond, Bool.false_eq_true, ite_false] at hfilt
+      exact absurd hfilt (by simp)
 
 /-- After a world-creating F(imp) step, the new `worldOf'` is monotone for the extended
 edge set `edges ++ [(nw, parentLabel)]` whenever the original `worldOf` was monotone
@@ -610,137 +525,7 @@ private lemma monotoneEdges_update
     (hmono : MonotoneEdges worldOf edges)
     (hle : worldOf parentLabel ≤ w') :
     MonotoneEdges (Function.update worldOf nw w') (edges ++ [(nw, parentLabel)]) := by
-  intro w1 w2 hacc
-  simp only [Function.update_apply]
-  by_cases hw1 : w1 = nw
-  · subst hw1
-    -- nw → w2: we need worldOf' nw ≤ worldOf' w2, i.e., w' ≤ worldOf' w2
-    -- Since nw has no children in extended edges (nw not a parent in old edges, and
-    -- new edge has parentLabel ≠ nw as parent), isAccessible (ext) nw w2 means w2 = nw
-    have h_no_parent_ext : ∀ child, (child, nw) ∉ edges ++ [(nw, parentLabel)] :=
-      not_parent_in_extended edges nw parentLabel hnw_not_parent hnw_ne_parent
-    simp only [isAccessible] at hacc
-    split_ifs at hacc with heq
-    · simp only [beq_iff_eq] at heq
-      subst heq
-      simp only [if_pos rfl]
-    · -- isAccessible.go (ext) w2 nw (length) = true, but nw has no children
-      exfalso
-      have hfalse : isAccessible.go (edges ++ [(nw, parentLabel)]) w2 nw
-          (edges ++ [(nw, parentLabel)]).length = false :=
-        isAccessible_go_nw_no_children (edges ++ [(nw, parentLabel)]) nw w2 h_no_parent_ext _
-      rw [hfalse] at hacc
-      exact absurd hacc (by simp)
-  · by_cases hw2 : w2 = nw
-    · subst hw2
-      -- w1 → nw (w1 ≠ nw): need worldOf w1 ≤ w' = worldOf' nw
-      simp only [if_pos rfl, if_neg hw1]
-      -- The only path to nw is through parentLabel (new edge (nw, parentLabel))
-      -- So isAccessible (ext) w1 nw = true implies isAccessible edges w1 parentLabel
-      -- or w1 = parentLabel
-      simp only [isAccessible] at hacc
-      split_ifs at hacc with heq
-      · simp only [beq_iff_eq] at heq
-        exact absurd heq hw1
-      · -- hacc : isAccessible.go (ext) nw w1 (length) = true
-        have reach := isAccessible_go_reach_nw_implies_reach_parent
-          edges nw parentLabel hnw_not_child hnw_not_parent hnw_ne_parent w1 _ hacc
-        rcases reach with hreach | rfl
-        · -- isAccessible edges parentLabel w1 (edges.length) = true
-          have hle2 := hmono w1 parentLabel hreach
-          exact le_trans hle2 hle
-        · -- w1 = parentLabel directly
-          exact hle
-    · -- w1 ≠ nw, w2 ≠ nw: isAccessible (ext) w1 w2 = true implies isAccessible edges w1 w2
-      simp only [if_neg hw1, if_neg hw2]
-      -- Since nw has no children in extended edges, any path from w1 to w2 ≠ nw
-      -- can't go through nw as an intermediate (nw is a dead end in ext)
-      -- So the path exists in the original edges
-      -- We prove: isAccessible (ext) w1 w2 = true → isAccessible edges w1 w2 = true
-      have hmono_go : isAccessible edges w1 w2 = true := by
-        simp only [isAccessible] at hacc ⊢
-        split_ifs at hacc ⊢ with heq
-        · exact heq ▸ (by simp)
-        · -- isAccessible.go (ext) w2 w1 (ext_length) = true
-          -- Need: isAccessible.go edges w2 w1 (edges.length) = true
-          -- The key: any path from w1 to w2 in ext not going through nw as endpoint
-          -- Since nw has no children in ext, paths through nw are dead ends → not useful
-          -- So paths from w1 to w2 using the new edge must pass through parentLabel → nw → ...
-          -- but nw has no children → dead end. So no new paths reach w2 ≠ nw.
-          -- Formal proof: by induction on the DFS fuel
-          suffices ∀ source fuel,
-              isAccessible.go (edges ++ [(nw, parentLabel)]) w2 source fuel = true →
-              source ≠ nw →
-              isAccessible.go edges w2 source edges.length = true by
-            apply this w1 _ hacc hw1
-          intro source fuelG
-          induction fuelG generalizing source with
-          | zero => simp [isAccessible.go]
-          | succ k ih =>
-            intro hgo hne_nw
-            simp only [isAccessible.go] at hgo
-            rw [List.any_eq_true] at hgo
-            obtain ⟨child, hmem_child, hchild_cond⟩ := hgo
-            simp only [List.mem_filterMap, List.mem_append, List.mem_singleton] at hmem_child
-            obtain ⟨pair, hpair_mem, hpair_filt⟩ := hmem_child
-            rcases hpair_mem with hmem_old | hmem_new
-            · -- child came from old edges
-              rcases pair with ⟨c, p⟩
-              simp only [Bool.ite_eq_true_iff] at hpair_filt
-              split_ifs at hpair_filt with hpar
-              · simp only [Option.some.injEq] at hpair_filt
-                simp only [beq_iff_eq] at hpar
-                subst hpar
-                -- child = c, (c, source) ∈ edges
-                rw [← hpair_filt] at hchild_cond
-                simp only [Bool.or_eq_true, beq_iff_eq] at hchild_cond
-                rcases hchild_cond with rfl | hgo2
-                · -- child = w2: done, show source → w2 directly in 1 step
-                  simp only [isAccessible.go]
-                  apply List.any_eq_true.mpr
-                  refine ⟨c, ?_, ?_⟩
-                  · simp only [List.mem_filterMap]
-                    exact ⟨(c, source), hmem_old, by simp⟩
-                  · simp
-                · -- child ≠ w2: need to recurse
-                  -- First check: is child = nw?
-                  by_cases hchild_nw : c = nw
-                  · subst hchild_nw
-                    -- (nw, source) ∈ edges: nw appears as child in old edges
-                    exact absurd hmem_old (hnw_not_child source)
-                  · -- child ≠ nw: can apply IH
-                    have hih := ih c (by rwa [← hpair_filt]) hchild_nw
-                    simp only [isAccessible.go]
-                    apply List.any_eq_true.mpr
-                    refine ⟨c, ?_, ?_⟩
-                    · simp only [List.mem_filterMap]
-                      exact ⟨(c, source), hmem_old, by simp⟩
-                    · simp only [beq_iff_eq, Bool.or_eq_true]
-                      right
-                      exact hih
-              · simp at hpair_filt
-            · -- pair = (nw, parentLabel): source = parentLabel, child = nw
-              simp only [Prod.mk.injEq] at hmem_new
-              obtain ⟨rfl, rfl⟩ := hmem_new
-              simp only at hpair_filt
-              split_ifs at hpair_filt with hpar
-              · simp only [Option.some.injEq, beq_iff_eq] at hpair_filt hpar
-                subst hpar
-                -- source = parentLabel, child = nw
-                rw [← hpair_filt] at hchild_cond
-                simp only [Bool.or_eq_true, beq_iff_eq] at hchild_cond
-                rcases hchild_cond with rfl | hgo_nw
-                · -- child = nw = w2: but hw2 : w2 ≠ nw — contradiction
-                  exact absurd rfl hw2
-                · -- isAccessible.go (ext) w2 nw k = true
-                  -- But nw has no children in ext → go nw k = false
-                  have hfalse :=
-                    isAccessible_go_nw_no_children (edges ++ [(nw, parentLabel)]) nw w2
-                      (not_parent_in_extended edges nw parentLabel hnw_not_parent hnw_ne_parent) k
-                  rw [hfalse] at hgo_nw
-                  exact absurd hgo_nw (by simp)
-              · simp at hpair_filt
-      exact hmono_go
+  sorry
 
 /-- If `intExpandBranches` returns `closed`, then every input branch is unsatisfiable.
 

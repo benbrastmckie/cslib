@@ -1,16 +1,10 @@
 {
-  "status": "planned",
-  "summary": "5-phase plan created: define DM multiset measure, prove measure decrease, build WF normalizeWF, bridge to normalize (eliminate sorry), CI verification",
+  "status": "partial",
+  "summary": "Phase 1 complete: termination measure infrastructure already present and verified axiom-clean. Fixed 3 syntax errors in Phase 2+ stubs.",
   "blockers": [],
-  "continuation_context": null,
-  "next_action_hint": "implement",
-  "phases_completed": 0,
+  "continuation_context": {"completed_phases": [1], "next_phase": 2},
+  "next_action_hint": "continue",
+  "phases_completed": 1,
   "phases_total": 5,
-  "artifacts": [
-    {
-      "path": "specs/332_normalization_termination_proof/plans/01_termination-plan.md",
-      "type": "plan",
-      "summary": "Implementation plan for normalization termination proof using Dershowitz-Manna multiset ordering with 5 sequential phases totaling 10 hours"
-    }
-  ]
+  "artifacts": []
 }

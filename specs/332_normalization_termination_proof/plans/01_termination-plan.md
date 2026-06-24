@@ -90,7 +90,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Termination Measure Infrastructure [IN PROGRESS]
+### Phase 1: Termination Measure Infrastructure [COMPLETED]
 <!-- Agent: cslib-implementation-agent, started 2026-06-24 -->
 <!-- Started: 2026-06-24 -->
 
@@ -99,19 +99,19 @@ Phases within the same wave can execute in parallel.
 `Dershowitz-Manna` API is usable.
 
 **Tasks**:
-- [ ] Add `import Mathlib.Data.Multiset.DershowitzManna` to the import block
-- [ ] Define `maximalFormulas : T.Derivation G A -> Multiset Nat` -- collects `complexity(F)` for
-      each beta-redex (the 5 proper redex patterns in `reduceRoot`); recurses into subterms
-- [ ] Define `commutingSum : T.Derivation G A -> Nat` -- sum over commuting conversion sites of
-      the node count of the sub-derivation rooted at each site
-- [ ] Define `nodeCount : T.Derivation G A -> Nat` -- total number of nodes (if not already present)
-- [ ] Define the combined measure type and well-founded relation:
+- [x] Add `import Mathlib.Data.Multiset.DershowitzManna` to the import block *(already present at line 11)*
+- [x] Define `maximalFormulas : T.Derivation G A -> Multiset Nat` -- collects `complexity(F)` for
+      each beta-redex (the 5 proper redex patterns in `reduceRoot`); recurses into subterms *(already defined at line 1032)*
+- [x] Define `commutingSum : T.Derivation G A -> Nat` -- sum over commuting conversion sites of
+      the node count of the sub-derivation rooted at each site *(already defined at line 1059)*
+- [x] Define `nodeCount : T.Derivation G A -> Nat` -- total number of nodes (if not already present) *(already defined at line 1018)*
+- [x] Define the combined measure type and well-founded relation:
       `normMeasure d := (maximalFormulas d, commutingSum d)` with
-      `Prod.Lex IsDershowitzMannaLT (· < ·)` ordering
-- [ ] Prove `normMeasure_wf : WellFounded (InvImage (Prod.Lex ...) normMeasure)` using
-      `Multiset.wellFounded_isDershowitzMannaLT` and `Nat.lt_wfRel.wf`
-- [ ] Run `lake build Cslib.Logics.Propositional.NaturalDeduction.Normalization` to verify
-      definitions compile
+      `Prod.Lex IsDershowitzMannaLT (· < ·)` ordering *(already defined at line 1085)*
+- [x] Prove `normMeasure_wf : WellFounded (InvImage (Prod.Lex ...) normMeasure)` using
+      `Multiset.wellFounded_isDershowitzMannaLT` and `Nat.lt_wfRel.wf` *(already proved at line 1089)*
+- [x] Run `lake build Cslib.Logics.Propositional.NaturalDeduction.Normalization` to verify
+      definitions compile *(deviation: altered -- pre-existing errors in Phase 2+ proofs prevent clean build, but all Phase 1 definitions verified axiom-clean via lean_verify)*
 
 **Timing**: 2 hours
 

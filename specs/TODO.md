@@ -1,5 +1,5 @@
 ---
-next_project_number: 334
+next_project_number: 335
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 334
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,245,278,290,299,301,316,321 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,245,278,290,299,301,316,321,334 | -- | Bimodal Porting, Foundations, Propositional Logic, ... |
 | 2 | 39,40,181,215,300,317,332 | 36,37,180,290,299,316 | Bimodal Porting, Propositional Logic, Temporal Logic, ... |
 | 3 | 41,275,333 | 39,40,332 | Foundations |
 
@@ -52,6 +52,7 @@ next_project_number: 334
 ### Code Hygiene
 
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
+334 [NOT STARTED] — Codebase refactoring audit for the LK sequent calculus module: (1
 
 ### Modal
 
@@ -61,6 +62,16 @@ next_project_number: 334
 ### Uncategorized
 
 ## Tasks
+
+### 334. Propositional refactoring audit
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Code Hygiene
+- **Dependencies**: None
+
+**Description**: Codebase refactoring audit for the LK sequent calculus module: (1) Extract shared Proposition.IsSubformula/subformulas definitions from Normalization.lean into a standalone Cslib/Logics/Propositional/Subformula.lean module, eliminating the duplicate LKIsSubformula/lkSubformulas in SubformulaProperty.lean and the Proposition.complexity name collision that caused it. (2) Audit all files under Cslib/Logics/Propositional/ for similar issues: duplicate definitions across modules, transitive import collisions, definitions that belong in shared utility files, overly large files that should be split, missing abstractions that would reduce code duplication, and namespace hygiene problems. (3) Propose and implement refactoring to produce a clean, minimal dependency graph consistent with CSLib CONTRIBUTING.md, ORGANISATION.md, and NOTATION.md standards. The subformula extraction is the concrete exemplar; the broader audit should cover the full propositional logic subtree
+
+---
 
 ### 333. Normalization module refactor
 - **Status**: [NOT STARTED]

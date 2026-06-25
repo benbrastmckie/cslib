@@ -1,5 +1,5 @@
 {
-  "next_project_number": 344,
+  "next_project_number": 349,
   "active_projects": [
     {
       "project_number": 342,
@@ -1213,6 +1213,77 @@
       "dependencies": [
         341
       ],
+      "created": "2026-06-25T00:00:00Z",
+      "last_updated": "2026-06-25T00:00:00Z",
+      "artifacts": []
+    },
+    {
+      "project_number": 344,
+      "project_name": "algebraic_strong_completeness",
+      "topic": "Propositional Logic",
+      "dependencies": [
+        343
+      ],
+      "description": "Add algebraic STRONG (theory-level) completeness for propositional logic, factored through the v ⊨ T satisfaction primitive. Today Cslib/Logics/Propositional/Semantics/Algebra/ has only WEAK completeness (Derivable Axioms φ ↔ validity, e.g. hilbert_alg_complete_theory in HilbertCompleteness.lean); the only STRONG completeness (Γ ⊢ φ ↔ Γ ⊨ φ) lives in Cslib/Logics/Propositional/Metalogic/{MinStrongCompleteness,IntStrongCompleteness,StrongCompleteness}.lean via KRIPKE semantics, not algebra. Goal: state and prove an algebraic strong completeness SetDerivable Axioms Γ φ ↔ (algebraic Γ-consequence), where algebraic consequence means 'every GHA model (v, bot_val) that satisfies every formula of Γ also satisfies φ' — i.e. consequence built directly from the same Satisfies / v ⊨ T predicate used for theories (AlgTValid in Cslib/Logics/Propositional/Semantics/Algebra.lean). Reuse SetDerivable (Cslib/Logics/Propositional/Semantics/SemanticConsequence.lean) and the Hilbert Lindenbaum scaffolding (HilbertLindenbaum.lean: canonicalV, canonicalBotVal, canonicalV_spec, hilbertLindenbaumMk_eq_top_iff). This (a) fills a real gap (no algebraic strong completeness exists) and (b) is the payoff of treating v ⊨ T as a primitive: Γ ⊨ φ is just 'every model satisfying Γ satisfies φ', the consequence relation generated from the theory-satisfaction predicate. Ideally depends on 343 (generic Satisfies/v ⊨ T) but can also be stated against AlgTValid directly. Verify full CSLib CI green.",
+      "status": "not_started",
+      "task_type": "cslib",
+      "created": "2026-06-25T00:00:00Z",
+      "last_updated": "2026-06-25T00:00:00Z",
+      "artifacts": []
+    },
+    {
+      "project_number": 345,
+      "project_name": "reconcile_logic_encodings_isminimal",
+      "topic": "Propositional Logic",
+      "dependencies": [
+        341
+      ],
+      "description": "Reconcile the two parallel encodings of the propositional logics and add the missing IsMinimal typeclass. Waring's Cslib/Logics/Propositional/Defs.lean encodes a logic as a Theory (Set (Proposition Atom)) with strength characterised by INCLUSION: IsIntuitionistic T ↔ IPL ⊆ T and IsClassical T ↔ CPL ⊆ T, with monotone propagation lemmas (instIsIntuitionisticExtention / instIsClassicalExtention). The proof-system side instead uses inductive axiom predicates MinPropAxiom/IntPropAxiom/PropositionalAxiom (ProofSystem/Axioms.lean) with strength characterised by the WITNESS-BUNDLE typeclass MinimalAxioms (Cslib/Logics/Propositional/NaturalDeduction/Equivalence.lean: 8 schema witnesses K, S, ∧I, ∧E1, ∧E2, ∨I1, ∨I2, ∨E). There is currently NO IsMinimal mirroring IsIntuitionistic/IsClassical. Work: (1) add IsMinimal T defined by inclusion of the minimal schemas (mirror Waring's idiom, e.g. AxiomTheory MinPropAxiom ⊆ T or a dedicated minimal base set); (2) add a bridge MinimalAxioms Axioms ↔ IsMinimal (AxiomTheory Axioms) so the inclusion idiom and the witness bundle become interchangeable — derive the 8 witnesses from inclusion + the base instance, and vice versa; (3) optionally add monotone-extension propagation for IsMinimal. This gives Waring-style free strength propagation to the witness-bundle world used by task 341 — the cleanest answer to the strength-axis scalability concern. Files: Defs.lean, NaturalDeduction/Equivalence.lean, ProofSystem/Axioms.lean. Verify CI green. Relates to 341.",
+      "status": "not_started",
+      "task_type": "cslib",
+      "created": "2026-06-25T00:00:00Z",
+      "last_updated": "2026-06-25T00:00:00Z",
+      "artifacts": []
+    },
+    {
+      "project_number": 346,
+      "project_name": "bot_val_pointed_algebra_model",
+      "topic": "Propositional Logic",
+      "dependencies": [
+        343
+      ],
+      "description": "Provide a bot_val-as-field model for propositional algebraic semantics using the existing pointed-algebra machinery, as the principled type-level complement to task 343's function-absorption of bot_val. Minimal logic's GHA (Johansson) semantics has no bottom, so AlgEvaluate carries an explicit bot_val : H (Cslib/Logics/Propositional/Semantics/Algebra.lean) which then rides along in AlgTValid (notation v ⊨[bot_val] T). The repo already has PointedBrouwerian and PointedBrouwerianCompleteness (Cslib/Logics/Propositional/Semantics/Algebra/), i.e. a GHA bundled with a designated bottom. Goal: offer a pointed-GHA model in which bot_val is ALGEBRA DATA (a field) rather than a loose parameter, yielding a bot_val-FREE v ⊨ T at the type level (the model carries its own bottom), and relate it to the loose-parameter form. Trade-off to evaluate and document: cleaner types vs. loss of definitional equality with the current AlgEvaluate (a bundled structure introduces projections that would force simp/unfold edits in task 341's proofs) — decide which form is canonical. Mostly wiring given the existing Pointed* files. Files: PointedBrouwerian.lean, PointedBrouwerianCompleteness.lean, Algebra.lean. Verify CI green. Complements 343.",
+      "status": "not_started",
+      "task_type": "cslib",
+      "created": "2026-06-25T00:00:00Z",
+      "last_updated": "2026-06-25T00:00:00Z",
+      "artifacts": []
+    },
+    {
+      "project_number": 347,
+      "project_name": "satisfaction_naming_notation",
+      "topic": "Propositional Logic",
+      "dependencies": [
+        343
+      ],
+      "description": "Coordinate the naming of the propositional theory-satisfaction predicate with the rest of Cslib/Logics. The name Satisfies is ALREADY used library-wide for POINTWISE satisfaction of a single formula in a model: Cslib/Logics/Modal/Basic.lean (Satisfies m w φ), Cslib/Logics/Temporal/Semantics/Satisfies.lean (Satisfies M t φ), Cslib/Logics/LTL/Semantics/Satisfies.lean, Cslib/Logics/HML/LogicalEquivalence.lean; and ⊨ denotes validity/consequence (Cslib/Logics/Bimodal/Semantics/Validity.lean: ⊨ φ and Γ ⊨ φ). The task-343 'generic Satisfies' is a DIFFERENT notion: a valuation satisfying a whole THEORY (∀ B ∈ T, eval B = ⊤). Goal: pick a distinct, non-colliding name for the theory-satisfaction def (e.g. SatisfiesTheory or ModelsTheory) while keeping the v ⊨ T notation, aligned with the existing per-logic Satisfies/⊨ conventions so the propositional layer reads consistently with Modal/Temporal/LTL/Bimodal rather than overloading Satisfies. Decide whether the current task-341 notation v ⊨[bot_val] T should be deprecated/aliased to v ⊨ T once the generic predicate lands. Produce a short naming/notation convention note. Best settled before or alongside task 343's implementation. Files: Semantics/Algebra.lean, the new generic-predicate file, plus a convention note. Relates to 343.",
+      "status": "not_started",
+      "task_type": "cslib",
+      "created": "2026-06-25T00:00:00Z",
+      "last_updated": "2026-06-25T00:00:00Z",
+      "artifacts": []
+    },
+    {
+      "project_number": 348,
+      "project_name": "glivenko_conservativity_theory_parametric",
+      "topic": "Propositional Logic",
+      "dependencies": [
+        343,
+        345
+      ],
+      "description": "Restate the propositional Glivenko and conservativity results theory-parametrically against the canonical v ⊨ T predicate once it lands (task 343). The repo has Cslib/Logics/Propositional/Semantics/Algebra/Glivenko.lean and a family of conservativity files: Conservative.lean, ConservativeChain.lean, ConjImpConservative.lean, ConjImpBotConservative.lean, ImpConservative.lean, MplConservativeChain.lean. Glivenko.lean already provides theory instances IsIntuitionistic (IPL ∪ CPL) and IsClassical (IPL ∪ CPL), hinting at the theory-as-set direction. Goal: where these results currently specialise per tier or per algebra class, restate/generalise them uniformly in terms of v ⊨ T / theory satisfaction (and, where applicable, the IsMinimal/IsIntuitionistic/IsClassical inclusion typeclasses, including the IsMinimal bridge from task 345), so conservativity and Glivenko read as theory-parametric statements with the existing tier results recovered as corollaries. Audit which lemmas lift without loss and which genuinely need the tier-specific algebra. Files: Glivenko.lean and the *Conservative*.lean family. Verify CI green and existing results preserved. Depends on 343; relates to 345.",
+      "status": "not_started",
+      "task_type": "cslib",
       "created": "2026-06-25T00:00:00Z",
       "last_updated": "2026-06-25T00:00:00Z",
       "artifacts": []

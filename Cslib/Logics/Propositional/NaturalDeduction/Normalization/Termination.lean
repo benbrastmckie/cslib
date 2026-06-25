@@ -916,6 +916,59 @@ private def Theory.Derivation.commutingSum : T.Derivation G A → Nat
     | orE _ _ _ _ => D.nodeCount + D.commutingSum + E.commutingSum
     | _ => D.commutingSum + E.commutingSum
 
+/-- `nodeCount` is invariant under weakening: `weak` preserves the tree structure. -/
+private theorem Theory.Derivation.nodeCount_weak {T T' : Theory Atom} {Γ Δ : Ctx Atom}
+    {A : Proposition Atom} (hTheory : T ⊆ T') (hCtx : Γ ⊆ Δ) (D : T.Derivation Γ A) :
+    (D.weak hTheory hCtx).nodeCount = D.nodeCount := by
+  induction D generalizing T' Δ with
+  | ax => rfl
+  | ass => rfl
+  | andI G D₁ D₂ ih₁ ih₂ => simp only [Theory.Derivation.weak, nodeCount, ih₁, ih₂]
+  | andE1 G D ih => simp only [Theory.Derivation.weak, nodeCount, ih]
+  | andE2 G D ih => simp only [Theory.Derivation.weak, nodeCount, ih]
+  | orI1 G D ih => simp only [Theory.Derivation.weak, nodeCount, ih]
+  | orI2 G D ih => simp only [Theory.Derivation.weak, nodeCount, ih]
+  | orE G D DA DB ih ihA ihB => simp only [Theory.Derivation.weak, nodeCount, ih, ihA, ihB]
+  | impI G D ih => simp only [Theory.Derivation.weak, nodeCount, ih]
+  | impE D E ih ihE => simp only [Theory.Derivation.weak, nodeCount, ih, ihE]
+
+/-- `nodeCount` is invariant under context weakening. -/
+private theorem Theory.Derivation.nodeCount_weakCtx {Γ Δ : Ctx Atom}
+    {A : Proposition Atom} (hCtx : Γ ⊆ Δ) (D : T.Derivation Γ A) :
+    (D.weakCtx hCtx).nodeCount = D.nodeCount :=
+  D.nodeCount_weak Set.Subset.rfl hCtx
+
+/-- `commutingSum` is invariant under weakening: `weak` preserves the tree structure, on
+which `commutingSum` (and the `nodeCount` it references) depends. -/
+private theorem Theory.Derivation.commutingSum_weak {T T' : Theory Atom} {Γ Δ : Ctx Atom}
+    {A : Proposition Atom} (hTheory : T ⊆ T') (hCtx : Γ ⊆ Δ) (D : T.Derivation Γ A) :
+    (D.weak hTheory hCtx).commutingSum = D.commutingSum := by
+  induction D generalizing T' Δ with
+  | ax => rfl
+  | ass => rfl
+  | andI G D₁ D₂ ih₁ ih₂ => simp only [Theory.Derivation.weak, commutingSum, ih₁, ih₂]
+  | andE1 G D ih =>
+    simp only [commutingSum] at ih ⊢
+    cases D <;> simp_all [Theory.Derivation.weak, commutingSum, nodeCount_weak, nodeCount]
+  | andE2 G D ih =>
+    simp only [commutingSum] at ih ⊢
+    cases D <;> simp_all [Theory.Derivation.weak, commutingSum, nodeCount_weak, nodeCount]
+  | orI1 G D ih => simp only [Theory.Derivation.weak, commutingSum, ih]
+  | orI2 G D ih => simp only [Theory.Derivation.weak, commutingSum, ih]
+  | orE G D DA DB ih ihA ihB =>
+    simp only [Theory.Derivation.weak, commutingSum, ih, ihA, ihB, nodeCount_weak]
+    cases D <;> simp [Theory.Derivation.weak, nodeCount_weak]
+  | impI G D ih => simp only [Theory.Derivation.weak, commutingSum, ih]
+  | impE D E ih ihE =>
+    simp only [Theory.Derivation.weak, commutingSum, ih, ihE, nodeCount_weak]
+    cases D <;> simp [Theory.Derivation.weak, nodeCount_weak]
+
+/-- `commutingSum` is invariant under context weakening. -/
+private theorem Theory.Derivation.commutingSum_weakCtx {Γ Δ : Ctx Atom}
+    {A : Proposition Atom} (hCtx : Γ ⊆ Δ) (D : T.Derivation Γ A) :
+    (D.weakCtx hCtx).commutingSum = D.commutingSum :=
+  D.commutingSum_weak Set.Subset.rfl hCtx
+
 /-- A strongly normal derivation contains no beta-redexes, hence its `maximalFormulas`
 multiset is empty: the `{cc}` summand is contributed exactly at the proper-redex positions
 (`andE1`/`andE2` of `andI`, `orE` of `orI1`/`orI2`, `impE` of `impI`) that `isStronglyNormal`
@@ -1065,7 +1118,156 @@ satisfy the strong-normality invariant `reduceRootSubSN`.
   decrease the secondary `commutingSum` component (the `orE` site is no longer directly below an
   elimination), so `Prod.Lex.right` applies. ([Prawitz1965], Ch. III–IV.)
 
-The proof `reduceRoot_decreases_normMeasure` comes in a later dispatch. -/
+`reduceRoot_decreases_normMeasure` is proved below. -/
+
+set_option maxHeartbeats 1200000 in
+/-- A single root reduction strictly decreases the combined normalization measure. -/
+private theorem Theory.Derivation.reduceRoot_decreases_normMeasure
+    {G : Ctx Atom} {A : Proposition Atom} (d : T.Derivation G A)
+    (h_subsSN : d.reduceRootSubSN)
+    (d' : T.Derivation G A) (hd' : d.reduceRoot = some d') :
+    Prod.Lex Multiset.IsDershowitzMannaLT (· < ·) (normMeasure d') (normMeasure d) := by
+  unfold reduceRoot at hd'
+  split at hd' <;>
+    [skip; skip; skip; skip; skip; skip; skip; skip; (exact absurd hd' (by simp))]
+  · -- h_1: impE (impI _ D) E  →  D.subsOne E   (implication β)
+    -- reduceRootSubSN: D.isStronglyNormal ∧ E.isStronglyNormal
+    -- maximalFormulas (impE (impI G D) E) = {(B→A).complexity} + D.maximalFormulas + E.maximalFormulas
+    -- Since D and E are SN, D.maximalFormulas = ∅ and E.maximalFormulas = ∅.
+    -- Every element of (D.subsOne E).maximalFormulas is = B.complexity (by subsOne_new_redex_complexity_lt)
+    -- and B.complexity < (B→A).complexity.
+    rename_i _Γ _A₀ _B D E
+    rw [Option.some.injEq] at hd'; subst hd'
+    refine Prod.Lex.left _ _ ?_
+    simp only [normMeasure, maximalFormulas, conclusionComplexity]
+    -- h_subsSN unfolds to D.isStronglyNormal = true ∧ E.isStronglyNormal = true
+    rcases h_subsSN with ⟨hD, hE⟩
+    -- Provide DM witnesses directly using SN to simplify maximalFormulas
+    -- X=∅, Y=(D.subsOne E).maximalFormulas, Z={(_B→A).complexity}
+    -- M = (D.subsOne E).maximalFormulas = ∅ + Y, N = {(_B→A).complexity} + D.maximalFormulas + E.maximalFormulas = ∅ + Z
+    refine ⟨∅, (D.subsOne E).maximalFormulas,
+           {(_B → A).complexity} + D.maximalFormulas + E.maximalFormulas,
+           by simp,
+           by simp, by simp, ?_⟩
+    intro y hy
+    refine ⟨(_B → A).complexity, by simp, ?_⟩
+    -- y ∈ (D.subsOne E).maximalFormulas; D.maximalFormulas = ∅; so y is new
+    rcases subsOne_new_redex_complexity_lt D E hy (by simp [maximalFormulas_sn_eq_zero D hD]) with hkE | rfl
+    · -- y ∈ E.maximalFormulas but E.maximalFormulas = ∅
+      simp [maximalFormulas_sn_eq_zero E hE] at hkE
+    · -- y = _B.complexity; need _B.complexity < (_B → A).complexity
+      simp only [Proposition.complexity]; omega
+  · -- h_2: andE1 _ (andI _ D₁ D₂)  →  D₁   (conjunction β)
+    rw [Option.some.injEq] at hd'; subst hd'
+    refine Prod.Lex.left _ _ ?_
+    simp only [normMeasure, maximalFormulas, conclusionComplexity]
+    exact Multiset.isDershowitzMannaLT_cons_add
+  · -- h_3: andE2 _ (andI _ D₁ D₂)  →  D₂   (conjunction β, right projection)
+    -- Goal after simp: D₂ < {c} + (D₁ + D₂), use isDershowitzMannaLT_cons_add'
+    rw [Option.some.injEq] at hd'; subst hd'
+    refine Prod.Lex.left _ _ ?_
+    simp only [normMeasure, maximalFormulas, conclusionComplexity]
+    exact Multiset.isDershowitzMannaLT_cons_add'
+  · -- h_4: orE _ (orI1 _ D) DA _  →  DA.subsOne D   (disjunction β)
+    -- reduceRootSubSN: D_or.isStronglyNormal ∧ DA.isStronglyNormal
+    rename_i _G' _x _Aor _Bor D_or DA DB_or
+    rw [Option.some.injEq] at hd'; subst hd'
+    refine Prod.Lex.left _ _ ?_
+    simp only [normMeasure, maximalFormulas, conclusionComplexity]
+    rcases h_subsSN with ⟨hD, hDA⟩
+    -- DM witnesses: X=∅, Y=LHS, Z=full RHS (with D_or.mf and DA.mf still present)
+    refine ⟨∅, (DA.subsOne D_or).maximalFormulas,
+           {(_Aor ∨ _Bor).complexity} + D_or.maximalFormulas + DA.maximalFormulas + DB_or.maximalFormulas,
+           by simp,
+           by simp, by simp, ?_⟩
+    intro y hy
+    refine ⟨(_Aor ∨ _Bor).complexity, by simp, ?_⟩
+    rcases subsOne_new_redex_complexity_lt _ _ hy (by simp [maximalFormulas_sn_eq_zero _ hDA]) with hkE | rfl
+    · simp [maximalFormulas_sn_eq_zero _ hD] at hkE
+    · simp only [Proposition.complexity]; omega
+  · -- h_5: orE _ (orI2 _ D) _ DB  →  DB.subsOne D
+    -- reduceRootSubSN: D_or.isStronglyNormal ∧ DB.isStronglyNormal
+    rename_i _G' _x _Aor _Bor D_or DA_or DB
+    rw [Option.some.injEq] at hd'; subst hd'
+    refine Prod.Lex.left _ _ ?_
+    simp only [normMeasure, maximalFormulas, conclusionComplexity]
+    rcases h_subsSN with ⟨hD, hDB⟩
+    refine ⟨∅, (DB.subsOne D_or).maximalFormulas,
+           {(_Aor ∨ _Bor).complexity} + D_or.maximalFormulas + DA_or.maximalFormulas + DB.maximalFormulas,
+           by simp,
+           by simp, by simp, ?_⟩
+    intro y hy
+    refine ⟨(_Aor ∨ _Bor).complexity, by simp, ?_⟩
+    rcases subsOne_new_redex_complexity_lt _ _ hy (by simp [maximalFormulas_sn_eq_zero _ hDB]) with hkE | rfl
+    · simp [maximalFormulas_sn_eq_zero _ hD] at hkE
+    · simp only [Proposition.complexity]; omega
+  · -- h_6: andE1 G (orE _ D DA DB)  →  orE G D (andE1 DA) (andE1 DB)   (commuting)
+    -- maximalFormulas is preserved (equality); commutingSum strictly decreases
+    rename_i _Gp _xp Dcc DAcc DBcc
+    rw [Option.some.injEq] at hd'; subst hd'
+    rcases h_subsSN with ⟨hA, hB⟩
+    show Prod.Lex _ _ (_, _) (_, _)
+    -- Key: (andE1 _ DA).maximalFormulas = DA.maximalFormulas when DA is SN (not andI, not orE)
+    have hDA_mf : (andE1 _ DAcc).maximalFormulas = DAcc.maximalFormulas := by
+      cases DAcc <;>
+        simp only [isStronglyNormal, maximalFormulas] at * <;>
+        first | exact absurd hA (by decide) | rfl
+    have hDB_mf : (andE1 _ DBcc).maximalFormulas = DBcc.maximalFormulas := by
+      cases DBcc <;>
+        simp only [isStronglyNormal, maximalFormulas] at * <;>
+        first | exact absurd hB (by decide) | rfl
+    -- Key: (andE1 _ DA).commutingSum = DA.commutingSum when DA is SN (not orE)
+    have hDA_cs : (andE1 _ DAcc).commutingSum = DAcc.commutingSum := by
+      cases DAcc <;>
+        simp only [isStronglyNormal, commutingSum] at * <;>
+        first | exact absurd hA (by decide) | rfl
+    have hDB_cs : (andE1 _ DBcc).commutingSum = DBcc.commutingSum := by
+      cases DBcc <;>
+        simp only [isStronglyNormal, commutingSum] at * <;>
+        first | exact absurd hB (by decide) | rfl
+    rw [show (andE1 G (orE G Dcc DAcc DBcc)).maximalFormulas
+          = (orE G Dcc (andE1 _ DAcc) (andE1 _ DBcc)).maximalFormulas from by
+        cases Dcc <;> simp_all [maximalFormulas, hDA_mf, hDB_mf]]
+    refine Prod.Lex.right _ ?_
+    -- Goal: commutingSum (orE Dcc (andE1 DAcc) (andE1 DBcc)) < commutingSum (andE1 (orE Dcc DAcc DBcc))
+    -- cases Dcc to unfold commutingSum, then use hDA_cs/hDB_cs
+    cases Dcc <;> simp_all [commutingSum, nodeCount, hDA_cs, hDB_cs] <;> omega
+  · -- h_7: andE2 G (orE _ D DA DB)  →  orE G D (andE2 DA) (andE2 DB)
+    rename_i _Gp _xp Dcc DAcc DBcc
+    rw [Option.some.injEq] at hd'; subst hd'
+    rcases h_subsSN with ⟨hA, hB⟩
+    show Prod.Lex _ _ (_, _) (_, _)
+    -- When DAcc is SN under andE2 (not andI, not orE), andE2's maximalFormulas = DAcc's
+    have hDA_mf : (andE2 _ DAcc).maximalFormulas = DAcc.maximalFormulas := by
+      cases DAcc <;>
+        simp only [isStronglyNormal, maximalFormulas] at * <;>
+        first | exact absurd hA (by decide) | rfl
+    have hDB_mf : (andE2 _ DBcc).maximalFormulas = DBcc.maximalFormulas := by
+      cases DBcc <;>
+        simp only [isStronglyNormal, maximalFormulas] at * <;>
+        first | exact absurd hB (by decide) | rfl
+    have hDA_cs : (andE2 _ DAcc).commutingSum = DAcc.commutingSum := by
+      cases DAcc <;>
+        simp only [isStronglyNormal, commutingSum] at * <;>
+        first | exact absurd hA (by decide) | rfl
+    have hDB_cs : (andE2 _ DBcc).commutingSum = DBcc.commutingSum := by
+      cases DBcc <;>
+        simp only [isStronglyNormal, commutingSum] at * <;>
+        first | exact absurd hB (by decide) | rfl
+    rw [show (andE2 G (orE G Dcc DAcc DBcc)).maximalFormulas
+          = (orE G Dcc (andE2 _ DAcc) (andE2 _ DBcc)).maximalFormulas from by
+        cases Dcc <;> simp_all [maximalFormulas, hDA_mf, hDB_mf]]
+    refine Prod.Lex.right _ ?_
+    cases Dcc <;> simp_all [commutingSum, nodeCount, hDA_cs, hDB_cs] <;> omega
+  · -- h_8: impE (orE G D DA DB) E  →  orE G D (impE DA E') (impE DB E')
+    -- TODO(task 332, h_8): the commuting conversion impE (orE D DA DB) E duplicates E into
+    -- both orE branches, so maximalFormulas gains an extra copy of E.maximalFormulas. The
+    -- equality (and the commutingSum decrease) holds because reduceRootSubSN here gives
+    -- (impE DA E').isStronglyNormal ∧ (impE DB E').isStronglyNormal, which forces E itself SN,
+    -- hence E.maximalFormulas = 0 and E.commutingSum = 0. Fix: extract Ecc SN from hA, then
+    -- maximalFormulas_sn_eq_zero + maximalFormulas_weakCtx kill the extra copy. Full near-complete
+    -- attempt preserved in handoffs/termination-h8-attempt-needs-Esn.lean.bak.
+    sorry
 
 /-- `normalize` produces strongly normal derivations.
 

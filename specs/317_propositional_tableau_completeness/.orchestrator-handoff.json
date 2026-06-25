@@ -1,15 +1,32 @@
 {
-  "status": "planned",
-  "summary": "Created 4-phase implementation plan for 8 sorry sites across 3 completeness files. Phases: (1) classical truth lemma with Hintikka bridge, (2) classical countermodel+completeness, (3) intuitionistic completeness resolving B1 atomic contradiction and B2 saturation mismatch, (4) minimal soundness+completeness. Sequential dependency chain. Estimated 11 hours.",
-  "blockers": [],
-  "continuation_context": null,
-  "artifacts": [
-    {
-      "path": "specs/317_propositional_tableau_completeness/plans/01_tableau-completeness-plan.md",
-      "type": "plan",
-      "summary": "4-phase plan covering classical (C1-C3), intuitionistic (I1-I3), and minimal (M1-M2) tableau completeness proofs with blocker resolution strategies"
-    }
+  "status": "partial",
+  "summary": "Propositional tableau completeness. Classical phase partially attempted; Intuitionistic and Minimal completeness NOT started. PRIMARY ISSUE: Classical/Completeness.lean does NOT build — ~54 errors (~51 pre-existing at committed HEAD) in the classicalTruthLemma / Hintikka-helper region (~L110-229). The red build, not the sorry count, is the blocker. The file is at 1 live sorry (classicalExpandBranches_hintikka ~L462, the deep loop-invariant induction). Two easy sorries (classicalTableau_hintikka bridge, F(phi) membership) were attempted but the supporting helpers are red — saved in classical-easy-attempt.patch.",
+  "blockers": [
+    "Classical/Completeness.lean build-red: ~54 errors incl. invented constants (List.findSome?_of_mem, List.find?_of_mem are not real Mathlib lemmas), unsolved goals, failed rewrites, 'function expected'. Must be fixed (sorries OK) before the file's sorry count is meaningful.",
+    "M1 (minimalTableau_sound) is in Minimal/Soundness.lean = task 316 territory. 317 must NOT edit it; use as-is."
   ],
-  "phases_completed": 1,
-  "phases_total": 1
+  "where_to_begin": "Phase 1 Priority 0 of plan 01: get Classical/Completeness.lean to a GREEN build with sorries allowed. Replace the invented List lemma names with the correct ones (loogle/leansearch), fix the unsolved goals and failed rewrites in ~L110-229. Leave classicalExpandBranches_hintikka (~L462) as a sorry for now — it is a deep induction (the classical analog of 316's crux) best done as its own focused/research-informed pass. COMMIT the green build as a milestone before tackling the deep induction. Then proceed Phase 2 (classical), Phase 3 (intuitionistic, resolving B1/B2), Phase 4 (minimal M2 + Decidable; NOT M1).",
+  "continuation_context": {
+    "build_state": { "builds": false, "error_count_classical_completeness": 54, "preexisting_errors_at_head": 51 },
+    "plan_path": "specs/317_propositional_tableau_completeness/plans/01_tableau-completeness-plan.md",
+    "saved_attempt_patch": "specs/317_propositional_tableau_completeness/classical-easy-attempt.patch",
+    "file_status": {
+      "Classical/Completeness.lean": "RED ~54 errors, 1 sorry (classicalExpandBranches_hintikka ~L462)",
+      "Intuitionistic/Completeness.lean": "baseline, 7 sorries (B1/B2 unresolved), not started",
+      "Minimal/Completeness.lean": "baseline, 8 sorries, not started (M2 here; M1 is 316's in Minimal/Soundness.lean)",
+      "DecisionProcedure.lean files": "baseline, not started"
+    },
+    "territory_contract": "317 owns all */Completeness.lean and */DecisionProcedure.lean. 316 owns all */Soundness.lean (incl. Minimal/Soundness.lean / minimalTableau_sound). Do not cross."
+  },
+  "artifacts": [
+    { "path": "specs/317_propositional_tableau_completeness/plans/01_tableau-completeness-plan.md", "type": "plan" },
+    { "path": "specs/317_propositional_tableau_completeness/classical-easy-attempt.patch", "type": "saved_attempt" }
+  ],
+  "phases_completed": 0,
+  "phases_total": 4,
+  "metadata": {
+    "session_id": "sess_1782335183_8462da",
+    "updated": "2026-06-24",
+    "note": "Rewritten by orchestrator to correct a stale handoff (previously status=planned, dated before any implementation attempt). Reflects current ground truth: classical phase attempted, build red."
+  }
 }

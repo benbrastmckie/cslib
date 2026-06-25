@@ -1,38 +1,32 @@
 {
-  "status": "implemented",
-  "summary": "Fixed all build errors in Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean. File now compiles with 0 errors (only sorry warnings). 8 sorry placeholders remain (one added vs the 7 in the pre-edit file, due to structural simplification of broken proof branches).",
+  "status": "partial",
+  "summary": "Intuitionistic tableau soundness. Working tree is at the GREEN committed baseline: Intuitionistic/Soundness.lean builds with 0 errors and 4 sorries (live: 945, 950, 961; comment: 919). The FreshAbove freshness-invariant machinery (the verified fix) was built across two prior sessions, then accidentally reverted before commit; it has been RECOVERED from agent transcripts. One genuine obstacle remains: the linearResult bp=bh F(->) arm needs intRule_preserves_sat extended from a 3-tuple to a 4-tuple to expose `worldOf parentLabel <= w'`.",
   "blockers": [],
+  "where_to_begin": "Phase A of plan 06: re-apply the recovered FreshAbove declarations from specs/316_propositional_tableau_soundness/recovered/freshabove-machinery.lean onto the green baseline (insertion points + recipe in reports/07_freshabove-recovery.md), thread FreshAbove through the intExpandBranches_closed_unsat induction, close the two hfresh sorries (945, 961) via Nat.ne_of_lt, then COMMIT. Then Phase B: extend intRule_preserves_sat to a 4-tuple and assemble the linearResult bp=bh case (950). Commit after each green step so progress cannot be lost again.",
   "continuation_context": {
-    "build_state": {
-      "builds": true,
-      "error_count": 0,
-      "sorry_count": 8,
-      "description": "lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Soundness exits 0 with no errors. 8 sorries remain as proof obligations."
-    },
-    "errors_map": {},
+    "build_state": { "builds": true, "error_count": 0, "sorry_count": 4 },
+    "plan_path": "specs/316_propositional_tableau_soundness/plans/06_soundness-plan-revised.md",
+    "recovered_machinery": "specs/316_propositional_tableau_soundness/recovered/freshabove-machinery.lean",
+    "recovery_report": "specs/316_propositional_tableau_soundness/reports/07_freshabove-recovery.md",
     "sorry_inventory": [
-      {"line": 819, "description": "Outer lemma application gap: threading MonotoneEdges from hcore to the outer intExpandBranches_closed_unsat statement."},
-      {"line": 922, "description": "sf-witness extraction: obtain sf in bPers with intApplyRuleFull sf nwH bPers = result from intStepBranch."},
-      {"line": 927, "description": "hfresh (linearResult): all sf' in bPers have sf'.label != nwH (freshness of the new world label)."},
-      {"line": 932, "description": "linearResult bp=bh case: apply intRule_preserves_sat for linearResult and use fuel IH (ih) to derive contradiction."},
-      {"line": 933, "description": "linearResult bp in bt case: show (bp,edgesP) in new_branches.zip new_edgeSets and apply fuel IH."},
-      {"line": 936, "description": "hfresh (branchingResult): same freshness obligation as line 927."},
-      {"line": 938, "description": "branchingResult bp=bh case: apply intRule_preserves_sat for branchingResult and use fuel IH."},
-      {"line": 939, "description": "branchingResult bp in bt case: membership in new_branches and apply fuel IH."}
+      { "line": 919, "kind": "comment", "description": "sf-witness extraction note; not a live sorry" },
+      { "line": 945, "kind": "live", "description": "hfresh (linearResult): forall sf' in bPers, sf'.label != nwH. Closes via FreshAbove + Nat.ne_of_lt once threaded (recovered, sorry-free)." },
+      { "line": 950, "kind": "live", "description": "linearResult bp=bh case. BLOCKED on the F(->) monotonicity gap: needs intRule_preserves_sat 3-tuple -> 4-tuple to expose worldOf parentLabel <= w'. This is the one real remaining obstacle." },
+      { "line": 961, "kind": "live", "description": "hfresh (branchingResult): same as 945; recovered sorry-free once threaded." }
     ],
-    "key_finding": "Fixed 7 original build errors plus cascades. Main fixes: intExpandBranches.go argument order (closurePred before fuel''), List.mem_zip->List.of_mem_zip, rcases for Option pairs, edgesH eliminated by rcases (use edgesP in that branch), intRule_preserves_sat .1/.2 invalid (must rw [hresult_sf] first), ih vs ih_inner confusion (linearResult/branchingResult call intExpandBranches not .go, so need fuel IH not pending IH). Replaced complex sub-proofs with sorry to achieve compilation.",
-    "plan_path": "specs/316_propositional_tableau_soundness/plans/05_soundness-plan.md",
-    "approach": "Surgical fix of original 7 build errors followed by sorry-ification of cascade errors from broken proof strategy in the inner induction.",
-    "verified_state": "lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Soundness exits 0. Classical/Soundness.lean and Minimal/DecisionProcedure.lean also build without regression.",
-    "last_session_note": "The core difficulties: (1) intExpandBranches.go signature is (closurePred fuel' pending ...) not (fuel'' closurePred ...); (2) rcases hzip_p with <rfl,rfl> | hmem_rest eliminates edgesH in favor of edgesP; (3) intRule_preserves_sat returns a match expression, not a product - cannot use .1/.2; (4) in linearResult/branchingResult cases, hgo has type intExpandBranches ... fuel'' not intExpandBranches.go closurePred fuel'', so ih_inner (pending induction) cannot be applied - fuel IH (ih) must be used instead. The 8 remaining sorries represent the core proof obligations."
+    "remaining_obstacle": "Extend intRule_preserves_sat from 3-tuple <wo', hwo'_eq, hsat'> to 4-tuple <wo', hwo'_eq, hsat', hle> where hle : worldOf parentLabel <= w' (the accessible witness world from the Kripke truth condition).",
+    "do_not": "Do NOT git checkout / revert in-progress work — fix forward and commit. Do NOT add a `.symm` at the former L978 (baseline orientation is correct; see report 06)."
   },
   "artifacts": [
-    "/home/benjamin/Projects/cslib/Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean"
+    { "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean", "type": "source" },
+    { "path": "specs/316_propositional_tableau_soundness/recovered/freshabove-machinery.lean", "type": "recovered_code" },
+    { "path": "specs/316_propositional_tableau_soundness/reports/07_freshabove-recovery.md", "type": "report" }
   ],
+  "phases_completed": 1,
+  "phases_total": 4,
   "metadata": {
-    "session_id": "sess_1782319379_bf5780_316",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "session_id": "sess_1782335183_8462da",
+    "updated": "2026-06-24",
+    "note": "Rewritten by orchestrator to correct a stale handoff (previously claimed status=implemented, 8 sorries). Reflects post-recovery ground truth."
   }
 }

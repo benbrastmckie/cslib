@@ -4,31 +4,14 @@
     {
       "project_number": 341,
       "project_name": "theory_parametric_completeness",
-      "status": "completed",
+      "status": "not_started",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Restate propositional algebraic completeness theory-parametrically over AlgTValid, adopting Thomas Waring's v ⊨ T formulation as the canonical statement. Currently the three tier completeness theorems MPL.hilbert_alg_complete (Cslib/Logics/Propositional/Semantics/Algebra/HilbertCompleteness.lean:57), IPL.hilbert_alg_complete (:80), and CPL.hilbert_alg_complete (:105) fold each logic's axioms into the algebra class (GHAValid/HAValid/BAValid) rather than carrying a v ⊨ T hypothesis. Introduce a single theory-parametric completeness theorem of the form: Derivable Axioms φ ↔ ∀ (H) [GeneralizedHeytingAlgebra H] (v) (bot_val), AlgTValid (AxiomTheory Axioms) v bot_val → AlgEvaluate v bot_val φ = ⊤, for any Axioms with [MinimalAxioms Axioms], and recover the three existing tier theorems as corollaries. The AlgTValid predicate already exists (Cslib/Logics/Propositional/Semantics/Algebra.lean:149) but is currently unused; the Lindenbaum scaffolding (HilbertLindenbaumAlgebra, canonicalV, canonicalBotVal, canonicalV_spec, hilbertLindenbaumMk_eq_top_iff in Semantics/Algebra/HilbertLindenbaum.lean) is already parametric in the axiom set with [MinimalAxioms Axioms], so the machinery largely exists. Work needed: (1) soundness direction must discharge axioms from the AlgTValid hypothesis instead of the per-tier *_alg_axiom_sound lemmas (Semantics/Algebra/Soundness.lean); (2) a new lemma that the canonical/Lindenbaum valuation satisfies AlgTValid (AxiomTheory Axioms); (3) the corollary bridges showing v ⊨ IntPropAxiom / PropositionalAxiom force the Heyting/Boolean (bot_val = ⊥) specializations to recover HAValid/BAValid. This matches the shape of Thomas Waring's Theory.complete. Verify the full CI pipeline stays green and existing tier theorems remain (as corollaries).",
       "created": "2026-06-24T23:38:46Z",
-      "last_updated": "2026-06-25T00:13:36Z",
-      "artifacts": [
-        {
-          "path": "specs/341_theory_parametric_completeness/reports/01_theory-parametric-completeness.md",
-          "type": "report",
-          "summary": "Theory-parametric algebraic completeness — strategy compile-verified, 3 work items"
-        },
-        {
-          "path": "specs/341_theory_parametric_completeness/plans/01_theory-parametric-completeness.md",
-          "type": "plan",
-          "summary": "4-phase plan: alg_theory_soundness, canonicalV_algTValid, hilbert_alg_complete_theory + tier corollaries, full CI"
-        },
-        {
-          "path": "specs/341_theory_parametric_completeness/summaries/01_theory-parametric-completeness-summary.md",
-          "type": "summary",
-          "summary": "Theory-parametric algebraic completeness implemented — 4 phases, 0 sorries, 0 new axioms, tier theorems recovered as corollaries"
-        }
-      ],
-      "session_id": "sess_1782345866_50afaf",
-      "completion_summary": "Theory-parametric algebraic completeness implemented. Added hilbert_alg_complete_theory (universe-pinned, parametric over AlgTValid) and recovered MPL/IPL/CPL tier theorems as corollaries. 0 sorries, 0 new axioms, full CI green."
+      "last_updated": "2026-06-24T23:38:46Z",
+      "artifacts": [],
+      "session_id": "sess_1782344326_7392ed_341"
     },
     {
       "project_number": 335,

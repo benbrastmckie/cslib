@@ -629,15 +629,6 @@ theorem canonicalV_axiom_top
   rw [hilbertLindenbaumMk_eq_top_iff]
   exact ⟨.ax [] φ h⟩
 
-/-- The canonical Lindenbaum valuation models the axiom theory `AxiomTheory Axioms`.
-That is, every axiom evaluates to `⊤` under the canonical valuation and bottom value.
-This is a one-liner reusing `canonicalV_axiom_top`, used in the theory-parametric
-completeness theorem `hilbert_alg_complete_theory`. -/
-lemma canonicalV_algTValid
-    (Axioms : Proposition Atom → Prop) [MinimalAxioms Axioms] :
-    canonicalV Axioms ⊨[canonicalBotVal Axioms] AxiomTheory Axioms := by
-  intro B hB; exact canonicalV_axiom_top Axioms B (by simpa [AxiomTheory] using hB)
-
 /-! ## Heyting Algebra (EFQ) -/
 
 /-- `⊥ ≤ [A]` when `Axioms` includes EFQ. -/

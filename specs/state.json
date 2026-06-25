@@ -155,7 +155,14 @@
       ],
       "last_updated": "2026-06-24T14:44:42Z",
       "session_id": "sess_1782302542_261dfa_332",
-      "completion_summary": "Termination proof (d.normalize.redexWeight = 0) remains open. Green with 1 documented sorry in Normalization/Termination.lean:448. Three automated single-dispatch attempts all hit context overflow — the ~200-300 line well-founded-recursion proof + exploration exceeds a single agent context. Needs a phased multi-dispatch proof campaign (per plans/04_termination-plan-v4.md) or human-led effort."
+      "completion_summary": "Termination proof (d.normalize.redexWeight = 0) remains open. Green with 1 documented sorry in Normalization/Termination.lean:448. Three automated single-dispatch attempts all hit context overflow — the ~200-300 line well-founded-recursion proof + exploration exceeds a single agent context. Needs a phased multi-dispatch proof campaign (per plans/04_termination-plan-v4.md) or human-led effort.",
+      "artifacts": [
+        {
+          "type": "plan",
+          "path": "specs/332_normalization_termination_proof/plans/05_termination-plan-v5.md",
+          "summary": "v5 accuracy revision: module structure, phases A/B committed, B-h8 in progress, C/D/E remaining"
+        }
+      ]
     },
     {
       "project_number": 333,

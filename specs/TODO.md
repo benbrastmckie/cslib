@@ -169,6 +169,7 @@ next_project_number: 343
 - **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Dependencies**: Task 290
+- **Plan**: [332_normalization_termination_proof/plans/05_termination-plan-v5.md]
 
 **Description**: Prove the normalization termination theorem for CSLib Theory.Derivation: d.normalize.redexWeight = 0 (the 1 sorry remaining in Normalization.lean line 1083). The proof requires well-founded induction on a (cutrank, total_cut_length) lexicographic measure following Prawitz 1965, Ch. III-IV. Key obstacle: subsOne can increase derivation height, breaking fuel-sufficiency arguments. Needs ~200-300 lines of infrastructure: cutrank definition, cut_length measure, strict decrease lemma for reduceRoot, and the main induction. File: Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean. Depends on 290.
 

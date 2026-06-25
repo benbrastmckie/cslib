@@ -1,11 +1,13 @@
 # Implementation Plan (Revised v4): Task #332
 
 - **Task**: 332 - Prove normalization termination theorem for CSLib Theory.Derivation
-- **Status**: [IN PROGRESS]
-- **Effort**: see "Session Update 2026-06-24" below for the accurate on-disk state
-- **Last accurate sync**: 2026-06-24 (Session Update section). The body below (written against the
-  monolith) is retained for its strategy and verified tactics but its on-disk-state claims are
-  superseded by the Session Update.
+- **Status**: [SUPERSEDED by plans/05_termination-plan-v5.md]
+- **Effort**: see plans/05_termination-plan-v5.md for the accurate, current plan
+- **Note**: This v4 is retained for history only. Its strategy and verified tactic patterns are
+  valid, but its on-disk-state bookkeeping drifted (it claimed 7/8 cases proved / 1 sorry while the
+  described commit `88862dd1` was red with 6 sorries) and it predates the task-333 refactor. The
+  fully-accurate plan is **v5**. The "Session Update — 2026-06-24" section below summarizes the
+  correction; v5 is the canonical source.
 - **Dependencies**: None (Task 290 is [PARTIAL] with this same sorry; this task directly resolves it)
 - **Research Inputs**: reports/01_termination-research.md; reports/02_lit-termination-strategy.md (height-free DM measure); reports/03_commuting-and-wf-bridge.md (verified commuting-case tactics + WF bridge); handoffs/phase-2-handoff-20260624T163704Z.md
 - **Artifacts**: plans/01_termination-plan.md (superseded), plans/02_termination-plan-revised.md (superseded), plans/03_termination-plan-v3.md (superseded), plans/04_termination-plan-v4.md (this file)

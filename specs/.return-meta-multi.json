@@ -1,12 +1,16 @@
 {
-  "status": "completed",
+  "status": "partial",
   "metadata": {
     "tasks_completed": [
-      336,
-      337
+      333
+    ],
+    "tasks_partial": [
+      332,
+      290
     ],
     "tasks_failed": [],
-    "cycles_used": 2,
-    "multi_task_mode": true
+    "cycles_used": 4,
+    "multi_task_mode": true,
+    "note": "333 refactor complete+green. 332/290 blocked on hard termination proof (3 context overflows). Repo green throughout."
   }
 }

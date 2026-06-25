@@ -13,7 +13,7 @@ next_project_number: 343
 |------|-------|------------|--------|
 | 1 | 36,37,180,226,241,278,290,299,301,316,321,341,342 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,317,332 | 36,37,180,290,299,316 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
-| 3 | 41,275,333 | 39,40,332 | Foundations |
+| 3 | 41,275 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -39,8 +39,7 @@ next_project_number: 343
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
-  └─ 332 [IMPLEMENTING] — Prove the normalization termination theorem for CSLib Theory.Deri
-    └─ 333 [NOT STARTED] — Refactor and split the 1099-line Normalization.lean into well-org
+  └─ 332 [PARTIAL] — Prove the normalization termination theorem for CSLib Theory.Deri
 316 [PARTIAL] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
 341 [NOT STARTED] — Restate propositional algebraic completeness theory-parametricall
@@ -158,7 +157,7 @@ next_project_number: 343
 ---
 
 ### 333. Normalization module refactor
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: Task 332
 
@@ -167,7 +166,7 @@ next_project_number: 343
 ---
 
 ### 332. Normalization termination proof
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Dependencies**: Task 290
 

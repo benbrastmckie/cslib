@@ -26,13 +26,15 @@
     ]
   },
   "max_cycles": 15,
-  "cycle_count": 2,
+  "cycle_count": 4,
   "failed_tasks": [],
-  "completed_tasks": [],
+  "completed_tasks": [
+    333
+  ],
   "current_statuses": {
     "290": "partial",
-    "332": "implementing",
-    "333": "not_started"
+    "332": "partial",
+    "333": "completed"
   },
   "task_dirs": {
     "290": "specs/290_nd_normalization_subformula_property",
@@ -49,5 +51,9 @@
     "332": "cslib-implementation-agent",
     "333": "cslib-implementation-agent"
   },
-  "strategy": "refactor-first reorder (user-approved): revert to green phase-0 baseline, run 333 refactor first, then complete termination proof in small Termination.lean module, then close 332/290"
+  "strategy": "refactor-first reorder (user-approved): revert to green phase-0 baseline, run 333 refactor first, then complete termination proof in small Termination.lean module, then close 332/290",
+  "partial_tasks": [
+    332,
+    290
+  ]
 }

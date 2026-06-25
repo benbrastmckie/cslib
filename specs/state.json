@@ -14,14 +14,15 @@
     {
       "project_number": 341,
       "project_name": "theory_parametric_completeness",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Restate propositional algebraic completeness theory-parametrically over AlgTValid, adopting Thomas Waring's v ⊨ T formulation as the canonical statement. Currently the three tier completeness theorems MPL.hilbert_alg_complete (Cslib/Logics/Propositional/Semantics/Algebra/HilbertCompleteness.lean:57), IPL.hilbert_alg_complete (:80), and CPL.hilbert_alg_complete (:105) fold each logic's axioms into the algebra class (GHAValid/HAValid/BAValid) rather than carrying a v ⊨ T hypothesis. Introduce a single theory-parametric completeness theorem of the form: Derivable Axioms φ ↔ ∀ (H) [GeneralizedHeytingAlgebra H] (v) (bot_val), AlgTValid (AxiomTheory Axioms) v bot_val → AlgEvaluate v bot_val φ = ⊤, for any Axioms with [MinimalAxioms Axioms], and recover the three existing tier theorems as corollaries. The AlgTValid predicate already exists (Cslib/Logics/Propositional/Semantics/Algebra.lean:149) but is currently unused; the Lindenbaum scaffolding (HilbertLindenbaumAlgebra, canonicalV, canonicalBotVal, canonicalV_spec, hilbertLindenbaumMk_eq_top_iff in Semantics/Algebra/HilbertLindenbaum.lean) is already parametric in the axiom set with [MinimalAxioms Axioms], so the machinery largely exists. Work needed: (1) soundness direction must discharge axioms from the AlgTValid hypothesis instead of the per-tier *_alg_axiom_sound lemmas (Semantics/Algebra/Soundness.lean); (2) a new lemma that the canonical/Lindenbaum valuation satisfies AlgTValid (AxiomTheory Axioms); (3) the corollary bridges showing v ⊨ IntPropAxiom / PropositionalAxiom force the Heyting/Boolean (bot_val = ⊥) specializations to recover HAValid/BAValid. This matches the shape of Thomas Waring's Theory.complete. Verify the full CI pipeline stays green and existing tier theorems remain (as corollaries).",
       "created": "2026-06-24T23:38:46Z",
-      "last_updated": "2026-06-24T23:38:46Z",
+      "last_updated": "2026-06-25T00:00:00Z",
       "artifacts": [],
-      "session_id": "sess_1782344326_7392ed_341"
+      "session_id": "sess_1782344326_7392ed_341",
+      "completion_summary": "Theory-parametric algebraic completeness: hilbert_alg_complete_theory (Derivable Axioms φ ↔ ∀ GHA v bot_val, v ⊨[bot_val] AxiomTheory Axioms → AlgEvaluate v bot_val φ = ⊤) with MPL/IPL/CPL tier theorems recovered as corollaries. AlgTValid adopted as canonical v ⊨ T predicate. Reinstated on main after revert 886a5df4; rebuilt green (646 jobs, 0 sorries, 0 new axioms)."
     },
     {
       "project_number": 335,

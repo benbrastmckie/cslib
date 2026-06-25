@@ -11,7 +11,7 @@ next_project_number: 343
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,316,321,341,342 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,316,321,342 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,317,332 | 36,37,180,290,299,316 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275 | 39,40 | Foundations |
 
@@ -42,7 +42,6 @@ next_project_number: 343
   └─ 332 [IMPLEMENTING] — Prove the normalization termination theorem for CSLib Theory.Deri
 316 [PARTIAL] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
-341 [NOT STARTED] — Restate propositional algebraic completeness theory-parametricall
 
 ### Temporal Logic
 
@@ -73,7 +72,7 @@ next_project_number: 343
 ---
 
 ### 341. Theory parametric completeness
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

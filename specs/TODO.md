@@ -39,7 +39,7 @@ next_project_number: 343
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
-  └─ 332 [PARTIAL] — Prove the normalization termination theorem for CSLib Theory.Deri
+  └─ 332 [IMPLEMENTING] — Prove the normalization termination theorem for CSLib Theory.Deri
 316 [PARTIAL] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
 341 [NOT STARTED] — Restate propositional algebraic completeness theory-parametricall
@@ -166,9 +166,10 @@ next_project_number: 343
 ---
 
 ### 332. Normalization termination proof
-- **Status**: [PARTIAL]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Dependencies**: Task 290
+- **Research**: [332_normalization_termination_proof/reports/03_commuting-and-wf-bridge.md]
 - **Plan**: [332_normalization_termination_proof/plans/05_termination-plan-v5.md]
 
 **Description**: Prove the normalization termination theorem for CSLib Theory.Derivation: d.normalize.redexWeight = 0 (the 1 sorry remaining in Normalization.lean line 1083). The proof requires well-founded induction on a (cutrank, total_cut_length) lexicographic measure following Prawitz 1965, Ch. III-IV. Key obstacle: subsOne can increase derivation height, breaking fuel-sufficiency arguments. Needs ~200-300 lines of infrastructure: cutrank definition, cut_length measure, strict decrease lemma for reduceRoot, and the main induction. File: Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean. Depends on 290.

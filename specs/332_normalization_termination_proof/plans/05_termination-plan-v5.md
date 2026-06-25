@@ -2,9 +2,9 @@
 
 - **Task**: 332 — Prove the normalization termination theorem for CSLib `Theory.Derivation`
 - **Status**: [IN PROGRESS]
-- **Effort**: ~2 hours remaining (Phases A, B committed green; B-h8 in progress; C, D, E remaining)
+- **Effort**: ~2 hours remaining (Phases 1, 2 committed green; Phase 3 in progress; Phases 4, 5, 6 remaining)
 - **Dependencies**: Task 333 (module refactor) — **COMPLETED** (`28d3ac65`); Task 290 is [PARTIAL]
-  and shares this exact termination obligation (it closes automatically once Phase D lands).
+  and shares this exact termination obligation (it closes automatically once Phase 5 lands).
 - **Research Inputs**: reports/01_termination-research.md; reports/02_lit-termination-strategy.md
   (height-free DM measure); reports/03_commuting-and-wf-bridge.md (commuting-case tactics + WF bridge)
 - **Artifacts**: plans/01–03 (superseded); plans/04_termination-plan-v4.md (superseded — its
@@ -53,14 +53,14 @@ declarations by name, not line number.**
 
 `Normalization/Termination.lean` builds **green with exactly 2 sorries**:
 1. `reduceRoot_decreases_normMeasure`, case **h_8** (impE·orE commuting) — isolated as a documented
-   sorry pending Phase B-h8.
-2. `normalize_isStronglyNormal` — the pre-existing fuel sorry, to be **deleted** in Phase D.
+   sorry pending Phase 3.
+2. `normalize_isStronglyNormal` — the pre-existing fuel sorry, to be **deleted** in Phase 5.
 
 Proved and committed (green):
-- **Measure infra** (Phase A, `352c04dd`): `nodeCount`, `maximalFormulas` (+ ~12 lemmas),
+- **Measure infra** (Phase 1, `352c04dd`): `nodeCount`, `maximalFormulas` (+ ~12 lemmas),
   `subsOne_new_redex_complexity_lt`, `commutingSum`, `maximalFormulas_sn_eq_zero`, `reduceRootSubSN`,
   the `Multiset.isDershowitzMannaLT_*` helpers, `normMeasure`, `normMeasure_wf`.
-- **Decrease lemma 7/8** (Phase B, `7ef4ea42`): `reduceRoot_decreases_normMeasure` cases h_1/h_4/h_5
+- **Decrease lemma 7/8** (Phase 2, `7ef4ea42`): `reduceRoot_decreases_normMeasure` cases h_1/h_4/h_5
   (substitution β), h_2/h_3 (conjunction β), h_6/h_7 (andE·orE commuting); plus weakening-preservation
   helpers `nodeCount_weak`, `nodeCount_weakCtx`, `commutingSum_weak`, `commutingSum_weakCtx`. The
   lemma carries a local `set_option maxHeartbeats 1200000`.
@@ -68,11 +68,11 @@ Proved and committed (green):
 ## Goals & Non-Goals
 
 **Goals**:
-- Close h_8 of `reduceRoot_decreases_normMeasure` (Phase B-h8).
-- Prove `exists_stronglyNormal_form` by `WellFounded.induction normMeasure_wf` (Phase C).
+- Close h_8 of `reduceRoot_decreases_normMeasure` (Phase 3).
+- Prove `exists_stronglyNormal_form` by `WellFounded.induction normMeasure_wf` (Phase 4).
 - Re-point `subformula_property` at `exists_stronglyNormal_form`; delete the fuel
-  `normalize_isStronglyNormal` and any now-dead fuel lemmas (Phase D).
-- Sorry-free, axiom-clean `Normalization/` passing full CSLib CI (Phase E).
+  `normalize_isStronglyNormal` and any now-dead fuel lemmas (Phase 5).
+- Sorry-free, axiom-clean `Normalization/` passing full CSLib CI (Phase 6).
 
 **Non-Goals**:
 - The `2^height` fuel sufficiency proof (dead — growth is hyper-exponential, report 03 §B.4).
@@ -92,29 +92,31 @@ Proved and committed (green):
 
 ## Implementation Phases
 
+**Dependency Analysis**:
+
 | Wave | Phase | Blocked by |
 |------|-------|------------|
-| — | A, B | (COMPLETED, committed green) |
-| 1 | B-h8 | — |
-| 2 | C | B-h8 |
-| 3 | D | C |
-| 4 | E | D |
+| — | 1, 2 | (COMPLETED, committed green) |
+| 1 | 3 | — |
+| 2 | 4 | Phase 3 |
+| 3 | 5 | Phase 4 |
+| 4 | 6 | Phase 5 |
 
-### Phase A: Recover DM-measure infrastructure [COMPLETED] (`352c04dd`)
+### Phase 1: Recover DM-measure infrastructure [COMPLETED]
 
 Ported `nodeCount`, `maximalFormulas` (+ lemmas), `subsOne_new_redex_complexity_lt`, `commutingSum`,
 `maximalFormulas_sn_eq_zero`, `reduceRootSubSN`, `isDershowitzMannaLT_*` helpers, `normMeasure`,
 `normMeasure_wf` into `Termination.lean`; added `import Mathlib.Data.Multiset.DershowitzManna`.
 Green (627 jobs), no new sorries.
 
-### Phase B: Strict-decrease lemma, 7/8 cases [COMPLETED] (`7ef4ea42`)
+### Phase 2: Strict-decrease lemma, 7/8 cases [COMPLETED]
 
 `reduceRoot_decreases_normMeasure`: h_1/h_4/h_5 (substitution β via `subsOne_new_redex_complexity_lt`
 + `Prod.Lex.left`), h_2/h_3 (conjunction β), h_6/h_7 (andE·orE commuting via `maximalFormulas`-equality
 + `Prod.Lex.right` + `commutingSum` decrease). Added `nodeCount_weak(_Ctx)` / `commutingSum_weak(_Ctx)`.
 Green, h_8 isolated as documented sorry.
 
-### Phase B-h8: Close the impE·orE commuting case [IN PROGRESS]
+### Phase 3: Close the impE·orE commuting case [IN PROGRESS]
 
 **Goal**: prove h_8 of `reduceRoot_decreases_normMeasure`.
 
@@ -132,7 +134,7 @@ Green, h_8 isolated as documented sorry.
 
 **Verification**: build green; only the fuel sorry remains.
 
-### Phase C: `exists_stronglyNormal_form` via WF induction [NOT STARTED]
+### Phase 4: `exists_stronglyNormal_form` via WF induction [NOT STARTED]
 
 **Goal**: prove `exists_stronglyNormal_form (d) : ∃ d', d'.isStronglyNormal = true` (report 03 §B.4
 Route 1).
@@ -152,7 +154,7 @@ Route 1).
 
 **Verification**: `exists_stronglyNormal_form` compiles axiom-clean.
 
-### Phase D: Bridge `subformula_property`; delete the fuel sorry [NOT STARTED]
+### Phase 5: Bridge `subformula_property`; delete the fuel sorry [NOT STARTED]
 
 **Goal**: eliminate the last sorry.
 
@@ -172,7 +174,7 @@ Route 1).
 
 **Verification**: zero sorry; `subformula_property` axiom-clean.
 
-### Phase E: CI verification and cleanup [NOT STARTED]
+### Phase 6: CI verification and cleanup [NOT STARTED]
 
 **Tasks**:
 - [ ] `lake build` (full); `lake exe checkInitImports`; `lake exe lint-style`; `lake lint`;
@@ -203,20 +205,20 @@ Route 1).
 
 | Helper | Need | Status |
 |---|---|---|
-| `nodeCount_weak`, `nodeCount_weakCtx` | weakening preserves nodeCount (h_8) | **present** (Phase B) |
-| `commutingSum_weak`, `commutingSum_weakCtx` | weakening preserves commutingSum (h_8) | **present** (Phase B) |
-| `maximalFormulas_weakCtx`, `maximalFormulas_sn_eq_zero` | h_8 / SN ⇒ mf = 0 | **present** (Phase A) |
+| `nodeCount_weak`, `nodeCount_weakCtx` | weakening preserves nodeCount (h_8) | **present** (Phase 2) |
+| `commutingSum_weak`, `commutingSum_weakCtx` | weakening preserves commutingSum (h_8) | **present** (Phase 2) |
+| `maximalFormulas_weakCtx`, `maximalFormulas_sn_eq_zero` | h_8 / SN ⇒ mf = 0 | **present** (Phase 1) |
 | `commutingSum_sn_eq_zero` | h_8: SN ⇒ commutingSum = 0 | **to write** (mirror `maximalFormulas_sn_eq_zero`) |
-| `reduceRoot_none_subSN_isStronglyNormal` (or reuse `redexWeight_zero_sn`) | Phase C base case | reuse existing |
-| `normSubterms` | Phase C step 1 | to write |
-| `exists_stronglyNormal_form` | Phase C main | to write |
+| `reduceRoot_none_subSN_isStronglyNormal` (or reuse `redexWeight_zero_sn`) | Phase 4 base case | reuse existing |
+| `normSubterms` | Phase 4 step 1 | to write |
+| `exists_stronglyNormal_form` | Phase 4 main | to write |
 
-No new imports beyond `Mathlib.Data.Multiset.DershowitzManna` (Phase A). No axioms. No `2^height`
+No new imports beyond `Mathlib.Data.Multiset.DershowitzManna` (Phase 1). No axioms. No `2^height`
 fuel proof. No confluence.
 
-## Rollback / Contingency
+## Rollback/Contingency
 
-1. **Green commits are the baseline**: Phase A (`352c04dd`) and Phase B (`7ef4ea42`) are green; restore
+1. **Green commits are the baseline**: Phase 1 (`352c04dd`) and Phase 2 (`7ef4ea42`) are green; restore
    from the latest green commit on trouble. Never restore the red monolith state.
 2. **If h_8 resists**: keep it isolated as the documented sorry (current committed state); the rest of
    the decrease lemma stands. Do not let the file go red.

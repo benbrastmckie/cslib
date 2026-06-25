@@ -1024,6 +1024,60 @@ private theorem Theory.Derivation.maximalFormulas_sn_eq_zero
       have h1 := ih hd.1; have h2 := ihE hd.2
       simp only [maximalFormulas] at h1 ⊢; rw [h2]; simpa using h1
 
+/-- A strongly normal derivation contains no commuting conversions, hence its `commutingSum`
+is zero: the `nodeCount + ...` summand is contributed exactly at the commuting-conversion
+positions (`andE1`/`andE2` of `orE`, `impE` of `orE`) that `isStronglyNormal` forbids. -/
+private theorem Theory.Derivation.commutingSum_sn_eq_zero
+    {G : Ctx Atom} {A : Proposition Atom} (d : T.Derivation G A)
+    (hd : d.isStronglyNormal = true) : d.commutingSum = 0 := by
+  induction d with
+  | ax _ | ass _ => rfl
+  | andI _ D₁ D₂ ih₁ ih₂ =>
+    simp only [isStronglyNormal, Bool.and_eq_true] at hd
+    simp [commutingSum, ih₁ hd.1, ih₂ hd.2]
+  | andE1 _ D ih =>
+    cases D with
+    | andI _ _ _ => simp [isStronglyNormal] at hd
+    | orE _ _ _ _ => simp [isStronglyNormal] at hd
+    | ax _ | ass _ => simp only [commutingSum]
+    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp only [isStronglyNormal] at hd
+      simpa only [commutingSum] using ih hd
+  | andE2 _ D ih =>
+    cases D with
+    | andI _ _ _ => simp [isStronglyNormal] at hd
+    | orE _ _ _ _ => simp [isStronglyNormal] at hd
+    | ax _ | ass _ => simp only [commutingSum]
+    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp only [isStronglyNormal] at hd
+      simpa only [commutingSum] using ih hd
+  | orI1 _ D ih => simp only [isStronglyNormal] at hd; simpa only [commutingSum] using ih hd
+  | orI2 _ D ih => simp only [isStronglyNormal] at hd; simpa only [commutingSum] using ih hd
+  | orE _ D DA DB ih ihA ihB =>
+    cases D with
+    | orI1 _ _ => simp [isStronglyNormal] at hd
+    | orI2 _ _ => simp [isStronglyNormal] at hd
+    | orE _ _ _ _ => simp [isStronglyNormal] at hd
+    | ax _ | ass _ =>
+      simp only [isStronglyNormal, Bool.and_eq_true] at hd
+      simp [commutingSum, ihA hd.1.2, ihB hd.2]
+    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp only [isStronglyNormal, Bool.and_eq_true] at hd
+      have h1 := ih hd.1.1; have h2 := ihA hd.1.2; have h3 := ihB hd.2
+      simp only [commutingSum] at h1 ⊢; omega
+  | impI _ D ih => simp only [isStronglyNormal] at hd; simpa only [commutingSum] using ih hd
+  | impE D E ih ihE =>
+    cases D with
+    | impI _ _ => simp [isStronglyNormal] at hd
+    | orE _ _ _ _ => simp [isStronglyNormal] at hd
+    | ax _ | ass _ =>
+      simp only [isStronglyNormal, Bool.and_eq_true] at hd
+      simp [commutingSum, ihE hd.2]
+    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      simp only [isStronglyNormal, Bool.and_eq_true] at hd
+      have h1 := ih hd.1; have h2 := ihE hd.2
+      simp only [commutingSum] at h1 ⊢; omega
+
 /-- The strong-normality invariant on the *immediate* sub-derivations consumed by
 `reduceRoot`. This is the genuine side condition under which a single root reduction strictly
 decreases `normMeasure`:
@@ -1260,13 +1314,22 @@ private theorem Theory.Derivation.reduceRoot_decreases_normMeasure
     refine Prod.Lex.right _ ?_
     cases Dcc <;> simp_all [commutingSum, nodeCount, hDA_cs, hDB_cs] <;> omega
   · -- h_8: impE (orE G D DA DB) E  →  orE G D (impE DA E') (impE DB E')
-    -- TODO(task 332, h_8): the commuting conversion impE (orE D DA DB) E duplicates E into
-    -- both orE branches, so maximalFormulas gains an extra copy of E.maximalFormulas. The
-    -- equality (and the commutingSum decrease) holds because reduceRootSubSN here gives
-    -- (impE DA E').isStronglyNormal ∧ (impE DB E').isStronglyNormal, which forces E itself SN,
-    -- hence E.maximalFormulas = 0 and E.commutingSum = 0. Fix: extract Ecc SN from hA, then
-    -- maximalFormulas_sn_eq_zero + maximalFormulas_weakCtx kill the extra copy. Full near-complete
-    -- attempt preserved in handoffs/termination-h8-attempt-needs-Esn.lean.bak.
+    -- reduceRootSubSN gives:
+    --   hA : (DAcc.impE (weakCtx ⋯ Ecc)).isStronglyNormal = true
+    --   hB : (DBcc.impE (weakCtx ⋯ Ecc)).isStronglyNormal = true
+    -- Since DAcc is SN and NOT impI or orE, hA forces (weakCtx ⋯ Ecc).isStronglyNormal.
+    -- Hence: (weakCtx ⋯ Ecc).maximalFormulas = ∅ (maximalFormulas_sn_eq_zero + _weakCtx)
+    --         (weakCtx ⋯ Ecc).commutingSum = 0   (commutingSum_sn_eq_zero  + _weakCtx)
+    -- With Ecc's extra copies gone, maximalFormulas equality holds and commutingSum decreases
+    -- by (orE G Dcc DAcc DBcc).nodeCount ≥ 1.
+    -- TODO(task 332, Phase 3): h_8 is the last open decrease case. The E-SN approach is correct
+    -- (commutingSum_sn_eq_zero is proved above; reduceRootSubSN's hA forces E strongly normal, so
+    -- Ecc.maximalFormulas = 0 and Ecc.commutingSum = 0, cancelling the duplicated-E copies). The
+    -- blocker is purely tactic performance: nesting cases DAcc × DBcc × Dcc with simp_all is a
+    -- ~250-branch whnf blowup (times out even at 1.2M heartbeats). The fix is the Phase-2 structure:
+    -- prove E-SN facts + per-side haves (hDA_mf/hDB_mf/hDA_cs/hDB_cs) as standalone bounded `have`s,
+    -- then a SINGLE `cases Dcc` for the mf-equality and commutingSum-decrease. Red attempt preserved
+    -- in handoffs/termination-h8-Esn-attempt-red.lean.bak.
     sorry
 
 /-- `normalize` produces strongly normal derivations.

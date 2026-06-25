@@ -128,7 +128,7 @@ case from an `AlgTValid` hypothesis instead of the per-tier `*_alg_axiom_sound` 
 
 ---
 
-### Phase 2: Canonical valuation satisfies `AlgTValid` (`canonicalV_algTValid`) [IN PROGRESS]
+### Phase 2: Canonical valuation satisfies `AlgTValid` (`canonicalV_algTValid`) [COMPLETED]
 
 **Goal**: Add the one-liner lemma that the canonical/Lindenbaum valuation models
 `AxiomTheory Axioms`, reusing the already-existing `canonicalV_axiom_top`.

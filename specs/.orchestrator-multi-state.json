@@ -1,52 +1,53 @@
 {
-  "session_id": "sess_1782335770_b2cbfa",
+  "session_id": "sess_1782352018_d29255",
   "task_numbers": [
-    299,
-    300
+    290,
+    332,
+    333
   ],
   "waves": [
     [
-      299
+      333
     ],
     [
-      300
+      332
+    ],
+    [
+      290
     ]
   ],
   "dependency_graph": {
-    "299": [],
-    "300": [
-      "299"
+    "333": [],
+    "332": [
+      "333"
+    ],
+    "290": [
+      "332"
     ]
   },
-  "max_cycles": 10,
-  "cycle_count": 3,
+  "max_cycles": 15,
+  "cycle_count": 2,
   "failed_tasks": [],
-  "completed_tasks": [
-    336,
-    337
-  ],
+  "completed_tasks": [],
   "current_statuses": {
-    "299": "implementing",
-    "300": "not_started",
-    "336": "completed",
-    "337": "completed",
-    "316": "partial",
-    "241": "implementing",
-    "301": "implementing"
+    "290": "partial",
+    "332": "implementing",
+    "333": "not_started"
   },
   "task_dirs": {
-    "299": "specs/299_modal_k_tableau",
-    "300": "specs/300_modal_extensions_t_s4_s5"
+    "290": "specs/290_nd_normalization_subformula_property",
+    "332": "specs/332_normalization_termination_proof",
+    "333": "specs/333_normalization_module_refactor"
   },
   "research_agents": {
-    "299": "cslib-research-agent",
-    "300": "cslib-research-agent"
+    "290": "cslib-research-agent",
+    "332": "cslib-research-agent",
+    "333": "cslib-research-agent"
   },
   "implement_agents": {
-    "299": "cslib-implementation-agent",
-    "300": "cslib-implementation-agent"
+    "290": "cslib-implementation-agent",
+    "332": "cslib-implementation-agent",
+    "333": "cslib-implementation-agent"
   },
-  "notes": "Stopped by user mid task-299 phase 4. 299 phases 1-3 green & committed; phase 4 Soundness.lean RED (WIP rewrite, ~10-12 proof errors documented in handoff+plan). 300 blocked on 299. Resume: /orchestrate 299-300.",
-  "notes_316": "OVERFLOW x4 on intuitionistic induction. 316-cont reverted FreshAbove+8->4 work to HEAD (LOST from tree; design preserved in report05/plan06). Restored green HEAD baseline (4 sorries: 919,945,950,961). NEW STRATEGY: commit-after-each-step, NO revert, rebuild FreshAbove in committable slices.",
-  "strategy": "difficulty-stratified micro-dispatch + commit-each-green-step + no-revert"
+  "strategy": "refactor-first reorder (user-approved): revert to green phase-0 baseline, run 333 refactor first, then complete termination proof in small Termination.lean module, then close 332/290"
 }

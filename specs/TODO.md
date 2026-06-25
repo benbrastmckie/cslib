@@ -12,7 +12,7 @@ next_project_number: 349
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,180,226,241,278,290,299,301,316,321,342,343,345 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,317,332,344,346,347,348 | 36,37,180,290,299,316,343,345 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 2 | 39,40,181,215,300,317,332,344,348 | 36,37,180,290,299,316,343,345 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -44,8 +44,6 @@ next_project_number: 349
   └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
 343 [NOT STARTED] — Rewire the propositional validity/consequence predicates to facto
   └─ 344 [NOT STARTED] — Add algebraic STRONG (theory-level) completeness for propositiona
-  └─ 346 [NOT STARTED] — Provide a bot_val-as-field model for propositional algebraic sema
-  └─ 347 [NOT STARTED] — Coordinate the naming of the propositional theory-satisfaction pr
   └─ 348 [NOT STARTED] — Restate the propositional Glivenko and conservativity results the
 345 [NOT STARTED] — Reconcile the two parallel encodings of the propositional logics 
   └─ 348 [NOT STARTED] — Restate the propositional Glivenko and conservativity results the (see above)
@@ -78,26 +76,6 @@ next_project_number: 349
 
 ---
 
-### 347. Satisfaction naming notation
-- **Status**: [NOT STARTED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 343
-
-**Description**: Coordinate the naming of the propositional theory-satisfaction predicate with the rest of Cslib/Logics. The name Satisfies is ALREADY used library-wide for POINTWISE satisfaction of a single formula in a model: Cslib/Logics/Modal/Basic.lean (Satisfies m w φ), Cslib/Logics/Temporal/Semantics/Satisfies.lean (Satisfies M t φ), Cslib/Logics/LTL/Semantics/Satisfies.lean, Cslib/Logics/HML/LogicalEquivalence.lean; and ⊨ denotes validity/consequence (Cslib/Logics/Bimodal/Semantics/Validity.lean: ⊨ φ and Γ ⊨ φ). The task-343 'generic Satisfies' is a DIFFERENT notion: a valuation satisfying a whole THEORY (∀ B ∈ T, eval B = ⊤). Goal: pick a distinct, non-colliding name for the theory-satisfaction def (e.g. SatisfiesTheory or ModelsTheory) while keeping the v ⊨ T notation, aligned with the existing per-logic Satisfies/⊨ conventions so the propositional layer reads consistently with Modal/Temporal/LTL/Bimodal rather than overloading Satisfies. Decide whether the current task-341 notation v ⊨[bot_val] T should be deprecated/aliased to v ⊨ T once the generic predicate lands. Produce a short naming/notation convention note. Best settled before or alongside task 343's implementation. Files: Semantics/Algebra.lean, the new generic-predicate file, plus a convention note. Relates to 343.
-
----
-
-### 346. Bot val pointed algebra model
-- **Status**: [NOT STARTED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 343
-
-**Description**: Provide a bot_val-as-field model for propositional algebraic semantics using the existing pointed-algebra machinery, as the principled type-level complement to task 343's function-absorption of bot_val. Minimal logic's GHA (Johansson) semantics has no bottom, so AlgEvaluate carries an explicit bot_val : H (Cslib/Logics/Propositional/Semantics/Algebra.lean) which then rides along in AlgTValid (notation v ⊨[bot_val] T). The repo already has PointedBrouwerian and PointedBrouwerianCompleteness (Cslib/Logics/Propositional/Semantics/Algebra/), i.e. a GHA bundled with a designated bottom. Goal: offer a pointed-GHA model in which bot_val is ALGEBRA DATA (a field) rather than a loose parameter, yielding a bot_val-FREE v ⊨ T at the type level (the model carries its own bottom), and relate it to the loose-parameter form. Trade-off to evaluate and document: cleaner types vs. loss of definitional equality with the current AlgEvaluate (a bundled structure introduces projections that would force simp/unfold edits in task 341's proofs) — decide which form is canonical. Mostly wiring given the existing Pointed* files. Files: PointedBrouwerian.lean, PointedBrouwerianCompleteness.lean, Algebra.lean. Verify CI green. Complements 343.
-
----
-
 ### 345. Reconcile logic encodings isminimal
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
@@ -124,7 +102,7 @@ next_project_number: 349
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 341
 
-**Description**: Rewire the propositional validity/consequence predicates to factor through a single generic theory-satisfaction predicate, formalizing the 'v ⊨ T belongs to the model layer' design (Waring's theory-as-set spirit, with 341's AlgTValid as one instance). CANONICAL DEFINITION (semantics layer, e.g. Cslib/Logics/Propositional/Semantics/): def Satisfies (eval : PL.Proposition Atom → β) (T : PL.Theory Atom) : Prop := ∀ B ∈ T, eval B = ⊤, with notation v ⊨ T, where eval is the already-(v, bot_val)-applied evaluator. KEY CONSTRAINT: keep Satisfies generic over the partially-applied eval FUNCTION (AlgEvaluate v bot_val : Proposition → H), NOT a bundled Model structure — a structure introduces .eval projections that break definitional equality and would force simp/unfold edits across 341's four proofs. With the function-style def, AlgTValid T v bot_val := Satisfies (AlgEvaluate v bot_val) T is DEFINITIONALLY EQUAL to its current body (∀ B ∈ T, AlgEvaluate v bot_val B = ⊤), so task 341's lemmas (alg_theory_soundness, canonicalV_algTValid, hilbert_alg_complete_theory, the three tier corollaries) need zero proof changes. SCOPE: (1) add the generic Satisfies def + v ⊨ T notation + reusable lemmas (monotone in T, behaviour on ∅ and ∪); (2) redefine AlgTValid (Cslib/Logics/Propositional/Semantics/Algebra.lean, originally task 227) as the GHA instance — one line, defeq; (3) OPTIONAL/main payoff: factor GHAValid/HAValid/BAValid (Algebra.lean) and SemanticEntails/ISemanticEntails/MSemanticEntails (Semantics/SemanticConsequence.lean) through Satisfies so the three predicate families share one primitive. ORTHOGONAL/UNCHANGED: Waring's Theory + IsIntuitionistic/IsClassical inclusion typeclasses (Defs.lean) handle the logic-STRENGTH axis and are not touched. RATIONALE: clears rule-of-three — ≥3 satisfaction relations already exist (Evaluate, BoolEvaluate, AlgEvaluate, plus Kripke forcing); bot_val is a GHA-specific artifact that should be model data, not part of the canonical satisfaction predicate's identity. This is a design task for contemplation: evaluate whether the unified Satisfies fights the existing AlgEvaluate signature in practice before committing. Verify full CSLib CI stays green and 341's theorems are unchanged (defeq). Depends on 341.
+**Description**: Rewire the propositional validity/consequence predicates to factor through a single generic theory-satisfaction predicate `v ⊨ T`, defined at the right level of generality. CANONICAL DEFINITION (propositional semantics layer): def SatisfiesTheory (eval : PL.Proposition Atom → β) (T : PL.Theory Atom) : Prop := ∀ B ∈ T, eval B = ⊤, with notation v ⊨ T, where eval is the ALREADY-(v, bot_val)-applied evaluator. KEY CONSTRAINT: keep the predicate generic over the partially-applied eval FUNCTION (e.g. AlgEvaluate v bot_val : Proposition → H), NOT a bundled Model/algebra structure — a structure introduces .eval projections that break definitional equality and would force simp/unfold edits across task 341's four proofs. With the function-style def, AlgTValid T v bot_val := SatisfiesTheory (AlgEvaluate v bot_val) T is DEFINITIONALLY EQUAL to its current body (∀ B ∈ T, AlgEvaluate v bot_val B = ⊤), so 341's lemmas (alg_theory_soundness, canonicalV_algTValid, hilbert_alg_complete_theory, the three tier corollaries) need zero proof changes. bot_val thus rides INSIDE the evaluator (model data), never in the relation's signature. GENERALITY BOUNDARY — instantiate/factor across the four evaluators that already exist, and no further: Evaluate (Prop), BoolEvaluate (Bool), AlgEvaluate (GHA), and Kripke forcing (IForces). Concretely rewire GHAValid/HAValid/BAValid (Cslib/Logics/Propositional/Semantics/Algebra.lean) and SemanticEntails/ISemanticEntails/MSemanticEntails (Cslib/Logics/Propositional/Semantics/SemanticConsequence.lean) to factor through it, and add reusable lemmas (monotone in T, behaviour on ∅ and ∪). EXPLICITLY EXCLUDE cross-logic lifting: Modal/Temporal/LTL have genuinely different model types (Kripke world, temporal frame, ω-sequence) — a shared abstraction there is out of scope; defer until this propositional pattern proves out. NAMING DECISION (settle as part of this task): the bare name `Satisfies` is already taken for POINTWISE single-formula satisfaction in Modal/Basic.lean, Temporal/Semantics/Satisfies.lean, LTL/Semantics/Satisfies.lean, HML/LogicalEquivalence.lean, and `⊨` denotes validity/consequence in Bimodal/Semantics/Validity.lean; so name the theory-satisfaction def distinctly (e.g. SatisfiesTheory or ModelsTheory) while keeping the v ⊨ T notation, and decide whether the current task-341 notation v ⊨[bot_val] T should be deprecated/aliased to v ⊨ T. REJECTED ALTERNATIVE (do not pursue): bundling bot_val as a field of a pointed algebra (via the existing PointedBrouwerian machinery) was considered and declined — a bundled structure breaks the definitional equality above; the function-style evaluator is canonical. ORTHOGONAL/UNCHANGED: Waring's Theory + IsIntuitionistic/IsClassical inclusion typeclasses (Defs.lean) handle the logic-STRENGTH axis and are not touched here. Verify full CSLib CI stays green and 341's theorems are unchanged (defeq).
 
 ---
 

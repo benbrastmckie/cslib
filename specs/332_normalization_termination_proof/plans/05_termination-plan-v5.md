@@ -64,6 +64,8 @@ Proved and committed (green):
   (substitution β), h_2/h_3 (conjunction β), h_6/h_7 (andE·orE commuting); plus weakening-preservation
   helpers `nodeCount_weak`, `nodeCount_weakCtx`, `commutingSum_weak`, `commutingSum_weakCtx`. The
   lemma carries a local `set_option maxHeartbeats 1200000`.
+- **`commutingSum_sn_eq_zero`** (Phase 3 partial, `fb63f8ff`): SN ⇒ `commutingSum = 0`, mirroring
+  `maximalFormulas_sn_eq_zero`. Banked for the h_8 close (currently unused while h_8 is isolated).
 
 ## Goals & Non-Goals
 
@@ -120,15 +122,24 @@ Green, h_8 isolated as documented sorry.
 
 **Goal**: prove h_8 of `reduceRoot_decreases_normMeasure`.
 
-**Tasks**:
-- [ ] Extract `(Ecc.weakCtx _).isStronglyNormal = true` from `h_subsSN`'s
-      `(impE DAcc (Ecc.weakCtx _)).isStronglyNormal` conjunct.
-- [ ] Derive `Ecc.maximalFormulas = ∅` (`maximalFormulas_sn_eq_zero` + `maximalFormulas_weakCtx`)
-      and `Ecc.commutingSum = 0` (add `commutingSum_sn_eq_zero` if absent, mirroring
-      `maximalFormulas_sn_eq_zero`).
-- [ ] Reuse the four correct `have`s (`hDA_mf`/`hDB_mf`/`hDA_cs`/`hDB_cs`) from the preserved attempt;
-      feed `E`-SN facts into the final `maximalFormulas`-equality rewrite and the `commutingSum`
-      `omega` step so the duplicated-`E` copies cancel.
+**The math is validated; the blocker is purely tactic performance.** Two dedicated agent
+dispatches confirmed the approach: `reduceRootSubSN` here gives `(impE DA E').isStronglyNormal ∧
+(impE DB E').isStronglyNormal`, forcing `E` strongly normal, so `Ecc.maximalFormulas = 0`
+(`maximalFormulas_sn_eq_zero` + `maximalFormulas_weakCtx`) and `Ecc.commutingSum = 0`
+(`commutingSum_sn_eq_zero` + `commutingSum_weakCtx`) — the duplicated-`E` copies cancel and the
+measure decreases by `(orE …).nodeCount ≥ 1`. Both helper lemmas now exist and compile.
+
+**Why it is still open**: the latest attempt nested `cases DAcc × cases DBcc × cases Dcc` with
+`simp_all`, a ~250-branch whnf blowup that times out even at `maxHeartbeats 1200000`. The red
+attempt is preserved in `handoffs/termination-h8-Esn-attempt-red.lean.bak`.
+
+**Remaining task — the synthesis recipe (avoids the blowup)**:
+- [x] `commutingSum_sn_eq_zero` proved and banked (`fb63f8ff`).
+- [ ] Rewrite h_8 with the Phase-2 structure: prove `hEcc_sn`/`hEcc_mf`/`hEcc_cs` and the per-side
+      `hDA_mf`/`hDB_mf`/`hDA_cs`/`hDB_cs` as **standalone bounded `have`s** (each does one local
+      `cases DAcc`/`cases DBcc`), then a **single `cases Dcc`** for the `maximalFormulas`-equality
+      rewrite and another single `cases Dcc <;> simp_all […] <;> omega` for the `commutingSum`
+      decrease. No nesting ⇒ ~10 branches per step instead of ~250.
 - [ ] `lake build …Normalization.Termination`; `reduceRoot_decreases_normMeasure` fully sorry-free
       → file back to 1 sorry (fuel).
 

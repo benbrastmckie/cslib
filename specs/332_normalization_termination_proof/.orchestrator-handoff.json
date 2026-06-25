@@ -1,10 +1,27 @@
 {
   "status": "partial",
-  "summary": "Phase 2a (v2) complete: subsOne_new_redex_complexity_lt proved by input-induction; build green with 1 sorry",
-  "blockers": [],
-  "continuation_context": {"completed_phases": [0,1,"2a"], "next_phase": "2b"},
-  "next_action_hint": "continue",
+  "summary": "DM-measure termination proof: phases 1-2 complete (commit 352c04dd, 7ef4ea42); reduceRoot_decreases_normMeasure has 7/8 cases proved. Phase 3 partial (fb63f8ff): commutingSum_sn_eq_zero banked; h_8 (impE-orE commuting) math validated but blocked on tactic-performance (nested cases whnf blowup, times out at 1.2M heartbeats). Re-isolated h_8 as documented sorry to keep build green.",
+  "blockers": [
+    "h_8 of reduceRoot_decreases_normMeasure: approach proven correct (E strongly normal from reduceRootSubSN => duplicated-E copies vanish) but the nested cases DAcc x DBcc x Dcc + simp_all is a ~250-branch whnf blowup. Needs the synthesis recipe: standalone bounded per-side haves + single cases Dcc (see plan Phase 3)."
+  ],
+  "sorry_inventory": {
+    "reduceRoot_decreases_normMeasure_h_8": "impE-orE commuting case; synthesis recipe in plan v5 Phase 3; red attempt in handoffs/termination-h8-Esn-attempt-red.lean.bak",
+    "normalize_isStronglyNormal_fuel": "pre-existing dead fuel sorry (d.normalize.redexWeight = 0); to be DELETED in Phase 5 (re-point subformula_property at exists_stronglyNormal_form)"
+  },
+  "continuation_context": {
+    "file": "Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean",
+    "completed_phases": [1, 2, "3-partial"],
+    "next_phase": "3 (close h_8 via synthesis recipe), then 4 (exists_stronglyNormal_form), 5 (bridge + delete fuel sorry), 6 (CI)",
+    "build_state": "green, 2 sorries",
+    "preserved_attempts": [
+      "handoffs/termination-h8-Esn-attempt-red.lean.bak (E-SN math correct, tactic blowup)",
+      "handoffs/termination-h8-attempt-needs-Esn.lean.bak (clean per-side haves, missing E-SN)"
+    ]
+  },
+  "artifacts": [
+    {"path": "Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean", "type": "lean", "summary": "green, 2 sorries (h_8 + fuel); DM-measure infra + 7/8 decrease cases + commutingSum_sn_eq_zero"}
+  ],
   "phases_completed": 2,
-  "phases_total": 7,
-  "artifacts": []
+  "phases_total": 6,
+  "session_id": "sess_1782352018_d29255"
 }

@@ -153,9 +153,8 @@
       "dependencies": [
         290
       ],
-      "last_updated": "2026-06-24T14:44:42Z",
-      "session_id": "sess_1782302542_261dfa_332",
-      "completion_summary": "Termination proof (d.normalize.redexWeight = 0) remains open. Green with 1 documented sorry in Normalization/Termination.lean:448. Three automated single-dispatch attempts all hit context overflow — the ~200-300 line well-founded-recursion proof + exploration exceeds a single agent context. Needs a phased multi-dispatch proof campaign (per plans/04_termination-plan-v4.md) or human-led effort.",
+      "last_updated": "2026-06-25T06:33:01Z",
+      "session_id": "sess_1782352018_d29255",
       "artifacts": [
         {
           "type": "report",

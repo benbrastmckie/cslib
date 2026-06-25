@@ -24,7 +24,7 @@
         {
           "path": "specs/341_theory_parametric_completeness/summaries/01_theory-parametric-completeness-summary.md",
           "type": "summary",
-          "summary": "Theory-parametric algebraic completeness fully implemented: alg_theory_soundness, canonicalV_algTValid, hilbert_alg_complete_theory + MPL/IPL/CPL corollaries. 0 sorries, 0 new axioms."
+          "summary": "Theory-parametric algebraic completeness implemented — 4 phases, 0 sorries, 0 new axioms, tier theorems recovered as corollaries"
         }
       ],
       "session_id": "sess_1782345866_50afaf",

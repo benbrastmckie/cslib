@@ -1,5 +1,5 @@
 ---
-next_project_number: 342
+next_project_number: 343
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 342
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,316,321,341 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,316,321,341,342 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,317,332 | 36,37,180,290,299,316 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275,333 | 39,40,332 | Foundations |
 
@@ -50,6 +50,7 @@ next_project_number: 342
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 241 [IMPLEMENTING] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 301 [IMPLEMENTING] — Implement tableau decision procedure for temporal logic (Cslib.Lo
+342 [NOT STARTED] — Migrate the Burgess argument-order convention to the Pnueli conve
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
   └─ 275 [BLOCKED] — Prove that Bimodal TM is conservative over Temporal BX for tempor
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
@@ -61,6 +62,16 @@ next_project_number: 342
 ### Uncategorized
 
 ## Tasks
+
+### 342. Temporal burgess to pnueli convention
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: Migrate the Burgess argument-order convention to the Pnueli convention for untl and snce throughout Cslib/Logics/Temporal. Temporal currently uses the Burgess order (untl event guard, snce event guard) where the event holds at the witness point and the guard holds at intermediate points, with derived operators someFuture = untl _ top and somePast = snce _ top. Swap to the standard Pnueli order (untl guard event, snce guard event) used in Cslib/Logics/LTL so the two logics agree. Scope: Syntax/Formula.lean constructors, notation, and the convention docstring; Semantics (Satisfies, Validity); the BX axiom schemata in ProofSystem/Axioms.lean; all derived-operator definitions (someFuture, somePast, allFuture, allPast, always, sometimes); every downstream proof in Metalogic (Soundness, Completeness, DenseSoundness, DenseCompleteness, MCS, DeductionTheorem, Chronicle/* including TruthLemma, ConservativeExtension); and the LTL Embedding (Cslib/Logics/LTL/Embedding.lean, Formula.toTemporal) which currently bridges the convention swap. Verify the whole tree builds sorry-free via lake build and the CSLib CI pipeline. Large mechanical-but-pervasive refactor across the entire Temporal subtree.
+
+---
 
 ### 341. Theory parametric completeness
 - **Status**: [NOT STARTED]

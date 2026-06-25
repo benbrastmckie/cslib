@@ -1,6 +1,16 @@
 {
-  "next_project_number": 342,
+  "next_project_number": 343,
   "active_projects": [
+    {
+      "project_number": 342,
+      "project_name": "temporal_burgess_to_pnueli_convention",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Migrate the Burgess argument-order convention to the Pnueli convention for untl and snce throughout Cslib/Logics/Temporal. Temporal currently uses the Burgess order (untl event guard, snce event guard) where the event holds at the witness point and the guard holds at intermediate points, with derived operators someFuture = untl _ top and somePast = snce _ top. Swap to the standard Pnueli order (untl guard event, snce guard event) used in Cslib/Logics/LTL so the two logics agree. Scope: Syntax/Formula.lean constructors, notation, and the convention docstring; Semantics (Satisfies, Validity); the BX axiom schemata in ProofSystem/Axioms.lean; all derived-operator definitions (someFuture, somePast, allFuture, allPast, always, sometimes); every downstream proof in Metalogic (Soundness, Completeness, DenseSoundness, DenseCompleteness, MCS, DeductionTheorem, Chronicle/* including TruthLemma, ConservativeExtension); and the LTL Embedding (Cslib/Logics/LTL/Embedding.lean, Formula.toTemporal) which currently bridges the convention swap. Verify the whole tree builds sorry-free via lake build and the CSLib CI pipeline. Large mechanical-but-pervasive refactor across the entire Temporal subtree.",
+      "topic": "Temporal Logic",
+      "created": "2026-06-25T02:33:01Z",
+      "last_updated": "2026-06-25T02:33:01Z"
+    },
     {
       "project_number": 341,
       "project_name": "theory_parametric_completeness",

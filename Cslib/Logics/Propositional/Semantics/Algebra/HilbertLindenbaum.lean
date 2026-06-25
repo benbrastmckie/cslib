@@ -635,7 +635,7 @@ This is a one-liner reusing `canonicalV_axiom_top`, used in the theory-parametri
 completeness theorem `hilbert_alg_complete_theory`. -/
 lemma canonicalV_algTValid
     (Axioms : Proposition Atom → Prop) [MinimalAxioms Axioms] :
-    AlgTValid (AxiomTheory Axioms) (canonicalV Axioms) (canonicalBotVal Axioms) := by
+    canonicalV Axioms ⊨[canonicalBotVal Axioms] AxiomTheory Axioms := by
   intro B hB; exact canonicalV_axiom_top Axioms B (by simpa [AxiomTheory] using hB)
 
 /-! ## Heyting Algebra (EFQ) -/

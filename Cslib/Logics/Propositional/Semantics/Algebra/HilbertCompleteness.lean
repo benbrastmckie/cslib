@@ -49,7 +49,7 @@ universe u
 
 /-- **Theory-Parametric Hilbert-Level Algebraic Completeness**.
 A formula `φ` is derivable from axioms `Axioms` if and only if every GHA valuation that
-models the axiom theory `AlgTValid (AxiomTheory Axioms) v bot_val` satisfies `φ`.
+models the axiom theory (`v ⊨[bot_val] AxiomTheory Axioms`) satisfies `φ`.
 
 **Forward (soundness)**: Apply `alg_theory_soundness` with empty context and the supplied
 `AlgTValid` hypothesis.
@@ -66,7 +66,7 @@ theorem hilbert_alg_complete_theory {Atom : Type u}
     {φ : PL.Proposition Atom} :
     Derivable Axioms φ ↔
     ∀ (H : Type u) [GeneralizedHeytingAlgebra H] (v : Atom → H) (bot_val : H),
-      AlgTValid (AxiomTheory Axioms) v bot_val → AlgEvaluate v bot_val φ = ⊤ := by
+      v ⊨[bot_val] AxiomTheory Axioms → AlgEvaluate v bot_val φ = ⊤ := by
   constructor
   · intro ⟨d⟩ H _ v bot_val hT
     exact alg_theory_soundness d v bot_val hT (fun _ h => nomatch h)

@@ -192,7 +192,7 @@ theorem min_alg_soundness
 
 /-- **Theory-Parametric Algebraic Soundness**: If `Γ ⊢ φ` via axioms `Axioms`, then for
 every GHA `H`, assignment `v`, and bottom value `bot_val`, if the valuation `v` models the
-axiom theory `AlgTValid (AxiomTheory Axioms) v bot_val` and every formula in `Γ` evaluates
+axiom theory (`v ⊨[bot_val] AxiomTheory Axioms`) and every formula in `Γ` evaluates
 to `⊤`, then `φ` evaluates to `⊤`.
 
 This generalises `min_alg_soundness` by discharging the axiom case from the `AlgTValid`
@@ -203,7 +203,7 @@ theorem alg_theory_soundness
     (d : DerivationTree Axioms Γ φ)
     {H : Type*} [GeneralizedHeytingAlgebra H]
     (v : Atom → H) (bot_val : H)
-    (hT : AlgTValid (AxiomTheory Axioms) v bot_val)
+    (hT : v ⊨[bot_val] AxiomTheory Axioms)
     (h_ctx : ∀ ψ, ψ ∈ Γ → AlgEvaluate v bot_val ψ = ⊤) :
     AlgEvaluate v bot_val φ = ⊤ := by
   match d with

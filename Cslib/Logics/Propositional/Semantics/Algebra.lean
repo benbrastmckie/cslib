@@ -150,4 +150,9 @@ def AlgTValid {H : Type*} [GeneralizedHeytingAlgebra H]
     (T : PL.Theory Atom) (v : Atom → H) (bot_val : H) : Prop :=
   ∀ B ∈ T, AlgEvaluate v bot_val B = ⊤
 
+/-- Notation `v ⊨[bot_val] T` for `AlgTValid T v bot_val`: the valuation `v` with designated
+bottom `bot_val` models the theory `T`. The bottom value is carried explicitly in brackets
+because a `GeneralizedHeytingAlgebra` has no primitive `⊥`. -/
+scoped notation:50 v " ⊨[" bot_val "] " T:50 => AlgTValid T v bot_val
+
 end Cslib.Logic.PL

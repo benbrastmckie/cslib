@@ -11,6 +11,7 @@ import Cslib.Init
 public import Cslib.Logics.Propositional.Semantics.Algebra
 public import Cslib.Logics.Propositional.ProofSystem.Derivation
 public import Cslib.Logics.Propositional.ProofSystem.Axioms
+public import Cslib.Logics.Propositional.NaturalDeduction.Equivalence
 
 /-! # Algebraic Soundness for Propositional Logic
 
@@ -187,6 +188,36 @@ theorem min_alg_soundness
     exact h1
   | .weakening _ _ ψ d' h_sub =>
     exact min_alg_soundness d' v bot_val
+      (fun x hx => h_ctx x (h_sub x hx))
+
+/-- **Theory-Parametric Algebraic Soundness**: If `Γ ⊢ φ` via axioms `Axioms`, then for
+every GHA `H`, assignment `v`, and bottom value `bot_val`, if the valuation `v` models the
+axiom theory `AlgTValid (AxiomTheory Axioms) v bot_val` and every formula in `Γ` evaluates
+to `⊤`, then `φ` evaluates to `⊤`.
+
+This generalises `min_alg_soundness` by discharging the axiom case from the `AlgTValid`
+hypothesis rather than from a per-tier `*_alg_axiom_sound` lemma. -/
+theorem alg_theory_soundness
+    {Axioms : PL.Proposition Atom → Prop} [MinimalAxioms Axioms]
+    {Γ : List (PL.Proposition Atom)} {φ : PL.Proposition Atom}
+    (d : DerivationTree Axioms Γ φ)
+    {H : Type*} [GeneralizedHeytingAlgebra H]
+    (v : Atom → H) (bot_val : H)
+    (hT : AlgTValid (AxiomTheory Axioms) v bot_val)
+    (h_ctx : ∀ ψ, ψ ∈ Γ → AlgEvaluate v bot_val ψ = ⊤) :
+    AlgEvaluate v bot_val φ = ⊤ := by
+  match d with
+  | .ax _ ψ h_ax => exact hT ψ (by simpa [AxiomTheory] using h_ax)
+  | .assumption _ ψ h_mem => exact h_ctx ψ h_mem
+  | .modus_ponens _ ψ χ d₁ d₂ =>
+    have h1 := alg_theory_soundness d₁ v bot_val hT h_ctx
+    have h2 := alg_theory_soundness d₂ v bot_val hT h_ctx
+    simp only [AlgEvaluate] at h1
+    rw [himp_eq_top_iff] at h1
+    rw [h2, top_le_iff] at h1
+    exact h1
+  | .weakening _ _ ψ d' h_sub =>
+    exact alg_theory_soundness d' v bot_val hT
       (fun x hx => h_ctx x (h_sub x hx))
 
 /-- **Algebraic Soundness for Minimal Logic (derivable)**: If `⊢ φ` via `MinPropAxiom`,

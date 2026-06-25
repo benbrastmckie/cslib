@@ -1,5 +1,5 @@
 ---
-next_project_number: 343
+next_project_number: 344
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 343
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,316,321,342 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,343 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,317,332 | 36,37,180,290,299,316 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275 | 39,40 | Foundations |
 
@@ -42,6 +42,7 @@ next_project_number: 343
   └─ 332 [IMPLEMENTING] — Prove the normalization termination theorem for CSLib Theory.Deri
 316 [PARTIAL] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
+343 [NOT STARTED] — Rewire the propositional validity/consequence predicates to facto
 
 ### Temporal Logic
 
@@ -60,6 +61,16 @@ next_project_number: 343
 ### Uncategorized
 
 ## Tasks
+
+### 343. Rewire validity through satisfies
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 341
+
+**Description**: Rewire the propositional validity/consequence predicates to factor through a single generic theory-satisfaction predicate, formalizing the 'v ⊨ T belongs to the model layer' design (Waring's theory-as-set spirit, with 341's AlgTValid as one instance). CANONICAL DEFINITION (semantics layer, e.g. Cslib/Logics/Propositional/Semantics/): def Satisfies (eval : PL.Proposition Atom → β) (T : PL.Theory Atom) : Prop := ∀ B ∈ T, eval B = ⊤, with notation v ⊨ T, where eval is the already-(v, bot_val)-applied evaluator. KEY CONSTRAINT: keep Satisfies generic over the partially-applied eval FUNCTION (AlgEvaluate v bot_val : Proposition → H), NOT a bundled Model structure — a structure introduces .eval projections that break definitional equality and would force simp/unfold edits across 341's four proofs. With the function-style def, AlgTValid T v bot_val := Satisfies (AlgEvaluate v bot_val) T is DEFINITIONALLY EQUAL to its current body (∀ B ∈ T, AlgEvaluate v bot_val B = ⊤), so task 341's lemmas (alg_theory_soundness, canonicalV_algTValid, hilbert_alg_complete_theory, the three tier corollaries) need zero proof changes. SCOPE: (1) add the generic Satisfies def + v ⊨ T notation + reusable lemmas (monotone in T, behaviour on ∅ and ∪); (2) redefine AlgTValid (Cslib/Logics/Propositional/Semantics/Algebra.lean, originally task 227) as the GHA instance — one line, defeq; (3) OPTIONAL/main payoff: factor GHAValid/HAValid/BAValid (Algebra.lean) and SemanticEntails/ISemanticEntails/MSemanticEntails (Semantics/SemanticConsequence.lean) through Satisfies so the three predicate families share one primitive. ORTHOGONAL/UNCHANGED: Waring's Theory + IsIntuitionistic/IsClassical inclusion typeclasses (Defs.lean) handle the logic-STRENGTH axis and are not touched. RATIONALE: clears rule-of-three — ≥3 satisfaction relations already exist (Evaluate, BoolEvaluate, AlgEvaluate, plus Kripke forcing); bot_val is a GHA-specific artifact that should be model data, not part of the canonical satisfaction predicate's identity. This is a design task for contemplation: evaluate whether the unified Satisfies fights the existing AlgEvaluate signature in practice before committing. Verify full CSLib CI stays green and 341's theorems are unchanged (defeq). Depends on 341.
+
+---
 
 ### 342. Temporal burgess to pnueli convention
 - **Status**: [NOT STARTED]

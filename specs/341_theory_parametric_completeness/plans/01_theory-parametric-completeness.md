@@ -154,7 +154,7 @@ case from an `AlgTValid` hypothesis instead of the per-tier `*_alg_axiom_sound` 
 
 ---
 
-### Phase 3: Parametric theorem + tier corollary bridges [NOT STARTED]
+### Phase 3: Parametric theorem + tier corollary bridges [COMPLETED]
 
 **Goal**: Add `hilbert_alg_complete_theory` to `HilbertCompleteness.lean` and re-derive the three
 tier theorems as corollaries via explicit two-direction proofs, with mandatory universe pinning.
@@ -208,7 +208,7 @@ tier theorems as corollaries via explicit two-direction proofs, with mandatory u
 
 ---
 
-### Phase 4: Full CI pipeline verification [NOT STARTED]
+### Phase 4: Full CI pipeline verification [IN PROGRESS]
 
 **Goal**: Run the complete CSLib CI pipeline and confirm green with zero debt and all three tier
 theorems preserved.

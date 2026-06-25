@@ -159,7 +159,7 @@
     {
       "project_number": 333,
       "project_name": "normalization_module_refactor",
-      "status": "not_started",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Refactor and split the 1099-line Normalization.lean into well-organized submodules following CSLib conventions. Proposed split: (1) Cslib/Logics/Propositional/NaturalDeduction/Normalization/Basic.lean — isNormal, isStronglyNormal predicates, SubformulaProperty; (2) Normalization/Reduction.lean — reduceRoot, normalizeAux, normalize; (3) Normalization/Termination.lean — redexWeight, sn_redexWeight_zero, redexWeight_zero_sn, normalizeAux_fixpoint, normalize_isStronglyNormal; (4) Normalization/SubformulaProperty.lean — subformula_property_of_isStronglyNormal, subformula_property. Clean up API: review private vs public visibility, ensure naming follows CSLib NOTATION.md and CONTRIBUTING.md conventions. Depends on 332.",
       "dependencies": [

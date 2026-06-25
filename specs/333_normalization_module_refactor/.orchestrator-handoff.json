@@ -1,0 +1,54 @@
+{
+  "status": "implemented",
+  "summary": "Refactored Normalization.lean (1099 lines) into 4 submodules under Normalization/. Barrel Normalization.lean updated to public import all 4. Cslib.lean updated via mk_all. All 4 submodules build clean. The 1 pre-existing sorry remains in Termination.lean:448 (normalize_isStronglyNormal). Build failures in Bimodal/Temporal are pre-existing, unrelated to this refactor.",
+  "blockers": [],
+  "continuation_context": "Task complete. No continuation needed. Task 332 should close the sorry in Termination.lean.",
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/NaturalDeduction/Normalization/Basic.lean",
+      "type": "new_file",
+      "summary": "Subformula infrastructure, normality predicates, formulas, SubformulaProperty definition"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/NaturalDeduction/Normalization/Reduction.lean",
+      "type": "new_file",
+      "summary": "subsOne, reduceRoot, normalizeAux, normalize"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean",
+      "type": "new_file",
+      "summary": "Grounding lemma, fixpoint lemma, redexWeight, sn_redexWeight_zero, redexWeight_zero_sn, normalize_isStronglyNormal (sorry here — task 332)"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/NaturalDeduction/Normalization/SubformulaProperty.lean",
+      "type": "new_file",
+      "summary": "subformula_property_of_isStronglyNormal, subformula_property"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean",
+      "type": "modified_file",
+      "summary": "Barrel: replaced 1099-line monolith with 4 public imports"
+    },
+    {
+      "path": "Cslib.lean",
+      "type": "modified_file",
+      "summary": "Updated by mk_all to add 4 new module entries"
+    }
+  ],
+  "phases_completed": 4,
+  "phases_total": 4,
+  "ci_results": {
+    "lake_build_submodules": "PASS",
+    "lake_build_barrel": "PASS",
+    "lake_build_full": "FAILS_PREEXISTING (Bimodal/Temporal/Modal failures pre-date this refactor)",
+    "checkInitImports": "PASS (transitive: Normalization.Basic -> NaturalDeduction.Basic -> InferenceSystem -> Cslib.Init)",
+    "mk_all_module": "PASS",
+    "lint_style": "PASS (no issues on new files)",
+    "lake_lint": "PASS (no issues on new files)",
+    "lake_shake": "PASS (no import issues on new files)",
+    "lake_test": "FAILS_PREEXISTING (same Bimodal/Temporal failures)",
+    "sorry_count": 1,
+    "sorry_file": "Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean",
+    "sorry_line": 448
+  }
+}

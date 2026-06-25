@@ -397,6 +397,12 @@ public import Cslib.Logics.Modal.ProofSystem.Instances.S4
 public import Cslib.Logics.Modal.ProofSystem.Instances.S5
 public import Cslib.Logics.Modal.ProofSystem.Instances.T
 public import Cslib.Logics.Modal.ProofSystem.Instances.TB
+public import Cslib.Logics.Modal.Tableau.Branch
+public import Cslib.Logics.Modal.Tableau.Closure
+public import Cslib.Logics.Modal.Tableau.Defs
+public import Cslib.Logics.Modal.Tableau.Rules
+public import Cslib.Logics.Modal.Tableau.Saturation
+public import Cslib.Logics.Modal.Tableau.Soundness
 public import Cslib.Logics.Propositional.CurryHoward.Defs
 public import Cslib.Logics.Propositional.CurryHoward.Isomorphism
 public import Cslib.Logics.Propositional.Defs
@@ -417,6 +423,10 @@ public import Cslib.Logics.Propositional.NaturalDeduction.Equivalence
 public import Cslib.Logics.Propositional.NaturalDeduction.FromHilbert
 public import Cslib.Logics.Propositional.NaturalDeduction.HilbertDerivedRules
 public import Cslib.Logics.Propositional.NaturalDeduction.Normalization
+public import Cslib.Logics.Propositional.NaturalDeduction.Normalization.Basic
+public import Cslib.Logics.Propositional.NaturalDeduction.Normalization.Reduction
+public import Cslib.Logics.Propositional.NaturalDeduction.Normalization.SubformulaProperty
+public import Cslib.Logics.Propositional.NaturalDeduction.Normalization.Termination
 public import Cslib.Logics.Propositional.ProofSystem.Axioms
 public import Cslib.Logics.Propositional.ProofSystem.Derivation
 public import Cslib.Logics.Propositional.ProofSystem.FragmentAxioms
@@ -521,6 +531,12 @@ public import Cslib.Logics.Temporal.Syntax.BigConj
 public import Cslib.Logics.Temporal.Syntax.Context
 public import Cslib.Logics.Temporal.Syntax.Formula
 public import Cslib.Logics.Temporal.Syntax.Subformulas
+public import Cslib.Logics.Temporal.Tableau.Branch
+public import Cslib.Logics.Temporal.Tableau.Closure
+public import Cslib.Logics.Temporal.Tableau.Defs
+public import Cslib.Logics.Temporal.Tableau.Rules
+public import Cslib.Logics.Temporal.Tableau.Saturation
+public import Cslib.Logics.Temporal.Tableau.TimeOrdering
 public import Cslib.Logics.Temporal.Theorems
 public import Cslib.MachineLearning.PACLearning.Defs
 public import Cslib.MachineLearning.PACLearning.VCDimension

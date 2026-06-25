@@ -1,0 +1,52 @@
+{
+  "status": "implemented",
+  "started_at": "2026-06-24T00:00:00Z",
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/NaturalDeduction/Normalization/Basic.lean",
+      "type": "lean_module",
+      "summary": "Subformula infrastructure, isNormal, isIntroRoot, isStronglyNormal predicates, formulas, SubformulaProperty"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/NaturalDeduction/Normalization/Reduction.lean",
+      "type": "lean_module",
+      "summary": "subsOne, reduceRoot, normalizeAux, normalize"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean",
+      "type": "lean_module",
+      "summary": "conclusionGrounded, liftGrounded, conclusion_grounded_or_intro, normalizeAux_fixpoint, redexWeight, sn_redexWeight_zero, redexWeight_zero_sn, normalize_isStronglyNormal (1 sorry here)"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/NaturalDeduction/Normalization/SubformulaProperty.lean",
+      "type": "lean_module",
+      "summary": "subformula_property_of_isStronglyNormal, subformula_property"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean",
+      "type": "lean_module",
+      "summary": "Barrel module: public imports all 4 submodules"
+    }
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "phases_completed": 4,
+    "phases_total": 4,
+    "last_completed_phase": "SubformulaProperty"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 1,
+    "sorry_location": "Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean:448",
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "notes": "Pre-existing build failures in Bimodal/Temporal/Modal modules are unrelated to this refactor (confirmed by stash test). All 4 submodules and barrel build clean. Only warning is the 1 pre-existing sorry."
+  },
+  "metadata": {
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+  }
+}

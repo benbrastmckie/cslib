@@ -1,7 +1,7 @@
 # Implementation Plan: Task #341
 
 - **Task**: 341 - Theory-parametric algebraic completeness for propositional logic
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 3.5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/341_theory_parametric_completeness/reports/01_theory-parametric-completeness.md

@@ -2,13 +2,46 @@
 
 - **Task**: 332 - Prove normalization termination theorem for CSLib Theory.Derivation
 - **Status**: [IN PROGRESS]
-- **Effort**: 3 hours remaining (Phases 0/1/2a/2b-β complete on disk)
+- **Effort**: see "Session Update 2026-06-24" below for the accurate on-disk state
+- **Last accurate sync**: 2026-06-24 (Session Update section). The body below (written against the
+  monolith) is retained for its strategy and verified tactics but its on-disk-state claims are
+  superseded by the Session Update.
 - **Dependencies**: None (Task 290 is [PARTIAL] with this same sorry; this task directly resolves it)
 - **Research Inputs**: reports/01_termination-research.md; reports/02_lit-termination-strategy.md (height-free DM measure); reports/03_commuting-and-wf-bridge.md (verified commuting-case tactics + WF bridge); handoffs/phase-2-handoff-20260624T163704Z.md
 - **Artifacts**: plans/01_termination-plan.md (superseded), plans/02_termination-plan-revised.md (superseded), plans/03_termination-plan-v3.md (superseded), plans/04_termination-plan-v4.md (this file)
 - **Standards**: plan-format.md, status-markers.md, artifact-management.md, tasks.md, literature-fidelity-policy.md
 - **Type**: cslib
 - **Lean Intent**: true
+
+## Session Update — 2026-06-24 (accurate on-disk state; supersedes drifted claims below)
+
+**Drift correction.** The "Ground-Truth On-Disk State" and "What Changed From v3" sections below
+were **optimistic and inaccurate**. The committed version they describe (`88862dd1`,
+monolithic `Normalization.lean`) was in fact **red** (whnf timeouts + an `apply` unification
+failure in `reduceRoot_decreases_normMeasure`) and carried **6 sorries** in that lemma — NOT
+"builds with 1 sorry and 7/8 cases proved." Only h_2/h_3 were actually closed there.
+
+**Structural change (task 333 ran first).** The 1099-line monolith was reverted to its green
+phase-0 baseline and **refactored into submodules** (task 333, committed `28d3ac65`):
+`Normalization/{Basic,Reduction,Termination,SubformulaProperty}.lean` + a barrel. All termination
+work now lives in `Normalization/Termination.lean`, NOT the monolith. Locate declarations by
+name; ignore the monolith line numbers below.
+
+**Actual phase status (this session, each a committed green milestone):**
+
+| Phase | Work | State |
+|-------|------|-------|
+| A | Recover DM-measure infra (nodeCount, maximalFormulas + lemmas, subsOne_new_redex_complexity_lt, commutingSum, maximalFormulas_sn_eq_zero, reduceRootSubSN, isDershowitzMannaLT helpers, normMeasure, normMeasure_wf) into Termination.lean | **DONE** — committed `352c04dd`, green |
+| B | `reduceRoot_decreases_normMeasure`: h_1/h_4/h_5 (subst β), h_2/h_3 (conj β), h_6/h_7 (andE commuting) proved; added nodeCount_weak(_Ctx)/commutingSum_weak(_Ctx); local `maxHeartbeats 1200000` | **DONE (7/8)** — committed `7ef4ea42`, green, h_8 isolated as documented sorry |
+| B-h8 | h_8 (impE-orE commuting): the conversion duplicates `E` into both branches, so the maximalFormulas equality + commutingSum decrease need `E` strongly normal (`E.maximalFormulas = 0`, `E.commutingSum = 0`), obtainable from `reduceRootSubSN`'s `(impE DA E').isStronglyNormal ∧ (impE DB E').isStronglyNormal`. May need a `commutingSum_sn_eq_zero` helper. Near-complete attempt in `handoffs/termination-h8-attempt-needs-Esn.lean.bak` | **IN PROGRESS** |
+| C | `normSubterms` + `exists_stronglyNormal_form` via `WellFounded.induction normMeasure_wf` (Phase 3 below) | NOT STARTED |
+| D | Re-point `subformula_property` at `exists_stronglyNormal_form`; **delete** the dead fuel `normalize_isStronglyNormal` sorry (`d.normalize.redexWeight = 0` — the 2^height fuel route is dead, see Non-Goals) → 0 sorries (Phase 4 below) | NOT STARTED |
+| E | Full CSLib CI (Phase 5 below) | NOT STARTED |
+
+**Current file state:** `Normalization/Termination.lean` builds green with **2 sorries** — h_8
+(above) and the pre-existing fuel `normalize_isStronglyNormal` (deleted in Phase D). The
+overarching strategy (height-free DM measure → `exists_stronglyNormal_form` → re-point
+`subformula_property`, Route 1) is unchanged and being followed.
 
 ## Overview
 

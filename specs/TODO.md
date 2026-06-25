@@ -1,5 +1,5 @@
 ---
-next_project_number: 350
+next_project_number: 353
 ---
 
 # TODO
@@ -11,8 +11,8 @@ next_project_number: 350
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,343 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,317,332,344 | 36,37,180,290,299,316,343 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,343,350,352 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,317,332,344,351 | 36,37,180,290,299,316,343,350 | Bimodal Porting, Foundations, Modal Logic, ... |
 | 3 | 41,275,345 | 39,40,344 | Foundations, Propositional Logic |
 | 4 | 348 | 345 | Propositional Logic |
 
@@ -29,6 +29,8 @@ next_project_number: 350
 ### Foundations
 
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
+350 [NOT STARTED] — Discharge the deduction theorem and Lindenbaum extension generica
+  └─ 351 [NOT STARTED] — Formalize the weakest-logic characterization of the deduction the
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Modal Logic
@@ -43,7 +45,7 @@ next_project_number: 350
   └─ 332 [IMPLEMENTING] — Prove the normalization termination theorem for CSLib Theory.Deri
 316 [PARTIAL] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
-343 [NOT STARTED] — Establish the canonical theory-satisfaction predicate v ⊨ T for p
+343 [PLANNED] — Establish the canonical theory-satisfaction predicate v ⊨ T for p
   └─ 344 [NOT STARTED] — Add algebraic STRONG (context/theory) completeness for the HILBER
     └─ 345 [NOT STARTED] — Reconcile the two strength encodings on the Hilbert substrate and
       └─ 348 [NOT STARTED] — Restate Glivenko and conservativity theory-parametrically against
@@ -62,9 +64,43 @@ next_project_number: 350
 
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
 
+### Algebraic Semantics
+
+352 [NOT STARTED] — Prove CPL is conservative over its classical implicational fragme
+
 ### Uncategorized
 
 ## Tasks
+
+### 352. Cpl conservative over classical implicational fragment
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Algebraic Semantics
+- **Dependencies**: None
+
+**Description**: Prove CPL is conservative over its classical implicational fragment CPL⟨→,⊤⟩, extending the propositional conservativity chain to the classical side, as raised in the Zulip CSLib Propositional Logic thread by Matthew Doty (2026-06-25): "There's also CPL⟨→, ⊤⟩ ... Is it worth proving CPL is conservative over that?" (https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/near/606508446). The classical implicational fragment Hilbert system is K (φ → ψ → φ), S, and a classical implicational axiom (e.g. Peirce's law ((φ → ψ) → φ) → φ; the research phase must pin down the exact axiomatization — Matthew's thread message lists candidate schemata that should be verified). The existing chain (completed tasks 310/311/312/322) closes the intuitionistic and minimal sides — IPL⟨→,⊤⟩ ⊂ IPL⟨∧,→,⊤⟩ ⊂ IPL⟨∧,→,⊥,⊤⟩ ⊂ IPL and the MPL chain — via Hilbert-algebra / Brouwerian routes in Cslib/Logics/Propositional/Semantics/Algebra/{ImpConservative,ConjImpConservative,ConservativeChain,MplConservativeChain,Hilbert}.lean, with fragment axioms in ProofSystem/FragmentAxioms.lean (ImpAxiom, ConjImpAxiom, ConjImpBotAxiom). For the classical implicational fragment the natural algebraic semantics are implication algebras / Tarski algebras; Matthew noted these are obscure and suggested traditional truth-assignment semantics may be the more natural route here ("I'm not about using algebraic semantics here, rather than traditional truth assignments") — the research/plan phase should evaluate both routes and pick the cleaner one. Deliver a cpl_conservative_over_imp (classical) conservativity theorem analogous to the intuitionistic ipl_conservative_over_imp, adding the classical implicational fragment axiom set to FragmentAxioms.lean and extending the derivability subsumption chain. NOTE: Matthew himself flagged this as lower-interest ("not as interesting in terms of Curry-Howard or Category theory or anything"), so this is an optional/exploratory extension — confirm desirability before heavy investment. Files: Cslib/Logics/Propositional/ProofSystem/FragmentAxioms.lean, a new Semantics/Algebra/ClassicalImpConservative.lean (or a truth-assignment-based module), ConservativeChain.lean. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); existing chain preserved.
+
+---
+
+### 351. Deduction theorem weakest logic converse
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Foundations
+- **Dependencies**: Task 350
+
+**Description**: Formalize the weakest-logic characterization of the deduction theorem: prove the converse direction that no current Cslib result provides. Introduce an axiom class bundling Modus Ponens with the Deduction Theorem property (the HasDeductionTheorem-style hypothesis Γ ⊢ A → B ↔ A :: Γ ⊢ B, plus reflection/assumption) and prove it instances the implicational Hilbert core MinimalHilbert (= K, S, MP; Cslib/Foundations/Logic/ProofSystem.lean:342) by DERIVING the K axiom A → B → A and the S axiom (A → B → C) → (A → B) → A → C from DT + MP alone. Composed with the existing forward direction (MinimalHilbert ⇒ deduction theorem via list_deduction_theorem), this yields the equivalence characterizing IPL⟨→,⊤⟩ as the weakest logic admitting the deduction theorem, as proposed in the Zulip CSLib Temporal Logic thread by Matthew Doty (2026-06-25): "make another axiom class for the deduction theorem and modus ponens, and show that it instances the IPL⟨→,⊤⟩ class, since IPL⟨→,⊤⟩ is the weakest logic that proves the deduction theorem." (https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Temporal.20Logic/near/606511638). Currently NO converse result exists: every deductionTheorem/hasDeductionTheorem consumes the K and S axioms (h_implyK, h_implyS) as inputs to prove deduction; none derives them. Additionally, decouple the deduction-theorem machinery from [HasBot F]: the generic DerivationSystem/HasDeductionTheorem layer (Cslib/Foundations/Logic/Metalogic/Consistency.lean) lives under a [HasBot F] variable block although its content is purely implicational, so introduce or generalize to a ⊥-free implicational class (cf. existing ⊥-free classes ImpAxiom in Propositional/ProofSystem/FragmentAxioms.lean:84 and HasHilbertTree in Foundations/Logic/Metalogic/DeductionHelpers.lean:61) so purely-implicational systems inherit the deduction theorem without a spurious ⊥. Files: Cslib/Foundations/Logic/ProofSystem.lean, Cslib/Foundations/Logic/Metalogic/{Consistency,ListDeduction,DeductionHelpers}.lean, possibly a new Cslib/Foundations/Logic/Metalogic/DeductionCharacterization.lean. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Related to task 345 (MinimalAxioms/IsMinimal reconcile) and best done after or alongside task 350 (generic deduction-theorem consolidation).
+
+---
+
+### 350. Generic deduction theorem lindenbaum consolidation
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Foundations
+- **Dependencies**: None
+
+**Description**: Discharge the deduction theorem and Lindenbaum extension generically across all four logics (Propositional, Modal, Temporal, Bimodal), eliminating the 4x-duplicated hand proofs. The Foundations generic layer already provides a once-and-for-all deduction theorem (list_deduction_theorem in Cslib/Foundations/Logic/Metalogic/ListDeduction.lean:55, exposed as algebraic_has_deduction_theorem in GenericMCS.lean:65) requiring only [MinimalHilbert S] (= K, S, MP), a generic set_lindenbaum (Consistency.lean), and the MinimalHilbert-parametrized MCS-property quartet (MCSProperties.lean). The MCS quartet is already inherited generically, but the deduction theorem is still proved by hand four times and merely wrapped as the HasDeductionTheorem predicate: Propositional hasDeductionTheorem (Propositional/Metalogic/DeductionTheorem.lean:198), Modal hasDeductionTheorem (Modal/Metalogic/DeductionTheorem.lean:177), temporal_has_deduction_theorem (Temporal/Metalogic/DeductionTheorem.lean:167 plus DenseMCS.lean:266), and Bimodal deductionTheorem/bimodalHasDeductionTheorem (Bimodal/Metalogic/Core/DeductionTheorem.lean:161/225). Lindenbaum (prop_lindenbaum, modal_lindenbaum, temporal_lindenbaum, bimodal_lindenbaum) is likewise re-proved per logic via Zorn. Work: route each logic's HasDeductionTheorem instance through the generic algebraic_has_deduction_theorem (using the existing GenericMCSBridge.lean seams in Modal and Temporal, and adding equivalent bridges for Propositional and Bimodal), then delete the four hand proofs of the deduction theorem; likewise discharge each *_lindenbaum from the generic set_lindenbaum where the logic carries no extra structure. Preserve temporal/bimodal-specific witnesses (g_witness, h_witness, allFuture/allPast closure). Completes the consolidation begun in task 338 (which covered only MCS boilerplate for Propositional and Temporal), extending it to the deduction theorem and to Bimodal. Files: the four DeductionTheorem.lean files, the GenericMCSBridge.lean files, Cslib/Foundations/Logic/Metalogic/{ListDeduction,GenericMCS,Consistency}.lean. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); all downstream consumers (MCS, Completeness, Chronicle, TruthLemma) still compile sorry-free. Implements the Zulip CSLib Temporal Logic suggestion by Matthew Doty (prove the deduction theorem once via an axiom class and inherit it across all structural logics that extend the implicational core): https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Temporal.20Logic/near/606511638
+
+---
 
 ### 348. Glivenko conservativity theory parametric
 - **Status**: [NOT STARTED]
@@ -97,10 +133,12 @@ next_project_number: 350
 ---
 
 ### 343. Rewire validity through satisfies
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 341
+- **Research**: [343_rewire_validity_through_satisfies/reports/01_canonical-satisfies-predicate.md]
+- **Plan**: [343_rewire_validity_through_satisfies/plans/01_rewire-validity-satisfies.md]
 
 **Description**: Establish the canonical theory-satisfaction predicate v ⊨ T for propositional logic on the HILBERT/algebraic substrate, adopting the SHAPE of Waring's TValid (Semantics/Heyting.lean) while keeping cslib's PRIMITIVE .bot language and the bot_val parameter — the faithful minimal-logic semantics, since GHAValid quantifying ∀ bot_val means 'valid under every interpretation of ⊥' (Johansson/GHA algebras do not pin a bottom). Define v ⊨ T generically over the ALREADY-applied evaluator: SatisfiesTheory (eval : Proposition Atom → β) (T : Theory Atom) := ∀ A ∈ T, eval A = ⊤, notation v ⊨ T; with AlgTValid T v bot_val := SatisfiesTheory (AlgEvaluate v bot_val) T (DEFINITIONALLY EQUAL, so 341's Hilbert proofs are untouched). bot_val rides inside the evaluator, never in the predicate signature. Keep it generic over the eval FUNCTION, not a bundled Model (defeq). Generality boundary: factor Evaluate (Prop), BoolEvaluate (Bool), AlgEvaluate (GHA), Kripke forcing; EXCLUDE cross-logic (Modal/Temporal/LTL). Adopt uniform v ⊨ A / v ⊨ S / v ⊨ T notation; deprecate/alias v ⊨[bot_val] T. Rewire GHAValid/HAValid/BAValid (Algebra.lean) and SemanticEntails/ISemanticEntails/MSemanticEntails (SemanticConsequence.lean) to factor through it. This underpins the Hilbert completeness theorems (341 weak, 344 strong). CI green; 341 unchanged (defeq).
 

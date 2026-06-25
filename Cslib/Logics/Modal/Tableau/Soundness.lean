@@ -166,8 +166,8 @@ def accFreshInv
     (acc : Accessibility) : Prop :=
   ∀ w w', acc.hasEdge w w' → w < modalNextWorld b ∧ w' < modalNextWorld b
 
-/-- `accFreshInv` holds trivially for the empty accessibility relation. -/
 omit [DecidableEq Atom] [Hashable Atom] in
+/-- `accFreshInv` holds trivially for the empty accessibility relation. -/
 lemma accFreshInv_empty
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) :
     accFreshInv b Accessibility.empty := by
@@ -206,19 +206,20 @@ theorem modalStepBranch_preserves_sat
   cases sign with
   | pos =>
       have hpos : Satisfies m (f lbl) formula := hsf_b.1 rfl
-      -- Unfold propResult for pos formulas
-      simp only [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
-        modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable] at hsf
+      -- Unfold propResult for pos formulas (modalApplyOne exposes tryAllPropRules)
+      simp only [modalApplyOne] at hsf
       cases formula with
       | atom p =>
         -- No prop rule or modal rule applies to T(atom p)
-        simp at hsf
+        simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable] at hsf
       | bot =>
         -- T(⊥) means Satisfies m (f lbl) ⊥ = False, contradiction
         simp only [Satisfies] at hpos
       | box φ =>
         -- T(□φ): tryAllPropRules returns notApplicable, then boxPos fires
-        simp only [modalBoxOf?, modalDiaOf?] at hsf
+        simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable] at hsf
         -- boxPos: result = .persistent (boxPropagation b acc φ lbl)
         -- if boxPropagation is empty → notApplicable (simp eliminates)
         -- otherwise → persistent newForms
@@ -268,7 +269,9 @@ theorem modalStepBranch_preserves_sat
         | bot =>
           -- T(a → ⊥) = T(¬a): negPos rule fires → linear [F(a)@lbl]
           -- modalNegOf? (a → ⊥) = some a; negPos matches .pos, returns .linear [.neg a lbl]
-          simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+          simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+            modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+            Option.some.injEq, Prod.mk.injEq] at hsf
           obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
           subst hnewBs hnewAcc
           -- negPos fired: newForms = [⟨.neg, a, lbl⟩]
@@ -293,7 +296,9 @@ theorem modalStepBranch_preserves_sat
             | bot =>
               -- T((a1 → ⊥) → c) = T(¬a1 → c): modalOrOf? matches → orPos → branching
               -- orPos: branches = [[T(a1)@lbl], [T(c)@lbl]]
-              simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+              simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+                modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+                Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
               -- orPos: branches = [[⟨.pos, a1, lbl⟩], [⟨.pos, c, lbl⟩]]
@@ -323,7 +328,9 @@ theorem modalStepBranch_preserves_sat
             | atom _ | imp _ _ | box _ =>
               -- T((a1 → a2) → c) where a2 ≠ ⊥: modalImpOf? matches → impPos → branching
               -- impPos: branches = [[F(a)@lbl], [T(c)@lbl]] where a = a1 → a2
-              simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+              simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+                modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+                Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
               simp only [Satisfies] at hpos
@@ -348,7 +355,9 @@ theorem modalStepBranch_preserves_sat
                 · exact hb sf' hmem_old
           | atom _ | bot | box _ =>
             -- T(a → c) where a is atom/bot/box and c ≠ ⊥: modalImpOf? matches → impPos
-            simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+            simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+              modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+              Option.some.injEq, Prod.mk.injEq] at hsf
             obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
             subst hnewBs hnewAcc
             simp only [Satisfies] at hpos
@@ -373,19 +382,22 @@ theorem modalStepBranch_preserves_sat
               · exact hb sf' hmem_old
     | neg =>
       have hneg : ¬Satisfies m (f lbl) formula := hsf_b.2 rfl
-      simp only [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
-        modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable] at hsf
+      -- Unfold propResult for neg formulas (modalApplyOne exposes tryAllPropRules)
+      simp only [modalApplyOne] at hsf
       cases formula with
       | atom p =>
-        simp at hsf
+        simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable] at hsf
       | bot =>
         -- F(⊥): no rule applies (⊥ is not a negation, not an and/or/imp for neg)
-        simp at hsf
+        simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable] at hsf
       | box φ =>
         -- F(□φ): boxNeg rule → linear [F(φ)@w', boxProps, diaNegProps], newAcc = acc.addEdge lbl w'
         -- w' = modalNextWorld b
-        simp only [modalBoxOf?, modalDiaOf?] at hsf
-        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+          Option.some.injEq, Prod.mk.injEq] at hsf
         obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
         subst hnewBs hnewAcc
         -- boxNeg: w' = modalNextWorld b is fresh
@@ -606,7 +618,9 @@ theorem modalStepBranch_preserves_sat
         cases c with
         | bot =>
           -- F(a → ⊥) = F(¬a): negNeg rule fires → linear [T(a)@lbl]
-          simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+          simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+            modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+            Option.some.injEq, Prod.mk.injEq] at hsf
           obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
           subst hnewBs hnewAcc
           refine ⟨[⟨.pos, a, lbl⟩] ++ b, List.mem_cons_self _ _, W, m, f, hacc, ?_⟩
@@ -628,7 +642,9 @@ theorem modalStepBranch_preserves_sat
             cases a2 with
             | bot =>
               -- F((a1 → ⊥) → c) = F(¬a1 → c): modalOrOf? matches → orNeg → linear [F(a1)@lbl, F(c)@lbl]
-              simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+              simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+                modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+                Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
               refine ⟨[⟨.neg, a1, lbl⟩, ⟨.neg, c, lbl⟩] ++ b, List.mem_cons_self _ _,
@@ -682,7 +698,9 @@ theorem modalStepBranch_preserves_sat
               · exact hb sf' hmem_old
             | atom _ | imp _ _ | box _ =>
               -- F((a1 → a2) → c) where a2 ≠ ⊥: modalImpOf? matches → impNeg → linear [T(a)@lbl, F(c)@lbl]
-              simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+              simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+                modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+                Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
               -- impNeg: newForms = [⟨.pos, a, lbl⟩, ⟨.neg, c, lbl⟩] where a = a1 → a2
@@ -704,7 +722,9 @@ theorem modalStepBranch_preserves_sat
               · exact hb sf' hmem_old
           | atom _ | bot | box _ =>
             -- F(a → c) where a is atom/bot/box and c ≠ ⊥: impNeg fires → linear [T(a)@lbl, F(c)@lbl]
-            simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+            simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+              modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+              Option.some.injEq, Prod.mk.injEq] at hsf
             obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
             subst hnewBs hnewAcc
             refine ⟨[⟨.pos, a, lbl⟩, ⟨.neg, c, lbl⟩] ++ b,

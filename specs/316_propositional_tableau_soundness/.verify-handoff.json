@@ -1,0 +1,58 @@
+{
+  "status": "researched",
+  "agent_type": "cslib-research-hard-agent",
+  "session_id": "sess_1782335183_8462da_316verify",
+  "task_number": 316,
+  "reference_grounding_tier": 1,
+  "adversarial_verification_triggered": true,
+  "final_verdict": "APPROVE_WITH_CORRECTIONS",
+  "corrections": [
+    {
+      "id": 1,
+      "severity": "non-blocking",
+      "type": "citation-hygiene",
+      "detail": "references.bib lacks Fitting1983, Fitting2014, WaalerWallen1999, and Handbook1999. Add these BibKeys before any artifact cites [Fitting1983]/[Fitting2014], or citations will not resolve. Does not affect the proof strategy."
+    },
+    {
+      "id": 2,
+      "severity": "non-blocking",
+      "type": "citation-discrepancy",
+      "detail": "Module docstrings cite Fitting1983 Chapter 4; report 05 cites Chapter 9 section 9.5. Reconcile so docstring and report agree. Does not affect correctness."
+    },
+    {
+      "id": 3,
+      "severity": "clarification",
+      "type": "already-resolved",
+      "detail": "Report flags an L978 .symm orientation error. Current working tree at L978 is `rw [List.zip_append (by exact hdlength_edges)]` with NO .symm - already correct. Implementer must mirror this exact orientation in the new linearResult bp=bh case and must NOT add a .symm."
+    }
+  ],
+  "openlogic_dependencies": [
+    {
+      "claim": "Satisfiable-set definition (m : Pfx->W with m(sigma)<=m(sigma.n), T/F forcing)",
+      "report_location": "line ~107",
+      "openlogic_role": "secondary corroboration only",
+      "primary_authoritative_support": "Fitting2014 section 5-6 (peer-reviewed, Notre Dame J. Formal Logic) - confirmed real via PDF fetch; section titles match",
+      "resolution": "NOT sole support; primary citation is authoritative Fitting2014. Confirmed."
+    },
+    {
+      "claim": "F-> rule requires a fresh prefix (freshness side-condition)",
+      "report_location": "line ~107 and ~349 (appendix entry)",
+      "openlogic_role": "secondary corroboration / reference-list entry",
+      "primary_authoritative_support": "Fitting1983 section 9.5 and WaalerWallen1999 Ch.5; web search confirms Fitting 'Proof Methods' book states the new-prefix-on-branch condition",
+      "resolution": "NOT sole support. ALSO confirmed by Lean goal-state inspection at L945 (hfresh unprovable without the invariant) - supersedes any textbook."
+    }
+  ],
+  "lean_specifics_verified": {
+    "hfresh_needs_invariant": "confirmed - goal at L945 has no nwH-to-label hypothesis in scope",
+    "lemmas_exist_sorry_free": "confirmed - intRule_preserves_sat L83, applyPersistenceFixpoint_sat L404, monotoneEdges_go L527, monotoneEdges_update L688-762, iforces_persistence (Kripke.lean); zero sorry in L400-770",
+    "match_not_product": "confirmed - intRule_preserves_sat conclusion is a match on intApplyRuleFull; rw [hresult_sf] required (working code does this at L970)",
+    "monotoneEdges_update_args": "confirmed - takes hnw_not_child, hnw_not_parent, hnw_ne_parent, hmono, hle: worldOf parentLabel <= w'",
+    "ih_not_ih_inner": "confirmed - live goal shows ih quantifies over branches/edgeSets/fuel''; linear arm hgo reduces to intExpandBranches ... fuel''",
+    "L978_fix": "confirmed/clarified - working tree uses `by exact hdlength_edges` (no .symm), which is the correct orientation"
+  },
+  "artifacts": [
+    "specs/316_propositional_tableau_soundness/reports/06_research-verification.md"
+  ],
+  "next_steps": "Implementer may proceed with the FreshAbove strategy. Apply citation-hygiene corrections 1-2 to references.bib/docstrings; honor correction 3 (no .symm at the mirrored L978 membership).",
+  "summary": "APPROVE-WITH-CORRECTIONS. The FreshAbove invariant strategy in report 05 is sound and safe to implement. Its central claim (freshness is necessary) is confirmed by Lean goal-state inspection at L945 - the strongest standard - and its literature grounding rests on authoritative peer-reviewed sources (Fitting1983 9.5, Fitting2014 5-6, Waaler-Wallen Ch.5), NOT solely on the non-authoritative Open Logic Project (which appears only as secondary corroboration at 2 spots, both independently confirmed). All 5 concrete Lean specifics verified correct against the actual code. Corrections are citation-hygiene only (4 missing BibKeys, 1 chapter-number discrepancy) plus 1 already-resolved L978 clarification; none blocks implementation."
+}

@@ -1,13 +1,30 @@
 {
-  "status": "planned",
-  "next_artifact_number": 2,
-  "plan_path": "specs/299_modal_k_tableau/plans/01_modal-k-tableau-plan.md",
-  "phase_count": 7,
-  "estimated_hours": 14,
-  "dependency_waves": [[1], [2], [3], [4, 5], [6], [7]],
-  "session_id": "sess_1782335770_b2cbfa_299",
   "task_number": 299,
-  "next_action": "implement",
-  "hard_constraints": ["zero-sorry", "zero-new-axiom"],
-  "high_risk_phase": 6
+  "status": "partial",
+  "phases_completed": 3,
+  "phases_total": 7,
+  "summary": "Phases 1-3 committed and green (Defs, Rules, Branch, Closure, Saturation; all zero-sorry). Phase 4 (Soundness.lean) is an IN-PROGRESS rewrite left mid-flight by a crashed implementation agent and does NOT build. Phases 5-7 (Completeness scaffolding, completeness loop invariant, decision procedure + CI) not started. Completeness.lean does not exist yet.",
+  "continuation_context": {
+    "resume_target": "Cslib/Logics/Modal/Tableau/Soundness.lean",
+    "build_command": "lake build Cslib.Logics.Modal.Tableau.Soundness",
+    "current_build": "RED",
+    "what_is_done": "Phases 1-3 committed green (commits 78287d0b, 0c64d1cf, 815618b3). Orchestrator applied one fix: reordered `omit ... in` before the docstring on accFreshInv_empty (~line 169-170) to clear a parse error.",
+    "remaining_errors_in_soundness": [
+      {"lines": "303,335,362,402,649,705", "issue": "Unknown identifier `hnewBs` (~15 occurrences). A binder is referenced as `hnewBs` but was introduced under a different name (likely `newBs`/`hstep` obtain pattern). Same broken pattern copy-pasted across several modalStepBranch_preserves_sat case blocks. Fix the obtain/rename in one block, replicate."},
+      {"lines": "99,124,173,227", "issue": "unsolved goals"},
+      {"lines": "100", "issue": "`simp` made no progress (remove or replace)"},
+      {"lines": "126", "issue": "failed to synthesize instance of type class"},
+      {"lines": "129,131,151", "issue": "application type mismatch"},
+      {"lines": "228", "issue": "No goals to be solved (remove trailing tactic)"},
+      {"lines": "275,624", "issue": "`cases` failed with nested error"},
+      {"lines": "746", "issue": "Duplicate alternative name `imp` in a match/cases"}
+    ],
+    "estimated_distinct_sites": "10-12",
+    "hard_requirements": "Zero sorry, zero new axioms. Verify with `#print axioms modalTableau_sound` and grep. Use lean_goal / lean_multi_attempt on each broken goal; do NOT paper over with sorry. K box-positive must propagate ONLY to recorded R-successors (not all worlds) — preserve this; do not regress to the bimodal S5-collapse box rule.",
+    "after_soundness_green": "Then Phase 5 Completeness scaffolding (create Completeness.lean: model extraction + modal truth lemma), Phase 6 completeness loop invariant (expandBranches_hintikka — the isolated high-risk piece; if it cannot be closed without sorry/axiom, mark BLOCKED per zero-debt fallback), Phase 7 decision procedure + full CI (lake build, lake test, checkInitImports, lint-style, shake).",
+    "recommended_resume": "Dispatch a single cslib-implementation-agent scoped to: (1) drive Soundness.lean to green, commit; (2) Phase 5, commit. Commit per milestone; STOP and write handoff before context fills (prior agent crashed on 'Prompt is too long' by attempting too much in one run)."
+  },
+  "blockers": [],
+  "environment_warning": "MULTIPLE concurrent Claude Code sessions are sharing this single git checkout (PIDs seen: 53932, 84515, plus the orchestrator session). A sibling session's `git add -A` already swept this WIP Soundness.lean into an unrelated commit (message 'task 332 phase 2b'). Before resuming, serialize the sessions or give each a separate git worktree to avoid clobbering uncommitted work and the git index.",
+  "next_action_hint": "implement"
 }

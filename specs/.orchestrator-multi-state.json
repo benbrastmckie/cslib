@@ -26,7 +26,7 @@
     337
   ],
   "current_statuses": {
-    "299": "planned",
+    "299": "implementing",
     "300": "not_started",
     "336": "completed",
     "337": "completed",
@@ -46,8 +46,7 @@
     "299": "cslib-implementation-agent",
     "300": "cslib-implementation-agent"
   },
-  "notes": {
-    "336": "cycle2 resume: D green(uncommitted); D4 broken(line57 syntax); D5/D45/DB not started; phase6 pending"
-  },
-  "notes_316": "impl agent crashed (prompt too long); 8->4 sorries but build error at L978; awaiting research"
+  "notes": "Stopped by user mid task-299 phase 4. 299 phases 1-3 green & committed; phase 4 Soundness.lean RED (WIP rewrite, ~10-12 proof errors documented in handoff+plan). 300 blocked on 299. Resume: /orchestrate 299-300.",
+  "notes_316": "OVERFLOW x4 on intuitionistic induction. 316-cont reverted FreshAbove+8->4 work to HEAD (LOST from tree; design preserved in report05/plan06). Restored green HEAD baseline (4 sorries: 919,945,950,961). NEW STRATEGY: commit-after-each-step, NO revert, rebuild FreshAbove in committable slices.",
+  "strategy": "difficulty-stratified micro-dispatch + commit-each-green-step + no-revert"
 }

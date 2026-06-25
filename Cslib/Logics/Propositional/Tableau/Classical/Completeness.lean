@@ -461,13 +461,177 @@ private lemma classicalExpandBranches_hintikka (fuel : Nat) :
         classicalHintikkaSet b := by
   sorry
 
+/-- Any formula on a branch is still present on every branch produced by `classicalStepBranch`.
+Uses `Branch.extendMany b x = x ++ b`. -/
+private lemma classicalStepBranch_mem_preserved
+    (b : Branch (Proposition Atom) Unit)
+    (e : List (SignedFormula (Proposition Atom) Unit))
+    (sf : SignedFormula (Proposition Atom) Unit)
+    (hsfb : sf ∈ b)
+    (newBs : List (Branch (Proposition Atom) Unit))
+    (newExp : List (SignedFormula (Proposition Atom) Unit))
+    (hstep : classicalStepBranch b e = some (newBs, newExp)) :
+    ∀ b' ∈ newBs, sf ∈ b' := by
+  -- classicalStepBranch finds sf' ∈ b with classicalApplyOne sf' ≠ notApplicable,
+  -- producing newBs from extendMany b applied to the rule output.
+  -- In all cases, every b' ∈ newBs is extendMany b x = x ++ b, so sf ∈ b → sf ∈ b'.
+  simp only [classicalStepBranch] at hstep
+  obtain ⟨sf', hb'_mem, hfound⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hfound with hexp
+  · exact Option.noConfusion hfound
+  · -- hfound : (match classicalApplyOne sf' with ...) = some (newBs, newExp)
+    -- split on classicalApplyOne result
+    rcases hca : classicalApplyOne sf' with out | brs | out | _
+    all_goals simp only [hca] at hfound
+    · -- linear: newBs = [extendMany b out]
+      obtain ⟨rfl, _⟩ := Option.some.inj hfound
+      intro b' hb'
+      simp only [List.mem_singleton] at hb'
+      subst hb'
+      simp only [Branch.extendMany, List.mem_append]
+      exact Or.inr hsfb
+    · -- branching: newBs = brs.map (extendMany b ·)
+      obtain ⟨rfl, _⟩ := Option.some.inj hfound
+      intro b' hb'
+      obtain ⟨br, _, rfl⟩ := List.mem_map.mp hb'
+      simp only [Branch.extendMany, List.mem_append]
+      exact Or.inr hsfb
+    · -- persistent: newBs = [extendMany b out]
+      obtain ⟨rfl, _⟩ := Option.some.inj hfound
+      intro b' hb'
+      simp only [List.mem_singleton] at hb'
+      subst hb'
+      simp only [Branch.extendMany, List.mem_append]
+      exact Or.inr hsfb
+    · -- notApplicable: none — but hfound says some
+      simp at hfound
+
+/-- Every formula in every initial branch appears in the open branch returned by
+`classicalExpandBranches`. Used to show F(φ) is on the countermodel branch. -/
+private lemma classicalExpandBranches_openBranch_initial_mem (fuel : Nat)
+    (sf : SignedFormula (Proposition Atom) Unit) :
+    ∀ (branches : List (Branch (Proposition Atom) Unit))
+      (expandedSets : List (List (SignedFormula (Proposition Atom) Unit))),
+      expandedSets.length = branches.length →
+      (∀ b₀ ∈ branches, sf ∈ b₀) →
+      ∀ b, classicalExpandBranches branches expandedSets fuel = .openBranch b →
+        sf ∈ b := by
+  induction fuel with
+  | zero =>
+    intro branches expandedSets _ hAll b h
+    simp only [classicalExpandBranches] at h
+    -- h comes from: match findSome? ... with | some b' => .openBranch b' | none => .closed
+    -- Split on findSome? result
+    cases hfs : branches.findSome? (fun b' => if isClassicallyClosed b' then none else some b') with
+    | none =>
+      simp only [hfs] at h
+      exact absurd h (by simp)
+    | some b' =>
+      simp only [hfs] at h
+      injection h with heq
+      subst heq
+      obtain ⟨b₀, hb₀_mem, hf⟩ := List.exists_of_findSome?_eq_some hfs
+      by_cases hcl : isClassicallyClosed b₀ = true
+      · -- hf : none = some b' when closed — contradiction
+        simp only [hcl, ite_true] at hf
+        -- hf is now none = some b', which is False
+        exact absurd hf (by simp)
+      · -- hf : some b₀ = some b' when not closed
+        simp only [Bool.not_eq_true] at hcl
+        have hfval : b₀ = b' := by simp only [hcl, ite_false] at hf; exact Option.some.inj hf
+        exact hfval ▸ hAll b₀ hb₀_mem
+  | succ fuel' ih =>
+    intro branches expandedSets hlength hAll b h
+    -- Key inner lemma: if every branch in pending has sf, then sf ∈ result open branch.
+    -- We track both pending and done, with sf in all of them.
+    suffices key : ∀ (pending : List (Branch (Proposition Atom) Unit))
+        (pendingExp : List (List (SignedFormula (Proposition Atom) Unit)))
+        (done : List (Branch (Proposition Atom) Unit))
+        (doneExp : List (List (SignedFormula (Proposition Atom) Unit))),
+        pendingExp.length = pending.length →
+        doneExp.length = done.length →
+        (∀ bp ∈ pending, sf ∈ bp) →
+        (∀ bd ∈ done, sf ∈ bd) →
+        classicalExpandBranches.processNext fuel' pending pendingExp done doneExp = .openBranch b →
+        sf ∈ b from
+      key branches expandedSets [] [] hlength rfl hAll (by simp)
+        (by simpa [classicalExpandBranches] using h)
+    intro pending
+    induction pending with
+    | nil =>
+      intro pendingExp done doneExp _ _ _ _ hinner
+      simp [classicalExpandBranches.processNext] at hinner
+    | cons bh bt ih_inner =>
+      intro pendingExp done doneExp hlength_p hdlength hAll_p hAll_d hinner
+      simp only [List.length_cons] at hlength_p
+      cases hpendingExp : pendingExp with
+      | nil =>
+        simp only [hpendingExp, List.length_nil] at hlength_p; omega
+      | cons e es =>
+        simp only [hpendingExp, List.length_cons, Nat.add_right_cancel_iff] at hlength_p
+        rw [hpendingExp] at hinner
+        simp only [classicalExpandBranches.processNext] at hinner
+        by_cases hcl : isClassicallyClosed bh = true
+        · rw [if_pos hcl] at hinner
+          have hAll_bt : ∀ bp ∈ bt, sf ∈ bp := by
+            intro bp hbp
+            exact hAll_p bp (by simp [hbp])
+          have hAll_done_bh : ∀ bd ∈ done ++ [bh], sf ∈ bd := by
+            intro bd hbd
+            simp only [List.mem_append, List.mem_singleton] at hbd
+            rcases hbd with hd | heq
+            · exact hAll_d bd hd
+            · subst heq; exact hAll_p bd (by simp)
+          exact ih_inner es (done ++ [bh]) (doneExp ++ [e]) hlength_p
+            (by simp [hdlength]) hAll_bt hAll_done_bh hinner
+        · simp only [Bool.not_eq_true] at hcl
+          rw [if_neg (by simp [hcl])] at hinner
+          cases hstep : classicalStepBranch bh e with
+          | none =>
+            rw [hstep] at hinner
+            -- hinner : .openBranch bh = .openBranch b → bh = b
+            have hbeq : bh = b := by cases hinner; rfl
+            exact hbeq ▸ hAll_p bh (by simp)
+          | some step =>
+            obtain ⟨newBs, newExp⟩ := step
+            rw [hstep] at hinner
+            have hbh_sf : sf ∈ bh := hAll_p bh (by simp)
+            -- Each b' ∈ newBs satisfies sf ∈ b' since extendMany bh x = x ++ bh
+            have hNewBs_sf : ∀ b' ∈ newBs, sf ∈ b' :=
+              classicalStepBranch_mem_preserved bh e sf hbh_sf newBs newExp hstep
+            apply ih (done ++ newBs ++ bt) (doneExp ++ newBs.map (fun _ => newExp) ++ es)
+              (by simp [hdlength, hlength_p]) _ b hinner
+            intro b' hb'_mem
+            simp only [List.mem_append] at hb'_mem
+            rcases hb'_mem with (hd | hn) | hbt
+            · exact hAll_d b' hd
+            · exact hNewBs_sf b' hn
+            · exact hAll_p b' (by simp [hbt])
+
 /-- The open branch returned by the classical tableau is a classical Hintikka set.
 
 This is the key bridge between the expansion loop and the truth lemma. -/
 lemma classicalTableau_hintikka (φ : Proposition Atom) (b : Branch (Proposition Atom) Unit)
     (h : classicalTableau φ = .openBranch b) : classicalHintikkaSet b := by
   simp only [classicalTableau] at h
-  sorry
+  -- Apply classicalExpandBranches_hintikka with:
+  -- - branches = [[⟨.neg, φ, ()⟩]], expandedSets = [[]], fuel from h
+  -- - Length: rfl (both length 1)
+  -- - Initial invariant: vacuously true since expandedSets[0] = [] (empty)
+  -- Apply classicalExpandBranches_hintikka. The invariant holds vacuously because
+  -- the initial expandedSets is [[]] (one empty list), so every e we look up is [].
+  exact classicalExpandBranches_hintikka _ _ _ rfl
+    (fun i b' e _ he sf hsfin => by
+      -- e comes from [[]] .get? i. For i=0, [[]] .get? 0 = some [], so e = [].
+      -- For i≥1, [[]] .get? i = none, contradicting he.
+      simp only [List.get?] at he
+      split at he
+      · -- He says e = [], so sf ∈ [] is absurd
+        simp only [List.get?] at he
+        exact absurd hsfin (he ▸ List.not_mem_nil _)
+      · -- He says none = some e, which is False
+        simp at he)
+    b h
 
 /-! ## Countermodel Extraction -/
 
@@ -483,7 +647,17 @@ lemma classicalOpenBranch_countermodel (φ : Proposition Atom)
   -- Show F(φ) is on the branch b
   -- The initial branch is [F(φ)] and the expansion only prepends, so F(φ) ∈ b
   have hfphi : b.any (fun sf => sf.sign == .neg && sf.formula == φ) = true := by
-    sorry
+    -- F(φ) = ⟨.neg, φ, ()⟩ is on the initial branch and is preserved by expansion
+    have h' : classicalExpandBranches [[⟨.neg, φ, ()⟩]] [[]] (4 * (φ.complexity + 1) + 1) =
+        .openBranch b := by simp only [classicalTableau] at h; exact h
+    have hmem : (⟨.neg, φ, ()⟩ : SignedFormula (Proposition Atom) Unit) ∈ b :=
+      classicalExpandBranches_openBranch_initial_mem _ _ _ _ rfl
+        (fun b₀ hb₀ => by
+          simp at hb₀
+          subst hb₀
+          exact List.mem_cons_self _ _)
+        b h'
+    exact List.any_eq_true.mpr ⟨⟨.neg, φ, ()⟩, hmem, by simp⟩
   exact (classicalTruthLemma b hH φ).2 hfphi
 
 /-! ## Main Completeness Theorem -/

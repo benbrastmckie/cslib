@@ -217,6 +217,36 @@ accessibility-edge tracking that makes box-positive propagation K-sound (not S5)
 
 ### Phase 4: Soundness [IN PROGRESS]
 
+> **RESUME NOTES (orchestrator, last touched this session).** `Soundness.lean` exists as an
+> in-progress rewrite that a crashed implementation agent left mid-flight; it does **not**
+> build. Current state of `lake build Cslib.Logics.Modal.Tableau.Soundness`: **RED**. The
+> orchestrator applied exactly one fix — reordered `omit ... in` to sit *before* the docstring
+> on `accFreshInv_empty` (~line 169) to clear a parse error; everything else below is unfixed.
+> Detailed machine-readable inventory is in `.orchestrator-handoff.json`
+> (`continuation_context.remaining_errors_in_soundness`). Summary of the ~10–12 distinct
+> broken sites to fix (zero sorry, zero new axioms):
+>
+> - **`hnewBs` unknown identifier** at lines 303, 335, 362, 402, 649, 705 (~15 hits) — a binder
+>   referenced by the wrong name (`obtain`/rename pattern), copy-pasted across several
+>   `modalStepBranch_preserves_sat` case blocks. Fix one block, replicate to the rest.
+> - **unsolved goals**: 99, 124, 173, 227
+> - **`simp` made no progress**: 100 (remove/replace)
+> - **failed to synthesize instance**: 126
+> - **application type mismatch**: 129, 131, 151
+> - **No goals to be solved**: 228 (delete trailing tactic)
+> - **`cases` failed (nested error)**: 275, 624
+> - **Duplicate alternative name `imp`**: 746 (in a match/cases)
+>
+> Use `lean_goal` / `lean_multi_attempt` on each site; do **not** paper over with `sorry`.
+> Preserve K-correctness: box-positive propagates ONLY to recorded R-successors (not all
+> worlds) — do not regress to the bimodal S5-collapse box rule. Commit "task 299 phase 4:
+> soundness repaired to green" once `#print axioms modalTableau_sound` is clean, then proceed
+> to Phase 5.
+>
+> **Environment hazard**: multiple concurrent Claude sessions share this one checkout; a
+> sibling `git add -A` already swept this WIP file into commit `task 332 phase 2b`. Serialize
+> sessions or use separate git worktrees before resuming.
+
 **Goal**: Prove `modalTableau_sound` against Kripke semantics over all models.
 
 **Tasks**:

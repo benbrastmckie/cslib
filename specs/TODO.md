@@ -1,17 +1,17 @@
 ---
-next_project_number: 341
+next_project_number: 342
 ---
 
 # TODO
 
 ## Task Order
 
-*Updated 2026-06-24. Generated from state.json dependency graph.*
+*Updated 2026-06-25. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,316,321 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,316,321,341 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,317,332 | 36,37,180,290,299,316 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275,333 | 39,40,332 | Foundations |
 
@@ -43,6 +43,7 @@ next_project_number: 341
     └─ 333 [NOT STARTED] — Refactor and split the 1099-line Normalization.lean into well-org
 316 [PARTIAL] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
+341 [RESEARCHED] — Restate propositional algebraic completeness theory-parametricall
 
 ### Temporal Logic
 
@@ -60,6 +61,17 @@ next_project_number: 341
 ### Uncategorized
 
 ## Tasks
+
+### 341. Theory parametric completeness
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+- **Research**: [341_theory_parametric_completeness/reports/01_theory-parametric-completeness.md]
+
+**Description**: Restate propositional algebraic completeness theory-parametrically over AlgTValid, adopting Thomas Waring's v ⊨ T formulation as the canonical statement. Currently the three tier completeness theorems MPL.hilbert_alg_complete (Cslib/Logics/Propositional/Semantics/Algebra/HilbertCompleteness.lean:57), IPL.hilbert_alg_complete (:80), and CPL.hilbert_alg_complete (:105) fold each logic's axioms into the algebra class (GHAValid/HAValid/BAValid) rather than carrying a v ⊨ T hypothesis. Introduce a single theory-parametric completeness theorem of the form: Derivable Axioms φ ↔ ∀ (H) [GeneralizedHeytingAlgebra H] (v) (bot_val), AlgTValid (AxiomTheory Axioms) v bot_val → AlgEvaluate v bot_val φ = ⊤, for any Axioms with [MinimalAxioms Axioms], and recover the three existing tier theorems as corollaries. The AlgTValid predicate already exists (Cslib/Logics/Propositional/Semantics/Algebra.lean:149) but is currently unused; the Lindenbaum scaffolding (HilbertLindenbaumAlgebra, canonicalV, canonicalBotVal, canonicalV_spec, hilbertLindenbaumMk_eq_top_iff in Semantics/Algebra/HilbertLindenbaum.lean) is already parametric in the axiom set with [MinimalAxioms Axioms], so the machinery largely exists. Work needed: (1) soundness direction must discharge axioms from the AlgTValid hypothesis instead of the per-tier *_alg_axiom_sound lemmas (Semantics/Algebra/Soundness.lean); (2) a new lemma that the canonical/Lindenbaum valuation satisfies AlgTValid (AxiomTheory Axioms); (3) the corollary bridges showing v ⊨ IntPropAxiom / PropositionalAxiom force the Heyting/Boolean (bot_val = ⊥) specializations to recover HAValid/BAValid. This matches the shape of Thomas Waring's Theory.complete. Verify the full CI pipeline stays green and existing tier theorems remain (as corollaries).
+
+---
 
 ### 340. Derived connective defaults
 - **Status**: [COMPLETED]

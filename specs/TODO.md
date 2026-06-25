@@ -13,7 +13,7 @@ next_project_number: 350
 |------|-------|------------|--------|
 | 1 | 36,37,180,226,241,278,290,299,301,316,321,342,343 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,317,332,344 | 36,37,180,290,299,316,343 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
-| 3 | 41,275,345,349 | 39,40,344 | Foundations, Propositional Logic |
+| 3 | 41,275,345 | 39,40,344 | Foundations, Propositional Logic |
 | 4 | 348 | 345 | Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -44,10 +44,9 @@ next_project_number: 350
 316 [PARTIAL] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
 343 [NOT STARTED] — Establish the canonical theory-satisfaction predicate v ⊨ T for p
-  └─ 344 [NOT STARTED] — Make theory-parametric completeness canonical over NATURAL DEDUCT
-    └─ 345 [NOT STARTED] — Adopt INCLUSION-based strength as canonical (IPL ⊆ T / IsIntuitio
+  └─ 344 [NOT STARTED] — Add algebraic STRONG (context/theory) completeness for the HILBER
+    └─ 345 [NOT STARTED] — Reconcile the two strength encodings on the Hilbert substrate and
       └─ 348 [NOT STARTED] — Restate Glivenko and conservativity theory-parametrically against
-    └─ 349 [NOT STARTED] — Reposition the merged task 341 onto the canonical ND completeness
 
 ### Temporal Logic
 
@@ -67,23 +66,13 @@ next_project_number: 350
 
 ## Tasks
 
-### 349. Reposition 341 onto nd completeness
-- **Status**: [NOT STARTED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 344
-
-**Description**: Reposition the merged task 341 onto the canonical ND completeness (344) so the two developments converge into one. Re-derive hilbert_alg_complete_theory and the MPL/IPL/CPL tier theorems (Semantics/Algebra/HilbertCompleteness.lean) as COROLLARIES of the ND Theory.complete, bridging via NaturalDeduction/Equivalence.lean (ND↔Hilbert). Align AlgTValid to the canonical v ⊨ T (TValid) and deprecate/alias the v ⊨[bot_val] T notation. Relate or retire HilbertLindenbaumAlgebra (Semantics/Algebra/HilbertLindenbaum.lean) in favour of the T-parametric Lindenbaum-Tarski algebra Quotient T.propositionSetoid. Preserve all public theorem names and keep the full CI pipeline green. This is the cleanup of the previously-merged branch under the new ND-canonical architecture.
-
----
-
 ### 348. Glivenko conservativity theory parametric
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 343, Task 345
 
-**Description**: Restate Glivenko and conservativity theory-parametrically against v ⊨ T, using Heyting-homomorphism machinery (Waring's GeneralizedHeytingHom.map_interpret, Theory.Extension.toGeneralizedHeytingHom) adapted to the primitive-.bot Lindenbaum quotient. Generalise the existing Glivenko.lean and the *Conservative*.lean family (Conservative, ConservativeChain, ConjImpConservative, ConjImpBotConservative, ImpConservative, MplConservativeChain) so they read as theory-parametric statements with the tier results as corollaries; reuse the IsIntuitionistic/IsClassical inclusion typeclasses (345). Audit which lemmas lift without loss vs which need tier-specific algebra. CI green; existing results preserved.
+**Description**: Restate Glivenko and conservativity theory-parametrically against v ⊨ T on the algebraic substrate, using Heyting-homomorphism machinery (GeneralizedHeytingHom.map_interpret and Extension-style homs, cf. Waring's Heyting.lean) over the HilbertLindenbaumAlgebra / Lindenbaum quotient. Generalise the existing Glivenko.lean and *Conservative*.lean family (Conservative, ConservativeChain, ConjImpConservative, ConjImpBotConservative, ImpConservative, MplConservativeChain) so they read as theory-parametric statements with the tier results as corollaries; reuse the IsIntuitionistic/IsClassical/IsMinimal inclusion typeclasses (345). All completeness/soundness remains Hilbert-based. CI green; existing results preserved.
 
 ---
 
@@ -93,7 +82,7 @@ next_project_number: 350
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 341, Task 344
 
-**Description**: Adopt INCLUSION-based strength as canonical (IPL ⊆ T / IsIntuitionistic, CPL ⊆ T / IsClassical; HeytingAlgebra via propHeytingOfLE (IPL ≤ T), BooleanAlgebra via propBooleanOfLE (CPL ≤ T)) — matching the 'a logic is a theory' view and giving free monotone propagation. Add IsMinimal (minimal ⊆ T) for symmetry if useful. Demote the MinimalAxioms witness bundle (NaturalDeduction/Equivalence.lean) to a HILBERT-ONLY bridge via MinimalAxioms Axioms ↔ minimal ⊆ AxiomTheory Axioms: the ND completeness (344) needs no MinimalAxioms; the bundle survives only to connect the Hilbert presentation. This reconciles the two logic encodings (theory-set + inclusion vs axiom-predicate + witnesses) onto the inclusion idiom. CI green.
+**Description**: Reconcile the two strength encodings on the Hilbert substrate and add the missing inclusion view. Waring's Defs.lean characterises strength by INCLUSION (IsIntuitionistic T ↔ IPL ⊆ T, IsClassical T ↔ CPL ⊆ T, with monotone propagation), while the Hilbert machinery uses the witness-bundle typeclass MinimalAxioms (NaturalDeduction/Equivalence.lean: 8 schema witnesses K, S, ∧I, ∧E1, ∧E2, ∨I1, ∨I2, ∨E). MinimalAxioms STAYS — it is genuinely needed for Hilbert completeness, because the Hilbert system encodes the connectives as axioms. Work: (1) add IsMinimal T ↔ minimal ⊆ T mirroring IsIntuitionistic/IsClassical; (2) add a bridge MinimalAxioms Axioms ↔ minimal ⊆ AxiomTheory Axioms so the inclusion idiom (monotone, free propagation) and the witness bundle are interchangeable; (3) optionally monotone-extension propagation. Gives Waring-style strength-axis scalability WITHOUT abandoning the Hilbert witness bundle. Files: Defs.lean, NaturalDeduction/Equivalence.lean, ProofSystem/Axioms.lean. CI green.
 
 ---
 
@@ -103,7 +92,7 @@ next_project_number: 350
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 343
 
-**Description**: Make theory-parametric completeness canonical over NATURAL DEDUCTION (DerivableIn T) — the standard Rasiowa-style algebraic completeness — adapting Waring's Theory.complete (Heyting.lean) to cslib's primitive-.bot substrate. Statement: DerivableIn T A ↔ ∀ {H} [GeneralizedHeytingAlgebra H] {v} (bot_val), (v ⊨ T) → v ⊨ A, over an ARBITRARY Theory T with NO MinimalAxioms (the structural ∧/∨/→ rules are ND constructors, so the witness bundle is unnecessary here). Canonical algebra = the Lindenbaum-Tarski quotient Quotient T.propositionSetoid (GHA; HeytingAlgebra/BooleanAlgebra by inclusion strength). Recover MPL/IPL/CPL by specialising bot_val = ⊥. Strong/context completeness via SValid (v⟦Γ⟧ ≤ v⟦A⟧). The Hilbert hilbert_alg_complete_theory (341) becomes a corollary via NaturalDeduction/Equivalence.lean (done in 349). Prereq: ensure the ND lemmas this relies on exist (cut, propositionSetoid, equiv_iff_*, derivableIn_iff_equiv_top, Embedding for efq/dne, ForMathlib Heyting.Hom); port NaturalDeduction/Lemmas if missing. CI green.
+**Description**: Add algebraic STRONG (context/theory) completeness for the HILBERT system, extending 341's weak completeness and factored through v ⊨ T. 341 gives Derivable Axioms φ ↔ validity (theorems only); the only strong completeness today (Γ ⊢ φ ↔ Γ ⊨ φ) is Kripke-based in Metalogic/*StrongCompleteness.lean, not algebraic. Goal: SetDerivable Axioms Γ φ ↔ (algebraic Γ-consequence) — every GHA model (v, bot_val) with v ⊨ AxiomTheory Axioms and v⟦ψ⟧ = ⊤ for all ψ ∈ Γ satisfies v⟦φ⟧ = ⊤ (equivalently the SValid/≤ form v⟦Γ⟧ ≤ v⟦φ⟧). Stay on HILBERT: reuse SetDerivable (Semantics/SemanticConsequence.lean), the HilbertLindenbaumAlgebra + canonicalV/canonicalBotVal scaffolding (Semantics/Algebra/HilbertLindenbaum.lean), and [MinimalAxioms Axioms]. Recover the weak theorem (341) as the Γ = ∅ case. CI green.
 
 ---
 
@@ -113,7 +102,7 @@ next_project_number: 350
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 341
 
-**Description**: Establish the canonical theory-satisfaction predicate v ⊨ T for propositional logic, adopting Waring's TValid architecture (Semantics/Heyting.lean, kripke branch) but DIVERGING on falsum on correctness grounds: keep cslib's PRIMITIVE .bot (Defs.lean:85) rather than Waring's atom-⊥, because primitive falsum is the faithful encoding (⊥ is a logical constant, not a substitutable atom) and the bot_val parameter is the CORRECT minimal-logic semantics — GHAValid quantifying ∀ bot_val means 'true under every interpretation of ⊥', reflecting that Johansson/GHA algebras do not pin a bottom. So bot_val is retained by design, not eliminated. Define v ⊨ T generically over the ALREADY-applied evaluator: SatisfiesTheory (eval : Proposition Atom → β) (T : Theory Atom) := ∀ A ∈ T, eval A = ⊤, notation v ⊨ T; with AlgTValid T v bot_val := SatisfiesTheory (AlgEvaluate v bot_val) T (DEFINITIONALLY EQUAL, so 341's proofs are untouched). bot_val rides inside the evaluator, never in the predicate's signature. Keep it generic over the eval FUNCTION, not a bundled Model structure (defeq). Generality boundary: factor Evaluate (Prop), BoolEvaluate (Bool), AlgEvaluate (GHA), Kripke forcing; EXCLUDE cross-logic (Modal/Temporal/LTL). Adopt Waring's uniform v ⊨ A / v ⊨ S / v ⊨ T notation; deprecate/alias v ⊨[bot_val] T. Rewire GHAValid/HAValid/BAValid (Algebra.lean) and SemanticEntails/ISemanticEntails/MSemanticEntails (SemanticConsequence.lean) to factor through it. Reuse Waring's Heyting.lean structure where it ports cleanly (preserve his copyright on ported material). CI green; 341 unchanged (defeq).
+**Description**: Establish the canonical theory-satisfaction predicate v ⊨ T for propositional logic on the HILBERT/algebraic substrate, adopting the SHAPE of Waring's TValid (Semantics/Heyting.lean) while keeping cslib's PRIMITIVE .bot language and the bot_val parameter — the faithful minimal-logic semantics, since GHAValid quantifying ∀ bot_val means 'valid under every interpretation of ⊥' (Johansson/GHA algebras do not pin a bottom). Define v ⊨ T generically over the ALREADY-applied evaluator: SatisfiesTheory (eval : Proposition Atom → β) (T : Theory Atom) := ∀ A ∈ T, eval A = ⊤, notation v ⊨ T; with AlgTValid T v bot_val := SatisfiesTheory (AlgEvaluate v bot_val) T (DEFINITIONALLY EQUAL, so 341's Hilbert proofs are untouched). bot_val rides inside the evaluator, never in the predicate signature. Keep it generic over the eval FUNCTION, not a bundled Model (defeq). Generality boundary: factor Evaluate (Prop), BoolEvaluate (Bool), AlgEvaluate (GHA), Kripke forcing; EXCLUDE cross-logic (Modal/Temporal/LTL). Adopt uniform v ⊨ A / v ⊨ S / v ⊨ T notation; deprecate/alias v ⊨[bot_val] T. Rewire GHAValid/HAValid/BAValid (Algebra.lean) and SemanticEntails/ISemanticEntails/MSemanticEntails (SemanticConsequence.lean) to factor through it. This underpins the Hilbert completeness theorems (341 weak, 344 strong). CI green; 341 unchanged (defeq).
 
 ---
 

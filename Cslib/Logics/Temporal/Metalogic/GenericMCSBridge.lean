@@ -6,7 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Temporal.Metalogic.DeductionTheorem
+public import Cslib.Logics.Temporal.Metalogic.DerivationTree
 public import Cslib.Foundations.Logic.Metalogic.MCSProperties
 public import Cslib.Logics.Temporal.ProofSystem.Instances
 

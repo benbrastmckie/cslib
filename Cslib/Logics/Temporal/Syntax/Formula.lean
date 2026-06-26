@@ -61,8 +61,11 @@ the first argument is the **event** (holds at the witness point) and the second 
 
 This module uses the **Burgess convention** for `untl` and `snce`: `untl event guard`,
 where the **event** (holds at the witness point) comes first and the **guard** (holds
-at all intermediate points) comes second. This matches [Burgess1984] and the axiom
-expansion in `Axioms.lean`:
+at all intermediate points) comes second. This is the original argument order of Kamp's
+`U`/`S` connectives as axiomatized in [Burgess1982I], whose truth condition reads `U(α, β)`
+true at `x` iff there is `y > x` with `α` true at `y` and `β` true at every `z` with
+`x < z < y` (so `α` is the event and `β` the guard), with the abbreviation `F α := U(α, ⊤)`.
+See also the survey [Burgess1984]. This matches the axiom expansion in `Axioms.lean`:
 
 - `someFuture φ = untl φ ⊤` (φ is the event, ⊤ is the trivial guard).
 - `somePast φ = snce φ ⊤` (φ is the event, ⊤ is the trivial guard).
@@ -77,6 +80,8 @@ The module `Cslib.Logics.LTL.Embedding` bridges the two conventions explicitly v
 ## References
 
 * [H. Kamp, *Tense Logic and the Theory of Linear Order*][Kamp1968]
+* [J. P. Burgess, *Axioms for Tense Logic. I. "Since" and "Until"*][Burgess1982I]
+* [J. P. Burgess, *Basic Tense Logic*][Burgess1984]
 * [D. Gabbay, A. Pnueli, S. Shelah, J. Stavi, *On the temporal analysis of fairness*][GPSS1980]
 -/
 

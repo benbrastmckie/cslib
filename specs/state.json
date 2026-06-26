@@ -48,7 +48,7 @@
           "summary": "Derived K and S from DT+MP (dt_implies_implyK/S), decoupled HasBot from DerivationSystem/HasDeductionTheorem, added MinimalHilbert bridge and characterization theorem; zero sorry, zero new axioms"
         }
       ],
-      "completion_summary": "Formalized the converse of the deduction-theorem characterization: derived K and S axioms from DT+MP (dt_implies_implyK, dt_implies_implyS), decoupled DerivationSystem/HasDeductionTheorem from [HasBot F], added dtInferenceSystem bridge and MinimalHilbert instance, stated characterization theorem in DeductionCharacterization.lean. Zero sorry, zero new axioms, all CI gates green for task-relevant modules."
+      "completion_summary": "Formalized the weakest-logic converse of the deduction theorem. Decoupled DerivationSystem/HasDeductionTheorem from [HasBot F] (⊥-free implicational). New DeductionCharacterization.lean derives the K and S axioms from a DT+MP axiom class (dt_implies_implyK/S), with a dtInferenceSystem bridge instancing MinimalHilbert and the characterization theorems (dt_implies_minimal_hilbert, minimal_hilbert_has_deduction_theorem). Zero sorry, zero new axioms; builds clean. 3 phases, 3 commits."
     },
     {
       "project_number": 350,

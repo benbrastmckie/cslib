@@ -1000,6 +1000,149 @@ private lemma intApplyRuleFull_some_info
         obtain ⟨_, _, rfl⟩ := hmem_pers; rfl
     | _ => simp at h
 
+/-- For a non-world-creating linear result, `nw' = nwH`. -/
+private lemma intApplyRuleFull_none_nw
+    (sf : ISF Atom) (nwH : Nat) (b : IBranch Atom)
+    (newForms : List (ISF Atom)) (nw' : Nat)
+    (h : intApplyRuleFull sf nwH b = .linearResult newForms nw' none) :
+    nw' = nwH := by
+  obtain ⟨sign, form, label⟩ := sf
+  simp only [intApplyRuleFull] at h
+  cases sign with
+  | pos =>
+    cases form with
+    | and φ ψ => simp only [IntRuleResult.linearResult.injEq] at h; exact h.2.1
+    | _ => simp at h
+  | neg =>
+    cases form with
+    | or φ ψ => simp only [IntRuleResult.linearResult.injEq] at h; exact h.2.1
+    | imp φ ψ => simp [intFImpRule] at h
+    | _ => simp at h
+
+/-- For a branching result, `nw' = nwH`. -/
+private lemma intApplyRuleFull_branching_nw
+    (sf : ISF Atom) (nwH : Nat) (b : IBranch Atom)
+    (branches' : List (List (ISF Atom))) (nw' : Nat)
+    (h : intApplyRuleFull sf nwH b = .branchingResult branches' nw') :
+    nw' = nwH := by
+  obtain ⟨sign, form, label⟩ := sf
+  simp only [intApplyRuleFull] at h
+  cases sign with
+  | pos =>
+    cases form with
+    | or φ ψ => simp only [IntRuleResult.branchingResult.injEq] at h; exact h.2
+    | _ => simp at h
+  | neg =>
+    cases form with
+    | and φ ψ => simp only [IntRuleResult.branchingResult.injEq] at h; exact h.2
+    | _ => simp at h
+
+/-- `FreshAbove` is preserved by a linear expansion step. -/
+private lemma freshAbove_of_linearResult
+    (sf : ISF Atom) (nwH : Nat) (b : IBranch Atom) (edges : IEdges)
+    (newForms : List (ISF Atom)) (nw' : Nat) (newEdge : Option (Nat × Nat))
+    (hres : intApplyRuleFull sf nwH b = .linearResult newForms nw' newEdge)
+    (hfresh : FreshAbove b edges nwH)
+    (hsf_mem : sf ∈ b) :
+    FreshAbove (Branch.extendMany b newForms)
+               (match newEdge with | none => edges | some e => edges ++ [e]) nw' := by
+  cases newEdge with
+  | none =>
+    simp only
+    have hnw' : nw' = nwH := intApplyRuleFull_none_nw sf nwH b newForms nw' hres
+    subst hnw'
+    exact freshAbove_extendMany b edges nwH newForms hfresh
+        (fun sf' hmem =>
+          (intApplyRuleFull_none_labels sf nwH b newForms nwH hres sf' hmem) ▸
+          hfresh.1 sf hsf_mem)
+  | some e =>
+    simp only
+    obtain ⟨he, hnw', hnew⟩ := intApplyRuleFull_some_info sf nwH b newForms nw' e hres
+    subst hnw'
+    exact freshAbove_world_create b edges nwH sf.label newForms hfresh
+        (hfresh.1 sf hsf_mem)
+        (fun sf' hmem => Nat.le_of_eq (hnew sf' hmem))
+
+/-- `intApplyRuleFull` satisfiability for branching results, without freshness requirement. -/
+private lemma intRule_branchingResult_sat {World : Type*} [Preorder World]
+    (val : World → Atom → Prop) (botForces : World → Prop)
+    (worldOf : Nat → World)
+    (b : IBranch Atom) (sf : ISF Atom) (hmem_sf : sf ∈ b)
+    (hsat : intBranchSatisfied val botForces worldOf b)
+    (nw : Nat) (branches' : List (List (ISF Atom))) (nw' : Nat)
+    (hbranch : intApplyRuleFull sf nw b = .branchingResult branches' nw') :
+    ∃ br ∈ branches', intBranchSatisfied val botForces worldOf (Branch.extendMany b br) := by
+  obtain ⟨sign, form, label⟩ := sf
+  have hsf_info := hsat ⟨sign, form, label⟩ hmem_sf
+  simp only at hsf_info
+  have extend_sat : ∀ (newForms : List (ISF Atom)),
+      (∀ sf' ∈ newForms,
+        (sf'.sign = .pos → IForces val botForces (worldOf sf'.label) sf'.formula) ∧
+        (sf'.sign = .neg → ¬ IForces val botForces (worldOf sf'.label) sf'.formula)) →
+      intBranchSatisfied val botForces worldOf (Branch.extendMany b newForms) := by
+    intro newForms hnew sf' hmem'
+    simp only [Branch.extendMany, List.mem_append] at hmem'
+    rcases hmem' with h | h
+    · exact hnew sf' h
+    · exact hsat sf' h
+  simp only [intApplyRuleFull] at hbranch
+  cases sign with
+  | pos =>
+    have hpos := hsf_info.1 rfl
+    cases form with
+    | or φ ψ =>
+      simp only [IntRuleResult.branchingResult.injEq] at hbranch
+      obtain ⟨rfl, _⟩ := hbranch
+      rw [IForces_or] at hpos
+      rcases hpos with hφ | hψ
+      · refine ⟨[⟨.pos, φ, label⟩], List.mem_cons_self, extend_sat _ ?_⟩
+        intro sf' hmem'; simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+        subst hmem'; exact ⟨fun _ => hφ, fun h => absurd h (Sign.noConfusion)⟩
+      · refine ⟨[⟨.pos, ψ, label⟩], by simp, extend_sat _ ?_⟩
+        intro sf' hmem'; simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+        subst hmem'; exact ⟨fun _ => hψ, fun h => absurd h (Sign.noConfusion)⟩
+    | _ => simp at hbranch
+  | neg =>
+    have hneg := hsf_info.2 rfl
+    cases form with
+    | and φ ψ =>
+      simp only [IntRuleResult.branchingResult.injEq] at hbranch
+      obtain ⟨rfl, _⟩ := hbranch
+      rw [IForces_and, not_and_or] at hneg
+      rcases hneg with hφ | hψ
+      · refine ⟨[⟨.neg, φ, label⟩], List.mem_cons_self, extend_sat _ ?_⟩
+        intro sf' hmem'; simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+        subst hmem'; exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hφ⟩
+      · refine ⟨[⟨.neg, ψ, label⟩], by simp, extend_sat _ ?_⟩
+        intro sf' hmem'; simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+        subst hmem'; exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hψ⟩
+    | _ => simp at hbranch
+
+/-- Combine FreshAbove proofs for three concatenated lists. -/
+private lemma freshAbove_zip_three
+    (xs₁ xs₂ xs₃ : List (IBranch Atom))
+    (ns₁ ns₂ ns₃ : List Nat)
+    (es₁ es₂ es₃ : List IEdges)
+    (hn₁ : ns₁.length = xs₁.length) (he₁ : es₁.length = xs₁.length)
+    (hn₂ : ns₂.length = xs₂.length) (he₂ : es₂.length = xs₂.length)
+    (hn₃ : ns₃.length = xs₃.length) (he₃ : es₃.length = xs₃.length)
+    (h₁ : ∀ b nw e, (b, (nw, e)) ∈ xs₁.zip (ns₁.zip es₁) → FreshAbove b e nw)
+    (h₂ : ∀ b nw e, (b, (nw, e)) ∈ xs₂.zip (ns₂.zip es₂) → FreshAbove b e nw)
+    (h₃ : ∀ b nw e, (b, (nw, e)) ∈ xs₃.zip (ns₃.zip es₃) → FreshAbove b e nw) :
+    ∀ b nw e, (b, (nw, e)) ∈ (xs₁ ++ xs₂ ++ xs₃).zip ((ns₁ ++ ns₂ ++ ns₃).zip (es₁ ++ es₂ ++ es₃)) →
+    FreshAbove b e nw := by
+  intro b nw e hmem
+  rw [List.zip_append (show ns₁.length = es₁.length by omega),
+      List.zip_append (show (ns₁ ++ ns₂).length = (es₁ ++ es₂).length by simp [hn₁, he₁, hn₂, he₂]),
+      List.zip_append (show xs₁.length = (ns₁.zip es₁).length by simp [List.length_zip, hn₁, he₁]),
+      List.zip_append (show (xs₁ ++ xs₂).length = (ns₁.zip es₁ ++ ns₂.zip es₂).length by
+        simp [List.length_zip, hn₁, he₁, hn₂, he₂])] at hmem
+  simp only [List.mem_append] at hmem
+  rcases hmem with h | h | h
+  · exact h₁ b nw e h
+  · exact h₂ b nw e h
+  · exact h₃ b nw e h
+
 /-- If `intExpandBranches` returns `closed`, then every input branch is unsatisfiable.
 
 This is the core loop invariant for the soundness proof. The proof requires:

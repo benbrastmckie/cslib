@@ -1,5 +1,5 @@
 {
-  "next_project_number": 355,
+  "next_project_number": 356,
   "active_projects": [
     {
       "project_number": 352,
@@ -1380,6 +1380,21 @@
       "last_updated": "2026-06-26T06:48:18Z",
       "artifacts": [],
       "session_id": "sess_1782454225_4b6c04_354"
+    },
+    {
+      "project_number": 355,
+      "project_name": "modal_propositional_deduction_theorem_consolidation",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Consolidate the Modal and Propositional deductionTheorem through the generic algebraic deduction-theorem layer, completing the consolidation begun in task 350 (which handled Temporal and Bimodal). Task 350 deferred Modal/Propositional because their deductionTheorem defs are polymorphic over an Axioms : Proposition -> Prop predicate, whereas the generic algebraicDerivationSystem (Cslib/Foundations/Logic/Metalogic/GenericMCS.lean) and MinimalHilbert (Cslib/Foundations/Logic/ProofSystem.lean) are keyed on a TYPE S with [InferenceSystem S] [MinimalHilbert S]. Bridging requires new predicate->InferenceSystem infrastructure: introduce a HilbertOf Axioms wrapper type (predicate -> type) carrying [InferenceSystem] and [MinimalHilbert] instances, then build temporal-style bridges (deriv_iff_algebraic) for Modal (HilbertK at Modal/Metalogic/GenericMCSBridge.lean, whose current content is documentation-only) and Propositional (no bridge exists). Re-implement Modal hasDeductionTheorem (Modal/Metalogic/DeductionTheorem.lean) and Propositional hasDeductionTheorem (Propositional/Metalogic/DeductionTheorem.lean) signature-preserving (do NOT delete: ~25 raw DerivationTree call sites consume them directly), routing through the new bridge + algebraic_has_deduction_theorem, and remove the hand WF-recursion bodies + deductionWithMem helpers. Preserve any logic-specific witnesses. Files: Modal/Metalogic/{DeductionTheorem,GenericMCSBridge}.lean, Propositional/Metalogic/DeductionTheorem.lean (+ a new Propositional GenericMCSBridge.lean), Cslib/Foundations/Logic/Metalogic/GenericMCS.lean. Zero technical debt (no new sorry, no new axioms; Classical.choice on already-noncomputable defs acceptable). CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake --add-public --keep-implied --keep-prefix); all downstream consumers (MCS, Completeness, TruthLemma) still compile sorry-free. Surfaced as a follow-up by task 350; implements the same Zulip CSLib Temporal Logic suggestion by Matthew Doty (prove the deduction theorem once via an axiom class and inherit it across the structural logics): https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Temporal.20Logic/near/606511638",
+      "topic": "Foundations",
+      "dependencies": [
+        350
+      ],
+      "created": "2026-06-26T18:25:40Z",
+      "last_updated": "2026-06-26T18:25:40Z",
+      "session_id": "sess_1782453793_190e95",
+      "artifacts": []
     }
   ],
   "repository_health": {

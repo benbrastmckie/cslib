@@ -1,0 +1,16 @@
+{
+  "status": "in_progress",
+  "started_at": "2026-06-26T00:00:00Z",
+  "fix_tasks_created": 0,
+  "artifacts": [],
+  "partial_progress": {
+    "stage": "initializing",
+    "details": "cslib-vet-agent started, parsing delegation context"
+  },
+  "metadata": {
+    "session_id": "sess_1782495634_4ea100",
+    "agent_type": "cslib-vet-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "vet", "skill-cslib-vet"]
+  }
+}

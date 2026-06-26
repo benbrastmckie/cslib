@@ -1,5 +1,5 @@
 ---
-next_project_number: 355
+next_project_number: 356
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 355
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,345,352 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,345,352,355 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,317,332,348 | 36,37,180,290,299,316,345 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275 | 39,40 | Foundations |
 
@@ -28,6 +28,7 @@ next_project_number: 355
 ### Foundations
 
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
+355 [NOT STARTED] — Consolidate the Modal and Propositional deductionTheorem through 
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Modal Logic
@@ -66,6 +67,16 @@ next_project_number: 355
 ### Uncategorized
 
 ## Tasks
+
+### 355. Modal propositional deduction theorem consolidation
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Foundations
+- **Dependencies**: Task 350
+
+**Description**: Consolidate the Modal and Propositional deductionTheorem through the generic algebraic deduction-theorem layer, completing the consolidation begun in task 350 (which handled Temporal and Bimodal). Task 350 deferred Modal/Propositional because their deductionTheorem defs are polymorphic over an Axioms : Proposition -> Prop predicate, whereas the generic algebraicDerivationSystem (Cslib/Foundations/Logic/Metalogic/GenericMCS.lean) and MinimalHilbert (Cslib/Foundations/Logic/ProofSystem.lean) are keyed on a TYPE S with [InferenceSystem S] [MinimalHilbert S]. Bridging requires new predicate->InferenceSystem infrastructure: introduce a HilbertOf Axioms wrapper type (predicate -> type) carrying [InferenceSystem] and [MinimalHilbert] instances, then build temporal-style bridges (deriv_iff_algebraic) for Modal (HilbertK at Modal/Metalogic/GenericMCSBridge.lean, whose current content is documentation-only) and Propositional (no bridge exists). Re-implement Modal hasDeductionTheorem (Modal/Metalogic/DeductionTheorem.lean) and Propositional hasDeductionTheorem (Propositional/Metalogic/DeductionTheorem.lean) signature-preserving (do NOT delete: ~25 raw DerivationTree call sites consume them directly), routing through the new bridge + algebraic_has_deduction_theorem, and remove the hand WF-recursion bodies + deductionWithMem helpers. Preserve any logic-specific witnesses. Files: Modal/Metalogic/{DeductionTheorem,GenericMCSBridge}.lean, Propositional/Metalogic/DeductionTheorem.lean (+ a new Propositional GenericMCSBridge.lean), Cslib/Foundations/Logic/Metalogic/GenericMCS.lean. Zero technical debt (no new sorry, no new axioms; Classical.choice on already-noncomputable defs acceptable). CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake --add-public --keep-implied --keep-prefix); all downstream consumers (MCS, Completeness, TruthLemma) still compile sorry-free. Surfaced as a follow-up by task 350; implements the same Zulip CSLib Temporal Logic suggestion by Matthew Doty (prove the deduction theorem once via an axiom class and inherit it across the structural logics): https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Temporal.20Logic/near/606511638
+
+---
 
 ### 354. Mpl arbitrary point brouwerian completeness
 - **Status**: [COMPLETED]

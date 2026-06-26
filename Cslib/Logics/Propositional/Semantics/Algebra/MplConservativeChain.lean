@@ -13,6 +13,7 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianCompletenes
 public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentPredicates
 public import Cslib.Logics.Propositional.Semantics.Algebra.ImpConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative
+public import Cslib.Logics.Propositional.Semantics.Algebra.MplPointedConservative
 
 /-! # MPL Conservative Extension Chain (Direct Algebraic Route)
 
@@ -73,6 +74,12 @@ MPL fragment and its subalgebras, avoiding any dependency on IPL conservativity 
 - `hilbertMplConservativeOverConjImp_direct`: MPL is conservative over ConjImp for
   or-bot-free formulas, via the direct GHA→BSL bridge.
 - `mplAxiom_iff_conjImpAxiom`: Biconditional: MinPropAxiom ↔ ConjImpAxiom for or-bot-free.
+- `GHAValid_implies_BrouwerianBotValid_direct`: GHA-validity implies free-bot Brouwerian
+  validity for or-free formulas.
+- `hilbertMplConservativeOverConjImpBot_direct`: MPL is conservative over ConjImpBotMin for
+  or-free formulas, via the direct GHA→free-bot-BSL bridge (fourth tower step).
+- `mplAxiom_iff_conjImpBotMinAxiom`: Biconditional: MinPropAxiom ↔ ConjImpBotMinAxiom for
+  or-free formulas.
 - `hilbertMplConservativeOverImp_direct`: MPL is conservative over ImpAxiom for
   imp-top-only formulas, by composing the two direct steps.
 - `mplAxiom_iff_impAxiom`: Biconditional: MinPropAxiom ↔ ImpAxiom for imp-top-only.
@@ -157,6 +164,26 @@ theorem hilbertMplConservativeOverConjImp_direct {Atom : Type u} {φ : PL.Propos
   conjImp_brouwerian_complete hOBF
     (GHAValid_implies_BrouwerianValid_direct hOBF (MPL.hilbert_alg_complete.mp h))
 
+/-! ## Direct MPL→ConjImpBotMin Conservativity -/
+
+/-- **GHA-to-free-bot-Brouwerian validity bridge**: GHA-validity implies free-bot Brouwerian
+semilattice validity for or-free formulas, proved by a direct algebraic route without IPL.
+
+The proof instantiates `GHAValid φ` at the free join completion `LowerSet B` (a Heyting
+algebra, hence a GHA) with the principal downset embedding `LowerSet.Iic ∘ v : Atom → LowerSet B`
+and free bottom value `LowerSet.Iic bot_val`, then applies `brouwerianBotEmbeddingLemma` to
+convert the resulting `AlgEvaluate (LowerSet.Iic ∘ v) (LowerSet.Iic bot_val) φ = ⊤` to
+`BrouwerianBotEvaluate v bot_val φ = ⊤`.
+
+This is the algebraic core of `hilbertMplConservativeOverConjImpBot_direct`. The key
+difference from `GHAValid_implies_BrouwerianValid_direct` is that `bot_val` is free (no
+`OrderBot` constraint), allowing `⊥` to be used in formulas without ex falso. -/
+theorem GHAValid_implies_BrouwerianBotValid_direct {Atom : Type u} {φ : PL.Proposition Atom}
+    (hOF : φ.IsOrFree = true) (h : GHAValid.{u, u} φ) : BrouwerianBotValid.{u, u} φ := by
+  intro B _ v bot_val
+  exact (brouwerianBotEmbeddingLemma v bot_val φ hOF).mpr
+    (h (H := LowerSet B) (LowerSet.Iic ∘ v) (LowerSet.Iic bot_val))
+
 attribute [instance] BrouwerianSemilattice.toHilbertAlgebra
 
 /-! ## Biconditional for MPL↔ConjImp -/
@@ -171,6 +198,39 @@ theorem mplAxiom_iff_conjImpAxiom {Atom : Type u} {φ : PL.Proposition Atom}
     (hOBF : φ.IsOrBotFree = true) :
     Derivable (@MinPropAxiom Atom) φ ↔ Derivable (@ConjImpAxiom Atom) φ :=
   ⟨hilbertMplConservativeOverConjImp_direct hOBF, fun ⟨d⟩ =>
+    ⟨liftDerivationTree (fun _ hψ => hψ.toMinPropAxiom) d⟩⟩
+
+/-! ## Direct MPL→ConjImpBotMin Conservativity (Chain Step 4) -/
+
+/-- **Direct MPL-to-ConjImpBotMin conservative extension theorem**: MPL is a conservative
+extension of MPL⟨∧,→,⊥,⊤⟩ for or-free formulas, proved via a direct algebraic route.
+
+The proof composes:
+1. `MPL.hilbert_alg_complete.mp h` converts `Derivable MinPropAxiom φ` to `GHAValid φ`.
+2. `GHAValid_implies_BrouwerianBotValid_direct` converts `GHAValid φ` to `BrouwerianBotValid φ`
+   by instantiating at `LowerSet B` (a `HeytingAlgebra`, hence a `GeneralizedHeytingAlgebra`)
+   with `bot_val = LowerSet.Iic bot_val` and applying `brouwerianBotEmbeddingLemma`.
+3. `conjImpBotMin_brouwerianBot_complete hOF` converts `BrouwerianBotValid φ` to
+   `Derivable ConjImpBotMinAxiom φ`.
+
+This is the fourth step of the MPL fragment tower:
+`MPL⟨→,⊤⟩ ⊂ MPL⟨∧,→,⊤⟩ ⊂ MPL⟨∧,→,⊥,⊤⟩ ⊂ MPL`. -/
+theorem hilbertMplConservativeOverConjImpBot_direct {Atom : Type u} {φ : PL.Proposition Atom}
+    (hOF : φ.IsOrFree = true) (h : Derivable (@MinPropAxiom Atom) φ) :
+    Derivable (@ConjImpBotMinAxiom Atom) φ :=
+  conjImpBotMin_brouwerianBot_complete hOF
+    (GHAValid_implies_BrouwerianBotValid_direct hOF (MPL.hilbert_alg_complete.mp h))
+
+/-- **Biconditional**: for or-free formulas, derivability in MinPropAxiom and
+ConjImpBotMinAxiom coincide.
+
+The forward direction is the direct conservativity `hilbertMplConservativeOverConjImpBot_direct`.
+The backward direction lifts via the axiom subsumption `ConjImpBotMinAxiom → MinPropAxiom`
+using `liftDerivationTree` and `ConjImpBotMinAxiom.toMinPropAxiom` (from task 353). -/
+theorem mplAxiom_iff_conjImpBotMinAxiom {Atom : Type u} {φ : PL.Proposition Atom}
+    (hOF : φ.IsOrFree = true) :
+    Derivable (@MinPropAxiom Atom) φ ↔ Derivable (@ConjImpBotMinAxiom Atom) φ :=
+  ⟨hilbertMplConservativeOverConjImpBot_direct hOF, fun ⟨d⟩ =>
     ⟨liftDerivationTree (fun _ hψ => hψ.toMinPropAxiom) d⟩⟩
 
 /-! ## Direct MPL→Imp Conservativity (Composition) -/

@@ -1,0 +1,42 @@
+{
+  "status": "implemented",
+  "summary": "Task 354 closes the fourth MPL conservativity step (MPL⟨∧,→,⊥,⊤⟩ ⊂ MPL). New file MplPointedConservative.lean provides the free-bot evaluator (BrouwerianBotEvaluate, bot↦bot_val), embedding lemma, soundness, and ConjImpBotMin Lindenbaum completeness (no OrderBot since no efq). MplConservativeChain.lean is extended with GHAValid_implies_BrouwerianBotValid_direct (inside attribute[-instance] bracket), hilbertMplConservativeOverConjImpBot_direct, and mplAxiom_iff_conjImpBotMinAxiom. Cslib.lean barrel updated. Scoped build green: 677 jobs, zero warnings. All lean_verify calls return standard axioms only (propext, Classical.choice, Quot.sound). Zero sorry, zero vacuous definitions, zero new axioms.",
+  "artifacts": [
+    {
+      "path": "specs/354_mpl_arbitrary_point_brouwerian_completeness/summaries/01_arbitrary-point-completeness-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary: free-bot Brouwerian completeness for MPL⟨∧,→,⊥,⊤⟩. Documents all artifacts, verification results, and design decisions."
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Semantics/Algebra/MplPointedConservative.lean",
+      "type": "lean_source",
+      "summary": "New file: BrouwerianBotEvaluate, BrouwerianBotValid, embedding lemma, soundness, ConjImpBotMin Lindenbaum BSL (no OrderBot), truth lemma, completeness."
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Semantics/Algebra/MplConservativeChain.lean",
+      "type": "lean_source",
+      "summary": "Appended: GHAValid_implies_BrouwerianBotValid_direct, hilbertMplConservativeOverConjImpBot_direct, mplAxiom_iff_conjImpBotMinAxiom."
+    }
+  ],
+  "phases_completed": 3,
+  "phases_total": 3,
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": null,
+  "verification": {
+    "verification_passed": true,
+    "mode": "scoped_build",
+    "note": "Full lake build has 11 pre-existing Temporal failures (task-343 in-flight, out of scope). Scoped build of the two touched propositional modules is the green gate.",
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "scoped_build_MplPointedConservative": "PASS (665 jobs, zero warnings)",
+    "scoped_build_MplConservativeChain": "PASS (677 jobs, zero warnings)",
+    "lean_verify_hilbertMplConservativeOverConjImpBot_direct": "PASS (propext, Classical.choice, Quot.sound only)",
+    "lean_verify_mplAxiom_iff_conjImpBotMinAxiom": "PASS (propext, Classical.choice, Quot.sound only)",
+    "lean_verify_conjImpBotMin_brouwerianBot_complete": "PASS (propext, Classical.choice, Quot.sound only)",
+    "lean_verify_brouwerianBotEmbeddingLemma": "PASS (propext, Classical.choice, Quot.sound only)"
+  }
+}

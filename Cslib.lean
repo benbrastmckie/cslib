@@ -454,10 +454,10 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertLindenbaum
 public import Cslib.Logics.Propositional.Semantics.Algebra.ImpConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.KripkeBridge
 public import Cslib.Logics.Propositional.Semantics.Algebra.MplConservativeChain
+public import Cslib.Logics.Propositional.Semantics.Algebra.MplPointedConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.NonemptyLowerSet
 public import Cslib.Logics.Propositional.Semantics.Algebra.PointedBrouwerian
 public import Cslib.Logics.Propositional.Semantics.Algebra.PointedBrouwerianCompleteness
-public import Cslib.Logics.Propositional.Semantics.Algebra.Scratch344
 public import Cslib.Logics.Propositional.Semantics.Algebra.Soundness
 public import Cslib.Logics.Propositional.Semantics.Bool
 public import Cslib.Logics.Propositional.Semantics.Kripke

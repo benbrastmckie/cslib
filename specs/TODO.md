@@ -40,7 +40,7 @@ next_project_number: 355
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
   └─ 332 [IMPLEMENTING] — Prove the normalization termination theorem for CSLib Theory.Deri
-316 [PARTIAL] — Fill the 6 sorry instances in propositional tableau soundness pro
+316 [PLANNED] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
 345 [NOT STARTED] — Reconcile the two strength encodings on the Hilbert substrate and
   └─ 348 [NOT STARTED] — Restate Glivenko and conservativity theory-parametrically against
@@ -435,14 +435,14 @@ next_project_number: 355
 ---
 
 ### 316. Propositional tableau soundness
-- **Status**: [PARTIAL]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 323
 - **Research**:
   - [316_propositional_tableau_soundness/reports/01_soundness-research.md]
   - [316_propositional_tableau_soundness/reports/02_blockers-resolution.md]
-- **Plan**: [316_propositional_tableau_soundness/plans/05_soundness-plan.md]
+- **Plan**: [316_propositional_tableau_soundness/plans/08_soundness-plan-revised.md]
 
 **Description**: Fill the 6 sorry instances in propositional tableau soundness proofs across all three logics. Classical (Classical/Soundness.lean): prove classically_closed_unsatisfiable (closed branch is unsatisfiable under any Boolean valuation) and classicalTableau_sound (closed tableau implies Tautology phi), plus one helper lemma — by induction on rule applications showing each propositional rule preserves satisfiability. Intuitionistic (Intuitionistic/Soundness.lean): prove intuitionisticTableau_sound (closed tableau implies IValid phi) plus two helper lemmas — by showing each rule (including world-creating F(imp) and persistent T(imp)) preserves forcing at Kripke worlds. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_sound (closed tableau implies MValid phi) — adapts intuitionistic proof with MinimalClosure (complementary atoms only, no ex falso). Core technique: induction on expansion steps showing each rule application preserves the semantic invariant for the respective logic.
 

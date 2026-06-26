@@ -413,13 +413,13 @@
     {
       "project_number": 316,
       "project_name": "propositional_tableau_soundness",
-      "status": "partial",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Fill the 6 sorry instances in propositional tableau soundness proofs across all three logics. Classical (Classical/Soundness.lean): prove classically_closed_unsatisfiable (closed branch is unsatisfiable under any Boolean valuation) and classicalTableau_sound (closed tableau implies Tautology phi), plus one helper lemma — by induction on rule applications showing each propositional rule preserves satisfiability. Intuitionistic (Intuitionistic/Soundness.lean): prove intuitionisticTableau_sound (closed tableau implies IValid phi) plus two helper lemmas — by showing each rule (including world-creating F(imp) and persistent T(imp)) preserves forcing at Kripke worlds. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_sound (closed tableau implies MValid phi) — adapts intuitionistic proof with MinimalClosure (complementary atoms only, no ex falso). Core technique: induction on expansion steps showing each rule application preserves the semantic invariant for the respective logic.",
       "created": "2026-06-23T19:55:52Z",
-      "last_updated": "2026-06-26T07:41:32Z",
-      "next_artifact_number": 2,
+      "last_updated": "2026-06-26T18:10:45Z",
+      "next_artifact_number": 3,
       "artifacts": [
         {
           "type": "report",
@@ -432,16 +432,15 @@
           "summary": "Hard-mode blocker resolution: F(imp) worldOf existential restructuring, fuel-based loop invariant induction, persistence fixpoint soundness"
         },
         {
-          "path": "specs/316_propositional_tableau_soundness/plans/05_soundness-plan.md",
-          "type": "plan",
-          "summary": "4-phase soundness plan: helper lemma proofs, DFS fuel arithmetic, main expansion loop invariant, CI verification"
+          "path": "specs/316_propositional_tableau_soundness/plans/08_soundness-plan-revised.md",
+          "type": "plan"
         }
       ],
       "dependencies": [
         323
       ],
       "parent_task": 298,
-      "session_id": "sess_1750830000_plan316",
+      "session_id": "sess_1782495649_5c7163",
       "completion_summary": "PARTIAL: Intuitionistic/Soundness.lean builds green; recovered FreshAbove machinery committed. 3 sorries remain (2 hfresh + linearResult F-imp 4-tuple). Needs /revise 316 to thread freshInv through the key suffices before further /implement. Classical and Minimal soundness sorries unstarted."
     },
     {

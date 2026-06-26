@@ -158,7 +158,7 @@ build) touch disjoint directories and may run concurrently.
 
 ---
 
-### Phase 2: Build Bimodal temporal-style bridge [IN PROGRESS]
+### Phase 2: Build Bimodal temporal-style bridge [COMPLETED]
 
 **Goal**: Create a new, hand-proof-independent pointwise-equivalence bridge for Bimodal at
 `HilbertTM` / `FrameClass.Base`, with consistency/max-consistency equivalences — compiles standalone
@@ -193,7 +193,7 @@ with Phase 1).
 
 ---
 
-### Phase 3: Bimodal deduction theorem re-implementation via new bridge [NOT STARTED]
+### Phase 3: Bimodal deduction theorem re-implementation via new bridge [IN PROGRESS]
 
 **Goal**: Audit `fc = Base` usage, re-implement the Bimodal `deductionTheorem` via the new bridge
 (signature preserved), delete `deductionWithMem`, re-prove `bimodalHasDeductionTheorem` — Bimodal

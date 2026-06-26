@@ -235,6 +235,7 @@ public import Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.TemporalConse
 public import Cslib.Logics.Bimodal.Metalogic.Core
 public import Cslib.Logics.Bimodal.Metalogic.Core.DeductionTheorem
 public import Cslib.Logics.Bimodal.Metalogic.Core.DerivationTree
+public import Cslib.Logics.Bimodal.Metalogic.Core.GenericMCSBridge
 public import Cslib.Logics.Bimodal.Metalogic.Core.MCSProperties
 public import Cslib.Logics.Bimodal.Metalogic.Core.MaximalConsistent
 public import Cslib.Logics.Bimodal.Metalogic.Core.RestrictedMCS
@@ -456,6 +457,7 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.MplConservativeChain
 public import Cslib.Logics.Propositional.Semantics.Algebra.NonemptyLowerSet
 public import Cslib.Logics.Propositional.Semantics.Algebra.PointedBrouwerian
 public import Cslib.Logics.Propositional.Semantics.Algebra.PointedBrouwerianCompleteness
+public import Cslib.Logics.Propositional.Semantics.Algebra.Scratch344
 public import Cslib.Logics.Propositional.Semantics.Algebra.Soundness
 public import Cslib.Logics.Propositional.Semantics.Bool
 public import Cslib.Logics.Propositional.Semantics.Kripke

@@ -1,7 +1,7 @@
 # Implementation Plan: Task #351 - Deduction Theorem Weakest-Logic Converse
 
 - **Task**: 351 - deduction_theorem_weakest_logic_converse
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 6 hours
 - **Dependencies**: 350 (generic deduction-theorem consolidation; coordinate naming with 345)
 - **Research Inputs**: reports/01_deduction-theorem-weakest-logic-converse.md

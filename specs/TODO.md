@@ -11,7 +11,7 @@ next_project_number: 355
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,345,351,352 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,345,352 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,317,332,348 | 36,37,180,290,299,316,345 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275 | 39,40 | Foundations |
 
@@ -28,7 +28,6 @@ next_project_number: 355
 ### Foundations
 
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
-351 [RESEARCHED] — Formalize the weakest-logic characterization of the deduction the
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Modal Logic
@@ -101,10 +100,12 @@ next_project_number: 355
 ---
 
 ### 351. Deduction theorem weakest logic converse
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: Task 350
+- **Plan**: [351_deduction_theorem_weakest_logic_converse/plans/01_deduction-theorem-weakest-logic-converse.md]
+- **Summary**: [351_deduction_theorem_weakest_logic_converse/summaries/01_deduction-theorem-weakest-logic-converse-summary.md]
 
 **Description**: Formalize the weakest-logic characterization of the deduction theorem: prove the converse direction that no current Cslib result provides. Introduce an axiom class bundling Modus Ponens with the Deduction Theorem property (the HasDeductionTheorem-style hypothesis Γ ⊢ A → B ↔ A :: Γ ⊢ B, plus reflection/assumption) and prove it instances the implicational Hilbert core MinimalHilbert (= K, S, MP; Cslib/Foundations/Logic/ProofSystem.lean:342) by DERIVING the K axiom A → B → A and the S axiom (A → B → C) → (A → B) → A → C from DT + MP alone. Composed with the existing forward direction (MinimalHilbert ⇒ deduction theorem via list_deduction_theorem), this yields the equivalence characterizing IPL⟨→,⊤⟩ as the weakest logic admitting the deduction theorem, as proposed in the Zulip CSLib Temporal Logic thread by Matthew Doty (2026-06-25): "make another axiom class for the deduction theorem and modus ponens, and show that it instances the IPL⟨→,⊤⟩ class, since IPL⟨→,⊤⟩ is the weakest logic that proves the deduction theorem." (https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Temporal.20Logic/near/606511638). Currently NO converse result exists: every deductionTheorem/hasDeductionTheorem consumes the K and S axioms (h_implyK, h_implyS) as inputs to prove deduction; none derives them. Additionally, decouple the deduction-theorem machinery from [HasBot F]: the generic DerivationSystem/HasDeductionTheorem layer (Cslib/Foundations/Logic/Metalogic/Consistency.lean) lives under a [HasBot F] variable block although its content is purely implicational, so introduce or generalize to a ⊥-free implicational class (cf. existing ⊥-free classes ImpAxiom in Propositional/ProofSystem/FragmentAxioms.lean:84 and HasHilbertTree in Foundations/Logic/Metalogic/DeductionHelpers.lean:61) so purely-implicational systems inherit the deduction theorem without a spurious ⊥. Files: Cslib/Foundations/Logic/ProofSystem.lean, Cslib/Foundations/Logic/Metalogic/{Consistency,ListDeduction,DeductionHelpers}.lean, possibly a new Cslib/Foundations/Logic/Metalogic/DeductionCharacterization.lean. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Related to task 345 (MinimalAxioms/IsMinimal reconcile) and best done after or alongside task 350 (generic deduction-theorem consolidation).
 

@@ -193,7 +193,7 @@ with Phase 1).
 
 ---
 
-### Phase 3: Bimodal deduction theorem re-implementation via new bridge [IN PROGRESS]
+### Phase 3: Bimodal deduction theorem re-implementation via new bridge [COMPLETED]
 
 **Goal**: Audit `fc = Base` usage, re-implement the Bimodal `deductionTheorem` via the new bridge
 (signature preserved), delete `deductionWithMem`, re-prove `bimodalHasDeductionTheorem` — Bimodal
@@ -228,7 +228,7 @@ Metalogic + BXCanonical + Bundle green.
 
 ---
 
-### Phase 4: Modal/Propositional deferral, doc correction, follow-up spec, and full CI [NOT STARTED]
+### Phase 4: Modal/Propositional deferral, doc correction, follow-up spec, and full CI [IN PROGRESS]
 
 **Goal**: Correct the Modal bridge gap-analysis comment, record an explicit follow-up task spec for
 the orchestrator to spawn, and pass the full CI pipeline repo-wide with all downstream consumers

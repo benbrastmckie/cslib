@@ -8,6 +8,8 @@ module
 public import Cslib.Logics.Bimodal.Metalogic.Core.DerivationTree
 public import Cslib.Foundations.Data.ListHelpers
 public import Cslib.Foundations.Logic.Metalogic.DeductionHelpers
+public import Cslib.Logics.Bimodal.Metalogic.Core.GenericMCSBridge
+public import Cslib.Foundations.Logic.Metalogic.GenericMCS
 
 /-!
 # Deduction Theorem - Hilbert System Deduction Infrastructure
@@ -221,13 +223,16 @@ The bimodal deduction theorem wrapped for the generic MCS framework.
 This witnesses that `bimodalDerivationSystem` satisfies the `HasDeductionTheorem`
 property, enabling use of generic MCS closure properties (closed_under_derivation,
 implication_property, negation_complete) from `Consistency.lean`.
--/
+
+Proof via the `bimodal_deriv_iff_algebraic` bridge to `algebraic_has_deduction_theorem`:
+the bridge converts tree derivability to the algebraic (list-implication) level where
+the deduction theorem is provable generically from `MinimalHilbert`, then converts back. -/
 lemma bimodalHasDeductionTheorem :
     Metalogic.HasDeductionTheorem (bimodalDerivationSystem (Atom := Atom)) := by
   intro Γ φ ψ h
-  show Bimodal.Deriv Γ (φ.imp ψ)
-  obtain ⟨d⟩ := (h : Bimodal.Deriv (φ :: Γ) ψ)
-  exact ⟨deductionTheorem Γ φ ψ d⟩
+  exact Cslib.Logic.Bimodal.Metalogic.Core.bimodal_deriv_iff_algebraic.mpr
+    (Cslib.Logic.Metalogic.GenericMCS.algebraic_has_deduction_theorem
+      (Cslib.Logic.Bimodal.Metalogic.Core.bimodal_deriv_iff_algebraic.mp h))
 
 end -- noncomputable section
 

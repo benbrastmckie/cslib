@@ -146,7 +146,7 @@ friction, fall back to a new `Cslib/Logics/Propositional/Metalogic/SetDeduction.
 
 ---
 
-### Phase 2: Γ-relativized Lindenbaum quotient + top characterization [NOT STARTED]
+### Phase 2: Γ-relativized Lindenbaum quotient + top characterization [COMPLETED]
 
 **Goal**: In a NEW file, build the Γ-relativized Lindenbaum GHA — the model in which every `ψ ∈ Γ`
 is `⊤` — by reusing the `HilbertLindenbaumAlgebra` construction shape with `SetDerivable Axioms Γ`

@@ -228,7 +228,7 @@ Metalogic + BXCanonical + Bundle green.
 
 ---
 
-### Phase 4: Modal/Propositional deferral, doc correction, follow-up spec, and full CI [IN PROGRESS]
+### Phase 4: Modal/Propositional deferral, doc correction, follow-up spec, and full CI [COMPLETED]
 
 **Goal**: Correct the Modal bridge gap-analysis comment, record an explicit follow-up task spec for
 the orchestrator to spawn, and pass the full CI pipeline repo-wide with all downstream consumers

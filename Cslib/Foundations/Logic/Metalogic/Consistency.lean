@@ -41,18 +41,19 @@ open Cslib.Logic
 
 namespace Cslib.Logic.Metalogic
 
-variable {F : Type*} [HasBot F] [HasImp F]
+variable {F : Type*} [HasImp F]
 
 /-- A derivation system abstracts over logic-specific proof systems.
 
-`F` is the formula type with bottom and implication.
+`F` is the formula type with implication (and optionally bottom: consistency
+machinery adds `[HasBot F]` separately below).
 `Deriv` maps a context (list of assumptions) and a conclusion to a `Prop`.
 
 Required properties:
 - `weakening`: derivations can be extended with additional assumptions
 - `assumption`: any formula in the context is derivable from it
 - `mp`: modus ponens is admissible -/
-structure DerivationSystem (F : Type*) [HasBot F] [HasImp F] where
+structure DerivationSystem (F : Type*) [HasImp F] where
   /-- Context-based derivability: `Deriv Γ φ` means `φ` is derivable from `Γ`. -/
   Deriv : List F → F → Prop
   /-- Weakening: if `Γ ⊢ φ` and `Γ ⊆ Δ`, then `Δ ⊢ φ`. -/
@@ -63,6 +64,10 @@ structure DerivationSystem (F : Type*) [HasBot F] [HasImp F] where
   mp : ∀ {Γ : List F} {φ ψ : F}, Deriv Γ (HasImp.imp φ ψ) → Deriv Γ φ → Deriv Γ ψ
 
 /-! ## Consistency Definitions -/
+
+-- `[HasBot F]` is needed for consistency, Lindenbaum, and closure properties,
+-- but NOT for `DerivationSystem` or `HasDeductionTheorem` (which are ⊥-free).
+variable [HasBot F]
 
 /-- List-based consistency: `Γ` is consistent iff `Γ` does not derive `⊥`. -/
 def Consistent (D : DerivationSystem F) (Γ : List F) : Prop :=
@@ -182,6 +187,7 @@ Each logic supplies its own proof of this property. -/
 def HasDeductionTheorem (D : DerivationSystem F) : Prop :=
   ∀ {Γ : List F} {φ ψ : F}, D.Deriv (φ :: Γ) ψ → D.Deriv Γ (HasImp.imp φ ψ)
 
+omit [HasBot F] in
 /-- Helper: given a derivation `L ⊢ ψ` where `L ⊆ insert φ S`, produce a derivation
 from `φ :: L_S ⊢ ψ` where `L_S` contains only elements of `S`. Uses classical
 decidability for list filtering. -/

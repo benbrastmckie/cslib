@@ -1,26 +1,58 @@
 {
-  "status": "in_progress",
+  "status": "partial",
+  "requires_user_review": true,
+  "review_reason": "Full CI pipeline partially fails due to pre-existing build errors in unrelated modules (Bimodal.Theorems.Perpetuity.Principles, SequentCalculus, Modal.Tableau.Soundness, etc.). All task 350 modified modules build successfully. Full lake build, lake lint, lake test, and checkInitImports fail only due to cascading errors from pre-existing failures NOT introduced by task 350.",
   "started_at": "2026-06-25T00:00:00Z",
+  "completed_at": "2026-06-25T12:00:00Z",
   "artifacts": [
     "Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean",
     "Cslib/Logics/Temporal/Metalogic/DeductionTheorem.lean",
-    "Cslib/Logics/Temporal/Metalogic/DenseMCS.lean",
     "Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean",
     "Cslib/Logics/Bimodal/Metalogic/Core/DeductionTheorem.lean",
-    "Cslib.lean"
+    "Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean",
+    "Cslib.lean",
+    "specs/350_generic_deduction_theorem_lindenbaum_consolidation/summaries/01_deduction-theorem-consolidation-summary.md"
   ],
   "partial_progress": {
-    "stage": "phase-4",
-    "details": "Phases 1-3 complete; Phase 4 (CI + Modal doc) in progress",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 3,
-    "last_completed_phase": "Bimodal deduction theorem re-implementation"
+    "phases_completed": 4,
+    "last_completed_phase": "Modal doc correction and CI"
+  },
+  "verification": {
+    "verification_passed": false,
+    "note": "All task-350 modified modules build successfully (scoped builds pass). Full CI pipeline fails due to pre-existing build errors in unrelated modules not introduced by task 350.",
+    "scoped_builds_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": false,
+    "build_note": "Full lake build fails: pre-existing errors in Bimodal.Theorems.Perpetuity.Principles (simp no progress), SequentCalculus (namespace collision Cslib.Logic.PL vs Cslib.Logics.Propositional), Modal.Tableau.Soundness, and others. None are in files modified by task 350.",
+    "checkInitImports_passed": false,
+    "checkInitImports_note": "Crashes due to missing .olean from pre-existing build failures.",
+    "lint_passed": false,
+    "lint_note": "lake lint crashes due to missing .olean from pre-existing build failures.",
+    "lint_style_passed": true,
+    "mk_all_passed": true,
+    "mk_all_note": "lake exe mk_all --module verified Cslib.lean is current (task 354 had already committed the Scratch344 removal).",
+    "shake_passed": "partial",
+    "shake_note": "No shake issues in task 350 modified files. Pre-existing modules marked out-of-date.",
+    "test_passed": false,
+    "test_note": "CslibTests fails because Cslib barrel cannot build due to pre-existing errors.",
+    "ci_pipeline_passed": false
+  },
+  "next_steps": {
+    "next_action_hint": "spawn_follow_up",
+    "follow_up_task": {
+      "title": "Modal/Propositional deduction theorem consolidation via HilbertOf wrapper",
+      "description": "Build HilbertOf Axioms wrapper type + per-predicate bridges to consolidate Modal and Propositional deductionTheorem (~25 raw call sites). Requires new predicate->InferenceSystem+MinimalHilbert infrastructure. See task 350 summary for full spec.",
+      "task_type": "cslib",
+      "depends_on": [350]
+    }
   },
   "metadata": {
     "session_id": "sess_1750870000_a3b2c1",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed_with_preexisting_ci_failures"
   }
 }

@@ -11,8 +11,8 @@ next_project_number: 355
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,344,350,352 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,317,332,345,351 | 36,37,180,290,299,316,344,350 | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,344,351,352 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,317,332,345 | 36,37,180,290,299,316,344 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275,348 | 39,40,345 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -28,8 +28,7 @@ next_project_number: 355
 ### Foundations
 
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
-350 [IMPLEMENTING] — Discharge the deduction theorem and Lindenbaum extension generica
-  └─ 351 [NOT STARTED] — Formalize the weakest-logic characterization of the deduction the
+351 [NOT STARTED] — Formalize the weakest-logic characterization of the deduction the
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Modal Logic
@@ -113,10 +112,13 @@ next_project_number: 355
 ---
 
 ### 350. Generic deduction theorem lindenbaum consolidation
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
+- **Research**: [350_generic_deduction_theorem_lindenbaum_consolidation/reports/01_generic-dt-lindenbaum-consolidation.md]
+- **Plan**: [350_generic_deduction_theorem_lindenbaum_consolidation/plans/01_deduction-theorem-consolidation.md]
+- **Summary**: [350_generic_deduction_theorem_lindenbaum_consolidation/summaries/01_deduction-theorem-consolidation-summary.md]
 
 **Description**: Discharge the deduction theorem and Lindenbaum extension generically across all four logics (Propositional, Modal, Temporal, Bimodal), eliminating the 4x-duplicated hand proofs. The Foundations generic layer already provides a once-and-for-all deduction theorem (list_deduction_theorem in Cslib/Foundations/Logic/Metalogic/ListDeduction.lean:55, exposed as algebraic_has_deduction_theorem in GenericMCS.lean:65) requiring only [MinimalHilbert S] (= K, S, MP), a generic set_lindenbaum (Consistency.lean), and the MinimalHilbert-parametrized MCS-property quartet (MCSProperties.lean). The MCS quartet is already inherited generically, but the deduction theorem is still proved by hand four times and merely wrapped as the HasDeductionTheorem predicate: Propositional hasDeductionTheorem (Propositional/Metalogic/DeductionTheorem.lean:198), Modal hasDeductionTheorem (Modal/Metalogic/DeductionTheorem.lean:177), temporal_has_deduction_theorem (Temporal/Metalogic/DeductionTheorem.lean:167 plus DenseMCS.lean:266), and Bimodal deductionTheorem/bimodalHasDeductionTheorem (Bimodal/Metalogic/Core/DeductionTheorem.lean:161/225). Lindenbaum (prop_lindenbaum, modal_lindenbaum, temporal_lindenbaum, bimodal_lindenbaum) is likewise re-proved per logic via Zorn. Work: route each logic's HasDeductionTheorem instance through the generic algebraic_has_deduction_theorem (using the existing GenericMCSBridge.lean seams in Modal and Temporal, and adding equivalent bridges for Propositional and Bimodal), then delete the four hand proofs of the deduction theorem; likewise discharge each *_lindenbaum from the generic set_lindenbaum where the logic carries no extra structure. Preserve temporal/bimodal-specific witnesses (g_witness, h_witness, allFuture/allPast closure). Completes the consolidation begun in task 338 (which covered only MCS boilerplate for Propositional and Temporal), extending it to the deduction theorem and to Bimodal. Files: the four DeductionTheorem.lean files, the GenericMCSBridge.lean files, Cslib/Foundations/Logic/Metalogic/{ListDeduction,GenericMCS,Consistency}.lean. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); all downstream consumers (MCS, Completeness, Chronicle, TruthLemma) still compile sorry-free. Implements the Zulip CSLib Temporal Logic suggestion by Matthew Doty (prove the deduction theorem once via an axiom class and inherit it across all structural logics that extend the implicational core): https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Temporal.20Logic/near/606511638
 

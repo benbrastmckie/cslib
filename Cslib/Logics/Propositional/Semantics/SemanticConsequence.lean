@@ -9,6 +9,8 @@ module
 public import Cslib.Logics.Propositional.Semantics.Bool
 public import Cslib.Logics.Propositional.Semantics.Kripke
 public import Cslib.Logics.Propositional.ProofSystem.Derivation
+public import Cslib.Logics.Propositional.Metalogic.DeductionTheorem
+public import Cslib.Logics.Propositional.NaturalDeduction.Equivalence
 
 /-! # Set-Based Derivability and Semantic Consequence
 
@@ -30,6 +32,8 @@ foundations needed for strong completeness theorems.
 - `SetDerivable_of_Derivable`: Theorems are set-derivable from any set.
 - `SetDerivable_empty_iff`: Set-derivability from `∅` is the same as derivability.
 - `SetDerivable_mp`: Modus ponens is closed under set-derivability.
+- `setDeriv_deduction`: Deduction theorem at the `SetDerivable` level.
+- `setDeriv_cut`: Cut rule at the `SetDerivable` level.
 
 ## References
 
@@ -46,6 +50,8 @@ open Cslib.Logic
 universe u
 
 variable {Atom : Type u}
+
+attribute [local instance] Classical.propDecidable
 
 /-! ## Set-Based Derivability -/
 
@@ -119,6 +125,99 @@ theorem SetDerivable_mp {Axioms : PL.Proposition Atom → Prop}
         (fun x hx => List.mem_append.mpr (Or.inl hx)))
       ((propDerivationSystem Axioms).weakening hL₂_deriv
         (fun x hx => List.mem_append.mpr (Or.inr hx)))⟩
+
+/-! ## SetDerivable Deduction Theorem -/
+
+/-- **Set-Deduction Theorem**: if `B` is set-derivable from `insert A Γ`, then
+`A → B` is set-derivable from `Γ`.
+
+This mirrors `min_deriv_imp_of_union` (MinLindenbaum.lean) but is generic over
+any `[MinimalAxioms Axioms]`. The proof extracts the finite witness list `L ⊆ insert A Γ`,
+applies the standard deduction theorem (`deductionTheorem`/`deductionWithMem`) to eliminate
+occurrences of `A` from `L`, and establishes that the resulting list lies in `Γ`.
+
+See [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Theorem 1.16. -/
+theorem setDeriv_deduction {Axioms : PL.Proposition Atom → Prop}
+    [inst : MinimalAxioms Axioms]
+    {Γ : Set (PL.Proposition Atom)} {A B : PL.Proposition Atom}
+    (h : SetDerivable Axioms (insert A Γ) B) :
+    SetDerivable Axioms Γ (A.imp B) := by
+  obtain ⟨L, hL_sub, hL_deriv⟩ := h
+  obtain ⟨d⟩ := hL_deriv
+  -- Weaken d : DerivationTree Axioms L B to A :: L, then apply the deduction theorem
+  have d_ext : DerivationTree Axioms (A :: L) B :=
+    DerivationTree.weakening L (A :: L) B d
+      (fun x hx => List.mem_cons.mpr (Or.inr hx))
+  have d_dt : DerivationTree Axioms L (A.imp B) :=
+    deductionTheorem inst.h_K inst.h_S L A B d_ext
+  -- hL_sub says each element of L is in insert A Γ = {A} ∪ Γ
+  -- (Set.mem_insert_iff: x ∈ insert A Γ ↔ x = A ∨ x ∈ Γ)
+  by_cases hAL : A ∈ L
+  · -- A appears in L: use deductionWithMem to eliminate all occurrences of A
+    open Cslib.Logic.Helpers in
+    have d_mem : DerivationTree Axioms (removeAll L A) (A.imp (A.imp B)) :=
+      deductionWithMem inst.h_K inst.h_S L A (A.imp B) d_dt hAL
+    -- removeAll L A ⊆ Γ (since every element of L that is not A belongs to Γ)
+    open Cslib.Logic.Helpers in
+    have h_rem_sub : ∀ x ∈ removeAll L A, x ∈ Γ := by
+      intro x hx
+      simp only [removeAll, ne_eq, decide_not, List.mem_filter, Bool.not_eq_eq_eq_not,
+        Bool.not_true, decide_eq_false_iff_not] at hx
+      obtain ⟨hx_in, hx_ne⟩ := hx
+      rcases Set.mem_insert_iff.mp (hL_sub x hx_in) with rfl | hmem
+      · exact absurd rfl hx_ne
+      · exact hmem
+    -- Collapse A → (A → B) to A → B via S-combinator + identity
+    open Cslib.Logic.Helpers in
+    let ctx := removeAll L A
+    -- S-axiom instance: (A → (A → B)) → ((A → A) → (A → B))
+    open Cslib.Logic.Helpers in
+    have d_is : DerivationTree Axioms ctx
+        ((A.imp (A.imp B)).imp ((A.imp A).imp (A.imp B))) :=
+      DerivationTree.weakening [] ctx _ (.ax [] _ (inst.h_S A A B)) (fun _ h => nomatch h)
+    -- Apply to d_mem: ctx ⊢ (A → A) → (A → B)
+    open Cslib.Logic.Helpers in
+    have d_step1 : DerivationTree Axioms ctx ((A.imp A).imp (A.imp B)) :=
+      DerivationTree.modus_ponens ctx _ _ d_is d_mem
+    -- Build A → A from K and S: ⊢ A → A
+    have d_k1 : DerivationTree Axioms [] (A.imp ((A.imp A).imp A)) :=
+      .ax [] _ (inst.h_K A (A.imp A))
+    have d_s1 : DerivationTree Axioms []
+        ((A.imp ((A.imp A).imp A)).imp ((A.imp (A.imp A)).imp (A.imp A))) :=
+      .ax [] _ (inst.h_S A (A.imp A) A)
+    have d_mp1 : DerivationTree Axioms [] ((A.imp (A.imp A)).imp (A.imp A)) :=
+      DerivationTree.modus_ponens [] _ _ d_s1 d_k1
+    have d_k2 : DerivationTree Axioms [] (A.imp (A.imp A)) :=
+      .ax [] _ (inst.h_K A A)
+    have d_id : DerivationTree Axioms [] (A.imp A) :=
+      DerivationTree.modus_ponens [] _ _ d_mp1 d_k2
+    open Cslib.Logic.Helpers in
+    have d_id_w : DerivationTree Axioms ctx (A.imp A) :=
+      DerivationTree.weakening [] ctx _ d_id (fun _ h => nomatch h)
+    -- Apply S-result to identity: ctx ⊢ A → B
+    open Cslib.Logic.Helpers in
+    have d_final : DerivationTree Axioms ctx (A.imp B) :=
+      DerivationTree.modus_ponens ctx _ _ d_step1 d_id_w
+    exact ⟨ctx, h_rem_sub, ⟨d_final⟩⟩
+  · -- A ∉ L: every element of L already belongs to Γ
+    have hL_sub' : ∀ x ∈ L, x ∈ Γ := by
+      intro x hx
+      rcases Set.mem_insert_iff.mp (hL_sub x hx) with rfl | hmem
+      · exact absurd hx hAL
+      · exact hmem
+    exact ⟨L, hL_sub', ⟨d_dt⟩⟩
+
+/-- **Set-Cut Rule**: if `B` is set-derivable from `insert A Γ` and `A` is itself
+set-derivable from `Γ`, then `B` is set-derivable from `Γ`.
+
+This is an immediate corollary of `setDeriv_deduction` and `SetDerivable_mp`. -/
+theorem setDeriv_cut {Axioms : PL.Proposition Atom → Prop}
+    [MinimalAxioms Axioms]
+    {Γ : Set (PL.Proposition Atom)} {A B : PL.Proposition Atom}
+    (hAB : SetDerivable Axioms (insert A Γ) B)
+    (hA : SetDerivable Axioms Γ A) :
+    SetDerivable Axioms Γ B :=
+  SetDerivable_mp (setDeriv_deduction hAB) hA
 
 /-! ## Classical Semantic Consequence -/
 

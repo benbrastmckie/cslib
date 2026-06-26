@@ -417,7 +417,7 @@
       "topic": "Propositional Logic",
       "description": "Fill the 6 sorry instances in propositional tableau soundness proofs across all three logics. Classical (Classical/Soundness.lean): prove classically_closed_unsatisfiable (closed branch is unsatisfiable under any Boolean valuation) and classicalTableau_sound (closed tableau implies Tautology phi), plus one helper lemma — by induction on rule applications showing each propositional rule preserves satisfiability. Intuitionistic (Intuitionistic/Soundness.lean): prove intuitionisticTableau_sound (closed tableau implies IValid phi) plus two helper lemmas — by showing each rule (including world-creating F(imp) and persistent T(imp)) preserves forcing at Kripke worlds. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_sound (closed tableau implies MValid phi) — adapts intuitionistic proof with MinimalClosure (complementary atoms only, no ex falso). Core technique: induction on expansion steps showing each rule application preserves the semantic invariant for the respective logic.",
       "created": "2026-06-23T19:55:52Z",
-      "last_updated": "2026-06-24T15:57:24Z",
+      "last_updated": "2026-06-26T07:41:32Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
@@ -440,7 +440,8 @@
         323
       ],
       "parent_task": 298,
-      "session_id": "sess_1750830000_plan316"
+      "session_id": "sess_1750830000_plan316",
+      "completion_summary": "PARTIAL: Intuitionistic/Soundness.lean builds green; recovered FreshAbove machinery committed. 3 sorries remain (2 hfresh + linearResult F-imp 4-tuple). Needs /revise 316 to thread freshInv through the key suffices before further /implement. Classical and Minimal soundness sorries unstarted."
     },
     {
       "project_number": 317,

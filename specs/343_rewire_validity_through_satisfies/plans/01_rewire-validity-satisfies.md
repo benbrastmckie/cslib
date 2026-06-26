@@ -1,7 +1,7 @@
 # Implementation Plan: Task #343 — Rewire Validity Through `Satisfies`
 
 - **Task**: 343 - Establish canonical `v ⊨ T` satisfaction predicate and rewire validity/entailment predicates through it
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 4 hours
 - **Dependencies**: Task 341 (Hilbert/algebraic completeness substrate) — must remain untouched via defeq
 - **Research Inputs**: specs/343_rewire_validity_through_satisfies/reports/01_canonical-satisfies-predicate.md

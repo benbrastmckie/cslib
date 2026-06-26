@@ -11,9 +11,9 @@ next_project_number: 355
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,344,351,352 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,317,332,345 | 36,37,180,290,299,316,344 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
-| 3 | 41,275,348 | 39,40,345 | Foundations, Propositional Logic |
+| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,345,351,352 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,317,332,348 | 36,37,180,290,299,316,345 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 3 | 41,275 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -28,7 +28,7 @@ next_project_number: 355
 ### Foundations
 
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
-351 [NOT STARTED] — Formalize the weakest-logic characterization of the deduction the
+351 [RESEARCHED] — Formalize the weakest-logic characterization of the deduction the
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Modal Logic
@@ -43,9 +43,8 @@ next_project_number: 355
   └─ 332 [IMPLEMENTING] — Prove the normalization termination theorem for CSLib Theory.Deri
 316 [PARTIAL] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
-344 [PLANNED] — Add algebraic STRONG (context/theory) completeness for the HILBER
-  └─ 345 [NOT STARTED] — Reconcile the two strength encodings on the Hilbert substrate and
-    └─ 348 [NOT STARTED] — Restate Glivenko and conservativity theory-parametrically against
+345 [NOT STARTED] — Reconcile the two strength encodings on the Hilbert substrate and
+  └─ 348 [NOT STARTED] — Restate Glivenko and conservativity theory-parametrically against
 
 ### Temporal Logic
 
@@ -63,7 +62,7 @@ next_project_number: 355
 
 ### Algebraic Semantics
 
-352 [PLANNED] — Prove CPL is conservative over its classical implicational fragme
+352 [IMPLEMENTING] — Prove CPL is conservative over its classical implicational fragme
 
 ### Uncategorized
 
@@ -90,7 +89,7 @@ next_project_number: 355
 ---
 
 ### 352. Cpl conservative over classical implicational fragment
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: None
@@ -102,7 +101,7 @@ next_project_number: 355
 ---
 
 ### 351. Deduction theorem weakest logic converse
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: Task 350
@@ -145,7 +144,7 @@ next_project_number: 355
 ---
 
 ### 344. Algebraic strong completeness
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 343

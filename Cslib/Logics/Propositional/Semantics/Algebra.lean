@@ -142,17 +142,22 @@ def BAValid (φ : PL.Proposition Atom) : Prop :=
     AlgEvaluate v (⊥ : H) φ = ⊤
 
 /-- A valuation `v` with bottom value `bot_val` models a theory `T` if every axiom of `T`
-evaluates to `⊤`. This is Thomas Waring's `v ⊨ T` pattern, parametric in the theory.
+evaluates to `⊤`. Definitionally equal to `SatisfiesTheory (AlgEvaluate v bot_val) T` (which
+see), with `bot_val` riding inside the applied evaluator.
 
 This predicate is used to state general algebraic completeness: a formula is derivable in `T`
 iff it evaluates to `⊤` in every GHA under every `T`-valid valuation. -/
 def AlgTValid {H : Type*} [GeneralizedHeytingAlgebra H]
     (T : PL.Theory Atom) (v : Atom → H) (bot_val : H) : Prop :=
-  ∀ B ∈ T, AlgEvaluate v bot_val B = ⊤
+  SatisfiesTheory (AlgEvaluate v bot_val) T
 
 /-- Notation `v ⊨[bot_val] T` for `AlgTValid T v bot_val`: the valuation `v` with designated
 bottom `bot_val` models the theory `T`. The bottom value is carried explicitly in brackets
-because a `GeneralizedHeytingAlgebra` has no primitive `⊥`. -/
+because a `GeneralizedHeytingAlgebra` has no primitive `⊥`.
+
+Legacy alias: this notation unfolds to `SatisfiesTheory (AlgEvaluate v bot_val) T` via the
+definition of `AlgTValid`. Use `SatisfiesTheory` directly when `bot_val` is already absorbed
+into the evaluator. -/
 scoped notation:50 v " ⊨[" bot_val "] " T:50 => AlgTValid T v bot_val
 
 end Cslib.Logic.PL

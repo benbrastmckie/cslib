@@ -15,17 +15,20 @@
     "353": []
   },
   "max_cycles": 10,
-  "cycle_count": 6,
+  "cycle_count": 4,
   "failed_tasks": [],
   "completed_tasks": [
-    353,
-    354
+    343,
+    344
   ],
   "current_statuses": {
     "352": "not_started",
     "353": "completed",
     "343": "completed",
-    "354": "completed"
+    "354": "completed",
+    "350": "completed",
+    "344": "completed",
+    "351": "researched"
   },
   "task_dirs": {
     "352": "specs/352_cpl_conservative_over_classical_implicational_fragment",

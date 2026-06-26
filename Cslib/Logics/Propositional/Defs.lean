@@ -206,3 +206,40 @@ instance instIsIntuitionisticIntuitionisticCompletion (T : Theory Atom) :
     IsIntuitionistic T.intuitionisticCompletion := by grind
 
 end Cslib.Logic.PL.Theory
+
+namespace Cslib.Logic.PL
+
+/-! ## Satisfaction Predicates -/
+
+/-- `Satisfies eval A` holds when the evaluator `eval : Proposition Atom → β` maps formula `A`
+to the top element `⊤` of the codomain algebra. This is the canonical single-formula satisfaction
+predicate, generic over any evaluator whose codomain carries a `[Top β]` instance.
+
+Used in the bodies of `GHAValid`, `HAValid`, `BAValid` in `Algebra.lean` to factor
+the "evaluates to `⊤`" condition through a named predicate.
+
+See `SatisfiesTheory` for the theory-level variant. -/
+def Satisfies {β : Type*} [Top β] (eval : Proposition Atom → β) (A : Proposition Atom) : Prop :=
+  eval A = ⊤
+
+/-- `SatisfiesTheory eval T` holds when the evaluator `eval : Proposition Atom → β` maps every
+formula `A ∈ T` to `⊤`. Generic over any evaluator whose codomain carries a `[Top β]` instance.
+
+`AlgTValid T v bot_val` is definitionally equal to `SatisfiesTheory (AlgEvaluate v bot_val) T`,
+with `bot_val` riding inside the applied evaluator. The `v ⊨[bot_val] T` bracket notation in
+`Algebra.lean` is the specific legacy alias for the algebraic case.
+
+See `Satisfies` for the single-formula variant. -/
+def SatisfiesTheory {β : Type*} [Top β] (eval : Proposition Atom → β) (T : Theory Atom) : Prop :=
+  ∀ A ∈ T, eval A = ⊤
+
+/-- Scoped satisfaction notation: `eval ⊨ A` abbreviates `Satisfies eval A`.
+Disambiguated from the `SatisfiesTheory` form by type: `A : Proposition Atom`
+selects this single-formula form. -/
+scoped notation:50 eval " ⊨ " A => Satisfies eval A
+
+/-- Scoped theory satisfaction notation: `eval ⊨ T` abbreviates `SatisfiesTheory eval T`.
+Disambiguated from the `Satisfies` form by type: `T : Theory Atom` selects this form. -/
+scoped notation:50 eval " ⊨ " T => SatisfiesTheory eval T
+
+end Cslib.Logic.PL

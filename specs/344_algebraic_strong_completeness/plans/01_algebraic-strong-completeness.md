@@ -1,7 +1,7 @@
 # Implementation Plan: Task #344 — Algebraic Strong (Context/Theory) Completeness for the Hilbert System
 
 - **Task**: 344 - algebraic_strong_completeness
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 6 hours
 - **Dependencies**: 343 (SatisfiesTheory / `v ⊨ T` machinery; SetDerivable)
 - **Research Inputs**: reports/01_algebraic-strong-completeness.md

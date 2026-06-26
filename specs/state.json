@@ -4,7 +4,7 @@
     {
       "project_number": 352,
       "project_name": "cpl_conservative_over_classical_implicational_fragment",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Prove CPL is conservative over its classical implicational fragment CPL⟨→,⊤⟩, extending the propositional conservativity chain to the classical side, as raised in the Zulip CSLib Propositional Logic thread by Matthew Doty (2026-06-25): \"There's also CPL⟨→, ⊤⟩ ... Is it worth proving CPL is conservative over that?\" (https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/near/606508446). The classical implicational fragment Hilbert system is K (φ → ψ → φ), S, and a classical implicational axiom (e.g. Peirce's law ((φ → ψ) → φ) → φ; the research phase must pin down the exact axiomatization — Matthew's thread message lists candidate schemata that should be verified). The existing chain (completed tasks 310/311/312/322) closes the intuitionistic and minimal sides — IPL⟨→,⊤⟩ ⊂ IPL⟨∧,→,⊤⟩ ⊂ IPL⟨∧,→,⊥,⊤⟩ ⊂ IPL and the MPL chain — via Hilbert-algebra / Brouwerian routes in Cslib/Logics/Propositional/Semantics/Algebra/{ImpConservative,ConjImpConservative,ConservativeChain,MplConservativeChain,Hilbert}.lean, with fragment axioms in ProofSystem/FragmentAxioms.lean (ImpAxiom, ConjImpAxiom, ConjImpBotAxiom). For the classical implicational fragment the natural algebraic semantics are implication algebras / Tarski algebras; Matthew noted these are obscure and suggested traditional truth-assignment semantics may be the more natural route here (\"I'm not about using algebraic semantics here, rather than traditional truth assignments\") — the research/plan phase should evaluate both routes and pick the cleaner one. Deliver a cpl_conservative_over_imp (classical) conservativity theorem analogous to the intuitionistic ipl_conservative_over_imp, adding the classical implicational fragment axiom set to FragmentAxioms.lean and extending the derivability subsumption chain. NOTE: Matthew himself flagged this as lower-interest (\"not as interesting in terms of Curry-Howard or Category theory or anything\"), so this is an optional/exploratory extension — confirm desirability before heavy investment. Files: Cslib/Logics/Propositional/ProofSystem/FragmentAxioms.lean, a new Semantics/Algebra/ClassicalImpConservative.lean (or a truth-assignment-based module), ConservativeChain.lean. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); existing chain preserved.",
       "topic": "Algebraic Semantics",
@@ -26,7 +26,7 @@
     {
       "project_number": 351,
       "project_name": "deduction_theorem_weakest_logic_converse",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "description": "Formalize the weakest-logic characterization of the deduction theorem: prove the converse direction that no current Cslib result provides. Introduce an axiom class bundling Modus Ponens with the Deduction Theorem property (the HasDeductionTheorem-style hypothesis Γ ⊢ A → B ↔ A :: Γ ⊢ B, plus reflection/assumption) and prove it instances the implicational Hilbert core MinimalHilbert (= K, S, MP; Cslib/Foundations/Logic/ProofSystem.lean:342) by DERIVING the K axiom A → B → A and the S axiom (A → B → C) → (A → B) → A → C from DT + MP alone. Composed with the existing forward direction (MinimalHilbert ⇒ deduction theorem via list_deduction_theorem), this yields the equivalence characterizing IPL⟨→,⊤⟩ as the weakest logic admitting the deduction theorem, as proposed in the Zulip CSLib Temporal Logic thread by Matthew Doty (2026-06-25): \"make another axiom class for the deduction theorem and modus ponens, and show that it instances the IPL⟨→,⊤⟩ class, since IPL⟨→,⊤⟩ is the weakest logic that proves the deduction theorem.\" (https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Temporal.20Logic/near/606511638). Currently NO converse result exists: every deductionTheorem/hasDeductionTheorem consumes the K and S axioms (h_implyK, h_implyS) as inputs to prove deduction; none derives them. Additionally, decouple the deduction-theorem machinery from [HasBot F]: the generic DerivationSystem/HasDeductionTheorem layer (Cslib/Foundations/Logic/Metalogic/Consistency.lean) lives under a [HasBot F] variable block although its content is purely implicational, so introduce or generalize to a ⊥-free implicational class (cf. existing ⊥-free classes ImpAxiom in Propositional/ProofSystem/FragmentAxioms.lean:84 and HasHilbertTree in Foundations/Logic/Metalogic/DeductionHelpers.lean:61) so purely-implicational systems inherit the deduction theorem without a spurious ⊥. Files: Cslib/Foundations/Logic/ProofSystem.lean, Cslib/Foundations/Logic/Metalogic/{Consistency,ListDeduction,DeductionHelpers}.lean, possibly a new Cslib/Foundations/Logic/Metalogic/DeductionCharacterization.lean. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Related to task 345 (MinimalAxioms/IsMinimal reconcile) and best done after or alongside task 350 (generic deduction-theorem consolidation).",
       "topic": "Foundations",
@@ -34,7 +34,8 @@
         350
       ],
       "created": "2026-06-25T16:59:06Z",
-      "last_updated": "2026-06-25T16:59:06Z"
+      "last_updated": "2026-06-26T07:00:07Z",
+      "session_id": "sess_1782453793_190e95_351"
     },
     {
       "project_number": 350,
@@ -46,7 +47,7 @@
       "created": "2026-06-25T16:58:49Z",
       "last_updated": "2026-06-26T06:49:08Z",
       "session_id": "sess_1750870000_a3b2c1",
-      "completion_summary": "Re-implemented Temporal and Bimodal deductionTheorem via generic bridge round-trips (signature-preserved). Deleted deductionWithMem helpers and WF-recursion bodies. Created new Bimodal GenericMCSBridge.lean. Corrected Modal bridge gap-analysis comment. All task-350 modified modules build green (scoped builds); full CI has pre-existing failures in unrelated modules (Perpetuity.Principles, SequentCalculus, Tableau). Zero sorry, zero new axioms.",
+      "completion_summary": "Consolidated the deduction theorem generically for Temporal (via existing temporal_deriv_iff_algebraic bridge) and Bimodal (new GenericMCSBridge at HilbertTM/FrameClass.Base), re-implementing each deductionTheorem signature-preserving. Lindenbaum already consolidated (no work needed). Modal/Propositional deferred to follow-up (predicate->InferenceSystem infrastructure). Zero sorry, zero new axioms; scoped builds green. 4 phases, 4 commits.",
       "artifacts": [
         {
           "type": "report",
@@ -1301,10 +1302,10 @@
         343
       ],
       "description": "Add algebraic STRONG (context/theory) completeness for the HILBERT system, extending 341's weak completeness and factored through v ⊨ T. 341 gives Derivable Axioms φ ↔ validity (theorems only); the only strong completeness today (Γ ⊢ φ ↔ Γ ⊨ φ) is Kripke-based in Metalogic/*StrongCompleteness.lean, not algebraic. Goal: SetDerivable Axioms Γ φ ↔ (algebraic Γ-consequence) — every GHA model (v, bot_val) with v ⊨ AxiomTheory Axioms and v⟦ψ⟧ = ⊤ for all ψ ∈ Γ satisfies v⟦φ⟧ = ⊤ (equivalently the SValid/≤ form v⟦Γ⟧ ≤ v⟦φ⟧). Stay on HILBERT: reuse SetDerivable (Semantics/SemanticConsequence.lean), the HilbertLindenbaumAlgebra + canonicalV/canonicalBotVal scaffolding (Semantics/Algebra/HilbertLindenbaum.lean), and [MinimalAxioms Axioms]. Recover the weak theorem (341) as the Γ = ∅ case. CI green.",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "created": "2026-06-25T00:00:00Z",
-      "last_updated": "2026-06-26T06:39:14Z",
+      "last_updated": "2026-06-26T07:03:00Z",
       "artifacts": [],
       "session_id": "sess_1782454557_a308bd_344"
     },

@@ -123,7 +123,13 @@ theorem SetDerivable_mp {Axioms : PL.Proposition Atom → Prop}
 /-! ## Classical Semantic Consequence -/
 
 /-- Classical (bivalent) semantic consequence: `φ` is a semantic consequence of `Γ`
-if every valuation satisfying all formulas in `Γ` also satisfies `φ`. -/
+if every valuation satisfying all formulas in `Γ` also satisfies `φ`.
+
+**Convention note**: The premise `∀ ψ ∈ Γ, Evaluate v ψ` uses Prop-valued forcing rather than
+the algebraic `SatisfiesTheory (Evaluate v) Γ` form (which would require `Evaluate v ψ = ⊤`,
+i.e. `= True` in `Prop`). These are propositionally but not definitionally equal (propext is
+needed), so the algebraic `⊨` notation from `Defs.lean` cannot be applied here defeq-safely.
+Full unification of the Prop-forcing and algebraic-`= ⊤` conventions is a deferred roadmap item. -/
 def SemanticEntails (Γ : Set (PL.Proposition Atom))
     (φ : PL.Proposition Atom) : Prop :=
   ∀ (v : Valuation Atom),
@@ -133,7 +139,12 @@ def SemanticEntails (Γ : Set (PL.Proposition Atom))
 
 /-- Intuitionistic Kripke semantic consequence: `φ` is an intuitionistic consequence
 of `Γ` if for every intuitionistic Kripke model (with `bot_forces = fun _ => False`)
-and every world where all formulas in `Γ` are forced, `φ` is also forced. -/
+and every world where all formulas in `Γ` are forced, `φ` is also forced.
+
+**Convention note**: The premise `∀ ψ ∈ Γ, IForces val ... w ψ` uses Prop-valued Kripke
+forcing rather than the algebraic `SatisfiesTheory` form. These inhabit different semantic
+layers (`IForces` is a world-indexed relation, not an `= ⊤` equation), so the algebraic
+`⊨` notation from `Defs.lean` does not apply here. Full unification is a deferred roadmap item. -/
 def ISemanticEntails (Γ : Set (PL.Proposition Atom))
     (φ : PL.Proposition Atom) : Prop :=
   ∀ (World : Type u) [Preorder World] (val : World → Atom → Prop),
@@ -146,7 +157,12 @@ def ISemanticEntails (Γ : Set (PL.Proposition Atom))
 
 /-- Minimal Kripke semantic consequence: `φ` is a minimal consequence of `Γ`
 if for every minimal Kripke model (with arbitrary upward-closed `bot_forces`)
-and every world where all formulas in `Γ` are forced, `φ` is also forced. -/
+and every world where all formulas in `Γ` are forced, `φ` is also forced.
+
+**Convention note**: As with `ISemanticEntails`, the premise uses Prop-valued Kripke
+forcing (`IForces val bot_forces w ψ`) rather than the algebraic `SatisfiesTheory` form.
+These inhabit different semantic layers and the algebraic `⊨` notation from `Defs.lean`
+does not apply here defeq-safely. Full unification is a deferred roadmap item. -/
 def MSemanticEntails (Γ : Set (PL.Proposition Atom))
     (φ : PL.Proposition Atom) : Prop :=
   ∀ (World : Type u) [Preorder World] (val : World → Atom → Prop)

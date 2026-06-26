@@ -134,7 +134,7 @@ Phases within the same wave can execute in parallel. This plan is fully sequenti
 
 ---
 
-### Phase 2: Transcribe converse heart (dt_implies_implyK / dt_implies_implyS) [IN PROGRESS]
+### Phase 2: Transcribe converse heart (dt_implies_implyK / dt_implies_implyS) [COMPLETED]
 
 - **Goal:** Create `DeductionCharacterization.lean` and transcribe the verified §3 proof terms
   deriving K and S from `D.assumption`, `D.mp`, and `hdt : HasDeductionTheorem D` — no weakening,
@@ -166,7 +166,7 @@ Phases within the same wave can execute in parallel. This plan is fully sequenti
 
 ---
 
-### Phase 3: dtInferenceSystem bridge, MinimalHilbert instance, characterization theorem [NOT STARTED]
+### Phase 3: dtInferenceSystem bridge, MinimalHilbert instance, characterization theorem [COMPLETED]
 
 - **Goal:** Add the `dtInferenceSystem` wrapper (dual of `algebraicDerivationSystem`) so a
   DT-system's empty-context derivations form an `InferenceSystem`, produce the `MinimalHilbert`

@@ -61,7 +61,7 @@ next_project_number: 355
 
 ### Algebraic Semantics
 
-352 [IMPLEMENTING] — Prove CPL is conservative over its classical implicational fragme
+352 [BLOCKED] — Prove CPL is conservative over its classical implicational fragme
 
 ### Uncategorized
 
@@ -88,7 +88,7 @@ next_project_number: 355
 ---
 
 ### 352. Cpl conservative over classical implicational fragment
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: None

@@ -1,0 +1,9 @@
+{
+  "session_id": "sess_1782454849_22df5a",
+  "task_numbers": [352, 353],
+  "completed_tasks": [353],
+  "failed_tasks": [352],
+  "current_statuses": {"352": "blocked", "353": "completed"},
+  "cycle_count": 4,
+  "max_cycles": 10
+}

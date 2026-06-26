@@ -1,16 +1,22 @@
 {
   "status": "implemented",
-  "started_at": "2026-06-25T00:00:00Z",
+  "started_at": "2026-06-25T23:00:00Z",
+  "completed_at": "2026-06-26T06:25:00Z",
   "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/ProofSystem/FragmentAxioms.lean",
+      "type": "lean_file",
+      "summary": "143 lines appended: ConjImpBotMinAxiom inductive, two subsumptions, witnesses, subst closure, 5 isOrFree lemmas, HasDeductionTheorem instance"
+    },
     {
       "path": "specs/353_mpl_conjimpbot_fragment_axiom/summaries/01_conjimpbotmin-axiom-summary.md",
       "type": "summary",
-      "summary": "Implementation summary for ConjImpBotMinAxiom: 143 lines added to FragmentAxioms.lean, all CI steps passed for our module (pre-existing failures in 11 unrelated modules confirmed to predate this task)"
+      "summary": "Full implementation summary with CI results and plan-deviations section"
     }
   ],
   "partial_progress": {
     "stage": "complete",
-    "details": "Both phases completed. 143 lines inserted into FragmentAxioms.lean. Scoped build passes. Pre-existing CI failures confirmed pre-existing.",
+    "details": "Both phases completed in previous session (commit a5989075). Re-verification confirms zero sorry, zero axioms, lint-style clean.",
     "lint_count_start": null,
     "lint_count_current": null,
     "phases_completed": 2
@@ -21,16 +27,15 @@
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": true,
-    "scoped_build_passed": true,
-    "lint_style_passed": true,
     "ci_pipeline_passed": true,
-    "notes": "lake build (full) and lake test have 11 pre-existing broken modules unrelated to this task; scoped build of FragmentAxioms passes cleanly; confirmed failures are identical on original codebase"
+    "note": "Scoped build passes. Full build has 11 pre-existing failures in unrelated Bimodal/Modal/Temporal modules, confirmed to predate task 353."
   },
   "metadata": {
-    "session_id": "sess_1750809600_task353",
+    "session_id": "sess_1782454849_22df5a_353",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "passed"
+    "compliance_check": "passed",
+    "commit": "a5989075"
   }
 }

@@ -1,59 +1,42 @@
 {
-  "session_id": "sess_1782352018_d29255",
+  "session_id": "sess_1782454849_22df5a",
   "task_numbers": [
-    290,
-    332,
-    333
+    352,
+    353
   ],
   "waves": [
     [
-      333
-    ],
-    [
-      332
-    ],
-    [
-      290
+      352,
+      353
     ]
   ],
   "dependency_graph": {
-    "333": [],
-    "332": [
-      "333"
-    ],
-    "290": [
-      "332"
-    ]
+    "352": [],
+    "353": []
   },
-  "max_cycles": 15,
-  "cycle_count": 4,
+  "max_cycles": 10,
+  "cycle_count": 6,
   "failed_tasks": [],
   "completed_tasks": [
-    333
+    353,
+    354
   ],
   "current_statuses": {
-    "290": "partial",
-    "332": "partial",
-    "333": "completed"
+    "352": "not_started",
+    "353": "completed",
+    "343": "completed",
+    "354": "completed"
   },
   "task_dirs": {
-    "290": "specs/290_nd_normalization_subformula_property",
-    "332": "specs/332_normalization_termination_proof",
-    "333": "specs/333_normalization_module_refactor"
+    "352": "specs/352_cpl_conservative_over_classical_implicational_fragment",
+    "353": "specs/353_mpl_conjimpbot_fragment_axiom"
   },
   "research_agents": {
-    "290": "cslib-research-agent",
-    "332": "cslib-research-agent",
-    "333": "cslib-research-agent"
+    "352": "cslib-research-agent",
+    "353": "cslib-research-agent"
   },
   "implement_agents": {
-    "290": "cslib-implementation-agent",
-    "332": "cslib-implementation-agent",
-    "333": "cslib-implementation-agent"
-  },
-  "strategy": "refactor-first reorder (user-approved): revert to green phase-0 baseline, run 333 refactor first, then complete termination proof in small Termination.lean module, then close 332/290",
-  "partial_tasks": [
-    332,
-    290
-  ]
+    "352": "cslib-implementation-agent",
+    "353": "cslib-implementation-agent"
+  }
 }

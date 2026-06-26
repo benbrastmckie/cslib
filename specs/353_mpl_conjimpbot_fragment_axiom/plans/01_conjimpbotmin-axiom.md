@@ -1,7 +1,7 @@
 # Implementation Plan: Task #353
 
 - **Task**: 353 - Add the MPL ⟨∧,→,⊥,⊤⟩ fragment axiom system `ConjImpBotMinAxiom`
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 1 hour
 - **Dependencies**: None
 - **Research Inputs**: specs/353_mpl_conjimpbot_fragment_axiom/reports/01_conjimpbotmin-axiom.md

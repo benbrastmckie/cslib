@@ -1,7 +1,7 @@
 # Implementation Plan: Task #354
 
 - **Task**: 354 - Close the fourth conservativity step of the MPL fragment tower (MPL⟨∧,→,⊥,⊤⟩ ⊂ MPL via arbitrary-point Brouwerian completeness)
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 3.5 hours
 - **Dependencies**: 353 (provides `ConjImpBotMinAxiom`, `toMinPropAxiom`, `mem_implyK/mem_implyS` witnesses)
 - **Research Inputs**: reports/01_arbitrary-point-completeness.md

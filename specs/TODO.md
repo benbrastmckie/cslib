@@ -1,20 +1,19 @@
 ---
-next_project_number: 353
+next_project_number: 355
 ---
 
 # TODO
 
 ## Task Order
 
-*Updated 2026-06-25. Generated from state.json dependency graph.*
+*Updated 2026-06-26. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,343,350,352 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,317,332,344,351 | 36,37,180,290,299,316,343,350 | Bimodal Porting, Foundations, Modal Logic, ... |
-| 3 | 41,275,345 | 39,40,344 | Foundations, Propositional Logic |
-| 4 | 348 | 345 | Propositional Logic |
+| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,344,350,352 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,317,332,345,351 | 36,37,180,290,299,316,344,350 | Bimodal Porting, Foundations, Modal Logic, ... |
+| 3 | 41,275,348 | 39,40,345 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -29,7 +28,7 @@ next_project_number: 353
 ### Foundations
 
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
-350 [NOT STARTED] — Discharge the deduction theorem and Lindenbaum extension generica
+350 [IMPLEMENTING] — Discharge the deduction theorem and Lindenbaum extension generica
   └─ 351 [NOT STARTED] — Formalize the weakest-logic characterization of the deduction the
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
@@ -45,10 +44,9 @@ next_project_number: 353
   └─ 332 [IMPLEMENTING] — Prove the normalization termination theorem for CSLib Theory.Deri
 316 [PARTIAL] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
-343 [PLANNED] — Establish the canonical theory-satisfaction predicate v ⊨ T for p
-  └─ 344 [NOT STARTED] — Add algebraic STRONG (context/theory) completeness for the HILBER
-    └─ 345 [NOT STARTED] — Reconcile the two strength encodings on the Hilbert substrate and
-      └─ 348 [NOT STARTED] — Restate Glivenko and conservativity theory-parametrically against
+344 [PLANNED] — Add algebraic STRONG (context/theory) completeness for the HILBER
+  └─ 345 [NOT STARTED] — Reconcile the two strength encodings on the Hilbert substrate and
+    └─ 348 [NOT STARTED] — Restate Glivenko and conservativity theory-parametrically against
 
 ### Temporal Logic
 
@@ -66,17 +64,39 @@ next_project_number: 353
 
 ### Algebraic Semantics
 
-352 [NOT STARTED] — Prove CPL is conservative over its classical implicational fragme
+352 [PLANNED] — Prove CPL is conservative over its classical implicational fragme
 
 ### Uncategorized
 
 ## Tasks
 
+### 354. Mpl arbitrary point brouwerian completeness
+- **Status**: [COMPLETED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 353
+
+**Description**: Close the fourth conservativity step of the MPL fragment tower so it parallels the IPL chain step-for-step. Build algebraic completeness for MPL⟨∧,→,⊥,⊤⟩ (ConjImpBotMinAxiom from task 353) against Brouwerian semilattices with an ARBITRARY distinguished element (a free bot_val : H) — NOT the OrderBot least-element semantics of PointedBrouwerian.lean (PointedBrouwerian.lean:22,67), which encodes ex falso. Generalise PointedBrouwerianEvaluate / PointedBrouwerianCompleteness by dropping the [OrderBot H] requirement and interpreting ⊥ as a parametric bot_val — exactly the AlgEvaluate v bot_val that GHAValid already quantifies over (Semantics/Algebra.lean:93). Then prove hilbertMplConservativeOverConjImpBot_direct (MPL conservative over ConjImpBotMin for or-free formulas, analogous to hilbertMplConservativeOverConjImp_direct in MplConservativeChain.lean) plus the biconditional mplAxiom_iff_conjImpBotMinAxiom. Reuse the GHA→Brouwerian bridge GHAValid_implies_BrouwerianValid_direct, generalised to carry bot_val. Result: MPL⟨→,⊤⟩ ⊂ MPL⟨∧,→,⊤⟩ ⊂ MPL⟨∧,→,⊥,⊤⟩ ⊂ MPL mirrors IPL's Hilbert → Brouwerian → pointed-Brouwerian → GHA, the sole divergence being free vs. least ⊥. Depends on 353. CI green.
+
+---
+
+### 353. Mpl conjimpbot fragment axiom
+- **Status**: [COMPLETED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Create the MPL-flavoured ⟨∧,→,⊥,⊤⟩ fragment axiom system ConjImpBotMinAxiom — identical to the existing ConjImpBotAxiom (ProofSystem/FragmentAxioms.lean:259) but WITHOUT the ex-falso constructor Proposition.bot.imp φ (line 277). This is the fourth element MPL⟨∧,→,⊥,⊤⟩ of the MPL fragment tower, sitting between ConjImpAxiom and MinPropAxiom, and is the point where the MPL chain genuinely diverges from IPL (free ⊥ vs. least ⊥). Deliver: (1) inductive ConjImpBotMinAxiom with the 5 non-exfalso constructors (implyK, implyS, andIntro, andElimL, andElimR); (2) subsumptions ConjImpAxiom.toConjImpBotMinAxiom and ConjImpBotMinAxiom.toMinPropAxiom (deliberately NOT toIntPropAxiom — staying inside minimal logic is the whole point); (3) substitution closure, fragment-predicate compatibility, and the HasDeductionTheorem instance, mirroring the existing ConjImpBotAxiom blocks (FragmentAxioms.lean:282-394). Leave ConjImpBotAxiom untouched. CI green (lake build, checkInitImports, lint-style, shake).
+
+---
+
 ### 352. Cpl conservative over classical implicational fragment
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: None
+- **Research**: [352_cpl_conservative_over_classical_implicational_fragment/reports/01_cpl-conservative-classical-implicational.md]
+- **Plan**: [352_cpl_conservative_over_classical_implicational_fragment/plans/01_classical-imp-conservativity.md]
 
 **Description**: Prove CPL is conservative over its classical implicational fragment CPL⟨→,⊤⟩, extending the propositional conservativity chain to the classical side, as raised in the Zulip CSLib Propositional Logic thread by Matthew Doty (2026-06-25): "There's also CPL⟨→, ⊤⟩ ... Is it worth proving CPL is conservative over that?" (https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/near/606508446). The classical implicational fragment Hilbert system is K (φ → ψ → φ), S, and a classical implicational axiom (e.g. Peirce's law ((φ → ψ) → φ) → φ; the research phase must pin down the exact axiomatization — Matthew's thread message lists candidate schemata that should be verified). The existing chain (completed tasks 310/311/312/322) closes the intuitionistic and minimal sides — IPL⟨→,⊤⟩ ⊂ IPL⟨∧,→,⊤⟩ ⊂ IPL⟨∧,→,⊥,⊤⟩ ⊂ IPL and the MPL chain — via Hilbert-algebra / Brouwerian routes in Cslib/Logics/Propositional/Semantics/Algebra/{ImpConservative,ConjImpConservative,ConservativeChain,MplConservativeChain,Hilbert}.lean, with fragment axioms in ProofSystem/FragmentAxioms.lean (ImpAxiom, ConjImpAxiom, ConjImpBotAxiom). For the classical implicational fragment the natural algebraic semantics are implication algebras / Tarski algebras; Matthew noted these are obscure and suggested traditional truth-assignment semantics may be the more natural route here ("I'm not about using algebraic semantics here, rather than traditional truth assignments") — the research/plan phase should evaluate both routes and pick the cleaner one. Deliver a cpl_conservative_over_imp (classical) conservativity theorem analogous to the intuitionistic ipl_conservative_over_imp, adding the classical implicational fragment axiom set to FragmentAxioms.lean and extending the derivability subsumption chain. NOTE: Matthew himself flagged this as lower-interest ("not as interesting in terms of Curry-Howard or Category theory or anything"), so this is an optional/exploratory extension — confirm desirability before heavy investment. Files: Cslib/Logics/Propositional/ProofSystem/FragmentAxioms.lean, a new Semantics/Algebra/ClassicalImpConservative.lean (or a truth-assignment-based module), ConservativeChain.lean. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); existing chain preserved.
 
@@ -93,7 +113,7 @@ next_project_number: 353
 ---
 
 ### 350. Generic deduction theorem lindenbaum consolidation
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
@@ -123,7 +143,7 @@ next_project_number: 353
 ---
 
 ### 344. Algebraic strong completeness
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 343
@@ -133,7 +153,7 @@ next_project_number: 353
 ---
 
 ### 343. Rewire validity through satisfies
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 341

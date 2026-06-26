@@ -1,7 +1,13 @@
 {
-  "status": "implemented",
-  "summary": "Fixed all transcription bugs in the recovered FreshAbove machinery (+251 lines). The root causes were: (1) extraneous leading `· simp` bullets after `split_ifs` that auto-close one case, (2) double-bracket `obtain ⟨⟨sign, form, label⟩⟩` triggering an unwanted case-split on Sign, (3) `exact ⟨start, he⟩` should be `⟨p, he⟩` after subst, and (4) `obtain ⟨rfl, rfl, rfl⟩` failing on `some x = some e` form. Build is 0 errors, 3 sorries. Commit: c98ea291.",
-  "blockers": [],
+  "status": "partial",
+  "summary": "Neither hfresh sorry (lines ~1184 and ~1200) could be closed in this dispatch: both require `FreshAbove bPers edgesH nwH` in the proof context, but the `key` suffices inside `intExpandBranches_closed_unsat` does not track this invariant — confirmed by lean_goal and lean_multi_attempt. The build remains green at 3 sorries (the two hfresh lines plus the linearResult bp=bh case at ~1189); no edits were made. The Classical/Soundness.lean and Minimal/DecisionProcedure.lean sorries are entirely unstarted and out of scope for task 316.",
+  "blockers": [
+    {
+      "id": "no-freshAbove-in-key",
+      "description": "Both `have hfresh : ∀ sf' ∈ bPers, sf'.label ≠ nwH := by sorry` sites (lines ~1184 and ~1200) require a `FreshAbove bh edgesH nwH` hypothesis in scope to apply `freshAbove_applyPersistenceFixpoint` + `Nat.ne_of_lt`. The `key` suffices (lines ~1078–1096 of Soundness.lean) tracks only length conditions and the closed-expansion equation — no freshness invariant. Closing these two sorries requires strengthening `key` to carry a per-branch freshness invariant through the pending-list induction. This is a larger structural change than the two-sorry budget allows.",
+      "description2": "The F(→) linearResult bp=bh sorry (line ~1189) is the 4-tuple obstacle from prior handoffs: it additionally requires `intRule_preserves_sat` for the world-creating case, which needs hfresh AND threading of the updated worldOf' through the inductive hypothesis. A broken WIP attempt is shelved at specs/316_propositional_tableau_soundness/recovered/intrule-4tuple-attempt-broken.lean"
+    }
+  ],
   "continuation_context": {
     "plan_path": "specs/316_propositional_tableau_soundness/plans/06_soundness-plan-revised.md",
     "build_state": {
@@ -10,16 +16,31 @@
       "sorry_count": 3
     },
     "sorry_inventory": [
-      { "line": 1184, "kind": "sorry", "desc": "hfresh : ∀ sf' ∈ bPers, sf'.label ≠ nwH (first occurrence)" },
-      { "line": 1189, "kind": "sorry", "desc": "linearResult bp=bh case: apply intRule_preserves_sat + ih" },
-      { "line": 1200, "kind": "sorry", "desc": "hfresh : ∀ sf' ∈ bPers, sf'.label ≠ nwH (second occurrence)" }
+      {
+        "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
+        "line": 1184,
+        "description": "have hfresh : ∀ sf' ∈ bPers, sf'.label ≠ nwH (linearResult case) — BLOCKED: needs FreshAbove invariant in key suffices"
+      },
+      {
+        "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
+        "line": 1189,
+        "description": "linearResult bp=bh case: apply intRule_preserves_sat + ih — BLOCKED: needs hfresh (above) + worldOf' threading for world-creating F(→) case"
+      },
+      {
+        "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
+        "line": 1200,
+        "description": "have hfresh : ∀ sf' ∈ bPers, sf'.label ≠ nwH (branchingResult case) — BLOCKED: needs FreshAbove invariant in key suffices"
+      }
     ],
-    "remaining_obstacle": "Three live sorries inside intExpandBranches_closed_sound, all in the main soundness induction (lines 1184, 1189, 1200). These require proving freshness of persistence forms and the inductive case for linear results.",
-    "where_to_begin": "Open Soundness.lean at line ~1150. Use lean_goal at lines 1184, 1189, 1200 to see the exact goal states, then implement proofs for the three sorries."
+    "remaining_obstacle": "The `key` suffices (lines ~1078–1096 of Soundness.lean) must be strengthened to carry a FreshAbove invariant. The fix: add a component `(freshInv : ∀ bPend edgesPend nwPend, (bPend, edgesPend) ∈ pending.zip pendingEdges → nwPend ∈ pendingNW → FreshAbove bPend edgesPend nwPend)` (or equivalent). Once that is in scope, hfresh at 1184 and 1200 close via `freshAbove_applyPersistenceFixpoint` + `Nat.ne_of_lt`. The linearResult bp=bh sorry at 1189 then additionally needs the world-creating worldOf' threading through the inductive hypothesis. A broken WIP attempt is shelved at specs/316_propositional_tableau_soundness/recovered/intrule-4tuple-attempt-broken.lean",
+    "where_to_begin": "Strengthen the `key` suffices by adding a freshness component. The `nil` case of the pending induction needs no freshInv premise. The `cons` case derives `FreshAbove bPers edgesH nwH` as `freshAbove_applyPersistenceFixpoint bh edgesH nwH (fuel''+1) (freshInv bh edgesH nwH ...)`, then `intro sf' hsf'; exact Nat.ne_of_lt (hfreshAbove.1 sf' hsf')`. The `cons` recursive call must discharge freshInv for the next round, using `freshAbove_extendMany` (non-world-creating) or `freshAbove_world_create` (F(→)) to establish the updated FreshAbove for the expanded branch."
   },
   "artifacts": [
-    { "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean", "type": "lean_implementation" }
+    {
+      "path": "specs/316_propositional_tableau_soundness/.orchestrator-handoff.json",
+      "type": "handoff"
+    }
   ],
-  "phases_completed": 3,
+  "phases_completed": 0,
   "phases_total": 4
 }

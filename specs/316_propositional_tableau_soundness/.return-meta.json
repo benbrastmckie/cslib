@@ -1,18 +1,10 @@
 {
-  "status": "in_progress",
-  "started_at": "2026-06-25T00:00:00Z",
-  "artifacts": [],
-  "partial_progress": {
-    "stage": "phase-a-threading",
-    "details": "Implementing FreshAbove threading to close L945 and L961 sorries",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 0
-  },
+  "status": "partial",
   "metadata": {
-    "session_id": "sess_1782454850_be017d",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "cycles_used": 5,
+    "final_state": "partial",
+    "build": "green",
+    "sorry_count_intuitionistic": 3,
+    "note": "FreshAbove machinery recovered+committed; 3 Intuitionistic sorries remain (2 hfresh + 1 linearResult); needs plan revision to thread freshInv through key suffices. Classical/Minimal soundness unstarted."
   }
 }

@@ -1,0 +1,13 @@
+{
+  "task_number": 352,
+  "session_id": "sess_1782454849_22df5a_352",
+  "stage": "plan",
+  "status": "planned",
+  "summary": "Planned CPL conservativity over classical implicational fragment CPL<imp,top> via the truth-assignment (Kalmar) route, not algebraic. 5 sequential phases: (1) ClassicalImpAxiom fragment (K+S+Peirce) plus plumbing appended to FragmentAxioms.lean; (2) new Metalogic/ClassicalImpCompleteness.lean with soundness and negation-free derived Hilbert lemmas; (3) Kalmar truth lemma (risk-concentrated); (4) atom elimination + classicalImp_completeness; (5) cpl_conservative_over_imp + ConservativeChain.lean classical-branch edge + full CI gate. Footprint strictly additive within Propositional/{ProofSystem,Metalogic,Semantics/Algebra} to avoid conflict with running task 350. Zero-debt fallback: BLOCKED phase if Kalmar intractable, no sorry/no axiom.",
+  "phases_total": 5,
+  "estimated_hours": 7,
+  "artifacts": [
+    "specs/352_cpl_conservative_over_classical_implicational_fragment/plans/01_classical-imp-conservativity.md"
+  ],
+  "next_command": "/implement 352"
+}

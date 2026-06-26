@@ -536,4 +536,112 @@ theorem conjImpBotMinAxiom_hasDeductionTheorem :
     Metalogic.HasDeductionTheorem (propDerivationSystem (@ConjImpBotMinAxiom Atom)) :=
   hasDeductionTheorem ConjImpBotMinAxiom.mem_implyK ConjImpBotMinAxiom.mem_implyS
 
+/-! ## ClassicalImp Axiom System -/
+
+/-- Axiom schemata for the classical implicational fragment CPL⟨→,⊤⟩.
+
+The 3 axiom constructors are:
+- **implyK** (weakening): `φ → (ψ → φ)`
+- **implyS** (distribution): `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))`
+- **peirce** (Peirce's law): `((φ → ψ) → φ) → φ`
+
+Together with modus ponens, these axioms characterize the purely implicational fragment
+of classical propositional logic (the Tarski–Bernays axiomatization). Peirce's law
+distinguishes this system from the intuitionistic implicational fragment IPL⟨→,⊤⟩. -/
+inductive ClassicalImpAxiom : PL.Proposition Atom → Prop where
+  /-- Weakening: `φ → (ψ → φ)` -/
+  | implyK (φ ψ : PL.Proposition Atom) :
+      ClassicalImpAxiom (φ.imp (ψ.imp φ))
+  /-- Distribution: `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))` -/
+  | implyS (φ ψ χ : PL.Proposition Atom) :
+      ClassicalImpAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ)))
+  /-- Peirce's law: `((φ → ψ) → φ) → φ` -/
+  | peirce (φ ψ : PL.Proposition Atom) :
+      ClassicalImpAxiom (((φ.imp ψ).imp φ).imp φ)
+
+/-! ## ClassicalImp Axiom Subsumption -/
+
+/-- Every implicational axiom is a classical implicational axiom. -/
+theorem ImpAxiom.toClassicalImpAxiom {φ : PL.Proposition Atom}
+    (h : ImpAxiom φ) : ClassicalImpAxiom φ := by
+  cases h with
+  | implyK a b => exact .implyK a b
+  | implyS a b c => exact .implyS a b c
+
+/-- Every classical implicational axiom is a classical propositional axiom. -/
+theorem ClassicalImpAxiom.toPropAxiom {φ : PL.Proposition Atom}
+    (h : ClassicalImpAxiom φ) : PropositionalAxiom φ := by
+  cases h with
+  | implyK a b => exact .implyK a b
+  | implyS a b c => exact .implyS a b c
+  | peirce a b => exact .peirce a b
+
+/-! ## ClassicalImp Implication Axiom Witnesses -/
+
+namespace ClassicalImpAxiom
+
+/-- `ClassicalImpAxiom` includes implyK: witness for deduction theorem arguments. -/
+theorem mem_implyK :
+    ∀ (φ ψ : PL.Proposition Atom),
+    ClassicalImpAxiom (φ.imp (ψ.imp φ)) :=
+  fun φ ψ => .implyK φ ψ
+
+/-- `ClassicalImpAxiom` includes implyS: witness for deduction theorem arguments. -/
+theorem mem_implyS :
+    ∀ (φ ψ χ : PL.Proposition Atom),
+    ClassicalImpAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))) :=
+  fun φ ψ χ => .implyS φ ψ χ
+
+end ClassicalImpAxiom
+
+/-! ## ClassicalImp Substitution Closure -/
+
+/-- Classical implicational axiom schemata are preserved under substitution. -/
+theorem subst_preserves_classicalImpAxiom
+    {Atom : Type u} {Atom' : Type u}
+    {φ : PL.Proposition Atom}
+    (h : ClassicalImpAxiom φ) (f : Atom → PL.Proposition Atom') :
+    ClassicalImpAxiom (φ.subst f) := by
+  cases h with
+  | implyK a b => exact .implyK (a.subst f) (b.subst f)
+  | implyS a b c => exact .implyS (a.subst f) (b.subst f) (c.subst f)
+  | peirce a b => exact .peirce (a.subst f) (b.subst f)
+
+/-! ## ClassicalImp Fragment Predicate Compatibility -/
+
+/-- Applying the `implyK` constructor to imp-top-only propositions yields an imp-top-only formula.
+
+This is `φ → (ψ → φ)`, imp-top-only when `φ` and `ψ` are. -/
+lemma classicalImpAxiom_implyK_isImpTopOnly {φ ψ : PL.Proposition Atom}
+    (hφ : φ.IsImpTopOnly = true) (hψ : ψ.IsImpTopOnly = true) :
+    (φ.imp (ψ.imp φ)).IsImpTopOnly = true :=
+  imp_isImpTopOnly hφ (imp_isImpTopOnly hψ hφ)
+
+/-- Applying the `implyS` constructor to imp-top-only propositions yields an imp-top-only formula.
+
+This is `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))`, imp-top-only when `φ`, `ψ`, `χ` are. -/
+lemma classicalImpAxiom_implyS_isImpTopOnly {φ ψ χ : PL.Proposition Atom}
+    (hφ : φ.IsImpTopOnly = true) (hψ : ψ.IsImpTopOnly = true) (hχ : χ.IsImpTopOnly = true) :
+    ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))).IsImpTopOnly = true :=
+  imp_isImpTopOnly
+    (imp_isImpTopOnly hφ (imp_isImpTopOnly hψ hχ))
+    (imp_isImpTopOnly (imp_isImpTopOnly hφ hψ) (imp_isImpTopOnly hφ hχ))
+
+/-- Applying the `peirce` constructor to imp-top-only propositions yields an imp-top-only formula.
+
+This is `((φ → ψ) → φ) → φ`, imp-top-only when `φ` and `ψ` are. -/
+lemma classicalImpAxiom_peirce_isImpTopOnly {φ ψ : PL.Proposition Atom}
+    (hφ : φ.IsImpTopOnly = true) (hψ : ψ.IsImpTopOnly = true) :
+    (((φ.imp ψ).imp φ).imp φ).IsImpTopOnly = true :=
+  imp_isImpTopOnly
+    (imp_isImpTopOnly (imp_isImpTopOnly hφ hψ) hφ)
+    hφ
+
+/-! ## ClassicalImp Deduction Theorem Instance -/
+
+/-- The deduction theorem holds for `ClassicalImpAxiom`. -/
+theorem classicalImpAxiom_hasDeductionTheorem :
+    Metalogic.HasDeductionTheorem (propDerivationSystem (@ClassicalImpAxiom Atom)) :=
+  hasDeductionTheorem ClassicalImpAxiom.mem_implyK ClassicalImpAxiom.mem_implyS
+
 end Cslib.Logic.PL

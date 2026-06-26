@@ -761,6 +761,245 @@ private lemma monotoneEdges_update
         -- Use monotoneEdges_go with any fuel (edges.length + 1)
         exact monotoneEdges_go worldOf edges w2 w1 (edges.length + 1) hmono hacc_old
 
+/-! ## Freshness Invariant -/
+
+/-- Branch freshness invariant: all signed-formula labels on `b` are strictly below `nw`,
+and all edge endpoints in `edges` are strictly below `nw`.
+
+This ensures that when the F(→) world-creating rule introduces a fresh label `nwH`
+(the current `nextWorld` counter), `nwH` does not already appear on the branch or in
+the edge set, making `Function.update worldOf nwH w'` well-defined for all existing labels. -/
+def FreshAbove (b : IBranch Atom) (edges : IEdges) (nw : Nat) : Prop :=
+  (∀ sf ∈ b, sf.label < nw) ∧ (∀ c p : Nat, (c, p) ∈ edges → c < nw ∧ p < nw)
+
+/-- `applyAllTImpRules` preserves `FreshAbove`: the T(φ→ψ) persistence rule only adds
+formulas at world labels already present on the branch, so no new labels are introduced. -/
+private lemma freshAbove_applyAllTImpRules (b : IBranch Atom) (edges : IEdges) (nw : Nat)
+    (hfresh : FreshAbove b edges nw) :
+    FreshAbove (applyAllTImpRules b edges) edges nw := by
+  obtain ⟨hbounds, hedges⟩ := hfresh
+  refine ⟨?_, hedges⟩
+  intro sf hmem
+  simp only [applyAllTImpRules, List.mem_append, List.mem_flatten, List.mem_filterMap] at hmem
+  rcases hmem with hmem | ⟨newForms, ⟨sf', hmem', houter⟩, hmem_inner⟩
+  · exact hbounds sf hmem
+  · cases hsign : sf'.sign with
+    | neg => simp only [hsign] at houter; simp at houter
+    | pos =>
+      cases hform : sf'.formula with
+      | atom _ | bot | and _ _ | or _ _ =>
+          simp only [hsign, hform] at houter; simp at houter
+      | imp φ ψ =>
+        simp only [hsign, hform] at houter
+        split_ifs at houter with hemp
+        · simp only [Bool.false_eq_true, hemp, ite_false, Option.some.injEq] at houter
+          rw [← houter] at hmem_inner
+          simp only [intTImpRule, List.mem_filterMap] at hmem_inner
+          obtain ⟨w', hw'_mem, hw'_sf⟩ := hmem_inner
+          simp only [List.mem_filter, List.mem_eraseDups, List.mem_map] at hw'_mem
+          obtain ⟨⟨sf'', hmem'', hlab⟩, _⟩ := hw'_mem
+          split_ifs at hw'_sf with hany1 hany2
+          · simp only [Option.some.injEq] at hw'_sf
+            rw [← hw'_sf]; simp only; rw [← hlab]
+            exact hbounds sf'' hmem''
+
+/-- The persistence fixpoint preserves `FreshAbove`. -/
+private lemma freshAbove_applyPersistenceFixpoint (b : IBranch Atom) (edges : IEdges) (nw : Nat)
+    (fuel : Nat) (hfresh : FreshAbove b edges nw) :
+    FreshAbove (applyPersistenceFixpoint b edges fuel) edges nw := by
+  induction fuel generalizing b with
+  | zero => simpa [applyPersistenceFixpoint] using hfresh
+  | succ k ih =>
+    simp only [applyPersistenceFixpoint]
+    split_ifs
+    · exact hfresh
+    · exact ih _ (freshAbove_applyAllTImpRules b edges nw hfresh)
+
+/-- A non-world-creating expansion step preserves `FreshAbove` when all new forms use
+existing labels (`sf'.label < nw` for all `sf' ∈ newForms`). -/
+private lemma freshAbove_extendMany (b : IBranch Atom) (edges : IEdges) (nw : Nat)
+    (newForms : List (ISF Atom))
+    (hfresh : FreshAbove b edges nw)
+    (hnew : ∀ sf' ∈ newForms, sf'.label < nw) :
+    FreshAbove (Branch.extendMany b newForms) edges nw :=
+  ⟨fun sf hmem => by
+      simp only [Branch.extendMany, List.mem_append] at hmem
+      rcases hmem with h | h
+      · exact hnew sf h
+      · exact hfresh.1 sf h,
+    hfresh.2⟩
+
+/-- The F(→) world-creating step produces `FreshAbove … (nw+1)` for the new branch
+and extended edge set. The new world `nw` and its parent edge both become `< nw + 1`. -/
+private lemma freshAbove_world_create (b : IBranch Atom) (edges : IEdges) (nw parentLabel : Nat)
+    (newForms : List (ISF Atom))
+    (hfresh : FreshAbove b edges nw)
+    (hparent_lt : parentLabel < nw)
+    (hnew : ∀ sf' ∈ newForms, sf'.label ≤ nw) :
+    FreshAbove (Branch.extendMany b newForms) (edges ++ [(nw, parentLabel)]) (nw + 1) :=
+  ⟨fun sf hmem => by
+      simp only [Branch.extendMany, List.mem_append] at hmem
+      rcases hmem with h | h
+      · exact Nat.lt_succ_of_le (hnew sf h)
+      · exact Nat.lt_succ_of_lt (hfresh.1 sf h),
+    fun c p hmem => by
+      simp only [List.mem_append, List.mem_singleton] at hmem
+      rcases hmem with h | h
+      · exact ⟨Nat.lt_succ_of_lt (hfresh.2 c p h).1,
+               Nat.lt_succ_of_lt (hfresh.2 c p h).2⟩
+      · simp only [Prod.mk.injEq] at h
+        obtain ⟨rfl, rfl⟩ := h
+        exact ⟨Nat.lt_succ_self _, Nat.lt_succ_of_lt hparent_lt⟩⟩
+
+/-- When `FreshAbove b edges nw` holds and `worldOf'` agrees with `worldOf` on all
+labels `≠ nw`, then `MonotoneEdges worldOf' edges` follows from `MonotoneEdges worldOf edges`.
+
+Used for non-world-creating (T∧/F∨) rule applications where the world function only
+changes at the fresh label `nw`, which is not in the existing edge set. -/
+private lemma monotoneEdges_of_agree
+    {World : Type*} [Preorder World]
+    (wo wo' : Nat → World) (edges : IEdges) (nw : Nat)
+    (hfresh_edges : ∀ c p, (c, p) ∈ edges → c < nw ∧ p < nw)
+    (hagree : ∀ k, k ≠ nw → wo' k = wo k)
+    (hmono : MonotoneEdges wo edges) :
+    MonotoneEdges wo' edges := by
+  intro w1 w2 hacc
+  simp only [isAccessible] at hacc
+  split_ifs at hacc with heq
+  · simp only [beq_iff_eq] at heq; subst heq; exact le_refl _
+  · have hw2_child : ∃ p, (w2, p) ∈ edges := by
+      have key : ∀ k start, isAccessible.go edges w2 start k = true → ∃ p, (w2, p) ∈ edges := by
+        intro k
+        induction k with
+        | zero => simp [isAccessible.go]
+        | succ m ih =>
+          intro start hgo
+          simp only [isAccessible.go, List.any_eq_true, List.mem_filterMap] at hgo
+          obtain ⟨child, ⟨⟨c, p⟩, he, hfilt⟩, hchild⟩ := hgo
+          simp only at hfilt
+          split_ifs at hfilt with hcond
+          · simp only [Option.some.injEq] at hfilt
+            subst hfilt
+            split_ifs at hchild with heq2
+            · simp only [beq_iff_eq] at heq2; subst heq2
+              exact ⟨p, he⟩
+            · exact ih c hchild
+      exact key _ w1 hacc
+    have hw1_parent : ∃ c, (c, w1) ∈ edges := by
+      have key : ∀ k start, isAccessible.go edges w2 start k = true → ∃ c, (c, start) ∈ edges := by
+        intro k
+        induction k with
+        | zero => simp [isAccessible.go]
+        | succ m ih =>
+          intro start hgo
+          simp only [isAccessible.go, List.any_eq_true, List.mem_filterMap] at hgo
+          obtain ⟨child, ⟨⟨c, p⟩, he, hfilt⟩, _⟩ := hgo
+          simp only at hfilt
+          split_ifs at hfilt with hcond
+          · simp only [Option.some.injEq] at hfilt
+            subst hfilt
+            simp only [beq_iff_eq] at hcond; subst hcond
+            exact ⟨c, he⟩
+      exact key _ w1 hacc
+    obtain ⟨c_w1, hc_w1⟩ := hw1_parent
+    obtain ⟨p_w2, hp_w2⟩ := hw2_child
+    have hw1_lt : w1 < nw := (hfresh_edges c_w1 w1 hc_w1).2
+    have hw2_lt : w2 < nw := (hfresh_edges w2 p_w2 hp_w2).1
+    have hw1_ne : w1 ≠ nw := Nat.ne_of_lt hw1_lt
+    have hw2_ne : w2 ≠ nw := Nat.ne_of_lt hw2_lt
+    rw [hagree w1 hw1_ne, hagree w2 hw2_ne]
+    exact hmono w1 w2 (by simp only [isAccessible, heq, Bool.false_eq_true, ite_false]; exact hacc)
+
+/-- For a non-world-creating linear result (`newEdge = none`), all new forms have the
+same label as the expanded signed formula `sf`. -/
+private lemma intApplyRuleFull_none_labels
+    (sf : ISF Atom) (nwH : Nat) (b : IBranch Atom)
+    (newForms : List (ISF Atom)) (nw' : Nat)
+    (h : intApplyRuleFull sf nwH b = .linearResult newForms nw' none) :
+    ∀ sf' ∈ newForms, sf'.label = sf.label := by
+  obtain ⟨sign, form, label⟩ := sf
+  simp only [intApplyRuleFull] at h
+  cases sign with
+  | pos =>
+    cases form with
+    | and φ ψ =>
+      simp only [IntRuleResult.linearResult.injEq] at h
+      obtain ⟨rfl, _, _⟩ := h
+      intro sf' hmem'
+      simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+      rcases hmem' with rfl | rfl <;> rfl
+    | _ => simp at h
+  | neg =>
+    cases form with
+    | or φ ψ =>
+      simp only [IntRuleResult.linearResult.injEq] at h
+      obtain ⟨rfl, _, _⟩ := h
+      intro sf' hmem'
+      simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+      rcases hmem' with rfl | rfl <;> rfl
+    | imp φ ψ => simp [intFImpRule] at h
+    | _ => simp at h
+
+/-- For a branching result, all new forms in each branch have the same label as `sf`. -/
+private lemma intApplyRuleFull_branching_labels
+    (sf : ISF Atom) (nwH : Nat) (b : IBranch Atom)
+    (branches' : List (List (ISF Atom))) (nw' : Nat)
+    (h : intApplyRuleFull sf nwH b = .branchingResult branches' nw') :
+    ∀ br ∈ branches', ∀ sf' ∈ br, sf'.label = sf.label := by
+  obtain ⟨sign, form, label⟩ := sf
+  simp only [intApplyRuleFull] at h
+  cases sign with
+  | pos =>
+    cases form with
+    | or φ ψ =>
+      simp only [IntRuleResult.branchingResult.injEq] at h
+      obtain ⟨rfl, _⟩ := h
+      intro br hbr sf' hsf'
+      simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr
+      rcases hbr with rfl | rfl
+      · simp only [List.mem_cons, List.mem_nil_iff, or_false] at hsf'; rcases hsf' with rfl; rfl
+      · simp only [List.mem_cons, List.mem_nil_iff, or_false] at hsf'; rcases hsf' with rfl; rfl
+    | _ => simp at h
+  | neg =>
+    cases form with
+    | and φ ψ =>
+      simp only [IntRuleResult.branchingResult.injEq] at h
+      obtain ⟨rfl, _⟩ := h
+      intro br hbr sf' hsf'
+      simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr
+      rcases hbr with rfl | rfl
+      · simp only [List.mem_cons, List.mem_nil_iff, or_false] at hsf'; rcases hsf' with rfl; rfl
+      · simp only [List.mem_cons, List.mem_nil_iff, or_false] at hsf'; rcases hsf' with rfl; rfl
+    | _ => simp at h
+
+/-- For a world-creating linear result (`newEdge = some e`), the new edge is `(nwH, sf.label)`,
+`nw' = nwH + 1`, and all new forms have label `= nwH`. -/
+private lemma intApplyRuleFull_some_info
+    (sf : ISF Atom) (nwH : Nat) (b : IBranch Atom)
+    (newForms : List (ISF Atom)) (nw' : Nat) (e : Nat × Nat)
+    (h : intApplyRuleFull sf nwH b = .linearResult newForms nw' (some e)) :
+    e = (nwH, sf.label) ∧ nw' = nwH + 1 ∧ ∀ sf' ∈ newForms, sf'.label = nwH := by
+  obtain ⟨sign, form, label⟩ := sf
+  simp only [intApplyRuleFull] at h
+  cases sign with
+  | pos => cases form <;> simp at h
+  | neg =>
+    cases form with
+    | imp φ ψ =>
+      simp only [intFImpRule] at h
+      simp only [IntRuleResult.linearResult.injEq] at h
+      obtain ⟨rfl, rfl, he⟩ := h
+      simp only [Option.some.injEq] at he; subst he
+      refine ⟨rfl, rfl, ?_⟩
+      intro sf' hmem'
+      simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+      rcases hmem' with (rfl | rfl) | hmem_pers
+      · rfl
+      · rfl
+      · simp only [propagatePersistence, posFormulasAt, List.mem_map] at hmem_pers
+        obtain ⟨_, _, rfl⟩ := hmem_pers; rfl
+    | _ => simp at h
+
 /-- If `intExpandBranches` returns `closed`, then every input branch is unsatisfiable.
 
 This is the core loop invariant for the soundness proof. The proof requires:
@@ -975,7 +1214,7 @@ lemma intExpandBranches_closed_unsat
                       rw [List.zip_append (by simp [hdlength_edges])]
                       simp only [List.mem_append]
                       refine Or.inl ?_
-                      rw [List.zip_append (by exact hdlength_edges)]
+                      rw [List.zip_append (by exact hdlength_edges.symm)]
                       simp only [List.mem_append]
                       refine Or.inr ?_
                       -- membership in zip of two maps of same list:

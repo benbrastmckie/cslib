@@ -393,4 +393,147 @@ theorem conjImpBotAxiom_hasDeductionTheorem :
     Metalogic.HasDeductionTheorem (propDerivationSystem (@ConjImpBotAxiom Atom)) :=
   hasDeductionTheorem ConjImpBotAxiom.mem_implyK ConjImpBotAxiom.mem_implyS
 
+/-! ## ConjImpBotMin Axiom System -/
+
+/-- Axiom schemata for the MPL conjunctive-implicational-bot fragment MPL⟨∧,→,⊥,⊤⟩.
+
+Identical to `ConjImpBotAxiom` except that it omits ex falso quodlibet (`⊥ → φ`). This is the
+point at which the minimal-logic (MPL) tower diverges from the intuitionistic tower: `⊥` is a
+free constant rather than the least element with explosion.
+
+The 5 axiom constructors are:
+- **implyK** (weakening): `φ → (ψ → φ)`
+- **implyS** (distribution): `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))`
+- **andI** (conjunction introduction): `φ → (ψ → φ ∧ ψ)`
+- **andE1** (left conjunction elimination): `φ ∧ ψ → φ`
+- **andE2** (right conjunction elimination): `φ ∧ ψ → ψ`
+
+Together with modus ponens, these axioms characterize the conjunctive-implicational-bot fragment
+of minimal propositional logic (no ex falso). -/
+inductive ConjImpBotMinAxiom : PL.Proposition Atom → Prop where
+  /-- Weakening: `φ → (ψ → φ)` -/
+  | implyK (φ ψ : PL.Proposition Atom) :
+      ConjImpBotMinAxiom (φ.imp (ψ.imp φ))
+  /-- Distribution: `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))` -/
+  | implyS (φ ψ χ : PL.Proposition Atom) :
+      ConjImpBotMinAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ)))
+  /-- Conjunction introduction: `φ → (ψ → φ ∧ ψ)` -/
+  | andI (φ ψ : PL.Proposition Atom) :
+      ConjImpBotMinAxiom (φ.imp (ψ.imp (φ.and ψ)))
+  /-- Left conjunction elimination: `φ ∧ ψ → φ` -/
+  | andE1 (φ ψ : PL.Proposition Atom) :
+      ConjImpBotMinAxiom ((φ.and ψ).imp φ)
+  /-- Right conjunction elimination: `φ ∧ ψ → ψ` -/
+  | andE2 (φ ψ : PL.Proposition Atom) :
+      ConjImpBotMinAxiom ((φ.and ψ).imp ψ)
+
+/-! ## ConjImpBotMin Axiom Subsumption -/
+
+/-- Every conjunctive-implicational axiom is a conjunctive-implicational-bot-min axiom. -/
+theorem ConjImpAxiom.toConjImpBotMinAxiom {φ : PL.Proposition Atom}
+    (h : ConjImpAxiom φ) : ConjImpBotMinAxiom φ := by
+  cases h with
+  | implyK a b => exact .implyK a b
+  | implyS a b c => exact .implyS a b c
+  | andI a b => exact .andI a b
+  | andE1 a b => exact .andE1 a b
+  | andE2 a b => exact .andE2 a b
+
+/-- Every conjunctive-implicational-bot-min axiom is a minimal propositional axiom.
+
+Note: the target is `MinPropAxiom` (which has no ex falso), **not** `IntPropAxiom`. Staying inside
+minimal logic is the defining feature of this fragment. -/
+theorem ConjImpBotMinAxiom.toMinPropAxiom {φ : PL.Proposition Atom}
+    (h : ConjImpBotMinAxiom φ) : MinPropAxiom φ := by
+  cases h with
+  | implyK a b => exact .implyK a b
+  | implyS a b c => exact .implyS a b c
+  | andI a b => exact .andI a b
+  | andE1 a b => exact .andE1 a b
+  | andE2 a b => exact .andE2 a b
+
+/-! ## ConjImpBotMin Implication Axiom Witnesses -/
+
+namespace ConjImpBotMinAxiom
+
+/-- `ConjImpBotMinAxiom` includes implyK: witness for deduction theorem arguments. -/
+theorem mem_implyK :
+    ∀ (φ ψ : PL.Proposition Atom),
+    ConjImpBotMinAxiom (φ.imp (ψ.imp φ)) :=
+  fun φ ψ => .implyK φ ψ
+
+/-- `ConjImpBotMinAxiom` includes implyS: witness for deduction theorem arguments. -/
+theorem mem_implyS :
+    ∀ (φ ψ χ : PL.Proposition Atom),
+    ConjImpBotMinAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))) :=
+  fun φ ψ χ => .implyS φ ψ χ
+
+end ConjImpBotMinAxiom
+
+/-! ## ConjImpBotMin Substitution Closure -/
+
+/-- Conjunctive-implicational-bot-min axiom schemata are preserved under substitution. -/
+theorem subst_preserves_conjImpBotMinAxiom
+    {Atom : Type u} {Atom' : Type u}
+    {φ : PL.Proposition Atom}
+    (h : ConjImpBotMinAxiom φ) (f : Atom → PL.Proposition Atom') :
+    ConjImpBotMinAxiom (φ.subst f) := by
+  cases h with
+  | implyK a b => exact .implyK (a.subst f) (b.subst f)
+  | implyS a b c => exact .implyS (a.subst f) (b.subst f) (c.subst f)
+  | andI a b => exact .andI (a.subst f) (b.subst f)
+  | andE1 a b => exact .andE1 (a.subst f) (b.subst f)
+  | andE2 a b => exact .andE2 (a.subst f) (b.subst f)
+
+/-! ## ConjImpBotMin Fragment Predicate Compatibility -/
+
+/-- Applying the `implyK` constructor to or-free propositions yields an or-free formula.
+
+This is `φ → (ψ → φ)`, which is or-free when `φ` and `ψ` are. -/
+lemma conjImpBotMinAxiom_implyK_isOrFree {φ ψ : PL.Proposition Atom}
+    (hφ : φ.IsOrFree = true) (hψ : ψ.IsOrFree = true) :
+    (φ.imp (ψ.imp φ)).IsOrFree = true :=
+  imp_isOrFree hφ (imp_isOrFree hψ hφ)
+
+/-- Applying the `implyS` constructor to or-free propositions yields an or-free formula.
+
+This is `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))`, or-free when `φ`, `ψ`, `χ` are. -/
+lemma conjImpBotMinAxiom_implyS_isOrFree {φ ψ χ : PL.Proposition Atom}
+    (hφ : φ.IsOrFree = true) (hψ : ψ.IsOrFree = true) (hχ : χ.IsOrFree = true) :
+    ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))).IsOrFree = true :=
+  imp_isOrFree
+    (imp_isOrFree hφ (imp_isOrFree hψ hχ))
+    (imp_isOrFree (imp_isOrFree hφ hψ) (imp_isOrFree hφ hχ))
+
+/-- Applying the `andI` constructor to or-free propositions yields an or-free formula.
+
+This is `φ → (ψ → φ ∧ ψ)`, or-free when `φ` and `ψ` are. -/
+lemma conjImpBotMinAxiom_andI_isOrFree {φ ψ : PL.Proposition Atom}
+    (hφ : φ.IsOrFree = true) (hψ : ψ.IsOrFree = true) :
+    (φ.imp (ψ.imp (φ.and ψ))).IsOrFree = true :=
+  imp_isOrFree hφ (imp_isOrFree hψ (and_isOrFree hφ hψ))
+
+/-- Applying the `andE1` constructor to or-free propositions yields an or-free formula.
+
+This is `φ ∧ ψ → φ`, or-free when `φ` and `ψ` are. -/
+lemma conjImpBotMinAxiom_andE1_isOrFree {φ ψ : PL.Proposition Atom}
+    (hφ : φ.IsOrFree = true) (hψ : ψ.IsOrFree = true) :
+    ((φ.and ψ).imp φ).IsOrFree = true :=
+  imp_isOrFree (and_isOrFree hφ hψ) hφ
+
+/-- Applying the `andE2` constructor to or-free propositions yields an or-free formula.
+
+This is `φ ∧ ψ → ψ`, or-free when `φ` and `ψ` are. -/
+lemma conjImpBotMinAxiom_andE2_isOrFree {φ ψ : PL.Proposition Atom}
+    (hφ : φ.IsOrFree = true) (hψ : ψ.IsOrFree = true) :
+    ((φ.and ψ).imp ψ).IsOrFree = true :=
+  imp_isOrFree (and_isOrFree hφ hψ) hψ
+
+/-! ## ConjImpBotMin Deduction Theorem Instance -/
+
+/-- The deduction theorem holds for `ConjImpBotMinAxiom`. -/
+theorem conjImpBotMinAxiom_hasDeductionTheorem :
+    Metalogic.HasDeductionTheorem (propDerivationSystem (@ConjImpBotMinAxiom Atom)) :=
+  hasDeductionTheorem ConjImpBotMinAxiom.mem_implyK ConjImpBotMinAxiom.mem_implyS
+
 end Cslib.Logic.PL

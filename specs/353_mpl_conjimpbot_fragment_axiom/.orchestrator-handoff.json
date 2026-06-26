@@ -1,0 +1,16 @@
+{
+  "status": "implemented",
+  "summary": "Added ConjImpBotMinAxiom to Cslib/Logics/Propositional/ProofSystem/FragmentAxioms.lean: 143 lines appended after the ConjImpBotAxiom block. Includes 5-constructor inductive, two subsumption theorems (ConjImpAxiom.toConjImpBotMinAxiom and ConjImpBotMinAxiom.toMinPropAxiom targeting MinPropAxiom), mem_implyK/mem_implyS witnesses, subst_preserves_conjImpBotMinAxiom with universe variable rebind, five isOrFree fragment-predicate lemmas, and conjImpBotMinAxiom_hasDeductionTheorem instance. Zero sorry, zero new axioms. Scoped build passes cleanly (660ms). Pre-existing failures in 11 unrelated modules (SequentCalculus, Bimodal, Modal, Temporal) confirmed to predate this task by running the original codebase.",
+  "artifacts": [
+    {
+      "path": "specs/353_mpl_conjimpbot_fragment_axiom/summaries/01_conjimpbotmin-axiom-summary.md",
+      "type": "summary",
+      "summary": "Full implementation summary with CI results table and plan-deviations section"
+    }
+  ],
+  "phases_completed": 2,
+  "phases_total": 2,
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "Run /vet 353 to quality-gate; then /pr 353 to submit the PR. Note: 11 pre-existing build failures exist in unrelated modules — these are not introduced by this task."
+}

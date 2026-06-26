@@ -452,6 +452,7 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertConservativeGlivenko
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertLindenbaum
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertLindenbaumRel
+public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertStrongCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.ImpConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.KripkeBridge
 public import Cslib.Logics.Propositional.Semantics.Algebra.MplConservativeChain

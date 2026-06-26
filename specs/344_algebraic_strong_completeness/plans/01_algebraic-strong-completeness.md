@@ -1,7 +1,7 @@
 # Implementation Plan: Task #344 — Algebraic Strong (Context/Theory) Completeness for the Hilbert System
 
 - **Task**: 344 - algebraic_strong_completeness
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 6 hours
 - **Dependencies**: 343 (SatisfiesTheory / `v ⊨ T` machinery; SetDerivable)
 - **Research Inputs**: reports/01_algebraic-strong-completeness.md
@@ -203,7 +203,7 @@ files untouched.
 
 ---
 
-### Phase 3: Strong-completeness iff + 341 recovery [NOT STARTED]
+### Phase 3: Strong-completeness iff + 341 recovery [COMPLETED]
 
 **Goal**: Prove the headline theorem and certify the `Γ = ∅` recovery of 341, then run the full CI
 gate.

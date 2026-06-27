@@ -115,6 +115,35 @@ theorem hilbertGlivenko {Atom : Type u} {φ : PL.Proposition Atom}
   intro H' _ v'
   exact CPL.hilbert_alg_complete.mp h H' v'
 
+/-! ## Theory-Parametric Glivenko Theorem -/
+
+/-- **Theory-parametric Glivenko theorem**: if `φ` is derivable from a classically-sound
+axiom set `A_cl`, then `¬¬φ` is derivable from an intuitionistically-complete axiom set
+`A_int`.
+
+This generalises `hilbertGlivenko` from the concrete pair `(PropositionalAxiom, IntPropAxiom)`
+to any pair of axiom predicates satisfying `MinimalAxioms`, with the classical-soundness
+and intuitionistic-completeness conditions supplied as explicit hypotheses:
+
+- `h_cl : ∀ ψ, Derivable A_cl ψ → BAValid ψ` — BA-soundness of `A_cl`
+- `h_int : ∀ ψ, HAValid ψ → Derivable A_int ψ` — HA-completeness of `A_int`
+
+The core of the proof is unchanged from `hilbertGlivenko`: route through `glivenko_algebraic`.
+
+**Boundary note (R1)**: the target is pinned at `HAValid`/`IsIntuitionistic`. Weakening
+`h_int` to a GHA target or strengthening the `¬¬φ` conclusion below IPL would require
+classical-fragment completeness unavailable over Heyting/Brouwerian completions.
+
+**Concrete recovery**: `hilbertGlivenko h = hilbertGlivenko_theory PropositionalAxiom IntPropAxiom
+  (fun _ => CPL.hilbert_alg_complete.mp) (fun _ => IPL.hilbert_alg_complete.mpr) h`. -/
+theorem hilbertGlivenko_theory {Atom : Type u} {φ : PL.Proposition Atom}
+    (A_cl A_int : PL.Proposition Atom → Prop)
+    [MinimalAxioms A_cl] [MinimalAxioms A_int]
+    (h_cl : ∀ ψ, Derivable A_cl ψ → BAValid.{u, u} ψ)
+    (h_int : ∀ ψ, HAValid.{u, u} ψ → Derivable A_int ψ)
+    (h : Derivable A_cl φ) : Derivable A_int (¬¬φ) :=
+  h_int _ (glivenko_algebraic (h_cl _ h))
+
 /-! ## Parametric Syntactic Bridge -/
 
 /-- **Parametric ND bridge**: for any axiom predicate `Axioms` satisfying `MinimalAxioms`,

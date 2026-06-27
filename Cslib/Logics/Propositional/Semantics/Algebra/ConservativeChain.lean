@@ -281,6 +281,38 @@ theorem minAxiom_iff_chain {Atom : Type u} {φ : PL.Proposition Atom}
     Derivable (@MinPropAxiom Atom) φ ↔ Derivable (@IntPropAxiom Atom) φ :=
   ⟨derivableMinOfDerivableInt, hilbertIplConservativeOverMpl hBF⟩
 
+/-! ## Glivenko Strength Wrapper -/
+
+/-- **Theory-parametric Glivenko (strength wrapper)**: if every axiom of `A_cl` is a
+`PropositionalAxiom` (classical soundness), and every `IntPropAxiom` is an axiom of `A_int`
+(intuitionistic completeness), then CPL-strength derivability of `φ` implies
+IPL-strength derivability of `¬¬φ`.
+
+This is a convenience wrapper over `hilbertGlivenko_theory` that discharges the BA-soundness
+and HA-completeness hypotheses via the Hilbert-level completeness theorems:
+- `h_cl ψ hψ = CPL.hilbert_alg_complete.mp (derivable_mono hcl hψ)` (soundness via CPL)
+- `h_int ψ hHA = derivable_mono hint (IPL.hilbert_alg_complete.mpr hHA)` (completeness via IPL)
+
+**Design note (deviation from plan)**: The plan proposed using `CPL ⊆ AxiomTheory A_cl` /
+`IPL ⊆ AxiomTheory A_int` as the strength hypotheses, following the ND-theory inclusion
+idiom. Those inclusion conditions alone do not imply BA-soundness of `A_cl` (the axiom set
+could contain non-BA-valid elements). The correct condition for BA-soundness is
+`∀ ψ, A_cl ψ → PropositionalAxiom ψ` (A_cl is a sub-predicate of `PropositionalAxiom`), and
+for HA-completeness is `∀ ψ, IntPropAxiom ψ → A_int ψ` (A_int extends IPL axioms).
+
+**Concrete recovery**: `hilbertGlivenko = hilbertGlivenko_strength PropositionalAxiom IntPropAxiom
+  (fun ψ h => h) (fun ψ h => h.toIntPropAxiom)`. -/
+theorem hilbertGlivenko_strength {Atom : Type u} {φ : PL.Proposition Atom}
+    (A_cl A_int : PL.Proposition Atom → Prop)
+    [MinimalAxioms A_cl] [MinimalAxioms A_int]
+    (hcl : ∀ ψ, A_cl ψ → @PropositionalAxiom Atom ψ)
+    (hint : ∀ ψ, @IntPropAxiom Atom ψ → A_int ψ)
+    (h : Derivable A_cl φ) : Derivable A_int (¬¬φ) :=
+  hilbertGlivenko_theory A_cl A_int
+    (fun _ hψ => CPL.hilbert_alg_complete.mp (derivable_mono hcl hψ))
+    (fun _ hHA => derivable_mono hint (IPL.hilbert_alg_complete.mpr hHA))
+    h
+
 /-! ## ND Corollaries via Bridges -/
 
 variable {Atom : Type u} [DecidableEq Atom]

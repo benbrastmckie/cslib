@@ -142,7 +142,7 @@ file can consume them, without re-deriving any per-tier subsumption yet.
 
 ---
 
-### Phase 2: Theory-parametric Glivenko [IN PROGRESS]
+### Phase 2: Theory-parametric Glivenko [COMPLETED]
 
 **Goal**: Introduce the headline deliverable: a theory-parametric Glivenko over a
 classical-strength source and intuitionistic-strength target, plus a strength-predicate wrapper.
@@ -177,7 +177,7 @@ classical-strength source and intuitionistic-strength target, plus a strength-pr
 
 ---
 
-### Phase 3: `conservative_via_embedding` combinator (L3 as hypothesis) [NOT STARTED]
+### Phase 3: `conservative_via_embedding` combinator (L3 as hypothesis) [IN PROGRESS]
 
 **Goal**: Introduce the shared four-move conservativity skeleton as one combinator, with the
 bespoke commutation/embedding lemma supplied as an explicit hypothesis — never derived from a hom

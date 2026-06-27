@@ -190,7 +190,7 @@ Phases within the same wave can execute in parallel. Phases 1-4 each touch a dis
 
 ---
 
-### Phase 5: Zero-debt verification [NOT STARTED]
+### Phase 5: Zero-debt verification [COMPLETED]
 
 **Goal**: Confirm the whole repair is CI-green and debt-free across all four modules.
 

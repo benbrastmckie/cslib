@@ -1264,21 +1264,21 @@ private theorem Theory.Derivation.reduceRoot_decreases_normMeasure
     -- Key: (andE1 _ DA).maximalFormulas = DA.maximalFormulas when DA is SN (not andI, not orE)
     have hDA_mf : (andE1 _ DAcc).maximalFormulas = DAcc.maximalFormulas := by
       cases DAcc <;>
-        simp only [isStronglyNormal, maximalFormulas] at * <;>
-        first | exact absurd hA (by decide) | rfl
+        simp only [isStronglyNormal, maximalFormulas] at *
+      first | exact absurd hA (by decide) | rfl
     have hDB_mf : (andE1 _ DBcc).maximalFormulas = DBcc.maximalFormulas := by
       cases DBcc <;>
-        simp only [isStronglyNormal, maximalFormulas] at * <;>
-        first | exact absurd hB (by decide) | rfl
+        simp only [isStronglyNormal, maximalFormulas] at *
+      first | exact absurd hB (by decide) | rfl
     -- Key: (andE1 _ DA).commutingSum = DA.commutingSum when DA is SN (not orE)
     have hDA_cs : (andE1 _ DAcc).commutingSum = DAcc.commutingSum := by
       cases DAcc <;>
-        simp only [isStronglyNormal, commutingSum] at * <;>
-        first | exact absurd hA (by decide) | rfl
+        simp only [isStronglyNormal, commutingSum] at *
+      first | exact absurd hA (by decide) | rfl
     have hDB_cs : (andE1 _ DBcc).commutingSum = DBcc.commutingSum := by
       cases DBcc <;>
-        simp only [isStronglyNormal, commutingSum] at * <;>
-        first | exact absurd hB (by decide) | rfl
+        simp only [isStronglyNormal, commutingSum] at *
+      first | exact absurd hB (by decide) | rfl
     rw [show (andE1 G (orE G Dcc DAcc DBcc)).maximalFormulas
           = (orE G Dcc (andE1 _ DAcc) (andE1 _ DBcc)).maximalFormulas from by
         cases Dcc <;> simp_all [maximalFormulas, hDA_mf, hDB_mf]]
@@ -1294,20 +1294,20 @@ private theorem Theory.Derivation.reduceRoot_decreases_normMeasure
     -- When DAcc is SN under andE2 (not andI, not orE), andE2's maximalFormulas = DAcc's
     have hDA_mf : (andE2 _ DAcc).maximalFormulas = DAcc.maximalFormulas := by
       cases DAcc <;>
-        simp only [isStronglyNormal, maximalFormulas] at * <;>
-        first | exact absurd hA (by decide) | rfl
+        simp only [isStronglyNormal, maximalFormulas] at *
+      first | exact absurd hA (by decide) | rfl
     have hDB_mf : (andE2 _ DBcc).maximalFormulas = DBcc.maximalFormulas := by
       cases DBcc <;>
-        simp only [isStronglyNormal, maximalFormulas] at * <;>
-        first | exact absurd hB (by decide) | rfl
+        simp only [isStronglyNormal, maximalFormulas] at *
+      first | exact absurd hB (by decide) | rfl
     have hDA_cs : (andE2 _ DAcc).commutingSum = DAcc.commutingSum := by
       cases DAcc <;>
-        simp only [isStronglyNormal, commutingSum] at * <;>
-        first | exact absurd hA (by decide) | rfl
+        simp only [isStronglyNormal, commutingSum] at *
+      first | exact absurd hA (by decide) | rfl
     have hDB_cs : (andE2 _ DBcc).commutingSum = DBcc.commutingSum := by
       cases DBcc <;>
-        simp only [isStronglyNormal, commutingSum] at * <;>
-        first | exact absurd hB (by decide) | rfl
+        simp only [isStronglyNormal, commutingSum] at *
+      first | exact absurd hB (by decide) | rfl
     rw [show (andE2 G (orE G Dcc DAcc DBcc)).maximalFormulas
           = (orE G Dcc (andE2 _ DAcc) (andE2 _ DBcc)).maximalFormulas from by
         cases Dcc <;> simp_all [maximalFormulas, hDA_mf, hDB_mf]]
@@ -1469,21 +1469,27 @@ private lemma Theory.Derivation.snAndE2Form_head {G : Ctx Atom} {A B : Propositi
 
 /-! ## Constructive strong-normal form: smart eliminators and substitution-normalization -/
 
+omit [DecidableEq Atom] in
 private lemma cx_imp_left {A B : Proposition Atom} : A.complexity < (A → B).complexity := by
   simp only [Proposition.complexity]; omega
 
+omit [DecidableEq Atom] in
 private lemma cx_imp_right {A B : Proposition Atom} : B.complexity < (A → B).complexity := by
   simp only [Proposition.complexity]; omega
 
+omit [DecidableEq Atom] in
 private lemma cx_or_left {A B : Proposition Atom} : A.complexity < (A ∨ B).complexity := by
   simp only [Proposition.complexity]; omega
 
+omit [DecidableEq Atom] in
 private lemma cx_or_right {A B : Proposition Atom} : B.complexity < (A ∨ B).complexity := by
   simp only [Proposition.complexity]; omega
 
+omit [DecidableEq Atom] in
 private lemma cx_and_left {A B : Proposition Atom} : A.complexity < (A ∧ B).complexity := by
   simp only [Proposition.complexity]; omega
 
+omit [DecidableEq Atom] in
 private lemma cx_and_right {A B : Proposition Atom} : B.complexity < (A ∧ B).complexity := by
   simp only [Proposition.complexity]; omega
 
@@ -1572,10 +1578,10 @@ cast away before the structural `sizeOf` comparison. -/
 private lemma sizeOf_cast {Γ Γ₂ : Ctx Atom} {A : Proposition Atom} (h : Γ = Γ₂)
     (D : T.Derivation Γ A) : sizeOf (h ▸ D) = sizeOf D := by subst h; rfl
 
+set_option maxHeartbeats 2000000 in
 -- The mutual well-founded recursion `snImpEForm`/`snOrEForm`/`snSubst` with the carried
 -- head-behaviour invariant produces a large equation-compiler goal; raise the heartbeat
 -- limit so the (sorry-free) termination proof elaborates within budget.
-set_option maxHeartbeats 2000000 in
 mutual
 
 /-- L3: smart implication eliminator. Measure: ((A→B).complexity, 0, sizeOf f). -/
@@ -1608,7 +1614,8 @@ private def Theory.Derivation.snImpEForm {G : Ctx Atom} {A B : Proposition Atom}
   | .impE D' E', hf => ⟨Derivation.impE (Derivation.impE D' E') a, by
       simp only [isStronglyNormal, Bool.and_eq_true]; exact ⟨hf, ha⟩⟩
   termination_by ((A → B).complexity, 0, sizeOf f)
-  decreasing_by all_goals (simp_wf; first | (left; simp [Proposition.complexity]; omega) | (right; omega))
+  decreasing_by
+    all_goals (simp_wf; first | (left; simp [Proposition.complexity]; omega) | (right; omega))
 
 /-- L4: smart disjunction eliminator. Measure: ((A∨B).complexity, 0, sizeOf D). -/
 private def Theory.Derivation.snOrEForm {G : Ctx Atom} {A B C : Proposition Atom}
@@ -1654,7 +1661,8 @@ private def Theory.Derivation.snOrEForm {G : Ctx Atom} {A B C : Proposition Atom
   | .impE D' E', hD => ⟨orE G (Derivation.impE D' E') DA DB, by
       simp only [isStronglyNormal, Bool.and_eq_true] at hD ⊢; exact ⟨⟨hD, hDA⟩, hDB⟩⟩
   termination_by ((A ∨ B).complexity, 0, sizeOf D)
-  decreasing_by all_goals (simp_wf; first | (left; simp [Proposition.complexity]; omega) | (right; omega))
+  decreasing_by
+    all_goals (simp_wf; first | (left; simp [Proposition.complexity]; omega) | (right; omega))
 
 /-- L5: substitution-normalization. Measure: `(P.complexity, 1, sizeOf body)`.
 
@@ -1769,7 +1777,7 @@ private def Theory.Derivation.snSubst {P B : Proposition Atom} {G : Ctx Atom}
       have hbd0 : bd.isStronglyNormal = true := by simpa only [isStronglyNormal] using hbd
       let bd' : T.Derivation (insert P (insert A0 G)) B0 := Finset.insert_comm A0 P G ▸ bd
       have hbd' : bd'.isStronglyNormal = true := by
-        show (Finset.insert_comm A0 P G ▸ bd).isStronglyNormal = true
+        change (Finset.insert_comm A0 P G ▸ bd).isStronglyNormal = true
         rw [isStronglyNormal_cast]; exact hbd0
       let s := snSubst bd' hbd' (arg.weakCtx (Finset.subset_insert _ _))
         (by rw [isStronglyNormal_weakCtx]; exact harg)
@@ -1793,13 +1801,13 @@ private def Theory.Derivation.snSubst {P B : Proposition Atom} {G : Ctx Atom}
       let sd' := snSubst D' hD'sn arg harg
       let dA' : T.Derivation (insert P (insert A0 G)) B := Finset.insert_comm A0 P G ▸ DA'
       have hdA' : dA'.isStronglyNormal = true := by
-        show (Finset.insert_comm A0 P G ▸ DA').isStronglyNormal = true
+        change (Finset.insert_comm A0 P G ▸ DA').isStronglyNormal = true
         rw [isStronglyNormal_cast]; exact hDA'sn
       let sA := snSubst dA' hdA' (arg.weakCtx (Finset.subset_insert _ _))
         (by rw [isStronglyNormal_weakCtx]; exact harg)
       let dB' : T.Derivation (insert P (insert B0 G)) B := Finset.insert_comm B0 P G ▸ DB'
       have hdB' : dB'.isStronglyNormal = true := by
-        show (Finset.insert_comm B0 P G ▸ DB').isStronglyNormal = true
+        change (Finset.insert_comm B0 P G ▸ DB').isStronglyNormal = true
         rw [isStronglyNormal_cast]; exact hDB'sn
       let sB := snSubst dB' hdB' (arg.weakCtx (Finset.subset_insert _ _))
         (by rw [isStronglyNormal_weakCtx]; exact harg)

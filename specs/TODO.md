@@ -77,7 +77,7 @@ next_project_number: 380
 
 377 [PLANNED] — Create the classical conjunction-implication fragment axiom syste
   └─ 378 [PLANNED] — Prove CPL is conservative over its classical conjunction-implicat
-    └─ 379 [PLANNING] — Prove CPL is conservative over its classical conjunction-implicat
+    └─ 379 [PLANNED] — Prove CPL is conservative over its classical conjunction-implicat
 367 [NOT STARTED] — Collapse the three near-identical Brouwerian completeness develop
 
 ### Uncategorized
@@ -90,10 +90,11 @@ next_project_number: 380
 ## Tasks
 
 ### 379. Cpl conservative over classical conjimpbot
-- **Status**: [PLANNING]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 378
+- **Plan**: [379_cpl_conservative_over_classical_conjimpbot/plans/01_classical-conjimpbot-conservativity.md]
 
 **Description**: Prove CPL is conservative over its classical conjunction-implication-falsum fragment CPL⟨∧,→,⊥,⊤⟩, completing the classical column to 4-for-4 (symmetric with the minimal and intuitionistic towers). Deliver classicalConjImpBot_completeness : IsOrFree φ → Tautology φ → Derivable ClassicalConjImpBotAxiom φ by adding a ⊥ case to the ∧-extended Kalmár truth lemma from task 378 (⊥ is always false under any Boolean assignment, so the surrogate handling is direct), plus the conservativity edge cpl_conservative_over_classicalConjImpBot and classicalConjImpBot_iff_chain. RISK: reuses the ∧-extended Kalmár machinery from 378; the ⊥ case should be the easy increment, but keep zero-debt — [BLOCKED] with goal state rather than sorry if stuck. Mirrors tasks 352/378. After this lands the classical conservativity column is complete and the MPL/IPL/CPL towers are structurally symmetric. Files: Cslib/Logics/Propositional/Metalogic/ClassicalConjImpBotCompleteness.lean (new). Depends on task 378 (reuses the ∧-extended Kalmár lemma).
 

@@ -1663,7 +1663,7 @@
     {
       "project_number": 371,
       "project_name": "symmetrize_sequent_calculus_coverage",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Symmetrize the LK/LJ sequent-calculus metatheory and add the missing cut-elimination corollaries; all three items are near-mechanical consequences of results already proved. (1) LJ subformula property: LK has Cslib/Logics/Propositional/SequentCalculus/LK/SubformulaProperty.lean but LJ has none despite having cut-elimination (LJ/CutElimination.lean) -- add LJ/SubformulaProperty.lean mirroring the LK proof, adapted to single-conclusion sequents. (2) LK decidability: LJ has decidability (LJ/Decidability.lean, via tableau) but LK does not -- add an LK decision procedure, either by cut-free proof search (using LK cut-elimination + subformula property to bound the search) or by reduction to the existing classical tautology checker, and prove it correct. (3) Cut-free completeness as a named theorem: LK has the CutFreeLKProof subtype and LKProof.cutElim but no standalone statement -- add lk_cut_free_completeness : Tautology phi -> Nonempty (CutFreeLKProof (emptyset turnstile {phi})) as a corollary of cutElim composed with lk_iff_tautology. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake).",
@@ -1671,8 +1671,20 @@
       "created": "2026-06-27T05:29:32Z",
       "last_updated": "2026-06-27T05:29:32Z",
       "next_artifact_number": 1,
-      "artifacts": [],
-      "session_id": null
+      "artifacts": [
+        {
+          "type": "research",
+          "path": "specs/371_symmetrize_sequent_calculus_coverage/reports/01_symmetrize-sequent-calculus.md",
+          "summary": "Reuse-first report; three independent corollary files; zero new axioms"
+        },
+        {
+          "type": "plan",
+          "path": "specs/371_symmetrize_sequent_calculus_coverage/plans/01_symmetrize-sequent-calculus.md",
+          "summary": "4 phases: LJ subformula prop, LK decidability, LK cut-free completeness, barrels+CI"
+        }
+      ],
+      "session_id": null,
+      "completion_summary": "Symmetrized LK/LJ sequent metatheory: added LJ.subformula_property, LK Decidability (deduction lemmas both directions), and lk_cut_free_completeness. 3 new modules, barrels+CI green, 0 sorry, 0 new axioms. Committed 2611cff0."
     },
     {
       "project_number": 372,
@@ -1709,7 +1721,7 @@
     {
       "project_number": 374,
       "project_name": "sequent_calculus_interpolation",
-      "status": "not_started",
+      "status": "partial",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Add Craig interpolation for the propositional sequent calculi, a foundational metatheorem currently absent for LK and LJ. Implement Maehara's method: for a cut-free LK proof of Gamma1, Gamma2 turnstile Delta1, Delta2, construct an interpolant I in the shared vocabulary with Gamma1 turnstile Delta1, I and I, Gamma2 turnstile Delta2, by induction on the cut-free derivation (using LK cut-elimination + subformula property as the foundation), then derive Craig interpolation for implications as the standard corollary; provide the intuitionistic (LJ) analogue. This is a larger new piece (estimate several hundred lines) and the highest-effort item in the propositional backlog -- schedule after the LK/LJ coverage is symmetrized (task 371 supplies the LJ subformula property the LJ case needs). Consider whether to also state the algebraic interpolation corollary over the Lindenbaum/Heyting substrate. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake).",
@@ -1719,7 +1731,18 @@
       "created": "2026-06-27T05:29:32Z",
       "last_updated": "2026-06-27T05:35:19Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "type": "research",
+          "path": "specs/374_sequent_calculus_interpolation/reports/01_sequent-calculus-interpolation.md",
+          "summary": "Maehara via cover-based vocabulary partition; new Proposition.vars; 6 phases; LJ separate; sorry-free achievable"
+        },
+        {
+          "type": "plan",
+          "path": "specs/374_sequent_calculus_interpolation/plans/01_sequent-calculus-interpolation.md",
+          "summary": "6 phases, waves [[1],[2,5],[3],[4],[6]]; Phase 3 hard, 3a/3b split"
+        }
+      ],
       "session_id": null
     },
     {
@@ -1742,7 +1765,7 @@
     {
       "project_number": 376,
       "project_name": "prove_fuel_sufficiency_lemma_for_classical_tableau_completeness",
-      "status": "researched",
+      "status": "partial",
       "task_type": "cslib",
       "description": "Prove the fuel-sufficiency lemma needed to discharge the sorry at line 492 of Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean. The sorry is the body of `classicalExpandBranches_hintikka`, which proves that any open branch produced by `classicalExpandBranches` satisfies the Hintikka condition. The induction on fuel is blocked because the fuel=0 base case is unprovable with the current invariant: when `classicalExpandBranches branches expandedSets 0 = .openBranch b`, the invariant covers only `sf ∈ expandedSets[j]`, leaving `sf ∈ b \\ expandedSets[j]` without any Hintikka guarantee.\n\nThe recommended approach (Path A) is to prove a helper lemma — call it `classicalExpandBranches_fuel_sufficient` or similar — establishing that when `classicalExpandBranches` is called with `fuel = 4*(φ.complexity+1)+1` (the bound used by `classicalTableau`), it NEVER returns `.openBranch` via the fuel=0 degenerate path. That is, every open branch is found saturated via `classicalStepBranch b e = none` before fuel reaches 0. This makes the fuel=0 case of `classicalExpandBranches_hintikka` vacuously true. The proof is a termination/measure argument: each step strictly decreases the number of unexpanded applicable formulas on open branches, and the fuel bound 4*(φ.complexity+1)+1 exceeds this measure. The companion lemma `classicalExpandBranches_openBranch_initial_mem` (already proved) establishes membership preservation and can be used to bound the applicable set.\n\nFallback paths if Path A proves intractable: (B) restate `classicalExpandBranches_hintikka` using well-founded recursion on the pair (unexpanded-applicable-formula count, fuel) rather than fuel alone — avoids the fuel=0 issue at the cost of restructuring the recursion scheme; (C) prove `classicalTableau_hintikka` directly without using `classicalExpandBranches_hintikka` as an intermediate general lemma, using structural induction on (pending_size, fuel). Paths B and C are fully documented in specs/363_repair_classical_tableau_completeness/.orchestrator-handoff.json.\n\nDeliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` (and any helper lemmas required by Path A/B/C) in Completeness.lean, with the file building green under `lake build` and `lake test`. The zero-debt green build of task 363 depends directly on this lemma being closed.",
       "effort": "3-5 hours",
@@ -1755,6 +1778,11 @@
           "type": "research",
           "path": "specs/363_repair_classical_tableau_completeness/reports/01_spawn-analysis.md",
           "summary": "Spawn analysis from parent task 363"
+        },
+        {
+          "type": "plan",
+          "path": "specs/376_prove_fuel_sufficiency_lemma_for_classical_tableau_completeness/plans/01_fuel-sufficiency-lemma.md",
+          "summary": "Approach A corrected: restate lemma with totalMeasure<=fuel hypothesis; 5 phases; Phase1 go/no-go"
         }
       ]
     },

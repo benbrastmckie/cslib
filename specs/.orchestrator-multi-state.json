@@ -1,57 +1,135 @@
 {
-  "session_id": "sess_1782538677_f01f15",
+  "session_id": "sess_1782560978_wtorch",
+  "worktree": "/home/benjamin/Projects/cslib/.claude/worktrees/orchestrate-376-371-363-374-369-317-375",
   "task_numbers": [
+    376,
+    371,
     363,
-    364,
-    365
+    374,
+    369,
+    317,
+    375
   ],
   "waves": [
     [
+      376,
+      371
+    ],
+    [
       363,
-      364,
-      365
+      374
+    ],
+    [
+      369
+    ],
+    [
+      317
+    ],
+    [
+      375
     ]
   ],
   "dependency_graph": {
-    "363": [],
-    "364": [],
-    "365": []
+    "376": [],
+    "371": [],
+    "363": [
+      376
+    ],
+    "374": [
+      371
+    ],
+    "369": [
+      363
+    ],
+    "317": [
+      363,
+      369
+    ],
+    "375": [
+      317,
+      363
+    ]
   },
-  "max_cycles": 15,
-  "cycle_count": 5,
-  "failed_tasks": [
-    {
-      "task": 363,
-      "status": "blocked",
-      "reason": "Phase 3 classicalExpandBranches_hintikka: genuine proof blocker (fuel=0 base case unprovable with current invariant). Green modulo 1 pre-existing sorry. 3 resolution paths documented."
-    },
-    {
-      "task": 364,
-      "status": "blocked",
-      "reason": "68 errors remain (hnewBs cascade in modalStepBranch_preserves_sat). 6 agents overflowed context (lean_goal output too large). Phase 1 complete + committed. Needs human session or rule-case extraction refactor first."
-    }
-  ],
+  "external_satisfied_deps": {
+    "317": [
+      316,
+      323
+    ]
+  },
+  "max_cycles": 25,
+  "cycle_count": 99,
+  "failed_tasks": [],
   "completed_tasks": [
-    365
+    371
   ],
   "current_statuses": {
+    "376": "partial",
+    "371": "completed",
     "363": "blocked",
-    "364": "blocked",
-    "365": "completed"
+    "374": "partial",
+    "369": "blocked",
+    "317": "blocked",
+    "375": "blocked"
   },
   "task_dirs": {
+    "376": "specs/376_prove_fuel_sufficiency_lemma_for_classical_tableau_completeness",
+    "371": "specs/371_symmetrize_sequent_calculus_coverage",
     "363": "specs/363_repair_classical_tableau_completeness",
-    "364": "specs/364_modal_tableau_soundness_drift_repair",
-    "365": "specs/365_propositional_docstring_sorry_note_hygiene"
+    "374": "specs/374_sequent_calculus_interpolation",
+    "369": "specs/369_parameterize_int_min_tableau",
+    "317": "specs/317_propositional_tableau_completeness",
+    "375": "specs/375_proof_system_equivalence_tableau_sequent_edges"
   },
   "research_agents": {
+    "376": "cslib-research-agent",
+    "371": "cslib-research-agent",
     "363": "cslib-research-agent",
-    "364": "cslib-research-agent",
-    "365": "cslib-research-agent"
+    "374": "cslib-research-agent",
+    "369": "cslib-research-agent",
+    "317": "cslib-research-agent",
+    "375": "cslib-research-agent"
   },
   "implement_agents": {
+    "376": "cslib-implementation-agent",
+    "371": "cslib-implementation-agent",
     "363": "cslib-implementation-agent",
-    "364": "cslib-implementation-agent",
-    "365": "cslib-implementation-agent"
-  }
+    "374": "cslib-implementation-agent",
+    "369": "cslib-implementation-agent",
+    "317": "cslib-implementation-agent",
+    "375": "cslib-implementation-agent"
+  },
+  "blocked_resolution": {
+    "363": {
+      "blocked_on_task": 376,
+      "resume_status": "implementing",
+      "note": "Phases 1-2 done+committed; phase 3 needs 376 fuel-sufficiency lemma. On 376 completion, flip blocked->implementing and re-dispatch with 376 result as continuation."
+    },
+    "317": {
+      "blocked_on_tasks": [
+        363,
+        369
+      ],
+      "resume_status": "not_started",
+      "note": "External deps 316,323 completed. Becomes eligible once 363,369 terminal."
+    }
+  },
+  "notes_371": "Phases 1-2 files created (LJ SubformulaProperty, LK Decidability). Phase 3 (lk_cut_free_completeness) + Phase 4 (barrels+CI) remain. Agent overflowed context. Continuation deferred until 376 build finishes (avoid concurrent lake build in shared worktree).",
+  "notes_376": "29e9d5b0 committed BROKEN (good infra classicalBranchComplexity/append/mono_expanded at 535-553 + broken decrease-lemma attempts 563-632, Bool API errors). Last verified-green = 241816a3 (1 sorry). Dispatching stabilizer to restore green keeping good infra. Measure-decrease attempts so far: 2 (nothing closeable).",
+  "notes_374": "PARKED PARTIAL after 4 reproducible 32k-output deaths on andR (direct/tight/micro/abstract). BANKED+committed: Phase1 vars (Subformula.lean), Phase2 interpolation scaffold (green), Phase3 ax case (cc27c644). REMAINING: 4 interpolation cases (andR/orL/impL — two-premise; impR — single) as documented sorries in LK/Interpolation.lean, then Phase4 LK Craig corollary, Phase5 LJ core, Phase6 LJ+CI. Needs a more capable model or different proof structuring; not closeable in bounded sonnet dispatches. 374 is a dependency leaf — parking blocks nothing.",
+  "parked_partial": [
+    374
+  ],
+  "measure_attempts": 3,
+  "final_376_attempt": true,
+  "partial_tasks": [
+    374,
+    376
+  ],
+  "blocked_tasks": [
+    363,
+    369,
+    317,
+    375
+  ],
+  "final_outcome": "1 completed (371), 2 partial (374,376), 4 blocked on 376 measure-decrease kernel (363,369,317,375)"
 }

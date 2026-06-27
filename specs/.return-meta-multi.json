@@ -2,13 +2,20 @@
   "status": "partial",
   "metadata": {
     "tasks_completed": [
-      365
+      371
     ],
-    "tasks_failed": [
+    "tasks_partial": [
+      374,
+      376
+    ],
+    "tasks_blocked": [
       363,
-      364
+      369,
+      317,
+      375
     ],
-    "cycles_used": 5,
+    "branch": "orchestrate-376-371-363-374-369-317-375",
+    "blocker": "376 measure-decrease termination kernel (Dershowitz-Manna / per-branch-max measure) not closeable in bounded dispatches",
     "multi_task_mode": true
   }
 }

@@ -962,20 +962,19 @@ private lemma classicalExpMeasure_step_lt
   · simp at hfound
 
 /-- The open branch returned by `classicalExpandBranches` is a classical Hintikka set,
-provided the total measure of unexpanded formulas is at most the fuel.
+provided `classicalExpMeasure branches expandedSets ≤ fuel`.
 
-When `classicalTotalMeasure branches expandedSets ≤ fuel`:
-- **fuel = 0**: measure = 0, so every formula on every branch is already expanded (in its
-  expanded set). The returned branch's Hintikka condition follows directly from the invariant.
+- **fuel = 0**: measure = 0 forces `branches = []` (each term `3^C ≥ 1` means a non-empty
+  list gives sum ≥ 1); `classicalExpandBranches [] _ 0 = .closed`, making the goal vacuous.
 - **fuel = n+1**: The inner loop either finds a saturated open branch (Hintikka by invariant
-  and saturation) or expands one formula and recurses.
+  and saturation) or expands one formula via `classicalExpMeasure_step_lt` and recurses.
 
 The proof is by induction on fuel with an inner induction on the pending list. -/
 private lemma classicalExpandBranches_hintikka (fuel : Nat) :
     ∀ (branches : List (Branch (Proposition Atom) Unit))
       (expandedSets : List (List (SignedFormula (Proposition Atom) Unit))),
       expandedSets.length = branches.length →
-      classicalTotalMeasure branches expandedSets ≤ fuel →
+      classicalExpMeasure branches expandedSets ≤ fuel →
       -- Invariant: each branch satisfies Hintikka for its expanded formulas
       (∀ (i : Nat) (b : Branch (Proposition Atom) Unit) (e : List (SignedFormula (Proposition Atom) Unit)),
         branches[i]? = some b → expandedSets[i]? = some e →
@@ -989,35 +988,22 @@ private lemma classicalExpandBranches_hintikka (fuel : Nat) :
   induction fuel with
   | zero =>
     intro branches expandedSets hlength hfuel hInv b h
-    -- hfuel : classicalTotalMeasure branches expandedSets ≤ 0
-    have hm : classicalTotalMeasure branches expandedSets = 0 := Nat.le_zero.mp hfuel
-    simp only [classicalExpandBranches] at h
-    cases hfs : branches.findSome? (fun b' => if isClassicallyClosed b' then none else some b') with
-    | none => simp only [hfs] at h; exact absurd h (by simp)
-    | some b' =>
-      simp only [hfs] at h
-      injection h with heq; subst heq
-      obtain ⟨b₀, hb₀_mem, hfound⟩ := List.exists_of_findSome?_eq_some hfs
-      by_cases hcl : isClassicallyClosed b₀ = true
-      · simp only [hcl, ite_true] at hfound; exact absurd hfound (by simp)
-      · simp only [Bool.not_eq_true] at hcl
-        have hb₀eq : b₀ = b' := by simp only [hcl, ite_false] at hfound; exact Option.some.inj hfound
-        rw [← hb₀eq]
-        -- b₀ is in branches at some index i
-        obtain ⟨i, hi, hi_eq⟩ := List.mem_iff_getElem.mp hb₀_mem
-        -- hi_eq : branches[i] = b₀
-        refine ⟨hcl, ?_⟩
-        intro sf hsfmem
-        -- sf ∈ b₀ = branches[i]
-        have hsfi : sf ∈ branches[i] := hi_eq ▸ hsfmem
-        -- From measure = 0: sf ∈ expandedSets[i]
-        have hsfe : sf ∈ expandedSets[i]'(by omega) :=
-          classicalTotalMeasure_zero_mem_subset hlength hm hi hsfi
-        -- From hInv: Hintikka condition for sf ∈ expandedSets[i] w.r.t. branches[i]
-        have hInv_i := hInv i branches[i] (expandedSets[i]'(by omega))
-          (List.getElem?_eq_getElem hi) (List.getElem?_eq_getElem (by omega)) sf hsfe
-        rw [hi_eq] at hInv_i
-        exact hInv_i
+    -- classicalExpMeasure ≤ 0 ⟹ = 0.  Each term 3^C ≥ 1, so a non-empty zip gives
+    -- sum ≥ 1 > 0; contradiction forces branches = [].
+    -- classicalExpandBranches [] _ 0 = .closed, making h absurd.
+    have hm : classicalExpMeasure branches expandedSets = 0 := Nat.le_zero.mp hfuel
+    have hbranches : branches = [] := by
+      rcases branches with _ | ⟨bh, bt⟩
+      · rfl
+      · exfalso
+        rcases expandedSets with _ | ⟨e, es⟩
+        · simp only [List.length_nil, List.length_cons] at hlength; omega
+        · simp only [classicalExpMeasure, List.zip_cons_cons, List.map_cons,
+                     List.sum_cons] at hm
+          have h3 := Nat.one_le_pow (classicalBranchComplexity bh e) 3 (by omega)
+          omega
+    subst hbranches
+    simp [classicalExpandBranches] at h
   | succ fuel' ih =>
     intro branches expandedSets hlength hfuel hInv b h
     simp only [classicalExpandBranches] at h
@@ -1036,7 +1022,7 @@ private lemma classicalExpandBranches_hintikka (fuel : Nat) :
             | .branching brs => ∃ br ∈ brs, ∀ sf' ∈ br, sf' ∈ bi
             | .persistent out => ∀ sf' ∈ out, sf' ∈ bi
             | .notApplicable => True) →
-        classicalTotalMeasure (done ++ pending) (doneExp ++ pendingExp) ≤ fuel' + 1 →
+        classicalExpMeasure (done ++ pending) (doneExp ++ pendingExp) ≤ fuel' + 1 →
         classicalExpandBranches.processNext fuel' pending pendingExp done doneExp = .openBranch b →
         classicalHintikkaSet b from
       key branches expandedSets [] [] hlength rfl hInv hfuel (by simpa [classicalExpandBranches] using h)
@@ -1065,7 +1051,7 @@ private lemma classicalExpandBranches_hintikka (fuel : Nat) :
               convert hi_bi using 2; simp
             · -- rewrite doneExp ++ [e] ++ es as doneExp ++ pendingExp in hi_ei
               rw [hpendingExp]; convert hi_ei using 2; simp
-          · -- classicalTotalMeasure (done ++ [bh] ++ bt) ... = classicalTotalMeasure (done ++ bh :: bt) ...
+          · -- classicalExpMeasure (done ++ [bh] ++ bt) ... = classicalExpMeasure (done ++ bh :: bt) ...
             convert hmeas using 2 <;> simp
           · exact hinner
         · simp only [Bool.not_eq_true] at hcl
@@ -1103,20 +1089,13 @@ private lemma classicalExpandBranches_hintikka (fuel : Nat) :
               simp only [List.length_append, List.length_map, hdlength]
               simp only [hpendingExp, List.length_cons, Nat.add_right_cancel_iff] at hlength_p
               omega
-            · -- Measure hypothesis: totalMeasure (done ++ newBs ++ bt) ≤ fuel'
-              -- NOTE: classicalTotalMeasure does not strictly decrease per expansion step.
-              -- For beta (branching) rules, one branch becomes two: each new branch
-              -- inherits all of bh's unexpanded formulas plus one new formula, so
-              -- the total measure can increase (roughly doubling for beta rules).
-              -- The correct fix is to use a complexity-weighted measure that decreases
-              -- per step (expansion always produces strict subformulas, so
-              -- sum-of-complexity decreases even under beta duplication -- though the
-              -- bookkeeping for the rest-of-branch doubling is subtle).
-              -- Phase 3'/4 of the plan addresses this by either:
-              -- (a) proving the sum-of-complexity measure decreases, or
-              -- (b) raising the fuel bound in Expansion.lean to match the exponential
-              --     worst-case growth of classicalTotalMeasure.
-              sorry
+            · -- Measure hypothesis: classicalExpMeasure (done ++ newBs ++ bt) ≤ fuel'
+              -- classicalExpMeasure_step_lt: LHS + 1 ≤ classicalExpMeasure (done ++ bh :: bt) (...)
+              -- hmeas: classicalExpMeasure (done ++ bh :: bt) (...) ≤ fuel' + 1
+              -- Hence LHS ≤ fuel' by omega.
+              have hstep_lt := classicalExpMeasure_step_lt done bt newBs doneExp es newExp bh e
+                hdlength.symm hstep
+              omega
             · -- Hintikka invariant for the new branch list.
               -- Split into three index regions: done, newBs, bt.
               intro i b' e' hi' he' sf hsfin
@@ -1339,13 +1318,10 @@ lemma classicalTableau_hintikka (φ : Proposition Atom) (b : Branch (Proposition
   simp only [classicalTableau] at h
   -- The initial state has exactly one formula on one branch and an empty expanded set.
   -- The measure is 1 (one unexpanded formula), which is ≤ the fuel bound.
-  have hfuel_init : classicalTotalMeasure [[⟨.neg, φ, ()⟩]] [[]] ≤ 4 * (φ.complexity + 1) + 1 := by
-    simp only [classicalTotalMeasure, classicalRemMeasure]
-    simp only [List.zip_cons_cons, List.zip_nil_right, List.map_cons, List.map_nil,
-               List.sum_cons, List.sum_nil, add_zero]
-    simp only [List.filter, List.any, List.length, Bool.not_false, ite_true,
-               List.length_nil, List.length_cons, Nat.zero_add]
-    omega
+  -- PHASE 4: prove classicalExpMeasure [[⟨.neg, φ, ()⟩]] [[]] ≤ fuel after raising the bound
+  -- in Expansion.lean from 4*(φ.complexity+1)+1 to 3^(φ.complexity) (or appropriate bound).
+  have hfuel_init : classicalExpMeasure [[⟨.neg, φ, ()⟩]] [[]] ≤ 4 * (φ.complexity + 1) + 1 :=
+    sorry
   -- Supply branches/expandedSets explicitly so the lambda's `he` type is fully determined.
   -- Initial invariant holds vacuously: expandedSets = [[]], so every e looked up is [].
   exact classicalExpandBranches_hintikka _ [[⟨.neg, φ, ()⟩]] [[]] rfl hfuel_init

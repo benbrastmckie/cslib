@@ -4,10 +4,11 @@
   "artifacts": [],
   "partial_progress": {
     "stage": "initializing",
-    "details": "Phase 2: step-decrease lemma"
+    "details": "Phase 3: wire classicalExpMeasure_step_lt into classicalExpandBranches_hintikka"
   },
   "metadata": {
     "agent_type": "cslib-implementation-hard-agent",
-    "delegation_depth": 1
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
   }
 }

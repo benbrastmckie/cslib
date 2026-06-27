@@ -48,7 +48,7 @@ next_project_number: 380
   └─ 332 [IMPLEMENTING] — Close the two remaining normalization-termination sorries for CSL
     └─ 373 [NOT STARTED] — Extend the Curry-Howard layer from a structural isomorphism to a 
 345 [PLANNED] — Reconcile the two strength encodings on the Hilbert substrate and
-  └─ 348 [RESEARCHING] — Restate Glivenko and conservativity theory-parametrically against
+  └─ 348 [RESEARCHED] — Restate Glivenko and conservativity theory-parametrically against
   └─ 372 [NOT STARTED] — Complete the propositional fragment lattice by adding the disjunc
 368 [NOT STARTED] — Deduplicate the prime-exclusion machinery shared by the intuition
 370 [NOT STARTED] — Close the decidability asymmetry in the metalogic layer: classica
@@ -401,10 +401,11 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 348. Glivenko conservativity theory parametric
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 343, Task 345
+- **Research**: [348_glivenko_conservativity_theory_parametric/reports/01_parametric-conservativity-spine.md]
 
 **Description**: Restate Glivenko and conservativity theory-parametrically against v ⊨ T on the algebraic substrate, using Heyting-homomorphism machinery (GeneralizedHeytingHom.map_interpret and Extension-style homs, cf. Waring's Heyting.lean) over the HilbertLindenbaumAlgebra / Lindenbaum quotient. Generalise the existing Glivenko.lean and *Conservative*.lean family (Conservative, ConservativeChain, ConjImpConservative, ConjImpBotConservative, ImpConservative, MplConservativeChain) so they read as theory-parametric statements with the tier results as corollaries; reuse the IsIntuitionistic/IsClassical/IsMinimal inclusion typeclasses (345). All completeness/soundness remains Hilbert-based. CI green; existing results preserved.
 

@@ -1435,12 +1435,18 @@
         345
       ],
       "description": "Restate Glivenko and conservativity theory-parametrically against v ⊨ T on the algebraic substrate, using Heyting-homomorphism machinery (GeneralizedHeytingHom.map_interpret and Extension-style homs, cf. Waring's Heyting.lean) over the HilbertLindenbaumAlgebra / Lindenbaum quotient. Generalise the existing Glivenko.lean and *Conservative*.lean family (Conservative, ConservativeChain, ConjImpConservative, ConjImpBotConservative, ImpConservative, MplConservativeChain) so they read as theory-parametric statements with the tier results as corollaries; reuse the IsIntuitionistic/IsClassical/IsMinimal inclusion typeclasses (345). All completeness/soundness remains Hilbert-based. CI green; existing results preserved.",
-      "status": "researching",
+      "status": "researched",
       "task_type": "cslib",
       "created": "2026-06-25T00:00:00Z",
       "last_updated": "2026-06-27T00:00:00Z",
-      "artifacts": [],
-      "next_artifact_number": 1
+      "artifacts": [
+        {
+          "path": "specs/348_glivenko_conservativity_theory_parametric/reports/01_parametric-conservativity-spine.md",
+          "type": "report"
+        }
+      ],
+      "next_artifact_number": 2,
+      "researched": "2026-06-27T00:00:00Z"
     },
     {
       "project_number": 353,

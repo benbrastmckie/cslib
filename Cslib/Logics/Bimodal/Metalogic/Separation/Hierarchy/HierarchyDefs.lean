@@ -113,7 +113,7 @@ theorem s_free_has_single_S_type {φ x y : Formula Atom} (h : isSFree φ = true)
 /-- Helper: Formula.neg preserves hasSingleUType. -/
 theorem has_single_U_type_neg {φ x y : Formula Atom} (h : hasSingleUType φ x y) :
     hasSingleUType (Formula.neg φ) x y := by
-  simp [hasSingleUType]
+  simp [Formula.neg, PropositionalConnectives.neg, hasSingleUType]
   exact h
 
 /-- Helper: Formula.and preserves hasSingleUType. -/

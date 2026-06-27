@@ -1,0 +1,57 @@
+{
+  "task_number": 363,
+  "status": "partial",
+  "phases_completed": 2,
+  "phases_total": 4,
+  "session_id": "sess_1782538677_f01f15_363",
+  "last_updated": "2026-06-27",
+  "sorry_inventory": {
+    "count": 1,
+    "items": [
+      {
+        "file": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean",
+        "line": 492,
+        "lemma": "classicalExpandBranches_hintikka",
+        "status": "pre_existing_blocked"
+      }
+    ]
+  },
+  "blockers": [
+    {
+      "phase": 3,
+      "lemma": "classicalExpandBranches_hintikka",
+      "what_failed": "The fuel=0 base case of the induction is unprovable with the current invariant. When fuel=0, classicalExpandBranches returns .openBranch b where b is the first non-closed branch in the list. The invariant says (for sf in expandedSets[j]) Hintikka_rule(sf, b), but does NOT cover sf in b \\ expandedSets[j]. These uncovered formulas could violate the Hintikka condition.",
+      "what_was_tried": [
+        "Induction on fuel with the current invariant (∀ i b e, branches[i]? = some b → expandedSets[i]? = some e → ∀ sf ∈ e, ...) — fuel=0 base case fails.",
+        "Strengthening the invariant with a saturation precondition (∀ sf ∈ b, sf ∈ e ∨ notApplicable) — fails at call site (branches=[[F(φ)]], expandedSets=[[]], F(φ) is typically applicable and not in []).",
+        "Adding (fuel = 0 → ∀ open b' ∈ branches, classicalHintikkaSet b') — not maintained in IH application to new branches after expansion step.",
+        "lean_multi_attempt on the fuel=0 case — reached same stuck state at the Hintikka condition for uncovered formulas."
+      ],
+      "why_stuck": "The algorithm can reach fuel=0 with unexpanded formulas on open branches. The stated invariant only covers ALREADY-EXPANDED formulas (sf ∈ expandedSets[i]). For sf ∈ branches[i] but NOT in expandedSets[i], nothing in the current invariant tells us whether Hintikka_rule(sf, branches[i]) holds. This is a genuine proof gap requiring either a fuel-sufficiency argument or a different induction measure.",
+      "what_is_needed": "ONE of: (A) Prove a separate fuel-sufficiency lemma showing that with fuel = 4*(φ.complexity+1)+1, the algorithm NEVER terminates via the fuel=0 degenerate path — i.e., processNext always finds saturation before fuel runs out. OR (B) Restate classicalExpandBranches_hintikka using well-founded recursion on the total number of unexpanded applicable formulas instead of fuel. OR (C) Prove the lemma directly for classicalTableau_hintikka without using classicalExpandBranches_hintikka as an intermediate general lemma.",
+      "fuel_zero_case_in_detail": "The fuel=0 case of the induction requires: given (branches, expandedSets) with the invariant, classicalExpandBranches branches expandedSets 0 = .openBranch b → classicalHintikkaSet b. The algorithm at fuel=0 runs `branches.findSome? (fun b' => if isClassicallyClosed b' then none else some b')` and returns the first non-closed branch b. We get isClassicallyClosed b = false (condition 1 of Hintikka). But for condition 2 (∀ sf ∈ b, Hintikka_rule(sf, b)), we can only access Hintikka_rule(sf, b) for sf ∈ expandedSets[j] from the invariant. For sf ∈ b \\ expandedSets[j], there is no information. In the actual execution with the correct fuel bound, this case never arises because all applicable formulas get expanded before fuel runs out. But the INDUCTIVE PROOF cannot express this without the fuel-sufficiency lemma."
+    }
+  ],
+  "completed_work": {
+    "phase_1": "Prior agent (previous session) repaired the classicalTruthLemma proof script (lines 84-399): sign extraction (8 sites → eq_of_beq hsfcond.1), hca reduction (subst pattern), membership API (bare List.mem_cons_self), hasContradiction (List.findSome?_eq_none_iff), botPos closure (b.find? case-split).",
+    "phase_2": "Prior agent repaired classicalStepBranch_mem_preserved, classicalOpenBranch_countermodel, classicalTableau_complete.",
+    "this_session": "Fixed List.getElem? (Unknown constant) → l[i]? notation with explicit (i : Nat) type annotation. Fixed call site in classicalTableau_hintikka to supply branches/expandedSets explicitly. Removed unused ite_false from simp only. File now builds green with zero errors and exactly one sorry (the pre-existing classicalExpandBranches_hintikka sorry)."
+  },
+  "build_state": {
+    "scoped_build": "green",
+    "error_count": 0,
+    "sorry_count": 1,
+    "sorry_file": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean",
+    "sorry_line": 492,
+    "sorry_lemma": "classicalExpandBranches_hintikka"
+  },
+  "next_steps_for_successor_agent": {
+    "primary": "Prove classicalExpandBranches_hintikka (line 478-492). The sorry is the whole body. The succ case of the fuel induction is provable (follows companion lemma structure + saturation argument). The fuel=0 case requires one of the three approaches documented in blockers[0].what_is_needed.",
+    "recommended_approach": "Approach (A): Prove a helper lemma first: classicalExpandBranches_never_openBranch_at_fuel_zero_with_sufficient_initial_fuel that shows when classicalTableau is called with its standard fuel bound 4*(φ.complexity+1)+1, the fuel never reaches 0 while there are still unsaturated branches. This is a measure argument on formula complexity. Then in classicalExpandBranches_hintikka, the fuel=0 case is vacuous.",
+    "alternative_approach": "Approach (C): Prove classicalTableau_hintikka directly without going through classicalExpandBranches_hintikka. Use structural induction on the PAIR (pending_size, fuel) where pending_size counts unexpanded applicable formulas. This avoids the fuel=0 issue entirely.",
+    "file_to_edit": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean",
+    "sorry_location": "Line 492 (private lemma classicalExpandBranches_hintikka, lines 478-492)"
+  },
+  "requires_user_review": true,
+  "recommended_task_status": "BLOCKED"
+}

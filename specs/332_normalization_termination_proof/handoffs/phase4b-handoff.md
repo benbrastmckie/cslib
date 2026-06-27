@@ -1,5 +1,43 @@
 # Task 332 Phase 4b Handoff — `snSubst` Mutual Termination (L3/L4/L5)
 
+**Status:** PARTIAL — **HEAD-BOUND TERMINATION CLOSED (sorry-free).** The mutual
+well-founded termination encoding was already solved; this dispatch discharged the sole
+remaining *termination* obligation — the **head-bound** `snSubst → snImpEForm` edge — with no
+`sorry` in `snSubst.decreasing_by`. The remaining `sorry`s are all DATA/context-cast cases
+(`snSubst` impI/orE; `snOrEForm` orE commuting) plus the pre-existing fuel `sorry`. The
+mechanical SN-reassembly proofs and the `snSubst` `impE/andE1/andE2/andI/ax/ass/orI1/orI2`
+data cases are now all proven. `Termination.lean` (main file) was **never touched** and stays
+green with its pre-existing fuel `sorry`.
+
+## UPDATE (this dispatch) — head-bound discharged
+
+- **`snSubst` return subtype now carries the head-behaviour invariant**
+  `body.isIntroRoot = false → ((d.isIntroRoot = true ∨ d.isOrERoot = true) → B.complexity ≤ P.complexity)`.
+  Proven sorry-free for `ax/ass/andI/andE1/andE2/impE/orI1/orI2`. The head-bound's entire
+  dependency cone (neutral implications `ax/ass/andE1/andE2/impE`) is therefore genuinely
+  sorry-free, so the termination argument does not rest on any data `sorry`.
+- **`snSubst.impE` head-matches** `(snSubst D' arg).1`: if intro/orE-headed, derive
+  `hle : (type D').complexity ≤ P.complexity` from `D'`'s invariant and call `snImpEForm`
+  (the edge decreases); if neutral, reassemble `impE` directly (no eliminator call).
+- **`decreasing_by` is sorry-free.** Structural edges: `simp_wf; right; right` then `omega`
+  (expanded parents) or `exact sizeOf_impE_left/right _ _` (the `impE` structural edges).
+  Head edge: `simp_wf; exact lex3_of_le_of_lt hle (by omega)`.
+- **New supporting decls (all before the `mutual` block):** `cx_and_left`, `cx_and_right`,
+  `Theory.Derivation.snAndE1Form_head`, `Theory.Derivation.snAndE2Form_head`,
+  `sizeOf_impE_left`, `sizeOf_impE_right`, `lex3_of_le_of_lt`. Added
+  `set_option maxHeartbeats 2000000 in` before `mutual` (the invariant enlarges the
+  equation-compiler goal). **Removed** the dead stage-1 stubs `snSubstStub`/`snImpEFormS`.
+- **Remaining `sorry` inventory (TerminationScratch.lean):**
+  1. `normalize_isStronglyNormal` fuel `sorry` (pre-existing; copied from main — DO NOT touch).
+  2. `snOrEForm` `orE` commuting case (`_ => sorry`) — context casts, deferred.
+  3. `snSubst` `_ => sorry` (covers `impI` and `orE`) — context casts, deferred.
+- **Next:** the only termination-relevant work left is the `impI`/`orE` context-cast cases
+  (handoff §4 item 3): `insert A (insert P G) = insert P (insert A G)` reindexing + `arg.weakCtx`,
+  threading the `sizeOf`-cast equalities into `decreasing_by`. These are DATA cases; the measure
+  and the head-bound are untouched by them.
+
+### (Original status below, retained for context)
+
 **Status:** PARTIAL. The mutual well-founded **termination encoding is SOLVED and
 machine-checked** (the crux that stalled the two prior attempts). The remaining gap is the
 single *head-bound* termination side-condition plus the mechanical SN-reassembly proofs and

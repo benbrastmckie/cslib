@@ -124,7 +124,7 @@ Phases within the same wave can execute in parallel. Phases 1-4 each touch a dis
 
 ---
 
-### Phase 3: Eliminations (~15 edits) [NOT STARTED]
+### Phase 3: Eliminations (~15 edits) [COMPLETED]
 
 **Goal**: Fix the repeated second-layer `neg` unfold stall across the parallel Case-2/Case-3 elimination clones. All same family; NO `obtain`-shape drift.
 

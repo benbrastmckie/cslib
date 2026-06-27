@@ -177,7 +177,7 @@ classical-strength source and intuitionistic-strength target, plus a strength-pr
 
 ---
 
-### Phase 3: `conservative_via_embedding` combinator (L3 as hypothesis) [IN PROGRESS]
+### Phase 3: `conservative_via_embedding` combinator (L3 as hypothesis) [COMPLETED]
 
 **Goal**: Introduce the shared four-move conservativity skeleton as one combinator, with the
 bespoke commutation/embedding lemma supplied as an explicit hypothesis — never derived from a hom

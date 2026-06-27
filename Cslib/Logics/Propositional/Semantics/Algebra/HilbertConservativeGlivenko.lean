@@ -144,6 +144,37 @@ theorem hilbertGlivenko_theory {Atom : Type u} {φ : PL.Proposition Atom}
     (h : Derivable A_cl φ) : Derivable A_int (¬¬φ) :=
   h_int _ (glivenko_algebraic (h_cl _ h))
 
+/-! ## Conservative-via-Embedding Combinator -/
+
+/-- **Conservative-via-embedding combinator**: the shared four-move skeleton for all Hilbert
+conservativity theorems, parametrised by opaque validity predicates and a fragment predicate.
+
+Given:
+- `BigValid`, `SmallValid` : opaque validity predicates (kept as `Prop` parameters so that
+  instance resolution and any `attribute [-instance]` scoping stays at the call site, per R5)
+- `P : Proposition → Bool` : a decidable fragment predicate (e.g. `IsBotFree`, `IsOrBotFree`)
+- `big_complete` : derivability in the larger system implies `BigValid`
+- `small_complete` : `P`-restricted `SmallValid` formulas are derivable in the smaller system
+- `commute` : `BigValid` implies `SmallValid` on `P`-restricted formulas (the bespoke embedding
+  lemma, which is the irreducible per-completion hypothesis)
+
+Then any `P`-restricted formula derivable in the larger system is derivable in the smaller.
+
+**Design note (R1/R2)**: `commute` is the irreducible per-completion hypothesis. It must **not**
+be derived from a generic Heyting homomorphism: the Brouwerian and free-meet completions are not
+full Heyting algebra homomorphisms. Each call site supplies its own bespoke lemma. -/
+theorem conservative_via_embedding {Atom : Type*}
+    {A_big A_small : PL.Proposition Atom → Prop}
+    (BigValid SmallValid : PL.Proposition Atom → Prop)
+    (P : PL.Proposition Atom → Bool)
+    (big_complete : ∀ φ, Derivable A_big φ → BigValid φ)
+    (small_complete : ∀ φ, P φ = true → SmallValid φ → Derivable A_small φ)
+    (commute : ∀ φ, P φ = true → BigValid φ → SmallValid φ)
+    {φ : PL.Proposition Atom}
+    (hP : P φ = true)
+    (h : Derivable A_big φ) : Derivable A_small φ :=
+  small_complete φ hP (commute φ hP (big_complete φ h))
+
 /-! ## Parametric Syntactic Bridge -/
 
 /-- **Parametric ND bridge**: for any axiom predicate `Axioms` satisfying `MinimalAxioms`,

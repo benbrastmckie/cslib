@@ -1,5 +1,5 @@
 ---
-next_project_number: 365
+next_project_number: 376
 ---
 
 # TODO
@@ -11,9 +11,10 @@ next_project_number: 365
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,317,321,342,345,352,355,360,363,364 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,332,348 | 36,37,180,290,299,345 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
-| 3 | 41,275 | 39,40 | Foundations |
+| 1 | 36,37,180,226,241,278,290,299,301,321,342,345,355,363,364,365,368,370,371 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,332,348,360,366,369,372,374 | 36,37,180,290,299,345,355,363,364,371 | Bimodal Porting, Foundations, Modal Logic, ... |
+| 3 | 41,275,317,367,373 | 39,40,332,348,369 | Foundations, Propositional Logic, Algebraic Semantics |
+| 4 | 375 | 317 | Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -29,22 +30,33 @@ next_project_number: 365
 
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
 355 [NOT STARTED] — Consolidate the Modal and Propositional deductionTheorem through 
+  └─ 366 [NOT STARTED] — Capstone audit ensuring the deduction theorem is correctly abstra
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Modal Logic
 
 299 [IMPLEMENTING] — Implement tableau decision procedure for basic modal logic K with
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
-364 [RESEARCHED] — Repair the pre-existing Mathlib/toolchain-drift build failure in 
+364 [IMPLEMENTING] — Repair the pre-existing Mathlib/toolchain-drift build failure in 
+  └─ 360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t
 
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
-  └─ 332 [IMPLEMENTING] — Prove the normalization termination theorem for CSLib Theory.Deri
-317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
+  └─ 332 [IMPLEMENTING] — Close the two remaining normalization-termination sorries for CSL
+    └─ 373 [NOT STARTED] — Extend the Curry-Howard layer from a structural isomorphism to a 
 345 [RESEARCHED] — Reconcile the two strength encodings on the Hilbert substrate and
   └─ 348 [NOT STARTED] — Restate Glivenko and conservativity theory-parametrically against
+  └─ 372 [NOT STARTED] — Complete the propositional fragment lattice by adding the disjunc
+368 [NOT STARTED] — Deduplicate the prime-exclusion machinery shared by the intuition
+370 [NOT STARTED] — Close the decidability asymmetry in the metalogic layer: classica
+371 [NOT STARTED] — Symmetrize the LK/LJ sequent-calculus metatheory and add the miss
+  └─ 374 [NOT STARTED] — Add Craig interpolation for the propositional sequent calculi, a 
+317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
+  └─ 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
+369 [NOT STARTED] — Parameterize the intuitionistic and minimal tableau developments 
+  └─ 317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri (see above)
 
 ### Temporal Logic
 
@@ -59,20 +71,132 @@ next_project_number: 365
 ### Code Hygiene
 
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
+365 [RESEARCHED] — Docstring/comment-only hygiene pass over the Propositional metath
 
 ### Algebraic Semantics
 
-352 [PLANNED] — Prove CPL is conservative over its classical implicational fragme
+367 [NOT STARTED] — Collapse the three near-identical Brouwerian completeness develop
 
 ### Uncategorized
 
-360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t
-363 [NOT STARTED] — Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean fa
+363 [RESEARCHED] — Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean fa
+  └─ 360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t (see above)
+  └─ 369 [NOT STARTED] — (Propositional Logic: Parameterize the intuitionistic and mini) (see above)
 
 ## Tasks
 
-### 364. Modal tableau soundness drift repair
+### 375. Proof system equivalence tableau sequent edges
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 317, Task 363
+
+**Description**: Complete the cross-system equivalence story by folding the tableau (and remaining sequent) decision systems into the proof-system TFAE. Cslib/Logics/Propositional/ProofSystemEquivalence.lean currently proves Hilbert<->ND<->LK for CPL (cplProofSystemsTfae) and Hilbert<->ND<->LJ for IPL (iplProofSystemsTfae), plus the MPL Hilbert<->ND two-way. Add the missing edges so the equivalence is genuinely complete across all proof systems: classical Tautology <-> LK provability <-> closed classical tableau, and intuitionistic validity <-> LJ provability <-> closed intuitionistic tableau, extending the TFAE lists accordingly. Requires the tableau soundness+completeness to be green (task 316 done for soundness; task 317 for completeness) and the classical tableau build repaired (task 363). No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 317, 363.
+
+---
+
+### 374. Sequent calculus interpolation
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 371
+
+**Description**: Add Craig interpolation for the propositional sequent calculi, a foundational metatheorem currently absent for LK and LJ. Implement Maehara's method: for a cut-free LK proof of Gamma1, Gamma2 turnstile Delta1, Delta2, construct an interpolant I in the shared vocabulary with Gamma1 turnstile Delta1, I and I, Gamma2 turnstile Delta2, by induction on the cut-free derivation (using LK cut-elimination + subformula property as the foundation), then derive Craig interpolation for implications as the standard corollary; provide the intuitionistic (LJ) analogue. This is a larger new piece (estimate several hundred lines) and the highest-effort item in the propositional backlog -- schedule after the LK/LJ coverage is symmetrized (task 371 supplies the LJ subformula property the LJ case needs). Consider whether to also state the algebraic interpolation corollary over the Lindenbaum/Heyting substrate. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake).
+
+---
+
+### 373. Curry howard reduction correspondence
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 332
+
+**Description**: Extend the Curry-Howard layer from a structural isomorphism to a genuine computational correspondence. Cslib/Logics/Propositional/CurryHoward/{Defs,Isomorphism.lean} currently provide only a constructor-renaming bijection between Theory.Derivation and the intrinsically-typed lambda calculus Theory.Term (curryHowardForward/Backward, roundtrip = rfl). Add: (1) the reduction correspondence -- prove that ND root reduction (NaturalDeduction/Normalization/Reduction.lean reduceRoot: the 5 beta-redexes + 3 commuting conversions) corresponds to beta/eta reduction on Theory.Term, i.e. d reduceRoot d' implies curryHowardForward d reduces to curryHowardForward d' (and a congruence/compatibility lemma); (2) term-level strong normalization -- transport derivation-level SN (normalize_isStronglyNormal) across the isomorphism to obtain SN for well-typed Terms. Depends on task 332 (the normalization termination proof must be sorry-free first). No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 332.
+
+---
+
+### 372. Or imp disjunctive implicational fragment
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 345
+
+**Description**: Complete the propositional fragment lattice by adding the disjunctive-implicational fragment IPL<or,->,top>, the one missing vertex. Current fragments (ProofSystem/FragmentAxioms.lean): ImpAxiom (K,S), ConjImpAxiom (+andI/andE1/andE2), ConjImpBotAxiom/ConjImpBotMinAxiom (+efq), ClassicalImpAxiom (+Peirce) -- none covers or-with-implication. Add OrImpAxiom : Proposition Atom -> Prop with constructors K, S, orI1, orI2, orE; the subsumption OrImpAxiom -> MinPropAxiom; the mem_implyK/mem_implyS witnesses and substitution-closure + fragment-predicate-compatibility lemmas mirroring the existing fragments; the deduction-theorem instance; a tag type Propositional.HilbertOrImp with its InferenceSystem/MinimalHilbert instances (ProofSystem/{Instances,FragmentInstances}.lean); and, if natural, its conservativity step into the chain. Land it on the cleaned-up strength substrate from task 345 (IsMinimal + MinimalAxioms<->inclusion bridge) so the fragment/strength story stays coherent. Like task 352 this is an optional lattice-completion extension -- confirm desirability before heavy investment in the conservativity step; the axioms + instances + deduction theorem are the core deliverable. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 345.
+
+---
+
+### 371. Symmetrize sequent calculus coverage
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Symmetrize the LK/LJ sequent-calculus metatheory and add the missing cut-elimination corollaries; all three items are near-mechanical consequences of results already proved. (1) LJ subformula property: LK has Cslib/Logics/Propositional/SequentCalculus/LK/SubformulaProperty.lean but LJ has none despite having cut-elimination (LJ/CutElimination.lean) -- add LJ/SubformulaProperty.lean mirroring the LK proof, adapted to single-conclusion sequents. (2) LK decidability: LJ has decidability (LJ/Decidability.lean, via tableau) but LK does not -- add an LK decision procedure, either by cut-free proof search (using LK cut-elimination + subformula property to bound the search) or by reduction to the existing classical tautology checker, and prove it correct. (3) Cut-free completeness as a named theorem: LK has the CutFreeLKProof subtype and LKProof.cutElim but no standalone statement -- add lk_cut_free_completeness : Tautology phi -> Nonempty (CutFreeLKProof (emptyset turnstile {phi})) as a corollary of cutElim composed with lk_iff_tautology. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake).
+
+---
+
+### 370. Int min metalogic decidability
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Close the decidability asymmetry in the metalogic layer: classical propositional logic has a decision procedure (instDecidableDerivablePropositionalAxiom via tautology enumeration, Metalogic/StrongCompleteness.lean:566), but intuitionistic (IntPropAxiom) and minimal (MinPropAxiom) logics have none. Establish Decidable (Derivable IntPropAxiom phi) and Decidable (Derivable MinPropAxiom phi) via the finite model property: bound the canonical Kripke models (prime DCCS / MinTheory worlds) by the subformulas of phi, give a terminating decision procedure over the finite model space, and prove it correct against the existing int/min strong-completeness theorems (IntStrongCompleteness.lean, MinStrongCompleteness.lean). Independent of the tableau decision procedures (which currently rest on unproved completeness witnesses). Note: the LJ sequent calculus already has a tableau-backed decidability instance (SequentCalculus/LJ/Decidability.lean) -- assess whether the FMP route or a bridge to LJ decidability is the cleaner source for the IPL instance before implementing. No new axioms (Classical.choice / Decidable.decide acceptable on noncomputable defs); CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake).
+
+---
+
+### 369. Parameterize int min tableau
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 363
+
+**Description**: Parameterize the intuitionistic and minimal tableau developments over their two points of difference to remove ~400 lines of duplication and set up task 317 to discharge ONE truth lemma instead of two. The two logics already share intExpandBranches, the rule set, the Nat-labelled Kripke world scheme, and the accessibility-edge mechanism; they diverge only in (a) the closure predicate (isIntuitionisticallyClosed, which fires on T(bot) at any world, vs isMinimallyClosed, contradiction-only) and (b) the extracted countermodel's botForces (intuitionistic: fun _ => False; minimal: botForces w = T(bot) present on the branch at w). Refactor the shared Soundness and Completeness scaffolding (Cslib/Logics/Propositional/Tableau/{Intuitionistic,Minimal}/{Soundness,Completeness,DecisionProcedure}.lean) to abstract over (closurePred, modelBot) so both logics instantiate a single parametric development, leveraging the generic Foundations/Logic/Tableau ClosureCondition typeclass where natural. Constraints: keep all three Soundness modules green and sorry-free (task 316); preserve the still-open completeness obligations as a SINGLE parametric truth-lemma/countermodel pair (do not introduce new sorries beyond the existing ones being unified). Must run after the classical tableau build is repaired (task 363) so the suite is green. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 363.
+
+---
+
+### 368. Lift prime exclusion generic lemma
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Deduplicate the prime-exclusion machinery shared by the intuitionistic and minimal Lindenbaum constructions by lifting it to a single generic Foundations lemma. Cslib/Logics/Propositional/Metalogic/IntLindenbaum.lean:258-438 (int_prime_exclusion, int_maximal_is_prime, int_excluding_chain_union, int_excluding_base_mem) and Cslib/Logics/Propositional/Metalogic/MinLindenbaum.lean:353-369 (min_* counterparts) repeat ~70% identical Zorn's-lemma + orE-axiom + chain-union-closure logic, differing only in that the intuitionistic case threads an extra EFQ consistency check (IntLindenbaum:328-382). Extract a generic prime-exclusion / maximal-is-prime lemma into Cslib/Foundations/Logic/Metalogic (parameterized over the deriv_imp_of_union witness and an optional consistency predicate, defaulting to the trivial predicate for the minimal case), then re-derive both int_prime_exclusion and min_prime_exclusion from it. ~150-line reduction. No new axioms; both StrongCompleteness proofs remain sorry-free; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake).
+
+---
+
+### 367. Unify brouwerian completeness triplication
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Algebraic Semantics
+- **Dependencies**: Task 348, Task 354
+
+**Description**: Collapse the three near-identical Brouwerian completeness developments into one parametric module; this is a NET SIMPLIFICATION (~1000-line reduction), not added abstraction. Cslib/Logics/Propositional/Semantics/Algebra/{BrouwerianCompleteness.lean (~528), PointedBrouwerianCompleteness.lean (~561), MplPointedConservative.lean (~658)} are ~80% copy-paste: identical soundness, Lindenbaum-quotient order lemmas (mk_le_mk/inf_mk/himp_mk/le_antisymm/...), canonicalV_spec truth lemma, and completeness/iff skeletons. They differ ONLY in bot semantics: ConjImp maps bot to top, ConjImpBot maps bot to the OrderBot least element (ex falso), ConjImpBotMin uses a free bot_val parameter (the free-vs-least split already landed in task 354). Refactor to a single development over the AlgEvaluate v bot_val / AlgTValid substrate (Semantics/Algebra.lean), with bot interpretation as the one varying parameter guarded by [OrderBot H] only where the least-element semantics is intended; recover the three tier results (Brouwerian / pointed-Brouwerian / free-bot Brouwerian completeness) as corollaries with their existing names preserved for downstream consumers. Build on the theory-parametric substrate from task 348. No new axioms; every existing theorem preserved (as a corollary or alias); CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 348, 354.
+
+---
+
+### 366. Deduction theorem threading documentation audit
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Foundations
+- **Dependencies**: Task 355
+
+**Description**: Capstone audit ensuring the deduction theorem is correctly abstracted, uniformly threaded, and thoroughly documented across all four logics, after task 355 routes Modal/Propositional through the generic algebraic deduction-theorem layer (algebraic_has_deduction_theorem in Cslib/Foundations/Logic/Metalogic/GenericMCS.lean, built on list_deduction_theorem in ListDeduction.lean). Work: (1) Verify end-to-end that NO logic retains a hand WF-recursion deduction-theorem body or a bespoke deductionWithMem helper -- Propositional (Metalogic/DeductionTheorem.lean), Modal, Temporal, Bimodal all reach the theorem through the single generic seam via their GenericMCSBridge. (2) Verify every downstream consumer (MCS, Lindenbaum, StrongCompleteness, TruthLemma, ProofSystemEquivalence, and the ~25 raw DerivationTree call sites) is threaded through the consolidated HasDeductionTheorem instance with no signature drift and stays sorry-free. (3) Documentation: add a single authoritative architecture docstring (in GenericMCS.lean or a short Foundations doc) explaining the predicate->type HilbertOf bridge and how the four structural logics inherit one deduction theorem; add/curate module docstrings on Propositional/Metalogic/DeductionTheorem.lean and the new Propositional GenericMCSBridge.lean narrating the routing; ensure cross-references resolve. This is the user's explicit priority ('correctly abstracted, threaded, and documented'). Zero behavioral change beyond docs and any thin re-routing 355 missed. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 355.
+
+---
+
+### 365. Propositional docstring sorry note hygiene
 - **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Topic**: Code Hygiene
+- **Dependencies**: None
+
+**Description**: Docstring/comment-only hygiene pass over the Propositional metatheory; zero code or proof changes. (1) Fix stale 'Notes on sorry' docstrings that no longer match the code after task 316 closed the tableau soundness sorries: Cslib/Logics/Propositional/Tableau/Classical/Soundness.lean lines ~34-39 claim the key lemmas (classicalRule_preserves_sat, classically_closed_unsatisfiable, classicalTableau_sound) are 'marked sorry' but they are fully proved; Cslib/Logics/Propositional/Tableau/Minimal/Soundness.lean lines ~41-44 say it 'inherits sorry from Intuitionistic.Soundness' but both are now sorry-free. Audit every 'Notes on sorry' section across the Tableau tree (Classical/Intuitionistic/Minimal Soundness + DecisionProcedure) and rewrite each to accurately describe current status (soundness sorry-free; the remaining sorries live only in the three Completeness modules and the Decidable instances rest on those witnesses). (2) Remove internal development task-number leaks from committed docstrings, replacing them with named-theorem references per CONTRIBUTING.md (same class as the vet finding behind task 356): Semantics/Algebra/Brouwerian.lean:41 references 'task 308' (now completed) -> reference the named bridge lemma brouwerianEmbeddingLemma in FreeJoinCompletion.lean instead; NaturalDeduction/Normalization/Termination.lean:22 and the inline comment at ~1325 reference 'task 332' -> reword to name the open obligation (reduceRootSubSN h_8 case / normalize_isStronglyNormal) rather than a tracker number. Files: the Tableau Soundness/DecisionProcedure docstrings, Brouwerian.lean, Termination.lean. CI green (lake build, lake exe lint-style); no behavioral change. Do FIRST -- trivial, zero-risk, and a prerequisite for 'everything in perfect order'.
+
+---
+
+### 364. Modal tableau soundness drift repair
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -83,7 +207,7 @@ next_project_number: 365
 ---
 
 ### 363. Repair Classical/Tableau/Completeness.lean proof gaps and bad lemma ref
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -112,7 +236,7 @@ next_project_number: 365
 ### 360. Repair 11 pre-existing broken modules failing repo-wide lake build
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
-- **Dependencies**: None
+- **Dependencies**: Task 363, Task 364
 
 **Description**: The repo-wide 'lake build' currently fails (unrelated to vetted tasks 343/344/350/351/353/354, whose files build clean in isolation). Failing modules: Cslib.Logics.Modal.Denotation (simp made no progress, Denotation.lean:60), Cslib.Logics.Bimodal.Syntax.SubformulaClosure.NestingDepth (unsolved goals, multiple lines), Cslib.Logics.Temporal.ConservativeExtension (ambiguous term, lines 54/59/69), Cslib.Logics.Bimodal.Theorems.Perpetuity.Principles (type mismatch, lines 84/164/176), Cslib.Logics.Temporal.Metalogic.DenseCompleteness (unsolved goals, line 166), Cslib.Logics.Propositional.SequentCalculus (duplicate _proof_1 environment clash between LJ and LK CutElimination), Cslib.Logics.Bimodal.Metalogic.Separation.Defs (many simp made no progress), Cslib.Logics.Propositional.Tableau.Minimal.Soundness, Cslib.Logics.Bimodal.ProofSystem.Substitution, Cslib.Logics.Modal.Tableau.Soundness, Cslib.Logics.Propositional.Tableau.Classical.Completeness. checkInitImports/shake also fail downstream due to missing oleans. Restore a green repo-wide build. Source: /vet CI run 2026-06-26.
 
@@ -185,7 +309,7 @@ next_project_number: 365
 ---
 
 ### 352. Cpl conservative over classical implicational fragment
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: None
@@ -374,7 +498,7 @@ next_project_number: 365
 - **Research**: [332_normalization_termination_proof/reports/03_commuting-and-wf-bridge.md]
 - **Plan**: [332_normalization_termination_proof/plans/05_termination-plan-v5.md]
 
-**Description**: Prove the normalization termination theorem for CSLib Theory.Derivation: d.normalize.redexWeight = 0 (the 1 sorry remaining in Normalization.lean line 1083). The proof requires well-founded induction on a (cutrank, total_cut_length) lexicographic measure following Prawitz 1965, Ch. III-IV. Key obstacle: subsOne can increase derivation height, breaking fuel-sufficiency arguments. Needs ~200-300 lines of infrastructure: cutrank definition, cut_length measure, strict decrease lemma for reduceRoot, and the main induction. File: Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean. Depends on 290.
+**Description**: Close the two remaining normalization-termination sorries for CSLib Theory.Derivation in Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean (the proof was split out of the former monolithic Normalization.lean). (1) reduceRootSubSN case h_8 at line ~1333 -- the impE(orE ...) commuting-conversion decrease; the mathematics is settled (commutingSum_sn_eq_zero is proved, and reduceRootSubSN's hA forces the major premise strongly normal so Ecc.maximalFormulas = empty and Ecc.commutingSum = 0), the blocker is a ~250-branch simp_all whnf blowup, fixed by proving the E-SN side facts as standalone bounded `have`s before a single `cases Dcc` (red attempt preserved in handoffs/termination-h8-Esn-attempt-red.lean.bak). (2) normalize_isStronglyNormal at line ~1349 -- the fuel-bound argument that `normalize` with 2^height fuel drives redexWeight to 0 (depends on (1)). Following Prawitz 1965 Ch. III-IV. Once both close, the subformula-property corollary (Normalization/SubformulaProperty.lean) and parent task 290 are fully discharged. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 290.
 
 ---
 
@@ -526,9 +650,9 @@ next_project_number: 365
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: Task 316, Task 323
+- **Dependencies**: Task 316, Task 323, Task 363, Task 369
 
-**Description**: Fill the 8 sorry instances in propositional tableau completeness proofs across all three logics. Classical (Classical/Completeness.lean): prove classicalOpenBranch_countermodel (open saturated branch yields a Boolean valuation falsifying phi) and classicalTableau_complete (if phi is not a Tautology then the tableau has an open branch), plus one helper — by constructing a valuation from the positive atoms in the saturated branch and proving a truth lemma by formula induction. Intuitionistic (Intuitionistic/Completeness.lean): prove intuitionisticOpenBranch_countermodel (open saturated branch yields a finite Kripke model refuting phi) and intuitionisticTableau_complete — by constructing worlds from the branch world indices, accessibility from the expansion record, valuation from positive atoms, and proving a truth lemma showing forced/not-forced matches signed formulas at each world. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_complete (if phi is not MValid then the tableau has an open branch) — adapts intuitionistic proof with MinimalClosure and botForces=false. Core technique: Hintikka-set argument — saturated branches satisfy Hintikka conditions, from which countermodels are extracted.
+**Description**: Fill the propositional tableau completeness sorries (7 real sorries; soundness is already sorry-free after task 316). The open obligations are the truth-lemma / countermodel-extraction proofs in the three Completeness modules. Classical (Tableau/Classical/Completeness.lean): classicalExpandBranches_hintikka (line ~462) -- note the module's separate build break (bad Mathlib lemma ref + unsolved goals) is repaired first under task 363. Intuitionistic (Tableau/Intuitionistic/Completeness.lean): intTruthLemma (line ~89), intuitionisticOpenBranch_countermodel (~98), intuitionisticTableau_complete (~112). Minimal (Tableau/Minimal/Completeness.lean): minTruthLemma (~168), minOpenBranch_countermodel (~179), minimalTableau_complete (~190). Core technique: Hintikka-set argument -- a saturated open branch satisfies Hintikka conditions, from which a countermodel is extracted (a Boolean valuation for classical; a finite Kripke model for intuitionistic/minimal) and a truth lemma by formula induction matches forced/not-forced to the signed formulas at each world. Because task 369 parameterizes the intuitionistic and minimal tableau over (closurePred, modelBot), the int and min cases should be discharged ONCE as a single parametric truth-lemma/countermodel pair rather than duplicated. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 316, 323, 363, 369.
 
 ---
 

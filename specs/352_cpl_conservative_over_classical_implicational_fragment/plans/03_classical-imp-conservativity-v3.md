@@ -375,7 +375,7 @@ within budget, mark this phase `[BLOCKED]` with the precise stuck goal state rec
 
 ---
 
-### Phase 8: Single-atom elimination step [NOT STARTED]
+### Phase 8: Single-atom elimination step [COMPLETED]
 
 **UNCHANGED from v3 draft (report 02 §F6: independent of the truth-lemma conclusion shape).**
 

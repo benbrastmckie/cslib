@@ -272,4 +272,19 @@ theorem classicalImp_kalmar {v : BoolValuation Atom} {goal : PL.Proposition Atom
         · -- (a→b) :: Γ ⊢ b→goal  (IHb-FALSE weakened)
           exact weakening_deriv (ihbF hvb) (fun _ hx => List.mem_cons.mpr (Or.inr hx))
 
+/-! ## Atom Elimination -/
+
+/-- Atom elimination (one step): if the context with `p` true derives `goal` and the context
+with `p` false (i.e., with `p → goal` instead) also derives `goal`, then the shorter context
+without the `p`-literal derives `goal`. Uses the deduction theorem to peel each branch and
+combine with one `mp_deriv`. -/
+theorem classicalImp_elim_atom {goal : PL.Proposition Atom}
+    {Γ : List (PL.Proposition Atom)} {p : Atom}
+    (hT : Deriv ClassicalImpAxiom (PL.Proposition.atom p :: Γ) goal)
+    (hF : Deriv ClassicalImpAxiom ((PL.Proposition.atom p).imp goal :: Γ) goal) :
+    Deriv ClassicalImpAxiom Γ goal :=
+  mp_deriv
+    (classicalImpAxiom_hasDeductionTheorem hF)  -- Γ ⊢ (p→goal)→goal
+    (classicalImpAxiom_hasDeductionTheorem hT)  -- Γ ⊢ p→goal
+
 end Cslib.Logic.PL

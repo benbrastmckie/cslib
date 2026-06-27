@@ -118,10 +118,8 @@ Uses `liftDerivationTree` with the axiom subsumption chain
 `ConjImpAxiom → MinPropAxiom → IntPropAxiom`. -/
 theorem derivableConjImpOfDerivableInt {Atom : Type u} {φ : PL.Proposition Atom}
     (h : Derivable (@ConjImpAxiom Atom) φ) :
-    Derivable (@IntPropAxiom Atom) φ := by
-  obtain ⟨d⟩ := h
-  exact ⟨liftDerivationTree
-    (fun ψ hψ => hψ.toMinPropAxiom.toIntPropAxiom) d⟩
+    Derivable (@IntPropAxiom Atom) φ :=
+  derivable_mono (fun _ hψ => hψ.toMinPropAxiom.toIntPropAxiom) h
 
 /-! ## Biconditional -/
 

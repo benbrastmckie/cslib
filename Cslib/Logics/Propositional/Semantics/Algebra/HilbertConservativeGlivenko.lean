@@ -94,27 +94,6 @@ theorem hilbertIplConservativeOverMpl {Atom : Type u} {φ : PL.Proposition Atom}
   rw [coe_AlgEvaluate v bot_val φ hBF] at hIPL
   exact WithBot.coe_eq_coe.mp hIPL
 
-/-! ## Hilbert-Primary Glivenko Theorem -/
-
-/-- **Hilbert-primary Glivenko theorem**: if `φ` is derivable in the classical Hilbert system,
-then `¬¬φ` is derivable in the intuitionistic Hilbert system.
-
-The proof routes through algebraic validity:
-1. `CPL.hilbert_alg_complete.mp h` converts `Derivable PropositionalAxiom φ` to `BAValid φ`.
-2. `glivenko_algebraic` lifts `BAValid φ` to `HAValid (¬¬φ)`.
-3. `IPL.hilbert_alg_complete.mpr` converts `HAValid (¬¬φ)` back to `Derivable IntPropAxiom (¬¬φ)`.
-
-This is the primary version, stated directly in the Hilbert setting without the
-`[DecidableEq Atom]` constraint. The ND corollary `glivenko` is below. -/
-theorem hilbertGlivenko {Atom : Type u} {φ : PL.Proposition Atom}
-    (h : Derivable (@PropositionalAxiom Atom) φ) :
-    Derivable (@IntPropAxiom Atom) (¬¬φ) := by
-  rw [IPL.hilbert_alg_complete]
-  intro H _ v
-  apply glivenko_algebraic
-  intro H' _ v'
-  exact CPL.hilbert_alg_complete.mp h H' v'
-
 /-! ## Theory-Parametric Glivenko Theorem -/
 
 /-- **Theory-parametric Glivenko theorem**: if `φ` is derivable from a classically-sound
@@ -135,7 +114,8 @@ The core of the proof is unchanged from `hilbertGlivenko`: route through `gliven
 classical-fragment completeness unavailable over Heyting/Brouwerian completions.
 
 **Concrete recovery**: `hilbertGlivenko h = hilbertGlivenko_theory PropositionalAxiom IntPropAxiom
-  (fun _ => CPL.hilbert_alg_complete.mp) (fun _ => IPL.hilbert_alg_complete.mpr) h`. -/
+  (fun _ hψ => CPL.hilbert_alg_complete.mp hψ)
+  (fun _ hHA => IPL.hilbert_alg_complete.mpr hHA) h`. -/
 theorem hilbertGlivenko_theory {Atom : Type u} {φ : PL.Proposition Atom}
     (A_cl A_int : PL.Proposition Atom → Prop)
     [MinimalAxioms A_cl] [MinimalAxioms A_int]
@@ -143,6 +123,24 @@ theorem hilbertGlivenko_theory {Atom : Type u} {φ : PL.Proposition Atom}
     (h_int : ∀ ψ, HAValid.{u, u} ψ → Derivable A_int ψ)
     (h : Derivable A_cl φ) : Derivable A_int (¬¬φ) :=
   h_int _ (glivenko_algebraic (h_cl _ h))
+
+/-! ## Hilbert-Primary Glivenko Theorem -/
+
+/-- **Hilbert-primary Glivenko theorem**: if `φ` is derivable in the classical Hilbert system,
+then `¬¬φ` is derivable in the intuitionistic Hilbert system.
+
+The proof routes through `hilbertGlivenko_theory`, instantiating at `PropositionalAxiom` and
+`IntPropAxiom` with the standard completeness facts `CPL.hilbert_alg_complete.mp` (soundness)
+and `IPL.hilbert_alg_complete.mpr` (completeness). This is the primary version, stated directly
+in the Hilbert setting without the `[DecidableEq Atom]` constraint. The ND corollary `glivenko`
+is below. -/
+theorem hilbertGlivenko {Atom : Type u} {φ : PL.Proposition Atom}
+    (h : Derivable (@PropositionalAxiom Atom) φ) :
+    Derivable (@IntPropAxiom Atom) (¬¬φ) :=
+  hilbertGlivenko_theory (@PropositionalAxiom Atom) (@IntPropAxiom Atom)
+    (fun _ hψ => CPL.hilbert_alg_complete.mp hψ)
+    (fun _ hHA => IPL.hilbert_alg_complete.mpr hHA)
+    h
 
 /-! ## Conservative-via-Embedding Combinator -/
 
@@ -204,7 +202,7 @@ Proof: compose `axiomTheory_min_iff_mpl` with `hilbert_iff_nd_min.symm`. The for
 `DerivableIn (AxiomTheory MinPropAxiom)` with `Derivable MinPropAxiom`. -/
 theorem derivableInMplIffDerivableMin {φ : PL.Proposition Atom} :
     DerivableIn (∅ : Theory Atom) φ ↔ Derivable (@MinPropAxiom Atom) φ :=
-  axiomTheory_min_iff_mpl.trans hilbert_iff_nd_min.symm
+  axiomTheory_min_iff_mpl.trans (derivableIn_axiomTheory_iff_derivable (@MinPropAxiom Atom))
 
 /-- **IPL bridge**: ND derivability in IPL is equivalent to Hilbert derivability with
 `IntPropAxiom`.
@@ -214,7 +212,7 @@ Proof: compose `axiomTheory_int_iff_ipl` with `hilbert_iff_nd_int.symm`. The for
 `DerivableIn (AxiomTheory IntPropAxiom)` with `Derivable IntPropAxiom`. -/
 theorem derivableInIplIffDerivableInt {φ : PL.Proposition Atom} :
     DerivableIn (IPL : Theory Atom) φ ↔ Derivable (@IntPropAxiom Atom) φ :=
-  axiomTheory_int_iff_ipl.trans hilbert_iff_nd_int.symm
+  axiomTheory_int_iff_ipl.trans (derivableIn_axiomTheory_iff_derivable (@IntPropAxiom Atom))
 
 /-- **CPL bridge**: ND derivability in `IPL ∪ CPL` is equivalent to Hilbert derivability with
 `PropositionalAxiom`.
@@ -224,7 +222,8 @@ Proof: compose `axiomTheory_cl_iff_cpl` with `hilbert_iff_nd_cl.symm`. The forme
 connects `DerivableIn (AxiomTheory PropositionalAxiom)` with `Derivable PropositionalAxiom`. -/
 theorem derivableInCplIffDerivableProp {φ : PL.Proposition Atom} :
     DerivableIn (IPL ∪ CPL : Theory Atom) φ ↔ Derivable (@PropositionalAxiom Atom) φ :=
-  axiomTheory_cl_iff_cpl.trans hilbert_iff_nd_cl.symm
+  axiomTheory_cl_iff_cpl.trans
+    (derivableIn_axiomTheory_iff_derivable (@PropositionalAxiom Atom))
 
 /-! ## ND Corollaries via Bridges -/
 

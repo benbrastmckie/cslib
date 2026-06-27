@@ -109,9 +109,8 @@ Uses `liftDerivationTree` with the axiom subsumption chain
 `MinPropAxiom → IntPropAxiom`. -/
 theorem derivableMinOfDerivableInt {Atom : Type u} {φ : PL.Proposition Atom}
     (h : Derivable (@MinPropAxiom Atom) φ) :
-    Derivable (@IntPropAxiom Atom) φ := by
-  obtain ⟨d⟩ := h
-  exact ⟨liftDerivationTree (fun ψ hψ => hψ.toIntPropAxiom) d⟩
+    Derivable (@IntPropAxiom Atom) φ :=
+  derivable_mono (fun _ hψ => hψ.toIntPropAxiom) h
 
 /-- **Subsumption**: every formula derivable in the full intuitionistic Hilbert system is
 derivable in the classical Hilbert system.
@@ -120,9 +119,8 @@ Uses `liftDerivationTree` with the axiom subsumption chain
 `IntPropAxiom → PropositionalAxiom` via `IntPropAxiom.toPropAxiom`. -/
 theorem derivableIntOfDerivableProp {Atom : Type u} {φ : PL.Proposition Atom}
     (h : Derivable (@IntPropAxiom Atom) φ) :
-    Derivable (@PropositionalAxiom Atom) φ := by
-  obtain ⟨d⟩ := h
-  exact ⟨liftDerivationTree (fun ψ hψ => hψ.toPropAxiom) d⟩
+    Derivable (@PropositionalAxiom Atom) φ :=
+  derivable_mono (fun _ hψ => hψ.toPropAxiom) h
 
 /-- **Derivability subsumption chain**: the five Hilbert systems are strictly ordered
 by derivability. For any formula `φ`:

@@ -211,7 +211,7 @@ typeclass.
 
 ---
 
-### Phase 4: Corollary recovery — re-derive per-tier theorems (regression guard) [NOT STARTED]
+### Phase 4: Corollary recovery — re-derive per-tier theorems (regression guard) [COMPLETED]
 
 **Goal**: Re-derive every existing public per-tier theorem as an instantiation of the Phase 1-3
 parametric statements, proving the public surface is preserved. This is the **hard regression
@@ -258,7 +258,7 @@ check**: existing theorem names and signatures must still hold.
 
 ---
 
-### Phase 5: Optional `AlgEvaluate_heytingHom` + full CI gate [NOT STARTED]
+### Phase 5: Optional `AlgEvaluate_heytingHom` + full CI gate [IN PROGRESS]
 
 **Goal**: Add the optional hom-intertwining lemma only if it lands clean and demonstrably shortens
 the Glivenko/`WithBot` cases; then run the complete CSLib CI pipeline as the final gate.

@@ -1,5 +1,5 @@
 ---
-next_project_number: 364
+next_project_number: 365
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 364
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,345,352,355,360,361,362,363 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,345,352,355,360,361,362,363,364 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,317,332,348 | 36,37,180,290,299,316,345 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275 | 39,40 | Foundations |
 
@@ -35,6 +35,7 @@ next_project_number: 364
 
 299 [IMPLEMENTING] — Implement tableau decision procedure for basic modal logic K with
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
+364 [RESEARCHED] — Repair the pre-existing Mathlib/toolchain-drift build failure in 
 
 ### Propositional Logic
 
@@ -72,6 +73,17 @@ next_project_number: 364
 363 [NOT STARTED] — Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean fa
 
 ## Tasks
+
+### 364. Modal tableau soundness drift repair
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+- **Research**: [364_modal_tableau_soundness_drift_repair/reports/01_drift-diagnosis.md]
+
+**Description**: Repair the pre-existing Mathlib/toolchain-drift build failure in Cslib/Logics/Modal/Tableau/Soundness.lean (947 lines, ~77 errors under leanprover/lean4:v4.31.0). The file is sorry-free but broke under a Lean/Mathlib bump; it was the only module not fixed during the 2026-06-26 CI-failure sweep (all other ~10 originally-failing modules were repaired). Three single-pass agents overflowed their context on it because lean_goal returns very large hypothesis contexts here, so this MUST be done in chunks with incremental commits, never calling lean_diagnostic_messages (hangs in this repo). A full root-cause diagnosis with concrete fix idioms is in reports/01_drift-diagnosis.md. The 77 errors reduce to ~4 fix-families: (1) cases X.sign no longer substitutes the isPos hypothesis (use cases h : X.sign <;> simp_all [Sign.isPos]); (2) simp only [Satisfies] ordering/no-op (reorder after rw, or use Satisfies.neg_iff/diamond_iff / Proposition.neg_def); (3) simp [tryAllPropRules,...] at hsf no longer normalizes to the shape the obtain pattern expects, causing ~60 Unknown identifier hnewBs cascades in modalStepBranch_preserves_sat (re-derive the post-simp shape via lean_goal and fix the obtain/simp set across the 5 parallel rule-cases); (4) LawfulBEq.eq_of_beq instance-synth/type mismatch. Zero sorry, zero new axioms, preserve all statements. CI: lake build (scoped + full), lake exe lint-style. Created as a follow-up of the CI-failure fix sweep.
+
+---
 
 ### 363. Repair Classical/Tableau/Completeness.lean proof gaps and bad lemma ref
 - **Status**: [NOT STARTED]

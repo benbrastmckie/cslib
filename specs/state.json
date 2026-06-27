@@ -1,5 +1,5 @@
 {
-  "next_project_number": 364,
+  "next_project_number": 365,
   "active_projects": [
     {
       "project_number": 360,
@@ -1516,6 +1516,25 @@
       "dependencies": [],
       "parent_task": 360,
       "session_id": null
+    },
+    {
+      "project_number": 364,
+      "project_name": "modal_tableau_soundness_drift_repair",
+      "status": "researched",
+      "task_type": "cslib",
+      "description": "Repair the pre-existing Mathlib/toolchain-drift build failure in Cslib/Logics/Modal/Tableau/Soundness.lean (947 lines, ~77 errors under leanprover/lean4:v4.31.0). The file is sorry-free but broke under a Lean/Mathlib bump; it was the only module not fixed during the 2026-06-26 CI-failure sweep (all other ~10 originally-failing modules were repaired). Three single-pass agents overflowed their context on it because lean_goal returns very large hypothesis contexts here, so this MUST be done in chunks with incremental commits, never calling lean_diagnostic_messages (hangs in this repo). A full root-cause diagnosis with concrete fix idioms is in reports/01_drift-diagnosis.md. The 77 errors reduce to ~4 fix-families: (1) cases X.sign no longer substitutes the isPos hypothesis (use cases h : X.sign <;> simp_all [Sign.isPos]); (2) simp only [Satisfies] ordering/no-op (reorder after rw, or use Satisfies.neg_iff/diamond_iff / Proposition.neg_def); (3) simp [tryAllPropRules,...] at hsf no longer normalizes to the shape the obtain pattern expects, causing ~60 Unknown identifier hnewBs cascades in modalStepBranch_preserves_sat (re-derive the post-simp shape via lean_goal and fix the obtain/simp set across the 5 parallel rule-cases); (4) LawfulBEq.eq_of_beq instance-synth/type mismatch. Zero sorry, zero new axioms, preserve all statements. CI: lake build (scoped + full), lake exe lint-style. Created as a follow-up of the CI-failure fix sweep.",
+      "topic": "Modal Logic",
+      "dependencies": [],
+      "created": "2026-06-27T02:56:28Z",
+      "last_updated": "2026-06-27T02:56:28Z",
+      "session_id": "sess_1782453793_190e95",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/364_modal_tableau_soundness_drift_repair/reports/01_drift-diagnosis.md",
+          "summary": "Root-cause diagnosis of the 4 drift fix-families + recommended chunked repair order"
+        }
+      ]
     }
   ],
   "repository_health": {

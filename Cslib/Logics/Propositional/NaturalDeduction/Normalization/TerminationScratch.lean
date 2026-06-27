@@ -1845,4 +1845,47 @@ private def Theory.Derivation.snSubst {P B : Proposition Atom} {G : Ctx Atom}
 
 end
 
+/-- L6: structural normalization driver. Recursively normalize an arbitrary derivation into a
+strongly-normal derivation of the same conclusion: dispatch the elimination cases to the smart
+eliminators `snAndE1Form`/`snAndE2Form`/`snImpEForm`/`snOrEForm` (which renormalize any redex they
+expose) and reassemble the introduction/leaf cases from the normalized children. -/
+private def Theory.Derivation.snForm {G : Ctx Atom} {A : Proposition Atom} :
+    (d : T.Derivation G A) → {d' : T.Derivation G A // d'.isStronglyNormal = true}
+  | ax h => ⟨ax h, rfl⟩
+  | ass h => ⟨ass h, rfl⟩
+  | andI _ D₁ D₂ =>
+      let s₁ := snForm D₁
+      let s₂ := snForm D₂
+      ⟨andI _ s₁.1 s₂.1, by simp only [isStronglyNormal, Bool.and_eq_true]; exact ⟨s₁.2, s₂.2⟩⟩
+  | andE1 _ D =>
+      let e := snForm D
+      snAndE1Form e.1 e.2
+  | andE2 _ D =>
+      let e := snForm D
+      snAndE2Form e.1 e.2
+  | orI1 _ D =>
+      let s := snForm D
+      ⟨orI1 _ s.1, by simpa only [isStronglyNormal] using s.2⟩
+  | orI2 _ D =>
+      let s := snForm D
+      ⟨orI2 _ s.1, by simpa only [isStronglyNormal] using s.2⟩
+  | orE _ D DA DB =>
+      let sd := snForm D
+      let sA := snForm DA
+      let sB := snForm DB
+      snOrEForm sd.1 sd.2 sA.1 sA.2 sB.1 sB.2
+  | impI _ D =>
+      let s := snForm D
+      ⟨impI _ s.1, by simpa only [isStronglyNormal] using s.2⟩
+  | impE D E =>
+      let sf := snForm D
+      let sa := snForm E
+      snImpEForm sf.1 sf.2 sa.1 sa.2
+
+/-- Every derivation has a strongly-normal form of the same conclusion: the existential
+witness extracted from the structural driver `snForm`. -/
+private theorem Theory.Derivation.exists_stronglyNormal_form {G : Ctx Atom} {A : Proposition Atom}
+    (d : T.Derivation G A) : ∃ d' : T.Derivation G A, d'.isStronglyNormal = true :=
+  ⟨(snForm d).1, (snForm d).2⟩
+
 end Cslib.Logic.PL

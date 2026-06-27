@@ -73,7 +73,7 @@ next_project_number: 380
 
 ### Algebraic Semantics
 
-367 [PLANNED] — Collapse the three near-identical Brouwerian completeness develop
+367 [IMPLEMENTING] — Collapse the three near-identical Brouwerian completeness develop
 377 [PLANNED] — Create the classical conjunction-implication fragment axiom syste
   └─ 378 [PLANNED] — Prove CPL is conservative over its classical conjunction-implicat
     └─ 379 [PLANNED] — Prove CPL is conservative over its classical conjunction-implicat
@@ -218,7 +218,7 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 367. Unify brouwerian completeness triplication
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 348, Task 354

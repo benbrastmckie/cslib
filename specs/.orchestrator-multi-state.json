@@ -1,57 +1,55 @@
 {
-  "session_id": "sess_1782538677_f01f15",
+  "session_id": "sess_1782560707_b3ce16",
   "task_numbers": [
-    363,
-    364,
-    365
+    345,
+    348,
+    367
   ],
   "waves": [
     [
-      363,
-      364,
-      365
+      345
+    ],
+    [
+      348
+    ],
+    [
+      367
     ]
   ],
   "dependency_graph": {
-    "363": [],
-    "364": [],
-    "365": []
+    "345": [],
+    "348": [
+      345
+    ],
+    "367": [
+      348
+    ]
   },
   "max_cycles": 15,
-  "cycle_count": 5,
-  "failed_tasks": [
-    {
-      "task": 363,
-      "status": "blocked",
-      "reason": "Phase 3 classicalExpandBranches_hintikka: genuine proof blocker (fuel=0 base case unprovable with current invariant). Green modulo 1 pre-existing sorry. 3 resolution paths documented."
-    },
-    {
-      "task": 364,
-      "status": "blocked",
-      "reason": "68 errors remain (hnewBs cascade in modalStepBranch_preserves_sat). 6 agents overflowed context (lean_goal output too large). Phase 1 complete + committed. Needs human session or rule-case extraction refactor first."
-    }
-  ],
+  "cycle_count": 6,
+  "failed_tasks": [],
   "completed_tasks": [
-    365
+    345,
+    348
   ],
   "current_statuses": {
-    "363": "blocked",
-    "364": "blocked",
-    "365": "completed"
+    "345": "completed",
+    "348": "completed",
+    "367": "implementing"
   },
   "task_dirs": {
-    "363": "specs/363_repair_classical_tableau_completeness",
-    "364": "specs/364_modal_tableau_soundness_drift_repair",
-    "365": "specs/365_propositional_docstring_sorry_note_hygiene"
+    "345": "specs/345_reconcile_logic_encodings_isminimal",
+    "348": "specs/348_glivenko_conservativity_theory_parametric",
+    "367": "specs/367_unify_brouwerian_completeness_triplication"
   },
   "research_agents": {
-    "363": "cslib-research-agent",
-    "364": "cslib-research-agent",
-    "365": "cslib-research-agent"
+    "345": "cslib-research-agent",
+    "348": "cslib-research-agent",
+    "367": "cslib-research-agent"
   },
   "implement_agents": {
-    "363": "cslib-implementation-agent",
-    "364": "cslib-implementation-agent",
-    "365": "cslib-implementation-agent"
+    "345": "cslib-implementation-agent",
+    "348": "cslib-implementation-agent",
+    "367": "cslib-implementation-agent"
   }
 }

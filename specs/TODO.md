@@ -11,9 +11,9 @@ next_project_number: 380
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,321,342,345,355,364,368,370,371,376,377 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,332,348,363,366,372,374,378 | 36,37,180,290,299,345,355,371,376,377 | Bimodal Porting, Foundations, Modal Logic, ... |
-| 3 | 41,275,360,367,369,373,379 | 39,40,332,348,363,364,378 | Foundations, Propositional Logic, Algebraic Semantics |
+| 1 | 36,37,180,226,241,278,290,299,301,321,342,348,355,364,368,370,371,372,376,377 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,332,363,366,367,374,378 | 36,37,180,290,299,348,355,371,376,377 | Bimodal Porting, Foundations, Modal Logic, ... |
+| 3 | 41,275,360,369,373,379 | 39,40,332,363,364,378 | Foundations, Propositional Logic, Algebraic Semantics |
 | 4 | 317 | 369 | Propositional Logic |
 | 5 | 375 | 317 | Propositional Logic |
 
@@ -47,13 +47,12 @@ next_project_number: 380
 290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
   └─ 332 [IMPLEMENTING] — Close the two remaining normalization-termination sorries for CSL
     └─ 373 [NOT STARTED] — Extend the Curry-Howard layer from a structural isomorphism to a 
-345 [PLANNED] — Reconcile the two strength encodings on the Hilbert substrate and
-  └─ 348 [PLANNED] — Restate Glivenko and conservativity theory-parametrically against
-  └─ 372 [NOT STARTED] — Complete the propositional fragment lattice by adding the disjunc
+348 [PLANNED] — Restate Glivenko and conservativity theory-parametrically against
 368 [NOT STARTED] — Deduplicate the prime-exclusion machinery shared by the intuition
 370 [NOT STARTED] — Close the decidability asymmetry in the metalogic layer: classica
 371 [NOT STARTED] — Symmetrize the LK/LJ sequent-calculus metatheory and add the miss
   └─ 374 [NOT STARTED] — Add Craig interpolation for the propositional sequent calculi, a 
+372 [NOT STARTED] — Complete the propositional fragment lattice by adding the disjunc
 317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
   └─ 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
 369 [NOT STARTED] — Parameterize the intuitionistic and minimal tableau developments 
@@ -414,7 +413,7 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 345. Reconcile logic encodings isminimal
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 341, Task 344

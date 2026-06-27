@@ -13,19 +13,19 @@ public import Cslib.Logics.Temporal.Semantics.Model
 This module defines the recursive satisfaction relation `Satisfies` for temporal
 logic formulas evaluated in a `TemporalModel` on a linear order.
 
-## Burgess Convention (Event, Guard)
+## Pnueli Convention (Guard, Event)
 
-The `untl` and `snce` operators follow the Burgess convention where the first
-argument is the EVENT (holds at the witness point) and the second is the GUARD
-(holds at all intermediate points):
+The `untl` and `snce` operators follow the Pnueli convention where the first
+argument is the GUARD (holds at all intermediate points) and the second is the
+EVENT (holds at the witness point):
 
-- `untl φ ψ` at `t`: there exists `s > t` such that `φ` holds at `s` (event)
+- `untl ψ φ` at `t`: there exists `s > t` such that `φ` holds at `s` (event)
   and `ψ` holds at all `r` strictly between `t` and `s` (guard).
-- `snce φ ψ` at `t`: there exists `s < t` such that `φ` holds at `s` (event)
+- `snce ψ φ` at `t`: there exists `s < t` such that `φ` holds at `s` (event)
   and `ψ` holds at all `r` strictly between `s` and `t` (guard).
 
-This matches the abstract typeclass expansion in `Axioms.lean` and the `Formula.someFuture`
-definition (`someFuture φ = untl φ top`, where φ is the event and ⊤ is the trivial guard).
+This matches `Cslib.Logics.LTL` and the `Formula.someFuture` definition
+(`someFuture φ = untl ⊤ φ`, where ⊤ is the trivial guard and φ is the event).
 
 ## Main Definitions
 
@@ -51,8 +51,8 @@ The evaluation is defined recursively on formula structure:
 - Atoms: true iff the valuation assigns true at this time.
 - Bot (⊥): always false.
 - Implication: standard material conditional.
-- Until U(φ,ψ): ∃ s > t, φ(s) ∧ ∀ r ∈ (t,s), ψ(r).  (φ=EVENT, ψ=GUARD)
-- Since S(φ,ψ): ∃ s < t, φ(s) ∧ ∀ r ∈ (s,t), ψ(r).  (φ=EVENT, ψ=GUARD)
+- Until U(ψ,φ): ∃ s > t, φ(s) ∧ ∀ r ∈ (t,s), ψ(r).  (ψ=GUARD, φ=EVENT)
+- Since S(ψ,φ): ∃ s < t, φ(s) ∧ ∀ r ∈ (s,t), ψ(r).  (ψ=GUARD, φ=EVENT)
 -/
 def Satisfies (M : TemporalModel D Atom) (t : D) : Formula Atom → Prop
   | .atom p => M.valuation t p

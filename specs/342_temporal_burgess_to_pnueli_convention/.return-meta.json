@@ -1,0 +1,41 @@
+{
+  "status": "implemented",
+  "started_at": "2026-06-27T00:00:00Z",
+  "completed_at": "2026-06-27T01:00:00Z",
+  "artifacts": [
+    {
+      "type": "summary",
+      "path": "specs/342_temporal_burgess_to_pnueli_convention/summaries/01_burgess-to-pnueli-cleanup-summary.md",
+      "description": "Implementation summary for Burgess -> Pnueli convention cleanup"
+    },
+    {
+      "type": "plan",
+      "path": "specs/342_temporal_burgess_to_pnueli_convention/plans/01_burgess-to-pnueli-cleanup.md",
+      "description": "Completed implementation plan"
+    }
+  ],
+  "partial_progress": {
+    "stage": "completed",
+    "details": "All 4 phases completed, full CI verified",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 4,
+    "last_completed_phase": "Phase 4: Full verification"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "notes": "Pre-existing Bimodal/Modal failures confirmed unrelated to this task. LTL+Temporal tree builds fully green."
+  },
+  "metadata": {
+    "session_id": "sess_1751000000_342abc",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
+}

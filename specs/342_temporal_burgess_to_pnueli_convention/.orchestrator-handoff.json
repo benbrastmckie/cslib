@@ -1,0 +1,26 @@
+{
+  "status": "implemented",
+  "phases_completed": 4,
+  "phases_total": 4,
+  "blockers": [],
+  "continuation_context": null,
+  "summary": "Task 342 completed. Rewrote all Burgess (event, guard) convention docstrings/comments to Pnueli (guard, event) across 8 files: 6 files doc-only, ProofSystem/Axioms.lean BX axiom doc rewrites, and Formula.lean/Embedding.lean bridge redefinitions. reflexiveUntl/reflexiveSnce redefined to Pnueli order; toTemporal swap removed. Full Temporal+LTL tree builds green, zero sorries, zero new axioms, lint-style and lint clean on touched files.",
+  "files_modified": [
+    "Cslib/Logics/Temporal/Syntax/Formula.lean",
+    "Cslib/Logics/Temporal/Semantics/Satisfies.lean",
+    "Cslib/Logics/Temporal/Syntax/Subformulas.lean",
+    "Cslib/Logics/Temporal/ProofSystem/Axioms.lean",
+    "Cslib/Logics/Temporal/Tableau/Rules.lean",
+    "Cslib/Logics/Temporal/Tableau/Defs.lean",
+    "Cslib/Logics/LTL/Syntax/Formula.lean",
+    "Cslib/Logics/LTL/Embedding.lean"
+  ],
+  "verification": {
+    "build": "green",
+    "sorry_count": 0,
+    "new_axioms": 0,
+    "lint_style": "clean",
+    "lint": "clean",
+    "shake": "clean"
+  }
+}

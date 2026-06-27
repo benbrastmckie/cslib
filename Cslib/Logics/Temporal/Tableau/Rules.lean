@@ -31,11 +31,12 @@ decision procedure, and its supporting helpers.
 | sncePos | T(S(guard,event))@t | branch: T(event)@t' OR T(guard)@t' + T(S)@t' | branching |
 | snceNeg | F(S(guard,event))@t | Reynolds co-decomp at past times | branching |
 
-## Burgess Convention Reminder
+## Convention Note (Pnueli)
 
-In the Lean inductive `Formula`, `untl guard event` stores the guard first.
+In the Lean inductive `Formula`, `untl guard event` stores the guard first (Pnueli convention).
 So `T(untl guard event)` holds at t iff ∃ s > t, event at s ∧ guard at all r ∈ (t,s).
-When we call `asUntl? φ = some (event, guard)`, event is the existential witness.
+The `asUntl?` decomposition adapter returns `some (event, guard)` — note the reversed order
+for local use; the internal `untl` constructor is always guard-first.
 
 ## References
 

@@ -48,31 +48,30 @@ Temporal operators (scoped to `Cslib.Logic.Temporal`):
 
 ## Derived Temporal Operators
 
-The derived operators use the Burgess convention: in `untl event guard` and `snce event guard`,
-the first argument is the **event** (holds at the witness point) and the second is the **guard**
-(holds at all intermediate points). This matches the abstract typeclass expansion in `Axioms.lean`.
+The derived operators use the Pnueli convention: in `untl guard event` and `snce guard event`,
+the first argument is the **guard** (holds at all intermediate points) and the second is the
+**event** (holds at the witness point). This matches `Cslib.Logics.LTL` and the axiom
+expansion in `Axioms.lean`.
 
-- `someFuture φ` (𝐅 φ): `φ U ⊤` — φ holds at some future point (Burgess: `untl φ ⊤`)
+- `someFuture φ` (𝐅 φ): `⊤ U φ` — φ holds at some future point (Pnueli: `untl ⊤ φ`)
 - `allFuture φ` (𝐆 φ): `¬𝐅¬φ` — φ holds at all future points
-- `somePast φ` (𝐏 φ): `φ S ⊤` — φ held at some past point (Burgess: `snce φ ⊤`)
+- `somePast φ` (𝐏 φ): `⊤ S φ` — φ held at some past point (Pnueli: `snce ⊤ φ`)
 - `allPast φ` (𝐇 φ): `¬𝐏¬φ` — φ held at all past points
 
 ## Convention Note
 
-This module uses the **Burgess convention** for `untl` and `snce`: `untl event guard`,
-where the **event** (holds at the witness point) comes first and the **guard** (holds
-at all intermediate points) comes second. This matches [Burgess1984] and the axiom
-expansion in `Axioms.lean`:
+This module uses the **Pnueli convention** for `untl` and `snce`: `untl guard event`,
+where the **guard** (holds at all intermediate points) comes first and the **event**
+(holds at the witness point) comes second. This matches [Pnueli1977] and agrees with
+`Cslib.Logics.LTL`:
 
-- `someFuture φ = untl φ ⊤` (φ is the event, ⊤ is the trivial guard).
-- `somePast φ = snce φ ⊤` (φ is the event, ⊤ is the trivial guard).
+- `someFuture φ = untl ⊤ φ` (⊤ is the trivial guard, φ is the event).
+- `somePast φ = snce ⊤ φ` (⊤ is the trivial guard, φ is the event).
 
-`Cslib.Logics.LTL` uses the **standard (Pnueli) convention** instead: `untl guard event`,
-with the guard and event arguments swapped. Semantic equivalence holds:
-`untl_Burgess event guard = untl_standard guard event`.
-
-The module `Cslib.Logics.LTL.Embedding` bridges the two conventions explicitly via
-`reflexiveUntl` and documents the argument-order swap in detail.
+Both `Cslib.Logics.Temporal` and `Cslib.Logics.LTL` use the Pnueli convention,
+so no argument-order swap is needed in the embedding. The module
+`Cslib.Logics.LTL.Embedding` maps LTL `untl` directly to Temporal `reflexiveUntl`
+without swapping arguments.
 
 ## References
 
@@ -131,9 +130,9 @@ abbrev Formula.and (φ₁ φ₂ : Formula Atom) : Formula Atom :=
 abbrev Formula.iff (φ₁ φ₂ : Formula Atom) : Formula Atom :=
   (φ₁.imp φ₂).and (φ₂.imp φ₁)
 
-/-- Some future (eventually): F φ := φ U ⊤.
-    Note: uses Burgess convention where `untl event guard` — φ is the event (holds at witness),
-    ⊤ is the trivial guard. Equivalent to standard LTL `F φ = ⊤ U φ` semantically. -/
+/-- Some future (eventually): 𝐅 φ := ⊤ U φ.
+    Pnueli convention: `untl guard event` — ⊤ is the trivial guard,
+    φ is the event (holds at witness). Agrees with LTL `someFuture φ = ⊤ U φ`. -/
 abbrev Formula.someFuture (φ : Formula Atom) : Formula Atom :=
   .untl .top φ
 
@@ -141,9 +140,9 @@ abbrev Formula.someFuture (φ : Formula Atom) : Formula Atom :=
 abbrev Formula.allFuture (φ : Formula Atom) : Formula Atom :=
   .neg (.someFuture (.neg φ))
 
-/-- Some past: P φ := φ S ⊤.
-    Note: uses Burgess convention where `snce event guard` — φ is the event (holds at witness),
-    ⊤ is the trivial guard. Equivalent to standard LTL `P φ = ⊤ S φ` semantically. -/
+/-- Some past: 𝐏 φ := ⊤ S φ.
+    Pnueli convention: `snce guard event` — ⊤ is the trivial guard,
+    φ is the event (holds at witness). Agrees with LTL `somePast φ = ⊤ S φ`. -/
 abbrev Formula.somePast (φ : Formula Atom) : Formula Atom :=
   .snce .top φ
 
@@ -192,9 +191,9 @@ variable {Atom : Type*}
 /--
 Structural complexity of a formula (number of connectives + 1).
 
-Pattern-aware cases for derived temporal operators (Burgess convention: `untl event guard`):
-- `F(φ) = φ U ⊤` → treated as overhead 1, not 4
-- `P(φ) = φ S ⊤` → treated as overhead 1, not 4
+Pattern-aware cases for derived temporal operators (Pnueli convention: `untl guard event`):
+- `F(φ) = ⊤ U φ` → treated as overhead 1, not 4
+- `P(φ) = ⊤ S φ` → treated as overhead 1, not 4
 - `G(φ) = ¬F(¬φ)` → treated as overhead 1, not 8
 - `H(φ) = ¬P(¬φ)` → treated as overhead 1, not 8
 - `next(φ) = ⊥ U φ` → treated as overhead 1
@@ -205,27 +204,27 @@ Pattern-aware cases for derived temporal operators (Burgess convention: `untl ev
 def complexity : Formula Atom → Nat
   | .atom _ => 1
   | .bot => 1
-  -- G(φ) = imp (untl (imp φ bot) (imp bot bot)) bot  [¬(¬φ U ⊤) in Burgess]
+  -- G(φ) = imp (untl (imp bot bot) (imp φ bot)) bot  [¬(⊤ U ¬φ) in Pnueli: guard=⊤, event=¬φ]
   | .imp (.untl (.imp .bot .bot) (.imp φ .bot)) .bot => 1 + complexity φ
-  -- H(φ) = imp (snce (imp φ bot) (imp bot bot)) bot  [¬(¬φ S ⊤) in Burgess]
+  -- H(φ) = imp (snce (imp bot bot) (imp φ bot)) bot  [¬(⊤ S ¬φ) in Pnueli: guard=⊤, event=¬φ]
   | .imp (.snce (.imp .bot .bot) (.imp φ .bot)) .bot => 1 + complexity φ
-  -- R(φ, ψ) = release = imp (untl (imp ψ bot) (imp φ bot)) bot  [¬(¬ψ_event U ¬φ_guard)]
+  -- R(φ, ψ) = release = imp (untl (imp φ bot) (imp ψ bot)) bot  [¬(¬φ_guard U ¬ψ_event) in Pnueli]
   | .imp (.untl (.imp φ .bot) (.imp ψ .bot)) .bot =>
     1 + complexity φ + complexity ψ
-  -- T(φ, ψ) = trigger = imp (snce (imp ψ bot) (imp φ bot)) bot  [¬(¬ψ_event S ¬φ_guard)]
+  -- T(φ, ψ) = trigger = imp (snce (imp φ bot) (imp ψ bot)) bot  [¬(¬φ_guard S ¬ψ_event) in Pnueli]
   | .imp (.snce (.imp φ .bot) (.imp ψ .bot)) .bot =>
     1 + complexity φ + complexity ψ
   -- generic imp
   | .imp φ ψ => 1 + complexity φ + complexity ψ
-  -- F(φ) = untl φ (imp bot bot)  [φ U ⊤ in Burgess]
+  -- F(φ) = untl (imp bot bot) φ  [⊤ U φ in Pnueli: guard=⊤, event=φ]
   | .untl (.imp .bot .bot) φ => 1 + complexity φ
-  -- next(φ) = untl φ bot  [φ U ⊥ in Burgess: guard ⊥ impossible, forces immediate step]
+  -- next(φ) = untl bot φ  [⊥ U φ in Pnueli: guard=⊥ impossible, forces immediate step]
   | .untl .bot φ => 1 + complexity φ
   -- generic untl
   | .untl ψ φ => 1 + complexity φ + complexity ψ
-  -- P(φ) = snce φ (imp bot bot)  [φ S ⊤ in Burgess]
+  -- P(φ) = snce (imp bot bot) φ  [⊤ S φ in Pnueli: guard=⊤, event=φ]
   | .snce (.imp .bot .bot) φ => 1 + complexity φ
-  -- prev(φ) = snce φ bot  [φ S ⊥ in Burgess: guard ⊥ impossible, forces immediate step]
+  -- prev(φ) = snce bot φ  [⊥ S φ in Pnueli: guard=⊥ impossible, forces immediate step]
   | .snce .bot φ => 1 + complexity φ
   -- generic snce
   | .snce ψ φ => 1 + complexity φ + complexity ψ
@@ -258,14 +257,14 @@ def countImplications : Formula Atom → Nat
 
 /-! ### Additional Derived Temporal Operators -/
 
-/-- Next-step operator: X(φ) = φ U ⊥.
-    X(φ) at t means φ holds at t+1. Uses Burgess convention: φ is the event,
-    ⊥ is the guard (impossible), forcing the witness to be immediately next. -/
+/-- Next-step operator: X(φ) = ⊥ U φ.
+    X(φ) at t means φ holds at t+1. Pnueli convention: ⊥ is the guard (impossible at any
+    intermediate point), φ is the event, forcing the witness to be immediately next. -/
 def next (φ : Formula Atom) : Formula Atom := .untl .bot φ
 
-/-- Previous-step operator: Y(φ) = φ S ⊥.
-    Y(φ) at t means φ holds at t-1. Uses Burgess convention: φ is the event,
-    ⊥ is the guard (impossible), forcing the witness to be immediately previous. -/
+/-- Previous-step operator: Y(φ) = ⊥ S φ.
+    Y(φ) at t means φ holds at t-1. Pnueli convention: ⊥ is the guard (impossible at any
+    intermediate point), φ is the event, forcing the witness to be immediately previous. -/
 def prev (φ : Formula Atom) : Formula Atom := .snce .bot φ
 
 /-- Derived reflexive future operator: G'φ := φ ∧ Gφ. -/
@@ -276,17 +275,19 @@ def weakFuture (φ : Formula Atom) : Formula Atom :=
 def weakPast (φ : Formula Atom) : Formula Atom :=
   φ ∧ 𝐇φ
 
-/-- Reflexive until: φ holds at some point ≥ t with ψ at all intermediate points.
-    Derives the non-strict (reflexive) until from the strict (Venema) until:
-    `reflexiveUntl φ ψ` at t ↔ ∃ s ≥ t, φ(s) ∧ ∀ r ∈ [t,s), ψ(r). -/
+/-- Reflexive until: event holds at some point ≥ t with guard at all intermediate points.
+    Pnueli convention: first arg is guard (holds at all intermediate points),
+    second arg is event (holds at the witness point, which may be t itself).
+    `reflexiveUntl φ ψ` at t ↔ ∃ s ≥ t, ψ(s) ∧ ∀ r ∈ [t,s), φ(r). -/
 abbrev reflexiveUntl (φ ψ : Formula Atom) : Formula Atom :=
-  φ ∨ (ψ ∧ (φ U ψ))
+  ψ ∨ (φ ∧ (φ U ψ))
 
-/-- Reflexive since: φ held at some point ≤ t with ψ at all intermediate points.
-    Derives the non-strict (reflexive) since from the strict (Venema) since:
-    `reflexiveSnce φ ψ` at t ↔ ∃ s ≤ t, φ(s) ∧ ∀ r ∈ (s,t], ψ(r). -/
+/-- Reflexive since: event held at some point ≤ t with guard at all intermediate points.
+    Pnueli convention: first arg is guard (holds at all intermediate points),
+    second arg is event (holds at the witness point, which may be t itself).
+    `reflexiveSnce φ ψ` at t ↔ ∃ s ≤ t, ψ(s) ∧ ∀ r ∈ (s,t], φ(r). -/
 abbrev reflexiveSnce (φ ψ : Formula Atom) : Formula Atom :=
-  φ ∨ (ψ ∧ (φ S ψ))
+  ψ ∨ (φ ∧ (φ S ψ))
 
 /-- Temporal 'always' operator (△φ): Hφ ∧ φ ∧ Gφ.
     φ holds at all times (past, present, and future). -/
@@ -299,14 +300,14 @@ def sometimes (φ : Formula Atom) : Formula Atom :=
   ¬(always (¬φ))
 
 /-- Release operator R(φ, ψ) := ¬(¬φ U ¬ψ). Dual of Until.
-    In Burgess convention: `untl (neg ψ) (neg φ)` where ¬ψ is the event and ¬φ is the guard,
-    corresponding to `¬φ U ¬ψ` in standard LTL notation. -/
+    Pnueli convention: `untl (neg φ) (neg ψ)` where ¬φ is the guard and ¬ψ is the event,
+    i.e., `¬φ U ¬ψ` — guard=¬φ, event=¬ψ. -/
 def release (φ ψ : Formula Atom) : Formula Atom :=
   ¬((¬ψ) U (¬φ))
 
 /-- Trigger operator T(φ, ψ) := ¬(¬φ S ¬ψ). Dual of Since (past analog of Release).
-    In Burgess convention: `snce (neg ψ) (neg φ)` where ¬ψ is the event and ¬φ is the guard,
-    corresponding to `¬φ S ¬ψ` in standard LTL notation. -/
+    Pnueli convention: `snce (neg φ) (neg ψ)` where ¬φ is the guard and ¬ψ is the event,
+    i.e., `¬φ S ¬ψ` — guard=¬φ, event=¬ψ. -/
 def trigger (φ ψ : Formula Atom) : Formula Atom :=
   ¬((¬ψ) S (¬φ))
 
@@ -319,12 +320,12 @@ def weakSince (φ ψ : Formula Atom) : Formula Atom :=
   (φ S ψ) ∨ 𝐇φ
 
 /-- Strong Release operator M(φ, ψ) := ψ U (ψ ∧ φ). Dual of weak until.
-    In Burgess convention: `untl (and ψ φ) ψ` where ψ∧φ is the event and ψ is the guard. -/
+    Pnueli convention: `untl ψ (ψ ∧ φ)` where ψ is the guard and ψ∧φ is the event. -/
 def strongRelease (φ ψ : Formula Atom) : Formula Atom :=
   (ψ ∧ φ) U ψ
 
 /-- Strong Trigger operator ST(φ, ψ) := ψ S (ψ ∧ φ). Past dual of strong release.
-    In Burgess convention: `snce (and ψ φ) ψ` where ψ∧φ is the event and ψ is the guard. -/
+    Pnueli convention: `snce ψ (ψ ∧ φ)` where ψ is the guard and ψ∧φ is the event. -/
 def strongTrigger (φ ψ : Formula Atom) : Formula Atom :=
   (ψ ∧ φ) S ψ
 

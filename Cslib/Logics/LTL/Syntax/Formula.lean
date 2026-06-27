@@ -59,12 +59,9 @@ where the guard precedes the event. This matches the classical LTL presentation 
 - `untl φ ψ` means: `φ` holds at all intermediate points, `ψ` holds at the witness.
 - `someFuture φ = untl ⊤ φ` (trivial guard, φ is the event).
 
-`Cslib.Logics.Temporal` uses the **Burgess convention** instead: `untl event guard`,
-with the event and guard arguments swapped. Semantic equivalence holds:
-`untl_standard guard event = untl_Burgess event guard`.
-
-The module `Cslib.Logics.LTL.Embedding` bridges the two conventions explicitly via
-`reflexiveUntl` and documents the guard/event swap in detail.
+`Cslib.Logics.Temporal` uses the same **Pnueli convention**: `untl guard event`,
+so both logics agree on argument order. The module `Cslib.Logics.LTL.Embedding`
+maps LTL `untl` to Temporal `reflexiveUntl` directly, without swapping arguments.
 
 ## References
 

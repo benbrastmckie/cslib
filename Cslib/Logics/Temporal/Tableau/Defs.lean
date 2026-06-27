@@ -34,21 +34,20 @@ on a branch carries the time point at which it is evaluated.
 
 Decomposition functions must match these patterns precisely and avoid overlap.
 
-## Burgess Convention
+## Pnueli Convention
 
-The temporal operators follow the Burgess (event, guard) convention:
-- `untl event guard` at `t`: ∃ s > t, event at s ∧ guard at all r ∈ (t,s)
-- `snce event guard` at `t`: ∃ s < t, event at s ∧ guard at all r ∈ (s,t)
-- `someFuture φ = untl ⊤ φ` — φ is the event, ⊤ is the guard
-- `somePast φ = snce ⊤ φ` — φ is the event, ⊤ is the guard
+The internal `Formula.untl` and `Formula.snce` constructors use the Pnueli (guard, event) order:
+- `untl guard event` at `t`: ∃ s > t, event at s ∧ guard at all r ∈ (t,s)
+- `snce guard event` at `t`: ∃ s < t, event at s ∧ guard at all r ∈ (s,t)
+- `someFuture φ = untl ⊤ φ` — ⊤ is the guard, φ is the event
+- `somePast φ = snce ⊤ φ` — ⊤ is the guard, φ is the event
 
-Wait — note the argument order in the inductive definition:
-`untl ψ φ` where ψ is the guard-stored-first arg and φ is the event.
-Looking at the semantic definition in Satisfies.lean:
-  `untl ψ φ`: ∃ s, t < s ∧ Satisfies M s φ ∧ ∀ r, t < r → r < s → Satisfies M r ψ
+This is confirmed by the Satisfies.lean pattern match: `.untl ψ φ` where ψ is the guard
+(first arg) and φ is the event (second arg).
 
-So in the Lean inductive `untl ψ φ`, the first arg `ψ` is the GUARD and `φ` is the EVENT.
-But `someFuture φ = .untl .top φ` means the guard is `⊤` and event is `φ`. ✓
+Note: the `asUntl?` and `asSnce?` decomposition adapters in this module return
+`some (event, guard)` tuples in reversed order for local tableau use. The internal
+`untl` constructor is always guard-first (Pnueli).
 
 ## References
 
@@ -198,12 +197,12 @@ lemma tempImpOf?_imp {a b : Formula Atom} (h1 : b ≠ Formula.bot)
 /-! ## Temporal Decomposition Functions -/
 
 /-- Decompose `φ` as a positive until `T(ψ U χ)`:
-`untl ψ_guard χ_event` (Burgess: first arg = guard, second = event).
-Returns `some (event, guard)` where event is the Burgess first-argument,
-or `none` if not an until formula.
+`untl ψ_guard χ_event` in Pnueli (guard, event) order.
+Returns `some (event, guard)` — note the reversed tuple order for local tableau use.
 
-Note: In the Lean inductive, `untl a b` stores guard=a, event=b.
-We return `(event, guard)` = `(b, a)` to match Burgess convention externally. -/
+The internal `untl a b` constructor stores guard=a, event=b (Pnueli).
+This adapter returns `(event, guard)` = `(b, a)` as a convenience for tableau rules
+that pattern-match on the existential witness (event) first. -/
 def asUntl? (φ : Formula Atom) : Option (Formula Atom × Formula Atom) :=
   match φ with
   | .untl guard event => some (event, guard)

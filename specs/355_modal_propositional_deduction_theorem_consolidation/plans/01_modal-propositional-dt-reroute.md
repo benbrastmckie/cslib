@@ -1,7 +1,7 @@
 # Implementation Plan: Task #355
 
 - **Task**: 355 - Modal & Propositional deductionTheorem consolidation
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 6.5 hours
 - **Dependencies**: Task 350 (complete — provides verified Temporal/Bimodal templates)
 - **Research Inputs**: specs/355_modal_propositional_deduction_theorem_consolidation/reports/01_modal-propositional-dt-consolidation.md
@@ -98,7 +98,7 @@ chains can run as parallel waves once Phase 1 lands.
 
 ---
 
-### Phase 1: Foundations — generic `HasMinimalAxioms` class [NOT STARTED]
+### Phase 1: Foundations — generic `HasMinimalAxioms` class [COMPLETED]
 
 **Goal**: Add the shared predicate-level minimal-axioms class to Foundations `GenericMCS.lean`,
 the only Foundations change and the synthesis source for every `MinimalHilbert (HilbertOf Axioms)`
@@ -126,7 +126,7 @@ instance.
 
 ---
 
-### Phase 2: Modal bridge — `HilbertOf` + instances + full bridge [NOT STARTED]
+### Phase 2: Modal bridge — `HilbertOf` + instances + full bridge [COMPLETED]
 
 **Goal**: Replace the doc-only `Modal/Metalogic/GenericMCSBridge.lean` with the real wrapper type,
 its instances, and the full forward/backward bridge (mirror Bimodal, add the `necessitation` case).
@@ -163,7 +163,7 @@ its instances, and the full forward/backward bridge (mirror Bimodal, add the `ne
 
 ---
 
-### Phase 3: Modal DT reroute [NOT STARTED]
+### Phase 3: Modal DT reroute [COMPLETED]
 
 **Goal**: Re-implement Modal `deductionTheorem` / `hasDeductionTheorem` through the bridge, delete
 `deductionWithMem` and the WF body, and confirm the 4 Modal consumers still compile.
@@ -195,7 +195,7 @@ its instances, and the full forward/backward bridge (mirror Bimodal, add the `ne
 
 ---
 
-### Phase 4: Propositional bridge — `HilbertOf` + instances + bridge [NOT STARTED]
+### Phase 4: Propositional bridge — `HilbertOf` + instances + bridge [COMPLETED]
 
 **Goal**: Create the new `Propositional/Metalogic/GenericMCSBridge.lean` (4-constructor, no
 necessitation) — strictly simpler than Modal.
@@ -228,7 +228,7 @@ necessitation) — strictly simpler than Modal.
 
 ---
 
-### Phase 5: Propositional DT reroute [NOT STARTED]
+### Phase 5: Propositional DT reroute [COMPLETED]
 
 **Goal**: Re-implement PL `deductionTheorem` / `hasDeductionTheorem` through the bridge, delete
 `deductionWithMem` + the fixed `HasHilbertTree` instance, and confirm the 6 PL consumers compile.
@@ -257,7 +257,7 @@ necessitation) — strictly simpler than Modal.
 
 ---
 
-### Phase 6: CI gate + downstream sorry-free verification [NOT STARTED]
+### Phase 6: CI gate + downstream sorry-free verification [IN PROGRESS]
 
 **Goal**: Run the full CSLib CI pipeline and confirm zero technical debt across all downstream
 consumers.

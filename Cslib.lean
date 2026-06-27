@@ -413,6 +413,7 @@ public import Cslib.Logics.Propositional.Metalogic.ClassicalConjImpBotCompletene
 public import Cslib.Logics.Propositional.Metalogic.ClassicalConjImpCompleteness
 public import Cslib.Logics.Propositional.Metalogic.ClassicalImpCompleteness
 public import Cslib.Logics.Propositional.Metalogic.DeductionTheorem
+public import Cslib.Logics.Propositional.Metalogic.GenericMCSBridge
 public import Cslib.Logics.Propositional.Metalogic.IntLindenbaum
 public import Cslib.Logics.Propositional.Metalogic.IntSoundness
 public import Cslib.Logics.Propositional.Metalogic.IntStrongCompleteness

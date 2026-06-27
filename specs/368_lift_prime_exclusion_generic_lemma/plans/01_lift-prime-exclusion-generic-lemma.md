@@ -1,7 +1,7 @@
 # Implementation Plan: Task #368
 
 - **Task**: 368 - lift_prime_exclusion_generic_lemma
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 6.5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/368_lift_prime_exclusion_generic_lemma/reports/01_lift-prime-exclusion-generic-lemma.md
@@ -148,7 +148,7 @@ block) and the `prime_exclusion` Zorn application, completing the generic file s
 
 ---
 
-### Phase 3: Re-derive minimal side (min_prime_exclusion wrapper) [NOT STARTED]
+### Phase 3: Re-derive minimal side (min_prime_exclusion wrapper) [IN PROGRESS]
 
 **Goal**: Replace the duplicated minimal prime-exclusion machinery in `MinLindenbaum.lean` with a
 thin wrapper over the generic lemma using `Cons := fun _ => True` and a vacuous EFQ bridge.

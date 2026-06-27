@@ -12,32 +12,41 @@ public import Cslib.Logics.Bimodal.Metalogic.Core.GenericMCSBridge
 public import Cslib.Foundations.Logic.Metalogic.GenericMCS
 
 /-!
-# Deduction Theorem - Hilbert System Deduction Infrastructure
+# Deduction Theorem for Bimodal TM Logic
 
-This module proves the deduction theorem for the bimodal TM logic Hilbert system.
+This module proves the deduction theorem for the bimodal TM Hilbert system,
+at an arbitrary frame class `fc : FrameClass`.
 
 ## Main Results
 
-- `bimodalHilbertTree`: `HasHilbertTree` for bimodal logic (fc-parameterized)
-- Generic helpers via `DeductionHelpers`: `deductionAxiom`, `deductionImpSelf`,
-  `deductionAssumptionOther`, `deductionMpUnderImp`
-- `deductionTheorem`: If `A :: Γ ⊢ B` then `Γ ⊢ A → B`
-- `bimodalHasDeductionTheorem`: Instance connecting to generic MCS framework
+- `bimodalHilbertTree`: `HasHilbertTree` for bimodal logic (fc-parameterized tree witnesses)
+- `deductionTheorem`: If `A :: Γ ⊢[fc] B` then `Γ ⊢[fc] A → B` (seam-routed)
+- `deductionWithMem`: Thin `removeAll`-aware wrapper over `deductionTheorem`
+- `bimodalHasDeductionTheorem`: `HasDeductionTheorem` for `bimodalDerivationSystem`
+  (Base-only, for the generic MCS framework)
 
-## Implementation Notes
+## Implementation (Option A — seam routing)
 
-The deduction theorem for Hilbert systems requires induction on the derivation structure.
-We handle each case of the 7-constructor DerivationTree:
-- Base case: axiom
-- Base case: assumption (splits into same vs other)
-- Inductive case: modus ponens
-- Inductive case: weakening (reduces to subderivation)
-- Modal/temporal necessitation and temporal duality do not apply with non-empty contexts
+`deductionTheorem` and `deductionWithMem` are **fc-polymorphic**: they work for any
+`fc : FrameClass`. They route through the `bimodal_deriv_iff_algebraic_fc` bridge
+(from `GenericMCSBridge.lean`) to `algebraic_has_deduction_theorem` in `GenericMCS.lean`.
+The bridge is supported by `MinimalHilbert (HilbertTMFc fc)`, which is constructible
+because the K and S axioms (`.imp_s`, `.imp_k`) have `minFrameClass = .Base ≤ fc`.
+No well-founded recursion on derivation height is required.
+
+The Base-specific `bimodalHasDeductionTheorem` similarly routes through the fixed-fc
+bridge `bimodal_deriv_iff_algebraic`.
+
+`deductionWithMem` is a load-bearing thin wrapper (not a candidate for deletion):
+it is called from `Core/MaximalConsistent.lean` and `Core/MCSProperties.lean`, where
+removing-all-occurrences is the required shape for Lindenbaum-style elimination.
 
 ## References
 
-* Ported from BimodalLogic/Theories/Bimodal/Metalogic/Core/DeductionTheorem.lean
-* Cslib/Logics/Temporal/Metalogic/DeductionTheorem.lean — temporal pattern
+* `Cslib/Foundations/Logic/Metalogic/GenericMCS.lean` — D1 architecture docstring;
+  `algebraic_has_deduction_theorem`, `HilbertTMFc` bridge pattern
+* `Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean` — fc-parameterized bridge
+* `Cslib/Logics/Temporal/Metalogic/DenseMCS.lean` — parallel fc deduction theorem (R2)
 -/
 
 @[expose] public section
@@ -68,136 +77,46 @@ Note: Bimodal uses swapped axiom names -- `.imp_s` is K and `.imp_k` is S. -/
   mp := fun d₁ d₂ => .modus_ponens _ _ _ d₁ d₂
   weakening := fun d h => .weakening _ _ _ d h
 
-/--
-Deduction theorem for contexts where A appears in the middle.
-
-If `Γ' ⊢ φ` and `A ∈ Γ'`, then `(removeAll Γ' A) ⊢ A → φ`.
-
-This is the key lemma for handling the weakening case where A appears in Γ'
-but not at the front. By recursing on the structure of the derivation (not using
-exchange), all recursive calls have strictly smaller height.
--/
-def deductionWithMem {fc : FrameClass} (Γ' : Context Atom)
-    (A φ : Formula Atom)
-    (h : DerivationTree fc Γ' φ) (hA : A ∈ Γ') :
-    DerivationTree fc (removeAll Γ' A) (A.imp φ) := by
-  letI := bimodalHilbertTree (Atom := Atom) fc
-  haveI : Decidable (A ∈ Γ') := Classical.propDecidable _
-  match h with
-  | DerivationTree.axiom _ ψ h_ax h_fc =>
-      exact deductionAxiom (removeAll Γ' A) A (.axiom [] ψ h_ax h_fc)
-  | DerivationTree.assumption _ ψ h_mem =>
-      by_cases h_eq : ψ = A
-      · rw [← h_eq]
-        exact deductionImpSelf (removeAll Γ' ψ) ψ
-      · have h_mem' : ψ ∈ removeAll Γ' A := by
-          simp only [removeAll, List.mem_filter, decide_eq_true_eq]
-          exact ⟨h_mem, h_eq⟩
-        exact deductionAssumptionOther (removeAll Γ' A) A ψ h_mem'
-  | DerivationTree.modus_ponens _ ψ χ h1 h2 =>
-      have ih1 := deductionWithMem Γ' A (ψ.imp χ) h1 hA
-      have ih2 := deductionWithMem Γ' A ψ h2 hA
-      exact deductionMpUnderImp (removeAll Γ' A) A ψ χ ih1 ih2
-  | DerivationTree.necessitation ψ h_deriv =>
-      simp at hA
-  | DerivationTree.temporal_necessitation ψ h_deriv =>
-      simp at hA
-  | DerivationTree.temporal_duality ψ h_deriv =>
-      simp at hA
-  | DerivationTree.weakening Γ'' _ ψ h1 h2 =>
-      haveI : Decidable (A ∈ Γ'') := Classical.propDecidable _
-      by_cases hA' : A ∈ Γ''
-      · have ih := deductionWithMem Γ'' A ψ h1 hA'
-        have h_sub : removeAll Γ'' A ⊆ removeAll Γ' A := by
-          intro x hx
-          simp only [removeAll, List.mem_filter, decide_eq_true_eq] at hx ⊢
-          exact ⟨h2 hx.1, hx.2⟩
-        exact DerivationTree.weakening (removeAll Γ'' A) (removeAll Γ' A) (A.imp ψ) ih h_sub
-      · have h_sub : Γ'' ⊆ removeAll Γ' A := by
-          intro x hx
-          simp only [removeAll, List.mem_filter, decide_eq_true_eq]
-          exact ⟨h2 hx, by intro h_eq; subst h_eq; exact absurd hx hA'⟩
-        have h_weak := DerivationTree.weakening Γ'' (removeAll Γ' A) ψ h1 h_sub
-        have s_ax : DerivationTree fc [] (ψ.imp (A.imp ψ)) :=
-          DerivationTree.axiom [] _ (Axiom.imp_s ψ A) trivial
-        have s_weak :=
-          DerivationTree.weakening [] (removeAll Γ' A) _ s_ax (List.nil_subset _)
-        exact DerivationTree.modus_ponens (removeAll Γ' A) ψ (A.imp ψ) s_weak h_weak
-termination_by h.height
-decreasing_by
-  · exact DerivationTree.mp_height_gt_left h1 h2
-  · exact DerivationTree.mp_height_gt_right h1 h2
-  · exact DerivationTree.subderiv_height_lt h1 h2
-
 /-! ## Main Deduction Theorem -/
 
 /--
-The Deduction Theorem: If `A :: Γ ⊢ B` then `Γ ⊢ A → B`.
+The Deduction Theorem: If `A :: Γ ⊢[fc] B` then `Γ ⊢[fc] A → B`.
 
 This fundamental metatheorem allows converting derivations with assumptions
 into implicational theorems.
 
-**Proof Strategy**: Well-founded recursion on derivation height.
-- Axiom case: Use S axiom to weaken
-- Assumption case: Identity if same, S axiom if different
-- Modus ponens case: Use K axiom distribution with recursive calls
-- Weakening case: Handle three subcases:
-  1. `Γ' = A :: Γ`: Apply recursion directly
-  2. `A ∉ Γ'`: Use S axiom (A not needed)
-  3. `A ∈ Γ'` but `Γ' ≠ A :: Γ`: Use deductionWithMem helper
-- Modal/temporal necessitation: Cannot occur (require empty context)
-- Temporal duality: Cannot occur (requires empty context)
+Proof via the `bimodal_deriv_iff_algebraic_fc` bridge to
+`algebraic_has_deduction_theorem`: the bridge converts tree derivability at
+arbitrary `fc` to the algebraic (list-implication) level where the deduction
+theorem is provable generically from `MinimalHilbert (HilbertTMFc fc)`,
+then converts back. No well-founded recursion on derivation height is needed.
 -/
-def deductionTheorem {fc : FrameClass} (Γ : Context Atom) (A B : Formula Atom)
+noncomputable def deductionTheorem {fc : FrameClass} (Γ : Context Atom) (A B : Formula Atom)
     (h : DerivationTree fc (A :: Γ) B) :
-    DerivationTree fc Γ (A.imp B) := by
-  letI := bimodalHilbertTree (Atom := Atom) fc
-  haveI : Decidable (A ∈ Γ) := Classical.propDecidable _
-  match h with
-  | DerivationTree.axiom _ φ h_ax h_fc =>
-      exact deductionAxiom Γ A (.axiom [] φ h_ax h_fc)
-  | DerivationTree.assumption _ φ h_mem =>
-      by_cases h_eq : φ = A
-      · subst h_eq
-        exact deductionImpSelf Γ φ
-      · have h_tail : φ ∈ Γ := by
-          cases h_mem with
-          | head => exact absurd rfl h_eq
-          | tail _ h => exact h
-        exact deductionAssumptionOther Γ A φ h_tail
-  | DerivationTree.modus_ponens _ φ ψ h1 h2 =>
-      have ih1 := deductionTheorem Γ A (φ.imp ψ) h1
-      have ih2 := deductionTheorem Γ A φ h2
-      exact deductionMpUnderImp Γ A φ ψ ih1 ih2
-  | DerivationTree.weakening Γ' _ φ h1 h2 =>
-      by_cases h_eq : Γ' = A :: Γ
-      · exact deductionTheorem Γ A φ (h_eq ▸ h1)
-      · haveI : Decidable (A ∈ Γ') := Classical.propDecidable _
-        by_cases hA : A ∈ Γ'
-        · have ih := deductionWithMem Γ' A φ h1 hA
-          have h_sub : removeAll Γ' A ⊆ Γ :=
-            removeAll_sub_of_sub h2 hA
-          exact DerivationTree.weakening (removeAll Γ' A) Γ (A.imp φ) ih h_sub
-        · have h_sub : Γ' ⊆ Γ := by
-            intro x hx
-            have h_mem := h2 hx
-            simp only [List.mem_cons] at h_mem
-            cases h_mem with
-            | inl h_eq => subst h_eq; exact absurd hx hA
-            | inr h_mem => exact h_mem
-          have h_weak := DerivationTree.weakening Γ' Γ φ h1 h_sub
-          have s_ax : DerivationTree fc [] (φ.imp (A.imp φ)) :=
-            DerivationTree.axiom [] _ (Axiom.imp_s φ A) trivial
-          have s_weak :=
-            DerivationTree.weakening [] Γ _ s_ax (List.nil_subset Γ)
-          exact DerivationTree.modus_ponens Γ φ (A.imp φ) s_weak h_weak
-termination_by h.height
-decreasing_by
-  · exact DerivationTree.mp_height_gt_left _ _
-  · exact DerivationTree.mp_height_gt_right _ _
-  · have heq : (h_eq ▸ h1).height = h1.height := by subst h_eq; rfl
-    rw [heq]
-    exact DerivationTree.subderiv_height_lt h1 h2
+    DerivationTree fc Γ (A.imp B) :=
+  (bimodal_deriv_iff_algebraic_fc.mpr
+    (Cslib.Logic.Metalogic.GenericMCS.algebraic_has_deduction_theorem
+      (bimodal_deriv_iff_algebraic_fc.mp ⟨h⟩))).some
+
+/--
+Deduction theorem for contexts where A appears in the middle.
+
+If `Γ' ⊢[fc] φ` and `A ∈ Γ'`, then `(removeAll Γ' A) ⊢[fc] A → φ`.
+
+Implemented via `deductionTheorem` with a single weakening step that embeds
+`Γ'` into `A :: removeAll Γ' A`. This is a thin `removeAll`-aware wrapper over
+the seam-routed `deductionTheorem`, kept because removing-all-occurrences is the
+shape required by Lindenbaum/consistency elimination in callers
+(`Core/MaximalConsistent.lean`, `Core/MCSProperties.lean`, etc.).
+-/
+noncomputable def deductionWithMem {fc : FrameClass} (Γ' : Context Atom)
+    (A φ : Formula Atom)
+    (h : DerivationTree fc Γ' φ) (_hA : A ∈ Γ') :
+    DerivationTree fc (removeAll Γ' A) (A.imp φ) :=
+  deductionTheorem (removeAll Γ' A) A φ
+    (.weakening Γ' (A :: removeAll Γ' A) φ h fun x hx =>
+      if h_eq : x = A then List.mem_cons.mpr (Or.inl h_eq)
+      else List.mem_cons.mpr (Or.inr (mem_removeAll_of_mem_of_ne hx h_eq)))
 
 /-! ## Generic MCS Framework Connection -/
 

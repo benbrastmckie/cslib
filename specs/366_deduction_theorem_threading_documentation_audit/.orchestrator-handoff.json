@@ -1,0 +1,14 @@
+{
+  "status": "planned",
+  "summary": "5-phase plan created: GO/NO-GO fc-bridge spike gates Option A (consolidate R1/R2) vs Option B (documented boundary), then D1/D2/D3 docs, deductionWithMem keep-annotate, and scoped CI; no new sorry/axiom; task-364 subtree untouched.",
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "implement",
+  "artifacts": [
+    {
+      "path": "specs/366_deduction_theorem_threading_documentation_audit/plans/01_deduction-threading-consolidation.md",
+      "type": "plan",
+      "summary": "Phased plan for deduction-theorem threading audit and documentation"
+    }
+  ]
+}

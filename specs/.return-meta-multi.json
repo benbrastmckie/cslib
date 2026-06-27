@@ -2,13 +2,20 @@
   "status": "partial",
   "metadata": {
     "tasks_completed": [
-      365
+      377,
+      378,
+      355,
+      379,
+      368,
+      366
     ],
     "tasks_failed": [
-      363,
-      364
+      {
+        "task": 370,
+        "reason": "FMP spike unresolved (sorry in orphan IntFMPSpike.lean); context overflow; blocked for manual follow-up"
+      }
     ],
-    "cycles_used": 5,
+    "cycles_used": 6,
     "multi_task_mode": true
   }
 }

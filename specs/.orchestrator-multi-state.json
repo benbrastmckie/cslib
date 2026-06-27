@@ -40,19 +40,29 @@
     ]
   },
   "max_cycles": 25,
-  "cycle_count": 1,
-  "failed_tasks": [],
+  "cycle_count": 6,
+  "failed_tasks": [
+    {
+      "task": 370,
+      "reason": "FMP spike unresolved (sorry in orphan spike file); context overflow; marked blocked for manual follow-up"
+    }
+  ],
   "completed_tasks": [
-    377
+    377,
+    378,
+    355,
+    379,
+    368,
+    366
   ],
   "current_statuses": {
-    "355": "researched",
-    "368": "researched",
-    "370": "researched",
+    "355": "completed",
+    "368": "completed",
+    "370": "blocked",
     "377": "completed",
-    "366": "not_started",
-    "378": "planned",
-    "379": "planned"
+    "366": "completed",
+    "378": "completed",
+    "379": "completed"
   },
   "task_dirs": {
     "355": "specs/355_modal_propositional_deduction_theorem_consolidation",

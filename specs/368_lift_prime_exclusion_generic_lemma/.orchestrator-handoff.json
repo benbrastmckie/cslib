@@ -1,14 +1,16 @@
 {
-  "status": "planned",
-  "summary": "5-phase plan created to lift shared prime-exclusion machinery into generic PrimeExclusion.lean with int/min wrappers",
+  "status": "implemented",
+  "summary": "Refactored min_prime_exclusion and int_prime_exclusion as thin wrappers calling generic Metalogic.prime_exclusion; deleted redundant helper lemmas; all downstream StrongCompleteness proofs build green.",
   "blockers": [],
   "continuation_context": null,
-  "next_action_hint": "implement",
+  "next_action_hint": "complete",
+  "phases_completed": 5,
+  "phases_total": 5,
   "artifacts": [
     {
-      "path": "specs/368_lift_prime_exclusion_generic_lemma/plans/01_lift-prime-exclusion-generic-lemma.md",
-      "type": "plan",
-      "summary": "Phased plan: generic scaffolding, main orE lemma, min wrapper, int wrapper, CI"
+      "path": "specs/368_lift_prime_exclusion_generic_lemma/summaries/01_lift-prime-exclusion-summary.md",
+      "type": "summary",
+      "summary": "Full implementation summary with verification details"
     }
   ]
 }

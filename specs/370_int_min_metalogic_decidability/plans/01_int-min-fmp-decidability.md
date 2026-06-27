@@ -120,7 +120,7 @@ after the Phase 1 spike gate is **conditional on the spike succeeding** (see Pha
 
 ---
 
-### Phase 1: De-Risking Spike — Finite Lindenbaum Witness + Fintype of Bounded Worlds (GO/NO-GO) [NOT STARTED]
+### Phase 1: De-Risking Spike — Finite Lindenbaum Witness + Fintype of Bounded Worlds (GO/NO-GO) [IN PROGRESS]
 
 **Goal**: Before committing any further effort, prove in isolation the two HIGH-risk
 obligations that gate the entire FMP construction: (a) the `Σ`-bounded finite Lindenbaum

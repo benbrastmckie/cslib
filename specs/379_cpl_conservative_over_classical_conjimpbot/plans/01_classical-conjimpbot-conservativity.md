@@ -1,7 +1,7 @@
 # Implementation Plan: Task #379 - CPL Conservative over Classical ⟨∧,→,⊥,⊤⟩ Fragment
 
 - **Task**: 379 - Prove CPL is conservative over its classical conjunctive-implicational-falsum fragment CPL⟨∧,→,⊥,⊤⟩ (CL-C)
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: ~3.5 hours
 - **Dependencies**: Task 378 (the ∧-extended Kalmár truth lemma `classicalConjImp_kalmar` + the derived-lemma / `litCtx` / collapse machinery in `Metalogic/ClassicalConjImpCompleteness.lean`); Task 377 (`ClassicalConjImpBotAxiom`, its `toPropAxiom`, the EFQ axiom, and `classicalConjImpBotAxiom_hasDeductionTheorem`). Both are currently `[PLANNING]` — see Risk R0.
 - **Research Inputs**: None (no research report for this task). Grounding: task-352 landed proof `Cslib/Logics/Propositional/Metalogic/ClassicalImpCompleteness.lean` (the proven Kalmár/Tarski–Bernays template), task-378 plan/module (the ∧ extension this builds on), and the intuitionistic analogue `Semantics/Algebra/ConjImpBotConservative.lean` (the ⊥-case / conservativity-edge shape).

@@ -1,7 +1,7 @@
 # Implementation Plan: Theory-Parametric Glivenko & Conservativity Spine
 
 - **Task**: 348 - glivenko_conservativity_theory_parametric
-- **Status**: [NOT STARTED]
+- **Status**: [IN PROGRESS]
 - **Effort**: 9 hours
 - **Dependencies**: Task 345 (`IsMinimal`/`MinimalAxioms` inclusion bridge — planned, must land first); Task 343 (done); Task 341 (parametric algebraic completeness — done, fixed backend)
 - **Research Inputs**: specs/348_glivenko_conservativity_theory_parametric/reports/01_parametric-conservativity-spine.md
@@ -101,7 +101,7 @@ propositional algebra conservativity programme (tasks 341/345/348/352 cluster).
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: L2 parametric core — `derivable_mono` + parametric ND bridge [NOT STARTED]
+### Phase 1: L2 parametric core — `derivable_mono` + parametric ND bridge [COMPLETED]
 
 **Goal**: Introduce the two foundational L2 parametric lemmas and place them where every per-tier
 file can consume them, without re-deriving any per-tier subsumption yet.
@@ -142,7 +142,7 @@ file can consume them, without re-deriving any per-tier subsumption yet.
 
 ---
 
-### Phase 2: Theory-parametric Glivenko [NOT STARTED]
+### Phase 2: Theory-parametric Glivenko [IN PROGRESS]
 
 **Goal**: Introduce the headline deliverable: a theory-parametric Glivenko over a
 classical-strength source and intuitionistic-strength target, plus a strength-predicate wrapper.

@@ -115,6 +115,23 @@ theorem hilbertGlivenko {Atom : Type u} {φ : PL.Proposition Atom}
   intro H' _ v'
   exact CPL.hilbert_alg_complete.mp h H' v'
 
+/-! ## Parametric Syntactic Bridge -/
+
+/-- **Parametric ND bridge**: for any axiom predicate `Axioms` satisfying `MinimalAxioms`,
+ND derivability in `AxiomTheory Axioms` is equivalent to Hilbert derivability with `Axioms`.
+
+This is the theory-parametric form of the three per-tier bridges
+(`derivableInMplIffDerivableMin`, `derivableInIplIffDerivableInt`,
+`derivableInCplIffDerivableProp`). Each of those can be recovered as an instantiation
+of this lemma composed with the corresponding `axiomTheory_*_iff_*` bridge. -/
+theorem derivableIn_axiomTheory_iff_derivable
+    {Atom : Type u} [DecidableEq Atom]
+    (Axioms : PL.Proposition Atom → Prop)
+    [MinimalAxioms Axioms] {φ : PL.Proposition Atom} :
+    DerivableIn (AxiomTheory Axioms : Theory Atom) ((∅ : Ctx Atom) ⊢ φ) ↔
+    Derivable Axioms φ :=
+  hilbert_iff_nd.symm
+
 /-! ## Syntactic Bridges (DerivableIn ↔ Derivable) -/
 
 variable {Atom : Type u} [DecidableEq Atom]

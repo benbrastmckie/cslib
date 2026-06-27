@@ -68,6 +68,21 @@ def liftDerivationTree
       .modus_ponens Γ φ ψ (liftDerivationTree h_sub d₁) (liftDerivationTree h_sub d₂)
   | .weakening Γ Δ φ d h => .weakening Γ Δ φ (liftDerivationTree h_sub d) h
 
+/-! ## Axiom-Monotonicity Lemma -/
+
+/-- **Axiom-monotonicity**: if every axiom of `A₁` is also an axiom of `A₂`, then every
+formula derivable from `A₁` is also derivable from `A₂`.
+
+This is the "subsumption" or "monotonicity" lemma for Hilbert derivability. It lifts the
+pointwise axiom inclusion `h_sub : ∀ ψ, A₁ ψ → A₂ ψ` to a derivability inclusion
+`Derivable A₁ φ → Derivable A₂ φ` using `liftDerivationTree`. -/
+theorem derivable_mono {Atom : Type u}
+    {A₁ A₂ : PL.Proposition Atom → Prop}
+    (h_sub : ∀ ψ, A₁ ψ → A₂ ψ)
+    {φ : PL.Proposition Atom}
+    (h : Derivable A₁ φ) : Derivable A₂ φ :=
+  let ⟨d⟩ := h; ⟨liftDerivationTree h_sub d⟩
+
 /-! ## Hilbert-Primary Conservative Extension -/
 
 /-- **Hilbert-primary conservative extension theorem**: IPL is a conservative extension of

@@ -11,9 +11,9 @@ next_project_number: 381
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,321,355,364,368,370,371,376,377 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,332,363,366,374,378 | 36,37,180,290,299,355,371,376,377 | Bimodal Porting, Foundations, Modal Logic, ... |
-| 3 | 41,275,360,369,373,379 | 39,40,332,363,364,378 | Foundations, Propositional Logic, Algebraic Semantics |
+| 1 | 36,37,180,226,241,278,290,299,301,321,364,370,371,376,381 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,332,363,374 | 36,37,180,290,299,371,376 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 3 | 41,275,360,369,373 | 39,40,332,363,364 | Foundations, Propositional Logic |
 | 4 | 317 | 369 | Propositional Logic |
 | 5 | 375 | 317 | Propositional Logic |
 
@@ -65,6 +65,10 @@ next_project_number: 381
 ### Code Hygiene
 
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
+
+### Bimodal Logic
+
+381 [NOT STARTED] — Repair the pre-existing Mathlib/toolchain-drift build failures in
 
 ### Uncategorized
 

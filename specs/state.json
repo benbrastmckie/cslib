@@ -1,5 +1,5 @@
 {
-  "next_project_number": 381,
+  "next_project_number": 382,
   "active_projects": [
     {
       "project_number": 360,
@@ -1954,6 +1954,19 @@
         }
       ],
       "session_id": "sess_1782587571_7fe21e"
+    },
+    {
+      "project_number": 381,
+      "project_name": "repair_bimodal_separation_perpetuity_drift",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Bimodal Logic",
+      "description": "Repair the pre-existing Mathlib/toolchain-drift build failures in the Bimodal Separation/Perpetuity cluster (downstream of the already-repaired Separation/Defs, which builds clean). Four modules fail under leanprover/lean4:v4.31.0, all sorry-free but broken by a Lean/Mathlib bump (same drift family as task 364): (1) Cslib/Logics/Bimodal/Metalogic/Separation/Duality.lean lines 357,362 'simp made no progress'; (2) Cslib/Logics/Bimodal/Metalogic/Separation/Eliminations.lean ~15 'unsolved goals' (lines 63,498,543,545,547,548,552,602,604,606,607,611,660,662,666 — likely a single simp-set/obtain-shape drift repeated across parallel cases); (3) Cslib/Logics/Bimodal/Metalogic/Separation/DedekindZ/QLemma.lean line 191 'unsolved goals'; (4) Cslib/Logics/Bimodal/Theorems/Perpetuity/Bridge.lean line 102 'Type mismatch'. These were NOT covered by task 360's repair sweep (which fixed Separation/Defs and Perpetuity/Principles). Fix idioms likely mirror task 364's diagnosis (reorder simp-after-rw, re-derive post-simp obtain shapes via lean_goal, instance/type-mismatch coercions). MUST proceed in chunks with incremental commits; do NOT call lean_diagnostic_messages (hangs in this repo) — use lean_goal + scoped lake build. Zero sorry, zero new axioms, preserve all statements. CI: scoped lake build per module + full lake build, lake exe lint-style. Restores the repo-wide green build together with task 364 (Modal/Tableau/Soundness) and task 363 (Classical/Tableau/Completeness).",
+      "dependencies": [],
+      "created": "2026-06-27T21:49:36Z",
+      "last_updated": "2026-06-27T21:49:36Z",
+      "next_artifact_number": 1,
+      "artifacts": []
     }
   ],
   "repository_health": {

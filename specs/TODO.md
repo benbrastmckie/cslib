@@ -47,8 +47,8 @@ next_project_number: 380
 290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
   └─ 332 [IMPLEMENTING] — Close the two remaining normalization-termination sorries for CSL
     └─ 373 [NOT STARTED] — Extend the Curry-Howard layer from a structural isomorphism to a 
-345 [RESEARCHED] — Reconcile the two strength encodings on the Hilbert substrate and
-  └─ 348 [NOT STARTED] — Restate Glivenko and conservativity theory-parametrically against
+345 [PLANNING] — Reconcile the two strength encodings on the Hilbert substrate and
+  └─ 348 [RESEARCHING] — Restate Glivenko and conservativity theory-parametrically against
   └─ 372 [NOT STARTED] — Complete the propositional fragment lattice by adding the disjunc
 368 [NOT STARTED] — Deduplicate the prime-exclusion machinery shared by the intuition
 370 [NOT STARTED] — Close the decidability asymmetry in the metalogic layer: classica
@@ -75,9 +75,9 @@ next_project_number: 380
 
 ### Algebraic Semantics
 
-377 [NOT STARTED] — Create the classical conjunction-implication fragment axiom syste
-  └─ 378 [NOT STARTED] — Prove CPL is conservative over its classical conjunction-implicat
-    └─ 379 [NOT STARTED] — Prove CPL is conservative over its classical conjunction-implicat
+377 [PLANNED] — Create the classical conjunction-implication fragment axiom syste
+  └─ 378 [PLANNING] — Prove CPL is conservative over its classical conjunction-implicat
+    └─ 379 [PLANNING] — Prove CPL is conservative over its classical conjunction-implicat
 367 [NOT STARTED] — Collapse the three near-identical Brouwerian completeness develop
 
 ### Uncategorized
@@ -90,7 +90,7 @@ next_project_number: 380
 ## Tasks
 
 ### 379. Cpl conservative over classical conjimpbot
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 378
@@ -100,7 +100,7 @@ next_project_number: 380
 ---
 
 ### 378. Cpl conservative over classical conjimp
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 377
@@ -110,10 +110,11 @@ next_project_number: 380
 ---
 
 ### 377. Classical conjunction fragment axioms
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 352
+- **Plan**: [377_classical_conjunction_fragment_axioms/plans/01_classical-conjimp-axioms.md]
 
 **Description**: Create the classical conjunction-implication fragment axiom systems to fill the missing classical middle of the propositional conservativity chain (the classical column is currently 2-for-4: only Glivenko at top + the implicational fragment at bottom from task 352). Deliver: (1) inductive ClassicalConjImpAxiom for CPL⟨∧,→,⊤⟩ = {implyK, implyS, peirce, andI, andE1, andE2} (mirror ConjImpAxiom ∪ the peirce constructor of ClassicalImpAxiom in ProofSystem/FragmentAxioms.lean); (2) inductive ClassicalConjImpBotAxiom for CPL⟨∧,→,⊥,⊤⟩ = above + efq; (3) subsumption (toX) maps: ConjImpAxiom.toClassicalConjImpAxiom, ClassicalImpAxiom.toClassicalConjImpAxiom, ClassicalConjImpAxiom.toClassicalConjImpBotAxiom, ClassicalConjImpAxiom.toPropAxiom, ClassicalConjImpBotAxiom.toPropAxiom; (4) supporting infra mirroring siblings: mem_implyK/mem_implyS witnesses, subst_preserves_* closure lemmas, the *_hasDeductionTheorem instance, and IsOrBotFree/IsOrFree fragment-predicate compatibility lemmas. Pure syntactic mirror of FragmentAxioms.lean blocks; no new semantics. Zero-debt, CI green. Files: Cslib/Logics/Propositional/ProofSystem/FragmentAxioms.lean (+ Axioms.lean if needed).
 
@@ -399,7 +400,7 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 348. Glivenko conservativity theory parametric
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 343, Task 345
@@ -409,7 +410,7 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 345. Reconcile logic encodings isminimal
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 341, Task 344

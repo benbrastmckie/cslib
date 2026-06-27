@@ -1,0 +1,19 @@
+{
+  "status": "implemented",
+  "phases_completed": 2,
+  "phases_total": 2,
+  "sorry_inventory": {
+    "Classical/Soundness.lean": 0,
+    "Minimal/Soundness.lean": 0,
+    "Intuitionistic/Soundness.lean": 0,
+    "Classical/Completeness.lean": 1,
+    "Intuitionistic/Completeness.lean": 4,
+    "Minimal/Completeness.lean": 4,
+    "NaturalDeduction/Normalization/Termination.lean": 2
+  },
+  "session_id": "sess_1782538677_f01f15_365",
+  "commits": [
+    "task 365 phase 1: rewrite stale Notes-on-sorry in Tableau tree",
+    "task 365 phase 2: remove task-number leaks (task 308, task 332)"
+  ]
+}

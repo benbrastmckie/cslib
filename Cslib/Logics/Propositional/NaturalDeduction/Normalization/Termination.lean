@@ -1323,15 +1323,57 @@ private theorem Theory.Derivation.reduceRoot_decreases_normMeasure
     --         (weakCtx ⋯ Ecc).commutingSum = 0   (commutingSum_sn_eq_zero  + _weakCtx)
     -- With Ecc's extra copies gone, maximalFormulas equality holds and commutingSum decreases
     -- by (orE G Dcc DAcc DBcc).nodeCount ≥ 1.
-    -- TODO(reduceRoot_decreases_normMeasure, h_8 case): h_8 is the last open decrease case. The E-SN approach is correct
-    -- (commutingSum_sn_eq_zero is proved above; reduceRootSubSN's hA forces E strongly normal, so
-    -- Ecc.maximalFormulas = 0 and Ecc.commutingSum = 0, cancelling the duplicated-E copies). The
-    -- blocker is purely tactic performance: nesting cases DAcc × DBcc × Dcc with simp_all is a
-    -- ~250-branch whnf blowup (times out even at 1.2M heartbeats). The fix is the Phase-2 structure:
-    -- prove E-SN facts + per-side haves (hDA_mf/hDB_mf/hDA_cs/hDB_cs) as standalone bounded `have`s,
-    -- then a SINGLE `cases Dcc` for the mf-equality and commutingSum-decrease. Red attempt preserved
-    -- in handoffs/termination-h8-Esn-attempt-red.lean.bak.
-    sorry
+    rename_i _Gp _xp _Aimp _Aor _Bor D_or DA_or DB_or E_or
+    rw [Option.some.injEq] at hd'; subst hd'
+    rcases h_subsSN with ⟨hA, hB⟩
+    show Prod.Lex _ _ (_, _) (_, _)
+    -- Extract (weakCtx E_or).isStronglyNormal from hA by cases on DA_or.
+    -- DA_or = impI/orE gives (impE ... ...).isStronglyNormal = false → hA : false = true.
+    -- All other constructors give hA as a conjunction; the second component is E's SN.
+    have hE_sn : (E_or.weakCtx (Finset.subset_insert _Aor G)).isStronglyNormal = true := by
+      cases DA_or <;>
+        simp only [isStronglyNormal, Bool.and_eq_true] at hA <;>
+        first | exact absurd hA (by decide) | exact hA.2 | exact hA
+    -- E_or.maximalFormulas = ∅ and E_or.commutingSum = 0 (weakCtx invariance + SN)
+    have hE_mf : E_or.maximalFormulas = ∅ := by
+      have h := maximalFormulas_sn_eq_zero _ hE_sn
+      rw [maximalFormulas_weakCtx] at h; exact h
+    have hE_cs : E_or.commutingSum = 0 := by
+      have h := commutingSum_sn_eq_zero _ hE_sn
+      rw [commutingSum_weakCtx] at h; exact h
+    -- maximalFormulas of (impE DA_or (weakCtx E_or)) = DA_or.maximalFormulas:
+    -- impI/orE excluded by hA; for others, (weakCtx E_or).maximalFormulas = ∅ drops out
+    have hDA_mf : (DA_or.impE (E_or.weakCtx (Finset.subset_insert _ _))).maximalFormulas
+                  = DA_or.maximalFormulas := by
+      cases DA_or <;>
+        simp only [isStronglyNormal, maximalFormulas, maximalFormulas_weakCtx, hE_mf] at * <;>
+        first | exact absurd hA (by decide) | simp
+    have hDB_mf : (DB_or.impE (E_or.weakCtx (Finset.subset_insert _ _))).maximalFormulas
+                  = DB_or.maximalFormulas := by
+      cases DB_or <;>
+        simp only [isStronglyNormal, maximalFormulas, maximalFormulas_weakCtx, hE_mf] at * <;>
+        first | exact absurd hB (by decide) | simp
+    -- commutingSum of (impE DA_or (weakCtx E_or)) = DA_or.commutingSum:
+    -- orE excluded by hA; for others, (weakCtx E_or).commutingSum = 0 drops out
+    have hDA_cs : (DA_or.impE (E_or.weakCtx (Finset.subset_insert _ _))).commutingSum
+                  = DA_or.commutingSum := by
+      cases DA_or <;>
+        simp only [isStronglyNormal, commutingSum, commutingSum_weakCtx, hE_cs] at * <;>
+        first | exact absurd hA (by decide) | omega
+    have hDB_cs : (DB_or.impE (E_or.weakCtx (Finset.subset_insert _ _))).commutingSum
+                  = DB_or.commutingSum := by
+      cases DB_or <;>
+        simp only [isStronglyNormal, commutingSum, commutingSum_weakCtx, hE_cs] at * <;>
+        first | exact absurd hB (by decide) | omega
+    -- maximalFormulas equality: duplicated E copies cancel (hE_mf makes them ∅)
+    rw [show ((orE G D_or DA_or DB_or).impE E_or).maximalFormulas
+          = (orE G D_or
+              (DA_or.impE (E_or.weakCtx (Finset.subset_insert _Aor G)))
+              (DB_or.impE (E_or.weakCtx (Finset.subset_insert _Bor G)))).maximalFormulas from by
+        cases D_or <;> simp_all [maximalFormulas, hDA_mf, hDB_mf, hE_mf]]
+    refine Prod.Lex.right _ ?_
+    -- commutingSum strictly decreases by (orE G D_or DA_or DB_or).nodeCount ≥ 1
+    cases D_or <;> simp_all [commutingSum, nodeCount, hDA_cs, hDB_cs, hE_cs] <;> omega
 
 /-- `normalize` produces strongly normal derivations.
 

@@ -170,8 +170,7 @@ theorem dense_indicator_in_all_limit_points
       --   = neg(snce(neg(swap(swap(nub))), top))
       -- Now swap(swap(nub)) = nub by involution.
       -- So = neg(snce(neg nub, top)) = allPast(nub).
-      simp only [Formula.allFuture, Formula.allPast, Formula.somePast,
-        Formula.neg, Formula.top, Formula.swapTemporal, Formula.swapTemporal_involution]
+      rw [Formula.swapTemporal_allFuture, Formula.swapTemporal_involution]
     -- Rewrite h_sat_h to use allPast
     rw [h_eq_form] at h_zero_mem
     have h_sat_hp := (chronicle_truth_lemma A h_base_mcs t₀ nub.allPast).mpr h_zero_mem

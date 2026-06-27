@@ -1,0 +1,15 @@
+{
+  "status": "implemented",
+  "summary": "Removed all 5 file-global set_option linter.* suppressions across 4 task-350 files. Fixed root-cause issues: 11 intra-command blank lines (emptyLine), 5 simp-to-simp-only conversions (flexible), and replaced 1 file-global dupNamespace suppression with 4 per-declaration scoped set_option in DenseMCS.lean. Also removed 6 stale maxHeartbeats overrides. All 4 modules build clean at default heartbeats with zero lint warnings.",
+  "phases_completed": 5,
+  "phases_total": 5,
+  "artifacts": [
+    {
+      "path": "specs/357_fix_linter_suppression_task350/summaries/01_linter-suppression-summary.md",
+      "type": "summary",
+      "summary": "Full implementation summary covering all 5 phases, deviations (none), and verification results"
+    }
+  ],
+  "next_action_hint": "Ready for /pr command. All 4 modified files build clean; no global suppressions remain; no sorries; no new axioms.",
+  "blockers": []
+}

@@ -57,15 +57,7 @@ of the proposition. -/
 @[scoped grind =]
 theorem neg_denotation {m : Model World Atom} (φ : Proposition Atom) :
     w ∉ (¬φ).denotation m ↔ w ∈ φ.denotation m := by
-  simp only [Proposition.denotation, Set.mem_union, Set.mem_compl_iff]
-  constructor
-  · intro h
-    push Not at h
-    exact h.1
-  · intro h hc
-    rcases hc with hc | hc
-    · exact hc h
-    · simp at hc
+  simp [Proposition.neg_def, Proposition.denotation]
 
 /-- Two worlds are theory-equivalent iff they are denotationally equivalent. -/
 theorem theoryEq_denotation_eq {m : Model World Atom} {w₁ w₂ : World} :

@@ -70,7 +70,8 @@ theorem int_truth_allPast
     (M : IntStructure Atom) (t : ℤ) (φ : Formula Atom) :
     intTruth M t (Formula.allPast φ) ↔
       ∀ s : ℤ, s < t → intTruth M s φ := by
-  simp only [intTruth]
+  simp only [Formula.allPast, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, PropositionalConnectives.top, intTruth]
   constructor
   · intro h s hs
     by_contra hns
@@ -82,7 +83,8 @@ theorem int_truth_allFuture
     (M : IntStructure Atom) (t : ℤ) (φ : Formula Atom) :
     intTruth M t (Formula.allFuture φ) ↔
       ∀ s : ℤ, t < s → intTruth M s φ := by
-  simp only [intTruth]
+  simp only [Formula.allFuture, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, PropositionalConnectives.top, intTruth]
   constructor
   · intro h s hs
     by_contra hns
@@ -115,7 +117,7 @@ theorem int_truth_allFuture
 @[simp] theorem int_truth_neg
     (M : IntStructure Atom) (t : ℤ) (φ : Formula Atom) :
     intTruth M t (Formula.neg φ) ↔ ¬ intTruth M t φ := by
-  simp only [intTruth]
+  simp only [Formula.neg, PropositionalConnectives.neg, intTruth]
 
 theorem int_truth_and
     (M : IntStructure Atom) (t : ℤ) (φ ψ : Formula Atom) :
@@ -131,7 +133,7 @@ theorem int_truth_and
 
 theorem int_truth_top (M : IntStructure Atom) (t : ℤ) :
     intTruth M t (Formula.top : Formula Atom) ↔ True := by
-  simp only [intTruth]; tauto
+  simp only [Formula.top, PropositionalConnectives.top, intTruth]; tauto
 
 /-! ## Formula Atoms -/
 
@@ -146,12 +148,14 @@ def formulaAtoms : Formula Atom → Set Atom
 
 @[simp] theorem formula_atoms_allPast (φ : Formula Atom) :
     formulaAtoms (Formula.allPast φ) = formulaAtoms φ := by
-  simp only [formulaAtoms]
+  simp only [Formula.allPast, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, PropositionalConnectives.top, formulaAtoms]
   ext a; simp only [Set.mem_union, Set.mem_empty_iff_false, or_false]
 
 @[simp] theorem formula_atoms_allFuture (φ : Formula Atom) :
     formulaAtoms (Formula.allFuture φ) = formulaAtoms φ := by
-  simp only [formulaAtoms]
+  simp only [Formula.allFuture, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, PropositionalConnectives.top, formulaAtoms]
   ext a; simp only [Set.mem_union, Set.mem_empty_iff_false, or_false]
 
 /-! ## Semantic Equivalence -/
@@ -224,19 +228,23 @@ def isSFree : Formula Atom → Bool
 
 @[simp] theorem is_U_free_allPast (φ : Formula Atom) :
     isUFree (Formula.allPast φ) = isUFree φ := by
-  simp only [isUFree, Bool.and_true]
+  simp only [Formula.allPast, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, PropositionalConnectives.top, isUFree, Bool.and_true]
 
 @[simp] theorem is_U_free_allFuture (φ : Formula Atom) :
     isUFree (Formula.allFuture φ) = false := by
-  simp only [isUFree, Bool.false_and]
+  simp only [Formula.allFuture, Formula.neg, PropositionalConnectives.neg,
+    isUFree, Bool.false_and]
 
 @[simp] theorem is_S_free_allPast (φ : Formula Atom) :
     isSFree (Formula.allPast φ) = false := by
-  simp only [isSFree, Bool.false_and]
+  simp only [Formula.allPast, Formula.neg, PropositionalConnectives.neg,
+    isSFree, Bool.false_and]
 
 @[simp] theorem is_S_free_allFuture (φ : Formula Atom) :
     isSFree (Formula.allFuture φ) = isSFree φ := by
-  simp only [isSFree, Bool.and_true]
+  simp only [Formula.allFuture, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, PropositionalConnectives.top, isSFree, Bool.and_true]
 
 /-- A formula is "syntactically separated" if it is a boolean combination
     of atoms, U-formulas with S-free arguments, S-formulas with U-free
@@ -254,13 +262,15 @@ def isSyntacticallySeparated : Formula Atom → Bool
     (φ : Formula Atom) :
     isSyntacticallySeparated (Formula.allPast φ) =
       isUFree φ := by
-  simp only [isSyntacticallySeparated, isUFree, Bool.and_true]
+  simp only [Formula.allPast, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, PropositionalConnectives.top, isSyntacticallySeparated, isUFree, Bool.and_true]
 
 @[simp] theorem is_syntactically_separated_allFuture
     (φ : Formula Atom) :
     isSyntacticallySeparated (Formula.allFuture φ) =
       isSFree φ := by
-  simp only [isSyntacticallySeparated, isSFree, Bool.and_true]
+  simp only [Formula.allFuture, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, PropositionalConnectives.top, isSyntacticallySeparated, isSFree, Bool.and_true]
 
 /-- A formula is "separable" if it is integer-equivalent to a
     syntactically separated formula. -/
@@ -281,11 +291,13 @@ def isFutureOnly : Formula Atom → Bool
 
 @[simp] theorem is_future_only_allPast (φ : Formula Atom) :
     isFutureOnly (Formula.allPast φ) = false := by
-  simp only [isFutureOnly, Bool.false_and]
+  simp only [Formula.allPast, Formula.neg, PropositionalConnectives.neg,
+    isFutureOnly, Bool.false_and]
 
 @[simp] theorem is_future_only_allFuture (φ : Formula Atom) :
     isFutureOnly (Formula.allFuture φ) = isFutureOnly φ := by
-  simp only [isFutureOnly, Bool.and_true]
+  simp only [Formula.allFuture, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, PropositionalConnectives.top, isFutureOnly, Bool.and_true]
 
 /-- A formula is "past-only": no `untl` constructor. -/
 def isPastOnly : Formula Atom → Bool
@@ -298,11 +310,13 @@ def isPastOnly : Formula Atom → Bool
 
 @[simp] theorem is_past_only_allPast (φ : Formula Atom) :
     isPastOnly (Formula.allPast φ) = isPastOnly φ := by
-  simp only [isPastOnly, Bool.and_true]
+  simp only [Formula.allPast, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, PropositionalConnectives.top, isPastOnly, Bool.and_true]
 
 @[simp] theorem is_past_only_allFuture (φ : Formula Atom) :
     isPastOnly (Formula.allFuture φ) = false := by
-  simp only [isPastOnly, Bool.false_and]
+  simp only [Formula.allFuture, Formula.neg, PropositionalConnectives.neg,
+    isPastOnly, Bool.false_and]
 
 /-- A formula is "properly separated" if it is a boolean combination of
     atoms, future-only formulas under `untl`, past-only formulas under
@@ -320,13 +334,15 @@ def isProperlySeparated : Formula Atom → Bool
     (φ : Formula Atom) :
     isProperlySeparated (Formula.allPast φ) =
       isPastOnly φ := by
-  simp only [isProperlySeparated, isPastOnly, Bool.and_true]
+  simp only [Formula.allPast, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, PropositionalConnectives.top, isProperlySeparated, isPastOnly, Bool.and_true]
 
 @[simp] theorem is_properly_separated_allFuture
     (φ : Formula Atom) :
     isProperlySeparated (Formula.allFuture φ) =
       isFutureOnly φ := by
-  simp only [isProperlySeparated, isFutureOnly, Bool.and_true]
+  simp only [Formula.allFuture, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, PropositionalConnectives.top, isProperlySeparated, isFutureOnly, Bool.and_true]
 
 /-- A formula is "properly separable" if it is integer-equivalent to a
     properly separated formula. -/
@@ -379,12 +395,14 @@ end
 @[simp] theorem junction_depth_allPast (φ : Formula Atom) :
     junctionDepth (Formula.allPast φ) =
       junctionDepthS φ := by
-  simp only [junctionDepth, junctionDepthS]; omega
+  simp only [Formula.allPast, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, PropositionalConnectives.top, junctionDepth, junctionDepthS]; omega
 
 @[simp] theorem junction_depth_allFuture (φ : Formula Atom) :
     junctionDepth (Formula.allFuture φ) =
       junctionDepthU φ := by
-  simp only [junctionDepth, junctionDepthU]; omega
+  simp only [Formula.allFuture, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, PropositionalConnectives.top, junctionDepth, junctionDepthU]; omega
 
 /-- U-nesting depth beneath S. -/
 def uDepthUnderS : Formula Atom → Nat
@@ -509,13 +527,15 @@ def noSNestedInU : Formula Atom -> Prop
     (φ : Formula Atom) :
     noSNestedInU (Formula.allPast φ) ↔
       noSNestedInU φ := by
-  simp only [noSNestedInU, and_true]
+  simp only [Formula.allPast, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, PropositionalConnectives.top, noSNestedInU, and_true]
 
 @[simp] theorem no_S_nested_in_U_allFuture
     (φ : Formula Atom) :
     noSNestedInU (Formula.allFuture φ) ↔
       (isSFree φ = true) := by
-  simp only [noSNestedInU, isSFree,
+  simp only [Formula.allFuture, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, PropositionalConnectives.top, noSNestedInU, isSFree,
     Bool.and_true, and_true]
 
 /-! ## Semantic Atom Dependence -/

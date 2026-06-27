@@ -12,8 +12,6 @@ public import Cslib.Logics.Propositional.SequentCalculus.LJ.Completeness
 public import Mathlib.Data.List.TFAE
 import Mathlib.Tactic.TFAE
 
-@[expose] public section
-
 /-! # Proof System Equivalences for Propositional Logic
 
 This module collects three-way equivalences between the Hilbert-style proof system,
@@ -36,6 +34,8 @@ The proofs are purely compositional, relying on existing bridge theorems:
 - `hilbert_iff_nd_ctx_int`, `nd_iff_lj` (LJ completeness)
 - `hilbert_iff_nd_ctx_min` (ND equivalence)
 -/
+
+@[expose] public section
 
 namespace Cslib.Logic.PL
 

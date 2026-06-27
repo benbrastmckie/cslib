@@ -28,7 +28,7 @@ in `Γ`.
   ```
 
 - `hilbert_alg_strong_complete_theory_empty`: Recovery lemma showing that the `Γ = ∅`
-  case recovers task 341's `hilbert_alg_complete_theory` (regression guard).
+  case recovers `hilbert_alg_complete_theory` (regression guard).
 
 ## Proof Strategy
 
@@ -108,15 +108,16 @@ theorem hilbert_alg_strong_complete_theory {Atom : Type u}
     -- relMk Γ φ = ⊤ ↔ SetDerivable Axioms Γ φ
     exact relMk_eq_top_iff.mp hTop
 
-/-! ## Recovery of Task-341 Weak Completeness -/
+/-! ## Recovery of Weak Completeness -/
 
 /-- **Recovery Lemma**: the `Γ = ∅` case of `hilbert_alg_strong_complete_theory`
-recovers task-341's `hilbert_alg_complete_theory`.
+recovers `hilbert_alg_complete_theory` (the weak/empty-context completeness theorem in
+`HilbertCompleteness.lean`).
 
 When `Γ = ∅`, the `SatisfiesTheory (AlgEvaluate v bot_val) ∅` premise is vacuously true,
 and `SetDerivable Axioms ∅ φ` collapses to `Derivable Axioms φ` via `SetDerivable_empty_iff`.
-This certifies that the strong completeness theorem is a genuine extension of task 341's
-result (regression guard). -/
+This certifies that the strong completeness theorem is a genuine extension of the
+weak-completeness result (regression guard). -/
 lemma hilbert_alg_strong_complete_theory_empty {Atom : Type u}
     (Axioms : PL.Proposition Atom → Prop) [MinimalAxioms Axioms]
     {φ : PL.Proposition Atom} :

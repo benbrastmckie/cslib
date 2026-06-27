@@ -45,7 +45,7 @@ theorem someFuture_unfold (psi : Formula Atom) :
 
 theorem f_nesting_depth_someFuture (psi : Formula Atom) :
     fNestingDepth (Formula.someFuture psi) = 1 + fNestingDepth psi := by
-  simp only [Formula.someFuture, Formula.top, fNestingDepth]
+  simp only [Formula.someFuture, Formula.top, PropositionalConnectives.top, fNestingDepth]
 
 @[simp]
 theorem f_nesting_depth_atom (a : Atom) : fNestingDepth (.atom a : Formula Atom) = 0 := rfl
@@ -58,11 +58,11 @@ theorem f_nesting_depth_box (psi : Formula Atom) : fNestingDepth (.box psi) = 0 
 
 @[simp]
 theorem f_nesting_depth_allPast (psi : Formula Atom) : fNestingDepth (Formula.allPast psi) = 0 := by
-  simp only [Formula.allPast, Formula.somePast, Formula.neg, Formula.top, fNestingDepth]
+  simp only [Formula.allPast, Formula.somePast, Formula.neg, PropositionalConnectives.neg, Formula.top, fNestingDepth]
 
 @[simp]
 theorem f_nesting_depth_allFuture (psi : Formula Atom) : fNestingDepth (Formula.allFuture psi) = 0 := by
-  simp only [Formula.allFuture, Formula.someFuture, Formula.neg, Formula.top, fNestingDepth]
+  simp only [Formula.allFuture, Formula.someFuture, Formula.neg, PropositionalConnectives.neg, Formula.top, fNestingDepth]
 
 /-- The maximum F-nesting depth among all formulas in the closure of `phi`. -/
 def maxFDepthInClosure (phi : Formula Atom) : Nat :=
@@ -85,7 +85,7 @@ theorem somePast_unfold (psi : Formula Atom) :
 
 theorem p_nesting_depth_somePast (psi : Formula Atom) :
     pNestingDepth (Formula.somePast psi) = 1 + pNestingDepth psi := by
-  simp only [Formula.somePast, Formula.top, pNestingDepth]
+  simp only [Formula.somePast, Formula.top, PropositionalConnectives.top, pNestingDepth]
 
 @[simp]
 theorem p_nesting_depth_atom (a : Atom) : pNestingDepth (.atom a : Formula Atom) = 0 := rfl
@@ -98,11 +98,11 @@ theorem p_nesting_depth_box (psi : Formula Atom) : pNestingDepth (.box psi) = 0 
 
 @[simp]
 theorem p_nesting_depth_allFuture (psi : Formula Atom) : pNestingDepth (Formula.allFuture psi) = 0 := by
-  simp only [Formula.allFuture, Formula.someFuture, Formula.neg, Formula.top, pNestingDepth]
+  simp only [Formula.allFuture, Formula.someFuture, Formula.neg, PropositionalConnectives.neg, Formula.top, pNestingDepth]
 
 @[simp]
 theorem p_nesting_depth_allPast (psi : Formula Atom) : pNestingDepth (Formula.allPast psi) = 0 := by
-  simp only [Formula.allPast, Formula.somePast, Formula.neg, Formula.top, pNestingDepth]
+  simp only [Formula.allPast, Formula.somePast, Formula.neg, PropositionalConnectives.neg, Formula.top, pNestingDepth]
 
 /-- The maximum P-nesting depth among all formulas in the closure of `phi`. -/
 def maxPDepthInClosure (phi : Formula Atom) : Nat :=
@@ -124,11 +124,11 @@ def extractPastInner : Formula Atom → Option (Formula Atom)
 
 theorem extractFutureInner_someFuture (chi : Formula Atom) :
     extractFutureInner (Formula.someFuture chi) = some chi := by
-  simp only [Formula.someFuture, Formula.top, extractFutureInner]
+  simp only [Formula.someFuture, Formula.top, PropositionalConnectives.top, extractFutureInner]
 
 theorem extractPastInner_somePast (chi : Formula Atom) :
     extractPastInner (Formula.somePast chi) = some chi := by
-  simp only [Formula.somePast, Formula.top, extractPastInner]
+  simp only [Formula.somePast, Formula.top, PropositionalConnectives.top, extractPastInner]
 
 /-- A formula is a future formula if it is of the form someFuture(inner). -/
 def IsFutureFormula (f : Formula Atom) : Prop := (extractFutureInner f).isSome = true

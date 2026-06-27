@@ -18,13 +18,13 @@ into a cut-free derivation of the same sequent.
 
 - `LJCutFree.mono`: Cut-freeness is preserved under context weakening (`LJProof.mono`).
 - `CutFreeLJProof.mono`: Cut-free proofs are closed under context weakening.
-- `cutAdmissibility`: From cut-free proofs of `Γ ⊢ A` and `insert A Γ ⊢ C`,
+- `ljCutAdmissibility`: From cut-free proofs of `Γ ⊢ A` and `insert A Γ ⊢ C`,
   we can derive a cut-free proof of `Γ ⊢ C`.
 - `LJProof.cutElim`: Every LJ-derivable sequent has a cut-free proof.
 
 ## Proof Strategy
 
-The key theorem `cutAdmissibility` takes **cut-free** inputs and produces a **cut-free**
+The key theorem `ljCutAdmissibility` takes **cut-free** inputs and produces a **cut-free**
 output. It proceeds by well-founded induction on `sizeOf A` (formula complexity), with
 structural recursion on proof trees for the fixed-formula case. The atom and `⊥` base cases
 are handled by case analysis on `d₁`. The compound formula cases (`and`, `or`, `imp`) handle
@@ -35,7 +35,7 @@ non-principal subcases structurally (decreasing proof size), and handle the prin
 The proof is decomposed following the LK cut elimination architecture:
 1. Three standalone self-recursive helpers for principal connective cases
 2. A mutual recursion block (`ljCutAdm_right` / `ljCutAdm_left`)
-3. A top-level WF wrapper (`cutAdmissibility`)
+3. A top-level WF wrapper (`ljCutAdmissibility`)
 
 ## References
 
@@ -652,13 +652,13 @@ termination_by sizeOf d₂
 The proof uses well-founded induction on formula complexity (`sizeOf A`).
 Following [TroelstraSchwichtenberg2000] Theorem 4.1.1 and
 [NegriVonPlato2001] Theorem 2.4.3. -/
-noncomputable def cutAdmissibility (A : Proposition Atom) (Γ : Ctx Atom)
+noncomputable def ljCutAdmissibility (A : Proposition Atom) (Γ : Ctx Atom)
     (C : Proposition Atom)
     (d₁ : CutFreeLJProof (Γ ⊢ A))
     (d₂ : CutFreeLJProof (insert A Γ ⊢ C)) :
     CutFreeLJProof (Γ ⊢ C) :=
   ljCutAdm_left A Γ C d₂
-    (fun B _hB Γ' C' d₁' d₂' => cutAdmissibility B Γ' C' d₁' d₂')
+    (fun B _hB Γ' C' d₁' d₂' => ljCutAdmissibility B Γ' C' d₁' d₂')
     d₁.1 d₁.2 (Finset.Subset.refl _)
 termination_by sizeOf A
 
@@ -666,10 +666,10 @@ termination_by sizeOf A
 
 /-- Cut-free provability: every LJ proof can be transformed into a cut-free proof.
 
-This is a corollary of `cutAdmissibility` applied to eliminate all cut steps.
+This is a corollary of `ljCutAdmissibility` applied to eliminate all cut steps.
 The proof proceeds by structural induction on the LJ proof tree. Each non-cut
 constructor is preserved directly. The cut case eliminates the cut step using
-`cutAdmissibility`, which requires both sub-proofs to be cut-free (provided
+`ljCutAdmissibility`, which requires both sub-proofs to be cut-free (provided
 inductively) and produces a cut-free result. -/
 theorem LJProof.cutElim {seq : @Sequent Atom} (d : LJProof seq) :
     Nonempty (CutFreeLJProof seq) := by
@@ -706,6 +706,6 @@ theorem LJProof.cutElim {seq : @Sequent Atom} (d : LJProof seq) :
   | cut A _ _ ih₁ ih₂ =>
       obtain ⟨d₁'⟩ := ih₁
       obtain ⟨d₂'⟩ := ih₂
-      exact ⟨cutAdmissibility A _ _ d₁' d₂'⟩
+      exact ⟨ljCutAdmissibility A _ _ d₁' d₂'⟩
 
 end Cslib.Logic.PL

@@ -1,65 +1,71 @@
 {
-  "next_project_number": 361,
+  "next_project_number": 364,
   "active_projects": [
     {
       "project_number": 360,
       "project_name": "repair_prebroken_cslib_modules",
-      "status": "not_started",
+      "status": "blocked",
       "task_type": "cslib",
       "title": "Repair 11 pre-existing broken modules failing repo-wide lake build",
       "description": "The repo-wide 'lake build' currently fails (unrelated to vetted tasks 343/344/350/351/353/354, whose files build clean in isolation). Failing modules: Cslib.Logics.Modal.Denotation (simp made no progress, Denotation.lean:60), Cslib.Logics.Bimodal.Syntax.SubformulaClosure.NestingDepth (unsolved goals, multiple lines), Cslib.Logics.Temporal.ConservativeExtension (ambiguous term, lines 54/59/69), Cslib.Logics.Bimodal.Theorems.Perpetuity.Principles (type mismatch, lines 84/164/176), Cslib.Logics.Temporal.Metalogic.DenseCompleteness (unsolved goals, line 166), Cslib.Logics.Propositional.SequentCalculus (duplicate _proof_1 environment clash between LJ and LK CutElimination), Cslib.Logics.Bimodal.Metalogic.Separation.Defs (many simp made no progress), Cslib.Logics.Propositional.Tableau.Minimal.Soundness, Cslib.Logics.Bimodal.ProofSystem.Substitution, Cslib.Logics.Modal.Tableau.Soundness, Cslib.Logics.Propositional.Tableau.Classical.Completeness. checkInitImports/shake also fail downstream due to missing oleans. Restore a green repo-wide build. Source: /vet CI run 2026-06-26.",
       "created": "2026-06-27T01:08:49Z",
-      "last_updated": "2026-06-27T01:08:49Z",
+      "last_updated": "2026-06-27T02:24:04Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [],
+      "session_id": "sess_1782522754_5f0817_360",
+      "blockers": "3 modules need intent-bearing proof work (tracked as tasks 361-363): Intuitionistic/Minimal Soundness (task-316 WIP), Modal/Tableau/Soundness, Classical/Tableau/Completeness. 8 of 11 originally-failing modules already repaired green."
     },
     {
       "project_number": 359,
       "project_name": "fix_docstring_internal_refs_and_citations",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Remove internal task numbers and Zulip-only citation from public docstrings",
       "description": "Four docstrings embed internal development task numbers: HilbertStrongCompleteness.lean (lines 31, 114, 118 reference 'task 341') and MplConservativeChain.lean (line 229 references 'task 353'). Replace these with references to the named theorems/lemmas directly. Additionally, DeductionCharacterization.lean (line 36) cites only a CSLib Zulip thread as its reference; replace or supplement with a published source for the deduction-theorem characterization (e.g. Troelstra & Schwichtenberg, Basic Proof Theory). Source: /vet of tasks 344, 351, 354.",
       "created": "2026-06-27T01:08:49Z",
-      "last_updated": "2026-06-27T01:08:49Z",
+      "last_updated": "2026-06-27T01:55:28Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [],
+      "session_id": "sess_1782522754_5f0817_359"
     },
     {
       "project_number": 358,
       "project_name": "fix_modal_mcs_bridge_outdated_docs",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Rewrite Modal/GenericMCSBridge.lean to remove contradictory gap analysis",
       "description": "Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean is a documentation-only file whose CORRECTION NOTICE (lines 14-32) states the original gap analysis was OUTDATED, but the old (incorrect) Component 1/2/3 analysis (lines 34-160) remains in place, making the file self-contradictory. Rewrite the module docstring to reflect the corrected understanding (the bridge IS buildable but requires a HilbertOf wrapper type) and remove or clearly archive the obsolete analysis. Source: /vet of task 350.",
       "created": "2026-06-27T01:08:49Z",
-      "last_updated": "2026-06-27T01:08:49Z",
+      "last_updated": "2026-06-27T01:55:22Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [],
+      "session_id": "sess_1782522754_5f0817_358"
     },
     {
       "project_number": 357,
       "project_name": "fix_linter_suppression_task350",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Replace global linter suppressions with targeted nolint in task-350 files",
       "description": "Five task-350 files suppress linters globally via set_option linter.* directives. Bimodal/Metalogic/Core/DeductionTheorem.lean disables linter.style.show, linter.style.emptyLine, and linter.flexible (lines 43-46). Bimodal/Metalogic/Core/GenericMCSBridge.lean (line 64) and Temporal/Metalogic/GenericMCSBridge.lean (line 54) disable linter.dupNamespace globally. Temporal/Metalogic/DenseMCS.lean (line 43) disables linter.flexible globally. Fix the underlying style/naming issue and remove each suppression, or use per-declaration @[nolint <category>] as DenseMCS.lean already does for dupNamespace on Temporal.DerivFc. Fix all linter issues accurately rather than blanket-suppressing. Source: /vet of task 350.",
       "created": "2026-06-27T01:08:49Z",
-      "last_updated": "2026-06-27T01:08:49Z",
+      "last_updated": "2026-06-27T01:55:17Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [],
+      "session_id": "sess_1782522754_5f0817_357"
     },
     {
       "project_number": 356,
       "project_name": "fix_dense_mcs_docblame_violations",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Add missing docstrings to six theorems in Temporal/DenseMCS.lean",
       "description": "Six public theorems in Cslib/Logics/Temporal/Metalogic/DenseMCS.lean lack /-- -/ docstrings: mp_deriv_fc (line 72), weakening_deriv_fc (line 80), assumption_deriv_fc (line 87), mcs_bot_not_mem_fc (line 324), mcs_neg_of_not_mem_fc (line 334), mcs_not_mem_of_neg_fc (line 342). Add a brief /-- ... -/ docstring immediately before each declaration to clear docBlame lint warnings. Source: /vet of task 350.",
       "created": "2026-06-27T01:08:49Z",
-      "last_updated": "2026-06-27T01:08:49Z",
+      "last_updated": "2026-06-27T01:55:11Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [],
+      "session_id": "sess_1782522754_5f0817_356"
     },
     {
       "project_number": 352,
@@ -1465,6 +1471,51 @@
       "last_updated": "2026-06-26T18:25:40Z",
       "session_id": "sess_1782453793_190e95",
       "artifacts": []
+    },
+    {
+      "project_number": 361,
+      "project_name": "repair_intuitionistic_minimal_soundness",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Repair Intuitionistic/Minimal Tableau Soundness build (task-316 WIP)",
+      "description": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean fails to build (error ~line 1383: `simp made no progress` on List.getElem_zip/List.getElem_map), which transitively breaks Cslib/Logics/Propositional/Tableau/Minimal/Soundness.lean. This file is active WIP for task 316 (specs/316_propositional_tableau_soundness/). Repair the proof at the failing site (and any sibling simp-progress failures) so both modules build green. A Cluster C call-site fix to Minimal/Soundness.lean from task 360 is staged in the working tree and should be validated/kept once the upstream is green. Zero-debt: no sorry/axiom. Source: task 360 build-repair (blocked WIP).",
+      "created": "2026-06-27T02:24:04Z",
+      "last_updated": "2026-06-27T02:24:04Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "dependencies": [],
+      "parent_task": 360,
+      "session_id": null
+    },
+    {
+      "project_number": 362,
+      "project_name": "repair_modal_tableau_soundness",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Repair Modal/Tableau/Soundness.lean mid-refactor proof gaps",
+      "description": "Cslib/Logics/Modal/Tableau/Soundness.lean fails to build with multiple `unsolved goals` and `simp made no progress` errors (lines ~99, 100, 124, and more), left mid-refactor by commit df974743 (vague \"update\") with dangling hypotheses. Reconstruct the intended proofs so the module builds green. Zero-debt: no sorry/axiom. Source: task 360 build-repair (blocked WIP).",
+      "created": "2026-06-27T02:24:04Z",
+      "last_updated": "2026-06-27T02:24:04Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "dependencies": [],
+      "parent_task": 360,
+      "session_id": null
+    },
+    {
+      "project_number": 363,
+      "project_name": "repair_classical_tableau_completeness",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Repair Classical/Tableau/Completeness.lean proof gaps and bad lemma ref",
+      "description": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean fails to build with `unsolved goals` (lines ~110, 111) and a reference to a non-existent Mathlib lemma `List.findSome?_of_mem` (line ~117), left mid-refactor. Replace the bad lemma reference with a valid one (or a local proof) and close the remaining goals so the module builds green. Zero-debt: no sorry/axiom. Source: task 360 build-repair (blocked WIP).",
+      "created": "2026-06-27T02:24:04Z",
+      "last_updated": "2026-06-27T02:24:04Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "dependencies": [],
+      "parent_task": 360,
+      "session_id": null
     }
   ],
   "repository_health": {

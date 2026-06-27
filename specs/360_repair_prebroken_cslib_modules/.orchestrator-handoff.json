@@ -1,0 +1,15 @@
+{
+  "status": "partial",
+  "phases_completed": 3,
+  "phases_total": 5,
+  "summary": "8 of 11 failing modules repaired green (Cluster A x6, SequentCalculus/ProofSystemEquivalence, HilbertLindenbaumRel). 3 modules remain blocked by genuine mid-refactor WIP: Intuitionistic.Soundness (task-316 territory, blocks Minimal.Soundness), Modal.Tableau.Soundness, Classical.Completeness. Zero-debt: not papered with sorry/axiom.",
+  "artifacts": [
+    {"path": "specs/360_repair_prebroken_cslib_modules/summaries/01_repo-build-repair-summary.md", "type": "summary", "summary": "Build-repair execution summary; 8 fixed, 3 blocked WIP"}
+  ],
+  "next_action_hint": "Dedicated fix tasks 361-363 for the 3 blocked WIP modules; repo build green after those.",
+  "blockers": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean:1383 simp made no progress (task-316 WIP; blocks Minimal/Soundness.lean)",
+    "Cslib/Logics/Modal/Tableau/Soundness.lean unsolved goals (lines 99/100/124, mid-refactor df974743)",
+    "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean unsolved goals + nonexistent lemma List.findSome?_of_mem (line 117)"
+  ]
+}

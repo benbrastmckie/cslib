@@ -40,11 +40,6 @@ We handle each case of the 7-constructor DerivationTree:
 * Cslib/Logics/Temporal/Metalogic/DeductionTheorem.lean — temporal pattern
 -/
 
-set_option linter.style.show false
-set_option linter.style.emptyLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Core
@@ -91,7 +86,6 @@ def deductionWithMem {fc : FrameClass} (Γ' : Context Atom)
   match h with
   | DerivationTree.axiom _ ψ h_ax h_fc =>
       exact deductionAxiom (removeAll Γ' A) A (.axiom [] ψ h_ax h_fc)
-
   | DerivationTree.assumption _ ψ h_mem =>
       by_cases h_eq : ψ = A
       · rw [← h_eq]
@@ -100,21 +94,16 @@ def deductionWithMem {fc : FrameClass} (Γ' : Context Atom)
           simp only [removeAll, List.mem_filter, decide_eq_true_eq]
           exact ⟨h_mem, h_eq⟩
         exact deductionAssumptionOther (removeAll Γ' A) A ψ h_mem'
-
   | DerivationTree.modus_ponens _ ψ χ h1 h2 =>
       have ih1 := deductionWithMem Γ' A (ψ.imp χ) h1 hA
       have ih2 := deductionWithMem Γ' A ψ h2 hA
       exact deductionMpUnderImp (removeAll Γ' A) A ψ χ ih1 ih2
-
   | DerivationTree.necessitation ψ h_deriv =>
       simp at hA
-
   | DerivationTree.temporal_necessitation ψ h_deriv =>
       simp at hA
-
   | DerivationTree.temporal_duality ψ h_deriv =>
       simp at hA
-
   | DerivationTree.weakening Γ'' _ ψ h1 h2 =>
       haveI : Decidable (A ∈ Γ'') := Classical.propDecidable _
       by_cases hA' : A ∈ Γ''
@@ -134,7 +123,6 @@ def deductionWithMem {fc : FrameClass} (Γ' : Context Atom)
         have s_weak :=
           DerivationTree.weakening [] (removeAll Γ' A) _ s_ax (List.nil_subset _)
         exact DerivationTree.modus_ponens (removeAll Γ' A) ψ (A.imp ψ) s_weak h_weak
-
 termination_by h.height
 decreasing_by
   · exact DerivationTree.mp_height_gt_left h1 h2
@@ -168,7 +156,6 @@ def deductionTheorem {fc : FrameClass} (Γ : Context Atom) (A B : Formula Atom)
   match h with
   | DerivationTree.axiom _ φ h_ax h_fc =>
       exact deductionAxiom Γ A (.axiom [] φ h_ax h_fc)
-
   | DerivationTree.assumption _ φ h_mem =>
       by_cases h_eq : φ = A
       · subst h_eq
@@ -178,12 +165,10 @@ def deductionTheorem {fc : FrameClass} (Γ : Context Atom) (A B : Formula Atom)
           | head => exact absurd rfl h_eq
           | tail _ h => exact h
         exact deductionAssumptionOther Γ A φ h_tail
-
   | DerivationTree.modus_ponens _ φ ψ h1 h2 =>
       have ih1 := deductionTheorem Γ A (φ.imp ψ) h1
       have ih2 := deductionTheorem Γ A φ h2
       exact deductionMpUnderImp Γ A φ ψ ih1 ih2
-
   | DerivationTree.weakening Γ' _ φ h1 h2 =>
       by_cases h_eq : Γ' = A :: Γ
       · exact deductionTheorem Γ A φ (h_eq ▸ h1)
@@ -206,7 +191,6 @@ def deductionTheorem {fc : FrameClass} (Γ : Context Atom) (A B : Formula Atom)
           have s_weak :=
             DerivationTree.weakening [] Γ _ s_ax (List.nil_subset Γ)
           exact DerivationTree.modus_ponens Γ φ (A.imp φ) s_weak h_weak
-
 termination_by h.height
 decreasing_by
   · exact DerivationTree.mp_height_gt_left _ _

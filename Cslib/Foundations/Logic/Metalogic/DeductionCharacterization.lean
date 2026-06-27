@@ -32,6 +32,7 @@ This module proves the converse and closes the characterization loop.
 
 ## References
 
+* [A. S. Troelstra, H. Schwichtenberg, *Basic Proof Theory*][TroelstraSchwichtenberg2000], Ch. 2.
 * B. Doty, CSLib Zulip Temporal Logic thread, 2026-06-25.
 -/
 

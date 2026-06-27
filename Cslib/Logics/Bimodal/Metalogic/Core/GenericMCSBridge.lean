@@ -61,10 +61,6 @@ can import this bridge without creating a cycle.
 * Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean — gap analysis (documentation only)
 -/
 
-set_option linter.dupNamespace false
-set_option linter.style.setOption false
-set_option maxHeartbeats 400000
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Core

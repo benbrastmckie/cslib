@@ -1,5 +1,5 @@
 ---
-next_project_number: 361
+next_project_number: 364
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 361
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,345,352,355,356,357,358,359,360 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,345,352,355,360,361,362,363 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,317,332,348 | 36,37,180,290,299,316,345 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275 | 39,40 | Foundations |
 
@@ -66,16 +66,42 @@ next_project_number: 361
 
 ### Uncategorized
 
-356 [NOT STARTED] — Six public theorems in Cslib/Logics/Temporal/Metalogic/DenseMCS.l
-357 [NOT STARTED] — Five task-350 files suppress linters globally via set_option lint
-358 [NOT STARTED] — Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean is a documenta
-359 [NOT STARTED] — Four docstrings embed internal development task numbers: HilbertS
-360 [NOT STARTED] — The repo-wide 'lake build' currently fails (unrelated to vetted t
+360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t
+361 [NOT STARTED] — Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean 
+362 [NOT STARTED] — Cslib/Logics/Modal/Tableau/Soundness.lean fails to build with mul
+363 [NOT STARTED] — Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean fa
 
 ## Tasks
 
-### 360. Repair 11 pre-existing broken modules failing repo-wide lake build
+### 363. Repair Classical/Tableau/Completeness.lean proof gaps and bad lemma ref
 - **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean fails to build with `unsolved goals` (lines ~110, 111) and a reference to a non-existent Mathlib lemma `List.findSome?_of_mem` (line ~117), left mid-refactor. Replace the bad lemma reference with a valid one (or a local proof) and close the remaining goals so the module builds green. Zero-debt: no sorry/axiom. Source: task 360 build-repair (blocked WIP).
+
+---
+
+### 362. Repair Modal/Tableau/Soundness.lean mid-refactor proof gaps
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Cslib/Logics/Modal/Tableau/Soundness.lean fails to build with multiple `unsolved goals` and `simp made no progress` errors (lines ~99, 100, 124, and more), left mid-refactor by commit df974743 (vague "update") with dangling hypotheses. Reconstruct the intended proofs so the module builds green. Zero-debt: no sorry/axiom. Source: task 360 build-repair (blocked WIP).
+
+---
+
+### 361. Repair Intuitionistic/Minimal Tableau Soundness build (task-316 WIP)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean fails to build (error ~line 1383: `simp made no progress` on List.getElem_zip/List.getElem_map), which transitively breaks Cslib/Logics/Propositional/Tableau/Minimal/Soundness.lean. This file is active WIP for task 316 (specs/316_propositional_tableau_soundness/). Repair the proof at the failing site (and any sibling simp-progress failures) so both modules build green. A Cluster C call-site fix to Minimal/Soundness.lean from task 360 is staged in the working tree and should be validated/kept once the upstream is green. Zero-debt: no sorry/axiom. Source: task 360 build-repair (blocked WIP).
+
+---
+
+### 360. Repair 11 pre-existing broken modules failing repo-wide lake build
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -84,7 +110,7 @@ next_project_number: 361
 ---
 
 ### 359. Remove internal task numbers and Zulip-only citation from public docstrings
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -93,7 +119,7 @@ next_project_number: 361
 ---
 
 ### 358. Rewrite Modal/GenericMCSBridge.lean to remove contradictory gap analysis
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -102,7 +128,7 @@ next_project_number: 361
 ---
 
 ### 357. Replace global linter suppressions with targeted nolint in task-350 files
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -111,7 +137,7 @@ next_project_number: 361
 ---
 
 ### 356. Add missing docstrings to six theorems in Temporal/DenseMCS.lean
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 

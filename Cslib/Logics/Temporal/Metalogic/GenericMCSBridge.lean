@@ -51,10 +51,6 @@ constructor maps to a corresponding algebraic derivation operation.
 * Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean — gap analysis (documentation only)
 -/
 
-set_option linter.dupNamespace false
-set_option linter.style.setOption false
-set_option maxHeartbeats 400000
-
 @[expose] public section
 
 namespace Cslib.Logic.Temporal

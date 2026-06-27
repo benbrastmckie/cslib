@@ -226,7 +226,8 @@ ConjImpBotMinAxiom coincide.
 
 The forward direction is the direct conservativity `hilbertMplConservativeOverConjImpBot_direct`.
 The backward direction lifts via the axiom subsumption `ConjImpBotMinAxiom → MinPropAxiom`
-using `liftDerivationTree` and `ConjImpBotMinAxiom.toMinPropAxiom` (from task 353). -/
+using `liftDerivationTree` (`ConjImpConservative.lean`) and
+`ConjImpBotMinAxiom.toMinPropAxiom` (`FragmentAxioms.lean`). -/
 theorem mplAxiom_iff_conjImpBotMinAxiom {Atom : Type u} {φ : PL.Proposition Atom}
     (hOF : φ.IsOrFree = true) :
     Derivable (@MinPropAxiom Atom) φ ↔ Derivable (@ConjImpBotMinAxiom Atom) φ :=

@@ -38,11 +38,6 @@ completeness proofs.
 * `Cslib/Foundations/Logic/Metalogic/Consistency.lean` — generic MCS framework
 -/
 
-set_option linter.style.setOption false
-set_option linter.dupNamespace false
-set_option linter.flexible false
-set_option maxHeartbeats 3200000
-
 @[expose] public section
 
 namespace Cslib.Logic.Temporal
@@ -56,12 +51,14 @@ attribute [local instance] Classical.propDecidable
 
 /-! ## FC-Parameterized Derivability -/
 
+set_option linter.dupNamespace false in
 /-- Prop-valued derivability at frame class `fc`. -/
 @[nolint dupNamespace]
 def Temporal.DerivFc (fc : FrameClass) (Gamma : List (Formula Atom))
     (phi : Formula Atom) : Prop :=
   Nonempty (DerivationTree fc Gamma phi)
 
+set_option linter.dupNamespace false in
 /-- Theorem derivability at frame class `fc` (from empty context). -/
 @[nolint dupNamespace]
 def Temporal.ThDerivableFc (fc : FrameClass) (phi : Formula Atom) : Prop :=
@@ -69,6 +66,7 @@ def Temporal.ThDerivableFc (fc : FrameClass) (phi : Formula Atom) : Prop :=
 
 /-! ## Basic Combinators -/
 
+/-- Modus ponens for fc-parameterized derivability: from `φ → ψ` and `φ` derive `ψ`. -/
 theorem mp_deriv_fc {fc : FrameClass} {Γ : List (Formula Atom)}
     {φ ψ : Formula Atom}
     (h₁ : Temporal.DerivFc fc Γ (φ → ψ))
@@ -77,6 +75,7 @@ theorem mp_deriv_fc {fc : FrameClass} {Γ : List (Formula Atom)}
   obtain ⟨d₁⟩ := h₁; obtain ⟨d₂⟩ := h₂
   exact ⟨.modus_ponens Γ φ ψ d₁ d₂⟩
 
+/-- Weakening for fc-parameterized derivability: enlarging the context preserves derivability. -/
 theorem weakening_deriv_fc {fc : FrameClass} {Γ Δ : List (Formula Atom)}
     {φ : Formula Atom}
     (h : Temporal.DerivFc fc Γ φ) (hsub : ∀ x ∈ Γ, x ∈ Δ) :
@@ -84,6 +83,7 @@ theorem weakening_deriv_fc {fc : FrameClass} {Γ Δ : List (Formula Atom)}
   obtain ⟨d⟩ := h
   exact ⟨.weakening Γ Δ φ d hsub⟩
 
+/-- Assumption rule for fc-parameterized derivability: any context hypothesis is derivable. -/
 theorem assumption_deriv_fc {fc : FrameClass} {Γ : List (Formula Atom)}
     {φ : Formula Atom}
     (h : φ ∈ Γ) : Temporal.DerivFc fc Γ φ :=
@@ -101,12 +101,14 @@ def temporalDerivationSystemFc (fc : FrameClass) :
 
 /-! ## FC-Parameterized MCS Abbreviations -/
 
+set_option linter.dupNamespace false in
 /-- Set consistency at frame class `fc`. -/
 @[nolint dupNamespace]
 abbrev Temporal.SetConsistentFc (fc : FrameClass)
     (Ω : Set (Formula Atom)) : Prop :=
   Metalogic.SetConsistent (temporalDerivationSystemFc fc) Ω
 
+set_option linter.dupNamespace false in
 /-- Set maximal consistency at frame class `fc`. -/
 @[nolint dupNamespace]
 abbrev Temporal.SetMaximalConsistentFc (fc : FrameClass)
@@ -245,7 +247,7 @@ noncomputable def deductionTheoremFc {fc : FrameClass}
       · have h_sub' : Γ' ⊆ Γ := by
           intro x hx
           have := h_sub hx
-          simp [List.mem_cons] at this
+          simp only [List.mem_cons] at this
           rcases this with rfl | h
           · exact absurd hx hA
           · exact h
@@ -259,7 +261,7 @@ decreasing_by
   · exact DerivationTree.height_modus_ponens_left d₁ d₂
   · exact DerivationTree.height_modus_ponens_right d₁ d₂
   · have h1 : (h_eq ▸ d').height = d'.height := by subst h_eq; rfl
-    simp [h1, DerivationTree.height]
+    simp only [h1, DerivationTree.height]; omega
 
 /-! ## Deduction Theorem Wrapper -/
 
@@ -267,8 +269,7 @@ decreasing_by
 theorem temporal_has_deduction_theorem_fc (fc : FrameClass) :
     Metalogic.HasDeductionTheorem (temporalDerivationSystemFc (Atom := Atom) fc) := by
   intro Γ φ ψ h
-  unfold temporalDerivationSystemFc Temporal.DerivFc at h ⊢
-  simp at h ⊢
+  simp only [temporalDerivationSystemFc, Temporal.DerivFc] at h ⊢
   obtain ⟨d⟩ := h
   exact ⟨deductionTheoremFc Γ φ ψ d⟩
 
@@ -321,16 +322,18 @@ lemma theoremInMcsFc {fc : FrameClass}
 
 /-! ## Negation Lemmas at fc -/
 
+/-- Falsum `⊥` is never a member of an fc-maximal-consistent set. -/
 theorem mcs_bot_not_mem_fc
     {fc : FrameClass}
     {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistentFc fc Ω) :
     Formula.bot ∉ Ω := by
   intro h_bot
   exact h_mcs.1 [Formula.bot]
-    (fun x hx => by simp [List.mem_cons] at hx; exact hx ▸ h_bot)
-    (by simp [temporalDerivationSystemFc, Temporal.DerivFc]
+    (fun x hx => by simp only [List.mem_cons, List.mem_nil_iff, or_false] at hx; exact hx ▸ h_bot)
+    (by simp only [temporalDerivationSystemFc, Temporal.DerivFc]
         exact ⟨.assumption _ _ (List.mem_cons.mpr (Or.inl rfl))⟩)
 
+/-- In an fc-MCS, if `φ` is not a member then its negation `¬φ` is (negation completeness). -/
 theorem mcs_neg_of_not_mem_fc
     {fc : FrameClass}
     {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistentFc fc Ω)
@@ -339,6 +342,7 @@ theorem mcs_neg_of_not_mem_fc
   · exact absurd h h_not
   · exact h
 
+/-- In an fc-MCS, if the negation `¬φ` is a member then `φ` is not. -/
 theorem mcs_not_mem_of_neg_fc
     {fc : FrameClass}
     {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistentFc fc Ω)
@@ -356,7 +360,7 @@ theorem set_consistent_fc_not_both
   · intro x hx
     simp only [List.mem_cons, List.mem_nil_iff, or_false] at hx
     rcases hx with rfl | rfl <;> assumption
-  · simp [temporalDerivationSystemFc, Temporal.DerivFc]
+  · simp only [temporalDerivationSystemFc, Temporal.DerivFc]
     exact ⟨.modus_ponens _ φ Formula.bot
       (.assumption _ (Formula.neg φ) (by simp))
       (.assumption _ φ (by simp))⟩

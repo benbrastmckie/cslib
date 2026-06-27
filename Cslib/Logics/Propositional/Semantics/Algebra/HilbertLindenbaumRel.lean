@@ -814,6 +814,17 @@ lemma relCanonicalV_algTValid
   rw [relMk_eq_top_iff]
   exact SetDerivable_of_Derivable ⟨.ax [] B (by simpa [AxiomTheory] using hB)⟩ Γ
 
+/-! ## Theory Satisfaction Predicate -/
+
+/-- An evaluation satisfies a theory `T` if it maps every formula in `T` to `⊤`.
+
+This predicate is used in the algebraic strong completeness theorem to express that a
+valuation models all formulas in the context `Γ`:
+`SatisfiesTheory eval Γ = ∀ ψ ∈ Γ, eval ψ = ⊤`. -/
+def SatisfiesTheory {α : Type u} [Top α]
+    (eval : Proposition Atom → α) (T : Set (Proposition Atom)) : Prop :=
+  ∀ ψ ∈ T, eval ψ = ⊤
+
 /-- The relativized canonical valuation satisfies all formulas in `Γ`.
 
 For any `ψ ∈ Γ`, `AlgEvaluate (relCanonicalV Γ) (relCanonicalBotVal Γ) ψ = ⊤`.

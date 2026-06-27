@@ -87,50 +87,57 @@ theorem subst_snce (q r : Atom) (phi psi : Formula Atom) :
 
 /-! ### Derived operator substitution lemmas -/
 
+-- Concrete-form helpers: `PropositionalConnectives.neg/top` reduce to constructors
+-- for `Formula Atom` (the instance sets `bot := .bot`, `imp := .imp`).
+omit [DecidableEq Atom] in
+private theorem neg_constructor (phi : Formula Atom) :
+    PropositionalConnectives.neg phi = phi.imp .bot := rfl
+
+omit [DecidableEq Atom] in
+private theorem top_constructor :
+    (PropositionalConnectives.top : Formula Atom) = .imp .bot .bot := rfl
+
 theorem subst_neg (q r : Atom) (phi : Formula Atom) :
     (Formula.neg phi).subst q r = Formula.neg (phi.subst q r) := by
-  simp [Formula.neg, subst]
+  simp only [Formula.neg, neg_constructor, subst_imp, subst_bot]
 
 theorem subst_and (q r : Atom) (phi psi : Formula Atom) :
     (Formula.and phi psi).subst q r =
       Formula.and (phi.subst q r) (psi.subst q r) := by
-  simp only [Formula.and, Formula.neg, subst_imp, subst_bot]
+  simp only [Formula.and, subst_imp, subst_bot]
 
 theorem subst_or (q r : Atom) (phi psi : Formula Atom) :
     (Formula.or phi psi).subst q r =
       Formula.or (phi.subst q r) (psi.subst q r) := by
-  simp only [Formula.or, Formula.neg, subst_imp, subst_bot]
+  simp only [Formula.or, subst_imp, subst_bot]
 
 theorem subst_diamond (q r : Atom) (phi : Formula Atom) :
     (Formula.diamond phi).subst q r =
       Formula.diamond (phi.subst q r) := by
-  simp only [Formula.diamond, Formula.neg, subst_imp,
-    subst_bot, subst_box]
+  simp only [Formula.diamond, subst_neg, subst_box]
 
 theorem subst_someFuture (q r : Atom) (phi : Formula Atom) :
     (Formula.someFuture phi).subst q r =
       Formula.someFuture (phi.subst q r) := by
-  simp only [Formula.someFuture, Formula.top, subst_untl,
-    subst_imp, subst_bot]
+  simp only [Formula.someFuture, Formula.top, top_constructor, subst_untl, subst_imp, subst_bot]
 
 theorem subst_somePast (q r : Atom) (phi : Formula Atom) :
     (Formula.somePast phi).subst q r =
       Formula.somePast (phi.subst q r) := by
-  simp only [Formula.somePast, Formula.top, subst_snce,
-    subst_imp, subst_bot]
+  simp only [Formula.somePast, Formula.top, top_constructor, subst_snce, subst_imp, subst_bot]
 
 theorem subst_allFuture (q r : Atom) (phi : Formula Atom) :
     (Formula.allFuture phi).subst q r =
       Formula.allFuture (phi.subst q r) := by
-  simp only [Formula.allFuture, Formula.neg,
-    Formula.someFuture, Formula.top,
+  simp only [Formula.allFuture, Formula.neg, neg_constructor,
+    Formula.someFuture, Formula.top, top_constructor,
     subst_imp, subst_bot, subst_untl]
 
 theorem subst_allPast (q r : Atom) (phi : Formula Atom) :
     (Formula.allPast phi).subst q r =
       Formula.allPast (phi.subst q r) := by
-  simp only [Formula.allPast, Formula.neg,
-    Formula.somePast, Formula.top,
+  simp only [Formula.allPast, Formula.neg, neg_constructor,
+    Formula.somePast, Formula.top, top_constructor,
     subst_imp, subst_bot, subst_snce]
 
 /-! ### Freshness and substitution -/
@@ -240,191 +247,65 @@ theorem mem_context_subst_iff {q r : Atom}
 
 /-! ## Axiom substitution -/
 
-/-- Axiom instances are preserved under atom substitution. -/
+/-- Axiom instances are preserved under atom substitution.
+
+All derived subst operations (`subst_neg`, `subst_diamond`, etc.) reduce definitionally to
+`rfl` because `Formula.neg`, `Formula.top`, etc. are `abbrev`s over the `PropositionalConnectives`
+defaults, which in turn expand to the base constructors `imp`/`bot`. The `exact` calls therefore
+typecheck without any `simp only` rewrite prelude. -/
 def axiomSubst (q r : Atom) {phi : Formula Atom}
     (h : Axiom phi) : Axiom (phi.subst q r) := by
   cases h with
-  | imp_k a b c =>
-    simp only [Formula.subst_imp]
-    exact Axiom.imp_k (a.subst q r) (b.subst q r)
-      (c.subst q r)
-  | imp_s a b =>
-    simp only [Formula.subst_imp]
-    exact Axiom.imp_s (a.subst q r) (b.subst q r)
-  | efq a =>
-    simp only [Formula.subst_imp, Formula.subst_bot]
-    exact Axiom.efq (a.subst q r)
-  | peirce a b =>
-    simp only [Formula.subst_imp]
-    exact Axiom.peirce (a.subst q r) (b.subst q r)
-  | modal_t a =>
-    simp only [Formula.subst_imp, Formula.subst_box]
-    exact Axiom.modal_t (a.subst q r)
-  | modal_4 a =>
-    simp only [Formula.subst_imp, Formula.subst_box]
-    exact Axiom.modal_4 (a.subst q r)
-  | modal_b a =>
-    simp only [Formula.subst_imp, Formula.subst_box,
-      Formula.subst_diamond]
-    exact Axiom.modal_b (a.subst q r)
-  | modal_5_collapse a =>
-    simp only [Formula.subst_imp, Formula.subst_box,
-      Formula.subst_diamond]
-    exact Axiom.modal_5_collapse (a.subst q r)
-  | modal_k_dist a b =>
-    simp only [Formula.subst_imp, Formula.subst_box]
-    exact Axiom.modal_k_dist (a.subst q r) (b.subst q r)
-  | serial_future =>
-    simp only [Formula.subst_imp, Formula.subst_someFuture,
-      Formula.subst_bot]
-    exact Axiom.serial_future
-  | serial_past =>
-    simp only [Formula.subst_imp, Formula.subst_somePast,
-      Formula.subst_bot]
-    exact Axiom.serial_past
+  | imp_k a b c => exact Axiom.imp_k (a.subst q r) (b.subst q r) (c.subst q r)
+  | imp_s a b => exact Axiom.imp_s (a.subst q r) (b.subst q r)
+  | efq a => exact Axiom.efq (a.subst q r)
+  | peirce a b => exact Axiom.peirce (a.subst q r) (b.subst q r)
+  | modal_t a => exact Axiom.modal_t (a.subst q r)
+  | modal_4 a => exact Axiom.modal_4 (a.subst q r)
+  | modal_b a => exact Axiom.modal_b (a.subst q r)
+  | modal_5_collapse a => exact Axiom.modal_5_collapse (a.subst q r)
+  | modal_k_dist a b => exact Axiom.modal_k_dist (a.subst q r) (b.subst q r)
+  | serial_future => exact Axiom.serial_future
+  | serial_past => exact Axiom.serial_past
   | left_mono_until_G a b c =>
-    simp only [Formula.subst_imp, Formula.subst_allFuture,
-      Formula.subst_untl]
-    exact Axiom.left_mono_until_G (a.subst q r)
-      (b.subst q r) (c.subst q r)
+    exact Axiom.left_mono_until_G (a.subst q r) (b.subst q r) (c.subst q r)
   | left_mono_since_H a b c =>
-    simp only [Formula.subst_imp, Formula.subst_allPast,
-      Formula.subst_snce]
-    exact Axiom.left_mono_since_H (a.subst q r)
-      (b.subst q r) (c.subst q r)
+    exact Axiom.left_mono_since_H (a.subst q r) (b.subst q r) (c.subst q r)
   | right_mono_until a b c =>
-    simp only [Formula.subst_imp, Formula.subst_allFuture,
-      Formula.subst_untl]
-    exact Axiom.right_mono_until (a.subst q r)
-      (b.subst q r) (c.subst q r)
+    exact Axiom.right_mono_until (a.subst q r) (b.subst q r) (c.subst q r)
   | right_mono_since a b c =>
-    simp only [Formula.subst_imp, Formula.subst_allPast,
-      Formula.subst_snce]
-    exact Axiom.right_mono_since (a.subst q r)
-      (b.subst q r) (c.subst q r)
-  | connect_future a =>
-    simp only [Formula.subst_imp, Formula.subst_allFuture,
-      Formula.subst_somePast]
-    exact Axiom.connect_future (a.subst q r)
-  | connect_past a =>
-    simp only [Formula.subst_imp, Formula.subst_allPast,
-      Formula.subst_someFuture]
-    exact Axiom.connect_past (a.subst q r)
+    exact Axiom.right_mono_since (a.subst q r) (b.subst q r) (c.subst q r)
+  | connect_future a => exact Axiom.connect_future (a.subst q r)
+  | connect_past a => exact Axiom.connect_past (a.subst q r)
   | enrichment_until a b c =>
-    simp only [Formula.subst_imp, Formula.subst_and,
-      Formula.subst_untl, Formula.subst_snce]
-    exact Axiom.enrichment_until (a.subst q r)
-      (b.subst q r) (c.subst q r)
+    exact Axiom.enrichment_until (a.subst q r) (b.subst q r) (c.subst q r)
   | enrichment_since a b c =>
-    simp only [Formula.subst_imp, Formula.subst_and,
-      Formula.subst_snce, Formula.subst_untl]
-    exact Axiom.enrichment_since (a.subst q r)
-      (b.subst q r) (c.subst q r)
-  | self_accum_until a b =>
-    simp only [Formula.subst_imp, Formula.subst_untl,
-      Formula.subst_and]
-    exact Axiom.self_accum_until (a.subst q r)
-      (b.subst q r)
-  | self_accum_since a b =>
-    simp only [Formula.subst_imp, Formula.subst_snce,
-      Formula.subst_and]
-    exact Axiom.self_accum_since (a.subst q r)
-      (b.subst q r)
-  | absorb_until a b =>
-    simp only [Formula.subst_imp, Formula.subst_untl,
-      Formula.subst_and]
-    exact Axiom.absorb_until (a.subst q r)
-      (b.subst q r)
-  | absorb_since a b =>
-    simp only [Formula.subst_imp, Formula.subst_snce,
-      Formula.subst_and]
-    exact Axiom.absorb_since (a.subst q r)
-      (b.subst q r)
+    exact Axiom.enrichment_since (a.subst q r) (b.subst q r) (c.subst q r)
+  | self_accum_until a b => exact Axiom.self_accum_until (a.subst q r) (b.subst q r)
+  | self_accum_since a b => exact Axiom.self_accum_since (a.subst q r) (b.subst q r)
+  | absorb_until a b => exact Axiom.absorb_until (a.subst q r) (b.subst q r)
+  | absorb_since a b => exact Axiom.absorb_since (a.subst q r) (b.subst q r)
   | linear_until a b c d =>
-    simp only [Formula.subst_imp, Formula.subst_and,
-      Formula.subst_or, Formula.subst_untl]
-    exact Axiom.linear_until (a.subst q r)
-      (b.subst q r) (c.subst q r) (d.subst q r)
+    exact Axiom.linear_until (a.subst q r) (b.subst q r) (c.subst q r) (d.subst q r)
   | linear_since a b c d =>
-    simp only [Formula.subst_imp, Formula.subst_and,
-      Formula.subst_or, Formula.subst_snce]
-    exact Axiom.linear_since (a.subst q r)
-      (b.subst q r) (c.subst q r) (d.subst q r)
-  | until_F a b =>
-    simp only [Formula.subst_imp, Formula.subst_untl,
-      Formula.subst_someFuture]
-    exact Axiom.until_F (a.subst q r) (b.subst q r)
-  | since_P a b =>
-    simp only [Formula.subst_imp, Formula.subst_snce,
-      Formula.subst_somePast]
-    exact Axiom.since_P (a.subst q r) (b.subst q r)
-  | temp_linearity a b =>
-    simp only [Formula.subst_imp, Formula.subst_and,
-      Formula.subst_or, Formula.subst_someFuture]
-    exact Axiom.temp_linearity (a.subst q r)
-      (b.subst q r)
-  | temp_linearity_past a b =>
-    simp only [Formula.subst_imp, Formula.subst_and,
-      Formula.subst_or, Formula.subst_somePast]
-    exact Axiom.temp_linearity_past (a.subst q r)
-      (b.subst q r)
-  | F_until_equiv a =>
-    simp only [Formula.subst_imp,
-      Formula.subst_someFuture, Formula.subst_untl,
-      Formula.subst_bot]
-    exact Axiom.F_until_equiv (a.subst q r)
-  | P_since_equiv a =>
-    simp only [Formula.subst_imp,
-      Formula.subst_somePast, Formula.subst_snce,
-      Formula.subst_bot]
-    exact Axiom.P_since_equiv (a.subst q r)
-  | modal_future a =>
-    simp only [Formula.subst_imp, Formula.subst_box,
-      Formula.subst_allFuture]
-    exact Axiom.modal_future (a.subst q r)
-  | discrete_symm_fwd =>
-    simp only [Formula.subst_imp, Formula.subst_untl,
-      Formula.subst_snce, Formula.subst_bot]
-    exact Axiom.discrete_symm_fwd
-  | discrete_symm_bwd =>
-    simp only [Formula.subst_imp, Formula.subst_snce,
-      Formula.subst_untl, Formula.subst_bot]
-    exact Axiom.discrete_symm_bwd
-  | discrete_propagate_fwd =>
-    simp only [Formula.subst_imp, Formula.subst_untl,
-      Formula.subst_allFuture, Formula.subst_bot]
-    exact Axiom.discrete_propagate_fwd
-  | discrete_propagate_bwd =>
-    simp only [Formula.subst_imp, Formula.subst_untl,
-      Formula.subst_allPast, Formula.subst_bot]
-    exact Axiom.discrete_propagate_bwd
-  | discrete_box_necessity =>
-    simp only [Formula.subst_imp, Formula.subst_untl,
-      Formula.subst_box, Formula.subst_bot]
-    exact Axiom.discrete_box_necessity
-  | prior_UZ a =>
-    simp only [Formula.subst_imp,
-      Formula.subst_someFuture, Formula.subst_untl,
-      Formula.subst_neg]
-    exact Axiom.prior_UZ (a.subst q r)
-  | prior_SZ a =>
-    simp only [Formula.subst_imp,
-      Formula.subst_somePast, Formula.subst_snce,
-      Formula.subst_neg]
-    exact Axiom.prior_SZ (a.subst q r)
-  | z1 a =>
-    simp only [Formula.subst_imp,
-      Formula.subst_allFuture,
-      Formula.subst_someFuture]
-    exact Axiom.z1 (a.subst q r)
-  | density a =>
-    simp only [Formula.subst_imp,
-      Formula.subst_allFuture]
-    exact Axiom.density (a.subst q r)
-  | dense_indicator =>
-    simp only [Formula.subst_neg, Formula.subst_untl,
-      Formula.subst_imp]
-    exact Axiom.dense_indicator
+    exact Axiom.linear_since (a.subst q r) (b.subst q r) (c.subst q r) (d.subst q r)
+  | until_F a b => exact Axiom.until_F (a.subst q r) (b.subst q r)
+  | since_P a b => exact Axiom.since_P (a.subst q r) (b.subst q r)
+  | temp_linearity a b => exact Axiom.temp_linearity (a.subst q r) (b.subst q r)
+  | temp_linearity_past a b => exact Axiom.temp_linearity_past (a.subst q r) (b.subst q r)
+  | F_until_equiv a => exact Axiom.F_until_equiv (a.subst q r)
+  | P_since_equiv a => exact Axiom.P_since_equiv (a.subst q r)
+  | modal_future a => exact Axiom.modal_future (a.subst q r)
+  | discrete_symm_fwd => exact Axiom.discrete_symm_fwd
+  | discrete_symm_bwd => exact Axiom.discrete_symm_bwd
+  | discrete_propagate_fwd => exact Axiom.discrete_propagate_fwd
+  | discrete_propagate_bwd => exact Axiom.discrete_propagate_bwd
+  | discrete_box_necessity => exact Axiom.discrete_box_necessity
+  | prior_UZ a => exact Axiom.prior_UZ (a.subst q r)
+  | prior_SZ a => exact Axiom.prior_SZ (a.subst q r)
+  | z1 a => exact Axiom.z1 (a.subst q r)
+  | density a => exact Axiom.density (a.subst q r)
+  | dense_indicator => exact Axiom.dense_indicator
 
 /-! ## swapTemporal commutes with substitution -/
 
@@ -453,7 +334,7 @@ theorem axiom_subst_minFrameClass (q r : Atom)
     {phi : Formula Atom} (h : Axiom phi) :
     (axiomSubst q r h).minFrameClass =
       h.minFrameClass := by
-  cases h <;> simp [axiomSubst, Axiom.minFrameClass]
+  cases h <;> rfl
 
 /-! ## Main theorem: derivation substitution -/
 

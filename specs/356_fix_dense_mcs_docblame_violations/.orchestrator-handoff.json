@@ -1,0 +1,15 @@
+{
+  "status": "implemented",
+  "summary": "Inserted six /-- ... -/ member docstrings above the six public theorems in DenseMCS.lean that lacked them (mp_deriv_fc, weakening_deriv_fc, assumption_deriv_fc, mcs_bot_not_mem_fc, mcs_neg_of_not_mem_fc, mcs_not_mem_of_neg_fc). One docstring was shortened by 7 chars vs plan text to stay within the 100-char line limit. lake build is clean (no warnings). lake lint shows no DenseMCS warnings. git diff shows exactly 6 added lines.",
+  "phases_completed": 1,
+  "phases_total": 1,
+  "artifacts": [
+    {
+      "path": "specs/356_fix_dense_mcs_docblame_violations/summaries/01_dense-mcs-docblame-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary for task 356: 6 docstrings inserted, build clean, lint clean"
+    }
+  ],
+  "next_action_hint": "Task 357 (linter suppression removal) may now proceed on the same file. Changes are in the working tree; orchestrator performs the commit.",
+  "blockers": []
+}

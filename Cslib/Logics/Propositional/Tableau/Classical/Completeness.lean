@@ -468,6 +468,50 @@ private lemma hintikka_inv_mono (b b' : Branch (Proposition Atom) Unit)
   | persistent out => rw [hca] at h; intro sf' hmem'; exact hsub _ (h sf' hmem')
   | notApplicable => trivial
 
+/-- Per-branch complexity measure: sum of formula complexities of formulas not yet expanded.
+A formula is "unexpanded" if it is on branch `b` but not in the expanded set `e`. -/
+private def classicalBranchComplexity
+    (b : Branch (Proposition Atom) Unit)
+    (e : List (SignedFormula (Proposition Atom) Unit)) : Nat :=
+  ((b.filter fun sf => !(e.any (· == sf))).map fun sf => sf.formula.complexity).sum
+
+/-- `classicalBranchComplexity` is additive over branch concatenation. -/
+private lemma classicalBranchComplexity_append
+    (b1 b2 : Branch (Proposition Atom) Unit)
+    (e : List (SignedFormula (Proposition Atom) Unit)) :
+    classicalBranchComplexity (b1 ++ b2) e =
+      classicalBranchComplexity b1 e + classicalBranchComplexity b2 e := by
+  simp only [classicalBranchComplexity, List.filter_append, List.map_append, List.sum_append]
+
+/-- Expanding the set `e` by one formula cannot increase `classicalBranchComplexity`:
+any newly excluded formula was contributing a non-negative amount. -/
+private lemma classicalBranchComplexity_mono_expanded
+    (b : Branch (Proposition Atom) Unit)
+    (e : List (SignedFormula (Proposition Atom) Unit))
+    (sf : SignedFormula (Proposition Atom) Unit) :
+    classicalBranchComplexity b (e ++ [sf]) ≤ classicalBranchComplexity b e := by
+  simp only [classicalBranchComplexity]
+  have natSublist_sum_le : ∀ {l1 l2 : List ℕ}, l1.Sublist l2 → l1.sum ≤ l2.sum := by
+    intro _ _ h
+    induction h with
+    | slnil => simp
+    | cons _ _ ih => exact ih.trans (Nat.le_add_left _ _)
+    | cons_cons _ _ ih => exact Nat.add_le_add_left ih _
+  apply natSublist_sum_le
+  apply List.Sublist.map
+  apply List.monotone_filter_right
+  intro x hx
+  simp only [List.any_append, Bool.not_or, Bool.and_eq_true] at hx
+  exact hx.1
+
+/-- Beta-robust termination measure: base-3 exponential of per-branch complexity, summed.
+Unlike the additive count `classicalTotalMeasure`, this measure strictly decreases at
+every expansion step (both alpha rules producing one child and beta rules producing two). -/
+private def classicalExpMeasure
+    (branches : List (Branch (Proposition Atom) Unit))
+    (expandedSets : List (List (SignedFormula (Proposition Atom) Unit))) : Nat :=
+  ((branches.zip expandedSets).map fun p => 3 ^ classicalBranchComplexity p.1 p.2).sum
+
 /-- Count of unexpanded formulas in branch `b` relative to expanded set `e`.
 Zero means every formula on the branch is in the expanded set, so the Hintikka
 invariant covers the entire branch. -/

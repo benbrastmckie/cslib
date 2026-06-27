@@ -125,11 +125,19 @@ theorem minimalTableau_sound (φ : Proposition Atom)
     subst hmem
     exact ⟨fun h' => absurd h' (Sign.noConfusion), fun _ => hneg⟩
   simp only [minimalTableau] at h
-  exact intExpandBranches_closed_unsat val botForces v_uc bf_uc _
+  apply intExpandBranches_closed_unsat val botForces v_uc bf_uc _
     isMinimallyClosed
     (fun worldOf' b hcl => minClosed_unsatisfiable val botForces worldOf' b hcl)
-    _ _ _ _ (by rfl) (by rfl) h
-    [⟨.neg, φ, 0⟩] (by simp) worldOf hsat
+    [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] (by rfl) (by rfl) (by rfl) h
+    [⟨.neg, φ, 0⟩] []
+  · simp [List.zip_cons_cons, List.zip_nil_right]
+  · exact fun w w' hacc => by
+      simp only [isAccessible] at hacc
+      split_ifs at hacc with heq
+      · have hw : w = w' := by exact_mod_cast beq_iff_eq.mp heq
+        exact le_of_eq (congrArg worldOf hw)
+      · simp [isAccessible.go] at hacc
+  · exact hsat
 
 end Cslib.Logic.PL
 

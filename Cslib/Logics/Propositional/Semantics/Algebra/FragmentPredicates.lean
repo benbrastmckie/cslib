@@ -67,7 +67,29 @@ def Proposition.IsImpTopOnly : Proposition Atom → Bool
   | .and _ _ => false
   | .or _ _ => false
 
+/-- A proposition is and-bot-free if it contains no conjunction and no falsum
+(only `atom`, `imp`, `or`). This characterizes the disjunctive-implicational
+fragment IPL⟨∨,→,⊤⟩. -/
+def Proposition.IsAndBotFree : Proposition Atom → Bool
+  | .atom _ => true
+  | .bot => false
+  | .imp a b => a.IsAndBotFree && b.IsAndBotFree
+  | .and _ _ => false
+  | .or a b => a.IsAndBotFree && b.IsAndBotFree
+
 /-! ## Subsumption Hierarchy -/
+
+/-- Every imp-top-only formula is and-bot-free. -/
+lemma IsImpTopOnly_implies_IsAndBotFree {Atom : Type*} (A : Proposition Atom) :
+    A.IsImpTopOnly = true → A.IsAndBotFree = true := by
+  induction A with
+  | atom _ => simp [Proposition.IsImpTopOnly, Proposition.IsAndBotFree]
+  | bot => simp [Proposition.IsImpTopOnly]
+  | imp a b iha ihb =>
+    simp only [Proposition.IsImpTopOnly, Proposition.IsAndBotFree, Bool.and_eq_true]
+    exact fun ⟨h1, h2⟩ => ⟨iha h1, ihb h2⟩
+  | and _ _ _ _ => simp [Proposition.IsImpTopOnly]
+  | or _ _ _ _ => simp [Proposition.IsImpTopOnly]
 
 /-- Every imp-top-only formula is or-bot-free. -/
 lemma IsImpTopOnly_implies_IsOrBotFree {Atom : Type*} (A : Proposition Atom) :
@@ -163,6 +185,18 @@ lemma imp_isImpTopOnly {Atom : Type*} {A B : Proposition Atom}
     (A.imp B).IsImpTopOnly = true := by
   simp only [Proposition.IsImpTopOnly, Bool.and_eq_true, hA, hB, and_self]
 
+/-- Implication of and-bot-free formulas is and-bot-free. -/
+lemma imp_isAndBotFree {Atom : Type*} {A B : Proposition Atom}
+    (hA : A.IsAndBotFree = true) (hB : B.IsAndBotFree = true) :
+    (A.imp B).IsAndBotFree = true := by
+  simp only [Proposition.IsAndBotFree, Bool.and_eq_true, hA, hB, and_self]
+
+/-- Disjunction of and-bot-free formulas is and-bot-free. -/
+lemma or_isAndBotFree {Atom : Type*} {A B : Proposition Atom}
+    (hA : A.IsAndBotFree = true) (hB : B.IsAndBotFree = true) :
+    (A.or B).IsAndBotFree = true := by
+  simp only [Proposition.IsAndBotFree, Bool.and_eq_true, hA, hB, and_self]
+
 /-! ## Substitution Closure -/
 
 /-- Substitution preserves IsOrFree when all substitution images are or-free. -/
@@ -215,6 +249,24 @@ theorem subst_preserves_isImpTopOnly {Atom Atom' : Type u} (A : Proposition Atom
     exact ⟨iha hA.1, ihb hA.2⟩
   | and _ _ _ _ => simp [Proposition.IsImpTopOnly] at hA
   | or _ _ _ _ => simp [Proposition.IsImpTopOnly] at hA
+
+/-- Substitution preserves IsAndBotFree when all substitution images are and-bot-free. -/
+theorem subst_preserves_isAndBotFree {Atom Atom' : Type u} (A : Proposition Atom)
+    (hA : A.IsAndBotFree = true) (f : Atom → Proposition Atom')
+    (hf : ∀ x, (f x).IsAndBotFree = true) :
+    (A.subst f).IsAndBotFree = true := by
+  induction A with
+  | atom x => exact hf x
+  | bot => simp [Proposition.IsAndBotFree] at hA
+  | imp a b iha ihb =>
+    simp only [Proposition.IsAndBotFree, Bool.and_eq_true] at hA
+    simp only [Proposition.subst, Proposition.IsAndBotFree, Bool.and_eq_true]
+    exact ⟨iha hA.1, ihb hA.2⟩
+  | and _ _ _ _ => simp [Proposition.IsAndBotFree] at hA
+  | or a b iha ihb =>
+    simp only [Proposition.IsAndBotFree, Bool.and_eq_true] at hA
+    simp only [Proposition.subst, Proposition.IsAndBotFree, Bool.and_eq_true]
+    exact ⟨iha hA.1, ihb hA.2⟩
 
 /-! ## Independence Lemmas
 

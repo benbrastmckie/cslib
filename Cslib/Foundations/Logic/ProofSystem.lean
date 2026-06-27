@@ -502,6 +502,9 @@ opaque Propositional.HilbertConjImp : Type := Empty
 /-- Tag type for the implicational fragment Hilbert system IPL⟨→,⊤⟩. -/
 opaque Propositional.HilbertImp : Type := Empty
 
+/-- Tag type for the disjunctive-implicational fragment Hilbert system IPL⟨∨,→,⊤⟩. -/
+opaque Propositional.HilbertOrImp : Type := Empty
+
 /-- Tag type for modal logic K. -/
 opaque Modal.HilbertK : Type := Empty
 

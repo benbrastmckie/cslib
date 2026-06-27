@@ -9,17 +9,20 @@ module
 public import Cslib.Logics.Propositional.ProofSystem.FragmentAxioms
 public import Cslib.Foundations.Logic.ProofSystem
 
-/-! # Instance Registration for Propositional.HilbertConjImp and Propositional.HilbertImp
+/-! # Instance Registration for Propositional.HilbertConjImp, Propositional.HilbertImp,
+and Propositional.HilbertOrImp
 
 This module registers `InferenceSystem`, `ModusPonens`, axiom instances,
-and `MinimalHilbert` instances for the `Propositional.HilbertConjImp` and
-`Propositional.HilbertImp` tag types, connecting the abstract typeclass hierarchy to the
-concrete derivation trees parameterized over `ConjImpAxiom` and `ImpAxiom` respectively.
+and `MinimalHilbert` instances for the `Propositional.HilbertConjImp`,
+`Propositional.HilbertImp`, and `Propositional.HilbertOrImp` tag types, connecting the
+abstract typeclass hierarchy to the concrete derivation trees parameterized over
+`ConjImpAxiom`, `ImpAxiom`, and `OrImpAxiom` respectively.
 
 ## Architecture
 
 - `HilbertConjImp` instances use `DerivationTree ConjImpAxiom [] phi`.
 - `HilbertImp` instances use `DerivationTree ImpAxiom [] phi`.
+- `HilbertOrImp` instances use `DerivationTree OrImpAxiom [] phi`.
 
 ## References
 
@@ -113,5 +116,52 @@ instance :
       (F := PL.Proposition Atom) where
 
 end ImpInstances
+
+/-! ## HilbertOrImp Instances -/
+
+section OrImpInstances
+
+instance : InferenceSystem Propositional.HilbertOrImp
+    (PL.Proposition Atom) where
+  derivation φ := PL.DerivationTree OrImpAxiom
+    ([] : List (PL.Proposition Atom)) φ
+
+instance :
+    ModusPonens Propositional.HilbertOrImp
+      (F := PL.Proposition Atom) where
+  mp := fun h1 h2 => by
+    obtain ⟨d1⟩ := h1; obtain ⟨d2⟩ := h2
+    exact ⟨PL.DerivationTree.modus_ponens [] _ _ d1 d2⟩
+
+instance :
+    HasAxiomImplyK Propositional.HilbertOrImp
+      (F := PL.Proposition Atom) where
+  implyK := ⟨PL.DerivationTree.ax [] _ (.implyK _ _)⟩
+
+instance :
+    HasAxiomImplyS Propositional.HilbertOrImp
+      (F := PL.Proposition Atom) where
+  implyS := ⟨PL.DerivationTree.ax [] _ (.implyS _ _ _)⟩
+
+instance :
+    HasAxiomOrI1 Propositional.HilbertOrImp
+      (F := PL.Proposition Atom) where
+  orI1 := ⟨PL.DerivationTree.ax [] _ (.orI1 _ _)⟩
+
+instance :
+    HasAxiomOrI2 Propositional.HilbertOrImp
+      (F := PL.Proposition Atom) where
+  orI2 := ⟨PL.DerivationTree.ax [] _ (.orI2 _ _)⟩
+
+instance :
+    HasAxiomOrE Propositional.HilbertOrImp
+      (F := PL.Proposition Atom) where
+  orE := ⟨PL.DerivationTree.ax [] _ (.orE _ _ _)⟩
+
+instance :
+    MinimalHilbert Propositional.HilbertOrImp
+      (F := PL.Proposition Atom) where
+
+end OrImpInstances
 
 end Cslib.Logic.PL

@@ -241,6 +241,142 @@ theorem impAxiom_hasDeductionTheorem :
     Metalogic.HasDeductionTheorem (propDerivationSystem (@ImpAxiom Atom)) :=
   hasDeductionTheorem ImpAxiom.mem_implyK ImpAxiom.mem_implyS
 
+/-! ## OrImp Axiom System -/
+
+/-- Axiom schemata for the disjunctive-implicational fragment IPL⟨∨,→,⊤⟩.
+
+The 5 axiom constructors are:
+- **implyK** (weakening): `φ → (ψ → φ)`
+- **implyS** (distribution): `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))`
+- **orI1** (left disjunction introduction): `φ → φ ∨ ψ`
+- **orI2** (right disjunction introduction): `ψ → φ ∨ ψ`
+- **orE** (disjunction elimination): `(φ → χ) → ((ψ → χ) → ((φ ∨ ψ) → χ))`
+
+Together with modus ponens, these axioms characterize the disjunctive-implicational
+fragment of minimal propositional logic. -/
+inductive OrImpAxiom : PL.Proposition Atom → Prop where
+  /-- Weakening: `φ → (ψ → φ)` -/
+  | implyK (φ ψ : PL.Proposition Atom) :
+      OrImpAxiom (φ.imp (ψ.imp φ))
+  /-- Distribution: `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))` -/
+  | implyS (φ ψ χ : PL.Proposition Atom) :
+      OrImpAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ)))
+  /-- Left disjunction introduction: `φ → φ ∨ ψ` -/
+  | orI1 (φ ψ : PL.Proposition Atom) :
+      OrImpAxiom (φ.imp (φ.or ψ))
+  /-- Right disjunction introduction: `ψ → φ ∨ ψ` -/
+  | orI2 (φ ψ : PL.Proposition Atom) :
+      OrImpAxiom (ψ.imp (φ.or ψ))
+  /-- Disjunction elimination: `(φ → χ) → ((ψ → χ) → ((φ ∨ ψ) → χ))` -/
+  | orE (φ ψ χ : PL.Proposition Atom) :
+      OrImpAxiom ((φ.imp χ).imp ((ψ.imp χ).imp ((φ.or ψ).imp χ)))
+
+/-! ## OrImp Axiom Subsumption -/
+
+/-- Every implicational axiom is a disjunctive-implicational axiom. -/
+theorem ImpAxiom.toOrImpAxiom {φ : PL.Proposition Atom}
+    (h : ImpAxiom φ) : OrImpAxiom φ := by
+  cases h with
+  | implyK a b => exact .implyK a b
+  | implyS a b c => exact .implyS a b c
+
+/-- Every disjunctive-implicational axiom is a minimal propositional axiom. -/
+theorem OrImpAxiom.toMinPropAxiom {φ : PL.Proposition Atom}
+    (h : OrImpAxiom φ) : MinPropAxiom φ := by
+  cases h with
+  | implyK a b => exact .implyK a b
+  | implyS a b c => exact .implyS a b c
+  | orI1 a b => exact .orI1 a b
+  | orI2 a b => exact .orI2 a b
+  | orE a b c => exact .orE a b c
+
+/-! ## OrImp Implication Axiom Witnesses -/
+
+namespace OrImpAxiom
+
+/-- `OrImpAxiom` includes implyK: witness for deduction theorem arguments. -/
+theorem mem_implyK :
+    ∀ (φ ψ : PL.Proposition Atom),
+    OrImpAxiom (φ.imp (ψ.imp φ)) :=
+  fun φ ψ => .implyK φ ψ
+
+/-- `OrImpAxiom` includes implyS: witness for deduction theorem arguments. -/
+theorem mem_implyS :
+    ∀ (φ ψ χ : PL.Proposition Atom),
+    OrImpAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))) :=
+  fun φ ψ χ => .implyS φ ψ χ
+
+end OrImpAxiom
+
+/-! ## OrImp Substitution Closure -/
+
+/-- Disjunctive-implicational axiom schemata are preserved under substitution. -/
+theorem subst_preserves_orImpAxiom
+    {Atom : Type u} {Atom' : Type u}
+    {φ : PL.Proposition Atom}
+    (h : OrImpAxiom φ) (f : Atom → PL.Proposition Atom') :
+    OrImpAxiom (φ.subst f) := by
+  cases h with
+  | implyK a b => exact .implyK (a.subst f) (b.subst f)
+  | implyS a b c => exact .implyS (a.subst f) (b.subst f) (c.subst f)
+  | orI1 a b => exact .orI1 (a.subst f) (b.subst f)
+  | orI2 a b => exact .orI2 (a.subst f) (b.subst f)
+  | orE a b c => exact .orE (a.subst f) (b.subst f) (c.subst f)
+
+/-! ## OrImp Fragment Predicate Compatibility -/
+
+/-- Applying the `implyK` constructor to and-bot-free propositions yields an and-bot-free formula.
+
+This is `φ → (ψ → φ)`, which is and-bot-free when `φ` and `ψ` are. -/
+lemma orImpAxiom_implyK_isAndBotFree {φ ψ : PL.Proposition Atom}
+    (hφ : φ.IsAndBotFree = true) (hψ : ψ.IsAndBotFree = true) :
+    (φ.imp (ψ.imp φ)).IsAndBotFree = true :=
+  imp_isAndBotFree hφ (imp_isAndBotFree hψ hφ)
+
+/-- Applying the `implyS` constructor to and-bot-free propositions yields an and-bot-free formula.
+
+This is `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))`, and-bot-free when `φ`, `ψ`, `χ` are. -/
+lemma orImpAxiom_implyS_isAndBotFree {φ ψ χ : PL.Proposition Atom}
+    (hφ : φ.IsAndBotFree = true) (hψ : ψ.IsAndBotFree = true) (hχ : χ.IsAndBotFree = true) :
+    ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))).IsAndBotFree = true :=
+  imp_isAndBotFree
+    (imp_isAndBotFree hφ (imp_isAndBotFree hψ hχ))
+    (imp_isAndBotFree (imp_isAndBotFree hφ hψ) (imp_isAndBotFree hφ hχ))
+
+/-- Applying the `orI1` constructor to and-bot-free propositions yields an and-bot-free formula.
+
+This is `φ → φ ∨ ψ`, and-bot-free when `φ` and `ψ` are. -/
+lemma orImpAxiom_orI1_isAndBotFree {φ ψ : PL.Proposition Atom}
+    (hφ : φ.IsAndBotFree = true) (hψ : ψ.IsAndBotFree = true) :
+    (φ.imp (φ.or ψ)).IsAndBotFree = true :=
+  imp_isAndBotFree hφ (or_isAndBotFree hφ hψ)
+
+/-- Applying the `orI2` constructor to and-bot-free propositions yields an and-bot-free formula.
+
+This is `ψ → φ ∨ ψ`, and-bot-free when `φ` and `ψ` are. -/
+lemma orImpAxiom_orI2_isAndBotFree {φ ψ : PL.Proposition Atom}
+    (hφ : φ.IsAndBotFree = true) (hψ : ψ.IsAndBotFree = true) :
+    (ψ.imp (φ.or ψ)).IsAndBotFree = true :=
+  imp_isAndBotFree hψ (or_isAndBotFree hφ hψ)
+
+/-- Applying the `orE` constructor to and-bot-free propositions yields an and-bot-free formula.
+
+This is `(φ → χ) → ((ψ → χ) → ((φ ∨ ψ) → χ))`, and-bot-free when `φ`, `ψ`, `χ` are. -/
+lemma orImpAxiom_orE_isAndBotFree {φ ψ χ : PL.Proposition Atom}
+    (hφ : φ.IsAndBotFree = true) (hψ : ψ.IsAndBotFree = true) (hχ : χ.IsAndBotFree = true) :
+    ((φ.imp χ).imp ((ψ.imp χ).imp ((φ.or ψ).imp χ))).IsAndBotFree = true :=
+  imp_isAndBotFree
+    (imp_isAndBotFree hφ hχ)
+    (imp_isAndBotFree (imp_isAndBotFree hψ hχ)
+      (imp_isAndBotFree (or_isAndBotFree hφ hψ) hχ))
+
+/-! ## OrImp Deduction Theorem Instance -/
+
+/-- The deduction theorem holds for `OrImpAxiom`. -/
+theorem orImpAxiom_hasDeductionTheorem :
+    Metalogic.HasDeductionTheorem (propDerivationSystem (@OrImpAxiom Atom)) :=
+  hasDeductionTheorem OrImpAxiom.mem_implyK OrImpAxiom.mem_implyS
+
 /-! ## ConjImpBot Axiom System -/
 
 /-- Axiom schemata for the conjunctive-implicational-bot fragment IPL⟨∧,→,⊥,⊤⟩.

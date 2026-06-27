@@ -2,26 +2,44 @@
   "task_number": 376,
   "status": "partial",
   "dispatch_status": "partial",
-  "phases_completed": 1,
+  "phases_completed": "1",
   "phases_total": 5,
-  "go_no_go": "GO",
-  "dispatch_summary": "Lemma restated with measure hypothesis; builds green with 1 checkpoint sorry",
+  "decision": "fixed",
+  "dispatch_summary": "Fixed 3 tactic errors in uncommitted Phase-2 attempt (hpendingExp missing from simp sets at lines 644+688, invalid <;>[...] syntax at line 653); build green with 2 well-structured sorries.",
   "build_state": {
     "scoped_build": "green",
     "error_count": 0,
-    "sorry_count": 1
+    "sorry_count": 2
   },
   "sorry_inventory": {
-    "count": 1,
+    "count": 2,
     "items": [
       {
         "file": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean",
-        "line": 531,
-        "lemma": "classicalExpandBranches_hintikka",
-        "status": "inductive_step_checkpoint"
+        "line": 703,
+        "description": "Measure-decrease obligation: classicalTotalMeasure (done ++ newBs ++ bt) (doneExp ++ newBs.map ... ++ es) <= fuel'. Core blocker: classicalTotalMeasure does not strictly decrease under beta (branching) rules; exponential worst-case growth. Requires either (a) a complexity-weighted measure proof or (b) a raised fuel bound in Expansion.lean."
+      },
+      {
+        "file": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean",
+        "line": 709,
+        "description": "Hintikka invariant propagation: after expansion, new branches (newBs) must satisfy the invariant that for each sf in newExp, classicalApplyOne sf outputs land on the new branch. Requires classicalStepBranch output-membership lemmas and bookkeeping for inherited formulas."
       }
     ]
   },
-  "continuation_context": "Phase 2: discharge the remaining inductive-step checkpoint sorry (~line 531); confirm the fuel bound 4*(complexity+1)+1 suffices or raise it in Expansion.lean",
-  "resolves_blocker_for": 363
+  "blockers": [
+    {
+      "sorry_line": 703,
+      "kind": "measure_decrease",
+      "description": "classicalTotalMeasure does not decrease under beta expansion (branching rules duplicate branches). Two remedies: (a) prove a complexity-weighted measure strictly decreases per step, or (b) raise the fuel bound in Expansion.lean to account for exponential branch growth.",
+      "verbatim_goal": "classicalTotalMeasure (done ++ newBs ++ bt) (doneExp ++ newBs.map (fun _ => newExp) ++ es) <= fuel'"
+    },
+    {
+      "sorry_line": 709,
+      "kind": "invariant_propagation",
+      "description": "After classicalStepBranch bh e = some (newBs, newExp), must prove: for each b' in newBs and sf in newExp, classicalApplyOne sf outputs land on b'. Also must show inherited formulas from bh are on each b' (from Branch.extendMany semantics).",
+      "verbatim_goal": "Hintikka invariant for done ++ newBs ++ bt and doneExp ++ newBs.map (fun _ => newExp) ++ es"
+    }
+  ],
+  "resolves_blocker_for": 363,
+  "continuation_context": "Two sub-goals remain to fully discharge classicalExpandBranches_hintikka: (1) measure-decrease [line 703] — likely requires either a new weighted-complexity measure or fuel-bound analysis from Expansion.lean; (2) Hintikka invariant propagation [line 709] — requires lemmas about classicalStepBranch output membership. The invariant propagation sorry is tractable next; the measure sorry may need a Phase 3/4 design decision on the fuel bound."
 }

@@ -518,6 +518,33 @@ private lemma classicalTotalMeasure_zero_mem_subset
       (List.mem_map.mpr ⟨(branches[i], expandedSets[i]'hi'), hzip, rfl⟩)
   exact classicalRemMeasure_zero_subset hterm hsf
 
+/-- When `classicalStepBranch b e = none`, every formula on `b` is either already in the
+expanded set `e` or has `classicalApplyOne` return `notApplicable` (the branch is saturated). -/
+private lemma classicalStepBranch_none_saturated
+    {b : Branch (Proposition Atom) Unit}
+    {e : List (SignedFormula (Proposition Atom) Unit)}
+    (hstep : classicalStepBranch b e = none)
+    (sf : SignedFormula (Proposition Atom) Unit) (hsfb : sf ∈ b) :
+    sf ∈ e ∨ classicalApplyOne sf = .notApplicable := by
+  simp only [classicalStepBranch] at hstep
+  rw [List.findSome?_eq_none_iff] at hstep
+  have hbody := hstep sf hsfb
+  by_cases hany : e.any (· == sf) = true
+  · left
+    simp only [List.any_eq_true] at hany
+    obtain ⟨sf', hme, heq⟩ := hany
+    simp only [beq_iff_eq] at heq
+    exact heq ▸ hme
+  · right
+    simp only [Bool.not_eq_true] at hany
+    simp only [hany, ite_false] at hbody
+    rcases hca : classicalApplyOne sf with out | brs | out | _
+    all_goals simp only [hca] at hbody
+    · exact absurd hbody (by simp)
+    · exact absurd hbody (by simp)
+    · exact absurd hbody (by simp)
+    · rfl
+
 /-- The open branch returned by `classicalExpandBranches` is a classical Hintikka set,
 provided the total measure of unexpanded formulas is at most the fuel.
 
@@ -525,7 +552,7 @@ When `classicalTotalMeasure branches expandedSets ≤ fuel`:
 - **fuel = 0**: measure = 0, so every formula on every branch is already expanded (in its
   expanded set). The returned branch's Hintikka condition follows directly from the invariant.
 - **fuel = n+1**: The inner loop either finds a saturated open branch (Hintikka by invariant
-  and saturation) or expands one formula (decreasing the measure) and recurses.
+  and saturation) or expands one formula and recurses.
 
 The proof is by induction on fuel with an inner induction on the pending list. -/
 private lemma classicalExpandBranches_hintikka (fuel : Nat) :
@@ -576,9 +603,111 @@ private lemma classicalExpandBranches_hintikka (fuel : Nat) :
         rw [hi_eq] at hInv_i
         exact hInv_i
   | succ fuel' ih =>
-    -- The succ case (processNext inner induction + measure-decrease argument) is proved
-    -- in Phase 2. This sorry is the single checkpoint sorry for Phase 1.
-    sorry
+    intro branches expandedSets hlength hfuel hInv b h
+    simp only [classicalExpandBranches] at h
+    -- Inner induction on the pending list, tracking the full invariant.
+    suffices key : ∀ (pending : List (Branch (Proposition Atom) Unit))
+        (pendingExp : List (List (SignedFormula (Proposition Atom) Unit)))
+        (done : List (Branch (Proposition Atom) Unit))
+        (doneExp : List (List (SignedFormula (Proposition Atom) Unit))),
+        pendingExp.length = pending.length →
+        doneExp.length = done.length →
+        (∀ (i : Nat) (bi : Branch (Proposition Atom) Unit)
+            (ei : List (SignedFormula (Proposition Atom) Unit)),
+          (done ++ pending)[i]? = some bi → (doneExp ++ pendingExp)[i]? = some ei →
+          ∀ sf ∈ ei, match classicalApplyOne sf with
+            | .linear out => ∀ sf' ∈ out, sf' ∈ bi
+            | .branching brs => ∃ br ∈ brs, ∀ sf' ∈ br, sf' ∈ bi
+            | .persistent out => ∀ sf' ∈ out, sf' ∈ bi
+            | .notApplicable => True) →
+        classicalTotalMeasure (done ++ pending) (doneExp ++ pendingExp) ≤ fuel' + 1 →
+        classicalExpandBranches.processNext fuel' pending pendingExp done doneExp = .openBranch b →
+        classicalHintikkaSet b from
+      key branches expandedSets [] [] hlength rfl hInv hfuel (by simpa [classicalExpandBranches] using h)
+    intro pending
+    induction pending with
+    | nil =>
+      intro pendingExp done doneExp _ _ _ _ hinner
+      simp [classicalExpandBranches.processNext] at hinner
+    | cons bh bt ih_inner =>
+      intro pendingExp done doneExp hlength_p hdlength hInv_all hmeas hinner
+      simp only [List.length_cons] at hlength_p
+      cases hpendingExp : pendingExp with
+      | nil => simp only [hpendingExp, List.length_nil] at hlength_p; omega
+      | cons e es =>
+        rw [hpendingExp] at hinner hmeas
+        simp only [classicalExpandBranches.processNext] at hinner
+        by_cases hcl : isClassicallyClosed bh = true
+        · -- Closed branch: skip and recurse on inner induction
+          rw [if_pos hcl] at hinner
+          apply ih_inner es (done ++ [bh]) (doneExp ++ [e])
+          · simp only [hpendingExp, List.length_cons, Nat.add_right_cancel_iff] at hlength_p; exact hlength_p
+          · simp only [List.length_append, List.length_singleton, hdlength]
+          · intro i bi ei hi_bi hi_ei
+            apply hInv_all i bi ei
+            · -- rewrite done ++ [bh] ++ bt = done ++ bh :: bt in hi_bi
+              convert hi_bi using 2; simp
+            · -- rewrite doneExp ++ [e] ++ es as doneExp ++ pendingExp in hi_ei
+              rw [hpendingExp]; convert hi_ei using 2; simp
+          · -- classicalTotalMeasure (done ++ [bh] ++ bt) ... = classicalTotalMeasure (done ++ bh :: bt) ...
+            convert hmeas using 2 <;> simp
+          · exact hinner
+        · simp only [Bool.not_eq_true] at hcl
+          rw [if_neg (by simp [hcl])] at hinner
+          cases hstep : classicalStepBranch bh e with
+          | none =>
+            -- Saturated open branch: return it as the Hintikka set
+            rw [hstep] at hinner
+            have hbeq : bh = b := by cases hinner; rfl
+            subst hbeq
+            -- bh is saturated and open, so it is a Hintikka set
+            refine ⟨hcl, ?_⟩
+            intro sf hsfmem
+            -- Get the Hintikka invariant for bh (at index done.length in done ++ bh :: bt)
+            have hbh_idx : (done ++ bh :: bt)[done.length]? = some bh := by
+              rw [List.getElem?_append_right (le_refl _)]
+              simp [Nat.sub_self]
+            have he_idx : (doneExp ++ pendingExp)[done.length]? = some e := by
+              rw [hpendingExp, List.getElem?_append_right (by omega)]
+              simp [hdlength, Nat.sub_self]
+            have hInv_bh := hInv_all done.length bh e hbh_idx he_idx
+            -- By classicalStepBranch_none_saturated: sf ∈ e or classicalApplyOne sf = notApplicable
+            rcases classicalStepBranch_none_saturated hstep sf hsfmem with hine | hna
+            · -- sf ∈ e: apply the Hintikka invariant
+              exact hInv_bh sf hine
+            · -- classicalApplyOne sf = notApplicable: the branch clause is True
+              simp [hna]
+          | some step =>
+            obtain ⟨newBs, newExp⟩ := step
+            rw [hstep] at hinner
+            -- Expansion exit: call classicalExpandBranches with fuel'
+            -- Apply the outer induction hypothesis ih
+            apply ih (done ++ newBs ++ bt) (doneExp ++ newBs.map (fun _ => newExp) ++ es)
+            · -- Length condition for new branches
+              simp only [List.length_append, List.length_map, hdlength]
+              simp only [hpendingExp, List.length_cons, Nat.add_right_cancel_iff] at hlength_p
+              omega
+            · -- Measure hypothesis: totalMeasure (done ++ newBs ++ bt) ≤ fuel'
+              -- NOTE: classicalTotalMeasure does not strictly decrease per expansion step.
+              -- For beta (branching) rules, one branch becomes two: each new branch
+              -- inherits all of bh's unexpanded formulas plus one new formula, so
+              -- the total measure can increase (roughly doubling for beta rules).
+              -- The correct fix is to use a complexity-weighted measure that decreases
+              -- per step (expansion always produces strict subformulas, so
+              -- sum-of-complexity decreases even under beta duplication -- though the
+              -- bookkeeping for the rest-of-branch doubling is subtle).
+              -- Phase 3'/4 of the plan addresses this by either:
+              -- (a) proving the sum-of-complexity measure decreases, or
+              -- (b) raising the fuel bound in Expansion.lean to match the exponential
+              --     worst-case growth of classicalTotalMeasure.
+              sorry
+            · -- Hintikka invariant for the new branch list
+              -- For each (b', newExp) pair (b' ∈ newBs) and sf ∈ e ++ [sf_expanded]:
+              --  * sf ∈ e: old invariant for bh applies since bh ⊆ b'
+              --  * sf = sf_expanded: classicalStepBranch ensures outputs are on b'
+              -- For branches in done and bt: inherited unchanged.
+              sorry
+            · exact hinner
 
 /-- Any formula on a branch is still present on every branch produced by `classicalStepBranch`.
 Uses `Branch.extendMany b x = x ++ b`. -/

@@ -19,7 +19,8 @@ This module proves termination of normalization via `redexWeight`, and establish
 - `Theory.Derivation.normalizeAux_fixpoint`: Strongly normal derivations are fixpoints of
   `normalizeAux`.
 - `Theory.Derivation.normalize_isStronglyNormal`: `normalize` produces strongly normal
-  derivations (proof currently `sorry` — see task 332).
+  derivations (proof currently `sorry` — the outstanding obligation is
+  `reduceRoot_decreases_normMeasure` for the h_8 case).
 
 ## References
 
@@ -1322,7 +1323,7 @@ private theorem Theory.Derivation.reduceRoot_decreases_normMeasure
     --         (weakCtx ⋯ Ecc).commutingSum = 0   (commutingSum_sn_eq_zero  + _weakCtx)
     -- With Ecc's extra copies gone, maximalFormulas equality holds and commutingSum decreases
     -- by (orE G Dcc DAcc DBcc).nodeCount ≥ 1.
-    -- TODO(task 332, Phase 3): h_8 is the last open decrease case. The E-SN approach is correct
+    -- TODO(reduceRoot_decreases_normMeasure, h_8 case): h_8 is the last open decrease case. The E-SN approach is correct
     -- (commutingSum_sn_eq_zero is proved above; reduceRootSubSN's hA forces E strongly normal, so
     -- Ecc.maximalFormulas = 0 and Ecc.commutingSum = 0, cancelling the duplicated-E copies). The
     -- blocker is purely tactic performance: nesting cases DAcc × DBcc × Dcc with simp_all is a

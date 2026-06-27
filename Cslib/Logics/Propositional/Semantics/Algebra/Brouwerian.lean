@@ -38,7 +38,7 @@ The Brouwerian semilattice models the `{⊓, ⇨, ⊤}` fragment of intuitionist
 
 On formulas in the `{⊓, ⇨, ⊤}` fragment (i.e., formulas where `bot` and `or` do not appear),
 `BrouwerianEvaluate v A = AlgEvaluate v ⊤ A` when the Brouwerian semilattice instance comes
-from a GHA. This bridge is the subject of task 308.
+from a GHA. This bridge is established by `brouwerianEmbeddingLemma` in `FreeJoinCompletion.lean`.
 
 ## References
 

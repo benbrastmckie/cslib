@@ -589,6 +589,20 @@ private lemma classicalBranchComplexity_extendMany
   simp only [Branch.extendMany]
   exact classicalBranchComplexity_append out b e
 
+/-- A child branch (original `b` extended by rule outputs `out`, with `sf` newly expanded) has
+complexity at most `cBC b e - 1`, when the outputs' total complexity is `≤ complexity sf - 1`. -/
+private lemma classicalBranchComplexity_child_le
+    (b : Branch (Proposition Atom) Unit) (out : List (SignedFormula (Proposition Atom) Unit))
+    (e : List (SignedFormula (Proposition Atom) Unit)) (sf : SignedFormula (Proposition Atom) Unit)
+    (hmem : sf ∈ b) (hne : e.any (· == sf) = false) (hsf1 : 1 ≤ sf.formula.complexity)
+    (hout : (out.map (fun x => x.formula.complexity)).sum ≤ sf.formula.complexity - 1) :
+    classicalBranchComplexity (Branch.extendMany b out) (e ++ [sf])
+      ≤ classicalBranchComplexity b e - 1 := by
+  rw [classicalBranchComplexity_extendMany]
+  have h1 := classicalBranchComplexity_le_mapsum out (e ++ [sf])
+  have h2 := classicalBranchComplexity_drop b e sf hmem hne
+  omega
+
 /-- For an applicable signed formula, the total complexity of the output formulas equals
 `sf.formula.complexity - 1`, and the expanded formula has complexity ≥ 1.
 This identity drives strict decrease of `classicalExpMeasure` at each tableau step. -/

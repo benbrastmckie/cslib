@@ -282,16 +282,17 @@ theorem Theory.Derivation.subformula_property_of_isStronglyNormal
 
 /-! ## Main Subformula Property Theorem -/
 
-/-- The main subformula property: every derivation has a strongly normal form.
+/-- The main subformula property: every derivation has a strongly normal form satisfying the
+subformula property.
 
-Proved via `normalizeAux`: the fuel-bounded normalizer with `2^d.height` fuel produces
-a strongly normal derivation by Prawitz's normalization theorem
-([Prawitz1965], Ch. III–IV). -/
+Proved via `exists_stronglyNormal_form` (constructive, height-free): the strongly-normal form
+is built by the structural driver `snForm` from smart eliminators and substitution-normalization
+([Prawitz1965], Ch. III–IV), and the subformula property of that form follows from
+`subformula_property_of_isStronglyNormal`. -/
 theorem Theory.Derivation.subformula_property {G : Ctx Atom} {A : Proposition Atom}
     (d : T.Derivation G A) :
-    ∃ (d' : T.Derivation G A), d'.isStronglyNormal = true ∧ d'.SubformulaProperty :=
-  ⟨d.normalize,
-    d.normalize_isStronglyNormal,
-    d.normalize.subformula_property_of_isStronglyNormal d.normalize_isStronglyNormal⟩
+    ∃ (d' : T.Derivation G A), d'.isStronglyNormal = true ∧ d'.SubformulaProperty := by
+  obtain ⟨d', hsn⟩ := d.exists_stronglyNormal_form
+  exact ⟨d', hsn, d'.subformula_property_of_isStronglyNormal hsn⟩
 
 end Cslib.Logic.PL

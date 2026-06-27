@@ -127,9 +127,8 @@ Uses `liftDerivationTree` with the axiom subsumption chain
 `MinPropAxiom → IntPropAxiom`. -/
 theorem derivableMinOfDerivableInt {Atom : Type u} {φ : PL.Proposition Atom}
     (h : Derivable (@MinPropAxiom Atom) φ) :
-    Derivable (@IntPropAxiom Atom) φ := by
-  obtain ⟨d⟩ := h
-  exact ⟨liftDerivationTree (fun ψ hψ => hψ.toIntPropAxiom) d⟩
+    Derivable (@IntPropAxiom Atom) φ :=
+  derivable_mono (fun _ hψ => hψ.toIntPropAxiom) h
 
 /-- **Subsumption**: every formula derivable in the full intuitionistic Hilbert system is
 derivable in the classical Hilbert system.
@@ -138,9 +137,8 @@ Uses `liftDerivationTree` with the axiom subsumption chain
 `IntPropAxiom → PropositionalAxiom` via `IntPropAxiom.toPropAxiom`. -/
 theorem derivableIntOfDerivableProp {Atom : Type u} {φ : PL.Proposition Atom}
     (h : Derivable (@IntPropAxiom Atom) φ) :
-    Derivable (@PropositionalAxiom Atom) φ := by
-  obtain ⟨d⟩ := h
-  exact ⟨liftDerivationTree (fun ψ hψ => hψ.toPropAxiom) d⟩
+    Derivable (@PropositionalAxiom Atom) φ :=
+  derivable_mono (fun _ hψ => hψ.toPropAxiom) h
 
 /-- **Derivability subsumption chain**: the five Hilbert systems are strictly ordered
 by derivability. For any formula `φ`:
@@ -298,6 +296,38 @@ theorem minAxiom_iff_chain {Atom : Type u} {φ : PL.Proposition Atom}
     (hBF : φ.IsBotFree = true) :
     Derivable (@MinPropAxiom Atom) φ ↔ Derivable (@IntPropAxiom Atom) φ :=
   ⟨derivableMinOfDerivableInt, hilbertIplConservativeOverMpl hBF⟩
+
+/-! ## Glivenko Strength Wrapper -/
+
+/-- **Theory-parametric Glivenko (strength wrapper)**: if every axiom of `A_cl` is a
+`PropositionalAxiom` (classical soundness), and every `IntPropAxiom` is an axiom of `A_int`
+(intuitionistic completeness), then CPL-strength derivability of `φ` implies
+IPL-strength derivability of `¬¬φ`.
+
+This is a convenience wrapper over `hilbertGlivenko_theory` that discharges the BA-soundness
+and HA-completeness hypotheses via the Hilbert-level completeness theorems:
+- `h_cl ψ hψ = CPL.hilbert_alg_complete.mp (derivable_mono hcl hψ)` (soundness via CPL)
+- `h_int ψ hHA = derivable_mono hint (IPL.hilbert_alg_complete.mpr hHA)` (completeness via IPL)
+
+**Design note (deviation from plan)**: The plan proposed using `CPL ⊆ AxiomTheory A_cl` /
+`IPL ⊆ AxiomTheory A_int` as the strength hypotheses, following the ND-theory inclusion
+idiom. Those inclusion conditions alone do not imply BA-soundness of `A_cl` (the axiom set
+could contain non-BA-valid elements). The correct condition for BA-soundness is
+`∀ ψ, A_cl ψ → PropositionalAxiom ψ` (A_cl is a sub-predicate of `PropositionalAxiom`), and
+for HA-completeness is `∀ ψ, IntPropAxiom ψ → A_int ψ` (A_int extends IPL axioms).
+
+**Concrete recovery**: `hilbertGlivenko = hilbertGlivenko_strength PropositionalAxiom IntPropAxiom
+  (fun ψ h => h) (fun ψ h => h.toIntPropAxiom)`. -/
+theorem hilbertGlivenko_strength {Atom : Type u} {φ : PL.Proposition Atom}
+    (A_cl A_int : PL.Proposition Atom → Prop)
+    [MinimalAxioms A_cl] [MinimalAxioms A_int]
+    (hcl : ∀ ψ, A_cl ψ → @PropositionalAxiom Atom ψ)
+    (hint : ∀ ψ, @IntPropAxiom Atom ψ → A_int ψ)
+    (h : Derivable A_cl φ) : Derivable A_int (¬¬φ) :=
+  hilbertGlivenko_theory A_cl A_int
+    (fun _ hψ => CPL.hilbert_alg_complete.mp (derivable_mono hcl hψ))
+    (fun _ hHA => derivable_mono hint (IPL.hilbert_alg_complete.mpr hHA))
+    h
 
 /-! ## ND Corollaries via Bridges -/
 

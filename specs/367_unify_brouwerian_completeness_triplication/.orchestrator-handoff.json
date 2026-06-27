@@ -1,0 +1,21 @@
+{
+  "status": "implemented",
+  "summary": "Task 367 complete: collapsed the three Brouwerian completeness modules into one generic development (BrouwerianCompletenessGeneric.lean). Net −1366/+597 lines in Algebra dir. All 8 load-bearing public names preserved; three filenames kept as generic-backed shims. 0 sorries, 0 new axioms.",
+  "phases_completed": 5,
+  "phases_total": 5,
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "Ready for PR. NOTE: full-project lake build / checkInitImports / shake could not be confirmed end-to-end because of PRE-EXISTING failures in Bimodal/Metalogic/Separation/* , Bimodal/Theorems/Perpetuity/Bridge, Modal/Tableau/Soundness (disjoint from this task, present in base commit). Targeted build of all 367 modules + dependents is green (679 jobs); lint-style on changed files passes.",
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/Semantics/Algebra/BrouwerianCompletenessGeneric.lean",
+      "type": "source",
+      "summary": "new generic Brouwerian completeness engine"
+    },
+    {
+      "path": "/summaries",
+      "type": "summary",
+      "summary": "phase 5 shim collapse"
+    }
+  ]
+}

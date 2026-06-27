@@ -1,7 +1,7 @@
 # Implementation Plan: Theory-Parametric Glivenko & Conservativity Spine
 
 - **Task**: 348 - glivenko_conservativity_theory_parametric
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 9 hours
 - **Dependencies**: Task 345 (`IsMinimal`/`MinimalAxioms` inclusion bridge — planned, must land first); Task 343 (done); Task 341 (parametric algebraic completeness — done, fixed backend)
 - **Research Inputs**: specs/348_glivenko_conservativity_theory_parametric/reports/01_parametric-conservativity-spine.md
@@ -101,7 +101,7 @@ propositional algebra conservativity programme (tasks 341/345/348/352 cluster).
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: L2 parametric core — `derivable_mono` + parametric ND bridge [NOT STARTED]
+### Phase 1: L2 parametric core — `derivable_mono` + parametric ND bridge [COMPLETED]
 
 **Goal**: Introduce the two foundational L2 parametric lemmas and place them where every per-tier
 file can consume them, without re-deriving any per-tier subsumption yet.
@@ -142,7 +142,7 @@ file can consume them, without re-deriving any per-tier subsumption yet.
 
 ---
 
-### Phase 2: Theory-parametric Glivenko [NOT STARTED]
+### Phase 2: Theory-parametric Glivenko [COMPLETED]
 
 **Goal**: Introduce the headline deliverable: a theory-parametric Glivenko over a
 classical-strength source and intuitionistic-strength target, plus a strength-predicate wrapper.
@@ -177,7 +177,7 @@ classical-strength source and intuitionistic-strength target, plus a strength-pr
 
 ---
 
-### Phase 3: `conservative_via_embedding` combinator (L3 as hypothesis) [NOT STARTED]
+### Phase 3: `conservative_via_embedding` combinator (L3 as hypothesis) [COMPLETED]
 
 **Goal**: Introduce the shared four-move conservativity skeleton as one combinator, with the
 bespoke commutation/embedding lemma supplied as an explicit hypothesis — never derived from a hom
@@ -211,7 +211,7 @@ typeclass.
 
 ---
 
-### Phase 4: Corollary recovery — re-derive per-tier theorems (regression guard) [NOT STARTED]
+### Phase 4: Corollary recovery — re-derive per-tier theorems (regression guard) [COMPLETED]
 
 **Goal**: Re-derive every existing public per-tier theorem as an instantiation of the Phase 1-3
 parametric statements, proving the public surface is preserved. This is the **hard regression
@@ -258,7 +258,7 @@ check**: existing theorem names and signatures must still hold.
 
 ---
 
-### Phase 5: Optional `AlgEvaluate_heytingHom` + full CI gate [NOT STARTED]
+### Phase 5: Optional `AlgEvaluate_heytingHom` + full CI gate [COMPLETED]
 
 **Goal**: Add the optional hom-intertwining lemma only if it lands clean and demonstrably shortens
 the Glivenko/`WithBot` cases; then run the complete CSLib CI pipeline as the final gate.

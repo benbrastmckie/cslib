@@ -178,6 +178,29 @@ theorem IntPropAxiom.toPropAxiom {φ : PL.Proposition Atom}
   | orI2 a b => exact .orI2 a b
   | orE a b c => exact .orE a b c
 
+/-! ## ConjImpAxioms Typeclass -/
+
+/-- Typeclass bundling the 5 conjunctive-implicational axiom witnesses.
+
+Any axiom predicate that includes K, S, andI, andE1, andE2 can provide an instance.
+This is a strict factor of `MinimalAxioms` (defined in `NaturalDeduction.Equivalence`);
+the three fragment axiom families (`ConjImpAxiom`, `ConjImpBotAxiom`, `ConjImpBotMinAxiom`)
+satisfy this but not `MinimalAxioms` (they lack or-axioms).
+The generic Lindenbaum meet-fragment lemmas and the `BrouwerianSemilattice` Lindenbaum
+instance are parameterized over `[ConjImpAxioms]`. -/
+class ConjImpAxioms {Atom : Type*} (Axioms : PL.Proposition Atom → Prop) : Prop where
+  /-- K axiom schema: φ → (ψ → φ) -/
+  h_K : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ))
+  /-- S axiom schema: (φ → (ψ → χ)) → ((φ → ψ) → (φ → χ)) -/
+  h_S : ∀ (φ ψ χ : PL.Proposition Atom),
+    Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ)))
+  /-- And-introduction schema: φ → (ψ → (φ ∧ ψ)) -/
+  h_andI : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp (φ.and ψ)))
+  /-- And-elimination1 schema: (φ ∧ ψ) → φ -/
+  h_andE1 : ∀ (φ ψ : PL.Proposition Atom), Axioms ((φ.and ψ).imp φ)
+  /-- And-elimination2 schema: (φ ∧ ψ) → ψ -/
+  h_andE2 : ∀ (φ ψ : PL.Proposition Atom), Axioms ((φ.and ψ).imp ψ)
+
 /-! ## Implication Axiom Witnesses -/
 
 namespace PropositionalAxiom

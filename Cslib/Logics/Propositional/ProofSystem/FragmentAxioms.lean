@@ -969,4 +969,30 @@ theorem classicalConjImpBotAxiom_hasDeductionTheorem :
     Metalogic.HasDeductionTheorem (propDerivationSystem (@ClassicalConjImpBotAxiom Atom)) :=
   hasDeductionTheorem ClassicalConjImpBotAxiom.mem_implyK ClassicalConjImpBotAxiom.mem_implyS
 
+/-! ## ConjImpAxioms Instances for Fragment Axiom Families -/
+
+/-- `ConjImpAxiom` satisfies `ConjImpAxioms`. -/
+instance conjImpAxiomConjImpAxioms : ConjImpAxioms (@ConjImpAxiom Atom) where
+  h_K := fun φ ψ => .implyK φ ψ
+  h_S := fun φ ψ χ => .implyS φ ψ χ
+  h_andI := fun φ ψ => .andI φ ψ
+  h_andE1 := fun φ ψ => .andE1 φ ψ
+  h_andE2 := fun φ ψ => .andE2 φ ψ
+
+/-- `ConjImpBotAxiom` satisfies `ConjImpAxioms`. -/
+instance conjImpBotAxiomConjImpAxioms : ConjImpAxioms (@ConjImpBotAxiom Atom) where
+  h_K := fun φ ψ => .implyK φ ψ
+  h_S := fun φ ψ χ => .implyS φ ψ χ
+  h_andI := fun φ ψ => .andI φ ψ
+  h_andE1 := fun φ ψ => .andE1 φ ψ
+  h_andE2 := fun φ ψ => .andE2 φ ψ
+
+/-- `ConjImpBotMinAxiom` satisfies `ConjImpAxioms`. -/
+instance conjImpBotMinAxiomConjImpAxioms : ConjImpAxioms (@ConjImpBotMinAxiom Atom) where
+  h_K := fun φ ψ => .implyK φ ψ
+  h_S := fun φ ψ χ => .implyS φ ψ χ
+  h_andI := fun φ ψ => .andI φ ψ
+  h_andE1 := fun φ ψ => .andE1 φ ψ
+  h_andE2 := fun φ ψ => .andE2 φ ψ
+
 end Cslib.Logic.PL

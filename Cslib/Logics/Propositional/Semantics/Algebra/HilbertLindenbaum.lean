@@ -6,6 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
+public import Cslib.Foundations.Order.BrouwerianSemilattice
 public import Cslib.Logics.Propositional.Semantics.Algebra
 public import Cslib.Logics.Propositional.NaturalDeduction.HilbertDerivedRules
 public import Cslib.Logics.Propositional.NaturalDeduction.Equivalence
@@ -129,10 +130,10 @@ theorem hilbertEquiv_trans
 /-! ## Setoid, Quotient Type, and Quotient Map -/
 
 /-- The Hilbert-equivalence setoid on `Proposition Atom`.
-Requires `MinimalAxioms` for K and S (needed by transitivity). -/
+Requires `ConjImpAxioms` for K and S (needed by transitivity). -/
 def hilbertPropositionSetoid
     {Axioms : Proposition Atom → Prop}
-    [inst : MinimalAxioms Axioms] :
+    [inst : ConjImpAxioms Axioms] :
     Setoid (Proposition Atom) where
   r := HilbertEquiv Axioms
   iseqv := {
@@ -142,16 +143,18 @@ def hilbertPropositionSetoid
   }
 
 /-- The Hilbert Lindenbaum algebra: quotient of `Proposition Atom` by Hilbert equivalence.
-Parameterized over an axiom predicate with a `MinimalAxioms` instance. -/
+Parameterized over an axiom predicate with a `ConjImpAxioms` instance. The `ConjImpAxioms`
+typeclass (K, S, andI, andE1, andE2) is sufficient for the meet-fragment and BSL structure;
+`MinimalAxioms` additionally provides or-axioms enabling the GHA instance. -/
 def HilbertLindenbaumAlgebra
     (Axioms : Proposition Atom → Prop)
-    [MinimalAxioms Axioms] : Type _ :=
+    [ConjImpAxioms Axioms] : Type _ :=
   Quotient (@hilbertPropositionSetoid _ Axioms _)
 
 /-- The quotient map: sends `A` to its Hilbert equivalence class `[A]`. -/
 def hilbertLindenbaumMk
     {Axioms : Proposition Atom → Prop}
-    [MinimalAxioms Axioms]
+    [ConjImpAxioms Axioms]
     (A : Proposition Atom) :
     HilbertLindenbaumAlgebra Axioms :=
   Quotient.mk hilbertPropositionSetoid A
@@ -161,7 +164,7 @@ def hilbertLindenbaumMk
 /-- `[A] ≤ [B]` iff `Deriv Axioms [A] B`. Well-defined by Hilbert equivalence. -/
 def hilbertLindenbaumLe
     {Axioms : Proposition Atom → Prop}
-    [inst : MinimalAxioms Axioms]
+    [inst : ConjImpAxioms Axioms]
     (x y : HilbertLindenbaumAlgebra Axioms) : Prop :=
   Quotient.liftOn₂ x y
     (fun A B => Deriv Axioms [A] B)
@@ -179,7 +182,7 @@ def hilbertLindenbaumLe
 @[simp]
 theorem hilbertLindenbaumLe_mk
     {Axioms : Proposition Atom → Prop}
-    [MinimalAxioms Axioms]
+    [ConjImpAxioms Axioms]
     (A B : Proposition Atom) :
     hilbertLindenbaumLe (hilbertLindenbaumMk (Axioms := Axioms) A)
       (hilbertLindenbaumMk B) ↔
@@ -217,7 +220,7 @@ theorem hilbertEquivOrCongr
 /-- And-congruence: if `A ≡ A'` and `B ≡ B'` then `A ∧ B ≡ A' ∧ B'`. -/
 theorem hilbertEquivAndCongr
     {Axioms : Proposition Atom → Prop}
-    [inst : MinimalAxioms Axioms]
+    [inst : ConjImpAxioms Axioms]
     {A A' B B' : Proposition Atom}
     (hA : HilbertEquiv Axioms A A')
     (hB : HilbertEquiv Axioms B B') :
@@ -241,7 +244,7 @@ theorem hilbertEquivAndCongr
 /-- Imp-congruence: if `A ≡ A'` and `B ≡ B'` then `A → B ≡ A' → B'`. -/
 theorem hilbertEquivImpCongr
     {Axioms : Proposition Atom → Prop}
-    [inst : MinimalAxioms Axioms]
+    [inst : ConjImpAxioms Axioms]
     {A A' B B' : Proposition Atom}
     (hA : HilbertEquiv Axioms A A')
     (hB : HilbertEquiv Axioms B B') :
@@ -284,7 +287,7 @@ def hilbertLindenbaumSup
 /-- Meet: `[A] ⊓ [B] = [A ∧ B]`. -/
 def hilbertLindenbaumInf
     {Axioms : Proposition Atom → Prop}
-    [inst : MinimalAxioms Axioms]
+    [inst : ConjImpAxioms Axioms]
     (x y : HilbertLindenbaumAlgebra Axioms) :
     HilbertLindenbaumAlgebra Axioms :=
   Quotient.lift₂
@@ -295,7 +298,7 @@ def hilbertLindenbaumInf
 /-- Heyting implication: `[A] ⇨ [B] = [A → B]`. -/
 def hilbertLindenbaumHimp
     {Axioms : Proposition Atom → Prop}
-    [inst : MinimalAxioms Axioms]
+    [inst : ConjImpAxioms Axioms]
     (x y : HilbertLindenbaumAlgebra Axioms) :
     HilbertLindenbaumAlgebra Axioms :=
   Quotient.lift₂
@@ -317,7 +320,7 @@ theorem hilbertLindenbaumSup_mk
 @[simp]
 theorem hilbertLindenbaumInf_mk
     {Axioms : Proposition Atom → Prop}
-    [MinimalAxioms Axioms]
+    [ConjImpAxioms Axioms]
     (A B : Proposition Atom) :
     hilbertLindenbaumInf (hilbertLindenbaumMk (Axioms := Axioms) A)
       (hilbertLindenbaumMk B) =
@@ -327,7 +330,7 @@ theorem hilbertLindenbaumInf_mk
 @[simp]
 theorem hilbertLindenbaumHimp_mk
     {Axioms : Proposition Atom → Prop}
-    [MinimalAxioms Axioms]
+    [ConjImpAxioms Axioms]
     (A B : Proposition Atom) :
     hilbertLindenbaumHimp (hilbertLindenbaumMk (Axioms := Axioms) A)
       (hilbertLindenbaumMk B) =
@@ -338,7 +341,7 @@ theorem hilbertLindenbaumHimp_mk
 /-- Reflexivity: `[A] ≤ [A]` via the assumption rule. -/
 theorem hilbertLindenbaumLe_refl
     {Axioms : Proposition Atom → Prop}
-    [MinimalAxioms Axioms]
+    [ConjImpAxioms Axioms]
     (x : HilbertLindenbaumAlgebra Axioms) :
     hilbertLindenbaumLe x x := by
   obtain ⟨A, rfl⟩ := Quotient.exists_rep x
@@ -347,7 +350,7 @@ theorem hilbertLindenbaumLe_refl
 /-- Transitivity via cut. -/
 theorem hilbertLindenbaumLe_trans
     {Axioms : Proposition Atom → Prop}
-    [inst : MinimalAxioms Axioms]
+    [inst : ConjImpAxioms Axioms]
     (x y z : HilbertLindenbaumAlgebra Axioms)
     (hxy : hilbertLindenbaumLe x y) (hyz : hilbertLindenbaumLe y z) :
     hilbertLindenbaumLe x z := by
@@ -359,7 +362,7 @@ theorem hilbertLindenbaumLe_trans
 /-- Antisymmetry via `Quotient.sound`. -/
 theorem hilbertLindenbaumLe_antisymm
     {Axioms : Proposition Atom → Prop}
-    [MinimalAxioms Axioms]
+    [ConjImpAxioms Axioms]
     (x y : HilbertLindenbaumAlgebra Axioms)
     (hxy : hilbertLindenbaumLe x y) (hyx : hilbertLindenbaumLe y x) :
     x = y := by
@@ -405,7 +408,7 @@ theorem hilbertLindenbaumSup_le
 /-- `[A ∧ B] ≤ [A]` via andE1. -/
 theorem hilbertLindenbaumInf_le_left
     {Axioms : Proposition Atom → Prop}
-    [inst : MinimalAxioms Axioms]
+    [inst : ConjImpAxioms Axioms]
     (x y : HilbertLindenbaumAlgebra Axioms) :
     hilbertLindenbaumLe (hilbertLindenbaumInf x y) x := by
   obtain ⟨A, rfl⟩ := Quotient.exists_rep x
@@ -415,7 +418,7 @@ theorem hilbertLindenbaumInf_le_left
 /-- `[A ∧ B] ≤ [B]` via andE2. -/
 theorem hilbertLindenbaumInf_le_right
     {Axioms : Proposition Atom → Prop}
-    [inst : MinimalAxioms Axioms]
+    [inst : ConjImpAxioms Axioms]
     (x y : HilbertLindenbaumAlgebra Axioms) :
     hilbertLindenbaumLe (hilbertLindenbaumInf x y) y := by
   obtain ⟨A, rfl⟩ := Quotient.exists_rep x
@@ -425,7 +428,7 @@ theorem hilbertLindenbaumInf_le_right
 /-- `le_inf`: from `[A] ≤ [B]` and `[A] ≤ [C]` derive `[A] ≤ [B ∧ C]` via andI. -/
 theorem hilbertLindenbaumLe_inf
     {Axioms : Proposition Atom → Prop}
-    [inst : MinimalAxioms Axioms]
+    [inst : ConjImpAxioms Axioms]
     (x y z : HilbertLindenbaumAlgebra Axioms)
     (hxy : hilbertLindenbaumLe x y) (hxz : hilbertLindenbaumLe x z) :
     hilbertLindenbaumLe x (hilbertLindenbaumInf y z) := by
@@ -438,7 +441,7 @@ theorem hilbertLindenbaumLe_inf
 `[A] ≤ [B → C]` iff `[A ∧ B] ≤ [C]`. -/
 theorem hilbertLindenbaumLe_himp_iff
     {Axioms : Proposition Atom → Prop}
-    [inst : MinimalAxioms Axioms]
+    [inst : ConjImpAxioms Axioms]
     (x y z : HilbertLindenbaumAlgebra Axioms) :
     hilbertLindenbaumLe x (hilbertLindenbaumHimp y z) ↔
     hilbertLindenbaumLe (hilbertLindenbaumInf x y) z := by
@@ -467,12 +470,37 @@ theorem hilbertLindenbaumLe_himp_iff
 /-- `[A] ≤ ⊤` where top is `[⊥ → ⊥]`. -/
 theorem hilbertLindenbaumLe_top
     {Axioms : Proposition Atom → Prop}
-    [inst : MinimalAxioms Axioms]
+    [inst : ConjImpAxioms Axioms]
     (x : HilbertLindenbaumAlgebra Axioms) :
     hilbertLindenbaumLe x (hilbertLindenbaumMk (bot.imp bot)) := by
   obtain ⟨A, rfl⟩ := Quotient.exists_rep x
   apply hilbertImpIDeriv inst.h_K inst.h_S
   exact assumption_deriv List.mem_cons_self
+
+/-! ## BSL Instance -/
+
+/-- The Hilbert Lindenbaum algebra is a `BrouwerianSemilattice` for any `[ConjImpAxioms]`.
+
+This is the key instance enabling the fragment axiom families (`ConjImpAxiom`, `ConjImpBotAxiom`,
+`ConjImpBotMinAxiom`) to use the Lindenbaum algebra machinery without requiring or-axioms. The
+`BrouwerianSemilattice` structure uses only the meet-fragment lemmas generalized to
+`[ConjImpAxioms]`. -/
+instance hilbertLindenbaumBSL
+    {Axioms : Proposition Atom → Prop}
+    [inst : ConjImpAxioms Axioms] :
+    BrouwerianSemilattice (HilbertLindenbaumAlgebra Axioms) where
+  le := hilbertLindenbaumLe
+  top := hilbertLindenbaumMk (Axioms := Axioms) (bot.imp bot)
+  inf := hilbertLindenbaumInf
+  himp := hilbertLindenbaumHimp
+  le_refl := hilbertLindenbaumLe_refl
+  le_trans := fun x y z => hilbertLindenbaumLe_trans x y z
+  le_antisymm := fun x y => hilbertLindenbaumLe_antisymm x y
+  inf_le_left := hilbertLindenbaumInf_le_left
+  inf_le_right := hilbertLindenbaumInf_le_right
+  le_inf := fun x y z => hilbertLindenbaumLe_inf x y z
+  le_himp_iff := fun x y z => hilbertLindenbaumLe_himp_iff x y z
+  le_top := hilbertLindenbaumLe_top
 
 /-! ## GHA Instance -/
 
@@ -507,7 +535,7 @@ instance hilbertLindenbaumGHA
 @[simp]
 theorem hilbertLindenbaumMk_le_mk
     {Axioms : Proposition Atom → Prop}
-    [MinimalAxioms Axioms]
+    [ConjImpAxioms Axioms]
     (A B : Proposition Atom) :
     hilbertLindenbaumMk (Axioms := Axioms) A ≤ hilbertLindenbaumMk B ↔
     Deriv Axioms [A] B :=
@@ -527,7 +555,7 @@ theorem hilbertLindenbaumMk_sup
 @[simp]
 theorem hilbertLindenbaumMk_inf
     {Axioms : Proposition Atom → Prop}
-    [MinimalAxioms Axioms]
+    [ConjImpAxioms Axioms]
     (A B : Proposition Atom) :
     hilbertLindenbaumMk (Axioms := Axioms) (A.and B) =
     hilbertLindenbaumMk A ⊓ hilbertLindenbaumMk B :=
@@ -537,7 +565,7 @@ theorem hilbertLindenbaumMk_inf
 @[simp]
 theorem hilbertLindenbaumMk_himp
     {Axioms : Proposition Atom → Prop}
-    [MinimalAxioms Axioms]
+    [ConjImpAxioms Axioms]
     (A B : Proposition Atom) :
     hilbertLindenbaumMk (Axioms := Axioms) (A.imp B) =
     hilbertLindenbaumMk A ⇨ hilbertLindenbaumMk B :=
@@ -546,7 +574,7 @@ theorem hilbertLindenbaumMk_himp
 /-- Top in the Hilbert Lindenbaum algebra is `[⊥ → ⊥]`. -/
 theorem hilbertLindenbaumTop
     {Axioms : Proposition Atom → Prop}
-    [MinimalAxioms Axioms] :
+    [ConjImpAxioms Axioms] :
     (⊤ : HilbertLindenbaumAlgebra Axioms) =
     hilbertLindenbaumMk (bot.imp bot) := rfl
 
@@ -555,7 +583,7 @@ theorem hilbertLindenbaumTop
 /-- `[A] = ⊤` in the Hilbert Lindenbaum algebra iff `A` is Hilbert-derivable from the
 empty context, i.e., `Derivable Axioms A`. -/
 theorem hilbertLindenbaumMk_eq_top_iff
-    {Axioms : Proposition Atom → Prop} [inst : MinimalAxioms Axioms]
+    {Axioms : Proposition Atom → Prop} [inst : ConjImpAxioms Axioms]
     {A : Proposition Atom} :
     hilbertLindenbaumMk (Axioms := Axioms) A = ⊤ ↔ Derivable Axioms A := by
   rw [hilbertLindenbaumTop]
@@ -588,12 +616,12 @@ theorem hilbertLindenbaumMk_eq_top_iff
 
 /-- The canonical variable assignment into the Hilbert Lindenbaum algebra:
 sends each atom `x` to its equivalence class `[x]`. -/
-def canonicalV (Axioms : Proposition Atom → Prop) [MinimalAxioms Axioms] :
+def canonicalV (Axioms : Proposition Atom → Prop) [ConjImpAxioms Axioms] :
     Atom → HilbertLindenbaumAlgebra Axioms :=
   fun x => hilbertLindenbaumMk (.atom x)
 
 /-- The canonical bottom value in the Hilbert Lindenbaum algebra: the class `[⊥]`. -/
-def canonicalBotVal (Axioms : Proposition Atom → Prop) [MinimalAxioms Axioms] :
+def canonicalBotVal (Axioms : Proposition Atom → Prop) [ConjImpAxioms Axioms] :
     HilbertLindenbaumAlgebra Axioms :=
   hilbertLindenbaumMk .bot
 

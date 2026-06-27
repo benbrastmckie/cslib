@@ -1407,10 +1407,10 @@
         344
       ],
       "description": "Reconcile the two strength encodings on the Hilbert substrate and add the missing inclusion view. Waring's Defs.lean characterises strength by INCLUSION (IsIntuitionistic T ↔ IPL ⊆ T, IsClassical T ↔ CPL ⊆ T, with monotone propagation), while the Hilbert machinery uses the witness-bundle typeclass MinimalAxioms (NaturalDeduction/Equivalence.lean: 8 schema witnesses K, S, ∧I, ∧E1, ∧E2, ∨I1, ∨I2, ∨E). MinimalAxioms STAYS — it is genuinely needed for Hilbert completeness, because the Hilbert system encodes the connectives as axioms. Work: (1) add IsMinimal T ↔ minimal ⊆ T mirroring IsIntuitionistic/IsClassical; (2) add a bridge MinimalAxioms Axioms ↔ minimal ⊆ AxiomTheory Axioms so the inclusion idiom (monotone, free propagation) and the witness bundle are interchangeable; (3) optionally monotone-extension propagation. Gives Waring-style strength-axis scalability WITHOUT abandoning the Hilbert witness bundle. Files: Defs.lean, NaturalDeduction/Equivalence.lean, ProofSystem/Axioms.lean. CI green.",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "created": "2026-06-25T00:00:00Z",
-      "last_updated": "2026-06-27T00:00:00Z",
+      "last_updated": "2026-06-27T12:13:07Z",
       "artifacts": [
         {
           "path": "specs/345_reconcile_logic_encodings_isminimal/reports/01_team-research.md",
@@ -1422,7 +1422,7 @@
           "type": "plan"
         }
       ],
-      "session_id": "placeholder",
+      "session_id": "sess_1782560707_b3ce16_345",
       "researched": "2026-06-27T01:23:12Z",
       "next_artifact_number": 2
     },
@@ -1435,10 +1435,10 @@
         345
       ],
       "description": "Restate Glivenko and conservativity theory-parametrically against v ⊨ T on the algebraic substrate, using Heyting-homomorphism machinery (GeneralizedHeytingHom.map_interpret and Extension-style homs, cf. Waring's Heyting.lean) over the HilbertLindenbaumAlgebra / Lindenbaum quotient. Generalise the existing Glivenko.lean and *Conservative*.lean family (Conservative, ConservativeChain, ConjImpConservative, ConjImpBotConservative, ImpConservative, MplConservativeChain) so they read as theory-parametric statements with the tier results as corollaries; reuse the IsIntuitionistic/IsClassical/IsMinimal inclusion typeclasses (345). All completeness/soundness remains Hilbert-based. CI green; existing results preserved.",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "created": "2026-06-25T00:00:00Z",
-      "last_updated": "2026-06-27T00:00:00Z",
+      "last_updated": "2026-06-27T12:43:30Z",
       "artifacts": [
         {
           "path": "specs/348_glivenko_conservativity_theory_parametric/reports/01_parametric-conservativity-spine.md",
@@ -1450,7 +1450,9 @@
         }
       ],
       "next_artifact_number": 2,
-      "researched": "2026-06-27T00:00:00Z"
+      "researched": "2026-06-27T00:00:00Z",
+      "completion_summary": "Theory-parametric Glivenko and conservativity spine: 5 new public declarations (derivable_mono, hilbertGlivenko_theory, hilbertGlivenko_strength, conservative_via_embedding, derivableIn_axiomTheory_iff_derivable) added; 7 existing per-tier theorems re-derived as one-line instantiations; zero sorries, zero new axioms.",
+      "session_id": "sess_1782560707_b3ce16_348"
     },
     {
       "project_number": 353,
@@ -1634,7 +1636,7 @@
     {
       "project_number": 367,
       "project_name": "unify_brouwerian_completeness_triplication",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Collapse the three near-identical Brouwerian completeness developments into one parametric module; this is a NET SIMPLIFICATION (~1000-line reduction), not added abstraction. Cslib/Logics/Propositional/Semantics/Algebra/{BrouwerianCompleteness.lean (~528), PointedBrouwerianCompleteness.lean (~561), MplPointedConservative.lean (~658)} are ~80% copy-paste: identical soundness, Lindenbaum-quotient order lemmas (mk_le_mk/inf_mk/himp_mk/le_antisymm/...), canonicalV_spec truth lemma, and completeness/iff skeletons. They differ ONLY in bot semantics: ConjImp maps bot to top, ConjImpBot maps bot to the OrderBot least element (ex falso), ConjImpBotMin uses a free bot_val parameter (the free-vs-least split already landed in task 354). Refactor to a single development over the AlgEvaluate v bot_val / AlgTValid substrate (Semantics/Algebra.lean), with bot interpretation as the one varying parameter guarded by [OrderBot H] only where the least-element semantics is intended; recover the three tier results (Brouwerian / pointed-Brouwerian / free-bot Brouwerian completeness) as corollaries with their existing names preserved for downstream consumers. Build on the theory-parametric substrate from task 348. No new axioms; every existing theorem preserved (as a corollary or alias); CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 348, 354.",
@@ -1643,10 +1645,10 @@
         354
       ],
       "created": "2026-06-27T05:29:32Z",
-      "last_updated": "2026-06-27T05:29:32Z",
+      "last_updated": "2026-06-27T14:22:49Z",
       "next_artifact_number": 1,
       "artifacts": [],
-      "session_id": null
+      "session_id": "sess_1782560707_b3ce16_367"
     },
     {
       "project_number": 368,

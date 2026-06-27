@@ -444,6 +444,7 @@ public import Cslib.Logics.Propositional.ProofSystemEquivalence
 public import Cslib.Logics.Propositional.Semantics.Algebra
 public import Cslib.Logics.Propositional.Semantics.Algebra.Bridge
 public import Cslib.Logics.Propositional.Semantics.Algebra.Brouwerian
+public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianBot
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpBotConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative

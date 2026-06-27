@@ -76,7 +76,7 @@ next_project_number: 380
 ### Algebraic Semantics
 
 377 [PLANNED] — Create the classical conjunction-implication fragment axiom syste
-  └─ 378 [PLANNING] — Prove CPL is conservative over its classical conjunction-implicat
+  └─ 378 [PLANNED] — Prove CPL is conservative over its classical conjunction-implicat
     └─ 379 [PLANNING] — Prove CPL is conservative over its classical conjunction-implicat
 367 [NOT STARTED] — Collapse the three near-identical Brouwerian completeness develop
 
@@ -100,10 +100,11 @@ next_project_number: 380
 ---
 
 ### 378. Cpl conservative over classical conjimp
-- **Status**: [PLANNING]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 377
+- **Plan**: [378_cpl_conservative_over_classical_conjimp/plans/01_classical-conjimp-conservativity.md]
 
 **Description**: Prove CPL is conservative over its classical conjunction-implication fragment CPL⟨∧,→,⊤⟩, the next rung above the implicational result (task 352). Deliver classicalConjImp_completeness : IsOrBotFree φ → Tautology φ → Derivable ClassicalConjImpAxiom φ, proved by EXTENDING the Kalmár / Tarski–Bernays truth-assignment lemma classicalImp_kalmar (Metalogic/ClassicalImpCompleteness.lean) with a conjunction (∧) case (the falsum-surrogate double-negation form carries over; add the ∧ truth-table subcases). Then derive the conservativity edge cpl_conservative_over_classicalConjImp (compose with CPL soundness via ClassicalConjImpAxiom.toPropAxiom, mirroring cpl_conservative_over_imp) and the classicalConjImp_iff_chain biconditional. RISK: the ∧-extended Kalmár induction is the genuine difficulty (medium-high) — must use the truth-assignment method, NOT an algebraic free-completion route (classical fragments are not Heyting-complete; Peirce is invalid in free Heyting completions). If the ∧ induction is intractable, mark [BLOCKED] with the exact goal state, no sorry. Mirrors task 352. Files: Cslib/Logics/Propositional/Metalogic/ClassicalConjImpCompleteness.lean (new), ProofSystem/FragmentAxioms.lean. Depends on the ClassicalConjImpAxiom system (task 377).
 

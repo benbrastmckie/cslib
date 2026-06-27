@@ -275,7 +275,7 @@ def Proposition.atoms : PL.Proposition Atom → List Atom
 
 ---
 
-### Phase 7: In-context helpers + CORRECTED Kalmár truth lemma (double-negation form) [NOT STARTED]
+### Phase 7: In-context helpers + CORRECTED Kalmár truth lemma (double-negation form) [COMPLETED]
 
 **This is the substantive correction in v3 and the risk-concentrated phase.** Encodes report 02
 §F3 (signature), §F4 (per-case table), §F7 (helpers).

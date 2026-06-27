@@ -255,7 +255,7 @@ K (`⊢ φ → ((φ→φ) → φ)`) and K (`⊢ φ → (φ→φ)`), via `mp_deri
 
 ---
 
-### Phase 4: Derived lemma — composition / `imp_trans` [NOT STARTED]
+### Phase 4: Derived lemma — composition / `imp_trans` [COMPLETED]
 
 **Goal**: Hypothetical-syllogism style composition, used by the truth lemma's `imp` case.
 

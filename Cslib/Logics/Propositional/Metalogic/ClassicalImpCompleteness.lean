@@ -73,4 +73,17 @@ theorem classicalImp_imp_self (φ : PL.Proposition Atom) :
     (mp_deriv ⟨.ax [] _ (.implyS φ (φ.imp φ) φ)⟩ ⟨.ax [] _ (.implyK φ (φ.imp φ))⟩)
     ⟨.ax [] _ (.implyK φ φ)⟩
 
+/-- Composition: from `⊢ φ → ψ` and `⊢ ψ → χ` derive `⊢ φ → χ`.
+
+Pure K + S derivation: K weakens `ψ → χ` to `φ → (ψ → χ)`, S distributes to give
+`(φ → ψ) → (φ → χ)`, and MP with `h₁` yields `φ → χ`. -/
+theorem classicalImp_imp_trans {φ ψ χ : PL.Proposition Atom}
+    (h₁ : Derivable ClassicalImpAxiom (φ.imp ψ))
+    (h₂ : Derivable ClassicalImpAxiom (ψ.imp χ)) :
+    Derivable ClassicalImpAxiom (φ.imp χ) :=
+  mp_deriv
+    (mp_deriv ⟨.ax [] _ (.implyS φ ψ χ)⟩
+              (mp_deriv ⟨.ax [] _ (.implyK (ψ.imp χ) φ)⟩ h₂))
+    h₁
+
 end Cslib.Logic.PL

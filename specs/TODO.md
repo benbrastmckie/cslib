@@ -11,7 +11,7 @@ next_project_number: 365
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,317,321,342,345,352,355,360,361,362,363,364 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,317,321,342,345,352,355,360,363,364 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,332,348 | 36,37,180,290,299,345 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275 | 39,40 | Foundations |
 
@@ -67,8 +67,6 @@ next_project_number: 365
 ### Uncategorized
 
 360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t
-361 [NOT STARTED] — Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean 
-362 [NOT STARTED] — Cslib/Logics/Modal/Tableau/Soundness.lean fails to build with mul
 363 [NOT STARTED] — Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean fa
 
 ## Tasks
@@ -94,7 +92,7 @@ next_project_number: 365
 ---
 
 ### 362. Repair Modal/Tableau/Soundness.lean mid-refactor proof gaps
-- **Status**: [NOT STARTED]
+- **Status**: [ABANDONED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -103,7 +101,7 @@ next_project_number: 365
 ---
 
 ### 361. Repair Intuitionistic/Minimal Tableau Soundness build (task-316 WIP)
-- **Status**: [NOT STARTED]
+- **Status**: [ABANDONED]
 - **Task Type**: cslib
 - **Dependencies**: None
 

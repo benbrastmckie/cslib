@@ -9,11 +9,11 @@
       "title": "Repair 11 pre-existing broken modules failing repo-wide lake build",
       "description": "The repo-wide 'lake build' currently fails (unrelated to vetted tasks 343/344/350/351/353/354, whose files build clean in isolation). Failing modules: Cslib.Logics.Modal.Denotation (simp made no progress, Denotation.lean:60), Cslib.Logics.Bimodal.Syntax.SubformulaClosure.NestingDepth (unsolved goals, multiple lines), Cslib.Logics.Temporal.ConservativeExtension (ambiguous term, lines 54/59/69), Cslib.Logics.Bimodal.Theorems.Perpetuity.Principles (type mismatch, lines 84/164/176), Cslib.Logics.Temporal.Metalogic.DenseCompleteness (unsolved goals, line 166), Cslib.Logics.Propositional.SequentCalculus (duplicate _proof_1 environment clash between LJ and LK CutElimination), Cslib.Logics.Bimodal.Metalogic.Separation.Defs (many simp made no progress), Cslib.Logics.Propositional.Tableau.Minimal.Soundness, Cslib.Logics.Bimodal.ProofSystem.Substitution, Cslib.Logics.Modal.Tableau.Soundness, Cslib.Logics.Propositional.Tableau.Classical.Completeness. checkInitImports/shake also fail downstream due to missing oleans. Restore a green repo-wide build. Source: /vet CI run 2026-06-26.",
       "created": "2026-06-27T01:08:49Z",
-      "last_updated": "2026-06-27T02:24:04Z",
+      "last_updated": "2026-06-27T04:59:36Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782522754_5f0817_360",
-      "blockers": "3 modules need intent-bearing proof work (tracked as tasks 361-363): Intuitionistic/Minimal Soundness (task-316 WIP), Modal/Tableau/Soundness, Classical/Tableau/Completeness. 8 of 11 originally-failing modules already repaired green."
+      "blockers": "Remaining repo-build breakage narrowed to 2 modules: Modal/Tableau/Soundness (tracked by task 364) and Classical/Tableau/Completeness (tracked by task 363). Intuitionistic/Minimal Soundness resolved by task 316. 8/11 originally-failing modules repaired under this task."
     },
     {
       "project_number": 359,
@@ -1475,32 +1475,34 @@
     {
       "project_number": 361,
       "project_name": "repair_intuitionistic_minimal_soundness",
-      "status": "not_started",
+      "status": "abandoned",
       "task_type": "cslib",
       "title": "Repair Intuitionistic/Minimal Tableau Soundness build (task-316 WIP)",
       "description": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean fails to build (error ~line 1383: `simp made no progress` on List.getElem_zip/List.getElem_map), which transitively breaks Cslib/Logics/Propositional/Tableau/Minimal/Soundness.lean. This file is active WIP for task 316 (specs/316_propositional_tableau_soundness/). Repair the proof at the failing site (and any sibling simp-progress failures) so both modules build green. A Cluster C call-site fix to Minimal/Soundness.lean from task 360 is staged in the working tree and should be validated/kept once the upstream is green. Zero-debt: no sorry/axiom. Source: task 360 build-repair (blocked WIP).",
       "created": "2026-06-27T02:24:04Z",
-      "last_updated": "2026-06-27T02:24:04Z",
+      "last_updated": "2026-06-27T04:59:36Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "dependencies": [],
       "parent_task": 360,
-      "session_id": null
+      "session_id": null,
+      "completion_summary": "Abandoned: Intuitionistic/Soundness.lean and Minimal/Soundness.lean now build green at HEAD after task 316 completed concurrently (commits 85107cde, 063473d5, 14a15a65). The breakage I observed was task 316 live WIP, since committed. Nothing to repair."
     },
     {
       "project_number": 362,
       "project_name": "repair_modal_tableau_soundness",
-      "status": "not_started",
+      "status": "abandoned",
       "task_type": "cslib",
       "title": "Repair Modal/Tableau/Soundness.lean mid-refactor proof gaps",
       "description": "Cslib/Logics/Modal/Tableau/Soundness.lean fails to build with multiple `unsolved goals` and `simp made no progress` errors (lines ~99, 100, 124, and more), left mid-refactor by commit df974743 (vague \"update\") with dangling hypotheses. Reconstruct the intended proofs so the module builds green. Zero-debt: no sorry/axiom. Source: task 360 build-repair (blocked WIP).",
       "created": "2026-06-27T02:24:04Z",
-      "last_updated": "2026-06-27T02:24:04Z",
+      "last_updated": "2026-06-27T04:59:36Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "dependencies": [],
       "parent_task": 360,
-      "session_id": null
+      "session_id": null,
+      "completion_summary": "Abandoned as duplicate: task 364 (modal_tableau_soundness_drift_repair) was created by a concurrent session for the same Modal/Tableau/Soundness.lean breakage and is already [researched]. Defer to 364."
     },
     {
       "project_number": 363,

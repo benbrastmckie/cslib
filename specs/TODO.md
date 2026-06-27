@@ -1,5 +1,5 @@
 ---
-next_project_number: 382
+next_project_number: 383
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 382
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,321,364,370,371,376,382 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,321,364,370,371,376 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,332,363,374 | 36,37,180,290,299,371,376 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275,360,369,373 | 39,40,332,363,364 | Foundations, Propositional Logic |
 | 4 | 317 | 369 | Propositional Logic |
@@ -66,10 +66,6 @@ next_project_number: 382
 
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
 
-### Bimodal Logic
-
-382 [NOT STARTED] — Complete the Bimodal Separation cluster drift repair: two modules
-
 ### Uncategorized
 
 376 [RESEARCHED] — Prove the fuel-sufficiency lemma needed to discharge the sorry at
@@ -78,6 +74,17 @@ next_project_number: 382
     └─ 369 [NOT STARTED] — (Propositional Logic: Parameterize the intuitionistic and mini) (see above)
 
 ## Tasks
+
+### 382. Complete separation cluster drift
+- **Status**: [COMPLETED]
+- **Task Type**: cslib
+- **Topic**: Bimodal Logic
+- **Dependencies**: None
+- **Summary**: [382_complete_separation_cluster_drift/summaries/01_implementation-summary.md]
+
+**Description**: Complete the Bimodal Separation cluster drift repair: two modules newly surfaced once task 381 fixed its 4 (they were masked because the build stopped at the earlier failures). Same Mathlib/toolchain-drift family as task 381 (the PropositionalConnectives.neg second-layer-abbrev simp-stall, plus simp 'unsolved goals'). Modules: (1) Cslib/Logics/Bimodal/Metalogic/Separation/TemporalClosure.lean line 283 'simp made no progress'; (2) Cslib/Logics/Bimodal/Metalogic/Separation/DedekindZ/Cases.lean 'unsolved goals' at lines 164,283,719,1061,1067,1068 (and possibly more). Apply task 381's verified idiom (add PropositionalConnectives.neg and Formula.and/or/neg to stalled simp sets; for unsolved goals after simp, re-derive the post-simp shape via lean_goal). ITERATE: after fixing these, re-run the scoped Separation build — more downstream modules may cascade; fix until the whole Bimodal/Metalogic/Separation subtree builds green. Zero sorry, zero new axioms, statements preserved. NEVER call lean_diagnostic_messages (use lean_goal + scoped lake build). Reuse specs/381_repair_bimodal_separation_perpetuity_drift/reports/01_drift-diagnosis.md.
+
+---
 
 ### 381. Repair bimodal separation perpetuity drift
 - **Status**: [COMPLETED]

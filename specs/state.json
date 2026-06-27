@@ -1993,15 +1993,22 @@
     {
       "project_number": 382,
       "project_name": "complete_separation_cluster_drift",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Bimodal Logic",
       "description": "Complete the Bimodal Separation cluster drift repair: two modules newly surfaced once task 381 fixed its 4 (they were masked because the build stopped at the earlier failures). Same Mathlib/toolchain-drift family as task 381 (the PropositionalConnectives.neg second-layer-abbrev simp-stall, plus simp 'unsolved goals'). Modules: (1) Cslib/Logics/Bimodal/Metalogic/Separation/TemporalClosure.lean line 283 'simp made no progress'; (2) Cslib/Logics/Bimodal/Metalogic/Separation/DedekindZ/Cases.lean 'unsolved goals' at lines 164,283,719,1061,1067,1068 (and possibly more). Apply task 381's verified idiom (add PropositionalConnectives.neg and Formula.and/or/neg to stalled simp sets; for unsolved goals after simp, re-derive the post-simp shape via lean_goal). ITERATE: after fixing these, re-run the scoped Separation build — more downstream modules may cascade; fix until the whole Bimodal/Metalogic/Separation subtree builds green. Zero sorry, zero new axioms, statements preserved. NEVER call lean_diagnostic_messages (use lean_goal + scoped lake build). Reuse specs/381_repair_bimodal_separation_perpetuity_drift/reports/01_drift-diagnosis.md.",
       "dependencies": [],
       "created": "2026-06-27T22:28:04Z",
-      "last_updated": "2026-06-27T22:28:04Z",
+      "last_updated": "2026-06-27T22:49:06Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [
+        {
+          "path": "specs/382_complete_separation_cluster_drift/summaries/01_implementation-summary.md",
+          "type": "summary",
+          "summary": "Separation cluster drift fully repaired (5 modules incl. Hierarchy cascade), sorry-free"
+        }
+      ],
+      "session_id": "sess_repair382_casc01"
     }
   ],
   "repository_health": {

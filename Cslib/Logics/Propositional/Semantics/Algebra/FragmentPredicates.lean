@@ -321,6 +321,28 @@ theorem coe_AlgEvaluate_orBotFree
     simp only [AlgEvaluate_and, h_inf, iha hA.1, ihc hA.2]
   | or _ _ _ _ => simp [Proposition.IsOrBotFree] at hA
 
+/-- For and-bot-free formulas, `AlgEvaluate` depends only on `⊔`, `⇨`, and `⊤` --
+not on `⊓` or `bot_val`. Given a morphism `f : H₁ → H₂` preserving `⊔` and `⇨`,
+evaluation of and-bot-free formulas commutes with `f` regardless of `bot_val`. -/
+theorem coe_AlgEvaluate_andBotFree
+    {Atom : Type*} {H₁ H₂ : Type*} [GeneralizedHeytingAlgebra H₁] [GeneralizedHeytingAlgebra H₂]
+    (f : H₁ → H₂)
+    (h_sup : ∀ a b, f (a ⊔ b) = f a ⊔ f b)
+    (h_himp : ∀ a b, f (a ⇨ b) = f a ⇨ f b)
+    (v : Atom → H₁) (b : H₁) (b' : H₂)
+    (A : Proposition Atom) (hA : A.IsAndBotFree = true) :
+    f (AlgEvaluate v b A) = AlgEvaluate (f ∘ v) b' A := by
+  induction A with
+  | atom _ => rfl
+  | bot => simp [Proposition.IsAndBotFree] at hA
+  | imp a c iha ihc =>
+    simp only [Proposition.IsAndBotFree, Bool.and_eq_true] at hA
+    simp only [AlgEvaluate_imp, h_himp, iha hA.1, ihc hA.2]
+  | and _ _ _ _ => simp [Proposition.IsAndBotFree] at hA
+  | or a c iha ihc =>
+    simp only [Proposition.IsAndBotFree, Bool.and_eq_true] at hA
+    simp only [AlgEvaluate_or, h_sup, iha hA.1, ihc hA.2]
+
 /-- For imp-top-only formulas, `AlgEvaluate` depends only on `⇨` --
 not on `⊓`, `⊔`, or `bot_val`. Given a morphism `f : H₁ → H₂` preserving `⇨`,
 evaluation of imp-top-only formulas commutes with `f` regardless of `bot_val`. -/

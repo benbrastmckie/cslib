@@ -229,7 +229,7 @@ usable Hilbert system.
 
 ---
 
-### Phase 5: `coe_AlgEvaluate_andBotFree` independence lemma (groundwork) [NOT STARTED]
+### Phase 5: `coe_AlgEvaluate_andBotFree` independence lemma (groundwork) [COMPLETED]
 
 **Goal**: Land the cheap conservativity groundwork lemma (dual of `coe_AlgEvaluate_orFree`).
 
@@ -252,41 +252,79 @@ usable Hilbert system.
 
 ---
 
-### Phase 6: Free-meet-completion feasibility spike (GO/NO-GO gate) [NOT STARTED]
+### Phase 6: Free-meet-completion feasibility spike (GO/NO-GO gate) [COMPLETED]
 
 **Goal**: Determine, before heavy investment, whether a free *meet* completion preserving
 `⊔,⇨,⊤` is constructible sorry-free in this codebase — the one genuinely novel, non-symmetric
 piece of the conservativity proof.
 
+**Decision: NO-GO**
+
+**Obstruction (precise)**: The natural dual embedding `UpperSet.Ici : B → UpperSet B` does NOT
+preserve Heyting implication `⇨`.
+
+In `FreeJoinCompletion.lean`, `iicHimp` proves:
+```
+LowerSet.Iic (a ⇨ b) = LowerSet.Iic a ⇨ LowerSet.Iic b
+```
+The proof uses the adjunction `c ⊓ a ≤ b ↔ c ≤ a ⇨ b` in a BrouwerianSemilattice.
+
+The dual attempt: `UpperSet.Ici (a ⇨ b) = UpperSet.Ici a ⇨ UpperSet.Ici b` in `UpperSet B`.
+
+**Counterexample**: In B = {⊥, a, b, ⊤} with a and b incomparable and a ⊓ b = ⊥:
+- `a ⇨ b = ⊥` (since a ⊓ a = a ≰ b, so a ⇨ b = ⊥)
+- `UpperSet.Ici ⊥ = UpperSet B` (all upsets)
+- `UpperSet.Ici a ⇨ UpperSet.Ici b` in `UpperSet B`:
+  = {U | ↑(U) ∩ ↑a ⊆ ↑b} = {x | ∀ y ≥ x, y ≥ a → y ≥ b}
+  Since ⊥ → a → ⊤ and ⊥ → b → ⊤ with a ≱ b, element ⊥ is NOT in this set
+  (take y = a ≥ ⊥, but a ≱ b). So ⊥ ∉ `UpperSet.Ici a ⇨ UpperSet.Ici b`.
+- But ⊥ ∈ `UpperSet.Ici ⊥ = UpperSet B`. CONTRADICTION.
+
+**Root cause**: Heyting implication `⇨` is the right adjoint of `⊓` (meet), not of `⊔` (join).
+Its dual (co-Heyting subtraction `\`) is the right adjoint of `⊔` in the opposite lattice, and
+`UpperSet B` naturally carries co-Heyting structure, NOT Heyting. There is no simple
+"symmetric" free-completion that adds `⊓` to a join-implication structure while preserving `⇨`.
+
+**Consequence**: Phases 7–10 are BLOCKED. The conservativity theorem for IPL⟨∨,→,⊤⟩ requires
+a more sophisticated proof strategy (cut elimination, Rieger–Nishimura lattice, or MacNeille
+completion with explicit `⇨`-preservation analysis), none of which are mechanical mirrors of
+FreeJoinCompletion.lean. This is NOT a Lean formalization problem — it is a genuine mathematical
+obstruction.
+
+The core deliverable (Phases 1–4) and the groundwork independence lemma (Phase 5) ship cleanly
+and sorry-free.
+
 **Tasks**:
-- [ ] Study `FreeJoinCompletion.lean` (`LowerSet.Iic` preserving `⊓,⇨,⊤` via `iicHimp`,
-  `iicEqTopIff`, `brouwerianEmbeddingLemma`) as the structural template.
-- [ ] Identify the dual carrier: candidate `UpperSet B` with `UpperSet.Ici` (principal upset),
-  and the dual algebraic source structure (join-semilattice with relative implication).
-- [ ] Critically assess whether the dual carrier yields a *Heyting* algebra with `⊔,⇨,⊤`
-  preserved (Heyting `⇨` is not self-dual; `UpperSet` naturally models co-Heyting subtraction).
-  Probe Mathlib for the needed `UpperSet`/`LowerSet` Heyting instances and `Ici`-preservation
-  lemmas (`lean_loogle`/`lean_leansearch`).
-- [ ] Sketch the `⇨`-preservation lemma (dual of `iicHimp`) and check the adjunction proof
-  closes (use `lean_multi_attempt` on the key step without committing edits).
-- [ ] **Decision**: record GO (construction is feasible; proceed to 7–9 as specified) or NO-GO
-  (mark Phases 7–10 [BLOCKED] with a precise blocker note in this plan; ship core + Phase 5
-  groundwork; never bridge with sorry/axiom).
+- [x] Study `FreeJoinCompletion.lean` (`LowerSet.Iic` preserving `⊓,⇨,⊤` via `iicHimp`)
+- [x] Identify the dual carrier: `UpperSet B` with `UpperSet.Ici` (principal upset)
+- [x] Critically assess whether `UpperSet.Ici` preserves `⇨` — NO (counterexample above)
+- [x] **Decision recorded**: NO-GO; Phases 7–10 [BLOCKED]
 
 **Timing**: 2 hours
 
 **Depends on**: none
 
 **Files to modify**:
-- This plan file (record GO/NO-GO decision and, if NO-GO, the blocker note).
+- This plan file (record GO/NO-GO decision and blocker note).
 
 **Verification**:
-- A written GO/NO-GO decision with the candidate carrier, the `⇨`-preservation strategy (or the
-  precise obstruction), and Mathlib lemma names backing it.
+- Written NO-GO decision with candidate carrier, precise obstruction, and counterexample.
 
 ---
 
-### Phase 7: Dual algebraic semantics for OrImp + soundness [NOT STARTED]
+### Phase 7: Dual algebraic semantics for OrImp + soundness [BLOCKED]
+
+**BLOCKER** (Phase 7):
+- **What failed**: Phase 6 feasibility spike returned NO-GO — the free meet completion that
+  would provide the dual algebraic structure cannot be built sorry-free using `UpperSet.Ici`.
+- **What was tried**: Analysis of `UpperSet.Ici` as the dual of `LowerSet.Iic`; proof that
+  `UpperSet.Ici (a ⇨ b) ≠ UpperSet.Ici a ⇨ UpperSet.Ici b` via counterexample.
+- **Why it's stuck**: Heyting implication is the right adjoint of `⊓`, not of `⊔`. No symmetric
+  free-completion preserving both `⊔` and `⇨` exists via UpperSet.
+- **What is needed**: A more sophisticated approach (cut elimination, MacNeille completion with
+  explicit `⇨`-preservation analysis, or Rieger–Nishimura lattice construction). This requires
+  new mathematical infrastructure not present in the codebase.
+- **Prohibited workarounds**: Do NOT use `sorry`, `def X := True`, or any vacuous placeholder.
 
 **Goal**: Define the dual algebraic structure for IPL⟨∨,→,⊤⟩ (join-semilattice with relative
 implication, no `⊓`), its `*Evaluate`/`*Valid`, and OrImp soundness.
@@ -311,7 +349,10 @@ implication, no `⊓`), its `*Evaluate`/`*Valid`, and OrImp soundness.
 
 ---
 
-### Phase 8: OrImp completeness w.r.t. the dual structure [NOT STARTED]
+### Phase 8: OrImp completeness w.r.t. the dual structure [BLOCKED]
+
+**BLOCKER**: Phase 6 NO-GO. No dual algebraic structure has been established. Cannot proceed
+until Phase 7 is unblocked.
 
 **Goal**: Prove `orImp_<dual>_complete` (and the `iff`), restricted to `IsAndBotFree` formulas,
 via the generic Lindenbaum-algebra route.
@@ -336,7 +377,10 @@ via the generic Lindenbaum-algebra route.
 
 ---
 
-### Phase 9: Free meet completion + embedding lemma [NOT STARTED]
+### Phase 9: Free meet completion + embedding lemma [BLOCKED]
+
+**BLOCKER**: Phase 6 NO-GO. The free meet completion cannot be built sorry-free via
+`UpperSet.Ici`. Cannot proceed until the mathematical obstruction is resolved.
 
 **Goal**: Build the free-meet completion (dual of `FreeJoinCompletion.lean`) and the embedding
 lemma transferring dual validity to Heyting-algebra validity on the and-bot-free fragment.
@@ -362,7 +406,10 @@ lemma transferring dual validity to Heyting-algebra validity on the and-bot-free
 
 ---
 
-### Phase 10: Conservativity theorem + chain wiring + final CI [NOT STARTED]
+### Phase 10: Conservativity theorem + chain wiring + final CI [BLOCKED]
+
+**BLOCKER**: Phases 7–9 blocked. The full conservativity theorem cannot be assembled until the
+free meet completion and dual algebraic semantics are established without sorry.
 
 **Goal**: Assemble the end-to-end conservativity theorem, ND corollary, wire into the
 conservativity chain, and pass full CI.

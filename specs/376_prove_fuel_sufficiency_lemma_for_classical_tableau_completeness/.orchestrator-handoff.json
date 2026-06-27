@@ -1,42 +1,36 @@
 {
   "task_number": 376,
-  "dispatch_status": "researched",
-  "dispatch_summary": "Validated base-3 exponential measure + raised fuel bound (3^complexity) as the lowest-risk path to close the L801 sorry; confirmed linear fuel bound is a genuine correctness bug.",
-  "artifact": {
-    "type": "research",
-    "path": "specs/376_prove_fuel_sufficiency_lemma_for_classical_tableau_completeness/reports/02_measure-decrease-termination.md",
-    "summary": "Measure-decrease termination research: rejects per-branch-max (unsound) and DM-multiset/wf-refactor (high rework); recommends additive base-3 exponential measure with raised fuel bound, all core arithmetic lean-validated."
+  "status": "partial",
+  "dispatch_status": "partial",
+  "phases_completed": 2,
+  "phases_total": 5,
+  "dispatch_summary": "Phase 2: classicalApplyOne_output_complexity proved and committed (hash 6c452bee). Build green, sorry_count=1 (existing, unchanged).",
+  "build_state": {
+    "scoped_build": "green",
+    "error_count": 0,
+    "sorry_count": 1,
+    "sorry_location": "Completeness.lean ~L931, pre-existing, not introduced by Phase 2"
   },
-  "recommended_approach": "b-exp-bound",
-  "feasibility_validated": true,
-  "key_mathlib_lemmas": [
-    "Nat.pow_le_pow_right",
-    "Nat.one_le_pow",
-    "pow_succ",
-    "Nat.sub_add_cancel",
-    "Multiset.IsDershowitzMannaLT",
-    "Multiset.wellFounded_isDershowitzMannaLT"
+  "lemmas_committed": [
+    "classicalBranchComplexity_drop",
+    "classicalApplyOne_output_complexity"
   ],
-  "measure_design": "classicalExpMeasure branches expandedSets := ((branches.zip expandedSets).map (fun p => 3 ^ classicalBranchComplexity p.1 p.2)).sum. Strictly decreases by >=1 per expansion step (alpha 1 child, beta exactly 2 children, each child branchComplexity <= C-1, base 3 absorbs the 2-way split: 3^a0+3^a1+1 <= 3^C). Phi_initial = 3^(phi.complexity) exactly, so fuel bound := 3^(phi.complexity) discharges by le_refl. fuel=0 base case becomes a contradiction (Phi=0 impossible when branches nonempty).",
-  "key_lemmas_to_add": [
-    "classicalBranchComplexity (+_append,+_mono_expanded) restored from commit 29e9d5b0",
-    "classicalBranchComplexity_drop: bc b (e++[sf]) + sf.formula.complexity <= bc b e (sf in b, sf not in e)",
-    "classicalApplyOne_output_complexity: sum(complexity of outputs) = complexity(sf)-1, and applicable => complexity sf >= 1",
-    "classicalExpMeasure_step_lt: per-step strict decrease wiring L801"
+  "output_complexity_statement": "(match classicalApplyOne sf with | .linear formulas => 1 ≤ sf.formula.complexity ∧ (formulas.map (·.formula.complexity)).sum = sf.formula.complexity - 1 | .branching branches => 1 ≤ sf.formula.complexity ∧ (branches.flatten.map (·.formula.complexity)).sum = sf.formula.complexity - 1 | .persistent formulas => 1 ≤ sf.formula.complexity ∧ (formulas.map (·.formula.complexity)).sum = sf.formula.complexity - 1 | .notApplicable => True)",
+  "proof_strategy_used": "rcases s <;> rcases φ with x | _ | ⟨a,b⟩ | ⟨a,b⟩ | ⟨a,b⟩; try rcases b <;> simp [..., SignedFormula.neg, SignedFormula.pos, ...] <;> omega",
+  "lean_notes": [
+    "List.join does NOT exist — use List.flatten",
+    "Match in theorem type needs outer parentheses: (match ... with ...) := by",
+    "rcases two-field constructors need ⟨a,b⟩ not 'a b' syntax",
+    "SignedFormula.neg, SignedFormula.pos must be in simp set to reduce field access .formula"
   ],
-  "fuel_bound_change": "Expansion.lean:158  4*(phi.complexity+1)+1  ->  3 ^ phi.complexity  (safe for fuel-generic classicalTableau_sound; ripples to ~3 completeness call sites: hfuel_init ~1024, h' reconstruction ~1060, classicalExpandBranches_openBranch_initial_mem call)",
-  "validated_via_lean": "lean_run_code (import Mathlib): 3^a0+3^a1+1<=3^C and 3^a0+1<=3^C (children<=C-1, C>=1) and (bcs != [] -> 1 <= (bcs.map (3^.)).sum) all compile sorry-free",
-  "top_residual_risk": "classicalExpMeasure_step_lt requires 4-way classicalApplyOne case analysis (rule-output complexity identity); template available in classicalStepBranch_hintikka_inv",
-  "phase_count": 5,
-  "sorry_inventory": {
-    "count": 1,
-    "items": [
-      {
-        "line": 801,
-        "lemma": "classicalExpandBranches_hintikka",
-        "status": "researched_not_yet_closed"
-      }
-    ]
-  },
-  "resolves_blocker_for": 363
+  "sorry_inventory": [
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean",
+      "line": "~931",
+      "description": "classicalExpandBranches_hintikka: measure step (pre-existing, needs classicalExpMeasure_step_lt)"
+    }
+  ],
+  "blockers": [],
+  "continuation_context": "Phase 3: prove classicalExpMeasure_step_lt — combines _drop + output_complexity + base-3 arithmetic (3^a0 + 3^a1 ≤ 2*3^(C-1) < 3^C where a0+a1=C-1). Then Phase 4 wire the sorry at ~L931. Template: classicalStepBranch_hintikka_inv (~L672 after insertions).",
+  "commit_hash": "6c452bee"
 }

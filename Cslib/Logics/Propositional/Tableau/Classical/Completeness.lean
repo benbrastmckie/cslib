@@ -598,6 +598,24 @@ private def classicalExpMeasure
     (expandedSets : List (List (SignedFormula (Proposition Atom) Unit))) : Nat :=
   ((branches.zip expandedSets).map fun p => 3 ^ classicalBranchComplexity p.1 p.2).sum
 
+/-- Base-3 decrease for a BETA step: two children of complexity ≤ C-1 plus the saved unit. -/
+private lemma pow3_two_add_one_le {a0 a1 C : Nat} (hC : 1 ≤ C) (h0 : a0 ≤ C - 1)
+    (h1 : a1 ≤ C - 1) :
+    3 ^ a0 + 3 ^ a1 + 1 ≤ 3 ^ C := by
+  have h0' : 3 ^ a0 ≤ 3 ^ (C - 1) := Nat.pow_le_pow_right (by omega) h0
+  have h1' : 3 ^ a1 ≤ 3 ^ (C - 1) := Nat.pow_le_pow_right (by omega) h1
+  have hone : 1 ≤ 3 ^ (C - 1) := Nat.one_le_pow _ _ (by omega)
+  rw [show C = C - 1 + 1 from (Nat.sub_add_cancel hC).symm, pow_succ]
+  omega
+
+/-- Base-3 decrease for an ALPHA step: one child of complexity ≤ C-1 plus the saved unit. -/
+private lemma pow3_add_one_le {a0 C : Nat} (hC : 1 ≤ C) (h0 : a0 ≤ C - 1) :
+    3 ^ a0 + 1 ≤ 3 ^ C := by
+  have h0' : 3 ^ a0 ≤ 3 ^ (C - 1) := Nat.pow_le_pow_right (by omega) h0
+  have hone : 1 ≤ 3 ^ (C - 1) := Nat.one_le_pow _ _ (by omega)
+  rw [show C = C - 1 + 1 from (Nat.sub_add_cancel hC).symm, pow_succ]
+  omega
+
 /-- Count of unexpanded formulas in branch `b` relative to expanded set `e`.
 Zero means every formula on the branch is in the expanded set, so the Hintikka
 invariant covers the entire branch. -/

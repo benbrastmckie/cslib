@@ -1,0 +1,23 @@
+{
+  "task_number": 371,
+  "status": "implemented",
+  "dispatch_status": "implemented",
+  "phases_completed": 4,
+  "phases_total": 4,
+  "dispatch_summary": "Phase 3: CutFreeCompleteness.lean created (lkCutFreeCompleteness + lkCutFreeIffTautology); Phase 4: barrels updated, Cslib.lean regenerated, Decidability.lean pre-existing build errors fixed; all CI checks green on new files",
+  "build_state": {
+    "scoped_build": "green",
+    "error_count": 0,
+    "sorry_count": 0
+  },
+  "sorry_inventory": {
+    "count": 0,
+    "items": []
+  },
+  "artifact": {
+    "type": "summary",
+    "path": "specs/371_symmetrize_sequent_calculus_coverage/summaries/01_symmetrize-sequent-calculus-summary.md",
+    "summary": "Three LJ/LK coverage modules added; barrels and Cslib.lean updated; 0 sorry, 0 new axioms, all scoped builds green"
+  },
+  "continuation_context": null
+}

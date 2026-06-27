@@ -480,8 +480,8 @@ private lemma classicalExpandBranches_hintikka (fuel : Nat) :
       (expandedSets : List (List (SignedFormula (Proposition Atom) Unit))),
       expandedSets.length = branches.length →
       -- Invariant: each branch satisfies Hintikka for its expanded formulas
-      (∀ i (b : Branch (Proposition Atom) Unit) (e : List (SignedFormula (Proposition Atom) Unit)),
-        List.getElem? branches i = some b → List.getElem? expandedSets i = some e →
+      (∀ (i : Nat) (b : Branch (Proposition Atom) Unit) (e : List (SignedFormula (Proposition Atom) Unit)),
+        branches[i]? = some b → expandedSets[i]? = some e →
         ∀ sf ∈ e, match classicalApplyOne sf with
           | .linear out => ∀ sf' ∈ out, sf' ∈ b
           | .branching brs => ∃ br ∈ brs, ∀ sf' ∈ br, sf' ∈ b
@@ -567,7 +567,7 @@ private lemma classicalExpandBranches_openBranch_initial_mem (fuel : Nat)
         exact absurd hf (by simp)
       · -- hf : some b₀ = some b' when not closed
         simp only [Bool.not_eq_true] at hcl
-        have hfval : b₀ = b' := by simp only [hcl, ite_false] at hf; exact Option.some.inj hf
+        have hfval : b₀ = b' := by simp only [hcl] at hf; exact Option.some.inj hf
         exact hfval ▸ hAll b₀ hb₀_mem
   | succ fuel' ih =>
     intro branches expandedSets hlength hAll b h
@@ -643,24 +643,20 @@ This is the key bridge between the expansion loop and the truth lemma. -/
 lemma classicalTableau_hintikka (φ : Proposition Atom) (b : Branch (Proposition Atom) Unit)
     (h : classicalTableau φ = .openBranch b) : classicalHintikkaSet b := by
   simp only [classicalTableau] at h
-  -- Apply classicalExpandBranches_hintikka with:
-  -- - branches = [[⟨.neg, φ, ()⟩]], expandedSets = [[]], fuel from h
-  -- - Length: rfl (both length 1)
-  -- - Initial invariant: vacuously true since expandedSets[0] = [] (empty)
-  -- Apply classicalExpandBranches_hintikka. The invariant holds vacuously because
-  -- the initial expandedSets is [[]] (one empty list), so every e we look up is [].
-  exact classicalExpandBranches_hintikka _ _ _ rfl
+  -- Supply branches/expandedSets explicitly so the lambda's `he` type is fully determined.
+  -- Initial invariant holds vacuously: expandedSets = [[]], so every e looked up is [].
+  exact classicalExpandBranches_hintikka _ [[⟨.neg, φ, ()⟩]] [[]] rfl
     (fun i b' e _ he sf hsfin => by
-      -- he : List.getElem? [[]] i = some e
-      -- For i=0, this is some [] = some e, so e = [] and hsfin is absurd.
-      -- For i≥1, this is none = some e — contradiction.
+      -- he : ([] : List ...) [i]? = some e (expandedSets = [[]], inner list is [])
+      -- For i=0: [[]][0]? = some [] = some e, so e = [], contradicting sf ∈ e = [].
+      -- For i≥1: [[]][n+1]? = none ≠ some e — contradiction.
       cases i with
       | zero =>
-        -- he : List.getElem? [[]] 0 = some e, i.e., some [] = some e, so e = []
-        have heq : e = [] := by simpa using he
-        exact absurd hsfin (heq ▸ List.not_mem_nil _)
+        -- he : [[]][0]? = some e, i.e., some [] = some e, so e = []
+        have heq : e = [] := by simp at he; exact he
+        simp [heq] at hsfin
       | succ n =>
-        -- he : List.getElem? [[]] (n+1) = some e, i.e., none = some e — contradiction
+        -- [[]][n+1]? = none ≠ some e
         simp at he)
     b h
 

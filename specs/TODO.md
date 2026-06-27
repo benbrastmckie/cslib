@@ -11,7 +11,7 @@ next_project_number: 382
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,321,364,370,371,376 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,321,364,370,371,376,382 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,332,363,374 | 36,37,180,290,299,371,376 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275,360,369,373 | 39,40,332,363,364 | Foundations, Propositional Logic |
 | 4 | 317 | 369 | Propositional Logic |
@@ -65,6 +65,10 @@ next_project_number: 382
 ### Code Hygiene
 
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
+
+### Bimodal Logic
+
+382 [NOT STARTED] — Complete the Bimodal Separation cluster drift repair: two modules
 
 ### Uncategorized
 

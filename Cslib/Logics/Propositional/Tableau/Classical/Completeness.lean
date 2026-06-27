@@ -1317,11 +1317,10 @@ lemma classicalTableau_hintikka (φ : Proposition Atom) (b : Branch (Proposition
     (h : classicalTableau φ = .openBranch b) : classicalHintikkaSet b := by
   simp only [classicalTableau] at h
   -- The initial state has exactly one formula on one branch and an empty expanded set.
-  -- The measure is 1 (one unexpanded formula), which is ≤ the fuel bound.
-  -- PHASE 4: prove classicalExpMeasure [[⟨.neg, φ, ()⟩]] [[]] ≤ fuel after raising the bound
-  -- in Expansion.lean from 4*(φ.complexity+1)+1 to 3^(φ.complexity) (or appropriate bound).
-  have hfuel_init : classicalExpMeasure [[⟨.neg, φ, ()⟩]] [[]] ≤ 4 * (φ.complexity + 1) + 1 :=
-    sorry
+  -- classicalExpMeasure [[⟨.neg, φ, ()⟩]] [[]] = 3 ^ φ.complexity (the measure of a single
+  -- unexpanded formula of complexity φ.complexity), so ≤ the fuel bound 3 ^ φ.complexity.
+  have hfuel_init : classicalExpMeasure [[⟨.neg, φ, ()⟩]] [[]] ≤ 3 ^ φ.complexity := by
+    simp [classicalExpMeasure, classicalBranchComplexity]
   -- Supply branches/expandedSets explicitly so the lambda's `he` type is fully determined.
   -- Initial invariant holds vacuously: expandedSets = [[]], so every e looked up is [].
   exact classicalExpandBranches_hintikka _ [[⟨.neg, φ, ()⟩]] [[]] rfl hfuel_init
@@ -1354,7 +1353,7 @@ lemma classicalOpenBranch_countermodel (φ : Proposition Atom)
   -- The initial branch is [F(φ)] and the expansion only prepends, so F(φ) ∈ b
   have hfphi : b.any (fun sf => sf.sign == .neg && sf.formula == φ) = true := by
     -- F(φ) = ⟨.neg, φ, ()⟩ is on the initial branch and is preserved by expansion
-    have h' : classicalExpandBranches [[⟨.neg, φ, ()⟩]] [[]] (4 * (φ.complexity + 1) + 1) =
+    have h' : classicalExpandBranches [[⟨.neg, φ, ()⟩]] [[]] (3 ^ φ.complexity) =
         .openBranch b := by simp only [classicalTableau] at h; exact h
     have hmem : (⟨.neg, φ, ()⟩ : SignedFormula (Proposition Atom) Unit) ∈ b :=
       classicalExpandBranches_openBranch_initial_mem _ _

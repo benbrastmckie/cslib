@@ -161,7 +161,7 @@ theorem replace_U_free_of_bool (phi A B : Formula Atom)
   | untl q p _ _ =>
     simp only [replaceUntlWithTop]
     rcases h_bool with ⟨rfl, rfl⟩ | h_uf
-    · simp [isUFree, Formula.neg]
+    · simp [isUFree, Formula.neg, PropositionalConnectives.neg]
     · simp [isUFree] at h_uf
   | snce q p _ _ =>
     have ⟨hp, hq⟩ := h_bool
@@ -223,7 +223,7 @@ theorem case1_psi_bool_only (a q A B : Formula Atom)
         · exact (⟨ha, hB⟩ : untlUnderBoolOnly (.snce B a) A B)
       · exact (⟨ha, hq⟩ : untlUnderBoolOnly (.snce q a) A B)
   · have hev_uf : isUFree (Formula.and (Formula.and (Formula.and A q) (.snce B a)) (.snce q a)) = true := by
-      simp [Formula.and, Formula.neg, isUFree, hA, hq, ha, hB]
+      simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, hA, hq, ha, hB]
     exact (⟨hev_uf, hq⟩ : untlUnderBoolOnly (.snce q _) A B)
 
 /-! ## Congruence Lemmas -/
@@ -280,7 +280,7 @@ theorem and_or_distrib (a b c : Formula Atom) :
 theorem Q_Z_neg_q_U_free (A B q : Formula Atom)
     (hA : isUFree A = true) (hB : isUFree B = true) (hq : isUFree q = true) :
     isUFree (qZ A B (Formula.neg q)) = true :=
-  Q_Z_U_free A B (Formula.neg q) hA hB (by simp [Formula.neg, isUFree, hq])
+  Q_Z_U_free A B (Formula.neg q) hA hB (by simp [Formula.neg, PropositionalConnectives.neg, isUFree, hq])
 
 /-! ## Replace U(A,B) with False (bot) Infrastructure
 
@@ -717,7 +717,7 @@ theorem snce_Ufree_event_qU_guard_separable (ev q A B : Formula Atom)
   -- alpha = ev ∨ ((¬q ∧ S(ev,q)) ∧ (q∨U))
   -- Since ev is U-free: alpha has U only in (q∨U) → untlUnderBoolOnly
   have h_nqSev_uf : isUFree (Formula.and (Formula.neg q) (.snce q ev)) = true := by
-    simp [Formula.and, Formula.neg, isUFree, hq, hev_uf]
+    simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, hq, hev_uf]
   -- alpha = ev ∨ (nqSev ∧ (q∨U)) where nqSev = ¬q∧S(ev,q) is U-free
   -- S(alpha, qZ): distribute via since_distrib_or_left
   -- then event-split the second disjunct on U
@@ -1059,13 +1059,13 @@ theorem case6_separable_Z (a q A B : Formula Atom)
     · apply and_separable
       · -- S(a, q∧¬A): a, q, A all U-free → syntactically separated
         have hg : isUFree (Formula.and q (Formula.neg A)) = true := by
-          simp [Formula.and, Formula.neg, isUFree, hq, hA]
+          simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, hq, hA]
         exact ⟨.snce (Formula.and q (Formula.neg A)) a,
           by simp [isSyntacticallySeparated, ha, hg], int_equiv_refl _⟩
       · -- ¬A: U-free and S-free
         exact u_free_s_free_is_separable (Formula.neg A)
-          (by simp [Formula.neg, isUFree, hA])
-          (by simp [Formula.neg, isSFree, hA'])
+          (by simp [Formula.neg, PropositionalConnectives.neg, isUFree, hA])
+          (by simp [Formula.neg, PropositionalConnectives.neg, isSFree, hA'])
     · -- ¬(B∧U): neg of (B∧U). B is U-free/S-free, U is S-free future.
       apply neg_separable
       exact and_separable (u_free_s_free_is_separable B hB hB')
@@ -1117,12 +1117,12 @@ theorem case6_separable_Z (a q A B : Formula Atom)
     apply is_separable_of_equiv (since_distrib_or_left _ _ (Formula.or q (.untl B A)))
     have hSTUFF_uf : isUFree (Formula.and (Formula.and (Formula.neg B) (Formula.neg A))
         (.snce (Formula.and q (Formula.neg A)) a)) = true := by
-      simp [Formula.and, Formula.neg, isUFree, ha, hq, hA, hB]
+      simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq, hA, hB]
     apply or_separable
     · -- S(STUFF∧q, q∨U): STUFF∧q is U-free → snce_Ufree_event_qU_guard_separable
       have hev_uf : isUFree (Formula.and (Formula.and (Formula.and (Formula.neg B)
           (Formula.neg A)) (.snce (Formula.and q (Formula.neg A)) a)) q) = true := by
-        simp [Formula.and, Formula.neg, isUFree, ha, hq, hA, hB]
+        simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq, hA, hB]
       exact snce_Ufree_event_qU_guard_separable _ q A B hev_uf hq hA hB hA' hB'
     · -- S(STUFF∧U, q∨U): STUFF is U-free → case5_separable_Z_gen
       exact case5_separable_Z_gen _ q A B hSTUFF_uf hq hA hB hA' hB'
@@ -1140,12 +1140,12 @@ theorem case6_separable_Z_gen (a q A B : Formula Atom)
   · apply and_separable
     · apply and_separable
       · have hg : isUFree (Formula.and q (Formula.neg A)) = true := by
-          simp [Formula.and, Formula.neg, isUFree, hq, hA]
+          simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, hq, hA]
         exact ⟨.snce (Formula.and q (Formula.neg A)) a,
           by simp [isSyntacticallySeparated, ha, hg], int_equiv_refl _⟩
       · exact u_free_s_free_is_separable (Formula.neg A)
-          (by simp [Formula.neg, isUFree, hA])
-          (by simp [Formula.neg, isSFree, hA'])
+          (by simp [Formula.neg, PropositionalConnectives.neg, isUFree, hA])
+          (by simp [Formula.neg, PropositionalConnectives.neg, isSFree, hA'])
     · apply neg_separable
       exact and_separable (u_free_s_free_is_separable B hB hB')
         ⟨.untl B A, by simp [isSyntacticallySeparated, hA', hB'], int_equiv_refl _⟩
@@ -1191,11 +1191,11 @@ theorem case6_separable_Z_gen (a q A B : Formula Atom)
     apply is_separable_of_equiv (since_distrib_or_left _ _ (Formula.or q (.untl B A)))
     have hSTUFF_uf : isUFree (Formula.and (Formula.and (Formula.neg B) (Formula.neg A))
         (.snce (Formula.and q (Formula.neg A)) a)) = true := by
-      simp [Formula.and, Formula.neg, isUFree, ha, hq, hA, hB]
+      simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq, hA, hB]
     apply or_separable
     · have hev_uf : isUFree (Formula.and (Formula.and (Formula.and (Formula.neg B)
           (Formula.neg A)) (.snce (Formula.and q (Formula.neg A)) a)) q) = true := by
-        simp [Formula.and, Formula.neg, isUFree, ha, hq, hA, hB]
+        simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq, hA, hB]
       exact snce_Ufree_event_qU_guard_separable _ q A B hev_uf hq hA hB hA' hB'
     · exact case5_separable_Z_gen _ q A B hSTUFF_uf hq hA hB hA' hB'
 
@@ -1417,13 +1417,13 @@ theorem case8_separable_Z_gen (a q A B : Formula Atom)
   apply is_separable_of_equiv (case8_equiv_Z a q A B)
   apply and_separable
   · -- S(a∧¬U, ⊤): Case 2 with guard = ⊤ = neg bot (U-free)
-    have hg : isUFree (Formula.neg (Formula.bot : Formula Atom)) = true := by simp [Formula.neg, isUFree]
+    have hg : isUFree (Formula.neg (Formula.bot : Formula Atom)) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree]
     obtain ⟨psi, hequiv, hsep⟩ := elim_case_2_gen a (Formula.neg (Formula.bot : Formula Atom)) A B ha hg hA hB hA' hB'
     exact ⟨psi, hsep, hequiv⟩
   · -- ¬S(¬q∧U, ¬a∨U): neg_separable of Case 5 (generalized)
     apply neg_separable
-    have hnq_uf : isUFree (Formula.neg q) = true := by simp [Formula.neg, isUFree, hq]
-    have hna_uf : isUFree (Formula.neg a) = true := by simp [Formula.neg, isUFree, ha]
+    have hnq_uf : isUFree (Formula.neg q) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, hq]
+    have hna_uf : isUFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
     exact case5_separable_Z_gen (Formula.neg q) (Formula.neg a) A B hnq_uf hna_uf hA hB hA' hB'
 
 /-- S(ev, q∨¬U) is separable when ev is U-free.
@@ -1435,16 +1435,16 @@ theorem snce_Ufree_event_qNotU_guard_separable (ev q A B : Formula Atom)
     (hA' : isSFree A = true) (hB' : isSFree B = true) :
     isSeparable (.snce (Formula.or q (Formula.neg (.untl B A))) ev) := by
   -- Case 4 pattern: S(a, q∨¬U) ↔ ¬H(¬a) ∧ ¬S((¬a∧¬q)∧U, ¬a)
-  have hna_uf : isUFree (Formula.neg ev) = true := by simp [Formula.neg, isUFree, hev_uf]
-  have hnq_uf : isUFree (Formula.neg q) = true := by simp [Formula.neg, isUFree, hq]
+  have hna_uf : isUFree (Formula.neg ev) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, hev_uf]
+  have hnq_uf : isUFree (Formula.neg q) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, hq]
   have hanq_uf : isUFree (Formula.and (Formula.neg ev) (Formula.neg q)) = true := by
-    simp [Formula.and, Formula.neg, isUFree, hev_uf, hq]
+    simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, hev_uf, hq]
   obtain ⟨psi1, hequiv1, hsep1⟩ := elim_case_1_gen
     (Formula.and (Formula.neg ev) (Formula.neg q)) (Formula.neg ev) A B
     hanq_uf hna_uf hA hB hA' hB'
   -- S(ev, q∨¬U) ↔ ¬H(¬ev) ∧ ¬psi1
   have hsep_H : isSyntacticallySeparated (.allPast (Formula.neg ev)) = true := by
-    simp [isSyntacticallySeparated, Formula.neg, isUFree, hev_uf]
+    simp [isSyntacticallySeparated, Formula.neg, PropositionalConnectives.neg, isUFree, hev_uf]
   refine is_separable_of_equiv ?_ (and_separable
     (neg_separable ⟨.allPast (Formula.neg ev), hsep_H, int_equiv_refl _⟩)
     (neg_separable ⟨psi1, hsep1, hequiv1⟩))
@@ -1656,15 +1656,15 @@ theorem case8_separable_Z (a q A B : Formula Atom)
   apply is_separable_of_equiv (case8_equiv_Z a q A B)
   apply and_separable
   · -- S(a∧¬U, ⊤): Case 2 with guard = ⊤ = neg bot (U-free)
-    have hg : isUFree (Formula.neg (Formula.bot : Formula Atom)) = true := by simp [Formula.neg, isUFree]
+    have hg : isUFree (Formula.neg (Formula.bot : Formula Atom)) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree]
     obtain ⟨psi, hequiv, hsep⟩ := elim_case_2_gen a (Formula.neg (Formula.bot : Formula Atom)) A B ha hg hA hB hA' hB'
     exact ⟨psi, hsep, hequiv⟩
   · -- ¬S(¬q∧U, ¬a∨U): neg_separable of Case 5
     apply neg_separable
-    have hnq_uf : isUFree (Formula.neg q) = true := by simp [Formula.neg, isUFree, hq]
-    have hna_uf : isUFree (Formula.neg a) = true := by simp [Formula.neg, isUFree, ha]
-    have hnq_sf : isSFree (Formula.neg q) = true := by simp [Formula.neg, isSFree, hq']
-    have hna_sf : isSFree (Formula.neg a) = true := by simp [Formula.neg, isSFree, ha']
+    have hnq_uf : isUFree (Formula.neg q) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, hq]
+    have hna_uf : isUFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
+    have hnq_sf : isSFree (Formula.neg q) = true := by simp [Formula.neg, PropositionalConnectives.neg, isSFree, hq']
+    have hna_sf : isSFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isSFree, ha']
     exact case5_separable_Z (Formula.neg q) (Formula.neg a) A B hnq_uf hna_uf hA hB hnq_sf hna_sf hA' hB'
 
 

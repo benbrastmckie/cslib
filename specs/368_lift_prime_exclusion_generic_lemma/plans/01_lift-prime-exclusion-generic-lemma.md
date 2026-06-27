@@ -87,7 +87,7 @@ Phases within the same wave can execute in parallel. Phases 3 and 4 touch differ
 (`MinLindenbaum.lean` vs `IntLindenbaum.lean`) and both depend only on the completed generic
 lemma, so they are independently completable.
 
-### Phase 1: Generic scaffolding — defs + base/chain lemmas [NOT STARTED]
+### Phase 1: Generic scaffolding — defs + base/chain lemmas [COMPLETED]
 
 **Goal**: Create `PrimeExclusion.lean` with the generic predicate definitions and the lightweight
 supporting lemmas (base membership and chain-union closure), all building sorry-free.
@@ -116,7 +116,7 @@ supporting lemmas (base membership and chain-union closure), all building sorry-
 
 ---
 
-### Phase 2: Generic main lemma — prime_maximal_is_prime + prime_exclusion [NOT STARTED]
+### Phase 2: Generic main lemma — prime_maximal_is_prime + prime_exclusion [COMPLETED]
 
 **Goal**: Implement the core generic `prime_maximal_is_prime` (including the heavy orE combination
 block) and the `prime_exclusion` Zorn application, completing the generic file sorry-free.

@@ -4,33 +4,44 @@
   "dispatch_status": "partial",
   "phases_completed": 2,
   "phases_total": 5,
-  "dispatch_summary": "Phase 2: classicalApplyOne_output_complexity proved and committed (hash 6c452bee). Build green, sorry_count=1 (existing, unchanged).",
+  "dispatch_summary": "Phase 2 plumbing micro-dispatch: classicalExpMeasure_append and classicalExpMeasure_const_exp proved and committed (hash 8811a9fe). Build green, sorry_count=1 (unchanged).",
   "build_state": {
     "scoped_build": "green",
     "error_count": 0,
     "sorry_count": 1,
-    "sorry_location": "Completeness.lean ~L931, pre-existing, not introduced by Phase 2"
+    "sorry_location": "Completeness.lean ~L1021 (pre-existing, classicalExpandBranches_hintikka measure step)"
   },
   "lemmas_committed": [
     "classicalBranchComplexity_drop",
-    "classicalApplyOne_output_complexity"
+    "classicalApplyOne_output_complexity",
+    "pow3_two_add_one_le",
+    "pow3_add_one_le",
+    "classicalExpMeasure_split",
+    "classicalBranchComplexity_le_mapsum",
+    "classicalBranchComplexity_extendMany",
+    "classicalBranchComplexity_child_le",
+    "classicalExpMeasure_append",
+    "classicalExpMeasure_const_exp"
   ],
-  "output_complexity_statement": "(match classicalApplyOne sf with | .linear formulas => 1 ≤ sf.formula.complexity ∧ (formulas.map (·.formula.complexity)).sum = sf.formula.complexity - 1 | .branching branches => 1 ≤ sf.formula.complexity ∧ (branches.flatten.map (·.formula.complexity)).sum = sf.formula.complexity - 1 | .persistent formulas => 1 ≤ sf.formula.complexity ∧ (formulas.map (·.formula.complexity)).sum = sf.formula.complexity - 1 | .notApplicable => True)",
-  "proof_strategy_used": "rcases s <;> rcases φ with x | _ | ⟨a,b⟩ | ⟨a,b⟩ | ⟨a,b⟩; try rcases b <;> simp [..., SignedFormula.neg, SignedFormula.pos, ...] <;> omega",
   "lean_notes": [
+    "List.zip_append signature: (_h : l₁.length = l₂.length) — takes length equality as unnamed arg",
+    "List.zip_cons_cons: (a :: as).zip (b :: bs) = (a, b) :: as.zip bs",
+    "List.sum_append and List.map_append and List.map_cons all available",
     "List.join does NOT exist — use List.flatten",
-    "Match in theorem type needs outer parentheses: (match ... with ...) := by",
-    "rcases two-field constructors need ⟨a,b⟩ not 'a b' syntax",
-    "SignedFormula.neg, SignedFormula.pos must be in simp set to reduce field access .formula"
+    "norm_num is NOT available in Completeness.lean (only Cslib.Init imported); use omega for 0 < 3 and 1 ≤ 3 goals",
+    "Nat.pow_le_pow_right signature: first arg is base positivity (0 < base), second is exponent inequality",
+    "List.filter_sublist takes no explicit arguments (all implicit) — use `exact List.filter_sublist` not `exact List.filter_sublist _`",
+    "Branch.extendMany b out = out ++ b (definition in Branch.lean:62); simp only [Branch.extendMany] unfolds to out ++ b",
+    "List.map_prod_left_eq_zip: List.map (fun x => (x, f x)) l = l.zip (List.map f l) — use ← to rewrite zip-of-map to map-of-pairs; then List.map_map + Function.comp_def close the goal"
   ],
   "sorry_inventory": [
     {
       "file": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean",
-      "line": "~931",
+      "line": "~1021",
       "description": "classicalExpandBranches_hintikka: measure step (pre-existing, needs classicalExpMeasure_step_lt)"
     }
   ],
   "blockers": [],
-  "continuation_context": "Phase 3: prove classicalExpMeasure_step_lt — combines _drop + output_complexity + base-3 arithmetic (3^a0 + 3^a1 ≤ 2*3^(C-1) < 3^C where a0+a1=C-1). Then Phase 4 wire the sorry at ~L931. Template: classicalStepBranch_hintikka_inv (~L672 after insertions).",
-  "commit_hash": "6c452bee"
+  "continuation_context": "Phase 2 FINAL assembly: classicalExpMeasure_step_lt — use classicalExpMeasure_append (LHS done++newBs++restBs) + classicalExpMeasure_split (RHS done++b::rest) to cancel done/rest; rewrite LHS middle via classicalExpMeasure_const_exp; rcases classicalApplyOne sf to bound each child exponent ≤ cBC b e −1 via classicalBranchComplexity_child_le (out-bound from classicalApplyOne_output_complexity) and conclude via pow3_add_one_le/pow3_two_add_one_le. Then Phase 3 wire L1021.",
+  "commit_hash": "8811a9fe"
 }

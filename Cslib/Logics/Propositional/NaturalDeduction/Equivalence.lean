@@ -164,6 +164,117 @@ instance : MinimalAxioms (@PropositionalAxiom Atom) where
   h_orI2 := fun φ ψ => .orI2 φ ψ
   h_orE := fun φ ψ χ => .orE φ ψ χ
 
+/-! ## Minimal Logic Inclusion View
+
+The definitions and theorems in this section provide the "strength by inclusion" view that
+reconciles the two encodings of minimal propositional strength on the Hilbert substrate:
+the `MinimalAxioms` typeclass (8-field class) and the set-inclusion characterization
+`minimal ⊆ T`. -/
+
+omit [DecidableEq Atom] in
+/-- The Hilbert axiom set for the 8 connective axiom schemas of minimal propositional logic
+(K, S, andI, andE1, andE2, orI1, orI2, orE).
+
+**Warning**: `minimal ≠ MPL`. In CSLib, `MPL = ∅` is the *theory* (set of propositions
+derivable by modus ponens with no axioms). In contrast, `minimal` is the *axiom set*: the
+8 Hilbert schemas that generate MPL when rules are added. `IsMinimal` is therefore a
+Hilbert-substrate notion: a theory "carries the 8 connective axiom schemas", distinct from
+natural-deduction minimal logic whose content lives in rule constructors, not in a theory set.
+
+The bridge `MinimalAxioms Axioms ↔ minimal ⊆ AxiomTheory Axioms` is non-vacuous precisely
+because `minimal ≠ ∅`. -/
+abbrev minimal : Theory Atom := AxiomTheory (@MinPropAxiom Atom)
+
+omit [DecidableEq Atom] in
+/-- A theory carries the minimal Hilbert axiom schemas if it contains all 8 connective schemas
+(K, S, andI, andE1, andE2, orI1, orI2, orE).
+
+This is defined as `MinimalAxioms (fun φ => φ ∈ T)` — reusing the existing 8-field typeclass
+rather than introducing a duplicate class. Since `IsMinimal` is an `abbrev`, `[IsMinimal T]`
+in a type signature reduces to `[MinimalAxioms (fun φ => φ ∈ T)]` during typeclass resolution.
+
+Note: `IsMinimal` is a Hilbert-substrate notion. See `minimal` for why `IsMinimal T` differs
+from `MPL ⊆ T` (which is trivially `True` since `MPL = ∅`). -/
+abbrev IsMinimal (T : Theory Atom) : Prop := MinimalAxioms (fun φ => φ ∈ T)
+
+omit [DecidableEq Atom] in
+/-- The core bridge lemma **(★)**: `MinimalAxioms P` if and only if `P` holds for every
+formula satisfying `MinPropAxiom`.
+
+Both `isMinimalIff` and `minimalAxioms_iff_subset` reduce to this lemma via the definitional
+equivalence `φ ∈ AxiomTheory P ↔ P φ` (`mem_axiomTheory`). -/
+theorem minimalAxioms_iff_forall_minPropAxiom
+    (P : PL.Proposition Atom → Prop) :
+    MinimalAxioms P ↔ ∀ φ, MinPropAxiom φ → P φ := by
+  constructor
+  · intro h φ hφ
+    cases hφ with
+    | implyK a b => exact h.h_K a b
+    | implyS a b c => exact h.h_S a b c
+    | andI a b => exact h.h_andI a b
+    | andE1 a b => exact h.h_andE1 a b
+    | andE2 a b => exact h.h_andE2 a b
+    | orI1 a b => exact h.h_orI1 a b
+    | orI2 a b => exact h.h_orI2 a b
+    | orE a b c => exact h.h_orE a b c
+  · intro h
+    exact { h_K := fun a b => h _ (.implyK a b),
+             h_S := fun a b c => h _ (.implyS a b c),
+             h_andI := fun a b => h _ (.andI a b),
+             h_andE1 := fun a b => h _ (.andE1 a b),
+             h_andE2 := fun a b => h _ (.andE2 a b),
+             h_orI1 := fun a b => h _ (.orI1 a b),
+             h_orI2 := fun a b => h _ (.orI2 a b),
+             h_orE := fun a b c => h _ (.orE a b c) }
+
+omit [DecidableEq Atom] in
+/-- A theory is minimal (carries all 8 connective schemas) iff it contains `minimal`.
+
+This is the "strength by inclusion" characterization: `IsMinimal T ↔ minimal ⊆ T`. The proof
+reduces via **(★)** (`minimalAxioms_iff_forall_minPropAxiom`) and `mem_axiomTheory`. -/
+theorem isMinimalIff (T : Theory Atom) : IsMinimal T ↔ minimal ⊆ T := by
+  constructor
+  · intro h x hx
+    exact (minimalAxioms_iff_forall_minPropAxiom _).mp h x (mem_axiomTheory.mp hx)
+  · intro h
+    apply (minimalAxioms_iff_forall_minPropAxiom _).mpr
+    intro x hx
+    exact h (mem_axiomTheory.mpr hx)
+
+omit [DecidableEq Atom] in
+/-- `MinimalAxioms Axioms` iff `minimal ⊆ AxiomTheory Axioms`.
+
+This is the key bridge between the typeclass encoding and the inclusion encoding.
+Both sides reduce to `∀ φ, MinPropAxiom φ → Axioms φ` via **(★)** and `mem_axiomTheory`. -/
+theorem minimalAxioms_iff_subset
+    (Axioms : PL.Proposition Atom → Prop) :
+    MinimalAxioms Axioms ↔ minimal ⊆ AxiomTheory Axioms := by
+  constructor
+  · intro h x hx
+    exact mem_axiomTheory.mpr ((minimalAxioms_iff_forall_minPropAxiom _).mp h x
+      (mem_axiomTheory.mp hx))
+  · intro h
+    apply (minimalAxioms_iff_forall_minPropAxiom _).mpr
+    intro x hx
+    exact mem_axiomTheory.mp (h (mem_axiomTheory.mpr hx))
+
+omit [DecidableEq Atom] in
+/-- If a theory is minimal and is contained in a larger theory, the larger theory is also minimal.
+
+This is the monotone propagation of the `IsMinimal` predicate, mirroring
+`instIsIntuitionisticExtention` and `instIsClassicalExtention`. -/
+theorem instIsMinimalExtention {T T' : Theory Atom} [h : IsMinimal T]
+    (hsub : T ⊆ T') : IsMinimal T' :=
+  (minimalAxioms_iff_forall_minPropAxiom _).mpr fun φ hφ =>
+    hsub ((minimalAxioms_iff_forall_minPropAxiom _).mp h φ hφ)
+
+omit [DecidableEq Atom] in
+/-- The theory `minimal` is itself minimal (i.e., contains all 8 connective schemas).
+
+This is the base instance: `minimal ⊆ minimal` witnesses `IsMinimal minimal`. -/
+instance instIsMinimalMinimal : IsMinimal (Atom := Atom) minimal :=
+  (isMinimalIff minimal).mpr (fun _ hx => hx)
+
 /-! ## Context Membership Bridge Lemmas -/
 
 /-- Elements of `(insert A Γ).toList` belong to `A :: Γ.toList`. -/

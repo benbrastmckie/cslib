@@ -1,7 +1,7 @@
 # Implementation Plan: Task #345 — Reconcile Logic Encodings (`IsMinimal`)
 
 - **Task**: 345 - Reconcile logic encodings: add `IsMinimal` inclusion view + `MinimalAxioms` bridge
-- **Status**: [NOT STARTED]
+- **Status**: [IN PROGRESS]
 - **Effort**: 3 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/345_reconcile_logic_encodings_isminimal/reports/01_team-research.md
@@ -107,7 +107,7 @@ Phases within the same wave can execute in parallel (note: phases 1-4 edit the s
 in practice they are applied sequentially; the wave map reflects logical dependency, not file
 isolation).
 
-### Phase 1: Pin `minimal` and define the `IsMinimal` view [NOT STARTED]
+### Phase 1: Pin `minimal` and define the `IsMinimal` view [COMPLETED]
 
 - **Goal:** Add the `minimal` set and the `IsMinimal` inclusion notion to `Equivalence.lean`,
   with docstrings that pin the meaning (`minimal ≠ MPL`) and frame `IsMinimal` as a
@@ -131,7 +131,7 @@ isolation).
 - **Timing:** ~40 min
 - **Depends on:** none
 
-### Phase 2: Prove the core lemma `(★)` [NOT STARTED]
+### Phase 2: Prove the core lemma `(★)` [COMPLETED]
 
 - **Goal:** Prove `MinimalAxioms P ↔ ∀ φ, MinPropAxiom φ → P φ`, the single load-bearing lemma
   both bridges reduce to.
@@ -152,7 +152,7 @@ isolation).
 - **Timing:** ~45 min
 - **Depends on:** none
 
-### Phase 3: Derive both bridges and `isMinimalIff` [NOT STARTED]
+### Phase 3: Derive both bridges and `isMinimalIff` [COMPLETED]
 
 - **Goal:** Derive the two deliverable bridges from `(★)` using `mem_axiomTheory` and
   `Set.setOf_subset_setOf`.
@@ -173,7 +173,7 @@ isolation).
 - **Timing:** ~40 min
 - **Depends on:** 1, 2
 
-### Phase 4: Optional monotone propagation + membership instance [NOT STARTED]
+### Phase 4: Optional monotone propagation + membership instance [COMPLETED]
 
 - **Goal:** Add the thin `Set.Subset.trans` propagation wrapper and a base membership instance,
   mirroring `instIsIntuitionisticExtention`. Include only if they land clean.
@@ -190,7 +190,7 @@ isolation).
 - **Timing:** ~30 min
 - **Depends on:** 3
 
-### Phase 5: CI verification (full pipeline) [NOT STARTED]
+### Phase 5: CI verification (full pipeline) [IN PROGRESS]
 
 - **Goal:** Confirm the change is zero-debt and CI-green across the whole pipeline.
 - **Tasks:**

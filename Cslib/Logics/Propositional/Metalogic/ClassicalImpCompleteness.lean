@@ -287,4 +287,116 @@ theorem classicalImp_elim_atom {goal : PL.Proposition Atom}
     (classicalImpAxiom_hasDeductionTheorem hF)  -- Γ ⊢ (p→goal)→goal
     (classicalImpAxiom_hasDeductionTheorem hT)  -- Γ ⊢ p→goal
 
+/-! ## Context Collapse -/
+
+/-- Valuation congruence for literal contexts: if `v` and `w` agree on every atom in `as`,
+then `litCtx v goal as = litCtx w goal as`. Used in `classicalImp_collapse` to reconcile
+Boolean-updated valuations when eliminating an atom not present in the remaining tail. -/
+private lemma litCtx_congr {goal : PL.Proposition Atom} {as : List Atom}
+    {v w : BoolValuation Atom} (h : ∀ q ∈ as, v q = w q) :
+    litCtx v goal as = litCtx w goal as := by
+  induction as with
+  | nil => rfl
+  | cons p ps ih =>
+    show (if v p then PL.Proposition.atom p else (PL.Proposition.atom p).imp goal) ::
+        litCtx v goal ps =
+      (if w p then PL.Proposition.atom p else (PL.Proposition.atom p).imp goal) ::
+        litCtx w goal ps
+    congr 1
+    · rw [h p (List.mem_cons.mpr (Or.inl rfl))]
+    · exact ih (fun q hq => h q (List.mem_cons.mpr (Or.inr hq)))
+
+/-- Collapse the full literal context: if for every Boolean assignment the context derives
+`goal`, then the empty context derives `goal`. By structural induction on `as`, using
+`classicalImp_elim_atom`.
+
+**Induction step** (`p :: ps`): for each `v`, case-split on `p ∈ ps`:
+- `p ∈ ps`: apply the deduction theorem to `h v`; the p-literal already in `litCtx v goal ps`
+  (by `litCtx_mem`) provides the `mp_deriv` witness.
+- `p ∉ ps`: update `v` to `vT`/`vF` at `p`; since `p ∉ ps`, both tail contexts equal
+  `litCtx v goal ps` (by `litCtx_congr`); `classicalImp_elim_atom` eliminates `p`. -/
+theorem classicalImp_collapse {goal : PL.Proposition Atom} (as : List Atom)
+    (h : ∀ v : BoolValuation Atom, Deriv ClassicalImpAxiom (litCtx v goal as) goal) :
+    Derivable ClassicalImpAxiom goal := by
+  induction as with
+  | nil => exact h (fun _ => false)
+  | cons p ps ih =>
+    apply ih
+    intro v
+    rcases Classical.em (p ∈ ps) with hp | hp
+    · -- p ∈ ps: the p-literal already lies in litCtx v goal ps
+      have hlit := litCtx_mem (v := v) (goal := goal) (as := ps) hp
+      have hDT := classicalImpAxiom_hasDeductionTheorem (h v)
+      cases hvp : v p with
+      | true =>
+        simp only [hvp, ite_true] at hlit hDT
+        exact mp_deriv hDT (assumption_deriv hlit)
+      | false =>
+        simp only [hvp, ite_false] at hlit hDT
+        exact mp_deriv hDT (assumption_deriv hlit)
+    · -- p ∉ ps: Boolean updates at p leave litCtx v goal ps unchanged
+      haveI := Classical.decEq Atom
+      have hT : Deriv ClassicalImpAxiom (PL.Proposition.atom p :: litCtx v goal ps) goal := by
+        have hTh : Deriv ClassicalImpAxiom
+            (PL.Proposition.atom p :: litCtx (Function.update v p true) goal ps) goal := by
+          have h0 := h (Function.update v p true)
+          simp only [litCtx, Function.update_self, ite_true] at h0
+          exact h0
+        rwa [litCtx_congr (fun q hq =>
+          Function.update_of_ne (fun (heq : q = p) => hp (heq ▸ hq)) true v)] at hTh
+      have hF : Deriv ClassicalImpAxiom ((PL.Proposition.atom p).imp goal :: litCtx v goal ps) goal := by
+        have hFh : Deriv ClassicalImpAxiom
+            ((PL.Proposition.atom p).imp goal :: litCtx (Function.update v p false) goal ps) goal := by
+          have h0 := h (Function.update v p false)
+          simp only [litCtx, Function.update_self] at h0
+          exact h0
+        rwa [litCtx_congr (fun q hq =>
+          Function.update_of_ne (fun (heq : q = p) => hp (heq ▸ hq)) false v)] at hFh
+      exact classicalImp_elim_atom hT hF
+
+/-- **The Kalmár–Tarski–Bernays completeness theorem.** K + S + Peirce is complete for
+classical implicational tautologies: every imp-top-only tautology is derivable in
+`ClassicalImpAxiom`.
+
+Proof: for each Boolean assignment `v`, apply `classicalImp_kalmar` at `goal := φ` to get
+`litCtx v φ φ.atoms ⊢ (φ → φ) → φ` (the TRUE conjunct); weaken `classicalImp_imp_self φ`
+to get `litCtx v φ φ.atoms ⊢ φ → φ`; apply `mp_deriv` to obtain `litCtx v φ φ.atoms ⊢ φ`;
+then collapse via `classicalImp_collapse`. -/
+theorem classicalImp_completeness {φ : PL.Proposition Atom}
+    (hITO : φ.IsImpTopOnly = true) (h : Tautology φ) :
+    Derivable ClassicalImpAxiom φ := by
+  rw [tautology_iff_boolEvaluate_true] at h
+  apply classicalImp_collapse φ.atoms
+  intro v
+  obtain ⟨hkalT, _⟩ := classicalImp_kalmar (goal := φ) φ.atoms hITO (fun p hp => hp)
+  exact mp_deriv (hkalT (h v))
+    (weakening_deriv (classicalImp_imp_self φ) (fun _ hx => absurd hx List.not_mem_nil))
+
+/-! ## Conservativity and Chain Extension -/
+
+/-- **Classical conservativity (Tarski–Bernays)**: CPL is conservative over CPL⟨→,⊤⟩ for
+imp-top-only formulas. If an imp-top-only formula is derivable in the full classical
+propositional calculus, then it is derivable in the classical implicational fragment
+CPL⟨→,⊤⟩ (K + S + Peirce). Proof: CPL soundness gives a tautology; then
+`classicalImp_completeness` yields a CPL⟨→,⊤⟩ derivation. -/
+theorem cpl_conservative_over_imp {φ : PL.Proposition Atom}
+    (hITO : φ.IsImpTopOnly = true) (h : Derivable PropositionalAxiom φ) :
+    Derivable ClassicalImpAxiom φ :=
+  classicalImp_completeness hITO (prop_soundness_tautology h)
+
+/-- **Subsumption**: every `ClassicalImpAxiom`-derivable formula is `PropositionalAxiom`-
+derivable. The CPL⟨→,⊤⟩ axioms K, S, Peirce are all `PropositionalAxiom`s; lift via
+`liftDerivationTree` using `ClassicalImpAxiom.toPropAxiom`. -/
+theorem derivablePropOfDerivableClassicalImp {φ : PL.Proposition Atom}
+    (h : Derivable ClassicalImpAxiom φ) : Derivable PropositionalAxiom φ := by
+  obtain ⟨d⟩ := h
+  exact ⟨liftDerivationTree (fun ψ hψ => hψ.toPropAxiom) d⟩
+
+/-- **Biconditional (chain edge CPL⟨→,⊤⟩ ⊆ CPL)**: for imp-top-only formulas, CPL⟨→,⊤⟩
+and CPL derivability coincide. Combines `cpl_conservative_over_imp` (the completeness
+direction) with `derivablePropOfDerivableClassicalImp` (the axiom-subsumption direction). -/
+theorem classicalImpAxiom_iff_chain {φ : PL.Proposition Atom} (hITO : φ.IsImpTopOnly = true) :
+    Derivable ClassicalImpAxiom φ ↔ Derivable PropositionalAxiom φ :=
+  ⟨derivablePropOfDerivableClassicalImp, cpl_conservative_over_imp hITO⟩
+
 end Cslib.Logic.PL

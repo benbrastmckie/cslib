@@ -402,7 +402,7 @@ ClassicalImpAxiom)`; unfold `propDerivationSystem`/`Deriv` if needed, `Deduction
 
 ---
 
-### Phase 9: Iterate elimination + `classicalImp_completeness` [NOT STARTED]
+### Phase 9: Iterate elimination + `classicalImp_completeness` [COMPLETED]
 
 **Goal**: Iterate `classicalImp_elim_atom` over the atom list to discharge the whole context, then
 conclude completeness. **One-step patch over v3 draft** (report 02 §F6): recover `Γ ⊢ φ` from the
@@ -442,7 +442,7 @@ Then feed `∀ v, Deriv (litCtx v φ as) φ` to `classicalImp_collapse` with `go
 
 ---
 
-### Phase 10: Conservativity, chain extension, CI gate [NOT STARTED]
+### Phase 10: Conservativity, chain extension, CI gate [IN PROGRESS]
 
 **UNCHANGED from v3 draft (report 02 §F6: conservativity capstone unaffected by the conclusion shape).**
 

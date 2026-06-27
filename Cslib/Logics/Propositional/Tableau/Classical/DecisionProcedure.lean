@@ -34,10 +34,11 @@ to reduce to `Tautology φ`.
 
 ## Notes on sorry
 
-The underlying `classicalTableau_sound` and `classicalTableau_complete` use sorry.
-The `Decidable` instance itself is sorry-free in structure: it uses `isTrue`/`isFalse`
-with sorry-tagged witnesses. The existing `instDecidableTautology` in `Bool.lean`
-provides the primary sorry-free decision procedure.
+`classicalTableau_sound` is now fully proved (sorry-free). The completeness direction
+(`classicalTableau_complete` in `Classical/Completeness.lean`) still rests on one sorry.
+The `Decidable` instance reflects this split: the soundness branch is clean; the countermodel
+branch carries the one remaining completeness sorry. The existing `instDecidableTautology`
+in `Bool.lean` provides the primary sorry-free decision procedure.
 
 ## References
 

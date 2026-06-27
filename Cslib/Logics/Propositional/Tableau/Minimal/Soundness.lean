@@ -40,8 +40,9 @@ The difference lies only in how `botForces` is instantiated at use sites.
 
 ## Notes on sorry
 
-`intExpandBranches_closed_unsat` is sorry'd in `Intuitionistic.Soundness`. The soundness
-proof here inherits that sorry. Both become sorry-free once the loop invariant is proved.
+This module is sorry-free. `intExpandBranches_closed_unsat` is proved in
+`Intuitionistic.Soundness`, and `minimalTableau_sound` inherits no outstanding obligations.
+Both Minimal and Intuitionistic Tableau soundness are fully proved.
 
 ## References
 
@@ -113,7 +114,7 @@ differences from the intuitionistic case:
 - `botForces` is arbitrary (from the MValid quantifier).
 - `isMinimallyClosed` (all complementary pairs) is used instead of `isIntuitionisticallyClosed`.
 
-NOTE: Inherits sorry from `intExpandBranches_closed_unsat` in `Intuitionistic.Soundness`. -/
+This theorem is sorry-free; `intExpandBranches_closed_unsat` is now fully proved. -/
 theorem minimalTableau_sound (φ : Proposition Atom)
     (h : minimalTableau φ = .closed) : MValid φ := by
   intro World _ val botForces v_uc bf_uc w₀

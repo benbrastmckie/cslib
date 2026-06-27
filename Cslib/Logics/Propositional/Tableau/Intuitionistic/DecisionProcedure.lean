@@ -33,8 +33,10 @@ The `Derivable IntPropAxiom φ` instance uses `int_soundness_completeness` to re
 
 ## Notes on sorry
 
-The underlying soundness/completeness theorems use sorry. The Decidable instance
-structure is sorry-free: it uses `isTrue`/`isFalse` with sorry-tagged witnesses.
+`intuitionisticTableau_sound` is now sorry-free. The completeness direction
+(`intuitionisticTableau_complete` in `Intuitionistic/Completeness.lean`) still rests on
+4 sorries. The `Decidable` instance carries the soundness branch clean and the countermodel
+branch with the 4 remaining completeness sorries.
 
 ## References
 

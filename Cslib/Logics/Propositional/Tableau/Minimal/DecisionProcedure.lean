@@ -17,10 +17,10 @@ tableau and connects it to derivability via `min_soundness_completeness`.
 
 ## Main Results
 
-- `minimalTableau_sound`: Proved in `Minimal.Soundness`. If `minimalTableau φ = closed`,
-  then `MValid φ`.
-- `minimalTableau_complete`: Proved in `Minimal.Completeness`. If `MValid φ`,
-  then `minimalTableau φ = closed`.
+- `minimalTableau_sound`: Proved (sorry-free) in `Minimal.Soundness`. If
+  `minimalTableau φ = closed`, then `MValid φ`.
+- `minimalTableau_complete`: In `Minimal.Completeness`; `MValid φ` implies
+  `minimalTableau φ = closed`. Currently rests on 4 sorries in `Minimal/Completeness.lean`.
 - `minimalTableau_decides`: Biconditional combining soundness and completeness.
 - `instDecidableMValid`: A `Decidable (MValid φ)` instance via tableau (NEW to CSLib).
 - `instDecidableDerivableMinPropAxiom`: `Decidable (Derivable MinPropAxiom φ)` via tableau.

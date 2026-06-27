@@ -33,10 +33,10 @@ is a tautology.
 
 ## Notes on sorry
 
-The soundness proof for the `classicalExpandBranches` loop (induction on fuel) requires
-significant infrastructure. The key lemmas are stated and their proofs are marked sorry.
-The decision procedure in `Classical/DecisionProcedure.lean` uses the existing Boolean
-enumeration completeness to give a sorry-free `Decidable (Tautology φ)` instance.
+This module is sorry-free. All three key lemmas (`classicalRule_preserves_sat`,
+`classically_closed_unsatisfiable`, `classicalTableau_sound`) are fully proved. The
+completeness and countermodel direction (`classicalTableau_complete`) rests on a sorry
+in `Classical/Completeness.lean`; soundness is independent of that.
 
 ## References
 

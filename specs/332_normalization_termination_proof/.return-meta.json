@@ -1,15 +1,41 @@
 {
-  "status": "in_progress",
-  "started_at": "2026-06-24T00:00:00Z",
-  "artifacts": [],
+  "status": "partial",
+  "started_at": "2026-06-27T00:00:00Z",
+  "phase": "4b",
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/NaturalDeduction/Normalization/TerminationScratch.lean",
+      "type": "scratch",
+      "summary": "Machine-checked mutual snImpEForm/snOrEForm/snSubst block under the validated 3-component lex termination measure (builds green modulo sorry)."
+    },
+    {
+      "path": "specs/332_normalization_termination_proof/handoffs/phase4b-handoff.md",
+      "type": "handoff",
+      "summary": "Documents the validated measure, the sole remaining head-bound termination obligation, the head-bound lemma stack, and SN/cast bookkeeping to close L5."
+    }
+  ],
   "partial_progress": {
-    "stage": "initializing",
-    "details": "Agent started, checking goal state",
-    "phases_completed": 0
+    "stage": "termination_encoding_validated",
+    "details": "3-component lexicographic measure (cut-formula complexity, phase, structural size) machine-verified to make Lean accept the mutual L3/L4/L5 recursion. All structural + beta-drop decreasing_by goals discharged (decreasing_tactic / left;simp[complexity];omega). Sole remaining termination gap: head-bound at snSubst->snImpEForm edge. SN reassembly proofs and impI/orE context casts also remain. Main Termination.lean untouched and green.",
+    "commit": "e87975fc"
   },
+  "verification": {
+    "verification_passed": false,
+    "main_file_green": true,
+    "scratch_builds": true,
+    "build_passed": true,
+    "ci_pipeline_passed": false
+  },
+  "sorry_inventory": [
+    "TerminationScratch.lean snSubst.decreasing_by: head-bound goal ((type of D').complexity, 0, sizeOf (snSubst D' arg).1) < (P.complexity, 1, sizeOf body) -- requires (type of D').complexity <= P.complexity via head-analysis invariant",
+    "TerminationScratch.lean snSubst: SN-reassembly proofs + impI/orE/leaf data sorrys",
+    "TerminationScratch.lean snOrEForm: orE commuting case (context casts)",
+    "Termination.lean:~1467 fuel sorry in normalize_isStronglyNormal (PRE-EXISTING, not touched)"
+  ],
   "metadata": {
-    "agent_type": "cslib-implementation-agent",
+    "session_id": "sess_1782576552_fae7a6",
+    "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
   }
 }

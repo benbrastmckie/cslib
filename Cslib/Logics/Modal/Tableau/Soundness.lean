@@ -225,9 +225,7 @@ theorem modalStepBranch_preserves_sat
         -- if boxPropagation is empty → notApplicable (simp eliminates)
         -- otherwise → persistent newForms
         split_ifs at hsf with hemp
-        · simp at hsf
-        · simp only [Option.some.injEq, Prod.mk.injEq] at hsf
-          obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
+        · obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
           subst hnewBs hnewAcc
           -- boxPos: newBs = [boxPropagation b acc φ lbl ++ b], acc unchanged
           refine ⟨boxPropagation b acc φ lbl ++ b, List.mem_cons_self _ _, W, m, f, hacc, ?_⟩
@@ -273,7 +271,7 @@ theorem modalStepBranch_preserves_sat
           simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
             modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
             Option.some.injEq, Prod.mk.injEq] at hsf
-          obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
+          obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
           subst hnewBs hnewAcc
           -- negPos fired: newForms = [⟨.neg, a, lbl⟩]
           refine ⟨[⟨.neg, a, lbl⟩] ++ b, List.mem_cons_self _ _, W, m, f, hacc, ?_⟩
@@ -300,7 +298,7 @@ theorem modalStepBranch_preserves_sat
               simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
                 modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
                 Option.some.injEq, Prod.mk.injEq] at hsf
-              obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
+              obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
               -- orPos: branches = [[⟨.pos, a1, lbl⟩], [⟨.pos, c, lbl⟩]]
               -- hpos: Satisfies m (f lbl) ((a1 → ⊥) → c) = ¬Satisfies m (f lbl) a1 → Satisfies m (f lbl) c
@@ -332,7 +330,7 @@ theorem modalStepBranch_preserves_sat
               simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
                 modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
                 Option.some.injEq, Prod.mk.injEq] at hsf
-              obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
+              obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
               simp only [Satisfies] at hpos
               rcases Classical.em (Satisfies m (f lbl) (.imp a1 a2)) with ha | ha
@@ -359,7 +357,7 @@ theorem modalStepBranch_preserves_sat
             simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
               modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
               Option.some.injEq, Prod.mk.injEq] at hsf
-            obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
+            obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
             subst hnewBs hnewAcc
             simp only [Satisfies] at hpos
             rcases Classical.em (Satisfies m (f lbl) a) with ha | ha
@@ -399,7 +397,7 @@ theorem modalStepBranch_preserves_sat
         simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
           modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
           Option.some.injEq, Prod.mk.injEq] at hsf
-        obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
+        obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
         subst hnewBs hnewAcc
         -- boxNeg: w' = modalNextWorld b is fresh
         -- hneg : ¬Satisfies m (f lbl) (□φ) = ∃ ww, m.r (f lbl) ww ∧ ¬Satisfies m ww φ

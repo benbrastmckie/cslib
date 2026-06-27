@@ -1000,6 +1000,52 @@ private lemma intApplyRuleFull_some_info
         obtain ⟨_, _, rfl⟩ := hmem_pers; rfl
     | _ => simp at h
 
+/-- For a non-world-creating linear result (`newEdge = none`), the next world number `nw'`
+equals the current world number `nwH`. -/
+private lemma intApplyRuleFull_none_nw
+    (sf : ISF Atom) (nwH : Nat) (b : IBranch Atom)
+    (newForms : List (ISF Atom)) (nw' : Nat)
+    (h : intApplyRuleFull sf nwH b = .linearResult newForms nw' none) :
+    nw' = nwH := by
+  obtain ⟨sign, form, label⟩ := sf
+  simp only [intApplyRuleFull] at h
+  cases sign with
+  | pos =>
+    cases form with
+    | and φ ψ =>
+      simp only [IntRuleResult.linearResult.injEq] at h
+      obtain ⟨_, rfl, _⟩ := h; rfl
+    | _ => simp at h
+  | neg =>
+    cases form with
+    | or φ ψ =>
+      simp only [IntRuleResult.linearResult.injEq] at h
+      obtain ⟨_, rfl, _⟩ := h; rfl
+    | imp φ ψ => simp [intFImpRule] at h
+    | _ => simp at h
+
+/-- For a branching result, the next world number `nw'` equals the current world number `nwH`. -/
+private lemma intApplyRuleFull_branching_nw
+    (sf : ISF Atom) (nwH : Nat) (b : IBranch Atom)
+    (branches' : List (List (ISF Atom))) (nw' : Nat)
+    (h : intApplyRuleFull sf nwH b = .branchingResult branches' nw') :
+    nw' = nwH := by
+  obtain ⟨sign, form, label⟩ := sf
+  simp only [intApplyRuleFull] at h
+  cases sign with
+  | pos =>
+    cases form with
+    | or φ ψ =>
+      simp only [IntRuleResult.branchingResult.injEq] at h
+      obtain ⟨_, rfl⟩ := h; rfl
+    | _ => simp at h
+  | neg =>
+    cases form with
+    | and φ ψ =>
+      simp only [IntRuleResult.branchingResult.injEq] at h
+      obtain ⟨_, rfl⟩ := h; rfl
+    | _ => simp at h
+
 /-- If `intExpandBranches` returns `closed`, then every input branch is unsatisfiable.
 
 This is the core loop invariant for the soundness proof. The proof requires:

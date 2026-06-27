@@ -1,5 +1,5 @@
 {
-  "next_project_number": 380,
+  "next_project_number": 381,
   "active_projects": [
     {
       "project_number": 360,
@@ -156,12 +156,25 @@
     {
       "project_number": 342,
       "project_name": "temporal_burgess_to_pnueli_convention",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Migrate the Burgess argument-order convention to the Pnueli convention for untl and snce throughout Cslib/Logics/Temporal. Temporal currently uses the Burgess order (untl event guard, snce event guard) where the event holds at the witness point and the guard holds at intermediate points, with derived operators someFuture = untl _ top and somePast = snce _ top. Swap to the standard Pnueli order (untl guard event, snce guard event) used in Cslib/Logics/LTL so the two logics agree. Scope: Syntax/Formula.lean constructors, notation, and the convention docstring; Semantics (Satisfies, Validity); the BX axiom schemata in ProofSystem/Axioms.lean; all derived-operator definitions (someFuture, somePast, allFuture, allPast, always, sometimes); every downstream proof in Metalogic (Soundness, Completeness, DenseSoundness, DenseCompleteness, MCS, DeductionTheorem, Chronicle/* including TruthLemma, ConservativeExtension); and the LTL Embedding (Cslib/Logics/LTL/Embedding.lean, Formula.toTemporal) which currently bridges the convention swap. Verify the whole tree builds sorry-free via lake build and the CSLib CI pipeline. Large mechanical-but-pervasive refactor across the entire Temporal subtree.",
       "topic": "Temporal Logic",
       "created": "2026-06-25T02:33:01Z",
-      "last_updated": "2026-06-25T02:33:01Z"
+      "last_updated": "2026-06-27T18:15:25Z",
+      "session_id": "sess_1782576469_20af07_342",
+      "artifacts": [
+        {
+          "path": "specs/342_temporal_burgess_to_pnueli_convention/reports/01_burgess-to-pnueli-convention.md",
+          "type": "report",
+          "summary": "Burgess->Pnueli convention research (premise correction)"
+        },
+        {
+          "path": "specs/342_temporal_burgess_to_pnueli_convention/plans/01_burgess-to-pnueli-cleanup.md",
+          "type": "plan",
+          "summary": "Re-scoped Burgess->Pnueli doc/bridge cleanup, 4 phases"
+        }
+      ]
     },
     {
       "project_number": 341,
@@ -1679,7 +1692,7 @@
     {
       "project_number": 372,
       "project_name": "or_imp_disjunctive_implicational_fragment",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Complete the propositional fragment lattice by adding the disjunctive-implicational fragment IPL<or,->,top>, the one missing vertex. Current fragments (ProofSystem/FragmentAxioms.lean): ImpAxiom (K,S), ConjImpAxiom (+andI/andE1/andE2), ConjImpBotAxiom/ConjImpBotMinAxiom (+efq), ClassicalImpAxiom (+Peirce) -- none covers or-with-implication. Add OrImpAxiom : Proposition Atom -> Prop with constructors K, S, orI1, orI2, orE; the subsumption OrImpAxiom -> MinPropAxiom; the mem_implyK/mem_implyS witnesses and substitution-closure + fragment-predicate-compatibility lemmas mirroring the existing fragments; the deduction-theorem instance; a tag type Propositional.HilbertOrImp with its InferenceSystem/MinimalHilbert instances (ProofSystem/{Instances,FragmentInstances}.lean); and, if natural, its conservativity step into the chain. Land it on the cleaned-up strength substrate from task 345 (IsMinimal + MinimalAxioms<->inclusion bridge) so the fragment/strength story stays coherent. Like task 352 this is an optional lattice-completion extension -- confirm desirability before heavy investment in the conservativity step; the axioms + instances + deduction theorem are the core deliverable. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 345.",
@@ -1687,10 +1700,21 @@
         345
       ],
       "created": "2026-06-27T05:29:32Z",
-      "last_updated": "2026-06-27T05:29:32Z",
+      "last_updated": "2026-06-27T18:17:22Z",
       "next_artifact_number": 1,
-      "artifacts": [],
-      "session_id": null
+      "artifacts": [
+        {
+          "path": "specs/372_or_imp_disjunctive_implicational_fragment/reports/01_or-imp-fragment-research.md",
+          "type": "report",
+          "summary": "OrImp disjunctive-implicational fragment research"
+        },
+        {
+          "path": "specs/372_or_imp_disjunctive_implicational_fragment/plans/01_or-imp-fragment.md",
+          "type": "plan",
+          "summary": "OrImp fragment: core (1-4) + gated conservativity (5-10)"
+        }
+      ],
+      "session_id": "sess_1782576469_20af07_372"
     },
     {
       "project_number": 373,
@@ -1819,6 +1843,22 @@
           "type": "plan"
         }
       ]
+    },
+    {
+      "project_number": 380,
+      "project_name": "or_imp_fragment_conservativity",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Prove the conservativity theorem for the disjunctive-implicational fragment IPL<or,->,top> over its OrImp Hilbert system (hilbertIplConservativeOverOrImp), wiring it into ConservativeChain.lean. This is the follow-up to task 372, whose core (OrImpAxiom, IsAndBotFree predicate, HilbertOrImp instances, deduction theorem, and the coe_AlgEvaluate_andBotFree groundwork lemma) shipped sorry-free. Task 372 Phase 6 established a NO-GO for the naive free-meet-completion route: UpperSet.Ici does not preserve Heyting implication (concrete 4-element counterexample: with a,b incomparable, UpperSet.Ici(a=>b) != UpperSet.Ici(a) => UpperSet.Ici(b) since the latter drops bot). Heyting implication is right-adjoint to meet, not join, so no symmetric dual of FreeJoinCompletion.lean exists via UpperSet. This task must pursue one of the alternative routes identified in the 372 research/spike: (1) a cut-elimination / proof-theoretic conservativity argument; (2) a MacNeille completion with explicit himp-preservation analysis; (3) a Rieger-Nishimura lattice construction; or (4) a Godel-Tait-style translation from OrImp into ConjImp reusing the existing ConjImpConservative machinery. Requires substantial new mathematical infrastructure beyond a mechanical mirror. No new axioms; no sorry bridges; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 372 (core fragment complete). See specs/372_or_imp_disjunctive_implicational_fragment/plans/01_or-imp-fragment.md Phases 7-10 (marked BLOCKED) and the orchestrator handoff blocker entry for the full obstruction analysis and alternative-approach notes.",
+      "dependencies": [
+        372
+      ],
+      "created": "2026-06-27T18:18:00Z",
+      "last_updated": "2026-06-27T18:18:00Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "session_id": null
     }
   ],
   "repository_health": {
@@ -1837,5 +1877,5 @@
     "Code Hygiene",
     "Algebraic Semantics"
   ],
-  "_last_updated": "2026-06-27T05:35:19Z"
+  "_last_updated": "2026-06-27T18:18:00Z"
 }

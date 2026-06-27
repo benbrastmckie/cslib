@@ -1,56 +1,40 @@
 {
-  "session_id": "sess_1782560707_b3ce16",
+  "session_id": "sess_1782576469_20af07",
   "task_numbers": [
-    345,
-    348,
-    367
+    342,
+    372
   ],
   "waves": [
     [
-      345
-    ],
-    [
-      348
-    ],
-    [
-      367
+      342,
+      372
     ]
   ],
   "dependency_graph": {
-    "345": [],
-    "348": [
-      345
-    ],
-    "367": [
-      348
-    ]
+    "342": [],
+    "372": []
   },
-  "max_cycles": 15,
-  "cycle_count": 7,
+  "max_cycles": 10,
+  "cycle_count": 3,
   "failed_tasks": [],
   "completed_tasks": [
-    345,
-    348,
-    367
+    342,
+    372
   ],
   "current_statuses": {
-    "345": "completed",
-    "348": "completed",
-    "367": "completed"
+    "342": "completed",
+    "372": "completed"
   },
   "task_dirs": {
-    "345": "specs/345_reconcile_logic_encodings_isminimal",
-    "348": "specs/348_glivenko_conservativity_theory_parametric",
-    "367": "specs/367_unify_brouwerian_completeness_triplication"
+    "342": "specs/342_temporal_burgess_to_pnueli_convention",
+    "372": "specs/372_or_imp_disjunctive_implicational_fragment"
   },
   "research_agents": {
-    "345": "cslib-research-agent",
-    "348": "cslib-research-agent",
-    "367": "cslib-research-agent"
+    "342": "cslib-research-agent",
+    "372": "cslib-research-agent"
   },
   "implement_agents": {
-    "345": "cslib-implementation-agent",
-    "348": "cslib-implementation-agent",
-    "367": "cslib-implementation-agent"
+    "342": "cslib-implementation-agent",
+    "372": "cslib-implementation-agent"
   }
 }

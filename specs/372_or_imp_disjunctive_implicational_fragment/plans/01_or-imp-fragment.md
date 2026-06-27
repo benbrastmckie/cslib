@@ -1,7 +1,7 @@
 # Implementation Plan: Task #372 - Disjunctive-Implicational Fragment IPL⟨∨,→,⊤⟩
 
 - **Task**: 372 - Disjunctive-implicational fragment `OrImpAxiom` + `HilbertOrImp` (+ conservativity)
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 13 hours (core ~3.25h; conservativity ~9.75h, high-variance: realistic ceiling 22h)
 - **Dependencies**: Task 345 (IsMinimal + MinimalAxioms↔inclusion bridge) — completed
 - **Research Inputs**: specs/372_or_imp_disjunctive_implicational_fragment/reports/01_or-imp-fragment-research.md

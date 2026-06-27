@@ -1,5 +1,5 @@
 ---
-next_project_number: 380
+next_project_number: 381
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 380
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,321,342,355,364,368,370,371,372,376,377 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,321,355,364,368,370,371,376,377,380 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,332,363,366,374,378 | 36,37,180,290,299,355,371,376,377 | Bimodal Porting, Foundations, Modal Logic, ... |
 | 3 | 41,275,360,369,373,379 | 39,40,332,363,364,378 | Foundations, Propositional Logic, Algebraic Semantics |
 | 4 | 317 | 369 | Propositional Logic |
@@ -51,7 +51,7 @@ next_project_number: 380
 370 [NOT STARTED] — Close the decidability asymmetry in the metalogic layer: classica
 371 [NOT STARTED] — Symmetrize the LK/LJ sequent-calculus metatheory and add the miss
   └─ 374 [NOT STARTED] — Add Craig interpolation for the propositional sequent calculi, a 
-372 [NOT STARTED] — Complete the propositional fragment lattice by adding the disjunc
+380 [NOT STARTED] — Prove the conservativity theorem for the disjunctive-implicationa
 317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
   └─ 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
 369 [NOT STARTED] — Parameterize the intuitionistic and minimal tableau developments 
@@ -62,7 +62,6 @@ next_project_number: 380
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 241 [IMPLEMENTING] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 301 [IMPLEMENTING] — Implement tableau decision procedure for temporal logic (Cslib.Lo
-342 [NOT STARTED] — Migrate the Burgess argument-order convention to the Pnueli conve
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
   └─ 275 [BLOCKED] — Prove that Bimodal TM is conservative over Temporal BX for tempor
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
@@ -167,10 +166,12 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 372. Or imp disjunctive implicational fragment
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 345
+- **Research**: [372_or_imp_disjunctive_implicational_fragment/reports/01_or-imp-fragment-research.md]
+- **Plan**: [372_or_imp_disjunctive_implicational_fragment/plans/01_or-imp-fragment.md]
 
 **Description**: Complete the propositional fragment lattice by adding the disjunctive-implicational fragment IPL<or,->,top>, the one missing vertex. Current fragments (ProofSystem/FragmentAxioms.lean): ImpAxiom (K,S), ConjImpAxiom (+andI/andE1/andE2), ConjImpBotAxiom/ConjImpBotMinAxiom (+efq), ClassicalImpAxiom (+Peirce) -- none covers or-with-implication. Add OrImpAxiom : Proposition Atom -> Prop with constructors K, S, orI1, orI2, orE; the subsumption OrImpAxiom -> MinPropAxiom; the mem_implyK/mem_implyS witnesses and substitution-closure + fragment-predicate-compatibility lemmas mirroring the existing fragments; the deduction-theorem instance; a tag type Propositional.HilbertOrImp with its InferenceSystem/MinimalHilbert instances (ProofSystem/{Instances,FragmentInstances}.lean); and, if natural, its conservativity step into the chain. Land it on the cleaned-up strength substrate from task 345 (IsMinimal + MinimalAxioms<->inclusion bridge) so the fragment/strength story stays coherent. Like task 352 this is an optional lattice-completion extension -- confirm desirability before heavy investment in the conservativity step; the axioms + instances + deduction theorem are the core deliverable. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 345.
 
@@ -445,10 +446,12 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 342. Temporal burgess to pnueli convention
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
+- **Research**: [342_temporal_burgess_to_pnueli_convention/reports/01_burgess-to-pnueli-convention.md]
+- **Plan**: [342_temporal_burgess_to_pnueli_convention/plans/01_burgess-to-pnueli-cleanup.md]
 
 **Description**: Migrate the Burgess argument-order convention to the Pnueli convention for untl and snce throughout Cslib/Logics/Temporal. Temporal currently uses the Burgess order (untl event guard, snce event guard) where the event holds at the witness point and the guard holds at intermediate points, with derived operators someFuture = untl _ top and somePast = snce _ top. Swap to the standard Pnueli order (untl guard event, snce guard event) used in Cslib/Logics/LTL so the two logics agree. Scope: Syntax/Formula.lean constructors, notation, and the convention docstring; Semantics (Satisfies, Validity); the BX axiom schemata in ProofSystem/Axioms.lean; all derived-operator definitions (someFuture, somePast, allFuture, allPast, always, sometimes); every downstream proof in Metalogic (Soundness, Completeness, DenseSoundness, DenseCompleteness, MCS, DeductionTheorem, Chronicle/* including TruthLemma, ConservativeExtension); and the LTL Embedding (Cslib/Logics/LTL/Embedding.lean, Formula.toTemporal) which currently bridges the convention swap. Verify the whole tree builds sorry-free via lake build and the CSLib CI pipeline. Large mechanical-but-pervasive refactor across the entire Temporal subtree.
 

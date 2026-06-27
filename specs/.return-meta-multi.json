@@ -2,12 +2,14 @@
   "status": "completed",
   "metadata": {
     "tasks_completed": [
-      345,
-      348,
-      367
+      342,
+      372
     ],
     "tasks_failed": [],
-    "cycles_used": 7,
-    "multi_task_mode": true
+    "cycles_used": 3,
+    "multi_task_mode": true,
+    "follow_up_tasks": [
+      380
+    ]
   }
 }

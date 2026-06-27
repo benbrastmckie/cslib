@@ -41,7 +41,7 @@ next_project_number: 364
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
   └─ 332 [IMPLEMENTING] — Prove the normalization termination theorem for CSLib Theory.Deri
-316 [PLANNED] — Fill the 6 sorry instances in propositional tableau soundness pro
+316 [IMPLEMENTING] — Fill the 6 sorry instances in propositional tableau soundness pro
   └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
 345 [RESEARCHED] — Reconcile the two strength encodings on the Hilbert substrate and
   └─ 348 [NOT STARTED] — Restate Glivenko and conservativity theory-parametrically against
@@ -524,7 +524,7 @@ next_project_number: 364
 ---
 
 ### 316. Propositional tableau soundness
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 323

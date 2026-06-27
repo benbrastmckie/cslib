@@ -1,0 +1,8 @@
+{
+  "status": "partial",
+  "metadata": {
+    "cycles_used": 5,
+    "final_state": "implementing",
+    "result": "3 sorries -> 1 sorry; build green; freshness invariant landed and committed"
+  }
+}

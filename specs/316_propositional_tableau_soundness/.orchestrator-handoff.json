@@ -1,46 +1,44 @@
 {
   "status": "partial",
-  "summary": "Neither hfresh sorry (lines ~1184 and ~1200) could be closed in this dispatch: both require `FreshAbove bPers edgesH nwH` in the proof context, but the `key` suffices inside `intExpandBranches_closed_unsat` does not track this invariant — confirmed by lean_goal and lean_multi_attempt. The build remains green at 3 sorries (the two hfresh lines plus the linearResult bp=bh case at ~1189); no edits were made. The Classical/Soundness.lean and Minimal/DecisionProcedure.lean sorries are entirely unstarted and out of scope for task 316.",
+  "summary": "Closed 2 of 3 sorries in Intuitionistic/Soundness.lean by strengthening the intExpandBranches_closed_unsat lemma with a FreshAbove freshness invariant (freshInv premise threaded through the pending-list induction), plus 2 supporting nw-invariance helper lemmas (intApplyRuleFull_none_nw, intApplyRuleFull_branching_nw). Build GREEN at exactly 1 sorry. Net: 3 sorries -> 1 sorry. ALSO fixed the dependent Minimal/Soundness.lean call site (shared lemma signature change). Both Intuitionistic/Soundness.lean and Minimal/Soundness.lean build GREEN. Classical/Completeness.lean has a pre-existing, unrelated breakage (not task 316).",
+  "phases_completed": 3,
+  "phases_total": 4,
+  "next_action_hint": "Close the final sorry at line ~1281 (linearResult bp=bh, the world-creating F(->) 4-tuple case).",
   "blockers": [
     {
-      "id": "no-freshAbove-in-key",
-      "description": "Both `have hfresh : ∀ sf' ∈ bPers, sf'.label ≠ nwH := by sorry` sites (lines ~1184 and ~1200) require a `FreshAbove bh edgesH nwH` hypothesis in scope to apply `freshAbove_applyPersistenceFixpoint` + `Nat.ne_of_lt`. The `key` suffices (lines ~1078–1096 of Soundness.lean) tracks only length conditions and the closed-expansion equation — no freshness invariant. Closing these two sorries requires strengthening `key` to carry a per-branch freshness invariant through the pending-list induction. This is a larger structural change than the two-sorry budget allows.",
-      "description2": "The F(→) linearResult bp=bh sorry (line ~1189) is the 4-tuple obstacle from prior handoffs: it additionally requires `intRule_preserves_sat` for the world-creating case, which needs hfresh AND threading of the updated worldOf' through the inductive hypothesis. A broken WIP attempt is shelved at specs/316_propositional_tableau_soundness/recovered/intrule-4tuple-attempt-broken.lean"
+      "id": "linearResult-bp-bh-4tuple",
+      "description": "The remaining sorry at line ~1281 (`· sorry -- linearResult bp=bh case: apply intRule_preserves_sat + ih`) is the world-creating F(->) case. With hfresh now available (the two hfresh sorries are closed), it still needs intRule_preserves_sat applied with the updated worldOf' threaded through the inductive hypothesis. A broken WIP for this case is shelved at specs/316_propositional_tableau_soundness/recovered/intrule-4tuple-attempt-broken.lean."
     }
   ],
   "continuation_context": {
-    "plan_path": "specs/316_propositional_tableau_soundness/plans/06_soundness-plan-revised.md",
+    "plan_path": "specs/316_propositional_tableau_soundness/plans/08_soundness-plan-revised.md",
     "build_state": {
       "builds": true,
       "error_count": 0,
-      "sorry_count": 3
+      "sorry_count": 1
     },
     "sorry_inventory": [
       {
         "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
-        "line": 1184,
-        "description": "have hfresh : ∀ sf' ∈ bPers, sf'.label ≠ nwH (linearResult case) — BLOCKED: needs FreshAbove invariant in key suffices"
-      },
-      {
-        "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
-        "line": 1189,
-        "description": "linearResult bp=bh case: apply intRule_preserves_sat + ih — BLOCKED: needs hfresh (above) + worldOf' threading for world-creating F(→) case"
-      },
-      {
-        "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
-        "line": 1200,
-        "description": "have hfresh : ∀ sf' ∈ bPers, sf'.label ≠ nwH (branchingResult case) — BLOCKED: needs FreshAbove invariant in key suffices"
+        "line": 1281,
+        "description": "linearResult bp=bh case (world-creating F(->)): apply intRule_preserves_sat + ih with worldOf' threading. hfresh is now available in scope."
       }
     ],
-    "remaining_obstacle": "The `key` suffices (lines ~1078–1096 of Soundness.lean) must be strengthened to carry a FreshAbove invariant. The fix: add a component `(freshInv : ∀ bPend edgesPend nwPend, (bPend, edgesPend) ∈ pending.zip pendingEdges → nwPend ∈ pendingNW → FreshAbove bPend edgesPend nwPend)` (or equivalent). Once that is in scope, hfresh at 1184 and 1200 close via `freshAbove_applyPersistenceFixpoint` + `Nat.ne_of_lt`. The linearResult bp=bh sorry at 1189 then additionally needs the world-creating worldOf' threading through the inductive hypothesis. A broken WIP attempt is shelved at specs/316_propositional_tableau_soundness/recovered/intrule-4tuple-attempt-broken.lean",
-    "where_to_begin": "Strengthen the `key` suffices by adding a freshness component. The `nil` case of the pending induction needs no freshInv premise. The `cons` case derives `FreshAbove bPers edgesH nwH` as `freshAbove_applyPersistenceFixpoint bh edgesH nwH (fuel''+1) (freshInv bh edgesH nwH ...)`, then `intro sf' hsf'; exact Nat.ne_of_lt (hfreshAbove.1 sf' hsf')`. The `cons` recursive call must discharge freshInv for the next round, using `freshAbove_extendMany` (non-world-creating) or `freshAbove_world_create` (F(→)) to establish the updated FreshAbove for the expanded branch."
+    "lint_debt": "7 lines exceed 100 chars in the edited region (approx lines 1290,1333,1343,1345,1398,1415,1440) — lake exe lint-style would flag these; wrap before PR submission.",
+    "where_to_begin": "Navigate to line ~1281 in Soundness.lean. The freshness invariant (FreshAbove bPers edgesH nwH) and hfresh (sf'.label != nwH for sf' in bPers) are now in scope via the strengthened key suffices. Apply intRule_preserves_sat for the world-creating F(->) case and thread the updated worldOf' through the inductive hypothesis. Consult recovered/intrule-4tuple-attempt-broken.lean for the prior approach (do not restore wholesale)."
   },
   "artifacts": [
     {
-      "path": "specs/316_propositional_tableau_soundness/.orchestrator-handoff.json",
-      "type": "handoff"
+      "type": "summary",
+      "path": "specs/316_propositional_tableau_soundness/plans/08_soundness-plan-revised.md",
+      "summary": "3->1 sorry; freshness invariant landed; build green"
     }
   ],
-  "phases_completed": 0,
-  "phases_total": 4
+  "sorry_inventory": [
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
+      "line": 1281,
+      "description": "linearResult bp=bh world-creating F(->) case"
+    }
+  ]
 }

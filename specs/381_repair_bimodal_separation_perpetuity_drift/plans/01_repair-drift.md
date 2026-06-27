@@ -98,7 +98,7 @@ Phases within the same wave can execute in parallel. Phases 1-4 each touch a dis
 
 ---
 
-### Phase 2: QLemma (1 edit) [NOT STARTED]
+### Phase 2: QLemma (1 edit) [COMPLETED]
 
 **Goal**: Fix the `unsolved goals` in `Q_Z_U_free` where the `neg` over `snce` is left unreduced.
 

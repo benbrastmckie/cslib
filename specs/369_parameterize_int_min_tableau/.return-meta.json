@@ -1,15 +1,14 @@
 {
-  "status": "planned",
-  "agent_type": "planner-agent",
-  "task_number": 369,
-  "delegation_path": ["orchestrator", "plan", "planner-agent"],
-  "artifact_type": "plan",
-  "artifact_path": "specs/369_parameterize_int_min_tableau/plans/01_parameterize-int-min-tableau.md",
-  "session_id": null,
-  "phase_count": 5,
-  "estimated_hours": 8,
-  "dependency_waves": [[1],[2],[3],[4],[5]],
-  "memory_candidates": [],
-  "next_steps": "Run /implement 369 to execute the plan",
-  "summary": "5-phase hard-sized plan for IntMinScheme parameterization; sorry-accounting invariant 6->1; P3 is the single red phase (truthLemma S)"
+  "status": "in_progress",
+  "started_at": "2026-06-27T00:00:00Z",
+  "artifacts": [],
+  "partial_progress": {
+    "stage": "phase-2",
+    "details": "Adding tableau_sound S wrapper to Scheme.lean"
+  },
+  "metadata": {
+    "agent_type": "cslib-implementation-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
+  }
 }

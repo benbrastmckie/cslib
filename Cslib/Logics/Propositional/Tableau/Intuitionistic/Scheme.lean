@@ -156,6 +156,65 @@ def minScheme : IntMinScheme Atom where
       intro hFbot hTbot
       exact minOpen_no_contradiction b hopen (HasBot.bot : Proposition Atom) w ⟨hTbot, hFbot⟩
 
+/-! ## Generic Tableau Soundness -/
+
+/-- **Generic Tableau Soundness**: If the tableau with closure predicate `S.closurePred`
+closes on `φ`, then `φ` is intuitionistically valid (`IValid φ`).
+
+The proof instantiates `intExpandBranches_closed_unsat` with `S.closurePred` and
+`S.closed_unsat`, giving a parametric wrap of `intuitionisticTableau_sound` that
+ranges over all `IntMinScheme` instances.
+
+The conclusion is `IValid φ` (validity with `botForces = fun _ => False`), matching the
+`botForces = fun _ => False` specialization in `IntMinScheme.closed_unsat`.
+
+- At `intScheme`: equivalent to `intuitionisticTableau_sound` (Phase 5 will repoint).
+- At `minScheme`: proves the `botForces = fun _ => False` sub-case of minimal soundness.
+  `minimalTableau_sound` (arbitrary `botForces`) stays in `Minimal/Soundness.lean`.
+
+## References
+
+* [M. Fitting, *Proof Methods for Modal and Intuitionistic Logics*][Fitting1983], Chapter 4 -/
+theorem tableau_sound.{u_world} (S : IntMinScheme.{_, u_world} Atom) (φ : Proposition Atom)
+    (h : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
+        (2 ^ (2 * φ.complexity + 2)) S.closurePred = .closed) :
+    IValid.{_, u_world} φ := by
+  intro World _ val v_uc w₀
+  by_contra hneg
+  let worldOf : Nat → World := fun _ => w₀
+  have hsat : intBranchSatisfied val (fun _ => False) worldOf [⟨.neg, φ, 0⟩] := by
+    intro sf hmem
+    simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem
+    subst hmem
+    exact ⟨fun h' => absurd h' (Sign.noConfusion), fun _ => hneg⟩
+  apply intExpandBranches_closed_unsat val (fun _ => False) v_uc
+      (fun {_ _} _ hf => absurd hf id) _
+      S.closurePred
+      (fun (worldOf' : Nat → World) (b : IBranch Atom) hcl =>
+          S.closed_unsat val worldOf' b hcl)
+      [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] (by rfl) (by rfl) (by rfl)
+      (by
+        intro b edges nw hmem
+        simp only [List.zip_cons_cons, List.zip_nil_right,
+          List.mem_cons, List.mem_nil_iff, or_false, Prod.mk.injEq] at hmem
+        obtain ⟨⟨hb, he⟩, hnw⟩ := hmem
+        subst hb; subst he; subst hnw
+        refine ⟨?_, ?_⟩
+        · intro sf hsf
+          simp only [List.mem_cons, List.mem_nil_iff, or_false] at hsf
+          simp [hsf]
+        · intro c p hcp
+          simp only [List.not_mem_nil] at hcp) h
+      [⟨.neg, φ, 0⟩] []
+  · simp [List.zip_cons_cons, List.zip_nil_right]
+  · exact fun w w' hacc => by
+      simp only [isAccessible] at hacc
+      split_ifs at hacc with heq
+      · have hw : w = w' := by exact_mod_cast beq_iff_eq.mp heq
+        exact le_of_eq (congrArg worldOf hw)
+      · simp [isAccessible.go] at hacc
+  · exact hsat
+
 end Cslib.Logic.PL
 
 end

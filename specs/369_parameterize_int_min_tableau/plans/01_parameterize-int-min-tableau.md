@@ -168,7 +168,7 @@ field-level sorry here.
 
 ---
 
-### Phase 2: Thin Soundness wrappers [NOT STARTED]
+### Phase 2: Thin Soundness wrappers [IN PROGRESS]
 
 **Goal**: Add generic `tableau_sound S` and re-express `intuitionisticTableau_sound` /
 `minimalTableau_sound` as one-line instantiations, keeping Soundness green.

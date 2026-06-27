@@ -26,16 +26,17 @@
     ]
   },
   "max_cycles": 15,
-  "cycle_count": 6,
+  "cycle_count": 7,
   "failed_tasks": [],
   "completed_tasks": [
     345,
-    348
+    348,
+    367
   ],
   "current_statuses": {
     "345": "completed",
     "348": "completed",
-    "367": "implementing"
+    "367": "completed"
   },
   "task_dirs": {
     "345": "specs/345_reconcile_logic_encodings_isminimal",

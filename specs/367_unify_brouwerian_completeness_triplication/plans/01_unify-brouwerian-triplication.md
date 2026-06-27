@@ -1,7 +1,7 @@
 # Implementation Plan: Collapse the Three Brouwerian Completeness Modules
 
 - **Task**: 367 - unify_brouwerian_completeness_triplication
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 9 hours
 - **Dependencies**: Task 345 (`IsMinimal` family — landed, commit 59c1d3ff); Task 348 (theory-parametric conservativity substrate — landed, commit 8a32b3ef)
 - **Research Inputs**: specs/367_unify_brouwerian_completeness_triplication/reports/01_unify-brouwerian-triplication.md

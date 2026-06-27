@@ -644,4 +644,329 @@ theorem classicalImpAxiom_hasDeductionTheorem :
     Metalogic.HasDeductionTheorem (propDerivationSystem (@ClassicalImpAxiom Atom)) :=
   hasDeductionTheorem ClassicalImpAxiom.mem_implyK ClassicalImpAxiom.mem_implyS
 
+/-! ## ClassicalConjImp Axiom System -/
+
+/-- Axiom schemata for the classical conjunctive-implicational fragment CPL⟨∧,→,⊤⟩.
+
+The 6 axiom constructors are:
+- **implyK** (weakening): `φ → (ψ → φ)`
+- **implyS** (distribution): `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))`
+- **peirce** (Peirce's law): `((φ → ψ) → φ) → φ`
+- **andI** (conjunction introduction): `φ → (ψ → φ ∧ ψ)`
+- **andE1** (left conjunction elimination): `φ ∧ ψ → φ`
+- **andE2** (right conjunction elimination): `φ ∧ ψ → ψ`
+
+Together with modus ponens, these axioms characterize the conjunctive-implicational
+fragment of classical propositional logic (CPL with conjunction and implication but
+without disjunction or falsum). Peirce's law distinguishes this system from the
+intuitionistic conjunctive-implicational fragment IPL⟨∧,→,⊤⟩. -/
+inductive ClassicalConjImpAxiom : PL.Proposition Atom → Prop where
+  /-- Weakening: `φ → (ψ → φ)` -/
+  | implyK (φ ψ : PL.Proposition Atom) :
+      ClassicalConjImpAxiom (φ.imp (ψ.imp φ))
+  /-- Distribution: `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))` -/
+  | implyS (φ ψ χ : PL.Proposition Atom) :
+      ClassicalConjImpAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ)))
+  /-- Peirce's law: `((φ → ψ) → φ) → φ` -/
+  | peirce (φ ψ : PL.Proposition Atom) :
+      ClassicalConjImpAxiom (((φ.imp ψ).imp φ).imp φ)
+  /-- Conjunction introduction: `φ → (ψ → φ ∧ ψ)` -/
+  | andI (φ ψ : PL.Proposition Atom) :
+      ClassicalConjImpAxiom (φ.imp (ψ.imp (φ.and ψ)))
+  /-- Left conjunction elimination: `φ ∧ ψ → φ` -/
+  | andE1 (φ ψ : PL.Proposition Atom) :
+      ClassicalConjImpAxiom ((φ.and ψ).imp φ)
+  /-- Right conjunction elimination: `φ ∧ ψ → ψ` -/
+  | andE2 (φ ψ : PL.Proposition Atom) :
+      ClassicalConjImpAxiom ((φ.and ψ).imp ψ)
+
+/-! ## ClassicalConjImpBot Axiom System -/
+
+/-- Axiom schemata for the classical conjunctive-implicational-bot fragment CPL⟨∧,→,⊥,⊤⟩.
+
+The 7 axiom constructors are:
+- **implyK** (weakening): `φ → (ψ → φ)`
+- **implyS** (distribution): `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))`
+- **peirce** (Peirce's law): `((φ → ψ) → φ) → φ`
+- **andI** (conjunction introduction): `φ → (ψ → φ ∧ ψ)`
+- **andE1** (left conjunction elimination): `φ ∧ ψ → φ`
+- **andE2** (right conjunction elimination): `φ ∧ ψ → ψ`
+- **efq** (ex falso quodlibet / explosion): `⊥ → φ`
+
+Together with modus ponens, these axioms characterize the conjunctive-implicational-bot
+fragment of classical propositional logic (CPL with conjunction, implication, and
+falsum but without disjunction). -/
+inductive ClassicalConjImpBotAxiom : PL.Proposition Atom → Prop where
+  /-- Weakening: `φ → (ψ → φ)` -/
+  | implyK (φ ψ : PL.Proposition Atom) :
+      ClassicalConjImpBotAxiom (φ.imp (ψ.imp φ))
+  /-- Distribution: `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))` -/
+  | implyS (φ ψ χ : PL.Proposition Atom) :
+      ClassicalConjImpBotAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ)))
+  /-- Peirce's law: `((φ → ψ) → φ) → φ` -/
+  | peirce (φ ψ : PL.Proposition Atom) :
+      ClassicalConjImpBotAxiom (((φ.imp ψ).imp φ).imp φ)
+  /-- Conjunction introduction: `φ → (ψ → φ ∧ ψ)` -/
+  | andI (φ ψ : PL.Proposition Atom) :
+      ClassicalConjImpBotAxiom (φ.imp (ψ.imp (φ.and ψ)))
+  /-- Left conjunction elimination: `φ ∧ ψ → φ` -/
+  | andE1 (φ ψ : PL.Proposition Atom) :
+      ClassicalConjImpBotAxiom ((φ.and ψ).imp φ)
+  /-- Right conjunction elimination: `φ ∧ ψ → ψ` -/
+  | andE2 (φ ψ : PL.Proposition Atom) :
+      ClassicalConjImpBotAxiom ((φ.and ψ).imp ψ)
+  /-- Ex falso quodlibet (explosion): `⊥ → φ` -/
+  | efq (φ : PL.Proposition Atom) :
+      ClassicalConjImpBotAxiom (Proposition.bot.imp φ)
+
+/-! ## ClassicalConjImp Axiom Subsumption -/
+
+/-- Every conjunctive-implicational axiom is a classical conjunctive-implicational axiom. -/
+theorem ConjImpAxiom.toClassicalConjImpAxiom {φ : PL.Proposition Atom}
+    (h : ConjImpAxiom φ) : ClassicalConjImpAxiom φ := by
+  cases h with
+  | implyK a b => exact .implyK a b
+  | implyS a b c => exact .implyS a b c
+  | andI a b => exact .andI a b
+  | andE1 a b => exact .andE1 a b
+  | andE2 a b => exact .andE2 a b
+
+/-- Every classical implicational axiom is a classical conjunctive-implicational axiom. -/
+theorem ClassicalImpAxiom.toClassicalConjImpAxiom {φ : PL.Proposition Atom}
+    (h : ClassicalImpAxiom φ) : ClassicalConjImpAxiom φ := by
+  cases h with
+  | implyK a b => exact .implyK a b
+  | implyS a b c => exact .implyS a b c
+  | peirce a b => exact .peirce a b
+
+/-- Every classical conjunctive-implicational axiom is a classical conjunctive-implicational-bot
+axiom. -/
+theorem ClassicalConjImpAxiom.toClassicalConjImpBotAxiom {φ : PL.Proposition Atom}
+    (h : ClassicalConjImpAxiom φ) : ClassicalConjImpBotAxiom φ := by
+  cases h with
+  | implyK a b => exact .implyK a b
+  | implyS a b c => exact .implyS a b c
+  | peirce a b => exact .peirce a b
+  | andI a b => exact .andI a b
+  | andE1 a b => exact .andE1 a b
+  | andE2 a b => exact .andE2 a b
+
+/-- Every classical conjunctive-implicational axiom is a classical propositional axiom. -/
+theorem ClassicalConjImpAxiom.toPropAxiom {φ : PL.Proposition Atom}
+    (h : ClassicalConjImpAxiom φ) : PropositionalAxiom φ := by
+  cases h with
+  | implyK a b => exact .implyK a b
+  | implyS a b c => exact .implyS a b c
+  | peirce a b => exact .peirce a b
+  | andI a b => exact .andI a b
+  | andE1 a b => exact .andE1 a b
+  | andE2 a b => exact .andE2 a b
+
+/-- Every classical conjunctive-implicational-bot axiom is a classical propositional axiom. -/
+theorem ClassicalConjImpBotAxiom.toPropAxiom {φ : PL.Proposition Atom}
+    (h : ClassicalConjImpBotAxiom φ) : PropositionalAxiom φ := by
+  cases h with
+  | implyK a b => exact .implyK a b
+  | implyS a b c => exact .implyS a b c
+  | peirce a b => exact .peirce a b
+  | andI a b => exact .andI a b
+  | andE1 a b => exact .andE1 a b
+  | andE2 a b => exact .andE2 a b
+  | efq a => exact .efq a
+
+/-! ## ClassicalConjImp Implication Axiom Witnesses -/
+
+namespace ClassicalConjImpAxiom
+
+/-- `ClassicalConjImpAxiom` includes implyK: witness for deduction theorem arguments. -/
+theorem mem_implyK :
+    ∀ (φ ψ : PL.Proposition Atom),
+    ClassicalConjImpAxiom (φ.imp (ψ.imp φ)) :=
+  fun φ ψ => .implyK φ ψ
+
+/-- `ClassicalConjImpAxiom` includes implyS: witness for deduction theorem arguments. -/
+theorem mem_implyS :
+    ∀ (φ ψ χ : PL.Proposition Atom),
+    ClassicalConjImpAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))) :=
+  fun φ ψ χ => .implyS φ ψ χ
+
+end ClassicalConjImpAxiom
+
+namespace ClassicalConjImpBotAxiom
+
+/-- `ClassicalConjImpBotAxiom` includes implyK: witness for deduction theorem arguments. -/
+theorem mem_implyK :
+    ∀ (φ ψ : PL.Proposition Atom),
+    ClassicalConjImpBotAxiom (φ.imp (ψ.imp φ)) :=
+  fun φ ψ => .implyK φ ψ
+
+/-- `ClassicalConjImpBotAxiom` includes implyS: witness for deduction theorem arguments. -/
+theorem mem_implyS :
+    ∀ (φ ψ χ : PL.Proposition Atom),
+    ClassicalConjImpBotAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))) :=
+  fun φ ψ χ => .implyS φ ψ χ
+
+end ClassicalConjImpBotAxiom
+
+/-! ## ClassicalConjImp Substitution Closure -/
+
+/-- Classical conjunctive-implicational axiom schemata are preserved under substitution. -/
+theorem subst_preserves_classicalConjImpAxiom
+    {Atom : Type u} {Atom' : Type u}
+    {φ : PL.Proposition Atom}
+    (h : ClassicalConjImpAxiom φ) (f : Atom → PL.Proposition Atom') :
+    ClassicalConjImpAxiom (φ.subst f) := by
+  cases h with
+  | implyK a b => exact .implyK (a.subst f) (b.subst f)
+  | implyS a b c => exact .implyS (a.subst f) (b.subst f) (c.subst f)
+  | peirce a b => exact .peirce (a.subst f) (b.subst f)
+  | andI a b => exact .andI (a.subst f) (b.subst f)
+  | andE1 a b => exact .andE1 (a.subst f) (b.subst f)
+  | andE2 a b => exact .andE2 (a.subst f) (b.subst f)
+
+/-- Classical conjunctive-implicational-bot axiom schemata are preserved under substitution. -/
+theorem subst_preserves_classicalConjImpBotAxiom
+    {Atom : Type u} {Atom' : Type u}
+    {φ : PL.Proposition Atom}
+    (h : ClassicalConjImpBotAxiom φ) (f : Atom → PL.Proposition Atom') :
+    ClassicalConjImpBotAxiom (φ.subst f) := by
+  cases h with
+  | implyK a b => exact .implyK (a.subst f) (b.subst f)
+  | implyS a b c => exact .implyS (a.subst f) (b.subst f) (c.subst f)
+  | peirce a b => exact .peirce (a.subst f) (b.subst f)
+  | andI a b => exact .andI (a.subst f) (b.subst f)
+  | andE1 a b => exact .andE1 (a.subst f) (b.subst f)
+  | andE2 a b => exact .andE2 (a.subst f) (b.subst f)
+  | efq a => exact .efq (a.subst f)
+
+/-! ## ClassicalConjImp Fragment Predicate Compatibility -/
+
+/-- Applying the `implyK` constructor to or-bot-free propositions yields an or-bot-free formula.
+
+This is `φ → (ψ → φ)`, which is or-bot-free when `φ` and `ψ` are. -/
+lemma classicalConjImpAxiom_implyK_isOrBotFree {φ ψ : PL.Proposition Atom}
+    (hφ : φ.IsOrBotFree = true) (hψ : ψ.IsOrBotFree = true) :
+    (φ.imp (ψ.imp φ)).IsOrBotFree = true :=
+  imp_isOrBotFree hφ (imp_isOrBotFree hψ hφ)
+
+/-- Applying the `implyS` constructor to or-bot-free propositions yields an or-bot-free formula.
+
+This is `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))`, or-bot-free when `φ`, `ψ`, `χ` are. -/
+lemma classicalConjImpAxiom_implyS_isOrBotFree {φ ψ χ : PL.Proposition Atom}
+    (hφ : φ.IsOrBotFree = true) (hψ : ψ.IsOrBotFree = true) (hχ : χ.IsOrBotFree = true) :
+    ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))).IsOrBotFree = true :=
+  imp_isOrBotFree
+    (imp_isOrBotFree hφ (imp_isOrBotFree hψ hχ))
+    (imp_isOrBotFree (imp_isOrBotFree hφ hψ) (imp_isOrBotFree hφ hχ))
+
+/-- Applying the `peirce` constructor to or-bot-free propositions yields an or-bot-free formula.
+
+This is `((φ → ψ) → φ) → φ`, or-bot-free when `φ` and `ψ` are. -/
+lemma classicalConjImpAxiom_peirce_isOrBotFree {φ ψ : PL.Proposition Atom}
+    (hφ : φ.IsOrBotFree = true) (hψ : ψ.IsOrBotFree = true) :
+    (((φ.imp ψ).imp φ).imp φ).IsOrBotFree = true :=
+  imp_isOrBotFree
+    (imp_isOrBotFree (imp_isOrBotFree hφ hψ) hφ)
+    hφ
+
+/-- Applying the `andI` constructor to or-bot-free propositions yields an or-bot-free formula.
+
+This is `φ → (ψ → φ ∧ ψ)`, or-bot-free when `φ` and `ψ` are. -/
+lemma classicalConjImpAxiom_andI_isOrBotFree {φ ψ : PL.Proposition Atom}
+    (hφ : φ.IsOrBotFree = true) (hψ : ψ.IsOrBotFree = true) :
+    (φ.imp (ψ.imp (φ.and ψ))).IsOrBotFree = true :=
+  imp_isOrBotFree hφ (imp_isOrBotFree hψ (and_isOrBotFree hφ hψ))
+
+/-- Applying the `andE1` constructor to or-bot-free propositions yields an or-bot-free formula.
+
+This is `φ ∧ ψ → φ`, or-bot-free when `φ` and `ψ` are. -/
+lemma classicalConjImpAxiom_andE1_isOrBotFree {φ ψ : PL.Proposition Atom}
+    (hφ : φ.IsOrBotFree = true) (hψ : ψ.IsOrBotFree = true) :
+    ((φ.and ψ).imp φ).IsOrBotFree = true :=
+  imp_isOrBotFree (and_isOrBotFree hφ hψ) hφ
+
+/-- Applying the `andE2` constructor to or-bot-free propositions yields an or-bot-free formula.
+
+This is `φ ∧ ψ → ψ`, or-bot-free when `φ` and `ψ` are. -/
+lemma classicalConjImpAxiom_andE2_isOrBotFree {φ ψ : PL.Proposition Atom}
+    (hφ : φ.IsOrBotFree = true) (hψ : ψ.IsOrBotFree = true) :
+    ((φ.and ψ).imp ψ).IsOrBotFree = true :=
+  imp_isOrBotFree (and_isOrBotFree hφ hψ) hψ
+
+/-! ## ClassicalConjImpBot Fragment Predicate Compatibility -/
+
+/-- Applying the `implyK` constructor to or-free propositions yields an or-free formula.
+
+This is `φ → (ψ → φ)`, which is or-free when `φ` and `ψ` are. -/
+lemma classicalConjImpBotAxiom_implyK_isOrFree {φ ψ : PL.Proposition Atom}
+    (hφ : φ.IsOrFree = true) (hψ : ψ.IsOrFree = true) :
+    (φ.imp (ψ.imp φ)).IsOrFree = true :=
+  imp_isOrFree hφ (imp_isOrFree hψ hφ)
+
+/-- Applying the `implyS` constructor to or-free propositions yields an or-free formula.
+
+This is `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))`, or-free when `φ`, `ψ`, `χ` are. -/
+lemma classicalConjImpBotAxiom_implyS_isOrFree {φ ψ χ : PL.Proposition Atom}
+    (hφ : φ.IsOrFree = true) (hψ : ψ.IsOrFree = true) (hχ : χ.IsOrFree = true) :
+    ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))).IsOrFree = true :=
+  imp_isOrFree
+    (imp_isOrFree hφ (imp_isOrFree hψ hχ))
+    (imp_isOrFree (imp_isOrFree hφ hψ) (imp_isOrFree hφ hχ))
+
+/-- Applying the `peirce` constructor to or-free propositions yields an or-free formula.
+
+This is `((φ → ψ) → φ) → φ`, or-free when `φ` and `ψ` are. -/
+lemma classicalConjImpBotAxiom_peirce_isOrFree {φ ψ : PL.Proposition Atom}
+    (hφ : φ.IsOrFree = true) (hψ : ψ.IsOrFree = true) :
+    (((φ.imp ψ).imp φ).imp φ).IsOrFree = true :=
+  imp_isOrFree
+    (imp_isOrFree (imp_isOrFree hφ hψ) hφ)
+    hφ
+
+/-- Applying the `andI` constructor to or-free propositions yields an or-free formula.
+
+This is `φ → (ψ → φ ∧ ψ)`, or-free when `φ` and `ψ` are. -/
+lemma classicalConjImpBotAxiom_andI_isOrFree {φ ψ : PL.Proposition Atom}
+    (hφ : φ.IsOrFree = true) (hψ : ψ.IsOrFree = true) :
+    (φ.imp (ψ.imp (φ.and ψ))).IsOrFree = true :=
+  imp_isOrFree hφ (imp_isOrFree hψ (and_isOrFree hφ hψ))
+
+/-- Applying the `andE1` constructor to or-free propositions yields an or-free formula.
+
+This is `φ ∧ ψ → φ`, or-free when `φ` and `ψ` are. -/
+lemma classicalConjImpBotAxiom_andE1_isOrFree {φ ψ : PL.Proposition Atom}
+    (hφ : φ.IsOrFree = true) (hψ : ψ.IsOrFree = true) :
+    ((φ.and ψ).imp φ).IsOrFree = true :=
+  imp_isOrFree (and_isOrFree hφ hψ) hφ
+
+/-- Applying the `andE2` constructor to or-free propositions yields an or-free formula.
+
+This is `φ ∧ ψ → ψ`, or-free when `φ` and `ψ` are. -/
+lemma classicalConjImpBotAxiom_andE2_isOrFree {φ ψ : PL.Proposition Atom}
+    (hφ : φ.IsOrFree = true) (hψ : ψ.IsOrFree = true) :
+    ((φ.and ψ).imp ψ).IsOrFree = true :=
+  imp_isOrFree (and_isOrFree hφ hψ) hψ
+
+/-- Applying the `efq` constructor to an or-free proposition yields an or-free formula.
+
+This is `⊥ → φ`, which is or-free when `φ` is. -/
+lemma classicalConjImpBotAxiom_efq_isOrFree {φ : PL.Proposition Atom}
+    (hφ : φ.IsOrFree = true) :
+    (Proposition.bot.imp φ).IsOrFree = true :=
+  imp_isOrFree (by simp [Proposition.IsOrFree]) hφ
+
+/-! ## ClassicalConjImp Deduction Theorem Instance -/
+
+/-- The deduction theorem holds for `ClassicalConjImpAxiom`. -/
+theorem classicalConjImpAxiom_hasDeductionTheorem :
+    Metalogic.HasDeductionTheorem (propDerivationSystem (@ClassicalConjImpAxiom Atom)) :=
+  hasDeductionTheorem ClassicalConjImpAxiom.mem_implyK ClassicalConjImpAxiom.mem_implyS
+
+/-! ## ClassicalConjImpBot Deduction Theorem Instance -/
+
+/-- The deduction theorem holds for `ClassicalConjImpBotAxiom`. -/
+theorem classicalConjImpBotAxiom_hasDeductionTheorem :
+    Metalogic.HasDeductionTheorem (propDerivationSystem (@ClassicalConjImpBotAxiom Atom)) :=
+  hasDeductionTheorem ClassicalConjImpBotAxiom.mem_implyK ClassicalConjImpBotAxiom.mem_implyS
+
 end Cslib.Logic.PL

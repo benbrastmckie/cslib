@@ -1,5 +1,5 @@
 ---
-next_project_number: 381
+next_project_number: 382
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 381
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,321,364,370,371,376,381 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,321,364,370,371,376 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,332,363,374 | 36,37,180,290,299,371,376 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275,360,369,373 | 39,40,332,363,364 | Foundations, Propositional Logic |
 | 4 | 317 | 369 | Propositional Logic |
@@ -36,7 +36,7 @@ next_project_number: 381
 
 299 [IMPLEMENTING] — Implement tableau decision procedure for basic modal logic K with
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
-364 [RESEARCHED] — Repair the pre-existing Mathlib/toolchain-drift build failure in 
+364 [PLANNED] — Repair the pre-existing Mathlib/toolchain-drift build failure in 
   └─ 360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t
 
 ### Propositional Logic
@@ -66,10 +66,6 @@ next_project_number: 381
 
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
 
-### Bimodal Logic
-
-381 [NOT STARTED] — Repair the pre-existing Mathlib/toolchain-drift build failures in
-
 ### Uncategorized
 
 376 [RESEARCHED] — Prove the fuel-sufficiency lemma needed to discharge the sorry at
@@ -78,6 +74,19 @@ next_project_number: 381
     └─ 369 [NOT STARTED] — (Propositional Logic: Parameterize the intuitionistic and mini) (see above)
 
 ## Tasks
+
+### 381. Repair bimodal separation perpetuity drift
+- **Status**: [COMPLETED]
+- **Task Type**: cslib
+- **Topic**: Bimodal Logic
+- **Dependencies**: None
+- **Research**: [381_repair_bimodal_separation_perpetuity_drift/reports/01_drift-diagnosis.md]
+- **Plan**: [381_repair_bimodal_separation_perpetuity_drift/plans/01_repair-drift.md]
+- **Summary**: [381_repair_bimodal_separation_perpetuity_drift/summaries/01_implementation-summary.md]
+
+**Description**: Repair the pre-existing Mathlib/toolchain-drift build failures in the Bimodal Separation/Perpetuity cluster (downstream of the already-repaired Separation/Defs, which builds clean). Four modules fail under leanprover/lean4:v4.31.0, all sorry-free but broken by a Lean/Mathlib bump (same drift family as task 364): (1) Cslib/Logics/Bimodal/Metalogic/Separation/Duality.lean lines 357,362 'simp made no progress'; (2) Cslib/Logics/Bimodal/Metalogic/Separation/Eliminations.lean ~15 'unsolved goals' (lines 63,498,543,545,547,548,552,602,604,606,607,611,660,662,666 — likely a single simp-set/obtain-shape drift repeated across parallel cases); (3) Cslib/Logics/Bimodal/Metalogic/Separation/DedekindZ/QLemma.lean line 191 'unsolved goals'; (4) Cslib/Logics/Bimodal/Theorems/Perpetuity/Bridge.lean line 102 'Type mismatch'. These were NOT covered by task 360's repair sweep (which fixed Separation/Defs and Perpetuity/Principles). Fix idioms likely mirror task 364's diagnosis (reorder simp-after-rw, re-derive post-simp obtain shapes via lean_goal, instance/type-mismatch coercions). MUST proceed in chunks with incremental commits; do NOT call lean_diagnostic_messages (hangs in this repo) — use lean_goal + scoped lake build. Zero sorry, zero new axioms, preserve all statements. CI: scoped lake build per module + full lake build, lake exe lint-style. Restores the repo-wide green build together with task 364 (Modal/Tableau/Soundness) and task 363 (Classical/Tableau/Completeness).
+
+---
 
 ### 380. Or imp fragment conservativity
 - **Status**: [COMPLETED]
@@ -266,13 +275,14 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 364. Modal tableau soundness drift repair
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
 - **Research**:
   - [364_modal_tableau_soundness_drift_repair/reports/01_drift-diagnosis.md]
   - [364_modal_tableau_soundness_drift_repair/reports/02_refactor-strategy.md]
+- **Plan**: [364_modal_tableau_soundness_drift_repair/plans/02_extract-sublemmas-refactor.md]
 
 **Description**: Repair the pre-existing Mathlib/toolchain-drift build failure in Cslib/Logics/Modal/Tableau/Soundness.lean (947 lines, ~77 errors under leanprover/lean4:v4.31.0). The file is sorry-free but broke under a Lean/Mathlib bump; it was the only module not fixed during the 2026-06-26 CI-failure sweep (all other ~10 originally-failing modules were repaired). Three single-pass agents overflowed their context on it because lean_goal returns very large hypothesis contexts here, so this MUST be done in chunks with incremental commits, never calling lean_diagnostic_messages (hangs in this repo). A full root-cause diagnosis with concrete fix idioms is in reports/01_drift-diagnosis.md. The 77 errors reduce to ~4 fix-families: (1) cases X.sign no longer substitutes the isPos hypothesis (use cases h : X.sign <;> simp_all [Sign.isPos]); (2) simp only [Satisfies] ordering/no-op (reorder after rw, or use Satisfies.neg_iff/diamond_iff / Proposition.neg_def); (3) simp [tryAllPropRules,...] at hsf no longer normalizes to the shape the obtain pattern expects, causing ~60 Unknown identifier hnewBs cascades in modalStepBranch_preserves_sat (re-derive the post-simp shape via lean_goal and fix the obtain/simp set across the 5 parallel rule-cases); (4) LawfulBEq.eq_of_beq instance-synth/type mismatch. Zero sorry, zero new axioms, preserve all statements. CI: lake build (scoped + full), lake exe lint-style. Created as a follow-up of the CI-failure fix sweep.
 

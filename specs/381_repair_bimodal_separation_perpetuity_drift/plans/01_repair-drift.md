@@ -1,7 +1,7 @@
 # Implementation Plan: Task #381 - Repair Bimodal Separation/Perpetuity Drift
 
 - **Task**: 381 - Repair the 4 Bimodal Separation/Perpetuity drift modules
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 2 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/381_repair_bimodal_separation_perpetuity_drift/reports/01_drift-diagnosis.md

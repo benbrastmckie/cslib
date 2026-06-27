@@ -262,10 +262,49 @@ private lemma maeharaCore {seq : LKSequent Atom} (d : LKProof seq) (hcf : CutFre
       · -- d_right : LKProof (insert I Γ₂ ⊢ₛ insert A (insert B Δ₂)); apply orR directly.
         exact ⟨LKProof.orR A B hAB₂ d_right⟩
   | ax A Γ Δ hL hR =>
-    -- PHASE 3: ax leaf table — four sub-cases by (A ∈ Γ₁?, A ∈ Δ₁?).
-    -- Deferred to Phase 3 (highest-risk case, requires ⊥/⊤/A/¬A interpolant selection).
+    -- Four-way case split on (A ∈ Γ₁ ∨ A ∈ Γ₂) × (A ∈ Δ₁ ∨ A ∈ Δ₂).
+    -- Interpolants: (Γ₁,Δ₁)→⊥, (Γ₁,Δ₂)→A, (Γ₂,Δ₁)→¬A, (Γ₂,Δ₂)→⊤.
     intro Γ₁ Γ₂ Δ₁ Δ₂ _hant _hsuc
-    sorry
+    have hant' : Γ = Γ₁ ∪ Γ₂ := _hant
+    have hsuc' : Δ = Δ₁ ∪ Δ₂ := _hsuc
+    rw [hant'] at hL
+    rw [hsuc'] at hR
+    rcases Finset.mem_union.mp hL with hL₁ | hL₂ <;>
+    rcases Finset.mem_union.mp hR with hR₁ | hR₂
+    · -- (A ∈ Γ₁, A ∈ Δ₁): I = ⊥; vars ∅; left by ax; right by botL.
+      exact ⟨⊥, by simp [vars_bot],
+        ⟨LKProof.ax A Γ₁ (insert ⊥ Δ₁) hL₁ (Finset.mem_insert_of_mem hR₁)⟩,
+        ⟨LKProof.botL (insert ⊥ Γ₂) Δ₂ (Finset.mem_insert_self ⊥ Γ₂)⟩⟩
+    · -- (A ∈ Γ₁, A ∈ Δ₂): I = A; left by ax; right by ax.
+      refine ⟨A, ?_,
+        ⟨LKProof.ax A Γ₁ (insert A Δ₁) hL₁ (Finset.mem_insert_self A Δ₁)⟩,
+        ⟨LKProof.ax A (insert A Γ₂) Δ₂ (Finset.mem_insert_self A Γ₂) hR₂⟩⟩
+      simp only [Finset.vars_union]
+      exact Finset.subset_inter
+        ((Finset.vars_subset_of_mem hL₁).trans Finset.subset_union_left)
+        ((Finset.vars_subset_of_mem hR₂).trans Finset.subset_union_right)
+    · -- (A ∈ Γ₂, A ∈ Δ₁): I = ¬A; left by impR; right by impL.
+      refine ⟨¬A, ?_,
+        ⟨LKProof.impR A ⊥ (Finset.mem_insert_self (¬A) Δ₁)
+          (LKProof.ax A (insert A Γ₁) (insert ⊥ (insert (¬A) Δ₁))
+            (Finset.mem_insert_self A Γ₁)
+            (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hR₁)))⟩,
+        ⟨LKProof.impL A ⊥ (Finset.mem_insert_self (¬A) Γ₂)
+          (LKProof.ax A (insert (¬A) Γ₂) (insert A Δ₂)
+            (Finset.mem_insert_of_mem hL₂) (Finset.mem_insert_self A Δ₂))
+          (LKProof.botL (insert ⊥ (insert (¬A) Γ₂)) Δ₂
+            (Finset.mem_insert_self ⊥ (insert (¬A) Γ₂)))⟩⟩
+      simp only [vars_neg, Finset.vars_union]
+      exact Finset.subset_inter
+        ((Finset.vars_subset_of_mem hR₁).trans Finset.subset_union_right)
+        ((Finset.vars_subset_of_mem hL₂).trans Finset.subset_union_left)
+    · -- (A ∈ Γ₂, A ∈ Δ₂): I = ⊤; vars ∅; left by impR∘botL; right by ax.
+      exact ⟨⊤, by simp [vars_top],
+        ⟨LKProof.impR ⊥ ⊥ (Finset.mem_insert_self ⊤ Δ₁)
+          (LKProof.botL (insert ⊥ Γ₁) (insert ⊥ (insert ⊤ Δ₁))
+            (Finset.mem_insert_self ⊥ Γ₁))⟩,
+        ⟨LKProof.ax A (insert ⊤ Γ₂) Δ₂
+          (Finset.mem_insert_of_mem hL₂) hR₂⟩⟩
   | andR A B hAB d₁ d₂ ih₁ ih₂ =>
     -- PHASE 3: two-premise case; obtain I₁, I₂ from each premise; combine via ∨ or ∧.
     intro Γ₁ Γ₂ Δ₁ Δ₂ _hant _hsuc

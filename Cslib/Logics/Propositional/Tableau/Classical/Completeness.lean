@@ -564,6 +564,31 @@ private lemma classicalBranchComplexity_drop
         simp only [hfe_x, hfesf_x]
         exact ih hmem'
 
+/-- `classicalBranchComplexity` is bounded by the total complexity of the branch. -/
+private lemma classicalBranchComplexity_le_mapsum
+    (l : Branch (Proposition Atom) Unit)
+    (e : List (SignedFormula (Proposition Atom) Unit)) :
+    classicalBranchComplexity l e ≤ (l.map (fun sf => sf.formula.complexity)).sum := by
+  simp only [classicalBranchComplexity]
+  have natSublist_sum_le : ∀ {l1 l2 : List ℕ}, l1.Sublist l2 → l1.sum ≤ l2.sum := by
+    intro _ _ h
+    induction h with
+    | slnil => simp
+    | cons _ _ ih => exact ih.trans (Nat.le_add_left _ _)
+    | cons_cons _ _ ih => exact Nat.add_le_add_left ih _
+  apply natSublist_sum_le
+  apply List.Sublist.map
+  exact List.filter_sublist
+
+/-- `classicalBranchComplexity` of an extended branch splits into outputs + original. -/
+private lemma classicalBranchComplexity_extendMany
+    (b : Branch (Proposition Atom) Unit) (out : List (SignedFormula (Proposition Atom) Unit))
+    (e : List (SignedFormula (Proposition Atom) Unit)) :
+    classicalBranchComplexity (Branch.extendMany b out) e
+      = classicalBranchComplexity out e + classicalBranchComplexity b e := by
+  simp only [Branch.extendMany]
+  exact classicalBranchComplexity_append out b e
+
 /-- For an applicable signed formula, the total complexity of the output formulas equals
 `sf.formula.complexity - 1`, and the expanded formula has complexity ≥ 1.
 This identity drives strict decrease of `classicalExpMeasure` at each tableau step. -/

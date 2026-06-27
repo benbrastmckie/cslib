@@ -287,7 +287,7 @@ consumes the previous). Dispatch one phase per agent run; commit after each gree
 
 ---
 
-### Phase 6: Conservativity edge + chain biconditional + CI gate [IN PROGRESS]
+### Phase 6: Conservativity edge + chain biconditional + CI gate [COMPLETED]
 
 - **Goal:** Land the conservativity triple, extend the chain doc-edge, pass the full CI gate.
 - **Tasks:**

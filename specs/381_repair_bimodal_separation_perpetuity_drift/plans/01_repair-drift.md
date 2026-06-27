@@ -163,7 +163,7 @@ Phases within the same wave can execute in parallel. Phases 1-4 each touch a dis
 
 ---
 
-### Phase 4: Bridge (1 edit, distinct idiom) [NOT STARTED]
+### Phase 4: Bridge (1 edit, distinct idiom) [COMPLETED]
 
 **Goal**: Fix the `Type mismatch` at line 102 in `pastMono` by routing the `swapTemporal` normalization through the structural `@[simp]` lemma instead of the raw recursive def.
 

@@ -1,26 +1,42 @@
 {
   "task_number": 376,
-  "status": "partial",
-  "dispatch_status": "in_progress",
-  "phases_completed": 0,
-  "phases_total": 5,
-  "dispatch_summary": "Building classicalBranchComplexity infrastructure: definition + decrease lemmas",
-  "build_state": {
-    "scoped_build": "unknown",
-    "error_count": 0,
-    "sorry_count": 1
+  "dispatch_status": "researched",
+  "dispatch_summary": "Validated base-3 exponential measure + raised fuel bound (3^complexity) as the lowest-risk path to close the L801 sorry; confirmed linear fuel bound is a genuine correctness bug.",
+  "artifact": {
+    "type": "research",
+    "path": "specs/376_prove_fuel_sufficiency_lemma_for_classical_tableau_completeness/reports/02_measure-decrease-termination.md",
+    "summary": "Measure-decrease termination research: rejects per-branch-max (unsound) and DM-multiset/wf-refactor (high rework); recommends additive base-3 exponential measure with raised fuel bound, all core arithmetic lean-validated."
   },
+  "recommended_approach": "b-exp-bound",
+  "feasibility_validated": true,
+  "key_mathlib_lemmas": [
+    "Nat.pow_le_pow_right",
+    "Nat.one_le_pow",
+    "pow_succ",
+    "Nat.sub_add_cancel",
+    "Multiset.IsDershowitzMannaLT",
+    "Multiset.wellFounded_isDershowitzMannaLT"
+  ],
+  "measure_design": "classicalExpMeasure branches expandedSets := ((branches.zip expandedSets).map (fun p => 3 ^ classicalBranchComplexity p.1 p.2)).sum. Strictly decreases by >=1 per expansion step (alpha 1 child, beta exactly 2 children, each child branchComplexity <= C-1, base 3 absorbs the 2-way split: 3^a0+3^a1+1 <= 3^C). Phi_initial = 3^(phi.complexity) exactly, so fuel bound := 3^(phi.complexity) discharges by le_refl. fuel=0 base case becomes a contradiction (Phi=0 impossible when branches nonempty).",
+  "key_lemmas_to_add": [
+    "classicalBranchComplexity (+_append,+_mono_expanded) restored from commit 29e9d5b0",
+    "classicalBranchComplexity_drop: bc b (e++[sf]) + sf.formula.complexity <= bc b e (sf in b, sf not in e)",
+    "classicalApplyOne_output_complexity: sum(complexity of outputs) = complexity(sf)-1, and applicable => complexity sf >= 1",
+    "classicalExpMeasure_step_lt: per-step strict decrease wiring L801"
+  ],
+  "fuel_bound_change": "Expansion.lean:158  4*(phi.complexity+1)+1  ->  3 ^ phi.complexity  (safe for fuel-generic classicalTableau_sound; ripples to ~3 completeness call sites: hfuel_init ~1024, h' reconstruction ~1060, classicalExpandBranches_openBranch_initial_mem call)",
+  "validated_via_lean": "lean_run_code (import Mathlib): 3^a0+3^a1+1<=3^C and 3^a0+1<=3^C (children<=C-1, C>=1) and (bcs != [] -> 1 <= (bcs.map (3^.)).sum) all compile sorry-free",
+  "top_residual_risk": "classicalExpMeasure_step_lt requires 4-way classicalApplyOne case analysis (rule-output complexity identity); template available in classicalStepBranch_hintikka_inv",
+  "phase_count": 5,
   "sorry_inventory": {
     "count": 1,
     "items": [
       {
         "line": 801,
-        "goal": "classicalTotalMeasure (done ++ newBs ++ bt) (doneExp ++ newBs.map (fun _ => newExp) ++ es) <= fuel'"
+        "lemma": "classicalExpandBranches_hintikka",
+        "status": "researched_not_yet_closed"
       }
     ]
   },
-  "measure_design": "classicalBranchComplexity = sum of sf.formula.complexity over unexpanded formulas on a branch. Strictly decreases per-branch under every expansion step (both alpha/beta), because all rule outputs are strict subformulas of the expanded formula. Total-sum can grow under beta (duplication), so the wire-up at L801 needs per-branch decrease + adjusted fuel bound or DM multiset ordering.",
-  "infra_lemmas_committed": [],
-  "resolves_blocker_for": 363,
-  "continuation_context": "Wire classicalBranchComplexity_step_lt into L801: either (a) replace classicalTotalMeasure with per-branch max or DM-multiset ordering, or (b) raise the fuel bound in Expansion.lean to exponential and use per-branch decrease to bound the new total measure."
+  "resolves_blocker_for": 363
 }

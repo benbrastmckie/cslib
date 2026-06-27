@@ -1,14 +1,25 @@
 {
-  "status": "in_progress",
-  "started_at": "2026-06-27T16:18:11Z",
-  "artifacts": [],
-  "partial_progress": {
-    "stage": "implementing",
-    "details": "Building classicalBranchComplexity measure infrastructure in section MeasureDecrease"
-  },
-  "metadata": {
-    "agent_type": "cslib-implementation-hard-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
-  }
+  "status": "researched",
+  "agent_type": "cslib-research-hard-agent",
+  "task_number": 376,
+  "artifact_path": "specs/376_prove_fuel_sufficiency_lemma_for_classical_tableau_completeness/reports/02_measure-decrease-termination.md",
+  "findings_count": 6,
+  "adversarial_verification_triggered": true,
+  "reference_grounding_tier": 1,
+  "bibkey_verification_status": "in_file_citations_used (Smullyan1968, Fitting1983 active in Tableau module headers; references.bib not opened directly)",
+  "recommended_approach": "b-exp-bound",
+  "feasibility_validated": true,
+  "next_steps": "Run /plan 376 to create implementation plan",
+  "memory_candidates": [
+    {
+      "title": "Beta-robust tableau termination measure: base-3 exponential over branches",
+      "body": "For a fuel-based tableau loop where beta rules duplicate a whole branch into 2 children, an additive count measure grows. A sum-over-branches Nat measure must satisfy f(C) > 2*f(C-1) to absorb a balanced 2-way split, forcing exponential growth; base 2 fails (2*2^(C-1)+1 > 2^C), base 3 works (3^a0+3^a1+1 <= 3^C for a0,a1 <= C-1, C>=1). Use Phi = sum over branches of 3^(per-branch unexpanded-complexity). Keeps the Nat-fuel induction intact and makes the fuel=0 case a contradiction (Phi=0 only when no branches).",
+      "keywords": ["tableau", "termination", "fuel", "Dershowitz-Manna", "measure", "exponential", "lean4", "cslib"]
+    },
+    {
+      "title": "Mathlib has Dershowitz-Manna multiset order",
+      "body": "Mathlib.Data.Multiset.DershowitzManna provides Multiset.IsDershowitzMannaLT with Multiset.wellFounded_isDershowitzMannaLT and a WellFoundedRelation instance. Exact model for 'remove x, add finitely many < x' steps, but using it for a fuel-based recursion requires a termination_by/decreasing_by function refactor.",
+      "keywords": ["mathlib", "multiset", "dershowitz-manna", "well-founded", "termination"]
+    }
+  ]
 }

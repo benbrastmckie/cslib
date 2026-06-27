@@ -1,0 +1,17 @@
+{
+  "status": "researched",
+  "task_number": 367,
+  "session_id": "sess_1782560707_b3ce16_367",
+  "summary": "The three Brouwerian completeness modules (BrouwerianCompleteness 528, PointedBrouwerianCompleteness 561, MplPointedConservative 658 = 1747 lines) share an ~80% identical Lindenbaum-quotient + order-lemma + truth-lemma + completeness skeleton and differ ONLY in the bot interpretation (top / OrderBot-least / free bot_val) plus one OrderBot-via-efq instance in the pointed tier. The generic HilbertLindenbaum.lean already provides every meet-fragment order lemma parametric over an arbitrary Axioms predicate, using only the five conj-imp witnesses (K,S,andI,andE1,andE2) of the 8-field MinimalAxioms class; the fragments re-derive them only because they lack the three or-axioms MinimalAxioms requires. Recommended fix: introduce a 5-field ConjImpAxioms typeclass (a strict factor of MinimalAxioms), make MinimalAxioms extend it, generalize the meet-fragment Lindenbaum lemmas' bound to [ConjImpAxioms], add one BrouwerianSemilattice instance, host the universal evaluator BrouwerianBotEvaluate in substrate, and recover all three tiers as corollaries that fix bot_val (pointed adds OrderBot via efq). The two bridge equalities BrouwerianEvaluate = BrouwerianBotEvaluate(.)(top) and PointedBrouwerianEvaluate = BrouwerianBotEvaluate(.)(bot) hold by trivial induction. Only 8 public names are externally referenced; all Lindenbaum internals are private and freely collapsible. Net ~ -1000 lines, no new axioms, no sorry.",
+  "artifacts": [
+    "specs/367_unify_brouwerian_completeness_triplication/reports/01_unify-brouwerian-triplication.md"
+  ],
+  "next_action_hint": "Plan with /plan 367. Phase the work as: (1) add ConjImpAxioms class + MinimalAxioms extends + 3 fragment instances; (2) relocate BrouwerianBotEvaluate/BrouwerianBotValid/embedding lemmas to substrate + add 2 bridge lemmas; (3) generalize HilbertLindenbaum meet-fragment lemma bounds to [ConjImpAxioms] and add BrouwerianSemilattice instance (verify no instance diamond with the existing GHA instance via scoped lake build EARLY; fall back to a self-contained Algebra/BrouwerianLindenbaum.lean if diamonds appear); (4) write generic soundness (5 schema lemmas + thin per-tier cases wrappers), generic truth lemma, generic completeness; (5) recover the three tier theorems as corollaries preserving all public names, keeping the three original filenames as thin re-export shims so consumer imports stay valid. Verify with lake build + lake exe checkInitImports + lake lint + lake shake.",
+  "blockers": [],
+  "risks": [
+    "Instance diamond: HilbertLindenbaumAlgebra would carry both BrouwerianSemilattice (via ConjImpAxioms) and GeneralizedHeytingAlgebra (via MinimalAxioms) for full-axiom Axioms; le/inf/himp are the same underlying functions so should be defeq, but verify with an early scoped build. Fallback = Approach B self-contained generic module.",
+    "MinimalAxioms extends ConjImpAxioms must keep the 3 existing instances (MinPropAxiom/IntPropAxiom/PropositionalAxiom) elaborating; if risky use a standalone instance [MinimalAxioms A] : ConjImpAxioms A instead.",
+    "Soundness cannot be fully unified into one theorem (cases h_ax needs the concrete inductive and the efq case); plan for 5 shared schema-soundness lemmas + per-tier wrappers.",
+    "Brouwerian tier keeps IsOrBotFree guard and needs IsOrBotFree -> IsOrFree (check FragmentPredicates.lean)."
+  ]
+}

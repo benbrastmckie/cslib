@@ -1604,7 +1604,7 @@
     {
       "project_number": 367,
       "project_name": "unify_brouwerian_completeness_triplication",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Algebraic Semantics",
       "description": "Collapse the three near-identical Brouwerian completeness developments into one parametric module; this is a NET SIMPLIFICATION (~1000-line reduction), not added abstraction. Cslib/Logics/Propositional/Semantics/Algebra/{BrouwerianCompleteness.lean (~528), PointedBrouwerianCompleteness.lean (~561), MplPointedConservative.lean (~658)} are ~80% copy-paste: identical soundness, Lindenbaum-quotient order lemmas (mk_le_mk/inf_mk/himp_mk/le_antisymm/...), canonicalV_spec truth lemma, and completeness/iff skeletons. They differ ONLY in bot semantics: ConjImp maps bot to top, ConjImpBot maps bot to the OrderBot least element (ex falso), ConjImpBotMin uses a free bot_val parameter (the free-vs-least split already landed in task 354). Refactor to a single development over the AlgEvaluate v bot_val / AlgTValid substrate (Semantics/Algebra.lean), with bot interpretation as the one varying parameter guarded by [OrderBot H] only where the least-element semantics is intended; recover the three tier results (Brouwerian / pointed-Brouwerian / free-bot Brouwerian completeness) as corollaries with their existing names preserved for downstream consumers. Build on the theory-parametric substrate from task 348. No new axioms; every existing theorem preserved (as a corollary or alias); CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 348, 354.",
@@ -1613,10 +1613,10 @@
         354
       ],
       "created": "2026-06-27T05:29:32Z",
-      "last_updated": "2026-06-27T05:29:32Z",
+      "last_updated": "2026-06-27T12:52:03Z",
       "next_artifact_number": 1,
       "artifacts": [],
-      "session_id": null
+      "session_id": "sess_1782560707_b3ce16_367"
     },
     {
       "project_number": 368,

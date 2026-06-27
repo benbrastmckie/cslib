@@ -1450,6 +1450,24 @@ private def Theory.Derivation.snAndE2Form {G : Ctx Atom} {A B : Proposition Atom
   | andE2 _ D', he => ⟨andE2 _ (andE2 _ D'), by simpa [isStronglyNormal] using he⟩
   | impE D' E', he => ⟨andE2 _ (impE D' E'), by simpa [isStronglyNormal] using he⟩
 
+/-- Head-behaviour lemma for `snAndE1Form`: if the output is intro-or-`orE`-headed, then the
+input `e` was already intro-or-`orE`-headed. The only way `snAndE1Form` produces a non-neutral
+head is at an `andI` leaf (output is the first projection, possibly intro-headed) or an `orE`
+node (output is `orE`-headed); in both the input head is `andI`/`orE`. Neutral inputs produce an
+`andE1`-headed (neutral) output. -/
+private lemma Theory.Derivation.snAndE1Form_head {G : Ctx Atom} {A B : Proposition Atom}
+    (e : T.Derivation G (A ∧ B)) (he : e.isStronglyNormal = true) :
+    ((snAndE1Form e he).1.isIntroRoot = true ∨ (snAndE1Form e he).1.isOrERoot = true) →
+      (e.isIntroRoot = true ∨ e.isOrERoot = true) := by
+  cases e <;> simp_all [snAndE1Form, isIntroRoot, isOrERoot]
+
+/-- Head-behaviour lemma for `snAndE2Form` (symmetric to `snAndE1Form_head`). -/
+private lemma Theory.Derivation.snAndE2Form_head {G : Ctx Atom} {A B : Proposition Atom}
+    (e : T.Derivation G (A ∧ B)) (he : e.isStronglyNormal = true) :
+    ((snAndE2Form e he).1.isIntroRoot = true ∨ (snAndE2Form e he).1.isOrERoot = true) →
+      (e.isIntroRoot = true ∨ e.isOrERoot = true) := by
+  cases e <;> simp_all [snAndE2Form, isIntroRoot, isOrERoot]
+
 /-- `normalize` produces strongly normal derivations.
 
 Proved via `redexWeight_zero_sn`: the goal reduces to showing `(d.normalize).redexWeight = 0`,
@@ -1478,6 +1496,12 @@ private lemma cx_or_left {A B : Proposition Atom} : A.complexity < (A ∨ B).com
   simp only [Proposition.complexity]; omega
 
 private lemma cx_or_right {A B : Proposition Atom} : B.complexity < (A ∨ B).complexity := by
+  simp only [Proposition.complexity]; omega
+
+private lemma cx_and_left {A B : Proposition Atom} : A.complexity < (A ∧ B).complexity := by
+  simp only [Proposition.complexity]; omega
+
+private lemma cx_and_right {A B : Proposition Atom} : B.complexity < (A ∧ B).complexity := by
   simp only [Proposition.complexity]; omega
 
 -- STUB to validate the eliminators structurally.
@@ -1559,6 +1583,32 @@ REMAINING WORK to fully close L5 (none of which touches the validated measure ab
 The `snSubstStub`/`snImpEFormS` defs above are the stage-1 scaffolding (eliminator validated
 against a stub); superseded by this block. -/
 
+/-- `sizeOf` of an `impE`'s function premise is smaller than the whole derivation. Proven
+outside the mutual block so the termination proof can close the `impE` structural edge by a
+cheap `exact` instead of an expensive in-context `simp`/`omega`. -/
+private lemma sizeOf_impE_left {Γ : Ctx Atom} {A B : Proposition Atom}
+    (D : T.Derivation Γ (A → B)) (E : T.Derivation Γ A) : sizeOf D < sizeOf (D.impE E) := by
+  simp only [Cslib.Logic.PL.Theory.Derivation.impE.sizeOf_spec]; omega
+
+/-- `sizeOf` of an `impE`'s argument premise is smaller than the whole derivation. -/
+private lemma sizeOf_impE_right {Γ : Ctx Atom} {A B : Proposition Atom}
+    (D : T.Derivation Γ (A → B)) (E : T.Derivation Γ A) : sizeOf E < sizeOf (D.impE E) := by
+  simp only [Cslib.Logic.PL.Theory.Derivation.impE.sizeOf_spec]; omega
+
+/-- Lexicographic decrease of the 3-component measure when the first component is `≤` and the
+second is `<` (the head-bound edge: cut complexity `≤ P` and phase `0 < 1`). Proven standalone
+so the `subst` on the equal-first-component case works on plain `ℕ` variables (a `rw` in the
+`decreasing_by` context fails with a dependent-motive error). -/
+private lemma lex3_of_le_of_lt {a a' b b' c c' : ℕ} (ha : a ≤ a') (hb : b < b') :
+    Prod.Lex (· < ·) (Prod.Lex (· < ·) (· < ·)) (a, b, c) (a', b', c') := by
+  rcases lt_or_eq_of_le ha with h | h
+  · exact Prod.Lex.left _ _ h
+  · subst h; exact Prod.Lex.right _ (Prod.Lex.left _ _ hb)
+
+-- The mutual well-founded recursion `snImpEForm`/`snOrEForm`/`snSubst` with the carried
+-- head-behaviour invariant produces a large equation-compiler goal; raise the heartbeat
+-- limit so the (sorry-free) termination proof elaborates within budget.
+set_option maxHeartbeats 2000000 in
 mutual
 
 /-- L3: smart implication eliminator. Measure: ((A→B).complexity, 0, sizeOf f). -/
@@ -1569,7 +1619,8 @@ private def Theory.Derivation.snImpEForm {G : Ctx Atom} {A B : Proposition Atom}
   match f, hf with
   | .impI _ body, hf =>
       have hbody : body.isStronglyNormal = true := by simpa [isStronglyNormal] using hf
-      snSubst body hbody a ha
+      let r := snSubst body hbody a ha
+      ⟨r.1, r.2.1⟩
   | .orE G D DA DB, hf => by
       have hDA : DA.isStronglyNormal = true := by cases D <;> simp_all [isStronglyNormal]
       have hDB : DB.isStronglyNormal = true := by cases D <;> simp_all [isStronglyNormal]
@@ -1601,10 +1652,12 @@ private def Theory.Derivation.snOrEForm {G : Ctx Atom} {A B C : Proposition Atom
   match D, hD with
   | .orI1 _ d0, hD =>
       have hd0 : d0.isStronglyNormal = true := by simpa [isStronglyNormal] using hD
-      snSubst DA hDA d0 hd0
+      let r := snSubst DA hDA d0 hd0
+      ⟨r.1, r.2.1⟩
   | .orI2 _ d0, hD =>
       have hd0 : d0.isStronglyNormal = true := by simpa [isStronglyNormal] using hD
-      snSubst DB hDB d0 hd0
+      let r := snSubst DB hDB d0 hd0
+      ⟨r.1, r.2.1⟩
   | .orE _ _ _ _, _ => sorry  -- commuting conversion (needs context casts) — deferred
   | .ax h, _ => ⟨orE G (ax h) DA DB, by simp_all [isStronglyNormal]⟩
   | .ass h, _ => ⟨orE G (ass h) DA DB, by simp_all [isStronglyNormal]⟩
@@ -1617,29 +1670,111 @@ private def Theory.Derivation.snOrEForm {G : Ctx Atom} {A B C : Proposition Atom
   termination_by ((A ∨ B).complexity, 0, sizeOf D)
   decreasing_by all_goals (simp_wf; first | (left; simp [Proposition.complexity]; omega) | (right; omega))
 
-/-- L5: substitution-normalization. Measure: (P.complexity, 1, sizeOf body). -/
+/-- L5: substitution-normalization. Measure: `(P.complexity, 1, sizeOf body)`.
+
+The return subtype carries, beyond strong normality, the **head-behaviour invariant**
+
+    body.isIntroRoot = false →
+      (d.isIntroRoot = true ∨ d.isOrERoot = true) → B.complexity ≤ P.complexity
+
+i.e. if the input `body` is neutral and the substituted output became intro-or-`orE`-headed,
+then the substituted variable was on `body`'s elimination spine and the conclusion `B` is a
+subformula of the cut `P`. This is exactly what discharges the head-bound termination obligation
+at the `impE`/`orE` re-elimination edge (the `snSubst → snImpEForm` call). -/
 private def Theory.Derivation.snSubst {P B : Proposition Atom} {G : Ctx Atom}
     (body : T.Derivation (insert P G) B) (hbody : body.isStronglyNormal = true)
     (arg : T.Derivation G P) (harg : arg.isStronglyNormal = true) :
-    {d : T.Derivation G B // d.isStronglyNormal = true} :=
+    {d : T.Derivation G B //
+      d.isStronglyNormal = true ∧
+      (body.isIntroRoot = false →
+        (d.isIntroRoot = true ∨ d.isOrERoot = true) → B.complexity ≤ P.complexity)} :=
   match body, hbody with
-  | .impE D' E', _ =>
-      let d' := snSubst D' (by sorry) arg harg
-      let e' := snSubst E' (by sorry) arg harg
-      snImpEForm d'.1 d'.2 e'.1 e'.2
-  | .andE1 _ D', _ =>
-      snAndE1Form (snSubst D' (by sorry) arg harg).1 (snSubst D' (by sorry) arg harg).2
-  | .andE2 _ D', _ =>
-      snAndE2Form (snSubst D' (by sorry) arg harg).1 (snSubst D' (by sorry) arg harg).2
-  | .andI _ X Y, _ =>
-      ⟨andI _ (snSubst X (by sorry) arg harg).1 (snSubst Y (by sorry) arg harg).1, by sorry⟩
+  | .ax h, _ => ⟨ax h, rfl, by intro _ hor; simp [isIntroRoot, isOrERoot] at hor⟩
+  | .ass h, _ => by
+      by_cases hBP : B = P
+      · subst hBP; exact ⟨arg, harg, by intro _ _; exact le_refl _⟩
+      · exact ⟨ass ((Finset.mem_insert.mp h).resolve_left hBP), rfl,
+          by intro _ hor; simp [isIntroRoot, isOrERoot] at hor⟩
+  | .andI _ X Y, hbd =>
+      have hbd' : X.isStronglyNormal = true ∧ Y.isStronglyNormal = true := by
+        simpa only [isStronglyNormal, Bool.and_eq_true] using hbd
+      let sx := snSubst X hbd'.1 arg harg
+      let sy := snSubst Y hbd'.2 arg harg
+      ⟨andI _ sx.1 sy.1, by
+        refine ⟨?_, ?_⟩
+        · simp only [isStronglyNormal, Bool.and_eq_true]; exact ⟨sx.2.1, sy.2.1⟩
+        · intro hni _; simp [isIntroRoot] at hni⟩
+  | .orI1 _ d0, hbd =>
+      have hd0 : d0.isStronglyNormal = true := by simpa only [isStronglyNormal] using hbd
+      let s := snSubst d0 hd0 arg harg
+      ⟨orI1 _ s.1, by
+        refine ⟨?_, ?_⟩
+        · simpa only [isStronglyNormal] using s.2.1
+        · intro hni _; simp [isIntroRoot] at hni⟩
+  | .orI2 _ d0, hbd =>
+      have hd0 : d0.isStronglyNormal = true := by simpa only [isStronglyNormal] using hbd
+      let s := snSubst d0 hd0 arg harg
+      ⟨orI2 _ s.1, by
+        refine ⟨?_, ?_⟩
+        · simpa only [isStronglyNormal] using s.2.1
+        · intro hni _; simp [isIntroRoot] at hni⟩
+  | .andE1 _ D', hbd =>
+      have hD'sn : D'.isStronglyNormal = true := by cases D' <;> simp_all [isStronglyNormal]
+      have hD'ni : D'.isIntroRoot = false := by
+        cases D' <;> simp_all [isStronglyNormal, isIntroRoot]
+      let e := snSubst D' hD'sn arg harg
+      let s := snAndE1Form e.1 e.2.1
+      ⟨s.1, s.2, by
+        intro _ hd
+        have hee := snAndE1Form_head e.1 e.2.1 hd
+        have hle := e.2.2 hD'ni hee
+        exact le_trans (le_of_lt cx_and_left) hle⟩
+  | .andE2 _ D', hbd =>
+      have hD'sn : D'.isStronglyNormal = true := by cases D' <;> simp_all [isStronglyNormal]
+      have hD'ni : D'.isIntroRoot = false := by
+        cases D' <;> simp_all [isStronglyNormal, isIntroRoot]
+      let e := snSubst D' hD'sn arg harg
+      let s := snAndE2Form e.1 e.2.1
+      ⟨s.1, s.2, by
+        intro _ hd
+        have hee := snAndE2Form_head e.1 e.2.1 hd
+        have hle := e.2.2 hD'ni hee
+        exact le_trans (le_of_lt cx_and_right) hle⟩
+  | .impE D' E', hbd =>
+      have hD'sn : D'.isStronglyNormal = true := by cases D' <;> simp_all [isStronglyNormal]
+      have hE'sn : E'.isStronglyNormal = true := by cases D' <;> simp_all [isStronglyNormal]
+      have hD'ni : D'.isIntroRoot = false := by
+        cases D' <;> simp_all [isStronglyNormal, isIntroRoot]
+      let d' := snSubst D' hD'sn arg harg
+      let e' := snSubst E' hE'sn arg harg
+      if h : d'.1.isIntroRoot = true ∨ d'.1.isOrERoot = true then
+        have hle := d'.2.2 hD'ni h
+        let r := snImpEForm d'.1 d'.2.1 e'.1 e'.2.1
+        ⟨r.1, r.2, by intro _ _; exact le_trans (le_of_lt cx_imp_right) hle⟩
+      else
+        ⟨impE d'.1 e'.1, by
+          have hi : d'.1.isIntroRoot = false := by
+            cases hb : d'.1.isIntroRoot
+            · rfl
+            · exact absurd (Or.inl hb) h
+          have ho : d'.1.isOrERoot = false := by
+            cases hb : d'.1.isOrERoot
+            · rfl
+            · exact absurd (Or.inr hb) h
+          have hsnD := d'.2.1
+          have hsnE := e'.2.1
+          refine ⟨?_, ?_⟩
+          · cases hx : d'.1 <;> simp_all [isStronglyNormal, isIntroRoot, isOrERoot]
+          · intro _ hor; simp [isIntroRoot, isOrERoot] at hor⟩
   | _, _ => sorry
   termination_by (P.complexity, 1, sizeOf body)
   decreasing_by
     all_goals first
-      | decreasing_tactic
-      | (simp_wf; left; simp [Proposition.complexity]; omega)
-      | sorry  -- HEAD-BOUND obligation: snSubst → snImpEForm edge (cut complexity ≤ P)
+      | (simp_wf; right; right; first
+          | omega
+          | exact sizeOf_impE_left _ _
+          | exact sizeOf_impE_right _ _)
+      | (simp_wf; exact lex3_of_le_of_lt hle (by omega))
 
 end
 

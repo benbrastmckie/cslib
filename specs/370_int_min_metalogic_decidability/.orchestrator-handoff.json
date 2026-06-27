@@ -1,0 +1,14 @@
+{
+  "status": "planned",
+  "summary": "Spike-gated 7-phase FMP plan for sorry-free Int/Min decidability; Phase 1 is the go/no-go finite-Lindenbaum + Fintype spike, [BLOCKED] (no sorry) on failure",
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "implement",
+  "artifacts": [
+    {
+      "path": "specs/370_int_min_metalogic_decidability/plans/01_int-min-fmp-decidability.md",
+      "type": "plan",
+      "summary": "FMP direct finite canonical Kripke model plan; spike-first, conditional later phases, zero-debt BLOCKED criterion"
+    }
+  ]
+}

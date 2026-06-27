@@ -11,18 +11,74 @@ public import Cslib.Foundations.Logic.Metalogic.Consistency
 
 /-! # Algebraic Derivation System with Free Deduction Theorem
 
-This module builds a `DerivationSystem` from `ListDeriv` and proves
-`HasDeductionTheorem` for it. The deduction theorem is a trivial consequence
-of the `list_deduction_theorem` from `ListDeduction.lean`.
+This module is the **algebraic seam** of CSLib's maximal-consistent-set (MCS)
+infrastructure. It builds one generic `DerivationSystem` from `ListDeriv` and
+proves `HasDeductionTheorem` once. Every logic in CSLib that reaches the algebraic
+seam inherits the full MCS machinery (`closed_under_derivation`,
+`implication_property`, `negation_complete`) for free.
 
-This bridges the algebraic `listImp` infrastructure to CSLib's existing
-`Consistency.lean` framework, making all existing MCS lemmas
-(`closed_under_derivation`, `implication_property`, `negation_complete`)
-available for ANY logic with `MinimalHilbert`.
+## Architecture: predicate → type → seam
+
+The bridge from a concrete logic to the seam involves three steps:
+
+1. **Predicate**: `HasMinimalAxioms (Axioms : F → Prop)` witnesses that `Axioms`
+   contains the K and S axiom schemata.
+
+2. **Type**: `HilbertOf Axioms` (in each logic's `GenericMCSBridge.lean`) is an
+   empty tag `inductive` type whose `InferenceSystem` maps closed derivability to
+   `Nonempty (DerivationTree Axioms [] φ)`.  A `MinimalHilbert (HilbertOf Axioms)`
+   instance is then constructed from the K/S/MP witnesses.
+
+3. **Seam**: `algebraic_has_deduction_theorem` is proved once here using
+   `list_deduction_theorem`. No per-logic tree induction is needed.
+
+The deduction theorem for each structural logic then reduces to:
+```
+  DerivationTree ↔ algebraicDerivationSystem  (via *_deriv_iff_algebraic)
+  algebraicDerivationSystem satisfies HasDeductionTheorem  (via algebraic_has_deduction_theorem)
+```
+
+## Frame-class parameterization (Option A outcome)
+
+The seam was originally built only for single-frame-class systems (`FrameClass.Base`).
+Task-366 extended the bridges to arbitrary `fc : FrameClass`:
+
+- **Bimodal** (`Core/GenericMCSBridge.lean`): `HilbertTMFc fc` tag type with
+  `MinimalHilbert (HilbertTMFc fc)` instance for any `fc`, yielding
+  `bimodal_deriv_iff_algebraic_fc`.  The fc-polymorphic `deductionTheorem` and
+  `deductionWithMem` in `Core/DeductionTheorem.lean` route through this bridge via
+  `bimodal_has_deduction_theorem_fc`.
+
+- **Temporal** (`Metalogic/GenericMCSBridge.lean`): `HilbertBXFc fc` tag type with
+  `MinimalHilbert (HilbertBXFc fc)` instance for any `fc`, yielding
+  `temporal_deriv_iff_algebraic_fc`.  The fc-polymorphic `deductionTheoremFc` and
+  `deductionWithMemFc` in `DenseMCS.lean` route through this bridge via
+  `temporal_has_deduction_theorem_fc`.
+
+The K and S axioms are provable at any `fc` because their `minFrameClass = .Base`
+and `FrameClass.base_le fc` holds universally.  No new axiom or `sorry` was
+introduced; the generalization is conservative.
+
+## Logics using this seam
+
+- **Propositional**: tag `PL.HilbertOf Axioms`; bridge `PL/Metalogic/GenericMCSBridge.lean`;
+  deduction theorem `PL/Metalogic/DeductionTheorem.lean`.
+- **Modal**: tag `Modal.HilbertOf Axioms`; bridge `Modal/Metalogic/GenericMCSBridge.lean`;
+  deduction theorem `Modal/Metalogic/DeductionTheorem.lean`.
+- **Temporal (Base)**: tag `Temporal.HilbertBX`; bridge `Temporal/Metalogic/GenericMCSBridge.lean`;
+  deduction theorem `Temporal/Metalogic/DeductionTheorem.lean`.
+- **Temporal (fc)**: tag `HilbertBXFc fc`; same bridge; fc deduction theorem
+  `Temporal/Metalogic/DenseMCS.lean`.
+- **Bimodal (Base)**: tag `Bimodal.HilbertTM`;
+  bridge `Bimodal/Metalogic/Core/GenericMCSBridge.lean`;
+  deduction theorem `Bimodal/Metalogic/Core/DeductionTheorem.lean`.
+- **Bimodal (fc)**: tag `HilbertTMFc fc`; same bridge; fc deduction theorem in same file.
 
 ## References
 
-* Isabelle `Propositional_Logic_Class.thy` -- `list_deduction_logic` interpretation
+* `Cslib.Foundations.Logic.Metalogic.ListDeduction` — `list_deduction_theorem` (the core lemma)
+* `Cslib.Foundations.Logic.Metalogic.Consistency` — MCS definitions and derived lemmas
+* Isabelle `Propositional_Logic_Class.thy` — `list_deduction_logic` interpretation
 -/
 
 @[expose] public section
@@ -91,5 +147,21 @@ theorem algebraic_mcs_negation_complete
     (φ : F) : φ ∈ G ∨ HasImp.imp φ HasBot.bot ∈ G :=
   SetMaximalConsistent.negation_complete
     algebraicDerivationSystem algebraic_has_deduction_theorem h_mcs φ
+
+/-! ## HasMinimalAxioms Predicate Class -/
+
+/-- Predicate-level class witnessing that an axiom predicate `Axioms : F → Prop`
+contains the K and S axiom schemata.
+
+This bridges the parameterized deduction theorem (which takes explicit `h_implyK`/`h_implyS`
+witnesses) to the generic algebraic path via `MinimalHilbert (HilbertOf Axioms)`. The
+`HilbertOf Axioms` wrapper type and its `MinimalHilbert` instance are built in the
+per-logic bridge files (`GenericMCSBridge.lean`). -/
+class HasMinimalAxioms (Axioms : F → Prop) : Prop where
+  /-- K axiom (weakening): `φ → (ψ → φ)` is an axiom. -/
+  hasImplyK : ∀ φ ψ, Axioms (HasImp.imp φ (HasImp.imp ψ φ))
+  /-- S axiom (distribution): `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))` is an axiom. -/
+  hasImplyS : ∀ φ ψ χ, Axioms (HasImp.imp (HasImp.imp φ (HasImp.imp ψ χ))
+    (HasImp.imp (HasImp.imp φ ψ) (HasImp.imp φ χ)))
 
 end Cslib.Logic.Metalogic.GenericMCS

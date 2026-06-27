@@ -12,6 +12,9 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.OrImpConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertConservativeGlivenko
 public import Cslib.Logics.Propositional.Semantics.Algebra.Conservative
+-- Classical conservativity column (Kalmár / truth-assignment method):
+-- CL-A CPL⟨→,⊤⟩ ⊂ CPL, CL-B CPL⟨∧,→,⊤⟩ ⊂ CPL, CL-C CPL⟨∧,→,⊥,⊤⟩ ⊂ CPL
+public import Cslib.Logics.Propositional.Metalogic.ClassicalConjImpBotCompleteness
 
 /-! # Conservative Extension Chain for Propositional Logic
 
@@ -35,6 +38,21 @@ Each `⊂` denotes conservative extension for the smaller fragment's language:
 | IPL⟨∧,→,⊤⟩ ⊂ IPL | `hilbertIplConservativeOverConjImp` | or-bot-free | `IsOrBotFree` |
 | MPL ⊂ IPL | `hilbertIplConservativeOverMpl` | bot-free | `IsBotFree` |
 | IPL ⊂ CPL (Glivenko) | `hilbertGlivenko` | all | ¬¬-translation |
+
+## Classical Conservativity Column (Kalmár / Truth-Assignment Method)
+
+The classical column is 4-for-4: all classical conservativity results use the Kalmár /
+Tarski–Bernays truth-assignment method, in contrast to the algebraic/Brouwerian route above.
+
+| Step (CL) | Theorem | Fragment | Condition |
+|-----------|---------|----------|-----------|
+| CL-A: CPL⟨→,⊤⟩ ⊂ CPL | `cpl_conservative_over_imp` | imp-top-only | `IsImpTopOnly` |
+| CL-B: CPL⟨∧,→,⊤⟩ ⊂ CPL | `cpl_conservative_over_classicalConjImp` | or-bot-free | `IsOrBotFree` |
+| CL-C: CPL⟨∧,→,⊥,⊤⟩ ⊂ CPL | `cpl_conservative_over_classicalConjImpBot` | or-free | `IsOrFree` |
+
+The three towers — MPL (minimal), IPL (intuitionistic), CPL (classical) — are now
+structurally symmetric: each is conservative over its ⟨∧,→,⊥,⊤⟩ rung by the route
+appropriate to it (algebraic/Brouwerian for MPL/IPL, truth-assignment for CPL).
 
 The new **inter-fragment** conservativity corollaries in this module compose these:
 

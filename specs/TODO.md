@@ -30,8 +30,6 @@ next_project_number: 381
 ### Foundations
 
 278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
-355 [NOT STARTED] — Consolidate the Modal and Propositional deductionTheorem through 
-  └─ 366 [NOT STARTED] — Capstone audit ensuring the deduction theorem is correctly abstra
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Modal Logic
@@ -47,8 +45,7 @@ next_project_number: 381
 290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
   └─ 332 [IMPLEMENTING] — Close the two remaining normalization-termination sorries for CSL
     └─ 373 [NOT STARTED] — Extend the Curry-Howard layer from a structural isomorphism to a 
-368 [NOT STARTED] — Deduplicate the prime-exclusion machinery shared by the intuition
-370 [NOT STARTED] — Close the decidability asymmetry in the metalogic layer: classica
+370 [BLOCKED] — Close the decidability asymmetry in the metalogic layer: classica
 371 [NOT STARTED] — Symmetrize the LK/LJ sequent-calculus metatheory and add the miss
   └─ 374 [NOT STARTED] — Add Craig interpolation for the propositional sequent calculi, a 
 317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
@@ -68,12 +65,6 @@ next_project_number: 381
 ### Code Hygiene
 
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
-
-### Algebraic Semantics
-
-377 [PLANNED] — Create the classical conjunction-implication fragment axiom syste
-  └─ 378 [PLANNED] — Prove CPL is conservative over its classical conjunction-implicat
-    └─ 379 [PLANNED] — Prove CPL is conservative over its classical conjunction-implicat
 
 ### Uncategorized
 
@@ -98,33 +89,36 @@ next_project_number: 381
 ---
 
 ### 379. Cpl conservative over classical conjimpbot
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 378
 - **Plan**: [379_cpl_conservative_over_classical_conjimpbot/plans/01_classical-conjimpbot-conservativity.md]
+- **Summary**: [379_cpl_conservative_over_classical_conjimpbot/summaries/01_classical-conjimpbot-conservativity-summary.md]
 
 **Description**: Prove CPL is conservative over its classical conjunction-implication-falsum fragment CPL⟨∧,→,⊥,⊤⟩, completing the classical column to 4-for-4 (symmetric with the minimal and intuitionistic towers). Deliver classicalConjImpBot_completeness : IsOrFree φ → Tautology φ → Derivable ClassicalConjImpBotAxiom φ by adding a ⊥ case to the ∧-extended Kalmár truth lemma from task 378 (⊥ is always false under any Boolean assignment, so the surrogate handling is direct), plus the conservativity edge cpl_conservative_over_classicalConjImpBot and classicalConjImpBot_iff_chain. RISK: reuses the ∧-extended Kalmár machinery from 378; the ⊥ case should be the easy increment, but keep zero-debt — [BLOCKED] with goal state rather than sorry if stuck. Mirrors tasks 352/378. After this lands the classical conservativity column is complete and the MPL/IPL/CPL towers are structurally symmetric. Files: Cslib/Logics/Propositional/Metalogic/ClassicalConjImpBotCompleteness.lean (new). Depends on task 378 (reuses the ∧-extended Kalmár lemma).
 
 ---
 
 ### 378. Cpl conservative over classical conjimp
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 377
 - **Plan**: [378_cpl_conservative_over_classical_conjimp/plans/01_classical-conjimp-conservativity.md]
+- **Summary**: [378_cpl_conservative_over_classical_conjimp/summaries/01_classical-conjimp-conservativity-summary.md]
 
 **Description**: Prove CPL is conservative over its classical conjunction-implication fragment CPL⟨∧,→,⊤⟩, the next rung above the implicational result (task 352). Deliver classicalConjImp_completeness : IsOrBotFree φ → Tautology φ → Derivable ClassicalConjImpAxiom φ, proved by EXTENDING the Kalmár / Tarski–Bernays truth-assignment lemma classicalImp_kalmar (Metalogic/ClassicalImpCompleteness.lean) with a conjunction (∧) case (the falsum-surrogate double-negation form carries over; add the ∧ truth-table subcases). Then derive the conservativity edge cpl_conservative_over_classicalConjImp (compose with CPL soundness via ClassicalConjImpAxiom.toPropAxiom, mirroring cpl_conservative_over_imp) and the classicalConjImp_iff_chain biconditional. RISK: the ∧-extended Kalmár induction is the genuine difficulty (medium-high) — must use the truth-assignment method, NOT an algebraic free-completion route (classical fragments are not Heyting-complete; Peirce is invalid in free Heyting completions). If the ∧ induction is intractable, mark [BLOCKED] with the exact goal state, no sorry. Mirrors task 352. Files: Cslib/Logics/Propositional/Metalogic/ClassicalConjImpCompleteness.lean (new), ProofSystem/FragmentAxioms.lean. Depends on the ClassicalConjImpAxiom system (task 377).
 
 ---
 
 ### 377. Classical conjunction fragment axioms
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: Task 352
 - **Plan**: [377_classical_conjunction_fragment_axioms/plans/01_classical-conjimp-axioms.md]
+- **Summary**: [377_classical_conjunction_fragment_axioms/summaries/01_classical-conjimp-axioms-summary.md]
 
 **Description**: Create the classical conjunction-implication fragment axiom systems to fill the missing classical middle of the propositional conservativity chain (the classical column is currently 2-for-4: only Glivenko at top + the implicational fragment at bottom from task 352). Deliver: (1) inductive ClassicalConjImpAxiom for CPL⟨∧,→,⊤⟩ = {implyK, implyS, peirce, andI, andE1, andE2} (mirror ConjImpAxiom ∪ the peirce constructor of ClassicalImpAxiom in ProofSystem/FragmentAxioms.lean); (2) inductive ClassicalConjImpBotAxiom for CPL⟨∧,→,⊥,⊤⟩ = above + efq; (3) subsumption (toX) maps: ConjImpAxiom.toClassicalConjImpAxiom, ClassicalImpAxiom.toClassicalConjImpAxiom, ClassicalConjImpAxiom.toClassicalConjImpBotAxiom, ClassicalConjImpAxiom.toPropAxiom, ClassicalConjImpBotAxiom.toPropAxiom; (4) supporting infra mirroring siblings: mem_implyK/mem_implyS witnesses, subst_preserves_* closure lemmas, the *_hasDeductionTheorem instance, and IsOrBotFree/IsOrFree fragment-predicate compatibility lemmas. Pure syntactic mirror of FragmentAxioms.lean blocks; no new semantics. Zero-debt, CI green. Files: Cslib/Logics/Propositional/ProofSystem/FragmentAxioms.lean (+ Axioms.lean if needed).
 
@@ -200,10 +194,12 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 370. Int min metalogic decidability
-- **Status**: [NOT STARTED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [370_int_min_metalogic_decidability/reports/01_int-min-decidability-fmp-vs-lj.md]
+- **Plan**: [370_int_min_metalogic_decidability/plans/01_int-min-fmp-decidability.md]
 
 **Description**: Close the decidability asymmetry in the metalogic layer: classical propositional logic has a decision procedure (instDecidableDerivablePropositionalAxiom via tautology enumeration, Metalogic/StrongCompleteness.lean:566), but intuitionistic (IntPropAxiom) and minimal (MinPropAxiom) logics have none. Establish Decidable (Derivable IntPropAxiom phi) and Decidable (Derivable MinPropAxiom phi) via the finite model property: bound the canonical Kripke models (prime DCCS / MinTheory worlds) by the subformulas of phi, give a terminating decision procedure over the finite model space, and prove it correct against the existing int/min strong-completeness theorems (IntStrongCompleteness.lean, MinStrongCompleteness.lean). Independent of the tableau decision procedures (which currently rest on unproved completeness witnesses). Note: the LJ sequent calculus already has a tableau-backed decidability instance (SequentCalculus/LJ/Decidability.lean) -- assess whether the FMP route or a bridge to LJ decidability is the cleaner source for the IPL instance before implementing. No new axioms (Classical.choice / Decidable.decide acceptable on noncomputable defs); CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake).
 
@@ -220,10 +216,13 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 368. Lift prime exclusion generic lemma
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [368_lift_prime_exclusion_generic_lemma/reports/01_lift-prime-exclusion-generic-lemma.md]
+- **Plan**: [368_lift_prime_exclusion_generic_lemma/plans/01_lift-prime-exclusion-generic-lemma.md]
+- **Summary**: [368_lift_prime_exclusion_generic_lemma/summaries/01_lift-prime-exclusion-summary.md]
 
 **Description**: Deduplicate the prime-exclusion machinery shared by the intuitionistic and minimal Lindenbaum constructions by lifting it to a single generic Foundations lemma. Cslib/Logics/Propositional/Metalogic/IntLindenbaum.lean:258-438 (int_prime_exclusion, int_maximal_is_prime, int_excluding_chain_union, int_excluding_base_mem) and Cslib/Logics/Propositional/Metalogic/MinLindenbaum.lean:353-369 (min_* counterparts) repeat ~70% identical Zorn's-lemma + orE-axiom + chain-union-closure logic, differing only in that the intuitionistic case threads an extra EFQ consistency check (IntLindenbaum:328-382). Extract a generic prime-exclusion / maximal-is-prime lemma into Cslib/Foundations/Logic/Metalogic (parameterized over the deriv_imp_of_union witness and an optional consistency predicate, defaulting to the trivial predicate for the minimal case), then re-derive both int_prime_exclusion and min_prime_exclusion from it. ~150-line reduction. No new axioms; both StrongCompleteness proofs remain sorry-free; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake).
 
@@ -240,10 +239,13 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 366. Deduction theorem threading documentation audit
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: Task 355
+- **Research**: [366_deduction_theorem_threading_documentation_audit/reports/01_deduction-threading-audit.md]
+- **Plan**: [366_deduction_theorem_threading_documentation_audit/plans/01_deduction-threading-consolidation.md]
+- **Summary**: [366_deduction_theorem_threading_documentation_audit/summaries/01_deduction-threading-summary.md]
 
 **Description**: Capstone audit ensuring the deduction theorem is correctly abstracted, uniformly threaded, and thoroughly documented across all four logics, after task 355 routes Modal/Propositional through the generic algebraic deduction-theorem layer (algebraic_has_deduction_theorem in Cslib/Foundations/Logic/Metalogic/GenericMCS.lean, built on list_deduction_theorem in ListDeduction.lean). Work: (1) Verify end-to-end that NO logic retains a hand WF-recursion deduction-theorem body or a bespoke deductionWithMem helper -- Propositional (Metalogic/DeductionTheorem.lean), Modal, Temporal, Bimodal all reach the theorem through the single generic seam via their GenericMCSBridge. (2) Verify every downstream consumer (MCS, Lindenbaum, StrongCompleteness, TruthLemma, ProofSystemEquivalence, and the ~25 raw DerivationTree call sites) is threaded through the consolidated HasDeductionTheorem instance with no signature drift and stays sorry-free. (3) Documentation: add a single authoritative architecture docstring (in GenericMCS.lean or a short Foundations doc) explaining the predicate->type HilbertOf bridge and how the four structural logics inherit one deduction theorem; add/curate module docstrings on Propositional/Metalogic/DeductionTheorem.lean and the new Propositional GenericMCSBridge.lean narrating the routing; ensure cross-references resolve. This is the user's explicit priority ('correctly abstracted, threaded, and documented'). Zero behavioral change beyond docs and any thin re-routing 355 missed. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 355.
 
@@ -345,10 +347,13 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 355. Modal propositional deduction theorem consolidation
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: Task 350
+- **Research**: [355_modal_propositional_deduction_theorem_consolidation/reports/01_modal-propositional-dt-consolidation.md]
+- **Plan**: [355_modal_propositional_deduction_theorem_consolidation/plans/01_modal-propositional-dt-reroute.md]
+- **Summary**: [355_modal_propositional_deduction_theorem_consolidation/summaries/01_modal-propositional-dt-reroute-summary.md]
 
 **Description**: Consolidate the Modal and Propositional deductionTheorem through the generic algebraic deduction-theorem layer, completing the consolidation begun in task 350 (which handled Temporal and Bimodal). Task 350 deferred Modal/Propositional because their deductionTheorem defs are polymorphic over an Axioms : Proposition -> Prop predicate, whereas the generic algebraicDerivationSystem (Cslib/Foundations/Logic/Metalogic/GenericMCS.lean) and MinimalHilbert (Cslib/Foundations/Logic/ProofSystem.lean) are keyed on a TYPE S with [InferenceSystem S] [MinimalHilbert S]. Bridging requires new predicate->InferenceSystem infrastructure: introduce a HilbertOf Axioms wrapper type (predicate -> type) carrying [InferenceSystem] and [MinimalHilbert] instances, then build temporal-style bridges (deriv_iff_algebraic) for Modal (HilbertK at Modal/Metalogic/GenericMCSBridge.lean, whose current content is documentation-only) and Propositional (no bridge exists). Re-implement Modal hasDeductionTheorem (Modal/Metalogic/DeductionTheorem.lean) and Propositional hasDeductionTheorem (Propositional/Metalogic/DeductionTheorem.lean) signature-preserving (do NOT delete: ~25 raw DerivationTree call sites consume them directly), routing through the new bridge + algebraic_has_deduction_theorem, and remove the hand WF-recursion bodies + deductionWithMem helpers. Preserve any logic-specific witnesses. Files: Modal/Metalogic/{DeductionTheorem,GenericMCSBridge}.lean, Propositional/Metalogic/DeductionTheorem.lean (+ a new Propositional GenericMCSBridge.lean), Cslib/Foundations/Logic/Metalogic/GenericMCS.lean. Zero technical debt (no new sorry, no new axioms; Classical.choice on already-noncomputable defs acceptable). CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake --add-public --keep-implied --keep-prefix); all downstream consumers (MCS, Completeness, TruthLemma) still compile sorry-free. Surfaced as a follow-up by task 350; implements the same Zulip CSLib Temporal Logic suggestion by Matthew Doty (prove the deduction theorem once via an axiom class and inherit it across the structural logics): https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Temporal.20Logic/near/606511638
 

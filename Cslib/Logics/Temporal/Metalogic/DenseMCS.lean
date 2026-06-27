@@ -34,7 +34,11 @@ completeness proofs.
 
 ## References
 
+* `Cslib/Foundations/Logic/Metalogic/GenericMCS.lean` — D1 architecture docstring;
+  `algebraic_has_deduction_theorem`, `HilbertBXFc fc` bridge pattern
+* `Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean` — fc-parameterized bridge
 * `Cslib/Logics/Temporal/Metalogic/MCS.lean` — Base-specific versions
+* `Cslib/Logics/Bimodal/Metalogic/Core/DeductionTheorem.lean` — parallel fc deduction theorem (R1)
 * `Cslib/Foundations/Logic/Metalogic/Consistency.lean` — generic MCS framework
 -/
 
@@ -174,94 +178,34 @@ noncomputable def deductionMpUnderImpFc {fc : FrameClass}
 
 /-! ## FC-Parameterized Deduction Theorem -/
 
-/-- FC version of `deductionWithMem`. -/
-noncomputable def deductionWithMemFc {fc : FrameClass}
-    (Γ' : Context Atom) (A φ : Formula Atom)
-    (d : DerivationTree fc Γ' φ) (hA : A ∈ Γ') :
-    DerivationTree fc (removeAll Γ' A) (A.imp φ) := by
-  match d with
-  | .axiom _ ψ h_ax h_fc =>
-    exact deductionAxiomFc (removeAll Γ' A) A (.axiom [] ψ h_ax h_fc)
-  | .assumption _ ψ h_mem =>
-    by_cases h_eq : ψ = A
-    · subst h_eq
-      exact deductionImpSelfFc (removeAll Γ' ψ) ψ
-    · have h_mem' : ψ ∈ removeAll Γ' A := mem_removeAll_of_mem_of_ne h_mem h_eq
-      exact deductionAssumptionOtherFc (removeAll Γ' A) A ψ h_mem'
-  | .modus_ponens _ ψ χ d₁ d₂ =>
-    have ih₁ := deductionWithMemFc Γ' A (ψ.imp χ) d₁ hA
-    have ih₂ := deductionWithMemFc Γ' A ψ d₂ hA
-    exact deductionMpUnderImpFc (removeAll Γ' A) A ψ χ ih₁ ih₂
-  | .temporal_necessitation ψ _d' =>
-    simp at hA
-  | .temporal_duality ψ _d' =>
-    simp at hA
-  | .weakening Γ'' _ ψ d' h_sub =>
-    by_cases hA' : A ∈ Γ''
-    · have ih := deductionWithMemFc Γ'' A ψ d' hA'
-      exact .weakening (removeAll Γ'' A) (removeAll Γ' A) (A.imp ψ) ih
-        (removeAll_sub_removeAll h_sub)
-    · have h_sub' : Γ'' ⊆ removeAll Γ' A := by
-        intro x hx
-        exact mem_removeAll_of_mem_of_ne (h_sub hx) (fun h_eq => hA' (h_eq ▸ hx))
-      have d_weak := DerivationTree.weakening Γ'' (removeAll Γ' A) ψ d' h_sub'
-      have k_ax : DerivationTree fc [] (ψ.imp (A.imp ψ)) :=
-        impKFc fc ψ A
-      have k_weak := DerivationTree.weakening [] (removeAll Γ' A) _ k_ax
-        (List.nil_subset _)
-      exact .modus_ponens (removeAll Γ' A) ψ (A.imp ψ) k_weak d_weak
-termination_by d.height
-decreasing_by
-  · exact DerivationTree.height_modus_ponens_left d₁ d₂
-  · exact DerivationTree.height_modus_ponens_right d₁ d₂
-  · exact DerivationTree.height_weakening d' h_sub
+/-- **Deduction Theorem at arbitrary fc**: If `A :: Γ ⊢[fc] B` then `Γ ⊢[fc] A → B`.
 
-/-- **Deduction Theorem at arbitrary fc**: If `A :: Γ ⊢[fc] B` then `Γ ⊢[fc] A → B`. -/
+Proof via the `temporal_deriv_iff_algebraic_fc` bridge to
+`algebraic_has_deduction_theorem`: the bridge converts tree derivability at
+arbitrary `fc` to the algebraic (list-implication) level where the deduction
+theorem is provable generically from `MinimalHilbert (HilbertBXFc fc)`,
+then converts back. No well-founded recursion on derivation height is needed. -/
 noncomputable def deductionTheoremFc {fc : FrameClass}
     (Γ : Context Atom) (A B : Formula Atom)
     (d : DerivationTree fc (A :: Γ) B) :
-    DerivationTree fc Γ (A.imp B) := by
-  match d with
-  | .axiom _ φ h_ax h_fc =>
-    exact deductionAxiomFc Γ A (.axiom [] φ h_ax h_fc)
-  | .assumption _ φ h_mem =>
-    by_cases h_eq : φ = A
-    · subst h_eq
-      exact deductionImpSelfFc Γ φ
-    · have h_tail : φ ∈ Γ := by
-        cases h_mem with
-        | head => exact absurd rfl h_eq
-        | tail _ h => exact h
-      exact deductionAssumptionOtherFc Γ A φ h_tail
-  | .modus_ponens _ φ ψ d₁ d₂ =>
-    have ih₁ := deductionTheoremFc Γ A (φ.imp ψ) d₁
-    have ih₂ := deductionTheoremFc Γ A φ d₂
-    exact deductionMpUnderImpFc Γ A φ ψ ih₁ ih₂
-  | .weakening Γ' _ φ d' h_sub =>
-    by_cases h_eq : Γ' = A :: Γ
-    · exact deductionTheoremFc Γ A φ (h_eq ▸ d')
-    · by_cases hA : A ∈ Γ'
-      · have ih := deductionWithMemFc Γ' A φ d' hA
-        exact .weakening (removeAll Γ' A) Γ (A.imp φ) ih
-          (removeAll_sub_of_sub h_sub hA)
-      · have h_sub' : Γ' ⊆ Γ := by
-          intro x hx
-          have := h_sub hx
-          simp only [List.mem_cons] at this
-          rcases this with rfl | h
-          · exact absurd hx hA
-          · exact h
-        have d_weak := DerivationTree.weakening Γ' Γ φ d' h_sub'
-        have k_ax : DerivationTree (Atom := Atom) fc []
-            (φ.imp (A.imp φ)) := impKFc fc φ A
-        have k_weak := DerivationTree.weakening [] Γ _ k_ax (List.nil_subset _)
-        exact .modus_ponens Γ φ (A.imp φ) k_weak d_weak
-termination_by d.height
-decreasing_by
-  · exact DerivationTree.height_modus_ponens_left d₁ d₂
-  · exact DerivationTree.height_modus_ponens_right d₁ d₂
-  · have h1 : (h_eq ▸ d').height = d'.height := by subst h_eq; rfl
-    simp only [h1, DerivationTree.height]; omega
+    DerivationTree fc Γ (A.imp B) :=
+  (temporal_deriv_iff_algebraic_fc.mpr
+    (Cslib.Logic.Metalogic.GenericMCS.algebraic_has_deduction_theorem
+      (temporal_deriv_iff_algebraic_fc.mp ⟨d⟩))).some
+
+/-- FC version of `deductionWithMem`.
+
+A thin `removeAll`-aware wrapper over the seam-routed `deductionTheoremFc`,
+kept because removing-all-occurrences is the shape required by
+Lindenbaum/consistency elimination in callers (`DenseCompleteness.lean`, `MCS.lean`, etc.). -/
+noncomputable def deductionWithMemFc {fc : FrameClass}
+    (Γ' : Context Atom) (A φ : Formula Atom)
+    (d : DerivationTree fc Γ' φ) (_hA : A ∈ Γ') :
+    DerivationTree fc (removeAll Γ' A) (A.imp φ) :=
+  deductionTheoremFc (removeAll Γ' A) A φ
+    (.weakening Γ' (A :: removeAll Γ' A) φ d fun x hx =>
+      if h_eq : x = A then List.mem_cons.mpr (Or.inl h_eq)
+      else List.mem_cons.mpr (Or.inr (mem_removeAll_of_mem_of_ne hx h_eq)))
 
 /-! ## Deduction Theorem Wrapper -/
 

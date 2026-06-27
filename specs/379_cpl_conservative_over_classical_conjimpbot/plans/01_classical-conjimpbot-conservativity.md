@@ -1,7 +1,7 @@
 # Implementation Plan: Task #379 - CPL Conservative over Classical ⟨∧,→,⊥,⊤⟩ Fragment
 
 - **Task**: 379 - Prove CPL is conservative over its classical conjunctive-implicational-falsum fragment CPL⟨∧,→,⊥,⊤⟩ (CL-C)
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: ~3.5 hours
 - **Dependencies**: Task 378 (the ∧-extended Kalmár truth lemma `classicalConjImp_kalmar` + the derived-lemma / `litCtx` / collapse machinery in `Metalogic/ClassicalConjImpCompleteness.lean`); Task 377 (`ClassicalConjImpBotAxiom`, its `toPropAxiom`, the EFQ axiom, and `classicalConjImpBotAxiom_hasDeductionTheorem`). Both are currently `[PLANNING]` — see Risk R0.
 - **Research Inputs**: None (no research report for this task). Grounding: task-352 landed proof `Cslib/Logics/Propositional/Metalogic/ClassicalImpCompleteness.lean` (the proven Kalmár/Tarski–Bernays template), task-378 plan/module (the ∧ extension this builds on), and the intuitionistic analogue `Semantics/Algebra/ConjImpBotConservative.lean` (the ⊥-case / conservativity-edge shape).
@@ -146,7 +146,7 @@ consumes the previous). Dispatch one phase per agent run; commit after each gree
 
 ---
 
-### Phase 0: Dependency gate + reuse/transcribe inventory [NOT STARTED]
+### Phase 0: Dependency gate + reuse/transcribe inventory [COMPLETED]
 
 - **Goal:** Confirm tasks 377 and 378 are landed and CI-green; record the exact landed signatures this
   plan transcribes/reuses, resolving the names left abstract here.
@@ -169,7 +169,7 @@ consumes the previous). Dispatch one phase per agent run; commit after each gree
 
 ---
 
-### Phase 1: New module skeleton + soundness [NOT STARTED]
+### Phase 1: New module skeleton + soundness [COMPLETED]
 
 - **Goal:** Create `Metalogic/ClassicalConjImpBotCompleteness.lean` with header, imports, namespace,
   and `classicalConjImpBot_soundness`.
@@ -190,7 +190,7 @@ consumes the previous). Dispatch one phase per agent run; commit after each gree
 
 ---
 
-### Phase 2: Derived lemmas for `ClassicalConjImpBotAxiom` (incl. EFQ helper) [NOT STARTED]
+### Phase 2: Derived lemmas for `ClassicalConjImpBotAxiom` (incl. EFQ helper) [COMPLETED]
 
 - **Goal:** Re-derive the axiom-set-specific helpers the truth lemma consumes, retargeted to
   `ClassicalConjImpBotAxiom`, plus the **new EFQ helper**.
@@ -214,7 +214,7 @@ consumes the previous). Dispatch one phase per agent run; commit after each gree
 
 ---
 
-### Phase 3: The `IsOrFree` Kalmár truth lemma — atom/imp/and (transcribe) [NOT STARTED]
+### Phase 3: The `IsOrFree` Kalmár truth lemma — atom/imp/and (transcribe) [COMPLETED]
 
 - **Goal:** State `classicalConjImpBot_kalmar` over `IsOrFree` and discharge the four reused branches
   (atom TRUE/FALSE, imp TRUE/FALSE, and TRUE/FALSE, or-excluded), transcribing from 378.
@@ -247,7 +247,7 @@ consumes the previous). Dispatch one phase per agent run; commit after each gree
 
 ---
 
-### Phase 4: Truth lemma — the new `bot` case (easy increment) [NOT STARTED]
+### Phase 4: Truth lemma — the new `bot` case (easy increment) [COMPLETED]
 
 - **Goal:** Discharge the single genuinely new branch of `classicalConjImpBot_kalmar`.
 - **Tasks:**
@@ -267,7 +267,7 @@ consumes the previous). Dispatch one phase per agent run; commit after each gree
 
 ---
 
-### Phase 5: Atom elimination + collapse + `classicalConjImpBot_completeness` [NOT STARTED]
+### Phase 5: Atom elimination + collapse + `classicalConjImpBot_completeness` [COMPLETED]
 
 - **Goal:** Iterate atom elimination over the literal context and conclude completeness.
 - **Tasks:**
@@ -287,7 +287,7 @@ consumes the previous). Dispatch one phase per agent run; commit after each gree
 
 ---
 
-### Phase 6: Conservativity edge + chain biconditional + CI gate [NOT STARTED]
+### Phase 6: Conservativity edge + chain biconditional + CI gate [COMPLETED]
 
 - **Goal:** Land the conservativity triple, extend the chain doc-edge, pass the full CI gate.
 - **Tasks:**

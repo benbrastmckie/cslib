@@ -1,15 +1,21 @@
 {
-  "status": "completed",
+  "status": "partial",
   "metadata": {
     "tasks_completed": [
-      342,
-      372
+      377,
+      378,
+      355,
+      379,
+      368,
+      366
     ],
-    "tasks_failed": [],
-    "cycles_used": 3,
-    "multi_task_mode": true,
-    "follow_up_tasks": [
-      380
-    ]
+    "tasks_failed": [
+      {
+        "task": 370,
+        "reason": "FMP spike unresolved (sorry in orphan IntFMPSpike.lean); context overflow; blocked for manual follow-up"
+      }
+    ],
+    "cycles_used": 6,
+    "multi_task_mode": true
   }
 }

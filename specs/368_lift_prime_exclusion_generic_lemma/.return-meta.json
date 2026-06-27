@@ -1,0 +1,53 @@
+{
+  "status": "implemented",
+  "started_at": "2026-06-27T00:00:00Z",
+  "artifacts": [
+    {
+      "path": "specs/368_lift_prime_exclusion_generic_lemma/summaries/01_lift-prime-exclusion-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary: thin wrappers for min/int prime exclusion calling generic Metalogic.prime_exclusion"
+    },
+    {
+      "path": "Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean",
+      "type": "implementation",
+      "summary": "Generic prime exclusion lemma (254 lines, 0 sorry, done by prior agent)"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Metalogic/MinLindenbaum.lean",
+      "type": "implementation",
+      "summary": "min_prime_exclusion refactored as thin wrapper calling Metalogic.prime_exclusion"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Metalogic/IntLindenbaum.lean",
+      "type": "implementation",
+      "summary": "int_prime_exclusion refactored as thin wrapper calling Metalogic.prime_exclusion"
+    }
+  ],
+  "partial_progress": {
+    "phases_completed": 5,
+    "phases_total": 5,
+    "last_completed_phase": "Refactor MinLindenbaum and IntLindenbaum as thin wrappers"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "scoped_build_modules": [
+      "Cslib.Logics.Propositional.Metalogic.MinLindenbaum",
+      "Cslib.Logics.Propositional.Metalogic.IntLindenbaum",
+      "Cslib.Foundations.Logic.Metalogic.PrimeExclusion",
+      "Cslib.Logics.Propositional.Metalogic.MinStrongCompleteness",
+      "Cslib.Logics.Propositional.Metalogic.IntStrongCompleteness"
+    ],
+    "note": "lake test has pre-existing failures in task-364 Tableau/Bimodal modules unrelated to this task"
+  },
+  "metadata": {
+    "session_id": "sess_1782560395_aeb7ef_368b",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+  }
+}

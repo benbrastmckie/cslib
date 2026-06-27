@@ -1,0 +1,14 @@
+{
+  "status": "planned",
+  "summary": "6-phase plan: Foundations HasMinimalAxioms class, then parallel Modal/PL bridge + DT reroute waves, then CI gate; zero new sorry/axioms",
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "implement",
+  "artifacts": [
+    {
+      "path": "specs/355_modal_propositional_deduction_theorem_consolidation/plans/01_modal-propositional-dt-reroute.md",
+      "type": "plan",
+      "summary": "6-phase consolidation plan with verified per-phase code references"
+    }
+  ]
+}

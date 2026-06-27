@@ -1,7 +1,7 @@
 # Implementation Plan: Task #377
 
 - **Task**: 377 - classical_conjunction_fragment_axioms
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 2 hours
 - **Dependencies**: Task 352 (ClassicalImpAxiom plumbing, completed)
 - **Research Inputs**: None (no research report; grounded directly in `FragmentAxioms.lean` sibling blocks)
@@ -94,7 +94,7 @@ Phases within the same wave can execute in parallel. Phases 2, 3, and 5 all depe
 inductives (Phase 1) and edit disjoint declaration groups in the same file, so they may be
 batched into a single agent run if preferred; they are listed separately for clarity of scope.
 
-### Phase 1: Axiom Inductives [NOT STARTED]
+### Phase 1: Axiom Inductives [COMPLETED]
 
 **Goal**: Define the two axiom inductive predicates, mirroring `ConjImpAxiom` (+ `peirce` from
 `ClassicalImpAxiom`) and `ConjImpBotAxiom` (+ `peirce`).
@@ -126,7 +126,7 @@ batched into a single agent run if preferred; they are listed separately for cla
 
 ---
 
-### Phase 2: Implication Witnesses and Substitution Closure [NOT STARTED]
+### Phase 2: Implication Witnesses and Substitution Closure [COMPLETED]
 
 **Goal**: Add `mem_implyK` / `mem_implyS` witnesses (inside each namespace) and the
 `subst_preserves_*` closure lemmas for both systems.
@@ -157,7 +157,7 @@ batched into a single agent run if preferred; they are listed separately for cla
 
 ---
 
-### Phase 3: Subsumption Maps (toX) [NOT STARTED]
+### Phase 3: Subsumption Maps (toX) [COMPLETED]
 
 **Goal**: Add the five `toX` subsumption theorems, each a `cases`-and-reconstruct proof.
 
@@ -185,7 +185,7 @@ batched into a single agent run if preferred; they are listed separately for cla
 
 ---
 
-### Phase 4: Deduction Theorem Instances [NOT STARTED]
+### Phase 4: Deduction Theorem Instances [COMPLETED]
 
 **Goal**: Add the `hasDeductionTheorem` instances for both systems using the Phase 2 witnesses.
 
@@ -211,7 +211,7 @@ batched into a single agent run if preferred; they are listed separately for cla
 
 ---
 
-### Phase 5: Fragment-Predicate Compatibility Lemmas [NOT STARTED]
+### Phase 5: Fragment-Predicate Compatibility Lemmas [COMPLETED]
 
 **Goal**: Add per-constructor fragment-predicate compatibility lemmas — `IsOrBotFree` for
 `ClassicalConjImpAxiom`, `IsOrFree` for `ClassicalConjImpBotAxiom`.
@@ -243,7 +243,7 @@ batched into a single agent run if preferred; they are listed separately for cla
 
 ---
 
-### Phase 6: CI Gate [NOT STARTED]
+### Phase 6: CI Gate [COMPLETED]
 
 **Goal**: Run the full CSLib CI pipeline and confirm zero proof debt across the new declarations.
 

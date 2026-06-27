@@ -1,7 +1,7 @@
 # Implementation Plan: Task #378 - CPL Conservative over Classical Conjunction-Implication Fragment CPL⟨∧,→,⊤⟩
 
 - **Task**: 378 - Prove CPL is conservative over its classical conjunction-implication fragment CPL⟨∧,→,⊤⟩ (CL-B rung)
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: ~5 hours
 - **Dependencies**: Task 377 (the `ClassicalConjImpAxiom` system: `implyK`, `implyS`, `peirce`, `andI`, `andE1`, `andE2`, plus `ClassicalConjImpAxiom.toPropAxiom`, `classicalConjImpAxiom_hasDeductionTheorem`, `mem_implyK`/`mem_implyS`, `subst_preserves_*`). Task 377 must be landed/CI-green before Phase 1.
 - **Research Inputs**: None (no research report; grounded directly in the task-352 template and the source files listed under Standards).
@@ -127,7 +127,7 @@ phase per agent run; commit immediately on green with `task 378 phase {P}: {name
 
 ---
 
-### Phase 1: Module scaffolding, soundness, derived helpers, atom collector [NOT STARTED]
+### Phase 1: Module scaffolding, soundness, derived helpers, atom collector [COMPLETED]
 
 **Goal**: Stand up `Cslib/Logics/Propositional/Metalogic/ClassicalConjImpCompleteness.lean` with all
 the non-truth-lemma scaffolding mirrored from task 352, plus the `and`-aware atom collector. This is
@@ -156,7 +156,7 @@ mechanical transcription (low risk) and must be solid before the truth lemma.
 
 ---
 
-### Phase 2: ∧-extended Kalmár truth lemma (RISK-CONCENTRATED) [NOT STARTED]
+### Phase 2: ∧-extended Kalmár truth lemma (RISK-CONCENTRATED) [COMPLETED]
 
 **Goal**: Land `classicalConjImp_kalmar`, the falsum-surrogate / double-negation truth lemma over
 `IsOrBotFree` formulas, with live `atom`, `imp`, and **`and`** cases. The `atom` and `imp` cases are
@@ -240,7 +240,7 @@ then also block; Phase 1 remains committed additive value.
 
 ---
 
-### Phase 3: Atom elimination and context collapse [NOT STARTED]
+### Phase 3: Atom elimination and context collapse [COMPLETED]
 
 **Goal**: Mirror the task-352 atom-elimination and context-collapse lemmas for
 `ClassicalConjImpAxiom`. Mechanical transcription (the proofs are axiom-name swaps of landed code;
@@ -263,7 +263,7 @@ they do not depend on the truth-lemma conclusion shape).
 
 ---
 
-### Phase 4: Completeness, conservativity edge, chain biconditional [NOT STARTED]
+### Phase 4: Completeness, conservativity edge, chain biconditional [COMPLETED]
 
 **Goal**: Assemble the deliverables from the truth lemma + collapse, then the conservativity edge and
 chain biconditional. Mirror task 352's Phases 9–10 (recovery step + conservativity), using
@@ -288,7 +288,7 @@ chain biconditional. Mirror task 352's Phases 9–10 (recovery step + conservati
 
 ---
 
-### Phase 5: CI gate [NOT STARTED]
+### Phase 5: CI gate [COMPLETED]
 
 **Goal**: Register the new module in the barrel and pass the full CSLib CI pipeline.
 

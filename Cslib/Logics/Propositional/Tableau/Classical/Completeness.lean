@@ -518,64 +518,6 @@ private lemma classicalTotalMeasure_zero_mem_subset
       (List.mem_map.mpr ⟨(branches[i], expandedSets[i]'hi'), hzip, rfl⟩)
   exact classicalRemMeasure_zero_subset hterm hsf
 
-/-! ## Complexity-based branch measure for strict decrease
-
-`classicalBranchComplexity b e` sums `sf.formula.complexity` over unexpanded formulas on
-branch `b`. Unlike `classicalRemMeasure` (which counts formulas), this measure strictly
-decreases for EACH child branch after any expansion step (alpha or beta), because every
-classical rule produces only strict subformulas of the expanded formula.
-
-The strict per-branch decrease is the key building block for Phase 3'/4: it allows choosing
-a fuel bound that guarantees saturation (the total-sum can grow under beta duplication, but
-the per-branch complexity strictly decreases, bounding the tree depth). -/
-
-section MeasureDecrease
-
-/-- Sum of formula complexities of unexpanded signed formulas on a branch. -/
-private def classicalBranchComplexity
-    (b : Branch (Proposition Atom) Unit)
-    (e : List (SignedFormula (Proposition Atom) Unit)) : Nat :=
-  ((b.filter fun sf => !(e.any (· == sf))).map fun sf => sf.formula.complexity).sum
-
-/-- `classicalBranchComplexity` splits over list concatenation. -/
-private lemma classicalBranchComplexity_append
-    (l₁ l₂ : Branch (Proposition Atom) Unit)
-    (e : List (SignedFormula (Proposition Atom) Unit)) :
-    classicalBranchComplexity (l₁ ++ l₂) e =
-    classicalBranchComplexity l₁ e + classicalBranchComplexity l₂ e := by
-  simp only [classicalBranchComplexity, List.filter_append, List.map_append, List.sum_append]
-
-/-- Expanding the expanded set (adding more formulas) can only reduce the branch complexity. -/
-private lemma classicalBranchComplexity_mono_expanded
-    (b : Branch (Proposition Atom) Unit)
-    (e : List (SignedFormula (Proposition Atom) Unit))
-    (sf : SignedFormula (Proposition Atom) Unit) :
-    classicalBranchComplexity b (e ++ [sf]) ≤ classicalBranchComplexity b e := by
-  simp only [classicalBranchComplexity]
-  induction b with
-  | nil => simp
-  | cons x xs ih =>
-    simp only [List.filter_cons, List.map_cons, List.sum_cons]
-    by_cases hxe : e.any (· == x) = true
-    · -- x ∈ e: excluded from both filters
-      have hxe2 : (e ++ [sf]).any (· == x) = true := by
-        simp only [List.any_append, hxe, Bool.true_or]
-      simp only [Bool.not_eq_true.mpr hxe, ite_false, Bool.not_eq_true.mpr hxe2, ite_false]; exact ih
-    · -- x ∉ e: check if x = sf
-      by_cases hxsf : (x == sf) = true
-      · -- x = sf: x ∉ (e ++ [sf])-filter but ∈ e-filter
-        have hxe2 : (e ++ [sf]).any (· == x) = true := by
-          simp [List.any_append, List.any_cons, hxsf]
-        simp only [Bool.not_eq_true.mpr hxe, Bool.not_false, ite_true,
-                   Bool.not_eq_true.mpr hxe2, ite_false]
-        simp only [List.map_cons, List.sum_cons]; omega
-      · -- x ≠ sf and x ∉ e: in both filters
-        have hxe2 : (e ++ [sf]).any (· == x) = false := by
-          simp [List.any_append, Bool.eq_false_of_ne_true hxe, hxsf]
-        simp only [Bool.not_eq_true.mpr hxe, Bool.not_false, ite_true,
-                   Bool.not_eq_true.mpr hxe2, Bool.not_false, ite_true]
-        simp only [List.map_cons, List.sum_cons]; omega
-
 /-- When `classicalStepBranch b e = none`, every formula on `b` is either already in the
 expanded set `e` or has `classicalApplyOne` return `notApplicable` (the branch is saturated). -/
 private lemma classicalStepBranch_none_saturated

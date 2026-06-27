@@ -1,0 +1,20 @@
+{
+  "status": "planned",
+  "agent_type": "planner-agent",
+  "delegation_path": ["orchestrator", "plan", "planner-agent"],
+  "session_id": "sess_1782560395_aeb7ef_368",
+  "task_number": 368,
+  "task_type": "cslib",
+  "artifacts": [
+    {
+      "path": "specs/368_lift_prime_exclusion_generic_lemma/plans/01_lift-prime-exclusion-generic-lemma.md",
+      "type": "plan",
+      "summary": "5-phase plan to lift prime-exclusion machinery into a generic Foundations lemma and re-derive int/min as wrappers"
+    }
+  ],
+  "phase_count": 5,
+  "estimated_hours": 6.5,
+  "dependency_waves": [[1], [2], [3, 4], [5]],
+  "memory_candidates": [],
+  "next_steps": "Run /implement 368 to execute the plan"
+}

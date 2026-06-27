@@ -1,57 +1,84 @@
 {
-  "session_id": "sess_1782538677_f01f15",
+  "session_id": "sess_1782560395_aeb7ef",
   "task_numbers": [
-    363,
-    364,
-    365
+    355,
+    368,
+    370,
+    377,
+    366,
+    378,
+    379
   ],
   "waves": [
     [
-      363,
-      364,
-      365
+      355,
+      368,
+      370,
+      377
+    ],
+    [
+      366,
+      378
+    ],
+    [
+      379
     ]
   ],
   "dependency_graph": {
-    "363": [],
-    "364": [],
-    "365": []
+    "355": [],
+    "368": [],
+    "370": [],
+    "377": [],
+    "366": [
+      "355"
+    ],
+    "378": [
+      "377"
+    ],
+    "379": [
+      "378"
+    ]
   },
-  "max_cycles": 15,
-  "cycle_count": 5,
-  "failed_tasks": [
-    {
-      "task": 363,
-      "status": "blocked",
-      "reason": "Phase 3 classicalExpandBranches_hintikka: genuine proof blocker (fuel=0 base case unprovable with current invariant). Green modulo 1 pre-existing sorry. 3 resolution paths documented."
-    },
-    {
-      "task": 364,
-      "status": "blocked",
-      "reason": "68 errors remain (hnewBs cascade in modalStepBranch_preserves_sat). 6 agents overflowed context (lean_goal output too large). Phase 1 complete + committed. Needs human session or rule-case extraction refactor first."
-    }
-  ],
+  "max_cycles": 25,
+  "cycle_count": 1,
+  "failed_tasks": [],
   "completed_tasks": [
-    365
+    377
   ],
   "current_statuses": {
-    "363": "blocked",
-    "364": "blocked",
-    "365": "completed"
+    "355": "researched",
+    "368": "researched",
+    "370": "researched",
+    "377": "completed",
+    "366": "not_started",
+    "378": "planned",
+    "379": "planned"
   },
   "task_dirs": {
-    "363": "specs/363_repair_classical_tableau_completeness",
-    "364": "specs/364_modal_tableau_soundness_drift_repair",
-    "365": "specs/365_propositional_docstring_sorry_note_hygiene"
+    "355": "specs/355_modal_propositional_deduction_theorem_consolidation",
+    "368": "specs/368_lift_prime_exclusion_generic_lemma",
+    "370": "specs/370_int_min_metalogic_decidability",
+    "377": "specs/377_classical_conjunction_fragment_axioms",
+    "366": "specs/366_deduction_theorem_threading_documentation_audit",
+    "378": "specs/378_cpl_conservative_over_classical_conjimp",
+    "379": "specs/379_cpl_conservative_over_classical_conjimpbot"
   },
   "research_agents": {
-    "363": "cslib-research-agent",
-    "364": "cslib-research-agent",
-    "365": "cslib-research-agent"
+    "355": "cslib-research-agent",
+    "368": "cslib-research-agent",
+    "370": "cslib-research-agent",
+    "377": "cslib-research-agent",
+    "366": "cslib-research-agent",
+    "378": "cslib-research-agent",
+    "379": "cslib-research-agent"
   },
   "implement_agents": {
-    "363": "cslib-implementation-agent",
-    "364": "cslib-implementation-agent",
-    "365": "cslib-implementation-agent"
+    "355": "cslib-implementation-agent",
+    "368": "cslib-implementation-agent",
+    "370": "cslib-implementation-agent",
+    "377": "cslib-implementation-agent",
+    "366": "cslib-implementation-agent",
+    "378": "cslib-implementation-agent",
+    "379": "cslib-implementation-agent"
   }
 }

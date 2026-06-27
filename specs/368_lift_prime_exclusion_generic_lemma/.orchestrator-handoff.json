@@ -1,0 +1,14 @@
+{
+  "status": "planned",
+  "summary": "5-phase plan created to lift shared prime-exclusion machinery into generic PrimeExclusion.lean with int/min wrappers",
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "implement",
+  "artifacts": [
+    {
+      "path": "specs/368_lift_prime_exclusion_generic_lemma/plans/01_lift-prime-exclusion-generic-lemma.md",
+      "type": "plan",
+      "summary": "Phased plan: generic scaffolding, main orE lemma, min wrapper, int wrapper, CI"
+    }
+  ]
+}

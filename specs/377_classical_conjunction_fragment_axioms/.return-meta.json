@@ -1,18 +1,40 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "started_at": "2026-06-27T00:00:00Z",
-  "artifacts": [],
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/ProofSystem/FragmentAxioms.lean",
+      "type": "implementation",
+      "summary": "Added ClassicalConjImpAxiom and ClassicalConjImpBotAxiom with all supporting infrastructure"
+    },
+    {
+      "path": "specs/377_classical_conjunction_fragment_axioms/summaries/01_classical-conjimp-axioms-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary for task 377"
+    }
+  ],
   "partial_progress": {
-    "stage": "initializing",
-    "details": "Agent started, metadata created",
+    "stage": "completed",
+    "details": "All 6 phases implemented and verified",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 0
+    "phases_completed": 6,
+    "last_completed_phase": "CI Gate"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "notes": "lake build Cslib.Logics.Propositional.ProofSystem.FragmentAxioms green; lake lint clean; lake shake clean; full lake build has pre-existing failures in unrelated Modal/Bimodal modules confirmed present before this dispatch"
   },
   "metadata": {
     "session_id": "sess_1782560395_aeb7ef_377",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

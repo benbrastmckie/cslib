@@ -1,7 +1,7 @@
 # Implementation Plan: Task #378 - CPL Conservative over Classical Conjunction-Implication Fragment CPL⟨∧,→,⊤⟩
 
 - **Task**: 378 - Prove CPL is conservative over its classical conjunction-implication fragment CPL⟨∧,→,⊤⟩ (CL-B rung)
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: ~5 hours
 - **Dependencies**: Task 377 (the `ClassicalConjImpAxiom` system: `implyK`, `implyS`, `peirce`, `andI`, `andE1`, `andE2`, plus `ClassicalConjImpAxiom.toPropAxiom`, `classicalConjImpAxiom_hasDeductionTheorem`, `mem_implyK`/`mem_implyS`, `subst_preserves_*`). Task 377 must be landed/CI-green before Phase 1.
 - **Research Inputs**: None (no research report; grounded directly in the task-352 template and the source files listed under Standards).

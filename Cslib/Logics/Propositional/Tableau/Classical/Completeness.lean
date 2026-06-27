@@ -468,17 +468,71 @@ private lemma hintikka_inv_mono (b b' : Branch (Proposition Atom) Unit)
   | persistent out => rw [hca] at h; intro sf' hmem'; exact hsub _ (h sf' hmem')
   | notApplicable => trivial
 
-/-- The open branch returned by `classicalExpandBranches` is a classical Hintikka set.
+/-- Count of unexpanded formulas in branch `b` relative to expanded set `e`.
+Zero means every formula on the branch is in the expanded set, so the Hintikka
+invariant covers the entire branch. -/
+private def classicalRemMeasure
+    (b : Branch (Proposition Atom) Unit)
+    (e : List (SignedFormula (Proposition Atom) Unit)) : Nat :=
+  (b.filter fun sf => !(e.any (· == sf))).length
 
-The proof is by induction on fuel with an inner induction on the pending list, tracking
-the Hintikka invariant: for every pair (b, e) in the list, the Hintikka condition holds
-for all formulas in b that were expanded (are in e), and the rule outputs are in b.
+/-- Total remaining measure across all branches: sum of per-branch unexpanded formula counts.
+When this is ≤ fuel, every formula on every open branch has been expanded before fuel runs out,
+so any returned open branch is a Hintikka set. -/
+private def classicalTotalMeasure
+    (branches : List (Branch (Proposition Atom) Unit))
+    (expandedSets : List (List (SignedFormula (Proposition Atom) Unit))) : Nat :=
+  ((branches.zip expandedSets).map fun p => classicalRemMeasure p.1 p.2).sum
 
-Technical note: This requires the full loop invariant for `classicalExpandBranches`. -/
+/-- If the per-branch measure is zero, every formula on the branch is in the expanded set. -/
+private lemma classicalRemMeasure_zero_subset
+    {b : Branch (Proposition Atom) Unit}
+    {e : List (SignedFormula (Proposition Atom) Unit)}
+    (hm : classicalRemMeasure b e = 0)
+    {sf : SignedFormula (Proposition Atom) Unit} (hsf : sf ∈ b) : sf ∈ e := by
+  simp only [classicalRemMeasure] at hm
+  by_contra hnsf
+  have hiff : e.any (· == sf) = true ↔ sf ∈ e := by simp [List.any_eq_true]
+  have hany : e.any (· == sf) = false := by
+    rw [Bool.eq_false_iff]; intro h; exact hnsf (hiff.mp h)
+  have hmem : sf ∈ b.filter (fun sf => !(e.any (· == sf))) :=
+    List.mem_filter.mpr ⟨hsf, by simp [hany]⟩
+  exact absurd (List.length_pos_of_mem hmem) (by omega)
+
+/-- If the total measure is zero, every formula on `branches[i]` is in `expandedSets[i]`. -/
+private lemma classicalTotalMeasure_zero_mem_subset
+    {branches : List (Branch (Proposition Atom) Unit)}
+    {expandedSets : List (List (SignedFormula (Proposition Atom) Unit))}
+    (hlength : expandedSets.length = branches.length)
+    (hm : classicalTotalMeasure branches expandedSets = 0)
+    {i : Nat} (hi : i < branches.length)
+    {sf : SignedFormula (Proposition Atom) Unit} (hsf : sf ∈ branches[i]) :
+    sf ∈ expandedSets[i]'(by omega) := by
+  have hi' : i < expandedSets.length := by omega
+  have hzip : (branches[i], expandedSets[i]'hi') ∈ branches.zip expandedSets := by
+    rw [List.mem_iff_getElem]
+    refine ⟨i, by simp [List.length_zip]; exact ⟨hi, hi'⟩, by simp [List.getElem_zip]⟩
+  simp only [classicalTotalMeasure] at hm
+  have hterm : classicalRemMeasure branches[i] (expandedSets[i]'hi') = 0 :=
+    List.sum_eq_zero_iff_forall_eq_nat.mp hm _
+      (List.mem_map.mpr ⟨(branches[i], expandedSets[i]'hi'), hzip, rfl⟩)
+  exact classicalRemMeasure_zero_subset hterm hsf
+
+/-- The open branch returned by `classicalExpandBranches` is a classical Hintikka set,
+provided the total measure of unexpanded formulas is at most the fuel.
+
+When `classicalTotalMeasure branches expandedSets ≤ fuel`:
+- **fuel = 0**: measure = 0, so every formula on every branch is already expanded (in its
+  expanded set). The returned branch's Hintikka condition follows directly from the invariant.
+- **fuel = n+1**: The inner loop either finds a saturated open branch (Hintikka by invariant
+  and saturation) or expands one formula (decreasing the measure) and recurses.
+
+The proof is by induction on fuel with an inner induction on the pending list. -/
 private lemma classicalExpandBranches_hintikka (fuel : Nat) :
     ∀ (branches : List (Branch (Proposition Atom) Unit))
       (expandedSets : List (List (SignedFormula (Proposition Atom) Unit))),
       expandedSets.length = branches.length →
+      classicalTotalMeasure branches expandedSets ≤ fuel →
       -- Invariant: each branch satisfies Hintikka for its expanded formulas
       (∀ (i : Nat) (b : Branch (Proposition Atom) Unit) (e : List (SignedFormula (Proposition Atom) Unit)),
         branches[i]? = some b → expandedSets[i]? = some e →
@@ -489,7 +543,42 @@ private lemma classicalExpandBranches_hintikka (fuel : Nat) :
           | .notApplicable => True) →
       ∀ b, classicalExpandBranches branches expandedSets fuel = .openBranch b →
         classicalHintikkaSet b := by
-  sorry
+  induction fuel with
+  | zero =>
+    intro branches expandedSets hlength hfuel hInv b h
+    -- hfuel : classicalTotalMeasure branches expandedSets ≤ 0
+    have hm : classicalTotalMeasure branches expandedSets = 0 := Nat.le_zero.mp hfuel
+    simp only [classicalExpandBranches] at h
+    cases hfs : branches.findSome? (fun b' => if isClassicallyClosed b' then none else some b') with
+    | none => simp only [hfs] at h; exact absurd h (by simp)
+    | some b' =>
+      simp only [hfs] at h
+      injection h with heq; subst heq
+      obtain ⟨b₀, hb₀_mem, hfound⟩ := List.exists_of_findSome?_eq_some hfs
+      by_cases hcl : isClassicallyClosed b₀ = true
+      · simp only [hcl, ite_true] at hfound; exact absurd hfound (by simp)
+      · simp only [Bool.not_eq_true] at hcl
+        have hb₀eq : b₀ = b' := by simp only [hcl, ite_false] at hfound; exact Option.some.inj hfound
+        rw [← hb₀eq]
+        -- b₀ is in branches at some index i
+        obtain ⟨i, hi, hi_eq⟩ := List.mem_iff_getElem.mp hb₀_mem
+        -- hi_eq : branches[i] = b₀
+        refine ⟨hcl, ?_⟩
+        intro sf hsfmem
+        -- sf ∈ b₀ = branches[i]
+        have hsfi : sf ∈ branches[i] := hi_eq ▸ hsfmem
+        -- From measure = 0: sf ∈ expandedSets[i]
+        have hsfe : sf ∈ expandedSets[i]'(by omega) :=
+          classicalTotalMeasure_zero_mem_subset hlength hm hi hsfi
+        -- From hInv: Hintikka condition for sf ∈ expandedSets[i] w.r.t. branches[i]
+        have hInv_i := hInv i branches[i] (expandedSets[i]'(by omega))
+          (List.getElem?_eq_getElem hi) (List.getElem?_eq_getElem (by omega)) sf hsfe
+        rw [hi_eq] at hInv_i
+        exact hInv_i
+  | succ fuel' ih =>
+    -- The succ case (processNext inner induction + measure-decrease argument) is proved
+    -- in Phase 2. This sorry is the single checkpoint sorry for Phase 1.
+    sorry
 
 /-- Any formula on a branch is still present on every branch produced by `classicalStepBranch`.
 Uses `Branch.extendMany b x = x ++ b`. -/
@@ -643,9 +732,18 @@ This is the key bridge between the expansion loop and the truth lemma. -/
 lemma classicalTableau_hintikka (φ : Proposition Atom) (b : Branch (Proposition Atom) Unit)
     (h : classicalTableau φ = .openBranch b) : classicalHintikkaSet b := by
   simp only [classicalTableau] at h
+  -- The initial state has exactly one formula on one branch and an empty expanded set.
+  -- The measure is 1 (one unexpanded formula), which is ≤ the fuel bound.
+  have hfuel_init : classicalTotalMeasure [[⟨.neg, φ, ()⟩]] [[]] ≤ 4 * (φ.complexity + 1) + 1 := by
+    simp only [classicalTotalMeasure, classicalRemMeasure]
+    simp only [List.zip_cons_cons, List.zip_nil_right, List.map_cons, List.map_nil,
+               List.sum_cons, List.sum_nil, add_zero]
+    simp only [List.filter, List.any, List.length, Bool.not_false, ite_true,
+               List.length_nil, List.length_cons, Nat.zero_add]
+    omega
   -- Supply branches/expandedSets explicitly so the lambda's `he` type is fully determined.
   -- Initial invariant holds vacuously: expandedSets = [[]], so every e looked up is [].
-  exact classicalExpandBranches_hintikka _ [[⟨.neg, φ, ()⟩]] [[]] rfl
+  exact classicalExpandBranches_hintikka _ [[⟨.neg, φ, ()⟩]] [[]] rfl hfuel_init
     (fun i b' e _ he sf hsfin => by
       -- he : ([] : List ...) [i]? = some e (expandedSets = [[]], inner list is [])
       -- For i=0: [[]][0]? = some [] = some e, so e = [], contradicting sf ∈ e = [].

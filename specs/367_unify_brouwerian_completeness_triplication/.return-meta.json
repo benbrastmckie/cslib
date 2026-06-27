@@ -1,19 +1,23 @@
 {
-  "status": "researched",
-  "started_at": "2026-06-27T12:44:00Z",
-  "completed_at": "2026-06-27T12:52:00Z",
+  "schema_version": "1.0",
+  "status": "planned",
+  "agent_type": "planner-agent",
+  "task_number": 367,
+  "task_type": "cslib",
+  "session_id": "sess_1782560707_b3ce16_367",
+  "delegation_path": ["orchestrator", "plan", "planner-agent"],
   "artifacts": [
-    "specs/367_unify_brouwerian_completeness_triplication/reports/01_unify-brouwerian-triplication.md",
-    "specs/367_unify_brouwerian_completeness_triplication/.orchestrator-handoff.json"
+    "specs/367_unify_brouwerian_completeness_triplication/plans/01_unify-brouwerian-triplication.md"
   ],
-  "partial_progress": {
-    "stage": "done",
-    "details": "Research complete: shared vs differing surface mapped, parametric ConjImpAxioms signature designed, tier recovery and Lindenbaum API documented."
-  },
-  "metadata": {
-    "session_id": "sess_1782560707_b3ce16_367",
-    "agent_type": "cslib-research-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+  "phase_count": 5,
+  "estimated_hours": 9,
+  "dependency_waves": [
+    {"wave": 1, "phases": [1, 2], "blocked_by": []},
+    {"wave": 2, "phases": [3], "blocked_by": [1]},
+    {"wave": 3, "phases": [4], "blocked_by": [2, 3]},
+    {"wave": 4, "phases": [5], "blocked_by": [4]}
+  ],
+  "memory_candidates": [],
+  "next_steps": "Run /implement 367 to execute the plan",
+  "timestamp": "2026-06-27T00:00:00Z"
 }

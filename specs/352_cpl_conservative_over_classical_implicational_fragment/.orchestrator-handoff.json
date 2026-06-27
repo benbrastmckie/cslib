@@ -1,21 +1,44 @@
 {
   "status": "partial",
-  "session_id": "sess_1782498610_8a4b4e",
-  "phases_completed": 6,
+  "summary": "ClassicalImpCompleteness module builds with all 10 phases complete and zero sorries; cpl_conservative_over_imp and classicalImp_completeness are present; style warnings cleared. Full CI (lake build, lake shake, lake test) fails on pre-existing broken modules from other tasks (316 Bimodal/Modal Tableau Soundness, 360 repair task) unrelated to task 352 — the task 352 module itself is clean.",
+  "phases_completed": 10,
   "phases_total": 10,
+  "blockers": [
+    {
+      "phase": "CI gate",
+      "description": "lake build (full), lake test, and lake lint fail due to pre-existing broken modules: Cslib.Logics.Bimodal.Theorems.Perpetuity.Bridge, Cslib.Logics.Bimodal.Metalogic.Separation.Duality, Cslib.Logics.Bimodal.Metalogic.Separation.Eliminations, Cslib.Logics.Bimodal.Metalogic.Separation.DedekindZ.QLemma, Cslib.Logics.Modal.Tableau.Soundness, Cslib.Logics.Propositional.Tableau.Classical.Completeness. These were broken at session start (shown in initial git status). Task 352 module (Cslib.Logics.Propositional.Metalogic.ClassicalImpCompleteness) builds cleanly with no warnings. Scoped CI for task 352 is fully green."
+    }
+  ],
   "sorry_inventory": [],
-  "blocked_phase": 7,
-  "blocked_reason": "truth lemma as stated (with abstract {goal}) is FALSE — counterexample given in plan",
-  "requires_user_review": true,
-  "last_green_build": "Cslib.Logics.Propositional.Metalogic.ClassicalImpCompleteness (134 lines, Phases 1-6)",
-  "next_action_hint": "Revise Phase 7 truth lemma statement. The `imp a b` TRUE-branch sub-case with v(a)=false and v(b)=false cannot be proved for arbitrary `goal`. FIX: Either (A) make the truth lemma a SINGLE-BRANCH statement `BoolEvaluate v φ = true → Deriv _ (litCtx v φ as) φ` (with `goal = φ` baked in) and use a GENERALIZED induction where the IH for sub-formula `a` is called with `goal := a.imp b`; or (B) split into two lemmas: one for the `imp` TRUE-branch sub-cases that uses IHa with `goal = a.imp b` explicitly. The context must stay `litCtx v (a.imp b) as` (noting that when `goal = a.imp b`, the context for IHa equals the outer context). See BLOCKER block in Phase 7 of the plan for precise details and the counterexample.",
   "artifacts": [
     "Cslib/Logics/Propositional/Metalogic/ClassicalImpCompleteness.lean",
-    "specs/352_cpl_conservative_over_classical_implicational_fragment/plans/02_classical-imp-conservativity-v2.md"
+    "specs/352_cpl_conservative_over_classical_implicational_fragment/plans/03_classical-imp-conservativity-v3.md"
   ],
-  "metadata": {
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
-  }
+  "verification": {
+    "scoped_build_passed": true,
+    "lake_build_module": "Cslib.Logics.Propositional.Metalogic.ClassicalImpCompleteness",
+    "full_build_passed": false,
+    "full_build_note": "Pre-existing failures in other modules unrelated to task 352",
+    "lake_lint_passed": false,
+    "lake_lint_note": "lake lint exits early due to pre-existing broken modules",
+    "lake_shake_passed": true,
+    "lake_shake_note": "No warnings for ClassicalImpCompleteness.lean after CI fixes",
+    "lake_test_passed": false,
+    "lake_test_note": "Same pre-existing failures as lake build",
+    "checkInitImports_passed": true,
+    "lint_style_passed": true,
+    "sorry_count": 0,
+    "axiom_count": 0,
+    "vacuous_count": 0,
+    "target_theorems_present": [
+      "classicalImp_completeness",
+      "cpl_conservative_over_imp",
+      "classicalImp_collapse"
+    ]
+  },
+  "commits": [
+    "20b6a78a task 352 phase 9: classicalImp_completeness + phase 10: cpl_conservative_over_imp",
+    "a28fd51a task 352: CI gate (lint/shake/docs)",
+    "9a4a2055 task 352: mark phases 9 and 10 completed in plan"
+  ]
 }

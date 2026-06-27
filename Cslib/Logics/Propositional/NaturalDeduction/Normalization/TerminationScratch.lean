@@ -1622,7 +1622,26 @@ private def Theory.Derivation.snOrEForm {G : Ctx Atom} {A B C : Proposition Atom
       have hd0 : d0.isStronglyNormal = true := by simpa [isStronglyNormal] using hD
       let r := snSubst DB hDB d0 hd0
       ⟨r.1, r.2.1⟩
-  | .orE _ _ _ _, _ => sorry  -- commuting conversion (needs context casts) — deferred
+  | .orE G' D' DA' DB', hD => by
+      -- commuting conversion: push the outer `orE _ _ DA DB` elimination into the SN `orE`'s
+      -- branches `DA'`/`DB'` (re-eliminating via `snOrEForm` to renormalize the new redex).
+      have hD'  : D'.isStronglyNormal  = true := by cases D' <;> simp_all [isStronglyNormal]
+      have hDA' : DA'.isStronglyNormal = true := by cases D' <;> simp_all [isStronglyNormal]
+      have hDB' : DB'.isStronglyNormal = true := by cases D' <;> simp_all [isStronglyNormal]
+      let xA := snOrEForm DA' hDA'
+        (DA.weakCtx (Finset.insert_subset_insert _ (Finset.subset_insert _ _)))
+        (by rw [isStronglyNormal_weakCtx]; exact hDA)
+        (DB.weakCtx (Finset.insert_subset_insert _ (Finset.subset_insert _ _)))
+        (by rw [isStronglyNormal_weakCtx]; exact hDB)
+      let xB := snOrEForm DB' hDB'
+        (DA.weakCtx (Finset.insert_subset_insert _ (Finset.subset_insert _ _)))
+        (by rw [isStronglyNormal_weakCtx]; exact hDA)
+        (DB.weakCtx (Finset.insert_subset_insert _ (Finset.subset_insert _ _)))
+        (by rw [isStronglyNormal_weakCtx]; exact hDB)
+      refine ⟨orE G' D' xA.1 xB.1, ?_⟩
+      have hX := xA.2
+      have hY := xB.2
+      cases D' <;> simp_all [isStronglyNormal]
   | .ax h, _ => ⟨orE G (ax h) DA DB, by simp_all [isStronglyNormal]⟩
   | .ass h, _ => ⟨orE G (ass h) DA DB, by simp_all [isStronglyNormal]⟩
   | .andE1 _ D', hD => ⟨orE G (andE1 _ D') DA DB, by

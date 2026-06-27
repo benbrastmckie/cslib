@@ -308,7 +308,7 @@ goal states and mark `[BLOCKED]` — do not sorry.
 
 ---
 
-### Phase 6: Literal-context definition `litCtx` + membership helper [NOT STARTED]
+### Phase 6: Literal-context definition `litCtx` + membership helper [COMPLETED]
 
 **Goal**: Define the List-based Kalmár literal context (see Representation Decision) and the one
 helper the truth lemma needs.

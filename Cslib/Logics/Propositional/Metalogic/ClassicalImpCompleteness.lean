@@ -96,4 +96,39 @@ theorem classicalImp_peirce_mp {Γ : List (PL.Proposition Atom)} {φ goal : PL.P
     Deriv ClassicalImpAxiom Γ φ :=
   mp_deriv ⟨.ax Γ _ (.peirce φ goal)⟩ h
 
+/-! ## Atom Collection -/
+
+/-- Collect the atoms appearing in a proposition as a list (with possible duplicates).
+Used in the Kalmár completeness argument to parameterize the literal context. -/
+def Proposition.atoms : PL.Proposition Atom → List Atom
+  | .atom p => [p]
+  | .imp a b => a.atoms ++ b.atoms
+  | _ => []
+
+/-! ## Literal Context -/
+
+/-- The Kalmár literal context for a Boolean assignment `v` and falsum-surrogate `goal`,
+keyed on a list of atoms `as`: atom `p` contributes `atom p` if `v p = true`, otherwise
+`atom p → goal`. Used in `classicalImp_kalmar` to encode the two Boolean branches for
+each atom simultaneously via the List-based deduction theorem. -/
+def litCtx (v : BoolValuation Atom) (goal : PL.Proposition Atom) :
+    List Atom → List (PL.Proposition Atom)
+  | [] => []
+  | p :: ps => (if v p then PL.Proposition.atom p else (PL.Proposition.atom p).imp goal)
+                :: litCtx v goal ps
+
+/-- Membership helper: the literal for atom `p` sits in `litCtx v goal as` whenever `p ∈ as`. -/
+theorem litCtx_mem {v : BoolValuation Atom} {goal : PL.Proposition Atom} {as : List Atom}
+    {p : Atom} (hp : p ∈ as) :
+    (if v p then PL.Proposition.atom p else (PL.Proposition.atom p).imp goal)
+      ∈ litCtx v goal as := by
+  induction as with
+  | nil => simp at hp
+  | cons q qs ih =>
+    rw [litCtx]
+    simp only [List.mem_cons]
+    rcases List.mem_cons.mp hp with rfl | hqs
+    · exact Or.inl rfl
+    · exact Or.inr (ih hqs)
+
 end Cslib.Logic.PL

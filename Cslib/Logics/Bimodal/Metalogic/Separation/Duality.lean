@@ -354,12 +354,12 @@ theorem properly_separable_imp_separable
 theorem neg_future_only {φ : Formula Atom}
     (h : isFutureOnly φ = true) :
     isFutureOnly (Formula.neg φ) = true := by
-  simp [isFutureOnly, h]
+  simp [Formula.neg, PropositionalConnectives.neg, isFutureOnly, h]
 
 theorem neg_past_only {φ : Formula Atom}
     (h : isPastOnly φ = true) :
     isPastOnly (Formula.neg φ) = true := by
-  simp [isPastOnly, h]
+  simp [Formula.neg, PropositionalConnectives.neg, isPastOnly, h]
 
 theorem and_future_only {φ ψ : Formula Atom}
     (h1 : isFutureOnly φ = true)

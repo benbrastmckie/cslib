@@ -11,8 +11,8 @@ next_project_number: 380
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,321,342,348,355,364,368,370,371,372,376,377 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,332,363,366,367,374,378 | 36,37,180,290,299,348,355,371,376,377 | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,321,342,355,364,367,368,370,371,372,376,377 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,332,363,366,374,378 | 36,37,180,290,299,355,371,376,377 | Bimodal Porting, Foundations, Modal Logic, ... |
 | 3 | 41,275,360,369,373,379 | 39,40,332,363,364,378 | Foundations, Propositional Logic, Algebraic Semantics |
 | 4 | 317 | 369 | Propositional Logic |
 | 5 | 375 | 317 | Propositional Logic |
@@ -47,7 +47,6 @@ next_project_number: 380
 290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
   └─ 332 [IMPLEMENTING] — Close the two remaining normalization-termination sorries for CSL
     └─ 373 [NOT STARTED] — Extend the Curry-Howard layer from a structural isomorphism to a 
-348 [PLANNED] — Restate Glivenko and conservativity theory-parametrically against
 368 [NOT STARTED] — Deduplicate the prime-exclusion machinery shared by the intuition
 370 [NOT STARTED] — Close the decidability asymmetry in the metalogic layer: classica
 371 [NOT STARTED] — Symmetrize the LK/LJ sequent-calculus metatheory and add the miss
@@ -74,10 +73,10 @@ next_project_number: 380
 
 ### Algebraic Semantics
 
+367 [NOT STARTED] — Collapse the three near-identical Brouwerian completeness develop
 377 [PLANNED] — Create the classical conjunction-implication fragment axiom syste
   └─ 378 [PLANNED] — Prove CPL is conservative over its classical conjunction-implicat
     └─ 379 [PLANNED] — Prove CPL is conservative over its classical conjunction-implicat
-367 [NOT STARTED] — Collapse the three near-identical Brouwerian completeness develop
 
 ### Uncategorized
 
@@ -401,7 +400,7 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 348. Glivenko conservativity theory parametric
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 343, Task 345

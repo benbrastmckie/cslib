@@ -1504,42 +1504,6 @@ private lemma cx_and_left {A B : Proposition Atom} : A.complexity < (A ∧ B).co
 private lemma cx_and_right {A B : Proposition Atom} : B.complexity < (A ∧ B).complexity := by
   simp only [Proposition.complexity]; omega
 
--- STUB to validate the eliminators structurally.
-private def Theory.Derivation.snSubstStub {P B : Proposition Atom} {G : Ctx Atom}
-    (body : T.Derivation (insert P G) B) (hbody : body.isStronglyNormal = true)
-    (arg : T.Derivation G P) (harg : arg.isStronglyNormal = true) :
-    {d : T.Derivation G B // d.isStronglyNormal = true} := sorry
-
-/-- L3 (stage-1 stub version): smart implication eliminator, structural on `f`. -/
-private def Theory.Derivation.snImpEFormS {G : Ctx Atom} {A B : Proposition Atom}
-    (f : T.Derivation G (A → B)) (hf : f.isStronglyNormal = true)
-    (a : T.Derivation G A) (ha : a.isStronglyNormal = true) :
-    {d : T.Derivation G B // d.isStronglyNormal = true} :=
-  match f, hf with
-  | .impI _ body, hf =>
-      have hbody : body.isStronglyNormal = true := by simpa [isStronglyNormal] using hf
-      snSubstStub body hbody a ha
-  | .orE G D DA DB, hf => by
-      have hD  : D.isStronglyNormal  = true := by cases D <;> simp_all [isStronglyNormal]
-      have hDA : DA.isStronglyNormal = true := by cases D <;> simp_all [isStronglyNormal]
-      have hDB : DB.isStronglyNormal = true := by cases D <;> simp_all [isStronglyNormal]
-      let xA := snImpEFormS DA hDA (a.weakCtx (Finset.subset_insert _ _))
-        (by rw [isStronglyNormal_weakCtx]; exact ha)
-      let xB := snImpEFormS DB hDB (a.weakCtx (Finset.subset_insert _ _))
-        (by rw [isStronglyNormal_weakCtx]; exact ha)
-      refine ⟨orE G D xA.1 xB.1, ?_⟩
-      have hX := xA.2
-      have hY := xB.2
-      cases D <;> simp_all [isStronglyNormal]
-  | .ax h,   _  => ⟨Derivation.impE (ax h) a,   by simp [isStronglyNormal]; exact ha⟩
-  | .ass h,  _  => ⟨Derivation.impE (ass h) a,  by simp [isStronglyNormal]; exact ha⟩
-  | .andE1 _ D', hf => ⟨Derivation.impE (andE1 _ D') a, by
-      simp only [isStronglyNormal, Bool.and_eq_true]; exact ⟨hf, ha⟩⟩
-  | .andE2 _ D', hf => ⟨Derivation.impE (andE2 _ D') a, by
-      simp only [isStronglyNormal, Bool.and_eq_true]; exact ⟨hf, ha⟩⟩
-  | .impE D' E', hf => ⟨Derivation.impE (Derivation.impE D' E') a, by
-      simp only [isStronglyNormal, Bool.and_eq_true]; exact ⟨hf, ha⟩⟩
-
 /-! ### Mutual block: VALIDATED termination measure for L3/L4/L5
 
 RESULT (machine-checked below): the mutual well-founded recursion of `snImpEForm` (L3),
@@ -1558,30 +1522,30 @@ where `phase = 0` for the two eliminators and `phase = 1` for `snSubst`, and the
     `left; simp [Proposition.complexity]; omega`.
   * snSubst → snSubst (structural on `body`): same complexity, same phase, smaller `sizeOf` —
     closed by `decreasing_tactic`.
-  * snSubst → eliminator (re-eliminate a substituted child at an `impE`/`orE` node): this is the
-    ONLY edge that is not mechanically discharged. Its obligation is the **HEAD-BOUND**:
-    when the substituted child `(snSubst D' arg).1` is intro-or-orE-headed, the type of `D'` has
-    complexity `≤ P.complexity` (= P at the bare-variable site, handled by `phase 0 < 1`;
-    `< P` along a non-empty elimination spine over the variable). It is `sorry`-ed in
-    `snSubst.decreasing_by` and is the sole remaining termination gap.
+  * snSubst → eliminator (re-eliminate a substituted child at an `impE` node): the **HEAD-BOUND**.
+    `snSubst`'s `impE` case head-matches `(snSubst D' arg).1`: in the intro-or-orE-headed
+    sub-case the carried invariant yields `(type D').complexity ≤ P.complexity`, so the edge
+    decreases (`< P` ⇒ first component, `= P` at the bare-variable site ⇒ phase `0 < 1`); in the
+    neutral sub-case the result is reassembled as `impE` directly, with no eliminator call.
+    This edge is now discharged **sorry-free** via `lex3_of_le_of_lt` and the head invariant.
 
-REMAINING WORK to fully close L5 (none of which touches the validated measure above):
-  1. HEAD-BOUND lemma stack. `snSubst`'s `impE`/`orE` cases must MATCH on the substituted
-     child's head and call the eliminator only in the intro-or-orE-headed sub-case, supplying
-     `(type D').complexity ≤ P.complexity`. This needs head-behaviour lemmas for `snAndE1Form`,
-     `snAndE2Form` (external, structural) and a carried subtype invariant for `snImpEForm`,
-     `snOrEForm`, `snSubst` of the form
-       `(body neutral) → ((d.isIntroRoot ∨ d.isOrERoot) → B.complexity ≤ P.complexity)`.
-     (The minimal `snSubst` below ALWAYS calls `snImpEForm` at `impE` nodes, which is why the
-     head-bound goal is currently `sorry`; the real definition must branch on the head.)
-  2. `isStronglyNormal` reassembly proofs (currently `sorry`): same `cases D <;> simp_all
-     [isStronglyNormal]` pattern already exercised by L1/L2/L3 leaf cases here.
-  3. Context casts for `snSubst`'s `impI` and `orE` cases, and `snOrEForm`'s commuting `orE`
-     case (`insert A (insert P G) = insert P (insert A G)` reindexing + `arg.weakCtx`); the
-     `sizeOf`-preservation of these casts must be threaded into `decreasing_by`.
+CLOSED in this dispatch (head-bound termination, no `sorry`):
+  - Head-behaviour invariant carried in `snSubst`'s return subtype:
+      `body.isIntroRoot = false → ((d.isIntroRoot ∨ d.isOrERoot) → B.complexity ≤ P.complexity)`,
+    proven for the `ax/ass/andI/andE1/andE2/impE/orI1/orI2` cases (the head-bound's entire
+    dependency cone — neutral implications `ax/ass/andE1/andE2/impE` — is sorry-free).
+  - Standalone head-behaviour lemmas `snAndE1Form_head`/`snAndE2Form_head`, complexity
+    subformula lemmas `cx_and_left/right`, `sizeOf_impE_left/right`, and the lex lemma
+    `lex3_of_le_of_lt`.
 
-The `snSubstStub`/`snImpEFormS` defs above are the stage-1 scaffolding (eliminator validated
-against a stub); superseded by this block. -/
+REMAINING WORK to fully close L5 (none of which touches the validated measure or the head-bound):
+  1. `snSubst`'s `impI`/`orE` cases (`_ => sorry`) and `snOrEForm`'s commuting `orE` case:
+     context casts (`insert A (insert P G) = insert P (insert A G)` reindexing + `arg.weakCtx`);
+     the `sizeOf`-preservation of these casts must be threaded into `decreasing_by`.
+
+The `snSubst` head-bound termination obligation is discharged sorry-free via the carried
+head-behaviour invariant (see `snSubst` below); the stage-1 scaffolding stubs have been
+removed. -/
 
 /-- `sizeOf` of an `impE`'s function premise is smaller than the whole derivation. Proven
 outside the mutual block so the termination proof can close the `impE` structural edge by a

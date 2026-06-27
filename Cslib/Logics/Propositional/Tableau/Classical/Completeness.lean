@@ -545,6 +545,104 @@ private lemma classicalStepBranch_none_saturated
     · exact absurd hbody (by simp)
     · rfl
 
+/-- If the Hintikka invariant holds for branch `b` against expanded set `e`, then after one step
+`classicalStepBranch b e = some (newBs, newExp)`, the invariant holds for every new branch
+`b' ∈ newBs` against the new expanded set `newExp`. -/
+private lemma classicalStepBranch_hintikka_inv
+    (b : Branch (Proposition Atom) Unit)
+    (e : List (SignedFormula (Proposition Atom) Unit))
+    (newBs : List (Branch (Proposition Atom) Unit))
+    (newExp : List (SignedFormula (Proposition Atom) Unit))
+    (hstep : classicalStepBranch b e = some (newBs, newExp))
+    (hInv_b : ∀ sf ∈ e,
+      match classicalApplyOne sf with
+      | .linear out => ∀ sf' ∈ out, sf' ∈ b
+      | .branching brs => ∃ br ∈ brs, ∀ sf' ∈ br, sf' ∈ b
+      | .persistent out => ∀ sf' ∈ out, sf' ∈ b
+      | .notApplicable => True) :
+    ∀ b' ∈ newBs, ∀ sf ∈ newExp,
+      match classicalApplyOne sf with
+      | .linear out => ∀ sf' ∈ out, sf' ∈ b'
+      | .branching brs => ∃ br ∈ brs, ∀ sf' ∈ br, sf' ∈ b'
+      | .persistent out => ∀ sf' ∈ out, sf' ∈ b'
+      | .notApplicable => True := by
+  simp only [classicalStepBranch] at hstep
+  obtain ⟨sf_exp, _, hfound⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hfound with hexp
+  · rcases hca : classicalApplyOne sf_exp with newForms | brs | newForms | _
+    all_goals simp only [hca] at hfound
+    · -- linear: newBs = [extendMany b newForms], newExp = e ++ [sf_exp]
+      obtain ⟨rfl, rfl⟩ := Option.some.inj hfound
+      intro b' hb' sf hsfin
+      simp only [List.mem_singleton] at hb'; subst hb'
+      rw [List.mem_append, List.mem_singleton] at hsfin
+      rcases hsfin with hsfin | rfl
+      · -- sf ∈ e: apply hInv_b and lift membership from b to b' = extendMany b newForms
+        have hInv_sf := hInv_b sf hsfin
+        rcases hca_sf : classicalApplyOne sf with out' | brs' | out' | _
+        all_goals simp only [hca_sf] at hInv_sf ⊢
+        · intro sf' hsf'
+          simp only [Branch.extendMany, List.mem_append]
+          exact Or.inr (hInv_sf sf' hsf')
+        · obtain ⟨br', hbr', hbr''⟩ := hInv_sf
+          exact ⟨br', hbr', fun sf' hsf' => by
+            simp only [Branch.extendMany, List.mem_append]; exact Or.inr (hbr'' sf' hsf')⟩
+        · intro sf' hsf'
+          simp only [Branch.extendMany, List.mem_append]
+          exact Or.inr (hInv_sf sf' hsf')
+      · -- sf = sf_exp: classicalApplyOne sf_exp = linear newForms, output ⊆ extendMany b newForms
+        simp only [hca]
+        intro sf' hsf'
+        simp only [Branch.extendMany, List.mem_append]
+        exact Or.inl hsf'
+    · -- branching: newBs = brs.map (extendMany b ·), newExp = e ++ [sf_exp]
+      obtain ⟨rfl, rfl⟩ := Option.some.inj hfound
+      intro b' hb' sf hsfin
+      rw [List.mem_map] at hb'
+      obtain ⟨br_exp, hbr_exp, rfl⟩ := hb'
+      rw [List.mem_append, List.mem_singleton] at hsfin
+      rcases hsfin with hsfin | rfl
+      · -- sf ∈ e: lift from b to b' = extendMany b br_exp
+        have hInv_sf := hInv_b sf hsfin
+        rcases hca_sf : classicalApplyOne sf with out' | brs' | out' | _
+        all_goals simp only [hca_sf] at hInv_sf ⊢
+        · intro sf' hsf'
+          simp only [Branch.extendMany, List.mem_append]
+          exact Or.inr (hInv_sf sf' hsf')
+        · obtain ⟨br', hbr', hbr''⟩ := hInv_sf
+          exact ⟨br', hbr', fun sf' hsf' => by
+            simp only [Branch.extendMany, List.mem_append]; exact Or.inr (hbr'' sf' hsf')⟩
+        · intro sf' hsf'
+          simp only [Branch.extendMany, List.mem_append]
+          exact Or.inr (hInv_sf sf' hsf')
+      · -- sf = sf_exp: classicalApplyOne sf_exp = branching brs, witness br_exp for b'
+        simp only [hca]
+        exact ⟨br_exp, hbr_exp, fun sf' hsf' => by
+          simp only [Branch.extendMany, List.mem_append]; exact Or.inl hsf'⟩
+    · -- persistent: same structure as linear
+      obtain ⟨rfl, rfl⟩ := Option.some.inj hfound
+      intro b' hb' sf hsfin
+      simp only [List.mem_singleton] at hb'; subst hb'
+      rw [List.mem_append, List.mem_singleton] at hsfin
+      rcases hsfin with hsfin | rfl
+      · have hInv_sf := hInv_b sf hsfin
+        rcases hca_sf : classicalApplyOne sf with out' | brs' | out' | _
+        all_goals simp only [hca_sf] at hInv_sf ⊢
+        · intro sf' hsf'
+          simp only [Branch.extendMany, List.mem_append]
+          exact Or.inr (hInv_sf sf' hsf')
+        · obtain ⟨br', hbr', hbr''⟩ := hInv_sf
+          exact ⟨br', hbr', fun sf' hsf' => by
+            simp only [Branch.extendMany, List.mem_append]; exact Or.inr (hbr'' sf' hsf')⟩
+        · intro sf' hsf'
+          simp only [Branch.extendMany, List.mem_append]
+          exact Or.inr (hInv_sf sf' hsf')
+      · simp only [hca]
+        intro sf' hsf'
+        simp only [Branch.extendMany, List.mem_append]
+        exact Or.inl hsf'
+    · simp at hfound
+
 /-- The open branch returned by `classicalExpandBranches` is a classical Hintikka set,
 provided the total measure of unexpanded formulas is at most the fuel.
 
@@ -701,12 +799,72 @@ private lemma classicalExpandBranches_hintikka (fuel : Nat) :
               -- (b) raising the fuel bound in Expansion.lean to match the exponential
               --     worst-case growth of classicalTotalMeasure.
               sorry
-            · -- Hintikka invariant for the new branch list
-              -- For each (b', newExp) pair (b' ∈ newBs) and sf ∈ e ++ [sf_expanded]:
-              --  * sf ∈ e: old invariant for bh applies since bh ⊆ b'
-              --  * sf = sf_expanded: classicalStepBranch ensures outputs are on b'
-              -- For branches in done and bt: inherited unchanged.
-              sorry
+            · -- Hintikka invariant for the new branch list.
+              -- Split into three index regions: done, newBs, bt.
+              intro i b' e' hi' he' sf hsfin
+              rcases Nat.lt_or_ge i done.length with hlt1 | hge1
+              · -- Region: i < done.length (done — unchanged)
+                have hb' : done[i]? = some b' := by
+                  rw [List.append_assoc, List.getElem?_append_left hlt1] at hi'; exact hi'
+                have he'_d : doneExp[i]? = some e' := by
+                  rw [List.append_assoc, List.getElem?_append_left (by omega)] at he'; exact he'
+                apply hInv_all i b' e'
+                · rw [List.getElem?_append_left hlt1]; exact hb'
+                · rw [hpendingExp, List.getElem?_append_left (by omega)]; exact he'_d
+                · exact hsfin
+              · rcases Nat.lt_or_ge i (done.length + newBs.length) with hlt2 | hge2
+                · -- Region: done.length ≤ i < done.length + newBs.length (newBs)
+                  have hj : i - done.length < newBs.length := by omega
+                  have hb'_newBs : newBs[i - done.length]? = some b' := by
+                    rw [List.append_assoc, List.getElem?_append_right hge1] at hi'
+                    rwa [List.getElem?_append_left hj] at hi'
+                  have hb'_mem : b' ∈ newBs := List.mem_of_getElem? hb'_newBs
+                  have he'_eq : e' = newExp := by
+                    rw [List.append_assoc,
+                        List.getElem?_append_right (by omega : doneExp.length ≤ i)] at he'
+                    rw [List.getElem?_append_left
+                          (by simp only [List.length_map]; omega)] at he'
+                    rw [List.getElem?_map,
+                        show newBs[i - doneExp.length]? = some b' from by
+                          rw [show i - doneExp.length = i - done.length from by omega]
+                          exact hb'_newBs] at he'
+                    simp only [Option.map_some, Option.some.injEq] at he'
+                    exact he'.symm
+                  subst he'_eq
+                  -- Get Hintikka invariant for (bh, e) from hInv_all
+                  have hInv_bh := hInv_all done.length bh e
+                    (by rw [List.getElem?_append_right (le_refl _)]; simp [Nat.sub_self])
+                    (by rw [hpendingExp, List.getElem?_append_right (by omega)];
+                        simp [hdlength, Nat.sub_self])
+                  exact classicalStepBranch_hintikka_inv bh e newBs e' hstep hInv_bh
+                    b' hb'_mem sf hsfin
+                · -- Region: done.length + newBs.length ≤ i (bt — shifted index)
+                  let j := i - done.length - newBs.length
+                  have hb'_bt : bt[j]? = some b' := by
+                    rw [List.append_assoc, List.getElem?_append_right hge1] at hi'
+                    rw [List.getElem?_append_right
+                          (by omega : newBs.length ≤ i - done.length)] at hi'
+                    exact hi'
+                  have he'_es : es[j]? = some e' := by
+                    rw [List.append_assoc,
+                        List.getElem?_append_right (by omega : doneExp.length ≤ i)] at he'
+                    rw [List.getElem?_append_right
+                          (by simp only [List.length_map]; omega :
+                            (List.map (fun _ => newExp) newBs).length ≤
+                              i - doneExp.length)] at he'
+                    rwa [show i - doneExp.length -
+                              (List.map (fun _ => newExp) newBs).length = j from by
+                          simp only [List.length_map]; omega] at he'
+                  apply hInv_all (done.length + 1 + j) b' e'
+                  · rw [List.getElem?_append_right
+                          (by omega : done.length ≤ done.length + 1 + j)]
+                    rw [show done.length + 1 + j - done.length = j + 1 from by omega]
+                    rw [List.getElem?_cons_succ]; exact hb'_bt
+                  · rw [hpendingExp, List.getElem?_append_right
+                          (by omega : doneExp.length ≤ done.length + 1 + j)]
+                    rw [show done.length + 1 + j - doneExp.length = j + 1 from by omega]
+                    rw [List.getElem?_cons_succ]; exact he'_es
+                  · exact hsfin
             · exact hinner
 
 /-- Any formula on a branch is still present on every branch produced by `classicalStepBranch`.

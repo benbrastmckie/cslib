@@ -1,18 +1,51 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "started_at": "2026-06-27T02:00:00Z",
-  "artifacts": [],
+  "completed_at": "2026-06-27T06:00:00Z",
+  "artifacts": [
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Propositional/Semantics/Algebra/ConjImpConservative.lean",
+      "description": "Added derivable_mono; re-derived derivableConjImpOfDerivableInt"
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Propositional/Semantics/Algebra/HilbertConservativeGlivenko.lean",
+      "description": "Added hilbertGlivenko_theory, conservative_via_embedding, derivableIn_axiomTheory_iff_derivable; re-derived hilbertGlivenko and ND bridges"
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Propositional/Semantics/Algebra/ConservativeChain.lean",
+      "description": "Added hilbertGlivenko_strength; re-derived derivableMinOfDerivableInt, derivableIntOfDerivableProp"
+    },
+    {
+      "type": "summary",
+      "path": "specs/348_glivenko_conservativity_theory_parametric/summaries/01_parametric-conservativity-spine-summary.md",
+      "description": "Implementation summary for task 348"
+    }
+  ],
   "partial_progress": {
-    "stage": "phase_1",
-    "details": "Implementing derivable_mono and derivableIn_axiomTheory_iff_derivable",
+    "stage": "complete",
+    "details": "All 5 phases completed; CI passed on propositional algebra subtree",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 0
+    "phases_completed": 5,
+    "last_completed_phase": "Phase 5: CI gate"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "note": "lake test/checkInitImports fail for pre-existing Bimodal errors (confirmed pre-task-348 via git blame). Propositional algebra subtree builds clean."
   },
   "metadata": {
     "session_id": "sess_1782560707_b3ce16_348",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

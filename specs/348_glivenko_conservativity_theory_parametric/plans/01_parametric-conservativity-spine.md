@@ -1,7 +1,7 @@
 # Implementation Plan: Theory-Parametric Glivenko & Conservativity Spine
 
 - **Task**: 348 - glivenko_conservativity_theory_parametric
-- **Status**: [IN PROGRESS]
+- **Status**: [COMPLETED]
 - **Effort**: 9 hours
 - **Dependencies**: Task 345 (`IsMinimal`/`MinimalAxioms` inclusion bridge — planned, must land first); Task 343 (done); Task 341 (parametric algebraic completeness — done, fixed backend)
 - **Research Inputs**: specs/348_glivenko_conservativity_theory_parametric/reports/01_parametric-conservativity-spine.md
@@ -258,7 +258,7 @@ check**: existing theorem names and signatures must still hold.
 
 ---
 
-### Phase 5: Optional `AlgEvaluate_heytingHom` + full CI gate [IN PROGRESS]
+### Phase 5: Optional `AlgEvaluate_heytingHom` + full CI gate [COMPLETED]
 
 **Goal**: Add the optional hom-intertwining lemma only if it lands clean and demonstrably shortens
 the Glivenko/`WithBot` cases; then run the complete CSLib CI pipeline as the final gate.

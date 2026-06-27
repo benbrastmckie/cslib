@@ -1,50 +1,26 @@
 {
   "task_number": 376,
-  "status": "partial",
-  "dispatch_status": "partial",
-  "phases_completed": 3,
+  "status": "implemented",
+  "dispatch_status": "implemented",
+  "phases_completed": 4,
   "phases_total": 5,
-  "dispatch_summary": "Phase 3 complete: swapped classicalTotalMeasure → classicalExpMeasure in classicalExpandBranches_hintikka statement; fuel=0 case proved by contradiction (branches=[] from measure=0, since 3^C≥1); recursive-call sorry discharged via classicalExpMeasure_step_lt + omega. Build green, sorry_count=1 (caller obligation only). Commit d5caf75e.",
+  "summary": "Phase 4 complete: raised fuel bound in Expansion.lean from 4*(φ.complexity+1)+1 to 3^φ.complexity; closed caller sorry in Completeness.lean (classicalTableau_hintikka) via simp [classicalExpMeasure, classicalBranchComplexity] which reduces both sides to 3^φ.complexity ≤ 3^φ.complexity; also updated classicalOpenBranch_countermodel's h' to use 3^φ.complexity. Build green, 0 sorry. Commit 3a98ae6b.",
   "build_state": {
     "scoped_build": "green",
     "error_count": 0,
-    "sorry_count": 1,
-    "sorry_location": "Completeness.lean L1324 — classicalTableau_hintikka caller: classicalExpMeasure [[⟨.neg,φ,()⟩]] [[]] ≤ fuel"
+    "sorry_count": 0
   },
-  "lemmas_committed": [
-    "classicalBranchComplexity_drop",
-    "classicalApplyOne_output_complexity",
-    "pow3_two_add_one_le",
-    "pow3_add_one_le",
-    "classicalExpMeasure_split",
-    "classicalBranchComplexity_le_mapsum",
-    "classicalBranchComplexity_extendMany",
-    "classicalBranchComplexity_child_le",
-    "classicalExpMeasure_append",
-    "classicalExpMeasure_const_exp",
-    "classicalExpMeasure_step_lt"
-  ],
+  "sorry_inventory": {
+    "count": 0,
+    "items": []
+  },
+  "resolves_blocker_for": 363,
+  "what_363_needs": "classicalExpandBranches_hintikka is now fully proven (0 sorry); the file Completeness.lean builds green with no sorries — task 363's blocker is resolved",
+  "continuation_context": "Phase 5: full CI (lake build, checkInitImports, lint-style, shake, test) and remove now-unused classicalTotalMeasure if dead",
   "lean_notes": [
-    "List.zip_append signature: (_h : l₁.length = l₂.length) — takes length equality as unnamed arg",
-    "List.zip_cons_cons: (a :: as).zip (b :: bs) = (a, b) :: as.zip bs",
-    "List.sum_append and List.map_append and List.map_cons all available",
-    "List.join does NOT exist — use List.flatten",
-    "norm_num is NOT available in Completeness.lean (only Cslib.Init imported); use omega for 0 < 3 and 1 ≤ 3 goals",
-    "Nat.pow_le_pow_right signature: first arg is base positivity (0 < base), second is exponent inequality",
-    "Branch.extendMany b out = out ++ b (definition in Branch.lean:62); simp only [Branch.extendMany] unfolds to out ++ b",
-    "List.map_prod_left_eq_zip: List.map (fun x => (x, f x)) l = l.zip (List.map f l) — use ← to rewrite zip-of-map to map-of-pairs; then List.map_map + Function.comp_def close the goal",
-    "classicalExpMeasure_step_lt hdlen arg: lemma signature is (hdlen : done.length = doneExp.length); in proof context hdlength : doneExp.length = done.length, so pass hdlength.symm",
-    "Nat.one_le_pow (n : Nat) (k : Nat) : 0 < k → 1 ≤ k^n — useful for 1 ≤ 3^C proofs",
-    "classicalExpMeasure branches [] = ((branches.zip []).map ...).sum = 0 since zip with empty = empty"
+    "classicalExpMeasure [[⟨.neg,φ,()⟩]] [[]] = 3^φ.complexity by simp [classicalExpMeasure, classicalBranchComplexity]",
+    "Two places in Completeness.lean referenced the old fuel literal: L1323 (hfuel_init type) and L1357 (h' type in classicalOpenBranch_countermodel) — both updated",
+    "norm_num NOT available in Completeness.lean; simp suffices here"
   ],
-  "sorry_inventory": [
-    {
-      "file": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean",
-      "line": 1324,
-      "description": "classicalTableau_hintikka caller: classicalExpMeasure [[⟨.neg,φ,()⟩]] [[]] ≤ 4*(φ.complexity+1)+1. Needs fuel bound raise in Expansion.lean OR direct computation: classicalExpMeasure [[⟨.neg,φ,()⟩]] [[]] = 3^(classicalBranchComplexity [⟨.neg,φ,()⟩] []) = 3^(φ.complexity). The current fuel 4*(φ.complexity+1)+1 may be < 3^(φ.complexity) for large φ, requiring the fuel to be raised to 3^(φ.complexity) or higher."
-    }
-  ],
-  "blockers": [],
-  "continuation_context": "Phase 4: in Expansion.lean raise classicalTableau fuel bound from 4*(φ.complexity+1)+1 to 3^(φ.complexity+1) (or appropriate exponential bound that dominates 3^(classicalBranchComplexity [⟨.neg,φ,()⟩] [])); then close the caller sorry in Completeness.lean L1324 by proving classicalExpMeasure [[⟨.neg,φ,()⟩]] [[]] = 3^(φ.complexity) ≤ new_fuel. Need to check classicalTableau_sound in Soundness.lean is fuel-generic (does not mention the concrete fuel value). Phase 5: CI pipeline.",
-  "commit_hash": "d5caf75e"
+  "commit_hash": "3a98ae6b"
 }

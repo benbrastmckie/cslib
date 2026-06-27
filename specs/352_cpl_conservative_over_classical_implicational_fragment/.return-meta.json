@@ -1,30 +1,7 @@
 {
   "status": "partial",
-  "started_at": "2026-06-26T00:00:00Z",
-  "artifacts": [
-    "Cslib/Logics/Propositional/Metalogic/ClassicalImpCompleteness.lean"
-  ],
-  "partial_progress": {
-    "stage": "phases 3-5 complete",
-    "details": "Phases 3, 4, 5 committed green. Phases 6-10 remain.",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 5,
-    "last_completed_phase": "Phase 5: Peirce classical case lemma"
-  },
-  "verification": {
-    "verification_passed": false,
-    "mode": "partial_completion",
-    "note": "Phases 3-5 individually verified via scoped lake build. Full CI deferred to Phase 10.",
-    "sorry_count": 0,
-    "axiom_count_delta": 0,
-    "build_passed": true
-  },
   "metadata": {
-    "session_id": "sess_1782498610_8a4b4e",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "handoff_path": "specs/352_cpl_conservative_over_classical_implicational_fragment/.orchestrator-handoff.json"
+    "cycles_used": 4,
+    "final_state": "blocked"
   }
 }

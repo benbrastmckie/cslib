@@ -1569,6 +1569,19 @@ private lemma lex3_of_le_of_lt {a a' b b' c c' : ℕ} (ha : a ≤ a') (hb : b < 
   · exact Prod.Lex.left _ _ h
   · subst h; exact Prod.Lex.right _ (Prod.Lex.left _ _ hb)
 
+/-- Casting a derivation along a context equality preserves `isStronglyNormal` (the predicate
+depends only on the derivation tree, not on the context index). Used to reindex the binder
+contexts of `impI`/`orE` subderivations (`insert A (insert P G) = insert P (insert A G)`) so the
+substituted hypothesis `P` sits at the front for the `snSubst` recursive call. -/
+private lemma isStronglyNormal_cast {Γ Γ₂ : Ctx Atom} {A : Proposition Atom} (h : Γ = Γ₂)
+    (D : T.Derivation Γ A) : (h ▸ D).isStronglyNormal = D.isStronglyNormal := by subst h; rfl
+
+/-- Casting a derivation along a context equality preserves `sizeOf` (the cast is a no-op on the
+tree). Lets the `snSubst` termination proof close the `impI`/`orE` binder edges by rewriting the
+cast away before the structural `sizeOf` comparison. -/
+private lemma sizeOf_cast {Γ Γ₂ : Ctx Atom} {A : Proposition Atom} (h : Γ = Γ₂)
+    (D : T.Derivation Γ A) : sizeOf (h ▸ D) = sizeOf D := by subst h; rfl
+
 -- The mutual well-founded recursion `snImpEForm`/`snOrEForm`/`snSubst` with the carried
 -- head-behaviour invariant produces a large equation-compiler goal; raise the heartbeat
 -- limit so the (sorry-free) termination proof elaborates within budget.
@@ -1749,14 +1762,30 @@ private def Theory.Derivation.snSubst {P B : Proposition Atom} {G : Ctx Atom}
           refine ⟨?_, ?_⟩
           · cases hx : d'.1 <;> simp_all [isStronglyNormal, isIntroRoot, isOrERoot]
           · intro _ hor; simp [isIntroRoot, isOrERoot] at hor⟩
-  | _, _ => sorry
+  | .impI (A := A0) (B := B0) _ bd, hbd =>
+      -- `body = impI bd : insert P G ⊢ (A0 → B0)`; substitute `arg` for `P` under the binder by
+      -- reindexing `bd`'s context `insert A0 (insert P G) = insert P (insert A0 G)` (P to front),
+      -- weakening `arg` into `insert A0 G`, and recursing; reassemble with `impI`.
+      have hbd0 : bd.isStronglyNormal = true := by simpa only [isStronglyNormal] using hbd
+      let bd' : T.Derivation (insert P (insert A0 G)) B0 := Finset.insert_comm A0 P G ▸ bd
+      have hbd' : bd'.isStronglyNormal = true := by
+        show (Finset.insert_comm A0 P G ▸ bd).isStronglyNormal = true
+        rw [isStronglyNormal_cast]; exact hbd0
+      let s := snSubst bd' hbd' (arg.weakCtx (Finset.subset_insert _ _))
+        (by rw [isStronglyNormal_weakCtx]; exact harg)
+      ⟨impI _ s.1, by
+        refine ⟨?_, ?_⟩
+        · simpa only [isStronglyNormal] using s.2.1
+        · intro hni _; simp [isIntroRoot] at hni⟩
+  | _, _ => sorry  -- orE: deferred (needs invariant refinement + branch context casts)
   termination_by (P.complexity, 1, sizeOf body)
   decreasing_by
     all_goals first
       | (simp_wf; right; right; first
           | omega
           | exact sizeOf_impE_left _ _
-          | exact sizeOf_impE_right _ _)
+          | exact sizeOf_impE_right _ _
+          | (rw [sizeOf_cast]; omega))
       | (simp_wf; exact lex3_of_le_of_lt hle (by omega))
 
 end

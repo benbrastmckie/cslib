@@ -504,6 +504,66 @@ private lemma classicalBranchComplexity_mono_expanded
   simp only [List.any_append, Bool.not_or, Bool.and_eq_true] at hx
   exact hx.1
 
+/-- Expanding `e` by `sf` (which is in `b` and not already in `e`) strictly decreases
+`classicalBranchComplexity` by at least `sf.formula.complexity`. -/
+private lemma classicalBranchComplexity_drop
+    (b : Branch (Proposition Atom) Unit)
+    (e : List (SignedFormula (Proposition Atom) Unit))
+    (sf : SignedFormula (Proposition Atom) Unit)
+    (hmem : sf ∈ b) (hne : e.any (· == sf) = false) :
+    classicalBranchComplexity b (e ++ [sf]) + sf.formula.complexity
+      ≤ classicalBranchComplexity b e := by
+  simp only [classicalBranchComplexity]
+  induction b with
+  | nil => simp at hmem
+  | cons x xs ih =>
+    rcases List.mem_cons.mp hmem with rfl | hmem'
+    · -- head = sf: included in e-filter, excluded from (e++[sf])-filter
+      have hfe : (sf :: xs).filter (fun z => !(e.any (· == z))) =
+          sf :: xs.filter (fun z => !(e.any (· == z))) := by
+        simp [List.filter_cons, hne]
+      have hfesf : (sf :: xs).filter (fun z => !((e ++ [sf]).any (· == z))) =
+          xs.filter (fun z => !((e ++ [sf]).any (· == z))) := by
+        simp [List.filter_cons, List.any_append, List.any_cons, hne]
+      simp only [hfe, hfesf, List.map_cons, List.sum_cons]
+      have hmono := classicalBranchComplexity_mono_expanded xs e sf
+      simp only [classicalBranchComplexity] at hmono
+      omega
+    · -- sf in tail
+      cases hex : e.any (· == x)
+      · -- x not in e: passes e-filter
+        cases hsfx : sf == x
+        · -- sf ≠ x: x passes both filters
+          have hfe_x : (x :: xs).filter (fun z => !(e.any (· == z))) =
+              x :: xs.filter (fun z => !(e.any (· == z))) := by simp [List.filter_cons, hex]
+          have hfesf_x : (x :: xs).filter (fun z => !((e ++ [sf]).any (· == z))) =
+              x :: xs.filter (fun z => !((e ++ [sf]).any (· == z))) := by
+            simp [List.filter_cons, List.any_append, List.any_cons, hex, hsfx]
+          simp only [hfe_x, hfesf_x, List.map_cons, List.sum_cons]
+          have := ih hmem'
+          omega
+        · -- sf = x: x in e-filter, not in (e++[sf])-filter
+          have hfe_x : (x :: xs).filter (fun z => !(e.any (· == z))) =
+              x :: xs.filter (fun z => !(e.any (· == z))) := by simp [List.filter_cons, hex]
+          have hfesf_x : (x :: xs).filter (fun z => !((e ++ [sf]).any (· == z))) =
+              xs.filter (fun z => !((e ++ [sf]).any (· == z))) := by
+            simp [List.filter_cons, List.any_append, List.any_cons, hex, hsfx]
+          simp only [hfe_x, hfesf_x, List.map_cons, List.sum_cons]
+          have hfml : sf.formula.complexity = x.formula.complexity := by
+            have h : sf = x := LawfulBEq.eq_of_beq hsfx
+            simp [h]
+          have hmono := classicalBranchComplexity_mono_expanded xs e sf
+          simp only [classicalBranchComplexity] at hmono
+          omega
+      · -- x in e: filtered out in both
+        have hfe_x : (x :: xs).filter (fun z => !(e.any (· == z))) =
+            xs.filter (fun z => !(e.any (· == z))) := by simp [List.filter_cons, hex]
+        have hfesf_x : (x :: xs).filter (fun z => !((e ++ [sf]).any (· == z))) =
+            xs.filter (fun z => !((e ++ [sf]).any (· == z))) := by
+          simp [List.filter_cons, List.any_append, hex]
+        simp only [hfe_x, hfesf_x]
+        exact ih hmem'
+
 /-- Beta-robust termination measure: base-3 exponential of per-branch complexity, summed.
 Unlike the additive count `classicalTotalMeasure`, this measure strictly decreases at
 every expansion step (both alpha rules producing one child and beta rules producing two). -/

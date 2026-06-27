@@ -1,5 +1,5 @@
 ---
-next_project_number: 377
+next_project_number: 380
 ---
 
 # TODO
@@ -11,9 +11,9 @@ next_project_number: 377
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,321,342,345,355,364,368,370,371,376 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,332,348,363,366,372,374 | 36,37,180,290,299,345,355,371,376 | Bimodal Porting, Foundations, Modal Logic, ... |
-| 3 | 41,275,360,367,369,373 | 39,40,332,348,363,364 | Foundations, Propositional Logic, Algebraic Semantics |
+| 1 | 36,37,180,226,241,278,290,299,301,321,342,345,355,364,368,370,371,376,377 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,332,348,363,366,372,374,378 | 36,37,180,290,299,345,355,371,376,377 | Bimodal Porting, Foundations, Modal Logic, ... |
+| 3 | 41,275,360,367,369,373,379 | 39,40,332,348,363,364,378 | Foundations, Propositional Logic, Algebraic Semantics |
 | 4 | 317 | 369 | Propositional Logic |
 | 5 | 375 | 317 | Propositional Logic |
 
@@ -75,6 +75,9 @@ next_project_number: 377
 
 ### Algebraic Semantics
 
+377 [NOT STARTED] — Create the classical conjunction-implication fragment axiom syste
+  └─ 378 [NOT STARTED] — Prove CPL is conservative over its classical conjunction-implicat
+    └─ 379 [NOT STARTED] — Prove CPL is conservative over its classical conjunction-implicat
 367 [NOT STARTED] — Collapse the three near-identical Brouwerian completeness develop
 
 ### Uncategorized
@@ -85,6 +88,36 @@ next_project_number: 377
     └─ 369 [NOT STARTED] — (Propositional Logic: Parameterize the intuitionistic and mini) (see above)
 
 ## Tasks
+
+### 379. Cpl conservative over classical conjimpbot
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Algebraic Semantics
+- **Dependencies**: Task 378
+
+**Description**: Prove CPL is conservative over its classical conjunction-implication-falsum fragment CPL⟨∧,→,⊥,⊤⟩, completing the classical column to 4-for-4 (symmetric with the minimal and intuitionistic towers). Deliver classicalConjImpBot_completeness : IsOrFree φ → Tautology φ → Derivable ClassicalConjImpBotAxiom φ by adding a ⊥ case to the ∧-extended Kalmár truth lemma from task 378 (⊥ is always false under any Boolean assignment, so the surrogate handling is direct), plus the conservativity edge cpl_conservative_over_classicalConjImpBot and classicalConjImpBot_iff_chain. RISK: reuses the ∧-extended Kalmár machinery from 378; the ⊥ case should be the easy increment, but keep zero-debt — [BLOCKED] with goal state rather than sorry if stuck. Mirrors tasks 352/378. After this lands the classical conservativity column is complete and the MPL/IPL/CPL towers are structurally symmetric. Files: Cslib/Logics/Propositional/Metalogic/ClassicalConjImpBotCompleteness.lean (new). Depends on task 378 (reuses the ∧-extended Kalmár lemma).
+
+---
+
+### 378. Cpl conservative over classical conjimp
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Algebraic Semantics
+- **Dependencies**: Task 377
+
+**Description**: Prove CPL is conservative over its classical conjunction-implication fragment CPL⟨∧,→,⊤⟩, the next rung above the implicational result (task 352). Deliver classicalConjImp_completeness : IsOrBotFree φ → Tautology φ → Derivable ClassicalConjImpAxiom φ, proved by EXTENDING the Kalmár / Tarski–Bernays truth-assignment lemma classicalImp_kalmar (Metalogic/ClassicalImpCompleteness.lean) with a conjunction (∧) case (the falsum-surrogate double-negation form carries over; add the ∧ truth-table subcases). Then derive the conservativity edge cpl_conservative_over_classicalConjImp (compose with CPL soundness via ClassicalConjImpAxiom.toPropAxiom, mirroring cpl_conservative_over_imp) and the classicalConjImp_iff_chain biconditional. RISK: the ∧-extended Kalmár induction is the genuine difficulty (medium-high) — must use the truth-assignment method, NOT an algebraic free-completion route (classical fragments are not Heyting-complete; Peirce is invalid in free Heyting completions). If the ∧ induction is intractable, mark [BLOCKED] with the exact goal state, no sorry. Mirrors task 352. Files: Cslib/Logics/Propositional/Metalogic/ClassicalConjImpCompleteness.lean (new), ProofSystem/FragmentAxioms.lean. Depends on the ClassicalConjImpAxiom system (task 377).
+
+---
+
+### 377. Classical conjunction fragment axioms
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Algebraic Semantics
+- **Dependencies**: Task 352
+
+**Description**: Create the classical conjunction-implication fragment axiom systems to fill the missing classical middle of the propositional conservativity chain (the classical column is currently 2-for-4: only Glivenko at top + the implicational fragment at bottom from task 352). Deliver: (1) inductive ClassicalConjImpAxiom for CPL⟨∧,→,⊤⟩ = {implyK, implyS, peirce, andI, andE1, andE2} (mirror ConjImpAxiom ∪ the peirce constructor of ClassicalImpAxiom in ProofSystem/FragmentAxioms.lean); (2) inductive ClassicalConjImpBotAxiom for CPL⟨∧,→,⊥,⊤⟩ = above + efq; (3) subsumption (toX) maps: ConjImpAxiom.toClassicalConjImpAxiom, ClassicalImpAxiom.toClassicalConjImpAxiom, ClassicalConjImpAxiom.toClassicalConjImpBotAxiom, ClassicalConjImpAxiom.toPropAxiom, ClassicalConjImpBotAxiom.toPropAxiom; (4) supporting infra mirroring siblings: mem_implyK/mem_implyS witnesses, subst_preserves_* closure lemmas, the *_hasDeductionTheorem instance, and IsOrBotFree/IsOrFree fragment-predicate compatibility lemmas. Pure syntactic mirror of FragmentAxioms.lean blocks; no new semantics. Zero-debt, CI green. Files: Cslib/Logics/Propositional/ProofSystem/FragmentAxioms.lean (+ Axioms.lean if needed).
+
+---
 
 ### 376. Prove fuel sufficiency lemma for classical tableau completeness
 - **Effort**: 3-5 hours

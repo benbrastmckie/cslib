@@ -1375,6 +1375,81 @@ private theorem Theory.Derivation.reduceRoot_decreases_normMeasure
     -- commutingSum strictly decreases by (orE G D_or DA_or DB_or).nodeCount ≥ 1
     cases D_or <;> simp_all [commutingSum, nodeCount, hDA_cs, hDB_cs, hE_cs] <;> omega
 
+/-- Theory and context weakening preserves `isStronglyNormal`. -/
+private theorem Theory.Derivation.isStronglyNormal_weak {T T' : Theory Atom} {Γ Δ : Ctx Atom}
+    {A : Proposition Atom} (hTheory : T ⊆ T') (hCtx : Γ ⊆ Δ) (D : T.Derivation Γ A) :
+    (D.weak hTheory hCtx).isStronglyNormal = D.isStronglyNormal := by
+  induction D generalizing T' Δ with
+  | ax => rfl
+  | ass => rfl
+  | andI G D₁ D₂ ih₁ ih₂ =>
+    simp only [Theory.Derivation.weak, isStronglyNormal, ih₁, ih₂]
+  | andE1 G D ih =>
+    simp only [isStronglyNormal] at ih ⊢
+    cases D <;> simp_all [Theory.Derivation.weak, isStronglyNormal]
+  | andE2 G D ih =>
+    simp only [isStronglyNormal] at ih ⊢
+    cases D <;> simp_all [Theory.Derivation.weak, isStronglyNormal]
+  | orI1 G D ih => simp only [Theory.Derivation.weak, isStronglyNormal, ih]
+  | orI2 G D ih => simp only [Theory.Derivation.weak, isStronglyNormal, ih]
+  | orE G D DA DB ih ihA ihB =>
+    simp only [isStronglyNormal] at ih ⊢
+    cases D <;>
+      simp_all [Theory.Derivation.weak, isStronglyNormal]
+  | impI G D ih => simp only [Theory.Derivation.weak, isStronglyNormal, ih]
+  | impE D E ih ihE =>
+    simp only [isStronglyNormal] at ih ⊢
+    cases D <;> simp_all [Theory.Derivation.weak, isStronglyNormal]
+
+/-- Context weakening preserves `isStronglyNormal` (corollary of `isStronglyNormal_weak`). -/
+private theorem Theory.Derivation.isStronglyNormal_weakCtx {Γ Δ : Ctx Atom}
+    {A : Proposition Atom} (hCtx : Γ ⊆ Δ) (D : T.Derivation Γ A) :
+    (D.weakCtx hCtx).isStronglyNormal = D.isStronglyNormal :=
+  D.isStronglyNormal_weak Set.Subset.rfl hCtx
+
+/-- Given a strongly-normal derivation `e : G ⊢ A ∧ B`, produce a strongly-normal `G ⊢ A`.
+Structural recursion on `e`: at an `andI` leaf project the first component; at an `orE` node
+push `andE1` into both branches. -/
+private def Theory.Derivation.snAndE1Form {G : Ctx Atom} {A B : Proposition Atom}
+    (e : T.Derivation G (A ∧ B)) (he : e.isStronglyNormal = true) :
+    {d : T.Derivation G A // d.isStronglyNormal = true} :=
+  match e, he with
+  | andI _ X _, he => ⟨X, by simp only [isStronglyNormal, Bool.and_eq_true] at he; exact he.1⟩
+  | orE G D DA DB, he => by
+      have hD  : D.isStronglyNormal  = true := by cases D <;> simp_all [isStronglyNormal]
+      have hDA : DA.isStronglyNormal = true := by cases D <;> simp_all [isStronglyNormal]
+      have hDB : DB.isStronglyNormal = true := by cases D <;> simp_all [isStronglyNormal]
+      refine ⟨orE G D (snAndE1Form DA hDA).1 (snAndE1Form DB hDB).1, ?_⟩
+      have hX := (snAndE1Form DA hDA).2
+      have hY := (snAndE1Form DB hDB).2
+      cases D <;> simp_all [isStronglyNormal, isOrERoot, isIntroRoot]
+  | ax h,   _  => ⟨andE1 _ (ax h),  rfl⟩
+  | ass h,  _  => ⟨andE1 _ (ass h), rfl⟩
+  | andE1 _ D', he => ⟨andE1 _ (andE1 _ D'), by simpa [isStronglyNormal] using he⟩
+  | andE2 _ D', he => ⟨andE1 _ (andE2 _ D'), by simpa [isStronglyNormal] using he⟩
+  | impE D' E', he => ⟨andE1 _ (impE D' E'), by simpa [isStronglyNormal] using he⟩
+
+/-- Given a strongly-normal derivation `e : G ⊢ A ∧ B`, produce a strongly-normal `G ⊢ B`.
+Symmetric to `snAndE1Form`: at an `andI` leaf project the second component. -/
+private def Theory.Derivation.snAndE2Form {G : Ctx Atom} {A B : Proposition Atom}
+    (e : T.Derivation G (A ∧ B)) (he : e.isStronglyNormal = true) :
+    {d : T.Derivation G B // d.isStronglyNormal = true} :=
+  match e, he with
+  | andI _ _ Y, he => ⟨Y, by simp only [isStronglyNormal, Bool.and_eq_true] at he; exact he.2⟩
+  | orE G D DA DB, he => by
+      have hD  : D.isStronglyNormal  = true := by cases D <;> simp_all [isStronglyNormal]
+      have hDA : DA.isStronglyNormal = true := by cases D <;> simp_all [isStronglyNormal]
+      have hDB : DB.isStronglyNormal = true := by cases D <;> simp_all [isStronglyNormal]
+      refine ⟨orE G D (snAndE2Form DA hDA).1 (snAndE2Form DB hDB).1, ?_⟩
+      have hX := (snAndE2Form DA hDA).2
+      have hY := (snAndE2Form DB hDB).2
+      cases D <;> simp_all [isStronglyNormal, isOrERoot, isIntroRoot]
+  | ax h,   _  => ⟨andE2 _ (ax h),  rfl⟩
+  | ass h,  _  => ⟨andE2 _ (ass h), rfl⟩
+  | andE1 _ D', he => ⟨andE2 _ (andE1 _ D'), by simpa [isStronglyNormal] using he⟩
+  | andE2 _ D', he => ⟨andE2 _ (andE2 _ D'), by simpa [isStronglyNormal] using he⟩
+  | impE D' E', he => ⟨andE2 _ (impE D' E'), by simpa [isStronglyNormal] using he⟩
+
 /-- `normalize` produces strongly normal derivations.
 
 Proved via `redexWeight_zero_sn`: the goal reduces to showing `(d.normalize).redexWeight = 0`,

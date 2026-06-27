@@ -128,7 +128,19 @@ theorem minimalTableau_sound (φ : Proposition Atom)
   apply intExpandBranches_closed_unsat val botForces v_uc bf_uc _
     isMinimallyClosed
     (fun worldOf' b hcl => minClosed_unsatisfiable val botForces worldOf' b hcl)
-    [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] (by rfl) (by rfl) (by rfl) h
+    [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] (by rfl) (by rfl) (by rfl)
+      (by
+        intro b edges nw hmem
+        simp only [List.zip_cons_cons, List.zip_nil_right, List.zip_nil_left,
+          List.mem_cons, List.mem_nil_iff, or_false, Prod.mk.injEq] at hmem
+        obtain ⟨⟨hb, he⟩, hnw⟩ := hmem
+        subst hb; subst he; subst hnw
+        refine ⟨?_, ?_⟩
+        · intro sf hsf
+          simp only [List.mem_cons, List.mem_nil_iff, or_false] at hsf
+          simp [hsf]
+        · intro c p hcp
+          simp only [List.not_mem_nil] at hcp) h
     [⟨.neg, φ, 0⟩] []
   · simp [List.zip_cons_cons, List.zip_nil_right]
   · exact fun w w' hacc => by

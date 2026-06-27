@@ -1847,7 +1847,7 @@
     {
       "project_number": 380,
       "project_name": "or_imp_fragment_conservativity",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Prove the conservativity theorem for the disjunctive-implicational fragment IPL<or,->,top> over its OrImp Hilbert system (hilbertIplConservativeOverOrImp), wiring it into ConservativeChain.lean. This is the follow-up to task 372, whose core (OrImpAxiom, IsAndBotFree predicate, HilbertOrImp instances, deduction theorem, and the coe_AlgEvaluate_andBotFree groundwork lemma) shipped sorry-free. Task 372 Phase 6 established a NO-GO for the naive free-meet-completion route: UpperSet.Ici does not preserve Heyting implication (concrete 4-element counterexample: with a,b incomparable, UpperSet.Ici(a=>b) != UpperSet.Ici(a) => UpperSet.Ici(b) since the latter drops bot). Heyting implication is right-adjoint to meet, not join, so no symmetric dual of FreeJoinCompletion.lean exists via UpperSet. This task must pursue one of the alternative routes identified in the 372 research/spike: (1) a cut-elimination / proof-theoretic conservativity argument; (2) a MacNeille completion with explicit himp-preservation analysis; (3) a Rieger-Nishimura lattice construction; or (4) a Godel-Tait-style translation from OrImp into ConjImp reusing the existing ConjImpConservative machinery. Requires substantial new mathematical infrastructure beyond a mechanical mirror. No new axioms; no sorry bridges; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 372 (core fragment complete). See specs/372_or_imp_disjunctive_implicational_fragment/plans/01_or-imp-fragment.md Phases 7-10 (marked BLOCKED) and the orchestrator handoff blocker entry for the full obstruction analysis and alternative-approach notes.",
@@ -1855,10 +1855,26 @@
         372
       ],
       "created": "2026-06-27T18:18:00Z",
-      "last_updated": "2026-06-27T18:18:00Z",
+      "last_updated": "2026-06-27T20:27:46Z",
       "next_artifact_number": 1,
-      "artifacts": [],
-      "session_id": null
+      "artifacts": [
+        {
+          "path": "specs/380_or_imp_fragment_conservativity/reports/01_or-imp-conservativity-research.md",
+          "type": "report",
+          "summary": "IPL over IPL<or,->,top> conservativity: recommended proof-theoretic route via LJ cut-elimination"
+        },
+        {
+          "path": "specs/380_or_imp_fragment_conservativity/plans/01_or-imp-conservativity.md",
+          "type": "plan",
+          "summary": "OrImp conservativity: 3-phase proof-theoretic plan (LJ cut-elim route)"
+        },
+        {
+          "path": "specs/380_or_imp_fragment_conservativity/summaries/01_implementation-summary.md",
+          "type": "summary",
+          "summary": "OrImp conservativity: proof-theoretic route, kernel-verified sorry-free; repo CI blocked by pre-existing Bimodal breakage"
+        }
+      ],
+      "session_id": "sess_1782587571_7fe21e"
     }
   ],
   "repository_health": {

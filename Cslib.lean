@@ -442,6 +442,7 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.Bridge
 public import Cslib.Logics.Propositional.Semantics.Algebra.Brouwerian
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianBot
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianCompleteness
+public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianCompletenessGeneric
 public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpBotConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.Conservative
@@ -461,6 +462,7 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.KripkeBridge
 public import Cslib.Logics.Propositional.Semantics.Algebra.MplConservativeChain
 public import Cslib.Logics.Propositional.Semantics.Algebra.MplPointedConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.NonemptyLowerSet
+public import Cslib.Logics.Propositional.Semantics.Algebra.OrImpConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.PointedBrouwerian
 public import Cslib.Logics.Propositional.Semantics.Algebra.PointedBrouwerianCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.Soundness

@@ -9,6 +9,7 @@ module
 import Cslib.Init
 public import Cslib.Logics.Propositional.Semantics.Algebra.ImpConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative
+public import Cslib.Logics.Propositional.Semantics.Algebra.OrImpConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertConservativeGlivenko
 public import Cslib.Logics.Propositional.Semantics.Algebra.Conservative
 
@@ -272,6 +273,14 @@ theorem conjImpAxiom_iff_chain {Atom : Type u} {φ : PL.Proposition Atom}
     Derivable (@ConjImpAxiom Atom) φ ↔ Derivable (@IntPropAxiom Atom) φ :=
   hilbertIplConservativeOverConjImp_iff hOBF |>.symm
 
+/-- **Biconditional for IPL⟨∨,→,⊤⟩ in the chain**: for and-bot-free formulas, derivability
+in OrImpAxiom and IntPropAxiom coincide. This places the disjunctive-implicational fragment
+IPL⟨∨,→,⊤⟩ in the conservative extension chain alongside IPL⟨∧,→,⊤⟩. -/
+theorem orImpAxiom_iff_chain {Atom : Type u} {φ : PL.Proposition Atom}
+    (hABF : φ.IsAndBotFree = true) :
+    Derivable (@OrImpAxiom Atom) φ ↔ Derivable (@IntPropAxiom Atom) φ :=
+  hilbertIplConservativeOverOrImp_iff hABF |>.symm
+
 /-- **Biconditional for MPL in the chain**: for bot-free formulas, derivability in
 MinPropAxiom and IntPropAxiom coincide. -/
 theorem minAxiom_iff_chain {Atom : Type u} {φ : PL.Proposition Atom}
@@ -330,6 +339,13 @@ theorem nd_chain_ipl_to_conjImp {A : PL.Proposition Atom}
     (hOBF : A.IsOrBotFree = true) (h : DerivableIn (IPL (Atom := Atom)) A) :
     Derivable (@ConjImpAxiom Atom) A :=
   ipl_conservative_over_conjImp hOBF h
+
+/-- **ND inter-fragment conservativity**: for and-bot-free formulas, IPL derivability
+implies OrImpAxiom derivability (ND version). -/
+theorem nd_chain_ipl_to_orImp {A : PL.Proposition Atom}
+    (hABF : A.IsAndBotFree = true) (h : DerivableIn (IPL (Atom := Atom)) A) :
+    Derivable (@OrImpAxiom Atom) A :=
+  ipl_conservative_over_orImp hABF h
 
 /-- **ND Glivenko corollary**: if `A` is CPL-derivable, then `¬¬A` is IPL-derivable.
 The negative translation bridges IPL and CPL at the top of the chain. -/

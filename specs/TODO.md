@@ -11,7 +11,7 @@ next_project_number: 381
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,321,355,364,368,370,371,376,377,380 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,321,355,364,368,370,371,376,377 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,332,363,366,374,378 | 36,37,180,290,299,355,371,376,377 | Bimodal Porting, Foundations, Modal Logic, ... |
 | 3 | 41,275,360,369,373,379 | 39,40,332,363,364,378 | Foundations, Propositional Logic, Algebraic Semantics |
 | 4 | 317 | 369 | Propositional Logic |
@@ -51,7 +51,6 @@ next_project_number: 381
 370 [NOT STARTED] — Close the decidability asymmetry in the metalogic layer: classica
 371 [NOT STARTED] — Symmetrize the LK/LJ sequent-calculus metatheory and add the miss
   └─ 374 [NOT STARTED] — Add Craig interpolation for the propositional sequent calculi, a 
-380 [NOT STARTED] — Prove the conservativity theorem for the disjunctive-implicationa
 317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
   └─ 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
 369 [NOT STARTED] — Parameterize the intuitionistic and minimal tableau developments 
@@ -84,6 +83,19 @@ next_project_number: 381
     └─ 369 [NOT STARTED] — (Propositional Logic: Parameterize the intuitionistic and mini) (see above)
 
 ## Tasks
+
+### 380. Or imp fragment conservativity
+- **Status**: [COMPLETED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 372
+- **Research**: [380_or_imp_fragment_conservativity/reports/01_or-imp-conservativity-research.md]
+- **Plan**: [380_or_imp_fragment_conservativity/plans/01_or-imp-conservativity.md]
+- **Summary**: [380_or_imp_fragment_conservativity/summaries/01_implementation-summary.md]
+
+**Description**: Prove the conservativity theorem for the disjunctive-implicational fragment IPL<or,->,top> over its OrImp Hilbert system (hilbertIplConservativeOverOrImp), wiring it into ConservativeChain.lean. This is the follow-up to task 372, whose core (OrImpAxiom, IsAndBotFree predicate, HilbertOrImp instances, deduction theorem, and the coe_AlgEvaluate_andBotFree groundwork lemma) shipped sorry-free. Task 372 Phase 6 established a NO-GO for the naive free-meet-completion route: UpperSet.Ici does not preserve Heyting implication (concrete 4-element counterexample: with a,b incomparable, UpperSet.Ici(a=>b) != UpperSet.Ici(a) => UpperSet.Ici(b) since the latter drops bot). Heyting implication is right-adjoint to meet, not join, so no symmetric dual of FreeJoinCompletion.lean exists via UpperSet. This task must pursue one of the alternative routes identified in the 372 research/spike: (1) a cut-elimination / proof-theoretic conservativity argument; (2) a MacNeille completion with explicit himp-preservation analysis; (3) a Rieger-Nishimura lattice construction; or (4) a Godel-Tait-style translation from OrImp into ConjImp reusing the existing ConjImpConservative machinery. Requires substantial new mathematical infrastructure beyond a mechanical mirror. No new axioms; no sorry bridges; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 372 (core fragment complete). See specs/372_or_imp_disjunctive_implicational_fragment/plans/01_or-imp-fragment.md Phases 7-10 (marked BLOCKED) and the orchestrator handoff blocker entry for the full obstruction analysis and alternative-approach notes.
+
+---
 
 ### 379. Cpl conservative over classical conjimpbot
 - **Status**: [PLANNED]

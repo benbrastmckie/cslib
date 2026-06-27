@@ -340,7 +340,7 @@ phase to the `def` plus at most one helper.
 
 ---
 
-### Phase 7: Kalmár truth lemma [NOT STARTED] — RISK-CONCENTRATED
+### Phase 7: Kalmár truth lemma [BLOCKED] — RISK-CONCENTRATED
 
 **Goal**: The core lemma, by induction on imp-top-only `φ`, relative to a Boolean assignment `v`,
 an atom list `as` covering `φ`'s atoms, and a fixed falsum-surrogate `goal`.
@@ -387,6 +387,16 @@ mark `[BLOCKED]` with the precise stuck goal state recorded in the plan + metada
 NO axiom. Phases 8–10 then also block; Phases 1–6 remain committed value.
 
 **Depends on**: 5, 6. **Verification**: `sorry`-free; `lean_verify` no unexpected axioms.
+
+**BLOCKER** (Phase 7):
+
+- **What failed**: The `imp a b` TRUE-branch sub-case `v a = false, v b = false` is UNPROVABLE for arbitrary `goal`.
+- **Counterexample**: `φ = (atom p).imp (atom q)`, `v p = false`, `v q = false`, `goal = atom r` (distinct), `as = [p, q]`. The literal context `Γ = [(atom p).imp (atom r), (atom q).imp (atom r)]`. The lemma claims `Γ ⊢ (atom p).imp (atom q)` (TRUE BRANCH since `v(p→q) = true`). But `[p→r, q→r] ⊬ p→q` in K+S+Peirce: the countermodel `v p = T, v q = F, v r = T` makes `p→r = T, q→r = T, p→q = F`.
+- **What was tried**: Attempted derivations using K, S, Peirce applied to `a.imp b`, `a`, `b`, or combinations of IHa-false (`Γ ⊢ a.imp goal`) and IHb-false (`Γ ⊢ b.imp goal`). None succeeded for arbitrary `goal`.
+- **Why it's stuck**: The truth lemma as stated is FALSE. For `v a = false, v b = false`, deriving `Γ ⊢ a.imp b` from `Γ ⊢ a.imp goal` and `Γ ⊢ b.imp goal` for arbitrary `goal` would require `goal → b` to be derivable, which is not generally true.
+- **Root cause**: The plan's statement with `{goal : PL.Proposition Atom}` as an abstract implicit parameter is too strong. The argument only works when `goal = a.imp b` (the outer formula), because then `IHa` (FALSE branch) gives `Γ ⊢ a.imp (a.imp b)`, and S + identity yields `Γ ⊢ a.imp b`.
+- **What is needed**: Fix the truth lemma statement so the induction carries `goal = φ` throughout. The CORRECT formulation uses a GENERALIZED IH by making `goal` an EXPLICIT parameter that users can instantiate with `goal = a.imp b` in the recursive call. Concretely, the IH for `a` must be called with `goal := a.imp b` (not the outer abstract `goal`). This requires restructuring: either (a) re-state the lemma with `goal` explicit and let Lean unify, allowing calling `IHa` with a DIFFERENT `goal`; or (b) use a single-branch version (`htrue : BoolEvaluate v φ = true → Deriv _ (litCtx v φ as) φ`) and show that in the `imp a b` case with `v a = false, v b = false`, we can call `IHa` with `goal = a.imp b` to get `litCtx v (a.imp b) as ⊢ a.imp (a.imp b)`, then S + identity gives `litCtx v (a.imp b) as ⊢ a.imp b`. Note: the CONTEXT changes when `goal` changes (from `litCtx v goal as` to `litCtx v (a.imp b) as`), requiring a CONTEXT EQUALITY proof that the outer and inner contexts agree when `goal = a.imp b`.
+- **Prohibited workarounds**: Do NOT use `sorry`, `def X := True`, or any vacuous placeholder.
 
 ---
 

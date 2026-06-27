@@ -1,36 +1,21 @@
 {
   "status": "partial",
   "session_id": "sess_1782498610_8a4b4e",
-  "phases_completed": 5,
+  "phases_completed": 6,
   "phases_total": 10,
   "sorry_inventory": [],
-  "new_axioms": [],
-  "commits": [
-    "a9b474eb: task 352: phase 3: identity lemma (classicalImp_imp_self)",
-    "004a6990: task 352: phase 4: imp_trans composition (classicalImp_imp_trans)",
-    "2082e793: task 352: phase 5: Peirce classical case lemma (classicalImp_peirce_mp)"
+  "blocked_phase": 7,
+  "blocked_reason": "truth lemma as stated (with abstract {goal}) is FALSE — counterexample given in plan",
+  "requires_user_review": true,
+  "last_green_build": "Cslib.Logics.Propositional.Metalogic.ClassicalImpCompleteness (134 lines, Phases 1-6)",
+  "next_action_hint": "Revise Phase 7 truth lemma statement. The `imp a b` TRUE-branch sub-case with v(a)=false and v(b)=false cannot be proved for arbitrary `goal`. FIX: Either (A) make the truth lemma a SINGLE-BRANCH statement `BoolEvaluate v φ = true → Deriv _ (litCtx v φ as) φ` (with `goal = φ` baked in) and use a GENERALIZED induction where the IH for sub-formula `a` is called with `goal := a.imp b`; or (B) split into two lemmas: one for the `imp` TRUE-branch sub-cases that uses IHa with `goal = a.imp b` explicitly. The context must stay `litCtx v (a.imp b) as` (noting that when `goal = a.imp b`, the context for IHa equals the outer context). See BLOCKER block in Phase 7 of the plan for precise details and the counterexample.",
+  "artifacts": [
+    "Cslib/Logics/Propositional/Metalogic/ClassicalImpCompleteness.lean",
+    "specs/352_cpl_conservative_over_classical_implicational_fragment/plans/02_classical-imp-conservativity-v2.md"
   ],
-  "artifacts": {
-    "main_module": "Cslib/Logics/Propositional/Metalogic/ClassicalImpCompleteness.lean",
-    "plan": "specs/352_cpl_conservative_over_classical_implicational_fragment/plans/02_classical-imp-conservativity-v2.md"
-  },
-  "phase_status": {
-    "phase_1": "COMPLETED (FragmentAxioms.lean, commit 14a7c447)",
-    "phase_2": "COMPLETED (module skeleton + soundness)",
-    "phase_3": "COMPLETED (classicalImp_imp_self via S K K)",
-    "phase_4": "COMPLETED (classicalImp_imp_trans via K+S)",
-    "phase_5": "COMPLETED (classicalImp_peirce_mp direct Peirce application)",
-    "phase_6": "NOT STARTED (litCtx definition + membership helper)",
-    "phase_7": "NOT STARTED (Kalmar truth lemma - RISK CONCENTRATED)",
-    "phase_8": "NOT STARTED (single-atom elimination)",
-    "phase_9": "NOT STARTED (iterate elimination + classicalImp_completeness)",
-    "phase_10": "NOT STARTED (conservativity + chain + CI gate)"
-  },
-  "next_action_hint": "Phase 6: Define litCtx (List-based Kalmar literal context) and litCtx_mem helper. See plan Phase 6 for signatures. Note: locate atom collector (Proposition.atoms or Proposition.vars) before implementing hcov in Phase 7.",
-  "important_notes": {
-    "phase_5_shape_note": "classicalImp_peirce_mp takes h : Deriv Γ ((φ.imp goal).imp φ) and returns Deriv Γ φ. This is the direct Peirce MP form. Phase 7 implementation should verify this matches the consumer need in the imp-case true-antecedent false-consequent sub-case. The plan warns 'shape TBD vs consumer' -- the dispatcher for Phase 7 should check if this form suffices or if an additional wrapper lemma is needed.",
-    "phase_7_challenge": "The imp-case sub-case where BoolEvaluate v a = false AND BoolEvaluate v b = false (with general goal) was analyzed and found non-trivial. See plan Phase 7 recipe. The Phase 5 lemma enables: to show Γ ⊢ a → b, show Γ ⊢ ((a→b)→goal)→(a→b) then apply classicalImp_peirce_mp. The inner goal may need careful construction.",
-    "build_status": "lake build Cslib.Logics.Propositional.Metalogic.ClassicalImpCompleteness passes green after each phase commit",
-    "zero_debt": "No sorry, no new axioms in phases 3-5"
+  "metadata": {
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
   }
 }

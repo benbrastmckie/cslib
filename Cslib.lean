@@ -89,6 +89,7 @@ public import Cslib.Foundations.Logic.Metalogic.GenericMCS
 public import Cslib.Foundations.Logic.Metalogic.ListDeduction
 public import Cslib.Foundations.Logic.Metalogic.ListImplication
 public import Cslib.Foundations.Logic.Metalogic.MCSProperties
+public import Cslib.Foundations.Logic.Metalogic.PrimeExclusion
 public import Cslib.Foundations.Logic.Metalogic.SetDeduction
 public import Cslib.Foundations.Logic.ProofSystem
 public import Cslib.Foundations.Logic.PropositionalTableau
@@ -408,6 +409,7 @@ public import Cslib.Logics.Modal.Tableau.Soundness
 public import Cslib.Logics.Propositional.CurryHoward.Defs
 public import Cslib.Logics.Propositional.CurryHoward.Isomorphism
 public import Cslib.Logics.Propositional.Defs
+public import Cslib.Logics.Propositional.Metalogic.ClassicalConjImpBotCompleteness
 public import Cslib.Logics.Propositional.Metalogic.ClassicalConjImpCompleteness
 public import Cslib.Logics.Propositional.Metalogic.ClassicalImpCompleteness
 public import Cslib.Logics.Propositional.Metalogic.DeductionTheorem

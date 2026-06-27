@@ -2,9 +2,9 @@
   "task_number": 376,
   "status": "implemented",
   "dispatch_status": "implemented",
-  "phases_completed": 4,
+  "phases_completed": 5,
   "phases_total": 5,
-  "summary": "Phase 4 complete: raised fuel bound in Expansion.lean from 4*(φ.complexity+1)+1 to 3^φ.complexity; closed caller sorry in Completeness.lean (classicalTableau_hintikka) via simp [classicalExpMeasure, classicalBranchComplexity] which reduces both sides to 3^φ.complexity ≤ 3^φ.complexity; also updated classicalOpenBranch_countermodel's h' to use 3^φ.complexity. Build green, 0 sorry. Commit 3a98ae6b.",
+  "summary": "Phase 5 complete: CI gate passed (scoped build green, 0 sorry). Removed dead code cluster (classicalRemMeasure, classicalRemMeasure_zero_subset, classicalTotalMeasure, classicalTotalMeasure_zero_mem_subset — never called by any live proof). Updated stale 'Notes on sorry' docstrings in DecisionProcedure.lean and Soundness.lean to reflect that classicalTableau_complete is now fully proved via the base-3 exponential fuel-sufficiency argument. classicalExpandBranches_hintikka and classicalTableau_complete are sorry-free.",
   "build_state": {
     "scoped_build": "green",
     "error_count": 0,
@@ -14,13 +14,16 @@
     "count": 0,
     "items": []
   },
+  "ci": {
+    "lake_build": "green",
+    "lint_style": "pass (no issues in Classical/ files)",
+    "checkInitImports": "pre-existing Bimodal failure only (Cslib.Logics.Bimodal.Theorems.Perpetuity.Bridge.olean missing); no Classical/ issues"
+  },
   "resolves_blocker_for": 363,
-  "what_363_needs": "classicalExpandBranches_hintikka is now fully proven (0 sorry); the file Completeness.lean builds green with no sorries — task 363's blocker is resolved",
-  "continuation_context": "Phase 5: full CI (lake build, checkInitImports, lint-style, shake, test) and remove now-unused classicalTotalMeasure if dead",
+  "dispatch_summary": "classicalExpandBranches_hintikka fully proven via base-3 exponential measure; fuel bound raised to 3^complexity; classicalTableau_complete now sorry-free",
   "lean_notes": [
     "classicalExpMeasure [[⟨.neg,φ,()⟩]] [[]] = 3^φ.complexity by simp [classicalExpMeasure, classicalBranchComplexity]",
-    "Two places in Completeness.lean referenced the old fuel literal: L1323 (hfuel_init type) and L1357 (h' type in classicalOpenBranch_countermodel) — both updated",
-    "norm_num NOT available in Completeness.lean; simp suffices here"
-  ],
-  "commit_hash": "3a98ae6b"
+    "classicalTotalMeasure and its cluster removed: classicalRemMeasure, classicalRemMeasure_zero_subset, classicalTotalMeasure, classicalTotalMeasure_zero_mem_subset — all dead code",
+    "classicalExpMeasure docstring updated to remove stale classicalTotalMeasure reference"
+  ]
 }

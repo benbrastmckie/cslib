@@ -630,8 +630,8 @@ private lemma classicalApplyOne_output_complexity
     omega
 
 /-- Beta-robust termination measure: base-3 exponential of per-branch complexity, summed.
-Unlike the additive count `classicalTotalMeasure`, this measure strictly decreases at
-every expansion step (both alpha rules producing one child and beta rules producing two). -/
+This measure strictly decreases at every expansion step (both alpha rules producing one child
+and beta rules producing two), giving the fuel sufficiency bound `3 ^ complexity`. -/
 private def classicalExpMeasure
     (branches : List (Branch (Proposition Atom) Unit))
     (expandedSets : List (List (SignedFormula (Proposition Atom) Unit))) : Nat :=
@@ -688,55 +688,6 @@ private lemma pow3_add_one_le {a0 C : Nat} (hC : 1 ≤ C) (h0 : a0 ≤ C - 1) :
   rw [show C = C - 1 + 1 from (Nat.sub_add_cancel hC).symm, pow_succ]
   omega
 
-/-- Count of unexpanded formulas in branch `b` relative to expanded set `e`.
-Zero means every formula on the branch is in the expanded set, so the Hintikka
-invariant covers the entire branch. -/
-private def classicalRemMeasure
-    (b : Branch (Proposition Atom) Unit)
-    (e : List (SignedFormula (Proposition Atom) Unit)) : Nat :=
-  (b.filter fun sf => !(e.any (· == sf))).length
-
-/-- Total remaining measure across all branches: sum of per-branch unexpanded formula counts.
-When this is ≤ fuel, every formula on every open branch has been expanded before fuel runs out,
-so any returned open branch is a Hintikka set. -/
-private def classicalTotalMeasure
-    (branches : List (Branch (Proposition Atom) Unit))
-    (expandedSets : List (List (SignedFormula (Proposition Atom) Unit))) : Nat :=
-  ((branches.zip expandedSets).map fun p => classicalRemMeasure p.1 p.2).sum
-
-/-- If the per-branch measure is zero, every formula on the branch is in the expanded set. -/
-private lemma classicalRemMeasure_zero_subset
-    {b : Branch (Proposition Atom) Unit}
-    {e : List (SignedFormula (Proposition Atom) Unit)}
-    (hm : classicalRemMeasure b e = 0)
-    {sf : SignedFormula (Proposition Atom) Unit} (hsf : sf ∈ b) : sf ∈ e := by
-  simp only [classicalRemMeasure] at hm
-  by_contra hnsf
-  have hiff : e.any (· == sf) = true ↔ sf ∈ e := by simp [List.any_eq_true]
-  have hany : e.any (· == sf) = false := by
-    rw [Bool.eq_false_iff]; intro h; exact hnsf (hiff.mp h)
-  have hmem : sf ∈ b.filter (fun sf => !(e.any (· == sf))) :=
-    List.mem_filter.mpr ⟨hsf, by simp [hany]⟩
-  exact absurd (List.length_pos_of_mem hmem) (by omega)
-
-/-- If the total measure is zero, every formula on `branches[i]` is in `expandedSets[i]`. -/
-private lemma classicalTotalMeasure_zero_mem_subset
-    {branches : List (Branch (Proposition Atom) Unit)}
-    {expandedSets : List (List (SignedFormula (Proposition Atom) Unit))}
-    (hlength : expandedSets.length = branches.length)
-    (hm : classicalTotalMeasure branches expandedSets = 0)
-    {i : Nat} (hi : i < branches.length)
-    {sf : SignedFormula (Proposition Atom) Unit} (hsf : sf ∈ branches[i]) :
-    sf ∈ expandedSets[i]'(by omega) := by
-  have hi' : i < expandedSets.length := by omega
-  have hzip : (branches[i], expandedSets[i]'hi') ∈ branches.zip expandedSets := by
-    rw [List.mem_iff_getElem]
-    refine ⟨i, by simp [List.length_zip]; exact ⟨hi, hi'⟩, by simp [List.getElem_zip]⟩
-  simp only [classicalTotalMeasure] at hm
-  have hterm : classicalRemMeasure branches[i] (expandedSets[i]'hi') = 0 :=
-    List.sum_eq_zero_iff_forall_eq_nat.mp hm _
-      (List.mem_map.mpr ⟨(branches[i], expandedSets[i]'hi'), hzip, rfl⟩)
-  exact classicalRemMeasure_zero_subset hterm hsf
 
 /-- When `classicalStepBranch b e = none`, every formula on `b` is either already in the
 expanded set `e` or has `classicalApplyOne` return `notApplicable` (the branch is saturated). -/

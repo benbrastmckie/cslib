@@ -32,13 +32,14 @@ The `Decidable (Tautology φ)` instance works as follows:
 The `Derivable PropositionalAxiom φ` instance uses `prop_completeness_iff_tautology`
 to reduce to `Tautology φ`.
 
-## Notes on sorry
+## Implementation Status
 
-`classicalTableau_sound` is now fully proved (sorry-free). The completeness direction
-(`classicalTableau_complete` in `Classical/Completeness.lean`) still rests on one sorry.
-The `Decidable` instance reflects this split: the soundness branch is clean; the countermodel
-branch carries the one remaining completeness sorry. The existing `instDecidableTautology`
-in `Bool.lean` provides the primary sorry-free decision procedure.
+Both directions are now fully proved (sorry-free). `classicalTableau_sound` was proved first;
+`classicalTableau_complete` in `Classical/Completeness.lean` is now also sorry-free, established
+via the base-3 exponential fuel-sufficiency argument (task 376): fuel `3 ^ complexity φ` is
+sufficient to expand every branch, so any branch returned as open is a Hintikka set, yielding
+a Boolean countermodel. The `Decidable` instance and `instDecidableTautology` are both
+sorry-free.
 
 ## References
 

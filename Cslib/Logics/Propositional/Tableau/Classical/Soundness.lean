@@ -31,12 +31,12 @@ Together these imply: if the tableau closes (all branches are closed), then the 
 branch `[F(φ)]` was unsatisfiable, meaning every valuation satisfies `T(φ)`, i.e., `φ`
 is a tautology.
 
-## Notes on sorry
+## Implementation Status
 
 This module is sorry-free. All three key lemmas (`classicalRule_preserves_sat`,
-`classically_closed_unsatisfiable`, `classicalTableau_sound`) are fully proved. The
-completeness and countermodel direction (`classicalTableau_complete`) rests on a sorry
-in `Classical/Completeness.lean`; soundness is independent of that.
+`classically_closed_unsatisfiable`, `classicalTableau_sound`) are fully proved.
+`classicalTableau_complete` in `Classical/Completeness.lean` is also now sorry-free
+(task 376); the entire classical tableau is proved correct.
 
 ## References
 

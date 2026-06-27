@@ -1,7 +1,7 @@
 # Implementation Plan: Collapse the Three Brouwerian Completeness Modules
 
 - **Task**: 367 - unify_brouwerian_completeness_triplication
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 9 hours
 - **Dependencies**: Task 345 (`IsMinimal` family — landed, commit 59c1d3ff); Task 348 (theory-parametric conservativity substrate — landed, commit 8a32b3ef)
 - **Research Inputs**: specs/367_unify_brouwerian_completeness_triplication/reports/01_unify-brouwerian-triplication.md
@@ -172,7 +172,7 @@ without touching any Lindenbaum or completeness code yet.
 
 ---
 
-### Phase 2: Relocate evaluator + embedding lemmas to substrate + 2 bridge lemmas [IN PROGRESS]
+### Phase 2: Relocate evaluator + embedding lemmas to substrate + 2 bridge lemmas [COMPLETED]
 
 **Goal**: Make the universal evaluator `BrouwerianBotEvaluate`/`BrouwerianBotValid` and the
 embedding lemmas part of the shared substrate, and prove the two definitional bridges that
@@ -214,7 +214,7 @@ recover the Brouwerian (⊤) and pointed (⊥) evaluators from it.
 
 ---
 
-### Phase 3: Generalize meet-fragment bounds to `[ConjImpAxioms]` + `BrouwerianSemilattice` instance (EARLY diamond build) [NOT STARTED]
+### Phase 3: Generalize meet-fragment bounds to `[ConjImpAxioms]` + `BrouwerianSemilattice` instance (EARLY diamond build) [COMPLETED]
 
 **Goal**: Make the generic Lindenbaum meet-fragment lemmas available to the fragment axiom
 families by weakening their bound to `[ConjImpAxioms]`, and add the single
@@ -266,7 +266,7 @@ build before anything depends on it.
 
 ---
 
-### Phase 4: Generic soundness (5 schema lemmas + wrappers) + truth lemma + completeness [NOT STARTED]
+### Phase 4: Generic soundness (5 schema lemmas + wrappers) + truth lemma + completeness [COMPLETED]
 
 **Goal**: Prove the shared completeness machinery exactly once over `BrouwerianBotEvaluate` and
 `[ConjImpAxioms]`: the five schema-soundness lemmas, the generic truth lemma, and generic
@@ -306,7 +306,7 @@ completeness.
 
 ---
 
-### Phase 5: Recover three tier theorems as corollaries + re-export shims + full CI gate [NOT STARTED]
+### Phase 5: Recover three tier theorems as corollaries + re-export shims + full CI gate [IN PROGRESS]
 
 **Goal**: Re-derive every public per-tier theorem as a corollary of the generic development
 (preserving all names and signatures), keep all three original filenames as thin re-export

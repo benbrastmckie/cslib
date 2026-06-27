@@ -134,6 +134,54 @@ theorem Proposition.IsSubformula.imp_right {A B : Proposition Atom} :
   simp only [IsSubformula, subformulas, Finset.mem_insert, Finset.mem_union]
   right; right; exact self_mem_subformulas B
 
+/-! ## Variable Occurrence -/
+
+/-- The set of propositional atoms (variables) occurring in a proposition.
+
+This is the total, Finset-valued atom-occurrence function used by the Craig interpolation
+construction (Maehara's method). Unlike the List-valued partial `atoms` function, `vars` is
+total and Finset-valued. -/
+def Proposition.vars : Proposition Atom → Finset Atom
+  | .atom x   => {x}
+  | .bot      => ∅
+  | .imp a b  => a.vars ∪ b.vars
+  | .and a b  => a.vars ∪ b.vars
+  | .or  a b  => a.vars ∪ b.vars
+
+/-! ### Connective rewrite lemmas for `Proposition.vars` -/
+
+/-- Atoms occurring in an atom proposition is the singleton `{x}`. -/
+@[simp]
+lemma vars_atom (x : Atom) : (Proposition.atom x : Proposition Atom).vars = {x} := rfl
+
+/-- Falsum has no occurring atoms. -/
+@[simp]
+lemma vars_bot : (⊥ : Proposition Atom).vars = ∅ := rfl
+
+/-- Atoms of an implication are the union of atoms of its components. -/
+@[simp]
+lemma vars_imp (a b : Proposition Atom) : (a → b).vars = a.vars ∪ b.vars := rfl
+
+/-- Atoms of a conjunction are the union of atoms of its components. -/
+@[simp]
+lemma vars_and (a b : Proposition Atom) : (a ∧ b).vars = a.vars ∪ b.vars := rfl
+
+/-- Atoms of a disjunction are the union of atoms of its components. -/
+@[simp]
+lemma vars_or (a b : Proposition Atom) : (a ∨ b).vars = a.vars ∪ b.vars := rfl
+
+/-- Atoms of `¬A = A → ⊥` are the atoms of `A`. -/
+@[simp]
+lemma vars_neg (a : Proposition Atom) : (¬a).vars = a.vars := by
+  change (Proposition.imp a Proposition.bot).vars = a.vars
+  simp only [Proposition.vars, Finset.union_empty]
+
+/-- Verum `⊤ = ⊥ → ⊥` has no occurring atoms. -/
+@[simp]
+lemma vars_top : (⊤ : Proposition Atom).vars = ∅ := by
+  change (Proposition.imp Proposition.bot Proposition.bot).vars = ∅
+  simp only [Proposition.vars, Finset.empty_union]
+
 /-! ## Complexity Measure -/
 
 /-- The complexity (size) of a proposition: number of connective occurrences.
@@ -174,5 +222,57 @@ omit [DecidableEq Atom] in
 lemma complexity_bot : (Proposition.bot : Proposition Atom).complexity = 0 := rfl
 
 end Cslib.Logic.PL
+
+end
+
+/-! ## Finset Lift of Variable Occurrence
+
+`Finset.vars` lifts `Proposition.vars` to finite sets of propositions. It is defined in the
+global `Finset` namespace so that dot notation `S.vars` is available for
+`S : Finset (Proposition Atom)`. Used by the Craig interpolation theorem (Maehara's method). -/
+
+@[expose] public section
+
+open Cslib.Logic.PL
+
+variable {Atom : Type*} [DecidableEq Atom]
+
+/-- The set of atoms occurring in any proposition in a finite set of propositions.
+The result is `S.biUnion Proposition.vars`. -/
+def Finset.vars (S : Finset (Proposition Atom)) : Finset Atom :=
+  S.biUnion Proposition.vars
+
+/-- Variables of the empty set of propositions is empty. -/
+@[simp]
+theorem Finset.vars_empty : (∅ : Finset (Proposition Atom)).vars = ∅ :=
+  Finset.biUnion_empty
+
+/-- Variables of a singleton set are the variables of that proposition. -/
+@[simp]
+theorem Finset.vars_singleton (A : Proposition Atom) :
+    ({A} : Finset (Proposition Atom)).vars = A.vars :=
+  Finset.singleton_biUnion
+
+/-- Variables of a union of proposition-sets is the union of their variables. -/
+@[simp]
+theorem Finset.vars_union (S T : Finset (Proposition Atom)) :
+    (S ∪ T).vars = S.vars ∪ T.vars :=
+  Finset.union_biUnion
+
+/-- Variables of `insert A S` are the variables of `A` together with the variables of `S`. -/
+@[simp]
+theorem Finset.vars_insert (A : Proposition Atom) (S : Finset (Proposition Atom)) :
+    (insert A S).vars = A.vars ∪ S.vars :=
+  Finset.biUnion_insert
+
+/-- If `A ∈ S`, then `A.vars ⊆ S.vars`. -/
+theorem Finset.vars_subset_of_mem {A : Proposition Atom} {S : Finset (Proposition Atom)}
+    (h : A ∈ S) : A.vars ⊆ S.vars :=
+  Finset.subset_biUnion_of_mem Proposition.vars h
+
+/-- `Finset.vars` is monotone: `S ⊆ T → S.vars ⊆ T.vars`. -/
+theorem Finset.vars_mono {S T : Finset (Proposition Atom)} (h : S ⊆ T) :
+    S.vars ⊆ T.vars :=
+  Finset.biUnion_subset_biUnion_of_subset_left Proposition.vars h
 
 end

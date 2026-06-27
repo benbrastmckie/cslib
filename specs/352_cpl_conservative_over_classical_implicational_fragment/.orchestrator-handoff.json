@@ -1,13 +1,36 @@
 {
-  "task_number": 352,
-  "session_id": "sess_1782454849_22df5a_352",
-  "stage": "plan",
-  "status": "planned",
-  "summary": "Planned CPL conservativity over classical implicational fragment CPL<imp,top> via the truth-assignment (Kalmar) route, not algebraic. 5 sequential phases: (1) ClassicalImpAxiom fragment (K+S+Peirce) plus plumbing appended to FragmentAxioms.lean; (2) new Metalogic/ClassicalImpCompleteness.lean with soundness and negation-free derived Hilbert lemmas; (3) Kalmar truth lemma (risk-concentrated); (4) atom elimination + classicalImp_completeness; (5) cpl_conservative_over_imp + ConservativeChain.lean classical-branch edge + full CI gate. Footprint strictly additive within Propositional/{ProofSystem,Metalogic,Semantics/Algebra} to avoid conflict with running task 350. Zero-debt fallback: BLOCKED phase if Kalmar intractable, no sorry/no axiom.",
-  "phases_total": 5,
-  "estimated_hours": 7,
-  "artifacts": [
-    "specs/352_cpl_conservative_over_classical_implicational_fragment/plans/01_classical-imp-conservativity.md"
+  "status": "partial",
+  "session_id": "sess_1782498610_8a4b4e",
+  "phases_completed": 5,
+  "phases_total": 10,
+  "sorry_inventory": [],
+  "new_axioms": [],
+  "commits": [
+    "a9b474eb: task 352: phase 3: identity lemma (classicalImp_imp_self)",
+    "004a6990: task 352: phase 4: imp_trans composition (classicalImp_imp_trans)",
+    "2082e793: task 352: phase 5: Peirce classical case lemma (classicalImp_peirce_mp)"
   ],
-  "next_command": "/implement 352"
+  "artifacts": {
+    "main_module": "Cslib/Logics/Propositional/Metalogic/ClassicalImpCompleteness.lean",
+    "plan": "specs/352_cpl_conservative_over_classical_implicational_fragment/plans/02_classical-imp-conservativity-v2.md"
+  },
+  "phase_status": {
+    "phase_1": "COMPLETED (FragmentAxioms.lean, commit 14a7c447)",
+    "phase_2": "COMPLETED (module skeleton + soundness)",
+    "phase_3": "COMPLETED (classicalImp_imp_self via S K K)",
+    "phase_4": "COMPLETED (classicalImp_imp_trans via K+S)",
+    "phase_5": "COMPLETED (classicalImp_peirce_mp direct Peirce application)",
+    "phase_6": "NOT STARTED (litCtx definition + membership helper)",
+    "phase_7": "NOT STARTED (Kalmar truth lemma - RISK CONCENTRATED)",
+    "phase_8": "NOT STARTED (single-atom elimination)",
+    "phase_9": "NOT STARTED (iterate elimination + classicalImp_completeness)",
+    "phase_10": "NOT STARTED (conservativity + chain + CI gate)"
+  },
+  "next_action_hint": "Phase 6: Define litCtx (List-based Kalmar literal context) and litCtx_mem helper. See plan Phase 6 for signatures. Note: locate atom collector (Proposition.atoms or Proposition.vars) before implementing hcov in Phase 7.",
+  "important_notes": {
+    "phase_5_shape_note": "classicalImp_peirce_mp takes h : Deriv Γ ((φ.imp goal).imp φ) and returns Deriv Γ φ. This is the direct Peirce MP form. Phase 7 implementation should verify this matches the consumer need in the imp-case true-antecedent false-consequent sub-case. The plan warns 'shape TBD vs consumer' -- the dispatcher for Phase 7 should check if this form suffices or if an additional wrapper lemma is needed.",
+    "phase_7_challenge": "The imp-case sub-case where BoolEvaluate v a = false AND BoolEvaluate v b = false (with general goal) was analyzed and found non-trivial. See plan Phase 7 recipe. The Phase 5 lemma enables: to show Γ ⊢ a → b, show Γ ⊢ ((a→b)→goal)→(a→b) then apply classicalImp_peirce_mp. The inner goal may need careful construction.",
+    "build_status": "lake build Cslib.Logics.Propositional.Metalogic.ClassicalImpCompleteness passes green after each phase commit",
+    "zero_debt": "No sorry, no new axioms in phases 3-5"
+  }
 }

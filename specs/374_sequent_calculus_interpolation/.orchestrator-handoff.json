@@ -4,21 +4,20 @@
   "dispatch_status": "partial",
   "phases_completed": 2,
   "phases_total": 6,
-  "dispatch_summary": "Phase 2 complete: repaired Interpolation.lean from RED (8 build errors) to GREEN (0 errors, 5 deferred sorry for hard cases ax/andR/orL/impL/impR)",
+  "dispatch_summary": "ax case discharged (4-way split: (Γ₁,Δ₁)→⊥, (Γ₁,Δ₂)→A, (Γ₂,Δ₁)→¬A, (Γ₂,Δ₂)→⊤); 4 hard cases remain",
   "build_state": {
     "scoped_build": "green",
     "error_count": 0,
-    "sorry_count": 5
+    "sorry_count": 4
   },
   "sorry_inventory": {
-    "count": 5,
+    "count": 4,
     "items": [
-      {"file": "Cslib/Logics/Propositional/SequentCalculus/LK/Interpolation.lean", "line": 268, "case": "ax"},
-      {"file": "Cslib/Logics/Propositional/SequentCalculus/LK/Interpolation.lean", "line": 272, "case": "andR"},
-      {"file": "Cslib/Logics/Propositional/SequentCalculus/LK/Interpolation.lean", "line": 276, "case": "orL"},
-      {"file": "Cslib/Logics/Propositional/SequentCalculus/LK/Interpolation.lean", "line": 280, "case": "impL"},
-      {"file": "Cslib/Logics/Propositional/SequentCalculus/LK/Interpolation.lean", "line": 284, "case": "impR"}
+      {"case": "andR"},
+      {"case": "orL"},
+      {"case": "impL"},
+      {"case": "impR"}
     ]
   },
-  "continuation_context": "Phase 3: discharge the 5 hard-case sorries (ax/andR/orL/impL/impR). The ax case needs a 4-way split on (A ∈ Γ₁?, A ∈ Δ₁?) with interpolants ⊥/⊤/A/¬A. The two-premise cases (andR, orL, impL) need to combine interpolants I₁ and I₂ from each premise. The impR case can reuse a single interpolant. Then Phase 4: LK Craig corollary. Phase 5: LJ core. Phase 6: LJ corollary + CI pipeline."
+  "continuation_context": "Remaining cases andR/orL/impL (combine I₁,I₂ from both premises) and impR (single interpolant); then Phase 4 LK Craig corollary, Phase 5 LJ core, Phase 6 LJ corollary+CI"
 }

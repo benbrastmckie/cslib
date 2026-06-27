@@ -652,6 +652,24 @@ private lemma classicalExpMeasure_split
              List.map_append, List.map_cons, List.sum_append, List.sum_cons]
   omega
 
+/-- `classicalExpMeasure` is additive over append, given length-aligned first components. -/
+private lemma classicalExpMeasure_append
+    (l1 l2 : List (Branch (Proposition Atom) Unit))
+    (e1 e2 : List (List (SignedFormula (Proposition Atom) Unit)))
+    (h : l1.length = e1.length) :
+    classicalExpMeasure (l1 ++ l2) (e1 ++ e2)
+      = classicalExpMeasure l1 e1 + classicalExpMeasure l2 e2 := by
+  simp only [classicalExpMeasure, List.zip_append h, List.map_append, List.sum_append]
+
+/-- When every new branch shares the same expanded set `newExp`, the measure is the sum of
+`3 ^ classicalBranchComplexity child newExp` over the new branches. -/
+private lemma classicalExpMeasure_const_exp
+    (newBs : List (Branch (Proposition Atom) Unit))
+    (newExp : List (SignedFormula (Proposition Atom) Unit)) :
+    classicalExpMeasure newBs (newBs.map (fun _ => newExp))
+      = (newBs.map (fun child => 3 ^ classicalBranchComplexity child newExp)).sum := by
+  simp only [classicalExpMeasure, ← List.map_prod_left_eq_zip, List.map_map, Function.comp_def]
+
 /-- Base-3 decrease for a BETA step: two children of complexity ≤ C-1 plus the saved unit. -/
 private lemma pow3_two_add_one_le {a0 a1 C : Nat} (hC : 1 ≤ C) (h0 : a0 ≤ C - 1)
     (h1 : a1 ≤ C - 1) :

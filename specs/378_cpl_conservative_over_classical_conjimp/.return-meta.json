@@ -1,0 +1,36 @@
+{
+  "status": "implemented",
+  "started_at": "2026-06-27T00:00:00Z",
+  "completed_at": "2026-06-27T00:30:00Z",
+  "artifacts": [
+    "Cslib/Logics/Propositional/Metalogic/ClassicalConjImpCompleteness.lean",
+    "Cslib.lean",
+    "specs/378_cpl_conservative_over_classical_conjimp/summaries/01_classical-conjimp-conservativity-summary.md"
+  ],
+  "partial_progress": {
+    "stage": "completed",
+    "details": "All 5 phases completed in single dispatch",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 5,
+    "last_completed_phase": "CI gate"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "new_axioms": false,
+    "standard_axioms_only": ["propext", "Classical.choice", "Quot.sound"],
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "notes": "lake shake blocked by pre-existing Modal/Bimodal failures (task 363) - not caused by this task"
+  },
+  "metadata": {
+    "session_id": "sess_1782560395_aeb7ef_378",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
+}

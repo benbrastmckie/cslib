@@ -408,6 +408,7 @@ public import Cslib.Logics.Modal.Tableau.Soundness
 public import Cslib.Logics.Propositional.CurryHoward.Defs
 public import Cslib.Logics.Propositional.CurryHoward.Isomorphism
 public import Cslib.Logics.Propositional.Defs
+public import Cslib.Logics.Propositional.Metalogic.ClassicalConjImpCompleteness
 public import Cslib.Logics.Propositional.Metalogic.ClassicalImpCompleteness
 public import Cslib.Logics.Propositional.Metalogic.DeductionTheorem
 public import Cslib.Logics.Propositional.Metalogic.IntLindenbaum

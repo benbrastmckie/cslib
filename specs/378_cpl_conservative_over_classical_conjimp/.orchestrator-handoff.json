@@ -1,0 +1,26 @@
+{
+  "task": 378,
+  "status": "implemented",
+  "session_id": "sess_1782560395_aeb7ef_378",
+  "summary": "Task 378 (cpl_conservative_over_classical_conjimp) fully implemented and CI-verified.",
+  "deliverables": {
+    "new_file": "Cslib/Logics/Propositional/Metalogic/ClassicalConjImpCompleteness.lean",
+    "barrel": "Cslib.lean (updated)",
+    "theorems": [
+      "Cslib.Logic.PL.classicalConjImp_completeness",
+      "Cslib.Logic.PL.cpl_conservative_over_classicalConjImp",
+      "Cslib.Logic.PL.classicalConjImp_iff_chain",
+      "Cslib.Logic.PL.classicalConjImp_kalmar"
+    ]
+  },
+  "verification": {
+    "sorry_count": 0,
+    "new_axioms": false,
+    "scoped_build": "green",
+    "lint_style": "clean",
+    "environment_lint": "clean",
+    "check_init_imports": "clean"
+  },
+  "sorry_inventory": [],
+  "next_actions": "Update task status to [IMPLEMENTING] -> completed; create git commit; update state.json"
+}

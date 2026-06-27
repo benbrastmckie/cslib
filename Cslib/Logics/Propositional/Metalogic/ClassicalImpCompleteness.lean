@@ -62,4 +62,15 @@ theorem classicalImp_soundness {φ : PL.Proposition Atom}
   obtain ⟨d⟩ := h
   exact prop_soundness_tautology ⟨liftDerivationTree (fun ψ hψ => hψ.toPropAxiom) d⟩
 
+/-! ## Derived Lemmas -/
+
+/-- Identity: `⊢ φ → φ` in the classical implicational fragment, proved by the standard
+S K K derivation. Specifically: S (with ψ := φ→φ, χ := φ) applied to K gives
+`(φ → (φ→φ)) → (φ → φ)`, and a second K gives `φ → φ`. -/
+theorem classicalImp_imp_self (φ : PL.Proposition Atom) :
+    Derivable ClassicalImpAxiom (φ.imp φ) :=
+  mp_deriv
+    (mp_deriv ⟨.ax [] _ (.implyS φ (φ.imp φ) φ)⟩ ⟨.ax [] _ (.implyK φ (φ.imp φ))⟩)
+    ⟨.ax [] _ (.implyK φ φ)⟩
+
 end Cslib.Logic.PL

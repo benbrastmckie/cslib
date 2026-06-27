@@ -235,7 +235,7 @@ prove directly by `induction d` mirroring `prop_soundness` — but try the lift 
 
 ---
 
-### Phase 3: Derived lemma — identity `⊢ φ → φ` [NOT STARTED]
+### Phase 3: Derived lemma — identity `⊢ φ → φ` [COMPLETED]
 
 **Goal**: The implicational identity over `ClassicalImpAxiom`, the first Hilbert derived rule.
 

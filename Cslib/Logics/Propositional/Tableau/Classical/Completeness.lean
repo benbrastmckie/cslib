@@ -564,6 +564,32 @@ private lemma classicalBranchComplexity_drop
         simp only [hfe_x, hfesf_x]
         exact ih hmem'
 
+/-- For an applicable signed formula, the total complexity of the output formulas equals
+`sf.formula.complexity - 1`, and the expanded formula has complexity ≥ 1.
+This identity drives strict decrease of `classicalExpMeasure` at each tableau step. -/
+private lemma classicalApplyOne_output_complexity
+    (sf : SignedFormula (Proposition Atom) Unit) :
+    (match classicalApplyOne sf with
+    | .linear formulas =>
+        1 ≤ sf.formula.complexity ∧
+        (formulas.map (·.formula.complexity)).sum = sf.formula.complexity - 1
+    | .branching branches =>
+        1 ≤ sf.formula.complexity ∧
+        (branches.flatten.map (·.formula.complexity)).sum = sf.formula.complexity - 1
+    | .persistent formulas =>
+        1 ≤ sf.formula.complexity ∧
+        (formulas.map (·.formula.complexity)).sum = sf.formula.complexity - 1
+    | .notApplicable => True) := by
+  obtain ⟨s, φ, l⟩ := sf
+  simp only [SignedFormula.formula]
+  rcases s <;> rcases φ with x | _ | ⟨a, b⟩ | ⟨a, b⟩ | ⟨a, b⟩ <;>
+    (try rcases b with _ | _ | ⟨_, _⟩ | ⟨_, _⟩ | ⟨_, _⟩) <;>
+    simp [classicalApplyOne, tryAllPropRules, applyPropRule, propAndOf?, propOrOf?,
+      propImpOf?, propNegOf?, RuleResult.isApplicable, Proposition.complexity,
+      SignedFormula.neg, SignedFormula.pos, SignedFormula.formula,
+      complexity_atom, complexity_bot, complexity_imp, complexity_and, complexity_or] <;>
+    omega
+
 /-- Beta-robust termination measure: base-3 exponential of per-branch complexity, summed.
 Unlike the additive count `classicalTotalMeasure`, this measure strictly decreases at
 every expansion step (both alpha rules producing one child and beta rules producing two). -/

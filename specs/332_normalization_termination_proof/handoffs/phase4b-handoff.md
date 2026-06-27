@@ -1,5 +1,53 @@
 # Task 332 Phase 4b Handoff — `snSubst` Mutual Termination (L3/L4/L5)
 
+## UPDATE (latest dispatch) — MUTUAL BLOCK FULLY SORRY-FREE + DRIVER ADDED
+
+**Status:** The L3/L4/L5 mutual block (`snImpEForm`/`snOrEForm`/`snSubst`) is now **completely
+`sorry`-free**, and the L6 driver `snForm` + `exists_stronglyNormal_form` are added and
+machine-checked. The ONLY remaining `sorry` in `TerminationScratch.lean` is the pre-existing
+fuel `sorry` in `normalize_isStronglyNormal` (copied from `Termination.lean`; final phase — DO
+NOT touch). `Termination.lean` (main file) was never touched.
+
+Work done this dispatch (each committed at a green build):
+1. **`snOrEForm` `orE` commuting case** (`task 332 phase 4b: snOrEForm commuting case`, `766f2ea6`):
+   push the outer `orE` elimination into the SN major-premise `orE`'s branches, re-eliminating via
+   `snOrEForm` (the `decreasing_by` absorbs the new structural `orE`→`orE` recursion automatically).
+2. **`snSubst` `impI` case** (`task 332 phase 4b: snSubst impI context-cast case`, `c2de3e1d`):
+   reindex the binder context `insert A0 (insert P G) = insert P (insert A0 G)` via
+   `Finset.insert_comm`, weaken `arg` into `insert A0 G`, recurse, reassemble with `impI`. Added
+   cast-invariance lemmas `isStronglyNormal_cast` / `sizeOf_cast`; the latter threads the
+   `sizeOf`-equality into `decreasing_by` (`rw [sizeOf_cast]; omega`).
+3. **`snSubst` `orE` case** (`task 332 phase 4b: snSubst impI/orE context-cast cases`, `fdab9260`):
+   substitute the major premise `D'` and (context-reindexed) branches `DA'`/`DB'`; head-match the
+   substituted major premise `sd'` — if intro-or-`orE`-headed, re-eliminate via `snOrEForm` (the
+   head-bound edge, discharged by `lex3_of_le_of_lt hle`); else reassemble `orE` directly.
+   **Invariant refinement (necessary, not a weakening-to-dodge):** the carried head invariant
+   gained a `body.isOrERoot = false` antecedent. The original
+   `body.isIntroRoot = false → (out intro-or-orE) → B.complexity ≤ P.complexity` is **unprovable
+   for an `orE` body** (its conclusion `B` need not be a subformula of the eliminated disjunction).
+   The refined invariant
+   `body.isIntroRoot = false → body.isOrERoot = false → (out intro-or-orE) → B ≤ P` is vacuous
+   for the `orE` case and is still supplied by every consumer (`andE1`/`andE2`/`impE`/`orE` major
+   premises) because in a strongly-normal derivation an elimination's major premise is never
+   `orE`-headed (that would be a commuting conversion). The head-bound termination proof is
+   unchanged.
+4. **L6 `snForm` driver + `exists_stronglyNormal_form`** (`task 332 phase 4b: snForm driver +
+   exists_stronglyNormal_form`, `ada3f4d6`): structural recursion on the input derivation,
+   dispatching eliminations to `snAndE1Form`/`snAndE2Form`/`snImpEForm`/`snOrEForm` and
+   reassembling intro/leaf cases. Accepted by Lean's structural-recursion checker (no
+   `termination_by` needed). `exists_stronglyNormal_form d := ⟨(snForm d).1, (snForm d).2⟩`.
+
+**Remaining `sorry` inventory (TerminationScratch.lean):**
+  - `normalize_isStronglyNormal` fuel `sorry` (~line 1485) — pre-existing, DO NOT touch.
+
+**Next (later phase, not this dispatch):** port the finished L3/L4/L5/L6 block into
+`Termination.lean`, re-point `subformula_property` at `exists_stronglyNormal_form`, retire the
+fuel `sorry`, delete `TerminationScratch.lean`, run the full CSLib CI pipeline.
+
+---
+
+### (Prior dispatch status retained below)
+
 **Status:** PARTIAL — **HEAD-BOUND TERMINATION CLOSED (sorry-free).** The mutual
 well-founded termination encoding was already solved; this dispatch discharged the sole
 remaining *termination* obligation — the **head-bound** `snSubst → snImpEForm` edge — with no

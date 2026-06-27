@@ -1538,14 +1538,22 @@ CLOSED in this dispatch (head-bound termination, no `sorry`):
     subformula lemmas `cx_and_left/right`, `sizeOf_impE_left/right`, and the lex lemma
     `lex3_of_le_of_lt`.
 
-REMAINING WORK to fully close L5 (none of which touches the validated measure or the head-bound):
-  1. `snSubst`'s `impI`/`orE` cases (`_ => sorry`) and `snOrEForm`'s commuting `orE` case:
-     context casts (`insert A (insert P G) = insert P (insert A G)` reindexing + `arg.weakCtx`);
-     the `sizeOf`-preservation of these casts must be threaded into `decreasing_by`.
+CLOSED (this dispatch) — the mutual block L3/L4/L5 is now fully `sorry`-free:
+  - `snOrEForm`'s commuting `orE` case (push the elimination into the SN `orE`'s branches,
+    re-eliminating via `snOrEForm`).
+  - `snSubst`'s `impI` and `orE` cases via the context-reindex cast
+    `insert A (insert P G) = insert P (insert A G)` (`Finset.insert_comm`), with cast invariance
+    lemmas `isStronglyNormal_cast`/`sizeOf_cast` threading the `sizeOf` equality into
+    `decreasing_by` (`rw [sizeOf_cast]; omega`).
+  - The carried head invariant was refined with a `body.isOrERoot = false` antecedent (the `orE`
+    case's conclusion need not be a subformula of the eliminated disjunction); all consumers
+    supply it since an elimination's major premise is never `orE`-headed in a SN derivation.
 
 The `snSubst` head-bound termination obligation is discharged sorry-free via the carried
 head-behaviour invariant (see `snSubst` below); the stage-1 scaffolding stubs have been
-removed. -/
+removed. The structural driver `snForm` (L6) and `exists_stronglyNormal_form` are appended after
+the block. The only remaining `sorry` in this file is the pre-existing fuel `sorry` in
+`normalize_isStronglyNormal` (copied from `Termination.lean`; the final phase). -/
 
 /-- `sizeOf` of an `impE`'s function premise is smaller than the whole derivation. Proven
 outside the mutual block so the termination proof can close the `impE` structural edge by a

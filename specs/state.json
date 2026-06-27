@@ -70,7 +70,7 @@
     {
       "project_number": 352,
       "project_name": "cpl_conservative_over_classical_implicational_fragment",
-      "status": "implementing",
+      "status": "blocked",
       "task_type": "cslib",
       "description": "Prove CPL is conservative over its classical implicational fragment CPL⟨→,⊤⟩, extending the propositional conservativity chain to the classical side, as raised in the Zulip CSLib Propositional Logic thread by Matthew Doty (2026-06-25): \"There's also CPL⟨→, ⊤⟩ ... Is it worth proving CPL is conservative over that?\" (https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/near/606508446). The classical implicational fragment Hilbert system is K (φ → ψ → φ), S, and a classical implicational axiom (e.g. Peirce's law ((φ → ψ) → φ) → φ; the research phase must pin down the exact axiomatization — Matthew's thread message lists candidate schemata that should be verified). The existing chain (completed tasks 310/311/312/322) closes the intuitionistic and minimal sides — IPL⟨→,⊤⟩ ⊂ IPL⟨∧,→,⊤⟩ ⊂ IPL⟨∧,→,⊥,⊤⟩ ⊂ IPL and the MPL chain — via Hilbert-algebra / Brouwerian routes in Cslib/Logics/Propositional/Semantics/Algebra/{ImpConservative,ConjImpConservative,ConservativeChain,MplConservativeChain,Hilbert}.lean, with fragment axioms in ProofSystem/FragmentAxioms.lean (ImpAxiom, ConjImpAxiom, ConjImpBotAxiom). For the classical implicational fragment the natural algebraic semantics are implication algebras / Tarski algebras; Matthew noted these are obscure and suggested traditional truth-assignment semantics may be the more natural route here (\"I'm not about using algebraic semantics here, rather than traditional truth assignments\") — the research/plan phase should evaluate both routes and pick the cleaner one. Deliver a cpl_conservative_over_imp (classical) conservativity theorem analogous to the intuitionistic ipl_conservative_over_imp, adding the classical implicational fragment axiom set to FragmentAxioms.lean and extending the derivability subsumption chain. NOTE: Matthew himself flagged this as lower-interest (\"not as interesting in terms of Curry-Howard or Category theory or anything\"), so this is an optional/exploratory extension — confirm desirability before heavy investment. Files: Cslib/Logics/Propositional/ProofSystem/FragmentAxioms.lean, a new Semantics/Algebra/ClassicalImpConservative.lean (or a truth-assignment-based module), ConservativeChain.lean. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); existing chain preserved.",
       "topic": "Algebraic Semantics",
@@ -88,7 +88,7 @@
           "summary": "v2 streamlined: 10 fine phases, one-lemma-per-dispatch, pre-stated Lean signatures, List-based litCtx (no Finset), anti-overflow tactics; phase 1 committed"
         }
       ],
-      "blockers": "Phases 2-5 (truth-assignment Kalmár completeness for ClassicalImpAxiom) blocked: two cslib-implementation-agent runs both exceeded context/output token limits while constructing the negation-free Kalmar truth lemma + atom-elimination proof, committing zero progress on Metalogic/ClassicalImpCompleteness.lean. Phase 1 (ClassicalImpAxiom K+S+Peirce fragment + plumbing) is committed and green (14a7c447). Resume path: break the Kalmar proof into separate per-lemma dispatches (derived Peirce lemmas; truth lemma true/false cases; atom elimination; classicalImp_completeness; cpl_conservative_over_imp) rather than one agent run. Zero-debt: no sorry, no axiom introduced.",
+      "blockers": "Phase 7 (Kalmár truth lemma) blocked by a GENUINE MATHEMATICAL obstruction (not tooling/overflow): the truth-assignment route's uniform literal-context Kalmár lemma is FALSE. Counterexample (committed bcfa16fe): φ=(p→q), v(p)=v(q)=F (so v⊨p→q), goal=r, as=[p,q] gives Γ=[p→r,q→r], but Γ⊬p→q (countermodel p=T,q=F,r=T). A fixed surrogate goal=φ also fails to close the v⊨(a→b),v⊭a sub-case (would need φ→b). Phases 1-6 committed GREEN, zero-debt (no sorry/axiom): ClassicalImpAxiom fragment+plumbing, classicalImp_soundness, derived lemmas (imp_self/imp_trans/peirce_mp), litCtx + litCtx_mem, Proposition.atoms. RESUME OPTIONS: (A) /research 352 --hard to find the correct completeness technique for the pure {→}-fragment (K+S+Peirce IS complete — classical result — but uniform-context Kalmár is the wrong proof; evaluate the implication-algebra/Tarski-algebra route Matthew flagged as 'obscure but natural'), then /revise + /implement. (B) Given the task is explicitly OPTIONAL/low-interest, consider /task --abandon 352 keeping Phases 1-6 as landed value, or descope to PR just the implicational fragment axioms + soundness.",
       "session_id": "sess_1782498610_8a4b4e"
     },
     {
@@ -480,12 +480,12 @@
     {
       "project_number": 316,
       "project_name": "propositional_tableau_soundness",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Fill the 6 sorry instances in propositional tableau soundness proofs across all three logics. Classical (Classical/Soundness.lean): prove classically_closed_unsatisfiable (closed branch is unsatisfiable under any Boolean valuation) and classicalTableau_sound (closed tableau implies Tautology phi), plus one helper lemma — by induction on rule applications showing each propositional rule preserves satisfiability. Intuitionistic (Intuitionistic/Soundness.lean): prove intuitionisticTableau_sound (closed tableau implies IValid phi) plus two helper lemmas — by showing each rule (including world-creating F(imp) and persistent T(imp)) preserves forcing at Kripke worlds. Minimal (Minimal/DecisionProcedure.lean): prove minimalTableau_sound (closed tableau implies MValid phi) — adapts intuitionistic proof with MinimalClosure (complementary atoms only, no ex falso). Core technique: induction on expansion steps showing each rule application preserves the semantic invariant for the respective logic.",
       "created": "2026-06-23T19:55:52Z",
-      "last_updated": "2026-06-26T18:10:45Z",
+      "last_updated": "2026-06-27T03:56:42Z",
       "next_artifact_number": 3,
       "artifacts": [
         {
@@ -507,8 +507,8 @@
         323
       ],
       "parent_task": 298,
-      "session_id": "sess_1782495649_5c7163",
-      "completion_summary": "PARTIAL: Intuitionistic/Soundness.lean builds green; recovered FreshAbove machinery committed. 3 sorries remain (2 hfresh + linearResult F-imp 4-tuple). Needs /revise 316 to thread freshInv through the key suffices before further /implement. Classical and Minimal soundness sorries unstarted."
+      "session_id": "sess_1782527785_b82b94",
+      "completion_summary": "All task-316 soundness sorries closed; build green. Classical/Soundness.lean, Intuitionistic/Soundness.lean, and Minimal/DecisionProcedure.lean each build with 0 sorry tactics (verified via lake build, no 'declaration uses sorry' warnings in the soundness modules). Final obstacle — the world-creating F(->) 4-tuple case in intExpandBranches_closed_unsat — closed via intRule_preserves_sat with worldOf' threading plus inline FreshAbove derivation. lint-style clean. Out of scope: Intuitionistic/Completeness.lean and Minimal/Completeness.lean still carry sorries (completeness, not soundness)."
     },
     {
       "project_number": 317,

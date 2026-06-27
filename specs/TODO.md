@@ -11,8 +11,8 @@ next_project_number: 365
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,345,352,355,360,361,362,363,364 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,317,332,348 | 36,37,180,290,299,316,345 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,317,321,342,345,352,355,360,361,362,363,364 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,332,348 | 36,37,180,290,299,345 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -42,8 +42,7 @@ next_project_number: 365
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
   └─ 332 [IMPLEMENTING] — Prove the normalization termination theorem for CSLib Theory.Deri
-316 [IMPLEMENTING] — Fill the 6 sorry instances in propositional tableau soundness pro
-  └─ 317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
+317 [BLOCKED] — Fill the 8 sorry instances in propositional tableau completeness 
 345 [RESEARCHED] — Reconcile the two strength encodings on the Hilbert substrate and
   └─ 348 [NOT STARTED] — Restate Glivenko and conservativity theory-parametrically against
 
@@ -63,7 +62,7 @@ next_project_number: 365
 
 ### Algebraic Semantics
 
-352 [IMPLEMENTING] — Prove CPL is conservative over its classical implicational fragme
+352 [BLOCKED] — Prove CPL is conservative over its classical implicational fragme
 
 ### Uncategorized
 
@@ -188,7 +187,7 @@ next_project_number: 365
 ---
 
 ### 352. Cpl conservative over classical implicational fragment
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: None
@@ -536,7 +535,7 @@ next_project_number: 365
 ---
 
 ### 316. Propositional tableau soundness
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 323

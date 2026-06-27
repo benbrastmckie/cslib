@@ -129,7 +129,7 @@ Phases within the same wave can execute in parallel. (Phase 1 touches `Equivalen
 `FragmentAxioms.lean`; Phase 2 touches substrate evaluator files — they are disjoint and may run
 in parallel.)
 
-### Phase 1: `ConjImpAxioms` class + `MinimalAxioms extends` + 3 fragment instances [NOT STARTED]
+### Phase 1: `ConjImpAxioms` class + `MinimalAxioms extends` + 3 fragment instances [IN PROGRESS]
 
 **Goal**: Introduce the single varying proof-theoretic input — a 5-field conj-imp typeclass that
 is a strict factor of `MinimalAxioms` — and give the three fragment axiom families instances,

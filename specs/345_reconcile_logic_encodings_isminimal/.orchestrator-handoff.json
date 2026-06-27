@@ -1,0 +1,38 @@
+{
+  "status": "implemented",
+  "summary": "Task 345 complete: added minimal, IsMinimal, minimalAxioms_iff_forall_minPropAxiom (★), isMinimalIff, minimalAxioms_iff_subset, instIsMinimalExtention, and instIsMinimalMinimal to Cslib/Logics/Propositional/NaturalDeduction/Equivalence.lean. All zero-debt: no sorry, no new axioms, module builds clean.",
+  "phases_completed": 5,
+  "phases_total": 5,
+  "blockers": [],
+  "continuation_context": {
+    "file_modified": "Cslib/Logics/Propositional/NaturalDeduction/Equivalence.lean",
+    "declarations_added": [
+      "Cslib.Logic.PL.minimal",
+      "Cslib.Logic.PL.IsMinimal",
+      "Cslib.Logic.PL.minimalAxioms_iff_forall_minPropAxiom",
+      "Cslib.Logic.PL.isMinimalIff",
+      "Cslib.Logic.PL.minimalAxioms_iff_subset",
+      "Cslib.Logic.PL.instIsMinimalExtention",
+      "Cslib.Logic.PL.instIsMinimalMinimal"
+    ],
+    "deviations": [
+      "Removed @[scoped grind =] from isMinimalIff (MinimalAxioms not tagged @[scoped grind] in Cslib.Logic.PL namespace)",
+      "Removed @[scoped grind →] from instIsMinimalExtention (same reason)",
+      "omit [DecidableEq Atom] in must precede docstring, not follow it",
+      "Used fun _ hx => hx instead of Set.subset_refl (not in scope)"
+    ],
+    "pre_existing_failures": [
+      "Cslib.Logics.Bimodal.Metalogic.Separation.Duality",
+      "Cslib.Logics.Bimodal.Metalogic.Separation.DedekindZ.QLemma",
+      "Cslib.Logics.Bimodal.Metalogic.Separation.Eliminations",
+      "Cslib.Logics.Bimodal.Theorems.Perpetuity.Bridge",
+      "Cslib.Logics.Modal.Tableau.Soundness"
+    ]
+  },
+  "next_action_hint": "ready_for_pr",
+  "artifacts": [
+    "Cslib/Logics/Propositional/NaturalDeduction/Equivalence.lean",
+    "specs/345_reconcile_logic_encodings_isminimal/summaries/01_isminimal-reconciliation-summary.md",
+    "specs/345_reconcile_logic_encodings_isminimal/plans/01_isminimal-reconciliation.md"
+  ]
+}

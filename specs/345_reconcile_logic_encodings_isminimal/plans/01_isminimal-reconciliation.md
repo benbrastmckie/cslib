@@ -1,7 +1,7 @@
 # Implementation Plan: Task #345 — Reconcile Logic Encodings (`IsMinimal`)
 
 - **Task**: 345 - Reconcile logic encodings: add `IsMinimal` inclusion view + `MinimalAxioms` bridge
-- **Status**: [IN PROGRESS]
+- **Status**: [COMPLETED]
 - **Effort**: 3 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/345_reconcile_logic_encodings_isminimal/reports/01_team-research.md
@@ -190,7 +190,7 @@ isolation).
 - **Timing:** ~30 min
 - **Depends on:** 3
 
-### Phase 5: CI verification (full pipeline) [IN PROGRESS]
+### Phase 5: CI verification (full pipeline) [COMPLETED]
 
 - **Goal:** Confirm the change is zero-debt and CI-green across the whole pipeline.
 - **Tasks:**

@@ -60,12 +60,14 @@
   "cycle_count": 99,
   "failed_tasks": [],
   "completed_tasks": [
-    371
+    371,
+    376,
+    363
   ],
   "current_statuses": {
-    "376": "partial",
+    "376": "completed",
     "371": "completed",
-    "363": "blocked",
+    "363": "completed",
     "374": "partial",
     "369": "blocked",
     "317": "blocked",
@@ -114,7 +116,7 @@
     }
   },
   "notes_371": "Phases 1-2 files created (LJ SubformulaProperty, LK Decidability). Phase 3 (lk_cut_free_completeness) + Phase 4 (barrels+CI) remain. Agent overflowed context. Continuation deferred until 376 build finishes (avoid concurrent lake build in shared worktree).",
-  "notes_376": "29e9d5b0 committed BROKEN (good infra classicalBranchComplexity/append/mono_expanded at 535-553 + broken decrease-lemma attempts 563-632, Bool API errors). Last verified-green = 241816a3 (1 sorry). Dispatching stabilizer to restore green keeping good infra. Measure-decrease attempts so far: 2 (nothing closeable).",
+  "notes_376": "376 SORRY-FREE 3a98ae6b! classicalExpandBranches_hintikka fully proven. Completeness.lean+Expansion.lean 0 sorry, full chain green 691 jobs. 363 blocker resolved (shares file). Phase 5: CI gate + update stale doc comments (DecisionProcedure/Soundness say completeness rests on sorry - now false).",
   "notes_374": "PARKED PARTIAL after 4 reproducible 32k-output deaths on andR (direct/tight/micro/abstract). BANKED+committed: Phase1 vars (Subformula.lean), Phase2 interpolation scaffold (green), Phase3 ax case (cc27c644). REMAINING: 4 interpolation cases (andR/orL/impL — two-premise; impR — single) as documented sorries in LK/Interpolation.lean, then Phase4 LK Craig corollary, Phase5 LJ core, Phase6 LJ+CI. Needs a more capable model or different proof structuring; not closeable in bounded sonnet dispatches. 374 is a dependency leaf — parking blocks nothing.",
   "parked_partial": [
     374
@@ -131,5 +133,7 @@
     317,
     375
   ],
-  "final_outcome": "1 completed (371), 2 partial (374,376), 4 blocked on 376 measure-decrease kernel (363,369,317,375)"
+  "final_outcome": "1 completed (371), 2 partial (374,376), 4 blocked on 376 measure-decrease kernel (363,369,317,375)",
+  "phase": "research-review-resume",
+  "current_phase_376": "5-CI"
 }

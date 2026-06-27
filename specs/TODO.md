@@ -1,17 +1,17 @@
 ---
-next_project_number: 356
+next_project_number: 361
 ---
 
 # TODO
 
 ## Task Order
 
-*Updated 2026-06-26. Generated from state.json dependency graph.*
+*Updated 2026-06-27. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,345,352,355 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,316,321,342,345,352,355,356,357,358,359,360 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,317,332,348 | 36,37,180,290,299,316,345 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275 | 39,40 | Foundations |
 
@@ -62,11 +62,62 @@ next_project_number: 356
 
 ### Algebraic Semantics
 
-352 [BLOCKED] — Prove CPL is conservative over its classical implicational fragme
+352 [IMPLEMENTING] — Prove CPL is conservative over its classical implicational fragme
 
 ### Uncategorized
 
+356 [NOT STARTED] — Six public theorems in Cslib/Logics/Temporal/Metalogic/DenseMCS.l
+357 [NOT STARTED] — Five task-350 files suppress linters globally via set_option lint
+358 [NOT STARTED] — Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean is a documenta
+359 [NOT STARTED] — Four docstrings embed internal development task numbers: HilbertS
+360 [NOT STARTED] — The repo-wide 'lake build' currently fails (unrelated to vetted t
+
 ## Tasks
+
+### 360. Repair 11 pre-existing broken modules failing repo-wide lake build
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: The repo-wide 'lake build' currently fails (unrelated to vetted tasks 343/344/350/351/353/354, whose files build clean in isolation). Failing modules: Cslib.Logics.Modal.Denotation (simp made no progress, Denotation.lean:60), Cslib.Logics.Bimodal.Syntax.SubformulaClosure.NestingDepth (unsolved goals, multiple lines), Cslib.Logics.Temporal.ConservativeExtension (ambiguous term, lines 54/59/69), Cslib.Logics.Bimodal.Theorems.Perpetuity.Principles (type mismatch, lines 84/164/176), Cslib.Logics.Temporal.Metalogic.DenseCompleteness (unsolved goals, line 166), Cslib.Logics.Propositional.SequentCalculus (duplicate _proof_1 environment clash between LJ and LK CutElimination), Cslib.Logics.Bimodal.Metalogic.Separation.Defs (many simp made no progress), Cslib.Logics.Propositional.Tableau.Minimal.Soundness, Cslib.Logics.Bimodal.ProofSystem.Substitution, Cslib.Logics.Modal.Tableau.Soundness, Cslib.Logics.Propositional.Tableau.Classical.Completeness. checkInitImports/shake also fail downstream due to missing oleans. Restore a green repo-wide build. Source: /vet CI run 2026-06-26.
+
+---
+
+### 359. Remove internal task numbers and Zulip-only citation from public docstrings
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Four docstrings embed internal development task numbers: HilbertStrongCompleteness.lean (lines 31, 114, 118 reference 'task 341') and MplConservativeChain.lean (line 229 references 'task 353'). Replace these with references to the named theorems/lemmas directly. Additionally, DeductionCharacterization.lean (line 36) cites only a CSLib Zulip thread as its reference; replace or supplement with a published source for the deduction-theorem characterization (e.g. Troelstra & Schwichtenberg, Basic Proof Theory). Source: /vet of tasks 344, 351, 354.
+
+---
+
+### 358. Rewrite Modal/GenericMCSBridge.lean to remove contradictory gap analysis
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean is a documentation-only file whose CORRECTION NOTICE (lines 14-32) states the original gap analysis was OUTDATED, but the old (incorrect) Component 1/2/3 analysis (lines 34-160) remains in place, making the file self-contradictory. Rewrite the module docstring to reflect the corrected understanding (the bridge IS buildable but requires a HilbertOf wrapper type) and remove or clearly archive the obsolete analysis. Source: /vet of task 350.
+
+---
+
+### 357. Replace global linter suppressions with targeted nolint in task-350 files
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Five task-350 files suppress linters globally via set_option linter.* directives. Bimodal/Metalogic/Core/DeductionTheorem.lean disables linter.style.show, linter.style.emptyLine, and linter.flexible (lines 43-46). Bimodal/Metalogic/Core/GenericMCSBridge.lean (line 64) and Temporal/Metalogic/GenericMCSBridge.lean (line 54) disable linter.dupNamespace globally. Temporal/Metalogic/DenseMCS.lean (line 43) disables linter.flexible globally. Fix the underlying style/naming issue and remove each suppression, or use per-declaration @[nolint <category>] as DenseMCS.lean already does for dupNamespace on Temporal.DerivFc. Fix all linter issues accurately rather than blanket-suppressing. Source: /vet of task 350.
+
+---
+
+### 356. Add missing docstrings to six theorems in Temporal/DenseMCS.lean
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Six public theorems in Cslib/Logics/Temporal/Metalogic/DenseMCS.lean lack /-- -/ docstrings: mp_deriv_fc (line 72), weakening_deriv_fc (line 80), assumption_deriv_fc (line 87), mcs_bot_not_mem_fc (line 324), mcs_neg_of_not_mem_fc (line 334), mcs_not_mem_of_neg_fc (line 342). Add a brief /-- ... -/ docstring immediately before each declaration to clear docBlame lint warnings. Source: /vet of task 350.
+
+---
 
 ### 355. Modal propositional deduction theorem consolidation
 - **Status**: [NOT STARTED]
@@ -99,12 +150,12 @@ next_project_number: 356
 ---
 
 ### 352. Cpl conservative over classical implicational fragment
-- **Status**: [BLOCKED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: None
 - **Research**: [352_cpl_conservative_over_classical_implicational_fragment/reports/01_cpl-conservative-classical-implicational.md]
-- **Plan**: [352_cpl_conservative_over_classical_implicational_fragment/plans/01_classical-imp-conservativity.md]
+- **Plan**: [352_cpl_conservative_over_classical_implicational_fragment/plans/02_classical-imp-conservativity-v2.md]
 
 **Description**: Prove CPL is conservative over its classical implicational fragment CPL⟨→,⊤⟩, extending the propositional conservativity chain to the classical side, as raised in the Zulip CSLib Propositional Logic thread by Matthew Doty (2026-06-25): "There's also CPL⟨→, ⊤⟩ ... Is it worth proving CPL is conservative over that?" (https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/near/606508446). The classical implicational fragment Hilbert system is K (φ → ψ → φ), S, and a classical implicational axiom (e.g. Peirce's law ((φ → ψ) → φ) → φ; the research phase must pin down the exact axiomatization — Matthew's thread message lists candidate schemata that should be verified). The existing chain (completed tasks 310/311/312/322) closes the intuitionistic and minimal sides — IPL⟨→,⊤⟩ ⊂ IPL⟨∧,→,⊤⟩ ⊂ IPL⟨∧,→,⊥,⊤⟩ ⊂ IPL and the MPL chain — via Hilbert-algebra / Brouwerian routes in Cslib/Logics/Propositional/Semantics/Algebra/{ImpConservative,ConjImpConservative,ConservativeChain,MplConservativeChain,Hilbert}.lean, with fragment axioms in ProofSystem/FragmentAxioms.lean (ImpAxiom, ConjImpAxiom, ConjImpBotAxiom). For the classical implicational fragment the natural algebraic semantics are implication algebras / Tarski algebras; Matthew noted these are obscure and suggested traditional truth-assignment semantics may be the more natural route here ("I'm not about using algebraic semantics here, rather than traditional truth assignments") — the research/plan phase should evaluate both routes and pick the cleaner one. Deliver a cpl_conservative_over_imp (classical) conservativity theorem analogous to the intuitionistic ipl_conservative_over_imp, adding the classical implicational fragment axiom set to FragmentAxioms.lean and extending the derivability subsumption chain. NOTE: Matthew himself flagged this as lower-interest ("not as interesting in terms of Curry-Howard or Category theory or anything"), so this is an optional/exploratory extension — confirm desirability before heavy investment. Files: Cslib/Logics/Propositional/ProofSystem/FragmentAxioms.lean, a new Semantics/Algebra/ClassicalImpConservative.lean (or a truth-assignment-based module), ConservativeChain.lean. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); existing chain preserved.
 

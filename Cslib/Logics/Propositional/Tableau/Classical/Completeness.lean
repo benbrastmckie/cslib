@@ -598,6 +598,21 @@ private def classicalExpMeasure
     (expandedSets : List (List (SignedFormula (Proposition Atom) Unit))) : Nat :=
   ((branches.zip expandedSets).map fun p => 3 ^ classicalBranchComplexity p.1 p.2).sum
 
+/-- `classicalExpMeasure` splits over a single distinguished position, given length-aligned prefixes. -/
+private lemma classicalExpMeasure_split
+    (done : List (Branch (Proposition Atom) Unit))
+    (doneExp : List (List (SignedFormula (Proposition Atom) Unit)))
+    (b : Branch (Proposition Atom) Unit) (e : List (SignedFormula (Proposition Atom) Unit))
+    (rest : List (Branch (Proposition Atom) Unit))
+    (restEs : List (List (SignedFormula (Proposition Atom) Unit)))
+    (hlen : done.length = doneExp.length) :
+    classicalExpMeasure (done ++ b :: rest) (doneExp ++ e :: restEs)
+      = classicalExpMeasure done doneExp + 3 ^ classicalBranchComplexity b e
+        + classicalExpMeasure rest restEs := by
+  simp only [classicalExpMeasure, List.zip_append hlen, List.zip_cons_cons,
+             List.map_append, List.map_cons, List.sum_append, List.sum_cons]
+  omega
+
 /-- Base-3 decrease for a BETA step: two children of complexity ≤ C-1 plus the saved unit. -/
 private lemma pow3_two_add_one_le {a0 a1 C : Nat} (hC : 1 ≤ C) (h0 : a0 ≤ C - 1)
     (h1 : a1 ≤ C - 1) :

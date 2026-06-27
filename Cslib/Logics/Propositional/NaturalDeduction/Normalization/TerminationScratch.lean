@@ -1670,27 +1670,31 @@ private def Theory.Derivation.snOrEForm {G : Ctx Atom} {A B C : Proposition Atom
 
 The return subtype carries, beyond strong normality, the **head-behaviour invariant**
 
-    body.isIntroRoot = false →
+    body.isIntroRoot = false → body.isOrERoot = false →
       (d.isIntroRoot = true ∨ d.isOrERoot = true) → B.complexity ≤ P.complexity
 
-i.e. if the input `body` is neutral and the substituted output became intro-or-`orE`-headed,
-then the substituted variable was on `body`'s elimination spine and the conclusion `B` is a
-subformula of the cut `P`. This is exactly what discharges the head-bound termination obligation
-at the `impE`/`orE` re-elimination edge (the `snSubst → snImpEForm` call). -/
+i.e. if the input `body` is a *neutral elimination* (neither intro- nor `orE`-headed) and the
+substituted output became intro-or-`orE`-headed, then the substituted variable was on `body`'s
+elimination spine and the conclusion `B` is a subformula of the cut `P`. This is exactly what
+discharges the head-bound termination obligation at the `impE`/`orE` re-elimination edge (the
+`snSubst → snImpEForm`/`snOrEForm` call). The `body.isOrERoot = false` antecedent is required for
+the `orE` case (whose conclusion `B` need not be a subformula of the eliminated disjunction); it
+is always available at the consumers because in a strongly-normal derivation an elimination's
+major premise is never `orE`-headed (that would be a commuting conversion). -/
 private def Theory.Derivation.snSubst {P B : Proposition Atom} {G : Ctx Atom}
     (body : T.Derivation (insert P G) B) (hbody : body.isStronglyNormal = true)
     (arg : T.Derivation G P) (harg : arg.isStronglyNormal = true) :
     {d : T.Derivation G B //
       d.isStronglyNormal = true ∧
-      (body.isIntroRoot = false →
+      (body.isIntroRoot = false → body.isOrERoot = false →
         (d.isIntroRoot = true ∨ d.isOrERoot = true) → B.complexity ≤ P.complexity)} :=
   match body, hbody with
-  | .ax h, _ => ⟨ax h, rfl, by intro _ hor; simp [isIntroRoot, isOrERoot] at hor⟩
+  | .ax h, _ => ⟨ax h, rfl, by intro _ _ hor; simp [isIntroRoot, isOrERoot] at hor⟩
   | .ass h, _ => by
       by_cases hBP : B = P
-      · subst hBP; exact ⟨arg, harg, by intro _ _; exact le_refl _⟩
+      · subst hBP; exact ⟨arg, harg, by intro _ _ _; exact le_refl _⟩
       · exact ⟨ass ((Finset.mem_insert.mp h).resolve_left hBP), rfl,
-          by intro _ hor; simp [isIntroRoot, isOrERoot] at hor⟩
+          by intro _ _ hor; simp [isIntroRoot, isOrERoot] at hor⟩
   | .andI _ X Y, hbd =>
       have hbd' : X.isStronglyNormal = true ∧ Y.isStronglyNormal = true := by
         simpa only [isStronglyNormal, Bool.and_eq_true] using hbd
@@ -1699,54 +1703,60 @@ private def Theory.Derivation.snSubst {P B : Proposition Atom} {G : Ctx Atom}
       ⟨andI _ sx.1 sy.1, by
         refine ⟨?_, ?_⟩
         · simp only [isStronglyNormal, Bool.and_eq_true]; exact ⟨sx.2.1, sy.2.1⟩
-        · intro hni _; simp [isIntroRoot] at hni⟩
+        · intro hni _ _; simp [isIntroRoot] at hni⟩
   | .orI1 _ d0, hbd =>
       have hd0 : d0.isStronglyNormal = true := by simpa only [isStronglyNormal] using hbd
       let s := snSubst d0 hd0 arg harg
       ⟨orI1 _ s.1, by
         refine ⟨?_, ?_⟩
         · simpa only [isStronglyNormal] using s.2.1
-        · intro hni _; simp [isIntroRoot] at hni⟩
+        · intro hni _ _; simp [isIntroRoot] at hni⟩
   | .orI2 _ d0, hbd =>
       have hd0 : d0.isStronglyNormal = true := by simpa only [isStronglyNormal] using hbd
       let s := snSubst d0 hd0 arg harg
       ⟨orI2 _ s.1, by
         refine ⟨?_, ?_⟩
         · simpa only [isStronglyNormal] using s.2.1
-        · intro hni _; simp [isIntroRoot] at hni⟩
+        · intro hni _ _; simp [isIntroRoot] at hni⟩
   | .andE1 _ D', hbd =>
       have hD'sn : D'.isStronglyNormal = true := by cases D' <;> simp_all [isStronglyNormal]
       have hD'ni : D'.isIntroRoot = false := by
         cases D' <;> simp_all [isStronglyNormal, isIntroRoot]
+      have hD'no : D'.isOrERoot = false := by
+        cases D' <;> simp_all [isStronglyNormal, isOrERoot]
       let e := snSubst D' hD'sn arg harg
       let s := snAndE1Form e.1 e.2.1
       ⟨s.1, s.2, by
-        intro _ hd
+        intro _ _ hd
         have hee := snAndE1Form_head e.1 e.2.1 hd
-        have hle := e.2.2 hD'ni hee
+        have hle := e.2.2 hD'ni hD'no hee
         exact le_trans (le_of_lt cx_and_left) hle⟩
   | .andE2 _ D', hbd =>
       have hD'sn : D'.isStronglyNormal = true := by cases D' <;> simp_all [isStronglyNormal]
       have hD'ni : D'.isIntroRoot = false := by
         cases D' <;> simp_all [isStronglyNormal, isIntroRoot]
+      have hD'no : D'.isOrERoot = false := by
+        cases D' <;> simp_all [isStronglyNormal, isOrERoot]
       let e := snSubst D' hD'sn arg harg
       let s := snAndE2Form e.1 e.2.1
       ⟨s.1, s.2, by
-        intro _ hd
+        intro _ _ hd
         have hee := snAndE2Form_head e.1 e.2.1 hd
-        have hle := e.2.2 hD'ni hee
+        have hle := e.2.2 hD'ni hD'no hee
         exact le_trans (le_of_lt cx_and_right) hle⟩
   | .impE D' E', hbd =>
       have hD'sn : D'.isStronglyNormal = true := by cases D' <;> simp_all [isStronglyNormal]
       have hE'sn : E'.isStronglyNormal = true := by cases D' <;> simp_all [isStronglyNormal]
       have hD'ni : D'.isIntroRoot = false := by
         cases D' <;> simp_all [isStronglyNormal, isIntroRoot]
+      have hD'no : D'.isOrERoot = false := by
+        cases D' <;> simp_all [isStronglyNormal, isOrERoot]
       let d' := snSubst D' hD'sn arg harg
       let e' := snSubst E' hE'sn arg harg
       if h : d'.1.isIntroRoot = true ∨ d'.1.isOrERoot = true then
-        have hle := d'.2.2 hD'ni h
+        have hle := d'.2.2 hD'ni hD'no h
         let r := snImpEForm d'.1 d'.2.1 e'.1 e'.2.1
-        ⟨r.1, r.2, by intro _ _; exact le_trans (le_of_lt cx_imp_right) hle⟩
+        ⟨r.1, r.2, by intro _ _ _; exact le_trans (le_of_lt cx_imp_right) hle⟩
       else
         ⟨impE d'.1 e'.1, by
           have hi : d'.1.isIntroRoot = false := by
@@ -1761,7 +1771,7 @@ private def Theory.Derivation.snSubst {P B : Proposition Atom} {G : Ctx Atom}
           have hsnE := e'.2.1
           refine ⟨?_, ?_⟩
           · cases hx : d'.1 <;> simp_all [isStronglyNormal, isIntroRoot, isOrERoot]
-          · intro _ hor; simp [isIntroRoot, isOrERoot] at hor⟩
+          · intro _ _ hor; simp [isIntroRoot, isOrERoot] at hor⟩
   | .impI (A := A0) (B := B0) _ bd, hbd =>
       -- `body = impI bd : insert P G ⊢ (A0 → B0)`; substitute `arg` for `P` under the binder by
       -- reindexing `bd`'s context `insert A0 (insert P G) = insert P (insert A0 G)` (P to front),
@@ -1776,8 +1786,53 @@ private def Theory.Derivation.snSubst {P B : Proposition Atom} {G : Ctx Atom}
       ⟨impI _ s.1, by
         refine ⟨?_, ?_⟩
         · simpa only [isStronglyNormal] using s.2.1
-        · intro hni _; simp [isIntroRoot] at hni⟩
-  | _, _ => sorry  -- orE: deferred (needs invariant refinement + branch context casts)
+        · intro hni _ _; simp [isIntroRoot] at hni⟩
+  | .orE (A := A0) (B := B0) _ D' DA' DB', hbd =>
+      -- `body = orE D' DA' DB' : insert P G ⊢ B`, strongly normal ⇒ major premise `D'` is neutral
+      -- and not `orE`-headed. Substitute `arg` for `P` in `D'` and (after reindexing the binder
+      -- contexts `insert A0/B0 (insert P G) = insert P (insert A0/B0 G)`) in the branches; then
+      -- head-match the substituted major premise `sd'`: if it became intro-or-`orE`-headed,
+      -- re-eliminate via `snOrEForm` (head-bound edge); otherwise reassemble `orE` directly.
+      have hD'sn  : D'.isStronglyNormal  = true := by cases D' <;> simp_all [isStronglyNormal]
+      have hDA'sn : DA'.isStronglyNormal = true := by cases D' <;> simp_all [isStronglyNormal]
+      have hDB'sn : DB'.isStronglyNormal = true := by cases D' <;> simp_all [isStronglyNormal]
+      have hD'ni : D'.isIntroRoot = false := by
+        cases D' <;> simp_all [isStronglyNormal, isIntroRoot]
+      have hD'no : D'.isOrERoot = false := by
+        cases D' <;> simp_all [isStronglyNormal, isOrERoot]
+      let sd' := snSubst D' hD'sn arg harg
+      let dA' : T.Derivation (insert P (insert A0 G)) B := Finset.insert_comm A0 P G ▸ DA'
+      have hdA' : dA'.isStronglyNormal = true := by
+        show (Finset.insert_comm A0 P G ▸ DA').isStronglyNormal = true
+        rw [isStronglyNormal_cast]; exact hDA'sn
+      let sA := snSubst dA' hdA' (arg.weakCtx (Finset.subset_insert _ _))
+        (by rw [isStronglyNormal_weakCtx]; exact harg)
+      let dB' : T.Derivation (insert P (insert B0 G)) B := Finset.insert_comm B0 P G ▸ DB'
+      have hdB' : dB'.isStronglyNormal = true := by
+        show (Finset.insert_comm B0 P G ▸ DB').isStronglyNormal = true
+        rw [isStronglyNormal_cast]; exact hDB'sn
+      let sB := snSubst dB' hdB' (arg.weakCtx (Finset.subset_insert _ _))
+        (by rw [isStronglyNormal_weakCtx]; exact harg)
+      if h : sd'.1.isIntroRoot = true ∨ sd'.1.isOrERoot = true then
+        have hle := sd'.2.2 hD'ni hD'no h
+        let r := snOrEForm sd'.1 sd'.2.1 sA.1 sA.2.1 sB.1 sB.2.1
+        ⟨r.1, r.2, by intro _ hno _; simp [isOrERoot] at hno⟩
+      else
+        ⟨orE _ sd'.1 sA.1 sB.1, by
+          have hi : sd'.1.isIntroRoot = false := by
+            cases hb : sd'.1.isIntroRoot
+            · rfl
+            · exact absurd (Or.inl hb) h
+          have ho : sd'.1.isOrERoot = false := by
+            cases hb : sd'.1.isOrERoot
+            · rfl
+            · exact absurd (Or.inr hb) h
+          have hsnD := sd'.2.1
+          have hsnA := sA.2.1
+          have hsnB := sB.2.1
+          refine ⟨?_, ?_⟩
+          · cases hx : sd'.1 <;> simp_all [isStronglyNormal, isIntroRoot, isOrERoot]
+          · intro _ hno _; simp [isOrERoot] at hno⟩
   termination_by (P.complexity, 1, sizeOf body)
   decreasing_by
     all_goals first

@@ -1,44 +1,16 @@
 {
-  "status": "partial",
-  "summary": "Closed 2 of 3 sorries in Intuitionistic/Soundness.lean by strengthening the intExpandBranches_closed_unsat lemma with a FreshAbove freshness invariant (freshInv premise threaded through the pending-list induction), plus 2 supporting nw-invariance helper lemmas (intApplyRuleFull_none_nw, intApplyRuleFull_branching_nw). Build GREEN at exactly 1 sorry. Net: 3 sorries -> 1 sorry. ALSO fixed the dependent Minimal/Soundness.lean call site (shared lemma signature change). Both Intuitionistic/Soundness.lean and Minimal/Soundness.lean build GREEN. Classical/Completeness.lean has a pre-existing, unrelated breakage (not task 316).",
-  "phases_completed": 3,
+  "status": "implemented",
+  "summary": "Closed the final sorry in Intuitionistic/Soundness.lean (the world-creating F(->) 4-tuple case of intExpandBranches_closed_unsat). Replaced it with a full ~131-line proof: applied intRule_preserves_sat with worldOf' threading, added inline FreshAbove derivation for the linearResult expansion, fixed the post-subst c/nwH scope, and resolved MonotoneEdges obligations. All three task-316 soundness target modules now build GREEN with 0 sorry tactics: Classical/Soundness.lean, Intuitionistic/Soundness.lean, Minimal/DecisionProcedure.lean. Verified via lake build (exit 0, no 'declaration uses sorry' warnings in the soundness files). lint-style clean for the edited file. NOTE: the 6 remaining sorries reported when building Minimal.DecisionProcedure are all in *Completeness* files (Intuitionistic/Completeness.lean, Minimal/Completeness.lean) which are out of task 316's scope (soundness only).",
+  "phases_completed": 4,
   "phases_total": 4,
-  "next_action_hint": "Close the final sorry at line ~1281 (linearResult bp=bh, the world-creating F(->) 4-tuple case).",
-  "blockers": [
-    {
-      "id": "linearResult-bp-bh-4tuple",
-      "description": "The remaining sorry at line ~1281 (`· sorry -- linearResult bp=bh case: apply intRule_preserves_sat + ih`) is the world-creating F(->) case. With hfresh now available (the two hfresh sorries are closed), it still needs intRule_preserves_sat applied with the updated worldOf' threaded through the inductive hypothesis. A broken WIP for this case is shelved at specs/316_propositional_tableau_soundness/recovered/intrule-4tuple-attempt-broken.lean."
-    }
-  ],
-  "continuation_context": {
-    "plan_path": "specs/316_propositional_tableau_soundness/plans/08_soundness-plan-revised.md",
-    "build_state": {
-      "builds": true,
-      "error_count": 0,
-      "sorry_count": 1
-    },
-    "sorry_inventory": [
-      {
-        "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
-        "line": 1281,
-        "description": "linearResult bp=bh case (world-creating F(->)): apply intRule_preserves_sat + ih with worldOf' threading. hfresh is now available in scope."
-      }
-    ],
-    "lint_debt": "7 lines exceed 100 chars in the edited region (approx lines 1290,1333,1343,1345,1398,1415,1440) — lake exe lint-style would flag these; wrap before PR submission.",
-    "where_to_begin": "Navigate to line ~1281 in Soundness.lean. The freshness invariant (FreshAbove bPers edgesH nwH) and hfresh (sf'.label != nwH for sf' in bPers) are now in scope via the strengthened key suffices. Apply intRule_preserves_sat for the world-creating F(->) case and thread the updated worldOf' through the inductive hypothesis. Consult recovered/intrule-4tuple-attempt-broken.lean for the prior approach (do not restore wholesale)."
-  },
+  "next_action_hint": "Task 316 soundness scope complete. Optional follow-up: clean up unusedSimpArgs linter warnings (lines ~1249,1511,1541,1574); these are non-fatal.",
+  "blockers": [],
+  "sorry_inventory": [],
   "artifacts": [
     {
       "type": "summary",
       "path": "specs/316_propositional_tableau_soundness/plans/08_soundness-plan-revised.md",
-      "summary": "3->1 sorry; freshness invariant landed; build green"
-    }
-  ],
-  "sorry_inventory": [
-    {
-      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
-      "line": 1281,
-      "description": "linearResult bp=bh world-creating F(->) case"
+      "summary": "All soundness sorries closed; Classical/Intuitionistic/Minimal soundness build green"
     }
   ]
 }

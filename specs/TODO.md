@@ -62,7 +62,7 @@ next_project_number: 365
 
 ### Algebraic Semantics
 
-352 [BLOCKED] — Prove CPL is conservative over its classical implicational fragme
+352 [PLANNED] — Prove CPL is conservative over its classical implicational fragme
 
 ### Uncategorized
 
@@ -185,12 +185,12 @@ next_project_number: 365
 ---
 
 ### 352. Cpl conservative over classical implicational fragment
-- **Status**: [BLOCKED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Algebraic Semantics
 - **Dependencies**: None
 - **Research**: [352_cpl_conservative_over_classical_implicational_fragment/reports/01_cpl-conservative-classical-implicational.md]
-- **Plan**: [352_cpl_conservative_over_classical_implicational_fragment/plans/02_classical-imp-conservativity-v2.md]
+- **Plan**: [352_cpl_conservative_over_classical_implicational_fragment/plans/03_classical-imp-conservativity-v3.md]
 
 **Description**: Prove CPL is conservative over its classical implicational fragment CPL⟨→,⊤⟩, extending the propositional conservativity chain to the classical side, as raised in the Zulip CSLib Propositional Logic thread by Matthew Doty (2026-06-25): "There's also CPL⟨→, ⊤⟩ ... Is it worth proving CPL is conservative over that?" (https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic/near/606508446). The classical implicational fragment Hilbert system is K (φ → ψ → φ), S, and a classical implicational axiom (e.g. Peirce's law ((φ → ψ) → φ) → φ; the research phase must pin down the exact axiomatization — Matthew's thread message lists candidate schemata that should be verified). The existing chain (completed tasks 310/311/312/322) closes the intuitionistic and minimal sides — IPL⟨→,⊤⟩ ⊂ IPL⟨∧,→,⊤⟩ ⊂ IPL⟨∧,→,⊥,⊤⟩ ⊂ IPL and the MPL chain — via Hilbert-algebra / Brouwerian routes in Cslib/Logics/Propositional/Semantics/Algebra/{ImpConservative,ConjImpConservative,ConservativeChain,MplConservativeChain,Hilbert}.lean, with fragment axioms in ProofSystem/FragmentAxioms.lean (ImpAxiom, ConjImpAxiom, ConjImpBotAxiom). For the classical implicational fragment the natural algebraic semantics are implication algebras / Tarski algebras; Matthew noted these are obscure and suggested traditional truth-assignment semantics may be the more natural route here ("I'm not about using algebraic semantics here, rather than traditional truth assignments") — the research/plan phase should evaluate both routes and pick the cleaner one. Deliver a cpl_conservative_over_imp (classical) conservativity theorem analogous to the intuitionistic ipl_conservative_over_imp, adding the classical implicational fragment axiom set to FragmentAxioms.lean and extending the derivability subsumption chain. NOTE: Matthew himself flagged this as lower-interest ("not as interesting in terms of Curry-Howard or Category theory or anything"), so this is an optional/exploratory extension — confirm desirability before heavy investment. Files: Cslib/Logics/Propositional/ProofSystem/FragmentAxioms.lean, a new Semantics/Algebra/ClassicalImpConservative.lean (or a truth-assignment-based module), ConservativeChain.lean. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); existing chain preserved.
 

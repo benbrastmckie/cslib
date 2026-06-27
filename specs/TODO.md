@@ -11,7 +11,7 @@ next_project_number: 376
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,321,342,345,355,363,364,365,368,370,371 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,321,342,345,355,363,364,368,370,371 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,332,348,360,366,369,372,374 | 36,37,180,290,299,345,355,363,364,371 | Bimodal Porting, Foundations, Modal Logic, ... |
 | 3 | 41,275,317,367,373 | 39,40,332,348,369 | Foundations, Propositional Logic, Algebraic Semantics |
 | 4 | 375 | 317 | Propositional Logic |
@@ -37,7 +37,7 @@ next_project_number: 376
 
 299 [IMPLEMENTING] — Implement tableau decision procedure for basic modal logic K with
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
-364 [IMPLEMENTING] — Repair the pre-existing Mathlib/toolchain-drift build failure in 
+364 [BLOCKED] — Repair the pre-existing Mathlib/toolchain-drift build failure in 
   └─ 360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t
 
 ### Propositional Logic
@@ -71,7 +71,6 @@ next_project_number: 376
 ### Code Hygiene
 
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
-365 [RESEARCHED] — Docstring/comment-only hygiene pass over the Propositional metath
 
 ### Algebraic Semantics
 
@@ -79,7 +78,7 @@ next_project_number: 376
 
 ### Uncategorized
 
-363 [RESEARCHED] — Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean fa
+363 [BLOCKED] — Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean fa
   └─ 360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t (see above)
   └─ 369 [NOT STARTED] — (Propositional Logic: Parameterize the intuitionistic and mini) (see above)
 
@@ -186,7 +185,7 @@ next_project_number: 376
 ---
 
 ### 365. Propositional docstring sorry note hygiene
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
@@ -196,7 +195,7 @@ next_project_number: 376
 ---
 
 ### 364. Modal tableau soundness drift repair
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -207,7 +206,7 @@ next_project_number: 376
 ---
 
 ### 363. Repair Classical/Tableau/Completeness.lean proof gaps and bad lemma ref
-- **Status**: [RESEARCHED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Dependencies**: None
 

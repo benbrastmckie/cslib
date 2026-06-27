@@ -1,7 +1,7 @@
 # Implementation Plan: Task #365
 
 - **Task**: 365 - Docstring/comment-only hygiene pass over the Propositional metatheory; ZERO code or proof changes
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 0.75 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/365_propositional_docstring_sorry_note_hygiene/.orchestrator-handoff.json

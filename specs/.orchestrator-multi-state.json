@@ -1,9 +1,57 @@
 {
-  "session_id": "sess_1782454849_22df5a",
-  "task_numbers": [352, 353],
-  "completed_tasks": [353],
-  "failed_tasks": [352],
-  "current_statuses": {"352": "blocked", "353": "completed"},
-  "cycle_count": 4,
-  "max_cycles": 10
+  "session_id": "sess_1782538677_f01f15",
+  "task_numbers": [
+    363,
+    364,
+    365
+  ],
+  "waves": [
+    [
+      363,
+      364,
+      365
+    ]
+  ],
+  "dependency_graph": {
+    "363": [],
+    "364": [],
+    "365": []
+  },
+  "max_cycles": 15,
+  "cycle_count": 5,
+  "failed_tasks": [
+    {
+      "task": 363,
+      "status": "blocked",
+      "reason": "Phase 3 classicalExpandBranches_hintikka: genuine proof blocker (fuel=0 base case unprovable with current invariant). Green modulo 1 pre-existing sorry. 3 resolution paths documented."
+    },
+    {
+      "task": 364,
+      "status": "blocked",
+      "reason": "68 errors remain (hnewBs cascade in modalStepBranch_preserves_sat). 6 agents overflowed context (lean_goal output too large). Phase 1 complete + committed. Needs human session or rule-case extraction refactor first."
+    }
+  ],
+  "completed_tasks": [
+    365
+  ],
+  "current_statuses": {
+    "363": "blocked",
+    "364": "blocked",
+    "365": "completed"
+  },
+  "task_dirs": {
+    "363": "specs/363_repair_classical_tableau_completeness",
+    "364": "specs/364_modal_tableau_soundness_drift_repair",
+    "365": "specs/365_propositional_docstring_sorry_note_hygiene"
+  },
+  "research_agents": {
+    "363": "cslib-research-agent",
+    "364": "cslib-research-agent",
+    "365": "cslib-research-agent"
+  },
+  "implement_agents": {
+    "363": "cslib-implementation-agent",
+    "364": "cslib-implementation-agent",
+    "365": "cslib-implementation-agent"
+  }
 }

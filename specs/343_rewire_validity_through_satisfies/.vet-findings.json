@@ -1,0 +1,218 @@
+{
+  "files_analyzed": 14,
+  "violations_found": 19,
+  "severity_counts": {
+    "critical": 0,
+    "high": 6,
+    "medium": 7,
+    "low": 6
+  },
+  "categories": [
+    {
+      "category_name": "Missing Docstrings (docBlame)",
+      "severity": "High",
+      "standard": "CONTRIBUTING",
+      "count": 6,
+      "description": "Six public theorem/lemma declarations in Temporal/DenseMCS.lean lack individual /-- -/docstrings. The first three (mp_deriv_fc, weakening_deriv_fc, assumption_deriv_fc) are helper combinators directly after the '## Basic Combinators' section header with no per-declaration doc. The next three (mcs_bot_not_mem_fc, mcs_neg_of_not_mem_fc, mcs_not_mem_of_neg_fc) follow the '## Negation Lemmas at fc' section header with no per-declaration doc. CONTRIBUTING.md requires every public theorem to carry a docstring; lake lint docBlame category will flag these.",
+      "violations": [
+        {
+          "task": 350,
+          "file": "Cslib/Logics/Temporal/Metalogic/DenseMCS.lean",
+          "line": 72,
+          "issue": "theorem mp_deriv_fc: no /-- -/ docstring; only a /-! section header precedes it"
+        },
+        {
+          "task": 350,
+          "file": "Cslib/Logics/Temporal/Metalogic/DenseMCS.lean",
+          "line": 80,
+          "issue": "theorem weakening_deriv_fc: no /-- -/ docstring"
+        },
+        {
+          "task": 350,
+          "file": "Cslib/Logics/Temporal/Metalogic/DenseMCS.lean",
+          "line": 87,
+          "issue": "theorem assumption_deriv_fc: no /-- -/ docstring"
+        },
+        {
+          "task": 350,
+          "file": "Cslib/Logics/Temporal/Metalogic/DenseMCS.lean",
+          "line": 324,
+          "issue": "theorem mcs_bot_not_mem_fc: no /-- -/ docstring; only '## Negation Lemmas at fc' section header precedes it"
+        },
+        {
+          "task": 350,
+          "file": "Cslib/Logics/Temporal/Metalogic/DenseMCS.lean",
+          "line": 334,
+          "issue": "theorem mcs_neg_of_not_mem_fc: no /-- -/ docstring"
+        },
+        {
+          "task": 350,
+          "file": "Cslib/Logics/Temporal/Metalogic/DenseMCS.lean",
+          "line": 342,
+          "issue": "theorem mcs_not_mem_of_neg_fc: no /-- -/ docstring"
+        }
+      ]
+    },
+    {
+      "category_name": "Non-Standard Linter Suppressions",
+      "severity": "Medium",
+      "standard": "CONTRIBUTING",
+      "count": 6,
+      "description": "Five files from task 350 use file-global 'set_option linter.*' to suppress linters beyond the standard 'set_option linter.style.setOption false' (which is always needed when any set_option is present). Non-standard suppressions include: linter.style.show, linter.style.emptyLine, and linter.flexible in Bimodal/DeductionTheorem.lean (suggesting non-standard formatting choices); and global linter.dupNamespace false in Bimodal/GenericMCSBridge.lean, Temporal/GenericMCSBridge.lean, and Temporal/DenseMCS.lean (these should use per-declaration @[nolint dupNamespace] as DenseMCS.lean already does for Temporal.DerivFc and friends, rather than silencing the linter for the whole file). Global suppression masks any genuine dupNamespace violations that may be introduced later.",
+      "violations": [
+        {
+          "task": 350,
+          "file": "Cslib/Logics/Bimodal/Metalogic/Core/DeductionTheorem.lean",
+          "line": 43,
+          "issue": "set_option linter.style.show false — non-standard global suppression; should be replaced with targeted @[nolint] or code reformatting"
+        },
+        {
+          "task": 350,
+          "file": "Cslib/Logics/Bimodal/Metalogic/Core/DeductionTheorem.lean",
+          "line": 44,
+          "issue": "set_option linter.style.emptyLine false — non-standard; suppresses empty-line style checks for the whole file"
+        },
+        {
+          "task": 350,
+          "file": "Cslib/Logics/Bimodal/Metalogic/Core/DeductionTheorem.lean",
+          "line": 46,
+          "issue": "set_option linter.flexible false — non-standard; suppresses flexible-syntax checks for the whole file"
+        },
+        {
+          "task": 350,
+          "file": "Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean",
+          "line": 64,
+          "issue": "set_option linter.dupNamespace false (global) — should use per-declaration @[nolint dupNamespace] instead"
+        },
+        {
+          "task": 350,
+          "file": "Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean",
+          "line": 54,
+          "issue": "set_option linter.dupNamespace false (global) — should use per-declaration @[nolint dupNamespace] instead"
+        },
+        {
+          "task": 350,
+          "file": "Cslib/Logics/Temporal/Metalogic/DenseMCS.lean",
+          "line": 43,
+          "issue": "set_option linter.flexible false (global) — non-standard; the file already uses per-declaration @[nolint dupNamespace] for legitimate cases"
+        }
+      ]
+    },
+    {
+      "category_name": "Outdated and Contradictory Module Documentation",
+      "severity": "Medium",
+      "standard": "CONTRIBUTING",
+      "count": 1,
+      "description": "Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean is a documentation-only file (no Lean code) whose gap analysis states the temporal-style bridge 'could NOT be built for Modal logics', but a CORRECTION NOTICE added in lines 14-32 states the opposite conclusion. The file retains the old (incorrect) analysis with the correction embedded inside it, making the document self-contradictory and potentially misleading to contributors. The correct resolution is to either rewrite the file with the corrected understanding or delete the old analysis and keep only the updated conclusion.",
+      "violations": [
+        {
+          "task": 350,
+          "file": "Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean",
+          "line": 14,
+          "issue": "CORRECTION NOTICE at lines 14-32 contradicts the gap analysis that follows it (lines 34-160). The file simultaneously claims the bridge cannot and can be built. The original gap analysis section headings (Component 1, 2, 3) should be updated or replaced; the CORRECTION NOTICE patch is insufficient."
+        }
+      ]
+    },
+    {
+      "category_name": "Internal Task References in Public Docstrings",
+      "severity": "Low",
+      "standard": "CONTRIBUTING",
+      "count": 4,
+      "description": "Four docstrings in task-344 files embed internal development task numbers (e.g., 'task 341', 'task-341', 'task 353'). These are project-management artifacts that should not appear in the public-facing library documentation. CONTRIBUTING.md asks contributors to reference published resources; task numbers are internal tracking identifiers. They also create dead links when the task system changes.",
+      "violations": [
+        {
+          "task": 344,
+          "file": "Cslib/Logics/Propositional/Semantics/Algebra/HilbertStrongCompleteness.lean",
+          "line": 31,
+          "issue": "Module docstring '## Main Results' section mentions 'task 341's hilbert_alg_complete_theory (regression guard)' — task number should be removed"
+        },
+        {
+          "task": 344,
+          "file": "Cslib/Logics/Propositional/Semantics/Algebra/HilbertStrongCompleteness.lean",
+          "line": 114,
+          "issue": "Lemma docstring for hilbert_alg_strong_complete_theory_empty opens with 'recovers task-341's hilbert_alg_complete_theory' — replace with reference to the named theorem only"
+        },
+        {
+          "task": 344,
+          "file": "Cslib/Logics/Propositional/Semantics/Algebra/HilbertStrongCompleteness.lean",
+          "line": 118,
+          "issue": "Same lemma docstring: 'genuine extension of task 341's result' — remove task reference"
+        },
+        {
+          "task": 354,
+          "file": "Cslib/Logics/Propositional/Semantics/Algebra/MplConservativeChain.lean",
+          "line": 229,
+          "issue": "Lemma docstring for mplAxiom_iff_conjImpBotMinAxiom contains '(from task 353)' — remove task reference"
+        }
+      ]
+    },
+    {
+      "category_name": "Extremely High Heartbeat Limit",
+      "severity": "Low",
+      "standard": "CONTRIBUTING",
+      "count": 1,
+      "description": "DenseMCS.lean sets maxHeartbeats to 3,200,000 (line 44), which is 8x the typical elevated value (400,000) seen in the sibling GenericMCSBridge files. This indicates at least one proof in the file is anomalously slow and should be investigated for a more efficient proof or broken into smaller lemmas.",
+      "violations": [
+        {
+          "task": 350,
+          "file": "Cslib/Logics/Temporal/Metalogic/DenseMCS.lean",
+          "line": 44,
+          "issue": "set_option maxHeartbeats 3200000 — 8x the elevated limit used by sibling files; performance investigation warranted"
+        }
+      ]
+    },
+    {
+      "category_name": "Informal Citation (Zulip thread as primary reference)",
+      "severity": "Low",
+      "standard": "CONTRIBUTING",
+      "count": 1,
+      "description": "DeductionCharacterization.lean cites 'B. Doty, CSLib Zulip Temporal Logic thread, 2026-06-25' as its sole reference. CONTRIBUTING.md instructs contributors to 'reference the resource in your documentation' when formalizing published concepts — implying published resources. A Zulip thread is informal and ephemeral. The deduction-theorem characterization (DT iff MinimalHilbert) is a standard result with published proofs (e.g., Troelstra & Schwichtenberg, Basic Proof Theory); the citation should point to an authoritative source.",
+      "violations": [
+        {
+          "task": 351,
+          "file": "Cslib/Foundations/Logic/Metalogic/DeductionCharacterization.lean",
+          "line": 36,
+          "issue": "References section cites 'B. Doty, CSLib Zulip Temporal Logic thread, 2026-06-25' as the only source; should cite a published textbook for the DT-characterization result"
+        }
+      ]
+    }
+  ],
+  "suggested_fix_tasks": [
+    {
+      "title": "Add missing docstrings to six theorems in Temporal/DenseMCS.lean",
+      "slug": "fix_dense_mcs_docblame_violations",
+      "task_type": "cslib",
+      "severity": "High",
+      "description": "Six public theorems in Cslib/Logics/Temporal/Metalogic/DenseMCS.lean lack /-- -/ docstrings: mp_deriv_fc (line 72), weakening_deriv_fc (line 80), assumption_deriv_fc (line 87), mcs_bot_not_mem_fc (line 324), mcs_neg_of_not_mem_fc (line 334), mcs_not_mem_of_neg_fc (line 342). Each needs a brief /-- ... -/ docstring added immediately before the declaration. This will clear docBlame lint warnings for these six sites.",
+      "categories": ["Missing Docstrings (docBlame)"],
+      "violation_count": 6
+    },
+    {
+      "title": "Replace global linter suppressions with targeted @[nolint] in task-350 files",
+      "slug": "fix_linter_suppression_task350",
+      "task_type": "cslib",
+      "severity": "Medium",
+      "description": "Five task-350 files suppress linters globally via set_option linter.* directives. Bimodal/DeductionTheorem.lean disables linter.style.show, linter.style.emptyLine, and linter.flexible (lines 43-46). Bimodal/GenericMCSBridge.lean and Temporal/GenericMCSBridge.lean both disable linter.dupNamespace globally (lines 64 and 54 respectively). Temporal/DenseMCS.lean disables linter.flexible globally (line 43). The preferred approach is either (a) fix the underlying formatting/naming issue and remove the suppression, or (b) use @[nolint <category>] per declaration as DenseMCS.lean already does for dupNamespace on Temporal.DerivFc. The linter.style.show and linter.style.emptyLine suppressions in Bimodal/DeductionTheorem.lean should be investigated and removed by fixing the underlying style issue.",
+      "categories": ["Non-Standard Linter Suppressions"],
+      "violation_count": 6
+    },
+    {
+      "title": "Rewrite Modal/GenericMCSBridge.lean to remove contradictory gap analysis",
+      "slug": "fix_modal_mcs_bridge_outdated_docs",
+      "task_type": "cslib",
+      "severity": "Medium",
+      "description": "Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean contains a CORRECTION NOTICE (lines 14-32) stating that the original gap analysis conclusion was 'OUTDATED', but the old (incorrect) analysis remains in place after the notice. The file is self-contradictory and potentially misleading. Resolution: rewrite the module docstring to reflect the corrected understanding — that the bridge IS buildable but requires a HilbertOf wrapper type, and that the concrete follow-up work is tracked elsewhere. Remove or clearly archive the old Component 1/2/3 analysis.",
+      "categories": ["Outdated and Contradictory Module Documentation"],
+      "violation_count": 1
+    },
+    {
+      "title": "Remove internal task numbers from public docstrings",
+      "slug": "fix_task_number_references_in_docstrings",
+      "task_type": "cslib",
+      "severity": "Low",
+      "description": "Four docstrings in HilbertStrongCompleteness.lean (lines 31, 114, 118) and MplConservativeChain.lean (line 229) contain internal development references such as 'task 341' and 'task 353'. These should be replaced by references to the named theorems or lemmas directly. Additionally, DeductionCharacterization.lean (line 36) cites a Zulip thread as its primary reference; this should be replaced or supplemented with a citation to a published textbook proof of the deduction-theorem characterization.",
+      "categories": ["Internal Task References in Public Docstrings", "Informal Citation (Zulip thread as primary reference)"],
+      "violation_count": 5
+    }
+  ]
+}

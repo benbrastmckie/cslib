@@ -1,7 +1,7 @@
 # Implementation Plan: Propositional Tableau Soundness (Revised v7)
 
 - **Task**: 316 - propositional_tableau_soundness
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 10 hours
 - **Dependencies**: 323 (completed)
 - **Research Inputs**: reports/05_intuitionistic-soundness-induction.md; reports/06_research-verification.md; reports/07_freshabove-recovery.md

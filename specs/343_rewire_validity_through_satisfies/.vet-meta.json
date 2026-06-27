@@ -1,0 +1,8 @@
+{
+  "status": "success",
+  "violations_found": 19,
+  "files_analyzed": 14,
+  "ci_passed": true,
+  "ci_note": "All 14 task-owned modules build clean (scoped lake build exit 0, no errors, no sorry). lint-style passed. Repo-wide build/test/checkInitImports/shake fail on 11 UNRELATED pre-existing broken modules, none touched by tasks 343/344/350/351/353/354.",
+  "summary": "Standards analysis found 19 violations (0 critical, 6 high, 7 medium, 6 low) across 14 files. CI is green for all task-owned files; repo-wide breakage is a separate pre-existing concern."
+}

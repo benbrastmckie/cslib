@@ -1515,22 +1515,23 @@
     {
       "project_number": 363,
       "project_name": "repair_classical_tableau_completeness",
-      "status": "researched",
+      "status": "blocked",
       "task_type": "cslib",
       "title": "Repair Classical/Tableau/Completeness.lean proof gaps and bad lemma ref",
       "description": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean fails to build with `unsolved goals` (lines ~110, 111) and a reference to a non-existent Mathlib lemma `List.findSome?_of_mem` (line ~117), left mid-refactor. Replace the bad lemma reference with a valid one (or a local proof) and close the remaining goals so the module builds green. Zero-debt: no sorry/axiom. Source: task 360 build-repair (blocked WIP).",
       "created": "2026-06-27T02:24:04Z",
-      "last_updated": "2026-06-27T05:48:50Z",
+      "last_updated": "2026-06-27T06:59:30Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "dependencies": [],
       "parent_task": 360,
-      "session_id": "sess_1782538677_f01f15_363"
+      "session_id": "sess_1782538677_f01f15_363",
+      "blockers": "Phase 3 (fill classicalExpandBranches_hintikka sorry, line ~492) is a genuine proof blocker: the fuel=0 base case is unprovable with the current invariant. File builds GREEN with exactly one pre-existing sorry (Phases 1-2 mechanical repairs complete + committed). Three documented resolution paths in .orchestrator-handoff.json: (A) fuel-sufficiency lemma [fuel=4*(φ.complexity+1)+1 never terminates via fuel=0 path]; (B) well-founded recursion on unexpanded-applicable-formula measure; (C) direct proof of classicalTableau_hintikka bypassing the lemma. Recommend /spawn a dedicated task for path A."
     },
     {
       "project_number": 364,
       "project_name": "modal_tableau_soundness_drift_repair",
-      "status": "implementing",
+      "status": "blocked",
       "task_type": "cslib",
       "description": "Repair the pre-existing Mathlib/toolchain-drift build failure in Cslib/Logics/Modal/Tableau/Soundness.lean (947 lines, ~77 errors under leanprover/lean4:v4.31.0). The file is sorry-free but broke under a Lean/Mathlib bump; it was the only module not fixed during the 2026-06-26 CI-failure sweep (all other ~10 originally-failing modules were repaired). Three single-pass agents overflowed their context on it because lean_goal returns very large hypothesis contexts here, so this MUST be done in chunks with incremental commits, never calling lean_diagnostic_messages (hangs in this repo). A full root-cause diagnosis with concrete fix idioms is in reports/01_drift-diagnosis.md. The 77 errors reduce to ~4 fix-families: (1) cases X.sign no longer substitutes the isPos hypothesis (use cases h : X.sign <;> simp_all [Sign.isPos]); (2) simp only [Satisfies] ordering/no-op (reorder after rw, or use Satisfies.neg_iff/diamond_iff / Proposition.neg_def); (3) simp [tryAllPropRules,...] at hsf no longer normalizes to the shape the obtain pattern expects, causing ~60 Unknown identifier hnewBs cascades in modalStepBranch_preserves_sat (re-derive the post-simp shape via lean_goal and fix the obtain/simp set across the 5 parallel rule-cases); (4) LawfulBEq.eq_of_beq instance-synth/type mismatch. Zero sorry, zero new axioms, preserve all statements. CI: lake build (scoped + full), lake exe lint-style. Created as a follow-up of the CI-failure fix sweep.",
       "topic": "Modal Logic",
@@ -1544,18 +1545,19 @@
           "path": "specs/364_modal_tableau_soundness_drift_repair/reports/01_drift-diagnosis.md",
           "summary": "Root-cause diagnosis of the 4 drift fix-families + recommended chunked repair order"
         }
-      ]
+      ],
+      "blockers": "File does not build: 68 errors remain, ALL the hnewBs cascade in modalStepBranch_preserves_sat (Phases 2-5). SIX agents have overflowed context on this file — root cause is that lean_goal on modalStepBranch_preserves_sat returns enormous hypothesis contexts that exhaust agent context windows, and the family-3 fix REQUIRES seeing the post-simp goal shape. Phase 1 (closed-branch cluster, families 1/2/4) IS complete and committed (c299dfdc): added Proposition.beqToEq helper, fixed sign/Satisfies/bot-case. Recommended path: a human-in-the-loop session, OR first refactor by extracting the 5 parallel rule-cases of modalStepBranch_preserves_sat into separate named sub-lemmas to shrink per-goal context below the overflow threshold, THEN repair each in isolation. Diagnosis + idioms in reports/01_drift-diagnosis.md; plan in plans/01_soundness-drift-repair.md."
     },
     {
       "project_number": 365,
       "project_name": "propositional_docstring_sorry_note_hygiene",
-      "status": "researched",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Code Hygiene",
       "description": "Docstring/comment-only hygiene pass over the Propositional metatheory; zero code or proof changes. (1) Fix stale 'Notes on sorry' docstrings that no longer match the code after task 316 closed the tableau soundness sorries: Cslib/Logics/Propositional/Tableau/Classical/Soundness.lean lines ~34-39 claim the key lemmas (classicalRule_preserves_sat, classically_closed_unsatisfiable, classicalTableau_sound) are 'marked sorry' but they are fully proved; Cslib/Logics/Propositional/Tableau/Minimal/Soundness.lean lines ~41-44 say it 'inherits sorry from Intuitionistic.Soundness' but both are now sorry-free. Audit every 'Notes on sorry' section across the Tableau tree (Classical/Intuitionistic/Minimal Soundness + DecisionProcedure) and rewrite each to accurately describe current status (soundness sorry-free; the remaining sorries live only in the three Completeness modules and the Decidable instances rest on those witnesses). (2) Remove internal development task-number leaks from committed docstrings, replacing them with named-theorem references per CONTRIBUTING.md (same class as the vet finding behind task 356): Semantics/Algebra/Brouwerian.lean:41 references 'task 308' (now completed) -> reference the named bridge lemma brouwerianEmbeddingLemma in FreeJoinCompletion.lean instead; NaturalDeduction/Normalization/Termination.lean:22 and the inline comment at ~1325 reference 'task 332' -> reword to name the open obligation (reduceRootSubSN h_8 case / normalize_isStronglyNormal) rather than a tracker number. Files: the Tableau Soundness/DecisionProcedure docstrings, Brouwerian.lean, Termination.lean. CI green (lake build, lake exe lint-style); no behavioral change. Do FIRST -- trivial, zero-risk, and a prerequisite for 'everything in perfect order'.",
       "dependencies": [],
       "created": "2026-06-27T05:29:32Z",
-      "last_updated": "2026-06-27T05:49:00Z",
+      "last_updated": "2026-06-27T08:30:11Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782538677_f01f15_365"

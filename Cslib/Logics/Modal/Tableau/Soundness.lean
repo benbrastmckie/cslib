@@ -122,7 +122,8 @@ lemma modalClosed_unsat
     have hformbot : sf.formula = (HasBot.bot : Proposition Atom) :=
       Proposition.beqToEq _ _ hbot
     rw [hformbot] at hsat
-    simp only [Satisfies] at hsat
+    change False at hsat
+    exact hsat
   | none =>
     -- T(φ)/F(φ) contradiction
     simp only [hfind, ClosureCondition.findClosure] at hcr
@@ -151,30 +152,7 @@ lemma modalClosed_unsat
         exact absurd htrue hfalse
       · cases hsf : sf.sign with
         | pos => exact absurd hsf hpos
-        | neg => simp only [hsf, Sign.isPos, ite_false] at hsfcond
-
-/-! ## Helper: Branch Extension Preserves Satisfiability -/
-
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Extending a branch with semantically valid formulas preserves satisfiability. -/
-private lemma extendBranchSat
-    {W : Type*} {m : Model W Atom} {f : WorldIndex → W}
-    {b : List (SignedFormula (Proposition Atom) WorldIndex)}
-    {acc : Accessibility}
-    (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
-    (hb : ∀ sf ∈ b,
-      (sf.sign = .pos → Satisfies m (f sf.label) sf.formula) ∧
-      (sf.sign = .neg → ¬Satisfies m (f sf.label) sf.formula))
-    (newForms : List (SignedFormula (Proposition Atom) WorldIndex))
-    (hnew : ∀ sf' ∈ newForms,
-      (sf'.sign = .pos → Satisfies m (f sf'.label) sf'.formula) ∧
-      (sf'.sign = .neg → ¬Satisfies m (f sf'.label) sf'.formula)) :
-    branchSatisfiable (newForms ++ b) acc :=
-  ⟨W, m, f, hacc, fun sf hmem => by
-    simp only [List.mem_append] at hmem
-    rcases hmem with h | h
-    · exact hnew sf h
-    · exact hb sf h⟩
+        | neg => simp [hsf, Sign.isPos] at hsfcond
 
 /-! ## Rule-Application Semantic Preservation -/
 
@@ -195,6 +173,7 @@ lemma accFreshInv_empty
     accFreshInv b Accessibility.empty := by
   intro w w' hedge
   simp only [Accessibility.empty, Accessibility.hasEdge, List.any_nil] at hedge
+  exact absurd hedge (by decide)
 
 /-- If `modalStepBranch b e acc = some (newBs, newExps, newAcc)` and `b` is satisfiable
 (with the freshness invariant `hInv`), then some branch in `newBs` is satisfiable.

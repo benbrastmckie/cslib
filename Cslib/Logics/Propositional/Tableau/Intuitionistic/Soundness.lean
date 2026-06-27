@@ -389,7 +389,7 @@ private lemma applyAllTImpRules_sat
           · by_cases hpsi : (b.any fun sf =>
                 sf.sign == .pos && sf.formula == ψ && sf.label == w') = true
             · simp [hphi, hpsi] at hw'_sf
-            · simp [hphi, hpsi] at hw'_sf
+            · simp only [hphi, ↓reduceIte, hpsi, Bool.false_eq_true, Option.some.injEq] at hw'_sf
               -- hw'_sf : ⟨.pos, ψ, w'⟩ = sf
               rw [← hw'_sf]
               have himpimp := (hsat ⟨.pos, .imp φ ψ, label_o⟩ hmem_outer).1 rfl
@@ -406,6 +406,7 @@ private lemma applyAllTImpRules_sat
                     fun h => by simp at h⟩
           · simp [hphi] at hw'_sf
 
+omit [Hashable Atom] in
 /-- Persistence fixpoint preserves satisfiability when `worldOf` is monotone. -/
 private lemma applyPersistenceFixpoint_sat
     {World : Type*} [Preorder World]
@@ -425,6 +426,7 @@ private lemma applyPersistenceFixpoint_sat
     · exact hsat
     · exact ih _ (applyAllTImpRules_sat val botForces v_uc bf_uc worldOf b edges hsat hmono)
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- A satisfiable branch cannot be closed. -/
 private lemma closurePred_false_of_sat
     {World : Type*} [Preorder World]
@@ -780,6 +782,7 @@ the edge set, making `Function.update worldOf nwH w'` well-defined for all exist
 def FreshAbove (b : IBranch Atom) (edges : IEdges) (nw : Nat) : Prop :=
   (∀ sf ∈ b, sf.label < nw) ∧ (∀ c p : Nat, (c, p) ∈ edges → c < nw ∧ p < nw)
 
+omit [Hashable Atom] in
 /-- `applyAllTImpRules` preserves `FreshAbove`: the T(φ→ψ) persistence rule only adds
 formulas at world labels already present on the branch, so no new labels are introduced. -/
 private lemma freshAbove_applyAllTImpRules (b : IBranch Atom) (edges : IEdges) (nw : Nat)
@@ -800,7 +803,7 @@ private lemma freshAbove_applyAllTImpRules (b : IBranch Atom) (edges : IEdges) (
       | imp φ ψ =>
         simp only [hsign, hform] at houter
         split_ifs at houter with hemp
-        · simp only [Bool.false_eq_true, hemp, ite_false, Option.some.injEq] at houter
+        · simp only [Option.some.injEq] at houter
           rw [← houter] at hmem_inner
           simp only [intTImpRule, List.mem_filterMap] at hmem_inner
           obtain ⟨w', hw'_mem, hw'_sf⟩ := hmem_inner
@@ -811,6 +814,7 @@ private lemma freshAbove_applyAllTImpRules (b : IBranch Atom) (edges : IEdges) (
             rw [← hw'_sf]; simp only; rw [← hlab]
             exact hbounds sf'' hmem''
 
+omit [Hashable Atom] in
 /-- The persistence fixpoint preserves `FreshAbove`. -/
 private lemma freshAbove_applyPersistenceFixpoint (b : IBranch Atom) (edges : IEdges) (nw : Nat)
     (fuel : Nat) (hfresh : FreshAbove b edges nw) :
@@ -823,6 +827,7 @@ private lemma freshAbove_applyPersistenceFixpoint (b : IBranch Atom) (edges : IE
     · exact hfresh
     · exact ih _ (freshAbove_applyAllTImpRules b edges nw hfresh)
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- A non-world-creating expansion step preserves `FreshAbove` when all new forms use
 existing labels (`sf'.label < nw` for all `sf' ∈ newForms`). -/
 private lemma freshAbove_extendMany (b : IBranch Atom) (edges : IEdges) (nw : Nat)
@@ -837,6 +842,7 @@ private lemma freshAbove_extendMany (b : IBranch Atom) (edges : IEdges) (nw : Na
       · exact hfresh.1 sf h,
     hfresh.2⟩
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- The F(→) world-creating step produces `FreshAbove … (nw+1)` for the new branch
 and extended edge set. The new world `nw` and its parent edge both become `< nw + 1`. -/
 private lemma freshAbove_world_create (b : IBranch Atom) (edges : IEdges) (nw parentLabel : Nat)
@@ -918,6 +924,7 @@ private lemma monotoneEdges_of_agree
     rw [hagree w1 hw1_ne, hagree w2 hw2_ne]
     exact hmono w1 w2 (by simp only [isAccessible, heq, Bool.false_eq_true, ite_false]; exact hacc)
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- For a non-world-creating linear result (`newEdge = none`), all new forms have the
 same label as the expanded signed formula `sf`. -/
 private lemma intApplyRuleFull_none_labels
@@ -948,6 +955,7 @@ private lemma intApplyRuleFull_none_labels
     | imp φ ψ => simp [intFImpRule] at h
     | _ => simp at h
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- For a branching result, all new forms in each branch have the same label as `sf`. -/
 private lemma intApplyRuleFull_branching_labels
     (sf : ISF Atom) (nwH : Nat) (b : IBranch Atom)
@@ -980,6 +988,7 @@ private lemma intApplyRuleFull_branching_labels
       · simp only [List.mem_cons, List.mem_nil_iff, or_false] at hsf'; rcases hsf' with rfl; rfl
     | _ => simp at h
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- For a world-creating linear result (`newEdge = some e`), the new edge is `(nwH, sf.label)`,
 `nw' = nwH + 1`, and all new forms have label `= nwH`. -/
 private lemma intApplyRuleFull_some_info
@@ -1008,6 +1017,7 @@ private lemma intApplyRuleFull_some_info
         obtain ⟨_, _, rfl⟩ := hmem_pers; rfl
     | _ => simp at h
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- For a non-world-creating linear result (`newEdge = none`), the next world number `nw'`
 equals the current world number `nwH`. -/
 private lemma intApplyRuleFull_none_nw
@@ -1032,6 +1042,7 @@ private lemma intApplyRuleFull_none_nw
     | imp φ ψ => simp [intFImpRule] at h
     | _ => simp at h
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- For a branching result, the next world number `nw'` equals the current world number `nwH`. -/
 private lemma intApplyRuleFull_branching_nw
     (sf : ISF Atom) (nwH : Nat) (b : IBranch Atom)
@@ -1054,6 +1065,7 @@ private lemma intApplyRuleFull_branching_nw
       obtain ⟨_, rfl⟩ := h; rfl
     | _ => simp at h
 
+omit [Hashable Atom] in
 /-- If `intExpandBranches` returns `closed`, then every input branch is unsatisfiable.
 
 This is the core loop invariant for the soundness proof. The proof requires:
@@ -1444,7 +1456,8 @@ lemma intExpandBranches_closed_unsat
                         · exact hfreshNew
                       · exact hfreshTail b e nw h_back
                     refine ih _ _ _ _ (by simp [hdlength_exp, hlength_exp])
-                        (by simp [hdlength_nw, hlength_nw]) (by simp [hdlength_edges, hlength_edges])
+                        (by simp [hdlength_nw, hlength_nw])
+                        (by simp [hdlength_edges, hlength_edges])
                         hfreshCombLin hgo bp edgesP ?_ wo hmono_p hsat_p
                     rw [List.zip_append (by simp [hdlength_edges]), List.mem_append]
                     exact Or.inr hmem_rest
@@ -1454,9 +1467,9 @@ lemma intExpandBranches_closed_unsat
                   have hfresh : ∀ sf' ∈ bPers, sf'.label ≠ nwH :=
                     fun sf' hmem' => Nat.ne_of_lt (hfreshAbove_pers.1 sf' hmem')
                   -- nw' = nwH for branching rules (no new world created)
-                  have hnw'eq : nw' = nwH := intApplyRuleFull_branching_nw sf nwH bPers branches' nw'
-                      hresult_sf
-                  -- FreshAbove for each branch in branches'.map (extendMany bPers ·) with edgesH,nwH
+                  have hnw'eq : nw' = nwH :=
+                    intApplyRuleFull_branching_nw sf nwH bPers branches' nw' hresult_sf
+                  -- FreshAbove for each branch in branches'.map (extendMany bPers ·)
                   have hfreshBr : ∀ br ∈ branches',
                       FreshAbove (Branch.extendMany bPers br) edgesH nwH := by
                     intro br hbr
@@ -1509,8 +1522,8 @@ lemma intExpandBranches_closed_unsat
                   · -- branchingResult bp=bh case: apply intRule_preserves_sat + ih
                     simp only [] at hgo
                     have hsat_pers : intBranchSatisfied val botForces wo bPers :=
-                      applyPersistenceFixpoint_sat val botForces v_uc bf_uc wo bh edgesP (fuel'' + 1)
-                        hsat_p hmono_p
+                      applyPersistenceFixpoint_sat val botForces v_uc bf_uc wo bh edgesP
+                        (fuel'' + 1) hsat_p hmono_p
                     have hpres := intRule_preserves_sat val botForces v_uc bf_uc wo bPers sf
                         hsf_mem hsat_pers nwH hfresh
                     rw [hresult_sf] at hpres
@@ -1552,7 +1565,8 @@ lemma intExpandBranches_closed_unsat
                           FreshAbove b e nw := by
                       rw [hnw'eq]; exact hfreshCombBr
                     refine ih _ _ _ _ (by simp [hdlength_exp, hlength_exp])
-                        (by simp [hdlength_nw, hlength_nw]) (by simp [hdlength_edges, hlength_edges])
+                        (by simp [hdlength_nw, hlength_nw])
+                        (by simp [hdlength_edges, hlength_edges])
                         hfreshCombBrT hgo bp edgesP ?_ wo hmono_p hsat_p
                     rw [List.zip_append (by simp [hdlength_edges]), List.mem_append]
                     exact Or.inr hmem_rest
@@ -1561,6 +1575,7 @@ lemma intExpandBranches_closed_unsat
 
 /-! ## Main Soundness Theorem -/
 
+omit [Hashable Atom] in
 /-- **Intuitionistic Tableau Soundness**: If `intuitionisticTableau φ = closed`, then
 `φ` is intuitionistically valid (`IValid φ`).
 
@@ -1590,7 +1605,7 @@ theorem intuitionisticTableau_sound (φ : Proposition Atom)
     [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] (by rfl) (by rfl) (by rfl)
       (by
         intro b edges nw hmem
-        simp only [List.zip_cons_cons, List.zip_nil_right, List.zip_nil_left,
+        simp only [List.zip_cons_cons, List.zip_nil_right,
           List.mem_cons, List.mem_nil_iff, or_false, Prod.mk.injEq] at hmem
         obtain ⟨⟨hb, he⟩, hnw⟩ := hmem
         subst hb; subst he; subst hnw

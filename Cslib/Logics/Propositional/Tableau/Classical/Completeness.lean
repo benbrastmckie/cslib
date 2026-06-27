@@ -863,6 +863,104 @@ private lemma classicalStepBranch_hintikka_inv
         exact Or.inl hsf'
     · simp at hfound
 
+/-- For classical propositional rules, every branching step produces exactly two new branches. -/
+private lemma classicalApplyOne_branching_length
+    (sf : SignedFormula (Proposition Atom) Unit)
+    (brs : List (Branch (Proposition Atom) Unit))
+    (h : classicalApplyOne sf = .branching brs) : brs.length = 2 := by
+  obtain ⟨s, φ, l⟩ := sf
+  rcases s <;> rcases φ with x | _ | ⟨a, b⟩ | ⟨a, b⟩ | ⟨a, b⟩ <;>
+    (try rcases b with _ | _ | ⟨_, _⟩ | ⟨_, _⟩ | ⟨_, _⟩) <;>
+    simp [classicalApplyOne, tryAllPropRules, applyPropRule, propAndOf?, propOrOf?,
+      propImpOf?, propNegOf?, RuleResult.isApplicable,
+      SignedFormula.neg, SignedFormula.pos, SignedFormula.formula,
+      SignedFormula.sign, SignedFormula.label] at h <;>
+    simp [← h]
+
+/-- One expansion step strictly decreases the exponential measure: when
+`classicalStepBranch bh e = some (newBs, newExp)`, the new configuration's measure plus
+one is at most the old configuration's measure. -/
+private lemma classicalExpMeasure_step_lt
+    (done bt newBs : List (Branch (Proposition Atom) Unit))
+    (doneExp es : List (List (SignedFormula (Proposition Atom) Unit)))
+    (newExp : List (SignedFormula (Proposition Atom) Unit))
+    (bh : Branch (Proposition Atom) Unit)
+    (e : List (SignedFormula (Proposition Atom) Unit))
+    (hdlen : done.length = doneExp.length)
+    (hstep : classicalStepBranch bh e = some (newBs, newExp)) :
+    classicalExpMeasure (done ++ newBs ++ bt) (doneExp ++ newBs.map (fun _ => newExp) ++ es) + 1
+      ≤ classicalExpMeasure (done ++ bh :: bt) (doneExp ++ e :: es) := by
+  -- Expand both sides into a common form
+  have hrhs : classicalExpMeasure (done ++ bh :: bt) (doneExp ++ e :: es) =
+      classicalExpMeasure done doneExp + 3 ^ classicalBranchComplexity bh e +
+        classicalExpMeasure bt es :=
+    classicalExpMeasure_split done doneExp bh e bt es hdlen
+  have hlhs : classicalExpMeasure (done ++ newBs ++ bt)
+        (doneExp ++ newBs.map (fun _ => newExp) ++ es) =
+      classicalExpMeasure done doneExp +
+        (newBs.map (fun child => 3 ^ classicalBranchComplexity child newExp)).sum +
+        classicalExpMeasure bt es := by
+    have hlen1 : (done ++ newBs).length = (doneExp ++ newBs.map (fun _ => newExp)).length := by
+      simp [List.length_append, List.length_map, hdlen]
+    rw [classicalExpMeasure_append (done ++ newBs) bt
+          (doneExp ++ newBs.map (fun _ => newExp)) es hlen1,
+        classicalExpMeasure_append done newBs doneExp (newBs.map (fun _ => newExp)) hdlen,
+        classicalExpMeasure_const_exp newBs newExp]
+  rw [hrhs, hlhs]
+  -- Reduce to core: sum of new branch measures + 1 ≤ old branch measure
+  suffices h : (newBs.map (fun child => 3 ^ classicalBranchComplexity child newExp)).sum + 1 ≤
+      3 ^ classicalBranchComplexity bh e by omega
+  -- Extract the expanded formula from hstep
+  simp only [classicalStepBranch] at hstep
+  obtain ⟨sf, hsfmem, hfound⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hfound with hany
+  simp only [Bool.not_eq_true] at hany
+  -- hany : e.any (· == sf) = false
+  have hcomp := classicalApplyOne_output_complexity sf
+  rcases hca : classicalApplyOne sf with nf | brs | nf | _
+  all_goals simp only [hca] at hfound hcomp
+  · -- linear: newBs = [Branch.extendMany bh nf], newExp = e ++ [sf]
+    obtain ⟨rfl, rfl⟩ := Option.some.inj hfound
+    obtain ⟨hsf1, hout_eq⟩ := hcomp
+    have hC : 1 ≤ classicalBranchComplexity bh e := by
+      have := classicalBranchComplexity_drop bh e sf hsfmem hany; omega
+    simp only [List.map_singleton, List.sum_singleton]
+    exact pow3_add_one_le hC
+      (classicalBranchComplexity_child_le bh nf e sf hsfmem hany hsf1 (le_of_eq hout_eq))
+  · -- branching: newBs = brs.map (Branch.extendMany bh ·), newExp = e ++ [sf]
+    obtain ⟨rfl, rfl⟩ := Option.some.inj hfound
+    obtain ⟨hsf1, hout_eq⟩ := hcomp
+    have hC : 1 ≤ classicalBranchComplexity bh e := by
+      have := classicalBranchComplexity_drop bh e sf hsfmem hany; omega
+    -- Branching always produces exactly 2 branches
+    obtain ⟨b0, b1, hbrs⟩ := List.length_eq_two.mp (classicalApplyOne_branching_length sf brs hca)
+    subst hbrs
+    simp only [List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, Nat.add_zero]
+    -- Per-branch complexity from flatten equality
+    have hflatsum : (b0.map (·.formula.complexity)).sum +
+        (b1.map (·.formula.complexity)).sum = sf.formula.complexity - 1 := by
+      have hfl : ([b0, b1].flatten.map (·.formula.complexity)).sum = sf.formula.complexity - 1 :=
+        hout_eq
+      simp only [List.flatten_cons, List.flatten_nil, List.append_nil,
+                 List.map_append, List.sum_append] at hfl
+      omega
+    have hout0 : (b0.map (fun x => x.formula.complexity)).sum ≤ sf.formula.complexity - 1 := by
+      omega
+    have hout1 : (b1.map (fun x => x.formula.complexity)).sum ≤ sf.formula.complexity - 1 := by
+      omega
+    have ha0 := classicalBranchComplexity_child_le bh b0 e sf hsfmem hany hsf1 hout0
+    have ha1 := classicalBranchComplexity_child_le bh b1 e sf hsfmem hany hsf1 hout1
+    exact pow3_two_add_one_le hC ha0 ha1
+  · -- persistent: same structure as linear
+    obtain ⟨rfl, rfl⟩ := Option.some.inj hfound
+    obtain ⟨hsf1, hout_eq⟩ := hcomp
+    have hC : 1 ≤ classicalBranchComplexity bh e := by
+      have := classicalBranchComplexity_drop bh e sf hsfmem hany; omega
+    simp only [List.map_singleton, List.sum_singleton]
+    exact pow3_add_one_le hC
+      (classicalBranchComplexity_child_le bh nf e sf hsfmem hany hsf1 (le_of_eq hout_eq))
+  · simp at hfound
+
 /-- The open branch returned by `classicalExpandBranches` is a classical Hintikka set,
 provided the total measure of unexpanded formulas is at most the fuel.
 

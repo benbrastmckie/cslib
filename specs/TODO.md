@@ -1,5 +1,5 @@
 ---
-next_project_number: 376
+next_project_number: 377
 ---
 
 # TODO
@@ -11,10 +11,11 @@ next_project_number: 376
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,321,342,345,355,363,364,368,370,371 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,332,348,360,366,369,372,374 | 36,37,180,290,299,345,355,363,364,371 | Bimodal Porting, Foundations, Modal Logic, ... |
-| 3 | 41,275,317,367,373 | 39,40,332,348,369 | Foundations, Propositional Logic, Algebraic Semantics |
-| 4 | 375 | 317 | Propositional Logic |
+| 1 | 36,37,180,226,241,278,290,299,301,321,342,345,355,364,368,370,371,376 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,332,348,363,366,372,374 | 36,37,180,290,299,345,355,371,376 | Bimodal Porting, Foundations, Modal Logic, ... |
+| 3 | 41,275,360,367,369,373 | 39,40,332,348,363,364 | Foundations, Propositional Logic, Algebraic Semantics |
+| 4 | 317 | 369 | Propositional Logic |
+| 5 | 375 | 317 | Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -78,11 +79,29 @@ next_project_number: 376
 
 ### Uncategorized
 
-363 [BLOCKED] — Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean fa
-  └─ 360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t (see above)
-  └─ 369 [NOT STARTED] — (Propositional Logic: Parameterize the intuitionistic and mini) (see above)
+376 [RESEARCHED] — Prove the fuel-sufficiency lemma needed to discharge the sorry at
+  └─ 363 [BLOCKED] — Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean fa
+    └─ 360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t (see above)
+    └─ 369 [NOT STARTED] — (Propositional Logic: Parameterize the intuitionistic and mini) (see above)
 
 ## Tasks
+
+### 376. Prove fuel sufficiency lemma for classical tableau completeness
+- **Effort**: 3-5 hours
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Dependencies**: None
+- **Research**: [363_repair_classical_tableau_completeness/reports/01_spawn-analysis.md]
+
+**Description**: Prove the fuel-sufficiency lemma needed to discharge the sorry at line 492 of Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean. The sorry is the body of `classicalExpandBranches_hintikka`, which proves that any open branch produced by `classicalExpandBranches` satisfies the Hintikka condition. The induction on fuel is blocked because the fuel=0 base case is unprovable with the current invariant: when `classicalExpandBranches branches expandedSets 0 = .openBranch b`, the invariant covers only `sf ∈ expandedSets[j]`, leaving `sf ∈ b \ expandedSets[j]` without any Hintikka guarantee.
+
+The recommended approach (Path A) is to prove a helper lemma — call it `classicalExpandBranches_fuel_sufficient` or similar — establishing that when `classicalExpandBranches` is called with `fuel = 4*(φ.complexity+1)+1` (the bound used by `classicalTableau`), it NEVER returns `.openBranch` via the fuel=0 degenerate path. That is, every open branch is found saturated via `classicalStepBranch b e = none` before fuel reaches 0. This makes the fuel=0 case of `classicalExpandBranches_hintikka` vacuously true. The proof is a termination/measure argument: each step strictly decreases the number of unexpanded applicable formulas on open branches, and the fuel bound 4*(φ.complexity+1)+1 exceeds this measure. The companion lemma `classicalExpandBranches_openBranch_initial_mem` (already proved) establishes membership preservation and can be used to bound the applicable set.
+
+Fallback paths if Path A proves intractable: (B) restate `classicalExpandBranches_hintikka` using well-founded recursion on the pair (unexpanded-applicable-formula count, fuel) rather than fuel alone — avoids the fuel=0 issue at the cost of restructuring the recursion scheme; (C) prove `classicalTableau_hintikka` directly without using `classicalExpandBranches_hintikka` as an intermediate general lemma, using structural induction on (pending_size, fuel). Paths B and C are fully documented in specs/363_repair_classical_tableau_completeness/.orchestrator-handoff.json.
+
+Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` (and any helper lemmas required by Path A/B/C) in Completeness.lean, with the file building green under `lake build` and `lake test`. The zero-debt green build of task 363 depends directly on this lemma being closed.
+
+---
 
 ### 375. Proof system equivalence tableau sequent edges
 - **Status**: [NOT STARTED]
@@ -208,7 +227,7 @@ next_project_number: 376
 ### 363. Repair Classical/Tableau/Completeness.lean proof gaps and bad lemma ref
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
-- **Dependencies**: None
+- **Dependencies**: Task 376
 
 **Description**: Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean fails to build with `unsolved goals` (lines ~110, 111) and a reference to a non-existent Mathlib lemma `List.findSome?_of_mem` (line ~117), left mid-refactor. Replace the bad lemma reference with a valid one (or a local proof) and close the remaining goals so the module builds green. Zero-debt: no sorry/axiom. Source: task 360 build-repair (blocked WIP).
 

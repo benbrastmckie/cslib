@@ -280,7 +280,8 @@ theorem untl_of_boxfree_sep_no_U_nested (phi psi : Formula Atom)
 theorem allFuture_of_boxfree_sep_no_U_nested (phi : Formula Atom)
     (h : isSyntacticallySeparated phi = true) :
     noUNestedInS (.allFuture (replaceBoxWithTop phi)) := by
-  simp only [noUNestedInS, and_true]
+  simp only [Formula.allFuture, Formula.someFuture, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, PropositionalConnectives.top, noUNestedInS, and_true]
   exact replace_box_separated_no_U_nested phi h
 
 /-! ## Congruence Lemmas for Box Normalization -/

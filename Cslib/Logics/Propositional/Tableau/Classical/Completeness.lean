@@ -107,23 +107,30 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
       simp only [Bool.and_eq_true] at hsfpos_cond
       obtain ⟨sf_neg, hsfneg_mem, hsfneg_cond⟩ := List.any_eq_true.mp hmem
       simp only [Bool.and_eq_true] at hsfneg_cond
-      have hpos_sign : sf_pos.sign = .pos := by cases sf_pos.sign <;> simp_all [SignedFormula.sign]
-      have hneg_sign : sf_neg.sign = .neg := by cases sf_neg.sign <;> simp_all [SignedFormula.sign]
+      have hpos_sign : sf_pos.sign = .pos := eq_of_beq hsfpos_cond.1
+      have hneg_sign : sf_neg.sign = .neg := eq_of_beq hsfneg_cond.1
       have hpos_form : sf_pos.formula = .atom p := eq_of_beq hsfpos_cond.2
       have hneg_form : sf_neg.formula = .atom p := eq_of_beq hsfneg_cond.2
       have hcont : b.hasContradiction = true := by
-        simp only [Branch.hasContradiction, Branch.findContradiction, Option.isSome_iff_exists]
-        use (.atom p, sf_pos.label)
-        apply List.findSome?_of_mem hsfpos_mem
-        simp only [SignedFormula.isPos, hpos_sign, Sign.isPos, true_and, ite_true]
-        rw [hpos_form]
-        apply List.any_eq_true.mpr
-        exact ⟨sf_neg, hsfneg_mem, by
-          simp only [Bool.and_eq_true]
-          refine ⟨⟨?_, ?_⟩, ?_⟩
-          · change (sf_neg.sign == .neg) = true; rw [hneg_sign]
-          · rw [hneg_form]
-          · simp [sf_neg.label, sf_pos.label]⟩
+        simp only [Branch.hasContradiction, Branch.findContradiction, Option.isSome]
+        cases hfind : b.findSome? (fun sf =>
+            if sf.isPos then
+              if b.any fun sf' => sf'.sign == .neg && sf'.formula == sf.formula && sf'.label == sf.label
+              then some (sf.formula, sf.label)
+              else none
+            else none) with
+        | some _ => rfl
+        | none =>
+          exfalso
+          simp only [List.findSome?_eq_none_iff] at hfind
+          have h_none := hfind sf_pos hsfpos_mem
+          simp only [hpos_sign, SignedFormula.isPos, Sign.isPos, ite_true] at h_none
+          simp only [ite_eq_right_iff] at h_none
+          have h_any : b.any (fun sf' => sf'.sign == .neg && sf'.formula == sf_pos.formula &&
+              sf'.label == sf_pos.label) = true := by
+            apply List.any_eq_true.mpr
+            exact ⟨sf_neg, hsfneg_mem, by simp [hneg_sign, hpos_form, hneg_form]⟩
+          exact absurd (h_none h_any) (by simp)
       have hclosed : isClassicallyClosed b = true := by
         simp only [isClassicallyClosed, ClosureCondition.isClosed, ClosureCondition.findClosure,
           Option.isSome_iff_exists]
@@ -143,10 +150,18 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
           Option.isSome_iff_exists]
         obtain ⟨sf, hsfmem, hsfcond⟩ := List.any_eq_true.mp hmem
         simp only [Bool.and_eq_true] at hsfcond
-        use sf
-        apply List.find?_of_mem hsfmem
-        simp only [Bool.and_eq_true, SignedFormula.isPos, Sign.isPos]
-        exact ⟨by cases sf.sign <;> simp_all [SignedFormula.sign], hsfcond.2⟩
+        have hsign : sf.sign = .pos := eq_of_beq hsfcond.1
+        have hbot_form : sf.formula = (HasBot.bot : Proposition Atom) := eq_of_beq hsfcond.2
+        have hpred : (sf.isPos && sf.formula == (HasBot.bot : Proposition Atom)) = true := by
+          simp [SignedFormula.isPos, hsign, Sign.isPos, hbot_form]
+        cases hf : b.find? (fun sf' => sf'.isPos && sf'.formula == (HasBot.bot : Proposition Atom)) with
+        | none =>
+          exfalso
+          have hsome : (b.find? (fun sf' => sf'.isPos && sf'.formula == (HasBot.bot : Proposition Atom))).isSome = true := by
+            rw [List.find?_isSome]
+            exact ⟨sf, hsfmem, hpred⟩
+          simp [hf] at hsome
+        | some sf' => exact ⟨.botPos sf'.label, rfl⟩
       simp [hclosed] at hopen
     · -- F(bot) on branch → BoolEvaluate ... bot = false
       intro _
@@ -157,7 +172,7 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
       intro hmem
       obtain ⟨sf, hsfmem, hsfcond⟩ := List.any_eq_true.mp hmem
       simp only [Bool.and_eq_true] at hsfcond
-      have hsign : sf.sign = .pos := by cases sf.sign <;> simp_all [SignedFormula.sign]
+      have hsign : sf.sign = .pos := eq_of_beq hsfcond.1
       have hform : sf.formula = .imp a c := eq_of_beq hsfcond.2
       -- The rule for T(imp a c) is branching: [F(a)] or [T(c)]
       -- By the Hintikka condition, one of these branches is in b
@@ -166,92 +181,99 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
       | bot =>
         -- T(imp a bot) = T(neg a): negPos rule gives .linear [F(a)]
         have hca : classicalApplyOne sf = .linear [SignedFormula.neg a sf.label] := by
-          rw [hsign, hform, hbot]; rfl
+          obtain ⟨s, fm, l⟩ := sf; subst hsign hform hbot; rfl
         rw [hca] at hout
         -- F(a) ∈ b
         have hfa_mem : SignedFormula.neg a sf.label ∈ b :=
-          hout _ (List.mem_cons_self _ _)
+          hout _ List.mem_cons_self
         have hfa_any : b.any (fun sf' => sf'.sign == .neg && sf'.formula == a) = true := by
           apply List.any_eq_true.mpr
           exact ⟨_, hfa_mem, by simp [SignedFormula.neg]⟩
-        have hfa := (ih_c.2 (by rwa [hbot] at hfa_any ▸ hfa_any))
-        rw [BoolEvaluate_imp, hbot]
-        simp [BoolEvaluate_bot]
+        rw [BoolEvaluate_imp, BoolEvaluate_bot]
+        simp [ih_a.2 hfa_any]
       | atom x =>
         have hca : classicalApplyOne sf =
           .branching [[SignedFormula.neg a sf.label], [SignedFormula.pos (.atom x) sf.label]] := by
-          rw [hsign, hform, hbot]; rfl
+          obtain ⟨s, fm, l⟩ := sf; subst hsign hform hbot; rfl
         rw [hca] at hout
         obtain ⟨br, hbr_mem, hbr⟩ := hout
-        rw [BoolEvaluate_imp, hbot]
+        rw [BoolEvaluate_imp]
         simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr_mem
         rcases hbr_mem with rfl | rfl
         · -- br = [F(a)], so F(a) ∈ b
-          have hfa_mem := hbr _ (List.mem_cons_self _ _)
+          have hfa_mem := hbr _ List.mem_cons_self
           have hfa_any : b.any (fun sf' => sf'.sign == .neg && sf'.formula == a) = true :=
             List.any_eq_true.mpr ⟨_, hfa_mem, by simp [SignedFormula.neg]⟩
           rw [(ih_a.2 hfa_any)]; simp
         · -- br = [T(atom x)], so T(atom x) ∈ b
-          have htc_mem := hbr _ (List.mem_cons_self _ _)
+          have htc_mem := hbr _ List.mem_cons_self
           have htc_any : b.any (fun sf' => sf'.sign == .pos && sf'.formula == .atom x) = true :=
             List.any_eq_true.mpr ⟨_, htc_mem, by simp [SignedFormula.pos]⟩
-          rw [(ih_c.1 htc_any)]; simp
+          have htval := ih_c.1 (hbot ▸ htc_any)
+          rw [hbot] at htval
+          rw [htval]; simp
       | imp b1 b2 =>
         have hca : classicalApplyOne sf =
           .branching [[SignedFormula.neg a sf.label], [SignedFormula.pos (.imp b1 b2) sf.label]] := by
-          rw [hsign, hform, hbot]; rfl
+          obtain ⟨s, fm, l⟩ := sf; subst hsign hform hbot; rfl
         rw [hca] at hout
         obtain ⟨br, hbr_mem, hbr⟩ := hout
         rw [BoolEvaluate_imp]
         simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr_mem
         rcases hbr_mem with rfl | rfl
-        · have hfa_mem := hbr _ (List.mem_cons_self _ _)
+        · have hfa_mem := hbr _ List.mem_cons_self
           have hfa_any : b.any (fun sf' => sf'.sign == .neg && sf'.formula == a) = true :=
             List.any_eq_true.mpr ⟨_, hfa_mem, by simp [SignedFormula.neg]⟩
           rw [(ih_a.2 hfa_any)]; simp
-        · have htc_mem := hbr _ (List.mem_cons_self _ _)
+        · have htc_mem := hbr _ List.mem_cons_self
           have htc_any : b.any (fun sf' => sf'.sign == .pos && sf'.formula == .imp b1 b2) = true :=
             List.any_eq_true.mpr ⟨_, htc_mem, by simp [SignedFormula.pos]⟩
-          rw [(ih_c.1 htc_any)]; simp
+          have htval := ih_c.1 (hbot ▸ htc_any)
+          rw [hbot] at htval
+          rw [htval]; simp
       | and b1 b2 =>
         have hca : classicalApplyOne sf =
           .branching [[SignedFormula.neg a sf.label], [SignedFormula.pos (.and b1 b2) sf.label]] := by
-          rw [hsign, hform, hbot]; rfl
+          obtain ⟨s, fm, l⟩ := sf; subst hsign hform hbot; rfl
         rw [hca] at hout
         obtain ⟨br, hbr_mem, hbr⟩ := hout
         rw [BoolEvaluate_imp]
         simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr_mem
         rcases hbr_mem with rfl | rfl
-        · have hfa_mem := hbr _ (List.mem_cons_self _ _)
+        · have hfa_mem := hbr _ List.mem_cons_self
           have hfa_any : b.any (fun sf' => sf'.sign == .neg && sf'.formula == a) = true :=
             List.any_eq_true.mpr ⟨_, hfa_mem, by simp [SignedFormula.neg]⟩
           rw [(ih_a.2 hfa_any)]; simp
-        · have htc_mem := hbr _ (List.mem_cons_self _ _)
+        · have htc_mem := hbr _ List.mem_cons_self
           have htc_any : b.any (fun sf' => sf'.sign == .pos && sf'.formula == .and b1 b2) = true :=
             List.any_eq_true.mpr ⟨_, htc_mem, by simp [SignedFormula.pos]⟩
-          rw [(ih_c.1 htc_any)]; simp
+          have htval := ih_c.1 (hbot ▸ htc_any)
+          rw [hbot] at htval
+          rw [htval]; simp
       | or b1 b2 =>
         have hca : classicalApplyOne sf =
           .branching [[SignedFormula.neg a sf.label], [SignedFormula.pos (.or b1 b2) sf.label]] := by
-          rw [hsign, hform, hbot]; rfl
+          obtain ⟨s, fm, l⟩ := sf; subst hsign hform hbot; rfl
         rw [hca] at hout
         obtain ⟨br, hbr_mem, hbr⟩ := hout
         rw [BoolEvaluate_imp]
         simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr_mem
         rcases hbr_mem with rfl | rfl
-        · have hfa_mem := hbr _ (List.mem_cons_self _ _)
+        · have hfa_mem := hbr _ List.mem_cons_self
           have hfa_any : b.any (fun sf' => sf'.sign == .neg && sf'.formula == a) = true :=
             List.any_eq_true.mpr ⟨_, hfa_mem, by simp [SignedFormula.neg]⟩
           rw [(ih_a.2 hfa_any)]; simp
-        · have htc_mem := hbr _ (List.mem_cons_self _ _)
+        · have htc_mem := hbr _ List.mem_cons_self
           have htc_any : b.any (fun sf' => sf'.sign == .pos && sf'.formula == .or b1 b2) = true :=
             List.any_eq_true.mpr ⟨_, htc_mem, by simp [SignedFormula.pos]⟩
-          rw [(ih_c.1 htc_any)]; simp
+          have htval := ih_c.1 (hbot ▸ htc_any)
+          rw [hbot] at htval
+          rw [htval]; simp
     · -- F(imp a c) on branch → BoolEvaluate v (imp a c) = false
       intro hmem
       obtain ⟨sf, hsfmem, hsfcond⟩ := List.any_eq_true.mp hmem
       simp only [Bool.and_eq_true] at hsfcond
-      have hsign : sf.sign = .neg := by cases sf.sign <;> simp_all [SignedFormula.sign]
+      have hsign : sf.sign = .neg := eq_of_beq hsfcond.1
       have hform : sf.formula = .imp a c := eq_of_beq hsfcond.2
       have hout := hrule sf hsfmem
       -- The impNeg rule (and negNeg) gives .linear outputs
@@ -260,19 +282,19 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
       | bot =>
         -- F(imp a bot) = F(neg a): negNeg rule gives .linear [T(a)]
         have hca : classicalApplyOne sf = .linear [SignedFormula.pos a sf.label] := by
-          rw [hsign, hform, hbot]; rfl
+          obtain ⟨s, fm, l⟩ := sf; subst hsign hform hbot; rfl
         rw [hca] at hout
         -- T(a) ∈ b
-        have hta_mem : SignedFormula.pos a sf.label ∈ b := hout _ (List.mem_cons_self _ _)
+        have hta_mem : SignedFormula.pos a sf.label ∈ b := hout _ List.mem_cons_self
         have hta_any : b.any (fun sf' => sf'.sign == .pos && sf'.formula == a) = true :=
           List.any_eq_true.mpr ⟨_, hta_mem, by simp [SignedFormula.pos]⟩
         have hta := ih_a.1 hta_any
         -- BoolEvaluate v (imp a bot) = !true || false = false
-        rw [BoolEvaluate_imp, hta, hbot, BoolEvaluate_bot]; simp
+        rw [BoolEvaluate_imp, hta, BoolEvaluate_bot]; simp
       | atom x =>
         have hca : classicalApplyOne sf =
           .linear [SignedFormula.pos a sf.label, SignedFormula.neg (.atom x) sf.label] := by
-          rw [hsign, hform, hbot]; rfl
+          obtain ⟨s, fm, l⟩ := sf; subst hsign hform hbot; rfl
         rw [hca] at hout
         have hta_mem : SignedFormula.pos a sf.label ∈ b := hout _ (by simp)
         have hfc_mem : SignedFormula.neg (.atom x) sf.label ∈ b := hout _ (by simp)
@@ -280,11 +302,13 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
           List.any_eq_true.mpr ⟨_, hta_mem, by simp [SignedFormula.pos]⟩
         have hfc_any : b.any (fun sf' => sf'.sign == .neg && sf'.formula == .atom x) = true :=
           List.any_eq_true.mpr ⟨_, hfc_mem, by simp [SignedFormula.neg]⟩
-        rw [BoolEvaluate_imp, ih_a.1 hta_any, hbot, ih_c.2 hfc_any]; simp
+        have hcval := ih_c.2 (hbot ▸ hfc_any)
+        rw [hbot] at hcval
+        rw [BoolEvaluate_imp, ih_a.1 hta_any, hcval]; simp
       | imp b1 b2 =>
         have hca : classicalApplyOne sf =
           .linear [SignedFormula.pos a sf.label, SignedFormula.neg (.imp b1 b2) sf.label] := by
-          rw [hsign, hform, hbot]; rfl
+          obtain ⟨s, fm, l⟩ := sf; subst hsign hform hbot; rfl
         rw [hca] at hout
         have hta_mem : SignedFormula.pos a sf.label ∈ b := hout _ (by simp)
         have hfc_mem : SignedFormula.neg (.imp b1 b2) sf.label ∈ b := hout _ (by simp)
@@ -292,11 +316,13 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
           List.any_eq_true.mpr ⟨_, hta_mem, by simp [SignedFormula.pos]⟩
         have hfc_any : b.any (fun sf' => sf'.sign == .neg && sf'.formula == .imp b1 b2) = true :=
           List.any_eq_true.mpr ⟨_, hfc_mem, by simp [SignedFormula.neg]⟩
-        rw [BoolEvaluate_imp, ih_a.1 hta_any, hbot, ih_c.2 hfc_any]; simp
+        have hcval := ih_c.2 (hbot ▸ hfc_any)
+        rw [hbot] at hcval
+        rw [BoolEvaluate_imp, ih_a.1 hta_any, hcval]; simp
       | and b1 b2 =>
         have hca : classicalApplyOne sf =
           .linear [SignedFormula.pos a sf.label, SignedFormula.neg (.and b1 b2) sf.label] := by
-          rw [hsign, hform, hbot]; rfl
+          obtain ⟨s, fm, l⟩ := sf; subst hsign hform hbot; rfl
         rw [hca] at hout
         have hta_mem : SignedFormula.pos a sf.label ∈ b := hout _ (by simp)
         have hfc_mem : SignedFormula.neg (.and b1 b2) sf.label ∈ b := hout _ (by simp)
@@ -304,11 +330,13 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
           List.any_eq_true.mpr ⟨_, hta_mem, by simp [SignedFormula.pos]⟩
         have hfc_any : b.any (fun sf' => sf'.sign == .neg && sf'.formula == .and b1 b2) = true :=
           List.any_eq_true.mpr ⟨_, hfc_mem, by simp [SignedFormula.neg]⟩
-        rw [BoolEvaluate_imp, ih_a.1 hta_any, hbot, ih_c.2 hfc_any]; simp
+        have hcval := ih_c.2 (hbot ▸ hfc_any)
+        rw [hbot] at hcval
+        rw [BoolEvaluate_imp, ih_a.1 hta_any, hcval]; simp
       | or b1 b2 =>
         have hca : classicalApplyOne sf =
           .linear [SignedFormula.pos a sf.label, SignedFormula.neg (.or b1 b2) sf.label] := by
-          rw [hsign, hform, hbot]; rfl
+          obtain ⟨s, fm, l⟩ := sf; subst hsign hform hbot; rfl
         rw [hca] at hout
         have hta_mem : SignedFormula.pos a sf.label ∈ b := hout _ (by simp)
         have hfc_mem : SignedFormula.neg (.or b1 b2) sf.label ∈ b := hout _ (by simp)
@@ -316,18 +344,20 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
           List.any_eq_true.mpr ⟨_, hta_mem, by simp [SignedFormula.pos]⟩
         have hfc_any : b.any (fun sf' => sf'.sign == .neg && sf'.formula == .or b1 b2) = true :=
           List.any_eq_true.mpr ⟨_, hfc_mem, by simp [SignedFormula.neg]⟩
-        rw [BoolEvaluate_imp, ih_a.1 hta_any, hbot, ih_c.2 hfc_any]; simp
+        have hcval := ih_c.2 (hbot ▸ hfc_any)
+        rw [hbot] at hcval
+        rw [BoolEvaluate_imp, ih_a.1 hta_any, hcval]; simp
   | and a c ih_a ih_c =>
     constructor
     · -- T(and a c) on branch → BoolEvaluate v (and a c) = true
       intro hmem
       obtain ⟨sf, hsfmem, hsfcond⟩ := List.any_eq_true.mp hmem
       simp only [Bool.and_eq_true] at hsfcond
-      have hsign : sf.sign = .pos := by cases sf.sign <;> simp_all [SignedFormula.sign]
+      have hsign : sf.sign = .pos := eq_of_beq hsfcond.1
       have hform : sf.formula = .and a c := eq_of_beq hsfcond.2
       have hout := hrule sf hsfmem
       have hca : classicalApplyOne sf = .linear [SignedFormula.pos a sf.label, SignedFormula.pos c sf.label] := by
-        rw [hsign, hform]; rfl
+        obtain ⟨s, fm, l⟩ := sf; subst hsign hform; rfl
       rw [hca] at hout
       have hta_mem : SignedFormula.pos a sf.label ∈ b := hout _ (by simp)
       have htc_mem : SignedFormula.pos c sf.label ∈ b := hout _ (by simp)
@@ -340,20 +370,20 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
       intro hmem
       obtain ⟨sf, hsfmem, hsfcond⟩ := List.any_eq_true.mp hmem
       simp only [Bool.and_eq_true] at hsfcond
-      have hsign : sf.sign = .neg := by cases sf.sign <;> simp_all [SignedFormula.sign]
+      have hsign : sf.sign = .neg := eq_of_beq hsfcond.1
       have hform : sf.formula = .and a c := eq_of_beq hsfcond.2
       have hout := hrule sf hsfmem
       have hca : classicalApplyOne sf = .branching [[SignedFormula.neg a sf.label], [SignedFormula.neg c sf.label]] := by
-        rw [hsign, hform]; rfl
+        obtain ⟨s, fm, l⟩ := sf; subst hsign hform; rfl
       rw [hca] at hout
       obtain ⟨br, hbr_mem, hbr⟩ := hout
       simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr_mem
       rcases hbr_mem with rfl | rfl
-      · have hfa_mem := hbr _ (List.mem_cons_self _ _)
+      · have hfa_mem := hbr _ List.mem_cons_self
         have hfa_any : b.any (fun sf' => sf'.sign == .neg && sf'.formula == a) = true :=
           List.any_eq_true.mpr ⟨_, hfa_mem, by simp [SignedFormula.neg]⟩
         simp [BoolEvaluate_and, ih_a.2 hfa_any]
-      · have hfc_mem := hbr _ (List.mem_cons_self _ _)
+      · have hfc_mem := hbr _ List.mem_cons_self
         have hfc_any : b.any (fun sf' => sf'.sign == .neg && sf'.formula == c) = true :=
           List.any_eq_true.mpr ⟨_, hfc_mem, by simp [SignedFormula.neg]⟩
         simp [BoolEvaluate_and, ih_c.2 hfc_any]
@@ -363,20 +393,20 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
       intro hmem
       obtain ⟨sf, hsfmem, hsfcond⟩ := List.any_eq_true.mp hmem
       simp only [Bool.and_eq_true] at hsfcond
-      have hsign : sf.sign = .pos := by cases sf.sign <;> simp_all [SignedFormula.sign]
+      have hsign : sf.sign = .pos := eq_of_beq hsfcond.1
       have hform : sf.formula = .or a c := eq_of_beq hsfcond.2
       have hout := hrule sf hsfmem
       have hca : classicalApplyOne sf = .branching [[SignedFormula.pos a sf.label], [SignedFormula.pos c sf.label]] := by
-        rw [hsign, hform]; rfl
+        obtain ⟨s, fm, l⟩ := sf; subst hsign hform; rfl
       rw [hca] at hout
       obtain ⟨br, hbr_mem, hbr⟩ := hout
       simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr_mem
       rcases hbr_mem with rfl | rfl
-      · have hta_mem := hbr _ (List.mem_cons_self _ _)
+      · have hta_mem := hbr _ List.mem_cons_self
         have hta_any : b.any (fun sf' => sf'.sign == .pos && sf'.formula == a) = true :=
           List.any_eq_true.mpr ⟨_, hta_mem, by simp [SignedFormula.pos]⟩
         simp [BoolEvaluate_or, ih_a.1 hta_any]
-      · have htc_mem := hbr _ (List.mem_cons_self _ _)
+      · have htc_mem := hbr _ List.mem_cons_self
         have htc_any : b.any (fun sf' => sf'.sign == .pos && sf'.formula == c) = true :=
           List.any_eq_true.mpr ⟨_, htc_mem, by simp [SignedFormula.pos]⟩
         simp [BoolEvaluate_or, ih_c.1 htc_any]
@@ -384,11 +414,11 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
       intro hmem
       obtain ⟨sf, hsfmem, hsfcond⟩ := List.any_eq_true.mp hmem
       simp only [Bool.and_eq_true] at hsfcond
-      have hsign : sf.sign = .neg := by cases sf.sign <;> simp_all [SignedFormula.sign]
+      have hsign : sf.sign = .neg := eq_of_beq hsfcond.1
       have hform : sf.formula = .or a c := eq_of_beq hsfcond.2
       have hout := hrule sf hsfmem
       have hca : classicalApplyOne sf = .linear [SignedFormula.neg a sf.label, SignedFormula.neg c sf.label] := by
-        rw [hsign, hform]; rfl
+        obtain ⟨s, fm, l⟩ := sf; subst hsign hform; rfl
       rw [hca] at hout
       have hfa_mem : SignedFormula.neg a sf.label ∈ b := hout _ (by simp)
       have hfc_mem : SignedFormula.neg c sf.label ∈ b := hout _ (by simp)
@@ -451,7 +481,7 @@ private lemma classicalExpandBranches_hintikka (fuel : Nat) :
       expandedSets.length = branches.length →
       -- Invariant: each branch satisfies Hintikka for its expanded formulas
       (∀ i (b : Branch (Proposition Atom) Unit) (e : List (SignedFormula (Proposition Atom) Unit)),
-        branches.get? i = some b → expandedSets.get? i = some e →
+        List.getElem? branches i = some b → List.getElem? expandedSets i = some e →
         ∀ sf ∈ e, match classicalApplyOne sf with
           | .linear out => ∀ sf' ∈ out, sf' ∈ b
           | .branching brs => ∃ br ∈ brs, ∀ sf' ∈ br, sf' ∈ b
@@ -478,7 +508,6 @@ private lemma classicalStepBranch_mem_preserved
   simp only [classicalStepBranch] at hstep
   obtain ⟨sf', hb'_mem, hfound⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hfound with hexp
-  · exact Option.noConfusion hfound
   · -- hfound : (match classicalApplyOne sf' with ...) = some (newBs, newExp)
     -- split on classicalApplyOne result
     rcases hca : classicalApplyOne sf' with out | brs | out | _
@@ -622,14 +651,16 @@ lemma classicalTableau_hintikka (φ : Proposition Atom) (b : Branch (Proposition
   -- the initial expandedSets is [[]] (one empty list), so every e we look up is [].
   exact classicalExpandBranches_hintikka _ _ _ rfl
     (fun i b' e _ he sf hsfin => by
-      -- e comes from [[]] .get? i. For i=0, [[]] .get? 0 = some [], so e = [].
-      -- For i≥1, [[]] .get? i = none, contradicting he.
-      simp only [List.get?] at he
-      split at he
-      · -- He says e = [], so sf ∈ [] is absurd
-        simp only [List.get?] at he
-        exact absurd hsfin (he ▸ List.not_mem_nil _)
-      · -- He says none = some e, which is False
+      -- he : List.getElem? [[]] i = some e
+      -- For i=0, this is some [] = some e, so e = [] and hsfin is absurd.
+      -- For i≥1, this is none = some e — contradiction.
+      cases i with
+      | zero =>
+        -- he : List.getElem? [[]] 0 = some e, i.e., some [] = some e, so e = []
+        have heq : e = [] := by simpa using he
+        exact absurd hsfin (heq ▸ List.not_mem_nil _)
+      | succ n =>
+        -- he : List.getElem? [[]] (n+1) = some e, i.e., none = some e — contradiction
         simp at he)
     b h
 
@@ -651,11 +682,12 @@ lemma classicalOpenBranch_countermodel (φ : Proposition Atom)
     have h' : classicalExpandBranches [[⟨.neg, φ, ()⟩]] [[]] (4 * (φ.complexity + 1) + 1) =
         .openBranch b := by simp only [classicalTableau] at h; exact h
     have hmem : (⟨.neg, φ, ()⟩ : SignedFormula (Proposition Atom) Unit) ∈ b :=
-      classicalExpandBranches_openBranch_initial_mem _ _ _ _ rfl
+      classicalExpandBranches_openBranch_initial_mem _ _
+        [[⟨.neg, φ, ()⟩]] [[]] rfl
         (fun b₀ hb₀ => by
-          simp at hb₀
+          simp only [List.mem_cons, List.mem_nil_iff, or_false] at hb₀
           subst hb₀
-          exact List.mem_cons_self _ _)
+          exact List.mem_cons_self)
         b h'
     exact List.any_eq_true.mpr ⟨⟨.neg, φ, ()⟩, hmem, by simp⟩
   exact (classicalTruthLemma b hH φ).2 hfphi
@@ -672,7 +704,7 @@ theorem classicalTableau_complete (φ : Proposition Atom)
     (h : Tautology φ) : classicalTableau φ = .closed := by
   by_contra hnt
   cases htab : classicalTableau φ with
-  | closed => exact hnt rfl
+  | closed => exact hnt htab
   | openBranch b =>
     have hcm := classicalOpenBranch_countermodel φ htab
     rw [tautology_iff_boolEvaluate_true] at h

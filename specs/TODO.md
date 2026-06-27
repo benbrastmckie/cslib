@@ -47,7 +47,7 @@ next_project_number: 380
 290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
   └─ 332 [IMPLEMENTING] — Close the two remaining normalization-termination sorries for CSL
     └─ 373 [NOT STARTED] — Extend the Curry-Howard layer from a structural isomorphism to a 
-345 [PLANNING] — Reconcile the two strength encodings on the Hilbert substrate and
+345 [PLANNED] — Reconcile the two strength encodings on the Hilbert substrate and
   └─ 348 [RESEARCHING] — Restate Glivenko and conservativity theory-parametrically against
   └─ 372 [NOT STARTED] — Complete the propositional fragment lattice by adding the disjunc
 368 [NOT STARTED] — Deduplicate the prime-exclusion machinery shared by the intuition
@@ -410,11 +410,12 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 345. Reconcile logic encodings isminimal
-- **Status**: [PLANNING]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 341, Task 344
 - **Research**: [345_reconcile_logic_encodings_isminimal/reports/01_team-research.md]
+- **Plan**: [345_reconcile_logic_encodings_isminimal/plans/01_isminimal-reconciliation.md]
 
 **Description**: Reconcile the two strength encodings on the Hilbert substrate and add the missing inclusion view. Waring's Defs.lean characterises strength by INCLUSION (IsIntuitionistic T ↔ IPL ⊆ T, IsClassical T ↔ CPL ⊆ T, with monotone propagation), while the Hilbert machinery uses the witness-bundle typeclass MinimalAxioms (NaturalDeduction/Equivalence.lean: 8 schema witnesses K, S, ∧I, ∧E1, ∧E2, ∨I1, ∨I2, ∨E). MinimalAxioms STAYS — it is genuinely needed for Hilbert completeness, because the Hilbert system encodes the connectives as axioms. Work: (1) add IsMinimal T ↔ minimal ⊆ T mirroring IsIntuitionistic/IsClassical; (2) add a bridge MinimalAxioms Axioms ↔ minimal ⊆ AxiomTheory Axioms so the inclusion idiom (monotone, free propagation) and the witness bundle are interchangeable; (3) optionally monotone-extension propagation. Gives Waring-style strength-axis scalability WITHOUT abandoning the Hilbert witness bundle. Files: Defs.lean, NaturalDeduction/Equivalence.lean, ProofSystem/Axioms.lean. CI green.
 

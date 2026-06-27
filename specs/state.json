@@ -1407,7 +1407,7 @@
         344
       ],
       "description": "Reconcile the two strength encodings on the Hilbert substrate and add the missing inclusion view. Waring's Defs.lean characterises strength by INCLUSION (IsIntuitionistic T ↔ IPL ⊆ T, IsClassical T ↔ CPL ⊆ T, with monotone propagation), while the Hilbert machinery uses the witness-bundle typeclass MinimalAxioms (NaturalDeduction/Equivalence.lean: 8 schema witnesses K, S, ∧I, ∧E1, ∧E2, ∨I1, ∨I2, ∨E). MinimalAxioms STAYS — it is genuinely needed for Hilbert completeness, because the Hilbert system encodes the connectives as axioms. Work: (1) add IsMinimal T ↔ minimal ⊆ T mirroring IsIntuitionistic/IsClassical; (2) add a bridge MinimalAxioms Axioms ↔ minimal ⊆ AxiomTheory Axioms so the inclusion idiom (monotone, free propagation) and the witness bundle are interchangeable; (3) optionally monotone-extension propagation. Gives Waring-style strength-axis scalability WITHOUT abandoning the Hilbert witness bundle. Files: Defs.lean, NaturalDeduction/Equivalence.lean, ProofSystem/Axioms.lean. CI green.",
-      "status": "planning",
+      "status": "planned",
       "task_type": "cslib",
       "created": "2026-06-25T00:00:00Z",
       "last_updated": "2026-06-27T00:00:00Z",
@@ -1416,6 +1416,10 @@
           "path": "specs/345_reconcile_logic_encodings_isminimal/reports/01_team-research.md",
           "type": "research",
           "summary": "Team research with 4 teammates"
+        },
+        {
+          "path": "specs/345_reconcile_logic_encodings_isminimal/plans/01_isminimal-reconciliation.md",
+          "type": "plan"
         }
       ],
       "session_id": "placeholder",

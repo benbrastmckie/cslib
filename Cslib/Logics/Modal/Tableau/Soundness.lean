@@ -71,6 +71,28 @@ def branchSatisfiable
 
 /-! ## Closed Branches are Unsatisfiable -/
 
+/-- Helper: recover propositional equality from BEq equality for `Proposition Atom`.
+
+`Proposition Atom` derives `BEq` via structural recursion, which does not automatically
+generate `LawfulBEq`. This lemma provides `eq_of_beq` by structural induction. -/
+private def Proposition.beqToEq {Atom : Type*} [DecidableEq Atom] :
+    ∀ (a b : Proposition Atom), (a == b) = true → a = b
+  | .atom p, .atom q, h =>
+      congrArg Proposition.atom ((inferInstance : LawfulBEq _).eq_of_beq h)
+  | .bot, .bot, _ => rfl
+  | .imp a₁ a₂, .imp b₁ b₂, h => by
+      have h' : (BEq.beq a₁ b₁ && BEq.beq a₂ b₂) = true := h
+      rw [Bool.and_eq_true] at h'
+      exact congrArg₂ Proposition.imp
+        (Proposition.beqToEq a₁ b₁ h'.1)
+        (Proposition.beqToEq a₂ b₂ h'.2)
+  | .box a, .box b, h =>
+      congrArg Proposition.box (Proposition.beqToEq a b h)
+  | .atom _, .bot, h | .atom _, .imp _ _, h | .atom _, .box _, h
+  | .bot, .atom _, h | .bot, .imp _ _, h | .bot, .box _, h
+  | .imp _ _, .atom _, h | .imp _ _, .bot, h | .imp _ _, .box _, h
+  | .box _, .atom _, h | .box _, .bot, h | .box _, .imp _ _, h => nomatch h
+
 /-- A modally closed branch is unsatisfiable with any accessibility relation.
 
 Classical closure means T(⊥) is present (never satisfiable) or T(φ)/F(φ) coexist at the
@@ -94,14 +116,13 @@ lemma modalClosed_unsat
     simp only [Bool.and_eq_true, SignedFormula.isPos] at hpred
     obtain ⟨hpos, hbot⟩ := hpred
     have hsat := (hb sf hmem).1 (by
-      cases sf.sign with
+      cases h : sf.sign with
       | pos => rfl
-      | neg => simp [Sign.isPos] at hpos)
-    simp only [Satisfies] at hsat
+      | neg => simp [h, Sign.isPos] at hpos)
     have hformbot : sf.formula = (HasBot.bot : Proposition Atom) :=
-      LawfulBEq.eq_of_beq hbot
+      Proposition.beqToEq _ _ hbot
     rw [hformbot] at hsat
-    exact absurd hsat id
+    simp only [Satisfies] at hsat
   | none =>
     -- T(φ)/F(φ) contradiction
     simp only [hfind, ClosureCondition.findClosure] at hcr
@@ -118,17 +139,18 @@ lemma modalClosed_unsat
         have htrue := (hb sf hsfmem).1 (by simp [hpos])
         obtain ⟨sf_neg, hmemneg, hsfneg⟩ := List.any_eq_true.mp hany
         simp only [Bool.and_eq_true] at hsfneg
-        obtain ⟨⟨hsneg, hformEq⟩, _⟩ := hsfneg
+        obtain ⟨⟨hsneg, hformEq⟩, hlabEq⟩ := hsfneg
         have hneg : sf_neg.sign = .neg := by
-          cases sf_neg.sign with
-          | pos => simp [Sign.isPos] at hsneg
+          cases h : sf_neg.sign with
+          | pos => simp [h] at hsneg
           | neg => rfl
-        have hformfeq : sf_neg.formula = sf.formula := LawfulBEq.eq_of_beq hformEq
+        have hformfeq : sf_neg.formula = sf.formula := Proposition.beqToEq _ _ hformEq
+        have hlabfeq : sf_neg.label = sf.label := LawfulBEq.eq_of_beq hlabEq
         have hfalse := (hb sf_neg hmemneg).2 (by simp [hneg])
-        rw [hformfeq] at hfalse
+        rw [hformfeq, hlabfeq] at hfalse
         exact absurd htrue hfalse
       · cases hsf : sf.sign with
-        | pos => exact hpos rfl
+        | pos => exact absurd hsf hpos
         | neg => simp only [hsf, Sign.isPos, ite_false] at hsfcond
 
 /-! ## Helper: Branch Extension Preserves Satisfiability -/

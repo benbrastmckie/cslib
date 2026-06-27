@@ -86,4 +86,14 @@ theorem classicalImp_imp_trans {φ ψ χ : PL.Proposition Atom}
               (mp_deriv ⟨.ax [] _ (.implyK (ψ.imp χ) φ)⟩ h₂))
     h₁
 
+/-- Classical case lemma (Peirce): from `Γ ⊢ (φ → goal) → φ` derive `Γ ⊢ φ`.
+
+Direct application of Peirce's law: the axiom `((φ → goal) → φ) → φ` combined with one
+modus ponens step. This is the only place Peirce's law is invoked in the classical
+implicational completeness argument. -/
+theorem classicalImp_peirce_mp {Γ : List (PL.Proposition Atom)} {φ goal : PL.Proposition Atom}
+    (h : Deriv ClassicalImpAxiom Γ ((φ.imp goal).imp φ)) :
+    Deriv ClassicalImpAxiom Γ φ :=
+  mp_deriv ⟨.ax Γ _ (.peirce φ goal)⟩ h
+
 end Cslib.Logic.PL

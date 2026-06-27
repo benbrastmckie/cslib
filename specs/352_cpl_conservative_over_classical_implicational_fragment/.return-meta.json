@@ -3,12 +3,12 @@
   "started_at": "2026-06-26T00:00:00Z",
   "artifacts": [],
   "partial_progress": {
-    "stage": "phase 4 complete",
-    "details": "Phases 3 and 4 complete. Working on Phase 5.",
+    "stage": "phases 3-5 complete",
+    "details": "Phases 3, 4, 5 complete. Phase 6 (litCtx) is next.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 4,
-    "last_completed_phase": "Phase 4: composition / imp_trans"
+    "phases_completed": 5,
+    "last_completed_phase": "Phase 5: Peirce classical case lemma"
   },
   "metadata": {
     "session_id": "sess_1782498610_8a4b4e",

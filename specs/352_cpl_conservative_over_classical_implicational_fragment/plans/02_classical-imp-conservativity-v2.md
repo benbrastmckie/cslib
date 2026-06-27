@@ -280,7 +280,7 @@ second tiny lemma if and only if Phase 7's recipe references it.)
 
 ---
 
-### Phase 5: Derived lemma — Peirce-driven classical case lemma [NOT STARTED]
+### Phase 5: Derived lemma — Peirce-driven classical case lemma [COMPLETED]
 
 **Goal**: The lemma where classical strength (Peirce) enters. This feeds the truth lemma's `imp`
 case false-antecedent subcase and/or the atom-elimination collapse. **Risk-bearing**: confirm the

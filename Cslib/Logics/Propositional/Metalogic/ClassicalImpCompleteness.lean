@@ -298,10 +298,7 @@ private lemma litCtx_congr {goal : PL.Proposition Atom} {as : List Atom}
   induction as with
   | nil => rfl
   | cons p ps ih =>
-    show (if v p then PL.Proposition.atom p else (PL.Proposition.atom p).imp goal) ::
-        litCtx v goal ps =
-      (if w p then PL.Proposition.atom p else (PL.Proposition.atom p).imp goal) ::
-        litCtx w goal ps
+    simp only [litCtx]
     congr 1
     · rw [h p (List.mem_cons.mpr (Or.inl rfl))]
     · exact ih (fun q hq => h q (List.mem_cons.mpr (Or.inr hq)))
@@ -332,7 +329,7 @@ theorem classicalImp_collapse {goal : PL.Proposition Atom} (as : List Atom)
         simp only [hvp, ite_true] at hlit hDT
         exact mp_deriv hDT (assumption_deriv hlit)
       | false =>
-        simp only [hvp, ite_false] at hlit hDT
+        simp only [hvp] at hlit hDT
         exact mp_deriv hDT (assumption_deriv hlit)
     · -- p ∉ ps: Boolean updates at p leave litCtx v goal ps unchanged
       haveI := Classical.decEq Atom
@@ -344,9 +341,11 @@ theorem classicalImp_collapse {goal : PL.Proposition Atom} (as : List Atom)
           exact h0
         rwa [litCtx_congr (fun q hq =>
           Function.update_of_ne (fun (heq : q = p) => hp (heq ▸ hq)) true v)] at hTh
-      have hF : Deriv ClassicalImpAxiom ((PL.Proposition.atom p).imp goal :: litCtx v goal ps) goal := by
+      have hF : Deriv ClassicalImpAxiom
+          ((PL.Proposition.atom p).imp goal :: litCtx v goal ps) goal := by
         have hFh : Deriv ClassicalImpAxiom
-            ((PL.Proposition.atom p).imp goal :: litCtx (Function.update v p false) goal ps) goal := by
+            ((PL.Proposition.atom p).imp goal ::
+              litCtx (Function.update v p false) goal ps) goal := by
           have h0 := h (Function.update v p false)
           simp only [litCtx, Function.update_self] at h0
           exact h0

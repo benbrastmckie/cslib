@@ -1,5 +1,5 @@
 ---
-next_project_number: 397
+next_project_number: 398
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 397
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,299,301,321,364,369,373,374,382,384,385,386,387,388,389,391,393,394,395,396 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,299,301,321,364,369,373,374,382,384,385,386,387,388,389,391,393,394,395,396,397 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,317,360,390,392 | 36,37,180,299,364,369,387 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275,370,375 | 39,40,317,360 | Foundations, Propositional Logic |
 
@@ -76,8 +76,18 @@ next_project_number: 397
 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
 394 [NOT STARTED] — Tier-3. Delete Foundations/Logic/Tableau/PropositionalTableau.lea
 395 [NOT STARTED] — META / coordination task. PRECONDITION: do NOT start until ALL fe
+397 [NOT STARTED] — Main never built green as a whole; the long-standing Modal/Tablea
 
 ## Tasks
+
+### 397. Repair main barrel build to green (subformula dedup + Normalization/Termination fallout)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Main never built green as a whole; the long-standing Modal/Tableau/Soundness red masked a chain of barrel-link breakages (errors only surface when all modules are imported together by Cslib.lean). Two safe fixes already committed (cc5a0c04): tableau-barrel module headers + temporary stub of the Soundness import. REMAINING: (1) Dedup the duplicate definitions of Proposition.subformulas / IsSubformula / self_mem_subformulas / IsSubformula.{refl,trans,and_left,and_right,or_left,or_right,imp_left,imp_right} / complexity, which are byte-identical in BOTH Cslib/Logics/Propositional/Subformula.lean (canonical, fuller — also has vars/Finset.vars) AND Cslib/Logics/Propositional/NaturalDeduction/Normalization/Basic.lean. Canonicalize to Subformula.lean: add `public import Cslib.Logics.Propositional.Subformula` to Normalization/Basic.lean and delete its duplicated `## Subformula Infrastructure` block (subformulas through complexity, ~lines 43-140), keeping the `## Derivation Definitions` onward. (2) Repair the fallout in Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean: importing Subformula.lean brings its @[simp] lemmas (complexity_imp/and/or/atom/bot, vars_*) into scope, breaking two `decreasing_by`/`apply` unifications (~lines 1617, 1664) and possibly the 2 pre-existing parked sorries. Fix by making those termination proofs robust to the simp set (prefer `simp only [...]` with explicit lemmas). (3) Then iterate `lake build` to FULL green, discovering and fixing any further barrel-link conflicts beyond Termination (depth unknown). Out of scope: re-enabling Modal/Tableau/Soundness (owned by tasks 299/364) — leave it stubbed. Verify: full `lake build` green with Soundness still stubbed. Overlaps task 388 (termination cleanup). Context: this was uncovered while preparing to merge worktree orchestrate-369-374-317-375-373-382 into main; that merge is blocked on main being green.
+
+---
 
 ### 396. Salvage reusable lemmas from task-299 Soundness refactor for the per-branch-accessibility soundness redesign
 - **Status**: [NOT STARTED]

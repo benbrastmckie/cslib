@@ -1,0 +1,23 @@
+{
+  "status": "implemented",
+  "phases_completed": 1,
+  "phases_total": 1,
+  "summary": "Removed dead Dershowitz-Manna termination-measure machinery from Termination.lean. Deleted 423 lines: normMeasure, normMeasure_wf, reduceRoot_decreases_normMeasure (all 8 cases), reduceRootSubSN, redexWeight, sn_redexWeight_zero, redexWeight_zero_sn, all four Multiset.isDershowitzMannaLT_* helpers, and import Mathlib.Data.Multiset.DershowitzManna. Kept all live shared helpers (maximalFormulas, commutingSum, nodeCount, weakCtx lemmas, subsOne_new_redex_complexity_lt, maximalFormulas_sn_eq_zero, conclusionComplexity). Updated module docstring to reflect constructive proof. Build green (598 jobs, 0 sorry, 0 new axioms). lake shake clean. Commit c7cb659a.",
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "complete",
+  "sorry_inventory": [],
+  "artifacts": [
+    "Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean"
+  ],
+  "verification": {
+    "build_passed": true,
+    "sorry_count": 0,
+    "axiom_count_unchanged": true,
+    "shake_clean": true,
+    "lines_deleted": 423,
+    "lines_before": 1888,
+    "lines_after": 1465,
+    "commit": "c7cb659a"
+  }
+}

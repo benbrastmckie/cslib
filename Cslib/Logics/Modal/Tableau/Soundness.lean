@@ -51,7 +51,7 @@ namespace Cslib.Logic.Modal.Tableau
 
 open Cslib.Logic.Tableau Cslib.Logic.Modal
 
-universe v
+universe v u
 variable {Atom : Type v} [DecidableEq Atom] [Hashable Atom]
 
 /-! ## Branch Satisfiability -/
@@ -192,9 +192,9 @@ theorem modalStepBranch_preserves_sat
     (newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
     (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
-    (hsat : branchSatisfiable.{v, v} b acc)
+    (hsat : branchSatisfiable.{v, u} b acc)
     (hInv : accFreshInv b acc) :
-    ∃ b' ∈ newBs, branchSatisfiable.{v, v} b' newAcc := by
+    ∃ b' ∈ newBs, branchSatisfiable.{v, u} b' newAcc := by
   obtain ⟨W, m, f, hacc, hb⟩ := hsat
   simp only [modalStepBranch] at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
@@ -1653,11 +1653,11 @@ theorem modalExpandBranches_closed_unsat
       (∀ b e newBs newExps newAcc,
         b ∈ branches →
         modalStepBranch b e acc = some (newBs, newExps, newAcc) →
-        branchSatisfiable b acc →
+        branchSatisfiable.{v, u} b acc →
         accFreshInv b acc →
-        ∃ b' ∈ newBs, branchSatisfiable b' newAcc) →
+        ∃ b' ∈ newBs, branchSatisfiable.{v, u} b' newAcc) →
       modalExpandBranches branches expandedSets acc fuel = .closed →
-      ∀ b ∈ branches, ¬branchSatisfiable b acc := by
+      ∀ b ∈ branches, ¬branchSatisfiable.{v, u} b acc := by
   induction fuel with
   | zero =>
     intro branches expandedSets acc hlength _ _ h b hb hsat
@@ -1685,7 +1685,7 @@ theorem modalExpandBranches_closed_unsat
         pendingExp.length = pending.length →
         doneExp.length = done.length →
         modalExpandBranches.processNext fuel' pending pendingExp done doneExp acc = .closed →
-        ∀ bp ∈ pending, ¬branchSatisfiable bp acc from
+        ∀ bp ∈ pending, ¬branchSatisfiable.{v, u} bp acc from
       key branches expandedSets [] [] hlength rfl
         (by simpa [modalExpandBranches] using h) b hb hsat
     intro pending

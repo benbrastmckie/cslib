@@ -64,15 +64,16 @@ next_project_number: 385
 
 ### Uncategorized
 
-384 [NOT STARTED] — Redesign the modal tableau fresh-world scheme to close the build-
+384 [RESEARCHED] — Redesign the modal tableau fresh-world scheme to close the build-
   └─ 364 [BLOCKED] — (Modal Logic: Repair the pre-existing Mathlib/toolchai) (see above)
 
 ## Tasks
 
 ### 384. Modal tableau soundness gap redesign
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Dependencies**: None
+- **Research**: [384_modal_tableau_soundness_gap_redesign/reports/01_soundness-gap-redesign.md]
 
 **Description**: Redesign the modal tableau fresh-world scheme to close the build-verified soundness-proof gap blocking task 364. Root cause (build-verified): modalExpandBranches (Cslib/Logics/Modal/Tableau) threads a SINGLE shared Accessibility acc through all worklist branches, while modalApplyOne numbers fresh worlds PER-BRANCH as modalNextWorld b. A diamond/boxNeg edge (w,w') created in one branch pollutes sibling branches whose modalNextWorld equals w', so the per-branch invariant accFreshInv / branchSatisfiable required by modalStepBranch_preserves_sat is unmaintainable: branchSatisfiable bp acc does NOT imply branchSatisfiable bp (acc.addEdge ..) (satisfiability is not monotone under edge addition; compiling counterexample: (Box p AND Box (p->bot)) @0 is satisfiable at a dead-end world but contradictory once world 0 gains a successor). This surfaced as the final 3 build errors (1744/1749/1770) in modalExpandBranches_closed_unsat's fuel-induction succ-case after task 364 repaired all genuine toolchain/Mathlib drift (61->3 errors, zero sorry). The original proof masked this with a -- Placeholder that only type-checked under the pre-bump toolchain's looser unification. DESIGN OPTIONS to evaluate: (A) per-branch Accessibility relations (each worklist branch carries its own acc), or (B) a globally-monotone fresh-world counter threaded through modalExpandBranches so fresh worlds never collide across branches. Either eliminates cross-branch pollution; then reformulate the loop invariant (per-branch accFreshInv) and prove the missing freshness-MAINTENANCE lemma (none exists today: only accFreshInv_empty and modalNextWorld_gt). Build-verified evidence and full obligation analysis: specs/364_modal_tableau_soundness_drift_repair/handoffs/verified-counterexample.lean, .../summaries/02_soundness-gap-summary.md, .../.orchestrator-handoff.json. Constraints: zero sorry, zero new axioms; preserve the public theorem statements modalTableau_sound / kValid where possible (changing modalExpandBranches' fresh-world scheme is expected). CI: lake build (scoped Cslib.Logics.Modal.Tableau.Soundness + full), lake exe lint-style. Blocks completion of task 364.
 

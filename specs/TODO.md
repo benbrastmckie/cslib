@@ -1,5 +1,5 @@
 ---
-next_project_number: 403
+next_project_number: 406
 ---
 
 # TODO
@@ -11,8 +11,8 @@ next_project_number: 403
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,299,301,317,321,360,384,385,386,387,388,389,391,393,394,395,396,398,400,401 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,370,375,390,392,399 | 36,37,180,299,317,360,387,398 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,278,299,301,317,321,360,384,385,386,387,388,389,391,393,394,395,396,398,400,401,403,404 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,370,375,390,392,399,405 | 36,37,180,299,317,360,387,398,404 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -76,8 +76,38 @@ next_project_number: 403
   └─ 399 [NOT STARTED] — Update PR #648 (feat/propositional-v2) following Thomas Waring's 
 400 [NOT STARTED] — Waring's closing message (Zulip thread 606970606) flagged connect
 401 [NOT STARTED] — From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portab
+403 [NOT STARTED] — Rename specs/384_modal_tableau_soundness_gap_redesign/ to specs/4
+404 [NOT STARTED] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
+  └─ 405 [NOT STARTED] — Simplify the proof machinery in the task-402 modal tableau soundn
 
 ## Tasks
+
+### 405. Proof style cleanup modal soundness
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: Task 404
+
+**Description**: Simplify the proof machinery in the task-402 modal tableau soundness redesign before any upstream PR. Targets in Cslib/Logics/Modal/Tableau/Soundness.lean: modalApplyOne_fresh (uses unfold + extract_lets + `repeat first | Or.inl rfl | Or.inr ... | split` plus an apply_ite/ite_self cleanup) and the modalExpandBranches_closed_unsat per-branch accs/Forall2 reformulation. Improve readability/robustness without changing statements. Verify scoped + full lake build green, zero sorry, lint-style pass. Touches the same file as task 404 (sequence after it); overlaps code-hygiene task 321.
+
+---
+
+### 404. Forall2 mathlib cleanup soundness
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Replace the local private re-proofs of List.Forall2 lemmas in Cslib/Logics/Modal/Tableau/Soundness.lean (forall2_append_aux, forall2_drop_aux, forall2_take_aux, forall2_of_zip_mem) with canonical Mathlib lemmas. These were added during task 402 because Mathlib.Data.List.Forall2 is not transitively imported by Cslib.Init. Either add the Mathlib import and switch call sites to library lemmas (List.Forall2.append/length_eq/etc.), or document why the local helpers are kept. Verify scoped + full lake build green, zero sorry, lint-style pass. Low-priority polish; helpers are correct as-is.
+
+---
+
+### 403. Rename specs 384 to 402
+- **Status**: [NOT STARTED]
+- **Task Type**: meta
+- **Dependencies**: None
+
+**Description**: Rename specs/384_modal_tableau_soundness_gap_redesign/ to specs/402_modal_tableau_soundness_gap_redesign/ to match task 402 (the soundness-gap redesign was renumbered 384->402 during the task-364 merge to avoid colliding with main task 384 tableau_completeness_sorries). git mv the directory and update task 402 artifact paths in specs/state.json (reports/01_soundness-gap-redesign.md, plans/01_per-branch-accessibility.md). Grep for any remaining 384_modal_tableau references. Bookkeeping only; no code changes.
+
+---
 
 ### 402. Modal tableau soundness gap redesign
 - **Status**: [COMPLETED]

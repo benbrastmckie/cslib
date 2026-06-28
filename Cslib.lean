@@ -549,6 +549,7 @@ public import Cslib.Logics.Temporal.Syntax.Formula
 public import Cslib.Logics.Temporal.Syntax.Subformulas
 public import Cslib.Logics.Temporal.Tableau.Branch
 public import Cslib.Logics.Temporal.Tableau.Closure
+public import Cslib.Logics.Temporal.Tableau.Completeness
 public import Cslib.Logics.Temporal.Tableau.Defs
 public import Cslib.Logics.Temporal.Tableau.Rules
 public import Cslib.Logics.Temporal.Tableau.Saturation

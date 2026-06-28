@@ -113,7 +113,7 @@ theorem Theory.Derivation.subformula_property_of_isStronglyNormal
       | orE _ _ _ _ => simp at hn
       | ax h => exact Or.inr ⟨_, h, Proposition.IsSubformula.refl _⟩
       | ass h => exact Or.inl ⟨_, h, Proposition.IsSubformula.refl _⟩
-      | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
         rcases (conclusion_grounded_or_intro _ hn_D) with hg | hir | hore
         · exact hg
         · simp [isIntroRoot] at hir
@@ -138,7 +138,7 @@ theorem Theory.Derivation.subformula_property_of_isStronglyNormal
       | orE _ _ _ _ => simp at hn
       | ax h => exact Or.inr ⟨_, h, Proposition.IsSubformula.refl _⟩
       | ass h => exact Or.inl ⟨_, h, Proposition.IsSubformula.refl _⟩
-      | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
         rcases (conclusion_grounded_or_intro _ hn_D) with hg | hir | hore
         · exact hg
         · simp [isIntroRoot] at hir
@@ -167,7 +167,7 @@ theorem Theory.Derivation.subformula_property_of_isStronglyNormal
       | orE _ _ _ _ => simp at hn
       | ax h => exact Or.inr ⟨_, h, Proposition.IsSubformula.refl _⟩
       | ass h => exact Or.inl ⟨_, h, Proposition.IsSubformula.refl _⟩
-      | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
         rcases (conclusion_grounded_or_intro _ hn_D) with hg | hir | hore
         · exact hg
         · simp [isIntroRoot] at hir
@@ -256,7 +256,7 @@ theorem Theory.Derivation.subformula_property_of_isStronglyNormal
       | orE _ _ _ _ => simp at hn
       | ax h => exact Or.inr ⟨_, h, Proposition.IsSubformula.refl _⟩
       | ass h => exact Or.inl ⟨_, h, Proposition.IsSubformula.refl _⟩
-      | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
         rcases (conclusion_grounded_or_intro _ hn_D) with hg | hir | hore
         · exact hg
         · simp [isIntroRoot] at hir
@@ -277,6 +277,19 @@ theorem Theory.Derivation.subformula_property_of_isStronglyNormal
             (Proposition.IsSubformula.trans hBsub Proposition.IsSubformula.imp_left) hCS⟩)
         · exact Or.inr (Or.inr ⟨C', hC', Proposition.IsSubformula.trans
             (Proposition.IsSubformula.trans hBsub Proposition.IsSubformula.imp_left) hCS⟩)
+      · exact Or.inr (Or.inl hBhyp)
+      · exact Or.inr (Or.inr hBax)
+  | @efq _ _ i D ih =>
+    -- efq's conclusion `A` is grounded by the axiom `⊥ → A ∈ T`. Any formula `B` in the
+    -- ⊥-subderivation is a subformula of `⊥`, hence (via `imp_left`) of `⊥ → A ∈ T`.
+    haveI := i
+    simp only [isStronglyNormal] at hn
+    simp only [formulas, Finset.mem_union, Finset.mem_singleton] at hB
+    obtain rfl | hBD := hB
+    · exact Or.inl (Proposition.IsSubformula.refl _)
+    · rcases ih hn hBD with hBsub | hBhyp | hBax
+      · exact Or.inr (Or.inr ⟨_, IsIntuitionistic.efq A,
+          Proposition.IsSubformula.trans hBsub Proposition.IsSubformula.imp_left⟩)
       · exact Or.inr (Or.inl hBhyp)
       · exact Or.inr (Or.inr hBax)
 

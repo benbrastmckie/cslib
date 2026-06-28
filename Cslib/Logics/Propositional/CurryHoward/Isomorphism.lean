@@ -64,6 +64,7 @@ def Theory.curryHowardForward {G : Ctx Atom} {A : Proposition Atom} :
       .case_ G (curryHowardForward d) (curryHowardForward dA) (curryHowardForward dB)
   | .impI Γ d      => .lam Γ (curryHowardForward d)
   | .impE d d'     => .app (curryHowardForward d) (curryHowardForward d')
+  | @Derivation.efq _ _ _ _ _ i d => @Term.efq _ _ _ _ _ i (curryHowardForward d)
 
 /-! ### Backward map: Term → Derivation -/
 
@@ -83,11 +84,12 @@ def Theory.curryHowardBackward {G : Ctx Atom} {A : Proposition Atom} :
       .orE G (curryHowardBackward t) (curryHowardBackward tA) (curryHowardBackward tB)
   | .lam Γ t      => .impI Γ (curryHowardBackward t)
   | .app t t'     => .impE (curryHowardBackward t) (curryHowardBackward t')
+  | @Term.efq _ _ _ _ _ i t => @Derivation.efq _ _ _ _ _ i (curryHowardBackward t)
 
 /-! ### Roundtrip properties -/
 
 /-- The composition `curryHowardForward ∘ curryHowardBackward` is the identity on `Term`.
-Proved by structural induction on the term; each of the 10 cases reduces to `rfl` since
+Proved by structural induction on the term; each of the 11 cases reduces to `rfl` since
 the maps are constructor-for-constructor inverses. -/
 theorem Theory.curryHoward_forward_backward {G : Ctx Atom} {A : Proposition Atom}
     (t : Theory.Term (T := T) G A) :
@@ -103,9 +105,10 @@ theorem Theory.curryHoward_forward_backward {G : Ctx Atom} {A : Proposition Atom
   | case_ _ _ _ _ ih ih₁ ih₂ => simp [curryHowardBackward, curryHowardForward, ih, ih₁, ih₂]
   | lam _ _ ih => simp [curryHowardBackward, curryHowardForward, ih]
   | app _ _ ih₁ ih₂ => simp [curryHowardBackward, curryHowardForward, ih₁, ih₂]
+  | efq _ ih => simp [curryHowardBackward, curryHowardForward, ih]
 
 /-- The composition `curryHowardBackward ∘ curryHowardForward` is the identity on `Derivation`.
-Proved by structural induction on the derivation; each of the 10 cases reduces to `rfl`. -/
+Proved by structural induction on the derivation; each of the 11 cases reduces to `rfl`. -/
 theorem Theory.curryHoward_backward_forward {G : Ctx Atom} {A : Proposition Atom}
     (d : T.Derivation G A) :
     curryHowardBackward (curryHowardForward d) = d := by
@@ -120,6 +123,7 @@ theorem Theory.curryHoward_backward_forward {G : Ctx Atom} {A : Proposition Atom
   | orE _ _ _ _ ih ih₁ ih₂ => simp [curryHowardForward, curryHowardBackward, ih, ih₁, ih₂]
   | impI _ _ ih => simp [curryHowardForward, curryHowardBackward, ih]
   | impE _ _ ih₁ ih₂ => simp [curryHowardForward, curryHowardBackward, ih₁, ih₂]
+  | efq _ ih => simp [curryHowardForward, curryHowardBackward, ih]
 
 /-! ### Equivalence -/
 

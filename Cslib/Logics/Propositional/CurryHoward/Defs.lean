@@ -16,7 +16,7 @@ This file defines the simply-typed lambda calculus `Term` that corresponds to
 **intrinsically typed**: `Term (T := T) G A` is a type whose inhabitants are
 exactly the terms of type `A` under context `G` relative to theory `T`.
 
-The `Term` type has exactly 10 constructors, mirroring the 10 constructors of
+The `Term` type has exactly 11 constructors, mirroring the 11 constructors of
 `Theory.Derivation` one-to-one:
 
 | `Theory.Derivation` constructor | `Term` constructor | Curry-Howard correspondence |
@@ -31,6 +31,7 @@ The `Term` type has exactly 10 constructors, mirroring the 10 constructors of
 | `orE`   | `case_` | disjunction elim ↔ case analysis |
 | `impI`  | `lam`  | implication intro ↔ lambda abstraction |
 | `impE`  | `app`  | implication elim (modus ponens) ↔ function application |
+| `efq`   | `efq`  | ex falso quodlibet (⊥ elim) ↔ abort (intuitionistic only) |
 
 ## References
 
@@ -51,8 +52,8 @@ variable {Atom : Type u} [DecidableEq Atom]
 /-- A simply-typed lambda term over `Proposition Atom` as the type language.
 `Term (T := T) G A` is the type of terms of type `A` in context `G` relative to theory `T`.
 This is the intrinsically-typed term language witnessing the Curry-Howard isomorphism with
-`Theory.Derivation`: the 10 constructors of `Term` correspond one-to-one with the
-10 constructors of `Theory.Derivation`. -/
+`Theory.Derivation`: the 11 constructors of `Term` correspond one-to-one with the
+11 constructors of `Theory.Derivation`. -/
 inductive Theory.Term {T : Theory Atom} : Ctx Atom → Proposition Atom → Type u where
   /-- Constant term corresponding to a theory axiom (mirrors `Derivation.ax`).
   A closed term inhabiting `A` is provided by each axiom `A ∈ T`. -/
@@ -96,5 +97,10 @@ inductive Theory.Term {T : Theory Atom} : Ctx Atom → Proposition Atom → Type
   Applying a function `t : A → B` to an argument `s : A` yields `app t s : B`. -/
   | app {Γ : Ctx Atom} {A B : Proposition Atom} :
       Term Γ (A → B) → Term Γ A → Term Γ B
+  /-- Abort term corresponding to ex falso quodlibet / bottom elimination
+  (mirrors `Derivation.efq`). Available exactly when the theory is intuitionistic
+  (`[IsIntuitionistic T]`). An abort term `efq t` of type `A` is formed from a term `t : ⊥`. -/
+  | efq {Γ : Ctx Atom} {A : Proposition Atom} [IsIntuitionistic T] :
+      Term Γ ⊥ → Term Γ A
 
 end Cslib.Logic.PL

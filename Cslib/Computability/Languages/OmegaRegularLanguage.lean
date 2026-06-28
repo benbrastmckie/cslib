@@ -361,6 +361,47 @@ private lemma buchiFamily_component_isRegular {Symbol : Type} [Inhabited Symbol]
   grind [buchiFamily, IsRegular.hmul, IsRegular.omegaPow]
 
 open NA.Buchi in
+/-- Concrete deterministic Muller automaton (DMA) over the Büchi congruence quotient of `na`.
+
+**Components** (Phase 3, task 241):
+- **State space**: `Q = Quotient na.BuchiCongruence.eq`, finite by `buchiCongruence_fin_index`.
+- **Initial state**: `Quotient.mk na.BuchiCongruence.eq []`, the class of the empty word.
+- **Transition**: `δ(q, a) = ⟦u ++ [a]⟧` for the representative `u` of class `q`, well-defined
+  by `BuchiCongruence.right_cov` (right-appending a single symbol preserves Büchi congruence).
+- **Accept set**: `{S : Set Q | ∃ b ∈ S, ∃ a : Q, (buchiFamily (a, b) ∩ language na).Nonempty}`.
+  A Muller set `S` is accepting iff it contains a recurrent class `b` such that some Büchi
+  family element `buchiFamily (a, b)` intersects `language na`; by `buchiFamily_saturation`
+  this is equivalent to `buchiFamily (a, b) ⊆ language na`.
+
+The language equality is stated as `buchiCongr_DMA_language_eq` below (BLOCKED, Phase 4). -/
+private noncomputable def buchiCongr_DMA [Inhabited Symbol]
+    {State : Type} (na : NA.Buchi State Symbol) :
+    DA.Muller (Quotient na.BuchiCongruence.eq) Symbol where
+  tr q a := Quotient.liftOn q
+    (fun u => Quotient.mk na.BuchiCongruence.eq (u ++ [a]))
+    (fun _ _ h => Quotient.sound (na.BuchiCongruence.right_cov.elim [a] h))
+  start := Quotient.mk na.BuchiCongruence.eq []
+  accept := {S : Set (Quotient na.BuchiCongruence.eq) |
+    ∃ b ∈ S, ∃ a : Quotient na.BuchiCongruence.eq,
+      ((na.buchiFamily (a, b) ⊓ language na).toSet).Nonempty}
+
+open NA.Buchi in
+/-- **[BLOCKED — Phase 4, task 241]**: `buchiCongr_DMA na` recognizes the same ω-language
+as the NBA `na`.
+
+**Proof sketch**: By `buchiFamily_cover`, every `xs` lies in some `na.buchiFamily (a, b)`.
+By `buchiFamily_saturation`, each family element is either ⊆ `language na` or disjoint from
+it. For `xs ∈ na.buchiFamily (a, b)` with the element ⊆ `language na`, the DMA run visits
+class `b` infinitely often (since `xs` is built from words in `eqvCls b`), so
+`b ∈ infOcc(run xs) =: S` and `(a, b)` witnesses `S ∈ buchiCongr_DMA.accept`.
+Conversely, if `S ∈ buchiCongr_DMA.accept`, there exist `b ∈ S` and `a : Q` with
+`na.buchiFamily (a, b) ⊆ language na`; since `b` recurs in `run xs`, one can decompose `xs`
+to lie in `na.buchiFamily (a, b) ⊆ language na`. -/
+proof_wanted buchiCongr_DMA_language_eq [Inhabited Symbol]
+    {State : Type} [Finite State] (na : NA.Buchi State Symbol) :
+    language (buchiCongr_DMA na) = language na
+
+open NA.Buchi in
 /-- Forward direction scaffold for McNaughton's theorem: ω-regular → DMA-recognizable.
 
 Reduces the forward direction of `IsRegular.iff_da_muller` to `h_pkg`: given any

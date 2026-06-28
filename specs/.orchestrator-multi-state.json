@@ -69,7 +69,7 @@
     "371": "completed",
     "363": "completed",
     "374": "partial",
-    "369": "implementing",
+    "369": "partial",
     "317": "blocked",
     "375": "blocked"
   },
@@ -125,7 +125,7 @@
   "final_376_attempt": true,
   "partial_tasks": [
     374,
-    376
+    369
   ],
   "blocked_tasks": [
     363,
@@ -136,5 +136,12 @@
   "final_outcome": "1 completed (371), 2 partial (374,376), 4 blocked on 376 measure-decrease kernel (363,369,317,375)",
   "phase": "research-review-resume",
   "current_phase_376": "5-CI",
-  "current_phase_369": 1
+  "current_phase_369": "3b-defeq-only",
+  "notes_369": "STOPPED (clean green checkpoint 1f2d569a). DONE+committed: IntMinScheme structure + intScheme/minScheme instances (bot_truth proven) + tableau_sound S (parametric soundness) + truthLemma S statement + openBranch_countermodel S + tableau_complete S (sorry-free). Scheme.lean green, 4 deferred sorries (truthLemma + 3 structural intExpandBranches_openBranch facts). REMAINING for 369: rewire Int/Min Completeness to parametric (3b/3c), P4 DecisionProcedure, P5 delete ~400 dup lines + CI. Old Int/Min Completeness still carry original 6 sorries (untouched). The 4 Scheme sorries + the rewiring are 317 territory.",
+  "stopping_point": "finish_369_then_stop",
+  "remaining_after_stop": [
+    317,
+    375
+  ],
+  "stopped_clean": true
 }

@@ -1634,7 +1634,7 @@
     {
       "project_number": 369,
       "project_name": "parameterize_int_min_tableau",
-      "status": "planned",
+      "status": "partial",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Parameterize the intuitionistic and minimal tableau developments over their two points of difference to remove ~400 lines of duplication and set up task 317 to discharge ONE truth lemma instead of two. The two logics already share intExpandBranches, the rule set, the Nat-labelled Kripke world scheme, and the accessibility-edge mechanism; they diverge only in (a) the closure predicate (isIntuitionisticallyClosed, which fires on T(bot) at any world, vs isMinimallyClosed, contradiction-only) and (b) the extracted countermodel's botForces (intuitionistic: fun _ => False; minimal: botForces w = T(bot) present on the branch at w). Refactor the shared Soundness and Completeness scaffolding (Cslib/Logics/Propositional/Tableau/{Intuitionistic,Minimal}/{Soundness,Completeness,DecisionProcedure}.lean) to abstract over (closurePred, modelBot) so both logics instantiate a single parametric development, leveraging the generic Foundations/Logic/Tableau ClosureCondition typeclass where natural. Constraints: keep all three Soundness modules green and sorry-free (task 316); preserve the still-open completeness obligations as a SINGLE parametric truth-lemma/countermodel pair (do not introduce new sorries beyond the existing ones being unified). Must run after the classical tableau build is repaired (task 363) so the suite is green. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 363.",

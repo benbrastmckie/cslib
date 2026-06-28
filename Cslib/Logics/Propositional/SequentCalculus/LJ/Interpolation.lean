@@ -28,7 +28,8 @@ Maehara's method: a structural induction over a cut-free proof.
 - The right rules `orR1`, `orR2`, `andR`, `impR` act on the unsplit succedent; the
   interpolant is threaded (possibly combined for `andR`) without a side-split.
 - The `cut` case is vacuous since `LJCutFree` is `False` for cut steps.
-- The hard two-premise cases `orL` and `impL` are held as `sorry` checkpoints for Phase C2.
+- The `orL` two-premise case is proved by side-splitting `A∨B ∈ Γ₁` or `Γ₂`, combining
+  interpolants `I₁∨I₂` resp. `I₁∧I₂`. The `impL` case remains as a `sorry` checkpoint.
 - Follows the `(d, hcf) + induction d with` pattern from `SubformulaProperty.lean`.
 
 ## References
@@ -50,6 +51,8 @@ variable {Atom : Type u} [DecidableEq Atom]
 
 /-! ## Maehara Core Lemma for LJ -/
 
+set_option maxHeartbeats 400000 in
+-- The orL and impL two-premise cases each require ~100k heartbeats; 400k covers the full induction.
 /-- **Maehara core for LJ**: For any cut-free LJ proof `d` of `seq` and any cover partition
 `Γ₁ ∪ Γ₂ = seq.1` of the antecedent, there exists an interpolant `I` satisfying:
 1. `I.vars ⊆ Γ₁.vars ∩ (Γ₂ ∪ {seq.2}).vars` (variable constraint),
@@ -58,8 +61,7 @@ variable {Atom : Type u} [DecidableEq Atom]
 
 Unlike the LK version, only the antecedent is partitioned (single-conclusion sequents).
 The right rules `orR1`, `orR2`, `andR`, `impR` thread the interpolant through unchanged
-(or combine for `andR`). The `cut` case is vacuous. The hard two-premise cases `orL` and
-`impL` are deferred to Phase C2. -/
+(or combine for `andR`). The `cut` case is vacuous. -/
 private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCutFree d) :
     ∀ Γ₁ Γ₂ : Finset (Proposition Atom),
       seq.1 = Γ₁ ∪ Γ₂ →
@@ -213,9 +215,114 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
                ((h_I₁.trans Finset.inter_subset_right).trans hA_sub)
                ((h_I₂.trans Finset.inter_subset_right).trans hB_sub)
   | @orL Γ C A B hAB d₁ d₂ ih₁ ih₂ =>
-    -- Phase C2: two-premise case; deferred.
-    intro Γ₁ Γ₂ _hant
-    sorry -- Phase C2
+    -- Conclusion: Γ ⊢ C where A∨B ∈ Γ = Γ₁ ∪ Γ₂; two premises:
+    --   d₁ : insert A Γ ⊢ C,  d₂ : insert B Γ ⊢ C.
+    -- Side-split on A∨B ∈ Γ₁ or A∨B ∈ Γ₂; combine I₁∨I₂ resp. I₁∧I₂.
+    intro Γ₁ Γ₂ hant
+    have hant' : Γ = Γ₁ ∪ Γ₂ := hant
+    obtain ⟨hcf₁, hcf₂⟩ := hcf
+    rw [hant'] at hAB
+    rcases Finset.mem_union.mp hAB with hAB₁ | hAB₂
+    · -- A∨B ∈ Γ₁: interpolant I = I₁ ∨ I₂.
+      -- Place A on Γ₁ side for d₁, B on Γ₁ side for d₂;
+      -- combine left via orL+orR, right via orL.
+      have hAB_vars : A.vars ∪ B.vars ⊆ Γ₁.vars := by
+        have := Finset.vars_subset_of_mem hAB₁; simp only [vars_or] at this; exact this
+      have hA_vars : A.vars ⊆ Γ₁.vars := Finset.subset_union_left.trans hAB_vars
+      have hB_vars : B.vars ⊆ Γ₁.vars := Finset.subset_union_right.trans hAB_vars
+      have hcover₁ : insert A Γ = insert A Γ₁ ∪ Γ₂ := by
+        rw [hant']; exact (Finset.insert_union A Γ₁ Γ₂).symm
+      have hcover₂ : insert B Γ = insert B Γ₁ ∪ Γ₂ := by
+        rw [hant']; exact (Finset.insert_union B Γ₁ Γ₂).symm
+      obtain ⟨I₁, h_vars₁, ⟨d_left₁⟩, ⟨d_right₁⟩⟩ :=
+        ih₁ hcf₁ (insert A Γ₁) Γ₂ hcover₁
+      obtain ⟨I₂, h_vars₂, ⟨d_left₂⟩, ⟨d_right₂⟩⟩ :=
+        ih₂ hcf₂ (insert B Γ₁) Γ₂ hcover₂
+      refine ⟨I₁ ∨ I₂, ?_, ?_, ?_⟩
+      · -- vars: (I₁∨I₂).vars ⊆ Γ₁.vars ∩ (Γ₂ ∪ {C}).vars
+        simp only [vars_or]
+        refine Finset.subset_inter ?_ ?_
+        · apply Finset.union_subset
+          · have h₁L := h_vars₁.trans Finset.inter_subset_left
+            have h_A_drop : (insert A Γ₁).vars ⊆ Γ₁.vars := by
+              simp only [Finset.vars_insert]
+              exact Finset.union_subset hA_vars (Finset.Subset.refl _)
+            exact h₁L.trans h_A_drop
+          · have h₂L := h_vars₂.trans Finset.inter_subset_left
+            have h_B_drop : (insert B Γ₁).vars ⊆ Γ₁.vars := by
+              simp only [Finset.vars_insert]
+              exact Finset.union_subset hB_vars (Finset.Subset.refl _)
+            exact h₂L.trans h_B_drop
+        · exact Finset.union_subset (h_vars₁.trans Finset.inter_subset_right)
+                                    (h_vars₂.trans Finset.inter_subset_right)
+      · -- Left: LJProof (Γ₁, I₁ ∨ I₂) via orL A B hAB₁ with orR1 and orR2 branches.
+        exact ⟨LJProof.orL A B hAB₁
+          (LJProof.orR1 I₁ I₂ d_left₁)
+          (LJProof.orR2 I₁ I₂ d_left₂)⟩
+      · -- Right: LJProof (insert (I₁∨I₂) Γ₂, C) via orL I₁ I₂ with weakened halves.
+        have hperm_I₁ : insert I₁ Γ₂ ⊆ insert I₁ (insert (I₁ ∨ I₂) Γ₂) :=
+          Finset.insert_subset_insert I₁ (Finset.subset_insert _ _)
+        have hperm_I₂ : insert I₂ Γ₂ ⊆ insert I₂ (insert (I₁ ∨ I₂) Γ₂) :=
+          Finset.insert_subset_insert I₂ (Finset.subset_insert _ _)
+        exact ⟨LJProof.orL I₁ I₂ (Finset.mem_insert_self _ _)
+          (d_right₁.mono hperm_I₁)
+          (d_right₂.mono hperm_I₂)⟩
+    · -- A∨B ∈ Γ₂: interpolant I = I₁ ∧ I₂.
+      -- Place A on Γ₂ side for d₁, B on Γ₂ side for d₂;
+      -- combine left via andR, right via andL+orL.
+      have hAB_vars₂ : A.vars ∪ B.vars ⊆ Γ₂.vars := by
+        have := Finset.vars_subset_of_mem hAB₂; simp only [vars_or] at this; exact this
+      have hA_vars₂ : A.vars ⊆ Γ₂.vars := Finset.subset_union_left.trans hAB_vars₂
+      have hB_vars₂ : B.vars ⊆ Γ₂.vars := Finset.subset_union_right.trans hAB_vars₂
+      have hcover₁' : insert A Γ = Γ₁ ∪ insert A Γ₂ := by
+        rw [hant']; exact (Finset.union_insert A Γ₁ Γ₂).symm
+      have hcover₂' : insert B Γ = Γ₁ ∪ insert B Γ₂ := by
+        rw [hant']; exact (Finset.union_insert B Γ₁ Γ₂).symm
+      obtain ⟨I₁, h_vars₁, ⟨d_left₁⟩, ⟨d_right₁⟩⟩ :=
+        ih₁ hcf₁ Γ₁ (insert A Γ₂) hcover₁'
+      obtain ⟨I₂, h_vars₂, ⟨d_left₂⟩, ⟨d_right₂⟩⟩ :=
+        ih₂ hcf₂ Γ₁ (insert B Γ₂) hcover₂'
+      refine ⟨I₁ ∧ I₂, ?_, ?_, ?_⟩
+      · -- vars: (I₁∧I₂).vars ⊆ Γ₁.vars ∩ (Γ₂ ∪ {C}).vars
+        simp only [vars_and]
+        refine Finset.subset_inter ?_ ?_
+        · exact Finset.union_subset (h_vars₁.trans Finset.inter_subset_left)
+                                    (h_vars₂.trans Finset.inter_subset_left)
+        · apply Finset.union_subset
+          · have h₁R := h_vars₁.trans Finset.inter_subset_right
+            have h_A_drop₂ : (insert A Γ₂ ∪ {C}).vars ⊆ (Γ₂ ∪ {C}).vars := by
+              simp only [Finset.vars_union, Finset.vars_insert, Finset.vars_singleton]
+              exact Finset.union_subset
+                (Finset.union_subset (hA_vars₂.trans Finset.subset_union_left)
+                  Finset.subset_union_left)
+                Finset.subset_union_right
+            exact h₁R.trans h_A_drop₂
+          · have h₂R := h_vars₂.trans Finset.inter_subset_right
+            have h_B_drop₂ : (insert B Γ₂ ∪ {C}).vars ⊆ (Γ₂ ∪ {C}).vars := by
+              simp only [Finset.vars_union, Finset.vars_insert, Finset.vars_singleton]
+              exact Finset.union_subset
+                (Finset.union_subset (hB_vars₂.trans Finset.subset_union_left)
+                  Finset.subset_union_left)
+                Finset.subset_union_right
+            exact h₂R.trans h_B_drop₂
+      · -- Left: LJProof (Γ₁, I₁ ∧ I₂) via andR I₁ I₂.
+        exact ⟨LJProof.andR I₁ I₂ d_left₁ d_left₂⟩
+      · -- Right: LJProof (insert (I₁∧I₂) Γ₂, C) via andL I₁ I₂ then orL A B.
+        -- d_right₁ : LJProof (insert I₁ (insert A Γ₂), C)
+        -- d_right₂ : LJProof (insert I₂ (insert B Γ₂), C)
+        -- Use andL to expose I₁,I₂; then orL A B with A∨B ∈ Γ₂.
+        have hperm₁_ant : insert I₁ (insert A Γ₂) ⊆
+            insert A (insert I₁ (insert I₂ (insert (I₁ ∧ I₂) Γ₂))) := by
+          intro x; simp only [Finset.mem_insert]; tauto
+        have hperm₂_ant : insert I₂ (insert B Γ₂) ⊆
+            insert B (insert I₁ (insert I₂ (insert (I₁ ∧ I₂) Γ₂))) := by
+          intro x; simp only [Finset.mem_insert]; tauto
+        exact ⟨LJProof.andL I₁ I₂ (Finset.mem_insert_self _ _)
+          (LJProof.orL A B
+            (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+              (Finset.mem_insert_of_mem hAB₂)))
+            (d_right₁.mono hperm₁_ant)
+            (d_right₂.mono hperm₂_ant))⟩
   | orR1 A B d' ih =>
     -- Conclusion: Γ ⊢ A ∨ B; premise: Γ ⊢ A.
     -- Pass-through: use interpolant I from premise IH; wrap right derivation with orR1.

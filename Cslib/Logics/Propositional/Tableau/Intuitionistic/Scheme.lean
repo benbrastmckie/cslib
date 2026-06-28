@@ -229,6 +229,94 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom)
       ¬ IForces (intExtractValuation b) (S.modelBot b) w φ) := by
   sorry
 
+/-! ## Parametric Open Branch Countermodel -/
+
+/-- **Parametric Open Branch Countermodel**: An open branch returned by the parametric
+expansion witnesses that `φ` is not forced in the branch-derived Kripke model.
+
+If the expansion with `S.closurePred` returns `.openBranch b`, then the extracted
+valuation `intExtractValuation b` with `botForces = S.modelBot b` falsifies `φ` at
+world 0.
+
+- At `intScheme`: specializes to `intuitionisticOpenBranch_countermodel` (Phase 3b).
+- At `minScheme`: specializes to `minOpenBranch_countermodel` (Phase 3b).
+
+## Proof structure
+
+From `h : intExpandBranches ... S.closurePred = .openBranch b` we extract three
+structural facts (each left as `sorry` pending `intExpandBranches_openBranch_*` structural
+lemmas, which require induction on the expansion loop):
+1. `hopen`: the returned branch is open (`S.closurePred b = false`).
+2. `hsat`: the returned branch is saturated (`intStepBranch b [] 0 = none`).
+3. `hFmem`: F(φ)@0 is on b (branch monotonicity: formulas are only added).
+Then `(truthLemma S b hopen hsat φ 0).2 hFmem` closes the goal.
+
+## References
+
+* [M. Fitting, *Proof Methods for Modal and Intuitionistic Logics*][Fitting1983], Chapter 4 -/
+lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
+    (b : IBranch Atom)
+    (h : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
+        (2 ^ (2 * φ.complexity + 2)) S.closurePred = .openBranch b) :
+    ¬ IForces (intExtractValuation b) (S.modelBot b) 0 φ := by
+  -- Extract structural properties of b from the openBranch result.
+  have hopen : S.closurePred b = false := by
+    -- MISSING: `intExpandBranches_openBranch_closed`
+    -- The expansion loop checks `closurePred b = false` before returning `.openBranch b`
+    -- in both the fuel=0 case (via `findSome?`) and the fuel+1 inner loop.
+    -- Formal proof requires induction on `intExpandBranches` and its `go` helper.
+    sorry
+  have hsat : ∀ sf ∈ b, intStepBranch b [] 0 = none := by
+    -- MISSING: `intExpandBranches_openBranch_sat`
+    -- In the fuel+1 case, `.openBranch bPers` is returned when
+    -- `intStepBranch bPers e nw = none` for the accumulated expanded set `e` and
+    -- next-world `nw`. Connecting this to `intStepBranch b [] 0 = none` (empty expanded
+    -- set, world 0) requires showing the expanded set does not affect the none result
+    -- for a fully saturated branch. Formal proof requires induction on the expansion loop.
+    sorry
+  have hFmem : b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == 0) := by
+    -- MISSING: `intExpandBranches_openBranch_initial_mem`
+    -- The initial branch `[[⟨.neg, φ, 0⟩]]` contains F(φ)@0.
+    -- Under expansion, formulas are only added to branches (branch monotonicity via
+    -- `applyPersistenceFixpoint` and `Branch.extendMany`). So F(φ)@0 remains in b.
+    -- Formal proof requires a monotonicity lemma on `intExpandBranches`
+    -- (analogous to `classicalExpandBranches_openBranch_initial_mem`).
+    sorry
+  -- Apply the truth lemma's F-branch direction.
+  exact (truthLemma S b hopen hsat φ 0).2 hFmem
+
+/-! ## Parametric Tableau Completeness -/
+
+/-- **Parametric Tableau Completeness**: If `φ` is forced at world 0 in every
+branch-derived Kripke model, then the parametric expansion closes on `φ`.
+
+Proof: by contrapositive. If the expansion returns `.openBranch b`, then
+`openBranch_countermodel S` gives `¬ IForces (intExtractValuation b) (S.modelBot b) 0 φ`,
+contradicting `hvalid b`.
+
+The hypothesis `hvalid` encodes the per-scheme validity notion:
+- For `intScheme` (where `modelBot b = fun _ => False`): `hvalid b` follows from `IValid φ`
+  applied at World `= ℕ`, `val = intExtractValuation b`, with the upward-closure of
+  `intExtractValuation b`.
+- For `minScheme` (where `modelBot b = minBranchBotForces b`): `hvalid b` follows from
+  `MValid φ` applied with `botForces = minBranchBotForces b` and upward-closure of both
+  `intExtractValuation b` and `minBranchBotForces b`.
+
+This theorem is sorry-free given `openBranch_countermodel S`.
+
+## References
+
+* [M. Fitting, *Proof Methods for Modal and Intuitionistic Logics*][Fitting1983], Chapter 4 -/
+theorem tableau_complete (S : IntMinScheme Atom) (φ : Proposition Atom)
+    (hvalid : ∀ (b : IBranch Atom), IForces (intExtractValuation b) (S.modelBot b) 0 φ) :
+    intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
+        (2 ^ (2 * φ.complexity + 2)) S.closurePred = .closed := by
+  by_contra hne
+  cases hresult : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
+      (2 ^ (2 * φ.complexity + 2)) S.closurePred with
+  | closed => exact hne hresult
+  | openBranch b => exact absurd (hvalid b) (openBranch_countermodel S φ b hresult)
+
 end Cslib.Logic.PL
 
 end

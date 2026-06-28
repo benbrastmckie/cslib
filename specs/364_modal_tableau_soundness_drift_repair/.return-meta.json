@@ -1,14 +1,18 @@
 {
   "status": "partial",
-  "started_at": "2026-06-27T00:00:00Z",
+  "started_at": "2026-06-28T00:00:00Z",
   "completed_at": "2026-06-28T00:00:00Z",
+  "phases_completed": 0,
+  "phases_total": 1,
+  "blocked": true,
   "artifacts": [
-    {"path": "Cslib/Logics/Modal/Tableau/Soundness.lean", "type": "lean_source", "summary": "modalStepBranch_preserves_sat fully repaired; modalExpandBranches_closed_unsat zero-case complete; succ-case 4 errors remaining"},
-    {"path": "specs/364_modal_tableau_soundness_drift_repair/.orchestrator-handoff.json", "type": "handoff", "summary": "Detailed blockers for the remaining succ-case"}
+    {"path": "specs/364_modal_tableau_soundness_drift_repair/.orchestrator-handoff.json", "type": "handoff", "summary": "Blocked handoff: build-verified soundness gap in key fuel-induction"},
+    {"path": "specs/364_modal_tableau_soundness_drift_repair/handoffs/verified-counterexample.lean", "type": "evidence", "summary": "Compiling Lean counterexample refuting the satisfiability-lifting obligation"},
+    {"path": "specs/364_modal_tableau_soundness_drift_repair/summaries/02_soundness-gap-summary.md", "type": "summary", "summary": "Analysis and blocker writeup"}
   ],
   "partial_progress": {
-    "stage": "tail-induction-incomplete",
-    "details": "Core semantic-preservation theorem modalStepBranch_preserves_sat compiles (T-side, F-side, boxPos, boxNeg fresh-world). modalExpandBranches_closed_unsat zero-case compiles. Succ-case (fuel induction) has 4 errors from pre-existing incomplete invariant maintenance (pending-subset-branches membership, accFreshInv maintenance placeholder, universe pin, hinner match reduction)."
+    "stage": "blocked",
+    "details": "Reduced key fuel-induction to 3 obligations; 2 are mathematically false for carried worklist branches (build-verified counterexample). Root cause: shared acc + per-branch fresh-world numbering. Requires definitional change, out of scope. File reverted to baseline."
   },
   "verification": {
     "verification_passed": false,
@@ -17,19 +21,13 @@
     "axiom_count": 0,
     "build_passed": false,
     "ci_pipeline_passed": false,
-    "errors_current": 4,
-    "errors_baseline_head": 61
+    "errors_current": 3,
+    "errors_baseline": 3
   },
-  "phases_completed": 7,
-  "phases_total": 8,
-  "commits_this_session": 7,
   "requires_user_review": true,
   "memory_candidates": [
-    "Under the current Lean toolchain, `cases x` (and `rcases ... with rfl`) CLEARS the scrutinee variable; recognizer arms that previously kept the variable accessible must use named constructor binders and reference the constructor form (.atom n / .imp a b / .box a) instead of the cleared variable.",
-    "A `def f (b) (acc) : Prop := exists (W : Type*) ...` over a section `variable {Atom : Type*}` has TWO universe params [Atom-univ, witness-univ]; `f.{u}` pins the FIRST (Atom) slot, which is usually wrong. To share the existential witness universe between a hypothesis and the goal, declare `universe v; variable {Atom : Type v}` and pin both slots with `f.{v, v}`.",
-    "An incorrect universe pin can produce a FALSE-GREEN build: when the goal type fails to elaborate, Lean error-recovers and the entire proof body type-checks against a recovered (sorry-like) goal, hiding the real per-leaf errors until the universe is corrected.",
-    "Current Lean `split_ifs at h` auto-discharges branches whose hypothesis becomes `none = some _`, leaving only the satisfiable branch; nested per-condition `split_ifs` then fails with 'no if-then-else'. Use a single `split_ifs ... with a b` and drop the absurd bullets.",
-    "Mathlib renames in tail proofs: `List.mem_zip` -> `List.of_mem_zip` (forward only); construct zip membership via `List.mem_iff_getElem` + `List.getElem_zip` + `List.getElem_mem`; `List.findSome?_eq_none_iff` for the all-none predicate."
+    "CSLib modal K tableau (Soundness.lean): modalExpandBranches uses a SHARED Accessibility `acc` across all worklist branches while modalApplyOne numbers fresh worlds PER-BRANCH via modalNextWorld. This causes cross-branch edge pollution: a diamond/boxNeg edge (w, modalNextWorld b) created in one branch is visible to sibling branches whose modalNextWorld equals that target, breaking the per-branch accFreshInv that modalStepBranch_preserves_sat requires. The key soundness invariant is therefore not maintainable without a definitional change (per-branch acc OR global fresh-world counter).",
+    "Lean proof technique: to refute a 'satisfiability is preserved under adding an accessibility edge' obligation, use bp = [T(box p)@0, T(box (p->bot))@0]: satisfiable at a dead-end world, unsatisfiable once that world gains a successor (forces p and not-p)."
   ],
   "metadata": {
     "session_id": "sess_1782625986_93ef30",

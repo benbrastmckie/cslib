@@ -2,58 +2,36 @@
   "task_number": 364,
   "session_id": "sess_1782625986_93ef30",
   "phase": "implementing",
-  "status": "partial",
-  "summary": "Repaired modalStepBranch_preserves_sat completely (universe fix .{v,v}, all T-side and F-side propositional recognizer arms reconstructed with named binders + cases-a substructure, boxPos, and the hard boxNeg fresh-world case incl. boxProps/diaNegProps extraction). modalExpandBranches_closed_unsat zero-case repaired (zip block updated to current getElem lemmas). 4 errors remain in the modalExpandBranches_closed_unsat succ-case (fuel-induction step), which has genuine incomplete-proof gaps that predate this drift-repair task.",
-  "phases_completed": 7,
-  "phases_total": 8,
-  "errors_current": 4,
-  "errors_baseline_head": 61,
-  "commits_this_session": 7,
+  "status": "blocked",
+  "summary": "The 3 build errors in modalExpandBranches_closed_unsat's succ-case `key` fuel-induction cannot be closed by a local repair. Genuine effort (relax/drop the vestigial hstep premise, inline modalStepBranch_preserves_sat, reformulate `key` with per-branch freshness) reduces the proof to three obligations on the post-step shared accumulator. Two of them are MATHEMATICALLY FALSE for carried sibling branches: the freshness invariant and the satisfiability needed for the contradiction. A build-verified Lean counterexample is included. Root cause is the shared-`acc` + per-branch fresh-world (modalNextWorld) design, which lets a diamond rule in one branch pollute sibling branches in the worklist. This is a real soundness-proof hole beyond drift; closing it needs a definitional change (out of scope), not a 3-error fix.",
+  "phases_completed": 0,
+  "phases_total": 1,
+  "errors_current": 3,
+  "errors_baseline": 3,
+  "commits": [],
   "sorry_inventory": [],
   "new_axioms": [],
   "blockers": [
     {
-      "location": "Cslib/Logics/Modal/Tableau/Soundness.lean:1744",
-      "phase": "modalExpandBranches_closed_unsat succ-case (key lemma induction)",
-      "error": "Application type mismatch: List.mem_cons_self has type ?m in ?m :: ?l but is expected to have type bp in branches",
-      "root_cause": "The `key` sub-lemma is parameterized over `pending` but applies the outer `hstep` (stated about `branches`) to `bp in pending`. There is no `pending subset branches` invariant threaded through the induction, so `bp in branches` cannot be discharged.",
-      "needed": "Reformulate the `suffices key : ...` statement to carry `pending subset branches` (or state hstep about pending). Real induction-invariant work, not mechanical."
-    },
-    {
-      "location": "Cslib/Logics/Modal/Tableau/Soundness.lean:1745",
-      "phase": "modalExpandBranches_closed_unsat succ-case",
-      "error": "Application type mismatch: hbp_sat has type branchSatisfiable.{v, u_3} bp acc but expected branchSatisfiable.{v, u_1} bp acc",
-      "root_cause": "modalExpandBranches_closed_unsat is universe-polymorphic in branchSatisfiable's witness universe; the hstep parameter and hbp_sat acquired different theorem universe params. Same class as the (now-fixed) modalStepBranch_preserves_sat, but must be pinned in the theorem statement (hstep hypothesis + conclusion) to .{v, v}.",
-      "needed": "Add universe pin branchSatisfiable.{v, v} to the hstep hypothesis and conclusion of modalExpandBranches_closed_unsat (and propagate to modalTableau_sound's application)."
-    },
-    {
-      "location": "Cslib/Logics/Modal/Tableau/Soundness.lean:1749 and 1753-1764",
-      "phase": "modalExpandBranches_closed_unsat succ-case",
-      "error": "Type mismatch: hInv w w' hedge mentions modalNextWorld (List.flatMap id branches) but expected modalNextWorld bp; plus a -- Placeholder block for newAcc freshness maintenance",
-      "root_cause": "accFreshInv bp acc (acc-worlds < modalNextWorld bp) does NOT follow from accFreshInv (flatMap branches) acc, because bp is a sublist so modalNextWorld bp <= modalNextWorld (flatMap branches) (available bound is too weak / wrong direction). Freshness-invariant maintenance across modalStepBranch is left as a placeholder in the original code.",
-      "needed": "Develop the freshness-invariant maintenance lemma: how accFreshInv is preserved/transferred when a branch is expanded and acc grows via addEdge. Core tableau-soundness proof engineering, not drift repair."
-    },
-    {
-      "location": "Cslib/Logics/Modal/Tableau/Soundness.lean:1770",
-      "phase": "modalExpandBranches_closed_unsat succ-case (hmem_rest branch)",
-      "error": "Application type mismatch: hinner has type (match some (newBs,newExp,newAcc) with ...) but expected processNext fuel' bt ... = closed",
-      "root_cause": "hinner still contains an unreduced match some (...) after rw [hstep_r]; the recursion into ih_inner needs the match evaluated to the processNext branch.",
-      "needed": "Reduce hinner via simp (evaluate the match on some (...)) before passing to ih_inner; coupled with the membership/freshness fixes above."
+      "location": "Cslib/Logics/Modal/Tableau/Soundness.lean:1744,1749,1770 (key fuel-induction, succ case)",
+      "phase": "modalExpandBranches_closed_unsat succ-case `suffices key` induction",
+      "what_was_done": "Relaxed then DROPPED the vestigial hstep hypothesis (its `b in branches` premise was unprovable and the hypothesis itself is unthreadable: it is tied to a fixed `acc` while the recursion changes `acc` to `newAcc`). Replaced it by inlining modalStepBranch_preserves_sat, which is universally quantified over acc. Reformulated `key` to carry per-branch freshness `(hpInv : forall bp in pending, accFreshInv bp acc)`. This reduces the entire succ-case to THREE helper obligations on the new worklist `done ++ newBs ++ bt` at `newAcc` -- build-confirmed: after the reformulation the only remaining errors were the four references to these three helpers.",
+      "obligation_1_maintenance_newBs": "accFreshInv b' newAcc for every result branch b' in newBs. TRUE and provable (each newBs branch contains b plus, in fresh-world rules, a witness at label modalNextWorld b, so modalNextWorld b' > the new edge target).",
+      "obligation_2_freshness_carried_FALSE": "accFreshInv bp acc -> accFreshInv bp newAcc for a carried sibling branch bp. FALSE: modalApplyOne (diamondPos/boxNeg) adds edge (w, w') with w' = modalNextWorld b (PER-BRANCH numbering for the expanded branch b). A sibling bp produced by an earlier propositional `.branching` shares b's labels, so modalNextWorld bp = modalNextWorld b = w'. accFreshInv bp newAcc requires the new edge target w' < modalNextWorld bp, i.e. w' < w' -- false (strict inequality).",
+      "obligation_3_sat_carried_FALSE_build_verified": "branchSatisfiable bp acc -> branchSatisfiable bp newAcc for a carried branch bp. FALSE, verified by a compiling Lean `example`: bp = [T(box p)@0, T(box (p -> bot))@0] is satisfiable at Accessibility.empty (dead-end world 0 makes both boxes vacuous) but NOT satisfiable after empty.addEdge 0 1 (world 0 gains successor 1, forcing p and not-p at world 1).",
+      "root_cause": "modalExpandBranches threads a SINGLE shared `acc` through all worklist branches, while modalApplyOne numbers fresh worlds PER-BRANCH via modalNextWorld. An edge created by one branch's existential (diamond/boxNeg) rule is therefore visible to and constrains sibling branches that do not contain that fresh world. modalStepBranch_preserves_sat REQUIRES per-branch accFreshInv of the expanded branch for its fresh-world witness construction; this precondition is false for any branch processed after a sibling created a fresh world. The maintainable flatMap-level invariant accFreshInv (flatMap branches) acc is strictly WEAKER and cannot supply the per-branch accFreshInv that preserves_sat (and the hstep call at 1749) demand.",
+      "verbatim_obligation_at_1749": "freshness arg requires `accFreshInv bp acc` for the branch being expanded; the only invariant maintainable through the recursion is the strictly weaker flatMap-level `accFreshInv (branches.flatMap id) acc`, from which the per-branch fact does not follow (wrong direction: modalNextWorld bp <= modalNextWorld (flatMap branches)).",
+      "what_is_needed": "One of (none is a local 3-error repair; all require revisiting the recognizer/expansion DEFINITIONS, which the task scope forbids): (A) give each branch its OWN accessibility relation so fresh worlds/edges are branch-local (changes modalStepBranch / modalExpandBranches signatures and behavior); (B) thread a globally-monotone fresh-world counter so fresh indices never collide across branches; (C) prove a much stronger GLOBAL invariant coupling box-positive consistency across all worklist branches so the cross-branch pollution is provably harmless (major proof redesign).",
+      "predates_this_task": true
     }
   ],
   "continuation_context": {
     "is_successor": false,
-    "resume_at": "modalExpandBranches_closed_unsat succ-case (the suffices key induction), Soundness.lean ~1677-1770",
-    "verified_completed": [
-      "Universe pin corrected to .{v,v} (Atom + witness) on modalStepBranch_preserves_sat",
-      "T-side T(a->c) propositional recognizer arms (negPos/orPos/andPos/impPos) fully reconstructed",
-      "F-side F(a->c) propositional recognizer arms (negNeg/orNeg/andNeg/impNeg) fully reconstructed",
-      "boxPos T(box phi) case",
-      "boxNeg F(box phi) fresh-world case incl. acc-condition, boxProps and diaNegProps extraction, freshness via Nat.ne_of_lt",
-      "modalExpandBranches_closed_unsat zero-case (zip block rewritten with List.getElem_zip / List.mem_iff_getElem / List.findSome?_eq_none_iff)"
-    ]
+    "resume_at": "modalExpandBranches_closed_unsat succ-case; but DO NOT retry as a local proof repair -- requires a design decision (per-branch acc OR global fresh-world counter) from the maintainer first.",
+    "recommended_next_action": "Escalate the design question: should modalExpandBranches give each branch its own Accessibility, or use a global fresh-world counter? Either resolves the cross-branch pollution. Then re-plan the soundness proof against the revised definitions."
   },
   "artifacts": [
-    {"path": "Cslib/Logics/Modal/Tableau/Soundness.lean", "type": "lean_source", "summary": "modalStepBranch_preserves_sat complete; modalExpandBranches_closed_unsat zero-case complete, succ-case 4 errors remaining"}
+    {"path": "specs/364_modal_tableau_soundness_drift_repair/handoffs/verified-counterexample.lean", "type": "evidence", "summary": "Build-verified Lean example: a branch satisfiable at acc is unsatisfiable after one edge add -- refutes the satisfiability-lifting obligation `key` needs for carried worklist branches."},
+    {"path": "Cslib/Logics/Modal/Tableau/Soundness.lean", "type": "lean_source", "summary": "Reverted to committed baseline (3 errors) to avoid regressing the error profile; all evidence preserved in handoffs/ and this JSON."}
   ]
 }

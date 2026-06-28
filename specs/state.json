@@ -2139,7 +2139,7 @@
           }
         ]
       },
-      "completion_summary": "Phases 1,2,6 + structural split of Soundness.lean into SoundnessStep.lean done and committed (isolates the 1459-line modalStepBranch_preserves_sat to make the file tractable). Phase 3 maintenance lemma (the genuine crux) remains: 3 agents choked on context (huge modal goal states); one produced a masked-error sham (213 lines hiding ~40 errors), reverted. Build: SoundnessStep clean, Soundness has only the 3 pre-existing closed_unsat errors, zero sorry."
+      "completion_summary": "Split + Phases 1,2,3,6 done & committed. Phase 3 (maintenance lemma modalStepBranch_preserves_accFreshInv — the genuine crux) proven directly, zero sorry. Remaining: Phase 4 (reformulate modalExpandBranches_closed_unsat to per-branch accs/Forall2, the 3 known errors) + Phase 5 (call site + CI)."
     }
   ],
   "repository_health": {

@@ -11,9 +11,9 @@ next_project_number: 385
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,299,301,321,364,369,373,374,382 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,317,360 | 36,37,180,299,364,369 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
-| 3 | 41,275,370,375 | 39,40,317,360 | Foundations, Propositional Logic |
+| 1 | 36,37,180,226,241,278,299,301,321,360,369,373,374,382 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,317,370 | 36,37,180,299,360,369 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 3 | 41,275,375 | 39,40,317 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -34,8 +34,6 @@ next_project_number: 385
 
 299 [IMPLEMENTING] — Implement tableau decision procedure for basic modal logic K with
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
-364 [BLOCKED] — Repair the pre-existing Mathlib/toolchain-drift build failure in 
-  └─ 360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t
 
 ### Propositional Logic
 
@@ -62,6 +60,9 @@ next_project_number: 385
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
 
 ### Uncategorized
+
+360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t
+  └─ 370 [PLANNED] — (Propositional Logic: Close the decidability asymmetry in the ) (see above)
 
 ## Tasks
 
@@ -304,7 +305,7 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 364. Modal tableau soundness drift repair
-- **Status**: [BLOCKED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 384

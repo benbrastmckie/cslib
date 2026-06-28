@@ -51,7 +51,8 @@ namespace Cslib.Logic.Modal.Tableau
 
 open Cslib.Logic.Tableau Cslib.Logic.Modal
 
-variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
+universe v
+variable {Atom : Type v} [DecidableEq Atom] [Hashable Atom]
 
 /-! ## Branch Satisfiability -/
 
@@ -191,9 +192,9 @@ theorem modalStepBranch_preserves_sat
     (newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
     (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
-    (hsat : branchSatisfiable b acc)
+    (hsat : branchSatisfiable.{v, v} b acc)
     (hInv : accFreshInv b acc) :
-    ∃ b' ∈ newBs, branchSatisfiable b' newAcc := by
+    ∃ b' ∈ newBs, branchSatisfiable.{v, v} b' newAcc := by
   obtain ⟨W, m, f, hacc, hb⟩ := hsat
   simp only [modalStepBranch] at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
@@ -225,7 +226,7 @@ theorem modalStepBranch_preserves_sat
         -- if boxPropagation is empty → notApplicable (simp eliminates)
         -- otherwise → persistent newForms
         split_ifs at hsf with hemp
-        · simp at hsf
+        · simp only [Option.some.injEq, Prod.mk.injEq] at hsf
           obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
           subst hnewBs hnewAcc
           -- boxPos: newBs = [boxPropagation b acc φ lbl ++ b], acc unchanged
@@ -299,7 +300,7 @@ theorem modalStepBranch_preserves_sat
               simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
                 modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
                 Option.some.injEq, Prod.mk.injEq] at hsf
-              obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
+              obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
               -- orPos: branches = [[⟨.pos, a1, lbl⟩], [⟨.pos, c, lbl⟩]]
               -- hpos: Satisfies m (f lbl) ((a1 → ⊥) → c) = ¬Satisfies m (f lbl) a1 → Satisfies m (f lbl) c
@@ -331,7 +332,7 @@ theorem modalStepBranch_preserves_sat
               simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
                 modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
                 Option.some.injEq, Prod.mk.injEq] at hsf
-              obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
+              obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
               simp only [Satisfies] at hpos
               rcases Classical.em (Satisfies m (f lbl) (.imp a1 a2)) with ha | ha
@@ -358,7 +359,7 @@ theorem modalStepBranch_preserves_sat
             simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
               modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
               Option.some.injEq, Prod.mk.injEq] at hsf
-            obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
+            obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
             subst hnewBs hnewAcc
             simp only [Satisfies] at hpos
             rcases Classical.em (Satisfies m (f lbl) a) with ha | ha
@@ -645,7 +646,7 @@ theorem modalStepBranch_preserves_sat
               simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
                 modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
                 Option.some.injEq, Prod.mk.injEq] at hsf
-              obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
+              obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
               refine ⟨[⟨.neg, a1, lbl⟩, ⟨.neg, c, lbl⟩] ++ b, List.mem_cons_self,
                 W, m, f, hacc, ?_⟩
@@ -701,7 +702,7 @@ theorem modalStepBranch_preserves_sat
               simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
                 modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
                 Option.some.injEq, Prod.mk.injEq] at hsf
-              obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
+              obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
               -- impNeg: newForms = [⟨.pos, a, lbl⟩, ⟨.neg, c, lbl⟩] where a = a1 → a2
               refine ⟨[⟨.pos, .imp a1 a2, lbl⟩, ⟨.neg, c, lbl⟩] ++ b,
@@ -725,7 +726,7 @@ theorem modalStepBranch_preserves_sat
             simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
               modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
               Option.some.injEq, Prod.mk.injEq] at hsf
-            obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
+            obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
             subst hnewBs hnewAcc
             refine ⟨[⟨.pos, a, lbl⟩, ⟨.neg, c, lbl⟩] ++ b,
               List.mem_cons_self, W, m, f, hacc, ?_⟩

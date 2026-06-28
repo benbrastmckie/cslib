@@ -191,7 +191,7 @@ different agents, but the wave table sequences them for clarity since both feed 
   lemmas compile with explicit hypotheses (the Muller-packaging obligation remains as a typed
   goal handed to Phase 3, with no `sorry`). **PASSED** — build green, zero sorries.
 
-### Phase 3: Muller-packaging lemma `(⇒)` [NOT STARTED]
+### Phase 3: Muller-packaging lemma `(⇒)` [BLOCKED]
 
 - **Goal:** Package the saturating cover into a single `DA.Muller State Symbol` whose language is
   `p`, completing the forward direction.

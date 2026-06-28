@@ -144,6 +144,13 @@ inductive Theory.Derivation {T : Theory Atom} : Ctx Atom → Proposition Atom �
   /-- Implication elimination (modus ponens) -/
   | impE {Γ : Ctx Atom} {A B : Proposition Atom} :
       Derivation Γ (A → B) → Derivation Γ A → Derivation Γ B
+  /-- Ex falso quodlibet (bottom elimination). Requires `[IsIntuitionistic T]`.
+  Available at IPL/CPL strength; absent at MPL strength. This is a primitive gated
+  constructor of `Theory.Derivation`, ensuring IPL is the base logic with MPL retained as
+  a fragment (the `AxiomTheory MinPropAxiom` theory admits no `IsIntuitionistic` instance,
+  so efq is unconstructible in minimal strength derivations). -/
+  | efq {Γ : Ctx Atom} {A : Proposition Atom} [IsIntuitionistic T] :
+      Derivation Γ ⊥ → Derivation Γ A
 
 /-- Inference system for derivations under the theory `T`. -/
 instance (T : Theory Atom) : InferenceSystem T (Sequent (Atom := Atom)) where
@@ -219,6 +226,9 @@ def Theory.Derivation.weak {T T' : Theory Atom} {Γ Δ : Ctx Atom} {A : Proposit
       (DB.weak hTheory (Finset.insert_subset_insert _ hCtx))
   | @impI _ _ _ A B Γ D => impI (Δ) <| D.weak hTheory <| Finset.insert_subset_insert _ hCtx
   | impE D D' => impE (D.weak hTheory hCtx) (D'.weak hTheory hCtx)
+  | efq D =>
+      haveI : IsIntuitionistic T' := instIsIntuitionisticExtention hTheory
+      efq (D.weak hTheory hCtx)
 
 /-- Weakening the theory only. -/
 def Theory.Derivation.weakTheory {T T' : Theory Atom} {Γ : Ctx Atom} {A : Proposition Atom}
@@ -304,6 +314,7 @@ def Theory.Derivation.subs {Γ Γ' Δ : Ctx Atom} {B : Proposition Atom}
     rw [show insert A' (Γ \ Γ' ∪ Δ) = (insert A' Γ \ Γ') ∪ insert A' Δ by grind]
     exact E.subs Ds |>.weakCtx (by grind)
   | impE E E' => impE (E.subs Ds) (E'.subs Ds)
+  | efq E => efq (E.subs Ds)
 
 /-- Transport a derivation along a substitution of atoms. -/
 def Theory.Derivation.substAtom {Atom Atom' : Type u} [DecidableEq Atom] [DecidableEq Atom']
@@ -322,6 +333,7 @@ def Theory.Derivation.substAtom {Atom Atom' : Type u} [DecidableEq Atom] [Decida
       ((Finset.image_insert (· >>= f) _ _) ▸ (DB.substAtom f))
   | impI _ D => impI _ <| (Finset.image_insert (· >>= f) _ _) ▸ (D.substAtom f)
   | impE D E => impE (D.substAtom f) (E.substAtom f)
+  | efq D => impE (ax (Set.mem_image_of_mem (· >>= f) (IsIntuitionistic.efq _))) (D.substAtom f)
 
 theorem DerivableIn.substAtom {Atom Atom' : Type u} [DecidableEq Atom] [DecidableEq Atom']
     {T : Theory Atom}

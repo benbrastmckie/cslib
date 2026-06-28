@@ -86,7 +86,7 @@ Derived via `impE` with the axiom `⊥ → A` from the theory. -/
 def Theory.Derivation.botE [IsIntuitionistic T]
     (d : T.Derivation Γ ⊥) :
     T.Derivation Γ A :=
-  Derivation.impE (Derivation.ax (IsIntuitionistic.efq A)) d
+  Derivation.efq d
 
 /-! ## Negation Rules -/
 

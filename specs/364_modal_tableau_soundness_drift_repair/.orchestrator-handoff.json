@@ -1,50 +1,29 @@
 {
   "task_number": 364,
-  "session_id": "sess_1782557964_fda92a_364",
-  "phase": "research",
-  "status": "researched",
-  "agent_type": "cslib-research-agent",
+  "session_id": "sess_1782606021_7d7e76",
+  "phase": "implementing",
+  "status": "partial",
+  "agent_type": "skill-orchestrate",
   "target_file": "Cslib/Logics/Modal/Tableau/Soundness.lean",
-  "report": "specs/364_modal_tableau_soundness_drift_repair/reports/02_refactor-strategy.md",
-  "recommendation": "ADOPT the extract-sub-lemmas refactor. Proceed to /plan to produce a follow-up plan with Phase 0 (stub extraction) + per-case drift-repair phases.",
-  "key_findings": {
-    "theorem_line_range": "186-787",
-    "signature_must_not_change": true,
-    "downstream_dependents": ["modalExpandBranches_closed_unsat (798)", "modalTableau_sound (917)", "call site 941"],
-    "non_trivial_cases": 10,
-    "framing_correction": "Task/diagnosis said 5 parallel cases; that is the POS branch only. NEG branch is a symmetric 5. There are 10 Family-3 obtain sites (pos 230/276/303/335/362, neg 402/625/649/705/729).",
-    "bottleneck_case": "boxNeg (N1, lines 396-616, ~220 lines, all 4 fix-families) — may need further internal decomposition into _boxProps_sat / _diaNegProps_sat helpers",
-    "hInv_used_by": "boxNeg only (lines 458,465)",
-    "hexp_used_by": "none",
-    "extraction_clean": "No cross-case let/have; cases not induction; boxNeg lets are local"
-  },
-  "proposed_sub_lemmas": [
-    "modalStepBranch_preserves_sat_boxPos",
-    "modalStepBranch_preserves_sat_negPos",
-    "modalStepBranch_preserves_sat_orPos",
-    "modalStepBranch_preserves_sat_impPos",
-    "modalStepBranch_preserves_sat_impPosGen",
-    "modalStepBranch_preserves_sat_boxNeg",
-    "modalStepBranch_preserves_sat_negNeg",
-    "modalStepBranch_preserves_sat_orNeg",
-    "modalStepBranch_preserves_sat_impNeg",
-    "modalStepBranch_preserves_sat_impNegGen"
+  "summary": "Phase 1 (mechanical drift sweeps) committed at 51e03e28: scoped-build errors reduced 68 -> 62, zero sorry, statements preserved. Two subsequent cslib-implementation-agent dispatches both OVERFLOWED context on this file; the second REGRESSED the file to 103 errors and was reverted to the 62-error checkpoint. The hnewBs obtain-shape cascade is the genuine blocker.",
+  "phases_completed": 1,
+  "phases_total": 7,
+  "errors_current": 62,
+  "errors_baseline": 68,
+  "blockers": [
+    "CONTEXT OVERFLOW: cslib-implementation-agent exhausts its context window on this 947-line file (lean_goal returns very large hypothesis contexts; the scoped build emits a 1600-line error log). Two dispatches overflowed at 64 and 46 tool calls respectively, neither writing a final handoff.",
+    "REGRESSION RISK: unsupervised rewrites of the boxPos/negPos/negNeg obtain-and-simp blocks (lines 228/276/625) regressed 62 -> 103 errors (introduced Invalid-notation / Application-type-mismatch). These 3 root tactic failures drive ~46 of the 62 errors (the hnewBs cascade) and require careful, supervised re-derivation of the post-simp goal shape.",
+    "ENTANGLED CLUSTERS: the line-747 'Duplicate alternative name imp' fix and the zip block (822-828, List.mem_zip removed) are not isolated mechanical swaps; they are bound to the proof's case structure and the changed List API, so they need shape verification, not blind substitution."
   ],
-  "reuse": {
-    "Proposition.beqToEq": "REUSE for all Family-4 beq sites (Soundness.lean:78, private, in-scope)",
-    "branchSatisfiable": "reused in sub-lemma goals (63)",
-    "accFreshInv": "reused in boxNeg binder (164)",
-    "modalNextWorld_gt": "Branch.lean:104, freshness for boxNeg",
-    "new_abstractions_needed": false
+  "continuation_context": {
+    "next_phase": 3,
+    "remaining_errors": 62,
+    "error_digest": "specs/364_modal_tableau_soundness_drift_repair/.error-digest.md",
+    "notes": "Resume from the 62-error checkpoint (HEAD 51e03e28). The 3 root tactic failures at 228 (boxPos), 276 (negPos), 625 (negNeg) clear ~46 cascade errors. Use the pre-computed .error-digest.md (contains the goal dumps) instead of re-running the full scoped build. This needs SUPERVISED/interactive Lean work or a per-root single-shot dispatch budget; unsupervised whole-file autonomy keeps overflowing and regressing."
   },
-  "recommended_phases": {
-    "phase_0": "Pure refactor: 10 stubbed private lemmas + skeleton dispatch; file builds with 10 sorries; signature unchanged; commit",
-    "phases_1_5": "drift-repair pos cluster (boxPos, negPos, orPos, impPos, impPosGen)",
-    "phases_6_9": "drift-repair neg propositional cluster (negNeg, orNeg, impNeg, impNegGen)",
-    "phase_10": "drift-repair boxNeg (dedicated run; sub-decompose if needed)",
-    "phase_11": "zero-debt verification: lake build clean, lean_verify zero sorry/axioms, lint-style, checkInitImports"
-  },
-  "zero_debt_flag": "Phase 0 introduces 10 sorries as INTERMEDIATE scaffold. Acceptable ONLY if final state is zero-sorry. Do NOT mark task complete while any sorry remains; Phase 11 gate is blocking. No axioms.",
-  "discipline": "NEVER call lean_diagnostic_messages. Build-driven (lake build Cslib.Logics.Modal.Tableau.Soundness). lean_goal sparingly on the small skeleton/sub-lemma goals only.",
-  "next_command": "/plan 364"
+  "artifacts": [
+    "Cslib/Logics/Modal/Tableau/Soundness.lean",
+    "specs/364_modal_tableau_soundness_drift_repair/.error-digest.md"
+  ],
+  "next_action_hint": "Interactive /implement 364 with per-root supervision, or hand the 3 obtain-shape roots (228/276/625) to a human + the error digest. Do NOT re-run unsupervised whole-file autonomous dispatch (overflows + regresses)."
 }

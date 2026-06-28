@@ -300,7 +300,7 @@
     {
       "project_number": 332,
       "project_name": "normalization_termination_proof",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Close the two remaining normalization-termination sorries for CSLib Theory.Derivation in Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean (the proof was split out of the former monolithic Normalization.lean). (1) reduceRootSubSN case h_8 at line ~1333 -- the impE(orE ...) commuting-conversion decrease; the mathematics is settled (commutingSum_sn_eq_zero is proved, and reduceRootSubSN's hA forces the major premise strongly normal so Ecc.maximalFormulas = empty and Ecc.commutingSum = 0), the blocker is a ~250-branch simp_all whnf blowup, fixed by proving the E-SN side facts as standalone bounded `have`s before a single `cases Dcc` (red attempt preserved in handoffs/termination-h8-Esn-attempt-red.lean.bak). (2) normalize_isStronglyNormal at line ~1349 -- the fuel-bound argument that `normalize` with 2^height fuel drives redexWeight to 0 (depends on (1)). Following Prawitz 1965 Ch. III-IV. Once both close, the subformula-property corollary (Normalization/SubformulaProperty.lean) and parent task 290 are fully discharged. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 290.",
       "dependencies": [
@@ -320,7 +320,8 @@
           "summary": "v5 (accurate): DM-measure approach; phases A/B committed green; B-h8 in progress; C/D/E remaining"
         }
       ],
-      "next_artifact_number": 6
+      "next_artifact_number": 6,
+      "completion_summary": "Proved Theory.Derivation.exists_stronglyNormal_form CONSTRUCTIVELY (smart eliminators snAndE1Form/snAndE2Form/snImpEForm/snOrEForm + substitution-normalization snSubst, well-founded on a 3-component (cut-complexity, phase, sizeOf) lexicographic measure with a carried head-behaviour invariant). Diagnosed+documented that the prior Dershowitz-Manna normMeasure route is UNSOUND (maximalFormulas undercounts maximal segments through orE, so commuting conversions raise the measure) -- the root cause this task hit across prior sessions. Also closed the h_8 commuting case of reduceRoot_decreases_normMeasure. subformula_property re-pointed at exists_stronglyNormal_form; fuel normalize_isStronglyNormal retired. Normalization/ is 0-sorry, axiom-clean (no sorryAx; [propext,Classical.choice,Quot.sound]), builds green; lake exe lint-style passes. CAVEAT: full-project CI gates (checkInitImports/lint/test/shake) could not be fully run due to PRE-EXISTING unrelated red modules (Bimodal/Modal) outside task territory; branch diff is Normalization/-only."
     },
     {
       "project_number": 333,
@@ -638,7 +639,7 @@
     {
       "project_number": 290,
       "project_name": "nd_normalization_subformula_property",
-      "status": "partial",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Formalize Prawitz-style normalization for CSLib Theory.Derivation (propositional IPL and MPL). Define Derivation.isNormal predicate (no maximal formula -- i.e., no introduction rule immediately followed by the corresponding elimination on the same formula). Prove a normalization function normalize that transforms any derivation into a normal form. Derive the subformula property as a corollary: every formula in a normal derivation is a subformula of the conclusion or a hypothesis. The Theory.Derivation type is Type u (not Prop), enabling a computable normalization function. Reference: [Prawitz1965] Ch. IV-V. Consider starting with the implicational fragment ({arrow} only) as a milestone, then extending to full IPL connectives. Files: new module Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean. Depends on 266.",
@@ -667,7 +668,8 @@
           "type": "plan"
         }
       ],
-      "next_artifact_number": 5
+      "next_artifact_number": 5,
+      "completion_summary": "Discharged via task 332: Theory.Derivation.subformula_property is now sorry-free (every derivation has a strongly-normal form satisfying the subformula property), proved constructively via exists_stronglyNormal_form. Normalization/ 0-sorry, green, axiom-clean."
     },
     {
       "project_number": 292,

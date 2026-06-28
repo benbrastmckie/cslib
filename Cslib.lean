@@ -408,6 +408,7 @@ public import Cslib.Logics.Modal.Tableau.Saturation
 public import Cslib.Logics.Modal.Tableau.Soundness
 public import Cslib.Logics.Propositional.CurryHoward.Defs
 public import Cslib.Logics.Propositional.CurryHoward.Isomorphism
+public import Cslib.Logics.Propositional.CurryHoward.Reduction
 public import Cslib.Logics.Propositional.Defs
 public import Cslib.Logics.Propositional.Metalogic.ClassicalConjImpBotCompleteness
 public import Cslib.Logics.Propositional.Metalogic.ClassicalConjImpCompleteness

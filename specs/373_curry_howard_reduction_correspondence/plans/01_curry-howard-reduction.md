@@ -178,7 +178,7 @@ no existing declaration touched.
 
 ---
 
-### Phase 2: Forward reduction correspondence [NOT STARTED]
+### Phase 2: Forward reduction correspondence [COMPLETED]
 
 **Goal**: Prove the load-bearing `reduceRoot_forward` and its `_some` compatibility
 corollary. End state: full correspondence, zero sorry. (~130 lines; 2/8 hardest cases built
@@ -225,7 +225,7 @@ the correspondence is a single `rw [curryHoward_backward_forward]` (built green)
 
 ---
 
-### Phase 3: Backward congruence + term strong normalization [NOT STARTED]
+### Phase 3: Backward congruence + term strong normalization [COMPLETED]
 
 **Goal**: Add the backward dual `reduceRoot_backward`, define `Term.isStronglyNormal`, and
 prove the SN deliverable `Term.exists_stronglyNormal_form`. (~60 lines; all built green.)

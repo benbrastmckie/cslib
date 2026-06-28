@@ -552,6 +552,7 @@ public import Cslib.Logics.Temporal.Tableau.Closure
 public import Cslib.Logics.Temporal.Tableau.Defs
 public import Cslib.Logics.Temporal.Tableau.Rules
 public import Cslib.Logics.Temporal.Tableau.Saturation
+public import Cslib.Logics.Temporal.Tableau.Soundness
 public import Cslib.Logics.Temporal.Tableau.TimeOrdering
 public import Cslib.Logics.Temporal.Theorems
 public import Cslib.MachineLearning.PACLearning.Defs

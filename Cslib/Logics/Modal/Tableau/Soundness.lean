@@ -54,6 +54,103 @@ open Cslib.Logic.Tableau Cslib.Logic.Modal
 
 universe v u
 variable {Atom : Type v} [DecidableEq Atom] [Hashable Atom]
+
+/-! ## Freshness Invariant Maintenance -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Prepending formulas to a branch preserves `accFreshInv`: the next-world bound only grows. -/
+private lemma accFreshInv_append
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (hInv : accFreshInv b acc)
+    (xs : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    accFreshInv (xs ++ b) acc := by
+  intro w w' hedge
+  obtain ⟨hw, hw'⟩ := hInv w w' hedge
+  exact ⟨Nat.lt_of_lt_of_le hw (modalNextWorld_le_append xs b),
+         Nat.lt_of_lt_of_le hw' (modalNextWorld_le_append xs b)⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Decompose membership of an edge in `acc.addEdge w w'`: it is either the new edge or old. -/
+private lemma hasEdge_addEdge_cases {acc : Accessibility} {w w' a a' : WorldIndex}
+    (h : (acc.addEdge w w').hasEdge a a' = true) :
+    (a = w ∧ a' = w') ∨ acc.hasEdge a a' = true := by
+  simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, Bool.or_eq_true,
+    Bool.and_eq_true, beq_iff_eq] at h
+  rcases h with ⟨hw, hw'⟩ | h
+  · exact Or.inl ⟨hw.symm, hw'.symm⟩
+  · exact Or.inr h
+
+/-- The accessibility relation returned by `modalApplyOne` is either unchanged, or it adds a single
+fresh edge `sf.label → modalNextWorld b`; in the latter case the result is `.linear` with a head
+witness whose label is exactly the fresh world `modalNextWorld b`. -/
+private lemma modalApplyOne_fresh
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    (modalApplyOne sf b acc).snd = acc ∨
+    (∃ wsf rest, (modalApplyOne sf b acc).fst = RuleResult.linear (wsf :: rest)
+      ∧ (modalApplyOne sf b acc).snd = acc.addEdge sf.label wsf.label) := by
+  unfold modalApplyOne
+  extract_lets w propResult
+  repeat' first
+    | exact Or.inl rfl
+    | exact Or.inr ⟨_, _, rfl, rfl⟩
+    | split
+  -- remaining goals are acc-unchanged arms whose nested `if` has `acc` on both sides
+  all_goals first
+    | exact Or.inl rfl
+    | exact Or.inr ⟨_, _, rfl, rfl⟩
+    | (left; simp only [apply_ite Prod.snd, ite_self])
+
+/-- **Freshness maintenance** (task-364 obligation 1): `modalStepBranch` preserves the per-branch
+freshness invariant `accFreshInv`. Every child branch produced satisfies `accFreshInv` against the
+post-step accessibility relation. This is the only genuinely new semantic obligation; the
+anti-monotonicity obligations of the original design are eliminated structurally by the per-branch
+`accs` scheme. -/
+lemma modalStepBranch_preserves_accFreshInv
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hInv : accFreshInv b acc) :
+    ∀ b' ∈ newBs, accFreshInv b' newAcc := by
+  simp only [modalStepBranch] at hstep
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  rcases modalApplyOne_fresh sf b acc with hacc | ⟨wsf, rest, hfst, hacc⟩
+  · -- accessibility unchanged: every child branch has the form `xs ++ b`
+    rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+    · rw [hfstc, hacc] at hsf
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      obtain ⟨rfl, _, rfl⟩ := hsf
+      intro b' hb'; simp only [List.mem_singleton] at hb'; subst hb'
+      exact accFreshInv_append hInv nf
+    · rw [hfstc, hacc] at hsf
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      obtain ⟨rfl, _, rfl⟩ := hsf
+      intro b' hb'; obtain ⟨x, _, rfl⟩ := List.mem_map.mp hb'
+      exact accFreshInv_append hInv x
+    · rw [hfstc, hacc] at hsf
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      obtain ⟨rfl, _, rfl⟩ := hsf
+      intro b' hb'; simp only [List.mem_singleton] at hb'; subst hb'
+      exact accFreshInv_append hInv nf
+    · rw [hfstc] at hsf; simp at hsf
+  · -- a fresh edge `sf.label → modalNextWorld b` was added; single linear child headed by `wsf`
+    rw [hfst, hacc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨rfl, _, rfl⟩ := hsf
+    intro b' hb'; simp only [List.mem_singleton] at hb'; subst hb'
+    intro a a' hedge
+    rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
+    · exact ⟨Nat.lt_of_lt_of_le (modalNextWorld_gt b sf hsfmem)
+              (modalNextWorld_le_append (wsf :: rest) b),
+            Nat.lt_succ_of_le (label_le_modalMaxWorld (by simp))⟩
+    · obtain ⟨ha, ha'⟩ := hInv a a' hold
+      exact ⟨Nat.lt_of_lt_of_le ha (modalNextWorld_le_append (wsf :: rest) b),
+             Nat.lt_of_lt_of_le ha' (modalNextWorld_le_append (wsf :: rest) b)⟩
+
 /-! ## Main Fuel-Induction Soundness Lemma -/
 
 /-- **Modal expansion closed implies all unsatisfiable**: If

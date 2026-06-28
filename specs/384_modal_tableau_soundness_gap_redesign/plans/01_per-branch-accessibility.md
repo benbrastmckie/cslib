@@ -164,7 +164,7 @@ is upstream of `Saturation.lean`, has no dependency on Phase 1, and builds fast.
 
 ---
 
-### Phase 3: Maintenance lemma `modalStepBranch_preserves_accFreshInv` (`Soundness.lean`) [NOT STARTED]
+### Phase 3: Maintenance lemma `modalStepBranch_preserves_accFreshInv` (`Soundness.lean`) [COMPLETED]
 
 **Goal**: Prove the freshness-maintenance lemma (task-364 obligation 1) that every child branch
 produced by `modalStepBranch` satisfies `accFreshInv` against the post-step acc. This is the only

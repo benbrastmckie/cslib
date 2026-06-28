@@ -225,7 +225,7 @@ Phases within the same wave can execute in parallel. Phases 1 and 2 are independ
 
 ---
 
-### Phase 7: Soundness.lean — per-rule preservation, frame-class soundness, main theorem [IN PROGRESS]
+### Phase 7: Soundness.lean — per-rule preservation, frame-class soundness, main theorem [BLOCKED]
 
 **Goal**: Prove the tableau sound against `Satisfies`: closed ⇒ valid in the targeted frame class, including density/discreteness rule soundness. Follow the Propositional Classical soundness template.
 

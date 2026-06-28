@@ -1,14 +1,28 @@
 {
   "status": "partial",
-  "summary": "Cycle 3: phases 1-6 committed sorry-free and CI-green (Defs, TimeOrdering, Rules, Branch, Closure, Saturation). Phase 7 Soundness.lean written (~190 lines) but does NOT build (agent hit context limit mid-phase); preserved as .wip-Soundness.lean and moved out of the source tree so the committed tree stays green. Phase 8 Completeness not started. No sorries anywhere.",
-  "phases_completed": 6,
+  "summary": "Cycle 4: phases 1-7 committed sorry-free and green. Soundness.lean (186 lines) proves classicallyClosed_unsat and documents 4 BLOCKED obligations in a BlockedObligations section (no sorry). Phase 8 Completeness not started. Key fix this cycle: bridged List.find? predicate definitional-equality gap (SignedFormula.isPos vs sf.isPos, ⊥ vs HasBot.bot) using 'show ... from rfl' witness.",
+  "phases_completed": 7,
   "phases_total": 8,
   "sorry_inventory": [],
   "continuation_context": {
-    "next_phase": "Fix + commit Soundness.lean (phase 7) from specs/301_temporal_tableau/.wip-Soundness.lean, then Completeness.lean (phase 8)",
-    "files_completed": ["Defs.lean", "TimeOrdering.lean", "Rules.lean", "Branch.lean", "Closure.lean", "Saturation.lean"],
-    "files_wip": ["specs/301_temporal_tableau/.wip-Soundness.lean (broken, needs repair)"],
-    "files_remaining": ["Soundness.lean", "Completeness.lean"]
+    "next_phase": "Phase 8: Completeness.lean — model extraction, truth lemma, decidability",
+    "files_completed": [
+      "Defs.lean",
+      "TimeOrdering.lean",
+      "Rules.lean",
+      "Branch.lean",
+      "Closure.lean",
+      "Saturation.lean",
+      "Soundness.lean (partial: classicallyClosed_unsat proved; eventualityDefect_unsat BLOCKED)"
+    ],
+    "files_remaining": ["Completeness.lean"],
+    "commit": "54a1c5e8"
   },
-  "next_action_hint": "Resume implementation: repair .wip-Soundness.lean (build errors, no sorries), move back to Cslib/Logics/Temporal/Tableau/Soundness.lean, commit phase 7, then implement Completeness phase 8 (highest-risk: eventuality-fulfilment). Zero-debt: BLOCKED rather than sorry if completeness cannot close."
+  "blocked_obligations": [
+    "eventualityDefect_unsat: requires FMP or loop-detection argument for time-subset blocking with pending Until eventualities",
+    "temporalStepBranch_preserves_sat: F(U) propagation soundness argument (Modal K case not directly portable)",
+    "temporalExpandBranches_closed_unsat: fuel-induction loop invariant (blocked by above two)",
+    "temporalTableau_sound: main soundness theorem (blocked by all three above)"
+  ],
+  "next_action_hint": "Phase 8 Completeness is the highest-risk phase. Recommended approach: start with model extraction (extractModel from saturated Hintikka branches), then truth lemma for propositional/allFuture/allPast cases, then defer Until/Since completeness as BLOCKED if FMP is needed. Zero-debt: BLOCKED rather than sorry if completeness cannot close."
 }

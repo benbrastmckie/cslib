@@ -1,5 +1,5 @@
 ---
-next_project_number: 396
+next_project_number: 397
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 396
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,299,301,321,364,369,373,374,382,384,385,386,387,388,389,391,393,394,395 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,299,301,321,364,369,373,374,382,384,385,386,387,388,389,391,393,394,395,396 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,317,360,390,392 | 36,37,180,299,364,369,387 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275,370,375 | 39,40,317,360 | Foundations, Propositional Logic |
 
@@ -36,6 +36,7 @@ next_project_number: 396
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
 364 [IMPLEMENTING] — Repair the pre-existing Mathlib/toolchain-drift build failure in 
   └─ 360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t
+396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 
 ### Propositional Logic
 
@@ -77,6 +78,16 @@ next_project_number: 396
 395 [NOT STARTED] — META / coordination task. PRECONDITION: do NOT start until ALL fe
 
 ## Tasks
+
+### 396. Salvage reusable lemmas from task-299 Soundness refactor for the per-branch-accessibility soundness redesign
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Evaluate and salvage the architecture-independent proof-engineering lemmas left on branch wip/task-299-soundness-refactor (commit 27d93e2d) by the stopped task-299 modal-K soundness re-attempt. Portable (acc-free) candidates: sfSat, sfSat_pos, sfSat_neg, RuleResultSat, and recognizer characterization lemmas (e.g. modalNegOf?_eq_some) in Cslib/Logics/Modal/Tableau/Soundness.lean, plus the branchSatisfiable Type (vs Type*) universe simplification. The FULL 299 refactor is UNBUILT and rewrites modalStepBranch_preserves_sat on the now-superseded global-Accessibility architecture, so do NOT merge it wholesale. Goal: decide which lemmas help the modal-tableau soundness-gap-redesign effort (the per-branch Accessibility 'task 384' tracked in the cslib-364 worktree / branch task-364-soundness-drift) and cherry-pick or restate them there if the propositional-rule recognizer layer hits the 'stuck on variable antecedent / consumed-scrutinee' friction documented in specs/364_modal_tableau_soundness_drift_repair/handoffs/BLOCKED-repair-guide.md (section 4). NOTE: 'task 384' here means the soundness-gap-redesign task in the cslib-364 worktree, which is a DIFFERENT task than main's own #384 (tableau_completeness_sorries) — task numbering diverged across worktrees. Reference branch: wip/task-299-soundness-refactor. Parent context: task 299 modal_k_tableau.
+
+---
 
 ### 395. Review and revise vet tasks 384-394 after all worktrees merge into main
 - **Status**: [NOT STARTED]

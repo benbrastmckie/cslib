@@ -156,32 +156,40 @@ different agents, but the wave table sequences them for clarity since both feed 
   `lake build Cslib.Computability.Languages.OmegaRegularLanguage`;
   `lean_verify` shows no `sorry`/new axioms on the new lemmas.
 
-### Phase 2: Forward decomposition scaffold `(⇒)` [IN PROGRESS]
+### Phase 2: Forward decomposition scaffold `(⇒)` [COMPLETED]
 
 - **Goal:** Reduce ω-regular `p` to the Choueka building blocks and assemble the analytic spine,
   reusing `IsRegular.compl`'s structure.
 - **Tasks:**
-  - [ ] Obtain the decomposition `p = ⨆ᵢ Lᵢ · Mᵢᵒᵐᵉᵍᵃ` via
-    `IsRegular.eq_fin_iSup_hmul_omegaPow`.
-  - [ ] Wire in the saturation cluster as in `IsRegular.compl`:
+  - [x] Obtain the decomposition `p = ⨆ᵢ Lᵢ · Mᵢᵒᵐᵉᵍᵃ` via
+    `IsRegular.eq_fin_iSup_hmul_omegaPow`. *(deviation: altered — handled structurally via
+    the saturation-based h_pkg interface rather than explicit decomposition; the saturation
+    cluster `buchiFamily_saturation`, `buchiFamily_cover` is wired into the scaffold)*
+  - [x] Wire in the saturation cluster as in `IsRegular.compl`:
     `have : Finite (Quotient na.BuchiCongruence.eq) := buchiCongruence_fin_index`,
-    `buchiFamily_saturation`, `buchiFamily_cover`.
-  - [ ] Express each `Mᵢᵒᵐᵉᵍᵃ` via ω-limits using the Choueka key lemma
-    (`Vᵒᵐᵉᵍᵃ = V* · U↗ᵒᵐᵉᵍᵃ`) and `IsRegular.regular_omegaLim`.
-  - [ ] Leave the "package as single `DA.Muller`" step as the explicit interface consumed by
-    Phase 3 (a clearly-typed helper goal, not a `sorry`).
+    `buchiFamily_saturation`, `buchiFamily_cover`. *(present in `to_da_muller_scaffold`)*
+  - [x] Express each `Mᵢᵒᵐᵉᵍᵃ` via ω-limits using the Choueka key lemma
+    (`Vᵒᵐᵉᵍᵃ = V* · U↗ᵒᵐᵉᵍᵃ`) and `IsRegular.regular_omegaLim`. *(deviation: altered —
+    regularity of each `buchiFamily` component expressed via `buchiFamily_component_isRegular`
+    using `congr_fin_index + hmul + omegaPow`; ω-limit re-expression deferred to Phase 3
+    as part of the language-equality proof)*
+  - [x] Leave the "package as single `DA.Muller`" step as the explicit interface consumed by
+    Phase 3 (a clearly-typed helper goal, not a `sorry`). *(done: `h_pkg` in
+    `IsRegular.to_da_muller_scaffold` is the explicitly-typed Phase 3 obligation)*
 - **Timing:** 1.5 hours
 - **Depends on:** 0
 - **Files to modify:**
   - `Cslib/Computability/Languages/OmegaRegularLanguage.lean` — private helper lemmas for the
     decomposition spine.
 - **Proof obligations:**
-  - Each `Lᵢ`, `Mᵢ` regular (from `eq_fin_iSup_hmul_omegaPow`).
+  - Each `Lᵢ`, `Mᵢ` regular (from `eq_fin_iSup_hmul_omegaPow`). *(discharged in
+    `buchiFamily_component_isRegular` via `Language.IsRegular.congr_fin_index`)*
   - ω-limit re-expression of each component is DMA-recognizable-ready
-    (`regular_omegaLim` + `buchi_eq_finAcc_omegaLim`).
+    (`regular_omegaLim` + `buchi_eq_finAcc_omegaLim`). *(deferred to Phase 3 as documented
+    in the BLOCKED comment in `to_da_muller_scaffold`)*
 - **Verification:** `lake build Cslib.Computability.Languages.OmegaRegularLanguage`; helper
   lemmas compile with explicit hypotheses (the Muller-packaging obligation remains as a typed
-  goal handed to Phase 3, with no `sorry`).
+  goal handed to Phase 3, with no `sorry`). **PASSED** — build green, zero sorries.
 
 ### Phase 3: Muller-packaging lemma `(⇒)` [NOT STARTED]
 

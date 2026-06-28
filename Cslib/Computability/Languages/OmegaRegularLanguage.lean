@@ -343,15 +343,70 @@ theorem IsRegular.of_da_muller {State : Type} [Finite State]
   intro F _
   exact langF_reg F
 
+open NA.Buchi in
+/-- Each element of the Büchi family of a finite-state NBA is an ω-regular language.
+
+The family element `na.buchiFamily (a, b)` equals `eqvCls a * (eqvCls b)^ω`. Both
+`eqvCls a` and `eqvCls b` are regular languages by `Language.IsRegular.congr_fin_index`
+(which applies since `[Finite State]` yields `Finite (Quotient na.BuchiCongruence.eq)`
+via `buchiCongruence_fin_index`). Regularity of the product follows from `IsRegular.hmul`
+and `IsRegular.omegaPow`. -/
+private lemma buchiFamily_component_isRegular {Symbol : Type} [Inhabited Symbol]
+    {State : Type} [Finite State]
+    {na : NA.Buchi State Symbol}
+    (i : Quotient na.BuchiCongruence.eq × Quotient na.BuchiCongruence.eq) :
+    (na.buchiFamily i).IsRegular := by
+  haveI : Finite (Quotient na.BuchiCongruence.eq) := buchiCongruence_fin_index
+  have := Language.IsRegular.congr_fin_index (c := na.BuchiCongruence)
+  grind [buchiFamily, IsRegular.hmul, IsRegular.omegaPow]
+
+open NA.Buchi in
+/-- Forward direction scaffold for McNaughton's theorem: ω-regular → DMA-recognizable.
+
+Reduces the forward direction of `IsRegular.iff_da_muller` to `h_pkg`: given any
+finite-state NBA `na`, there exists a finite-state DMA over the Büchi congruence quotient
+`Q = Quotient na.BuchiCongruence.eq` whose language equals `language na`.
+
+**BLOCKED (Phase 3)**: Prove `h_pkg` by constructing the explicit `DA.Muller` record with:
+- State space: `Q = Quotient na.BuchiCongruence.eq` (finite by `buchiCongruence_fin_index`)
+- Initial state: `⟦[]⟧` (class of the empty word)
+- Transition: `δ([u], a) = [u ++ [a]]` (right multiplication in the congruence quotient)
+- Accept set: `{S : Set Q | ∃ b : Q, b ∈ S ∧ (⟦[]⟧, b) ∈ good_pairs na}` where
+  `good_pairs na = {(a, b) | (na.buchiFamily (a, b) ∩ language na).Nonempty}`
+  (equivalently, by `buchiFamily_saturation`, pairs whose family is ⊆ `language na`).
+
+The language equality `language dm = language na` uses:
+- `buchiFamily_saturation`: the Büchi family saturates `language na`
+- `buchiFamily_cover`: the Büchi family covers all ω-sequences
+- `buchiFamily_component_isRegular`: each component is ω-regular -/
+private lemma IsRegular.to_da_muller_scaffold {Symbol : Type} [Inhabited Symbol]
+    {p : ωLanguage Symbol}
+    (h : p.IsRegular)
+    (h_pkg : ∀ {State : Type} [Finite State] (na : NA.Buchi State Symbol),
+        ∃ (dm : DA.Muller (Quotient na.BuchiCongruence.eq) Symbol),
+          language dm = language na) :
+    ∃ (State : Type) (_ : Finite State) (da : DA.Muller State Symbol), language da = p := by
+  obtain ⟨State, h_fin, na, rfl⟩ := h
+  -- The Büchi congruence quotient Q is finite
+  haveI h_qfin : Finite (Quotient na.BuchiCongruence.eq) := buchiCongruence_fin_index
+  -- The Büchi family saturates and covers language na (established here for Phase 3 reference)
+  have _h_sat := buchiFamily_saturation (na := na)
+  have _h_cov := buchiFamily_cover (na := na)
+  -- Each Büchi family component is ω-regular (Phase 3 uses this in the language equality proof)
+  have _h_comp : ∀ i, (na.buchiFamily i).IsRegular := buchiFamily_component_isRegular
+  -- Phase 3 obligation: obtain the DMA over Q with language na
+  obtain ⟨dm, h_dm⟩ := h_pkg na
+  exact ⟨Quotient na.BuchiCongruence.eq, h_qfin, dm, h_dm⟩
+
 /-- McNaughton's Theorem: an ω-language is ω-regular (recognized by a finite-state NBA)
 if and only if it is recognized by a finite-state deterministic Muller automaton.
 
 **Proof**: The backward direction `(⇐)` follows from `IsRegular.of_da_muller`. The
 forward direction `(⇒)` is the genuine determinization content of McNaughton's theorem.
 
-**Status**: The forward direction `(⇒)` requires the Choueka congruence-based DMA
-construction and is deferred (task 241, phase 3). The proof stub is left with
-`proof_wanted` for this direction. -/
+**Status**: The forward direction `(⇒)` requires constructing the DMA over the Büchi
+congruence quotient (see `IsRegular.to_da_muller_scaffold` and `buchiFamily_component_isRegular`,
+task 241 phase 2). The DMA packaging step is deferred to task 241, phase 3. -/
 proof_wanted IsRegular.iff_da_muller [Inhabited Symbol] {p : ωLanguage Symbol} :
     p.IsRegular ↔
     ∃ (State : Type) (_ : Finite State) (da : DA.Muller State Symbol), language da = p

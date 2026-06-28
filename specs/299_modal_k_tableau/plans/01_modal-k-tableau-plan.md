@@ -215,7 +215,7 @@ accessibility-edge tracking that makes box-positive propagation K-sound (not S5)
 
 ---
 
-### Phase 4: Soundness [IN PROGRESS]
+### Phase 4: Soundness [BLOCKED]
 
 > **RESUME NOTES (orchestrator, last touched this session).** `Soundness.lean` exists as an
 > in-progress rewrite that a crashed implementation agent left mid-flight; it does **not**

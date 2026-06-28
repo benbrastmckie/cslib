@@ -1,0 +1,16 @@
+{
+  "status": "planned",
+  "summary": "Created 4-phase implementation plan for the Curry-Howard reduction correspondence + term-level strong normalization. Design B (native Term.reduceRoot) per the research report, which built every load-bearing mechanism green. All new work in one new file Cslib/Logics/Propositional/CurryHoward/Reduction.lean; zero new sorry, zero new axioms. Phases: (1) Term.subsOne/weakCtx/reduceRoot + subsOne_fwd/weakCtx_fwd; (2) reduceRoot_forward + reduceRoot_forward_some compatibility lemma; (3) reduceRoot_backward + Term.isStronglyNormal + Term.exists_stronglyNormal_form (SN transport); (4) mk_all wiring + CI on the specific target.",
+  "phases_total": 4,
+  "phases_completed": 0,
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "implement",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/373_curry_howard_reduction_correspondence/plans/01_curry-howard-reduction.md",
+      "summary": "4-phase plan, ~6h, ~250-300 lines, Design B native Term.reduceRoot with Design A transport fallback; per-phase verification builds Cslib.Logics.Propositional.CurryHoward.Reduction only (no whole-library build)."
+    }
+  ]
+}

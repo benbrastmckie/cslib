@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "agent_type": "planner-agent",
+  "delegation_path": ["orchestrator", "plan", "planner-agent"],
+  "task_number": 373,
+  "session_id": "sess_1782614409_bb49a0",
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/373_curry_howard_reduction_correspondence/plans/01_curry-howard-reduction.md",
+      "summary": "4-phase plan: Term.subsOne/weakCtx/reduceRoot + fwd lemmas; reduceRoot_forward (+_some compat); reduceRoot_backward + Term SN transport; file wiring + CI. Design B native, zero new sorry/axioms."
+    }
+  ],
+  "phase_count": 4,
+  "estimated_hours": 6,
+  "dependency_waves": [[1], [2], [3], [4]],
+  "memory_candidates": [],
+  "next_steps": "Run /implement 373 to execute the plan"
+}

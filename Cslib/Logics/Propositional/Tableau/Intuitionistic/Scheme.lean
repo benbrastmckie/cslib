@@ -4,8 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Benjamin Brast-McKie
 -/
 
+module
+
 import Cslib.Init
-import Cslib.Logics.Propositional.Tableau.Minimal.Completeness
+public import Cslib.Logics.Propositional.Tableau.Minimal.Soundness
 
 /-! # IntMinScheme: Parameterized Interface for Intuitionistic/Minimal Tableau
 
@@ -54,10 +56,18 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 /-! ## IntMinScheme Structure -/
 
 /-- A tableau scheme bundling the two divergence points between the intuitionistic and
-minimal propositional tableau developments, together with per-logic proof obligations.
+minimal propositional tableau developments: the branch closure predicate and the
+countermodel's `botForces` predicate, together with the completeness bot-case obligation.
 
 Use plain `def` instances (`intScheme`/`minScheme`) rather than `instance` declarations
-to avoid typeclass resolution ambiguity on `Bool`-valued data. -/
+to avoid typeclass resolution ambiguity on `Bool`-valued data.
+
+The soundness obligation (`closed_unsat`) is NOT a field here because it is
+universe-polymorphic (`∀ {World : Type*} ...`) while the completeness theorems use
+`World = Nat`. Carrying `closed_unsat` as a field would make `IntMinScheme` universe-polymorphic
+and cause universe metavariables in `truthLemma`, `openBranch_countermodel`, and
+`tableau_complete`. Instead, `closed_unsat` is passed as a separate parameter to
+`tableau_sound`. -/
 structure IntMinScheme (Atom : Type*) [DecidableEq Atom] [Hashable Atom] where
   /-- Branch closure predicate. Determines when a branch is declared closed.
   - Intuitionistic: `isIntuitionisticallyClosed` (T(⊥) or complementary T(φ)/F(φ) pair).
@@ -67,14 +77,6 @@ structure IntMinScheme (Atom : Type*) [DecidableEq Atom] [Hashable Atom] where
   - Intuitionistic: `fun _ _ => False` (bot is never forced in intuitionistic models).
   - Minimal: `minBranchBotForces b` (T(⊥) is read directly from the branch). -/
   modelBot : IBranch Atom → Nat → Prop
-  /-- Soundness obligation: a closed branch is unsatisfiable under `botForces = fun _ => False`.
-  Used to instantiate `intExpandBranches_closed_unsat` in `tableau_sound`.
-  For minimal soundness with arbitrary `botForces`, supply `minClosed_unsatisfiable`
-  directly at call sites. -/
-  closed_unsat : ∀ {World : Type*} [Preorder World]
-      (val : World → Atom → Prop) (worldOf : Nat → World)
-      (b : IBranch Atom),
-      closurePred b = true → ¬ intBranchSatisfied val (fun _ => False) worldOf b
   /-- Completeness bot-case obligation: on an open branch, T(⊥) and F(⊥) are consistent
   with `modelBot`.
   - If T(⊥)@w is on the branch, then `modelBot b w` holds.
@@ -95,14 +97,14 @@ structure IntMinScheme (Atom : Type*) [DecidableEq Atom] [Hashable Atom] where
 
 - `closurePred`: `isIntuitionisticallyClosed` (T(⊥) or complementary pair).
 - `modelBot`: `fun _ _ => False` (intuitionistic models have bot always unforced).
-- `closed_unsat`: `intClosed_unsatisfiable` directly.
 - `bot_truth`: the T(⊥) case is vacuous (T(⊥) cannot appear on an open intuitionistic
-  branch); the F(⊥) case is trivial since `¬ False = True`. -/
+  branch); the F(⊥) case is trivial since `¬ False = True`.
+
+The soundness obligation `intClosed_unsatisfiable` is passed directly to `tableau_sound`
+as a separate parameter (not stored in the scheme). -/
 def intScheme : IntMinScheme Atom where
   closurePred := isIntuitionisticallyClosed
   modelBot    := fun _ _ => False
-  closed_unsat := fun val worldOf b hclosed =>
-    intClosed_unsatisfiable val worldOf b hclosed
   bot_truth := fun b hopen w => by
     -- isIntuitionisticallyClosed b = false means:
     --   ClosureCondition.isClosed b = false  (no T(⊥) on b)
@@ -139,13 +141,13 @@ def intScheme : IntMinScheme Atom where
 
 - `closurePred`: `isMinimallyClosed` (complementary pair only, no T(⊥) closure).
 - `modelBot`: `minBranchBotForces b` (T(⊥) read from the branch).
-- `closed_unsat`: `minClosed_unsatisfiable` specialized to `botForces = fun _ => False`.
-- `bot_truth`: first conjunct is definitional; second uses `minOpen_no_contradiction`. -/
+- `bot_truth`: first conjunct is definitional; second uses `minOpen_no_contradiction`.
+
+The soundness obligation `minClosed_unsatisfiable` is passed directly to `tableau_sound`
+as a separate parameter (not stored in the scheme). -/
 def minScheme : IntMinScheme Atom where
   closurePred := isMinimallyClosed
   modelBot    := minBranchBotForces
-  closed_unsat := fun val worldOf b hclosed =>
-    minClosed_unsatisfiable val (fun _ => False) worldOf b hclosed
   bot_truth := fun b hopen w => by
     constructor
     · -- T(⊥)@w ∈ b → minBranchBotForces b w (definitionally the same)
@@ -161,21 +163,31 @@ def minScheme : IntMinScheme Atom where
 /-- **Generic Tableau Soundness**: If the tableau with closure predicate `S.closurePred`
 closes on `φ`, then `φ` is intuitionistically valid (`IValid φ`).
 
-The proof instantiates `intExpandBranches_closed_unsat` with `S.closurePred` and
-`S.closed_unsat`, giving a parametric wrap of `intuitionisticTableau_sound` that
-ranges over all `IntMinScheme` instances.
+The proof instantiates `intExpandBranches_closed_unsat` with `S.closurePred` and the
+provided `closed_unsat` argument. This gives a parametric wrap of
+`intuitionisticTableau_sound` that ranges over all `IntMinScheme` instances.
 
-The conclusion is `IValid φ` (validity with `botForces = fun _ => False`), matching the
-`botForces = fun _ => False` specialization in `IntMinScheme.closed_unsat`.
+The `closed_unsat` parameter is passed separately (not stored in `IntMinScheme`) because
+it is universe-polymorphic (`∀ {World : Type*} ...`) while the completeness theorems in
+`IntMinScheme` use `World = Nat`. Storing `closed_unsat` in the struct would make
+`IntMinScheme` universe-polymorphic and cause universe metavariables in the completeness
+theorems. See the `IntMinScheme` docstring.
 
-- At `intScheme`: equivalent to `intuitionisticTableau_sound` (Phase 5 will repoint).
-- At `minScheme`: proves the `botForces = fun _ => False` sub-case of minimal soundness.
-  `minimalTableau_sound` (arbitrary `botForces`) stays in `Minimal/Soundness.lean`.
+The conclusion is `IValid φ` (validity with `botForces = fun _ => False`), matching
+the `botForces = fun _ => False` specialization typically used with this function.
+
+- At `intScheme`/`intClosed_unsatisfiable`: equivalent to `intuitionisticTableau_sound`.
+- At `minScheme`/`minClosed_unsatisfiable (fun _ => False)`: minimal soundness sub-case.
 
 ## References
 
 * [M. Fitting, *Proof Methods for Modal and Intuitionistic Logics*][Fitting1983], Chapter 4 -/
-theorem tableau_sound.{u_world} (S : IntMinScheme.{_, u_world} Atom) (φ : Proposition Atom)
+theorem tableau_sound.{u_world} (S : IntMinScheme Atom)
+    (closed_unsat : ∀ {World : Type u_world} [Preorder World]
+        (val : World → Atom → Prop) (worldOf : Nat → World)
+        (b : IBranch Atom),
+        S.closurePred b = true → ¬ intBranchSatisfied val (fun _ => False) worldOf b)
+    (φ : Proposition Atom)
     (h : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
         (2 ^ (2 * φ.complexity + 2)) S.closurePred = .closed) :
     IValid.{_, u_world} φ := by
@@ -191,7 +203,7 @@ theorem tableau_sound.{u_world} (S : IntMinScheme.{_, u_world} Atom) (φ : Propo
       (fun {_ _} _ hf => absurd hf id) _
       S.closurePred
       (fun (worldOf' : Nat → World) (b : IBranch Atom) hcl =>
-          S.closed_unsat val worldOf' b hcl)
+          closed_unsat val worldOf' b hcl)
       [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] (by rfl) (by rfl) (by rfl)
       (by
         intro b edges nw hmem

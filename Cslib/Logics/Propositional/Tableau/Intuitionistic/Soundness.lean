@@ -1626,6 +1626,26 @@ theorem intuitionisticTableau_sound (φ : Proposition Atom)
       · simp [isAccessible.go] at hacc
   · exact hsat
 
+/-! ## Countermodel Extraction
+
+These definitions are placed here (rather than in `Int/Completeness.lean`) so that
+`Intuitionistic/Scheme.lean` can import them without creating a circular dependency with
+`Int/Completeness.lean`. -/
+
+/-- The valuation extracted from an open saturated branch.
+
+Atom `p` is assigned true at world `w` iff T(atom p) appears at label `w` on the branch.
+This is the shared valuation used by both the intuitionistic and minimal countermodel
+constructions. -/
+def intExtractValuation (b : IBranch Atom) (w : Nat) (p : Atom) : Prop :=
+  b.any (fun sf => sf.sign == .pos && sf.formula == .atom p && sf.label == w)
+
+/-- The `botForces` predicate for the intuitionistic countermodel: always False.
+
+In intuitionistic logic, ⊥ is never forced. This predicate serves as the `botForces`
+parameter for the parameterized `IForces` semantics in the intuitionistic countermodel. -/
+def intBotForces : Nat → Prop := fun _ => False
+
 end Cslib.Logic.PL
 
 end

@@ -414,6 +414,7 @@ public import Cslib.Logics.Propositional.Metalogic.ClassicalConjImpCompleteness
 public import Cslib.Logics.Propositional.Metalogic.ClassicalImpCompleteness
 public import Cslib.Logics.Propositional.Metalogic.DeductionTheorem
 public import Cslib.Logics.Propositional.Metalogic.GenericMCSBridge
+public import Cslib.Logics.Propositional.Metalogic.IntFMPSpike
 public import Cslib.Logics.Propositional.Metalogic.IntLindenbaum
 public import Cslib.Logics.Propositional.Metalogic.IntSoundness
 public import Cslib.Logics.Propositional.Metalogic.IntStrongCompleteness
@@ -488,6 +489,7 @@ public import Cslib.Logics.Propositional.SequentCalculus.LK.Completeness
 public import Cslib.Logics.Propositional.SequentCalculus.LK.CutElimination
 public import Cslib.Logics.Propositional.SequentCalculus.LK.CutFreeCompleteness
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Decidability
+public import Cslib.Logics.Propositional.SequentCalculus.LK.Interpolation
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Soundness
 public import Cslib.Logics.Propositional.SequentCalculus.LK.SubformulaProperty
 public import Cslib.Logics.Propositional.Subformula
@@ -503,6 +505,7 @@ public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Completeness
 public import Cslib.Logics.Propositional.Tableau.Intuitionistic.DecisionProcedure
 public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Expansion
 public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Rules
+public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme
 public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Soundness
 public import Cslib.Logics.Propositional.Tableau.Minimal
 public import Cslib.Logics.Propositional.Tableau.Minimal.Completeness

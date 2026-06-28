@@ -1,0 +1,43 @@
+{
+  "session_id": "sess_1782614409_bb49a0",
+  "task_numbers": [
+    369,
+    374,
+    317,
+    375,
+    373,
+    382
+  ],
+  "dependency_graph": {
+    "369": [],
+    "374": [],
+    "317": [
+      369
+    ],
+    "375": [
+      317
+    ],
+    "373": [],
+    "382": []
+  },
+  "execution_mode": "serial-shared-worktree",
+  "order": [
+    369,
+    374,
+    382,
+    373,
+    317,
+    375
+  ],
+  "cycle_count": 0,
+  "completed_tasks": [],
+  "failed_tasks": [],
+  "current_statuses": {
+    "369": "partial",
+    "374": "partial",
+    "317": "blocked",
+    "375": "not_started",
+    "373": "researched",
+    "382": "not_started"
+  }
+}

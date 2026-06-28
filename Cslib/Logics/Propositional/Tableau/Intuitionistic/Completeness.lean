@@ -8,6 +8,7 @@ module
 
 import Cslib.Init
 public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Soundness
+public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme
 
 /-! # Intuitionistic Tableau Completeness
 
@@ -16,25 +17,32 @@ intuitionistically valid, then the tableau closes on `φ`.
 
 ## Main Results
 
-- `intExtractModel`: Construct a Kripke model from an open saturated branch.
-- `intTruthLemma`: The extracted model satisfies all signed formulas on the branch.
+- `intExtractValuation`: Defined in `Intuitionistic.Soundness`; see that module.
+- `intTruthLemma`: Delegates to the parametric `truthLemma intScheme` from `Scheme.lean`.
 - `intuitionisticTableau_complete`: If `IValid φ`, then `intuitionisticTableau φ = closed`.
+
+## Design
+
+This module now delegates to the parametric implementations in `Intuitionistic.Scheme`.
+The declarations `intTruthLemma`, `intuitionisticOpenBranch_countermodel`, and
+`intuitionisticTableau_complete` are thin corollaries of their parametric counterparts
+`truthLemma intScheme`, `openBranch_countermodel intScheme`, and `tableau_complete intScheme`.
 
 ## Countermodel Construction
 
-From an open saturated branch `b`, construct a Kripke model as follows:
-- **Worlds**: The set of world labels appearing on `b`, ordered by ≤.
-- **Valuation**: `v(w, p) = true ↔ T(atom p) is on branch b at world w`.
-- **botForces**: Always `False` (intuitionistic semantics).
-- **Accessibility**: `w ≤ w'` iff `w ≤ w'` as natural numbers (the creation order).
-
-The model is well-formed because:
-1. Upward-closure of valuation follows from the persistence propagation in the expansion.
-2. The truth lemma follows by induction on formula structure using the saturation condition.
+From an open saturated branch `b`, the countermodel is:
+- **Worlds**: Natural numbers (world labels on `b`) with ≤ ordering.
+- **Valuation**: `intExtractValuation b` (defined in `Intuitionistic.Soundness`).
+- **botForces**: Always `False` (`intScheme.modelBot b = fun _ => False`).
+- **Accessibility**: `w ≤ w'` as natural numbers.
 
 ## Notes on sorry
 
-The truth lemma requires careful induction on formula structure. All proofs are marked sorry.
+`intTruthLemma` and `intuitionisticOpenBranch_countermodel` delegate to `truthLemma intScheme`
+and `openBranch_countermodel intScheme` respectively, which carry the deferred sorries in
+`Scheme.lean`. The remaining sorry in `intuitionisticTableau_complete` bridges `IValid φ` to
+the per-branch forcing hypothesis required by `tableau_complete intScheme`; this bridge is
+part of the completeness obligations handed to task 317.
 
 ## References
 
@@ -49,66 +57,58 @@ open Cslib.Logic.Tableau
 
 variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 
-/-! ## Countermodel Extraction -/
-
-/-- The valuation extracted from an open saturated branch.
-
-Atom `p` is assigned true at world `w` iff T(atom p) appears at label `w` on the branch. -/
-def intExtractValuation (b : IBranch Atom) (w : Nat) (p : Atom) : Prop :=
-  b.any (fun sf => sf.sign == .pos && sf.formula == .atom p && sf.label == w)
-
-/-- The `botForces` predicate for the intuitionistic countermodel: always False. -/
-def intBotForces : Nat → Prop := fun _ => False
-
 /-! ## Truth Lemma -/
 
 /-- The truth lemma for the intuitionistic tableau.
 
-If `b` is an open saturated branch (after persistence fixpoint), then the extracted
-valuation `intExtractValuation b` satisfies every T(φ) on `b` and falsifies every F(φ) on `b`.
+Delegates to `truthLemma intScheme`. The parametric sorry in `truthLemma` is the single
+deferred completeness obligation for task 317.
 
-The proof is by induction on `φ`:
-- **atom p**: T(p) on branch ↔ `intExtractValuation b w p` by definition.
-- **bot**: T(⊥) cannot appear on an open branch (closure would have fired).
-- **imp φ ψ**:
-  - T(φ → ψ) at w: by saturation, for all w' ≥ w with T(φ) at w',
-    T(ψ) is at w' (by the T(imp) rule applied to fixpoint). By IH.
-  - F(φ → ψ) at w: by saturation (world-creating rule was applied),
-    there is a world w' with T(φ) at w' and F(ψ) at w'. By IH.
-- **and**, **or**: Standard truth lemma steps.
-
-NOTE: Full proof marked sorry. -/
+If `b` is an open saturated branch, then the extracted valuation `intExtractValuation b`
+satisfies every T(φ) on `b` and falsifies every F(φ) on `b`. -/
 lemma intTruthLemma (b : IBranch Atom)
     (hopen : isIntuitionisticallyClosed b = false)
-    (hsat : ∀ sf ∈ b, intStepBranch b [] 0 = none) -- Simplified saturation hypothesis
+    (hsat : ∀ sf ∈ b, intStepBranch b [] 0 = none)
     (φ : Proposition Atom) (w : Nat) :
     (b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w) →
       IForces (intExtractValuation b) intBotForces w φ) ∧
     (b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) →
       ¬ IForces (intExtractValuation b) intBotForces w φ) := by
-  sorry
+  exact truthLemma intScheme b hopen hsat φ w
 
 /-- An open saturated branch from the intuitionistic tableau yields a Kripke countermodel.
 
+Delegates to `openBranch_countermodel intScheme`. The structural sorries in
+`openBranch_countermodel` (relating `intExpandBranches ... = .openBranch b` to properties
+of `b`) are deferred to task 317.
+
 If `intuitionisticTableau φ = openBranch b`, then `intExtractValuation b` falsifies `φ`
 at world 0 in the intuitionistic Kripke model with worlds ordered by ≤ on Nat. -/
-lemma intuitionisticOpenBranch_countermodel (φ : Proposition Atom)
+lemma intuitionisticOpenBranch_countermodel {b : IBranch Atom} (φ : Proposition Atom)
     (h : intuitionisticTableau φ = .openBranch b) :
     ¬ IForces (intExtractValuation b) intBotForces 0 φ := by
-  sorry
+  exact openBranch_countermodel intScheme φ b h
 
 /-! ## Main Completeness Theorem -/
 
 /-- **Intuitionistic Tableau Completeness**: If `φ` is intuitionistically valid,
 then the intuitionistic tableau closes on `φ`.
 
-Proof by contrapositive: if `intuitionisticTableau φ = openBranch b`, then
-`intuitionisticOpenBranch_countermodel` gives a Kripke model falsifying `φ`,
-contradicting `IValid φ`.
+Delegates to `tableau_complete intScheme`. The remaining sorry bridges `IValid φ` to the
+per-branch forcing hypothesis `∀ b, IForces (intExtractValuation b) (fun _ => False) 0 φ`
+required by `tableau_complete`; this bridge is the core completeness obligation for task 317.
 
-NOTE: Full proof marked sorry. -/
+Proof strategy: `tableau_complete intScheme φ` takes `∀ b, IForces (intExtractValuation b)
+(intScheme.modelBot b) 0 φ`. For the intuitionistic scheme, `modelBot b = fun _ => False`,
+so the hypothesis becomes `∀ b, IForces (intExtractValuation b) (fun _ => False) 0 φ`.
+This follows from `IValid φ` by instantiating at `World = Nat`, `val = intExtractValuation b`,
+with the upward-closure of `intExtractValuation b` (proved by task 317). -/
 theorem intuitionisticTableau_complete (φ : Proposition Atom)
     (h : IValid φ) : intuitionisticTableau φ = .closed := by
+  apply tableau_complete intScheme
+  intro _b
+  -- Bridge: IValid φ → IForces (intExtractValuation b) (fun _ => False) 0 φ
+  -- Requires: upward-closure of intExtractValuation b (task 317 obligation)
   sorry
 
 end Cslib.Logic.PL

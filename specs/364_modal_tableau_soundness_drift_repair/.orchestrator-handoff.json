@@ -1,37 +1,59 @@
 {
   "task_number": 364,
-  "session_id": "sess_1782614477_39b09e",
+  "session_id": "sess_1782625986_93ef30",
   "phase": "implementing",
   "status": "partial",
-  "agent_type": "skill-orchestrate (hard)",
-  "target_file": "Cslib/Logics/Modal/Tableau/Soundness.lean",
-  "worktree": "/home/benjamin/Projects/cslib-364 (branch task-364-soundness-drift)",
-  "summary": "Root A (boxPos split_ifs drift, line 228) FIXED and committed (425c1c53): scoped build 62 -> 61, zero sorry, statements preserved. The remaining recognizer-reduction roots (negPos 275, orPos/impPos cascades, negNeg 624) were diagnosed to the definition level: they are NOT mechanical drift but a genuine reduction-order/proof-structure problem (tryAllPropRules' andOf?/orOf? are stuck on the abstract subformula `a` in `a -> bot`, so find? never reaches negPos; and orPos genuinely fires when a is itself a negation). 5 autonomous dispatches (2 prior + 3 this session) overflowed because every state-inspection surfaces the ~400-line hsf. Stopped autonomous brute-force per resource discipline.",
-  "phases_completed": 1,
-  "phases_total": 7,
-  "errors_baseline_session": 62,
-  "errors_current": 61,
-  "commits_this_session": ["425c1c53 task 364 phase 3: fix Root A boxPos split_ifs drift (line 228)"],
+  "summary": "Repaired modalStepBranch_preserves_sat completely (universe fix .{v,v}, all T-side and F-side propositional recognizer arms reconstructed with named binders + cases-a substructure, boxPos, and the hard boxNeg fresh-world case incl. boxProps/diaNegProps extraction). modalExpandBranches_closed_unsat zero-case repaired (zip block updated to current getElem lemmas). 4 errors remain in the modalExpandBranches_closed_unsat succ-case (fuel-induction step), which has genuine incomplete-proof gaps that predate this drift-repair task.",
+  "phases_completed": 7,
+  "phases_total": 8,
+  "errors_current": 4,
+  "errors_baseline_head": 61,
+  "commits_this_session": 7,
+  "sorry_inventory": [],
+  "new_axioms": [],
   "blockers": [
-    "PROOF-STRUCTURE (not drift): the `| imp a c => cases c with | bot =>` arm handles `a -> bot` uniformly as negPos, but tryAllPropRules cannot reduce for abstract `a` (andPos/orPos precede negPos and their recognizers are stuck on `a`), AND orPos genuinely fires when a is a negation (`(x->bot)->bot = x or bot`). Needs `cases a` sub-structuring or standalone reduction lemmas, mirrored across orPos/impPos/negNeg. This is hours of genuine proof engineering.",
-    "CONTEXT-OVERFLOW (process): in-place repair of these roots requires iterating tactics against a ~400-line hsf; lean_goal/lean_multi_attempt/full build logs all surface it and overflow the agent. Single-site no-dump dispatch still overflowed (55 tool calls). In-place autonomous dispatch is the wrong tool for these roots."
+    {
+      "location": "Cslib/Logics/Modal/Tableau/Soundness.lean:1744",
+      "phase": "modalExpandBranches_closed_unsat succ-case (key lemma induction)",
+      "error": "Application type mismatch: List.mem_cons_self has type ?m in ?m :: ?l but is expected to have type bp in branches",
+      "root_cause": "The `key` sub-lemma is parameterized over `pending` but applies the outer `hstep` (stated about `branches`) to `bp in pending`. There is no `pending subset branches` invariant threaded through the induction, so `bp in branches` cannot be discharged.",
+      "needed": "Reformulate the `suffices key : ...` statement to carry `pending subset branches` (or state hstep about pending). Real induction-invariant work, not mechanical."
+    },
+    {
+      "location": "Cslib/Logics/Modal/Tableau/Soundness.lean:1745",
+      "phase": "modalExpandBranches_closed_unsat succ-case",
+      "error": "Application type mismatch: hbp_sat has type branchSatisfiable.{v, u_3} bp acc but expected branchSatisfiable.{v, u_1} bp acc",
+      "root_cause": "modalExpandBranches_closed_unsat is universe-polymorphic in branchSatisfiable's witness universe; the hstep parameter and hbp_sat acquired different theorem universe params. Same class as the (now-fixed) modalStepBranch_preserves_sat, but must be pinned in the theorem statement (hstep hypothesis + conclusion) to .{v, v}.",
+      "needed": "Add universe pin branchSatisfiable.{v, v} to the hstep hypothesis and conclusion of modalExpandBranches_closed_unsat (and propagate to modalTableau_sound's application)."
+    },
+    {
+      "location": "Cslib/Logics/Modal/Tableau/Soundness.lean:1749 and 1753-1764",
+      "phase": "modalExpandBranches_closed_unsat succ-case",
+      "error": "Type mismatch: hInv w w' hedge mentions modalNextWorld (List.flatMap id branches) but expected modalNextWorld bp; plus a -- Placeholder block for newAcc freshness maintenance",
+      "root_cause": "accFreshInv bp acc (acc-worlds < modalNextWorld bp) does NOT follow from accFreshInv (flatMap branches) acc, because bp is a sublist so modalNextWorld bp <= modalNextWorld (flatMap branches) (available bound is too weak / wrong direction). Freshness-invariant maintenance across modalStepBranch is left as a placeholder in the original code.",
+      "needed": "Develop the freshness-invariant maintenance lemma: how accFreshInv is preserved/transferred when a branch is expanded and acc grows via addEdge. Core tableau-soundness proof engineering, not drift repair."
+    },
+    {
+      "location": "Cslib/Logics/Modal/Tableau/Soundness.lean:1770",
+      "phase": "modalExpandBranches_closed_unsat succ-case (hmem_rest branch)",
+      "error": "Application type mismatch: hinner has type (match some (newBs,newExp,newAcc) with ...) but expected processNext fuel' bt ... = closed",
+      "root_cause": "hinner still contains an unreduced match some (...) after rw [hstep_r]; the recursion into ih_inner needs the match evaluated to the processNext branch.",
+      "needed": "Reduce hinner via simp (evaluate the match on some (...)) before passing to ih_inner; coupled with the membership/freshness fixes above."
+    }
   ],
   "continuation_context": {
-    "next_phase": 4,
-    "remaining_errors": 61,
-    "error_digest": "specs/364_modal_tableau_soundness_drift_repair/.error-digest.md (see UPDATE section at end for the sharpened, definition-grounded diagnosis)",
-    "recommended_approach": "Reduction-lemma extraction (prove small-context @[simp] lemmas that collapse tryAllPropRules on the relevant `.imp a .bot` shapes, including the orPos sub-case when a is a negation) OR restructure the `| bot =>` arm with `cases a`. This sidesteps the hsf overflow because the lemmas are proven in a tiny context. The report-02 sub-lemma extraction strategy (rejected by plan 03) is re-justified for THESE recognizer roots only.",
-    "do_not": "Do NOT re-dispatch unsupervised whole-file or in-place single-site agents that experiment with simp tweaks against hsf — confirmed to overflow 5x. Do NOT trust uncommitted edits from an overflowed agent (they have regressed before)."
+    "is_successor": false,
+    "resume_at": "modalExpandBranches_closed_unsat succ-case (the suffices key induction), Soundness.lean ~1677-1770",
+    "verified_completed": [
+      "Universe pin corrected to .{v,v} (Atom + witness) on modalStepBranch_preserves_sat",
+      "T-side T(a->c) propositional recognizer arms (negPos/orPos/andPos/impPos) fully reconstructed",
+      "F-side F(a->c) propositional recognizer arms (negNeg/orNeg/andNeg/impNeg) fully reconstructed",
+      "boxPos T(box phi) case",
+      "boxNeg F(box phi) fresh-world case incl. acc-condition, boxProps and diaNegProps extraction, freshness via Nat.ne_of_lt",
+      "modalExpandBranches_closed_unsat zero-case (zip block rewritten with List.getElem_zip / List.mem_iff_getElem / List.findSome?_eq_none_iff)"
+    ]
   },
-  "remaining_root_sites": {
-    "T_side_pos_sign": [275, 303, 335, 362, 402],
-    "F_side_neg_sign": [624, 649, 705, 729],
-    "structural": [744],
-    "tail": [819, 820, 825, 855, 869, 872, 874, 875, 877, 879, 881, 883, 885, 891, 893, 917, 956]
-  },
-  "next_action_hint": "Pursue reduction-lemma extraction for the recognizer roots (interactive or report-02-style), starting from negPos (line 275). The boxPos Root-A idiom (flat obtain + plain simp) is committed and correct. Tail items (zip block 819-825 = List.mem_zip removed; app-type-mismatch 855/869/917; universe 956; duplicate-imp 744) are separable and mostly mechanical once the recognizer cascade clears.",
   "artifacts": [
-    {"type": "summary", "path": "specs/364_modal_tableau_soundness_drift_repair/.error-digest.md", "summary": "Definition-grounded diagnosis of recognizer-reduction roots + Root A fix record"}
-  ],
-  "sorry_inventory": {"count": 0, "locations": []}
+    {"path": "Cslib/Logics/Modal/Tableau/Soundness.lean", "type": "lean_source", "summary": "modalStepBranch_preserves_sat complete; modalExpandBranches_closed_unsat zero-case complete, succ-case 4 errors remaining"}
+  ]
 }

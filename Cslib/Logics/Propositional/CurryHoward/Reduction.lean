@@ -163,6 +163,8 @@ lemma Theory.reduceRoot_forward {G : Ctx Atom} {A : Proposition Atom}
   | impE d d' =>
       cases d <;>
         simp [curryHowardForward, Term.reduceRoot, Derivation.reduceRoot, subsOne_fwd, weakCtx_fwd]
+  | efq d =>
+      simp [curryHowardForward, Term.reduceRoot, Derivation.reduceRoot]
 
 /-- Corollary of `reduceRoot_forward`: if derivation `d` reduces at its root to `d'`,
 then `curryHowardForward d` reduces at its root to `curryHowardForward d'`. This is the
@@ -230,6 +232,8 @@ lemma Theory.reduceRoot_backward {G : Ctx Atom} {A : Proposition Atom}
   | case_ G t tA tB =>
       cases t <;>
         simp [curryHowardBackward, Term.reduceRoot, Derivation.reduceRoot, subsOne_bwd]
+  | efq t =>
+      simp [curryHowardBackward, Term.reduceRoot, Derivation.reduceRoot]
 
 /-! ## Term-level strong normalization -/
 

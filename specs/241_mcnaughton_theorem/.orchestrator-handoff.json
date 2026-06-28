@@ -1,51 +1,42 @@
 {
   "status": "partial",
-  "summary": "Phase 1 (reverse direction IsRegular.of_da_muller: DMA → ω-regular) implemented, committed green at c4d3869d. The proof_wanted IsRegular.iff_da_muller remains (forward direction not attempted). Build is clean: zero sorries, zero new axioms, lake lint clean.",
+  "summary": "Phase 3 (DMA record construction) committed at 4593a630. buchiCongr_DMA definition typechecks: DA.Muller over Quotient na.BuchiCongruence.eq with transition via right_cov.elim and accept set via buchiFamily meet. Language equality (buchiCongr_DMA_language_eq) is proof_wanted BLOCKED for Phase 4.",
   "artifacts": [
     {
       "path": "specs/241_mcnaughton_theorem/plans/01_mcnaughton-da-muller.md",
       "type": "plan",
-      "summary": "Implementation plan; Phase 0 and Phase 1 marked COMPLETED"
-    },
-    {
-      "path": "specs/241_mcnaughton_theorem/summaries/01_mcnaughton-da-muller-summary.md",
-      "type": "summary",
-      "summary": "Phase 1 implementation summary with continuation context for forward direction"
+      "summary": "Implementation plan; Phase 0 and Phase 1 marked COMPLETED; Phase 2 scaffold committed; Phase 3 DMA record added"
     },
     {
       "path": "Cslib/Computability/Languages/OmegaRegularLanguage.lean",
       "type": "lean_file",
-      "summary": "Added theorem IsRegular.of_da_muller (lines 259-345); proof_wanted IsRegular.iff_da_muller remains"
+      "summary": "Added buchiCongr_DMA (private noncomputable def) and proof_wanted buchiCongr_DMA_language_eq around line 363"
     }
   ],
-  "phases_completed": 1,
+  "phases_completed": 3,
   "phases_total": 6,
   "sorry_inventory": [],
   "requires_user_review": true,
-  "blocked_phase": null,
+  "blocked_phase": "Phase 4: prove buchiCongr_DMA_language_eq",
   "continuation_context": {
-    "what_is_done": "theorem IsRegular.of_da_muller committed at c4d3869d; reverse direction (DMA → ω-regular) is complete and CI green",
-    "what_remains": "proof_wanted IsRegular.iff_da_muller (forward direction: ω-regular → DMA via Choueka saturation)",
-    "forward_direction_approach": {
-      "step1": "obtain NBA na from h : p.IsRegular via destruct",
-      "step2": "have : Finite (Quotient na.BuchiCongruence.eq) := buchiCongruence_fin_index",
-      "step3": "have h_sat := buchiFamily_saturation (na := na); have h_cov := buchiFamily_cover (na := na)",
-      "step4": "build DA.Muller with State = Quotient na.BuchiCongruence.eq and accept = {S | S ∈ Image of buchiFamily on Quotient}",
-      "step5": "prove language of assembled DMA = p using buchiFamily_saturation + buchiFamily_cover",
-      "template": "IsRegular.compl proof (lines 246-257 of OmegaRegularLanguage.lean) is the exact structural template",
-      "key_challenge": "constructing the explicit DA.Muller record with the correct accept : Set (Set State) type from the Choueka machinery"
+    "what_is_done": "buchiCongr_DMA defined (lines ~363-386 of OmegaRegularLanguage.lean): DA.Muller over Quotient na.BuchiCongruence.eq with tr via Quotient.liftOn + right_cov.elim, start = Quotient.mk [] , accept = {S | ∃ b ∈ S, ∃ a, (na.buchiFamily (a,b) ⊓ language na).toSet.Nonempty}. Build green, zero sorries.",
+    "what_remains": "proof_wanted buchiCongr_DMA_language_eq: language (buchiCongr_DMA na) = language na. This is Phase 4 — the genuine McNaughton direction. Then Phase 5 wires h_pkg (using buchiCongr_DMA + buchiCongr_DMA_language_eq), and Phase 6 closes IsRegular.iff_da_muller.",
+    "phase4_approach": {
+      "direction_fwd": "xs ∈ language na → xs ∈ language (buchiCongr_DMA na): use buchiFamily_saturation + buchiFamily_cover to show xs ∈ na.buchiFamily (a,b) ⊆ language na for some (a,b); then show b ∈ infOcc(buchiCongr_DMA.run xs) so accept set is triggered.",
+      "direction_bwd": "xs ∈ language (buchiCongr_DMA na) → xs ∈ language na: infOcc(run xs) ∈ accept means some b ∈ infOcc and (a,b) good; b recurs in run so xs admits a decomposition in buchiFamily (a,b) ⊆ language na.",
+      "key_lemma_needed": "relate buchiCongr_DMA.run to eqvCls: need to show buchiCongr_DMA.run xs n = ⟦xs.extract 0 n⟧ (the DMA state after reading first n symbols is the class of the length-n prefix).",
+      "supporting_machinery": "buchiFamily_saturation, buchiFamily_cover, mem_buchiFamily in BuchiCongruence.lean"
     },
-    "relevant_lemmas": [
-      "buchiCongruence_fin_index (BuchiCongruence.lean)",
-      "buchiFamily_saturation (BuchiCongruence.lean:181)",
-      "buchiFamily_cover (BuchiCongruence.lean)",
-      "IsRegular.eq_fin_iSup_hmul_omegaPow (OmegaRegularLanguage.lean:195)",
-      "IsRegular.fin_cover_saturates (OmegaRegularLanguage.lean:224)",
-      "Buchi.toMuller_language_eq (BuchiChar.lean:88)",
-      "IsRegular.of_da_muller (OmegaRegularLanguage.lean:268, newly added)"
+    "key_files": [
+      "Cslib/Computability/Languages/OmegaRegularLanguage.lean",
+      "Cslib/Computability/Languages/Congruences/BuchiCongruence.lean"
     ],
-    "file_to_edit": "Cslib/Computability/Languages/OmegaRegularLanguage.lean",
-    "target_declaration": "proof_wanted IsRegular.iff_da_muller at line 357"
+    "commit_history": [
+      "c4d3869d: phase 1 — IsRegular.of_da_muller (reverse direction, complete)",
+      "0c72f854: phase 2 — to_da_muller_scaffold (forward scaffold with h_pkg hypothesis)",
+      "a3ecb300: update handoff after phase 2",
+      "4593a630: phase 3 — buchiCongr_DMA record + proof_wanted buchiCongr_DMA_language_eq"
+    ]
   },
-  "next_action_hint": "Implement Phase 2 (forward decomposition scaffold) by studying how IsRegular.compl uses buchiFamily_saturation and adapt it to produce a DA.Muller. Start by checking buchiFamily's exact type and the Quotient state space structure in BuchiCongruence.lean."
+  "next_action_hint": "Phase 4: prove buchiCongr_DMA_language_eq. First establish the run-state lemma: buchiCongr_DMA.run xs n = Quotient.mk na.BuchiCongruence.eq (xs.extract 0 n). This connects the DMA run to the congruence classes and enables both directions of the language equality."
 }

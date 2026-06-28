@@ -11,9 +11,9 @@ next_project_number: 402
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,299,301,321,364,369,373,374,382,384,385,386,387,388,389,391,393,394,395,396,398,400,401 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,317,360,390,392,399 | 36,37,180,299,364,369,387,398 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
-| 3 | 41,275,370,375 | 39,40,317,360 | Foundations, Propositional Logic |
+| 1 | 36,37,180,226,241,278,299,301,317,321,364,384,385,386,387,388,389,391,393,394,395,396,398,400,401 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,360,375,390,392,399 | 36,37,180,299,317,364,387,398 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 3 | 41,275,370 | 39,40,360 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -41,12 +41,8 @@ next_project_number: 402
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-369 [PARTIAL] — Parameterize the intuitionistic and minimal tableau developments 
-  └─ 317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
-    └─ 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
-373 [RESEARCHED] — Extend the Curry-Howard layer from a structural isomorphism to a 
-374 [PARTIAL] — Add Craig interpolation for the propositional sequent calculi, a 
-382 [NOT STARTED] — Post-332 cleanup: remove the dead Dershowitz-Manna termination-me
+317 [PLANNED] — Fill the propositional tableau completeness sorries (7 real sorri
+  └─ 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
 370 [PLANNED] — Close the decidability asymmetry in the metalogic layer: classica
 
 ### Temporal Logic
@@ -258,7 +254,7 @@ next_project_number: 402
 ---
 
 ### 382. Normalization deadcode cleanup
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 332
@@ -358,7 +354,7 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 374. Sequent calculus interpolation
-- **Status**: [PARTIAL]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 371
@@ -370,10 +366,11 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 373. Curry howard reduction correspondence
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 332
+- **Plan**: [373_curry_howard_reduction_correspondence/plans/01_curry-howard-reduction.md]
 
 **Description**: Extend the Curry-Howard layer from a structural isomorphism to a genuine computational correspondence. Cslib/Logics/Propositional/CurryHoward/{Defs,Isomorphism.lean} currently provide only a constructor-renaming bijection between Theory.Derivation and the intrinsically-typed lambda calculus Theory.Term (curryHowardForward/Backward, roundtrip = rfl). Add: (1) the reduction correspondence -- prove that ND root reduction (NaturalDeduction/Normalization/Reduction.lean reduceRoot: the 5 beta-redexes + 3 commuting conversions) corresponds to beta/eta reduction on Theory.Term, i.e. d reduceRoot d' implies curryHowardForward d reduces to curryHowardForward d' (and a congruence/compatibility lemma); (2) term-level strong normalization -- transport derivation-level SN (normalize_isStronglyNormal) across the isomorphism to obtain SN for well-typed Terms. Depends on task 332 (the normalization termination proof must be sorry-free first). No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 332.
 
@@ -416,7 +413,7 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 369. Parameterize int min tableau
-- **Status**: [PARTIAL]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 363
@@ -937,10 +934,11 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [BLOCKED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 316, Task 323, Task 363, Task 369
+- **Plan**: [317_propositional_tableau_completeness/plans/02_tableau-completeness-unified.md]
 
 **Description**: Fill the propositional tableau completeness sorries (7 real sorries; soundness is already sorry-free after task 316). The open obligations are the truth-lemma / countermodel-extraction proofs in the three Completeness modules. Classical (Tableau/Classical/Completeness.lean): classicalExpandBranches_hintikka (line ~462) -- note the module's separate build break (bad Mathlib lemma ref + unsolved goals) is repaired first under task 363. Intuitionistic (Tableau/Intuitionistic/Completeness.lean): intTruthLemma (line ~89), intuitionisticOpenBranch_countermodel (~98), intuitionisticTableau_complete (~112). Minimal (Tableau/Minimal/Completeness.lean): minTruthLemma (~168), minOpenBranch_countermodel (~179), minimalTableau_complete (~190). Core technique: Hintikka-set argument -- a saturated open branch satisfies Hintikka conditions, from which a countermodel is extracted (a Boolean valuation for classical; a finite Kripke model for intuitionistic/minimal) and a truth lemma by formula induction matches forced/not-forced to the signed formulas at each world. Because task 369 parameterizes the intuitionistic and minimal tableau over (closurePred, modelBot), the int and min cases should be discharged ONCE as a single parametric truth-lemma/countermodel pair rather than duplicated. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 316, 323, 363, 369.
 

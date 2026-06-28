@@ -1,32 +1,16 @@
 {
-  "status": "partial",
-  "summary": "Propositional tableau completeness. Classical phase partially attempted; Intuitionistic and Minimal completeness NOT started. PRIMARY ISSUE: Classical/Completeness.lean does NOT build — ~54 errors (~51 pre-existing at committed HEAD) in the classicalTruthLemma / Hintikka-helper region (~L110-229). The red build, not the sorry count, is the blocker. The file is at 1 live sorry (classicalExpandBranches_hintikka ~L462, the deep loop-invariant induction). Two easy sorries (classicalTableau_hintikka bridge, F(phi) membership) were attempted but the supporting helpers are red — saved in classical-easy-attempt.patch.",
-  "blockers": [
-    "Classical/Completeness.lean build-red: ~54 errors incl. invented constants (List.findSome?_of_mem, List.find?_of_mem are not real Mathlib lemmas), unsolved goals, failed rewrites, 'function expected'. Must be fixed (sorries OK) before the file's sorry count is meaningful.",
-    "M1 (minimalTableau_sound) is in Minimal/Soundness.lean = task 316 territory. 317 must NOT edit it; use as-is."
-  ],
-  "where_to_begin": "Phase 1 Priority 0 of plan 01: get Classical/Completeness.lean to a GREEN build with sorries allowed. Replace the invented List lemma names with the correct ones (loogle/leansearch), fix the unsolved goals and failed rewrites in ~L110-229. Leave classicalExpandBranches_hintikka (~L462) as a sorry for now — it is a deep induction (the classical analog of 316's crux) best done as its own focused/research-informed pass. COMMIT the green build as a milestone before tackling the deep induction. Then proceed Phase 2 (classical), Phase 3 (intuitionistic, resolving B1/B2), Phase 4 (minimal M2 + Decidable; NOT M1).",
-  "continuation_context": {
-    "build_state": { "builds": false, "error_count_classical_completeness": 54, "preexisting_errors_at_head": 51 },
-    "plan_path": "specs/317_propositional_tableau_completeness/plans/01_tableau-completeness-plan.md",
-    "saved_attempt_patch": "specs/317_propositional_tableau_completeness/classical-easy-attempt.patch",
-    "file_status": {
-      "Classical/Completeness.lean": "RED ~54 errors, 1 sorry (classicalExpandBranches_hintikka ~L462)",
-      "Intuitionistic/Completeness.lean": "baseline, 7 sorries (B1/B2 unresolved), not started",
-      "Minimal/Completeness.lean": "baseline, 8 sorries, not started (M2 here; M1 is 316's in Minimal/Soundness.lean)",
-      "DecisionProcedure.lean files": "baseline, not started"
-    },
-    "territory_contract": "317 owns all */Completeness.lean and */DecisionProcedure.lean. 316 owns all */Soundness.lean (incl. Minimal/Soundness.lean / minimalTableau_sound). Do not cross."
-  },
-  "artifacts": [
-    { "path": "specs/317_propositional_tableau_completeness/plans/01_tableau-completeness-plan.md", "type": "plan" },
-    { "path": "specs/317_propositional_tableau_completeness/classical-easy-attempt.patch", "type": "saved_attempt" }
-  ],
+  "status": "planned",
+  "summary": "Revised plan for task 317 (propositional tableau completeness) after task 369 unified the int/min path. Six concrete sorries remain, verified against source: 4 in Intuitionistic/Scheme.lean (truthLemma S ~L242; the three openBranch_countermodel structural obligations hopen ~L280 / hsat ~L288 / hFmem ~L296) and 2 per-logic validity bridges (Intuitionistic/Completeness.lean ~L112; Minimal/Completeness.lean ~L110). Classical/Completeness.lean is ALREADY sorry-free (deviation from the delegation brief, which listed classicalExpandBranches_hintikka as remaining work — it is proved at L924; classicalTableau_complete sorry-free at L1328). Plan sequences structural lemmas (openness+monotonicity, then saturation) before the parametric truth lemma, then the per-logic bridges, then a classical+Decidable+CI confirmation pass.",
+  "phases_total": 5,
   "phases_completed": 0,
-  "phases_total": 4,
-  "metadata": {
-    "session_id": "sess_1782335183_8462da",
-    "updated": "2026-06-24",
-    "note": "Rewritten by orchestrator to correct a stale handoff (previously status=planned, dated before any implementation attempt). Reflects current ground truth: classical phase attempted, build red."
-  }
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "implement",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/317_propositional_tableau_completeness/plans/02_tableau-completeness-unified.md",
+      "summary": "Unified post-369 completeness plan: 5 phases, ~9h, targeting the 6 remaining int/min parametric sorries; dominant risk is the per-logic bridge upward-closure under the ambient Nat Preorder (may require refining tableau_complete's hvalid to the open saturated branch)."
+    }
+  ]
 }

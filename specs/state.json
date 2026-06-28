@@ -679,14 +679,19 @@
     {
       "project_number": 317,
       "project_name": "propositional_tableau_completeness",
-      "status": "blocked",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Fill the propositional tableau completeness sorries (7 real sorries; soundness is already sorry-free after task 316). The open obligations are the truth-lemma / countermodel-extraction proofs in the three Completeness modules. Classical (Tableau/Classical/Completeness.lean): classicalExpandBranches_hintikka (line ~462) -- note the module's separate build break (bad Mathlib lemma ref + unsolved goals) is repaired first under task 363. Intuitionistic (Tableau/Intuitionistic/Completeness.lean): intTruthLemma (line ~89), intuitionisticOpenBranch_countermodel (~98), intuitionisticTableau_complete (~112). Minimal (Tableau/Minimal/Completeness.lean): minTruthLemma (~168), minOpenBranch_countermodel (~179), minimalTableau_complete (~190). Core technique: Hintikka-set argument -- a saturated open branch satisfies Hintikka conditions, from which a countermodel is extracted (a Boolean valuation for classical; a finite Kripke model for intuitionistic/minimal) and a truth lemma by formula induction matches forced/not-forced to the signed formulas at each world. Because task 369 parameterizes the intuitionistic and minimal tableau over (closurePred, modelBot), the int and min cases should be discharged ONCE as a single parametric truth-lemma/countermodel pair rather than duplicated. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 316, 323, 363, 369.",
       "created": "2026-06-23T19:55:52Z",
-      "last_updated": "2026-06-27T05:35:19Z",
-      "next_artifact_number": 1,
-      "artifacts": [],
+      "last_updated": "2026-06-27T20:30:00Z",
+      "next_artifact_number": 3,
+      "artifacts": [
+        {
+          "type": "plan",
+          "path": "specs/317_propositional_tableau_completeness/plans/02_tableau-completeness-unified.md"
+        }
+      ],
       "dependencies": [
         316,
         323,
@@ -1820,7 +1825,7 @@
     {
       "project_number": 369,
       "project_name": "parameterize_int_min_tableau",
-      "status": "partial",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Parameterize the intuitionistic and minimal tableau developments over their two points of difference to remove ~400 lines of duplication and set up task 317 to discharge ONE truth lemma instead of two. The two logics already share intExpandBranches, the rule set, the Nat-labelled Kripke world scheme, and the accessibility-edge mechanism; they diverge only in (a) the closure predicate (isIntuitionisticallyClosed, which fires on T(bot) at any world, vs isMinimallyClosed, contradiction-only) and (b) the extracted countermodel's botForces (intuitionistic: fun _ => False; minimal: botForces w = T(bot) present on the branch at w). Refactor the shared Soundness and Completeness scaffolding (Cslib/Logics/Propositional/Tableau/{Intuitionistic,Minimal}/{Soundness,Completeness,DecisionProcedure}.lean) to abstract over (closurePred, modelBot) so both logics instantiate a single parametric development, leveraging the generic Foundations/Logic/Tableau ClosureCondition typeclass where natural. Constraints: keep all three Soundness modules green and sorry-free (task 316); preserve the still-open completeness obligations as a SINGLE parametric truth-lemma/countermodel pair (do not introduce new sorries beyond the existing ones being unified). Must run after the classical tableau build is repaired (task 363) so the suite is green. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 363.",
@@ -1842,7 +1847,8 @@
           "summary": "5 phases; P3 red (1 parametric sorry); 6\u21921 sorry-accounting"
         }
       ],
-      "session_id": null
+      "session_id": null,
+      "completion_summary": "Parameterized intuitionistic and minimal tableau over (closurePred, modelBot) via Intuitionistic/Scheme.lean (intScheme/minScheme). Broke the Scheme\u2192Min/Completeness\u2192Int/Completeness circular import by relocating intExtractValuation/intBotForces to Int/Soundness and minBranchBotForces/minOpen_no_contradiction to Min/Soundness. Int/Min Completeness now delegate truthLemma/openBranch_countermodel/tableau_complete to the parametric Scheme lemmas. Reduced 10 sorries to 6 (eliminated 4, introduced none): the truth-lemma/countermodel obligation is now a SINGLE parametric set in Scheme.lean (truthLemma S + 3 structural countermodel sorries) for task 317 to discharge once, plus 2 residual per-logic IValid/MValid validity bridges. All three Soundness modules sorry-free; all Propositional Tableau targets build green."
     },
     {
       "project_number": 370,
@@ -1928,15 +1934,16 @@
     {
       "project_number": 374,
       "project_name": "sequent_calculus_interpolation",
-      "status": "partial",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Add Craig interpolation for the propositional sequent calculi, a foundational metatheorem currently absent for LK and LJ. Implement Maehara's method: for a cut-free LK proof of Gamma1, Gamma2 turnstile Delta1, Delta2, construct an interpolant I in the shared vocabulary with Gamma1 turnstile Delta1, I and I, Gamma2 turnstile Delta2, by induction on the cut-free derivation (using LK cut-elimination + subformula property as the foundation), then derive Craig interpolation for implications as the standard corollary; provide the intuitionistic (LJ) analogue. This is a larger new piece (estimate several hundred lines) and the highest-effort item in the propositional backlog -- schedule after the LK/LJ coverage is symmetrized (task 371 supplies the LJ subformula property the LJ case needs). Consider whether to also state the algebraic interpolation corollary over the Lindenbaum/Heyting substrate. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake).",
+      "completion_summary": "Craig interpolation via Maehara's method for both LK and LJ. maeharaCore (LK) and ljMaeharaCore (LJ) proved by structural induction over cut-free proofs; Craig corollaries LKProof.interpolation and LJProof.interpolation expose the public API. Both barrels (LK.lean, LJ.lean) wire the new modules; LJ.Interpolation added to Cslib.lean. Zero sorries, no new axioms, all CI checks green for the interpolation files.",
       "dependencies": [
         371
       ],
       "created": "2026-06-27T05:29:32Z",
-      "last_updated": "2026-06-27T05:35:19Z",
+      "last_updated": "2026-06-28T00:00:00Z",
       "next_artifact_number": 1,
       "artifacts": [
         {
@@ -1950,7 +1957,7 @@
           "summary": "6 phases, waves [[1],[2,5],[3],[4],[6]]; Phase 3 hard, 3a/3b split"
         }
       ],
-      "session_id": null
+      "session_id": "sess_1782614409_bb49a0"
     },
     {
       "project_number": 375,
@@ -2199,23 +2206,31 @@
     {
       "project_number": 373,
       "project_name": "curry_howard_reduction_correspondence",
-      "status": "researched",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
+      "completion_summary": "Added Cslib/Logics/Propositional/CurryHoward/Reduction.lean implementing the full reduction correspondence and term-level SN. Proved reduceRoot_forward (8 redex cases: 5 beta + 3 commuting conversions), reduceRoot_backward (converse), and reduceRoot_some (existential lifting). Transported derivation-level SN across the isomorphism via isStronglyNormal_fwd to obtain Term.isStronglyNormal and Term.exists_stronglyNormal_form. Wired into Cslib.lean barrel. Build green (628 jobs), 0 sorry, 0 new axioms. lint-style clean for new file. checkInitImports/shake blocked by pre-existing Modal/Bimodal red (task 364), not a 373 regression.",
       "description": "Extend the Curry-Howard layer from a structural isomorphism to a genuine computational correspondence. Cslib/Logics/Propositional/CurryHoward/{Defs,Isomorphism.lean} currently provide only a constructor-renaming bijection between Theory.Derivation and the intrinsically-typed lambda calculus Theory.Term (curryHowardForward/Backward, roundtrip = rfl). Add: (1) the reduction correspondence -- prove that ND root reduction (NaturalDeduction/Normalization/Reduction.lean reduceRoot: the 5 beta-redexes + 3 commuting conversions) corresponds to beta/eta reduction on Theory.Term, i.e. d reduceRoot d' implies curryHowardForward d reduces to curryHowardForward d' (and a congruence/compatibility lemma); (2) term-level strong normalization -- transport derivation-level SN (normalize_isStronglyNormal) across the isomorphism to obtain SN for well-typed Terms. Depends on task 332 (the normalization termination proof must be sorry-free first). No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 332.",
       "dependencies": [
         332
       ],
       "created": "2026-06-27T05:29:32Z",
-      "last_updated": "2026-06-27T05:29:32Z",
-      "next_artifact_number": 1,
-      "artifacts": [],
+      "last_updated": "2026-06-27T00:00:00Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "number": 1,
+          "type": "plan",
+          "path": "specs/373_curry_howard_reduction_correspondence/plans/01_curry-howard-reduction.md",
+          "created": "2026-06-27T00:00:00Z"
+        }
+      ],
       "session_id": "sess_1782576552_fae7a6"
     },
     {
       "project_number": 382,
       "project_name": "normalization_deadcode_cleanup",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Post-332 cleanup: remove the dead Dershowitz-Manna termination-measure machinery orphaned by task 332's constructive strong-normalization proof. Dead (0 live uses, verified): normMeasure, normMeasure_wf, reduceRoot_decreases_normMeasure (incl. the h_8 case), redexWeight, redexWeight_zero_sn, and the Multiset.isDershowitzMannaLT_* helpers used only by them; likely also the 'import Mathlib.Data.Multiset.DershowitzManna'. KEEP the live shared helpers (maximalFormulas, commutingSum, nodeCount, weakCtx lemmas, subsOne_new_redex_complexity_lt, maximalFormulas_sn_eq_zero) used by the constructive route. After removal: lake build Normalization green + 0 sorry, then run lake shake to confirm no further dead imports/decls. Also re-run the full CI pipeline (lake build, checkInitImports, lake lint, lake test, lake shake) once main is green again -- currently blocked by PRE-EXISTING unrelated red modules (Bimodal/*, Modal/Tableau/Soundness; owned by task 364 etc.). File: Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean. Depends on 332.",
@@ -2223,10 +2238,11 @@
         332
       ],
       "created": "2026-06-27T00:00:00Z",
-      "last_updated": "2026-06-27T00:00:00Z",
+      "last_updated": "2026-06-28T00:00:00Z",
       "next_artifact_number": 1,
       "artifacts": [],
-      "session_id": null
+      "session_id": "sess_1782614409_bb49a0",
+      "completion_summary": "Removed dead Dershowitz-Manna machinery from Termination.lean (-423 lines, 1888->1465). Dead decls removed: normMeasure, normMeasure_wf, reduceRoot_decreases_normMeasure, reduceRootSubSN, redexWeight, sn_redexWeight_zero, redexWeight_zero_sn, Multiset.isDershowitzMannaLT_{add_right,cons_add,cons_add',remove_add_lt}, import Mathlib.Data.Multiset.DershowitzManna. Kept live: maximalFormulas, commutingSum, nodeCount, weakCtx lemmas, subsOne_new_redex_complexity_lt, maximalFormulas_sn_eq_zero, conclusionComplexity. Build green (598 jobs, 0 sorry, 0 new axioms). lake shake clean for the file. Commit c7cb659a."
     },
     {
       "project_number": 383,

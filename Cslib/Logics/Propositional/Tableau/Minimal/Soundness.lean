@@ -152,6 +152,82 @@ theorem minimalTableau_sound (φ : Proposition Atom)
       · simp [isAccessible.go] at hacc
   · exact hsat
 
+/-! ## Countermodel Bot Predicate and No-Contradiction
+
+These definitions are placed here (rather than in `Min/Completeness.lean`) so that
+`Intuitionistic/Scheme.lean` can import them without creating a circular dependency with
+the Completeness modules. -/
+
+/-- The `botForces` predicate for the minimal countermodel.
+
+`minBranchBotForces b w = true` iff T(⊥) appears at label `w` on the branch `b`.
+
+This is upward-closed by the persistence fixpoint: if T(⊥) is at world w and w ≤ w',
+then T(⊥) is also at w' (since T(⊥) is a T-formula and persistence propagates all
+T-formulas from accessible worlds). -/
+def minBranchBotForces (b : IBranch Atom) (w : Nat) : Prop :=
+  b.any (fun sf =>
+    sf.sign == .pos && sf.formula == (HasBot.bot : Proposition Atom) && sf.label == w)
+
+omit [Hashable Atom] in
+/-- An open minimal branch has no complementary T(φ)/F(φ) pair at the same label.
+
+This follows directly from `isMinimallyClosed b = false`: if T(φ) and F(φ) were both
+at label l, then `Branch.hasContradiction b = true`, which means `isMinimallyClosed b = true`,
+contradicting openness. -/
+lemma minOpen_no_contradiction (b : IBranch Atom)
+    (hopen : isMinimallyClosed b = false) (φ : Proposition Atom) (w : Nat) :
+    ¬ (b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w) ∧
+       b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w)) := by
+  intro ⟨hpos, hneg⟩
+  -- The branch has T(φ) at w and F(φ) at w: show hasContradiction = true, contradicting hopen
+  have hcontra : isMinimallyClosed b = true := by
+    simp only [isMinimallyClosed, Branch.hasContradiction]
+    rw [List.any_eq_true] at hpos hneg
+    obtain ⟨sf_pos, hsf_pos_mem, hpos_cond⟩ := hpos
+    obtain ⟨sf_neg, hsf_neg_mem, hneg_cond⟩ := hneg
+    simp only [Bool.and_eq_true] at hpos_cond hneg_cond
+    obtain ⟨⟨hpos_sign_b, hpos_form_b⟩, hpos_label_b⟩ := hpos_cond
+    obtain ⟨⟨hneg_sign_b, hneg_form_b⟩, hneg_label_b⟩ := hneg_cond
+    simp only [beq_iff_eq] at hpos_sign_b hneg_sign_b hpos_label_b hneg_label_b
+    -- Convert formula BEq to propositional equality
+    have hpos_form_eq : sf_pos.formula = φ :=
+      eq_of_beq hpos_form_b
+    have hneg_form_eq : sf_neg.formula = φ :=
+      eq_of_beq hneg_form_b
+    -- Show findContradiction.isSome via cases on the findSome? result
+    simp only [Branch.findContradiction, Option.isSome]
+    cases hfind : List.findSome? (fun sf =>
+        if sf.isPos = true then
+          if (List.any b fun sf' =>
+              sf'.sign == Sign.neg && sf'.formula == sf.formula && sf'.label == sf.label) = true
+          then some (sf.formula, sf.label)
+          else none
+        else none) b with
+    | some _ => rfl
+    | none =>
+      exfalso
+      simp only [List.findSome?_eq_none_iff] at hfind
+      have h_none := hfind sf_pos hsf_pos_mem
+      simp only [SignedFormula.isPos, hpos_sign_b, Sign.isPos, ite_true,
+                 List.any_eq_true] at h_none
+      simp only [ite_eq_right_iff] at h_none
+      -- h_none : (∃ x ∈ b with x.sign = .neg && formula=sf_pos.formula && label=sf_pos.label)
+      --          → some (...) = none
+      -- We have sf_neg as such a witness
+      have hwitness := h_none ⟨sf_neg, hsf_neg_mem, by
+        simp only [Bool.and_eq_true, BEq.beq]
+        refine ⟨⟨?_, ?_⟩, ?_⟩
+        · -- (sf_neg.sign == .neg) = true
+          exact hneg_sign_b ▸ beq_self_eq_true _
+        · -- (sf_neg.formula == sf_pos.formula) = true
+          -- We know sf_neg.formula = φ = sf_pos.formula
+          rw [hpos_form_eq]; exact hneg_form_b
+        · -- (sf_neg.label == sf_pos.label) = true
+          simp only [decide_eq_true_eq]; exact hneg_label_b.trans hpos_label_b.symm⟩
+      exact absurd hwitness (by simp)
+  simp [hcontra] at hopen
+
 end Cslib.Logic.PL
 
 end

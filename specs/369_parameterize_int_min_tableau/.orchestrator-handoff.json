@@ -1,0 +1,96 @@
+{
+  "status": "blocked",
+  "summary": "Phase 3b BLOCKED: circular import chain prevents Int/Completeness.lean from importing Scheme.lean. Chain: Scheme.lean → Minimal/Completeness.lean (public import) → Int/Completeness.lean. No file changes made in this dispatch. Prior work (Phase 3a-ii): openBranch_countermodel S + tableau_complete S in Scheme.lean green. Int/Completeness.lean and Min/Completeness.lean bodies unchanged at baseline sorries.",
+  "phases_completed": 4,
+  "phases_total": 5,
+  "sorry_inventory": [
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 230,
+      "description": "truthLemma S — parametric truth lemma body deferred to task 317"
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 268,
+      "description": "openBranch_countermodel S — hopen: missing intExpandBranches_openBranch_closed (structural induction showing closurePred b = false when openBranch returned)"
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 276,
+      "description": "openBranch_countermodel S — hsat: missing intExpandBranches_openBranch_sat (structural induction connecting actual saturation intStepBranch bPers e nw = none to simplified intStepBranch b [] 0 = none)"
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 284,
+      "description": "openBranch_countermodel S — hFmem: missing intExpandBranches_openBranch_initial_mem (branch monotonicity showing F(φ)@0 from initial branch is preserved)"
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+      "line": 81,
+      "description": "intTruthLemma — to be rewired to truthLemma intScheme in Phase 3b"
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+      "line": 95,
+      "description": "intuitionisticOpenBranch_countermodel — to be rewired to openBranch_countermodel intScheme in Phase 3b"
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+      "line": 110,
+      "description": "intuitionisticTableau_complete — to be rewired to tableau_complete intScheme in Phase 3b"
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+      "line": 160,
+      "description": "minTruthLemma — to be rewired to truthLemma minScheme in Phase 3b"
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+      "line": 176,
+      "description": "minOpenBranch_countermodel — to be rewired to openBranch_countermodel minScheme in Phase 3b"
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+      "line": 188,
+      "description": "minimalTableau_complete — to be rewired to tableau_complete minScheme in Phase 3b"
+    }
+  ],
+  "blockers": [
+    {
+      "phase": "3b",
+      "type": "circular_import",
+      "description": "Scheme.lean → Minimal/Completeness.lean → Int/Completeness.lean forms a cycle. Adding 'import Intuitionistic.Scheme' to Int/Completeness.lean would create: Int/Completeness → Scheme → Min/Completeness → Int/Completeness.",
+      "root_cause": "intExtractValuation and intBotForces are defined in Int/Completeness.lean. Scheme.lean uses them through Min/Completeness.lean's public re-export of Int/Completeness. This places Scheme.lean strictly AFTER Int/Completeness in the module order.",
+      "fix_required_files": [
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean OR Expansion.lean — move intExtractValuation + intBotForces here",
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean — change import from Minimal/Completeness to Int/Soundness + Min/Soundness",
+        "Cslib/Logics/Propositional/Tableau/Minimal/Soundness.lean — move minBranchBotForces + minOpen_no_contradiction here",
+        "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean — change import from Int/Completeness to Scheme",
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean — add import Scheme; replace 3 sorry bodies"
+      ],
+      "single_file_constraint": "This dispatch was limited to Int/Completeness.lean only. The fix requires touching 5 files. A new multi-file dispatch with territory covering all 5 files is needed."
+    }
+  ],
+  "continuation_context": {
+    "next_phase": "3b-restructure",
+    "description": "Requires a new dispatch covering 5 files: restructure imports so Int/Completeness.lean can import Scheme.lean, then rewire the 3 sorried bodies. After that: 3c rewire Min/Completeness to minScheme; P4 DecisionProcedure; P5 full CI.",
+    "import_fix_summary": "Move intExtractValuation/intBotForces to an earlier module; move minBranchBotForces/minOpen_no_contradiction to Min/Soundness; change Scheme.lean imports to break cycle; add Scheme import to Int/Completeness.lean.",
+    "validity_note": "tableau_complete S takes ∀ b, IForces (intExtractValuation b) (S.modelBot b) 0 φ NOT IValid/MValid. For Int: need intExtractValuation_uc (saturated branches are upward-closed) to bridge IValid φ → ∀ b, IForces val (fun _ => False) 0 φ. This is a structural result requiring induction on intExpandBranches.",
+    "structural_sorries_note": "The 3 structural sorries in openBranch_countermodel (hopen, hsat, hFmem) require: intExpandBranches_openBranch_{closed,sat,initial_mem}. These require induction on intExpandBranches + go. Task 317's job.",
+    "sorry_count_baseline": "10 total (3 in Int/Completeness.lean, 4 in Scheme.lean, 3 in Min/Completeness.lean). No change from this dispatch."
+  },
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "type": "implementation",
+      "summary": "IntMinScheme + intScheme + minScheme + tableau_sound + truthLemma (1 sorry) + openBranch_countermodel (3 structural sorries) + tableau_complete (sorry-free)"
+    }
+  ],
+  "task_number": 369,
+  "build_state": {
+    "scoped_build": "green",
+    "error_count": 0,
+    "sorry_count": 4,
+    "commit": "1f2d569a"
+  }
+}

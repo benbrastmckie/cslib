@@ -151,11 +151,14 @@ Given a formula `φ`, runs the signed tableau starting from `F(φ)` at label `()
 - Returns `openBranch b` iff `φ` is not a tautology; `b` is an open saturated branch
   from which a Boolean countermodel can be extracted (see `Classical/Soundness.lean`).
 
-The fuel bound `4 * (φ.complexity + 1) + 1` covers classical propositional logic
-(each sub-formula is expanded at most once per branch). -/
+The fuel bound `3 ^ φ.complexity` is a base-3 exponential bound derived from the
+measure-decrease termination proof: `classicalExpMeasure` uses a `3^C` Lyapunov function
+where `C = classicalBranchComplexity`, and the initial single-branch state has measure
+exactly `3 ^ φ.complexity`. The prior linear bound `4 * (φ.complexity + 1) + 1` was
+insufficient for formulas of complexity ≥ 3. -/
 def classicalTableau (φ : Proposition Atom) : ClassicalTableauResult Atom :=
   let initialBranch : Branch (Proposition Atom) Unit := [⟨.neg, φ, ()⟩]
-  let fuel := 4 * (φ.complexity + 1) + 1
+  let fuel := 3 ^ φ.complexity
   classicalExpandBranches [initialBranch] [[]] fuel
 
 end ClassicalExpansion

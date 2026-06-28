@@ -11,11 +11,9 @@ next_project_number: 384
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,299,301,321,364,371,373,376,382 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,363,374 | 36,37,180,299,371,376 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
-| 3 | 41,275,360,369 | 39,40,363,364 | Foundations, Propositional Logic |
-| 4 | 317,370 | 360,369 | Propositional Logic |
-| 5 | 375 | 317 | Propositional Logic |
+| 1 | 36,37,180,226,241,278,299,301,321,364,369,373,374,382 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,317,360 | 36,37,180,299,364,369 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 3 | 41,275,370,375 | 39,40,317,360 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -42,14 +40,12 @@ next_project_number: 384
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-371 [NOT STARTED] — Symmetrize the LK/LJ sequent-calculus metatheory and add the miss
-  └─ 374 [NOT STARTED] — Add Craig interpolation for the propositional sequent calculi, a 
+369 [PARTIAL] — Parameterize the intuitionistic and minimal tableau developments 
+  └─ 317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
+    └─ 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
 373 [RESEARCHED] — Extend the Curry-Howard layer from a structural isomorphism to a 
+374 [PARTIAL] — Add Craig interpolation for the propositional sequent calculi, a 
 382 [NOT STARTED] — Post-332 cleanup: remove the dead Dershowitz-Manna termination-me
-317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
-  └─ 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
-369 [NOT STARTED] — Parameterize the intuitionistic and minimal tableau developments 
-  └─ 317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri (see above)
 370 [PLANNED] — Close the decidability asymmetry in the metalogic layer: classica
 
 ### Temporal Logic
@@ -66,11 +62,6 @@ next_project_number: 384
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
 
 ### Uncategorized
-
-376 [RESEARCHED] — Prove the fuel-sufficiency lemma needed to discharge the sorry at
-  └─ 363 [BLOCKED] — Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean fa
-    └─ 360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t (see above)
-    └─ 369 [NOT STARTED] — (Propositional Logic: Parameterize the intuitionistic and mini) (see above)
 
 ## Tasks
 
@@ -159,10 +150,11 @@ next_project_number: 384
 
 ### 376. Prove fuel sufficiency lemma for classical tableau completeness
 - **Effort**: 3-5 hours
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 - **Research**: [363_repair_classical_tableau_completeness/reports/01_spawn-analysis.md]
+- **Plan**: [376_prove_fuel_sufficiency_lemma_for_classical_tableau_completeness/plans/01_fuel-sufficiency-lemma.md]
 
 **Description**: Prove the fuel-sufficiency lemma needed to discharge the sorry at line 492 of Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean. The sorry is the body of `classicalExpandBranches_hintikka`, which proves that any open branch produced by `classicalExpandBranches` satisfies the Hintikka condition. The induction on fuel is blocked because the fuel=0 base case is unprovable with the current invariant: when `classicalExpandBranches branches expandedSets 0 = .openBranch b`, the invariant covers only `sf ∈ expandedSets[j]`, leaving `sf ∈ b \ expandedSets[j]` without any Hintikka guarantee.
 
@@ -185,10 +177,12 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 374. Sequent calculus interpolation
-- **Status**: [NOT STARTED]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 371
+- **Research**: [374_sequent_calculus_interpolation/reports/01_sequent-calculus-interpolation.md]
+- **Plan**: [374_sequent_calculus_interpolation/plans/01_sequent-calculus-interpolation.md]
 
 **Description**: Add Craig interpolation for the propositional sequent calculi, a foundational metatheorem currently absent for LK and LJ. Implement Maehara's method: for a cut-free LK proof of Gamma1, Gamma2 turnstile Delta1, Delta2, construct an interpolant I in the shared vocabulary with Gamma1 turnstile Delta1, I and I, Gamma2 turnstile Delta2, by induction on the cut-free derivation (using LK cut-elimination + subformula property as the foundation), then derive Craig interpolation for implications as the standard corollary; provide the intuitionistic (LJ) analogue. This is a larger new piece (estimate several hundred lines) and the highest-effort item in the propositional backlog -- schedule after the LK/LJ coverage is symmetrized (task 371 supplies the LJ subformula property the LJ case needs). Consider whether to also state the algebraic interpolation corollary over the Lindenbaum/Heyting substrate. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake).
 
@@ -217,10 +211,12 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 371. Symmetrize sequent calculus coverage
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [371_symmetrize_sequent_calculus_coverage/reports/01_symmetrize-sequent-calculus.md]
+- **Plan**: [371_symmetrize_sequent_calculus_coverage/plans/01_symmetrize-sequent-calculus.md]
 
 **Description**: Symmetrize the LK/LJ sequent-calculus metatheory and add the missing cut-elimination corollaries; all three items are near-mechanical consequences of results already proved. (1) LJ subformula property: LK has Cslib/Logics/Propositional/SequentCalculus/LK/SubformulaProperty.lean but LJ has none despite having cut-elimination (LJ/CutElimination.lean) -- add LJ/SubformulaProperty.lean mirroring the LK proof, adapted to single-conclusion sequents. (2) LK decidability: LJ has decidability (LJ/Decidability.lean, via tableau) but LK does not -- add an LK decision procedure, either by cut-free proof search (using LK cut-elimination + subformula property to bound the search) or by reduction to the existing classical tautology checker, and prove it correct. (3) Cut-free completeness as a named theorem: LK has the CutFreeLKProof subtype and LKProof.cutElim but no standalone statement -- add lk_cut_free_completeness : Tautology phi -> Nonempty (CutFreeLKProof (emptyset turnstile {phi})) as a corollary of cutElim composed with lk_iff_tautology. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake).
 
@@ -239,10 +235,12 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 369. Parameterize int min tableau
-- **Status**: [NOT STARTED]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 363
+- **Research**: [369_parameterize_int_min_tableau/reports/01_parameterize-int-min-tableau.md]
+- **Plan**: [369_parameterize_int_min_tableau/plans/01_parameterize-int-min-tableau.md]
 
 **Description**: Parameterize the intuitionistic and minimal tableau developments over their two points of difference to remove ~400 lines of duplication and set up task 317 to discharge ONE truth lemma instead of two. The two logics already share intExpandBranches, the rule set, the Nat-labelled Kripke world scheme, and the accessibility-edge mechanism; they diverge only in (a) the closure predicate (isIntuitionisticallyClosed, which fires on T(bot) at any world, vs isMinimallyClosed, contradiction-only) and (b) the extracted countermodel's botForces (intuitionistic: fun _ => False; minimal: botForces w = T(bot) present on the branch at w). Refactor the shared Soundness and Completeness scaffolding (Cslib/Logics/Propositional/Tableau/{Intuitionistic,Minimal}/{Soundness,Completeness,DecisionProcedure}.lean) to abstract over (closurePred, modelBot) so both logics instantiate a single parametric development, leveraging the generic Foundations/Logic/Tableau ClosureCondition typeclass where natural. Constraints: keep all three Soundness modules green and sorry-free (task 316); preserve the still-open completeness obligations as a SINGLE parametric truth-lemma/countermodel pair (do not introduce new sorries beyond the existing ones being unified). Must run after the classical tableau build is repaired (task 363) so the suite is green. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 363.
 
@@ -310,7 +308,7 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 363. Repair Classical/Tableau/Completeness.lean proof gaps and bad lemma ref
-- **Status**: [BLOCKED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: Task 376
 

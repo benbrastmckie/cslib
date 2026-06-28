@@ -9,9 +9,11 @@ module
 import Cslib.Init
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Basic
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Completeness
--- CutElimination is available transitively via SubformulaProperty
+-- CutElimination is available transitively via SubformulaProperty and CutFreeCompleteness
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Soundness
 public import Cslib.Logics.Propositional.SequentCalculus.LK.SubformulaProperty
+public import Cslib.Logics.Propositional.SequentCalculus.LK.Decidability
+public import Cslib.Logics.Propositional.SequentCalculus.LK.CutFreeCompleteness
 
 /-! # LK Classical Propositional Sequent Calculus
 

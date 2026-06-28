@@ -1,0 +1,23 @@
+{
+  "task_number": 374,
+  "status": "partial",
+  "dispatch_status": "partial",
+  "phases_completed": 2,
+  "phases_total": 6,
+  "dispatch_summary": "ax case discharged (4-way split: (Γ₁,Δ₁)→⊥, (Γ₁,Δ₂)→A, (Γ₂,Δ₁)→¬A, (Γ₂,Δ₂)→⊤); 4 hard cases remain",
+  "build_state": {
+    "scoped_build": "green",
+    "error_count": 0,
+    "sorry_count": 4
+  },
+  "sorry_inventory": {
+    "count": 4,
+    "items": [
+      {"case": "andR"},
+      {"case": "orL"},
+      {"case": "impL"},
+      {"case": "impR"}
+    ]
+  },
+  "continuation_context": "Remaining cases andR/orL/impL (combine I₁,I₂ from both premises) and impR (single interpolant); then Phase 4 LK Craig corollary, Phase 5 LJ core, Phase 6 LJ corollary+CI"
+}

@@ -481,10 +481,13 @@ public import Cslib.Logics.Propositional.SequentCalculus.LJ.Completeness
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.CutElimination
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.Decidability
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.Soundness
+public import Cslib.Logics.Propositional.SequentCalculus.LJ.SubformulaProperty
 public import Cslib.Logics.Propositional.SequentCalculus.LK
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Basic
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Completeness
 public import Cslib.Logics.Propositional.SequentCalculus.LK.CutElimination
+public import Cslib.Logics.Propositional.SequentCalculus.LK.CutFreeCompleteness
+public import Cslib.Logics.Propositional.SequentCalculus.LK.Decidability
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Soundness
 public import Cslib.Logics.Propositional.SequentCalculus.LK.SubformulaProperty
 public import Cslib.Logics.Propositional.Subformula

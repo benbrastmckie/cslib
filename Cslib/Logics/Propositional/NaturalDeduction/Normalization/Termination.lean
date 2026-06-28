@@ -1493,9 +1493,9 @@ omit [DecidableEq Atom] in
 private lemma cx_and_right {A B : Proposition Atom} : B.complexity < (A ∧ B).complexity := by
   simp only [Proposition.complexity]; omega
 
-/-! ### Mutual block: VALIDATED termination measure for L3/L4/L5
+/-! ### Mutual block: termination measure for L3/L4/L5
 
-RESULT (machine-checked below): the mutual well-founded recursion of `snImpEForm` (L3),
+The mutual well-founded recursion of `snImpEForm` (L3),
 `snOrEForm` (L4), `snSubst` (L5) terminates under the **3-component lexicographic measure**
 
     (cut-formula complexity, phase, structural size)
@@ -1516,9 +1516,9 @@ where `phase = 0` for the two eliminators and `phase = 1` for `snSubst`, and the
     sub-case the carried invariant yields `(type D').complexity ≤ P.complexity`, so the edge
     decreases (`< P` ⇒ first component, `= P` at the bare-variable site ⇒ phase `0 < 1`); in the
     neutral sub-case the result is reassembled as `impE` directly, with no eliminator call.
-    This edge is now discharged **sorry-free** via `lex3_of_le_of_lt` and the head invariant.
+    This edge is discharged via `lex3_of_le_of_lt` and the head invariant.
 
-CLOSED in this dispatch (head-bound termination, no `sorry`):
+Head-bound termination support:
   - Head-behaviour invariant carried in `snSubst`'s return subtype:
       `body.isIntroRoot = false → ((d.isIntroRoot ∨ d.isOrERoot) → B.complexity ≤ P.complexity)`,
     proven for the `ax/ass/andI/andE1/andE2/impE/orI1/orI2` cases (the head-bound's entire
@@ -1527,7 +1527,7 @@ CLOSED in this dispatch (head-bound termination, no `sorry`):
     subformula lemmas `cx_and_left/right`, `sizeOf_impE_left/right`, and the lex lemma
     `lex3_of_le_of_lt`.
 
-CLOSED (this dispatch) — the mutual block L3/L4/L5 is now fully `sorry`-free:
+Mutual-block case structure:
   - `snOrEForm`'s commuting `orE` case (push the elimination into the SN `orE`'s branches,
     re-eliminating via `snOrEForm`).
   - `snSubst`'s `impI` and `orE` cases via the context-reindex cast
@@ -1538,10 +1538,9 @@ CLOSED (this dispatch) — the mutual block L3/L4/L5 is now fully `sorry`-free:
     case's conclusion need not be a subformula of the eliminated disjunction); all consumers
     supply it since an elimination's major premise is never `orE`-headed in a SN derivation.
 
-The `snSubst` head-bound termination obligation is discharged sorry-free via the carried
-head-behaviour invariant (see `snSubst` below); the stage-1 scaffolding stubs have been
-removed. The structural driver `snForm` (L6) and `exists_stronglyNormal_form` are appended after
-the block; the development is fully `sorry`-free. -/
+The `snSubst` head-bound termination obligation is discharged via the carried
+head-behaviour invariant (see `snSubst` below). The structural driver `snForm` (L6) and
+`exists_stronglyNormal_form` follow the block. -/
 
 /-- `sizeOf` of an `impE`'s function premise is smaller than the whole derivation. Proven
 outside the mutual block so the termination proof can close the `impE` structural edge by a

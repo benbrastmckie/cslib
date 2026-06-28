@@ -215,6 +215,20 @@ theorem tableau_sound.{u_world} (S : IntMinScheme.{_, u_world} Atom) (φ : Propo
       · simp [isAccessible.go] at hacc
   · exact hsat
 
+/-! ## Parametric Truth Lemma -/
+
+/-- Parametric truth lemma (the single deferred completeness obligation, task 317).
+Generalizes `intTruthLemma` over an `IntMinScheme`'s `closurePred`/`modelBot`. -/
+lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom)
+    (hopen : S.closurePred b = false)
+    (hsat : ∀ sf ∈ b, intStepBranch b [] 0 = none)
+    (φ : Proposition Atom) (w : Nat) :
+    (b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w) →
+      IForces (intExtractValuation b) (S.modelBot b) w φ) ∧
+    (b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) →
+      ¬ IForces (intExtractValuation b) (S.modelBot b) w φ) := by
+  sorry
+
 end Cslib.Logic.PL
 
 end

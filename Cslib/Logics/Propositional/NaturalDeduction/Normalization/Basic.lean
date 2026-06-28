@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Propositional.NaturalDeduction.Basic
+public import Cslib.Logics.Propositional.Subformula
 
 /-! # Normalization Basics for Propositional Natural Deduction
 
@@ -39,105 +40,6 @@ namespace Cslib.Logic.PL
 open Proposition Theory InferenceSystem DerivableIn
 
 variable {Atom : Type u} [DecidableEq Atom]
-
-/-! ## Subformula Infrastructure -/
-
-/-- All subformulas of a proposition, including itself.
-
-This is used to state the subformula property: every formula occurring in a normal
-derivation is a subformula of the conclusion or a hypothesis. -/
-def Proposition.subformulas : Proposition Atom → Finset (Proposition Atom)
-  | φ@(.atom _) => {φ}
-  | φ@.bot => {φ}
-  | φ@(.imp A B) => insert φ (A.subformulas ∪ B.subformulas)
-  | φ@(.and A B) => insert φ (A.subformulas ∪ B.subformulas)
-  | φ@(.or A B) => insert φ (A.subformulas ∪ B.subformulas)
-
-/-- A proposition `A` is a subformula of `B` if `A` occurs in the subformula set of `B`. -/
-def Proposition.IsSubformula (A B : Proposition Atom) : Prop :=
-  A ∈ B.subformulas
-
-/-- Every proposition is a subformula of itself. -/
-theorem Proposition.self_mem_subformulas (A : Proposition Atom) : A ∈ A.subformulas := by
-  cases A <;> simp [subformulas]
-
-/-- Every proposition is a subformula of itself. -/
-theorem Proposition.IsSubformula.refl (A : Proposition Atom) : A.IsSubformula A :=
-  Proposition.self_mem_subformulas A
-
-/-- If `A` is a subformula of `B` and `B` is a subformula of `C`,
-then `A` is a subformula of `C`. -/
-theorem Proposition.IsSubformula.trans {A B C : Proposition Atom}
-    (h1 : A.IsSubformula B) (h2 : B.IsSubformula C) : A.IsSubformula C := by
-  unfold IsSubformula at *
-  induction C with
-  | atom _ =>
-    simp only [subformulas, Finset.mem_singleton] at h2; subst h2; exact h1
-  | bot =>
-    simp only [subformulas, Finset.mem_singleton] at h2; subst h2; exact h1
-  | imp P Q ihP ihQ =>
-    simp only [subformulas, Finset.mem_insert, Finset.mem_union] at h2
-    rcases h2 with rfl | hP | hQ
-    · exact h1
-    · exact Finset.mem_insert.mpr (Or.inr (Finset.mem_union.mpr (Or.inl (ihP hP))))
-    · exact Finset.mem_insert.mpr (Or.inr (Finset.mem_union.mpr (Or.inr (ihQ hQ))))
-  | and P Q ihP ihQ =>
-    simp only [subformulas, Finset.mem_insert, Finset.mem_union] at h2
-    rcases h2 with rfl | hP | hQ
-    · exact h1
-    · exact Finset.mem_insert.mpr (Or.inr (Finset.mem_union.mpr (Or.inl (ihP hP))))
-    · exact Finset.mem_insert.mpr (Or.inr (Finset.mem_union.mpr (Or.inr (ihQ hQ))))
-  | or P Q ihP ihQ =>
-    simp only [subformulas, Finset.mem_insert, Finset.mem_union] at h2
-    rcases h2 with rfl | hP | hQ
-    · exact h1
-    · exact Finset.mem_insert.mpr (Or.inr (Finset.mem_union.mpr (Or.inl (ihP hP))))
-    · exact Finset.mem_insert.mpr (Or.inr (Finset.mem_union.mpr (Or.inr (ihQ hQ))))
-
-/-- Left component of a conjunction is a subformula of the conjunction. -/
-theorem Proposition.IsSubformula.and_left {A B : Proposition Atom} :
-    A.IsSubformula (A.and B) := by
-  simp only [IsSubformula, subformulas, Finset.mem_insert, Finset.mem_union]
-  right; left; exact self_mem_subformulas A
-
-/-- Right component of a conjunction is a subformula of the conjunction. -/
-theorem Proposition.IsSubformula.and_right {A B : Proposition Atom} :
-    B.IsSubformula (A.and B) := by
-  simp only [IsSubformula, subformulas, Finset.mem_insert, Finset.mem_union]
-  right; right; exact self_mem_subformulas B
-
-/-- Left component of a disjunction is a subformula of the disjunction. -/
-theorem Proposition.IsSubformula.or_left {A B : Proposition Atom} :
-    A.IsSubformula (A.or B) := by
-  simp only [IsSubformula, subformulas, Finset.mem_insert, Finset.mem_union]
-  right; left; exact self_mem_subformulas A
-
-/-- Right component of a disjunction is a subformula of the disjunction. -/
-theorem Proposition.IsSubformula.or_right {A B : Proposition Atom} :
-    B.IsSubformula (A.or B) := by
-  simp only [IsSubformula, subformulas, Finset.mem_insert, Finset.mem_union]
-  right; right; exact self_mem_subformulas B
-
-/-- Antecedent of an implication is a subformula of the implication. -/
-theorem Proposition.IsSubformula.imp_left {A B : Proposition Atom} :
-    A.IsSubformula (A.imp B) := by
-  simp only [IsSubformula, subformulas, Finset.mem_insert, Finset.mem_union]
-  right; left; exact self_mem_subformulas A
-
-/-- Consequent of an implication is a subformula of the implication. -/
-theorem Proposition.IsSubformula.imp_right {A B : Proposition Atom} :
-    B.IsSubformula (A.imp B) := by
-  simp only [IsSubformula, subformulas, Finset.mem_insert, Finset.mem_union]
-  right; right; exact self_mem_subformulas B
-
-/-- The complexity (size) of a proposition. Atoms and `⊥` have complexity 0;
-connectives add 1 plus the sum of their children's complexities. -/
-def Proposition.complexity : Proposition Atom → Nat
-  | .atom _ => 0
-  | .bot => 0
-  | .imp A B => 1 + A.complexity + B.complexity
-  | .and A B => 1 + A.complexity + B.complexity
-  | .or A B => 1 + A.complexity + B.complexity
 
 /-! ## Derivation Definitions -/
 

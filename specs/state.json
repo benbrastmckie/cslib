@@ -2269,16 +2269,17 @@
     {
       "project_number": 397,
       "project_name": "repair_main_barrel_build_green",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Repair main barrel build to green (subformula dedup + Normalization/Termination fallout)",
       "description": "Main never built green as a whole; the long-standing Modal/Tableau/Soundness red masked a chain of barrel-link breakages (errors only surface when all modules are imported together by Cslib.lean). Two safe fixes already committed (cc5a0c04): tableau-barrel module headers + temporary stub of the Soundness import. REMAINING: (1) Dedup the duplicate definitions of Proposition.subformulas / IsSubformula / self_mem_subformulas / IsSubformula.{refl,trans,and_left,and_right,or_left,or_right,imp_left,imp_right} / complexity, which are byte-identical in BOTH Cslib/Logics/Propositional/Subformula.lean (canonical, fuller \u2014 also has vars/Finset.vars) AND Cslib/Logics/Propositional/NaturalDeduction/Normalization/Basic.lean. Canonicalize to Subformula.lean: add `public import Cslib.Logics.Propositional.Subformula` to Normalization/Basic.lean and delete its duplicated `## Subformula Infrastructure` block (subformulas through complexity, ~lines 43-140), keeping the `## Derivation Definitions` onward. (2) Repair the fallout in Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean: importing Subformula.lean brings its @[simp] lemmas (complexity_imp/and/or/atom/bot, vars_*) into scope, breaking two `decreasing_by`/`apply` unifications (~lines 1617, 1664) and possibly the 2 pre-existing parked sorries. Fix by making those termination proofs robust to the simp set (prefer `simp only [...]` with explicit lemmas). (3) Then iterate `lake build` to FULL green, discovering and fixing any further barrel-link conflicts beyond Termination (depth unknown). Out of scope: re-enabling Modal/Tableau/Soundness (owned by tasks 299/364) \u2014 leave it stubbed. Verify: full `lake build` green with Soundness still stubbed. Overlaps task 388 (termination cleanup). Context: this was uncovered while preparing to merge worktree orchestrate-369-374-317-375-373-382 into main; that merge is blocked on main being green.",
       "created": "2026-06-28T15:37:28Z",
-      "last_updated": "2026-06-28T15:37:28Z",
+      "last_updated": "2026-06-28T17:35:22Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782661048_2ecfd1_397",
-      "dependencies": []
+      "dependencies": [],
+      "completion_summary": "Subformula dedup (canonicalized to Subformula.lean) + 2 Termination decreasing_by fixes; full lake build green (Modal Soundness still stubbed pending 364/384 merge)."
     },
     {
       "project_number": 398,

@@ -11,9 +11,9 @@ next_project_number: 402
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,299,301,321,364,369,373,374,382,384,385,386,387,388,389,391,393,394,395,396,397,400,401 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,317,360,390,392,398 | 36,37,180,299,364,369,387,397 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
-| 3 | 41,275,370,375,399 | 39,40,317,360,398 | Foundations, Propositional Logic |
+| 1 | 36,37,180,226,241,278,299,301,321,364,369,373,374,382,384,385,386,387,388,389,391,393,394,395,396,398,400,401 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,317,360,390,392,399 | 36,37,180,299,364,369,387,398 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 3 | 41,275,370,375 | 39,40,317,360 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -76,9 +76,8 @@ next_project_number: 402
 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
 394 [NOT STARTED] — Tier-3. Delete Foundations/Logic/Tableau/PropositionalTableau.lea
 395 [NOT STARTED] — META / coordination task. PRECONDITION: do NOT start until ALL fe
-397 [NOT STARTED] — Main never built green as a whole; the long-standing Modal/Tablea
-  └─ 398 [NOT STARTED] — DESIGN SETTLED (CSLib Zulip 'Propositional Logic' thread, Waring'
-    └─ 399 [NOT STARTED] — Update PR #648 (feat/propositional-v2) following Thomas Waring's 
+398 [NOT STARTED] — DESIGN SETTLED (CSLib Zulip 'Propositional Logic' thread, Waring'
+  └─ 399 [NOT STARTED] — Update PR #648 (feat/propositional-v2) following Thomas Waring's 
 400 [NOT STARTED] — Waring's closing message (Zulip thread 606970606) flagged connect
 401 [NOT STARTED] — From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portab
 
@@ -121,7 +120,7 @@ next_project_number: 402
 ---
 
 ### 397. Repair main barrel build to green (subformula dedup + Normalization/Termination fallout)
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 

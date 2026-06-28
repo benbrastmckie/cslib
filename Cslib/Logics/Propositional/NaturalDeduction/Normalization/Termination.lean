@@ -1614,7 +1614,7 @@ private def Theory.Derivation.snImpEForm {G : Ctx Atom} {A B : Proposition Atom}
       simp only [isStronglyNormal, Bool.and_eq_true]; exact ⟨hf, ha⟩⟩
   termination_by ((A → B).complexity, 0, sizeOf f)
   decreasing_by
-    all_goals (simp_wf; first | (left; simp [Proposition.complexity]; omega) | (right; omega))
+    all_goals (simp_wf; first | (left; omega) | (right; omega))
 
 /-- L4: smart disjunction eliminator. Measure: ((A∨B).complexity, 0, sizeOf D). -/
 private def Theory.Derivation.snOrEForm {G : Ctx Atom} {A B C : Proposition Atom}
@@ -1661,7 +1661,7 @@ private def Theory.Derivation.snOrEForm {G : Ctx Atom} {A B C : Proposition Atom
       simp only [isStronglyNormal, Bool.and_eq_true] at hD ⊢; exact ⟨⟨hD, hDA⟩, hDB⟩⟩
   termination_by ((A ∨ B).complexity, 0, sizeOf D)
   decreasing_by
-    all_goals (simp_wf; first | (left; simp [Proposition.complexity]; omega) | (right; omega))
+    all_goals (simp_wf; first | (left; omega) | (right; omega))
 
 /-- L5: substitution-normalization. Measure: `(P.complexity, 1, sizeOf body)`.
 

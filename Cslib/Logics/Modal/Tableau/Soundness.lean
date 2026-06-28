@@ -933,8 +933,9 @@ theorem modalStepBranch_preserves_sat
       | box φ =>
         -- F(□φ): boxNeg rule → linear [F(φ)@w', boxProps, diaNegProps], newAcc = acc.addEdge lbl w'
         -- w' = modalNextWorld b
-        simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+        simp only [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
           modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+          Option.getD_some, Option.getD_none, Bool.false_eq_true, if_false,
           Option.some.injEq, Prod.mk.injEq] at hsf
         obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
         subst hnewBs hnewAcc
@@ -967,7 +968,7 @@ theorem modalStepBranch_preserves_sat
                 if b.any (· == prop) then none else some prop
               | _ => none
             else none
-        refine ⟨(witness :: boxProps ++ diaNegProps) ++ b, by simp,
+        refine ⟨(witness :: boxProps ++ diaNegProps) ++ b, List.mem_cons_self,
           W, m, f', ?_, ?_⟩
         · -- Show newAcc' = acc.addEdge lbl w' is respected by (m, f')
           intro u v hedge
@@ -979,169 +980,148 @@ theorem modalStepBranch_preserves_sat
             obtain ⟨rfl, rfl⟩ := hedge
             -- f' lbl = f lbl (lbl < w' by freshness, so lbl ≠ w')
             -- f' w' = ww
-            have hlbl_ne : lbl ≠ w' := by
-              have := modalNextWorld_gt b ⟨.neg, .box φ, lbl⟩ hsfmem
-              simp only [w']
-              omega
-            simp only [f', if_neg hlbl_ne, if_pos rfl]
+            have hlbl_ne : lbl ≠ w' :=
+              Nat.ne_of_lt (modalNextWorld_gt b ⟨.neg, .box φ, lbl⟩ hsfmem)
+            rw [show f' lbl = f lbl from if_neg hlbl_ne,
+              show f' w' = ww from if_pos rfl]
             exact hwwr
           · -- Old edge in acc
-            simp only [Accessibility.hasEdge] at hedge
             -- f' u = f u if u ≠ w' and f' v = f v if v ≠ w'
             have huw' : u ≠ w' := by
               intro heq
-              subst heq
-              -- w' cannot appear in acc.edges (freshness invariant)
-              have := hInv u v (by simp [Accessibility.hasEdge, hedge])
-              simp only [w'] at this
-              have hlt := this.2
-              exact Nat.lt_irrefl _ hlt
+              have hfresh := (hInv u v hedge).1
+              rw [heq] at hfresh
+              simp only [w'] at hfresh
+              exact Nat.lt_irrefl _ hfresh
             have hvw' : v ≠ w' := by
               intro heq
-              subst heq
-              have := hInv u v (by simp [Accessibility.hasEdge, hedge])
-              simp only [w'] at this
-              have hlt := this.2
-              exact Nat.lt_irrefl _ hlt
+              have hfresh := (hInv u v hedge).2
+              rw [heq] at hfresh
+              simp only [w'] at hfresh
+              exact Nat.lt_irrefl _ hfresh
             simp only [f', if_neg huw', if_neg hvw']
-            exact hacc u v (by simp [Accessibility.hasEdge, hedge])
+            exact hacc u v hedge
         · -- Show (witness :: boxProps ++ diaNegProps) ++ b is satisfied by (m, f')
           intro sf' hmem'
           simp only [List.mem_append, List.mem_cons] at hmem'
-          rcases hmem' with (rfl | hmem_box | hmem_old)
+          rcases hmem' with ((rfl | hmem_bp) | hmem_dn) | hmem_old
           · -- sf' = witness = ⟨.neg, φ, w'⟩
             constructor
             · intro h; simp at h
             · intro _
               -- Need ¬Satisfies m (f' w') φ = ¬Satisfies m ww φ = hwwφ
-              simp only [f', if_pos rfl]
+              simp only [witness, f', if_pos rfl]
               exact hwwφ
-          · -- sf' ∈ boxProps ++ diaNegProps
-            simp only [List.mem_append] at hmem_box
-            rcases hmem_box with hmem_bp | hmem_dn
-            · -- sf' ∈ boxProps: sf' = ⟨.pos, ψ, w'⟩ where T(□ψ)@lbl ∈ b
-              simp only [boxProps, List.mem_filterMap] at hmem_bp
-              obtain ⟨⟨ψ, src⟩, hpairMem, hsf'_from⟩ := hmem_bp
-              split_ifs at hsf'_from with hsrceq
-              · split_ifs at hsf'_from with hinb
-                · exact absurd hsf'_from (by simp)
-                · simp only [Option.some.injEq] at hsf'_from
-                  subst hsf'_from
-                  -- sf' = ⟨.pos, ψ, w'⟩
-                  -- ⟨.pos, ψ, src⟩ ∈ b (via boxPositivesOf)... wait, hpairMem from boxPositivesOf
-                  -- boxPositivesOf b gives (ψ, sf.label) for T(□ψ)@sf.label ∈ b
-                  -- Actually hpairMem : (ψ, src) ∈ boxPositivesOf b
-                  simp only [boxPositivesOf, List.mem_filterMap] at hpairMem
-                  obtain ⟨bsf, hbsfMem, hbsfbox⟩ := hpairMem
-                  simp only [beq_iff_eq] at hbsfbox
-                  split_ifs at hbsfbox with hbsfpos
-                  · cases hbsfformula : bsf.formula with
-                    | box ψ' =>
-                      simp only [hbsfformula] at hbsfbox
-                      simp only [Option.some.injEq, Prod.mk.injEq] at hbsfbox
-                      obtain ⟨rfl, rfl⟩ := hbsfbox
-                      simp only [beq_iff_eq] at hsrceq
-                      subst hsrceq
-                      -- bsf = ⟨.pos, □ψ, lbl⟩ ∈ b
-                      have hbsfpos' : bsf.sign = .pos := by
-                        cases bsf.sign with
-                        | pos => rfl
-                        | neg => simp [Sign.isPos] at hbsfpos
-                      have hbsfsf : bsf = ⟨.pos, .box ψ, lbl⟩ := by
-                        cases bsf; simp_all
-                      have hbox_sat := (hb bsf hbsfMem).1 hbsfpos'
-                      rw [hbsfsf] at hbox_sat
-                      simp only [Satisfies] at hbox_sat
-                      -- hbox_sat : ∀ u, m.r (f lbl) u → Satisfies m u ψ
-                      -- f' w' = ww and m.r (f lbl) ww = hwwr
-                      constructor
-                      · intro _
-                        have hlbl_ne : lbl ≠ w' := by
-                          have := modalNextWorld_gt b ⟨.neg, .box φ, lbl⟩ hsfmem
-                          simp only [w']; omega
-                        simp only [f', if_pos rfl, if_neg hlbl_ne]
-                        exact hbox_sat ww hwwr
-                      · intro h; simp at h
-                    | _ => simp at hbsfbox
-                  · exact absurd hbsfbox (by simp)
+          · -- sf' ∈ boxProps: sf' = ⟨.pos, ψ, w'⟩ where T(□ψ)@lbl ∈ b
+            simp only [boxProps, List.mem_filterMap] at hmem_bp
+            obtain ⟨⟨ψ, src⟩, hpairMem, hsf'_from⟩ := hmem_bp
+            split_ifs at hsf'_from with hsrceq
+            · split_ifs at hsf'_from with hinb
               · exact absurd hsf'_from (by simp)
-            · -- sf' ∈ diaNegProps: sf' = ⟨.neg, ψ, w'⟩ where F(◇ψ)@lbl = F((□(ψ→⊥))→⊥)@lbl ∈ b
-              simp only [diaNegProps, List.mem_filterMap] at hmem_dn
-              obtain ⟨bsf, hbsfMem, hbsfprop⟩ := hmem_dn
-              simp only [beq_iff_eq] at hbsfprop
-              split_ifs at hbsfprop with hbsfsign
-              · cases hbsfformula : bsf.formula with
-                | imp bx bt =>
-                  cases bx with
-                  | box inner =>
-                    cases inner with
-                    | imp ψ bott =>
-                      cases bott with
+              · simp only [Option.some.injEq] at hsf'_from
+                subst hsf'_from
+                -- sf' = ⟨.pos, ψ, w'⟩
+                -- ⟨.pos, ψ, src⟩ ∈ b (via boxPositivesOf)... wait, hpairMem from boxPositivesOf
+                -- boxPositivesOf b gives (ψ, sf.label) for T(□ψ)@sf.label ∈ b
+                -- Actually hpairMem : (ψ, src) ∈ boxPositivesOf b
+                simp only [boxPositivesOf, List.mem_filterMap] at hpairMem
+                obtain ⟨bsf, hbsfMem, hbsfbox⟩ := hpairMem
+                simp only [beq_iff_eq] at hbsfbox
+                split_ifs at hbsfbox with hbsfpos
+                · cases hbsfformula : bsf.formula with
+                  | box ψ' =>
+                    simp only [hbsfformula] at hbsfbox
+                    simp only [Option.some.injEq, Prod.mk.injEq] at hbsfbox
+                    obtain ⟨rfl, rfl⟩ := hbsfbox
+                    simp only [beq_iff_eq] at hsrceq
+                    subst hsrceq
+                    -- bsf = ⟨.pos, □ψ, lbl⟩ ∈ b
+                    have hbsfpos' : bsf.sign = .pos := by
+                      cases bsf.sign with
+                      | pos => rfl
+                      | neg => simp [Sign.isPos] at hbsfpos
+                    have hbsfsf : bsf = ⟨.pos, .box ψ, lbl⟩ := by
+                      cases bsf; simp_all
+                    have hbox_sat := (hb bsf hbsfMem).1 hbsfpos'
+                    rw [hbsfsf] at hbox_sat
+                    simp only [Satisfies] at hbox_sat
+                    -- hbox_sat : ∀ u, m.r (f lbl) u → Satisfies m u ψ
+                    -- f' w' = ww and m.r (f lbl) ww = hwwr
+                    constructor
+                    · intro _
+                      have hlbl_ne : lbl ≠ w' :=
+                        Nat.ne_of_lt (modalNextWorld_gt b ⟨.neg, .box φ, lbl⟩ hsfmem)
+                      simp only [f', if_pos rfl, if_neg hlbl_ne]
+                      exact hbox_sat ww hwwr
+                    · intro h; simp at h
+                  | _ => simp at hbsfbox
+                · exact absurd hbsfbox (by simp)
+            · exact absurd hsf'_from (by simp)
+          · -- sf' ∈ diaNegProps: sf' = ⟨.neg, ψ, w'⟩ where F(◇ψ)@lbl = F((□(ψ→⊥))→⊥)@lbl ∈ b
+            simp only [diaNegProps, List.mem_filterMap] at hmem_dn
+            obtain ⟨bsf, hbsfMem, hbsfprop⟩ := hmem_dn
+            simp only [beq_iff_eq] at hbsfprop
+            split_ifs at hbsfprop with hbsfsign
+            · cases hbsfformula : bsf.formula with
+              | imp bx bt =>
+                cases bx with
+                | box inner =>
+                  cases inner with
+                  | imp ψ bott =>
+                    cases bott with
+                    | bot =>
+                      cases bt with
                       | bot =>
-                        cases bt with
-                        | bot =>
-                          -- bsf.formula = .imp (.box (.imp ψ .bot)) .bot = F(◇ψ)
-                          split_ifs at hbsfprop with hinb
-                          · exact absurd hbsfprop (by simp)
-                          · simp only [Option.some.injEq] at hbsfprop
-                            subst hbsfprop
-                            -- sf' = ⟨.neg, ψ, w'⟩
-                            -- bsf = ⟨.neg, ◇ψ, lbl⟩ ∈ b
-                            have hbsfneg : bsf.sign = .neg := by
-                              cases bsf.sign with
-                              | neg => rfl
-                              | pos =>
-                                simp only [Sign.isPos, Bool.true_eq_false] at hbsfsign
-                            have hbsf_formula : bsf.formula = .imp (.box (.imp ψ .bot)) .bot := hbsfformula
-                            have hbsf_lbl : bsf.label = lbl := by
-                              simp only [beq_iff_eq] at hbsfprop
-                              cases bsf; simp_all [beq_iff_eq]
-                            have hdiaNeg := (hb bsf hbsfMem).2 hbsfneg
-                            rw [hbsf_formula] at hdiaNeg
-                            -- hdiaNeg : ¬Satisfies m (f bsf.label) (◇ψ)
-                            -- = ¬∃ u, m.r (f bsf.label) u ∧ Satisfies m u ψ
-                            -- = ∀ u, m.r (f bsf.label) u → ¬Satisfies m u ψ
-                            rw [hbsf_lbl] at hdiaNeg
-                            simp only [Satisfies] at hdiaNeg
+                        -- bsf.formula = .imp (.box (.imp ψ .bot)) .bot = F(◇ψ)
+                        split_ifs at hbsfprop with hinb
+                        · exact absurd hbsfprop (by simp)
+                        · simp only [Option.some.injEq] at hbsfprop
+                          subst hbsfprop
+                          -- sf' = ⟨.neg, ψ, w'⟩
+                          -- bsf = ⟨.neg, ◇ψ, lbl⟩ ∈ b
+                          have hbsfneg : bsf.sign = .neg := by
+                            cases bsf.sign with
+                            | neg => rfl
+                            | pos =>
+                              simp only [Sign.isPos, Bool.true_eq_false] at hbsfsign
+                          have hbsf_formula : bsf.formula = .imp (.box (.imp ψ .bot)) .bot := hbsfformula
+                          have hbsf_lbl : bsf.label = lbl := by
+                            simp only [beq_iff_eq] at hbsfprop
+                            cases bsf; simp_all [beq_iff_eq]
+                          have hdiaNeg := (hb bsf hbsfMem).2 hbsfneg
+                          rw [hbsf_formula] at hdiaNeg
+                          -- hdiaNeg : ¬Satisfies m (f bsf.label) (◇ψ)
+                          -- = ¬∃ u, m.r (f bsf.label) u ∧ Satisfies m u ψ
+                          -- = ∀ u, m.r (f bsf.label) u → ¬Satisfies m u ψ
+                          rw [hbsf_lbl] at hdiaNeg
+                          simp only [Satisfies] at hdiaNeg
+                          -- hdiaNeg : (∀ u, m.r (f lbl) u → Satisfies m u ψ) → False
+                          -- i.e., ∃ u, m.r (f lbl) u ∧ ¬Satisfies m u ψ ... no wait
+                          -- Satisfies m (f lbl) (.imp (.box (.imp ψ .bot)) .bot) = ¬Satisfies m (f lbl) (□(ψ→⊥))
+                          -- = ¬(∀ u, m.r (f lbl) u → (Satisfies m u ψ → False))
+                          -- hdiaNeg says this is False, i.e. ∀ u, m.r (f lbl) u → ¬Satisfies m u ψ
+                          -- We need ¬Satisfies m (f' w') ψ = ¬Satisfies m ww ψ
+                          constructor
+                          · intro h; simp at h
+                          · intro _
+                            have hlbl_ne : lbl ≠ w' :=
+                              Nat.ne_of_lt (modalNextWorld_gt b ⟨.neg, .box φ, lbl⟩ hsfmem)
+                            simp only [f', if_pos rfl, if_neg hlbl_ne]
                             -- hdiaNeg : (∀ u, m.r (f lbl) u → Satisfies m u ψ) → False
-                            -- i.e., ∃ u, m.r (f lbl) u ∧ ¬Satisfies m u ψ ... no wait
-                            -- Satisfies m (f lbl) (.imp (.box (.imp ψ .bot)) .bot) = ¬Satisfies m (f lbl) (□(ψ→⊥))
-                            -- = ¬(∀ u, m.r (f lbl) u → (Satisfies m u ψ → False))
-                            -- hdiaNeg says this is False, i.e. ∀ u, m.r (f lbl) u → ¬Satisfies m u ψ
-                            -- We need ¬Satisfies m (f' w') ψ = ¬Satisfies m ww ψ
-                            constructor
-                            · intro h; simp at h
-                            · intro _
-                              have hlbl_ne : lbl ≠ w' := by
-                                have := modalNextWorld_gt b ⟨.neg, .box φ, lbl⟩ hsfmem
-                                simp only [w']; omega
-                              simp only [f', if_pos rfl, if_neg hlbl_ne]
-                              -- hdiaNeg : (∀ u, m.r (f lbl) u → Satisfies m u ψ) → False
-                              -- hwwr : m.r (f lbl) ww
-                              -- So ¬Satisfies m ww ψ follows from hdiaNeg
-                              intro hψ
-                              exact hdiaNeg (fun u hur => by
-                                by_contra hnu
-                                push_neg at hnu
-                                exact hdiaNeg (fun u' hur' => by
-                                  rcases Classical.em (Satisfies m u' ψ) with h | h
-                                  · exact h
-                                  · exact absurd (hdiaNeg (fun u'' hur'' => by
-                                      rcases Classical.em (Satisfies m u'' ψ) with h2 | h2
-                                      · exact h2
-                                      · simp only [not_exists, not_and] at hdiaNeg
-                                        exact absurd (hdiaNeg fun _ _ => id) (by push_neg; exact ⟨ww, hwwr, hψ⟩))) id))
-                        | _ => exact absurd hbsfprop (by simp)
+                            -- hwwr : m.r (f lbl) ww
+                            -- So ¬Satisfies m ww ψ follows from hdiaNeg
+                            intro hψ
+                            exact hdiaNeg (fun hall => hall ww hwwr hψ)
                       | _ => exact absurd hbsfprop (by simp)
                     | _ => exact absurd hbsfprop (by simp)
                   | _ => exact absurd hbsfprop (by simp)
                 | _ => exact absurd hbsfprop (by simp)
-              · exact absurd hbsfprop (by simp)
+              | _ => exact absurd hbsfprop (by simp)
+            · exact absurd hbsfprop (by simp)
           · -- sf' ∈ b: use hb with f' which agrees with f on old worlds
             -- sf'.label ≠ w' because sf'.label < w' by freshness
-            have hlabel_ne : sf'.label ≠ w' := by
-              have := modalNextWorld_gt b sf' hmem_old
-              simp only [w']; omega
+            have hlabel_ne : sf'.label ≠ w' :=
+              Nat.ne_of_lt (modalNextWorld_gt b sf' hmem_old)
             have hf'_eq : f' sf'.label = f sf'.label := by
               simp only [f', if_neg hlabel_ne]
             constructor

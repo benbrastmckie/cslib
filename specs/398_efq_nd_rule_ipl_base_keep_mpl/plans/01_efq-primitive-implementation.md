@@ -101,7 +101,7 @@ Phases within the same wave can execute in parallel. Phases 2, 3, and 4 edit dis
 
 ---
 
-### Phase 2: ND↔Hilbert bridge + admissibility [NOT STARTED]
+### Phase 2: ND↔Hilbert bridge + admissibility [COMPLETED]
 
 **Goal**: Add the `efq` arm to `ndToHilbert` and confirm `hilbert_iff_nd*`, MPL correspondence, Glivenko, and `AxiomAdmissibility` all stay green with no proof edits.
 

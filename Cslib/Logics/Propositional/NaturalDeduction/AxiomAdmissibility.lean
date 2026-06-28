@@ -76,6 +76,7 @@ def Theory.Derivation.replaceAxioms {T T' : Theory Atom}
     orE G (d.replaceAxioms h) (dA.replaceAxioms h) (dB.replaceAxioms h)
   | impI Γ d => impI Γ (d.replaceAxioms h)
   | impE d₁ d₂ => impE (d₁.replaceAxioms h) (d₂.replaceAxioms h)
+  | efq d => impE ((h (IsIntuitionistic.efq _)).weakCtx (Finset.empty_subset _)) (d.replaceAxioms h)
 
 /-- Prop-level wrapper for `replaceAxioms`: transfer `DerivableIn T (Γ ⊢ A)` to
 `DerivableIn T' (Γ ⊢ A)` when all of T's axioms are derivable from T'. -/

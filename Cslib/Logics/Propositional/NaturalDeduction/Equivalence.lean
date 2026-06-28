@@ -385,6 +385,13 @@ noncomputable def ndToHilbert
       (fun x hx => finset_insert_toList_mem_cons A Γ' hx)
     -- Apply deduction theorem to get Γ'.toList ⊢ A → B
     exact deductionTheorem inst.h_K inst.h_S Γ'.toList A B ih'
+  | Theory.Derivation.efq d => by
+    -- d : Derivation Γ ⊥; [IsIntuitionistic (AxiomTheory Axioms)] recovered from constructor
+    -- Use modus ponens: efq φ gives (⊥ → φ) ∈ theory, then apply to ih : ⊥ derivation
+    have ih := ndToHilbert d
+    have hinst : Theory.IsIntuitionistic (AxiomTheory Axioms) := inferInstance
+    have hax := mem_axiomTheory.mp (hinst.efq φ)
+    exact .modus_ponens Γ.toList ⊥ φ (.ax Γ.toList _ hax) ih
 
 /-- Prop-level wrapper: if `φ` is derivable in ND under `AxiomTheory Axioms` with
 context `Γ`, then `Γ.toList ⊢ φ` in the Hilbert system. -/

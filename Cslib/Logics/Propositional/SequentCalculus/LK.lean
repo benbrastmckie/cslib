@@ -14,6 +14,7 @@ public import Cslib.Logics.Propositional.SequentCalculus.LK.Soundness
 public import Cslib.Logics.Propositional.SequentCalculus.LK.SubformulaProperty
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Decidability
 public import Cslib.Logics.Propositional.SequentCalculus.LK.CutFreeCompleteness
+public import Cslib.Logics.Propositional.SequentCalculus.LK.Interpolation
 
 /-! # LK Classical Propositional Sequent Calculus
 

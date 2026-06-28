@@ -253,7 +253,7 @@ close, mark `[BLOCKED]` with the exact `lean_goal` — never `sorry`-defer.
 
 ---
 
-### Phase B: LK Craig corollary + public `LKProof.interpolation` + barrel [NOT STARTED]
+### Phase B: LK Craig corollary + public `LKProof.interpolation` + barrel [COMPLETED]
 
 **Goal**: Derive the implication-form Craig corollary and a `cutElim`-fed public theorem; wire the
 `LK.lean` barrel.

@@ -793,6 +793,77 @@ private lemma maeharaCore {seq : LKSequent Atom} (d : LKProof seq) (hcf : CutFre
         -- Permute ant to insert A (insert I Γ₂); apply impR (A→B ∈ Δ₂) to get insert I Γ₂ ⊢ₛ Δ₂.
         exact ⟨LKProof.impR A B hAB₂ (d_right.mono hperm (Finset.Subset.refl _))⟩
 
+/-! ## LK Craig Interpolation Corollary -/
+
+/-- **LK Craig Interpolation** (corollary): From any LK proof of `∅ ⊢ₛ {A → B}`, there exists
+an interpolant `I` such that:
+1. `I.vars ⊆ A.vars ∩ B.vars` (variable constraint),
+2. `∅ ⊢ₛ {A → I}` (left half-implication), and
+3. `∅ ⊢ₛ {I → B}` (right half-implication).
+
+Uses `maeharaCore` with the cover partition `Γ₁ = {A}`, `Γ₂ = ∅`, `Δ₁ = ∅`, `Δ₂ = {B}`,
+applied to a cut-free proof of `{A} ⊢ₛ {B}` extracted from `d` via `cutElim`.
+
+Reference: [TroelstraSchwichtenberg2000] §4; [NegriVonPlato2001] §3.3. -/
+private lemma lkCraigInterpolation {A B : Proposition Atom}
+    (d : LKProof ((∅ : Finset (Proposition Atom)) ⊢ₛ insert (A → B) ∅)) :
+    ∃ I : Proposition Atom,
+      I.vars ⊆ A.vars ∩ B.vars ∧
+      Nonempty (LKProof ((∅ : Finset (Proposition Atom)) ⊢ₛ insert (A → I) ∅)) ∧
+      Nonempty (LKProof ((∅ : Finset (Proposition Atom)) ⊢ₛ insert (I → B) ∅)) := by
+  -- Build a (cut-using) proof of {A} ⊢ₛ {B} from d via cut on A→B and impL.
+  have d_AB : LKProof (insert A ∅ ⊢ₛ insert B ∅) :=
+    LKProof.cut (A → B)
+      -- left prem: {A} ⊢ₛ {A→B, B} via weakening d to the larger contexts
+      (d.mono (Finset.empty_subset _)
+        (Finset.insert_subset_insert (A → B) (Finset.empty_subset _)))
+      -- right prem: {A, A→B} ⊢ₛ {B} via impL A B
+      (LKProof.impL A B (Finset.mem_insert_self _ _)
+        -- {A, A→B} ⊢ₛ {A, B} via ax A
+        (LKProof.ax A (insert (A → B) (insert A ∅)) (insert A (insert B ∅))
+          (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
+          (Finset.mem_insert_self _ _))
+        -- {B, A, A→B} ⊢ₛ {B} via ax B
+        (LKProof.ax B (insert B (insert (A → B) (insert A ∅))) (insert B ∅)
+          (Finset.mem_insert_self _ _)
+          (Finset.mem_insert_self _ _)))
+  -- Apply cut elimination to get a cut-free proof of {A} ⊢ₛ {B}.
+  obtain ⟨cfp⟩ := d_AB.cutElim
+  -- Apply maeharaCore with Γ₁ = {A}, Γ₂ = ∅, Δ₁ = ∅, Δ₂ = {B}.
+  obtain ⟨I, h_vars, ⟨d_left⟩, ⟨d_right⟩⟩ :=
+    maeharaCore cfp.1 cfp.2 (insert A ∅) ∅ ∅ (insert B ∅)
+      (Finset.union_empty _).symm
+      (Finset.empty_union _).symm
+  -- Simplify the variable bound: (insert A ∅ ∪ ∅).vars ∩ (∅ ∪ insert B ∅).vars = A.vars ∩ B.vars.
+  simp only [Finset.vars_insert, Finset.vars_empty,
+    Finset.union_empty, Finset.empty_union] at h_vars
+  refine ⟨I, h_vars, ?_, ?_⟩
+  · -- ∅ ⊢ₛ {A → I} via impR applied to d_left : {A} ⊢ₛ {I}.
+    -- Weaken succedent of d_left to insert I (insert (A → I) ∅), then apply impR.
+    exact ⟨LKProof.impR A I (Finset.mem_insert_self _ _)
+      (d_left.mono (Finset.Subset.refl _)
+        (Finset.insert_subset_insert I (Finset.empty_subset _)))⟩
+  · -- ∅ ⊢ₛ {I → B} via impR applied to d_right : {I} ⊢ₛ {B}.
+    -- Weaken succedent of d_right to insert B (insert (I → B) ∅), then apply impR.
+    exact ⟨LKProof.impR I B (Finset.mem_insert_self _ _)
+      (d_right.mono (Finset.Subset.refl _)
+        (Finset.insert_subset_insert B (Finset.empty_subset _)))⟩
+
+/-- **LK Craig Interpolation**: For any LK proof of `∅ ⊢ₛ {A → B}`, there exists an
+interpolant `I` with `I.vars ⊆ A.vars ∩ B.vars`, `∅ ⊢ₛ {A → I}`, and `∅ ⊢ₛ {I → B}`.
+
+Follows from `maeharaCore` (Maehara's method) applied via `LKProof.cutElim`
+(Gentzen's Hauptsatz).
+
+Reference: [TroelstraSchwichtenberg2000] Theorem 4.1.6; [NegriVonPlato2001] Theorem 3.3.3. -/
+theorem LKProof.interpolation {A B : Proposition Atom}
+    (d : LKProof ((∅ : Finset (Proposition Atom)) ⊢ₛ insert (A → B) ∅)) :
+    ∃ I : Proposition Atom,
+      I.vars ⊆ A.vars ∩ B.vars ∧
+      Nonempty (LKProof ((∅ : Finset (Proposition Atom)) ⊢ₛ insert (A → I) ∅)) ∧
+      Nonempty (LKProof ((∅ : Finset (Proposition Atom)) ⊢ₛ insert (I → B) ∅)) :=
+  lkCraigInterpolation d
+
 end Cslib.Logic.PL
 
 end

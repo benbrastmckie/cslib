@@ -1,29 +1,37 @@
 {
   "task_number": 364,
-  "session_id": "sess_1782606021_7d7e76",
+  "session_id": "sess_1782614477_39b09e",
   "phase": "implementing",
   "status": "partial",
-  "agent_type": "skill-orchestrate",
+  "agent_type": "skill-orchestrate (hard)",
   "target_file": "Cslib/Logics/Modal/Tableau/Soundness.lean",
-  "summary": "Phase 1 (mechanical drift sweeps) committed at 51e03e28: scoped-build errors reduced 68 -> 62, zero sorry, statements preserved. Two subsequent cslib-implementation-agent dispatches both OVERFLOWED context on this file; the second REGRESSED the file to 103 errors and was reverted to the 62-error checkpoint. The hnewBs obtain-shape cascade is the genuine blocker.",
+  "worktree": "/home/benjamin/Projects/cslib-364 (branch task-364-soundness-drift)",
+  "summary": "Root A (boxPos split_ifs drift, line 228) FIXED and committed (425c1c53): scoped build 62 -> 61, zero sorry, statements preserved. The remaining recognizer-reduction roots (negPos 275, orPos/impPos cascades, negNeg 624) were diagnosed to the definition level: they are NOT mechanical drift but a genuine reduction-order/proof-structure problem (tryAllPropRules' andOf?/orOf? are stuck on the abstract subformula `a` in `a -> bot`, so find? never reaches negPos; and orPos genuinely fires when a is itself a negation). 5 autonomous dispatches (2 prior + 3 this session) overflowed because every state-inspection surfaces the ~400-line hsf. Stopped autonomous brute-force per resource discipline.",
   "phases_completed": 1,
   "phases_total": 7,
-  "errors_current": 62,
-  "errors_baseline": 68,
+  "errors_baseline_session": 62,
+  "errors_current": 61,
+  "commits_this_session": ["425c1c53 task 364 phase 3: fix Root A boxPos split_ifs drift (line 228)"],
   "blockers": [
-    "CONTEXT OVERFLOW: cslib-implementation-agent exhausts its context window on this 947-line file (lean_goal returns very large hypothesis contexts; the scoped build emits a 1600-line error log). Two dispatches overflowed at 64 and 46 tool calls respectively, neither writing a final handoff.",
-    "REGRESSION RISK: unsupervised rewrites of the boxPos/negPos/negNeg obtain-and-simp blocks (lines 228/276/625) regressed 62 -> 103 errors (introduced Invalid-notation / Application-type-mismatch). These 3 root tactic failures drive ~46 of the 62 errors (the hnewBs cascade) and require careful, supervised re-derivation of the post-simp goal shape.",
-    "ENTANGLED CLUSTERS: the line-747 'Duplicate alternative name imp' fix and the zip block (822-828, List.mem_zip removed) are not isolated mechanical swaps; they are bound to the proof's case structure and the changed List API, so they need shape verification, not blind substitution."
+    "PROOF-STRUCTURE (not drift): the `| imp a c => cases c with | bot =>` arm handles `a -> bot` uniformly as negPos, but tryAllPropRules cannot reduce for abstract `a` (andPos/orPos precede negPos and their recognizers are stuck on `a`), AND orPos genuinely fires when a is a negation (`(x->bot)->bot = x or bot`). Needs `cases a` sub-structuring or standalone reduction lemmas, mirrored across orPos/impPos/negNeg. This is hours of genuine proof engineering.",
+    "CONTEXT-OVERFLOW (process): in-place repair of these roots requires iterating tactics against a ~400-line hsf; lean_goal/lean_multi_attempt/full build logs all surface it and overflow the agent. Single-site no-dump dispatch still overflowed (55 tool calls). In-place autonomous dispatch is the wrong tool for these roots."
   ],
   "continuation_context": {
-    "next_phase": 3,
-    "remaining_errors": 62,
-    "error_digest": "specs/364_modal_tableau_soundness_drift_repair/.error-digest.md",
-    "notes": "Resume from the 62-error checkpoint (HEAD 51e03e28). The 3 root tactic failures at 228 (boxPos), 276 (negPos), 625 (negNeg) clear ~46 cascade errors. Use the pre-computed .error-digest.md (contains the goal dumps) instead of re-running the full scoped build. This needs SUPERVISED/interactive Lean work or a per-root single-shot dispatch budget; unsupervised whole-file autonomy keeps overflowing and regressing."
+    "next_phase": 4,
+    "remaining_errors": 61,
+    "error_digest": "specs/364_modal_tableau_soundness_drift_repair/.error-digest.md (see UPDATE section at end for the sharpened, definition-grounded diagnosis)",
+    "recommended_approach": "Reduction-lemma extraction (prove small-context @[simp] lemmas that collapse tryAllPropRules on the relevant `.imp a .bot` shapes, including the orPos sub-case when a is a negation) OR restructure the `| bot =>` arm with `cases a`. This sidesteps the hsf overflow because the lemmas are proven in a tiny context. The report-02 sub-lemma extraction strategy (rejected by plan 03) is re-justified for THESE recognizer roots only.",
+    "do_not": "Do NOT re-dispatch unsupervised whole-file or in-place single-site agents that experiment with simp tweaks against hsf — confirmed to overflow 5x. Do NOT trust uncommitted edits from an overflowed agent (they have regressed before)."
   },
+  "remaining_root_sites": {
+    "T_side_pos_sign": [275, 303, 335, 362, 402],
+    "F_side_neg_sign": [624, 649, 705, 729],
+    "structural": [744],
+    "tail": [819, 820, 825, 855, 869, 872, 874, 875, 877, 879, 881, 883, 885, 891, 893, 917, 956]
+  },
+  "next_action_hint": "Pursue reduction-lemma extraction for the recognizer roots (interactive or report-02-style), starting from negPos (line 275). The boxPos Root-A idiom (flat obtain + plain simp) is committed and correct. Tail items (zip block 819-825 = List.mem_zip removed; app-type-mismatch 855/869/917; universe 956; duplicate-imp 744) are separable and mostly mechanical once the recognizer cascade clears.",
   "artifacts": [
-    "Cslib/Logics/Modal/Tableau/Soundness.lean",
-    "specs/364_modal_tableau_soundness_drift_repair/.error-digest.md"
+    {"type": "summary", "path": "specs/364_modal_tableau_soundness_drift_repair/.error-digest.md", "summary": "Definition-grounded diagnosis of recognizer-reduction roots + Root A fix record"}
   ],
-  "next_action_hint": "Interactive /implement 364 with per-root supervision, or hand the 3 obtain-shape roots (228/276/625) to a human + the error digest. Do NOT re-run unsupervised whole-file autonomous dispatch (overflows + regresses)."
+  "sorry_inventory": {"count": 0, "locations": []}
 }

@@ -1,5 +1,5 @@
 ---
-next_project_number: 398
+next_project_number: 402
 ---
 
 # TODO
@@ -11,9 +11,9 @@ next_project_number: 398
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,299,301,321,364,369,373,374,382,384,385,386,387,388,389,391,393,394,395,396,397 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,317,360,390,392 | 36,37,180,299,364,369,387 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
-| 3 | 41,275,370,375 | 39,40,317,360 | Foundations, Propositional Logic |
+| 1 | 36,37,180,226,241,278,299,301,321,364,369,373,374,382,384,385,386,387,388,389,391,393,394,395,396,397,400,401 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,317,360,390,392,398 | 36,37,180,299,364,369,387,397 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 3 | 41,275,370,375,399 | 39,40,317,360,398 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -77,8 +77,48 @@ next_project_number: 398
 394 [NOT STARTED] — Tier-3. Delete Foundations/Logic/Tableau/PropositionalTableau.lea
 395 [NOT STARTED] — META / coordination task. PRECONDITION: do NOT start until ALL fe
 397 [NOT STARTED] — Main never built green as a whole; the long-standing Modal/Tablea
+  └─ 398 [NOT STARTED] — DESIGN SETTLED (CSLib Zulip 'Propositional Logic' thread, Waring'
+    └─ 399 [NOT STARTED] — Update PR #648 (feat/propositional-v2) following Thomas Waring's 
+400 [NOT STARTED] — Waring's closing message (Zulip thread 606970606) flagged connect
+401 [NOT STARTED] — From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portab
 
 ## Tasks
+
+### 401. Expose polymorphic AlgEvaluate at Bool/Prop as the canonical computable evaluator (DPLL)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portability) and Waring's GeneralizedHeytingAlgebra-polymorphic evaluator suggestion in the Zulip thread. Surface the algebraic `AlgEvaluate` specialized at `Bool` (computable) and `Prop` as the canonical evaluation path, and reconcile with Semantics/Bool.lean (BoolEvaluate + bridge lemma + Decidable instance) so there is ONE documented story: Prop-valued `Evaluate` for uniformity with Kripke semantics; Bool/AlgEvaluate for decision procedures (DPLL/SAT). Keep `Valuation` = Atom->Prop (canonical model construction needs it). Confirm the bridge to prop_strong_soundness. Coordinate with Matthew's DPLL/Tseitin development. Lower priority; independent of the IPL-base work. Source: Zulip thread (msgs 603367168, 603520169, 603572691, 603755068, 603877853 on HasInterp/GHA).
+
+---
+
+### 400. Unbundle connective typeclasses; reconcile with fmontesi PR #607 (Waring's flag a)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Waring's closing message (Zulip thread 606970606) flagged connective typeclasses as a SEPARATE development: 'perhaps you could just leave a review on the existing PR on the subject &/or help that get merged — the design seems very similar.' The existing PR is #607 (fmontesi/connectives, 'logical operators'). Our `Cslib/Foundations/Logic/Connectives.lean` is a parallel module (tasks 260/266/340, not upstream) explicitly modeled on #607's operator-typeclass direction. WORK: review #607; map the API delta (our bundled PropositionalConnectives/ModalConnectives/TemporalConnectives/BimodalConnectives with defaulted neg/top fields vs #607's one-class-per-operator); decide align-vs-contribute; unbundle Connectives.lean from the propositional PR (task 399) so the shared connectives land via #607. Leave a human-authored review on #607 (Zulip AI policy). Independent of the IPL-base work. Source: Zulip thread 606970606.
+
+---
+
+### 399. Update PR #648 to the settled IPL-base foundation per Waring's end-of-thread recommendation
+- **Status**: [NOT STARTED]
+- **Task Type**: pr
+- **Dependencies**: Task 398
+
+**Description**: Update PR #648 (feat/propositional-v2) following Thomas Waring's closing recommendation in the CSLib Zulip 'Propositional Logic' thread (606970606). PR #648 is ~239 commits behind fork main, which is why Waring reports the restored references and Zulip-thread link are 'not in the PR' (both ARE on main at NaturalDeduction/Basic.lean:76 + the Design trade-off note). PLAN (per the user's chosen strategy): branch off upstream/main and cherry-pick the propositional FOUNDATION as a focused, reviewable commit, then update #648 to that branch. Scope of the foundation: the five-primitive `Proposition` type with primitive `⊥`; NaturalDeduction/Basic with the settled IPL-as-base design (efq as a primitive ND rule — see task 398); restored references AND the Zulip-thread link (Waring's flag (b)). EXCLUDE connective typeclasses — Waring flagged these as a SEPARATE development (task 400); do not bundle them. Keep the PR small (Matthew + Waring both asked for small pieces); later layers (Hilbert+equivalence, algebraic semantics incl. retained MPL metatheory, conservativity chains, sequent LJ/LK, tableau) follow as separate stacked PRs. Note /pr is user-only (branch creation, CI, submission); this task prepares the cherry-pick + a human-authored PR/Zulip description for the user to push (Zulip AI policy). Waring will 'review the PR properly once we've settled on the design', so this depends on task 398 (efq/IPL-base implemented). Also coordinate with PR-readiness vet tasks 386/387/389. Source: Zulip thread 606970606.
+
+---
+
+### 398. Make IPL the base propositional logic: add efq as a primitive ND rule, preserving MPL metatheory
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: Task 397
+
+**Description**: DESIGN SETTLED (CSLib Zulip 'Propositional Logic' thread, Waring's closing message 606970606 + our synthesis): take IPL as the base propositional logic FOR NOW by adding ex-falso (efq / bottom-elimination) as a PRIMITIVE constructor of the ND `Derivation` so that the primitive `⊥` constructor is actually interpreted (Waring: 'it seems very unnatural to have a constructor with no semantics'). This makes minimal logic the positive fragment IPL<→,∧,∨,⊤> conceptually, and makes the conservativity results' `IsBotFree` predicate framing more natural (Waring's point). CRITICAL CONSTRAINT (our decision, diverging from Waring's 'forget minimal logic'): PRESERVE all completed MPL work — do NOT delete it. Keep MinSoundness, MinLindenbaum, MinStrongCompleteness, MPL completeness (`MPL.hilbert_alg_complete`), the `bot_val`/Johansson-algebra parametric semantics, and the MPL/IPL conservativity chains (MplConservativeChain, ConservativeChain, ImpConservative, etc.). Minimal logic stays as a retained LAYER beneath IPL, sequenced for later fragment work, not removed. Current state: efq is a DERIVED rule (`Theory.Derivation.botE`) gated by `[IsIntuitionistic T]` in NaturalDeduction/DerivedRules.lean; ND/Basic.lean documents the trade-off. WORK: (1) add efq as a primitive ND `Derivation` constructor available at IPL/CPL strength; (2) keep the ND<->Hilbert equivalence (`hilbert_iff_nd*`) provably intact so efq-as-rule and efq-as-axiom coincide and MPL (no efq rule) still corresponds; (3) keep substitution lemmas, DecidableEq, and the `FromPropositional` embeddings green; (4) update ND/Basic.lean Implementation-notes to record IPL-as-base with MPL retained; (5) postpone general fragment design (Waring). Verify full `lake build` + downstream Modal/Temporal/Bimodal. Honor Zulip AI policy (human-authored prose). Depends on 397 (green main for verification). Source: Zulip thread 606970606.
+
+---
 
 ### 397. Repair main barrel build to green (subformula dedup + Normalization/Termination fallout)
 - **Status**: [NOT STARTED]

@@ -173,4 +173,98 @@ lemma Theory.reduceRoot_forward_some {G : Ctx Atom} {A : Proposition Atom}
     (curryHowardForward d).reduceRoot = some (curryHowardForward d') := by
   rw [reduceRoot_forward, h, Option.map_some]
 
+/-! ## Backward compatibility lemmas -/
+
+/-- Compatibility of `subsOne` with the Curry-Howard backward map:
+`curryHowardBackward (t.subsOne s) = (curryHowardBackward t).subsOne (curryHowardBackward s)`.
+Proved by unfolding `Term.subsOne` on the left-hand side and applying the
+`curryHoward_backward_forward` roundtrip identity. Dual to `subsOne_fwd`.
+See [SorensenUrzyczyn2006] §2.2. -/
+lemma Theory.subsOne_bwd {A B : Proposition Atom} {Γ : Ctx Atom}
+    (t : Theory.Term (T := T) (insert A Γ) B)
+    (s : Theory.Term (T := T) Γ A) :
+    curryHowardBackward (t.subsOne s) =
+    (curryHowardBackward t).subsOne (curryHowardBackward s) := by
+  unfold Term.subsOne
+  rw [curryHoward_backward_forward]
+
+/-- Compatibility of `weakCtx` with the Curry-Howard backward map:
+`curryHowardBackward (t.weakCtx h) = (curryHowardBackward t).weakCtx h`.
+Proved by unfolding `Term.weakCtx` on the left-hand side and applying the
+`curryHoward_backward_forward` roundtrip identity. Dual to `weakCtx_fwd`.
+See [SorensenUrzyczyn2006] §2.2. -/
+lemma Theory.weakCtx_bwd {Γ Δ : Ctx Atom} {A : Proposition Atom}
+    (t : Theory.Term (T := T) Γ A) (h : Γ ⊆ Δ) :
+    curryHowardBackward (t.weakCtx h) = (curryHowardBackward t).weakCtx h := by
+  unfold Term.weakCtx
+  rw [curryHoward_backward_forward]
+
+/-! ## Backward reduction correspondence -/
+
+/-- The Curry-Howard backward map commutes with root reduction: for any term `t`,
+the derivation `curryHowardBackward t` reduces at its root if and only if `t` does, and the
+reduction step is transported through the isomorphism. Formally,
+`(curryHowardBackward t).reduceRoot = t.reduceRoot.map curryHowardBackward`.
+Proved by `cases t` with nested `cases` on the subterm being eliminated; proper
+β-redex cases are discharged using `subsOne_bwd`, and the `app (case_ ...) s` commuting
+conversion uses `weakCtx_bwd`. See [SorensenUrzyczyn2006] §2.2. -/
+lemma Theory.reduceRoot_backward {G : Ctx Atom} {A : Proposition Atom}
+    (t : Theory.Term (T := T) G A) :
+    (curryHowardBackward t).reduceRoot = t.reduceRoot.map curryHowardBackward := by
+  cases t with
+  | const _ => rfl
+  | var _ => rfl
+  | pair _ _ _ => simp [curryHowardBackward, Term.reduceRoot, Derivation.reduceRoot]
+  | lam _ _ => simp [curryHowardBackward, Term.reduceRoot, Derivation.reduceRoot]
+  | inl _ _ => simp [curryHowardBackward, Term.reduceRoot, Derivation.reduceRoot]
+  | inr _ _ => simp [curryHowardBackward, Term.reduceRoot, Derivation.reduceRoot]
+  | fst G t =>
+      cases t <;>
+        simp [curryHowardBackward, Term.reduceRoot, Derivation.reduceRoot]
+  | snd G t =>
+      cases t <;>
+        simp [curryHowardBackward, Term.reduceRoot, Derivation.reduceRoot]
+  | app t s =>
+      cases t <;>
+        simp [curryHowardBackward, Term.reduceRoot, Derivation.reduceRoot, subsOne_bwd, weakCtx_bwd]
+  | case_ G t tA tB =>
+      cases t <;>
+        simp [curryHowardBackward, Term.reduceRoot, Derivation.reduceRoot, subsOne_bwd]
+
+/-! ## Term-level strong normalization -/
+
+/-- Strong normalization predicate on terms, defined by transport through the
+Curry-Howard isomorphism: a term is strongly normal if and only if the derivation
+it corresponds to under `curryHowardBackward` is strongly normal.
+See [Prawitz1965] Ch. IV. Note: this asserts that `t` is itself in normal form
+(single-tree predicate), not that all reduction sequences from `t` terminate. -/
+def Theory.Term.isStronglyNormal {G : Ctx Atom} {A : Proposition Atom}
+    (t : Theory.Term (T := T) G A) : Bool :=
+  (curryHowardBackward t).isStronglyNormal
+
+/-- Every term has a strongly-normal form: there exists a term `t'` with
+`t'.isStronglyNormal = true`. Proved by transporting `Derivation.exists_stronglyNormal_form`
+through the Curry-Howard isomorphism: apply it to `curryHowardBackward t` to obtain a
+strongly-normal derivation `d'`, then map forward to `curryHowardForward d'` and use the
+`curryHoward_backward_forward` roundtrip identity to verify the `isStronglyNormal` predicate.
+See [Prawitz1965] Ch. IV. -/
+theorem Theory.Term.exists_stronglyNormal_form {G : Ctx Atom} {A : Proposition Atom}
+    (t : Theory.Term (T := T) G A) :
+    ∃ t' : Theory.Term (T := T) G A, t'.isStronglyNormal = true := by
+  obtain ⟨d', hd'⟩ := (curryHowardBackward t).exists_stronglyNormal_form
+  refine ⟨curryHowardForward d', ?_⟩
+  unfold Theory.Term.isStronglyNormal
+  rw [curryHoward_backward_forward]
+  exact hd'
+
+/-- The Curry-Howard forward map preserves strong normality: a derivation `d` is
+strongly normal if and only if its corresponding term `curryHowardForward d` is.
+Proved via `curryHoward_backward_forward`, which collapses `backward ∘ forward` to the
+identity. See [SorensenUrzyczyn2006] §2.2. -/
+lemma Theory.isStronglyNormal_fwd {G : Ctx Atom} {A : Proposition Atom}
+    (d : T.Derivation G A) :
+    (curryHowardForward d).isStronglyNormal = d.isStronglyNormal := by
+  unfold Theory.Term.isStronglyNormal
+  rw [curryHoward_backward_forward]
+
 end Cslib.Logic.PL

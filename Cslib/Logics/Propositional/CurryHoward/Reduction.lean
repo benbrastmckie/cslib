@@ -132,4 +132,45 @@ def Theory.Term.reduceRoot {G : Ctx Atom} {A : Proposition Atom} :
                        (.app tB (s.weakCtx (Finset.subset_insert _ _))))
   | _ => none
 
+/-! ## Forward reduction correspondence -/
+
+/-- The Curry-Howard forward map commutes with root reduction: for any derivation `d`,
+the term `curryHowardForward d` reduces at its root if and only if `d` does, and the
+reduction step is transported through the isomorphism. Formally,
+`(curryHowardForward d).reduceRoot = d.reduceRoot.map curryHowardForward`.
+Proved by `cases d` with nested `cases` on the subderivation being eliminated; proper
+β-redex cases are discharged using `subsOne_fwd`, and the `impE (orE ...)` commuting
+conversion uses `weakCtx_fwd`. See [SorensenUrzyczyn2006] §2.2. -/
+lemma Theory.reduceRoot_forward {G : Ctx Atom} {A : Proposition Atom}
+    (d : T.Derivation G A) :
+    (curryHowardForward d).reduceRoot = d.reduceRoot.map curryHowardForward := by
+  cases d with
+  | ax _ => rfl
+  | ass _ => rfl
+  | andI _ _ _ => simp [curryHowardForward, Term.reduceRoot, Derivation.reduceRoot]
+  | orI1 _ _ => simp [curryHowardForward, Term.reduceRoot, Derivation.reduceRoot]
+  | orI2 _ _ => simp [curryHowardForward, Term.reduceRoot, Derivation.reduceRoot]
+  | impI _ _ => simp [curryHowardForward, Term.reduceRoot, Derivation.reduceRoot]
+  | andE1 G d =>
+      cases d <;>
+        simp [curryHowardForward, Term.reduceRoot, Derivation.reduceRoot]
+  | andE2 G d =>
+      cases d <;>
+        simp [curryHowardForward, Term.reduceRoot, Derivation.reduceRoot]
+  | orE G d dA dB =>
+      cases d <;>
+        simp [curryHowardForward, Term.reduceRoot, Derivation.reduceRoot, subsOne_fwd]
+  | impE d d' =>
+      cases d <;>
+        simp [curryHowardForward, Term.reduceRoot, Derivation.reduceRoot, subsOne_fwd, weakCtx_fwd]
+
+/-- Corollary of `reduceRoot_forward`: if derivation `d` reduces at its root to `d'`,
+then `curryHowardForward d` reduces at its root to `curryHowardForward d'`. This is the
+direct "forward reduction step" compatibility used to transport normalization arguments
+through the Curry-Howard isomorphism. See [SorensenUrzyczyn2006] §2.2. -/
+lemma Theory.reduceRoot_forward_some {G : Ctx Atom} {A : Proposition Atom}
+    (d d' : T.Derivation G A) (h : d.reduceRoot = some d') :
+    (curryHowardForward d).reduceRoot = some (curryHowardForward d') := by
+  rw [reduceRoot_forward, h, Option.map_some]
+
 end Cslib.Logic.PL

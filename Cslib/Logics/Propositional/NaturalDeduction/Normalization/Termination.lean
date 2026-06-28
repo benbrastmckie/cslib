@@ -95,7 +95,7 @@ theorem Theory.Derivation.conclusion_grounded_or_intro
     | orE _ _ _ _ => simp [isStronglyNormal] at hn
     | ax h => exact Or.inl (Or.inr ⟨_, h, .and_left⟩)
     | ass h => exact Or.inl (Or.inl ⟨_, h, .and_left⟩)
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+    | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
       simp only [isStronglyNormal] at hn
       rcases ih hn with hg | hintro | hore
       · exact Or.inl (liftGrounded .and_left hg)
@@ -107,7 +107,7 @@ theorem Theory.Derivation.conclusion_grounded_or_intro
     | orE _ _ _ _ => simp [isStronglyNormal] at hn
     | ax h => exact Or.inl (Or.inr ⟨_, h, .and_right⟩)
     | ass h => exact Or.inl (Or.inl ⟨_, h, .and_right⟩)
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+    | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
       simp only [isStronglyNormal] at hn
       rcases ih hn with hg | hintro | hore
       · exact Or.inl (liftGrounded .and_right hg)
@@ -156,7 +156,7 @@ theorem Theory.Derivation.conclusion_grounded_or_intro
         · exact Or.inr (Or.inr rfl)
         · exact Or.inr (Or.inr rfl)
       · exact Or.inr (Or.inr rfl)
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+    | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
       simp only [isStronglyNormal, Bool.and_eq_true] at hn
       rcases ihA hn.1.2 with hgA | hirA | hireA
       · rcases hgA with ⟨C', hC', hCS⟩ | ⟨C', hC', hCS⟩
@@ -187,12 +187,17 @@ theorem Theory.Derivation.conclusion_grounded_or_intro
     | orE _ _ _ _ => simp [isStronglyNormal] at hn
     | ax h => exact Or.inl (Or.inr ⟨_, h, .imp_right⟩)
     | ass h => exact Or.inl (Or.inl ⟨_, h, .imp_right⟩)
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+    | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
       simp only [isStronglyNormal, Bool.and_eq_true] at hn
       rcases ih hn.1 with hgD | hintroD | horeD
       · exact Or.inl (liftGrounded .imp_right hgD)
       · simp [isIntroRoot] at hintroD
       · simp [isOrERoot] at horeD
+  | @efq _ _ i _ _ =>
+    -- efq's conclusion `A` is grounded: `[IsIntuitionistic T]` provides the axiom `⊥ → A ∈ T`,
+    -- of which `A` is the consequent subformula.
+    haveI := i
+    exact Or.inl (Or.inr ⟨_, IsIntuitionistic.efq _, .imp_right⟩)
 
 /-! ## Normalization Termination Lemmas -/
 
@@ -217,34 +222,34 @@ private theorem Theory.Derivation.normalizeAux_fixpoint_aux (n : Nat) :
     intro G A d h
     have hred : d.reduceRoot = none := by
       cases d with
-      | ax _ | ass _ | andI _ _ _ | orI1 _ _ | orI2 _ _ | impI _ _ => rfl
+      | ax _ | ass _ | andI _ _ _ | orI1 _ _ | orI2 _ _ | impI _ _ | efq _ => rfl
       | andE1 _ D =>
         simp only [isStronglyNormal] at h; cases D with
         | andI _ _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
-        | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => rfl
+        | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ => rfl
       | andE2 _ D =>
         simp only [isStronglyNormal] at h; cases D with
         | andI _ _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
-        | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => rfl
+        | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ => rfl
       | orE _ D _ _ =>
         simp only [isStronglyNormal] at h; cases D with
         | orI1 _ _ | orI2 _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
-        | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => rfl
+        | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ => rfl
       | impE D _ =>
         simp only [isStronglyNormal] at h; cases D with
         | impI _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
-        | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ => rfl
+        | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ => rfl
     cases d with
     | ax _ | ass _ => simp [normalizeAux, hred]
     | andI _ D₁ D₂ =>
       simp only [isStronglyNormal, Bool.and_eq_true] at h
       simp only [normalizeAux, ihn _ h.1, ihn _ h.2, hred]
-    | orI1 _ D | orI2 _ D | impI _ D =>
+    | orI1 _ D | orI2 _ D | impI _ D | efq D =>
       simp only [isStronglyNormal] at h; simp only [normalizeAux, ihn _ h, hred]
     | andE1 _ D | andE2 _ D =>
       simp only [isStronglyNormal] at h; cases D with
       | andI _ _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
-      | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ =>
+      | ax _ | ass _ | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
         simp only [normalizeAux, ihn _ h, hred]
     | orE _ D DA DB =>
       simp only [isStronglyNormal] at h; cases D with
@@ -265,6 +270,12 @@ private theorem Theory.Derivation.normalizeAux_fixpoint_aux (n : Nat) :
         simp only [isStronglyNormal, Bool.and_eq_true] at h
         obtain ⟨⟨hD, hDA⟩, hDB⟩ := h
         simp only [normalizeAux, ihn (impE D' E') hD, ihn DA hDA, ihn DB hDB, hred]
+      | efq D' =>
+        simp only [isStronglyNormal, Bool.and_eq_true] at h
+        obtain ⟨⟨hD, hDA⟩, hDB⟩ := h
+        simp only [normalizeAux,
+          ihn (Derivation.efq D') (by simp only [isStronglyNormal]; exact hD),
+          ihn DA hDA, ihn DB hDB, hred]
     | impE D E =>
       simp only [isStronglyNormal] at h; cases D with
       | impI _ _ | orE _ _ _ _ => simp [isStronglyNormal] at h
@@ -283,6 +294,12 @@ private theorem Theory.Derivation.normalizeAux_fixpoint_aux (n : Nat) :
         simp only [isStronglyNormal, Bool.and_eq_true] at h
         obtain ⟨hD, hE⟩ := h
         simp only [normalizeAux, ihn (impE D' E') hD, ihn E hE, hred]
+      | efq D' =>
+        simp only [isStronglyNormal, Bool.and_eq_true] at h
+        obtain ⟨hD, hE⟩ := h
+        simp only [normalizeAux,
+          ihn (Derivation.efq D') (by simp only [isStronglyNormal]; exact hD),
+          ihn E hE, hred]
 
 /-- A strongly normal derivation is a fixpoint of `normalizeAux`. -/
 theorem Theory.Derivation.normalizeAux_fixpoint {G : Ctx Atom} {A : Proposition Atom}
@@ -318,6 +335,7 @@ private def Theory.Derivation.nodeCount : T.Derivation G A → Nat
   | orE _ D DA DB => 1 + D.nodeCount + DA.nodeCount + DB.nodeCount
   | impI _ D => 1 + D.nodeCount
   | impE D E => 1 + D.nodeCount + E.nodeCount
+  | efq D => 1 + D.nodeCount
 
 /-- The multiset of cut-formula complexities at beta-redex sites.
 Each beta-redex contributes the complexity of the eliminated formula to this multiset.
@@ -345,6 +363,8 @@ private def Theory.Derivation.maximalFormulas : T.Derivation G A → Multiset Na
     match D with
     | impI _ _ => {D.conclusionComplexity} + D.maximalFormulas + E.maximalFormulas
     | _ => D.maximalFormulas + E.maximalFormulas
+  -- efq has no introduction rule for ⊥, hence is never a redex: no cut formula contributed.
+  | efq D => D.maximalFormulas
 
 /-- `maximalFormulas` is invariant under weakening: it depends only on the type indices at
 beta-redex sites, never on the contexts or theory. -/
@@ -372,6 +392,7 @@ private theorem Theory.Derivation.maximalFormulas_weak {T T' : Theory Atom} {Γ 
   | impE D E ih ihE =>
     simp only [maximalFormulas] at ih ⊢
     cases D <;> simp_all [Theory.Derivation.weak, maximalFormulas, conclusionComplexity]
+  | efq D ih => simp only [Theory.Derivation.weak, maximalFormulas, ih]
 
 /-- Context weakening preserves `maximalFormulas` (corollary of `maximalFormulas_weak`). -/
 private theorem Theory.Derivation.maximalFormulas_weakCtx {Γ Δ : Ctx Atom}
@@ -737,6 +758,12 @@ private theorem Theory.Derivation.subs_maximalFormulas_mem {Γ Γ' Δ : Ctx Atom
         · exact Or.inl (by simp only [maximalFormulas, Multiset.mem_add]; exact Or.inr h')
         · exact Or.inr (Or.inl h')
         · exact Or.inr (Or.inr h')
+  | efq D ih =>
+    simp only [subs, maximalFormulas] at hk
+    rcases ih hk with h' | h' | h'
+    · exact Or.inl (by simp only [maximalFormulas]; exact h')
+    · exact Or.inr (Or.inl h')
+    · exact Or.inr (Or.inr h')
 
 /-- Specialization of `subs_maximalFormulas_mem` to single-hypothesis substitution `subsOne`.
 Every beta-redex complexity in `D.subsOne E` that is *new* (not already present in `D`) is either
@@ -788,6 +815,8 @@ private def Theory.Derivation.commutingSum : T.Derivation G A → Nat
     match D with
     | orE _ _ _ _ => D.nodeCount + D.commutingSum + E.commutingSum
     | _ => D.commutingSum + E.commutingSum
+  -- efq is never the major premise of a commuting conversion: no commuting contribution.
+  | efq D => D.commutingSum
 
 /-- `nodeCount` is invariant under weakening: `weak` preserves the tree structure. -/
 private theorem Theory.Derivation.nodeCount_weak {T T' : Theory Atom} {Γ Δ : Ctx Atom}
@@ -804,6 +833,7 @@ private theorem Theory.Derivation.nodeCount_weak {T T' : Theory Atom} {Γ Δ : C
   | orE G D DA DB ih ihA ihB => simp only [Theory.Derivation.weak, nodeCount, ih, ihA, ihB]
   | impI G D ih => simp only [Theory.Derivation.weak, nodeCount, ih]
   | impE D E ih ihE => simp only [Theory.Derivation.weak, nodeCount, ih, ihE]
+  | efq D ih => simp only [Theory.Derivation.weak, nodeCount, ih]
 
 /-- `nodeCount` is invariant under context weakening. -/
 private theorem Theory.Derivation.nodeCount_weakCtx {Γ Δ : Ctx Atom}
@@ -835,6 +865,7 @@ private theorem Theory.Derivation.commutingSum_weak {T T' : Theory Atom} {Γ Δ 
   | impE D E ih ihE =>
     simp only [Theory.Derivation.weak, commutingSum, ih, ihE, nodeCount_weak]
     cases D <;> simp [Theory.Derivation.weak, nodeCount_weak]
+  | efq D ih => simp only [Theory.Derivation.weak, commutingSum, ih]
 
 /-- `commutingSum` is invariant under context weakening. -/
 private theorem Theory.Derivation.commutingSum_weakCtx {Γ Δ : Ctx Atom}
@@ -859,7 +890,7 @@ private theorem Theory.Derivation.maximalFormulas_sn_eq_zero
     | andI _ _ _ => simp [isStronglyNormal] at hd
     | orE _ _ _ _ => simp [isStronglyNormal] at hd
     | ax _ | ass _ => simp only [maximalFormulas]
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+    | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
       simp only [isStronglyNormal] at hd
       simpa only [maximalFormulas] using ih hd
   | andE2 _ D ih =>
@@ -867,7 +898,7 @@ private theorem Theory.Derivation.maximalFormulas_sn_eq_zero
     | andI _ _ _ => simp [isStronglyNormal] at hd
     | orE _ _ _ _ => simp [isStronglyNormal] at hd
     | ax _ | ass _ => simp only [maximalFormulas]
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+    | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
       simp only [isStronglyNormal] at hd
       simpa only [maximalFormulas] using ih hd
   | orI1 _ D ih => simp only [isStronglyNormal] at hd; simpa only [maximalFormulas] using ih hd
@@ -880,7 +911,7 @@ private theorem Theory.Derivation.maximalFormulas_sn_eq_zero
     | ax _ | ass _ =>
       simp only [isStronglyNormal, Bool.and_eq_true] at hd
       simp [maximalFormulas, ihA hd.1.2, ihB hd.2]
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+    | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
       simp only [isStronglyNormal, Bool.and_eq_true] at hd
       have h1 := ih hd.1.1; have h2 := ihA hd.1.2; have h3 := ihB hd.2
       simp only [maximalFormulas] at h1 ⊢; rw [h2, h3]; simpa using h1
@@ -892,10 +923,11 @@ private theorem Theory.Derivation.maximalFormulas_sn_eq_zero
     | ax _ | ass _ =>
       simp only [isStronglyNormal, Bool.and_eq_true] at hd
       simp [maximalFormulas, ihE hd.2]
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+    | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
       simp only [isStronglyNormal, Bool.and_eq_true] at hd
       have h1 := ih hd.1; have h2 := ihE hd.2
       simp only [maximalFormulas] at h1 ⊢; rw [h2]; simpa using h1
+  | efq D ih => simp only [isStronglyNormal] at hd; simpa only [maximalFormulas] using ih hd
 
 /-- A strongly normal derivation contains no commuting conversions, hence its `commutingSum`
 is zero: the `nodeCount + ...` summand is contributed exactly at the commuting-conversion
@@ -913,7 +945,7 @@ private theorem Theory.Derivation.commutingSum_sn_eq_zero
     | andI _ _ _ => simp [isStronglyNormal] at hd
     | orE _ _ _ _ => simp [isStronglyNormal] at hd
     | ax _ | ass _ => simp only [commutingSum]
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+    | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
       simp only [isStronglyNormal] at hd
       simpa only [commutingSum] using ih hd
   | andE2 _ D ih =>
@@ -921,7 +953,7 @@ private theorem Theory.Derivation.commutingSum_sn_eq_zero
     | andI _ _ _ => simp [isStronglyNormal] at hd
     | orE _ _ _ _ => simp [isStronglyNormal] at hd
     | ax _ | ass _ => simp only [commutingSum]
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+    | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
       simp only [isStronglyNormal] at hd
       simpa only [commutingSum] using ih hd
   | orI1 _ D ih => simp only [isStronglyNormal] at hd; simpa only [commutingSum] using ih hd
@@ -934,7 +966,7 @@ private theorem Theory.Derivation.commutingSum_sn_eq_zero
     | ax _ | ass _ =>
       simp only [isStronglyNormal, Bool.and_eq_true] at hd
       simp [commutingSum, ihA hd.1.2, ihB hd.2]
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+    | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
       simp only [isStronglyNormal, Bool.and_eq_true] at hd
       have h1 := ih hd.1.1; have h2 := ihA hd.1.2; have h3 := ihB hd.2
       simp only [commutingSum] at h1 ⊢; omega
@@ -946,10 +978,11 @@ private theorem Theory.Derivation.commutingSum_sn_eq_zero
     | ax _ | ass _ =>
       simp only [isStronglyNormal, Bool.and_eq_true] at hd
       simp [commutingSum, ihE hd.2]
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+    | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
       simp only [isStronglyNormal, Bool.and_eq_true] at hd
       have h1 := ih hd.1; have h2 := ihE hd.2
       simp only [commutingSum] at h1 ⊢; omega
+  | efq D ih => simp only [isStronglyNormal] at hd; simpa only [commutingSum] using ih hd
 
 /-- Theory and context weakening preserves `isStronglyNormal`. -/
 private theorem Theory.Derivation.isStronglyNormal_weak {T T' : Theory Atom} {Γ Δ : Ctx Atom}
@@ -976,6 +1009,7 @@ private theorem Theory.Derivation.isStronglyNormal_weak {T T' : Theory Atom} {Γ
   | impE D E ih ihE =>
     simp only [isStronglyNormal] at ih ⊢
     cases D <;> simp_all [Theory.Derivation.weak, isStronglyNormal]
+  | efq D ih => simp only [Theory.Derivation.weak, isStronglyNormal, ih]
 
 /-- Context weakening preserves `isStronglyNormal` (corollary of `isStronglyNormal_weak`). -/
 private theorem Theory.Derivation.isStronglyNormal_weakCtx {Γ Δ : Ctx Atom}
@@ -1004,6 +1038,8 @@ private def Theory.Derivation.snAndE1Form {G : Ctx Atom} {A B : Proposition Atom
   | andE1 _ D', he => ⟨andE1 _ (andE1 _ D'), by simpa [isStronglyNormal] using he⟩
   | andE2 _ D', he => ⟨andE1 _ (andE2 _ D'), by simpa [isStronglyNormal] using he⟩
   | impE D' E', he => ⟨andE1 _ (impE D' E'), by simpa [isStronglyNormal] using he⟩
+  | @Derivation.efq _ _ _ _ _ i D', he =>
+      ⟨@Derivation.efq _ _ _ _ _ i D', by simpa [isStronglyNormal] using he⟩
 
 /-- Given a strongly-normal derivation `e : G ⊢ A ∧ B`, produce a strongly-normal `G ⊢ B`.
 Symmetric to `snAndE1Form`: at an `andI` leaf project the second component. -/
@@ -1025,6 +1061,8 @@ private def Theory.Derivation.snAndE2Form {G : Ctx Atom} {A B : Proposition Atom
   | andE1 _ D', he => ⟨andE2 _ (andE1 _ D'), by simpa [isStronglyNormal] using he⟩
   | andE2 _ D', he => ⟨andE2 _ (andE2 _ D'), by simpa [isStronglyNormal] using he⟩
   | impE D' E', he => ⟨andE2 _ (impE D' E'), by simpa [isStronglyNormal] using he⟩
+  | @Derivation.efq _ _ _ _ _ i D', he =>
+      ⟨@Derivation.efq _ _ _ _ _ i D', by simpa [isStronglyNormal] using he⟩
 
 /-- Head-behaviour lemma for `snAndE1Form`: if the output is intro-or-`orE`-headed, then the
 input `e` was already intro-or-`orE`-headed. The only way `snAndE1Form` produces a non-neutral
@@ -1189,6 +1227,8 @@ private def Theory.Derivation.snImpEForm {G : Ctx Atom} {A B : Proposition Atom}
       simp only [isStronglyNormal, Bool.and_eq_true]; exact ⟨hf, ha⟩⟩
   | .impE D' E', hf => ⟨Derivation.impE (Derivation.impE D' E') a, by
       simp only [isStronglyNormal, Bool.and_eq_true]; exact ⟨hf, ha⟩⟩
+  | @Derivation.efq _ _ _ _ _ i D', hf =>
+      ⟨@Derivation.efq _ _ _ _ _ i D', by simpa only [isStronglyNormal] using hf⟩
   termination_by ((A → B).complexity, 0, sizeOf f)
   decreasing_by
     all_goals (simp_wf; first | (left; omega) | (right; omega))
@@ -1236,6 +1276,8 @@ private def Theory.Derivation.snOrEForm {G : Ctx Atom} {A B C : Proposition Atom
       simp only [isStronglyNormal, Bool.and_eq_true] at hD ⊢; exact ⟨⟨hD, hDA⟩, hDB⟩⟩
   | .impE D' E', hD => ⟨orE G (Derivation.impE D' E') DA DB, by
       simp only [isStronglyNormal, Bool.and_eq_true] at hD ⊢; exact ⟨⟨hD, hDA⟩, hDB⟩⟩
+  | @Derivation.efq _ _ _ _ _ i D', hD =>
+      ⟨@Derivation.efq _ _ _ _ _ i D', by simpa only [isStronglyNormal] using hD⟩
   termination_by ((A ∨ B).complexity, 0, sizeOf D)
   decreasing_by
     all_goals (simp_wf; first | (left; omega) | (right; omega))
@@ -1292,6 +1334,14 @@ private def Theory.Derivation.snSubst {P B : Proposition Atom} {G : Ctx Atom}
         refine ⟨?_, ?_⟩
         · simpa only [isStronglyNormal] using s.2.1
         · intro hni _ _; simp [isIntroRoot] at hni⟩
+  | @Derivation.efq _ _ _ _ _ i D', hbd =>
+      -- efq has no redex; substitute into the ⊥-premise and re-wrap with efq at conclusion `B`.
+      have hD'sn : D'.isStronglyNormal = true := by simpa only [isStronglyNormal] using hbd
+      let s := snSubst D' hD'sn arg harg
+      ⟨@Derivation.efq _ _ _ _ _ i s.1, by
+        refine ⟨?_, ?_⟩
+        · simpa only [isStronglyNormal] using s.2.1
+        · intro _ _ hor; simp [isIntroRoot, isOrERoot] at hor⟩
   | .andE1 _ D', hbd =>
       have hD'sn : D'.isStronglyNormal = true := by cases D' <;> simp_all [isStronglyNormal]
       have hD'ni : D'.isIntroRoot = false := by
@@ -1455,6 +1505,9 @@ private def Theory.Derivation.snForm {G : Ctx Atom} {A : Proposition Atom} :
       let sf := snForm D
       let sa := snForm E
       snImpEForm sf.1 sf.2 sa.1 sa.2
+  | @Derivation.efq _ _ _ _ _ i D =>
+      let s := snForm D
+      ⟨@Derivation.efq _ _ _ _ _ i s.1, by simpa only [isStronglyNormal] using s.2⟩
 
 /-- Every derivation has a strongly-normal form of the same conclusion: the existential
 witness extracted from the structural driver `snForm`. -/

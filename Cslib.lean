@@ -405,7 +405,9 @@ public import Cslib.Logics.Modal.Tableau.Closure
 public import Cslib.Logics.Modal.Tableau.Defs
 public import Cslib.Logics.Modal.Tableau.Rules
 public import Cslib.Logics.Modal.Tableau.Saturation
-public import Cslib.Logics.Modal.Tableau.Soundness
+-- TEMPORARILY STUBBED (tasks 299/364): Modal.Tableau.Soundness does not yet build
+-- (broken refactor: lost binders, universe mismatches). Re-enable once soundness repair lands.
+-- public import Cslib.Logics.Modal.Tableau.Soundness
 public import Cslib.Logics.Propositional.CurryHoward.Defs
 public import Cslib.Logics.Propositional.CurryHoward.Isomorphism
 public import Cslib.Logics.Propositional.Defs

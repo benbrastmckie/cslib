@@ -1,16 +1,22 @@
 {
-  "status": "planned",
-  "summary": "Created 4-phase implementation plan for the Curry-Howard reduction correspondence + term-level strong normalization. Design B (native Term.reduceRoot) per the research report, which built every load-bearing mechanism green. All new work in one new file Cslib/Logics/Propositional/CurryHoward/Reduction.lean; zero new sorry, zero new axioms. Phases: (1) Term.subsOne/weakCtx/reduceRoot + subsOne_fwd/weakCtx_fwd; (2) reduceRoot_forward + reduceRoot_forward_some compatibility lemma; (3) reduceRoot_backward + Term.isStronglyNormal + Term.exists_stronglyNormal_form (SN transport); (4) mk_all wiring + CI on the specific target.",
+  "status": "implemented",
+  "phases_completed": 4,
   "phases_total": 4,
-  "phases_completed": 0,
+  "summary": "Added Cslib/Logics/Propositional/CurryHoward/Reduction.lean with: (1) reduceRoot_forward (8 redex cases: 5 beta + 3 commuting conversions), (2) reduceRoot_backward (converse direction), (3) reduceRoot_some (existential lifting), (4) Term.isStronglyNormal, Term.exists_stronglyNormal_form, isStronglyNormal_fwd transporting derivation-level SN across the isomorphism. Wired into Cslib.lean barrel. Build green (628 jobs), 0 sorry, 0 new axioms. lint-style clean for new file.",
   "blockers": [],
   "continuation_context": null,
-  "next_action_hint": "implement",
+  "next_action_hint": "complete",
+  "sorry_inventory": [],
   "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/373_curry_howard_reduction_correspondence/plans/01_curry-howard-reduction.md",
-      "summary": "4-phase plan, ~6h, ~250-300 lines, Design B native Term.reduceRoot with Design A transport fallback; per-phase verification builds Cslib.Logics.Propositional.CurryHoward.Reduction only (no whole-library build)."
-    }
-  ]
+    "Cslib/Logics/Propositional/CurryHoward/Reduction.lean",
+    "specs/373_curry_howard_reduction_correspondence/plans/01_curry-howard-reduction.md"
+  ],
+  "ci_results": {
+    "lake_build_scoped": "passed (628 jobs)",
+    "lint_style_new_file": "passed (no issues)",
+    "mk_all_module": "passed (no update necessary)",
+    "check_init_imports": "blocked by pre-existing Modal/Bimodal failures (task 364)",
+    "lake_shake": "blocked by pre-existing Modal/Bimodal failures (task 364)",
+    "lake_test": "not run (blocked by pre-existing failures)"
+  }
 }

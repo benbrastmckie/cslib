@@ -1,5 +1,5 @@
 {
-  "next_project_number": 382,
+  "next_project_number": 383,
   "active_projects": [
     {
       "project_number": 360,
@@ -309,31 +309,6 @@
       "last_updated": "2026-06-24T16:17:39Z",
       "session_id": "sess_1782316274_dc14fa",
       "completion_summary": "Extracted shared Subformula.lean module (subformulas, IsSubformula, complexity), removed phantom Tableau.Defs import from CutElimination.lean, eliminated 135-line lk-prefixed duplication in SubformulaProperty.lean, consolidated complexity definition. Net -245 lines across 6 files, +178 in new shared module. All CI passes."
-    },
-    {
-      "project_number": 332,
-      "project_name": "normalization_termination_proof",
-      "status": "implementing",
-      "task_type": "cslib",
-      "description": "Close the two remaining normalization-termination sorries for CSLib Theory.Derivation in Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean (the proof was split out of the former monolithic Normalization.lean). (1) reduceRootSubSN case h_8 at line ~1333 -- the impE(orE ...) commuting-conversion decrease; the mathematics is settled (commutingSum_sn_eq_zero is proved, and reduceRootSubSN's hA forces the major premise strongly normal so Ecc.maximalFormulas = empty and Ecc.commutingSum = 0), the blocker is a ~250-branch simp_all whnf blowup, fixed by proving the E-SN side facts as standalone bounded `have`s before a single `cases Dcc` (red attempt preserved in handoffs/termination-h8-Esn-attempt-red.lean.bak). (2) normalize_isStronglyNormal at line ~1349 -- the fuel-bound argument that `normalize` with 2^height fuel drives redexWeight to 0 (depends on (1)). Following Prawitz 1965 Ch. III-IV. Once both close, the subformula-property corollary (Normalization/SubformulaProperty.lean) and parent task 290 are fully discharged. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 290.",
-      "dependencies": [
-        290
-      ],
-      "last_updated": "2026-06-27T05:35:19Z",
-      "session_id": "sess_1782352018_d29255",
-      "artifacts": [
-        {
-          "type": "report",
-          "path": "specs/332_normalization_termination_proof/reports/03_commuting-and-wf-bridge.md",
-          "summary": "Verified commuting-case tactics and the WF/DM bridge (Route 1) underpinning the termination proof"
-        },
-        {
-          "type": "plan",
-          "path": "specs/332_normalization_termination_proof/plans/05_termination-plan-v5.md",
-          "summary": "v5 (accurate): DM-measure approach; phases A/B committed green; B-h8 in progress; C/D/E remaining"
-        }
-      ],
-      "next_artifact_number": 6
     },
     {
       "project_number": 333,
@@ -647,40 +622,6 @@
         300,
         301
       ]
-    },
-    {
-      "project_number": 290,
-      "project_name": "nd_normalization_subformula_property",
-      "status": "partial",
-      "task_type": "cslib",
-      "topic": "Propositional Logic",
-      "description": "Formalize Prawitz-style normalization for CSLib Theory.Derivation (propositional IPL and MPL). Define Derivation.isNormal predicate (no maximal formula -- i.e., no introduction rule immediately followed by the corresponding elimination on the same formula). Prove a normalization function normalize that transforms any derivation into a normal form. Derive the subformula property as a corollary: every formula in a normal derivation is a subformula of the conclusion or a hypothesis. The Theory.Derivation type is Type u (not Prop), enabling a computable normalization function. Reference: [Prawitz1965] Ch. IV-V. Consider starting with the implicational fragment ({arrow} only) as a milestone, then extending to full IPL connectives. Files: new module Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean. Depends on 266.",
-      "dependencies": [],
-      "created": "2026-06-23T12:00:00Z",
-      "last_updated": "2026-06-24T11:58:40Z",
-      "session_id": "sess_1782297437_564838",
-      "artifacts": [
-        {
-          "path": "specs/290_nd_normalization_subformula_property/summaries/01_nd-normalization-summary.md",
-          "type": "summary",
-          "description": "Partial implementation summary: phases 1-4 complete, phase 5 blocked on Prawitz main-branch lemma"
-        },
-        {
-          "path": "Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean",
-          "type": "lean",
-          "description": "New file: subformula infrastructure, isNormal, reduceRoot, normalize; subformula property partial"
-        },
-        {
-          "path": "specs/290_nd_normalization_subformula_property/reports/03_termination-measure-research.md",
-          "type": "report",
-          "description": "Termination measure research: redexWeight approach for normalize_isStronglyNormal + conclusion_grounded_or_intro fix"
-        },
-        {
-          "path": "specs/290_nd_normalization_subformula_property/plans/04_nd-normalization-plan-v3.md",
-          "type": "plan"
-        }
-      ],
-      "next_artifact_number": 5
     },
     {
       "project_number": 292,
@@ -1790,22 +1731,6 @@
       "session_id": "sess_1782576469_20af07_372"
     },
     {
-      "project_number": 373,
-      "project_name": "curry_howard_reduction_correspondence",
-      "status": "not_started",
-      "task_type": "cslib",
-      "topic": "Propositional Logic",
-      "description": "Extend the Curry-Howard layer from a structural isomorphism to a genuine computational correspondence. Cslib/Logics/Propositional/CurryHoward/{Defs,Isomorphism.lean} currently provide only a constructor-renaming bijection between Theory.Derivation and the intrinsically-typed lambda calculus Theory.Term (curryHowardForward/Backward, roundtrip = rfl). Add: (1) the reduction correspondence -- prove that ND root reduction (NaturalDeduction/Normalization/Reduction.lean reduceRoot: the 5 beta-redexes + 3 commuting conversions) corresponds to beta/eta reduction on Theory.Term, i.e. d reduceRoot d' implies curryHowardForward d reduces to curryHowardForward d' (and a congruence/compatibility lemma); (2) term-level strong normalization -- transport derivation-level SN (normalize_isStronglyNormal) across the isomorphism to obtain SN for well-typed Terms. Depends on task 332 (the normalization termination proof must be sorry-free first). No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 332.",
-      "dependencies": [
-        332
-      ],
-      "created": "2026-06-27T05:29:32Z",
-      "last_updated": "2026-06-27T05:29:32Z",
-      "next_artifact_number": 1,
-      "artifacts": [],
-      "session_id": null
-    },
-    {
       "project_number": 374,
       "project_name": "sequent_calculus_interpolation",
       "status": "not_started",
@@ -1980,6 +1905,99 @@
       "last_updated": "2026-06-27T21:49:36Z",
       "next_artifact_number": 1,
       "artifacts": []
+    },
+    {
+      "project_number": 332,
+      "project_name": "normalization_termination_proof",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "Close the two remaining normalization-termination sorries for CSLib Theory.Derivation in Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean (the proof was split out of the former monolithic Normalization.lean). (1) reduceRootSubSN case h_8 at line ~1333 -- the impE(orE ...) commuting-conversion decrease; the mathematics is settled (commutingSum_sn_eq_zero is proved, and reduceRootSubSN's hA forces the major premise strongly normal so Ecc.maximalFormulas = empty and Ecc.commutingSum = 0), the blocker is a ~250-branch simp_all whnf blowup, fixed by proving the E-SN side facts as standalone bounded `have`s before a single `cases Dcc` (red attempt preserved in handoffs/termination-h8-Esn-attempt-red.lean.bak). (2) normalize_isStronglyNormal at line ~1349 -- the fuel-bound argument that `normalize` with 2^height fuel drives redexWeight to 0 (depends on (1)). Following Prawitz 1965 Ch. III-IV. Once both close, the subformula-property corollary (Normalization/SubformulaProperty.lean) and parent task 290 are fully discharged. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 290.",
+      "dependencies": [
+        290
+      ],
+      "last_updated": "2026-06-27T05:35:19Z",
+      "session_id": "sess_1782576552_fae7a6",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/332_normalization_termination_proof/reports/03_commuting-and-wf-bridge.md",
+          "summary": "Verified commuting-case tactics and the WF/DM bridge (Route 1) underpinning the termination proof"
+        },
+        {
+          "type": "plan",
+          "path": "specs/332_normalization_termination_proof/plans/05_termination-plan-v5.md",
+          "summary": "v5 (accurate): DM-measure approach; phases A/B committed green; B-h8 in progress; C/D/E remaining"
+        }
+      ],
+      "next_artifact_number": 6,
+      "completion_summary": "Proved Theory.Derivation.exists_stronglyNormal_form CONSTRUCTIVELY (smart eliminators snAndE1Form/snAndE2Form/snImpEForm/snOrEForm + substitution-normalization snSubst, well-founded on a 3-component (cut-complexity, phase, sizeOf) lexicographic measure with a carried head-behaviour invariant). Diagnosed+documented that the prior Dershowitz-Manna normMeasure route is UNSOUND (maximalFormulas undercounts maximal segments through orE, so commuting conversions raise the measure) -- the root cause this task hit across prior sessions. Also closed the h_8 commuting case of reduceRoot_decreases_normMeasure. subformula_property re-pointed at exists_stronglyNormal_form; fuel normalize_isStronglyNormal retired. Normalization/ is 0-sorry, axiom-clean (no sorryAx; [propext,Classical.choice,Quot.sound]), builds green; lake exe lint-style passes. CAVEAT: full-project CI gates (checkInitImports/lint/test/shake) could not be fully run due to PRE-EXISTING unrelated red modules (Bimodal/Modal) outside task territory; branch diff is Normalization/-only."
+    },
+    {
+      "project_number": 290,
+      "project_name": "nd_normalization_subformula_property",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Formalize Prawitz-style normalization for CSLib Theory.Derivation (propositional IPL and MPL). Define Derivation.isNormal predicate (no maximal formula -- i.e., no introduction rule immediately followed by the corresponding elimination on the same formula). Prove a normalization function normalize that transforms any derivation into a normal form. Derive the subformula property as a corollary: every formula in a normal derivation is a subformula of the conclusion or a hypothesis. The Theory.Derivation type is Type u (not Prop), enabling a computable normalization function. Reference: [Prawitz1965] Ch. IV-V. Consider starting with the implicational fragment ({arrow} only) as a milestone, then extending to full IPL connectives. Files: new module Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean. Depends on 266.",
+      "dependencies": [],
+      "created": "2026-06-23T12:00:00Z",
+      "last_updated": "2026-06-24T11:58:40Z",
+      "session_id": "sess_1782297437_564838",
+      "artifacts": [
+        {
+          "path": "specs/290_nd_normalization_subformula_property/summaries/01_nd-normalization-summary.md",
+          "type": "summary",
+          "description": "Partial implementation summary: phases 1-4 complete, phase 5 blocked on Prawitz main-branch lemma"
+        },
+        {
+          "path": "Cslib/Logics/Propositional/NaturalDeduction/Normalization.lean",
+          "type": "lean",
+          "description": "New file: subformula infrastructure, isNormal, reduceRoot, normalize; subformula property partial"
+        },
+        {
+          "path": "specs/290_nd_normalization_subformula_property/reports/03_termination-measure-research.md",
+          "type": "report",
+          "description": "Termination measure research: redexWeight approach for normalize_isStronglyNormal + conclusion_grounded_or_intro fix"
+        },
+        {
+          "path": "specs/290_nd_normalization_subformula_property/plans/04_nd-normalization-plan-v3.md",
+          "type": "plan"
+        }
+      ],
+      "next_artifact_number": 5,
+      "completion_summary": "Discharged via task 332: Theory.Derivation.subformula_property is now sorry-free (every derivation has a strongly-normal form satisfying the subformula property), proved constructively via exists_stronglyNormal_form. Normalization/ 0-sorry, green, axiom-clean."
+    },
+    {
+      "project_number": 373,
+      "project_name": "curry_howard_reduction_correspondence",
+      "status": "researched",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Extend the Curry-Howard layer from a structural isomorphism to a genuine computational correspondence. Cslib/Logics/Propositional/CurryHoward/{Defs,Isomorphism.lean} currently provide only a constructor-renaming bijection between Theory.Derivation and the intrinsically-typed lambda calculus Theory.Term (curryHowardForward/Backward, roundtrip = rfl). Add: (1) the reduction correspondence -- prove that ND root reduction (NaturalDeduction/Normalization/Reduction.lean reduceRoot: the 5 beta-redexes + 3 commuting conversions) corresponds to beta/eta reduction on Theory.Term, i.e. d reduceRoot d' implies curryHowardForward d reduces to curryHowardForward d' (and a congruence/compatibility lemma); (2) term-level strong normalization -- transport derivation-level SN (normalize_isStronglyNormal) across the isomorphism to obtain SN for well-typed Terms. Depends on task 332 (the normalization termination proof must be sorry-free first). No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 332.",
+      "dependencies": [
+        332
+      ],
+      "created": "2026-06-27T05:29:32Z",
+      "last_updated": "2026-06-27T05:29:32Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "session_id": "sess_1782576552_fae7a6"
+    },
+    {
+      "project_number": 382,
+      "project_name": "normalization_deadcode_cleanup",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Post-332 cleanup: remove the dead Dershowitz-Manna termination-measure machinery orphaned by task 332's constructive strong-normalization proof. Dead (0 live uses, verified): normMeasure, normMeasure_wf, reduceRoot_decreases_normMeasure (incl. the h_8 case), redexWeight, redexWeight_zero_sn, and the Multiset.isDershowitzMannaLT_* helpers used only by them; likely also the 'import Mathlib.Data.Multiset.DershowitzManna'. KEEP the live shared helpers (maximalFormulas, commutingSum, nodeCount, weakCtx lemmas, subsOne_new_redex_complexity_lt, maximalFormulas_sn_eq_zero) used by the constructive route. After removal: lake build Normalization green + 0 sorry, then run lake shake to confirm no further dead imports/decls. Also re-run the full CI pipeline (lake build, checkInitImports, lake lint, lake test, lake shake) once main is green again -- currently blocked by PRE-EXISTING unrelated red modules (Bimodal/*, Modal/Tableau/Soundness; owned by task 364 etc.). File: Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean. Depends on 332.",
+      "dependencies": [
+        332
+      ],
+      "created": "2026-06-27T00:00:00Z",
+      "last_updated": "2026-06-27T00:00:00Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "session_id": null
     }
   ],
   "repository_health": {

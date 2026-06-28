@@ -1,5 +1,5 @@
 ---
-next_project_number: 382
+next_project_number: 383
 ---
 
 # TODO
@@ -11,9 +11,9 @@ next_project_number: 382
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,321,364,371,376,381 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,332,363,374 | 36,37,180,290,299,371,376 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
-| 3 | 41,275,360,369,373 | 39,40,332,363,364 | Foundations, Propositional Logic |
+| 1 | 36,37,180,226,241,278,299,301,321,364,371,373,376,381,382 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,363,374 | 36,37,180,299,371,376 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 3 | 41,275,360,369 | 39,40,363,364 | Foundations, Propositional Logic |
 | 4 | 317,370 | 360,369 | Propositional Logic |
 | 5 | 375 | 317 | Propositional Logic |
 
@@ -42,11 +42,10 @@ next_project_number: 382
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
-  └─ 332 [IMPLEMENTING] — Close the two remaining normalization-termination sorries for CSL
-    └─ 373 [NOT STARTED] — Extend the Curry-Howard layer from a structural isomorphism to a 
 371 [NOT STARTED] — Symmetrize the LK/LJ sequent-calculus metatheory and add the miss
   └─ 374 [NOT STARTED] — Add Craig interpolation for the propositional sequent calculi, a 
+373 [RESEARCHED] — Extend the Curry-Howard layer from a structural isomorphism to a 
+382 [NOT STARTED] — Post-332 cleanup: remove the dead Dershowitz-Manna termination-me
 317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
   └─ 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
 369 [NOT STARTED] — Parameterize the intuitionistic and minimal tableau developments 
@@ -78,6 +77,16 @@ next_project_number: 382
     └─ 369 [NOT STARTED] — (Propositional Logic: Parameterize the intuitionistic and mini) (see above)
 
 ## Tasks
+
+### 382. Normalization deadcode cleanup
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 332
+
+**Description**: Post-332 cleanup: remove the dead Dershowitz-Manna termination-measure machinery orphaned by task 332's constructive strong-normalization proof. Dead (0 live uses, verified): normMeasure, normMeasure_wf, reduceRoot_decreases_normMeasure (incl. the h_8 case), redexWeight, redexWeight_zero_sn, and the Multiset.isDershowitzMannaLT_* helpers used only by them; likely also the 'import Mathlib.Data.Multiset.DershowitzManna'. KEEP the live shared helpers (maximalFormulas, commutingSum, nodeCount, weakCtx lemmas, subsOne_new_redex_complexity_lt, maximalFormulas_sn_eq_zero) used by the constructive route. After removal: lake build Normalization green + 0 sorry, then run lake shake to confirm no further dead imports/decls. Also re-run the full CI pipeline (lake build, checkInitImports, lake lint, lake test, lake shake) once main is green again -- currently blocked by PRE-EXISTING unrelated red modules (Bimodal/*, Modal/Tableau/Soundness; owned by task 364 etc.). File: Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean. Depends on 332.
+
+---
 
 ### 381. Repair bimodal separation perpetuity drift
 - **Status**: [NOT STARTED]
@@ -176,7 +185,7 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 373. Curry howard reduction correspondence
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 332
@@ -584,7 +593,7 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 332. Normalization termination proof
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: Task 290
 - **Research**: [332_normalization_termination_proof/reports/03_commuting-and-wf-bridge.md]
@@ -909,7 +918,7 @@ Literature sources:
 ---
 
 ### 290. Nd normalization subformula property
-- **Status**: [PARTIAL]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

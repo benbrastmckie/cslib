@@ -575,10 +575,152 @@ private lemma maeharaCore {seq : LKSequent Atom} (d : LKProof seq) (hcf : CutFre
               (Finset.mem_insert_of_mem hAB₂)))
             (d_right₁.mono hperm₁_ant (Finset.Subset.refl _))
             (d_right₂.mono hperm₂_ant (Finset.Subset.refl _)))⟩
-  | impL A B hAB d₁ d₂ ih₁ ih₂ =>
-    -- PHASE 3: two-premise case; most intricate.
-    intro Γ₁ Γ₂ Δ₁ Δ₂ _hant _hsuc
-    sorry
+  | @impL Γ Δ A B hAB d₁ d₂ ih₁ ih₂ =>
+    -- Conclusion: Γ ⊢ₛ Δ where (A→B) ∈ Γ = Γ₁ ∪ Γ₂; two asymmetric premises:
+    --   d₁ : Γ ⊢ₛ insert A Δ  (A added to succedent)
+    --   d₂ : insert B Γ ⊢ₛ Δ  (B added to antecedent)
+    -- Side-split on (A→B) ∈ Γ₁ or (A→B) ∈ Γ₂; combine I₁∨I₂ resp. I₁∧I₂.
+    intro Γ₁ Γ₂ Δ₁ Δ₂ hant hsuc
+    have hant' : Γ = Γ₁ ∪ Γ₂ := hant
+    have hsuc' : Δ = Δ₁ ∪ Δ₂ := hsuc
+    obtain ⟨hcf₁, hcf₂⟩ := hcf
+    rw [hant'] at hAB
+    rcases Finset.mem_union.mp hAB with hAB₁ | hAB₂
+    · -- (A→B) ∈ Γ₁: interpolant I = I₁ ∨ I₂.
+      -- Place A on Δ₁ side for d₁, B on Γ₁ side for d₂; combine via orR and orL.
+      have hAB_vars : A.vars ∪ B.vars ⊆ Γ₁.vars := by
+        have := Finset.vars_subset_of_mem hAB₁; simp only [vars_imp] at this; exact this
+      have hA_vars : A.vars ⊆ Γ₁.vars := Finset.subset_union_left.trans hAB_vars
+      have hB_vars : B.vars ⊆ Γ₁.vars := Finset.subset_union_right.trans hAB_vars
+      have hcover_suc₁ : insert A Δ = insert A Δ₁ ∪ Δ₂ := by
+        rw [hsuc']; exact (Finset.insert_union A Δ₁ Δ₂).symm
+      have hcover_ant₂ : insert B Γ = insert B Γ₁ ∪ Γ₂ := by
+        rw [hant']; exact (Finset.insert_union B Γ₁ Γ₂).symm
+      obtain ⟨I₁, h_vars₁, ⟨d_left₁⟩, ⟨d_right₁⟩⟩ :=
+        ih₁ hcf₁ Γ₁ Γ₂ (insert A Δ₁) Δ₂ hant' hcover_suc₁
+      obtain ⟨I₂, h_vars₂, ⟨d_left₂⟩, ⟨d_right₂⟩⟩ :=
+        ih₂ hcf₂ (insert B Γ₁) Γ₂ Δ₁ Δ₂ hcover_ant₂ hsuc'
+      -- d_left₁ : Γ₁ ⊢ₛ insert I₁ (insert A Δ₁)
+      -- d_right₁ : insert I₁ Γ₂ ⊢ₛ Δ₂
+      -- d_left₂ : insert B Γ₁ ⊢ₛ insert I₂ Δ₁
+      -- d_right₂ : insert I₂ Γ₂ ⊢ₛ Δ₂
+      refine ⟨I₁ ∨ I₂, ?_, ?_, ?_⟩
+      · -- vars: (I₁∨I₂).vars ⊆ (Γ₁ ∪ Δ₁).vars ∩ (Γ₂ ∪ Δ₂).vars
+        simp only [vars_or]
+        refine Finset.subset_inter ?_ ?_
+        · apply Finset.union_subset
+          · have h₁L : I₁.vars ⊆ (Γ₁ ∪ insert A Δ₁).vars :=
+              h_vars₁.trans Finset.inter_subset_left
+            have h_A_drop : (Γ₁ ∪ insert A Δ₁).vars ⊆ (Γ₁ ∪ Δ₁).vars := by
+              simp only [Finset.vars_union, Finset.vars_insert]
+              exact Finset.union_subset Finset.subset_union_left
+                (Finset.union_subset (hA_vars.trans Finset.subset_union_left)
+                  Finset.subset_union_right)
+            exact h₁L.trans h_A_drop
+          · have h₂L : I₂.vars ⊆ (insert B Γ₁ ∪ Δ₁).vars :=
+              h_vars₂.trans Finset.inter_subset_left
+            have h_B_drop : (insert B Γ₁ ∪ Δ₁).vars ⊆ (Γ₁ ∪ Δ₁).vars := by
+              simp only [Finset.vars_union, Finset.vars_insert]
+              exact Finset.union_subset
+                (Finset.union_subset (hB_vars.trans Finset.subset_union_left)
+                  Finset.subset_union_left)
+                Finset.subset_union_right
+            exact h₂L.trans h_B_drop
+        · apply Finset.union_subset
+          · exact h_vars₁.trans Finset.inter_subset_right
+          · exact h_vars₂.trans Finset.inter_subset_right
+      · -- Left half: Γ₁ ⊢ₛ insert (I₁∨I₂) Δ₁.
+        -- Apply impL A B hAB₁ with both prems built via orR.
+        --   left prem: Γ₁ ⊢ₛ insert A (insert (I₁∨I₂) Δ₁)  via orR from d_left₁
+        --   right prem: insert B Γ₁ ⊢ₛ insert (I₁∨I₂) Δ₁   via orR from d_left₂
+        have hperm_lprem : insert I₁ (insert A Δ₁) ⊆
+            insert I₁ (insert I₂ (insert A (insert (I₁ ∨ I₂) Δ₁))) := by
+          intro x; simp only [Finset.mem_insert]; tauto
+        have hperm_rprem : insert I₂ Δ₁ ⊆
+            insert I₁ (insert I₂ (insert (I₁ ∨ I₂) Δ₁)) := by
+          intro x; simp only [Finset.mem_insert]; tauto
+        exact ⟨LKProof.impL A B hAB₁
+          (LKProof.orR I₁ I₂ (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
+            (d_left₁.mono (Finset.Subset.refl _) hperm_lprem))
+          (LKProof.orR I₁ I₂ (Finset.mem_insert_self _ _)
+            (d_left₂.mono (Finset.Subset.refl _) hperm_rprem))⟩
+      · -- Right half: insert (I₁∨I₂) Γ₂ ⊢ₛ Δ₂ via orL I₁ I₂.
+        -- d_right₁ : insert I₁ Γ₂ ⊢ₛ Δ₂; d_right₂ : insert I₂ Γ₂ ⊢ₛ Δ₂.
+        have hperm_I₁ : insert I₁ Γ₂ ⊆ insert I₁ (insert (I₁ ∨ I₂) Γ₂) := by
+          intro x; simp only [Finset.mem_insert]; tauto
+        have hperm_I₂ : insert I₂ Γ₂ ⊆ insert I₂ (insert (I₁ ∨ I₂) Γ₂) := by
+          intro x; simp only [Finset.mem_insert]; tauto
+        exact ⟨LKProof.orL I₁ I₂ (Finset.mem_insert_self _ _)
+          (d_right₁.mono hperm_I₁ (Finset.Subset.refl _))
+          (d_right₂.mono hperm_I₂ (Finset.Subset.refl _))⟩
+    · -- (A→B) ∈ Γ₂: interpolant I = I₁ ∧ I₂.
+      -- Place A on Δ₂ side for d₁, B on Γ₂ side for d₂; combine via andR and andL+impL.
+      have hAB_vars₂ : A.vars ∪ B.vars ⊆ Γ₂.vars := by
+        have := Finset.vars_subset_of_mem hAB₂; simp only [vars_imp] at this; exact this
+      have hA_vars₂ : A.vars ⊆ Γ₂.vars := Finset.subset_union_left.trans hAB_vars₂
+      have hB_vars₂ : B.vars ⊆ Γ₂.vars := Finset.subset_union_right.trans hAB_vars₂
+      have hcover_suc₁' : insert A Δ = Δ₁ ∪ insert A Δ₂ := by
+        rw [hsuc']; exact (Finset.union_insert A Δ₁ Δ₂).symm
+      have hcover_ant₂' : insert B Γ = Γ₁ ∪ insert B Γ₂ := by
+        rw [hant']; exact (Finset.union_insert B Γ₁ Γ₂).symm
+      obtain ⟨I₁, h_vars₁, ⟨d_left₁⟩, ⟨d_right₁⟩⟩ :=
+        ih₁ hcf₁ Γ₁ Γ₂ Δ₁ (insert A Δ₂) hant' hcover_suc₁'
+      obtain ⟨I₂, h_vars₂, ⟨d_left₂⟩, ⟨d_right₂⟩⟩ :=
+        ih₂ hcf₂ Γ₁ (insert B Γ₂) Δ₁ Δ₂ hcover_ant₂' hsuc'
+      -- d_left₁ : Γ₁ ⊢ₛ insert I₁ Δ₁
+      -- d_right₁ : insert I₁ Γ₂ ⊢ₛ insert A Δ₂
+      -- d_left₂ : Γ₁ ⊢ₛ insert I₂ Δ₁
+      -- d_right₂ : insert I₂ (insert B Γ₂) ⊢ₛ Δ₂
+      refine ⟨I₁ ∧ I₂, ?_, ?_, ?_⟩
+      · -- vars: (I₁∧I₂).vars ⊆ (Γ₁ ∪ Δ₁).vars ∩ (Γ₂ ∪ Δ₂).vars
+        simp only [vars_and]
+        refine Finset.subset_inter ?_ ?_
+        · apply Finset.union_subset
+          · exact h_vars₁.trans Finset.inter_subset_left
+          · exact h_vars₂.trans Finset.inter_subset_left
+        · apply Finset.union_subset
+          · have h₁R : I₁.vars ⊆ (Γ₂ ∪ insert A Δ₂).vars :=
+              h_vars₁.trans Finset.inter_subset_right
+            have h_A_drop₂ : (Γ₂ ∪ insert A Δ₂).vars ⊆ (Γ₂ ∪ Δ₂).vars := by
+              simp only [Finset.vars_union, Finset.vars_insert]
+              exact Finset.union_subset Finset.subset_union_left
+                (Finset.union_subset (hA_vars₂.trans Finset.subset_union_left)
+                  Finset.subset_union_right)
+            exact h₁R.trans h_A_drop₂
+          · have h₂R : I₂.vars ⊆ (insert B Γ₂ ∪ Δ₂).vars :=
+              h_vars₂.trans Finset.inter_subset_right
+            have h_B_drop₂ : (insert B Γ₂ ∪ Δ₂).vars ⊆ (Γ₂ ∪ Δ₂).vars := by
+              simp only [Finset.vars_union, Finset.vars_insert]
+              exact Finset.union_subset
+                (Finset.union_subset (hB_vars₂.trans Finset.subset_union_left)
+                  Finset.subset_union_left)
+                Finset.subset_union_right
+            exact h₂R.trans h_B_drop₂
+      · -- Left half: Γ₁ ⊢ₛ insert (I₁∧I₂) Δ₁ via andR I₁ I₂.
+        -- d_left₁ : Γ₁ ⊢ₛ insert I₁ Δ₁; d_left₂ : Γ₁ ⊢ₛ insert I₂ Δ₁.
+        have hweaken₁ : insert I₁ Δ₁ ⊆ insert I₁ (insert (I₁ ∧ I₂) Δ₁) := by
+          intro x; simp only [Finset.mem_insert]; tauto
+        have hweaken₂ : insert I₂ Δ₁ ⊆ insert I₂ (insert (I₁ ∧ I₂) Δ₁) := by
+          intro x; simp only [Finset.mem_insert]; tauto
+        exact ⟨LKProof.andR I₁ I₂ (Finset.mem_insert_self _ _)
+          (d_left₁.mono (Finset.Subset.refl _) hweaken₁)
+          (d_left₂.mono (Finset.Subset.refl _) hweaken₂)⟩
+      · -- Right half: insert (I₁∧I₂) Γ₂ ⊢ₛ Δ₂.
+        -- Apply impL A B (A→B ∈ insert (I₁∧I₂) Γ₂):
+        --   left prem: insert (I₁∧I₂) Γ₂ ⊢ₛ insert A Δ₂  via andL from d_right₁
+        --   right prem: insert B (insert (I₁∧I₂) Γ₂) ⊢ₛ Δ₂ via andL from d_right₂
+        have hperm_r1 : insert I₁ Γ₂ ⊆
+            insert I₁ (insert I₂ (insert (I₁ ∧ I₂) Γ₂)) := by
+          intro x; simp only [Finset.mem_insert]; tauto
+        have hperm_r2 : insert I₂ (insert B Γ₂) ⊆
+            insert I₁ (insert I₂ (insert B (insert (I₁ ∧ I₂) Γ₂))) := by
+          intro x; simp only [Finset.mem_insert]; tauto
+        exact ⟨LKProof.impL A B (Finset.mem_insert_of_mem hAB₂)
+          (LKProof.andL I₁ I₂ (Finset.mem_insert_self _ _)
+            (d_right₁.mono hperm_r1 (Finset.Subset.refl _)))
+          (LKProof.andL I₁ I₂
+            (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
+            (d_right₂.mono hperm_r2 (Finset.Subset.refl _)))⟩
   | @impR Γ Δ A B hAB d' ih =>
     -- Conclusion: Γ ⊢ₛ Δ where A→B ∈ Δ = Δ₁ ∪ Δ₂; premise: insert A Γ ⊢ₛ insert B Δ.
     -- Side-split on A→B ∈ Δ₁ or A→B ∈ Δ₂; place A on the antecedent and B on the

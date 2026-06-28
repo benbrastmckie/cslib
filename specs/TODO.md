@@ -11,8 +11,8 @@ next_project_number: 384
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,299,301,321,364,369,373,374,382 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,317,360 | 36,37,180,299,364,369 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 1 | 36,37,180,226,241,278,299,301,321,364,369,373,374,382,384,385,386,387,388,389,391,393,394,395,396,398,399 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,317,360,390,392,397 | 36,37,180,299,364,369,387,396 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275,370,375 | 39,40,317,360 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -32,7 +32,7 @@ next_project_number: 384
 
 ### Modal Logic
 
-299 [IMPLEMENTING] — Implement tableau decision procedure for basic modal logic K with
+299 [PLANNED] — Implement tableau decision procedure for basic modal logic K with
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
 364 [IMPLEMENTING] — Repair the pre-existing Mathlib/toolchain-drift build failure in 
   └─ 360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t
@@ -63,6 +63,23 @@ next_project_number: 384
 
 ### Uncategorized
 
+384 [NOT STARTED] — Tier-1 CRITICAL. Restate the mis-stated saturation hypothesis (Ta
+385 [NOT STARTED] — Tier-1 CRITICAL; fixes mk_all. (1) IntFMPSpike.lean: fix 12 error
+386 [NOT STARTED] — Tier-1. lake lint currently fails. Fix: GenericMCSBridge.lean:133
+387 [NOT STARTED] — Tier-2 DECISION TAKEN: rename to match ORGANISATION.md:223 and th
+  └─ 390 [NOT STARTED] — Tier-2. ORGANISATION.md Propositional section lists only Defs/Nat
+  └─ 392 [NOT STARTED] — Tier-3. Delete grep-verified dead decls: Tableau/Classical/Soundn
+388 [NOT STARTED] — Tier-2. NaturalDeduction/Normalization/Termination.lean + Reducti
+389 [NOT STARTED] — Tier-2. (a) Foundations/Order/HilbertAlgebra/FreeMeetExtension.le
+391 [NOT STARTED] — Tier-3. Remove internal task/process jargon from public docstring
+393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
+394 [NOT STARTED] — Tier-3. Delete Foundations/Logic/Tableau/PropositionalTableau.lea
+395 [NOT STARTED] — META / coordination task. PRECONDITION: do NOT start until ALL fe
+396 [NOT STARTED] — Synthesis design from the CSLib Zulip 'Propositional Logic' threa
+  └─ 397 [NOT STARTED] — PR #648 (feat/propositional-v2) is ~239 commits behind fork main 
+398 [NOT STARTED] — Thomas flagged that connective typeclasses are a SEPARATE develop
+399 [NOT STARTED] — From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portab
+
 ## Tasks
 
 ### 383. Complete separation cluster drift
@@ -77,7 +94,7 @@ next_project_number: 384
 ---
 
 ### 382. Normalization deadcode cleanup
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 332
@@ -177,7 +194,7 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 374. Sequent calculus interpolation
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 371

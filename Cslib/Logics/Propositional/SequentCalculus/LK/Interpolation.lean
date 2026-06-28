@@ -51,6 +51,7 @@ variable {Atom : Type u} [DecidableEq Atom]
 /-! ## Maehara Core Lemma -/
 
 set_option maxHeartbeats 1600000 in
+-- Two-premise cases (andR, orL, impL, impR) require up to ~400k each; 1600000 covers the full induction.
 /-- **Maehara core**: For any cut-free LK proof `d` of `seq` and any cover partition
 `Γ₁ ∪ Γ₂ = seq.ant`, `Δ₁ ∪ Δ₂ = seq.suc`, there exists an interpolant `I` satisfying:
 1. `I.vars ⊆ (Γ₁ ∪ Δ₁).vars ∩ (Γ₂ ∪ Δ₂).vars` (variable constraint),
@@ -341,14 +342,16 @@ private lemma maeharaCore {seq : LKSequent Atom} (d : LKProof seq) (hcf : CutFre
             have h_A_drop : (Γ₁ ∪ insert A Δ₁).vars ⊆ (Γ₁ ∪ Δ₁).vars := by
               simp only [Finset.vars_union, Finset.vars_insert]
               exact Finset.union_subset Finset.subset_union_left
-                (Finset.union_subset (hA_vars.trans Finset.subset_union_right) Finset.subset_union_right)
+                (Finset.union_subset (hA_vars.trans Finset.subset_union_right)
+                  Finset.subset_union_right)
             exact h₁L.trans h_A_drop
           · have h₂L : I₂.vars ⊆ (Γ₁ ∪ insert B Δ₁).vars :=
               h_vars₂.trans Finset.inter_subset_left
             have h_B_drop : (Γ₁ ∪ insert B Δ₁).vars ⊆ (Γ₁ ∪ Δ₁).vars := by
               simp only [Finset.vars_union, Finset.vars_insert]
               exact Finset.union_subset Finset.subset_union_left
-                (Finset.union_subset (hB_vars.trans Finset.subset_union_right) Finset.subset_union_right)
+                (Finset.union_subset (hB_vars.trans Finset.subset_union_right)
+                  Finset.subset_union_right)
             exact h₂L.trans h_B_drop
         · apply Finset.union_subset
           · exact h_vars₁.trans Finset.inter_subset_right
@@ -380,7 +383,8 @@ private lemma maeharaCore {seq : LKSequent Atom} (d : LKProof seq) (hcf : CutFre
           (d_right₁.mono hperm_I₁ (Finset.Subset.refl _))
           (d_right₂.mono hperm_I₂ (Finset.Subset.refl _))⟩
     · -- A∧B ∈ Δ₂: interpolant I = I₁ ∧ I₂.
-      -- Place A on Δ₂ side for d₁, B on Δ₂ side for d₂; left with andR I₁ I₂; right with andL+andR A B.
+      -- Place A on Δ₂ side for d₁, B on Δ₂ side for d₂;
+      -- left with andR I₁ I₂; right with andL+andR A B.
       have hAB_vars₂ : A.vars ∪ B.vars ⊆ Δ₂.vars := by
         have := Finset.vars_subset_of_mem hAB₂; simp only [vars_and] at this; exact this
       have hA_vars₂ : A.vars ⊆ Δ₂.vars := Finset.subset_union_left.trans hAB_vars₂
@@ -511,7 +515,8 @@ private lemma maeharaCore {seq : LKSequent Atom} (d : LKProof seq) (hcf : CutFre
           (d_right₁.mono hperm_I₁ (Finset.Subset.refl _))
           (d_right₂.mono hperm_I₂ (Finset.Subset.refl _))⟩
     · -- A∨B ∈ Γ₂: interpolant I = I₁ ∧ I₂.
-      -- Place A on Γ₂ side for d₁, B on Γ₂ side for d₂; combine left with andR I₁ I₂; right with andL+orL A B.
+      -- Place A on Γ₂ side for d₁, B on Γ₂ side for d₂;
+      -- combine left with andR I₁ I₂; right with andL+orL A B.
       have hAB_vars₂ : A.vars ∪ B.vars ⊆ Γ₂.vars := by
         have := Finset.vars_subset_of_mem hAB₂; simp only [vars_or] at this; exact this
       have hA_vars₂ : A.vars ⊆ Γ₂.vars := Finset.subset_union_left.trans hAB_vars₂

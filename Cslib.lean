@@ -482,6 +482,7 @@ public import Cslib.Logics.Propositional.SequentCalculus.LJ.Basic
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.Completeness
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.CutElimination
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.Decidability
+public import Cslib.Logics.Propositional.SequentCalculus.LJ.Interpolation
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.Soundness
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.SubformulaProperty
 public import Cslib.Logics.Propositional.SequentCalculus.LK

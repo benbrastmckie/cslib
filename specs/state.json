@@ -1763,15 +1763,16 @@
     {
       "project_number": 374,
       "project_name": "sequent_calculus_interpolation",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Add Craig interpolation for the propositional sequent calculi, a foundational metatheorem currently absent for LK and LJ. Implement Maehara's method: for a cut-free LK proof of Gamma1, Gamma2 turnstile Delta1, Delta2, construct an interpolant I in the shared vocabulary with Gamma1 turnstile Delta1, I and I, Gamma2 turnstile Delta2, by induction on the cut-free derivation (using LK cut-elimination + subformula property as the foundation), then derive Craig interpolation for implications as the standard corollary; provide the intuitionistic (LJ) analogue. This is a larger new piece (estimate several hundred lines) and the highest-effort item in the propositional backlog -- schedule after the LK/LJ coverage is symmetrized (task 371 supplies the LJ subformula property the LJ case needs). Consider whether to also state the algebraic interpolation corollary over the Lindenbaum/Heyting substrate. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake).",
+      "completion_summary": "Craig interpolation via Maehara's method for both LK and LJ. maeharaCore (LK) and ljMaeharaCore (LJ) proved by structural induction over cut-free proofs; Craig corollaries LKProof.interpolation and LJProof.interpolation expose the public API. Both barrels (LK.lean, LJ.lean) wire the new modules; LJ.Interpolation added to Cslib.lean. Zero sorries, no new axioms, all CI checks green for the interpolation files.",
       "dependencies": [
         371
       ],
       "created": "2026-06-27T05:29:32Z",
-      "last_updated": "2026-06-27T05:35:19Z",
+      "last_updated": "2026-06-28T00:00:00Z",
       "next_artifact_number": 1,
       "artifacts": [
         {
@@ -1785,7 +1786,7 @@
           "summary": "6 phases, waves [[1],[2,5],[3],[4],[6]]; Phase 3 hard, 3a/3b split"
         }
       ],
-      "session_id": null
+      "session_id": "sess_1782614409_bb49a0"
     },
     {
       "project_number": 375,
@@ -2058,7 +2059,7 @@
     {
       "project_number": 382,
       "project_name": "normalization_deadcode_cleanup",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Post-332 cleanup: remove the dead Dershowitz-Manna termination-measure machinery orphaned by task 332's constructive strong-normalization proof. Dead (0 live uses, verified): normMeasure, normMeasure_wf, reduceRoot_decreases_normMeasure (incl. the h_8 case), redexWeight, redexWeight_zero_sn, and the Multiset.isDershowitzMannaLT_* helpers used only by them; likely also the 'import Mathlib.Data.Multiset.DershowitzManna'. KEEP the live shared helpers (maximalFormulas, commutingSum, nodeCount, weakCtx lemmas, subsOne_new_redex_complexity_lt, maximalFormulas_sn_eq_zero) used by the constructive route. After removal: lake build Normalization green + 0 sorry, then run lake shake to confirm no further dead imports/decls. Also re-run the full CI pipeline (lake build, checkInitImports, lake lint, lake test, lake shake) once main is green again -- currently blocked by PRE-EXISTING unrelated red modules (Bimodal/*, Modal/Tableau/Soundness; owned by task 364 etc.). File: Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean. Depends on 332.",
@@ -2066,10 +2067,11 @@
         332
       ],
       "created": "2026-06-27T00:00:00Z",
-      "last_updated": "2026-06-27T00:00:00Z",
+      "last_updated": "2026-06-28T00:00:00Z",
       "next_artifact_number": 1,
       "artifacts": [],
-      "session_id": null
+      "session_id": "sess_1782614409_bb49a0",
+      "completion_summary": "Removed dead Dershowitz-Manna machinery from Termination.lean (-423 lines, 1888->1465). Dead decls removed: normMeasure, normMeasure_wf, reduceRoot_decreases_normMeasure, reduceRootSubSN, redexWeight, sn_redexWeight_zero, redexWeight_zero_sn, Multiset.isDershowitzMannaLT_{add_right,cons_add,cons_add',remove_add_lt}, import Mathlib.Data.Multiset.DershowitzManna. Kept live: maximalFormulas, commutingSum, nodeCount, weakCtx lemmas, subsOne_new_redex_complexity_lt, maximalFormulas_sn_eq_zero, conclusionComplexity. Build green (598 jobs, 0 sorry, 0 new axioms). lake shake clean for the file. Commit c7cb659a."
     },
     {
       "project_number": 383,

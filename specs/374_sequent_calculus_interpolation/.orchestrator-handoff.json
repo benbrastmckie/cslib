@@ -1,23 +1,17 @@
 {
   "task_number": 374,
-  "status": "partial",
-  "dispatch_status": "partial",
-  "phases_completed": 2,
-  "phases_total": 6,
-  "dispatch_summary": "ax case discharged (4-way split: (Γ₁,Δ₁)→⊥, (Γ₁,Δ₂)→A, (Γ₂,Δ₁)→¬A, (Γ₂,Δ₂)→⊤); 4 hard cases remain",
-  "build_state": {
-    "scoped_build": "green",
-    "error_count": 0,
-    "sorry_count": 4
-  },
-  "sorry_inventory": {
-    "count": 4,
-    "items": [
-      {"case": "andR"},
-      {"case": "orL"},
-      {"case": "impL"},
-      {"case": "impR"}
-    ]
-  },
-  "continuation_context": "Remaining cases andR/orL/impL (combine I₁,I₂ from both premises) and impR (single interpolant); then Phase 4 LK Craig corollary, Phase 5 LJ core, Phase 6 LJ corollary+CI"
+  "status": "planned",
+  "summary": "Plan v2 divides the remaining task-374 work into 9 fine-grained phases (one proof obligation each where possible) across two independent tracks. LK track (A1 impR warmup -> A2 andR two-premise template -> A3 orL mirror -> A4 impL hardest -> B Craig corollary + barrel) closes the 4 remaining maeharaCore sorries and ships the public LKProof.interpolation. LJ track (C1 ljMaeharaCore leaf/one-premise/pass-through cases -> C2 orL+impL two-premise -> C3 Craig corollary + barrel) builds the new LJ/Interpolation.lean end-to-end. Phase D is the final whole-library CI sweep. LK and LJ tracks touch disjoint files and run in parallel; zero-debt policy (mark BLOCKED with lean_goal, never sorry-defer).",
+  "phases_completed": 0,
+  "phases_total": 9,
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "implement",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/374_sequent_calculus_interpolation/plans/02_interpolation-divided.md",
+      "summary": "Divided per-obligation plan v2: 9 phases (A1-A4, B LK track; C1-C3 LJ track; D final CI), each ending at a green build with zero new sorry debt."
+    }
+  ]
 }

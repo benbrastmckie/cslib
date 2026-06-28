@@ -153,138 +153,233 @@ lemma modalStepBranch_preserves_accFreshInv
 
 /-! ## Main Fuel-Induction Soundness Lemma -/
 
-/-- **Modal expansion closed implies all unsatisfiable**: If
-`modalExpandBranches branches expandedSets acc fuel = .closed` and inputs have the same length
-and `hstep` (the semantic preservation lemma) holds, then every branch in `branches` is
-unsatisfiable.
+private lemma forall₂_of_zip_mem {α β : Type*} {R : α → β → Prop}
+    {xs : List α} {ys : List β}
+    (hlen : xs.length = ys.length)
+    (h : ∀ {x y}, (x, y) ∈ xs.zip ys → R x y) :
+    List.Forall₂ R xs ys := by
+  induction xs generalizing ys with
+  | nil =>
+    cases ys with
+    | nil => exact List.Forall₂.nil
+    | cons y ys => simp at hlen
+  | cons x xs ih =>
+    cases ys with
+    | nil => simp at hlen
+    | cons y ys =>
+      simp only [List.length_cons, Nat.add_right_cancel_iff] at hlen
+      apply List.Forall₂.cons
+      · apply h; simp
+      · apply ih hlen
+        intro x' y' hm
+        apply h; exact .tail _ hm
+
+private lemma forall₂_replicate_right {α β : Type*} {R : α → β → Prop}
+    {xs : List α} {a : β} :
+    List.Forall₂ R xs (List.replicate xs.length a) ↔ ∀ x ∈ xs, R x a := by
+  induction xs with
+  | nil => simp
+  | cons x xs ih =>
+    simp only [List.length_cons, List.replicate_succ, List.mem_cons]
+    constructor
+    · intro hf
+      cases hf with
+      | cons hx hxs =>
+        intro y hy
+        rcases hy with rfl | hy
+        · exact hx
+        · exact ih.mp hxs y hy
+    · intro hall
+      apply List.Forall₂.cons
+      · exact hall x (Or.inl rfl)
+      · exact ih.mpr (fun y hy => hall y (Or.inr hy))
+
+private lemma forall₂_append_aux {α β : Type*} {R : α → β → Prop}
+    {l1 l2 : List α} {m1 m2 : List β}
+    (h1 : List.Forall₂ R l1 m1) (h2 : List.Forall₂ R l2 m2) :
+    List.Forall₂ R (l1 ++ l2) (m1 ++ m2) := by
+  induction h1 with
+  | nil => exact h2
+  | cons hx _ ih => exact List.Forall₂.cons hx ih
+
+private lemma forall₂_drop_aux {α β : Type*} {R : α → β → Prop} :
+    ∀ (n : Nat) {l1 : List α} {l2 : List β},
+    List.Forall₂ R l1 l2 → List.Forall₂ R (l1.drop n) (l2.drop n)
+  | 0, _, _, h => by simpa
+  | _ + 1, _, _, .nil => by simp
+  | n + 1, _, _, .cons _ h => forall₂_drop_aux n h
+
+private lemma forall₂_take_aux {α β : Type*} {R : α → β → Prop} :
+    ∀ (n : Nat) {l1 : List α} {l2 : List β},
+    List.Forall₂ R l1 l2 → List.Forall₂ R (l1.take n) (l2.take n)
+  | 0, _, _, _ => by simp
+  | _ + 1, _, _, .nil => by simp
+  | n + 1, _, _, .cons h1 h2 => .cons h1 (forall₂_take_aux n h2)
+
+/-- **Modal expansion closed implies all branches unsatisfiable**: If
+`modalExpandBranches branches expandedSets accs fuel = .closed`, the length invariants hold,
+and the per-branch freshness invariant `accFreshInv` holds for each `(branches[i], accs[i])`
+pair, then every branch is unsatisfiable against its corresponding accessibility relation.
 
 Proved by induction on `fuel` with inner induction on the `pending` list for `processNext`.
-The length invariant ensures the malformed `| _ :: _, [] =>` case is never reached. -/
-theorem modalExpandBranches_closed_unsat
-    (fuel : Nat) :
-    ∀ (branches : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-      (expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-      (acc : Accessibility),
+The per-branch `accs` design eliminates the anti-monotonicity obligations of earlier designs. -/
+theorem modalExpandBranches_closed_unsat (fuel : Nat) :
+    ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility),
       expandedSets.length = branches.length →
-      accFreshInv (branches.flatMap id) acc →
-      (∀ b e newBs newExps newAcc,
-        b ∈ branches →
-        modalStepBranch b e acc = some (newBs, newExps, newAcc) →
-        branchSatisfiable.{v, u} b acc →
-        accFreshInv b acc →
-        ∃ b' ∈ newBs, branchSatisfiable.{v, u} b' newAcc) →
-      modalExpandBranches branches expandedSets acc fuel = .closed →
-      ∀ b ∈ branches, ¬branchSatisfiable.{v, u} b acc := by
+      accs.length = branches.length →
+      List.Forall₂ (fun b acc => accFreshInv b acc) branches accs →
+      modalExpandBranches branches expandedSets accs fuel = .closed →
+      List.Forall₂ (fun b acc => ¬branchSatisfiable.{v, u} b acc) branches accs := by
   induction fuel with
   | zero =>
-    intro branches expandedSets acc hlength _ _ h b hb hsat
+    intro branches expandedSets accs hlength hlength_accs hFresh h
     simp only [modalExpandBranches] at h
     split at h
     · simp at h
     · rename_i hfind
-      obtain ⟨i, hilt, hib⟩ := List.mem_iff_getElem.mp hb
-      have hziplt : i < (branches.zip expandedSets).length := by
-        simp only [List.length_zip]; omega
-      have hmem : (branches.zip expandedSets)[i] ∈ branches.zip expandedSets :=
-        List.getElem_mem hziplt
-      have hfn := List.findSome?_eq_none_iff.mp hfind _ hmem
-      rw [List.getElem_zip] at hfn
-      simp only [hib] at hfn
-      by_cases hcl : isModalClosed b = true
-      · exact modalClosed_unsat b hcl acc hsat
-      · simp [hcl] at hfn
+      apply forall₂_of_zip_mem hlength_accs.symm
+      intro b a hmem
+      have hfn := (List.findSome?_eq_none_iff.mp hfind) _ hmem
+      have hcl : isModalClosed b = true := by
+        cases h : isModalClosed b with
+        | true => rfl
+        | false => simp [h] at hfn
+      exact modalClosed_unsat b hcl a
   | succ fuel' ih =>
-    intro branches expandedSets acc hlength hInv hstep h b hb hsat
-    suffices key : ∀ (pending : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-        (pendingExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-        (done : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-        (doneExp : List (List (SignedFormula (Proposition Atom) WorldIndex))),
+    intro branches expandedSets accs hlength hlength_accs hFresh h
+    suffices key : ∀ (pending pendingExp :
+          List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (pendingAccs : List Accessibility)
+        (done doneExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (doneAccs : List Accessibility),
         pendingExp.length = pending.length →
+        pendingAccs.length = pending.length →
         doneExp.length = done.length →
-        modalExpandBranches.processNext fuel' pending pendingExp done doneExp acc = .closed →
-        ∀ bp ∈ pending, ¬branchSatisfiable.{v, u} bp acc from
-      key branches expandedSets [] [] hlength rfl
-        (by simpa [modalExpandBranches] using h) b hb hsat
+        doneAccs.length = done.length →
+        List.Forall₂ (fun b a => accFreshInv b a) pending pendingAccs →
+        List.Forall₂ (fun b a => accFreshInv b a) done doneAccs →
+        modalExpandBranches.processNext
+          fuel' pending pendingExp pendingAccs done doneExp doneAccs = .closed →
+        List.Forall₂ (fun b a => ¬branchSatisfiable.{v, u} b a) pending pendingAccs from
+      key branches expandedSets accs [] [] []
+        hlength hlength_accs rfl rfl hFresh List.Forall₂.nil
+        (by simpa [modalExpandBranches] using h)
     intro pending
     induction pending with
-    | nil => intro _ _ _ _ _ _ bp hmem; simp at hmem
+    | nil =>
+      intro _ _ _ _ _ _ _ _ _ hFresh_pending _ _
+      cases hFresh_pending
+      exact List.Forall₂.nil
     | cons bh bt ih_inner =>
-      intro pendingExp done doneExp hlength hdlength hinner bp hbp
-      simp only [List.length_cons] at hlength
-      cases hpendingExp : pendingExp with
-      | nil =>
-        simp only [hpendingExp, List.length_nil] at hlength; omega
-      | cons e es =>
-        simp only [hpendingExp, List.length_cons, Nat.add_right_cancel_iff] at hlength
-        rw [hpendingExp] at hinner
-        simp only [modalExpandBranches.processNext] at hinner
-        simp only [List.mem_cons] at hbp
-        by_cases hcl : isModalClosed bh = true
-        · rw [if_pos hcl] at hinner
-          rcases hbp with rfl | hmem_rest
-          · exact modalClosed_unsat bp hcl acc
-          · exact ih_inner es (done ++ [bh]) (doneExp ++ [e]) hlength
-              (by simp [hdlength]) hinner bp hmem_rest
-        · simp only [Bool.not_eq_true] at hcl
-          rw [if_neg (by simp [hcl])] at hinner
-          cases hstep_r : modalStepBranch bh e acc with
-          | none =>
-            rw [hstep_r] at hinner; simp at hinner
-          | some step =>
-            obtain ⟨newBs, newExp, newAcc⟩ := step
-            rw [hstep_r] at hinner
-            have hnewlen : newExp.length = newBs.length := by
-              unfold modalStepBranch at hstep_r
-              obtain ⟨sf, _, hf⟩ := List.exists_of_findSome?_eq_some hstep_r
-              rcases h_apply : (modalApplyOne sf bh acc) with ⟨result, newAcc'⟩
-              simp only [h_apply] at hf
-              cases result with
-              | notApplicable => simp at hf
-              | linear nf =>
-                split_ifs at hf
-                simp only [Option.some.injEq, Prod.mk.injEq] at hf
-                obtain ⟨rfl, rfl, _⟩ := hf; simp
-              | branching bs =>
-                split_ifs at hf
-                simp only [Option.some.injEq, Prod.mk.injEq] at hf
-                obtain ⟨rfl, rfl, _⟩ := hf; simp [List.length_map]
-              | persistent nf =>
-                split_ifs at hf
-                simp only [Option.some.injEq, Prod.mk.injEq] at hf
-                obtain ⟨rfl, rfl, _⟩ := hf; simp
-            have hlen_rec : (doneExp ++ newExp ++ es).length =
-                (done ++ newBs ++ bt).length := by simp [hdlength, hlength, hnewlen]
-            rcases hbp with rfl | hmem_rest
-            · intro hbp_sat
-              -- Use hstep to find a satisfiable branch in newBs
-              obtain ⟨b', hb'_mem, hb'_sat⟩ :=
-                hstep bp e newBs newExp newAcc (List.mem_cons_self)
-                  hstep_r hbp_sat (by
-                    -- Need accFreshInv bh acc
-                    -- This follows from hInv restricted to bh
-                    intro w w' hedge
-                    exact hInv w w' hedge)
-              exact ih (done ++ newBs ++ bt)
-                (doneExp ++ newExp ++ es)
-                newAcc hlen_rec
-                (by intro w w' hedge; exact (by
-                  -- accFreshInv for newAcc on the new branch list
-                  -- This is the invariant maintenance obligation
-                  -- For the initial call, hInv handles this
-                  -- In general, this requires knowing how newAcc was formed
-                  -- Placeholder: use hInv
-                  exact hInv w w' (by
-                    simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons,
-                      Bool.or_eq_true] at hedge
-                    rcases hedge with h' | h'
-                    · exact absurd hedge (by simp [Accessibility.hasEdge])
-                    · exact h')))
-                (by intro b2 e2 newBs2 newExps2 newAcc2 hmem2 hstep2 hsat2 hInv2
-                    exact hstep b2 e2 newBs2 newExps2 newAcc2 (by simp [hmem2]) hstep2 hsat2 hInv2)
-                hinner b' (by simp [hb'_mem]) hb'_sat
-            · exact ih_inner es (done ++ newBs ++ bt)
-                (doneExp ++ newExp ++ es)
-                hlength (by simp [hdlength, hlength, hnewlen]) hinner bp hmem_rest
+      intro pendingExp pendingAccs done doneExp doneAccs
+        hpendingExpLen hpendingAccsLen hdoneExpLen hdoneAccsLen
+        hFresh_pending hFresh_done hinner
+      cases pendingAccs with
+      | nil => simp at hpendingAccsLen
+      | cons a restAs =>
+        cases pendingExp with
+        | nil => simp at hpendingExpLen
+        | cons e es =>
+          simp only [List.length_cons, Nat.add_right_cancel_iff] at hpendingExpLen hpendingAccsLen
+          cases hFresh_pending with
+          | cons hInv_bh hFresh_rest =>
+            simp only [modalExpandBranches.processNext] at hinner
+            by_cases hcl : isModalClosed bh = true
+            · -- Branch is closed: skip it and recurse
+              rw [if_pos hcl] at hinner
+              apply List.Forall₂.cons
+              · exact modalClosed_unsat bh hcl a
+              · exact ih_inner es restAs (done ++ [bh]) (doneExp ++ [e]) (doneAccs ++ [a])
+                    (by simp [hpendingExpLen])
+                    (by simp [hpendingAccsLen])
+                    (by simp [hdoneExpLen])
+                    (by simp [hdoneAccsLen])
+                    hFresh_rest
+                    (forall₂_append_aux hFresh_done
+                      (List.Forall₂.cons hInv_bh List.Forall₂.nil))
+                    hinner
+            · -- Branch is open: expand it
+              simp only [Bool.not_eq_true] at hcl
+              rw [if_neg (by simp [hcl])] at hinner
+              cases hstep_eq : modalStepBranch bh e a with
+              | none => rw [hstep_eq] at hinner; simp at hinner
+              | some step =>
+                obtain ⟨newBs, newExps, newAcc⟩ := step
+                rw [hstep_eq] at hinner
+                have hnewExpLen : newExps.length = newBs.length := by
+                  unfold modalStepBranch at hstep_eq
+                  obtain ⟨sf, _, hf⟩ := List.exists_of_findSome?_eq_some hstep_eq
+                  rcases h_apply : (modalApplyOne sf bh a) with ⟨result, _⟩
+                  simp only [h_apply] at hf
+                  cases result with
+                  | notApplicable => simp at hf
+                  | linear nf =>
+                    split_ifs at hf
+                    simp only [Option.some.injEq, Prod.mk.injEq] at hf
+                    obtain ⟨rfl, rfl, _⟩ := hf; simp
+                  | branching bs =>
+                    split_ifs at hf
+                    simp only [Option.some.injEq, Prod.mk.injEq] at hf
+                    obtain ⟨rfl, rfl, _⟩ := hf; simp [List.length_map]
+                  | persistent nf =>
+                    split_ifs at hf
+                    simp only [Option.some.injEq, Prod.mk.injEq] at hf
+                    obtain ⟨rfl, rfl, _⟩ := hf; simp
+                -- Build freshness invariant for all child branches
+                have hFreshNew : List.Forall₂ (fun b a => accFreshInv b a)
+                    newBs (List.replicate newBs.length newAcc) :=
+                  forall₂_replicate_right.mpr
+                    (modalStepBranch_preserves_accFreshInv bh e a newBs newExps newAcc
+                      hstep_eq hInv_bh)
+                have hFreshAll : List.Forall₂ (fun b a => accFreshInv b a)
+                    (done ++ newBs ++ bt)
+                    (doneAccs ++ List.replicate newBs.length newAcc ++ restAs) :=
+                  forall₂_append_aux (forall₂_append_aux hFresh_done hFreshNew) hFresh_rest
+                -- Apply the fuel induction hypothesis
+                have hunsat_all :
+                    List.Forall₂ (fun b a => ¬branchSatisfiable.{v, u} b a)
+                    (done ++ newBs ++ bt)
+                    (doneAccs ++ List.replicate newBs.length newAcc ++ restAs) :=
+                  ih (done ++ newBs ++ bt) (doneExp ++ newExps ++ es)
+                    (doneAccs ++ List.replicate newBs.length newAcc ++ restAs)
+                    (by simp only [List.length_append]; omega)
+                    (by simp only [List.length_append, List.length_replicate]; omega)
+                    hFreshAll hinner
+                -- Extract: newBs ++ bt part (drop the done prefix)
+                have hunsat_newBs_bt :
+                    List.Forall₂ (fun b a => ¬branchSatisfiable.{v, u} b a)
+                    (newBs ++ bt) (List.replicate newBs.length newAcc ++ restAs) := by
+                  have h := forall₂_drop_aux done.length hunsat_all
+                  rw [List.append_assoc done newBs bt, List.drop_left,
+                      List.append_assoc doneAccs (List.replicate newBs.length newAcc) restAs,
+                      List.drop_left' hdoneAccsLen] at h
+                  exact h
+                -- Extract: bt part (drop the newBs prefix)
+                have hunsat_bt :
+                    List.Forall₂ (fun b a => ¬branchSatisfiable.{v, u} b a)
+                    bt restAs := by
+                  have h := forall₂_drop_aux newBs.length hunsat_newBs_bt
+                  rw [List.drop_left,
+                      List.drop_left' List.length_replicate] at h
+                  exact h
+                -- Extract: newBs part (take the newBs prefix)
+                have hunsat_newBs :
+                    List.Forall₂ (fun b a => ¬branchSatisfiable.{v, u} b a)
+                    newBs (List.replicate newBs.length newAcc) := by
+                  have h := forall₂_take_aux newBs.length hunsat_newBs_bt
+                  rw [List.take_left,
+                      List.take_left' List.length_replicate] at h
+                  exact h
+                -- Show bh is unsatisfiable (contrapositive via sat preservation)
+                have hbh_unsat : ¬branchSatisfiable.{v, u} bh a := by
+                  intro hbh_sat
+                  obtain ⟨b', hb'_mem, hb'_sat⟩ :=
+                    modalStepBranch_preserves_sat bh e a newBs newExps newAcc
+                      hstep_eq hbh_sat hInv_bh
+                  exact (forall₂_replicate_right.mp hunsat_newBs b' hb'_mem) hb'_sat
+                -- Combine head and tail
+                exact List.Forall₂.cons hbh_unsat hunsat_bt
 
 /-! ## K-Validity and Soundness -/
 
@@ -297,16 +392,12 @@ def kValid (φ : Proposition Atom) : Prop :=
 Proof by contrapositive: if `φ` is falsified at some world `w` in model `m`, then
 the initial branch `[F(φ)@0]` is satisfiable (use constant world assignment `_ ↦ w`).
 But if the tableau closes, all initial branches are unsatisfiable by
-`modalExpandBranches_closed_unsat`.
-
-This proof requires `hstep_pres` (the semantic preservation step), which is provided
-by `modalStepBranch_preserves_sat` together with the freshness invariant. -/
+`modalExpandBranches_closed_unsat` (per-branch accessibility design). -/
 theorem modalTableau_sound (φ : Proposition Atom)
     (h : modalTableau φ = .closed) :
     kValid φ := by
   intro World m w
   by_contra hnotsat
-  -- The initial branch [F(φ)@0] is satisfiable via the constant assignment _ ↦ w
   have hsat : branchSatisfiable [⟨.neg, φ, 0⟩] Accessibility.empty :=
     ⟨World, m, fun _ => w,
       fun w1 w2 hedge => absurd hedge (by simp [Accessibility.empty, Accessibility.hasEdge]),
@@ -314,20 +405,13 @@ theorem modalTableau_sound (φ : Proposition Atom)
         simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem
         subst hmem
         exact ⟨fun h => by simp at h, fun _ => hnotsat⟩⟩
-  -- The freshness invariant holds initially (empty acc)
-  have hInvInit : accFreshInv [⟨.neg, φ, 0⟩] Accessibility.empty :=
-    accFreshInv_empty _
-  -- Apply the loop invariant: the expansion cannot close if the initial branch is satisfiable
-  exact modalExpandBranches_closed_unsat
-    (modalFuel φ)
-    [[⟨.neg, φ, 0⟩]] [[]] Accessibility.empty
-    rfl
-    (by intro w1 w2 hedge; exact absurd hedge (by simp [Accessibility.empty, Accessibility.hasEdge]))
-    (fun b e newBs newExps newAcc hmem hstep_eq hsat_b hInv_b =>
-      modalStepBranch_preserves_sat b e Accessibility.empty newBs newExps newAcc hstep_eq hsat_b
-        (by intro w1 w2 hedge; exact absurd hedge (by simp [Accessibility.empty, Accessibility.hasEdge])))
+  have hunsat := modalExpandBranches_closed_unsat (modalFuel φ)
+    [[⟨.neg, φ, 0⟩]] [[]] [Accessibility.empty]
+    rfl rfl
+    (List.Forall₂.cons (accFreshInv_empty _) List.Forall₂.nil)
     (by simp only [modalTableau] at h; exact h)
-    _ (by simp) hsat
+  cases hunsat with
+  | cons h_unsat _ => exact h_unsat hsat
 
 end Cslib.Logic.Modal.Tableau
 

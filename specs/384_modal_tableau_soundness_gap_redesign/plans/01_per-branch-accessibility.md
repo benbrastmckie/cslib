@@ -201,7 +201,7 @@ genuinely new semantic obligation; obligations 2 and 3 are eliminated structural
 
 ---
 
-### Phase 4: Reformulate `modalExpandBranches_closed_unsat` (`Soundness.lean`) [NOT STARTED]
+### Phase 4: Reformulate `modalExpandBranches_closed_unsat` (`Soundness.lean`) [COMPLETED]
 
 **Goal**: Replace the single-`acc` loop invariant and the unthreadable fixed-`acc` `hstep`
 hypothesis with a zipped per-branch invariant, then discharge the fuel + pending inductions —
@@ -243,7 +243,7 @@ attempt because the two false obligations are removed).
 
 ---
 
-### Phase 5: `modalTableau_sound` call site + full CI build (`Soundness.lean`) [NOT STARTED]
+### Phase 5: `modalTableau_sound` call site + full CI build (`Soundness.lean`) [COMPLETED]
 
 **Goal**: Adapt the single `modalTableau_sound` call site to the per-branch entry, then run the
 full CI pipeline and confirm the public API is unchanged.

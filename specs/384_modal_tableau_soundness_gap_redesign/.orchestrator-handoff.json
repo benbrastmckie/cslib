@@ -1,25 +1,19 @@
 {
-  "task_number": 384,
-  "task_slug": "modal_tableau_soundness_gap_redesign",
-  "session_id": "sess_1782651741_bd598c",
   "phase": "implement",
-  "status": "partial",
-  "phases_completed": 5,
+  "status": "implemented",
+  "phases_completed": 6,
   "phases_total": 6,
-  "completed": [
-    "1 per-branch accs plumbing (Saturation.lean)",
-    "2 freshness monotonicity helpers (Branch.lean)",
-    "6 references.bib citations",
-    "structural split Soundness.lean -> SoundnessStep.lean (cf006bf8)",
-    "3 maintenance lemma modalStepBranch_preserves_accFreshInv (c55abbf0) — the genuine crux, zero sorry, driven directly"
-  ],
-  "remaining": [
-    "4 reformulate modalExpandBranches_closed_unsat to per-branch accs/Forall2 (HIGHEST RISK, ~130 lines)",
-    "5 update modalTableau_sound call site + full lake build + lint-style"
-  ],
-  "current_build_state": "Soundness.lean: exactly 3 errors, all in modalExpandBranches_closed_unsat (lines 176/180/197), the OLD single-acc proof that no longer matches modalExpandBranches' new accs:List signature. The '-- Placeholder: use hInv' at ~line 274 IS the original masked gap. SoundnessStep.lean clean. Zero sorry in committed code.",
-  "phase4_spec": "Restate: forall branches expandedSets accs, expandedSets.length=branches.length -> accs.length=branches.length -> List.Forall2 accFreshInv branches accs -> modalExpandBranches branches expandedSets accs fuel = .closed -> List.Forall2 (fun b acc => not branchSatisfiable.{v,u} b acc) branches accs. DROP the fixed-acc hstep hypothesis — call modalStepBranch_preserves_sat directly (it is forall-closed over acc). Thread freshness for the expanded slot via Phase 3 modalStepBranch_preserves_accFreshInv; siblings keep their accs[j] unchanged (obligations 2&3 never arise). processNext now threads pendingAccs/doneAccs; recursion uses doneAccs ++ List.replicate newBs.length newAcc ++ restAs. Handle append splits with List.Forall2 append/cons lemmas; index-form fallback allowed. Then update modalTableau_sound (Phase 5): call site currently passes single Accessibility.empty + the hstep lambda — change to [Accessibility.empty] and Forall2 forms; conclusion gives Forall2 over [[F φ @0]] [empty], extract the single ¬branchSatisfiable.",
-  "constraints": ["zero sorry", "zero new axioms", "lake build scoped + full", "lake exe lint-style"],
-  "blocks_task": 364,
-  "next_command": "/implement 384  (resume at Phase 4)"
+  "summary": "Task 384 complete. The soundness-proof gap in modalExpandBranches_closed_unsat is closed with zero sorry and zero new axioms. The per-branch accs design (Option A) eliminates the two false anti-monotonicity obligations by construction. Key fixes in Phase 4: (1) private helper lemmas forall₂_{append,drop,take}_aux replace unavailable Mathlib.Data.List.Forall2 imports; (2) forall₂_of_zip_mem uses 'apply h; simp' not 'exact h (List.mem_cons_self _ _)'; (3) fuel-0 case uses 'cases h : isModalClosed b' not split_ifs; (4) List.length_replicate used without bogus explicit args. Scoped build Cslib.Logics.Modal.Tableau.Soundness is green (480 jobs). Full lake build fails only on pre-existing Propositional.Tableau module keyword issue unrelated to task 384. This unblocks task 364.",
+  "blockers": [],
+  "sorry_inventory": [],
+  "ci_results": {
+    "scoped_build": "green",
+    "scoped_build_target": "Cslib.Logics.Modal.Tableau.Soundness",
+    "full_build": "partial - pre-existing Propositional.Tableau module keyword error unrelated to task 384",
+    "lake_lint": "no warnings in Soundness.lean",
+    "lake_lint_style": "clean for Soundness.lean",
+    "lake_shake": "no import issues in Soundness.lean",
+    "sorry_count": 0,
+    "axiom_count_delta": 0
+  }
 }

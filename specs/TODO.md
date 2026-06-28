@@ -11,10 +11,9 @@ next_project_number: 385
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,299,301,321,369,373,374,382,384 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,317,364 | 36,37,180,299,369,384 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
-| 3 | 41,275,360,375 | 39,40,317,364 | Foundations, Propositional Logic |
-| 4 | 370 | 360 | Propositional Logic |
+| 1 | 36,37,180,226,241,278,299,301,321,364,369,373,374,382 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,317,360 | 36,37,180,299,364,369 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 3 | 41,275,370,375 | 39,40,317,360 | Foundations, Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -64,13 +63,10 @@ next_project_number: 385
 
 ### Uncategorized
 
-384 [PARTIAL] — Redesign the modal tableau fresh-world scheme to close the build-
-  └─ 364 [BLOCKED] — (Modal Logic: Repair the pre-existing Mathlib/toolchai) (see above)
-
 ## Tasks
 
 ### 384. Modal tableau soundness gap redesign
-- **Status**: [PARTIAL]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 - **Research**: [384_modal_tableau_soundness_gap_redesign/reports/01_soundness-gap-redesign.md]

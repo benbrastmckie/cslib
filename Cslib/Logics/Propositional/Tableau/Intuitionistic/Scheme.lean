@@ -4,8 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Benjamin Brast-McKie
 -/
 
+module
+
 import Cslib.Init
-import Cslib.Logics.Propositional.Tableau.Minimal.Completeness
+public import Cslib.Logics.Propositional.Tableau.Minimal.Completeness
 
 /-! # IntMinScheme: Parameterized Interface for Intuitionistic/Minimal Tableau
 

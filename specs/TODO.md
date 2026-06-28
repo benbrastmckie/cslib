@@ -6,7 +6,7 @@ next_project_number: 383
 
 ## Task Order
 
-*Updated 2026-06-27. Generated from state.json dependency graph.*
+*Updated 2026-06-28. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
@@ -36,7 +36,7 @@ next_project_number: 383
 
 299 [IMPLEMENTING] — Implement tableau decision procedure for basic modal logic K with
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
-364 [PLANNED] — Repair the pre-existing Mathlib/toolchain-drift build failure in 
+364 [BLOCKED] — Repair the pre-existing Mathlib/toolchain-drift build failure in 
   └─ 360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t
 
 ### Propositional Logic
@@ -286,7 +286,7 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 364. Modal tableau soundness drift repair
-- **Status**: [PLANNED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

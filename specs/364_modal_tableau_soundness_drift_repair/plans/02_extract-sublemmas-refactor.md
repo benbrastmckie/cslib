@@ -1,7 +1,7 @@
 # Implementation Plan: Task #364
 
 - **Task**: 364 - Repair Mathlib/toolchain-drift build failure in `Cslib/Logics/Modal/Tableau/Soundness.lean` (extract-sub-lemmas refactor)
-- **Status**: [NOT STARTED]
+- **Status**: [BLOCKED] — execution failed 6×; needs a fresh research round (see EXECUTION BLOCKER below)
 - **Effort**: 9 hours
 - **Dependencies**: None (closed-branch cluster already repaired in commit `c299dfdc`)
 - **Research Inputs**:
@@ -11,6 +11,83 @@
 - **Standards**: plan-format.md, status-markers.md, artifact-management.md, tasks.md
 - **Type**: cslib
 - **Lean Intent**: false
+
+---
+
+## ⚠️ EXECUTION BLOCKER — READ BEFORE ANY IMPLEMENTATION ATTEMPT
+
+> **Status: BLOCKED. This plan's execution has failed 6 times (3 pre-session + 3 in the
+> 2026-06-27 orchestration). Do NOT re-dispatch a single implementation agent against this
+> file — it will overflow. A fresh RESEARCH round is required first to solve the two open
+> problems below. This section is the research brief.**
+
+### Failure log (every attempt died without committing usable progress)
+
+| # | Approach | Death mode | Tool uses |
+|---|----------|-----------|-----------|
+| 1-3 | Pre-session single-pass in-place (per task description) | context overflow | — |
+| 4 | 12-phase extract plan, single agent, all phases | "Prompt is too long" (context overflow) | 39 |
+| 5 | **Phase 0 only** (extract 10 stubs) | **"API Error: response exceeded 32000 output-token max"** — tried to emit the whole 947-line file in one response | 9 |
+| 6 | In-place, family-by-family, **forbidden `lean_goal`**, `lean_multi_attempt` only | context overflow | 35 |
+
+Net committed progress across all 6: **zero**. Error count unchanged (~68).
+
+### Root cause of the EXECUTION difficulty (distinct from the drift itself)
+
+1. **`lean_goal` is unusable here.** The shared prologue of `modalStepBranch_preserves_sat`
+   accumulates ~13 hypotheses; every `lean_goal` probe returns a ~1 KB context, and the proof
+   needs dozens of probes — one agent context cannot hold them. Agents that call `lean_goal`
+   die. (Attempt 6 forbade it and *still* died, because reading the large proof in slices to
+   locate the obtain-shape also accumulates context.)
+2. **Phase 0 (the extraction) is itself a trap.** Doing the cut/paste either requires reading
+   the whole 600-line monolithic theorem (overflow) or writing a large edited file in one
+   response (output-token limit, attempt 5). The "make it tractable" step is the step that
+   blows up.
+
+### CORRECTION to this plan's scoping (important — the plan undercounts the drift)
+
+The Overview below claims *"all ~68 errors are confined to `modalStepBranch_preserves_sat`
+(186-787)"*. **This is wrong.** A fresh full build (2026-06-27) shows a **second, independent
+drift cluster at lines ~800-935**, outside that theorem, NOT covered by reports 01/02:
+
+| Lines | Error | Likely family |
+|-------|-------|---------------|
+| 804 | `List.bind` does not exist | Mathlib API rename → `List.flatMap` |
+| 823 | Unknown constant `List.mem_zip` | Mathlib API rename / moved |
+| 892 | Unknown constant `Bool.or_eq_true.mp` | Mathlib API rename |
+| 822, 828, 875 | Unknown identifier `b` / `bh` | binding drift downstream of the above |
+| 858, 896 | Application type mismatch | — |
+| 869, 882, 899 | failed to synthesize instance | typeclass drift |
+| 870, 900, 925 | unsolved goals | — |
+| 935 | Unknown identifier `modalExpandBranches_closed_unsat` | cascade from a broken lemma above |
+
+The `modalStepBranch_preserves_sat` cluster (the F1-F4 families in reports 01/02) is still
+real and is the bulk: F2 at 228/229, F1 `cases` at 276/625, the **F3 `hnewBs` cascade** at
+304/336/363/403/650/706/730 (all from ~10 `obtain` sites at 230/276/303/335/362 pos,
+402/625/649/705/729 neg), F4 duplicate `imp` at 747.
+
+### What the fresh RESEARCH round must produce (the two open problems)
+
+1. **A context-safe method to read this file's proof state.** Candidates to evaluate:
+   - The **`lean_minimal_hypotheses`** MCP tool (purpose-built to shrink the hypothesis context
+     — likely the single highest-value lead; NONE of the failed agents used it).
+   - **Scratch-file isolation**: copy one rule-case body into a standalone `example` in a tiny
+     file with only that case's hypotheses, where `lean_goal` returns a small context; solve the
+     `obtain`-shape there, then transplant the fix.
+   - `lean_multi_attempt` with candidate `obtain` patterns (bounded output) to find the one that
+     re-binds `hnewBs` post-drift — the single most valuable unknown.
+2. **A mechanical (non-LLM) way to perform the Phase-0 extraction**, e.g. a sed/script-driven
+   cut of each rule-case body into a stub, so no agent has to read or emit the whole file.
+   Alternatively decide whether extraction is even needed, or whether per-`obtain`-site micro
+   edits (≤25-line slices, build-as-feedback, no proof-state probing) can fix it in place.
+3. **Map the 800-935 cluster fully** (above) and confirm the exact Mathlib replacements
+   (`List.bind`→`List.flatMap`, the `List.mem_zip` / `Bool.or_eq_true.mp` successors).
+
+### Hard constraints (unchanged)
+Zero sorry, zero new axioms, preserve all statements (esp. public signature 186-196).
+NEVER call `lean_diagnostic_messages` (hangs). CI: scoped + full `lake build`, `lake exe lint-style`.
+
+---
 
 ## Overview
 

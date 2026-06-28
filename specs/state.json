@@ -1579,13 +1579,13 @@
     {
       "project_number": 364,
       "project_name": "modal_tableau_soundness_drift_repair",
-      "status": "planned",
+      "status": "blocked",
       "task_type": "cslib",
       "description": "Repair the pre-existing Mathlib/toolchain-drift build failure in Cslib/Logics/Modal/Tableau/Soundness.lean (947 lines, ~77 errors under leanprover/lean4:v4.31.0). The file is sorry-free but broke under a Lean/Mathlib bump; it was the only module not fixed during the 2026-06-26 CI-failure sweep (all other ~10 originally-failing modules were repaired). Three single-pass agents overflowed their context on it because lean_goal returns very large hypothesis contexts here, so this MUST be done in chunks with incremental commits, never calling lean_diagnostic_messages (hangs in this repo). A full root-cause diagnosis with concrete fix idioms is in reports/01_drift-diagnosis.md. The 77 errors reduce to ~4 fix-families: (1) cases X.sign no longer substitutes the isPos hypothesis (use cases h : X.sign <;> simp_all [Sign.isPos]); (2) simp only [Satisfies] ordering/no-op (reorder after rw, or use Satisfies.neg_iff/diamond_iff / Proposition.neg_def); (3) simp [tryAllPropRules,...] at hsf no longer normalizes to the shape the obtain pattern expects, causing ~60 Unknown identifier hnewBs cascades in modalStepBranch_preserves_sat (re-derive the post-simp shape via lean_goal and fix the obtain/simp set across the 5 parallel rule-cases); (4) LawfulBEq.eq_of_beq instance-synth/type mismatch. Zero sorry, zero new axioms, preserve all statements. CI: lake build (scoped + full), lake exe lint-style. Created as a follow-up of the CI-failure fix sweep.",
       "topic": "Modal Logic",
       "dependencies": [],
       "created": "2026-06-27T02:56:28Z",
-      "last_updated": "2026-06-27T21:55:04Z",
+      "last_updated": "2026-06-28T00:00:26Z",
       "session_id": "sess_repair364_ba0565",
       "artifacts": [
         {
@@ -1601,9 +1601,10 @@
         {
           "path": "specs/364_modal_tableau_soundness_drift_repair/plans/02_extract-sublemmas-refactor.md",
           "type": "plan",
-          "summary": "Modal/Tableau/Soundness drift repair: 12-phase extract-sub-lemmas refactor"
+          "summary": "Extract-sub-lemmas plan + EXECUTION BLOCKER research brief (6 failed attempts, corrected error map)"
         }
-      ]
+      ],
+      "blockers": "Execution intractable for agents: 6 failed attempts (3 pre-session + 3 on 2026-06-27), zero committed progress. lean_goal overflows context inside modalStepBranch_preserves_sat; Phase-0 extraction hits context/output-token limits. Needs a fresh-context RESEARCH round before any further implementation. Full failure log, corrected error map (incl. an undocumented 2nd drift cluster at lines 800-935), and a research brief are in plans/02_extract-sublemmas-refactor.md (## EXECUTION BLOCKER) and .orchestrator-handoff.json. Last broken file in the repo; everything else green after tasks 381+382."
     },
     {
       "project_number": 365,

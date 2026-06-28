@@ -1,0 +1,54 @@
+{
+  "task_number": 364,
+  "status": "blocked",
+  "summary": "Modal/Tableau/Soundness.lean drift repair is the LAST broken file in the repo (everything else builds green after tasks 381+382). Execution has failed 6 times (3 pre-session + 3 on 2026-06-27); zero committed progress. Blocked pending a fresh-context RESEARCH round.",
+  "blocker": {
+    "kind": "execution_intractable_for_agents",
+    "why": "lean_goal returns ~1KB contexts inside modalStepBranch_preserves_sat (~13-hypothesis prologue); the proof needs dozens of probes, overflowing any single agent context. The Phase-0 extraction itself overflows (reading the whole 600-line theorem) or hits the 32k output-token limit (writing the whole file at once).",
+    "failed_attempts": [
+      {"n": "1-3", "approach": "pre-session single-pass in-place", "death": "context overflow"},
+      {"n": 4, "approach": "12-phase extract plan, single agent", "death": "Prompt is too long", "tool_uses": 39, "agentId": "a2d2d2570a4775b63"},
+      {"n": 5, "approach": "Phase 0 only (extract 10 stubs)", "death": "API Error: response exceeded 32000 output-token max (tried to emit whole file in one response)", "tool_uses": 9, "agentId": "a0928d0942c004b1d"},
+      {"n": 6, "approach": "in-place family-by-family, lean_goal forbidden, lean_multi_attempt only", "death": "context overflow", "tool_uses": 35, "agentId": "ac9461fd609448e66"}
+    ]
+  },
+  "current_state": {
+    "file": "Cslib/Logics/Modal/Tableau/Soundness.lean",
+    "lines": 948,
+    "scoped_build_error_count": 68,
+    "sorry_count": 0,
+    "note": "File is sorry-free but does not compile. Closed-branch cluster (lines ~63-184) already repaired in commit c299dfdc."
+  },
+  "error_map": {
+    "cluster_A_modalStepBranch_preserves_sat_186_787": {
+      "F2_simp_ordering": [228, 229],
+      "F1_cases_failed": [276, 625],
+      "F3_hnewBs_cascade_errors": [304, 336, 363, 403, 650, 706, 730],
+      "F3_obtain_sites_to_fix": {"positive": [230, 276, 303, 335, 362], "negative": [402, 625, 649, 705, 729]},
+      "F4_duplicate_alt_imp": [747]
+    },
+    "cluster_B_NOT_in_plan_02_scope_800_935": {
+      "List.bind_removed": [804],
+      "List.mem_zip_unknown": [823],
+      "Bool.or_eq_true.mp_unknown": [892],
+      "unknown_identifier_b_bh": [822, 828, 875],
+      "application_type_mismatch": [858, 896],
+      "failed_synthesize_instance": [869, 882, 899],
+      "unsolved_goals": [870, 900, 925],
+      "cascade_modalExpandBranches_closed_unsat": [935]
+    }
+  },
+  "research_round_must_produce": [
+    "A context-safe way to read this file's proof state: EVALUATE the lean_minimal_hypotheses MCP tool FIRST (no failed agent used it) — likely highest-value lead. Fallback: scratch-file isolation (copy one rule-case into a standalone example with minimal hypotheses so lean_goal is small), or lean_multi_attempt with candidate obtain patterns.",
+    "The exact post-drift obtain pattern that re-binds hnewBs at the ~10 obtain sites (single most valuable unknown; eliminates ~60 cascade errors).",
+    "A mechanical/script-driven (non-LLM) Phase-0 extraction so no agent reads or emits the whole file; OR a decision that per-obtain-site micro-edits (<=25-line slices, build-as-feedback, NO proof-state probing) suffice in place.",
+    "Full mapping + exact Mathlib replacements for cluster B (List.bind->List.flatMap, List.mem_zip successor, Bool.or_eq_true.mp successor, the instance-synth failures)."
+  ],
+  "constraints": "zero sorry, zero new axioms, preserve all statements (esp. public signature lines 186-196), NEVER call lean_diagnostic_messages (hangs), CI: scoped+full lake build + lake exe lint-style.",
+  "artifacts": [
+    {"path": "specs/364_modal_tableau_soundness_drift_repair/plans/02_extract-sublemmas-refactor.md", "type": "plan", "note": "contains the EXECUTION BLOCKER research brief at top"},
+    {"path": "specs/364_modal_tableau_soundness_drift_repair/reports/01_drift-diagnosis.md", "type": "report"},
+    {"path": "specs/364_modal_tableau_soundness_drift_repair/reports/02_refactor-strategy.md", "type": "report", "note": "scoping is INCOMPLETE — misses cluster B (800-935)"}
+  ],
+  "next_action_hint": "Run a fresh-context /research 364 round targeting the four research_round_must_produce items, then revise plan 02, then implement with the context-safe method."
+}

@@ -1665,15 +1665,17 @@ theorem modalExpandBranches_closed_unsat
     split at h
     · simp at h
     · rename_i hfind
-      obtain ⟨i, hi, hbi⟩ : ∃ i : Fin branches.length, branches.get i = b :=
-        List.mem_iff_get.mp hb
-      have hzip_mem : (b, expandedSets.get ⟨i, by omega⟩) ∈ branches.zip expandedSets := by
-        rw [List.mem_zip]
-        exact ⟨List.get_mem _ _ _, List.get_mem _ _ _,
-               Fin.mk_eq_mk.mpr (by omega), hbi⟩
-      have hfn := List.findSome?_eq_none_iff.mp hfind _ hzip_mem
-      split_ifs at hfn with hcl
-      exact modalClosed_unsat b hcl acc hsat
+      obtain ⟨i, hilt, hib⟩ := List.mem_iff_getElem.mp hb
+      have hziplt : i < (branches.zip expandedSets).length := by
+        simp only [List.length_zip]; omega
+      have hmem : (branches.zip expandedSets)[i] ∈ branches.zip expandedSets :=
+        List.getElem_mem hziplt
+      have hfn := List.findSome?_eq_none_iff.mp hfind _ hmem
+      rw [List.getElem_zip] at hfn
+      simp only [hib] at hfn
+      by_cases hcl : isModalClosed b = true
+      · exact modalClosed_unsat b hcl acc hsat
+      · simp [hcl] at hfn
   | succ fuel' ih =>
     intro branches expandedSets acc hlength hInv hstep h b hb hsat
     suffices key : ∀ (pending : List (List (SignedFormula (Proposition Atom) WorldIndex)))
@@ -1703,7 +1705,7 @@ theorem modalExpandBranches_closed_unsat
         by_cases hcl : isModalClosed bh = true
         · rw [if_pos hcl] at hinner
           rcases hbp with rfl | hmem_rest
-          · exact modalClosed_unsat bp hcl acc hsat
+          · exact modalClosed_unsat bp hcl acc
           · exact ih_inner es (done ++ [bh]) (doneExp ++ [e]) hlength
               (by simp [hdlength]) hinner bp hmem_rest
         · simp only [Bool.not_eq_true] at hcl
@@ -1717,7 +1719,7 @@ theorem modalExpandBranches_closed_unsat
             have hnewlen : newExp.length = newBs.length := by
               unfold modalStepBranch at hstep_r
               obtain ⟨sf, _, hf⟩ := List.exists_of_findSome?_eq_some hstep_r
-              rcases h_apply : (modalApplyOne sf bh e) with ⟨result, newAcc'⟩
+              rcases h_apply : (modalApplyOne sf bh acc) with ⟨result, newAcc'⟩
               simp only [h_apply] at hf
               cases result with
               | notApplicable => simp at hf
@@ -1739,7 +1741,7 @@ theorem modalExpandBranches_closed_unsat
             · intro hbp_sat
               -- Use hstep to find a satisfiable branch in newBs
               obtain ⟨b', hb'_mem, hb'_sat⟩ :=
-                hstep bh e newBs newExp newAcc (List.mem_cons_self)
+                hstep bp e newBs newExp newAcc (List.mem_cons_self)
                   hstep_r hbp_sat (by
                     -- Need accFreshInv bh acc
                     -- This follows from hInv restricted to bh

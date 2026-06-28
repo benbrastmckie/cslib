@@ -156,7 +156,7 @@ per-milestone commits. Do NOT dispatch two agents against this file concurrently
 
 ---
 
-### Phase 2: c ≠ ⊥ flat-obtain sweep (mechanical, ~6 edits) [NOT STARTED]
+### Phase 2: c ≠ ⊥ flat-obtain sweep (mechanical, ~6 edits) [IN PROGRESS]
 
 - **Goal:** Flatten the stale nested obtains in the already-correct c ≠ ⊥ arms; remove the largest
   `Unknown identifier hnewBs` cascade and confirm the flat-obtain hypothesis on real code before the

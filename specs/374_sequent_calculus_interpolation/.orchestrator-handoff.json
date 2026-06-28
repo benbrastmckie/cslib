@@ -1,17 +1,13 @@
 {
-  "task_number": 374,
-  "status": "planned",
-  "summary": "Plan v2 divides the remaining task-374 work into 9 fine-grained phases (one proof obligation each where possible) across two independent tracks. LK track (A1 impR warmup -> A2 andR two-premise template -> A3 orL mirror -> A4 impL hardest -> B Craig corollary + barrel) closes the 4 remaining maeharaCore sorries and ships the public LKProof.interpolation. LJ track (C1 ljMaeharaCore leaf/one-premise/pass-through cases -> C2 orL+impL two-premise -> C3 Craig corollary + barrel) builds the new LJ/Interpolation.lean end-to-end. Phase D is the final whole-library CI sweep. LK and LJ tracks touch disjoint files and run in parallel; zero-debt policy (mark BLOCKED with lean_goal, never sorry-defer).",
-  "phases_completed": 0,
+  "status": "partial",
+  "phases_completed": 2,
   "phases_total": 9,
+  "summary": "Plan v2 (divided). A1 impR + A2 andR (two-premise combination template) landed green. LK Interpolation.lean builds green with 2 remaining sorries: orL, impL.",
   "blockers": [],
-  "continuation_context": null,
+  "continuation_context": {"next_phase":"A3","description":"LK orL case — mirror of andR with the partition on the ANTECEDENT side (A∨B ∈ Γ; premises insert A Γ ⊢ Δ and insert B Γ ⊢ Δ; A∨B∈Γ₁ → I=I₁∨I₂, ∈Γ₂ → I=I₁∧I₂). Use the committed andR proof in Interpolation.lean as the template (side-swapped)."},
   "next_action_hint": "implement",
-  "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/374_sequent_calculus_interpolation/plans/02_interpolation-divided.md",
-      "summary": "Divided per-obligation plan v2: 9 phases (A1-A4, B LK track; C1-C3 LJ track; D final CI), each ending at a green build with zero new sorry debt."
-    }
+  "sorry_inventory": [
+    {"case":"orL","file":"Cslib/Logics/Propositional/SequentCalculus/LK/Interpolation.lean","line":444},
+    {"case":"impL","file":"Cslib/Logics/Propositional/SequentCalculus/LK/Interpolation.lean","line":448}
   ]
 }

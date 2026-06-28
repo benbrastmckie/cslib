@@ -147,7 +147,7 @@ unchanged (`A`, `B` are subformulas of `A→B`).
 
 ---
 
-### Phase A2: LK `andR` case (two-premise TEMPLATE) [NOT STARTED]
+### Phase A2: LK `andR` case (two-premise TEMPLATE) [IN PROGRESS]
 
 **Goal**: Close the `andR` `sorry` (Interpolation.lean:311) and **establish the reusable
 two-premise interpolant-combination template**; file green with 2 `sorry` remaining (`orL`, `impL`).

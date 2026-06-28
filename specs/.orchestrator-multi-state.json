@@ -29,15 +29,19 @@
     317,
     375
   ],
-  "cycle_count": 0,
-  "completed_tasks": [],
+  "cycle_count": 1,
+  "completed_tasks": [
+    369,
+    373
+  ],
   "failed_tasks": [],
   "current_statuses": {
-    "369": "partial",
-    "374": "partial",
-    "317": "blocked",
+    "369": "completed",
+    "374": "implementing(plan-v2 A1/9)",
+    "317": "ready",
     "375": "not_started",
-    "373": "researched",
+    "373": "completed",
     "382": "not_started"
-  }
+  },
+  "notes": "374 divided per reports/02_decomposition.md into per-obligation phases (plan v2); implementing 1 phase/dispatch"
 }

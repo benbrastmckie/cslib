@@ -61,7 +61,7 @@ theorem u_free_s_free_is_separable (φ : Formula Atom)
 
 theorem neg_separated {φ : Formula Atom} (h : isSyntacticallySeparated φ = true) :
     isSyntacticallySeparated (Formula.neg φ) = true := by
-  simp [Formula.neg, isSyntacticallySeparated, h]
+  simp [Formula.neg, PropositionalConnectives.neg, isSyntacticallySeparated, h]
 
 theorem and_separated {φ ψ : Formula Atom}
     (h1 : isSyntacticallySeparated φ = true) (h2 : isSyntacticallySeparated ψ = true) :
@@ -498,7 +498,7 @@ theorem case2_psi_properties (a q A B : Formula Atom)
   · -- Separation check
     have hsep_A : isSyntacticallySeparated A = true := u_free_s_free_imp_separated A hA hA'
     have hsep_B : isSyntacticallySeparated B = true := u_free_s_free_imp_separated B hB hB'
-    simp only [d1, d2, d3, Formula.or, Formula.and, Formula.neg,
+    simp only [d1, d2, d3, Formula.or, Formula.and, Formula.neg, PropositionalConnectives.neg,
       isSyntacticallySeparated, isUFree, isSFree, ha, hq, hA, hB, hA', hB',
       Bool.true_and, Bool.and_true, hsep_A, hsep_B]
 
@@ -541,16 +541,16 @@ theorem elim_case_3 (a q A B : Formula Atom)
       intEquiv (.snce (Formula.or q (.untl B A)) a) psi ∧
       isSyntacticallySeparated psi = true := by
   have haq_Uf : isUFree (Formula.and (Formula.neg a) (Formula.neg q)) = true := by
-    simp [Formula.and, Formula.neg, isUFree, ha, hq]
+    simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq]
   have haq_Sf : isSFree (Formula.and (Formula.neg a) (Formula.neg q)) = true := by
-    simp [Formula.and, Formula.neg, isSFree, ha', hq']
-  have ha_neg_Uf : isUFree (Formula.neg a) = true := by simp [Formula.neg, isUFree, ha]
-  have ha_neg_Sf : isSFree (Formula.neg a) = true := by simp [Formula.neg, isSFree, ha']
+    simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isSFree, ha', hq']
+  have ha_neg_Uf : isUFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
+  have ha_neg_Sf : isSFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isSFree, ha']
   obtain ⟨psi2, hequiv2, hsep2⟩ := elim_case_2
     (Formula.and (Formula.neg a) (Formula.neg q)) (Formula.neg a) A B
     haq_Uf ha_neg_Uf hA hB haq_Sf ha_neg_Sf hA' hB'
   have hsep_H : isSyntacticallySeparated (.allPast (Formula.neg a)) = true := by
-    simp only [is_syntactically_separated_allPast, Formula.neg, isUFree, ha, Bool.and_true]
+    simp only [is_syntactically_separated_allPast, Formula.neg, PropositionalConnectives.neg, isUFree, ha, Bool.and_true]
   refine ⟨Formula.and (Formula.neg (.allPast (Formula.neg a))) (Formula.neg psi2), ?_, ?_⟩
   · intro M t; constructor
     · intro hS
@@ -600,16 +600,16 @@ theorem elim_case_4 (a q A B : Formula Atom)
       intEquiv (.snce (Formula.or q (Formula.neg (.untl B A))) a) psi ∧
       isSyntacticallySeparated psi = true := by
   have haq_Uf : isUFree (Formula.and (Formula.neg a) (Formula.neg q)) = true := by
-    simp [Formula.and, Formula.neg, isUFree, ha, hq]
+    simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq]
   have haq_Sf : isSFree (Formula.and (Formula.neg a) (Formula.neg q)) = true := by
-    simp [Formula.and, Formula.neg, isSFree, ha', hq']
-  have ha_neg_Uf : isUFree (Formula.neg a) = true := by simp [Formula.neg, isUFree, ha]
-  have ha_neg_Sf : isSFree (Formula.neg a) = true := by simp [Formula.neg, isSFree, ha']
+    simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isSFree, ha', hq']
+  have ha_neg_Uf : isUFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
+  have ha_neg_Sf : isSFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isSFree, ha']
   obtain ⟨psi1, hequiv1, hsep1⟩ := elim_case_1
     (Formula.and (Formula.neg a) (Formula.neg q)) (Formula.neg a) A B
     haq_Uf ha_neg_Uf hA hB haq_Sf ha_neg_Sf hA' hB'
   have hsep_H : isSyntacticallySeparated (.allPast (Formula.neg a)) = true := by
-    simp only [is_syntactically_separated_allPast, Formula.neg, isUFree, ha, Bool.and_true]
+    simp only [is_syntactically_separated_allPast, Formula.neg, PropositionalConnectives.neg, isUFree, ha, Bool.and_true]
   refine ⟨Formula.and (Formula.neg (.allPast (Formula.neg a))) (Formula.neg psi1), ?_, ?_⟩
   · intro M t; constructor
     · intro hS
@@ -658,13 +658,13 @@ theorem elim_case_3_gen (a q A B : Formula Atom)
       intEquiv (.snce (Formula.or q (.untl B A)) a) psi ∧
       isSyntacticallySeparated psi = true := by
   have haq_Uf : isUFree (Formula.and (Formula.neg a) (Formula.neg q)) = true := by
-    simp [isUFree, ha, hq]
-  have ha_neg_Uf : isUFree (Formula.neg a) = true := by simp [isUFree, ha]
+    simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq]
+  have ha_neg_Uf : isUFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
   obtain ⟨psi2, hequiv2, hsep2⟩ := elim_case_2_gen
     (Formula.and (Formula.neg a) (Formula.neg q)) (Formula.neg a) A B
     haq_Uf ha_neg_Uf hA hB hA' hB'
   have hsep_H : isSyntacticallySeparated (.allPast (Formula.neg a)) = true := by
-    simp only [is_syntactically_separated_allPast, Formula.neg, isUFree, ha, Bool.and_true]
+    simp only [is_syntactically_separated_allPast, Formula.neg, PropositionalConnectives.neg, isUFree, ha, Bool.and_true]
   refine ⟨Formula.and (Formula.neg (.allPast (Formula.neg a))) (Formula.neg psi2), ?_, ?_⟩
   · intro M t; constructor
     · intro hS
@@ -713,13 +713,13 @@ theorem elim_case_4_gen (a q A B : Formula Atom)
       intEquiv (.snce (Formula.or q (Formula.neg (.untl B A))) a) psi ∧
       isSyntacticallySeparated psi = true := by
   have haq_Uf : isUFree (Formula.and (Formula.neg a) (Formula.neg q)) = true := by
-    simp [isUFree, ha, hq]
-  have ha_neg_Uf : isUFree (Formula.neg a) = true := by simp [isUFree, ha]
+    simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq]
+  have ha_neg_Uf : isUFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
   obtain ⟨psi1, hequiv1, hsep1⟩ := elim_case_1_gen
     (Formula.and (Formula.neg a) (Formula.neg q)) (Formula.neg a) A B
     haq_Uf ha_neg_Uf hA hB hA' hB'
   have hsep_H : isSyntacticallySeparated (.allPast (Formula.neg a)) = true := by
-    simp only [is_syntactically_separated_allPast, Formula.neg, isUFree, ha, Bool.and_true]
+    simp only [is_syntactically_separated_allPast, Formula.neg, PropositionalConnectives.neg, isUFree, ha, Bool.and_true]
   refine ⟨Formula.and (Formula.neg (.allPast (Formula.neg a))) (Formula.neg psi1), ?_, ?_⟩
   · intro M t; constructor
     · intro hS

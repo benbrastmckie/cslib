@@ -189,7 +189,7 @@ theorem Q_lemma_Z_bwd (A B C : Formula Atom) (M : IntStructure Atom) (t0 t1 : â„
 theorem Q_Z_U_free (A B C : Formula Atom)
     (hA : isUFree A = true) (hB : isUFree B = true) (hC : isUFree C = true) :
     isUFree (qZ A B C) = true := by
-  simp [qZ, isUFree, hA, hB, hC]
+  simp [qZ, Formula.or, Formula.neg, PropositionalConnectives.neg, isUFree, hA, hB, hC]
 
 /-- qZ(A,B,C) has noSNestedInU when A, B, C do. -/
 theorem Q_Z_no_S_nested (A B C : Formula Atom)

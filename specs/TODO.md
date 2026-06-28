@@ -1,5 +1,5 @@
 ---
-next_project_number: 383
+next_project_number: 384
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 383
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,299,301,321,364,371,373,376,381,382 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,299,301,321,364,371,373,376,382 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,363,374 | 36,37,180,299,371,376 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275,360,369 | 39,40,363,364 | Foundations, Propositional Logic |
 | 4 | 317,370 | 360,369 | Propositional Logic |
@@ -65,10 +65,6 @@ next_project_number: 383
 
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
 
-### Bimodal Logic
-
-381 [NOT STARTED] — Repair the pre-existing Mathlib/toolchain-drift build failures in
-
 ### Uncategorized
 
 376 [RESEARCHED] — Prove the fuel-sufficiency lemma needed to discharge the sorry at
@@ -77,6 +73,17 @@ next_project_number: 383
     └─ 369 [NOT STARTED] — (Propositional Logic: Parameterize the intuitionistic and mini) (see above)
 
 ## Tasks
+
+### 383. Complete separation cluster drift
+- **Status**: [COMPLETED]
+- **Task Type**: cslib
+- **Topic**: Bimodal Logic
+- **Dependencies**: Task 381
+- **Summary**: [383_complete_separation_cluster_drift/summaries/01_implementation-summary.md]
+
+**Description**: Complete the Bimodal Separation cluster drift repair: two modules newly surfaced once task 381 fixed its 4 (they were masked because the build stopped at the earlier failures). Same Mathlib/toolchain-drift family as task 381 (the PropositionalConnectives.neg second-layer-abbrev simp-stall, plus simp 'unsolved goals'). Modules: (1) Cslib/Logics/Bimodal/Metalogic/Separation/TemporalClosure.lean line 283 'simp made no progress'; (2) Cslib/Logics/Bimodal/Metalogic/Separation/DedekindZ/Cases.lean 'unsolved goals' at lines 164,283,719,1061,1067,1068 (and possibly more). Apply task 381's verified idiom (add PropositionalConnectives.neg and Formula.and/or/neg to stalled simp sets; for unsolved goals after simp, re-derive the post-simp shape via lean_goal). ITERATE: after fixing these, re-run the scoped Separation build — more downstream modules may cascade; fix until the whole Bimodal/Metalogic/Separation subtree builds green. Zero sorry, zero new axioms, statements preserved. NEVER call lean_diagnostic_messages (use lean_goal + scoped lake build). Reuse specs/381_repair_bimodal_separation_perpetuity_drift/reports/01_drift-diagnosis.md.
+
+---
 
 ### 382. Normalization deadcode cleanup
 - **Status**: [NOT STARTED]
@@ -89,10 +96,13 @@ next_project_number: 383
 ---
 
 ### 381. Repair bimodal separation perpetuity drift
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Bimodal Logic
 - **Dependencies**: None
+- **Research**: [381_repair_bimodal_separation_perpetuity_drift/reports/01_drift-diagnosis.md]
+- **Plan**: [381_repair_bimodal_separation_perpetuity_drift/plans/01_repair-drift.md]
+- **Summary**: [381_repair_bimodal_separation_perpetuity_drift/summaries/01_implementation-summary.md]
 
 **Description**: Repair the pre-existing Mathlib/toolchain-drift build failures in the Bimodal Separation/Perpetuity cluster (downstream of the already-repaired Separation/Defs, which builds clean). Four modules fail under leanprover/lean4:v4.31.0, all sorry-free but broken by a Lean/Mathlib bump (same drift family as task 364): (1) Cslib/Logics/Bimodal/Metalogic/Separation/Duality.lean lines 357,362 'simp made no progress'; (2) Cslib/Logics/Bimodal/Metalogic/Separation/Eliminations.lean ~15 'unsolved goals' (lines 63,498,543,545,547,548,552,602,604,606,607,611,660,662,666 — likely a single simp-set/obtain-shape drift repeated across parallel cases); (3) Cslib/Logics/Bimodal/Metalogic/Separation/DedekindZ/QLemma.lean line 191 'unsolved goals'; (4) Cslib/Logics/Bimodal/Theorems/Perpetuity/Bridge.lean line 102 'Type mismatch'. These were NOT covered by task 360's repair sweep (which fixed Separation/Defs and Perpetuity/Principles). Fix idioms likely mirror task 364's diagnosis (reorder simp-after-rw, re-derive post-simp obtain shapes via lean_goal, instance/type-mismatch coercions). MUST proceed in chunks with incremental commits; do NOT call lean_diagnostic_messages (hangs in this repo) — use lean_goal + scoped lake build. Zero sorry, zero new axioms, preserve all statements. CI: scoped lake build per module + full lake build, lake exe lint-style. Restores the repo-wide green build together with task 364 (Modal/Tableau/Soundness) and task 363 (Classical/Tableau/Completeness).
 

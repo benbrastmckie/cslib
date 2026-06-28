@@ -1227,7 +1227,7 @@ theorem snce_single_U_depth_one_separable (C w A B : Formula Atom)
     -- a = replaceUntl C A B (neg bot) is U-free
     let a_pos := replaceUntl C A B (Formula.neg .bot)
     have ha_uf : isUFree a_pos = true :=
-      replace_untl_U_free C A B (Formula.neg .bot) hsingle_C (by simp [isUFree])
+      replace_untl_U_free C A B (Formula.neg .bot) hsingle_C (by simp [Formula.neg, PropositionalConnectives.neg, isUFree])
     -- S(C^U, w) is equiv to S(a^U, w)
     have h_equiv_pos : intEquiv (.snce w (Formula.and C (.untl B A)))
         (.snce w (Formula.and a_pos (.untl B A))) :=
@@ -1244,7 +1244,7 @@ theorem snce_single_U_depth_one_separable (C w A B : Formula Atom)
       let q_pos := replaceUntl w A B (Formula.neg .bot)
       let q_neg := replaceUntl w A B .bot
       have hqp_uf : isUFree q_pos = true :=
-        replace_untl_U_free w A B (Formula.neg .bot) hsingle_w (by simp [isUFree])
+        replace_untl_U_free w A B (Formula.neg .bot) hsingle_w (by simp [Formula.neg, PropositionalConnectives.neg, isUFree])
       have hqn_uf : isUFree q_neg = true :=
         replace_untl_U_free w A B .bot hsingle_w (by simp [isUFree])
       -- S(a^U, w) equiv S(a^U, (q_pos v -U) ^ (U v q_neg))
@@ -1301,7 +1301,7 @@ theorem snce_single_U_depth_one_separable (C w A B : Formula Atom)
       let q_pos := replaceUntl w A B (Formula.neg .bot)
       let q_neg := replaceUntl w A B .bot
       have hqp_uf : isUFree q_pos = true :=
-        replace_untl_U_free w A B (Formula.neg .bot) hsingle_w (by simp [isUFree])
+        replace_untl_U_free w A B (Formula.neg .bot) hsingle_w (by simp [Formula.neg, PropositionalConnectives.neg, isUFree])
       have hqn_uf : isUFree q_neg = true :=
         replace_untl_U_free w A B .bot hsingle_w (by simp [isUFree])
       -- S(a'^-U, w) equiv S(a'^-U, (q_pos v -U) ^ (U v q_neg))
@@ -1357,7 +1357,7 @@ theorem snce_single_U_depth_one_sep_with_U_type (C w A B : Formula Atom)
   · have h_simp_pos := single_U_and_conj_simplify C A B hsingle_C hexp_C hdC
     let a_pos := replaceUntl C A B (Formula.neg .bot)
     have ha_uf : isUFree a_pos = true :=
-      replace_untl_U_free C A B (Formula.neg .bot) hsingle_C (by simp [isUFree])
+      replace_untl_U_free C A B (Formula.neg .bot) hsingle_C (by simp [Formula.neg, PropositionalConnectives.neg, isUFree])
     have h_equiv_pos : intEquiv (.snce w (Formula.and C (.untl B A)))
         (.snce w (Formula.and a_pos (.untl B A))) :=
       snce_congr h_simp_pos (int_equiv_refl w)
@@ -1369,7 +1369,7 @@ theorem snce_single_U_depth_one_sep_with_U_type (C w A B : Formula Atom)
       let q_pos := replaceUntl w A B (Formula.neg .bot)
       let q_neg := replaceUntl w A B .bot
       have hqp_uf : isUFree q_pos = true :=
-        replace_untl_U_free w A B (Formula.neg .bot) hsingle_F (by simp [isUFree])
+        replace_untl_U_free w A B (Formula.neg .bot) hsingle_F (by simp [Formula.neg, PropositionalConnectives.neg, isUFree])
       have hqn_uf : isUFree q_neg = true :=
         replace_untl_U_free w A B .bot hsingle_F (by simp [isUFree])
       have h_guard_equiv : intEquiv (.snce w (Formula.and a_pos (.untl B A)))
@@ -1415,7 +1415,7 @@ theorem snce_single_U_depth_one_sep_with_U_type (C w A B : Formula Atom)
       let q_pos := replaceUntl w A B (Formula.neg .bot)
       let q_neg := replaceUntl w A B .bot
       have hqp_uf : isUFree q_pos = true :=
-        replace_untl_U_free w A B (Formula.neg .bot) hsingle_F (by simp [isUFree])
+        replace_untl_U_free w A B (Formula.neg .bot) hsingle_F (by simp [Formula.neg, PropositionalConnectives.neg, isUFree])
       have hqn_uf : isUFree q_neg = true :=
         replace_untl_U_free w A B .bot hsingle_F (by simp [isUFree])
       have h_guard_equiv : intEquiv (.snce w (Formula.and a_neg (Formula.neg (.untl B A))))

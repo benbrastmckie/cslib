@@ -1,5 +1,5 @@
 {
-  "next_project_number": 383,
+  "next_project_number": 384,
   "active_projects": [
     {
       "project_number": 360,
@@ -1896,7 +1896,7 @@
     {
       "project_number": 381,
       "project_name": "repair_bimodal_separation_perpetuity_drift",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Bimodal Logic",
       "description": "Repair the pre-existing Mathlib/toolchain-drift build failures in the Bimodal Separation/Perpetuity cluster (downstream of the already-repaired Separation/Defs, which builds clean). Four modules fail under leanprover/lean4:v4.31.0, all sorry-free but broken by a Lean/Mathlib bump (same drift family as task 364): (1) Cslib/Logics/Bimodal/Metalogic/Separation/Duality.lean lines 357,362 'simp made no progress'; (2) Cslib/Logics/Bimodal/Metalogic/Separation/Eliminations.lean ~15 'unsolved goals' (lines 63,498,543,545,547,548,552,602,604,606,607,611,660,662,666 — likely a single simp-set/obtain-shape drift repeated across parallel cases); (3) Cslib/Logics/Bimodal/Metalogic/Separation/DedekindZ/QLemma.lean line 191 'unsolved goals'; (4) Cslib/Logics/Bimodal/Theorems/Perpetuity/Bridge.lean line 102 'Type mismatch'. These were NOT covered by task 360's repair sweep (which fixed Separation/Defs and Perpetuity/Principles). Fix idioms likely mirror task 364's diagnosis (reorder simp-after-rw, re-derive post-simp obtain shapes via lean_goal, instance/type-mismatch coercions). MUST proceed in chunks with incremental commits; do NOT call lean_diagnostic_messages (hangs in this repo) — use lean_goal + scoped lake build. Zero sorry, zero new axioms, preserve all statements. CI: scoped lake build per module + full lake build, lake exe lint-style. Restores the repo-wide green build together with task 364 (Modal/Tableau/Soundness) and task 363 (Classical/Tableau/Completeness).",
@@ -1904,7 +1904,24 @@
       "created": "2026-06-27T21:49:36Z",
       "last_updated": "2026-06-27T21:49:36Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [
+        {
+          "path": "specs/381_repair_bimodal_separation_perpetuity_drift/reports/01_drift-diagnosis.md",
+          "type": "report",
+          "summary": "Separation/Perpetuity drift: shared Formula.neg abbrev-chain root (3/4 modules) + Bridge swapTemporal fix"
+        },
+        {
+          "path": "specs/381_repair_bimodal_separation_perpetuity_drift/plans/01_repair-drift.md",
+          "type": "plan",
+          "summary": "Separation/Perpetuity drift: 5-phase mechanical repair (shared neg-abbrev root + Bridge swapTemporal)"
+        },
+        {
+          "path": "specs/381_repair_bimodal_separation_perpetuity_drift/summaries/01_implementation-summary.md",
+          "type": "summary",
+          "summary": "Separation/Perpetuity drift repair: 4 modules fixed sorry-free; 2 more (TemporalClosure, DedekindZ/Cases) surfaced"
+        }
+      ],
+      "session_id": "sess_repair381_febf2d"
     },
     {
       "project_number": 332,
@@ -1998,6 +2015,28 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": null
+    },
+    {
+      "project_number": 383,
+      "project_name": "complete_separation_cluster_drift",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Bimodal Logic",
+      "description": "Complete the Bimodal Separation cluster drift repair: two modules newly surfaced once task 381 fixed its 4 (they were masked because the build stopped at the earlier failures). Same Mathlib/toolchain-drift family as task 381 (the PropositionalConnectives.neg second-layer-abbrev simp-stall, plus simp 'unsolved goals'). Modules: (1) Cslib/Logics/Bimodal/Metalogic/Separation/TemporalClosure.lean line 283 'simp made no progress'; (2) Cslib/Logics/Bimodal/Metalogic/Separation/DedekindZ/Cases.lean 'unsolved goals' at lines 164,283,719,1061,1067,1068 (and possibly more). Apply task 381's verified idiom (add PropositionalConnectives.neg and Formula.and/or/neg to stalled simp sets; for unsolved goals after simp, re-derive the post-simp shape via lean_goal). ITERATE: after fixing these, re-run the scoped Separation build — more downstream modules may cascade; fix until the whole Bimodal/Metalogic/Separation subtree builds green. Zero sorry, zero new axioms, statements preserved. NEVER call lean_diagnostic_messages (use lean_goal + scoped lake build). Reuse specs/381_repair_bimodal_separation_perpetuity_drift/reports/01_drift-diagnosis.md.",
+      "dependencies": [
+        381
+      ],
+      "created": "2026-06-27T22:28:04Z",
+      "last_updated": "2026-06-27T22:49:06Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/383_complete_separation_cluster_drift/summaries/01_implementation-summary.md",
+          "type": "summary",
+          "summary": "Separation cluster drift fully repaired (5 modules incl. Hierarchy cascade), sorry-free"
+        }
+      ],
+      "session_id": "sess_repair382_casc01"
     }
   ],
   "repository_health": {

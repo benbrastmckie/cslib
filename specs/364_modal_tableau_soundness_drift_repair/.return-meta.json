@@ -1,0 +1,30 @@
+{
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/364_modal_tableau_soundness_drift_repair/plans/02_extract-sublemmas-refactor.md",
+      "summary": "12-phase chunked plan: Phase 0 extracts 10 stubbed sub-lemmas + skeleton, phases 1-10 drift-repair one private lemma each, phase 11 zero-debt verification"
+    }
+  ],
+  "next_steps": "Run /implement 364 to execute the plan",
+  "metadata": {
+    "session_id": "sess_1782557964_fda92a_364",
+    "agent_type": "planner-agent",
+    "duration_seconds": 300,
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 12,
+    "estimated_hours": 9,
+    "dependency_waves": [[0], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [11]]
+  },
+  "memory_candidates": [
+    {
+      "content": "When a single monolithic Lean theorem's proof overflows agent context during drift-repair (lean_goal returns huge hypothesis contexts because a shared prologue accumulates many hypotheses before any case work), the fix is a faithful structural refactor: extract each `cases` leaf into an independently-stated `private lemma` taking only the hypotheses that case needs. This bounds each sub-lemma's lean_goal context to a small, inspectable size, enabling per-chunk drift-repair. Land the structure first with `by sorry` stubs (a green-but-scaffolded checkpoint), then strictly reduce the sorry count to zero one lemma per commit. Preserve the public signature byte-for-byte when it is depended on downstream. Clean extraction requires: no cross-case let/have bindings and `cases` (not `induction`).",
+      "category": "TECHNIQUE",
+      "source_artifact": "specs/364_modal_tableau_soundness_drift_repair/plans/02_extract-sublemmas-refactor.md",
+      "confidence": 0.8,
+      "suggested_keywords": ["lean", "context-overflow", "proof-refactor", "private-lemma-extraction", "drift-repair", "stub-scaffold"]
+    }
+  ]
+}

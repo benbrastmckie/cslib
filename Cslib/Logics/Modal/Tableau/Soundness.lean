@@ -230,7 +230,7 @@ theorem modalStepBranch_preserves_sat
           obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
           subst hnewBs hnewAcc
           -- boxPos: newBs = [boxPropagation b acc φ lbl ++ b], acc unchanged
-          refine ⟨boxPropagation b acc φ lbl ++ b, List.mem_cons_self _ _, W, m, f, hacc, ?_⟩
+          refine ⟨boxPropagation b acc φ lbl ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
           intro sf' hmem'
           simp only [List.mem_append] at hmem'
           rcases hmem' with hmem_new | hmem_old
@@ -276,7 +276,7 @@ theorem modalStepBranch_preserves_sat
           obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
           subst hnewBs hnewAcc
           -- negPos fired: newForms = [⟨.neg, a, lbl⟩]
-          refine ⟨[⟨.neg, a, lbl⟩] ++ b, List.mem_cons_self _ _, W, m, f, hacc, ?_⟩
+          refine ⟨[⟨.neg, a, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
           intro sf' hmem'
           simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
           rcases hmem' with rfl | hmem_old
@@ -308,7 +308,7 @@ theorem modalStepBranch_preserves_sat
               rcases Classical.em (Satisfies m (f lbl) a1) with ha1 | ha1
               · -- a1 satisfied: take branch [T(c)@lbl]
                 refine ⟨[⟨.pos, c, lbl⟩] ++ b,
-                  List.mem_map.mpr ⟨[⟨.pos, c, lbl⟩], List.mem_cons.mpr (Or.inr (List.mem_cons_self _ _)), rfl⟩,
+                  List.mem_map.mpr ⟨[⟨.pos, c, lbl⟩], List.mem_cons.mpr (Or.inr (List.mem_cons_self)), rfl⟩,
                   W, m, f, hacc, ?_⟩
                 intro sf' hmem'
                 simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
@@ -319,7 +319,7 @@ theorem modalStepBranch_preserves_sat
                 -- orPos branches = [[T(a1)], [T(c)]]; we need T(a1) or T(c)
                 -- Since ¬Satisfies a1, use branch [T(c)] via hpos
                 refine ⟨[⟨.pos, c, lbl⟩] ++ b,
-                  List.mem_map.mpr ⟨[⟨.pos, c, lbl⟩], List.mem_cons.mpr (Or.inr (List.mem_cons_self _ _)), rfl⟩,
+                  List.mem_map.mpr ⟨[⟨.pos, c, lbl⟩], List.mem_cons.mpr (Or.inr (List.mem_cons_self)), rfl⟩,
                   W, m, f, hacc, ?_⟩
                 intro sf' hmem'
                 simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
@@ -338,7 +338,7 @@ theorem modalStepBranch_preserves_sat
               rcases Classical.em (Satisfies m (f lbl) (.imp a1 a2)) with ha | ha
               · -- T(a1→a2) satisfied: take branch [T(c)@lbl]
                 refine ⟨[⟨.pos, c, lbl⟩] ++ b,
-                  List.mem_map.mpr ⟨[⟨.pos, c, lbl⟩], List.mem_cons.mpr (Or.inr (List.mem_cons_self _ _)), rfl⟩,
+                  List.mem_map.mpr ⟨[⟨.pos, c, lbl⟩], List.mem_cons.mpr (Or.inr (List.mem_cons_self)), rfl⟩,
                   W, m, f, hacc, ?_⟩
                 intro sf' hmem'
                 simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
@@ -347,7 +347,7 @@ theorem modalStepBranch_preserves_sat
                 · exact hb sf' hmem_old
               · -- T(a1→a2) not satisfied: take branch [F(a1→a2)@lbl]
                 refine ⟨[⟨.neg, .imp a1 a2, lbl⟩] ++ b,
-                  List.mem_map.mpr ⟨[⟨.neg, .imp a1 a2, lbl⟩], List.mem_cons_self _ _, rfl⟩,
+                  List.mem_map.mpr ⟨[⟨.neg, .imp a1 a2, lbl⟩], List.mem_cons_self, rfl⟩,
                   W, m, f, hacc, ?_⟩
                 intro sf' hmem'
                 simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
@@ -365,7 +365,7 @@ theorem modalStepBranch_preserves_sat
             rcases Classical.em (Satisfies m (f lbl) a) with ha | ha
             · -- a satisfied: take branch [T(c)@lbl]
               refine ⟨[⟨.pos, c, lbl⟩] ++ b,
-                List.mem_map.mpr ⟨[⟨.pos, c, lbl⟩], List.mem_cons.mpr (Or.inr (List.mem_cons_self _ _)), rfl⟩,
+                List.mem_map.mpr ⟨[⟨.pos, c, lbl⟩], List.mem_cons.mpr (Or.inr (List.mem_cons_self)), rfl⟩,
                 W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
@@ -374,7 +374,7 @@ theorem modalStepBranch_preserves_sat
               · exact hb sf' hmem_old
             · -- a not satisfied: take branch [F(a)@lbl]
               refine ⟨[⟨.neg, a, lbl⟩] ++ b,
-                List.mem_map.mpr ⟨[⟨.neg, a, lbl⟩], List.mem_cons_self _ _, rfl⟩,
+                List.mem_map.mpr ⟨[⟨.neg, a, lbl⟩], List.mem_cons_self, rfl⟩,
                 W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
@@ -430,7 +430,7 @@ theorem modalStepBranch_preserves_sat
                 if b.any (· == prop) then none else some prop
               | _ => none
             else none
-        refine ⟨(witness :: boxProps ++ diaNegProps) ++ b, List.mem_cons_self _ _,
+        refine ⟨(witness :: boxProps ++ diaNegProps) ++ b, List.mem_cons_self,
           W, m, f', ?_, ?_⟩
         · -- Show newAcc' = acc.addEdge lbl w' is respected by (m, f')
           intro u v hedge
@@ -624,7 +624,7 @@ theorem modalStepBranch_preserves_sat
             Option.some.injEq, Prod.mk.injEq] at hsf
           obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
           subst hnewBs hnewAcc
-          refine ⟨[⟨.pos, a, lbl⟩] ++ b, List.mem_cons_self _ _, W, m, f, hacc, ?_⟩
+          refine ⟨[⟨.pos, a, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
           intro sf' hmem'
           simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
           rcases hmem' with rfl | hmem_old
@@ -648,7 +648,7 @@ theorem modalStepBranch_preserves_sat
                 Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
-              refine ⟨[⟨.neg, a1, lbl⟩, ⟨.neg, c, lbl⟩] ++ b, List.mem_cons_self _ _,
+              refine ⟨[⟨.neg, a1, lbl⟩, ⟨.neg, c, lbl⟩] ++ b, List.mem_cons_self,
                 W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
@@ -706,7 +706,7 @@ theorem modalStepBranch_preserves_sat
               subst hnewBs hnewAcc
               -- impNeg: newForms = [⟨.pos, a, lbl⟩, ⟨.neg, c, lbl⟩] where a = a1 → a2
               refine ⟨[⟨.pos, .imp a1 a2, lbl⟩, ⟨.neg, c, lbl⟩] ++ b,
-                List.mem_cons_self _ _, W, m, f, hacc, ?_⟩
+                List.mem_cons_self, W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
               rcases hmem' with (rfl | rfl | hmem_old)
@@ -729,7 +729,7 @@ theorem modalStepBranch_preserves_sat
             obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
             subst hnewBs hnewAcc
             refine ⟨[⟨.pos, a, lbl⟩, ⟨.neg, c, lbl⟩] ++ b,
-              List.mem_cons_self _ _, W, m, f, hacc, ?_⟩
+              List.mem_cons_self, W, m, f, hacc, ?_⟩
             intro sf' hmem'
             simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
             rcases hmem' with (rfl | rfl | hmem_old)
@@ -801,7 +801,7 @@ theorem modalExpandBranches_closed_unsat
       (expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
       (acc : Accessibility),
       expandedSets.length = branches.length →
-      accFreshInv (branches.bind id) acc →
+      accFreshInv (branches.flatMap id) acc →
       (∀ b e newBs newExps newAcc,
         b ∈ branches →
         modalStepBranch b e acc = some (newBs, newExps, newAcc) →
@@ -866,20 +866,39 @@ theorem modalExpandBranches_closed_unsat
           | some step =>
             obtain ⟨newBs, newExp, newAcc⟩ := step
             rw [hstep_r] at hinner
-            have hlen_rec : (doneExp ++ newBs.map (fun _ => newExp) ++ es).length =
-                (done ++ newBs ++ bt).length := by simp [hdlength, hlength]
+            have hnewlen : newExp.length = newBs.length := by
+              unfold modalStepBranch at hstep_r
+              obtain ⟨sf, _, hf⟩ := List.exists_of_findSome?_eq_some hstep_r
+              rcases h_apply : (modalApplyOne sf bh e) with ⟨result, newAcc'⟩
+              simp only [h_apply] at hf
+              cases result with
+              | notApplicable => simp at hf
+              | linear nf =>
+                split_ifs at hf
+                simp only [Option.some.injEq, Prod.mk.injEq] at hf
+                obtain ⟨rfl, rfl, _⟩ := hf; simp
+              | branching bs =>
+                split_ifs at hf
+                simp only [Option.some.injEq, Prod.mk.injEq] at hf
+                obtain ⟨rfl, rfl, _⟩ := hf; simp [List.length_map]
+              | persistent nf =>
+                split_ifs at hf
+                simp only [Option.some.injEq, Prod.mk.injEq] at hf
+                obtain ⟨rfl, rfl, _⟩ := hf; simp
+            have hlen_rec : (doneExp ++ newExp ++ es).length =
+                (done ++ newBs ++ bt).length := by simp [hdlength, hlength, hnewlen]
             rcases hbp with rfl | hmem_rest
             · intro hbp_sat
               -- Use hstep to find a satisfiable branch in newBs
               obtain ⟨b', hb'_mem, hb'_sat⟩ :=
-                hstep bh e newBs newExp newAcc (List.mem_cons_self _ _)
+                hstep bh e newBs newExp newAcc (List.mem_cons_self)
                   hstep_r hbp_sat (by
                     -- Need accFreshInv bh acc
                     -- This follows from hInv restricted to bh
                     intro w w' hedge
                     exact hInv w w' hedge)
               exact ih (done ++ newBs ++ bt)
-                (doneExp ++ newBs.map (fun _ => newExp) ++ es)
+                (doneExp ++ newExp ++ es)
                 newAcc hlen_rec
                 (by intro w w' hedge; exact (by
                   -- accFreshInv for newAcc on the new branch list
@@ -888,16 +907,17 @@ theorem modalExpandBranches_closed_unsat
                   -- In general, this requires knowing how newAcc was formed
                   -- Placeholder: use hInv
                   exact hInv w w' (by
-                    simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons] at hedge
-                    rcases Bool.or_eq_true.mp hedge with h' | h'
+                    simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons,
+                      Bool.or_eq_true] at hedge
+                    rcases hedge with h' | h'
                     · exact absurd hedge (by simp [Accessibility.hasEdge])
                     · exact h')))
                 (by intro b2 e2 newBs2 newExps2 newAcc2 hmem2 hstep2 hsat2 hInv2
                     exact hstep b2 e2 newBs2 newExps2 newAcc2 (by simp [hmem2]) hstep2 hsat2 hInv2)
                 hinner b' (by simp [hb'_mem]) hb'_sat
             · exact ih_inner es (done ++ newBs ++ bt)
-                (doneExp ++ newBs.map (fun _ => newExp) ++ es)
-                hlength (by simp [hdlength, hlength]) hinner bp hmem_rest
+                (doneExp ++ newExp ++ es)
+                hlength (by simp [hdlength, hlength, hnewlen]) hinner bp hmem_rest
 
 /-! ## K-Validity and Soundness -/
 
@@ -922,8 +942,7 @@ theorem modalTableau_sound (φ : Proposition Atom)
   -- The initial branch [F(φ)@0] is satisfiable via the constant assignment _ ↦ w
   have hsat : branchSatisfiable [⟨.neg, φ, 0⟩] Accessibility.empty :=
     ⟨World, m, fun _ => w,
-      fun w1 w2 hedge => by
-        simp only [Accessibility.empty, Accessibility.hasEdge, List.any_nil] at hedge,
+      fun w1 w2 hedge => absurd hedge (by simp [Accessibility.empty, Accessibility.hasEdge]),
       fun sf hmem => by
         simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem
         subst hmem

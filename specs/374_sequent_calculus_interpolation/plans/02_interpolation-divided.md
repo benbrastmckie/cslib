@@ -110,7 +110,7 @@ in A2.
 
 ---
 
-### Phase A1: LK `impR` case (warmup, one-premise) [NOT STARTED]
+### Phase A1: LK `impR` case (warmup, one-premise) [COMPLETED]
 
 **Goal**: Close the `impR` `sorry` (Interpolation.lean:323); file stays green with 3 `sorry`
 remaining (`andR`, `orL`, `impL`).

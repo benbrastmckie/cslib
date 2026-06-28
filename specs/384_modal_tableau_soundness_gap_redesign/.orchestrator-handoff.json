@@ -1,0 +1,17 @@
+{
+  "task_number": 384,
+  "task_slug": "modal_tableau_soundness_gap_redesign",
+  "session_id": "sess_1782651741_bd598c",
+  "phase": "implement",
+  "status": "partial",
+  "phases_completed": 4,
+  "phases_total": 6,
+  "completed": ["1 (per-branch accs plumbing, Saturation.lean)", "2 (freshness monotonicity helpers, Branch.lean)", "6 (references.bib citations)", "structural split: Soundness.lean -> SoundnessStep.lean (cf006bf8)"],
+  "remaining": ["3 (maintenance lemma modalStepBranch_preserves_accFreshInv)", "4 (reformulate modalExpandBranches_closed_unsat, errors now at Soundness.lean 79/83/100)", "5 (modalTableau_sound call site + full CI)"],
+  "blocker": "Phase 3 maintenance lemma is the genuine crux and remains unproven. Three cslib-implementation agents hit 'Prompt is too long' (context overflow) — the modal-tableau goal states are ~2KB each, so ~40 lean_goal/multi_attempt calls exhaust a sub-agent's window. The one agent that produced output wrote a 213-line lemma that only APPEARED to have 2 errors: a broken `split_ifs ... / · simp at hsf / · obtain` bullet structure short-circuited elaboration so Lean never checked the body; fixing the bullet exposed 41 real errors. This is the same masked-error trap (loose elaboration hiding obligations) that caused the original task-364 gap. The broken attempt was reverted; tree is at clean committed split.",
+  "current_build_state": "SoundnessStep.lean builds clean. Soundness.lean has exactly 3 pre-existing errors in modalExpandBranches_closed_unsat (lines 79/83/100 = old 1744/1749/1770), to be fixed by Phase 4 once Phase 3 lemma exists. Zero sorry.",
+  "phase3_spec": "Lemma modalStepBranch_preserves_accFreshInv (b e acc newBs newExps newAcc) (hstep) (hInv: accFreshInv b acc): forall b' in newBs, accFreshInv b' newAcc. Proof: unfold modalStepBranch/modalApplyOne; case on RuleResult. Prop/boxPos/diamondNeg (newAcc=acc): b'=newForms++b, discharge via hInv + modalNextWorld_le_append (Phase 2). diamondPos/boxNeg (newAcc=acc.addEdge w w', w=sf.label, w'=modalNextWorld b): old edges < modalNextWorld b <= modalNextWorld b'; new source w=sf.label<modalNextWorld b via modalNextWorld_gt + sf in b; new target w'<modalNextWorld b' via label_le_modalMaxWorld on witness in b' (Phase 2 helpers). ~60-100 lines.",
+  "constraints": ["zero sorry", "zero new axioms", "lake build scoped + full", "lake exe lint-style"],
+  "blocks_task": 364,
+  "next_command": "/implement 384  (resume at Phase 3; place lemma above modalExpandBranches_closed_unsat)"
+}

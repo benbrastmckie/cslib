@@ -125,7 +125,7 @@ grep -nE '(^|[^[:alnum:]_])(sorry|axiom)([^[:alnum:]_]|$)' "$f" \
 
 ---
 
-### Phase 1: Term substitution, weakening, and native `reduceRoot` [NOT STARTED]
+### Phase 1: Term substitution, weakening, and native `reduceRoot` [COMPLETED]
 
 **Goal**: Create `Reduction.lean` with the transport-defined `Term.subsOne`/`Term.weakCtx`,
 their forward lemmas `subsOne_fwd`/`weakCtx_fwd`, and the native 8-case `Term.reduceRoot`.

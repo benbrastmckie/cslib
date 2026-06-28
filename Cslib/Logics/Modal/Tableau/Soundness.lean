@@ -226,8 +226,7 @@ theorem modalStepBranch_preserves_sat
         -- otherwise → persistent newForms
         split_ifs at hsf with hemp
         · simp at hsf
-        · simp only [Option.some.injEq, Prod.mk.injEq] at hsf
-          obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
+          obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
           subst hnewBs hnewAcc
           -- boxPos: newBs = [boxPropagation b acc φ lbl ++ b], acc unchanged
           refine ⟨boxPropagation b acc φ lbl ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩

@@ -1,20 +1,20 @@
 ---
-next_project_number: 381
+next_project_number: 382
 ---
 
 # TODO
 
 ## Task Order
 
-*Updated 2026-06-27. Generated from state.json dependency graph.*
+*Updated 2026-06-28. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,290,299,301,321,364,370,371,376,381 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,290,299,301,321,364,371,376,381 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,332,363,374 | 36,37,180,290,299,371,376 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275,360,369,373 | 39,40,332,363,364 | Foundations, Propositional Logic |
-| 4 | 317 | 369 | Propositional Logic |
+| 4 | 317,370 | 360,369 | Propositional Logic |
 | 5 | 375 | 317 | Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -45,13 +45,13 @@ next_project_number: 381
 290 [PARTIAL] — Formalize Prawitz-style normalization for CSLib Theory.Derivation
   └─ 332 [IMPLEMENTING] — Close the two remaining normalization-termination sorries for CSL
     └─ 373 [NOT STARTED] — Extend the Curry-Howard layer from a structural isomorphism to a 
-370 [BLOCKED] — Close the decidability asymmetry in the metalogic layer: classica
 371 [NOT STARTED] — Symmetrize the LK/LJ sequent-calculus metatheory and add the miss
   └─ 374 [NOT STARTED] — Add Craig interpolation for the propositional sequent calculi, a 
 317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
   └─ 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
 369 [NOT STARTED] — Parameterize the intuitionistic and minimal tableau developments 
   └─ 317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri (see above)
+370 [PLANNED] — Close the decidability asymmetry in the metalogic layer: classica
 
 ### Temporal Logic
 
@@ -78,6 +78,16 @@ next_project_number: 381
     └─ 369 [NOT STARTED] — (Propositional Logic: Parameterize the intuitionistic and mini) (see above)
 
 ## Tasks
+
+### 381. Repair bimodal separation perpetuity drift
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Bimodal Logic
+- **Dependencies**: None
+
+**Description**: Repair the pre-existing Mathlib/toolchain-drift build failures in the Bimodal Separation/Perpetuity cluster (downstream of the already-repaired Separation/Defs, which builds clean). Four modules fail under leanprover/lean4:v4.31.0, all sorry-free but broken by a Lean/Mathlib bump (same drift family as task 364): (1) Cslib/Logics/Bimodal/Metalogic/Separation/Duality.lean lines 357,362 'simp made no progress'; (2) Cslib/Logics/Bimodal/Metalogic/Separation/Eliminations.lean ~15 'unsolved goals' (lines 63,498,543,545,547,548,552,602,604,606,607,611,660,662,666 — likely a single simp-set/obtain-shape drift repeated across parallel cases); (3) Cslib/Logics/Bimodal/Metalogic/Separation/DedekindZ/QLemma.lean line 191 'unsolved goals'; (4) Cslib/Logics/Bimodal/Theorems/Perpetuity/Bridge.lean line 102 'Type mismatch'. These were NOT covered by task 360's repair sweep (which fixed Separation/Defs and Perpetuity/Principles). Fix idioms likely mirror task 364's diagnosis (reorder simp-after-rw, re-derive post-simp obtain shapes via lean_goal, instance/type-mismatch coercions). MUST proceed in chunks with incremental commits; do NOT call lean_diagnostic_messages (hangs in this repo) — use lean_goal + scoped lake build. Zero sorry, zero new axioms, preserve all statements. CI: scoped lake build per module + full lake build, lake exe lint-style. Restores the repo-wide green build together with task 364 (Modal/Tableau/Soundness) and task 363 (Classical/Tableau/Completeness).
+
+---
 
 ### 380. Or imp fragment conservativity
 - **Status**: [COMPLETED]
@@ -198,10 +208,10 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 370. Int min metalogic decidability
-- **Status**: [BLOCKED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: None
+- **Dependencies**: Task 360
 - **Research**: [370_int_min_metalogic_decidability/reports/01_int-min-decidability-fmp-vs-lj.md]
 - **Plan**: [370_int_min_metalogic_decidability/plans/01_int-min-fmp-decidability.md]
 

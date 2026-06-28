@@ -1585,8 +1585,8 @@
       "topic": "Modal Logic",
       "dependencies": [],
       "created": "2026-06-27T02:56:28Z",
-      "last_updated": "2026-06-27T11:08:15Z",
-      "session_id": "sess_1782538677_f01f15_364",
+      "last_updated": "2026-06-28T00:16:00Z",
+      "session_id": "sess_1782605120_37db64_364",
       "artifacts": [
         {
           "type": "report",
@@ -1597,8 +1597,14 @@
           "type": "report",
           "path": "specs/364_modal_tableau_soundness_drift_repair/reports/02_refactor-strategy.md",
           "summary": "Rule-case extraction refactor strategy: 10 sub-lemmas (5 pos + 5 neg sign), Phase-0-first, boxNeg bottleneck"
+        },
+        {
+          "type": "report",
+          "path": "specs/364_modal_tableau_soundness_drift_repair/reports/03_verified-fix-mapping.md",
+          "summary": "Build-grounded verification of task-364 drift: refutes prior reports' 'all errors in one theorem' premise, identifies undiagnosed downstream cluster (List.bind keystone, List.mem_zip, mem_cons_self, Bool.or_eq_true), gives chunked in-place repair ordering."
         }
-      ]
+      ],
+      "next_artifact_number": 4
     },
     {
       "project_number": 365,
@@ -1712,13 +1718,15 @@
     {
       "project_number": 370,
       "project_name": "int_min_metalogic_decidability",
-      "status": "blocked",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Close the decidability asymmetry in the metalogic layer: classical propositional logic has a decision procedure (instDecidableDerivablePropositionalAxiom via tautology enumeration, Metalogic/StrongCompleteness.lean:566), but intuitionistic (IntPropAxiom) and minimal (MinPropAxiom) logics have none. Establish Decidable (Derivable IntPropAxiom phi) and Decidable (Derivable MinPropAxiom phi) via the finite model property: bound the canonical Kripke models (prime DCCS / MinTheory worlds) by the subformulas of phi, give a terminating decision procedure over the finite model space, and prove it correct against the existing int/min strong-completeness theorems (IntStrongCompleteness.lean, MinStrongCompleteness.lean). Independent of the tableau decision procedures (which currently rest on unproved completeness witnesses). Note: the LJ sequent calculus already has a tableau-backed decidability instance (SequentCalculus/LJ/Decidability.lean) -- assess whether the FMP route or a bridge to LJ decidability is the cleaner source for the IPL instance before implementing. No new axioms (Classical.choice / Decidable.decide acceptable on noncomputable defs); CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake).",
-      "dependencies": [],
+      "dependencies": [
+        360
+      ],
       "created": "2026-06-27T05:29:32Z",
-      "last_updated": "2026-06-27T12:04:45Z",
+      "last_updated": "2026-06-27T00:00:00Z",
       "next_artifact_number": 1,
       "artifacts": [
         {
@@ -1733,7 +1741,7 @@
         }
       ],
       "session_id": "sess_1782560395_aeb7ef_370",
-      "blockers": "FMP go/no-go spike (Phase 1) did not cleanly resolve: Cslib/Logics/Propositional/Metalogic/IntFMPSpike.lean (orphan, not in barrel) contains 1 remaining sorry in the finite-Lindenbaum/Fintype witness; implementation agent overflowed context (Prompt too long) after 29 tool calls. Per plan, no sorry should ship — needs manual continuation or a [BLOCKED] decision on the Sigma-bounded finite Lindenbaum lemma. Leaf task: blocks nothing in this batch."
+      "blockers": "RESOLVED 2026-06-27: original FMP go/no-go is GO. Spike IntFMPSpike.lean is sorry-free with Fintype done and int_fin_imp_witness ~95% complete (infinite-canonical-model-restricted-to-Σ route). Remaining: 2 concrete compile errors (reserved-token identifier hψ'Σ; unsolved closed' field goal), then promote to barreled IntDecidability.lean and delete the orphan. See plan Current State section. Phase 2 (subformulas) already exists in Subformula.lean."
     },
     {
       "project_number": 371,

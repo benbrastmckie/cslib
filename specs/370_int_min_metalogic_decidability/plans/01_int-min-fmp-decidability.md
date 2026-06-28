@@ -1,8 +1,8 @@
 # Implementation Plan: Task #370 — Sorry-Free Int/Min Decidability via FMP
 
 - **Task**: 370 - int_min_metalogic_decidability
-- **Status**: [NOT STARTED]
-- **Effort**: 16 hours (est. 1000-1800 Lean lines across Int+Min; spike-gated)
+- **Status**: [IN PROGRESS] — Phase 1 spike GO (architecture validated); resume from Phase 1 cleanup
+- **Effort**: ~10 hours remaining (est. 800-1400 Lean lines across Int+Min; spike de-risked)
 - **Dependencies**: None
 - **Research Inputs**: specs/370_int_min_metalogic_decidability/reports/01_int-min-decidability-fmp-vs-lj.md
 - **Artifacts**: plans/01_int-min-fmp-decidability.md (this file)
@@ -29,6 +29,47 @@ The single HIGH-risk component is the **`Σ`-bounded finite Lindenbaum lemma**
 spike cannot discharge the finite Lindenbaum + Fintype obligations sorry-free within bounded
 effort, the task is marked **[BLOCKED]** with an exact recorded goal state — never a `sorry`,
 and never a fallback to the tableau instance.
+
+### Current State (updated 2026-06-27 — supersedes the original [BLOCKED])
+
+The original blocker ("FMP go/no-go did not cleanly resolve; 1 remaining sorry in the
+finite-Lindenbaum/Fintype witness") is **stale**. Re-inspection of committed code shows the
+HIGH-risk design questions are effectively **resolved**, and the remaining work is concrete:
+
+- **Phase 1 spike result = GO.** `Cslib/Logics/Propositional/Metalogic/IntFMPSpike.lean` is
+  committed (orchestration commit `1977f78b`) and contains **no `sorry`**. The two gating
+  obligations are essentially in place:
+  - `Fintype (IntFinWorld φ)` — **DONE** via `Fintype.ofInjective` on the carrier→`Σ.powerset`
+    embedding (`instFintypeIntFinWorld`). This solves risk R2 *without* deciding `SetDerivable`.
+  - `int_fin_imp_witness` — **architecture validated, ~95% complete.** The spike abandons the
+    from-scratch *finite* Lindenbaum (original R1) for a cleaner route: lift `w` to the existing
+    **infinite** canonical model, apply the already-proven sorry-free `int_imp_witness` +
+    `int_prime_exclusion`, then **restrict the resulting prime DCCS back to Σ**
+    (`carrier' := φ.subformulas.filter (· ∈ T'')`). This sidesteps Zorn-for-finite-models. The
+    helper `intFinWorld_propConsistent` is also complete.
+- **The committed spike does NOT compile.** A scoped `lake build` of the module reports two
+  concrete, ordinary errors inside `int_fin_imp_witness` (no `sorry`, no feasibility wall):
+  1. **Parse error** — a hypothesis is named `hψ'Σ`; `Σ` is a reserved Lean 4 token. Rename to
+     ASCII (e.g. `hψ'mem`).
+  2. **Unsolved goals in the `closed'` field proof** — the restriction-to-Σ deductive-closure
+     argument (`SetDerivable IntPropAxiom ↑carrier' ψ' → ψ' ∈ carrier'`) does not close. The
+     pieces are present (`SetDerivable_weakening` from `↑carrier' ⊆ ↑T''`, then T''’s DCCS
+     closure field `IntDCCS.2 : ∀ L φ, (∀ x∈L, x∈T'') → Deriv L φ → φ ∈ T''`); the projection
+     wiring via `h_sd_T''.choose`/`.choose_spec` mismatches the actual shape of `SetDerivable`
+     and must be re-derived.
+- **Trap:** the spike file is an **orphan — not in `Cslib.lean`** — so the full `lake build`
+  never compiles it. That is why the orchestration reported success and CI looked green while
+  leaving a broken committed file. Any resume MUST either fix-and-promote it into a barreled
+  file or delete it; it must not be left as a committed non-compiling orphan.
+- **Phase 2 already exists.** `Cslib/Logics/Propositional/Subformula.lean` (committed under task
+  334, in the barrel) provides `subformulas`, `Proposition.IsSubformula`, and the closure lemmas
+  (`imp_left/right`, `and_left/right`, `or_left/right`, `refl`, `trans`). Phase 2 is therefore
+  a no-op beyond importing it — do **not** redefine these.
+
+**Resume point:** Phase 1 cleanup (fix the two compile errors), then Phases 3→7 with Phase 2
+collapsed to an import. Standard `/implement`/`/orchestrate` is appropriate (the risky design is
+settled); only escalate to `--hard` or split Int/Min into separate dispatches if a re-dispatch
+again overflows context on the `int_fmp` ↔ truth-lemma assembly.
 
 ### Research Integration
 
@@ -120,112 +161,112 @@ after the Phase 1 spike gate is **conditional on the spike succeeding** (see Pha
 
 ---
 
-### Phase 1: De-Risking Spike — Finite Lindenbaum Witness + Fintype of Bounded Worlds (GO/NO-GO) [IN PROGRESS]
+### Phase 1: Spike Cleanup — Make `IntFMPSpike.lean` Compile (GO already decided) [IN PROGRESS]
 
-**Goal**: Before committing any further effort, prove in isolation the two HIGH-risk
-obligations that gate the entire FMP construction: (a) the `Σ`-bounded finite Lindenbaum
-extension witness `int_fin_imp_witness`, and (b) a sorry-free `Fintype (IntFinWorld φ)` with
-decidable world membership that does **not** require deciding `SetDerivable` (R2). This phase is
-a **go/no-go gate**: success authorizes Phases 2-7; failure terminates the task as `[BLOCKED]`.
+**Goal**: The go/no-go gate is **decided GO** — the spike `IntFMPSpike.lean` already contains a
+sorry-free `Fintype (IntFinWorld φ)` and an ~95%-complete `int_fin_imp_witness` built via the
+infinite-canonical-model-restricted-to-Σ route (NOT the original finite-iteration Lindenbaum).
+The remaining Phase 1 work is to **make the file compile** by fixing the two concrete errors
+surfaced by `lake build Cslib.Logics.Propositional.Metalogic.IntFMPSpike`, then proceed.
 
 **Tasks**:
-- [ ] Create a **scratch spike file** (e.g. `Cslib/Logics/Propositional/Metalogic/IntFMPSpike.lean`,
-      or a `specs/370_.../scratch/` Lean file) in which the rest of the construction may be
-      `sorry`-stubbed **only inside this scratch file, never in committed library code**.
-- [ ] Define the candidate `subformulas` closure (minimal version) and the finitary world
-      predicate `P` on `Σ.powerset` used to dodge R2: worlds as `Σ.powerset.filter P` with `P`
-      purely finitary (membership/`∀ ψ ∈ Σ` bounded checks; prime closure on `.or`; for Int the
-      `⊥ ∉ carrier` consistency check). Confirm `P` is `Decidable`.
-- [ ] Establish `instance : Fintype (IntFinWorld φ)` sorry-free via `Fintype.ofFinset` over
-      `Σ.powerset.filter P` (R2 resolution). Confirm world membership is decidable WITHOUT
-      deciding `SetDerivable`.
-- [ ] Prove `int_fin_imp_witness` (the finite, Zorn-free Lindenbaum): given `.imp ψ χ ∈ Σ` and
-      `.imp ψ χ ∉ w.carrier`, produce `w' ≥ w` with `ψ ∈ w'.carrier`, `χ ∉ w'.carrier`. Follow
-      the skeleton: (1) `w.carrier ∪ {ψ} ⊬ χ` (else deduction theorem + `closed` forces
-      `.imp ψ χ ∈ w.carrier`, contradiction); (2) extend to a `Σ`-bounded prime saturated set
-      omitting χ by **finite iteration over Σ** (decide each `ζ ∈ Σ` in turn — this replaces
-      `int_prime_exclusion`'s Zorn argument); (3) package as `IntFinWorld φ`. Mirror
-      `int_imp_witness` + `int_prime_exclusion` patterns.
-- [ ] Use lean-lsp tooling (`lean_goal`, `lean_multi_attempt`, `lean_local_search`,
-      `lean_state_search`) to drive the proofs; verify no `sorry`/`admit` reaches the two target
-      lemmas (`lean_verify` axiom audit on the spike lemmas).
-- [ ] **GO/NO-GO decision**:
-      - **GO** (both lemmas land sorry-free): record the working definitions/proof skeletons,
-        promote validated definitions out of scratch, and proceed to Phase 2.
-      - **NO-GO** (finite Lindenbaum or Fintype cannot be discharged sorry-free within the
-        allotted spike effort): **STOP**. Mark the task `[BLOCKED]`. Record the exact failing
-        goal state(s) (`lean_goal` output) and the obstruction. Do **NOT** introduce any
-        `sorry` into committed code and do **NOT** fall back to the tableau-backed instance.
+- [ ] **Fix the parse error**: the hypothesis named `hψ'Σ` (in the `closed'` field proof) uses
+      the reserved Lean 4 token `Σ`. Rename to an ASCII identifier (e.g. `hψ'mem`) and update its
+      use sites.
+- [ ] **Close the `closed'` field goal** `SetDerivable IntPropAxiom (↑carrier') ψ' → ψ' ∈ carrier'`
+      inside `int_fin_imp_witness`. The route is already scaffolded but the final projection
+      fails:
+      - `carrier' := φ.subformulas.filter (· ∈ T'')`, so `↑carrier' ⊆ ↑T''` as sets.
+      - Weaken the derivation with `SetDerivable_weakening h_sub_set h_sd'` to get
+        `SetDerivable IntPropAxiom ↑T'' ψ'`.
+      - Apply T''’s DCCS closure field. `IntDCCS S = PropSetConsistent .. S ∧ (∀ L φ, (∀ x∈L, x∈S)
+        → Deriv L φ → φ ∈ S)`, reached via `hT''_prime.1.2`. Re-derive the witness list/membership/
+        derivation from `SetDerivable` directly (the current `h_sd_T''.choose`/`.choose_spec.1/.2`
+        wiring mismatches the actual `SetDerivable` shape — use `obtain ⟨L, hLsub, hLderiv⟩ := h_sd_T''`
+        or the correct accessor) so that `ψ' ∈ T''`, hence `ψ' ∈ carrier'`.
+- [ ] Verify the whole spike module compiles: `lake build Cslib.Logics.Propositional.Metalogic.IntFMPSpike`.
+- [ ] `lean_verify` axiom audit on `int_fin_imp_witness`, `instFintypeIntFinWorld`,
+      `intFinWorld_propConsistent`: no `sorryAx`; only permitted axioms (`Classical.choice` etc.).
+- [ ] Decide the orphan-file disposition (carried out in Phase 3): the validated defs/lemmas are
+      **promoted** into the barreled `IntDecidability.lean`; the scratch `IntFMPSpike.lean` is then
+      **deleted** (it must not remain as a committed, un-barreled, formerly-broken file).
 
-**Timing**: 2-3 hours
+**Timing**: 1-1.5 hours
 
-**Depends on**: none
+**Depends on**: none (resume point)
 
 **Files to modify**:
-- `Cslib/Logics/Propositional/Metalogic/IntFMPSpike.lean` (scratch; new) — spike-only; not part
-  of committed deliverable unless cleanly promoted.
+- `Cslib/Logics/Propositional/Metalogic/IntFMPSpike.lean` — fix the two compile errors; this is
+  the scratch source that Phase 3 promotes then deletes.
 
 **Verification**:
-- Both `int_fin_imp_witness` and `Fintype (IntFinWorld φ)` type-check with no `sorry`/`admit`
-  (`lean_verify` / `#print axioms` shows only permitted axioms, e.g. `Classical.choice`).
-- GO path: validated definitions recorded for reuse in Phases 1-product onward.
-- NO-GO path: `[BLOCKED]` recorded with exact goal state in the return metadata and summary;
-  no committed `sorry`.
+- `lake build Cslib.Logics.Propositional.Metalogic.IntFMPSpike` is green.
+- `int_fin_imp_witness`, `instFintypeIntFinWorld`, `intFinWorld_propConsistent` type-check with no
+  `sorry`/`admit` (`lean_verify` / `#print axioms` shows only permitted axioms).
 
 ---
 
-### Phase 2: Subformula Closure Infrastructure [NOT STARTED]
+### Phase 2: Subformula Closure Infrastructure [COMPLETED — pre-existing]
 
-**Goal**: Land the shared, sorry-free `subformulas` Finset closure and its closure lemmas in
-committed library code (promoting the Phase 1 scratch version). LOW risk; mechanical.
+**Goal**: Provide the `subformulas` Finset closure and its closure lemmas. **Already satisfied
+by committed code** — no new work.
+
+**Status**: `Cslib/Logics/Propositional/Subformula.lean` (committed under task 334, present in
+the `Cslib.lean` barrel) already provides:
+- `Proposition.subformulas : Proposition Atom → Finset (Proposition Atom)` over all 5 constructors;
+- `Proposition.IsSubformula` (`A.IsSubformula B ↔ A ∈ B.subformulas`);
+- closure lemmas `IsSubformula.refl`, `.trans`, `.and_left/.and_right`, `.or_left/.or_right`,
+  `.imp_left/.imp_right`.
 
 **Tasks**:
-- [ ] Add new file `Cslib/Logics/Propositional/Metalogic/IntDecidability.lean` with
-      `import Cslib.Init` first line and the corresponding `*StrongCompleteness` import.
-- [ ] Define `subformulas [DecidableEq Atom] : Proposition Atom → Finset (Proposition Atom)`
-      over all 5 constructors (`atom`, `bot`, `imp`, `and`, `or`), each inserting the node and
-      unioning children's closures.
-- [ ] Prove `self_mem_subformulas (φ) : φ ∈ subformulas φ`.
-- [ ] Prove the 6 closure lemmas: `subformulas_closed_imp_left/right`, `and_left/right`,
-      `or_left/right` (mechanical structural recursion via `simp`/`Finset.mem_*`).
+- [ ] In `IntDecidability.lean`, `import Cslib.Logics.Propositional.Subformula` and use
+      `φ.subformulas` / `Proposition.IsSubformula` directly. Do **NOT** redefine `subformulas`
+      or the closure lemmas (the spike already depends on these names).
+- [ ] If any specific finset-membership form is needed downstream (e.g. `self_mem_subformulas`),
+      derive it from `IsSubformula.refl` rather than defining a new lemma.
 
-**Timing**: 1.5 hours
+**Timing**: 0 hours (verification only)
 
-**Depends on**: 1 (conditional on GO)
+**Depends on**: 1
 
-**Files to modify**:
-- `Cslib/Logics/Propositional/Metalogic/IntDecidability.lean` (new) — `subformulas` + closure
-  lemmas.
+**Files to modify**: none (import only).
 
 **Verification**:
-- `lake build` green on the new file; all closure lemmas sorry-free (`lean_verify`).
+- `Cslib/Logics/Propositional/Subformula.lean` builds (already in barrel); names resolve.
 
 ---
 
-### Phase 3: Finite World Type — `IntFinWorld`, `Fintype`, `Preorder`, Decidable Membership [NOT STARTED]
+### Phase 3: Promote Spike Into Barreled `IntDecidability.lean` [NOT STARTED]
 
-**Goal**: Promote the spike's bounded-world construction into committed code: the
-`Σ`-bounded prime saturated world structure with sorry-free `Fintype`, `Preorder` (`⊆`), and
-decidable membership (the R2 resolution), reusing the Phase 1 GO result.
+**Goal**: Move the now-compiling spike construction (`IntFinWorld`, `IntFinWorld.ext`,
+`instPreorderIntFinWorld`, `instFintypeIntFinWorld`, `intFinWorld_propConsistent`,
+`int_fin_imp_witness`) from the scratch `IntFMPSpike.lean` into a committed, barreled file, and
+delete the orphan. The construction itself is already validated in Phase 1 — this phase is
+relocation + barrel hygiene, not new proof work.
 
 **Tasks**:
-- [ ] Define `IntFinWorld φ` carrying `carrier ⊆ subformulas φ`, the finitary `closed`/`prime`/
-      (Int) `consistent` invariants, exactly as validated in Phase 1.
-- [ ] Provide `instance : Fintype (IntFinWorld φ)` via `Fintype.ofFinset` over
-      `(subformulas φ).powerset.filter P` (R2 resolution; no `SetDerivable` decision).
-- [ ] Provide `instance : Preorder (IntFinWorld φ)` with `(·.carrier ⊆ ·.carrier)`.
-- [ ] Prove (or re-establish) the lemma that filtered finitary worlds correspond to restrictions
-      of prime DCCS, as needed downstream.
+- [ ] Create `Cslib/Logics/Propositional/Metalogic/IntDecidability.lean` with `import Cslib.Init`
+      first line, plus `import Cslib.Logics.Propositional.Metalogic.IntStrongCompleteness` and
+      `import Cslib.Logics.Propositional.Subformula`.
+- [ ] Move the validated definitions/instances/lemmas verbatim from `IntFMPSpike.lean`. Keep the
+      `Fintype.ofInjective`-based `instFintypeIntFinWorld` and the infinite-canonical-restriction
+      proof of `int_fin_imp_witness` (the route validated in Phase 1).
+- [ ] `lake exe mk_all --module` to register the new file in the `Cslib.lean` barrel.
+- [ ] **Delete `Cslib/Logics/Propositional/Metalogic/IntFMPSpike.lean`** (orphan removed).
+- [ ] `lake build Cslib.Logics.Propositional.Metalogic.IntDecidability` green; axiom audit clean.
 
-**Timing**: 2-3 hours
+**Timing**: 1-1.5 hours
 
-**Depends on**: 2
+**Depends on**: 1, 2
 
 **Files to modify**:
-- `Cslib/Logics/Propositional/Metalogic/IntDecidability.lean` — world type + instances.
+- `Cslib/Logics/Propositional/Metalogic/IntDecidability.lean` (new) — promoted world type +
+  instances + `int_fin_imp_witness`.
+- `Cslib/Logics/Propositional/Metalogic/IntFMPSpike.lean` (delete).
+- `Cslib.lean` (barrel, via `mk_all`).
 
 **Verification**:
-- `lake build` green; `Fintype`/`Preorder` instances and membership decidability sorry-free.
+- `lake build` (scoped) green; new file in barrel; `IntFMPSpike.lean` removed.
 - `#print axioms` on the instances shows only permitted axioms.
 
 ---

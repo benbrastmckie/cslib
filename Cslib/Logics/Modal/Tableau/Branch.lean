@@ -129,6 +129,49 @@ lemma modalNextWorld_gt (b : List (SignedFormula (Proposition Atom) WorldIndex))
       | inr h => exact ih _ _ h
   exact Nat.lt_succ_of_le (key2 b 0 sf hmem)
 
+/-- Every label in a branch is bounded by `modalMaxWorld b`.
+
+This is the membership bound; essentially `key2` from `modalNextWorld_gt`. -/
+lemma label_le_modalMaxWorld
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {sf : SignedFormula (Proposition Atom) WorldIndex}
+    (h : sf ∈ b) : sf.label ≤ modalMaxWorld b :=
+  Nat.lt_succ_iff.mp (modalNextWorld_gt b sf h)
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `modalMaxWorld` is monotone under list prepend:
+`modalMaxWorld b ≤ modalMaxWorld (xs ++ b)`.
+
+The maximum of a branch only grows as more formulas are prepended. -/
+lemma modalMaxWorld_le_append
+    (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    modalMaxWorld b ≤ modalMaxWorld (xs ++ b) := by
+  simp only [modalMaxWorld, List.foldl_append]
+  suffices mono : ∀ (ys : List (SignedFormula (Proposition Atom) WorldIndex))
+      (i j : WorldIndex), i ≤ j →
+      ys.foldl (fun mx sf => max mx sf.label) i ≤
+      ys.foldl (fun mx sf => max mx sf.label) j by
+    exact mono b 0 _ (Nat.zero_le _)
+  intro ys
+  induction ys with
+  | nil => intro i j h; simpa
+  | cons hd tl ih =>
+    intro i j h
+    simp only [List.foldl]
+    apply ih
+    exact Nat.max_le.mpr ⟨Nat.le_trans h (Nat.le_max_left j hd.label), Nat.le_max_right j hd.label⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `modalNextWorld` is monotone under list prepend:
+`modalNextWorld b ≤ modalNextWorld (xs ++ b)`.
+
+Corollary of `modalMaxWorld_le_append`. -/
+lemma modalNextWorld_le_append
+    (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    modalNextWorld b ≤ modalNextWorld (xs ++ b) := by
+  unfold modalNextWorld
+  exact Nat.succ_le_succ (modalMaxWorld_le_append xs b)
+
 /-! ## Box Propagation Helper -/
 
 /-- Collect all box-positive formulas `T(□φ)@w` from a branch for propagation.

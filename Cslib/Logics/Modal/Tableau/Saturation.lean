@@ -124,52 +124,56 @@ def modalStepBranch
 Processes each branch in a worklist:
 - If the branch is closed, skip it.
 - If the branch has no more applicable rules (saturated and open), return it as a
-  K-countermodel together with the current accessibility relation.
+  K-countermodel together with the branch-local accessibility relation.
 - Otherwise apply one expansion step and recurse with remaining fuel.
+
+Each branch carries its own `Accessibility` relation in the parallel list `accs`
+(with `accs.length = branches.length`), so an existential-rule edge fired on one
+branch cannot pollute sibling branches.
 
 Termination is guaranteed by the fuel parameter. -/
 def modalExpandBranches
     (branches : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-    (acc : Accessibility)
+    (accs : List Accessibility)
     (fuel : Nat) : ModalTableauResult Atom :=
   match fuel with
   | 0 =>
-    -- Fuel exhausted: return first open branch (treat as countermodel)
-    match branches.zip expandedSets |>.findSome? (fun (b, _) =>
-        if isModalClosed b then none else some b) with
-    | some b => .openBranch b acc
+    -- Fuel exhausted: return first open branch with its local accessibility relation
+    match (branches.zip accs) |>.findSome? (fun (b, a) =>
+        if isModalClosed b then none else some (b, a)) with
+    | some (b, a) => .openBranch b a
     | none => .closed
   | fuel' + 1 =>
     -- processNext: iterate through branches, finding the first open one to expand
     let rec processNext
         (pending : List (List (SignedFormula (Proposition Atom) WorldIndex)))
         (pendingExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (pendingAccs : List Accessibility)
         (done : List (List (SignedFormula (Proposition Atom) WorldIndex)))
         (doneExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-        (currAcc : Accessibility)
+        (doneAccs : List Accessibility)
         : ModalTableauResult Atom :=
-      match pending, pendingExp with
-      | [], _ => .closed  -- All branches closed
-      | b :: restBs, e :: restEs =>
+      match pending, pendingExp, pendingAccs with
+      | [], _, _ => .closed  -- All branches closed
+      | b :: restBs, e :: restEs, a :: restAs =>
         if isModalClosed b then
-          -- Branch is closed: skip it
-          processNext restBs restEs (done ++ [b]) (doneExp ++ [e]) currAcc
+          -- Branch is closed: skip it, carry its acc to done
+          processNext restBs restEs restAs (done ++ [b]) (doneExp ++ [e]) (doneAccs ++ [a])
         else
-          match modalStepBranch b e currAcc with
+          match modalStepBranch b e a with
           | none =>
-            -- Branch is saturated and open: return countermodel
-            .openBranch b currAcc
+            -- Branch is saturated and open: return with this branch's local acc
+            .openBranch b a
           | some (newBs, newExps, newAcc) =>
-            -- Expanded: recurse with new branches
+            -- Expanded: recurse with new branches using newAcc for each child
             modalExpandBranches
               (done ++ newBs ++ restBs)
               (doneExp ++ newExps ++ restEs)
-              newAcc
+              (doneAccs ++ List.replicate newBs.length newAcc ++ restAs)
               fuel'
-      | _ :: restBs, [] =>
-        processNext restBs [] done doneExp currAcc
-    processNext branches expandedSets [] [] acc
+      | _, _, _ => .closed  -- malformed (length invariant rules this out)
+    processNext branches expandedSets accs [] [] []
 
 /-! ## Entry Point -/
 
@@ -185,7 +189,7 @@ which by K-completeness equals "φ is K-provable". -/
 def modalTableau (φ : Proposition Atom) : ModalTableauResult Atom :=
   let initialBranch : List (SignedFormula (Proposition Atom) WorldIndex) :=
     [⟨.neg, φ, 0⟩]
-  modalExpandBranches [initialBranch] [[]] Accessibility.empty (modalFuel φ)
+  modalExpandBranches [initialBranch] [[]] [Accessibility.empty] (modalFuel φ)
 
 /-! ## Hintikka Set Predicate -/
 

@@ -57,6 +57,7 @@ def Theory.Derivation.height : T.Derivation G A → Nat
   | orE _ D DA DB => 1 + max D.height (max DA.height DB.height)
   | impI _ D => 1 + D.height
   | impE D E => 1 + max D.height E.height
+  | efq D => 1 + D.height
 
 /-! ## The isNormal Predicate -/
 
@@ -92,6 +93,8 @@ def Theory.Derivation.isNormal : T.Derivation G A → Bool
     match D with
     | impI _ _ => false
     | _ => D.isNormal && E.isNormal
+  -- efq has no introduction rule for ⊥, so efq nodes are never proper redexes
+  | efq D => D.isNormal
 
 /-- Axiom derivations are normal (leaves, no redex). -/
 theorem Theory.Derivation.isNormal_ax {G : Ctx Atom} {A : Proposition Atom} {h : A ∈ T} :
@@ -158,6 +161,8 @@ def Theory.Derivation.isStronglyNormal : T.Derivation G A → Bool
     | impI _ _ => false        -- proper redex
     | orE _ _ _ _ => false     -- commuting conversion
     | _ => D.isStronglyNormal && E.isStronglyNormal
+  -- efq has no introduction rule for ⊥ and no commuting conversions; no redex flags needed
+  | efq D => D.isStronglyNormal
 
 /-- Strong normality implies normality: strongly normal derivations avoid all proper redexes
 and additionally avoid commuting conversions. -/
@@ -171,14 +176,14 @@ theorem Theory.Derivation.isStronglyNormal_implies_isNormal
     simp only [isNormal, Bool.and_eq_true]
     exact ⟨ih₁ h.1, ih₂ h.2⟩
   | andE1 _ D ih =>
-    -- D : T.Derivation G (A ∧ B). Valid constructors: ax, ass, andI, andE1, andE2, impE, orE.
+    -- D : T.Derivation G (A ∧ B). Valid constructors: ax, ass, andI, andE1, andE2, impE, orE, efq.
     -- (orI1, orI2, impI would give wrong type.)
     cases D with
     | andI _ _ _ => simp [isStronglyNormal] at h   -- proper redex: false
     | orE _ _ _ _ => simp [isStronglyNormal] at h  -- commuting conversion: false
     | ax _ | ass _ =>
       simp [isNormal, isStronglyNormal] at *
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+    | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
       simp only [isStronglyNormal] at h; simp only [isNormal]; exact ih h
   | andE2 _ D ih =>
     -- D : T.Derivation G (A ∧ B). Same valid constructors as andE1 case.
@@ -186,14 +191,14 @@ theorem Theory.Derivation.isStronglyNormal_implies_isNormal
     | andI _ _ _ => simp [isStronglyNormal] at h
     | orE _ _ _ _ => simp [isStronglyNormal] at h
     | ax _ | ass _ => simp [isNormal, isStronglyNormal] at *
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+    | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
       simp only [isStronglyNormal] at h; simp only [isNormal]; exact ih h
   | orI1 _ D ih =>
     simp only [isNormal, isStronglyNormal] at *; exact ih h
   | orI2 _ D ih =>
     simp only [isNormal, isStronglyNormal] at *; exact ih h
   | orE _ D DA DB ih ihA ihB =>
-    -- D : T.Derivation G (A ∨ B). Valid constructors: ax, ass, orI1, orI2, andE1, andE2, impE, orE.
+    -- D : T.Derivation G (A ∨ B). Valid: ax, ass, orI1, orI2, andE1, andE2, impE, orE, efq.
     -- (andI, impI would give wrong type.)
     cases D with
     | orI1 _ _ => simp [isStronglyNormal] at h   -- proper redex: false
@@ -204,14 +209,14 @@ theorem Theory.Derivation.isStronglyNormal_implies_isNormal
       simp only [isStronglyNormal, isNormal] at h ⊢
       simp only [Bool.and_eq_true] at h ⊢
       exact ⟨⟨trivial, ihA h.1.2⟩, ihB h.2⟩
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+    | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
       -- isStronglyNormal (orE G D DA DB) = D.sn && DA.sn && DB.sn
       simp only [isStronglyNormal, isNormal, Bool.and_eq_true] at h ⊢
       exact ⟨⟨ih h.1.1, ihA h.1.2⟩, ihB h.2⟩
   | impI _ D ih =>
     simp only [isNormal, isStronglyNormal] at *; exact ih h
   | impE D E ih ihE =>
-    -- D : T.Derivation G (A → B). Valid constructors: ax, ass, impI, impE, andE1, andE2, orE.
+    -- D : T.Derivation G (A → B). Valid constructors: ax, ass, impI, impE, andE1, andE2, orE, efq.
     -- (andI, orI1, orI2 would give wrong type.)
     cases D with
     | impI _ _ => simp [isStronglyNormal] at h    -- proper redex: false
@@ -220,9 +225,11 @@ theorem Theory.Derivation.isStronglyNormal_implies_isNormal
       simp only [isStronglyNormal, isNormal] at h ⊢
       simp only [Bool.and_eq_true] at h ⊢
       exact ⟨trivial, ihE h.2⟩
-    | andE1 _ _ | andE2 _ _ | impE _ _ =>
+    | andE1 _ _ | andE2 _ _ | impE _ _ | efq _ =>
       simp only [isStronglyNormal, isNormal, Bool.and_eq_true] at h ⊢
       exact ⟨ih h.1, ihE h.2⟩
+  | efq D ih =>
+    simp only [isNormal, isStronglyNormal] at *; exact ih h
 
 /-! ## Formulas and Subformula Property -/
 
@@ -238,6 +245,7 @@ def Theory.Derivation.formulas : T.Derivation G A → Finset (Proposition Atom)
   | orE _ D DA DB => {A} ∪ D.formulas ∪ DA.formulas ∪ DB.formulas
   | impI _ D => {A} ∪ D.formulas
   | impE D E => {A} ∪ D.formulas ∪ E.formulas
+  | efq D => {A} ∪ D.formulas
 
 /-- The subformula property: every formula occurring in the derivation is a subformula of
 the conclusion, a hypothesis, or a theory axiom. -/

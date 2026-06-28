@@ -96,6 +96,7 @@ def Theory.Derivation.normalizeAux : Nat → T.Derivation G A → T.Derivation G
       | orE G D DA DB => orE G (D.normalizeAux n) (DA.normalizeAux n) (DB.normalizeAux n)
       | impI G D => impI G (D.normalizeAux n)
       | impE D E => impE (D.normalizeAux n) (E.normalizeAux n)
+      | efq D => efq (D.normalizeAux n)
     match d'.reduceRoot with
     | none => d'
     | some d'' => d''.normalizeAux n

@@ -405,9 +405,8 @@ public import Cslib.Logics.Modal.Tableau.Closure
 public import Cslib.Logics.Modal.Tableau.Defs
 public import Cslib.Logics.Modal.Tableau.Rules
 public import Cslib.Logics.Modal.Tableau.Saturation
--- TEMPORARILY STUBBED (tasks 299/364): Modal.Tableau.Soundness does not yet build
--- (broken refactor: lost binders, universe mismatches). Re-enable once soundness repair lands.
--- public import Cslib.Logics.Modal.Tableau.Soundness
+public import Cslib.Logics.Modal.Tableau.Soundness
+public import Cslib.Logics.Modal.Tableau.SoundnessStep
 public import Cslib.Logics.Propositional.CurryHoward.Defs
 public import Cslib.Logics.Propositional.CurryHoward.Isomorphism
 public import Cslib.Logics.Propositional.CurryHoward.Reduction
@@ -417,9 +416,7 @@ public import Cslib.Logics.Propositional.Metalogic.ClassicalConjImpCompleteness
 public import Cslib.Logics.Propositional.Metalogic.ClassicalImpCompleteness
 public import Cslib.Logics.Propositional.Metalogic.DeductionTheorem
 public import Cslib.Logics.Propositional.Metalogic.GenericMCSBridge
--- TEMPORARILY STUBBED (task 385, parked FMP): IntFMPSpike is a scratch de-risking
--- spike for Task 370 (carries a sorry); it drifted out of sync with the tableau/metalogic
--- API during the orchestrate-369 merge. Re-enable or remove via the parked-FMP task.
+-- TEMPORARILY STUBBED (task 385, parked FMP): IntFMPSpike scratch spike drifted out of sync with tableau/metalogic API.
 -- public import Cslib.Logics.Propositional.Metalogic.IntFMPSpike
 public import Cslib.Logics.Propositional.Metalogic.IntLindenbaum
 public import Cslib.Logics.Propositional.Metalogic.IntSoundness

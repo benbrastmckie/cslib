@@ -1,0 +1,8 @@
+{
+  "status": "completed",
+  "metadata": {
+    "cycles_used": 5,
+    "final_state": "completed",
+    "caveat": "full build blocked by pre-existing unrelated Propositional.Tableau module drift"
+  }
+}

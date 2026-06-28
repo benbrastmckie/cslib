@@ -1,30 +1,38 @@
 {
-  "status": "planned",
+  "status": "partial",
+  "started_at": "2026-06-28T00:00:00Z",
+  "completed_at": "2026-06-28T00:00:00Z",
+  "phases_completed": 0,
+  "phases_total": 1,
+  "blocked": true,
   "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/364_modal_tableau_soundness_drift_repair/plans/02_extract-sublemmas-refactor.md",
-      "summary": "12-phase chunked plan: Phase 0 extracts 10 stubbed sub-lemmas + skeleton, phases 1-10 drift-repair one private lemma each, phase 11 zero-debt verification"
-    }
+    {"path": "specs/364_modal_tableau_soundness_drift_repair/.orchestrator-handoff.json", "type": "handoff", "summary": "Blocked handoff: build-verified soundness gap in key fuel-induction"},
+    {"path": "specs/364_modal_tableau_soundness_drift_repair/handoffs/verified-counterexample.lean", "type": "evidence", "summary": "Compiling Lean counterexample refuting the satisfiability-lifting obligation"},
+    {"path": "specs/364_modal_tableau_soundness_drift_repair/summaries/02_soundness-gap-summary.md", "type": "summary", "summary": "Analysis and blocker writeup"}
   ],
-  "next_steps": "Run /implement 364 to execute the plan",
-  "metadata": {
-    "session_id": "sess_1782557964_fda92a_364",
-    "agent_type": "planner-agent",
-    "duration_seconds": 300,
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
-    "phase_count": 12,
-    "estimated_hours": 9,
-    "dependency_waves": [[0], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [11]]
+  "partial_progress": {
+    "stage": "blocked",
+    "details": "Reduced key fuel-induction to 3 obligations; 2 are mathematically false for carried worklist branches (build-verified counterexample). Root cause: shared acc + per-branch fresh-world numbering. Requires definitional change, out of scope. File reverted to baseline."
   },
+  "verification": {
+    "verification_passed": false,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": false,
+    "ci_pipeline_passed": false,
+    "errors_current": 3,
+    "errors_baseline": 3
+  },
+  "requires_user_review": true,
   "memory_candidates": [
-    {
-      "content": "When a single monolithic Lean theorem's proof overflows agent context during drift-repair (lean_goal returns huge hypothesis contexts because a shared prologue accumulates many hypotheses before any case work), the fix is a faithful structural refactor: extract each `cases` leaf into an independently-stated `private lemma` taking only the hypotheses that case needs. This bounds each sub-lemma's lean_goal context to a small, inspectable size, enabling per-chunk drift-repair. Land the structure first with `by sorry` stubs (a green-but-scaffolded checkpoint), then strictly reduce the sorry count to zero one lemma per commit. Preserve the public signature byte-for-byte when it is depended on downstream. Clean extraction requires: no cross-case let/have bindings and `cases` (not `induction`).",
-      "category": "TECHNIQUE",
-      "source_artifact": "specs/364_modal_tableau_soundness_drift_repair/plans/02_extract-sublemmas-refactor.md",
-      "confidence": 0.8,
-      "suggested_keywords": ["lean", "context-overflow", "proof-refactor", "private-lemma-extraction", "drift-repair", "stub-scaffold"]
-    }
-  ]
+    "CSLib modal K tableau (Soundness.lean): modalExpandBranches uses a SHARED Accessibility `acc` across all worklist branches while modalApplyOne numbers fresh worlds PER-BRANCH via modalNextWorld. This causes cross-branch edge pollution: a diamond/boxNeg edge (w, modalNextWorld b) created in one branch is visible to sibling branches whose modalNextWorld equals that target, breaking the per-branch accFreshInv that modalStepBranch_preserves_sat requires. The key soundness invariant is therefore not maintainable without a definitional change (per-branch acc OR global fresh-world counter).",
+    "Lean proof technique: to refute a 'satisfiability is preserved under adding an accessibility edge' obligation, use bp = [T(box p)@0, T(box (p->bot))@0]: satisfiable at a dead-end world, unsatisfiable once that world gains a successor (forces p and not-p)."
+  ],
+  "metadata": {
+    "session_id": "sess_1782625986_93ef30",
+    "agent_type": "cslib-implementation-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
+  }
 }

@@ -1,5 +1,5 @@
 {
-  "next_project_number": 402,
+  "next_project_number": 403,
   "active_projects": [
     {
       "project_number": 395,
@@ -1697,7 +1697,7 @@
     {
       "project_number": 364,
       "project_name": "modal_tableau_soundness_drift_repair",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Repair the pre-existing Mathlib/toolchain-drift build failure in Cslib/Logics/Modal/Tableau/Soundness.lean (947 lines, ~77 errors under leanprover/lean4:v4.31.0). The file is sorry-free but broke under a Lean/Mathlib bump; it was the only module not fixed during the 2026-06-26 CI-failure sweep (all other ~10 originally-failing modules were repaired). Three single-pass agents overflowed their context on it because lean_goal returns very large hypothesis contexts here, so this MUST be done in chunks with incremental commits, never calling lean_diagnostic_messages (hangs in this repo). A full root-cause diagnosis with concrete fix idioms is in reports/01_drift-diagnosis.md. The 77 errors reduce to ~4 fix-families: (1) cases X.sign no longer substitutes the isPos hypothesis (use cases h : X.sign <;> simp_all [Sign.isPos]); (2) simp only [Satisfies] ordering/no-op (reorder after rw, or use Satisfies.neg_iff/diamond_iff / Proposition.neg_def); (3) simp [tryAllPropRules,...] at hsf no longer normalizes to the shape the obtain pattern expects, causing ~60 Unknown identifier hnewBs cascades in modalStepBranch_preserves_sat (re-derive the post-simp shape via lean_goal and fix the obtain/simp set across the 5 parallel rule-cases); (4) LawfulBEq.eq_of_beq instance-synth/type mismatch. Zero sorry, zero new axioms, preserve all statements. CI: lake build (scoped + full), lake exe lint-style. Created as a follow-up of the CI-failure fix sweep.",
       "topic": "Modal Logic",
@@ -1727,7 +1727,8 @@
           "summary": "7-phase in-place build-log-driven commit-per-cluster drift repair grounded in authoritative report 03; rejects 10-sub-lemma refactor."
         }
       ],
-      "next_artifact_number": 4
+      "next_artifact_number": 4,
+      "completion_summary": "Modal tableau soundness drift repair COMPLETE. Toolchain/Mathlib drift repaired (61->0 errors) and the soundness-proof gap closed via spawned task 384 (per-branch Accessibility redesign): Soundness.lean split into SoundnessStep.lean, modalStepBranch_preserves_accFreshInv proven, modalExpandBranches_closed_unsat reformulated to per-branch accs/List.Forall2. Verified: scoped Cslib.Logics.Modal.Tableau.Soundness build GREEN, modalTableau_sound uses only standard axioms (no sorryAx), zero sorry across Modal/Tableau, lint-style PASS, public API preserved. CAVEAT: full `lake build` is red on a PRE-EXISTING REPO-WIDE issue present on main (duplicate Proposition.subformulas definition in Subformula.lean vs NaturalDeduction/Normalization/Basic.lean) \u2014 independent of this task; also fixed 5 branch-local module-marker regressions in Propositional/Tableau as a bonus."
     },
     {
       "project_number": 365,
@@ -2356,6 +2357,62 @@
       "artifacts": [],
       "session_id": "sess_1782661425_64245d_401",
       "dependencies": []
+    },
+    {
+      "project_number": 402,
+      "project_name": "modal_tableau_soundness_gap_redesign",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "Redesign the modal tableau fresh-world scheme to close the build-verified soundness-proof gap blocking task 364. Root cause (build-verified): modalExpandBranches (Cslib/Logics/Modal/Tableau) threads a SINGLE shared Accessibility acc through all worklist branches, while modalApplyOne numbers fresh worlds PER-BRANCH as modalNextWorld b. A diamond/boxNeg edge (w,w') created in one branch pollutes sibling branches whose modalNextWorld equals w', so the per-branch invariant accFreshInv / branchSatisfiable required by modalStepBranch_preserves_sat is unmaintainable: branchSatisfiable bp acc does NOT imply branchSatisfiable bp (acc.addEdge ..) (satisfiability is not monotone under edge addition; compiling counterexample: (Box p AND Box (p->bot)) @0 is satisfiable at a dead-end world but contradictory once world 0 gains a successor). This surfaced as the final 3 build errors (1744/1749/1770) in modalExpandBranches_closed_unsat's fuel-induction succ-case after task 364 repaired all genuine toolchain/Mathlib drift (61->3 errors, zero sorry). The original proof masked this with a -- Placeholder that only type-checked under the pre-bump toolchain's looser unification. DESIGN OPTIONS to evaluate: (A) per-branch Accessibility relations (each worklist branch carries its own acc), or (B) a globally-monotone fresh-world counter threaded through modalExpandBranches so fresh worlds never collide across branches. Either eliminates cross-branch pollution; then reformulate the loop invariant (per-branch accFreshInv) and prove the missing freshness-MAINTENANCE lemma (none exists today: only accFreshInv_empty and modalNextWorld_gt). Build-verified evidence and full obligation analysis: specs/364_modal_tableau_soundness_drift_repair/handoffs/verified-counterexample.lean, .../summaries/02_soundness-gap-summary.md, .../.orchestrator-handoff.json. Constraints: zero sorry, zero new axioms; preserve the public theorem statements modalTableau_sound / kValid where possible (changing modalExpandBranches' fresh-world scheme is expected). CI: lake build (scoped Cslib.Logics.Modal.Tableau.Soundness + full), lake exe lint-style. Blocks completion of task 364.",
+      "dependencies": [],
+      "parent_task": 364,
+      "last_updated": "2026-06-28T13:10:00Z",
+      "session_id": "sess_1782650931_f8e119",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/384_modal_tableau_soundness_gap_redesign/reports/01_soundness-gap-redesign.md",
+          "summary": "Design eval: recommend per-branch Accessibility (Option A); rejects global counter (Option B) \u2014 pollution travels via shared source world. Core preserved; only modalExpandBranches + loop lemma change."
+        },
+        {
+          "type": "plan",
+          "path": "specs/384_modal_tableau_soundness_gap_redesign/plans/01_per-branch-accessibility.md",
+          "summary": "6-phase plan: per-branch Accessibility (Option A) refactor of modalExpandBranches, freshness-maintenance lemma, reformulated loop lemma; closes Soundness errors 1744/1749/1770 (zero sorry/axioms)."
+        }
+      ],
+      "plan_metadata": {
+        "phases": 6,
+        "total_effort_hours": 7,
+        "complexity": "complex",
+        "research_integrated": true,
+        "plan_version": 1,
+        "dependency_waves": [
+          [
+            1,
+            2,
+            6
+          ],
+          [
+            3
+          ],
+          [
+            4
+          ],
+          [
+            5
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/01_soundness-gap-redesign.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-06-28"
+          }
+        ]
+      },
+      "completion_summary": "Closed the modal K tableau soundness-proof gap by adopting per-branch accessibility (Option A). modalExpandBranches_closed_unsat reformulated with List.Forall\u2082 invariant over parallel accs list; zero sorry; zero new axioms; scoped build green. Unblocks task 364.",
+      "notes_renumber": "Renumbered from 384 (worktree-local) on merge into main; main 384 = tableau_completeness_sorries."
     }
   ],
   "repository_health": {

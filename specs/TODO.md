@@ -1,5 +1,5 @@
 ---
-next_project_number: 402
+next_project_number: 403
 ---
 
 # TODO
@@ -11,9 +11,9 @@ next_project_number: 402
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,299,301,317,321,364,384,385,386,387,388,389,391,393,394,395,396,398,400,401 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,360,375,390,392,399 | 36,37,180,299,317,364,387,398 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
-| 3 | 41,275,370 | 39,40,360 | Foundations, Propositional Logic |
+| 1 | 36,37,180,226,241,278,299,301,317,321,360,384,385,386,387,388,389,391,393,394,395,396,398,400,401 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,370,375,390,392,399 | 36,37,180,299,317,360,387,398 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 3 | 41,275 | 39,40 | Foundations |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -34,8 +34,6 @@ next_project_number: 402
 
 299 [PLANNED] — Implement tableau decision procedure for basic modal logic K with
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
-364 [IMPLEMENTING] — Repair the pre-existing Mathlib/toolchain-drift build failure in 
-  └─ 360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 
 ### Propositional Logic
@@ -60,6 +58,8 @@ next_project_number: 402
 
 ### Uncategorized
 
+360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t
+  └─ 370 [PLANNED] — (Propositional Logic: Close the decidability asymmetry in the ) (see above)
 384 [NOT STARTED] — Tier-1 CRITICAL. Restate the mis-stated saturation hypothesis (Ta
 385 [NOT STARTED] — Tier-1 CRITICAL; fixes mk_all. (1) IntFMPSpike.lean: fix 12 error
 386 [NOT STARTED] — Tier-1. lake lint currently fails. Fix: GenericMCSBridge.lean:133
@@ -78,6 +78,17 @@ next_project_number: 402
 401 [NOT STARTED] — From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portab
 
 ## Tasks
+
+### 402. Modal tableau soundness gap redesign
+- **Status**: [COMPLETED]
+- **Task Type**: cslib
+- **Dependencies**: None
+- **Research**: [384_modal_tableau_soundness_gap_redesign/reports/01_soundness-gap-redesign.md]
+- **Plan**: [384_modal_tableau_soundness_gap_redesign/plans/01_per-branch-accessibility.md]
+
+**Description**: Redesign the modal tableau fresh-world scheme to close the build-verified soundness-proof gap blocking task 364. Root cause (build-verified): modalExpandBranches (Cslib/Logics/Modal/Tableau) threads a SINGLE shared Accessibility acc through all worklist branches, while modalApplyOne numbers fresh worlds PER-BRANCH as modalNextWorld b. A diamond/boxNeg edge (w,w') created in one branch pollutes sibling branches whose modalNextWorld equals w', so the per-branch invariant accFreshInv / branchSatisfiable required by modalStepBranch_preserves_sat is unmaintainable: branchSatisfiable bp acc does NOT imply branchSatisfiable bp (acc.addEdge ..) (satisfiability is not monotone under edge addition; compiling counterexample: (Box p AND Box (p->bot)) @0 is satisfiable at a dead-end world but contradictory once world 0 gains a successor). This surfaced as the final 3 build errors (1744/1749/1770) in modalExpandBranches_closed_unsat's fuel-induction succ-case after task 364 repaired all genuine toolchain/Mathlib drift (61->3 errors, zero sorry). The original proof masked this with a -- Placeholder that only type-checked under the pre-bump toolchain's looser unification. DESIGN OPTIONS to evaluate: (A) per-branch Accessibility relations (each worklist branch carries its own acc), or (B) a globally-monotone fresh-world counter threaded through modalExpandBranches so fresh worlds never collide across branches. Either eliminates cross-branch pollution; then reformulate the loop invariant (per-branch accFreshInv) and prove the missing freshness-MAINTENANCE lemma (none exists today: only accFreshInv_empty and modalNextWorld_gt). Build-verified evidence and full obligation analysis: specs/364_modal_tableau_soundness_drift_repair/handoffs/verified-counterexample.lean, .../summaries/02_soundness-gap-summary.md, .../.orchestrator-handoff.json. Constraints: zero sorry, zero new axioms; preserve the public theorem statements modalTableau_sound / kValid where possible (changing modalExpandBranches' fresh-world scheme is expected). CI: lake build (scoped Cslib.Logics.Modal.Tableau.Soundness + full), lake exe lint-style. Blocks completion of task 364.
+
+---
 
 ### 401. Expose polymorphic AlgEvaluate at Bool/Prop as the canonical computable evaluator (DPLL)
 - **Status**: [NOT STARTED]
@@ -471,7 +482,7 @@ Deliverable: a complete, sorry-free proof of `classicalExpandBranches_hintikka` 
 ---
 
 ### 364. Modal tableau soundness drift repair
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

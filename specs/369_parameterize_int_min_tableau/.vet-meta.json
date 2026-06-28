@@ -1,0 +1,35 @@
+{
+  "status": "success",
+  "violations_found": 61,
+  "files_analyzed": 19,
+  "ci_passed": false,
+  "open_sorries": 1,
+  "findings_path": "/home/benjamin/Projects/cslib/specs/369_parameterize_int_min_tableau/.vet-findings.json",
+  "summary": "Vetted 6 merged tasks (369, 373, 374, 382, 364, 402) against the Propositional development on main. The full CI baseline is almost green: lake build (3148 jobs), lake test, checkInitImports, and lint-style all PASS. The hard blocker is lake lint, which fails with 54 errors across 10355 declarations from 17 linters — significantly more than the ~13 pre-merge estimate. Of these 54 violations, 21 are Propositional-specific (13 defsWithUnderscore in GenericMCSBridge + LJ/LK CutElimination newly introduced by tasks 373/374, 1 defLemma in GenericMCSBridge, 3 docBlame in Tableau helpers, 3 unusedArguments, 1 simpNF in Subformula) and 33 are pre-existing cross-cutting violations in Modal, Temporal, Bimodal, and Foundations that were already present before the merge. One documented sorry remains at Minimal/Completeness.lean:110 (minimalTableau_complete, deferred to task 317, not hidden). The PR #648 foundation slice files (Defs.lean and NaturalDeduction/Basic.lean) are individually clean: correct headers, Cslib.Init imported, all declarations documented, BibKeys present, Zulip thread link in Basic.lean. The five stale tasks most relevant post-merge are: 386 (expand scope to cover 21 PL-specific lint violations, hard gate), a new cross-cutting task (33 violations across Modal/Temporal/Bimodal/Foundations, also hard gate), 384 (1 sorry in Minimal completeness), 390 (ORGANISATION.md update), and 387 (namespace rename decision, requires upstream coordination). Tasks 388, 389, 391, 392, 393, and 395 need reassessment against the actual merged state; task 395 (reconcile_vet_tasks_post_merge) is the meta-task that can drive that reassessment.",
+  "metadata": {
+    "session_id": "sess_1782671052_6af6a1",
+    "agent_type": "cslib-vet-agent",
+    "tasks_vetted": [369, 373, 374, 382, 364, 402],
+    "verification": {
+      "ci_pipeline_passed": false,
+      "lake_build": "PASS",
+      "lake_test": "PASS",
+      "lake_exe_checkInitImports": "PASS",
+      "lake_exe_lint_style": "PASS",
+      "lake_lint": "FAIL (54 errors)",
+      "lake_shake": "trusted from session baseline"
+    },
+    "lint_breakdown": {
+      "total_lint_errors": 54,
+      "pl_specific": 21,
+      "cross_cutting_preexisting": 33,
+      "categories": {
+        "defsWithUnderscore": 28,
+        "docBlame": 12,
+        "defLemma": 6,
+        "unusedArguments": 6,
+        "simpNF": 1
+      }
+    }
+  }
+}

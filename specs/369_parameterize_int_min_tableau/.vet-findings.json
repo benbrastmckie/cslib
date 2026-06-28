@@ -1,0 +1,165 @@
+{
+  "tasks_vetted": [369, 373, 374, 382, 364, 402],
+  "files_analyzed": 19,
+  "ci_passed": false,
+  "ci_results": {
+    "lake_build": "PASS",
+    "lake_test": "PASS",
+    "lake_exe_checkInitImports": "PASS",
+    "lake_exe_lint_style": "PASS",
+    "lake_lint": "FAIL (54 errors in 10355 declarations, 17 linters)",
+    "lake_shake": "not re-run (trusted from session baseline)"
+  },
+  "open_sorries": [
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+      "line": 110,
+      "theorem": "minimalTableau_complete",
+      "note": "Documented in module header as deferred to task 317; bridges MValid → per-branch forcing hypothesis. Not a hidden sorry.",
+      "pr648_slice": false,
+      "existing_task": "384"
+    }
+  ],
+  "categories": [
+    {
+      "name": "CI: lake lint FAIL — defsWithUnderscore (PL-specific)",
+      "severity": "Critical",
+      "count": 13,
+      "pr648_slice": false,
+      "existing_task": "386",
+      "description": "13 underscore-named definitions in the Propositional tree: GenericMCSBridge.lean:133 (deriv_tree_to_list), :165 (unfold_listImp_in_tree), :192 (list_deriv_to_tree); LJ/CutElimination.lean:116 (ljCutAdm_principal_andR), :225 (ljCutAdm_principal_orR), :350 (ljCutAdm_principal_impR), :462 (ljCutAdm_left), :543 (ljCutAdm_right); LK/CutElimination.lean:145 (cutAdm_right_andR), :293 (cutAdm_right_orR), :437 (cutAdm_right_impR), :586 (cutAdm_right), :708 (cutAdm_left). The GenericMCSBridge 3 are a cross-logic pattern also present in Modal/Temporal/Bimodal. The LJ/LK 10 are new from task 374 (sequent_calculus_interpolation). All introduced under the Cslib.Logic.PL namespace. Fix: rename to lowerCamelCase (e.g., ljCutAdmPrincipalAndR). Note: ljCutAdm_left/_right and cutAdm_right contain underscores that separate structural levels — rename to ljCutAdmLeft, ljCutAdmRight, cutAdmRight, cutAdmLeft."
+    },
+    {
+      "name": "CI: lake lint FAIL — defLemma (PL-specific)",
+      "severity": "Critical",
+      "count": 1,
+      "pr648_slice": false,
+      "existing_task": "386",
+      "description": "GenericMCSBridge.lean:133 — @Cslib.Logic.PL.deriv_tree_to_list is a def but should be lemma/theorem (Prop-valued). Fix: change `def` to `lemma`. Shares the same declaration as one of the defsWithUnderscore violations, so fixing the rename also resolves defLemma."
+    },
+    {
+      "name": "CI: lake lint FAIL — docBlame (PL-specific)",
+      "severity": "Critical",
+      "count": 3,
+      "pr648_slice": false,
+      "existing_task": "386",
+      "description": "Three local helper declarations missing docstrings: Tableau/Classical/Expansion.lean:125 (classicalExpandBranches.processNext, a let-rec helper); Tableau/Intuitionistic/Expansion.lean:169 (intExpandBranches.go); Tableau/Intuitionistic/Rules.lean:91 (isAccessible.go). These are all internal sub-function helpers (local rec defs). Fix: add /-- ... -/ docstring to each."
+    },
+    {
+      "name": "CI: lake lint FAIL — unusedArguments (PL-specific)",
+      "severity": "Critical",
+      "count": 3,
+      "pr648_slice": false,
+      "existing_task": "386",
+      "description": "Three declarations with arguments that the linter flags as unused: (1) Metalogic/DeductionTheorem.lean:85 deductionWithMem arg9 _hA (membership proof included in signature for callers but unused in body — add @[nolint unusedArguments] with comment explaining callers rely on the type signature); (2) NaturalDeduction/Normalization/Termination.lean:41 conclusionGrounded arg6 _d (derivation parameter kept for type-dependency purposes); (3) Tableau/Intuitionistic/Soundness.lean:1643 intBotForces arg1 (Nat argument is intentionally ignored — `fun _ => False` by design). All three are intentional; fix by adding targeted @[nolint unusedArguments] annotations with explanatory comments."
+    },
+    {
+      "name": "CI: lake lint FAIL — simpNF (PL-specific)",
+      "severity": "Critical",
+      "count": 1,
+      "pr648_slice": false,
+      "existing_task": "386",
+      "description": "Propositional/Subformula.lean:173 — @Cslib.Logic.PL.vars_neg LHS `a.neg.vars` simplifies to `a.vars ∪ Cslib.Logic.PL.Proposition.bot.vars` via @Cslib.Logic.PL.vars_imp. The @[simp] LHS is not in simp-normal form. Fix: either change LHS to match the normal form, or re-express the lemma without using neg abbreviation in the LHS, or add @[nolint simpNF] if the non-normal-form LHS is intentional for usability."
+    },
+    {
+      "name": "CI: lake lint FAIL — cross-cutting non-PL violations",
+      "severity": "Critical",
+      "count": 33,
+      "pr648_slice": false,
+      "existing_task": null,
+      "description": "33 lint violations spread across non-Propositional modules. These are pre-existing issues (not introduced by tasks 369/373/374/382/364/402) but block CI globally: (A) Foundations/HilbertAlgebra/FreeMeetExtension.lean: 7 docBlame violations (fld, fmeLe, fmeEquiv, fmeSetoid, FreeMeetExtension, mk, freeMeetEmbed) — assign to task 394 (foundations_logic_cleanup). (B) Foundations/Logic/Metalogic/DeductionCharacterization.lean:109: 1 defsWithUnderscore (dt_inference_system) — task 394. (C) Modal/Metalogic/GenericMCSBridge.lean: 1 defLemma (deriv_tree_to_list) + 3 defsWithUnderscore (deriv_tree_to_list, unfold_listImp_in_tree, list_deriv_to_tree). (D) Modal/Tableau/Saturation.lean: 1 docBlame (modalExpandBranches.processNext). (E) Modal/Metalogic/DeductionTheorem.lean: 1 unusedArguments (deductionWithMem arg9). (F) Temporal/Metalogic/GenericMCSBridge.lean: 2 defLemma + 5 defsWithUnderscore. (G) Temporal/Tableau/Saturation.lean: 1 docBlame. (H) Temporal/Metalogic/DenseMCS.lean: 1 unusedArguments. (I) Bimodal/Metalogic/Core/GenericMCSBridge.lean: 2 defLemma + 6 defsWithUnderscore. (J) Bimodal/Metalogic/Core/DeductionTheorem.lean: 1 unusedArguments. Groups C+E, F+H, I+J are a cross-cutting pattern matching the PL GenericMCSBridge/DeductionTheorem violations — all four logics share the same underscore-naming pattern and def-vs-lemma mismatch. A single cross-cutting task can fix GenericMCSBridge + DeductionTheorem across all four logics simultaneously."
+    },
+    {
+      "name": "Open sorry (documented, tracked)",
+      "severity": "High",
+      "count": 1,
+      "pr648_slice": false,
+      "existing_task": "384",
+      "description": "One sorry remains in Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:110 (theorem minimalTableau_complete). The sorry is explicitly documented in the module header as deferred to 'task 317' and bridges MValid φ to the per-branch forcing hypothesis for tableau_complete minScheme. This is not a hidden or accidental sorry — it has docstring disclosure and is bounded to the Minimal tableau completeness obligation. Not in the PR #648 foundation slice (Defs.lean + NaturalDeduction/Basic.lean). The CSLib reviewer policy on acceptable deferred sorries in WIP modules should be verified before submitting to upstream."
+    },
+    {
+      "name": "Namespace mismatch: Cslib.Logic.PL vs. Cslib.Logic.Propositional",
+      "severity": "Medium",
+      "count": 1,
+      "pr648_slice": true,
+      "existing_task": "387",
+      "description": "ORGANISATION.md (Namespace Convention section) states `Cslib.Logic.Propositional` for Logics/Propositional/, but all files in the Propositional tree use `namespace Cslib.Logic.PL`. The PR #648 foundation slice (Defs.lean line 78, NaturalDeduction/Basic.lean line 94) both open `namespace Cslib.Logic.PL`. This needs upstream coordination — renaming is a breaking API change and requires agreement on whether Cslib.Logic.PL is the canonical short name or a legacy alias. Task 387 covers the rename; the PR description should note this pending decision."
+    },
+    {
+      "name": "ORGANISATION.md Propositional section stale",
+      "severity": "Medium",
+      "count": 1,
+      "pr648_slice": false,
+      "existing_task": "390",
+      "description": "ORGANISATION.md line 100-105 shows a stub Propositional/ tree with only Defs.lean, NaturalDeduction/Basic.lean, ProofSystem/, and Metalogic/. The actual tree (95+ files) now includes SequentCalculus/{LJ,LK} (incl. Interpolation and Cut Elimination), CurryHoward/{Defs,Isomorphism,Reduction}, Semantics/Algebra (25+ files), Tableau/{Classical,Intuitionistic,Minimal} (28+ files), Subformula.lean, ProofSystemEquivalence.lean. Task 390 covers this update."
+    },
+    {
+      "name": "Parked scratch file (IntFMPSpike.lean)",
+      "severity": "Low",
+      "count": 1,
+      "pr648_slice": false,
+      "existing_task": "385",
+      "description": "Cslib/Logics/Propositional/Metalogic/IntFMPSpike.lean is a parked scratch spike, confirmed stubbed out of the Cslib.lean barrel. Internal issues in that file are deliberately excluded from this vet per the session framing. Task 385 (complete_parked_tableau_interpolation_fmp) covers its eventual completion or removal."
+    },
+    {
+      "name": "PR #648 foundation slice quality (PASS)",
+      "severity": "Info",
+      "count": 0,
+      "pr648_slice": true,
+      "existing_task": null,
+      "description": "Defs.lean and NaturalDeduction/Basic.lean both pass all individual quality checks: correct copyright headers, Cslib.Init imported (directly in Defs.lean; transitively via Defs in Basic.lean), all exported declarations have docstrings, BibKeys present and complete ([Johansson1937], [Gentzen1935], [Prawitz1965], [TroelstraVanDalen1988], [Church1956], [ChagrovZakharyaschev1997], [SorensenUrzyczyn2006]), Zulip thread link in NaturalDeduction/Basic.lean module header, no bare `notation` or `infix` (uses scoped notation within the PL namespace), no underscored def names, no defLemma issues, no docBlame. The design-decision note on ⊥-as-constructor vs. efq-as-theory-axiom is documented with trade-off rationale. These two files are clean for PR submission subject to the lint gate passing globally."
+    }
+  ],
+  "suggested_fix_tasks": [
+    {
+      "title": "Fix PL-specific lake lint violations (21 violations in Propositional tree)",
+      "slug": "fix_pl_lint_violations_post_merge",
+      "severity": "Critical",
+      "task_type": "cslib",
+      "violations": 21,
+      "supersedes": "386",
+      "pr648_blocking": true,
+      "description": "Refresh task 386 with post-merge accurate scope. Fix all 21 lint violations introduced within the Propositional tree: (a) rename 13 defsWithUnderscore to lowerCamelCase in GenericMCSBridge + LJ/LK CutElimination (ljCutAdm_principal_andR → ljCutAdmPrincipalAndR, etc.); (b) change deriv_tree_to_list from def to lemma in GenericMCSBridge.lean (defLemma, combined with rename); (c) add docstrings to classicalExpandBranches.processNext, intExpandBranches.go, isAccessible.go (docBlame ×3); (d) add @[nolint unusedArguments] with explanatory comments to deductionWithMem, conclusionGrounded, intBotForces (unusedArguments ×3); (e) fix vars_neg simpNF in Subformula.lean. This is the hard CI gate for PR #648 from the Propositional side. Requires coordinating the GenericMCSBridge rename with the corresponding changes in Modal/Temporal/Bimodal (see cross-cutting task)."
+    },
+    {
+      "title": "Fix cross-cutting GenericMCSBridge + DeductionTheorem lint (33 violations across Modal/Temporal/Bimodal/Foundations)",
+      "slug": "fix_crosscutting_genericmcsbridge_lint",
+      "severity": "Critical",
+      "task_type": "cslib",
+      "violations": 33,
+      "supersedes": null,
+      "pr648_blocking": true,
+      "description": "NEW task (no prior stale task covers the full cross-cutting scope). Fix the same defsWithUnderscore + defLemma + unusedArguments + docBlame pattern that exists identically in Modal, Temporal, and Bimodal: rename deriv_tree_to_list → derivTreeToList, unfold_listImp_in_tree → unfoldListImpInTree, list_deriv_to_tree → listDerivToTree (and *_fc variants) in all four GenericMCSBridge files; change from def to lemma; add @[nolint unusedArguments] to deductionWithMem in Modal/Bimodal/Temporal; add docstrings to modalExpandBranches.processNext and temporalExpandBranches.processNext. Also fix Foundations: dt_inference_system → dtInferenceSystem in DeductionCharacterization.lean; add 7 docstrings to FreeMeetExtension.lean (overlap with task 394 — coordinate or absorb). These 33 violations are pre-existing (not introduced by tasks 369–402) but they block PR CI globally. Should be fixed in parallel with or immediately before the PL task."
+    },
+    {
+      "title": "Resolve sorry in minimalTableau_complete (Minimal/Completeness.lean:110)",
+      "slug": "resolve_minimal_tableau_completeness_sorry",
+      "severity": "High",
+      "task_type": "cslib",
+      "violations": 1,
+      "supersedes": "384",
+      "pr648_blocking": false,
+      "description": "Refresh task 384 with accurate file location. The single remaining sorry is at Minimal/Completeness.lean:110 in theorem minimalTableau_complete; it bridges MValid φ to the per-branch forcing hypothesis required by tableau_complete minScheme. The module header documents this as deferred to 'task 317' and acknowledges the parametric sorries in Scheme.lean. Resolution requires upward-closure of intExtractValuation and minBranchBotForces (the core completeness obligation). Not in the PR #648 foundation slice; upstream reviewers will need to decide if this is acceptable as a documented work-in-progress."
+    },
+    {
+      "title": "Update ORGANISATION.md Propositional section to reflect current tree",
+      "slug": "update_organisation_propositional_tree",
+      "severity": "Medium",
+      "task_type": "cslib",
+      "violations": 1,
+      "supersedes": "390",
+      "pr648_blocking": false,
+      "description": "Refresh task 390. The Propositional section currently shows a 4-item stub. The actual tree (95+ files) now has SequentCalculus/{LJ,LK} with Interpolation/CutElimination/SubformulaProperty/Decidability; CurryHoward/{Defs,Isomorphism,Reduction}; Semantics/Algebra (25+ files including Brouwerian, HilbertAlgebra, Kripke, Glivenko, Conservative variants); Tableau/{Classical,Intuitionistic,Minimal} with Completeness/Soundness/DecisionProcedure; Subformula.lean; ProofSystemEquivalence.lean. Also update the Namespace Convention section to clarify the Cslib.Logic.PL vs Cslib.Logic.Propositional decision."
+    },
+    {
+      "title": "Resolve Cslib.Logic.PL → Cslib.Logic.Propositional namespace rename decision",
+      "slug": "resolve_pl_namespace_rename",
+      "severity": "Medium",
+      "task_type": "cslib",
+      "violations": 1,
+      "supersedes": "387",
+      "pr648_blocking": false,
+      "description": "Refresh task 387. All Propositional tree files use namespace Cslib.Logic.PL. ORGANISATION.md specifies Cslib.Logic.Propositional. This is a breaking change requiring upstream discussion on Zulip before mechanical rename. The PR #648 foundation slice exposes this publicly (Defs.lean:78, NaturalDeduction/Basic.lean:94). The PR description should note this as a known pending decision. Task scope: open upstream Zulip thread, get maintainer consensus, then do the rename across all Propositional files plus downstream consumers (Modal/FromPropositional, Temporal/FromPropositional, Bimodal/Embedding/PropositionalEmbedding)."
+    }
+  ]
+}

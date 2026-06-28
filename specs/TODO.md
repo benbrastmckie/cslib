@@ -1,5 +1,5 @@
 ---
-next_project_number: 406
+next_project_number: 407
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 406
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,299,301,317,321,360,384,385,386,387,388,389,391,393,394,395,396,398,400,401,403,404 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,299,301,317,321,360,384,385,386,387,388,389,391,393,395,396,398,400,401,403,404,406 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,370,375,390,392,399,405 | 36,37,180,299,317,360,387,398,404 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275 | 39,40 | Foundations |
 
@@ -60,17 +60,16 @@ next_project_number: 406
 
 360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t
   └─ 370 [PLANNED] — (Propositional Logic: Close the decidability asymmetry in the ) (see above)
-384 [NOT STARTED] — Tier-1 CRITICAL. Restate the mis-stated saturation hypothesis (Ta
+384 [NOT STARTED] — [Refreshed post-merge vet; scope narrowed.] The single remaining 
 385 [NOT STARTED] — Tier-1 CRITICAL; fixes mk_all. (1) IntFMPSpike.lean: fix 12 error
-386 [NOT STARTED] — Tier-1. lake lint currently fails. Fix: GenericMCSBridge.lean:133
-387 [NOT STARTED] — Tier-2 DECISION TAKEN: rename to match ORGANISATION.md:223 and th
-  └─ 390 [NOT STARTED] — Tier-2. ORGANISATION.md Propositional section lists only Defs/Nat
+386 [NOT STARTED] — [Refreshed by post-merge vet sess_1782671052_6af6a1; supersedes t
+387 [NOT STARTED] — [Refreshed post-merge vet.] DECISION REQUIRES UPSTREAM AGREEMENT.
+  └─ 390 [NOT STARTED] — [Refreshed post-merge vet.] The Propositional section (~ORGANISAT
   └─ 392 [NOT STARTED] — Tier-3. Delete grep-verified dead decls: Tableau/Classical/Soundn
 388 [NOT STARTED] — Tier-2. NaturalDeduction/Normalization/Termination.lean + Reducti
 389 [NOT STARTED] — Tier-2. (a) Foundations/Order/HilbertAlgebra/FreeMeetExtension.le
 391 [NOT STARTED] — Tier-3. Remove internal task/process jargon from public docstring
 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
-394 [NOT STARTED] — Tier-3. Delete Foundations/Logic/Tableau/PropositionalTableau.lea
 395 [NOT STARTED] — META / coordination task. PRECONDITION: do NOT start until ALL fe
 398 [NOT STARTED] — DESIGN SETTLED (CSLib Zulip 'Propositional Logic' thread, Waring'
   └─ 399 [NOT STARTED] — Update PR #648 (feat/propositional-v2) following Thomas Waring's 
@@ -79,8 +78,18 @@ next_project_number: 406
 403 [NOT STARTED] — Rename specs/384_modal_tableau_soundness_gap_redesign/ to specs/4
 404 [NOT STARTED] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
   └─ 405 [NOT STARTED] — Simplify the proof machinery in the task-402 modal tableau soundn
+406 [NOT STARTED] — NEW from post-merge vet (sess_1782671052_6af6a1). Fix 33 pre-exis
 
 ## Tasks
+
+### 406. Fix cross-cutting lake lint across Modal/Temporal/Bimodal/Foundations (33)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: NEW from post-merge vet (sess_1782671052_6af6a1). Fix 33 pre-existing lake lint violations (not introduced by the merges but blocking CI globally -> hard repo push gate). Same pattern as the PL GenericMCSBridge/DeductionTheorem fixes (task 386). Modal: Metalogic/GenericMCSBridge.lean defLemma x1 + defsWithUnderscore x3 (deriv_tree_to_list, unfold_listImp_in_tree, list_deriv_to_tree), Tableau/Saturation.lean docBlame x1 (modalExpandBranches.processNext), Metalogic/DeductionTheorem.lean unusedArguments x1 (deductionWithMem arg9). Temporal: Metalogic/GenericMCSBridge.lean defLemma x2 + defsWithUnderscore x5, Tableau/Saturation.lean docBlame x1, Metalogic/DenseMCS.lean unusedArguments x1. Bimodal: Metalogic/Core/GenericMCSBridge.lean defLemma x2 + defsWithUnderscore x6, Metalogic/Core/DeductionTheorem.lean unusedArguments x1. Foundations: HilbertAlgebra/FreeMeetExtension.lean docBlame x7 (fld, fmeLe, fmeEquiv, fmeSetoid, FreeMeetExtension, mk, freeMeetEmbed), Logic/Metalogic/DeductionCharacterization.lean:109 defsWithUnderscore x1 (dt_inference_system). Rename underscores->lowerCamelCase, def->lemma, @[nolint unusedArguments]+comments, add docstrings. ABSORBS stale task 394 (foundations_logic_cleanup). Best coordinated with task 386's GenericMCSBridge renames. Verify `lake lint` green. Source: vet findings.
+
+---
 
 ### 405. Proof style cleanup modal soundness
 - **Status**: [NOT STARTED]
@@ -185,7 +194,7 @@ next_project_number: 406
 ---
 
 ### 394. Foundations/Logic cleanup: deprecated file, instances, namespaces, notation
-- **Status**: [NOT STARTED]
+- **Status**: [ABANDONED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -220,12 +229,12 @@ next_project_number: 406
 
 ---
 
-### 390. Update ORGANISATION.md to match the real Propositional/Foundations trees
+### 390. Update ORGANISATION.md Propositional section (post-merge tree)
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Dependencies**: Task 387
 
-**Description**: Tier-2. ORGANISATION.md Propositional section lists only Defs/NaturalDeduction/ProofSystem/Metalogic; add Semantics/ + Semantics/Algebra/ (28 files), Tableau/, SequentCalculus/, CurryHoward/. Foundations/Logic/ entry: add Tableau/ subtree, the 7 missing Metalogic files, Theorems/Temporal/FrameConditions.lean. Reconcile the Namespace Convention section with the rename in task 387. Source: §4.7.
+**Description**: [Refreshed post-merge vet.] The Propositional section (~ORGANISATION.md:100-105) is a 4-item stub. Update to reflect the actual 95+-file tree: SequentCalculus/{LJ,LK} (Interpolation, CutElimination, SubformulaProperty, Decidability); CurryHoward/{Defs,Isomorphism,Reduction}; Semantics/Algebra (25+ files: Brouwerian, HilbertAlgebra, Kripke, Glivenko, Conservative variants); Tableau/{Classical,Intuitionistic,Minimal} (Completeness/Soundness/DecisionProcedure); Subformula.lean; ProofSystemEquivalence.lean. Also update the Namespace Convention section re Cslib.Logic.PL vs Cslib.Logic.Propositional (task 387). Do before the PR lands.
 
 ---
 
@@ -247,21 +256,21 @@ next_project_number: 406
 
 ---
 
-### 387. Rename Cslib.Logic.PL -> Cslib.Logic.Propositional across Propositional tree
+### 387. PL -> Propositional namespace rename (upstream-gated)
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
-**Description**: Tier-2 DECISION TAKEN: rename to match ORGANISATION.md:223 and the Modal/Temporal/Bimodal convention. Rename namespace Cslib.Logic.PL -> Cslib.Logic.Propositional across all 35 Propositional source files (96 occurrences) and every cross-module reference (including out-of-scope importers e.g. Modal/Temporal embeddings if any reference PL). Mechanical but wide; verify full build + downstream logics still compile. Source: §4.1.
+**Description**: [Refreshed post-merge vet.] DECISION REQUIRES UPSTREAM AGREEMENT. All Propositional files use `namespace Cslib.Logic.PL`; ORGANISATION.md specifies `Cslib.Logic.Propositional`. The PR #648 foundation slice exposes this publicly (Defs.lean:78, NaturalDeduction/Basic.lean:94). Breaking rename -> open an upstream Zulip thread for maintainer consensus FIRST (human-authored, AI policy), then mechanically rename across all Propositional files + downstream consumers (Modal/Temporal/Bimodal FromPropositional/Embedding). Until agreed, note as pending in the PR #648 description. Does NOT block the PR #648 foundation cherry-pick.
 
 ---
 
-### 386. Fix the 8 lake lint errors in Propositional scope
+### 386. Fix Propositional-specific lake lint violations (21, post-merge)
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
-**Description**: Tier-1. lake lint currently fails. Fix: GenericMCSBridge.lean:133/165/192 underscore def names (deriv_tree_to_list, unfold_listImp_in_tree, list_deriv_to_tree) -> lowerCamelCase, and :133 def->lemma (defLemma); Subformula.lean:173 vars_neg simpNF (LHS simplifies); add docstrings to Tableau/Classical/Expansion.lean:125 classicalExpandBranches.processNext, Tableau/Intuitionistic/Expansion.lean:169 intExpandBranches.go, Tableau/Intuitionistic/Rules.lean:91 isAccessible.go (docBlame); resolve unused-argument lints DeductionTheorem.lean:85 deductionWithMem arg 9, Intuitionistic/Completeness.lean:60 intBotForces arg 1. Verify with 'lake lint'. Source: §3.6.
+**Description**: [Refreshed by post-merge vet sess_1782671052_6af6a1; supersedes the pre-merge scope.] Fix the 21 PL-specific lake lint violations (hard CI gate for a clean repo push). (a) defsWithUnderscore (13) -> lowerCamelCase: GenericMCSBridge.lean:133 deriv_tree_to_list, :165 unfold_listImp_in_tree, :192 list_deriv_to_tree; SequentCalculus/LJ/CutElimination.lean:116/225/350 ljCutAdm_principal_andR/orR/impR, :462/543 ljCutAdm_left/right; SequentCalculus/LK/CutElimination.lean:145/293/437 cutAdm_right_andR/orR/impR, :586/708 cutAdm_right/left. (b) defLemma (1): GenericMCSBridge.lean:133 deriv_tree_to_list def->lemma (same decl as the rename). (c) docBlame (3): docstrings for Tableau/Classical/Expansion.lean:125 classicalExpandBranches.processNext, Tableau/Intuitionistic/Expansion.lean:169 intExpandBranches.go, Tableau/Intuitionistic/Rules.lean:91 isAccessible.go. (d) unusedArguments (3): targeted @[nolint unusedArguments] + comment: Metalogic/DeductionTheorem.lean:85 deductionWithMem arg9 _hA, Normalization/Termination.lean:41 conclusionGrounded arg6 _d, Tableau/Intuitionistic/Soundness.lean:1643 intBotForces arg1. (e) simpNF (1): Subformula.lean:173 vars_neg LHS not simp-normal (rewrite LHS or @[nolint simpNF]). Coordinate GenericMCSBridge renames with the cross-cutting task (403). Verify `lake lint` PL-clean. Source: specs/369_*/.vet-findings.json.
 
 ---
 
@@ -274,12 +283,12 @@ next_project_number: 406
 
 ---
 
-### 384. Discharge 6 live tableau-completeness sorries (intuitionistic + minimal)
+### 384. Resolve documented sorry in minimalTableau_complete
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
-**Description**: Tier-1 CRITICAL. Restate the mis-stated saturation hypothesis (Tableau/Intuitionistic/Completeness.lean:83, Minimal/Completeness.lean:162) which currently collapses to ignore its bound variable, THEN discharge the 6 live sorries: Intuitionistic/Completeness.lean:89 intTruthLemma, :98 intuitionisticOpenBranch_countermodel, :112 intuitionisticTableau_complete; Minimal/Completeness.lean:168 minTruthLemma, :179 minOpenBranch_countermodel, :190 minimalTableau_complete. These transitively underwrite the shipped instances instDecidableIValid/instDecidableMValid/intuitionisticTableau_decides/minimalTableau_decides which currently only typecheck via sorry. May be satisfied via the parametric Scheme route (task 385). Source: specs/vet-propositional-foundations.md §3.1.
+**Description**: [Refreshed post-merge vet; scope narrowed.] The single remaining tableau sorry is at Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:110 (theorem minimalTableau_complete), documented in the module header as deferred to task 317. It bridges MValid phi to the per-branch forcing hypothesis for `tableau_complete minScheme`; resolution needs upward-closure of intExtractValuation and minBranchBotForces. Not in the PR #648 foundation slice. Decide with upstream whether acceptable as documented WIP or must be gated.
 
 ---
 

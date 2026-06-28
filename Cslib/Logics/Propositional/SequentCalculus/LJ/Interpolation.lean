@@ -29,7 +29,8 @@ Maehara's method: a structural induction over a cut-free proof.
   interpolant is threaded (possibly combined for `andR`) without a side-split.
 - The `cut` case is vacuous since `LJCutFree` is `False` for cut steps.
 - The `orL` two-premise case is proved by side-splitting `A∨B ∈ Γ₁` or `Γ₂`, combining
-  interpolants `I₁∨I₂` resp. `I₁∧I₂`. The `impL` case remains as a `sorry` checkpoint.
+  interpolants `I₁∨I₂` resp. `I₁∧I₂`. The `impL` case uses `J→K` (resp. `J∧K`) when
+  `A→B ∈ Γ₁` (resp. `A→B ∈ Γ₂`), carrying the implication into the interpolant.
 - Follows the `(d, hcf) + induction d with` pattern from `SubformulaProperty.lean`.
 
 ## References
@@ -348,9 +349,128 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
              simp only [Finset.vars_union, Finset.vars_singleton, vars_or]
              exact Finset.union_subset_union_right Finset.subset_union_right
   | @impL Γ C A B hAB d₁ d₂ ih₁ ih₂ =>
-    -- Phase C2: two-premise case; deferred.
-    intro Γ₁ Γ₂ _hant
-    sorry -- Phase C2
+    -- Conclusion: Γ ⊢ C where A→B ∈ Γ = Γ₁ ∪ Γ₂; premises:
+    --   d₁ : Γ ⊢ A,  d₂ : insert B Γ ⊢ C.
+    -- Side-split on A→B ∈ Γ₁ (interpolant J→K) or A→B ∈ Γ₂ (interpolant J∧K).
+    intro Γ₁ Γ₂ hant
+    have hant' : Γ = Γ₁ ∪ Γ₂ := hant
+    obtain ⟨hcf₁, hcf₂⟩ := hcf
+    rw [hant'] at hAB
+    rcases Finset.mem_union.mp hAB with hAB₁ | hAB₂
+    · -- A→B ∈ Γ₁: interpolant I = J → K.
+      -- ih₁ with swapped partition (Δ₁=Γ₂, Δ₂=Γ₁); ih₂ with (Δ₁=insert B Γ₁, Δ₂=Γ₂).
+      have hAB_vars : A.vars ∪ B.vars ⊆ Γ₁.vars := by
+        have := Finset.vars_subset_of_mem hAB₁
+        simp only [show (A → B).vars = A.vars ∪ B.vars from rfl] at this; exact this
+      have hA_vars₁ : A.vars ⊆ Γ₁.vars := Finset.subset_union_left.trans hAB_vars
+      have hB_vars₁ : B.vars ⊆ Γ₁.vars := Finset.subset_union_right.trans hAB_vars
+      have hcover_ih₁ : Γ = Γ₂ ∪ Γ₁ := by rw [hant']; exact Finset.union_comm Γ₁ Γ₂
+      have hcover_ih₂ : insert B Γ = insert B Γ₁ ∪ Γ₂ := by
+        rw [hant']; exact (Finset.insert_union B Γ₁ Γ₂).symm
+      obtain ⟨J, h_varsJ, ⟨d_leftJ⟩, ⟨d_rightJ⟩⟩ :=
+        ih₁ hcf₁ Γ₂ Γ₁ hcover_ih₁
+      -- d_leftJ  : Γ₂ ⊢ J,  d_rightJ : insert J Γ₁ ⊢ A
+      obtain ⟨K, h_varsK, ⟨d_leftK⟩, ⟨d_rightK⟩⟩ :=
+        ih₂ hcf₂ (insert B Γ₁) Γ₂ hcover_ih₂
+      -- d_leftK  : insert B Γ₁ ⊢ K,  d_rightK : insert K Γ₂ ⊢ C
+      refine ⟨J → K, ?_, ?_, ?_⟩
+      · -- vars: (J→K).vars ⊆ Γ₁.vars ∩ (Γ₂ ∪ {C}).vars
+        simp only [show (J → K).vars = J.vars ∪ K.vars from rfl]
+        refine Finset.subset_inter ?_ ?_
+        · -- J.vars ∪ K.vars ⊆ Γ₁.vars
+          apply Finset.union_subset
+          · -- J.vars ⊆ Γ₁.vars via (Γ₁ ∪ {A}).vars ⊆ Γ₁.vars, since A.vars ⊆ Γ₁.vars
+            have hJR := h_varsJ.trans Finset.inter_subset_right
+            have h_GA_drop : (Γ₁ ∪ {A}).vars ⊆ Γ₁.vars := by
+              simp only [Finset.vars_union, Finset.vars_singleton]
+              exact Finset.union_subset (Finset.Subset.refl _) hA_vars₁
+            exact hJR.trans h_GA_drop
+          · -- K.vars ⊆ Γ₁.vars via (insert B Γ₁).vars ⊆ Γ₁.vars, since B.vars ⊆ Γ₁.vars
+            have hKL := h_varsK.trans Finset.inter_subset_left
+            have h_BG₁_drop : (insert B Γ₁).vars ⊆ Γ₁.vars := by
+              simp only [Finset.vars_insert]
+              exact Finset.union_subset hB_vars₁ (Finset.Subset.refl _)
+            exact hKL.trans h_BG₁_drop
+        · -- J.vars ∪ K.vars ⊆ (Γ₂ ∪ {C}).vars
+          apply Finset.union_subset
+          · -- J.vars ⊆ Γ₂.vars ⊆ (Γ₂ ∪ {C}).vars
+            exact (h_varsJ.trans Finset.inter_subset_left).trans
+                  (Finset.vars_mono Finset.subset_union_left)
+          · -- K.vars ⊆ (Γ₂ ∪ {C}).vars directly
+            exact h_varsK.trans Finset.inter_subset_right
+      · -- Left: Γ₁ ⊢ J → K
+        -- impR J K then impL A B with A→B ∈ insert J Γ₁; left = d_rightJ; right = d_leftK mono.
+        have hperm_K : insert B Γ₁ ⊆ insert B (insert J Γ₁) :=
+          Finset.insert_subset_insert B (Finset.subset_insert J Γ₁)
+        exact ⟨LJProof.impR J K
+          (LJProof.impL A B (Finset.mem_insert_of_mem hAB₁)
+            d_rightJ
+            (d_leftK.mono hperm_K))⟩
+      · -- Right: insert (J → K) Γ₂ ⊢ C
+        -- impL J K with principal J→K ∈ insert (J→K) Γ₂;
+        -- left from d_leftJ mono, right from d_rightK mono.
+        have hperm_J₂ : Γ₂ ⊆ insert (J → K) Γ₂ := Finset.subset_insert _ _
+        have hperm_K₂ : insert K Γ₂ ⊆ insert K (insert (J → K) Γ₂) :=
+          Finset.insert_subset_insert K (Finset.subset_insert _ _)
+        exact ⟨LJProof.impL J K (Finset.mem_insert_self _ _)
+          (d_leftJ.mono hperm_J₂)
+          (d_rightK.mono hperm_K₂)⟩
+    · -- A→B ∈ Γ₂: interpolant I = J ∧ K.
+      -- ih₁ with partition (Δ₁=Γ₁, Δ₂=Γ₂); ih₂ with (Δ₁=Γ₁, Δ₂=insert B Γ₂).
+      have hAB_vars₂ : A.vars ∪ B.vars ⊆ Γ₂.vars := by
+        have := Finset.vars_subset_of_mem hAB₂
+        simp only [show (A → B).vars = A.vars ∪ B.vars from rfl] at this; exact this
+      have hA_vars₂ : A.vars ⊆ Γ₂.vars := Finset.subset_union_left.trans hAB_vars₂
+      have hB_vars₂ : B.vars ⊆ Γ₂.vars := Finset.subset_union_right.trans hAB_vars₂
+      have hcover_ih₂ : insert B Γ = Γ₁ ∪ insert B Γ₂ := by
+        rw [hant']; exact (Finset.union_insert B Γ₁ Γ₂).symm
+      obtain ⟨J, h_varsJ, ⟨d_leftJ⟩, ⟨d_rightJ⟩⟩ :=
+        ih₁ hcf₁ Γ₁ Γ₂ hant'
+      -- d_leftJ  : Γ₁ ⊢ J,  d_rightJ : insert J Γ₂ ⊢ A
+      obtain ⟨K, h_varsK, ⟨d_leftK⟩, ⟨d_rightK⟩⟩ :=
+        ih₂ hcf₂ Γ₁ (insert B Γ₂) hcover_ih₂
+      -- d_leftK  : Γ₁ ⊢ K,  d_rightK : insert K (insert B Γ₂) ⊢ C
+      refine ⟨J ∧ K, ?_, ?_, ?_⟩
+      · -- vars: (J∧K).vars ⊆ Γ₁.vars ∩ (Γ₂ ∪ {C}).vars
+        simp only [vars_and]
+        refine Finset.subset_inter ?_ ?_
+        · -- J.vars ∪ K.vars ⊆ Γ₁.vars
+          exact Finset.union_subset (h_varsJ.trans Finset.inter_subset_left)
+                                    (h_varsK.trans Finset.inter_subset_left)
+        · -- J.vars ∪ K.vars ⊆ (Γ₂ ∪ {C}).vars
+          apply Finset.union_subset
+          · -- J.vars ⊆ (Γ₂ ∪ {A}).vars ⊆ (Γ₂ ∪ {C}).vars, since A.vars ⊆ Γ₂.vars
+            have hJR := h_varsJ.trans Finset.inter_subset_right
+            have h_A_drop : (Γ₂ ∪ {A}).vars ⊆ (Γ₂ ∪ {C}).vars := by
+              simp only [Finset.vars_union, Finset.vars_singleton]
+              exact Finset.union_subset Finset.subset_union_left
+                                        (hA_vars₂.trans Finset.subset_union_left)
+            exact hJR.trans h_A_drop
+          · -- K.vars ⊆ (insert B Γ₂ ∪ {C}).vars ⊆ (Γ₂ ∪ {C}).vars, since B.vars ⊆ Γ₂.vars
+            have hKR := h_varsK.trans Finset.inter_subset_right
+            have h_B_drop : (insert B Γ₂ ∪ {C}).vars ⊆ (Γ₂ ∪ {C}).vars := by
+              simp only [Finset.vars_union, Finset.vars_insert, Finset.vars_singleton]
+              exact Finset.union_subset
+                (Finset.union_subset (hB_vars₂.trans Finset.subset_union_left)
+                  Finset.subset_union_left)
+                Finset.subset_union_right
+            exact hKR.trans h_B_drop
+      · -- Left: Γ₁ ⊢ J ∧ K
+        exact ⟨LJProof.andR J K d_leftJ d_leftK⟩
+      · -- Right: insert (J ∧ K) Γ₂ ⊢ C
+        -- andL J K exposes J,K in Σ = insert J (insert K (insert (J∧K) Γ₂));
+        -- then impL A B with A→B ∈ Σ; left = d_rightJ mono; right = d_rightK mono.
+        have hperm_J_ant : insert J Γ₂ ⊆ insert J (insert K (insert (J ∧ K) Γ₂)) := by
+          intro x; simp only [Finset.mem_insert]; tauto
+        have hperm_K_ant : insert K (insert B Γ₂) ⊆
+            insert B (insert J (insert K (insert (J ∧ K) Γ₂))) := by
+          intro x; simp only [Finset.mem_insert]; tauto
+        exact ⟨LJProof.andL J K (Finset.mem_insert_self _ _)
+          (LJProof.impL A B
+            (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+              (Finset.mem_insert_of_mem hAB₂)))
+            (d_rightJ.mono hperm_J_ant)
+            (d_rightK.mono hperm_K_ant))⟩
   | @impR Γ A B d' ih =>
     -- Conclusion: Γ ⊢ A → B; premise: insert A Γ ⊢ B.
     -- Place A on the Γ₂ side: partition insert A Γ = Γ₁ ∪ insert A Γ₂.

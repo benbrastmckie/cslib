@@ -238,20 +238,19 @@ theorem modalStepBranch_preserves_sat
             -- Each such sf' = ⟨.pos, φ, w'⟩ where acc.hasEdge lbl w' = true
             simp only [boxPropagation, Accessibility.successorsOf, List.mem_filterMap] at hmem_new
             obtain ⟨w', hw'mem, hsf'⟩ := hmem_new
-            -- hw'mem : w' ∈ acc.edges.filterMap (fun (src, tgt) => if src == lbl then some tgt else none)
-            simp only [List.mem_filterMap] at hw'mem
+            -- hw'mem already reduced by the previous simp to ∃ a, a ∈ acc.edges ∧ ...
             obtain ⟨⟨src, tgt⟩, hedge_mem, hsrc⟩ := hw'mem
             simp only [beq_iff_eq] at hsrc
             split_ifs at hsrc with hsrceq
             · simp only [Option.some.injEq] at hsrc
               subst hsrc
-              -- acc.hasEdge lbl w' = true since (lbl, w') ∈ acc.edges
+              -- acc.hasEdge lbl w' = true since (src, w') ∈ acc.edges and src = lbl
               have hedge : acc.hasEdge lbl tgt = true := by
+                rw [show lbl = src from hsrceq.symm]
                 simp only [Accessibility.hasEdge, List.any_eq_true]
-                exact ⟨(lbl, tgt), hedge_mem, by simp [hsrceq]⟩
+                exact ⟨(src, tgt), hedge_mem, by simp⟩
               -- sf' = ⟨.pos, φ, tgt⟩ (from hsf' after splitting if b.any)
               split_ifs at hsf' with hinb
-              · exact absurd hsf' (by simp)
               · simp only [Option.some.injEq] at hsf'
                 subst hsf'
                 -- Need: (sf' = ⟨.pos, φ, tgt⟩).sign = .pos → Satisfies m (f tgt) φ
@@ -262,7 +261,6 @@ theorem modalStepBranch_preserves_sat
                   simp only [Satisfies] at hpos
                   exact hpos (f tgt) (hacc lbl tgt hedge)
                 · intro h; simp at h
-            · exact absurd hsrc (by simp)
           · exact hb sf' hmem_old
       | imp a c =>
         -- T(a → c): rule depends on structure of a and c
@@ -938,7 +936,7 @@ theorem modalStepBranch_preserves_sat
         simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
           modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
           Option.some.injEq, Prod.mk.injEq] at hsf
-        obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩ := hsf
+        obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
         subst hnewBs hnewAcc
         -- boxNeg: w' = modalNextWorld b is fresh
         -- hneg : ¬Satisfies m (f lbl) (□φ) = ∃ ww, m.r (f lbl) ww ∧ ¬Satisfies m ww φ

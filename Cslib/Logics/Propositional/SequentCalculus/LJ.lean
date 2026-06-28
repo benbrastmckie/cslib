@@ -12,6 +12,7 @@ public import Cslib.Logics.Propositional.SequentCalculus.LJ.Soundness
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.CutElimination
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.Completeness
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.SubformulaProperty
+public import Cslib.Logics.Propositional.SequentCalculus.LJ.Interpolation
 
 /-! # LJ Intuitionistic Propositional Sequent Calculus
 

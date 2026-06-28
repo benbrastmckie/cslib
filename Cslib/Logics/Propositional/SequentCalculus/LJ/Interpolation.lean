@@ -504,6 +504,65 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
                  Finset.subset_union_left)
                (Finset.subset_union_right.trans Finset.subset_union_right)
 
+/-! ## LJ Craig Interpolation Corollary -/
+
+/-- **LJ Craig Interpolation** (corollary): From any LJ proof of `∅ ⊢ A → B`, there exists
+an interpolant `I` such that:
+1. `I.vars ⊆ A.vars ∩ B.vars` (variable constraint),
+2. `∅ ⊢ A → I` (left half-implication), and
+3. `∅ ⊢ I → B` (right half-implication).
+
+Uses `ljMaeharaCore` with the cover partition `Γ₁ = {A}`, `Γ₂ = ∅`,
+applied to a cut-free proof of `{A} ⊢ B` extracted from `d` via `cutElim`.
+
+Reference: [TroelstraSchwichtenberg2000] §4; [NegriVonPlato2001] §3.3. -/
+private lemma ljCraigInterpolation {A B : Proposition Atom}
+    (d : LJProof ((∅ : Finset (Proposition Atom)) ⊢ A → B)) :
+    ∃ I : Proposition Atom,
+      I.vars ⊆ A.vars ∩ B.vars ∧
+      Nonempty (LJProof ((∅ : Finset (Proposition Atom)) ⊢ A → I)) ∧
+      Nonempty (LJProof ((∅ : Finset (Proposition Atom)) ⊢ I → B)) := by
+  -- Build a (cut-using) proof of {A} ⊢ B from d via cut on A → B and impL.
+  have d_AB : LJProof (insert A (∅ : Finset (Proposition Atom)) ⊢ B) :=
+    LJProof.cut (A → B)
+      -- left prem: {A} ⊢ A → B via mono (∅ ⊆ {A})
+      (d.mono (Finset.empty_subset _))
+      -- right prem: {A → B, A} ⊢ B via impL A B
+      (LJProof.impL A B (Finset.mem_insert_self _ _)
+        -- {A → B, A} ⊢ A via ax A
+        (LJProof.ax A _ (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)))
+        -- {B, A → B, A} ⊢ B via ax B
+        (LJProof.ax B _ (Finset.mem_insert_self _ _)))
+  -- Apply cut elimination to get a cut-free proof of {A} ⊢ B.
+  obtain ⟨cfp⟩ := d_AB.cutElim
+  -- Apply ljMaeharaCore with Γ₁ = {A}, Γ₂ = ∅.
+  obtain ⟨I, h_vars, ⟨d_left⟩, ⟨d_right⟩⟩ :=
+    ljMaeharaCore cfp.1 cfp.2 (insert A ∅) ∅
+      (Finset.union_empty _).symm
+  -- Simplify the variable bound: (insert A ∅).vars ∩ (∅ ∪ {B}).vars = A.vars ∩ B.vars.
+  simp only [Finset.vars_insert, Finset.vars_empty, Finset.vars_singleton,
+    Finset.union_empty, Finset.empty_union] at h_vars
+  refine ⟨I, h_vars, ?_, ?_⟩
+  · -- ∅ ⊢ A → I via impR applied to d_left : {A} ⊢ I.
+    exact ⟨LJProof.impR A I d_left⟩
+  · -- ∅ ⊢ I → B via impR applied to d_right : {I} ⊢ B.
+    exact ⟨LJProof.impR I B d_right⟩
+
+/-- **LJ Craig Interpolation**: For any LJ proof of `∅ ⊢ A → B`, there exists an
+interpolant `I` with `I.vars ⊆ A.vars ∩ B.vars`, `∅ ⊢ A → I`, and `∅ ⊢ I → B`.
+
+Follows from `ljMaeharaCore` (Maehara's method) applied via `LJProof.cutElim`
+(Gentzen's Hauptsatz for LJ).
+
+Reference: [TroelstraSchwichtenberg2000] Theorem 4.1.6; [NegriVonPlato2001] Theorem 3.3.3. -/
+theorem LJProof.interpolation {A B : Proposition Atom}
+    (d : LJProof ((∅ : Finset (Proposition Atom)) ⊢ A → B)) :
+    ∃ I : Proposition Atom,
+      I.vars ⊆ A.vars ∩ B.vars ∧
+      Nonempty (LJProof ((∅ : Finset (Proposition Atom)) ⊢ A → I)) ∧
+      Nonempty (LJProof ((∅ : Finset (Proposition Atom)) ⊢ I → B)) :=
+  ljCraigInterpolation d
+
 end Cslib.Logic.PL
 
 end

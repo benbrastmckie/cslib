@@ -12,6 +12,27 @@
 - **Standards**: plan-format.md, status-markers.md, artifact-formats.md, tasks.md
 - **Type**: cslib
 
+## AS-BUILT RECONCILIATION (added at completion)
+
+**Status: [COMPLETED] — fully discharged.** All deliverables exist sorry-free in
+`Cslib/Logics/Propositional/NaturalDeduction/Normalization/`: `isNormal` (Basic.lean:169),
+`isStronglyNormal` (Basic.lean:231), `normalize` (Reduction.lean:104), `SubformulaProperty`
+(SubformulaProperty.lean:342), and `subformula_property` (SubformulaProperty.lean:292,
+axiom-clean).
+
+The two blockers this plan lists below were both resolved:
+- The **3 sorries in `conclusion_grounded_or_intro`** (the `orE` intro-headed branches) were fixed
+  during the Normalization refactor (3-way disjunction with `isOrERoot`, as report 03 §2 predicted).
+- The **2 sorries in `subformula_property`** (termination — "`normalize` is strongly normal") were
+  discharged by **task 332**, but via a *constructive* route, NOT the termination-measure route this
+  plan's report 03 recommended (that Dershowitz–Manna measure was later proven **unsound** — see
+  332 plans/06_termination-plan-v6-as-built.md §"Why v6"). `subformula_property` was re-pointed at
+  `Theory.Derivation.exists_stronglyNormal_form` and the fuel theorem retired.
+
+Nothing in 290's scope was skipped. The only outstanding items are inherited from 332: (a) the
+full-project CI gates are blocked by pre-existing unrelated red modules, and (b) dead-code cleanup
+of the abandoned termination-measure machinery. See 332 v6 plan "Skipped / Outstanding Items".
+
 ## Overview
 
 This is the third revision of the ND normalization plan, incorporating findings from report 03

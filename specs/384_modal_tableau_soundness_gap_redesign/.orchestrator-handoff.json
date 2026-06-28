@@ -1,19 +1,20 @@
 {
+  "task_number": 384,
+  "task_slug": "modal_tableau_soundness_gap_redesign",
+  "session_id": "sess_1782651741_bd598c",
   "phase": "implement",
   "status": "implemented",
   "phases_completed": 6,
   "phases_total": 6,
-  "summary": "Task 384 complete. The soundness-proof gap in modalExpandBranches_closed_unsat is closed with zero sorry and zero new axioms. The per-branch accs design (Option A) eliminates the two false anti-monotonicity obligations by construction. Key fixes in Phase 4: (1) private helper lemmas forall₂_{append,drop,take}_aux replace unavailable Mathlib.Data.List.Forall2 imports; (2) forall₂_of_zip_mem uses 'apply h; simp' not 'exact h (List.mem_cons_self _ _)'; (3) fuel-0 case uses 'cases h : isModalClosed b' not split_ifs; (4) List.length_replicate used without bogus explicit args. Scoped build Cslib.Logics.Modal.Tableau.Soundness is green (480 jobs). Full lake build fails only on pre-existing Propositional.Tableau module keyword issue unrelated to task 384. This unblocks task 364.",
-  "blockers": [],
-  "sorry_inventory": [],
-  "ci_results": {
-    "scoped_build": "green",
-    "scoped_build_target": "Cslib.Logics.Modal.Tableau.Soundness",
-    "full_build": "partial - pre-existing Propositional.Tableau module keyword error unrelated to task 384",
-    "lake_lint": "no warnings in Soundness.lean",
-    "lake_lint_style": "clean for Soundness.lean",
-    "lake_shake": "no import issues in Soundness.lean",
-    "sorry_count": 0,
-    "axiom_count_delta": 0
-  }
+  "summary": "Soundness gap CLOSED. Per-branch Accessibility (Option A) fully implemented: split Soundness.lean -> SoundnessStep.lean; per-branch accs threading; freshness monotonicity helpers; modalStepBranch_preserves_accFreshInv (Phase 3 crux, driven directly); modalExpandBranches_closed_unsat reformulated to per-branch accs/List.Forall2 (Phase 4); modalTableau_sound call site updated (Phase 5).",
+  "verification": {
+    "scoped_build": "green (lake build Cslib.Logics.Modal.Tableau.Soundness, 480 jobs)",
+    "sorry": 0,
+    "axioms": "modalTableau_sound uses only propext, Classical.choice, Quot.sound (no sorryAx, no new axioms)",
+    "lint_style": "pass",
+    "public_api": "kValid, modalTableau_sound, modalTableau, ModalTableauResult preserved"
+  },
+  "caveat_out_of_scope": "Full `lake build` and `lake exe checkInitImports` FAIL on a PRE-EXISTING, unrelated issue: the module barrel Cslib.lean cannot import the non-module Propositional.Tableau subtree (Cslib/Logics/Propositional/Tableau/{Classical,Intuitionistic,Minimal}.lean lack the `module` marker; only Defs has it). Both Cslib.lean and those files are untouched by task 384 (last changed by tasks 298 and earlier merges). Modal.Tableau is a proper module and builds clean. This repo-wide module-migration drift blocks the full-CI gate for task 364's eventual merge and should be a SEPARATE task. Also: SoundnessStep.lean (new module) is not yet in the barrel via mk_all — fold into the same follow-up once the barrel builds.",
+  "blocks_task": 364,
+  "follow_up_recommended": "Spawn a task to complete the module-system migration of Cslib/Logics/Propositional/Tableau/{Classical,Intuitionistic,Minimal}.lean (add `module` markers + transitive deps), then add SoundnessStep.lean to the barrel via `lake exe mk_all --module` and confirm full `lake build` + `checkInitImports` green."
 }

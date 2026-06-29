@@ -49,7 +49,7 @@ Revises PR #648 based on reviewer feedback (thomaskwaring, msg 606970606). Adds 
 - **Ex falso quodlibet is now a primitive rule** (`efq` constructor of `Derivation`), so `⊥` has an inference rule and **IPL is the base logic**; minimal logic (MPL) is set aside for a separate PR/discussion, per the agreed compromise
 - Reconciled with merged PR #536's InferenceSystem-parameterized typeclasses
 - Constructor naming uses `imp`/`impI`/`impE` (renamed from `impl`/`implI`/`implE` for consistency with FormalizedFormalLogic convention; open to reverting if reviewers prefer `impl`)
-- Semantics files removed per thomaskwaring's request (deferred to follow-up PR)
+- Semantics not included — deferred to a follow-up PR (per thomaskwaring's request)
 - Connective typeclasses removed — a separate development coordinated via PR #607 (this PR no longer ships `Connectives.lean`)
 - References include Gentzen 1935, Prawitz 1965, and Troelstra & van Dalen 1988, and a link to the CSLib Zulip design thread is added
 
@@ -69,7 +69,6 @@ These benefits extend to planned completeness work for modal and temporal logics
 ## Coordination
 
 - **PR #607** (fmontesi): connective typeclasses are a separate development; this PR no longer ships its own `Connectives.lean`. One design point for #607: it makes negation primitive (`HasNot`) with no `HasBot`, but for intuitionistic/minimal logic `¬φ := φ → ⊥`, so a `HasBot` class with derived `¬`/`⊤` is needed for the `⊥`-primitive `Proposition` to register. I'll leave a review on #607.
-- **PR #587** (thomaskwaring): since this PR no longer adds `Cslib/Foundations/Logic/Connectives.lean`, the earlier file-path overlap is moot.
 
 ## Deferred
 

@@ -1,0 +1,78 @@
+{
+  "status": "implemented",
+  "summary": "Task 385 complete: repo-wide build blocker eliminated (IntFMPSpike → IntDecidability), structural sorries closed, Phase 4 hsat sorry deferred via research-or-defer gate (formulation bridge unbridgeable without task 317), Phase 5 documentation complete. All CI checks green.",
+  "phases_completed": 4,
+  "phases_total": 5,
+  "phase_outcomes": {
+    "phase_1": "COMPLETED — applied 7-edit verified diff to IntFMPSpike.lean (Σ renames, Powerset import, world-polymorphic imp case, Finset.mem_coe fix, private removal, lint clearance); delivered intExpandBranches_openBranch_closed + intExpandBranches_openBranch_initial_mem structural lemmas as part of diff",
+    "phase_2": "COMPLETED — git mv to IntDecidability.lean, stripped spike framing, re-enabled Cslib.lean import, mk_all clean, repo-wide lake build GREEN",
+    "phase_3": "COMPLETED — fixed proof errors in Phase 1 diff structural lemmas (ih_inner arg ordering, split_ifs → cases, if_neg explicit proof, nil contradiction, List.mem_cons_self); build clean",
+    "phase_4": "BLOCKED (research-or-defer gate: deferred) — intStepBranch b [] 0 = none (empty expanded set, world 0) ≠ intStepBranch bPers e nw = none (accumulated e, positive nw); bridge would require reformulating truthLemma interface — task 317 scope",
+    "phase_5": "COMPLETED (documentation only) — task-317 sequencing comments added to Scheme.lean:246 and Completeness.lean:113; folded into Phase 4 commit"
+  },
+  "artifacts": [
+    {
+      "path": "specs/385_complete_parked_tableau_interpolation_fmp/summaries/01_intdecidability-implementation-summary.md",
+      "type": "summary",
+      "summary": "Full implementation summary: phases 1-5 outcomes, CI verification results, sorry inventory, plan deviations"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Metalogic/IntDecidability.lean",
+      "type": "implementation",
+      "summary": "Renamed from IntFMPSpike.lean; sorry-free IPC decidability/FMP module with finite-world type and finite implication witness"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "type": "implementation",
+      "summary": "Added intExpandBranches_openBranch_closed + intExpandBranches_openBranch_initial_mem structural lemmas; task-317 sequencing documentation for remaining sorries"
+    }
+  ],
+  "verification": {
+    "verification_passed": true,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "build_jobs": 3153,
+    "checkInitImports": "clean",
+    "lint_style": "clean",
+    "lake_shake": "pre-existing Temporal/* suggestions only (unrelated to task 385)",
+    "sorry_count_new": 0,
+    "axiom_count_new": 0
+  },
+  "sorry_inventory": [
+    {
+      "location": "Scheme.lean:246",
+      "name": "truthLemma",
+      "description": "Parametric Kripke truth lemma (formula induction + persistence/monotonicity across Nat-labelled worlds + parametric modelBot/S.bot_truth)",
+      "disposition": "deferred-to-317"
+    },
+    {
+      "location": "Scheme.lean:519",
+      "name": "hsat (intExpandBranches_openBranch_sat)",
+      "description": "intStepBranch b [] 0 = none — formulation bridge from accumulated-set loop return to empty-set/world-0 form requires reformulating truthLemma interface",
+      "disposition": "deferred-to-317 (Phase 4 gate outcome: formulation bridge unbridgeable)"
+    },
+    {
+      "location": "Completeness.lean:113",
+      "name": "IValid→forcing bridge",
+      "description": "IValid φ → IForces (intExtractValuation b) (S.modelBot b) 0 φ with upward closure of intExtractValuation b",
+      "disposition": "deferred-to-317"
+    }
+  ],
+  "blockers": [
+    {
+      "phase": 4,
+      "type": "formulation-bridge",
+      "description": "intStepBranch b [] 0 = none (openBranch_countermodel hsat) is not derivable from intStepBranch bPers e nw = none (loop return condition) without reformulating truthLemma's interface to accept the accumulated-set form",
+      "resolution": "Coordinate with task 317: reformulate truthLemma's hsat parameter to accept intStepBranch b e nw = none rather than intStepBranch b [] 0 = none"
+    }
+  ],
+  "next_action_hint": "Submit PR for task 385 via /pr 385. Task 317 (parametric Kripke truth lemma) should be dispatched after PR merge to close the 3 deferred sorries in Scheme.lean and Completeness.lean.",
+  "task_317_coordination": {
+    "obligations": [
+      "Scheme.lean:246 — truthLemma: parametric Kripke truth lemma by formula induction handling persistence/monotonicity across Nat-labelled worlds and parametric modelBot/S.bot_truth",
+      "Scheme.lean:519 — hsat: requires reformulating openBranch_countermodel's hsat hypothesis from intStepBranch b [] 0 = none to the accumulated-set form intStepBranch b e nw = none that the loop actually guarantees",
+      "Completeness.lean:113 — IValid→forcing bridge with upward closure of intExtractValuation b"
+    ],
+    "note": "These 3 sorries cannot be closed without task 317's parametric truth lemma. The hsat sorry (Scheme.lean:519) additionally requires an interface change to truthLemma — this should be coordinated between task 317 and any follow-on 385 round."
+  }
+}

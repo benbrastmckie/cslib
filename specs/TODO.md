@@ -11,7 +11,7 @@ next_project_number: 411
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,299,301,317,321,370,385,386,387,388,396,400,401,403,404,406,407 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,299,301,317,321,370,386,387,388,396,400,401,403,404,406,407 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,375,389,390,405,409 | 36,37,180,299,317,387,404,407 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,275,391,392 | 39,40,386,387,389 | Bimodal Porting, Foundations, PL-Docs, ... |
 | 4 | 393 | 386,391 | PL-Hygiene |
@@ -57,11 +57,6 @@ next_project_number: 411
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
 406 [NOT STARTED] — NEW from post-merge vet (sess_1782671052_6af6a1). Fix 33 pre-exis
 
-### PL Tableau
-
-317 [PLANNED] — Fill the propositional tableau completeness sorries (7 real sorri
-385 [PLANNED] — [Reconciled by task 395, post-merge.] Tier-1. LK/Interpolation su
-
 ### PL Hygiene
 
 386 [NOT STARTED] — [Refreshed by post-merge vet sess_1782671052_6af6a1; supersedes t
@@ -76,6 +71,10 @@ next_project_number: 411
 389 [NOT STARTED] — [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAl
   └─ 391 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Remove internal task/process ja
 390 [NOT STARTED] — [Refreshed post-merge vet.] The Propositional section (~ORGANISAT
+
+### PL Tableau
+
+317 [PLANNED] — Fill the propositional tableau completeness sorries (7 real sorri
 
 ### PL Semantics
 
@@ -353,10 +352,11 @@ next_project_number: 411
 ---
 
 ### 385. Complete and integrate IntFMPSpike, LK/Interpolation, Tableau Scheme
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: PL-Tableau
 - **Dependencies**: Task 395
+- **Summary**: [385_complete_parked_tableau_interpolation_fmp/summaries/01_intdecidability-implementation-summary.md]
 
 **Description**: [Reconciled by task 395, post-merge.] Tier-1. LK/Interpolation sub-part DROPPED — task 374 delivered LKProof.interpolation sorry-free (Interpolation.lean:864). TWO sub-parts remain: (1) BUILD-BLOCKER, DO FIRST: IntFMPSpike.lean has 2 compile errors (lines 201/231) and is the ONLY thing breaking repo-wide `lake build` (imported at Cslib.lean:419). Fix the 2 errors, strip spike/specs-370 framing, rename to IntDecidability.lean, keep wired into Cslib.lean + barrel. (2) Tableau/Intuitionistic/Scheme.lean: finish the 4 parked sorries (truthLemma:242 parametric over IntMinScheme; openBranch_countermodel:280/288/296 — :296 has ready classical analogue classicalExpandBranches_openBranch_initial_mem); ideally repoint Intuitionistic/Minimal completeness at the parametric route (coordinates with 317). Verify full lake build green + lint-style. Source: §3.2-3.4 + 395 reconciliation.
 

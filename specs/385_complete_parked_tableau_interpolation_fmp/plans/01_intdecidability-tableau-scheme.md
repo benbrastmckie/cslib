@@ -1,7 +1,7 @@
 # Implementation Plan: Task #385
 
 - **Task**: 385 - Complete and integrate IntFMPSpike, LK/Interpolation, Tableau Scheme
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 6 hours
 - **Dependencies**: 395 (reconciliation, satisfied); coordinates with 317 (Phase 5 only)
 - **Research Inputs**: reports/01_fmp-tableau-build-blocker-research.md; reports/intfmpspike-verified-patch.diff

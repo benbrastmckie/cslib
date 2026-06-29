@@ -232,6 +232,11 @@ noncomputable def ndToLJ {Γ : Ctx Atom} {A : Proposition Atom} :
     · exact LJProof.impL B C (Finset.mem_insert_self _ _)
         ((ndToLJ d₂).mono (Finset.subset_insert _ _))
         (LJProof.ax C _ (Finset.mem_insert_self _ _))
+  | @Derivation.efq _ _ _ _ _ _ d => by
+    -- efq: Γ ⊢ ⊥ (intuitionistic theory); want Γ ⊢ A via cut on ⊥ then left falsum.
+    apply LJProof.cut ⊥
+    · exact ndToLJ d
+    · exact LJProof.botL _ _ (Finset.mem_insert_self _ _)
 
 /-! ## ND–LJ Equivalence -/
 

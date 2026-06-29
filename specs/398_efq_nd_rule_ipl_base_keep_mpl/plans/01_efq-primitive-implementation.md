@@ -127,7 +127,7 @@ Phases within the same wave can execute in parallel. Phases 2, 3, and 4 edit dis
 
 ---
 
-### Phase 3: Curry-Howard term mirror [NOT STARTED]
+### Phase 3: Curry-Howard term mirror [COMPLETED]
 
 **Goal**: Mirror `efq` in `Theory.Term` and repair the isomorphism and reduction so the 1-1 Curry-Howard correspondence is restored.
 
@@ -152,7 +152,7 @@ Phases within the same wave can execute in parallel. Phases 2, 3, and 4 edit dis
 
 ---
 
-### Phase 4: Normalization — strategy decision + Basic/Reduction efq arms [NOT STARTED]
+### Phase 4: Normalization — strategy decision + Basic/Reduction efq arms [COMPLETED]
 
 **Goal**: Fix the zero-debt subformula-property strategy up front, then add efq arms to `Normalization/Basic.lean` (`height`, `isNormal`, `isStronglyNormal`, structural lemmas) and `Normalization/Reduction.lean`.
 
@@ -187,7 +187,7 @@ Phases within the same wave can execute in parallel. Phases 2, 3, and 4 edit dis
 
 ---
 
-### Phase 5: Normalization — Termination (SN measure) [NOT STARTED]
+### Phase 5: Normalization — Termination (SN measure) [COMPLETED]
 
 **Goal**: Add efq arms to `Normalization/Termination.lean` (the ~52-site dominant module) so the strong-normalization measure/recursion accounts for efq.
 
@@ -209,7 +209,7 @@ Phases within the same wave can execute in parallel. Phases 2, 3, and 4 edit dis
 
 ---
 
-### Phase 6: Normalization — SubformulaProperty (zero-debt risk) [NOT STARTED]
+### Phase 6: Normalization — SubformulaProperty (zero-debt risk) [COMPLETED]
 
 **Goal**: Add efq arms to `Normalization/SubformulaProperty.lean` implementing the Phase 4 decided strategy, keeping `subformula_property_of_isStronglyNormal` (`:52`) and `subformula_property` (`:292`) green with zero debt.
 
@@ -234,7 +234,7 @@ Phases within the same wave can execute in parallel. Phases 2, 3, and 4 edit dis
 
 ---
 
-### Phase 7: Prose update + full verification & CI [NOT STARTED]
+### Phase 7: Prose update + full verification & CI [COMPLETED]
 
 **Goal**: Update the `Basic.lean` Implementation-notes to record IPL-as-base with MPL retained, confirm all preserved MPL assets and downstream logics build, and run the full CI pipeline against the task-397 green baseline.
 

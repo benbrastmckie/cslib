@@ -316,6 +316,13 @@ noncomputable def ndToLK {Γ : Finset (Proposition Atom)} {A : Proposition Atom}
           intro x hx; simp only [Finset.mem_singleton] at hx; subst hx
           exact Finset.mem_insert_self _ _))
         (LKProof.ax C _ _ (Finset.mem_insert_self _ _) (Finset.mem_singleton_self _))
+  | @Derivation.efq _ _ _ _ _ _ d => by
+    -- efq: Γ ⊢ ⊥; want Γ ⊢ₛ {A} via cut on ⊥ then left falsum.
+    apply LKProof.cut ⊥
+    · exact (ndToLK d).mono Finset.Subset.rfl (by
+        intro x hx; simp only [Finset.mem_singleton] at hx; subst hx
+        exact Finset.mem_insert_self _ _)
+    · exact LKProof.botL _ _ (Finset.mem_insert_self _ _)
 
 /-! ## ND–LK Equivalence -/
 

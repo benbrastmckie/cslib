@@ -44,33 +44,35 @@ abbreviates a derivation of `A` in the empty context: `T⇓(∅ ⊢ A)`.
 
 The primitive inference rules are: axiom (from theory), assumption (from context),
 conjunction introduction and elimination (×2), disjunction introduction (×2) and elimination,
-and implication introduction and elimination — 10 constructors in total. Ex falso quodlibet
-(bottom elimination) is a derived rule requiring `[IsIntuitionistic T]`.
+implication introduction and elimination, and ex falso quodlibet (bottom elimination) — 11
+constructors in total. The `efq` rule is *gated*: it carries an `[IsIntuitionistic T]` instance
+binder, so it is available at IPL/CPL strength but unconstructible at MPL strength.
 
 Logic strength is controlled by the theory parameter:
-- `MPL` (minimal propositional logic [Johansson1937]): no axioms beyond the 10 primitive rules.
-- `IPL` (intuitionistic propositional logic): adds the principle of explosion `⊥ → A`.
+- `MPL` (minimal propositional logic [Johansson1937]): the theory admits no `IsIntuitionistic`
+  instance, so `efq` is gated off, leaving the 10 ungated primitive rules.
+- `IPL` (intuitionistic propositional logic): `[IsIntuitionistic T]` holds, so `efq` (the
+  principle of explosion `⊥ → A`) is available as a primitive rule.
 - `CPL` (classical propositional logic): adds double negation elimination `¬¬A → A`.
 
-**Design trade-off.** `⊥` is a primitive constructor of `Proposition` (a nullary connective), but
-ex falso quodlibet (`⊥ → A`) is not a primitive rule — it enters as a theory axiom via
-`[IsIntuitionistic T]`. This differs from many on-paper natural deduction presentations
-([Prawitz1965], §10.4 of [TroelstraVanDalen1988], §2.2 of [SorensenUrzyczyn2006]),
-which include bottom elimination as a primitive rule.
+**Design: IPL as base, MPL retained as a fragment.** `⊥` is a primitive constructor of
+`Proposition` (a nullary connective), and ex falso quodlibet (bottom elimination) is a
+*primitive gated constructor* `efq` of `Derivation`, matching the Gentzen-style
+constructor-rule correspondence used in many on-paper natural deduction presentations
+([Prawitz1965], §10.4 of [TroelstraVanDalen1988], §2.2 of [SorensenUrzyczyn2006]), which include
+bottom elimination as a primitive rule. Because the constructor carries an `[IsIntuitionistic T]`
+binder, IPL is the base logic: `efq` is available exactly when the theory validates explosion.
+Minimal logic is retained as a *fragment layer beneath IPL* — `AxiomTheory MinPropAxiom` admits no
+`IsIntuitionistic` instance, so `efq` is unconstructible there and the entire minimal-logic
+metatheory (its Hilbert substrate, soundness, Lindenbaum/strong-completeness, and the
+conservativity chains) is preserved unchanged, corresponding to the efq-free sub-language.
 
-The trade-off is between two valid design goals:
-- **API uniformity and zero duplication** across the multi-logic hierarchy (Modal, Temporal,
-  Bimodal): a single `Proposition` type with primitive `⊥` lets MPL, IPL, and CPL share one
-  substitution monad and one set of bridge lemmas, and the `FromPropositional` embeddings use
-  the direct map `| .bot => .bot`.
-- **Constructor-rule correspondence** characteristic of Gentzen-style ND: with `⊥` as a
-  primitive constructor, ND symmetry would demand that its elimination rule (`efq`) also be a
-  primitive constructor of `Derivation`.
-
-Note that `⊥` is the one connective with **no introduction rule** in any proof system; the
-asymmetry (0 intro rules, 1 elim rule) is a property of `⊥` itself, not a defect of this design.
-Making `efq` a theory axiom rather than a derivation constructor reflects this asymmetry directly:
-it is absent in MPL and present in IPL/CPL as a logic-dependent rule.
+`⊥` is the one connective with **no introduction rule** in any proof system; the asymmetry
+(0 intro rules, 1 elim rule) is a property of `⊥` itself, not a defect of this design. Gating
+`efq` on `[IsIntuitionistic T]` also keeps API uniformity and zero duplication across the
+multi-logic hierarchy (Modal, Temporal, Bimodal): a single `Proposition` type with primitive `⊥`
+lets MPL, IPL, and CPL share one substitution monad and one set of bridge lemmas, with the
+`FromPropositional` embeddings using the direct map `| .bot => .bot`.
 
 This design choice and its trade-offs are discussed further in the
 [CSLib Zulip thread on Propositional Logic](https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic).
@@ -113,7 +115,8 @@ scoped notation Γ:60 " ⊢ " A => (⟨Γ, A⟩ : Sequent)
 /-- A `T`-derivation of {A₁, ..., Aₙ} ⊢ B demonstrates B using (undischarged) assumptions among Aᵢ,
 possibly appealing to axioms from `T`. Primitives: axiom, assumption, conjunction intro/elim,
 disjunction intro/elim, and implication intro/elim.
-Ex falso quodlibet (bottom elimination) is a derived rule requiring `[IsIntuitionistic T]`. -/
+Ex falso quodlibet (bottom elimination) is a primitive gated rule requiring `[IsIntuitionistic T]`,
+making IPL the base logic with minimal logic retained as a fragment. -/
 inductive Theory.Derivation {T : Theory Atom} : Ctx Atom → Proposition Atom → Type u where
   /-- Axiom -/
   | ax {Γ : Ctx Atom} {A : Proposition Atom} (_ : A ∈ T) : Derivation Γ A

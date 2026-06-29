@@ -228,9 +228,9 @@ theorem int_fin_imp_witness (φ : PL.Proposition Atom)
     Finset.filter_subset _ _
   have closed' : ∀ ψ' ∈ φ.subformulas,
       SetDerivable IntPropAxiom (↑carrier' : Set (PL.Proposition Atom)) ψ' → ψ' ∈ carrier' := by
-    intro ψ' hψ'Σ h_sd'
+    intro ψ' hψ'mem h_sd'
     simp only [carrier', Finset.mem_filter]
-    refine ⟨hψ'Σ, ?_⟩
+    refine ⟨hψ'mem, ?_⟩
     -- SetDerivable from ↑carrier' ⊆ ↑T'' (as sets)
     have h_sub_set : (↑carrier' : Set (PL.Proposition Atom)) ⊆ ↑T'' := by
       intro ξ hξ
@@ -251,12 +251,12 @@ theorem int_fin_imp_witness (φ : PL.Proposition Atom)
       (.or a b) ∈ carrier' → a ∈ carrier' ∨ b ∈ carrier' := by
     intro a b hab
     simp only [carrier', Finset.mem_filter] at hab ⊢
-    have ⟨hab_Σ, hab_T''⟩ := hab
+    have ⟨hab_sub, hab_T''⟩ := hab
     rcases hT''_prime.2 a b hab_T'' with ha | hb
     · left
-      exact ⟨Proposition.IsSubformula.trans Proposition.IsSubformula.or_left hab_Σ, ha⟩
+      exact ⟨Proposition.IsSubformula.trans Proposition.IsSubformula.or_left hab_sub, ha⟩
     · right
-      exact ⟨Proposition.IsSubformula.trans Proposition.IsSubformula.or_right hab_Σ, hb⟩
+      exact ⟨Proposition.IsSubformula.trans Proposition.IsSubformula.or_right hab_sub, hb⟩
   let w' : IntFinWorld φ := ⟨carrier', sub', closed', consistent', prime'⟩
   -- Step 8: w ≤ w' (w.carrier ⊆ carrier')
   have h_le : w ≤ w' := by

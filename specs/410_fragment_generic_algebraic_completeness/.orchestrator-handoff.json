@@ -1,0 +1,36 @@
+{
+  "status": "researched",
+  "task_number": 410,
+  "session_id": "sess_1782760056_06c853_410",
+  "agent_type": "cslib-research-agent",
+  "summary": "Per-fragment algebraic completeness for the generic Derivable P-logic framework is, in substance, already discharged piecewise in MplConservativeChain.lean + HilbertCompleteness.lean + BrouwerianCompleteness*.lean. Task 410 is an abstraction/instantiation task, not open research. Design: a CanAlgComplete P structure bundling a target axiom system Ax_P plus complete (P phi -> GHAValid phi -> Derivable Ax_P phi) and sound (Derivable Ax_P phi -> GHAValid phi); then canAlgComplete_iff gives Derivable Ax_P phi <-> GHAValid phi on the fragment, and composing with AlgEvalIndependent (407) + ghaValid_iff_haValid_of_botFree upgrades to HAValid for bot-free fragments. Instances by reuse: IsBotFree -> MinPropAxiom (MPL.hilbert_alg_complete is total), IsOrBotFree -> ConjImpAxiom (via LowerSet B + conjImp_brouwerian_complete), IsImpTopOnly -> ImpAxiom (via mplAxiom_iff_impAxiom, routed through IsOrBotFree/LowerSet B). KEY CORRECTION: IsImpTopOnly is recoverable today WITHOUT the Rasiowa free algebra; the residual's framing is over-stated. All instances compose existing sorry-free theorems: zero-debt, no new axioms.",
+  "artifacts": [
+    "specs/410_fragment_generic_algebraic_completeness/reports/01_fragment-generic-algebraic-completeness.md"
+  ],
+  "key_findings": [
+    "MplConservativeChain.lean already proves mplAxiom_iff_conjImpAxiom (IsOrBotFree), mplAxiom_iff_impAxiom (IsImpTopOnly), mplAxiom_iff_conjImpBotMinAxiom (IsOrFree); HilbertCompleteness.lean proves MPL.hilbert_alg_complete (total: Derivable MinPropAxiom phi <-> GHAValid phi).",
+    "The completeness core GHAValid phi -> Derivable Ax_P phi factors as GHAValid_implies_BrouwerianValid_direct (instantiate at LowerSet B Heyting model) then conjImp_brouwerian_complete; soundness back-direction is derivableMinOfDerivableConjImp/Imp composed with MPL.hilbert_alg_complete.mp.",
+    "AlgEvalIndependent P is orthogonal to completeness: it bridges GHAValid <-> HAValid on the bot-free fragment, exactly the task's (CanAlgComplete P, AlgEvalIndependent P) pairing.",
+    "IsImpTopOnly does NOT need the Rasiowa free algebra; it is recovered via IsImpTopOnly_implies_IsOrBotFree through LowerSet B. Decline/defer the Rasiowa free implicative algebra.",
+    "Recommend CanAlgComplete as a structure (Ax is output data, not instance-inferable), not a class; precedent for typeclass-parameterized completeness is ConjImpAxioms.",
+    "A literally single-AlgEvaluate generic proof across all three fragments is not achievable (three evaluators: AlgEvaluate over GHA, Brouwerian(Bot)Evaluate over BrouwerianSemilattice); the typeclass-instance bundling is the idiomatic closure."
+  ],
+  "verified_names": [
+    "MPL.hilbert_alg_complete (HilbertCompleteness.lean:93)",
+    "mplAxiom_iff_conjImpAxiom (MplConservativeChain.lean:197)",
+    "mplAxiom_iff_impAxiom (MplConservativeChain.lean:263)",
+    "GHAValid_implies_BrouwerianValid_direct (MplConservativeChain.lean:143)",
+    "conjImp_brouwerian_complete (BrouwerianCompleteness.lean:151)",
+    "derivableMinOfDerivableConjImp / derivableMinOfDerivableImp (MplConservativeChain.lean:278,290)",
+    "ghaValid_iff_haValid_of_botFree / generic_gha_implies_ha / AlgEvalIndependent (FragmentGeneric.lean)",
+    "ConjImpAxioms class (Axioms.lean:191); ConjImpAxiom/ImpAxiom (FragmentAxioms.lean:59,84)"
+  ],
+  "bibkeys_verified": ["Rasiowa1974 (references.bib:771)", "Nemitz1965 (:825)", "Kohler1981 (:835)"],
+  "zero_debt_outlook": "All proposed instances compose existing sorry-free theorems via term-level .mp/.mpr composition. No sorry, no new axiom, no vacuous definition required.",
+  "next_action_hint": "Run /plan 410. Plan should produce one new additive file Cslib/Logics/Propositional/Semantics/Algebra/CanAlgComplete.lean: (Phase 1) CanAlgComplete structure + canAlgComplete_iff + canAlgComplete_haValid_iff; (Phase 2) three instances by reuse (IsBotFree/MinPropAxiom, IsOrBotFree/ConjImpAxiom, IsImpTopOnly/ImpAxiom); (Phase 3) CI: mk_all barrel import, checkInitImports, docBlame docstrings, lake build/lint. Optionally update FragmentGeneric.lean residual note (lines 40-53). Decline the Rasiowa free implicative algebra.",
+  "open_questions": [
+    "Which target logic to name as the IsBotFree P-logic: recommend MinPropAxiom (MPL).",
+    "Should CanAlgComplete expose the canonical algebra or stay minimal (just the iff)? Recommend minimal first.",
+    "structure vs class form for CanAlgComplete: recommend structure (Ax is output data)."
+  ]
+}

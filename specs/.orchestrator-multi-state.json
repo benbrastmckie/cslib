@@ -1,45 +1,37 @@
 {
-  "session_id": "sess_1782673164_f5576d",
+  "session_id": "sess_1782760056_06c853",
   "task_numbers": [
-    398,
-    399
+    408,
+    410
   ],
   "waves": [
     [
-      398
-    ],
-    [
-      399
+      408,
+      410
     ]
   ],
   "dependency_graph": {
-    "398": [],
-    "399": [
-      "398"
-    ]
+    "408": [],
+    "410": []
   },
   "max_cycles": 10,
-  "cycle_count": 8,
+  "cycle_count": 0,
   "failed_tasks": [],
-  "completed_tasks": [
-    398,
-    399
-  ],
+  "completed_tasks": [],
   "current_statuses": {
-    "398": "completed",
-    "399": "pr_ready"
+    "408": "not_started",
+    "410": "not_started"
   },
   "task_dirs": {
-    "398": "specs/398_efq_nd_rule_ipl_base_keep_mpl",
-    "399": "specs/399_refresh_pr648_ipl_base_foundation"
+    "408": "specs/408_minimal_sequent_calculus_lm",
+    "410": "specs/410_fragment_generic_algebraic_completeness"
   },
   "research_agents": {
-    "398": "cslib-research-agent",
-    "399": "pr-review-research-agent"
+    "408": "cslib-research-agent",
+    "410": "cslib-research-agent"
   },
   "implement_agents": {
-    "398": "cslib-implementation-agent",
-    "399": "pr-review-implementation-agent"
-  },
-  "notes": "BATCH COMPLETE. 398 completed (efq primitive, CI green, zero-debt). 399 pr_ready (PR #648 foundation refresh prepared; user runs /pr to submit). NOTE: stray uncommitted Cslib.lean un-stub of IntFMPSpike left untouched for user review."
+    "408": "cslib-implementation-agent",
+    "410": "cslib-implementation-agent"
+  }
 }

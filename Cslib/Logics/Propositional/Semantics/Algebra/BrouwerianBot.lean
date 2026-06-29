@@ -8,6 +8,7 @@ module
 
 import Cslib.Init
 
+public import Cslib.Logics.Propositional.Semantics.Algebra.BotProperties
 public import Cslib.Logics.Propositional.Semantics.Algebra.FreeJoinCompletion
 public import Cslib.Logics.Propositional.Semantics.Algebra.PointedBrouwerian
 
@@ -190,6 +191,35 @@ theorem pointedBrouwerianEvaluate_eq_botBot {H : Type*} [BrouwerianSemilattice H
   | imp a b iha ihb => simp [PointedBrouwerianEvaluate, BrouwerianBotEvaluate, iha, ihb]
   | and a b iha ihb => simp [PointedBrouwerianEvaluate, BrouwerianBotEvaluate, iha, ihb]
   | or a b iha ihb => rfl
+
+/-! ## HasLeastBot Bridge Lemmas
+
+The following lemmas connect the free-bot Brouwerian evaluator to the `HasLeastBot` hierarchy.
+They show that the explosion axiom `⊥ → A` evaluates to `⊤` whenever the designated bottom
+value is least, placing each evaluator in the semantic property hierarchy:
+
+- `BrouwerianBotEvaluate v ⊤` = `BrouwerianEvaluate v` (free/top bottom, MPL level)
+- `BrouwerianBotEvaluate v b` with `HasLeastBot b` ← explosion-sound (IPL level)
+- `BrouwerianBotEvaluate v ⊥` = `PointedBrouwerianEvaluate v` (canonical bottom, IPL level) -/
+
+/-- Explosion soundness for the free-bot evaluator with any `HasLeastBot` bottom value:
+`BrouwerianBotEvaluate v bot_val (⊥ → A) = ⊤` whenever `bot_val` is the least element.
+Uses `BrouwerianSemilattice.himp_eq_top_iff` to reduce to `HasLeastBot.bot_le_val`. -/
+lemma brouwerianBotEvaluate_efq_eq_top {H : Type*} [BrouwerianSemilattice H]
+    (v : Atom → H) (bot_val : H) [HasLeastBot bot_val] (A : PL.Proposition Atom) :
+    BrouwerianBotEvaluate v bot_val (.imp .bot A) = ⊤ := by
+  simp only [BrouwerianBotEvaluate_imp, BrouwerianBotEvaluate_bot]
+  rw [BrouwerianSemilattice.himp_eq_top_iff]
+  exact HasLeastBot.bot_le_val _
+
+/-- Explosion soundness for `PointedBrouwerianEvaluate`: `⊥ → A` evaluates to `⊤` in any
+pointed Brouwerian semilattice. Follows via `pointedBrouwerianEvaluate_eq_botBot` and
+`brouwerianBotEvaluate_efq_eq_top`, using `HasLeastBot (⊥ : H)` from `instHasLeastBotOrderBot`. -/
+lemma pointedBrouwerianEvaluate_efq_eq_top {H : Type*} [BrouwerianSemilattice H] [OrderBot H]
+    (v : Atom → H) (A : PL.Proposition Atom) :
+    PointedBrouwerianEvaluate v (.imp .bot A) = ⊤ := by
+  rw [pointedBrouwerianEvaluate_eq_botBot]
+  exact brouwerianBotEvaluate_efq_eq_top v ⊥ A
 
 end Cslib.Logic.PL
 

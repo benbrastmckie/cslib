@@ -142,7 +142,7 @@ Wave-2 phases depend only on the Phase-1 re-framing and edit largely disjoint tr
 
 ---
 
-### Phase 4: Wire evaluators to the hierarchy; keep completeness green [NOT STARTED]
+### Phase 4: Wire evaluators to the hierarchy; keep completeness green [COMPLETED]
 
 **Goal**: Re-express the existing evaluators through the Phase-3 hierarchy, keeping all completeness/conservativity unchanged in strength.
 

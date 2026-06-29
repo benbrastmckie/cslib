@@ -11,7 +11,7 @@ next_project_number: 421
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,299,301,317,321,370,386,387,388,396,400,401,403,404,406,407,411,415,416,418,419,420 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,226,241,299,301,317,321,370,386,387,388,396,400,401,403,404,406,407,411,415,419 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181,215,300,375,389,390,405,409 | 36,37,180,299,317,387,404,407 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,275,391,392,413 | 39,40,321,370,375,386,387,389 | Bimodal Porting, Foundations, PL-Docs, ... |
 | 4 | 393,412,414 | 41,181,215,241,275,300,301,321,386,391 | Foundations, Code Hygiene, PL-Hygiene |
@@ -58,7 +58,6 @@ next_project_number: 421
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
   └─ 414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p
 406 [NOT STARTED] — NEW from post-merge vet (sess_1782671052_6af6a1). Fix 33 pre-exis
-418 [PLANNED] — [Spawned from task 415 audit — supports Finding 1.] Factor the sh
 
 ### PL Hygiene
 
@@ -72,7 +71,6 @@ next_project_number: 421
 
 ### PL Docs
 
-420 [PLANNED] — [Spawned from task 415 audit — closes the Finding 1 design questi
 389 [NOT STARTED] — [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAl
   └─ 391 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Remove internal task/process ja
 390 [NOT STARTED] — [Refreshed post-merge vet.] The Propositional section (~ORGANISAT
@@ -89,7 +87,6 @@ next_project_number: 421
 ### PL Metalogic
 
 370 [PLANNED] — Close the decidability asymmetry in the metalogic layer: classica
-416 [PLANNED] — [Spawned from task 415 audit — closes Finding 3.] Activate the do
 
 ### PL Equivalence
 
@@ -112,12 +109,13 @@ next_project_number: 421
 ## Tasks
 
 ### 420. Doc: record native intuitionistic-embedding prerequisites
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: PL-Docs
 - **Dependencies**: None
 - **Research**: [420_native_embedding_prerequisites_doc/reports/01_native-embedding-prerequisites.md]
 - **Plan**: [420_native_embedding_prerequisites_doc/plans/01_native-embedding-prerequisites-doc.md]
+- **Summary**: [420_native_embedding_prerequisites_doc/summaries/01_native-embedding-prerequisites-summary.md]
 
 **Description**: [Spawned from task 415 audit — closes the Finding 1 design question; DOC-ONLY, no Lean change.] Write a short in-repo design note (an ORGANISATION.md section or a docs/ design doc) recording the four prerequisites for a native, intuitionistic-faithful propositional embedding: (1) native and/or constructors (not the Lukasiewicz encoding); (2) a gated intuitionistic target modal/temporal system to embed into; (3) birelational target semantics bridging to PL IForces; (4) a proof-theoretic preservation/faithfulness theorem. Purpose: well-specify the XL native-embedding work so the classical-only embedding boundary is not re-litigated when CSLib eventually adds an intuitionistic modal logic. Any prose intended for upstream/Zulip must be human-authored per the AI policy. Source: report §3 ("what a structure-preserving embedding would require") + Rank 5.
 
@@ -134,7 +132,7 @@ next_project_number: 421
 ---
 
 ### 418. Shared PropositionalEmbedding typeclass + single limitation note
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
@@ -152,18 +150,20 @@ next_project_number: 421
 - **Dependencies**: None
 - **Research**: [417_parametric_conservativity_lift_foundations/reports/01_conservativity-lift-design.md]
 - **Plan**: [417_parametric_conservativity_lift_foundations/plans/01_conservativity-lift-foundations.md]
+- **Summary**: [417_parametric_conservativity_lift_foundations/summaries/01_conservativity-lift-foundations-summary.md]
 
 **Description**: [Spawned from task 415 audit — closes Finding 2.] Add Cslib/Foundations/Logic/Metalogic/ConservativityLift.lean providing a parametric conservative_over_cpl lemma (signature in report §4) plus a generic classical truth-functional bridge lemma, then re-express temporal_conservative_extension (Temporal/ConservativeExtension.lean:87) and bimodal_conservative_extension (Bimodal/Metalogic/ConservativeExtension/PropositionalConservativity.lean:118) — and optionally re-home modal_conservative_extension_param (Modal/Metalogic/ConservativeExtension.lean:54) — as thin instances. Collapses 3 semantic-bridge + 3 conservativity proofs into 1 generic bridge + 1 generic lemma + 3 instances. This extends the Modal side's existing "by construction" fragment-genericity win (one parametric lemma already covers 15 systems) to ALL THREE modal-family logics — the most direct hit on Waring's Zulip fragment-genericity ask. Synergistic with task 416 (shared prop_completeness usage); not a hard dependency. RISK: unifying the Modal.Satisfies / Temporal.Satisfies / Bimodal.truthAt shapes behind one interface. CI green; 0 new sorry/axioms. Source: report §4, Rank 2.
 
 ---
 
 ### 416. Instantiate GenericLindenbaum to remove Min/Int duplication
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: PL-Metalogic
 - **Dependencies**: None
 - **Research**: [416_instantiate_generic_lindenbaum_phase6/reports/01_generic-lindenbaum-phase6.md]
 - **Plan**: [416_instantiate_generic_lindenbaum_phase6/plans/01_fix-stale-design-notes.md]
+- **Summary**: [416_instantiate_generic_lindenbaum_phase6/summaries/01_fix-design-notes-summary.md]
 
 **Description**: [Spawned from task 415 audit — closes Finding 3.] Activate the dormant GenericLindenbaum substrate: re-derive MinTheory and IntDCCS as instances of GenericTheory Axioms Cons (Cons := fun _ => True for minimal; PropSetConsistent IntPropAxiom for intuitionistic), replacing the duplicated min_*/int_* Lindenbaum bodies (MinLindenbaum.lean ~247 lines, IntLindenbaum.lean ~318 lines) with thin instances over generic_deriv_from_closure_to_S / generic_deriv_imp_of_union / generic_imp_witness. The substrate (Cslib/Logics/Propositional/Metalogic/GenericLindenbaum.lean, ~295 lines) is currently additive/unused — see GenericLindenbaum.lean:43-52 ("deferred to Phase 6 of the MPL-base structure-first redesign"). Behavior must stay identical; deletes ~270 net duplicated lines and activates the dormant file. OVERLAP WITH TASK 393: task 393 (Zulip-first consolidation, deps 386/391/395) is the broader umbrella covering this PLUS the 3 Soundness + 8 conservativity modules + LJ/LK helper duplication; THIS task is the narrow, non-Zulip-gated Lindenbaum slice only — coordinate with the 393 owner and cross-reference it, do NOT double-edit the same decls. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); 0 new sorry/axioms. Source: specs/415_audit_propositional_lifting_structure_first/reports/01_lifting-audit.md §5, Rank 1.
 

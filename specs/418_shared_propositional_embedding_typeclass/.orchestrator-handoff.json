@@ -1,23 +1,32 @@
 {
-  "status": "planned",
+  "status": "implemented",
   "task_number": 418,
   "task_slug": "shared_propositional_embedding_typeclass",
-  "agent_type": "planner-agent",
+  "summary": "All 5 phases complete. Created Cslib/Logics/Propositional/Embedding.lean with PropositionalEmbedding typeclass, PL.Proposition.embed skeleton (structural on atom/bot/imp; Łukasiewicz on and/or), five @[simp] rfl lemmas, single classical-scope limitation note (Wajsberg1938/McKinsey1939), and uninstantiated NativePropositionalEmbedding extension point. Rewrote toModal/toTemporal/toBimodal as thin φ.embed wrappers. All toX_* simp/grind lemmas preserved verbatim as rfl. Triplicated notes collapsed to one-line pointers. Task 417 coordination: Temporal and Bimodal bridge proofs required no repointing — Task 417's evaluate_iff_of_classicalBridge abstraction already handles embedding definitionally. Full CI green.",
+  "phases_completed": 5,
+  "phases_total": 5,
   "artifacts": [
-    "specs/418_shared_propositional_embedding_typeclass/plans/01_shared-embedding-typeclass.md"
+    "specs/418_shared_propositional_embedding_typeclass/summaries/01_shared-embedding-typeclass-summary.md"
   ],
-  "plan_path": "specs/418_shared_propositional_embedding_typeclass/plans/01_shared-embedding-typeclass.md",
-  "research_inputs": [
-    "specs/418_shared_propositional_embedding_typeclass/reports/01_shared-embedding-typeclass.md"
+  "lean_artifacts": [
+    "Cslib/Logics/Propositional/Embedding.lean",
+    "Cslib/Logics/Modal/FromPropositional.lean",
+    "Cslib/Logics/Temporal/FromPropositional.lean",
+    "Cslib/Logics/Bimodal/Embedding/PropositionalEmbedding.lean",
+    "Cslib.lean"
   ],
-  "phase_count": 5,
-  "estimated_hours": 4,
-  "dependency_waves": [[1], [2, 3, 4], [5]],
-  "coordination": {
-    "task_417_overlap": [
-      "Cslib/Logics/Temporal/ConservativeExtension.lean",
-      "Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/PropositionalConservativity.lean"
-    ]
+  "verification": {
+    "verification_passed": true,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "notes": "Pre-existing sorry in Temporal/Minimal/Completeness.lean not introduced by this task. Temporal/Bimodal bridge repoint not needed (Task 417 covered it). No lint warnings in modified files."
   },
-  "next_steps": "Run /implement 418 to execute the plan"
+  "blockers": [],
+  "continuation_context": null,
+  "task_417_coordination": "No merge conflict — Task 417 already abstracted conservativity proofs via evaluate_iff_of_classicalBridge, which reduces through the PropositionalEmbedding instances definitionally. The bridge proofs in ConservativeExtension.lean and PropositionalConservativity.lean needed no simp-repoint.",
+  "design_decision": "Typeclass-carried atomEmbed with outParam Atom: class PropositionalEmbedding (Atom : outParam Type*) (F : Type*) [HasBot F] [HasImp F]. This allows Atom to be inferred from the target type F via the instance, keeping all toX := φ.embed wrappers unambiguous.",
+  "completed_at": "2026-06-29"
 }

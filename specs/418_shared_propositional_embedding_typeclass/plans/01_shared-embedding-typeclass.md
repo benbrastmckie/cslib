@@ -1,7 +1,7 @@
 # Implementation Plan: Task #418 — Shared `PropositionalEmbedding` typeclass + single limitation note
 
 - **Task**: 418 - Shared PropositionalEmbedding typeclass + single limitation note
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 4 hours
 - **Dependencies**: None (coordination point with Task 417 — see Risks)
 - **Research Inputs**: reports/01_shared-embedding-typeclass.md

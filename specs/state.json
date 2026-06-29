@@ -1270,7 +1270,7 @@
       "project_number": 416,
       "project_name": "instantiate_generic_lindenbaum_phase6",
       "title": "Instantiate GenericLindenbaum to remove Min/Int duplication",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "PL-Metalogic",
       "parent_task": 415,
@@ -1287,10 +1287,15 @@
           "path": "specs/416_instantiate_generic_lindenbaum_phase6/plans/01_fix-stale-design-notes.md",
           "type": "plan",
           "summary": ""
+        },
+        {
+          "path": "specs/416_instantiate_generic_lindenbaum_phase6/summaries/01_fix-design-notes-summary.md",
+          "type": "summary",
+          "summary": ""
         }
       ],
       "created": "2026-06-29T22:35:38Z",
-      "last_updated": "2026-06-29T22:50:33Z",
+      "last_updated": "2026-06-29T23:25:51Z",
       "session_id": "sess_1782772776_909541_416"
     },
     {
@@ -1314,6 +1319,11 @@
           "path": "specs/417_parametric_conservativity_lift_foundations/plans/01_conservativity-lift-foundations.md",
           "type": "plan",
           "summary": ""
+        },
+        {
+          "path": "specs/417_parametric_conservativity_lift_foundations/summaries/01_conservativity-lift-foundations-summary.md",
+          "type": "summary",
+          "summary": ""
         }
       ],
       "created": "2026-06-29T22:35:38Z",
@@ -1324,7 +1334,7 @@
       "project_number": 418,
       "project_name": "shared_propositional_embedding_typeclass",
       "title": "Shared PropositionalEmbedding typeclass + single limitation note",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Code Hygiene",
       "parent_task": 415,
@@ -1332,20 +1342,12 @@
       "dependencies": [],
       "next_artifact_number": 1,
       "artifacts": [
-        {
-          "path": "specs/418_shared_propositional_embedding_typeclass/reports/01_shared-embedding-typeclass.md",
-          "type": "report",
-          "summary": ""
-        },
-        {
-          "path": "specs/418_shared_propositional_embedding_typeclass/plans/01_shared-embedding-typeclass.md",
-          "type": "plan",
-          "summary": ""
-        }
+        "specs/418_shared_propositional_embedding_typeclass/summaries/01_shared-embedding-typeclass-summary.md"
       ],
       "created": "2026-06-29T22:35:38Z",
-      "last_updated": "2026-06-29T22:50:44Z",
-      "session_id": "sess_1782772776_909541_418"
+      "last_updated": "2026-06-29T23:42:58Z",
+      "session_id": "sess_1751204400_a7b3c9",
+      "completion_summary": "Factored the three near-identical PL embeddings (toModal, toTemporal, toBimodal) into one shared PropositionalEmbedding typeclass skeleton in Cslib/Logics/Propositional/Embedding.lean. All toX_* simp/grind lemmas preserved verbatim as rfl. Single classical-scope limitation note (Wajsberg/McKinsey). Full CI green: 0 new sorry, 0 new axioms."
     },
     {
       "project_number": 419,
@@ -1368,7 +1370,7 @@
       "project_number": 420,
       "project_name": "native_embedding_prerequisites_doc",
       "title": "Doc: record native intuitionistic-embedding prerequisites",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "PL-Docs",
       "parent_task": 415,
@@ -1385,10 +1387,15 @@
           "path": "specs/420_native_embedding_prerequisites_doc/plans/01_native-embedding-prerequisites-doc.md",
           "type": "plan",
           "summary": ""
+        },
+        {
+          "path": "specs/420_native_embedding_prerequisites_doc/summaries/01_native-embedding-prerequisites-summary.md",
+          "type": "summary",
+          "summary": ""
         }
       ],
       "created": "2026-06-29T22:35:38Z",
-      "last_updated": "2026-06-29T22:50:50Z",
+      "last_updated": "2026-06-29T23:25:59Z",
       "session_id": "sess_1782772776_909541_420"
     }
   ],

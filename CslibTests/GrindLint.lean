@@ -75,7 +75,8 @@ open_scoped_all Cslib
 #grind_lint skip Cslib.Logic.HML.Satisfies.diamond
 #grind_lint skip Cslib.LambdaCalculus.LocallyNameless.Untyped.Term.step_multiApp_l
 #adaptation_note
-/-- sizeOf_spec auto-generated theorems from Chronicle/Quasimodel structures -/
+/-- sizeOf_spec auto-generated theorems from Chronicle/Quasimodel/finite-world structures -/
+#grind_lint skip Cslib.Logic.PL.IntFinWorld.mk.sizeOf_spec
 #grind_lint skip Cslib.Logic.Temporal.Metalogic.Chronicle.C5BackwardWalkResult.mk.sizeOf_spec
 #grind_lint skip Cslib.Logic.Temporal.Metalogic.Chronicle.C5ForwardWalkResult.mk.sizeOf_spec
 #grind_lint skip Cslib.Logic.Temporal.Metalogic.Chronicle.EliminationResult.mk.sizeOf_spec

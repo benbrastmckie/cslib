@@ -6,8 +6,9 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
-public import Cslib.Logics.Propositional.Metalogic.IntStrongCompleteness
+public import Cslib.Logics.Propositional.Metalogic.IntSoundness
+public import Cslib.Logics.Propositional.Metalogic.IntLindenbaum
+public import Cslib.Logics.Propositional.Semantics.SemanticConsequence
 public import Cslib.Logics.Propositional.Subformula
 public import Mathlib.Data.Finset.Powerset
 

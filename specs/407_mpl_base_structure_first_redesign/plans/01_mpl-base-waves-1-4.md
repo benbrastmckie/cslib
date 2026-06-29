@@ -21,6 +21,14 @@ This plan covers **Waves 1–4**. The two heavy structural items — **W5** (min
 ### Research Integration
 Phases map 1:1 to report 01's Waves 1–4, reordered/loaded per report 02 §6: W1 = MPL-base re-framing (option C), W2 = named property hierarchy, W3 = metalogic genericization **+ fragment-genericity foundation** (headline), W4 = tableau unification, plus a final full-CI verification phase. Design A (with `⊥`) is adopted; Design B is documented-but-not-implemented (report 02 §6, "out of scope").
 
+### Universal-algebra coherence (guiding principle)
+This task realizes the **universal-algebra pattern**: `⊥` is a single primitive nullary operation in the fixed signature `{⊥,→,∧,∨}` (never excluded), and its **characteristic properties are introduced axiomatically later** — never by changing syntax or by an exclude-then-re-add of the constant. Two consequences bind the phases below:
+- **One property, two faces.** Proof-level **explosion** (`IsIntuitionistic` / the `efq` module, Phase 1) and algebra-level **leastness** (`HasLeastBot` / initiality, Phase 2) are the *same* characteristic property of `⊥`, viewed proof-theoretically vs. semantically, and are tied together by soundness. State them so this correspondence is explicit (Phase 2/3), not incidental.
+- **Consistency across layers.** The ND layer gates explosion as a property on *one* derivation type (Phase 1); the spawned sequent-calculus task (408) mirrors this with a **property-gated `botL` on one calculus**, and the spawned option-B task (409) — a *separate* `⊥`-rule-free inductive — is the deliberately-avoided duplication route, kept trigger-only.
+
+### Cherry-pick / PR granularity
+Implementation lands on this fork first, then ships upstream by **cherry-picking**. Size each phase's commit as an **independently mergeable small PR** (matching the maintainers' stated small-PR preference, Zulip #603086134/#606970606): self-contained, green on its own, with no forward dependency on a later phase's edits. Where a phase naturally splits (e.g. Phase 3's metalogic genericization vs. fragment-genericity foundation), prefer two cherry-pickable commits over one. The connective-typeclasses work (#606970606) stays a *separate* PR and is not bundled here.
+
 ### Prior Plan Reference
 No prior plan for task 407. Task 398's plan (`specs/398_.../plans/01_efq-primitive-implementation.md`) is the substrate this plan re-frames, not reverts.
 

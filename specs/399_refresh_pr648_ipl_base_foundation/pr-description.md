@@ -18,7 +18,7 @@ not be posted by any automated tool.
 
 **PR**: https://github.com/leanprover/cslib/pull/648
 **Branch**: `feat/propositional-v2` — rebased onto current `upstream/main` (toolchain
-`v4.32.0-rc1`); 3 clean commits, head `63cd13c8`. **GitHub CI green; MERGEABLE.**
+`v4.32.0-rc1`); 3 clean commits, head `65a3af7a`. **GitHub CI green; MERGEABLE.**
 Net diff: 4 files — `Defs.lean`, `NaturalDeduction/Basic.lean`, `NaturalDeduction/Theory.lean`,
 `references.bib`. (`Connectives.lean` and `Cslib.lean` are no longer touched by the PR.)
 
@@ -58,7 +58,7 @@ Revises PR #648 based on reviewer feedback (thomaskwaring, msg 606970606). Adds 
 - `Cslib/Logics/Propositional/Defs.lean` -- `Proposition` with primitive `bot`; derived `neg`, `top`, `iff`; `IPL` is the empty base theory and `CPL` adds double-negation elimination (the `MPL` / `IsIntuitionistic` / `intuitionisticCompletion` layer is set aside for the minimal-logic PR)
 - `Cslib/Logics/Propositional/NaturalDeduction/Basic.lean` -- derivation constructors `impI`/`impE`, `andE1`/`andE2`, `orI1`/`orI2` with explicit `Γ` arguments, plus the new primitive `efq` (⊥-elimination); implementation notes, references, and Zulip-thread link
 - `Cslib/Logics/Propositional/NaturalDeduction/Theory.lean` -- `[Bot Atom]` removed; the classical layer (`IsClassical`, `byContra`/`lem`/`pierce`, and the `CPL`/`LEM`/`Pierce` instances) re-proved over the new base via the `efq` constructor
-- `references.bib` -- added `Gentzen1935`, `Prawitz1965`, `TroelstraVanDalen1988`
+- `references.bib` -- added `Avigad2022`, `Gentzen1935`, `Prawitz1965`, `TroelstraVanDalen1988`
 
 ## Design rationale
 

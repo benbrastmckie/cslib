@@ -1,5 +1,5 @@
 ---
-next_project_number: 408
+next_project_number: 410
 ---
 
 # TODO
@@ -12,7 +12,7 @@ next_project_number: 408
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,180,226,241,278,299,301,317,321,370,385,386,387,388,396,399,400,401,403,404,406,407 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,375,389,390,405 | 36,37,180,299,317,387,404 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 2 | 39,40,181,215,300,375,389,390,405,408,409 | 36,37,180,299,317,387,404,407 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275,391,392 | 39,40,386,387,389 | Bimodal Porting, Foundations, Propositional Logic |
 | 4 | 393 | 386,391 | Propositional Logic |
 
@@ -65,7 +65,9 @@ next_project_number: 408
 399 [PR READY] — Update PR #648 (feat/propositional-v2) following Thomas Waring's 
 400 [NOT STARTED] — Waring's closing message (Zulip thread 606970606) flagged connect
 401 [NOT STARTED] — From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portab
-407 [RESEARCHED] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
+407 [PLANNED] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
+  └─ 408 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 5. Lar
+  └─ 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 
 ### Temporal Logic
 
@@ -82,12 +84,35 @@ next_project_number: 408
 
 ## Tasks
 
+### 409. Literal ⊥-rule-free base ND inductive (option B): split MinDerivation + Explosion; re-cut Curry-Howard & normalization
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 407
+
+**Description**: SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- OPTIONAL / advanced. Task 407 adopts option C (re-frame the task-398 gated efq constructor as the explosion property module; the base relation is ⊥-rule-free UP TO the IsIntuitionistic gate). Option B is the LITERAL structure-first ND: split Theory.Derivation into a genuinely ⊥-rule-free base inductive MinDerivation (no efq constructor) plus an Explosion extension, prove all structural metatheory once on the base, and recover IPL-ND by adjoining efq. TRIGGER CONDITION: only pursue if a concrete downstream consumer needs a physically ⊥-free derivation object (e.g. a minimal-ND normalization theorem, or a lambda-calculus without an abort/efq combinator). COST/RISK: re-opens the single genuinely hard point from task 398 -- the subformula property under efq -- and forces re-cutting Curry-Howard (Theory.Term mirror) and Prawitz normalization (Basic/Reduction/Termination/SubformulaProperty) against the split. Reuse the task-398 decided strategy (atomic restriction + permutation conversions); treat any non-green proof as [BLOCKED], never sorry. HIGH effort -- use --hard. Depends on 407 (and ideally 408). Source: task 407 report 01 §5 option B / §7 W6, report 02 §5.
+
+---
+
+### 408. Minimal sequent calculus LM: a ⊥-rule-free base; route LJ = LM + botL; structural results proved once
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 407
+
+**Description**: SPAWNED from task 407 (MPL structure-first redesign), Wave 5. Largest structural gap found in report 01: LJProof and LKProof HARD-CODE the botL/explosion rule (SequentCalculus/LJ/Basic.lean:91-92, LK/Basic.lean:76-77) and there is NO minimal sequent calculus; cut elimination/subformula/decidability/interpolation are proved per-system, not once at a ⊥-rule-free base. GOAL (structure-first, Design A with ⊥): define a minimal base sequent calculus LM (the LJ rules MINUS botL), prove the structural metatheory ONCE on LM (cut elimination, subformula property), then RECOVER LJ = LM + botL (the explosion module) by composition/re-export so LJ's cut/subformula DERIVE from LM. Keep LK (classical) consistent. Preserve all existing LJ/LK results (soundness, hilbert_iff_lj/lk, LJProof.cutElim/LKProof.cutElim) -- no weakening. Est. 500-800 new + 200-300 modified lines (report 01 §7.1; sequent-calculus agent estimate). HIGH effort -- use --hard. Depends on 407 (design + property modules) and green main. Files: SequentCalculus/Defs.lean, new SequentCalculus/LM/*, LJ/* (re-route), LK/*. Honor Zulip AI policy (human-authored prose). Source: task 407 report 01 §3.4/§7 W5.
+
+---
+
 ### 407. Research & design: make MPL the structure-first base logic (⊥ as nullary connective; explosion/leastness/initiality as independent property modules)
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 398
-- **Research**: [407_mpl_base_structure_first_redesign/reports/01_mpl-base-structure-first.md]
+- **Research**:
+  - [407_mpl_base_structure_first_redesign/reports/01_mpl-base-structure-first.md]
+  - [407_mpl_base_structure_first_redesign/reports/02_mpl-base-with-vs-without-bot.md]
+- **Plan**: [407_mpl_base_structure_first_redesign/plans/01_mpl-base-waves-1-4.md]
 
 **Description**: DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat.md) + codebase synthesis. Adopt the STRUCTURE-FIRST account: one fixed language ⟨Atom,⊥,∧,∨,→⟩; ⊥ is a primitive NULLARY connective whose meaning is intentionally underdetermined (a Johansson 'designated constant' supplied by every model, no intrinsic proof rule). MPL is the BASE proof theory (no rule/axiom mentions ⊥; ¬A:=A→⊥; A,A→⊥⊢⊥ is just impE). IPL = MPL + explosion (⊥/A) as an INDEPENDENT module; CPL = IPL + classical principles. Semantically, leastness (⊥≤a), initiality (universal property 0→A), and explosion-soundness are INDEPENDENT properties added by conservative strengthening, not changes to syntax or recursive clauses. Modularity organized around PROPERTIES (typeclasses/mixins), not connectives, so structural metatheory (weakening, substitution, admissibility, cut) is proved ONCE at MPL. RELATION TO 398: this is the deeper redesign 398 postponed (398 report §5). 398 took the OPPOSITE commitment (IPL-as-base via a gated ND efq constructor). Recommendation (report §5) is option (C): re-frame 398's gate as the explosion PROPERTY MODULE rather than revert it. FINDINGS (report 01): codebase is already ~70-80% structure-first. ALIGNED: algebraic semantics (AlgEvaluate with arbitrary bot_val; BrouwerianBot vs PointedBrouwerian; IsBotFree; conservativity chains) and Hilbert axioms (MinPropAxiom→IntPropAxiom+efq→PropositionalAxiom+peirce; IsIntuitionistic/MinimalAxioms typeclasses). GAPS: (1) ND inverted by 398 (gated efq = IPL-base); (2) sequent calculus LARGE gap (LJ/LK hard-code botL; no minimal LM; structural results per-system); (3) metalogic ~50% Min*/Int* duplication, Lindenbaum hard-wires EFQ; (4) semantic leastness/initiality/explosion present only implicitly (OrderBot + per-axiom proofs), not as a NAMED property hierarchy. SCOPE: research+design done (report 01). Plan should cover the cheap additive waves first: W1 design canonicalization+ND re-framing (C), W2 named semantic property hierarchy, W3 metalogic genericization, W4 tableau unification; and SPAWN W5 (minimal sequent calculus LM) and optional W6 (literal ⊥-rule-free ND, option B) as separate --hard tasks. Preserve ALL MPL/conservativity assets (do not revert 398). --hard recommended for planning. Honor Zulip AI policy. See OPEN QUESTIONS in report §9 (ND reconciliation C vs B; task scope; categorical/initiality timing; property naming; relation to task 400).
 

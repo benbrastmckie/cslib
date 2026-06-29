@@ -840,10 +840,10 @@
     {
       "project_number": 400,
       "project_name": "reconcile_connectives_pr607",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "title": "Unbundle connective typeclasses; reconcile with fmontesi PR #607 (Waring's flag a)",
-      "description": "Waring's closing message (Zulip thread 606970606) flagged connective typeclasses as a SEPARATE development: 'perhaps you could just leave a review on the existing PR on the subject &/or help that get merged — the design seems very similar.' The existing PR is #607 (fmontesi/connectives, 'logical operators'). Our `Cslib/Foundations/Logic/Connectives.lean` is a parallel module (tasks 260/266/340, not upstream) explicitly modeled on #607's operator-typeclass direction. WORK: review #607; map the API delta (our bundled PropositionalConnectives/ModalConnectives/TemporalConnectives/BimodalConnectives with defaulted neg/top fields vs #607's one-class-per-operator); decide align-vs-contribute; unbundle Connectives.lean from the propositional PR (task 399) so the shared connectives land via #607. Leave a human-authored review on #607 (Zulip AI policy). Independent of the IPL-base work. Source: Zulip thread 606970606.",
+      "description": "[ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/reports/01_pr607-engagement.md] Engage fmontesi PR #607 (feat(Logic): logical operators) to land the connective typeclasses there instead of in #648 (Waring, Zulip 606970606). PREREQ DONE: our Connectives.lean removed from #648 (commit 85db79a6 on feat/propositional-ipl-base). PRIMARY POINT for the #607 review: #607 makes negation primitive (HasNot) and has NO HasBot; for IPL/MPL, neg is definitionally (phi -> bot), so #607 needs a HasBot (and HasTop) class with neg/top DERIVED, else the five-primitive Proposition (primitive bot) cannot register faithfully. SECONDARY: naming HasImpl/impl vs HasImp/imp; notation precedence conflicts (-> 25 vs 30, or 30 vs 35); bundle-vs-a-la-carte (PropositionalConnectives); notation ownership (typeclass notation + _def lemmas vs direct-on-Proposition). DELIVERABLE: human-authored review on #607 (Zulip AI policy), then register Proposition instances via #607 once the falsum question settles. Independent of the IPL-base work.",
       "created": "2026-06-28T15:43:45Z",
       "last_updated": "2026-06-28T15:43:45Z",
       "next_artifact_number": 1,

@@ -53,7 +53,7 @@
       "dependencies": [
         395
       ],
-      "topic": "Propositional Logic",
+      "topic": "PL-Tableau",
       "completion_summary": "Reconciled by task 395: the single sorry at Tableau/Minimal/Completeness.lean:110 (minimalTableau_complete) is documented as deferred to task 317, which fills it alongside the other tableau-completeness sorries. Fully subsumed by task 317; abandoned to avoid duplicate work."
     },
     {
@@ -71,7 +71,7 @@
       "dependencies": [
         395
       ],
-      "topic": "Propositional Logic"
+      "topic": "PL-Tableau"
     },
     {
       "project_number": 386,
@@ -88,7 +88,7 @@
       "dependencies": [
         395
       ],
-      "topic": "Propositional Logic"
+      "topic": "PL-Hygiene"
     },
     {
       "project_number": 387,
@@ -105,7 +105,7 @@
       "dependencies": [
         395
       ],
-      "topic": "Propositional Logic"
+      "topic": "PL-Hygiene"
     },
     {
       "project_number": 388,
@@ -123,7 +123,7 @@
         395,
         398
       ],
-      "topic": "Propositional Logic"
+      "topic": "PL-Hygiene"
     },
     {
       "project_number": 389,
@@ -141,7 +141,7 @@
         317,
         395
       ],
-      "topic": "Propositional Logic"
+      "topic": "PL-Docs"
     },
     {
       "project_number": 390,
@@ -159,7 +159,7 @@
         387,
         395
       ],
-      "topic": "Propositional Logic"
+      "topic": "PL-Docs"
     },
     {
       "project_number": 391,
@@ -178,7 +178,7 @@
         389,
         395
       ],
-      "topic": "Propositional Logic"
+      "topic": "PL-Docs"
     },
     {
       "project_number": 392,
@@ -198,7 +198,7 @@
         389,
         395
       ],
-      "topic": "Propositional Logic"
+      "topic": "PL-Hygiene"
     },
     {
       "project_number": 393,
@@ -217,7 +217,7 @@
         391,
         395
       ],
-      "topic": "Propositional Logic"
+      "topic": "PL-Hygiene"
     },
     {
       "project_number": 360,
@@ -254,7 +254,7 @@
       "project_name": "propositional_tableau_completeness",
       "status": "planned",
       "task_type": "cslib",
-      "topic": "Propositional Logic",
+      "topic": "PL-Tableau",
       "description": "Fill the propositional tableau completeness sorries (7 real sorries; soundness is already sorry-free after task 316). The open obligations are the truth-lemma / countermodel-extraction proofs in the three Completeness modules. Classical (Tableau/Classical/Completeness.lean): classicalExpandBranches_hintikka (line ~462) -- note the module's separate build break (bad Mathlib lemma ref + unsolved goals) is repaired first under task 363. Intuitionistic (Tableau/Intuitionistic/Completeness.lean): intTruthLemma (line ~89), intuitionisticOpenBranch_countermodel (~98), intuitionisticTableau_complete (~112). Minimal (Tableau/Minimal/Completeness.lean): minTruthLemma (~168), minOpenBranch_countermodel (~179), minimalTableau_complete (~190). Core technique: Hintikka-set argument -- a saturated open branch satisfies Hintikka conditions, from which a countermodel is extracted (a Boolean valuation for classical; a finite Kripke model for intuitionistic/minimal) and a truth lemma by formula induction matches forced/not-forced to the signed formulas at each world. Because task 369 parameterizes the intuitionistic and minimal tableau over (closurePred, modelBot), the int and min cases should be discharged ONCE as a single parametric truth-lemma/countermodel pair rather than duplicated. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 316, 323, 363, 369.",
       "created": "2026-06-23T19:55:52Z",
       "last_updated": "2026-06-27T20:30:00Z",
@@ -378,7 +378,7 @@
       "status": "expanded",
       "task_type": "cslib",
       "description": "Implement a two-sided Gentzen-style sequent calculus (LK for classical, LJ for intuitionistic) for propositional logic with cut elimination. Use Finset-based contexts on both sides, following the CLL sequent calculus in Cslib/Logics/LinearLogic/CLL/Basic.lean as a template. Prove soundness, completeness, cut elimination (Hauptsatz), and equivalence bridges to the existing Hilbert and natural deduction systems (hilbert_iff_lk, nd_iff_lk). This completes the proof-system triad (Hilbert + ND + SC) for propositional logic and would be the first LK/LJ formalization in Lean 4.",
-      "topic": "Propositional Logic",
+      "topic": "PL-Base",
       "created": "2026-06-23T02:57:39Z",
       "last_updated": "2026-06-23T19:33:50Z",
       "next_artifact_number": 2,
@@ -552,7 +552,7 @@
       "status": "researched",
       "task_type": "cslib",
       "description": "Cherry-pick propositional semantics from the local codebase into a <500 LOC follow-up PR stacked on PR #648. PR #648 contributes the formula type and natural deduction; this follow-up adds the semantics layer. Scope: (1) Semantics/Algebra.lean — GHA evaluation with bot_val parameter for minimal/intuitionistic/classical logic. (2) Semantics/Bool.lean — BoolEvaluate with bridge to AlgEvaluate. (3) Semantics/SemanticConsequence.lean — semantic consequence and tautology definitions. (4) Semantics/Kripke.lean — Kripke semantics with botForces for minimal logic (include if LOC budget permits). All four files already exist locally with full implementations. Task is to select, trim, and package for upstream submission. Ensure lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake all pass on the PR branch. Write PR description referencing the Zulip Propositional Logic thread.",
-      "topic": "Propositional Logic",
+      "topic": "PL-Semantics",
       "dependencies": [],
       "created": "2026-06-16T23:00:00Z",
       "last_updated": "2026-06-17T00:00:00Z",
@@ -702,7 +702,7 @@
       "project_name": "int_min_metalogic_decidability",
       "status": "planned",
       "task_type": "cslib",
-      "topic": "Propositional Logic",
+      "topic": "PL-Metalogic",
       "description": "Close the decidability asymmetry in the metalogic layer: classical propositional logic has a decision procedure (instDecidableDerivablePropositionalAxiom via tautology enumeration, Metalogic/StrongCompleteness.lean:566), but intuitionistic (IntPropAxiom) and minimal (MinPropAxiom) logics have none. Establish Decidable (Derivable IntPropAxiom phi) and Decidable (Derivable MinPropAxiom phi) via the finite model property: bound the canonical Kripke models (prime DCCS / MinTheory worlds) by the subformulas of phi, give a terminating decision procedure over the finite model space, and prove it correct against the existing int/min strong-completeness theorems (IntStrongCompleteness.lean, MinStrongCompleteness.lean). Independent of the tableau decision procedures (which currently rest on unproved completeness witnesses). Note: the LJ sequent calculus already has a tableau-backed decidability instance (SequentCalculus/LJ/Decidability.lean) -- assess whether the FMP route or a bridge to LJ decidability is the cleaner source for the IPL instance before implementing. No new axioms (Classical.choice / Decidable.decide acceptable on noncomputable defs); CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake).",
       "dependencies": [],
       "created": "2026-06-27T05:29:32Z",
@@ -728,7 +728,7 @@
       "project_name": "proof_system_equivalence_tableau_sequent_edges",
       "status": "not_started",
       "task_type": "cslib",
-      "topic": "Propositional Logic",
+      "topic": "PL-Equivalence",
       "description": "Complete the cross-system equivalence story by folding the tableau (and remaining sequent) decision systems into the proof-system TFAE. Cslib/Logics/Propositional/ProofSystemEquivalence.lean currently proves Hilbert<->ND<->LK for CPL (cplProofSystemsTfae) and Hilbert<->ND<->LJ for IPL (iplProofSystemsTfae), plus the MPL Hilbert<->ND two-way. Add the missing edges so the equivalence is genuinely complete across all proof systems: classical Tautology <-> LK provability <-> closed classical tableau, and intuitionistic validity <-> LJ provability <-> closed intuitionistic tableau, extending the TFAE lists accordingly. Requires the tableau soundness+completeness to be green (task 316 done for soundness; task 317 for completeness) and the classical tableau build repaired (task 363). No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 317, 363.",
       "dependencies": [
         317,
@@ -787,7 +787,7 @@
       "dependencies": [
         397
       ],
-      "topic": "Propositional Logic"
+      "topic": "PL-Base"
     },
     {
       "project_number": 399,
@@ -835,7 +835,7 @@
       "dependencies": [
         398
       ],
-      "topic": "Propositional Logic",
+      "topic": "PL-Base",
       "completion_summary": "IPL-base foundation prepared for PR #648: ungated primitive efq constructor makes IPL the base (IPL:=∅; MPL/IsIntuitionistic/intuitionisticCompletion removed; classical layer retained). Verified on branch feat/propositional-ipl-base, commit 5dbed274 (3-file diff, 594 jobs green, lint clean, zero sorry). PR/Zulip drafts authored (pr-description.md, zulip-response.md). Remaining steps are human-only: review, fast-forward push, reword PR description, post Zulip 606970606. MPL-as-base dispute deferred to tasks 407/408/409."
     },
     {
@@ -887,7 +887,7 @@
       ],
       "session_id": "sess_1782759395_5a8840",
       "dependencies": [],
-      "topic": "Propositional Logic",
+      "topic": "PL-Connectives",
       "blockers": "Phases 1-4 (agent scaffolding) complete: comparison tables, verified falsum/verum derived-neg bridge (reuse Mathlib Bot/Top, no new HasBot), empirical grind-direction finding (notation->constructor helps; constructor->notation worsens upstream case), consolidated review packet. Phases 5-8 are human/external gates: (5) human must author+post the #607/Zulip review (AI policy - agent cannot write prose); (6) await upstream maintainer resolution of the falsum question; (7-8) conditional Lean registration of PL.Proposition instances + NOTATION/ORGANISATION updates, gated on upstream agreement."
     },
     {
@@ -903,7 +903,7 @@
       "artifacts": [],
       "session_id": "sess_1782661425_64245d_401",
       "dependencies": [],
-      "topic": "Propositional Logic"
+      "topic": "PL-Semantics"
     },
     {
       "project_number": 403,
@@ -986,7 +986,7 @@
       "dependencies": [
         398
       ],
-      "topic": "Propositional Logic",
+      "topic": "PL-Base",
       "plan_metadata": {
         "phases": 9,
         "total_effort_hours": 18,
@@ -1074,7 +1074,7 @@
       "dependencies": [
         407
       ],
-      "topic": "Propositional Logic",
+      "topic": "PL-Base",
       "parent_task": 407
     },
     {
@@ -1092,7 +1092,7 @@
       "dependencies": [
         407
       ],
-      "topic": "Propositional Logic",
+      "topic": "PL-Base",
       "parent_task": 407
     },
     {
@@ -1121,7 +1121,7 @@
       "dependencies": [
         407
       ],
-      "topic": "Propositional Logic",
+      "topic": "PL-Base",
       "parent_task": 407
     }
   ],

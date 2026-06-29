@@ -52,8 +52,10 @@ variable {Atom : Type u} [DecidableEq Atom]
 
 /-! ## Maehara Core Lemma for LJ -/
 
-set_option maxHeartbeats 400000 in
--- The orL and impL two-premise cases each require ~100k heartbeats; 400k covers the full induction.
+set_option maxHeartbeats 800000 in
+-- The orL and impL two-premise cases each require ~100k heartbeats. After the MPL/IPL unification
+-- (task 408) `LJProof`/`LJCutFree`/`mono` are re-exports of the generic `SeqProof T` operations,
+-- which adds whnf/unfolding overhead across the full induction; 800k covers it with margin.
 /-- **Maehara core for LJ**: For any cut-free LJ proof `d` of `seq` and any cover partition
 `Γ₁ ∪ Γ₂ = seq.1` of the antecedent, there exists an interpolant `I` satisfying:
 1. `I.vars ⊆ Γ₁.vars ∩ (Γ₂ ∪ {seq.2}).vars` (variable constraint),
@@ -81,16 +83,16 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
     rw [hant'] at hA
     rcases Finset.mem_union.mp hA with hA₁ | hA₂
     · -- A ∈ Γ₁: choose I = A; left by ax; right by ax with self-insert.
-      refine ⟨A, ?_, ⟨LJProof.ax A Γ₁ hA₁⟩,
-                     ⟨LJProof.ax A (insert A Γ₂) (Finset.mem_insert_self A Γ₂)⟩⟩
+      refine ⟨A, ?_, ⟨SeqProof.ax A Γ₁ hA₁⟩,
+                     ⟨SeqProof.ax A (insert A Γ₂) (Finset.mem_insert_self A Γ₂)⟩⟩
       refine Finset.subset_inter (Finset.vars_subset_of_mem hA₁) ?_
       simp only [Finset.vars_union, Finset.vars_singleton]
       exact Finset.subset_union_right
     · -- A ∈ Γ₂: choose I = ⊤; left by impR∘botL; right by ax.
       refine ⟨⊤, ?_,
-        ⟨LJProof.impR ⊥ ⊥
-          (LJProof.botL (insert ⊥ Γ₁) ⊥ (Finset.mem_insert_self ⊥ Γ₁))⟩,
-        ⟨LJProof.ax A (insert ⊤ Γ₂) (Finset.mem_insert_of_mem hA₂)⟩⟩
+        ⟨SeqProof.impR ⊥ ⊥
+          (SeqProof.botL (insert ⊥ Γ₁) ⊥ (Finset.mem_insert_self ⊥ Γ₁))⟩,
+        ⟨SeqProof.ax A (insert ⊤ Γ₂) (Finset.mem_insert_of_mem hA₂)⟩⟩
       simp only [vars_top, Finset.empty_subset]
   | botL Γ C hbot =>
     -- Conclusion: Γ ⊢ C where ⊥ ∈ Γ = Γ₁ ∪ Γ₂.
@@ -100,14 +102,14 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
     rcases Finset.mem_union.mp hbot with hbot₁ | hbot₂
     · -- ⊥ ∈ Γ₁: choose I = ⊥; left by botL; right by botL with self-insert.
       refine ⟨⊥, ?_,
-        ⟨LJProof.botL Γ₁ ⊥ hbot₁⟩,
-        ⟨LJProof.botL (insert ⊥ Γ₂) C (Finset.mem_insert_self ⊥ Γ₂)⟩⟩
+        ⟨SeqProof.botL Γ₁ ⊥ hbot₁⟩,
+        ⟨SeqProof.botL (insert ⊥ Γ₂) C (Finset.mem_insert_self ⊥ Γ₂)⟩⟩
       simp only [vars_bot, Finset.empty_subset]
     · -- ⊥ ∈ Γ₂: choose I = ⊤; left by impR∘botL; right by weakL∘botL.
       refine ⟨⊤, ?_,
-        ⟨LJProof.impR ⊥ ⊥
-          (LJProof.botL (insert ⊥ Γ₁) ⊥ (Finset.mem_insert_self ⊥ Γ₁))⟩,
-        ⟨LJProof.weakL ⊤ (LJProof.botL Γ₂ C hbot₂)⟩⟩
+        ⟨SeqProof.impR ⊥ ⊥
+          (SeqProof.botL (insert ⊥ Γ₁) ⊥ (Finset.mem_insert_self ⊥ Γ₁))⟩,
+        ⟨SeqProof.weakL ⊤ (SeqProof.botL Γ₂ C hbot₂)⟩⟩
       simp only [vars_top, Finset.empty_subset]
   | @weakL Γ C A d' ih =>
     -- Conclusion: insert A Γ ⊢ C; premise: Γ ⊢ C.
@@ -158,7 +160,7 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
         calc I.vars ⊆ (insert A (insert B Γ₁)).vars ∩ _ := h_vars
              _ ⊆ (insert A (insert B Γ₁)).vars := Finset.inter_subset_left
              _ ⊆ Γ₁.vars := hΓ₁_vars
-      · exact ⟨LJProof.andL A B hAB₁ d_left⟩
+      · exact ⟨SeqProof.andL A B hAB₁ d_left⟩
     · -- A∧B ∈ Γ₂: IH with Γ₁' = Γ₁, Γ₂' = insert A (insert B Γ₂).
       have hcover : insert A (insert B Γ) = Γ₁ ∪ insert A (insert B Γ₂) := by
         rw [hant']; ext x; simp only [Finset.mem_insert, Finset.mem_union]; tauto
@@ -182,7 +184,7 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
              _ ⊆ (Γ₂ ∪ {C}).vars := by
                  simp only [Finset.vars_union]
                  exact Finset.union_subset_union_left hΓ₂_vars
-      · exact ⟨LJProof.andL A B (Finset.mem_insert_of_mem hAB₂)
+      · exact ⟨SeqProof.andL A B (Finset.mem_insert_of_mem hAB₂)
                  (d_right.mono hperm)⟩
   | @andR Γ A B d₁ d₂ ih₁ ih₂ =>
     -- Conclusion: Γ ⊢ A ∧ B; premises: Γ ⊢ A and Γ ⊢ B (same antecedent).
@@ -193,13 +195,13 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
     -- Left: Γ₁ ⊢ I₁ ∧ I₂ by andR.
     -- Right: insert (I₁ ∧ I₂) Γ₂ ⊢ A ∧ B via andL to extract I₁ (resp. I₂) then andR.
     have h_A : LJProof (insert (I₁ ∧ I₂) Γ₂ ⊢ A) :=
-      LJProof.andL I₁ I₂ (Finset.mem_insert_self _ _)
+      SeqProof.andL I₁ I₂ (Finset.mem_insert_self _ _)
         (d_right1.mono (by intro x; simp only [Finset.mem_insert]; tauto))
     have h_B : LJProof (insert (I₁ ∧ I₂) Γ₂ ⊢ B) :=
-      LJProof.andL I₁ I₂ (Finset.mem_insert_self _ _)
+      SeqProof.andL I₁ I₂ (Finset.mem_insert_self _ _)
         (d_right2.mono (by intro x; simp only [Finset.mem_insert]; tauto))
-    refine ⟨I₁ ∧ I₂, ?_, ⟨LJProof.andR I₁ I₂ d_left1 d_left2⟩,
-                         ⟨LJProof.andR A B h_A h_B⟩⟩
+    refine ⟨I₁ ∧ I₂, ?_, ⟨SeqProof.andR I₁ I₂ d_left1 d_left2⟩,
+                         ⟨SeqProof.andR A B h_A h_B⟩⟩
     have hA_sub : (Γ₂ ∪ {A}).vars ⊆ (Γ₂ ∪ {A ∧ B}).vars := by
       simp only [Finset.vars_union, Finset.vars_singleton, vars_and]
       exact Finset.union_subset_union_right Finset.subset_union_left
@@ -257,15 +259,15 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
         · exact Finset.union_subset (h_vars₁.trans Finset.inter_subset_right)
                                     (h_vars₂.trans Finset.inter_subset_right)
       · -- Left: LJProof (Γ₁, I₁ ∨ I₂) via orL A B hAB₁ with orR1 and orR2 branches.
-        exact ⟨LJProof.orL A B hAB₁
-          (LJProof.orR1 I₁ I₂ d_left₁)
-          (LJProof.orR2 I₁ I₂ d_left₂)⟩
+        exact ⟨SeqProof.orL A B hAB₁
+          (SeqProof.orR1 I₁ I₂ d_left₁)
+          (SeqProof.orR2 I₁ I₂ d_left₂)⟩
       · -- Right: LJProof (insert (I₁∨I₂) Γ₂, C) via orL I₁ I₂ with weakened halves.
         have hperm_I₁ : insert I₁ Γ₂ ⊆ insert I₁ (insert (I₁ ∨ I₂) Γ₂) :=
           Finset.insert_subset_insert I₁ (Finset.subset_insert _ _)
         have hperm_I₂ : insert I₂ Γ₂ ⊆ insert I₂ (insert (I₁ ∨ I₂) Γ₂) :=
           Finset.insert_subset_insert I₂ (Finset.subset_insert _ _)
-        exact ⟨LJProof.orL I₁ I₂ (Finset.mem_insert_self _ _)
+        exact ⟨SeqProof.orL I₁ I₂ (Finset.mem_insert_self _ _)
           (d_right₁.mono hperm_I₁)
           (d_right₂.mono hperm_I₂)⟩
     · -- A∨B ∈ Γ₂: interpolant I = I₁ ∧ I₂.
@@ -307,7 +309,7 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
                 Finset.subset_union_right
             exact h₂R.trans h_B_drop₂
       · -- Left: LJProof (Γ₁, I₁ ∧ I₂) via andR I₁ I₂.
-        exact ⟨LJProof.andR I₁ I₂ d_left₁ d_left₂⟩
+        exact ⟨SeqProof.andR I₁ I₂ d_left₁ d_left₂⟩
       · -- Right: LJProof (insert (I₁∧I₂) Γ₂, C) via andL I₁ I₂ then orL A B.
         -- d_right₁ : LJProof (insert I₁ (insert A Γ₂), C)
         -- d_right₂ : LJProof (insert I₂ (insert B Γ₂), C)
@@ -318,8 +320,8 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
         have hperm₂_ant : insert I₂ (insert B Γ₂) ⊆
             insert B (insert I₁ (insert I₂ (insert (I₁ ∧ I₂) Γ₂))) := by
           intro x; simp only [Finset.mem_insert]; tauto
-        exact ⟨LJProof.andL I₁ I₂ (Finset.mem_insert_self _ _)
-          (LJProof.orL A B
+        exact ⟨SeqProof.andL I₁ I₂ (Finset.mem_insert_self _ _)
+          (SeqProof.orL A B
             (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
               (Finset.mem_insert_of_mem hAB₂)))
             (d_right₁.mono hperm₁_ant)
@@ -329,7 +331,7 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
     -- Pass-through: use interpolant I from premise IH; wrap right derivation with orR1.
     intro Γ₁ Γ₂ hant
     obtain ⟨I, h_vars, ⟨d_left⟩, ⟨d_right⟩⟩ := ih hcf Γ₁ Γ₂ hant
-    refine ⟨I, ?_, ⟨d_left⟩, ⟨LJProof.orR1 A B d_right⟩⟩
+    refine ⟨I, ?_, ⟨d_left⟩, ⟨SeqProof.orR1 A B d_right⟩⟩
     refine Finset.subset_inter (h_vars.trans Finset.inter_subset_left) ?_
     calc I.vars ⊆ _ ∩ (Γ₂ ∪ {A}).vars := h_vars
          _ ⊆ (Γ₂ ∪ {A}).vars := Finset.inter_subset_right
@@ -341,7 +343,7 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
     -- Pass-through: use interpolant I from premise IH; wrap right derivation with orR2.
     intro Γ₁ Γ₂ hant
     obtain ⟨I, h_vars, ⟨d_left⟩, ⟨d_right⟩⟩ := ih hcf Γ₁ Γ₂ hant
-    refine ⟨I, ?_, ⟨d_left⟩, ⟨LJProof.orR2 A B d_right⟩⟩
+    refine ⟨I, ?_, ⟨d_left⟩, ⟨SeqProof.orR2 A B d_right⟩⟩
     refine Finset.subset_inter (h_vars.trans Finset.inter_subset_left) ?_
     calc I.vars ⊆ _ ∩ (Γ₂ ∪ {B}).vars := h_vars
          _ ⊆ (Γ₂ ∪ {B}).vars := Finset.inter_subset_right
@@ -402,8 +404,8 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
         -- impR J K then impL A B with A→B ∈ insert J Γ₁; left = d_rightJ; right = d_leftK mono.
         have hperm_K : insert B Γ₁ ⊆ insert B (insert J Γ₁) :=
           Finset.insert_subset_insert B (Finset.subset_insert J Γ₁)
-        exact ⟨LJProof.impR J K
-          (LJProof.impL A B (Finset.mem_insert_of_mem hAB₁)
+        exact ⟨SeqProof.impR J K
+          (SeqProof.impL A B (Finset.mem_insert_of_mem hAB₁)
             d_rightJ
             (d_leftK.mono hperm_K))⟩
       · -- Right: insert (J → K) Γ₂ ⊢ C
@@ -412,7 +414,7 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
         have hperm_J₂ : Γ₂ ⊆ insert (J → K) Γ₂ := Finset.subset_insert _ _
         have hperm_K₂ : insert K Γ₂ ⊆ insert K (insert (J → K) Γ₂) :=
           Finset.insert_subset_insert K (Finset.subset_insert _ _)
-        exact ⟨LJProof.impL J K (Finset.mem_insert_self _ _)
+        exact ⟨SeqProof.impL J K (Finset.mem_insert_self _ _)
           (d_leftJ.mono hperm_J₂)
           (d_rightK.mono hperm_K₂)⟩
     · -- A→B ∈ Γ₂: interpolant I = J ∧ K.
@@ -456,7 +458,7 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
                 Finset.subset_union_right
             exact hKR.trans h_B_drop
       · -- Left: Γ₁ ⊢ J ∧ K
-        exact ⟨LJProof.andR J K d_leftJ d_leftK⟩
+        exact ⟨SeqProof.andR J K d_leftJ d_leftK⟩
       · -- Right: insert (J ∧ K) Γ₂ ⊢ C
         -- andL J K exposes J,K in Σ = insert J (insert K (insert (J∧K) Γ₂));
         -- then impL A B with A→B ∈ Σ; left = d_rightJ mono; right = d_rightK mono.
@@ -465,8 +467,8 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
         have hperm_K_ant : insert K (insert B Γ₂) ⊆
             insert B (insert J (insert K (insert (J ∧ K) Γ₂))) := by
           intro x; simp only [Finset.mem_insert]; tauto
-        exact ⟨LJProof.andL J K (Finset.mem_insert_self _ _)
-          (LJProof.impL A B
+        exact ⟨SeqProof.andL J K (Finset.mem_insert_self _ _)
+          (SeqProof.impL A B
             (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
               (Finset.mem_insert_of_mem hAB₂)))
             (d_rightJ.mono hperm_J_ant)
@@ -486,7 +488,7 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
     -- Commutativity insert I (insert A Γ₂) ≅ insert A (insert I Γ₂), then impR.
     have hcomm : insert I (insert A Γ₂) ⊆ insert A (insert I Γ₂) := by
       intro x; simp only [Finset.mem_insert]; tauto
-    refine ⟨I, ?_, ⟨d_left⟩, ⟨LJProof.impR A B (d_right.mono hcomm)⟩⟩
+    refine ⟨I, ?_, ⟨d_left⟩, ⟨SeqProof.impR A B (d_right.mono hcomm)⟩⟩
     -- Vars: I.vars ⊆ Γ₁.vars ∩ (Γ₂ ∪ {A → B}).vars
     -- h_vars: I.vars ⊆ Γ₁.vars ∩ (insert A Γ₂ ∪ {B}).vars
     -- Note: (insert A Γ₂ ∪ {B}).vars = Γ₂.vars ∪ A.vars ∪ B.vars
@@ -524,15 +526,15 @@ private lemma ljCraigInterpolation {A B : Proposition Atom}
       Nonempty (LJProof ((∅ : Finset (Proposition Atom)) ⊢ I → B)) := by
   -- Build a (cut-using) proof of {A} ⊢ B from d via cut on A → B and impL.
   have d_AB : LJProof (insert A (∅ : Finset (Proposition Atom)) ⊢ B) :=
-    LJProof.cut (A → B)
+    SeqProof.cut (A → B)
       -- left prem: {A} ⊢ A → B via mono (∅ ⊆ {A})
       (d.mono (Finset.empty_subset _))
       -- right prem: {A → B, A} ⊢ B via impL A B
-      (LJProof.impL A B (Finset.mem_insert_self _ _)
+      (SeqProof.impL A B (Finset.mem_insert_self _ _)
         -- {A → B, A} ⊢ A via ax A
-        (LJProof.ax A _ (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)))
+        (SeqProof.ax A _ (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)))
         -- {B, A → B, A} ⊢ B via ax B
-        (LJProof.ax B _ (Finset.mem_insert_self _ _)))
+        (SeqProof.ax B _ (Finset.mem_insert_self _ _)))
   -- Apply cut elimination to get a cut-free proof of {A} ⊢ B.
   obtain ⟨cfp⟩ := d_AB.cutElim
   -- Apply ljMaeharaCore with Γ₁ = {A}, Γ₂ = ∅.
@@ -544,9 +546,9 @@ private lemma ljCraigInterpolation {A B : Proposition Atom}
     Finset.union_empty, Finset.empty_union] at h_vars
   refine ⟨I, h_vars, ?_, ?_⟩
   · -- ∅ ⊢ A → I via impR applied to d_left : {A} ⊢ I.
-    exact ⟨LJProof.impR A I d_left⟩
+    exact ⟨SeqProof.impR A I d_left⟩
   · -- ∅ ⊢ I → B via impR applied to d_right : {I} ⊢ B.
-    exact ⟨LJProof.impR I B d_right⟩
+    exact ⟨SeqProof.impR I B d_right⟩
 
 /-- **LJ Craig Interpolation**: For any LJ proof of `∅ ⊢ A → B`, there exists an
 interpolant `I` with `I.vars ⊆ A.vars ∩ B.vars`, `∅ ⊢ A → I`, and `∅ ⊢ I → B`.

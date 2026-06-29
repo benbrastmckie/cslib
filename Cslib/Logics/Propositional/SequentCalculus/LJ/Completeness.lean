@@ -33,7 +33,7 @@ This module proves that LJ is complete for intuitionistic propositional logic by
 **Forward (`ndToLJ`)**: Structural induction on `Theory.Derivation`.
 - `ax h_mem`: Each `IntPropAxiom` constructor translates to an LJ proof of the
   corresponding sequent `∅ ⊢ axiom`, then weakened via `LJProof.mono`.
-- `ass h_mem`: The assumption rule maps to `LJProof.ax` directly.
+- `ass h_mem`: The assumption rule maps to `SeqProof.ax` directly.
 - Logical rules map to the corresponding LJ rules.
 
 **Backward (`nd_iff_lj` ← direction)**: Via Kripke semantics.
@@ -70,101 +70,101 @@ the conclusion is simply the formula being proved. -/
 /-- LJ proof of implyK axiom: `∅ ⊢ φ → (ψ → φ)`. -/
 def ljAxiomImplyK (φ ψ : Proposition Atom) :
     LJProof (∅ ⊢ φ.imp (ψ.imp φ)) :=
-  LJProof.impR φ (ψ.imp φ) <|
-    LJProof.impR ψ φ <|
-      LJProof.ax φ _ (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
+  SeqProof.impR φ (ψ.imp φ) <|
+    SeqProof.impR ψ φ <|
+      SeqProof.ax φ _ (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
 
 /-- LJ proof of implyS axiom: `∅ ⊢ (φ → ψ → χ) → (φ → ψ) → φ → χ`. -/
 def ljAxiomImplyS (φ ψ χ : Proposition Atom) :
     LJProof (∅ ⊢ (φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))) := by
-  apply LJProof.impR (φ.imp (ψ.imp χ)) ((φ.imp ψ).imp (φ.imp χ))
-  apply LJProof.impR (φ.imp ψ) (φ.imp χ)
-  apply LJProof.impR φ χ
+  apply SeqProof.impR (φ.imp (ψ.imp χ)) ((φ.imp ψ).imp (φ.imp χ))
+  apply SeqProof.impR (φ.imp ψ) (φ.imp χ)
+  apply SeqProof.impR φ χ
   -- Context: {φ, φ→ψ, φ→ψ→χ} (with possible extras from impR insertions)
   -- Apply impL on (φ→ψ→χ): it's in the context
-  apply LJProof.impL φ (ψ.imp χ)
+  apply SeqProof.impL φ (ψ.imp χ)
     (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)))
   · -- Need to prove φ
-    exact LJProof.ax φ _ (Finset.mem_insert_self _ _)
+    exact SeqProof.ax φ _ (Finset.mem_insert_self _ _)
   · -- Now have ψ→χ in context, and φ→ψ and φ
     -- Apply impL on (φ→ψ) to get ψ
-    apply LJProof.impL φ ψ
+    apply SeqProof.impL φ ψ
       (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)))
-    · exact LJProof.ax φ _ (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
+    · exact SeqProof.ax φ _ (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
     · -- Context now has {ψ, ψ→χ, φ→ψ, φ→ψ→χ, φ}
       -- Apply impL on (ψ→χ) to get χ
-      apply LJProof.impL ψ χ (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
-      · exact LJProof.ax ψ _ (Finset.mem_insert_self _ _)
-      · exact LJProof.ax χ _ (Finset.mem_insert_self _ _)
+      apply SeqProof.impL ψ χ (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
+      · exact SeqProof.ax ψ _ (Finset.mem_insert_self _ _)
+      · exact SeqProof.ax χ _ (Finset.mem_insert_self _ _)
 
 /-- LJ proof of efq axiom: `∅ ⊢ ⊥ → φ`. -/
 def ljAxiomEfq (φ : Proposition Atom) :
     LJProof (∅ ⊢ Proposition.bot.imp φ) :=
-  LJProof.impR Proposition.bot φ <|
-    LJProof.botL _ φ (Finset.mem_insert_self _ _)
+  SeqProof.impR Proposition.bot φ <|
+    SeqProof.botL _ φ (Finset.mem_insert_self _ _)
 
 /-- LJ proof of andI axiom: `∅ ⊢ φ → ψ → φ ∧ ψ`. -/
 def ljAxiomAndI (φ ψ : Proposition Atom) :
     LJProof (∅ ⊢ φ.imp (ψ.imp (φ.and ψ))) := by
-  apply LJProof.impR φ (ψ.imp (φ.and ψ))
-  apply LJProof.impR ψ (φ.and ψ)
+  apply SeqProof.impR φ (ψ.imp (φ.and ψ))
+  apply SeqProof.impR ψ (φ.and ψ)
   -- Context: {ψ, φ} ⊢ φ ∧ ψ
-  apply LJProof.andR φ ψ
-  · exact LJProof.ax φ _ (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
-  · exact LJProof.ax ψ _ (Finset.mem_insert_self _ _)
+  apply SeqProof.andR φ ψ
+  · exact SeqProof.ax φ _ (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
+  · exact SeqProof.ax ψ _ (Finset.mem_insert_self _ _)
 
 /-- LJ proof of andE1 axiom: `∅ ⊢ φ ∧ ψ → φ`. -/
 def ljAxiomAndE1 (φ ψ : Proposition Atom) :
     LJProof (∅ ⊢ (φ.and ψ).imp φ) := by
-  apply LJProof.impR (φ.and ψ) φ
+  apply SeqProof.impR (φ.and ψ) φ
   -- Context: {φ∧ψ} ⊢ φ
-  apply LJProof.andL φ ψ (Finset.mem_insert_self _ _)
+  apply SeqProof.andL φ ψ (Finset.mem_insert_self _ _)
   -- Context: {φ, ψ, φ∧ψ} ⊢ φ
-  exact LJProof.ax φ _ (Finset.mem_insert_self _ _)
+  exact SeqProof.ax φ _ (Finset.mem_insert_self _ _)
 
 /-- LJ proof of andE2 axiom: `∅ ⊢ φ ∧ ψ → ψ`. -/
 def ljAxiomAndE2 (φ ψ : Proposition Atom) :
     LJProof (∅ ⊢ (φ.and ψ).imp ψ) := by
-  apply LJProof.impR (φ.and ψ) ψ
-  apply LJProof.andL φ ψ (Finset.mem_insert_self _ _)
-  exact LJProof.ax ψ _ (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
+  apply SeqProof.impR (φ.and ψ) ψ
+  apply SeqProof.andL φ ψ (Finset.mem_insert_self _ _)
+  exact SeqProof.ax ψ _ (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
 
 /-- LJ proof of orI1 axiom: `∅ ⊢ φ → φ ∨ ψ`. -/
 def ljAxiomOrI1 (φ ψ : Proposition Atom) :
     LJProof (∅ ⊢ φ.imp (φ.or ψ)) :=
-  LJProof.impR φ (φ.or ψ) <|
-    LJProof.orR1 φ ψ <|
-      LJProof.ax φ _ (Finset.mem_insert_self _ _)
+  SeqProof.impR φ (φ.or ψ) <|
+    SeqProof.orR1 φ ψ <|
+      SeqProof.ax φ _ (Finset.mem_insert_self _ _)
 
 /-- LJ proof of orI2 axiom: `∅ ⊢ ψ → φ ∨ ψ`. -/
 def ljAxiomOrI2 (φ ψ : Proposition Atom) :
     LJProof (∅ ⊢ ψ.imp (φ.or ψ)) :=
-  LJProof.impR ψ (φ.or ψ) <|
-    LJProof.orR2 φ ψ <|
-      LJProof.ax ψ _ (Finset.mem_insert_self _ _)
+  SeqProof.impR ψ (φ.or ψ) <|
+    SeqProof.orR2 φ ψ <|
+      SeqProof.ax ψ _ (Finset.mem_insert_self _ _)
 
 /-- LJ proof of orE axiom: `∅ ⊢ (φ → χ) → (ψ → χ) → (φ ∨ ψ) → χ`. -/
 def ljAxiomOrE (φ ψ χ : Proposition Atom) :
     LJProof (∅ ⊢ (φ.imp χ).imp ((ψ.imp χ).imp ((φ.or ψ).imp χ))) := by
-  apply LJProof.impR (φ.imp χ) ((ψ.imp χ).imp ((φ.or ψ).imp χ))
-  apply LJProof.impR (ψ.imp χ) ((φ.or ψ).imp χ)
-  apply LJProof.impR (φ.or ψ) χ
+  apply SeqProof.impR (φ.imp χ) ((ψ.imp χ).imp ((φ.or ψ).imp χ))
+  apply SeqProof.impR (ψ.imp χ) ((φ.or ψ).imp χ)
+  apply SeqProof.impR (φ.or ψ) χ
   -- Context: {φ∨ψ, ψ→χ, φ→χ} ⊢ χ
   -- Apply orL on (φ∨ψ)
-  apply LJProof.orL φ ψ (Finset.mem_insert_self _ _)
+  apply SeqProof.orL φ ψ (Finset.mem_insert_self _ _)
   · -- Left branch: {φ, φ∨ψ, ψ→χ, φ→χ} ⊢ χ
     -- Apply impL on (φ→χ)
-    apply LJProof.impL φ χ
+    apply SeqProof.impL φ χ
       (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
         (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))))
-    · exact LJProof.ax φ _ (Finset.mem_insert_self _ _)
-    · exact LJProof.ax χ _ (Finset.mem_insert_self _ _)
+    · exact SeqProof.ax φ _ (Finset.mem_insert_self _ _)
+    · exact SeqProof.ax χ _ (Finset.mem_insert_self _ _)
   · -- Right branch: {ψ, φ∨ψ, ψ→χ, φ→χ} ⊢ χ
     -- Apply impL on (ψ→χ)
-    apply LJProof.impL ψ χ
+    apply SeqProof.impL ψ χ
       (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)))
-    · exact LJProof.ax ψ _ (Finset.mem_insert_self _ _)
-    · exact LJProof.ax χ _ (Finset.mem_insert_self _ _)
+    · exact SeqProof.ax ψ _ (Finset.mem_insert_self _ _)
+    · exact SeqProof.ax χ _ (Finset.mem_insert_self _ _)
 
 /-- Dispatch on `IntPropAxiom` to produce a nonempty LJ proof of `Γ ⊢ axiom`.
 Uses `Nonempty` since `IntPropAxiom` is `Prop`-valued and cannot eliminate into `Type`. -/
@@ -197,46 +197,46 @@ noncomputable def ndToLJ {Γ : Ctx Atom} {A : Proposition Atom} :
     simp only [AxiomTheory, Set.mem_setOf_eq] at h_mem
     exact Classical.choice (ljOfIntAxiom h_mem)
   | .ass h_mem =>
-    LJProof.ax A Γ h_mem
+    SeqProof.ax A Γ h_mem
   | @Derivation.andI _ _ _ B C G d₁ d₂ =>
-    LJProof.andR B C (ndToLJ d₁) (ndToLJ d₂)
+    SeqProof.andR B C (ndToLJ d₁) (ndToLJ d₂)
   | @Derivation.andE1 _ _ _ B C G d => by
     -- Have: G ⊢ B ∧ C; want G ⊢ B
-    apply LJProof.cut (B.and C)
+    apply SeqProof.cut (B.and C)
     · exact ndToLJ d
-    · exact LJProof.andL B C (Finset.mem_insert_self _ _)
-        (LJProof.ax B _ (Finset.mem_insert_self _ _))
+    · exact SeqProof.andL B C (Finset.mem_insert_self _ _)
+        (SeqProof.ax B _ (Finset.mem_insert_self _ _))
   | @Derivation.andE2 _ _ _ B C G d => by
     -- Have: G ⊢ B ∧ C; want G ⊢ C
-    apply LJProof.cut (B.and C)
+    apply SeqProof.cut (B.and C)
     · exact ndToLJ d
-    · exact LJProof.andL B C (Finset.mem_insert_self _ _)
-        (LJProof.ax C _ (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)))
+    · exact SeqProof.andL B C (Finset.mem_insert_self _ _)
+        (SeqProof.ax C _ (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)))
   | @Derivation.orI1 _ _ _ B C G d =>
-    LJProof.orR1 B C (ndToLJ d)
+    SeqProof.orR1 B C (ndToLJ d)
   | @Derivation.orI2 _ _ _ B C G d =>
-    LJProof.orR2 B C (ndToLJ d)
+    SeqProof.orR2 B C (ndToLJ d)
   | @Derivation.orE _ _ _ B C E G d dB dC => by
     -- Have: G ⊢ B ∨ C, insert B G ⊢ E, insert C G ⊢ E; want G ⊢ E
-    apply LJProof.cut (B.or C)
+    apply SeqProof.cut (B.or C)
     · exact ndToLJ d
-    · exact LJProof.orL B C (Finset.mem_insert_self _ _)
+    · exact SeqProof.orL B C (Finset.mem_insert_self _ _)
         ((ndToLJ dB).mono (Finset.insert_subset_insert _ (Finset.subset_insert _ _)))
         ((ndToLJ dC).mono (Finset.insert_subset_insert _ (Finset.subset_insert _ _)))
   | @Derivation.impI _ _ _ B C Γ' d =>
-    LJProof.impR B C (ndToLJ d)
+    SeqProof.impR B C (ndToLJ d)
   | @Derivation.impE _ _ _ _ B C d₁ d₂ => by
     -- Have: Γ ⊢ B → C and Γ ⊢ B; want Γ ⊢ C
-    apply LJProof.cut (B.imp C)
+    apply SeqProof.cut (B.imp C)
     · exact ndToLJ d₁
-    · exact LJProof.impL B C (Finset.mem_insert_self _ _)
+    · exact SeqProof.impL B C (Finset.mem_insert_self _ _)
         ((ndToLJ d₂).mono (Finset.subset_insert _ _))
-        (LJProof.ax C _ (Finset.mem_insert_self _ _))
+        (SeqProof.ax C _ (Finset.mem_insert_self _ _))
   | @Derivation.efq _ _ _ _ _ _ d => by
     -- efq: Γ ⊢ ⊥ (intuitionistic theory); want Γ ⊢ A via cut on ⊥ then left falsum.
-    apply LJProof.cut ⊥
+    apply SeqProof.cut ⊥
     · exact ndToLJ d
-    · exact LJProof.botL _ _ (Finset.mem_insert_self _ _)
+    · exact SeqProof.botL _ _ (Finset.mem_insert_self _ _)
 
 /-! ## ND–LJ Equivalence -/
 

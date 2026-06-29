@@ -18,7 +18,7 @@ conclusion sequent. The general case follows from Gentzen's *Hauptsatz* (`LJProo
 
 ## Main Definitions
 
-- `LJProof.formulas`: The set of all formulas appearing in any sequent of an LJ proof tree.
+- `SeqProof.formulas`: The set of all formulas appearing in any sequent of an LJ proof tree.
 
 ## Main Results
 
@@ -46,11 +46,12 @@ variable {Atom : Type u} [DecidableEq Atom]
 
 /-! ## Formula Collection -/
 
-/-- The set of all formula occurrences in an LJ proof tree: every node contributes
-all formulas from its premise sequents, propagated upward from the leaves. -/
-def LJProof.formulas {seq : @Sequent Atom} : LJProof seq → Finset (Proposition Atom)
+/-- The set of all formula occurrences in a proof tree: every node contributes
+all formulas from its premise sequents, propagated upward from the leaves. Generic over `T`. -/
+def SeqProof.formulas {T : Theory Atom} {seq : @Sequent Atom} :
+    SeqProof T seq → Finset (Proposition Atom)
   | .ax A Γ _         => insert A Γ
-  | .botL Γ C _       => insert C Γ
+  | @SeqProof.botL _ _ _ Γ C _ _ => insert C Γ
   | .andL _ _ _ d     => d.formulas
   | .andR _ _ d₁ d₂  => d₁.formulas ∪ d₂.formulas
   | .orL _ _ _ d₁ d₂ => d₁.formulas ∪ d₂.formulas
@@ -85,18 +86,18 @@ private lemma ljCutFreeSubformulaProp {seq : @Sequent Atom}
   induction d with
   | ax A Γ hA =>
     intro B hB
-    simp only [LJProof.formulas] at hB
+    simp only [SeqProof.formulas] at hB
     exact ⟨B, hB, Proposition.IsSubformula.refl B⟩
   | botL Γ C hbot =>
     intro B hB
-    simp only [LJProof.formulas] at hB
+    simp only [SeqProof.formulas] at hB
     exact ⟨B, hB, Proposition.IsSubformula.refl B⟩
   | andL A B hAB d' ih =>
     -- Conclusion: Γ ⊢ C where (A ∧ B) ∈ Γ.  Target: insert C Γ.
     -- Premise: insert A (insert B Γ) ⊢ C.  IH target: insert C (insert A (insert B Γ)).
     -- After simp: C' = C ∨ C' = A ∨ C' = B ∨ C' ∈ Γ  (4 cases).
     intro B' hB'
-    simp only [LJProof.formulas] at hB'
+    simp only [SeqProof.formulas] at hB'
     obtain ⟨C', hC', hCS⟩ := ih hcf B' hB'
     simp only [Finset.mem_insert] at hC'
     rcases hC' with rfl | rfl | rfl | hC'
@@ -115,7 +116,7 @@ private lemma ljCutFreeSubformulaProp {seq : @Sequent Atom}
     -- IH₁ target: insert A Γ.  After simp: C' = A ∨ C' ∈ Γ  (2 cases).
     -- IH₂ target: insert B Γ.  After simp: C' = B ∨ C' ∈ Γ  (2 cases).
     intro B' hB'
-    simp only [LJProof.formulas, Finset.mem_union] at hB'
+    simp only [SeqProof.formulas, Finset.mem_union] at hB'
     rcases hB' with hB₁ | hB₂
     · obtain ⟨C', hC', hCS⟩ := ih₁ hcf.1 B' hB₁
       simp only [Finset.mem_insert] at hC'
@@ -138,7 +139,7 @@ private lemma ljCutFreeSubformulaProp {seq : @Sequent Atom}
     -- IH₁ target: insert C (insert A Γ).  After simp: C' = C ∨ C' = A ∨ C' ∈ Γ  (3 cases).
     -- IH₂ target: insert C (insert B Γ).  After simp: C' = C ∨ C' = B ∨ C' ∈ Γ  (3 cases).
     intro B' hB'
-    simp only [LJProof.formulas, Finset.mem_union] at hB'
+    simp only [SeqProof.formulas, Finset.mem_union] at hB'
     rcases hB' with hB₁ | hB₂
     · obtain ⟨C', hC', hCS⟩ := ih₁ hcf.1 B' hB₁
       simp only [Finset.mem_insert] at hC'
@@ -164,7 +165,7 @@ private lemma ljCutFreeSubformulaProp {seq : @Sequent Atom}
     -- Conclusion: Γ ⊢ A ∨ B.  Target: insert (A ∨ B) Γ.
     -- IH target: insert A Γ.  After simp: C' = A ∨ C' ∈ Γ  (2 cases).
     intro B' hB'
-    simp only [LJProof.formulas] at hB'
+    simp only [SeqProof.formulas] at hB'
     obtain ⟨C', hC', hCS⟩ := ih hcf B' hB'
     simp only [Finset.mem_insert] at hC'
     rcases hC' with rfl | hC'
@@ -177,7 +178,7 @@ private lemma ljCutFreeSubformulaProp {seq : @Sequent Atom}
     -- Conclusion: Γ ⊢ A ∨ B.  Target: insert (A ∨ B) Γ.
     -- IH target: insert B Γ.  After simp: C' = B ∨ C' ∈ Γ  (2 cases).
     intro B' hB'
-    simp only [LJProof.formulas] at hB'
+    simp only [SeqProof.formulas] at hB'
     obtain ⟨C', hC', hCS⟩ := ih hcf B' hB'
     simp only [Finset.mem_insert] at hC'
     rcases hC' with rfl | hC'
@@ -192,7 +193,7 @@ private lemma ljCutFreeSubformulaProp {seq : @Sequent Atom}
     -- IH₂ target (insert B Γ ⊢ C): insert C (insert B Γ).
     -- After simp: C' = C ∨ C' = B ∨ C' ∈ Γ  (3 cases).
     intro B' hB'
-    simp only [LJProof.formulas, Finset.mem_union] at hB'
+    simp only [SeqProof.formulas, Finset.mem_union] at hB'
     rcases hB' with hB₁ | hB₂
     · obtain ⟨C', hC', hCS⟩ := ih₁ hcf.1 B' hB₁
       simp only [Finset.mem_insert] at hC'
@@ -217,7 +218,7 @@ private lemma ljCutFreeSubformulaProp {seq : @Sequent Atom}
     -- Premise: insert A Γ ⊢ B.  IH target: insert B (insert A Γ).
     -- After simp: C' = B ∨ C' = A ∨ C' ∈ Γ  (3 cases).
     intro B' hB'
-    simp only [LJProof.formulas] at hB'
+    simp only [SeqProof.formulas] at hB'
     obtain ⟨C', hC', hCS⟩ := ih hcf B' hB'
     simp only [Finset.mem_insert] at hC'
     rcases hC' with rfl | rfl | hC'
@@ -234,7 +235,7 @@ private lemma ljCutFreeSubformulaProp {seq : @Sequent Atom}
     -- Premise: Γ ⊢ C.  IH target: insert C Γ.
     -- After simp: C' = C ∨ C' ∈ Γ  (2 cases).
     intro B' hB'
-    simp only [LJProof.formulas] at hB'
+    simp only [SeqProof.formulas] at hB'
     obtain ⟨C', hC', hCS⟩ := ih hcf B' hB'
     simp only [Finset.mem_insert] at hC'
     rcases hC' with rfl | hC'

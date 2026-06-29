@@ -94,7 +94,7 @@ def ljListDeductionFwd : ∀ (L : List (Proposition Atom)) (Γ : Ctx Atom) (C : 
     simpa using d
   | A :: As, Γ, C, d => by
     simp only [listToImp]
-    apply LJProof.impR A (listToImp As C)
+    apply SeqProof.impR A (listToImp As C)
     apply ljListDeductionFwd As (insert A Γ) C
     apply LJProof.mono _ d
     intro x hx
@@ -146,11 +146,11 @@ def ljListDeductionBwd : ∀ (L : List (Proposition Atom)) (Γ : Ctx Atom) (C : 
     --     cut (A → rest) d' (impL A rest mem_imp ax_A ax_rest)
     --     where mem_imp comes from the cut inserting (A → rest) into context
     have dRest : LJProof ((List.toFinset (A :: As) ∪ Γ) ⊢ listToImp As C) :=
-      LJProof.cut (A.imp (listToImp As C)) d' (
-        LJProof.impL A (listToImp As C)
+      SeqProof.cut (A.imp (listToImp As C)) d' (
+        SeqProof.impL A (listToImp As C)
           (Finset.mem_insert_self _ _)
-          (LJProof.ax A _ (Finset.mem_insert_of_mem hA))
-          (LJProof.ax _ _ (Finset.mem_insert_self _ _)))
+          (SeqProof.ax A _ (Finset.mem_insert_of_mem hA))
+          (SeqProof.ax _ _ (Finset.mem_insert_self _ _)))
     -- (4) Apply IH to dRest to get (As.toFinset ∪ Γ' ⊢ C)
     have dIH := ljListDeductionBwd As (List.toFinset (A :: As) ∪ Γ) C dRest
     -- (5) The two contexts are equal by set arithmetic:

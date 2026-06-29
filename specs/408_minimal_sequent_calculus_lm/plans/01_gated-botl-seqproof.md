@@ -161,7 +161,7 @@ preserving signatures and termination measures.
 
 ---
 
-### Phase 3: Subformula property — `LJ/SubformulaProperty.lean` [NOT STARTED]
+### Phase 3: Subformula property — `LJ/SubformulaProperty.lean` [COMPLETED]
 
 **Goal**: Recover the subformula property over the gated calculus (generic where applicable).
 
@@ -183,7 +183,7 @@ preserving signatures and termination measures.
 
 ---
 
-### Phase 4: Soundness + Completeness (IPL-specific) — `LJ/Soundness.lean`, `LJ/Completeness.lean` [NOT STARTED]
+### Phase 4: Soundness + Completeness (IPL-specific) — `LJ/Soundness.lean`, `LJ/Completeness.lean` [COMPLETED]
 
 **Goal**: Recover `LJProof.sound` and `hilbert_iff_lj` unchanged; these stay strength-specific at
 `T = IPL`.
@@ -209,7 +209,7 @@ preserving signatures and termination measures.
 
 ---
 
-### Phase 5: Interpolation + Decidability — `LJ/Interpolation.lean`, `LJ/Decidability.lean` [NOT STARTED]
+### Phase 5: Interpolation + Decidability — `LJ/Interpolation.lean`, `LJ/Decidability.lean` [COMPLETED]
 
 **Goal**: Recover interpolation (9 `botL` arms) and confirm decidability type stability.
 

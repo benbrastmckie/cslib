@@ -1,0 +1,14 @@
+{
+  "status": "implemented",
+  "summary": "Task 420 DOC-ONLY: added new subsection '### Propositional Embeddings and the Classical-Scope Boundary' to ORGANISATION.md recording all four prerequisites for a native intuitionistic-faithful propositional embedding. Phase 2 (Bimodal docstring parity + cross-references to all three embedding modules) was skipped this cycle because task 418 owns Bimodal/Embedding/PropositionalEmbedding.lean concurrently — that parity work is deferred to / folded into task 418's restructure. lake exe lint-style clean (exit 0); git diff shows only ORGANISATION.md modified with pure Markdown additions; zero sorry, zero axioms introduced.",
+  "phases_completed": 2,
+  "phases_total": 3,
+  "artifacts": [
+    "specs/420_native_embedding_prerequisites_doc/summaries/01_native-embedding-prerequisites-summary.md"
+  ],
+  "blockers": [],
+  "deferred": {
+    "phase2_bimodal_parity": "Bimodal/Embedding/PropositionalEmbedding.lean forward-looking Limitations note and all three cross-ref additions (Modal, Temporal, Bimodal) deferred to task 418, which is restructuring PropositionalEmbedding.lean. Once task 418 lands, those one-line cross-refs can be applied as a follow-up or folded into 418's PR."
+  },
+  "continuation_context": null
+}

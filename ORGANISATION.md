@@ -210,6 +210,42 @@ Bimodal/
     └── Soundness/             -- Soundness proofs
 ```
 
+### Propositional Embeddings and the Classical-Scope Boundary
+
+The three propositional-to-logic embeddings (`Modal/FromPropositional.lean`,
+`Temporal/FromPropositional.lean`, `Bimodal/Embedding/PropositionalEmbedding.lean`) map the
+propositional connectives `{atom, bot, imp}` directly to their target-logic counterparts,
+while encoding `{and, or}` via Łukasiewicz definitions (`and φ ψ := ¬(φ → ¬ψ)`,
+`or φ ψ := ¬φ → ψ`). These encodings are classically valid but **not** intuitionistically
+valid, so the embeddings certify only the classical propositional (CPL) fragment.
+
+**Four prerequisites for a future native, intuitionistic-faithful embedding**:
+
+1. **Native `and`/`or` constructors** on the target modal/temporal/bimodal syntax
+   (currently absent; only `PL.Proposition` has native `and`/`or` with `HasAnd`/`HasOr`
+   instances, at `Propositional/Defs.lean:89,91`).
+
+2. **Gated intuitionistic proof system** — an `[IsIntuitionistic]`-gated modal/temporal
+   Hilbert or natural-deduction system (currently the `IsIntuitionistic` typeclass gates only
+   the PL-level systems: `NaturalDeduction/Basic.lean:182`,
+   `SequentCalculus/LJ/Basic.lean:100`).
+
+3. **Birelational target semantics bridging to PL `IForces`** — an intuitionistic modal/
+   temporal semantics requires two distinct relations: a preorder `≤` (for persistence/
+   monotonicity) and an accessibility relation `R` (for modal/temporal reachability). This is
+   distinct from PL `IForces` (`Propositional/Semantics/Kripke.lean:58-130`), which is a
+   *single-relation* intuitionistic Kripke structure. PL `IForces` is the intended bridge
+   target for propositional atoms; the `≤` vs. `R` split belongs to the richer target
+   semantics, not to PL `IForces` itself.
+
+4. **Proof-theoretic preservation** — a faithfulness theorem of the form
+   `IPL.Derivable φ → IModal.Derivable φ.toIModal` (and its converse), going beyond the
+   current classical-semantic equivalence `PL.Tautology φ ↔ valid φ.toModal` established in
+   `Modal/FromPropositional.lean:106,162`.
+
+See the `## Limitations` sections in each of the three embedding modules for the
+classical-scope rationale and forward-looking notes.
+
 ### Other Logics
 
 - `Logics/HML/` -- Hennessy-Milner Logic (for process equivalence).

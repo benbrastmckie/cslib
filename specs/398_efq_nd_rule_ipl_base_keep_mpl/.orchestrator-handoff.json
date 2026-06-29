@@ -1,0 +1,45 @@
+{
+  "status": "implemented",
+  "task_number": 398,
+  "phases_completed": 7,
+  "phases_total": 7,
+  "summary_artifact": "specs/398_efq_nd_rule_ipl_base_keep_mpl/summaries/01_efq-primitive-summary.md",
+  "sorry_inventory": [],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count_delta": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "build_jobs": 3148,
+    "steps": {
+      "lake_build": "green",
+      "lake_test": "green",
+      "lake_exe_checkInitImports": "green",
+      "lake_exe_lint_style": "green",
+      "lake_shake": "green (no regressions in modified files)",
+      "lake_lint": "no errors in modified files (pre-existing errors in CutElimination unrelated to task)"
+    }
+  },
+  "preserved_mpl_assets": [
+    "Metalogic/MinSoundness",
+    "Metalogic/MinLindenbaum",
+    "Metalogic/MinStrongCompleteness",
+    "Semantics/Algebra/HilbertAlgCompleteness",
+    "Semantics/Algebra/HilbertConservativeGlivenko",
+    "Semantics/Algebra/ConservativeChain",
+    "Semantics/Algebra/MplConservativeChain",
+    "Semantics/Algebra/Glivenko"
+  ],
+  "commits": [
+    "90b68d1f task 398 phase 1: add gated efq constructor and total-recursion arms",
+    "4bbd91e1 task 398 phase 2: efq arm in ndToHilbert; hilbert_iff_nd* and MPL correspondence preserved",
+    "323f4cbf task 398 phase 4: normalization efq arms (Basic/Reduction) with decided subformula strategy",
+    "34e54fa1 task 398 phase 5: efq arms in Normalization.Termination (SN measure)",
+    "95ef5208 task 398 phase 3: repair Curry-Howard reduction efq arms (completes phase 3)",
+    "cc56f146 task 398 phase 6: efq arms in Normalization.SubformulaProperty (zero-debt)",
+    "13a5b7bd task 398 phase 7: IPL-as-base docstrings; LJ/LK efq arms; full build + CI green; MPL retained"
+  ],
+  "plan_deviations": "None. LJ/LK Completeness efq arms were not listed in Phase 7 files-to-modify but were required for exhaustive match coverage — consistent with the plan goal of downstream green builds."
+}

@@ -1,0 +1,54 @@
+{
+  "status": "implemented",
+  "task_number": 399,
+  "task_slug": "refresh_pr648_ipl_base_foundation",
+  "session_id": "sess_1782673164_f5576d_399",
+  "phases_completed": 4,
+  "phases_total": 4,
+  "artifacts": [
+    {
+      "type": "recipe",
+      "path": "specs/399_refresh_pr648_ipl_base_foundation/cherry-pick-recipe.md",
+      "summary": "Exact file changes + Option A rationale + Phase 2 build verification (all green off upstream/main v4.32.0-rc1)"
+    },
+    {
+      "type": "script",
+      "path": "specs/399_refresh_pr648_ipl_base_foundation/prepare-foundation-branch.sh",
+      "summary": "Executable: creates feat/propositional-foundation off upstream/main, stages changes, no push"
+    },
+    {
+      "type": "pr_description",
+      "path": "specs/399_refresh_pr648_ipl_base_foundation/pr-description.md",
+      "summary": "PR body draft (HUMAN-AUTHOR-REQUIRED): Waring flags (a)(b) addressed, Theory.lean deletion noted, build verified"
+    },
+    {
+      "type": "zulip_response",
+      "path": "specs/399_refresh_pr648_ipl_base_foundation/zulip-response.md",
+      "summary": "Zulip reply draft (HUMAN-AUTHOR-REQUIRED per AI policy): efq done, connectives excluded, references+link present"
+    },
+    {
+      "type": "summary",
+      "path": "specs/399_refresh_pr648_ipl_base_foundation/summaries/01_pr648-refresh-summary.md",
+      "summary": "Implementation summary: all 4 phases, key findings, artifacts table, user next steps"
+    }
+  ],
+  "build_verification": {
+    "upstream_head": "2772f421",
+    "toolchain": "leanprover/lean4:v4.32.0-rc1",
+    "mathlib_rev": "29af5245bafea7d69fdca69591450f60b916ed71",
+    "checks": {
+      "lake_build_Defs": "GREEN",
+      "lake_build_Basic": "GREEN",
+      "lake_build_Cslib": "GREEN",
+      "lake_exe_checkInitImports": "GREEN",
+      "lake_exe_lint_style": "GREEN"
+    }
+  },
+  "key_decisions": {
+    "theory_lean": "Option A: deleted (old [Bot Atom] API incompatible with new IsIntuitionistic)",
+    "connectives": "Excluded per Waring flag (a): coordinate with PR #607 via task 400",
+    "bib_entries_added": 7,
+    "bib_note": "7 entries (not 6): Church1956 and ChagrovZakharyaschev1997 also cited in Defs.lean; Avigad2022 not cited in cherry-pick files"
+  },
+  "task_status_after": "pr_ready"
+}

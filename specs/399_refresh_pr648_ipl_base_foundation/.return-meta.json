@@ -1,20 +1,21 @@
 {
-  "status": "researched",
+  "status": "planned",
   "artifacts": [
     {
-      "type": "report",
-      "path": "specs/399_refresh_pr648_ipl_base_foundation/reports/01_pr648-refresh-research.md",
-      "summary": "PR review research synthesizing 1 GitHub PR source, 1 Zulip thread (27 messages), and local repo analysis"
+      "type": "plan",
+      "path": "specs/399_refresh_pr648_ipl_base_foundation/plans/01_pr648-refresh-plan.md",
+      "summary": "4-phase plan to prepare (not submit) a foundation-only refresh of PR #648: cherry-pick recipe, local build verification, PR + Zulip drafts, transition to [PR READY]"
     }
   ],
+  "next_steps": "Run /implement 399 to execute the plan",
   "metadata": {
     "session_id": "sess_1782661425_115d26_399",
-    "agent_type": "pr-review-research-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "skill-pr-review-research", "pr-review-research-agent"],
-    "github_prs_fetched": 1,
-    "zulip_threads_fetched": 1,
-    "zulip_status": "fetched"
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 4,
+    "estimated_hours": 4,
+    "dependency_waves": [[1], [2, 3], [4]]
   },
   "memory_candidates": []
 }

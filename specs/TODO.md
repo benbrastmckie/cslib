@@ -11,9 +11,9 @@ next_project_number: 407
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,299,301,317,321,360,395,396,399,400,401,403,404,406 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,370,375,384,385,386,387,388,389,405 | 36,37,180,299,317,360,395,404 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
-| 3 | 41,275,390,391,392 | 39,40,386,387,389 | Bimodal Porting, Foundations, Propositional Logic |
+| 1 | 36,37,180,226,241,278,299,301,317,321,370,385,386,387,388,396,399,400,401,403,404,406 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 2 | 39,40,181,215,300,375,389,390,405 | 36,37,180,299,317,387,404 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 3 | 41,275,391,392 | 39,40,386,387,389 | Bimodal Porting, Foundations, Propositional Logic |
 | 4 | 393 | 386,391 | Propositional Logic |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -42,7 +42,6 @@ next_project_number: 407
 
 ### Project Management
 
-395 [NOT STARTED] — META / coordination task. PRECONDITION: do NOT start until ALL fe
 403 [NOT STARTED] — Rename specs/384_modal_tableau_soundness_gap_redesign/ to specs/4
 
 ### Propositional Logic
@@ -50,23 +49,22 @@ next_project_number: 407
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 317 [PLANNED] — Fill the propositional tableau completeness sorries (7 real sorri
   └─ 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
-  └─ 389 [NOT STARTED] — Tier-2. (a) Foundations/Order/HilbertAlgebra/FreeMeetExtension.le
-    └─ 391 [NOT STARTED] — Tier-3. Remove internal task/process jargon from public docstring
+  └─ 389 [NOT STARTED] — [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAl
+    └─ 391 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Remove internal task/process ja
       └─ 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
-    └─ 392 [NOT STARTED] — Tier-3. Delete grep-verified dead decls: Tableau/Classical/Soundn
-399 [RESEARCHED] — Update PR #648 (feat/propositional-v2) following Thomas Waring's 
-400 [NOT STARTED] — Waring's closing message (Zulip thread 606970606) flagged connect
-401 [NOT STARTED] — From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portab
+    └─ 392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls
 370 [PLANNED] — Close the decidability asymmetry in the metalogic layer: classica
-384 [NOT STARTED] — [Refreshed post-merge vet; scope narrowed.] The single remaining 
-385 [NOT STARTED] — Tier-1 CRITICAL; fixes mk_all. (1) IntFMPSpike.lean: fix 12 error
+385 [NOT STARTED] — [Reconciled by task 395, post-merge.] Tier-1. LK/Interpolation su
 386 [NOT STARTED] — [Refreshed by post-merge vet sess_1782671052_6af6a1; supersedes t
-  └─ 392 [NOT STARTED] — Tier-3. Delete grep-verified dead decls: Tableau/Classical/Soundn (see above)
+  └─ 392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls (see above)
   └─ 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo (see above)
 387 [NOT STARTED] — [Refreshed post-merge vet.] DECISION REQUIRES UPSTREAM AGREEMENT.
   └─ 390 [NOT STARTED] — [Refreshed post-merge vet.] The Propositional section (~ORGANISAT
-  └─ 392 [NOT STARTED] — Tier-3. Delete grep-verified dead decls: Tableau/Classical/Soundn (see above)
-388 [NOT STARTED] — Tier-2. NaturalDeduction/Normalization/Termination.lean + Reducti
+  └─ 392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls (see above)
+388 [NOT STARTED] — [Reconciled by task 395, post-merge.] Tier-2. NaturalDeduction/No
+399 [PR READY] — Update PR #648 (feat/propositional-v2) following Thomas Waring's 
+400 [NOT STARTED] — Waring's closing message (Zulip thread 606970606) flagged connect
+401 [NOT STARTED] — From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portab
 
 ### Temporal Logic
 
@@ -79,7 +77,6 @@ next_project_number: 407
 ### Code Hygiene
 
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
-360 [BLOCKED] — The repo-wide 'lake build' currently fails (unrelated to vetted t
 406 [NOT STARTED] — NEW from post-merge vet (sess_1782671052_6af6a1). Fix 33 pre-exis
 
 ## Tasks
@@ -145,10 +142,17 @@ next_project_number: 407
 ---
 
 ### 399. Update PR #648 to the settled IPL-base foundation per Waring's end-of-thread recommendation
-- **Status**: [RESEARCHED]
+- **Status**: [PR READY]
 - **Task Type**: pr
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 398
+- **Research**: [399_refresh_pr648_ipl_base_foundation/reports/01_pr648-refresh-research.md]
+- **Plan**: [399_refresh_pr648_ipl_base_foundation/plans/01_pr648-refresh-plan.md]
+- **Artifact**:
+  - [399_refresh_pr648_ipl_base_foundation/cherry-pick-recipe.md]
+  - [399_refresh_pr648_ipl_base_foundation/prepare-foundation-branch.sh]
+  - [399_refresh_pr648_ipl_base_foundation/pr-description.md]
+  - [399_refresh_pr648_ipl_base_foundation/zulip-response.md]
 
 **Description**: Update PR #648 (feat/propositional-v2) following Thomas Waring's closing recommendation in the CSLib Zulip 'Propositional Logic' thread (606970606). PR #648 is ~239 commits behind fork main, which is why Waring reports the restored references and Zulip-thread link are 'not in the PR' (both ARE on main at NaturalDeduction/Basic.lean:76 + the Design trade-off note). PLAN (per the user's chosen strategy): branch off upstream/main and cherry-pick the propositional FOUNDATION as a focused, reviewable commit, then update #648 to that branch. Scope of the foundation: the five-primitive `Proposition` type with primitive `⊥`; NaturalDeduction/Basic with the settled IPL-as-base design (efq as a primitive ND rule — see task 398); restored references AND the Zulip-thread link (Waring's flag (b)). EXCLUDE connective typeclasses — Waring flagged these as a SEPARATE development (task 400); do not bundle them. Keep the PR small (Matthew + Waring both asked for small pieces); later layers (Hilbert+equivalence, algebraic semantics incl. retained MPL metatheory, conservativity chains, sequent LJ/LK, tableau) follow as separate stacked PRs. Note /pr is user-only (branch creation, CI, submission); this task prepares the cherry-pick + a human-authored PR/Zulip description for the user to push (Zulip AI policy). Waring will 'review the PR properly once we've settled on the design', so this depends on task 398 (efq/IPL-base implemented). Also coordinate with PR-readiness vet tasks 386/387/389. Source: Zulip thread 606970606.
 
@@ -178,10 +182,11 @@ next_project_number: 407
 ---
 
 ### 395. Review and revise vet tasks 384-394 after all worktrees merge into main
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: meta
 - **Topic**: Project Management
 - **Dependencies**: None
+- **Research**: [395_reconcile_vet_tasks_post_merge/reports/01_vet-reconciliation.md]
 
 **Description**: META / coordination task. PRECONDITION: do NOT start until ALL feature worktrees branched off main have been merged into main (cslib-wt-orch = orchestrate-369-374-317-375-373-382; cslib-364 = task-364-soundness-drift; cslib-wt-orch2 = orchestrate-299-300-301-241). Once integrated, review and revise the vet fix-tasks 384-394 (created from specs/vet-propositional-foundations.md) against the work that actually landed, since several overlap in-flight worktree tasks. Known overlaps to reconcile by reading the merged CODE (worktree state.json statuses are stale): task 374 completed LK/LJ interpolation (maeharaCore sorry-free + public Craig theorem + barrel) => likely makes task 385 redundant; task 382 removed dead Dershowitz-Manna termination machinery => likely makes task 388 redundant; tasks 369 (parameterize int/min tableau) + 317 (unified completeness) advance task 384 (the 6 live tableau-completeness sorries). For each of 384-394: mark completed/abandoned if landed, revise scope/description for partial overlap, or keep as-is. Re-run the vet CI checks (lake build/lint/mk_all on Propositional+Foundations) after integration to refresh ground truth and add/remove tasks accordingly. Then commit the reconciled task list.
 
@@ -203,7 +208,7 @@ next_project_number: 407
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 386, Task 387, Task 389, Task 395
 
-**Description**: Tier-3. Delete grep-verified dead decls: Tableau/Classical/Soundness.lean:73-138 (12 classicalApplyOne_* simp lemmas) + :486, Classical/Completeness.lean:435/447, Tableau/Defs.lean:81 propImpOrNegOf?, Intuitionistic/Rules.lean:114/203, Intuitionistic/Soundness.lean:431/505, NaturalDeduction/Equivalence.lean:305 hilbertAxiomToND, LK/Completeness.lean:69/73 mem_insert_*. Rename underscore defs: modus_ponens constructor (Derivation.lean:77), LK/LJ cutAdm_*/ljCutAdm_*, lift_int_to_cl, goodSelection_seq, HasFresh to_infinite, emptyHrelation_apply; fix Extention->Extension (Defs.lean:190/195, Equivalence.lean:257). Source: §5.3-5.4.
+**Description**: [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls: Tableau/Classical/Soundness.lean:73-136 (12 classicalApplyOne_* private simp lemmas, 0 calls) + :486, Classical/Completeness.lean:435/447, Tableau/Defs.lean:81 propImpOrNegOf?, Intuitionistic/Rules.lean:114/203, Intuitionistic/Soundness.lean:431/505, NaturalDeduction/Equivalence.lean:305 hilbertAxiomToND, LK/Completeness.lean:69/73 mem_insert_*. Fix Extention->Extension typo (Equivalence.lean:256-257, Defs.lean:190/195). Rename underscore defs: modus_ponens constructor (Derivation.lean:77), lift_int_to_cl, goodSelection_seq, HasFresh to_infinite, emptyHrelation_apply. The LK/LJ cutAdm_*/ljCutAdm_* renames are DROPPED from this task — task 386 OWNS them (defsWithUnderscore). Sequence after 386. Source: §5.3-5.4 + 395.
 
 ---
 
@@ -213,7 +218,7 @@ next_project_number: 407
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 317, Task 389, Task 395
 
-**Description**: Tier-3. Remove internal task/process jargon from public docstrings: ClassicalConjImpCompleteness.lean:19/23/51/57, ClassicalConjImpBotCompleteness.lean (task 352/378, CL-A/B/C rung, 4-for-4), ConservativeChain.lean:44-45, HilbertLindenbaumRel.lean:21-23 (Route A2, 341 proof files), Connectives.lean (PR#607/task 340/173), Tableau/RuleResult.lean:35, Foundations/Logic/Tableau/PropositionalTableau.lean:7, ListImplication.lean:83-139 stream-of-consciousness. Fix stale counts: IntSoundness.lean 3->9, MinSoundness.lean 2->8, Int/MinStrongCompleteness 3->5 cases, IntLindenbaum.lean:320 misattached docstring, Tableau/{Int,Min}/DecisionProcedure 4->3 sorries, Minimal/Completeness.lean:50-51 Notes-on-sorry. Source: §5.1-5.2.
+**Description**: [Reconciled by task 395.] Tier-3. Remove internal task/process jargon from public docstrings: ClassicalConjImpCompleteness.lean (task 352, CL-B rung), ClassicalConjImpBotCompleteness.lean (task 378, CL-C rung), ConservativeChain.lean:44-45, HilbertLindenbaumRel.lean:21-23 (Route A2, 341 proof files), Tableau/RuleResult.lean:35, Foundations/Logic/Tableau/PropositionalTableau.lean:7, ListImplication.lean:83-139. Connectives.lean jargon (PR#607/task 340/173) is OWNED by task 400 (Connectives owner) — coordinate, do NOT double-edit. Stale-count fixes: re-verify post-task-398. NOTE StrongCompleteness 3-case counts (atom/bot/imp) remain CORRECT (398 changed derivation constructors, not formula structure). Fix only genuinely-stale counts: IntSoundness, MinSoundness, IntLindenbaum:320 misattached docstring, Tableau Int/Min DecisionProcedure sorry counts, Minimal/Completeness:50-51. Source: §5.1-5.2 + 395.
 
 ---
 
@@ -233,7 +238,7 @@ next_project_number: 407
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 317, Task 395
 
-**Description**: Tier-2. (a) Foundations/Order/HilbertAlgebra/FreeMeetExtension.lean: add docstrings to 7 undocumented def/abbrev (fld:50 also rename himpFold, fmeLe:106, fmeEquiv:123, fmeSetoid:125, FreeMeetExtension:152, mk:159, freeMeetEmbed:257) — only hard docBlame in Foundations. (b) Add standard copyright/module/import Cslib.Init + convert to public import on the 4 Tableau barrels (Tableau.lean, Classical.lean, Intuitionistic.lean, Minimal.lean) -> clears Copyright-too-short lint. (c) Add omit for 14 unusedSectionVars (mostly Tableau/Classical/Completeness, Minimal/Soundness:118, Minimal/Completeness:89). (d) Add references.bib entry NegriVonPlato2001 (Negri & von Plato, Structural Proof Theory, CUP 2001) cited by OrImpConservative.lean. Source: §4.3-4.6.
+**Description**: [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAlgebra/FreeMeetExtension.lean: add docstrings to 7 undocumented def/abbrev (fld:50 also rename himpFold, fmeLe:106, fmeEquiv:123, fmeSetoid:125, FreeMeetExtension:152, mk:159, freeMeetEmbed:257) — only hard docBlame in Foundations. (b) DROPPED — the 4 Tableau barrels already carry copyright + import Cslib.Init (verified post-merge). (c) Add omit for 14 unusedSectionVars (mostly Tableau/Classical/Completeness, Minimal/Soundness:118, Minimal/Completeness:89). (d) Add references.bib entry NegriVonPlato2001 (Negri & von Plato, Structural Proof Theory, CUP 2001) cited by OrImpConservative.lean. Sequence the Tableau/Classical+Minimal Completeness edits AFTER task 317. Source: §4.3-4.6 + 395.
 
 ---
 
@@ -243,7 +248,7 @@ next_project_number: 407
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 395, Task 398
 
-**Description**: Tier-2. NaturalDeduction/Normalization/Termination.lean + Reduction.lean: delete the ~800-1000 line abandoned fuel/measure normalization track that parallels the live constructive proof (snForm->exists_stronglyNormal_form): redexWeight+lemmas 311-433; normMeasure/normMeasure_wf/reduceRoot_decreases_normMeasure/reduceRootSubSN/subs_maximalFormulas_mem/subsOne_new_redex_complexity_lt 1107-1375; normalize/normalizeAux (Reduction 84-105, public API); normalizeAux_fixpoint 289. Then clear the 56 unused simp args, 20 no-op/dead tactics, 25 long lines, 7 flexible-simp; remove or comment-justify maxHeartbeats 1200000 (1177) and 2000000 (1580). Decompose remaining heavy proofs. Source: §4.2.
+**Description**: [Reconciled by task 395, post-merge.] Tier-2. NaturalDeduction/Normalization/Termination.lean + Reduction.lean cleanup. The redexWeight + normMeasure fuel/measure track is ALREADY GONE (delivered by merged task 382). `normalize`/`normalizeAux` are NOW LIVE (task 398 added efq arms) — do NOT delete them. Remaining dead PRIVATE decls (0 callers, safe to delete): normalizeAux_fixpoint (Termination.lean:305), subs_maximalFormulas_mem (:492), subsOne_new_redex_complexity_lt (:775). Then clear residual lint debt: unused simp args, no-op/dead tactics, long lines, flexible-simp; remove or comment-justify maxHeartbeats overrides; decompose remaining heavy proofs. SEQUENCE AFTER task 398 (it is actively editing Termination.lean). Source: §4.2 + 395.
 
 ---
 
@@ -263,7 +268,7 @@ next_project_number: 407
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 395
 
-**Description**: [Refreshed by post-merge vet sess_1782671052_6af6a1; supersedes the pre-merge scope.] Fix the 21 PL-specific lake lint violations (hard CI gate for a clean repo push). (a) defsWithUnderscore (13) -> lowerCamelCase: GenericMCSBridge.lean:133 deriv_tree_to_list, :165 unfold_listImp_in_tree, :192 list_deriv_to_tree; SequentCalculus/LJ/CutElimination.lean:116/225/350 ljCutAdm_principal_andR/orR/impR, :462/543 ljCutAdm_left/right; SequentCalculus/LK/CutElimination.lean:145/293/437 cutAdm_right_andR/orR/impR, :586/708 cutAdm_right/left. (b) defLemma (1): GenericMCSBridge.lean:133 deriv_tree_to_list def->lemma (same decl as the rename). (c) docBlame (3): docstrings for Tableau/Classical/Expansion.lean:125 classicalExpandBranches.processNext, Tableau/Intuitionistic/Expansion.lean:169 intExpandBranches.go, Tableau/Intuitionistic/Rules.lean:91 isAccessible.go. (d) unusedArguments (3): targeted @[nolint unusedArguments] + comment: Metalogic/DeductionTheorem.lean:85 deductionWithMem arg9 _hA, Normalization/Termination.lean:41 conclusionGrounded arg6 _d, Tableau/Intuitionistic/Soundness.lean:1643 intBotForces arg1. (e) simpNF (1): Subformula.lean:173 vars_neg LHS not simp-normal (rewrite LHS or @[nolint simpNF]). Coordinate GenericMCSBridge renames with the cross-cutting task (403). Verify `lake lint` PL-clean. Source: specs/369_*/.vet-findings.json.
+**Description**: [Refreshed by post-merge vet sess_1782671052_6af6a1; supersedes the pre-merge scope.] Fix the 21 PL-specific lake lint violations (hard CI gate for a clean repo push). (a) defsWithUnderscore (13) -> lowerCamelCase: GenericMCSBridge.lean:133 deriv_tree_to_list, :165 unfold_listImp_in_tree, :192 list_deriv_to_tree; SequentCalculus/LJ/CutElimination.lean:116/225/350 ljCutAdm_principal_andR/orR/impR, :462/543 ljCutAdm_left/right; SequentCalculus/LK/CutElimination.lean:145/293/437 cutAdm_right_andR/orR/impR, :586/708 cutAdm_right/left. (b) defLemma (1): GenericMCSBridge.lean:133 deriv_tree_to_list def->lemma (same decl as the rename). (c) docBlame (3): docstrings for Tableau/Classical/Expansion.lean:125 classicalExpandBranches.processNext, Tableau/Intuitionistic/Expansion.lean:169 intExpandBranches.go, Tableau/Intuitionistic/Rules.lean:91 isAccessible.go. (d) unusedArguments (3): targeted @[nolint unusedArguments] + comment: Metalogic/DeductionTheorem.lean:85 deductionWithMem arg9 _hA, Normalization/Termination.lean:41 conclusionGrounded arg6 _d, Tableau/Intuitionistic/Soundness.lean:1643 intBotForces arg1. (e) simpNF (1): Subformula.lean:173 vars_neg LHS not simp-normal (rewrite LHS or @[nolint simpNF]). Coordinate GenericMCSBridge renames with the cross-cutting task (403). Verify `lake lint` PL-clean. Source: specs/369_*/.vet-findings.json. [395-reconciled: task 386 OWNS the LK/LJ cutAdm_*/ljCutAdm_* underscore renames (defsWithUnderscore); task 392 drops them. Re-run `lake lint` after the build is green (task 385/IntFMPSpike) to refresh the exact violation set before fixing.]
 
 ---
 
@@ -273,12 +278,12 @@ next_project_number: 407
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 395
 
-**Description**: Tier-1 CRITICAL; fixes mk_all. (1) IntFMPSpike.lean: fix 12 errors (rename Sigma-token binders hψ'Σ/hab_Σ, add import Mathlib.Data.Finset.Powerset, drop private vs @[expose] public clash, fix Set.mem_coe lemma name, repair intFinWorld_propConsistent induction), strip spike/specs-370 framing, rename to IntDecidability.lean, add to Cslib.lean. (2) SequentCalculus/LK/Interpolation.lean: discharge the 4 maeharaCore sorries (andR:311, orL:315, impL:319, impR:323), add a public craigInterpolation theorem, wire into Cslib.lean + LK barrel. (3) Tableau/Intuitionistic/Scheme.lean: finish the 4 parked sorries (truthLemma:230 parametric over IntMinScheme; openBranch_countermodel :268/:276/:284 — :284 has ready classical analogue classicalExpandBranches_openBranch_initial_mem), fix module-mode inconsistency, wire in; ideally repoint Intuitionistic/Minimal completeness at the parametric route to remove duplication (coordinates with 384). Source: §3.2-3.4.
+**Description**: [Reconciled by task 395, post-merge.] Tier-1. LK/Interpolation sub-part DROPPED — task 374 delivered LKProof.interpolation sorry-free (Interpolation.lean:864). TWO sub-parts remain: (1) BUILD-BLOCKER, DO FIRST: IntFMPSpike.lean has 2 compile errors (lines 201/231) and is the ONLY thing breaking repo-wide `lake build` (imported at Cslib.lean:419). Fix the 2 errors, strip spike/specs-370 framing, rename to IntDecidability.lean, keep wired into Cslib.lean + barrel. (2) Tableau/Intuitionistic/Scheme.lean: finish the 4 parked sorries (truthLemma:242 parametric over IntMinScheme; openBranch_countermodel:280/288/296 — :296 has ready classical analogue classicalExpandBranches_openBranch_initial_mem); ideally repoint Intuitionistic/Minimal completeness at the parametric route (coordinates with 317). Verify full lake build green + lint-style. Source: §3.2-3.4 + 395 reconciliation.
 
 ---
 
 ### 384. Resolve documented sorry in minimalTableau_complete
-- **Status**: [NOT STARTED]
+- **Status**: [ABANDONED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 395
@@ -301,7 +306,7 @@ next_project_number: 407
 - **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: Task 360
+- **Dependencies**: None
 - **Research**: [370_int_min_metalogic_decidability/reports/01_int-min-decidability-fmp-vs-lj.md]
 - **Plan**: [370_int_min_metalogic_decidability/plans/01_int-min-fmp-decidability.md]
 
@@ -310,7 +315,7 @@ next_project_number: 407
 ---
 
 ### 360. Repair 11 pre-existing broken modules failing repo-wide lake build
-- **Status**: [BLOCKED]
+- **Status**: [ABANDONED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 363, Task 364

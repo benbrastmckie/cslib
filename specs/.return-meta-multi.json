@@ -1,17 +1,13 @@
 {
-  "status": "partial",
+  "status": "completed",
   "metadata": {
-    "tasks_completed": [],
-    "tasks_partial": [
-      299,
-      301,
-      241
+    "tasks_completed": [
+      398,
+      399
     ],
-    "tasks_blocked": [
-      300
-    ],
-    "cycles_used": 5,
+    "tasks_failed": [],
+    "cycles_used": 8,
     "multi_task_mode": true,
-    "main_build": "RED (Cslib.Logics.Modal.Tableau.Soundness, task 299 phase 4, pre-existing)"
+    "note": "398 completed; 399 pr_ready (terminal for pr-prep). Stray Cslib.lean IntFMPSpike un-stub left uncommitted for user."
   }
 }

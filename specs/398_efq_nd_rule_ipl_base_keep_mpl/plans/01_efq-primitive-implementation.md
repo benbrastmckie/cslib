@@ -1,7 +1,7 @@
 # Implementation Plan: Task #398 — Promote efq to a primitive ND `Derivation` constructor (IPL-as-base, MPL retained)
 
 - **Task**: 398 - Make IPL the base propositional logic: add efq as a primitive ND rule, preserving MPL metatheory
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 11 hours
 - **Dependencies**: 397 (green main required as the verification baseline)
 - **Research Inputs**: specs/398_efq_nd_rule_ipl_base_keep_mpl/reports/01_efq-primitive-ipl-base.md

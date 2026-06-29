@@ -905,13 +905,13 @@
     {
       "project_number": 407,
       "project_name": "mpl_base_structure_first_redesign",
-      "status": "planned",
+      "status": "researched",
       "task_type": "cslib",
       "title": "Research & design: make MPL the structure-first base logic (⊥ as nullary connective; explosion/leastness/initiality as independent property modules)",
       "description": "DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat.md) + codebase synthesis. Adopt the STRUCTURE-FIRST account: one fixed language ⟨Atom,⊥,∧,∨,→⟩; ⊥ is a primitive NULLARY connective whose meaning is intentionally underdetermined (a Johansson 'designated constant' supplied by every model, no intrinsic proof rule). MPL is the BASE proof theory (no rule/axiom mentions ⊥; ¬A:=A→⊥; A,A→⊥⊢⊥ is just impE). IPL = MPL + explosion (⊥/A) as an INDEPENDENT module; CPL = IPL + classical principles. Semantically, leastness (⊥≤a), initiality (universal property 0→A), and explosion-soundness are INDEPENDENT properties added by conservative strengthening, not changes to syntax or recursive clauses. Modularity organized around PROPERTIES (typeclasses/mixins), not connectives, so structural metatheory (weakening, substitution, admissibility, cut) is proved ONCE at MPL. RELATION TO 398: this is the deeper redesign 398 postponed (398 report §5). 398 took the OPPOSITE commitment (IPL-as-base via a gated ND efq constructor). Recommendation (report §5) is option (C): re-frame 398's gate as the explosion PROPERTY MODULE rather than revert it. FINDINGS (report 01): codebase is already ~70-80% structure-first. ALIGNED: algebraic semantics (AlgEvaluate with arbitrary bot_val; BrouwerianBot vs PointedBrouwerian; IsBotFree; conservativity chains) and Hilbert axioms (MinPropAxiom→IntPropAxiom+efq→PropositionalAxiom+peirce; IsIntuitionistic/MinimalAxioms typeclasses). GAPS: (1) ND inverted by 398 (gated efq = IPL-base); (2) sequent calculus LARGE gap (LJ/LK hard-code botL; no minimal LM; structural results per-system); (3) metalogic ~50% Min*/Int* duplication, Lindenbaum hard-wires EFQ; (4) semantic leastness/initiality/explosion present only implicitly (OrderBot + per-axiom proofs), not as a NAMED property hierarchy. SCOPE: research+design done (report 01). Plan should cover the cheap additive waves first: W1 design canonicalization+ND re-framing (C), W2 named semantic property hierarchy, W3 metalogic genericization, W4 tableau unification; and SPAWN W5 (minimal sequent calculus LM) and optional W6 (literal ⊥-rule-free ND, option B) as separate --hard tasks. Preserve ALL MPL/conservativity assets (do not revert 398). --hard recommended for planning. Honor Zulip AI policy. See OPEN QUESTIONS in report §9 (ND reconciliation C vs B; task scope; categorical/initiality timing; property naming; relation to task 400).",
       "created": "2026-06-29T00:00:00Z",
-      "last_updated": "2026-06-29T00:00:00Z",
-      "next_artifact_number": 2,
+      "last_updated": "2026-06-29T16:20:08Z",
+      "next_artifact_number": 4,
       "artifacts": [
         {
           "path": "specs/407_mpl_base_structure_first_redesign/reports/01_mpl-base-structure-first.md",
@@ -927,9 +927,14 @@
           "path": "specs/407_mpl_base_structure_first_redesign/plans/01_mpl-base-waves-1-4.md",
           "type": "plan",
           "summary": "Option C, Waves 1-4: ND MPL-base re-framing; named bottom-property hierarchy; generic explosion-parameterized metalogic + fragment-genericity foundation; tableau unification; full-CI verify. W5/W6 spawned separately."
+        },
+        {
+          "path": "specs/407_mpl_base_structure_first_redesign/reports/03_design-verification-plan-readiness.md",
+          "type": "report",
+          "summary": "Adversarial verification of MPL-base design (option C, 70-80%-done, four gap claims) against current code; plan-readiness verdict SOUND-AS-IS with three non-blocking sharpenings S1-S3."
         }
       ],
-      "session_id": "sess_1782744926_3601df_407",
+      "session_id": "sess_1782749627_4f3dc3_407",
       "dependencies": [
         398
       ],

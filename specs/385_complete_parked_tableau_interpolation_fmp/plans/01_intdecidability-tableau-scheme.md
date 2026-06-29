@@ -166,7 +166,7 @@ spike/specs-370 framing (docstrings + section headers only, NO decl renames), re
 - `lake exe lint-style` -> clean.
 - `lake shake --add-public --keep-implied --keep-prefix` -> clean.
 
-### Phase 3: Close Scheme.lean :296 then :280 (structural sorries) [NOT STARTED]
+### Phase 3: Close Scheme.lean :296 then :280 (structural sorries) [COMPLETED]
 
 **Goal**: Close the two in-scope structural sorries in `openBranch_countermodel` sorry-free:
 `:296` (`hFmem`, F(φ)@0 ∈ b) and `:280` (`hopen`, `closurePred b = false`), by mirroring the

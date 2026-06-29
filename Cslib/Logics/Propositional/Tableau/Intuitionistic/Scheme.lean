@@ -241,6 +241,235 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom)
       ¬ IForces (intExtractValuation b) (S.modelBot b) w φ) := by
   sorry
 
+/-! ## Structural Lemmas for `openBranch_countermodel` -/
+
+/-- Formulas are preserved under `applyPersistenceFixpoint`:
+`applyAllTImpRules` only appends to `b`, so `sf ∈ b` is maintained across fixpoint
+iterations. -/
+private lemma applyPersistenceFixpoint_mem_preserved
+    (b : IBranch Atom) (edges : IEdges) (fuel : Nat)
+    (sf : ISF Atom) (h : sf ∈ b) :
+    sf ∈ applyPersistenceFixpoint b edges fuel := by
+  induction fuel generalizing b with
+  | zero => simpa [applyPersistenceFixpoint] using h
+  | succ k ih =>
+    simp only [applyPersistenceFixpoint]
+    split_ifs
+    · exact h
+    · apply ih; simp only [applyAllTImpRules, List.mem_append]; exact Or.inl h
+
+/-- If the expansion loop returns `.openBranch b`, then `closurePred b = false`.
+
+In the fuel=0 case, `findSome?` only yields a branch when `closurePred b = false`.
+In the fuel+1 case, the inner go returns `.openBranch bPers` only inside the `else`
+branch of `if closurePred bPers`, so `closurePred bPers = false`. When a rule fires
+it recurses to `intExpandBranches` with fuel', and the outer IH applies. -/
+private lemma intExpandBranches_openBranch_closed (fuel : Nat)
+    (branches : List (IBranch Atom))
+    (expandedSets : List (List (ISF Atom)))
+    (nextWorlds : List Nat)
+    (edgeSets : List IEdges)
+    (closurePred : IBranch Atom → Bool)
+    (b : IBranch Atom)
+    (h : intExpandBranches branches expandedSets nextWorlds edgeSets fuel closurePred
+        = .openBranch b) :
+    closurePred b = false := by
+  induction fuel generalizing branches expandedSets nextWorlds edgeSets with
+  | zero =>
+    simp only [intExpandBranches] at h
+    cases hfs : branches.findSome? (fun b' => if closurePred b' then none else some b') with
+    | none => simp [hfs] at h
+    | some b' =>
+      simp only [hfs] at h; injection h with heq; subst heq
+      obtain ⟨b₀, _, hcond⟩ := List.exists_of_findSome?_eq_some hfs
+      cases heq : closurePred b₀ with
+      | true => simp [heq] at hcond
+      | false =>
+        simp [heq] at hcond
+        exact hcond ▸ heq
+  | succ fuel' ih =>
+    simp only [intExpandBranches] at h
+    suffices key : ∀ (pending : List (IBranch Atom))
+        (pendingExp : List (List (ISF Atom)))
+        (pendingNW : List Nat)
+        (pendingEdges : List IEdges)
+        (done : List (IBranch Atom))
+        (doneExp : List (List (ISF Atom)))
+        (doneNW : List Nat)
+        (doneEdges : List IEdges),
+        intExpandBranches.go closurePred fuel' pending pendingExp pendingNW pendingEdges
+            done doneExp doneNW doneEdges = .openBranch b →
+        closurePred b = false from
+      key branches expandedSets nextWorlds edgeSets [] [] [] [] h
+    intro pending
+    induction pending with
+    | nil =>
+      intro _ _ _ _ _ _ _ hgo
+      simp only [intExpandBranches.go] at hgo
+      simp at hgo
+    | cons bh bt ih_inner =>
+      intro pendingExp pendingNW pendingEdges done doneExp doneNW doneEdges hgo
+      cases hpE : pendingExp with
+      | nil =>
+        rw [hpE] at hgo; simp only [intExpandBranches.go] at hgo
+        exact ih_inner [] [] [] done doneExp doneNW doneEdges hgo
+      | cons eH eT =>
+        cases hpNW : pendingNW with
+        | nil =>
+          rw [hpE, hpNW] at hgo; simp only [intExpandBranches.go] at hgo
+          exact ih_inner [] [] [] done doneExp doneNW doneEdges hgo
+        | cons nwH nwT =>
+          cases hpEdges : pendingEdges with
+          | nil =>
+            rw [hpE, hpNW, hpEdges] at hgo; simp only [intExpandBranches.go] at hgo
+            exact ih_inner [] [] [] done doneExp doneNW doneEdges hgo
+          | cons edgesH edgesT =>
+            rw [hpE, hpNW, hpEdges] at hgo
+            set bPers := applyPersistenceFixpoint bh edgesH (fuel' + 1) with hbPers_def
+            simp only [intExpandBranches.go] at hgo
+            by_cases hcl : closurePred bPers = true
+            · rw [if_pos hcl] at hgo
+              exact ih_inner eT nwT edgesT
+                  (done ++ [bPers]) (doneExp ++ [eH]) (doneNW ++ [nwH]) (doneEdges ++ [edgesH])
+                  hgo
+            · simp only [Bool.not_eq_true] at hcl
+              rw [if_neg (by simp [← hbPers_def, hcl])] at hgo
+              cases hstep : intStepBranch bPers eH nwH with
+              | none =>
+                rw [hstep] at hgo; injection hgo with heq; subst heq; exact hcl
+              | some step =>
+                obtain ⟨result, newExp⟩ := step
+                rw [hstep] at hgo
+                cases result with
+                | linearResult newForms nw' newEdge =>
+                  simp only at hgo; exact ih _ _ _ _ hgo
+                | branchingResult branches' nw' =>
+                  simp only at hgo; exact ih _ _ _ _ hgo
+                | notApplicable =>
+                  simp only at hgo; injection hgo with heq; subst heq; exact hcl
+
+/-- Every formula in every initial branch appears in the open branch returned by
+`intExpandBranches`. This shows that F(φ)@0, present in the initial branch, is still
+on the open countermodel branch.
+
+Both `applyPersistenceFixpoint` and `Branch.extendMany` only prepend/append formulas,
+so membership is monotone throughout the expansion. -/
+private lemma intExpandBranches_openBranch_initial_mem (fuel : Nat)
+    (sf : ISF Atom) :
+    ∀ (branches : List (IBranch Atom))
+      (expandedSets : List (List (ISF Atom)))
+      (nextWorlds : List Nat)
+      (edgeSets : List IEdges)
+      (closurePred : IBranch Atom → Bool),
+      (∀ b₀ ∈ branches, sf ∈ b₀) →
+      ∀ b, intExpandBranches branches expandedSets nextWorlds edgeSets fuel closurePred
+          = .openBranch b →
+        sf ∈ b := by
+  induction fuel with
+  | zero =>
+    intro branches expandedSets nextWorlds edgeSets closurePred hAll b h
+    simp only [intExpandBranches] at h
+    cases hfs : branches.findSome? (fun b' => if closurePred b' then none else some b') with
+    | none => simp [hfs] at h
+    | some b' =>
+      simp only [hfs] at h; injection h with heq; subst heq
+      obtain ⟨b₀, hb₀_mem, hcond⟩ := List.exists_of_findSome?_eq_some hfs
+      cases heq : closurePred b₀ with
+      | true => simp [heq] at hcond
+      | false =>
+        simp [heq] at hcond
+        exact hcond ▸ hAll b₀ hb₀_mem
+  | succ fuel' ih =>
+    intro branches expandedSets nextWorlds edgeSets closurePred hAll b h
+    simp only [intExpandBranches] at h
+    suffices key : ∀ (pending : List (IBranch Atom))
+        (pendingExp : List (List (ISF Atom)))
+        (pendingNW : List Nat)
+        (pendingEdges : List IEdges)
+        (done : List (IBranch Atom))
+        (doneExp : List (List (ISF Atom)))
+        (doneNW : List Nat)
+        (doneEdges : List IEdges),
+        (∀ bp ∈ pending, sf ∈ bp) →
+        (∀ bd ∈ done, sf ∈ bd) →
+        intExpandBranches.go closurePred fuel' pending pendingExp pendingNW pendingEdges
+            done doneExp doneNW doneEdges = .openBranch b →
+        sf ∈ b from
+      key branches expandedSets nextWorlds edgeSets [] [] [] []
+          (fun b₀ hb₀ => hAll b₀ hb₀) (by simp) h
+    intro pending
+    induction pending with
+    | nil =>
+      intro _ _ _ _ _ _ _ _ _ hgo
+      simp only [intExpandBranches.go] at hgo
+      simp at hgo
+    | cons bh bt ih_inner =>
+      intro pendingExp pendingNW pendingEdges done doneExp doneNW doneEdges hPend hDone hgo
+      cases hpE : pendingExp with
+      | nil =>
+        rw [hpE] at hgo; simp only [intExpandBranches.go] at hgo
+        exact ih_inner [] [] [] done doneExp doneNW doneEdges
+            (fun bp hbp => hPend bp (List.mem_cons_of_mem _ hbp)) hDone hgo
+      | cons eH eT =>
+        cases hpNW : pendingNW with
+        | nil =>
+          rw [hpE, hpNW] at hgo; simp only [intExpandBranches.go] at hgo
+          exact ih_inner [] [] [] done doneExp doneNW doneEdges
+              (fun bp hbp => hPend bp (List.mem_cons_of_mem _ hbp)) hDone hgo
+        | cons nwH nwT =>
+          cases hpEdges : pendingEdges with
+          | nil =>
+            rw [hpE, hpNW, hpEdges] at hgo; simp only [intExpandBranches.go] at hgo
+            exact ih_inner [] [] [] done doneExp doneNW doneEdges
+                (fun bp hbp => hPend bp (List.mem_cons_of_mem _ hbp)) hDone hgo
+          | cons edgesH edgesT =>
+            rw [hpE, hpNW, hpEdges] at hgo
+            set bPers := applyPersistenceFixpoint bh edgesH (fuel' + 1) with hbPers_def
+            have hbh_sf : sf ∈ bh := hPend bh List.mem_cons_self
+            have hbPers_sf : sf ∈ bPers :=
+              applyPersistenceFixpoint_mem_preserved bh edgesH (fuel' + 1) sf hbh_sf
+            simp only [intExpandBranches.go] at hgo
+            by_cases hcl : closurePred bPers = true
+            · rw [if_pos hcl] at hgo
+              exact ih_inner eT nwT edgesT
+                  (done ++ [bPers]) (doneExp ++ [eH]) (doneNW ++ [nwH]) (doneEdges ++ [edgesH])
+                  (fun bp hbp => hPend bp (List.mem_cons_of_mem _ hbp))
+                  (by intro bd hbd
+                      simp only [List.mem_append, List.mem_singleton] at hbd
+                      rcases hbd with h1 | rfl
+                      · exact hDone bd h1
+                      · exact hbPers_sf)
+                  hgo
+            · simp only [Bool.not_eq_true] at hcl
+              rw [if_neg (by simp [← hbPers_def, hcl])] at hgo
+              cases hstep : intStepBranch bPers eH nwH with
+              | none =>
+                rw [hstep] at hgo; injection hgo with heq; subst heq; exact hbPers_sf
+              | some step =>
+                obtain ⟨result, newExp⟩ := step
+                rw [hstep] at hgo
+                cases result with
+                | linearResult newForms nw' newEdge =>
+                  simp only at hgo
+                  refine ih _ _ _ _ _ ?_ b hgo
+                  intro b₀ hb₀
+                  simp only [List.mem_append, List.mem_singleton] at hb₀
+                  rcases hb₀ with ((hd | rfl) | hbt)
+                  · exact hDone b₀ hd
+                  · simp only [Branch.extendMany, List.mem_append]; exact Or.inr hbPers_sf
+                  · exact hPend b₀ (List.mem_cons_of_mem _ hbt)
+                | branchingResult branches' nw' =>
+                  simp only at hgo
+                  refine ih _ _ _ _ _ ?_ b hgo
+                  intro b₀ hb₀
+                  simp only [List.mem_append, List.mem_map] at hb₀
+                  rcases hb₀ with ((hd | ⟨x, _, rfl⟩) | hbt)
+                  · exact hDone b₀ hd
+                  · simp only [Branch.extendMany, List.mem_append]; exact Or.inr hbPers_sf
+                  · exact hPend b₀ (List.mem_cons_of_mem _ hbt)
+                | notApplicable =>
+                  simp only at hgo; injection hgo with heq; subst heq; exact hbPers_sf
+
 /-! ## Parametric Open Branch Countermodel -/
 
 /-- **Parametric Open Branch Countermodel**: An open branch returned by the parametric
@@ -272,12 +501,8 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
         (2 ^ (2 * φ.complexity + 2)) S.closurePred = .openBranch b) :
     ¬ IForces (intExtractValuation b) (S.modelBot b) 0 φ := by
   -- Extract structural properties of b from the openBranch result.
-  have hopen : S.closurePred b = false := by
-    -- MISSING: `intExpandBranches_openBranch_closed`
-    -- The expansion loop checks `closurePred b = false` before returning `.openBranch b`
-    -- in both the fuel=0 case (via `findSome?`) and the fuel+1 inner loop.
-    -- Formal proof requires induction on `intExpandBranches` and its `go` helper.
-    sorry
+  have hopen : S.closurePred b = false :=
+    intExpandBranches_openBranch_closed _ _ _ _ _ _ _ h
   have hsat : ∀ sf ∈ b, intStepBranch b [] 0 = none := by
     -- MISSING: `intExpandBranches_openBranch_sat`
     -- In the fuel+1 case, `.openBranch bPers` is returned when
@@ -287,13 +512,14 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
     -- for a fully saturated branch. Formal proof requires induction on the expansion loop.
     sorry
   have hFmem : b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == 0) := by
-    -- MISSING: `intExpandBranches_openBranch_initial_mem`
-    -- The initial branch `[[⟨.neg, φ, 0⟩]]` contains F(φ)@0.
-    -- Under expansion, formulas are only added to branches (branch monotonicity via
-    -- `applyPersistenceFixpoint` and `Branch.extendMany`). So F(φ)@0 remains in b.
-    -- Formal proof requires a monotonicity lemma on `intExpandBranches`
-    -- (analogous to `classicalExpandBranches_openBranch_initial_mem`).
-    sorry
+    have hmem : (⟨.neg, φ, 0⟩ : ISF Atom) ∈ b :=
+      intExpandBranches_openBranch_initial_mem _ _ _ _ _ _ _
+          (fun b₀ hb₀ => by
+              simp only [List.mem_cons, List.mem_nil_iff, or_false] at hb₀
+              subst hb₀
+              exact List.mem_cons_self)
+          b h
+    exact List.any_eq_true.mpr ⟨_, hmem, by simp⟩
   -- Apply the truth lemma's F-branch direction.
   exact (truthLemma S b hopen hsat φ 0).2 hFmem
 

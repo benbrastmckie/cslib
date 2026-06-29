@@ -60,7 +60,7 @@ trade-off he raised, etc.]
 
 - [ ] efq is an **ungated** primitive rule ⇒ IPL is the base (NOT "gated / MPL retained" — minimal is set aside)
 - [ ] Minimal logic / fragment design **deferred to later work** (matches Waring's compromise)
-- [ ] Connective typeclasses removed from PR; engage PR #607 (task 400); HasBot/derived-¬ point
+- [ ] Connective typeclasses removed from PR; engage PR #607 on the HasBot/derived-¬ point
 - [ ] References (3: Gentzen/Prawitz/Troelstra–van Dalen) + Zulip link added (Johansson omitted — minimal set aside)
 - [ ] #648 rebased onto current upstream/main (3 clean commits); GitHub CI green; MERGEABLE
 - [ ] Welcome formal review

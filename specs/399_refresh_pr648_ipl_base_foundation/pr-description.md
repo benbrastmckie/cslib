@@ -76,9 +76,9 @@ These benefits extend to planned completeness work for modal and temporal logics
 - **Semantics** (`Bool.lean`, evaluation) -- follow-up PR; the `Prop` vs `Bool` vs `GeneralizedHeytingAlgebra` question (raised by thomaskwaring and ctchou) will be addressed there.
 - Hilbert systems, sequent calculi, and tableau -- stacked PRs.
 
-## Namespace note (pending, task 387)
+## Namespace note (pending)
 
-The PR exposes `namespace Cslib.Logic.PL`; the rename to `Cslib.Logics.Propositional` (per ORGANISATION.md) needs maintainer consensus and is tracked separately. Not blocking.
+The PR exposes `namespace Cslib.Logic.PL`; the rename to `Cslib.Logics.Propositional` (per ORGANISATION.md) needs maintainer consensus and can follow as a separate change. Not blocking.
 
 ## AI Tools Used
 

@@ -37,16 +37,24 @@ This characterizes the "⊥-free" fragment abstractly.
 **Mechanism delivered**: `AlgEvalIndependent` + `isBotFree_eval_independent` +
 `isOrBotFree_eval_independent` + `generic_gha_implies_ha` + `ghaValid_of_botFree`.
 
-**Residual (not reached in this spike)**:
-The remaining step — from `HAValid φ` to `Derivable X-logic φ` for a specific sub-logic
-`X` — requires **algebraic completeness**, which is not currently generic in `P`. Each
-fragment has its own canonical algebra model:
-- `IsBotFree`: routes through `WithBot G` + Heyting completeness.
-- `IsOrBotFree`: routes through `LowerSet B` + Brouwerian completeness.
-- `IsImpTopOnly`: routes through the Rasiowa free algebra.
+**Residual — now discharged by `CanAlgComplete` (task 410)**:
+The remaining step — from `HAValid φ` (equivalently `GHAValid φ`) to `Derivable X-logic φ`
+for a specific sub-logic `X` — is **algebraic completeness**. This is not new mathematics:
+it already exists piecewise (`MPL.hilbert_alg_complete`, `mplAxiom_iff_conjImpAxiom`,
+`mplAxiom_iff_impAxiom`, `conjImp_brouwerian_complete`). What was missing was the unifying
+abstraction, now provided by `CanAlgComplete P` in `CanAlgComplete.lean`, which bundles a
+target axiom system together with the completeness and soundness directions and ships three
+instances by reuse:
+- `IsBotFree` → `MinPropAxiom`: routes through `WithBot G` + Heyting completeness for the
+  `GHAValid ↔ HAValid` collapse (`ghaValid_iff_haValid_of_botFree`).
+- `IsOrBotFree` → `ConjImpAxiom`: routes through `LowerSet B` + Brouwerian completeness.
+- `IsImpTopOnly` → `ImpAxiom`: recovered today by fragment subsumption
+  (`IsImpTopOnly → IsOrBotFree → LowerSet B`), so **no Rasiowa free implicative algebra is
+  required**.
 
-A fully generic `Derivable P-logic φ ← HAValid φ` parameterized by `P` is open research.
-A dedicated follow-on research task should be spawned.
+A literally single-`AlgEvaluate`-generic proof is not achievable (three evaluators over three
+algebra classes); the idiomatic closure is the `CanAlgComplete` typeclass-instance bundling
+(precedent: `ConjImpAxioms`). See `canAlgComplete_iff` and `canAlgComplete_haValid_iff`.
 
 **One worked conservativity link**: `ghaValid_iff_haValid_of_botFree` re-derives the
 `GHAValid ↔ HAValid` equivalence for bot-free formulas as a corollary of the generic

@@ -12,7 +12,7 @@ next_project_number: 411
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,180,226,241,278,299,301,317,321,370,385,386,387,388,396,400,401,403,404,406,407 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,375,389,390,405,408,409,410 | 36,37,180,299,317,387,404,407 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 2 | 39,40,181,215,300,375,389,390,405,409 | 36,37,180,299,317,387,404,407 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275,391,392 | 39,40,386,387,389 | Bimodal Porting, Foundations, Propositional Logic |
 | 4 | 393 | 386,391 | Propositional Logic |
 
@@ -54,7 +54,7 @@ next_project_number: 411
       └─ 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
     └─ 392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls
 370 [PLANNED] — Close the decidability asymmetry in the metalogic layer: classica
-385 [NOT STARTED] — [Reconciled by task 395, post-merge.] Tier-1. LK/Interpolation su
+385 [PLANNED] — [Reconciled by task 395, post-merge.] Tier-1. LK/Interpolation su
 386 [NOT STARTED] — [Refreshed by post-merge vet sess_1782671052_6af6a1; supersedes t
   └─ 392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls (see above)
   └─ 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo (see above)
@@ -65,9 +65,7 @@ next_project_number: 411
 400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 401 [NOT STARTED] — From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portab
 407 [PR READY] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
-  └─ 408 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 5. Lar
   └─ 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-  └─ 410 [NOT STARTED] — Research and formalize the per-fragment algebraic completeness ne
 
 ### Temporal Logic
 
@@ -85,10 +83,12 @@ next_project_number: 411
 ## Tasks
 
 ### 410. Fragment-generic algebraic completeness for MPL-base derivability
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 407
+- **Research**: [410_fragment_generic_algebraic_completeness/reports/01_fragment-generic-algebraic-completeness.md]
+- **Plan**: [410_fragment_generic_algebraic_completeness/plans/01_can-alg-complete-instantiation.md]
 
 **Description**: Research and formalize the per-fragment algebraic completeness needed to instantiate the fully-generic Derivable P-logic framework. Current residual from task 407 (phase 7 S3 spike): FragmentGeneric.lean delivers AlgEvalIndependent + generic_gha_implies_ha + ghaValid_of_botFree (the GHAValid <-> HAValid equivalence for bot-free formulas). The remaining step -- HAValid phi -> Derivable X-logic phi for a specific sub-logic X -- requires per-fragment algebraic completeness, which is not currently generic in P. Each fragment has its own canonical algebra model: IsBotFree routes through WithBot G + Heyting completeness; IsOrBotFree routes through LowerSet B + Brouwerian completeness; IsImpTopOnly routes through the Rasiowa free algebra. A fully generic Derivable P-logic phi <- HAValid phi parameterized by P is open research. Research goal: (1) identify what algebraic completeness property a fragment P needs to satisfy so that the generic framework closes; (2) state and prove a typeclass or predicate CanAlgComplete P such that (CanAlgComplete P, AlgEvalIndependent P) implies generic Derivable P-logic phi <-> GHAValid phi; (3) instantiate for at least IsBotFree and IsOrBotFree; (4) determine whether IsImpTopOnly can be recovered. See Cslib/Logics/Propositional/Semantics/Algebra/FragmentGeneric.lean lines 40-53 for the open residual. References: Rasiowa1974 (algebraic approach), task 407 reports 01-03. Task type: cslib. Depends on 407 (delivers FragmentGeneric.lean).
 
@@ -105,10 +105,13 @@ next_project_number: 411
 ---
 
 ### 408. Sequent calculus: property-gated botL (single calculus, MPL/IPL one inductive; cut/subformula proved once)
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 407
+- **Research**: [408_minimal_sequent_calculus_lm/reports/01_minimal-sequent-calculus-gated-botl.md]
+- **Plan**: [408_minimal_sequent_calculus_lm/plans/01_gated-botl-seqproof.md]
+- **Summary**: [408_minimal_sequent_calculus_lm/summaries/01_gated-botl-seqproof-summary.md]
 
 **Description**: SPAWNED from task 407 (MPL structure-first redesign), Wave 5. Largest structural gap (report 01 §3.4/§7.1): LJProof/LKProof HARD-CODE the botL/explosion rule (SequentCalculus/LJ/Basic.lean:91-92, LK/Basic.lean:76-77) and there is NO minimal sequent calculus; cut elimination/subformula/decidability/interpolation are proved per-system, not once at a base. PRIMARY DESIGN (universal-algebra approach, aligned with task 407 option C): a SINGLE sequent calculus over the full signature (incl. primitive ⊥) with a PROPERTY-GATED botL constructor -- gate botL by [IsIntuitionistic T] (mirroring task 407's gated efq in ND), so MPL and IPL are the SAME inductive at different property strengths and the structural metatheory (cut elimination, subformula property) is proved ONCE generically over the gate. MPL = the strength WITHOUT the IsIntuitionistic instance; IPL = WITH it. This avoids the exclude-then-add / two-inductive duplication cost and keeps the sequent layer consistent with the ND layer. SCOPE: cleanly unifies MPL/IPL (single-conclusion); LK (classical, multiple-conclusion) is a different structural shape and stays its own calculus, related via its own module rather than folded in. FALLBACK (only if property-gating cut-elimination proves infeasible): define a separate minimal LMProof inductive (LJ rules minus botL), prove structural results once on LM, recover LJ = LM + botL by composition/re-export. Preserve all existing LJ/LK results (soundness, hilbert_iff_lj/lk, LJProof.cutElim/LKProof.cutElim) -- no weakening. HIGH effort -- use --hard. Depends on 407 (gated-rule design + property modules) and green main. Files: SequentCalculus/Defs.lean, LJ/* (gated botL + generic cut/subformula), LK/* (relate). Honor Zulip AI policy (human-authored prose). Source: task 407 report 01 §3.4/§7 W5, report 02 §6.
 
@@ -331,7 +334,7 @@ next_project_number: 411
 ---
 
 ### 385. Complete and integrate IntFMPSpike, LK/Interpolation, Tableau Scheme
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 395

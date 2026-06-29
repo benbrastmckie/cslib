@@ -15,12 +15,12 @@
     "410": []
   },
   "max_cycles": 10,
-  "cycle_count": 0,
+  "cycle_count": 2,
   "failed_tasks": [],
   "completed_tasks": [],
   "current_statuses": {
-    "408": "not_started",
-    "410": "not_started"
+    "408": "planned",
+    "410": "planned"
   },
   "task_dirs": {
     "408": "specs/408_minimal_sequent_calculus_lm",

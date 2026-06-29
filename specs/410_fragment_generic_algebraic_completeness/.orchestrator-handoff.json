@@ -1,36 +1,38 @@
 {
-  "status": "researched",
-  "task_number": 410,
-  "session_id": "sess_1782760056_06c853_410",
-  "agent_type": "cslib-research-agent",
-  "summary": "Per-fragment algebraic completeness for the generic Derivable P-logic framework is, in substance, already discharged piecewise in MplConservativeChain.lean + HilbertCompleteness.lean + BrouwerianCompleteness*.lean. Task 410 is an abstraction/instantiation task, not open research. Design: a CanAlgComplete P structure bundling a target axiom system Ax_P plus complete (P phi -> GHAValid phi -> Derivable Ax_P phi) and sound (Derivable Ax_P phi -> GHAValid phi); then canAlgComplete_iff gives Derivable Ax_P phi <-> GHAValid phi on the fragment, and composing with AlgEvalIndependent (407) + ghaValid_iff_haValid_of_botFree upgrades to HAValid for bot-free fragments. Instances by reuse: IsBotFree -> MinPropAxiom (MPL.hilbert_alg_complete is total), IsOrBotFree -> ConjImpAxiom (via LowerSet B + conjImp_brouwerian_complete), IsImpTopOnly -> ImpAxiom (via mplAxiom_iff_impAxiom, routed through IsOrBotFree/LowerSet B). KEY CORRECTION: IsImpTopOnly is recoverable today WITHOUT the Rasiowa free algebra; the residual's framing is over-stated. All instances compose existing sorry-free theorems: zero-debt, no new axioms.",
+  "status": "implemented",
+  "summary": "Created the additive file CanAlgComplete.lean bundling per-fragment algebraic completeness behind a single generic structure. Phase 1: `CanAlgComplete P` structure (Ax + complete + sound fields, universes pinned .{u,u}) plus packaged theorems `canAlgComplete_iff` and `canAlgComplete_haValid_iff`. Phase 2: three instances by reuse only — `canAlgCompleteIsBotFree` (MinPropAxiom via total MPL.hilbert_alg_complete), `canAlgCompleteIsOrBotFree` (ConjImpAxiom via LowerSet B + conjImp_brouwerian_complete), `canAlgCompleteIsImpTopOnly` (ImpAxiom via mplAxiom_iff_impAxiom routing through IsOrBotFree → LowerSet B). Rasiowa free implicative algebra declined as planned. Phase 3: barrel import added, FragmentGeneric residual note (lines 40-53) updated to point at CanAlgComplete and correct the Rasiowa framing. No new mathematics: all instances are term-level compositions of existing sorry-free theorems.",
+  "phases_completed": 3,
+  "phases_total": 3,
+  "blockers": [
+    {
+      "type": "pre_existing_external",
+      "scope": "repo-wide CI, NOT task 410",
+      "description": "Repo-wide `lake build` and `lake test` are RED due to two pre-existing broken files, both committed and unmodified by task 410, neither importing nor imported by task-410 files: (1) Cslib/Logics/Propositional/SequentCalculus/LJ/Completeness.lean — genuine source errors (unknown constant `Cslib.Logic.PL.LJProof.cut`, 'No goals to be solved'); (2) Cslib/Logics/Propositional/Metalogic/IntFMPSpike.lean — heavily-broken parked spike, deliberately stubbed out of the barrel by task 385.",
+      "impact": "A CSLib PR cannot pass CI until these are fixed by their owning tasks (LJ.Completeness ~ tasks 356-360; IntFMPSpike ~ tasks 385/400). Do NOT submit a PR for task 410 until repo build is green.",
+      "action_needed": "Resolve LJ.Completeness and IntFMPSpike under their owning tasks, OR submit task 410 on a branch once main's build is restored. No task-410 code change can unblock this.",
+      "mitigation_applied": "`lake exe mk_all --module` had blindly re-added the stubbed IntFMPSpike import to Cslib.lean; I restored the manual stub comment so task 410 does not regress the barrel."
+    }
+  ],
+  "continuation_context": "No further task-410 implementation work is required — all three phases are complete and every task-410-scoped verification passes (scoped build green; checkInitImports, lint-style, and env #lint all clean with 0 errors; axiom-clean using only propext/Classical.choice/Quot.sound; zero sorry/admit/axiom). The only thing preventing a fully-green repo build is external pre-existing breakage. Re-dispatching task 410 implementation would be wasteful. The next gate is human/owning-task resolution of LJ.Completeness and IntFMPSpike before any PR.",
   "artifacts": [
-    "specs/410_fragment_generic_algebraic_completeness/reports/01_fragment-generic-algebraic-completeness.md"
+    "Cslib/Logics/Propositional/Semantics/Algebra/CanAlgComplete.lean",
+    "Cslib/Logics/Propositional/Semantics/Algebra/FragmentGeneric.lean",
+    "Cslib.lean",
+    "specs/410_fragment_generic_algebraic_completeness/plans/01_can-alg-complete-instantiation.md"
   ],
-  "key_findings": [
-    "MplConservativeChain.lean already proves mplAxiom_iff_conjImpAxiom (IsOrBotFree), mplAxiom_iff_impAxiom (IsImpTopOnly), mplAxiom_iff_conjImpBotMinAxiom (IsOrFree); HilbertCompleteness.lean proves MPL.hilbert_alg_complete (total: Derivable MinPropAxiom phi <-> GHAValid phi).",
-    "The completeness core GHAValid phi -> Derivable Ax_P phi factors as GHAValid_implies_BrouwerianValid_direct (instantiate at LowerSet B Heyting model) then conjImp_brouwerian_complete; soundness back-direction is derivableMinOfDerivableConjImp/Imp composed with MPL.hilbert_alg_complete.mp.",
-    "AlgEvalIndependent P is orthogonal to completeness: it bridges GHAValid <-> HAValid on the bot-free fragment, exactly the task's (CanAlgComplete P, AlgEvalIndependent P) pairing.",
-    "IsImpTopOnly does NOT need the Rasiowa free algebra; it is recovered via IsImpTopOnly_implies_IsOrBotFree through LowerSet B. Decline/defer the Rasiowa free implicative algebra.",
-    "Recommend CanAlgComplete as a structure (Ax is output data, not instance-inferable), not a class; precedent for typeclass-parameterized completeness is ConjImpAxioms.",
-    "A literally single-AlgEvaluate generic proof across all three fragments is not achievable (three evaluators: AlgEvaluate over GHA, Brouwerian(Bot)Evaluate over BrouwerianSemilattice); the typeclass-instance bundling is the idiomatic closure."
-  ],
-  "verified_names": [
-    "MPL.hilbert_alg_complete (HilbertCompleteness.lean:93)",
-    "mplAxiom_iff_conjImpAxiom (MplConservativeChain.lean:197)",
-    "mplAxiom_iff_impAxiom (MplConservativeChain.lean:263)",
-    "GHAValid_implies_BrouwerianValid_direct (MplConservativeChain.lean:143)",
-    "conjImp_brouwerian_complete (BrouwerianCompleteness.lean:151)",
-    "derivableMinOfDerivableConjImp / derivableMinOfDerivableImp (MplConservativeChain.lean:278,290)",
-    "ghaValid_iff_haValid_of_botFree / generic_gha_implies_ha / AlgEvalIndependent (FragmentGeneric.lean)",
-    "ConjImpAxioms class (Axioms.lean:191); ConjImpAxiom/ImpAxiom (FragmentAxioms.lean:59,84)"
-  ],
-  "bibkeys_verified": ["Rasiowa1974 (references.bib:771)", "Nemitz1965 (:825)", "Kohler1981 (:835)"],
-  "zero_debt_outlook": "All proposed instances compose existing sorry-free theorems via term-level .mp/.mpr composition. No sorry, no new axiom, no vacuous definition required.",
-  "next_action_hint": "Run /plan 410. Plan should produce one new additive file Cslib/Logics/Propositional/Semantics/Algebra/CanAlgComplete.lean: (Phase 1) CanAlgComplete structure + canAlgComplete_iff + canAlgComplete_haValid_iff; (Phase 2) three instances by reuse (IsBotFree/MinPropAxiom, IsOrBotFree/ConjImpAxiom, IsImpTopOnly/ImpAxiom); (Phase 3) CI: mk_all barrel import, checkInitImports, docBlame docstrings, lake build/lint. Optionally update FragmentGeneric.lean residual note (lines 40-53). Decline the Rasiowa free implicative algebra.",
-  "open_questions": [
-    "Which target logic to name as the IsBotFree P-logic: recommend MinPropAxiom (MPL).",
-    "Should CanAlgComplete expose the canonical algebra or stay minimal (just the iff)? Recommend minimal first.",
-    "structure vs class form for CanAlgComplete: recommend structure (Ax is output data)."
-  ]
+  "sorry_inventory": {
+    "total": 0,
+    "by_file": {},
+    "new_axioms": 0,
+    "axioms_used": ["propext", "Classical.choice", "Quot.sound"],
+    "note": "Zero debt. lean_verify on both completeness instances reports only the three standard Mathlib axioms; no sorryAx, no admit, no new axiom."
+  },
+  "verification_scoped": {
+    "scoped_build": "green (CanAlgComplete + FragmentGeneric + MplConservativeChain, 689 jobs)",
+    "checkInitImports": "pass",
+    "lint_style": "pass",
+    "env_lint": "pass (0 errors, 6 linters)",
+    "shake": "imports manually verified necessary; full shake blocked by external build breakage; with --keep-implied HilbertCompleteness (implied via MplConservativeChain) is retained intentionally",
+    "full_build_and_test": "RED — external pre-existing breakage only (see blockers)"
+  }
 }

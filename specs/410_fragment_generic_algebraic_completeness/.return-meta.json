@@ -1,19 +1,41 @@
 {
-  "status": "researched",
+  "status": "implemented",
   "started_at": "2026-06-29T00:00:00Z",
   "completed_at": "2026-06-29T00:00:00Z",
   "artifacts": [
-    "specs/410_fragment_generic_algebraic_completeness/reports/01_fragment-generic-algebraic-completeness.md",
-    "specs/410_fragment_generic_algebraic_completeness/.orchestrator-handoff.json"
+    "Cslib/Logics/Propositional/Semantics/Algebra/CanAlgComplete.lean",
+    "Cslib/Logics/Propositional/Semantics/Algebra/FragmentGeneric.lean",
+    "Cslib.lean"
   ],
   "partial_progress": {
-    "stage": "research-finished",
-    "details": "Report and orchestrator handoff written. Designed CanAlgComplete; instantiations identified by reuse for all three fragments; IsImpTopOnly recoverable without Rasiowa free algebra."
+    "stage": "complete",
+    "phases_completed": 3,
+    "last_completed_phase": "CI integration, docs, and residual note"
   },
+  "verification": {
+    "verification_passed": true,
+    "scope": "task_410_deliverables",
+    "scoped_build_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "new_axiom_count": 0,
+    "axioms_used": ["propext", "Classical.choice", "Quot.sound"],
+    "checkInitImports_passed": true,
+    "lint_style_passed": true,
+    "env_lint_passed": true,
+    "env_lint_note": "#lint over CanAlgComplete: 0 errors, 6 linters (docBlame, defLemma, defsWithUnderscore, simpNF, unusedArguments, dupNamespace)",
+    "full_build_passed": false,
+    "full_test_passed": false,
+    "full_build_blocked_externally": true,
+    "external_blocker": "Pre-existing unrelated broken files block repo-wide lake build/test: Cslib/Logics/Propositional/SequentCalculus/LJ/Completeness.lean (unknown constant LJProof.cut, 'No goals to be solved') and the parked Cslib/Logics/Propositional/Metalogic/IntFMPSpike.lean. Both committed, unmodified by task 410, no import relation to task-410 files."
+  },
+  "requires_user_review": true,
+  "review_reason": "Task 410 deliverables are complete and green in scope, but repo-wide lake build/test are RED due to pre-existing unrelated breakage (LJ.Completeness, parked IntFMPSpike). A PR must NOT be submitted until those are fixed by their owning tasks (400/385/356-360).",
   "metadata": {
     "session_id": "sess_1782760056_06c853_410",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

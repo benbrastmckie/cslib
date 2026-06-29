@@ -1,7 +1,7 @@
 # Implementation Plan: Task #408 — Property-Gated `botL` Sequent Calculus
 
 - **Task**: 408 - Sequent calculus: property-gated botL (single calculus, MPL/IPL one inductive; cut/subformula proved once)
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 15 hours
 - **Dependencies**: 407 (gated-rule design + property modules; green main)
 - **Research Inputs**: specs/408_minimal_sequent_calculus_lm/reports/01_minimal-sequent-calculus-gated-botl.md

@@ -11,7 +11,7 @@ next_project_number: 410
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,299,301,317,321,370,385,386,387,388,396,399,400,401,403,404,406,407 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,278,299,301,317,321,370,385,386,387,388,396,400,401,403,404,406,407 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,300,375,389,390,405,408,409 | 36,37,180,299,317,387,404,407 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275,391,392 | 39,40,386,387,389 | Bimodal Porting, Foundations, Propositional Logic |
 | 4 | 393 | 386,391 | Propositional Logic |
@@ -62,8 +62,7 @@ next_project_number: 410
   └─ 390 [NOT STARTED] — [Refreshed post-merge vet.] The Propositional section (~ORGANISAT
   └─ 392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls (see above)
 388 [NOT STARTED] — [Reconciled by task 395, post-merge.] Tier-2. NaturalDeduction/No
-399 [PR READY] — [REVISED 2026-06-29 — minimal additive approach supersedes the ch
-400 [RESEARCHED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
+400 [PLANNED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 401 [NOT STARTED] — From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portab
 407 [PLANNED] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
   └─ 408 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 5. Lar
@@ -170,20 +169,21 @@ next_project_number: 410
 ---
 
 ### 400. Unbundle connective typeclasses; reconcile with fmontesi PR #607 (Waring's flag a)
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**:
   - [400_reconcile_connectives_pr607/reports/01_pr607-engagement.md]
   - [400_reconcile_connectives_pr607/reports/02_engagement-strategy.md]
+- **Plan**: [400_reconcile_connectives_pr607/plans/02_pr607-engagement.md]
 
 **Description**: [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/reports/01_pr607-engagement.md] Engage fmontesi PR #607 (feat(Logic): logical operators) to land the connective typeclasses there instead of in #648 (Waring, Zulip 606970606). PREREQ DONE: our Connectives.lean removed from #648 (commit 85db79a6 on feat/propositional-ipl-base). PRIMARY POINT for the #607 review: #607 makes negation primitive (HasNot) and has NO HasBot; for IPL/MPL, neg is definitionally (phi -> bot), so #607 needs a HasBot (and HasTop) class with neg/top DERIVED, else the five-primitive Proposition (primitive bot) cannot register faithfully. SECONDARY: naming HasImpl/impl vs HasImp/imp; notation precedence conflicts (-> 25 vs 30, or 30 vs 35); bundle-vs-a-la-carte (PropositionalConnectives); notation ownership (typeclass notation + _def lemmas vs direct-on-Proposition). DELIVERABLE: human-authored review on #607 (Zulip AI policy), then register Proposition instances via #607 once the falsum question settles. Independent of the IPL-base work.
 
 ---
 
 ### 399. Update PR #648 to the settled IPL-base foundation per Waring's end-of-thread recommendation
-- **Status**: [PR READY]
+- **Status**: [COMPLETED]
 - **Task Type**: pr
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 398

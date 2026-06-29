@@ -223,7 +223,7 @@ Wave-2 phases depend only on the Phase-1 re-framing and edit largely disjoint tr
 
 ---
 
-### Phase 9: Full verification, design-note finalization & CI [NOT STARTED]
+### Phase 9: Full verification, design-note finalization & CI [IN PROGRESS]
 
 **Goal**: Confirm the whole library is green and all preserved assets intact; finalize the internal design note.
 

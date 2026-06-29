@@ -792,12 +792,12 @@
     {
       "project_number": 399,
       "project_name": "refresh_pr648_ipl_base_foundation",
-      "status": "pr_ready",
+      "status": "completed",
       "task_type": "pr",
       "title": "Update PR #648 to the settled IPL-base foundation per Waring's end-of-thread recommendation",
       "description": "[REVISED 2026-06-29 — minimal additive approach supersedes the cherry-pick recipe. Implementation DONE & verified on branch feat/propositional-ipl-base, commit 5dbed274 (3-file diff, 594 jobs green, lint clean, zero sorry): ungated primitive efq constructor makes IPL the base; IPL:=∅; MPL/IsIntuitionistic/intuitionisticCompletion removed; classical layer kept. Update #648 via FAST-FORWARD push of feat/propositional-ipl-base:feat/propositional-v2 (no force-push). Remaining = human: review, ff-push, reword PR description, post Zulip 606970606. MPL-as-base dispute deferred to tasks 407/408/409. See ipl-base-minimal-revision.md.] Update PR #648 (feat/propositional-v2) following Thomas Waring's closing recommendation in the CSLib Zulip 'Propositional Logic' thread (606970606). PR #648 is ~239 commits behind fork main, which is why Waring reports the restored references and Zulip-thread link are 'not in the PR' (both ARE on main at NaturalDeduction/Basic.lean:76 + the Design trade-off note). PLAN (per the user's chosen strategy): branch off upstream/main and cherry-pick the propositional FOUNDATION as a focused, reviewable commit, then update #648 to that branch. Scope of the foundation: the five-primitive `Proposition` type with primitive `⊥`; NaturalDeduction/Basic with the settled IPL-as-base design (efq as a primitive ND rule — see task 398); restored references AND the Zulip-thread link (Waring's flag (b)). EXCLUDE connective typeclasses — Waring flagged these as a SEPARATE development (task 400); do not bundle them. Keep the PR small (Matthew + Waring both asked for small pieces); later layers (Hilbert+equivalence, algebraic semantics incl. retained MPL metatheory, conservativity chains, sequent LJ/LK, tableau) follow as separate stacked PRs. Note /pr is user-only (branch creation, CI, submission); this task prepares the cherry-pick + a human-authored PR/Zulip description for the user to push (Zulip AI policy). Waring will 'review the PR properly once we've settled on the design', so this depends on task 398 (efq/IPL-base implemented). Also coordinate with PR-readiness vet tasks 386/387/389. Source: Zulip thread 606970606.",
       "created": "2026-06-28T15:43:45Z",
-      "last_updated": "2026-06-29T07:40:00Z",
+      "last_updated": "2026-06-29T18:50:28Z",
       "next_artifact_number": 1,
       "artifacts": [
         {
@@ -831,21 +831,22 @@
           "summary": "Zulip reply draft (HUMAN-AUTHOR-REQUIRED): efq done, connectives excluded, references+link present, welcomes review"
         }
       ],
-      "session_id": "sess_1782673164_f5576d_399",
+      "session_id": "sess_complete_399",
       "dependencies": [
         398
       ],
-      "topic": "Propositional Logic"
+      "topic": "Propositional Logic",
+      "completion_summary": "IPL-base foundation prepared for PR #648: ungated primitive efq constructor makes IPL the base (IPL:=∅; MPL/IsIntuitionistic/intuitionisticCompletion removed; classical layer retained). Verified on branch feat/propositional-ipl-base, commit 5dbed274 (3-file diff, 594 jobs green, lint clean, zero sorry). PR/Zulip drafts authored (pr-description.md, zulip-response.md). Remaining steps are human-only: review, fast-forward push, reword PR description, post Zulip 606970606. MPL-as-base dispute deferred to tasks 407/408/409."
     },
     {
       "project_number": 400,
       "project_name": "reconcile_connectives_pr607",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "title": "Unbundle connective typeclasses; reconcile with fmontesi PR #607 (Waring's flag a)",
       "description": "[ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/reports/01_pr607-engagement.md] Engage fmontesi PR #607 (feat(Logic): logical operators) to land the connective typeclasses there instead of in #648 (Waring, Zulip 606970606). PREREQ DONE: our Connectives.lean removed from #648 (commit 85db79a6 on feat/propositional-ipl-base). PRIMARY POINT for the #607 review: #607 makes negation primitive (HasNot) and has NO HasBot; for IPL/MPL, neg is definitionally (phi -> bot), so #607 needs a HasBot (and HasTop) class with neg/top DERIVED, else the five-primitive Proposition (primitive bot) cannot register faithfully. SECONDARY: naming HasImpl/impl vs HasImp/imp; notation precedence conflicts (-> 25 vs 30, or 30 vs 35); bundle-vs-a-la-carte (PropositionalConnectives); notation ownership (typeclass notation + _def lemmas vs direct-on-Proposition). DELIVERABLE: human-authored review on #607 (Zulip AI policy), then register Proposition instances via #607 once the falsum question settles. Independent of the IPL-base work.",
       "created": "2026-06-28T15:43:45Z",
-      "last_updated": "2026-06-29T17:44:04Z",
+      "last_updated": "2026-06-29T18:52:47Z",
       "next_artifact_number": 3,
       "artifacts": [
         {
@@ -857,9 +858,14 @@
           "type": "report",
           "path": "specs/400_reconcile_connectives_pr607/reports/02_engagement-strategy.md",
           "summary": "Live-PR-grounded engagement strategy: incremental (not alternative); reuse Mathlib Bot/Top, derived-neg bridge; human-authorable review skeleton"
+        },
+        {
+          "path": "specs/400_reconcile_connectives_pr607/plans/02_pr607-engagement.md",
+          "type": "plan",
+          "summary": "PR #607 engagement plan: agent-doable review scaffolding (Phases 1-4), human review gate + upstream-resolution gate (5-6, BLOCKED), conditional downstream Proposition-instance registration (7-8, BLOCKED on upstream)"
         }
       ],
-      "session_id": "sess_1782754611_b50d40",
+      "session_id": "sess_1782758901_ee8ca9",
       "dependencies": [],
       "topic": "Propositional Logic"
     },

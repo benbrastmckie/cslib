@@ -202,7 +202,7 @@ Classical-track templates and the existing `intExpandBranches.go` inductions.
 - `lake exe checkInitImports`; `lake exe lint-style`; `lake shake --add-public --keep-implied --keep-prefix` -> clean.
 - Sorry count under `intuitionisticTableau_complete` reduced by 2 (`:296`, `:280` gone).
 
-### Phase 4: Attempt Scheme.lean :288 (sat) — research-or-defer gate [NOT STARTED]
+### Phase 4: Attempt Scheme.lean :288 (sat) — research-or-defer gate [BLOCKED]
 
 **Goal**: Attempt `:288` (`hsat`, `intStepBranch b [] 0 = none`) sorry-free via
 `intExpandBranches_openBranch_sat`. If the empty-set/world-0 formulation proves unbridgeable from
@@ -235,7 +235,7 @@ coordinate `hsat` reformulation with 317) — NO sorry/axiom workaround.
 - `lake exe checkInitImports`; `lake exe lint-style`; `lake shake --add-public --keep-implied --keep-prefix` -> clean.
 - If closed: sorry count reduced by 1. If deferred: no new debt; outcome documented.
 
-### Phase 5: Coordinate :242 (truthLemma) + Completeness.lean:112 with task 317 [DEFERRED — NOT STARTED]
+### Phase 5: Coordinate :242 (truthLemma) + Completeness.lean:112 with task 317 [COMPLETED]
 
 **Goal**: DEFERRED/COORDINATION ONLY. Document that `Scheme.lean:242` (parametric Kripke
 truthLemma) and `Completeness.lean:112` (IValid->forcing bridge + `intExtractValuation` upward

@@ -239,6 +239,10 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom)
       IForces (intExtractValuation b) (S.modelBot b) w φ) ∧
     (b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) →
       ¬ IForces (intExtractValuation b) (S.modelBot b) w φ) := by
+  -- Task 317: parametric Kripke truth lemma (formula induction + persistence/monotonicity
+  -- across Nat-labelled worlds + parametric modelBot/S.bot_truth). Sequenced after 317.
+  -- Note: the hsat parameter may need reformulation to `intStepBranch b e nw = none`
+  -- (matching the actual expanded-set/world from the loop) rather than `[] 0`.
   sorry
 
 /-! ## Structural Lemmas for `openBranch_countermodel` -/
@@ -504,12 +508,14 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
   have hopen : S.closurePred b = false :=
     intExpandBranches_openBranch_closed _ _ _ _ _ _ _ h
   have hsat : ∀ sf ∈ b, intStepBranch b [] 0 = none := by
-    -- MISSING: `intExpandBranches_openBranch_sat`
-    -- In the fuel+1 case, `.openBranch bPers` is returned when
-    -- `intStepBranch bPers e nw = none` for the accumulated expanded set `e` and
-    -- next-world `nw`. Connecting this to `intStepBranch b [] 0 = none` (empty expanded
-    -- set, world 0) requires showing the expanded set does not affect the none result
-    -- for a fully saturated branch. Formal proof requires induction on the expansion loop.
+    -- DEFERRED (task 317 coordination): The loop returns `.openBranch bPers` when
+    -- `intStepBranch bPers e nw = none` for the ACCUMULATED expanded set `e` and
+    -- next-world `nw`. Bridging to `intStepBranch b [] 0 = none` (empty expanded set,
+    -- world 0) requires either (a) showing `expanded` does not affect saturation for a
+    -- fully-explored branch, or (b) reformulating `truthLemma` to accept
+    -- `intStepBranch b e nw = none` for some `e`/`nw`. Option (b) is the clean path:
+    -- task 317's parametric truth lemma should be stated with the actual `e`/`nw` from
+    -- the expansion loop, not the degenerate `[] 0` form.
     sorry
   have hFmem : b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == 0) := by
     have hmem : (⟨.neg, φ, 0⟩ : ISF Atom) ∈ b :=

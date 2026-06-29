@@ -107,8 +107,9 @@ theorem intuitionisticTableau_complete (φ : Proposition Atom)
     (h : IValid φ) : intuitionisticTableau φ = .closed := by
   apply tableau_complete intScheme
   intro _b
-  -- Bridge: IValid φ → IForces (intExtractValuation b) (fun _ => False) 0 φ
-  -- Requires: upward-closure of intExtractValuation b (task 317 obligation)
+  -- Task 317: IValid→forcing bridge with upward closure of intExtractValuation b.
+  -- Sequenced after task 317 completes the parametric truth lemma.
+  -- (This obligation is outside task 385 scope by design.)
   sorry
 
 end Cslib.Logic.PL

@@ -125,7 +125,7 @@ Wave-2 phases depend only on the Phase-1 re-framing and edit largely disjoint tr
 
 ---
 
-### Phase 3: Named semantic property hierarchy — reuse `Is*`/`OrderBot` (S2) [NOT STARTED]
+### Phase 3: Named semantic property hierarchy — reuse `Is*`/`OrderBot` (S2) [COMPLETED]
 
 **Goal**: Reify "leastness/explosion as independent properties" as named typeclasses that **reuse** the existing conventions, not parallel `Has*` duplicates.
 

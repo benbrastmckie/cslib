@@ -840,14 +840,25 @@
     {
       "project_number": 400,
       "project_name": "reconcile_connectives_pr607",
-      "status": "researching",
+      "status": "researched",
       "task_type": "cslib",
       "title": "Unbundle connective typeclasses; reconcile with fmontesi PR #607 (Waring's flag a)",
       "description": "[ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/reports/01_pr607-engagement.md] Engage fmontesi PR #607 (feat(Logic): logical operators) to land the connective typeclasses there instead of in #648 (Waring, Zulip 606970606). PREREQ DONE: our Connectives.lean removed from #648 (commit 85db79a6 on feat/propositional-ipl-base). PRIMARY POINT for the #607 review: #607 makes negation primitive (HasNot) and has NO HasBot; for IPL/MPL, neg is definitionally (phi -> bot), so #607 needs a HasBot (and HasTop) class with neg/top DERIVED, else the five-primitive Proposition (primitive bot) cannot register faithfully. SECONDARY: naming HasImpl/impl vs HasImp/imp; notation precedence conflicts (-> 25 vs 30, or 30 vs 35); bundle-vs-a-la-carte (PropositionalConnectives); notation ownership (typeclass notation + _def lemmas vs direct-on-Proposition). DELIVERABLE: human-authored review on #607 (Zulip AI policy), then register Proposition instances via #607 once the falsum question settles. Independent of the IPL-base work.",
       "created": "2026-06-28T15:43:45Z",
-      "last_updated": "2026-06-29T17:37:07Z",
-      "next_artifact_number": 1,
-      "artifacts": [],
+      "last_updated": "2026-06-29T17:44:04Z",
+      "next_artifact_number": 3,
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/400_reconcile_connectives_pr607/reports/01_pr607-engagement.md",
+          "summary": "Initial PR #607 engagement: HasBot/derived-neg point + naming/precedence/bundling nits"
+        },
+        {
+          "type": "report",
+          "path": "specs/400_reconcile_connectives_pr607/reports/02_engagement-strategy.md",
+          "summary": "Live-PR-grounded engagement strategy: incremental (not alternative); reuse Mathlib Bot/Top, derived-neg bridge; human-authorable review skeleton"
+        }
+      ],
       "session_id": "sess_1782754611_b50d40",
       "dependencies": [],
       "topic": "Propositional Logic"

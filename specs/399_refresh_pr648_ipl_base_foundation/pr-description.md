@@ -2,119 +2,93 @@
 HUMAN-AUTHOR-REQUIRED
 
 This file is AI-assisted scaffolding for the PR body of PR #648.
-The HUMAN (benbrastmckie) must review, reword, and finalize every section
-before pasting it into the GitHub PR body.
+The HUMAN (benbrastmckie) must review, reword, and finalize before pasting
+it into the GitHub PR body.
 
-Zulip AI policy: AI-drafted Zulip messages are NOT allowed (Chris Henson warning,
-msg 605827029). This document will not be posted by any automated tool. The author
-must copy, read, reword, and submit in their own words.
+This draft is a MINIMAL REVISION of the CURRENT live #648 description: same
+section skeleton (Summary / Modified files / Design rationale / Coordination /
+Deferred / AI Tools), with only the parts changed by the IPL-base commit edited.
+It does NOT restructure the existing description.
 
-Sections marked [FILL IN] require human input.
+Zulip AI policy: AI-drafted Zulip messages are NOT allowed. This document will
+not be posted by any automated tool.
 ============================================================ -->
 
-# PR Description Draft — PR #648: IPL-base propositional foundation
+# PR Description — PR #648 (minimal revision of the live body)
 
 **PR**: https://github.com/leanprover/cslib/pull/648
 **Branch**: `feat/propositional-v2` — rebased onto current `upstream/main` (toolchain
-`v4.32.0-rc1`); 3 clean commits, no merge commit. Head commit `63cd13c8` adds the IPL-base
-refactor. The two original commits (`1a2e2e7e`, `cc44c14d`) are preserved.
-**CI**: GitHub Actions — all checks **green** on `63cd13c8`. Verified locally too:
-`lake build`, `lake exe mk_all --check`, `lake exe checkInitImports`, `lake lint`,
-`lake exe lint-style`, `lake test` — all pass; zero `sorry`.
+`v4.32.0-rc1`); 3 clean commits, head `63cd13c8`. **GitHub CI green; MERGEABLE.**
+Net diff: 4 files — `Defs.lean`, `NaturalDeduction/Basic.lean`, `NaturalDeduction/Theory.lean`,
+`references.bib`. (`Connectives.lean` and `Cslib.lean` are no longer touched by the PR.)
 
 ---
 
-## Suggested commit message (the new commit)
+## Delta from the current live #648 description (so you can see what changed)
 
-```
-feat(Logics/Propositional): make IPL the base logic with primitive ex falso
-
-Promote ex falso quodlibet (bottom-elimination) to an ungated primitive
-constructor of the natural-deduction Derivation, so IPL is the base
-propositional logic and the primitive bot constructor has an inference
-rule. IPL becomes the empty base theory; CPL still adds double negation
-elimination.
-
-The minimal-logic (MPL) layer is deferred to a separate PR: this removes
-MPL, the IsIntuitionistic typeclass, intuitionisticCompletion, and the
-derived efq rules, keeping the classical layer (byContra/lem/pierce and
-the IsClassical instances for CPL/LEM/Pierce) intact, re-proved via the
-efq constructor.
-
-Per reviewer feedback (Waring, CSLib Zulip 'Propositional Logic'):
-- Drop the connective typeclasses (Foundations/Logic/Connectives.lean and
-  its registration instances) -- a separate development handled via PR #607.
-- Restore references (Johansson 1937, Gentzen 1935, Prawitz 1965,
-  Troelstra-van Dalen 1988) and add the CSLib Zulip thread link.
-```
+- **Summary → Key changes**: added the efq/IPL-base bullet; added "connective typeclasses removed";
+  rewrote the references bullet (we now ship Gentzen/Prawitz/Troelstra–van Dalen, not "German refs
+  replaced with Avigad").
+- **Removed the "New files" section** — `Connectives.lean` is no longer added.
+- **Modified files**: dropped `Cslib.lean` (no net change) and all `Connectives` mentions; updated
+  the `Defs.lean`/`Basic.lean`/`Theory.lean` lines for IPL-base + `efq`; `references.bib` now lists
+  the 3 added entries.
+- **Design rationale**: one added sentence on primitive `efq` / IPL-base.
+- **Coordination / Deferred**: updated for connectives→#607 and the minimal-logic deferral.
 
 ---
 
-## Suggested PR Body
+## Suggested PR Body (paste-ready after rewording)
 
-<!-- [FILL IN] Reword in your own voice before posting. -->
+## Summary
 
-This refreshes PR #648 to settle the propositional-logic *base* per Thomas Waring's
-recommendation on the Zulip thread
-[Propositional Logic](https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic)
-(msg 606970606): with `⊥` a primitive constructor, ex falso should be a real rule, so
-**IPL is the base logic** and the question of a separate minimal-logic development is
-**deferred to later work**.
+Revises PR #648 based on reviewer feedback (thomaskwaring, msg 606970606). Adds `bot` as a primitive constructor of `Proposition` (eliminating all `[Bot Atom]` constraints) and makes **IPL the base logic** by taking ex falso quodlibet as a primitive natural-deduction rule. Rebased on upstream/main post-#536.
 
-### What the PR delivers
+**Key changes from #648:**
+- `bot` is a primitive constructor (not an atom), so explosion and `IsClassical` no longer require `[Bot Atom]`
+- **Ex falso quodlibet is now a primitive rule** (`efq` constructor of `Derivation`), so `⊥` has an inference rule and **IPL is the base logic**; minimal logic (MPL) is set aside for a separate PR/discussion, per the agreed compromise
+- Reconciled with merged PR #536's InferenceSystem-parameterized typeclasses
+- Constructor naming uses `imp`/`impI`/`impE` (renamed from `impl`/`implI`/`implE` for consistency with FormalizedFormalLogic convention; open to reverting if reviewers prefer `impl`)
+- Semantics files removed per thomaskwaring's request (deferred to follow-up PR)
+- Connective typeclasses removed — a separate development coordinated via PR #607 (this PR no longer ships `Connectives.lean`)
+- References include Gentzen 1935, Prawitz 1965, and Troelstra & van Dalen 1988, and a link to the CSLib Zulip design thread is added
 
-- **Five-primitive `Proposition`**: `atom`, `bot`, `imp`, `and`, `or`. `⊥` is a primitive
-  constructor (no `[Bot Atom]` constraint); `¬φ := φ → ⊥`, `⊤ := ⊥ → ⊥` are derived.
-- **IPL is the base natural-deduction system.** Ex falso quodlibet (`efq`, ⊥-elimination)
-  is an **ungated primitive constructor** of `Theory.Derivation` — so `⊥` has an inference
-  rule rather than being a constructor with no behaviour. `CPL` extends the base with double
-  negation elimination; classical derived rules (`byContra`, `lem`, `pierce`) and the
-  `IsClassical` instances for `CPL`/`LEM`/`Pierce` are included.
-- **References + Zulip link**: `Johansson1937`, `Gentzen1935`, `Prawitz1965`,
-  `TroelstraVanDalen1988` are in `references.bib` and cited in `NaturalDeduction/Basic.lean`,
-  whose `## Implementation notes` motivate primitive efq and link the design thread.
+## Modified files
 
-### Addressing the review comments (Waring, msg 606970606)
+- `Cslib/Logics/Propositional/Defs.lean` -- `Proposition` with primitive `bot`; derived `neg`, `top`, `iff`; `IPL` is the empty base theory and `CPL` adds double-negation elimination (the `MPL` / `IsIntuitionistic` / `intuitionisticCompletion` layer is set aside for the minimal-logic PR)
+- `Cslib/Logics/Propositional/NaturalDeduction/Basic.lean` -- derivation constructors `impI`/`impE`, `andE1`/`andE2`, `orI1`/`orI2` with explicit `Γ` arguments, plus the new primitive `efq` (⊥-elimination); implementation notes, references, and Zulip-thread link
+- `Cslib/Logics/Propositional/NaturalDeduction/Theory.lean` -- `[Bot Atom]` removed; the classical layer (`IsClassical`, `byContra`/`lem`/`pierce`, and the `CPL`/`LEM`/`Pierce` instances) re-proved over the new base via the `efq` constructor
+- `references.bib` -- added `Gentzen1935`, `Prawitz1965`, `TroelstraVanDalen1988`
 
-- **efq as a rule / forget minimal logic for now.** efq is now a primitive rule and `⊥` has
-  semantics. Minimal logic (MPL) is **not** part of this PR — `MPL`, the `IsIntuitionistic`
-  typeclass, `intuitionisticCompletion`, and the derived efq rules are removed. The
-  minimal-as-fragment / fragment-design work is deferred to a separate PR for separate
-  discussion (tracked on the fork as tasks 407–409).
-- **Connective typeclasses are a separate development.** `Cslib/Foundations/Logic/Connectives.lean`
-  and its registration instances are **removed** from this PR; the connective-typeclass work is
-  coordinated with fmontesi's PR #607 (see task 400). One design point for #607: it currently makes
-  negation primitive (`HasNot`) with no `HasBot`; for IPL/MPL `¬φ := φ → ⊥`, so a `HasBot` class
-  with derived `¬`/`⊤` is needed for `Proposition` to register.
-- **References + Zulip link.** Added (above).
+## Design rationale
 
-### Deferred to follow-up PRs
+Primitive `bot` eliminates `[Bot Atom]` constraints throughout the propositional logic API, gives `Proposition.subst` a natural recursive case for `bot`, and follows the standard treatment in Avigad (2022) where `bot` is a logical constant rather than an atomic proposition. The trade-off (noted by thomaskwaring) is an extra `bot` case in structural recursions. Relatedly, taking ex falso as a **primitive rule** rather than leaving `⊥` a constructor with no inference behaviour follows the standard natural-deduction treatment (Gentzen 1935, Prawitz 1965, Troelstra & van Dalen 1988) and is thomaskwaring's recommendation; minimal logic — the efq-free fragment — is deferred so the fragment design can be settled on its own.
 
-| Content | Future home |
-|---|---|
-| Minimal logic (MPL) + fragment design | separate PR (the deferred discussion) |
-| Connective typeclasses | via PR #607 |
-| Hilbert systems, ND–Hilbert equivalence | stacked PR |
-| Algebraic / Kripke semantics | stacked PR |
-| Sequent calculi LJ/LK, tableau | stacked PRs |
+These benefits extend to planned completeness work for modal and temporal logics: primitive `bot` ensures `Proposition.subst` preserves bottom structurally (`subst f .bot = .bot`), whereas atom-encoded bot requires additional constraints to prevent `subst f (.atom ⊥) = f ⊥` from mapping bottom to an arbitrary formula. As thomaskwaring notes, non-bottom-preserving maps are also useful (e.g., conservativity results via `WithBot.some`).
 
-### Namespace note (pending, task 387)
+## Coordination
 
-The PR exposes `namespace Cslib.Logic.PL`; the rename to `Cslib.Logics.Propositional`
-(per ORGANISATION.md) needs maintainer consensus and is tracked in task 387. Not blocking.
+- **PR #607** (fmontesi): connective typeclasses are a separate development; this PR no longer ships its own `Connectives.lean`. One design point for #607: it makes negation primitive (`HasNot`) with no `HasBot`, but for intuitionistic/minimal logic `¬φ := φ → ⊥`, so a `HasBot` class with derived `¬`/`⊤` is needed for the `⊥`-primitive `Proposition` to register. I'll leave a review on #607.
+- **PR #587** (thomaskwaring): since this PR no longer adds `Cslib/Foundations/Logic/Connectives.lean`, the earlier file-path overlap is moot.
 
-### AI tool disclosure
+## Deferred
 
-<!-- [FILL IN] Per CSLib/Mathlib AI policy, disclose how AI tools were used, e.g.:
-"AI tools (Claude) assisted with refactoring, proof adjustment, documentation drafting,
-and bib lookup; all Lean code was reviewed and verified by the author." -->
+- **Minimal logic (MPL) + fragment design** -- a separate PR/discussion (the agreed deferral).
+- **Semantics** (`Bool.lean`, evaluation) -- follow-up PR; the `Prop` vs `Bool` vs `GeneralizedHeytingAlgebra` question (raised by thomaskwaring and ctchou) will be addressed there.
+- Hilbert systems, sequent calculi, and tableau -- stacked PRs.
+
+## Namespace note (pending, task 387)
+
+The PR exposes `namespace Cslib.Logic.PL`; the rename to `Cslib.Logics.Propositional` (per ORGANISATION.md) needs maintainer consensus and is tracked separately. Not blocking.
+
+## AI Tools Used
+
+Claude Code was used to refactor for primitive `efq`/IPL-base, remove the connective typeclasses and the minimal-logic layer, rebase onto upstream/main and resolve the `references.bib` conflict, and verify CI. All mathematical decisions reviewed by the human author.
 
 ---
 
 ## Status / next steps
 
-The branch is **already pushed** and **GitHub CI is green** (head `63cd13c8`); the PR is
-`MERGEABLE` (awaiting maintainer review). Remaining, human-only:
-
-1. Reword this draft in your own words (AI policy — see banner) and paste it into the #648 PR body.
-2. Post `zulip-response.md` to Zulip thread 606970606 **in your own words**.
+Already pushed; **GitHub CI green**; PR `MERGEABLE` (awaiting maintainer review). Human-only:
+1. Reword the body above in your own words and paste it into the #648 description.
+2. Post `zulip-response.md` to Zulip thread 606970606 in your own words.

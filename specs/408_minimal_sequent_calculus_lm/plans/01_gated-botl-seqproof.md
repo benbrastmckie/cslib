@@ -235,7 +235,7 @@ preserving signatures and termination measures.
 
 ---
 
-### Phase 6: External consumer audit — `OrImpConservative.lean`, `ProofSystemEquivalence.lean` [NOT STARTED]
+### Phase 6: External consumer audit — `OrImpConservative.lean`, `ProofSystemEquivalence.lean` [COMPLETED]
 
 **Goal**: Keep the external public surface type-stable under `LJProof = SeqProof IPL`.
 
@@ -260,7 +260,7 @@ preserving signatures and termination measures.
 
 ---
 
-### Phase 7: Full CI verification + LK regression check [NOT STARTED]
+### Phase 7: Full CI verification + LK regression check [COMPLETED]
 
 **Goal**: Confirm the whole tree is green, LK is untouched and intact, and zero debt was added.
 

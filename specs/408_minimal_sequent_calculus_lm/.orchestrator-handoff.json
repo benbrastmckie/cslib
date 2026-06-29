@@ -1,0 +1,23 @@
+{
+  "status": "implemented",
+  "summary": "Unified MPL/IPL single-conclusion sequent calculus into one inductive SeqProof T with property-gated botL ([IsIntuitionistic T]); LJProof := SeqProof IPL. Structural metatheory (height, mono, CutFree, IsBotRuleFree, formulas) proved once generically over T; cut elimination, subformula property, soundness, completeness, interpolation, decidability all preserved at T=IPL with original signatures. LK untouched. Full lake build green; checkInitImports/lint-style/shake/mk_all pass; zero sorry/axiom/vacuous in task scope.",
+  "phases_completed": 7,
+  "phases_total": 7,
+  "blockers": [],
+  "continuation_context": {
+    "handoff_path": null,
+    "note": "Task 408 implementation complete and green. Two PRE-EXISTING, out-of-scope CI conditions remain on the tree (not introduced by 408): (1) lake test fails on CslibTests.GrindLint for IntFinWorld.mk.sizeOf_spec in Metalogic/IntDecidability.lean (tasks 385/400 spike code) -- deductively independent of the SeqProof refactor; (2) lake lint defsWithUnderscore on the pre-existing ljCutAdm_* helper names. Recommend separate tasks if these need clearing before PR."
+  },
+  "artifacts": [
+    "specs/408_minimal_sequent_calculus_lm/summaries/01_gated-botl-seqproof-summary.md",
+    "specs/408_minimal_sequent_calculus_lm/plans/01_gated-botl-seqproof.md"
+  ],
+  "sorry_inventory": {
+    "task_408_files": 0,
+    "preexisting_unrelated": {
+      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean": 2,
+      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean": 1,
+      "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean": 5
+    }
+  }
+}

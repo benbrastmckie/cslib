@@ -59,21 +59,29 @@ universe u
 
 namespace Cslib.Logic.PL
 
-open Proposition
+open Proposition Theory
 
 variable {Atom : Type u} [DecidableEq Atom]
 
-/-- LJ proof trees for intuitionistic propositional logic. The presentation is all-additive:
-every rule has an explicit context set `Γ` (antecedent) and a single conclusion formula.
-Principal formulas appear in both premise and conclusion contexts.
+/-- Single-conclusion sequent-calculus proof trees parameterized by a theory `T : Theory Atom`.
+The presentation is all-additive: every rule has an explicit context set `Γ` (antecedent) and a
+single conclusion formula. Principal formulas appear in both premise and conclusion contexts.
 
-LJ uses single-conclusion sequents (`Γ ⊢ A` where `A : Proposition Atom`) rather than
+`SeqProof` uses single-conclusion sequents (`Γ ⊢ A` where `A : Proposition Atom`) rather than
 two-sided multi-conclusion sequents as in LK. This means there is no `weakR` constructor,
 and right disjunction splits into `orR1` and `orR2`.
 
+The ten connective/structural rules (`ax`, `andL`, `andR`, `orL`, `orR1`, `orR2`, `impL`, `impR`,
+`weakL`, `cut`) form the **minimal** base (MPL strength). The explosion rule `botL` is *gated* by
+`[IsIntuitionistic T]`, the exact analogue of the gated `efq` in `Theory.Derivation`: it is
+constructible only when the theory `T` validates ex falso quodlibet. Hence `SeqProof MPL`
+(`MPL = ∅` admits no `IsIntuitionistic` instance) is the `botL`-free minimal calculus, while
+`SeqProof IPL` (= `LJProof`) recovers full intuitionistic LJ. Structural metatheory (`height`,
+`mono`, `CutFree`, cut elimination, subformula property) is proved once generically over `T`.
+
 Constructors:
 - `ax`: identity axiom — `A` appears in the antecedent.
-- `botL`: left falsum — `⊥` in the antecedent derives anything.
+- `botL`: left falsum — `⊥` in the antecedent derives anything (gated by `[IsIntuitionistic T]`).
 - `andL`: left conjunction — from `A, B, Γ ⊢ C` derive `A ∧ B, Γ ⊢ C`.
 - `andR`: right conjunction — from `Γ ⊢ A` and `Γ ⊢ B` derive `Γ ⊢ A ∧ B`.
 - `orL`: left disjunction — from `A, Γ ⊢ C` and `B, Γ ⊢ C` derive `A ∨ B, Γ ⊢ C`.
@@ -83,61 +91,72 @@ Constructors:
 - `impR`: right implication — from `A, Γ ⊢ B` derive `Γ ⊢ A → B`.
 - `weakL`: left weakening — add a formula to the antecedent.
 - `cut`: cut rule — eliminate a formula `A` using a left and right proof. -/
-inductive LJProof : @Sequent Atom → Type u where
+inductive SeqProof (T : Theory Atom) : @Sequent Atom → Type u where
   /-- Identity axiom: formula `A` appears in the antecedent. -/
   | ax (A : Proposition Atom) (Γ : Ctx Atom) (_ : A ∈ Γ) :
-      LJProof (Γ ⊢ A)
-  /-- Left falsum: bottom in the antecedent derives anything. -/
-  | botL (Γ : Ctx Atom) (C : Proposition Atom) (_ : (⊥ : Proposition Atom) ∈ Γ) :
-      LJProof (Γ ⊢ C)
+      SeqProof T (Γ ⊢ A)
+  /-- Left falsum: bottom in the antecedent derives anything. Gated by `[IsIntuitionistic T]`,
+  so this rule is unconstructible at minimal (`MPL`) strength. -/
+  | botL (Γ : Ctx Atom) (C : Proposition Atom) [IsIntuitionistic T]
+      (_ : (⊥ : Proposition Atom) ∈ Γ) :
+      SeqProof T (Γ ⊢ C)
   /-- Left conjunction: from `A, B, Γ ⊢ C` derive `A ∧ B, Γ ⊢ C`. -/
   | andL {Γ : Ctx Atom} {C : Proposition Atom} (A B : Proposition Atom)
       (_ : (A ∧ B) ∈ Γ)
-      (_ : LJProof (insert A (insert B Γ) ⊢ C)) :
-      LJProof (Γ ⊢ C)
+      (_ : SeqProof T (insert A (insert B Γ) ⊢ C)) :
+      SeqProof T (Γ ⊢ C)
   /-- Right conjunction: from `Γ ⊢ A` and `Γ ⊢ B` derive `Γ ⊢ A ∧ B`. -/
   | andR {Γ : Ctx Atom} (A B : Proposition Atom)
-      (_ : LJProof (Γ ⊢ A))
-      (_ : LJProof (Γ ⊢ B)) :
-      LJProof (Γ ⊢ A ∧ B)
+      (_ : SeqProof T (Γ ⊢ A))
+      (_ : SeqProof T (Γ ⊢ B)) :
+      SeqProof T (Γ ⊢ A ∧ B)
   /-- Left disjunction: from `A, Γ ⊢ C` and `B, Γ ⊢ C` derive `A ∨ B, Γ ⊢ C`. -/
   | orL {Γ : Ctx Atom} {C : Proposition Atom} (A B : Proposition Atom)
       (_ : (A ∨ B) ∈ Γ)
-      (_ : LJProof (insert A Γ ⊢ C))
-      (_ : LJProof (insert B Γ ⊢ C)) :
-      LJProof (Γ ⊢ C)
+      (_ : SeqProof T (insert A Γ ⊢ C))
+      (_ : SeqProof T (insert B Γ ⊢ C)) :
+      SeqProof T (Γ ⊢ C)
   /-- Right disjunction left: from `Γ ⊢ A` derive `Γ ⊢ A ∨ B`. -/
   | orR1 {Γ : Ctx Atom} (A B : Proposition Atom)
-      (_ : LJProof (Γ ⊢ A)) :
-      LJProof (Γ ⊢ A ∨ B)
+      (_ : SeqProof T (Γ ⊢ A)) :
+      SeqProof T (Γ ⊢ A ∨ B)
   /-- Right disjunction right: from `Γ ⊢ B` derive `Γ ⊢ A ∨ B`. -/
   | orR2 {Γ : Ctx Atom} (A B : Proposition Atom)
-      (_ : LJProof (Γ ⊢ B)) :
-      LJProof (Γ ⊢ A ∨ B)
+      (_ : SeqProof T (Γ ⊢ B)) :
+      SeqProof T (Γ ⊢ A ∨ B)
   /-- Left implication: from `Γ ⊢ A` and `B, Γ ⊢ C` derive `(A → B), Γ ⊢ C`. -/
   | impL {Γ : Ctx Atom} {C : Proposition Atom} (A B : Proposition Atom)
       (_ : (A → B) ∈ Γ)
-      (_ : LJProof (Γ ⊢ A))
-      (_ : LJProof (insert B Γ ⊢ C)) :
-      LJProof (Γ ⊢ C)
+      (_ : SeqProof T (Γ ⊢ A))
+      (_ : SeqProof T (insert B Γ ⊢ C)) :
+      SeqProof T (Γ ⊢ C)
   /-- Right implication: from `A, Γ ⊢ B` derive `Γ ⊢ A → B`. -/
   | impR {Γ : Ctx Atom} (A B : Proposition Atom)
-      (_ : LJProof (insert A Γ ⊢ B)) :
-      LJProof (Γ ⊢ A → B)
+      (_ : SeqProof T (insert A Γ ⊢ B)) :
+      SeqProof T (Γ ⊢ A → B)
   /-- Left weakening: add a formula to the antecedent. -/
   | weakL {Γ : Ctx Atom} {C : Proposition Atom} (A : Proposition Atom)
-      (_ : LJProof (Γ ⊢ C)) :
-      LJProof (insert A Γ ⊢ C)
+      (_ : SeqProof T (Γ ⊢ C)) :
+      SeqProof T (insert A Γ ⊢ C)
   /-- Cut rule: cut on formula `A`. -/
   | cut {Γ : Ctx Atom} {C : Proposition Atom} (A : Proposition Atom)
-      (_ : LJProof (Γ ⊢ A))
-      (_ : LJProof (insert A Γ ⊢ C)) :
-      LJProof (Γ ⊢ C)
+      (_ : SeqProof T (Γ ⊢ A))
+      (_ : SeqProof T (insert A Γ ⊢ C)) :
+      SeqProof T (Γ ⊢ C)
 
-/-- The height of an LJ proof tree (maximum rule depth). -/
-def LJProof.height {seq : @Sequent Atom} : LJProof seq → Nat
+/-- LJ proof trees for intuitionistic propositional logic: `SeqProof` at theory `IPL`. Since
+`IsIntuitionistic IPL` holds, the gated `botL` rule is available, recovering full LJ. -/
+abbrev LJProof (seq : @Sequent Atom) : Type u := SeqProof IPL seq
+
+/-- Minimal-strength single-conclusion proof trees: `SeqProof` at theory `MPL = ∅`. Since `MPL`
+admits no `IsIntuitionistic` instance, the gated `botL` rule is structurally unconstructible, so
+`SeqProofMinimal` is the `botL`-free minimal calculus. -/
+abbrev SeqProofMinimal (seq : @Sequent Atom) : Type u := SeqProof MPL seq
+
+/-- The height of a proof tree (maximum rule depth), generic over the theory `T`. -/
+def SeqProof.height {T : Theory Atom} {seq : @Sequent Atom} : SeqProof T seq → Nat
   | .ax _ _ _ => 0
-  | .botL _ _ _ => 0
+  | @SeqProof.botL _ _ _ _ _ _ _ => 0
   | .andL _ _ _ d => d.height + 1
   | .andR _ _ d₁ d₂ => max d₁.height d₂.height + 1
   | .orL _ _ _ d₁ d₂ => max d₁.height d₂.height + 1
@@ -148,18 +167,23 @@ def LJProof.height {seq : @Sequent Atom} : LJProof seq → Nat
   | .weakL _ d => d.height + 1
   | .cut _ d₁ d₂ => max d₁.height d₂.height + 1
 
-/-- Left-side monotonicity (weakening): if `Γ ⊆ Γ'` then any LJ proof of `Γ ⊢ C` yields
-an LJ proof of `Γ' ⊢ C`.
+/-- The height of an LJ proof tree (maximum rule depth). Re-export of `SeqProof.height` at `IPL`. -/
+@[reducible] def LJProof.height {seq : @Sequent Atom} (d : LJProof seq) : Nat :=
+  SeqProof.height d
 
-Unlike LK's two-sided `mono`, LJ has a single-conclusion succedent so only the antecedent
-needs to be weakened. This follows by structural induction on the proof, inserting additional
-weakening steps at axiom and `botL` leaves and propagating context extensions upward through
-the rules. -/
-def LJProof.mono {Γ Γ' : Ctx Atom} {C : Proposition Atom}
-    (hL : Γ ⊆ Γ') : LJProof (Γ ⊢ C) → LJProof (Γ' ⊢ C)
+/-- Left-side monotonicity (weakening): if `Γ ⊆ Γ'` then any proof of `Γ ⊢ C` yields
+a proof of `Γ' ⊢ C`. Generic over the theory `T`.
+
+Unlike LK's two-sided `mono`, this single-conclusion calculus weakens only the antecedent.
+This follows by structural induction on the proof, inserting additional weakening steps at
+axiom and `botL` leaves and propagating context extensions upward through the rules. The gated
+`botL` arm rebinds its stored `[IsIntuitionistic T]` instance via `letI` before reconstruction. -/
+def SeqProof.mono {T : Theory Atom} {Γ Γ' : Ctx Atom} {C : Proposition Atom}
+    (hL : Γ ⊆ Γ') : SeqProof T (Γ ⊢ C) → SeqProof T (Γ' ⊢ C)
   | .ax A _ hA =>
       ax A Γ' (hL hA)
-  | .botL _ _ hbot =>
+  | @SeqProof.botL _ _ _ _ _ inst hbot =>
+      letI := inst
       botL Γ' _ (hL hbot)
   | .andL A B hAB d =>
       andL A B (hL hAB)
@@ -189,19 +213,45 @@ def LJProof.mono {Γ Γ' : Ctx Atom} {C : Proposition Atom}
         (d₁.mono hL)
         (d₂.mono (Finset.insert_subset_insert _ hL))
 
-/-- A predicate asserting that an LJ proof is cut-free (contains no `cut` steps). -/
-def LJCutFree : LJProof (Atom := Atom) seq → Prop
+/-- Left-side monotonicity for LJ proofs. Re-export of `SeqProof.mono` at `IPL`. -/
+@[reducible] def LJProof.mono {Γ Γ' : Ctx Atom} {C : Proposition Atom}
+    (hL : Γ ⊆ Γ') (d : LJProof (Γ ⊢ C)) : LJProof (Γ' ⊢ C) :=
+  SeqProof.mono hL d
+
+/-- A predicate asserting that a proof is cut-free (contains no `cut` steps). Generic over `T`. -/
+def SeqProof.CutFree {T : Theory Atom} : SeqProof T seq → Prop
   | .ax _ _ _ => True
-  | .botL _ _ _ => True
-  | .andL _ _ _ d => LJCutFree d
-  | .andR _ _ d₁ d₂ => LJCutFree d₁ ∧ LJCutFree d₂
-  | .orL _ _ _ d₁ d₂ => LJCutFree d₁ ∧ LJCutFree d₂
-  | .orR1 _ _ d => LJCutFree d
-  | .orR2 _ _ d => LJCutFree d
-  | .impL _ _ _ d₁ d₂ => LJCutFree d₁ ∧ LJCutFree d₂
-  | .impR _ _ d => LJCutFree d
-  | .weakL _ d => LJCutFree d
+  | @SeqProof.botL _ _ _ _ _ _ _ => True
+  | .andL _ _ _ d => SeqProof.CutFree d
+  | .andR _ _ d₁ d₂ => SeqProof.CutFree d₁ ∧ SeqProof.CutFree d₂
+  | .orL _ _ _ d₁ d₂ => SeqProof.CutFree d₁ ∧ SeqProof.CutFree d₂
+  | .orR1 _ _ d => SeqProof.CutFree d
+  | .orR2 _ _ d => SeqProof.CutFree d
+  | .impL _ _ _ d₁ d₂ => SeqProof.CutFree d₁ ∧ SeqProof.CutFree d₂
+  | .impR _ _ d => SeqProof.CutFree d
+  | .weakL _ d => SeqProof.CutFree d
   | .cut _ _ _ => False
+
+/-- A predicate asserting that a proof does not use the gated `botL` rule. Generic over `T`.
+At minimal strength (`SeqProofMinimal = SeqProof MPL`) every proof satisfies this, since `botL`
+is unconstructible there. -/
+def SeqProof.IsBotRuleFree {T : Theory Atom} : ∀ {seq : @Sequent Atom}, SeqProof T seq → Prop
+  | _, .ax _ _ _ => True
+  | _, @SeqProof.botL _ _ _ _ _ _ _ => False
+  | _, .andL _ _ _ d => SeqProof.IsBotRuleFree d
+  | _, .andR _ _ d₁ d₂ => SeqProof.IsBotRuleFree d₁ ∧ SeqProof.IsBotRuleFree d₂
+  | _, .orL _ _ _ d₁ d₂ => SeqProof.IsBotRuleFree d₁ ∧ SeqProof.IsBotRuleFree d₂
+  | _, .orR1 _ _ d => SeqProof.IsBotRuleFree d
+  | _, .orR2 _ _ d => SeqProof.IsBotRuleFree d
+  | _, .impL _ _ _ d₁ d₂ => SeqProof.IsBotRuleFree d₁ ∧ SeqProof.IsBotRuleFree d₂
+  | _, .impR _ _ d => SeqProof.IsBotRuleFree d
+  | _, .weakL _ d => SeqProof.IsBotRuleFree d
+  | _, .cut _ d₁ d₂ => SeqProof.IsBotRuleFree d₁ ∧ SeqProof.IsBotRuleFree d₂
+
+/-- A predicate asserting that an LJ proof is cut-free (contains no `cut` steps). Re-export of
+`SeqProof.CutFree` at `IPL`. -/
+@[reducible] def LJCutFree {seq : @Sequent Atom} (d : LJProof seq) : Prop :=
+  SeqProof.CutFree d
 
 /-- An `LJProof` that is cut-free. -/
 def CutFreeLJProof (seq : @Sequent Atom) : Type u :=

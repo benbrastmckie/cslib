@@ -1,5 +1,5 @@
 ---
-next_project_number: 411
+next_project_number: 421
 ---
 
 # TODO
@@ -11,10 +11,10 @@ next_project_number: 411
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,278,299,301,317,321,370,386,387,388,396,400,401,403,404,406,407 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,241,299,301,317,321,370,386,387,388,396,400,401,403,404,406,407,411,415,416,418,419,420 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181,215,300,375,389,390,405,409 | 36,37,180,299,317,387,404,407 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,275,391,392 | 39,40,386,387,389 | Bimodal Porting, Foundations, PL-Docs, ... |
-| 4 | 393 | 386,391 | PL-Hygiene |
+| 3 | 41,275,391,392,413 | 39,40,321,370,375,386,387,389 | Bimodal Porting, Foundations, PL-Docs, ... |
+| 4 | 393,412,414 | 41,181,215,241,275,300,301,321,386,391 | Foundations, Code Hygiene, PL-Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -29,8 +29,8 @@ next_project_number: 411
 
 ### Foundations
 
-278 [NOT STARTED] — Simplify proofs using new simp/grind normalization tags. After ta
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
+  └─ 412 [NOT STARTED] — [Split from task 278.] Simplify proofs in Foundations/Logic/ that
 
 ### Modal Logic
 
@@ -39,6 +39,7 @@ next_project_number: 411
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 404 [NOT STARTED] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
   └─ 405 [NOT STARTED] — Simplify the proof machinery in the task-402 modal tableau soundn
+419 [NOT STARTED] — [Spawned from task 415 audit — supports the structure-first visio
 
 ### Project Management
 
@@ -55,7 +56,9 @@ next_project_number: 411
 ### Code Hygiene
 
 321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
+  └─ 414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p
 406 [NOT STARTED] — NEW from post-merge vet (sess_1782671052_6af6a1). Fix 33 pre-exis
+418 [PLANNED] — [Spawned from task 415 audit — supports Finding 1.] Factor the sh
 
 ### PL Hygiene
 
@@ -65,9 +68,11 @@ next_project_number: 411
 387 [NOT STARTED] — [Refreshed post-merge vet.] DECISION REQUIRES UPSTREAM AGREEMENT.
   └─ 392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls (see above)
 388 [NOT STARTED] — [Reconciled by task 395, post-merge.] Tier-2. NaturalDeduction/No
+413 [NOT STARTED] — [Split from task 278.] Simplify Propositional/ proofs that use ma
 
 ### PL Docs
 
+420 [PLANNED] — [Spawned from task 415 audit — closes the Finding 1 design questi
 389 [NOT STARTED] — [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAl
   └─ 391 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Remove internal task/process ja
 390 [NOT STARTED] — [Refreshed post-merge vet.] The Propositional section (~ORGANISAT
@@ -84,6 +89,7 @@ next_project_number: 411
 ### PL Metalogic
 
 370 [PLANNED] — Close the decidability asymmetry in the metalogic layer: classica
+416 [PLANNED] — [Spawned from task 415 audit — closes Finding 3.] Activate the do
 
 ### PL Equivalence
 
@@ -97,8 +103,152 @@ next_project_number: 411
 
 407 [PR READY] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
   └─ 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
+415 [RESEARCHED] — Audit how the structure-first propositional base (MPL/IPL/CPL: pr
+
+### Uncategorized
+
+411 [NOT STARTED] — Adopt the complete, CI-green IntDecidability.lean from branch ref
 
 ## Tasks
+
+### 420. Doc: record native intuitionistic-embedding prerequisites
+- **Status**: [PLANNED]
+- **Task Type**: cslib
+- **Topic**: PL-Docs
+- **Dependencies**: None
+- **Research**: [420_native_embedding_prerequisites_doc/reports/01_native-embedding-prerequisites.md]
+- **Plan**: [420_native_embedding_prerequisites_doc/plans/01_native-embedding-prerequisites-doc.md]
+
+**Description**: [Spawned from task 415 audit — closes the Finding 1 design question; DOC-ONLY, no Lean change.] Write a short in-repo design note (an ORGANISATION.md section or a docs/ design doc) recording the four prerequisites for a native, intuitionistic-faithful propositional embedding: (1) native and/or constructors (not the Lukasiewicz encoding); (2) a gated intuitionistic target modal/temporal system to embed into; (3) birelational target semantics bridging to PL IForces; (4) a proof-theoretic preservation/faithfulness theorem. Purpose: well-specify the XL native-embedding work so the classical-only embedding boundary is not re-litigated when CSLib eventually adds an intuitionistic modal logic. Any prose intended for upstream/Zulip must be human-authored per the AI policy. Source: report §3 ("what a structure-preserving embedding would require") + Rank 5.
+
+---
+
+### 419. Generalize derivation lifting to a cross-logic InferenceSystem layer (spike)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: Task 417
+
+**Description**: [Spawned from task 415 audit — supports the structure-first vision; SPIKE.] Investigate hoisting liftDerivation / Derivable_mono (Modal/Metalogic/InterSystem/Lifting.lean:47) and Bimodal's liftDerivationWith onto the shared InferenceSystem / algebraicDerivationSystem abstraction already used by GenericMCSBridge, yielding ONE axiom-subsumption derivation-lifting result reusable by Modal, Bimodal, and PL. SPIKE FIRST: commit only if the necessitation / temporal_duality constructor variance is cleanly abstractable; otherwise document precisely why and stop (mark BLOCKED, never sorry). Benefits from task 417's Foundations placement (soft dependency). Effort L (abstraction risk). CI green if landed. Source: report §6, Rank 4.
+
+---
+
+### 418. Shared PropositionalEmbedding typeclass + single limitation note
+- **Status**: [PLANNED]
+- **Task Type**: cslib
+- **Topic**: Code Hygiene
+- **Dependencies**: None
+- **Research**: [418_shared_propositional_embedding_typeclass/reports/01_shared-embedding-typeclass.md]
+- **Plan**: [418_shared_propositional_embedding_typeclass/plans/01_shared-embedding-typeclass.md]
+
+**Description**: [Spawned from task 415 audit — supports Finding 1.] Factor the shared "structural on atom/bot/imp, Lukasiewicz on and/or" embedding pattern into a single PropositionalEmbedding typeclass/abstraction so toModal (Modal/FromPropositional.lean:58), toTemporal (Temporal/FromPropositional.lean:57), and toBimodal (Bimodal/Embedding/PropositionalEmbedding.lean:59) share one definition skeleton and a SINGLE authored classical-scope limitation note (currently triplicated at Modal/FromPropositional.lean:35-41, Temporal/FromPropositional.lean:34-40, Bimodal/Embedding/PropositionalEmbedding.lean:33-41). Preserve the existing simp/grind lemma surface and the commuting-diamond lemmas (toModal_toBimodal / toTemporal_toBimodal). Adds a clearly-typed extension point for a future native (intuitionistic-faithful) embedding but does NOT itself enable the intuitionistic lift. CI green; 0 new sorry. Source: report §3, Rank 3.
+
+---
+
+### 417. Foundations-level parametric conservativity lift (unify modal/temporal/bimodal)
+- **Status**: [COMPLETED]
+- **Task Type**: cslib
+- **Topic**: Foundations
+- **Dependencies**: None
+- **Research**: [417_parametric_conservativity_lift_foundations/reports/01_conservativity-lift-design.md]
+- **Plan**: [417_parametric_conservativity_lift_foundations/plans/01_conservativity-lift-foundations.md]
+
+**Description**: [Spawned from task 415 audit — closes Finding 2.] Add Cslib/Foundations/Logic/Metalogic/ConservativityLift.lean providing a parametric conservative_over_cpl lemma (signature in report §4) plus a generic classical truth-functional bridge lemma, then re-express temporal_conservative_extension (Temporal/ConservativeExtension.lean:87) and bimodal_conservative_extension (Bimodal/Metalogic/ConservativeExtension/PropositionalConservativity.lean:118) — and optionally re-home modal_conservative_extension_param (Modal/Metalogic/ConservativeExtension.lean:54) — as thin instances. Collapses 3 semantic-bridge + 3 conservativity proofs into 1 generic bridge + 1 generic lemma + 3 instances. This extends the Modal side's existing "by construction" fragment-genericity win (one parametric lemma already covers 15 systems) to ALL THREE modal-family logics — the most direct hit on Waring's Zulip fragment-genericity ask. Synergistic with task 416 (shared prop_completeness usage); not a hard dependency. RISK: unifying the Modal.Satisfies / Temporal.Satisfies / Bimodal.truthAt shapes behind one interface. CI green; 0 new sorry/axioms. Source: report §4, Rank 2.
+
+---
+
+### 416. Instantiate GenericLindenbaum to remove Min/Int duplication
+- **Status**: [PLANNED]
+- **Task Type**: cslib
+- **Topic**: PL-Metalogic
+- **Dependencies**: None
+- **Research**: [416_instantiate_generic_lindenbaum_phase6/reports/01_generic-lindenbaum-phase6.md]
+- **Plan**: [416_instantiate_generic_lindenbaum_phase6/plans/01_fix-stale-design-notes.md]
+
+**Description**: [Spawned from task 415 audit — closes Finding 3.] Activate the dormant GenericLindenbaum substrate: re-derive MinTheory and IntDCCS as instances of GenericTheory Axioms Cons (Cons := fun _ => True for minimal; PropSetConsistent IntPropAxiom for intuitionistic), replacing the duplicated min_*/int_* Lindenbaum bodies (MinLindenbaum.lean ~247 lines, IntLindenbaum.lean ~318 lines) with thin instances over generic_deriv_from_closure_to_S / generic_deriv_imp_of_union / generic_imp_witness. The substrate (Cslib/Logics/Propositional/Metalogic/GenericLindenbaum.lean, ~295 lines) is currently additive/unused — see GenericLindenbaum.lean:43-52 ("deferred to Phase 6 of the MPL-base structure-first redesign"). Behavior must stay identical; deletes ~270 net duplicated lines and activates the dormant file. OVERLAP WITH TASK 393: task 393 (Zulip-first consolidation, deps 386/391/395) is the broader umbrella covering this PLUS the 3 Soundness + 8 conservativity modules + LJ/LK helper duplication; THIS task is the narrow, non-Zulip-gated Lindenbaum slice only — coordinate with the 393 owner and cross-reference it, do NOT double-edit the same decls. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); 0 new sorry/axioms. Source: specs/415_audit_propositional_lifting_structure_first/reports/01_lifting-audit.md §5, Rank 1.
+
+---
+
+### 415. Audit propositional->modal/temporal/bimodal lifting vs structure-first vision
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Topic**: PL-Base
+- **Dependencies**: None
+- **Research**: [415_audit_propositional_lifting_structure_first/reports/01_lifting-audit.md]
+
+**Description**: Audit how the structure-first propositional base (MPL/IPL/CPL: primitive nullary bot, gated efq/botL, property-module typeclasses) actually LIFTS into the Modal, Temporal, and Bimodal logics, and assess the result against the CSLib Zulip "Propositional Logic" thread (606970606) structure-first / fragment-genericity expectations -- with the explicit goal of identifying where the architecture can SURPASS those expectations. This is an infrastructure-verification (research/review) task; it produces a report and SPAWNS concrete follow-on implementation tasks, it does not itself refactor proofs.
+
+THREE SEED FINDINGS to verify and deepen (from prior exploration):
+1. CPL-ONLY EMBEDDING: toModal/toTemporal/toBimodal encode and/or via Lukasiewicz (Modal/FromPropositional.lean:35-41, Temporal/FromPropositional.lean:34-40, Bimodal/Embedding/PropositionalEmbedding.lean:33-41) -- classically valid but NOT intuitionistically valid. So only the CLASSICAL collapse of the propositional base lifts; the minimal/intuitionistic structure-first base does NOT survive the lift. Confirm with exact embedding defs + the semantic-preservation theorem statements (modal_satisfies_toModal_iff_evaluate:106 etc.), and characterize precisely what a structure-preserving (native and/or) embedding would require.
+2. CONSERVATIVITY ASYMMETRY: Modal uses a PARAMETRIC conservativity lemma (modal_conservative_extension_param, Modal/Metalogic/ConservativeExtension.lean:54) while Temporal (ConservativeExtension.lean:87) and Bimodal (Metalogic/ConservativeExtension/PropositionalConservativity.lean:60) re-prove it CONCRETELY. Assess whether a single parametric/Foundations-level conservativity-lift framework can subsume all three.
+3. GENERICLINDENBAUM DEBT: GenericLindenbaum.lean:47 defines a parametric explosion-parameterized substrate but Min/Int Lindenbaum, soundness, and strong-completeness remain ~50% duplicated; re-instantiation is "deferred to Phase 6" (task 407 residual). Scope the consolidation and its overlap with task 393.
+
+ALSO: check the InterSystem liftDerivation (Modal/Metalogic/InterSystem/Lifting.lean:47) and whether the per-system structural metatheory (weakening/subst/cut across ND/LJ/LK) admits a shared parametric layer.
+
+DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes each finding with file:line evidence, (b) maps the lift architecture against the Zulip structure-first vision (met / partial / open), (c) for each gap gives a concrete Lean-level sketch of the fix and an effort estimate, and (d) proposes a prioritized set of spawnable follow-on tasks (e.g. structure-preserving embedding; unify conservativity; GenericLindenbaum Phase-6). Honor the Zulip AI policy (any prose intended for upstream must be human-authored). No code changes in this task.
+
+---
+
+### 414. Simplify proofs normalization modal family
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Code Hygiene
+- **Dependencies**: Task 180, Task 181, Task 215, Task 241, Task 275, Task 299, Task 300, Task 301, Task 321
+
+**Description**: [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ proofs that use manual `simp only [listImp_*, bigconj_*, toTemporal_*, toBimodal_*]` lists or verbose tactic chains over the task-268 normalization lemmas (including the Temporal/FromPropositional and Bimodal/Embedding/TemporalEmbedding embedding simp lemmas); replace with `grind`/`simp` where the new co-tags make the explicit lists redundant. Sequence after the modal-family proof-development settles: Modal 299/300; Temporal 180 (G/H primitives rewrite FromPropositional.lean), 241, 301; Bimodal 181 (propagates constructors through TemporalEmbedding.lean), 215, 275; plus the file-structure pass 321. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake.
+
+---
+
+### 413. Simplify proofs normalization propositional
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: PL-Hygiene
+- **Dependencies**: Task 317, Task 370, Task 375, Task 321
+
+**Description**: [Split from task 278.] Simplify Propositional/ proofs that use manual `simp only [listImp_*, bigconj_*]` lists or verbose tactic chains over the task-268 normalization lemmas; replace with `grind`/`simp` where the new co-tags make the explicit lists redundant. Covers Hilbert/ND/completeness/decidability proof sites in Cslib/Logics/Propositional/. Sequence after the major PL proof-development tasks land (317 tableau completeness, 370 int/min decidability, 375 proof-system equivalence) and the Logics/Foundations file-structure pass (321). Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake.
+
+---
+
+### 412. Simplify proofs normalization foundations
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Foundations
+- **Dependencies**: Task 41, Task 321
+
+**Description**: [Split from task 278.] Simplify proofs in Foundations/Logic/ that use manual `simp only [listImp_nil, listImp_cons, bigconj_nil, bigconj_singleton, bigconj_cons_cons, negBigconj_def, ...]` or verbose tactic chains over the task-268 normalization lemmas; replace with `grind`/`simp` where the @[simp, scoped grind =] co-tags (ListImplication.lean, Theorems/BigConj.lean) make the explicit lemma lists redundant. Audit ListImplication, BigConj, and downstream Foundations/Logic proof sites. Sequence after the Foundations completeness-infra abstraction (41) and the Logics/Foundations file-structure pass (321) to avoid re-sweeping moved code. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake.
+
+---
+
+### 411. Adopt complete int decidability
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+- **Research**: [411_adopt_complete_int_decidability/reports/01_int-decidability-integration-findings.md]
+
+**Description**: Adopt the complete, CI-green IntDecidability.lean from branch refactor/prop_logic onto main, delivering the actual Decidable instance that main's task-385 version lacks. This completes the Int side of parent task 370.
+
+CONTEXT: main's current Cslib/Logics/Propositional/Metalogic/IntDecidability.lean (committed by task 385, HEAD 07792009) is the WITNESS-ONLY version (272 lines, 7 decls): task 385 renamed/fixed the former IntFMPSpike scratch spike to make `lake build` green, but it STOPS at `int_fin_imp_witness` and provides NO `Decidable` instance. The branch refactor/prop_logic (tasks 415/416) has a COMPLETE version (436 lines, 10 decls) that carries the same construction through `intFinVal` -> `intFinVal_upward_closed` -> `int_fin_truth_lemma` -> `int_fmp` -> `instDecidableDerivableIntPropAxiom'` (the actual `Decidable (Derivable IntPropAxiom phi)` instance), CI-green with no `sorryAx` (axioms: propext, Classical.choice, Quot.sound). This task adopts that completion.
+
+PRIMARY DELIVERABLE -- single-file swap, verified build-safe:
+1. Replace main's IntDecidability.lean with the branch version: `git show refactor/prop_logic:Cslib/Logics/Propositional/Metalogic/IntDecidability.lean > Cslib/Logics/Propositional/Metalogic/IntDecidability.lean`.
+2. Change NOTHING else for the core deliverable. Build-safety already verified: the ONLY dependency drift is that the branch deleted an unused lemma `intBotMem_iff_false` from IntStrongCompleteness.lean; our IntDecidability does NOT reference it, and main's MinStrongCompleteness.lean has a docstring that DOES reference it -- so KEEP main's IntStrongCompleteness.lean unchanged. The grind-lint skip `Cslib.Logic.PL.IntFinWorld.mk.sizeOf_spec` the complete file needs is ALREADY present in main's CslibTests/GrindLint.lean (line 79) -- no change needed. The Cslib.lean import (line ~420) already points at IntDecidability -- it stays valid.
+
+DO NOT bring over / KEEP main's versions of: Scheme.lean (redundant; both branches sit at the same 2 sorries deferred-to-317), CslibTests/GrindLint.lean, IntStrongCompleteness.lean, and ALL specs/ task metadata. The branch's task numbers 408-416 COLLIDE with main's (number fork) -- do NOT union state.json/TODO.md or copy the branch's spec dirs.
+
+OPTIONAL SECONDARY SCOPE (only if explicitly requested): cherry-pick the 6 NEW Temporal FMP decidability files that are absent from main -- Cslib/Logics/Temporal/Metalogic/Decidability/Decidability.lean plus Decidability/FMP/{FMP,Filtration,FiniteModel,SubformulaClosure,TruthPreservation}.lean -- and add their public imports to Cslib.lean. Independent of the Int work; their deps (Temporal.Metalogic.Completeness/Soundness/DenseCompleteness/DenseSoundness) are already on main. Build-verify before committing.
+
+DO NOT git-merge the branch -- this is a curated file adoption, not a branch merge (a full merge drags in the unmergeable task-number-fork metadata, redundant Scheme.lean, and an add/add conflict).
+
+ACCEPTANCE:
+- main's IntDecidability.lean contains `instDecidableDerivableIntPropAxiom'` (a `Decidable (Derivable IntPropAxiom phi)` instance).
+- `lake build` green for the whole library; `lake test`, `lake exe checkInitImports`, `lake exe lint-style`, `lake shake` all pass.
+- `#print axioms instDecidableDerivableIntPropAxiom'` (or lean_verify) shows ONLY propext, Classical.choice, Quot.sound -- NO sorryAx.
+- 0 new sorry/admit introduced; main's pre-existing Scheme.lean sorries (deferred-to-317) untouched.
+- No metadata corruption: specs/state.json and TODO.md unchanged except this task's own status. Zero-debt.
+
+SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/416_int_min_fmp_spike_revise/reports/01_fmp-spike-resolution.md (on that branch). Verified build-safe against main HEAD 07792009.
+
+---
 
 ### 410. Fragment-generic algebraic completeness for MPL-base derivability
 - **Status**: [COMPLETED]
@@ -489,10 +639,10 @@ next_project_number: 411
 ---
 
 ### 278. Simplify proofs with normalization tags
-- **Status**: [NOT STARTED]
+- **Status**: [EXPANDED]
 - **Task Type**: cslib
 - **Topic**: Foundations
-- **Dependencies**: None
+- **Dependencies**: Task 41, Task 180, Task 181, Task 299, Task 301, Task 317, Task 321, Task 370, Task 375
 
 **Description**: Simplify proofs using new simp/grind normalization tags. After task 268 adds @[simp, scoped grind =] tags to Hilbert system definitional lemmas, audit all proofs in Propositional/, Modal/, Temporal/, and Bimodal/ that use manual `simp only [listImp_nil, listImp_cons, bigconj_nil, ...]` or verbose tactic chains involving these normalization lemmas. Replace with `grind` or `simp` where the new tags make the explicit lemma lists redundant. Also check Foundations/Logic/ proofs. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake
 

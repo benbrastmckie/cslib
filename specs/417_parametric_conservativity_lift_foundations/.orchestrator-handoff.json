@@ -1,0 +1,28 @@
+{
+  "status": "implemented",
+  "summary": "Parametric conservativity lift completed. Created Cslib/Foundations/Logic/Metalogic/ConservativityLift.lean with two generic declarations (evaluate_iff_of_classicalBridge, conservative_over_cpl). Re-expressed Temporal/ConservativeExtension.lean and Bimodal/.../PropositionalConservativity.lean as thin instances. Full CI green: lake build, checkInitImports, lint-style, lake shake, lake test all pass. 0 new sorry, 0 new axioms. Modal re-home skipped (Phase 4 optional; 15 Systems callers untouched).",
+  "phases_completed": 5,
+  "phases_total": 5,
+  "artifacts": [
+    "specs/417_parametric_conservativity_lift_foundations/summaries/01_conservativity-lift-foundations-summary.md",
+    "Cslib/Foundations/Logic/Metalogic/ConservativityLift.lean",
+    "Cslib/Logics/Temporal/ConservativeExtension.lean",
+    "Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/PropositionalConservativity.lean"
+  ],
+  "blockers": [],
+  "continuation_context": null,
+  "ci_verification": {
+    "lake_build": "green",
+    "lake_checkInitImports": "green",
+    "lake_lint_style": "green",
+    "lake_lint": "green (no warnings on new/modified files)",
+    "lake_shake": "green (pre-existing warnings in Tableau files only)",
+    "lake_test": "exit 0 (pre-existing sorries in Tableau files only)",
+    "sorry_count_new_files": 0,
+    "axiom_count_new_files": 0
+  },
+  "phase_deviations": [
+    "Phase 4 (Modal re-home): Skipped. Modal ConservativeExtension.lean left unchanged; 15 Systems callers untouched as required."
+  ],
+  "open_for_pr": "Foundations→Logics import direction noted in docstring; confirm with reviewer in PR (non-blocking; fallback path has no signature change)."
+}

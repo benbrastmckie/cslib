@@ -6,6 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
+public import Cslib.Foundations.Logic.Metalogic.ConservativityLift
 public import Cslib.Logics.Bimodal.Embedding.PropositionalEmbedding
 public import Cslib.Logics.Bimodal.Metalogic.Core.DerivationTree
 public import Cslib.Logics.Bimodal.Metalogic.Soundness.Soundness
@@ -65,41 +66,19 @@ theorem bimodal_truthAt_toBimodal_iff_evaluate
     let τ : WorldHistory ℱ := WorldHistory.trivial
     let Omega : Set (WorldHistory ℱ) := Set.univ
     truthAt M Omega τ 0 φ.toBimodal ↔ PL.Evaluate v φ := by
-  induction φ with
-  | atom p =>
-    -- atom: truthAt M Omega τ 0 (Formula.atom p) = ∃ ht : True, v p
-    simp only [PL.Proposition.toBimodal, truthAt, PL.Evaluate,
-               WorldHistory.trivial]
-    exact ⟨fun ⟨_, h⟩ => h, fun h => ⟨True.intro, h⟩⟩
-  | bot =>
-    -- bot: truthAt M Omega τ 0 Formula.bot = False
-    simp only [PL.Proposition.toBimodal, truthAt, PL.Evaluate]
-  | imp φ ψ ih1 ih2 =>
-    simp only [PL.Proposition.toBimodal, PL.Evaluate, truthAt]
-    exact ⟨fun h he => ih2.mp (h (ih1.mpr he)),
-           fun h hm => ih2.mpr (h (ih1.mp hm))⟩
-  | and φ ψ ih1 ih2 =>
-    -- toBimodal: A ∧ B ↦ (A → B → ⊥) → ⊥  (Lukasiewicz encoding)
-    simp only [PL.Proposition.toBimodal, PL.Evaluate, truthAt]
-    constructor
-    · intro h
-      constructor
-      · by_contra hna; exact h (fun ha _ => hna (ih1.mp ha))
-      · by_contra hnb; exact h (fun _ hb => hnb (ih2.mp hb))
-    · intro ⟨ha, hb⟩ h
-      exact h (ih1.mpr ha) (ih2.mpr hb)
-  | or φ ψ ih1 ih2 =>
-    -- toBimodal: A ∨ B ↦ (A → ⊥) → B  (Lukasiewicz encoding)
-    simp only [PL.Proposition.toBimodal, PL.Evaluate, truthAt]
-    constructor
-    · intro h
-      by_cases ha : PL.Evaluate v φ
-      · exact Or.inl ha
-      · exact Or.inr (ih2.mp (h (fun hma => ha (ih1.mp hma))))
-    · intro h hna
-      cases h with
-      | inl ha => exact absurd (ih1.mpr ha) hna
-      | inr hb => exact ih2.mpr hb
+  -- Unfold let bindings and apply the generic parametric bridge lemma.
+  -- h_atom uses the existential collapse: truthAt at atom p = ∃ ht : True, v p.
+  -- All other connectives (bot, imp, and, or) reduce to Iff.rfl via Lukasiewicz encoding.
+  exact evaluate_iff_of_classicalBridge PL.Proposition.toBimodal
+    (truthAt { valuation := fun _ p => v p }
+      Set.univ (WorldHistory.trivial (D := ℤ)) (0 : ℤ))
+    v
+    (fun p => ⟨fun ⟨_, h⟩ => h, fun h => ⟨True.intro, h⟩⟩)
+    id
+    (fun _ _ => Iff.rfl)
+    (fun _ _ => Iff.rfl)
+    (fun _ _ => Iff.rfl)
+    φ
 
 /-! ## Conservative Extension Theorem -/
 
@@ -118,24 +97,24 @@ Proof:
 theorem bimodal_conservative_extension {Atom : Type*} {φ : PL.Proposition Atom}
     (h : Cslib.Logic.Bimodal.Bimodal.ThDerivable φ.toBimodal) :
     PL.Derivable PropositionalAxiom φ := by
-  apply prop_completeness
-  intro v
-  -- Unpack the derivation tree from ThDerivable
-  obtain ⟨d⟩ := h
-  -- Set up the trivial frame, model, and world history
-  let ℱ : TaskFrame ℤ := TaskFrame.trivialFrame
-  let M : TaskModel Atom ℱ := { valuation := fun _ p => v p }
-  let τ : WorldHistory ℱ := WorldHistory.trivial
-  let Omega : Set (WorldHistory ℱ) := Set.univ
-  -- τ ∈ Omega trivially
-  have h_mem : τ ∈ Omega := Set.mem_univ _
-  -- Omega is shift-closed (universal set)
-  have h_sc : ShiftClosed Omega := Set.univ_shift_closed
-  -- Apply TM soundness (ℤ is Nontrivial, etc.)
-  have hsat : truthAt M Omega τ 0 φ.toBimodal :=
-    soundness [] φ.toBimodal d ℤ ℱ M Omega h_sc τ h_mem 0 (by simp)
-  -- Apply the semantic bridge lemma
-  exact (bimodal_truthAt_toBimodal_iff_evaluate v φ).mp hsat
+  apply conservative_over_cpl
+      (Tgt := Bimodal.Formula Atom)
+      (emb := PL.Proposition.toBimodal)
+      (sat := fun v ψ =>
+        truthAt (ℱ := TaskFrame.trivialFrame) { valuation := fun _ p => v p }
+          Set.univ WorldHistory.trivial (0 : ℤ) ψ)
+  · -- bridge: bimodal_truthAt_toBimodal_iff_evaluate gives sat v (emb φ) ↔ PL.Evaluate v φ
+    intro v
+    exact bimodal_truthAt_toBimodal_iff_evaluate v φ
+  · -- h_sat: TM soundness on the trivial ℤ-frame gives sat v (emb φ) for each v
+    intro v
+    obtain ⟨d⟩ := h
+    let ℱ : TaskFrame ℤ := TaskFrame.trivialFrame
+    let M : TaskModel Atom ℱ := { valuation := fun _ p => v p }
+    let τ : WorldHistory ℱ := WorldHistory.trivial
+    let Omega : Set (WorldHistory ℱ) := Set.univ
+    exact soundness [] φ.toBimodal d ℤ ℱ M Omega Set.univ_shift_closed τ
+      (Set.mem_univ _) 0 (by simp)
 
 end Cslib.Logic
 

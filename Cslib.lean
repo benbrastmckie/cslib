@@ -8,6 +8,7 @@ public import Cslib.Computability.Automata.DA.Basic
 public import Cslib.Computability.Automata.DA.Buchi
 public import Cslib.Computability.Automata.DA.BuchiChar
 public import Cslib.Computability.Automata.DA.BuchiClosure
+public import Cslib.Computability.Automata.DA.Concat
 public import Cslib.Computability.Automata.DA.Congr
 public import Cslib.Computability.Automata.DA.Conversions
 public import Cslib.Computability.Automata.DA.Parity
@@ -82,6 +83,7 @@ public import Cslib.Foundations.Logic.Axioms
 public import Cslib.Foundations.Logic.Connectives
 public import Cslib.Foundations.Logic.InferenceSystem
 public import Cslib.Foundations.Logic.LogicalEquivalence
+public import Cslib.Foundations.Logic.Metalogic.ConservativityLift
 public import Cslib.Foundations.Logic.Metalogic.Consistency
 public import Cslib.Foundations.Logic.Metalogic.DeductionCharacterization
 public import Cslib.Foundations.Logic.Metalogic.DeductionHelpers

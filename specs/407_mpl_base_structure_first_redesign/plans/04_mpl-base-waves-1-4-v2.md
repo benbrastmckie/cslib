@@ -207,7 +207,7 @@ Wave-2 phases depend only on the Phase-1 re-framing and edit largely disjoint tr
 
 ---
 
-### Phase 8: Tableau unification [IN PROGRESS]
+### Phase 8: Tableau unification [COMPLETED]
 
 **Goal**: Single parameterized tableau expansion; minimal/intuitionistic become closure-predicate instances.
 

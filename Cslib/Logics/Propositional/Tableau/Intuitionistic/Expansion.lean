@@ -19,8 +19,25 @@ T(φ)/F(φ) pairs at the same label).
 ## Main Definitions
 
 - `IntTableauResult`: Result of the intuitionistic expansion (closed or open).
-- `intExpandBranches`: Fuel-based expansion loop for the intuitionistic tableau.
-- `intuitionisticTableau`: The complete decision procedure starting from `F(φ)` at world 0.
+- `intExpandBranches`/`propExpandBranches`: Fuel-based expansion loop, **parameterized by
+  `closurePred`** — the generic workhorse. `intuitionisticTableau` instantiates it with
+  `isIntuitionisticallyClosed`; `minimalTableau` instantiates it with `isMinimallyClosed`.
+  `propExpandBranches` is an alias that emphasizes this generic, closure-predicate-parameterized
+  design (Phase 8, task 407 S3 follow-up).
+- `intuitionisticTableau`: Starting from `F(φ)` at world 0, closes iff `IValid φ`.
+- `minimalTableau`: Same as above but uses `isMinimallyClosed`; closes iff `MValid φ`.
+
+## Tableau Unification (Phase 8)
+
+The two divergence points between intuitionistic and minimal tableau are:
+1. **Closure predicate**: `isIntuitionisticallyClosed` vs `isMinimallyClosed`.
+2. **Bottom forcing in countermodel**: `fun _ _ => False` vs `minBranchBotForces b`.
+
+Point 1 is handled here by the `closurePred` parameter.
+Point 2 is handled in `Intuitionistic/Scheme.lean` via `IntMinScheme`.
+
+There is no duplicate expansion function: both tableau variants are instances of
+the single `intExpandBranches`/`propExpandBranches` loop.
 
 ## Design
 
@@ -216,6 +233,28 @@ def intExpandBranches
       | _ :: restBs, _, _, _ =>
         go restBs [] [] [] done doneExp doneNW doneEdges
     go branches expandedSets nextWorlds edgeSets [] [] [] []
+
+/-! ## Generic Alias -/
+
+/-- `propExpandBranches` is the generic propositional tableau expansion loop,
+parameterized by `closurePred : IBranch Atom → Bool`.
+
+This is a documentation alias for `intExpandBranches`, emphasizing that the expansion loop
+is closure-predicate-agnostic. The two concrete instantiations are:
+- `intuitionisticTableau`: `closurePred = isIntuitionisticallyClosed`
+- `minimalTableau`: `closurePred = isMinimallyClosed`
+
+The `IntMinScheme` structure in `Scheme.lean` bundles both divergence points (closure
+predicate and countermodel `botForces`) into a single parameterized interface. -/
+@[inline] def propExpandBranches
+    (branches : List (IBranch Atom))
+    (expandedSets : List (List (ISF Atom)))
+    (nextWorlds : List Nat)
+    (edgeSets : List IEdges)
+    (fuel : Nat)
+    (closurePred : IBranch Atom → Bool) :
+    IntTableauResult Atom :=
+  intExpandBranches branches expandedSets nextWorlds edgeSets fuel closurePred
 
 /-! ## Decision Procedures -/
 

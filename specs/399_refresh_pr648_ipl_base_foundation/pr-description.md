@@ -68,7 +68,7 @@ These benefits extend to planned completeness work for modal and temporal logics
 
 ## Coordination
 
-- **PR #607** (fmontesi): connective typeclasses are a separate development; this PR no longer ships its own `Connectives.lean`. One design point for #607: it makes negation primitive (`HasNot`) with no `HasBot`, but for intuitionistic/minimal logic `¬φ := φ → ⊥`, so a `HasBot` class with derived `¬`/`⊤` is needed for the `⊥`-primitive `Proposition` to register. I'll leave a review on #607.
+- **PR #607** (fmontesi): connective typeclasses are a separate development; this PR no longer ships its own `Connectives.lean`. One design point for #607: it makes negation primitive (`HasNot`) with no `⊥`/`⊤` class, but a `⊥`-primitive `Proposition` (where `¬φ := φ → ⊥` and `⊤ := ⊥ → ⊥`) registers faithfully by reusing Mathlib's `Bot`/`Top` together with a derived `HasNot` (`not := neg`) and a `(φ → ⊥) = ¬φ` grind bridge — no separate `HasBot` class needed. I'll leave a review on #607.
 
 ## Deferred
 
@@ -82,12 +82,4 @@ The PR exposes `namespace Cslib.Logic.PL`; the rename to `Cslib.Logics.Propositi
 
 ## AI Tools Used
 
-Claude Code was used to refactor for primitive `efq`/IPL-base, remove the connective typeclasses and the minimal-logic layer, rebase onto upstream/main and resolve the `references.bib` conflict, and verify CI. All mathematical decisions reviewed by the human author.
-
----
-
-## Status / next steps
-
-Already pushed; **GitHub CI green**; PR `MERGEABLE` (awaiting maintainer review). Human-only:
-1. Reword the body above in your own words and paste it into the #648 description.
-2. Post `zulip-response.md` to Zulip thread 606970606 in your own words.
+Claude Code was used to refactor for primitive `efq`/IPL-base, remove the connective typeclasses and the minimal-logic layer, rebase onto upstream/main and resolve the `references.bib` conflict, and verify CI. All mathematical decisions reviewed.

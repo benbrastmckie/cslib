@@ -51,7 +51,7 @@ Revises PR #648 based on reviewer feedback (thomaskwaring, msg 606970606). Adds 
 - Constructor naming uses `imp`/`impI`/`impE` (renamed from `impl`/`implI`/`implE` for consistency with FormalizedFormalLogic convention; open to reverting if reviewers prefer `impl`)
 - Semantics not included — deferred to a follow-up PR (per thomaskwaring's request)
 - Connective typeclasses removed — a separate development coordinated via PR #607 (this PR no longer ships `Connectives.lean`)
-- References include Gentzen 1935, Prawitz 1965, and Troelstra & van Dalen 1988, and a link to the CSLib Zulip design thread is added
+- References include Avigad 2022, Gentzen 1935, Prawitz 1965, and Troelstra & van Dalen 1988, and a link to the CSLib Zulip design thread is added
 
 ## Modified files
 
@@ -75,10 +75,6 @@ These benefits extend to planned completeness work for modal and temporal logics
 - **Minimal logic (MPL) + fragment design** -- a separate PR/discussion (the agreed deferral).
 - **Semantics** (`Bool.lean`, evaluation) -- follow-up PR; the `Prop` vs `Bool` vs `GeneralizedHeytingAlgebra` question (raised by thomaskwaring and ctchou) will be addressed there.
 - Hilbert systems, sequent calculi, and tableau -- stacked PRs.
-
-## Namespace note (pending)
-
-The PR exposes `namespace Cslib.Logic.PL`; the rename to `Cslib.Logics.Propositional` (per ORGANISATION.md) needs maintainer consensus and can follow as a separate change. Not blocking.
 
 ## AI Tools Used
 

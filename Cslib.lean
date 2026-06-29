@@ -417,9 +417,7 @@ public import Cslib.Logics.Propositional.Metalogic.ClassicalImpCompleteness
 public import Cslib.Logics.Propositional.Metalogic.DeductionTheorem
 public import Cslib.Logics.Propositional.Metalogic.GenericLindenbaum
 public import Cslib.Logics.Propositional.Metalogic.GenericMCSBridge
--- TEMPORARILY STUBBED (task 385, parked FMP): IntFMPSpike scratch spike drifted
--- out of sync with the tableau/metalogic API during the merge.
--- public import Cslib.Logics.Propositional.Metalogic.IntFMPSpike
+public import Cslib.Logics.Propositional.Metalogic.IntDecidability
 public import Cslib.Logics.Propositional.Metalogic.IntLindenbaum
 public import Cslib.Logics.Propositional.Metalogic.IntSoundness
 public import Cslib.Logics.Propositional.Metalogic.IntStrongCompleteness
@@ -454,6 +452,7 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.Brouwerian
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianBot
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianCompletenessGeneric
+public import Cslib.Logics.Propositional.Semantics.Algebra.CanAlgComplete
 public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpBotConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.Conservative

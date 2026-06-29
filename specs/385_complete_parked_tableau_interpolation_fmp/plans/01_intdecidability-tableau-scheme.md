@@ -128,7 +128,7 @@ re-imported in this phase.
 - `lake build Cslib.Logics.Propositional.Metalogic.IntFMPSpike` -> EXIT 0 (errors), warnings cleared.
 - `lake exe lint-style` on the file -> clean.
 
-### Phase 2: Rename + rewire + mk_all + full build verify [NOT STARTED]
+### Phase 2: Rename + rewire + mk_all + full build verify [COMPLETED]
 
 **Goal**: Promote the spike file to a committed module: rename to `IntDecidability.lean`, strip
 spike/specs-370 framing (docstrings + section headers only, NO decl renames), re-enable the

@@ -173,6 +173,48 @@ theorem Theory.Derivation.emptySequent_eq {A : Proposition Atom} : T⇓A = T⇓(
 theorem DerivableIn.iff_derivableIn_empty {A : Proposition Atom} :
     DerivableIn T A ↔ DerivableIn T (∅ ⊢ A) := by rfl
 
+/-! ### Gate-free fragment view (S1): MinimalDerivation and IsBotRuleFree
+
+The following abbreviation and predicate name the `⊥`-rule-free view of the shared
+`Theory.Derivation` inductive. They do not introduce a new inductive type — the design
+deliberately shares one derivation type across MPL/IPL/CPL, gating `efq` on
+`[IsIntuitionistic T]`. These objects exist so that later phases can refer to the
+gate-free fragment by name rather than reasoning about the absence of `efq` ad hoc.
+
+The connection to the gate mechanism: `efq` requires `[IsIntuitionistic T]`; `MPL = ∅`
+admits no `IsIntuitionistic` instance (`IsIntuitionistic MPL` would require `IPL ⊆ ∅`,
+which is false). Hence every `MinimalDerivation` is automatically `IsBotRuleFree`.
+This is the operational content of `min_consistent : ¬ Derivable MinPropAxiom ⊥`
+(MinLindenbaum.lean) and `instIsIntuitionisticExtention` (Defs.lean): the `efq`
+constructor is structurally unconstructible at MPL strength, not merely inadmissible. -/
+
+/-- A derivation is `⊥`-rule-free if it does not appeal to the `efq` constructor.
+Since `efq` carries `[IsIntuitionistic T]`, every derivation at `MPL` strength
+(`MPL = ∅` admits no `IsIntuitionistic` instance) satisfies this predicate.
+This predicate names the gate-free fragment within the shared derivation inductive
+without introducing a separate `⊥`-rule-free inductive type (which is task 409/W6). -/
+def Theory.Derivation.IsBotRuleFree {T : Theory Atom} :
+    ∀ {Γ : Ctx Atom} {A : Proposition Atom}, T.Derivation Γ A → Prop
+  | _, _, ax _ => True
+  | _, _, ass _ => True
+  | _, _, andI _ D₁ D₂ => D₁.IsBotRuleFree ∧ D₂.IsBotRuleFree
+  | _, _, andE1 _ D => D.IsBotRuleFree
+  | _, _, andE2 _ D => D.IsBotRuleFree
+  | _, _, orI1 _ D => D.IsBotRuleFree
+  | _, _, orI2 _ D => D.IsBotRuleFree
+  | _, _, orE _ D DA DB => D.IsBotRuleFree ∧ DA.IsBotRuleFree ∧ DB.IsBotRuleFree
+  | _, _, impI _ D => D.IsBotRuleFree
+  | _, _, impE D D' => D.IsBotRuleFree ∧ D'.IsBotRuleFree
+  | _, _, efq _ => False
+
+/-- The type of minimal-strength derivations of `Γ ⊢ A`: `Theory.Derivation` for the
+empty theory `MPL = ∅`. Since `MPL` admits no `IsIntuitionistic` instance, the `efq`
+constructor is unconstructible at this strength — every term of `MinimalDerivation Γ A`
+is automatically `IsBotRuleFree`. This corresponds to the `efq`-free sub-language that
+is the natural deduction fragment of minimal propositional logic (MPL). -/
+abbrev Theory.MinimalDerivation (Γ : Ctx Atom) (A : Proposition Atom) :=
+  MPL.Derivation Γ A
+
 /-- An equivalence between A and B is a derivation of B from A and vice-versa. -/
 def Theory.equiv (A B : Proposition Atom) :=
   T⇓({A} ⊢ B) × T⇓({B} ⊢ A)

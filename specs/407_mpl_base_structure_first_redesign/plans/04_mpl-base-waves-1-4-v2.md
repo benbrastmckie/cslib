@@ -90,7 +90,7 @@ Wave-2 phases depend only on the Phase-1 re-framing and edit largely disjoint tr
 
 ---
 
-### Phase 1: Pin `MinimalDerivation`/`IsBotRuleFree` (S1) [NOT STARTED]
+### Phase 1: Pin `MinimalDerivation`/`IsBotRuleFree` (S1) [COMPLETED]
 
 **Goal**: Fix the precise definitional meaning/role of the gate-free-fragment view **before** any docstring rewrite, so no later phase starts on an undefined term. No proof churn.
 

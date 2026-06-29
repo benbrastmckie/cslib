@@ -48,31 +48,56 @@ implication introduction and elimination, and ex falso quodlibet (bottom elimina
 constructors in total. The `efq` rule is *gated*: it carries an `[IsIntuitionistic T]` instance
 binder, so it is available at IPL/CPL strength but unconstructible at MPL strength.
 
-Logic strength is controlled by the theory parameter:
+**MPL is the base logic.** Logic strength is controlled by the theory parameter:
 - `MPL` (minimal propositional logic [Johansson1937]): the theory admits no `IsIntuitionistic`
-  instance, so `efq` is gated off, leaving the 10 ungated primitive rules.
-- `IPL` (intuitionistic propositional logic): `[IsIntuitionistic T]` holds, so `efq` (the
-  principle of explosion `⊥ → A`) is available as a primitive rule.
-- `CPL` (classical propositional logic): adds double negation elimination `¬¬A → A`.
+  instance, so `efq` is gated off, leaving the 10 ungated primitive rules. MPL is the base
+  derivation relation — it has no ⊥-rule. This is formalized by `MinimalDerivation` and
+  `IsBotRuleFree` (see below).
+- `IPL` (intuitionistic propositional logic): `[IsIntuitionistic T]` holds, so the explosion
+  property module `efq` (`⊥ → A`) is available. IPL = MPL + explosion.
+- `CPL` (classical propositional logic): adds the classicality property `¬¬A → A` (double
+  negation elimination). CPL = IPL + classicality.
 
-**Design: IPL as base, MPL retained as a fragment.** `⊥` is a primitive constructor of
-`Proposition` (a nullary connective), and ex falso quodlibet (bottom elimination) is a
-*primitive gated constructor* `efq` of `Derivation`, matching the Gentzen-style
-constructor-rule correspondence used in many on-paper natural deduction presentations
-([Prawitz1965], §10.4 of [TroelstraVanDalen1988], §2.2 of [SorensenUrzyczyn2006]), which include
-bottom elimination as a primitive rule. Because the constructor carries an `[IsIntuitionistic T]`
-binder, IPL is the base logic: `efq` is available exactly when the theory validates explosion.
-Minimal logic is retained as a *fragment layer beneath IPL* — `AxiomTheory MinPropAxiom` admits no
-`IsIntuitionistic` instance, so `efq` is unconstructible there and the entire minimal-logic
-metatheory (its Hilbert substrate, soundness, Lindenbaum/strong-completeness, and the
-conservativity chains) is preserved unchanged, corresponding to the efq-free sub-language.
+The **property modules** are typeclasses: `IsIntuitionistic T` (explosion/efq) and
+`IsClassical T` (double negation elimination). Each property is *additive*: it can be
+layered on the MPL base independently. `MinimalAxioms` identifies the 8 connective axiom
+schemas of the Hilbert substrate shared by all three systems.
+
+**Design A: `⊥` as a primitive nullary connective (this implementation).** The signature
+is the fixed set `{⊥, →, ∧, ∨}` where `⊥` is a nullary constructor of `Proposition` with
+*underdetermined meaning* — no intro rule and no elim rule at base (MPL) strength. The
+meaning of `⊥` is determined by the property modules: at IPL/CPL strength `efq` adds the
+elim rule (explosion); at MPL strength `⊥` is an ordinary proposition with no special rule.
+
+The canonical justification for Design A is **substitution-invariance**: any renaming of
+atoms that sends `p₀ ↦ ⊥` must commute with derivability. If `⊥` were treated as a
+meta-symbol excluded from the language, the language would fail to be closed under
+propositional substitution — `A[p₀/⊥]` would escape the language. Concretely: the
+`substAtom` operation (`Derivation.substAtom`) works uniformly over all propositions
+including `⊥ = .bot` (the `| .bot => .bot` case in every embedding). This is also the
+free-algebra argument: the type `Proposition Atom` is the free monad on `{⊥, →, ∧, ∨}`,
+so `⊥` is an element of this algebra, not an external constant. See the
+[CSLib Zulip thread on Propositional Logic](https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic)
+for the full argument (#604219492).
+
+**Design B (not implemented, documented here for reference).** Two variants were
+considered but rejected: (B1) a fragment language without `⊥` for MPL, extending the
+language to add `⊥` for IPL; and (B2) encoding `⊥` as a distinguished atom `⊥ : Atom`.
+Both violate substitution-invariance: B1 requires a language extension rather than a
+property extension; B2 treats `⊥` as syntactically distinguishable from other atoms while
+remaining in the same type, which breaks the free-algebra structure. Design A (⊥ as
+constructor, explosion as property) is the only choice compatible with the shared
+`Proposition` type and the single-substitution-monad architecture.
 
 `⊥` is the one connective with **no introduction rule** in any proof system; the asymmetry
-(0 intro rules, 1 elim rule) is a property of `⊥` itself, not a defect of this design. Gating
-`efq` on `[IsIntuitionistic T]` also keeps API uniformity and zero duplication across the
-multi-logic hierarchy (Modal, Temporal, Bimodal): a single `Proposition` type with primitive `⊥`
-lets MPL, IPL, and CPL share one substitution monad and one set of bridge lemmas, with the
-`FromPropositional` embeddings using the direct map `| .bot => .bot`.
+(0 intro rules, 1 elim rule) is a property of `⊥` itself, not a defect of this design. This
+matches Gentzen-style constructor-rule correspondence in on-paper natural deduction
+presentations ([Prawitz1965], §10.4 of [TroelstraVanDalen1988], §2.2 of
+[SorensenUrzyczyn2006]), which include bottom elimination as a primitive rule. Gating
+`efq` on `[IsIntuitionistic T]` keeps API uniformity and zero duplication across the
+multi-logic hierarchy (Modal, Temporal, Bimodal): a single `Proposition` type with primitive
+`⊥` lets MPL, IPL, and CPL share one substitution monad and one set of bridge lemmas,
+with the `FromPropositional` embeddings using the direct map `| .bot => .bot`.
 
 This design choice and its trade-offs are discussed further in the
 [CSLib Zulip thread on Propositional Logic](https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic).
@@ -114,9 +139,10 @@ scoped notation Γ:60 " ⊢ " A => (⟨Γ, A⟩ : Sequent)
 
 /-- A `T`-derivation of {A₁, ..., Aₙ} ⊢ B demonstrates B using (undischarged) assumptions among Aᵢ,
 possibly appealing to axioms from `T`. Primitives: axiom, assumption, conjunction intro/elim,
-disjunction intro/elim, and implication intro/elim.
-Ex falso quodlibet (bottom elimination) is a primitive gated rule requiring `[IsIntuitionistic T]`,
-making IPL the base logic with minimal logic retained as a fragment. -/
+disjunction intro/elim, and implication intro/elim. **MPL is the base**: these 10 ungated rules
+are the base derivation relation, with no ⊥-rule. Ex falso quodlibet (bottom elimination) is the
+explosion property module `efq`, gated by `[IsIntuitionistic T]`: it is available at IPL/CPL
+strength but unconstructible at MPL strength, making IPL = MPL + explosion. -/
 inductive Theory.Derivation {T : Theory Atom} : Ctx Atom → Proposition Atom → Type u where
   /-- Axiom -/
   | ax {Γ : Ctx Atom} {A : Proposition Atom} (_ : A ∈ T) : Derivation Γ A
@@ -147,11 +173,12 @@ inductive Theory.Derivation {T : Theory Atom} : Ctx Atom → Proposition Atom �
   /-- Implication elimination (modus ponens) -/
   | impE {Γ : Ctx Atom} {A B : Proposition Atom} :
       Derivation Γ (A → B) → Derivation Γ A → Derivation Γ B
-  /-- Ex falso quodlibet (bottom elimination). Requires `[IsIntuitionistic T]`.
-  Available at IPL/CPL strength; absent at MPL strength. This is a primitive gated
-  constructor of `Theory.Derivation`, ensuring IPL is the base logic with MPL retained as
-  a fragment (the `AxiomTheory MinPropAxiom` theory admits no `IsIntuitionistic` instance,
-  so efq is unconstructible in minimal strength derivations). -/
+  /-- The explosion property module: ex falso quodlibet (bottom elimination).
+  Requires `[IsIntuitionistic T]`. Available at IPL/CPL strength; absent at MPL strength.
+  This gated constructor marks the transition from MPL (base, no ⊥-rule) to IPL (MPL +
+  explosion). `MPL = ∅` admits no `IsIntuitionistic` instance, so `efq` is structurally
+  unconstructible at minimal strength (not merely inadmissible). Every `MinimalDerivation`
+  satisfies `IsBotRuleFree` precisely because no `efq` term is constructible there. -/
   | efq {Γ : Ctx Atom} {A : Proposition Atom} [IsIntuitionistic T] :
       Derivation Γ ⊥ → Derivation Γ A
 

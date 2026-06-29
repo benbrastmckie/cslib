@@ -107,7 +107,7 @@ Wave-2 phases depend only on the Phase-1 re-framing and edit largely disjoint tr
 
 ---
 
-### Phase 2: MPL-base re-framing of ND docstrings + design note [NOT STARTED]
+### Phase 2: MPL-base re-framing of ND docstrings + design note [COMPLETED]
 
 **Goal**: Make MPL the *documented* base with `efq` as the explosion module; record the Design A justification. Docs only.
 

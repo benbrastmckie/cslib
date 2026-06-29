@@ -458,6 +458,7 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpBotConservativ
 public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.Conservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.ConservativeChain
+public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentGeneric
 public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentPredicates
 public import Cslib.Logics.Propositional.Semantics.Algebra.FreeJoinCompletion
 public import Cslib.Logics.Propositional.Semantics.Algebra.Glivenko

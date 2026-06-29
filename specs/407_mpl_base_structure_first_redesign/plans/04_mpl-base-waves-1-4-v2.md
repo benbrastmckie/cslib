@@ -191,7 +191,7 @@ Wave-2 phases depend only on the Phase-1 re-framing and edit largely disjoint tr
 
 ---
 
-### Phase 7: Fragment-genericity spike with research-or-defer gate (S3) [IN PROGRESS]
+### Phase 7: Fragment-genericity spike with research-or-defer gate (S3) [COMPLETED]
 
 **Goal**: Bounded exploration of a generic fragment-lifting/conservativity layer, with an explicit decision point — **not** assembly of existing assets.
 
@@ -207,7 +207,7 @@ Wave-2 phases depend only on the Phase-1 re-framing and edit largely disjoint tr
 
 ---
 
-### Phase 8: Tableau unification [NOT STARTED]
+### Phase 8: Tableau unification [IN PROGRESS]
 
 **Goal**: Single parameterized tableau expansion; minimal/intuitionistic become closure-predicate instances.
 

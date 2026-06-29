@@ -15,11 +15,12 @@ Sections marked [FILL IN] require human input.
 # PR Description Draft — PR #648: IPL-base propositional foundation
 
 **PR**: https://github.com/leanprover/cslib/pull/648
-**Branch**: `feat/propositional-v2` (updated by **fast-forward** — adds one commit
-`85db79a6`; the two existing commits and review threads are preserved, no force-push).
-**Build verified locally** on the branch (toolchain v4.31.0):
-`lake build Cslib.Logics.Propositional.NaturalDeduction.Theory` (593 jobs) — green;
-`lake exe lint-style` — clean; `lake exe checkInitImports` — clean; zero `sorry`.
+**Branch**: `feat/propositional-v2` — rebased onto current `upstream/main` (toolchain
+`v4.32.0-rc1`); 3 clean commits, no merge commit. Head commit `63cd13c8` adds the IPL-base
+refactor. The two original commits (`1a2e2e7e`, `cc44c14d`) are preserved.
+**CI**: GitHub Actions — all checks **green** on `63cd13c8`. Verified locally too:
+`lake build`, `lake exe mk_all --check`, `lake exe checkInitImports`, `lake lint`,
+`lake exe lint-style`, `lake test` — all pass; zero `sorry`.
 
 ---
 
@@ -110,11 +111,10 @@ and bib lookup; all Lean code was reviewed and verified by the author." -->
 
 ---
 
-## User Next Steps
+## Status / next steps
 
-1. Review and finalize this draft in your own words (AI policy — see banner).
-2. Review the commit: `git show 85db79a6` on branch `feat/propositional-ipl-base`.
-3. Update #648 by fast-forward (no force-push):
-   `git push origin feat/propositional-ipl-base:feat/propositional-v2`
-4. Paste the reworded body into the #648 PR description.
-5. Post `zulip-response.md` to Zulip thread 606970606 **in your own words**.
+The branch is **already pushed** and **GitHub CI is green** (head `63cd13c8`); the PR is
+`MERGEABLE` (awaiting maintainer review). Remaining, human-only:
+
+1. Reword this draft in your own words (AI policy — see banner) and paste it into the #648 PR body.
+2. Post `zulip-response.md` to Zulip thread 606970606 **in your own words**.

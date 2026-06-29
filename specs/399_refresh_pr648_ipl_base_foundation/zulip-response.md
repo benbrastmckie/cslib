@@ -34,7 +34,7 @@ That's the design now in #648 — and it reads as a reasonable compromise.
   derived-rule scaffolding are removed; the fragment design / minimal-logic development is left for
   separate later work, as suggested.
 - The classical layer stays (`CPL` = base + double-negation elimination; `byContra`/`lem`/`pierce`).
-- Verified locally: build green, `lint-style` clean, `checkInitImports` clean, zero `sorry`.
+- CI is green (GitHub Actions, on the current `v4.32.0-rc1` toolchain); zero `sorry`.
 
 **2. Connective typeclasses — flag (a).** Removed from the PR (`Connectives.lean` and its
 registration instances are gone). Happy to take it to fmontesi's PR #607 instead. One design point
@@ -43,12 +43,13 @@ intuitionistic/minimal logic `¬φ := φ → ⊥`, so a `HasBot` class with `¬`
 `⊥`-primitive `Proposition` register cleanly. (Optional — judge whether to mention this here or as a
 review on #607 itself.)
 
-**3. References + Zulip link — flag (b).** Added: Johansson 1937, Gentzen 1935, Prawitz 1965,
+**3. References + Zulip link — flag (b).** Added: Gentzen 1935, Prawitz 1965, and
 Troelstra & van Dalen 1988 are in `references.bib` and cited in `Basic.lean`; the design thread is
-linked in its `## Implementation notes`.
+linked in its `## Implementation notes`. (These are the natural-deduction references; minimal-logic
+sources like Johansson are deliberately omitted since minimal logic is set aside for now.)
 
-**4. PR status.** #648 is refreshed by adding one focused commit (fast-forward — the existing
-commits stay). Looking forward to your review now that the base design is settled.
+**4. PR status.** #648 is updated (rebased onto current `upstream/main`; 3 clean commits, no merge
+commit) and GitHub CI is green. Looking forward to your review now that the base design is settled.
 
 [FILL IN: your own framing, any questions for Thomas, acknowledgement of the encoding-vs-rule
 trade-off he raised, etc.]
@@ -60,8 +61,8 @@ trade-off he raised, etc.]
 - [ ] efq is an **ungated** primitive rule ⇒ IPL is the base (NOT "gated / MPL retained" — minimal is set aside)
 - [ ] Minimal logic / fragment design **deferred to later work** (matches Waring's compromise)
 - [ ] Connective typeclasses removed from PR; engage PR #607 (task 400); HasBot/derived-¬ point
-- [ ] References (4: Johansson/Gentzen/Prawitz/Troelstra–van Dalen) + Zulip link added
-- [ ] #648 updated by fast-forward (no force-push); existing commits + review preserved
+- [ ] References (3: Gentzen/Prawitz/Troelstra–van Dalen) + Zulip link added (Johansson omitted — minimal set aside)
+- [ ] #648 rebased onto current upstream/main (3 clean commits); GitHub CI green; MERGEABLE
 - [ ] Welcome formal review
 
 ## Thread / recipient details

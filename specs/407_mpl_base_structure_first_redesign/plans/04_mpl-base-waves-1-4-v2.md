@@ -158,7 +158,7 @@ Wave-2 phases depend only on the Phase-1 re-framing and edit largely disjoint tr
 
 ---
 
-### Phase 5: Generic explosion-parameterized Lindenbaum substrate (additive-first) [NOT STARTED]
+### Phase 5: Generic explosion-parameterized Lindenbaum substrate (additive-first) [COMPLETED]
 
 **Goal**: Factor a generic deductive-closure / implication-witness parameterized by the explosion/consistency property, added **alongside** the existing `Min*`/`Int*` code (no deletion yet).
 
@@ -174,7 +174,7 @@ Wave-2 phases depend only on the Phase-1 re-framing and edit largely disjoint tr
 
 ---
 
-### Phase 6: Re-instantiate `Min*`/`Int*`; unify `bot_forces`; remove duplication [NOT STARTED]
+### Phase 6: Re-instantiate `Min*`/`Int*`; unify `bot_forces`; remove duplication [IN PROGRESS]
 
 **Goal**: Migrate `Min*`/`Int*` onto the Phase-5 substrate one instance at a time and delete duplicated code once both pass.
 

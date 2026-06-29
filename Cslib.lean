@@ -415,6 +415,7 @@ public import Cslib.Logics.Propositional.Metalogic.ClassicalConjImpBotCompletene
 public import Cslib.Logics.Propositional.Metalogic.ClassicalConjImpCompleteness
 public import Cslib.Logics.Propositional.Metalogic.ClassicalImpCompleteness
 public import Cslib.Logics.Propositional.Metalogic.DeductionTheorem
+public import Cslib.Logics.Propositional.Metalogic.GenericLindenbaum
 public import Cslib.Logics.Propositional.Metalogic.GenericMCSBridge
 -- TEMPORARILY STUBBED (task 385, parked FMP): IntFMPSpike scratch spike drifted
 -- out of sync with the tableau/metalogic API during the merge.

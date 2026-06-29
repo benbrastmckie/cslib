@@ -413,6 +413,7 @@ public import Cslib.Logics.Propositional.CurryHoward.Defs
 public import Cslib.Logics.Propositional.CurryHoward.Isomorphism
 public import Cslib.Logics.Propositional.CurryHoward.Reduction
 public import Cslib.Logics.Propositional.Defs
+public import Cslib.Logics.Propositional.Embedding
 public import Cslib.Logics.Propositional.Metalogic.ClassicalConjImpBotCompleteness
 public import Cslib.Logics.Propositional.Metalogic.ClassicalConjImpCompleteness
 public import Cslib.Logics.Propositional.Metalogic.ClassicalImpCompleteness

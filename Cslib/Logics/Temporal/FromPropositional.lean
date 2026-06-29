@@ -6,60 +6,39 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Propositional.Defs
+public import Cslib.Logics.Propositional.Embedding
 public import Cslib.Logics.Temporal.Syntax.Formula
 
 /-! # Propositional to Temporal Embedding
 
-This module defines the structural embedding from propositional logic into temporal logic.
-The embedding maps each propositional primitive constructor to the corresponding temporal
-constructor, establishing Propositional as a sub-logic of Temporal.
+This module defines the structural embedding from propositional logic into temporal logic,
+instantiating the shared `PropositionalEmbedding` skeleton from
+`Cslib.Logics.Propositional.Embedding`.
 
 ## Main Definitions
 
-- `PL.Proposition.toTemporal`: Propositional → Temporal (maps atom/bot/imp/and/or)
+- `PL.Proposition.toTemporal`: Propositional → Temporal (thin wrapper over `PL.Proposition.embed`)
 
-## Encoding Rationale
-
-`PL.Proposition` has five primitive constructors `{atom, bot, imp, and, or}`, while
-`Temporal.Formula` has only `{atom, bot, imp, untl, snce}`. The `and`/`or` cases must
-therefore be encoded using a formula built from the available temporal connectives. The
-Lukasiewicz encodings `and φ ψ := ¬(φ → ¬ψ)` and `or φ ψ := ¬φ → ψ` are classically
-sound and are used here because this embedding targets classical temporal logic (BX).
-
-Note: This differs from the propositional level, where `and`/`or` are native constructors
-with `HasAnd`/`HasOr` instances. The embedding necessarily uses Lukasiewicz because
-`Temporal.Formula` lacks native `and`/`or` constructors.
-
-## Limitations
-
-**Classical scope only.** The Lukasiewicz encodings `¬(φ → ¬ψ)` for `∧` and `¬φ → ψ` for `∨`
-are classically valid but not intuitionistically valid. This embedding is therefore sound for
-classical temporal logics (e.g., BX) but **not** for intuitionistic temporal logics. If CSLib
-adds intuitionistic temporal logic in the future, a separate embedding respecting the native
-`and`/`or` constructors will be required.
+See `Cslib.Logics.Propositional.Embedding` for the shared typeclass, the `embed` skeleton,
+and the classical-scope limitation note (Łukasiewicz / [Wajsberg1938] / [McKinsey1939]).
 -/
 
 @[expose] public section
 
 namespace Cslib.Logic
 
+/-- `Temporal.Formula` instance for `PropositionalEmbedding`:
+atoms map to `Temporal.Formula.atom`. -/
+instance instPropositionalEmbeddingTemporal :
+    PropositionalEmbedding Atom (Temporal.Formula Atom) where
+  atomEmbed := Temporal.Formula.atom
+
 /-- Embed a propositional formula into temporal logic.
 
-The `atom`, `bot`, and `imp` cases map to the corresponding `Temporal.Formula` constructors.
-The `and` and `or` cases use the Lukasiewicz encoding into `{atom, bot, imp, untl, snce}`
-because `Temporal.Formula` has no native `and`/`or` constructors:
-- `A ∧ B` maps to `¬(A → ¬B)` = `(A → (B → ⊥)) → ⊥`
-- `A ∨ B` maps to `¬A → B` = `(A → ⊥) → B`
-
-These encodings are classically equivalent to `∧` and `∨` but not intuitionistically
-([Wajsberg1938], [McKinsey1939]); this embedding therefore targets classical temporal logic. -/
-def PL.Proposition.toTemporal : PL.Proposition Atom → Temporal.Formula Atom
-  | .atom p => .atom p
-  | .bot => .bot
-  | .imp φ₁ φ₂ => .imp (φ₁.toTemporal) (φ₂.toTemporal)
-  | .and φ₁ φ₂ => .imp (.imp φ₁.toTemporal (.imp φ₂.toTemporal .bot)) .bot
-  | .or φ₁ φ₂ => .imp (.imp φ₁.toTemporal .bot) φ₂.toTemporal
+Thin wrapper over `PL.Proposition.embed` using the `Temporal.Formula` instance of
+`PropositionalEmbedding`. The `and`/`or` cases use the Łukasiewicz encoding via
+`{bot, imp}` (classical scope only; see `Cslib.Logics.Propositional.Embedding`). -/
+def PL.Proposition.toTemporal (φ : PL.Proposition Atom) : Temporal.Formula Atom := φ.embed
 
 /-- Coercion from propositional to temporal formulas. -/
 instance instCoePLToTemporal : Coe (PL.Proposition Atom) (Temporal.Formula Atom) where

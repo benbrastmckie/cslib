@@ -6,61 +6,40 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Propositional.Defs
+public import Cslib.Logics.Propositional.Embedding
 public import Cslib.Logics.Propositional.Semantics.Bool
 public import Cslib.Logics.Modal.Basic
 
 /-! # Propositional to Modal Embedding
 
-This module defines the structural embedding from propositional logic into modal logic.
-The embedding maps each propositional primitive constructor to the corresponding modal
-constructor, establishing Propositional as a sub-logic of Modal.
+This module defines the structural embedding from propositional logic into modal logic,
+instantiating the shared `PropositionalEmbedding` skeleton from
+`Cslib.Logics.Propositional.Embedding`.
 
 ## Main Definitions
 
-- `PL.Proposition.toModal`: Propositional → Modal (maps atom/bot/imp/and/or)
+- `PL.Proposition.toModal`: Propositional → Modal (thin wrapper over `PL.Proposition.embed`)
 
-## Encoding Rationale
-
-`PL.Proposition` has five primitive constructors `{atom, bot, imp, and, or}`, while
-`Modal.Proposition` has only `{atom, bot, imp, box}`. The `and`/`or` cases must therefore
-be encoded using a formula built from the available modal connectives. The Lukasiewicz
-encodings `and φ ψ := ¬(φ → ¬ψ)` and `or φ ψ := ¬φ → ψ` are classically sound and
-are used here because this embedding targets classical modal logic.
-
-Note: This differs from the propositional level, where `and`/`or` are native constructors
-with `HasAnd`/`HasOr` instances. The embedding necessarily uses Lukasiewicz because
-`Modal.Proposition` lacks native `and`/`or` constructors.
-
-## Limitations
-
-**Classical scope only.** The Lukasiewicz encodings `¬(φ → ¬ψ)` for `∧` and `¬φ → ψ` for `∨`
-are classically valid but not intuitionistically valid. This embedding is therefore sound for
-classical modal logics (e.g., K, S4, S5) but **not** for intuitionistic modal logics. If CSLib
-adds intuitionistic modal logic in the future, a separate embedding respecting the native
-`and`/`or` constructors will be required.
+See `Cslib.Logics.Propositional.Embedding` for the shared typeclass, the `embed` skeleton,
+and the classical-scope limitation note (Łukasiewicz / [Wajsberg1938] / [McKinsey1939]).
 -/
 
 @[expose] public section
 
 namespace Cslib.Logic
 
+/-- `Modal.Proposition` instance for `PropositionalEmbedding`:
+atoms map to `Modal.Proposition.atom`. -/
+instance instPropositionalEmbeddingModal :
+    PropositionalEmbedding Atom (Modal.Proposition Atom) where
+  atomEmbed := Modal.Proposition.atom
+
 /-- Embed a propositional formula into modal logic.
 
-The `atom`, `bot`, and `imp` cases map to the corresponding `Modal.Proposition` constructors.
-The `and` and `or` cases use the Lukasiewicz encoding into `{atom, bot, imp, box}` because
-`Modal.Proposition` has no native `and`/`or` constructors:
-- `A ∧ B` maps to `¬(A → ¬B)` = `(A → (B → ⊥)) → ⊥`
-- `A ∨ B` maps to `¬A → B` = `(A → ⊥) → B`
-
-These encodings are classically equivalent to `∧` and `∨` but not intuitionistically
-([Wajsberg1938], [McKinsey1939]); this embedding therefore targets classical modal logic. -/
-def PL.Proposition.toModal : PL.Proposition Atom → Modal.Proposition Atom
-  | .atom p => .atom p
-  | .bot => .bot
-  | .imp φ₁ φ₂ => .imp (φ₁.toModal) (φ₂.toModal)
-  | .and φ₁ φ₂ => φ₁.toModal.and φ₂.toModal
-  | .or φ₁ φ₂ => φ₁.toModal.or φ₂.toModal
+Thin wrapper over `PL.Proposition.embed` using the `Modal.Proposition` instance of
+`PropositionalEmbedding`. The `and`/`or` cases use the Łukasiewicz encoding via
+`{bot, imp}` (classical scope only; see `Cslib.Logics.Propositional.Embedding`). -/
+def PL.Proposition.toModal (φ : PL.Proposition Atom) : Modal.Proposition Atom := φ.embed
 
 /-- Coercion from propositional to modal formulas. -/
 instance instCoePLToModal : Coe (PL.Proposition Atom) (Modal.Proposition Atom) where
@@ -112,11 +91,11 @@ theorem modal_satisfies_toModal_iff_evaluate
   | atom p => rfl
   | bot => rfl
   | imp φ ψ ih1 ih2 =>
-    simp only [PL.Proposition.toModal, Modal.Satisfies, PL.Evaluate]
+    simp only [PL.Proposition.toModal_imp, Modal.Satisfies, PL.Evaluate]
     exact ⟨fun h he => ih2.mp (h (ih1.mpr he)),
            fun h hm => ih2.mpr (h (ih1.mp hm))⟩
   | and φ ψ ih1 ih2 =>
-    simp only [PL.Proposition.toModal, PL.Evaluate]
+    simp only [PL.Proposition.toModal_and, PL.Evaluate]
     constructor
     · intro h
       simp only [Modal.Satisfies] at h
@@ -127,7 +106,7 @@ theorem modal_satisfies_toModal_iff_evaluate
       simp only [Modal.Satisfies]
       intro h; exact h (ih1.mpr ha) (ih2.mpr hb)
   | or φ ψ ih1 ih2 =>
-    simp only [PL.Proposition.toModal, PL.Evaluate]
+    simp only [PL.Proposition.toModal_or, PL.Evaluate]
     constructor
     · intro h
       simp only [Modal.Satisfies] at h

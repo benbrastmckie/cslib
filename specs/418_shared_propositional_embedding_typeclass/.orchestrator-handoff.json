@@ -1,0 +1,23 @@
+{
+  "status": "planned",
+  "task_number": 418,
+  "task_slug": "shared_propositional_embedding_typeclass",
+  "agent_type": "planner-agent",
+  "artifacts": [
+    "specs/418_shared_propositional_embedding_typeclass/plans/01_shared-embedding-typeclass.md"
+  ],
+  "plan_path": "specs/418_shared_propositional_embedding_typeclass/plans/01_shared-embedding-typeclass.md",
+  "research_inputs": [
+    "specs/418_shared_propositional_embedding_typeclass/reports/01_shared-embedding-typeclass.md"
+  ],
+  "phase_count": 5,
+  "estimated_hours": 4,
+  "dependency_waves": [[1], [2, 3, 4], [5]],
+  "coordination": {
+    "task_417_overlap": [
+      "Cslib/Logics/Temporal/ConservativeExtension.lean",
+      "Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/PropositionalConservativity.lean"
+    ]
+  },
+  "next_steps": "Run /implement 418 to execute the plan"
+}

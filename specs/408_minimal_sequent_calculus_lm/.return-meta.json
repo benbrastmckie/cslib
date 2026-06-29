@@ -1,15 +1,16 @@
 {
   "status": "in_progress",
-  "started_at": "2026-06-29T19:08:53Z",
-  "artifacts": [],
+  "started_at": "2026-06-29T19:21:20Z",
   "partial_progress": {
-    "stage": "exploring",
-    "details": "Read LJ/Basic.lean and LK/Basic.lean; examining cut elimination, Defs, and task 407 design"
+    "stage": "implementing",
+    "phases_completed": 2,
+    "last_completed_phase": "Phase 2: generic cut elimination (CutElimination.lean green)",
+    "details": "Unified inductive SeqProof T with gated botL; LJProof := SeqProof IPL. Basic + CutElimination build clean. Finding: botL match arms at IPL synthesize the instance, so only generic-over-T defs need the @-pattern; IPL-specific files mostly unchanged."
   },
   "metadata": {
     "session_id": "sess_1782760056_06c853_408",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
   }
 }

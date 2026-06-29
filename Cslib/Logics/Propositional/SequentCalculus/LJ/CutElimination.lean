@@ -61,27 +61,27 @@ lemma LJCutFree.mono {seq : @Sequent Atom} {Γ' : Ctx Atom}
     (hL : seq.1 ⊆ Γ') (d : LJProof seq) (hcf : LJCutFree d) :
     LJCutFree (d.mono hL) := by
   induction d generalizing Γ' with
-  | ax _ _ _ => simp [LJProof.mono, LJCutFree]
-  | botL _ _ _ => simp [LJProof.mono, LJCutFree]
+  | ax _ _ _ => simp [SeqProof.mono, SeqProof.CutFree]
+  | botL _ _ _ => simp [SeqProof.mono, SeqProof.CutFree]
   | andL _ _ _ _ ih =>
-    simp only [LJProof.mono, LJCutFree] at *; exact ih _ hcf
+    simp only [SeqProof.mono, SeqProof.CutFree] at *; exact ih _ hcf
   | andR _ _ _ _ ih₁ ih₂ =>
-    simp only [LJProof.mono, LJCutFree] at *
+    simp only [SeqProof.mono, SeqProof.CutFree] at *
     exact ⟨ih₁ _ hcf.1, ih₂ _ hcf.2⟩
   | orL _ _ _ _ _ ih₁ ih₂ =>
-    simp only [LJProof.mono, LJCutFree] at *
+    simp only [SeqProof.mono, SeqProof.CutFree] at *
     exact ⟨ih₁ _ hcf.1, ih₂ _ hcf.2⟩
   | orR1 _ _ _ ih =>
-    simp only [LJProof.mono, LJCutFree] at *; exact ih _ hcf
+    simp only [SeqProof.mono, SeqProof.CutFree] at *; exact ih _ hcf
   | orR2 _ _ _ ih =>
-    simp only [LJProof.mono, LJCutFree] at *; exact ih _ hcf
+    simp only [SeqProof.mono, SeqProof.CutFree] at *; exact ih _ hcf
   | impL _ _ _ _ _ ih₁ ih₂ =>
-    simp only [LJProof.mono, LJCutFree] at *
+    simp only [SeqProof.mono, SeqProof.CutFree] at *
     exact ⟨ih₁ _ hcf.1, ih₂ _ hcf.2⟩
   | impR _ _ _ ih =>
-    simp only [LJProof.mono, LJCutFree] at *; exact ih _ hcf
+    simp only [SeqProof.mono, SeqProof.CutFree] at *; exact ih _ hcf
   | weakL _ _ ih =>
-    simp only [LJProof.mono, LJCutFree] at *; exact ih _ hcf
+    simp only [SeqProof.mono, SeqProof.CutFree] at *; exact ih _ hcf
   | cut _ _ _ => exact absurd hcf id
 
 /-- Monotonicity for cut-free LJ proofs. -/

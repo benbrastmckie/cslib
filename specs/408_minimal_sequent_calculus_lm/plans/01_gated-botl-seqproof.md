@@ -131,7 +131,7 @@ Phases within the same wave can execute in parallel (subject to file-level terri
 
 ---
 
-### Phase 2: Generic cut elimination — `LJ/CutElimination.lean` [NOT STARTED]
+### Phase 2: Generic cut elimination — `LJ/CutElimination.lean` [COMPLETED]
 
 **Goal**: Carry `ljCutAdmissibility`/`LJProof.cutElim` over the gate generically over `T`,
 preserving signatures and termination measures.

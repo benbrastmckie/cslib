@@ -1,18 +1,29 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "started_at": "2026-06-29T00:00:00Z",
-  "artifacts": [],
+  "completed_at": "2026-06-29T00:00:00Z",
+  "artifacts": [
+    "specs/407_mpl_base_structure_first_redesign/mpl-base-design-note.md",
+    "specs/407_mpl_base_structure_first_redesign/summaries/04_mpl-base-waves-1-4-v2-summary.md"
+  ],
   "partial_progress": {
-    "stage": "initializing",
-    "details": "Phase 9 started - CI verification and design note finalization",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 8
+    "phases_completed": 9,
+    "last_completed_phase": "Full verification, design-note finalization & CI"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "notes": "lake test passes (9142/9142); lake build passes (3151 jobs); 0 new sorries in task-407 files; 4 pre-existing sorries in Tableau/Scheme.lean+Completeness.lean from task 317; many in Bimodal from tasks 36/37; mk_all pre-existing IntFMPSpike stub (task 385)"
   },
   "metadata": {
     "session_id": "sess_1782755492_9bd301",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

@@ -1,5 +1,5 @@
 ---
-next_project_number: 410
+next_project_number: 411
 ---
 
 # TODO
@@ -12,7 +12,7 @@ next_project_number: 410
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,180,226,241,278,299,301,317,321,370,385,386,387,388,396,400,401,403,404,406,407 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
-| 2 | 39,40,181,215,300,375,389,390,405,408,409 | 36,37,180,299,317,387,404,407 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
+| 2 | 39,40,181,215,300,375,389,390,405,408,409,410 | 36,37,180,299,317,387,404,407 | Bimodal Porting, Modal Logic, Propositional Logic, ... |
 | 3 | 41,275,391,392 | 39,40,386,387,389 | Bimodal Porting, Foundations, Propositional Logic |
 | 4 | 393 | 386,391 | Propositional Logic |
 
@@ -62,11 +62,12 @@ next_project_number: 410
   └─ 390 [NOT STARTED] — [Refreshed post-merge vet.] The Propositional section (~ORGANISAT
   └─ 392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls (see above)
 388 [NOT STARTED] — [Reconciled by task 395, post-merge.] Tier-2. NaturalDeduction/No
-400 [PLANNED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
+400 [IMPLEMENTING] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 401 [NOT STARTED] — From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portab
-407 [PLANNED] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
+407 [IMPLEMENTING] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
   └─ 408 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 5. Lar
   └─ 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
+  └─ 410 [NOT STARTED] — Research and formalize the per-fragment algebraic completeness ne
 
 ### Temporal Logic
 
@@ -82,6 +83,16 @@ next_project_number: 410
 406 [NOT STARTED] — NEW from post-merge vet (sess_1782671052_6af6a1). Fix 33 pre-exis
 
 ## Tasks
+
+### 410. Fragment-generic algebraic completeness for MPL-base derivability
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 407
+
+**Description**: Research and formalize the per-fragment algebraic completeness needed to instantiate the fully-generic Derivable P-logic framework. Current residual from task 407 (phase 7 S3 spike): FragmentGeneric.lean delivers AlgEvalIndependent + generic_gha_implies_ha + ghaValid_of_botFree (the GHAValid <-> HAValid equivalence for bot-free formulas). The remaining step -- HAValid phi -> Derivable X-logic phi for a specific sub-logic X -- requires per-fragment algebraic completeness, which is not currently generic in P. Each fragment has its own canonical algebra model: IsBotFree routes through WithBot G + Heyting completeness; IsOrBotFree routes through LowerSet B + Brouwerian completeness; IsImpTopOnly routes through the Rasiowa free algebra. A fully generic Derivable P-logic phi <- HAValid phi parameterized by P is open research. Research goal: (1) identify what algebraic completeness property a fragment P needs to satisfy so that the generic framework closes; (2) state and prove a typeclass or predicate CanAlgComplete P such that (CanAlgComplete P, AlgEvalIndependent P) implies generic Derivable P-logic phi <-> GHAValid phi; (3) instantiate for at least IsBotFree and IsOrBotFree; (4) determine whether IsImpTopOnly can be recovered. See Cslib/Logics/Propositional/Semantics/Algebra/FragmentGeneric.lean lines 40-53 for the open residual. References: Rasiowa1974 (algebraic approach), task 407 reports 01-03. Task type: cslib. Depends on 407 (delivers FragmentGeneric.lean).
+
+---
 
 ### 409. Literal ⊥-rule-free base ND inductive (option B): split MinDerivation + Explosion; re-cut Curry-Howard & normalization
 - **Status**: [NOT STARTED]
@@ -104,7 +115,7 @@ next_project_number: 410
 ---
 
 ### 407. Research & design: make MPL the structure-first base logic (⊥ as nullary connective; explosion/leastness/initiality as independent property modules)
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 398
@@ -113,6 +124,7 @@ next_project_number: 410
   - [407_mpl_base_structure_first_redesign/reports/02_mpl-base-with-vs-without-bot.md]
   - [407_mpl_base_structure_first_redesign/reports/03_design-verification-plan-readiness.md]
 - **Plan**: [407_mpl_base_structure_first_redesign/plans/04_mpl-base-waves-1-4-v2.md]
+- **Summary**: [407_mpl_base_structure_first_redesign/summaries/04_mpl-base-waves-1-4-v2-summary.md]
 
 **Description**: DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat.md) + codebase synthesis. Adopt the STRUCTURE-FIRST account: one fixed language ⟨Atom,⊥,∧,∨,→⟩; ⊥ is a primitive NULLARY connective whose meaning is intentionally underdetermined (a Johansson 'designated constant' supplied by every model, no intrinsic proof rule). MPL is the BASE proof theory (no rule/axiom mentions ⊥; ¬A:=A→⊥; A,A→⊥⊢⊥ is just impE). IPL = MPL + explosion (⊥/A) as an INDEPENDENT module; CPL = IPL + classical principles. Semantically, leastness (⊥≤a), initiality (universal property 0→A), and explosion-soundness are INDEPENDENT properties added by conservative strengthening, not changes to syntax or recursive clauses. Modularity organized around PROPERTIES (typeclasses/mixins), not connectives, so structural metatheory (weakening, substitution, admissibility, cut) is proved ONCE at MPL. RELATION TO 398: this is the deeper redesign 398 postponed (398 report §5). 398 took the OPPOSITE commitment (IPL-as-base via a gated ND efq constructor). Recommendation (report §5) is option (C): re-frame 398's gate as the explosion PROPERTY MODULE rather than revert it. FINDINGS (report 01): codebase is already ~70-80% structure-first. ALIGNED: algebraic semantics (AlgEvaluate with arbitrary bot_val; BrouwerianBot vs PointedBrouwerian; IsBotFree; conservativity chains) and Hilbert axioms (MinPropAxiom→IntPropAxiom+efq→PropositionalAxiom+peirce; IsIntuitionistic/MinimalAxioms typeclasses). GAPS: (1) ND inverted by 398 (gated efq = IPL-base); (2) sequent calculus LARGE gap (LJ/LK hard-code botL; no minimal LM; structural results per-system); (3) metalogic ~50% Min*/Int* duplication, Lindenbaum hard-wires EFQ; (4) semantic leastness/initiality/explosion present only implicitly (OrderBot + per-axiom proofs), not as a NAMED property hierarchy. SCOPE: research+design done (report 01). Plan should cover the cheap additive waves first: W1 design canonicalization+ND re-framing (C), W2 named semantic property hierarchy, W3 metalogic genericization, W4 tableau unification; and SPAWN W5 (minimal sequent calculus LM) and optional W6 (literal ⊥-rule-free ND, option B) as separate --hard tasks. Preserve ALL MPL/conservativity assets (do not revert 398). --hard recommended for planning. Honor Zulip AI policy. See OPEN QUESTIONS in report §9 (ND reconciliation C vs B; task scope; categorical/initiality timing; property naming; relation to task 400).
 
@@ -169,7 +181,7 @@ next_project_number: 410
 ---
 
 ### 400. Unbundle connective typeclasses; reconcile with fmontesi PR #607 (Waring's flag a)
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

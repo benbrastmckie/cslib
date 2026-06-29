@@ -1,5 +1,5 @@
 {
-  "next_project_number": 410,
+  "next_project_number": 411,
   "active_projects": [
     {
       "project_number": 406,
@@ -841,12 +841,12 @@
     {
       "project_number": 400,
       "project_name": "reconcile_connectives_pr607",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "Unbundle connective typeclasses; reconcile with fmontesi PR #607 (Waring's flag a)",
       "description": "[ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/reports/01_pr607-engagement.md] Engage fmontesi PR #607 (feat(Logic): logical operators) to land the connective typeclasses there instead of in #648 (Waring, Zulip 606970606). PREREQ DONE: our Connectives.lean removed from #648 (commit 85db79a6 on feat/propositional-ipl-base). PRIMARY POINT for the #607 review: #607 makes negation primitive (HasNot) and has NO HasBot; for IPL/MPL, neg is definitionally (phi -> bot), so #607 needs a HasBot (and HasTop) class with neg/top DERIVED, else the five-primitive Proposition (primitive bot) cannot register faithfully. SECONDARY: naming HasImpl/impl vs HasImp/imp; notation precedence conflicts (-> 25 vs 30, or 30 vs 35); bundle-vs-a-la-carte (PropositionalConnectives); notation ownership (typeclass notation + _def lemmas vs direct-on-Proposition). DELIVERABLE: human-authored review on #607 (Zulip AI policy), then register Proposition instances via #607 once the falsum question settles. Independent of the IPL-base work.",
       "created": "2026-06-28T15:43:45Z",
-      "last_updated": "2026-06-29T18:52:47Z",
+      "last_updated": "2026-06-29T18:57:07Z",
       "next_artifact_number": 3,
       "artifacts": [
         {
@@ -865,7 +865,7 @@
           "summary": "PR #607 engagement plan: agent-doable review scaffolding (Phases 1-4), human review gate + upstream-resolution gate (5-6, BLOCKED), conditional downstream Proposition-instance registration (7-8, BLOCKED on upstream)"
         }
       ],
-      "session_id": "sess_1782758901_ee8ca9",
+      "session_id": "sess_1782759395_5a8840",
       "dependencies": [],
       "topic": "Propositional Logic"
     },
@@ -922,13 +922,13 @@
     {
       "project_number": 407,
       "project_name": "mpl_base_structure_first_redesign",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "Research & design: make MPL the structure-first base logic (⊥ as nullary connective; explosion/leastness/initiality as independent property modules)",
       "description": "DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat.md) + codebase synthesis. Adopt the STRUCTURE-FIRST account: one fixed language ⟨Atom,⊥,∧,∨,→⟩; ⊥ is a primitive NULLARY connective whose meaning is intentionally underdetermined (a Johansson 'designated constant' supplied by every model, no intrinsic proof rule). MPL is the BASE proof theory (no rule/axiom mentions ⊥; ¬A:=A→⊥; A,A→⊥⊢⊥ is just impE). IPL = MPL + explosion (⊥/A) as an INDEPENDENT module; CPL = IPL + classical principles. Semantically, leastness (⊥≤a), initiality (universal property 0→A), and explosion-soundness are INDEPENDENT properties added by conservative strengthening, not changes to syntax or recursive clauses. Modularity organized around PROPERTIES (typeclasses/mixins), not connectives, so structural metatheory (weakening, substitution, admissibility, cut) is proved ONCE at MPL. RELATION TO 398: this is the deeper redesign 398 postponed (398 report §5). 398 took the OPPOSITE commitment (IPL-as-base via a gated ND efq constructor). Recommendation (report §5) is option (C): re-frame 398's gate as the explosion PROPERTY MODULE rather than revert it. FINDINGS (report 01): codebase is already ~70-80% structure-first. ALIGNED: algebraic semantics (AlgEvaluate with arbitrary bot_val; BrouwerianBot vs PointedBrouwerian; IsBotFree; conservativity chains) and Hilbert axioms (MinPropAxiom→IntPropAxiom+efq→PropositionalAxiom+peirce; IsIntuitionistic/MinimalAxioms typeclasses). GAPS: (1) ND inverted by 398 (gated efq = IPL-base); (2) sequent calculus LARGE gap (LJ/LK hard-code botL; no minimal LM; structural results per-system); (3) metalogic ~50% Min*/Int* duplication, Lindenbaum hard-wires EFQ; (4) semantic leastness/initiality/explosion present only implicitly (OrderBot + per-axiom proofs), not as a NAMED property hierarchy. SCOPE: research+design done (report 01). Plan should cover the cheap additive waves first: W1 design canonicalization+ND re-framing (C), W2 named semantic property hierarchy, W3 metalogic genericization, W4 tableau unification; and SPAWN W5 (minimal sequent calculus LM) and optional W6 (literal ⊥-rule-free ND, option B) as separate --hard tasks. Preserve ALL MPL/conservativity assets (do not revert 398). --hard recommended for planning. Honor Zulip AI policy. See OPEN QUESTIONS in report §9 (ND reconciliation C vs B; task scope; categorical/initiality timing; property naming; relation to task 400).",
       "created": "2026-06-29T00:00:00Z",
-      "last_updated": "2026-06-29T17:42:00Z",
-      "next_artifact_number": 4,
+      "last_updated": "2026-06-29T00:00:00Z",
+      "next_artifact_number": 5,
       "artifacts": [
         {
           "path": "specs/407_mpl_base_structure_first_redesign/reports/01_mpl-base-structure-first.md",
@@ -949,6 +949,11 @@
           "path": "specs/407_mpl_base_structure_first_redesign/plans/04_mpl-base-waves-1-4-v2.md",
           "type": "plan",
           "summary": "Waves 1-4 v2 plan: carries prior Option C plan forward, decomposed into 9 small phases, integrating report 03 sharpenings S1 (pin MinimalDerivation/IsBotRuleFree), S2 (reuse IsIntuitionistic/OrderBot, no HasExplosion), S3 (fragment-genericity spike with research-or-defer gate)."
+        },
+        {
+          "path": "specs/407_mpl_base_structure_first_redesign/summaries/04_mpl-base-waves-1-4-v2-summary.md",
+          "type": "summary",
+          "summary": "Phase 9 CI verification complete; design note finalized; task 410 spawned for fragment-generic algebraic completeness follow-on research."
         }
       ],
       "session_id": "sess_1782750230_3ec4a4_407plan",
@@ -1042,6 +1047,24 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782744926_3601df_407_409",
+      "dependencies": [
+        407
+      ],
+      "topic": "Propositional Logic",
+      "parent_task": 407
+    },
+    {
+      "project_number": 410,
+      "project_name": "fragment_generic_algebraic_completeness",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Fragment-generic algebraic completeness for MPL-base derivability",
+      "description": "Research and formalize the per-fragment algebraic completeness needed to instantiate the fully-generic Derivable P-logic framework. Current residual from task 407 (phase 7 S3 spike): FragmentGeneric.lean delivers AlgEvalIndependent + generic_gha_implies_ha + ghaValid_of_botFree (the GHAValid <-> HAValid equivalence for bot-free formulas). The remaining step -- HAValid phi -> Derivable X-logic phi for a specific sub-logic X -- requires per-fragment algebraic completeness, which is not currently generic in P. Each fragment has its own canonical algebra model: IsBotFree routes through WithBot G + Heyting completeness; IsOrBotFree routes through LowerSet B + Brouwerian completeness; IsImpTopOnly routes through the Rasiowa free algebra. A fully generic Derivable P-logic phi <- HAValid phi parameterized by P is open research. Research goal: (1) identify what algebraic completeness property a fragment P needs to satisfy so that the generic framework closes; (2) state and prove a typeclass or predicate CanAlgComplete P such that (CanAlgComplete P, AlgEvalIndependent P) implies generic Derivable P-logic phi <-> GHAValid phi; (3) instantiate for at least IsBotFree and IsOrBotFree; (4) determine whether IsImpTopOnly can be recovered. See Cslib/Logics/Propositional/Semantics/Algebra/FragmentGeneric.lean lines 40-53 for the open residual. References: Rasiowa1974 (algebraic approach), task 407 reports 01-03. Task type: cslib. Depends on 407 (delivers FragmentGeneric.lean).",
+      "created": "2026-06-29T00:00:00Z",
+      "last_updated": "2026-06-29T00:00:00Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "session_id": "sess_1782755492_9bd301_410",
       "dependencies": [
         407
       ],

@@ -1,7 +1,7 @@
 # Implementation Plan: Task #407 — MPL the structure-first base *with* `⊥` (option C), Waves 1–4 (v2)
 
 - **Task**: 407 — Make MPL the structure-first base logic (`⊥` as nullary connective; explosion/leastness/initiality as independent property modules), carrying Waves 1–4 forward with report 03's sharpenings S1–S3
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: ~16–20 hours (9 phases, each one agent run / ~1–3h)
 - **Dependencies**: 398 (completed) — this **builds on, and does not revert,** 398; it re-frames 398's gated `efq` constructor as the explosion property module. Verification baseline: green `main`.
 - **Research Inputs**:
@@ -223,7 +223,7 @@ Wave-2 phases depend only on the Phase-1 re-framing and edit largely disjoint tr
 
 ---
 
-### Phase 9: Full verification, design-note finalization & CI [IN PROGRESS]
+### Phase 9: Full verification, design-note finalization & CI [COMPLETED]
 
 **Goal**: Confirm the whole library is green and all preserved assets intact; finalize the internal design note.
 

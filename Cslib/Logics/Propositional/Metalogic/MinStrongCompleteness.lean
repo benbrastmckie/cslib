@@ -90,7 +90,14 @@ theorem minCanonicalVal_upward_closed
     (hw : w ≤ w') (hv : minCanonicalVal w p) : minCanonicalVal w' p :=
   hw hv
 
-/-- The canonical `bot_forces`: `⊥` is forced at world `S` iff `⊥ ∈ S`. -/
+/-- The canonical `bot_forces`: `⊥` is forced at world `S` iff `⊥ ∈ S`.
+
+Both min and int canonical worlds can be equipped with the same membership-based
+`bot_forces = fun w => ⊥ ∈ w.val`. For Min, this is a genuine non-trivial predicate
+(some MinTheory worlds contain `⊥`). For Int, the same predicate equals `False` at every
+consistent world (see `intBotMem_iff_false` in `IntStrongCompleteness`). This unification
+is the canonical-model correlate of the `BotProperties` hierarchy: both systems use the
+same `bot_forces` mechanism, distinguished only by whether consistency rules out `⊥ ∈ w`. -/
 def minBotForces (w : MinCanonicalWorld Atom) : Prop :=
   ⊥ ∈ w.val
 
@@ -99,6 +106,12 @@ theorem minBotForces_upward_closed
     {w w' : MinCanonicalWorld Atom}
     (hw : w ≤ w') (hbf : minBotForces w) : minBotForces w' :=
   hw hbf
+
+/-- `minBotForces w ↔ ⊥ ∈ w.val` is trivially `Iff.rfl` (the definition).
+Documents the shared membership-based `bot_forces` convention used by both the
+minimal and intuitionistic canonical models. -/
+lemma minBotForces_iff_botMem (w : MinCanonicalWorld Atom) :
+    minBotForces w ↔ (⊥ : PL.Proposition Atom) ∈ w.val := Iff.rfl
 
 /-! ## Truth Lemma -/
 

@@ -8,6 +8,7 @@ module
 
 public import Cslib.Foundations.Logic.Metalogic.PrimeExclusion
 public import Cslib.Logics.Propositional.Metalogic.DeductionTheorem
+public import Cslib.Logics.Propositional.Metalogic.GenericLindenbaum
 public import Cslib.Logics.Propositional.Metalogic.MCS
 public import Cslib.Logics.Propositional.Metalogic.Soundness
 
@@ -103,27 +104,8 @@ theorem int_deriv_from_closure_to_S {S : Set (PL.Proposition Atom)}
     (φ : PL.Proposition Atom)
     (hd : (propDerivationSystem IntPropAxiom).Deriv L φ) :
     ∃ L' : List (PL.Proposition Atom),
-      (∀ y ∈ L', y ∈ S) ∧ (propDerivationSystem IntPropAxiom).Deriv L' φ := by
-  induction L generalizing φ with
-  | nil => exact ⟨[], fun _ h => (nomatch h), hd⟩
-  | cons a L' ih =>
-    -- DT: L' ⊢ a → φ
-    have hd_dt := hasDeductionTheorem IntPropAxiom.mem_implyK IntPropAxiom.mem_implyS hd
-    -- IH on L' with formula (a → φ): get L_imp ⊆ S with L_imp ⊢ a → φ
-    obtain ⟨L_imp, hL_imp_sub, hL_imp_deriv⟩ :=
-      ih (fun x hx => hL x (List.mem_cons.mpr (Or.inr hx))) (a → φ) hd_dt
-    -- Witness for a: La ⊆ S with La ⊢ a
-    obtain ⟨La, hLa_sub, hLa_deriv⟩ := hL a (List.mem_cons.mpr (Or.inl rfl))
-    -- Combine: La ++ L_imp ⊆ S, La ++ L_imp ⊢ φ (by MP)
-    exact ⟨La ++ L_imp,
-      fun y hy => by
-        rw [List.mem_append] at hy
-        exact hy.elim (hLa_sub y) (hL_imp_sub y),
-      (propDerivationSystem IntPropAxiom).mp
-        ((propDerivationSystem IntPropAxiom).weakening hL_imp_deriv
-          (fun x hx => List.mem_append.mpr (Or.inr hx)))
-        ((propDerivationSystem IntPropAxiom).weakening hLa_deriv
-          (fun x hx => List.mem_append.mpr (Or.inl hx)))⟩
+      (∀ y ∈ L', y ∈ S) ∧ (propDerivationSystem IntPropAxiom).Deriv L' φ :=
+  generic_deriv_from_closure_to_S IntPropAxiom.mem_implyK IntPropAxiom.mem_implyS L hL φ hd
 
 /-! ## Cut Lemma for Union Contexts -/
 
@@ -138,55 +120,8 @@ theorem int_deriv_imp_of_union
     (hd : (propDerivationSystem IntPropAxiom).Deriv L ψ) :
     ∃ L' : List (PL.Proposition Atom),
       (∀ x ∈ L', x ∈ S) ∧
-      (propDerivationSystem IntPropAxiom).Deriv L' (φ → ψ) := by
-  obtain ⟨d⟩ := hd
-  -- Weaken to φ :: L, then DT gives L ⊢ φ → ψ
-  have d_ext := DerivationTree.weakening L (φ :: L) ψ d
-    (fun x hx => List.mem_cons.mpr (Or.inr hx))
-  have d_dt := deductionTheorem IntPropAxiom.mem_implyK IntPropAxiom.mem_implyS L φ ψ d_ext
-  by_cases hφL : φ ∈ L
-  · -- φ ∈ L: use deductionWithMem to remove ALL occurrences of φ
-    have d_mem := deductionWithMem
-        IntPropAxiom.mem_implyK IntPropAxiom.mem_implyS L φ (φ → ψ) d_dt hφL
-    -- d_mem : DerivationTree (removeAll L φ) (φ → (φ → ψ))
-    -- removeAll L φ ⊆ S
-    have h_rem_sub : ∀ x ∈ removeAll L φ, x ∈ S := by
-      intro x hx
-      simp only [removeAll, ne_eq, decide_not, List.mem_filter, Bool.not_eq_eq_eq_not,
-        Bool.not_true, decide_eq_false_iff_not] at hx
-      obtain ⟨hx_in, hx_ne⟩ := hx
-      rcases hL x hx_in with h | h
-      · exact h
-      · exact absurd (Set.mem_singleton_iff.mp h) hx_ne
-    -- Collapse φ → (φ → ψ) to φ → ψ via S-combinator + identity
-    -- implyS: (φ → (φ → ψ)) → ((φ → φ) → (φ → ψ))
-    let ctx := removeAll L φ
-    have d_is : DerivationTree IntPropAxiom (Atom := Atom) ctx
-        ((φ.imp (φ.imp ψ)).imp ((φ.imp φ).imp (φ.imp ψ))) :=
-      .weakening [] ctx _ (.ax [] _ (.implyS φ φ ψ)) (fun _ h => nomatch h)
-    -- MP: ctx ⊢ (φ → φ) → (φ → ψ)
-    have d_step1 := DerivationTree.modus_ponens ctx _ _ d_is d_mem
-    -- Build identity ⊢ φ → φ
-    have d_k1 : DerivationTree IntPropAxiom (Atom := Atom) [] (φ.imp ((φ.imp φ).imp φ)) :=
-      .ax [] _ (.implyK φ (φ.imp φ))
-    have d_s1 : DerivationTree IntPropAxiom (Atom := Atom) []
-        ((φ.imp ((φ.imp φ).imp φ)).imp ((φ.imp (φ.imp φ)).imp (φ.imp φ))) :=
-      .ax [] _ (.implyS φ (φ.imp φ) φ)
-    have d_mp1 := DerivationTree.modus_ponens [] _ _ d_s1 d_k1
-    have d_k2 : DerivationTree IntPropAxiom (Atom := Atom) [] (φ.imp (φ.imp φ)) :=
-      .ax [] _ (.implyK φ φ)
-    have d_id := DerivationTree.modus_ponens [] _ _ d_mp1 d_k2
-    have d_id_w := DerivationTree.weakening [] ctx _ d_id (fun _ h => nomatch h)
-    -- MP: ctx ⊢ φ → ψ
-    have d_final := DerivationTree.modus_ponens ctx _ _ d_step1 d_id_w
-    exact ⟨ctx, h_rem_sub, ⟨d_final⟩⟩
-  · -- φ ∉ L: L ⊆ S already
-    have hL_S : ∀ x ∈ L, x ∈ S := by
-      intro x hx
-      rcases hL x hx with h | h
-      · exact h
-      · exact absurd (Set.mem_singleton_iff.mp h ▸ hx) hφL
-    exact ⟨L, hL_S, ⟨d_dt⟩⟩
+      (propDerivationSystem IntPropAxiom).Deriv L' (φ → ψ) :=
+  generic_deriv_imp_of_union IntPropAxiom.mem_implyK IntPropAxiom.mem_implyS hL hd
 
 /-! ## Deductive Closure -/
 
@@ -237,23 +172,30 @@ theorem int_imp_witness {S : Set (PL.Proposition Atom)}
     (h_not : (φ → ψ) ∉ S) :
     ∃ T : Set (PL.Proposition Atom),
       S ⊆ T ∧ IntDCCS T ∧ φ ∈ T ∧ ψ ∉ T := by
-  have h_cons_union : PropSetConsistent IntPropAxiom (S ∪ {φ}) := by
-    intro L hL hd
-    obtain ⟨L', hL'_sub, hL'_deriv⟩ := int_deriv_imp_of_union hL hd
-    have h_neg_phi : (¬φ) ∈ S := h_dccs.2 L' _ hL'_sub hL'_deriv
-    have h_imp_psi : (φ → ψ) ∈ S := by
-      apply h_dccs.2 [(¬φ)] (φ → ψ)
-      · intro x hx
-        simp only [List.mem_cons, List.not_mem_nil, or_false] at hx; exact hx ▸ h_neg_phi
-      · exact intNegPhiImpPsi_deriv φ ψ
-    exact h_not h_imp_psi
-  refine ⟨intDeductiveClosure (S ∪ {φ}), ?_, ?_, ?_, ?_⟩
-  · exact Set.Subset.trans Set.subset_union_left (int_subset_deductive_closure _)
-  · exact intDeductiveClosure_is_dccs h_cons_union
-  · exact int_subset_deductive_closure _ (Set.mem_union_right S (Set.mem_singleton_iff.mpr rfl))
-  · intro ⟨L, hL_sub, hL_deriv⟩
-    obtain ⟨L', hL'_sub, hL'_deriv⟩ := int_deriv_imp_of_union hL_sub hL_deriv
-    exact h_not (h_dccs.2 L' _ hL'_sub hL'_deriv)
+  -- h_cons_ext: prove consistency of GenericDeductiveClosure IntPropAxiom (S ∪ {φ})
+  -- by: (1) EFQ argument for S ∪ {φ} consistency, (2) closure preserves consistency
+  obtain ⟨T, hST, hT_gen, hφT, hψT⟩ :=
+    generic_imp_witness (Cons := PropSetConsistent IntPropAxiom)
+      IntPropAxiom.mem_implyK IntPropAxiom.mem_implyS
+      (h_theory := h_dccs)
+      (h_cons_ext := fun h_theory h_not' => by
+        -- Step 1: S ∪ {φ} is consistent (EFQ argument)
+        have h_cons_union : PropSetConsistent IntPropAxiom (S ∪ {φ}) := by
+          intro L hL hd
+          obtain ⟨L', hL'_sub, hL'_deriv⟩ :=
+            generic_deriv_imp_of_union IntPropAxiom.mem_implyK IntPropAxiom.mem_implyS hL hd
+          have h_neg_phi : (¬φ) ∈ S := h_theory.2 L' _ hL'_sub hL'_deriv
+          have h_imp_psi : (φ → ψ) ∈ S := by
+            apply h_theory.2 [(¬φ)] (φ → ψ)
+            · intro x hx
+              simp only [List.mem_cons, List.not_mem_nil, or_false] at hx; exact hx ▸ h_neg_phi
+            · exact intNegPhiImpPsi_deriv φ ψ
+          exact h_not' h_imp_psi
+        -- Step 2: consistency is preserved under generic deductive closure
+        -- (GenericDeductiveClosure IntPropAxiom = intDeductiveClosure definitionally)
+        exact intDeductiveClosure_consistent h_cons_union)
+      h_not
+  exact ⟨T, hST, hT_gen, hφT, hψT⟩
 
 /-! ## Prime DCCSs for Intuitionistic Logic -/
 

@@ -174,7 +174,7 @@ Wave-2 phases depend only on the Phase-1 re-framing and edit largely disjoint tr
 
 ---
 
-### Phase 6: Re-instantiate `Min*`/`Int*`; unify `bot_forces`; remove duplication [IN PROGRESS]
+### Phase 6: Re-instantiate `Min*`/`Int*`; unify `bot_forces`; remove duplication [COMPLETED]
 
 **Goal**: Migrate `Min*`/`Int*` onto the Phase-5 substrate one instance at a time and delete duplicated code once both pass.
 
@@ -191,7 +191,7 @@ Wave-2 phases depend only on the Phase-1 re-framing and edit largely disjoint tr
 
 ---
 
-### Phase 7: Fragment-genericity spike with research-or-defer gate (S3) [NOT STARTED]
+### Phase 7: Fragment-genericity spike with research-or-defer gate (S3) [IN PROGRESS]
 
 **Goal**: Bounded exploration of a generic fragment-lifting/conservativity layer, with an explicit decision point — **not** assembly of existing assets.
 

@@ -88,6 +88,17 @@ theorem intCanonicalVal_upward_closed
     (hw : w ≤ w') (hv : intCanonicalVal w p) : intCanonicalVal w' p :=
   hw hv
 
+/-- At any `IntCanonicalWorld`, `⊥ ∈ w.val` is equivalent to `False`, because all prime
+`IntDCCS` worlds are consistent (`⊥ ∉ w`).
+
+This is the companion to `minBotForces_iff_botMem` (from `MinStrongCompleteness`): both
+min and int canonical worlds support the same membership-based `bot_forces = fun w => ⊥ ∈ w.val`
+convention. For Int worlds, this predicate is trivially false everywhere. The current Int
+truth lemma uses `fun _ => False` directly; this lemma records the equivalence. -/
+lemma intBotMem_iff_false (w : IntCanonicalWorld Atom) :
+    (⊥ : PL.Proposition Atom) ∈ w.val ↔ False :=
+  ⟨int_dccs_bot_not_mem w.property.1, False.elim⟩
+
 /-! ## Truth Lemma -/
 
 /-- **Truth Lemma**: For any canonical world `S` and formula `φ`,

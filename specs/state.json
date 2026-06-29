@@ -13,7 +13,8 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782671689_c8c1fd_406",
-      "dependencies": []
+      "dependencies": [],
+      "topic": "Code Hygiene"
     },
     {
       "project_number": 395,
@@ -27,7 +28,8 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782652757_2f676d_395",
-      "dependencies": []
+      "dependencies": [],
+      "topic": "Project Management"
     },
     {
       "project_number": 384,
@@ -41,7 +43,10 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782651207_1e893c_384",
-      "dependencies": []
+      "dependencies": [
+        395
+      ],
+      "topic": "Propositional Logic"
     },
     {
       "project_number": 385,
@@ -55,7 +60,10 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782651207_1e893c_385",
-      "dependencies": []
+      "dependencies": [
+        395
+      ],
+      "topic": "Propositional Logic"
     },
     {
       "project_number": 386,
@@ -69,7 +77,10 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782651207_1e893c_386",
-      "dependencies": []
+      "dependencies": [
+        395
+      ],
+      "topic": "Propositional Logic"
     },
     {
       "project_number": 387,
@@ -83,7 +94,10 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782651207_1e893c_387",
-      "dependencies": []
+      "dependencies": [
+        395
+      ],
+      "topic": "Propositional Logic"
     },
     {
       "project_number": 388,
@@ -97,7 +111,11 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782651207_1e893c_388",
-      "dependencies": []
+      "dependencies": [
+        395,
+        398
+      ],
+      "topic": "Propositional Logic"
     },
     {
       "project_number": 389,
@@ -111,7 +129,11 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782651207_1e893c_389",
-      "dependencies": []
+      "dependencies": [
+        317,
+        395
+      ],
+      "topic": "Propositional Logic"
     },
     {
       "project_number": 390,
@@ -126,8 +148,10 @@
       "artifacts": [],
       "session_id": "sess_1782651207_1e893c_390",
       "dependencies": [
-        387
-      ]
+        387,
+        395
+      ],
+      "topic": "Propositional Logic"
     },
     {
       "project_number": 391,
@@ -141,7 +165,12 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782651207_1e893c_391",
-      "dependencies": []
+      "dependencies": [
+        317,
+        389,
+        395
+      ],
+      "topic": "Propositional Logic"
     },
     {
       "project_number": 392,
@@ -156,8 +185,12 @@
       "artifacts": [],
       "session_id": "sess_1782651207_1e893c_392",
       "dependencies": [
-        387
-      ]
+        386,
+        387,
+        389,
+        395
+      ],
+      "topic": "Propositional Logic"
     },
     {
       "project_number": 393,
@@ -171,7 +204,12 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782651207_1e893c_393",
-      "dependencies": []
+      "dependencies": [
+        386,
+        391,
+        395
+      ],
+      "topic": "Propositional Logic"
     },
     {
       "project_number": 360,
@@ -189,7 +227,8 @@
       "dependencies": [
         363,
         364
-      ]
+      ],
+      "topic": "Code Hygiene"
     },
     {
       "project_number": 321,
@@ -460,7 +499,8 @@
       "dependencies": [
         36,
         39
-      ]
+      ],
+      "topic": "Bimodal Porting"
     },
     {
       "project_number": 241,
@@ -712,34 +752,52 @@
     {
       "project_number": 398,
       "project_name": "efq_nd_rule_ipl_base_keep_mpl",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Make IPL the base propositional logic: add efq as a primitive ND rule, preserving MPL metatheory",
       "description": "DESIGN SETTLED (CSLib Zulip 'Propositional Logic' thread, Waring's closing message 606970606 + our synthesis): take IPL as the base propositional logic FOR NOW by adding ex-falso (efq / bottom-elimination) as a PRIMITIVE constructor of the ND `Derivation` so that the primitive `⊥` constructor is actually interpreted (Waring: 'it seems very unnatural to have a constructor with no semantics'). This makes minimal logic the positive fragment IPL<→,∧,∨,⊤> conceptually, and makes the conservativity results' `IsBotFree` predicate framing more natural (Waring's point). CRITICAL CONSTRAINT (our decision, diverging from Waring's 'forget minimal logic'): PRESERVE all completed MPL work — do NOT delete it. Keep MinSoundness, MinLindenbaum, MinStrongCompleteness, MPL completeness (`MPL.hilbert_alg_complete`), the `bot_val`/Johansson-algebra parametric semantics, and the MPL/IPL conservativity chains (MplConservativeChain, ConservativeChain, ImpConservative, etc.). Minimal logic stays as a retained LAYER beneath IPL, sequenced for later fragment work, not removed. Current state: efq is a DERIVED rule (`Theory.Derivation.botE`) gated by `[IsIntuitionistic T]` in NaturalDeduction/DerivedRules.lean; ND/Basic.lean documents the trade-off. WORK: (1) add efq as a primitive ND `Derivation` constructor available at IPL/CPL strength; (2) keep the ND<->Hilbert equivalence (`hilbert_iff_nd*`) provably intact so efq-as-rule and efq-as-axiom coincide and MPL (no efq rule) still corresponds; (3) keep substitution lemmas, DecidableEq, and the `FromPropositional` embeddings green; (4) update ND/Basic.lean Implementation-notes to record IPL-as-base with MPL retained; (5) postpone general fragment design (Waring). Verify full `lake build` + downstream Modal/Temporal/Bimodal. Honor Zulip AI policy (human-authored prose). Depends on 397 (green main for verification). Source: Zulip thread 606970606.",
       "created": "2026-06-28T15:43:45Z",
-      "last_updated": "2026-06-28T15:43:45Z",
+      "last_updated": "2026-06-29T14:12:00Z",
       "next_artifact_number": 1,
-      "artifacts": [],
-      "session_id": "sess_1782661425_92feb3_398",
+      "artifacts": [
+        {
+          "path": "specs/398_efq_nd_rule_ipl_base_keep_mpl/reports/01_efq-primitive-ipl-base.md",
+          "type": "report",
+          "summary": "Recommended gated-constructor efq design; full proof-obligation map; 5-phase plan"
+        },
+        {
+          "path": "specs/398_efq_nd_rule_ipl_base_keep_mpl/plans/01_efq-primitive-implementation.md",
+          "type": "plan",
+          "summary": "7-phase gated-constructor efq plan; zero-debt subformula gate; MPL preserved"
+        },
+        {
+          "path": "specs/398_efq_nd_rule_ipl_base_keep_mpl/summaries/01_efq-primitive-summary.md",
+          "type": "summary",
+          "summary": "efq promoted to gated primitive ND constructor; IPL-as-base; MPL retained; full CI green; zero-debt"
+        }
+      ],
+      "session_id": "sess_1782673164_f5576d_398",
       "dependencies": [
         397
-      ]
+      ],
+      "topic": "Propositional Logic"
     },
     {
       "project_number": 399,
       "project_name": "refresh_pr648_ipl_base_foundation",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "pr",
       "title": "Update PR #648 to the settled IPL-base foundation per Waring's end-of-thread recommendation",
       "description": "Update PR #648 (feat/propositional-v2) following Thomas Waring's closing recommendation in the CSLib Zulip 'Propositional Logic' thread (606970606). PR #648 is ~239 commits behind fork main, which is why Waring reports the restored references and Zulip-thread link are 'not in the PR' (both ARE on main at NaturalDeduction/Basic.lean:76 + the Design trade-off note). PLAN (per the user's chosen strategy): branch off upstream/main and cherry-pick the propositional FOUNDATION as a focused, reviewable commit, then update #648 to that branch. Scope of the foundation: the five-primitive `Proposition` type with primitive `⊥`; NaturalDeduction/Basic with the settled IPL-as-base design (efq as a primitive ND rule — see task 398); restored references AND the Zulip-thread link (Waring's flag (b)). EXCLUDE connective typeclasses — Waring flagged these as a SEPARATE development (task 400); do not bundle them. Keep the PR small (Matthew + Waring both asked for small pieces); later layers (Hilbert+equivalence, algebraic semantics incl. retained MPL metatheory, conservativity chains, sequent LJ/LK, tableau) follow as separate stacked PRs. Note /pr is user-only (branch creation, CI, submission); this task prepares the cherry-pick + a human-authored PR/Zulip description for the user to push (Zulip AI policy). Waring will 'review the PR properly once we've settled on the design', so this depends on task 398 (efq/IPL-base implemented). Also coordinate with PR-readiness vet tasks 386/387/389. Source: Zulip thread 606970606.",
       "created": "2026-06-28T15:43:45Z",
-      "last_updated": "2026-06-28T15:43:45Z",
+      "last_updated": "2026-06-29T14:22:04Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782661425_115d26_399",
       "dependencies": [
         398
-      ]
+      ],
+      "topic": "Propositional Logic"
     },
     {
       "project_number": 400,
@@ -753,7 +811,8 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782661425_6dd850_400",
-      "dependencies": []
+      "dependencies": [],
+      "topic": "Propositional Logic"
     },
     {
       "project_number": 401,
@@ -767,7 +826,8 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782661425_64245d_401",
-      "dependencies": []
+      "dependencies": [],
+      "topic": "Propositional Logic"
     },
     {
       "project_number": 403,
@@ -777,7 +837,8 @@
       "description": "Rename specs/384_modal_tableau_soundness_gap_redesign/ to specs/402_modal_tableau_soundness_gap_redesign/ to match task 402 (the soundness-gap redesign was renumbered 384->402 during the task-364 merge to avoid colliding with main task 384 tableau_completeness_sorries). git mv the directory and update task 402 artifact paths in specs/state.json (reports/01_soundness-gap-redesign.md, plans/01_per-branch-accessibility.md). Grep for any remaining 384_modal_tableau references. Bookkeeping only; no code changes.",
       "dependencies": [],
       "parent_task": 402,
-      "last_updated": "2026-06-28T18:30:31Z"
+      "last_updated": "2026-06-28T18:30:31Z",
+      "topic": "Project Management"
     },
     {
       "project_number": 404,
@@ -787,7 +848,8 @@
       "description": "Replace the local private re-proofs of List.Forall2 lemmas in Cslib/Logics/Modal/Tableau/Soundness.lean (forall2_append_aux, forall2_drop_aux, forall2_take_aux, forall2_of_zip_mem) with canonical Mathlib lemmas. These were added during task 402 because Mathlib.Data.List.Forall2 is not transitively imported by Cslib.Init. Either add the Mathlib import and switch call sites to library lemmas (List.Forall2.append/length_eq/etc.), or document why the local helpers are kept. Verify scoped + full lake build green, zero sorry, lint-style pass. Low-priority polish; helpers are correct as-is.",
       "dependencies": [],
       "parent_task": 402,
-      "last_updated": "2026-06-28T18:30:31Z"
+      "last_updated": "2026-06-28T18:30:31Z",
+      "topic": "Modal Logic"
     },
     {
       "project_number": 405,
@@ -799,7 +861,8 @@
         404
       ],
       "parent_task": 402,
-      "last_updated": "2026-06-28T18:30:31Z"
+      "last_updated": "2026-06-28T18:30:31Z",
+      "topic": "Modal Logic"
     }
   ],
   "repository_health": {

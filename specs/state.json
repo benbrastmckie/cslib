@@ -1342,7 +1342,11 @@
       "dependencies": [],
       "next_artifact_number": 1,
       "artifacts": [
-        "specs/418_shared_propositional_embedding_typeclass/summaries/01_shared-embedding-typeclass-summary.md"
+        {
+          "path": "specs/418_shared_propositional_embedding_typeclass/summaries/01_shared-embedding-typeclass-summary.md",
+          "type": "summary",
+          "summary": ""
+        }
       ],
       "created": "2026-06-29T22:35:38Z",
       "last_updated": "2026-06-29T23:42:58Z",
@@ -1353,7 +1357,7 @@
       "project_number": 419,
       "project_name": "generalize_derivation_lifting_intersystem",
       "title": "Generalize derivation lifting to a cross-logic InferenceSystem layer (spike)",
-      "status": "not_started",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "parent_task": 415,
@@ -1362,9 +1366,17 @@
         417
       ],
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/419_generalize_derivation_lifting_intersystem/reports/01_derivation-lifting-spike.md",
+          "type": "report",
+          "summary": ""
+        }
+      ],
       "created": "2026-06-29T22:35:38Z",
-      "last_updated": "2026-06-29T22:35:38Z"
+      "last_updated": "2026-06-29T22:35:38Z",
+      "blockers": "SPIKE verdict: NOT cleanly abstractable. The task premise conflates three different operations — Modal liftDerivation + PL liftDerivationTree are axiom-predicate subsumption lifts (∀φ, A1 φ → A2 φ), while Bimodal liftDerivationWith is conservative-extension fresh-atom unembedding (noncomputable, freshness side-conditions, per-node liftFormula incl. swapTemporal) — not axiom subsumption. Bimodal DerivationTree is parameterized by FrameClass over a concrete Axiom inductive with NO axiom predicate, so there is nothing to subsume. The shared algebraicDerivationSystem/ListDeriv substrate omits necessitation by design, which axiom-subsumption lifting must recurse through. Three distinct formula algebras (4/5/7 constructors) cannot be ranged over by one recursion without XL+ syntax unification. The only clean unification (PL+Modal derivable_mono typeclass) removes zero recursion bodies and excludes Bimodal, failing the stated payload. Recommendation: keep the three per-logic lifts (reuse-first satisfied). No sorry introduced. See specs/419_generalize_derivation_lifting_intersystem/reports/01_derivation-lifting-spike.md",
+      "updated": "2026-06-29T23:45:10Z"
     },
     {
       "project_number": 420,

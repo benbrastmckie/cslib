@@ -1,0 +1,22 @@
+{
+  "status": "implemented",
+  "summary": "Doc-only fix: rewrote the stale Design Notes paragraph in GenericLindenbaum.lean (lines 47-55). The paragraph previously claimed the substrate was 'additive' and re-instantiation was 'deferred to Phase 6'. The new text states the substrate is active and load-bearing, names both consumer modules (MinLindenbaum.lean and IntLindenbaum.lean), and lists all six thin delegating instances with line numbers. CI is fully green.",
+  "phases_completed": 1,
+  "phases_total": 1,
+  "artifacts": [
+    "specs/416_instantiate_generic_lindenbaum_phase6/summaries/01_fix-design-notes-summary.md"
+  ],
+  "blockers": [],
+  "continuation_context": null,
+  "verification": {
+    "build_scoped": "PASS (GenericLindenbaum, MinLindenbaum, IntLindenbaum — 727 jobs)",
+    "checkInitImports": "PASS",
+    "lint": "No new warnings in modified files (54 pre-existing warnings in other files unchanged)",
+    "lint_style": "PASS",
+    "shake": "No new findings in modified files",
+    "test": "PASS (exit code 0)",
+    "sorry_count": 0,
+    "axiom_count": 0,
+    "git_diff": "Changes confined to Design Notes prose block in GenericLindenbaum.lean only"
+  }
+}

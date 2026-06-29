@@ -44,9 +44,15 @@ This design is described in the task 407 Phase 5 plan.
 
 ## Design Notes
 
-This file is **additive**: `MinLindenbaum.lean` and `IntLindenbaum.lean` are
-not modified. Re-instantiation of `MinTheory`/`IntDCCS` off this substrate
-is deferred to Phase 6 of the MPL-base structure-first redesign (task 407).
+This substrate is **active and load-bearing**. Re-instantiation of `MinTheory`/`IntDCCS`
+off this substrate was completed in task 407 phase 6 (commit 9242d243). Both consumer
+modules import `GenericLindenbaum` and delegate their core Lindenbaum lemmas to the
+`generic_*` definitions here via six thin instances:
+
+- `MinLindenbaum.lean` (lines 91, 107, 144): `min_deriv_from_closure_to_S`,
+  `min_deriv_imp_of_union`, `min_imp_witness`.
+- `IntLindenbaum.lean` (lines 108, 124, 178): `int_deriv_from_closure_to_S`,
+  `int_deriv_imp_of_union`, `int_imp_witness`.
 
 The deduction theorem is accessed via explicit `h_implyK`/`h_implyS` witnesses,
 consistent with the existing Lindenbaum files and `DeductionTheorem.lean`.

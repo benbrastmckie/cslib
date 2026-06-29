@@ -39,7 +39,7 @@ next_project_number: 421
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 404 [NOT STARTED] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
   └─ 405 [NOT STARTED] — Simplify the proof machinery in the task-402 modal tableau soundn
-419 [NOT STARTED] — [Spawned from task 415 audit — supports the structure-first visio
+419 [BLOCKED] — [Spawned from task 415 audit — supports the structure-first visio
 
 ### Project Management
 
@@ -122,10 +122,11 @@ next_project_number: 421
 ---
 
 ### 419. Generalize derivation lifting to a cross-logic InferenceSystem layer (spike)
-- **Status**: [NOT STARTED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 417
+- **Research**: [419_generalize_derivation_lifting_intersystem/reports/01_derivation-lifting-spike.md]
 
 **Description**: [Spawned from task 415 audit — supports the structure-first vision; SPIKE.] Investigate hoisting liftDerivation / Derivable_mono (Modal/Metalogic/InterSystem/Lifting.lean:47) and Bimodal's liftDerivationWith onto the shared InferenceSystem / algebraicDerivationSystem abstraction already used by GenericMCSBridge, yielding ONE axiom-subsumption derivation-lifting result reusable by Modal, Bimodal, and PL. SPIKE FIRST: commit only if the necessitation / temporal_duality constructor variance is cleanly abstractable; otherwise document precisely why and stop (mark BLOCKED, never sorry). Benefits from task 417's Foundations placement (soft dependency). Effort L (abstraction risk). CI green if landed. Source: report §6, Rank 4.
 
@@ -136,8 +137,7 @@ next_project_number: 421
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
-- **Research**: [418_shared_propositional_embedding_typeclass/reports/01_shared-embedding-typeclass.md]
-- **Plan**: [418_shared_propositional_embedding_typeclass/plans/01_shared-embedding-typeclass.md]
+- **Summary**: [418_shared_propositional_embedding_typeclass/summaries/01_shared-embedding-typeclass-summary.md]
 
 **Description**: [Spawned from task 415 audit — supports Finding 1.] Factor the shared "structural on atom/bot/imp, Lukasiewicz on and/or" embedding pattern into a single PropositionalEmbedding typeclass/abstraction so toModal (Modal/FromPropositional.lean:58), toTemporal (Temporal/FromPropositional.lean:57), and toBimodal (Bimodal/Embedding/PropositionalEmbedding.lean:59) share one definition skeleton and a SINGLE authored classical-scope limitation note (currently triplicated at Modal/FromPropositional.lean:35-41, Temporal/FromPropositional.lean:34-40, Bimodal/Embedding/PropositionalEmbedding.lean:33-41). Preserve the existing simp/grind lemma surface and the commuting-diamond lemmas (toModal_toBimodal / toTemporal_toBimodal). Adds a clearly-typed extension point for a future native (intuitionistic-faithful) embedding but does NOT itself enable the intuitionistic lift. CI green; 0 new sorry. Source: report §3, Rank 3.
 

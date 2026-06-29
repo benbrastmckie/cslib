@@ -1,7 +1,7 @@
 # Implementation Plan: Task #420
 
 - **Task**: 420 - Doc: record native intuitionistic-embedding prerequisites
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 1.5 hours
 - **Dependencies**: None (parent task 415; coordination note with task 418 — see Risks)
 - **Research Inputs**: specs/420_native_embedding_prerequisites_doc/reports/01_native-embedding-prerequisites.md

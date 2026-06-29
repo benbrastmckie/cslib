@@ -1,37 +1,73 @@
 {
-  "session_id": "sess_1782760056_06c853",
+  "session_id": "sess_1782772776_909541",
   "task_numbers": [
-    408,
-    410
+    416,
+    417,
+    418,
+    419,
+    420
   ],
   "waves": [
     [
-      408,
-      410
+      416,
+      417,
+      418,
+      420
+    ],
+    [
+      419
     ]
   ],
   "dependency_graph": {
-    "408": [],
-    "410": []
+    "416": [],
+    "417": [],
+    "418": [],
+    "419": [
+      417
+    ],
+    "420": []
   },
-  "max_cycles": 10,
-  "cycle_count": 2,
-  "failed_tasks": [],
-  "completed_tasks": [],
+  "max_cycles": 25,
+  "cycle_count": 4,
+  "failed_tasks": [
+    {
+      "task": 419,
+      "status": "blocked",
+      "reason": "SPIKE verdict: not cleanly abstractable (designed BLOCKED outcome, documented, no sorry)"
+    }
+  ],
+  "completed_tasks": [
+    416,
+    417,
+    418,
+    420
+  ],
   "current_statuses": {
-    "408": "planned",
-    "410": "planned"
+    "416": "completed",
+    "417": "completed",
+    "418": "completed",
+    "419": "blocked",
+    "420": "completed"
   },
   "task_dirs": {
-    "408": "specs/408_minimal_sequent_calculus_lm",
-    "410": "specs/410_fragment_generic_algebraic_completeness"
+    "416": "specs/416_instantiate_generic_lindenbaum_phase6",
+    "417": "specs/417_parametric_conservativity_lift_foundations",
+    "418": "specs/418_shared_propositional_embedding_typeclass",
+    "419": "specs/419_generalize_derivation_lifting_intersystem",
+    "420": "specs/420_native_embedding_prerequisites_doc"
   },
   "research_agents": {
-    "408": "cslib-research-agent",
-    "410": "cslib-research-agent"
+    "416": "cslib-research-agent",
+    "417": "cslib-research-agent",
+    "418": "cslib-research-agent",
+    "419": "cslib-research-agent",
+    "420": "cslib-research-agent"
   },
   "implement_agents": {
-    "408": "cslib-implementation-agent",
-    "410": "cslib-implementation-agent"
+    "416": "cslib-implementation-agent",
+    "417": "cslib-implementation-agent",
+    "418": "cslib-implementation-agent",
+    "419": "cslib-implementation-agent",
+    "420": "cslib-implementation-agent"
   }
 }

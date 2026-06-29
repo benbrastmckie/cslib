@@ -1,13 +1,20 @@
 {
-  "status": "completed",
+  "status": "partial",
   "metadata": {
     "tasks_completed": [
-      398,
-      399
+      416,
+      417,
+      418,
+      420
     ],
-    "tasks_failed": [],
-    "cycles_used": 8,
-    "multi_task_mode": true,
-    "note": "398 completed; 399 pr_ready (terminal for pr-prep). Stray Cslib.lean IntFMPSpike un-stub left uncommitted for user."
+    "tasks_failed": [
+      {
+        "task": 419,
+        "status": "blocked",
+        "reason": "SPIKE: not cleanly abstractable — designed BLOCKED outcome, documented, no sorry"
+      }
+    ],
+    "cycles_used": 4,
+    "multi_task_mode": true
   }
 }

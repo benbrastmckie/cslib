@@ -1,0 +1,32 @@
+{
+  "status": "researched",
+  "task": 419,
+  "task_type": "cslib",
+  "mode": "spike",
+  "summary": "SPIKE VERDICT: (b) NOT CLEANLY ABSTRACTABLE -- recommend BLOCKED (never sorry). The premise that Modal liftDerivation, PL liftDerivationTree, and Bimodal liftDerivationWith are three instances of one axiom-subsumption lift unifiable on InferenceSystem/algebraicDerivationSystem is refuted by source inspection. (1) Axis mismatch: PL and Modal lift over an axiom predicate (Axioms : Proposition -> Prop); Bimodal's DerivationTree is frame-class-parameterized (fc : FrameClass) over a concrete Axiom inductive and has NO axiom predicate -- so Bimodal has no axiom-subsumption lift to unify, and its liftDerivationWith is conservative-extension atom unembedding (freshness side-conditions + per-node formula rewrites), a different operation. (2) Substrate cannot host it: algebraicDerivationSystem is built on ListDeriv, which omits necessitation by design (GenericMCS.lean:103-109), whereas axiom-subsumption lifting must recurse through necessitation/temporal_*; axiom subsumption at the seam is a tag-to-tag morphism that the InferenceSystem class (single tag S, method derivation : alpha -> Sort) does not model. (3) Constructor/formula-type variance: three distinct formula algebras (PL.Proposition / Modal.Proposition / Bimodal.Formula) and constructor sets (4/5/7); no single recursion ranges over all three without unifying the syntaxes (XL+). The only clean unification (a PL+Modal statement-level typeclass) removes zero recursion bodies and excludes Bimodal, failing the stated payload. The necessitation arm is axiom-blind and would pass through; temporal_duality is moot because Bimodal lacks an axiom predicate (fails one level earlier). Recommend marking 419 BLOCKED; no sorry, no vacuous definition.",
+  "verdict": "not_cleanly_abstractable",
+  "recommendation": "BLOCKED",
+  "artifacts": [
+    "specs/419_generalize_derivation_lifting_intersystem/reports/01_derivation-lifting-spike.md"
+  ],
+  "blockers": [
+    {
+      "type": "structural_abstraction_infeasible",
+      "severity": "blocking",
+      "title": "Axiom-subsumption derivation lift is not cross-logic abstractable as specified",
+      "detail": "Bimodal's DerivationTree (Bimodal/ProofSystem/Derivation.lean:53) is parameterized by fc : FrameClass over a concrete Axiom inductive (Bimodal/ProofSystem/Axioms.lean:79), NOT by an axiom predicate, so there is no Axioms1->Axioms2 subsumption to perform; its liftDerivationWith (Bimodal/Metalogic/ConservativeExtension/Lifting.lean:636) is conservative-extension fresh-atom unembedding (noncomputable, freshness side-conditions, per-node liftFormula rewrites incl. liftFormula_swapTemporal for the duality arm), a fundamentally different operation from Modal liftDerivation (Lifting.lean:47) and PL liftDerivationTree (ConjImpConservative.lean:59), which are genuine axiom-predicate subsumption lifts. The shared InferenceSystem/algebraicDerivationSystem substrate (Foundations/Logic/InferenceSystem.lean:42, GenericMCS.lean:110) cannot host the lift: algebraicDerivationSystem rests on ListDeriv (ListDeduction.lean:47) which omits necessitation by design (documented GenericMCS.lean:103-109), while the lift must recurse through necessitation/temporal_*; and axiom subsumption at the seam is a morphism between distinct tag types (HilbertOf Axioms1 vs HilbertOf Axioms2), which the InferenceSystem class does not model. Plus the three trees range over three distinct formula types and constructor sets (4/5/7). One axiom-subsumption lift serving Modal+Bimodal+PL is therefore not cleanly abstractable.",
+      "resolution_options": [
+        "Mark task 419 BLOCKED (recommended). The blocker is structural, not effort-based; more implementation time will not resolve it and it must never be papered over with sorry or a vacuous definition.",
+        "Optionally spawn a separate, smaller user-approved task: a PL+Modal-only statement-level derivable_mono typeclass (cosmetic XS), explicitly excluding Bimodal. This does NOT deliver task 419's stated cross-logic payload and removes zero recursion bodies."
+      ]
+    }
+  ],
+  "metadata": {
+    "session_id": "session_01UqzKXqBTY8f137DwrC63p5",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "lean_edits_made": false,
+    "sorry_introduced": false
+  }
+}

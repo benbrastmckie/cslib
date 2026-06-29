@@ -1,7 +1,7 @@
 <!-- ============================================================
 HUMAN-AUTHOR-REQUIRED
 
-This file is AI-assisted scaffolding for the PR body of a refreshed PR #648.
+This file is AI-assisted scaffolding for the PR body of PR #648.
 The HUMAN (benbrastmckie) must review, reword, and finalize every section
 before pasting it into the GitHub PR body.
 
@@ -9,52 +9,42 @@ Zulip AI policy: AI-drafted Zulip messages are NOT allowed (Chris Henson warning
 msg 605827029). This document will not be posted by any automated tool. The author
 must copy, read, reword, and submit in their own words.
 
-Sections marked [FILL IN] require human input. All prose should be reworded
-to reflect the author's own voice before posting.
+Sections marked [FILL IN] require human input.
 ============================================================ -->
 
-# PR Description Draft — Refresh PR #648: IPL-Base Foundation
+# PR Description Draft — PR #648: IPL-base propositional foundation
 
-**PR URL**: https://github.com/leanprover/cslib/pull/648
-**Branch**: `feat/propositional-foundation` (new branch off upstream/main)
-**Build verified locally**: `lake build`, `lake exe checkInitImports`, `lake exe lint-style` — all green off upstream/main HEAD (`2772f421`, toolchain v4.32.0-rc1).
-
----
-
-## Suggested PR Title
-
-```
-feat(Logics/Propositional): IPL-base foundation with primitive ⊥ and gated efq
-```
+**PR**: https://github.com/leanprover/cslib/pull/648
+**Branch**: `feat/propositional-v2` (updated by **fast-forward** — adds one commit
+`85db79a6`; the two existing commits and review threads are preserved, no force-push).
+**Build verified locally** on the branch (toolchain v4.31.0):
+`lake build Cslib.Logics.Propositional.NaturalDeduction.Theory` (593 jobs) — green;
+`lake exe lint-style` — clean; `lake exe checkInitImports` — clean; zero `sorry`.
 
 ---
 
-## Suggested Commit Message
+## Suggested commit message (the new commit)
 
 ```
-feat(Logics/Propositional): IPL-base foundation with primitive ⊥ and gated efq
+feat(Logics/Propositional): make IPL the base logic with primitive ex falso
 
-Add bot as a primitive constructor of Proposition and efq as a gated
-primitive natural deduction rule, making IPL the base logic with MPL
-retained as a fragment.
+Promote ex falso quodlibet (bottom-elimination) to an ungated primitive
+constructor of the natural-deduction Derivation, so IPL is the base
+propositional logic and the primitive bot constructor has an inference
+rule. IPL becomes the empty base theory; CPL still adds double negation
+elimination.
 
-Changes:
-- Defs.lean: five-primitive Proposition {atom, bot, imp, and, or};
-  IsIntuitionistic/IsClassical on Theory Atom (new API); subst monad
-- NaturalDeduction/Basic.lean: 11 constructors including efq gated on
-  [IsIntuitionistic T]; imp/impI/impE naming; IPL-as-base design note;
-  restored references; Zulip-thread link
-- references.bib: add Johansson1937, Gentzen1935, Prawitz1965,
-  TroelstraVanDalen1988, SorensenUrzyczyn2006, Church1956,
-  ChagrovZakharyaschev1997
-- Delete NaturalDeduction/Theory.lean (instances absorbed into Defs.lean)
-- Cslib.lean: remove Theory import
+The minimal-logic (MPL) layer is deferred to a separate PR: this removes
+MPL, the IsIntuitionistic typeclass, intuitionisticCompletion, and the
+derived efq rules, keeping the classical layer (byContra/lem/pierce and
+the IsClassical instances for CPL/LEM/Pierce) intact, re-proved via the
+efq constructor.
 
-Connective typeclasses (PropositionalConnectives, HasBot, HasImp, HasAnd,
-HasOr) are excluded per reviewer request; see PR #607 and task 400.
-Derived rules (byContra, lem, pierce) follow in a separate PR.
-Hilbert systems, semantics, sequent calculi, and tableau follow as
-stacked PRs.
+Per reviewer feedback (Waring, CSLib Zulip 'Propositional Logic'):
+- Drop the connective typeclasses (Foundations/Logic/Connectives.lean and
+  its registration instances) -- a separate development handled via PR #607.
+- Restore references (Johansson 1937, Gentzen 1935, Prawitz 1965,
+  Troelstra-van Dalen 1988) and add the CSLib Zulip thread link.
 ```
 
 ---
@@ -63,110 +53,68 @@ stacked PRs.
 
 <!-- [FILL IN] Reword in your own voice before posting. -->
 
-This is a focused refresh of PR #648, scoped down to the propositional
-*foundation* layer per Thomas Waring's closing recommendation (Zulip thread
-[Propositional Logic](https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic),
-message 606970606).
+This refreshes PR #648 to settle the propositional-logic *base* per Thomas Waring's
+recommendation on the Zulip thread
+[Propositional Logic](https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic)
+(msg 606970606): with `⊥` a primitive constructor, ex falso should be a real rule, so
+**IPL is the base logic** and the question of a separate minimal-logic development is
+**deferred to later work**.
 
-### What this PR does
+### What the PR delivers
 
-- **Five-primitive `Proposition` type**: `atom`, `bot`, `imp`, `and`, `or`.
-  `⊥` is a primitive constructor (not simulated via `[Bot Atom]`), which
-  eliminates all `[Bot Atom]` constraints from the API.
+- **Five-primitive `Proposition`**: `atom`, `bot`, `imp`, `and`, `or`. `⊥` is a primitive
+  constructor (no `[Bot Atom]` constraint); `¬φ := φ → ⊥`, `⊤ := ⊥ → ⊥` are derived.
+- **IPL is the base natural-deduction system.** Ex falso quodlibet (`efq`, ⊥-elimination)
+  is an **ungated primitive constructor** of `Theory.Derivation` — so `⊥` has an inference
+  rule rather than being a constructor with no behaviour. `CPL` extends the base with double
+  negation elimination; classical derived rules (`byContra`, `lem`, `pierce`) and the
+  `IsClassical` instances for `CPL`/`LEM`/`Pierce` are included.
+- **References + Zulip link**: `Johansson1937`, `Gentzen1935`, `Prawitz1965`,
+  `TroelstraVanDalen1988` are in `references.bib` and cited in `NaturalDeduction/Basic.lean`,
+  whose `## Implementation notes` motivate primitive efq and link the design thread.
 
-- **Gated `efq` (ex falso quodlibet)**: `efq` is a primitive *gated* constructor
-  of `Theory.Derivation`, carrying an `[IsIntuitionistic T]` instance binder. This
-  makes IPL the base logic — `efq` is available exactly when the theory validates
-  explosion. Minimal logic (MPL) is retained as a fragment: `AxiomTheory MinPropAxiom`
-  admits no `IsIntuitionistic` instance, so `efq` is unconstructible in MPL
-  derivations and the entire MPL metatheory (Hilbert substrate, soundness,
-  Lindenbaum, strong-completeness, conservativity chains) is preserved unchanged.
+### Addressing the review comments (Waring, msg 606970606)
 
-- **`impl`/`implI`/`implE` → `imp`/`impI`/`impE` rename**: This follows the
-  `imp` naming in `Defs.lean`.
+- **efq as a rule / forget minimal logic for now.** efq is now a primitive rule and `⊥` has
+  semantics. Minimal logic (MPL) is **not** part of this PR — `MPL`, the `IsIntuitionistic`
+  typeclass, `intuitionisticCompletion`, and the derived efq rules are removed. The
+  minimal-as-fragment / fragment-design work is deferred to a separate PR for separate
+  discussion (tracked on the fork as tasks 407–409).
+- **Connective typeclasses are a separate development.** `Cslib/Foundations/Logic/Connectives.lean`
+  and its registration instances are **removed** from this PR; the connective-typeclass work is
+  coordinated with fmontesi's PR #607 (see task 400). One design point for #607: it currently makes
+  negation primitive (`HasNot`) with no `HasBot`; for IPL/MPL `¬φ := φ → ⊥`, so a `HasBot` class
+  with derived `¬`/`⊤` is needed for `Proposition` to register.
+- **References + Zulip link.** Added (above).
 
-- **References restored and Zulip-thread link added**: All cited references
-  (Johansson 1937, Gentzen 1935, Prawitz 1965, Troelstra & van Dalen 1988,
-  Sørensen & Urzyczyn 2006, Church 1956, Chagrov & Zakharyaschev 1997) are
-  present in `references.bib` and cited in the `## References` sections of the
-  relevant files. The Zulip design thread is linked in `## Implementation notes`.
+### Deferred to follow-up PRs
 
-- **IPL-as-base design note**: `NaturalDeduction/Basic.lean` now contains an
-  `## Implementation notes` section explaining the design choice (IPL-as-base,
-  MPL-as-fragment), the trade-offs with the Johansson/Waring encoding approach,
-  and a link to the CSLib Zulip thread.
-
-### What is NOT in this PR (addressing Waring flag (a))
-
-Per Thomas Waring's feedback, **connective typeclasses are a separate development**
-and are NOT bundled here:
-
-- `Cslib/Foundations/Logic/Connectives.lean` (new file with `HasBot`, `HasImp`,
-  `HasAnd`, `HasOr`, `PropositionalConnectives`) is excluded.
-- The `PropositionalConnectives`, `HasAnd`, `HasOr` instances that appeared in
-  `Defs.lean` in the previous version of this PR are removed.
-- See PR #607 (fmontesi) for the existing connective typeclass work; the
-  CSLib-side coordination is tracked in task 400.
-
-Other deferred work (not in this PR, to come in stacked PRs):
-
-| Content | Reason | Future home |
-|---------|--------|-------------|
-| Derived rules (`byContra`, `lem`, `pierce`) | Keep this PR small | Follow-up `DerivedRules` PR |
-| Hilbert proof systems / ND–Hilbert equivalence | Later stacked PR | Future work |
-| Algebraic / Kripke semantics | Later stacked PR (see Waring's `GeneralizedHeytingAlgebra` suggestion) | Future work |
-| Sequent calculi LJ/LK | Later stacked PR | Future work |
-| Tableau systems | Later stacked PR | Future work |
-
-### Theory.lean deletion — explicit reviewer decision
-
-`NaturalDeduction/Theory.lean` (upstream/main) uses the old
-`IsIntuitionistic Atom (S : InferenceSystem) [Bot Atom]` API, which is
-fundamentally incompatible with the new `IsIntuitionistic (T : Theory Atom)` API
-in the refreshed `Defs.lean`. The PR therefore **deletes `Theory.lean`** and
-removes its import from `Cslib.lean`.
-
-The core instances previously in `Theory.lean` (`instIsIntuitionisticIPL`,
-`instIsClassicalCPL`, `instIsIntuitionisticIntuitionisticCompletion`) are now in
-`Defs.lean`. The derived rules (`efqCtx`, `efqRule`, `contra`, `byContra`,
-`lem`, `pierce`, `LEM`, `Pierce`, `instIsClassicalLEM`, `instIsClassicalPierce`)
-are available in a follow-up `DerivedRules` PR (already implemented on the fork).
-
-This is the only way to land the foundation without carrying forward the old API.
-I am flagging this explicitly for reviewer confirmation.
+| Content | Future home |
+|---|---|
+| Minimal logic (MPL) + fragment design | separate PR (the deferred discussion) |
+| Connective typeclasses | via PR #607 |
+| Hilbert systems, ND–Hilbert equivalence | stacked PR |
+| Algebraic / Kripke semantics | stacked PR |
+| Sequent calculi LJ/LK, tableau | stacked PRs |
 
 ### Namespace note (pending, task 387)
 
-The PR exposes `namespace Cslib.Logic.PL`. The rename to
-`namespace Cslib.Logics.Propositional` requires upstream maintainer consensus
-and is tracked separately in task 387. It does not block this PR.
+The PR exposes `namespace Cslib.Logic.PL`; the rename to `Cslib.Logics.Propositional`
+(per ORGANISATION.md) needs maintainer consensus and is tracked in task 387. Not blocking.
 
 ### AI tool disclosure
 
-<!-- [FILL IN] Per CSLib and Mathlib AI usage policy, disclose how AI tools
-were used in this PR. E.g.:
-"AI tools (Claude) were used to assist with proof structure exploration,
-documentation drafting, and bib entry lookup. All Lean code was reviewed
-and verified by the author." -->
-
-### Build verification
-
-Verified locally on a fresh branch from upstream/main HEAD (`2772f421`,
-toolchain `v4.32.0-rc1`):
-- `lake build Cslib.Logics.Propositional.Defs` — green
-- `lake build Cslib.Logics.Propositional.NaturalDeduction.Basic` — green
-- `lake build Cslib` (full barrel) — green
-- `lake exe checkInitImports` — green
-- `lake exe lint-style` on touched files — green
+<!-- [FILL IN] Per CSLib/Mathlib AI policy, disclose how AI tools were used, e.g.:
+"AI tools (Claude) assisted with refactoring, proof adjustment, documentation drafting,
+and bib lookup; all Lean code was reviewed and verified by the author." -->
 
 ---
 
 ## User Next Steps
 
-1. Review and finalize this draft in your own words (AI policy — see banner above).
-2. Run `bash specs/399_refresh_pr648_ipl_base_foundation/prepare-foundation-branch.sh`
-   to create the local branch `feat/propositional-foundation` off upstream/main with
-   all recipe changes staged (no commit yet).
-3. Commit with the suggested commit message above (or your own wording).
-4. Run `/pr 399` (user-only command) to push the branch and open the GitHub PR.
-5. Finalize and post `zulip-response.md` to Zulip thread 606970606 **in your own words**.
+1. Review and finalize this draft in your own words (AI policy — see banner).
+2. Review the commit: `git show 85db79a6` on branch `feat/propositional-ipl-base`.
+3. Update #648 by fast-forward (no force-push):
+   `git push origin feat/propositional-ipl-base:feat/propositional-v2`
+4. Paste the reworded body into the #648 PR description.
+5. Post `zulip-response.md` to Zulip thread 606970606 **in your own words**.

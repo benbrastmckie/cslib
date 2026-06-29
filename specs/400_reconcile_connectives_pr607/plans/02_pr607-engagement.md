@@ -1,7 +1,7 @@
 # Implementation Plan: Task #400 — Engage PR #607 (connective typeclasses)
 
 - **Task**: 400 - Unbundle connective typeclasses; reconcile with fmontesi PR #607 (Waring's flag a)
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: ~9.5 hours agent-doable work (plus human-authored review + external upstream wait)
 - **Dependencies**: None (independent of the 407-409 IPL-base refactor)
 - **Research Inputs**: reports/01_pr607-engagement.md; reports/02_engagement-strategy.md (primary, live-PR-grounded)
@@ -109,7 +109,7 @@ are human/external gates.
 
 ---
 
-### Phase 1: Design-comparison and option tables (factual scaffolding) [NOT STARTED]
+### Phase 1: Design-comparison and option tables (factual scaffolding) [COMPLETED] (2026-06-29)
 
 **Goal**: Produce the factual comparison tables the human review needs, building on the live-PR data
 in report 02 and anchored to benbrastmckie's 2026-06-17 comment (do not restate it).
@@ -143,7 +143,7 @@ in report 02 and anchored to benbrastmckie's 2026-06-17 comment (do not restate 
 
 ---
 
-### Phase 2: Falsum/verum scaffolding — Mathlib `Bot`/`Top` reuse + derived-`¬` bridge sketch [NOT STARTED]
+### Phase 2: Falsum/verum scaffolding — Mathlib `Bot`/`Top` reuse + derived-`¬` bridge sketch [COMPLETED] (2026-06-29)
 
 **Goal**: Produce a verified Lean sketch showing that a bot-primitive formula type registers
 faithfully against #607's classes by reusing Mathlib `Bot`/`Top` and a derived-`¬` bridge — the
@@ -176,7 +176,7 @@ corrected primary technical point (NOT a new `HasBot` class).
 
 ---
 
-### Phase 3: `_def` normal-form direction — empirical `grind`-through-notation check [NOT STARTED]
+### Phase 3: `_def` normal-form direction — empirical `grind`-through-notation check [COMPLETED] (2026-06-29)
 
 **Goal**: Settle, with evidence, chenson's open CHANGES_REQUESTED point: whether the `simp`/`grind`
 normal form can be "the notation" (collapse `φ.and ψ ⤳ φ ∧ ψ`) so the modal `Satisfies.*_iff_*`
@@ -206,7 +206,7 @@ proofs do not need `=_ *_def` rewrites.
 
 ---
 
-### Phase 4: Consolidate the human-review scaffolding packet [NOT STARTED]
+### Phase 4: Consolidate the human-review scaffolding packet [COMPLETED] (2026-06-29)
 
 **Goal**: Merge Phases 1-3 into one ordered scaffolding packet structured to report 02's §6 review
 skeleton, ready for the human to adapt — explicitly not finished prose.

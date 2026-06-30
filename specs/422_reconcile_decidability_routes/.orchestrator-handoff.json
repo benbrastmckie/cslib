@@ -1,26 +1,22 @@
 {
   "status": "completed",
-  "summary": "Task 422 complete (4/4 phases). Reconciled Int/Min decidability routes: (1) FMP instances demoted to named noncomputable defs (decidableDerivableIntPropAxiomFMP / decidableDerivableMinPropAxiomFMP) — tableau instances remain sole registered Decidable instances; (2) two-routes docstrings added to all 4 module headers with 317 sorry citations and FMP axiom profile; (3) infrastructure cross-reference docstrings link int_fin_truth_lemma / min_fin_truth_lemma to parametric truthLemma, recording explicit factoring-deferred decision; (4) axiom audit: FMP defs sorry-free ({propext, Classical.choice, Quot.sound}), tableau instances carry only pre-existing 317 sorryAx. Scoped build (4 modules, 773 jobs) green. Whole-repo build blocked by unrelated pre-existing ProofSystemMorphism.lean (task 417/419 WIP). lake lint and lint-style clean for task-422 files. Zero new sorries or axioms.",
+  "summary": "Task 422 complete. Reconciled Int/Min decidability routes: FMP instances demoted to named defs (decidableDerivableIntPropAxiomFMP, decidableDerivableMinPropAxiomFMP), four module headers carry two-routes docstrings, infrastructure cross-references added, task-422 modules build cleanly, FMP axioms clean ({propext, Classical.choice, Quot.sound}), zero new sorries introduced.",
   "phases_completed": 4,
   "phases_total": 4,
   "blockers": [],
-  "external_caveats": [
-    "Whole-repo lake build currently blocked by Cslib/Foundations/Logic/Metalogic/ProofSystemMorphism.lean (untracked WIP file, task 417/419 territory, unusedSimpArgs on List.map_map). This is NOT a task-422 regression — it predates task 422 and all 4 task-422 modules build cleanly in the scoped build."
-  ],
   "continuation_context": {
     "task_number": 422,
     "next_action": "none — task complete",
     "open_items": [
-      "Task 317 (tableau sorry closure) remains open — pre-existing, Scheme.lean:255, Completeness.lean:113, Minimal/Completeness.lean:110",
-      "Task 417/419 (ProofSystemMorphism.lean build breakage) — unrelated to 422, needs separate fix"
+      "Task 317 (tableau sorry closure) remains open — pre-existing, not introduced by 422",
+      "ProofSystemMorphism.lean (untracked WIP file) has build errors — belongs to a different task, not 422"
     ]
   },
-  "next_action_hint": "Mark task 422 completed in state.json and submit PR when ready. Task 317 (tableau sorries) is the next priority for the decidability route.",
+  "next_action_hint": "Mark task 422 completed in state.json and submit PR when ready.",
   "artifacts": [
     "specs/422_reconcile_decidability_routes/summaries/01_reconcile-decidability-routes-summary.md",
     "specs/422_reconcile_decidability_routes/.return-meta.json",
-    "specs/422_reconcile_decidability_routes/.orchestrator-handoff.json",
-    "specs/422_reconcile_decidability_routes/plans/01_reconcile-decidability-routes.md"
+    "specs/422_reconcile_decidability_routes/.orchestrator-handoff.json"
   ],
   "sorry_inventory": []
 }

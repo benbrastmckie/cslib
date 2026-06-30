@@ -1,0 +1,33 @@
+{
+  "status": "implemented",
+  "started_at": "2026-06-29T00:00:00Z",
+  "completed_at": "2026-06-29T00:00:00Z",
+  "artifacts": [
+    "specs/411_adopt_complete_int_decidability/summaries/01_intdecidability-adoption-summary.md",
+    "Cslib/Logics/Propositional/Metalogic/IntDecidability.lean"
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "details": "All phases completed. CI pipeline GREEN. Axioms clean.",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 2,
+    "last_completed_phase": "Build-verify gate"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "axioms": ["propext", "Classical.choice", "Quot.sound"],
+    "no_sorry_ax": true
+  },
+  "metadata": {
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
+}

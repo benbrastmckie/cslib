@@ -58,7 +58,7 @@ sorry-free) and must be adopted as a **file swap on main**, never via `git merge
 | 2 | 2 | 1 |
 | 3 | 3 | 2 (only if build fails) |
 
-### Phase 1: Curated single-file swap [NOT STARTED]
+### Phase 1: Curated single-file swap [COMPLETED]
 
 **Goal**: Put the branch's complete `IntDecidability.lean` onto main, changing nothing else.
 
@@ -73,7 +73,7 @@ sorry-free) and must be adopted as a **file swap on main**, never via `git merge
 
 **Verification**: file present, 436 lines, contains `instDecidableDerivableIntPropAxiom'`.
 
-### Phase 2: Build-verify gate [NOT STARTED]
+### Phase 2: Build-verify gate [COMPLETED]
 
 **Goal**: Empirically confirm the swap is green and sorry-free across the full CI pipeline.
 

@@ -1,0 +1,23 @@
+{
+  "status": "implemented",
+  "summary": "Adopted the complete sorry-free IntDecidability.lean from branch refactor/prop_logic onto main via curated single-file swap. The instDecidableDerivableIntPropAxiom' FMP decidability instance is now on main. Full CI pipeline GREEN. Axioms: only propext, Classical.choice, Quot.sound (no sorryAx). Phase 3 (contingency backport) was NOT triggered.",
+  "phases_completed": 2,
+  "phases_total": 2,
+  "phase3_triggered": false,
+  "artifacts": [
+    "specs/411_adopt_complete_int_decidability/summaries/01_intdecidability-adoption-summary.md"
+  ],
+  "blockers": [],
+  "next_action_hint": "Update task 411 status to [COMPLETED] in state.json/TODO.md. Unblocked: task 421 (Min-side FMP), task 422 (route reconciliation). Parent task 370 Int-side is now complete.",
+  "verification": {
+    "lake_build": "Build completed successfully (3156 jobs)",
+    "lake_test": "EXIT_CODE=0",
+    "checkInitImports": "CLEAN",
+    "lint_style": "CLEAN",
+    "lake_lint": "55 pre-existing errors (none in IntDecidability.lean)",
+    "lake_shake": "Pre-existing remove Cslib.Init suggestions (system-wide, not introduced by this change)",
+    "axioms": ["propext", "Classical.choice", "Quot.sound"],
+    "sorry_ax": false
+  },
+  "collision_note": "Branch refactor/prop_logic task 411 = dma_concat_closure (automata). IntDecidability work was under tasks 415/416 on that branch. This adoption used git show file swap, NOT git merge."
+}

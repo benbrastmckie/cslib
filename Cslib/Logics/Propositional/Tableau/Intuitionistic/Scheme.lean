@@ -473,6 +473,164 @@ private lemma intExpandBranches_openBranch_closed (fuel : Nat)
                 | notApplicable =>
                   simp only at hgo; injection hgo with heq; subst heq; exact hcl
 
+/-! ## Expansion Invariant Helpers -/
+
+/-- Output condition for a single signed formula on branch `b`: asserts that the
+rule outputs are present on `b`. For non-compound formulas (atoms, T(imp), bot), the
+condition is vacuously `True`. -/
+private def sfSatisfied (b : IBranch Atom) (sf : ISF Atom) : Prop :=
+  match sf.sign, sf.formula with
+  | .pos, .and φ ψ =>
+    b.any (fun x => x.sign == .pos && x.formula == φ && x.label == sf.label) = true ∧
+    b.any (fun x => x.sign == .pos && x.formula == ψ && x.label == sf.label) = true
+  | .neg, .and φ ψ =>
+    b.any (fun x => x.sign == .neg && x.formula == φ && x.label == sf.label) = true ∨
+    b.any (fun x => x.sign == .neg && x.formula == ψ && x.label == sf.label) = true
+  | .pos, .or φ ψ =>
+    b.any (fun x => x.sign == .pos && x.formula == φ && x.label == sf.label) = true ∨
+    b.any (fun x => x.sign == .pos && x.formula == ψ && x.label == sf.label) = true
+  | .neg, .or φ ψ =>
+    b.any (fun x => x.sign == .neg && x.formula == φ && x.label == sf.label) = true ∧
+    b.any (fun x => x.sign == .neg && x.formula == ψ && x.label == sf.label) = true
+  | .neg, .imp φ ψ =>
+    ∃ w' : Nat, sf.label ≤ w' ∧
+      b.any (fun x => x.sign == .pos && x.formula == φ && x.label == w') = true ∧
+      b.any (fun x => x.sign == .neg && x.formula == ψ && x.label == w') = true
+  | _, _ => True
+
+/-- The expanded-set invariant: every formula in `e` has its rule outputs present on `b`. -/
+private def IExpandedConsistent (b : IBranch Atom) (e : List (ISF Atom)) : Prop :=
+  ∀ sf ∈ e, sfSatisfied b sf
+
+/-- `List.any` is monotone under branch inclusion. -/
+private lemma any_mono_sub {α : Type*} {p : α → Bool} {l l' : List α}
+    (hsub : ∀ x ∈ l, x ∈ l') (h : l.any p = true) : l'.any p = true := by
+  rw [List.any_eq_true] at h ⊢
+  obtain ⟨x, hx, hpx⟩ := h
+  exact ⟨x, hsub x hx, hpx⟩
+
+omit [Hashable Atom] in
+/-- `sfSatisfied` is monotone under branch inclusion: if outputs are in `b`, they are in `b'`
+whenever `b ⊆ b'`. -/
+private lemma sfSatisfied_mono {b b' : IBranch Atom} {sf : ISF Atom}
+    (hmono : ∀ x ∈ b, x ∈ b') (h : sfSatisfied b sf) : sfSatisfied b' sf := by
+  simp only [sfSatisfied] at *
+  rcases sf with ⟨s, f, l⟩
+  cases s <;> cases f <;> simp only [sfSatisfied] at * <;>
+    first
+    | exact h
+    | exact ⟨any_mono_sub hmono h.1, any_mono_sub hmono h.2⟩
+    | (rcases h with h | h
+       · exact Or.inl (any_mono_sub hmono h)
+       · exact Or.inr (any_mono_sub hmono h))
+    | (obtain ⟨w', hw', h1, h2⟩ := h
+       exact ⟨w', hw', any_mono_sub hmono h1, any_mono_sub hmono h2⟩)
+
+omit [Hashable Atom] in
+/-- `IExpandedConsistent` is monotone under branch inclusion. -/
+private lemma IExpandedConsistent_mono {b b' : IBranch Atom} {e : List (ISF Atom)}
+    (hmono : ∀ x ∈ b, x ∈ b') (h : IExpandedConsistent b e) : IExpandedConsistent b' e :=
+  fun sf hsfin => sfSatisfied_mono hmono (h sf hsfin)
+
+omit [Hashable Atom] in
+/-- When `intStepBranch b e nw = none` and `sf ∈ b` with `intApplyRuleFull sf nw b ≠ .notApplicable`
+(i.e., `sf` is a compound formula), then `sf ∈ e`. -/
+private lemma intStepBranch_none_compound_mem
+    {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
+    (hstep : intStepBranch b e nw = none)
+    (sf : ISF Atom) (hsfb : sf ∈ b)
+    (hcomp : intApplyRuleFull sf nw b ≠ .notApplicable) :
+    sf ∈ e := by
+  simp only [intStepBranch, List.findSome?_eq_none_iff] at hstep
+  have hbody := hstep sf hsfb
+  by_cases hany : e.any (· == sf) = true
+  · simp only [List.any_eq_true, beq_iff_eq] at hany
+    obtain ⟨x, hxe, rfl⟩ := hany
+    exact hxe
+  · rw [Bool.not_eq_true] at hany
+    simp only [hany, ite_false] at hbody
+    cases hca : intApplyRuleFull sf nw b with
+    | linearResult fs nw' edge => simp only [hca] at hbody; exact absurd hbody (by simp)
+    | branchingResult brs nw' => simp only [hca] at hbody; exact absurd hbody (by simp)
+    | notApplicable => exact absurd hca hcomp
+
+/-- Given `intStepBranch b e nw = none` and `IExpandedConsistent b e`,
+every saturation condition of `IBranchSaturation Atom b` holds.
+
+This is the bridge lemma connecting the expansion invariant to the Hintikka saturation
+structure required by `truthLemma`. -/
+private lemma IExpandedConsistent_sat
+    {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
+    (hstep : intStepBranch b e nw = none)
+    (hIC : IExpandedConsistent b e) :
+    IBranchSaturation Atom b := by
+  -- Helper: given a compound sf ∈ b (via any condition), return its IExpandedConsistent witness.
+  have compound_sat : ∀ (sf : ISF Atom),
+      sf ∈ b → intApplyRuleFull sf nw b ≠ .notApplicable → sfSatisfied b sf := by
+    intro sf hsfb hcomp
+    exact hIC sf (intStepBranch_none_compound_mem hstep sf hsfb hcomp)
+  constructor
+  · -- sat_tand: T(φ∧ψ)@w ∈ b → T(φ)@w ∈ b ∧ T(ψ)@w ∈ b
+    intro φ ψ w hmem
+    rw [List.any_eq_true] at hmem
+    obtain ⟨sf, hsfb, hsfp⟩ := hmem
+    simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
+    obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
+    have hsfeq : sf = ⟨.pos, .and φ ψ, w⟩ := by cases sf; simp_all
+    have hcomp : intApplyRuleFull sf nw b ≠ .notApplicable := by
+      rw [hsfeq]; simp [intApplyRuleFull]
+    have hsat := compound_sat sf hsfb hcomp
+    rw [hsfeq] at hsat; simp only [sfSatisfied] at hsat
+    exact hsat
+  · -- sat_fand: F(φ∧ψ)@w ∈ b → F(φ)@w ∈ b ∨ F(ψ)@w ∈ b
+    intro φ ψ w hmem
+    rw [List.any_eq_true] at hmem
+    obtain ⟨sf, hsfb, hsfp⟩ := hmem
+    simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
+    obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
+    have hsfeq : sf = ⟨.neg, .and φ ψ, w⟩ := by cases sf; simp_all
+    have hcomp : intApplyRuleFull sf nw b ≠ .notApplicable := by
+      rw [hsfeq]; simp [intApplyRuleFull]
+    have hsat := compound_sat sf hsfb hcomp
+    rw [hsfeq] at hsat; simp only [sfSatisfied] at hsat
+    exact hsat
+  · -- sat_tor: T(φ∨ψ)@w ∈ b → T(φ)@w ∈ b ∨ T(ψ)@w ∈ b
+    intro φ ψ w hmem
+    rw [List.any_eq_true] at hmem
+    obtain ⟨sf, hsfb, hsfp⟩ := hmem
+    simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
+    obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
+    have hsfeq : sf = ⟨.pos, .or φ ψ, w⟩ := by cases sf; simp_all
+    have hcomp : intApplyRuleFull sf nw b ≠ .notApplicable := by
+      rw [hsfeq]; simp [intApplyRuleFull]
+    have hsat := compound_sat sf hsfb hcomp
+    rw [hsfeq] at hsat; simp only [sfSatisfied] at hsat
+    exact hsat
+  · -- sat_for_: F(φ∨ψ)@w ∈ b → F(φ)@w ∈ b ∧ F(ψ)@w ∈ b
+    intro φ ψ w hmem
+    rw [List.any_eq_true] at hmem
+    obtain ⟨sf, hsfb, hsfp⟩ := hmem
+    simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
+    obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
+    have hsfeq : sf = ⟨.neg, .or φ ψ, w⟩ := by cases sf; simp_all
+    have hcomp : intApplyRuleFull sf nw b ≠ .notApplicable := by
+      rw [hsfeq]; simp [intApplyRuleFull]
+    have hsat := compound_sat sf hsfb hcomp
+    rw [hsfeq] at hsat; simp only [sfSatisfied] at hsat
+    exact hsat
+  · -- sat_fimp: F(φ→ψ)@w ∈ b → ∃ w' ≥ w, T(φ)@w' ∈ b ∧ F(ψ)@w' ∈ b
+    intro φ ψ w hmem
+    rw [List.any_eq_true] at hmem
+    obtain ⟨sf, hsfb, hsfp⟩ := hmem
+    simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
+    obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
+    have hsfeq : sf = ⟨.neg, .imp φ ψ, w⟩ := by cases sf; simp_all
+    have hcomp : intApplyRuleFull sf nw b ≠ .notApplicable := by
+      rw [hsfeq]; simp [intApplyRuleFull]
+    have hsat := compound_sat sf hsfb hcomp
+    rw [hsfeq] at hsat; simp only [sfSatisfied] at hsat
+    exact hsat
+
 /-- If `intExpandBranches` returns `.openBranch b`, then `b` is Hintikka-saturated:
 every compound formula on `b` has its rule-outputs also on `b` (see `IBranchSaturation`).
 

@@ -323,37 +323,62 @@ in general. The completeness proof requires either:
 --     ∀ t t', (t, t') ∈ ord.constraints → t < t' := ...
 ```
 
-### Blocked: Propositional Truth Lemma (Proof Complexity)
+### Propositional Truth Lemma
 
-```lean
--- BLOCKED (proof complexity): ~300 lines of case analysis per connective.
---
--- lemma temporalTruthLemma_propositional
---     (b : TBranch Atom) (ord : TimeOrdering) (tracker : EventualityTracker Atom)
---     (hH : temporalHintikkaSet b ord tracker)
---     (φ : Formula Atom) (t : TimeIndex) :
---     (b.any (fun sf => sf.sign == .pos && sf.label == t && sf.formula == φ) →
---       Satisfies (extractModel b) t φ) ∧
---     (b.any (fun sf => sf.sign == .neg && sf.label == t && sf.formula == φ) →
---       ¬ Satisfies (extractModel b) t φ) := by
---   induction φ with
---   | atom p => exact ⟨(extractModel_atom_sat_iff b t p).mpr,
---                      fun h => extractModel_atom_neg_notSat b ord tracker hH.1 t p ...⟩
---   | bot =>
---     exact ⟨fun h => absurd ... (openBranch_noBotPos ...),
---            fun _ => extractModel_bot_false ...⟩
---   | imp φ ψ ih_φ ih_ψ =>
---     -- Case analysis on temporalApplyOne sf b ord for each T/F(imp φ ψ)
---     -- which calls tryAllPropRules first, then temporal rules.
---     -- Propositional imp case: either neg, or, and, or proper imp rule.
---     sorry -- BLOCKED
---   | untl guard event ih_g ih_e =>
---     exact ⟨fun h => temporalTruthLemma_untl b ord tracker hH guard event t h,
---            fun h => ...⟩  -- BLOCKED (FMP required)
---   | snce guard event ih_g ih_e =>
---     exact ⟨fun h => temporalTruthLemma_snce b ord tracker hH guard event t h,
---            fun h => ...⟩  -- BLOCKED (FMP required)
-```
+The Until/Since (`untl`/`snce`) cases remain FMP-blocked (see below); the propositional
+fragment (atom/bot/imp) is handled here by strong induction on `Formula.complexity`. -/
+
+/-- Auxiliary truth lemma for the propositional fragment, bounded by a `Nat` fuel `n` so
+that the proof can use strong (well-founded) induction on `Formula.complexity`: every strict
+subformula of a propositional formula has strictly smaller complexity, so the single
+induction hypothesis `ih` covers all (including the *deep* subformulas exposed by the
+Łukasiewicz encoding of `and`/`or`/`neg`). -/
+private lemma temporalTruthLemma_propositional_aux
+    (b : TBranch Atom) (ord : TimeOrdering) (tracker : EventualityTracker Atom)
+    (hH : temporalHintikkaSet b ord tracker)
+    (n : Nat) :
+    ∀ (φ : Formula Atom), φ.complexity ≤ n → IsPropositional φ → ∀ (t : TimeIndex),
+      (b.any (fun sf => sf.sign == .pos && sf.label == t && sf.formula == φ) →
+        Satisfies (extractModel b) t φ) ∧
+      (b.any (fun sf => sf.sign == .neg && sf.label == t && sf.formula == φ) →
+        ¬ Satisfies (extractModel b) t φ) := by
+  obtain ⟨hopen, hrule⟩ := hH
+  induction n with
+  | zero =>
+    intro φ hle hp t
+    exact absurd hle (by have := Formula.one_le_complexity φ; omega)
+  | succ n ih =>
+    intro φ hle hp t
+    cases hp with
+    | atom p =>
+      refine ⟨fun hmem => ?_, fun hmem => ?_⟩
+      · exact extractModel_atomPos_sat b t p (any_pos_mem b t (.atom p) hmem)
+      · exact extractModel_atom_neg_notSat b ord tracker hopen t p
+          (any_neg_mem b t (.atom p) hmem)
+    | bot =>
+      refine ⟨fun hmem => ?_, fun _ => extractModel_bot_false b t⟩
+      exact absurd ⟨t, any_pos_mem b t .bot hmem⟩
+        (openBranch_noBotPos b ord tracker hopen)
+    | imp hφ' hψ' =>
+      -- φ = .imp φ' ψ'. The fired tableau rule depends on the encoded shape of φ'/ψ'
+      -- (and/or/neg/proper-imp); each output subformula has complexity ≤ n, so `ih`
+      -- applies. See research report §4c. ISOLATED HOLE — only this case remains.
+      sorry
+
+/-- Truth lemma for the propositional fragment (atom, ⊥, →) of the temporal tableau:
+for a propositional `φ`, every `T(φ)@t` on a temporal Hintikka branch is satisfied in the
+extracted model, and every `F(φ)@t` is not. Until/Since are excluded by `IsPropositional`. -/
+lemma temporalTruthLemma_propositional
+    (b : TBranch Atom) (ord : TimeOrdering) (tracker : EventualityTracker Atom)
+    (hH : temporalHintikkaSet b ord tracker)
+    (φ : Formula Atom) (hprop : IsPropositional φ) (t : TimeIndex) :
+    (b.any (fun sf => sf.sign == .pos && sf.label == t && sf.formula == φ) →
+      Satisfies (extractModel b) t φ) ∧
+    (b.any (fun sf => sf.sign == .neg && sf.label == t && sf.formula == φ) →
+      ¬ Satisfies (extractModel b) t φ) :=
+  temporalTruthLemma_propositional_aux b ord tracker hH φ.complexity φ le_rfl hprop t
+
+/-! ### Remaining FMP-Blocked Obligations
 
 ### Blocked: Until Eventuality Fulfilment (FMP Required)
 

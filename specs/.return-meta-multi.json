@@ -3,12 +3,11 @@
   "metadata": {
     "tasks_completed": [],
     "tasks_failed": [
-      427,
-      426,
-      425,
-      301
+      317,
+      430
     ],
-    "cycles_used": 1,
-    "multi_task_mode": true
+    "cycles_used": 6,
+    "multi_task_mode": true,
+    "note": "317 partial (green restored, 580 closed, B2 invariant infra committed sorry-free; residual: 713 wiring + 658 fuel-sufficiency + B1). 430 dependency-blocked on 317 B2."
   }
 }

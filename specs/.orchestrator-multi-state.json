@@ -40,27 +40,15 @@
     ]
   },
   "max_cycles": 25,
-  "cycle_count": 1,
+  "cycle_count": 6,
   "failed_tasks": [
     {
-      "task": 427,
-      "status": "partial",
-      "reason": "Non-convergent: 5th context overflow on imp case of temporalTruthLemma_propositional_aux; plain re-dispatch fails"
+      "task": 317,
+      "reason": "partial: B2 infrastructure landed sorry-free + green build restored, but 2 residual B2 sorries (713 wiring-tractable, 658 needs fuel-sufficiency argument) + B1 remain"
     },
     {
-      "task": 426,
-      "status": "partial",
-      "reason": "Structural blocker: Phase 3 run-level InstantStrict threading blocked by let-rec barrier in processNext (green at 4/5 phases)"
-    },
-    {
-      "task": 425,
-      "status": "not_started",
-      "reason": "Dependency-blocked: predecessors 426,427 not terminal"
-    },
-    {
-      "task": 301,
-      "status": "blocked",
-      "reason": "Dependency-blocked: predecessors 426,427,425 not terminal"
+      "task": 430,
+      "reason": "dependency-blocked: gated on 317 B2 (intExpandBranches_openBranch_sat not yet sorry-free)"
     }
   ],
   "completed_tasks": [],
@@ -68,7 +56,9 @@
     "427": "partial",
     "426": "partial",
     "425": "not_started",
-    "301": "blocked"
+    "301": "blocked",
+    "433": "planned",
+    "434": "planned"
   },
   "task_dirs": {
     "433": "specs/433_prove_acceptmembership_ramsey_lemma_for_buchicongr_dma_forwa",
@@ -90,5 +80,9 @@
     "435": "cslib-implementation-agent",
     "436": "cslib-implementation-agent",
     "241": "cslib-implementation-agent"
-  }
+  },
+  "build_green": true,
+  "b2_progress": "580 closed (committed). fuel=0 + none-case (566) are ENTANGLED - both need the expanded-set invariant induction-strengthening. hfuel split was unsound, reverted. 2 agents overflowed on this. B1 (truthLemma:330) also open.",
+  "exit_status": "partial",
+  "final_note": "4 agent overflows on the recursive saturation proof; escalated. B2 infra committed; residual needs /plan + interactive session."
 }

@@ -1,52 +1,24 @@
 {
   "status": "partial",
-  "summary": "Closed sorry at Scheme.lean:580 (the notApplicable contradiction case in intExpandBranches_openBranch_sat) by adding intStepBranch_result_ne_notApplicable to Expansion.lean. Build green (664 jobs, zero errors). 2 B2 sorries remain at lines 511 and 566; both require an expanded-set invariant not yet formalized.",
-  "phases_completed": 2,
-  "phases_total": 3,
+  "summary": "Restored green build (was committed-RED), closed B2 notApplicable sorry (580), and landed all B2 expanded-set-invariant infrastructure sorry-free. Two residual B2 sorries + B1 remain.",
+  "phases_completed": 5,
+  "phases_total": 6,
   "build_green": true,
-  "commit": "f74ae724",
+  "b2_infrastructure_committed": true,
   "blockers": [
-    {
-      "id": "B2a",
-      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "line": 511,
-      "case": "fuel=0 base case of intExpandBranches_openBranch_sat",
-      "root_cause": "With fuel=0, intExpandBranches returns the first open branch from the initial branches list WITHOUT calling intStepBranch. That branch may be completely unsaturated (e.g., {F(A→B)@0}). IBranchSaturation fails for compound formulas. The lemma is FALSE as stated for fuel=0 with compound initial branches.",
-      "fix": "Add precondition `fuel ≥ 1` to intExpandBranches_openBranch_sat (the call site in openBranch_countermodel uses fuel=2^(2*c+2)≥4, so Nat.one_le_pow applies). Alternatively, restructure the base case to note it is only reached with the empty expanded set, and derive a contradiction from the fact that the initial branch {F(φ)@0} always has fuel≥1 in the actual call."
-    },
-    {
-      "id": "B2b",
-      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "line": 566,
-      "case": "intStepBranch bPers eH nwH = none implies IBranchSaturation",
-      "root_cause": "When intStepBranch returns none, every compound formula sf in bPers is in eH (since intApplyRuleFull sf ... ≠ .notApplicable for compound sf). But being in eH only means sf was previously expanded; it does NOT immediately imply the rule outputs are on bPers unless the expanded-set invariant is carried through the induction.",
-      "invariant_needed": "ExpandedSetInvariant(bPers, eH): for every sf ∈ eH, sf's rule outputs (per intApplyRuleFull) are on bPers. Specifically: T(φ∧ψ)@w ∈ eH → T(φ)@w ∈ bPers ∧ T(ψ)@w ∈ bPers; F(φ∧ψ)@w ∈ eH → F(φ)@w ∈ bPers ∨ F(ψ)@w ∈ bPers; T(φ∨ψ)@w ∈ eH → similar; F(φ∨ψ)@w ∈ eH → similar; F(φ→ψ)@w ∈ eH → ∃ w'≥w, T(φ)@w' ∈ bPers ∧ F(ψ)@w' ∈ bPers.",
-      "fix": "Strengthen intExpandBranches_openBranch_sat to add `hinv: ∀ b e, (b,e) ∈ branches.zip expandedSets → ExpandedSetInvariant b e` as precondition, and prove the invariant is maintained: (1) empty expanded set satisfies it vacuously; (2) when a linear rule fires on sf adding newForms, ExpandedSetInvariant(bPers++newForms, eH++[sf]) follows from ExpandedSetInvariant(bPers,eH) plus newForms containing the rule outputs; (3) persistence monotonically extends the branch, preserving the invariant; (4) for sat_fimp, the world ordering w≤w' follows from the world counter being strictly increasing (freshness lemmas already in Soundness.lean)."
-    },
-    {
-      "id": "B1",
-      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "line": 330,
-      "case": "truthLemma inductive case",
-      "root_cause": "Separate blocker; not B2.",
-      "fix": "See prior handoff notes."
-    }
+    {"id": "B2-none", "location": "Scheme.lean:713 (intExpandBranches_openBranch_sat none case)", "severity": "medium", "tractable": true, "next_action": "Thread IExpandedConsistent through the key/go recursion so hIC : IExpandedConsistent bPers eH is in scope at the none case, then close with the existing sorry-free bridge `IExpandedConsistent_sat hstep hIC`. This is wiring; all helper lemmas (IExpandedConsistent_sat, IExpandedConsistent_mono, intStepBranch_none_compound_mem, sfSatisfied_mono, any_mono_sub) already exist and are sorry-free."},
+    {"id": "B2-fuel0", "location": "Scheme.lean:658 (fuel=0 base case)", "severity": "high", "tractable": false, "next_action": "Requires a FUEL-SUFFICIENCY argument: prove the bound fuel = 2^(2*complexity+2) always reaches a saturated (intStepBranch=none) branch before fuel exhausts, so the fuel=0 path is never the one returning the open countermodel. A naive (hfuel : 1 <= fuel) precondition is UNSOUND (the recursion bottoms out at fuel'=0; IH would need 1<=fuel'). This is genuine new content (a measure/termination argument), best designed via /plan."},
+    {"id": "B1", "location": "Scheme.lean:330 (truthLemma T(imp) forward direction)", "severity": "high", "tractable": false, "next_action": "Needs branch completeness (T or F label at every formula/world pair) OR reformulation to only prove the F-direction sufficient for openBranch_countermodel. Independent of B2."},
+    {"id": "bridges", "location": "Intuitionistic/Completeness.lean:113 and Minimal/Completeness.lean:110", "severity": "medium", "next_action": "IValid->forcing bridge needs atom upward-closure of intExtractValuation (task 430 scope). 430 is gated on B2 (intExpandBranches saturation)."}
   ],
-  "sorry_inventory": [
-    "Scheme.lean:330 (truthLemma — B1)",
-    "Scheme.lean:511 (intExpandBranches_openBranch_sat — B2a fuel-0 base case)",
-    "Scheme.lean:566 (intExpandBranches_openBranch_sat — B2b intStepBranch=none case)",
-    "Completeness.lean:106 (intuitionisticTableau_complete bridge)",
-    "Minimal/Completeness.lean:104 (minimalTableau_complete bridge)"
-  ],
-  "progress_this_dispatch": [
-    "CLOSED: Scheme.lean:580 (notApplicable contradiction) via intStepBranch_result_ne_notApplicable in Expansion.lean",
-    "COMMITTED: f74ae724 task 317 phase-6: close notApplicable sorry"
-  ],
-  "next_action_hint": "For B2a (line 511): add `(hfuel : 1 ≤ fuel)` precondition to intExpandBranches_openBranch_sat; update the call site in openBranch_countermodel (line 749) with `Nat.one_le_pow 2 _ (by norm_num)`. For B2b (line 566): define ExpandedSetInvariant predicate, add it as precondition, then at line 566 apply the invariant for the given sf to directly extract the rule outputs from bPers. The linearResult and branchingResult cases give the witnesses directly; the sat_fimp case needs w≤nwH from freshness lemmas (see intApplyRuleFull_some_info in Soundness.lean for the world-ordering argument).",
-  "key_files": [
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean (freshness/world-ordering lemmas)"
-  ]
+  "sorry_inventory": {
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean": [330, 658, 713],
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean": [113],
+    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean": [110]
+  },
+  "continuation_context": "B2 infrastructure done+committed (7bea4f6c + scaffolding commit). Next: close 713 (wiring, tractable) then 658 (fuel-sufficiency, needs design). Then 430 unblocks. Run /plan 317 --hard for the fuel-sufficiency argument; do it when no concurrent session is editing Scheme.lean (task 407/others collide on this file).",
+  "next_action_hint": "plan",
+  "environment_note": "4 cslib-implementation-agent dispatches overflowed context (Prompt too long) on this large, concurrently-edited file. The recursive proof intExpandBranches_openBranch_sat produces goal states that exceed agent context. Recommend interactive/expert session or /plan decomposition over further autonomous /implement dispatch.",
+  "task_430_gate": "still gated on B2 (intExpandBranches_openBranch_sat not yet sorry-free)",
+  "artifacts": []
 }

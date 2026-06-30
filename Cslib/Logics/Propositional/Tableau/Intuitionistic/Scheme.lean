@@ -242,7 +242,6 @@ the module headers in `Metalogic/IntDecidability.lean` and `Metalogic/MinDecidab
 for the full rationale. -/
 lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom)
     (hopen : S.closurePred b = false)
-    (hsat : ∀ sf ∈ b, intStepBranch b [] 0 = none)
     (φ : Proposition Atom) (w : Nat) :
     (b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w) →
       IForces (intExtractValuation b) (S.modelBot b) w φ) ∧
@@ -519,16 +518,6 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
   -- Extract structural properties of b from the openBranch result.
   have hopen : S.closurePred b = false :=
     intExpandBranches_openBranch_closed _ _ _ _ _ _ _ h
-  have hsat : ∀ sf ∈ b, intStepBranch b [] 0 = none := by
-    -- DEFERRED (task 317 coordination): The loop returns `.openBranch bPers` when
-    -- `intStepBranch bPers e nw = none` for the ACCUMULATED expanded set `e` and
-    -- next-world `nw`. Bridging to `intStepBranch b [] 0 = none` (empty expanded set,
-    -- world 0) requires either (a) showing `expanded` does not affect saturation for a
-    -- fully-explored branch, or (b) reformulating `truthLemma` to accept
-    -- `intStepBranch b e nw = none` for some `e`/`nw`. Option (b) is the clean path:
-    -- task 317's parametric truth lemma should be stated with the actual `e`/`nw` from
-    -- the expansion loop, not the degenerate `[] 0` form.
-    sorry
   have hFmem : b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == 0) := by
     have hmem : (⟨.neg, φ, 0⟩ : ISF Atom) ∈ b :=
       intExpandBranches_openBranch_initial_mem _ _ _ _ _ _ _
@@ -539,7 +528,7 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
           b h
     exact List.any_eq_true.mpr ⟨_, hmem, by simp⟩
   -- Apply the truth lemma's F-branch direction.
-  exact (truthLemma S b hopen hsat φ 0).2 hFmem
+  exact (truthLemma S b hopen φ 0).2 hFmem
 
 /-! ## Parametric Tableau Completeness -/
 

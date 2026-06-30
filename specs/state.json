@@ -1089,10 +1089,15 @@
           "path": "specs/429_prove_ramsey_recurrentclass_lemma_for_buchicongruence_prefix_runs/summaries/01_ramsey-recurrent-class-summary.md",
           "type": "summary",
           "summary": "Ramsey recurrent-class lemma proved; CI green"
+        },
+        {
+          "type": "summary",
+          "path": "specs/429_prove_ramsey_recurrentclass_lemma_for_buchicongruence_prefix_runs/summaries/01_ramsey-recurrent-class-summary.md",
+          "summary": "Ramsey recurrent-class lemma; BuchiCongruence green"
         }
       ],
       "session_id": "sess_1782817543_eee5ae_429",
-      "completion_summary": "Proved buchiCongruence_recurrentPrefixClass (BuchiCongruence.lean) and private buchiCongr_recurrentClass (OmegaRegularLanguage.lean): for [Finite State] and xs : ωSequence Symbol, there exist a b : Quotient na.BuchiCongruence.eq with b * b = b, a * b = a, and a ∈ ((buchiCongr_DMA na).run xs).infOcc. Zero sorries, zero new axioms; CI passes. Enables task 241 Phase 4 forward direction."
+      "completion_summary": "Proved buchiCongruence_recurrentPrefixClass in BuchiCongruence.lean (Ramsey recurrent-class for [Finite State] prefix runs) + private bridge buchiCongr_recurrentClass in OmegaRegularLanguage.lean (gives a ∈ infOcc, the conclusion task 241 Phase 4 needs). Also got BuchiCongruence.lean building green (was a red module from the PR #609 toolchain bump). Both modules green, 0 sorries/0 axioms. Committed 8f044ab0, b9a021bc."
     },
     {
       "project_number": 426,

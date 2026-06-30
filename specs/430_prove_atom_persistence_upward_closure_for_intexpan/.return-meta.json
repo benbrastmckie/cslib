@@ -1,15 +1,27 @@
 {
-  "status": "in_progress",
-  "started_at": "2026-06-29T00:00:00Z",
-  "artifacts": [],
+  "status": "researched",
+  "started_at": "2026-06-30T00:00:00Z",
+  "completed_at": "2026-06-30T00:00:00Z",
+  "artifacts": [
+    "specs/430_prove_atom_persistence_upward_closure_for_intexpan/reports/03_falsification-spike.md"
+  ],
   "partial_progress": {
-    "stage": "initializing",
-    "details": "Falsification spike started; reading research context"
+    "stage": "report_written",
+    "details": "Both experiments executed empirically; Route A chosen over Route C; both routes reduce to an edge-atom-persistence invariant coupled to task 317 B2"
   },
   "metadata": {
     "session_id": "sess_1782818058_465873",
     "agent_type": "cslib-research-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "experiments": {
+      "exp1_raw_edge_uc": "FAILS (phi4 branch2 edge (2,1): T(d)@1 present, T(d)@2 absent)",
+      "exp2_route_c_containment": "REFUTED (phi4 sat_fimp edge parent1 not-subseteq child2; imp-F witness broken)",
+      "exp2_route_a_closure": "UC by construction + Preorder/IValid typecheck; BUT atom-F falsified on phi6 saturated branch (F(d)@2 with ancestor T(d)@1)"
+    },
+    "decision": "Route A (edge ReflTransGen order) over Route C; pursue sat_atom_persist saturation field on returned branch; coupled to 317 B2; not a standalone unblock",
+    "no_new_axioms": true,
+    "no_sorry_introduced": true,
+    "scratch_cleanup_flag": "Cslib/Scratch430.lean pre-existed in HEAD from a prior spike; restored to HEAD (zero net change); should be removed from source tree in cleanup"
   }
 }

@@ -19,7 +19,7 @@
     ]
   },
   "max_cycles": 10,
-  "cycle_count": 4,
+  "cycle_count": 5,
   "failed_tasks": [],
   "completed_tasks": [
     428,
@@ -28,7 +28,8 @@
   "current_statuses": {
     "317": "implementing",
     "430": "researched",
-    "429": "completed"
+    "429": "completed",
+    "241": "implementing"
   },
   "task_dirs": {
     "317": "specs/317_propositional_tableau_completeness",

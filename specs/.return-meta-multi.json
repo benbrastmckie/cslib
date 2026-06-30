@@ -1,13 +1,16 @@
 {
   "status": "partial",
   "metadata": {
-    "tasks_completed": [],
-    "tasks_failed": [
-      317,
-      430
+    "tasks_completed": [
+      433,
+      435
     ],
-    "cycles_used": 6,
-    "multi_task_mode": true,
-    "note": "317 partial (green restored, 580 closed, B2 invariant infra committed sorry-free; residual: 713 wiring + 658 fuel-sufficiency + B1). 430 dependency-blocked on 317 B2."
+    "tasks_failed": [
+      434,
+      436,
+      241
+    ],
+    "cycles_used": 4,
+    "multi_task_mode": true
   }
 }

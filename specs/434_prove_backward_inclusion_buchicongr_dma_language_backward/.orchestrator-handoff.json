@@ -1,13 +1,29 @@
 {
-  "status": "planned",
+  "status": "partial",
   "task_number": 434,
-  "artifact_path": "specs/434_prove_backward_inclusion_buchicongr_dma_language_backward/plans/01_backward-inclusion-buchicongr-dma.md",
+  "task_type": "cslib",
+  "orchestrator_mode": true,
+  "summary": "Build is GREEN and the backward lemma is NOT sorry-free: the single remaining sorry in buchiCongr_DMA_language_backward (Cslib/Computability/Languages/OmegaRegularLanguage.lean:588) could not be closed. After extensive analysis (mirroring buchiCongr_DMA_accept_mem's Ramsey breakpoint pattern, attempting algebraic normalization via buchiCongruence_idempotentPow/absorption, trying the alternate cover-decomposition index, and empirically confirming grind/aesop both fail at the goal), the gap is a genuine missing mathematical lemma: for a fixed recurring prefix class b, goodness of na.buchiFamily (b, X) (meeting language na) is not provably independent of which idempotent companion X is used, and the accept-set's existential witness a has no provable algebraic or content relationship to xs's own Ramsey-derived loop class. Cross-referenced the upstream reference project ctchou/AutomataTheory (same author, this file is a port of it): its McNaughton proof does not use this BuchiCongr-quotient-as-DMA-states construction at all (it uses the Choueka lemma instead), suggesting this exact construction may lack a verified reference proof for the backward direction. No file edits were made to OmegaRegularLanguage.lean; it is byte-identical to HEAD with the original single sorry at line 588. lake build Cslib.Computability.Languages.OmegaRegularLanguage succeeds (1096/1096 jobs, zero errors, only the expected sorry warning).",
+  "phases_completed": 1,
   "phases_total": 4,
-  "phases_completed": 0,
-  "summary": "Plan created for backward inclusion buchiCongr_DMA_language_backward (language (buchiCongr_DMA na) ⊆ language na). Four sequential phases: (1) lemma scaffold + Muller acceptance / accept-set unfolding; (2) establish xs ∈ buchiFamily (a,b) via run_eq + mem_infOcc + mem_buchiFamily (crux, with buchiFamily_cover reconciliation fallback); (3) apply buchiFamily_saturation to conclude xs ∈ language na + docstring; (4) lake build + lean_verify zero sorries. Scoped to a single cslib-implementation-agent dispatch.",
-  "next_action_hint": "Run /implement 434 (cslib-implementation-agent) to execute the plan. Independent of forward direction (task index 1) and the eq/wiring task (435).",
-  "key_files": [
-    "Cslib/Computability/Languages/OmegaRegularLanguage.lean",
-    "Cslib/Computability/Languages/Congruences/BuchiCongruence.lean"
+  "blockers": [
+    {
+      "phase": "Phase 2: Establish xs ∈ buchiFamily (a, b)",
+      "what_failed": "Cannot prove xs ∈ na.buchiFamily (b, a) for the specific companion class `a` bound by destructuring the accept-set witness hxs (OmegaRegularLanguage.lean:588).",
+      "what_was_tried": [
+        "Mirrored buchiCongr_DMA_accept_mem's pattern: applied frequently_iff_strictMono to hb_prefix and ran the same infinite_graph_ramsey homogeneity argument restricted to b's recurrence times. This unconditionally yields xs ∈ na.buchiFamily (b, c) for a freshly-derived idempotent companion c (b*c=b, c*c=c) -- solid progress, but c is not provably equal to hfam's witness a.",
+        "Attempted to derive b*a=b / a*a=a directly from hfam (mem_buchiFamily.mp on its witness ys) -- not derivable; mem_buchiFamily places no algebraic constraint on a's products.",
+        "Attempted normalizing a to an idempotent power a^(N!) via buchiCongruence_idempotentPow/buchiCongruence_absorption by regrouping ys's loop segments -- shows ys's own recurring class is b*a^(N!), which still cannot be related to the given b.",
+        "Tried switching the target index from (b,a) to the already-available cover decomposition (a₀,b₀) via hxs_fam -- identical underlying gap (relating an arbitrary realized decomposition of xs to the accept-set witness).",
+        "Empirically confirmed via lean_multi_attempt: grind [mem_buchiFamily, buchiCongruence_mk_append, buchiCongruence_idempotentPow, buchiCongruence_absorption] and aesop both fail exhaustively at the goal."
+      ],
+      "why_stuck": "The accept-set definition of buchiCongr_DMA (∃ a ∈ S, ∃ b, (buchiFamily (a,b) ⊓ language na).Nonempty) asserts mere existence of some good companion for some recurring class, with no information tying the witness companion to xs's actual realized content. Closing this requires a 'linked-pair independence' theorem from finite-(ω-)semigroup theory not currently present in CSLib's BuchiCongruence.lean. The broader buchiCongr_DMA_language_eq theorem in the same file is independently tagged [BLOCKED — Phase 4, task 241] with a proof sketch that hand-waves exactly this same step.",
+      "what_is_needed": "Either (1) a new CSLib lemma establishing that goodness of (b, X) depends only on b for idempotent companions X realizable via Ramsey factorization of a b-recurring word, or (2) consultation with Ching-Tsun Chou (file author) on whether ctchou/AutomataTheory has an unported alternative for this direction, since its own McNaughton proof avoids this construction entirely (uses the Choueka lemma route instead)."
+    }
+  ],
+  "continuation_context": "Full blocker writeup (with all attempted strategies and literature cross-reference) is recorded inline in specs/434_prove_backward_inclusion_buchicongr_dma_language_backward/plans/01_backward-inclusion-buchicongr-dma.md under Phase 2 (marked [BLOCKED]). Phase 1 is marked [COMPLETED] (matches the already-built, non-sorry portion of the lemma at OmegaRegularLanguage.lean:546-586). Recommend either spawning a research task to develop the missing 'companion-independence' lemma in BuchiCongruence.lean, or escalating to compare against ctchou/AutomataTheory's Choueka-lemma-based McNaughton route as a structurally different (and reference-verified) path for the parent task 241 / buchiCongr_DMA_language_eq, since this congruence-quotient-as-DMA construction may not be completable as currently designed.",
+  "artifacts": [
+    "specs/434_prove_backward_inclusion_buchicongr_dma_language_backward/plans/01_backward-inclusion-buchicongr-dma.md",
+    "specs/434_prove_backward_inclusion_buchicongr_dma_language_backward/.return-meta.json"
   ]
 }

@@ -27,16 +27,31 @@
     ]
   },
   "max_cycles": 15,
-  "cycle_count": 3,
-  "failed_tasks": [],
+  "cycle_count": 4,
+  "failed_tasks": [
+    {
+      "task": 434,
+      "reason": "blocked: architectural soundness gap in buchiCongr_DMA accept set (backward inclusion sorry, line 588)"
+    },
+    {
+      "task": 436,
+      "reason": "blocked: downstream of 434 (language_eq needs backward)"
+    },
+    {
+      "task": 241,
+      "reason": "blocked: downstream of 436/434"
+    }
+  ],
   "completed_tasks": [
     433,
     435
   ],
   "current_statuses": {
     "433": "completed",
+    "434": "blocked",
     "435": "completed",
-    "434": "planned"
+    "436": "blocked",
+    "241": "blocked"
   },
   "task_dirs": {
     "434": "specs/434_prove_backward_inclusion_buchicongr_dma_language_backward",

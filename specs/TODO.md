@@ -54,8 +54,8 @@ next_project_number: 442
       └─ 427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
         └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
           └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
-434 [IMPLEMENTING] — Prove the backward inclusion `buchiCongr_DMA_language_backward` (
-  └─ 436 [RESEARCHED] — Combine the forward inclusion (buchiCongr_DMA_language_forward, f
+434 [BLOCKED] — Prove the backward inclusion `buchiCongr_DMA_language_backward` (
+  └─ 436 [BLOCKED] — Combine the forward inclusion (buchiCongr_DMA_language_forward, f
     └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
@@ -164,7 +164,7 @@ Reference: specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-st
 
 ### 436. Combine inclusions into buchicongr dma language eq and close
 - **Effort**: 1-2 hours
-- **Status**: [RESEARCHED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 435, Task 434
@@ -188,7 +188,7 @@ Reference: specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-st
 
 ### 434. Prove backward inclusion buchicongr dma language backward
 - **Effort**: 1-2 hours
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 433

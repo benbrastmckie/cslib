@@ -483,7 +483,7 @@
       "description": "Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller) establishing equivalence between omega-regular languages and deterministic Muller automata. Research phase should evaluate ctchou/AutomataTheory (independent Lean 4 project that claims McNaughton already proved) for architectural compatibility, portability, and licensing before deciding whether to port, adapt, or develop independently.",
       "topic": "Temporal Logic",
       "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-30T15:21:57Z",
+      "last_updated": "2026-06-30T20:55:42Z",
       "dependencies": [
         428,
         429,
@@ -517,7 +517,7 @@
       ],
       "session_id": "sess_1782832881_8335e5",
       "previous_status": "implementing",
-      "blockers": "Forward inclusion buchiCongr_DMA_language_forward overflows a single agent dispatch even with 428/429 infrastructure present; needs sub-lemma decomposition (see .orchestrator-handoff.json suggested_subdecomposition). Run /spawn 241."
+      "blockers": "McNaughton forward direction blocked on buchiCongr_DMA_language_eq (task 436), which is blocked on backward inclusion (task 434) architectural gap. Subtasks 433 (accept_mem) and 435 (forward inclusion) COMPLETED. Needs companion-independence lemma or Choueka-route pivot."
     },
     {
       "project_number": 226,
@@ -1207,7 +1207,7 @@
     {
       "project_number": 434,
       "project_name": "prove_backward_inclusion_buchicongr_dma_language_backward",
-      "status": "implementing",
+      "status": "blocked",
       "task_type": "cslib",
       "description": "Prove the backward inclusion `buchiCongr_DMA_language_backward` (language (buchiCongr_DMA na) ⊆ language na) in Cslib/Computability/Languages/OmegaRegularLanguage.lean. Proceed from accept-set membership: if infOcc(run xs) ∈ accept, there exists b ∈ infOcc(run xs) and a such that (buchiFamily (a,b) ⊓ language na).Nonempty, giving a witness ys ∈ language na. Then use buchiFamily_saturation (BuchiCongruence.lean:181) to lift from the witness to xs ∈ language na. This direction does not depend on the Ramsey/recurrence argument for the forward direction — it can be proven in any order relative to tasks 0 and 1. Exact API: accept set definition of buchiCongr_DMA; buchiFamily_saturation (BuchiCongruence.lean:181); mem_buchiFamily (BuchiCongruence.lean:107). CI must pass green (lake build, lean_verify on buchiCongr_DMA_language_backward) with zero sorries. Topic: Temporal Logic. Parent task: 241.",
       "effort": "1-2 hours",
@@ -1217,7 +1217,7 @@
         433
       ],
       "created": "2026-06-30T15:25:41Z",
-      "last_updated": "2026-06-30T20:20:46Z",
+      "last_updated": "2026-06-30T20:55:42Z",
       "artifacts": [
         {
           "type": "research",
@@ -1225,7 +1225,8 @@
           "summary": "Spawn analysis from parent task 241"
         }
       ],
-      "session_id": "sess_1782850760_91e823_434"
+      "session_id": "sess_1782850760_91e823_434",
+      "blockers": "Backward inclusion buchiCongr_DMA_language_backward has one irreducible sorry (OmegaRegularLanguage.lean:588). Genuine architectural gap: the buchiCongr_DMA accept set (∃ recurring class b with SOME good companion) is too permissive for the ⊆ direction — xs's own Ramsey decomposition yields buchiFamily(b,c) for a companion c not provably equal to the accept-set witness a, and goodness of (b,X) is not provably companion-independent. Needs either (1) a new finite-semigroup 'companion-independence' lemma in BuchiCongruence.lean, or (2) pivot to the Choueka-lemma route used by upstream ctchou/AutomataTheory. Same gap already flagged as proof_wanted + [BLOCKED — task 241] on buchiCongr_DMA_language_eq. Forward (435) + accept_mem (433) are done and green."
     },
     {
       "project_number": 435,
@@ -1254,7 +1255,7 @@
     {
       "project_number": 436,
       "project_name": "combine_inclusions_into_buchicongr_dma_language_eq_and_close",
-      "status": "researched",
+      "status": "blocked",
       "task_type": "cslib",
       "description": "Combine the forward inclusion (buchiCongr_DMA_language_forward, from task index 1) and backward inclusion (buchiCongr_DMA_language_backward, from task index 2) via Set / ωLanguage antisymmetry (le_antisymm or Set.Subset.antisymm) to prove `buchiCongr_DMA_language_eq` in Cslib/Computability/Languages/OmegaRegularLanguage.lean. Then: (1) wire the h_pkg obligation in to_da_muller_scaffold (Phase 5 of the original plan); (2) close IsRegular.iff_da_muller (~line 497 of OmegaRegularLanguage.lean, Phase 6 of the original plan); (3) run the full CSLib CI pipeline to green. Full CI pipeline: lake build, lake exe checkInitImports, lake lint, lake exe lint-style, lake test, lake shake --add-public --keep-implied --keep-prefix; lean_verify Cslib.ωLanguage.IsRegular.iff_da_muller (zero sorries, zero new axioms). Add docstrings to all new public lemmas. This task directly applies both named inclusions — the implementer needs their exact types before writing the antisymmetry combination. Topic: Temporal Logic. Parent task: 241.",
       "effort": "1-2 hours",
@@ -1265,14 +1266,15 @@
         434
       ],
       "created": "2026-06-30T15:25:42Z",
-      "last_updated": "2026-06-30T15:25:42Z",
+      "last_updated": "2026-06-30T20:55:42Z",
       "artifacts": [
         {
           "type": "research",
           "path": "specs/241_mcnaughton_theorem/reports/03_spawn-analysis.md",
           "summary": "Spawn analysis from parent task 241"
         }
-      ]
+      ],
+      "blockers": "Downstream of task 434: buchiCongr_DMA_language_eq combines forward (435, done) + backward (434, BLOCKED). Cannot close until 434 backward inclusion or an architectural pivot resolves the accept-set soundness gap."
     },
     {
       "project_number": 438,

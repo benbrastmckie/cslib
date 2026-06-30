@@ -70,7 +70,7 @@ No ROADMAP.md consultation requested (roadmap flag not set). This lemma is a sub
 
 Phases within the same wave can execute in parallel. This is a single-lemma proof, so all phases are strictly sequential.
 
-### Phase 1: Lemma scaffold and accept-set unfolding [IN PROGRESS]
+### Phase 1: Lemma scaffold and accept-set unfolding [COMPLETED]
 
 **Goal**: Introduce the lemma with the correct signature, reduce the goal to proving `xs ∈ language na` from a destructured accept witness.
 
@@ -97,7 +97,100 @@ Phases within the same wave can execute in parallel. This is a single-lemma proo
 **Verification**:
 - `lean_goal` shows hypotheses `b`, `hb_inf : b ∈ ((buchiCongr_DMA na).run xs).infOcc`, `a`, `hys_fam`, `hys_lang`, and goal `xs ∈ language na` (a single `sorry` remaining).
 
-### Phase 2: Establish `xs ∈ buchiFamily (a, b)` [NOT STARTED]
+### Phase 2: Establish `xs ∈ buchiFamily (a, b)` [BLOCKED]
+
+**BLOCKER** (Phase 2):
+
+- **What failed**: Cannot prove `xs ∈ na.buchiFamily (b, a)` (the literal goal at the
+  remaining `sorry`, OmegaRegularLanguage.lean:588) for the *specific* `a` bound by
+  destructuring the accept-set witness `hxs`. The companion class `a` in `hfam :
+  (na.buchiFamily (b, a) ⊓ language na).toSet.Nonempty` is an *arbitrary* existential
+  witness from the accept-set definition — it is **not** algebraically tied to `b` (no
+  `b * a = b` / `a * a = a` is known or derivable from `hfam` alone) and is **not** tied
+  to `xs`'s actual content (it comes from a separate witness word `ys`, not from `xs`).
+  `mem_buchiFamily` requires `xs`'s own loop segments to be *literal substrings of `xs`*
+  whose Büchi-congruence class is *exactly* `a` for every segment — there is no freedom to
+  substitute or fabricate content, since the decomposition must satisfy
+  `xl ++ω xls.flatten = xs` on the nose.
+
+- **What was tried**:
+  1. Mirrored `buchiCongr_DMA_accept_mem`'s pattern exactly per the task's hint: applied
+     `frequently_iff_strictMono` to `hb_prefix` to extract a strictly monotone breakpoint
+     sequence of `b`-recurrence times. This **does** establish (unconditionally, via DMA
+     determinism: `run(t_{i+1}) = run(t_i) * class(gap_i)` together with `run(t_i)=run(t_{i+1})=b`)
+     that every gap segment `w_i` between consecutive recurrence times satisfies
+     `b * ⟦w_i⟧ = b`. Running the *same* `infinite_graph_ramsey` homogeneity argument as
+     `buchiCongr_DMA_accept_mem`/`buchiFamily_cover`, but restricted to the (infinite) set of
+     `b`-recurrence times, yields a **fresh** idempotent companion `c` (`b*c=b`, `c*c=c`)
+     realized as actual substrings of `xs`, giving `xs ∈ na.buchiFamily (b, c)` —
+     a genuine, unconditional decomposition of `xs`. This is solid, reusable progress, but
+     `c` is **not provably equal to `a`** (the value fixed by `hfam`), so it does not close
+     the stated goal `xs ∈ na.buchiFamily (b, a)`.
+  2. Attempted to derive `b * a = b` / `a * a = a` from `hfam` directly (via
+     `mem_buchiFamily.mp` on its witness `ys`) — not derivable; `mem_buchiFamily` only
+     requires each loop segment of `ys` to individually lie in `eqvCls a`, which places no
+     algebraic constraint on `a * a` or `b * a`.
+  3. Attempted to "normalize" `a` to an idempotent power `a^(N!)` via
+     `buchiCongruence_idempotentPow`/`buchiCongruence_absorption` (regrouping `ys`'s loop
+     segments in blocks of `N!`) to get a fresh good pair `(b * a^(N!), a^(N!))` — this
+     shows `ys`'s own *recurring* prefix class is `b * a^(N!)` (not necessarily `b`), so it
+     does not bridge to our given `b` either, since `b * a` is still unknown.
+  4. Tried switching the chosen witness index from `(b, a)` to the cover decomposition
+     `(a₀, b₀)` already in scope (`hxs_fam : xs ∈ na.buchiFamily (a₀, b₀)`, via
+     `buchiFamily_cover`) — this trades one unmatched pair for another; proving
+     `(buchiFamily (a₀, b₀) ⊓ language na).Nonempty` has the identical underlying gap
+     (relating an arbitrary realized decomposition of `xs` to the accept-set's witness).
+  5. Empirically confirmed via `lean_multi_attempt`: `grind [mem_buchiFamily,
+     buchiCongruence_mk_append, buchiCongruence_idempotentPow, buchiCongruence_absorption]`
+     and `aesop` both fail exhaustively at the goal (no usable closing automation).
+
+- **Why it's stuck**: The accept-set definition of `buchiCongr_DMA`
+  (`{S | ∃ a ∈ S, ∃ b, (buchiFamily (a,b) ⊓ language na).Nonempty}`, OmegaRegularLanguage.lean:
+  395-397) only asserts *existence* of *some* good companion for *some* recurring class — it
+  carries no information tying the witness companion to the recurring class's actual
+  realization in `xs`. Closing this goal in general requires a "linked-pair independence"
+  theorem from finite-(ω-)semigroup theory: that for a *fixed* recurring class `b`, the
+  predicate "`(buchiFamily (b, X) ⊓ language na).Nonempty`" is the *same* for every valid
+  idempotent companion `X` realizable as a factorization of *some* `b`-recurring ω-word
+  (not just for the one `X` happens to label). This is a real, nontrivial mathematical fact
+  in ω-automata/Wilke-algebra theory (related to "saturated/well-defined Muller acceptance
+  conditions on ω-semigroups") and is **not currently proved anywhere in CSLib**
+  (`BuchiCongruence.lean` has no lemma relating two different companions of the same
+  recurring class). Cross-referencing the upstream reference implementation
+  (`ctchou/AutomataTheory`, same author/license, the project this file ports from) confirms
+  this: its McNaughton proof (`AutomataTheory/Languages/DetMullerLang.lean`) does **not**
+  use a `BuchiCongr`-quotient-as-DMA-states construction at all — it uses the Choueka lemma
+  (`L^ω = L* · L'↗ω`) plus closure properties instead. `BuchiCongr`/`Ample`/`Saturates` in
+  the reference project are used *only* to prove closure under complementation, never to
+  build a DMA directly. This `buchiCongr_DMA` construction (and its accept-set, as literally
+  stated) therefore appears to be a CSLib-local construction without a verified reference
+  proof for this exact direction, consistent with the broader `buchiCongr_DMA_language_eq`
+  being independently tagged `[BLOCKED — Phase 4, task 241]` in this same file
+  (OmegaRegularLanguage.lean:591), whose own proof sketch (lines 594-601) hand-waves
+  precisely this step ("since `b` recurs in `run xs`, one can decompose `xs` to lie in
+  `na.buchiFamily (a, b)`") without justifying why the decomposition's companion class must
+  equal the accept-set's witness.
+
+- **What is needed**: One of:
+  1. A new lemma in `BuchiCongruence.lean` establishing "goodness of `(b, X)` depends only on
+     `b`" for `X` ranging over idempotent companions of `b` realizable via Ramsey
+     factorization of some `b`-recurring word (the genuine missing piece), **or**
+  2. Redefining `buchiCongr_DMA`'s accept set to encode the companion canonically (e.g. via
+     a fixed choice function from the Ramsey/idempotent-power construction rather than a bare
+     existential) — out of scope per this task's non-goals ("Do NOT alter the `buchiCongr_DMA`
+     definition, its accept set"), **or**
+  3. Consultation with Ching-Tsun Chou (file's primary author) on whether
+     `ctchou/AutomataTheory` has an unported alternative construction for this exact
+     direction, since the reference repo's McNaughton proof does not go through this
+     congruence-quotient-as-DMA route at all.
+
+- **Prohibited workarounds**: Did NOT use `sorry` placeholders beyond the one already
+  present, did NOT introduce `def X := True`/`trivial`/vacuous placeholders, and did NOT
+  alter `buchiCongr_DMA`, its accept set, or the already-completed `buchiCongr_DMA_accept_mem`
+  / `buchiCongr_DMA_language_forward` lemmas. The file is left exactly as found (one `sorry`
+  at line 588), confirmed still building green via `lake build
+  Cslib.Computability.Languages.OmegaRegularLanguage` (1096/1096 jobs, only the expected
+  `declaration uses 'sorry'` warning, zero errors).
 
 **Goal**: Prove the membership `xs ∈ na.buchiFamily (a, b)` (the index whose family intersects `language na`), which is the substantive step of the proof.
 

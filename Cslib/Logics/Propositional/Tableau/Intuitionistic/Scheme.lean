@@ -302,15 +302,12 @@ the module headers in `Metalogic/IntDecidability.lean` and `Metalogic/MinDecidab
 for the full rationale. -/
 lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom)
     (hopen : S.closurePred b = false)
+    (hsat : IBranchSaturation Atom b)
     (φ : Proposition Atom) (w : Nat) :
     (b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w) →
       IForces (intExtractValuation b) (S.modelBot b) w φ) ∧
     (b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) →
       ¬ IForces (intExtractValuation b) (S.modelBot b) w φ) := by
-  -- Proof by induction on φ.
-  -- Atom and ⊥ cases are proved. Compound cases (and, or, imp) require saturation:
-  -- T(φ∧ψ)@w ∈ b → T(φ)@w ∈ b ∧ T(ψ)@w ∈ b (and analogues), which follows from a
-  -- structural saturation lemma on the expansion loop (task 317 blocker).
   induction φ generalizing w with
   | atom p =>
     simp only [IForces_atom, intExtractValuation]
@@ -322,17 +319,50 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom)
     simp only [IForces_bot]
     exact S.bot_truth b hopen w
   | imp φ' ψ' ih_φ' ih_ψ' =>
-    -- Task 317: requires saturation. T(φ'→ψ')@w: modus ponens across worlds;
-    -- F(φ'→ψ')@w: world-creating rule T(φ')@w' ∧ F(ψ')@w' for some w'>w.
-    sorry
+    simp only [IForces_imp]
+    constructor
+    · -- T(φ'→ψ')@w ∈ b → ∀ w' ≥ w, IForces val w' φ' → IForces val w' ψ'.
+      -- Requires a T-modus ponens saturation (sat_timp) together with backward reasoning
+      -- from IForces to branch membership, neither of which is available without branch
+      -- completeness. Deferred: task 317 phase-6 blocker (intStepBranch internals +
+      -- completeness of branch labelling).
+      intro _
+      sorry
+    · -- F(φ'→ψ')@w ∈ b → ¬∀ w' ≥ w, IForces val w' φ' → IForces val w' ψ'.
+      -- sat_fimp witnesses w', T(φ')@w', F(ψ')@w'; IH closes each membership-to-forcing step.
+      intro h hcontra
+      obtain ⟨w', hw', ht_φ', hf_ψ'⟩ := hsat.sat_fimp φ' ψ' w h
+      exact (ih_ψ' w').2 hf_ψ' (hcontra w' hw' ((ih_φ' w').1 ht_φ'))
   | and φ' ψ' ih_φ' ih_ψ' =>
-    -- Task 317: T(φ'∧ψ')@w → T(φ')@w ∧ T(ψ')@w (alpha-rule saturation);
-    -- F(φ'∧ψ')@w → F(φ')@w ∨ F(ψ')@w (beta-rule saturation, one sub-branch).
-    sorry
+    simp only [IForces_and]
+    constructor
+    · -- T(φ'∧ψ')@w ∈ b → IForces val w φ' ∧ IForces val w ψ'.
+      -- sat_tand splits alpha-rule; both sub-membership facts close via T-direction of IH.
+      intro h
+      obtain ⟨ht_φ', ht_ψ'⟩ := hsat.sat_tand φ' ψ' w h
+      exact ⟨(ih_φ' w).1 ht_φ', (ih_ψ' w).1 ht_ψ'⟩
+    · -- F(φ'∧ψ')@w ∈ b → ¬(IForces val w φ' ∧ IForces val w ψ').
+      -- sat_fand gives F(φ')@w or F(ψ')@w; F-direction of IH gives a contradiction.
+      intro h hcontra
+      rcases hsat.sat_fand φ' ψ' w h with hf | hf
+      · exact (ih_φ' w).2 hf hcontra.1
+      · exact (ih_ψ' w).2 hf hcontra.2
   | or φ' ψ' ih_φ' ih_ψ' =>
-    -- Task 317: T(φ'∨ψ')@w → T(φ')@w ∨ T(ψ')@w (beta-rule);
-    -- F(φ'∨ψ')@w → F(φ')@w ∧ F(ψ')@w (alpha-rule saturation).
-    sorry
+    simp only [IForces_or]
+    constructor
+    · -- T(φ'∨ψ')@w ∈ b → IForces val w φ' ∨ IForces val w ψ'.
+      -- sat_tor gives T(φ')@w or T(ψ')@w; T-direction of IH closes each.
+      intro h
+      rcases hsat.sat_tor φ' ψ' w h with ht | ht
+      · exact Or.inl ((ih_φ' w).1 ht)
+      · exact Or.inr ((ih_ψ' w).1 ht)
+    · -- F(φ'∨ψ')@w ∈ b → ¬(IForces val w φ' ∨ IForces val w ψ').
+      -- sat_for_ gives F(φ')@w and F(ψ')@w; F-direction of IH refutes each disjunct.
+      intro h hcontra
+      obtain ⟨hf_φ', hf_ψ'⟩ := hsat.sat_for_ φ' ψ' w h
+      rcases hcontra with hpos | hpos
+      · exact (ih_φ' w).2 hf_φ' hpos
+      · exact (ih_ψ' w).2 hf_ψ' hpos
 
 /-! ## Structural Lemmas for `openBranch_countermodel` -/
 
@@ -714,8 +744,11 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
               exact List.mem_cons_self)
           b h
     exact List.any_eq_true.mpr ⟨_, hmem, by simp⟩
+  -- Obtain saturation witness from the expansion structure.
+  have hsat : IBranchSaturation Atom b :=
+    intExpandBranches_openBranch_sat _ _ _ _ _ _ _ h
   -- Apply the truth lemma's F-branch direction.
-  exact (truthLemma S b hopen φ 0).2 hFmem
+  exact (truthLemma S b hopen hsat φ 0).2 hFmem
 
 /-! ## Parametric Tableau Completeness -/
 

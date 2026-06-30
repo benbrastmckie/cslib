@@ -1,0 +1,30 @@
+{
+  "status": "implemented",
+  "agent_type": "general-implementation-agent",
+  "session_id": "sess_1782818392_271f51_432",
+  "delegation_path": ["orchestrator", "implement", "general-implementation-agent"],
+  "task_number": 432,
+  "started_at": "2026-06-30T00:00:00Z",
+  "completed_at": "2026-06-30T05:00:00Z",
+  "phases_completed": 4,
+  "phases_total": 4,
+  "artifacts": [
+    {
+      "type": "summary",
+      "path": "specs/432_fix_roadmap_integration_argv_overflow/summaries/01_argv-overflow-fix-summary.md",
+      "summary": "Implementation summary for argv overflow fix across three shell scripts"
+    }
+  ],
+  "completion_data": {
+    "completion_summary": "Fixed E2BIG argv overflow in roadmap-integration.sh by replacing content-passing with temp-file path-passing at two sites; applied the same mktemp pattern to issue-grouping.sh (2 sites) and tier-selection.sh (2 sites) for consistency. Verified against the real 94 KB state.json with no error and valid JSON output."
+  },
+  "memory_candidates": [
+    {
+      "content": "Shell scripts that invoke inline Python heredocs via `python3 - \"$VAR\" << 'PYEOF'` will abort with E2BIG (Argument list too long) when the variable content exceeds the OS ARG_MAX limit (~2 MB on Linux). The fix: write the content to a mktemp file with `printf '%s' \"$VAR\" > \"$TMP\"`, pass the path as argv, read in Python with `json.load(open(sys.argv[1], encoding='utf-8'))`, and `rm -f` after. `printf '%s'` avoids spurious trailing-newline corruption. Short strings (index lists, flags) can stay as argv.",
+      "category": "TECHNIQUE",
+      "source_artifact": "specs/432_fix_roadmap_integration_argv_overflow/summaries/01_argv-overflow-fix-summary.md",
+      "confidence": 0.95,
+      "suggested_keywords": ["shell", "argv", "E2BIG", "ARG_MAX", "python", "mktemp", "heredoc"]
+    }
+  ]
+}

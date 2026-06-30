@@ -1185,7 +1185,7 @@
     {
       "project_number": 433,
       "project_name": "prove_acceptmembership_ramsey_lemma_for_buchicongr_dma_forwa",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Prove a private named lemma (e.g. `buchiCongr_DMA_accept_mem`) in OmegaRegularLanguage.lean establishing: for any `xs ∈ language na`, the set `infOcc((buchiCongr_DMA na).run xs)` contains a class `b` for which `∃ a, (buchiFamily (a,b) ⊓ language na).Nonempty`. This is the core Ramsey/recurrence argument for the forward inclusion of McNaughton's theorem. Use `buchiCongr_recurrentClass` (private, OmegaRegularLanguage.lean) to extract idempotent `b` and absorbing `a` with `a ∈ infOcc(run xs)`; use `buchiCongr_DMA_run_eq` to connect run states to congruence classes; use `buchiFamily_saturation` (BuchiCongruence.lean:181) and `mem_buchiFamily` (BuchiCongruence.lean:107) to conclude nonemptiness. Exact API map from orchestrator handoff: DA.Muller language at DA/Basic.lean:117; `buchiCongr_recurrentClass` gives a,b with b*b=b, a*b=a, a ∈ infOcc(run xs); `buchiCongr_DMA_run_eq`: (buchiCongr_DMA na).run xs n = ⟦xs.extract 0 n⟧; `buchiFamily_saturation` at BuchiCongruence.lean:181; `mem_infOcc` at InfOcc.lean:88; `frequently_in_finite_type` at InfOcc.lean:46. CI must pass green (lake build, lean_verify on the new lemma) with zero sorries. Topic: Temporal Logic. Parent task: 241.",
       "effort": "2-3 hours",
@@ -1193,7 +1193,7 @@
       "topic": "Temporal Logic",
       "dependencies": [],
       "created": "2026-06-30T15:25:41Z",
-      "last_updated": "2026-06-30T18:13:43Z",
+      "last_updated": "2026-06-30T20:20:25Z",
       "artifacts": [
         {
           "type": "research",
@@ -1201,12 +1201,13 @@
           "summary": "Spawn analysis from parent task 241"
         }
       ],
-      "session_id": "sess_1782843132_748805_433"
+      "session_id": "sess_1782843132_748805_433",
+      "completion_summary": "Proved private lemma buchiCongr_DMA_accept_mem in OmegaRegularLanguage.lean — the Ramsey/recurrence core of McNaughton forward inclusion: for xs ∈ language na, infOcc of the buchiCongr_DMA run contains a recurrent prefix class a paired with some b giving a nonempty buchiFamily(a,b) ⊓ language na. Uses infinite_graph_ramsey on the prefix coloring to extract idempotent b, absorbing a, and a concrete buchiFamily decomposition of xs. Sorry-free; axioms [propext, Classical.choice, Quot.sound]. Module builds green."
     },
     {
       "project_number": 434,
       "project_name": "prove_backward_inclusion_buchicongr_dma_language_backward",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Prove the backward inclusion `buchiCongr_DMA_language_backward` (language (buchiCongr_DMA na) ⊆ language na) in Cslib/Computability/Languages/OmegaRegularLanguage.lean. Proceed from accept-set membership: if infOcc(run xs) ∈ accept, there exists b ∈ infOcc(run xs) and a such that (buchiFamily (a,b) ⊓ language na).Nonempty, giving a witness ys ∈ language na. Then use buchiFamily_saturation (BuchiCongruence.lean:181) to lift from the witness to xs ∈ language na. This direction does not depend on the Ramsey/recurrence argument for the forward direction — it can be proven in any order relative to tasks 0 and 1. Exact API: accept set definition of buchiCongr_DMA; buchiFamily_saturation (BuchiCongruence.lean:181); mem_buchiFamily (BuchiCongruence.lean:107). CI must pass green (lake build, lean_verify on buchiCongr_DMA_language_backward) with zero sorries. Topic: Temporal Logic. Parent task: 241.",
       "effort": "1-2 hours",
@@ -1216,7 +1217,7 @@
         433
       ],
       "created": "2026-06-30T15:25:41Z",
-      "last_updated": "2026-06-30T15:37:59Z",
+      "last_updated": "2026-06-30T20:20:46Z",
       "artifacts": [
         {
           "type": "research",
@@ -1224,12 +1225,12 @@
           "summary": "Spawn analysis from parent task 241"
         }
       ],
-      "session_id": "sess_1782833467_90f6aa_434"
+      "session_id": "sess_1782850760_91e823_434"
     },
     {
       "project_number": 435,
       "project_name": "replace_sorry_in_buchicongr_dma_language_forward_using_accep",
-      "status": "researched",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Replace the sorry-stub `buchiCongr_DMA_language_forward` (language na ⊆ language (buchiCongr_DMA na)) at approximately line 435 of Cslib/Computability/Languages/OmegaRegularLanguage.lean. Apply the accept-membership lemma produced by task index 0 (SUB-A: buchiCongr_DMA_accept_mem or equivalent) and unfold the DA.Muller language definition (language da xs ↔ (da.run xs).infOcc ∈ da.accept, DA/Basic.lean:117), matching infOcc((buchiCongr_DMA na).run xs) against the accept set `{S | ∃ b ∈ S, ∃ a, ((buchiFamily (a,b) ⊓ language na).toSet).Nonempty}`. The implementer must read the exact statement committed by SUB-A to determine the correct existential witnesses and unfolding sequence. CI must pass green (lake build, lean_verify on buchiCongr_DMA_language_forward) with zero sorries. Topic: Temporal Logic. Parent task: 241.",
       "effort": "1-2 hours",
@@ -1240,14 +1241,15 @@
         434
       ],
       "created": "2026-06-30T15:25:42Z",
-      "last_updated": "2026-06-30T15:25:42Z",
+      "last_updated": "2026-06-30T20:20:25Z",
       "artifacts": [
         {
           "type": "research",
           "path": "specs/241_mcnaughton_theorem/reports/03_spawn-analysis.md",
           "summary": "Spawn analysis from parent task 241"
         }
-      ]
+      ],
+      "completion_summary": "Replaced the sorry in buchiCongr_DMA_language_forward (language na ⊆ language (buchiCongr_DMA na)). After fixing the ωLanguage→Set coercion (change/simp only [buchiCongr_DMA, Set.mem_setOf_eq] instead of the broken rw [ωAcceptor.mem_language]), the forward inclusion closes directly via exact buchiCongr_DMA_accept_mem na xs hxs. Sorry-free; module builds green."
     },
     {
       "project_number": 436,

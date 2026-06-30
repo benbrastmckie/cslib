@@ -1,21 +1,13 @@
 {
-  "session_id": "sess_1782843132_748805",
+  "session_id": "sess_1782850760_91e823",
   "task_numbers": [
-    433,
     434,
-    435,
     436,
     241
   ],
   "waves": [
     [
-      433
-    ],
-    [
       434
-    ],
-    [
-      435
     ],
     [
       436
@@ -25,61 +17,40 @@
     ]
   ],
   "dependency_graph": {
-    "433": [],
-    "434": [
-      433
-    ],
-    "435": [
-      433,
-      434
-    ],
+    "434": [],
     "436": [
-      434,
-      435
+      "434"
     ],
     "241": [
-      433,
-      434,
-      435,
-      436
+      "434",
+      "436"
     ]
   },
-  "max_cycles": 25,
-  "cycle_count": 6,
+  "max_cycles": 15,
+  "cycle_count": 3,
   "failed_tasks": [],
   "completed_tasks": [
-    406
+    433,
+    435
   ],
   "current_statuses": {
-    "406": "completed",
-    "180": "planned",
-    "321": "implementing"
+    "433": "completed",
+    "435": "completed",
+    "434": "planned"
   },
   "task_dirs": {
-    "433": "specs/433_prove_acceptmembership_ramsey_lemma_for_buchicongr_dma_forwa",
     "434": "specs/434_prove_backward_inclusion_buchicongr_dma_language_backward",
-    "435": "specs/435_replace_sorry_in_buchicongr_dma_language_forward_using_accep",
     "436": "specs/436_combine_inclusions_into_buchicongr_dma_language_eq_and_close",
     "241": "specs/241_mcnaughton_theorem"
   },
   "research_agents": {
-    "433": "cslib-research-agent",
     "434": "cslib-research-agent",
-    "435": "cslib-research-agent",
     "436": "cslib-research-agent",
     "241": "cslib-research-agent"
   },
   "implement_agents": {
-    "433": "cslib-implementation-agent",
     "434": "cslib-implementation-agent",
-    "435": "cslib-implementation-agent",
     "436": "cslib-implementation-agent",
     "241": "cslib-implementation-agent"
-  },
-  "notes": {
-    "406": "COMPLETED d11d0692",
-    "321": "phases 1-3 committed green (privatize x2 + GNBA barrel-split 2344a765); GNBA pattern validated as template; phases 4-7 = 4 Chronicle mega-file splits remain (high overflow/stall risk)",
-    "180": "WIP exported to specs/180.../wip/01_primitive-gh-wip.patch (durable); also in stash@{0}; needs --hard per-phase; breaks Temporal build so must run alone",
-    "env": "repo under heavy concurrent build load from other orchestration sessions (task 299/433) -> agents stalling on lake build watchdog"
   }
 }

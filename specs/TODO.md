@@ -11,11 +11,11 @@ next_project_number: 441
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,299,317,390,396,400,404,407,415,419,433,438,440 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,181,215,300,375,389,405,409,430,434,439 | 36,37,180,299,317,404,407,433 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,275,391,392,426,435 | 39,40,389,434,439 | Bimodal Porting, Foundations, Temporal Logic, ... |
-| 4 | 393,427,436 | 391,426,435 | Temporal Logic, PL-Hygiene |
-| 5 | 241,425 | 427,436 | Temporal Logic |
+| 1 | 36,37,180,226,299,317,390,396,400,404,407,415,419,434,438,440 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,181,215,300,375,389,405,409,430,436,439 | 36,37,180,299,317,404,407,434 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 3 | 41,241,275,391,392,426 | 39,40,389,436,439 | Bimodal Porting, Foundations, Temporal Logic, ... |
+| 4 | 393,427 | 391,426 | Temporal Logic, PL-Hygiene |
+| 5 | 425 | 427 | Temporal Logic |
 | 6 | 301 | 425 | Temporal Logic |
 | 7 | 321 | 301 | Code Hygiene |
 | 8 | 412,413,414 | 41,181,215,241,275,300,321,375 | Foundations, Code Hygiene, PL-Hygiene |
@@ -53,11 +53,9 @@ next_project_number: 441
       └─ 427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
         └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
           └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
-433 [IMPLEMENTING] — Prove a private named lemma (e.g. `buchiCongr_DMA_accept_mem`) in
-  └─ 434 [PLANNED] — Prove the backward inclusion `buchiCongr_DMA_language_backward` (
-    └─ 435 [RESEARCHED] — Replace the sorry-stub `buchiCongr_DMA_language_forward` (languag
-      └─ 436 [RESEARCHED] — Combine the forward inclusion (buchiCongr_DMA_language_forward, f
-        └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
+434 [IMPLEMENTING] — Prove the backward inclusion `buchiCongr_DMA_language_backward` (
+  └─ 436 [RESEARCHED] — Combine the forward inclusion (buchiCongr_DMA_language_forward, f
+    └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -166,7 +164,7 @@ Reference: specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-st
 
 ### 435. Replace sorry in buchicongr dma language forward using accep
 - **Effort**: 1-2 hours
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 433, Task 434
@@ -178,7 +176,7 @@ Reference: specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-st
 
 ### 434. Prove backward inclusion buchicongr dma language backward
 - **Effort**: 1-2 hours
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 433
@@ -190,7 +188,7 @@ Reference: specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-st
 
 ### 433. Prove acceptmembership ramsey lemma for buchicongr dma forwa
 - **Effort**: 2-3 hours
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None

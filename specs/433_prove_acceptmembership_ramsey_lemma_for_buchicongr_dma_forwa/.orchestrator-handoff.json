@@ -1,10 +1,31 @@
 {
-  "status": "planned",
-  "task_number": 433,
-  "stage": "plan",
-  "artifact_path": "specs/433_prove_acceptmembership_ramsey_lemma_for_buchicongr_dma_forwa/plans/01_buchicongr-accept-mem-ramsey.md",
-  "phase_count": 5,
-  "estimated_hours": 2.5,
-  "next_steps": "Run /implement 433 (single cslib-implementation-agent dispatch)",
-  "timestamp": "2026-06-30T00:00:00Z"
+  "status": "implemented",
+  "summary": "Build is GREEN: `lake build Cslib.Computability.Languages.OmegaRegularLanguage` exits 0 with zero `error:` lines (only style/sorry warnings remain). Task 433's lemma `buchiCongr_DMA_accept_mem` is sorry-free and axiom-clean (verified via `#print axioms`: only [propext, Classical.choice, Quot.sound], no sorryAx). The original blocker (broken `rw [ωAcceptor.mem_language]` in buchiCongr_DMA_language_forward/backward, caused by the goal going through the ωLanguage->Set `equiv` coercion instead of the SetLike membership pattern `mem_language` expects) was fixed in both lemmas by replacing the `rw` with `change`/`show` steps that unfold through the coercion via defeq. Fixing this exposed that the real root cause ran deeper than the two cited rw sites: buchiCongr_DMA's `accept` field needed the Muller-set/infOcc element to be the FIRST (prefix) slot of the buchiFamily pair, not the second (loop) slot, since the run's infOcc only ever contains the recurrent prefix class. I initially 'fixed' this by swapping the accept field's bound-variable order; a concurrent agent (apparently the actual task 433/435 agent, sharing this same working tree) independently fixed the same root inconsistency from the other end by correcting accept_mem's own theorem statement and its internal eqvCls/preimage closing step. The two fixes raced and briefly conflicted (both 'fixed' the same swap in opposite directions, producing a fresh type mismatch); I detected this via two consecutive failing builds, reverted my accept-field change back to the original `∃ a ∈ S, ∃ b, buchiFamily(a,b)` form (matching the now-corrected accept_mem and its doc comment), and re-aligned buchiCongr_DMA_language_backward's witness selection (`refine ⟨(b, a), ...⟩` instead of `(a, b)`) to match. Also fixed an unrelated explicit-argument bug in the backward lemma (`@buchiFamily_saturation Symbol _ State na` used positional args in the wrong order; replaced with the project's established `buchiFamily_saturation (na := na)` named-argument pattern used elsewhere in the file) and completed two further coercion-unfold steps that were hidden behind the first rw failure (the `xs ∈ (⡨ i, na.buchiFamily i)` cover step and the final `(language na).toSet` rewrite target). The whole episode landed in commit 54143599 ('task 433,435: prove buchiCongr_DMA_accept_mem + forward inclusion'), authored by the concurrent agent but incorporating my fixes to buchiCongr_DMA_language_backward (still containing exactly one preserved sorry, task 434's) -- buchiCongr_DMA_language_forward's sorry was filled in (exact accept_mem application) by that concurrent agent once the accept-field convention was settled, which is task 435's scope, not mine, but is now part of the same commit. I did not touch buchiCongr_DMA_accept_mem's mathematical content beyond confirming it builds and is sorry/axiom-clean; the one trivial closing step it was missing (`exact Set.mem_preimage.mpr rfl`, plus simplifying its unused-simp-arg list) was added by the concurrent agent, not by me.",
+  "phases_completed": 1,
+  "phases_total": 1,
+  "blockers": [],
+  "continuation_context": null,
+  "artifacts": [
+    {
+      "path": "Cslib/Computability/Languages/OmegaRegularLanguage.lean",
+      "type": "lean_source",
+      "summary": "buchiCongr_DMA_language_forward and buchiCongr_DMA_language_backward now elaborate past their original broken `rw [ωAcceptor.mem_language]` coercion issue; backward lemma is complete down to a single preserved `sorry` (task 434); buchiCongr_DMA_accept_mem (task 433) is sorry-free and axiom-clean; buchiCongr_DMA's accept-set field and its doc comment are mutually consistent (`∃ a ∈ S, ∃ b, buchiFamily (a, b) ⊓ language na nonempty`, a = infOcc/prefix index)."
+    }
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count_in_file": 1,
+    "sorry_owner": "buchiCongr_DMA_language_backward (task 434)",
+    "accept_mem_sorry_free": true,
+    "accept_mem_axioms": ["propext", "Classical.choice", "Quot.sound"],
+    "build_command": "lake build Cslib.Computability.Languages.OmegaRegularLanguage",
+    "build_exit_code": 0,
+    "error_line_count": 0,
+    "committed_as": "54143599 task 433,435: prove buchiCongr_DMA_accept_mem + forward inclusion"
+  },
+  "metadata": {
+    "task_number": 433,
+    "task_type": "cslib",
+    "orchestrator_mode": true
+  }
 }

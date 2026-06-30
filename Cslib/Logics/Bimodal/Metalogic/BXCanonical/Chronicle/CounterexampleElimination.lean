@@ -147,7 +147,7 @@ many points of fs in [x,y], there must be a gap, and the midpoint of that gap
 works. We use the simpler approach: (x + y) / 2 works when Adjacent, and for
 the general case we find any gap in the finite set fs within (x,y).
 -/
-theorem exists_rat_between_not_in_finset (fs : Finset Rat) (x y : Rat) (hxy : x < y) :
+private theorem exists_rat_between_not_in_finset (fs : Finset Rat) (x y : Rat) (hxy : x < y) :
     ∃ z : Rat, x < z ∧ z < y ∧ z ∉ fs := by
   -- The set of fs-elements strictly between x and y
   set T := fs.filter (fun s => x < s ∧ s < y) with hT_def
@@ -268,7 +268,7 @@ chronicle construction in ChronicleConstruction.lean.
 See Burgess 1982, Section 2: "g is a function from {(x,y) : x,y ∈ dom f,
 x < y} to the set of all DCSs" where DCS = deductively closed set
 (consistent + CUD). -/
-theorem BurgessR3Maximal_bot_not_mem {fc : FrameClass} {A B C : Set (Formula Atom)}
+private theorem BurgessR3Maximal_bot_not_mem {fc : FrameClass} {A B C : Set (Formula Atom)}
     (_h_r3m : BurgessR3Maximal fc A B C)
     (h_cons : SetConsistent fc B) :
     Formula.bot ∉ B := by
@@ -282,7 +282,7 @@ that splits an existing adjacent pair, the old adjacent pairs that don't involve
 split are preserved. Adjacent pairs involving the split point need BurgessR3Maximal
 from lemma_2_6_splitting or lemma_2_7.
 -/
-theorem c2'_preserved_on_old_adjacent {fc : FrameClass} {χ χ' : Chronicle Atom}
+private theorem c2'_preserved_on_old_adjacent {fc : FrameClass} {χ χ' : Chronicle Atom}
     (h_c2' : χ.c2' fc)
     (h_f_agrees : ∀ x ∈ χ.dom, χ'.f x = χ.f x)
     (h_g_agrees : ∀ a b, a ∈ χ.dom → b ∈ χ.dom → χ'.g a b = χ.g a b)
@@ -311,7 +311,7 @@ Proof: Use η = ⊤ as the seed element.
   Proof: If H(α.neg) ∈ C, then α.neg ∈ hContent(C) ⊆ A, contradicting α ∈ A. So P(α) ∈ C.
   Then P(α) → S(⊤, α) by P_since_equiv.
 -/
-theorem burgessR3Maximal_from_h_content_sub {fc : FrameClass} {A C : Set (Formula Atom)}
+private theorem burgessR3Maximal_from_h_content_sub {fc : FrameClass} {A C : Set (Formula Atom)}
     (h_mcs_A : SetMaximalConsistent fc A) (h_mcs_C : SetMaximalConsistent fc C)
     (h_hc : hContent C ⊆ A) :
     ∃ B : Set (Formula Atom), BurgessR3Maximal fc A B C := by
@@ -366,7 +366,7 @@ The construction uses Lemma 2.4 to obtain an MCS C with:
 
 The new point y is placed beyond all current domain points.
 -/
-lemma eliminateC5Counterexample {fc : FrameClass} {χ : Chronicle Atom}
+private lemma eliminateC5Counterexample {fc : FrameClass} {χ : Chronicle Atom}
     (h_c0 : χ.c0 fc)
     (ce : C5Counterexample χ)
     :
@@ -411,7 +411,7 @@ lemma eliminateC5Counterexample {fc : FrameClass} {χ : Chronicle Atom}
 Given a C5' counterexample (x, xi, eta), extend the chronicle by adding a new point
 y < x with eta in f'(y).
 -/
-lemma eliminateC5'Counterexample {fc : FrameClass} {χ : Chronicle Atom}
+private lemma eliminateC5'Counterexample {fc : FrameClass} {χ : Chronicle Atom}
     (h_c0 : χ.c0 fc)
     (ce : C5'Counterexample χ) :
     ∃ χ' : Chronicle Atom,
@@ -466,7 +466,7 @@ The seed {α} ∪ gContent(f(x)) is consistent because G(α) → F(α) (by
 for adjacent x < y, insert z = (x+y)/2 between x and y with α ∈ f(z) and
 gContent(f(x)) ⊆ f(z).
 -/
-lemma eliminateGPropCounterexample {fc : FrameClass} {χ : Chronicle Atom}
+private lemma eliminateGPropCounterexample {fc : FrameClass} {χ : Chronicle Atom}
     (h_c0 : χ.c0 fc)
     (x y : Rat) (α : Formula Atom)
     (h_x_mem : x ∈ χ.dom) (_h_y_mem : y ∈ χ.dom)
@@ -506,7 +506,7 @@ lemma eliminateGPropCounterexample {fc : FrameClass} {χ : Chronicle Atom}
 **H-propagation counterexample elimination**: Mirror for backward direction.
 Given H(α) ∈ f(x) and α ∉ f(y) for adjacent y < x, insert z between y and x.
 -/
-lemma eliminateHPropCounterexample {fc : FrameClass} {χ : Chronicle Atom}
+private lemma eliminateHPropCounterexample {fc : FrameClass} {χ : Chronicle Atom}
     (h_c0 : χ.c0 fc)
     (x y : Rat) (α : Formula Atom)
     (h_x_mem : x ∈ χ.dom) (_h_y_mem : y ∈ χ.dom)

@@ -65,6 +65,17 @@ equal to `Evaluate`'s `imp` case).
 `a ⇨ b = b || !a` while `BoolEvaluate` uses `!a || b`; these are propositionally equal by
 `Bool.or_comm` but not definitionally. The proof uses `simp` with `himp_eq` and commutativity.
 
+## Roadmap
+
+- `baValid_imp_tautology : BAValid φ → Tautology φ` — direct route via
+  `prop_soundness_tautology ∘ CPL.hilbert_alg_complete.mpr`; requires importing
+  `Semantics/Algebra/HilbertCompleteness.lean` and
+  `Metalogic/Soundness.lean`.
+- `tautology_iff_baValid : Tautology φ ↔ BAValid φ` — follows from
+  `prop_completeness_iff_tautology.trans CPL.hilbert_alg_complete`; restricted to
+  `BAValid.{u, u}` (same universe for `Atom` and `H`); a universe-polymorphic form
+  may need a `ULift`-based argument.
+
 ## References
 
 * [A. Rasiowa, *An Algebraic Approach to Non-Classical Logics*][Rasiowa1974] — the algebraic

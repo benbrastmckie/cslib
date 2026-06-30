@@ -132,7 +132,7 @@ into the single authoritative narrative tying `Evaluate`, `BoolEvaluate`, and `A
 
 ---
 
-### Phase 2: Add cross-reference docstrings in Bool.lean and Algebra.lean [IN PROGRESS]
+### Phase 2: Add cross-reference docstrings in Bool.lean and Algebra.lean [COMPLETED]
 
 **Goal**: Point the two host files at the canonical story and explicitly name the DPLL/SAT decision
 path, leaving a forward-looking anchor for Matthew Doty's DPLL/Tseitin work.
@@ -168,7 +168,7 @@ path, leaving a forward-looking anchor for Matthew Doty's DPLL/Tseitin work.
 
 ---
 
-### Phase 3: (OPTIONAL / CONDITIONAL) Add algebraic-validity convenience lemma(s) [NOT STARTED]
+### Phase 3: (OPTIONAL / CONDITIONAL) Add algebraic-validity convenience lemma(s) [PARTIAL]
 
 **Goal**: Surface classical validity in algebraic vocabulary by adding `baValid_imp_tautology`, and —
 only if a clean completeness round-trip exists — the full `tautology_iff_baValid`. This phase is

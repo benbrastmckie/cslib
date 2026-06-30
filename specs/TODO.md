@@ -1,5 +1,5 @@
 ---
-next_project_number: 430
+next_project_number: 431
 ---
 
 # TODO
@@ -11,10 +11,11 @@ next_project_number: 430
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,299,317,321,386,387,396,400,404,406,407,415,419,425,426,427,428 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,181,215,300,301,375,389,390,405,409,429 | 36,37,180,299,317,387,404,407,425,426,427,428 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,241,275,391,392,413 | 39,40,321,375,386,387,389,429 | Bimodal Porting, Foundations, Temporal Logic, ... |
-| 4 | 393,412,414 | 41,181,215,241,275,300,301,321,386,391 | Foundations, Code Hygiene, PL-Hygiene |
+| 1 | 36,37,180,226,299,321,386,387,396,400,404,406,407,415,419,425,426,427,428,430 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,181,215,300,301,317,390,405,409,429 | 36,37,180,299,387,404,407,425,426,427,428,430 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 3 | 41,241,275,375,389 | 39,40,317,429 | Bimodal Porting, Foundations, Temporal Logic, ... |
+| 4 | 391,392,412,413,414 | 41,181,215,241,275,300,301,321,375,386,387,389 | Foundations, Code Hygiene, PL-Docs, ... |
+| 5 | 393 | 386,391 | PL-Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -62,6 +63,11 @@ next_project_number: 430
   └─ 414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p
 406 [NOT STARTED] — NEW from post-merge vet (sess_1782671052_6af6a1). Fix 33 pre-exis
 
+### PL Tableau
+
+430 [RESEARCHED] — Prove the atom-persistence / upward-closure structural lemma for 
+  └─ 317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
+
 ### PL Hygiene
 
 386 [NOT STARTED] — [Refreshed by post-merge vet sess_1782671052_6af6a1; supersedes t
@@ -76,10 +82,6 @@ next_project_number: 430
 389 [NOT STARTED] — [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAl
   └─ 391 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Remove internal task/process ja
 390 [NOT STARTED] — [Refreshed post-merge vet.] The Propositional section (~ORGANISAT
-
-### PL Tableau
-
-317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
 
 ### PL Semantics
 
@@ -100,6 +102,79 @@ next_project_number: 430
 415 [RESEARCHED] — Audit how the structure-first propositional base (MPL/IPL/CPL: pr
 
 ## Tasks
+
+### 430. Prove atom persistence upward closure for intexpan
+- **Effort**: 2-3 hours
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Topic**: PL-Tableau
+- **Dependencies**: None
+- **Research**: [317_propositional_tableau_completeness/reports/02_spawn-analysis.md]
+
+**Description**: Prove the atom-persistence / upward-closure structural lemma for open branches produced by `intExpandBranches`, and use it to discharge the two validity-bridge sorries in task 317.
+
+## Context
+
+Task 317 has two remaining validity-bridge sorries:
+- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:112` (`intuitionisticTableau_complete`): needs `IValid φ → ∀ b, IForces (intExtractValuation b) (fun _ => False) 0 φ`.
+- `Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:109` (`minimalTableau_complete`): needs `MValid φ → ∀ b, IForces (intExtractValuation b) (minBranchBotForces b) 0 φ`.
+
+Instantiating `IValid`/`MValid` at the branch model (World = Nat, val = intExtractValuation b) requires supplying upward-closure of `intExtractValuation b`:
+  `T(atom p)@w ∈ b ∧ w ≤ w' → T(atom p)@w' ∈ b`
+
+This atom-persistence property is NOT in `IBranchSaturation` (which covers compound-formula saturation only). The orchestrator handoff `.orchestrator-handoff.json` identifies this as blocker B3.
+
+## What needs to be proved
+
+Prove `intExpandBranches_openBranch_atom_persist` (or equivalent): if `intExpandBranches ... = .openBranch b`, then `intExtractValuation b` is upward-closed under the appropriate world accessibility relation.
+
+Key structural facts to use:
+- `propagatePersistence` (Rules.lean) copies ALL T(α) from parent world w to fresh child world w' when F(φ→ψ)@w fires (`intFImpRule`). So atoms propagate from direct parents to direct children.
+- `applyAllTImpRules`/`applyPersistenceFixpoint` (Expansion.lean) run the T(φ→ψ) modus-ponens fixpoint across the edge list. Atoms are not directly handled here, but the T(→) consequences of atom propagation are.
+- The explicit edge list `edges : IEdges` tracks `(child, parent)` pairs; `isAccessible edges w w'` is the reachability relation.
+
+## Design decision the implementer must make
+
+There are two viable paths:
+
+**Path A (recommended if provable)**: Prove upward-closure under `≤` on Nat. This is the current countermodel's Preorder. Requires showing that whenever `T(atom p)@w ∈ b` and `w' > w` is a world on the branch, then `T(atom p)@w' ∈ b`. This follows from transitivity of `propagatePersistence` across the world tree, because new worlds are assigned strictly increasing labels and each inherits all T(α) from its parent. Verify with `lean_goal` at the sorry site whether this holds for the expansion invariant.
+
+**Path B (fallback)**: If `≤` on Nat does not match the edge-list accessibility (sibling worlds may share `≤` ordering but not be accessible to each other), define the countermodel Kripke accessibility using `isAccessible edges` instead of `≤`. This requires:
+- Defining a custom `Preorder` on Nat for the specific branch `b` and its edge list (or passing the edge list from `openBranch_countermodel` down to the validity bridges).
+- Proving `intExtractValuation b` is upward-closed under `isAccessible edges`.
+- Updating `openBranch_countermodel` to pass the edge list and use `isAccessible`-based Preorder.
+
+## Exposition target
+
+Expose the atom-persistence fact as ONE of:
+1. A new field `sat_atom_persist` in `IBranchSaturation` (simplest if it can be proved from the expansion).
+2. A standalone `private lemma intExpandBranches_openBranch_atom_persist` in `Scheme.lean`.
+3. A wrapper helper `intExtractValuation_uc` proved inline at the sorry sites.
+
+The chosen form must be sufficient to supply the upward-closure argument to `IValid`/`MValid` instantiation in both `intuitionisticTableau_complete` and `minimalTableau_complete`.
+
+## Files to modify
+
+- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` — add the persistence structural lemma (or new `IBranchSaturation` field + proof in `intExpandBranches_openBranch_sat`).
+- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean` — fill sorry at ~L112.
+- `Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean` — fill sorry at ~L109.
+- Possibly `Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean` and/or `Rules.lean` if invariants need to be stated there.
+
+## Non-goals
+
+- Do NOT touch the T(imp) sorry at Scheme.lean:330 (task 317's remaining obligation).
+- Do NOT touch the `intExpandBranches_openBranch_sat` leaf sorries at Scheme.lean:481/536/550 (task 317's remaining obligation).
+- Do NOT touch `*/Soundness.lean` (task 316 territory).
+
+## Verification
+
+After implementation:
+- `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Completeness` and `…Minimal.Completeness` succeed with the two validity-bridge sorries gone.
+- `grep -n sorry Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean` returns nothing.
+- `grep -n sorry Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean` returns nothing.
+- Build remains green (no regressions in Scheme.lean or Soundness files).
+
+---
 
 ### 429. Prove ramsey recurrentclass lemma for buchicongruence prefix runs
 - **Effort**: 3-4 hours
@@ -644,7 +719,7 @@ SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/41
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: PL-Tableau
-- **Dependencies**: Task 316, Task 323, Task 363, Task 369
+- **Dependencies**: Task 316, Task 323, Task 363, Task 369, Task 430
 - **Plan**: [317_propositional_tableau_completeness/plans/02_tableau-completeness-unified.md]
 
 **Description**: Fill the propositional tableau completeness sorries (7 real sorries; soundness is already sorry-free after task 316). The open obligations are the truth-lemma / countermodel-extraction proofs in the three Completeness modules. Classical (Tableau/Classical/Completeness.lean): classicalExpandBranches_hintikka (line ~462) -- note the module's separate build break (bad Mathlib lemma ref + unsolved goals) is repaired first under task 363. Intuitionistic (Tableau/Intuitionistic/Completeness.lean): intTruthLemma (line ~89), intuitionisticOpenBranch_countermodel (~98), intuitionisticTableau_complete (~112). Minimal (Tableau/Minimal/Completeness.lean): minTruthLemma (~168), minOpenBranch_countermodel (~179), minimalTableau_complete (~190). Core technique: Hintikka-set argument -- a saturated open branch satisfies Hintikka conditions, from which a countermodel is extracted (a Boolean valuation for classical; a finite Kripke model for intuitionistic/minimal) and a truth lemma by formula induction matches forced/not-forced to the signed formulas at each world. Because task 369 parameterizes the intuitionistic and minimal tableau over (closurePred, modelBot), the int and min cases should be discharged ONCE as a single parametric truth-lemma/countermodel pair rather than duplicated. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 316, 323, 363, 369.

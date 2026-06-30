@@ -1,5 +1,5 @@
 {
-  "next_project_number": 430,
+  "next_project_number": 431,
   "active_projects": [
     {
       "project_number": 406,
@@ -277,7 +277,8 @@
         316,
         323,
         363,
-        369
+        369,
+        430
       ],
       "parent_task": 298,
       "previous_status": "implementing",
@@ -1616,6 +1617,26 @@
       "artifacts": [],
       "dependencies": [],
       "parent_task": 301
+    },
+    {
+      "project_number": 430,
+      "project_name": "prove_atom_persistence_upward_closure_for_intexpan",
+      "status": "researched",
+      "task_type": "cslib",
+      "description": "Prove the atom-persistence / upward-closure structural lemma for open branches produced by `intExpandBranches`, and use it to discharge the two validity-bridge sorries in task 317.\n\n## Context\n\nTask 317 has two remaining validity-bridge sorries:\n- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:112` (`intuitionisticTableau_complete`): needs `IValid φ → ∀ b, IForces (intExtractValuation b) (fun _ => False) 0 φ`.\n- `Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:109` (`minimalTableau_complete`): needs `MValid φ → ∀ b, IForces (intExtractValuation b) (minBranchBotForces b) 0 φ`.\n\nInstantiating `IValid`/`MValid` at the branch model (World = Nat, val = intExtractValuation b) requires supplying upward-closure of `intExtractValuation b`:\n  `T(atom p)@w ∈ b ∧ w ≤ w' → T(atom p)@w' ∈ b`\n\nThis atom-persistence property is NOT in `IBranchSaturation` (which covers compound-formula saturation only). The orchestrator handoff `.orchestrator-handoff.json` identifies this as blocker B3.\n\n## What needs to be proved\n\nProve `intExpandBranches_openBranch_atom_persist` (or equivalent): if `intExpandBranches ... = .openBranch b`, then `intExtractValuation b` is upward-closed under the appropriate world accessibility relation.\n\nKey structural facts to use:\n- `propagatePersistence` (Rules.lean) copies ALL T(α) from parent world w to fresh child world w' when F(φ→ψ)@w fires (`intFImpRule`). So atoms propagate from direct parents to direct children.\n- `applyAllTImpRules`/`applyPersistenceFixpoint` (Expansion.lean) run the T(φ→ψ) modus-ponens fixpoint across the edge list. Atoms are not directly handled here, but the T(→) consequences of atom propagation are.\n- The explicit edge list `edges : IEdges` tracks `(child, parent)` pairs; `isAccessible edges w w'` is the reachability relation.\n\n## Design decision the implementer must make\n\nThere are two viable paths:\n\n**Path A (recommended if provable)**: Prove upward-closure under `≤` on Nat. This is the current countermodel's Preorder. Requires showing that whenever `T(atom p)@w ∈ b` and `w' > w` is a world on the branch, then `T(atom p)@w' ∈ b`. This follows from transitivity of `propagatePersistence` across the world tree, because new worlds are assigned strictly increasing labels and each inherits all T(α) from its parent. Verify with `lean_goal` at the sorry site whether this holds for the expansion invariant.\n\n**Path B (fallback)**: If `≤` on Nat does not match the edge-list accessibility (sibling worlds may share `≤` ordering but not be accessible to each other), define the countermodel Kripke accessibility using `isAccessible edges` instead of `≤`. This requires:\n- Defining a custom `Preorder` on Nat for the specific branch `b` and its edge list (or passing the edge list from `openBranch_countermodel` down to the validity bridges).\n- Proving `intExtractValuation b` is upward-closed under `isAccessible edges`.\n- Updating `openBranch_countermodel` to pass the edge list and use `isAccessible`-based Preorder.\n\n## Exposition target\n\nExpose the atom-persistence fact as ONE of:\n1. A new field `sat_atom_persist` in `IBranchSaturation` (simplest if it can be proved from the expansion).\n2. A standalone `private lemma intExpandBranches_openBranch_atom_persist` in `Scheme.lean`.\n3. A wrapper helper `intExtractValuation_uc` proved inline at the sorry sites.\n\nThe chosen form must be sufficient to supply the upward-closure argument to `IValid`/`MValid` instantiation in both `intuitionisticTableau_complete` and `minimalTableau_complete`.\n\n## Files to modify\n\n- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` — add the persistence structural lemma (or new `IBranchSaturation` field + proof in `intExpandBranches_openBranch_sat`).\n- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean` — fill sorry at ~L112.\n- `Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean` — fill sorry at ~L109.\n- Possibly `Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean` and/or `Rules.lean` if invariants need to be stated there.\n\n## Non-goals\n\n- Do NOT touch the T(imp) sorry at Scheme.lean:330 (task 317's remaining obligation).\n- Do NOT touch the `intExpandBranches_openBranch_sat` leaf sorries at Scheme.lean:481/536/550 (task 317's remaining obligation).\n- Do NOT touch `*/Soundness.lean` (task 316 territory).\n\n## Verification\n\nAfter implementation:\n- `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Completeness` and `…Minimal.Completeness` succeed with the two validity-bridge sorries gone.\n- `grep -n sorry Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean` returns nothing.\n- `grep -n sorry Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean` returns nothing.\n- Build remains green (no regressions in Scheme.lean or Soundness files).",
+      "effort": "2-3 hours",
+      "parent_task": 317,
+      "topic": "PL-Tableau",
+      "dependencies": [],
+      "created": "2026-06-30T11:02:39Z",
+      "last_updated": "2026-06-30T11:02:39Z",
+      "artifacts": [
+        {
+          "type": "research",
+          "path": "specs/317_propositional_tableau_completeness/reports/02_spawn-analysis.md",
+          "summary": "Spawn analysis from parent task 317"
+        }
+      ]
     }
   ],
   "repository_health": {
@@ -1632,7 +1653,8 @@
     "pr",
     "agent-system",
     "Code Hygiene",
-    "Algebraic Semantics"
+    "Algebraic Semantics",
+    "PL-Tableau"
   ],
   "_last_updated": "2026-06-27T18:18:00Z"
 }

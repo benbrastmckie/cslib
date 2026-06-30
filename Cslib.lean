@@ -475,6 +475,7 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertLindenbaumRel
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertStrongCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.ImpConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.KripkeBridge
+public import Cslib.Logics.Propositional.Semantics.Algebra.LiftViaMorphism
 public import Cslib.Logics.Propositional.Semantics.Algebra.MplConservativeChain
 public import Cslib.Logics.Propositional.Semantics.Algebra.MplPointedConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.NonemptyLowerSet

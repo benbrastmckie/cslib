@@ -1,5 +1,5 @@
 ---
-next_project_number: 441
+next_project_number: 442
 ---
 
 # TODO
@@ -12,7 +12,7 @@ next_project_number: 441
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,180,226,299,317,390,396,400,404,407,415,419,434,438,440 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,181,215,300,375,389,405,409,430,436,439 | 36,37,180,299,317,404,407,434 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,181,215,300,375,389,405,409,430,436,439,441 | 36,37,180,299,317,404,407,434 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,241,275,391,392,426 | 39,40,389,436,439 | Bimodal Porting, Foundations, Temporal Logic, ... |
 | 4 | 393,427 | 391,426 | Temporal Logic, PL-Hygiene |
 | 5 | 425 | 427 | Temporal Logic |
@@ -40,6 +40,7 @@ next_project_number: 441
 
 299 [PLANNED] — Implement tableau decision procedure for basic modal logic K with
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
+  └─ 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 404 [RESEARCHED] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
   └─ 405 [NOT STARTED] — Simplify the proof machinery in the task-402 modal tableau soundn
@@ -108,6 +109,17 @@ next_project_number: 441
 438 [NOT STARTED] — Upstream the comment/docstring cleanups identified by the task 43
 
 ## Tasks
+
+### 441. Modal proposition native refactor
+- **Status**: [PLANNED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: Task 299
+- **Plan**: [441_modal_proposition_native_refactor/plans/01_modal-proposition-native-refactor.md]
+
+**Description**: Refactor Modal.Proposition from the Lukasiewicz encoding (primitives atom/bot/imp/box; and/or/neg/diamond encoded as nested imp) to NATIVE constructors atom/bot/imp/and/or/box/diamond (diamond primitive), mirroring the propositional layer (PL.Proposition has native and/or). Goal: highest-quality mathematical foundations — one tableau rule/decomposer per connective, structural-induction truth lemma, no unsound uniform-imp bridge lemmas, no view/strong-induction workarounds. Cascades through Modal/Basic.lean (datatype+Satisfies+complexity+axiom theorems), Modal/LogicalEquivalence.lean (Context), all Modal/Tableau/*, and Bimodal/Embedding/ModalEmbedding.lean. Design captured in plans/01 (was task 299 plan v6). Depends on task 299 (encoding-based tableau) landing first; this then re-bases it onto native constructors. Zero sorry/admit/new-axiom. Est 1,500-2,000 lines touched.
+
+---
 
 ### 440. Review pr leanprover cslib 648
 - **Status**: [NOT STARTED]

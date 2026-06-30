@@ -1,5 +1,5 @@
 {
-  "next_project_number": 441,
+  "next_project_number": 442,
   "active_projects": [
     {
       "project_number": 440,
@@ -1308,6 +1308,29 @@
           "summary": "Spawn analysis from parent task 426"
         }
       ]
+    },
+    {
+      "project_number": 441,
+      "project_name": "modal_proposition_native_refactor",
+      "status": "planned",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Refactor Modal.Proposition from the Lukasiewicz encoding (primitives atom/bot/imp/box; and/or/neg/diamond encoded as nested imp) to NATIVE constructors atom/bot/imp/and/or/box/diamond (diamond primitive), mirroring the propositional layer (PL.Proposition has native and/or). Goal: highest-quality mathematical foundations — one tableau rule/decomposer per connective, structural-induction truth lemma, no unsound uniform-imp bridge lemmas, no view/strong-induction workarounds. Cascades through Modal/Basic.lean (datatype+Satisfies+complexity+axiom theorems), Modal/LogicalEquivalence.lean (Context), all Modal/Tableau/*, and Bimodal/Embedding/ModalEmbedding.lean. Design captured in plans/01 (was task 299 plan v6). Depends on task 299 (encoding-based tableau) landing first; this then re-bases it onto native constructors. Zero sorry/admit/new-axiom. Est 1,500-2,000 lines touched.",
+      "created": "2026-06-30T20:48:25Z",
+      "last_updated": "2026-06-30T20:48:25Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/441_modal_proposition_native_refactor/plans/01_modal-proposition-native-refactor.md",
+          "type": "plan",
+          "summary": "Native-constructor refactor design (formerly task 299 plan v6)"
+        }
+      ],
+      "dependencies": [
+        299
+      ],
+      "parent_task": 299,
+      "sources": []
     }
   ],
   "repository_health": {

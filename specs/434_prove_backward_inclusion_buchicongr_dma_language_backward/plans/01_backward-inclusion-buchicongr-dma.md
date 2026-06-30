@@ -1,7 +1,7 @@
 # Implementation Plan: Task #434
 
 - **Task**: 434 - prove_backward_inclusion_buchicongr_dma_language_backward
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 1.5 hours
 - **Dependencies**: None (independent of forward direction; parent task 241)
 - **Research Inputs**: Task description (self-contained API map); spawn analysis `specs/241_mcnaughton_theorem/reports/03_spawn-analysis.md`; orchestrator handoff `specs/241_mcnaughton_theorem/.orchestrator-handoff.json`
@@ -70,7 +70,7 @@ No ROADMAP.md consultation requested (roadmap flag not set). This lemma is a sub
 
 Phases within the same wave can execute in parallel. This is a single-lemma proof, so all phases are strictly sequential.
 
-### Phase 1: Lemma scaffold and accept-set unfolding [NOT STARTED]
+### Phase 1: Lemma scaffold and accept-set unfolding [IN PROGRESS]
 
 **Goal**: Introduce the lemma with the correct signature, reduce the goal to proving `xs ∈ language na` from a destructured accept witness.
 

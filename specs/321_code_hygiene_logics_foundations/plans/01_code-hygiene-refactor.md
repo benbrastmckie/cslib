@@ -286,7 +286,7 @@ becomes its own submodule. Disjoint directory from Phases 4-5, so parallel with 
 
 ---
 
-### Phase 7: Split Temporal/.../Chronicle/PointInsertion.lean [NOT STARTED]
+### Phase 7: Split Temporal/.../Chronicle/PointInsertion.lean [IN PROGRESS]
 
 **Goal**: Reduce 2731 lines to a barrel; mirror of Phase 4. Runs after Phase 6 (same directory;
 this file is imported by the Temporal CounterexampleElimination barrel from Phase 6, whose path is

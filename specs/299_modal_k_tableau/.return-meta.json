@@ -1,19 +1,18 @@
 {
-  "status": "planned",
-  "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/299_modal_k_tableau/plans/06_modal-k-tableau-plan.md",
-      "summary": "Revised plan v6: refactor Modal.Proposition to native constructors and rebuild the K tableau (sound + complete + decidable) on the native datatype"
-    }
-  ],
-  "next_steps": "Run /implement 299 to execute the v6 plan starting at Phase A (native-datatype foundation).",
+  "status": "in_progress",
+  "started_at": "2026-06-30T00:00:00Z",
+  "artifacts": [],
+  "partial_progress": {
+    "stage": "initializing",
+    "details": "Agent started Phase A of task 299",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 0
+  },
   "metadata": {
-    "agent_type": "reviser-agent",
-    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
-    "phase_count": 6,
-    "estimated_hours": 12,
-    "reports_integrated": ["01_modal-k-tableau-research.md", "03_completeness-decomposition.md", "04_truth-lemma-architecture.md"],
-    "supersedes": "specs/299_modal_k_tableau/plans/05_modal-k-tableau-plan.md"
+    "session_id": "sess_phaseA_299",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
   }
 }

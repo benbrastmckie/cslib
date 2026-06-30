@@ -255,12 +255,14 @@ Phases within the same wave can execute in parallel. Phases 1 and 2 are independ
 
 **Tasks**:
 - [x] Create `Cslib/Logics/Temporal/Tableau/Completeness.lean`; define `extractModel` building a `TemporalModel Nat Atom` over recorded time points. *(completed: extractModel on Nat domain, extractAtom_iff, extractBot_false, openBranch_noBotPos, openBranch_noContradiction)*
+- [x] Prove `extractModel_atomPos_sat` (T(atom p)@t ∈ b → Satisfies extractModel at atom p) and `extractModel_atom_neg_notSat` (F(atom p)@t ∈ b → ¬Satisfies). *(completed in this cycle using List.findSome?_isSome_iff)*
 - [ ] Prove the `sat_*` saturation-invariant family with `*_not_expanded` companions for until/since/F/P. *(deviation: deferred to successor task — BLOCKED by FMP)*
-- [ ] Prove `temporalTruthLemma` (`truthLemma_pos`/`truthLemma_neg`) by induction on φ — including the **until/since eventuality-fulfilment cases**. *(deviation: propositional cases BLOCKED by proof complexity; until/since cases BLOCKED by FMP)*
-- [ ] Prove `openBranch_countermodel` and `temporalTableau_complete`. *(deviation: BLOCKED by truth lemma gaps)*
+- [ ] Prove `temporalTruthLemma` (`truthLemma_pos`/`truthLemma_neg`) by induction on φ — including the **until/since eventuality-fulfilment cases**. *(deviation: atom/bot base cases now supported; propositional-imp cases BLOCKED by proof complexity; until/since cases BLOCKED by FMP)*
+- [ ] Prove `openBranch_countermodel` and `temporalTableau_complete`. *(deviation: BLOCKED by (1) ordConstraints_strict design issue — lemma as stated is FALSE for branches with addPast; and (2) truth lemma gaps)*
 - [ ] Assemble `temporalTableau_decides` and the `Decidable (Valid(fc) φ)` instance. *(deviation: BLOCKED by completeness)*
 - [x] Resolve the `TimeOrdering` direct-successor vs transitive-closure question. *(deviation: documented in Completeness.lean: direct-successor semantics used; Phase 8 analysis confirms transitive closure not needed for the propositional layer)*
 - [x] **Zero-debt gate**: all blocked obligations documented in comments with structured lemma statements; zero sorry, zero new axioms. *(completed)*
+- [x] **New finding**: ordConstraints_strict was MISCLASSIFIED as proof-complexity. It is actually FALSE as stated: addPast t tNew adds (tNew, t) with tNew > t, violating the claimed ∀ (a,b) ∈ constraints, a < b. Documented in Completeness.lean.
 
 **Timing**: ~4 hours (~400 lines). Highest risk.
 

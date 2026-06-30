@@ -113,6 +113,14 @@ lemma extractModel_atom_sat_iff (b : TBranch Atom) (t : TimeIndex) (p : Atom) :
   simp only [Satisfies.atom_iff, extractModel]
 
 omit [Hashable Atom] in
+/-- T(atom p)@t on a branch implies atom p is satisfied in the extracted model at t. -/
+lemma extractModel_atomPos_sat (b : TBranch Atom) (t : TimeIndex) (p : Atom)
+    (hmem : (⟨.pos, .atom p, t⟩ : TSF Atom) ∈ b) :
+    Satisfies (extractModel b) t (.atom p) := by
+  rw [extractModel_atom_sat_iff, List.any_eq_true]
+  exact ⟨⟨.pos, .atom p, t⟩, hmem, by simp⟩
+
+omit [Hashable Atom] in
 /-- ⊥ is never satisfied in any extracted model, at any time. -/
 lemma extractModel_bot_false (b : TBranch Atom) (t : TimeIndex) :
     ¬ Satisfies (extractModel b) t .bot :=

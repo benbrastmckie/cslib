@@ -255,7 +255,7 @@ this file imports `PointInsertion`).
 
 ---
 
-### Phase 6: Split Temporal/.../Chronicle/CounterexampleElimination.lean [NOT STARTED]
+### Phase 6: Split Temporal/.../Chronicle/CounterexampleElimination.lean [COMPLETED]
 
 **Goal**: Reduce 3262 lines to a barrel; the "Recursive Walks" block (lines 521-1613, ~1090 lines)
 becomes its own submodule. Disjoint directory from Phases 4-5, so parallel with Wave 2.

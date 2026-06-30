@@ -546,6 +546,10 @@ public import Cslib.Logics.Temporal.Metalogic.Chronicle.ChronicleConstruction
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.ChronicleToCountermodel
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.ChronicleTypes
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.CounterexampleElimination
+public import Cslib.Logics.Temporal.Metalogic.Chronicle.CounterexampleElimination.Elimination
+public import Cslib.Logics.Temporal.Metalogic.Chronicle.CounterexampleElimination.MainElimination
+public import Cslib.Logics.Temporal.Metalogic.Chronicle.CounterexampleElimination.RecursiveWalks
+public import Cslib.Logics.Temporal.Metalogic.Chronicle.CounterexampleElimination.Structures
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.Frame
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.OrderedSeedConsistency
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.PointInsertion

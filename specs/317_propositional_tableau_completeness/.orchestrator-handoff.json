@@ -1,84 +1,52 @@
 {
-  "task_id": 317,
-  "task_slug": "propositional_tableau_completeness",
   "status": "partial",
-  "phases_completed": 5,
-  "phases_total": 6,
-  "session_id": "sess_1782793781_75c2f0",
-  "commit": "c648603b",
-  "sorry_inventory": {
-    "total_remaining": 5,
-    "by_file": {
-      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean": [
-        {
-          "location": "~line 330 (case imp.left in truthLemma)",
-          "description": "T(phi->psi)@w ∈ b → ∀ w' ≥ w, IForces w' phi → IForces w' psi. Requires (a) sat_timp (T-modus ponens saturation: T(phi→psi)@w ∈ b ∧ T(phi)@w' ∈ b ∧ w ≤ w' → T(psi)@w' ∈ b) AND (b) backward reasoning from IForces to branch membership (IForces val w' phi → T(phi)@w' ∈ b), which requires branch completeness (every formula has T or F label at every world). Neither is available.",
-          "blocker_category": "phase-6: intStepBranch internals + branch completeness"
-        },
-        {
-          "location": "~line 481 (intExpandBranches_openBranch_sat, fuel=0 base case)",
-          "description": "Leaf sorry: proving IBranchSaturation from fuel=0 openBranch return. Requires intStepBranch internals analysis.",
-          "blocker_category": "phase-6: intStepBranch internals"
-        },
-        {
-          "location": "~line 536 (intExpandBranches_openBranch_sat, intStepBranch=none case)",
-          "description": "Leaf sorry: intStepBranch bPers eH nwH = none implies IBranchSaturation bPers. Requires proving that intStepBranch returning none implies all compound formulas have been expanded.",
-          "blocker_category": "phase-6: intStepBranch internals"
-        },
-        {
-          "location": "~line 550 (intExpandBranches_openBranch_sat, notApplicable case)",
-          "description": "Leaf sorry: intStepBranch returning notApplicable implies IBranchSaturation. Same blocker as =none case.",
-          "blocker_category": "phase-6: intStepBranch internals"
-        }
-      ],
-      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean": [
-        {
-          "location": "~line 112 (intuitionisticTableau_complete)",
-          "description": "Bridge: IValid phi → IForces (intExtractValuation b) (fun _ => False) 0 phi. Requires upward-closure of intExtractValuation b (i.e., T(atom p)@w ∈ b ∧ w ≤ w' → T(atom p)@w' ∈ b). This is NOT generally true — the branch would need explicit atom persistence rules in the expansion. A separate saturation lemma for atom-persistence is needed.",
-          "blocker_category": "atom-persistence + IValid instantiation"
-        }
-      ],
-      "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean": [
-        {
-          "location": "~line 109 (minimalTableau_complete)",
-          "description": "Bridge: MValid phi → IForces (intExtractValuation b) (minBranchBotForces b) 0 phi. Same blocker as intuitionisticTableau_complete: requires upward-closure of intExtractValuation b and minBranchBotForces b.",
-          "blocker_category": "atom-persistence + MValid instantiation"
-        }
-      ]
-    }
-  },
-  "deliverables_completed": {
-    "A": {
-      "description": "Thread IBranchSaturation into truthLemma; discharge and/or compound cases",
-      "status": "completed",
-      "details": "Added hsat : IBranchSaturation Atom b to truthLemma signature. Filled: and (both directions via sat_tand/sat_fand + IH), or (both directions via sat_tor/sat_for_ + IH), imp F-direction (via sat_fimp + IH). Left imp T-direction as sorry. Updated openBranch_countermodel to obtain hsat from intExpandBranches_openBranch_sat and pass it."
-    },
-    "B": {
-      "description": "Close validity bridges in Completeness.lean files",
-      "status": "not_started",
-      "details": "Validity bridges require atom-persistence of intExtractValuation b (i.e., T(atom p)@w ∈ b ∧ w ≤ w' → T(atom p)@w' ∈ b). This is NOT a saturation condition in IBranchSaturation and requires analysing the expansion's applyPersistenceFixpoint / applyAllTImpRules to show it propagates atoms. This is a new lemma, not a simple wiring of existing results."
-    }
-  },
+  "summary": "Closed sorry at Scheme.lean:580 (the notApplicable contradiction case in intExpandBranches_openBranch_sat) by adding intStepBranch_result_ne_notApplicable to Expansion.lean. Build green (664 jobs, zero errors). 2 B2 sorries remain at lines 511 and 566; both require an expanded-set invariant not yet formalized.",
+  "phases_completed": 2,
+  "phases_total": 3,
+  "build_green": true,
+  "commit": "f74ae724",
   "blockers": [
     {
+      "id": "B2a",
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 511,
+      "case": "fuel=0 base case of intExpandBranches_openBranch_sat",
+      "root_cause": "With fuel=0, intExpandBranches returns the first open branch from the initial branches list WITHOUT calling intStepBranch. That branch may be completely unsaturated (e.g., {F(A→B)@0}). IBranchSaturation fails for compound formulas. The lemma is FALSE as stated for fuel=0 with compound initial branches.",
+      "fix": "Add precondition `fuel ≥ 1` to intExpandBranches_openBranch_sat (the call site in openBranch_countermodel uses fuel=2^(2*c+2)≥4, so Nat.one_le_pow applies). Alternatively, restructure the base case to note it is only reached with the empty expanded set, and derive a contradiction from the fact that the initial branch {F(φ)@0} always has fuel≥1 in the actual call."
+    },
+    {
+      "id": "B2b",
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 566,
+      "case": "intStepBranch bPers eH nwH = none implies IBranchSaturation",
+      "root_cause": "When intStepBranch returns none, every compound formula sf in bPers is in eH (since intApplyRuleFull sf ... ≠ .notApplicable for compound sf). But being in eH only means sf was previously expanded; it does NOT immediately imply the rule outputs are on bPers unless the expanded-set invariant is carried through the induction.",
+      "invariant_needed": "ExpandedSetInvariant(bPers, eH): for every sf ∈ eH, sf's rule outputs (per intApplyRuleFull) are on bPers. Specifically: T(φ∧ψ)@w ∈ eH → T(φ)@w ∈ bPers ∧ T(ψ)@w ∈ bPers; F(φ∧ψ)@w ∈ eH → F(φ)@w ∈ bPers ∨ F(ψ)@w ∈ bPers; T(φ∨ψ)@w ∈ eH → similar; F(φ∨ψ)@w ∈ eH → similar; F(φ→ψ)@w ∈ eH → ∃ w'≥w, T(φ)@w' ∈ bPers ∧ F(ψ)@w' ∈ bPers.",
+      "fix": "Strengthen intExpandBranches_openBranch_sat to add `hinv: ∀ b e, (b,e) ∈ branches.zip expandedSets → ExpandedSetInvariant b e` as precondition, and prove the invariant is maintained: (1) empty expanded set satisfies it vacuously; (2) when a linear rule fires on sf adding newForms, ExpandedSetInvariant(bPers++newForms, eH++[sf]) follows from ExpandedSetInvariant(bPers,eH) plus newForms containing the rule outputs; (3) persistence monotonically extends the branch, preserving the invariant; (4) for sat_fimp, the world ordering w≤w' follows from the world counter being strictly increasing (freshness lemmas already in Soundness.lean)."
+    },
+    {
       "id": "B1",
-      "description": "truthLemma T(imp) direction: requires branch completeness (T or F label at every formula/world pair) to go from IForces to branch membership. Standard saturation is insufficient.",
-      "severity": "high",
-      "next_action": "Either (a) prove branch completeness from the expansion, or (b) reformulate the truth lemma to only prove the F-direction (which suffices for openBranch_countermodel), or (c) use a different proof strategy for T(imp) that avoids backward membership reasoning."
-    },
-    {
-      "id": "B2",
-      "description": "intExpandBranches_openBranch_sat leaf sorries (481/536/550): require proving IBranchSaturation from intStepBranch returning none/notApplicable. Need to analyse intStepBranch's expansion logic.",
-      "severity": "high",
-      "next_action": "Read intStepBranch definition and prove that returning none/notApplicable implies sat_tand/sat_fand/sat_tor/sat_for_/sat_fimp conditions."
-    },
-    {
-      "id": "B3",
-      "description": "Validity bridge: intExtractValuation b is NOT upward-closed in general. IValid phi cannot be instantiated at branch model without atom persistence.",
-      "severity": "medium",
-      "next_action": "Prove atom persistence from the expansion: the expansion's applyAllTImpRules or applyPersistenceFixpoint must propagate T(atom p)@w to T(atom p)@w' for w ≤ w'. Add this to IBranchSaturation as sat_atom_persist, or prove it as a separate structural lemma."
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 330,
+      "case": "truthLemma inductive case",
+      "root_cause": "Separate blocker; not B2.",
+      "fix": "See prior handoff notes."
     }
   ],
-  "next_action": "Phase 6: Analyse intStepBranch internals to close leaf sorries in intExpandBranches_openBranch_sat (blocker B2). This is the most direct path to closing the sat_tand/sat_fand/sat_tor/sat_for_/sat_fimp conditions. Once those leaf sorries are closed, revisit blockers B1 (T-imp) and B3 (validity bridge).",
-  "context_budget_note": "Deliverable A completed in ~11 tool calls. Context remaining. Validity bridge (Deliverable B) is a deeper blocker than anticipated — requires atom-persistence analysis of the expansion loop, not merely wiring existing results."
+  "sorry_inventory": [
+    "Scheme.lean:330 (truthLemma — B1)",
+    "Scheme.lean:511 (intExpandBranches_openBranch_sat — B2a fuel-0 base case)",
+    "Scheme.lean:566 (intExpandBranches_openBranch_sat — B2b intStepBranch=none case)",
+    "Completeness.lean:106 (intuitionisticTableau_complete bridge)",
+    "Minimal/Completeness.lean:104 (minimalTableau_complete bridge)"
+  ],
+  "progress_this_dispatch": [
+    "CLOSED: Scheme.lean:580 (notApplicable contradiction) via intStepBranch_result_ne_notApplicable in Expansion.lean",
+    "COMMITTED: f74ae724 task 317 phase-6: close notApplicable sorry"
+  ],
+  "next_action_hint": "For B2a (line 511): add `(hfuel : 1 ≤ fuel)` precondition to intExpandBranches_openBranch_sat; update the call site in openBranch_countermodel (line 749) with `Nat.one_le_pow 2 _ (by norm_num)`. For B2b (line 566): define ExpandedSetInvariant predicate, add it as precondition, then at line 566 apply the invariant for the given sf to directly extract the rule outputs from bPers. The linearResult and branchingResult cases give the witnesses directly; the sat_fimp case needs w≤nwH from freshness lemmas (see intApplyRuleFull_some_info in Soundness.lean for the world-ordering argument).",
+  "key_files": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean (freshness/world-ordering lemmas)"
+  ]
 }

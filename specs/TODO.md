@@ -48,7 +48,7 @@ next_project_number: 433
 426 [PLANNED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
   └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
     └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
-427 [PLANNED] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
+427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
   └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model (see above)
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
@@ -227,12 +227,13 @@ After implementation:
 ---
 
 ### 427. Temporal tableau propositional truth lemma
-- **Status**: [PLANNED]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
 - **Research**: [427_temporal_tableau_propositional_truth_lemma/reports/01_propositional-truth-lemma.md]
 - **Plan**: [427_temporal_tableau_propositional_truth_lemma/plans/01_propositional-truth-lemma.md]
+- **Summary**: [427_temporal_tableau_propositional_truth_lemma/summaries/01_partial-summary.md]
 
 **Description**: [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_propositional (atom/bot/imp cases) in Cslib/Logics/Temporal/Tableau/Completeness.lean sorry-free. This obligation is independently provable (no FMP, no dependence on the ordConstraints fix), but exceeds a single agent context window when attempted naively. KEY: the imp case requires generalized STRUCTURAL induction on the formula giving subformula induction hypotheses — NOT induction on the IsPropositional proof (which only yields IHs for the immediate subformulas phi/psi). Adapt the propositional truth lemma from Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean to the time-indexed temporalHintikkaSet/TBranch setting. Reuse already-proved base cases: extractModel_atomPos_sat, extractModel_atom_neg_notSat, extractModel_bot_false. A 1150-line prior attempt (with the structural difficulty diagnosed) is preserved at specs/301_temporal_tableau/.wip-Completeness-truthlemma-attempt.lean for reference. Start from green commit 7f052834. Scope strictly to this one lemma. Independent of tasks 423 and 425.
 

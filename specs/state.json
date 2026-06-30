@@ -1,5 +1,5 @@
 {
-  "next_project_number": 428,
+  "next_project_number": 430,
   "active_projects": [
     {
       "project_number": 406,
@@ -559,8 +559,8 @@
       "created": "2026-06-19T05:20:19Z",
       "last_updated": "2026-06-30T10:53:45Z",
       "dependencies": [
-        423,
-        424
+        428,
+        429
       ],
       "next_artifact_number": 5,
       "artifacts": [
@@ -1534,7 +1534,7 @@
       "completion_summary": "Reconciled the two decidability routes: kept tableau as the sole canonical Decidable instance per logic; demoted the FMP instances to named noncomputable defs (decidableDerivableIntPropAxiomFMP / ...MinPropAxiomFMP). Added 'two routes, distinct roles' cross-referenced docstrings across all 4 module headers (IntDecidability, MinDecidability, Tableau Int/Min DecisionProcedure), citing the 317 sorries and FMP axiom profile; infra factoring deferred (disjoint carriers, cross-referenced only). FMP defs sorry-free {propext,Classical.choice,Quot.sound}; tableau instances carry pre-existing 317 sorryAx (documented). 0 new sorry/axiom; the 4 modules build green (773-job scoped build). NOTE: repo-wide build is red due to UNRELATED task-419 WIP (Cslib.lean:94 imports untracked ProofSystemMorphism.lean)."
     },
     {
-      "project_number": 423,
+      "project_number": 428,
       "project_name": "expose_buchicongruence_eqvcls_monoid_and_idempotent_lemmas",
       "status": "researched",
       "task_type": "cslib",
@@ -1554,7 +1554,7 @@
       ]
     },
     {
-      "project_number": 424,
+      "project_number": 429,
       "project_name": "prove_ramsey_recurrentclass_lemma_for_buchicongruence_prefix_runs",
       "status": "researched",
       "task_type": "cslib",
@@ -1563,7 +1563,7 @@
       "parent_task": 241,
       "topic": "Temporal Logic",
       "dependencies": [
-        423
+        428
       ],
       "created": "2026-06-30T10:57:07Z",
       "last_updated": "2026-06-30T10:57:07Z",

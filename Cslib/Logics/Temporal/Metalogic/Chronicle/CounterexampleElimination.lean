@@ -134,7 +134,7 @@ theorem exists_rat_lt_finset (fs : Finset Rat) :
 /--
 There exists a rational strictly between x and y that is NOT in a finite set fs.
 -/
-theorem exists_rat_between_not_in_finset (fs : Finset Rat) (x y : Rat) (hxy : x < y) :
+private theorem exists_rat_between_not_in_finset (fs : Finset Rat) (x y : Rat) (hxy : x < y) :
     ∃ z : Rat, x < z ∧ z < y ∧ z ∉ fs := by
   set T := fs.filter (fun s => x < s ∧ s < y) with hT_def
   by_cases hT : T.Nonempty
@@ -217,7 +217,7 @@ theorem BurgessR3Maximal_sdc {A B C : Set (Formula Atom)}
 /--
 **BurgessR3Maximal excludes ⊥ when B is consistent**.
 -/
-theorem BurgessR3Maximal_bot_not_mem {A B C : Set (Formula Atom)}
+private theorem BurgessR3Maximal_bot_not_mem {A B C : Set (Formula Atom)}
     (_h_r3m : BurgessR3Maximal A B C)
     (h_cons : Temporal.SetConsistent B) :
     Formula.bot ∉ B := by
@@ -230,7 +230,7 @@ Helper: for adjacent pairs in a chronicle satisfying c2', when inserting a new p
 that splits an existing adjacent pair, the old adjacent pairs that don't involve the
 split are preserved.
 -/
-theorem c2'_preserved_on_old_adjacent {χ χ' : Chronicle Atom}
+private theorem c2'_preserved_on_old_adjacent {χ χ' : Chronicle Atom}
     (h_c2' : χ.c2')
     (h_f_agrees : ∀ x ∈ χ.dom, χ'.f x = χ.f x)
     (h_g_agrees : ∀ a b, a ∈ χ.dom → b ∈ χ.dom → χ'.g a b = χ.g a b)
@@ -247,7 +247,7 @@ theorem c2'_preserved_on_old_adjacent {χ χ' : Chronicle Atom}
 **BurgessR3Maximal from hContent subset (backward direction)**:
 If hContent(C) ⊆ A (i.e., H(φ) ∈ C → φ ∈ A), then ∃ B, BurgessR3Maximal(A, B, C).
 -/
-theorem burgessR3Maximal_from_h_content_sub {A C : Set (Formula Atom)}
+private theorem burgessR3Maximal_from_h_content_sub {A C : Set (Formula Atom)}
     (h_mcs_A : Temporal.SetMaximalConsistent A) (h_mcs_C : Temporal.SetMaximalConsistent C)
     (h_hc : hContent C ⊆ A) :
     ∃ B : Set (Formula Atom), BurgessR3Maximal A B C := by
@@ -296,7 +296,7 @@ theorem burgessR3Maximal_from_h_content_sub {A C : Set (Formula Atom)}
 and a C5 counterexample (x, xi, eta), extend the chronicle by adding a new point y
 with eta in f'(y).
 -/
-lemma eliminateC5Counterexample {χ : Chronicle Atom}
+private lemma eliminateC5Counterexample {χ : Chronicle Atom}
     (h_c0 : χ.c0)
     (ce : C5Counterexample χ)
     :
@@ -331,7 +331,7 @@ lemma eliminateC5Counterexample {χ : Chronicle Atom}
 /--
 **Lemma 2.10'** (C5' Counterexample Elimination): Mirror of Lemma 2.10 for Since.
 -/
-lemma eliminateC5'Counterexample {χ : Chronicle Atom}
+private lemma eliminateC5'Counterexample {χ : Chronicle Atom}
     (h_c0 : χ.c0)
     (ce : C5'Counterexample χ) :
     ∃ χ' : Chronicle Atom,

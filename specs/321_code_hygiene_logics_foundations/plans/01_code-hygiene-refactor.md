@@ -119,7 +119,7 @@ split, with zero import changes.
 
 ---
 
-### Phase 2: Privatize internal helpers in the Temporal Chronicle mega-files [NOT STARTED]
+### Phase 2: Privatize internal helpers in the Temporal Chronicle mega-files [COMPLETED]
 
 **Goal**: Same as Phase 1 for the Temporal Chronicle pair; disjoint directory, runs in parallel.
 

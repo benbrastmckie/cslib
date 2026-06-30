@@ -1,0 +1,11 @@
+{
+  "status": "implemented",
+  "phase": 3,
+  "summary": "Created Cslib/Logics/Modal/Metalogic/InterSystem/LiftViaMorphism.lean — Modal lift as Deriv.map corollary. Defines modalSig (closures = [box]), toDeriv/ofDeriv equivalence (5 constructors; necessitation ↔ close box), ofDeriv_toDeriv/toDeriv_ofDeriv round-trips, modalEquiv, modalHom (g=id, clMap = ⟨m,hm,rfl⟩), toDeriv_liftDerivation (HEq), and Derivable_mono_via_morphism. Build: 0 errors, 0 warnings. Axioms: propext + Quot.sound only (no sorryAx). lake lint: no new warnings. Lifting.lean and all downstream files untouched.",
+  "artifacts": [
+    "/home/benjamin/Projects/cslib/Cslib/Logics/Modal/Metalogic/InterSystem/LiftViaMorphism.lean"
+  ],
+  "blockers": [],
+  "key_technique": "Lean 4 definitional proof irrelevance collapses the h ▸ e = e cast in ofDeriv's close arm automatically; rcases List.mem_singleton.mp hm with rfl substitutes m := Proposition.box without residual Eq.rec overhead. Round-trip simp calls close directly.",
+  "note": "Do NOT edit Cslib.lean (mk_all) or git commit — orchestrator handles those centrally. Phase 4 (Bimodal frame lift) is next; its closures list will be [box, allFuture, swapTemporal] following the same pattern."
+}

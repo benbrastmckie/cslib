@@ -117,15 +117,15 @@
     {
       "project_number": 388,
       "project_name": "termination_deadcode_and_heartbeat_cleanup",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "cslib",
       "title": "Remove dead normalization track and heartbeat/simp debt in Termination.lean",
       "description": "[Reconciled by task 395, post-merge.] Tier-2. NaturalDeduction/Normalization/Termination.lean + Reduction.lean cleanup. The redexWeight + normMeasure fuel/measure track is ALREADY GONE (delivered by merged task 382). `normalize`/`normalizeAux` are NOW LIVE (task 398 added efq arms) — do NOT delete them. Remaining dead PRIVATE decls (0 callers, safe to delete): normalizeAux_fixpoint (Termination.lean:305), subs_maximalFormulas_mem (:492), subsOne_new_redex_complexity_lt (:775). Then clear residual lint debt: unused simp args, no-op/dead tactics, long lines, flexible-simp; remove or comment-justify maxHeartbeats overrides; decompose remaining heavy proofs. SEQUENCE AFTER task 398 (it is actively editing Termination.lean). Source: §4.2 + 395.",
       "created": "2026-06-28T12:53:27Z",
-      "last_updated": "2026-06-28T12:53:27Z",
+      "last_updated": "2026-06-30T04:42:31Z",
       "next_artifact_number": 1,
       "artifacts": [],
-      "session_id": "sess_1782651207_1e893c_388",
+      "session_id": "sess_1782793893_c01ba9_388",
       "dependencies": [
         395,
         398
@@ -974,24 +974,33 @@
     {
       "project_number": 403,
       "project_name": "rename_specs_384_to_402",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "meta",
       "description": "Rename specs/384_modal_tableau_soundness_gap_redesign/ to specs/402_modal_tableau_soundness_gap_redesign/ to match task 402 (the soundness-gap redesign was renumbered 384->402 during the task-364 merge to avoid colliding with main task 384 tableau_completeness_sorries). git mv the directory and update task 402 artifact paths in specs/state.json (reports/01_soundness-gap-redesign.md, plans/01_per-branch-accessibility.md). Grep for any remaining 384_modal_tableau references. Bookkeeping only; no code changes.",
       "dependencies": [],
       "parent_task": 402,
-      "last_updated": "2026-06-28T18:30:31Z",
-      "topic": "Project Management"
+      "last_updated": "2026-06-30T04:42:35Z",
+      "topic": "Project Management",
+      "session_id": "sess_1782793893_c01ba9_403"
     },
     {
       "project_number": 404,
       "project_name": "forall2_mathlib_cleanup_soundness",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "description": "Replace the local private re-proofs of List.Forall2 lemmas in Cslib/Logics/Modal/Tableau/Soundness.lean (forall2_append_aux, forall2_drop_aux, forall2_take_aux, forall2_of_zip_mem) with canonical Mathlib lemmas. These were added during task 402 because Mathlib.Data.List.Forall2 is not transitively imported by Cslib.Init. Either add the Mathlib import and switch call sites to library lemmas (List.Forall2.append/length_eq/etc.), or document why the local helpers are kept. Verify scoped + full lake build green, zero sorry, lint-style pass. Low-priority polish; helpers are correct as-is.",
       "dependencies": [],
       "parent_task": 402,
-      "last_updated": "2026-06-28T18:30:31Z",
-      "topic": "Modal Logic"
+      "last_updated": "2026-06-30T03:49:59Z",
+      "topic": "Modal Logic",
+      "session_id": "sess_1782791125_e726d9",
+      "artifacts": [
+        {
+          "path": "specs/404_forall2_mathlib_cleanup_soundness/reports/01_forall2-mathlib-cleanup.md",
+          "type": "report",
+          "summary": "Verified lemma mapping table, exact edits, build verification result."
+        }
+      ]
     },
     {
       "project_number": 405,
@@ -1407,7 +1416,7 @@
       "project_number": 419,
       "project_name": "generalize_derivation_lifting_intersystem",
       "title": "Generalize derivation lifting to a cross-logic InferenceSystem layer (spike)",
-      "status": "planned",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "parent_task": 415,
@@ -1429,9 +1438,9 @@
         }
       ],
       "created": "2026-06-29T22:35:38Z",
-      "last_updated": "2026-06-30T00:59:32Z",
-      "blockers": null,
-      "updated": "2026-06-30T00:16:05Z",
+      "last_updated": "2026-06-30T05:11:13Z",
+      "blockers": "SPIKE verdict: cross-logic axiom-subsumption derivation lift is NOT cleanly abstractable as specified. Forward-direction lifts for PL+Modal+Bimodal DID land as Deriv.map corollaries on the shared ProofSystemMorphism scaffold (committed phases 1-4, sorry-free). The full payload resists: (1) Bimodal's subsumption axis is frame-class inclusion (DerivationTree.lift {fc1<=fc2}, Derivation.lean:92) over a single concrete Axiom inductive gated by minFrameClass<=fc (Derivation.lean:53,59), NOT axiom-predicate inclusion like Modal/PL -- so no single instantiable result covers all three; (2) Bimodal backward map (ofDeriv/bimodalEquiv) requires reconstructing erased Axiom+h_fc gate data and could only be written with sorry (WIP build failed, sorry at LiftViaMorphism.lean:217,224); (3) cross-syntax liftDerivationWith is fresh-atom unembedding (Bimodal/Metalogic/ConservativeExtension/Lifting.lean:636), a different operation, not an axiom subsumption. Per SPIKE rule: documented, stopped, no sorry. WIP refactor reverted; committed phases 1-4 retained.",
+      "updated": "2026-06-30T05:11:13Z",
       "session_id": "sess_1782772776_909541_419"
     },
     {

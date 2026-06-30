@@ -1,0 +1,17 @@
+{
+  "status": "implemented",
+  "summary": "Phase 4 complete. New file Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/LiftViaMorphism.lean builds 0 errors / 0 warnings / 0 sorries. Main deliverables: (1) `bimodalSig fc` with Ax = gate-subtype and closures = [box, allFuture, swapTemporal]; (2) `toDeriv` forward map; (3) `bimodalHom h_le` with g=id, axMap=le_trans reindexing, clMap=identity; (4) `toDeriv_lift` theorem (HEq corollary). Axiom check: only standard Lean axioms propext+Quot.sound, no sorryAx.",
+  "artifacts": [
+    "Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/LiftViaMorphism.lean"
+  ],
+  "blockers": [
+    "ofDeriv / bimodalEquiv NOT provided: the backward map requires case-splitting on hm : m ∈ [Formula.box, allFuture, swapTemporal] (Prop-valued List.Mem) to produce a Type u-valued DerivationTree. This is large elimination of a non-singleton Prop inductive to Type u, which Lean 4's kernel forbids. Classical.choice workaround yields a noncomputable def but makes round-trip proofs unprovable. Fix: revise ProofSig.closures to use a Type-valued tag (e.g., Fin n → F → F) instead of List (F → F)."
+  ],
+  "notes": [
+    "Universe restriction: bimodalSig only works for Atom : Type (universe 0) because ProofSig.Ax : F → Type 0, while Axiom : Formula Atom → Type u requires u=0.",
+    "Keyword issue: DerivationTree.axiom constructor requires guillemet-quoted `«axiom»` in induction case names.",
+    "Proof technique for modus_ponens: simp fully reduces subderivation equality; only the context Gamma vs Gamma.map id needs congr 1 + List.map_id.",
+    "bimodalHom.clMap = identity because bimodalSig.closures is independent of fc."
+  ],
+  "what_remains": "Phase 5 (liftDerivationWith cross-syntax morphism) and barrel update (lake exe mk_all --module) + git commit."
+}

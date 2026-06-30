@@ -1,0 +1,25 @@
+{
+  "status": "done",
+  "file": "Cslib/Logics/Propositional/Semantics/Algebra/LiftViaMorphism.lean",
+  "build": "lake build Cslib.Logics.Propositional.Semantics.Algebra.LiftViaMorphism: 681/681 OK",
+  "changes": [
+    "plSig: replaced `closures := []` with `Closure := PEmpty` and `closureOp := PEmpty.elim`",
+    "ofDeriv close case: `| .close _ hm _ _ => False.elim (List.not_mem_nil hm)` -> `| .close i _ _ => i.elim`",
+    "toDeriv_ofDeriv close case: `| close _ hm _ _ => exact absurd hm List.not_mem_nil` -> `| close i _ _ => exact i.elim`",
+    "plHom clMap: `fun _ hm => False.elim (List.not_mem_nil hm)` -> `fun i => i.elim`",
+    "Docstrings updated to say `Closure = PEmpty` instead of `closures = []`"
+  ],
+  "verify": {
+    "toDeriv": "axioms: [] (clean)",
+    "ofDeriv": "axioms: [] (clean)",
+    "ofDeriv_toDeriv": "axioms: [propext] (clean)",
+    "toDeriv_ofDeriv": "axioms: [propext] (clean)",
+    "plHom": "axioms: [] (clean)",
+    "plEquiv": "axioms: [sorryAx] -- PRE-EXISTING from import chain (task-317 placeholder in Tableau/Intuitionistic/Scheme.lean, not introduced here)",
+    "toDeriv_liftDerivationTree": "axioms: [propext, Quot.sound] (clean)",
+    "derivable_mono_via_morphism": "axioms: [propext, Quot.sound] (clean)"
+  },
+  "sorry_count": 0,
+  "new_axioms": false,
+  "blockers": []
+}

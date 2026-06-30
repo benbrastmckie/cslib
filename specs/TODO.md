@@ -37,13 +37,13 @@ next_project_number: 423
 299 [PLANNED] — Implement tableau decision procedure for basic modal logic K with
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
-404 [NOT STARTED] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
+404 [RESEARCHED] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
   └─ 405 [NOT STARTED] — Simplify the proof machinery in the task-402 modal tableau soundn
-419 [PLANNED] — [Spawned from task 415 audit — supports the structure-first visio
+419 [BLOCKED] — [Spawned from task 415 audit — supports the structure-first visio
 
 ### Project Management
 
-403 [NOT STARTED] — Rename specs/384_modal_tableau_soundness_gap_redesign/ to specs/4
+403 [PLANNED] — Rename specs/384_modal_tableau_soundness_gap_redesign/ to specs/4
 
 ### Temporal Logic
 
@@ -66,7 +66,7 @@ next_project_number: 423
   └─ 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
 387 [NOT STARTED] — [Refreshed post-merge vet.] DECISION REQUIRES UPSTREAM AGREEMENT.
   └─ 392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls (see above)
-388 [NOT STARTED] — [Reconciled by task 395, post-merge.] Tier-2. NaturalDeduction/No
+388 [PLANNED] — [Reconciled by task 395, post-merge.] Tier-2. NaturalDeduction/No
 413 [NOT STARTED] — [Split from task 278.] Simplify Propositional/ proofs that use ma
 
 ### PL Docs
@@ -134,7 +134,7 @@ next_project_number: 423
 ---
 
 ### 419. Generalize derivation lifting to a cross-logic InferenceSystem layer (spike)
-- **Status**: [PLANNED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 417
@@ -339,17 +339,18 @@ SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/41
 ---
 
 ### 404. Forall2 mathlib cleanup soundness
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
+- **Research**: [404_forall2_mathlib_cleanup_soundness/reports/01_forall2-mathlib-cleanup.md]
 
 **Description**: Replace the local private re-proofs of List.Forall2 lemmas in Cslib/Logics/Modal/Tableau/Soundness.lean (forall2_append_aux, forall2_drop_aux, forall2_take_aux, forall2_of_zip_mem) with canonical Mathlib lemmas. These were added during task 402 because Mathlib.Data.List.Forall2 is not transitively imported by Cslib.Init. Either add the Mathlib import and switch call sites to library lemmas (List.Forall2.append/length_eq/etc.), or document why the local helpers are kept. Verify scoped + full lake build green, zero sorry, lint-style pass. Low-priority polish; helpers are correct as-is.
 
 ---
 
 ### 403. Rename specs 384 to 402
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: meta
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -489,7 +490,7 @@ SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/41
 ---
 
 ### 388. Remove dead normalization track and heartbeat/simp debt in Termination.lean
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: PL-Hygiene
 - **Dependencies**: Task 395, Task 398

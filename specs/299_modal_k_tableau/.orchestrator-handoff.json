@@ -1,24 +1,23 @@
 {
+  "status": "planned",
   "task_number": 299,
-  "status": "partial",
-  "phases_completed": 5,
-  "phases_total": 7,
-  "summary": "Soundness (phases 1-4) GREEN. Completeness phase 5 ~90% done: extractModel, extractModel_* helpers, openBranch_noTBot, openBranch_noContradiction, hintikka_box_pos, hintikka_box_neg, modalTruthLemma, and modalOpenBranch_countermodel all compile. Zero sorries, zero axioms. BLOCKED on hintikka_imp_pos and hintikka_imp_neg (15 build errors) due to a proof-architecture flaw, not mechanical errors.",
-  "build_command": "lake build Cslib.Logics.Modal.Tableau.Completeness",
-  "current_build": "RED (15 errors, all in hintikka_imp_pos lines ~224-270 and hintikka_imp_neg lines ~304-324)",
-  "zero_sorry_check": "PASSED (grep for sorry/admit/axiom in Cslib/Logics/Modal/Tableau/ is empty)",
-  "green_and_committed": "hintikka_box_pos fixed and committed (8ccdf6e9). Foundational closure helpers (openBranch_noTBot/noContradiction) fixed by correcting b.findContradiction -> Branch.findContradiction b (Branch is an abbrev for List, so dot-notation misresolved to the non-existent List.findContradiction).",
-  "dispatch_history": "4 implementation dispatches all ended on environmental failures (1 process-exit, 2 context overflows, 1 API stall), each while EXPLORING the closure/rule API. Arming agents with the extracted API (closure instance + Lukasiewicz classifiers) produced real committed progress (foundational helpers + box_pos). The remaining two imp lemmas are blocked by design, not by capability.",
-  "blockers": [
+  "summary": "Revised plan v6 for task 299 (modal K tableau). Foundational architecture change (user-confirmed): refactor Modal.Proposition from Lukasiewicz-encoded (atom/bot/imp/box only, with and/or/neg/diamond encoded as nested imp) to NATIVE constructors atom/bot/imp/and/or/box/diamond (diamond primitive), mirroring the propositional layer. This dissolves the completeness blocker at its source: the false uniform-imp bridge lemmas are deleted, tableau rules collapse to one decomposer/rule per connective with no nested-imp matching, and the truth lemma uses plain structural induction instead of strong-induction-on-sizeOf. Six phases (A-F), each one agent run building to green with zero sorry/admit/new-axiom. v5 strategy carries over; every signature changes with the datatype.",
+  "artifacts": [
     {
-      "blocker": "hintikka_imp_pos / hintikka_imp_neg are unprovable AS STATED for Lukasiewicz-encoded connectives",
-      "root_cause": "and/or/neg are encoded as nested imp: and = (phi->(psi->bot))->bot, or = (phi->bot)->psi, neg = phi->bot. modalApplyOne's tryAllPropRules pattern-matches the ENCODED connective with rule order [andPos,andNeg,orPos,orNeg,impPos,impNeg,negPos,negNeg]. So T((phi->(psi->bot))->bot) matches andPos FIRST and produces linear [pos phi w, pos psi w]. But hintikka_imp_pos claims conclusion 'neg a w in b OR pos c w in b' with a = phi->(psi->bot), c = bot. The and-rule output yields neither neg a nor pos c, so the bridge lemma is FALSE for conjunction/disjunction/negation-encoded inputs. modalTruthLemma calls hintikka_imp_pos/neg uniformly for EVERY Proposition.imp, including these encodings, so the factoring is unsound.",
-      "verified_mechanical_fixes_for_the_genuine_proper-imp_subcases": [
-        "Per-case simp sets are MISSING Option.getD_some, so hcond stays a stuck 'match (if ...).fst with ...'. VERIFIED (via lean_multi_attempt): 'simp only [Option.getD_some, reduceIte, List.mem_singleton] at hcond' reduces hcond to '∀ sf', sf' = SignedFormula.neg X w -> sf' in b', then 'exact Or.inl (hcond _ rfl)' closes the bot.atom case.",
-        "List.mem_cons_self is applied as 'List.mem_cons_self _ _' (two explicit args) but in this toolchain it takes NO explicit args (it IS the term 'a in a :: l'). Replace every 'List.mem_cons_self _ _' with 'List.mem_cons_self' in both imp lemmas."
-      ]
+      "type": "plan",
+      "path": "specs/299_modal_k_tableau/plans/06_modal-k-tableau-plan.md",
+      "summary": "v6 native-constructor refactor plan: Phase A datatype+Satisfies+complexity+LogicalEquivalence+ModalEmbedding; Phase B tableau Defs/Rules/Branch/Closure; Phase C Soundness+SoundnessStep; Phase D Saturation+LoopInduction; Phase E Completeness (native structural truth lemma); Phase F decides+barrel+CI."
     }
   ],
-  "recommended_resume": "Needs PROOF-ARCHITECTURE work, NOT another blind implementation dispatch. (1) /research 299 narrowly: how does the propositional classicalTruthLemma (Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean, lines 84-1267) handle Lukasiewicz-encoded and/or/neg in its imp induction case? It is ~1180 lines precisely because it does NOT factor into uniform imp bridge lemmas. (2) /revise the plan to either (a) restate hintikka_imp_pos/neg to return the and/or/neg decomposition when the imp is an encoding and the proper-imp conclusion otherwise, updating modalTruthLemma to consume it, OR (b) inline the case analysis into modalTruthLemma's imp case mirroring the propositional proof. (3) Apply the two verified mechanical fixes to the genuine proper-implication sub-cases regardless. Then Phase 6 (LoopInduction.lean modalExpandBranches_hintikka invariant) and Phase 7 (modalTableau_complete / modalTableau_decides barrel + add Completeness to Cslib barrel via 'lake exe mk_all --module') remain.",
-  "hard_requirements": "Zero sorry, zero new axioms. Currently satisfied."
+  "phases": [
+    {"id": "A", "name": "Native datatype + Satisfies + complexity + downstream foundation", "status": "not_started"},
+    {"id": "B", "name": "Tableau Defs/Rules/Closure/Branch on native constructors", "status": "not_started"},
+    {"id": "C", "name": "Soundness + SoundnessStep", "status": "not_started"},
+    {"id": "D", "name": "Saturation + LoopInduction", "status": "not_started"},
+    {"id": "E", "name": "Completeness truth lemma (native structural induction)", "status": "not_started"},
+    {"id": "F", "name": "Decision procedure + barrel + CI", "status": "not_started"}
+  ],
+  "supersedes": "specs/299_modal_k_tableau/plans/05_modal-k-tableau-plan.md",
+  "reports_integrated": ["01_modal-k-tableau-research.md", "03_completeness-decomposition.md", "04_truth-lemma-architecture.md"],
+  "next_action_hint": "Run /implement 299 to execute the v6 plan starting at Phase A (the native-datatype foundation must build green — including Bimodal/Embedding/ModalEmbedding.lean — before any Tableau work)."
 }

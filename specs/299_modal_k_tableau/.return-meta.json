@@ -1,25 +1,19 @@
 {
   "status": "planned",
-  "started_at": "2026-06-30T20:05:00Z",
-  "completed_at": "2026-06-30T20:20:00Z",
   "artifacts": [
     {
-      "path": "specs/299_modal_k_tableau/plans/05_modal-k-tableau-plan.md",
       "type": "plan",
-      "summary": "v4 revision: restructures the blocked completeness truth lemma to strong induction on sizeOf (report 04), deleting the unprovable imp bridge lemmas; preserves all GREEN soundness and completeness work."
+      "path": "specs/299_modal_k_tableau/plans/06_modal-k-tableau-plan.md",
+      "summary": "Revised plan v6: refactor Modal.Proposition to native constructors and rebuild the K tableau (sound + complete + decidable) on the native datatype"
     }
   ],
-  "next_steps": "Run /implement 299 to execute the revised plan, beginning with Phase 5c (modalTruthLemma via strong induction). Consider --hard given prior deflection.",
+  "next_steps": "Run /implement 299 to execute the v6 plan starting at Phase A (native-datatype foundation).",
   "metadata": {
-    "session_id": "sess_1782849708_71fa88",
     "agent_type": "reviser-agent",
     "delegation_path": ["orchestrator", "revise", "reviser-agent"],
-    "task_number": 299,
-    "task_type": "cslib",
-    "phase_count": 10,
-    "estimated_hours": 6,
-    "preserved_phases": 7,
-    "revised_phases": "Phase 5c (truth lemma restructured from structural to strong induction on sizeOf with inlined connective case analysis; imp bridge lemmas deleted); Phases 6-7 carried forward refined.",
-    "reports_integrated": ["reports/04_truth-lemma-architecture.md"]
+    "phase_count": 6,
+    "estimated_hours": 12,
+    "reports_integrated": ["01_modal-k-tableau-research.md", "03_completeness-decomposition.md", "04_truth-lemma-architecture.md"],
+    "supersedes": "specs/299_modal_k_tableau/plans/05_modal-k-tableau-plan.md"
   }
 }

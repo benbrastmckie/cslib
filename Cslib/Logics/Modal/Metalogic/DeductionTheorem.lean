@@ -70,7 +70,7 @@ noncomputable def deductionTheorem
     (d : DerivationTree Axioms (A :: Γ) B) :
     DerivationTree Axioms Γ (A → B) := by
   haveI : HasMinimalAxioms Axioms := ⟨h_implyK, h_implyS⟩
-  exact list_deriv_to_tree
+  exact listDerivToTree
     (algebraic_has_deduction_theorem
       (modal_deriv_iff_algebraic.mp ⟨d⟩))
 
@@ -81,6 +81,9 @@ noncomputable def deductionTheorem
 Thin `removeAll`-aware wrapper over the seam-routed `deductionTheorem`. Kept because
 removing-all-occurrences is the shape required by Lindenbaum-style elimination in its
 1 external caller: `Modal/Metalogic/Completeness.lean:542`. -/
+-- `_hA : A ∈ Γ'` is retained to match the generic-MCS helper signature even though
+-- the implementation routes through `deductionTheorem` and doesn't use it directly.
+@[nolint unusedArguments]
 noncomputable def deductionWithMem
     {Axioms : Proposition Atom → Prop}
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))

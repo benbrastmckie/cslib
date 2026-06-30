@@ -198,6 +198,9 @@ noncomputable def deductionTheoremFc {fc : FrameClass}
 A thin `removeAll`-aware wrapper over the seam-routed `deductionTheoremFc`,
 kept because removing-all-occurrences is the shape required by
 Lindenbaum/consistency elimination in callers (`DenseCompleteness.lean`, `MCS.lean`, etc.). -/
+-- `_hA : A ∈ Γ'` is retained to match the generic-MCS helper signature even though
+-- the implementation routes through `deductionTheoremFc` and doesn't use it directly.
+@[nolint unusedArguments]
 noncomputable def deductionWithMemFc {fc : FrameClass}
     (Γ' : Context Atom) (A φ : Formula Atom)
     (d : DerivationTree fc Γ' φ) (_hA : A ∈ Γ') :

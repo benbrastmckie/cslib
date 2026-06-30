@@ -192,7 +192,7 @@ def temporalExpandBranches
     | some (b, ord) => .openBranch b ord
     | none => .closed
   | fuel' + 1 =>
-    let rec processNext
+    let rec @[nolint docBlame] processNext
         (pending : List (TBranch Atom))
         (pendingExp : List (TBranch Atom))
         (pendingOrd : List TimeOrdering)

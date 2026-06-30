@@ -109,6 +109,9 @@ the seam-routed `deductionTheorem`, kept because removing-all-occurrences is the
 shape required by Lindenbaum/consistency elimination in callers
 (`Core/MaximalConsistent.lean`, `Core/MCSProperties.lean`, etc.).
 -/
+-- `_hA : A ∈ Γ'` is retained to match the generic-MCS helper signature even though
+-- the implementation routes through `deductionTheorem` and doesn't use it directly.
+@[nolint unusedArguments]
 noncomputable def deductionWithMem {fc : FrameClass} (Γ' : Context Atom)
     (A φ : Formula Atom)
     (h : DerivationTree fc Γ' φ) (_hA : A ∈ Γ') :

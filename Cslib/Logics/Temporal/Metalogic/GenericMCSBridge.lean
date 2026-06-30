@@ -18,11 +18,11 @@ at `S := Temporal.HilbertBX`.
 
 ## Main Results
 
-- `deriv_tree_to_list`: `DerivationTree .Base Γ φ → (algDS).Deriv Γ φ`
+- `derivTreeToList`: `DerivationTree .Base Γ φ → (algDS).Deriv Γ φ`
   (forward, structural induction on the tree).
-- `unfold_listImp_in_tree`: `Γ ⊢ listImp Ψ φ → Ψ ⊆ Γ → Γ ⊢ φ`
+- `unfoldListImpInTree`: `Γ ⊢ listImp Ψ φ → Ψ ⊆ Γ → Γ ⊢ φ`
   (backward helper).
-- `list_deriv_to_tree`: `(algDS).Deriv Γ φ → DerivationTree .Base Γ φ`
+- `listDerivToTree`: `(algDS).Deriv Γ φ → DerivationTree .Base Γ φ`
   (backward direction).
 - `temporal_deriv_iff_algebraic`: bidirectional equivalence on derivability.
 - `temporal_setConsistent_iff_algebraic`: consistency equivalence.
@@ -41,7 +41,7 @@ at `S := Temporal.HilbertBX`.
 constructor maps to a corresponding algebraic derivation operation.
 
 **Backward** (algebraic → tree): extract `d₀ : [] ⊢ listImp Γ φ`, weaken to
-`Γ ⊢ listImp Γ φ`, then apply `unfold_listImp_in_tree` to eliminate each layer.
+`Γ ⊢ listImp Γ φ`, then apply `unfoldListImpInTree` to eliminate each layer.
 
 ## References
 
@@ -79,7 +79,7 @@ variable {Atom : Type*}
 - **temporal_necessitation**: G-necessitation gives `⊢ G(ψ)` in `HilbertBX`.
 - **temporal_duality**: construct the dual tree using `temporal_duality`.
 - **weakening**: monotone in the context. -/
-noncomputable def deriv_tree_to_list
+lemma derivTreeToList
     {Γ : Context Atom} {φ : Formula Atom}
     (d : DerivationTree FrameClass.Base Γ φ) :
     (temporalAlgDS (Atom := Atom)).Deriv Γ φ := by
@@ -134,7 +134,7 @@ produce `Γ ⊢ φ` by iterating modus ponens with assumption trees.
 
 Induction on `Ψ`: in the cons case, `a ∈ Γ` gives `Γ ⊢ a` by assumption,
 then MP reduces `listImp (a :: Ψ') φ` to `listImp Ψ' φ`. -/
-noncomputable def unfold_listImp_in_tree
+noncomputable def unfoldListImpInTree
     {Γ : Context Atom} {φ : Formula Atom}
     (Ψ : Context Atom)
     (d : DerivationTree FrameClass.Base Γ (listImp Ψ φ))
@@ -159,8 +159,8 @@ noncomputable def unfold_listImp_in_tree
 /-- Backward bridge: `temporalAlgDS.Deriv Γ φ → DerivationTree .Base Γ φ`.
 
 Extracts `d₀ : [] ⊢ listImp Γ φ` from the algebraic derivation, weakens to `Γ`,
-then applies `unfold_listImp_in_tree` to eliminate the list-implication layers. -/
-noncomputable def list_deriv_to_tree
+then applies `unfoldListImpInTree` to eliminate the list-implication layers. -/
+noncomputable def listDerivToTree
     {Γ : Context Atom} {φ : Formula Atom}
     (h : (temporalAlgDS (Atom := Atom)).Deriv Γ φ) :
     DerivationTree FrameClass.Base Γ φ := by
@@ -175,7 +175,7 @@ noncomputable def list_deriv_to_tree
   have d_weak : DerivationTree FrameClass.Base Γ (listImp Γ φ) :=
     DerivationTree.weakening [] Γ (listImp Γ φ) d₀ (List.nil_subset Γ)
   -- Eliminate listImp using assumption trees
-  exact unfold_listImp_in_tree Γ d_weak (fun _a ha => ha)
+  exact unfoldListImpInTree Γ d_weak (fun _a ha => ha)
 
 /-! ## Full Derivability Equivalence -/
 
@@ -188,9 +188,9 @@ theorem temporal_deriv_iff_algebraic
   unfold temporalDerivationSystem Temporal.Deriv
   constructor
   · intro ⟨d⟩
-    exact deriv_tree_to_list d
+    exact derivTreeToList d
   · intro h
-    exact ⟨list_deriv_to_tree h⟩
+    exact ⟨listDerivToTree h⟩
 
 /-! ## MCS Equivalences -/
 
@@ -283,7 +283,7 @@ instance (fc : FrameClass) :
 Structural induction on the tree. Propositional/temporal constructors all map
 cleanly; necessitation and duality constructors have empty context and use
 `listImp_axiom_k` to weaken to arbitrary `Γ`. -/
-noncomputable def deriv_tree_to_list_fc {fc : FrameClass}
+lemma derivTreeToListFc {fc : FrameClass}
     {Γ : Context Atom} {φ : Formula Atom}
     (d : DerivationTree fc Γ φ) :
     (temporalAlgDSFc fc (Atom := Atom)).Deriv Γ φ := by
@@ -322,7 +322,7 @@ noncomputable def deriv_tree_to_list_fc {fc : FrameClass}
 
 /-- Backward helper (fc-generalized): given `Γ ⊢[fc] listImp Ψ φ` and `Ψ ⊆ Γ`,
 produce `Γ ⊢[fc] φ` by iterating modus ponens with assumption trees. -/
-noncomputable def unfold_listImp_in_tree_fc {fc : FrameClass}
+noncomputable def unfoldListImpInTreeFc {fc : FrameClass}
     {Γ : Context Atom} {φ : Formula Atom}
     (Ψ : Context Atom)
     (d : DerivationTree fc Γ (listImp Ψ φ))
@@ -344,8 +344,8 @@ noncomputable def unfold_listImp_in_tree_fc {fc : FrameClass}
 /-- Backward bridge: `(temporalAlgDSFc fc).Deriv Γ φ → DerivationTree fc Γ φ`.
 
 Extracts `d₀ : [] ⊢[fc] listImp Γ φ` from the algebraic derivation, weakens to `Γ`,
-then applies `unfold_listImp_in_tree_fc`. -/
-noncomputable def list_deriv_to_tree_fc {fc : FrameClass}
+then applies `unfoldListImpInTreeFc`. -/
+noncomputable def listDerivToTreeFc {fc : FrameClass}
     {Γ : Context Atom} {φ : Formula Atom}
     (h : (temporalAlgDSFc fc (Atom := Atom)).Deriv Γ φ) :
     DerivationTree fc Γ φ := by
@@ -354,7 +354,7 @@ noncomputable def list_deriv_to_tree_fc {fc : FrameClass}
   have d₀ : DerivationTree fc [] (listImp Γ φ) := h.toDerivation
   have d_weak : DerivationTree fc Γ (listImp Γ φ) :=
     .weakening [] Γ (listImp Γ φ) d₀ (List.nil_subset Γ)
-  exact unfold_listImp_in_tree_fc Γ d_weak (fun _a ha => ha)
+  exact unfoldListImpInTreeFc Γ d_weak (fun _a ha => ha)
 
 /-! ## FC-Parameterized Full Equivalence -/
 
@@ -365,7 +365,7 @@ theorem temporal_deriv_iff_algebraic_fc {fc : FrameClass}
     Nonempty (DerivationTree fc Γ φ) ↔
     (temporalAlgDSFc fc (Atom := Atom)).Deriv Γ φ := by
   constructor
-  · intro ⟨d⟩; exact deriv_tree_to_list_fc d
-  · intro h; exact ⟨list_deriv_to_tree_fc h⟩
+  · intro ⟨d⟩; exact derivTreeToListFc d
+  · intro h; exact ⟨listDerivToTreeFc h⟩
 
 end Cslib.Logic.Temporal

@@ -18,11 +18,11 @@ at `S := Bimodal.HilbertTM`.
 
 ## Main Results
 
-- `deriv_tree_to_list`: `DerivationTree .Base Γ φ → (bimodalAlgDS).Deriv Γ φ`
+- `derivTreeToList`: `DerivationTree .Base Γ φ → (bimodalAlgDS).Deriv Γ φ`
   (forward, structural induction on the tree).
-- `unfold_listImp_in_tree`: `Γ ⊢ listImp Ψ φ → Ψ ⊆ Γ → Γ ⊢ φ`
+- `unfoldListImpInTree`: `Γ ⊢ listImp Ψ φ → Ψ ⊆ Γ → Γ ⊢ φ`
   (backward helper).
-- `list_deriv_to_tree`: `(bimodalAlgDS).Deriv Γ φ → DerivationTree .Base Γ φ`
+- `listDerivToTree`: `(bimodalAlgDS).Deriv Γ φ → DerivationTree .Base Γ φ`
   (backward direction).
 - `bimodal_deriv_iff_algebraic`: bidirectional equivalence on derivability.
 - `bimodal_setConsistent_iff_algebraic`: consistency equivalence.
@@ -44,7 +44,7 @@ non-propositional rules (`necessitation`, `temporal_necessitation`, `temporal_du
 only fire at empty context and bottom out at `InferenceSystem.DerivableIn HilbertTM`.
 
 **Backward** (algebraic → tree): extract `d₀ : [] ⊢ listImp Γ φ`, weaken to
-`Γ ⊢ listImp Γ φ`, then apply `unfold_listImp_in_tree` to eliminate each layer.
+`Γ ⊢ listImp Γ φ`, then apply `unfoldListImpInTree` to eliminate each layer.
 
 ## Design Note
 
@@ -91,7 +91,7 @@ variable {Atom : Type*}
 - **temporal_necessitation**: G-necessitation gives `⊢ Gψ` in `HilbertTM`.
 - **temporal_duality**: construct the dual tree using `temporal_duality`.
 - **weakening**: monotone in the context. -/
-noncomputable def deriv_tree_to_list
+lemma derivTreeToList
     {Γ : Bimodal.Context Atom} {φ : Bimodal.Formula Atom}
     (d : Bimodal.DerivationTree FrameClass.Base Γ φ) :
     (bimodalAlgDS (Atom := Atom)).Deriv Γ φ := by
@@ -158,7 +158,7 @@ produce `Γ ⊢ φ` by iterating modus ponens with assumption trees.
 
 Induction on `Ψ`: in the cons case, `a ∈ Γ` gives `Γ ⊢ a` by assumption,
 then MP reduces `listImp (a :: Ψ') φ` to `listImp Ψ' φ`. -/
-noncomputable def unfold_listImp_in_tree
+noncomputable def unfoldListImpInTree
     {Γ : Bimodal.Context Atom} {φ : Bimodal.Formula Atom}
     (Ψ : Bimodal.Context Atom)
     (d : Bimodal.DerivationTree FrameClass.Base Γ (listImp Ψ φ))
@@ -183,8 +183,8 @@ noncomputable def unfold_listImp_in_tree
 /-- Backward bridge: `bimodalAlgDS.Deriv Γ φ → DerivationTree .Base Γ φ`.
 
 Extracts `d₀ : [] ⊢ listImp Γ φ` from the algebraic derivation, weakens to `Γ`,
-then applies `unfold_listImp_in_tree` to eliminate the list-implication layers. -/
-noncomputable def list_deriv_to_tree
+then applies `unfoldListImpInTree` to eliminate the list-implication layers. -/
+noncomputable def listDerivToTree
     {Γ : Bimodal.Context Atom} {φ : Bimodal.Formula Atom}
     (h : (bimodalAlgDS (Atom := Atom)).Deriv Γ φ) :
     Bimodal.DerivationTree FrameClass.Base Γ φ := by
@@ -197,7 +197,7 @@ noncomputable def list_deriv_to_tree
   have d_weak : Bimodal.DerivationTree FrameClass.Base Γ (listImp Γ φ) :=
     Bimodal.DerivationTree.weakening [] Γ (listImp Γ φ) d₀ (List.nil_subset Γ)
   -- Eliminate listImp using assumption trees
-  exact unfold_listImp_in_tree Γ d_weak (fun _a ha => ha)
+  exact unfoldListImpInTree Γ d_weak (fun _a ha => ha)
 
 /-! ## Full Derivability Equivalence -/
 
@@ -210,9 +210,9 @@ theorem bimodal_deriv_iff_algebraic
   unfold bimodalDerivationSystem Bimodal.Deriv
   constructor
   · intro ⟨d⟩
-    exact deriv_tree_to_list d
+    exact derivTreeToList d
   · intro h
-    exact ⟨list_deriv_to_tree h⟩
+    exact ⟨listDerivToTree h⟩
 
 /-! ## MCS Equivalences -/
 
@@ -254,8 +254,8 @@ the algebraic seam, we need a `MinimalHilbert` instance parameterized by an arbi
    `temporal_duality`) require empty context, so in the forward bridge they are
    handled via `InferenceSystem.DerivableIn (HilbertTMFc fc) (□ψ)` etc., which
    are `Nonempty (DerivationTree fc [] ...)`.
-3. The backward bridge uses `unfold_listImp_in_tree_fc` — the fc-generalization
-   of the existing `unfold_listImp_in_tree`.
+3. The backward bridge uses `unfoldListImpInTreeFc` — the fc-generalization
+   of the existing `unfoldListImpInTree`.
 
 This gives `algebraic_has_deduction_theorem` for any `fc`, enabling
 `deductionTheorem {fc}` and `deductionWithMem {fc}` in `DeductionTheorem.lean`
@@ -311,7 +311,7 @@ end HilbertTMFcInstances
 Structural induction on the tree. Propositional/modal/temporal constructors all
 map cleanly; necessitation/duality constructors have empty context and use
 `listImp_axiom_k` to produce a result at the same empty context. -/
-noncomputable def deriv_tree_to_list_fc {fc : FrameClass}
+lemma derivTreeToListFc {fc : FrameClass}
     {Γ : Bimodal.Context Atom} {φ : Bimodal.Formula Atom}
     (d : Bimodal.DerivationTree fc Γ φ) :
     (bimodalAlgDSFc fc (Atom := Atom)).Deriv Γ φ := by
@@ -356,7 +356,7 @@ noncomputable def deriv_tree_to_list_fc {fc : FrameClass}
 
 /-- Backward helper (fc-generalized): given `Γ ⊢[fc] listImp Ψ φ` and `Ψ ⊆ Γ`,
 produce `Γ ⊢[fc] φ` by iterating modus ponens with assumption trees. -/
-noncomputable def unfold_listImp_in_tree_fc {fc : FrameClass}
+noncomputable def unfoldListImpInTreeFc {fc : FrameClass}
     {Γ : Bimodal.Context Atom} {φ : Bimodal.Formula Atom}
     (Ψ : Bimodal.Context Atom)
     (d : Bimodal.DerivationTree fc Γ (listImp Ψ φ))
@@ -379,8 +379,8 @@ noncomputable def unfold_listImp_in_tree_fc {fc : FrameClass}
 /-- Backward bridge: `(bimodalAlgDSFc fc).Deriv Γ φ → DerivationTree fc Γ φ`.
 
 Extracts `d₀ : [] ⊢[fc] listImp Γ φ` from the algebraic derivation, weakens to `Γ`,
-then applies `unfold_listImp_in_tree_fc`. -/
-noncomputable def list_deriv_to_tree_fc {fc : FrameClass}
+then applies `unfoldListImpInTreeFc`. -/
+noncomputable def listDerivToTreeFc {fc : FrameClass}
     {Γ : Bimodal.Context Atom} {φ : Bimodal.Formula Atom}
     (h : (bimodalAlgDSFc fc (Atom := Atom)).Deriv Γ φ) :
     Bimodal.DerivationTree fc Γ φ := by
@@ -389,7 +389,7 @@ noncomputable def list_deriv_to_tree_fc {fc : FrameClass}
   have d₀ : Bimodal.DerivationTree fc [] (listImp Γ φ) := h.toDerivation
   have d_weak : Bimodal.DerivationTree fc Γ (listImp Γ φ) :=
     Bimodal.DerivationTree.weakening [] Γ (listImp Γ φ) d₀ (List.nil_subset Γ)
-  exact unfold_listImp_in_tree_fc Γ d_weak (fun _a ha => ha)
+  exact unfoldListImpInTreeFc Γ d_weak (fun _a ha => ha)
 
 /-! ## FC-Parameterized Full Equivalence -/
 
@@ -400,7 +400,7 @@ theorem bimodal_deriv_iff_algebraic_fc {fc : FrameClass}
     Nonempty (Bimodal.DerivationTree fc Γ φ) ↔
     (bimodalAlgDSFc fc (Atom := Atom)).Deriv Γ φ := by
   constructor
-  · intro ⟨d⟩; exact deriv_tree_to_list_fc d
-  · intro h; exact ⟨list_deriv_to_tree_fc h⟩
+  · intro ⟨d⟩; exact derivTreeToListFc d
+  · intro h; exact ⟨listDerivToTreeFc h⟩
 
 end Cslib.Logic.Bimodal.Metalogic.Core

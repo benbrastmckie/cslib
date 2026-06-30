@@ -146,7 +146,7 @@ def modalExpandBranches
     | none => .closed
   | fuel' + 1 =>
     -- processNext: iterate through branches, finding the first open one to expand
-    let rec processNext
+    let rec @[nolint docBlame] processNext
         (pending : List (List (SignedFormula (Proposition Atom) WorldIndex)))
         (pendingExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
         (pendingAccs : List Accessibility)

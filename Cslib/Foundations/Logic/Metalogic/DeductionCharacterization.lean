@@ -24,7 +24,7 @@ This module proves the converse and closes the characterization loop.
 - `dt_implies_implyK`: From `HasDeductionTheorem D`, derive `⊢ φ → (ψ → φ)`.
 - `dt_implies_implyS`: From `HasDeductionTheorem D`, derive the S axiom.
 - `DtSystem`: Tag type for the inference system induced by a DT-system.
-- `dt_inference_system`: Inference system instance from `(D, hdt)`.
+- `dtInferenceSystem`: Inference system instance from `(D, hdt)`.
 - `DtSystem.dt_minimal_hilbert`: `MinimalHilbert` instance from any DT-system.
 - `dt_implies_minimal_hilbert`: DT-systems instance MinimalHilbert.
 - `minimal_hilbert_has_deduction_theorem`: MinimalHilbert implies DT (restates
@@ -111,7 +111,7 @@ structure DtSystem (D : DerivationSystem F) (hdt : HasDeductionTheorem D) : Type
 A derivation of `φ` in `DtSystem D hdt` is a proof of `D.Deriv [] φ`,
 lifted to `Type 0` via `PLift`. This makes
 `InferenceSystem.DerivableIn (DtSystem D hdt) φ ↔ D.Deriv [] φ`. -/
-instance dt_inference_system (D : DerivationSystem F) (hdt : HasDeductionTheorem D) :
+instance dtInferenceSystem (D : DerivationSystem F) (hdt : HasDeductionTheorem D) :
     InferenceSystem (DtSystem D hdt) F where
   derivation φ := PLift (D.Deriv [] φ)
 

@@ -47,6 +47,8 @@ instance instHImpLeftCommutative : LeftCommutative ((· ⇨ ·) : H → H → H)
 
 /-! ## Foldr lemmas -/
 
+/-- Right-fold of `⇨` over a multiset: `fld S t = s₁ ⇨ (s₂ ⇨ (... ⇨ t))`.
+Used to represent derivability of `t` from the multiset `S` in a Hilbert algebra. -/
 abbrev fld (S : Multiset H) (t : H) : H := Multiset.foldr (· ⇨ ·) t S
 
 theorem fld_zero (t : H) : fld (0 : Multiset H) t = t := Multiset.foldr_zero _ t
@@ -103,6 +105,9 @@ theorem fld_absorb (S T : Multiset H) (u : H)
 
 /-! ## Preorder and setoid on `Multiset H` -/
 
+/-- Pre-order on multisets: `fmeLe S T` holds when every element of `T` is derivable from `S`,
+i.e. `∀ t ∈ T, fld S t = ⊤`. This is the entailment relation that defines the Free Meet Extension
+quotient. -/
 def fmeLe (S T : Multiset H) : Prop := ∀ t ∈ T, fld S t = ⊤
 
 theorem fmeLe_refl (S : Multiset H) : fmeLe S S := by
@@ -120,8 +125,12 @@ theorem fmeLe_trans {S T U : Multiset H}
   intro u hu
   exact fld_absorb S T u (by rw [hTU u hu]; exact fld_top S) hST
 
+/-- Antisymmetric closure of `fmeLe`: `fmeEquiv S T` iff `S` and `T` derive each other.
+This is the equivalence relation used to form the Free Meet Extension quotient type. -/
 def fmeEquiv (S T : Multiset H) : Prop := fmeLe S T ∧ fmeLe T S
 
+/-- The setoid on `Multiset H` induced by `fmeEquiv`.
+Used as the quotient data for `FreeMeetExtension H`. -/
 def fmeSetoid (H : Type*) [HilbertAlgebra H] : Setoid (Multiset H) where
   r := fmeEquiv
   iseqv := ⟨fun S => ⟨fmeLe_refl S, fmeLe_refl S⟩,
@@ -149,6 +158,9 @@ theorem fmeLe_add_iff_map {U S T : Multiset H} :
 
 /-! ## FreeMeetExtension type -/
 
+/-- The Free Meet Extension of a Hilbert algebra `H`: the quotient of `Multiset H` by the
+entailment equivalence `fmeEquiv`. Elements represent (equivalence classes of) finite conjunctions
+of elements of `H`. -/
 def FreeMeetExtension (H : Type*) [HilbertAlgebra H] :=
   Quotient (fmeSetoid H)
 
@@ -156,6 +168,8 @@ namespace FreeMeetExtension
 
 variable {H : Type*} [HilbertAlgebra H]
 
+/-- The canonical quotient map: sends a multiset `S : Multiset H` to its equivalence class
+in `FreeMeetExtension H`. -/
 def mk (S : Multiset H) : FreeMeetExtension H :=
   Quotient.mk (fmeSetoid H) S
 
@@ -254,6 +268,8 @@ end FreeMeetExtension
 
 /-! ## Singleton embedding -/
 
+/-- Singleton embedding `a ↦ mk {a}` from `H` into `FreeMeetExtension H`.
+Sends each element to the class of the singleton multiset `{a}`. -/
 def freeMeetEmbed (a : H) : FreeMeetExtension H := FreeMeetExtension.mk {a}
 
 theorem freeMeetEmbed_eq_top_iff {a : H} :

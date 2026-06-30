@@ -11,9 +11,9 @@ next_project_number: 423
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,299,301,317,321,370,386,387,388,396,400,401,403,404,406,407,411,415,419 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
-| 2 | 39,40,181,215,300,375,389,390,405,409,421 | 36,37,180,299,317,387,404,407,411 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,275,391,392,413,422 | 39,40,321,370,375,386,387,389,421 | Bimodal Porting, Foundations, PL-Docs, ... |
+| 1 | 36,37,180,226,241,299,301,317,321,370,386,387,388,396,400,401,403,404,406,407,415,419,421 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 2 | 39,40,181,215,300,375,389,390,405,409,422 | 36,37,180,299,317,387,404,407,421 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 3 | 41,275,391,392,413 | 39,40,321,370,375,386,387,389 | Bimodal Porting, Foundations, PL-Docs, ... |
 | 4 | 393,412,414 | 41,181,215,241,275,300,301,321,386,391 | Foundations, Code Hygiene, PL-Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -103,11 +103,6 @@ next_project_number: 423
 407 [PR READY] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
   └─ 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 415 [RESEARCHED] — Audit how the structure-first propositional base (MPL/IPL/CPL: pr
-
-### Uncategorized
-
-411 [PLANNED] — Adopt the complete, CI-green IntDecidability.lean from branch ref
-  └─ 421 [NOT STARTED] — (PL-Metalogic: Complete the Min side of parent task 370) (see above)
 
 ## Tasks
 
@@ -244,7 +239,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 411. Adopt complete int decidability
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 - **Research**:

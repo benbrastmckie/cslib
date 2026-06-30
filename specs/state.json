@@ -1,5 +1,5 @@
 {
-  "next_project_number": 426,
+  "next_project_number": 428,
   "active_projects": [
     {
       "project_number": 406,
@@ -347,8 +347,8 @@
         }
       ],
       "dependencies": [
-        423,
-        424,
+        426,
+        427,
         425
       ],
       "parent_task": 296,
@@ -1576,7 +1576,7 @@
       ]
     },
     {
-      "project_number": 423,
+      "project_number": 426,
       "project_name": "temporal_tableau_ordconstraints_redesign",
       "status": "not_started",
       "task_type": "cslib",
@@ -1590,7 +1590,7 @@
       "parent_task": 301
     },
     {
-      "project_number": 424,
+      "project_number": 427,
       "project_name": "temporal_tableau_propositional_truth_lemma",
       "status": "not_started",
       "task_type": "cslib",

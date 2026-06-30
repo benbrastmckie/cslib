@@ -1,5 +1,5 @@
 ---
-next_project_number: 426
+next_project_number: 428
 ---
 
 # TODO
@@ -11,9 +11,9 @@ next_project_number: 426
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,299,317,321,386,387,396,400,404,406,407,415,419,423,423,424,424,425 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,181,215,241,300,301,375,389,390,405,409 | 36,37,180,299,317,387,404,407,423,424,425 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,275,391,392,413 | 39,40,321,375,386,387,389 | Bimodal Porting, Foundations, PL-Docs, ... |
+| 1 | 36,37,180,226,299,317,321,386,387,396,400,404,406,407,415,419,423,425,426,427 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,181,215,300,301,375,389,390,405,409,424 | 36,37,180,299,317,387,404,407,423,425,426,427 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 3 | 41,241,275,391,392,413 | 39,40,321,375,386,387,389,424 | Bimodal Porting, Foundations, Temporal Logic, ... |
 | 4 | 393,412,414 | 41,181,215,241,275,300,301,321,386,391 | Foundations, Code Hygiene, PL-Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -44,13 +44,14 @@ next_project_number: 426
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-423 [NOT STARTED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
-  └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
-  └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
-424 [NOT STARTED] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
-  └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller) (see above)
-  └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo (see above)
+423 [RESEARCHED] — Add named lemmas to Cslib/Computability/Languages/Congruences/Rig
+  └─ 424 [RESEARCHED] — Prove a named lemma (suggested name: `buchiCongr_recurrentClass` 
+    └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
+  └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
+426 [NOT STARTED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
+  └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo (see above)
+427 [NOT STARTED] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
   └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo (see above)
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
@@ -100,6 +101,26 @@ next_project_number: 426
 
 ## Tasks
 
+### 427. Temporal tableau propositional truth lemma
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_propositional (atom/bot/imp cases) in Cslib/Logics/Temporal/Tableau/Completeness.lean sorry-free. This obligation is independently provable (no FMP, no dependence on the ordConstraints fix), but exceeds a single agent context window when attempted naively. KEY: the imp case requires generalized STRUCTURAL induction on the formula giving subformula induction hypotheses — NOT induction on the IsPropositional proof (which only yields IHs for the immediate subformulas phi/psi). Adapt the propositional truth lemma from Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean to the time-indexed temporalHintikkaSet/TBranch setting. Reuse already-proved base cases: extractModel_atomPos_sat, extractModel_atom_neg_notSat, extractModel_bot_false. A 1150-line prior attempt (with the structural difficulty diagnosed) is preserved at specs/301_temporal_tableau/.wip-Completeness-truthlemma-attempt.lean for reference. Start from green commit 7f052834. Scope strictly to this one lemma. Independent of tasks 423 and 425.
+
+---
+
+### 426. Temporal tableau ordconstraints redesign
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: [Decomposed from task 301, blocker A.] Redesign the time-ordering scheme in the temporal tableau so the ordering invariants hold. The lemma ordConstraints_strict (Cslib/Logics/Temporal/Tableau/Completeness.lean) is FALSE as stated: addPast t tNew adds the constraint (tNew, t) with tNew > t, violating the claimed invariant (a,b) in constraints -> a < b. Choose and implement a correct scheme (e.g. topological sort of the constraint graph, or a signed/relative integer time domain) so that extractModel builds a well-founded strict order, then prove the corrected ordConstraints lemma sorry-free. Start from green commit 7f052834. Independent of tasks 424 and 425.
+
+---
+
 ### 425. Temporal tableau ptl fmp decidability
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
@@ -111,66 +132,26 @@ next_project_number: 426
 ---
 
 ### 424. Prove ramsey recurrentclass lemma for buchicongruence prefix runs
-temporal tableau propositional truth lemma
 - **Effort**: 3-4 hours
-- **Status**: [RESEARCHED
-NOT_STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
-cslib
 - **Topic**: Temporal Logic
-Temporal Logic
 - **Dependencies**: Task 423
+- **Research**: [241_mcnaughton_theorem/reports/02_spawn-analysis.md]
 
 **Description**: Prove a named lemma (suggested name: `buchiCongr_recurrentClass` or similar) in `Cslib/Computability/Languages/Congruences/BuchiCongruence.lean` (or `OmegaRegularLanguage.lean`) stating: for `[Finite State]` (where `State` is the state type of the NBA `na`) and any `xs : ωSequence Alphabet`, there exist quotient classes `a b : Quotient na.BuchiCongruence.eq` such that (1) `b * b = b` (b is idempotent), (2) `a * b = a`, and (3) `a ∈ (buchiCongr_DMA na).run xs |>.infOcc` (i.e., `∃ᶠ k in Filter.atTop, (buchiCongr_DMA na).run xs k = a`). The proof strategy mirrors `buchiFamily_cover` (BuchiCongruence.lean line 118) which already invokes `infinite_graph_ramsey`; the key adaptation is recasting the Ramsey argument on the prefix-class run `k ↦ ⟦xs.extract 0 k⟧` (which equals `(buchiCongr_DMA na).run xs k` by `buchiCongr_DMA_run_eq`). The idempotent-power collapse lemma from INFRA-1 is used to show that when the Ramsey witness period `p` yields `b = ⟦xs.extract i (i+p)⟧` with `b^m = b`, the prefix classes at positions `i + k*p` equal `a` for the stabilising prefix class `a = ⟦xs.extract 0 i⟧`. API references: `mem_infOcc` (InfOcc.lean:88), `frequently_in_finite_type` (InfOcc.lean:46), `infinite_graph_ramsey`, `buchiCongr_DMA_run_eq` (OmegaRegularLanguage.lean ~line 405). This lemma is the direct bridge enabling Phase 4 of task 241 to close `b ∈ infOcc` and complete the forward direction of `buchiCongr_DMA_language_eq`. CI must pass green.
-[Decomposed from task 301, blocker B.] Prove temporalTruthLemma_propositional (atom/bot/imp cases) in Cslib/Logics/Temporal/Tableau/Completeness.lean sorry-free. This obligation is independently provable (no FMP, no dependence on the ordConstraints fix), but exceeds a single agent context window when attempted naively. KEY: the imp case requires generalized STRUCTURAL induction on the formula giving subformula induction hypotheses — NOT induction on the IsPropositional proof (which only yields IHs for the immediate subformulas phi/psi). Adapt the propositional truth lemma from Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean to the time-indexed temporalHintikkaSet/TBranch setting. Reuse already-proved base cases: extractModel_atomPos_sat, extractModel_atom_neg_notSat, extractModel_bot_false. A 1150-line prior attempt (with the structural difficulty diagnosed) is preserved at specs/301_temporal_tableau/.wip-Completeness-truthlemma-attempt.lean for reference. Start from green commit 7f052834. Scope strictly to this one lemma. Independent of tasks 423 and 425.
-
----
-
-### 424. Prove ramsey recurrentclass lemma for buchicongruence prefix runs
-temporal tableau propositional truth lemma
-- **Effort**: 3-4 hours
-- **Status**: [RESEARCHED
-NOT_STARTED]
-- **Task Type**: cslib
-cslib
-- **Topic**: Temporal Logic
-Temporal Logic
-- **Dependencies**: Task 423
-
-**Description**: Prove a named lemma (suggested name: `buchiCongr_recurrentClass` or similar) in `Cslib/Computability/Languages/Congruences/BuchiCongruence.lean` (or `OmegaRegularLanguage.lean`) stating: for `[Finite State]` (where `State` is the state type of the NBA `na`) and any `xs : ωSequence Alphabet`, there exist quotient classes `a b : Quotient na.BuchiCongruence.eq` such that (1) `b * b = b` (b is idempotent), (2) `a * b = a`, and (3) `a ∈ (buchiCongr_DMA na).run xs |>.infOcc` (i.e., `∃ᶠ k in Filter.atTop, (buchiCongr_DMA na).run xs k = a`). The proof strategy mirrors `buchiFamily_cover` (BuchiCongruence.lean line 118) which already invokes `infinite_graph_ramsey`; the key adaptation is recasting the Ramsey argument on the prefix-class run `k ↦ ⟦xs.extract 0 k⟧` (which equals `(buchiCongr_DMA na).run xs k` by `buchiCongr_DMA_run_eq`). The idempotent-power collapse lemma from INFRA-1 is used to show that when the Ramsey witness period `p` yields `b = ⟦xs.extract i (i+p)⟧` with `b^m = b`, the prefix classes at positions `i + k*p` equal `a` for the stabilising prefix class `a = ⟦xs.extract 0 i⟧`. API references: `mem_infOcc` (InfOcc.lean:88), `frequently_in_finite_type` (InfOcc.lean:46), `infinite_graph_ramsey`, `buchiCongr_DMA_run_eq` (OmegaRegularLanguage.lean ~line 405). This lemma is the direct bridge enabling Phase 4 of task 241 to close `b ∈ infOcc` and complete the forward direction of `buchiCongr_DMA_language_eq`. CI must pass green.
-[Decomposed from task 301, blocker B.] Prove temporalTruthLemma_propositional (atom/bot/imp cases) in Cslib/Logics/Temporal/Tableau/Completeness.lean sorry-free. This obligation is independently provable (no FMP, no dependence on the ordConstraints fix), but exceeds a single agent context window when attempted naively. KEY: the imp case requires generalized STRUCTURAL induction on the formula giving subformula induction hypotheses — NOT induction on the IsPropositional proof (which only yields IHs for the immediate subformulas phi/psi). Adapt the propositional truth lemma from Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean to the time-indexed temporalHintikkaSet/TBranch setting. Reuse already-proved base cases: extractModel_atomPos_sat, extractModel_atom_neg_notSat, extractModel_bot_false. A 1150-line prior attempt (with the structural difficulty diagnosed) is preserved at specs/301_temporal_tableau/.wip-Completeness-truthlemma-attempt.lean for reference. Start from green commit 7f052834. Scope strictly to this one lemma. Independent of tasks 423 and 425.
 
 ---
 
 ### 423. Expose buchicongruence eqvcls monoid and idempotent lemmas
-temporal tableau ordconstraints redesign
 - **Effort**: 2-3 hours
-- **Status**: [RESEARCHED
-NOT_STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
-cslib
 - **Topic**: Temporal Logic
-Temporal Logic
-- **Dependencies**: 
+- **Dependencies**: None
+- **Research**: [241_mcnaughton_theorem/reports/02_spawn-analysis.md]
 
 **Description**: Add named lemmas to Cslib/Computability/Languages/Congruences/RightCongruence.lean and/or BuchiCongruence.lean exposing the multiplicative structure on BuchiCongruence quotient classes: (1) the well-definedness rewrite `⟦u ++ v⟧ = ⟦u⟧ · ⟦v⟧` (equivalently `Quotient.mk _ (u ++ v) = Quotient.mk _ u * Quotient.mk _ v`), confirming the `Mul` instance on `Quotient BuchiCongruence.eq` acts as concatenation; (2) the idempotent-power collapse lemma: if `b * b = b` (b is idempotent) then `b ^ k = b` for all `k ≥ 1`; and (3) the absorption corollary: if `b * b = b` and `a * b = a` then `a * b ^ k = a` for all `k`. These lemmas are purely algebraic about the existing `RightCongruence` monoid structure and carry no research-grade difficulty. They are the algebraic substrate needed by the Ramsey recurrent-class lemma (task INFRA-2) and ultimately by the forward direction of `buchiCongr_DMA_language_eq` in task 241. Files in scope: `Cslib/Computability/Languages/Congruences/RightCongruence.lean`, `Cslib/Computability/Languages/Congruences/BuchiCongruence.lean`. CI must pass green with `lake build` and `lake exe lint-style`.
-[Decomposed from task 301, blocker A.] Redesign the time-ordering scheme in the temporal tableau so the ordering invariants hold. The lemma ordConstraints_strict (Cslib/Logics/Temporal/Tableau/Completeness.lean) is FALSE as stated: addPast t tNew adds the constraint (tNew, t) with tNew > t, violating the claimed invariant (a,b) in constraints -> a < b. Choose and implement a correct scheme (e.g. topological sort of the constraint graph, or a signed/relative integer time domain) so that extractModel builds a well-founded strict order, then prove the corrected ordConstraints lemma sorry-free. Start from green commit 7f052834. Independent of tasks 424 and 425.
-
----
-
-### 423. Expose buchicongruence eqvcls monoid and idempotent lemmas
-temporal tableau ordconstraints redesign
-- **Effort**: 2-3 hours
-- **Status**: [RESEARCHED
-NOT_STARTED]
-- **Task Type**: cslib
-cslib
-- **Topic**: Temporal Logic
-Temporal Logic
-- **Dependencies**: 
-
-**Description**: Add named lemmas to Cslib/Computability/Languages/Congruences/RightCongruence.lean and/or BuchiCongruence.lean exposing the multiplicative structure on BuchiCongruence quotient classes: (1) the well-definedness rewrite `⟦u ++ v⟧ = ⟦u⟧ · ⟦v⟧` (equivalently `Quotient.mk _ (u ++ v) = Quotient.mk _ u * Quotient.mk _ v`), confirming the `Mul` instance on `Quotient BuchiCongruence.eq` acts as concatenation; (2) the idempotent-power collapse lemma: if `b * b = b` (b is idempotent) then `b ^ k = b` for all `k ≥ 1`; and (3) the absorption corollary: if `b * b = b` and `a * b = a` then `a * b ^ k = a` for all `k`. These lemmas are purely algebraic about the existing `RightCongruence` monoid structure and carry no research-grade difficulty. They are the algebraic substrate needed by the Ramsey recurrent-class lemma (task INFRA-2) and ultimately by the forward direction of `buchiCongr_DMA_language_eq` in task 241. Files in scope: `Cslib/Computability/Languages/Congruences/RightCongruence.lean`, `Cslib/Computability/Languages/Congruences/BuchiCongruence.lean`. CI must pass green with `lake build` and `lake exe lint-style`.
-[Decomposed from task 301, blocker A.] Redesign the time-ordering scheme in the temporal tableau so the ordering invariants hold. The lemma ordConstraints_strict (Cslib/Logics/Temporal/Tableau/Completeness.lean) is FALSE as stated: addPast t tNew adds the constraint (tNew, t) with tNew > t, violating the claimed invariant (a,b) in constraints -> a < b. Choose and implement a correct scheme (e.g. topological sort of the constraint graph, or a signed/relative integer time domain) so that extractModel builds a well-founded strict order, then prove the corrected ordConstraints lemma sorry-free. Start from green commit 7f052834. Independent of tasks 424 and 425.
 
 ---
 
@@ -674,7 +655,7 @@ SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/41
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: Task 423, Task 424, Task 425
+- **Dependencies**: Task 426, Task 427, Task 425
 - **Research**: [301_temporal_tableau/reports/01_temporal-tableau-decision-procedure.md]
 - **Plan**: [301_temporal_tableau/plans/01_temporal-tableau-decision-procedure.md]
 

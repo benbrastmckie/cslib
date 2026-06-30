@@ -6,7 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Foundations.Logic.Metalogic.ConservativityLift
+public import Cslib.Logics.Propositional.Metalogic.ConservativityLift
 public import Cslib.Logics.Temporal.FromPropositional
 public import Cslib.Logics.Temporal.Semantics.Satisfies
 public import Cslib.Logics.Temporal.Metalogic.Soundness

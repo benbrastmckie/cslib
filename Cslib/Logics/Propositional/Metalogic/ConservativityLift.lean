@@ -6,9 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
--- Foundations → Logics import: CPL completeness is the shared substrate needed to state
--- the conservativity result. Deliberate exception following the precedent established in
--- Foundations/Order/HilbertAlgebra/DiegoEmbedding.lean:15-16.
 public import Cslib.Init
 public import Cslib.Logics.Propositional.Semantics.Bool
 public import Cslib.Logics.Propositional.Metalogic.StrongCompleteness
@@ -29,12 +26,15 @@ and Bimodal propositional conservativity results.
   satisfaction callback from soundness, derives `Derivable PropositionalAxiom φ` via
   `prop_completeness`.
 
-## Architecture Note
+## Placement Rationale
 
-This file imports `Cslib.Logics.Propositional.*` from within `Cslib.Foundations`. This is a
-deliberate Foundations → Logics layering exception: CPL completeness is shared metalogic
-infrastructure used by multiple Logics subsystems, not domain-specific code. Precedent:
-`Foundations/Order/HilbertAlgebra/DiegoEmbedding.lean`, lines 15–16.
+Both theorems are parametric over an embedding target `Tgt` but their subject is the concrete
+CSLib propositional logic: `evaluate_iff_of_classicalBridge` recurses over `PL.Proposition`
+and unfolds `PL.Evaluate`; `conservative_over_cpl` invokes `prop_completeness`. Generic over
+the target type does not mean logic-agnostic: the file's imports (`Propositional.Semantics.Bool`,
+`Propositional.Metalogic.StrongCompleteness`) are both intra-layer here. `Propositional/Metalogic`
+is the lowest-common-ancestor module visible to all three clients (Modal, Temporal, Bimodal) that
+already import `Logics/Propositional`, so this is the natural home for the shared bridge lemmas.
 -/
 
 @[expose] public section

@@ -83,7 +83,6 @@ public import Cslib.Foundations.Logic.Axioms
 public import Cslib.Foundations.Logic.Connectives
 public import Cslib.Foundations.Logic.InferenceSystem
 public import Cslib.Foundations.Logic.LogicalEquivalence
-public import Cslib.Foundations.Logic.Metalogic.ConservativityLift
 public import Cslib.Foundations.Logic.Metalogic.Consistency
 public import Cslib.Foundations.Logic.Metalogic.DeductionCharacterization
 public import Cslib.Foundations.Logic.Metalogic.DeductionHelpers
@@ -417,6 +416,7 @@ public import Cslib.Logics.Propositional.Embedding
 public import Cslib.Logics.Propositional.Metalogic.ClassicalConjImpBotCompleteness
 public import Cslib.Logics.Propositional.Metalogic.ClassicalConjImpCompleteness
 public import Cslib.Logics.Propositional.Metalogic.ClassicalImpCompleteness
+public import Cslib.Logics.Propositional.Metalogic.ConservativityLift
 public import Cslib.Logics.Propositional.Metalogic.DeductionTheorem
 public import Cslib.Logics.Propositional.Metalogic.GenericLindenbaum
 public import Cslib.Logics.Propositional.Metalogic.GenericMCSBridge

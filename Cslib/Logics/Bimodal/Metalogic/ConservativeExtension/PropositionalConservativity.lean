@@ -6,7 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Foundations.Logic.Metalogic.ConservativityLift
+public import Cslib.Logics.Propositional.Metalogic.ConservativityLift
 public import Cslib.Logics.Bimodal.Embedding.PropositionalEmbedding
 public import Cslib.Logics.Bimodal.Metalogic.Core.DerivationTree
 public import Cslib.Logics.Bimodal.Metalogic.Soundness.Soundness

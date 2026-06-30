@@ -11,11 +11,14 @@ next_project_number: 441
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,299,317,321,390,396,400,404,406,407,415,419,427,433,434,438,439,440 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,181,215,300,375,389,405,409,426,430,435 | 36,37,180,299,317,404,407,433,439 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,275,391,392,413,425,436 | 39,40,321,375,389,426,427,434,435 | Bimodal Porting, Foundations, Temporal Logic, ... |
-| 4 | 241,301,393,412 | 41,321,391,425,436 | Foundations, Temporal Logic, PL-Hygiene |
-| 5 | 414 | 181,215,241,275,300,301,321 | Code Hygiene |
+| 1 | 36,37,226,299,317,390,396,400,404,406,407,415,419,433,434,438,440 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,180,215,300,375,389,405,409,430,435 | 36,37,299,317,404,406,407,433 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 3 | 41,181,275,391,392,427,436,439 | 39,40,180,389,434,435 | Bimodal Porting, Foundations, Temporal Logic, ... |
+| 4 | 241,393,426 | 391,436,439 | Temporal Logic, PL-Hygiene |
+| 5 | 425 | 426,427 | Temporal Logic |
+| 6 | 301 | 425 | Temporal Logic |
+| 7 | 321 | 301 | Code Hygiene |
+| 8 | 412,413,414 | 41,181,215,241,275,300,321,375 | Foundations, Code Hygiene, PL-Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -44,27 +47,27 @@ next_project_number: 441
 
 ### Temporal Logic
 
-180 [PLANNED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
-  └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
-    └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 433 [PLANNED] — Prove a private named lemma (e.g. `buchiCongr_DMA_accept_mem`) in
   └─ 435 [RESEARCHED] — Replace the sorry-stub `buchiCongr_DMA_language_forward` (languag
     └─ 436 [RESEARCHED] — Combine the forward inclusion (buchiCongr_DMA_language_forward, f
       └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 434 [PLANNED] — Prove the backward inclusion `buchiCongr_DMA_language_backward` (
   └─ 436 [RESEARCHED] — Combine the forward inclusion (buchiCongr_DMA_language_forward, f (see above)
-439 [RESEARCHED] — Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_red
-  └─ 426 [BLOCKED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
-    └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model (see above)
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
+180 [PLANNED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
+  └─ 427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
+    └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
+      └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
+  └─ 439 [RESEARCHED] — Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_red
+    └─ 426 [BLOCKED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
+      └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model (see above)
 
 ### Code Hygiene
 
+406 [PLANNED] — NEW from post-merge vet (sess_1782671052_6af6a1). Fix 33 pre-exis
 321 [RESEARCHED] — Review file size and structure throughout Logics/ and Foundations
   └─ 414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p
-406 [PLANNED] — NEW from post-merge vet (sess_1782671052_6af6a1). Fix 33 pre-exis
 
 ### PL Tableau
 
@@ -126,7 +129,7 @@ next_project_number: 441
 - **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: None
+- **Dependencies**: Task 180
 - **Research**: [426_temporal_tableau_ordconstraints_redesign/reports/03_spawn-analysis.md]
 
 **Description**: Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_redesign). Phases 1, 2, 4, 5 are already done and green. Only Phase 3 remains.
@@ -290,7 +293,7 @@ After implementation:
 - **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: None
+- **Dependencies**: Task 180
 - **Research**: [427_temporal_tableau_propositional_truth_lemma/reports/01_propositional-truth-lemma.md]
 - **Plan**: [427_temporal_tableau_propositional_truth_lemma/plans/02_imp-case-streamlined.md]
 - **Summary**: [427_temporal_tableau_propositional_truth_lemma/summaries/01_partial-summary.md]
@@ -538,7 +541,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
-- **Dependencies**: None
+- **Dependencies**: Task 301
 - **Research**: [321_code_hygiene_logics_foundations/reports/01_code-hygiene-survey.md]
 
 **Description**: Review file size and structure throughout Logics/ and Foundations/ to identify and refactor files that are too long or poorly structured. Abstract and expose all and only what should be abstracted/exposed, maintaining the highest standards for code hygiene. Survey file lengths, identify candidates over ~400 lines, check for proper module boundaries, unnecessary public exports, missing abstraction barriers, and violations of single-responsibility principle. Produce a refactoring plan with prioritized actions
@@ -714,7 +717,7 @@ Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completenes
 - **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: None
+- **Dependencies**: Task 406
 - **Research**: [180_temporal_primitive_always_historically/reports/01_primitive-always-historically-research.md]
 - **Plan**: [180_temporal_primitive_always_historically/plans/01_primitive-gh-implementation.md]
 

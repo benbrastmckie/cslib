@@ -1,26 +1,52 @@
 {
-  "session_id": "sess_1782836442_a0291e",
+  "session_id": "sess_1782838873_48a805",
   "task_numbers": [
     427,
     426,
     425,
-    301
+    301,
+    439
   ],
   "waves": [
     [
-      427,
-      426
-    ],
-    [
-      425
-    ],
-    [
-      301
+      406,
+      180,
+      321
     ]
   ],
+  "max_cycles": 15,
+  "cycle_count": 3,
+  "failed_tasks": [],
+  "completed_tasks": [],
+  "current_statuses": {
+    "406": "planned",
+    "180": "planned",
+    "321": "researched"
+  },
+  "task_dirs": {
+    "406": "specs/406_fix_crosscutting_lint_modal_temporal_bimodal_foundations",
+    "180": "specs/180_temporal_primitive_always_historically",
+    "321": "specs/321_code_hygiene_logics_foundations",
+    "439": "specs/439_refactor_processnext_to_mutual_def_and_prove_instantstrict_t"
+  },
+  "research_agents": {
+    "406": "cslib-research-agent",
+    "180": "cslib-research-agent",
+    "321": "cslib-research-agent",
+    "439": "cslib-research-agent"
+  },
+  "implement_agents": {
+    "406": "cslib-implementation-agent",
+    "180": "cslib-implementation-agent",
+    "321": "cslib-implementation-agent",
+    "439": "cslib-implementation-agent"
+  },
   "dependency_graph": {
     "427": [],
-    "426": [],
+    "439": [],
+    "426": [
+      439
+    ],
     "425": [
       426,
       427
@@ -31,32 +57,32 @@
       425
     ]
   },
-  "max_cycles": 20,
-  "cycle_count": 0,
-  "failed_tasks": [],
-  "completed_tasks": [],
-  "current_statuses": {
-    "427": "partial",
-    "426": "partial",
-    "425": "not_started",
-    "301": "blocked"
+  "territory_serialize": [
+    [
+      "427",
+      "439"
+    ]
+  ],
+  "notes": {
+    "180": "implement attempt 1 overflowed context (Prompt too long); 7 Temporal WIP files stashed at stash@{0} (task180-wip-primitive-gh) to unblock 406 build; resume after 406 commits then git stash pop",
+    "stray_files": "14 test_*.lean scratch at repo root belong to modal-tableau stream (task 299), left untouched"
   },
-  "task_dirs": {
-    "427": "specs/427_temporal_tableau_propositional_truth_lemma",
-    "426": "specs/426_temporal_tableau_ordconstraints_redesign",
-    "425": "specs/425_temporal_tableau_ptl_fmp_decidability",
-    "301": "specs/301_temporal_tableau"
+  "paused": true,
+  "pause_reason": "427 imp-case proof complete + sorry-free but build red due to task 180 (allFuture/allPast Formula constructors added; Defs.lean missing cases). Waiting for 180 to restore green build, then verify+commit 427 -> dispatch 439 -> 426 -> 425 -> 301.",
+  "pause_backup": "scratchpad/427_Completeness.lean.bak + worktree_backup_*.patch",
+  "external_dependencies": {
+    "427": [
+      180
+    ],
+    "439": [
+      180
+    ],
+    "180": [
+      406
+    ],
+    "321": [
+      301
+    ]
   },
-  "research_agents": {
-    "427": "cslib-research-agent",
-    "426": "cslib-research-agent",
-    "425": "cslib-research-agent",
-    "301": "cslib-research-agent"
-  },
-  "implement_agents": {
-    "427": "cslib-implementation-agent",
-    "426": "cslib-implementation-agent",
-    "425": "cslib-implementation-agent",
-    "301": "cslib-implementation-agent"
-  }
+  "dependency_note": "Added deps to avoid file-territory clashes: 180->406 (user-stated), 427->180 (Formula+Completeness.lean), 439->180 (Saturation rules+Completeness wire), 321->301 (hygiene reshapes temporal files last). Safe order: 406,180,427,439,426,425,301,321."
 }

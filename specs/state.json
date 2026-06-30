@@ -167,6 +167,9 @@
           "type": "report",
           "summary": "Size-debt survey: 85 files >400 lines, four 2700-3566-line Chronicle mega-files, zero-private metalogic gap"
         }
+      ],
+      "dependencies": [
+        301
       ]
     },
     {
@@ -625,7 +628,9 @@
       "project_name": "temporal_primitive_always_historically",
       "status": "planned",
       "task_type": "cslib",
-      "dependencies": [],
+      "dependencies": [
+        406
+      ],
       "description": "Add allFuture (G) and allPast (H) as primitive constructors to Temporal.Formula, giving {atom, bot, imp, and, or, untl, snce, allFuture, allPast}. Currently G is derived as neg(someFuture(neg phi)) and H as neg(somePast(neg phi)), which are only valid classically. Making them primitive enables intuitionistic temporal logics. Note: someFuture (F) and somePast (P) remain derivable without negation (F = top U phi, P = top S phi). Scope: (1) Syntax/Formula.lean: add .allFuture/.allPast constructors, update complexity, subst, atoms, encodeNat, temporalDepth, swapTemporal. (2) Semantics: structural clauses for universal future/past quantification. (3) ProofSystem: temporal axioms referencing G/H now use primitive constructors. (4) Metalogic: cases in Soundness, Chronicle/TruthLemma, MCS, Completeness. (5) Classical equivalences become theorems. Verify full CI. Reference: Boudou et al. for intuitionistic temporal logic.",
       "artifacts": [
         {
@@ -1088,7 +1093,9 @@
           "path": "specs/427_temporal_tableau_propositional_truth_lemma/summaries/01_partial-summary.md"
         }
       ],
-      "dependencies": [],
+      "dependencies": [
+        180
+      ],
       "parent_task": 301
     },
     {
@@ -1272,7 +1279,9 @@
       "effort": "3-5 hours",
       "parent_task": 426,
       "topic": "Temporal Logic",
-      "dependencies": [],
+      "dependencies": [
+        180
+      ],
       "created": "2026-06-30T17:01:59Z",
       "last_updated": "2026-06-30T17:01:59Z",
       "artifacts": [

@@ -11,10 +11,10 @@ next_project_number: 433
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,299,321,387,396,400,404,406,407,415,419,426,427,428,430,431 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,181,215,300,317,390,405,409,425,429 | 36,37,180,299,387,404,407,426,427,428,430 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,241,275,301,375,389 | 39,40,317,425,429 | Bimodal Porting, Foundations, Temporal Logic, ... |
-| 4 | 391,392,412,413,414 | 41,181,215,241,275,300,301,321,375,387,389 | Foundations, Code Hygiene, PL-Docs, ... |
+| 1 | 36,37,180,226,299,321,390,396,400,404,406,407,415,419,426,427,429,430,431 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,181,215,241,300,317,405,409,425 | 36,37,180,299,404,407,426,427,429,430 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 3 | 41,275,301,375,389 | 39,40,317,425 | Bimodal Porting, Foundations, Temporal Logic, ... |
+| 4 | 391,392,412,413,414 | 41,181,215,241,275,300,301,321,375,389 | Foundations, Code Hygiene, PL-Docs, ... |
 | 5 | 393 | 391 | PL-Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -50,9 +50,8 @@ next_project_number: 433
     └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 427 [PLANNED] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
   └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model (see above)
-428 [IMPLEMENTING] — Add named lemmas to Cslib/Computability/Languages/Congruences/Rig
-  └─ 429 [RESEARCHED] — Prove a named lemma (suggested name: `buchiCongr_recurrentClass` 
-    └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
+429 [RESEARCHED] — Prove a named lemma (suggested name: `buchiCongr_recurrentClass` 
+  └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -67,18 +66,17 @@ next_project_number: 433
 430 [RESEARCHED] — Prove the atom-persistence / upward-closure structural lemma for 
   └─ 317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
 
-### PL Hygiene
-
-387 [BLOCKED] — [Refreshed post-merge vet.] DECISION REQUIRES UPSTREAM AGREEMENT.
-  └─ 392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls
-393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
-413 [NOT STARTED] — [Split from task 278.] Simplify Propositional/ proofs that use ma
-
 ### PL Docs
 
+390 [NOT STARTED] — [Refreshed post-merge vet.] The Propositional section (~ORGANISAT
 389 [NOT STARTED] — [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAl
   └─ 391 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Remove internal task/process ja
-390 [NOT STARTED] — [Refreshed post-merge vet.] The Propositional section (~ORGANISAT
+
+### PL Hygiene
+
+392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls
+393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
+413 [NOT STARTED] — [Split from task 278.] Simplify Propositional/ proofs that use ma
 
 ### PL Semantics
 
@@ -213,7 +211,7 @@ After implementation:
 
 ### 428. Expose buchicongruence eqvcls monoid and idempotent lemmas
 - **Effort**: 2-3 hours
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -458,13 +456,13 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 387. PL -> Propositional namespace rename (upstream-gated)
-- **Status**: [BLOCKED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: PL-Hygiene
 - **Dependencies**: Task 395
 - **Research**: [387_rename_namespace_pl_to_propositional/reports/01_rename-pl-to-propositional.md]
 
-**Description**: [Refreshed post-merge vet.] DECISION REQUIRES UPSTREAM AGREEMENT. All Propositional files use `namespace Cslib.Logic.PL`; ORGANISATION.md specifies `Cslib.Logic.Propositional`. The PR #648 foundation slice exposes this publicly (Defs.lean:78, NaturalDeduction/Basic.lean:94). Breaking rename -> open an upstream Zulip thread for maintainer consensus FIRST (human-authored, AI policy), then mechanically rename across all Propositional files + downstream consumers (Modal/Temporal/Bimodal FromPropositional/Embedding). Until agreed, note as pending in the PR #648 description. Does NOT block the PR #648 foundation cherry-pick.
+**Description**: [REDIRECTED 2026-06-30 after upstream check] Original scope (breaking rename Cslib.Logic.PL -> Cslib.Logic.Propositional) ABANDONED: upstream leanprover/cslib standardizes on namespace Cslib.Logic.PL (Defs.lean:43, NaturalDeduction/Basic.lean:66; in place since #89 2026-04-06, survived #536). Upstream ORGANISATION.md (38 lines) mandates no 'Propositional' leaf and is marked provisional. The rename would break against upstream's merged public API and increase divergence. New scope (DONE): fixed local ORGANISATION.md Namespace Convention to document Cslib.Logic.PL <- Logics/Propositional/, matching upstream. Does not block PR #648.
 
 ---
 

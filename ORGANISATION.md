@@ -256,7 +256,7 @@ classical-scope rationale and forward-looking notes.
 The `Cslib.Logic` namespace spans both `Foundations/Logic/` and `Logics/`:
 - `Cslib.Logic.Axioms` -- from `Foundations/Logic/Axioms.lean`
 - `Cslib.Logic.Automation` -- from `Foundations/Logic/Automation/`
-- `Cslib.Logic.Propositional` -- from `Logics/Propositional/`
+- `Cslib.Logic.PL` -- from `Logics/Propositional/` (the namespace leaf is `PL`, matching upstream `leanprover/cslib`)
 - `Cslib.Logic.Modal` -- from `Logics/Modal/`
 - `Cslib.Logic.Temporal` -- from `Logics/Temporal/`
 - `Cslib.Logic.Bimodal` -- from `Logics/Bimodal/`

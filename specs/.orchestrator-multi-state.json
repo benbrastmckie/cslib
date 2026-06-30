@@ -18,15 +18,18 @@
     "432": []
   },
   "max_cycles": 15,
-  "cycle_count": 1,
+  "cycle_count": 2,
   "failed_tasks": [],
   "completed_tasks": [
-    386
+    386,
+    387
   ],
   "current_statuses": {
     "299": "planned",
     "386": "completed",
-    "432": "completed"
+    "432": "completed",
+    "428": "completed",
+    "387": "completed"
   },
   "task_dirs": {
     "299": "specs/299_modal_k_tableau",

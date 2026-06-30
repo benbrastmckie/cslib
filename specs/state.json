@@ -1122,7 +1122,7 @@
         },
         {
           "type": "plan",
-          "path": "specs/426_temporal_tableau_ordconstraints_redesign/plans/01_ordering-instant-redesign.md"
+          "path": "specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-streamlined.md"
         },
         {
           "type": "summary",
@@ -1150,7 +1150,7 @@
         },
         {
           "type": "plan",
-          "path": "specs/427_temporal_tableau_propositional_truth_lemma/plans/01_propositional-truth-lemma.md"
+          "path": "specs/427_temporal_tableau_propositional_truth_lemma/plans/02_imp-case-streamlined.md"
         },
         {
           "type": "summary",

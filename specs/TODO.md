@@ -232,7 +232,7 @@ After implementation:
 - **Topic**: Temporal Logic
 - **Dependencies**: None
 - **Research**: [427_temporal_tableau_propositional_truth_lemma/reports/01_propositional-truth-lemma.md]
-- **Plan**: [427_temporal_tableau_propositional_truth_lemma/plans/01_propositional-truth-lemma.md]
+- **Plan**: [427_temporal_tableau_propositional_truth_lemma/plans/02_imp-case-streamlined.md]
 - **Summary**: [427_temporal_tableau_propositional_truth_lemma/summaries/01_partial-summary.md]
 
 **Description**: [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_propositional (atom/bot/imp cases) in Cslib/Logics/Temporal/Tableau/Completeness.lean sorry-free. This obligation is independently provable (no FMP, no dependence on the ordConstraints fix), but exceeds a single agent context window when attempted naively. KEY: the imp case requires generalized STRUCTURAL induction on the formula giving subformula induction hypotheses — NOT induction on the IsPropositional proof (which only yields IHs for the immediate subformulas phi/psi). Adapt the propositional truth lemma from Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean to the time-indexed temporalHintikkaSet/TBranch setting. Reuse already-proved base cases: extractModel_atomPos_sat, extractModel_atom_neg_notSat, extractModel_bot_false. A 1150-line prior attempt (with the structural difficulty diagnosed) is preserved at specs/301_temporal_tableau/.wip-Completeness-truthlemma-attempt.lean for reference. Start from green commit 7f052834. Scope strictly to this one lemma. Independent of tasks 423 and 425.
@@ -245,7 +245,7 @@ After implementation:
 - **Topic**: Temporal Logic
 - **Dependencies**: None
 - **Research**: [426_temporal_tableau_ordconstraints_redesign/reports/01_ordconstraints-redesign.md]
-- **Plan**: [426_temporal_tableau_ordconstraints_redesign/plans/01_ordering-instant-redesign.md]
+- **Plan**: [426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-streamlined.md]
 - **Summary**: [426_temporal_tableau_ordconstraints_redesign/summaries/01_partial-summary.md]
 
 **Description**: [Decomposed from task 301, blocker A.] Redesign the time-ordering scheme in the temporal tableau so the ordering invariants hold. The lemma ordConstraints_strict (Cslib/Logics/Temporal/Tableau/Completeness.lean) is FALSE as stated: addPast t tNew adds the constraint (tNew, t) with tNew > t, violating the claimed invariant (a,b) in constraints -> a < b. Choose and implement a correct scheme (e.g. topological sort of the constraint graph, or a signed/relative integer time domain) so that extractModel builds a well-founded strict order, then prove the corrected ordConstraints lemma sorry-free. Start from green commit 7f052834. Independent of tasks 424 and 425.

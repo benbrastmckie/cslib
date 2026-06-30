@@ -1,22 +1,20 @@
 {
-  "status": "planned",
   "task_number": 432,
+  "task_name": "fix_roadmap_integration_argv_overflow",
   "session_id": "sess_1782818392_271f51_432",
-  "summary": "4-phase plan to fix the E2BIG argv overflow in roadmap-integration.sh. Phase 1 fixes site 1 (pass ROADMAP.md path, read via open()). Phase 2 fixes site 2 (the actual trigger: write both JSON blobs to mktemp temp files, pass paths, json.load, rm -f). Phase 3 verifies against the real large state.json that E2BIG no longer occurs. Phase 4 applies the temp-file pattern to sibling scripts issue-grouping.sh and tier-selection.sh for consistency.",
-  "artifact": {
-    "path": "specs/432_fix_roadmap_integration_argv_overflow/plans/01_argv-overflow-fix.md",
-    "type": "plan"
-  },
-  "artifacts": [
-    {
-      "path": "specs/432_fix_roadmap_integration_argv_overflow/plans/01_argv-overflow-fix.md",
-      "type": "plan"
-    }
-  ],
-  "files_to_change": [
+  "status": "implemented",
+  "phases_completed": 4,
+  "phases_total": 4,
+  "completed_at": "2026-06-30T05:00:00Z",
+  "summary": "Fixed E2BIG argv overflow in roadmap-integration.sh (2 sites), issue-grouping.sh (2 sites), and tier-selection.sh (2 sites) by replacing large-content argv-passing with mktemp temp-file path-passing. Verified against real 94 KB state.json — exits 0, valid JSON output, no stray temp files. All three scripts pass bash -n syntax check with zero remaining json.loads(sys.argv references.",
+  "files_modified": [
     ".claude/scripts/roadmap-integration.sh",
     ".claude/scripts/issue-grouping.sh",
     ".claude/scripts/tier-selection.sh"
   ],
-  "next_steps": "Run /implement 432 to execute the plan"
+  "artifacts": [
+    "specs/432_fix_roadmap_integration_argv_overflow/summaries/01_argv-overflow-fix-summary.md"
+  ],
+  "blockers": [],
+  "continuation_context": null
 }

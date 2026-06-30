@@ -1,11 +1,16 @@
 {
-  "status": "completed",
+  "status": "partial",
   "metadata": {
     "tasks_completed": [
-      388,
-      403
+      386
     ],
-    "tasks_failed": [],
+    "tasks_failed": [
+      {
+        "task": 387,
+        "status": "blocked",
+        "reason": "human_gated"
+      }
+    ],
     "cycles_used": 3,
     "multi_task_mode": true
   }

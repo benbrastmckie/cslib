@@ -1,26 +1,28 @@
 {
   "task": 386,
+  "session_id": "sess_1782817543_eee5ae_386",
   "status": "implemented",
-  "session_id": "sess_1782818392_271f51_386",
-  "completed_at": "2026-06-30T12:45:00Z",
   "phases_completed": 4,
   "phases_total": 4,
-  "summary": "All 20 PL-namespace lake lint violations cleared across 9 files. Phase 1 (attribute/docstring fixes: simpNF nolint, 3 docBlame nolint, 2 unusedArguments nolint) was completed by a prior session. Phases 2-4 (lowerCamelCase renames and def->lemma conversion) were completed this session. Specific changes: (1) GenericMCSBridge.lean: deriv_tree_to_list->derivTreeToList (noncomputable def->lemma), unfold_listImp_in_tree->unfoldListImpInTree, list_deriv_to_tree->listDerivToTree, plus cross-file consumer update in DeductionTheorem.lean:79. (2) LK/CutElimination.lean: 5 cutAdm_* helpers renamed to lowerCamelCase. (3) LJ/CutElimination.lean: 5 ljCutAdm_* helpers renamed to lowerCamelCase. CI passed: zero sorries, zero new axioms, lake build green, lake lint shows zero PL-path errors, lake exe lint-style clean, lake exe mk_all clean. Two pre-existing build failures (BuchiCongruence task 428, Intuitionistic/Completeness) confirmed pre-existing and out of scope.",
   "blockers": [],
   "continuation_context": null,
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 19,
-    "build_passed": true,
-    "ci_pipeline_passed": true,
-    "notes": "Pre-existing build failures not caused by this task: BuchiCongruence.lean (task 428), Tableau/Intuitionistic/Completeness.lean (confirmed pre-existing via stash test)"
+  "summary": "All 20 PL-namespace lint violations cleared across 9 files. 4 phases executed sequentially as planned. Build green for all 9 touched modules. Zero sorries, zero new axioms. Two pre-existing build failures (Completeness.lean type mismatch from task 317, BuchiCongruence syntax error from toolchain bump) are unrelated to task 386.",
+  "key_deviation": "let rec @[nolint docBlame] name syntax used for docBlame suppression on nested let rec helpers (Lean 4 does not support /-- -/ docstrings before let rec inside function bodies).",
+  "artifacts": {
+    "plan": "specs/386_fix_lake_lint_errors_propositional/plans/01_fix-pl-lint-violations.md",
+    "summary": "specs/386_fix_lake_lint_errors_propositional/summaries/01_fix-pl-lint-violations-summary.md",
+    "metadata": "specs/386_fix_lake_lint_errors_propositional/.return-meta.json"
   },
-  "artifacts": [
-    "specs/386_fix_lake_lint_errors_propositional/reports/01_pl-lint-violations-fix-map.md",
-    "specs/386_fix_lake_lint_errors_propositional/plans/01_fix-pl-lint-violations.md",
-    "specs/386_fix_lake_lint_errors_propositional/summaries/01_fix-pl-lint-violations-summary.md"
-  ],
-  "sorry_inventory": []
+  "pre_existing_failures": [
+    {
+      "module": "Cslib.Logics.Propositional.Tableau.Intuitionistic.Completeness",
+      "cause": "task 317 commit c648603b added hsat param to truthLemma but Completeness.lean was not updated",
+      "verified_pre_existing": true
+    },
+    {
+      "module": "Cslib.Computability.Languages.Congruences.BuchiCongruence",
+      "cause": "toolchain bump PR #609",
+      "verified_pre_existing": true
+    }
+  ]
 }

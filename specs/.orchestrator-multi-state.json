@@ -1,39 +1,36 @@
 {
-  "session_id": "sess_1782817543_eee5ae",
+  "session_id": "sess_1782818392_271f51",
   "task_numbers": [
+    299,
     386,
-    387
+    432
   ],
   "waves": [
     [
+      299,
       386,
-      387
+      432
     ]
   ],
   "dependency_graph": {
+    "299": [],
     "386": [],
-    "387": []
+    "432": []
   },
-  "max_cycles": 10,
-  "cycle_count": 2,
+  "max_cycles": 15,
+  "cycle_count": 1,
   "failed_tasks": [],
-  "completed_tasks": [],
+  "completed_tasks": [
+    386
+  ],
   "current_statuses": {
-    "386": "not_started",
-    "387": "not_started",
-    "426": "planned",
-    "427": "planned"
+    "299": "planned",
+    "386": "completed",
+    "432": "completed"
   },
   "task_dirs": {
+    "299": "specs/299_modal_k_tableau",
     "386": "specs/386_fix_lake_lint_errors_propositional",
-    "387": "specs/387_rename_namespace_pl_to_propositional"
-  },
-  "research_agents": {
-    "386": "cslib-research-agent",
-    "387": "cslib-research-agent"
-  },
-  "implement_agents": {
-    "386": "cslib-implementation-agent",
-    "387": "cslib-implementation-agent"
+    "432": "specs/432_fix_roadmap_integration_argv_overflow"
   }
 }

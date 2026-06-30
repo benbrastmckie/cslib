@@ -41,6 +41,11 @@
           "path": "specs/386_fix_lake_lint_errors_propositional/summaries/01_fix-pl-lint-violations-summary.md",
           "type": "summary",
           "summary": "Fixed 21 PL lint violations across 5 files"
+        },
+        {
+          "type": "summary",
+          "path": "specs/386_fix_lake_lint_errors_propositional/summaries/01_fix-pl-lint-violations-summary.md",
+          "summary": "4-phase lint fix execution summary; 20/20 cleared"
         }
       ],
       "session_id": "sess_1782818392_271f51_386",
@@ -48,7 +53,7 @@
         395
       ],
       "topic": "PL-Hygiene",
-      "completion_summary": "Cleared all 20 PL-namespace lake lint violations across 9 files: lowerCamelCase renames in GenericMCSBridge (3), LK CutElimination (5), LJ CutElimination (5); def→lemma for derivTreeToList; docBlame docstrings on 3 let-rec helpers; nolint annotations on 3 unusedArguments/simpNF declarations. lake lint gate passes with zero PL-path errors."
+      "completion_summary": "Cleared all 20 PL-namespace lake lint violations across 9 Logics/Propositional files (13 defsWithUnderscore renames incl. deriv_tree_to_list noncomputable def->lemma fusion, 3 docBlame, 2 unusedArguments nolints, 1 simpNF nolint). Build green, 0 sorries/axioms. Two pre-existing unrelated build failures (Completeness.lean task-317 regression, BuchiCongruence toolchain bump) noted."
     },
     {
       "project_number": 387,
@@ -1029,7 +1034,7 @@
     {
       "project_number": 428,
       "project_name": "expose_buchicongruence_eqvcls_monoid_and_idempotent_lemmas",
-      "status": "completed",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Add named lemmas to Cslib/Computability/Languages/Congruences/RightCongruence.lean and/or BuchiCongruence.lean exposing the multiplicative structure on BuchiCongruence quotient classes: (1) the well-definedness rewrite `⟦u ++ v⟧ = ⟦u⟧ · ⟦v⟧` (equivalently `Quotient.mk _ (u ++ v) = Quotient.mk _ u * Quotient.mk _ v`), confirming the `Mul` instance on `Quotient BuchiCongruence.eq` acts as concatenation; (2) the idempotent-power collapse lemma: if `b * b = b` (b is idempotent) then `b ^ k = b` for all `k ≥ 1`; and (3) the absorption corollary: if `b * b = b` and `a * b = a` then `a * b ^ k = a` for all `k`. These lemmas are purely algebraic about the existing `RightCongruence` monoid structure and carry no research-grade difficulty. They are the algebraic substrate needed by the Ramsey recurrent-class lemma (task INFRA-2) and ultimately by the forward direction of `buchiCongr_DMA_language_eq` in task 241. Files in scope: `Cslib/Computability/Languages/Congruences/RightCongruence.lean`, `Cslib/Computability/Languages/Congruences/BuchiCongruence.lean`. CI must pass green with `lake build` and `lake exe lint-style`.",
       "effort": "2-3 hours",
@@ -1048,6 +1053,11 @@
           "path": "specs/428_expose_buchicongruence_eqvcls_monoid_and_idempotent_lemmas/plans/01_buchi-monoid-idempotent-lemmas.md",
           "type": "plan",
           "summary": "Phased plan: monoid instance + idempotent lemmas"
+        },
+        {
+          "type": "summary",
+          "path": "specs/428_expose_buchicongruence_eqvcls_monoid_and_idempotent_lemmas/summaries/01_buchi-monoid-idempotent-lemmas-summary.md",
+          "summary": "Implementation summary: Monoid instance and idempotent lemmas on BuchiCongruence quotient"
         }
       ],
       "session_id": "sess_1782817758_a52a5d_428"

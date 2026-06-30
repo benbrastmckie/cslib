@@ -11,9 +11,9 @@ next_project_number: 442
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,299,317,390,396,400,404,407,415,419,434,438,440 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,181,215,300,375,389,405,409,430,436,439,441 | 36,37,180,299,317,404,407,434 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,241,275,391,392,413,426 | 39,40,375,389,436,439 | Bimodal Porting, Foundations, Temporal Logic, ... |
+| 1 | 36,37,180,226,241,299,317,390,396,400,404,407,415,419,438,440 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,181,215,300,375,389,405,409,430,439,441 | 36,37,180,299,317,404,407 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 3 | 41,275,391,392,413,426 | 39,40,375,389,439 | Bimodal Porting, Foundations, Temporal Logic, ... |
 | 4 | 393,412,427 | 41,391,426 | Foundations, Temporal Logic, PL-Hygiene |
 | 5 | 425 | 427 | Temporal Logic |
 | 6 | 301 | 425 | Temporal Logic |
@@ -53,9 +53,7 @@ next_project_number: 442
       └─ 427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
         └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
           └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
-434 [BLOCKED] — Prove the backward inclusion `buchiCongr_DMA_language_backward` (
-  └─ 436 [BLOCKED] — Combine the forward inclusion (buchiCongr_DMA_language_forward, f
-    └─ 241 [PLANNED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
+241 [PLANNED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -162,7 +160,7 @@ Reference: specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-st
 
 ### 436. Combine inclusions into buchicongr dma language eq and close
 - **Effort**: 1-2 hours
-- **Status**: [BLOCKED]
+- **Status**: [ABANDONED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 435, Task 434
@@ -186,7 +184,7 @@ Reference: specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-st
 
 ### 434. Prove backward inclusion buchicongr dma language backward
 - **Effort**: 1-2 hours
-- **Status**: [BLOCKED]
+- **Status**: [ABANDONED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 433

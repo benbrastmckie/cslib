@@ -27,29 +27,29 @@
     ]
   },
   "max_cycles": 15,
-  "cycle_count": 10,
+  "cycle_count": 1,
   "failed_tasks": [
     {
       "task": 434,
-      "reason": "blocked: architectural soundness gap in buchiCongr_DMA accept set (backward inclusion sorry, line 588)"
+      "status": "blocked",
+      "reason": "Missing companion-independence lemma (finite ω-semigroup theory); Phase 2 unprovable as designed"
     },
     {
       "task": 436,
-      "reason": "blocked: downstream of 434 (language_eq needs backward)"
+      "status": "blocked",
+      "reason": "Predecessor 434 blocked"
     },
     {
       "task": 241,
-      "reason": "blocked: downstream of 436/434"
+      "status": "blocked",
+      "reason": "Predecessors 434/436 blocked"
     }
   ],
-  "completed_tasks": [
-    406,
-    321
-  ],
+  "completed_tasks": [],
   "current_statuses": {
-    "406": "completed",
-    "180": "partial",
-    "321": "completed"
+    "434": "blocked",
+    "436": "researched",
+    "241": "blocked"
   },
   "task_dirs": {
     "434": "specs/434_prove_backward_inclusion_buchicongr_dma_language_backward",

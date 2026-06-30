@@ -1,0 +1,30 @@
+{
+  "task_number": 401,
+  "task_name": "polymorphic_evaluator_bool_prop_dpll",
+  "status": "completed",
+  "completed_at": "2026-06-30T02:30:00Z",
+  "session_id": "sess_1782784353_00a32e_401",
+  "phases": [
+    {"phase": 1, "name": "Fix docstring drift and canonical story", "status": "COMPLETED"},
+    {"phase": 2, "name": "Cross-reference docstrings in Bool.lean and Algebra.lean", "status": "COMPLETED"},
+    {"phase": 3, "name": "Algebraic-validity lemmas", "status": "SKIPPED", "reason": "Universe mismatch prevents clean self-contained proof; new imports required; per plan conditional clause: skip entirely and document"}
+  ],
+  "artifacts": [
+    "Cslib/Logics/Propositional/Semantics/Algebra/Bridge.lean",
+    "Cslib/Logics/Propositional/Semantics/Bool.lean",
+    "Cslib/Logics/Propositional/Semantics/Algebra.lean",
+    "specs/401_polymorphic_evaluator_bool_prop_dpll/summaries/01_evaluator-bool-prop-dpll-docs-summary.md"
+  ],
+  "verification": {
+    "sorry_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "lake_test_failed_reason": "Pre-existing ProofSystemMorphism.lean (task 417/419 WIP) -- unrelated to task 401"
+  },
+  "next_action_hint": "Whole-repo green gate is blocked by Cslib/Foundations/Logic/Metalogic/ProofSystemMorphism.lean (task 417/419 WIP). Task 401 itself is complete and sorry-free. No follow-up needed for 401.",
+  "roadmap_notes": [
+    "baValid_imp_tautology and tautology_iff_baValid documented as roadmap items in Bridge.lean docstring",
+    "Matthew Doty's DPLL/Tseitin/CNF work anchored in Bool.lean Design Notes"
+  ]
+}

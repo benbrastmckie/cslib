@@ -11,7 +11,7 @@ next_project_number: 423
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,299,301,317,321,386,387,388,396,400,401,403,404,406,407,415,419 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,226,241,299,301,317,321,386,387,388,396,400,403,404,406,407,415,419 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181,215,300,375,389,390,405,409 | 36,37,180,299,317,387,404,407 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,275,391,392,413 | 39,40,321,375,386,387,389 | Bimodal Porting, Foundations, PL-Docs, ... |
 | 4 | 393,412,414 | 41,181,215,241,275,300,301,321,386,391 | Foundations, Code Hygiene, PL-Hygiene |
@@ -82,7 +82,6 @@ next_project_number: 423
 ### PL Semantics
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-401 [IMPLEMENTING] — From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portab
 
 ### PL Equivalence
 
@@ -360,7 +359,7 @@ SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/41
 ---
 
 ### 401. Expose polymorphic AlgEvaluate at Bool/Prop as the canonical computable evaluator (DPLL)
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: PL-Semantics
 - **Dependencies**: None

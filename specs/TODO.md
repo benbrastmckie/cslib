@@ -82,7 +82,7 @@ next_project_number: 423
 ### PL Semantics
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-401 [PLANNED] — From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portab
+401 [IMPLEMENTING] — From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portab
 
 ### PL Equivalence
 
@@ -360,7 +360,7 @@ SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/41
 ---
 
 ### 401. Expose polymorphic AlgEvaluate at Bool/Prop as the canonical computable evaluator (DPLL)
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: PL-Semantics
 - **Dependencies**: None

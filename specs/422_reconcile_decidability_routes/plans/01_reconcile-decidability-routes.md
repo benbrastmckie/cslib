@@ -152,7 +152,7 @@ registered `Decidable` instances. No behavioral change expected (no consumers).
 
 ---
 
-### Phase 2: "Two routes, distinct roles" docstrings across all four module headers [NOT STARTED]
+### Phase 2: "Two routes, distinct roles" docstrings across all four module headers [COMPLETED]
 
 **Goal**: Add a mutually cross-referencing docstring block to all four module headers describing
 the two independent decision routes, their distinct roles, the 317 sorry citations, and the FMP

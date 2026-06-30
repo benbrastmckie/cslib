@@ -35,8 +35,43 @@ The `Derivable IntPropAxiom φ` instance uses `int_soundness_completeness` to re
 
 `intuitionisticTableau_sound` is now sorry-free. The completeness direction
 (`intuitionisticTableau_complete` in `Intuitionistic/Completeness.lean`) still rests on
-4 sorries. The `Decidable` instance carries the soundness branch clean and the countermodel
-branch with the 4 remaining completeness sorries.
+4 sorries tracked under task 317:
+- `Scheme.lean:246` — parametric `truthLemma S b …` (forcing ↔ membership, all connectives)
+- `Scheme.lean:519` — open-branch countermodel structural property
+- `Completeness.lean:113` — `IValid → forcing` bridge using the parametric `truthLemma`
+- `Minimal/Completeness.lean:110` — `MValid → forcing` bridge (reuses `truthLemma minScheme`)
+
+The `Decidable` instance (`instDecidableDerivableIntPropAxiom`) carries the soundness branch
+clean and the countermodel branch with the pre-existing 317 `sorryAx`. This is not a
+regression introduced here; the sorry-taint pre-dates this task.
+
+## Two Decision Routes — Distinct Roles
+
+CSLib contains **two independent decision procedures** for `Derivable IntPropAxiom φ`:
+
+### Route 1 (Tableau — this module, canonical registered instance)
+- **Module**: `Tableau/Intuitionistic/DecisionProcedure.lean`
+- **Mechanism**: Constructive signed-tableau proof-search/countermodel. Decides via
+  `instDecidableIValid` composed with `int_soundness_completeness`.
+- **Axiom profile**: Carries pre-existing 317 `sorryAx` (see above). Will become sorry-free
+  when task 317 lands.
+- **Exposed as**: `instDecidableDerivableIntPropAxiom` — the **sole registered `Decidable`
+  instance** for `Derivable IntPropAxiom φ` (as of task 422).
+- **Role**: Canonical extension-facing instance; feeds the modal/temporal/bimodal extensions.
+
+### Route 2 (FMP — sorry-free, named def, not a registered instance)
+- **Module**: `Metalogic/IntDecidability.lean`
+- **Mechanism**: Finite model property via `Σ`-bounded finite canonical Kripke model.
+- **Axiom profile**: `{propext, Classical.choice, Quot.sound}` — **sorry-free**.
+- **Exposed as**: `decidableDerivableIntPropAxiomFMP` (`noncomputable def`). Also see
+  `int_fmp` (FMP biconditional) and `int_fin_truth_lemma`.
+- **Role**: Independent theoretical result, useful as a correctness witness. Not a registered
+  instance; does not compete with `instDecidableDerivableIntPropAxiom` for resolution.
+
+The two routes have disjoint carrier types (signed-branch worlds vs `IntFinWorld`) and
+independent proof lineages. Factoring a common truth-lemma abstraction is explicitly deferred.
+See also `instDecidableDerivableMinPropAxiom` / `decidableDerivableMinPropAxiomFMP` for the
+analogous Minimal propositional decidability pair.
 
 ## References
 

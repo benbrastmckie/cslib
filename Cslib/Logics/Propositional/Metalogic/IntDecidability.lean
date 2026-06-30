@@ -40,6 +40,38 @@ construction: worlds are `Σ`-bounded prime deductively-closed sets where `Σ :=
   prime DCCS via `int_imp_witness` + `int_prime_exclusion`, then restrict back to `Σ`. This
   avoids Zorn's lemma for finite models entirely.
 
+## Two Decision Routes — Distinct Roles
+
+CSLib contains **two independent decision procedures** for `Derivable IntPropAxiom φ`:
+
+### Route 1 (FMP — this module)
+- **Module**: `Metalogic/IntDecidability.lean`
+- **Mechanism**: Finite model property via a `Σ`-bounded finite canonical Kripke model
+  (`IntFinWorld φ`). Decides by checking `∀ w : IntFinWorld φ, φ ∈ w.carrier`.
+- **Axiom profile**: `{propext, Classical.choice, Quot.sound}` — **sorry-free**.
+- **Exposed as**: `decidableDerivableIntPropAxiomFMP` (`noncomputable def`, not a registered
+  instance). Also see `int_fmp` (the FMP biconditional) and `int_fin_truth_lemma`.
+- **Role**: Independent theoretical result; the FMP route does not use tableaux or
+  branch-saturation. Useful as a correctness witness for the tableau approach.
+- **Companion**: `decidableDerivableMinPropAxiomFMP` in `Metalogic/MinDecidability.lean`.
+
+### Route 2 (Tableau — canonical registered instance)
+- **Module**: `Tableau/Intuitionistic/DecisionProcedure.lean`
+- **Mechanism**: Constructive signed-tableau proof-search with countermodel extraction.
+  Decides via `instDecidableIValid` composed with `int_soundness_completeness`.
+- **Axiom profile**: Carries the pre-existing 317 `sorryAx` from four open completeness sorries
+  (`Scheme.lean:246`, `Scheme.lean:519`, `Completeness.lean:113`,
+  `Minimal/Completeness.lean:110`). Will become sorry-free when task 317 lands.
+- **Exposed as**: `instDecidableDerivableIntPropAxiom` (the **sole registered `Decidable`
+  instance** for `Derivable IntPropAxiom φ`).
+- **Role**: Canonical extension-facing instance. The modal, temporal, and bimodal extensions
+  import the propositional embedding layer and rely on this instance for automation.
+
+The two routes have **disjoint carrier types** (`IntFinWorld` vs signed-branch world machinery)
+and independent proof lineages. Factoring a common truth-lemma abstraction is explicitly
+deferred (high risk, low payoff while 317 is open). See `int_fin_truth_lemma` vs the
+parametric `truthLemma` in `Tableau/Intuitionistic/Scheme.lean` for the parallel statements.
+
 ## References
 
 * [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Theorem 2.43

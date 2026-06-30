@@ -38,6 +38,49 @@ The key difference between intuitionistic and minimal:
 Soundness and completeness proofs are in the dedicated `Soundness.lean` and
 `Completeness.lean` modules respectively.
 
+## Notes on sorry
+
+`minimalTableau_sound` is sorry-free. The completeness direction
+(`minimalTableau_complete` in `Minimal/Completeness.lean`) rests on pre-existing 317 sorries:
+- `Scheme.lean:246` — parametric `truthLemma S b …` (the minimal tableau reuses
+  `truthLemma minScheme`, so it inherits this sorry)
+- `Scheme.lean:519` — open-branch countermodel structural property
+- `Minimal/Completeness.lean:110` — `MValid → forcing` bridge using `truthLemma minScheme`
+
+The `Decidable` instance (`instDecidableDerivableMinPropAxiom`) carries the soundness branch
+clean and the countermodel branch with the pre-existing 317 `sorryAx`. This sorry-taint is
+pre-existing and not introduced by task 422; it will be resolved when task 317 lands.
+
+## Two Decision Routes — Distinct Roles
+
+CSLib contains **two independent decision procedures** for `Derivable MinPropAxiom φ`:
+
+### Route 1 (Tableau — this module, canonical registered instance)
+- **Module**: `Tableau/Minimal/DecisionProcedure.lean`
+- **Mechanism**: Constructive signed-tableau proof-search/countermodel. Reuses the
+  intuitionistic expansion (`intExpandBranches`) with `isMinimallyClosed` closure predicate.
+  Decides via `instDecidableMValid` composed with `min_soundness_completeness`.
+- **Axiom profile**: Carries pre-existing 317 `sorryAx` (see above). Will become sorry-free
+  when task 317 lands.
+- **Exposed as**: `instDecidableDerivableMinPropAxiom` — the **sole registered `Decidable`
+  instance** for `Derivable MinPropAxiom φ` (as of task 422).
+- **Role**: Canonical extension-facing instance for minimal propositional logic.
+
+### Route 2 (FMP — sorry-free, named def, not a registered instance)
+- **Module**: `Metalogic/MinDecidability.lean`
+- **Mechanism**: Finite model property via `Σ`-bounded finite canonical Kripke model
+  (`MinFinWorld φ`). Unlike the intuitionistic FMP, minimal worlds may contain `⊥`.
+- **Axiom profile**: `{propext, Classical.choice, Quot.sound}` — **sorry-free**.
+- **Exposed as**: `decidableDerivableMinPropAxiomFMP` (`noncomputable def`). Also see
+  `min_fmp` (FMP biconditional) and `min_fin_truth_lemma`.
+- **Role**: Independent theoretical result, useful as a correctness witness. Not a registered
+  instance; does not compete with `instDecidableDerivableMinPropAxiom` for resolution.
+
+The two routes have disjoint carrier types (signed-branch worlds vs `MinFinWorld`) and
+independent proof lineages. Factoring a common truth-lemma abstraction is explicitly deferred.
+See also `instDecidableDerivableIntPropAxiom` / `decidableDerivableIntPropAxiomFMP` for the
+analogous Intuitionistic propositional decidability pair.
+
 ## References
 
 * [M. Fitting, *Proof Methods for Modal and Intuitionistic Logics*][Fitting1983], Chapter 4

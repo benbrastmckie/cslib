@@ -42,6 +42,40 @@ construction: worlds are `Σ`-bounded prime MinTheory worlds where `Σ := φ.sub
 - Unlike the intuitionistic version, `MinFinWorld` has **no consistency field**: MinTheory
   worlds may contain `⊥`, so `minFinBotForces w := (⊥ ∈ w.carrier)` is a genuine predicate.
 
+## Two Decision Routes — Distinct Roles
+
+CSLib contains **two independent decision procedures** for `Derivable MinPropAxiom φ`:
+
+### Route 1 (FMP — this module)
+- **Module**: `Metalogic/MinDecidability.lean`
+- **Mechanism**: Finite model property via a `Σ`-bounded finite canonical Kripke model
+  (`MinFinWorld φ`). Decides by checking `∀ w : MinFinWorld φ, φ ∈ w.carrier`.
+- **Axiom profile**: `{propext, Classical.choice, Quot.sound}` — **sorry-free**.
+- **Exposed as**: `decidableDerivableMinPropAxiomFMP` (`noncomputable def`, not a registered
+  instance). Also see `min_fmp` (the FMP biconditional) and `min_fin_truth_lemma`.
+- **Role**: Independent theoretical result; the FMP route does not use tableaux or
+  branch-saturation. Useful as a correctness witness for the tableau approach.
+- **Companion**: `decidableDerivableIntPropAxiomFMP` in `Metalogic/IntDecidability.lean`.
+- **Note**: Unlike the intuitionistic FMP, `MinFinWorld` has no consistency field: `⊥` may
+  hold in a minimal world, so `minFinBotForces w := (⊥ ∈ w.carrier)` is a genuine predicate.
+
+### Route 2 (Tableau — canonical registered instance)
+- **Module**: `Tableau/Minimal/DecisionProcedure.lean`
+- **Mechanism**: Constructive signed-tableau proof-search with countermodel extraction.
+  Decides via `instDecidableMValid` composed with `min_soundness_completeness`.
+- **Axiom profile**: Carries the pre-existing 317 `sorryAx` from open completeness sorries
+  (`Scheme.lean:246`, `Scheme.lean:519`, `Minimal/Completeness.lean:110`). Will become
+  sorry-free when task 317 lands. (Minimal reuses the shared parametric `truthLemma minScheme`
+  from `Scheme.lean:246`, so it also depends on that sorry.)
+- **Exposed as**: `instDecidableDerivableMinPropAxiom` (the **sole registered `Decidable`
+  instance** for `Derivable MinPropAxiom φ`).
+- **Role**: Canonical extension-facing instance for minimal propositional logic.
+
+The two routes have **disjoint carrier types** (`MinFinWorld` vs signed-branch world machinery)
+and independent proof lineages. Factoring a common truth-lemma abstraction is explicitly
+deferred (high risk, low payoff while 317 is open). See `min_fin_truth_lemma` vs the
+parametric `truthLemma` in `Tableau/Intuitionistic/Scheme.lean` for the parallel statements.
+
 ## References
 
 * [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Theorem 2.43

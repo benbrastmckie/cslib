@@ -11,9 +11,9 @@ next_project_number: 423
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,299,301,317,321,370,386,387,388,396,400,401,403,404,406,407,415,419,422 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,226,241,299,301,317,321,386,387,388,396,400,401,403,404,406,407,415,419 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
 | 2 | 39,40,181,215,300,375,389,390,405,409 | 36,37,180,299,317,387,404,407 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,275,391,392,413 | 39,40,321,370,375,386,387,389 | Bimodal Porting, Foundations, PL-Docs, ... |
+| 3 | 41,275,391,392,413 | 39,40,321,375,386,387,389 | Bimodal Porting, Foundations, PL-Docs, ... |
 | 4 | 393,412,414 | 41,181,215,241,275,300,301,321,386,391 | Foundations, Code Hygiene, PL-Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -82,12 +82,7 @@ next_project_number: 423
 ### PL Semantics
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-401 [NOT STARTED] — From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portab
-
-### PL Metalogic
-
-370 [PLANNED] — Close the decidability asymmetry in the metalogic layer: classica
-422 [NOT STARTED] — Reconcile the two parallel decidability developments coexisting o
+401 [PLANNED] — From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portab
 
 ### PL Equivalence
 
@@ -106,10 +101,11 @@ next_project_number: 423
 ## Tasks
 
 ### 422. Reconcile parallel Int/Min decidability routes (tableau vs FMP): canonical instance, docstrings, infrastructure
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: PL-Metalogic
 - **Dependencies**: Task 411, Task 421
+- **Summary**: [422_reconcile_decidability_routes/summaries/01_reconcile-decidability-routes-summary.md]
 
 **Description**: Reconcile the two parallel decidability developments coexisting on main after task 411 (Int) and 421 (Min): the TABLEAU route (Tableau/{Intuitionistic,Minimal}/DecisionProcedure.lean: instDecidableDerivableIntPropAxiom / instDecidableDerivableMinPropAxiom — constructive proof-search/countermodel infra the modal/temporal/bimodal extensions build on via FromPropositional/Embedding; currently rests on the tableau-completeness sorries owned by task 317) and the FMP route (Metalogic/IntDecidability.lean + the new MinDecidability.lean: the primed FMP instances — sorry-free finite-model-property results with distinct theoretical value). BOTH routes are intentionally kept. RESEARCH + REFACTOR (zero new sorries): (1) INSTANCE RESOLUTION: main will have TWO `Decidable (Derivable IntPropAxiom φ)` (and two for Min) — an ambiguity hazard (Lean resolves by priority/most-recent silently). Designate ONE canonical `instance` per proposition class (recommended: keep the tableau instance canonical as the extension-facing one, or set explicit instance priorities) and demote the other to a named def/theorem that exposes the FMP result WITHOUT registering a competing instance; verify no downstream instance-resolution breakage in the modal/temporal/bimodal extensions. (2) NAMING: retire the primed `'` names; adopt principled suffixes (e.g. _tableau / _fmp) consistent with the canonical choice. (3) DOCSTRINGS/HEADERS: write the "two routes, distinct roles" narrative in IntDecidability.lean, MinDecidability.lean, and Tableau/{Intuitionistic,Minimal}/DecisionProcedure.lean; cross-reference each route from the other; state the FMP theoretical role vs the tableau operational role (proof search feeding logic extensions); note the tableau route becomes genuinely sorry-free only once task 317 lands. (4) INFRASTRUCTURE: assess IntFinWorld/MinFinWorld (FMP) vs the tableau Hintikka/branch machinery for shared abstractions worth factoring or cross-referencing; document the relationship between the duplicated truth lemmas (int_fin_truth_lemma/min_fin_truth_lemma [FMP] vs the parametric tableau truthLemma [317-owned]). DEPENDS ON 411 (Int FMP on main) and 421 (Min FMP on main) so both Int and Min instances are reconciled in one coherent pass. Coordinates with 317 (tableau sorry closure). ACCEPTANCE: exactly one canonical Decidable instance per Int and Min proposition with no resolution ambiguity; both routes carry cross-referenced two-routes docstrings; lake build/test/checkInitImports/lint-style/shake green; 0 new sorry/axiom; extensions still build.
 
@@ -364,10 +360,11 @@ SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/41
 ---
 
 ### 401. Expose polymorphic AlgEvaluate at Bool/Prop as the canonical computable evaluator (DPLL)
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: PL-Semantics
 - **Dependencies**: None
+- **Plan**: [401_polymorphic_evaluator_bool_prop_dpll/plans/01_evaluator-bool-prop-dpll-docs.md]
 
 **Description**: From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portability) and Waring's GeneralizedHeytingAlgebra-polymorphic evaluator suggestion in the Zulip thread. Surface the algebraic `AlgEvaluate` specialized at `Bool` (computable) and `Prop` as the canonical evaluation path, and reconcile with Semantics/Bool.lean (BoolEvaluate + bridge lemma + Decidable instance) so there is ONE documented story: Prop-valued `Evaluate` for uniformity with Kripke semantics; Bool/AlgEvaluate for decision procedures (DPLL/SAT). Keep `Valuation` = Atom->Prop (canonical model construction needs it). Confirm the bridge to prop_strong_soundness. Coordinate with Matthew's DPLL/Tseitin development. Lower priority; independent of the IPL-base work. Source: Zulip thread (msgs 603367168, 603520169, 603572691, 603755068, 603877853 on HasInterp/GHA).
 
@@ -554,12 +551,14 @@ SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/41
 ---
 
 ### 370. Int min metalogic decidability
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: PL-Metalogic
 - **Dependencies**: None
 - **Research**: [370_int_min_metalogic_decidability/reports/01_int-min-decidability-fmp-vs-lj.md]
-- **Plan**: [370_int_min_metalogic_decidability/plans/01_int-min-fmp-decidability.md]
+- **Plan**:
+  - [370_int_min_metalogic_decidability/plans/01_int-min-fmp-decidability.md]
+  - [370_int_min_metalogic_decidability/plans/02_close-out-superseded-by-fmp-landing.md]
 
 **Description**: Close the decidability asymmetry in the metalogic layer: classical propositional logic has a decision procedure (instDecidableDerivablePropositionalAxiom via tautology enumeration, Metalogic/StrongCompleteness.lean:566), but intuitionistic (IntPropAxiom) and minimal (MinPropAxiom) logics have none. Establish Decidable (Derivable IntPropAxiom phi) and Decidable (Derivable MinPropAxiom phi) via the finite model property: bound the canonical Kripke models (prime DCCS / MinTheory worlds) by the subformulas of phi, give a terminating decision procedure over the finite model space, and prove it correct against the existing int/min strong-completeness theorems (IntStrongCompleteness.lean, MinStrongCompleteness.lean). Independent of the tableau decision procedures (which currently rest on unproved completeness witnesses). Note: the LJ sequent calculus already has a tableau-backed decidability instance (SequentCalculus/LJ/Decidability.lean) -- assess whether the FMP route or a bridge to LJ decidability is the cleaner source for the IPL instance before implementing. No new axioms (Classical.choice / Decidable.decide acceptable on noncomputable defs); CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake).
 

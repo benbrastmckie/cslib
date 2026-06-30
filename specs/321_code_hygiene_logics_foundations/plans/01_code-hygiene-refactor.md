@@ -147,7 +147,7 @@ split, with zero import changes.
 
 ---
 
-### Phase 3: Validate and document the barrel-split pattern on GNBA.lean [IN PROGRESS]
+### Phase 3: Validate and document the barrel-split pattern on GNBA.lean [COMPLETED]
 
 **Goal**: Establish the canonical barrel-split recipe on a clean, well-privatized, single-importer
 file so the higher-risk Chronicle splits follow a proven template.

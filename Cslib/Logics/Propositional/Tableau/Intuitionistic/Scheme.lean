@@ -443,6 +443,112 @@ private lemma intExpandBranches_openBranch_closed (fuel : Nat)
                 | notApplicable =>
                   simp only at hgo; injection hgo with heq; subst heq; exact hcl
 
+/-- If `intExpandBranches` returns `.openBranch b`, then `b` is Hintikka-saturated:
+every compound formula on `b` has its rule-outputs also on `b` (see `IBranchSaturation`).
+
+The proof mirrors `intExpandBranches_openBranch_closed`: induction on `fuel`, with inner
+induction on the `pending` list in the `go` helper. In the recursive cases (`linearResult`,
+`branchingResult`), the fuel IH closes the goal. In the leaf cases (`none`, `notApplicable`),
+the returned branch equals `bPers` directly; saturation of `bPers` requires analysing
+`intStepBranch`'s internal invariants and is left as `sorry` (task 317 phase-6 blocker).
+The fuel-0 base case has the same gap. -/
+private lemma intExpandBranches_openBranch_sat (fuel : Nat)
+    (branches : List (IBranch Atom))
+    (expandedSets : List (List (ISF Atom)))
+    (nextWorlds : List Nat)
+    (edgeSets : List IEdges)
+    (closurePred : IBranch Atom → Bool)
+    (b : IBranch Atom)
+    (h : intExpandBranches branches expandedSets nextWorlds edgeSets fuel closurePred
+        = .openBranch b) :
+    IBranchSaturation Atom b := by
+  induction fuel generalizing branches expandedSets nextWorlds edgeSets with
+  | zero =>
+    simp only [intExpandBranches] at h
+    cases hfs : branches.findSome? (fun b' => if closurePred b' then none else some b') with
+    | none => simp [hfs] at h
+    | some b' =>
+      simp only [hfs] at h; injection h with heq; subst heq
+      obtain ⟨b₀, _, hcond⟩ := List.exists_of_findSome?_eq_some hfs
+      cases heq : closurePred b₀ with
+      | true => simp [heq] at hcond
+      | false =>
+        simp only [heq, Bool.false_eq_true, if_false, Option.some.injEq] at hcond
+        -- b = b₀ from the initial branch list; saturation of b₀ requires that
+        -- intStepBranch b₀ eH nwH = none for the appropriate eH and nwH, which
+        -- in turn requires analysing intStepBranch's internals.
+        -- Left as sorry (task 317 phase-6 blocker: intStepBranch internals).
+        sorry
+  | succ fuel' ih =>
+    simp only [intExpandBranches] at h
+    suffices key : ∀ (pending : List (IBranch Atom))
+        (pendingExp : List (List (ISF Atom)))
+        (pendingNW : List Nat)
+        (pendingEdges : List IEdges)
+        (done : List (IBranch Atom))
+        (doneExp : List (List (ISF Atom)))
+        (doneNW : List Nat)
+        (doneEdges : List IEdges),
+        intExpandBranches.go closurePred fuel' pending pendingExp pendingNW pendingEdges
+            done doneExp doneNW doneEdges = .openBranch b →
+        IBranchSaturation Atom b from
+      key branches expandedSets nextWorlds edgeSets [] [] [] [] h
+    intro pending
+    induction pending with
+    | nil =>
+      intro _ _ _ _ _ _ _ hgo
+      simp only [intExpandBranches.go] at hgo
+      simp at hgo
+    | cons bh bt ih_inner =>
+      intro pendingExp pendingNW pendingEdges done doneExp doneNW doneEdges hgo
+      cases hpE : pendingExp with
+      | nil =>
+        rw [hpE] at hgo; simp only [intExpandBranches.go] at hgo
+        exact ih_inner [] [] [] done doneExp doneNW doneEdges hgo
+      | cons eH eT =>
+        cases hpNW : pendingNW with
+        | nil =>
+          rw [hpE, hpNW] at hgo; simp only [intExpandBranches.go] at hgo
+          exact ih_inner [] [] [] done doneExp doneNW doneEdges hgo
+        | cons nwH nwT =>
+          cases hpEdges : pendingEdges with
+          | nil =>
+            rw [hpE, hpNW, hpEdges] at hgo; simp only [intExpandBranches.go] at hgo
+            exact ih_inner [] [] [] done doneExp doneNW doneEdges hgo
+          | cons edgesH edgesT =>
+            rw [hpE, hpNW, hpEdges] at hgo
+            set bPers := applyPersistenceFixpoint bh edgesH (fuel' + 1) with hbPers_def
+            simp only [intExpandBranches.go] at hgo
+            by_cases hcl : closurePred bPers = true
+            · rw [if_pos hcl] at hgo
+              exact ih_inner eT nwT edgesT
+                  (done ++ [bPers]) (doneExp ++ [eH]) (doneNW ++ [nwH]) (doneEdges ++ [edgesH])
+                  hgo
+            · simp only [Bool.not_eq_true] at hcl
+              rw [if_neg (by simp [← hbPers_def, hcl])] at hgo
+              cases hstep : intStepBranch bPers eH nwH with
+              | none =>
+                rw [hstep] at hgo; injection hgo with heq; subst heq
+                -- b = bPers; intStepBranch returned none, meaning all compound
+                -- formulas in bPers have been expanded. Proving IBranchSaturation
+                -- requires analysing intStepBranch's none-condition internals.
+                -- Left as sorry (task 317 phase-6 blocker).
+                sorry
+              | some step =>
+                obtain ⟨result, newExp⟩ := step
+                rw [hstep] at hgo
+                cases result with
+                | linearResult newForms nw' newEdge =>
+                  simp only at hgo; exact ih _ _ _ _ hgo
+                | branchingResult branches' nw' =>
+                  simp only at hgo; exact ih _ _ _ _ hgo
+                | notApplicable =>
+                  simp only at hgo; injection hgo with heq; subst heq
+                  -- b = bPers; notApplicable means no tableau rule is applicable
+                  -- to bPers, implying saturation. Requires intStepBranch analysis.
+                  -- Left as sorry (task 317 phase-6 blocker).
+                  sorry
+
 omit [Hashable Atom] in
 /-- Every formula in every initial branch appears in the open branch returned by
 `intExpandBranches`. This shows that F(φ)@0, present in the initial branch, is still

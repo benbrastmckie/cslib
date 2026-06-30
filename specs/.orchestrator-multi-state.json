@@ -28,28 +28,17 @@
   },
   "max_cycles": 15,
   "cycle_count": 1,
-  "failed_tasks": [
-    {
-      "task": 434,
-      "status": "blocked",
-      "reason": "Missing companion-independence lemma (finite ω-semigroup theory); Phase 2 unprovable as designed"
-    },
-    {
-      "task": 436,
-      "status": "blocked",
-      "reason": "Predecessor 434 blocked"
-    },
-    {
-      "task": 241,
-      "status": "blocked",
-      "reason": "Predecessors 434/436 blocked"
-    }
+  "failed_tasks": [],
+  "completed_tasks": [
+    433,
+    435
   ],
-  "completed_tasks": [],
   "current_statuses": {
-    "434": "blocked",
-    "436": "researched",
-    "241": "blocked"
+    "433": "completed",
+    "434": "abandoned",
+    "435": "completed",
+    "436": "abandoned",
+    "241": "planned"
   },
   "task_dirs": {
     "434": "specs/434_prove_backward_inclusion_buchicongr_dma_language_backward",
@@ -65,5 +54,10 @@
     "434": "cslib-implementation-agent",
     "436": "cslib-implementation-agent",
     "241": "cslib-implementation-agent"
-  }
+  },
+  "abandoned_tasks": [
+    434,
+    436
+  ],
+  "final_disposition": "2 completed (433,435); 2 abandoned as obsolete under 241 Choueka pivot (434,436); 241 replanned to Choueka route, held at planned per user"
 }

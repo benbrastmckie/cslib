@@ -574,10 +574,9 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
                   simp only at hgo; exact ih _ _ _ _ hgo
                 | notApplicable =>
                   simp only at hgo; injection hgo with heq; subst heq
-                  -- b = bPers; notApplicable means no tableau rule is applicable
-                  -- to bPers, implying saturation. Requires intStepBranch analysis.
-                  -- Left as sorry (task 317 phase-6 blocker).
-                  sorry
+                  -- hstep : intStepBranch bPers eH nwH = some (.notApplicable, newExp)
+                  -- This contradicts intStepBranch_result_ne_notApplicable.
+                  exact absurd rfl (intStepBranch_result_ne_notApplicable hstep)
 
 omit [Hashable Atom] in
 /-- Every formula in every initial branch appears in the open branch returned by

@@ -156,6 +156,28 @@ def intStepBranch (b : IBranch Atom) (expanded : List (ISF Atom)) (nextWorld : N
       | .notApplicable => none
       | result => some (result, expanded ++ [sf])
 
+/-- If `intStepBranch` returns `some (r, e')`, then `r ≠ .notApplicable`.
+The definition maps every `.notApplicable` result of `intApplyRuleFull` to `none`,
+so `.notApplicable` never appears as the first component of a `some` return value. -/
+lemma intStepBranch_result_ne_notApplicable
+    {b : IBranch Atom} {expanded : List (ISF Atom)} {nextWorld : Nat}
+    {r : IntRuleResult Atom} {exp' : List (ISF Atom)}
+    (h : intStepBranch b expanded nextWorld = some (r, exp')) : r ≠ .notApplicable := by
+  simp only [intStepBranch] at h
+  obtain ⟨sf, _, hsf⟩ := List.exists_of_findSome?_eq_some h
+  by_cases hexp : (expanded.any (· == sf)) = true
+  · simp [hexp] at hsf
+  · simp only [Bool.not_eq_true] at hexp
+    simp [hexp] at hsf
+    cases hint : intApplyRuleFull sf nextWorld b with
+    | notApplicable => simp [hint] at hsf
+    | linearResult fs nw' e =>
+      simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
+      exact hsf.1.symm ▸ (by simp)
+    | branchingResult bs nw' =>
+      simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
+      exact hsf.1.symm ▸ (by simp)
+
 /-! ## Expansion Loop -/
 
 /-- Expand a list of intuitionistic tableau branches with a fuel counter.

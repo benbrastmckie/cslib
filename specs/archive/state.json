@@ -5286,6 +5286,168 @@
         "plans/",
         "summaries/"
       ]
+    },
+    {
+      "project_number": 386,
+      "project_name": "fix_lake_lint_errors_propositional",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "Fix Propositional-specific lake lint violations (21, post-merge)",
+      "description": "[Refreshed by post-merge vet sess_1782671052_6af6a1; supersedes the pre-merge scope.] Fix the 21 PL-specific lake lint violations (hard CI gate for a clean repo push). (a) defsWithUnderscore (13) -> lowerCamelCase: GenericMCSBridge.lean:133 deriv_tree_to_list, :165 unfold_listImp_in_tree, :192 list_deriv_to_tree; SequentCalculus/LJ/CutElimination.lean:116/225/350 ljCutAdm_principal_andR/orR/impR, :462/543 ljCutAdm_left/right; SequentCalculus/LK/CutElimination.lean:145/293/437 cutAdm_right_andR/orR/impR, :586/708 cutAdm_right/left. (b) defLemma (1): GenericMCSBridge.lean:133 deriv_tree_to_list def->lemma (same decl as the rename). (c) docBlame (3): docstrings for Tableau/Classical/Expansion.lean:125 classicalExpandBranches.processNext, Tableau/Intuitionistic/Expansion.lean:169 intExpandBranches.go, Tableau/Intuitionistic/Rules.lean:91 isAccessible.go. (d) unusedArguments (3): targeted @[nolint unusedArguments] + comment: Metalogic/DeductionTheorem.lean:85 deductionWithMem arg9 _hA, Normalization/Termination.lean:41 conclusionGrounded arg6 _d, Tableau/Intuitionistic/Soundness.lean:1643 intBotForces arg1. (e) simpNF (1): Subformula.lean:173 vars_neg LHS not simp-normal (rewrite LHS or @[nolint simpNF]). Coordinate GenericMCSBridge renames with the cross-cutting task (403). Verify `lake lint` PL-clean. Source: specs/369_*/.vet-findings.json. [395-reconciled: task 386 OWNS the LK/LJ cutAdm_*/ljCutAdm_* underscore renames (defsWithUnderscore); task 392 drops them. Re-run `lake lint` after the build is green (task 385/IntFMPSpike) to refresh the exact violation set before fixing.]",
+      "created": "2026-06-28T12:53:27Z",
+      "last_updated": "2026-06-30T11:34:05Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/386_fix_lake_lint_errors_propositional/reports/01_pl-lint-violations-fix-map.md",
+          "summary": "20 PL lint violations fix-map (refreshed: conclusionGrounded already fixed)"
+        },
+        {
+          "type": "plan",
+          "path": "specs/386_fix_lake_lint_errors_propositional/plans/01_fix-pl-lint-violations.md",
+          "summary": "4-phase mechanical lint-fix plan; waves [[1],[2,3,4]]"
+        },
+        {
+          "path": "specs/386_fix_lake_lint_errors_propositional/summaries/01_fix-pl-lint-violations-summary.md",
+          "type": "summary",
+          "summary": "Fixed 21 PL lint violations across 5 files"
+        },
+        {
+          "type": "summary",
+          "path": "specs/386_fix_lake_lint_errors_propositional/summaries/01_fix-pl-lint-violations-summary.md",
+          "summary": "4-phase lint fix execution summary; 20/20 cleared"
+        }
+      ],
+      "session_id": "sess_1782818392_271f51_386",
+      "dependencies": [
+        395
+      ],
+      "topic": "PL-Hygiene",
+      "completion_summary": "Cleared all 20 PL-namespace lake lint violations across 9 Logics/Propositional files (13 defsWithUnderscore renames incl. deriv_tree_to_list noncomputable def->lemma fusion, 3 docBlame, 2 unusedArguments nolints, 1 simpNF nolint). Build green, 0 sorries/axioms. Two pre-existing unrelated build failures (Completeness.lean task-317 regression, BuchiCongruence toolchain bump) noted.",
+      "archived": "2026-06-30T14:51:50Z"
+    },
+    {
+      "project_number": 387,
+      "project_name": "rename_namespace_pl_to_propositional",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "PL -> Propositional namespace rename (upstream-gated)",
+      "description": "[REDIRECTED 2026-06-30 after upstream check] Original scope (breaking rename Cslib.Logic.PL -> Cslib.Logic.Propositional) ABANDONED: upstream leanprover/cslib standardizes on namespace Cslib.Logic.PL (Defs.lean:43, NaturalDeduction/Basic.lean:66; in place since #89 2026-04-06, survived #536). Upstream ORGANISATION.md (38 lines) mandates no 'Propositional' leaf and is marked provisional. The rename would break against upstream's merged public API and increase divergence. New scope (DONE): fixed local ORGANISATION.md Namespace Convention to document Cslib.Logic.PL <- Logics/Propositional/, matching upstream. Does not block PR #648.",
+      "created": "2026-06-28T12:53:27Z",
+      "last_updated": "2026-06-28T18:34:49Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/387_rename_namespace_pl_to_propositional/reports/01_rename-pl-to-propositional.md",
+          "summary": "Full PL->Propositional rename impact map (132 files); human-gated blocker"
+        }
+      ],
+      "session_id": "sess_1782651207_1e893c_387",
+      "dependencies": [
+        395
+      ],
+      "topic": "PL-Hygiene",
+      "completion_summary": "Redirected after checking upstream leanprover/cslib: upstream already uses namespace Cslib.Logic.PL (the rename target was backwards). Dropped the breaking rename; instead corrected the local ORGANISATION.md Namespace Convention line to read 'Cslib.Logic.PL <- Logics/Propositional/' to match the upstream standard. Human-gated blocker removed.",
+      "archived": "2026-06-30T14:51:50Z"
+    },
+    {
+      "project_number": 428,
+      "project_name": "expose_buchicongruence_eqvcls_monoid_and_idempotent_lemmas",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "Add named lemmas to Cslib/Computability/Languages/Congruences/RightCongruence.lean and/or BuchiCongruence.lean exposing the multiplicative structure on BuchiCongruence quotient classes: (1) the well-definedness rewrite `⟦u ++ v⟧ = ⟦u⟧ · ⟦v⟧` (equivalently `Quotient.mk _ (u ++ v) = Quotient.mk _ u * Quotient.mk _ v`), confirming the `Mul` instance on `Quotient BuchiCongruence.eq` acts as concatenation; (2) the idempotent-power collapse lemma: if `b * b = b` (b is idempotent) then `b ^ k = b` for all `k ≥ 1`; and (3) the absorption corollary: if `b * b = b` and `a * b = a` then `a * b ^ k = a` for all `k`. These lemmas are purely algebraic about the existing `RightCongruence` monoid structure and carry no research-grade difficulty. They are the algebraic substrate needed by the Ramsey recurrent-class lemma (task INFRA-2) and ultimately by the forward direction of `buchiCongr_DMA_language_eq` in task 241. Files in scope: `Cslib/Computability/Languages/Congruences/RightCongruence.lean`, `Cslib/Computability/Languages/Congruences/BuchiCongruence.lean`. CI must pass green with `lake build` and `lake exe lint-style`.",
+      "effort": "2-3 hours",
+      "parent_task": 241,
+      "topic": "Temporal Logic",
+      "dependencies": [],
+      "created": "2026-06-30T10:57:07Z",
+      "last_updated": "2026-06-30T11:39:07Z",
+      "artifacts": [
+        {
+          "type": "research",
+          "path": "specs/241_mcnaughton_theorem/reports/02_spawn-analysis.md",
+          "summary": "Spawn analysis from parent task 241"
+        },
+        {
+          "path": "specs/428_expose_buchicongruence_eqvcls_monoid_and_idempotent_lemmas/plans/01_buchi-monoid-idempotent-lemmas.md",
+          "type": "plan",
+          "summary": "Phased plan: monoid instance + idempotent lemmas"
+        },
+        {
+          "path": "specs/428_expose_buchicongruence_eqvcls_monoid_and_idempotent_lemmas/summaries/01_buchi-monoid-idempotent-lemmas-summary.md",
+          "type": "summary",
+          "summary": "Monoid instance + 3 algebraic lemmas; CI green"
+        }
+      ],
+      "session_id": "sess_1782817758_a52a5d_428",
+      "archived": "2026-06-30T14:51:50Z"
+    },
+    {
+      "project_number": 429,
+      "project_name": "prove_ramsey_recurrentclass_lemma_for_buchicongruence_prefix_runs",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "Prove a named lemma (suggested name: `buchiCongr_recurrentClass` or similar) in `Cslib/Computability/Languages/Congruences/BuchiCongruence.lean` (or `OmegaRegularLanguage.lean`) stating: for `[Finite State]` (where `State` is the state type of the NBA `na`) and any `xs : ωSequence Alphabet`, there exist quotient classes `a b : Quotient na.BuchiCongruence.eq` such that (1) `b * b = b` (b is idempotent), (2) `a * b = a`, and (3) `a ∈ (buchiCongr_DMA na).run xs |>.infOcc` (i.e., `∃ᶠ k in Filter.atTop, (buchiCongr_DMA na).run xs k = a`). The proof strategy mirrors `buchiFamily_cover` (BuchiCongruence.lean line 118) which already invokes `infinite_graph_ramsey`; the key adaptation is recasting the Ramsey argument on the prefix-class run `k ↦ ⟦xs.extract 0 k⟧` (which equals `(buchiCongr_DMA na).run xs k` by `buchiCongr_DMA_run_eq`). The idempotent-power collapse lemma from INFRA-1 is used to show that when the Ramsey witness period `p` yields `b = ⟦xs.extract i (i+p)⟧` with `b^m = b`, the prefix classes at positions `i + k*p` equal `a` for the stabilising prefix class `a = ⟦xs.extract 0 i⟧`. API references: `mem_infOcc` (InfOcc.lean:88), `frequently_in_finite_type` (InfOcc.lean:46), `infinite_graph_ramsey`, `buchiCongr_DMA_run_eq` (OmegaRegularLanguage.lean ~line 405). This lemma is the direct bridge enabling Phase 4 of task 241 to close `b ∈ infOcc` and complete the forward direction of `buchiCongr_DMA_language_eq`. CI must pass green.",
+      "effort": "3-4 hours",
+      "parent_task": 241,
+      "topic": "Temporal Logic",
+      "dependencies": [
+        428
+      ],
+      "created": "2026-06-30T10:57:07Z",
+      "last_updated": "2026-06-30T12:30:00Z",
+      "artifacts": [
+        {
+          "type": "research",
+          "path": "specs/241_mcnaughton_theorem/reports/02_spawn-analysis.md",
+          "summary": "Spawn analysis from parent task 241"
+        },
+        {
+          "path": "specs/429_prove_ramsey_recurrentclass_lemma_for_buchicongruence_prefix_runs/plans/01_ramsey-recurrent-class.md",
+          "type": "plan",
+          "summary": "3-phase plan: Ramsey recurrent-class lemma"
+        },
+        {
+          "path": "specs/429_prove_ramsey_recurrentclass_lemma_for_buchicongruence_prefix_runs/summaries/01_ramsey-recurrent-class-summary.md",
+          "type": "summary",
+          "summary": "Ramsey recurrent-class lemma proved; CI green"
+        },
+        {
+          "type": "summary",
+          "path": "specs/429_prove_ramsey_recurrentclass_lemma_for_buchicongruence_prefix_runs/summaries/01_ramsey-recurrent-class-summary.md",
+          "summary": "Ramsey recurrent-class lemma; BuchiCongruence green"
+        }
+      ],
+      "session_id": "sess_1782817543_eee5ae_429",
+      "completion_summary": "Proved buchiCongruence_recurrentPrefixClass in BuchiCongruence.lean (Ramsey recurrent-class for [Finite State] prefix runs) + private bridge buchiCongr_recurrentClass in OmegaRegularLanguage.lean (gives a ∈ infOcc, the conclusion task 241 Phase 4 needs). Also got BuchiCongruence.lean building green (was a red module from the PR #609 toolchain bump). Both modules green, 0 sorries/0 axioms. Committed 8f044ab0, b9a021bc.",
+      "archived": "2026-06-30T14:51:50Z"
+    },
+    {
+      "project_number": 432,
+      "project_name": "fix_roadmap_integration_argv_overflow",
+      "status": "completed",
+      "task_type": "meta",
+      "priority": "low",
+      "description": "Fix .claude/scripts/roadmap-integration.sh which aborts with '/etc/profiles/per-user/benjamin/bin/python3: Argument list too long' at line 352 during /review. The script appears to pass file content (state.json/ROADMAP.md) as a python argv argument; pass via stdin or a temp file path instead so roadmap auto-annotation works again. Source: specs/reviews/review-2026-06-30.md low issue 2.",
+      "created": "2026-06-30T11:17:18Z",
+      "last_updated": "2026-06-30T11:32:55Z",
+      "session_id": "sess_1782818392_271f51_432",
+      "artifacts": [
+        {
+          "path": "specs/432_fix_roadmap_integration_argv_overflow/reports/01_argv-overflow-fix.md",
+          "type": "report",
+          "summary": "Identified two argv-overflow sites in roadmap-integration.sh"
+        },
+        {
+          "path": "specs/432_fix_roadmap_integration_argv_overflow/summaries/01_argv-overflow-fix-summary.md",
+          "type": "summary",
+          "summary": "Fixed argv overflow in roadmap-integration.sh and 2 sibling scripts"
+        }
+      ],
+      "completion_summary": "Fixed E2BIG argv overflow in roadmap-integration.sh by replacing content-passing with temp-file path-passing at two sites; applied the same mktemp pattern to issue-grouping.sh (2 sites) and tier-selection.sh (2 sites) for consistency. Verified against the real 94 KB state.json with no error and valid JSON output.",
+      "archived": "2026-06-30T14:51:50Z"
     }
   ],
   "archived_at": "2026-06-28T18:47:30Z"

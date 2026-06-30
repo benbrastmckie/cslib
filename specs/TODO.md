@@ -34,7 +34,7 @@ next_project_number: 433
 
 ### Modal Logic
 
-299 [PLANNED] — Implement tableau decision procedure for basic modal logic K with
+299 [RESEARCHING] — Implement tableau decision procedure for basic modal logic K with
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 404 [RESEARCHED] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
@@ -99,17 +99,6 @@ next_project_number: 433
 431 [NOT STARTED] — Audit the ~6 'sorry' occurrences that the 2026-06-30 review found
 
 ## Tasks
-
-### 432. Fix roadmap integration argv overflow
-- **Status**: [COMPLETED]
-- **Task Type**: meta
-- **Dependencies**: None
-- **Research**: [432_fix_roadmap_integration_argv_overflow/reports/01_argv-overflow-fix.md]
-- **Summary**: [432_fix_roadmap_integration_argv_overflow/summaries/01_argv-overflow-fix-summary.md]
-
-**Description**: Fix .claude/scripts/roadmap-integration.sh which aborts with '/etc/profiles/per-user/benjamin/bin/python3: Argument list too long' at line 352 during /review. The script appears to pass file content (state.json/ROADMAP.md) as a python argv argument; pass via stdin or a temp file path instead so roadmap auto-annotation works again. Source: specs/reviews/review-2026-06-30.md low issue 2.
-
----
 
 ### 431. Audit unowned foundational sorries
 - **Status**: [NOT STARTED]
@@ -193,36 +182,6 @@ After implementation:
 - `grep -n sorry Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean` returns nothing.
 - `grep -n sorry Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean` returns nothing.
 - Build remains green (no regressions in Scheme.lean or Soundness files).
-
----
-
-### 429. Prove ramsey recurrentclass lemma for buchicongruence prefix runs
-- **Effort**: 3-4 hours
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: Task 428
-- **Research**: [241_mcnaughton_theorem/reports/02_spawn-analysis.md]
-- **Plan**: [429_prove_ramsey_recurrentclass_lemma_for_buchicongruence_prefix_runs/plans/01_ramsey-recurrent-class.md]
-- **Summary**:
-  - [429_prove_ramsey_recurrentclass_lemma_for_buchicongruence_prefix_runs/summaries/01_ramsey-recurrent-class-summary.md]
-  - [429_prove_ramsey_recurrentclass_lemma_for_buchicongruence_prefix_runs/summaries/01_ramsey-recurrent-class-summary.md]
-
-**Description**: Prove a named lemma (suggested name: `buchiCongr_recurrentClass` or similar) in `Cslib/Computability/Languages/Congruences/BuchiCongruence.lean` (or `OmegaRegularLanguage.lean`) stating: for `[Finite State]` (where `State` is the state type of the NBA `na`) and any `xs : ωSequence Alphabet`, there exist quotient classes `a b : Quotient na.BuchiCongruence.eq` such that (1) `b * b = b` (b is idempotent), (2) `a * b = a`, and (3) `a ∈ (buchiCongr_DMA na).run xs |>.infOcc` (i.e., `∃ᶠ k in Filter.atTop, (buchiCongr_DMA na).run xs k = a`). The proof strategy mirrors `buchiFamily_cover` (BuchiCongruence.lean line 118) which already invokes `infinite_graph_ramsey`; the key adaptation is recasting the Ramsey argument on the prefix-class run `k ↦ ⟦xs.extract 0 k⟧` (which equals `(buchiCongr_DMA na).run xs k` by `buchiCongr_DMA_run_eq`). The idempotent-power collapse lemma from INFRA-1 is used to show that when the Ramsey witness period `p` yields `b = ⟦xs.extract i (i+p)⟧` with `b^m = b`, the prefix classes at positions `i + k*p` equal `a` for the stabilising prefix class `a = ⟦xs.extract 0 i⟧`. API references: `mem_infOcc` (InfOcc.lean:88), `frequently_in_finite_type` (InfOcc.lean:46), `infinite_graph_ramsey`, `buchiCongr_DMA_run_eq` (OmegaRegularLanguage.lean ~line 405). This lemma is the direct bridge enabling Phase 4 of task 241 to close `b ∈ infOcc` and complete the forward direction of `buchiCongr_DMA_language_eq`. CI must pass green.
-
----
-
-### 428. Expose buchicongruence eqvcls monoid and idempotent lemmas
-- **Effort**: 2-3 hours
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: None
-- **Research**: [241_mcnaughton_theorem/reports/02_spawn-analysis.md]
-- **Plan**: [428_expose_buchicongruence_eqvcls_monoid_and_idempotent_lemmas/plans/01_buchi-monoid-idempotent-lemmas.md]
-- **Summary**: [428_expose_buchicongruence_eqvcls_monoid_and_idempotent_lemmas/summaries/01_buchi-monoid-idempotent-lemmas-summary.md]
-
-**Description**: Add named lemmas to Cslib/Computability/Languages/Congruences/RightCongruence.lean and/or BuchiCongruence.lean exposing the multiplicative structure on BuchiCongruence quotient classes: (1) the well-definedness rewrite `⟦u ++ v⟧ = ⟦u⟧ · ⟦v⟧` (equivalently `Quotient.mk _ (u ++ v) = Quotient.mk _ u * Quotient.mk _ v`), confirming the `Mul` instance on `Quotient BuchiCongruence.eq` acts as concatenation; (2) the idempotent-power collapse lemma: if `b * b = b` (b is idempotent) then `b ^ k = b` for all `k ≥ 1`; and (3) the absorption corollary: if `b * b = b` and `a * b = a` then `a * b ^ k = a` for all `k`. These lemmas are purely algebraic about the existing `RightCongruence` monoid structure and carry no research-grade difficulty. They are the algebraic substrate needed by the Ramsey recurrent-class lemma (task INFRA-2) and ultimately by the forward direction of `buchiCongr_DMA_language_eq` in task 241. Files in scope: `Cslib/Computability/Languages/Congruences/RightCongruence.lean`, `Cslib/Computability/Languages/Congruences/BuchiCongruence.lean`. CI must pass green with `lake build` and `lake exe lint-style`.
 
 ---
 
@@ -462,32 +421,6 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 
 ---
 
-### 387. PL -> Propositional namespace rename (upstream-gated)
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: PL-Hygiene
-- **Dependencies**: Task 395
-- **Research**: [387_rename_namespace_pl_to_propositional/reports/01_rename-pl-to-propositional.md]
-
-**Description**: [REDIRECTED 2026-06-30 after upstream check] Original scope (breaking rename Cslib.Logic.PL -> Cslib.Logic.Propositional) ABANDONED: upstream leanprover/cslib standardizes on namespace Cslib.Logic.PL (Defs.lean:43, NaturalDeduction/Basic.lean:66; in place since #89 2026-04-06, survived #536). Upstream ORGANISATION.md (38 lines) mandates no 'Propositional' leaf and is marked provisional. The rename would break against upstream's merged public API and increase divergence. New scope (DONE): fixed local ORGANISATION.md Namespace Convention to document Cslib.Logic.PL <- Logics/Propositional/, matching upstream. Does not block PR #648.
-
----
-
-### 386. Fix Propositional-specific lake lint violations (21, post-merge)
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: PL-Hygiene
-- **Dependencies**: Task 395
-- **Research**: [386_fix_lake_lint_errors_propositional/reports/01_pl-lint-violations-fix-map.md]
-- **Plan**: [386_fix_lake_lint_errors_propositional/plans/01_fix-pl-lint-violations.md]
-- **Summary**:
-  - [386_fix_lake_lint_errors_propositional/summaries/01_fix-pl-lint-violations-summary.md]
-  - [386_fix_lake_lint_errors_propositional/summaries/01_fix-pl-lint-violations-summary.md]
-
-**Description**: [Refreshed by post-merge vet sess_1782671052_6af6a1; supersedes the pre-merge scope.] Fix the 21 PL-specific lake lint violations (hard CI gate for a clean repo push). (a) defsWithUnderscore (13) -> lowerCamelCase: GenericMCSBridge.lean:133 deriv_tree_to_list, :165 unfold_listImp_in_tree, :192 list_deriv_to_tree; SequentCalculus/LJ/CutElimination.lean:116/225/350 ljCutAdm_principal_andR/orR/impR, :462/543 ljCutAdm_left/right; SequentCalculus/LK/CutElimination.lean:145/293/437 cutAdm_right_andR/orR/impR, :586/708 cutAdm_right/left. (b) defLemma (1): GenericMCSBridge.lean:133 deriv_tree_to_list def->lemma (same decl as the rename). (c) docBlame (3): docstrings for Tableau/Classical/Expansion.lean:125 classicalExpandBranches.processNext, Tableau/Intuitionistic/Expansion.lean:169 intExpandBranches.go, Tableau/Intuitionistic/Rules.lean:91 isAccessible.go. (d) unusedArguments (3): targeted @[nolint unusedArguments] + comment: Metalogic/DeductionTheorem.lean:85 deductionWithMem arg9 _hA, Normalization/Termination.lean:41 conclusionGrounded arg6 _d, Tableau/Intuitionistic/Soundness.lean:1643 intBotForces arg1. (e) simpNF (1): Subformula.lean:173 vars_neg LHS not simp-normal (rewrite LHS or @[nolint simpNF]). Coordinate GenericMCSBridge renames with the cross-cutting task (403). Verify `lake lint` PL-clean. Source: specs/369_*/.vet-findings.json. [395-reconciled: task 386 OWNS the LK/LJ cutAdm_*/ljCutAdm_* underscore renames (defsWithUnderscore); task 392 drops them. Re-run `lake lint` after the build is green (task 385/IntFMPSpike) to refresh the exact violation set before fixing.]
-
----
-
 ### 375. Proof system equivalence tableau sequent edges
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
@@ -542,7 +475,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 299. Modal k tableau
-- **Status**: [PLANNED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

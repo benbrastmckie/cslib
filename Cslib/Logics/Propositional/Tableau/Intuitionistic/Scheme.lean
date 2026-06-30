@@ -90,6 +90,13 @@ structure IntMinScheme (Atom : Type*) [DecidableEq Atom] [Hashable Atom] where
           sf.sign == .neg && sf.formula == (HasBot.bot : Proposition Atom)
           && sf.label == w) →
         ¬ modelBot b w)
+  /-- No-contradiction: an open branch cannot contain both T(φ)@w and F(φ)@w.
+  Follows from the closure predicate checking complementary pairs (`Branch.hasContradiction`).
+  Needed for the atom F-direction in `truthLemma`. -/
+  no_contradiction : ∀ (b : IBranch Atom), closurePred b = false →
+      ∀ (φ : Proposition Atom) (w : Nat),
+        ¬ (b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w) = true ∧
+           b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) = true)
 
 /-! ## Intuitionistic Scheme Instance -/
 
@@ -134,6 +141,12 @@ def intScheme : IntMinScheme Atom where
     · -- F(⊥)@w ∈ b → ¬ (fun _ _ => False) b w = True (trivial)
       intro _
       exact id
+  no_contradiction := fun b hopen φ w => by
+    -- isIntuitionisticallyClosed b = false → Branch.hasContradiction b = false
+    simp only [isIntuitionisticallyClosed, Bool.or_eq_false_iff] at hopen
+    obtain ⟨_, hnocontra⟩ := hopen
+    -- Branch.hasContradiction = isMinimallyClosed (definitional)
+    exact minOpen_no_contradiction b hnocontra φ w
 
 /-! ## Minimal Scheme Instance -/
 
@@ -157,6 +170,8 @@ def minScheme : IntMinScheme Atom where
       -- Uses minOpen_no_contradiction: ¬ (T(⊥)@w ∈ b ∧ F(⊥)@w ∈ b)
       intro hFbot hTbot
       exact minOpen_no_contradiction b hopen (HasBot.bot : Proposition Atom) w ⟨hTbot, hFbot⟩
+  no_contradiction := fun b hopen φ w =>
+    minOpen_no_contradiction b hopen φ w
 
 /-! ## Generic Tableau Soundness -/
 
@@ -247,11 +262,32 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom)
       IForces (intExtractValuation b) (S.modelBot b) w φ) ∧
     (b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) →
       ¬ IForces (intExtractValuation b) (S.modelBot b) w φ) := by
-  -- Task 317: parametric Kripke truth lemma (formula induction + persistence/monotonicity
-  -- across Nat-labelled worlds + parametric modelBot/S.bot_truth). Sequenced after 317.
-  -- Note: the hsat parameter may need reformulation to `intStepBranch b e nw = none`
-  -- (matching the actual expanded-set/world from the loop) rather than `[] 0`.
-  sorry
+  -- Proof by induction on φ.
+  -- Atom and ⊥ cases are proved. Compound cases (and, or, imp) require saturation:
+  -- T(φ∧ψ)@w ∈ b → T(φ)@w ∈ b ∧ T(ψ)@w ∈ b (and analogues), which follows from a
+  -- structural saturation lemma on the expansion loop (task 317 blocker).
+  induction φ generalizing w with
+  | atom p =>
+    simp only [IForces_atom, intExtractValuation]
+    constructor
+    · exact id
+    · intro hneg hpos
+      exact S.no_contradiction b hopen (.atom p) w ⟨hpos, hneg⟩
+  | bot =>
+    simp only [IForces_bot]
+    exact S.bot_truth b hopen w
+  | imp φ' ψ' ih_φ' ih_ψ' =>
+    -- Task 317: requires saturation. T(φ'→ψ')@w: modus ponens across worlds;
+    -- F(φ'→ψ')@w: world-creating rule T(φ')@w' ∧ F(ψ')@w' for some w'>w.
+    sorry
+  | and φ' ψ' ih_φ' ih_ψ' =>
+    -- Task 317: T(φ'∧ψ')@w → T(φ')@w ∧ T(ψ')@w (alpha-rule saturation);
+    -- F(φ'∧ψ')@w → F(φ')@w ∨ F(ψ')@w (beta-rule saturation, one sub-branch).
+    sorry
+  | or φ' ψ' ih_φ' ih_ψ' =>
+    -- Task 317: T(φ'∨ψ')@w → T(φ')@w ∨ T(ψ')@w (beta-rule);
+    -- F(φ'∨ψ')@w → F(φ')@w ∧ F(ψ')@w (alpha-rule saturation).
+    sorry
 
 /-! ## Structural Lemmas for `openBranch_countermodel` -/
 

@@ -1,19 +1,19 @@
 ---
-next_project_number: 421
+next_project_number: 423
 ---
 
 # TODO
 
 ## Task Order
 
-*Updated 2026-06-29. Generated from state.json dependency graph.*
+*Updated 2026-06-30. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,180,226,241,299,301,317,321,370,386,387,388,396,400,401,403,404,406,407,411,415,419 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
-| 2 | 39,40,181,215,300,375,389,390,405,409 | 36,37,180,299,317,387,404,407 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,275,391,392,413 | 39,40,321,370,375,386,387,389 | Bimodal Porting, Foundations, PL-Docs, ... |
+| 2 | 39,40,181,215,300,375,389,390,405,409,421 | 36,37,180,299,317,387,404,407,411 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 3 | 41,275,391,392,413,422 | 39,40,321,370,375,386,387,389,421 | Bimodal Porting, Foundations, PL-Docs, ... |
 | 4 | 393,412,414 | 41,181,215,241,275,300,301,321,386,391 | Foundations, Code Hygiene, PL-Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -87,6 +87,8 @@ next_project_number: 421
 ### PL Metalogic
 
 370 [PLANNED] — Close the decidability asymmetry in the metalogic layer: classica
+421 [NOT STARTED] — Complete the Min side of parent task 370 by adding a sorry-free `
+  └─ 422 [NOT STARTED] — Reconcile the two parallel decidability developments coexisting o
 
 ### PL Equivalence
 
@@ -105,8 +107,29 @@ next_project_number: 421
 ### Uncategorized
 
 411 [NOT STARTED] — Adopt the complete, CI-green IntDecidability.lean from branch ref
+  └─ 421 [NOT STARTED] — (PL-Metalogic: Complete the Min side of parent task 370) (see above)
 
 ## Tasks
+
+### 422. Reconcile parallel Int/Min decidability routes (tableau vs FMP): canonical instance, docstrings, infrastructure
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: PL-Metalogic
+- **Dependencies**: Task 411, Task 421
+
+**Description**: Reconcile the two parallel decidability developments coexisting on main after task 411 (Int) and 421 (Min): the TABLEAU route (Tableau/{Intuitionistic,Minimal}/DecisionProcedure.lean: instDecidableDerivableIntPropAxiom / instDecidableDerivableMinPropAxiom — constructive proof-search/countermodel infra the modal/temporal/bimodal extensions build on via FromPropositional/Embedding; currently rests on the tableau-completeness sorries owned by task 317) and the FMP route (Metalogic/IntDecidability.lean + the new MinDecidability.lean: the primed FMP instances — sorry-free finite-model-property results with distinct theoretical value). BOTH routes are intentionally kept. RESEARCH + REFACTOR (zero new sorries): (1) INSTANCE RESOLUTION: main will have TWO `Decidable (Derivable IntPropAxiom φ)` (and two for Min) — an ambiguity hazard (Lean resolves by priority/most-recent silently). Designate ONE canonical `instance` per proposition class (recommended: keep the tableau instance canonical as the extension-facing one, or set explicit instance priorities) and demote the other to a named def/theorem that exposes the FMP result WITHOUT registering a competing instance; verify no downstream instance-resolution breakage in the modal/temporal/bimodal extensions. (2) NAMING: retire the primed `'` names; adopt principled suffixes (e.g. _tableau / _fmp) consistent with the canonical choice. (3) DOCSTRINGS/HEADERS: write the "two routes, distinct roles" narrative in IntDecidability.lean, MinDecidability.lean, and Tableau/{Intuitionistic,Minimal}/DecisionProcedure.lean; cross-reference each route from the other; state the FMP theoretical role vs the tableau operational role (proof search feeding logic extensions); note the tableau route becomes genuinely sorry-free only once task 317 lands. (4) INFRASTRUCTURE: assess IntFinWorld/MinFinWorld (FMP) vs the tableau Hintikka/branch machinery for shared abstractions worth factoring or cross-referencing; document the relationship between the duplicated truth lemmas (int_fin_truth_lemma/min_fin_truth_lemma [FMP] vs the parametric tableau truthLemma [317-owned]). DEPENDS ON 411 (Int FMP on main) and 421 (Min FMP on main) so both Int and Min instances are reconciled in one coherent pass. Coordinates with 317 (tableau sorry closure). ACCEPTANCE: exactly one canonical Decidable instance per Int and Min proposition with no resolution ambiguity; both routes carry cross-referenced two-routes docstrings; lake build/test/checkInitImports/lint-style/shake green; 0 new sorry/axiom; extensions still build.
+
+---
+
+### 421. Min-side FMP decidability: sorry-free Decidable (Derivable MinPropAxiom φ) mirroring the Int construction (completes parent 370 Min side)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: PL-Metalogic
+- **Dependencies**: Task 411
+
+**Description**: Complete the Min side of parent task 370 by adding a sorry-free `Decidable (Derivable MinPropAxiom φ)` instance via the finite model property, mirroring the Int FMP construction that task 411 adopts onto main (Metalogic/IntDecidability.lean: IntFinWorld → intFinVal → intFinVal_upward_closed → int_fin_truth_lemma → int_fmp → instDecidableDerivableIntPropAxiom'). The branch refactor/prop_logic provides ONLY IntDecidability.lean — there is NO Min FMP file to adopt — so this is a from-scratch MIRROR: build a MinFinWorld (minimal Kripke finite-world bounded by subformulas of φ; no ⊥/explosion since minimal logic lacks ⊥-elimination), the finite valuation + upward-closure lemma, a minimal finite truth lemma by formula induction, the finite model property (min_fmp), and the sorry-free Decidable instance (instDecidableDerivableMinPropAxiom'-style), proved correct against MinStrongCompleteness. Axioms must be EXACTLY propext/Classical.choice/Quot.sound (no sorryAx). Wire into Cslib.lean + barrel. DEPENDS ON 411 (the Int FMP construction must be on main to mirror its structure and reuse shared finite-world machinery). Coordinates with parent 370 (Int+Min decidability asymmetry) and 422 (route reconciliation). ACCEPTANCE: new sorry-free Min FMP Decidable instance; lake build/test/checkInitImports/lint-style/shake green; #print axioms shows no sorryAx; 0 new sorry.
+
+---
 
 ### 420. Doc: record native intuitionistic-embedding prerequisites
 - **Status**: [COMPLETED]

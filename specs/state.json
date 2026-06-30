@@ -653,6 +653,11 @@
           "path": "specs/180_temporal_primitive_always_historically/plans/01_primitive-gh-implementation.md",
           "type": "plan",
           "summary": "8-phase plan to promote allFuture/allPast to primitive Temporal.Formula constructors"
+        },
+        {
+          "path": "specs/180_temporal_primitive_always_historically/reports/02_implementation-attempt-status.md",
+          "type": "report",
+          "summary": "Where the parked implementation attempt left off; resume guidance for research/implement"
         }
       ],
       "topic": "Temporal Logic",

@@ -1,1 +1,21 @@
-{"status":"planned","summary":"Created an 8-phase implementation plan to promote allFuture (G) and allPast (H) to primitive Temporal.Formula constructors with structural semantics, sequenced syntax→semantics→proof system→metalogic→equivalence theorems and flagging TruthLemma/Completeness as highest-risk.","artifacts":[{"path":"specs/180_temporal_primitive_always_historically/plans/01_primitive-gh-implementation.md","type":"plan","summary":"8-phase plan: constructors+recursive fns, subformulas, structural G/H semantics, proof system, soundness/MCS, TruthLemma/Completeness (highest risk), tableau, classical-equivalence theorems + full CI"}],"blockers":[],"continuation_context":null,"next_action_hint":"implement"}
+{
+  "status": "partial",
+  "summary": "Implementation ATTEMPTED then parked. One agent run promoted allFuture/allPast toward primitive constructors (syntax layer green standalone) but exhausted its context window before completing the metalogic phases; no phase verified end-to-end. WIP preserved as a committed patch. Resume per-phase with --hard.",
+  "artifacts": [
+    {"path": "specs/180_temporal_primitive_always_historically/reports/01_primitive-always-historically-research.md", "type": "report", "summary": "Original research: primitive G/H motivation, axiom dependency analysis, scope assessment"},
+    {"path": "specs/180_temporal_primitive_always_historically/reports/02_implementation-attempt-status.md", "type": "report", "summary": "WHERE THINGS WERE LEFT: state after the parked implementation attempt — read this first"},
+    {"path": "specs/180_temporal_primitive_always_historically/plans/01_primitive-gh-implementation.md", "type": "plan", "summary": "8-phase plan; metadata Status=[PARTIAL] with an Implementation Status section + resume recipe"}
+  ],
+  "blockers": [
+    "Single multi-phase agent run exhausts context (Prompt too long) — task MUST be driven one phase per agent run (--hard).",
+    "Promoting the Formula constructor breaks the entire Temporal build until all 8 phases land, so #180 must be implemented alone on an otherwise-green Temporal tree (do not interleave with other Temporal-touching tasks)."
+  ],
+  "continuation_context": {
+    "phase_reached": "Attempt touched all 7 Temporal files (Syntax/Formula, Syntax/Subformulas, Semantics/Satisfies, ProofSystem/Axioms, ProofSystem/Instances, Tableau/Completeness, Tableau/Rules). Only the syntax layer is known-good: `lake build Cslib.Logics.Temporal.Syntax.Formula` is GREEN from the WIP. Semantics/proof-system/metalogic cases are incomplete and the full Temporal build is RED with the WIP applied.",
+    "wip_patch": "specs/180_temporal_primitive_always_historically/wip/01_primitive-gh-wip.patch (1063 lines; committed; applies cleanly to HEAD 8833bbd3; also in git stash@{0} 'task180-wip-primitive-gh')",
+    "resume_recipe": "git apply specs/180_temporal_primitive_always_historically/wip/01_primitive-gh-wip.patch, then drive ONE plan phase per agent run (--hard). Mark each `### Phase N` heading [COMPLETED] only after its scoped lake build is green.",
+    "next_phase": 2,
+    "notes": "Phase 1 (syntax constructors) substantially in the WIP and building. Next real work is Phase 2/3 (recursive functions over Formula + structural G/H semantics in Satisfies.lean), then the high-risk metalogic phases (Chronicle/TruthLemma, Completeness). The original research report's axiom-dependency analysis still holds; a fresh /research pass should focus on the metalogic case obligations (Soundness, MCS, TruthLemma) rather than re-deriving syntax/semantics."
+  },
+  "next_action_hint": "implement"
+}

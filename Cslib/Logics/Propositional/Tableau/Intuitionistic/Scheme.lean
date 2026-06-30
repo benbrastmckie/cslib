@@ -53,6 +53,51 @@ open Cslib.Logic.Tableau
 
 variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 
+/-! ## IBranchSaturation -/
+
+/-- Saturation conditions for an open intuitionistic tableau branch.
+
+A branch `b` is Hintikka-saturated if every compound formula on `b` has its rule outputs
+also on `b`: alpha-rule formulas have BOTH outputs, beta-rule formulas have AT LEAST ONE
+output (corresponding to the sub-branch taken), and the world-creating F(φ→ψ) rule has
+T(φ) and F(ψ) at a fresh world.
+
+These conditions are established structurally by `intExpandBranches_openBranch_sat` (task 317,
+pending) via induction on the expansion loop. The key step: `intStepBranch b e nw = none`
+implies every compound formula in `b` is in `e`, and formulas in `e` had their rule outputs
+added to an ancestor branch; branch monotonicity carries them forward to `b`.
+
+Note on `sat_fimp`: the new world `w'` satisfies `w ≤ w'` because the expansion assigns
+strictly increasing world labels (nextWorld starts at 1 and only increments). -/
+structure IBranchSaturation (Atom : Type*) [DecidableEq Atom] [Hashable Atom]
+    (b : IBranch Atom) where
+  /-- T(φ∧ψ)@w ∈ b → T(φ)@w ∈ b ∧ T(ψ)@w ∈ b (alpha-rule saturation) -/
+  sat_tand : ∀ (φ ψ : Proposition Atom) (w : Nat),
+      b.any (fun sf => sf.sign == .pos && sf.formula == .and φ ψ && sf.label == w) = true →
+      b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w) = true ∧
+      b.any (fun sf => sf.sign == .pos && sf.formula == ψ && sf.label == w) = true
+  /-- F(φ∧ψ)@w ∈ b → F(φ)@w ∈ b ∨ F(ψ)@w ∈ b (beta-rule: one sub-branch taken) -/
+  sat_fand : ∀ (φ ψ : Proposition Atom) (w : Nat),
+      b.any (fun sf => sf.sign == .neg && sf.formula == .and φ ψ && sf.label == w) = true →
+      b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) = true ∨
+      b.any (fun sf => sf.sign == .neg && sf.formula == ψ && sf.label == w) = true
+  /-- T(φ∨ψ)@w ∈ b → T(φ)@w ∈ b ∨ T(ψ)@w ∈ b (beta-rule: one sub-branch taken) -/
+  sat_tor : ∀ (φ ψ : Proposition Atom) (w : Nat),
+      b.any (fun sf => sf.sign == .pos && sf.formula == .or φ ψ && sf.label == w) = true →
+      b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w) = true ∨
+      b.any (fun sf => sf.sign == .pos && sf.formula == ψ && sf.label == w) = true
+  /-- F(φ∨ψ)@w ∈ b → F(φ)@w ∈ b ∧ F(ψ)@w ∈ b (alpha-rule saturation) -/
+  sat_for_ : ∀ (φ ψ : Proposition Atom) (w : Nat),
+      b.any (fun sf => sf.sign == .neg && sf.formula == .or φ ψ && sf.label == w) = true →
+      b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) = true ∧
+      b.any (fun sf => sf.sign == .neg && sf.formula == ψ && sf.label == w) = true
+  /-- F(φ→ψ)@w ∈ b → ∃ w' ≥ w, T(φ)@w' ∈ b ∧ F(ψ)@w' ∈ b (world-creating rule) -/
+  sat_fimp : ∀ (φ ψ : Proposition Atom) (w : Nat),
+      b.any (fun sf => sf.sign == .neg && sf.formula == .imp φ ψ && sf.label == w) = true →
+      ∃ (w' : Nat), w ≤ w' ∧
+        b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w') = true ∧
+        b.any (fun sf => sf.sign == .neg && sf.formula == ψ && sf.label == w') = true
+
 /-! ## IntMinScheme Structure -/
 
 /-- A tableau scheme bundling the two divergence points between the intuitionistic and

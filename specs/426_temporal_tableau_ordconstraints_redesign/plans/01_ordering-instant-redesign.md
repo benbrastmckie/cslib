@@ -257,7 +257,7 @@ Phase 1 structure), so it can run in parallel with Phase 2/3.
 
 ---
 
-### Phase 5: Remove the false lemma, wire order-preservation, final sorry-free verification [NOT STARTED]
+### Phase 5: Remove the false lemma, wire order-preservation, final sorry-free verification [COMPLETED]
 
 **Goal**: Remove/replace the false `ordConstraints_strict` comment block, wire the
 order-preservation component of `branchSat` (`D = ℤ`, `f = ord.instant`, `hf` from Phase 3) as far

@@ -24,54 +24,44 @@ procedure: an open saturated branch yields a countermodel.
 - `openBranch_noBotPos`: An open branch has no T(⊥) on it.
 - `openBranch_noContradiction`: An open branch has no simultaneous T(φ)@t and F(φ)@t.
 - `extractModel_atom_neg_notSat`: F(atom p)@t on an open branch implies
-  ¬ Satisfies (extractModel b) t (.atom p). Proved using `List.findSome?_isSome_iff`
-  to witness a contradiction pair, contradicting `openBranch_noContradiction`.
+  ¬ Satisfies (extractModel b) t (.atom p).
+- `extractModelℤ`: Constructs a `TemporalModel ℤ Atom` keyed on `ord.instant`.
+  This is the corrected countermodel for `openBranch_branchSat` (task 426): the time
+  domain is `D = ℤ` with `f = ord.instant`, which is order-preserving by `InstantStrict`.
+- `extractModelℤ_atomPos_sat`, `extractModelℤ_bot_false`: Basic properties of the ℤ model.
+- `extractModelℤ_atom_neg_notSat`: Negative atom property (requires injectivity hypothesis).
 
 ## Blocked Obligations
 
 The following results cannot be proved in the current scope.
 
-### Blocked (Design Issue — ordConstraints_strict Misstated)
+### Ordering Design: RESOLVED (Task 426)
 
-The previously listed obligation `ordConstraints_strict` is **not** merely proof-complex:
-the lemma as stated is FALSE. The `addPast t tNew` function adds `(tNew, t)` to the
-constraint store, where `tNew = branchNextTime b > t`. So `(tNew, t) ∈ constraints`
-but `tNew > t`, violating `∀ (a, b) ∈ constraints, a < b`.
-
-This means the `openBranch_branchSat` approach using `D = Nat` and `f = id` cannot
-work for branches with past-formula constraints. A topological-sort extraction or a
-different domain is needed. See the blocked section below for details.
+The false `ordConstraints_strict` (which claimed `a < b` for all `(a,b) ∈ constraints`
+as Nat labels) has been replaced by `TimeOrdering.InstantStrict` and the `D = ℤ / f =
+ord.instant` choice (task 426). The `openBranch_branchSat` sketch below reflects the
+corrected design. Remaining blockers: (1) run-level `InstantStrict` proof (task 426
+Phase 3, blocked on `processNext` refactor), (2) FMP for the Until/Since cases.
 
 ### Blocked (Proof Complexity — No Theoretical Blocker)
 
-1. `temporalTruthLemma_propositional` (propositional cases): The truth lemma
-   for `imp`/`neg`/`and`/`or` cases requires detailed case analysis of
-   `tryAllPropRules` output in `temporalApplyOne`, reproducing the classical
-   truth lemma proof but with time-indexed `temporalHintikkaSet`.
-   (Note: `extractModel_atom_neg_notSat` is now proved and available.)
+1. `temporalTruthLemma_propositional` (imp case): The propositional imp case requires
+   detailed case analysis of `tryAllPropRules` output. Task 427 handles this.
 
 ### Blocked (FMP Required — Theoretical Blocker)
 
-2. `temporalTruthLemma_untl`: Until eventuality fulfilment case. Proving
-   T(U(guard,event))@t ∈ b → ∃ s > t, event holds at s ∧ guard holds between,
-   in the extracted model requires either FMP for PTL or an explicit loop-
-   unwinding argument showing the time-subset blocking structure yields a model
-   where all pending eventualities are periodically re-satisfied.
+2. `temporalTruthLemma_untl`: Until eventuality fulfilment requires PTL FMP.
 
-3. `temporalTruthLemma_snce`: Since eventuality fulfilment case. Symmetric
-   to (2) in the past direction.
+3. `temporalTruthLemma_snce`: Since eventuality fulfilment case (symmetric to 2).
 
 4. `openBranch_branchSat`, `temporalTableau_complete`, `instDecidableValid`:
-   All blocked by the ordConstraints design issue + (2) + (3).
+   Blocked by (2) + (3) + run-level `InstantStrict` (task 426 Phase 3).
 
 ## Decomposition Recommendation
 
-The most tractable path to closing these obligations:
-1. Fix `ordConstraints_strict` design issue: either use a topological sort to build
-   a valid time assignment `f`, or separate the past/future constraint handling.
-2. For propositional truth lemma: adapt `Propositional/Tableau/Classical/Completeness.lean`.
-3. For Until/Since completeness: either import PTL FMP once proved, or construct
-   an explicit finite unwinding of the time-subset-blocked tableau graph.
+1. Task 427: Complete the propositional truth lemma (imp case).
+2. Task 426 Phase 3 follow-up: Factor out `processNext` to enable loop invariant induction.
+3. FMP task: Prove PTL Finite Model Property for Until/Since eventualities.
 
 ## References
 
@@ -376,37 +366,29 @@ The following section documents proof obligations that remain blocked.
 These are stated as structured goal declarations in comments.
 None use `sorry` or new axioms.
 
-### Blocked: Ord Constraints Are Strict (DESIGN ISSUE — Lemma False as Stated)
+### Time-Ordering Invariant: InstantStrict (RESOLVED — Task 426)
 
-**Status**: This lemma as stated is FALSE due to a design issue in the time-ordering scheme.
+**Status**: The false `ordConstraints_strict` lemma (which claimed `a < b` for all
+constraint pairs `(a, b)` as Nat labels) has been REPLACED by the corrected
+`InstantStrict` invariant (TimeOrdering.lean). See `TimeOrdering.InstantStrict`.
 
-**The problem**: `addPast t tNew` adds the constraint `(tNew, t)` to `ord.constraints`,
-meaning "tNew is before t" semantically. But `tNew = branchNextTime b`, which by
-`branchNextTime_gt` satisfies `sf.label < tNew` for all `sf ∈ b`, so `tNew > t` in Nat.
+**The fix**: `TimeOrdering` now carries an `instant : Nat → ℤ` field. Each `addFuture t
+tNew` sets `instant tNew = instant t + 1`, and each `addPast t tNew` sets
+`instant tNew = instant t - 1`. The invariant `InstantStrict ord : ∀ a b, (a,b) ∈
+ord.constraints → ord.instant a < ord.instant b` holds edge-by-edge from `empty`
+through every `addFuture`/`addPast` (proved sorry-free in TimeOrdering.lean).
 
-Therefore `(tNew, t) ∈ ord.constraints` with `tNew > t`, violating the claimed
-`∀ t t', (t, t') ∈ ord.constraints → t < t'`.
+**Order-preservation choice**: `D = ℤ`, `f = ord.instant`. The corrected
+`openBranch_branchSat` sketch (below) uses `⟨ℤ, inferInstance, inferInstance,
+extractModelℤ b ord, ord.instant, hInst, …⟩` where `hInst` is the run-level
+`InstantStrict ord` lemma. Proving `hInst` requires threading the invariant through
+`temporalExpandBranches` (see Phase 3 blocker in task 426's plan — the inner `let rec
+processNext` cannot be targeted by standard induction tactics until factored out).
 
-**Design note**: The `TimeOrdering` uses Nat labels as identifiers, not as time values.
-The constraint store defines the semantic ordering. When extracting a model with `f = id`,
-the model only works for branches with only `addFuture` constraints. For branches with
-`addPast` (from `snce` / past-existential rules), a different extraction is needed.
-
-**Consequence**: `openBranch_branchSat` with `D = Nat` and `f = id` cannot be proved
-in general. The completeness proof requires either:
-1. Restricting to formulas without `snce` (future-only temporal logic), OR
-2. A topological-sort-based extraction that maps labels to a consistent linear order, OR
-3. Constructing `branchSat` directly without the constraint-preserving requirement.
-
-```lean
--- BLOCKED (design issue): ordConstraints_strict is false for branches using addPast.
--- The addPast rule adds (tNew, t) where tNew = branchNextTime b > t.
--- This makes (tNew, t) ∈ constraints but tNew > t, violating the claimed invariant.
---
--- lemma ordConstraints_strict (φ : Formula Atom) (b : TBranch Atom) (ord : TimeOrdering)
---     (hresult : temporalTableau φ = .openBranch b ord) :
---     ∀ t t', (t, t') ∈ ord.constraints → t < t' := ...
-```
+**Why `ordConstraints_strict` is false**: `addPast t tNew` records `(tNew, t)` with
+`tNew = branchNextTime b > t` (by `branchNextTime_gt`). So `(tNew, t) ∈ constraints`
+but `tNew > t`, violating `∀ (a,b), a < b`. The Nat label is a fresh identifier, not
+a semantic time value; `ord.instant` carries the semantic order instead.
 
 ### Propositional Truth Lemma
 
@@ -498,16 +480,24 @@ lemma temporalTruthLemma_propositional
 
 ### Blocked: Open Branch Satisfiability
 
+Order-preservation component: UNLOCKED by task 426 (uses `D = ℤ`, `f = ord.instant`,
+`hInst` from the run-level `InstantStrict` lemma). Remaining blocker: the full
+`temporalTruthLemma` (FMP-blocked) and the run-level `InstantStrict` proof (Phase 3
+of task 426, requires factoring out `processNext`).
+
 ```lean
--- BLOCKED: depends on ordConstraints_strict + full temporalTruthLemma.
+-- BLOCKED: full temporalTruthLemma requires PTL FMP.
+-- Order-preservation component is NOW CORRECT with D=ℤ, f=ord.instant, hInst=InstantStrict.
+-- Phase 3 of task 426 (run-level InstantStrict) remains BLOCKED pending processNext refactor.
 --
 -- lemma openBranch_branchSat
 --     (b : TBranch Atom) (ord : TimeOrdering) (tracker : EventualityTracker Atom)
---     (hH : temporalHintikkaSet b ord tracker) :
+--     (hH : temporalHintikkaSet b ord tracker)
+--     (hInst : TimeOrdering.InstantStrict ord) :   -- from run-level invariant (task 426 Ph3)
 --     branchSat b ord :=
---   ⟨Nat, inferInstance, inferInstance, extractModel b, id,
---    fun t t' hconstr => ordConstraints_strict ... t t' hconstr,
---    fun sf hmem => temporalTruthLemma ... sf.sign sf.label sf.formula ...⟩
+--   ⟨ℤ, inferInstance, inferInstance, extractModelℤ b ord, ord.instant,
+--    fun t t' hconstr => hInst t t' hconstr,         -- order-preservation: PROVABLE
+--    fun sf hmem => temporalTruthLemma … ⟩           -- truth lemma: BLOCKED (FMP)
 ```
 
 ### Blocked: Completeness Theorem

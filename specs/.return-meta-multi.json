@@ -1,11 +1,9 @@
 {
   "status": "partial",
   "metadata": {
-    "tasks_completed": [],
-    "tasks_partial": [426, 427],
-    "tasks_blocked_by_dependency": [425, 301],
-    "tasks_failed": [],
-    "cycles_used": 4,
+    "tasks_completed": [428, 429],
+    "tasks_failed": [241],
+    "cycles_used": 6,
     "multi_task_mode": true
   }
 }

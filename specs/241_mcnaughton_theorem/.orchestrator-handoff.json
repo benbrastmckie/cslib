@@ -1,48 +1,33 @@
 {
   "status": "partial",
-  "summary": "Phase 4 advanced: run-state lemma buchiCongr_DMA_run_eq PROVED & committed (44280434), verified green (axiom-clean, no sorry). Two subsequent dispatches attempting the language equality buchiCongr_DMA_language_eq (forward inclusion) both hit agent CONTEXT OVERFLOW with zero commits. Root cause diagnosed: the forward direction is the research-grade core of McNaughton and requires NEW recurrent-class/idempotent infrastructure that the BuchiCongruence API does not yet expose. Task needs decomposition, not brute-force re-dispatch.",
-  "artifacts": [
-    {"path": "Cslib/Computability/Languages/OmegaRegularLanguage.lean", "type": "lean_file", "summary": "buchiCongr_DMA def (~line 380); buchiCongr_DMA_run_eq PROVED (line 405); proof_wanted buchiCongr_DMA_language_eq (line 430); proof_wanted IsRegular.iff_da_muller (line 481)"},
-    {"path": "specs/241_mcnaughton_theorem/plans/01_mcnaughton-da-muller.md", "type": "plan", "summary": "6-phase plan; phases 0-3 complete; phase 4 partial (run_eq done)"}
-  ],
   "phases_completed": 3,
   "phases_total": 6,
-  "sorry_inventory": [],
+  "summary": "INFRA now COMPLETE: tasks 428 (monoid + idempotent/absorption lemmas) and 429 (recurrentClass Ramsey lemma) landed green and are committed. With that infrastructure available, two fresh full-resource dispatches at the forward inclusion (buchiCongr_DMA_language_forward) STILL overflowed a single agent (one OUTPUT-token limit, one CONTEXT 'prompt too long') with zero committed proof. Conclusion: the proof *assembly* of the forward direction — not its prerequisites — is itself too large for one dispatch and must be decomposed into named sub-lemmas.",
   "blockers": [
-    "Phase 4 forward inclusion (language na ⊆ language (buchiCongr_DMA na)) requires proving that some recurrent prefix-class b ∈ infOcc((buchiCongr_DMA na).run xs) forms a 'good' pair (a,b) with buchiFamily(a,b) ⊆ language na. This is a Ramsey/idempotent argument with no existing API support; it overflows a single agent context."
+    "buchiCongr_DMA_language_forward (language na ⊆ language (buchiCongr_DMA na)) overflows a single agent dispatch even with the 428/429 API present. The proof must be split into committable sub-lemmas, each provable in its own dispatch."
   ],
-  "blocked_phase": "Phase 4: buchiCongr_DMA_language_eq",
-  "requires_user_review": true,
   "continuation_context": {
-    "what_is_done": "buchiCongr_DMA (DA.Muller over Quotient na.BuchiCongruence.eq) builds green. buchiCongr_DMA_run_eq committed (44280434): (buchiCongr_DMA na).run xs n = ⟦xs.extract 0 n⟧.",
-    "what_remains": "proof_wanted buchiCongr_DMA_language_eq (line 430): language (buchiCongr_DMA na) = language na; then Phase 5 (wire h_pkg) and Phase 6 (close IsRegular.iff_da_muller, line 481).",
+    "what_is_done": "buchiCongr_DMA builds green; buchiCongr_DMA_run_eq committed; INFRA complete and committed: buchiCongruence_instMonoid, buchiCongruence_mk_append (@[simp]), buchiCongruence_idempotentPow, buchiCongruence_absorption (BuchiCongruence.lean); buchiCongruence_recurrentPrefixClass (public, BuchiCongruence.lean); buchiCongr_recurrentClass (private, OmegaRegularLanguage.lean) giving a,b with b*b=b, a*b=a, a in infOcc(run xs). A forward-lemma STUB buchiCongr_DMA_language_forward exists with a sorry (line ~435, committed by concurrent work).",
+    "what_remains": "Replace the sorry in buchiCongr_DMA_language_forward; then prove backward inclusion; then close buchiCongr_DMA_language_eq (line 460) by antisymmetry; then Phase 5 (wire h_pkg) and Phase 6 (close IsRegular.iff_da_muller, line ~497).",
+    "suggested_subdecomposition": [
+      "SUB-A: accept-membership lemma — for xs in language na, show infOcc((buchiCongr_DMA na).run xs) contains a class b for which ∃ a, (buchiFamily (a,b) ⊓ language na).Nonempty, using buchiCongr_recurrentClass + buchiFamily_saturation + buchiCongr_DMA_run_eq. This is the heart of the forward direction.",
+      "SUB-B: forward lemma — buchiCongr_DMA_language_forward from SUB-A by unfolding DA.Muller language (DA/Basic.lean:117) and the accept set.",
+      "SUB-C: backward lemma — buchiCongr_DMA_language_backward from accept-set unfolding + buchiFamily_saturation.",
+      "SUB-D: combine — buchiCongr_DMA_language_eq via ωLanguage/Set antisymmetry of SUB-B and SUB-C; then Phases 5-6."
+    ],
     "exact_api_map": {
-      "DA.Muller language": "language da xs ↔ (da.run xs).infOcc ∈ da.accept  (DA/Basic.lean:117)",
-      "run": "da.run xs : ωSequence State  (DA/Basic.lean:53); run_zero, run_succ available",
-      "mem_infOcc": "x ∈ xs.infOcc ↔ ∃ᶠ k in atTop, xs k = x  (InfOcc.lean:88)",
-      "frequently_in_finite_type": "[Finite α] gives ∃ x, ∃ᶠ k, xs k = x  (InfOcc.lean:46)",
-      "buchiFamily": "buchiFamily (a,b) = eqvCls a * (eqvCls b)^ω  (BuchiCongruence.lean:103)",
-      "mem_buchiFamily": "xs ∈ buchiFamily (a,b) ↔ ∃ xl xls, xl ∈ eqvCls a ∧ (∀k, xls k ∈ eqvCls b - 1) ∧ xl ++ω xls.flatten = xs  (line 107)",
-      "buchiFamily_cover": "[Finite State] ⊢ ⨆ i, buchiFamily i = ⊤  (line 118) — uses infinite_graph_ramsey",
-      "buchiFamily_saturation": "Saturates (fun i => (buchiFamily i).toSet) (language na).toSet  (line 181); Saturates def at Foundations/Data/Set/Saturation.lean:25",
-      "buchiCongruence_fin_index": "[Finite State] ⊢ Finite (Quotient BuchiCongruence.eq)  (line 75)",
+      "DA.Muller language": "language da xs ↔ (da.run xs).infOcc ∈ da.accept (DA/Basic.lean:117)",
+      "recurrentClass": "buchiCongr_recurrentClass: a,b with b*b=b, a*b=a, a ∈ ((buchiCongr_DMA na).run xs).infOcc",
+      "run_eq": "buchiCongr_DMA_run_eq: (buchiCongr_DMA na).run xs n = ⟦xs.extract 0 n⟧",
+      "saturation": "buchiFamily_saturation (BuchiCongruence.lean:181); Saturates def Foundations/Data/Set/Saturation.lean:25",
+      "buchiFamily": "buchiFamily/mem_buchiFamily (BuchiCongruence.lean:103/107); buchiFamily_cover (line 118)",
+      "infOcc": "mem_infOcc (InfOcc.lean:88); frequently_in_finite_type (InfOcc.lean:46)",
       "accept_set": "{S | ∃ b ∈ S, ∃ a, ((buchiFamily (a,b) ⊓ language na).toSet).Nonempty}"
     },
-    "subtlety": "The (a,b) from buchiFamily_cover is NOT automatically the recurrent prefix-class. Prefix class after f(k) symbols is ⟦xl ++ blocks⟧ = a · b^k in the syntactic monoid. For b ∈ infOcc one needs idempotent structure (b·b=b, a·b=a) so prefix classes stabilize and the relevant recurrent class actually appears infinitely often in the run. This idempotent/recurrence layer is the missing infrastructure.",
     "key_files": [
       "Cslib/Computability/Languages/OmegaRegularLanguage.lean",
-      "Cslib/Computability/Languages/Congruences/BuchiCongruence.lean",
-      "Cslib/Computability/Languages/Congruences/RightCongruence.lean",
-      "Cslib/Foundations/Data/OmegaSequence/InfOcc.lean",
-      "Cslib/Computability/Automata/DA/Basic.lean"
-    ],
-    "recommended_decomposition": [
-      "INFRA-1: eqvCls multiplicative facts — expose ⟦u⟧·⟦v⟧ = ⟦u++v⟧ and an idempotent-power lemma for the BuchiCongruence monoid (likely needs RightCongruence monoid structure).",
-      "INFRA-2: recurrent-class lemma — for [Finite State] and any xs, ∃ a b, b idempotent, a·b=a, and ⟦xs.extract 0 n⟧ = a frequently (Ramsey over the prefix-class run, mirroring buchiFamily_cover).",
-      "FWD: language na ⊆ language (buchiCongr_DMA na) using INFRA-2 + buchiFamily_saturation + buchiCongr_DMA_run_eq.",
-      "BWD: language (buchiCongr_DMA na) ⊆ language na from accept-set unfolding + buchiFamily_saturation.",
-      "COMBINE: buchiCongr_DMA_language_eq := Set/language antisymmetry of FWD and BWD."
+      "Cslib/Computability/Languages/Congruences/BuchiCongruence.lean"
     ]
   },
-  "next_action_hint": "Decompose Phase 4: /spawn 241 to create INFRA-1 (eqvCls monoid/idempotent lemmas) and INFRA-2 (recurrent-class Ramsey lemma) as prerequisite tasks, OR /revise 241 to re-plan Phase 4 into these explicit small lemma phases. Each piece is single-dispatch-sized; the monolithic proof is not."
+  "next_action_hint": "Run /spawn 241 to create SUB-A (accept-membership Ramsey lemma) as a prerequisite — it is the single hardest piece and is dispatch-sized on its own. Then SUB-B/C/D become small. Do NOT re-dispatch the monolithic forward proof; it has now overflowed three times total."
 }

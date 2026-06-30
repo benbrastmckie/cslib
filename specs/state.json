@@ -414,7 +414,7 @@
     {
       "project_number": 241,
       "project_name": "mcnaughton_theorem",
-      "status": "implementing",
+      "status": "blocked",
       "task_type": "cslib",
       "description": "Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller) establishing equivalence between omega-regular languages and deterministic Muller automata. Research phase should evaluate ctchou/AutomataTheory (independent Lean 4 project that claims McNaughton already proved) for architectural compatibility, portability, and licensing before deciding whether to port, adapt, or develop independently.",
       "topic": "Temporal Logic",
@@ -448,7 +448,8 @@
         }
       ],
       "session_id": "sess_1782816794_a788ac",
-      "previous_status": "implementing"
+      "previous_status": "implementing",
+      "blockers": "Forward inclusion buchiCongr_DMA_language_forward overflows a single agent dispatch even with 428/429 infrastructure present; needs sub-lemma decomposition (see .orchestrator-handoff.json suggested_subdecomposition). Run /spawn 241."
     },
     {
       "project_number": 226,

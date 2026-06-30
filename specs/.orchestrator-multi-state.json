@@ -1,63 +1,68 @@
 {
-  "session_id": "sess_1782820639_7ae02f",
+  "session_id": "sess_1782831123_d3749c",
   "task_numbers": [
-    317,
-    430
+    427,
+    426,
+    425,
+    301
   ],
   "waves": [
     [
-      317
+      427,
+      426
     ],
     [
-      430
+      425
+    ],
+    [
+      301
     ]
   ],
   "dependency_graph": {
-    "317": [],
-    "430": [
-      "317"
+    "427": [],
+    "426": [],
+    "425": [
+      "426",
+      "427"
+    ],
+    "301": [
+      "426",
+      "427",
+      "425"
     ]
   },
-  "max_cycles": 10,
-  "cycle_count": 4,
-  "failed_tasks": [],
-  "completed_tasks": [],
+  "max_cycles": 20,
+  "cycle_count": 6,
+  "failed_tasks": [
+    241
+  ],
+  "completed_tasks": [
+    428,
+    429
+  ],
   "current_statuses": {
-    "317": "implementing",
-    "430": "researched",
-    "429": "completed",
-    "241": "implementing",
-    "299": "partial",
-    "426": "partial",
     "427": "partial",
+    "426": "partial",
     "425": "not_started",
-    "301": "blocked"
+    "301": "blocked",
+    "241": "blocked"
   },
   "task_dirs": {
-    "317": "specs/317_propositional_tableau_completeness",
-    "430": "specs/430_prove_atom_persistence_upward_closure_for_intexpan"
+    "427": "specs/427_temporal_tableau_propositional_truth_lemma",
+    "426": "specs/426_temporal_tableau_ordconstraints_redesign",
+    "425": "specs/425_temporal_tableau_ptl_fmp_decidability",
+    "301": "specs/301_temporal_tableau"
   },
   "research_agents": {
-    "317": "cslib-research-agent",
-    "430": "cslib-research-agent"
+    "427": "cslib-research-agent",
+    "426": "cslib-research-agent",
+    "425": "cslib-research-agent",
+    "301": "cslib-research-agent"
   },
   "implement_agents": {
-    "317": "cslib-implementation-agent",
-    "430": "cslib-implementation-agent"
-  },
-  "plan_paths": {
-    "317": "specs/317_propositional_tableau_completeness/plans/02_tableau-completeness-unified.md"
-  },
-  "notes": "cycle1: 317 broad dispatch overflowed (Prompt too long), zero net change. HEAD committed-RED since c648603b: truthLemma hsat param not threaded into intTruthLemma/minTruthLemma. Keystone=B2 intExpandBranches_openBranch_sat leaf sorries (Scheme.lean ~481/536/550).",
-  "build_green": true,
-  "head_commit": "687f4962",
-  "b2_progress": "580 closed; 511 (easy, hfuel precond) + 566 (expanded-set invariant) OPEN. 566 caused 2 overflows - too large for single dispatch.",
-  "partial_tasks": [
-    426,
-    427
-  ],
-  "blocked_by_dependency": [
-    425,
-    301
-  ]
+    "427": "cslib-implementation-agent",
+    "426": "cslib-implementation-agent",
+    "425": "cslib-implementation-agent",
+    "301": "cslib-implementation-agent"
+  }
 }

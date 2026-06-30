@@ -23,54 +23,53 @@ procedure: an open saturated branch yields a countermodel.
 - `extractModel_bot_false`: ⊥ is never satisfied in any extracted model.
 - `openBranch_noBotPos`: An open branch has no T(⊥) on it.
 - `openBranch_noContradiction`: An open branch has no simultaneous T(φ)@t and F(φ)@t.
+- `extractModel_atom_neg_notSat`: F(atom p)@t on an open branch implies
+  ¬ Satisfies (extractModel b) t (.atom p). Proved using `List.findSome?_isSome_iff`
+  to witness a contradiction pair, contradicting `openBranch_noContradiction`.
 
 ## Blocked Obligations
 
 The following results cannot be proved in the current scope.
 
-### Blocked (Proof Complexity — No Theoretical Blocker)
+### Blocked (Design Issue — ordConstraints_strict Misstated)
 
-These results are in principle provable without FMP but require
-substantial proof engineering:
+The previously listed obligation `ordConstraints_strict` is **not** merely proof-complex:
+the lemma as stated is FALSE. The `addPast t tNew` function adds `(tNew, t)` to the
+constraint store, where `tNew = branchNextTime b > t`. So `(tNew, t) ∈ constraints`
+but `tNew > t`, violating `∀ (a, b) ∈ constraints, a < b`.
+
+This means the `openBranch_branchSat` approach using `D = Nat` and `f = id` cannot
+work for branches with past-formula constraints. A topological-sort extraction or a
+different domain is needed. See the blocked section below for details.
+
+### Blocked (Proof Complexity — No Theoretical Blocker)
 
 1. `temporalTruthLemma_propositional` (propositional cases): The truth lemma
    for `imp`/`neg`/`and`/`or` cases requires detailed case analysis of
    `tryAllPropRules` output in `temporalApplyOne`, reproducing the classical
    truth lemma proof but with time-indexed `temporalHintikkaSet`.
-
-2. `ordConstraints_strict`: The `TimeOrdering` maintained by the saturation
-   loop has the invariant that `(t, t') ∈ ord.constraints → t < t'`. Proving
-   this requires a formal loop invariant over `temporalExpandBranches`.
-
-3. `extractModel_atom_neg_notSat`: F(atom p)@t on an open branch implies
-   ¬ Satisfies (extractModel b) t (.atom p). Follows from
-   `openBranch_noContradiction` + extracting from `Branch.findContradiction`
-   that T(atom p)@t cannot also be present. Requires a converse-of-`findSome?`
-   lemma (e.g., `List.findSome?_ne_none_of_mem`) whose exact name in the
-   current Mathlib version has not been confirmed.
+   (Note: `extractModel_atom_neg_notSat` is now proved and available.)
 
 ### Blocked (FMP Required — Theoretical Blocker)
 
-These results require the Finite Model Property for temporal logic over linear
-orders (or an explicit loop-detection argument):
-
-4. `temporalTruthLemma_untl`: Until eventuality fulfilment case. Proving
+2. `temporalTruthLemma_untl`: Until eventuality fulfilment case. Proving
    T(U(guard,event))@t ∈ b → ∃ s > t, event holds at s ∧ guard holds between,
    in the extracted model requires either FMP for PTL or an explicit loop-
    unwinding argument showing the time-subset blocking structure yields a model
    where all pending eventualities are periodically re-satisfied.
 
-5. `temporalTruthLemma_snce`: Since eventuality fulfilment case. Symmetric
-   to (4) in the past direction.
+3. `temporalTruthLemma_snce`: Since eventuality fulfilment case. Symmetric
+   to (2) in the past direction.
 
-6. `openBranch_branchSat`, `temporalTableau_complete`, `instDecidableValid`:
-   All blocked by (2), (4), (5).
+4. `openBranch_branchSat`, `temporalTableau_complete`, `instDecidableValid`:
+   All blocked by the ordConstraints design issue + (2) + (3).
 
 ## Decomposition Recommendation
 
 The most tractable path to closing these obligations:
-1. Prove (2) via a loop invariant on `temporalExpandBranches`.
-2. Prove (1) and (3) by adapting `Propositional/Tableau/Classical/Completeness.lean`.
+1. Fix `ordConstraints_strict` design issue: either use a topological sort to build
+   a valid time assignment `f`, or separate the past/future constraint handling.
+2. For propositional truth lemma: adapt `Propositional/Tableau/Classical/Completeness.lean`.
 3. For Until/Since completeness: either import PTL FMP once proved, or construct
    an explicit finite unwinding of the time-subset-blocked tableau graph.
 
@@ -175,52 +174,83 @@ lemma openBranch_noContradiction
     | some pair => simp [hcontra] at hfclas_none
     | none => rfl
 
-/-! ## Blocked Obligations (BLOCKED)
+omit [Hashable Atom] in
+/-- F(atom p)@t on an open branch implies ¬ Satisfies (extractModel b) t (atom p).
 
-The following section documents proof obligations that are blocked.
+If T(atom p)@t were also on the branch, `Branch.findContradiction` would return `some`,
+contradicting `openBranch_noContradiction`. We witness the contradiction via
+`List.findSome?_isSome_iff` using the positive signed formula as the search element. -/
+lemma extractModel_atom_neg_notSat
+    (b : TBranch Atom) (ord : TimeOrdering) (tracker : EventualityTracker Atom)
+    (hopen : isTemporalClosed b ord tracker = false)
+    (t : TimeIndex) (p : Atom)
+    (hmem : (⟨.neg, .atom p, t⟩ : TSF Atom) ∈ b) :
+    ¬ Satisfies (extractModel b) t (.atom p) := by
+  rw [extractModel_atom_sat_iff]
+  intro h_any
+  -- Extract a positive witness T(atom p)@t from the branch
+  rw [List.any_eq_true] at h_any
+  obtain ⟨sf_pos, hmem_pos, hcond⟩ := h_any
+  simp only [Bool.and_eq_true] at hcond
+  obtain ⟨⟨hpos_sign, hpos_lab⟩, hpos_form⟩ := hcond
+  have hsign : sf_pos.sign = .pos := LawfulBEq.eq_of_beq hpos_sign
+  have hlab : sf_pos.label = t := LawfulBEq.eq_of_beq hpos_lab
+  have hform : sf_pos.formula = .atom p := LawfulBEq.eq_of_beq hpos_form
+  -- An open branch has no T/F contradiction pair
+  have hcontra_none : Branch.findContradiction b = none :=
+    openBranch_noContradiction b ord tracker hopen
+  -- But sf_pos and hmem together witness a T/F pair at (atom p, t)
+  -- → Branch.findContradiction b ≠ none
+  have hcontra_some : (Branch.findContradiction b).isSome = true := by
+    simp only [Branch.findContradiction, List.findSome?_isSome_iff]
+    refine ⟨sf_pos, hmem_pos, ?_⟩
+    -- Show (predicate sf_pos).isSome = true
+    have hisPos : sf_pos.isPos = true := by
+      simp [SignedFormula.isPos, Sign.isPos, hsign]
+    -- The inner any: F(atom p)@t witnesses the negative match
+    have hinner : b.any (fun sf' =>
+        sf'.sign == .neg && sf'.formula == sf_pos.formula && sf'.label == sf_pos.label) = true := by
+      rw [List.any_eq_true]
+      exact ⟨⟨.neg, .atom p, t⟩, hmem, by simp [hform, hlab]⟩
+    simp [hisPos, hinner]
+  simp [hcontra_none] at hcontra_some
+
+/-! ## Remaining Blocked Obligations (BLOCKED)
+
+The following section documents proof obligations that remain blocked.
 These are stated as structured goal declarations in comments.
 None use `sorry` or new axioms.
 
-### Blocked: F(atom p)@t on open branch → ¬Satisfies (Proof Complexity)
+### Blocked: Ord Constraints Are Strict (DESIGN ISSUE — Lemma False as Stated)
+
+**Status**: This lemma as stated is FALSE due to a design issue in the time-ordering scheme.
+
+**The problem**: `addPast t tNew` adds the constraint `(tNew, t)` to `ord.constraints`,
+meaning "tNew is before t" semantically. But `tNew = branchNextTime b`, which by
+`branchNextTime_gt` satisfies `sf.label < tNew` for all `sf ∈ b`, so `tNew > t` in Nat.
+
+Therefore `(tNew, t) ∈ ord.constraints` with `tNew > t`, violating the claimed
+`∀ t t', (t, t') ∈ ord.constraints → t < t'`.
+
+**Design note**: The `TimeOrdering` uses Nat labels as identifiers, not as time values.
+The constraint store defines the semantic ordering. When extracting a model with `f = id`,
+the model only works for branches with only `addFuture` constraints. For branches with
+`addPast` (from `snce` / past-existential rules), a different extraction is needed.
+
+**Consequence**: `openBranch_branchSat` with `D = Nat` and `f = id` cannot be proved
+in general. The completeness proof requires either:
+1. Restricting to formulas without `snce` (future-only temporal logic), OR
+2. A topological-sort-based extraction that maps labels to a consistent linear order, OR
+3. Constructing `branchSat` directly without the constraint-preserving requirement.
 
 ```lean
--- BLOCKED (proof complexity): requires List.findSome?_ne_none_of_mem or similar.
---
--- lemma extractModel_atom_neg_notSat
---     (b : TBranch Atom) (ord : TimeOrdering) (tracker : EventualityTracker Atom)
---     (hopen : isTemporalClosed b ord tracker = false)
---     (t : TimeIndex) (p : Atom)
---     (hmem : (⟨.neg, .atom p, t⟩ : TSF Atom) ∈ b) :
---     ¬ Satisfies (extractModel b) t (.atom p) := by
---   rw [extractModel_atom_sat_iff]
---   intro h_pos
---   obtain ⟨sf_pos, hsfpos_mem, hsfpos_cond⟩ := List.any_eq_true.mp h_pos
---   simp only [Bool.and_eq_true] at hsfpos_cond
---   obtain ⟨⟨hsign, hlab⟩, hform⟩ := hsfpos_cond
---   have hpos_sign : sf_pos.sign = .pos := by cases sf_pos.sign <;> simp_all
---   have hpos_lab  : sf_pos.label = t := eq_of_beq hlab
---   have hpos_form : sf_pos.formula = .atom p := eq_of_beq hform
---   -- T(.atom p)@t and F(.atom p)@t both in b → Branch.findContradiction ≠ none
---   -- But openBranch_noContradiction says it is none. Contradiction.
---   -- Key gap: need List.findSome?_ne_none_of_mem (or equivalent) to show findContradiction
---   -- returns some when the witness exists.
---   sorry -- BLOCKED
-```
-
-### Blocked: Ord Constraints Are Strict (Proof Complexity)
-
-```lean
--- BLOCKED (proof complexity): requires formal loop invariant.
+-- BLOCKED (design issue): ordConstraints_strict is false for branches using addPast.
+-- The addPast rule adds (tNew, t) where tNew = branchNextTime b > t.
+-- This makes (tNew, t) ∈ constraints but tNew > t, violating the claimed invariant.
 --
 -- lemma ordConstraints_strict (φ : Formula Atom) (b : TBranch Atom) (ord : TimeOrdering)
 --     (hresult : temporalTableau φ = .openBranch b ord) :
---     ∀ t t', (t, t') ∈ ord.constraints → t < t' := by
---   -- Key: addFuture t (branchNextTime b) always satisfies t < branchNextTime b
---   -- because branchNextTime_gt says sf.label < branchNextTime b for all sf ∈ b.
---   -- So the time `t` at which the existential rule fires is on the branch,
---   -- hence t < branchNextTime b = t'.
---   -- Requires induction over temporalExpandBranches.
---   sorry -- BLOCKED
+--     ∀ t t', (t, t') ∈ ord.constraints → t < t' := ...
 ```
 
 ### Blocked: Propositional Truth Lemma (Proof Complexity)

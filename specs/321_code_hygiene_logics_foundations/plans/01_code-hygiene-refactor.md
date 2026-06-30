@@ -225,7 +225,7 @@ unchanged.
 
 ---
 
-### Phase 5: Split Bimodal/.../Chronicle/CounterexampleElimination.lean [NOT STARTED]
+### Phase 5: Split Bimodal/.../Chronicle/CounterexampleElimination.lean [COMPLETED]
 
 **Goal**: Reduce 3545 lines to a barrel over submodules; runs after Phase 4 (same directory, and
 this file imports `PointInsertion`).
@@ -239,11 +239,11 @@ this file imports `PointInsertion`).
 - Rewrite `Chronicle/CounterexampleElimination.lean` as a barrel.
 
 **Tasks**:
-- [ ] Extract per section, building after each; preserve order Structures → BurgessHelpers →
+- [x] Extract per section, building after each; preserve order Structures → BurgessHelpers →
       Elimination → Interface.
-- [ ] The barrel's `import Cslib.Logics.Bimodal...Chronicle.PointInsertion` continues to resolve
+- [x] The barrel's `import Cslib.Logics.Bimodal...Chronicle.PointInsertion` continues to resolve
       (Phase 4 kept that barrel path), so no importer edits.
-- [ ] Resolve cross-submodule `private` references; module docstrings on new files.
+- [x] Resolve cross-submodule `private` references; module docstrings on new files.
 
 **Timing**: 2 hours
 

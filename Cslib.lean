@@ -206,6 +206,10 @@ public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.ChronicleToCo
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.ChronicleTypes
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.CounterexampleElimination
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.PointInsertion
+public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.PointInsertion.Burgess
+public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.PointInsertion.Seeds
+public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.PointInsertion.Since
+public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.PointInsertion.XuGuard
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.RRelation
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Completeness
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Completeness.Dense

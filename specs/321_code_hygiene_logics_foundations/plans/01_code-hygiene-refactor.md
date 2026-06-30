@@ -191,7 +191,7 @@ file so the higher-risk Chronicle splits follow a proven template.
 
 ---
 
-### Phase 4: Split Bimodal/.../Chronicle/PointInsertion.lean [IN PROGRESS]
+### Phase 4: Split Bimodal/.../Chronicle/PointInsertion.lean [COMPLETED]
 
 **Goal**: Reduce the single largest file (3566 lines) to a barrel over 3-4 submodules, public API
 unchanged.
@@ -207,12 +207,12 @@ unchanged.
 - Rewrite `Chronicle/PointInsertion.lean` as a barrel importing the four submodules.
 
 **Tasks**:
-- [ ] Extract sections one submodule at a time, building after each extraction.
-- [ ] Keep the `namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle`; chain submodule
+- [x] Extract sections one submodule at a time, building after each extraction.
+- [x] Keep the `namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle`; chain submodule
       imports in declaration order (Seeds → Burgess → XuGuard → Since).
-- [ ] Handle cross-submodule `private` references per the Risks table; keep importer-facing lemmas
-      public in whichever submodule defines them (barrel re-exports them).
-- [ ] Module docstring on each new file.
+- [x] Handle cross-submodule `private` references per the Risks table; keep importer-facing lemmas
+      public in whichever submodule defines them (barrel re-exports them). *(deviation: removed `private` from all cross-referenced declarations in Seeds, Burgess, XuGuard — since is final, kept private as-is)*
+- [x] Module docstring on each new file.
 
 **Timing**: 2 hours
 

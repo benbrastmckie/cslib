@@ -1815,12 +1815,12 @@
       "artifacts": [
         {
           "type": "report",
-          "path": "specs/384_modal_tableau_soundness_gap_redesign/reports/01_soundness-gap-redesign.md",
+          "path": "specs/402_modal_tableau_soundness_gap_redesign/reports/01_soundness-gap-redesign.md",
           "summary": "Design eval: recommend per-branch Accessibility (Option A); rejects global counter (Option B) — pollution travels via shared source world. Core preserved; only modalExpandBranches + loop lemma change."
         },
         {
           "type": "plan",
-          "path": "specs/384_modal_tableau_soundness_gap_redesign/plans/01_per-branch-accessibility.md",
+          "path": "specs/402_modal_tableau_soundness_gap_redesign/plans/01_per-branch-accessibility.md",
           "summary": "6-phase plan: per-branch Accessibility (Option A) refactor of modalExpandBranches, freshness-maintenance lemma, reformulated loop lemma; closes Soundness errors 1744/1749/1770 (zero sorry/axioms)."
         }
       ],

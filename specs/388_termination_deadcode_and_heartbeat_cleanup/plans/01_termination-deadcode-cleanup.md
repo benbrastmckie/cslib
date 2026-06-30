@@ -1,7 +1,7 @@
 # Implementation Plan: Task #388
 
 - **Task**: 388 - Remove dead normalization track and heartbeat/simp debt in Termination.lean
-- **Status**: [IN PROGRESS]
+- **Status**: [COMPLETED]
 - **Effort**: 2.5 hours
 - **Dependencies**: 398 (completed — added efq arms to normalize/normalizeAux; sequence after it)
 - **Research Inputs**: specs/388_termination_deadcode_and_heartbeat_cleanup/reports/01_termination-deadcode-cleanup.md

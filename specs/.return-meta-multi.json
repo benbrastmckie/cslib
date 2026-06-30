@@ -1,20 +1,12 @@
 {
-  "status": "partial",
+  "status": "completed",
   "metadata": {
     "tasks_completed": [
-      416,
-      417,
-      418,
-      420
+      388,
+      403
     ],
-    "tasks_failed": [
-      {
-        "task": 419,
-        "status": "blocked",
-        "reason": "SPIKE: not cleanly abstractable — designed BLOCKED outcome, documented, no sorry"
-      }
-    ],
-    "cycles_used": 4,
+    "tasks_failed": [],
+    "cycles_used": 3,
     "multi_task_mode": true
   }
 }

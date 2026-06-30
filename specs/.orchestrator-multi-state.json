@@ -1,17 +1,40 @@
 {
-  "session_id": "sess_1782784210_964b6f",
-  "task_numbers": [317, 375],
-  "waves": [[317], [375]],
-  "dependency_graph": {"317": [], "375": ["317"]},
-  "max_cycles": 10,
-  "cycle_count": 1,
-  "failed_tasks": [],
-  "completed_tasks": [],
-  "current_statuses": {"317": "planned", "375": "not_started"},
-  "task_dirs": {
-    "317": "specs/317_propositional_tableau_completeness",
-    "375": "specs/375_proof_system_equivalence_tableau_sequent_edges"
+  "session_id": "sess_1782793893_c01ba9",
+  "task_numbers": [
+    388,
+    403
+  ],
+  "waves": [
+    [
+      388,
+      403
+    ]
+  ],
+  "dependency_graph": {
+    "388": [],
+    "403": []
   },
-  "research_agents": {"317": "cslib-research-agent", "375": "cslib-research-agent"},
-  "implement_agents": {"317": "cslib-implementation-agent", "375": "cslib-implementation-agent"}
+  "max_cycles": 10,
+  "cycle_count": 3,
+  "failed_tasks": [],
+  "completed_tasks": [
+    388,
+    403
+  ],
+  "current_statuses": {
+    "388": "completed",
+    "403": "completed"
+  },
+  "task_dirs": {
+    "388": "specs/388_termination_deadcode_and_heartbeat_cleanup",
+    "403": "specs/403_rename_specs_384_to_402"
+  },
+  "research_agents": {
+    "388": "cslib-research-agent",
+    "403": "general-research-agent"
+  },
+  "implement_agents": {
+    "388": "cslib-implementation-agent",
+    "403": "general-implementation-agent"
+  }
 }

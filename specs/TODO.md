@@ -11,7 +11,7 @@ next_project_number: 423
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,299,301,317,321,386,387,388,396,400,403,404,406,407,415,419 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 1 | 36,37,180,226,241,299,301,317,321,386,387,396,400,404,406,407,415,419 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 2 | 39,40,181,215,300,375,389,390,405,409 | 36,37,180,299,317,387,404,407 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,275,391,392,413 | 39,40,321,375,386,387,389 | Bimodal Porting, Foundations, PL-Docs, ... |
 | 4 | 393,412,414 | 41,181,215,241,275,300,301,321,386,391 | Foundations, Code Hygiene, PL-Hygiene |
@@ -41,10 +41,6 @@ next_project_number: 423
   └─ 405 [NOT STARTED] — Simplify the proof machinery in the task-402 modal tableau soundn
 419 [BLOCKED] — [Spawned from task 415 audit — supports the structure-first visio
 
-### Project Management
-
-403 [PLANNED] — Rename specs/384_modal_tableau_soundness_gap_redesign/ to specs/4
-
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
@@ -66,7 +62,6 @@ next_project_number: 423
   └─ 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
 387 [NOT STARTED] — [Refreshed post-merge vet.] DECISION REQUIRES UPSTREAM AGREEMENT.
   └─ 392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls (see above)
-388 [PLANNED] — [Reconciled by task 395, post-merge.] Tier-2. NaturalDeduction/No
 413 [NOT STARTED] — [Split from task 278.] Simplify Propositional/ proofs that use ma
 
 ### PL Docs
@@ -350,7 +345,7 @@ SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/41
 ---
 
 ### 403. Rename specs 384 to 402
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: meta
 - **Topic**: Project Management
 - **Dependencies**: None
@@ -490,7 +485,7 @@ SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/41
 ---
 
 ### 388. Remove dead normalization track and heartbeat/simp debt in Termination.lean
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: PL-Hygiene
 - **Dependencies**: Task 395, Task 398

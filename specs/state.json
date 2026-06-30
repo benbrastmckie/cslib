@@ -117,12 +117,12 @@
     {
       "project_number": 388,
       "project_name": "termination_deadcode_and_heartbeat_cleanup",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Remove dead normalization track and heartbeat/simp debt in Termination.lean",
       "description": "[Reconciled by task 395, post-merge.] Tier-2. NaturalDeduction/Normalization/Termination.lean + Reduction.lean cleanup. The redexWeight + normMeasure fuel/measure track is ALREADY GONE (delivered by merged task 382). `normalize`/`normalizeAux` are NOW LIVE (task 398 added efq arms) — do NOT delete them. Remaining dead PRIVATE decls (0 callers, safe to delete): normalizeAux_fixpoint (Termination.lean:305), subs_maximalFormulas_mem (:492), subsOne_new_redex_complexity_lt (:775). Then clear residual lint debt: unused simp args, no-op/dead tactics, long lines, flexible-simp; remove or comment-justify maxHeartbeats overrides; decompose remaining heavy proofs. SEQUENCE AFTER task 398 (it is actively editing Termination.lean). Source: §4.2 + 395.",
       "created": "2026-06-28T12:53:27Z",
-      "last_updated": "2026-06-30T04:42:31Z",
+      "last_updated": "2026-06-30T05:38:47Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782793893_c01ba9_388",
@@ -130,7 +130,8 @@
         395,
         398
       ],
-      "topic": "PL-Hygiene"
+      "topic": "PL-Hygiene",
+      "completion_summary": "Deleted ~424 lines of dead normalization-track code (normalizeAux_fixpoint cascade + subs_maximalFormulas_mem/subsOne_new_redex_complexity_lt pair) from Termination.lean and cleared residual lint debt; all 8 CI steps pass, 0 sorries, 0 new axioms."
     },
     {
       "project_number": 389,
@@ -974,14 +975,15 @@
     {
       "project_number": 403,
       "project_name": "rename_specs_384_to_402",
-      "status": "planned",
+      "status": "completed",
       "task_type": "meta",
       "description": "Rename specs/384_modal_tableau_soundness_gap_redesign/ to specs/402_modal_tableau_soundness_gap_redesign/ to match task 402 (the soundness-gap redesign was renumbered 384->402 during the task-364 merge to avoid colliding with main task 384 tableau_completeness_sorries). git mv the directory and update task 402 artifact paths in specs/state.json (reports/01_soundness-gap-redesign.md, plans/01_per-branch-accessibility.md). Grep for any remaining 384_modal_tableau references. Bookkeeping only; no code changes.",
       "dependencies": [],
       "parent_task": 402,
-      "last_updated": "2026-06-30T04:42:35Z",
+      "last_updated": "2026-06-30T05:38:50Z",
       "topic": "Project Management",
-      "session_id": "sess_1782793893_c01ba9_403"
+      "session_id": "sess_1782793893_c01ba9_403",
+      "completion_summary": "Renamed specs/384_modal_tableau_soundness_gap_redesign to 402_ via git mv (history preserved) and updated two artifact paths in specs/archive/state.json; task 384 (tableau_completeness_sorries) untouched. Bookkeeping only."
     },
     {
       "project_number": 404,

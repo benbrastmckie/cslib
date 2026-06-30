@@ -1,0 +1,17 @@
+{
+  "task_number": 403,
+  "task_slug": "rename_specs_384_to_402",
+  "agent_type": "planner-agent",
+  "delegation_path": ["orchestrator", "plan", "planner-agent"],
+  "status": "planned",
+  "timestamp": "2026-06-29T00:00:00Z",
+  "artifacts": [
+    "specs/403_rename_specs_384_to_402/plans/01_rename-384-to-402.md"
+  ],
+  "phase_count": 1,
+  "estimated_hours": 0.25,
+  "dependency_waves": 1,
+  "memory_candidates": [],
+  "next_steps": "Run /implement 403 to execute the plan",
+  "summary": "Single-phase mechanical rename plan: git mv the 384_modal_tableau directory to the 402 prefix, update two artifact-path strings in specs/archive/state.json (lines 1818, 1823), and verify no actionable stale references remain while task 384 stays untouched."
+}

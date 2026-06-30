@@ -1,0 +1,26 @@
+{
+  "task_number": 403,
+  "task_slug": "rename_specs_384_to_402",
+  "status": "implemented",
+  "phase": "implement",
+  "timestamp": "2026-06-29T00:00:00Z",
+  "summary": "Mechanical bookkeeping rename complete. git mv moved specs/384_modal_tableau_soundness_gap_redesign/ to specs/402_modal_tableau_soundness_gap_redesign/ (6 files, history preserved). Two artifact-path strings in specs/archive/state.json (lines 1818, 1823) updated from 384_ to 402_ prefix. Verified: no actionable 384_modal_tableau path references remain; archive JSON valid; task 384 (tableau_completeness_sorries) untouched.",
+  "phases_completed": 1,
+  "phases_total": 1,
+  "artifacts": [
+    {
+      "type": "summary",
+      "path": "specs/403_rename_specs_384_to_402/summaries/01_rename-384-to-402-summary.md",
+      "summary": "Execution summary for task 403 mechanical rename"
+    },
+    {
+      "type": "plan",
+      "path": "specs/403_rename_specs_384_to_402/plans/01_rename-384-to-402.md",
+      "summary": "Single-phase implementation plan, all tasks checked complete"
+    }
+  ],
+  "completion_data": {
+    "completion_summary": "Renamed specs/384_modal_tableau_soundness_gap_redesign/ to specs/402_modal_tableau_soundness_gap_redesign/ via git mv (6 files), and updated the two corresponding artifact-path strings in specs/archive/state.json to the 402_ prefix. All verification checks passed."
+  },
+  "blockers": []
+}

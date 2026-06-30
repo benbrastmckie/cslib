@@ -477,7 +477,7 @@
     {
       "project_number": 241,
       "project_name": "mcnaughton_theorem",
-      "status": "blocked",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller) establishing equivalence between omega-regular languages and deterministic Muller automata. Research phase should evaluate ctchou/AutomataTheory (independent Lean 4 project that claims McNaughton already proved) for architectural compatibility, portability, and licensing before deciding whether to port, adapt, or develop independently.",
       "topic": "Temporal Logic",
@@ -1086,9 +1086,9 @@
           "summary": "3-phase plan: Ramsey recurrent-class lemma"
         },
         {
-          "type": "summary",
           "path": "specs/429_prove_ramsey_recurrentclass_lemma_for_buchicongruence_prefix_runs/summaries/01_ramsey-recurrent-class-summary.md",
-          "summary": "Implementation summary: buchiCongruence_recurrentPrefixClass + buchiCongr_recurrentClass proved, CI green"
+          "type": "summary",
+          "summary": "Ramsey recurrent-class lemma proved; CI green"
         }
       ],
       "session_id": "sess_1782817543_eee5ae_429",

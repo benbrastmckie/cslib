@@ -1,39 +1,48 @@
 {
-  "session_id": "sess_1782818392_271f51",
+  "session_id": "sess_1782820639_7ae02f",
   "task_numbers": [
-    299,
-    386,
-    432
+    317,
+    430
   ],
   "waves": [
     [
-      299,
-      386,
-      432
+      317
+    ],
+    [
+      430
     ]
   ],
   "dependency_graph": {
-    "299": [],
-    "386": [],
-    "432": []
+    "317": [],
+    "430": [
+      "317"
+    ]
   },
-  "max_cycles": 15,
-  "cycle_count": 2,
+  "max_cycles": 10,
+  "cycle_count": 4,
   "failed_tasks": [],
   "completed_tasks": [
-    386,
-    387
+    428,
+    429
   ],
   "current_statuses": {
-    "299": "planned",
-    "386": "completed",
-    "432": "completed",
-    "428": "completed",
-    "387": "completed"
+    "317": "implementing",
+    "430": "researched",
+    "429": "completed"
   },
   "task_dirs": {
-    "299": "specs/299_modal_k_tableau",
-    "386": "specs/386_fix_lake_lint_errors_propositional",
-    "432": "specs/432_fix_roadmap_integration_argv_overflow"
+    "317": "specs/317_propositional_tableau_completeness",
+    "430": "specs/430_prove_atom_persistence_upward_closure_for_intexpan"
+  },
+  "research_agents": {
+    "317": "cslib-research-agent",
+    "430": "cslib-research-agent"
+  },
+  "implement_agents": {
+    "317": "cslib-implementation-agent",
+    "430": "cslib-implementation-agent"
+  },
+  "plan_paths": {
+    "317": "specs/317_propositional_tableau_completeness/plans/02_tableau-completeness-unified.md"
   }
 }

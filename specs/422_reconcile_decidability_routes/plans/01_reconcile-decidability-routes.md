@@ -194,7 +194,7 @@ axiom profile.
 
 ---
 
-### Phase 3: Infrastructure cross-reference docstrings (factoring deferred) [NOT STARTED]
+### Phase 3: Infrastructure cross-reference docstrings (factoring deferred) [COMPLETED]
 
 **Goal**: Document the relationship between the FMP and tableau infrastructure without
 refactoring, and record the explicit "factoring deferred" decision.

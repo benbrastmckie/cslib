@@ -230,7 +230,16 @@ theorem tableau_sound.{u_world} (S : IntMinScheme Atom)
 /-! ## Parametric Truth Lemma -/
 
 /-- Parametric truth lemma (the single deferred completeness obligation, task 317).
-Generalizes `intTruthLemma` over an `IntMinScheme`'s `closurePred`/`modelBot`. -/
+Generalizes `intTruthLemma` over an `IntMinScheme`'s `closurePred`/`modelBot`.
+
+**Infrastructure cross-reference** (task 422): The FMP routes in `Metalogic/IntDecidability.lean`
+and `Metalogic/MinDecidability.lean` prove analogous "forcing ↔ membership" statements
+(`int_fin_truth_lemma`, `min_fin_truth_lemma`) over finite `Σ`-bounded worlds. Those lemmas
+rest on the `IntLindenbaum.lean`/minimal Lindenbaum substrate and are sorry-free. This
+parametric `truthLemma` operates over Nat-labelled branch worlds (disjoint carrier type).
+Factoring a common abstraction across the two carrier systems is explicitly deferred; see
+the module headers in `Metalogic/IntDecidability.lean` and `Metalogic/MinDecidability.lean`
+for the full rationale. -/
 lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom)
     (hopen : S.closurePred b = false)
     (hsat : ∀ sf ∈ b, intStepBranch b [] 0 = none)

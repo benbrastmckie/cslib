@@ -297,15 +297,30 @@ theorem intFinVal_upward_closed {φ : PL.Proposition Atom}
 
 /-! ## Finite Truth Lemma -/
 
-/-- **Finite Truth Lemma**: For any `w : IntFinWorld φ` and formula `ψ ∈ φ.subformulas`,
-`IForces intFinVal (fun _ => False) w ψ ↔ ψ ∈ w.carrier`.
+/-- **Finite Truth Lemma (FMP route)**: For any `w : IntFinWorld φ` and formula
+`ψ ∈ φ.subformulas`, `IForces intFinVal (fun _ => False) w ψ ↔ ψ ∈ w.carrier`.
 
 Proof by structural induction on `ψ` with `w` fixed:
 - **atom**: `IForces ... w (.atom p) = intFinVal w p = (.atom p) ∈ w.carrier`. `Iff.rfl`.
 - **bot**: ⊥ is never forced (`bot_forces = fun _ => False`) and ⊥ ∉ w.carrier.
 - **imp**: backward direction uses `int_fin_imp_witness`; forward direction uses the `closed`
   field with modus ponens.
-- **and**, **or**: direct from IHs + DCCS closure field / primality field. -/
+- **and**, **or**: direct from IHs + DCCS closure field / primality field.
+
+**Infrastructure relationship** (task 422 — factoring deferred):
+This lemma is the FMP analogue of the parametric `truthLemma S b …` in
+`Tableau/Intuitionistic/Scheme.lean:234` (the 317-owned sorry). Both prove a
+"forcing ↔ membership" statement, but over **disjoint carrier types**:
+- `int_fin_truth_lemma`: world type `IntFinWorld φ` (Finset-carrier `Σ`-bounded prime DCCS,
+  resting on the `IntLindenbaum.lean` substrate: `int_imp_witness`, `int_prime_exclusion`,
+  `intDeductiveClosure`). Carrier is a `Finset (Proposition Atom)`. **Sorry-free.**
+- `truthLemma`: world type `Nat` (tableau branch labels from `IBranch`). Carrier is a
+  signed-branch occurrence predicate. **Currently sorry** (task 317).
+
+Factoring a common truth-lemma or world-type abstraction spanning these two carrier systems
+is **explicitly deferred**: the carriers are structurally incompatible, coupling them would
+thread through the still-open parametric `truthLemma` sorry, and the payoff is low while 317
+is open. Cross-reference: `min_fin_truth_lemma` for the analogous minimal FMP lemma. -/
 theorem int_fin_truth_lemma {φ : PL.Proposition Atom}
     (w : IntFinWorld φ) :
     ∀ {ψ : PL.Proposition Atom}, ψ ∈ φ.subformulas →

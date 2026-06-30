@@ -264,15 +264,33 @@ theorem min_fin_imp_witness {φ : PL.Proposition Atom}
 
 /-! ## Finite Truth Lemma -/
 
-/-- **Finite Truth Lemma**: For any `w : MinFinWorld φ` and formula `ψ ∈ φ.subformulas`,
-`IForces minFinVal minFinBotForces w ψ ↔ ψ ∈ w.carrier`.
+/-- **Finite Truth Lemma (FMP route)**: For any `w : MinFinWorld φ` and formula
+`ψ ∈ φ.subformulas`, `IForces minFinVal minFinBotForces w ψ ↔ ψ ∈ w.carrier`.
 
 Proof by structural induction on `ψ` with `w` fixed:
 - **atom**: `IForces ... w (.atom p) = minFinVal w p = (.atom p) ∈ w.carrier`. `Iff.rfl`.
 - **bot**: `IForces ... w ⊥ = minFinBotForces w = (⊥ ∈ w.carrier)`. `Iff.rfl`.
 - **imp**: backward direction uses `min_fin_imp_witness`; forward direction uses the `closed`
   field with modus ponens.
-- **and**, **or**: direct from IHs + deductive closure field / primality field. -/
+- **and**, **or**: direct from IHs + deductive closure field / primality field.
+
+**Infrastructure relationship** (task 422 — factoring deferred):
+This lemma is the Minimal FMP analogue of the parametric `truthLemma S b …` in
+`Tableau/Intuitionistic/Scheme.lean:234` (the 317-owned sorry, also used by the minimal
+tableau via `truthLemma minScheme`). Both prove "forcing ↔ membership" statements, but over
+**disjoint carrier types**:
+- `min_fin_truth_lemma`: world type `MinFinWorld φ` (Finset-carrier `Σ`-bounded prime
+  MinTheory worlds, resting on the minimal Lindenbaum substrate: `min_imp_witness`,
+  `min_prime_exclusion`). Unlike the intuitionistic FMP, `⊥` may be forced at some worlds
+  (`minFinBotForces w := (⊥ ∈ w.carrier)`). Carrier is a `Finset (Proposition Atom)`.
+  **Sorry-free.**
+- `truthLemma minScheme`: world type `Nat` (tableau branch labels). `modelBot` is the
+  minimal-closure predicate applied to branch labels. **Currently sorry** (task 317).
+
+Factoring a common truth-lemma or world-type abstraction is **explicitly deferred**: the
+carriers are structurally incompatible, coupling them would thread through the open
+`truthLemma` sorry, and the payoff is low while 317 is open.
+Cross-reference: `int_fin_truth_lemma` for the analogous intuitionistic FMP lemma. -/
 theorem min_fin_truth_lemma {φ : PL.Proposition Atom}
     (w : MinFinWorld φ) :
     ∀ {ψ : PL.Proposition Atom}, ψ ∈ φ.subformulas →

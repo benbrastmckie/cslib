@@ -11,9 +11,9 @@ next_project_number: 431
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,299,321,386,387,396,400,404,406,407,415,419,425,426,427,428,430 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,181,215,300,301,317,390,405,409,429 | 36,37,180,299,387,404,407,425,426,427,428,430 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,241,275,375,389 | 39,40,317,429 | Bimodal Porting, Foundations, Temporal Logic, ... |
+| 1 | 36,37,180,226,299,321,386,387,396,400,404,406,407,415,419,426,427,428,430 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,181,215,300,317,390,405,409,425,429 | 36,37,180,299,387,404,407,426,427,428,430 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 3 | 41,241,275,301,375,389 | 39,40,317,425,429 | Bimodal Porting, Foundations, Temporal Logic, ... |
 | 4 | 391,392,412,413,414 | 41,181,215,241,275,300,301,321,375,386,387,389 | Foundations, Code Hygiene, PL-Docs, ... |
 | 5 | 393 | 386,391 | PL-Hygiene |
 
@@ -45,12 +45,11 @@ next_project_number: 431
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
-  └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 426 [NOT STARTED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
-  └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo (see above)
+  └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
+    └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 427 [NOT STARTED] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
-  └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo (see above)
+  └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model (see above)
 428 [RESEARCHED] — Add named lemmas to Cslib/Computability/Languages/Congruences/Rig
   └─ 429 [RESEARCHED] — Prove a named lemma (suggested name: `buchiCongr_recurrentClass` 
     └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
@@ -224,7 +223,7 @@ After implementation:
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: None
+- **Dependencies**: Task 426, Task 427
 
 **Description**: [Decomposed from task 301, blocker C.] Establish the finite model property (FMP) for Propositional Temporal Logic and use it to discharge temporalTruthLemma_untl and temporalTruthLemma_snce (Until/Since eventuality fulfilment), which in turn unblock eventualityDefect_unsat, temporalTableau_sound, openBranch_branchSat, temporalTableau_complete, and the final instDecidableValid in Cslib/Logics/Temporal/Tableau/. This is the theoretical gate for full decidability. Mirror the approach of COMPLETED task 421 (min_fmp_decidability), which added a sorry-free Decidable instance via FMP — reuse its pattern/infrastructure where possible. The hardest sub-part; gates task 301 completion. Independent of tasks 423 and 424 in principle, but final wiring of instDecidableValid needs all three landed.
 

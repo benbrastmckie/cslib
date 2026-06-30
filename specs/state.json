@@ -1087,10 +1087,13 @@
       "topic": "Temporal Logic",
       "description": "[Decomposed from task 301, blocker C.] Establish the finite model property (FMP) for Propositional Temporal Logic and use it to discharge temporalTruthLemma_untl and temporalTruthLemma_snce (Until/Since eventuality fulfilment), which in turn unblock eventualityDefect_unsat, temporalTableau_sound, openBranch_branchSat, temporalTableau_complete, and the final instDecidableValid in Cslib/Logics/Temporal/Tableau/. This is the theoretical gate for full decidability. Mirror the approach of COMPLETED task 421 (min_fmp_decidability), which added a sorry-free Decidable instance via FMP — reuse its pattern/infrastructure where possible. The hardest sub-part; gates task 301 completion. Independent of tasks 423 and 424 in principle, but final wiring of instDecidableValid needs all three landed.",
       "created": "2026-06-30T10:57:13Z",
-      "last_updated": "2026-06-30T10:57:13Z",
+      "last_updated": "2026-06-30T11:12:23Z",
       "next_artifact_number": 1,
       "artifacts": [],
-      "dependencies": [],
+      "dependencies": [
+        426,
+        427
+      ],
       "parent_task": 301
     },
     {

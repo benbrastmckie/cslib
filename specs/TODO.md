@@ -38,7 +38,7 @@ next_project_number: 441
 
 ### Modal Logic
 
-299 [IMPLEMENTING] — Implement tableau decision procedure for basic modal logic K with
+299 [BLOCKED] — Implement tableau decision procedure for basic modal logic K with
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 404 [RESEARCHED] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
@@ -53,7 +53,7 @@ next_project_number: 441
       └─ 427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
         └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
           └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
-433 [PLANNED] — Prove a private named lemma (e.g. `buchiCongr_DMA_accept_mem`) in
+433 [IMPLEMENTING] — Prove a private named lemma (e.g. `buchiCongr_DMA_accept_mem`) in
   └─ 434 [PLANNED] — Prove the backward inclusion `buchiCongr_DMA_language_backward` (
     └─ 435 [RESEARCHED] — Replace the sorry-stub `buchiCongr_DMA_language_forward` (languag
       └─ 436 [RESEARCHED] — Combine the forward inclusion (buchiCongr_DMA_language_forward, f
@@ -63,7 +63,7 @@ next_project_number: 441
 
 ### Code Hygiene
 
-321 [PLANNED] — Review file size and structure throughout Logics/ and Foundations
+321 [IMPLEMENTING] — Review file size and structure throughout Logics/ and Foundations
   └─ 414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p
 
 ### PL Tableau
@@ -190,7 +190,7 @@ Reference: specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-st
 
 ### 433. Prove acceptmembership ramsey lemma for buchicongr dma forwa
 - **Effort**: 2-3 hours
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -535,7 +535,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 321. Code hygiene logics foundations
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 301
@@ -580,7 +580,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 299. Modal k tableau
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

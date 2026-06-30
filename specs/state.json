@@ -155,12 +155,12 @@
     {
       "project_number": 321,
       "project_name": "code_hygiene_logics_foundations",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Review file size and structure throughout Logics/ and Foundations/ to identify and refactor files that are too long or poorly structured. Abstract and expose all and only what should be abstracted/exposed, maintaining the highest standards for code hygiene. Survey file lengths, identify candidates over ~400 lines, check for proper module boundaries, unnecessary public exports, missing abstraction barriers, and violations of single-responsibility principle. Produce a refactoring plan with prioritized actions",
       "topic": "Code Hygiene",
       "created": "2026-06-24T10:46:01Z",
-      "last_updated": "2026-06-30T17:53:13Z",
+      "last_updated": "2026-06-30T18:24:03Z",
       "session_id": "sess_1782838873_48a805",
       "artifacts": [
         {
@@ -207,12 +207,12 @@
     {
       "project_number": 299,
       "project_name": "modal_k_tableau",
-      "status": "implementing",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Implement tableau decision procedure for basic modal logic K with world labels, box/diamond rules on top of propositional rules from shared infrastructure. Introduces world labels (accessibility relation tracking) and fundamental modal rule pattern: box-positive is universal/persistent, diamond-positive is existential (fresh accessible world). Use Lukasiewicz encoding for and/or. Prove soundness against Kripke semantics and completeness by extracting finite Kripke countermodels. Modal formula type: Cslib.Logic.Modal.Formula with atom, bot, imp, box primitives. Files under Cslib/Logics/Modal/Tableau/: Defs.lean, Rules.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 1,500-2,000 lines.",
       "created": "2026-06-23T17:47:17Z",
-      "last_updated": "2026-06-30T15:23:38Z",
+      "last_updated": "2026-06-30T18:31:19Z",
       "next_artifact_number": 3,
       "artifacts": [
         {
@@ -227,7 +227,8 @@
       ],
       "dependencies": [],
       "parent_task": 296,
-      "session_id": "sess_1751308890_f82ba1"
+      "session_id": "sess_1782832934_b6aa63",
+      "blockers": "Completeness phase 5: hintikka_imp_pos/hintikka_imp_neg unprovable as stated for Lukasiewicz-encoded connectives (and/or/neg encoded as nested imp; tableau matches encoded rule, not raw imp). Needs proof-architecture revision (restate bridge lemmas or inline case analysis mirroring propositional classicalTruthLemma). Soundness 1-4 + Completeness truth-lemma/box-lemmas GREEN, zero sorries. See .orchestrator-handoff.json."
     },
     {
       "project_number": 300,
@@ -1180,7 +1181,7 @@
     {
       "project_number": 433,
       "project_name": "prove_acceptmembership_ramsey_lemma_for_buchicongr_dma_forwa",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Prove a private named lemma (e.g. `buchiCongr_DMA_accept_mem`) in OmegaRegularLanguage.lean establishing: for any `xs ∈ language na`, the set `infOcc((buchiCongr_DMA na).run xs)` contains a class `b` for which `∃ a, (buchiFamily (a,b) ⊓ language na).Nonempty`. This is the core Ramsey/recurrence argument for the forward inclusion of McNaughton's theorem. Use `buchiCongr_recurrentClass` (private, OmegaRegularLanguage.lean) to extract idempotent `b` and absorbing `a` with `a ∈ infOcc(run xs)`; use `buchiCongr_DMA_run_eq` to connect run states to congruence classes; use `buchiFamily_saturation` (BuchiCongruence.lean:181) and `mem_buchiFamily` (BuchiCongruence.lean:107) to conclude nonemptiness. Exact API map from orchestrator handoff: DA.Muller language at DA/Basic.lean:117; `buchiCongr_recurrentClass` gives a,b with b*b=b, a*b=a, a ∈ infOcc(run xs); `buchiCongr_DMA_run_eq`: (buchiCongr_DMA na).run xs n = ⟦xs.extract 0 n⟧; `buchiFamily_saturation` at BuchiCongruence.lean:181; `mem_infOcc` at InfOcc.lean:88; `frequently_in_finite_type` at InfOcc.lean:46. CI must pass green (lake build, lean_verify on the new lemma) with zero sorries. Topic: Temporal Logic. Parent task: 241.",
       "effort": "2-3 hours",
@@ -1188,7 +1189,7 @@
       "topic": "Temporal Logic",
       "dependencies": [],
       "created": "2026-06-30T15:25:41Z",
-      "last_updated": "2026-06-30T15:37:56Z",
+      "last_updated": "2026-06-30T18:13:43Z",
       "artifacts": [
         {
           "type": "research",
@@ -1196,7 +1197,7 @@
           "summary": "Spawn analysis from parent task 241"
         }
       ],
-      "session_id": "sess_1782833467_90f6aa_433"
+      "session_id": "sess_1782843132_748805_433"
     },
     {
       "project_number": 434,

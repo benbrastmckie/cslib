@@ -317,4 +317,67 @@ lemma buchiCongruence_absorption {a b : Quotient na.BuchiCongruence.eq}
   | zero => simp
   | succ n => rw [buchiCongruence_pow_succ hb, hab]
 
+open Finset in
+/-- Ramsey recurrent-class lemma at the prefix-class level: for `[Finite State]` and any `xs`,
+there exist congruence classes `a b` with `b` idempotent (`b * b = b`), `a` absorbing
+(`a * b = a`), and the prefix class `⟦xs.extract 0 k⟧` equal to `a` infinitely often.
+
+This is the core lemma (without DMA reference) used by `buchiCongr_recurrentClass` to
+establish the `infOcc` conclusion needed for the forward direction of `buchiCongr_DMA_language_eq`
+(task 241). The proof applies `infinite_graph_ramsey` to the coloring
+`t ↦ ⟦xs.extract t.min' t.max'⟧`, mirroring the approach of `buchiFamily_cover`. -/
+lemma buchiCongruence_recurrentPrefixClass [Finite State]
+    (na : Buchi State Symbol) (xs : ωSequence Symbol) :
+    ∃ a b : Quotient na.BuchiCongruence.eq, b * b = b ∧ a * b = a ∧
+      ∃ᶠ k in atTop, (⟦xs.extract 0 k⟧ : Quotient na.BuchiCongruence.eq) = a := by
+  have : Finite (Quotient na.BuchiCongruence.eq) := buchiCongruence_fin_index
+  let color (t : Finset ℕ) : Quotient na.BuchiCongruence.eq :=
+    if h : t.Nonempty then ⟦ xs.extract (t.min' h) (t.max' h) ⟧ else ⟦ [] ⟧
+  obtain ⟨b, ns, h_ns, h_color⟩ := infinite_graph_ramsey color
+  obtain ⟨f, h_mono, rfl⟩ := strictMono_of_infinite h_ns
+  -- For i < j, ⟦xs.extract (f i) (f j)⟧ = b (the monochromatic color)
+  have hcol : ∀ i j : ℕ, i < j →
+      (⟦xs.extract (f i) (f j)⟧ : Quotient na.BuchiCongruence.eq) = b := by
+    intro i j hij
+    have hfij : f i < f j := h_mono hij
+    have h_le : f i ≤ f j := le_of_lt hfij
+    have h_ne : f i ≠ f j := Nat.ne_of_lt hfij
+    have h_ne' : ({f i, f j} : Finset ℕ).Nonempty := insert_nonempty _ _
+    have h_card : ({f i, f j} : Finset ℕ).card = 2 := card_pair h_ne
+    have h_sub : ↑({f i, f j} : Finset ℕ) ⊆ Set.range f := by
+      rw [coe_pair]; rintro x (rfl | rfl) <;> exact ⟨_, rfl⟩
+    have hbc := h_color _ h_card h_sub
+    have heval : color {f i, f j} = ⟦xs.extract (f i) (f j)⟧ := by
+      change (if h : ({f i, f j} : Finset ℕ).Nonempty then
+        ⟦xs.extract (({f i, f j} : Finset ℕ).min' h) (({f i, f j} : Finset ℕ).max' h)⟧
+        else ⟦[]⟧) = ⟦xs.extract (f i) (f j)⟧
+      rw [dif_pos h_ne', min'_pair, max'_pair, min_eq_left h_le, max_eq_right h_le]
+    rw [heval] at hbc
+    exact hbc
+  -- Idempotence: b * b = b
+  -- Use calc to rewrite each factor separately (rewriting `b` globally would collapse both factors)
+  have hbb : b * b = b := calc
+    b * b
+        = ⟦xs.extract (f 0) (f 1)⟧ * ⟦xs.extract (f 1) (f 2)⟧ := by
+            rw [hcol 0 1 (by omega), hcol 1 2 (by omega)]
+      _ = ⟦xs.extract (f 0) (f 1) ++ xs.extract (f 1) (f 2)⟧ :=
+            (buchiCongruence_mk_append _ _).symm
+      _ = ⟦xs.extract (f 0) (f 2)⟧ := by
+            rw [append_extract_extract (le_of_lt (h_mono (by omega : 0 < 1)))
+                                       (le_of_lt (h_mono (by omega : 1 < 2)))]
+      _ = b := hcol 0 2 (by omega)
+  -- Absorption: (⟦xs.extract 0 (f 0)⟧ * b) * b = ⟦xs.extract 0 (f 0)⟧ * b
+  have hab : (⟦xs.extract 0 (f 0)⟧ * b) * b = ⟦xs.extract 0 (f 0)⟧ * b := by
+    rw [mul_assoc, hbb]
+  -- Frequently: ⟦xs.extract 0 (f (m+1))⟧ = ⟦xs.extract 0 (f 0)⟧ * b infinitely often
+  have hfreq : ∃ᶠ k in atTop,
+      (⟦xs.extract 0 k⟧ : Quotient na.BuchiCongruence.eq) = ⟦xs.extract 0 (f 0)⟧ * b := by
+    rw [frequently_iff_strictMono]
+    exact ⟨fun m => f (m + 1), fun a b h => h_mono (Nat.succ_lt_succ h), fun m => by
+      have h_le : f 0 ≤ f (m + 1) := h_mono.monotone (Nat.zero_le _)
+      rw [show xs.extract 0 (f (m + 1)) = xs.extract 0 (f 0) ++ xs.extract (f 0) (f (m + 1))
+            from (append_extract_extract (Nat.zero_le _) h_le).symm,
+          buchiCongruence_mk_append, hcol 0 (m + 1) (Nat.zero_lt_succ m)]⟩
+  exact ⟨⟦xs.extract 0 (f 0)⟧ * b, b, hbb, hab, hfreq⟩
+
 end Cslib.Automata.NA.Buchi

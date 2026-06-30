@@ -416,6 +416,22 @@ private lemma buchiCongr_DMA_run_eq [Inhabited Symbol] {State : Type}
     exact (extract_succ_right (Nat.zero_le n)).symm
 
 open NA.Buchi in
+/-- Recurrent-class lemma for the Büchi-congruence DMA run: for `[Finite State]` and any
+`xs`, there exist congruence classes `a b` with `b` idempotent (`b * b = b`), `a` absorbing
+(`a * b = a`), and `a` occurring infinitely often in `(buchiCongr_DMA na).run xs`.
+
+Bridges from `buchiCongruence_recurrentPrefixClass` (the pure prefix-class core lemma) via
+`buchiCongr_DMA_run_eq`. Used by Phase 4 of the McNaughton theorem (task 241) to close the
+forward direction of `buchiCongr_DMA_language_eq`. -/
+private lemma buchiCongr_recurrentClass [Inhabited Symbol] {State : Type} [Finite State]
+    (na : NA.Buchi State Symbol) (xs : ωSequence Symbol) :
+    ∃ a b : Quotient na.BuchiCongruence.eq, b * b = b ∧ a * b = a ∧
+      a ∈ ((buchiCongr_DMA na).run xs).infOcc := by
+  obtain ⟨a, b, hbb, hab, hfreq⟩ := buchiCongruence_recurrentPrefixClass na xs
+  exact ⟨a, b, hbb, hab, mem_infOcc.mpr
+    (hfreq.mono fun k hk => (buchiCongr_DMA_run_eq na xs k).trans hk)⟩
+
+open NA.Buchi in
 /-- **[BLOCKED — Phase 4, task 241]**: `buchiCongr_DMA na` recognizes the same ω-language
 as the NBA `na`.
 

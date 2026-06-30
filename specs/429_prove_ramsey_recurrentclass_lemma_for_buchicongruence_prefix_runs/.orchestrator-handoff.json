@@ -1,0 +1,30 @@
+{
+  "status": "implemented",
+  "summary": "Two lemmas proved: buchiCongruence_recurrentPrefixClass (BuchiCongruence.lean) and private buchiCongr_recurrentClass (OmegaRegularLanguage.lean). Both build with zero sorries and standard axioms only.",
+  "phases_completed": 3,
+  "phases_total": 3,
+  "blockers": [],
+  "continuation_context": {
+    "new_lemmas": [
+      {
+        "name": "Cslib.Automata.NA.Buchi.buchiCongruence_recurrentPrefixClass",
+        "file": "Cslib/Computability/Languages/Congruences/BuchiCongruence.lean",
+        "signature": "[Finite State] → (na : Buchi State Symbol) → (xs : ωSequence Symbol) → ∃ a b : Quotient na.BuchiCongruence.eq, b * b = b ∧ a * b = a ∧ ∃ᶠ k in atTop, ⟦xs.extract 0 k⟧ = a",
+        "visibility": "public"
+      },
+      {
+        "name": "buchiCongr_recurrentClass",
+        "file": "Cslib/Computability/Languages/OmegaRegularLanguage.lean",
+        "signature": "[Inhabited Symbol] → [Finite State] → (na : NA.Buchi State Symbol) → (xs : ωSequence Symbol) → ∃ a b : Quotient na.BuchiCongruence.eq, b * b = b ∧ a * b = a ∧ a ∈ ((buchiCongr_DMA na).run xs).infOcc",
+        "visibility": "private"
+      }
+    ],
+    "next_action_hint": "Task 241 Phase 4 can now use buchiCongr_recurrentClass to obtain the recurrent class witness needed for the forward direction of buchiCongr_DMA_language_eq."
+  },
+  "artifacts": [
+    "Cslib/Computability/Languages/Congruences/BuchiCongruence.lean",
+    "Cslib/Computability/Languages/OmegaRegularLanguage.lean",
+    "specs/429_prove_ramsey_recurrentclass_lemma_for_buchicongruence_prefix_runs/summaries/01_ramsey-recurrent-class-summary.md"
+  ],
+  "next_action_hint": "Ready to commit and transition task 429 to [COMPLETED]. Task 241 Phase 4 can proceed using buchiCongr_recurrentClass."
+}

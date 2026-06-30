@@ -36,19 +36,26 @@
     {
       "project_number": 387,
       "project_name": "rename_namespace_pl_to_propositional",
-      "status": "not_started",
+      "status": "blocked",
       "task_type": "cslib",
       "title": "PL -> Propositional namespace rename (upstream-gated)",
       "description": "[Refreshed post-merge vet.] DECISION REQUIRES UPSTREAM AGREEMENT. All Propositional files use `namespace Cslib.Logic.PL`; ORGANISATION.md specifies `Cslib.Logic.Propositional`. The PR #648 foundation slice exposes this publicly (Defs.lean:78, NaturalDeduction/Basic.lean:94). Breaking rename -> open an upstream Zulip thread for maintainer consensus FIRST (human-authored, AI policy), then mechanically rename across all Propositional files + downstream consumers (Modal/Temporal/Bimodal FromPropositional/Embedding). Until agreed, note as pending in the PR #648 description. Does NOT block the PR #648 foundation cherry-pick.",
       "created": "2026-06-28T12:53:27Z",
       "last_updated": "2026-06-28T18:34:49Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/387_rename_namespace_pl_to_propositional/reports/01_rename-pl-to-propositional.md",
+          "summary": "Full PL->Propositional rename impact map (132 files); human-gated blocker"
+        }
+      ],
       "session_id": "sess_1782651207_1e893c_387",
       "dependencies": [
         395
       ],
-      "topic": "PL-Hygiene"
+      "topic": "PL-Hygiene",
+      "blockers": "Breaking public namespace rename (Cslib.Logic.PL -> Cslib.Logic.Propositional) requires upstream maintainer consensus via a human-authored Zulip thread BEFORE any mechanical rename. AI policy forbids an agent opening the Zulip thread, securing consensus, or unilaterally performing the breaking public rename. REQUIRED HUMAN ACTION: Open upstream Zulip thread proposing PL -> Propositional rename; secure maintainer agreement; then re-dispatch /implement for the mechanical rename documented in the report."
     },
     {
       "project_number": 389,
@@ -1097,12 +1104,12 @@
       "topic": "PL-Tableau",
       "dependencies": [],
       "created": "2026-06-30T11:02:39Z",
-      "last_updated": "2026-06-30T11:02:39Z",
+      "last_updated": "2026-06-30T11:11:39Z",
       "artifacts": [
         {
-          "type": "research",
-          "path": "specs/317_propositional_tableau_completeness/reports/02_spawn-analysis.md",
-          "summary": "Spawn analysis from parent task 317"
+          "type": "report",
+          "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/reports/01_atom-persistence-upward-closure.md",
+          "summary": "Seed research report: atom-persistence/upward-closure; identifies the ≤-on-ℕ vs edge-accessibility design tension and the research agenda."
         }
       ]
     }

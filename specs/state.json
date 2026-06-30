@@ -155,12 +155,12 @@
     {
       "project_number": 321,
       "project_name": "code_hygiene_logics_foundations",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Review file size and structure throughout Logics/ and Foundations/ to identify and refactor files that are too long or poorly structured. Abstract and expose all and only what should be abstracted/exposed, maintaining the highest standards for code hygiene. Survey file lengths, identify candidates over ~400 lines, check for proper module boundaries, unnecessary public exports, missing abstraction barriers, and violations of single-responsibility principle. Produce a refactoring plan with prioritized actions",
       "topic": "Code Hygiene",
       "created": "2026-06-24T10:46:01Z",
-      "last_updated": "2026-06-30T18:24:03Z",
+      "last_updated": "2026-06-30T20:58:38Z",
       "session_id": "sess_1782838873_48a805",
       "artifacts": [
         {
@@ -176,7 +176,8 @@
       ],
       "dependencies": [
         301
-      ]
+      ],
+      "completion_summary": "Split all four Bimodal/Temporal Chronicle mega-files (2731-3566 lines) into barrel + submodules and privatized internal helpers across 7 phases; public API preserved via original module paths, each phase committed green, zero sorries/axioms. Deferred: Bimodal/Temporal Chronicle divergence investigation and second-tier 1000-1700 line splits."
     },
     {
       "project_number": 317,

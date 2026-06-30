@@ -27,7 +27,7 @@
     ]
   },
   "max_cycles": 15,
-  "cycle_count": 4,
+  "cycle_count": 10,
   "failed_tasks": [
     {
       "task": 434,
@@ -43,15 +43,13 @@
     }
   ],
   "completed_tasks": [
-    433,
-    435
+    406,
+    321
   ],
   "current_statuses": {
-    "433": "completed",
-    "434": "blocked",
-    "435": "completed",
-    "436": "blocked",
-    "241": "blocked"
+    "406": "completed",
+    "180": "partial",
+    "321": "completed"
   },
   "task_dirs": {
     "434": "specs/434_prove_backward_inclusion_buchicongr_dma_language_backward",

@@ -1,16 +1,1 @@
-{
-  "status": "partial",
-  "metadata": {
-    "tasks_completed": [
-      433,
-      435
-    ],
-    "tasks_failed": [
-      434,
-      436,
-      241
-    ],
-    "cycles_used": 4,
-    "multi_task_mode": true
-  }
-}
+{"status":"partial","metadata":{"tasks_completed":[406,321],"tasks_failed":[],"tasks_partial":[180],"cycles_used":10,"multi_task_mode":true}}

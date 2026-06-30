@@ -13,12 +13,11 @@ next_project_number: 442
 |------|-------|------------|--------|
 | 1 | 36,37,180,226,299,317,390,396,400,404,407,415,419,434,438,440 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 2 | 39,40,181,215,300,375,389,405,409,430,436,439,441 | 36,37,180,299,317,404,407,434 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,241,275,391,392,426 | 39,40,389,436,439 | Bimodal Porting, Foundations, Temporal Logic, ... |
-| 4 | 393,427 | 391,426 | Temporal Logic, PL-Hygiene |
+| 3 | 41,241,275,391,392,413,426 | 39,40,375,389,436,439 | Bimodal Porting, Foundations, Temporal Logic, ... |
+| 4 | 393,412,427 | 41,391,426 | Foundations, Temporal Logic, PL-Hygiene |
 | 5 | 425 | 427 | Temporal Logic |
 | 6 | 301 | 425 | Temporal Logic |
-| 7 | 321 | 301 | Code Hygiene |
-| 8 | 412,413,414 | 41,181,215,241,275,300,321,375 | Foundations, Code Hygiene, PL-Hygiene |
+| 7 | 414 | 181,215,241,275,300,301 | Code Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -62,8 +61,7 @@ next_project_number: 442
 
 ### Code Hygiene
 
-321 [IMPLEMENTING] — Review file size and structure throughout Logics/ and Foundations
-  └─ 414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p
+414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p
 
 ### PL Tableau
 
@@ -545,7 +543,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 321. Code hygiene logics foundations
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 301

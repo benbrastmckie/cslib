@@ -1,7 +1,7 @@
 # Implementation Plan: Code Hygiene Refactor of Logics/ Chronicle Mega-Files
 
 - **Task**: 321 - Refactor oversized/poorly-structured files in Cslib/Logics/ and Cslib/Foundations/ for code hygiene
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 12 hours (7 phases)
 - **Dependencies**: None
 - **Research Inputs**: specs/321_code_hygiene_logics_foundations/reports/01_code-hygiene-survey.md

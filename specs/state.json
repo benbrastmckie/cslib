@@ -1,5 +1,5 @@
 {
-  "next_project_number": 433,
+  "next_project_number": 437,
   "active_projects": [
     {
       "project_number": 406,
@@ -148,12 +148,12 @@
     {
       "project_number": 299,
       "project_name": "modal_k_tableau",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Implement tableau decision procedure for basic modal logic K with world labels, box/diamond rules on top of propositional rules from shared infrastructure. Introduces world labels (accessibility relation tracking) and fundamental modal rule pattern: box-positive is universal/persistent, diamond-positive is existential (fresh accessible world). Use Lukasiewicz encoding for and/or. Prove soundness against Kripke semantics and completeness by extracting finite Kripke countermodels. Modal formula type: Cslib.Logic.Modal.Formula with atom, bot, imp, box primitives. Files under Cslib/Logics/Modal/Tableau/: Defs.lean, Rules.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 1,500-2,000 lines.",
       "created": "2026-06-23T17:47:17Z",
-      "last_updated": "2026-06-30T15:01:39Z",
+      "last_updated": "2026-06-30T15:23:38Z",
       "next_artifact_number": 3,
       "artifacts": [
         {
@@ -168,7 +168,7 @@
       ],
       "dependencies": [],
       "parent_task": 296,
-      "session_id": "sess_1782831411_f94ae8"
+      "session_id": "sess_1751308890_f82ba1"
     },
     {
       "project_number": 300,
@@ -419,10 +419,14 @@
       "description": "Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller) establishing equivalence between omega-regular languages and deterministic Muller automata. Research phase should evaluate ctchou/AutomataTheory (independent Lean 4 project that claims McNaughton already proved) for architectural compatibility, portability, and licensing before deciding whether to port, adapt, or develop independently.",
       "topic": "Temporal Logic",
       "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-30T10:53:45Z",
+      "last_updated": "2026-06-30T15:21:57Z",
       "dependencies": [
         428,
-        429
+        429,
+        433,
+        434,
+        435,
+        436
       ],
       "next_artifact_number": 5,
       "artifacts": [
@@ -447,7 +451,7 @@
           "summary": "Phase 1 committed (c4d3869d): reverse direction IsRegular.of_da_muller proved sorry-free. Forward direction remains proof_wanted."
         }
       ],
-      "session_id": "sess_1782816794_a788ac",
+      "session_id": "sess_1782832881_8335e5",
       "previous_status": "implementing",
       "blockers": "Forward inclusion buchiCongr_DMA_language_forward overflows a single agent dispatch even with 428/429 infrastructure present; needs sub-lemma decomposition (see .orchestrator-handoff.json suggested_subdecomposition). Run /spawn 241."
     },
@@ -1088,6 +1092,91 @@
       "priority": "medium",
       "description": "Audit the ~6 'sorry' occurrences that the 2026-06-30 review found with no clear owning task: Cslib/Foundations/Order/HilbertAlgebra.lean, Cslib/Foundations/Logic/Metalogic/GenericMCS.lean, Cslib/Languages/LambdaCalculus/Named/Untyped/Basic.lean, Cslib/Logics/Propositional/Semantics/Algebra/CanAlgComplete.lean, Cslib/Logics/LTL/Semantics/GNBA.lean, and Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean (2). For each: determine whether it is covered by an existing blocked task (36/37/215/275/317/425-427); if genuinely unowned, either close it or document a deferral pointer. Foundational sorries can leak sorryAx into downstream #print axioms checks (CanAlgComplete/GNBA feed completeness/automata). Source: specs/reviews/review-2026-06-30.md medium issue 2.",
       "created": "2026-06-30T11:17:18Z"
+    },
+    {
+      "project_number": 433,
+      "project_name": "prove_acceptmembership_ramsey_lemma_for_buchicongr_dma_forwa",
+      "status": "researched",
+      "task_type": "cslib",
+      "description": "Prove a private named lemma (e.g. `buchiCongr_DMA_accept_mem`) in OmegaRegularLanguage.lean establishing: for any `xs ∈ language na`, the set `infOcc((buchiCongr_DMA na).run xs)` contains a class `b` for which `∃ a, (buchiFamily (a,b) ⊓ language na).Nonempty`. This is the core Ramsey/recurrence argument for the forward inclusion of McNaughton's theorem. Use `buchiCongr_recurrentClass` (private, OmegaRegularLanguage.lean) to extract idempotent `b` and absorbing `a` with `a ∈ infOcc(run xs)`; use `buchiCongr_DMA_run_eq` to connect run states to congruence classes; use `buchiFamily_saturation` (BuchiCongruence.lean:181) and `mem_buchiFamily` (BuchiCongruence.lean:107) to conclude nonemptiness. Exact API map from orchestrator handoff: DA.Muller language at DA/Basic.lean:117; `buchiCongr_recurrentClass` gives a,b with b*b=b, a*b=a, a ∈ infOcc(run xs); `buchiCongr_DMA_run_eq`: (buchiCongr_DMA na).run xs n = ⟦xs.extract 0 n⟧; `buchiFamily_saturation` at BuchiCongruence.lean:181; `mem_infOcc` at InfOcc.lean:88; `frequently_in_finite_type` at InfOcc.lean:46. CI must pass green (lake build, lean_verify on the new lemma) with zero sorries. Topic: Temporal Logic. Parent task: 241.",
+      "effort": "2-3 hours",
+      "parent_task": 241,
+      "topic": "Temporal Logic",
+      "dependencies": [],
+      "created": "2026-06-30T15:25:41Z",
+      "last_updated": "2026-06-30T15:25:41Z",
+      "artifacts": [
+        {
+          "type": "research",
+          "path": "specs/241_mcnaughton_theorem/reports/03_spawn-analysis.md",
+          "summary": "Spawn analysis from parent task 241"
+        }
+      ]
+    },
+    {
+      "project_number": 434,
+      "project_name": "prove_backward_inclusion_buchicongr_dma_language_backward",
+      "status": "researched",
+      "task_type": "cslib",
+      "description": "Prove the backward inclusion `buchiCongr_DMA_language_backward` (language (buchiCongr_DMA na) ⊆ language na) in Cslib/Computability/Languages/OmegaRegularLanguage.lean. Proceed from accept-set membership: if infOcc(run xs) ∈ accept, there exists b ∈ infOcc(run xs) and a such that (buchiFamily (a,b) ⊓ language na).Nonempty, giving a witness ys ∈ language na. Then use buchiFamily_saturation (BuchiCongruence.lean:181) to lift from the witness to xs ∈ language na. This direction does not depend on the Ramsey/recurrence argument for the forward direction — it can be proven in any order relative to tasks 0 and 1. Exact API: accept set definition of buchiCongr_DMA; buchiFamily_saturation (BuchiCongruence.lean:181); mem_buchiFamily (BuchiCongruence.lean:107). CI must pass green (lake build, lean_verify on buchiCongr_DMA_language_backward) with zero sorries. Topic: Temporal Logic. Parent task: 241.",
+      "effort": "1-2 hours",
+      "parent_task": 241,
+      "topic": "Temporal Logic",
+      "dependencies": [],
+      "created": "2026-06-30T15:25:41Z",
+      "last_updated": "2026-06-30T15:25:41Z",
+      "artifacts": [
+        {
+          "type": "research",
+          "path": "specs/241_mcnaughton_theorem/reports/03_spawn-analysis.md",
+          "summary": "Spawn analysis from parent task 241"
+        }
+      ]
+    },
+    {
+      "project_number": 435,
+      "project_name": "replace_sorry_in_buchicongr_dma_language_forward_using_accep",
+      "status": "researched",
+      "task_type": "cslib",
+      "description": "Replace the sorry-stub `buchiCongr_DMA_language_forward` (language na ⊆ language (buchiCongr_DMA na)) at approximately line 435 of Cslib/Computability/Languages/OmegaRegularLanguage.lean. Apply the accept-membership lemma produced by task index 0 (SUB-A: buchiCongr_DMA_accept_mem or equivalent) and unfold the DA.Muller language definition (language da xs ↔ (da.run xs).infOcc ∈ da.accept, DA/Basic.lean:117), matching infOcc((buchiCongr_DMA na).run xs) against the accept set `{S | ∃ b ∈ S, ∃ a, ((buchiFamily (a,b) ⊓ language na).toSet).Nonempty}`. The implementer must read the exact statement committed by SUB-A to determine the correct existential witnesses and unfolding sequence. CI must pass green (lake build, lean_verify on buchiCongr_DMA_language_forward) with zero sorries. Topic: Temporal Logic. Parent task: 241.",
+      "effort": "1-2 hours",
+      "parent_task": 241,
+      "topic": "Temporal Logic",
+      "dependencies": [
+        433
+      ],
+      "created": "2026-06-30T15:25:42Z",
+      "last_updated": "2026-06-30T15:25:42Z",
+      "artifacts": [
+        {
+          "type": "research",
+          "path": "specs/241_mcnaughton_theorem/reports/03_spawn-analysis.md",
+          "summary": "Spawn analysis from parent task 241"
+        }
+      ]
+    },
+    {
+      "project_number": 436,
+      "project_name": "combine_inclusions_into_buchicongr_dma_language_eq_and_close",
+      "status": "researched",
+      "task_type": "cslib",
+      "description": "Combine the forward inclusion (buchiCongr_DMA_language_forward, from task index 1) and backward inclusion (buchiCongr_DMA_language_backward, from task index 2) via Set / ωLanguage antisymmetry (le_antisymm or Set.Subset.antisymm) to prove `buchiCongr_DMA_language_eq` in Cslib/Computability/Languages/OmegaRegularLanguage.lean. Then: (1) wire the h_pkg obligation in to_da_muller_scaffold (Phase 5 of the original plan); (2) close IsRegular.iff_da_muller (~line 497 of OmegaRegularLanguage.lean, Phase 6 of the original plan); (3) run the full CSLib CI pipeline to green. Full CI pipeline: lake build, lake exe checkInitImports, lake lint, lake exe lint-style, lake test, lake shake --add-public --keep-implied --keep-prefix; lean_verify Cslib.ωLanguage.IsRegular.iff_da_muller (zero sorries, zero new axioms). Add docstrings to all new public lemmas. This task directly applies both named inclusions — the implementer needs their exact types before writing the antisymmetry combination. Topic: Temporal Logic. Parent task: 241.",
+      "effort": "1-2 hours",
+      "parent_task": 241,
+      "topic": "Temporal Logic",
+      "dependencies": [
+        435,
+        434
+      ],
+      "created": "2026-06-30T15:25:42Z",
+      "last_updated": "2026-06-30T15:25:42Z",
+      "artifacts": [
+        {
+          "type": "research",
+          "path": "specs/241_mcnaughton_theorem/reports/03_spawn-analysis.md",
+          "summary": "Spawn analysis from parent task 241"
+        }
+      ]
     }
   ],
   "repository_health": {

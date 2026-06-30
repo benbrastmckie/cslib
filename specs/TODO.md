@@ -1,5 +1,5 @@
 ---
-next_project_number: 433
+next_project_number: 437
 ---
 
 # TODO
@@ -11,10 +11,11 @@ next_project_number: 433
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,299,317,321,390,396,400,404,406,407,415,419,426,427,431 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,181,215,300,375,389,405,409,425,430 | 36,37,180,299,317,404,407,426,427 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,275,301,391,392,413 | 39,40,321,375,389,425 | Bimodal Porting, Foundations, Temporal Logic, ... |
-| 4 | 393,412,414 | 41,181,215,241,275,300,301,321,391 | Foundations, Code Hygiene, PL-Hygiene |
+| 1 | 36,37,180,226,299,317,321,390,396,400,404,406,407,415,419,426,427,431,433,434 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,181,215,300,375,389,405,409,425,430,435 | 36,37,180,299,317,404,407,426,427,433 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 3 | 41,275,301,391,392,413,436 | 39,40,321,375,389,425,434,435 | Bimodal Porting, Foundations, Temporal Logic, ... |
+| 4 | 241,393,412 | 41,321,391,436 | Foundations, Temporal Logic, PL-Hygiene |
+| 5 | 414 | 181,215,241,275,300,301,321 | Code Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -34,7 +35,7 @@ next_project_number: 433
 
 ### Modal Logic
 
-299 [PLANNED] — Implement tableau decision procedure for basic modal logic K with
+299 [IMPLEMENTING] — Implement tableau decision procedure for basic modal logic K with
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 404 [RESEARCHED] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
@@ -44,12 +45,17 @@ next_project_number: 433
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 426 [PARTIAL] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
   └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
     └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
   └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model (see above)
+433 [RESEARCHED] — Prove a private named lemma (e.g. `buchiCongr_DMA_accept_mem`) in
+  └─ 435 [RESEARCHED] — Replace the sorry-stub `buchiCongr_DMA_language_forward` (languag
+    └─ 436 [RESEARCHED] — Combine the forward inclusion (buchiCongr_DMA_language_forward, f
+      └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
+434 [RESEARCHED] — Prove the backward inclusion `buchiCongr_DMA_language_backward` (
+  └─ 436 [RESEARCHED] — Combine the forward inclusion (buchiCongr_DMA_language_forward, f (see above)
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -99,6 +105,54 @@ next_project_number: 433
 431 [NOT STARTED] — Audit the ~6 'sorry' occurrences that the 2026-06-30 review found
 
 ## Tasks
+
+### 436. Combine inclusions into buchicongr dma language eq and close
+- **Effort**: 1-2 hours
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: Task 435, Task 434
+- **Research**: [241_mcnaughton_theorem/reports/03_spawn-analysis.md]
+
+**Description**: Combine the forward inclusion (buchiCongr_DMA_language_forward, from task index 1) and backward inclusion (buchiCongr_DMA_language_backward, from task index 2) via Set / ωLanguage antisymmetry (le_antisymm or Set.Subset.antisymm) to prove `buchiCongr_DMA_language_eq` in Cslib/Computability/Languages/OmegaRegularLanguage.lean. Then: (1) wire the h_pkg obligation in to_da_muller_scaffold (Phase 5 of the original plan); (2) close IsRegular.iff_da_muller (~line 497 of OmegaRegularLanguage.lean, Phase 6 of the original plan); (3) run the full CSLib CI pipeline to green. Full CI pipeline: lake build, lake exe checkInitImports, lake lint, lake exe lint-style, lake test, lake shake --add-public --keep-implied --keep-prefix; lean_verify Cslib.ωLanguage.IsRegular.iff_da_muller (zero sorries, zero new axioms). Add docstrings to all new public lemmas. This task directly applies both named inclusions — the implementer needs their exact types before writing the antisymmetry combination. Topic: Temporal Logic. Parent task: 241.
+
+---
+
+### 435. Replace sorry in buchicongr dma language forward using accep
+- **Effort**: 1-2 hours
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: Task 433
+- **Research**: [241_mcnaughton_theorem/reports/03_spawn-analysis.md]
+
+**Description**: Replace the sorry-stub `buchiCongr_DMA_language_forward` (language na ⊆ language (buchiCongr_DMA na)) at approximately line 435 of Cslib/Computability/Languages/OmegaRegularLanguage.lean. Apply the accept-membership lemma produced by task index 0 (SUB-A: buchiCongr_DMA_accept_mem or equivalent) and unfold the DA.Muller language definition (language da xs ↔ (da.run xs).infOcc ∈ da.accept, DA/Basic.lean:117), matching infOcc((buchiCongr_DMA na).run xs) against the accept set `{S | ∃ b ∈ S, ∃ a, ((buchiFamily (a,b) ⊓ language na).toSet).Nonempty}`. The implementer must read the exact statement committed by SUB-A to determine the correct existential witnesses and unfolding sequence. CI must pass green (lake build, lean_verify on buchiCongr_DMA_language_forward) with zero sorries. Topic: Temporal Logic. Parent task: 241.
+
+---
+
+### 434. Prove backward inclusion buchicongr dma language backward
+- **Effort**: 1-2 hours
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+- **Research**: [241_mcnaughton_theorem/reports/03_spawn-analysis.md]
+
+**Description**: Prove the backward inclusion `buchiCongr_DMA_language_backward` (language (buchiCongr_DMA na) ⊆ language na) in Cslib/Computability/Languages/OmegaRegularLanguage.lean. Proceed from accept-set membership: if infOcc(run xs) ∈ accept, there exists b ∈ infOcc(run xs) and a such that (buchiFamily (a,b) ⊓ language na).Nonempty, giving a witness ys ∈ language na. Then use buchiFamily_saturation (BuchiCongruence.lean:181) to lift from the witness to xs ∈ language na. This direction does not depend on the Ramsey/recurrence argument for the forward direction — it can be proven in any order relative to tasks 0 and 1. Exact API: accept set definition of buchiCongr_DMA; buchiFamily_saturation (BuchiCongruence.lean:181); mem_buchiFamily (BuchiCongruence.lean:107). CI must pass green (lake build, lean_verify on buchiCongr_DMA_language_backward) with zero sorries. Topic: Temporal Logic. Parent task: 241.
+
+---
+
+### 433. Prove acceptmembership ramsey lemma for buchicongr dma forwa
+- **Effort**: 2-3 hours
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+- **Research**: [241_mcnaughton_theorem/reports/03_spawn-analysis.md]
+
+**Description**: Prove a private named lemma (e.g. `buchiCongr_DMA_accept_mem`) in OmegaRegularLanguage.lean establishing: for any `xs ∈ language na`, the set `infOcc((buchiCongr_DMA na).run xs)` contains a class `b` for which `∃ a, (buchiFamily (a,b) ⊓ language na).Nonempty`. This is the core Ramsey/recurrence argument for the forward inclusion of McNaughton's theorem. Use `buchiCongr_recurrentClass` (private, OmegaRegularLanguage.lean) to extract idempotent `b` and absorbing `a` with `a ∈ infOcc(run xs)`; use `buchiCongr_DMA_run_eq` to connect run states to congruence classes; use `buchiFamily_saturation` (BuchiCongruence.lean:181) and `mem_buchiFamily` (BuchiCongruence.lean:107) to conclude nonemptiness. Exact API map from orchestrator handoff: DA.Muller language at DA/Basic.lean:117; `buchiCongr_recurrentClass` gives a,b with b*b=b, a*b=a, a ∈ infOcc(run xs); `buchiCongr_DMA_run_eq`: (buchiCongr_DMA na).run xs n = ⟦xs.extract 0 n⟧; `buchiFamily_saturation` at BuchiCongruence.lean:181; `mem_infOcc` at InfOcc.lean:88; `frequently_in_finite_type` at InfOcc.lean:46. CI must pass green (lake build, lean_verify on the new lemma) with zero sorries. Topic: Temporal Logic. Parent task: 241.
+
+---
 
 ### 431. Audit unowned foundational sorries
 - **Status**: [NOT STARTED]
@@ -475,7 +529,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 299. Modal k tableau
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -552,7 +606,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: Task 428, Task 429
+- **Dependencies**: Task 428, Task 429, Task 433, Task 434, Task 435, Task 436
 - **Research**:
   - [241_mcnaughton_theorem/reports/01_ctchou-coordination-seed.md]
   - [241_mcnaughton_theorem/reports/02_mcnaughton-ctchou-port-path.md]

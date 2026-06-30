@@ -38,7 +38,7 @@ next_project_number: 441
 
 ### Modal Logic
 
-299 [BLOCKED] — Implement tableau decision procedure for basic modal logic K with
+299 [RESEARCHED] — Implement tableau decision procedure for basic modal logic K with
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 404 [RESEARCHED] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
@@ -47,7 +47,7 @@ next_project_number: 441
 
 ### Temporal Logic
 
-180 [PLANNED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
+180 [PARTIAL] — Add allFuture (G) and allPast (H) as primitive constructors to Te
   └─ 439 [RESEARCHED] — Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_red
     └─ 426 [BLOCKED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
       └─ 427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
@@ -580,12 +580,14 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 299. Modal k tableau
-- **Status**: [BLOCKED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
-- **Research**: [299_modal_k_tableau/reports/03_completeness-decomposition.md]
 - **Plan**: [299_modal_k_tableau/plans/04_modal-k-tableau-plan.md]
+- **Research**:
+  - [299_modal_k_tableau/reports/03_completeness-decomposition.md]
+  - [299_modal_k_tableau/reports/04_truth-lemma-architecture.md]
 
 **Description**: Implement tableau decision procedure for basic modal logic K with world labels, box/diamond rules on top of propositional rules from shared infrastructure. Introduces world labels (accessibility relation tracking) and fundamental modal rule pattern: box-positive is universal/persistent, diamond-positive is existential (fresh accessible world). Use Lukasiewicz encoding for and/or. Prove soundness against Kripke semantics and completeness by extracting finite Kripke countermodels. Modal formula type: Cslib.Logic.Modal.Formula with atom, bot, imp, box primitives. Files under Cslib/Logics/Modal/Tableau/: Defs.lean, Rules.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 1,500-2,000 lines.
 
@@ -712,7 +714,7 @@ Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completenes
 ---
 
 ### 180. Temporal primitive always historically
-- **Status**: [PLANNED]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 406

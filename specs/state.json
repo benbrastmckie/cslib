@@ -207,27 +207,31 @@
     {
       "project_number": 299,
       "project_name": "modal_k_tableau",
-      "status": "blocked",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Implement tableau decision procedure for basic modal logic K with world labels, box/diamond rules on top of propositional rules from shared infrastructure. Introduces world labels (accessibility relation tracking) and fundamental modal rule pattern: box-positive is universal/persistent, diamond-positive is existential (fresh accessible world). Use Lukasiewicz encoding for and/or. Prove soundness against Kripke semantics and completeness by extracting finite Kripke countermodels. Modal formula type: Cslib.Logic.Modal.Formula with atom, bot, imp, box primitives. Files under Cslib/Logics/Modal/Tableau/: Defs.lean, Rules.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 1,500-2,000 lines.",
       "created": "2026-06-23T17:47:17Z",
-      "last_updated": "2026-06-30T18:31:19Z",
+      "last_updated": "2026-06-30T19:59:23Z",
       "next_artifact_number": 3,
       "artifacts": [
+        {
+          "path": "specs/299_modal_k_tableau/plans/04_modal-k-tableau-plan.md",
+          "type": "plan"
+        },
         {
           "path": "specs/299_modal_k_tableau/reports/03_completeness-decomposition.md",
           "type": "report",
           "summary": "Phase 5 completeness decomposition (5a-5d) + reference signature table + Phase 6 de-risk"
         },
         {
-          "path": "specs/299_modal_k_tableau/plans/04_modal-k-tableau-plan.md",
-          "type": "plan"
+          "type": "report",
+          "path": "specs/299_modal_k_tableau/reports/04_truth-lemma-architecture.md"
         }
       ],
       "dependencies": [],
       "parent_task": 296,
-      "session_id": "sess_1782832934_b6aa63",
+      "session_id": "sess_1782844490_b74534",
       "blockers": "Completeness phase 5: hintikka_imp_pos/hintikka_imp_neg unprovable as stated for Lukasiewicz-encoded connectives (and/or/neg encoded as nested imp; tableau matches encoded rule, not raw imp). Needs proof-architecture revision (restate bridge lemmas or inline case analysis mirroring propositional classicalTruthLemma). Soundness 1-4 + Completeness truth-lemma/box-lemmas GREEN, zero sorries. See .orchestrator-handoff.json."
     },
     {
@@ -633,7 +637,7 @@
     {
       "project_number": 180,
       "project_name": "temporal_primitive_always_historically",
-      "status": "planned",
+      "status": "partial",
       "task_type": "cslib",
       "dependencies": [
         406

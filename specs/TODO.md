@@ -11,7 +11,7 @@ next_project_number: 439
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,299,317,321,390,396,400,404,406,407,415,419,426,427,433,434,437,438 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,299,317,321,390,396,400,404,406,407,415,419,426,427,433,434,438 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 2 | 39,40,181,215,300,375,389,405,409,425,430,435 | 36,37,180,299,317,404,407,426,427,433 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,275,301,391,392,413,436 | 39,40,321,375,389,425,434,435 | Bimodal Porting, Foundations, Temporal Logic, ... |
 | 4 | 241,393,412 | 41,321,391,436 | Foundations, Temporal Logic, PL-Hygiene |
@@ -102,7 +102,6 @@ next_project_number: 439
 
 ### Uncategorized
 
-437 [NOT STARTED] — Fix the sorry-census methodology so it stops counting comment/doc
 438 [NOT STARTED] — Upstream the comment/docstring cleanups identified by the task 43
 
 ## Tasks
@@ -113,15 +112,6 @@ next_project_number: 439
 - **Dependencies**: None
 
 **Description**: Upstream the comment/docstring cleanups identified by the task 431 audit via a CSLib PR. The edits are already applied and committed locally at 35436d7e (chore): (1) deleted the commented-out Term.subst_comm TODO stub in Cslib/Languages/LambdaCalculus/Named/Untyped/Basic.lean, (2) reworded the stale 'removing the sorry' docstring in Cslib/Logics/LTL/Semantics/GNBA.lean:37 to past tense. Both are comment-only (no proof/build impact). Remaining work: submit to leanprover/cslib via /pr (user-only command) with a 'chore'/'doc' prefixed title. Optionally bundle any further doc-hygiene found in those two modules. Source: task 431 audit.
-
----
-
-### 437. Fix sorry census exclude comments
-- **Status**: [NOT STARTED]
-- **Task Type**: meta
-- **Dependencies**: None
-
-**Description**: Fix the sorry-census methodology so it stops counting comment/docstring lines as proof debt. Root cause surfaced by task 431: the 2026-06-30 health-review census is a raw grep for 'sorry' over Cslib/**.lean, which swept up 7 docstring/comment occurrences (e.g. 'sorry-free', 'removing the sorry') and a commented-out TODO stub, producing false 'unowned foundational sorry' findings. The afternoon re-census moved to word-boundary 'sorry' but still matches inside docstrings. Make the census count only live proof debt -- e.g. strip Lean line comments (--) and block comments (/- -/), or cross-check against compiler 'declaration uses sorry' warnings / #print axioms sorryAx. Update whichever review/vet tooling performs the census (see specs/reviews/review-2026-06-30.md scope line and review-2026-06-30-2.md). Source: task 431 audit, specs/431_audit_unowned_foundational_sorries/reports/01_unowned-sorries-audit.md.
 
 ---
 

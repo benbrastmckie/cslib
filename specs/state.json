@@ -1193,19 +1193,6 @@
       ]
     },
     {
-      "project_number": 437,
-      "project_name": "fix_sorry_census_exclude_comments",
-      "status": "not_started",
-      "task_type": "meta",
-      "priority": "low",
-      "description": "Fix the sorry-census methodology so it stops counting comment/docstring lines as proof debt. Root cause surfaced by task 431: the 2026-06-30 health-review census is a raw grep for 'sorry' over Cslib/**.lean, which swept up 7 docstring/comment occurrences (e.g. 'sorry-free', 'removing the sorry') and a commented-out TODO stub, producing false 'unowned foundational sorry' findings. The afternoon re-census moved to word-boundary 'sorry' but still matches inside docstrings. Make the census count only live proof debt -- e.g. strip Lean line comments (--) and block comments (/- -/), or cross-check against compiler 'declaration uses sorry' warnings / #print axioms sorryAx. Update whichever review/vet tooling performs the census (see specs/reviews/review-2026-06-30.md scope line and review-2026-06-30-2.md). Source: task 431 audit, specs/431_audit_unowned_foundational_sorries/reports/01_unowned-sorries-audit.md.",
-      "created": "2026-06-30T16:29:40Z",
-      "last_updated": "2026-06-30T16:29:40Z",
-      "session_id": "sess_1782832854_3aada0",
-      "dependencies": null,
-      "parent_task": 431
-    },
-    {
       "project_number": 438,
       "project_name": "pr_task431_comment_cleanups",
       "status": "not_started",

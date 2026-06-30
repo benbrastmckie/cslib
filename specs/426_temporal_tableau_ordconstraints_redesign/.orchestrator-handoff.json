@@ -1,22 +1,38 @@
 {
   "task": 426,
-  "status": "planned",
-  "orchestrator_mode": true,
-  "summary": "5-phase Option-B plan created: add integer instant scheme to TimeOrdering, prove InstantStrict (edge-by-edge + run-level) sorry-free, re-key extractModel to D=ℤ/f=instant, remove false ordConstraints_strict, verify green build.",
-  "artifacts": [
-    "specs/426_temporal_tableau_ordconstraints_redesign/plans/01_ordering-instant-redesign.md"
-  ],
-  "recommended_option": "B (relative integer instants assigned at creation; D=ℤ, f=instant)",
-  "scope_boundary": "Order-preservation redesign + InstantStrict lemma only; FMP-blocked Until/Since truth lemmas remain out of scope.",
-  "plan": {
-    "path": "specs/426_temporal_tableau_ordconstraints_redesign/plans/01_ordering-instant-redesign.md",
-    "phase_count": 5,
-    "estimated_hours": 7.5,
-    "dependency_waves": [[1], [2, 4], [3], [5]],
-    "high_risk_phase": "Phase 3 (run-level threading of InstantStrict through temporalExpandBranches); zero-debt fallback is to deliver Phase 2 edge-by-edge lemmas and mark Phase 3 [BLOCKED]."
+  "status": "partial",
+  "phases_completed": 4,
+  "phases_total": 5,
+  "last_green_commit": "f75e3608",
+  "summary": "Task 426 temporal tableau ordering redesign: phases 1, 2, 4, 5 complete sorry-free. Phase 3 (run-level InstantStrict threading) is BLOCKED by let rec barrier in processNext. Zero sorries introduced. lake build + lake test green.",
+  "sorry_inventory": {
+    "introduced": 0,
+    "pre_existing": 1,
+    "note": "Pre-existing sorry at Completeness.lean:433 is task 427's imp case — owned by task 427, not touched by task 426"
   },
-  "acceptance_criterion": "InstantStrict invariant compiles sorry-free (no new axioms, no vacuous defs); false ordConstraints_strict removed; lake build + lake test green.",
-  "fallback_option": "A: Mathlib LinearExtension + toLinearExtension (Mathlib.Order.Extension.Linear) requires acyclicity/PartialOrder proof; higher cost.",
-  "base_commit": "7f052834",
-  "next_phase": "implement"
+  "artifacts": {
+    "plan": "specs/426_temporal_tableau_ordconstraints_redesign/plans/01_ordering-instant-redesign.md",
+    "summary": "specs/426_temporal_tableau_ordconstraints_redesign/summaries/01_ordering-instant-redesign-summary.md",
+    "return_meta": "specs/426_temporal_tableau_ordconstraints_redesign/.return-meta.json"
+  },
+  "completed_phases": [
+    "Phase 1: Augment TimeOrdering with instant scheme",
+    "Phase 2: Define InstantStrict and prove edge-by-edge preservation lemmas",
+    "Phase 4: Re-key extractModel through f (extractModelZ) and re-prove atom lemmas",
+    "Phase 5: Remove false ordConstraints_strict, wire D=Z design, final verification"
+  ],
+  "blocked_phase": {
+    "number": 3,
+    "name": "Thread the invariant through the tableau run",
+    "blocker": "processNext is a let rec inside temporalExpandBranches (Saturation.lean). Lean 4 does not generate standalone recursion principles for let rec bindings, so standard Nat.strongInduction on fuel cannot be applied directly. Factoring processNext out as a top-level def (or using mutual blocks) would unblock this phase.",
+    "what_was_tried": "Planned Nat.strongInduction on fuel + case analysis over the match arms. Cannot name processNext in a separate lemma.",
+    "what_is_needed": "Factor processNext as a top-level def in Saturation.lean, then prove: if (InstantStrict ord, CoupledWithBranch b ord) and processNext is applied, the invariant is preserved. Each addFuture/addPast step uses Phase 2 preservation lemmas + branchNextTime_gt for freshness."
+  },
+  "verification": {
+    "lake_build": "green",
+    "lake_test": "9152 jobs all pass",
+    "lake_check_init": "pass",
+    "sorry_in_scope": 0,
+    "ordConstraints_strict_revived": false
+  }
 }

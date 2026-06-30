@@ -1,0 +1,21 @@
+{
+  "status": "planned",
+  "task": 427,
+  "summary": "Four-phase plan to prove temporalTruthLemma_propositional (atom/bot/imp) sorry-free in Cslib/Logics/Temporal/Tableau/Completeness.lean: (1) add IsPropositional + Formula.one_le_complexity; (2) port four any<->mem bridge lemmas from the WIP; (3) prove the fuel-bounded _aux lemma by induction n with a per-rule case skeleton (strong induction on Formula.complexity, NOT nested induction); (4) public lemma instantiation + sorry-free green CI. Reuses existing base cases; scoped to one file from green commit 7f052834.",
+  "artifacts": [
+    {
+      "path": "specs/427_temporal_tableau_propositional_truth_lemma/plans/01_propositional-truth-lemma.md",
+      "type": "plan"
+    }
+  ],
+  "base_commit": "7f052834",
+  "phase_count": 4,
+  "dependency_waves": [[1], [2], [3], [4]],
+  "next_step": "implement",
+  "next_action_hint": "Run /implement 427 to execute the plan. Sequential phases 1->2->3->4; Phase 3 (imp case, both directions) is the bulk. CI gate: lake build + lake test + lake exe lint-style; acceptance = no sorry/admit/new axiom in the new declarations.",
+  "blocked": false,
+  "sorry_inventory": {
+    "introduced": 0,
+    "note": "Recommended implementation path is sorry-free and axiom-free; untl/snce cases are structurally excluded by IsPropositional, no placeholder needed."
+  }
+}

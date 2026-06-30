@@ -1,0 +1,25 @@
+{
+  "task": 386,
+  "phase": "plan",
+  "status": "planned",
+  "session_id": "sess_1782817543_eee5ae_386",
+  "plan": "specs/386_fix_lake_lint_errors_propositional/plans/01_fix-pl-lint-violations.md",
+  "next_action": "implement",
+  "summary": "4-phase mechanical lint-fix plan for 20 PL violations. Phase 1 (attributes/docstrings: simpNF+docBlame+unusedArguments) gates Phases 2-4 (GenericMCSBridge renames+def->lemma+cross-file consumer; LK renames; LJ renames).",
+  "phase_count": 4,
+  "estimated_hours": 1.5,
+  "dependency_waves": [[1], [2, 3, 4]],
+  "task_type": "cslib",
+  "ci_required": true,
+  "key_caveats": [
+    "Namespace is Cslib/Logics/Propositional/ (with 's')",
+    "Only cross-file rename consumer: list_deriv_to_tree -> listDerivToTree at DeductionTheorem.lean:79",
+    "deriv_tree_to_list must also convert noncomputable def -> lemma (drop noncomputable)",
+    "replace_all on cutAdm_right/ljCutAdm_right: rename longest variants first to avoid substring clobbering",
+    "conclusionGrounded already fixed (task 388) - do NOT touch",
+    "Modal/Temporal/Bimodal GenericMCSBridge copies are OUT OF SCOPE",
+    "Verify with 'lake exe runLinter Cslib.Logics.Propositional.<Module>' (lake lint rejects module args)"
+  ],
+  "blockers": [],
+  "sorry_inventory": []
+}

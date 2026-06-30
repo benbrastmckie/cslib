@@ -231,4 +231,90 @@ theorem buchiFamily_saturation [Inhabited Symbol] :
    have : k < yls.cumLen (m + 1) - yls.cumLen m ∨ 0 < yls.cumLen (m + 2) - yls.cumLen (m + 1)
    finish
 
+/-! ## Monoid structure on the Büchi-congruence quotient -/
+
+/-- Left covariance of `na.BuchiCongruence`: if `u` and `u'` are Büchi-congruent
+then `w ++ u` and `w ++ u'` are also Büchi-congruent for all finite words `w`.
+This complements the right covariance provided by `RightCongruence` and is the
+key ingredient for proving that concatenation of representatives is well-defined
+on the quotient. -/
+lemma buchiCongruence_left_cov {u u' : List Symbol}
+    (h : na.BuchiCongruence.eq u u') (w : List Symbol) :
+    na.BuchiCongruence.eq (w ++ u) (w ++ u') := by
+  intro s t
+  constructor
+  · constructor
+    · intro hw
+      obtain ⟨r, h1, h2⟩ := LTS.pairLang_split hw
+      exact LTS.pairLang_append h1 ((h r t).1.mp h2)
+    · intro hw
+      obtain ⟨r, h1, h2⟩ := LTS.pairLang_split hw
+      exact LTS.pairLang_append h1 ((h r t).1.mpr h2)
+  · constructor
+    · intro hw
+      obtain ⟨r, (⟨h1, h2⟩ | ⟨h1, h2⟩)⟩ := LTS.pairViaLang_split hw
+      · exact LTS.pairViaLang_append_pairLang h1 ((h r t).1.mp h2)
+      · exact LTS.pairLang_append_pairViaLang h1 ((h r t).2.mp h2)
+    · intro hw
+      obtain ⟨r, (⟨h1, h2⟩ | ⟨h1, h2⟩)⟩ := LTS.pairViaLang_split hw
+      · exact LTS.pairViaLang_append_pairLang h1 ((h r t).1.mpr h2)
+      · exact LTS.pairLang_append_pairViaLang h1 ((h r t).2.mpr h2)
+
+/-- The `Monoid` instance on the quotient of `na.BuchiCongruence`:
+- multiplication is `⟦u⟧ * ⟦v⟧ = ⟦u ++ v⟧` (list concatenation lifted to congruence classes);
+- the identity element is `1 = ⟦[]⟧` (the class of the empty word).
+Well-definedness of multiplication uses right covariance (from `RightCongruence`)
+for the first argument and `buchiCongruence_left_cov` for the second argument. -/
+instance buchiCongruence_instMonoid : Monoid (Quotient na.BuchiCongruence.eq) where
+  mul a b := Quotient.liftOn₂ a b (fun u v => ⟦u ++ v⟧) fun u v u' v' hu hv =>
+    Quotient.sound (na.BuchiCongruence.eq.trans
+      (na.BuchiCongruence.right_cov.elim v hu)
+      (buchiCongruence_left_cov hv u'))
+  one := ⟦[]⟧
+  mul_assoc a b c := by
+    refine Quotient.inductionOn a fun u => ?_
+    refine Quotient.inductionOn b fun v => ?_
+    refine Quotient.inductionOn c fun w => ?_
+    change (⟦(u ++ v) ++ w⟧ : Quotient na.BuchiCongruence.eq) = ⟦u ++ (v ++ w)⟧
+    rw [List.append_assoc]
+  one_mul a := by
+    refine Quotient.inductionOn a fun u => ?_
+    rfl
+  mul_one a := by
+    refine Quotient.inductionOn a fun u => ?_
+    change (⟦u ++ []⟧ : Quotient na.BuchiCongruence.eq) = ⟦u⟧
+    rw [List.append_nil]
+
+/-- The quotient map sends concatenation to multiplication: `⟦u ++ v⟧ = ⟦u⟧ * ⟦v⟧`.
+This is the canonical rewrite lemma for converting between `List.append` and
+the monoid multiplication on `Quotient na.BuchiCongruence.eq`. -/
+@[simp]
+lemma buchiCongruence_mk_append (u v : List Symbol) :
+    (⟦u ++ v⟧ : Quotient na.BuchiCongruence.eq) = ⟦u⟧ * ⟦v⟧ :=
+  (Quotient.liftOn₂_mk (fun u v => ⟦u ++ v⟧) _ u v).symm
+
+/-- Idempotent-power collapse helper: if `b * b = b` then `b ^ (n + 1) = b` for all `n`. -/
+lemma buchiCongruence_pow_succ {b : Quotient na.BuchiCongruence.eq}
+    (hb : b * b = b) (n : ℕ) : b ^ (n + 1) = b := by
+  induction n with
+  | zero => simp
+  | succ m ih => simp only [pow_succ, ih, hb]
+
+/-- Idempotent-power collapse: if `b * b = b` in the monoid of Büchi-congruence classes,
+then `b ^ k = b` for all `k ≥ 1` (i.e., `k ≠ 0`). -/
+lemma buchiCongruence_idempotentPow {b : Quotient na.BuchiCongruence.eq}
+    (hb : b * b = b) {k : ℕ} (hk : k ≠ 0) : b ^ k = b := by
+  cases k with
+  | zero => exact absurd rfl hk
+  | succ n => exact buchiCongruence_pow_succ hb n
+
+/-- Absorption corollary: if `b * b = b` and `a * b = a` in the monoid of Büchi-congruence
+classes, then `a * b ^ k = a` for all `k ≥ 0`. For `k = 0`, `b ^ 0 = 1` and `a * 1 = a`.
+For `k = n + 1`, `buchiCongruence_pow_succ` rewrites `b ^ (n + 1)` to `b`. -/
+lemma buchiCongruence_absorption {a b : Quotient na.BuchiCongruence.eq}
+    (hb : b * b = b) (hab : a * b = a) (k : ℕ) : a * b ^ k = a := by
+  cases k with
+  | zero => simp
+  | succ n => rw [buchiCongruence_pow_succ hb, hab]
+
 end Cslib.Automata.NA.Buchi

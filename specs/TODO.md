@@ -11,7 +11,7 @@ next_project_number: 433
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,299,321,386,387,396,400,404,406,407,415,419,426,427,428,430,431,432 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,299,321,386,387,396,400,404,406,407,415,419,426,427,428,430,431 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 2 | 39,40,181,215,300,317,390,405,409,425,429 | 36,37,180,299,387,404,407,426,427,428,430 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,241,275,301,375,389 | 39,40,317,425,429 | Bimodal Porting, Foundations, Temporal Logic, ... |
 | 4 | 391,392,412,413,414 | 41,181,215,241,275,300,301,321,375,386,387,389 | Foundations, Code Hygiene, PL-Docs, ... |
@@ -45,10 +45,10 @@ next_project_number: 433
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-426 [NOT STARTED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
+426 [PLANNED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
   └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
     └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
-427 [NOT STARTED] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
+427 [PLANNED] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
   └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model (see above)
 428 [IMPLEMENTING] — Add named lemmas to Cslib/Computability/Languages/Congruences/Rig
   └─ 429 [RESEARCHED] — Prove a named lemma (suggested name: `buchiCongr_recurrentClass` 
@@ -103,15 +103,15 @@ next_project_number: 433
 ### Uncategorized
 
 431 [NOT STARTED] — Audit the ~6 'sorry' occurrences that the 2026-06-30 review found
-432 [RESEARCHED] — Fix .claude/scripts/roadmap-integration.sh which aborts with '/et
 
 ## Tasks
 
 ### 432. Fix roadmap integration argv overflow
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: meta
 - **Dependencies**: None
 - **Research**: [432_fix_roadmap_integration_argv_overflow/reports/01_argv-overflow-fix.md]
+- **Summary**: [432_fix_roadmap_integration_argv_overflow/summaries/01_argv-overflow-fix-summary.md]
 
 **Description**: Fix .claude/scripts/roadmap-integration.sh which aborts with '/etc/profiles/per-user/benjamin/bin/python3: Argument list too long' at line 352 during /review. The script appears to pass file content (state.json/ROADMAP.md) as a python argv argument; pass via stdin or a temp file path instead so roadmap auto-annotation works again. Source: specs/reviews/review-2026-06-30.md low issue 2.
 
@@ -227,20 +227,24 @@ After implementation:
 ---
 
 ### 427. Temporal tableau propositional truth lemma
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
+- **Research**: [427_temporal_tableau_propositional_truth_lemma/reports/01_propositional-truth-lemma.md]
+- **Plan**: [427_temporal_tableau_propositional_truth_lemma/plans/01_propositional-truth-lemma.md]
 
 **Description**: [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_propositional (atom/bot/imp cases) in Cslib/Logics/Temporal/Tableau/Completeness.lean sorry-free. This obligation is independently provable (no FMP, no dependence on the ordConstraints fix), but exceeds a single agent context window when attempted naively. KEY: the imp case requires generalized STRUCTURAL induction on the formula giving subformula induction hypotheses — NOT induction on the IsPropositional proof (which only yields IHs for the immediate subformulas phi/psi). Adapt the propositional truth lemma from Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean to the time-indexed temporalHintikkaSet/TBranch setting. Reuse already-proved base cases: extractModel_atomPos_sat, extractModel_atom_neg_notSat, extractModel_bot_false. A 1150-line prior attempt (with the structural difficulty diagnosed) is preserved at specs/301_temporal_tableau/.wip-Completeness-truthlemma-attempt.lean for reference. Start from green commit 7f052834. Scope strictly to this one lemma. Independent of tasks 423 and 425.
 
 ---
 
 ### 426. Temporal tableau ordconstraints redesign
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
+- **Research**: [426_temporal_tableau_ordconstraints_redesign/reports/01_ordconstraints-redesign.md]
+- **Plan**: [426_temporal_tableau_ordconstraints_redesign/plans/01_ordering-instant-redesign.md]
 
 **Description**: [Decomposed from task 301, blocker A.] Redesign the time-ordering scheme in the temporal tableau so the ordering invariants hold. The lemma ordConstraints_strict (Cslib/Logics/Temporal/Tableau/Completeness.lean) is FALSE as stated: addPast t tNew adds the constraint (tNew, t) with tNew > t, violating the claimed invariant (a,b) in constraints -> a < b. Choose and implement a correct scheme (e.g. topological sort of the constraint graph, or a signed/relative integer time domain) so that extractModel builds a well-founded strict order, then prove the corrected ordConstraints lemma sorry-free. Start from green commit 7f052834. Independent of tasks 424 and 425.
 

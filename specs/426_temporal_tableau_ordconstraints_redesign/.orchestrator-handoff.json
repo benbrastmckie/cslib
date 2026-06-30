@@ -1,0 +1,22 @@
+{
+  "task": 426,
+  "status": "planned",
+  "orchestrator_mode": true,
+  "summary": "5-phase Option-B plan created: add integer instant scheme to TimeOrdering, prove InstantStrict (edge-by-edge + run-level) sorry-free, re-key extractModel to D=ℤ/f=instant, remove false ordConstraints_strict, verify green build.",
+  "artifacts": [
+    "specs/426_temporal_tableau_ordconstraints_redesign/plans/01_ordering-instant-redesign.md"
+  ],
+  "recommended_option": "B (relative integer instants assigned at creation; D=ℤ, f=instant)",
+  "scope_boundary": "Order-preservation redesign + InstantStrict lemma only; FMP-blocked Until/Since truth lemmas remain out of scope.",
+  "plan": {
+    "path": "specs/426_temporal_tableau_ordconstraints_redesign/plans/01_ordering-instant-redesign.md",
+    "phase_count": 5,
+    "estimated_hours": 7.5,
+    "dependency_waves": [[1], [2, 4], [3], [5]],
+    "high_risk_phase": "Phase 3 (run-level threading of InstantStrict through temporalExpandBranches); zero-debt fallback is to deliver Phase 2 edge-by-edge lemmas and mark Phase 3 [BLOCKED]."
+  },
+  "acceptance_criterion": "InstantStrict invariant compiles sorry-free (no new axioms, no vacuous defs); false ordConstraints_strict removed; lake build + lake test green.",
+  "fallback_option": "A: Mathlib LinearExtension + toLinearExtension (Mathlib.Order.Extension.Linear) requires acyclicity/PartialOrder proof; higher cost.",
+  "base_commit": "7f052834",
+  "next_phase": "implement"
+}

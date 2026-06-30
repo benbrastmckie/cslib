@@ -1071,14 +1071,23 @@
     {
       "project_number": 426,
       "project_name": "temporal_tableau_ordconstraints_redesign",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Temporal Logic",
       "description": "[Decomposed from task 301, blocker A.] Redesign the time-ordering scheme in the temporal tableau so the ordering invariants hold. The lemma ordConstraints_strict (Cslib/Logics/Temporal/Tableau/Completeness.lean) is FALSE as stated: addPast t tNew adds the constraint (tNew, t) with tNew > t, violating the claimed invariant (a,b) in constraints -> a < b. Choose and implement a correct scheme (e.g. topological sort of the constraint graph, or a signed/relative integer time domain) so that extractModel builds a well-founded strict order, then prove the corrected ordConstraints lemma sorry-free. Start from green commit 7f052834. Independent of tasks 424 and 425.",
       "created": "2026-06-30T10:57:13Z",
       "last_updated": "2026-06-30T11:26:14Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/426_temporal_tableau_ordconstraints_redesign/reports/01_ordconstraints-redesign.md"
+        },
+        {
+          "type": "plan",
+          "path": "specs/426_temporal_tableau_ordconstraints_redesign/plans/01_ordering-instant-redesign.md"
+        }
+      ],
       "dependencies": [],
       "parent_task": 301,
       "session_id": "sess_1782818123_ab1047_426"
@@ -1086,14 +1095,23 @@
     {
       "project_number": 427,
       "project_name": "temporal_tableau_propositional_truth_lemma",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Temporal Logic",
       "description": "[Decomposed from task 301, blocker B.] Prove temporalTruthLemma_propositional (atom/bot/imp cases) in Cslib/Logics/Temporal/Tableau/Completeness.lean sorry-free. This obligation is independently provable (no FMP, no dependence on the ordConstraints fix), but exceeds a single agent context window when attempted naively. KEY: the imp case requires generalized STRUCTURAL induction on the formula giving subformula induction hypotheses — NOT induction on the IsPropositional proof (which only yields IHs for the immediate subformulas phi/psi). Adapt the propositional truth lemma from Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean to the time-indexed temporalHintikkaSet/TBranch setting. Reuse already-proved base cases: extractModel_atomPos_sat, extractModel_atom_neg_notSat, extractModel_bot_false. A 1150-line prior attempt (with the structural difficulty diagnosed) is preserved at specs/301_temporal_tableau/.wip-Completeness-truthlemma-attempt.lean for reference. Start from green commit 7f052834. Scope strictly to this one lemma. Independent of tasks 423 and 425.",
       "created": "2026-06-30T10:57:13Z",
       "last_updated": "2026-06-30T10:57:13Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/427_temporal_tableau_propositional_truth_lemma/reports/01_propositional-truth-lemma.md"
+        },
+        {
+          "type": "plan",
+          "path": "specs/427_temporal_tableau_propositional_truth_lemma/plans/01_propositional-truth-lemma.md"
+        }
+      ],
       "dependencies": [],
       "parent_task": 301
     },
@@ -1154,20 +1172,26 @@
     {
       "project_number": 432,
       "project_name": "fix_roadmap_integration_argv_overflow",
-      "status": "researched",
+      "status": "completed",
       "task_type": "meta",
       "priority": "low",
       "description": "Fix .claude/scripts/roadmap-integration.sh which aborts with '/etc/profiles/per-user/benjamin/bin/python3: Argument list too long' at line 352 during /review. The script appears to pass file content (state.json/ROADMAP.md) as a python argv argument; pass via stdin or a temp file path instead so roadmap auto-annotation works again. Source: specs/reviews/review-2026-06-30.md low issue 2.",
       "created": "2026-06-30T11:17:18Z",
-      "last_updated": "2026-06-30T11:24:51Z",
+      "last_updated": "2026-06-30T11:32:55Z",
       "session_id": "sess_1782818392_271f51_432",
       "artifacts": [
         {
           "path": "specs/432_fix_roadmap_integration_argv_overflow/reports/01_argv-overflow-fix.md",
           "type": "report",
           "summary": "Identified two argv-overflow sites in roadmap-integration.sh"
+        },
+        {
+          "path": "specs/432_fix_roadmap_integration_argv_overflow/summaries/01_argv-overflow-fix-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary for argv overflow fix across three shell scripts"
         }
-      ]
+      ],
+      "completion_summary": "Fixed E2BIG argv overflow in roadmap-integration.sh by replacing content-passing with temp-file path-passing at two sites; applied the same mktemp pattern to issue-grouping.sh (2 sites) and tier-selection.sh (2 sites) for consistency. Verified against the real 94 KB state.json with no error and valid JSON output."
     }
   ],
   "repository_health": {

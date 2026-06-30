@@ -1,0 +1,34 @@
+{
+  "task": 387,
+  "session_id": "sess_1782817543_eee5ae_387",
+  "phase": "research",
+  "status": "blocked",
+  "blockers": [
+    {
+      "type": "human_gated",
+      "summary": "Breaking public namespace rename (Cslib.Logic.PL -> Cslib.Logic.Propositional) requires upstream maintainer consensus via a human-authored Zulip thread BEFORE any mechanical rename. AI policy forbids an agent opening the Zulip thread, securing consensus, or unilaterally performing the breaking public rename.",
+      "required_human_action": "Open upstream Zulip thread proposing PL -> Propositional rename; secure maintainer agreement; then re-dispatch /implement for the mechanical rename documented in the report.",
+      "blocks_pr_648": false
+    }
+  ],
+  "findings": {
+    "divergence_confirmed": true,
+    "current_namespace": "Cslib.Logic.PL",
+    "canonical_namespace": "Cslib.Logic.Propositional",
+    "organisation_md_reference": "ORGANISATION.md:259 (Namespace Convention, lines 254-264)",
+    "pr648_exposure_points": [
+      "Cslib/Logics/Propositional/Defs.lean:78",
+      "Cslib/Logics/Propositional/NaturalDeduction/Basic.lean:121"
+    ],
+    "namespace_declarer_files": 106,
+    "downstream_code_consumer_files": 21,
+    "docstring_only_files": 5,
+    "estimated_total_files_touched": 132,
+    "non_propositional_declarer": "Cslib/Foundations/Order/HilbertAlgebra/DiegoEmbedding.lean:385"
+  },
+  "recommendation": "Mark task 387 [BLOCKED] pending human Zulip consensus. Does NOT block PR #648 cherry-pick; note divergence as 'pending' in PR #648 description. Full mechanical rename plan documented in report for one-pass execution post-consensus.",
+  "artifacts": [
+    "specs/387_rename_namespace_pl_to_propositional/reports/01_rename-pl-to-propositional.md"
+  ],
+  "updated_at": "2026-06-30T11:09:04Z"
+}

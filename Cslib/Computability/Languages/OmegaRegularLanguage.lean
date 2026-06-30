@@ -7,6 +7,7 @@ Authors: Ching-Tsun Chou
 module
 
 public import Cslib.Computability.Automata.DA.Buchi
+public import Cslib.Computability.Automata.DA.BuchiChar
 public import Cslib.Computability.Automata.NA.BuchiEquiv
 public import Cslib.Computability.Automata.NA.BuchiInter
 public import Cslib.Computability.Automata.NA.Sum
@@ -74,6 +75,15 @@ theorem IsRegular.regular_omegaLim {l : Language Symbol}
     (h : l.IsRegular) : (l↗ω).IsRegular := by
   obtain ⟨State, _, ⟨da, acc⟩, rfl⟩ := Language.IsRegular.iff_dfa.mp h
   grind [IsRegular.of_da_buchi, =_ DA.buchi_eq_finAcc_omegaLim]
+
+/-- The ω-limit of a regular language is recognized by a finite-state deterministic Muller
+automaton (the base case of McNaughton's compositional determinization). -/
+theorem IsRegular.omegaLim_da_muller {l : Language Symbol} (h : l.IsRegular) :
+    ∃ (State : Type) (_ : Finite State) (da : DA.Muller State Symbol),
+      language da = l↗ω := by
+  obtain ⟨State, _, ⟨da, acc⟩, rfl⟩ := Language.IsRegular.iff_dfa.mp h
+  exact ⟨State, inferInstance, (DA.Buchi.mk da acc).toMuller,
+    by grind [DA.Buchi.toMuller_language_eq, DA.buchi_eq_finAcc_omegaLim]⟩
 
 open ωLanguage in
 /-- The empty language is ω-regular. -/

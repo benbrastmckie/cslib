@@ -19,9 +19,11 @@
   "failed_tasks": [],
   "completed_tasks": [],
   "current_statuses": {
-    "406": "planned",
-    "180": "planned",
-    "321": "researched"
+    "427": "partial",
+    "426": "blocked",
+    "439": "researched",
+    "425": "not_started",
+    "301": "blocked"
   },
   "task_dirs": {
     "406": "specs/406_fix_crosscutting_lint_modal_temporal_bimodal_foundations",
@@ -42,19 +44,31 @@
     "439": "cslib-implementation-agent"
   },
   "dependency_graph": {
-    "427": [],
-    "439": [],
+    "406": [],
+    "180": [
+      "406"
+    ],
+    "439": [
+      "180"
+    ],
     "426": [
-      439
+      "439"
+    ],
+    "427": [
+      "180",
+      "426"
     ],
     "425": [
-      426,
-      427
+      "426",
+      "427"
     ],
     "301": [
-      426,
-      427,
-      425
+      "426",
+      "427",
+      "425"
+    ],
+    "321": [
+      "301"
     ]
   },
   "territory_serialize": [
@@ -84,5 +98,7 @@
       301
     ]
   },
-  "dependency_note": "Added deps to avoid file-territory clashes: 180->406 (user-stated), 427->180 (Formula+Completeness.lean), 439->180 (Saturation rules+Completeness wire), 321->301 (hygiene reshapes temporal files last). Safe order: 406,180,427,439,426,425,301,321."
+  "dependency_note": "Added deps to avoid file-territory clashes: 180->406 (user-stated), 427->180 (Formula+Completeness.lean), 439->180 (Saturation rules+Completeness wire), 321->301 (hygiene reshapes temporal files last). Safe order: 406,180,427,439,426,425,301,321.",
+  "serialized_chain": "406 -> 180 -> 439 -> 426 -> 427 -> 425 -> 301 -> 321",
+  "resolution_note": "Wave-0 batch did not converge: 426/427 overflowed; 426 phase-3 spawned task 439; 427 imp-case still open (6 overflows, work clobbered/reverted by concurrent session). Added territory edge 427->426 so the Temporal group is now a total order (one task per wave). 427 handoff updated with restart-cleanup instructions. Do NOT re-orchestrate this group in parallel; respect the chain."
 }

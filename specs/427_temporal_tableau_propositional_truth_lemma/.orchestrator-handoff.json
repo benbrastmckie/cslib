@@ -1,19 +1,34 @@
 {
   "status": "partial",
-  "summary": "Truth-lemma scaffold validated and committed; only the imp case of temporalTruthLemma_propositional_aux remains as one isolated documented sorry. Four agent dispatches overflowed context on this case.",
+  "summary": "Task 427 imp-case of temporalTruthLemma_propositional_aux remains OPEN at Completeness.lean:433 (single active sorry). SIX agent dispatches have now overflowed context on this case (4 historic + 2 this session: one plain implementer, one hard-mode decomposition). The hard-mode agent removed the sorry and added ~338 lines but sprawled across 8 Temporal files, broke Defs.lean (Missing cases), then overflowed; its UNCOMMITTED work was subsequently reverted by a concurrent session (git restore on the Temporal tree). Nothing was committed. Tree is back at clean HEAD baseline (d440ddd9).",
   "phases_completed": 3,
   "phases_total": 4,
-  "blockers": [],
+  "blockers": [
+    "DEPENDENCY GATE: 427 must NOT be started until task 180 lands. Task 180 adds allFuture (G) and allPast (H) as primitive constructors to Temporal.Formula. That changes the Formula inductive, so every Formula match (Completeness.lean, Defs.lean, Rules.lean, Subformulas.lean, Satisfies.lean) must gain new cases. Proving the propositional truth lemma BEFORE 180 means redoing the case analysis afterward. This was the actual source of the earlier 'Defs.lean: Missing cases' build break. 427 dependencies are now [180, 426].",
+    "CONTEXT OVERFLOW: the imp case is too large to prove in-place via repeated lean-lsp goal inspection inside the large Completeness.lean proof. All 6 attempts died with 'Prompt is too long'."
+  ],
   "continuation_context": {
-    "remaining": "Single imp case (| imp hφ' hψ' =>) in temporalTruthLemma_propositional_aux, ~line 366 of Cslib/Logics/Temporal/Tableau/Completeness.lean. ih/hrule/hopen/hφ'/hψ'/hle all in scope. Strategy in report §4a/§4c; F-direction in WIP 721-1000.",
-    "last_green_commit": "687f4962",
+    "remaining": "Single imp case `| imp hφ' hψ' =>` of temporalTruthLemma_propositional_aux at Cslib/Logics/Temporal/Tableau/Completeness.lean:433 (the lone active `sorry`). In-scope hyps: ih (strong IH over smaller Formula.complexity), hrule (saturation cond; shape at Saturation.lean:259), hopen, hφ', hψ', hle, t. Strategy: report §4a (rule-firing decision table) and §4c (per-rule closing logic); F-direction leaves portable from report WIP lines 721-1000.",
+    "last_green_commit": "687f4962 (ancestor of HEAD d440ddd9); HEAD baseline also builds with this one documented sorry",
+    "approach_for_restart": "1) DECOMPOSE: extract the imp case into a NEW standalone top-level lemma with explicit hypotheses, replace the imp branch with an application, prove the lemma in its own small context. 2) MANDATORY incremental commit after EVERY green sub-step (split T/F, then each rule shape andPos/orPos/impPos/negPos, then F-direction) so overflow/clobber can never lose work again. 3) Run in an ISOLATED git worktree so concurrent sessions cannot git-restore the work mid-flight. 4) Hard constraints (from plan): never call lean_diagnostic_messages (hangs); pipe builds through grep -E 'error|warning|completed'; read only targeted offset/limit ranges, never whole files.",
     "requires_user_review": true
   },
+  "cleanup_on_restart": {
+    "scratch_debris_to_delete": [
+      "test_hintikka_box2.lean","test_hintikka_box3.lean","test_hintikka_box4.lean","test_hintikka_box5.lean","test_hintikka_box6.lean","test_hintikka_box7.lean","test_hintikka_box8.lean","test_hintikka_box9.lean","test_hintikka_box10.lean","test_isempty.lean","test_isempty2.lean","test_isempty3.lean","test_isempty4.lean","test_simp_none.lean"
+    ],
+    "scratch_note": "14 untracked test_*.lean files in repo ROOT, left by the overflowed 427 hard-mode agent (hintikka/isempty proof experiments). Verify untracked (git ls-files --others) and unreferenced, then rm. Do NOT touch other sessions' files: Cslib/Logics/Modal/Tableau/Completeness.lean (task 299) and untracked specs/{180,321,406}/ dirs.",
+    "verify_baseline_first": "Before restarting, confirm `git diff --stat -- Cslib/Logics/Temporal/` is empty (tree at clean HEAD) and Completeness.lean has exactly ONE active sorry at line ~433."
+  },
+  "dependency_update": "427.dependencies set to [180, 426] this session (added territory edge 427->426). Full serialized Temporal chain — one task per wave, no file-territory collisions: 406 -> 180 -> 439 -> 426 -> 427 -> 425 -> 301 -> 321. Never orchestrate 427 in the same wave as 426/439 (shared Completeness.lean/Rules.lean).",
   "sorry_inventory": {
     "introduced": 1,
-    "note": "One isolated active sorry in temporalTruthLemma_propositional_aux imp case; all other cases + public lemma sorry-free and green."
+    "note": "One isolated active sorry at Completeness.lean:433 (imp case). All other propositional cases + public lemma sorry-free; untl/snce remain FMP-blocked (task 425, commented out)."
   },
   "artifacts": [
+    {"type": "report", "path": "specs/427_temporal_tableau_propositional_truth_lemma/reports/01_propositional-truth-lemma.md", "summary": "§4a decision table, §4c per-rule closing logic, WIP F-direction 721-1000"},
+    {"type": "plan", "path": "specs/427_temporal_tableau_propositional_truth_lemma/plans/02_imp-case-streamlined.md", "summary": "v2 streamlined imp-case plan (NOTE: non-standard format; reconcile to standard format + accurate phase statuses once work lands)"},
     {"type": "summary", "path": "specs/427_temporal_tableau_propositional_truth_lemma/summaries/01_partial-summary.md"}
-  ]
+  ],
+  "next_action_hint": "Wait for task 180 to land, then restart 427 in an isolated worktree with mandatory incremental commits. Do NOT re-dispatch a plain full-file implementer (6 overflows). Strongly consider manual/interactive proof of the imp case given the overflow history."
 }

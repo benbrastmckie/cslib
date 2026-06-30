@@ -34,5 +34,12 @@
     "lake_check_init": "pass",
     "sorry_in_scope": 0,
     "ordConstraints_strict_revived": false
+  },
+  "phase3_resolution": {
+    "status": "DELEGATED to spawned task 439",
+    "spawned_task": 439,
+    "spawn_root_cause": "Phase 3 is not just a missing recursion principle: processNext and temporalExpandBranches are MUTUALLY recursive (processNext calls temporalExpandBranches at Saturation.lean:219; temporalExpandBranches calls processNext at :231). The fix is a `mutual ... end` block (termination: lexicographic (fuel, pending.length)), NOT a plain top-level def. Task 439 does this refactor + proves InstantStrict threading + wires openBranch_branchSat.",
+    "dependency": "426.dependencies = [439]. 426 is BLOCKED on 439. On restart, run task 439 first; once 439 lands sorry-free, 426 needs only final verification/closeout (phases 1,2,4,5 already green; phase 3 delivered by 439).",
+    "territory_serialization": "Full Temporal chain (one task per wave, no Completeness.lean/Rules.lean collisions): 406 -> 180 -> 439 -> 426 -> 427 -> 425 -> 301 -> 321. Never run 426/439/427 in the same orchestrate wave."
   }
 }

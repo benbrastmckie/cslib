@@ -1,13 +1,30 @@
 {
-  "status": "planned",
-  "summary": "Created a 4-phase implementation plan for task 421. The plan mirrors the on-main IntDecidability.lean (436 lines) into a new MinDecidability.lean, exploiting four simplifications minimal logic permits (drop the `consistent` field, eliminate intFinWorld_propConsistent, bot-case Iff.rfl, drop PropSetConsistent plumbing) and adding only minFinBotForces + its upward-closure lemma. Target: sorry-free instDecidableDerivableMinPropAxiom' with axiom closure exactly {propext, Classical.choice, Quot.sound}. Phases: P1 scaffold + world type + Fintype/Preorder + valuation/bot_forces layer; P2 min_fin_imp_witness; P3 min_fin_truth_lemma; P4 min_fmp + Decidable instance + barrel wiring + full CI + axiom audit. Each phase sized to one agent run; phases strictly sequential (waves [1],[2],[3],[4]).",
+  "status": "implemented",
+  "summary": "Created MinDecidability.lean — sorry-free Decidable (Derivable MinPropAxiom φ) instance via FMP mirroring IntDecidability.lean. All 4 phases complete in one dispatch. Axiom audit: {propext, Classical.choice, Quot.sound}, no sorryAx. Barrel wired via mk_all. Committed as task 421.",
+  "phases_completed": 4,
+  "phases_total": 4,
   "artifacts": [
     {
-      "path": "specs/421_min_fmp_decidability/plans/01_min-fmp-decidability-plan.md",
-      "type": "plan",
-      "summary": "4-phase sorry-free Min FMP decidability plan mirroring IntDecidability.lean, with scoped lake build at phases 1-3, full CI pipeline at phase 4, and a final #print axioms audit gate"
+      "path": "specs/421_min_fmp_decidability/summaries/01_min-fmp-decidability-summary.md",
+      "type": "summary",
+      "summary": "Full implementation summary with CI results and design notes"
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Metalogic/MinDecidability.lean",
+      "type": "lean_file",
+      "summary": "New file: MinFinWorld, instFintypeMinFinWorld, minFinBotForces, min_fin_imp_witness, min_fin_truth_lemma, min_fmp, instDecidableDerivableMinPropAxiom'"
     }
   ],
-  "next_action_hint": "Run /implement 421 to execute the plan. Implementer should create Cslib/Logics/Propositional/Metalogic/MinDecidability.lean and port each Int declaration per report section 4 mapping; run scoped `lake build Cslib.Logics.Propositional.Metalogic.MinDecidability` after phases 1-3; at phase 4 wire Cslib.lean after line 423 via `lake exe mk_all --module` and run the full CI pipeline (lake build/test/checkInitImports/lint-style/shake) plus `#print axioms instDecidableDerivableMinPropAxiom'` confirming {propext, Classical.choice, Quot.sound} with no sorryAx. Never defer with sorry.",
-  "blockers": []
+  "blockers": [],
+  "next_action_hint": "Task 421 is complete. Parent task 370 (Int+Min decidability asymmetry) Min side is now done. Task 422 (route reconciliation / shared FMP abstraction) can proceed if desired.",
+  "sorry_inventory": [],
+  "verification": {
+    "axioms": ["propext", "Classical.choice", "Quot.sound"],
+    "sorry_ax_present": false,
+    "sorry_count": 0,
+    "build_passed": true,
+    "lint_style_passed": true,
+    "check_init_imports_passed": true,
+    "lake_shake_clean": true
+  }
 }

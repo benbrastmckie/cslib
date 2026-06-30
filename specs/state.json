@@ -123,17 +123,18 @@
     {
       "project_number": 317,
       "project_name": "propositional_tableau_completeness",
-      "status": "implementing",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "PL-Tableau",
       "description": "Fill the propositional tableau completeness sorries (7 real sorries; soundness is already sorry-free after task 316). The open obligations are the truth-lemma / countermodel-extraction proofs in the three Completeness modules. Classical (Tableau/Classical/Completeness.lean): classicalExpandBranches_hintikka (line ~462) -- note the module's separate build break (bad Mathlib lemma ref + unsolved goals) is repaired first under task 363. Intuitionistic (Tableau/Intuitionistic/Completeness.lean): intTruthLemma (line ~89), intuitionisticOpenBranch_countermodel (~98), intuitionisticTableau_complete (~112). Minimal (Tableau/Minimal/Completeness.lean): minTruthLemma (~168), minOpenBranch_countermodel (~179), minimalTableau_complete (~190). Core technique: Hintikka-set argument -- a saturated open branch satisfies Hintikka conditions, from which a countermodel is extracted (a Boolean valuation for classical; a finite Kripke model for intuitionistic/minimal) and a truth lemma by formula induction matches forced/not-forced to the signed formulas at each world. Because task 369 parameterizes the intuitionistic and minimal tableau over (closurePred, modelBot), the int and min cases should be discharged ONCE as a single parametric truth-lemma/countermodel pair rather than duplicated. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 316, 323, 363, 369.",
       "created": "2026-06-23T19:55:52Z",
-      "last_updated": "2026-06-30T11:55:46Z",
+      "last_updated": "2026-06-30T16:27:42Z",
       "next_artifact_number": 3,
       "artifacts": [
         {
           "type": "plan",
-          "path": "specs/317_propositional_tableau_completeness/plans/02_tableau-completeness-unified.md"
+          "path": "plans/03_b2-fuel-sufficiency.md",
+          "summary": "B2 fuel-sufficiency + none-case wiring plan (v3)"
         }
       ],
       "dependencies": [
@@ -143,7 +144,7 @@
         369
       ],
       "parent_task": 298,
-      "session_id": "sess_1782816909_d5d018"
+      "session_id": "sess_1782836570_11b1d4"
     },
     {
       "project_number": 299,
@@ -1107,7 +1108,7 @@
     {
       "project_number": 433,
       "project_name": "prove_acceptmembership_ramsey_lemma_for_buchicongr_dma_forwa",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Prove a private named lemma (e.g. `buchiCongr_DMA_accept_mem`) in OmegaRegularLanguage.lean establishing: for any `xs ∈ language na`, the set `infOcc((buchiCongr_DMA na).run xs)` contains a class `b` for which `∃ a, (buchiFamily (a,b) ⊓ language na).Nonempty`. This is the core Ramsey/recurrence argument for the forward inclusion of McNaughton's theorem. Use `buchiCongr_recurrentClass` (private, OmegaRegularLanguage.lean) to extract idempotent `b` and absorbing `a` with `a ∈ infOcc(run xs)`; use `buchiCongr_DMA_run_eq` to connect run states to congruence classes; use `buchiFamily_saturation` (BuchiCongruence.lean:181) and `mem_buchiFamily` (BuchiCongruence.lean:107) to conclude nonemptiness. Exact API map from orchestrator handoff: DA.Muller language at DA/Basic.lean:117; `buchiCongr_recurrentClass` gives a,b with b*b=b, a*b=a, a ∈ infOcc(run xs); `buchiCongr_DMA_run_eq`: (buchiCongr_DMA na).run xs n = ⟦xs.extract 0 n⟧; `buchiFamily_saturation` at BuchiCongruence.lean:181; `mem_infOcc` at InfOcc.lean:88; `frequently_in_finite_type` at InfOcc.lean:46. CI must pass green (lake build, lean_verify on the new lemma) with zero sorries. Topic: Temporal Logic. Parent task: 241.",
       "effort": "2-3 hours",
@@ -1115,19 +1116,20 @@
       "topic": "Temporal Logic",
       "dependencies": [],
       "created": "2026-06-30T15:25:41Z",
-      "last_updated": "2026-06-30T15:25:41Z",
+      "last_updated": "2026-06-30T15:37:56Z",
       "artifacts": [
         {
           "type": "research",
           "path": "specs/241_mcnaughton_theorem/reports/03_spawn-analysis.md",
           "summary": "Spawn analysis from parent task 241"
         }
-      ]
+      ],
+      "session_id": "sess_1782833467_90f6aa_433"
     },
     {
       "project_number": 434,
       "project_name": "prove_backward_inclusion_buchicongr_dma_language_backward",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Prove the backward inclusion `buchiCongr_DMA_language_backward` (language (buchiCongr_DMA na) ⊆ language na) in Cslib/Computability/Languages/OmegaRegularLanguage.lean. Proceed from accept-set membership: if infOcc(run xs) ∈ accept, there exists b ∈ infOcc(run xs) and a such that (buchiFamily (a,b) ⊓ language na).Nonempty, giving a witness ys ∈ language na. Then use buchiFamily_saturation (BuchiCongruence.lean:181) to lift from the witness to xs ∈ language na. This direction does not depend on the Ramsey/recurrence argument for the forward direction — it can be proven in any order relative to tasks 0 and 1. Exact API: accept set definition of buchiCongr_DMA; buchiFamily_saturation (BuchiCongruence.lean:181); mem_buchiFamily (BuchiCongruence.lean:107). CI must pass green (lake build, lean_verify on buchiCongr_DMA_language_backward) with zero sorries. Topic: Temporal Logic. Parent task: 241.",
       "effort": "1-2 hours",
@@ -1135,14 +1137,15 @@
       "topic": "Temporal Logic",
       "dependencies": [],
       "created": "2026-06-30T15:25:41Z",
-      "last_updated": "2026-06-30T15:25:41Z",
+      "last_updated": "2026-06-30T15:37:59Z",
       "artifacts": [
         {
           "type": "research",
           "path": "specs/241_mcnaughton_theorem/reports/03_spawn-analysis.md",
           "summary": "Spawn analysis from parent task 241"
         }
-      ]
+      ],
+      "session_id": "sess_1782833467_90f6aa_434"
     },
     {
       "project_number": 435,

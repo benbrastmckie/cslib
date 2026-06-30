@@ -50,11 +50,11 @@ next_project_number: 437
     └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
   └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model (see above)
-433 [RESEARCHED] — Prove a private named lemma (e.g. `buchiCongr_DMA_accept_mem`) in
+433 [PLANNED] — Prove a private named lemma (e.g. `buchiCongr_DMA_accept_mem`) in
   └─ 435 [RESEARCHED] — Replace the sorry-stub `buchiCongr_DMA_language_forward` (languag
     └─ 436 [RESEARCHED] — Combine the forward inclusion (buchiCongr_DMA_language_forward, f
       └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
-434 [RESEARCHED] — Prove the backward inclusion `buchiCongr_DMA_language_backward` (
+434 [PLANNED] — Prove the backward inclusion `buchiCongr_DMA_language_backward` (
   └─ 436 [RESEARCHED] — Combine the forward inclusion (buchiCongr_DMA_language_forward, f (see above)
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
@@ -67,7 +67,7 @@ next_project_number: 437
 
 ### PL Tableau
 
-317 [IMPLEMENTING] — Fill the propositional tableau completeness sorries (7 real sorri
+317 [PLANNED] — Fill the propositional tableau completeness sorries (7 real sorri
   └─ 430 [RESEARCHED] — Prove the atom-persistence / upward-closure structural lemma for 
 
 ### PL Docs
@@ -128,7 +128,7 @@ next_project_number: 437
 
 ### 434. Prove backward inclusion buchicongr dma language backward
 - **Effort**: 1-2 hours
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -140,7 +140,7 @@ next_project_number: 437
 
 ### 433. Prove acceptmembership ramsey lemma for buchicongr dma forwa
 - **Effort**: 2-3 hours
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -493,11 +493,11 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [IMPLEMENTING]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: PL-Tableau
 - **Dependencies**: Task 316, Task 323, Task 363, Task 369
-- **Plan**: [317_propositional_tableau_completeness/plans/02_tableau-completeness-unified.md]
+- **Plan**: [plans/03_b2-fuel-sufficiency.md]
 
 **Description**: Fill the propositional tableau completeness sorries (7 real sorries; soundness is already sorry-free after task 316). The open obligations are the truth-lemma / countermodel-extraction proofs in the three Completeness modules. Classical (Tableau/Classical/Completeness.lean): classicalExpandBranches_hintikka (line ~462) -- note the module's separate build break (bad Mathlib lemma ref + unsolved goals) is repaired first under task 363. Intuitionistic (Tableau/Intuitionistic/Completeness.lean): intTruthLemma (line ~89), intuitionisticOpenBranch_countermodel (~98), intuitionisticTableau_complete (~112). Minimal (Tableau/Minimal/Completeness.lean): minTruthLemma (~168), minOpenBranch_countermodel (~179), minimalTableau_complete (~190). Core technique: Hintikka-set argument -- a saturated open branch satisfies Hintikka conditions, from which a countermodel is extracted (a Boolean valuation for classical; a finite Kripke model for intuitionistic/minimal) and a truth lemma by formula induction matches forced/not-forced to the signed formulas at each world. Because task 369 parameterizes the intuitionistic and minimal tableau over (closurePred, modelBot), the int and min cases should be discharged ONCE as a single parametric truth-lemma/countermodel pair rather than duplicated. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 316, 323, 363, 369.
 

@@ -72,7 +72,7 @@ next_project_number: 423
 
 ### PL Tableau
 
-317 [PLANNED] — Fill the propositional tableau completeness sorries (7 real sorri
+317 [IMPLEMENTING] — Fill the propositional tableau completeness sorries (7 real sorri
 
 ### PL Semantics
 
@@ -580,7 +580,7 @@ SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/41
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: PL-Tableau
 - **Dependencies**: Task 316, Task 323, Task 363, Task 369

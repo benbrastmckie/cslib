@@ -1,38 +1,14 @@
 {
   "status": "partial",
-  "started_at": "2026-06-29T00:00:00Z",
-  "completed_at": "2026-06-29T01:00:00Z",
-  "artifacts": [
-    {
-      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "type": "implementation",
-      "summary": "Structural lemmas proved; hopen/hFmem closed; lint warnings fixed. Two sorries remain: truthLemma (Phase 3) and hsat (Phase 2)."
-    },
-    {
-      "path": "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
-      "type": "handoff",
-      "summary": "Orchestrator handoff with sorry inventory and Phase 2 continuation context."
-    }
-  ],
-  "partial_progress": {
-    "stage": "phase_1_complete",
-    "phases_completed": 1,
-    "phases_total": 5,
-    "details": "Phase 1 structural lemmas done. hopen and hFmem closed. hsat remains (Phase 2). Lint warnings fixed."
-  },
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 2,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": false,
-    "notes": "Targeted module build passes. Full CI not run (sorry_count > 0, task not complete)."
-  },
   "metadata": {
-    "session_id": "sess_1782784210_964b6f_317",
-    "agent_type": "cslib-implementation-hard-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
+    "cycles_used": 5,
+    "final_state": "implementing",
+    "sorry_count": 6,
+    "progress": "Built IBranchSaturation structure + intExpandBranches_openBranch_sat witness lemma; discharged truthLemma and/or cases (both directions) and imp F-direction; wired openBranch_countermodel. Build green.",
+    "remaining": [
+      "Scheme.lean:330 truthLemma imp T-direction (needs branch completeness)",
+      "Scheme.lean:511/566/580 witness-lemma leaf cases (intStepBranch internals)",
+      "Completeness.lean:112 + Minimal/Completeness.lean:109 validity bridges (atom-persistence/upward-closure lemma)"
+    ]
   }
 }

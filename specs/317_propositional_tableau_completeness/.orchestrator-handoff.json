@@ -1,81 +1,84 @@
 {
+  "task_id": 317,
+  "task_slug": "propositional_tableau_completeness",
   "status": "partial",
-  "summary": "Phase 3 progress: atom and bot cases proved in truthLemma; build restored (was broken by type error). Added no_contradiction field to IntMinScheme. Three compound cases (imp, and, or) remain sorry with precise saturation-blocker comments. Five total sorries across three files.",
-  "phases_completed": 3,
-  "phases_total": 5,
-  "sorry_inventory": [
-    {
-      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "line": 282,
-      "name": "truthLemma (imp case)",
-      "description": "T(φ→ψ) and F(φ→ψ) cases. T-direction needs modus-ponens saturation across worlds; F-direction needs world-creation saturation: F(φ→ψ)@w → ∃ w'>w, T(φ)@w' ∧ F(ψ)@w' ∈ b."
-    },
-    {
-      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "line": 286,
-      "name": "truthLemma (and case)",
-      "description": "T(φ∧ψ)@w → T(φ)@w ∧ T(ψ)@w (alpha-rule saturation); F(φ∧ψ)@w → F(φ)@w ∨ F(ψ)@w (beta-rule saturation, one sub-branch was taken)."
-    },
-    {
-      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "line": 290,
-      "name": "truthLemma (or case)",
-      "description": "T(φ∨ψ)@w → T(φ)@w ∨ T(ψ)@w (beta-rule); F(φ∨ψ)@w → F(φ)@w ∧ F(ψ)@w (alpha-rule saturation)."
-    },
-    {
-      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
-      "line": 112,
-      "name": "intuitionisticTableau_complete bridge",
-      "description": "IValid φ → ∀ b, IForces (intExtractValuation b) (fun _ => False) 0 φ. Requires upward-closure of intExtractValuation b and the fact that every canonical-world forcing agrees with the branch valuation."
-    },
-    {
-      "file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
-      "line": 109,
-      "name": "minimalTableau_complete bridge",
-      "description": "MValid φ → ∀ b, IForces (intExtractValuation b) (minBranchBotForces b) 0 φ. Analogous to the int bridge."
+  "phases_completed": 5,
+  "phases_total": 6,
+  "session_id": "sess_1782793781_75c2f0",
+  "commit": "c648603b",
+  "sorry_inventory": {
+    "total_remaining": 5,
+    "by_file": {
+      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean": [
+        {
+          "location": "~line 330 (case imp.left in truthLemma)",
+          "description": "T(phi->psi)@w ∈ b → ∀ w' ≥ w, IForces w' phi → IForces w' psi. Requires (a) sat_timp (T-modus ponens saturation: T(phi→psi)@w ∈ b ∧ T(phi)@w' ∈ b ∧ w ≤ w' → T(psi)@w' ∈ b) AND (b) backward reasoning from IForces to branch membership (IForces val w' phi → T(phi)@w' ∈ b), which requires branch completeness (every formula has T or F label at every world). Neither is available.",
+          "blocker_category": "phase-6: intStepBranch internals + branch completeness"
+        },
+        {
+          "location": "~line 481 (intExpandBranches_openBranch_sat, fuel=0 base case)",
+          "description": "Leaf sorry: proving IBranchSaturation from fuel=0 openBranch return. Requires intStepBranch internals analysis.",
+          "blocker_category": "phase-6: intStepBranch internals"
+        },
+        {
+          "location": "~line 536 (intExpandBranches_openBranch_sat, intStepBranch=none case)",
+          "description": "Leaf sorry: intStepBranch bPers eH nwH = none implies IBranchSaturation bPers. Requires proving that intStepBranch returning none implies all compound formulas have been expanded.",
+          "blocker_category": "phase-6: intStepBranch internals"
+        },
+        {
+          "location": "~line 550 (intExpandBranches_openBranch_sat, notApplicable case)",
+          "description": "Leaf sorry: intStepBranch returning notApplicable implies IBranchSaturation. Same blocker as =none case.",
+          "blocker_category": "phase-6: intStepBranch internals"
+        }
+      ],
+      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean": [
+        {
+          "location": "~line 112 (intuitionisticTableau_complete)",
+          "description": "Bridge: IValid phi → IForces (intExtractValuation b) (fun _ => False) 0 phi. Requires upward-closure of intExtractValuation b (i.e., T(atom p)@w ∈ b ∧ w ≤ w' → T(atom p)@w' ∈ b). This is NOT generally true — the branch would need explicit atom persistence rules in the expansion. A separate saturation lemma for atom-persistence is needed.",
+          "blocker_category": "atom-persistence + IValid instantiation"
+        }
+      ],
+      "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean": [
+        {
+          "location": "~line 109 (minimalTableau_complete)",
+          "description": "Bridge: MValid phi → IForces (intExtractValuation b) (minBranchBotForces b) 0 phi. Same blocker as intuitionisticTableau_complete: requires upward-closure of intExtractValuation b and minBranchBotForces b.",
+          "blocker_category": "atom-persistence + MValid instantiation"
+        }
+      ]
     }
-  ],
+  },
+  "deliverables_completed": {
+    "A": {
+      "description": "Thread IBranchSaturation into truthLemma; discharge and/or compound cases",
+      "status": "completed",
+      "details": "Added hsat : IBranchSaturation Atom b to truthLemma signature. Filled: and (both directions via sat_tand/sat_fand + IH), or (both directions via sat_tor/sat_for_ + IH), imp F-direction (via sat_fimp + IH). Left imp T-direction as sorry. Updated openBranch_countermodel to obtain hsat from intExpandBranches_openBranch_sat and pass it."
+    },
+    "B": {
+      "description": "Close validity bridges in Completeness.lean files",
+      "status": "not_started",
+      "details": "Validity bridges require atom-persistence of intExtractValuation b (i.e., T(atom p)@w ∈ b ∧ w ≤ w' → T(atom p)@w' ∈ b). This is NOT a saturation condition in IBranchSaturation and requires analysing the expansion's applyPersistenceFixpoint / applyAllTImpRules to show it propagates atoms. This is a new lemma, not a simple wiring of existing results."
+    }
+  },
   "blockers": [
     {
-      "id": "saturation-structural-lemma",
-      "description": "The three compound sorry cases (imp, and, or) in truthLemma each require a SATURATION structural lemma: if intExpandBranches ... = .openBranch b, then b satisfies semantic closure conditions. Specifically: T(φ∧ψ)@w ∈ b → T(φ)@w ∈ b ∧ T(ψ)@w ∈ b (and analogues for or, imp). This is equivalent to proving that b satisfies intStepBranch b e nw = none for some accumulated expanded set e and next-world nw, AND that every formula in e has its children on b.",
-      "root_cause": "When intExpandBranches returns .openBranch bPers, it is because intStepBranch bPers e nw = none for the CURRENT accumulated e and nw (not [] and 0). The expanded set e tracks which formulas have already been expanded; their children were added to bPers. A structural lemma intExpandBranches_openBranch_saturated must be proved by induction on the go inner loop, showing that every compound formula in bPers either (a) is in e with its children in bPers, or (b) returns notApplicable from intApplyRuleFull.",
-      "two_options": [
-        "Option A (structural induction): Prove intExpandBranches_openBranch_saturated by induction on fuel, mirroring the existing intExpandBranches_openBranch_closed proof (which is ~100 lines). This is the preferred approach if the fuel=0 base case can be discharged — however, at fuel=0 the loop picks the first open branch WITHOUT calling intStepBranch, so intStepBranch bPers e nw = none may be FALSE. This makes the fuel=0 base case potentially unprovable without a fuel-sufficiency argument.",
-        "Option B (fuel sufficiency): Prove that fuel = 2^(2*φ.complexity+2) is always sufficient to fully saturate the branch before running out of fuel. This allows the fuel=0 case to be vacuously avoided (the algorithm always terminates at fuel>0 with a genuinely saturated branch). Requires a complexity/termination argument showing that the number of distinct expansion steps is bounded by 2^(2*φ.complexity+2)."
-      ],
-      "recommendation": "Option B is more principled but requires a non-trivial combinatorial bound. Option A may be sufficient if we can show the fuel=0 path is never taken in practice (e.g., by modifying the fuel=0 case to return .closed instead of .openBranch, or by separately tracking whether the algorithm terminated normally). Recommend research task to choose and implement the approach."
+      "id": "B1",
+      "description": "truthLemma T(imp) direction: requires branch completeness (T or F label at every formula/world pair) to go from IForces to branch membership. Standard saturation is insufficient.",
+      "severity": "high",
+      "next_action": "Either (a) prove branch completeness from the expansion, or (b) reformulate the truth lemma to only prove the F-direction (which suffices for openBranch_countermodel), or (c) use a different proof strategy for T(imp) that avoids backward membership reasoning."
+    },
+    {
+      "id": "B2",
+      "description": "intExpandBranches_openBranch_sat leaf sorries (481/536/550): require proving IBranchSaturation from intStepBranch returning none/notApplicable. Need to analyse intStepBranch's expansion logic.",
+      "severity": "high",
+      "next_action": "Read intStepBranch definition and prove that returning none/notApplicable implies sat_tand/sat_fand/sat_tor/sat_for_/sat_fimp conditions."
+    },
+    {
+      "id": "B3",
+      "description": "Validity bridge: intExtractValuation b is NOT upward-closed in general. IValid phi cannot be instantiated at branch model without atom persistence.",
+      "severity": "medium",
+      "next_action": "Prove atom persistence from the expansion: the expansion's applyAllTImpRules or applyPersistenceFixpoint must propagate T(atom p)@w to T(atom p)@w' for w ≤ w'. Add this to IBranchSaturation as sat_atom_persist, or prove it as a separate structural lemma."
     }
   ],
-  "continuation_context": {
-    "is_successor": true,
-    "handoff_from": "task 317 phase 3",
-    "next_phase": 4,
-    "next_action": "Prove the three compound sorry cases in truthLemma. Requires: (1) structural saturation lemma intExpandBranches_openBranch_saturated, OR (2) a refactoring that makes saturation directly available at the openBranch_countermodel call site. See blockers[saturation-structural-lemma] for details.",
-    "key_design_decisions": [
-      "no_contradiction added to IntMinScheme as a field; proved for intScheme (via isIntuitionisticallyClosed structure) and minScheme (via minOpen_no_contradiction directly)",
-      "truthLemma now proves atom T (trivial/id), atom F (via S.no_contradiction), and bot (via S.bot_truth); compound cases sorry with exact saturation preconditions documented",
-      "intTruthLemma and minTruthLemma in Completeness files no longer take hsat (removed stale parameter that caused type error)",
-      "hsat parameter removed from intTruthLemma and minTruthLemma (the old form intStepBranch b [] 0 = none was wrong: with empty expanded set, compound formulas would fire rules and the condition would be false for any interesting branch)",
-      "The two validity-bridge sorries in Completeness.lean (intuitionisticTableau_complete) and Minimal/Completeness.lean (minimalTableau_complete) are SEPARATE obligations outside the saturation blocker"
-    ]
-  },
-  "next_action_hint": "Phase 4: Prove intExpandBranches_openBranch_saturated (structural saturation lemma) by induction on go, then use it to discharge the three compound sorry cases in truthLemma. Note fuel-sufficiency concern at fuel=0 base case.",
-  "artifacts": [
-    {
-      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "type": "lean-source",
-      "summary": "Added no_contradiction to IntMinScheme; proved atom T, atom F, and bot cases in truthLemma; compound cases sorry with precise saturation comments; build green (commit 54fc5371)"
-    },
-    {
-      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
-      "type": "lean-source",
-      "summary": "Fixed type error: intTruthLemma no longer passes stale hsat to truthLemma; hsat parameter removed from intTruthLemma signature"
-    },
-    {
-      "path": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
-      "type": "lean-source",
-      "summary": "Fixed type error: minTruthLemma no longer passes stale hsat to truthLemma; hsat parameter removed from minTruthLemma signature"
-    }
-  ]
+  "next_action": "Phase 6: Analyse intStepBranch internals to close leaf sorries in intExpandBranches_openBranch_sat (blocker B2). This is the most direct path to closing the sat_tand/sat_fand/sat_tor/sat_for_/sat_fimp conditions. Once those leaf sorries are closed, revisit blockers B1 (T-imp) and B3 (validity bridge).",
+  "context_budget_note": "Deliverable A completed in ~11 tool calls. Context remaining. Validity bridge (Deliverable B) is a deeper blocker than anticipated — requires atom-persistence analysis of the expansion loop, not merely wiring existing results."
 }

@@ -1,16 +1,42 @@
 {
-  "status": "planned",
-  "summary": "Revised plan for task 317 (propositional tableau completeness) after task 369 unified the int/min path. Six concrete sorries remain, verified against source: 4 in Intuitionistic/Scheme.lean (truthLemma S ~L242; the three openBranch_countermodel structural obligations hopen ~L280 / hsat ~L288 / hFmem ~L296) and 2 per-logic validity bridges (Intuitionistic/Completeness.lean ~L112; Minimal/Completeness.lean ~L110). Classical/Completeness.lean is ALREADY sorry-free (deviation from the delegation brief, which listed classicalExpandBranches_hintikka as remaining work — it is proved at L924; classicalTableau_complete sorry-free at L1328). Plan sequences structural lemmas (openness+monotonicity, then saturation) before the parametric truth lemma, then the per-logic bridges, then a classical+Decidable+CI confirmation pass.",
+  "status": "partial",
+  "summary": "Phase 1 structural work is complete: intExpandBranches_openBranch_closed and intExpandBranches_openBranch_initial_mem are fully proved and already committed, closing the hopen and hFmem obligations in openBranch_countermodel. Lint warnings (unusedSectionVars for [Hashable Atom] in three structural private lemmas, flexible simp [heq] at two hcond sites) were cleaned up in this dispatch and committed. Module builds with exactly two expected sorry warnings: truthLemma (line 255, Phase 3) and hsat in openBranch_countermodel (line 531, Phase 2). The hsat sorry requires resolving the mismatch between the expansion loop's accumulated (e, nw) saturation and truthLemma's intStepBranch b [] 0 = none; the plan recommends reformulating truthLemma's hsat parameter to accept intStepBranch b e nw = none for some e, nw (Option b, plan R2), with coordinated fuel-sufficiency handling of the fuel=0 case.",
+  "phases_completed": 1,
   "phases_total": 5,
-  "phases_completed": 0,
-  "blockers": [],
-  "continuation_context": null,
+  "sorry_inventory": [
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 255,
+      "description": "truthLemma (S : IntMinScheme Atom) -- parametric Kripke truth lemma; Phase 3"
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 531,
+      "description": "hsat in openBranch_countermodel: bridge from expansion-loop saturation intStepBranch bPers e nw = none (accumulated e, nw) to truthLemma form intStepBranch b [] 0 = none; Phase 2"
+    }
+  ],
+  "blockers": [
+    {
+      "phase": 2,
+      "description": "hsat sorry (Scheme.lean line 531): the expansion loop returns .openBranch bPers when intStepBranch bPers e nw = none for ACCUMULATED (e, nw). truthLemma expects intStepBranch b [] 0 = none (empty expanded set, world 0). These differ because formulas already in e would still trigger rules with empty expanded set, and nextWorld 0 vs actual nw. Resolution requires either fuel-sufficiency (proving the fuel=0 open-return path is unreachable for initial fuel 2^(2*phi.complexity+2)) or reformulating truthLemma's hsat to exist e nw, intStepBranch b e nw = none and adding a structural lemma intExpandBranches_openBranch_sat for the fuel+1 path.",
+      "what_failed": "Cannot directly prove intStepBranch b [] 0 = none from the expansion result. intStepBranch b e nw = none does not imply intStepBranch b [] 0 = none because formulas in e were already expanded and skipping them via expanded.any means they still trigger with empty e.",
+      "what_is_needed": "Either (a) prove a fuel-sufficiency lemma showing 2^(2*phi.complexity+2) > total expansion steps needed; OR (b) change truthLemma's hsat to exist e nw, intStepBranch b e nw = none and prove intExpandBranches_openBranch_sat. Option (b) requires coordinating truthLemma signature change with Phase 3."
+    }
+  ],
+  "continuation_context": {
+    "description": "Phase 2: prove intExpandBranches_openBranch_sat and close hsat sorry at Scheme.lean line 531. See plan Phase 2 checklist (~L147-166) and blockers R2/R3. The recommended approach: change truthLemma's hsat parameter from (forall sf in b, intStepBranch b [] 0 = none) to (exists e nw, intStepBranch b e nw = none), prove structural lemma intExpandBranches_openBranch_sat for the fuel+1 case, and handle fuel=0 via fuel-sufficiency or separate case. Both truthLemma (Phase 3) and openBranch_countermodel (Phase 2) are 317-owned so signature changes are in-scope.",
+    "handoff_path": "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
+    "next_phase": 2,
+    "key_file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "sorry_line_hsat": 531,
+    "sorry_line_truthLemma": 255
+  },
   "next_action_hint": "implement",
   "artifacts": [
     {
-      "type": "plan",
-      "path": "specs/317_propositional_tableau_completeness/plans/02_tableau-completeness-unified.md",
-      "summary": "Unified post-369 completeness plan: 5 phases, ~9h, targeting the 6 remaining int/min parametric sorries; dominant risk is the per-logic bridge upward-closure under the ambient Nat Preorder (may require refining tableau_complete's hvalid to the open saturated branch)."
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "type": "implementation",
+      "summary": "Structural lemmas intExpandBranches_openBranch_closed and intExpandBranches_openBranch_initial_mem fully proved (prior commits). hopen and hFmem sorries closed in openBranch_countermodel. Lint warnings fixed (unusedSectionVars, flexible tactics) in this dispatch. Two sorries remain: truthLemma (Phase 3) and hsat in openBranch_countermodel (Phase 2)."
     }
   ]
 }

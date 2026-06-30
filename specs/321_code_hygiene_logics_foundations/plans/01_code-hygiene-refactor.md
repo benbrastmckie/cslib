@@ -269,11 +269,11 @@ becomes its own submodule. Disjoint directory from Phases 4-5, so parallel with 
 - Rewrite `Chronicle/CounterexampleElimination.lean` as a barrel.
 
 **Tasks**:
-- [ ] Extract per section, building after each; order Structures → Elimination → RecursiveWalks →
+- [x] Extract per section, building after each; order Structures → Elimination → RecursiveWalks →
       MainElimination.
-- [ ] Keep `namespace Cslib.Logic.Temporal.Metalogic.Chronicle`; the barrel keeps importing
+- [x] Keep `namespace Cslib.Logic.Temporal.Metalogic.Chronicle`; the barrel keeps importing
       `Chronicle.PointInsertion` (not yet split — fine).
-- [ ] Resolve cross-submodule `private` references; module docstrings on new files.
+- [x] Resolve cross-submodule `private` references; module docstrings on new files.
 
 **Timing**: 2 hours
 

@@ -1157,18 +1157,30 @@
     {
       "project_number": 411,
       "project_name": "adopt_complete_int_decidability",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Adopt the complete, CI-green IntDecidability.lean from branch refactor/prop_logic onto main, delivering the actual Decidable instance that main's task-385 version lacks. This completes the Int side of parent task 370.\n\nCONTEXT: main's current Cslib/Logics/Propositional/Metalogic/IntDecidability.lean (committed by task 385, HEAD 07792009) is the WITNESS-ONLY version (272 lines, 7 decls): task 385 renamed/fixed the former IntFMPSpike scratch spike to make `lake build` green, but it STOPS at `int_fin_imp_witness` and provides NO `Decidable` instance. The branch refactor/prop_logic (tasks 415/416) has a COMPLETE version (436 lines, 10 decls) that carries the same construction through `intFinVal` -> `intFinVal_upward_closed` -> `int_fin_truth_lemma` -> `int_fmp` -> `instDecidableDerivableIntPropAxiom'` (the actual `Decidable (Derivable IntPropAxiom phi)` instance), CI-green with no `sorryAx` (axioms: propext, Classical.choice, Quot.sound). This task adopts that completion.\n\nPRIMARY DELIVERABLE -- single-file swap, verified build-safe:\n1. Replace main's IntDecidability.lean with the branch version: `git show refactor/prop_logic:Cslib/Logics/Propositional/Metalogic/IntDecidability.lean > Cslib/Logics/Propositional/Metalogic/IntDecidability.lean`.\n2. Change NOTHING else for the core deliverable. Build-safety already verified: the ONLY dependency drift is that the branch deleted an unused lemma `intBotMem_iff_false` from IntStrongCompleteness.lean; our IntDecidability does NOT reference it, and main's MinStrongCompleteness.lean has a docstring that DOES reference it -- so KEEP main's IntStrongCompleteness.lean unchanged. The grind-lint skip `Cslib.Logic.PL.IntFinWorld.mk.sizeOf_spec` the complete file needs is ALREADY present in main's CslibTests/GrindLint.lean (line 79) -- no change needed. The Cslib.lean import (line ~420) already points at IntDecidability -- it stays valid.\n\nDO NOT bring over / KEEP main's versions of: Scheme.lean (redundant; both branches sit at the same 2 sorries deferred-to-317), CslibTests/GrindLint.lean, IntStrongCompleteness.lean, and ALL specs/ task metadata. The branch's task numbers 408-416 COLLIDE with main's (number fork) -- do NOT union state.json/TODO.md or copy the branch's spec dirs.\n\nOPTIONAL SECONDARY SCOPE (only if explicitly requested): cherry-pick the 6 NEW Temporal FMP decidability files that are absent from main -- Cslib/Logics/Temporal/Metalogic/Decidability/Decidability.lean plus Decidability/FMP/{FMP,Filtration,FiniteModel,SubformulaClosure,TruthPreservation}.lean -- and add their public imports to Cslib.lean. Independent of the Int work; their deps (Temporal.Metalogic.Completeness/Soundness/DenseCompleteness/DenseSoundness) are already on main. Build-verify before committing.\n\nDO NOT git-merge the branch -- this is a curated file adoption, not a branch merge (a full merge drags in the unmergeable task-number-fork metadata, redundant Scheme.lean, and an add/add conflict).\n\nACCEPTANCE:\n- main's IntDecidability.lean contains `instDecidableDerivableIntPropAxiom'` (a `Decidable (Derivable IntPropAxiom phi)` instance).\n- `lake build` green for the whole library; `lake test`, `lake exe checkInitImports`, `lake exe lint-style`, `lake shake` all pass.\n- `#print axioms instDecidableDerivableIntPropAxiom'` (or lean_verify) shows ONLY propext, Classical.choice, Quot.sound -- NO sorryAx.\n- 0 new sorry/admit introduced; main's pre-existing Scheme.lean sorries (deferred-to-317) untouched.\n- No metadata corruption: specs/state.json and TODO.md unchanged except this task's own status. Zero-debt.\n\nSOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/416_int_min_fmp_spike_revise/reports/01_fmp-spike-resolution.md (on that branch). Verified build-safe against main HEAD 07792009.",
       "dependencies": [],
       "parent_task": 370,
       "artifacts": [
         {
-          "type": "report",
           "path": "specs/411_adopt_complete_int_decidability/reports/01_int-decidability-integration-findings.md",
-          "summary": "Conflict root-cause + verified single-file-swap resolution for adopting branch IntDecidability onto main"
+          "type": "report",
+          "summary": "Integration analysis: single-file swap not git-merge; shared lineage; branch completion decls"
+        },
+        {
+          "path": "specs/411_adopt_complete_int_decidability/reports/02_task411-collision-and-corrected-adoption.md",
+          "type": "report",
+          "summary": "Diagnosis: task-number fork collision (branch 411=dma_concat); deliverable sorry-free; build-safety re-verified; corrected curated-swap execution"
+        },
+        {
+          "path": "specs/411_adopt_complete_int_decidability/plans/01_curated-intdecidability-adoption.md",
+          "type": "plan",
+          "summary": "3-phase curated single-file swap on main (NOT branch merge) + build-verify gate + IntLindenbaum-drift contingency"
         }
-      ]
+      ],
+      "last_updated": "2026-06-30T01:00:36Z",
+      "next_artifact_number": 2
     },
     {
       "project_number": 412,
@@ -1311,11 +1323,6 @@
       "next_artifact_number": 1,
       "artifacts": [
         {
-          "path": "specs/417_parametric_conservativity_lift_foundations/reports/01_conservativity-lift-design.md",
-          "type": "report",
-          "summary": ""
-        },
-        {
           "path": "specs/417_parametric_conservativity_lift_foundations/plans/01_conservativity-lift-foundations.md",
           "type": "plan",
           "summary": ""
@@ -1324,11 +1331,17 @@
           "path": "specs/417_parametric_conservativity_lift_foundations/summaries/01_conservativity-lift-foundations-summary.md",
           "type": "summary",
           "summary": ""
+        },
+        {
+          "path": "specs/417_parametric_conservativity_lift_foundations/reports/02_virtuous-placement.md",
+          "type": "report",
+          "summary": ""
         }
       ],
       "created": "2026-06-29T22:35:38Z",
-      "last_updated": "2026-06-29T23:25:03Z",
-      "session_id": "sess_1782773589_58e00c"
+      "last_updated": "2026-06-30T01:00:23Z",
+      "session_id": "sess_1782772776_909541_417",
+      "updated": "2026-06-30T00:53:52Z"
     },
     {
       "project_number": 418,
@@ -1357,7 +1370,7 @@
       "project_number": 419,
       "project_name": "generalize_derivation_lifting_intersystem",
       "title": "Generalize derivation lifting to a cross-logic InferenceSystem layer (spike)",
-      "status": "blocked",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "parent_task": 415,
@@ -1368,15 +1381,21 @@
       "next_artifact_number": 1,
       "artifacts": [
         {
-          "path": "specs/419_generalize_derivation_lifting_intersystem/reports/01_derivation-lifting-spike.md",
+          "path": "specs/419_generalize_derivation_lifting_intersystem/reports/02_virtuous-unification.md",
           "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/419_generalize_derivation_lifting_intersystem/plans/02_proof-system-morphism-overlay.md",
+          "type": "plan",
           "summary": ""
         }
       ],
       "created": "2026-06-29T22:35:38Z",
-      "last_updated": "2026-06-29T22:35:38Z",
-      "blockers": "SPIKE verdict: NOT cleanly abstractable. The task premise conflates three different operations — Modal liftDerivation + PL liftDerivationTree are axiom-predicate subsumption lifts (∀φ, A1 φ → A2 φ), while Bimodal liftDerivationWith is conservative-extension fresh-atom unembedding (noncomputable, freshness side-conditions, per-node liftFormula incl. swapTemporal) — not axiom subsumption. Bimodal DerivationTree is parameterized by FrameClass over a concrete Axiom inductive with NO axiom predicate, so there is nothing to subsume. The shared algebraicDerivationSystem/ListDeriv substrate omits necessitation by design, which axiom-subsumption lifting must recurse through. Three distinct formula algebras (4/5/7 constructors) cannot be ranged over by one recursion without XL+ syntax unification. The only clean unification (PL+Modal derivable_mono typeclass) removes zero recursion bodies and excludes Bimodal, failing the stated payload. Recommendation: keep the three per-logic lifts (reuse-first satisfied). No sorry introduced. See specs/419_generalize_derivation_lifting_intersystem/reports/01_derivation-lifting-spike.md",
-      "updated": "2026-06-29T23:45:10Z"
+      "last_updated": "2026-06-30T00:59:32Z",
+      "blockers": null,
+      "updated": "2026-06-30T00:16:05Z",
+      "session_id": "sess_1782772776_909541_419"
     },
     {
       "project_number": 420,

@@ -39,7 +39,7 @@ next_project_number: 423
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 404 [NOT STARTED] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
   └─ 405 [NOT STARTED] — Simplify the proof machinery in the task-402 modal tableau soundn
-419 [BLOCKED] — [Spawned from task 415 audit — supports the structure-first visio
+419 [PLANNED] — [Spawned from task 415 audit — supports the structure-first visio
 
 ### Project Management
 
@@ -106,7 +106,7 @@ next_project_number: 423
 
 ### Uncategorized
 
-411 [NOT STARTED] — Adopt the complete, CI-green IntDecidability.lean from branch ref
+411 [PLANNED] — Adopt the complete, CI-green IntDecidability.lean from branch ref
   └─ 421 [NOT STARTED] — (PL-Metalogic: Complete the Min side of parent task 370) (see above)
 
 ## Tasks
@@ -145,11 +145,12 @@ next_project_number: 423
 ---
 
 ### 419. Generalize derivation lifting to a cross-logic InferenceSystem layer (spike)
-- **Status**: [BLOCKED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 417
-- **Research**: [419_generalize_derivation_lifting_intersystem/reports/01_derivation-lifting-spike.md]
+- **Research**: [419_generalize_derivation_lifting_intersystem/reports/02_virtuous-unification.md]
+- **Plan**: [419_generalize_derivation_lifting_intersystem/plans/02_proof-system-morphism-overlay.md]
 
 **Description**: [Spawned from task 415 audit — supports the structure-first vision; SPIKE.] Investigate hoisting liftDerivation / Derivable_mono (Modal/Metalogic/InterSystem/Lifting.lean:47) and Bimodal's liftDerivationWith onto the shared InferenceSystem / algebraicDerivationSystem abstraction already used by GenericMCSBridge, yielding ONE axiom-subsumption derivation-lifting result reusable by Modal, Bimodal, and PL. SPIKE FIRST: commit only if the necessitation / temporal_duality constructor variance is cleanly abstractable; otherwise document precisely why and stop (mark BLOCKED, never sorry). Benefits from task 417's Foundations placement (soft dependency). Effort L (abstraction risk). CI green if landed. Source: report §6, Rank 4.
 
@@ -171,9 +172,9 @@ next_project_number: 423
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
-- **Research**: [417_parametric_conservativity_lift_foundations/reports/01_conservativity-lift-design.md]
 - **Plan**: [417_parametric_conservativity_lift_foundations/plans/01_conservativity-lift-foundations.md]
 - **Summary**: [417_parametric_conservativity_lift_foundations/summaries/01_conservativity-lift-foundations-summary.md]
+- **Research**: [417_parametric_conservativity_lift_foundations/reports/02_virtuous-placement.md]
 
 **Description**: [Spawned from task 415 audit — closes Finding 2.] Add Cslib/Foundations/Logic/Metalogic/ConservativityLift.lean providing a parametric conservative_over_cpl lemma (signature in report §4) plus a generic classical truth-functional bridge lemma, then re-express temporal_conservative_extension (Temporal/ConservativeExtension.lean:87) and bimodal_conservative_extension (Bimodal/Metalogic/ConservativeExtension/PropositionalConservativity.lean:118) — and optionally re-home modal_conservative_extension_param (Modal/Metalogic/ConservativeExtension.lean:54) — as thin instances. Collapses 3 semantic-bridge + 3 conservativity proofs into 1 generic bridge + 1 generic lemma + 3 instances. This extends the Modal side's existing "by construction" fragment-genericity win (one parametric lemma already covers 15 systems) to ALL THREE modal-family logics — the most direct hit on Waring's Zulip fragment-genericity ask. Synergistic with task 416 (shared prop_completeness usage); not a hard dependency. RISK: unifying the Modal.Satisfies / Temporal.Satisfies / Bimodal.truthAt shapes behind one interface. CI green; 0 new sorry/axioms. Source: report §4, Rank 2.
 
@@ -243,10 +244,13 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 411. Adopt complete int decidability
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Dependencies**: None
-- **Research**: [411_adopt_complete_int_decidability/reports/01_int-decidability-integration-findings.md]
+- **Research**:
+  - [411_adopt_complete_int_decidability/reports/01_int-decidability-integration-findings.md]
+  - [411_adopt_complete_int_decidability/reports/02_task411-collision-and-corrected-adoption.md]
+- **Plan**: [411_adopt_complete_int_decidability/plans/01_curated-intdecidability-adoption.md]
 
 **Description**: Adopt the complete, CI-green IntDecidability.lean from branch refactor/prop_logic onto main, delivering the actual Decidable instance that main's task-385 version lacks. This completes the Int side of parent task 370.
 

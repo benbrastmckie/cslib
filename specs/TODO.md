@@ -11,8 +11,8 @@ next_project_number: 433
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,299,317,321,390,396,400,404,406,407,415,419,426,427,429,431 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,181,215,241,300,375,389,405,409,425,430 | 36,37,180,299,317,404,407,426,427,429 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,241,299,317,321,390,396,400,404,406,407,415,419,426,427,431 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,181,215,300,375,389,405,409,425,430 | 36,37,180,299,317,404,407,426,427 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,275,301,391,392,413 | 39,40,321,375,389,425 | Bimodal Porting, Foundations, Temporal Logic, ... |
 | 4 | 393,412,414 | 41,181,215,241,275,300,301,321,391 | Foundations, Code Hygiene, PL-Hygiene |
 
@@ -44,13 +44,12 @@ next_project_number: 433
 ### Temporal Logic
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
+241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 426 [PLANNED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
   └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
     └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 427 [PLANNED] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
   └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model (see above)
-429 [PLANNED] — Prove a named lemma (suggested name: `buchiCongr_recurrentClass` 
-  └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -199,12 +198,13 @@ After implementation:
 
 ### 429. Prove ramsey recurrentclass lemma for buchicongruence prefix runs
 - **Effort**: 3-4 hours
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 428
 - **Research**: [241_mcnaughton_theorem/reports/02_spawn-analysis.md]
 - **Plan**: [429_prove_ramsey_recurrentclass_lemma_for_buchicongruence_prefix_runs/plans/01_ramsey-recurrent-class.md]
+- **Summary**: [429_prove_ramsey_recurrentclass_lemma_for_buchicongruence_prefix_runs/summaries/01_ramsey-recurrent-class-summary.md]
 
 **Description**: Prove a named lemma (suggested name: `buchiCongr_recurrentClass` or similar) in `Cslib/Computability/Languages/Congruences/BuchiCongruence.lean` (or `OmegaRegularLanguage.lean`) stating: for `[Finite State]` (where `State` is the state type of the NBA `na`) and any `xs : ωSequence Alphabet`, there exist quotient classes `a b : Quotient na.BuchiCongruence.eq` such that (1) `b * b = b` (b is idempotent), (2) `a * b = a`, and (3) `a ∈ (buchiCongr_DMA na).run xs |>.infOcc` (i.e., `∃ᶠ k in Filter.atTop, (buchiCongr_DMA na).run xs k = a`). The proof strategy mirrors `buchiFamily_cover` (BuchiCongruence.lean line 118) which already invokes `infinite_graph_ramsey`; the key adaptation is recasting the Ramsey argument on the prefix-class run `k ↦ ⟦xs.extract 0 k⟧` (which equals `(buchiCongr_DMA na).run xs k` by `buchiCongr_DMA_run_eq`). The idempotent-power collapse lemma from INFRA-1 is used to show that when the Ramsey witness period `p` yields `b = ⟦xs.extract i (i+p)⟧` with `b^m = b`, the prefix classes at positions `i + k*p` equal `a` for the stabilising prefix class `a = ⟦xs.extract 0 i⟧`. API references: `mem_infOcc` (InfOcc.lean:88), `frequently_in_finite_type` (InfOcc.lean:46), `infinite_graph_ramsey`, `buchiCongr_DMA_run_eq` (OmegaRegularLanguage.lean ~line 405). This lemma is the direct bridge enabling Phase 4 of task 241 to close `b ∈ infOcc` and complete the forward direction of `buchiCongr_DMA_language_eq`. CI must pass green.
 

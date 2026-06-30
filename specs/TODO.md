@@ -34,7 +34,7 @@ next_project_number: 433
 
 ### Modal Logic
 
-299 [RESEARCHING] — Implement tableau decision procedure for basic modal logic K with
+299 [RESEARCHED] — Implement tableau decision procedure for basic modal logic K with
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 404 [RESEARCHED] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
@@ -475,12 +475,12 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 299. Modal k tableau
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
-- **Research**: [299_modal_k_tableau/reports/01_modal-k-tableau-research.md]
 - **Plan**: [299_modal_k_tableau/plans/02_modal-k-tableau-plan.md]
+- **Research**: [299_modal_k_tableau/reports/03_completeness-decomposition.md]
 
 **Description**: Implement tableau decision procedure for basic modal logic K with world labels, box/diamond rules on top of propositional rules from shared infrastructure. Introduces world labels (accessibility relation tracking) and fundamental modal rule pattern: box-positive is universal/persistent, diamond-positive is existential (fresh accessible world). Use Lukasiewicz encoding for and/or. Prove soundness against Kripke semantics and completeness by extracting finite Kripke countermodels. Modal formula type: Cslib.Logic.Modal.Formula with atom, bot, imp, box primitives. Files under Cslib/Logics/Modal/Tableau/: Defs.lean, Rules.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 1,500-2,000 lines.
 

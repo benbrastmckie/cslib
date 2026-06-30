@@ -1,45 +1,34 @@
 {
   "task_number": 299,
   "status": "partial",
-  "phases_completed": 3,
+  "phases_completed": 4,
   "phases_total": 7,
-  "summary": "Phases 1-3 green (committed). Phase 4 Soundness.lean is BLOCKED — file still does not build after 4 dispatch attempts. Three structural blockers remain. Phases 5-7 cannot start until phase 4 is green.",
+  "summary": "Phases 1-4 (Defs, Rules, Closure+Saturation, Soundness) are COMPLETE and GREEN. Phase 4 was completed by tasks 364 and 384 (spawned from task 299 to close the soundness gap). Phases 5-7 (Completeness + decision procedure) remain. Completeness.lean does not exist yet.",
   "continuation_context": {
-    "resume_target": "Cslib/Logics/Modal/Tableau/Soundness.lean",
+    "resume_target": "Cslib/Logics/Modal/Tableau/Completeness.lean (to be created)",
     "build_command": "lake build Cslib.Logics.Modal.Tableau.Soundness 2>&1 | grep '^error:' | sort -u",
-    "current_build": "RED",
-    "commit": "d1a73224",
-    "what_was_fixed_this_session": [
-      "box-positive split_ifs: removed erroneous second bullet (split_ifs produced only ONE case after initial simp; two bullets caused 'no goals to be solved')",
-      "hnewlen proof: changed `modalApplyOne sf bh e` to `modalApplyOne sf bh acc` (e is expanded-set List, not Accessibility — wrong arg caused Unknown-identifier cascade at 894 and type mismatch at 920)",
-      "hnewlen split_ifs: added bullet separators so case-pos (sf∈e → none=some → absurd) and case-neg are handled separately",
-      "Global replace: `obtain ⟨⟨hnewBs, _⟩, hnewAcc⟩` → `obtain ⟨hnewBs, _, hnewAcc⟩` (conjunction A∧B∧C is right-associated, not nested product; old pattern was wrong everywhere)"
+    "current_build": "GREEN",
+    "commit": "1845ede5",
+    "soundness_commit": "7dbb8609",
+    "what_was_resolved": [
+      "Blocker 1 (T(a→⊥) pos-sign case ~line 275): RESOLVED by task 384 (SoundnessStep.lean rewrite with cases a before simp)",
+      "Blocker 2 (box-positive membership/refine mismatch ~line 232): RESOLVED by task 364",
+      "Blocker 3 (modalExpandBranches_closed_unsat structural mismatch ~lines 920/959): RESOLVED by task 384 phase 4 (per-branch accs redesign)",
+      "Task 384 also split Soundness.lean into Soundness.lean + SoundnessStep.lean for manageability"
     ],
+    "zero_sorry_check": "PASSED — no sorries in Cslib/Logics/Modal/Tableau/",
     "remaining_blockers": [
       {
-        "blocker": "T(a→⊥) pos-sign case: cases/obtain failure (~line 275)",
-        "detail": "After `simp [tryAllPropRules, ...]`, `hsf` still contains a complex match because `a : Proposition Atom` is generic and `modalAndOf? (.imp a .bot)` requires knowing whether `a` is of form `imp _ _`. Fix: add `cases a with` BEFORE the simp call in the `| bot =>` case of `cases c` to make `a` concrete in each branch. This is a copy-paste issue that affects all occurrences of the `T(imp a c)` case — each simp call needs the formula variable to be fully concrete.",
-        "fix_required": "In `modalStepBranch_preserves_sat`, inside `| pos =>` → `| imp a c =>` → `| bot =>`: add `cases a with | atom p => ... | bot => ... | imp a1 a2 => cases a2 with | bot => ... | _ => ... | box φ => ...` before the simp call so `a` is concrete."
-      },
-      {
-        "blocker": "Box-positive membership/refine mismatch (~line 232)",
-        "detail": "After `subst hnewBs hnewAcc`, the `refine` call uses `List.mem_cons_self` but the goal structure may differ. The exact mismatch needs `lean_goal` to diagnose. Possibly `∃ b' ∈ newBs, P` desugars differently after subst.",
-        "fix_required": "Run `lean_goal` at line 232, check exact goal shape, fix the `refine` or membership proof."
-      },
-      {
-        "blocker": "modalExpandBranches_closed_unsat structural mismatch (~lines 920, 959)",
-        "detail": "The ih_inner (pending-list induction hypothesis) expects `processNext fuel' bt es (done++newBs++bt) (doneExp++newExp++es) acc = .closed` but `hinner` (derived from the `some step` case after rewriting) has type `modalExpandBranches (done++newBs++bt) (doneExp++newExp++es) newAcc fuel' = .closed`. These differ in: (1) acc vs newAcc (accessibility changed by boxNeg/diamondPos world creation), (2) modalExpandBranches vs processNext (different levels of the recursion). Additionally, the `hstep` function passed to ih is parameterized for the original `branches` but the new pending = done++newBs++bt may contain branches not in `branches`. ROOT CAUSE: the proof of `modalExpandBranches_closed_unsat` needs redesign — the `key` inner lemma must carry its OWN hstep-style hypothesis (not capture the outer one) and the accessibility threading must be part of the invariant. RECOMMENDED FIX: restructure `key` to carry `∀ b e newBs newExps newAcc, b ∈ pending → modalStepBranch b e acc_pending = some(newBs, newExps, newAcc) → branchSatisfiable b acc_pending → ... ∃ b'∈newBs, branchSatisfiable b' newAcc` as an EXPLICIT parameter of `key`, and thread the invariant that all pending branches are semantically related to the original branches.",
-        "fix_required": "Substantial restructuring of the `modalExpandBranches_closed_unsat` proof, particularly the `key` inner lemma. May require adding an invariant that relates the current pending list and accessibility to the original ones. This is the hardest fix and may take a separate dedicated dispatch."
+        "blocker": "Completeness.lean does not exist yet",
+        "detail": "Phase 5 (Completeness scaffolding) and Phase 6 (loop invariant) and Phase 7 (decision procedure + CI) are all NOT STARTED. Completeness.lean must be created.",
+        "fix_required": "Implement Phase 5: model extraction + truth lemma, plus Phase 6: loop invariant, plus Phase 7: decision procedure barrel + CI. See plan phases 5-7 in specs/299_modal_k_tableau/plans/02_modal-k-tableau-plan.md."
       }
     ],
-    "hard_requirements": "Zero sorry, zero new axioms. Use lean_goal on each blocked site. Do NOT regress K-correctness: box-positive propagates ONLY to acc-recorded successors.",
-    "recommended_resume": "Dispatch a fresh cslib-implementation-agent with STRICT BUDGET: (1) fix line 275 first (cases a split before simp) — this alone may fix many downstream errors; (2) run lean_goal at line 232 to fix refine; (3) DO NOT attempt the modalExpandBranches_closed_unsat restructuring in the same dispatch — that should be a SEPARATE dispatch. Stop after 2 fixes, build, commit."
+    "hard_requirements": "Zero sorry, zero new axioms. Completeness must extract a finite Kripke countermodel from a saturated open branch.",
+    "recommended_resume": "Spawn a fresh cslib-implementation-agent to implement Phase 5 (Completeness scaffolding) in Completeness.lean. See plan phases 5-7 for detailed specs."
   },
   "blockers": [
-    "line ~275: T(a→⊥) simp cannot evaluate for generic `a` — needs case split on `a` before simp",
-    "line ~232: refine/membership mismatch in box-positive case",
-    "lines ~920/959: modalExpandBranches_closed_unsat proof architecture needs redesign — acc threading and processNext vs modalExpandBranches structural gap"
+    "Phase 5: Completeness.lean not yet created — need model extraction, truth lemma, loop invariant, and decision procedure"
   ],
-  "environment_warning": "Multiple concurrent Claude Code sessions may share this checkout. Serialize sessions or use separate git worktrees to avoid clobbering uncommitted work.",
   "next_action_hint": "implement"
 }

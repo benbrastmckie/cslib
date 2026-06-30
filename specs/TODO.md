@@ -11,15 +11,14 @@ next_project_number: 441
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,226,299,317,390,396,400,404,406,407,415,419,433,434,438,440 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,180,215,300,375,389,405,409,430,435 | 36,37,299,317,404,406,407,433 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,181,275,391,392,436,439 | 39,40,180,389,434,435 | Bimodal Porting, Foundations, Temporal Logic, ... |
-| 4 | 241,393,426 | 391,436,439 | Temporal Logic, PL-Hygiene |
-| 5 | 427 | 426 | Temporal Logic |
-| 6 | 425 | 427 | Temporal Logic |
-| 7 | 301 | 425 | Temporal Logic |
-| 8 | 321 | 301 | Code Hygiene |
-| 9 | 412,413,414 | 41,181,215,241,275,300,321,375 | Foundations, Code Hygiene, PL-Hygiene |
+| 1 | 36,37,180,226,299,317,390,396,400,404,407,415,419,433,438,440 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,181,215,300,375,389,405,409,430,434,439 | 36,37,180,299,317,404,407,433 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 3 | 41,275,391,392,426,435 | 39,40,389,434,439 | Bimodal Porting, Foundations, Temporal Logic, ... |
+| 4 | 393,427,436 | 391,426,435 | Temporal Logic, PL-Hygiene |
+| 5 | 241,425 | 427,436 | Temporal Logic |
+| 6 | 301 | 425 | Temporal Logic |
+| 7 | 321 | 301 | Code Hygiene |
+| 8 | 412,413,414 | 41,181,215,241,275,300,321,375 | Foundations, Code Hygiene, PL-Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -48,25 +47,23 @@ next_project_number: 441
 
 ### Temporal Logic
 
-433 [PLANNED] — Prove a private named lemma (e.g. `buchiCongr_DMA_accept_mem`) in
-  └─ 435 [RESEARCHED] — Replace the sorry-stub `buchiCongr_DMA_language_forward` (languag
-    └─ 436 [RESEARCHED] — Combine the forward inclusion (buchiCongr_DMA_language_forward, f
-      └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
-434 [PLANNED] — Prove the backward inclusion `buchiCongr_DMA_language_backward` (
-  └─ 436 [RESEARCHED] — Combine the forward inclusion (buchiCongr_DMA_language_forward, f (see above)
-39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
-40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 180 [PLANNED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
   └─ 439 [RESEARCHED] — Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_red
     └─ 426 [BLOCKED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
       └─ 427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
         └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
           └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
+433 [PLANNED] — Prove a private named lemma (e.g. `buchiCongr_DMA_accept_mem`) in
+  └─ 434 [PLANNED] — Prove the backward inclusion `buchiCongr_DMA_language_backward` (
+    └─ 435 [RESEARCHED] — Replace the sorry-stub `buchiCongr_DMA_language_forward` (languag
+      └─ 436 [RESEARCHED] — Combine the forward inclusion (buchiCongr_DMA_language_forward, f
+        └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
+39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
+40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ### Code Hygiene
 
-406 [PLANNED] — NEW from post-merge vet (sess_1782671052_6af6a1). Fix 33 pre-exis
-321 [RESEARCHED] — Review file size and structure throughout Logics/ and Foundations
+321 [PLANNED] — Review file size and structure throughout Logics/ and Foundations
   └─ 414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p
 
 ### PL Tableau
@@ -172,7 +169,7 @@ Reference: specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-st
 - **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: Task 433
+- **Dependencies**: Task 433, Task 434
 - **Research**: [241_mcnaughton_theorem/reports/03_spawn-analysis.md]
 
 **Description**: Replace the sorry-stub `buchiCongr_DMA_language_forward` (language na ⊆ language (buchiCongr_DMA na)) at approximately line 435 of Cslib/Computability/Languages/OmegaRegularLanguage.lean. Apply the accept-membership lemma produced by task index 0 (SUB-A: buchiCongr_DMA_accept_mem or equivalent) and unfold the DA.Muller language definition (language da xs ↔ (da.run xs).infOcc ∈ da.accept, DA/Basic.lean:117), matching infOcc((buchiCongr_DMA na).run xs) against the accept set `{S | ∃ b ∈ S, ∃ a, ((buchiFamily (a,b) ⊓ language na).toSet).Nonempty}`. The implementer must read the exact statement committed by SUB-A to determine the correct existential witnesses and unfolding sequence. CI must pass green (lake build, lean_verify on buchiCongr_DMA_language_forward) with zero sorries. Topic: Temporal Logic. Parent task: 241.
@@ -184,7 +181,7 @@ Reference: specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-st
 - **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: None
+- **Dependencies**: Task 433
 - **Research**: [241_mcnaughton_theorem/reports/03_spawn-analysis.md]
 
 **Description**: Prove the backward inclusion `buchiCongr_DMA_language_backward` (language (buchiCongr_DMA na) ⊆ language na) in Cslib/Computability/Languages/OmegaRegularLanguage.lean. Proceed from accept-set membership: if infOcc(run xs) ∈ accept, there exists b ∈ infOcc(run xs) and a such that (buchiFamily (a,b) ⊓ language na).Nonempty, giving a witness ys ∈ language na. Then use buchiFamily_saturation (BuchiCongruence.lean:181) to lift from the witness to xs ∈ language na. This direction does not depend on the Ramsey/recurrence argument for the forward direction — it can be proven in any order relative to tasks 0 and 1. Exact API: accept set definition of buchiCongr_DMA; buchiFamily_saturation (BuchiCongruence.lean:181); mem_buchiFamily (BuchiCongruence.lean:107). CI must pass green (lake build, lean_verify on buchiCongr_DMA_language_backward) with zero sorries. Topic: Temporal Logic. Parent task: 241.
@@ -417,7 +414,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 406. Fix cross-cutting lake lint across Modal/Temporal/Bimodal/Foundations (33)
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
@@ -538,11 +535,12 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 321. Code hygiene logics foundations
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 301
 - **Research**: [321_code_hygiene_logics_foundations/reports/01_code-hygiene-survey.md]
+- **Plan**: [321_code_hygiene_logics_foundations/plans/01_code-hygiene-refactor.md]
 
 **Description**: Review file size and structure throughout Logics/ and Foundations/ to identify and refactor files that are too long or poorly structured. Abstract and expose all and only what should be abstracted/exposed, maintaining the highest standards for code hygiene. Survey file lengths, identify candidates over ~400 lines, check for proper module boundaries, unnecessary public exports, missing abstraction barriers, and violations of single-responsibility principle. Produce a refactoring plan with prioritized actions
 

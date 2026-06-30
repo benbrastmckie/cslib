@@ -34,12 +34,12 @@
     {
       "project_number": 406,
       "project_name": "fix_crosscutting_lint_modal_temporal_bimodal_foundations",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Fix cross-cutting lake lint across Modal/Temporal/Bimodal/Foundations (33)",
       "description": "NEW from post-merge vet (sess_1782671052_6af6a1). Fix 33 pre-existing lake lint violations (not introduced by the merges but blocking CI globally -> hard repo push gate). Same pattern as the PL GenericMCSBridge/DeductionTheorem fixes (task 386). Modal: Metalogic/GenericMCSBridge.lean defLemma x1 + defsWithUnderscore x3 (deriv_tree_to_list, unfold_listImp_in_tree, list_deriv_to_tree), Tableau/Saturation.lean docBlame x1 (modalExpandBranches.processNext), Metalogic/DeductionTheorem.lean unusedArguments x1 (deductionWithMem arg9). Temporal: Metalogic/GenericMCSBridge.lean defLemma x2 + defsWithUnderscore x5, Tableau/Saturation.lean docBlame x1, Metalogic/DenseMCS.lean unusedArguments x1. Bimodal: Metalogic/Core/GenericMCSBridge.lean defLemma x2 + defsWithUnderscore x6, Metalogic/Core/DeductionTheorem.lean unusedArguments x1. Foundations: HilbertAlgebra/FreeMeetExtension.lean docBlame x7 (fld, fmeLe, fmeEquiv, fmeSetoid, FreeMeetExtension, mk, freeMeetEmbed), Logic/Metalogic/DeductionCharacterization.lean:109 defsWithUnderscore x1 (dt_inference_system). Rename underscores->lowerCamelCase, def->lemma, @[nolint unusedArguments]+comments, add docstrings. ABSORBS stale task 394 (foundations_logic_cleanup). Best coordinated with task 386's GenericMCSBridge renames. Verify `lake lint` green. Source: vet findings.",
       "created": "2026-06-28T18:34:49Z",
-      "last_updated": "2026-06-30T17:31:53Z",
+      "last_updated": "2026-06-30T17:53:09Z",
       "next_artifact_number": 1,
       "artifacts": [
         {
@@ -55,7 +55,8 @@
       ],
       "session_id": "sess_1782838873_48a805",
       "dependencies": [],
-      "topic": "Code Hygiene"
+      "topic": "Code Hygiene",
+      "completion_summary": "Cleared all 33 pre-existing lake lint violations across Modal/Temporal/Bimodal/Foundations (snake_case→camelCase renames, def→lemma, @[nolint] attrs, docstrings); generalizes task 386 pattern. All 9 target modules build clean, zero sorries. Committed d11d0692."
     },
     {
       "project_number": 389,
@@ -154,18 +155,23 @@
     {
       "project_number": 321,
       "project_name": "code_hygiene_logics_foundations",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Review file size and structure throughout Logics/ and Foundations/ to identify and refactor files that are too long or poorly structured. Abstract and expose all and only what should be abstracted/exposed, maintaining the highest standards for code hygiene. Survey file lengths, identify candidates over ~400 lines, check for proper module boundaries, unnecessary public exports, missing abstraction barriers, and violations of single-responsibility principle. Produce a refactoring plan with prioritized actions",
       "topic": "Code Hygiene",
       "created": "2026-06-24T10:46:01Z",
-      "last_updated": "2026-06-30T17:31:56Z",
+      "last_updated": "2026-06-30T17:53:13Z",
       "session_id": "sess_1782838873_48a805",
       "artifacts": [
         {
           "path": "specs/321_code_hygiene_logics_foundations/reports/01_code-hygiene-survey.md",
           "type": "report",
           "summary": "Size-debt survey: 85 files >400 lines, four 2700-3566-line Chronicle mega-files, zero-private metalogic gap"
+        },
+        {
+          "path": "specs/321_code_hygiene_logics_foundations/plans/01_code-hygiene-refactor.md",
+          "type": "plan",
+          "summary": "7-phase incremental refactor: privatize helpers, validate barrel-split, split 4 Chronicle mega-files one per phase"
         }
       ],
       "dependencies": [
@@ -1201,7 +1207,9 @@
       "effort": "1-2 hours",
       "parent_task": 241,
       "topic": "Temporal Logic",
-      "dependencies": [],
+      "dependencies": [
+        433
+      ],
       "created": "2026-06-30T15:25:41Z",
       "last_updated": "2026-06-30T15:37:59Z",
       "artifacts": [
@@ -1223,7 +1231,8 @@
       "parent_task": 241,
       "topic": "Temporal Logic",
       "dependencies": [
-        433
+        433,
+        434
       ],
       "created": "2026-06-30T15:25:42Z",
       "last_updated": "2026-06-30T15:25:42Z",

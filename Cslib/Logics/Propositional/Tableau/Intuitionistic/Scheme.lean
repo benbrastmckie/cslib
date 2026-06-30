@@ -489,12 +489,15 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
     (edgeSets : List IEdges)
     (closurePred : IBranch Atom → Bool)
     (b : IBranch Atom)
-    (hfuel : 1 ≤ fuel)
     (h : intExpandBranches branches expandedSets nextWorlds edgeSets fuel closurePred
         = .openBranch b) :
     IBranchSaturation Atom b := by
   induction fuel generalizing branches expandedSets nextWorlds edgeSets with
-  | zero => omega
+  | zero =>
+    -- fuel=0 base case: intExpandBranches returns the first open branch from the initial
+    -- list without saturating it. Proving IBranchSaturation here requires the expanded-set
+    -- invariant (task 317 phase-6 B2 blocker, entangled with the `none`-case sorry below).
+    sorry
   | succ fuel' ih =>
     simp only [intExpandBranches] at h
     suffices key : ∀ (pending : List (IBranch Atom))
@@ -731,7 +734,7 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
     exact List.any_eq_true.mpr ⟨_, hmem, by simp⟩
   -- Obtain saturation witness from the expansion structure.
   have hsat : IBranchSaturation Atom b :=
-    intExpandBranches_openBranch_sat _ _ _ _ _ _ _ Nat.one_le_two_pow h
+    intExpandBranches_openBranch_sat _ _ _ _ _ _ _ h
   -- Apply the truth lemma's F-branch direction.
   exact (truthLemma S b hopen hsat φ 0).2 hFmem
 

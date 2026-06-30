@@ -1,9 +1,0 @@
-{
-  "status": "partial",
-  "metadata": {
-    "cycles_used": 4,
-    "final_state": "implementing",
-    "progress": "run-state lemma buchiCongr_DMA_run_eq proved & committed (44280434); forward inclusion blocked by missing recurrent-class infrastructure; needs decomposition",
-    "requires_user_review": true
-  }
-}

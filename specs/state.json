@@ -1,5 +1,5 @@
 {
-  "next_project_number": 423,
+  "next_project_number": 426,
   "active_projects": [
     {
       "project_number": 406,
@@ -260,12 +260,12 @@
     {
       "project_number": 317,
       "project_name": "propositional_tableau_completeness",
-      "status": "implementing",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "PL-Tableau",
       "description": "Fill the propositional tableau completeness sorries (7 real sorries; soundness is already sorry-free after task 316). The open obligations are the truth-lemma / countermodel-extraction proofs in the three Completeness modules. Classical (Tableau/Classical/Completeness.lean): classicalExpandBranches_hintikka (line ~462) -- note the module's separate build break (bad Mathlib lemma ref + unsolved goals) is repaired first under task 363. Intuitionistic (Tableau/Intuitionistic/Completeness.lean): intTruthLemma (line ~89), intuitionisticOpenBranch_countermodel (~98), intuitionisticTableau_complete (~112). Minimal (Tableau/Minimal/Completeness.lean): minTruthLemma (~168), minOpenBranch_countermodel (~179), minimalTableau_complete (~190). Core technique: Hintikka-set argument -- a saturated open branch satisfies Hintikka conditions, from which a countermodel is extracted (a Boolean valuation for classical; a finite Kripke model for intuitionistic/minimal) and a truth lemma by formula induction matches forced/not-forced to the signed formulas at each world. Because task 369 parameterizes the intuitionistic and minimal tableau over (closurePred, modelBot), the int and min cases should be discharged ONCE as a single parametric truth-lemma/countermodel pair rather than duplicated. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 316, 323, 363, 369.",
       "created": "2026-06-23T19:55:52Z",
-      "last_updated": "2026-06-30T06:04:04Z",
+      "last_updated": "2026-06-30T10:55:29Z",
       "next_artifact_number": 3,
       "artifacts": [
         {
@@ -279,7 +279,9 @@
         363,
         369
       ],
-      "parent_task": 298
+      "parent_task": 298,
+      "previous_status": "implementing",
+      "session_id": "sess_1782816909_d5d018"
     },
     {
       "project_number": 299,
@@ -325,12 +327,12 @@
     {
       "project_number": 301,
       "project_name": "temporal_tableau",
-      "status": "partial",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Temporal Logic",
       "description": "Implement tableau decision procedure for temporal logic (Cslib.Logic.Temporal.Formula) with until/since decomposition rules, time labels, and temporal ordering tracking. Most complex new tableau: until/since rules have no modal analogue, requiring branching decomposition with event-witness and guard-continue alternatives. Adapt patterns from bimodal decidability system (TimeOrdering, temporal rule structure, frame-class rules) but build fresh implementations on shared Foundations infrastructure. Include density and discreteness frame-class rules. Formula type has atom, bot, imp, untl, snce primitives using Lukasiewicz encoding. Files under Cslib/Logics/Temporal/Tableau/: Defs.lean, Rules.lean, TimeOrdering.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 2,000-2,500 lines.",
       "created": "2026-06-23T17:47:17Z",
-      "last_updated": "2026-06-30T06:02:42Z",
+      "last_updated": "2026-06-30T10:57:13Z",
       "next_artifact_number": 3,
       "artifacts": [
         {
@@ -344,7 +346,11 @@
           "summary": "8-phase plan, one per file. Risk concentrated in phases 6-8 (until/since completeness). Zero-debt."
         }
       ],
-      "dependencies": [],
+      "dependencies": [
+        423,
+        424,
+        425
+      ],
       "parent_task": 296,
       "session_id": "sess_1782337264_0e4361",
       "blockers": "3 blockers (cannot complete this run): (A) ordConstraints_strict false as stated — time-ordering design flaw; (B) temporalTruthLemma_propositional exceeds single-agent context, needs generalized structural induction; (C) Until/Since decidability requires PTL finite model property (mirror completed task 421). Base cases committed sorry-free at 7f052834. Decomposition recommended — see .orchestrator-handoff.json."
@@ -546,13 +552,16 @@
     {
       "project_number": 241,
       "project_name": "mcnaughton_theorem",
-      "status": "implementing",
+      "status": "blocked",
       "task_type": "cslib",
       "description": "Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller) establishing equivalence between omega-regular languages and deterministic Muller automata. Research phase should evaluate ctchou/AutomataTheory (independent Lean 4 project that claims McNaughton already proved) for architectural compatibility, portability, and licensing before deciding whether to port, adapt, or develop independently.",
       "topic": "Temporal Logic",
       "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-24T22:31:14Z",
-      "dependencies": [],
+      "last_updated": "2026-06-30T10:53:45Z",
+      "dependencies": [
+        423,
+        424
+      ],
       "next_artifact_number": 5,
       "artifacts": [
         {
@@ -576,7 +585,8 @@
           "summary": "Phase 1 committed (c4d3869d): reverse direction IsRegular.of_da_muller proved sorry-free. Forward direction remains proof_wanted."
         }
       ],
-      "session_id": "sess_1782337917_d3406f_241"
+      "session_id": "sess_1782816794_a788ac",
+      "previous_status": "implementing"
     },
     {
       "project_number": 226,
@@ -1522,6 +1532,90 @@
       ],
       "topic": "PL-Metalogic",
       "completion_summary": "Reconciled the two decidability routes: kept tableau as the sole canonical Decidable instance per logic; demoted the FMP instances to named noncomputable defs (decidableDerivableIntPropAxiomFMP / ...MinPropAxiomFMP). Added 'two routes, distinct roles' cross-referenced docstrings across all 4 module headers (IntDecidability, MinDecidability, Tableau Int/Min DecisionProcedure), citing the 317 sorries and FMP axiom profile; infra factoring deferred (disjoint carriers, cross-referenced only). FMP defs sorry-free {propext,Classical.choice,Quot.sound}; tableau instances carry pre-existing 317 sorryAx (documented). 0 new sorry/axiom; the 4 modules build green (773-job scoped build). NOTE: repo-wide build is red due to UNRELATED task-419 WIP (Cslib.lean:94 imports untracked ProofSystemMorphism.lean)."
+    },
+    {
+      "project_number": 423,
+      "project_name": "expose_buchicongruence_eqvcls_monoid_and_idempotent_lemmas",
+      "status": "researched",
+      "task_type": "cslib",
+      "description": "Add named lemmas to Cslib/Computability/Languages/Congruences/RightCongruence.lean and/or BuchiCongruence.lean exposing the multiplicative structure on BuchiCongruence quotient classes: (1) the well-definedness rewrite `⟦u ++ v⟧ = ⟦u⟧ · ⟦v⟧` (equivalently `Quotient.mk _ (u ++ v) = Quotient.mk _ u * Quotient.mk _ v`), confirming the `Mul` instance on `Quotient BuchiCongruence.eq` acts as concatenation; (2) the idempotent-power collapse lemma: if `b * b = b` (b is idempotent) then `b ^ k = b` for all `k ≥ 1`; and (3) the absorption corollary: if `b * b = b` and `a * b = a` then `a * b ^ k = a` for all `k`. These lemmas are purely algebraic about the existing `RightCongruence` monoid structure and carry no research-grade difficulty. They are the algebraic substrate needed by the Ramsey recurrent-class lemma (task INFRA-2) and ultimately by the forward direction of `buchiCongr_DMA_language_eq` in task 241. Files in scope: `Cslib/Computability/Languages/Congruences/RightCongruence.lean`, `Cslib/Computability/Languages/Congruences/BuchiCongruence.lean`. CI must pass green with `lake build` and `lake exe lint-style`.",
+      "effort": "2-3 hours",
+      "parent_task": 241,
+      "topic": "Temporal Logic",
+      "dependencies": [],
+      "created": "2026-06-30T10:57:07Z",
+      "last_updated": "2026-06-30T10:57:07Z",
+      "artifacts": [
+        {
+          "type": "research",
+          "path": "specs/241_mcnaughton_theorem/reports/02_spawn-analysis.md",
+          "summary": "Spawn analysis from parent task 241"
+        }
+      ]
+    },
+    {
+      "project_number": 424,
+      "project_name": "prove_ramsey_recurrentclass_lemma_for_buchicongruence_prefix_runs",
+      "status": "researched",
+      "task_type": "cslib",
+      "description": "Prove a named lemma (suggested name: `buchiCongr_recurrentClass` or similar) in `Cslib/Computability/Languages/Congruences/BuchiCongruence.lean` (or `OmegaRegularLanguage.lean`) stating: for `[Finite State]` (where `State` is the state type of the NBA `na`) and any `xs : ωSequence Alphabet`, there exist quotient classes `a b : Quotient na.BuchiCongruence.eq` such that (1) `b * b = b` (b is idempotent), (2) `a * b = a`, and (3) `a ∈ (buchiCongr_DMA na).run xs |>.infOcc` (i.e., `∃ᶠ k in Filter.atTop, (buchiCongr_DMA na).run xs k = a`). The proof strategy mirrors `buchiFamily_cover` (BuchiCongruence.lean line 118) which already invokes `infinite_graph_ramsey`; the key adaptation is recasting the Ramsey argument on the prefix-class run `k ↦ ⟦xs.extract 0 k⟧` (which equals `(buchiCongr_DMA na).run xs k` by `buchiCongr_DMA_run_eq`). The idempotent-power collapse lemma from INFRA-1 is used to show that when the Ramsey witness period `p` yields `b = ⟦xs.extract i (i+p)⟧` with `b^m = b`, the prefix classes at positions `i + k*p` equal `a` for the stabilising prefix class `a = ⟦xs.extract 0 i⟧`. API references: `mem_infOcc` (InfOcc.lean:88), `frequently_in_finite_type` (InfOcc.lean:46), `infinite_graph_ramsey`, `buchiCongr_DMA_run_eq` (OmegaRegularLanguage.lean ~line 405). This lemma is the direct bridge enabling Phase 4 of task 241 to close `b ∈ infOcc` and complete the forward direction of `buchiCongr_DMA_language_eq`. CI must pass green.",
+      "effort": "3-4 hours",
+      "parent_task": 241,
+      "topic": "Temporal Logic",
+      "dependencies": [
+        423
+      ],
+      "created": "2026-06-30T10:57:07Z",
+      "last_updated": "2026-06-30T10:57:07Z",
+      "artifacts": [
+        {
+          "type": "research",
+          "path": "specs/241_mcnaughton_theorem/reports/02_spawn-analysis.md",
+          "summary": "Spawn analysis from parent task 241"
+        }
+      ]
+    },
+    {
+      "project_number": 423,
+      "project_name": "temporal_tableau_ordconstraints_redesign",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Temporal Logic",
+      "description": "[Decomposed from task 301, blocker A.] Redesign the time-ordering scheme in the temporal tableau so the ordering invariants hold. The lemma ordConstraints_strict (Cslib/Logics/Temporal/Tableau/Completeness.lean) is FALSE as stated: addPast t tNew adds the constraint (tNew, t) with tNew > t, violating the claimed invariant (a,b) in constraints -> a < b. Choose and implement a correct scheme (e.g. topological sort of the constraint graph, or a signed/relative integer time domain) so that extractModel builds a well-founded strict order, then prove the corrected ordConstraints lemma sorry-free. Start from green commit 7f052834. Independent of tasks 424 and 425.",
+      "created": "2026-06-30T10:57:13Z",
+      "last_updated": "2026-06-30T10:57:13Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "dependencies": [],
+      "parent_task": 301
+    },
+    {
+      "project_number": 424,
+      "project_name": "temporal_tableau_propositional_truth_lemma",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Temporal Logic",
+      "description": "[Decomposed from task 301, blocker B.] Prove temporalTruthLemma_propositional (atom/bot/imp cases) in Cslib/Logics/Temporal/Tableau/Completeness.lean sorry-free. This obligation is independently provable (no FMP, no dependence on the ordConstraints fix), but exceeds a single agent context window when attempted naively. KEY: the imp case requires generalized STRUCTURAL induction on the formula giving subformula induction hypotheses — NOT induction on the IsPropositional proof (which only yields IHs for the immediate subformulas phi/psi). Adapt the propositional truth lemma from Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean to the time-indexed temporalHintikkaSet/TBranch setting. Reuse already-proved base cases: extractModel_atomPos_sat, extractModel_atom_neg_notSat, extractModel_bot_false. A 1150-line prior attempt (with the structural difficulty diagnosed) is preserved at specs/301_temporal_tableau/.wip-Completeness-truthlemma-attempt.lean for reference. Start from green commit 7f052834. Scope strictly to this one lemma. Independent of tasks 423 and 425.",
+      "created": "2026-06-30T10:57:13Z",
+      "last_updated": "2026-06-30T10:57:13Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "dependencies": [],
+      "parent_task": 301
+    },
+    {
+      "project_number": 425,
+      "project_name": "temporal_tableau_ptl_fmp_decidability",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Temporal Logic",
+      "description": "[Decomposed from task 301, blocker C.] Establish the finite model property (FMP) for Propositional Temporal Logic and use it to discharge temporalTruthLemma_untl and temporalTruthLemma_snce (Until/Since eventuality fulfilment), which in turn unblock eventualityDefect_unsat, temporalTableau_sound, openBranch_branchSat, temporalTableau_complete, and the final instDecidableValid in Cslib/Logics/Temporal/Tableau/. This is the theoretical gate for full decidability. Mirror the approach of COMPLETED task 421 (min_fmp_decidability), which added a sorry-free Decidable instance via FMP — reuse its pattern/infrastructure where possible. The hardest sub-part; gates task 301 completion. Independent of tasks 423 and 424 in principle, but final wiring of instDecidableValid needs all three landed.",
+      "created": "2026-06-30T10:57:13Z",
+      "last_updated": "2026-06-30T10:57:13Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "dependencies": [],
+      "parent_task": 301
     }
   ],
   "repository_health": {

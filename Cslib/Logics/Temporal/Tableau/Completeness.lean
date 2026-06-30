@@ -126,6 +126,50 @@ lemma extractModel_bot_false (b : TBranch Atom) (t : TimeIndex) :
     ¬ Satisfies (extractModel b) t .bot :=
   Satisfies.bot_false (extractModel b) t
 
+/-! ## ℤ-Keyed Countermodel Extraction -/
+
+/-- Extract a `TemporalModel ℤ Atom` from an open branch, keyed on the integer instant
+assigned to each time label by the time ordering.
+
+This is the corrected countermodel for `branchSat`: it uses the domain `D = ℤ` and the
+order-preserving assignment `f = ord.instant`, supplying a time domain with a genuine
+`LinearOrder` and `Nontrivial` instance. The valuation maps atom `p` at instant `z` to
+`true` iff some signed formula T(atom p) at a time label with `ord.instant label = z`
+appears on the branch.
+
+Note: `ord.instant` may be non-injective (two labels can share an instant), making this
+model well-defined but potentially "collapsing" distinct time points. For the positive atom
+and ⊥ properties, non-injectivity poses no issue; the negative atom property requires
+an additional injectivity hypothesis (see `extractModelℤ_atom_neg_notSat`). -/
+def extractModelℤ (b : TBranch Atom) (ord : TimeOrdering) : TemporalModel ℤ Atom where
+  valuation z p := b.any fun sf =>
+    sf.sign == .pos && ord.instant sf.label == z && sf.formula == .atom p
+
+omit [Hashable Atom] in
+/-- Atom satisfaction in `extractModelℤ b ord` is equivalent to there being some
+T(atom p)@t on the branch with `ord.instant t = z`. -/
+lemma extractModelℤ_atom_sat_iff (b : TBranch Atom) (ord : TimeOrdering)
+    (z : ℤ) (p : Atom) :
+    Satisfies (extractModelℤ b ord) z (.atom p) ↔
+    b.any (fun sf => sf.sign == .pos && ord.instant sf.label == z && sf.formula == .atom p) := by
+  simp only [Satisfies.atom_iff, extractModelℤ]
+
+omit [Hashable Atom] in
+/-- T(atom p)@t on a branch implies atom p is satisfied in `extractModelℤ b ord`
+at `ord.instant t`. -/
+lemma extractModelℤ_atomPos_sat (b : TBranch Atom) (ord : TimeOrdering)
+    (t : TimeIndex) (p : Atom)
+    (hmem : (⟨.pos, .atom p, t⟩ : TSF Atom) ∈ b) :
+    Satisfies (extractModelℤ b ord) (ord.instant t) (.atom p) := by
+  rw [extractModelℤ_atom_sat_iff, List.any_eq_true]
+  exact ⟨⟨.pos, .atom p, t⟩, hmem, by simp⟩
+
+omit [Hashable Atom] in
+/-- ⊥ is never satisfied in any `extractModelℤ` model, at any instant. -/
+lemma extractModelℤ_bot_false (b : TBranch Atom) (ord : TimeOrdering) (z : ℤ) :
+    ¬ Satisfies (extractModelℤ b ord) z .bot :=
+  Satisfies.bot_false (extractModelℤ b ord) z
+
 /-! ## Open Branch Structure -/
 
 omit [Hashable Atom] in
@@ -216,6 +260,47 @@ lemma extractModel_atom_neg_notSat
     have hisPos : sf_pos.isPos = true := by
       simp [SignedFormula.isPos, Sign.isPos, hsign]
     -- The inner any: F(atom p)@t witnesses the negative match
+    have hinner : b.any (fun sf' =>
+        sf'.sign == .neg && sf'.formula == sf_pos.formula && sf'.label == sf_pos.label) = true := by
+      rw [List.any_eq_true]
+      exact ⟨⟨.neg, .atom p, t⟩, hmem, by simp [hform, hlab]⟩
+    simp [hisPos, hinner]
+  simp [hcontra_none] at hcontra_some
+
+omit [Hashable Atom] in
+/-- F(atom p)@t on an open branch implies
+¬ Satisfies (extractModelℤ b ord) (ord.instant t) (atom p),
+provided `ord.instant` is injective on branch labels carrying `atom p`.
+
+This injectivity hypothesis is needed because two distinct labels `t ≠ t'` could share
+an instant (`ord.instant t = ord.instant t'`); without injectivity, a T(atom p)@t' at the
+same instant would make the ℤ model satisfy atom p at `ord.instant t` even when F(atom p)@t
+is present. Proving injectivity of `ord.instant` on live branch labels is a separate task. -/
+lemma extractModelℤ_atom_neg_notSat
+    (b : TBranch Atom) (ord : TimeOrdering) (tracker : EventualityTracker Atom)
+    (hopen : isTemporalClosed b ord tracker = false)
+    (t : TimeIndex) (p : Atom)
+    (hmem : (⟨.neg, .atom p, t⟩ : TSF Atom) ∈ b)
+    (hInj : ∀ sf ∈ b, sf.formula = .atom p → sf.sign = .pos →
+            ord.instant sf.label = ord.instant t → sf.label = t) :
+    ¬ Satisfies (extractModelℤ b ord) (ord.instant t) (.atom p) := by
+  rw [extractModelℤ_atom_sat_iff]
+  intro h_any
+  rw [List.any_eq_true] at h_any
+  obtain ⟨sf_pos, hmem_pos, hcond⟩ := h_any
+  simp only [Bool.and_eq_true] at hcond
+  obtain ⟨⟨hpos_sign, hpos_inst⟩, hpos_form⟩ := hcond
+  have hsign : sf_pos.sign = .pos := LawfulBEq.eq_of_beq hpos_sign
+  have hinst : ord.instant sf_pos.label = ord.instant t := LawfulBEq.eq_of_beq hpos_inst
+  have hform : sf_pos.formula = .atom p := LawfulBEq.eq_of_beq hpos_form
+  have hlab : sf_pos.label = t := hInj sf_pos hmem_pos hform hsign hinst
+  have hcontra_none : Branch.findContradiction b = none :=
+    openBranch_noContradiction b ord tracker hopen
+  have hcontra_some : (Branch.findContradiction b).isSome = true := by
+    simp only [Branch.findContradiction, List.findSome?_isSome_iff]
+    refine ⟨sf_pos, hmem_pos, ?_⟩
+    have hisPos : sf_pos.isPos = true := by
+      simp [SignedFormula.isPos, Sign.isPos, hsign]
     have hinner : b.any (fun sf' =>
         sf'.sign == .neg && sf'.formula == sf_pos.formula && sf'.label == sf_pos.label) = true := by
       rw [List.any_eq_true]

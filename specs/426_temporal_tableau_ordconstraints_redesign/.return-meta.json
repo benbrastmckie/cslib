@@ -3,12 +3,12 @@
   "started_at": "2026-06-30T13:26:52Z",
   "artifacts": [],
   "partial_progress": {
-    "stage": "phase_2_complete",
-    "details": "Phase 2 done: InstantStrict defined, three preservation lemmas proved sorry-free (instantStrict_empty, instantStrict_addFuture, instantStrict_addPast).",
+    "stage": "phase_4_complete",
+    "details": "Phase 4 done: extractModelℤ added, atom lemmas proved sorry-free (extractModelℤ_atom_sat_iff, extractModelℤ_atomPos_sat, extractModelℤ_bot_false, extractModelℤ_atom_neg_notSat with injectivity hypothesis). Phase 3 BLOCKED (processNext let-rec prevents loop invariant induction).",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 2,
-    "last_completed_phase": "Define InstantStrict and prove edge-by-edge preservation lemmas"
+    "phases_completed": 4,
+    "last_completed_phase": "extractModelℤ and re-keyed atom lemmas"
   },
   "metadata": {
     "agent_type": "cslib-implementation-agent",

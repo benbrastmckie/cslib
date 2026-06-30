@@ -177,7 +177,7 @@ dependents compiling.
 
 ---
 
-### Phase 3: Thread the invariant through the tableau run (corrected `ordConstraints` lemma) [NOT STARTED]
+### Phase 3: Thread the invariant through the tableau run (corrected `ordConstraints` lemma) [BLOCKED]
 
 **Goal**: Prove the run-level corrected lemma that replaces `ordConstraints_strict`:
 `temporalTableau φ = .openBranch b ord → InstantStrict ord`, **sorry-free**. This is the core
@@ -204,6 +204,13 @@ state reached and what is needed (e.g. a `processNext` invariant lemma), and (c)
 `status: "partial"` with `requires_user_review: true`. The documented Option A (`LinearExtension`)
 is the heavier alternative if the user chooses to pursue full threading differently.
 
+**BLOCKER (Phase 3)**:
+- **What failed**: The run-level induction requires threading the invariant through `processNext`, a `let rec` definition inside `temporalExpandBranches`. In Lean 4, `let rec` definitions do not generate standalone recursion principles, so standard induction tactics cannot be applied to them directly.
+- **What was tried**: Planned to use `Nat.strongInduction` on fuel + case analysis on `processNext`. But `processNext` cannot be named directly in a separate lemma because it's a `let rec` binding inside a `do`-style match.
+- **Why it's stuck**: The proof needs (1) a coupling invariant `CoupledWithBranch b ord : ∀ a ∈ ord.allTimes, ∃ sf ∈ b, sf.label = a` preserved by each step, and (2) a loop invariant over `processNext`. Both require `processNext` to be a top-level definition or have an explicit induction principle.
+- **What is needed**: Factor out `processNext` as a top-level `def` (in Saturation.lean), or use a `mutual` block, or introduce a well-founded recursion over `(fuel, List.length pending)`. Then define `invariantHolds (orderings : List TimeOrdering) (branches : List (TBranch Atom))` = "all (b_i, ord_i) pairs are coupled and InstantStrict ord_i" and prove it's preserved by each step. The step lemma is: if `InstantStrict ord` and `CoupledWithBranch b ord` and `temporalApplyOne sf b ord = (result, newOrd)` and `sf ∈ b`, then `InstantStrict newOrd` and all new branches are coupled with `newOrd`. This follows from `branchNextTime_gt` supplying freshness, and the case analysis over `temporalApplyPos`/`temporalApplyNeg` showing each new branch contains the new time as a label.
+- **Prohibited workarounds**: Do NOT use `sorry`, `def X := True`, or any vacuous placeholder.
+
 **Timing**: 2 hours
 
 **Depends on**: 2
@@ -220,7 +227,7 @@ is the heavier alternative if the user chooses to pursue full threading differen
 
 ---
 
-### Phase 4: Re-key `extractModel` through `f` (`extractModelℤ`) and re-prove atom lemmas [NOT STARTED]
+### Phase 4: Re-key `extractModel` through `f` (`extractModelℤ`) and re-prove atom lemmas [COMPLETED]
 
 **Goal**: Provide `extractModelℤ : TemporalModel ℤ Atom` keyed on `ord.instant` and re-prove the
 atom-level model properties sorry-free. Independent of the Phase 3 threading (depends only on the

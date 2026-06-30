@@ -418,7 +418,9 @@ public import Cslib.Logics.Modal.ProofSystem.Instances.T
 public import Cslib.Logics.Modal.ProofSystem.Instances.TB
 public import Cslib.Logics.Modal.Tableau.Branch
 public import Cslib.Logics.Modal.Tableau.Closure
+public import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.Defs
+public import Cslib.Logics.Modal.Tableau.LoopInduction
 public import Cslib.Logics.Modal.Tableau.Rules
 public import Cslib.Logics.Modal.Tableau.Saturation
 public import Cslib.Logics.Modal.Tableau.Soundness
@@ -553,6 +555,10 @@ public import Cslib.Logics.Temporal.Metalogic.Chronicle.CounterexampleEliminatio
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.Frame
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.OrderedSeedConsistency
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.PointInsertion
+public import Cslib.Logics.Temporal.Metalogic.Chronicle.PointInsertion.Burgess
+public import Cslib.Logics.Temporal.Metalogic.Chronicle.PointInsertion.Seeds
+public import Cslib.Logics.Temporal.Metalogic.Chronicle.PointInsertion.Since
+public import Cslib.Logics.Temporal.Metalogic.Chronicle.PointInsertion.Splitting
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.RRelation
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.TruthLemma
 public import Cslib.Logics.Temporal.Metalogic.Completeness

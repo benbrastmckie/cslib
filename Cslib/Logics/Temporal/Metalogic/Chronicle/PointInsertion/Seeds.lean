@@ -490,7 +490,7 @@ theorem BurgessR3Maximal_extension_fails {A B C : Set (Formula Atom)}
   exact h_R3M.2.2 _ h_cud h_proper h_r3
 
 /-- dc_delta_B_burgessR3: Extension of B by delta preserves burgessR3. -/
-private theorem dc_delta_B_burgessR3 {A B C : Set (Formula Atom)}
+theorem dc_delta_B_burgessR3 {A B C : Set (Formula Atom)}
     (h_mcs_A : Temporal.SetMaximalConsistent A) (h_mcs_C : Temporal.SetMaximalConsistent C)
     (h_dcs : ClosedUnderDerivation B)
     (h_r3 : burgessR3 A B C)

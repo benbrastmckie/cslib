@@ -44,7 +44,7 @@ open Cslib.Logic.Temporal.Metalogic
 /-! ## gContent(A) ⊆ B from BurgessR3Maximal -/
 
 /-- Helper: ⊢ φ → (β → (β ∧ φ)). Conjunction introduction curried. -/
-private noncomputable def conjIntroCurried (β φ : Formula Atom) :
+noncomputable def conjIntroCurried (β φ : Formula Atom) :
     DerivationTree FrameClass.Base [] (φ.imp (β.imp (Formula.and β φ))) := by
   have h1 : DerivationTree FrameClass.Base [β, φ] (Formula.and β φ) :=
     DerivationTree.modus_ponens [β, φ] _ _
@@ -56,7 +56,7 @@ private noncomputable def conjIntroCurried (β φ : Formula Atom) :
   exact deductionTheorem [] φ _ (deductionTheorem [φ] β _ h1)
 
 /-- Helper: ⊢ φ → (φ.neg → ψ) for any ψ. -/
-private noncomputable def exFalsoFromAssumption (φ ψ : Formula Atom) :
+noncomputable def exFalsoFromAssumption (φ ψ : Formula Atom) :
     DerivationTree FrameClass.Base [] (φ.imp (φ.neg.imp ψ)) := by
   have h1 : DerivationTree FrameClass.Base [φ.neg, φ] Formula.bot :=
     DerivationTree.modus_ponens [φ.neg, φ] φ Formula.bot
@@ -320,7 +320,7 @@ noncomputable def snceLeftMonoDeriv (φ ψ χ : Formula Atom)
   exact DerivationTree.modus_ponens [] _ _ h_ax h_H
 
 /-- Right monotonicity for Until at MCS level. -/
-private theorem right_mono_until_mcs {A : Set (Formula Atom)}
+theorem right_mono_until_mcs {A : Set (Formula Atom)}
     (h_mcs : Temporal.SetMaximalConsistent A) {φ ψ χ : Formula Atom}
     (hImpl : DerivationTree FrameClass.Base [] (ψ.imp χ))
     (hUntl : (φ U ψ) ∈ A) :
@@ -332,7 +332,7 @@ private theorem right_mono_until_mcs {A : Set (Formula Atom)}
     (temporal_implication_property h_mcs (theoremInMcs h_mcs h_bx3) h_G_impl) hUntl
 
 /-- Right monotonicity for Since at MCS level. -/
-private theorem right_mono_since_mcs {C : Set (Formula Atom)}
+theorem right_mono_since_mcs {C : Set (Formula Atom)}
     (h_mcs : Temporal.SetMaximalConsistent C) {φ ψ χ : Formula Atom}
     (hImpl : DerivationTree FrameClass.Base [] (ψ.imp χ))
     (hSnce : (φ S ψ) ∈ C) :
@@ -368,7 +368,7 @@ theorem enrichment_since_mcs {C : Set (Formula Atom)}
 /-! ## F/P Monotonicity -/
 
 /-- F-monotonicity at MCS level. -/
-private theorem F_mono_mcs {A : Set (Formula Atom)}
+theorem F_mono_mcs {A : Set (Formula Atom)}
     (h_mcs : Temporal.SetMaximalConsistent A) {phi psi : Formula Atom}
     (hImpl : DerivationTree FrameClass.Base [] (phi.imp psi))
     (h_F : (𝐅phi) ∈ A) :
@@ -377,7 +377,7 @@ private theorem F_mono_mcs {A : Set (Formula Atom)}
   exact right_mono_until_mcs h_mcs hImpl h_F
 
 /-- P-monotonicity at MCS level. -/
-private theorem P_mono_mcs {C : Set (Formula Atom)}
+theorem P_mono_mcs {C : Set (Formula Atom)}
     (h_mcs : Temporal.SetMaximalConsistent C) {phi psi : Formula Atom}
     (hImpl : DerivationTree FrameClass.Base [] (phi.imp psi))
     (h_P : (𝐏phi) ∈ C) :

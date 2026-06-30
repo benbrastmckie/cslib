@@ -286,7 +286,7 @@ becomes its own submodule. Disjoint directory from Phases 4-5, so parallel with 
 
 ---
 
-### Phase 7: Split Temporal/.../Chronicle/PointInsertion.lean [IN PROGRESS]
+### Phase 7: Split Temporal/.../Chronicle/PointInsertion.lean [COMPLETED]
 
 **Goal**: Reduce 2731 lines to a barrel; mirror of Phase 4. Runs after Phase 6 (same directory;
 this file is imported by the Temporal CounterexampleElimination barrel from Phase 6, whose path is
@@ -303,10 +303,10 @@ preserved).
 - Rewrite `Chronicle/PointInsertion.lean` as a barrel.
 
 **Tasks**:
-- [ ] Extract per section, building after each; order Seeds → Burgess → Splitting → Since.
-- [ ] Barrel keeps the original module path so the Phase-6 CounterexampleElimination submodules
+- [x] Extract per section, building after each; order Seeds → Burgess → Splitting → Since.
+- [x] Barrel keeps the original module path so the Phase-6 CounterexampleElimination submodules
       and `Temporal/Metalogic.lean` importer resolve unchanged.
-- [ ] Resolve cross-submodule `private` references; module docstrings on new files.
+- [x] Resolve cross-submodule `private` references; module docstrings on new files.
 
 **Timing**: 2 hours
 

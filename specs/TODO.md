@@ -64,12 +64,12 @@ next_project_number: 433
 
 ### PL Tableau
 
-430 [RESEARCHING] — Prove the atom-persistence / upward-closure structural lemma for 
+430 [RESEARCHED] — Prove the atom-persistence / upward-closure structural lemma for 
   └─ 317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
 
 ### PL Hygiene
 
-386 [PLANNED] — [Refreshed by post-merge vet sess_1782671052_6af6a1; supersedes t
+386 [IMPLEMENTING] — [Refreshed by post-merge vet sess_1782671052_6af6a1; supersedes t
   └─ 392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls
   └─ 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
 387 [BLOCKED] — [Refreshed post-merge vet.] DECISION REQUIRES UPSTREAM AGREEMENT.
@@ -103,14 +103,15 @@ next_project_number: 433
 ### Uncategorized
 
 431 [NOT STARTED] — Audit the ~6 'sorry' occurrences that the 2026-06-30 review found
-432 [NOT STARTED] — Fix .claude/scripts/roadmap-integration.sh which aborts with '/et
+432 [RESEARCHED] — Fix .claude/scripts/roadmap-integration.sh which aborts with '/et
 
 ## Tasks
 
 ### 432. Fix roadmap integration argv overflow
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: meta
 - **Dependencies**: None
+- **Research**: [432_fix_roadmap_integration_argv_overflow/reports/01_argv-overflow-fix.md]
 
 **Description**: Fix .claude/scripts/roadmap-integration.sh which aborts with '/etc/profiles/per-user/benjamin/bin/python3: Argument list too long' at line 352 during /review. The script appears to pass file content (state.json/ROADMAP.md) as a python argv argument; pass via stdin or a temp file path instead so roadmap auto-annotation works again. Source: specs/reviews/review-2026-06-30.md low issue 2.
 
@@ -127,11 +128,13 @@ next_project_number: 433
 
 ### 430. Prove atom persistence upward closure for intexpan
 - **Effort**: 2-3 hours
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: PL-Tableau
 - **Dependencies**: None
-- **Research**: [430_prove_atom_persistence_upward_closure_for_intexpan/reports/01_atom-persistence-upward-closure.md]
+- **Research**:
+  - [430_prove_atom_persistence_upward_closure_for_intexpan/reports/01_atom-persistence-upward-closure.md]
+  - [430_prove_atom_persistence_upward_closure_for_intexpan/reports/02_team-research.md]
 
 **Description**: Prove the atom-persistence / upward-closure structural lemma for open branches produced by `intExpandBranches`, and use it to discharge the two validity-bridge sorries in task 317.
 
@@ -463,7 +466,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 386. Fix Propositional-specific lake lint violations (21, post-merge)
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: PL-Hygiene
 - **Dependencies**: Task 395

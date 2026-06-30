@@ -180,7 +180,7 @@ references and docstrings.
 
 ---
 
-### Phase 3: LK CutElimination renames [IN PROGRESS]
+### Phase 3: LK CutElimination renames [COMPLETED]
 
 **Goal**: Rename the 5 underscore `cutAdm_*` helpers in LK to lowerCamelCase and update all
 intra-file call sites including the public wrapper `cutAdmissibility`.
@@ -215,7 +215,7 @@ intra-file call sites including the public wrapper `cutAdmissibility`.
 
 ---
 
-### Phase 4: LJ CutElimination renames [NOT STARTED]
+### Phase 4: LJ CutElimination renames [COMPLETED]
 
 **Goal**: Rename the 5 underscore `ljCutAdm_*` helpers in LJ to lowerCamelCase and update all
 intra-file call sites including the public wrapper `ljCutAdmissibility`.

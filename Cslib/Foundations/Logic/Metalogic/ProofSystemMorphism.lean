@@ -180,7 +180,8 @@ The four existing CSLib lift functions are instances (up to constructor-preservi
 built in Phases 2–5):
 - Modal `liftDerivation h_sub` ↔ `Deriv.map ⟨id, rfl, h_sub, {box}⟩`
 - PL `liftDerivationTree h_sub` ↔ `Deriv.map ⟨id, rfl, h_sub, ∅⟩`
-- Bimodal `DerivationTree.lift h_le` ↔ `Deriv.map ⟨id, rfl, fun ⟨h, hfc⟩ => ⟨h, le_trans hfc h_le⟩, …⟩`
+- Bimodal `DerivationTree.lift h_le` ↔
+  `Deriv.map ⟨id, rfl, fun ⟨h, hfc⟩ => ⟨h, le_trans hfc h_le⟩, …⟩`
 - Bimodal `liftDerivationWith a` ↔ `Deriv.map ⟨liftFormula a, liftFormula_imp, liftAxiom a, …⟩` -/
 def map {F₁ F₂ : Type*} [HasImp F₁] [HasImp F₂]
     {σ₁ : ProofSig F₁} {σ₂ : ProofSig F₂}
@@ -243,15 +244,20 @@ theorem map_id {F : Type*} [HasImp F] (σ : ProofSig F)
     congr 1 <;> first | rw [List.map_id] | exact proof_irrel_heq _ _
   | mp Γ φ ψ d₁ d₂ ih₁ ih₂ =>
     simp only [map, ProofSigHom.id, id_eq]
-    congr 1 <;> first | rw [List.map_id] | assumption
+    congr 1; rw [List.map_id]
   | close m hm φ d ih =>
     -- Empty context: `[].map id = []`, so no context transport needed; `id` fixes the
     -- chosen closure `m` pointwise, so the formula index is `m φ` on both sides.
     simp only [map, ProofSigHom.id, id_eq]
-    congr 1 <;> first | rw [List.map_id] | assumption | exact eq_of_heq (by assumption) | exact proof_irrel_heq _ _ | rfl
+    congr 1; first | rw [List.map_id] | assumption | exact eq_of_heq (by assumption)
   | weak Γ Δ φ d h ih =>
     simp only [map, ProofSigHom.id, id_eq]
-    congr 1 <;> first | rw [List.map_id] | assumption | exact eq_of_heq (by assumption) | exact proof_irrel_heq _ _ | rfl
+    congr 1 <;>
+      first
+        | rw [List.map_id]
+        | assumption
+        | exact eq_of_heq (by assumption)
+        | exact proof_irrel_heq _ _
 
 /-- **Functor composition law** (heterogeneous equality form).
 
@@ -270,10 +276,10 @@ theorem map_comp {F₁ F₂ F₃ : Type*} [HasImp F₁] [HasImp F₂] [HasImp F�
   induction d with
   | ax Γ φ h =>
     simp only [map, ProofSigHom.comp]
-    congr 1 <;> first | rw [List.map_map] | exact proof_irrel_heq _ _ | rfl
+    congr 1; rw [List.map_map]
   | assum Γ φ h =>
     simp only [map, ProofSigHom.comp]
-    congr 1 <;> first | rw [List.map_map] | exact proof_irrel_heq _ _ | rfl
+    congr 1 <;> first | rw [List.map_map] | exact proof_irrel_heq _ _
   | mp Γ φ ψ d₁ d₂ ih₁ ih₂ =>
     -- `congr 1` exposes the `g_imp ▸` casts on the `mp` premises; the first premise is closed
     -- by chaining `eqRec_heq` (strip both casts) with the IH and `map_eqRec_heq` (push `map H₂`
@@ -284,9 +290,6 @@ theorem map_comp {F₁ F₂ F₃ : Type*} [HasImp F₁] [HasImp F₂] [HasImp F�
         | rw [List.map_map]
         | exact (eqRec_heq _ _).trans
             (ih₁.trans ((map_eqRec_heq H₂ _ _).symm.trans (eqRec_heq _ _).symm))
-        | assumption
-        | exact proof_irrel_heq _ _
-        | rfl
   | close m hm φ d ih =>
     -- The `close` conclusion carries a `clMap`-coherence cast on each side, and the RHS applies
     -- `map H₂` to a cast `close`. Strip the LHS cast (`eqRec_heq`), push `map H₂` past the inner
@@ -297,11 +300,15 @@ theorem map_comp {F₁ F₂ F₃ : Type*} [HasImp F₁] [HasImp F₂] [HasImp F�
     refine (eqRec_heq _ _).trans (HEq.trans ?_ (map_eqRec_heq H₂ _ _).symm)
     simp only [map]
     refine HEq.trans ?_ (eqRec_heq _ _).symm
-    congr 1 <;> first | exact eq_of_heq ih | exact ih | exact proof_irrel_heq _ _ | rfl
+    congr 1; exact eq_of_heq ih
   | weak Γ Δ φ d h ih =>
     simp only [map, ProofSigHom.comp]
     congr 1 <;>
-      first | rw [List.map_map] | assumption | exact eq_of_heq (by assumption) | exact proof_irrel_heq _ _ | rfl
+      first
+        | rw [List.map_map]
+        | assumption
+        | exact eq_of_heq (by assumption)
+        | exact proof_irrel_heq _ _
 
 end Deriv
 

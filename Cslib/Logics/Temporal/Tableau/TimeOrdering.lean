@@ -7,6 +7,8 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
+import Mathlib.Logic.Function.Basic
+import Mathlib.Data.Int.Order.Basic
 
 /-! # Time Ordering Constraint Store
 
@@ -46,31 +48,47 @@ namespace Cslib.Logic.Temporal.Tableau
 
 Each entry `(a, b)` represents the constraint `a < b` (time `a` is strictly
 before time `b`). Constraints are added monotonically as the tableau creates
-new time points via existential rules. -/
+new time points via existential rules.
+
+The `instant` field assigns an integer position to each time label, consistent
+with the semantic direction of every constraint edge. This enables the corrected
+ordering invariant `InstantStrict` (see below) without requiring a topological
+sort or acyclicity proof. -/
 structure TimeOrdering where
   /-- List of strict-order constraints as ordered pairs `(a, b)` meaning `a < b`. -/
   constraints : List (Nat × Nat)
+  /-- Integer position of each time label, assigned at creation.
+  The initial label has instant 0. Each `addFuture t tNew` sets
+  `instant tNew = instant t + 1`; each `addPast t tNew` sets
+  `instant tNew = instant t - 1`. -/
+  instant : Nat → ℤ := fun _ => 0
 
 namespace TimeOrdering
 
 /-! ## Basic Operations -/
 
-/-- The empty time ordering with no constraints. -/
-def empty : TimeOrdering := ⟨[]⟩
+/-- The empty time ordering with no constraints.
+
+All instants default to `0`; no constraints exist yet. -/
+def empty : TimeOrdering := { constraints := [], instant := fun _ => 0 }
 
 /-- Add a future constraint: `t < tNew` (time `tNew` is strictly after `t`).
 
 Used by positive existential rules (someFuture+, untlPos) to record the
-fresh future time point. -/
+fresh future time point. Sets `instant tNew = instant t + 1`, ensuring
+`instant t < instant tNew` for the new constraint edge. -/
 def addFuture (ord : TimeOrdering) (t tNew : Nat) : TimeOrdering :=
-  ⟨(t, tNew) :: ord.constraints⟩
+  { constraints := (t, tNew) :: ord.constraints
+    instant := fun a => if a = tNew then ord.instant t + 1 else ord.instant a }
 
 /-- Add a past constraint: `tNew < t` (time `tNew` is strictly before `t`).
 
 Used by negative existential rules (somePast+, sncePos) to record the
-fresh past time point. -/
+fresh past time point. Sets `instant tNew = instant t - 1`, ensuring
+`instant tNew < instant t` for the new constraint edge. -/
 def addPast (ord : TimeOrdering) (t tNew : Nat) : TimeOrdering :=
-  ⟨(tNew, t) :: ord.constraints⟩
+  { constraints := (tNew, t) :: ord.constraints
+    instant := fun a => if a = tNew then ord.instant t - 1 else ord.instant a }
 
 /-- All future time points of `t`: times `t'` with a direct constraint `t < t'`. -/
 def futureOf (ord : TimeOrdering) (t : Nat) : List Nat :=

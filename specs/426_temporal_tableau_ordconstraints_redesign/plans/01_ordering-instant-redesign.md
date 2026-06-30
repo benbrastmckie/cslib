@@ -110,7 +110,7 @@ No ROADMAP.md consulted for this task (no `roadmap_path` provided; `roadmap_flag
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Augment `TimeOrdering` with the instant scheme [NOT STARTED]
+### Phase 1: Augment `TimeOrdering` with the instant scheme [COMPLETED]
 
 **Goal**: Add an integer `instant` field to `TimeOrdering` and thread it through
 `empty`/`addFuture`/`addPast` per Option B, keeping `TimeOrdering.lean` and its immediate

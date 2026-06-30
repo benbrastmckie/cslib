@@ -11,11 +11,10 @@ next_project_number: 433
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,299,321,390,396,400,404,406,407,415,419,426,427,429,430,431 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,181,215,241,300,317,405,409,425 | 36,37,180,299,404,407,426,427,429,430 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,275,301,375,389 | 39,40,317,425 | Bimodal Porting, Foundations, Temporal Logic, ... |
-| 4 | 391,392,412,413,414 | 41,181,215,241,275,300,301,321,375,389 | Foundations, Code Hygiene, PL-Docs, ... |
-| 5 | 393 | 391 | PL-Hygiene |
+| 1 | 36,37,180,226,299,317,321,390,396,400,404,406,407,415,419,426,427,429,431 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,181,215,241,300,375,389,405,409,425,430 | 36,37,180,299,317,404,407,426,427,429 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 3 | 41,275,301,391,392,413 | 39,40,321,375,389,425 | Bimodal Porting, Foundations, Temporal Logic, ... |
+| 4 | 393,412,414 | 41,181,215,241,275,300,301,321,391 | Foundations, Code Hygiene, PL-Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -63,8 +62,8 @@ next_project_number: 433
 
 ### PL Tableau
 
-430 [RESEARCHED] — Prove the atom-persistence / upward-closure structural lemma for 
-  └─ 317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
+317 [IMPLEMENTING] — Fill the propositional tableau completeness sorries (7 real sorri
+  └─ 430 [RESEARCHED] — Prove the atom-persistence / upward-closure structural lemma for 
 
 ### PL Docs
 
@@ -127,7 +126,7 @@ next_project_number: 433
 - **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: PL-Tableau
-- **Dependencies**: None
+- **Dependencies**: Task 317
 - **Research**:
   - [430_prove_atom_persistence_upward_closure_for_intexpan/reports/01_atom-persistence-upward-closure.md]
   - [430_prove_atom_persistence_upward_closure_for_intexpan/reports/02_team-research.md]
@@ -504,10 +503,10 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [BLOCKED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: PL-Tableau
-- **Dependencies**: Task 316, Task 323, Task 363, Task 369, Task 430
+- **Dependencies**: Task 316, Task 323, Task 363, Task 369
 - **Plan**: [317_propositional_tableau_completeness/plans/02_tableau-completeness-unified.md]
 
 **Description**: Fill the propositional tableau completeness sorries (7 real sorries; soundness is already sorry-free after task 316). The open obligations are the truth-lemma / countermodel-extraction proofs in the three Completeness modules. Classical (Tableau/Classical/Completeness.lean): classicalExpandBranches_hintikka (line ~462) -- note the module's separate build break (bad Mathlib lemma ref + unsolved goals) is repaired first under task 363. Intuitionistic (Tableau/Intuitionistic/Completeness.lean): intTruthLemma (line ~89), intuitionisticOpenBranch_countermodel (~98), intuitionisticTableau_complete (~112). Minimal (Tableau/Minimal/Completeness.lean): minTruthLemma (~168), minOpenBranch_countermodel (~179), minimalTableau_complete (~190). Core technique: Hintikka-set argument -- a saturated open branch satisfies Hintikka conditions, from which a countermodel is extracted (a Boolean valuation for classical; a finite Kripke model for intuitionistic/minimal) and a truth lemma by formula induction matches forced/not-forced to the signed formulas at each world. Because task 369 parameterizes the intuitionistic and minimal tableau over (closurePred, modelBot), the int and min cases should be discharged ONCE as a single parametric truth-lemma/countermodel pair rather than duplicated. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 316, 323, 363, 369.

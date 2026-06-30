@@ -5,8 +5,8 @@ This file is AI-assisted scaffolding for a new PR body for task 407.
 The HUMAN (benbrastmckie) must review, reword, and finalize before
 pasting it into the GitHub PR body.
 
-OPEN QUESTIONS — See "## Open questions (resolve before submitting)" below.
-These are blocking decisions the AI cannot make. Resolve them before running /pr 407.
+PRE-SUBMISSION DECISIONS — All five open questions were resolved by the author
+on 2026-06-30 (see "## Resolved decisions" below and decisions.md). No blockers remain.
 
 Zulip AI policy (msg #605827029, Chris Henson): AI-drafted Zulip prose may not
 be posted to Zulip. This document is an internal scaffold; any maintainer
@@ -44,6 +44,12 @@ module (`efq`) is an *independently additive* property, not part of the base rel
   `PointedBrouwerian` (leastness constraint, IPL semantics) are wired through this hierarchy.
   Explosion soundness `algEvaluate_imp_bot_eq_top` and IPL-validity lift `algTValid_ipl_of_hasLeastBot`
   are proved relative to `HasLeastBot`, not baked into `OrderBot`.
+- Adds the **explicit initial-object / universal-property witness** `HasInitialBot`
+  (`initialArrow : ∀ a, b ≤ a`) layered above `HasLeastBot`, with the
+  `HasLeastBot → HasInitialBot` upgrade instance. The `PointedBrouwerian` explosion case now
+  reads `HasInitialBot.initialArrow` rather than bare `bot_le`, realizing in code the design's
+  "explosion = the universal property of an initial object (`0 → A`)" reading. This makes the
+  categorical/initiality layer a first-class artifact rather than an implicit `bot_le`.
 - Introduces a **generic explosion-parameterized Lindenbaum substrate** (`GenericDCCS`,
   `GenericLindenbaumAlg`, `GenericLindenbaum`) from which `MinLindenbaum` and `IntLindenbaum`
   are re-derived as instances, eliminating approximately 50% of duplicated Min*/Int* closure
@@ -72,7 +78,9 @@ first-class artifacts and eliminates duplication in the metalogic.
 
 - `Cslib/Logics/Propositional/Semantics/Algebra/BotProperties.lean`
   — `HasLeastBot` mixin, `instHasLeastBotOrderBot`, explosion soundness and IPL-validity
-  corollaries relative to leastness.
+  corollaries relative to leastness; plus the `HasInitialBot` class (`initialArrow`),
+  the `HasLeastBot → HasInitialBot` upgrade instance, and explosion soundness via the
+  initial-object witness (`hasInitialBot_himp_eq_top`, `algEvaluate_imp_bot_eq_top_of_initialBot`).
 
 - `Cslib/Logics/Propositional/Semantics/Algebra/FragmentGeneric.lean`
   — `AlgEvalIndependent`, concrete instances for `IsBotFree`/`IsOrBotFree`, generic
@@ -89,7 +97,13 @@ first-class artifacts and eliminates duplication in the metalogic.
 
 - `Cslib/Logics/Propositional/Semantics/Algebra/BrouwerianBot.lean`
   — `BrouwerianBot` and `PointedBrouwerian` wired through `HasLeastBot`;
-  `instHasLeastBotPointedBrouwerian` instance added.
+  `instHasLeastBotPointedBrouwerian` instance added; plus the `HasInitialBot` bridge lemmas
+  `brouwerianBotEvaluate_efq_eq_top_of_initialBot` and
+  `pointedBrouwerianEvaluate_efq_eq_top_of_initialBot` (explosion via `HasInitialBot.initialArrow`).
+
+- `Cslib/Logics/Propositional/Semantics/Algebra/PointedBrouwerianCompleteness.lean`
+  — `efq` proof case routed through `HasInitialBot.initialArrow` (was bare `bot_le`);
+  completeness statements unchanged and sorry-free.
 
 - `Cslib/Logics/Propositional/Metalogic/IntLindenbaum.lean`
   — Deductive-closure, consistency, saturation, and Lindenbaum fields derived from
@@ -110,7 +124,8 @@ first-class artifacts and eliminates duplication in the metalogic.
   — Three new modules added to the barrel: `BotProperties`, `FragmentGeneric`,
   `GenericLindenbaum`.
 
-**Net diff: 830 insertions, 200 deletions across 11 files.**
+**Net diff: ~920 insertions, ~233 deletions across 11 files** (waves 1–4 plus the
+`HasInitialBot` initial-object witness follow-on, commit `569f6ac5`).
 
 ---
 
@@ -166,6 +181,20 @@ as a thin `Prop`-mixin asserting `∀ a, bot_val ≤ a` over an existing Mathlib
 instance, rather than a new structure competing with `OrderBot`. This keeps the semantic
 property hierarchy additive and avoids duplicating Mathlib structure.
 
+### `HasInitialBot` — the initiality witness (Q3)
+
+The design's categorical reading is that **explosion is the universal property of an initial
+object**: `⊥` is a distinguished object, and the difference between MPL and IPL is exactly the
+addition of the universal arrow `0 → A`, not a change in syntax. Prior to this PR that arrow
+was only *implicit* — EFQ soundness discharged via `bot_le`. `HasInitialBot` makes it explicit
+as a lightweight `Prop`-class with the single field `initialArrow : ∀ a, b ≤ a`, layered above
+`HasLeastBot` via a `HasLeastBot → HasInitialBot` upgrade instance. The `PointedBrouwerian`
+explosion case is re-expressed as `HasInitialBot.initialArrow _`, so the "explosion = initial
+object" reading is realized in the actual proof term. A full `CategoryTheory.Limits.IsInitial`
+formulation was deliberately **not** used: in the Brouwerian/Heyting order setting the universal
+arrow is exactly `⊥ ≤ a`, so the order-level witness is faithful and avoids pulling heavy
+categorical machinery (and any churn to the completeness chain) into the propositional base.
+
 ### Fragment-genericity spike (S3 gate triggered)
 
 The fragment-genericity headline (`AlgEvalIndependent` / generic `GHAValid ↔ HAValid`) was
@@ -185,11 +214,13 @@ is spawned to address it.
   once, route `LJ = LM + botL`. Deferred to task 408 (spawned; high cost).
 - **Per-fragment algebraic completeness**: `HAValid φ → Derivable P-logic φ` for a
   parameterized fragment predicate `P`. Deferred to task 410 (spawned).
-- **Categorical/initiality layer**: the explicit universal-property witness `0 → A`
-  (initial-object semantics for `⊥`). Deferred; only `bot_le` via `OrderBot` is currently
-  provided.
 - **Connective typeclasses**: any reconciliation with PR #607's `HasNot`/`HasBot` typeclass
   design. Kept independent per Zulip #606970606.
+
+> **Note:** the categorical/initiality witness (`0 → A`) is **no longer deferred** — per the
+> Q3 decision it ships in this PR as `HasInitialBot` (see Summary and Design rationale). The
+> *broader* categorical-semantics programme (functorial/diagrammatic development beyond the
+> initial-object arrow) remains future work.
 
 ---
 
@@ -251,40 +282,30 @@ All checks run on this branch before PR preparation:
 
 ---
 
-## Open questions (resolve before submitting)
+## Resolved decisions
 
-These questions were identified in research report 01 §9 and carry forward to the PR.
-**None can be resolved by the agent; each requires a human decision.** Running `/pr 407`
-is blocked until these are settled.
+The five questions from research report 01 §9 were resolved by the author on 2026-06-30
+(recorded in `specs/407_mpl_base_structure_first_redesign/decisions.md`). No blockers remain.
 
-1. **ND reconciliation: confirm option C vs. pursue option B now.**
-   This PR adopts option C (re-frame the task-398 typeclass gate as the explosion property
-   module; zero proof churn). Option B (a literal `⊥`-rule-free `MinDerivation` inductive,
-   with Curry–Howard/normalization re-cut) is deferred to task 409 and is *not* included
-   here. Confirm this is the intended scope. If option B is wanted now, a different implementation
-   branch is required and the summary above must be rewritten substantially.
+1. **ND reconciliation → Option C.** Re-frame the task-398 typeclass gate as the explosion
+   property module; zero proof churn. The literal `⊥`-rule-free `MinDerivation` inductive
+   (option B) stays deferred to task 409.
 
-2. **Scope: is this PR meant to land Waves 1–4 only, or should Waves 5–6 be included?**
-   This PR ships Waves 1–4 only. Tasks 408 (LM base, Wave 5) and 409 (option B ND, Wave 6)
-   are spawned as separate tasks. Confirm that waves 5–6 remain separate PRs.
+2. **Scope → Waves 1–4 only.** Tasks 408 (LM base, Wave 5) and 409 (option B ND, Wave 6)
+   remain separate stacked PRs.
 
-3. **Categorical/initiality: include or defer?**
-   The explicit initial-object witness (`0 → A` universal-property categorical semantics) is
-   not included — only `bot_le` via `OrderBot`. If the broader categorical-semantics programme
-   requires this now rather than as a follow-on, the PR scope needs expanding (and task 410
-   may need a companion).
+3. **Categorical/initiality → Include now.** The explicit initial-object witness ships in
+   this PR as `HasInitialBot` (`initialArrow : ∀ a, b ≤ a`), layered over `HasLeastBot`, with
+   `PointedBrouwerian` explosion soundness routed through it. The broader categorical-semantics
+   programme remains future work.
 
-4. **Property naming: `HasLeastBot` as shipped — does it match the preferred vocabulary?**
-   The PR ships `HasLeastBot` (thin `Prop`-mixin over `OrderBot`) but no `HasDesignatedBot`
-   structure (the existing `bot_val` parameter plays that role). `HasExplosion` was not coined
-   (`IsIntuitionistic` plays that role). Confirm whether these naming choices align with the
-   evolving NOTATION.md / typeclass naming conventions, especially in light of PR #607's
-   `HasNot`/`HasBot` design.
+4. **Property naming → Keep `HasLeastBot`.** Shipped as a thin `Prop`-mixin over `OrderBot`;
+   `bot_val` plays the designated-constant role and `IsIntuitionistic` plays the explosion
+   role, so no `HasDesignatedBot`/`HasExplosion` classes are coined. `HasInitialBot` is added
+   for the initiality witness.
 
-5. **Relationship to task 400 / PR #607: is coordination adequate?**
-   This PR keeps connective typeclasses entirely out of scope and does not modify
-   `Connectives.lean`. Confirm that this stance — deferring to task 400 — is correct, and
-   that no in-scope Lean code here conflicts with the connective-typeclass design in #607.
+5. **Coordination with task 400 / PR #607 → Adequate.** Connective typeclasses stay entirely
+   out of scope; `Connectives.lean` is untouched; reconciliation deferred to task 400.
 
 ---
 

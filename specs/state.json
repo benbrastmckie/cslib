@@ -888,7 +888,7 @@
           }
         ]
       },
-      "note": "5 pre-submission decisions resolved 2026-06-30 (see decisions.md). Q1=C, Q2=waves1-4, Q3=INCLUDE categorical/initiality (needs impl), Q4=keep HasLeastBot, Q5=adequate. Gated on Q3 initial-object witness implementation before /pr."
+      "note": "Ready for /pr 407. All 5 pre-submission decisions resolved 2026-06-30 (decisions.md). Q3 (categorical/initiality) implemented as HasInitialBot witness, committed 569f6ac5, green. pr-description.md finalized. PR submission is user-only: run /pr 407."
     },
     {
       "project_number": 409,

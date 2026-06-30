@@ -37,7 +37,7 @@ next_project_number: 442
 
 ### Modal Logic
 
-299 [PLANNED] — Implement tableau decision procedure for basic modal logic K with
+299 [IMPLEMENTING] — Implement tableau decision procedure for basic modal logic K with
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
   └─ 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
@@ -586,7 +586,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 299. Modal k tableau
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

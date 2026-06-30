@@ -1,23 +1,30 @@
 {
-  "status": "planned",
   "task_number": 299,
-  "summary": "Revised plan v6 for task 299 (modal K tableau). Foundational architecture change (user-confirmed): refactor Modal.Proposition from Lukasiewicz-encoded (atom/bot/imp/box only, with and/or/neg/diamond encoded as nested imp) to NATIVE constructors atom/bot/imp/and/or/box/diamond (diamond primitive), mirroring the propositional layer. This dissolves the completeness blocker at its source: the false uniform-imp bridge lemmas are deleted, tableau rules collapse to one decomposer/rule per connective with no nested-imp matching, and the truth lemma uses plain structural induction instead of strong-induction-on-sizeOf. Six phases (A-F), each one agent run building to green with zero sorry/admit/new-axiom. v5 strategy carries over; every signature changes with the datatype.",
+  "status": "partial",
+  "phases_completed": 5,
+  "phases_total": 7,
+  "summary": "Encoding-based completion (plan v5) in progress. Soundness (phases 1-4) GREEN. Completeness (phase 5) truth lemma rewritten on the Lukasiewicz encoding using the user-confirmed option (b): the two FALSE uniform-imp bridge lemmas (hintikka_imp_pos/neg) are DELETED and replaced by an inline case analysis in modalTruthLemma, driven by a new modalComplexity measure with strong/well-founded induction (so encoded and/or/neg subterms get correct IHs). This is a 491-line diff to Completeness.lean (+321/-170), zero sorry/admit/axiom. Build is RED with 29 mechanical errors in the truth-lemma region (lines 220-514) where the inline case analysis is unfinished. The prior dispatch died on a network error (ECONNRESET), NOT a logic wall.",
+  "build_command": "lake build Cslib.Logics.Modal.Tableau.Completeness",
+  "current_build": "RED (29 errors, all in Completeness.lean lines 220-514; 85 unusedSimpArgs warnings are cosmetic)",
+  "zero_sorry_check": "PASSED (grep for sorry/admit/axiom in Cslib/Logics/Modal/Tableau/ is empty)",
+  "error_clusters": [
+    "220-222: unsolved goals + `split` failed on `none = some (x, y)` (decomposer-result case; needs cases/simp on the equation hypothesis, not split)",
+    "252-255, 279-282, 420, 478: unsolved goals in inline imp sub-cases",
+    "310, 340: `rewrite` pattern not found (simp/rw target shape mismatch — likely needs the modalComplexity/Satisfies reduction lemmas or a different rewrite target)",
+    "429-514: repeated `Unknown identifier x`/`y` — a destructuring (obtain/rcases/match) introduced binder names x,y that are not in scope at the use sites; rebind or use the correct pattern names"
+  ],
+  "blockers": [],
+  "continuation_context": {
+    "resume_file": "Cslib/Logics/Modal/Tableau/Completeness.lean (WIP, committed as a labeled RED checkpoint)",
+    "wip_backup": "/tmp/claude-1000/-home-benjamin-Projects-cslib/871b3d09-b288-4311-82e5-9afe0ac404fe/scratchpad/Completeness.WIP-backup.lean",
+    "build_log": "/tmp/claude-1000/-home-benjamin-Projects-cslib/871b3d09-b288-4311-82e5-9afe0ac404fe/scratchpad/build299.txt",
+    "approach": "Keep the option-(b) inline-imp-case + modalComplexity strong-induction rewrite. Do NOT revert and do NOT change the datatype (native-constructor refactor is deferred to task 441). Fix the 29 errors in lines 220-514 using lean_goal at each failing position; reuse the rule engine's modalAndOf?/modalOrOf?/modalImpOf?/modalNegOf? decomposers so the truth-lemma split matches the rule engine. Then apply the two verified mechanical fixes (Option.getD_some in the per-case simp set; List.mem_cons_self with no explicit args) to the proper-implication sub-case. After Completeness is GREEN: Phase 6 (LoopInduction modalExpandBranches_hintikka invariant), Phase 7 (modalTableau_complete/decides barrel + add Completeness to Cslib barrel via `lake exe mk_all --module`), then CI: lake build, checkInitImports, lint-style.",
+    "do_not": "No sorry/admit/axiom. No datatype change. No revert of the WIP."
+  },
+  "next_action_hint": "Resume with /orchestrate 299 (or /implement 299): fix the 29 listed errors in Completeness.lean lines 220-514 to green, then phases 6-7 and CI.",
+  "hard_requirements": "Zero sorry, zero new axioms. Currently satisfied.",
+  "related_followup_task": "441 (modal_proposition_native_refactor) holds the native-constructor refactor design (plan v6); depends on 299.",
   "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/299_modal_k_tableau/plans/06_modal-k-tableau-plan.md",
-      "summary": "v6 native-constructor refactor plan: Phase A datatype+Satisfies+complexity+LogicalEquivalence+ModalEmbedding; Phase B tableau Defs/Rules/Branch/Closure; Phase C Soundness+SoundnessStep; Phase D Saturation+LoopInduction; Phase E Completeness (native structural truth lemma); Phase F decides+barrel+CI."
-    }
-  ],
-  "phases": [
-    {"id": "A", "name": "Native datatype + Satisfies + complexity + downstream foundation", "status": "not_started"},
-    {"id": "B", "name": "Tableau Defs/Rules/Closure/Branch on native constructors", "status": "not_started"},
-    {"id": "C", "name": "Soundness + SoundnessStep", "status": "not_started"},
-    {"id": "D", "name": "Saturation + LoopInduction", "status": "not_started"},
-    {"id": "E", "name": "Completeness truth lemma (native structural induction)", "status": "not_started"},
-    {"id": "F", "name": "Decision procedure + barrel + CI", "status": "not_started"}
-  ],
-  "supersedes": "specs/299_modal_k_tableau/plans/05_modal-k-tableau-plan.md",
-  "reports_integrated": ["01_modal-k-tableau-research.md", "03_completeness-decomposition.md", "04_truth-lemma-architecture.md"],
-  "next_action_hint": "Run /implement 299 to execute the v6 plan starting at Phase A (the native-datatype foundation must build green — including Bimodal/Embedding/ModalEmbedding.lean — before any Tableau work)."
+    { "type": "plan", "path": "specs/299_modal_k_tableau/plans/05_modal-k-tableau-plan.md", "summary": "Active encoding-based plan v5" }
+  ]
 }

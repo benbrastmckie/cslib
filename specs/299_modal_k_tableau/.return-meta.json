@@ -1,18 +1,8 @@
 {
-  "status": "in_progress",
-  "started_at": "2026-06-30T00:00:00Z",
-  "artifacts": [],
-  "partial_progress": {
-    "stage": "initializing",
-    "details": "Agent started Phase A of task 299",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 0
-  },
+  "status": "partial",
   "metadata": {
-    "session_id": "sess_phaseA_299",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "cycles_used": 2,
+    "final_state": "implementing",
+    "note": "Stopped at user request; handoff updated. WIP checkpoint committed RED (29 errors, zero sorry). Resume to finish phase 5 then 6-7."
   }
 }

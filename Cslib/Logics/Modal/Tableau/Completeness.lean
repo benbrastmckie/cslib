@@ -194,134 +194,162 @@ lemma hintikka_box_neg
     ∃ w', acc.hasEdge w w' = true ∧ (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
   hH.2.2 ψ w hmem
 
-/-- Implication-positive bridge: `T(a → c)@w ∈ b` and `modalHintikkaSet b acc`
-imply `F(a)@w ∈ b ∨ T(c)@w ∈ b`.
+/-! ## Propositional Rule Reduction (encoding-aware)
 
-Proof: unfold `modalApplyOne` on `T(a → c)@w`. For a "pure" implication (not neg/or/and),
-the branching rule gives branches `[[F(a)@w], [T(c)@w]]`, and the Hintikka branching
-condition yields one complete branch. For `T(a → ⊥)` (neg), the linear rule gives `[F(a)@w]`,
-so `F(a)@w ∈ b` and `Or.inl` applies. -/
-lemma hintikka_imp_pos
-    (b : List (SignedFormula (Proposition Atom) WorldIndex))
-    (acc : Accessibility) (hH : modalHintikkaSet b acc)
-    (a c : Proposition Atom) (w : WorldIndex)
-    (hmem : (⟨.pos, .imp a c, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
-    (⟨.neg, a, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b ∨
-    (⟨.pos, c, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
-  obtain ⟨_, hrule, _⟩ := hH
-  have hcond := hrule ⟨.pos, .imp a c, w⟩ hmem
-  simp only at hcond
-  simp only [modalApplyOne, tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
-    modalImpOf?, modalNegOf?, RuleResult.isApplicable] at hcond
-  -- Case split on the structure of the imp formula to determine which propositional rule fires
-  cases c with
-  | bot =>
-    -- T(a → ⊥) = T(¬a): neg rule → linear [F(a)@w]
-    cases a with
-    | atom name =>
-      -- T(¬(atom name)): linear rule → F(atom name)@w
-      simp only [List.map, List.find?, Option.isSome, ↓reduceIte] at hcond
-      simp only [List.mem_singleton] at hcond
-      exact Or.inl (hcond ⟨.neg, .atom name, w⟩ (List.mem_cons_self _ _))
-    | bot =>
-      -- T(⊥ → ⊥) = T(¬⊥) = T(⊤): linear rule → F(⊥)@w
-      simp only [List.map, List.find?, Option.isSome, ↓reduceIte] at hcond
-      exact Or.inl (hcond ⟨.neg, .bot, w⟩ (List.mem_cons_self _ _))
-    | imp a1 a2 =>
-      -- T(¬(a1 → a2)): check if a1 → a2 has special structure
-      simp only [List.map, List.find?, Option.isSome] at hcond
-      split_ifs at hcond with h1
-      all_goals (
-        simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hcond
-        try exact Or.inl (hcond ⟨.neg, .imp a1 a2, w⟩ (Or.inl rfl))
-        try exact Or.inl (hcond ⟨.neg, .imp a1 a2, w⟩ (List.mem_cons_self _ _)))
-    | box a1 =>
-      simp only [List.map, List.find?, Option.isSome, ↓reduceIte] at hcond
-      exact Or.inl (hcond ⟨.neg, .box a1, w⟩ (List.mem_cons_self _ _))
-  | atom name =>
-    -- T(a → atom name): pure implication, branching rule
-    simp only [List.map, List.find?, Option.isSome] at hcond
-    split_ifs at hcond with h1 h2
-    all_goals simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false,
-      List.mem_append] at hcond
-    all_goals (
-      try {
-        obtain ⟨br, hbr_mem, hbr⟩ := hcond
-        simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
-        rcases hbr_mem with rfl | rfl
-        · exact Or.inl (hbr ⟨.neg, a, w⟩ (List.mem_cons_self _ _))
-        · exact Or.inr (hbr ⟨.pos, .atom name, w⟩ (List.mem_cons_self _ _))
-      })
-  | imp c1 c2 =>
-    simp only [List.map, List.find?, Option.isSome] at hcond
-    split_ifs at hcond with h1 h2 h3
-    all_goals simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false,
-      List.mem_append] at hcond
-    all_goals (
-      try {
-        obtain ⟨br, hbr_mem, hbr⟩ := hcond
-        simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
-        rcases hbr_mem with rfl | rfl
-        · exact Or.inl (hbr ⟨.neg, a, w⟩ (List.mem_cons_self _ _))
-        · exact Or.inr (hbr ⟨.pos, .imp c1 c2, w⟩ (List.mem_cons_self _ _))
-      })
-  | box c1 =>
-    simp only [List.map, List.find?, Option.isSome, ↓reduceIte] at hcond
-    obtain ⟨br, hbr_mem, hbr⟩ := hcond
-    simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
-    rcases hbr_mem with rfl | rfl
-    · exact Or.inl (hbr ⟨.neg, a, w⟩ (List.mem_cons_self _ _))
-    · exact Or.inr (hbr ⟨.pos, .box c1, w⟩ (List.mem_cons_self _ _))
+Because `Proposition Atom` Lukasiewicz-encodes `and`/`or`/`neg` as nested `imp`, a single
+`imp a c` may fire the `andPos`/`orPos`/`negPos` rule rather than the proper `impPos` rule.
+The truth lemma therefore cannot use uniform implication bridge lemmas; instead it reduces
+`modalApplyOne` on an `imp` to a decomposer-driven case split and recurses with strong
+induction on `modalComplexity`. The lemmas below provide that reduction. -/
 
-/-- Implication-negative bridge: `F(a → c)@w ∈ b` and `modalHintikkaSet b acc`
-imply `T(a)@w ∈ b` and either `c = .bot` or `F(c)@w ∈ b`.
+/-- Inversion: if `modalAndOf? φ` succeeds then `φ` is the encoded conjunction. -/
+lemma modalAndOf?_eq {φ x y : Proposition Atom} (h : modalAndOf? φ = some (x, y)) :
+    φ = .imp (.imp x (.imp y .bot)) .bot := by
+  unfold modalAndOf? at h; split at h <;> simp_all
 
-When `c ≠ .bot`, the F(a→c) linear alpha rule gives `[T(a)@w, F(c)@w]` and the
-Hintikka condition forces both into `b`.  When `c = .bot`, `F(a→⊥) = F(¬a)` is
-handled by the neg rule which gives only `[T(a)@w]`; the `Or.inl rfl` branch
-suffices because the truth lemma only needs `T(a)@w` to prove
-`¬(Satisfies m w a → False)`. -/
-lemma hintikka_imp_neg
-    (b : List (SignedFormula (Proposition Atom) WorldIndex))
-    (acc : Accessibility) (hH : modalHintikkaSet b acc)
-    (a c : Proposition Atom) (w : WorldIndex)
-    (hmem : (⟨.neg, .imp a c, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
-    (⟨.pos, a, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b ∧
-    (c = .bot ∨ (⟨.neg, c, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) := by
-  obtain ⟨_, hrule, _⟩ := hH
-  have hcond := hrule ⟨.neg, .imp a c, w⟩ hmem
-  simp only at hcond
-  simp only [modalApplyOne, tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
-    modalImpOf?, modalNegOf?, RuleResult.isApplicable] at hcond
-  cases c with
-  | bot =>
-    -- F(a → ⊥) = F(¬a): the neg rule fires, giving linear output [T(a)@w].
-    -- The new signature only requires T(a)@w ∧ (.bot = .bot ∨ F(.bot)@w ∈ b),
-    -- so the second conjunct is Or.inl rfl.
-    simp only [List.map, List.find?, Option.isSome] at hcond
-    split_ifs at hcond with h1
-    · simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hcond
-      exact ⟨hcond ⟨.pos, a, w⟩ (List.mem_cons_self _ _), Or.inl rfl⟩
-    · simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hcond
-      exact ⟨hcond ⟨.pos, a, w⟩ (List.mem_cons_self _ _), Or.inl rfl⟩
-  | atom name =>
-    simp only [List.map, List.find?, Option.isSome] at hcond
-    split_ifs at hcond with h1 h2
-    all_goals (
-      simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hcond
-      try exact ⟨hcond ⟨.pos, a, w⟩ (List.mem_cons_self _ _),
-                 Or.inr (hcond ⟨.neg, .atom name, w⟩ (by simp))⟩)
-  | imp c1 c2 =>
-    simp only [List.map, List.find?, Option.isSome] at hcond
-    split_ifs at hcond with h1 h2 h3
-    all_goals (
-      simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hcond
-      try exact ⟨hcond ⟨.pos, a, w⟩ (List.mem_cons_self _ _),
-                 Or.inr (hcond ⟨.neg, .imp c1 c2, w⟩ (by simp))⟩)
-  | box c1 =>
-    simp only [List.map, List.find?, Option.isSome, ↓reduceIte] at hcond
-    exact ⟨hcond ⟨.pos, a, w⟩ (List.mem_cons_self _ _),
-           Or.inr (hcond ⟨.neg, .box c1, w⟩ (by simp))⟩
+/-- Inversion: if `modalOrOf? φ` succeeds then `φ` is the encoded disjunction. -/
+lemma modalOrOf?_eq {φ x y : Proposition Atom} (h : modalOrOf? φ = some (x, y)) :
+    φ = .imp (.imp x .bot) y := by
+  unfold modalOrOf? at h; split at h <;> simp_all
+
+/-- Inversion: if `modalImpOf? φ` succeeds then `φ` is the proper implication `x → y`. -/
+lemma modalImpOf?_eq {φ x y : Proposition Atom} (h : modalImpOf? φ = some (x, y)) :
+    φ = .imp x y := by
+  unfold modalImpOf? at h
+  split at h
+  · simp_all
+  · rename_i a b _
+    split at h <;> split at h <;> simp_all
+
+/-- Inversion: if `modalNegOf? φ` succeeds then `φ` is the encoded negation `x → ⊥`. -/
+lemma modalNegOf?_eq {φ x : Proposition Atom} (h : modalNegOf? φ = some x) :
+    φ = .imp x .bot := by
+  unfold modalNegOf? at h; split at h <;> simp_all
+
+/-- Reduction of `tryAllPropRules` on a positively-signed formula to a priority-ordered
+case split on the four decomposition functions (and > or > imp > neg). -/
+lemma tryAllPropRules_pos {F L : Type*}
+    (andOf? : F → Option (F × F)) (orOf? : F → Option (F × F))
+    (impOf? : F → Option (F × F)) (negOf? : F → Option F)
+    (φ : F) (l : L) :
+    tryAllPropRules andOf? orOf? impOf? negOf? ⟨.pos, φ, l⟩ =
+      match andOf? φ with
+      | some (x, y) => .linear [⟨.pos, x, l⟩, ⟨.pos, y, l⟩]
+      | none =>
+        match orOf? φ with
+        | some (x, y) => .branching [[⟨.pos, x, l⟩], [⟨.pos, y, l⟩]]
+        | none =>
+          match impOf? φ with
+          | some (x, y) => .branching [[⟨.neg, x, l⟩], [⟨.pos, y, l⟩]]
+          | none =>
+            match negOf? φ with
+            | some x => .linear [⟨.neg, x, l⟩]
+            | none => .notApplicable := by
+  simp only [tryAllPropRules, List.map, List.find?, applyPropRule, RuleResult.isApplicable]
+  rcases hA : andOf? φ with _ | ⟨x, y⟩
+  · rcases hO : orOf? φ with _ | ⟨x, y⟩
+    · rcases hI : impOf? φ with _ | ⟨x, y⟩
+      · rcases hN : negOf? φ with _ | x <;> simp [hA, hO, hI]
+      · simp [hA, hO, hI]
+    · simp [hA, hO]
+  · simp [hA]
+
+/-- Reduction of `tryAllPropRules` on a negatively-signed formula. -/
+lemma tryAllPropRules_neg {F L : Type*}
+    (andOf? : F → Option (F × F)) (orOf? : F → Option (F × F))
+    (impOf? : F → Option (F × F)) (negOf? : F → Option F)
+    (φ : F) (l : L) :
+    tryAllPropRules andOf? orOf? impOf? negOf? ⟨.neg, φ, l⟩ =
+      match andOf? φ with
+      | some (x, y) => .branching [[⟨.neg, x, l⟩], [⟨.neg, y, l⟩]]
+      | none =>
+        match orOf? φ with
+        | some (x, y) => .linear [⟨.neg, x, l⟩, ⟨.neg, y, l⟩]
+        | none =>
+          match impOf? φ with
+          | some (x, y) => .linear [⟨.pos, x, l⟩, ⟨.neg, y, l⟩]
+          | none =>
+            match negOf? φ with
+            | some x => .linear [⟨.pos, x, l⟩]
+            | none => .notApplicable := by
+  simp only [tryAllPropRules, List.map, List.find?, applyPropRule, RuleResult.isApplicable]
+  rcases hA : andOf? φ with _ | ⟨x, y⟩
+  · rcases hO : orOf? φ with _ | ⟨x, y⟩
+    · rcases hI : impOf? φ with _ | ⟨x, y⟩
+      · rcases hN : negOf? φ with _ | x <;> simp [hA, hO, hI]
+      · simp [hA, hO, hI]
+    · simp [hA, hO]
+  · simp [hA]
+
+/-- When the propositional rules apply, `modalApplyOne` returns the propositional result. -/
+lemma modalApplyOne_eq_prop_of_applicable
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (h : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf).isApplicable = true) :
+    (modalApplyOne sf b acc).1
+      = tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf := by
+  simp only [modalApplyOne]
+  rw [if_pos h]
+
+/-- Reduction of `modalApplyOne` on a positive implication to a decomposer case split. -/
+lemma modalApplyOne_imp_pos (a c : Proposition Atom) (w : WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOne ⟨.pos, .imp a c, w⟩ b acc).1 =
+      match modalAndOf? (.imp a c) with
+      | some (x, y) => .linear [⟨.pos, x, w⟩, ⟨.pos, y, w⟩]
+      | none =>
+        match modalOrOf? (.imp a c) with
+        | some (x, y) => .branching [[⟨.pos, x, w⟩], [⟨.pos, y, w⟩]]
+        | none =>
+          match modalImpOf? (.imp a c) with
+          | some (x, y) => .branching [[⟨.neg, x, w⟩], [⟨.pos, y, w⟩]]
+          | none =>
+            match modalNegOf? (.imp a c) with
+            | some x => .linear [⟨.neg, x, w⟩]
+            | none => .notApplicable := by
+  rw [← tryAllPropRules_pos]
+  apply modalApplyOne_eq_prop_of_applicable
+  rw [tryAllPropRules_pos]
+  rcases hA : modalAndOf? (.imp a c) with _ | ⟨x, y⟩
+  · rcases hO : modalOrOf? (.imp a c) with _ | ⟨x, y⟩
+    · rcases hI : modalImpOf? (.imp a c) with _ | ⟨x, y⟩
+      · rcases hN : modalNegOf? (.imp a c) with _ | x
+        · exfalso; revert hA hO hI hN
+          cases c <;> cases a <;> simp_all [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?]
+        · simp [hA, hO, hI, hN, RuleResult.isApplicable]
+      · simp [hA, hO, hI, RuleResult.isApplicable]
+    · simp [hA, hO, RuleResult.isApplicable]
+  · simp [hA, RuleResult.isApplicable]
+
+/-- Reduction of `modalApplyOne` on a negative implication to a decomposer case split. -/
+lemma modalApplyOne_imp_neg (a c : Proposition Atom) (w : WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOne ⟨.neg, .imp a c, w⟩ b acc).1 =
+      match modalAndOf? (.imp a c) with
+      | some (x, y) => .branching [[⟨.neg, x, w⟩], [⟨.neg, y, w⟩]]
+      | none =>
+        match modalOrOf? (.imp a c) with
+        | some (x, y) => .linear [⟨.neg, x, w⟩, ⟨.neg, y, w⟩]
+        | none =>
+          match modalImpOf? (.imp a c) with
+          | some (x, y) => .linear [⟨.pos, x, w⟩, ⟨.neg, y, w⟩]
+          | none =>
+            match modalNegOf? (.imp a c) with
+            | some x => .linear [⟨.pos, x, w⟩]
+            | none => .notApplicable := by
+  rw [← tryAllPropRules_neg]
+  apply modalApplyOne_eq_prop_of_applicable
+  rw [tryAllPropRules_neg]
+  rcases hA : modalAndOf? (.imp a c) with _ | ⟨x, y⟩
+  · rcases hO : modalOrOf? (.imp a c) with _ | ⟨x, y⟩
+    · rcases hI : modalImpOf? (.imp a c) with _ | ⟨x, y⟩
+      · rcases hN : modalNegOf? (.imp a c) with _ | x
+        · exfalso; revert hA hO hI hN
+          cases c <;> cases a <;> simp_all [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?]
+        · simp [hA, hO, hI, hN, RuleResult.isApplicable]
+      · simp [hA, hO, hI, RuleResult.isApplicable]
+    · simp [hA, hO, RuleResult.isApplicable]
+  · simp [hA, RuleResult.isApplicable]
 
 /-! ## Modal Truth Lemma (Phase 5c) -/
 
@@ -331,64 +359,187 @@ extracted Kripke model `extractModel b acc`.
 For every formula `φ` and world `w`, `T(φ)@w ∈ b` implies `φ` is satisfied at `w`
 in `extractModel b acc`, and `F(φ)@w ∈ b` implies it is not.
 
-Proof by structural induction on `φ`.  The atom case uses `extractModel_atomPos_sat`
-(positive) and `openBranch_noContradiction` (negative).  The bot case uses
-`openBranch_noTBot` (positive is impossible) and `extractModel_bot_false` (negative).
-The imp and box cases delegate to the bridge lemmas `hintikka_imp_pos`,
-`hintikka_imp_neg`, `hintikka_box_pos`, and `hintikka_box_neg`. -/
+Proof by strong induction on `modalComplexity φ`. The atom case uses
+`extractModel_atomPos_sat`/`openBranch_noContradiction`; the bot case uses
+`openBranch_noTBot`/`extractModel_bot_false`; the box case uses the bridge lemmas
+`hintikka_box_pos`/`hintikka_box_neg`.
+
+The `imp` case must inspect the Lukasiewicz encoding: `modalApplyOne` fires the
+`and`/`or`/`neg` rule when the implication is an encoded connective. We reduce
+`modalApplyOne` via `modalApplyOne_imp_pos`/`modalApplyOne_imp_neg` to a decomposer
+case split, then recurse on the genuine sub-formulas (which are strictly smaller in
+`modalComplexity`, hence reachable by the strong-induction hypothesis). Uniform
+implication bridge lemmas are impossible here precisely because `T((φ→(ψ→⊥))→⊥)` fires
+the conjunction rule, not the implication rule. -/
 lemma modalTruthLemma
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility) (hH : modalHintikkaSet b acc) :
     ∀ (φ : Proposition Atom) (w : WorldIndex),
       (⟨.pos, φ, w⟩ ∈ b → Satisfies (extractModel b acc) w φ) ∧
       (⟨.neg, φ, w⟩ ∈ b → ¬ Satisfies (extractModel b acc) w φ) := by
-  intro φ
-  induction φ with
-  | atom p =>
-    intro w
-    constructor
-    · exact extractModel_atomPos_sat b acc w p
-    · intro hmem hsat
+  suffices H : ∀ (n : Nat) (φ : Proposition Atom), modalComplexity φ = n → ∀ w,
+      (⟨.pos, φ, w⟩ ∈ b → Satisfies (extractModel b acc) w φ) ∧
+      (⟨.neg, φ, w⟩ ∈ b → ¬ Satisfies (extractModel b acc) w φ) by
+    intro φ w; exact H (modalComplexity φ) φ rfl w
+  intro n
+  induction n using Nat.strongRecOn with
+  | ind n IHn =>
+    intro φ hφ w
+    have IH : ∀ (ψ : Proposition Atom), modalComplexity ψ < n → ∀ w',
+        (⟨.pos, ψ, w'⟩ ∈ b → Satisfies (extractModel b acc) w' ψ) ∧
+        (⟨.neg, ψ, w'⟩ ∈ b → ¬ Satisfies (extractModel b acc) w' ψ) :=
+      fun ψ hlt w' => IHn (modalComplexity ψ) hlt ψ rfl w'
+    cases φ with
+    | atom p =>
+      refine ⟨extractModel_atomPos_sat b acc w p, ?_⟩
+      intro hmem hsat
       simp only [Satisfies, extractModel, List.any_eq_true] at hsat
       obtain ⟨sf, hsf_mem, hcond⟩ := hsat
       simp only [Bool.and_eq_true] at hcond
       obtain ⟨⟨hsign, hform⟩, hlab⟩ := hcond
-      -- Convert BEq to Eq; eq_of_beq works because Proposition Atom has LawfulBEq via DecidableEq
       have hsign_eq : sf.sign = .pos := eq_of_beq hsign
       have hform_eq : sf.formula = .atom p := eq_of_beq hform
       have hlab_eq : sf.label = w := eq_of_beq hlab
       have hpos : (⟨.pos, .atom p, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
         convert hsf_mem using 1; rcases sf with ⟨s, f, l⟩; simp_all
       exact openBranch_noContradiction b hH.1 (.atom p) w hpos hmem
-  | bot =>
-    intro w
-    constructor
-    · intro hmem
-      exact absurd hmem (openBranch_noTBot b hH.1 w)
-    · intro _
-      exact extractModel_bot_false b acc w
-  | imp a c ih_a ih_c =>
-    intro w
-    constructor
-    · intro hmem hsa
-      rcases hintikka_imp_pos b acc hH a c w hmem with ha | hc
-      · exact absurd hsa ((ih_a w).2 ha)
-      · exact (ih_c w).1 hc
-    · intro hmem
-      intro hsa
-      rcases hintikka_imp_neg b acc hH a c w hmem with ⟨hpos_a, hc_or⟩
-      have hsa_val : Satisfies (extractModel b acc) w a := (ih_a w).1 hpos_a
-      rcases hc_or with rfl | hF_c
-      · exact extractModel_bot_false b acc w (hsa hsa_val)
-      · exact (ih_c w).2 hF_c (hsa hsa_val)
-  | box ψ ih_ψ =>
-    intro w
-    constructor
-    · intro hmem w' hr
-      exact (ih_ψ w').1 (hintikka_box_pos b acc hH ψ w w' hmem hr)
-    · intro hmem hall
-      obtain ⟨w', hw', hF⟩ := hintikka_box_neg b acc hH ψ w hmem
-      exact (ih_ψ w').2 hF (hall w' hw')
+    | bot =>
+      refine ⟨fun hmem => absurd hmem (openBranch_noTBot b hH.1 w), ?_⟩
+      intro _; exact extractModel_bot_false b acc w
+    | imp a c =>
+      constructor
+      · -- T(imp a c)@w ∈ b → Satisfies w (imp a c)
+        intro hmem
+        have hcond := hH.2.1 ⟨.pos, .imp a c, w⟩ hmem
+        simp only at hcond
+        rw [modalApplyOne_imp_pos] at hcond
+        rcases hA : modalAndOf? (.imp a c) with _ | ⟨x, y⟩
+        · rcases hO : modalOrOf? (.imp a c) with _ | ⟨x, y⟩
+          · rcases hI : modalImpOf? (.imp a c) with _ | ⟨x, y⟩
+            · rcases hN : modalNegOf? (.imp a c) with _ | x
+              · exfalso; revert hA hO hI hN
+                cases c <;> cases a <;> simp_all [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?]
+              · -- negPos: φ = ¬x ; rule gives F(x)@w
+                simp only [hA, hO, hI, hN] at hcond
+                have hxmem : (⟨.neg, x, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+                  hcond ⟨.neg, x, w⟩ (by simp)
+                have hshape := modalNegOf?_eq hN
+                rw [Proposition.imp.injEq] at hshape
+                obtain ⟨rfl, rfl⟩ := hshape
+                exact (IH x (by rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_box,
+                  modalComplexity_atom, modalComplexity_bot]; omega) w).2 hxmem
+            · -- impPos: proper implication, branching [[F x],[T y]]
+              simp only [hA, hO, hI] at hcond
+              have hshape := modalImpOf?_eq hI
+              rw [Proposition.imp.injEq] at hshape
+              obtain ⟨rfl, rfl⟩ := hshape
+              intro hsx
+              obtain ⟨br, hbr_mem, hbr⟩ := hcond
+              simp only [List.mem_cons, List.mem_singleton, List.not_mem_nil, or_false] at hbr_mem
+              rcases hbr_mem with rfl | rfl
+              · exact absurd hsx ((IH x (by rw [← hφ]; simp only [modalComplexity_imp,
+                  modalComplexity_box, modalComplexity_atom, modalComplexity_bot]; omega) w).2
+                  (hbr ⟨.neg, x, w⟩ (by simp)))
+              · exact (IH y (by rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_box,
+                  modalComplexity_atom, modalComplexity_bot]; omega) w).1 (hbr ⟨.pos, y, w⟩ (by simp))
+          · -- orPos: φ = x ∨ y, branching [[T x],[T y]]
+            simp only [hA, hO] at hcond
+            have hshape := modalOrOf?_eq hO
+            rw [Proposition.imp.injEq] at hshape
+            obtain ⟨rfl, rfl⟩ := hshape
+            intro hsx
+            obtain ⟨br, hbr_mem, hbr⟩ := hcond
+            simp only [List.mem_cons, List.mem_singleton, List.not_mem_nil, or_false] at hbr_mem
+            rcases hbr_mem with rfl | rfl
+            · exact absurd ((IH x (by rw [← hφ]; simp only [modalComplexity_imp,
+                modalComplexity_box, modalComplexity_atom, modalComplexity_bot]; omega) w).1
+                (hbr ⟨.pos, x, w⟩ (by simp))) hsx
+            · exact (IH y (by rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_box,
+                modalComplexity_atom, modalComplexity_bot]; omega) w).1 (hbr ⟨.pos, y, w⟩ (by simp))
+        · -- andPos: φ = x ∧ y, linear [T x, T y]
+          simp only [hA] at hcond
+          have hshape := modalAndOf?_eq hA
+          rw [Proposition.imp.injEq] at hshape
+          obtain ⟨rfl, rfl⟩ := hshape
+          intro hsa
+          exact hsa ((IH x (by rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_box,
+              modalComplexity_atom, modalComplexity_bot]; omega) w).1 (hcond ⟨.pos, x, w⟩ (by simp)))
+            ((IH y (by rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_box,
+              modalComplexity_atom, modalComplexity_bot]; omega) w).1 (hcond ⟨.pos, y, w⟩ (by simp)))
+      · -- F(imp a c)@w ∈ b → ¬ Satisfies w (imp a c)
+        intro hmem
+        have hcond := hH.2.1 ⟨.neg, .imp a c, w⟩ hmem
+        simp only at hcond
+        rw [modalApplyOne_imp_neg] at hcond
+        rcases hA : modalAndOf? (.imp a c) with _ | ⟨x, y⟩
+        · rcases hO : modalOrOf? (.imp a c) with _ | ⟨x, y⟩
+          · rcases hI : modalImpOf? (.imp a c) with _ | ⟨x, y⟩
+            · rcases hN : modalNegOf? (.imp a c) with _ | x
+              · exfalso; revert hA hO hI hN
+                cases c <;> cases a <;> simp_all [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?]
+              · -- negNeg: φ = ¬x ; rule gives T(x)@w
+                simp only [hA, hO, hI, hN] at hcond
+                have hxmem : (⟨.pos, x, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+                  hcond ⟨.pos, x, w⟩ (by simp)
+                have hshape := modalNegOf?_eq hN
+                rw [Proposition.imp.injEq] at hshape
+                obtain ⟨rfl, rfl⟩ := hshape
+                intro hsa
+                exact hsa ((IH x (by rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_box,
+                  modalComplexity_atom, modalComplexity_bot]; omega) w).1 hxmem)
+            · -- impNeg: proper implication, linear [T x, F y]
+              simp only [hA, hO, hI] at hcond
+              have hxmem : (⟨.pos, x, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+                hcond ⟨.pos, x, w⟩ (by simp)
+              have hymem : (⟨.neg, y, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+                hcond ⟨.neg, y, w⟩ (by simp)
+              have hshape := modalImpOf?_eq hI
+              rw [Proposition.imp.injEq] at hshape
+              obtain ⟨rfl, rfl⟩ := hshape
+              intro hsa
+              exact (IH y (by rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_box,
+                modalComplexity_atom, modalComplexity_bot]; omega) w).2 hymem
+                (hsa ((IH x (by rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_box,
+                  modalComplexity_atom, modalComplexity_bot]; omega) w).1 hxmem))
+          · -- orNeg: φ = x ∨ y, linear [F x, F y]
+            simp only [hA, hO] at hcond
+            have hxmem : (⟨.neg, x, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+              hcond ⟨.neg, x, w⟩ (by simp)
+            have hymem : (⟨.neg, y, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+              hcond ⟨.neg, y, w⟩ (by simp)
+            have hshape := modalOrOf?_eq hO
+            rw [Proposition.imp.injEq] at hshape
+            obtain ⟨rfl, rfl⟩ := hshape
+            intro hsa
+            exact (IH y (by rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_box,
+              modalComplexity_atom, modalComplexity_bot]; omega) w).2 hymem
+              (hsa (fun hsx => absurd hsx ((IH x (by rw [← hφ]; simp only [modalComplexity_imp,
+                modalComplexity_box, modalComplexity_atom, modalComplexity_bot]; omega) w).2 hxmem)))
+        · -- andNeg: φ = x ∧ y, branching [[F x],[F y]]
+          simp only [hA] at hcond
+          have hshape := modalAndOf?_eq hA
+          rw [Proposition.imp.injEq] at hshape
+          obtain ⟨rfl, rfl⟩ := hshape
+          intro hsa
+          obtain ⟨br, hbr_mem, hbr⟩ := hcond
+          simp only [List.mem_cons, List.mem_singleton, List.not_mem_nil, or_false] at hbr_mem
+          rcases hbr_mem with rfl | rfl
+          · exact hsa (fun hsx _ => absurd hsx ((IH x (by rw [← hφ]; simp only [modalComplexity_imp,
+              modalComplexity_box, modalComplexity_atom, modalComplexity_bot]; omega) w).2
+              (hbr ⟨.neg, x, w⟩ (by simp))))
+          · exact hsa (fun _ hsy => absurd hsy ((IH y (by rw [← hφ]; simp only [modalComplexity_imp,
+              modalComplexity_box, modalComplexity_atom, modalComplexity_bot]; omega) w).2
+              (hbr ⟨.neg, y, w⟩ (by simp))))
+    | box ψ =>
+      constructor
+      · intro hmem w' hr
+        exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_box,
+          modalComplexity_atom, modalComplexity_bot]; omega) w').1
+          (hintikka_box_pos b acc hH ψ w w' hmem hr)
+      · intro hmem hall
+        obtain ⟨w', hw', hF⟩ := hintikka_box_neg b acc hH ψ w hmem
+        exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_box,
+          modalComplexity_atom, modalComplexity_bot]; omega) w').2 hF (hall w' hw')
 
 /-! ## Open-Branch Countermodel (Phase 5d) -/
 

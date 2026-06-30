@@ -1,11 +1,21 @@
 {
-  "status": "planned",
-  "summary": "Phased implementation plan created for task 428. Two phases: (1) define the Monoid structure (Mul/One/Monoid) on Quotient na.BuchiCongruence.eq plus the canonical rewrite lemma mk_append; (2) prove idempotent-power collapse and absorption corollary, then run full CI. Planning verified that NO Mul/Monoid instance currently exists and that a well-defined multiplication requires proving two-sided (left) congruence specific to BuchiCongruence, since the RightCongruence class only provides right covariance.",
+  "status": "implemented",
+  "summary": "Added Monoid instance and three algebraic lemmas to BuchiCongruence.lean. The quotient Quotient na.BuchiCongruence.eq is now a Monoid with ⟦u⟧ * ⟦v⟧ = ⟦u ++ v⟧ and 1 = ⟦[]⟧. Three deliverables: (1) buchiCongruence_mk_append simp lemma; (2) buchiCongruence_idempotentPow collapse; (3) buchiCongruence_absorption corollary. Build passes cleanly.",
+  "phases_completed": 2,
+  "phases_total": 2,
+  "blockers": [],
+  "continuation_context": null,
   "artifacts": [
     {
-      "path": "specs/428_expose_buchicongruence_eqvcls_monoid_and_idempotent_lemmas/plans/01_buchi-monoid-idempotent-lemmas.md",
-      "type": "plan"
+      "type": "lean",
+      "path": "Cslib/Computability/Languages/Congruences/BuchiCongruence.lean",
+      "description": "BuchiCongruence.lean with Monoid instance and algebraic lemmas added (86 lines)"
+    },
+    {
+      "type": "summary",
+      "path": "specs/428_expose_buchicongruence_eqvcls_monoid_and_idempotent_lemmas/summaries/01_buchi-monoid-idempotent-lemmas-summary.md",
+      "description": "Implementation summary with plan deviations and CI results"
     }
   ],
-  "next_action_hint": "Run /implement 428 to execute the plan. Start with Phase 1 (monoid instance); Phase 2 depends on it. CI gate: lake build + lake exe lint-style."
+  "next_action_hint": "Task 429 (Ramsey recurrent-class lemma) can now use buchiCongruence_instMonoid, buchiCongruence_mk_append, buchiCongruence_idempotentPow, and buchiCongruence_absorption. Task 241 phase 4 (buchiCongr_DMA_language_eq) depends on these."
 }

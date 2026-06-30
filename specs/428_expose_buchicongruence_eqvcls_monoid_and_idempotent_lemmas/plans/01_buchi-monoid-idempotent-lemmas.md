@@ -1,7 +1,7 @@
 # Implementation Plan: Task #428
 
 - **Task**: 428 - expose_buchicongruence_eqvcls_monoid_and_idempotent_lemmas
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 3 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/241_mcnaughton_theorem/reports/02_spawn-analysis.md
@@ -150,7 +150,7 @@ because the idempotent/absorption lemmas are stated in terms of the `Mul`/`Monoi
 
 ---
 
-### Phase 2: Idempotent-power collapse and absorption lemmas [NOT STARTED]
+### Phase 2: Idempotent-power collapse and absorption lemmas [COMPLETED]
 
 **Goal**: Provide the named algebraic lemmas (2) and (3) over the monoid, plus
 full CI verification.

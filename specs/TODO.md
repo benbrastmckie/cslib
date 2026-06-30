@@ -11,9 +11,9 @@ next_project_number: 433
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,299,321,387,396,400,404,406,407,415,419,426,427,428,430,431 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,181,215,300,317,390,405,409,425,429 | 36,37,180,299,387,404,407,426,427,428,430 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,241,275,301,375,389 | 39,40,317,425,429 | Bimodal Porting, Foundations, Temporal Logic, ... |
+| 1 | 36,37,180,226,299,321,387,396,400,404,406,407,415,419,426,427,429,430,431 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,181,215,241,300,317,390,405,409,425 | 36,37,180,299,387,404,407,426,427,429,430 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 3 | 41,275,301,375,389 | 39,40,317,425 | Bimodal Porting, Foundations, Temporal Logic, ... |
 | 4 | 391,392,412,413,414 | 41,181,215,241,275,300,301,321,375,387,389 | Foundations, Code Hygiene, PL-Docs, ... |
 | 5 | 393 | 391 | PL-Hygiene |
 
@@ -50,9 +50,8 @@ next_project_number: 433
     └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 427 [PLANNED] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
   └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model (see above)
-428 [IMPLEMENTING] — Add named lemmas to Cslib/Computability/Languages/Congruences/Rig
-  └─ 429 [RESEARCHED] — Prove a named lemma (suggested name: `buchiCongr_recurrentClass` 
-    └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
+429 [RESEARCHED] — Prove a named lemma (suggested name: `buchiCongr_recurrentClass` 
+  └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -213,7 +212,7 @@ After implementation:
 
 ### 428. Expose buchicongruence eqvcls monoid and idempotent lemmas
 - **Effort**: 2-3 hours
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -468,12 +467,13 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 386. Fix Propositional-specific lake lint violations (21, post-merge)
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: PL-Hygiene
 - **Dependencies**: Task 395
 - **Research**: [386_fix_lake_lint_errors_propositional/reports/01_pl-lint-violations-fix-map.md]
 - **Plan**: [386_fix_lake_lint_errors_propositional/plans/01_fix-pl-lint-violations.md]
+- **Summary**: [386_fix_lake_lint_errors_propositional/summaries/01_fix-pl-lint-violations-summary.md]
 
 **Description**: [Refreshed by post-merge vet sess_1782671052_6af6a1; supersedes the pre-merge scope.] Fix the 21 PL-specific lake lint violations (hard CI gate for a clean repo push). (a) defsWithUnderscore (13) -> lowerCamelCase: GenericMCSBridge.lean:133 deriv_tree_to_list, :165 unfold_listImp_in_tree, :192 list_deriv_to_tree; SequentCalculus/LJ/CutElimination.lean:116/225/350 ljCutAdm_principal_andR/orR/impR, :462/543 ljCutAdm_left/right; SequentCalculus/LK/CutElimination.lean:145/293/437 cutAdm_right_andR/orR/impR, :586/708 cutAdm_right/left. (b) defLemma (1): GenericMCSBridge.lean:133 deriv_tree_to_list def->lemma (same decl as the rename). (c) docBlame (3): docstrings for Tableau/Classical/Expansion.lean:125 classicalExpandBranches.processNext, Tableau/Intuitionistic/Expansion.lean:169 intExpandBranches.go, Tableau/Intuitionistic/Rules.lean:91 isAccessible.go. (d) unusedArguments (3): targeted @[nolint unusedArguments] + comment: Metalogic/DeductionTheorem.lean:85 deductionWithMem arg9 _hA, Normalization/Termination.lean:41 conclusionGrounded arg6 _d, Tableau/Intuitionistic/Soundness.lean:1643 intBotForces arg1. (e) simpNF (1): Subformula.lean:173 vars_neg LHS not simp-normal (rewrite LHS or @[nolint simpNF]). Coordinate GenericMCSBridge renames with the cross-cutting task (403). Verify `lake lint` PL-clean. Source: specs/369_*/.vet-findings.json. [395-reconciled: task 386 OWNS the LK/LJ cutAdm_*/ljCutAdm_* underscore renames (defsWithUnderscore); task 392 drops them. Re-run `lake lint` after the build is green (task 385/IntFMPSpike) to refresh the exact violation set before fixing.]
 

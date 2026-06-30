@@ -73,12 +73,13 @@ model (`intExtractValuation b`, `minBranchBotForces b`) satisfies positive formu
 falsifies negative formulas. -/
 lemma minTruthLemma (b : IBranch Atom)
     (hopen : isMinimallyClosed b = false)
+    (hsat : IBranchSaturation Atom b)
     (φ : Proposition Atom) (w : Nat) :
     (b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w) →
       IForces (intExtractValuation b) (minBranchBotForces b) w φ) ∧
     (b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) →
       ¬ IForces (intExtractValuation b) (minBranchBotForces b) w φ) := by
-  exact truthLemma minScheme b hopen φ w
+  exact truthLemma minScheme b hopen hsat φ w
 
 /-! ## Completeness Theorems -/
 

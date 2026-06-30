@@ -68,12 +68,13 @@ If `b` is an open saturated branch, then the extracted valuation `intExtractValu
 satisfies every T(φ) on `b` and falsifies every F(φ) on `b`. -/
 lemma intTruthLemma (b : IBranch Atom)
     (hopen : isIntuitionisticallyClosed b = false)
+    (hsat : IBranchSaturation Atom b)
     (φ : Proposition Atom) (w : Nat) :
     (b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w) →
       IForces (intExtractValuation b) intBotForces w φ) ∧
     (b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) →
       ¬ IForces (intExtractValuation b) intBotForces w φ) := by
-  exact truthLemma intScheme b hopen φ w
+  exact truthLemma intScheme b hopen hsat φ w
 
 /-- An open saturated branch from the intuitionistic tableau yields a Kripke countermodel.
 

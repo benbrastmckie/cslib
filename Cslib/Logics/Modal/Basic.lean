@@ -76,7 +76,7 @@ inductive Proposition (Atom : Type u) : Type u where
   | imp (φ₁ φ₂ : Proposition Atom)
   /-- Necessity / box. -/
   | box (φ : Proposition Atom)
-  deriving DecidableEq, BEq
+  deriving DecidableEq
 
 /-- Register `Modal.Proposition` as an instance of `ModalConnectives`.
 

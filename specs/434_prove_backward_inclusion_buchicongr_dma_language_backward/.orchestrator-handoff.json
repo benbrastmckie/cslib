@@ -1,0 +1,13 @@
+{
+  "status": "planned",
+  "task_number": 434,
+  "artifact_path": "specs/434_prove_backward_inclusion_buchicongr_dma_language_backward/plans/01_backward-inclusion-buchicongr-dma.md",
+  "phases_total": 4,
+  "phases_completed": 0,
+  "summary": "Plan created for backward inclusion buchiCongr_DMA_language_backward (language (buchiCongr_DMA na) ⊆ language na). Four sequential phases: (1) lemma scaffold + Muller acceptance / accept-set unfolding; (2) establish xs ∈ buchiFamily (a,b) via run_eq + mem_infOcc + mem_buchiFamily (crux, with buchiFamily_cover reconciliation fallback); (3) apply buchiFamily_saturation to conclude xs ∈ language na + docstring; (4) lake build + lean_verify zero sorries. Scoped to a single cslib-implementation-agent dispatch.",
+  "next_action_hint": "Run /implement 434 (cslib-implementation-agent) to execute the plan. Independent of forward direction (task index 1) and the eq/wiring task (435).",
+  "key_files": [
+    "Cslib/Computability/Languages/OmegaRegularLanguage.lean",
+    "Cslib/Computability/Languages/Congruences/BuchiCongruence.lean"
+  ]
+}

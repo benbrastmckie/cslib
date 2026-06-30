@@ -1,16 +1,15 @@
 {
   "status": "in_progress",
-  "started_at": "2026-06-30T14:53:20Z",
+  "started_at": "2026-06-30T00:00:00Z",
   "artifacts": [],
   "partial_progress": {
     "stage": "initializing",
-    "details": "Agent started, reading current file state for imp case",
-    "phases_completed": 0
+    "details": "Hard-mode agent started, parsing delegation context for imp-case extraction",
+    "phases_completed": 3
   },
   "metadata": {
-    "session_id": "sess_1782831123_d3749c_427",
-    "agent_type": "cslib-implementation-agent",
+    "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
   }
 }

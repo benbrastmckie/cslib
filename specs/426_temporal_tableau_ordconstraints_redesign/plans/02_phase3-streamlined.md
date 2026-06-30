@@ -31,7 +31,7 @@ induction principle to hang them on.
 
 ## Phase 3 — streamlined steps (each ends green + committed)
 
-#### Step 3.1: Extract `processNext` to a top-level `def` [COMPLETED]
+#### Step 3.1: Extract `processNext` to a top-level `def` [IN PROGRESS]
 - [ ] In `Cslib/Logics/Temporal/Tableau/Saturation.lean`, lift the inline `let rec processNext`
   out of `temporalExpandBranches` into a top-level `def processNext (…) : … := …` with the same
   body, taking the worklist/fuel and accumulators as explicit parameters.

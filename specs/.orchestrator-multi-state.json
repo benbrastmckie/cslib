@@ -1,88 +1,62 @@
 {
-  "session_id": "sess_1782833467_90f6aa",
+  "session_id": "sess_1782836442_a0291e",
   "task_numbers": [
-    433,
-    434,
-    435,
-    436,
-    241
+    427,
+    426,
+    425,
+    301
   ],
   "waves": [
     [
-      433,
-      434
+      427,
+      426
     ],
     [
-      435
+      425
     ],
     [
-      436
-    ],
-    [
-      241
+      301
     ]
   ],
   "dependency_graph": {
-    "433": [],
-    "434": [],
-    "435": [
-      433
+    "427": [],
+    "426": [],
+    "425": [
+      426,
+      427
     ],
-    "436": [
-      435,
-      434
-    ],
-    "241": [
-      433,
-      434,
-      435,
-      436
+    "301": [
+      426,
+      427,
+      425
     ]
   },
-  "max_cycles": 25,
-  "cycle_count": 6,
-  "failed_tasks": [
-    {
-      "task": 317,
-      "reason": "partial: B2 infrastructure landed sorry-free + green build restored, but 2 residual B2 sorries (713 wiring-tractable, 658 needs fuel-sufficiency argument) + B1 remain"
-    },
-    {
-      "task": 430,
-      "reason": "dependency-blocked: gated on 317 B2 (intExpandBranches_openBranch_sat not yet sorry-free)"
-    }
-  ],
+  "max_cycles": 20,
+  "cycle_count": 0,
+  "failed_tasks": [],
   "completed_tasks": [],
   "current_statuses": {
     "427": "partial",
     "426": "partial",
     "425": "not_started",
-    "301": "blocked",
-    "433": "planned",
-    "434": "planned"
+    "301": "blocked"
   },
   "task_dirs": {
-    "433": "specs/433_prove_acceptmembership_ramsey_lemma_for_buchicongr_dma_forwa",
-    "434": "specs/434_prove_backward_inclusion_buchicongr_dma_language_backward",
-    "435": "specs/435_replace_sorry_in_buchicongr_dma_language_forward_using_accep",
-    "436": "specs/436_combine_inclusions_into_buchicongr_dma_language_eq_and_close",
-    "241": "specs/241_mcnaughton_theorem"
+    "427": "specs/427_temporal_tableau_propositional_truth_lemma",
+    "426": "specs/426_temporal_tableau_ordconstraints_redesign",
+    "425": "specs/425_temporal_tableau_ptl_fmp_decidability",
+    "301": "specs/301_temporal_tableau"
   },
   "research_agents": {
-    "433": "cslib-research-agent",
-    "434": "cslib-research-agent",
-    "435": "cslib-research-agent",
-    "436": "cslib-research-agent",
-    "241": "cslib-research-agent"
+    "427": "cslib-research-agent",
+    "426": "cslib-research-agent",
+    "425": "cslib-research-agent",
+    "301": "cslib-research-agent"
   },
   "implement_agents": {
-    "433": "cslib-implementation-agent",
-    "434": "cslib-implementation-agent",
-    "435": "cslib-implementation-agent",
-    "436": "cslib-implementation-agent",
-    "241": "cslib-implementation-agent"
-  },
-  "build_green": true,
-  "b2_progress": "580 closed (committed). fuel=0 + none-case (566) are ENTANGLED - both need the expanded-set invariant induction-strengthening. hfuel split was unsound, reverted. 2 agents overflowed on this. B1 (truthLemma:330) also open.",
-  "exit_status": "partial",
-  "final_note": "4 agent overflows on the recursive saturation proof; escalated. B2 infra committed; residual needs /plan + interactive session."
+    "427": "cslib-implementation-agent",
+    "426": "cslib-implementation-agent",
+    "425": "cslib-implementation-agent",
+    "301": "cslib-implementation-agent"
+  }
 }

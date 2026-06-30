@@ -1,5 +1,5 @@
 {
-  "next_project_number": 439,
+  "next_project_number": 440,
   "active_projects": [
     {
       "project_number": 406,
@@ -574,7 +574,7 @@
     {
       "project_number": 180,
       "project_name": "temporal_primitive_always_historically",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "dependencies": [],
       "description": "Add allFuture (G) and allPast (H) as primitive constructors to Temporal.Formula, giving {atom, bot, imp, and, or, untl, snce, allFuture, allPast}. Currently G is derived as neg(someFuture(neg phi)) and H as neg(somePast(neg phi)), which are only valid classically. Making them primitive enables intuitionistic temporal logics. Note: someFuture (F) and somePast (P) remain derivable without negation (F = top U phi, P = top S phi). Scope: (1) Syntax/Formula.lean: add .allFuture/.allPast constructors, update complexity, subst, atoms, encodeNat, temporalDepth, swapTemporal. (2) Semantics: structural clauses for universal future/past quantification. (3) ProofSystem: temporal axioms referencing G/H now use primitive constructors. (4) Metalogic: cases in Soundness, Chronicle/TruthLemma, MCS, Completeness. (5) Classical equivalences become theorems. Verify full CI. Reference: Boudou et al. for intuitionistic temporal logic.",
@@ -586,7 +586,8 @@
         }
       ],
       "topic": "Temporal Logic",
-      "last_updated": "2026-06-14T17:54:05Z"
+      "last_updated": "2026-06-30T17:02:10Z",
+      "session_id": "sess_1782838873_48a805"
     },
     {
       "project_number": 181,
@@ -981,12 +982,12 @@
     {
       "project_number": 426,
       "project_name": "temporal_tableau_ordconstraints_redesign",
-      "status": "partial",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Temporal Logic",
       "description": "[Decomposed from task 301, blocker A.] Redesign the time-ordering scheme in the temporal tableau so the ordering invariants hold. The lemma ordConstraints_strict (Cslib/Logics/Temporal/Tableau/Completeness.lean) is FALSE as stated: addPast t tNew adds the constraint (tNew, t) with tNew > t, violating the claimed invariant (a,b) in constraints -> a < b. Choose and implement a correct scheme (e.g. topological sort of the constraint graph, or a signed/relative integer time domain) so that extractModel builds a well-founded strict order, then prove the corrected ordConstraints lemma sorry-free. Start from green commit 7f052834. Independent of tasks 424 and 425.",
       "created": "2026-06-30T10:57:13Z",
-      "last_updated": "2026-06-30T11:26:14Z",
+      "last_updated": "2026-06-30T16:56:22Z",
       "next_artifact_number": 1,
       "artifacts": [
         {
@@ -1002,9 +1003,12 @@
           "path": "specs/426_temporal_tableau_ordconstraints_redesign/summaries/01_partial-summary.md"
         }
       ],
-      "dependencies": [],
+      "dependencies": [
+        439
+      ],
       "parent_task": 301,
-      "session_id": "sess_1782818123_ab1047_426"
+      "session_id": "sess_1782838570_e5667e",
+      "previous_status": "partial"
     },
     {
       "project_number": 427,
@@ -1204,6 +1208,26 @@
       "session_id": "sess_1782832854_3aada0",
       "dependencies": null,
       "parent_task": 431
+    },
+    {
+      "project_number": 439,
+      "project_name": "refactor_processnext_to_mutual_def_and_prove_instantstrict_t",
+      "status": "researched",
+      "task_type": "cslib",
+      "description": "Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_redesign). Phases 1, 2, 4, 5 are already done and green. Only Phase 3 remains.\n\nThe blocker: in Cslib/Logics/Temporal/Tableau/Saturation.lean, `processNext` is a `let rec` nested inside `temporalExpandBranches`. The two functions are mutually recursive: `processNext` (line ~219) calls `temporalExpandBranches`, and `temporalExpandBranches` (line ~231) calls `processNext`. This mutual recursion is currently expressed via closure (nesting). Lean 4 generates no standalone recursion principle for `let rec` bindings, so the `InstantStrict` threading proof cannot be expressed as designed.\n\nStep 3.1 (mechanical refactor): Convert the nested `let rec processNext` + `temporalExpandBranches` into a `mutual ... end` block at top level. The termination argument is lexicographic: `temporalExpandBranches` recurses on `fuel` (Nat), `processNext` recurses structurally on `List.length pending`; `processNext`'s call to `temporalExpandBranches` uses `fuel'` (strictly smaller). Verify with `lake build Cslib.Logics.Temporal.Tableau.Saturation` before attempting any proof. Commit the green refactor.\n\nStep 3.2 (threading proof): Now that `processNext` is a top-level def in a `mutual` block, it has a recursion principle. Prove `InstantStrict` is preserved through the run by induction on fuel (for `temporalExpandBranches`) and structural induction on `pending` (for `processNext`), using the Phase 2 edge-by-edge lemmas (`InstantStrict.addFuture`, `InstantStrict.addPast`) as the inductive step. Commit green.\n\nStep 3.3 (wire and finalize): Use the run-level `InstantStrict` result to discharge the order-preservation component of `openBranch_branchSat` for the D=Z/f=instant model, as far as the FMP boundary allows (Until/Since remain FMP-blocked, leave documented, no sorry). Run `lake build && lake test` and `lake exe checkInitImports`. Update task 426 to completed; update summary.\n\nReference: specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-streamlined.md for full step details. Files: Cslib/Logics/Temporal/Tableau/Saturation.lean (refactor), Cslib/Logics/Temporal/Tableau/Completeness.lean (wire). Territory constraint: serialize with task 427 on Completeness.lean (never parallelize). Zero-debt: no sorry allowed.",
+      "effort": "3-5 hours",
+      "parent_task": 426,
+      "topic": "Temporal Logic",
+      "dependencies": [],
+      "created": "2026-06-30T17:01:59Z",
+      "last_updated": "2026-06-30T17:01:59Z",
+      "artifacts": [
+        {
+          "type": "research",
+          "path": "specs/426_temporal_tableau_ordconstraints_redesign/reports/03_spawn-analysis.md",
+          "summary": "Spawn analysis from parent task 426"
+        }
+      ]
     }
   ],
   "repository_health": {

@@ -432,6 +432,17 @@ private lemma buchiCongr_recurrentClass [Inhabited Symbol] {State : Type} [Finit
     (hfreq.mono fun k hk => (buchiCongr_DMA_run_eq na xs k).trans hk)⟩
 
 open NA.Buchi in
+/-- For any `xs ∈ language na`, the infimum-occurrence set of the Büchi-congruence DMA run
+contains a state that, paired with some partner state, gives a Büchi family element
+intersecting `language na`. This is the Ramsey/recurrence core of the forward inclusion of
+McNaughton's theorem, establishing `infOcc(run xs) ∈ (buchiCongr_DMA na).accept`. -/
+private lemma buchiCongr_DMA_accept_mem [Inhabited Symbol] {State : Type} [Finite State]
+    (na : NA.Buchi State Symbol) (xs : ωSequence Symbol) (hxs : xs ∈ language na) :
+    ∃ b ∈ ((buchiCongr_DMA na).run xs).infOcc,
+      ∃ a, ((na.buchiFamily (a, b) ⊓ language na).toSet).Nonempty := by
+  sorry
+
+open NA.Buchi in
 private lemma buchiCongr_DMA_language_forward [Inhabited Symbol] {State : Type} [Finite State]
     (na : NA.Buchi State Symbol) :
     language na ⊆ language (buchiCongr_DMA na) := by

@@ -1,0 +1,10 @@
+{
+  "status": "planned",
+  "task_number": 433,
+  "stage": "plan",
+  "artifact_path": "specs/433_prove_acceptmembership_ramsey_lemma_for_buchicongr_dma_forwa/plans/01_buchicongr-accept-mem-ramsey.md",
+  "phase_count": 5,
+  "estimated_hours": 2.5,
+  "next_steps": "Run /implement 433 (single cslib-implementation-agent dispatch)",
+  "timestamp": "2026-06-30T00:00:00Z"
+}

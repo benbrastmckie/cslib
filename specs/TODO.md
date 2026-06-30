@@ -1,5 +1,5 @@
 ---
-next_project_number: 439
+next_project_number: 440
 ---
 
 # TODO
@@ -11,10 +11,10 @@ next_project_number: 439
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,299,317,321,390,396,400,404,406,407,415,419,426,427,433,434,438 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,181,215,300,375,389,405,409,425,430,435 | 36,37,180,299,317,404,407,426,427,433 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,275,301,391,392,413,436 | 39,40,321,375,389,425,434,435 | Bimodal Porting, Foundations, Temporal Logic, ... |
-| 4 | 241,393,412 | 41,321,391,436 | Foundations, Temporal Logic, PL-Hygiene |
+| 1 | 36,37,180,226,299,317,321,390,396,400,404,406,407,415,419,427,433,434,438,439 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,181,215,300,375,389,405,409,426,430,435 | 36,37,180,299,317,404,407,433,439 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 3 | 41,275,391,392,413,425,436 | 39,40,321,375,389,426,427,434,435 | Bimodal Porting, Foundations, Temporal Logic, ... |
+| 4 | 241,301,393,412 | 41,321,391,425,436 | Foundations, Temporal Logic, PL-Hygiene |
 | 5 | 414 | 181,215,241,275,300,301,321 | Code Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -44,18 +44,19 @@ next_project_number: 439
 
 ### Temporal Logic
 
-180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-426 [PARTIAL] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
+180 [RESEARCHED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
+427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
   └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
     └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
-427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
-  └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model (see above)
 433 [PLANNED] — Prove a private named lemma (e.g. `buchiCongr_DMA_accept_mem`) in
   └─ 435 [RESEARCHED] — Replace the sorry-stub `buchiCongr_DMA_language_forward` (languag
     └─ 436 [RESEARCHED] — Combine the forward inclusion (buchiCongr_DMA_language_forward, f
       └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 434 [PLANNED] — Prove the backward inclusion `buchiCongr_DMA_language_backward` (
   └─ 436 [RESEARCHED] — Combine the forward inclusion (buchiCongr_DMA_language_forward, f (see above)
+439 [RESEARCHED] — Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_red
+  └─ 426 [BLOCKED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
+    └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model (see above)
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -105,6 +106,28 @@ next_project_number: 439
 438 [NOT STARTED] — Upstream the comment/docstring cleanups identified by the task 43
 
 ## Tasks
+
+### 439. Refactor processnext to mutual def and prove instantstrict t
+- **Effort**: 3-5 hours
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+- **Research**: [426_temporal_tableau_ordconstraints_redesign/reports/03_spawn-analysis.md]
+
+**Description**: Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_redesign). Phases 1, 2, 4, 5 are already done and green. Only Phase 3 remains.
+
+The blocker: in Cslib/Logics/Temporal/Tableau/Saturation.lean, `processNext` is a `let rec` nested inside `temporalExpandBranches`. The two functions are mutually recursive: `processNext` (line ~219) calls `temporalExpandBranches`, and `temporalExpandBranches` (line ~231) calls `processNext`. This mutual recursion is currently expressed via closure (nesting). Lean 4 generates no standalone recursion principle for `let rec` bindings, so the `InstantStrict` threading proof cannot be expressed as designed.
+
+Step 3.1 (mechanical refactor): Convert the nested `let rec processNext` + `temporalExpandBranches` into a `mutual ... end` block at top level. The termination argument is lexicographic: `temporalExpandBranches` recurses on `fuel` (Nat), `processNext` recurses structurally on `List.length pending`; `processNext`'s call to `temporalExpandBranches` uses `fuel'` (strictly smaller). Verify with `lake build Cslib.Logics.Temporal.Tableau.Saturation` before attempting any proof. Commit the green refactor.
+
+Step 3.2 (threading proof): Now that `processNext` is a top-level def in a `mutual` block, it has a recursion principle. Prove `InstantStrict` is preserved through the run by induction on fuel (for `temporalExpandBranches`) and structural induction on `pending` (for `processNext`), using the Phase 2 edge-by-edge lemmas (`InstantStrict.addFuture`, `InstantStrict.addPast`) as the inductive step. Commit green.
+
+Step 3.3 (wire and finalize): Use the run-level `InstantStrict` result to discharge the order-preservation component of `openBranch_branchSat` for the D=Z/f=instant model, as far as the FMP boundary allows (Until/Since remain FMP-blocked, leave documented, no sorry). Run `lake build && lake test` and `lake exe checkInitImports`. Update task 426 to completed; update summary.
+
+Reference: specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-streamlined.md for full step details. Files: Cslib/Logics/Temporal/Tableau/Saturation.lean (refactor), Cslib/Logics/Temporal/Tableau/Completeness.lean (wire). Territory constraint: serialize with task 427 on Completeness.lean (never parallelize). Zero-debt: no sorry allowed.
+
+---
 
 ### 438. Pr task431 comment cleanups
 - **Status**: [NOT STARTED]
@@ -263,10 +286,10 @@ After implementation:
 ---
 
 ### 426. Temporal tableau ordconstraints redesign
-- **Status**: [PARTIAL]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: None
+- **Dependencies**: Task 439
 - **Research**: [426_temporal_tableau_ordconstraints_redesign/reports/01_ordconstraints-redesign.md]
 - **Plan**: [426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-streamlined.md]
 - **Summary**: [426_temporal_tableau_ordconstraints_redesign/summaries/01_partial-summary.md]
@@ -671,7 +694,7 @@ Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completenes
 ---
 
 ### 180. Temporal primitive always historically
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None

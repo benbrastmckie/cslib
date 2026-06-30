@@ -198,23 +198,40 @@ to all applicable rules, including the K box/diamond rules using `acc`.
 
 For a branch `b` with accessibility relation `acc`, this holds when:
 1. The branch is not closed (no contradiction or T(⊥)).
-2. For every T(φ) on the branch, the applicable rule's outputs are also on the branch:
-   - Linear rules: all outputs present.
-   - Branching rules: at least one complete branch's outputs present.
-   - Persistent rules: all outputs present.
-3. For every T(□φ)@w, T(φ)@w' is on the branch for each w' with `acc.hasEdge w w'`.
-4. For every F(◇φ)@w, F(φ)@w' is on the branch for each w' with `acc.hasEdge w w'`. -/
+2. For every signed formula on the branch whose rule result is not boxNeg (i.e., not
+   `F(□φ)@w` with sign `.neg` and formula `.box _`), the rule outputs are present:
+   - Linear rules: all outputs present on branch.
+   - Branching rules: at least one complete sub-branch's outputs present.
+   - Persistent rules: all outputs present (captures T(□φ)@w box-positive closure:
+     `modalApplyOne` returns `.persistent (boxPropagation b acc φ w)`, which is empty
+     iff all T(φ)@w' are already in `b`, so the persistent clause forces them in).
+3. For every `F(□φ)@w` on the branch, there exists a successor `w'` (with
+   `acc.hasEdge w w' = true`) such that `F(φ)@w' ∈ b`.
+   This is a separate conjunct because the `boxNeg` rule creates a FRESH world
+   `modalNextWorld b` whose index exceeds all labels in `b`, so the standard linear
+   condition `∀ sf' ∈ newForms, sf' ∈ b` would be vacuously false for `boxNeg` outputs.
+
+Note: T(□φ)@w box-positive closure is captured by the persistent clause in conjunct 2:
+if `boxPropagation b acc φ w` is non-empty, the persistent condition forces all
+`T(φ)@w'` (for uncovered successors) into `b`; if empty, `notApplicable` and all
+successors already have `T(φ)@w'` in `b`. -/
 def modalHintikkaSet
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility) : Prop :=
   isModalClosed b = false ∧
-  ∀ sf ∈ b,
+  (∀ sf ∈ b,
     let (result, _) := modalApplyOne sf b acc
-    match result with
-    | .linear newForms => ∀ sf' ∈ newForms, sf' ∈ b
-    | .branching branches => ∃ br ∈ branches, ∀ sf' ∈ br, sf' ∈ b
-    | .persistent newForms => ∀ sf' ∈ newForms, sf' ∈ b
-    | .notApplicable => True
+    match sf.sign, sf.formula with
+    | .neg, .box _ => True  -- F(□φ): fresh-world rule; handled by 3rd conjunct
+    | _, _ =>
+      match result with
+      | .linear newForms => ∀ sf' ∈ newForms, sf' ∈ b
+      | .branching branches => ∃ br ∈ branches, ∀ sf' ∈ br, sf' ∈ b
+      | .persistent newForms => ∀ sf' ∈ newForms, sf' ∈ b
+      | .notApplicable => True) ∧
+  -- Box-negative witness: F(□φ)@w on the branch implies a successor world with F(φ)
+  (∀ (φ : Proposition Atom) (w : WorldIndex),
+    ⟨.neg, .box φ, w⟩ ∈ b → ∃ w', acc.hasEdge w w' = true ∧ ⟨.neg, φ, w'⟩ ∈ b)
 
 end Cslib.Logic.Modal.Tableau
 

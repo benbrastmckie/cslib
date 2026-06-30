@@ -1,15 +1,14 @@
 {
   "status": "in_progress",
-  "started_at": "2026-06-30T12:37:21Z",
+  "started_at": "2026-06-30T00:00:00Z",
   "artifacts": [],
   "partial_progress": {
     "stage": "initializing",
-    "details": "Agent started, reading key files",
+    "details": "Agent started, reading source files",
     "phases_completed": 0
   },
   "metadata": {
     "agent_type": "cslib-implementation-agent",
-    "task_id": 317,
-    "task_slug": "propositional_tableau_completeness"
+    "delegation_depth": 1
   }
 }

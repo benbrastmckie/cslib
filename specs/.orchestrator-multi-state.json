@@ -19,20 +19,19 @@
     ]
   },
   "max_cycles": 10,
-  "cycle_count": 3,
+  "cycle_count": 4,
   "failed_tasks": [],
-  "completed_tasks": [
-    428,
-    429
-  ],
+  "completed_tasks": [],
   "current_statuses": {
     "317": "implementing",
     "430": "researched",
     "429": "completed",
     "241": "implementing",
     "299": "partial",
-    "426": "planned",
-    "427": "partial"
+    "426": "partial",
+    "427": "partial",
+    "425": "not_started",
+    "301": "blocked"
   },
   "task_dirs": {
     "317": "specs/317_propositional_tableau_completeness",
@@ -51,5 +50,14 @@
   },
   "notes": "cycle1: 317 broad dispatch overflowed (Prompt too long), zero net change. HEAD committed-RED since c648603b: truthLemma hsat param not threaded into intTruthLemma/minTruthLemma. Keystone=B2 intExpandBranches_openBranch_sat leaf sorries (Scheme.lean ~481/536/550).",
   "build_green": true,
-  "head_commit": "687f4962"
+  "head_commit": "687f4962",
+  "b2_progress": "580 closed (f74ae724); 511 needs hfuel>=1 precond; 566 needs expanded-set invariant",
+  "partial_tasks": [
+    426,
+    427
+  ],
+  "blocked_by_dependency": [
+    425,
+    301
+  ]
 }

@@ -1108,7 +1108,7 @@
     {
       "project_number": 426,
       "project_name": "temporal_tableau_ordconstraints_redesign",
-      "status": "planned",
+      "status": "partial",
       "task_type": "cslib",
       "topic": "Temporal Logic",
       "description": "[Decomposed from task 301, blocker A.] Redesign the time-ordering scheme in the temporal tableau so the ordering invariants hold. The lemma ordConstraints_strict (Cslib/Logics/Temporal/Tableau/Completeness.lean) is FALSE as stated: addPast t tNew adds the constraint (tNew, t) with tNew > t, violating the claimed invariant (a,b) in constraints -> a < b. Choose and implement a correct scheme (e.g. topological sort of the constraint graph, or a signed/relative integer time domain) so that extractModel builds a well-founded strict order, then prove the corrected ordConstraints lemma sorry-free. Start from green commit 7f052834. Independent of tasks 424 and 425.",
@@ -1123,6 +1123,10 @@
         {
           "type": "plan",
           "path": "specs/426_temporal_tableau_ordconstraints_redesign/plans/01_ordering-instant-redesign.md"
+        },
+        {
+          "type": "summary",
+          "path": "specs/426_temporal_tableau_ordconstraints_redesign/summaries/01_partial-summary.md"
         }
       ],
       "dependencies": [],

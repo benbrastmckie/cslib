@@ -45,7 +45,7 @@ next_project_number: 433
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 241 [IMPLEMENTING] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
-426 [PLANNED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
+426 [PARTIAL] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
   └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
     └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
@@ -240,12 +240,13 @@ After implementation:
 ---
 
 ### 426. Temporal tableau ordconstraints redesign
-- **Status**: [PLANNED]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
 - **Research**: [426_temporal_tableau_ordconstraints_redesign/reports/01_ordconstraints-redesign.md]
 - **Plan**: [426_temporal_tableau_ordconstraints_redesign/plans/01_ordering-instant-redesign.md]
+- **Summary**: [426_temporal_tableau_ordconstraints_redesign/summaries/01_partial-summary.md]
 
 **Description**: [Decomposed from task 301, blocker A.] Redesign the time-ordering scheme in the temporal tableau so the ordering invariants hold. The lemma ordConstraints_strict (Cslib/Logics/Temporal/Tableau/Completeness.lean) is FALSE as stated: addPast t tNew adds the constraint (tNew, t) with tNew > t, violating the claimed invariant (a,b) in constraints -> a < b. Choose and implement a correct scheme (e.g. topological sort of the constraint graph, or a signed/relative integer time domain) so that extractModel builds a well-founded strict order, then prove the corrected ordConstraints lemma sorry-free. Start from green commit 7f052834. Independent of tasks 424 and 425.
 

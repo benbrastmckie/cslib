@@ -1,23 +1,26 @@
 {
-  "status": "researched",
-  "task_number": 388,
-  "phase": "research",
-  "summary": "Tier-2 dead-code + lint cleanup of Termination.lean. Confirmed all three named dead decls exist with 0 external callers: normalizeAux_fixpoint (line 305, actually a public theorem, not private), subs_maximalFormulas_mem (line 492), subsOne_new_redex_complexity_lt (line 775). Dead code is a CASCADE in two groups. Group A (normalizeAux_fixpoint chain, lines 204-308, ~105 lines): also orphans normalizeAux_ax (204, @[simp]), normalizeAux_ass (210, @[simp]), normalizeAux_fixpoint_aux (216) — all private, 0 external refs; delete as a unit + update module docstring lines 18-19. Group B (lines 492-794, ~300 lines): subs_maximalFormulas_mem's only caller is subsOne_new_redex_complexity_lt, so delete both together. Total ~405 lines. CONFIRMED normalize/normalizeAux are LIVE public defs in Reduction.lean (84, 105) with task-398 efq arms — must NOT be deleted (no downstream callers but explicitly kept; public defs don't trip dead-code linter). Lint debt: NO long lines (>100), lint-style clean, NO sorries. One maxHeartbeats override at line 1195 guarding the snImpEForm/snOrEForm/snSubst mutual block — ALREADY comment-justified (lines 1196-1198), satisfies task's comment-justify requirement, no mandatory action. Most bare/flexible simp (508,555,593,666,731,781) lives inside Group B deletion region and vanishes. Unused-simp-arg/no-op-tactic/flexible-simp env-linter items need a post-deletion `lake lint` to surface — recommend not pre-enumerating since deletions change the surface. Only regression risk: the two @[simp] ax/ass lemmas — verify with scoped lake build after Group A deletion.",
+  "status": "implemented",
+  "summary": "Deleted Group A (normalizeAux_fixpoint cascade, ~107 lines: section header, normalizeAux_ax, normalizeAux_ass, normalizeAux_fixpoint_aux, normalizeAux_fixpoint) and Group B (subs_maximalFormulas_mem + subsOne_new_redex_complexity_lt, ~308 lines) from Termination.lean. Updated module docstring. Fixed residual lint debt (2x unused simp arg nodeCount_weak, 2x unused simp args isOrERoot/isIntroRoot, 2x flexible simp -> simp only, 1x @[nolint unusedArguments] for conclusionGrounded). Full CI passed (build, checkInitImports, lint, lint-style, shake, mk_all, test). Net: 9 insertions / 424 deletions (1518 -> 1103 lines). Phase 4 skipped (mutual block decomposition, high-risk, optional).",
+  "phases_completed": 3,
+  "phases_total": 4,
+  "phase_4_skipped": true,
+  "phase_4_reason": "high-risk mutual block decomposition; maxHeartbeats override already comment-justified; no trivially cheap path",
   "artifacts": [
-    "specs/388_termination_deadcode_and_heartbeat_cleanup/reports/01_termination-deadcode-cleanup.md"
+    "specs/388_termination_deadcode_and_heartbeat_cleanup/summaries/01_termination-deadcode-cleanup-summary.md"
   ],
-  "next_action": "plan",
-  "sequencing_warning": "SEQUENCE AFTER task 398 (edits Termination.lean). Re-verify line numbers with grep -n at implementation time.",
-  "recommended_phases": [
-    "Phase 1: Delete Group A (lines 204-308) + module docstring 18-19; lake build module to confirm @[simp] removals safe",
-    "Phase 2: Delete Group B (lines 492-794); lake build module",
-    "Phase 3: lake lint + lake exe lint-style sweep, fix residual env-linter items",
-    "Phase 4 (optional/low-priority): consider decomposing heavy mutual block at 1199 only if cheap; heartbeat override already justified",
-    "Final: full CI (build, checkInitImports, lint, lint-style, test); zero-debt confirmed"
-  ],
+  "verification": {
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 19,
+    "lint_clean_for_target": true,
+    "tests_passed": true
+  },
   "metadata": {
-    "session_id": "sess_orchestrator_388",
-    "agent_type": "cslib-research-agent",
+    "session_id": "sess_1751220001_a3f9c2",
+    "agent_type": "cslib-implementation-agent",
+    "task_number": 388,
     "task_type": "cslib"
   }
 }

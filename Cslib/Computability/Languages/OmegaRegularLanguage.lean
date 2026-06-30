@@ -396,6 +396,26 @@ private noncomputable def buchiCongr_DMA [Inhabited Symbol]
       ((na.buchiFamily (a, b) ⊓ language na).toSet).Nonempty}
 
 open NA.Buchi in
+/-- The state of `buchiCongr_DMA na` after reading the first `n` symbols of `xs` equals
+the Büchi congruence class of the length-`n` prefix `xs.extract 0 n`.
+
+This is the key run-state lemma for proving `buchiCongr_DMA_language_eq`: it connects
+the DMA run to the congruence classes of prefixes, enabling both directions of the
+language equality proof. -/
+private lemma buchiCongr_DMA_run_eq [Inhabited Symbol] {State : Type}
+    (na : NA.Buchi State Symbol) (xs : ωSequence Symbol) (n : ℕ) :
+    (buchiCongr_DMA na).run xs n =
+      Quotient.mk na.BuchiCongruence.eq (xs.extract 0 n) := by
+  induction n with
+  | zero =>
+    simp only [DA.run_zero, buchiCongr_DMA, extract_eq_nil]
+  | succ n ih =>
+    rw [DA.run_succ, ih]
+    simp only [buchiCongr_DMA, Quotient.liftOn_mk]
+    congr 1
+    exact (extract_succ_right (Nat.zero_le n)).symm
+
+open NA.Buchi in
 /-- **[BLOCKED — Phase 4, task 241]**: `buchiCongr_DMA na` recognizes the same ω-language
 as the NBA `na`.
 

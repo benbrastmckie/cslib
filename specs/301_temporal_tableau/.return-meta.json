@@ -1,50 +1,31 @@
 {
   "status": "partial",
-  "started_at": "2026-06-27T00:00:00Z",
+  "started_at": "2026-06-30T06:02:17Z",
   "artifacts": [
-    "Cslib/Logics/Temporal/Tableau/Defs.lean",
-    "Cslib/Logics/Temporal/Tableau/TimeOrdering.lean",
-    "Cslib/Logics/Temporal/Tableau/Rules.lean",
-    "Cslib/Logics/Temporal/Tableau/Branch.lean",
-    "Cslib/Logics/Temporal/Tableau/Closure.lean",
-    "Cslib/Logics/Temporal/Tableau/Saturation.lean",
-    "Cslib/Logics/Temporal/Tableau/Soundness.lean",
     "Cslib/Logics/Temporal/Tableau/Completeness.lean"
   ],
   "partial_progress": {
-    "stage": "phase_8_partial",
-    "phases_completed": 8,
-    "last_completed_phase": "Phase 8: Completeness.lean [PARTIAL]",
-    "details": "Phase 8 partial: extractModel defined on Nat domain, extractAtom_iff, extractBot_false, openBranch_noBotPos, openBranch_noContradiction proved. Truth lemma (propositional), branchSat, completeness, and Decidable instance BLOCKED (documented structured lemmas in comments, zero sorry, zero axioms)."
+    "stage": "phase_8_base_cases_committed",
+    "phases_completed": 7,
+    "last_completed_phase": "Phase 8 truth-lemma atom/bot base cases (committed 7f052834); truth lemma + decidability decomposed",
+    "details": "2-cycle orchestration. Committed atom base cases sorry-free on green tree. Propositional truth lemma attempt exhausted agent context 3x; preserved as WIP, dirty state reverted. Three blockers characterized: ordConstraints design flaw, oversized propositional truth lemma, PTL FMP theoretical blocker."
   },
   "sorry_inventory": [],
-  "blocked_obligations": [
-    "extractModel_atom_neg_notSat: requires List.findSome?_ne_none_of_mem or equivalent (proof complexity)",
-    "ordConstraints_strict: requires loop invariant over temporalExpandBranches (proof complexity)",
-    "temporalTruthLemma_propositional: ~300 lines per connective case analysis of tryAllPropRules output (proof complexity)",
-    "temporalTruthLemma_untl: Until eventuality fulfilment requires FMP for PTL (theoretical blocker)",
-    "temporalTruthLemma_snce: Since eventuality fulfilment requires FMP for PTL (theoretical blocker)",
-    "openBranch_branchSat: blocked by ordConstraints_strict + truth lemma gaps",
-    "temporalTableau_complete: blocked by branchSat",
-    "instDecidableValid: blocked by soundness (Phase 7) and completeness"
-  ],
   "verification": {
-    "verification_passed": false,
+    "verification_passed": true,
     "mode": "partial",
     "build_passed": true,
     "sorry_count": 0,
-    "vacuous_count": 0,
     "axiom_count": 0,
-    "lint_style_clean": true,
-    "check_init_imports_clean": true,
-    "note": "Phase 8 partial: Completeness.lean builds clean (no sorry, no axioms). Truth lemma and decidability blocked — see blocked_obligations."
+    "note": "Completeness.lean builds clean at committed green state 7f052834 (654 jobs). Uncommitted cycle-2 WIP discarded (had 5 sorries); preserved as .wip-Completeness-truthlemma-attempt.lean for the decomposition task."
   },
   "requires_user_review": true,
-  "review_reason": "Completeness (Phase 8) is PARTIAL: extractModel and structural branch lemmas proved; truth lemma blocked by proof complexity (propositional) and FMP (until/since). Task status should be updated to reflect all 8 phases attempted, 7 committed sorry-free, Phase 8 partial. Decomposition recommendation: (1) prove ordConstraints_strict via loop invariant, (2) prove propositional truth lemma adapting Classical/Completeness.lean, (3) resolve Until/Since via FMP or loop-unwinding.",
+  "review_reason": "Task 301 cannot complete this run: ordConstraints_strict is false as stated (design flaw), propositional truth lemma exceeds single-agent context (needs generalized induction restructuring), and until/since decidability requires PTL FMP (theoretical blocker, mirrors completed task 421). Decomposition into tasks A/B/C recommended.",
   "metadata": {
-    "session_id": "sess_1782627911_8612ef_301_c3",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "session_id": "sess_1782793830_6c75f0",
+    "agent_type": "skill-orchestrate",
+    "cycles_used": 2,
+    "max_cycles": 5,
+    "final_state": "partial"
   }
 }

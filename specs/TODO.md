@@ -45,7 +45,7 @@ next_project_number: 423
 
 180 [NOT STARTED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 241 [IMPLEMENTING] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
-301 [IMPLEMENTING] — Implement tableau decision procedure for temporal logic (Cslib.Lo
+301 [PARTIAL] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -591,7 +591,7 @@ SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/41
 ---
 
 ### 301. Temporal tableau
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None

@@ -1,39 +1,29 @@
 {
   "status": "partial",
-  "summary": "Cycle 5 (final): All 8 phases attempted. Phases 1-7 committed sorry-free and green. Phase 8 Completeness.lean created and committed [PARTIAL]: extractModel, extractAtom_iff, extractBot_false, openBranch_noBotPos, openBranch_noContradiction proved clean. Truth lemma (propositional + untl/snce) and decidability BLOCKED with structured documentation. Zero sorry, zero new axioms across all 8 files.",
-  "phases_completed": 8,
+  "summary": "Orchestration run (session sess_1782793830_6c75f0, 2 cycles) advanced the Phase-8 truth-lemma base cases on a green committed state, then converged on a definitive blocker characterization. Committed (7f052834): extractModel_atomPos_sat, extractModel_atom_neg_notSat (atom base cases), reusing extractModel_bot_false. Build green (654 jobs), zero sorry, zero new axioms. Cycle 2 attempted temporalTruthLemma_propositional but exhausted agent context three times running; attempt preserved as WIP, dirty state discarded to keep tree green. Task CANNOT reach [COMPLETED] this run due to two genuine non-grindable blockers (design flaw + theoretical FMP) plus one oversized obligation. Recommend decomposition.",
+  "phases_completed": 7,
   "phases_total": 8,
   "sorry_inventory": [],
   "continuation_context": {
-    "next_phase": "DONE — all phases attempted; task is [PARTIAL] pending resolution of blocked obligations",
-    "files_completed": [
-      "Defs.lean",
-      "TimeOrdering.lean",
-      "Rules.lean",
-      "Branch.lean",
-      "Closure.lean",
-      "Saturation.lean",
-      "Soundness.lean (partial: classicallyClosed_unsat proved; eventualityDefect_unsat BLOCKED)",
-      "Completeness.lean (partial: extractModel + structural lemmas; truth lemma + decidability BLOCKED)"
-    ],
-    "files_remaining": [],
-    "commit": "2a843432"
+    "next_phase": "Phase 8 Completeness.lean — base cases committed; truth lemma + decidability require decomposition",
+    "green_commit": "7f052834",
+    "wip_reference": "specs/301_temporal_tableau/.wip-Completeness-truthlemma-attempt.lean (1150-line propositional-truth-lemma attempt, 5 sorries, NOT committable; shows the imp case needs subformula IHs via generalized structural induction)",
+    "proved_and_committed": [
+      "extractModel_atomPos_sat (positive atom base case)",
+      "extractModel_atom_neg_notSat (negative atom base case, via List.findSome?_isSome_iff)",
+      "extractModel_bot_false (bot case, prior)",
+      "extractModel, extractAtom_iff, openBranch_noContradiction, openBranch_noBotPos (prior)"
+    ]
   },
   "blocked_obligations": [
-    "Phase 7 — eventualityDefect_unsat: requires FMP or loop-detection argument",
-    "Phase 7 — temporalTableau_sound: blocked by eventualityDefect_unsat",
-    "Phase 8 — extractModel_atom_neg_notSat: needs List.findSome?_ne_none_of_mem (proof complexity)",
-    "Phase 8 — ordConstraints_strict: needs loop invariant over temporalExpandBranches (proof complexity)",
-    "Phase 8 — temporalTruthLemma_propositional: ~300 lines per connective, adapts Classical/Completeness.lean (proof complexity)",
-    "Phase 8 — temporalTruthLemma_untl: Until eventuality fulfilment requires PTL FMP (theoretical blocker)",
-    "Phase 8 — temporalTruthLemma_snce: Since eventuality fulfilment requires PTL FMP (theoretical blocker)",
-    "Phase 8 — openBranch_branchSat, temporalTableau_complete, instDecidableValid: blocked by above"
+    "DESIGN FLAW (not proof complexity): ordConstraints_strict is FALSE as stated. addPast t tNew adds (tNew, t) with tNew > t, violating the claimed invariant (a,b) in constraints -> a < b. Needs the time-ordering scheme redesigned (e.g. topological sort or signed/relative time domain) before downstream ordering lemmas can hold.",
+    "OVERSIZED OBLIGATION: temporalTruthLemma_propositional (atom/bot/imp cases) is independently provable (no FMP, no ordConstraints dependency) but exceeds a single agent context window. The imp case requires generalized structural induction giving subformula IHs, not induction on the IsPropositional proof. Needs its own focused task with the correct proof skeleton + the WIP reference.",
+    "THEORETICAL BLOCKER: temporalTruthLemma_untl / temporalTruthLemma_snce (Until/Since eventuality fulfilment) require the finite model property for Propositional Temporal Logic. Blocks eventualityDefect_unsat, temporalTableau_sound, openBranch_branchSat, temporalTableau_complete, and instDecidableValid. Likely mirrors completed task 421 (min_fmp_decidability: Decidable via FMP)."
   ],
   "decomposition_recommendation": [
-    "Task A: Prove ordConstraints_strict via induction over temporalExpandBranches loop invariant",
-    "Task B: Prove propositional truth lemma by adapting Propositional/Tableau/Classical/Completeness.lean to time-indexed branches",
-    "Task C: Resolve Until/Since completeness via PTL FMP (either import or prove from scratch)",
-    "All three tasks are independent; A and B can proceed without C; C is the theoretical blocker"
+    "Task A (design/research+impl): Redesign the time-ordering scheme so ordConstraints invariants hold (fix ordConstraints_strict). Independent of B and C.",
+    "Task B (focused impl): Prove temporalTruthLemma_propositional via generalized structural induction (subformula IHs), starting from green commit 7f052834 and the WIP reference. Independent of A and C. MUST be scoped to this one lemma to fit agent context.",
+    "Task C (FMP, theoretical): Establish PTL finite model property and derive temporalTruthLemma_untl/snce -> instDecidableValid, mirroring completed task 421. The hard blocker; gates final decidability."
   ],
-  "next_action_hint": "Mark task 301 [PARTIAL] in state.json. Spawn decomposition tasks A (ordConstraints_strict), B (propositional truth lemma), C (PTL FMP) for future work."
+  "next_action_hint": "Mark task 301 [PARTIAL]. Spawn decomposition tasks A (ordConstraints redesign), B (propositional truth lemma via generalized induction), C (PTL FMP decidability, mirror task 421). A and B can proceed immediately and independently; C is the theoretical gate for full completion. Do NOT re-dispatch a broad implementation agent — it will exhaust context again (3 exhaustions observed)."
 }

@@ -325,12 +325,12 @@
     {
       "project_number": 301,
       "project_name": "temporal_tableau",
-      "status": "implementing",
+      "status": "partial",
       "task_type": "cslib",
       "topic": "Temporal Logic",
       "description": "Implement tableau decision procedure for temporal logic (Cslib.Logic.Temporal.Formula) with until/since decomposition rules, time labels, and temporal ordering tracking. Most complex new tableau: until/since rules have no modal analogue, requiring branching decomposition with event-witness and guard-continue alternatives. Adapt patterns from bimodal decidability system (TimeOrdering, temporal rule structure, frame-class rules) but build fresh implementations on shared Foundations infrastructure. Include density and discreteness frame-class rules. Formula type has atom, bot, imp, untl, snce primitives using Lukasiewicz encoding. Files under Cslib/Logics/Temporal/Tableau/: Defs.lean, Rules.lean, TimeOrdering.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 2,000-2,500 lines.",
       "created": "2026-06-23T17:47:17Z",
-      "last_updated": "2026-06-24T21:49:28Z",
+      "last_updated": "2026-06-30T06:02:42Z",
       "next_artifact_number": 3,
       "artifacts": [
         {
@@ -346,7 +346,8 @@
       ],
       "dependencies": [],
       "parent_task": 296,
-      "session_id": "sess_1782337264_0e4361"
+      "session_id": "sess_1782337264_0e4361",
+      "blockers": "3 blockers (cannot complete this run): (A) ordConstraints_strict false as stated — time-ordering design flaw; (B) temporalTruthLemma_propositional exceeds single-agent context, needs generalized structural induction; (C) Until/Since decidability requires PTL finite model property (mirror completed task 421). Base cases committed sorry-free at 7f052834. Decomposition recommended — see .orchestrator-handoff.json."
     },
     {
       "project_number": 296,

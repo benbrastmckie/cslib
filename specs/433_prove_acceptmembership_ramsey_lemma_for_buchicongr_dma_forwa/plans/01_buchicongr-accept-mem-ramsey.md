@@ -1,7 +1,7 @@
 # Implementation Plan: Task #433
 
 - **Task**: 433 - prove_acceptmembership_ramsey_lemma_for_buchicongr_dma_forward
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 2.5 hours
 - **Dependencies**: None (parent task 241; required upstream lemmas already proved)
 - **Research Inputs**: Task description (self-contained API map); specs/241_mcnaughton_theorem/reports/03_spawn-analysis.md
@@ -145,7 +145,7 @@ phase depends on. No parallelism within this task.
 
 ---
 
-### Phase 2: Recurrent class and cover decomposition [NOT STARTED]
+### Phase 2: Recurrent class and cover decomposition [IN PROGRESS]
 
 **Goal**: Obtain the recurring `infOcc` class and the cover decomposition of `xs`, establishing
 the two facts the witness is built from.

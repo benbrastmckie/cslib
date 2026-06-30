@@ -1,7 +1,7 @@
 # Implementation Plan: Task #406 — Cross-Cutting Lint Fixes (Modal/Temporal/Bimodal/Foundations)
 
 - **Task**: 406 - Fix cross-cutting `lake lint` violations across Modal/Temporal/Bimodal/Foundations (33)
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 3 hours
 - **Dependencies**: None (zero file overlap with task 386; 386 is [COMPLETED] and supplies canonical target names)
 - **Research Inputs**: reports/01_crosscutting-lint-fixes.md

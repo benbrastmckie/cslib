@@ -378,10 +378,11 @@ open NA.Buchi in
 - **Initial state**: `Quotient.mk na.BuchiCongruence.eq []`, the class of the empty word.
 - **Transition**: `δ(q, a) = ⟦u ++ [a]⟧` for the representative `u` of class `q`, well-defined
   by `BuchiCongruence.right_cov` (right-appending a single symbol preserves Büchi congruence).
-- **Accept set**: `{S : Set Q | ∃ b ∈ S, ∃ a : Q, (buchiFamily (a, b) ∩ language na).Nonempty}`.
-  A Muller set `S` is accepting iff it contains a recurrent class `b` such that some Büchi
-  family element `buchiFamily (a, b)` intersects `language na`; by `buchiFamily_saturation`
-  this is equivalent to `buchiFamily (a, b) ⊆ language na`.
+- **Accept set**: `{S : Set Q | ∃ a ∈ S, ∃ b : Q, (buchiFamily (a, b) ∩ language na).Nonempty}`.
+  A Muller set `S` is accepting iff it contains a recurrent prefix class `a` (the first,
+  prefix index of `buchiFamily`, which is what the run's `infOcc` actually contains) such that
+  some Büchi family element `buchiFamily (a, b)` intersects `language na`; by
+  `buchiFamily_saturation` this is equivalent to `buchiFamily (a, b) ⊆ language na`.
 
 The language equality is stated as `buchiCongr_DMA_language_eq` below (BLOCKED, Phase 4). -/
 private noncomputable def buchiCongr_DMA [Inhabited Symbol]
@@ -431,30 +432,163 @@ private lemma buchiCongr_recurrentClass [Inhabited Symbol] {State : Type} [Finit
   exact ⟨a, b, hbb, hab, mem_infOcc.mpr
     (hfreq.mono fun k hk => (buchiCongr_DMA_run_eq na xs k).trans hk)⟩
 
-open NA.Buchi in
+open Finset NA.Buchi in
 /-- For any `xs ∈ language na`, the infimum-occurrence set of the Büchi-congruence DMA run
 contains a state that, paired with some partner state, gives a Büchi family element
 intersecting `language na`. This is the Ramsey/recurrence core of the forward inclusion of
-McNaughton's theorem, establishing `infOcc(run xs) ∈ (buchiCongr_DMA na).accept`. -/
+McNaughton's theorem, establishing `infOcc(run xs) ∈ (buchiCongr_DMA na).accept`.
+
+The proof re-runs the Ramsey argument of `buchiCongruence_recurrentPrefixClass`/
+`buchiFamily_cover` locally: a single application of `infinite_graph_ramsey` to the prefix
+coloring of `xs` yields both the recurring absorbing class `a` (via the exposed pairwise
+homogeneity `hcol`, not just the single-point recurrence exposed by `buchiCongr_recurrentClass`)
+*and* a concrete decomposition of `xs` itself into `na.buchiFamily (a, b)`, so the recurring
+class and the family witness come from the same Ramsey witness and are guaranteed consistent. -/
 private lemma buchiCongr_DMA_accept_mem [Inhabited Symbol] {State : Type} [Finite State]
     (na : NA.Buchi State Symbol) (xs : ωSequence Symbol) (hxs : xs ∈ language na) :
-    ∃ b ∈ ((buchiCongr_DMA na).run xs).infOcc,
-      ∃ a, ((na.buchiFamily (a, b) ⊓ language na).toSet).Nonempty := by
-  sorry
+    ∃ a ∈ ((buchiCongr_DMA na).run xs).infOcc,
+      ∃ b, ((na.buchiFamily (a, b) ⊓ language na).toSet).Nonempty := by
+  have : Finite (Quotient na.BuchiCongruence.eq) := buchiCongruence_fin_index
+  let color (t : Finset ℕ) : Quotient na.BuchiCongruence.eq :=
+    if h : t.Nonempty then ⟦ xs.extract (t.min' h) (t.max' h) ⟧ else ⟦ [] ⟧
+  obtain ⟨b, ns, h_ns, h_color⟩ := infinite_graph_ramsey color
+  obtain ⟨f, h_mono, rfl⟩ := strictMono_of_infinite h_ns
+  -- Pairwise homogeneity: any two indices in the homogeneous set color the same as `b`.
+  have hcol : ∀ i j : ℕ, i < j →
+      (⟦xs.extract (f i) (f j)⟧ : Quotient na.BuchiCongruence.eq) = b := by
+    intro i j hij
+    have hfij : f i < f j := h_mono hij
+    have h_le : f i ≤ f j := le_of_lt hfij
+    have h_ne : f i ≠ f j := Nat.ne_of_lt hfij
+    have h_ne' : ({f i, f j} : Finset ℕ).Nonempty := insert_nonempty _ _
+    have h_card : ({f i, f j} : Finset ℕ).card = 2 := card_pair h_ne
+    have h_sub : ↑({f i, f j} : Finset ℕ) ⊆ Set.range f := by
+      rw [coe_pair]; rintro x (rfl | rfl) <;> exact ⟨_, rfl⟩
+    have hbc := h_color _ h_card h_sub
+    have heval : color {f i, f j} = ⟦xs.extract (f i) (f j)⟧ := by
+      change (if h : ({f i, f j} : Finset ℕ).Nonempty then
+        ⟦xs.extract (({f i, f j} : Finset ℕ).min' h) (({f i, f j} : Finset ℕ).max' h)⟧
+        else ⟦[]⟧) = ⟦xs.extract (f i) (f j)⟧
+      rw [dif_pos h_ne', min'_pair, max'_pair, min_eq_left h_le, max_eq_right h_le]
+    rw [heval] at hbc
+    exact hbc
+  -- `b` is idempotent (the same 3-point argument as `buchiCongruence_recurrentPrefixClass`).
+  have hbb : b * b = b := calc
+    b * b
+        = ⟦xs.extract (f 0) (f 1)⟧ * ⟦xs.extract (f 1) (f 2)⟧ := by
+            rw [hcol 0 1 (by omega), hcol 1 2 (by omega)]
+      _ = ⟦xs.extract (f 0) (f 1) ++ xs.extract (f 1) (f 2)⟧ :=
+            (buchiCongruence_mk_append _ _).symm
+      _ = ⟦xs.extract (f 0) (f 2)⟧ := by
+            rw [append_extract_extract (le_of_lt (h_mono (by omega : 0 < 1)))
+                                       (le_of_lt (h_mono (by omega : 1 < 2)))]
+      _ = b := hcol 0 2 (by omega)
+  -- `a` is the prefix class right after the first loop iteration: it recurs at every later
+  -- breakpoint, and (unlike `b`) is literally attained by `(buchiCongr_DMA na).run xs`.
+  set a := (⟦xs.extract 0 (f 1)⟧ : Quotient na.BuchiCongruence.eq) with ha_def
+  have ha0b : a = ⟦xs.extract 0 (f 0)⟧ * b := by
+    rw [ha_def, show xs.extract 0 (f 1) = xs.extract 0 (f 0) ++ xs.extract (f 0) (f 1)
+          from (append_extract_extract (Nat.zero_le _)
+            (le_of_lt (h_mono (by omega : 0 < 1)))).symm,
+        buchiCongruence_mk_append, hcol 0 1 (by omega)]
+  have hab : a * b = a := by rw [ha0b, mul_assoc, hbb]
+  -- `a` recurs as a prefix class infinitely often.
+  have hfreq : ∃ᶠ k in atTop, (⟦xs.extract 0 k⟧ : Quotient na.BuchiCongruence.eq) = a := by
+    rw [frequently_iff_strictMono]
+    refine ⟨fun m => f (m + 1), fun i j h => h_mono (Nat.succ_lt_succ h), fun m => ?_⟩
+    rw [show xs.extract 0 (f (m + 1)) = xs.extract 0 (f 0) ++ xs.extract (f 0) (f (m + 1))
+          from (append_extract_extract (Nat.zero_le _)
+            (h_mono.monotone (Nat.zero_le _))).symm,
+        buchiCongruence_mk_append, hcol 0 (m + 1) (Nat.zero_lt_succ m), ← ha0b]
+  -- Transport `hfreq` to `infOcc` of the DMA run via `buchiCongr_DMA_run_eq`.
+  have ha_infOcc : a ∈ ((buchiCongr_DMA na).run xs).infOcc :=
+    mem_infOcc.mpr (hfreq.mono fun k hk => (buchiCongr_DMA_run_eq na xs k).trans hk)
+  -- `xs` itself decomposes into `na.buchiFamily (a, b)`: prefix up to the second breakpoint
+  -- has class `a`, and every later segment (between consecutive breakpoints) has class `b`.
+  have hg_mono : StrictMono (fun k => f (k + 1)) := fun i j h => h_mono (Nat.succ_lt_succ h)
+  have hmem : xs ∈ na.buchiFamily (a, b) := by
+    apply mem_buchiFamily.mpr
+    refine ⟨xs.take (f 1), (xs.drop (f 1)).toSegs (fun k => f (k + 1) - f 1), ?_, ?_, ?_⟩
+    · show xs.take (f 1) ∈ na.BuchiCongruence.eqvCls a
+      simp only [RightCongruence.eqvCls, Set.mem_preimage, Set.mem_singleton_iff, ha_def,
+        extract_eq_take]
+    · intro k
+      have h_le : f 1 ≤ f (k + 1) := hg_mono.monotone (Nat.zero_le _)
+      have h_le' : f 1 ≤ f (k + 2) := hg_mono.monotone (by omega)
+      have h_eq1 : f 1 + (f (k + 1) - f 1) = f (k + 1) := by omega
+      have h_eq2 : f 1 + (f (k + 2) - f 1) = f (k + 2) := by omega
+      simp only [Language.mem_sub_one, toSegs_def, extract_drop, h_eq1, h_eq2]
+      refine ⟨?_, ?_⟩
+      · show (⟦xs.extract (f (k + 1)) (f (k + 2))⟧ : Quotient na.BuchiCongruence.eq) = b
+        exact hcol (k + 1) (k + 2) (by omega)
+      · simp only [ne_eq, extract_eq_nil_iff, not_le]
+        exact h_mono (by omega)
+    · grind [Nat.base_zero_strictMono hg_mono]
+  exact ⟨a, ha_infOcc, b, xs, hmem, hxs⟩
 
 open NA.Buchi in
 private lemma buchiCongr_DMA_language_forward [Inhabited Symbol] {State : Type} [Finite State]
     (na : NA.Buchi State Symbol) :
     language na ⊆ language (buchiCongr_DMA na) := by
   intro xs hxs
-  rw [ωAcceptor.mem_language]
-  simp only [DA.Muller.instωAcceptor]
+  show ((buchiCongr_DMA na).run xs).infOcc ∈ (buchiCongr_DMA na).accept
   -- Goal: infOcc(run xs) ∈ accept
   -- From buchiFamily_cover: xs ∈ buchiFamily (p, q) for some idempotent q
   -- The run visits p*q = a at segment boundaries infinitely often
   -- buchiCongr_recurrentClass gives a,b with b*b=b, a*b=a, a ∈ infOcc
   -- We need to show infOcc ∈ {S | ∃ b ∈ S, ∃ a, (buchiFamily (a,b) ∩ language na).Nonempty}
   sorry
+
+open NA.Buchi in
+/-- For any `xs` in the language of `buchiCongr_DMA na`, `xs` lies in `language na`.
+Backward inclusion of `buchiCongr_DMA_language_eq`: Muller acceptance unfolds to an
+accept-set witness, from which `buchiFamily_saturation` and `buchiFamily_cover` transfer
+language membership from the witness to `xs`. -/
+private lemma buchiCongr_DMA_language_backward [Inhabited Symbol] {State : Type} [Finite State]
+    (na : NA.Buchi State Symbol) :
+    language (buchiCongr_DMA na) ⊆ language na := by
+  intro xs hxs
+  show xs ∈ language na
+  change ((buchiCongr_DMA na).run xs).infOcc ∈ (buchiCongr_DMA na).accept at hxs
+  -- hxs : ((buchiCongr_DMA na).run xs).infOcc ∈ (buchiCongr_DMA na).accept
+  simp only [buchiCongr_DMA, Set.mem_setOf_eq] at hxs
+  obtain ⟨b, hb_inf, a, hfam⟩ := hxs
+  -- hb_inf : b ∈ ((buchiCongr_DMA na).run xs).infOcc
+  -- hfam : ((na.buchiFamily (a, b) ⊓ language na).toSet).Nonempty
+  -- b is a prefix class appearing infinitely often; buchiFamily_saturation makes the family a
+  -- subset of language na; obtain xs's own cover family and transfer membership.
+  have hsat := buchiFamily_saturation (na := na)
+  have hcover := buchiFamily_cover (na := na)
+  rw [mem_infOcc] at hb_inf
+  -- hb_inf : ∃ᶠ k in atTop, ((buchiCongr_DMA na).run xs) k = b
+  -- Convert via buchiCongr_DMA_run_eq: the run state at k is ⟦xs.extract 0 k⟧
+  have hb_prefix : ∃ᶠ k in atTop,
+      (⟦xs.extract 0 k⟧ : Quotient na.BuchiCongruence.eq) = b := by
+    apply hb_inf.mono
+    intro k hk
+    rw [← hk]
+    exact (buchiCongr_DMA_run_eq na xs k).symm
+  -- Get the cover decomposition: xs ∈ buchiFamily (a₀, b₀) for some (a₀, b₀)
+  have hxs_cover : xs ∈ (⨆ i, na.buchiFamily i) := by
+    rw [hcover]; trivial
+  rw [ωLanguage.mem_iSup] at hxs_cover
+  obtain ⟨⟨a₀, b₀⟩, hxs_fam⟩ := hxs_cover
+  -- Apply buchiFamily_saturation via saturates_eq_biUnion to reduce to finding a good cover index
+  show xs ∈ (language na).toSet
+  rw [show (language na).toSet =
+      ⋃ i ∈ {i | ((na.buchiFamily i).toSet ∩ (language na).toSet).Nonempty},
+        (na.buchiFamily i).toSet from
+      Set.saturates_eq_biUnion hsat (by
+        ext xs; simp [ωLanguage.mem_iSup, hcover])]
+  simp only [Set.mem_iUnion, Set.mem_setOf_eq, exists_prop]
+  -- Use (a, b) from the accept witness as the good index
+  refine ⟨(a, b), ?_, ?_⟩
+  · -- (buchiFamily (a,b) ∩ language na).Nonempty: direct from hfam
+    convert hfam using 1
+    ext ys
+    simp [ωLanguage.toSet, Set.mem_inter_iff]
+  · -- xs ∈ buchiFamily (a, b): need to show from b ∈ infOcc(run xs)
+    sorry
 
 open NA.Buchi in
 /-- **[BLOCKED — Phase 4, task 241]**: `buchiCongr_DMA na` recognizes the same ω-language

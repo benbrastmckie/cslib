@@ -1,104 +1,85 @@
 {
-  "session_id": "sess_1782838873_48a805",
+  "session_id": "sess_1782843132_748805",
   "task_numbers": [
-    427,
-    426,
-    425,
-    301,
-    439
+    433,
+    434,
+    435,
+    436,
+    241
   ],
   "waves": [
     [
-      406,
-      180,
-      321
+      433
+    ],
+    [
+      434
+    ],
+    [
+      435
+    ],
+    [
+      436
+    ],
+    [
+      241
     ]
   ],
-  "max_cycles": 15,
-  "cycle_count": 3,
+  "dependency_graph": {
+    "433": [],
+    "434": [
+      433
+    ],
+    "435": [
+      433,
+      434
+    ],
+    "436": [
+      434,
+      435
+    ],
+    "241": [
+      433,
+      434,
+      435,
+      436
+    ]
+  },
+  "max_cycles": 25,
+  "cycle_count": 6,
   "failed_tasks": [],
-  "completed_tasks": [],
+  "completed_tasks": [
+    406
+  ],
   "current_statuses": {
-    "427": "partial",
-    "426": "blocked",
-    "439": "researched",
-    "425": "not_started",
-    "301": "blocked"
+    "406": "completed",
+    "180": "planned",
+    "321": "implementing"
   },
   "task_dirs": {
-    "406": "specs/406_fix_crosscutting_lint_modal_temporal_bimodal_foundations",
-    "180": "specs/180_temporal_primitive_always_historically",
-    "321": "specs/321_code_hygiene_logics_foundations",
-    "439": "specs/439_refactor_processnext_to_mutual_def_and_prove_instantstrict_t"
+    "433": "specs/433_prove_acceptmembership_ramsey_lemma_for_buchicongr_dma_forwa",
+    "434": "specs/434_prove_backward_inclusion_buchicongr_dma_language_backward",
+    "435": "specs/435_replace_sorry_in_buchicongr_dma_language_forward_using_accep",
+    "436": "specs/436_combine_inclusions_into_buchicongr_dma_language_eq_and_close",
+    "241": "specs/241_mcnaughton_theorem"
   },
   "research_agents": {
-    "406": "cslib-research-agent",
-    "180": "cslib-research-agent",
-    "321": "cslib-research-agent",
-    "439": "cslib-research-agent"
+    "433": "cslib-research-agent",
+    "434": "cslib-research-agent",
+    "435": "cslib-research-agent",
+    "436": "cslib-research-agent",
+    "241": "cslib-research-agent"
   },
   "implement_agents": {
-    "406": "cslib-implementation-agent",
-    "180": "cslib-implementation-agent",
-    "321": "cslib-implementation-agent",
-    "439": "cslib-implementation-agent"
+    "433": "cslib-implementation-agent",
+    "434": "cslib-implementation-agent",
+    "435": "cslib-implementation-agent",
+    "436": "cslib-implementation-agent",
+    "241": "cslib-implementation-agent"
   },
-  "dependency_graph": {
-    "406": [],
-    "180": [
-      "406"
-    ],
-    "439": [
-      "180"
-    ],
-    "426": [
-      "439"
-    ],
-    "427": [
-      "180",
-      "426"
-    ],
-    "425": [
-      "426",
-      "427"
-    ],
-    "301": [
-      "426",
-      "427",
-      "425"
-    ],
-    "321": [
-      "301"
-    ]
-  },
-  "territory_serialize": [
-    [
-      "427",
-      "439"
-    ]
-  ],
   "notes": {
-    "180": "implement attempt 1 overflowed context (Prompt too long); 7 Temporal WIP files stashed at stash@{0} (task180-wip-primitive-gh) to unblock 406 build; resume after 406 commits then git stash pop",
-    "stray_files": "14 test_*.lean scratch at repo root belong to modal-tableau stream (task 299), left untouched"
-  },
-  "paused": true,
-  "pause_reason": "427 imp-case proof complete + sorry-free but build red due to task 180 (allFuture/allPast Formula constructors added; Defs.lean missing cases). Waiting for 180 to restore green build, then verify+commit 427 -> dispatch 439 -> 426 -> 425 -> 301.",
-  "pause_backup": "scratchpad/427_Completeness.lean.bak + worktree_backup_*.patch",
-  "external_dependencies": {
-    "427": [
-      180
-    ],
-    "439": [
-      180
-    ],
-    "180": [
-      406
-    ],
-    "321": [
-      301
-    ]
-  },
-  "dependency_note": "Added deps to avoid file-territory clashes: 180->406 (user-stated), 427->180 (Formula+Completeness.lean), 439->180 (Saturation rules+Completeness wire), 321->301 (hygiene reshapes temporal files last). Safe order: 406,180,427,439,426,425,301,321.",
-  "serialized_chain": "406 -> 180 -> 439 -> 426 -> 427 -> 425 -> 301 -> 321",
-  "resolution_note": "Wave-0 batch did not converge: 426/427 overflowed; 426 phase-3 spawned task 439; 427 imp-case still open (6 overflows, work clobbered/reverted by concurrent session). Added territory edge 427->426 so the Temporal group is now a total order (one task per wave). 427 handoff updated with restart-cleanup instructions. Do NOT re-orchestrate this group in parallel; respect the chain."
+    "406": "COMPLETED d11d0692",
+    "321": "phases 1-3 committed green (privatize x2 + GNBA barrel-split 2344a765); GNBA pattern validated as template; phases 4-7 = 4 Chronicle mega-file splits remain (high overflow/stall risk)",
+    "180": "WIP exported to specs/180.../wip/01_primitive-gh-wip.patch (durable); also in stash@{0}; needs --hard per-phase; breaks Temporal build so must run alone",
+    "env": "repo under heavy concurrent build load from other orchestration sessions (task 299/433) -> agents stalling on lake build watchdog"
+  }
 }

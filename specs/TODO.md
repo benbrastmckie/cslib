@@ -1,5 +1,5 @@
 ---
-next_project_number: 431
+next_project_number: 433
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 431
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,299,321,386,387,396,400,404,406,407,415,419,426,427,428,430 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,299,321,386,387,396,400,404,406,407,415,419,426,427,428,430,431,432 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 2 | 39,40,181,215,300,317,390,405,409,425,429 | 36,37,180,299,387,404,407,426,427,428,430 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,241,275,301,375,389 | 39,40,317,425,429 | Bimodal Porting, Foundations, Temporal Logic, ... |
 | 4 | 391,392,412,413,414 | 41,181,215,241,275,300,301,321,375,386,387,389 | Foundations, Code Hygiene, PL-Docs, ... |
@@ -50,7 +50,7 @@ next_project_number: 431
     └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 427 [NOT STARTED] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
   └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model (see above)
-428 [RESEARCHED] — Add named lemmas to Cslib/Computability/Languages/Congruences/Rig
+428 [IMPLEMENTING] — Add named lemmas to Cslib/Computability/Languages/Congruences/Rig
   └─ 429 [RESEARCHED] — Prove a named lemma (suggested name: `buchiCongr_recurrentClass` 
     └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
@@ -64,12 +64,12 @@ next_project_number: 431
 
 ### PL Tableau
 
-430 [RESEARCHED] — Prove the atom-persistence / upward-closure structural lemma for 
+430 [RESEARCHING] — Prove the atom-persistence / upward-closure structural lemma for 
   └─ 317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
 
 ### PL Hygiene
 
-386 [NOT STARTED] — [Refreshed by post-merge vet sess_1782671052_6af6a1; supersedes t
+386 [PLANNED] — [Refreshed by post-merge vet sess_1782671052_6af6a1; supersedes t
   └─ 392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls
   └─ 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
 387 [BLOCKED] — [Refreshed post-merge vet.] DECISION REQUIRES UPSTREAM AGREEMENT.
@@ -100,11 +100,34 @@ next_project_number: 431
   └─ 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 415 [RESEARCHED] — Audit how the structure-first propositional base (MPL/IPL/CPL: pr
 
+### Uncategorized
+
+431 [NOT STARTED] — Audit the ~6 'sorry' occurrences that the 2026-06-30 review found
+432 [NOT STARTED] — Fix .claude/scripts/roadmap-integration.sh which aborts with '/et
+
 ## Tasks
+
+### 432. Fix roadmap integration argv overflow
+- **Status**: [NOT STARTED]
+- **Task Type**: meta
+- **Dependencies**: None
+
+**Description**: Fix .claude/scripts/roadmap-integration.sh which aborts with '/etc/profiles/per-user/benjamin/bin/python3: Argument list too long' at line 352 during /review. The script appears to pass file content (state.json/ROADMAP.md) as a python argv argument; pass via stdin or a temp file path instead so roadmap auto-annotation works again. Source: specs/reviews/review-2026-06-30.md low issue 2.
+
+---
+
+### 431. Audit unowned foundational sorries
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Audit the ~6 'sorry' occurrences that the 2026-06-30 review found with no clear owning task: Cslib/Foundations/Order/HilbertAlgebra.lean, Cslib/Foundations/Logic/Metalogic/GenericMCS.lean, Cslib/Languages/LambdaCalculus/Named/Untyped/Basic.lean, Cslib/Logics/Propositional/Semantics/Algebra/CanAlgComplete.lean, Cslib/Logics/LTL/Semantics/GNBA.lean, and Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean (2). For each: determine whether it is covered by an existing blocked task (36/37/215/275/317/425-427); if genuinely unowned, either close it or document a deferral pointer. Foundational sorries can leak sorryAx into downstream #print axioms checks (CanAlgComplete/GNBA feed completeness/automata). Source: specs/reviews/review-2026-06-30.md medium issue 2.
+
+---
 
 ### 430. Prove atom persistence upward closure for intexpan
 - **Effort**: 2-3 hours
-- **Status**: [RESEARCHED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: PL-Tableau
 - **Dependencies**: None
@@ -189,11 +212,12 @@ After implementation:
 
 ### 428. Expose buchicongruence eqvcls monoid and idempotent lemmas
 - **Effort**: 2-3 hours
-- **Status**: [RESEARCHED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
 - **Research**: [241_mcnaughton_theorem/reports/02_spawn-analysis.md]
+- **Plan**: [428_expose_buchicongruence_eqvcls_monoid_and_idempotent_lemmas/plans/01_buchi-monoid-idempotent-lemmas.md]
 
 **Description**: Add named lemmas to Cslib/Computability/Languages/Congruences/RightCongruence.lean and/or BuchiCongruence.lean exposing the multiplicative structure on BuchiCongruence quotient classes: (1) the well-definedness rewrite `⟦u ++ v⟧ = ⟦u⟧ · ⟦v⟧` (equivalently `Quotient.mk _ (u ++ v) = Quotient.mk _ u * Quotient.mk _ v`), confirming the `Mul` instance on `Quotient BuchiCongruence.eq` acts as concatenation; (2) the idempotent-power collapse lemma: if `b * b = b` (b is idempotent) then `b ^ k = b` for all `k ≥ 1`; and (3) the absorption corollary: if `b * b = b` and `a * b = a` then `a * b ^ k = a` for all `k`. These lemmas are purely algebraic about the existing `RightCongruence` monoid structure and carry no research-grade difficulty. They are the algebraic substrate needed by the Ramsey recurrent-class lemma (task INFRA-2) and ultimately by the forward direction of `buchiCongr_DMA_language_eq` in task 241. Files in scope: `Cslib/Computability/Languages/Congruences/RightCongruence.lean`, `Cslib/Computability/Languages/Congruences/BuchiCongruence.lean`. CI must pass green with `lake build` and `lake exe lint-style`.
 
@@ -439,10 +463,12 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 386. Fix Propositional-specific lake lint violations (21, post-merge)
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: PL-Hygiene
 - **Dependencies**: Task 395
+- **Research**: [386_fix_lake_lint_errors_propositional/reports/01_pl-lint-violations-fix-map.md]
+- **Plan**: [386_fix_lake_lint_errors_propositional/plans/01_fix-pl-lint-violations.md]
 
 **Description**: [Refreshed by post-merge vet sess_1782671052_6af6a1; supersedes the pre-merge scope.] Fix the 21 PL-specific lake lint violations (hard CI gate for a clean repo push). (a) defsWithUnderscore (13) -> lowerCamelCase: GenericMCSBridge.lean:133 deriv_tree_to_list, :165 unfold_listImp_in_tree, :192 list_deriv_to_tree; SequentCalculus/LJ/CutElimination.lean:116/225/350 ljCutAdm_principal_andR/orR/impR, :462/543 ljCutAdm_left/right; SequentCalculus/LK/CutElimination.lean:145/293/437 cutAdm_right_andR/orR/impR, :586/708 cutAdm_right/left. (b) defLemma (1): GenericMCSBridge.lean:133 deriv_tree_to_list def->lemma (same decl as the rename). (c) docBlame (3): docstrings for Tableau/Classical/Expansion.lean:125 classicalExpandBranches.processNext, Tableau/Intuitionistic/Expansion.lean:169 intExpandBranches.go, Tableau/Intuitionistic/Rules.lean:91 isAccessible.go. (d) unusedArguments (3): targeted @[nolint unusedArguments] + comment: Metalogic/DeductionTheorem.lean:85 deductionWithMem arg9 _hA, Normalization/Termination.lean:41 conclusionGrounded arg6 _d, Tableau/Intuitionistic/Soundness.lean:1643 intBotForces arg1. (e) simpNF (1): Subformula.lean:173 vars_neg LHS not simp-normal (rewrite LHS or @[nolint simpNF]). Coordinate GenericMCSBridge renames with the cross-cutting task (403). Verify `lake lint` PL-clean. Source: specs/369_*/.vet-findings.json. [395-reconciled: task 386 OWNS the LK/LJ cutAdm_*/ljCutAdm_* underscore renames (defsWithUnderscore); task 392 drops them. Re-run `lake lint` after the build is green (task 385/IntFMPSpike) to refresh the exact violation set before fixing.]
 

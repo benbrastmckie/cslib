@@ -1,5 +1,5 @@
 {
-  "next_project_number": 431,
+  "next_project_number": 433,
   "active_projects": [
     {
       "project_number": 406,
@@ -19,14 +19,25 @@
     {
       "project_number": 386,
       "project_name": "fix_lake_lint_errors_propositional",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "cslib",
       "title": "Fix Propositional-specific lake lint violations (21, post-merge)",
       "description": "[Refreshed by post-merge vet sess_1782671052_6af6a1; supersedes the pre-merge scope.] Fix the 21 PL-specific lake lint violations (hard CI gate for a clean repo push). (a) defsWithUnderscore (13) -> lowerCamelCase: GenericMCSBridge.lean:133 deriv_tree_to_list, :165 unfold_listImp_in_tree, :192 list_deriv_to_tree; SequentCalculus/LJ/CutElimination.lean:116/225/350 ljCutAdm_principal_andR/orR/impR, :462/543 ljCutAdm_left/right; SequentCalculus/LK/CutElimination.lean:145/293/437 cutAdm_right_andR/orR/impR, :586/708 cutAdm_right/left. (b) defLemma (1): GenericMCSBridge.lean:133 deriv_tree_to_list def->lemma (same decl as the rename). (c) docBlame (3): docstrings for Tableau/Classical/Expansion.lean:125 classicalExpandBranches.processNext, Tableau/Intuitionistic/Expansion.lean:169 intExpandBranches.go, Tableau/Intuitionistic/Rules.lean:91 isAccessible.go. (d) unusedArguments (3): targeted @[nolint unusedArguments] + comment: Metalogic/DeductionTheorem.lean:85 deductionWithMem arg9 _hA, Normalization/Termination.lean:41 conclusionGrounded arg6 _d, Tableau/Intuitionistic/Soundness.lean:1643 intBotForces arg1. (e) simpNF (1): Subformula.lean:173 vars_neg LHS not simp-normal (rewrite LHS or @[nolint simpNF]). Coordinate GenericMCSBridge renames with the cross-cutting task (403). Verify `lake lint` PL-clean. Source: specs/369_*/.vet-findings.json. [395-reconciled: task 386 OWNS the LK/LJ cutAdm_*/ljCutAdm_* underscore renames (defsWithUnderscore); task 392 drops them. Re-run `lake lint` after the build is green (task 385/IntFMPSpike) to refresh the exact violation set before fixing.]",
       "created": "2026-06-28T12:53:27Z",
       "last_updated": "2026-06-28T18:34:49Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/386_fix_lake_lint_errors_propositional/reports/01_pl-lint-violations-fix-map.md",
+          "summary": "20 PL lint violations fix-map (refreshed: conclusionGrounded already fixed)"
+        },
+        {
+          "type": "plan",
+          "path": "specs/386_fix_lake_lint_errors_propositional/plans/01_fix-pl-lint-violations.md",
+          "summary": "4-phase mechanical lint-fix plan; waves [[1],[2,3,4]]"
+        }
+      ],
       "session_id": "sess_1782651207_1e893c_386",
       "dependencies": [
         395
@@ -1012,7 +1023,7 @@
     {
       "project_number": 428,
       "project_name": "expose_buchicongruence_eqvcls_monoid_and_idempotent_lemmas",
-      "status": "researched",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Add named lemmas to Cslib/Computability/Languages/Congruences/RightCongruence.lean and/or BuchiCongruence.lean exposing the multiplicative structure on BuchiCongruence quotient classes: (1) the well-definedness rewrite `⟦u ++ v⟧ = ⟦u⟧ · ⟦v⟧` (equivalently `Quotient.mk _ (u ++ v) = Quotient.mk _ u * Quotient.mk _ v`), confirming the `Mul` instance on `Quotient BuchiCongruence.eq` acts as concatenation; (2) the idempotent-power collapse lemma: if `b * b = b` (b is idempotent) then `b ^ k = b` for all `k ≥ 1`; and (3) the absorption corollary: if `b * b = b` and `a * b = a` then `a * b ^ k = a` for all `k`. These lemmas are purely algebraic about the existing `RightCongruence` monoid structure and carry no research-grade difficulty. They are the algebraic substrate needed by the Ramsey recurrent-class lemma (task INFRA-2) and ultimately by the forward direction of `buchiCongr_DMA_language_eq` in task 241. Files in scope: `Cslib/Computability/Languages/Congruences/RightCongruence.lean`, `Cslib/Computability/Languages/Congruences/BuchiCongruence.lean`. CI must pass green with `lake build` and `lake exe lint-style`.",
       "effort": "2-3 hours",
@@ -1020,14 +1031,20 @@
       "topic": "Temporal Logic",
       "dependencies": [],
       "created": "2026-06-30T10:57:07Z",
-      "last_updated": "2026-06-30T10:57:07Z",
+      "last_updated": "2026-06-30T11:14:52Z",
       "artifacts": [
         {
           "type": "research",
           "path": "specs/241_mcnaughton_theorem/reports/02_spawn-analysis.md",
           "summary": "Spawn analysis from parent task 241"
+        },
+        {
+          "path": "specs/428_expose_buchicongruence_eqvcls_monoid_and_idempotent_lemmas/plans/01_buchi-monoid-idempotent-lemmas.md",
+          "type": "plan",
+          "summary": "Phased plan: monoid instance + idempotent lemmas"
         }
-      ]
+      ],
+      "session_id": "sess_1782817758_a52a5d_428"
     },
     {
       "project_number": 429,
@@ -1099,7 +1116,7 @@
     {
       "project_number": 430,
       "project_name": "prove_atom_persistence_upward_closure_for_intexpan",
-      "status": "researched",
+      "status": "researching",
       "task_type": "cslib",
       "description": "Prove the atom-persistence / upward-closure structural lemma for open branches produced by `intExpandBranches`, and use it to discharge the two validity-bridge sorries in task 317.\n\n## Context\n\nTask 317 has two remaining validity-bridge sorries:\n- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:112` (`intuitionisticTableau_complete`): needs `IValid φ → ∀ b, IForces (intExtractValuation b) (fun _ => False) 0 φ`.\n- `Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:109` (`minimalTableau_complete`): needs `MValid φ → ∀ b, IForces (intExtractValuation b) (minBranchBotForces b) 0 φ`.\n\nInstantiating `IValid`/`MValid` at the branch model (World = Nat, val = intExtractValuation b) requires supplying upward-closure of `intExtractValuation b`:\n  `T(atom p)@w ∈ b ∧ w ≤ w' → T(atom p)@w' ∈ b`\n\nThis atom-persistence property is NOT in `IBranchSaturation` (which covers compound-formula saturation only). The orchestrator handoff `.orchestrator-handoff.json` identifies this as blocker B3.\n\n## What needs to be proved\n\nProve `intExpandBranches_openBranch_atom_persist` (or equivalent): if `intExpandBranches ... = .openBranch b`, then `intExtractValuation b` is upward-closed under the appropriate world accessibility relation.\n\nKey structural facts to use:\n- `propagatePersistence` (Rules.lean) copies ALL T(α) from parent world w to fresh child world w' when F(φ→ψ)@w fires (`intFImpRule`). So atoms propagate from direct parents to direct children.\n- `applyAllTImpRules`/`applyPersistenceFixpoint` (Expansion.lean) run the T(φ→ψ) modus-ponens fixpoint across the edge list. Atoms are not directly handled here, but the T(→) consequences of atom propagation are.\n- The explicit edge list `edges : IEdges` tracks `(child, parent)` pairs; `isAccessible edges w w'` is the reachability relation.\n\n## Design decision the implementer must make\n\nThere are two viable paths:\n\n**Path A (recommended if provable)**: Prove upward-closure under `≤` on Nat. This is the current countermodel's Preorder. Requires showing that whenever `T(atom p)@w ∈ b` and `w' > w` is a world on the branch, then `T(atom p)@w' ∈ b`. This follows from transitivity of `propagatePersistence` across the world tree, because new worlds are assigned strictly increasing labels and each inherits all T(α) from its parent. Verify with `lean_goal` at the sorry site whether this holds for the expansion invariant.\n\n**Path B (fallback)**: If `≤` on Nat does not match the edge-list accessibility (sibling worlds may share `≤` ordering but not be accessible to each other), define the countermodel Kripke accessibility using `isAccessible edges` instead of `≤`. This requires:\n- Defining a custom `Preorder` on Nat for the specific branch `b` and its edge list (or passing the edge list from `openBranch_countermodel` down to the validity bridges).\n- Proving `intExtractValuation b` is upward-closed under `isAccessible edges`.\n- Updating `openBranch_countermodel` to pass the edge list and use `isAccessible`-based Preorder.\n\n## Exposition target\n\nExpose the atom-persistence fact as ONE of:\n1. A new field `sat_atom_persist` in `IBranchSaturation` (simplest if it can be proved from the expansion).\n2. A standalone `private lemma intExpandBranches_openBranch_atom_persist` in `Scheme.lean`.\n3. A wrapper helper `intExtractValuation_uc` proved inline at the sorry sites.\n\nThe chosen form must be sufficient to supply the upward-closure argument to `IValid`/`MValid` instantiation in both `intuitionisticTableau_complete` and `minimalTableau_complete`.\n\n## Files to modify\n\n- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` — add the persistence structural lemma (or new `IBranchSaturation` field + proof in `intExpandBranches_openBranch_sat`).\n- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean` — fill sorry at ~L112.\n- `Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean` — fill sorry at ~L109.\n- Possibly `Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean` and/or `Rules.lean` if invariants need to be stated there.\n\n## Non-goals\n\n- Do NOT touch the T(imp) sorry at Scheme.lean:330 (task 317's remaining obligation).\n- Do NOT touch the `intExpandBranches_openBranch_sat` leaf sorries at Scheme.lean:481/536/550 (task 317's remaining obligation).\n- Do NOT touch `*/Soundness.lean` (task 316 territory).\n\n## Verification\n\nAfter implementation:\n- `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Completeness` and `…Minimal.Completeness` succeed with the two validity-bridge sorries gone.\n- `grep -n sorry Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean` returns nothing.\n- `grep -n sorry Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean` returns nothing.\n- Build remains green (no regressions in Scheme.lean or Soundness files).",
       "effort": "2-3 hours",
@@ -1107,14 +1124,33 @@
       "topic": "PL-Tableau",
       "dependencies": [],
       "created": "2026-06-30T11:02:39Z",
-      "last_updated": "2026-06-30T11:11:39Z",
+      "last_updated": "2026-06-30T11:14:51Z",
       "artifacts": [
         {
           "type": "report",
           "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/reports/01_atom-persistence-upward-closure.md",
           "summary": "Seed research report: atom-persistence/upward-closure; identifies the ≤-on-ℕ vs edge-accessibility design tension and the research agenda."
         }
-      ]
+      ],
+      "session_id": "sess_1782818058_465873"
+    },
+    {
+      "project_number": 431,
+      "project_name": "audit_unowned_foundational_sorries",
+      "status": "not_started",
+      "task_type": "cslib",
+      "priority": "medium",
+      "description": "Audit the ~6 'sorry' occurrences that the 2026-06-30 review found with no clear owning task: Cslib/Foundations/Order/HilbertAlgebra.lean, Cslib/Foundations/Logic/Metalogic/GenericMCS.lean, Cslib/Languages/LambdaCalculus/Named/Untyped/Basic.lean, Cslib/Logics/Propositional/Semantics/Algebra/CanAlgComplete.lean, Cslib/Logics/LTL/Semantics/GNBA.lean, and Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean (2). For each: determine whether it is covered by an existing blocked task (36/37/215/275/317/425-427); if genuinely unowned, either close it or document a deferral pointer. Foundational sorries can leak sorryAx into downstream #print axioms checks (CanAlgComplete/GNBA feed completeness/automata). Source: specs/reviews/review-2026-06-30.md medium issue 2.",
+      "created": "2026-06-30T11:17:18Z"
+    },
+    {
+      "project_number": 432,
+      "project_name": "fix_roadmap_integration_argv_overflow",
+      "status": "not_started",
+      "task_type": "meta",
+      "priority": "low",
+      "description": "Fix .claude/scripts/roadmap-integration.sh which aborts with '/etc/profiles/per-user/benjamin/bin/python3: Argument list too long' at line 352 during /review. The script appears to pass file content (state.json/ROADMAP.md) as a python argv argument; pass via stdin or a temp file path instead so roadmap auto-annotation works again. Source: specs/reviews/review-2026-06-30.md low issue 2.",
+      "created": "2026-06-30T11:17:18Z"
     }
   ],
   "repository_health": {

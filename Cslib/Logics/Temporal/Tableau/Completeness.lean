@@ -245,6 +245,46 @@ private lemma Formula.one_le_complexity (φ : Formula Atom) : 1 ≤ φ.complexit
   unfold Formula.complexity
   split <;> omega
 
+omit [Hashable Atom] in
+/-- Convert a `b.any` positive membership witness to list membership. -/
+private lemma any_pos_mem (b : TBranch Atom) (t : TimeIndex) (φ : Formula Atom)
+    (h : b.any (fun sf => sf.sign == .pos && sf.label == t && sf.formula == φ) = true) :
+    (⟨.pos, φ, t⟩ : TSF Atom) ∈ b := by
+  rw [List.any_eq_true] at h
+  obtain ⟨sf, hmem, hcond⟩ := h
+  simp only [Bool.and_eq_true, beq_iff_eq] at hcond
+  obtain ⟨⟨hsign, hlabel⟩, hform⟩ := hcond
+  obtain ⟨s, fm, l⟩ := sf
+  simp_all
+
+omit [Hashable Atom] in
+/-- Convert a `b.any` negative membership witness to list membership. -/
+private lemma any_neg_mem (b : TBranch Atom) (t : TimeIndex) (φ : Formula Atom)
+    (h : b.any (fun sf => sf.sign == .neg && sf.label == t && sf.formula == φ) = true) :
+    (⟨.neg, φ, t⟩ : TSF Atom) ∈ b := by
+  rw [List.any_eq_true] at h
+  obtain ⟨sf, hmem, hcond⟩ := h
+  simp only [Bool.and_eq_true, beq_iff_eq] at hcond
+  obtain ⟨⟨hsign, hlabel⟩, hform⟩ := hcond
+  obtain ⟨s, fm, l⟩ := sf
+  simp_all
+
+omit [Hashable Atom] in
+/-- Convert list membership to a `b.any` positive witness. -/
+private lemma mem_to_any_pos (b : TBranch Atom) (t : TimeIndex) (φ : Formula Atom)
+    (h : (⟨.pos, φ, t⟩ : TSF Atom) ∈ b) :
+    b.any (fun sf => sf.sign == .pos && sf.label == t && sf.formula == φ) = true := by
+  rw [List.any_eq_true]
+  exact ⟨⟨.pos, φ, t⟩, h, by simp⟩
+
+omit [Hashable Atom] in
+/-- Convert list membership to a `b.any` negative witness. -/
+private lemma mem_to_any_neg (b : TBranch Atom) (t : TimeIndex) (φ : Formula Atom)
+    (h : (⟨.neg, φ, t⟩ : TSF Atom) ∈ b) :
+    b.any (fun sf => sf.sign == .neg && sf.label == t && sf.formula == φ) = true := by
+  rw [List.any_eq_true]
+  exact ⟨⟨.neg, φ, t⟩, h, by simp⟩
+
 /-! ## Remaining Blocked Obligations (BLOCKED)
 
 The following section documents proof obligations that remain blocked.

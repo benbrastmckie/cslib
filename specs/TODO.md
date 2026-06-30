@@ -11,7 +11,7 @@ next_project_number: 437
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,299,317,321,390,396,400,404,406,407,415,419,426,427,431,433,434 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,299,317,321,390,396,400,404,406,407,415,419,426,427,433,434 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 2 | 39,40,181,215,300,375,389,405,409,425,430,435 | 36,37,180,299,317,404,407,426,427,433 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,275,301,391,392,413,436 | 39,40,321,375,389,425,434,435 | Bimodal Porting, Foundations, Temporal Logic, ... |
 | 4 | 241,393,412 | 41,321,391,436 | Foundations, Temporal Logic, PL-Hygiene |
@@ -100,10 +100,6 @@ next_project_number: 437
   └─ 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 415 [RESEARCHED] — Audit how the structure-first propositional base (MPL/IPL/CPL: pr
 
-### Uncategorized
-
-431 [NOT STARTED] — Audit the ~6 'sorry' occurrences that the 2026-06-30 review found
-
 ## Tasks
 
 ### 436. Combine inclusions into buchicongr dma language eq and close
@@ -155,9 +151,10 @@ next_project_number: 437
 ---
 
 ### 431. Audit unowned foundational sorries
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
+- **Research**: [431_audit_unowned_foundational_sorries/reports/01_unowned-sorries-audit.md]
 
 **Description**: Audit the ~6 'sorry' occurrences that the 2026-06-30 review found with no clear owning task: Cslib/Foundations/Order/HilbertAlgebra.lean, Cslib/Foundations/Logic/Metalogic/GenericMCS.lean, Cslib/Languages/LambdaCalculus/Named/Untyped/Basic.lean, Cslib/Logics/Propositional/Semantics/Algebra/CanAlgComplete.lean, Cslib/Logics/LTL/Semantics/GNBA.lean, and Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean (2). For each: determine whether it is covered by an existing blocked task (36/37/215/275/317/425-427); if genuinely unowned, either close it or document a deferral pointer. Foundational sorries can leak sorryAx into downstream #print axioms checks (CanAlgComplete/GNBA feed completeness/automata). Source: specs/reviews/review-2026-06-30.md medium issue 2.
 

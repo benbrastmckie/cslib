@@ -1,0 +1,36 @@
+{
+  "task": 431,
+  "phase": "research",
+  "status": "research_complete",
+  "session_id": "session_016GD5StP3d3ujrNuEDgj589",
+  "agent_type": "cslib-research-agent",
+  "headline": "All 7 flagged 'sorry' occurrences are docstring/comment text, not live proof debt. Zero live sorries in the 6 audited files.",
+  "report": "specs/431_audit_unowned_foundational_sorries/reports/01_unowned-sorries-audit.md",
+  "sorry_inventory": {
+    "live_sorries_in_audited_files": 0,
+    "occurrences_audited": 7,
+    "classification": "all comment/docstring or commented-out stub"
+  },
+  "findings": [
+    {"file": "Cslib/Foundations/Order/HilbertAlgebra.lean", "line": 51, "kind": "docstring", "owner": "none", "verdict": "UNOWNED, not a sorry", "disposition": "no-op"},
+    {"file": "Cslib/Foundations/Logic/Metalogic/GenericMCS.lean", "line": 59, "kind": "docstring", "owner": "none", "verdict": "UNOWNED, not a sorry", "disposition": "no-op"},
+    {"file": "Cslib/Languages/LambdaCalculus/Named/Untyped/Basic.lean", "line": 112, "kind": "commented-out TODO stub", "owner": "none", "verdict": "UNOWNED, not a live sorry", "disposition": "optional cleanup: delete commented stub"},
+    {"file": "Cslib/Logics/Propositional/Semantics/Algebra/CanAlgComplete.lean", "line": 41, "kind": "docstring (sorry-free claim)", "owner": "none", "verdict": "UNOWNED, verified clean (axioms: [])", "disposition": "no-op"},
+    {"file": "Cslib/Logics/LTL/Semantics/GNBA.lean", "line": 37, "kind": "docstring (historical roadmap)", "owner": "none", "verdict": "UNOWNED, verified clean; referenced sorry already removed", "disposition": "optional cleanup: reword to past tense"},
+    {"file": "Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean", "line": 725, "kind": "docstring (sorry-free claim)", "owner": "none", "verdict": "UNOWNED, not a sorry", "disposition": "no-op"},
+    {"file": "Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean", "line": 783, "kind": "comment (sorry-free claim)", "owner": "none", "verdict": "UNOWNED, not a sorry", "disposition": "no-op"}
+  ],
+  "ownership_conclusion": "None of the 7 occurrences is owned by tasks 36/37/215/275/317/425/426/427, because none is a real sorry. Those tasks own genuine sorries in Bimodal/Tableau/Temporal files, none of which overlap the 6 audited files.",
+  "axiom_checks": [
+    {"theorem": "Cslib.Logic.LTL.Formula.isRegular", "result": "axioms: [], warnings: []"},
+    {"theorem": "Cslib.Logic.PL.canAlgComplete_iff", "result": "axioms: [], warnings: []"}
+  ],
+  "recommendations": [
+    "Close task 431 as audit-complete: no genuine proof debt; review Medium issue 2 was a raw-text census false positive.",
+    "No new tracking task warranted.",
+    "Optional cosmetic cleanup (low priority): Basic.lean:105-112 commented-out subst_comm TODO stub; GNBA.lean:37 reword 'removing the sorry'.",
+    "Fix the census tooling to exclude comment/docstring lines (root cause of the false positive)."
+  ],
+  "next_action": "no_implementation_needed",
+  "zero_debt_compliant": true
+}

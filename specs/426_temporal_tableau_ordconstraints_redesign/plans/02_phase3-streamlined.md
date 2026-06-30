@@ -31,7 +31,7 @@ induction principle to hang them on.
 
 ## Phase 3 — streamlined steps (each ends green + committed)
 
-#### Step 3.1: Extract `processNext` to a top-level `def` [NOT STARTED]
+#### Step 3.1: Extract `processNext` to a top-level `def` [COMPLETED]
 - [ ] In `Cslib/Logics/Temporal/Tableau/Saturation.lean`, lift the inline `let rec processNext`
   out of `temporalExpandBranches` into a top-level `def processNext (…) : … := …` with the same
   body, taking the worklist/fuel and accumulators as explicit parameters.
@@ -39,7 +39,7 @@ induction principle to hang them on.
 - [ ] Confirm definitional equality is preserved: `lake build Cslib.Logics.Temporal.Tableau.Saturation 2>&1 | grep -E 'error|completed'` green, and any existing lemmas that unfold `temporalExpandBranches` still build.
 - [ ] Commit `task 426 phase 3.1: lift processNext to top-level def (green)`.
 
-#### Step 3.2: Carry the coupling invariant [NOT STARTED]
+#### Step 3.2: Carry the coupling invariant [IN PROGRESS]
 - [ ] State the loop invariant pairing the branch and ordering: every endpoint of every edge in
   `ord.constraints` is a label on `b`, and `tNew = branchNextTime b` is fresh w.r.t. `ord`
   (so `Function.update` side-conditions `a ≠ tNew`, `b ≠ tNew` discharge from `branchNextTime_gt`

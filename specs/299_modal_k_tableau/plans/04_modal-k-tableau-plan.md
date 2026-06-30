@@ -1,7 +1,7 @@
 # Implementation Plan: Task #299 (Revised, v3)
 
 - **Task**: 299 - Modal K Tableau Decision Procedure
-- **Status**: [IN PROGRESS]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 9.25 hours remaining (Phases 5a-7; soundness Phases 1-4 done, ~11h sunk)
 - **Dependencies**: None
 - **Research Inputs**: specs/299_modal_k_tableau/reports/01_modal-k-tableau-research.md; specs/299_modal_k_tableau/reports/03_completeness-decomposition.md
@@ -246,7 +246,7 @@ single-shot phase into sub-phases, split `Soundness.lean`, and landed:
 
 ---
 
-### Phase 5a: Skeleton + model extraction + atom reflection + forall₂ refactor [NOT STARTED]
+### Phase 5a: Skeleton + model extraction + atom reflection + forall₂ refactor [IN PROGRESS]
 
 **Goal**: Stand up `Completeness.lean`, define `extractModel`, prove atom-reflection, and hoist the
 generic `forall₂_*` helpers into a shared module so completeness never imports `Soundness.lean`.
@@ -443,7 +443,7 @@ Phase-6 dependency, keeping the committed tree sorry-free.
 
 ---
 
-### Phase 6: Completeness loop invariant + final completeness [NOT STARTED]
+### Phase 6: Completeness loop invariant + final completeness [IN PROGRESS]
 
 **Goal**: Prove `modalExpandBranches_hintikka` (returned open branch is a Hintikka set) and discharge
 `modalTableau_complete` fully — the dominant remaining risk, but de-risked by the 384/364 soundness

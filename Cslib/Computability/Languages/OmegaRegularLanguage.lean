@@ -432,6 +432,20 @@ private lemma buchiCongr_recurrentClass [Inhabited Symbol] {State : Type} [Finit
     (hfreq.mono fun k hk => (buchiCongr_DMA_run_eq na xs k).trans hk)⟩
 
 open NA.Buchi in
+private lemma buchiCongr_DMA_language_forward [Inhabited Symbol] {State : Type} [Finite State]
+    (na : NA.Buchi State Symbol) :
+    language na ⊆ language (buchiCongr_DMA na) := by
+  intro xs hxs
+  rw [ωAcceptor.mem_language]
+  simp only [DA.Muller.instωAcceptor]
+  -- Goal: infOcc(run xs) ∈ accept
+  -- From buchiFamily_cover: xs ∈ buchiFamily (p, q) for some idempotent q
+  -- The run visits p*q = a at segment boundaries infinitely often
+  -- buchiCongr_recurrentClass gives a,b with b*b=b, a*b=a, a ∈ infOcc
+  -- We need to show infOcc ∈ {S | ∃ b ∈ S, ∃ a, (buchiFamily (a,b) ∩ language na).Nonempty}
+  sorry
+
+open NA.Buchi in
 /-- **[BLOCKED — Phase 4, task 241]**: `buchiCongr_DMA na` recognizes the same ω-language
 as the NBA `na`.
 

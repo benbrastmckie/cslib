@@ -489,26 +489,12 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
     (edgeSets : List IEdges)
     (closurePred : IBranch Atom → Bool)
     (b : IBranch Atom)
+    (hfuel : 1 ≤ fuel)
     (h : intExpandBranches branches expandedSets nextWorlds edgeSets fuel closurePred
         = .openBranch b) :
     IBranchSaturation Atom b := by
   induction fuel generalizing branches expandedSets nextWorlds edgeSets with
-  | zero =>
-    simp only [intExpandBranches] at h
-    cases hfs : branches.findSome? (fun b' => if closurePred b' then none else some b') with
-    | none => simp [hfs] at h
-    | some b' =>
-      simp only [hfs] at h; injection h with heq; subst heq
-      obtain ⟨b₀, _, hcond⟩ := List.exists_of_findSome?_eq_some hfs
-      cases heq : closurePred b₀ with
-      | true => simp [heq] at hcond
-      | false =>
-        simp only [heq, Bool.false_eq_true, if_false, Option.some.injEq] at hcond
-        -- b = b₀ from the initial branch list; saturation of b₀ requires that
-        -- intStepBranch b₀ eH nwH = none for the appropriate eH and nwH, which
-        -- in turn requires analysing intStepBranch's internals.
-        -- Left as sorry (task 317 phase-6 blocker: intStepBranch internals).
-        sorry
+  | zero => omega
   | succ fuel' ih =>
     simp only [intExpandBranches] at h
     suffices key : ∀ (pending : List (IBranch Atom))
@@ -745,7 +731,7 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
     exact List.any_eq_true.mpr ⟨_, hmem, by simp⟩
   -- Obtain saturation witness from the expansion structure.
   have hsat : IBranchSaturation Atom b :=
-    intExpandBranches_openBranch_sat _ _ _ _ _ _ _ h
+    intExpandBranches_openBranch_sat _ _ _ _ _ _ _ Nat.one_le_two_pow h
   -- Apply the truth lemma's F-branch direction.
   exact (truthLemma S b hopen hsat φ 0).2 hFmem
 

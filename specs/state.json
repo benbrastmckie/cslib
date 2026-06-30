@@ -882,7 +882,8 @@
             "integrated_date": "2026-06-29"
           }
         ]
-      }
+      },
+      "note": "5 pre-submission decisions resolved 2026-06-30 (see decisions.md). Q1=C, Q2=waves1-4, Q3=INCLUDE categorical/initiality (needs impl), Q4=keep HasLeastBot, Q5=adequate. Gated on Q3 initial-object witness implementation before /pr."
     },
     {
       "project_number": 409,

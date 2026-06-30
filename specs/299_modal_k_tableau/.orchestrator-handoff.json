@@ -25,7 +25,7 @@
       }
     ],
     "hard_requirements": "Zero sorry, zero new axioms. Completeness must extract a finite Kripke countermodel from a saturated open branch.",
-    "recommended_resume": "Spawn a fresh cslib-implementation-agent to implement Phase 5 (Completeness scaffolding) in Completeness.lean. See plan phases 5-7 for detailed specs."
+    "recommended_resume": "Phase 5 (Completeness.lean truth lemma) overflowed context TWICE in single dispatches. DECOMPOSE before retrying: split into (5a) create Completeness.lean + extractModel + buildAtomValuation mirror [small], (5b) modal truth lemma pos-induction box/diamond cases [study classicalTruthLemma + Bimodal truthLemma_pos FIRST, narrow], (5c) neg-induction + modalOpenBranch_countermodel, (5d) state modalTableau_complete reduced to modalExpandBranches_hintikka loop-invariant placeholder. Use /spawn 299 or /research 299 to pre-extract the exact reference lemma signatures so the implementer does not need to read large files. Soundness phases 1-4 are DONE and GREEN (commit 3660ac0c)."
   },
   "blockers": [
     "Phase 5: Completeness.lean not yet created — need model extraction, truth lemma, loop invariant, and decision procedure"

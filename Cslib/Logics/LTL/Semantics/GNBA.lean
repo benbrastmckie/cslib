@@ -34,8 +34,8 @@ The construction proceeds in five phases:
 
 4. **Correctness** (Phase 4): Language equality `language (gnbaNBA φ) = φ.omegaLanguage`.
 
-5. **Integration** (Phase 5): Proof of `Formula.isRegular_untl` removing the `sorry` from
-   `Formula.isRegular`.
+5. **Integration** (Phase 5): Proof of `Formula.isRegular_untl`, which discharged the `sorry`
+   that `Formula.isRegular` previously carried.
 
 ## Closure Convention
 

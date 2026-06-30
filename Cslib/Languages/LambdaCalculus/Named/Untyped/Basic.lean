@@ -102,15 +102,6 @@ instance instHasSubstitutionTerm [DecidableEq Var] [HasFresh Var] :
     HasSubstitution (Term Var) Var (Term Var) where
   subst := Term.subst
 
--- TODO
--- theorem Term.subst_comm
---   [DecidableEq Var] [HasFresh Var]
---   {m : Term Var} {x : Var} {n1 : Term Var} {y : Var} {n2 : Term Var} :
---   (m[x := n1])[y := n2] = (m[y := n2])[x := n1] := by
---   induction m
---   -- case var z =>
---   sorry
-
 /-- Contexts. -/
 inductive Context (Var : Type u) : Type u where
   | hole

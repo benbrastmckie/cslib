@@ -256,6 +256,7 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom)
 
 /-! ## Structural Lemmas for `openBranch_countermodel` -/
 
+omit [Hashable Atom] in
 /-- Formulas are preserved under `applyPersistenceFixpoint`:
 `applyAllTImpRules` only appends to `b`, so `sf ∈ b` is maintained across fixpoint
 iterations. -/
@@ -271,6 +272,7 @@ private lemma applyPersistenceFixpoint_mem_preserved
     · exact h
     · apply ih; simp only [applyAllTImpRules, List.mem_append]; exact Or.inl h
 
+omit [Hashable Atom] in
 /-- If the expansion loop returns `.openBranch b`, then `closurePred b = false`.
 
 In the fuel=0 case, `findSome?` only yields a branch when `closurePred b = false`.
@@ -298,7 +300,7 @@ private lemma intExpandBranches_openBranch_closed (fuel : Nat)
       cases heq : closurePred b₀ with
       | true => simp [heq] at hcond
       | false =>
-        simp [heq] at hcond
+        simp only [heq, Bool.false_eq_true, if_false, Option.some.injEq] at hcond
         exact hcond ▸ heq
   | succ fuel' ih =>
     simp only [intExpandBranches] at h
@@ -361,6 +363,7 @@ private lemma intExpandBranches_openBranch_closed (fuel : Nat)
                 | notApplicable =>
                   simp only at hgo; injection hgo with heq; subst heq; exact hcl
 
+omit [Hashable Atom] in
 /-- Every formula in every initial branch appears in the open branch returned by
 `intExpandBranches`. This shows that F(φ)@0, present in the initial branch, is still
 on the open countermodel branch.
@@ -390,7 +393,7 @@ private lemma intExpandBranches_openBranch_initial_mem (fuel : Nat)
       cases heq : closurePred b₀ with
       | true => simp [heq] at hcond
       | false =>
-        simp [heq] at hcond
+        simp only [heq, Bool.false_eq_true, if_false, Option.some.injEq] at hcond
         exact hcond ▸ hAll b₀ hb₀_mem
   | succ fuel' ih =>
     intro branches expandedSets nextWorlds edgeSets closurePred hAll b h

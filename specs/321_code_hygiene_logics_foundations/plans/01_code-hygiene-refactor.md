@@ -1,7 +1,7 @@
 # Implementation Plan: Code Hygiene Refactor of Logics/ Chronicle Mega-Files
 
 - **Task**: 321 - Refactor oversized/poorly-structured files in Cslib/Logics/ and Cslib/Foundations/ for code hygiene
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 12 hours (7 phases)
 - **Dependencies**: None
 - **Research Inputs**: specs/321_code_hygiene_logics_foundations/reports/01_code-hygiene-survey.md
@@ -147,7 +147,7 @@ split, with zero import changes.
 
 ---
 
-### Phase 3: Validate and document the barrel-split pattern on GNBA.lean [NOT STARTED]
+### Phase 3: Validate and document the barrel-split pattern on GNBA.lean [IN PROGRESS]
 
 **Goal**: Establish the canonical barrel-split recipe on a clean, well-privatized, single-importer
 file so the higher-risk Chronicle splits follow a proven template.
@@ -191,7 +191,7 @@ file so the higher-risk Chronicle splits follow a proven template.
 
 ---
 
-### Phase 4: Split Bimodal/.../Chronicle/PointInsertion.lean [NOT STARTED]
+### Phase 4: Split Bimodal/.../Chronicle/PointInsertion.lean [IN PROGRESS]
 
 **Goal**: Reduce the single largest file (3566 lines) to a barrel over 3-4 submodules, public API
 unchanged.

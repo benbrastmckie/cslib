@@ -1433,20 +1433,21 @@
     {
       "project_number": 421,
       "project_name": "min_fmp_decidability",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Min-side FMP decidability: sorry-free Decidable (Derivable MinPropAxiom φ) mirroring the Int construction (completes parent 370 Min side)",
       "description": "Complete the Min side of parent task 370 by adding a sorry-free `Decidable (Derivable MinPropAxiom φ)` instance via the finite model property, mirroring the Int FMP construction that task 411 adopts onto main (Metalogic/IntDecidability.lean: IntFinWorld → intFinVal → intFinVal_upward_closed → int_fin_truth_lemma → int_fmp → instDecidableDerivableIntPropAxiom'). The branch refactor/prop_logic provides ONLY IntDecidability.lean — there is NO Min FMP file to adopt — so this is a from-scratch MIRROR: build a MinFinWorld (minimal Kripke finite-world bounded by subformulas of φ; no ⊥/explosion since minimal logic lacks ⊥-elimination), the finite valuation + upward-closure lemma, a minimal finite truth lemma by formula induction, the finite model property (min_fmp), and the sorry-free Decidable instance (instDecidableDerivableMinPropAxiom'-style), proved correct against MinStrongCompleteness. Axioms must be EXACTLY propext/Classical.choice/Quot.sound (no sorryAx). Wire into Cslib.lean + barrel. DEPENDS ON 411 (the Int FMP construction must be on main to mirror its structure and reuse shared finite-world machinery). Coordinates with parent 370 (Int+Min decidability asymmetry) and 422 (route reconciliation). ACCEPTANCE: new sorry-free Min FMP Decidable instance; lake build/test/checkInitImports/lint-style/shake green; #print axioms shows no sorryAx; 0 new sorry.",
       "created": "2026-06-30T00:03:21Z",
-      "last_updated": "2026-06-30T00:03:21Z",
+      "last_updated": "2026-06-30T01:37:19Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "blockers": [],
-      "session_id": "sess_1782777801_b901d4",
+      "session_id": "sess_1782781843_ad09f5_421",
       "dependencies": [
         411
       ],
-      "topic": "PL-Metalogic"
+      "topic": "PL-Metalogic",
+      "completion_summary": "Created Cslib/Logics/Propositional/Metalogic/MinDecidability.lean (sorry-free instDecidableDerivableMinPropAxiom' via FMP), a strictly-simpler 1:1 mirror of IntDecidability.lean. No-EFQ simplifications: dropped consistent field, eliminated propConsistent helper, bot-case Iff.rfl, no PropSetConsistent plumbing; only new decls minFinBotForces + upward-closure. Wired into Cslib.lean:429. Axioms = {propext, Classical.choice, Quot.sound}, no sorryAx, 0 sorry. Completes parent 370 Min side; unblocks 422."
     },
     {
       "project_number": 422,

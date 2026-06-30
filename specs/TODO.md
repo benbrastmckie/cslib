@@ -11,8 +11,8 @@ next_project_number: 423
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,299,301,317,321,370,386,387,388,396,400,401,403,404,406,407,415,419,421 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
-| 2 | 39,40,181,215,300,375,389,390,405,409,422 | 36,37,180,299,317,387,404,407,421 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,241,299,301,317,321,370,386,387,388,396,400,401,403,404,406,407,415,419,422 | -- | Bimodal Porting, Modal Logic, Project Management, ... |
+| 2 | 39,40,181,215,300,375,389,390,405,409 | 36,37,180,299,317,387,404,407 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,275,391,392,413 | 39,40,321,370,375,386,387,389 | Bimodal Porting, Foundations, PL-Docs, ... |
 | 4 | 393,412,414 | 41,181,215,241,275,300,301,321,386,391 | Foundations, Code Hygiene, PL-Hygiene |
 
@@ -87,8 +87,7 @@ next_project_number: 423
 ### PL Metalogic
 
 370 [PLANNED] — Close the decidability asymmetry in the metalogic layer: classica
-421 [NOT STARTED] — Complete the Min side of parent task 370 by adding a sorry-free `
-  └─ 422 [NOT STARTED] — Reconcile the two parallel decidability developments coexisting o
+422 [NOT STARTED] — Reconcile the two parallel decidability developments coexisting o
 
 ### PL Equivalence
 
@@ -117,7 +116,7 @@ next_project_number: 423
 ---
 
 ### 421. Min-side FMP decidability: sorry-free Decidable (Derivable MinPropAxiom φ) mirroring the Int construction (completes parent 370 Min side)
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: PL-Metalogic
 - **Dependencies**: Task 411

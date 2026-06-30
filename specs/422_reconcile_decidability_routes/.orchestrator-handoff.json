@@ -1,0 +1,54 @@
+{
+  "status": "implemented",
+  "summary": "Task 422 complete. Demoted both FMP noncomputable instances to named noncomputable defs (decidableDerivableIntPropAxiomFMP, decidableDerivableMinPropAxiomFMP). Tableau instances remain the sole registered Decidable instances per proposition class. Added two-routes docstrings to all four module headers. Added infrastructure cross-reference docstrings to int_fin_truth_lemma, min_fin_truth_lemma, and truthLemma in Scheme.lean. FMP defs are sorry-free ({propext, Classical.choice, Quot.sound}); tableau instances carry pre-existing 317 sorryAx (documented). 0 new sorries/axioms introduced. All 4 modified modules build cleanly. Repo-wide lake build has only pre-existing ProofSystemMorphism.lean failure (untracked WIP from another task, not task 422's scope).",
+  "phases_completed": 4,
+  "phases_total": 4,
+  "artifacts": [
+    {
+      "path": "specs/422_reconcile_decidability_routes/summaries/01_reconcile-decidability-routes-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary covering all 4 phases, axiom audit table, CI pipeline results, file list, plan deviations (none), and sorry inventory."
+    }
+  ],
+  "blockers": [],
+  "next_action_hint": "Task 422 is complete. The chain 411->421->422 is now reconciled. Next action: task 317 (close the 4 tableau completeness sorries in Scheme.lean/Completeness.lean/Minimal/Completeness.lean) to make the canonical tableau instances sorry-free.",
+  "sorry_inventory": {
+    "pre_existing_317_sorries": [
+      {
+        "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+        "line": 255,
+        "description": "parametric truthLemma (formula induction over signed branch worlds)",
+        "task": 317
+      },
+      {
+        "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+        "line": 528,
+        "description": "openBranch_countermodel structural property",
+        "task": 317
+      },
+      {
+        "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+        "line": 113,
+        "description": "IValid -> forcing bridge using parametric truthLemma",
+        "task": 317
+      },
+      {
+        "file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+        "line": 110,
+        "description": "MValid -> forcing bridge using truthLemma minScheme",
+        "task": 317
+      }
+    ],
+    "new_sorries_introduced_by_422": 0
+  },
+  "verification": {
+    "decidableDerivableIntPropAxiomFMP_axioms": ["propext", "Classical.choice", "Quot.sound"],
+    "decidableDerivableMinPropAxiomFMP_axioms": ["propext", "Classical.choice", "Quot.sound"],
+    "instDecidableDerivableIntPropAxiom_axioms": ["propext", "sorryAx", "Classical.choice", "Quot.sound"],
+    "instDecidableDerivableMinPropAxiom_axioms": ["propext", "sorryAx", "Classical.choice", "Quot.sound"],
+    "instance_count_per_class": {
+      "Derivable_IntPropAxiom": 1,
+      "Derivable_MinPropAxiom": 1
+    }
+  }
+}

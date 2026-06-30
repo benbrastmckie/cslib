@@ -1,7 +1,7 @@
 # Implementation Plan: Reconcile Parallel Int/Min Decidability Routes (Tableau vs FMP)
 
 - **Task**: 422 - Reconcile parallel Int/Min decidability routes (tableau vs FMP): canonical instance, docstrings, infrastructure
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 3 hours
 - **Dependencies**: 411 (Int FMP on main), 421 (Min FMP on main); coordinates with 317 (tableau sorry closure, out of scope here)
 - **Research Inputs**: specs/422_reconcile_decidability_routes/reports/01_reconcile-decidability-routes.md
@@ -237,7 +237,7 @@ to Phase 1; coordinate file regions to avoid conflicts.
 
 ---
 
-### Phase 4: Full CI + axiom verification [NOT STARTED]
+### Phase 4: Full CI + axiom verification [COMPLETED]
 
 **Goal**: Verify zero new sorries/axioms, the FMP/tableau axiom profiles, and full CSLib CI
 green, including the extensions.

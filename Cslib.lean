@@ -91,6 +91,7 @@ public import Cslib.Foundations.Logic.Metalogic.ListDeduction
 public import Cslib.Foundations.Logic.Metalogic.ListImplication
 public import Cslib.Foundations.Logic.Metalogic.MCSProperties
 public import Cslib.Foundations.Logic.Metalogic.PrimeExclusion
+public import Cslib.Foundations.Logic.Metalogic.ProofSystemMorphism
 public import Cslib.Foundations.Logic.Metalogic.SetDeduction
 public import Cslib.Foundations.Logic.ProofSystem
 public import Cslib.Foundations.Logic.PropositionalTableau
@@ -425,6 +426,7 @@ public import Cslib.Logics.Propositional.Metalogic.IntLindenbaum
 public import Cslib.Logics.Propositional.Metalogic.IntSoundness
 public import Cslib.Logics.Propositional.Metalogic.IntStrongCompleteness
 public import Cslib.Logics.Propositional.Metalogic.MCS
+public import Cslib.Logics.Propositional.Metalogic.MinDecidability
 public import Cslib.Logics.Propositional.Metalogic.MinLindenbaum
 public import Cslib.Logics.Propositional.Metalogic.MinSoundness
 public import Cslib.Logics.Propositional.Metalogic.MinStrongCompleteness

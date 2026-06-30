@@ -55,7 +55,7 @@ next_project_number: 442
           └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 434 [BLOCKED] — Prove the backward inclusion `buchiCongr_DMA_language_backward` (
   └─ 436 [BLOCKED] — Combine the forward inclusion (buchiCongr_DMA_language_forward, f
-    └─ 241 [BLOCKED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
+    └─ 241 [PLANNED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -664,7 +664,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 241. Mcnaughton theorem
-- **Status**: [BLOCKED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 428, Task 429, Task 433, Task 434, Task 435, Task 436
@@ -674,7 +674,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Plan**: [241_mcnaughton_theorem/plans/01_mcnaughton-da-muller.md]
 - **Summary**: [241_mcnaughton_theorem/summaries/01_mcnaughton-da-muller-summary.md]
 
-**Description**: Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller) establishing equivalence between omega-regular languages and deterministic Muller automata. Research phase should evaluate ctchou/AutomataTheory (independent Lean 4 project that claims McNaughton already proved) for architectural compatibility, portability, and licensing before deciding whether to port, adapt, or develop independently.
+**Description**: Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller): ω-regular ↔ deterministic Muller. ARCHITECTURE (plan v2): forward direction via the Choueka decomposition route — eq_fin_iSup_hmul_omegaPow finite-union decomposition + the existing DA.concat/mullerAccConcat flag construction + new omegaPow_da_muller + DMA finite-union closure — routing around the abandoned buchiCongr_DMA quotient-as-DMA construction (task 434 soundness gap). Backward direction reuses green IsRegular.of_da_muller. Missing analytic lemmas narrowed to three: concat_language_eq, omegaPow_da_muller, DA.Muller.union. See plans/02_mcnaughton-choueka-route.md.
 
 ---
 

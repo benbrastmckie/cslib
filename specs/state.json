@@ -479,12 +479,12 @@
     {
       "project_number": 241,
       "project_name": "mcnaughton_theorem",
-      "status": "blocked",
+      "status": "planned",
       "task_type": "cslib",
-      "description": "Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller) establishing equivalence between omega-regular languages and deterministic Muller automata. Research phase should evaluate ctchou/AutomataTheory (independent Lean 4 project that claims McNaughton already proved) for architectural compatibility, portability, and licensing before deciding whether to port, adapt, or develop independently.",
+      "description": "Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller): ω-regular ↔ deterministic Muller. ARCHITECTURE (plan v2): forward direction via the Choueka decomposition route — eq_fin_iSup_hmul_omegaPow finite-union decomposition + the existing DA.concat/mullerAccConcat flag construction + new omegaPow_da_muller + DMA finite-union closure — routing around the abandoned buchiCongr_DMA quotient-as-DMA construction (task 434 soundness gap). Backward direction reuses green IsRegular.of_da_muller. Missing analytic lemmas narrowed to three: concat_language_eq, omegaPow_da_muller, DA.Muller.union. See plans/02_mcnaughton-choueka-route.md.",
       "topic": "Temporal Logic",
       "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-30T20:55:42Z",
+      "last_updated": "2026-06-30T21:09:38Z",
       "dependencies": [
         428,
         429,
@@ -517,8 +517,7 @@
         }
       ],
       "session_id": "sess_1782832881_8335e5",
-      "previous_status": "implementing",
-      "blockers": "McNaughton forward direction blocked on buchiCongr_DMA_language_eq (task 436), which is blocked on backward inclusion (task 434) architectural gap. Subtasks 433 (accept_mem) and 435 (forward inclusion) COMPLETED. Needs companion-independence lemma or Choueka-route pivot."
+      "previous_status": "implementing"
     },
     {
       "project_number": 226,

@@ -148,27 +148,27 @@
     {
       "project_number": 299,
       "project_name": "modal_k_tableau",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Implement tableau decision procedure for basic modal logic K with world labels, box/diamond rules on top of propositional rules from shared infrastructure. Introduces world labels (accessibility relation tracking) and fundamental modal rule pattern: box-positive is universal/persistent, diamond-positive is existential (fresh accessible world). Use Lukasiewicz encoding for and/or. Prove soundness against Kripke semantics and completeness by extracting finite Kripke countermodels. Modal formula type: Cslib.Logic.Modal.Formula with atom, bot, imp, box primitives. Files under Cslib/Logics/Modal/Tableau/: Defs.lean, Rules.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 1,500-2,000 lines.",
       "created": "2026-06-23T17:47:17Z",
-      "last_updated": "2026-06-30T14:53:34Z",
-      "next_artifact_number": 2,
+      "last_updated": "2026-06-30T15:01:39Z",
+      "next_artifact_number": 3,
       "artifacts": [
-        {
-          "path": "specs/299_modal_k_tableau/plans/02_modal-k-tableau-plan.md",
-          "type": "plan"
-        },
         {
           "path": "specs/299_modal_k_tableau/reports/03_completeness-decomposition.md",
           "type": "report",
           "summary": "Phase 5 completeness decomposition (5a-5d) + reference signature table + Phase 6 de-risk"
+        },
+        {
+          "path": "specs/299_modal_k_tableau/plans/04_modal-k-tableau-plan.md",
+          "type": "plan"
         }
       ],
       "dependencies": [],
       "parent_task": 296,
-      "session_id": "sess_1782830769_919aa1"
+      "session_id": "sess_1782831411_f94ae8"
     },
     {
       "project_number": 300,

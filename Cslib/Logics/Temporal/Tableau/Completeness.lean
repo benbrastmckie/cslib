@@ -223,6 +223,28 @@ lemma extractModel_atom_neg_notSat
     simp [hisPos, hinner]
   simp [hcontra_none] at hcontra_some
 
+/-! ## Propositional Fragment -/
+
+/-- The propositional fragment of `Formula Atom`: formulas built from atoms, ⊥, and →.
+Does not include temporal operators (until, since). Since `and`, `or`, and `neg` are
+Łukasiewicz-encoded as `imp`/`bot`, this predicate covers the full classical propositional
+fragment automatically. -/
+inductive IsPropositional : Formula Atom → Prop where
+  /-- Atomic propositions are propositional. -/
+  | atom (p : Atom) : IsPropositional (.atom p)
+  /-- Falsum is propositional. -/
+  | bot : IsPropositional .bot
+  /-- Implication of propositional formulas is propositional. -/
+  | imp {φ ψ : Formula Atom} (hφ : IsPropositional φ) (hψ : IsPropositional ψ) :
+      IsPropositional (.imp φ ψ)
+
+omit [Hashable Atom] [DecidableEq Atom] in
+/-- Every formula has complexity at least 1. Used as the base-case vacuity
+in strong-induction proofs: `n = 0` implies no formula has `complexity ≤ 0`. -/
+private lemma Formula.one_le_complexity (φ : Formula Atom) : 1 ≤ φ.complexity := by
+  unfold Formula.complexity
+  split <;> omega
+
 /-! ## Remaining Blocked Obligations (BLOCKED)
 
 The following section documents proof obligations that remain blocked.

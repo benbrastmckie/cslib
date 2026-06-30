@@ -98,7 +98,7 @@ a decomposed sub-obligation of task 301 (temporal tableau completeness), blocker
 Phases within the same wave can execute in parallel. This plan is fully sequential: each phase
 adds declarations the next depends on, and each ends at a green build.
 
-### Phase 1: Add `IsPropositional` + `Formula.one_le_complexity` helpers [NOT STARTED]
+### Phase 1: Add `IsPropositional` + `Formula.one_le_complexity` helpers [IN PROGRESS]
 
 **Goal**: Introduce the propositional-fragment predicate and the complexity lower bound that the
 strong-induction base case (`n = 0` vacuity) requires, with a green build.

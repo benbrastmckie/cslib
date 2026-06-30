@@ -1,40 +1,35 @@
 {
-  "status": "blocked",
+  "status": "implemented",
   "started_at": "2026-06-30T00:00:00Z",
+  "completed_at": "2026-06-30T00:00:00Z",
   "artifacts": [
-    "specs/407_mpl_base_structure_first_redesign/pr-description.md"
+    "Cslib/Logics/Propositional/Semantics/Algebra/BotProperties.lean",
+    "Cslib/Logics/Propositional/Semantics/Algebra/BrouwerianBot.lean",
+    "Cslib/Logics/Propositional/Semantics/Algebra/PointedBrouwerianCompleteness.lean",
+    "specs/407_mpl_base_structure_first_redesign/summaries/05_initial-object-witness-summary.md"
   ],
   "partial_progress": {
-    "stage": "pr_description_complete",
-    "details": "PR description scaffolded. Blocked on human decisions (5 open questions in §9 of report 01). Task remains [PR READY]; /pr 407 must not run until questions are resolved.",
-    "phases_completed": 1
-  },
-  "blocker": {
-    "type": "human_decision",
-    "description": "Five design questions from research report 01 §9 must be resolved by a human before /pr 407 can run. See '## Open questions (resolve before submitting)' section of specs/407_mpl_base_structure_first_redesign/pr-description.md. Specifically: (1) confirm option C vs option B for ND reconciliation; (2) confirm Waves 1-4 only scope; (3) decide categorical/initiality inclusion; (4) confirm HasLeastBot naming versus PR #607 conventions; (5) confirm no conflict with task 400 / PR #607 scope.",
-    "blocked_at": "pr_description",
-    "requires_user_review": true,
-    "review_items": [
-      "ND reconciliation option C vs option B",
-      "PR scope: Waves 1-4 only vs include 5-6",
-      "Categorical/initiality: include or defer",
-      "Property naming: HasLeastBot, no HasExplosion, no HasDesignatedBot — confirm",
-      "Relationship to task 400 / PR #607: confirm no conflict"
-    ]
-  },
-  "verification": {
-    "verification_passed": true,
-    "mode": "pr_description_only",
-    "note": "CI deferred to /pr command — only pr-description.md was composed. CI results recorded in summaries/04_mpl-base-waves-1-4-v2-summary.md: build PASS (3151 jobs), checkInitImports PASS, lint PASS (task-407 files), lint-style PASS, shake PASS (task-407 files), mk_all PASS (task-407 files), test PASS (9142/9142). Sorries introduced: 0. New axioms: 0."
+    "stage": "complete",
+    "details": "All 4 phases completed; CI passed for touched modules",
+    "phases_completed": 4,
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "last_completed_phase": "CI verification"
   },
   "metadata": {
     "session_id": "sess_1782817543_eee5ae_407",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "pr_description", "skill-pr-implementation"],
-    "task_number": 407,
-    "task_type": "pr",
-    "orchestrator_mode": true,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
     "compliance_check": "passed"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "pre_existing_failure": "Cslib.Logics.Propositional.Tableau.Intuitionistic.Completeness (sorry in Scheme.lean, pre-existing on clean HEAD, unrelated to this task)"
   }
 }

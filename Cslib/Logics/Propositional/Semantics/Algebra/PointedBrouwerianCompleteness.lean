@@ -34,7 +34,9 @@ if a formula evaluates to `⊤` in every pointed Brouwerian semilattice then it 
 ConjImp cases are dispatched via the generic schema lemmas
 (`brouwerianBot_implyK_sound`, etc.) using the bridge
 `PointedBrouwerianEvaluate v φ = BrouwerianBotEvaluate v ⊥ φ`
-(`pointedBrouwerianEvaluate_eq_botBot`). The efq case uses `bot_le`.
+(`pointedBrouwerianEvaluate_eq_botBot`). The efq case uses `HasInitialBot.initialArrow`,
+making explicit that ex falso quodlibet is the universal property of the initial object
+(the canonical `⊥` is initial via `instHasInitialBotOfHasLeastBot`).
 
 **Completeness** instantiates `PointedBrouwerianValid` at the **Hilbert Lindenbaum algebra**
 `HilbertLindenbaumAlgebra ConjImpBotAxiom`, which carries both a `BrouwerianSemilattice`
@@ -75,7 +77,9 @@ Brouwerian semilattice: each `ConjImpBotAxiom` constructor evaluates to `⊤`.
 The five ConjImp cases are routed through the generic schema soundness lemmas
 (`brouwerianBot_implyK_sound`, etc.) via the bridge
 `PointedBrouwerianEvaluate v φ = BrouwerianBotEvaluate v ⊥ φ`. The efq case is handled
-separately: `⊥ ⇨ φ_val = ⊤` follows from `bot_le` in any pointed semilattice. -/
+separately: `⊥ ⇨ φ_val = ⊤` follows from `HasInitialBot.initialArrow` — the canonical `⊥`
+is an initial object (via `instHasInitialBotOfHasLeastBot ∘ instHasLeastBotOrderBot`), and
+EFQ is the universal property: the unique arrow `⊥ → a` exists for every `a`. -/
 theorem conjImpBot_pointedBrouwerian_axiom_sound {Atom : Type*} {φ : PL.Proposition Atom}
     (h_ax : ConjImpBotAxiom φ) : PointedBrouwerianValid φ := by
   intro H _ _ v
@@ -87,10 +91,13 @@ theorem conjImpBot_pointedBrouwerian_axiom_sound {Atom : Type*} {φ : PL.Proposi
   | andE1 φ ψ => exact brouwerianBot_andE1_sound v ⊥ φ ψ
   | andE2 φ ψ => exact brouwerianBot_andE2_sound v ⊥ φ ψ
   | efq φ =>
-    -- efq: ⊥ → φ; need ⊥ ⇨ φ_val = ⊤ in any pointed Brouwerian semilattice
+    -- efq: ⊥ → φ; the canonical ⊥ is an initial object (HasInitialBot (⊥ : H) via
+    -- instHasInitialBotOfHasLeastBot ∘ instHasLeastBotOrderBot), and
+    -- HasInitialBot.initialArrow _ provides the unique arrow ⊥ → φ_val.
+    -- This realizes "ex falso quodlibet = universal property of the initial object".
     simp only [BrouwerianBotEvaluate_imp, BrouwerianBotEvaluate_bot]
     rw [BrouwerianSemilattice.himp_eq_top_iff]
-    exact bot_le
+    exact HasInitialBot.initialArrow _
 
 /-- Soundness at the derivation tree level for `ConjImpBotAxiom`. -/
 theorem conjImpBot_pointedBrouwerian_soundness

@@ -221,6 +221,37 @@ lemma pointedBrouwerianEvaluate_efq_eq_top {H : Type*} [BrouwerianSemilattice H]
   rw [pointedBrouwerianEvaluate_eq_botBot]
   exact brouwerianBotEvaluate_efq_eq_top v ⊥ A
 
+/-! ## HasInitialBot Bridge Lemmas
+
+The following lemmas re-express explosion soundness in terms of the `HasInitialBot` hierarchy,
+making the categorical reading explicit: `⊥ → A` evaluates to `⊤` because the designated
+bottom is an **initial object** — the unique arrow `bot_val → a` (i.e. `bot_val ≤ a`) exists
+for every `a`. These are parallel to the `HasLeastBot` bridge lemmas above, differing only in
+which mixin is cited as the witness. -/
+
+/-- Explosion soundness for the free-bot evaluator via the initial-object universal property:
+`BrouwerianBotEvaluate v bot_val (⊥ → A) = ⊤` whenever `bot_val` is an initial object
+(`HasInitialBot bot_val`). The proof cites `HasInitialBot.initialArrow` — the unique arrow
+from the initial object to any target — making the categorical reading explicit. -/
+lemma brouwerianBotEvaluate_efq_eq_top_of_initialBot {H : Type*} [BrouwerianSemilattice H]
+    (v : Atom → H) (bot_val : H) [HasInitialBot bot_val] (A : PL.Proposition Atom) :
+    BrouwerianBotEvaluate v bot_val (.imp .bot A) = ⊤ := by
+  simp only [BrouwerianBotEvaluate_imp, BrouwerianBotEvaluate_bot]
+  rw [BrouwerianSemilattice.himp_eq_top_iff]
+  exact HasInitialBot.initialArrow _
+
+/-- Explosion soundness for `PointedBrouwerianEvaluate` via the initial-object witness:
+`⊥ → A` evaluates to `⊤` in any pointed Brouwerian semilattice, because the canonical `⊥`
+is an initial object (via `instHasInitialBotOfHasLeastBot` and `instHasLeastBotOrderBot`).
+Follows via `pointedBrouwerianEvaluate_eq_botBot` and
+`brouwerianBotEvaluate_efq_eq_top_of_initialBot`. -/
+lemma pointedBrouwerianEvaluate_efq_eq_top_of_initialBot
+    {H : Type*} [BrouwerianSemilattice H] [OrderBot H]
+    (v : Atom → H) (A : PL.Proposition Atom) :
+    PointedBrouwerianEvaluate v (.imp .bot A) = ⊤ := by
+  rw [pointedBrouwerianEvaluate_eq_botBot]
+  exact brouwerianBotEvaluate_efq_eq_top_of_initialBot v ⊥ A
+
 end Cslib.Logic.PL
 
 end

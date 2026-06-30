@@ -821,6 +821,11 @@
           "path": "specs/407_mpl_base_structure_first_redesign/mpl-base-design-note.md",
           "type": "design_note",
           "summary": "MPL-base design note: structure-first account, named property hierarchy, generic Lindenbaum substrate, Phase 7 residual (fragment-generic algebraic completeness, open research task 410)"
+        },
+        {
+          "path": "specs/407_mpl_base_structure_first_redesign/summaries/05_initial-object-witness-summary.md",
+          "type": "summary",
+          "summary": "HasInitialBot initial-object witness added to BotProperties/BrouwerianBot/PointedBrouwerianCompleteness; explosion-soundness re-expressed via named categorical universal property; zero sorries, zero axioms, all touched modules green"
         }
       ],
       "session_id": "sess_1782750230_3ec4a4_407plan",

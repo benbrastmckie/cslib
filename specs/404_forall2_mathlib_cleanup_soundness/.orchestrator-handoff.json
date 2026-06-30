@@ -1,0 +1,18 @@
+{
+  "status": "planned",
+  "summary": "Single-phase plan to replace four local List.Forall₂ re-proofs in Cslib/Logics/Modal/Tableau/Soundness.lean with Mathlib lemmas: add one plain import (Mathlib.Data.List.Forall2), delete four private helpers, swap six call sites (List.forall₂_iff_zip, List.rel_append, List.forall₂_drop, List.forall₂_take). Edit set already trial-verified green during research (492 jobs, 0 errors, 0 sorry) and reverted. Full CI gate (lake build, checkInitImports, lint-style, test, shake) included as the phase verification. forall₂_replicate_right kept (out of scope).",
+  "artifacts": [
+    {
+      "path": "specs/404_forall2_mathlib_cleanup_soundness/plans/01_forall2-mathlib-cleanup.md",
+      "type": "plan",
+      "summary": "Single-phase implementation plan with verified edit set and full CSLib CI verification gate."
+    },
+    {
+      "path": "specs/404_forall2_mathlib_cleanup_soundness/reports/01_forall2-mathlib-cleanup.md",
+      "type": "report",
+      "summary": "Verified Mathlib lemma mapping, exact text-anchored edits, scoped-build verification, CI/lint notes."
+    }
+  ],
+  "blockers": [],
+  "next_action_hint": "Run /implement 404 to apply the verified single-phase edit set and pass the full CSLib CI gate."
+}

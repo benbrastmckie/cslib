@@ -1,7 +1,7 @@
 # Implementation Plan: Task #421 — Min-side FMP Decidability
 
 - **Task**: 421 - Min-side FMP decidability: sorry-free `Decidable (Derivable MinPropAxiom φ)` mirroring the Int construction (completes parent 370 Min side)
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 5 hours
 - **Dependencies**: 411 (Int FMP construction must be on main — confirmed: `Cslib/Logics/Propositional/Metalogic/IntDecidability.lean` is present, 436 lines)
 - **Research Inputs**: specs/421_min_fmp_decidability/reports/01_min-fmp-decidability-research.md

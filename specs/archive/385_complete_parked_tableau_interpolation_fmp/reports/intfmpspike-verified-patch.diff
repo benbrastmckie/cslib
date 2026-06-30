@@ -1,0 +1,119 @@
+diff --git a/Cslib/Logics/Propositional/Metalogic/IntFMPSpike.lean b/Cslib/Logics/Propositional/Metalogic/IntFMPSpike.lean
+index 6b295f26..f5b3e3fd 100644
+--- a/Cslib/Logics/Propositional/Metalogic/IntFMPSpike.lean
++++ b/Cslib/Logics/Propositional/Metalogic/IntFMPSpike.lean
+@@ -9,6 +9,7 @@ module
+ import Cslib.Init
+ public import Cslib.Logics.Propositional.Metalogic.IntStrongCompleteness
+ public import Cslib.Logics.Propositional.Subformula
++public import Mathlib.Data.Finset.Powerset
+ 
+ /-! # Phase 1 De-Risking Spike: Finite World Type and Finite Lindenbaum Witness
+ 
+@@ -98,7 +99,7 @@ instance instPreorderIntFinWorld (φ : PL.Proposition Atom) :
+ /-! ## Fintype Instance -/
+ 
+ /-- The carrier map `IntFinWorld φ → ↑(φ.subformulas.powerset)` is injective. -/
+-private theorem intFinWorld_carrier_injective (φ : PL.Proposition Atom) :
++theorem intFinWorld_carrier_injective (φ : PL.Proposition Atom) :
+     Function.Injective
+       (fun w : IntFinWorld φ =>
+         (⟨w.carrier, Finset.mem_powerset.mpr w.sub⟩ :
+@@ -128,53 +129,40 @@ theorem intFinWorld_propConsistent (φ : PL.Proposition Atom)
+   -- PropSetConsistent = ¬ SetDerivable ... ⊥ essentially
+   -- We prove ¬ SetDerivable IntPropAxiom ↑w.carrier ⊥
+   intro L hLsub hLderiv
+-  -- From hLderiv : (propDerivationSystem IntPropAxiom).Deriv L ⊥
+-  -- Use int_soundness: since int derives ⊥, it is valid in every Int model
+-  -- But ⊥ is never forced (bot_forces = fun _ => False), contradiction.
+   obtain ⟨d⟩ := hLderiv
+-  -- Lift the derivation through soundness
+-  -- All elements of L are in ↑w.carrier ⊆ ↑(φ.subformulas : Finset _)
+-  -- By int_soundness, ⊥ is forced at any world where L is satisfied
+-  -- In the trivial valuation (val = fun _ _ => False), no formula in L is forced
+-  -- unless L ∋ ⊥; but ⊥ ∉ w.carrier.
+-  -- More precisely: val = fun _ _ => True, bot_forces = fun _ => False
+-  -- Under this valuation, atom p → True always.
+-  -- By induction on propositions, if ⊥ ∉ formula, then IForces = True.
+-  -- So all elements of L ⊆ ↑w.carrier are forced, but ⊥ is not. ✗
+-  -- We formalize this via int_soundness applied to the all-True model.
+-  have h_forces_all : ∀ ψ ∈ L, IForces (fun _ _ => True) (fun _ => False) () ψ := by
+-    intro ψ hψ
+-    have hmem := hLsub ψ hψ
+-    simp only [Finset.coe_sort_coe, Set.mem_coe, Finset.mem_coe] at hmem
+-    -- ψ ∈ w.carrier ⊆ φ.subformulas; ψ is a ⊥-free subformula of φ
+-    -- Show IForces (fun _ _ => True) (fun _ => False) () ψ by structural induction
+-    have hwsub : ψ ∈ φ.subformulas := w.sub hmem
+-    clear hmem
+-    induction ψ with
+-    | atom p => simp [IForces]
+-    | bot =>
+-      -- ⊥ ∈ φ.subformulas but ⊥ ∉ w.carrier (from w.consistent)
+-      -- Actually we derive contradiction: ⊥ ∈ L ⊆ w.carrier contradicts consistent
+-      exfalso
+-      -- ψ = ⊥, hψ : ⊥ ∈ L, hLsub : L ⊆ ↑w.carrier
+-      exact w.consistent (hLsub (⊥) hψ)
+-    | imp a b iha ihb =>
+-      simp [IForces]
+-      intro _ _ _
+-      exact ihb (Proposition.IsSubformula.trans (Proposition.IsSubformula.imp_right) hwsub)
+-    | and a b iha ihb =>
+-      simp [IForces]
+-      exact ⟨iha (Proposition.IsSubformula.trans Proposition.IsSubformula.and_left hwsub),
+-             ihb (Proposition.IsSubformula.trans Proposition.IsSubformula.and_right hwsub)⟩
+-    | or a b iha ihb =>
+-      simp [IForces]
+-      exact Or.inl (iha (Proposition.IsSubformula.trans Proposition.IsSubformula.or_left hwsub))
+-  -- Now apply int_soundness to d
+-  have := int_soundness d (fun _ _ => True) (fun {_ _} p _ _ => trivial)
+-    () h_forces_all
+-  -- this says: IForces (fun _ _ => True) (fun _ => False) () .bot
+-  -- = (fun _ => False) () = False
+-  simp [IForces] at this
++  by_cases hbotmem : (⊥ : PL.Proposition Atom) ∈ φ.subformulas
++  · -- ⊥ ∈ Σ branch: carrier ⊢ ⊥ and ⊥ ∈ Σ, so by `w.closed` we get ⊥ ∈ carrier,
++    -- contradicting `w.consistent`.
++    exact w.consistent (w.closed ⊥ hbotmem ⟨L, hLsub, ⟨d⟩⟩)
++  · -- ⊥ ∉ Σ branch: every formula in L (and all its subformulas) is ⊥-free, so the
++    -- all-True valuation forces all of L; int_soundness then forces ⊥, a contradiction.
++    have h_forces_all : ∀ ψ ∈ L, IForces (fun _ _ => True) (fun _ => False) () ψ := by
++      intro ψ hψ
++      have hmem := hLsub ψ hψ
++      simp only [Finset.mem_coe] at hmem
++      have hwsub : ψ ∈ φ.subformulas := w.sub hmem
++      clear hmem hψ
++      -- Prove forcing at *every* world (world-polymorphic IH avoids `()` vs `PUnit.unit`
++      -- defeq fragility in the imp case).
++      suffices hall : ∀ u : Unit, IForces (fun _ _ => True) (fun _ => False) u ψ from hall ()
++      induction ψ with
++      | atom p => intro u; simp [IForces]
++      | bot => intro u; exact absurd hwsub hbotmem
++      | imp a b iha ihb =>
++        intro u
++        exact fun u' _ _ => ihb (Proposition.IsSubformula.trans Proposition.IsSubformula.imp_right hwsub) u'
++      | and a b iha ihb =>
++        intro u
++        simp [IForces]
++        exact ⟨iha (Proposition.IsSubformula.trans Proposition.IsSubformula.and_left hwsub) u,
++               ihb (Proposition.IsSubformula.trans Proposition.IsSubformula.and_right hwsub) u⟩
++      | or a b iha ihb =>
++        intro u
++        simp [IForces]
++        exact Or.inl (iha (Proposition.IsSubformula.trans Proposition.IsSubformula.or_left hwsub) u)
++    have := int_soundness d (fun _ _ => True) (fun {_ _} p _ _ => trivial)
++      () h_forces_all
++    exact this
+ 
+ /-! ## Finite Imp Witness (Phase 1 Spike Target) -/
+ 
+@@ -265,8 +253,9 @@ theorem int_fin_imp_witness (φ : PL.Proposition Atom)
+     refine ⟨w.sub hξ, ?_⟩
+     -- ξ ∈ w.carrier ⊆ ↑(intDeductiveClosure ↑w.carrier)
+     -- ⊆ T ⊆ T''
++    have hξset : ξ ∈ (↑w.carrier : Set (PL.Proposition Atom)) := Finset.mem_coe.mpr hξ
+     have h1 : ξ ∈ intDeductiveClosure (↑w.carrier : Set (PL.Proposition Atom)) :=
+-      int_subset_deductive_closure (↑w.carrier) (by exact_mod_cast hξ)
++      int_subset_deductive_closure _ hξset
+     exact hTT'' (hDCT h1)
+   -- Step 9: ψ ∈ w'.carrier
+   have hψ : ψ ∈ w'.carrier := by

@@ -1,0 +1,11 @@
+{
+  "status": "researched",
+  "summary": "Portable acc-free lemmas (sfSat, sfSat_pos/neg, RuleResultSat, applyPropRule_sat, modal*Of?_eq_some) are salvageable; branchSatisfiable/modalClosed_unsat/modalStepBranch_preserves_sat are global-Accessibility-coupled and must not be merged.",
+  "artifacts": [
+    {"path": "specs/396_salvage_299_soundness_lemmas/reports/01_salvage-299-soundness-lemmas.md", "type": "report", "summary": "Per-lemma portability classification and 3-phase salvage plan (Phase A: recognizer _eq_some lemmas to Defs.lean; Phase B: sfSat/RuleResultSat/applyPropRule_sat block to cslib-364; Phase C: restate branch-sat glue)."}
+  ],
+  "next_action_hint": "Plan Phase A (add four modal*Of?_eq_some inverse lemmas to Cslib/Logics/Modal/Tableau/Defs.lean) independently; Phase B/B cherry-pick requires cslib-364 worktree.",
+  "blockers": [
+    "cslib-364 worktree, branch task-364-soundness-drift, and specs/364.../handoffs/BLOCKED-repair-guide.md are absent from this checkout; target architecture and section-4 friction could not be directly verified."
+  ]
+}

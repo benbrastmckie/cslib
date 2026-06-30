@@ -1857,6 +1857,3435 @@
       "completion_summary": "Closed the modal K tableau soundness-proof gap by adopting per-branch accessibility (Option A). modalExpandBranches_closed_unsat reformulated with List.Forall₂ invariant over parallel accs list; zero sorry; zero new axioms; scoped build green. Unblocks task 364.",
       "notes_renumber": "Renumbered from 384 (worktree-local) on merge into main; main 384 = tableau_completeness_sorries.",
       "archived_at": "2026-06-28T18:47:30Z"
+    },
+    {
+      "project_number": 395,
+      "project_name": "reconcile_vet_tasks_post_merge",
+      "status": "completed",
+      "task_type": "meta",
+      "title": "Review and revise vet tasks 384-394 after all worktrees merge into main",
+      "description": "META / coordination task. PRECONDITION: do NOT start until ALL feature worktrees branched off main have been merged into main (cslib-wt-orch = orchestrate-369-374-317-375-373-382; cslib-364 = task-364-soundness-drift; cslib-wt-orch2 = orchestrate-299-300-301-241). Once integrated, review and revise the vet fix-tasks 384-394 (created from specs/vet-propositional-foundations.md) against the work that actually landed, since several overlap in-flight worktree tasks. Known overlaps to reconcile by reading the merged CODE (worktree state.json statuses are stale): task 374 completed LK/LJ interpolation (maeharaCore sorry-free + public Craig theorem + barrel) => likely makes task 385 redundant; task 382 removed dead Dershowitz-Manna termination machinery => likely makes task 388 redundant; tasks 369 (parameterize int/min tableau) + 317 (unified completeness) advance task 384 (the 6 live tableau-completeness sorries). For each of 384-394: mark completed/abandoned if landed, revise scope/description for partial overlap, or keep as-is. Re-run the vet CI checks (lake build/lint/mk_all on Propositional+Foundations) after integration to refresh ground truth and add/remove tasks accordingly. Then commit the reconciled task list.",
+      "created": "2026-06-28T13:19:17Z",
+      "last_updated": "2026-06-29T14:38:37Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/395_reconcile_vet_tasks_post_merge/reports/01_vet-reconciliation.md",
+          "summary": "Per-task ABANDON/REVISE/KEEP verdicts for vet tasks 384-394, grounded in merged code + green lake build"
+        }
+      ],
+      "session_id": "sess_1782652757_2f676d_395",
+      "dependencies": [],
+      "topic": "Project Management",
+      "completion_summary": "Reconciled vet tasks 384-394 against merged main (all worktrees integrated). Verdicts grounded in code + a fresh green `lake build`: ABANDONED 360 (build confirmed green; only remaining failure IntFMPSpike belongs to 385) and 384 (subsumed by 317). REVISED 385 (drop LK/Interpolation done by 374; prioritize IntFMPSpike build-blocker; keep Scheme 4 sorries), 388 (redexWeight/normMeasure already removed by 382; normalize/normalizeAux now LIVE via 398 keep; delete only 3 remaining dead private decls), 389 (drop barrel-header item already compliant), 391 (Connectives jargon ceded to 400; most stale counts already correct post-398), 392 (cutAdm renames ceded to 386), 386 (owns cutAdm renames; re-lint after build green). KEPT 387, 390, 393 unchanged. Report: reports/01_vet-reconciliation.md.",
+      "archived_at": "2026-06-30T11:07:01Z"
+    },
+    {
+      "project_number": 384,
+      "project_name": "tableau_completeness_sorries",
+      "status": "abandoned",
+      "task_type": "cslib",
+      "title": "Resolve documented sorry in minimalTableau_complete",
+      "description": "[Refreshed post-merge vet; scope narrowed.] The single remaining tableau sorry is at Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:110 (theorem minimalTableau_complete), documented in the module header as deferred to task 317. It bridges MValid phi to the per-branch forcing hypothesis for `tableau_complete minScheme`; resolution needs upward-closure of intExtractValuation and minBranchBotForces. Not in the PR #648 foundation slice. Decide with upstream whether acceptable as documented WIP or must be gated.",
+      "created": "2026-06-28T12:53:27Z",
+      "last_updated": "2026-06-28T18:34:49Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "session_id": "sess_1782651207_1e893c_384",
+      "dependencies": [
+        395
+      ],
+      "topic": "PL-Tableau",
+      "completion_summary": "Reconciled by task 395: the single sorry at Tableau/Minimal/Completeness.lean:110 (minimalTableau_complete) is documented as deferred to task 317, which fills it alongside the other tableau-completeness sorries. Fully subsumed by task 317; abandoned to avoid duplicate work.",
+      "archived_at": "2026-06-30T11:07:01Z"
+    },
+    {
+      "project_number": 385,
+      "project_name": "complete_parked_tableau_interpolation_fmp",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "Complete and integrate IntFMPSpike, LK/Interpolation, Tableau Scheme",
+      "description": "[Reconciled by task 395, post-merge.] Tier-1. LK/Interpolation sub-part DROPPED — task 374 delivered LKProof.interpolation sorry-free (Interpolation.lean:864). TWO sub-parts remain: (1) BUILD-BLOCKER, DO FIRST: IntFMPSpike.lean has 2 compile errors (lines 201/231) and is the ONLY thing breaking repo-wide `lake build` (imported at Cslib.lean:419). Fix the 2 errors, strip spike/specs-370 framing, rename to IntDecidability.lean, keep wired into Cslib.lean + barrel. (2) Tableau/Intuitionistic/Scheme.lean: finish the 4 parked sorries (truthLemma:242 parametric over IntMinScheme; openBranch_countermodel:280/288/296 — :296 has ready classical analogue classicalExpandBranches_openBranch_initial_mem); ideally repoint Intuitionistic/Minimal completeness at the parametric route (coordinates with 317). Verify full lake build green + lint-style. Source: §3.2-3.4 + 395 reconciliation.",
+      "created": "2026-06-28T12:53:27Z",
+      "last_updated": "2026-06-29T20:48:13Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "type": "implementation",
+          "path": "specs/385_complete_parked_tableau_interpolation_fmp/summaries/01_intdecidability-implementation-summary.md",
+          "summary": "Implementation summary: 5 phases, build blocker eliminated, 2 structural sorries closed, hsat deferred, CI green"
+        }
+      ],
+      "session_id": "sess_1751219200_f8a3c7",
+      "dependencies": [
+        395
+      ],
+      "topic": "PL-Tableau",
+      "completion_summary": "Eliminated repo-wide build blocker: IntFMPSpike.lean patched and renamed to IntDecidability.lean, Cslib.lean import re-enabled, structural sorries (intExpandBranches_openBranch_closed + intExpandBranches_openBranch_initial_mem) closed, hsat sorry deferred via Phase 4 research-or-defer gate (formulation bridge requires task-317 truthLemma interface change), task-317 sequencing documentation complete, full CI green (3153 jobs).",
+      "archived_at": "2026-06-30T11:07:01Z"
+    },
+    {
+      "project_number": 388,
+      "project_name": "termination_deadcode_and_heartbeat_cleanup",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "Remove dead normalization track and heartbeat/simp debt in Termination.lean",
+      "description": "[Reconciled by task 395, post-merge.] Tier-2. NaturalDeduction/Normalization/Termination.lean + Reduction.lean cleanup. The redexWeight + normMeasure fuel/measure track is ALREADY GONE (delivered by merged task 382). `normalize`/`normalizeAux` are NOW LIVE (task 398 added efq arms) — do NOT delete them. Remaining dead PRIVATE decls (0 callers, safe to delete): normalizeAux_fixpoint (Termination.lean:305), subs_maximalFormulas_mem (:492), subsOne_new_redex_complexity_lt (:775). Then clear residual lint debt: unused simp args, no-op/dead tactics, long lines, flexible-simp; remove or comment-justify maxHeartbeats overrides; decompose remaining heavy proofs. SEQUENCE AFTER task 398 (it is actively editing Termination.lean). Source: §4.2 + 395.",
+      "created": "2026-06-28T12:53:27Z",
+      "last_updated": "2026-06-30T05:38:47Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "session_id": "sess_1782793893_c01ba9_388",
+      "dependencies": [
+        395,
+        398
+      ],
+      "topic": "PL-Hygiene",
+      "completion_summary": "Deleted ~424 lines of dead normalization-track code (normalizeAux_fixpoint cascade + subs_maximalFormulas_mem/subsOne_new_redex_complexity_lt pair) from Termination.lean and cleared residual lint debt; all 8 CI steps pass, 0 sorries, 0 new axioms.",
+      "archived_at": "2026-06-30T11:07:01Z"
+    },
+    {
+      "project_number": 360,
+      "project_name": "repair_prebroken_cslib_modules",
+      "status": "abandoned",
+      "task_type": "cslib",
+      "title": "Repair 11 pre-existing broken modules failing repo-wide lake build",
+      "description": "The repo-wide 'lake build' currently fails (unrelated to vetted tasks 343/344/350/351/353/354, whose files build clean in isolation). Failing modules: Cslib.Logics.Modal.Denotation (simp made no progress, Denotation.lean:60), Cslib.Logics.Bimodal.Syntax.SubformulaClosure.NestingDepth (unsolved goals, multiple lines), Cslib.Logics.Temporal.ConservativeExtension (ambiguous term, lines 54/59/69), Cslib.Logics.Bimodal.Theorems.Perpetuity.Principles (type mismatch, lines 84/164/176), Cslib.Logics.Temporal.Metalogic.DenseCompleteness (unsolved goals, line 166), Cslib.Logics.Propositional.SequentCalculus (duplicate _proof_1 environment clash between LJ and LK CutElimination), Cslib.Logics.Bimodal.Metalogic.Separation.Defs (many simp made no progress), Cslib.Logics.Propositional.Tableau.Minimal.Soundness, Cslib.Logics.Bimodal.ProofSystem.Substitution, Cslib.Logics.Modal.Tableau.Soundness, Cslib.Logics.Propositional.Tableau.Classical.Completeness. checkInitImports/shake also fail downstream due to missing oleans. Restore a green repo-wide build. Source: /vet CI run 2026-06-26.",
+      "created": "2026-06-27T01:08:49Z",
+      "last_updated": "2026-06-27T04:59:36Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "session_id": "sess_1782522754_5f0817_360",
+      "blockers": "Remaining repo-build breakage narrowed to 2 modules: Modal/Tableau/Soundness (tracked by task 364) and Classical/Tableau/Completeness (tracked by task 363). Intuitionistic/Minimal Soundness resolved by task 316. 8/11 originally-failing modules repaired under this task.",
+      "dependencies": [
+        363,
+        364
+      ],
+      "topic": "Code Hygiene",
+      "completion_summary": "Reconciled by task 395 (post-merge): repo-wide `lake build` confirmed GREEN — all 11 originally-failing modules now build. The 2 stragglers (Modal/Tableau/Soundness, Classical/Tableau/Completeness) were resolved by merged tasks 364/363. The only remaining build failure is IntFMPSpike.lean, which was NOT in task 360 scope and is tracked by task 385. Abandoned as resolved.",
+      "archived_at": "2026-06-30T11:07:01Z"
+    },
+    {
+      "project_number": 370,
+      "project_name": "int_min_metalogic_decidability",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "PL-Metalogic",
+      "description": "Close the decidability asymmetry in the metalogic layer: classical propositional logic has a decision procedure (instDecidableDerivablePropositionalAxiom via tautology enumeration, Metalogic/StrongCompleteness.lean:566), but intuitionistic (IntPropAxiom) and minimal (MinPropAxiom) logics have none. Establish Decidable (Derivable IntPropAxiom phi) and Decidable (Derivable MinPropAxiom phi) via the finite model property: bound the canonical Kripke models (prime DCCS / MinTheory worlds) by the subformulas of phi, give a terminating decision procedure over the finite model space, and prove it correct against the existing int/min strong-completeness theorems (IntStrongCompleteness.lean, MinStrongCompleteness.lean). Independent of the tableau decision procedures (which currently rest on unproved completeness witnesses). Note: the LJ sequent calculus already has a tableau-backed decidability instance (SequentCalculus/LJ/Decidability.lean) -- assess whether the FMP route or a bridge to LJ decidability is the cleaner source for the IPL instance before implementing. No new axioms (Classical.choice / Decidable.decide acceptable on noncomputable defs); CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake).",
+      "dependencies": [],
+      "created": "2026-06-27T05:29:32Z",
+      "last_updated": "2026-06-29T19:10:00Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/370_int_min_metalogic_decidability/reports/01_int-min-decidability-fmp-vs-lj.md",
+          "type": "report",
+          "summary": "FMP-vs-LJ route assessment, recommend sorry-free FMP"
+        },
+        {
+          "path": "specs/370_int_min_metalogic_decidability/plans/01_int-min-fmp-decidability.md",
+          "type": "plan",
+          "summary": "Implementation plan"
+        },
+        {
+          "path": "specs/370_int_min_metalogic_decidability/plans/02_close-out-superseded-by-fmp-landing.md",
+          "type": "plan",
+          "summary": "Close-out: superseded by 411/421/422; recommend completed"
+        }
+      ],
+      "session_id": "sess_1782560395_aeb7ef_370",
+      "blockers": "RESOLVED/SUPERSEDED 2026-06-29: 370 goals satisfied on main by 411 (Int) + 421 (Min); reconciliation by 422. Closed as completed-superseded.",
+      "completion_summary": "Superseded: sorry-free FMP decidability for IntPropAxiom (task 411, commit af9daf5e — IntDecidability.lean: IntFinWorld, instFintypeIntFinWorld, int_fin_truth_lemma, int_fin_imp_witness, int_fmp, decidableDerivableIntPropAxiomFMP) and MinPropAxiom (task 421, commit 6fb9f38b — MinDecidability.lean mirror) already landed on main; subformula closure in Subformula.lean (334). FMP defs are sorry-free (axioms {propext, Classical.choice, Quot.sound}) and tableau-independent. Route reconciliation (canonical tableau instance vs named FMP def) owned by task 422. Orphan IntFMPSpike.lean already removed. No residual implementable work; closed out via plans/02_close-out-superseded-by-fmp-landing.md.",
+      "archived_at": "2026-06-30T11:07:01Z"
+    },
+    {
+      "project_number": 398,
+      "project_name": "efq_nd_rule_ipl_base_keep_mpl",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "Make IPL the base propositional logic: add efq as a primitive ND rule, preserving MPL metatheory",
+      "description": "DESIGN SETTLED (CSLib Zulip 'Propositional Logic' thread, Waring's closing message 606970606 + our synthesis): take IPL as the base propositional logic FOR NOW by adding ex-falso (efq / bottom-elimination) as a PRIMITIVE constructor of the ND `Derivation` so that the primitive `⊥` constructor is actually interpreted (Waring: 'it seems very unnatural to have a constructor with no semantics'). This makes minimal logic the positive fragment IPL<→,∧,∨,⊤> conceptually, and makes the conservativity results' `IsBotFree` predicate framing more natural (Waring's point). CRITICAL CONSTRAINT (our decision, diverging from Waring's 'forget minimal logic'): PRESERVE all completed MPL work — do NOT delete it. Keep MinSoundness, MinLindenbaum, MinStrongCompleteness, MPL completeness (`MPL.hilbert_alg_complete`), the `bot_val`/Johansson-algebra parametric semantics, and the MPL/IPL conservativity chains (MplConservativeChain, ConservativeChain, ImpConservative, etc.). Minimal logic stays as a retained LAYER beneath IPL, sequenced for later fragment work, not removed. Current state: efq is a DERIVED rule (`Theory.Derivation.botE`) gated by `[IsIntuitionistic T]` in NaturalDeduction/DerivedRules.lean; ND/Basic.lean documents the trade-off. WORK: (1) add efq as a primitive ND `Derivation` constructor available at IPL/CPL strength; (2) keep the ND<->Hilbert equivalence (`hilbert_iff_nd*`) provably intact so efq-as-rule and efq-as-axiom coincide and MPL (no efq rule) still corresponds; (3) keep substitution lemmas, DecidableEq, and the `FromPropositional` embeddings green; (4) update ND/Basic.lean Implementation-notes to record IPL-as-base with MPL retained; (5) postpone general fragment design (Waring). Verify full `lake build` + downstream Modal/Temporal/Bimodal. Honor Zulip AI policy (human-authored prose). Depends on 397 (green main for verification). Source: Zulip thread 606970606.",
+      "created": "2026-06-28T15:43:45Z",
+      "last_updated": "2026-06-29T14:12:00Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/398_efq_nd_rule_ipl_base_keep_mpl/reports/01_efq-primitive-ipl-base.md",
+          "type": "report",
+          "summary": "Recommended gated-constructor efq design; full proof-obligation map; 5-phase plan"
+        },
+        {
+          "path": "specs/398_efq_nd_rule_ipl_base_keep_mpl/plans/01_efq-primitive-implementation.md",
+          "type": "plan",
+          "summary": "7-phase gated-constructor efq plan; zero-debt subformula gate; MPL preserved"
+        },
+        {
+          "path": "specs/398_efq_nd_rule_ipl_base_keep_mpl/summaries/01_efq-primitive-summary.md",
+          "type": "summary",
+          "summary": "efq promoted to gated primitive ND constructor; IPL-as-base; MPL retained; full CI green; zero-debt"
+        }
+      ],
+      "session_id": "sess_1782673164_f5576d_398",
+      "dependencies": [
+        397
+      ],
+      "topic": "PL-Base",
+      "archived_at": "2026-06-30T11:07:01Z"
+    },
+    {
+      "project_number": 399,
+      "project_name": "refresh_pr648_ipl_base_foundation",
+      "status": "completed",
+      "task_type": "pr",
+      "title": "Update PR #648 to the settled IPL-base foundation per Waring's end-of-thread recommendation",
+      "description": "[REVISED 2026-06-29 — minimal additive approach supersedes the cherry-pick recipe. Implementation DONE & verified on branch feat/propositional-ipl-base, commit 5dbed274 (3-file diff, 594 jobs green, lint clean, zero sorry): ungated primitive efq constructor makes IPL the base; IPL:=∅; MPL/IsIntuitionistic/intuitionisticCompletion removed; classical layer kept. Update #648 via FAST-FORWARD push of feat/propositional-ipl-base:feat/propositional-v2 (no force-push). Remaining = human: review, ff-push, reword PR description, post Zulip 606970606. MPL-as-base dispute deferred to tasks 407/408/409. See ipl-base-minimal-revision.md.] Update PR #648 (feat/propositional-v2) following Thomas Waring's closing recommendation in the CSLib Zulip 'Propositional Logic' thread (606970606). PR #648 is ~239 commits behind fork main, which is why Waring reports the restored references and Zulip-thread link are 'not in the PR' (both ARE on main at NaturalDeduction/Basic.lean:76 + the Design trade-off note). PLAN (per the user's chosen strategy): branch off upstream/main and cherry-pick the propositional FOUNDATION as a focused, reviewable commit, then update #648 to that branch. Scope of the foundation: the five-primitive `Proposition` type with primitive `⊥`; NaturalDeduction/Basic with the settled IPL-as-base design (efq as a primitive ND rule — see task 398); restored references AND the Zulip-thread link (Waring's flag (b)). EXCLUDE connective typeclasses — Waring flagged these as a SEPARATE development (task 400); do not bundle them. Keep the PR small (Matthew + Waring both asked for small pieces); later layers (Hilbert+equivalence, algebraic semantics incl. retained MPL metatheory, conservativity chains, sequent LJ/LK, tableau) follow as separate stacked PRs. Note /pr is user-only (branch creation, CI, submission); this task prepares the cherry-pick + a human-authored PR/Zulip description for the user to push (Zulip AI policy). Waring will 'review the PR properly once we've settled on the design', so this depends on task 398 (efq/IPL-base implemented). Also coordinate with PR-readiness vet tasks 386/387/389. Source: Zulip thread 606970606.",
+      "created": "2026-06-28T15:43:45Z",
+      "last_updated": "2026-06-29T18:50:28Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/399_refresh_pr648_ipl_base_foundation/reports/01_pr648-refresh-research.md",
+          "type": "report",
+          "summary": "PR #648 11 commits behind; foundation scope (Defs minus connectives, ND/Basic, references.bib); delete Theory.lean; Waring flags (a)(b)"
+        },
+        {
+          "path": "specs/399_refresh_pr648_ipl_base_foundation/plans/01_pr648-refresh-plan.md",
+          "type": "plan",
+          "summary": "4-phase PR #648 foundation refresh: cherry-pick recipe, isolated build verify, PR+Zulip drafts, [PR READY] transition"
+        },
+        {
+          "path": "specs/399_refresh_pr648_ipl_base_foundation/cherry-pick-recipe.md",
+          "type": "artifact",
+          "summary": "Cherry-pick recipe: exact file changes, Option A rationale, Phase 2 build verification results (all green)"
+        },
+        {
+          "path": "specs/399_refresh_pr648_ipl_base_foundation/prepare-foundation-branch.sh",
+          "type": "artifact",
+          "summary": "Executable script: creates feat/propositional-foundation branch off upstream/main with all recipe changes staged (no push)"
+        },
+        {
+          "path": "specs/399_refresh_pr648_ipl_base_foundation/pr-description.md",
+          "type": "artifact",
+          "summary": "PR body draft (HUMAN-AUTHOR-REQUIRED): addresses Waring flags (a)(b), Theory.lean deletion, namespace note, build claim"
+        },
+        {
+          "path": "specs/399_refresh_pr648_ipl_base_foundation/zulip-response.md",
+          "type": "artifact",
+          "summary": "Zulip reply draft (HUMAN-AUTHOR-REQUIRED): efq done, connectives excluded, references+link present, welcomes review"
+        }
+      ],
+      "session_id": "sess_complete_399",
+      "dependencies": [
+        398
+      ],
+      "topic": "PL-Base",
+      "completion_summary": "IPL-base foundation prepared for PR #648: ungated primitive efq constructor makes IPL the base (IPL:=∅; MPL/IsIntuitionistic/intuitionisticCompletion removed; classical layer retained). Verified on branch feat/propositional-ipl-base, commit 5dbed274 (3-file diff, 594 jobs green, lint clean, zero sorry). PR/Zulip drafts authored (pr-description.md, zulip-response.md). Remaining steps are human-only: review, fast-forward push, reword PR description, post Zulip 606970606. MPL-as-base dispute deferred to tasks 407/408/409.",
+      "archived_at": "2026-06-30T11:07:01Z"
+    },
+    {
+      "project_number": 401,
+      "project_name": "polymorphic_evaluator_bool_prop_dpll",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "Expose polymorphic AlgEvaluate at Bool/Prop as the canonical computable evaluator (DPLL)",
+      "description": "From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portability) and Waring's GeneralizedHeytingAlgebra-polymorphic evaluator suggestion in the Zulip thread. Surface the algebraic `AlgEvaluate` specialized at `Bool` (computable) and `Prop` as the canonical evaluation path, and reconcile with Semantics/Bool.lean (BoolEvaluate + bridge lemma + Decidable instance) so there is ONE documented story: Prop-valued `Evaluate` for uniformity with Kripke semantics; Bool/AlgEvaluate for decision procedures (DPLL/SAT). Keep `Valuation` = Atom->Prop (canonical model construction needs it). Confirm the bridge to prop_strong_soundness. Coordinate with Matthew's DPLL/Tseitin development. Lower priority; independent of the IPL-base work. Source: Zulip thread (msgs 603367168, 603520169, 603572691, 603755068, 603877853 on HasInterp/GHA).",
+      "created": "2026-06-28T15:43:45Z",
+      "last_updated": "2026-06-30T02:02:59Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "type": "plan",
+          "path": "specs/401_polymorphic_evaluator_bool_prop_dpll/plans/01_evaluator-bool-prop-dpll-docs.md",
+          "summary": "3-phase (2 core + 1 optional) documentation-consolidation plan: fix Bridge.lean docstring drift + canonical ONE-story table/diagram, cross-references in Bool.lean/Algebra.lean, optional baValid_imp_tautology. Zero-debt."
+        }
+      ],
+      "session_id": "sess_1782784353_00a32e_401",
+      "dependencies": [],
+      "topic": "PL-Semantics",
+      "plan_metadata": {
+        "phases": 3,
+        "total_effort_hours": 3,
+        "complexity": "simple",
+        "research_integrated": true,
+        "plan_version": 1,
+        "dependency_waves": [
+          [
+            1
+          ],
+          [
+            2,
+            3
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/01_polymorphic-evaluator-bool-prop-dpll.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-06-29"
+          }
+        ]
+      },
+      "completion_summary": "Documentation-consolidation: fixed 4 stale docstring references in Bridge.lean (prop_evaluate_eq->propEvaluateEq, bool_evaluate_eq->boolEvaluateEq); expanded Bridge.lean module docstring into the canonical ONE-evaluation-story narrative (evaluator table, soundness chain, Valuation=Atom->Prop note, roadmap for baValid_imp_tautology); added cross-reference docstrings to Bool.lean naming BoolEvaluate+instDecidableTautology as canonical DPLL/SAT path with Doty forward-looking anchor; added Bridge.lean pointer in Algebra.lean. All CI checks pass at module scope. Phase 3 partial: baValid_imp_tautology documented as roadmap item (universe constraint). Whole-repo build externally blocked by ProofSystemMorphism.lean (task 417/419).  ",
+      "archived_at": "2026-06-30T11:07:01Z"
+    },
+    {
+      "project_number": 403,
+      "project_name": "rename_specs_384_to_402",
+      "status": "completed",
+      "task_type": "meta",
+      "description": "Rename specs/384_modal_tableau_soundness_gap_redesign/ to specs/402_modal_tableau_soundness_gap_redesign/ to match task 402 (the soundness-gap redesign was renumbered 384->402 during the task-364 merge to avoid colliding with main task 384 tableau_completeness_sorries). git mv the directory and update task 402 artifact paths in specs/state.json (reports/01_soundness-gap-redesign.md, plans/01_per-branch-accessibility.md). Grep for any remaining 384_modal_tableau references. Bookkeeping only; no code changes.",
+      "dependencies": [],
+      "parent_task": 402,
+      "last_updated": "2026-06-30T05:38:50Z",
+      "topic": "Project Management",
+      "session_id": "sess_1782793893_c01ba9_403",
+      "completion_summary": "Renamed specs/384_modal_tableau_soundness_gap_redesign to 402_ via git mv (history preserved) and updated two artifact paths in specs/archive/state.json; task 384 (tableau_completeness_sorries) untouched. Bookkeeping only.",
+      "archived_at": "2026-06-30T11:07:01Z"
+    },
+    {
+      "project_number": 408,
+      "project_name": "minimal_sequent_calculus_lm",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "Sequent calculus: property-gated botL (single calculus, MPL/IPL one inductive; cut/subformula proved once)",
+      "description": "SPAWNED from task 407 (MPL structure-first redesign), Wave 5. Largest structural gap (report 01 §3.4/§7.1): LJProof/LKProof HARD-CODE the botL/explosion rule (SequentCalculus/LJ/Basic.lean:91-92, LK/Basic.lean:76-77) and there is NO minimal sequent calculus; cut elimination/subformula/decidability/interpolation are proved per-system, not once at a base. PRIMARY DESIGN (universal-algebra approach, aligned with task 407 option C): a SINGLE sequent calculus over the full signature (incl. primitive ⊥) with a PROPERTY-GATED botL constructor -- gate botL by [IsIntuitionistic T] (mirroring task 407's gated efq in ND), so MPL and IPL are the SAME inductive at different property strengths and the structural metatheory (cut elimination, subformula property) is proved ONCE generically over the gate. MPL = the strength WITHOUT the IsIntuitionistic instance; IPL = WITH it. This avoids the exclude-then-add / two-inductive duplication cost and keeps the sequent layer consistent with the ND layer. SCOPE: cleanly unifies MPL/IPL (single-conclusion); LK (classical, multiple-conclusion) is a different structural shape and stays its own calculus, related via its own module rather than folded in. FALLBACK (only if property-gating cut-elimination proves infeasible): define a separate minimal LMProof inductive (LJ rules minus botL), prove structural results once on LM, recover LJ = LM + botL by composition/re-export. Preserve all existing LJ/LK results (soundness, hilbert_iff_lj/lk, LJProof.cutElim/LKProof.cutElim) -- no weakening. HIGH effort -- use --hard. Depends on 407 (gated-rule design + property modules) and green main. Files: SequentCalculus/Defs.lean, LJ/* (gated botL + generic cut/subformula), LK/* (relate). Honor Zulip AI policy (human-authored prose). Source: task 407 report 01 §3.4/§7 W5, report 02 §6.",
+      "created": "2026-06-29T00:00:00Z",
+      "last_updated": "2026-06-29T19:47:31Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/408_minimal_sequent_calculus_lm/reports/01_minimal-sequent-calculus-gated-botl.md",
+          "type": "report",
+          "summary": "PRIMARY design (gated botL SeqProof T) feasible"
+        },
+        {
+          "path": "specs/408_minimal_sequent_calculus_lm/plans/01_gated-botl-seqproof.md",
+          "type": "plan",
+          "summary": "7-phase gated-botL SeqProof refactor"
+        },
+        {
+          "path": "specs/408_minimal_sequent_calculus_lm/summaries/01_gated-botl-seqproof-summary.md",
+          "type": "summary",
+          "summary": "Unified MPL/IPL into gated-botL SeqProof; full build green"
+        }
+      ],
+      "session_id": "sess_1782760056_06c853_408",
+      "dependencies": [
+        407
+      ],
+      "topic": "PL-Base",
+      "parent_task": 407,
+      "archived_at": "2026-06-30T11:07:01Z"
+    },
+    {
+      "project_number": 410,
+      "project_name": "fragment_generic_algebraic_completeness",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "Fragment-generic algebraic completeness for MPL-base derivability",
+      "description": "Research and formalize the per-fragment algebraic completeness needed to instantiate the fully-generic Derivable P-logic framework. Current residual from task 407 (phase 7 S3 spike): FragmentGeneric.lean delivers AlgEvalIndependent + generic_gha_implies_ha + ghaValid_of_botFree (the GHAValid <-> HAValid equivalence for bot-free formulas). The remaining step -- HAValid phi -> Derivable X-logic phi for a specific sub-logic X -- requires per-fragment algebraic completeness, which is not currently generic in P. Each fragment has its own canonical algebra model: IsBotFree routes through WithBot G + Heyting completeness; IsOrBotFree routes through LowerSet B + Brouwerian completeness; IsImpTopOnly routes through the Rasiowa free algebra. A fully generic Derivable P-logic phi <- HAValid phi parameterized by P is open research. Research goal: (1) identify what algebraic completeness property a fragment P needs to satisfy so that the generic framework closes; (2) state and prove a typeclass or predicate CanAlgComplete P such that (CanAlgComplete P, AlgEvalIndependent P) implies generic Derivable P-logic phi <-> GHAValid phi; (3) instantiate for at least IsBotFree and IsOrBotFree; (4) determine whether IsImpTopOnly can be recovered. See Cslib/Logics/Propositional/Semantics/Algebra/FragmentGeneric.lean lines 40-53 for the open residual. References: Rasiowa1974 (algebraic approach), task 407 reports 01-03. Task type: cslib. Depends on 407 (delivers FragmentGeneric.lean).",
+      "created": "2026-06-29T00:00:00Z",
+      "last_updated": "2026-06-29T19:47:36Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/410_fragment_generic_algebraic_completeness/reports/01_fragment-generic-algebraic-completeness.md",
+          "type": "report",
+          "summary": "Per-fragment completeness reduces to reuse via CanAlgComplete"
+        },
+        {
+          "path": "specs/410_fragment_generic_algebraic_completeness/plans/01_can-alg-complete-instantiation.md",
+          "type": "plan",
+          "summary": "3-phase additive CanAlgComplete instantiation"
+        }
+      ],
+      "session_id": "sess_1782760056_06c853_410",
+      "dependencies": [
+        407
+      ],
+      "topic": "PL-Base",
+      "parent_task": 407,
+      "archived_at": "2026-06-30T11:07:01Z"
+    },
+    {
+      "project_number": 411,
+      "project_name": "adopt_complete_int_decidability",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "Adopt the complete, CI-green IntDecidability.lean from branch refactor/prop_logic onto main, delivering the actual Decidable instance that main's task-385 version lacks. This completes the Int side of parent task 370.\n\nCONTEXT: main's current Cslib/Logics/Propositional/Metalogic/IntDecidability.lean (committed by task 385, HEAD 07792009) is the WITNESS-ONLY version (272 lines, 7 decls): task 385 renamed/fixed the former IntFMPSpike scratch spike to make `lake build` green, but it STOPS at `int_fin_imp_witness` and provides NO `Decidable` instance. The branch refactor/prop_logic (tasks 415/416) has a COMPLETE version (436 lines, 10 decls) that carries the same construction through `intFinVal` -> `intFinVal_upward_closed` -> `int_fin_truth_lemma` -> `int_fmp` -> `instDecidableDerivableIntPropAxiom'` (the actual `Decidable (Derivable IntPropAxiom phi)` instance), CI-green with no `sorryAx` (axioms: propext, Classical.choice, Quot.sound). This task adopts that completion.\n\nPRIMARY DELIVERABLE -- single-file swap, verified build-safe:\n1. Replace main's IntDecidability.lean with the branch version: `git show refactor/prop_logic:Cslib/Logics/Propositional/Metalogic/IntDecidability.lean > Cslib/Logics/Propositional/Metalogic/IntDecidability.lean`.\n2. Change NOTHING else for the core deliverable. Build-safety already verified: the ONLY dependency drift is that the branch deleted an unused lemma `intBotMem_iff_false` from IntStrongCompleteness.lean; our IntDecidability does NOT reference it, and main's MinStrongCompleteness.lean has a docstring that DOES reference it -- so KEEP main's IntStrongCompleteness.lean unchanged. The grind-lint skip `Cslib.Logic.PL.IntFinWorld.mk.sizeOf_spec` the complete file needs is ALREADY present in main's CslibTests/GrindLint.lean (line 79) -- no change needed. The Cslib.lean import (line ~420) already points at IntDecidability -- it stays valid.\n\nDO NOT bring over / KEEP main's versions of: Scheme.lean (redundant; both branches sit at the same 2 sorries deferred-to-317), CslibTests/GrindLint.lean, IntStrongCompleteness.lean, and ALL specs/ task metadata. The branch's task numbers 408-416 COLLIDE with main's (number fork) -- do NOT union state.json/TODO.md or copy the branch's spec dirs.\n\nOPTIONAL SECONDARY SCOPE (only if explicitly requested): cherry-pick the 6 NEW Temporal FMP decidability files that are absent from main -- Cslib/Logics/Temporal/Metalogic/Decidability/Decidability.lean plus Decidability/FMP/{FMP,Filtration,FiniteModel,SubformulaClosure,TruthPreservation}.lean -- and add their public imports to Cslib.lean. Independent of the Int work; their deps (Temporal.Metalogic.Completeness/Soundness/DenseCompleteness/DenseSoundness) are already on main. Build-verify before committing.\n\nDO NOT git-merge the branch -- this is a curated file adoption, not a branch merge (a full merge drags in the unmergeable task-number-fork metadata, redundant Scheme.lean, and an add/add conflict).\n\nACCEPTANCE:\n- main's IntDecidability.lean contains `instDecidableDerivableIntPropAxiom'` (a `Decidable (Derivable IntPropAxiom phi)` instance).\n- `lake build` green for the whole library; `lake test`, `lake exe checkInitImports`, `lake exe lint-style`, `lake shake` all pass.\n- `#print axioms instDecidableDerivableIntPropAxiom'` (or lean_verify) shows ONLY propext, Classical.choice, Quot.sound -- NO sorryAx.\n- 0 new sorry/admit introduced; main's pre-existing Scheme.lean sorries (deferred-to-317) untouched.\n- No metadata corruption: specs/state.json and TODO.md unchanged except this task's own status. Zero-debt.\n\nSOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/416_int_min_fmp_spike_revise/reports/01_fmp-spike-resolution.md (on that branch). Verified build-safe against main HEAD 07792009.",
+      "dependencies": [],
+      "parent_task": 370,
+      "artifacts": [
+        {
+          "path": "specs/411_adopt_complete_int_decidability/reports/01_int-decidability-integration-findings.md",
+          "type": "report",
+          "summary": "Integration analysis: single-file swap not git-merge; shared lineage; branch completion decls"
+        },
+        {
+          "path": "specs/411_adopt_complete_int_decidability/reports/02_task411-collision-and-corrected-adoption.md",
+          "type": "report",
+          "summary": "Diagnosis: task-number fork collision (branch 411=dma_concat); deliverable sorry-free; build-safety re-verified; corrected curated-swap execution"
+        },
+        {
+          "path": "specs/411_adopt_complete_int_decidability/plans/01_curated-intdecidability-adoption.md",
+          "type": "plan",
+          "summary": "3-phase curated single-file swap on main (NOT branch merge) + build-verify gate + IntLindenbaum-drift contingency"
+        }
+      ],
+      "last_updated": "2026-06-30T01:10:26Z",
+      "next_artifact_number": 2,
+      "completion_summary": "Adopted the complete sorry-free IntDecidability.lean (436 lines, instDecidableDerivableIntPropAxiom' FMP instance) from refactor/prop_logic onto main via curated single-file swap (NOT a branch merge — branch task 411 was the unrelated dma_concat_closure). lake build green (3156 jobs), lake test/checkInitImports/lint-style clean, #print axioms = {propext, Classical.choice, Quot.sound} with no sorryAx. Phase 3 contingency not needed. Completes the Int side of parent task 370; unblocks 421 (Min FMP) and 422 (route reconciliation).",
+      "archived_at": "2026-06-30T11:07:01Z"
+    },
+    {
+      "project_number": 416,
+      "project_name": "instantiate_generic_lindenbaum_phase6",
+      "title": "Instantiate GenericLindenbaum to remove Min/Int duplication",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "PL-Metalogic",
+      "parent_task": 415,
+      "description": "[Spawned from task 415 audit — closes Finding 3.] Activate the dormant GenericLindenbaum substrate: re-derive MinTheory and IntDCCS as instances of GenericTheory Axioms Cons (Cons := fun _ => True for minimal; PropSetConsistent IntPropAxiom for intuitionistic), replacing the duplicated min_*/int_* Lindenbaum bodies (MinLindenbaum.lean ~247 lines, IntLindenbaum.lean ~318 lines) with thin instances over generic_deriv_from_closure_to_S / generic_deriv_imp_of_union / generic_imp_witness. The substrate (Cslib/Logics/Propositional/Metalogic/GenericLindenbaum.lean, ~295 lines) is currently additive/unused — see GenericLindenbaum.lean:43-52 (\"deferred to Phase 6 of the MPL-base structure-first redesign\"). Behavior must stay identical; deletes ~270 net duplicated lines and activates the dormant file. OVERLAP WITH TASK 393: task 393 (Zulip-first consolidation, deps 386/391/395) is the broader umbrella covering this PLUS the 3 Soundness + 8 conservativity modules + LJ/LK helper duplication; THIS task is the narrow, non-Zulip-gated Lindenbaum slice only — coordinate with the 393 owner and cross-reference it, do NOT double-edit the same decls. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); 0 new sorry/axioms. Source: specs/415_audit_propositional_lifting_structure_first/reports/01_lifting-audit.md §5, Rank 1.",
+      "dependencies": [],
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/416_instantiate_generic_lindenbaum_phase6/reports/01_generic-lindenbaum-phase6.md",
+          "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/416_instantiate_generic_lindenbaum_phase6/plans/01_fix-stale-design-notes.md",
+          "type": "plan",
+          "summary": ""
+        },
+        {
+          "path": "specs/416_instantiate_generic_lindenbaum_phase6/summaries/01_fix-design-notes-summary.md",
+          "type": "summary",
+          "summary": ""
+        }
+      ],
+      "created": "2026-06-29T22:35:38Z",
+      "last_updated": "2026-06-29T23:25:51Z",
+      "session_id": "sess_1782772776_909541_416",
+      "archived_at": "2026-06-30T11:07:01Z"
+    },
+    {
+      "project_number": 417,
+      "project_name": "parametric_conservativity_lift_foundations",
+      "title": "Foundations-level parametric conservativity lift (unify modal/temporal/bimodal)",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Foundations",
+      "parent_task": 415,
+      "description": "[Spawned from task 415 audit — closes Finding 2.] Add Cslib/Foundations/Logic/Metalogic/ConservativityLift.lean providing a parametric conservative_over_cpl lemma (signature in report §4) plus a generic classical truth-functional bridge lemma, then re-express temporal_conservative_extension (Temporal/ConservativeExtension.lean:87) and bimodal_conservative_extension (Bimodal/Metalogic/ConservativeExtension/PropositionalConservativity.lean:118) — and optionally re-home modal_conservative_extension_param (Modal/Metalogic/ConservativeExtension.lean:54) — as thin instances. Collapses 3 semantic-bridge + 3 conservativity proofs into 1 generic bridge + 1 generic lemma + 3 instances. This extends the Modal side's existing \"by construction\" fragment-genericity win (one parametric lemma already covers 15 systems) to ALL THREE modal-family logics — the most direct hit on Waring's Zulip fragment-genericity ask. Synergistic with task 416 (shared prop_completeness usage); not a hard dependency. RISK: unifying the Modal.Satisfies / Temporal.Satisfies / Bimodal.truthAt shapes behind one interface. CI green; 0 new sorry/axioms. Source: report §4, Rank 2.",
+      "dependencies": [],
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/417_parametric_conservativity_lift_foundations/plans/01_conservativity-lift-foundations.md",
+          "type": "plan",
+          "summary": ""
+        },
+        {
+          "path": "specs/417_parametric_conservativity_lift_foundations/summaries/01_conservativity-lift-foundations-summary.md",
+          "type": "summary",
+          "summary": ""
+        },
+        {
+          "path": "specs/417_parametric_conservativity_lift_foundations/reports/02_virtuous-placement.md",
+          "type": "report",
+          "summary": ""
+        }
+      ],
+      "created": "2026-06-29T22:35:38Z",
+      "last_updated": "2026-06-30T01:00:23Z",
+      "session_id": "sess_1782772776_909541_417",
+      "updated": "2026-06-30T00:53:52Z",
+      "archived_at": "2026-06-30T11:07:01Z"
+    },
+    {
+      "project_number": 418,
+      "project_name": "shared_propositional_embedding_typeclass",
+      "title": "Shared PropositionalEmbedding typeclass + single limitation note",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Code Hygiene",
+      "parent_task": 415,
+      "description": "[Spawned from task 415 audit — supports Finding 1.] Factor the shared \"structural on atom/bot/imp, Lukasiewicz on and/or\" embedding pattern into a single PropositionalEmbedding typeclass/abstraction so toModal (Modal/FromPropositional.lean:58), toTemporal (Temporal/FromPropositional.lean:57), and toBimodal (Bimodal/Embedding/PropositionalEmbedding.lean:59) share one definition skeleton and a SINGLE authored classical-scope limitation note (currently triplicated at Modal/FromPropositional.lean:35-41, Temporal/FromPropositional.lean:34-40, Bimodal/Embedding/PropositionalEmbedding.lean:33-41). Preserve the existing simp/grind lemma surface and the commuting-diamond lemmas (toModal_toBimodal / toTemporal_toBimodal). Adds a clearly-typed extension point for a future native (intuitionistic-faithful) embedding but does NOT itself enable the intuitionistic lift. CI green; 0 new sorry. Source: report §3, Rank 3.",
+      "dependencies": [],
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/418_shared_propositional_embedding_typeclass/summaries/01_shared-embedding-typeclass-summary.md",
+          "type": "summary",
+          "summary": ""
+        }
+      ],
+      "created": "2026-06-29T22:35:38Z",
+      "last_updated": "2026-06-29T23:42:58Z",
+      "session_id": "sess_1751204400_a7b3c9",
+      "completion_summary": "Factored the three near-identical PL embeddings (toModal, toTemporal, toBimodal) into one shared PropositionalEmbedding typeclass skeleton in Cslib/Logics/Propositional/Embedding.lean. All toX_* simp/grind lemmas preserved verbatim as rfl. Single classical-scope limitation note (Wajsberg/McKinsey). Full CI green: 0 new sorry, 0 new axioms.",
+      "archived_at": "2026-06-30T11:07:01Z"
+    },
+    {
+      "project_number": 420,
+      "project_name": "native_embedding_prerequisites_doc",
+      "title": "Doc: record native intuitionistic-embedding prerequisites",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "PL-Docs",
+      "parent_task": 415,
+      "description": "[Spawned from task 415 audit — closes the Finding 1 design question; DOC-ONLY, no Lean change.] Write a short in-repo design note (an ORGANISATION.md section or a docs/ design doc) recording the four prerequisites for a native, intuitionistic-faithful propositional embedding: (1) native and/or constructors (not the Lukasiewicz encoding); (2) a gated intuitionistic target modal/temporal system to embed into; (3) birelational target semantics bridging to PL IForces; (4) a proof-theoretic preservation/faithfulness theorem. Purpose: well-specify the XL native-embedding work so the classical-only embedding boundary is not re-litigated when CSLib eventually adds an intuitionistic modal logic. Any prose intended for upstream/Zulip must be human-authored per the AI policy. Source: report §3 (\"what a structure-preserving embedding would require\") + Rank 5.",
+      "dependencies": [],
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/420_native_embedding_prerequisites_doc/reports/01_native-embedding-prerequisites.md",
+          "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/420_native_embedding_prerequisites_doc/plans/01_native-embedding-prerequisites-doc.md",
+          "type": "plan",
+          "summary": ""
+        },
+        {
+          "path": "specs/420_native_embedding_prerequisites_doc/summaries/01_native-embedding-prerequisites-summary.md",
+          "type": "summary",
+          "summary": ""
+        }
+      ],
+      "created": "2026-06-29T22:35:38Z",
+      "last_updated": "2026-06-29T23:25:59Z",
+      "session_id": "sess_1782772776_909541_420",
+      "archived_at": "2026-06-30T11:07:01Z"
+    },
+    {
+      "project_number": 421,
+      "project_name": "min_fmp_decidability",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "Min-side FMP decidability: sorry-free Decidable (Derivable MinPropAxiom φ) mirroring the Int construction (completes parent 370 Min side)",
+      "description": "Complete the Min side of parent task 370 by adding a sorry-free `Decidable (Derivable MinPropAxiom φ)` instance via the finite model property, mirroring the Int FMP construction that task 411 adopts onto main (Metalogic/IntDecidability.lean: IntFinWorld → intFinVal → intFinVal_upward_closed → int_fin_truth_lemma → int_fmp → instDecidableDerivableIntPropAxiom'). The branch refactor/prop_logic provides ONLY IntDecidability.lean — there is NO Min FMP file to adopt — so this is a from-scratch MIRROR: build a MinFinWorld (minimal Kripke finite-world bounded by subformulas of φ; no ⊥/explosion since minimal logic lacks ⊥-elimination), the finite valuation + upward-closure lemma, a minimal finite truth lemma by formula induction, the finite model property (min_fmp), and the sorry-free Decidable instance (instDecidableDerivableMinPropAxiom'-style), proved correct against MinStrongCompleteness. Axioms must be EXACTLY propext/Classical.choice/Quot.sound (no sorryAx). Wire into Cslib.lean + barrel. DEPENDS ON 411 (the Int FMP construction must be on main to mirror its structure and reuse shared finite-world machinery). Coordinates with parent 370 (Int+Min decidability asymmetry) and 422 (route reconciliation). ACCEPTANCE: new sorry-free Min FMP Decidable instance; lake build/test/checkInitImports/lint-style/shake green; #print axioms shows no sorryAx; 0 new sorry.",
+      "created": "2026-06-30T00:03:21Z",
+      "last_updated": "2026-06-30T01:37:19Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "blockers": [],
+      "session_id": "sess_1782781843_ad09f5_421",
+      "dependencies": [
+        411
+      ],
+      "topic": "PL-Metalogic",
+      "completion_summary": "Created Cslib/Logics/Propositional/Metalogic/MinDecidability.lean (sorry-free instDecidableDerivableMinPropAxiom' via FMP), a strictly-simpler 1:1 mirror of IntDecidability.lean. No-EFQ simplifications: dropped consistent field, eliminated propConsistent helper, bot-case Iff.rfl, no PropSetConsistent plumbing; only new decls minFinBotForces + upward-closure. Wired into Cslib.lean:429. Axioms = {propext, Classical.choice, Quot.sound}, no sorryAx, 0 sorry. Completes parent 370 Min side; unblocks 422.",
+      "archived_at": "2026-06-30T11:07:01Z"
+    },
+    {
+      "project_number": 422,
+      "project_name": "reconcile_decidability_routes",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "Reconcile parallel Int/Min decidability routes (tableau vs FMP): canonical instance, docstrings, infrastructure",
+      "description": "Reconcile the two parallel decidability developments coexisting on main after task 411 (Int) and 421 (Min): the TABLEAU route (Tableau/{Intuitionistic,Minimal}/DecisionProcedure.lean: instDecidableDerivableIntPropAxiom / instDecidableDerivableMinPropAxiom — constructive proof-search/countermodel infra the modal/temporal/bimodal extensions build on via FromPropositional/Embedding; currently rests on the tableau-completeness sorries owned by task 317) and the FMP route (Metalogic/IntDecidability.lean + the new MinDecidability.lean: the primed FMP instances — sorry-free finite-model-property results with distinct theoretical value). BOTH routes are intentionally kept. RESEARCH + REFACTOR (zero new sorries): (1) INSTANCE RESOLUTION: main will have TWO `Decidable (Derivable IntPropAxiom φ)` (and two for Min) — an ambiguity hazard (Lean resolves by priority/most-recent silently). Designate ONE canonical `instance` per proposition class (recommended: keep the tableau instance canonical as the extension-facing one, or set explicit instance priorities) and demote the other to a named def/theorem that exposes the FMP result WITHOUT registering a competing instance; verify no downstream instance-resolution breakage in the modal/temporal/bimodal extensions. (2) NAMING: retire the primed `'` names; adopt principled suffixes (e.g. _tableau / _fmp) consistent with the canonical choice. (3) DOCSTRINGS/HEADERS: write the \"two routes, distinct roles\" narrative in IntDecidability.lean, MinDecidability.lean, and Tableau/{Intuitionistic,Minimal}/DecisionProcedure.lean; cross-reference each route from the other; state the FMP theoretical role vs the tableau operational role (proof search feeding logic extensions); note the tableau route becomes genuinely sorry-free only once task 317 lands. (4) INFRASTRUCTURE: assess IntFinWorld/MinFinWorld (FMP) vs the tableau Hintikka/branch machinery for shared abstractions worth factoring or cross-referencing; document the relationship between the duplicated truth lemmas (int_fin_truth_lemma/min_fin_truth_lemma [FMP] vs the parametric tableau truthLemma [317-owned]). DEPENDS ON 411 (Int FMP on main) and 421 (Min FMP on main) so both Int and Min instances are reconciled in one coherent pass. Coordinates with 317 (tableau sorry closure). ACCEPTANCE: exactly one canonical Decidable instance per Int and Min proposition with no resolution ambiguity; both routes carry cross-referenced two-routes docstrings; lake build/test/checkInitImports/lint-style/shake green; 0 new sorry/axiom; extensions still build.",
+      "created": "2026-06-30T00:03:21Z",
+      "last_updated": "2026-06-30T02:03:35Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/422_reconcile_decidability_routes/summaries/01_reconcile-decidability-routes-summary.md",
+          "type": "summary",
+          "summary": "4-phase implementation: demote FMP instances to named defs, two-routes docstrings to 4 headers, infrastructure cross-references, full CI+axiom verification."
+        }
+      ],
+      "blockers": [],
+      "session_id": "sess_1782781843_ad09f5_422",
+      "dependencies": [
+        411,
+        421
+      ],
+      "topic": "PL-Metalogic",
+      "completion_summary": "Reconciled the two decidability routes: kept tableau as the sole canonical Decidable instance per logic; demoted the FMP instances to named noncomputable defs (decidableDerivableIntPropAxiomFMP / ...MinPropAxiomFMP). Added 'two routes, distinct roles' cross-referenced docstrings across all 4 module headers (IntDecidability, MinDecidability, Tableau Int/Min DecisionProcedure), citing the 317 sorries and FMP axiom profile; infra factoring deferred (disjoint carriers, cross-referenced only). FMP defs sorry-free {propext,Classical.choice,Quot.sound}; tableau instances carry pre-existing 317 sorryAx (documented). 0 new sorry/axiom; the 4 modules build green (773-job scoped build). NOTE: repo-wide build is red due to UNRELATED task-419 WIP (Cslib.lean:94 imports untracked ProofSystemMorphism.lean).",
+      "archived_at": "2026-06-30T11:07:01Z"
+    },
+    {
+      "project_number": 1,
+      "project_name": "integrate_bimodal_logic_results",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 2,
+      "project_name": "port_bimodal_syntax_infrastructure",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 3,
+      "project_name": "port_task_frame_semantics_bimodal",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 4,
+      "project_name": "port_proof_system_bimodal",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 5,
+      "project_name": "port_derived_theorems_bimodal",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 6,
+      "project_name": "port_frame_conditions_soundness_bimodal",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 7,
+      "project_name": "port_deduction_mcs_theory_bimodal",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 9,
+      "project_name": "port_decidability_tableau_bimodal",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/"
+      ]
+    },
+    {
+      "project_number": 10,
+      "project_name": "port_separation_theorem_bimodal",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 11,
+      "project_name": "port_conservative_extension_bimodal",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 12,
+      "project_name": "coordinate_cslib_pr_submission_bimodal_logic",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 14,
+      "project_name": "design_modular_logic_architecture",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 15,
+      "project_name": "complete_embedding_lattice",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 16,
+      "project_name": "formula_type_consistency",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 17,
+      "project_name": "project_management_roadmap_taskorder",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 18,
+      "project_name": "generate_project_overview",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 19,
+      "project_name": "explore_modular_logic_factoring",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 20,
+      "project_name": "propositional_hilbert_theorems",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 21,
+      "project_name": "modal_proof_system_theorems",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 22,
+      "project_name": "temporal_infrastructure_theorems",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 23,
+      "project_name": "temporal_semantics_linear_orders",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 24,
+      "project_name": "improve_roadmap_bimodal_porting",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 25,
+      "project_name": "revise_task_order_topic_assignments",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 26,
+      "project_name": "revise_roadmap_focus_on_porting",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 27,
+      "project_name": "review_docs_roadmap_alignment",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 28,
+      "project_name": "structure_metalogic_across_systems",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 29,
+      "project_name": "generic_mcs_foundations",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 30,
+      "project_name": "modal_metalogic",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 31,
+      "project_name": "temporal_metalogic",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 32,
+      "project_name": "fix_untl_argument_order_convention",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 33,
+      "project_name": "audit_noncomputable_temporal_instances",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 34,
+      "project_name": "port_base_completeness_mcs_properties",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 35,
+      "project_name": "port_dense_completeness_bimodal",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 38,
+      "project_name": "temporal_dense_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 42,
+      "project_name": "port_bimodal_tableau_core",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 43,
+      "project_name": "port_bimodal_fmp",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 44,
+      "project_name": "streamline_roadmap",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 45,
+      "project_name": "improve_roadmap_diagram_and_structure",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 46,
+      "project_name": "temporal_r_relation",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 47,
+      "project_name": "temporal_point_insertion",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 48,
+      "project_name": "temporal_chronicle_construction",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 49,
+      "project_name": "temporal_truth_lemma_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 50,
+      "project_name": "burgess_prior_art_seed_research",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 55,
+      "project_name": "update_roadmap_completions_and_diagram",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 56,
+      "project_name": "plan_pr_submission_strategy",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 57,
+      "project_name": "improve_theorem_organization",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 58,
+      "project_name": "ci_prep_sorry_fix_baseline",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 59,
+      "project_name": "pr1_foundations_logic",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 60,
+      "project_name": "pr2_modal_metalogic",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 61,
+      "project_name": "pr3_temporal_proof_system",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 62,
+      "project_name": "pr4_temporal_metalogic_core",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/"
+      ]
+    },
+    {
+      "project_number": 65,
+      "project_name": "pre_pr_cleanup_audit",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 66,
+      "project_name": "fix_lint_naming_conventions",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 67,
+      "project_name": "fix_simp_linter_warnings",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 68,
+      "project_name": "add_module_keyword_theorem_files",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 69,
+      "project_name": "fix_linter_warnings_foundations",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 70,
+      "project_name": "remove_unused_cslib_init_imports",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 71,
+      "project_name": "polish_docs_theorems_axioms",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 72,
+      "project_name": "relocate_propositional_embedding",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/"
+      ]
+    },
+    {
+      "project_number": 73,
+      "project_name": "propositional_shared_sublogic",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 74,
+      "project_name": "polish_pr1_quality_and_description",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 75,
+      "project_name": "propositional_hilbert_proof_system",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 77,
+      "project_name": "audit_noncomputable_usage",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 78,
+      "project_name": "module_keyword_and_private_audit",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 79,
+      "project_name": "deduplicate_shared_helpers",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 80,
+      "project_name": "generic_deduction_theorem",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 81,
+      "project_name": "pr1_foundations_logic_code_review",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 82,
+      "project_name": "systematic_codebase_review_logics_foundations",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 83,
+      "project_name": "update_pr1_description_and_roadmap",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 84,
+      "project_name": "resolve_public_import_cslib_init",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 85,
+      "project_name": "include_propositional_in_pr1",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 86,
+      "project_name": "pr1_lint_quality_audit",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 87,
+      "project_name": "derive_nd_from_hilbert",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 88,
+      "project_name": "refactor_propositional_hilbert_intuitionistic_base",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 89,
+      "project_name": "derived_connective_rules",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 90,
+      "project_name": "expand_modal_cube_proof_systems_metalogic",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 91,
+      "project_name": "pr_1_5_propositional_hilbert_submission",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 92,
+      "project_name": "modal_infrastructure_parameterize_derivation_tree",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 93,
+      "project_name": "modal_s5_preservation_instances",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 94,
+      "project_name": "modal_integrate_hilbert_derived_rules",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 95,
+      "project_name": "modal_k_t_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 96,
+      "project_name": "modal_d_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 97,
+      "project_name": "modal_s4_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 99,
+      "project_name": "complete_modal_cube_hilbert_systems",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 100,
+      "project_name": "modal_cube_shared_infrastructure",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 101,
+      "project_name": "modal_b_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 102,
+      "project_name": "modal_k4_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 103,
+      "project_name": "modal_k5_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 104,
+      "project_name": "modal_k45_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 105,
+      "project_name": "modal_tb_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 106,
+      "project_name": "modal_kb5_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 107,
+      "project_name": "modal_d4_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 108,
+      "project_name": "modal_d5_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 109,
+      "project_name": "modal_d45_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 110,
+      "project_name": "modal_db_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 112,
+      "project_name": "propositional_hilbert_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 113,
+      "project_name": "refactor_derivation_tree_axiom_types",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 114,
+      "project_name": "classical_propositional_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 115,
+      "project_name": "propositional_kripke_semantics",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 116,
+      "project_name": "intuitionistic_propositional_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 117,
+      "project_name": "minimal_propositional_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 118,
+      "project_name": "propositional_completeness_integration",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 119,
+      "project_name": "modal_code_quality_audit",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 120,
+      "project_name": "parameterize_natural_deduction_equivalence",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 121,
+      "project_name": "review_propositional_metalogic_cherry_pick",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 122,
+      "project_name": "fix_propositional_ci_checks",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 123,
+      "project_name": "add_bib_references_pr1",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 124,
+      "project_name": "plan_pr1_decomposition_into_smaller_prs",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 125,
+      "project_name": "subpr_1_1_hilbert_hierarchy_refactoring",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 126,
+      "project_name": "subpr_1_2_intmin_instances",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/"
+      ]
+    },
+    {
+      "project_number": 127,
+      "project_name": "subpr_1_3_propositional_semantics",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/"
+      ]
+    },
+    {
+      "project_number": 128,
+      "project_name": "subpr_1_4_nd_derived_rules",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/"
+      ]
+    },
+    {
+      "project_number": 129,
+      "project_name": "subpr_1_5_modal_logical_equivalence",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/"
+      ]
+    },
+    {
+      "project_number": 130,
+      "project_name": "subpr_1_6_classical_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/"
+      ]
+    },
+    {
+      "project_number": 131,
+      "project_name": "subpr_1_7_intuitionistic_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/"
+      ]
+    },
+    {
+      "project_number": 132,
+      "project_name": "subpr_1_8_minimal_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/"
+      ]
+    },
+    {
+      "project_number": 133,
+      "project_name": "subpr_1_9_fromhilbert_parameterization",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/"
+      ]
+    },
+    {
+      "project_number": 134,
+      "project_name": "subpr_1_10_hilbert_derived_rules",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/"
+      ]
+    },
+    {
+      "project_number": 135,
+      "project_name": "subpr_1_11_nd_hilbert_equivalence",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/"
+      ]
+    },
+    {
+      "project_number": 136,
+      "project_name": "pr1_citation_conformance",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 137,
+      "project_name": "refactor_modal_directory_structure",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 138,
+      "project_name": "subpr_1_1_1_proposition_refactor",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 145,
+      "project_name": "subpr_2_1_lukasiewicz_primitives",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 159,
+      "project_name": "subpr_3_1_temporal_formula",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 164,
+      "project_name": "fix_formula_pr_quality",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 165,
+      "project_name": "syntactic_sugar_survey_and_refactor",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 166,
+      "project_name": "pr633_syntactic_sugar_and_quality",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 167,
+      "project_name": "pr637_syntactic_sugar_and_quality",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 168,
+      "project_name": "pr3_temporal_syntactic_sugar_and_quality",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 169,
+      "project_name": "recreate_modal_primitives_pr_upstream",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 170,
+      "project_name": "submit_subpr_3_1_3_2_temporal_syntax",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 171,
+      "project_name": "research_connective_basis_min_int_classical",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 172,
+      "project_name": "connectives_hasand_hasor_full_primitives",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 173,
+      "project_name": "propositional_five_primitive_refactor",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 174,
+      "project_name": "propositional_metalogic_full_connectives",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 175,
+      "project_name": "modal_and_or_propagation",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 176,
+      "project_name": "temporal_and_or_propagation",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 177,
+      "project_name": "bimodal_and_or_propagation",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 178,
+      "project_name": "johansson_references_doc_corrections",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 179,
+      "project_name": "modal_primitive_diamond",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 182,
+      "project_name": "evaluate_classical_only_simplification",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 183,
+      "project_name": "strong_completeness_propositional_logics",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 184,
+      "project_name": "weak_completeness_compactness_corollaries",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 185,
+      "project_name": "propositional_foundations_quality_audit",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 186,
+      "project_name": "hilbert_nd_equivalence_refactor",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 187,
+      "project_name": "propositional_foundations_quality_fixes",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 188,
+      "project_name": "first_propositional_upstream_pr",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 189,
+      "project_name": "rename_completeness_to_canonical_model",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 190,
+      "project_name": "review_propositional_pr_readiness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 191,
+      "project_name": "clean_up_propositional_deduction_theorem_naming",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 192,
+      "project_name": "research_verify_literature_refs_pr_188",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 193,
+      "project_name": "clean_up_modal_deduction_theorem_naming",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 194,
+      "project_name": "curate_zotero_pdfs_for_literature",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 196,
+      "project_name": "refactor_connectives_mathlib_bot",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 197,
+      "project_name": "modal_upstream_initial_pr",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 198,
+      "project_name": "submit_propositional_upstream_pr",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": []
+    },
+    {
+      "project_number": 199,
+      "project_name": "review_pr_citations",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 200,
+      "project_name": "fix_literature_directory_quality",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 201,
+      "project_name": "review_modal_pr_citations",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 202,
+      "project_name": "review_hilbert_classes_vs_pr648",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 203,
+      "project_name": "first_temporal_pr_classical_propositional",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 204,
+      "project_name": "polish_pr_648_propositional",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 205,
+      "project_name": "review_pr649_quality_conventions",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 206,
+      "project_name": "fix_wfail_ci_warnings",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 207,
+      "project_name": "research_temporal_modal_refactor_pr649",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 208,
+      "project_name": "lint_missing_docstrings",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 209,
+      "project_name": "lint_namespace_fixes",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 210,
+      "project_name": "lint_naming_conventions",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 211,
+      "project_name": "lint_def_to_lemma",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 212,
+      "project_name": "lint_simp_issues",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 213,
+      "project_name": "lint_unused_arguments",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 214,
+      "project_name": "fix_cases_tactic_warnings",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 216,
+      "project_name": "push_relevant_changes_to_pr_648",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 217,
+      "project_name": "push_generic_metalogic_to_pr649",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/"
+      ]
+    },
+    {
+      "project_number": 218,
+      "project_name": "push_bib_entries_minor_fixes_pr649",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 219,
+      "project_name": "address_pr648_merge_semantics_files",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 220,
+      "project_name": "refactor_pr649_typeclass_split_ltl_formula",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 221,
+      "project_name": "revise_pr649_reviewer_feedback",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 222,
+      "project_name": "review_pr648_zulip_feedback_analysis",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 223,
+      "project_name": "review_fix_pr_649_rebase_on_648",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 224,
+      "project_name": "research_gha_vs_alternatives_semantics",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/"
+      ]
+    },
+    {
+      "project_number": 225,
+      "project_name": "gha_semantics_refactor",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 226,
+      "project_name": "gha_semantics_upstream_pr",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/"
+      ]
+    },
+    {
+      "project_number": 227,
+      "project_name": "algebraic_completeness_design",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 228,
+      "project_name": "pr648_primitive_bot_cleanup",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 229,
+      "project_name": "typeclass_diamond_resolution_lean4",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 230,
+      "project_name": "fix_pr649_reynolds_bib_beq_deriving",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 231,
+      "project_name": "fix_countermodel_dense_universe",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 232,
+      "project_name": "rebase_pr649_onto_pr648",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 233,
+      "project_name": "revise_pr649_ltl_only",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 234,
+      "project_name": "revise_untl_snce_convention",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 235,
+      "project_name": "strong_completeness_modal_cube",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 236,
+      "project_name": "follow_up_prs_buchi_omega_regular",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 237,
+      "project_name": "weak_completeness_corollaries_modal_cube",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 238,
+      "project_name": "modal_metalogic_stale_docstrings",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 239,
+      "project_name": "modal_metalogic_citation_standardization",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 240,
+      "project_name": "modal_metalogic_naming_and_barrel_fixes",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 242,
+      "project_name": "vardi_wolper_tableau_construction",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/"
+      ]
+    },
+    {
+      "project_number": 243,
+      "project_name": "deterministic_buchi_automata",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 247,
+      "project_name": "modal_compliance_dead_code_cleanup",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 248,
+      "project_name": "nba_emptiness_checking",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 250,
+      "project_name": "nba_complementation",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 251,
+      "project_name": "product_construction_model_checking",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 252,
+      "project_name": "acceptance_conditions_zoo",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 253,
+      "project_name": "gather_automata_literature",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 254,
+      "project_name": "revise_ltl_conventions_standard_semantics",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 255,
+      "project_name": "fix_stale_ltl_docstrings_post_task254",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 256,
+      "project_name": "add_ltl_satisfies_simp_lemmas",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 257,
+      "project_name": "fix_gnba_long_lines_and_style",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 258,
+      "project_name": "refactor_gnba_duplicated_subformula_proofs",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 259,
+      "project_name": "narrow_temporal_metalogic_linter_suppressions",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 260,
+      "project_name": "add_ltl_temporal_convention_contrast_docs",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 261,
+      "project_name": "review_propositional_logic_zulip_thread",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 262,
+      "project_name": "kripke_algebraic_bridge",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 263,
+      "project_name": "lake-shake-import-cleanup",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": []
+    },
+    {
+      "project_number": 265,
+      "project_name": "track_conservative_lean_sorry",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 266,
+      "project_name": "research_propositional_and_foundations_improvements",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 267,
+      "project_name": "verify_zulip_propositional_logic_claims",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/"
+      ]
+    },
+    {
+      "project_number": 268,
+      "project_name": "simp_grind_normalization_tags",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 269,
+      "project_name": "hilbert_search_tactic",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 270,
+      "project_name": "create_vet_command_skill_agent",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 271,
+      "project_name": "register_vet_in_manifest_and_claudemd",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 272,
+      "project_name": "glivenko_theorem",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 273,
+      "project_name": "all_modal_systems_conservative_over_cpl",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 274,
+      "project_name": "bimodal_tm_conservative_over_modal_k",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 276,
+      "project_name": "modal_cube_inter_system_conservativity",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 277,
+      "project_name": "fix_ci_workflow_failures",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 280,
+      "project_name": "proof_system_triad_gap_analysis",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 281,
+      "project_name": "hilbert_derived_structural_rules",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 282,
+      "project_name": "lindenbaum_algebra_over_hilbert",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 283,
+      "project_name": "hilbert_primary_algebraic_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
+    },
+    {
+      "project_number": 284,
+      "project_name": "hilbert_primary_conservative_glivenko",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 285,
+      "project_name": "nd_metalogic_as_hilbert_corollaries",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 286,
+      "project_name": "fix_omega_regular_todo_workaround",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 287,
+      "project_name": "fix_generic_mcs_bridge_docstrings",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 288,
+      "project_name": "lindenbaum_tarski_algebra_instances",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 289,
+      "project_name": "decidable_derivable_propositional_instance",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 294,
+      "project_name": "fix_missing_docstrings_nd_inference",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 295,
+      "project_name": "fix_dia_duality_axiom_typeclasses",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 297,
+      "project_name": "foundations_tableau_infrastructure",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 298,
+      "project_name": "propositional_tableau_decidability",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 302,
+      "project_name": "fragment_syntactic_predicates",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 303,
+      "project_name": "brouwerian_semilattice_typeclass",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 305,
+      "project_name": "fragment_hilbert_proof_systems",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 306,
+      "project_name": "brouwerian_soundness_completeness",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 307,
+      "project_name": "free_join_completion",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 308,
+      "project_name": "ipl_conservative_over_conj_imp",
+      "status": "orphan_archived",
+      "archived": "2026-06-30T11:07:38Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
     }
   ],
   "archived_at": "2026-06-28T18:47:30Z"

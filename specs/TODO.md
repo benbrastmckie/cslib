@@ -230,40 +230,6 @@ After implementation:
 
 ---
 
-### 422. Reconcile parallel Int/Min decidability routes (tableau vs FMP): canonical instance, docstrings, infrastructure
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: PL-Metalogic
-- **Dependencies**: Task 411, Task 421
-- **Summary**: [422_reconcile_decidability_routes/summaries/01_reconcile-decidability-routes-summary.md]
-
-**Description**: Reconcile the two parallel decidability developments coexisting on main after task 411 (Int) and 421 (Min): the TABLEAU route (Tableau/{Intuitionistic,Minimal}/DecisionProcedure.lean: instDecidableDerivableIntPropAxiom / instDecidableDerivableMinPropAxiom — constructive proof-search/countermodel infra the modal/temporal/bimodal extensions build on via FromPropositional/Embedding; currently rests on the tableau-completeness sorries owned by task 317) and the FMP route (Metalogic/IntDecidability.lean + the new MinDecidability.lean: the primed FMP instances — sorry-free finite-model-property results with distinct theoretical value). BOTH routes are intentionally kept. RESEARCH + REFACTOR (zero new sorries): (1) INSTANCE RESOLUTION: main will have TWO `Decidable (Derivable IntPropAxiom φ)` (and two for Min) — an ambiguity hazard (Lean resolves by priority/most-recent silently). Designate ONE canonical `instance` per proposition class (recommended: keep the tableau instance canonical as the extension-facing one, or set explicit instance priorities) and demote the other to a named def/theorem that exposes the FMP result WITHOUT registering a competing instance; verify no downstream instance-resolution breakage in the modal/temporal/bimodal extensions. (2) NAMING: retire the primed `'` names; adopt principled suffixes (e.g. _tableau / _fmp) consistent with the canonical choice. (3) DOCSTRINGS/HEADERS: write the "two routes, distinct roles" narrative in IntDecidability.lean, MinDecidability.lean, and Tableau/{Intuitionistic,Minimal}/DecisionProcedure.lean; cross-reference each route from the other; state the FMP theoretical role vs the tableau operational role (proof search feeding logic extensions); note the tableau route becomes genuinely sorry-free only once task 317 lands. (4) INFRASTRUCTURE: assess IntFinWorld/MinFinWorld (FMP) vs the tableau Hintikka/branch machinery for shared abstractions worth factoring or cross-referencing; document the relationship between the duplicated truth lemmas (int_fin_truth_lemma/min_fin_truth_lemma [FMP] vs the parametric tableau truthLemma [317-owned]). DEPENDS ON 411 (Int FMP on main) and 421 (Min FMP on main) so both Int and Min instances are reconciled in one coherent pass. Coordinates with 317 (tableau sorry closure). ACCEPTANCE: exactly one canonical Decidable instance per Int and Min proposition with no resolution ambiguity; both routes carry cross-referenced two-routes docstrings; lake build/test/checkInitImports/lint-style/shake green; 0 new sorry/axiom; extensions still build.
-
----
-
-### 421. Min-side FMP decidability: sorry-free Decidable (Derivable MinPropAxiom φ) mirroring the Int construction (completes parent 370 Min side)
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: PL-Metalogic
-- **Dependencies**: Task 411
-
-**Description**: Complete the Min side of parent task 370 by adding a sorry-free `Decidable (Derivable MinPropAxiom φ)` instance via the finite model property, mirroring the Int FMP construction that task 411 adopts onto main (Metalogic/IntDecidability.lean: IntFinWorld → intFinVal → intFinVal_upward_closed → int_fin_truth_lemma → int_fmp → instDecidableDerivableIntPropAxiom'). The branch refactor/prop_logic provides ONLY IntDecidability.lean — there is NO Min FMP file to adopt — so this is a from-scratch MIRROR: build a MinFinWorld (minimal Kripke finite-world bounded by subformulas of φ; no ⊥/explosion since minimal logic lacks ⊥-elimination), the finite valuation + upward-closure lemma, a minimal finite truth lemma by formula induction, the finite model property (min_fmp), and the sorry-free Decidable instance (instDecidableDerivableMinPropAxiom'-style), proved correct against MinStrongCompleteness. Axioms must be EXACTLY propext/Classical.choice/Quot.sound (no sorryAx). Wire into Cslib.lean + barrel. DEPENDS ON 411 (the Int FMP construction must be on main to mirror its structure and reuse shared finite-world machinery). Coordinates with parent 370 (Int+Min decidability asymmetry) and 422 (route reconciliation). ACCEPTANCE: new sorry-free Min FMP Decidable instance; lake build/test/checkInitImports/lint-style/shake green; #print axioms shows no sorryAx; 0 new sorry.
-
----
-
-### 420. Doc: record native intuitionistic-embedding prerequisites
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: PL-Docs
-- **Dependencies**: None
-- **Research**: [420_native_embedding_prerequisites_doc/reports/01_native-embedding-prerequisites.md]
-- **Plan**: [420_native_embedding_prerequisites_doc/plans/01_native-embedding-prerequisites-doc.md]
-- **Summary**: [420_native_embedding_prerequisites_doc/summaries/01_native-embedding-prerequisites-summary.md]
-
-**Description**: [Spawned from task 415 audit — closes the Finding 1 design question; DOC-ONLY, no Lean change.] Write a short in-repo design note (an ORGANISATION.md section or a docs/ design doc) recording the four prerequisites for a native, intuitionistic-faithful propositional embedding: (1) native and/or constructors (not the Lukasiewicz encoding); (2) a gated intuitionistic target modal/temporal system to embed into; (3) birelational target semantics bridging to PL IForces; (4) a proof-theoretic preservation/faithfulness theorem. Purpose: well-specify the XL native-embedding work so the classical-only embedding boundary is not re-litigated when CSLib eventually adds an intuitionistic modal logic. Any prose intended for upstream/Zulip must be human-authored per the AI policy. Source: report §3 ("what a structure-preserving embedding would require") + Rank 5.
-
----
-
 ### 419. Generalize derivation lifting to a cross-logic InferenceSystem layer (spike)
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
@@ -273,43 +239,6 @@ After implementation:
 - **Plan**: [419_generalize_derivation_lifting_intersystem/plans/02_proof-system-morphism-overlay.md]
 
 **Description**: [Spawned from task 415 audit — supports the structure-first vision; SPIKE.] Investigate hoisting liftDerivation / Derivable_mono (Modal/Metalogic/InterSystem/Lifting.lean:47) and Bimodal's liftDerivationWith onto the shared InferenceSystem / algebraicDerivationSystem abstraction already used by GenericMCSBridge, yielding ONE axiom-subsumption derivation-lifting result reusable by Modal, Bimodal, and PL. SPIKE FIRST: commit only if the necessitation / temporal_duality constructor variance is cleanly abstractable; otherwise document precisely why and stop (mark BLOCKED, never sorry). Benefits from task 417's Foundations placement (soft dependency). Effort L (abstraction risk). CI green if landed. Source: report §6, Rank 4.
-
----
-
-### 418. Shared PropositionalEmbedding typeclass + single limitation note
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Code Hygiene
-- **Dependencies**: None
-- **Summary**: [418_shared_propositional_embedding_typeclass/summaries/01_shared-embedding-typeclass-summary.md]
-
-**Description**: [Spawned from task 415 audit — supports Finding 1.] Factor the shared "structural on atom/bot/imp, Lukasiewicz on and/or" embedding pattern into a single PropositionalEmbedding typeclass/abstraction so toModal (Modal/FromPropositional.lean:58), toTemporal (Temporal/FromPropositional.lean:57), and toBimodal (Bimodal/Embedding/PropositionalEmbedding.lean:59) share one definition skeleton and a SINGLE authored classical-scope limitation note (currently triplicated at Modal/FromPropositional.lean:35-41, Temporal/FromPropositional.lean:34-40, Bimodal/Embedding/PropositionalEmbedding.lean:33-41). Preserve the existing simp/grind lemma surface and the commuting-diamond lemmas (toModal_toBimodal / toTemporal_toBimodal). Adds a clearly-typed extension point for a future native (intuitionistic-faithful) embedding but does NOT itself enable the intuitionistic lift. CI green; 0 new sorry. Source: report §3, Rank 3.
-
----
-
-### 417. Foundations-level parametric conservativity lift (unify modal/temporal/bimodal)
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Foundations
-- **Dependencies**: None
-- **Plan**: [417_parametric_conservativity_lift_foundations/plans/01_conservativity-lift-foundations.md]
-- **Summary**: [417_parametric_conservativity_lift_foundations/summaries/01_conservativity-lift-foundations-summary.md]
-- **Research**: [417_parametric_conservativity_lift_foundations/reports/02_virtuous-placement.md]
-
-**Description**: [Spawned from task 415 audit — closes Finding 2.] Add Cslib/Foundations/Logic/Metalogic/ConservativityLift.lean providing a parametric conservative_over_cpl lemma (signature in report §4) plus a generic classical truth-functional bridge lemma, then re-express temporal_conservative_extension (Temporal/ConservativeExtension.lean:87) and bimodal_conservative_extension (Bimodal/Metalogic/ConservativeExtension/PropositionalConservativity.lean:118) — and optionally re-home modal_conservative_extension_param (Modal/Metalogic/ConservativeExtension.lean:54) — as thin instances. Collapses 3 semantic-bridge + 3 conservativity proofs into 1 generic bridge + 1 generic lemma + 3 instances. This extends the Modal side's existing "by construction" fragment-genericity win (one parametric lemma already covers 15 systems) to ALL THREE modal-family logics — the most direct hit on Waring's Zulip fragment-genericity ask. Synergistic with task 416 (shared prop_completeness usage); not a hard dependency. RISK: unifying the Modal.Satisfies / Temporal.Satisfies / Bimodal.truthAt shapes behind one interface. CI green; 0 new sorry/axioms. Source: report §4, Rank 2.
-
----
-
-### 416. Instantiate GenericLindenbaum to remove Min/Int duplication
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: PL-Metalogic
-- **Dependencies**: None
-- **Research**: [416_instantiate_generic_lindenbaum_phase6/reports/01_generic-lindenbaum-phase6.md]
-- **Plan**: [416_instantiate_generic_lindenbaum_phase6/plans/01_fix-stale-design-notes.md]
-- **Summary**: [416_instantiate_generic_lindenbaum_phase6/summaries/01_fix-design-notes-summary.md]
-
-**Description**: [Spawned from task 415 audit — closes Finding 3.] Activate the dormant GenericLindenbaum substrate: re-derive MinTheory and IntDCCS as instances of GenericTheory Axioms Cons (Cons := fun _ => True for minimal; PropSetConsistent IntPropAxiom for intuitionistic), replacing the duplicated min_*/int_* Lindenbaum bodies (MinLindenbaum.lean ~247 lines, IntLindenbaum.lean ~318 lines) with thin instances over generic_deriv_from_closure_to_S / generic_deriv_imp_of_union / generic_imp_witness. The substrate (Cslib/Logics/Propositional/Metalogic/GenericLindenbaum.lean, ~295 lines) is currently additive/unused — see GenericLindenbaum.lean:43-52 ("deferred to Phase 6 of the MPL-base structure-first redesign"). Behavior must stay identical; deletes ~270 net duplicated lines and activates the dormant file. OVERLAP WITH TASK 393: task 393 (Zulip-first consolidation, deps 386/391/395) is the broader umbrella covering this PLUS the 3 Soundness + 8 conservativity modules + LJ/LK helper duplication; THIS task is the narrow, non-Zulip-gated Lindenbaum slice only — coordinate with the 393 owner and cross-reference it, do NOT double-edit the same decls. CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); 0 new sorry/axioms. Source: specs/415_audit_propositional_lifting_structure_first/reports/01_lifting-audit.md §5, Rank 1.
 
 ---
 
@@ -363,52 +292,6 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 
 ---
 
-### 411. Adopt complete int decidability
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Dependencies**: None
-- **Research**:
-  - [411_adopt_complete_int_decidability/reports/01_int-decidability-integration-findings.md]
-  - [411_adopt_complete_int_decidability/reports/02_task411-collision-and-corrected-adoption.md]
-- **Plan**: [411_adopt_complete_int_decidability/plans/01_curated-intdecidability-adoption.md]
-
-**Description**: Adopt the complete, CI-green IntDecidability.lean from branch refactor/prop_logic onto main, delivering the actual Decidable instance that main's task-385 version lacks. This completes the Int side of parent task 370.
-
-CONTEXT: main's current Cslib/Logics/Propositional/Metalogic/IntDecidability.lean (committed by task 385, HEAD 07792009) is the WITNESS-ONLY version (272 lines, 7 decls): task 385 renamed/fixed the former IntFMPSpike scratch spike to make `lake build` green, but it STOPS at `int_fin_imp_witness` and provides NO `Decidable` instance. The branch refactor/prop_logic (tasks 415/416) has a COMPLETE version (436 lines, 10 decls) that carries the same construction through `intFinVal` -> `intFinVal_upward_closed` -> `int_fin_truth_lemma` -> `int_fmp` -> `instDecidableDerivableIntPropAxiom'` (the actual `Decidable (Derivable IntPropAxiom phi)` instance), CI-green with no `sorryAx` (axioms: propext, Classical.choice, Quot.sound). This task adopts that completion.
-
-PRIMARY DELIVERABLE -- single-file swap, verified build-safe:
-1. Replace main's IntDecidability.lean with the branch version: `git show refactor/prop_logic:Cslib/Logics/Propositional/Metalogic/IntDecidability.lean > Cslib/Logics/Propositional/Metalogic/IntDecidability.lean`.
-2. Change NOTHING else for the core deliverable. Build-safety already verified: the ONLY dependency drift is that the branch deleted an unused lemma `intBotMem_iff_false` from IntStrongCompleteness.lean; our IntDecidability does NOT reference it, and main's MinStrongCompleteness.lean has a docstring that DOES reference it -- so KEEP main's IntStrongCompleteness.lean unchanged. The grind-lint skip `Cslib.Logic.PL.IntFinWorld.mk.sizeOf_spec` the complete file needs is ALREADY present in main's CslibTests/GrindLint.lean (line 79) -- no change needed. The Cslib.lean import (line ~420) already points at IntDecidability -- it stays valid.
-
-DO NOT bring over / KEEP main's versions of: Scheme.lean (redundant; both branches sit at the same 2 sorries deferred-to-317), CslibTests/GrindLint.lean, IntStrongCompleteness.lean, and ALL specs/ task metadata. The branch's task numbers 408-416 COLLIDE with main's (number fork) -- do NOT union state.json/TODO.md or copy the branch's spec dirs.
-
-OPTIONAL SECONDARY SCOPE (only if explicitly requested): cherry-pick the 6 NEW Temporal FMP decidability files that are absent from main -- Cslib/Logics/Temporal/Metalogic/Decidability/Decidability.lean plus Decidability/FMP/{FMP,Filtration,FiniteModel,SubformulaClosure,TruthPreservation}.lean -- and add their public imports to Cslib.lean. Independent of the Int work; their deps (Temporal.Metalogic.Completeness/Soundness/DenseCompleteness/DenseSoundness) are already on main. Build-verify before committing.
-
-DO NOT git-merge the branch -- this is a curated file adoption, not a branch merge (a full merge drags in the unmergeable task-number-fork metadata, redundant Scheme.lean, and an add/add conflict).
-
-ACCEPTANCE:
-- main's IntDecidability.lean contains `instDecidableDerivableIntPropAxiom'` (a `Decidable (Derivable IntPropAxiom phi)` instance).
-- `lake build` green for the whole library; `lake test`, `lake exe checkInitImports`, `lake exe lint-style`, `lake shake` all pass.
-- `#print axioms instDecidableDerivableIntPropAxiom'` (or lean_verify) shows ONLY propext, Classical.choice, Quot.sound -- NO sorryAx.
-- 0 new sorry/admit introduced; main's pre-existing Scheme.lean sorries (deferred-to-317) untouched.
-- No metadata corruption: specs/state.json and TODO.md unchanged except this task's own status. Zero-debt.
-
-SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/416_int_min_fmp_spike_revise/reports/01_fmp-spike-resolution.md (on that branch). Verified build-safe against main HEAD 07792009.
-
----
-
-### 410. Fragment-generic algebraic completeness for MPL-base derivability
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: PL-Base
-- **Dependencies**: Task 407
-- **Research**: [410_fragment_generic_algebraic_completeness/reports/01_fragment-generic-algebraic-completeness.md]
-- **Plan**: [410_fragment_generic_algebraic_completeness/plans/01_can-alg-complete-instantiation.md]
-
-**Description**: Research and formalize the per-fragment algebraic completeness needed to instantiate the fully-generic Derivable P-logic framework. Current residual from task 407 (phase 7 S3 spike): FragmentGeneric.lean delivers AlgEvalIndependent + generic_gha_implies_ha + ghaValid_of_botFree (the GHAValid <-> HAValid equivalence for bot-free formulas). The remaining step -- HAValid phi -> Derivable X-logic phi for a specific sub-logic X -- requires per-fragment algebraic completeness, which is not currently generic in P. Each fragment has its own canonical algebra model: IsBotFree routes through WithBot G + Heyting completeness; IsOrBotFree routes through LowerSet B + Brouwerian completeness; IsImpTopOnly routes through the Rasiowa free algebra. A fully generic Derivable P-logic phi <- HAValid phi parameterized by P is open research. Research goal: (1) identify what algebraic completeness property a fragment P needs to satisfy so that the generic framework closes; (2) state and prove a typeclass or predicate CanAlgComplete P such that (CanAlgComplete P, AlgEvalIndependent P) implies generic Derivable P-logic phi <-> GHAValid phi; (3) instantiate for at least IsBotFree and IsOrBotFree; (4) determine whether IsImpTopOnly can be recovered. See Cslib/Logics/Propositional/Semantics/Algebra/FragmentGeneric.lean lines 40-53 for the open residual. References: Rasiowa1974 (algebraic approach), task 407 reports 01-03. Task type: cslib. Depends on 407 (delivers FragmentGeneric.lean).
-
----
-
 ### 409. Literal ⊥-rule-free base ND inductive (option B): split MinDerivation + Explosion; re-cut Curry-Howard & normalization
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
@@ -416,19 +299,6 @@ SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/41
 - **Dependencies**: Task 407
 
 **Description**: SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- OPTIONAL / advanced. Task 407 adopts option C (re-frame the task-398 gated efq constructor as the explosion property module; the base relation is ⊥-rule-free UP TO the IsIntuitionistic gate). Option B is the LITERAL structure-first ND: split Theory.Derivation into a genuinely ⊥-rule-free base inductive MinDerivation (no efq constructor) plus an Explosion extension, prove all structural metatheory once on the base, and recover IPL-ND by adjoining efq. TRIGGER CONDITION: only pursue if a concrete downstream consumer needs a physically ⊥-free derivation object (e.g. a minimal-ND normalization theorem, or a lambda-calculus without an abort/efq combinator). COST/RISK: re-opens the single genuinely hard point from task 398 -- the subformula property under efq -- and forces re-cutting Curry-Howard (Theory.Term mirror) and Prawitz normalization (Basic/Reduction/Termination/SubformulaProperty) against the split. Reuse the task-398 decided strategy (atomic restriction + permutation conversions); treat any non-green proof as [BLOCKED], never sorry. HIGH effort -- use --hard. Depends on 407 (and ideally 408). Source: task 407 report 01 §5 option B / §7 W6, report 02 §5. ALIGNMENT NOTE: this two-inductive split is the Design-B-flavored route that the universal-algebra approach (task 407 option C) deliberately AVOIDS, because it duplicates derivation structure (exclude-then-add at the derivation level). Default remains task 407 option C: ONE derivation type with explosion as a property module. Pursue 409 ONLY if the trigger condition above fires.
-
----
-
-### 408. Sequent calculus: property-gated botL (single calculus, MPL/IPL one inductive; cut/subformula proved once)
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: PL-Base
-- **Dependencies**: Task 407
-- **Research**: [408_minimal_sequent_calculus_lm/reports/01_minimal-sequent-calculus-gated-botl.md]
-- **Plan**: [408_minimal_sequent_calculus_lm/plans/01_gated-botl-seqproof.md]
-- **Summary**: [408_minimal_sequent_calculus_lm/summaries/01_gated-botl-seqproof-summary.md]
-
-**Description**: SPAWNED from task 407 (MPL structure-first redesign), Wave 5. Largest structural gap (report 01 §3.4/§7.1): LJProof/LKProof HARD-CODE the botL/explosion rule (SequentCalculus/LJ/Basic.lean:91-92, LK/Basic.lean:76-77) and there is NO minimal sequent calculus; cut elimination/subformula/decidability/interpolation are proved per-system, not once at a base. PRIMARY DESIGN (universal-algebra approach, aligned with task 407 option C): a SINGLE sequent calculus over the full signature (incl. primitive ⊥) with a PROPERTY-GATED botL constructor -- gate botL by [IsIntuitionistic T] (mirroring task 407's gated efq in ND), so MPL and IPL are the SAME inductive at different property strengths and the structural metatheory (cut elimination, subformula property) is proved ONCE generically over the gate. MPL = the strength WITHOUT the IsIntuitionistic instance; IPL = WITH it. This avoids the exclude-then-add / two-inductive duplication cost and keeps the sequent layer consistent with the ND layer. SCOPE: cleanly unifies MPL/IPL (single-conclusion); LK (classical, multiple-conclusion) is a different structural shape and stays its own calculus, related via its own module rather than folded in. FALLBACK (only if property-gating cut-elimination proves infeasible): define a separate minimal LMProof inductive (LJ rules minus botL), prove structural results once on LM, recover LJ = LM + botL by composition/re-export. Preserve all existing LJ/LK results (soundness, hilbert_iff_lj/lk, LJProof.cutElim/LKProof.cutElim) -- no weakening. HIGH effort -- use --hard. Depends on 407 (gated-rule design + property modules) and green main. Files: SequentCalculus/Defs.lean, LJ/* (gated botL + generic cut/subformula), LK/* (relate). Honor Zulip AI policy (human-authored prose). Source: task 407 report 01 §3.4/§7 W5, report 02 §6.
 
 ---
 
@@ -480,27 +350,6 @@ SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/41
 
 ---
 
-### 403. Rename specs 384 to 402
-- **Status**: [COMPLETED]
-- **Task Type**: meta
-- **Topic**: Project Management
-- **Dependencies**: None
-
-**Description**: Rename specs/384_modal_tableau_soundness_gap_redesign/ to specs/402_modal_tableau_soundness_gap_redesign/ to match task 402 (the soundness-gap redesign was renumbered 384->402 during the task-364 merge to avoid colliding with main task 384 tableau_completeness_sorries). git mv the directory and update task 402 artifact paths in specs/state.json (reports/01_soundness-gap-redesign.md, plans/01_per-branch-accessibility.md). Grep for any remaining 384_modal_tableau references. Bookkeeping only; no code changes.
-
----
-
-### 401. Expose polymorphic AlgEvaluate at Bool/Prop as the canonical computable evaluator (DPLL)
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: PL-Semantics
-- **Dependencies**: None
-- **Plan**: [401_polymorphic_evaluator_bool_prop_dpll/plans/01_evaluator-bool-prop-dpll-docs.md]
-
-**Description**: From Matthew Doty's Atom->Bool vs Atom->Prop concern (DPLL portability) and Waring's GeneralizedHeytingAlgebra-polymorphic evaluator suggestion in the Zulip thread. Surface the algebraic `AlgEvaluate` specialized at `Bool` (computable) and `Prop` as the canonical evaluation path, and reconcile with Semantics/Bool.lean (BoolEvaluate + bridge lemma + Decidable instance) so there is ONE documented story: Prop-valued `Evaluate` for uniformity with Kripke semantics; Bool/AlgEvaluate for decision procedures (DPLL/SAT). Keep `Valuation` = Atom->Prop (canonical model construction needs it). Confirm the bridge to prop_strong_soundness. Coordinate with Matthew's DPLL/Tseitin development. Lower priority; independent of the IPL-base work. Source: Zulip thread (msgs 603367168, 603520169, 603572691, 603755068, 603877853 on HasInterp/GHA).
-
----
-
 ### 400. Unbundle connective typeclasses; reconcile with fmontesi PR #607 (Waring's flag a)
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
@@ -519,36 +368,6 @@ SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/41
 
 ---
 
-### 399. Update PR #648 to the settled IPL-base foundation per Waring's end-of-thread recommendation
-- **Status**: [COMPLETED]
-- **Task Type**: pr
-- **Topic**: PL-Base
-- **Dependencies**: Task 398
-- **Research**: [399_refresh_pr648_ipl_base_foundation/reports/01_pr648-refresh-research.md]
-- **Plan**: [399_refresh_pr648_ipl_base_foundation/plans/01_pr648-refresh-plan.md]
-- **Artifact**:
-  - [399_refresh_pr648_ipl_base_foundation/cherry-pick-recipe.md]
-  - [399_refresh_pr648_ipl_base_foundation/prepare-foundation-branch.sh]
-  - [399_refresh_pr648_ipl_base_foundation/pr-description.md]
-  - [399_refresh_pr648_ipl_base_foundation/zulip-response.md]
-
-**Description**: [REVISED 2026-06-29 — minimal additive approach supersedes the cherry-pick recipe. Implementation DONE & verified on branch feat/propositional-ipl-base, commit 5dbed274 (3-file diff, 594 jobs green, lint clean, zero sorry): ungated primitive efq constructor makes IPL the base; IPL:=∅; MPL/IsIntuitionistic/intuitionisticCompletion removed; classical layer kept. Update #648 via FAST-FORWARD push of feat/propositional-ipl-base:feat/propositional-v2 (no force-push). Remaining = human: review, ff-push, reword PR description, post Zulip 606970606. MPL-as-base dispute deferred to tasks 407/408/409. See ipl-base-minimal-revision.md.] Update PR #648 (feat/propositional-v2) following Thomas Waring's closing recommendation in the CSLib Zulip 'Propositional Logic' thread (606970606). PR #648 is ~239 commits behind fork main, which is why Waring reports the restored references and Zulip-thread link are 'not in the PR' (both ARE on main at NaturalDeduction/Basic.lean:76 + the Design trade-off note). PLAN (per the user's chosen strategy): branch off upstream/main and cherry-pick the propositional FOUNDATION as a focused, reviewable commit, then update #648 to that branch. Scope of the foundation: the five-primitive `Proposition` type with primitive `⊥`; NaturalDeduction/Basic with the settled IPL-as-base design (efq as a primitive ND rule — see task 398); restored references AND the Zulip-thread link (Waring's flag (b)). EXCLUDE connective typeclasses — Waring flagged these as a SEPARATE development (task 400); do not bundle them. Keep the PR small (Matthew + Waring both asked for small pieces); later layers (Hilbert+equivalence, algebraic semantics incl. retained MPL metatheory, conservativity chains, sequent LJ/LK, tableau) follow as separate stacked PRs. Note /pr is user-only (branch creation, CI, submission); this task prepares the cherry-pick + a human-authored PR/Zulip description for the user to push (Zulip AI policy). Waring will 'review the PR properly once we've settled on the design', so this depends on task 398 (efq/IPL-base implemented). Also coordinate with PR-readiness vet tasks 386/387/389. Source: Zulip thread 606970606.
-
----
-
-### 398. Make IPL the base propositional logic: add efq as a primitive ND rule, preserving MPL metatheory
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: PL-Base
-- **Dependencies**: Task 397
-- **Research**: [398_efq_nd_rule_ipl_base_keep_mpl/reports/01_efq-primitive-ipl-base.md]
-- **Plan**: [398_efq_nd_rule_ipl_base_keep_mpl/plans/01_efq-primitive-implementation.md]
-- **Summary**: [398_efq_nd_rule_ipl_base_keep_mpl/summaries/01_efq-primitive-summary.md]
-
-**Description**: DESIGN SETTLED (CSLib Zulip 'Propositional Logic' thread, Waring's closing message 606970606 + our synthesis): take IPL as the base propositional logic FOR NOW by adding ex-falso (efq / bottom-elimination) as a PRIMITIVE constructor of the ND `Derivation` so that the primitive `⊥` constructor is actually interpreted (Waring: 'it seems very unnatural to have a constructor with no semantics'). This makes minimal logic the positive fragment IPL<→,∧,∨,⊤> conceptually, and makes the conservativity results' `IsBotFree` predicate framing more natural (Waring's point). CRITICAL CONSTRAINT (our decision, diverging from Waring's 'forget minimal logic'): PRESERVE all completed MPL work — do NOT delete it. Keep MinSoundness, MinLindenbaum, MinStrongCompleteness, MPL completeness (`MPL.hilbert_alg_complete`), the `bot_val`/Johansson-algebra parametric semantics, and the MPL/IPL conservativity chains (MplConservativeChain, ConservativeChain, ImpConservative, etc.). Minimal logic stays as a retained LAYER beneath IPL, sequenced for later fragment work, not removed. Current state: efq is a DERIVED rule (`Theory.Derivation.botE`) gated by `[IsIntuitionistic T]` in NaturalDeduction/DerivedRules.lean; ND/Basic.lean documents the trade-off. WORK: (1) add efq as a primitive ND `Derivation` constructor available at IPL/CPL strength; (2) keep the ND<->Hilbert equivalence (`hilbert_iff_nd*`) provably intact so efq-as-rule and efq-as-axiom coincide and MPL (no efq rule) still corresponds; (3) keep substitution lemmas, DecidableEq, and the `FromPropositional` embeddings green; (4) update ND/Basic.lean Implementation-notes to record IPL-as-base with MPL retained; (5) postpone general fragment design (Waring). Verify full `lake build` + downstream Modal/Temporal/Bimodal. Honor Zulip AI policy (human-authored prose). Depends on 397 (green main for verification). Source: Zulip thread 606970606.
-
----
-
 ### 396. Salvage reusable lemmas from task-299 Soundness refactor for the per-branch-accessibility soundness redesign
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
@@ -556,17 +375,6 @@ SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/41
 - **Dependencies**: None
 
 **Description**: Evaluate and salvage the architecture-independent proof-engineering lemmas left on branch wip/task-299-soundness-refactor (commit 27d93e2d) by the stopped task-299 modal-K soundness re-attempt. Portable (acc-free) candidates: sfSat, sfSat_pos, sfSat_neg, RuleResultSat, and recognizer characterization lemmas (e.g. modalNegOf?_eq_some) in Cslib/Logics/Modal/Tableau/Soundness.lean, plus the branchSatisfiable Type (vs Type*) universe simplification. The FULL 299 refactor is UNBUILT and rewrites modalStepBranch_preserves_sat on the now-superseded global-Accessibility architecture, so do NOT merge it wholesale. Goal: decide which lemmas help the modal-tableau soundness-gap-redesign effort (the per-branch Accessibility 'task 384' tracked in the cslib-364 worktree / branch task-364-soundness-drift) and cherry-pick or restate them there if the propositional-rule recognizer layer hits the 'stuck on variable antecedent / consumed-scrutinee' friction documented in specs/364_modal_tableau_soundness_drift_repair/handoffs/BLOCKED-repair-guide.md (section 4). NOTE: 'task 384' here means the soundness-gap-redesign task in the cslib-364 worktree, which is a DIFFERENT task than main's own #384 (tableau_completeness_sorries) — task numbering diverged across worktrees. Reference branch: wip/task-299-soundness-refactor. Parent context: task 299 modal_k_tableau.
-
----
-
-### 395. Review and revise vet tasks 384-394 after all worktrees merge into main
-- **Status**: [COMPLETED]
-- **Task Type**: meta
-- **Topic**: Project Management
-- **Dependencies**: None
-- **Research**: [395_reconcile_vet_tasks_post_merge/reports/01_vet-reconciliation.md]
-
-**Description**: META / coordination task. PRECONDITION: do NOT start until ALL feature worktrees branched off main have been merged into main (cslib-wt-orch = orchestrate-369-374-317-375-373-382; cslib-364 = task-364-soundness-drift; cslib-wt-orch2 = orchestrate-299-300-301-241). Once integrated, review and revise the vet fix-tasks 384-394 (created from specs/vet-propositional-foundations.md) against the work that actually landed, since several overlap in-flight worktree tasks. Known overlaps to reconcile by reading the merged CODE (worktree state.json statuses are stale): task 374 completed LK/LJ interpolation (maeharaCore sorry-free + public Craig theorem + barrel) => likely makes task 385 redundant; task 382 removed dead Dershowitz-Manna termination machinery => likely makes task 388 redundant; tasks 369 (parameterize int/min tableau) + 317 (unified completeness) advance task 384 (the 6 live tableau-completeness sorries). For each of 384-394: mark completed/abandoned if landed, revise scope/description for partial overlap, or keep as-is. Re-run the vet CI checks (lake build/lint/mk_all on Propositional+Foundations) after integration to refresh ground truth and add/remove tasks accordingly. Then commit the reconciled task list.
 
 ---
 
@@ -620,16 +428,6 @@ SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/41
 
 ---
 
-### 388. Remove dead normalization track and heartbeat/simp debt in Termination.lean
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: PL-Hygiene
-- **Dependencies**: Task 395, Task 398
-
-**Description**: [Reconciled by task 395, post-merge.] Tier-2. NaturalDeduction/Normalization/Termination.lean + Reduction.lean cleanup. The redexWeight + normMeasure fuel/measure track is ALREADY GONE (delivered by merged task 382). `normalize`/`normalizeAux` are NOW LIVE (task 398 added efq arms) — do NOT delete them. Remaining dead PRIVATE decls (0 callers, safe to delete): normalizeAux_fixpoint (Termination.lean:305), subs_maximalFormulas_mem (:492), subsOne_new_redex_complexity_lt (:775). Then clear residual lint debt: unused simp args, no-op/dead tactics, long lines, flexible-simp; remove or comment-justify maxHeartbeats overrides; decompose remaining heavy proofs. SEQUENCE AFTER task 398 (it is actively editing Termination.lean). Source: §4.2 + 395.
-
----
-
 ### 387. PL -> Propositional namespace rename (upstream-gated)
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
@@ -650,27 +448,6 @@ SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/41
 
 ---
 
-### 385. Complete and integrate IntFMPSpike, LK/Interpolation, Tableau Scheme
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: PL-Tableau
-- **Dependencies**: Task 395
-- **Summary**: [385_complete_parked_tableau_interpolation_fmp/summaries/01_intdecidability-implementation-summary.md]
-
-**Description**: [Reconciled by task 395, post-merge.] Tier-1. LK/Interpolation sub-part DROPPED — task 374 delivered LKProof.interpolation sorry-free (Interpolation.lean:864). TWO sub-parts remain: (1) BUILD-BLOCKER, DO FIRST: IntFMPSpike.lean has 2 compile errors (lines 201/231) and is the ONLY thing breaking repo-wide `lake build` (imported at Cslib.lean:419). Fix the 2 errors, strip spike/specs-370 framing, rename to IntDecidability.lean, keep wired into Cslib.lean + barrel. (2) Tableau/Intuitionistic/Scheme.lean: finish the 4 parked sorries (truthLemma:242 parametric over IntMinScheme; openBranch_countermodel:280/288/296 — :296 has ready classical analogue classicalExpandBranches_openBranch_initial_mem); ideally repoint Intuitionistic/Minimal completeness at the parametric route (coordinates with 317). Verify full lake build green + lint-style. Source: §3.2-3.4 + 395 reconciliation.
-
----
-
-### 384. Resolve documented sorry in minimalTableau_complete
-- **Status**: [ABANDONED]
-- **Task Type**: cslib
-- **Topic**: PL-Tableau
-- **Dependencies**: Task 395
-
-**Description**: [Refreshed post-merge vet; scope narrowed.] The single remaining tableau sorry is at Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:110 (theorem minimalTableau_complete), documented in the module header as deferred to task 317. It bridges MValid phi to the per-branch forcing hypothesis for `tableau_complete minScheme`; resolution needs upward-closure of intExtractValuation and minBranchBotForces. Not in the PR #648 foundation slice. Decide with upstream whether acceptable as documented WIP or must be gated.
-
----
-
 ### 375. Proof system equivalence tableau sequent edges
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
@@ -678,30 +455,6 @@ SOURCE: branch refactor/prop_logic, tasks 415/416. Resolution analysis: specs/41
 - **Dependencies**: Task 317, Task 363
 
 **Description**: Complete the cross-system equivalence story by folding the tableau (and remaining sequent) decision systems into the proof-system TFAE. Cslib/Logics/Propositional/ProofSystemEquivalence.lean currently proves Hilbert<->ND<->LK for CPL (cplProofSystemsTfae) and Hilbert<->ND<->LJ for IPL (iplProofSystemsTfae), plus the MPL Hilbert<->ND two-way. Add the missing edges so the equivalence is genuinely complete across all proof systems: classical Tautology <-> LK provability <-> closed classical tableau, and intuitionistic validity <-> LJ provability <-> closed intuitionistic tableau, extending the TFAE lists accordingly. Requires the tableau soundness+completeness to be green (task 316 done for soundness; task 317 for completeness) and the classical tableau build repaired (task 363). No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 317, 363.
-
----
-
-### 370. Int min metalogic decidability
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: PL-Metalogic
-- **Dependencies**: None
-- **Research**: [370_int_min_metalogic_decidability/reports/01_int-min-decidability-fmp-vs-lj.md]
-- **Plan**:
-  - [370_int_min_metalogic_decidability/plans/01_int-min-fmp-decidability.md]
-  - [370_int_min_metalogic_decidability/plans/02_close-out-superseded-by-fmp-landing.md]
-
-**Description**: Close the decidability asymmetry in the metalogic layer: classical propositional logic has a decision procedure (instDecidableDerivablePropositionalAxiom via tautology enumeration, Metalogic/StrongCompleteness.lean:566), but intuitionistic (IntPropAxiom) and minimal (MinPropAxiom) logics have none. Establish Decidable (Derivable IntPropAxiom phi) and Decidable (Derivable MinPropAxiom phi) via the finite model property: bound the canonical Kripke models (prime DCCS / MinTheory worlds) by the subformulas of phi, give a terminating decision procedure over the finite model space, and prove it correct against the existing int/min strong-completeness theorems (IntStrongCompleteness.lean, MinStrongCompleteness.lean). Independent of the tableau decision procedures (which currently rest on unproved completeness witnesses). Note: the LJ sequent calculus already has a tableau-backed decidability instance (SequentCalculus/LJ/Decidability.lean) -- assess whether the FMP route or a bridge to LJ decidability is the cleaner source for the IPL instance before implementing. No new axioms (Classical.choice / Decidable.decide acceptable on noncomputable defs); CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake).
-
----
-
-### 360. Repair 11 pre-existing broken modules failing repo-wide lake build
-- **Status**: [ABANDONED]
-- **Task Type**: cslib
-- **Topic**: Code Hygiene
-- **Dependencies**: Task 363, Task 364
-
-**Description**: The repo-wide 'lake build' currently fails (unrelated to vetted tasks 343/344/350/351/353/354, whose files build clean in isolation). Failing modules: Cslib.Logics.Modal.Denotation (simp made no progress, Denotation.lean:60), Cslib.Logics.Bimodal.Syntax.SubformulaClosure.NestingDepth (unsolved goals, multiple lines), Cslib.Logics.Temporal.ConservativeExtension (ambiguous term, lines 54/59/69), Cslib.Logics.Bimodal.Theorems.Perpetuity.Principles (type mismatch, lines 84/164/176), Cslib.Logics.Temporal.Metalogic.DenseCompleteness (unsolved goals, line 166), Cslib.Logics.Propositional.SequentCalculus (duplicate _proof_1 environment clash between LJ and LK CutElimination), Cslib.Logics.Bimodal.Metalogic.Separation.Defs (many simp made no progress), Cslib.Logics.Propositional.Tableau.Minimal.Soundness, Cslib.Logics.Bimodal.ProofSystem.Substitution, Cslib.Logics.Modal.Tableau.Soundness, Cslib.Logics.Propositional.Tableau.Classical.Completeness. checkInitImports/shake also fail downstream due to missing oleans. Restore a green repo-wide build. Source: /vet CI run 2026-06-26.
 
 ---
 

@@ -1,0 +1,21 @@
+{
+  "status": "implemented",
+  "summary": "ConservativityLift.lean relocated from Foundations/Logic/Metalogic to Logics/Propositional/Metalogic. The Foundations→Logics import inversion is eliminated. namespace Cslib.Logic and both theorem signatures (evaluate_iff_of_classicalBridge, conservative_over_cpl) are byte-for-byte unchanged — the move is name-invariant. Obsolete inversion comments removed; placement rationale docstring added. Two consumer import lines updated (Temporal, Bimodal). Barrel regenerated via lake exe mk_all --module. Full CI green: lake build (3156 jobs), lake exe checkInitImports, lake lint-style, lake shake, lake test (exit 0). Zero new sorry, zero new axioms (17 pre-existing unchanged). Committed as 63b8d644.",
+  "artifacts": [
+    "Cslib/Logics/Propositional/Metalogic/ConservativityLift.lean",
+    "Cslib/Logics/Temporal/ConservativeExtension.lean",
+    "Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/PropositionalConservativity.lean",
+    "Cslib.lean"
+  ],
+  "blockers": [],
+  "ci_results": {
+    "build": "pass (3156 jobs)",
+    "checkInitImports": "pass",
+    "lint": "pass (no new warnings; 55 pre-existing in unrelated files)",
+    "lint_style": "pass",
+    "shake": "pass (no new import issues in modified files)",
+    "test": "pass (exit 0)"
+  },
+  "out_of_scope_noted": "DiegoEmbedding.lean in Foundations/Order/HilbertAlgebra carries its own Foundations→Logics inversion edge. Not fixed here. Spawn candidate per research report §4 and task 417 instructions.",
+  "commit": "63b8d644"
+}

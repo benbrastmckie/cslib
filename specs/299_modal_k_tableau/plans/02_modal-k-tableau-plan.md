@@ -300,7 +300,7 @@ Apply the **Context-Budget Protocol** above to every sub-phase below.
 
 ---
 
-### Phase 4a: Prop-rule cases — concrete the formula variable [NOT STARTED]
+### Phase 4a: Prop-rule cases — concrete the formula variable [COMPLETED]
 
 **Goal**: Make the `T(imp a c)` / `T(a → ⊥)` propositional cases of
 `modalStepBranch_preserves_sat` compile by case-splitting the formula variable before the
@@ -332,7 +332,7 @@ errors.
 
 ---
 
-### Phase 4b: Box-positive refine / membership after subst [NOT STARTED]
+### Phase 4b: Box-positive refine / membership after subst [COMPLETED]
 
 **Goal**: Fix the box-positive `refine` membership mismatch after `subst` (~line 232) so the
 remaining cases of `modalStepBranch_preserves_sat` compile; after this sub-phase the whole
@@ -361,7 +361,7 @@ remaining cases of `modalStepBranch_preserves_sat` compile; after this sub-phase
 
 ---
 
-### Phase 4c: Redesign modalExpandBranches_closed_unsat (acc + recursion threading) [NOT STARTED]
+### Phase 4c: Redesign modalExpandBranches_closed_unsat (acc + recursion threading) [COMPLETED]
 
 **Goal**: Fix the structural mismatch in `modalExpandBranches_closed_unsat` (~lines 920/959):
 `acc` vs `newAcc` (accessibility mutated by `boxNeg`/`diamondPos` world creation) and
@@ -393,7 +393,7 @@ sub-phase and is isolated so it gets a full agent run.
 
 ---
 
-### Phase 4d: Main theorem + full-file green + re-wire import [NOT STARTED]
+### Phase 4d: Main theorem + full-file green + re-wire import [COMPLETED]
 
 **Goal**: Discharge `modalTableau_sound` (and `kValid`), bring `Soundness.lean` fully green
 (zero errors, zero sorries, zero new axioms), re-wire the import, and verify the whole library.
@@ -420,7 +420,7 @@ sub-phase and is isolated so it gets a full agent run.
 
 ---
 
-### Phase 5: Completeness scaffolding — model extraction + truth lemma [NOT STARTED]
+### Phase 5: Completeness scaffolding — model extraction + truth lemma [IN PROGRESS]
 
 **Goal**: Build the countermodel from an open saturated branch and prove the modal truth
 lemma — everything in `Completeness.lean` EXCEPT the loop invariant (deferred to Phase 6).

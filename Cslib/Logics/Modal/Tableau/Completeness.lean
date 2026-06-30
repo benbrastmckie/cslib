@@ -88,7 +88,7 @@ lemma extractModel_bot_false
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility) (w : WorldIndex) :
     ¬ Satisfies (extractModel b acc) w .bot := by
-  simp only [Satisfies]
+  simp [Satisfies]
 
 /-! ## Open-Branch Helpers -/
 
@@ -104,6 +104,7 @@ lemma openBranch_noTBot
   | none =>
     have hno := List.find?_eq_none.mp hfind ⟨.pos, .bot, w⟩ hmem
     simp [SignedFormula.isPos, Sign.isPos] at hno
+    exact hno rfl
 
 /-- If `T(φ)@w ∈ b` and the branch is open, then `F(φ)@w ∉ b`. -/
 lemma openBranch_noContradiction
@@ -117,7 +118,7 @@ lemma openBranch_noContradiction
   | some _ => simp [hfind_bot] at hopen
   | none =>
     simp only [hfind_bot] at hopen
-    cases hcontra : b.findContradiction with
+    cases hcontra : Branch.findContradiction b with
     | some pair => simp [hcontra] at hopen
     | none =>
       simp only [Branch.findContradiction, List.findSome?_eq_none_iff] at hcontra
@@ -147,58 +148,40 @@ lemma hintikka_box_pos
   -- Apply the Hintikka rule condition to T(□ψ)@w (non-boxNeg case)
   have hcond := hrule ⟨.pos, .box ψ, w⟩ hmem
   simp only at hcond
-  -- Unfold modalApplyOne for T(□ψ)@w: propositional rules don't match .box, so boxPos fires
+  -- Unfold modalApplyOne for T(□ψ)@w: propositional rules return none, so boxPos fires
   simp only [modalApplyOne, tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
     modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable] at hcond
-  -- The boxPos case: `if boxPropagation b acc ψ w |>.isEmpty then notApplicable else persistent`
+  -- Reduce outer if: none.getD notApplicable = notApplicable → match gives false → if false
+  simp [Option.getD_none] at hcond
+  -- w' is a successor of w
+  have hw'_succ : w' ∈ acc.successorsOf w := by
+    simp only [Accessibility.successorsOf, List.mem_filterMap]
+    simp only [Accessibility.hasEdge, List.any_eq_true] at hr
+    obtain ⟨⟨src, tgt⟩, hedge_mem, hbeq⟩ := hr
+    simp only [Bool.and_eq_true, beq_iff_eq] at hbeq
+    exact ⟨(src, tgt), hedge_mem, by simp [hbeq.1, hbeq.2]⟩
+  -- The boxPos case: if boxPropagation = [] then notApplicable else persistent
   split_ifs at hcond with hemp
-  · -- hemp : boxPropagation b acc ψ w = [] (via isEmpty)
-    -- This means: for all w'' ∈ successorsOf w, T(ψ)@w'' ∈ b
-    by_contra habs
-    -- T(ψ)@w' ∉ b, but w' ∈ successorsOf w (from hr)
+  · -- hemp : boxPropagation b acc ψ w = [] → every successor already has T(ψ) in b
     simp only [boxPropagation, List.filterMap_eq_nil_iff] at hemp
-    -- w' ∈ acc.successorsOf w
-    have hw'_succ : w' ∈ acc.successorsOf w := by
-      simp only [Accessibility.successorsOf, List.mem_filterMap]
-      simp only [Accessibility.hasEdge, List.any_eq_true] at hr
-      obtain ⟨⟨src, tgt⟩, hedge_mem, hbeq⟩ := hr
-      simp only [Bool.and_eq_true, beq_iff_eq] at hbeq
-      exact ⟨(src, tgt), hedge_mem, by simp [hbeq.1, hbeq.2]⟩
-    -- hemp applied to w' gives: if T(ψ)@w' ∈ b then it's not in the filterMap output; but
-    -- since this is "filterMap_eq_nil_iff", every element of successorsOf maps to none
     have hnil := hemp w' hw'_succ
-    simp only at hnil
-    split_ifs at hnil with hinb
-    · -- T(ψ)@w' ∈ b (via b.any = true), contradicts habs
-      simp only [List.any_eq_true] at hinb
-      obtain ⟨sf', hsf'mem, hbeq⟩ := hinb
-      simp only [beq_iff_eq] at hbeq
-      rw [← hbeq] at hsf'mem
-      exact habs hsf'mem
-    · simp at hnil
-  · -- hemp : boxPropagation b acc ψ w ≠ [] (via isEmpty)
-    -- hcond : ∀ sf' ∈ boxPropagation b acc ψ w, sf' ∈ b
-    by_contra habs
-    -- T(ψ)@w' ∉ b; show T(ψ)@w' ∈ boxPropagation
-    have hw'_in_boxProp : (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
-        boxPropagation b acc ψ w := by
-      simp only [boxPropagation, Accessibility.successorsOf, List.mem_filterMap]
-      simp only [Accessibility.hasEdge, List.any_eq_true] at hr
-      obtain ⟨⟨src, tgt⟩, hedge_mem, hbeq⟩ := hr
-      simp only [Bool.and_eq_true, beq_iff_eq] at hbeq
-      refine ⟨(src, tgt), hedge_mem, ?_⟩
-      simp only [hbeq.1, ↓reduceIte]
-      simp only [hbeq.2]
-      split_ifs with hinb
-      · -- b.any (· == T(ψ)@w') = true → T(ψ)@w' ∈ b → contradiction
-        exfalso; apply habs
-        simp only [List.any_eq_true] at hinb
-        obtain ⟨sf', hsf'mem, hbeq'⟩ := hinb
-        simp only [beq_iff_eq] at hbeq'
-        rw [← hbeq'] at hsf'mem
-        exact hsf'mem
-      · rfl
-    exact habs (hcond _ hw'_in_boxProp)
+    by_cases hinb : (b.any fun x => x == (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex)) = true
+    · -- T(ψ)@w' already in b
+      simp only [List.any_eq_true, beq_iff_eq] at hinb
+      obtain ⟨sf', hsf'mem, rfl⟩ := hinb
+      exact hsf'mem
+    · simp [if_neg hinb] at hnil
+      exact hnil
+  · -- hemp : boxPropagation ≠ [] → hcond : ∀ sf' ∈ boxPropagation, sf' ∈ b
+    by_cases hinb : (b.any fun x => x == (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex)) = true
+    · -- T(ψ)@w' already in b
+      simp only [List.any_eq_true, beq_iff_eq] at hinb
+      obtain ⟨sf', hsf'mem, rfl⟩ := hinb
+      exact hsf'mem
+    · -- T(ψ)@w' ∉ b, so T(ψ)@w' ∈ boxPropagation; apply hcond
+      apply hcond
+      simp only [boxPropagation, List.mem_filterMap]
+      exact ⟨w', hw'_succ, if_neg hinb⟩
 
 /-- Box-negative bridge: `F(□ψ)@w ∈ b` implies `∃ w', acc.hasEdge w w' = true ∧ F(ψ)@w' ∈ b`.
 

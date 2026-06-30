@@ -170,8 +170,12 @@ lemma vars_and (a b : Proposition Atom) : (a ∧ b).vars = a.vars ∪ b.vars := 
 @[simp]
 lemma vars_or (a b : Proposition Atom) : (a ∨ b).vars = a.vars ∪ b.vars := rfl
 
-/-- Atoms of `¬A = A → ⊥` are the atoms of `A`. -/
-@[simp]
+/-- Atoms of `¬A = A → ⊥` are the atoms of `A`.
+
+Note: `@[nolint simpNF]` is needed because the LHS `a.neg.vars` is already reducible
+by `vars_imp` + `vars_bot` + `Finset.union_empty`, making this a convenience restatement
+kept as a named simp lemma for readability. -/
+@[simp, nolint simpNF]
 lemma vars_neg (a : Proposition Atom) : (¬a).vars = a.vars := by
   change (Proposition.imp a Proposition.bot).vars = a.vars
   simp only [Proposition.vars, Finset.union_empty]

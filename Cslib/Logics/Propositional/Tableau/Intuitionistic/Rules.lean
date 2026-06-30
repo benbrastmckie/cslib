@@ -87,8 +87,9 @@ termination. The fuel equals the number of edges, which bounds the longest possi
 def isAccessible (edges : IEdges) (w w' : Nat) : Bool :=
   if w == w' then true
   else
-    -- DFS over the reverse edge graph: from w, which children can be reached?
-    let rec go (current : Nat) (fuel : Nat) : Bool :=
+    -- DFS over the reverse edge graph: from `w`, which worlds are reachable.
+    -- Uses `fuel` to bound the search depth and prevent non-termination.
+    let rec @[nolint docBlame] go (current : Nat) (fuel : Nat) : Bool :=
       match fuel with
       | 0 => false
       | fuel' + 1 =>

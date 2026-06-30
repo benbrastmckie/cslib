@@ -1643,7 +1643,10 @@ def intExtractValuation (b : IBranch Atom) (w : Nat) (p : Atom) : Prop :=
 /-- The `botForces` predicate for the intuitionistic countermodel: always False.
 
 In intuitionistic logic, ⊥ is never forced. This predicate serves as the `botForces`
-parameter for the parameterized `IForces` semantics in the intuitionistic countermodel. -/
+parameter for the parameterized `IForces` semantics in the intuitionistic countermodel.
+Note: `@[nolint unusedArguments]` is needed because the `ℕ` world parameter is part of
+the `botForces` predicate signature but is not used in this constant-False definition. -/
+@[nolint unusedArguments]
 def intBotForces : Nat → Prop := fun _ => False
 
 end Cslib.Logic.PL

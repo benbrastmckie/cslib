@@ -183,7 +183,8 @@ def intExpandBranches
     | none => .closed
   | fuel' + 1 =>
     -- Inner loop: apply persistence and expand the first open branch.
-    let rec go (pending : List (IBranch Atom))
+    -- Iterates through pending branches, skipping closed ones and expanding the first open one.
+    let rec @[nolint docBlame] go (pending : List (IBranch Atom))
         (pendingExp : List (List (ISF Atom)))
         (pendingNW : List Nat)
         (pendingEdges : List IEdges)

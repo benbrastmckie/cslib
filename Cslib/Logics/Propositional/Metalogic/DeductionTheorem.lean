@@ -88,6 +88,8 @@ Thin `removeAll`-aware wrapper over the seam-routed `deductionTheorem`. Kept bec
 removing-all-occurrences is the shape required by Lindenbaum-style elimination in its
 4 callers: `IntLindenbaum.lean:148`, `MinLindenbaum.lean:131`,
 `StrongCompleteness.lean:447`, `Semantics/SemanticConsequence.lean:159`. -/
+-- `_hA : A ∈ Γ'` is an intentional weakening witness in the API signature.
+@[nolint unusedArguments]
 noncomputable def deductionWithMem
     {Axioms : PL.Proposition Atom → Prop}
     (h_implyK : ∀ (φ ψ : PL.Proposition Atom), Axioms (φ.imp (ψ.imp φ)))

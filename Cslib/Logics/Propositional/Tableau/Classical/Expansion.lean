@@ -122,7 +122,9 @@ def classicalExpandBranches
   | fuel' + 1 =>
     -- Process branches: find first open branch to expand
     -- Inner loop: iterate through branches, skipping closed ones and expanding the first open one.
-    let rec processNext (pending : List (Branch (Proposition Atom) Unit))
+    -- Inner helper: iterate through pending branches, skipping closed ones and expanding
+    -- the first open branch. Accumulates processed branches in `done`/`doneExp`.
+    let rec @[nolint docBlame] processNext (pending : List (Branch (Proposition Atom) Unit))
         (pendingExp : List (List (SignedFormula (Proposition Atom) Unit)))
         (done : List (Branch (Proposition Atom) Unit))
         (doneExp : List (List (SignedFormula (Proposition Atom) Unit)))

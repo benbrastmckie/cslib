@@ -11,11 +11,11 @@ next_project_number: 433
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,299,321,386,387,396,400,404,406,407,415,419,426,427,428,430,431 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,299,321,387,396,400,404,406,407,415,419,426,427,428,430,431 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 2 | 39,40,181,215,300,317,390,405,409,425,429 | 36,37,180,299,387,404,407,426,427,428,430 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,241,275,301,375,389 | 39,40,317,425,429 | Bimodal Porting, Foundations, Temporal Logic, ... |
-| 4 | 391,392,412,413,414 | 41,181,215,241,275,300,301,321,375,386,387,389 | Foundations, Code Hygiene, PL-Docs, ... |
-| 5 | 393 | 386,391 | PL-Hygiene |
+| 4 | 391,392,412,413,414 | 41,181,215,241,275,300,301,321,375,387,389 | Foundations, Code Hygiene, PL-Docs, ... |
+| 5 | 393 | 391 | PL-Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -69,11 +69,9 @@ next_project_number: 433
 
 ### PL Hygiene
 
-386 [IMPLEMENTING] — [Refreshed by post-merge vet sess_1782671052_6af6a1; supersedes t
-  └─ 392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls
-  └─ 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
 387 [BLOCKED] — [Refreshed post-merge vet.] DECISION REQUIRES UPSTREAM AGREEMENT.
-  └─ 392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls (see above)
+  └─ 392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls
+393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
 413 [NOT STARTED] — [Split from task 278.] Simplify Propositional/ proofs that use ma
 
 ### PL Docs

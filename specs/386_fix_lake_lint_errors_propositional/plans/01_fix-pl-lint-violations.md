@@ -1,7 +1,7 @@
 # Implementation Plan: Task #386 — Fix PL-Specific lake lint Violations
 
 - **Task**: 386 - fix_lake_lint_errors_propositional
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 1.5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/386_fix_lake_lint_errors_propositional/reports/01_pl-lint-violations-fix-map.md

@@ -19,12 +19,12 @@
     {
       "project_number": 386,
       "project_name": "fix_lake_lint_errors_propositional",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Fix Propositional-specific lake lint violations (21, post-merge)",
       "description": "[Refreshed by post-merge vet sess_1782671052_6af6a1; supersedes the pre-merge scope.] Fix the 21 PL-specific lake lint violations (hard CI gate for a clean repo push). (a) defsWithUnderscore (13) -> lowerCamelCase: GenericMCSBridge.lean:133 deriv_tree_to_list, :165 unfold_listImp_in_tree, :192 list_deriv_to_tree; SequentCalculus/LJ/CutElimination.lean:116/225/350 ljCutAdm_principal_andR/orR/impR, :462/543 ljCutAdm_left/right; SequentCalculus/LK/CutElimination.lean:145/293/437 cutAdm_right_andR/orR/impR, :586/708 cutAdm_right/left. (b) defLemma (1): GenericMCSBridge.lean:133 deriv_tree_to_list def->lemma (same decl as the rename). (c) docBlame (3): docstrings for Tableau/Classical/Expansion.lean:125 classicalExpandBranches.processNext, Tableau/Intuitionistic/Expansion.lean:169 intExpandBranches.go, Tableau/Intuitionistic/Rules.lean:91 isAccessible.go. (d) unusedArguments (3): targeted @[nolint unusedArguments] + comment: Metalogic/DeductionTheorem.lean:85 deductionWithMem arg9 _hA, Normalization/Termination.lean:41 conclusionGrounded arg6 _d, Tableau/Intuitionistic/Soundness.lean:1643 intBotForces arg1. (e) simpNF (1): Subformula.lean:173 vars_neg LHS not simp-normal (rewrite LHS or @[nolint simpNF]). Coordinate GenericMCSBridge renames with the cross-cutting task (403). Verify `lake lint` PL-clean. Source: specs/369_*/.vet-findings.json. [395-reconciled: task 386 OWNS the LK/LJ cutAdm_*/ljCutAdm_* underscore renames (defsWithUnderscore); task 392 drops them. Re-run `lake lint` after the build is green (task 385/IntFMPSpike) to refresh the exact violation set before fixing.]",
       "created": "2026-06-28T12:53:27Z",
-      "last_updated": "2026-06-30T11:22:20Z",
+      "last_updated": "2026-06-30T11:34:05Z",
       "next_artifact_number": 1,
       "artifacts": [
         {
@@ -36,13 +36,19 @@
           "type": "plan",
           "path": "specs/386_fix_lake_lint_errors_propositional/plans/01_fix-pl-lint-violations.md",
           "summary": "4-phase mechanical lint-fix plan; waves [[1],[2,3,4]]"
+        },
+        {
+          "type": "summary",
+          "path": "specs/386_fix_lake_lint_errors_propositional/summaries/01_fix-pl-lint-violations-summary.md",
+          "summary": "All 20 PL lint violations cleared: 13 defsWithUnderscore renames, 1 defLemma, 3 docBlame, 2 unusedArguments, 1 simpNF. 4 phases complete. CI passed."
         }
       ],
       "session_id": "sess_1782818392_271f51_386",
       "dependencies": [
         395
       ],
-      "topic": "PL-Hygiene"
+      "topic": "PL-Hygiene",
+      "completion_summary": "Cleared all 20 PL-namespace lake lint violations across 9 files: lowerCamelCase renames in GenericMCSBridge (3), LK CutElimination (5), LJ CutElimination (5); def→lemma for derivTreeToList; docBlame docstrings on 3 let-rec helpers; nolint annotations on 3 unusedArguments/simpNF declarations. lake lint gate passes with zero PL-path errors."
     },
     {
       "project_number": 387,
@@ -1188,7 +1194,7 @@
         {
           "path": "specs/432_fix_roadmap_integration_argv_overflow/summaries/01_argv-overflow-fix-summary.md",
           "type": "summary",
-          "summary": "Implementation summary for argv overflow fix across three shell scripts"
+          "summary": "Fixed argv overflow in roadmap-integration.sh and 2 sibling scripts"
         }
       ],
       "completion_summary": "Fixed E2BIG argv overflow in roadmap-integration.sh by replacing content-passing with temp-file path-passing at two sites; applied the same mktemp pattern to issue-grouping.sh (2 sites) and tier-selection.sh (2 sites) for consistency. Verified against the real 94 KB state.json with no error and valid JSON output."

@@ -231,6 +231,7 @@ public import Cslib.Logics.Bimodal.Metalogic.Bundle.WitnessSeed
 public import Cslib.Logics.Bimodal.Metalogic.Completeness
 public import Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.ExtDerivation
 public import Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.ExtFormula
+public import Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.LiftViaMorphism
 public import Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.Lifting
 public import Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.ModalConservativity
 public import Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.PropositionalConservativity
@@ -338,6 +339,7 @@ public import Cslib.Logics.Modal.Metalogic.DerivationTree
 public import Cslib.Logics.Modal.Metalogic.GenericMCSBridge
 public import Cslib.Logics.Modal.Metalogic.InterSystem.AxiomSubsumption
 public import Cslib.Logics.Modal.Metalogic.InterSystem.Conservativity
+public import Cslib.Logics.Modal.Metalogic.InterSystem.LiftViaMorphism
 public import Cslib.Logics.Modal.Metalogic.InterSystem.Lifting
 public import Cslib.Logics.Modal.Metalogic.MCS
 public import Cslib.Logics.Modal.Metalogic.Soundness

@@ -3,12 +3,12 @@
   "started_at": "2026-06-30T13:26:52Z",
   "artifacts": [],
   "partial_progress": {
-    "stage": "phase_1_complete",
-    "details": "Phase 1 done: TimeOrdering structure augmented with instant field, addFuture/addPast updated. All downstream modules build green.",
+    "stage": "phase_2_complete",
+    "details": "Phase 2 done: InstantStrict defined, three preservation lemmas proved sorry-free (instantStrict_empty, instantStrict_addFuture, instantStrict_addPast).",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 1,
-    "last_completed_phase": "Augment TimeOrdering with instant scheme"
+    "phases_completed": 2,
+    "last_completed_phase": "Define InstantStrict and prove edge-by-edge preservation lemmas"
   },
   "metadata": {
     "agent_type": "cslib-implementation-agent",

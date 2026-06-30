@@ -207,6 +207,71 @@ lemma futureOf_addPast_mono (ord : TimeOrdering) (t s tOld tNew : Nat)
   rw [mem_futureOf_iff] at *
   simp [addPast, h]
 
+/-! ## Instant-Strict Invariant -/
+
+/-- The edge-by-edge strict ordering invariant on integer instant assignments.
+
+Each constraint `(a, b)` in `ord.constraints` satisfies `ord.instant a < ord.instant b`.
+This is the corrected replacement for the false `ordConstraints_strict` lemma (which
+required `a < b` as Nat labels but fails because `addPast t tNew` records `(tNew, t)`
+with `tNew > t` numerically). Instead, the `instant` field carries a semantic integer
+position that is always consistent with every constraint edge. -/
+def InstantStrict (ord : TimeOrdering) : Prop :=
+  ∀ a b, (a, b) ∈ ord.constraints → ord.instant a < ord.instant b
+
+/-- `InstantStrict` holds vacuously for the empty ordering (no constraints). -/
+lemma instantStrict_empty : InstantStrict TimeOrdering.empty := by
+  intro a b h
+  simp [TimeOrdering.empty] at h
+
+/-- `addFuture` preserves `InstantStrict` provided `tNew` is fresh.
+
+Freshness: `tNew` must not appear as an endpoint in any existing constraint,
+and must differ from the source time `t`. In the temporal tableau these conditions
+are guaranteed by `branchNextTime_gt` (every `sf.label < branchNextTime b` for
+`sf ∈ b`, so the fresh time is distinct from all existing endpoints).
+
+The new constraint `(t, tNew)` satisfies the invariant because
+`instant tNew = instant t + 1 > instant t`. Old constraint endpoints are unchanged
+(their instants are unaffected by the update at the fresh point `tNew`). -/
+lemma instantStrict_addFuture (ord : TimeOrdering) (t tNew : Nat)
+    (h : InstantStrict ord)
+    (htne : t ≠ tNew)
+    (hfresh : ∀ a b, (a, b) ∈ ord.constraints → a ≠ tNew ∧ b ≠ tNew) :
+    InstantStrict (ord.addFuture t tNew) := by
+  intro a b hab
+  simp only [addFuture, List.mem_cons] at hab
+  rcases hab with h0 | hmem
+  · -- New edge: (a, b) = (t, tNew). Instant increases by 1.
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h0
+    simp only [addFuture, if_neg htne, ite_true]
+    omega
+  · -- Old edge: endpoints ≠ tNew, instants unchanged.
+    obtain ⟨hane, hbne⟩ := hfresh a b hmem
+    simp only [addFuture, if_neg hane, if_neg hbne]
+    exact h a b hmem
+
+/-- `addPast` preserves `InstantStrict` provided `tNew` is fresh.
+
+Symmetric to `instantStrict_addFuture` in the past direction.
+The new constraint is `(tNew, t)` with `instant tNew = instant t - 1 < instant t`. -/
+lemma instantStrict_addPast (ord : TimeOrdering) (t tNew : Nat)
+    (h : InstantStrict ord)
+    (htne : t ≠ tNew)
+    (hfresh : ∀ a b, (a, b) ∈ ord.constraints → a ≠ tNew ∧ b ≠ tNew) :
+    InstantStrict (ord.addPast t tNew) := by
+  intro a b hab
+  simp only [addPast, List.mem_cons] at hab
+  rcases hab with h0 | hmem
+  · -- New edge: (a, b) = (tNew, t). Instant decreases by 1.
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h0
+    simp only [addPast, ite_true, if_neg htne]
+    omega
+  · -- Old edge: endpoints ≠ tNew, instants unchanged.
+    obtain ⟨hane, hbne⟩ := hfresh a b hmem
+    simp only [addPast, if_neg hane, if_neg hbne]
+    exact h a b hmem
+
 end TimeOrdering
 
 /-! ## Fresh Time Generator -/

@@ -145,7 +145,7 @@ dependents compiling.
 
 ---
 
-### Phase 2: Define `InstantStrict` and prove edge-by-edge preservation lemmas [NOT STARTED]
+### Phase 2: Define `InstantStrict` and prove edge-by-edge preservation lemmas [COMPLETED]
 
 **Goal**: State `InstantStrict` and prove it is preserved from `empty` through every
 `addFuture`/`addPast`, **sorry-free**. These are the corrected replacement for the false

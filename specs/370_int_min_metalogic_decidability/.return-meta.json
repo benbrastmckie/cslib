@@ -1,18 +1,25 @@
 {
-  "status": "in_progress",
-  "started_at": "2026-06-27T12:05:59Z",
-  "artifacts": [],
-  "partial_progress": {
-    "stage": "initializing",
-    "details": "Agent started, reading plan and existing code patterns",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 0
-  },
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/370_int_min_metalogic_decidability/plans/02_close-out-superseded-by-fmp-landing.md",
+      "summary": "Close-out revision: all 370 deliverables landed on main via 411/421 (+ 422 reconciliation); recommend completed-as-superseded"
+    }
+  ],
+  "next_steps": "No implementable residual work. Recommend marking task 370 COMPLETED (superseded): sorry-free FMP decidability for Int (411, af9daf5e) and Min (421, 6fb9f38b) is on main; reconciliation owned by in-flight task 422. Do NOT re-register a competing FMP instance (422 keeps tableau canonical).",
   "metadata": {
-    "session_id": "sess_1782560395_aeb7ef_370",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "session_id": "sess_1782784353_00a32e_370",
+    "agent_type": "reviser-agent",
+    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
+    "revision_mode": "plan_revision_close_out",
+    "revision_reason": "superseded_overlap",
+    "phase_count": 1,
+    "estimated_hours": 0,
+    "residual_gap": false,
+    "recommendation": "completed_as_superseded",
+    "superseded_by": ["411", "421", "422"],
+    "landing_commits": {"int": "af9daf5e", "min": "6fb9f38b", "reconcile": "22b4ee84"},
+    "reports_integrated": []
   }
 }

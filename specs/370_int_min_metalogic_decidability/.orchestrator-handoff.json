@@ -1,14 +1,14 @@
 {
-  "status": "planned",
-  "summary": "Spike-gated 7-phase FMP plan for sorry-free Int/Min decidability; Phase 1 is the go/no-go finite-Lindenbaum + Fintype spike, [BLOCKED] (no sorry) on failure",
+  "status": "completed",
+  "summary": "Task 370 is fully superseded. Every deliverable of the original FMP plan is already on main: sorry-free Decidable (Derivable IntPropAxiom φ) via decidableDerivableIntPropAxiomFMP + full FMP layer (IntFinWorld, Fintype, int_fin_truth_lemma, int_fin_imp_witness, int_fmp) landed by task 411 (af9daf5e); the Min mirror (decidableDerivableMinPropAxiomFMP, MinFinWorld, min_fmp, ...) landed by task 421 (6fb9f38b). Subformula closure is in Subformula.lean (334). FMP defs are sorry-free (axiom profile {propext, Classical.choice, Quot.sound}; no sorryAx; tableau-independent). The orphan IntFMPSpike.lean was already removed by 411. No non-redundant residual gap exists; instance registration is deliberately owned by in-flight task 422 (tableau canonical, FMP as named def) and must not be reopened.",
   "blockers": [],
   "continuation_context": null,
-  "next_action_hint": "implement",
+  "next_action_hint": "mark-completed-superseded",
   "artifacts": [
     {
-      "path": "specs/370_int_min_metalogic_decidability/plans/01_int-min-fmp-decidability.md",
+      "path": "specs/370_int_min_metalogic_decidability/plans/02_close-out-superseded-by-fmp-landing.md",
       "type": "plan",
-      "summary": "FMP direct finite canonical Kripke model plan; spike-first, conditional later phases, zero-debt BLOCKED criterion"
+      "summary": "Close-out plan: goal-by-goal supersession mapping to 411/421/422; recommends completed-as-superseded; no implementable residual work"
     }
   ]
 }

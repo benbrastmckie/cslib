@@ -1,64 +1,9 @@
 {
   "status": "partial",
-  "summary": "Phase 2 (forward decomposition scaffold) committed at 0c72f854. Two private helper lemmas added to OmegaRegularLanguage.lean: (1) `buchiFamily_component_isRegular` — each buchiFamily element is ω-regular; (2) `IsRegular.to_da_muller_scaffold` — the forward direction given Phase 3's obligation h_pkg. Build green, zero sorries. The proof_wanted IsRegular.iff_da_muller remains.",
-  "artifacts": [
-    {
-      "path": "specs/241_mcnaughton_theorem/plans/01_mcnaughton-da-muller.md",
-      "type": "plan",
-      "summary": "Implementation plan; Phases 0, 1, 2 marked COMPLETED"
-    },
-    {
-      "path": "specs/241_mcnaughton_theorem/summaries/01_mcnaughton-da-muller-summary.md",
-      "type": "summary",
-      "summary": "Phase 1 implementation summary with continuation context for forward direction"
-    },
-    {
-      "path": "Cslib/Computability/Languages/OmegaRegularLanguage.lean",
-      "type": "lean_file",
-      "summary": "Added IsRegular.of_da_muller (Phase 1), buchiFamily_component_isRegular (Phase 2), IsRegular.to_da_muller_scaffold (Phase 2); proof_wanted IsRegular.iff_da_muller remains"
-    }
-  ],
-  "phases_completed": 2,
-  "phases_total": 6,
-  "sorry_inventory": [],
-  "requires_user_review": true,
-  "blocked_phase": null,
-  "continuation_context": {
-    "what_is_done": "Phases 0-2 committed green. Phase 1 commit: c4d3869d (IsRegular.of_da_muller). Phase 2 commit: 0c72f854 (buchiFamily_component_isRegular + IsRegular.to_da_muller_scaffold).",
-    "what_remains": "proof_wanted IsRegular.iff_da_muller (forward direction: NBA → DMA construction)",
-    "phase3_obligation": {
-      "statement": "∀ {State : Type} [Finite State] (na : NA.Buchi State Symbol), ∃ (dm : DA.Muller (Quotient na.BuchiCongruence.eq) Symbol), language dm = language na",
-      "dma_spec": {
-        "state_space": "Quotient na.BuchiCongruence.eq (finite by buchiCongruence_fin_index)",
-        "initial_state": "⟦[]⟧ (class of the empty word)",
-        "transition": "δ([u], a) = [u ++ [a]] (right multiplication in the congruence quotient)",
-        "accept_set": "{S : Set Q | ∃ b : Q, b ∈ S ∧ (⟦[]⟧, b) ∈ good_pairs na} where good_pairs na = {(a,b) | (na.buchiFamily (a,b) ∩ language na).Nonempty}"
-      },
-      "language_eq_proof_ingredients": [
-        "buchiFamily_saturation (na := na) : Saturates (fun i => (na.buchiFamily i).toSet) (language na).toSet",
-        "buchiFamily_cover (na := na) : ⨆ i, na.buchiFamily i = ⊤",
-        "buchiFamily_component_isRegular : each na.buchiFamily i is ω-regular",
-        "buchiCongruence_fin_index : Finite (Quotient na.BuchiCongruence.eq)"
-      ]
-    },
-    "scaffold_locations": {
-      "buchiFamily_component_isRegular": "OmegaRegularLanguage.lean:354-361",
-      "IsRegular.to_da_muller_scaffold": "OmegaRegularLanguage.lean:382-399",
-      "proof_wanted": "OmegaRegularLanguage.lean:410-412"
-    },
-    "key_challenge": "Constructing the explicit DA.Muller record with the correct transition function (as a Quotient-valued function) and the accept set expressed as a Set (Set Q). The hardest part is proving language equality using the saturation machinery.",
-    "relevant_lemmas": [
-      "buchiCongruence_fin_index (BuchiCongruence.lean:75)",
-      "buchiFamily_saturation (BuchiCongruence.lean:181)",
-      "buchiFamily_cover (BuchiCongruence.lean:118)",
-      "buchiFamily_component_isRegular (OmegaRegularLanguage.lean:354, newly added)",
-      "IsRegular.to_da_muller_scaffold (OmegaRegularLanguage.lean:382, newly added)",
-      "Language.IsRegular.congr_fin_index",
-      "Quotient.mk (for [u ++ [a]])",
-      "Quotient.liftOn or Quotient.ind for the transition function"
-    ],
-    "file_to_edit": "Cslib/Computability/Languages/OmegaRegularLanguage.lean",
-    "target_declaration": "proof_wanted IsRegular.iff_da_muller at line 410"
-  },
-  "next_action_hint": "Phase 3: implement h_pkg by constructing the DA.Muller record. Key first step: define the transition function δ : Quotient na.BuchiCongruence.eq → Symbol → Quotient na.BuchiCongruence.eq as δ(q, a) = Quotient.map (· ++ [a]) (congruence_right_cov) q. Then define accept set. Then prove language equality using buchiFamily_saturation + saturates_eq_biUnion + buchiFamily_cover."
+  "metadata": {
+    "cycles_used": 4,
+    "final_state": "implementing",
+    "progress": "run-state lemma buchiCongr_DMA_run_eq proved & committed (44280434); forward inclusion blocked by missing recurrent-class infrastructure; needs decomposition",
+    "requires_user_review": true
+  }
 }

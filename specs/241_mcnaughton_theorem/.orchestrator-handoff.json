@@ -1,42 +1,48 @@
 {
   "status": "partial",
-  "summary": "Phase 3 (DMA record construction) committed at 4593a630. buchiCongr_DMA definition typechecks: DA.Muller over Quotient na.BuchiCongruence.eq with transition via right_cov.elim and accept set via buchiFamily meet. Language equality (buchiCongr_DMA_language_eq) is proof_wanted BLOCKED for Phase 4.",
+  "summary": "Phase 4 advanced: run-state lemma buchiCongr_DMA_run_eq PROVED & committed (44280434), verified green (axiom-clean, no sorry). Two subsequent dispatches attempting the language equality buchiCongr_DMA_language_eq (forward inclusion) both hit agent CONTEXT OVERFLOW with zero commits. Root cause diagnosed: the forward direction is the research-grade core of McNaughton and requires NEW recurrent-class/idempotent infrastructure that the BuchiCongruence API does not yet expose. Task needs decomposition, not brute-force re-dispatch.",
   "artifacts": [
-    {
-      "path": "specs/241_mcnaughton_theorem/plans/01_mcnaughton-da-muller.md",
-      "type": "plan",
-      "summary": "Implementation plan; Phase 0 and Phase 1 marked COMPLETED; Phase 2 scaffold committed; Phase 3 DMA record added"
-    },
-    {
-      "path": "Cslib/Computability/Languages/OmegaRegularLanguage.lean",
-      "type": "lean_file",
-      "summary": "Added buchiCongr_DMA (private noncomputable def) and proof_wanted buchiCongr_DMA_language_eq around line 363"
-    }
+    {"path": "Cslib/Computability/Languages/OmegaRegularLanguage.lean", "type": "lean_file", "summary": "buchiCongr_DMA def (~line 380); buchiCongr_DMA_run_eq PROVED (line 405); proof_wanted buchiCongr_DMA_language_eq (line 430); proof_wanted IsRegular.iff_da_muller (line 481)"},
+    {"path": "specs/241_mcnaughton_theorem/plans/01_mcnaughton-da-muller.md", "type": "plan", "summary": "6-phase plan; phases 0-3 complete; phase 4 partial (run_eq done)"}
   ],
   "phases_completed": 3,
   "phases_total": 6,
   "sorry_inventory": [],
+  "blockers": [
+    "Phase 4 forward inclusion (language na ⊆ language (buchiCongr_DMA na)) requires proving that some recurrent prefix-class b ∈ infOcc((buchiCongr_DMA na).run xs) forms a 'good' pair (a,b) with buchiFamily(a,b) ⊆ language na. This is a Ramsey/idempotent argument with no existing API support; it overflows a single agent context."
+  ],
+  "blocked_phase": "Phase 4: buchiCongr_DMA_language_eq",
   "requires_user_review": true,
-  "blocked_phase": "Phase 4: prove buchiCongr_DMA_language_eq",
   "continuation_context": {
-    "what_is_done": "buchiCongr_DMA defined (lines ~363-386 of OmegaRegularLanguage.lean): DA.Muller over Quotient na.BuchiCongruence.eq with tr via Quotient.liftOn + right_cov.elim, start = Quotient.mk [] , accept = {S | ∃ b ∈ S, ∃ a, (na.buchiFamily (a,b) ⊓ language na).toSet.Nonempty}. Build green, zero sorries.",
-    "what_remains": "proof_wanted buchiCongr_DMA_language_eq: language (buchiCongr_DMA na) = language na. This is Phase 4 — the genuine McNaughton direction. Then Phase 5 wires h_pkg (using buchiCongr_DMA + buchiCongr_DMA_language_eq), and Phase 6 closes IsRegular.iff_da_muller.",
-    "phase4_approach": {
-      "direction_fwd": "xs ∈ language na → xs ∈ language (buchiCongr_DMA na): use buchiFamily_saturation + buchiFamily_cover to show xs ∈ na.buchiFamily (a,b) ⊆ language na for some (a,b); then show b ∈ infOcc(buchiCongr_DMA.run xs) so accept set is triggered.",
-      "direction_bwd": "xs ∈ language (buchiCongr_DMA na) → xs ∈ language na: infOcc(run xs) ∈ accept means some b ∈ infOcc and (a,b) good; b recurs in run so xs admits a decomposition in buchiFamily (a,b) ⊆ language na.",
-      "key_lemma_needed": "relate buchiCongr_DMA.run to eqvCls: need to show buchiCongr_DMA.run xs n = ⟦xs.extract 0 n⟧ (the DMA state after reading first n symbols is the class of the length-n prefix).",
-      "supporting_machinery": "buchiFamily_saturation, buchiFamily_cover, mem_buchiFamily in BuchiCongruence.lean"
+    "what_is_done": "buchiCongr_DMA (DA.Muller over Quotient na.BuchiCongruence.eq) builds green. buchiCongr_DMA_run_eq committed (44280434): (buchiCongr_DMA na).run xs n = ⟦xs.extract 0 n⟧.",
+    "what_remains": "proof_wanted buchiCongr_DMA_language_eq (line 430): language (buchiCongr_DMA na) = language na; then Phase 5 (wire h_pkg) and Phase 6 (close IsRegular.iff_da_muller, line 481).",
+    "exact_api_map": {
+      "DA.Muller language": "language da xs ↔ (da.run xs).infOcc ∈ da.accept  (DA/Basic.lean:117)",
+      "run": "da.run xs : ωSequence State  (DA/Basic.lean:53); run_zero, run_succ available",
+      "mem_infOcc": "x ∈ xs.infOcc ↔ ∃ᶠ k in atTop, xs k = x  (InfOcc.lean:88)",
+      "frequently_in_finite_type": "[Finite α] gives ∃ x, ∃ᶠ k, xs k = x  (InfOcc.lean:46)",
+      "buchiFamily": "buchiFamily (a,b) = eqvCls a * (eqvCls b)^ω  (BuchiCongruence.lean:103)",
+      "mem_buchiFamily": "xs ∈ buchiFamily (a,b) ↔ ∃ xl xls, xl ∈ eqvCls a ∧ (∀k, xls k ∈ eqvCls b - 1) ∧ xl ++ω xls.flatten = xs  (line 107)",
+      "buchiFamily_cover": "[Finite State] ⊢ ⨆ i, buchiFamily i = ⊤  (line 118) — uses infinite_graph_ramsey",
+      "buchiFamily_saturation": "Saturates (fun i => (buchiFamily i).toSet) (language na).toSet  (line 181); Saturates def at Foundations/Data/Set/Saturation.lean:25",
+      "buchiCongruence_fin_index": "[Finite State] ⊢ Finite (Quotient BuchiCongruence.eq)  (line 75)",
+      "accept_set": "{S | ∃ b ∈ S, ∃ a, ((buchiFamily (a,b) ⊓ language na).toSet).Nonempty}"
     },
+    "subtlety": "The (a,b) from buchiFamily_cover is NOT automatically the recurrent prefix-class. Prefix class after f(k) symbols is ⟦xl ++ blocks⟧ = a · b^k in the syntactic monoid. For b ∈ infOcc one needs idempotent structure (b·b=b, a·b=a) so prefix classes stabilize and the relevant recurrent class actually appears infinitely often in the run. This idempotent/recurrence layer is the missing infrastructure.",
     "key_files": [
       "Cslib/Computability/Languages/OmegaRegularLanguage.lean",
-      "Cslib/Computability/Languages/Congruences/BuchiCongruence.lean"
+      "Cslib/Computability/Languages/Congruences/BuchiCongruence.lean",
+      "Cslib/Computability/Languages/Congruences/RightCongruence.lean",
+      "Cslib/Foundations/Data/OmegaSequence/InfOcc.lean",
+      "Cslib/Computability/Automata/DA/Basic.lean"
     ],
-    "commit_history": [
-      "c4d3869d: phase 1 — IsRegular.of_da_muller (reverse direction, complete)",
-      "0c72f854: phase 2 — to_da_muller_scaffold (forward scaffold with h_pkg hypothesis)",
-      "a3ecb300: update handoff after phase 2",
-      "4593a630: phase 3 — buchiCongr_DMA record + proof_wanted buchiCongr_DMA_language_eq"
+    "recommended_decomposition": [
+      "INFRA-1: eqvCls multiplicative facts — expose ⟦u⟧·⟦v⟧ = ⟦u++v⟧ and an idempotent-power lemma for the BuchiCongruence monoid (likely needs RightCongruence monoid structure).",
+      "INFRA-2: recurrent-class lemma — for [Finite State] and any xs, ∃ a b, b idempotent, a·b=a, and ⟦xs.extract 0 n⟧ = a frequently (Ramsey over the prefix-class run, mirroring buchiFamily_cover).",
+      "FWD: language na ⊆ language (buchiCongr_DMA na) using INFRA-2 + buchiFamily_saturation + buchiCongr_DMA_run_eq.",
+      "BWD: language (buchiCongr_DMA na) ⊆ language na from accept-set unfolding + buchiFamily_saturation.",
+      "COMBINE: buchiCongr_DMA_language_eq := Set/language antisymmetry of FWD and BWD."
     ]
   },
-  "next_action_hint": "Phase 4: prove buchiCongr_DMA_language_eq. First establish the run-state lemma: buchiCongr_DMA.run xs n = Quotient.mk na.BuchiCongruence.eq (xs.extract 0 n). This connects the DMA run to the congruence classes and enables both directions of the language equality."
+  "next_action_hint": "Decompose Phase 4: /spawn 241 to create INFRA-1 (eqvCls monoid/idempotent lemmas) and INFRA-2 (recurrent-class Ramsey lemma) as prerequisite tasks, OR /revise 241 to re-plan Phase 4 into these explicit small lemma phases. Each piece is single-dispatch-sized; the monolithic proof is not."
 }

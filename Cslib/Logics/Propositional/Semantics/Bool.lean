@@ -35,6 +35,16 @@ evaluation function for propositional logic.
 (set membership `fun p => p ∈ S` is not decidable in general). The bridge lemma connects
 the two worlds: `Bool` computation to `Prop` metatheory.
 
+`BoolEvaluate` and `instDecidableTautology` are the canonical computable DPLL/SAT decision
+path for classical propositional logic. A future DPLL/Tseitin/CNF procedure (Matthew Doty's
+forthcoming work — not yet in-tree) should refine these two declarations and reuse the
+existing `Bool↔Prop` bridge (`boolEvaluateEq`, `propEvaluateEq` in
+`Semantics/Algebra/Bridge.lean`) rather than re-deriving it.
+
+For the unified three-evaluator story (`Evaluate` / `BoolEvaluate` / `AlgEvaluate`), see
+`Semantics/Algebra/Bridge.lean`, which establishes `boolEvaluateEq` and `propEvaluateEq`
+as the canonical bridge lemmas.
+
 ## References
 
 * [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Section 1.2

@@ -46,6 +46,10 @@ it can be any element of the algebra. At the `HeytingAlgebra` and `BooleanAlgebr
 `bot_val = ⊥` is the unique canonical choice (and `HAValid`/`BAValid` hardcode it, eliminating
 the parameter entirely).
 
+`AlgEvaluate` specializes to `Evaluate` (Prop-valued, via `propEvaluateEq`) and `BoolEvaluate`
+(Bool-valued, computable, via `boolEvaluateEq`). The canonical narrative tying all three
+evaluators together lives in `Semantics/Algebra/Bridge.lean`.
+
 ## Hilbert-Primary Architecture
 
 The Hilbert system is the primary proof system for this algebraic semantics module. Completeness

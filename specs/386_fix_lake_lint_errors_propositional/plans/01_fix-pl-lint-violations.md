@@ -1,7 +1,7 @@
 # Implementation Plan: Task #386 — Fix PL-Specific lake lint Violations
 
 - **Task**: 386 - fix_lake_lint_errors_propositional
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 1.5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/386_fix_lake_lint_errors_propositional/reports/01_pl-lint-violations-fix-map.md
@@ -141,7 +141,7 @@ changes. Doing `vars_neg` here first de-noises later per-module lint checks.
 
 ---
 
-### Phase 2: GenericMCSBridge renames + def→lemma + cross-file consumer [NOT STARTED]
+### Phase 2: GenericMCSBridge renames + def→lemma + cross-file consumer [COMPLETED]
 
 **Goal**: Rename the 3 PL bridge declarations to lowerCamelCase, convert `deriv_tree_to_list`
 to a `lemma` (dropping `noncomputable`), and update the one cross-file consumer plus all in-file
@@ -180,7 +180,7 @@ references and docstrings.
 
 ---
 
-### Phase 3: LK CutElimination renames [NOT STARTED]
+### Phase 3: LK CutElimination renames [IN PROGRESS]
 
 **Goal**: Rename the 5 underscore `cutAdm_*` helpers in LK to lowerCamelCase and update all
 intra-file call sites including the public wrapper `cutAdmissibility`.

@@ -76,7 +76,7 @@ noncomputable def deductionTheorem
     (d : DerivationTree Axioms (A :: Γ) B) :
     DerivationTree Axioms Γ (A → B) := by
   haveI : HasMinimalAxioms Axioms := ⟨h_implyK, h_implyS⟩
-  exact list_deriv_to_tree
+  exact listDerivToTree
     (algebraic_has_deduction_theorem
       (pl_deriv_iff_algebraic.mp ⟨d⟩))
 

@@ -20,11 +20,11 @@ at `S := HilbertOf Axioms`, for any axiom predicate satisfying `HasMinimalAxioms
 - `HilbertOf Axioms`: Empty inductive tag type whose `InferenceSystem` maps derivability
   to `Nonempty (DerivationTree Axioms [] φ)`.
 - `MinimalHilbert (HilbertOf Axioms)`: Synthesised from `[HasMinimalAxioms Axioms]`.
-- `deriv_tree_to_list`: `DerivationTree Axioms Γ φ → (propAlgDS Axioms).Deriv Γ φ`
+- `derivTreeToList`: `DerivationTree Axioms Γ φ → (propAlgDS Axioms).Deriv Γ φ`
   (forward, structural induction on the tree; 4 arms, no necessitation).
-- `unfold_listImp_in_tree`: `Γ ⊢ listImp Ψ φ → Ψ ⊆ Γ → Γ ⊢ φ`
+- `unfoldListImpInTree`: `Γ ⊢ listImp Ψ φ → Ψ ⊆ Γ → Γ ⊢ φ`
   (backward helper).
-- `list_deriv_to_tree`: `(propAlgDS Axioms).Deriv Γ φ → DerivationTree Axioms Γ φ`
+- `listDerivToTree`: `(propAlgDS Axioms).Deriv Γ φ → DerivationTree Axioms Γ φ`
   (backward direction).
 - `pl_deriv_iff_algebraic`: bidirectional equivalence on derivability.
 - `pl_setConsistent_iff_algebraic`: consistency equivalence.
@@ -46,7 +46,7 @@ logic has 4 constructors (ax, assumption, modus_ponens, weakening); there is no
 `necessitation` arm.
 
 **Backward** (algebraic → tree): extract `d₀ : [] ⊢ listImp Γ φ`, weaken to
-`Γ ⊢ listImp Γ φ`, then apply `unfold_listImp_in_tree` to eliminate each layer.
+`Γ ⊢ listImp Γ φ`, then apply `unfoldListImpInTree` to eliminate each layer.
 
 ## Design Note
 
@@ -137,7 +137,7 @@ produce `(propAlgDS Axioms).Deriv Γ φ` by structural induction on the derivati
 - **assumption**: reflected directly.
 - **modus_ponens**: contextual modus ponens.
 - **weakening**: monotone in the context. -/
-noncomputable def deriv_tree_to_list [HasMinimalAxioms Axioms]
+lemma derivTreeToList [HasMinimalAxioms Axioms]
     {Γ : List (PL.Proposition Atom)} {φ : PL.Proposition Atom}
     (d : PL.DerivationTree Axioms Γ φ) :
     (propAlgDS Axioms (Atom := Atom)).Deriv Γ φ := by
@@ -167,7 +167,7 @@ produce `Γ ⊢ φ` by iterating modus ponens with assumption trees.
 
 Induction on `Ψ`: in the cons case, `a ∈ Γ` gives `Γ ⊢ a` by assumption,
 then MP reduces `listImp (a :: Ψ') φ` to `listImp Ψ' φ`. -/
-noncomputable def unfold_listImp_in_tree
+noncomputable def unfoldListImpInTree
     {Γ : List (PL.Proposition Atom)} {φ : PL.Proposition Atom}
     (Ψ : List (PL.Proposition Atom))
     (d : PL.DerivationTree Axioms Γ (listImp Ψ φ))
@@ -192,8 +192,8 @@ noncomputable def unfold_listImp_in_tree
 /-- Backward bridge: `(propAlgDS Axioms).Deriv Γ φ → DerivationTree Axioms Γ φ`.
 
 Extracts `d₀ : [] ⊢ listImp Γ φ` from the algebraic derivation, weakens to `Γ`,
-then applies `unfold_listImp_in_tree` to eliminate the list-implication layers. -/
-noncomputable def list_deriv_to_tree [HasMinimalAxioms Axioms]
+then applies `unfoldListImpInTree` to eliminate the list-implication layers. -/
+noncomputable def listDerivToTree [HasMinimalAxioms Axioms]
     {Γ : List (PL.Proposition Atom)} {φ : PL.Proposition Atom}
     (h : (propAlgDS Axioms (Atom := Atom)).Deriv Γ φ) :
     PL.DerivationTree Axioms Γ φ := by
@@ -207,7 +207,7 @@ noncomputable def list_deriv_to_tree [HasMinimalAxioms Axioms]
   have d_weak : PL.DerivationTree Axioms Γ (listImp Γ φ) :=
     PL.DerivationTree.weakening [] Γ (listImp Γ φ) d₀ (List.nil_subset Γ)
   -- Eliminate listImp using assumption trees
-  exact unfold_listImp_in_tree Γ d_weak (fun _a ha => ha)
+  exact unfoldListImpInTree Γ d_weak (fun _a ha => ha)
 
 /-! ## Full Derivability Equivalence -/
 
@@ -221,9 +221,9 @@ theorem pl_deriv_iff_algebraic [HasMinimalAxioms Axioms]
   unfold propDerivationSystem Deriv
   constructor
   · intro ⟨d⟩
-    exact deriv_tree_to_list d
+    exact derivTreeToList d
   · intro h
-    exact ⟨list_deriv_to_tree h⟩
+    exact ⟨listDerivToTree h⟩
 
 /-! ## MCS Equivalences -/
 

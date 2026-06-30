@@ -1,18 +1,59 @@
 {
-  "next_project_number": 440,
+  "next_project_number": 441,
   "active_projects": [
+    {
+      "project_number": 440,
+      "project_name": "review_pr_leanprover_cslib_648",
+      "status": "not_started",
+      "task_type": "pr",
+      "description": "PR review: GitHub PR https://github.com/leanprover/cslib/pull/648 — address ctchou CHANGES_REQUESTED feedback (Gentzen/Avigad references, Semantics restructuring confirmation, reviewer reply, coordinate #587/#607)",
+      "sources": [
+        {
+          "type": "github_pr",
+          "url": "https://github.com/leanprover/cslib/pull/648",
+          "parsed": {
+            "owner": "leanprover",
+            "repo": "cslib",
+            "pr_number": 648
+          }
+        },
+        {
+          "type": "description",
+          "url": null,
+          "parsed": {
+            "text": "Address ctchou CHANGES_REQUESTED review (2026-06-15) on PR #648. Outstanding/verify items as of the 2026-06-29 rework: (1) References: reviewer asked NOT to cite 1930s German papers and to use Avigad textbook (ch.2-3). Avigad2022 was added to references.bib, but NaturalDeduction/Basic.lean (lines ~51,62) still cites Gentzen1935 (German title) — decide to remove/replace with Avigad or justify keeping. (2) Semantics: reviewer said Semantics/Basic.lean + Semantics/Bool.lean are redundant; current PR no longer includes any Semantics files — confirm this resolves the concern. (3) No re-review since rework; reviewDecision still CHANGES_REQUESTED — draft a reply to ctchou summarizing what was addressed. (4) Coordination: #536 is merged (satisfied); coordinate with #587 and #607."
+          }
+        }
+      ],
+      "created": "2026-06-30T17:38:50Z",
+      "last_updated": "2026-06-30T17:38:50Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "topic": "pr-review"
+    },
     {
       "project_number": 406,
       "project_name": "fix_crosscutting_lint_modal_temporal_bimodal_foundations",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "cslib",
       "title": "Fix cross-cutting lake lint across Modal/Temporal/Bimodal/Foundations (33)",
       "description": "NEW from post-merge vet (sess_1782671052_6af6a1). Fix 33 pre-existing lake lint violations (not introduced by the merges but blocking CI globally -> hard repo push gate). Same pattern as the PL GenericMCSBridge/DeductionTheorem fixes (task 386). Modal: Metalogic/GenericMCSBridge.lean defLemma x1 + defsWithUnderscore x3 (deriv_tree_to_list, unfold_listImp_in_tree, list_deriv_to_tree), Tableau/Saturation.lean docBlame x1 (modalExpandBranches.processNext), Metalogic/DeductionTheorem.lean unusedArguments x1 (deductionWithMem arg9). Temporal: Metalogic/GenericMCSBridge.lean defLemma x2 + defsWithUnderscore x5, Tableau/Saturation.lean docBlame x1, Metalogic/DenseMCS.lean unusedArguments x1. Bimodal: Metalogic/Core/GenericMCSBridge.lean defLemma x2 + defsWithUnderscore x6, Metalogic/Core/DeductionTheorem.lean unusedArguments x1. Foundations: HilbertAlgebra/FreeMeetExtension.lean docBlame x7 (fld, fmeLe, fmeEquiv, fmeSetoid, FreeMeetExtension, mk, freeMeetEmbed), Logic/Metalogic/DeductionCharacterization.lean:109 defsWithUnderscore x1 (dt_inference_system). Rename underscores->lowerCamelCase, def->lemma, @[nolint unusedArguments]+comments, add docstrings. ABSORBS stale task 394 (foundations_logic_cleanup). Best coordinated with task 386's GenericMCSBridge renames. Verify `lake lint` green. Source: vet findings.",
       "created": "2026-06-28T18:34:49Z",
-      "last_updated": "2026-06-28T18:34:49Z",
+      "last_updated": "2026-06-30T17:31:53Z",
       "next_artifact_number": 1,
-      "artifacts": [],
-      "session_id": "sess_1782671689_c8c1fd_406",
+      "artifacts": [
+        {
+          "path": "specs/406_fix_crosscutting_lint_modal_temporal_bimodal_foundations/reports/01_crosscutting-lint-fixes.md",
+          "type": "report",
+          "summary": "Mapped all 33 lint violations to exact locations and mechanical fix recipes (task 386 pattern)"
+        },
+        {
+          "path": "specs/406_fix_crosscutting_lint_modal_temporal_bimodal_foundations/plans/01_crosscutting-lint-fixes.md",
+          "type": "plan",
+          "summary": "5-phase plan clearing all 33 lint violations grouped by area with final build-then-lint gate"
+        }
+      ],
+      "session_id": "sess_1782838873_48a805",
       "dependencies": [],
       "topic": "Code Hygiene"
     },
@@ -113,12 +154,20 @@
     {
       "project_number": 321,
       "project_name": "code_hygiene_logics_foundations",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "description": "Review file size and structure throughout Logics/ and Foundations/ to identify and refactor files that are too long or poorly structured. Abstract and expose all and only what should be abstracted/exposed, maintaining the highest standards for code hygiene. Survey file lengths, identify candidates over ~400 lines, check for proper module boundaries, unnecessary public exports, missing abstraction barriers, and violations of single-responsibility principle. Produce a refactoring plan with prioritized actions",
       "topic": "Code Hygiene",
       "created": "2026-06-24T10:46:01Z",
-      "last_updated": "2026-06-24T10:46:01Z"
+      "last_updated": "2026-06-30T17:31:56Z",
+      "session_id": "sess_1782838873_48a805",
+      "artifacts": [
+        {
+          "path": "specs/321_code_hygiene_logics_foundations/reports/01_code-hygiene-survey.md",
+          "type": "report",
+          "summary": "Size-debt survey: 85 files >400 lines, four 2700-3566-line Chronicle mega-files, zero-private metalogic gap"
+        }
+      ]
     },
     {
       "project_number": 317,
@@ -574,7 +623,7 @@
     {
       "project_number": 180,
       "project_name": "temporal_primitive_always_historically",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "dependencies": [],
       "description": "Add allFuture (G) and allPast (H) as primitive constructors to Temporal.Formula, giving {atom, bot, imp, and, or, untl, snce, allFuture, allPast}. Currently G is derived as neg(someFuture(neg phi)) and H as neg(somePast(neg phi)), which are only valid classically. Making them primitive enables intuitionistic temporal logics. Note: someFuture (F) and somePast (P) remain derivable without negation (F = top U phi, P = top S phi). Scope: (1) Syntax/Formula.lean: add .allFuture/.allPast constructors, update complexity, subst, atoms, encodeNat, temporalDepth, swapTemporal. (2) Semantics: structural clauses for universal future/past quantification. (3) ProofSystem: temporal axioms referencing G/H now use primitive constructors. (4) Metalogic: cases in Soundness, Chronicle/TruthLemma, MCS, Completeness. (5) Classical equivalences become theorems. Verify full CI. Reference: Boudou et al. for intuitionistic temporal logic.",
@@ -583,10 +632,15 @@
           "path": "specs/180_temporal_primitive_always_historically/reports/01_primitive-always-historically-research.md",
           "type": "report",
           "summary": "Primitive G/H motivation, axiom dependency analysis, scope assessment, intuitionistic temporal references"
+        },
+        {
+          "path": "specs/180_temporal_primitive_always_historically/plans/01_primitive-gh-implementation.md",
+          "type": "plan",
+          "summary": "8-phase plan to promote allFuture/allPast to primitive Temporal.Formula constructors"
         }
       ],
       "topic": "Temporal Logic",
-      "last_updated": "2026-06-30T17:02:10Z",
+      "last_updated": "2026-06-30T17:08:52Z",
       "session_id": "sess_1782838873_48a805"
     },
     {
@@ -1247,7 +1301,8 @@
     "agent-system",
     "Code Hygiene",
     "Algebraic Semantics",
-    "PL-Tableau"
+    "PL-Tableau",
+    "pr-review"
   ],
   "_last_updated": "2026-06-27T18:18:00Z"
 }

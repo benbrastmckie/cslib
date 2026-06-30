@@ -1,5 +1,5 @@
 ---
-next_project_number: 440
+next_project_number: 441
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 440
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,299,317,321,390,396,400,404,406,407,415,419,427,433,434,438,439 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,299,317,321,390,396,400,404,406,407,415,419,427,433,434,438,439,440 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 2 | 39,40,181,215,300,375,389,405,409,426,430,435 | 36,37,180,299,317,404,407,433,439 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,275,391,392,413,425,436 | 39,40,321,375,389,426,427,434,435 | Bimodal Porting, Foundations, Temporal Logic, ... |
 | 4 | 241,301,393,412 | 41,321,391,425,436 | Foundations, Temporal Logic, PL-Hygiene |
@@ -44,7 +44,7 @@ next_project_number: 440
 
 ### Temporal Logic
 
-180 [RESEARCHED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
+180 [PLANNED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
 427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
   └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
     └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
@@ -62,14 +62,18 @@ next_project_number: 440
 
 ### Code Hygiene
 
-321 [NOT STARTED] — Review file size and structure throughout Logics/ and Foundations
+321 [RESEARCHED] — Review file size and structure throughout Logics/ and Foundations
   └─ 414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p
-406 [NOT STARTED] — NEW from post-merge vet (sess_1782671052_6af6a1). Fix 33 pre-exis
+406 [PLANNED] — NEW from post-merge vet (sess_1782671052_6af6a1). Fix 33 pre-exis
 
 ### PL Tableau
 
 317 [PLANNED] — Fill the propositional tableau completeness sorries (7 real sorri
   └─ 430 [RESEARCHED] — Prove the atom-persistence / upward-closure structural lemma for 
+
+### Pr Review
+
+440 [NOT STARTED] — PR review: GitHub PR https://github.com/leanprover/cslib/pull/648
 
 ### PL Docs
 
@@ -106,6 +110,16 @@ next_project_number: 440
 438 [NOT STARTED] — Upstream the comment/docstring cleanups identified by the task 43
 
 ## Tasks
+
+### 440. Review pr leanprover cslib 648
+- **Status**: [NOT STARTED]
+- **Task Type**: pr
+- **Topic**: pr-review
+- **Dependencies**: None
+
+**Description**: PR review: GitHub PR https://github.com/leanprover/cslib/pull/648 — address ctchou CHANGES_REQUESTED feedback (Gentzen/Avigad references, Semantics restructuring confirmation, reviewer reply, coordinate #587/#607)
+
+---
 
 ### 439. Refactor processnext to mutual def and prove instantstrict t
 - **Effort**: 3-5 hours
@@ -400,10 +414,12 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 406. Fix cross-cutting lake lint across Modal/Temporal/Bimodal/Foundations (33)
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
+- **Research**: [406_fix_crosscutting_lint_modal_temporal_bimodal_foundations/reports/01_crosscutting-lint-fixes.md]
+- **Plan**: [406_fix_crosscutting_lint_modal_temporal_bimodal_foundations/plans/01_crosscutting-lint-fixes.md]
 
 **Description**: NEW from post-merge vet (sess_1782671052_6af6a1). Fix 33 pre-existing lake lint violations (not introduced by the merges but blocking CI globally -> hard repo push gate). Same pattern as the PL GenericMCSBridge/DeductionTheorem fixes (task 386). Modal: Metalogic/GenericMCSBridge.lean defLemma x1 + defsWithUnderscore x3 (deriv_tree_to_list, unfold_listImp_in_tree, list_deriv_to_tree), Tableau/Saturation.lean docBlame x1 (modalExpandBranches.processNext), Metalogic/DeductionTheorem.lean unusedArguments x1 (deductionWithMem arg9). Temporal: Metalogic/GenericMCSBridge.lean defLemma x2 + defsWithUnderscore x5, Tableau/Saturation.lean docBlame x1, Metalogic/DenseMCS.lean unusedArguments x1. Bimodal: Metalogic/Core/GenericMCSBridge.lean defLemma x2 + defsWithUnderscore x6, Metalogic/Core/DeductionTheorem.lean unusedArguments x1. Foundations: HilbertAlgebra/FreeMeetExtension.lean docBlame x7 (fld, fmeLe, fmeEquiv, fmeSetoid, FreeMeetExtension, mk, freeMeetEmbed), Logic/Metalogic/DeductionCharacterization.lean:109 defsWithUnderscore x1 (dt_inference_system). Rename underscores->lowerCamelCase, def->lemma, @[nolint unusedArguments]+comments, add docstrings. ABSORBS stale task 394 (foundations_logic_cleanup). Best coordinated with task 386's GenericMCSBridge renames. Verify `lake lint` green. Source: vet findings.
 
@@ -519,10 +535,11 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 321. Code hygiene logics foundations
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
+- **Research**: [321_code_hygiene_logics_foundations/reports/01_code-hygiene-survey.md]
 
 **Description**: Review file size and structure throughout Logics/ and Foundations/ to identify and refactor files that are too long or poorly structured. Abstract and expose all and only what should be abstracted/exposed, maintaining the highest standards for code hygiene. Survey file lengths, identify candidates over ~400 lines, check for proper module boundaries, unnecessary public exports, missing abstraction barriers, and violations of single-responsibility principle. Produce a refactoring plan with prioritized actions
 
@@ -694,11 +711,12 @@ Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completenes
 ---
 
 ### 180. Temporal primitive always historically
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
 - **Research**: [180_temporal_primitive_always_historically/reports/01_primitive-always-historically-research.md]
+- **Plan**: [180_temporal_primitive_always_historically/plans/01_primitive-gh-implementation.md]
 
 **Description**: Add allFuture (G) and allPast (H) as primitive constructors to Temporal.Formula, giving {atom, bot, imp, and, or, untl, snce, allFuture, allPast}. Currently G is derived as neg(someFuture(neg phi)) and H as neg(somePast(neg phi)), which are only valid classically. Making them primitive enables intuitionistic temporal logics. Note: someFuture (F) and somePast (P) remain derivable without negation (F = top U phi, P = top S phi). Scope: (1) Syntax/Formula.lean: add .allFuture/.allPast constructors, update complexity, subst, atoms, encodeNat, temporalDepth, swapTemporal. (2) Semantics: structural clauses for universal future/past quantification. (3) ProofSystem: temporal axioms referencing G/H now use primitive constructors. (4) Metalogic: cases in Soundness, Chronicle/TruthLemma, MCS, Completeness. (5) Classical equivalences become theorems. Verify full CI. Reference: Boudou et al. for intuitionistic temporal logic.
 

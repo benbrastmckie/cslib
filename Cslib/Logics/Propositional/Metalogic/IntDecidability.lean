@@ -26,8 +26,10 @@ construction: worlds are `Σ`-bounded prime deductively-closed sets where `Σ :=
   the infinite canonical model and restricting back to `Σ`.
 - `int_fin_truth_lemma`: Truth lemma for the finite canonical model.
 - `int_fmp`: `Derivable IntPropAxiom φ ↔ ∀ w : IntFinWorld φ, φ ∈ w.carrier`.
-- `instDecidableDerivableIntPropAxiom'`: A sorry-free decidable instance independent of
-  the tableau completeness witnesses.
+- `decidableDerivableIntPropAxiomFMP`: A sorry-free `noncomputable def` (not a registered
+  instance) for `Derivable IntPropAxiom φ` via the FMP, independent of the tableau completeness
+  witnesses. The canonical registered `Decidable` instance is in
+  `Tableau/Intuitionistic/DecisionProcedure.lean` (`instDecidableDerivableIntPropAxiom`).
 
 ## Design Decisions
 
@@ -421,13 +423,20 @@ theorem int_fmp (φ : PL.Proposition Atom) :
 
 /-! ## Decidability Instance -/
 
-/-- **Sorry-free Decidable instance for `Derivable IntPropAxiom φ`** via the finite model
-property.
+/-- **Sorry-free `Decidable` decision procedure for `Derivable IntPropAxiom φ`** via the
+finite model property (FMP route).
 
 The decision procedure checks `∀ w : IntFinWorld φ, φ ∈ w.carrier` by enumerating all
 worlds in the finite type `IntFinWorld φ` (which is a `Fintype` via `instFintypeIntFinWorld`).
-This instance is independent of `intuitionisticTableau_complete` and carries no `sorryAx`. -/
-noncomputable instance instDecidableDerivableIntPropAxiom' (φ : PL.Proposition Atom) :
+This definition is independent of `intuitionisticTableau_complete` and carries no `sorryAx`
+(axiom profile: `{propext, Classical.choice, Quot.sound}`).
+
+This is a **named `noncomputable def`**, not a registered `instance`. The canonical registered
+`Decidable` instance for `Derivable IntPropAxiom φ` is `instDecidableDerivableIntPropAxiom` in
+`Tableau/Intuitionistic/DecisionProcedure.lean` (tableau route). See also
+`decidableDerivableMinPropAxiomFMP` in `Metalogic/MinDecidability.lean` for the analogous Min
+FMP decision procedure. -/
+noncomputable def decidableDerivableIntPropAxiomFMP (φ : PL.Proposition Atom) :
     Decidable (Derivable IntPropAxiom φ) :=
   decidable_of_iff (∀ w : IntFinWorld φ, φ ∈ w.carrier) (int_fmp φ).symm
 

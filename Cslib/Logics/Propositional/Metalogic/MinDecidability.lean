@@ -26,8 +26,10 @@ construction: worlds are `Σ`-bounded prime MinTheory worlds where `Σ := φ.sub
   the infinite canonical model and restricting back to `Σ`.
 - `min_fin_truth_lemma`: Truth lemma for the finite canonical model.
 - `min_fmp`: `Derivable MinPropAxiom φ ↔ ∀ w : MinFinWorld φ, φ ∈ w.carrier`.
-- `instDecidableDerivableMinPropAxiom'`: A sorry-free decidable instance independent of
-  the tableau completeness witnesses.
+- `decidableDerivableMinPropAxiomFMP`: A sorry-free `noncomputable def` (not a registered
+  instance) for `Derivable MinPropAxiom φ` via the FMP, independent of any tableau completeness
+  witnesses. The canonical registered `Decidable` instance is in
+  `Tableau/Minimal/DecisionProcedure.lean` (`instDecidableDerivableMinPropAxiom`).
 
 ## Design Decisions
 
@@ -373,13 +375,20 @@ theorem min_fmp (φ : PL.Proposition Atom) :
 
 /-! ## Decidability Instance -/
 
-/-- **Sorry-free Decidable instance for `Derivable MinPropAxiom φ`** via the finite model
-property.
+/-- **Sorry-free `Decidable` decision procedure for `Derivable MinPropAxiom φ`** via the
+finite model property (FMP route).
 
 The decision procedure checks `∀ w : MinFinWorld φ, φ ∈ w.carrier` by enumerating all
 worlds in the finite type `MinFinWorld φ` (which is a `Fintype` via `instFintypeMinFinWorld`).
-This instance is independent of any tableau completeness witnesses and carries no `sorryAx`. -/
-noncomputable instance instDecidableDerivableMinPropAxiom' (φ : PL.Proposition Atom) :
+This definition is independent of any tableau completeness witnesses and carries no `sorryAx`
+(axiom profile: `{propext, Classical.choice, Quot.sound}`).
+
+This is a **named `noncomputable def`**, not a registered `instance`. The canonical registered
+`Decidable` instance for `Derivable MinPropAxiom φ` is `instDecidableDerivableMinPropAxiom` in
+`Tableau/Minimal/DecisionProcedure.lean` (tableau route). See also
+`decidableDerivableIntPropAxiomFMP` in `Metalogic/IntDecidability.lean` for the analogous Int
+FMP decision procedure. -/
+noncomputable def decidableDerivableMinPropAxiomFMP (φ : PL.Proposition Atom) :
     Decidable (Derivable MinPropAxiom φ) :=
   decidable_of_iff (∀ w : MinFinWorld φ, φ ∈ w.carrier) (min_fmp φ).symm
 

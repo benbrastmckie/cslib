@@ -78,39 +78,38 @@ made, verbatim in spirit, in four different proof systems.
 
 #figure(
   table(
-    columns: (auto, auto, auto, auto),
+    columns: (auto, auto, 1fr),
     stroke: none,
-    align: left,
+    align: (left, left, left),
+    column-gutter: 0.8em,
     table.hline(),
     table.header(
-      [*System*], [*MPL base*], [*Gated $bot$-rule*], [*Available at*],
+      [*System*], [*MPL base*], [*Gated $bot$-rule (Lean anchor)*],
     ),
     table.hline(),
     [Hilbert],
     [`MinPropAxiom` (8 ctors)],
     [`efq` in `IntPropAxiom`; `peirce` in `PropositionalAxiom`],
-    [IPL / CPL],
 
     [Natural deduction],
     [10 ungated rules],
-    [`efq` #h(0.3em) `[IsIntuitionistic T]` (`Basic.lean:182-183`)],
-    [IPL / CPL],
+    [`efq` (`Basic.lean:182-183`)],
 
     [Sequent (LJ)],
     [structural rules],
-    [`botL` #h(0.3em) `[IsIntuitionistic T]` (`LJ/Basic.lean:98-100`)],
-    [IPL / CPL],
+    [`botL` (`LJ/Basic.lean:98-100`)],
 
     [Curry--Howard],
     [term formers],
-    [`efq` #h(0.3em) `[IsIntuitionistic T]` (`CurryHoward/Defs.lean:102-103`)],
-    [IPL / CPL],
+    [`efq` (`CurryHoward/Defs.lean:102-103`)],
     table.hline(),
   ),
-  caption: [One gate, `[IsIntuitionistic T]`, instantiated four times. The
-    Hilbert substrate `MinPropAxiom` has 8 connective schemas; `IntPropAxiom`
-    adds `efq` (`Axioms.lean:126-150 / 89-116`); `PropositionalAxiom` adds
-    `peirce` (`:48-78`).],
+  caption: [One gate, `[IsIntuitionistic T]`, instantiated four times. Every
+    gated $bot$-rule carries the `[IsIntuitionistic T]` instance binder, so it is
+    available at IPL / CPL and structurally unconstructible at MPL. The Hilbert
+    substrate `MinPropAxiom` has 8 connective schemas (`Axioms.lean:126-150`);
+    `IntPropAxiom` adds `efq` (`:89-116`); `PropositionalAxiom` adds `peirce`
+    (`:48-78`).],
 )
 
 In every case, because the gated rule carries `[IsIntuitionistic T]` and

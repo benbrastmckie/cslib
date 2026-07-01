@@ -60,6 +60,10 @@
 // Allow theorem boxes to break across pages
 #show figure.where(kind: "thmbox"): set block(breakable: true)
 
+// Allow long tables (e.g. the appendix anchor table) to break across pages
+// rather than overflowing off the bottom of a page.
+#show figure: set block(breakable: true)
+
 // ============================================================================
 // Custom Commands
 // ============================================================================
@@ -151,7 +155,7 @@
       table.hline(),
       [MPL], [none (free nullary op)], [---], [`MinPropAxiom` / `GHAValid`],
       [IPL], [leastness ($bot inter x = bot$)], [`efq`], [`IntPropAxiom` / `HasLeastBot`],
-      [CPL], [+ classicality], [`peirce`], [`PropositionalAxiom` / Boolean],
+      [CPL], [least, and classical], [`peirce`], [`PropositionalAxiom` / Boolean],
       table.hline(),
     ),
     caption: [The $"MPL" subset "IPL" subset "CPL"$ ladder: one signature, one

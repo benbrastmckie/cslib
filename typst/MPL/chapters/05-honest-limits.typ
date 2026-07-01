@@ -61,7 +61,8 @@ trade-offs the design accepts.
 
 == The honesty ledger
 
-#remark("O1 --- the substitution argument is pragmatic, not decisive")[
+#remark("O1")[
+  *The substitution argument is pragmatic, not decisive.*
   The free-monad / substitution-invariance argument (@sec:syntax) does not by
   itself _select_ the signature: declaring $bot$ a generator also yields a free
   monad, so the universal property restates the choice rather than forcing it.
@@ -72,7 +73,8 @@ trade-offs the design accepts.
   KF6 (@sec:kf6), not substitution-invariance.
 ]
 
-#remark("O2 --- unconstrained bot at MPL carries a cost")[
+#remark("O2")[
+  *An unconstrained $bot$ at MPL carries a cost.*
   That $bot$ is totally unconstrained at MPL is literally true (no `MinPropAxiom`
   mentions $bot$; `bot_val` is a free parameter; $top := bot arrow.r bot$
   imposes nothing; `efq` is unconstructible). The cost is the flip side: MPL
@@ -81,7 +83,8 @@ trade-offs the design accepts.
   double edge that fuels O1.
 ]
 
-#remark("O3 --- sorry-free scope is exactly the Hilbert / algebraic layer")[
+#remark("O3")[
+  *The sorry-free scope is exactly the Hilbert / algebraic layer.*
   Sorry-free: the derivability subsumption chain (`ConservativeChain.lean:152`)
   and GHA / HA / BA algebraic completeness
   (`HilbertCompleteness.lean:64, 93, 122, 155`); the
@@ -93,7 +96,8 @@ trade-offs the design accepts.
   The clean-proof claim is scoped to the Hilbert and algebraic development only.
 ]
 
-#remark("O4 --- 'property module' is partly a re-description")[
+#remark("O4")[
+  *"Property module" is partly a re-description.*
   `efq` is a _lexical constructor_ of the one shared derivation inductive, and
   `MinimalDerivation` is an _abbreviation_, not a physically $bot$-rule-free type
   (that is deferred to task 409). Every induction over minimal derivations still
@@ -104,7 +108,8 @@ trade-offs the design accepts.
   the note, is authoritative.
 ]
 
-#remark("O5 --- downstream payoff is a bet, not a delivery")[
+#remark("O5")[
+  *The downstream payoff is a bet, not a delivery.*
   The claimed strategic benefit --- MPL as a reusable intuitionistic substrate
   for the modal / temporal / bimodal logics --- is not realized today. Those
   embeddings are currently CPL-only (Łukasiewicz), so the minimal / intuitionistic

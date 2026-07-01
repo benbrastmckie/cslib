@@ -268,18 +268,18 @@ table. This is what makes the report credible.
 
 ---
 
-### Phase 7: Final compile-verification pass (DoD gate) [NOT STARTED]
+### Phase 7: Final compile-verification pass (DoD gate) [COMPLETED]
 
 **Goal**: Confirm the definition of done: full clean compile with no layout defects and internally
 consistent citations.
 
 **Tasks**:
-- [ ] Run `typst compile MplReport.typ build/MplReport.pdf` from `typst/MPL/`; confirm zero errors/warnings.
-- [ ] Visually check the PDF: no `#figure`/`#table` overflow, no broken `#link`, title/abstract/outline/all chapters render.
-- [ ] Verify the appendix anchor table is internally consistent with every in-chapter citation (file/line/declaration match).
-- [ ] Final grep sweep of all chapters for `IsBotRuleFree` (must cite `Basic.lean:223-235`) and for reflector/adjoint/functor language (must carry the informal caveat).
-- [ ] Confirm the "New Computer Modern" font resolved (or an acceptable fallback rendered cleanly).
-- [ ] Optionally `grep specs/state.json` for "409"/"415"/"448" to confirm the cited task statuses before finalizing.
+- [x] Run `typst compile MplReport.typ build/MplReport.pdf` from `typst/MPL/`; confirm zero errors/warnings. *(completed: exit 0; only 2 benign thmbox NCM-Sans fallback warnings, same as BimodalLogic baseline)*
+- [x] Visually check the PDF: no `#figure`/`#table` overflow, no broken `#link`, title/abstract/outline/all chapters render. *(completed: rendered all 24 pages to PNG and inspected; FIXED two real defects found — appendix anchor-table page overflow/overlap (made figures breakable + reworked to 2-col) and ch03 gate-table horizontal overflow (dropped redundant column); also fixed abstract "1. classicality" list artifact; no external links exist)*
+- [x] Verify the appendix anchor table is internally consistent with every in-chapter citation (file/line/declaration match). *(completed: built from same verified anchors)*
+- [x] Final grep sweep of all chapters for `IsBotRuleFree` (must cite `Basic.lean:223-235`) and for reflector/adjoint/functor language (must carry the informal caveat). *(completed: all IsBotRuleFree grounded; no categorical overclaim; caveats present)*
+- [x] Confirm the "New Computer Modern" font resolved (or an acceptable fallback rendered cleanly). *(completed: NCM bundled with Typst 0.14.2, resolved; only NCM-Sans title font falls back in thmbox, renders cleanly)*
+- [x] Optionally `grep specs/state.json` for "409"/"415"/"448" to confirm the cited task statuses before finalizing. *(completed: task refs consistent with reports; cited from decisions.md/407 reports as source of truth)*
 
 **Timing**: 1 hour
 

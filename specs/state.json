@@ -43,22 +43,33 @@
     {
       "project_number": 443,
       "project_name": "fix_lint_mcnaughton_choueka_concat",
-      "status": "researched",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Fix lint violations in McNaughton-theorem Choueka/Concat route (task 241)",
       "description": "Address the 2 lake lint violations introduced by task 241: rename the underscored instance buchiCongruence_instMonoid in Cslib/Computability/Languages/Congruences/BuchiCongruence.lean:263 (defsWithUnderscore), and silence or restructure the unused-argument warning on mullerAccConcat in Cslib/Computability/Automata/DA/Concat.lean:159 (unusedArguments). Verify with lake lint and lake build afterward; ensure no downstream call sites reference the renamed instance directly.",
       "parent_task": 241,
       "created": "2026-07-01T05:04:42Z",
-      "last_updated": "2026-07-01T05:11:15Z",
+      "last_updated": "2026-07-01T05:17:06Z",
       "next_artifact_number": 1,
       "artifacts": [
         {
           "path": "specs/443_fix_lint_mcnaughton_choueka_concat/reports/01_lint-fix-241.md",
           "type": "report",
           "summary": "Lint fix research for task 241 violations"
+        },
+        {
+          "path": "specs/443_fix_lint_mcnaughton_choueka_concat/plans/01_lint-fix-241.md",
+          "type": "plan",
+          "summary": "Single-phase lint fix plan for task 241 violations"
+        },
+        {
+          "path": "specs/443_fix_lint_mcnaughton_choueka_concat/summaries/01_lint-fix-241-summary.md",
+          "type": "summary",
+          "summary": "Lint fix implementation summary"
         }
       ],
-      "session_id": "sess_1782882476_455d76"
+      "session_id": "sess_1782882476_455d76",
+      "completion_summary": "Cleared 2 lake lint violations from task 241: renamed instance buchiCongruence_instMonoid -> buchiCongruenceMonoid (defsWithUnderscore) and added @[nolint unusedArguments] to mullerAccConcat (unusedArguments). All scoped builds + lake lint + full lake build pass."
     },
     {
       "project_number": 440,

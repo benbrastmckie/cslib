@@ -11,7 +11,7 @@ next_project_number: 447
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,317,390,396,400,404,407,415,419,438,440,442,443,444,445,446 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,317,390,396,400,404,407,415,419,438,440,442,444,445,446 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 2 | 39,40,181,215,299,375,389,405,409,430,439 | 36,37,180,317,404,407,442 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,275,300,391,392,413,426,441 | 39,40,299,375,389,439 | Bimodal Porting, Foundations, Modal Logic, ... |
 | 4 | 393,412,425 | 41,391,426 | Foundations, Temporal Logic, PL-Hygiene |
@@ -101,7 +101,6 @@ next_project_number: 447
 ### Uncategorized
 
 438 [NOT STARTED] — Upstream the comment/docstring cleanups identified by the task 43
-443 [RESEARCHED] — Address the 2 lake lint violations introduced by task 241: rename
 444 [NOT STARTED] — Vet fix for task 180 (High). Rename `allFuture_iff_neg_someFuture
 445 [NOT STARTED] — Vet fix for task 180 (Medium). TemporalConservativity.lean:269 (`
 446 [NOT STARTED] — Vet fix for task 180 (Low). Update References sections of TruthLe
@@ -136,10 +135,12 @@ next_project_number: 447
 ---
 
 ### 443. Fix lint violations in McNaughton-theorem Choueka/Concat route (task 241)
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 - **Research**: [443_fix_lint_mcnaughton_choueka_concat/reports/01_lint-fix-241.md]
+- **Plan**: [443_fix_lint_mcnaughton_choueka_concat/plans/01_lint-fix-241.md]
+- **Summary**: [443_fix_lint_mcnaughton_choueka_concat/summaries/01_lint-fix-241-summary.md]
 
 **Description**: Address the 2 lake lint violations introduced by task 241: rename the underscored instance buchiCongruence_instMonoid in Cslib/Computability/Languages/Congruences/BuchiCongruence.lean:263 (defsWithUnderscore), and silence or restructure the unused-argument warning on mullerAccConcat in Cslib/Computability/Automata/DA/Concat.lean:159 (unusedArguments). Verify with lake lint and lake build afterward; ensure no downstream call sites reference the renamed instance directly.
 

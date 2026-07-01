@@ -1,0 +1,12 @@
+{
+  "status": "implemented",
+  "summary": "Both lint violations cleared: renamed buchiCongruence_instMonoid -> buchiCongruenceMonoid; added @[nolint unusedArguments] to mullerAccConcat. All 3 scoped builds, lake lint (target sites clean), and full lake build pass. 2 remaining lint errors are in Temporal/Theorems.lean (task 180, out of scope).",
+  "artifacts": [
+    { "type": "summary", "path": "specs/443_fix_lint_mcnaughton_choueka_concat/summaries/01_lint-fix-241-summary.md", "summary": "Lint fix implementation summary" }
+  ],
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "complete",
+  "phases_completed": 1,
+  "phases_total": 1
+}

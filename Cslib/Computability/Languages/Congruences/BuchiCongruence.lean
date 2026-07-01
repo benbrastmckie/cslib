@@ -265,7 +265,7 @@ lemma buchiCongruence_left_cov {u u' : List Symbol}
 - the identity element is `1 = ⟦[]⟧` (the class of the empty word).
 Well-definedness of multiplication uses right covariance (from `RightCongruence`)
 for the first argument and `buchiCongruence_left_cov` for the second argument. -/
-instance buchiCongruence_instMonoid : Monoid (Quotient na.BuchiCongruence.eq) where
+instance buchiCongruenceMonoid : Monoid (Quotient na.BuchiCongruence.eq) where
   mul a b := Quotient.liftOn₂ a b (fun u v => ⟦u ++ v⟧) fun u v u' v' hu hv =>
     Quotient.sound (na.BuchiCongruence.eq.trans
       (na.BuchiCongruence.right_cov.elim v hu)

@@ -159,6 +159,7 @@ noncomputable def concat (da1 : DA State1 Symbol) (acc1 : Set State1)
 /-- The Muller acceptance family for the concat automaton. A set `acc` of concat states
 is in this family if there exists slot `i` persistently active across `acc` whose M2 states
 across `acc` form a set in `accSet2`. -/
+@[nolint unusedArguments]
 noncomputable def mullerAccConcat (_ : DA State1 Symbol) (_ : Set State1)
     (_ : DA State2 Symbol) (accSet2 : Set (Set State2)) :
     Set (Set (State1 × (Fin (Nat.card State2 + 2) → Option State2))) :=

@@ -11,8 +11,8 @@ next_project_number: 464
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,396,400,404,407,425,438,440,441,447,449,453,457,458,459,460,461,463 | -- | Propositional Logic, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,215,301,375,389,405,409,430,450,451,456,462 | 36,37,181,317,404,407,425,449,457,459 | Propositional Logic, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,181,226,300,317,396,400,404,407,425,438,440,441,447,449,453,459,460,461,463 | -- | Propositional Logic, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,215,301,375,389,405,409,430,450,451,456,462 | 36,37,181,317,404,407,425,449,459 | Propositional Logic, Modal Logic, Temporal Logic, ... |
 | 3 | 41,391,392,413,444,454 | 39,40,375,389,450 | Foundations, Bimodal Logic, Code Hygiene |
 | 4 | 393,412,414 | 41,215,300,301,391,444 | Code Hygiene |
 
@@ -85,11 +85,8 @@ next_project_number: 464
 
 ### Uncategorized
 
-457 [PLANNED] — Vet of task 299 (session sess_1782919557_8a4cc2) found 6 lake sha
-  └─ 462 [NOT STARTED] — Vet of task 299 flagged two maintainability items (both non-block
-458 [PLANNED] — Vet of task 455 (session sess_1782919557_8a4cc2) found 2 lake sha
 459 [PLANNED] — Vet of task 299 found 57 lines exceeding the 100-char `linter.sty
-  └─ 462 [NOT STARTED] — Vet of task 299 flagged two maintainability items (both non-block (see above)
+  └─ 462 [NOT STARTED] — Vet of task 299 flagged two maintainability items (both non-block
 460 [PLANNED] — Vet of task 455 found lint warnings in the repointed consumer Csl
 461 [NOT STARTED] — Vet found 6 `linter.unusedSectionVars` warnings; add `omit [...] 
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
@@ -142,7 +139,7 @@ next_project_number: 464
 ---
 
 ### 458. Fix lake shake import findings in shared Measure module + Classical consumer (task 455 vet)
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -151,7 +148,7 @@ next_project_number: 464
 ---
 
 ### 457. Fix lake shake import findings in modal K tableau files (task 299 vet)
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 

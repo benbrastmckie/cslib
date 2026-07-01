@@ -1,47 +1,57 @@
 {
-  "session_id": "sess_1782912232_20267a",
+  "session_id": "sess_1782921600_c97381",
   "task_numbers": [
-    404,
-    438
+    457,
+    458,
+    459,
+    460
   ],
   "waves": [
     [
-      404,
-      438
+      457,
+      458,
+      459,
+      460
     ]
   ],
-  "max_cycles": 10,
-  "cycle_count": 12,
-  "failed_tasks": [],
-  "completed_tasks": [],
+  "max_cycles": 20,
+  "cycle_count": 3,
+  "failed_tasks": [
+    {
+      "task": 317,
+      "status": "blocked",
+      "reason": "Phase 2 STOP-gate R1 — needs architectural decision"
+    }
+  ],
+  "completed_tasks": [
+    457,
+    458
+  ],
   "current_statuses": {
-    "404": "pr_ready",
-    "438": "pr_ready"
+    "457": "completed",
+    "458": "completed",
+    "459": "planned",
+    "460": "planned"
   },
   "task_dirs": {
-    "404": "specs/404_forall2_mathlib_cleanup_soundness",
-    "438": "specs/438_pr_task431_comment_cleanups"
+    "457": "specs/457_vet_299_shake_import_hygiene",
+    "458": "specs/458_vet_455_shake_import_hygiene",
+    "459": "specs/459_vet_299_longline_style",
+    "460": "specs/460_vet_455_classical_lint_warnings"
   },
   "research_agents": {
-    "404": "cslib-research-agent",
-    "438": "cslib-research-agent"
+    "457": "cslib-research-agent",
+    "458": "cslib-research-agent",
+    "459": "cslib-research-agent",
+    "460": "cslib-research-agent"
   },
   "implement_agents": {
-    "404": "cslib-implementation-agent",
-    "438": "cslib-implementation-agent"
+    "457": "cslib-implementation-agent",
+    "458": "cslib-implementation-agent",
+    "459": "cslib-implementation-agent",
+    "460": "cslib-implementation-agent"
   },
-  "dependency_graph": {
-    "404": [],
-    "438": []
-  },
-  "current_wave": 0,
-  "last_updated": "2026-07-01T14:54:59Z",
-  "partial_tasks": [
-    317
-  ],
-  "gated_tasks": [
-    430,
-    375
-  ],
-  "result_note": "317 PARTIAL (main green, sound dedup, B2 fuel=0 sorry 986 still open). 430,375 gated on 986. lean-lsp fixed."
+  "exit_status": "in_progress",
+  "exit_reason": "Wave 0 task 317 BLOCKED at foundation (Phase 2); dependent Wave 1 tasks 430,375 gated. Human architectural decision required.",
+  "notes": "317 blocked at Phase 2; dispatched hard research (routes a vs b) per user choice. 430/375 remain gated."
 }

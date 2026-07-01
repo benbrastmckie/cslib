@@ -1,7 +1,7 @@
 # Implementation Plan: Task #457
 
 - **Task**: 457 - Fix lake shake import findings in modal K tableau files (task 299 vet)
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Effort**: 0.75 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/457_vet_299_shake_import_hygiene/.orchestrator-handoff.json

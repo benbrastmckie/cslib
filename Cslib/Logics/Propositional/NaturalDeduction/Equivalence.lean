@@ -300,15 +300,6 @@ def hilbertToND
       (fun x hx => List.mem_toFinset.mpr (h_sub x (List.mem_toFinset.mp hx)))
       (hilbertToND d)
 
-/-- Helper for hilbertToND: axioms in `AxiomTheory Axioms` that are in and/or
-form yield ND derivations using the corresponding primitive ND constructors. -/
-private def hilbertAxiomToND
-    {Axioms : PL.Proposition Atom → Prop}
-    {Γ : Finset (PL.Proposition Atom)} {φ : PL.Proposition Atom}
-    (h_ax : Axioms φ) :
-    @Theory.Derivation Atom _ (AxiomTheory Axioms : Theory Atom) Γ φ :=
-  Theory.Derivation.ax (mem_axiomTheory.mpr h_ax)
-
 /-- Prop-level wrapper: if `Γ ⊢ φ` in the Hilbert system, then `φ` is derivable
 in ND under `AxiomTheory Axioms` with context `Γ.toFinset`. -/
 theorem hilbert_to_nd_deriv

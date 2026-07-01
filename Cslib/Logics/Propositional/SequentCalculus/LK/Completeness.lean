@@ -62,18 +62,6 @@ open Proposition LKSequent Theory Finset InferenceSystem
 
 variable {Atom : Type u} [DecidableEq Atom]
 
-/-! ## Membership Helpers
-
-Abbreviations for common Finset membership proofs used throughout the axiom constructions. -/
-
-theorem mem_insert_left {α : Type*} [DecidableEq α] {a : α} {s : Finset α} :
-    a ∈ insert a s :=
-  Finset.mem_insert_self a s
-
-theorem mem_insert_right {α : Type*} [DecidableEq α] {a b : α} {s : Finset α}
-    (h : a ∈ s) : a ∈ insert b s :=
-  Finset.mem_insert_of_mem h
-
 /-! ## LK Proofs of Axiom Schemata
 
 Each `PropositionalAxiom` is provable in LK from the empty antecedent.

@@ -445,44 +445,6 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
 
 /-! ## Hintikka Property of Open Branches -/
 
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Extending a branch preserves membership: if sf ∈ b then sf ∈ extendMany b newForms. -/
-private lemma mem_extendMany_of_mem (b : Branch (Proposition Atom) Unit)
-    (newForms : List (SignedFormula (Proposition Atom) Unit))
-    (sf : SignedFormula (Proposition Atom) Unit)
-    (hmem : sf ∈ b) : sf ∈ Branch.extendMany b newForms := by
-  simp only [Branch.extendMany, List.mem_append]
-  exact Or.inr hmem
-
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- The Hintikka rule condition for a branch b lifted to an extended branch b' = b ++ newForms.
-
-If every formula in `e` satisfies the Hintikka condition w.r.t. `b`, and `b ⊆ b'`,
-then every formula in `e` satisfies the Hintikka condition w.r.t. `b'`. -/
-private lemma hintikka_inv_mono (b b' : Branch (Proposition Atom) Unit)
-    (hsub : ∀ sf ∈ b, sf ∈ b')
-    (e : List (SignedFormula (Proposition Atom) Unit))
-    (hH : ∀ sf ∈ e, match classicalApplyOne sf with
-        | .linear out => ∀ sf' ∈ out, sf' ∈ b
-        | .branching brs => ∃ br ∈ brs, ∀ sf' ∈ br, sf' ∈ b
-        | .persistent out => ∀ sf' ∈ out, sf' ∈ b
-        | .notApplicable => True) :
-    ∀ sf ∈ e, match classicalApplyOne sf with
-        | .linear out => ∀ sf' ∈ out, sf' ∈ b'
-        | .branching brs => ∃ br ∈ brs, ∀ sf' ∈ br, sf' ∈ b'
-        | .persistent out => ∀ sf' ∈ out, sf' ∈ b'
-        | .notApplicable => True := by
-  intro sf hmem
-  have h := hH sf hmem
-  cases hca : classicalApplyOne sf with
-  | linear out => rw [hca] at h; intro sf' hmem'; exact hsub _ (h sf' hmem')
-  | branching brs =>
-    rw [hca] at h
-    obtain ⟨br, hbr_mem, hbr⟩ := h
-    exact ⟨br, hbr_mem, fun sf' hmem' => hsub _ (hbr sf' hmem')⟩
-  | persistent out => rw [hca] at h; intro sf' hmem'; exact hsub _ (h sf' hmem')
-  | notApplicable => trivial
-
 /-- Per-branch complexity measure: sum of formula complexities of formulas not yet expanded.
 A formula is "unexpanded" if it is on branch `b` but not in the expanded set `e`. -/
 private def classicalBranchComplexity

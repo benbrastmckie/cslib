@@ -67,76 +67,6 @@ def branchConsistent (v : BoolValuation Atom)
 def classicalBranchSatisfiable (b : Branch (Proposition Atom) Unit) : Prop :=
   ∃ v : BoolValuation Atom, branchConsistent v b
 
-/-! ## Helper simp lemmas for classicalApplyOne -/
-
-omit [DecidableEq Atom] [Hashable Atom] in
-private lemma classicalApplyOne_pos_atom (l : Unit) (x : Atom) :
-    classicalApplyOne (SignedFormula.pos (.atom x) l) = .notApplicable := rfl
-
-omit [DecidableEq Atom] [Hashable Atom] in
-private lemma classicalApplyOne_pos_bot (l : Unit) :
-    classicalApplyOne (SignedFormula.pos (Proposition.bot (Atom := Atom)) l) = .notApplicable := rfl
-
-omit [DecidableEq Atom] [Hashable Atom] in
-private lemma classicalApplyOne_pos_and (l : Unit) (a b : Proposition Atom) :
-    classicalApplyOne (SignedFormula.pos (.and a b) l) =
-    .linear [SignedFormula.pos a l, SignedFormula.pos b l] := rfl
-
-omit [DecidableEq Atom] [Hashable Atom] in
-private lemma classicalApplyOne_pos_or (l : Unit) (a b : Proposition Atom) :
-    classicalApplyOne (SignedFormula.pos (.or a b) l) =
-    .branching [[SignedFormula.pos a l], [SignedFormula.pos b l]] := rfl
-
-omit [DecidableEq Atom] [Hashable Atom] in
-private lemma classicalApplyOne_pos_imp (l : Unit) (a b : Proposition Atom) (h : b ≠ .bot) :
-    classicalApplyOne (SignedFormula.pos (.imp a b) l) =
-    .branching [[SignedFormula.neg a l], [SignedFormula.pos b l]] := by
-  cases b with
-  | bot => exact absurd rfl h
-  | atom x => rfl
-  | imp c d => rfl
-  | and c d => rfl
-  | or c d => rfl
-
-omit [DecidableEq Atom] [Hashable Atom] in
-private lemma classicalApplyOne_pos_neg (l : Unit) (a : Proposition Atom) :
-    classicalApplyOne (SignedFormula.pos (.imp a .bot) l) =
-    .linear [SignedFormula.neg a l] := rfl
-
-omit [DecidableEq Atom] [Hashable Atom] in
-private lemma classicalApplyOne_neg_atom (l : Unit) (x : Atom) :
-    classicalApplyOne (SignedFormula.neg (.atom x) l) = .notApplicable := rfl
-
-omit [DecidableEq Atom] [Hashable Atom] in
-private lemma classicalApplyOne_neg_bot (l : Unit) :
-    classicalApplyOne (SignedFormula.neg (Proposition.bot (Atom := Atom)) l) = .notApplicable := rfl
-
-omit [DecidableEq Atom] [Hashable Atom] in
-private lemma classicalApplyOne_neg_and (l : Unit) (a b : Proposition Atom) :
-    classicalApplyOne (SignedFormula.neg (.and a b) l) =
-    .branching [[SignedFormula.neg a l], [SignedFormula.neg b l]] := rfl
-
-omit [DecidableEq Atom] [Hashable Atom] in
-private lemma classicalApplyOne_neg_or (l : Unit) (a b : Proposition Atom) :
-    classicalApplyOne (SignedFormula.neg (.or a b) l) =
-    .linear [SignedFormula.neg a l, SignedFormula.neg b l] := rfl
-
-omit [DecidableEq Atom] [Hashable Atom] in
-private lemma classicalApplyOne_neg_imp (l : Unit) (a b : Proposition Atom) (h : b ≠ .bot) :
-    classicalApplyOne (SignedFormula.neg (.imp a b) l) =
-    .linear [SignedFormula.pos a l, SignedFormula.neg b l] := by
-  cases b with
-  | bot => exact absurd rfl h
-  | atom x => rfl
-  | imp c d => rfl
-  | and c d => rfl
-  | or c d => rfl
-
-omit [DecidableEq Atom] [Hashable Atom] in
-private lemma classicalApplyOne_neg_neg (l : Unit) (a : Proposition Atom) :
-    classicalApplyOne (SignedFormula.neg (.imp a .bot) l) =
-    .linear [SignedFormula.pos a l] := rfl
-
 /-! ## Key Lemmas -/
 
 omit [DecidableEq Atom] [Hashable Atom] in
@@ -480,16 +410,6 @@ lemma classically_closed_unsatisfiable (b : Branch (Proposition Atom) Unit)
     exact absurd htrue (Bool.eq_false_iff.mp hfalse)
 
 /-! ## Loop Invariant and Main Soundness Theorem -/
-
-omit [Hashable Atom] in
-/-- Helper: if a branch in the list is satisfiable, it is not classically closed. -/
-private lemma classicalBranchSatisfiable_not_closed
-    (b : Branch (Proposition Atom) Unit)
-    (hsat : classicalBranchSatisfiable b) :
-    isClassicallyClosed b = false := by
-  by_contra h
-  simp only [Bool.not_eq_false] at h
-  exact classically_closed_unsatisfiable b h hsat
 
 omit [Hashable Atom] in
 /-- Helper for extracting a satisfiable sub-branch from a classicalStepBranch step. -/

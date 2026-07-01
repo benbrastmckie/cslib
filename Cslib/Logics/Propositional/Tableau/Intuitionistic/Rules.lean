@@ -199,8 +199,8 @@ For `T`-signed and `F`-signed formulas, applies the appropriate rule:
 - `F(¬φ)` = `F(φ → ⊥)`: same as `F(φ → ψ)` with ψ = ⊥
 - `T(¬φ)` = `T(φ → ⊥)`: same as `T(φ → ψ)` with ψ = ⊥
 
-For intuitionistic tableau, ALL implications (including negation) use the implication rules.
-We use `propImpOrNegOf?` which treats negation as implication to ⊥. -/
+For intuitionistic tableau, ALL implications (including negation) use the implication rules,
+matching directly on `.imp` since `¬φ` is represented as `φ → ⊥`. -/
 def intApplyRule (sf : ISF Atom) (nextWorld : Nat) (b : IBranch Atom) :
     Option (List (ISF Atom) × Nat) :=
   let l := sf.label

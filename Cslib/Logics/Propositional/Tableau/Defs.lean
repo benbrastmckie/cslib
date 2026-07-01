@@ -75,14 +75,6 @@ def propNegOf? (φ : Proposition Atom) : Option (Proposition Atom) :=
   | .imp a .bot => some a
   | _ => none
 
-/-- Decompose `φ` as `φ₁ → φ₂` treating all implications uniformly, including `¬φ = φ → ⊥`.
-
-For intuitionistic tableau, we treat negation as implication to ⊥ uniformly. -/
-def propImpOrNegOf? (φ : Proposition Atom) : Option (Proposition Atom × Proposition Atom) :=
-  match φ with
-  | .imp a b => some (a, b)
-  | _ => none
-
 /-! ## Hashable Instance -/
 
 /-- A hash function for `Proposition Atom` using constructor-tag mixing.

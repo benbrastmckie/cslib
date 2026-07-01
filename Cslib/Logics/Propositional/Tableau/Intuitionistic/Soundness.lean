@@ -426,22 +426,6 @@ private lemma applyPersistenceFixpoint_sat
     · exact hsat
     · exact ih _ (applyAllTImpRules_sat val botForces v_uc bf_uc worldOf b edges hsat hmono)
 
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- A satisfiable branch cannot be closed. -/
-private lemma closurePred_false_of_sat
-    {World : Type*} [Preorder World]
-    (val : World → Atom → Prop) (botForces : World → Prop)
-    (worldOf : Nat → World)
-    (b : IBranch Atom)
-    (closurePred : IBranch Atom → Bool)
-    (closed_unsat : ∀ (wo : Nat → World) (b' : IBranch Atom),
-        closurePred b' = true → ¬ intBranchSatisfied val botForces wo b')
-    (hsat : intBranchSatisfied val botForces worldOf b) :
-    closurePred b = false := by
-  by_contra h
-  simp only [Bool.not_eq_false] at h
-  exact closed_unsat worldOf b h hsat
-
 /-- One-step lemma: if `child` is a direct child of `source` in `edges`, then
 `source` can access `child` according to `isAccessible`. -/
 private lemma isAccessible_one_step
@@ -499,34 +483,6 @@ private lemma not_parent_in_extended
   · exact hno_parent child h
   · simp only [Prod.mk.injEq] at h
     exact hne h.2.symm
-
-/-- `isAccessible.go` is monotone in fuel: if it returns true with less fuel,
-it also returns true with more fuel (for the same starting node). -/
-private lemma isAccessible_go_mono_fuel
-    (edges : IEdges) (target current : Nat) (fuel1 fuel2 : Nat)
-    (hle : fuel1 ≤ fuel2)
-    (h : isAccessible.go edges target current fuel1 = true) :
-    isAccessible.go edges target current fuel2 = true := by
-  have key : ∀ (f1 f2 curr : Nat),
-      f1 ≤ f2 → isAccessible.go edges target curr f1 = true →
-      isAccessible.go edges target curr f2 = true := by
-    intro f1; induction f1 with
-    | zero => simp [isAccessible.go]
-    | succ k ih =>
-      intro f2 curr hle' hany
-      simp only [isAccessible.go] at hany
-      cases f2 with
-      | zero => omega
-      | succ m =>
-        simp only [isAccessible.go]
-        rw [List.any_eq_true] at hany ⊢
-        obtain ⟨child, hmem, hchild⟩ := hany
-        refine ⟨child, hmem, ?_⟩
-        split_ifs with heq
-        · rfl
-        · simp only [heq, Bool.false_eq_true, ite_false] at hchild
-          exact ih m child (Nat.le_of_succ_le_succ hle') hchild
-  exact key _ _ _ hle h
 
 /-- `MonotoneEdges` extended to work with any fuel: if `isAccessible.go edges target source k`
 returns true and `worldOf` is monotone for the edges, then `worldOf source ≤ worldOf target`.

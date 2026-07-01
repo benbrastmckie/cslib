@@ -111,7 +111,7 @@ theorem conjImpBot_pointedBrouwerian_soundness
   match d with
   | .ax _ ψ h_ax => exact conjImpBot_pointedBrouwerian_axiom_sound h_ax H v
   | .assumption _ ψ h_mem => exact h_ctx ψ h_mem
-  | .modus_ponens _ ψ χ d₁ d₂ =>
+  | .modusPonens _ ψ χ d₁ d₂ =>
     have h1 := conjImpBot_pointedBrouwerian_soundness d₁ v h_ctx
     have h2 := conjImpBot_pointedBrouwerian_soundness d₂ v h_ctx
     simp only [PointedBrouwerianEvaluate_imp] at h1

@@ -63,7 +63,7 @@ pattern match on it for computable functions like `height`.
 The 4 constructors are:
 1. **ax**: Any axiom instance (satisfying `Axioms`) is derivable from any context.
 2. **assumption**: Any formula in the context is derivable.
-3. **modus_ponens**: From `Γ ⊢ φ → ψ` and `Γ ⊢ φ`, derive `Γ ⊢ ψ`.
+3. **modusPonens**: From `Γ ⊢ φ → ψ` and `Γ ⊢ φ`, derive `Γ ⊢ ψ`.
 4. **weakening**: From `Γ ⊢ φ` and `Γ ⊆ Δ`, derive `Δ ⊢ φ`. -/
 inductive DerivationTree (Axioms : PL.Proposition Atom → Prop) :
     List (PL.Proposition Atom) → PL.Proposition Atom → Type _ where
@@ -74,7 +74,7 @@ inductive DerivationTree (Axioms : PL.Proposition Atom → Prop) :
   | assumption (Γ : List (PL.Proposition Atom)) (φ : PL.Proposition Atom)
       (h : φ ∈ Γ) : DerivationTree Axioms Γ φ
   /-- Modus ponens: from `Γ ⊢ φ → ψ` and `Γ ⊢ φ`, derive `Γ ⊢ ψ`. -/
-  | modus_ponens (Γ : List (PL.Proposition Atom)) (φ ψ : PL.Proposition Atom)
+  | modusPonens (Γ : List (PL.Proposition Atom)) (φ ψ : PL.Proposition Atom)
       (d₁ : DerivationTree Axioms Γ (φ → ψ))
       (d₂ : DerivationTree Axioms Γ φ) : DerivationTree Axioms Γ ψ
   /-- Weakening: from `Γ ⊢ φ` and `Γ ⊆ Δ`, derive `Δ ⊢ φ`. -/
@@ -92,19 +92,19 @@ Used for well-founded recursion in the deduction theorem proof. -/
 def height : DerivationTree Axioms Γ φ → Nat
   | .ax _ _ _ => 0
   | .assumption _ _ _ => 0
-  | .modus_ponens _ _ _ d₁ d₂ => 1 + max d₁.height d₂.height
+  | .modusPonens _ _ _ d₁ d₂ => 1 + max d₁.height d₂.height
   | .weakening _ _ _ d _ => 1 + d.height
 
 /-! ## Height Properties -/
 
 theorem height_modus_ponens_left {Γ : List (PL.Proposition Atom)} {φ ψ : PL.Proposition Atom}
     (d₁ : DerivationTree Axioms Γ (φ → ψ)) (d₂ : DerivationTree Axioms Γ φ) :
-    d₁.height < (modus_ponens Γ φ ψ d₁ d₂).height := by
+    d₁.height < (modusPonens Γ φ ψ d₁ d₂).height := by
   simp [height]; omega
 
 theorem height_modus_ponens_right {Γ : List (PL.Proposition Atom)} {φ ψ : PL.Proposition Atom}
     (d₁ : DerivationTree Axioms Γ (φ → ψ)) (d₂ : DerivationTree Axioms Γ φ) :
-    d₂.height < (modus_ponens Γ φ ψ d₁ d₂).height := by
+    d₂.height < (modusPonens Γ φ ψ d₁ d₂).height := by
   simp [height]; omega
 
 theorem height_weakening {Γ Δ : List (PL.Proposition Atom)} {φ : PL.Proposition Atom}
@@ -134,7 +134,7 @@ theorem mp_deriv {Axioms : PL.Proposition Atom → Prop}
     {Γ : List (PL.Proposition Atom)} {φ ψ : PL.Proposition Atom}
     (h₁ : Deriv Axioms Γ (φ → ψ)) (h₂ : Deriv Axioms Γ φ) : Deriv Axioms Γ ψ := by
   obtain ⟨d₁⟩ := h₁; obtain ⟨d₂⟩ := h₂
-  exact ⟨.modus_ponens Γ φ ψ d₁ d₂⟩
+  exact ⟨.modusPonens Γ φ ψ d₁ d₂⟩
 
 theorem weakening_deriv {Axioms : PL.Proposition Atom → Prop}
     {Γ Δ : List (PL.Proposition Atom)} {φ : PL.Proposition Atom}

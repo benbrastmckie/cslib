@@ -88,7 +88,7 @@ def impE
     (d₁ : DerivationTree Axioms Γ (A → B))
     (d₂ : DerivationTree Axioms Γ A) :
     DerivationTree Axioms Γ B :=
-  DerivationTree.modus_ponens Γ A B d₁ d₂
+  DerivationTree.modusPonens Γ A B d₁ d₂
 
 /-- **Ex Falso Quodlibet** (⊥E): From `Γ ⊢ ⊥`, derive `Γ ⊢ A`.
 
@@ -101,7 +101,7 @@ def botE
     {A : PL.Proposition Atom}
     (d : DerivationTree Axioms Γ ⊥) :
     DerivationTree Axioms Γ A :=
-  DerivationTree.modus_ponens Γ ⊥ A
+  DerivationTree.modusPonens Γ ⊥ A
     (DerivationTree.weakening [] Γ _
       (DerivationTree.ax [] _ (h_EFQ A))
       (fun _ h => nomatch h))
@@ -151,7 +151,7 @@ noncomputable def hilbertCut
   have h_dt' := DerivationTree.weakening Δ (Γ ++ Δ) (A → B) h_dt
     (fun x hx => List.mem_append.mpr (Or.inr hx))
   -- MP: (Γ ++ Δ) ⊢ B
-  exact DerivationTree.modus_ponens (Γ ++ Δ) A B h_dt' h_d₁
+  exact DerivationTree.modusPonens (Γ ++ Δ) A B h_dt' h_d₁
 
 /-- **Weakening**: From `Γ ⊢ φ` and `Γ ⊆ Δ`, derive `Δ ⊢ φ`.
 
@@ -297,8 +297,8 @@ def hilbertSubstitution
     .ax (Γ'.map (·.subst f)) _ (h_subst h_ax f)
   | .assumption _ ψ h_mem =>
     .assumption _ _ (List.mem_map.mpr ⟨ψ, h_mem, rfl⟩)
-  | .modus_ponens _ _ _ d₁ d₂ =>
-    .modus_ponens _ _ _ (hilbertSubstitution h_subst d₁ f) (hilbertSubstitution h_subst d₂ f)
+  | .modusPonens _ _ _ d₁ d₂ =>
+    .modusPonens _ _ _ (hilbertSubstitution h_subst d₁ f) (hilbertSubstitution h_subst d₂ f)
   | .weakening _ _ _ d' h_sub =>
     .weakening _ _ _ (hilbertSubstitution h_subst d' f) (fun _ hx =>
       let ⟨y, hy_mem, hy_eq⟩ := List.mem_map.mp hx

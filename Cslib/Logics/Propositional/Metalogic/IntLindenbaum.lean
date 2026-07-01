@@ -73,14 +73,14 @@ noncomputable def intNegPhiImpPsi (φ ψ : PL.Proposition Atom) :
   let ik := DerivationTree.ax (Atom := Atom) []
     ((Proposition.bot.imp ψ).imp (φ.imp (Proposition.bot.imp ψ)))
     (.implyK (Proposition.bot.imp ψ) φ)
-  let step3 := DerivationTree.modus_ponens [] _ _ ik efq_ax
+  let step3 := DerivationTree.modusPonens [] _ _ ik efq_ax
   let is_ax := DerivationTree.ax (Atom := Atom) []
     ((φ.imp (Proposition.bot.imp ψ)).imp ((Proposition.neg φ).imp (φ.imp ψ)))
     (.implyS φ Proposition.bot ψ)
-  let step5 := DerivationTree.modus_ponens [] _ _ is_ax step3
+  let step5 := DerivationTree.modusPonens [] _ _ is_ax step3
   let step5w := DerivationTree.weakening [] [Proposition.neg φ] _ step5
     (fun _ h => nomatch h)
-  DerivationTree.modus_ponens [Proposition.neg φ] (Proposition.neg φ) (φ.imp ψ)
+  DerivationTree.modusPonens [Proposition.neg φ] (Proposition.neg φ) (φ.imp ψ)
     step5w
     (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))
 
@@ -240,7 +240,7 @@ theorem int_prime_exclusion {S : Set (PL.Proposition Atom)}
           .ax [] _ (.efq phi)
         let efq_w := DerivationTree.weakening [] Linc _ efq (fun _ h => nomatch h)
         obtain ⟨d_bot⟩ := hLinc_bot
-        let d_phi := DerivationTree.modus_ponens Linc _ _ efq_w d_bot
+        let d_phi := DerivationTree.modusPonens Linc _ _ efq_w d_bot
         exact ⟨Linc, hLinc_sub, ⟨d_phi⟩⟩)
       -- cut witness via int_deriv_imp_of_union
       (fun {U L a b} hL hd =>
@@ -267,8 +267,8 @@ private noncomputable def liftIntToCl {Γ : List (PL.Proposition Atom)} {φ : PL
   match d with
   | .ax Γ ψ h_ax => exact .ax Γ ψ h_ax.toPropAxiom
   | .assumption Γ ψ h_mem => exact .assumption Γ ψ h_mem
-  | .modus_ponens Γ ψ χ d₁ d₂ =>
-    exact .modus_ponens Γ ψ χ (liftIntToCl d₁) (liftIntToCl d₂)
+  | .modusPonens Γ ψ χ d₁ d₂ =>
+    exact .modusPonens Γ ψ χ (liftIntToCl d₁) (liftIntToCl d₂)
   | .weakening Γ' Δ ψ d' h_sub =>
     exact .weakening Γ' Δ ψ (liftIntToCl d') h_sub
 

@@ -282,7 +282,7 @@ This direction is purely structural (no axiom parameters needed).
 Each constructor maps to its ND counterpart:
 - `ax`: axiom schema instance -> ND axiom rule
 - `assumption`: context membership -> ND assumption (via `List.mem_toFinset`)
-- `modus_ponens`: -> ND implication elimination
+- `modusPonens`: -> ND implication elimination
 - `weakening`: -> ND context weakening (via `Finset` subset from `List` subset) -/
 def hilbertToND
     {Axioms : PL.Proposition Atom → Prop}
@@ -293,7 +293,7 @@ def hilbertToND
     Theory.Derivation.ax (mem_axiomTheory.mpr h_ax)
   | .assumption _ _ h_mem =>
     Theory.Derivation.ass (List.mem_toFinset.mpr h_mem)
-  | .modus_ponens _ _ _ d₁ d₂ =>
+  | .modusPonens _ _ _ d₁ d₂ =>
     Theory.Derivation.impE (hilbertToND d₁) (hilbertToND d₂)
   | .weakening _ _ _ d h_sub =>
     Theory.Derivation.weakCtx
@@ -365,7 +365,7 @@ noncomputable def ndToHilbert
       (fun x hx => finset_insert_toList_mem_cons B G hx)
     exact hilbertOrE inst.h_K inst.h_S inst.h_orE ihd ihA' ihB'
   | .impE d₁ d₂ =>
-    .modus_ponens Γ.toList _ φ
+    .modusPonens Γ.toList _ φ
       (ndToHilbert d₁)
       (ndToHilbert d₂)
   | @Theory.Derivation.impI _ _ _ A B Γ' d => by
@@ -382,7 +382,7 @@ noncomputable def ndToHilbert
     have ih := ndToHilbert d
     have hinst : Theory.IsIntuitionistic (AxiomTheory Axioms) := inferInstance
     have hax := mem_axiomTheory.mp (hinst.efq φ)
-    exact .modus_ponens Γ.toList ⊥ φ (.ax Γ.toList _ hax) ih
+    exact .modusPonens Γ.toList ⊥ φ (.ax Γ.toList _ hax) ih
 
 /-- Prop-level wrapper: if `φ` is derivable in ND under `AxiomTheory Axioms` with
 context `Γ`, then `Γ.toList ⊢ φ` in the Hilbert system. -/

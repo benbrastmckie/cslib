@@ -101,7 +101,7 @@ theorem conjImpBotMin_brouwerianBot_soundness
   match d with
   | .ax _ ψ h_ax => exact conjImpBotMin_brouwerianBot_axiom_sound h_ax H v bot_val
   | .assumption _ ψ h_mem => exact h_ctx ψ h_mem
-  | .modus_ponens _ ψ χ d₁ d₂ =>
+  | .modusPonens _ ψ χ d₁ d₂ =>
     have h1 := conjImpBotMin_brouwerianBot_soundness d₁ v bot_val h_ctx
     have h2 := conjImpBotMin_brouwerianBot_soundness d₂ v bot_val h_ctx
     simp only [BrouwerianBotEvaluate_imp] at h1

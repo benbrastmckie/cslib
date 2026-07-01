@@ -129,8 +129,8 @@ theorem int_truth_lemma
         | inr h => exact h ▸ h_psi_S
       · show (propDerivationSystem IntPropAxiom).Deriv _ _
         unfold propDerivationSystem Deriv
-        exact ⟨.modus_ponens _ _ _
-          (.modus_ponens _ _ _
+        exact ⟨.modusPonens _ _ _
+          (.modusPonens _ _ _
             (.weakening [] _ _ (.ax [] _ (.andI φ ψ)) (fun _ h => nomatch h))
             (.assumption _ _ (by simp [List.mem_cons])))
           (.assumption _ _ (by simp [List.mem_cons]))⟩
@@ -144,7 +144,7 @@ theorem int_truth_lemma
           exact hx ▸ h_mem
         · show (propDerivationSystem IntPropAxiom).Deriv _ _
           unfold propDerivationSystem Deriv
-          exact ⟨.modus_ponens _ _ _
+          exact ⟨.modusPonens _ _ _
             (.weakening [] _ _ (.ax [] _ (.andE1 φ ψ)) (fun _ h => nomatch h))
             (.assumption _ _ (by simp [List.mem_cons]))⟩
       · apply (int_truth_lemma S ψ).mpr
@@ -154,7 +154,7 @@ theorem int_truth_lemma
           exact hx ▸ h_mem
         · show (propDerivationSystem IntPropAxiom).Deriv _ _
           unfold propDerivationSystem Deriv
-          exact ⟨.modus_ponens _ _ _
+          exact ⟨.modusPonens _ _ _
             (.weakening [] _ _ (.ax [] _ (.andE2 φ ψ)) (fun _ h => nomatch h))
             (.assumption _ _ (by simp [List.mem_cons]))⟩
   | .or φ ψ => by
@@ -169,7 +169,7 @@ theorem int_truth_lemma
           exact hx ▸ h_phi_S
         · show (propDerivationSystem IntPropAxiom).Deriv _ _
           unfold propDerivationSystem Deriv
-          exact ⟨.modus_ponens _ _ _
+          exact ⟨.modusPonens _ _ _
             (.weakening [] _ _ (.ax [] _ (.orI1 φ ψ)) (fun _ h => nomatch h))
             (.assumption _ _ (by simp [List.mem_cons]))⟩
       · have h_psi_S := (int_truth_lemma S ψ).mp hψ
@@ -179,7 +179,7 @@ theorem int_truth_lemma
           exact hx ▸ h_psi_S
         · show (propDerivationSystem IntPropAxiom).Deriv _ _
           unfold propDerivationSystem Deriv
-          exact ⟨.modus_ponens _ _ _
+          exact ⟨.modusPonens _ _ _
             (.weakening [] _ _ (.ax [] _ (.orI2 φ ψ)) (fun _ h => nomatch h))
             (.assumption _ _ (by simp [List.mem_cons]))⟩
     · -- Backward: (φ ∨ ψ) ∈ S.val → IForces S (φ ∨ ψ)
@@ -245,7 +245,7 @@ theorem SetDerivable_efq_int {Γ : Set (PL.Proposition Atom)} {φ : PL.Propositi
   -- Build L ⊢ φ using EFQ: ⊢ ⊥ → φ, then MP
   let efq : DerivationTree IntPropAxiom (Atom := Atom) L (Proposition.bot.imp φ) :=
     .weakening [] L _ (.ax [] _ (.efq φ)) (fun _ h => nomatch h)
-  exact ⟨L, hL_sub, ⟨.modus_ponens L (Proposition.bot) φ efq d_bot⟩⟩
+  exact ⟨L, hL_sub, ⟨.modusPonens L (Proposition.bot) φ efq d_bot⟩⟩
 
 /-! ## Strong Completeness -/
 

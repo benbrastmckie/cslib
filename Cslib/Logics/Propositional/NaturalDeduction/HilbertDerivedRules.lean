@@ -105,8 +105,8 @@ def hilbertIffI
     (d₂ : DerivationTree Axioms Γ (B → A)) :
     DerivationTree Axioms Γ (A ↔ B) :=
   -- Use andI axiom: (A → B) → ((B → A) → (A → B) ∧ (B → A))
-  DerivationTree.modus_ponens Γ _ _
-    (DerivationTree.modus_ponens Γ _ _
+  DerivationTree.modusPonens Γ _ _
+    (DerivationTree.modusPonens Γ _ _
       (DerivationTree.ax Γ _ (h_andI (A.imp B) (B.imp A)))
       d₁)
     d₂
@@ -153,8 +153,8 @@ def hilbertAndI
     (d₁ : DerivationTree Axioms Γ A)
     (d₂ : DerivationTree Axioms Γ B) :
     DerivationTree Axioms Γ (A ∧ B) :=
-  DerivationTree.modus_ponens Γ _ _
-    (DerivationTree.modus_ponens Γ _ _
+  DerivationTree.modusPonens Γ _ _
+    (DerivationTree.modusPonens Γ _ _
       (DerivationTree.ax Γ _ (h_andI A B))
       d₁)
     d₂
@@ -170,7 +170,7 @@ def hilbertAndE1
     {A B : PL.Proposition Atom}
     (d : DerivationTree Axioms Γ (A ∧ B)) :
     DerivationTree Axioms Γ A :=
-  DerivationTree.modus_ponens Γ _ _
+  DerivationTree.modusPonens Γ _ _
     (DerivationTree.ax Γ _ (h_andE1 A B))
     d
 
@@ -185,7 +185,7 @@ def hilbertAndE2
     {A B : PL.Proposition Atom}
     (d : DerivationTree Axioms Γ (A ∧ B)) :
     DerivationTree Axioms Γ B :=
-  DerivationTree.modus_ponens Γ _ _
+  DerivationTree.modusPonens Γ _ _
     (DerivationTree.ax Γ _ (h_andE2 A B))
     d
 
@@ -202,7 +202,7 @@ def hilbertOrI1
     {A B : PL.Proposition Atom}
     (d : DerivationTree Axioms Γ A) :
     DerivationTree Axioms Γ (A ∨ B) :=
-  DerivationTree.modus_ponens Γ _ _
+  DerivationTree.modusPonens Γ _ _
     (DerivationTree.ax Γ _ (h_orI1 A B))
     d
 
@@ -217,7 +217,7 @@ def hilbertOrI2
     {A B : PL.Proposition Atom}
     (d : DerivationTree Axioms Γ B) :
     DerivationTree Axioms Γ (A ∨ B) :=
-  DerivationTree.modus_ponens Γ _ _
+  DerivationTree.modusPonens Γ _ _
     (DerivationTree.ax Γ _ (h_orI2 A B))
     d
 
@@ -245,11 +245,11 @@ noncomputable def hilbertOrE
   have hBC : DerivationTree Axioms Γ (B → C) := impI h_K h_S dB
   -- Apply OrE axiom: (A → C) → ((B → C) → ((A ∨ B) → C))
   -- Three MP: get (A ∨ B) → C, then apply to d
-  have h1 := DerivationTree.modus_ponens Γ _ _
+  have h1 := DerivationTree.modusPonens Γ _ _
     (DerivationTree.ax Γ _ (h_orE A B C))
     hAC
-  have h2 := DerivationTree.modus_ponens Γ _ _ h1 hBC
-  exact DerivationTree.modus_ponens Γ _ _ h2 d
+  have h2 := DerivationTree.modusPonens Γ _ _ h1 hBC
+  exact DerivationTree.modusPonens Γ _ _ h2 d
 
 /-! ## Classical Layer (K, S, EFQ, Peirce) -/
 
@@ -279,7 +279,7 @@ def hilbertDne
   -- EFQ(A): bot -> A
   have efq := DerivationTree.ax Γ _ (h_EFQ A)
   -- ImplyK: (bot -> A) -> ((A -> bot) -> (bot -> A))
-  have k_efq := DerivationTree.modus_ponens Γ _ _
+  have k_efq := DerivationTree.modusPonens Γ _ _
     (DerivationTree.ax Γ _
       (h_K (Proposition.bot.imp A)
         (A.imp Proposition.bot)))
@@ -288,11 +288,11 @@ def hilbertDne
   have s_ax := DerivationTree.ax Γ _
     (h_S (A.imp Proposition.bot) Proposition.bot A)
   -- Apply S to k_efq: ((A -> bot) -> bot) -> ((A -> bot) -> A)
-  have composed := DerivationTree.modus_ponens Γ _ _ s_ax k_efq
+  have composed := DerivationTree.modusPonens Γ _ _ s_ax k_efq
   -- Apply to d: (A -> bot) -> A
-  have imp_peirce := DerivationTree.modus_ponens Γ _ _ composed d
+  have imp_peirce := DerivationTree.modusPonens Γ _ _ composed d
   -- Apply Peirce: A
-  exact DerivationTree.modus_ponens Γ _ _ peirce imp_peirce
+  exact DerivationTree.modusPonens Γ _ _ peirce imp_peirce
 
 /-! ### Biconditional Elimination (Classical) -/
 

@@ -103,7 +103,7 @@ theorem min_soundness
     exact min_axiom_sound h_ax World val bot_forces v_uc bf_uc w
   | .assumption _ ψ h_mem =>
     exact h_ctx ψ h_mem
-  | .modus_ponens _ ψ χ d₁ d₂ =>
+  | .modusPonens _ ψ χ d₁ d₂ =>
     exact min_soundness d₁ val bot_forces v_uc bf_uc w h_ctx w (le_refl w)
       (min_soundness d₂ val bot_forces v_uc bf_uc w h_ctx)
   | .weakening Γ' Δ ψ d' h_sub =>

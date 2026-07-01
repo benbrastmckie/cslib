@@ -146,7 +146,7 @@ private theorem brouwerianBot_soundness_tree
   match d with
   | .ax _ ψ h_ax => exact h_ax_sound ψ h_ax
   | .assumption _ ψ h_mem => exact h_ctx ψ h_mem
-  | .modus_ponens _ ψ χ d₁ d₂ =>
+  | .modusPonens _ ψ χ d₁ d₂ =>
     have h1 := brouwerianBot_soundness_tree h_ax_sound d₁ h_ctx
     have h2 := brouwerianBot_soundness_tree h_ax_sound d₂ h_ctx
     simp only [BrouwerianBotEvaluate_imp] at h1

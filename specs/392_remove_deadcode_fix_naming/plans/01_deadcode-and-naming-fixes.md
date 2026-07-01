@@ -194,23 +194,23 @@ with its own verification gate.
 
 ---
 
-### Phase 4: `modus_ponens` constructor rename (large, isolated) [NOT STARTED]
+### Phase 4: `modus_ponens` constructor rename (large, isolated) [COMPLETED]
 
 **Goal**: Rename the Propositional `DerivationTree.modus_ponens` constructor to `modusPonens`
 across all 97 sites in 26 files, without touching identically-named constructors in other logics.
 
 **Tasks**:
-- [ ] Rename the constructor at `Cslib/Logics/Propositional/ProofSystem/Derivation.lean:~77` (declaration).
-- [ ] Edit the remaining 96 sites PER FILE (not repo-wide sed), covering all match patterns: `| modus_ponens`, `| .modus_ponens`, `| @modus_ponens` (GenericMCSBridge.lean:~133), `.modus_ponens`, `DerivationTree.modus_ponens`, `PL.DerivationTree.modus_ponens`, unqualified `modus_ponens Γ φ ψ`. Full per-file site list (report Appendix A):
+- [x] Rename the constructor at `Cslib/Logics/Propositional/ProofSystem/Derivation.lean:~77` (declaration).
+- [x] Edit the remaining 96 sites PER FILE (not repo-wide sed), covering all match patterns: `| modus_ponens`, `| .modus_ponens`, `| @modus_ponens` (GenericMCSBridge.lean:~133), `.modus_ponens`, `DerivationTree.modus_ponens`, `PL.DerivationTree.modus_ponens`, unqualified `modus_ponens Γ φ ψ`. *(Applied per-file via `sed -E 's/\bmodus_ponens\b/modusPonens/g'` on each of the 26 files individually -- not a repo-wide sed; word-boundary regex verified to skip `height_modus_ponens_left/right`.)*
   - ProofSystem/Derivation.lean (decl + L95,102,107,137; docstring L66) — do NOT rename helper lemmas `height_modus_ponens_left`/`right` (L100/105).
   - ProofSystem/Instances.lean (1), ProofSystem/IntMinInstances.lean (2), ProofSystem/FragmentInstances.lean (3).
   - Metalogic/Soundness.lean (1), IntSoundness.lean (1), MinSoundness.lean (1), StrongCompleteness.lean (18), IntStrongCompleteness.lean (7), MinStrongCompleteness.lean (6), IntLindenbaum.lean (6), MinLindenbaum.lean (2), GenericLindenbaum.lean (4), GenericMCSBridge.lean (2 code + comments).
   - Semantics/Algebra/Soundness.lean (4), LiftViaMorphism.lean (5), BrouwerianCompleteness.lean (1), BrouwerianCompletenessGeneric.lean (1), HilbertAlgCompleteness.lean (1), PointedBrouwerianCompleteness.lean (1), MplPointedConservative.lean (1), ConjImpConservative.lean (2).
   - Semantics/SemanticConsequence.lean (4).
   - NaturalDeduction/Equivalence.lean (4 code + comment), FromHilbert.lean (5), HilbertDerivedRules.lean (15).
-- [ ] Do NOT rename `height_modus_ponens_left`/`height_modus_ponens_right` (out of scope; remain snake_case — flag to user as follow-up).
-- [ ] After edits, run `git diff --name-only` and confirm NO file under Bimodal/Temporal/Modal/ExtDerivation was touched.
-- [ ] Re-grep `git grep -n "\bmodus_ponens\b" Cslib/Logics/Propositional/`; only the intended `height_modus_ponens_*` helper names should remain.
+- [x] Do NOT rename `height_modus_ponens_left`/`height_modus_ponens_right` (out of scope; remain snake_case — flag to user as follow-up). *(Confirmed unchanged: 2 hits remain repo-wide.)*
+- [x] After edits, run `git diff --name-only` and confirm NO file under Bimodal/Temporal/Modal/ExtDerivation was touched. *(Confirmed: `git diff --name-only -- Cslib/` returns exactly the 26 intended Propositional files.)*
+- [x] Re-grep `git grep -n "\bmodus_ponens\b" Cslib/Logics/Propositional/`; only the intended `height_modus_ponens_*` helper names should remain. *(Confirmed: 0 bare `modus_ponens` hits remain; 106 `modusPonens` sites renamed.)*
 
 **Timing**: ~2 hours
 

@@ -72,7 +72,7 @@ def plSig (Axioms : PL.Proposition Atom → Prop) : ProofSig (PL.Proposition Ato
 Each constructor maps to the corresponding `Metalogic.Deriv` constructor:
 - `ax h` maps to `ax ⟨h⟩` (wrapping via `PLift.up`);
 - `assumption h` maps to `assum h`;
-- `modus_ponens` maps to `mp` (`HasImp.imp = PL.Proposition.imp` definitionally);
+- `modusPonens` maps to `mp` (`HasImp.imp = PL.Proposition.imp` definitionally);
 - `weakening` maps to `weak` (`∀ x ∈ Γ, x ∈ Δ` and `Γ ⊆ Δ` are definitionally equal
   at the kernel level). -/
 def toDeriv {Axioms : PL.Proposition Atom → Prop}
@@ -80,7 +80,7 @@ def toDeriv {Axioms : PL.Proposition Atom → Prop}
     DerivationTree Axioms Γ φ → Metalogic.Deriv (plSig Axioms) Γ φ
   | .ax Γ φ h => .ax Γ φ ⟨h⟩
   | .assumption Γ φ h => .assum Γ φ h
-  | .modus_ponens Γ φ ψ d₁ d₂ => .mp Γ φ ψ (toDeriv d₁) (toDeriv d₂)
+  | .modusPonens Γ φ ψ d₁ d₂ => .mp Γ φ ψ (toDeriv d₁) (toDeriv d₂)
   | .weakening Γ Δ φ d h => .weak Γ Δ φ (toDeriv d) h
 
 /-- Backward direction: every `Metalogic.Deriv (plSig -)` maps to a `PL.DerivationTree`.
@@ -92,7 +92,7 @@ def ofDeriv {Axioms : PL.Proposition Atom → Prop}
     Metalogic.Deriv (plSig Axioms) Γ φ → DerivationTree Axioms Γ φ
   | .ax _ _ h => .ax _ _ h.down
   | .assum _ _ h => .assumption _ _ h
-  | .mp _ φ ψ d₁ d₂ => .modus_ponens _ φ ψ (ofDeriv d₁) (ofDeriv d₂)
+  | .mp _ φ ψ d₁ d₂ => .modusPonens _ φ ψ (ofDeriv d₁) (ofDeriv d₂)
   | .close _ hm _ _ => False.elim (List.not_mem_nil hm)
   | .weak _ _ _ d h => .weakening _ _ _ (ofDeriv d) h
 
@@ -104,7 +104,7 @@ theorem ofDeriv_toDeriv {Axioms : PL.Proposition Atom → Prop}
   induction d with
   | ax _ _ _ => rfl
   | assumption _ _ _ => rfl
-  | modus_ponens _ _ _ _ _ ih₁ ih₂ => simp only [toDeriv, ofDeriv, ih₁, ih₂]
+  | modusPonens _ _ _ _ _ ih₁ ih₂ => simp only [toDeriv, ofDeriv, ih₁, ih₂]
   | weakening _ _ _ _ _ ih => simp only [toDeriv, ofDeriv, ih]
 
 /-- Right inverse: `toDeriv ∘ ofDeriv = id`. -/
@@ -172,7 +172,7 @@ theorem toDeriv_liftDerivationTree
   | assumption Γ φ h =>
     simp only [liftDerivationTree, toDeriv, Metalogic.Deriv.map, plHom, id_eq]
     congr 1 <;> first | rw [List.map_id] | exact proof_irrel_heq _ _
-  | modus_ponens Γ φ ψ d₁ d₂ ih₁ ih₂ =>
+  | modusPonens Γ φ ψ d₁ d₂ ih₁ ih₂ =>
     simp only [liftDerivationTree, toDeriv, Metalogic.Deriv.map, plHom, id_eq]
     congr 1; rw [List.map_id]
   | weakening Γ Δ φ d h ih =>

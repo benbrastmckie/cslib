@@ -178,7 +178,7 @@ theorem setDeriv_deduction {Axioms : PL.Proposition Atom → Prop}
     -- Apply to d_mem: ctx ⊢ (A → A) → (A → B)
     open Cslib.Logic.Helpers in
     have d_step1 : DerivationTree Axioms ctx ((A.imp A).imp (A.imp B)) :=
-      DerivationTree.modus_ponens ctx _ _ d_is d_mem
+      DerivationTree.modusPonens ctx _ _ d_is d_mem
     -- Build A → A from K and S: ⊢ A → A
     have d_k1 : DerivationTree Axioms [] (A.imp ((A.imp A).imp A)) :=
       .ax [] _ (inst.h_K A (A.imp A))
@@ -186,18 +186,18 @@ theorem setDeriv_deduction {Axioms : PL.Proposition Atom → Prop}
         ((A.imp ((A.imp A).imp A)).imp ((A.imp (A.imp A)).imp (A.imp A))) :=
       .ax [] _ (inst.h_S A (A.imp A) A)
     have d_mp1 : DerivationTree Axioms [] ((A.imp (A.imp A)).imp (A.imp A)) :=
-      DerivationTree.modus_ponens [] _ _ d_s1 d_k1
+      DerivationTree.modusPonens [] _ _ d_s1 d_k1
     have d_k2 : DerivationTree Axioms [] (A.imp (A.imp A)) :=
       .ax [] _ (inst.h_K A A)
     have d_id : DerivationTree Axioms [] (A.imp A) :=
-      DerivationTree.modus_ponens [] _ _ d_mp1 d_k2
+      DerivationTree.modusPonens [] _ _ d_mp1 d_k2
     open Cslib.Logic.Helpers in
     have d_id_w : DerivationTree Axioms ctx (A.imp A) :=
       DerivationTree.weakening [] ctx _ d_id (fun _ h => nomatch h)
     -- Apply S-result to identity: ctx ⊢ A → B
     open Cslib.Logic.Helpers in
     have d_final : DerivationTree Axioms ctx (A.imp B) :=
-      DerivationTree.modus_ponens ctx _ _ d_step1 d_id_w
+      DerivationTree.modusPonens ctx _ _ d_step1 d_id_w
     exact ⟨ctx, h_rem_sub, ⟨d_final⟩⟩
   · -- A ∉ L: every element of L already belongs to Γ
     have hL_sub' : ∀ x ∈ L, x ∈ Γ := by

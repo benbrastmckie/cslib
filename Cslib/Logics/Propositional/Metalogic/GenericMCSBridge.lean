@@ -41,7 +41,7 @@ at `S := ClosedHilbert (PL.DerivationTree Axioms)`, for any axiom predicate sati
   `= Nonempty (PL.DerivationTree Axioms [] (listImp Γ φ))`
 
 **Forward** (tree → algebraic): structural induction on `DerivationTree`. Propositional
-logic has 4 constructors (ax, assumption, modus_ponens, weakening); there is no
+logic has 4 constructors (ax, assumption, modusPonens, weakening); there is no
 `necessitation` arm.
 
 **Backward** (algebraic → tree): extract `d₀ : [] ⊢ listImp Γ φ`, weaken to
@@ -88,7 +88,7 @@ scoping: `treeAlgDS` requires this instance in scope). -/
 instance [h : HasMinimalAxioms Axioms] :
     HilbertTree (F := PL.Proposition Atom) (PL.DerivationTree Axioms) where
   assumption {Γ a} hmem := .assumption Γ a hmem
-  mp {Γ φ ψ} d₁ d₂ := .modus_ponens Γ φ ψ d₁ d₂
+  mp {Γ φ ψ} d₁ d₂ := .modusPonens Γ φ ψ d₁ d₂
   weakening {Γ Δ φ} hsub d := .weakening Γ Δ φ d hsub
   axiomK φ ψ := .ax [] _ (h.hasImplyK φ ψ)
   axiomS φ ψ χ := .ax [] _ (h.hasImplyS φ ψ χ)
@@ -112,7 +112,7 @@ produce `(propAlgDS Axioms).Deriv Γ φ` by structural induction on the derivati
 - **ax**: the axiom `⊢ ψ` in `ClosedHilbert (PL.DerivationTree Axioms)` lifts to `Deriv Γ ψ`
   via K-weakening.
 - **assumption**: reflected directly.
-- **modus_ponens**: contextual modus ponens.
+- **modusPonens**: contextual modus ponens.
 - **weakening**: monotone in the context. -/
 lemma derivTreeToList [HasMinimalAxioms Axioms]
     {Γ : List (PL.Proposition Atom)} {φ : PL.Proposition Atom}
@@ -130,7 +130,7 @@ lemma derivTreeToList [HasMinimalAxioms Axioms]
   | assumption Γ ψ h_mem =>
     simp only [propAlgDS, treeAlgDS, algebraicDerivationSystem]
     exact list_deriv_reflection h_mem
-  | @modus_ponens Γ χ ψ _d₁ _d₂ ih₁ ih₂ =>
+  | @modusPonens Γ χ ψ _d₁ _d₂ ih₁ ih₂ =>
     simp only [propAlgDS, treeAlgDS, algebraicDerivationSystem] at *
     exact list_deriv_mp ih₁ ih₂
   | @weakening Γ' Γ ψ _d h_sub ih =>

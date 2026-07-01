@@ -119,8 +119,8 @@ theorem prop_truth_lemma_and
         | inr h => exact h ▸ h_psi_S)
     show (propDerivationSystem PropositionalAxiom).Deriv _ _
     unfold propDerivationSystem Deriv
-    exact ⟨.modus_ponens _ _ _
-      (.modus_ponens _ _ _
+    exact ⟨.modusPonens _ _ _
+      (.modusPonens _ _ _
         (.weakening [] _ _
           (.ax [] _ (.andI φ ψ))
           (fun _ h => nomatch h))
@@ -138,7 +138,7 @@ theorem prop_truth_lemma_and
           exact hx ▸ h_mem)
       show (propDerivationSystem PropositionalAxiom).Deriv _ _
       unfold propDerivationSystem Deriv
-      exact ⟨.modus_ponens _ _ _
+      exact ⟨.modusPonens _ _ _
         (.weakening [] _ _
           (.ax [] _ (.andE1 φ ψ))
           (fun _ h => nomatch h))
@@ -152,7 +152,7 @@ theorem prop_truth_lemma_and
           exact hx ▸ h_mem)
       show (propDerivationSystem PropositionalAxiom).Deriv _ _
       unfold propDerivationSystem Deriv
-      exact ⟨.modus_ponens _ _ _
+      exact ⟨.modusPonens _ _ _
         (.weakening [] _ _
           (.ax [] _ (.andE2 φ ψ))
           (fun _ h => nomatch h))
@@ -180,7 +180,7 @@ theorem prop_truth_lemma_or
           exact hx ▸ h_phi_S)
       show (propDerivationSystem PropositionalAxiom).Deriv _ _
       unfold propDerivationSystem Deriv
-      exact ⟨.modus_ponens _ _ _
+      exact ⟨.modusPonens _ _ _
         (.weakening [] _ _
           (.ax [] _ (.orI1 φ ψ))
           (fun _ h => nomatch h))
@@ -194,7 +194,7 @@ theorem prop_truth_lemma_or
           exact hx ▸ h_psi_S)
       show (propDerivationSystem PropositionalAxiom).Deriv _ _
       unfold propDerivationSystem Deriv
-      exact ⟨.modus_ponens _ _ _
+      exact ⟨.modusPonens _ _ _
         (.weakening [] _ _
           (.ax [] _ (.orI2 φ ψ))
           (fun _ h => nomatch h))
@@ -226,9 +226,9 @@ theorem prop_truth_lemma_or
         show (propDerivationSystem PropositionalAxiom).Deriv _ _
         unfold propDerivationSystem Deriv
         -- [¬φ, ¬ψ, φ ∨ ψ] ⊢ ⊥ via orE axiom + three modus ponens
-        exact ⟨.modus_ponens _ _ _
-          (.modus_ponens _ _ _
-            (.modus_ponens _ _ _
+        exact ⟨.modusPonens _ _ _
+          (.modusPonens _ _ _
+            (.modusPonens _ _ _
               (.weakening [] _ _
                 (.ax [] _ (.orE φ ψ .bot))
                 (fun _ h => nomatch h))
@@ -270,7 +270,7 @@ theorem prop_truth_lemma_imp
             DerivationTree PropositionalAxiom
             [φ.imp ψ, (φ.imp ψ).imp .bot]
             Proposition.bot :=
-          .modus_ponens _ (φ.imp ψ) .bot
+          .modusPonens _ (φ.imp ψ) .bot
             (.assumption _ _
               (by simp [List.mem_cons]))
             (.assumption _ _
@@ -279,7 +279,7 @@ theorem prop_truth_lemma_imp
         have d_efq' :
             DerivationTree PropositionalAxiom
             [φ.imp ψ, (φ.imp ψ).imp .bot] φ :=
-          .modus_ponens _ .bot φ
+          .modusPonens _ .bot φ
             (.weakening [] _ _
               (.ax [] _ (.efq φ))
               (fun _ h => nomatch h))
@@ -298,7 +298,7 @@ theorem prop_truth_lemma_imp
             (.ax [] _ (.peirce φ ψ))
             (fun _ h => nomatch h)
         -- MP: [(φ→ψ)→⊥] ⊢ φ
-        exact ⟨.modus_ponens _ _ _
+        exact ⟨.modusPonens _ _ _
           d_peirce' d_dt⟩
       -- By IH backward, Evaluate v φ
       have h_sat_phi := ih_φ.mpr h_phi_S
@@ -322,7 +322,7 @@ theorem prop_truth_lemma_imp
             DerivationTree PropositionalAxiom
             [ψ, (φ.imp ψ).imp .bot]
             (φ.imp ψ) :=
-          .modus_ponens _ ψ (φ.imp ψ)
+          .modusPonens _ ψ (φ.imp ψ)
             (.weakening [] _ _
               (.ax [] _ (.implyK ψ φ))
               (fun _ h => nomatch h))
@@ -333,7 +333,7 @@ theorem prop_truth_lemma_imp
             DerivationTree PropositionalAxiom
             [ψ, (φ.imp ψ).imp .bot]
             Proposition.bot :=
-          .modus_ponens _ (φ.imp ψ) .bot
+          .modusPonens _ (φ.imp ψ) .bot
             (.assumption _ _
               (by simp [List.mem_cons]))
             d_imp
@@ -408,7 +408,7 @@ private noncomputable def dne_from_neg_neg
     .weakening [] ctx _ (.ax [] _ (.implyK (Proposition.bot.imp φ) (¬φ)))
       (fun _ h => nomatch h)
   -- Combine: ctx ⊢ ¬φ → (⊥ → φ)
-  let d_step2 := DerivationTree.modus_ponens ctx _ _ d_k d_efq
+  let d_step2 := DerivationTree.modusPonens ctx _ _ d_k d_efq
   -- implyS: ctx ⊢ (¬φ → (⊥ → φ)) → ((¬φ → ⊥) → (¬φ → φ))
   let d_s2 : DerivationTree PropositionalAxiom ctx
       (((¬φ).imp (Proposition.bot.imp φ)).imp
@@ -416,15 +416,15 @@ private noncomputable def dne_from_neg_neg
     .weakening [] ctx _ (.ax [] _ (.implyS (¬φ) Proposition.bot φ))
       (fun _ h => nomatch h)
   -- ctx ⊢ (¬φ → ⊥) → (¬φ → φ)
-  let d_step3 := DerivationTree.modus_ponens ctx _ _ d_s2 d_step2
+  let d_step3 := DerivationTree.modusPonens ctx _ _ d_s2 d_step2
   -- ctx ⊢ ¬φ → φ
   let d_neg_to_phi : DerivationTree PropositionalAxiom ctx ((¬φ).imp φ) :=
-    DerivationTree.modus_ponens ctx _ _ d_step3 d_neg_neg
+    DerivationTree.modusPonens ctx _ _ d_step3 d_neg_neg
   -- Peirce: ctx ⊢ (¬φ → φ) → φ
   let d_peirce : DerivationTree PropositionalAxiom ctx (((¬φ).imp φ).imp φ) :=
     .weakening [] ctx _ (.ax [] _ (.peirce φ Proposition.bot)) (fun _ h => nomatch h)
   -- ctx ⊢ φ
-  DerivationTree.modus_ponens ctx _ _ d_peirce d_neg_to_phi
+  DerivationTree.modusPonens ctx _ _ d_peirce d_neg_to_phi
 
 /-! ## Key Lemma: Consistency of Γ ∪ {¬φ} -/
 

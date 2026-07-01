@@ -104,7 +104,7 @@ theorem int_soundness
     exact int_axiom_sound h_ax World val v_uc w
   | .assumption _ ψ h_mem =>
     exact h_ctx ψ h_mem
-  | .modus_ponens _ ψ χ d₁ d₂ =>
+  | .modusPonens _ ψ χ d₁ d₂ =>
     -- d₁ : Γ ⊢ ψ → χ, d₂ : Γ ⊢ ψ
     -- By IH: IForces w (ψ → χ) and IForces w ψ
     -- IForces w (ψ → χ) = ∀ w' ≥ w, IForces w' ψ → IForces w' χ

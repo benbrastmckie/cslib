@@ -115,7 +115,7 @@ theorem conjImp_brouwerian_soundness
   match d with
   | .ax _ ψ h_ax => exact conjImp_brouwerian_axiom_sound h_ax H v
   | .assumption _ ψ h_mem => exact h_ctx ψ h_mem
-  | .modus_ponens _ ψ χ d₁ d₂ =>
+  | .modusPonens _ ψ χ d₁ d₂ =>
     have h1 := conjImp_brouwerian_soundness d₁ v h_ctx
     have h2 := conjImp_brouwerian_soundness d₂ v h_ctx
     simp only [BrouwerianEvaluate] at h1

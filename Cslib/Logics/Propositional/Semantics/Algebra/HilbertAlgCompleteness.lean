@@ -94,7 +94,7 @@ theorem imp_hilbert_soundness
   match d with
   | .ax _ ψ h_ax => exact imp_hilbert_axiom_sound h_ax H v
   | .assumption _ ψ h_mem => exact h_ctx ψ h_mem
-  | .modus_ponens _ ψ χ d₁ d₂ =>
+  | .modusPonens _ ψ χ d₁ d₂ =>
     have h1 := imp_hilbert_soundness d₁ v h_ctx
     have h2 := imp_hilbert_soundness d₂ v h_ctx
     simp only [HilbertEvaluate] at h1

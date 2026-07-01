@@ -207,8 +207,8 @@ noncomputable def liftMinToCl {Γ : List (PL.Proposition Atom)} {φ : PL.Proposi
   match d with
   | .ax Γ ψ h_ax => exact .ax Γ ψ h_ax.toIntPropAxiom.toPropAxiom
   | .assumption Γ ψ h_mem => exact .assumption Γ ψ h_mem
-  | .modus_ponens Γ ψ χ d₁ d₂ =>
-    exact .modus_ponens Γ ψ χ (liftMinToCl d₁) (liftMinToCl d₂)
+  | .modusPonens Γ ψ χ d₁ d₂ =>
+    exact .modusPonens Γ ψ χ (liftMinToCl d₁) (liftMinToCl d₂)
   | .weakening Γ' Δ ψ d' h_sub =>
     exact .weakening Γ' Δ ψ (liftMinToCl d') h_sub
 

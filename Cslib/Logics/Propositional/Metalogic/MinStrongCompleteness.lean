@@ -140,8 +140,8 @@ theorem min_truth_lemma
         | inr h => exact h ▸ h_psi_S
       · show (propDerivationSystem MinPropAxiom).Deriv _ _
         unfold propDerivationSystem Deriv
-        exact ⟨.modus_ponens _ _ _
-          (.modus_ponens _ _ _
+        exact ⟨.modusPonens _ _ _
+          (.modusPonens _ _ _
             (.weakening [] _ _ (.ax [] _ (.andI φ ψ)) (fun _ h => nomatch h))
             (.assumption _ _ (by simp [List.mem_cons])))
           (.assumption _ _ (by simp [List.mem_cons]))⟩
@@ -155,7 +155,7 @@ theorem min_truth_lemma
           exact hx ▸ h_mem
         · show (propDerivationSystem MinPropAxiom).Deriv _ _
           unfold propDerivationSystem Deriv
-          exact ⟨.modus_ponens _ _ _
+          exact ⟨.modusPonens _ _ _
             (.weakening [] _ _ (.ax [] _ (.andE1 φ ψ)) (fun _ h => nomatch h))
             (.assumption _ _ (by simp [List.mem_cons]))⟩
       · apply (min_truth_lemma S ψ).mpr
@@ -165,7 +165,7 @@ theorem min_truth_lemma
           exact hx ▸ h_mem
         · show (propDerivationSystem MinPropAxiom).Deriv _ _
           unfold propDerivationSystem Deriv
-          exact ⟨.modus_ponens _ _ _
+          exact ⟨.modusPonens _ _ _
             (.weakening [] _ _ (.ax [] _ (.andE2 φ ψ)) (fun _ h => nomatch h))
             (.assumption _ _ (by simp [List.mem_cons]))⟩
   | .or φ ψ => by
@@ -180,7 +180,7 @@ theorem min_truth_lemma
           exact hx ▸ h_phi_S
         · show (propDerivationSystem MinPropAxiom).Deriv _ _
           unfold propDerivationSystem Deriv
-          exact ⟨.modus_ponens _ _ _
+          exact ⟨.modusPonens _ _ _
             (.weakening [] _ _ (.ax [] _ (.orI1 φ ψ)) (fun _ h => nomatch h))
             (.assumption _ _ (by simp [List.mem_cons]))⟩
       · have h_psi_S := (min_truth_lemma S ψ).mp hψ
@@ -190,7 +190,7 @@ theorem min_truth_lemma
           exact hx ▸ h_psi_S
         · show (propDerivationSystem MinPropAxiom).Deriv _ _
           unfold propDerivationSystem Deriv
-          exact ⟨.modus_ponens _ _ _
+          exact ⟨.modusPonens _ _ _
             (.weakening [] _ _ (.ax [] _ (.orI2 φ ψ)) (fun _ h => nomatch h))
             (.assumption _ _ (by simp [List.mem_cons]))⟩
     · -- Backward: (φ ∨ ψ) ∈ S.val → IForces S (φ ∨ ψ)

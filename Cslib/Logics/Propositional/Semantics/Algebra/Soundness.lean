@@ -176,7 +176,7 @@ theorem min_alg_soundness
   match d with
   | .ax _ ψ h_ax => exact min_alg_axiom_sound h_ax H v bot_val
   | .assumption _ ψ h_mem => exact h_ctx ψ h_mem
-  | .modus_ponens _ ψ χ d₁ d₂ =>
+  | .modusPonens _ ψ χ d₁ d₂ =>
     have h1 := min_alg_soundness d₁ v bot_val h_ctx
     have h2 := min_alg_soundness d₂ v bot_val h_ctx
     -- h1 : AlgEvaluate v bot_val (ψ → χ) = ⊤, i.e., ψ_h ⇨ χ_h = ⊤
@@ -209,7 +209,7 @@ theorem alg_theory_soundness
   match d with
   | .ax _ ψ h_ax => exact hT ψ (by simpa [AxiomTheory] using h_ax)
   | .assumption _ ψ h_mem => exact h_ctx ψ h_mem
-  | .modus_ponens _ ψ χ d₁ d₂ =>
+  | .modusPonens _ ψ χ d₁ d₂ =>
     have h1 := alg_theory_soundness d₁ v bot_val hT h_ctx
     have h2 := alg_theory_soundness d₂ v bot_val hT h_ctx
     simp only [AlgEvaluate] at h1
@@ -241,7 +241,7 @@ theorem int_alg_soundness
   match d with
   | .ax _ ψ h_ax => exact int_alg_axiom_sound h_ax H v
   | .assumption _ ψ h_mem => exact h_ctx ψ h_mem
-  | .modus_ponens _ ψ χ d₁ d₂ =>
+  | .modusPonens _ ψ χ d₁ d₂ =>
     have h1 := int_alg_soundness d₁ v h_ctx
     have h2 := int_alg_soundness d₂ v h_ctx
     simp only [AlgEvaluate] at h1
@@ -273,7 +273,7 @@ theorem prop_alg_soundness
   match d with
   | .ax _ ψ h_ax => exact prop_alg_axiom_sound h_ax H v
   | .assumption _ ψ h_mem => exact h_ctx ψ h_mem
-  | .modus_ponens _ ψ χ d₁ d₂ =>
+  | .modusPonens _ ψ χ d₁ d₂ =>
     have h1 := prop_alg_soundness d₁ v h_ctx
     have h2 := prop_alg_soundness d₂ v h_ctx
     simp only [AlgEvaluate] at h1

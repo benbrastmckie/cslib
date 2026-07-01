@@ -55,7 +55,7 @@ instance :
       (F := PL.Proposition Atom) where
   mp := fun h1 h2 => by
     obtain ⟨d1⟩ := h1; obtain ⟨d2⟩ := h2
-    exact ⟨PL.DerivationTree.modus_ponens [] _ _ d1 d2⟩
+    exact ⟨PL.DerivationTree.modusPonens [] _ _ d1 d2⟩
 
 /-! ## Propositional Axiom Instances -/
 

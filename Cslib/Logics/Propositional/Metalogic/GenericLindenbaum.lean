@@ -192,20 +192,20 @@ theorem generic_deriv_imp_of_union
         ((φ.imp (φ.imp ψ)).imp ((φ.imp φ).imp (φ.imp ψ))) :=
       .weakening [] ctx _ (.ax [] _ (h_implyS φ φ ψ)) (fun _ h => nomatch h)
     -- MP: ctx ⊢ (φ → φ) → (φ → ψ)
-    have d_step1 := DerivationTree.modus_ponens ctx _ _ d_is d_mem
+    have d_step1 := DerivationTree.modusPonens ctx _ _ d_is d_mem
     -- Build identity ⊢ φ → φ
     have d_k1 : DerivationTree Axioms (Atom := Atom) [] (φ.imp ((φ.imp φ).imp φ)) :=
       .ax [] _ (h_implyK φ (φ.imp φ))
     have d_s1 : DerivationTree Axioms (Atom := Atom) []
         ((φ.imp ((φ.imp φ).imp φ)).imp ((φ.imp (φ.imp φ)).imp (φ.imp φ))) :=
       .ax [] _ (h_implyS φ (φ.imp φ) φ)
-    have d_mp1 := DerivationTree.modus_ponens [] _ _ d_s1 d_k1
+    have d_mp1 := DerivationTree.modusPonens [] _ _ d_s1 d_k1
     have d_k2 : DerivationTree Axioms (Atom := Atom) [] (φ.imp (φ.imp φ)) :=
       .ax [] _ (h_implyK φ φ)
-    have d_id := DerivationTree.modus_ponens [] _ _ d_mp1 d_k2
+    have d_id := DerivationTree.modusPonens [] _ _ d_mp1 d_k2
     have d_id_w := DerivationTree.weakening [] ctx _ d_id (fun _ h => nomatch h)
     -- MP: ctx ⊢ φ → ψ
-    have d_final := DerivationTree.modus_ponens ctx _ _ d_step1 d_id_w
+    have d_final := DerivationTree.modusPonens ctx _ _ d_step1 d_id_w
     exact ⟨ctx, h_rem_sub, ⟨d_final⟩⟩
   · -- φ ∉ L: L ⊆ S already
     have hL_S : ∀ x ∈ L, x ∈ S := by

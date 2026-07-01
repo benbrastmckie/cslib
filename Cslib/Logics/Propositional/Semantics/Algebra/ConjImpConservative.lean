@@ -64,8 +64,8 @@ def liftDerivationTree
     DerivationTree Axioms1 Γ φ → DerivationTree Axioms2 Γ φ
   | .ax Γ φ h => .ax Γ φ (h_sub φ h)
   | .assumption Γ φ h => .assumption Γ φ h
-  | .modus_ponens Γ φ ψ d₁ d₂ =>
-      .modus_ponens Γ φ ψ (liftDerivationTree h_sub d₁) (liftDerivationTree h_sub d₂)
+  | .modusPonens Γ φ ψ d₁ d₂ =>
+      .modusPonens Γ φ ψ (liftDerivationTree h_sub d₁) (liftDerivationTree h_sub d₂)
   | .weakening Γ Δ φ d h => .weakening Γ Δ φ (liftDerivationTree h_sub d) h
 
 /-! ## Axiom-Monotonicity Lemma -/

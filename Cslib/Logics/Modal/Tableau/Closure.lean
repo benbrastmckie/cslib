@@ -7,7 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
-public import Cslib.Logics.Modal.Tableau.Rules
+public import Cslib.Logics.Modal.Tableau.Defs
 public import Cslib.Foundations.Logic.Tableau.ClosureCondition
 
 /-! # Modal K Tableau Closure

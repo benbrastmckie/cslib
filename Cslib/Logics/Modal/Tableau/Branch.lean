@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
+public import Cslib.Foundations.Logic.Tableau.SignedFormula
 public import Cslib.Logics.Modal.Tableau.Defs
 
 /-! # Modal Accessibility Relation and World Helpers

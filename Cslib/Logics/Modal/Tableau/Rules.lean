@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
+public import Cslib.Foundations.Logic.Tableau.PropositionalRules
 public import Cslib.Logics.Modal.Tableau.Branch
 
 /-! # Modal K Tableau Rules

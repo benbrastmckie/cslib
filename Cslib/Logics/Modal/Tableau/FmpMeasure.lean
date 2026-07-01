@@ -17,7 +17,6 @@ public import Cslib.Foundations.Logic.Tableau.Measure
 import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.SoundnessStep
 public import Cslib.Logics.Modal.Tableau.Saturation
-public import Cslib.Logics.Modal.Tableau.LoopInduction
 
 /-! # Modal K Tableau Finite-Model-Property Termination Measure
 

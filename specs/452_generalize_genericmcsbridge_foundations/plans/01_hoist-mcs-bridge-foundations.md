@@ -270,7 +270,7 @@ filesystem I/O error on an unrelated file during the first `lake build`, resolve
 
 ---
 
-### Phase 4: Part B core.2 — Retarget Temporal & Bimodal to the generic machinery [NOT STARTED]
+### Phase 4: Part B core.2 — Retarget Temporal & Bimodal to the generic machinery [COMPLETED]
 
 **Goal**: Replace the Temporal and Bimodal `_fc` backward helpers with delegations to the generic
 `unfoldListImp`/`listDerivToTree` via a `HilbertTree (DerivationTree fc)` instance, and replace the
@@ -279,15 +279,36 @@ two consistency/MCS lemmas with `setConsistent_iff_congr`/`setMaxConsistent_iff_
 public theorem names.
 
 **Tasks**:
-- [ ] Temporal: add `instance (fc : FrameClass) : HilbertTree (F := Formula Atom) (DerivationTree
+- [x] Temporal: add `instance (fc : FrameClass) : HilbertTree (F := Formula Atom) (DerivationTree
       fc)` (worked example, §6); retarget `unfoldListImpInTreeFc`/`listDerivToTreeFc` bodies (or the
       already-delegating base helpers) to the generic combinators; replace
       `temporal_setConsistent_iff_algebraic`/`temporal_setMaxConsistent_iff_algebraic` bodies with
       the generic `*_iff_congr`. Keep public names/statements.
-- [ ] Bimodal: same retarget with `HilbertTMFc`.
-- [ ] Compile each retarget before deleting the replaced bodies.
-- [ ] Confirm implicit `{Γ Δ φ}` binder adaptation on the first instance (Risk row 3) before
+- [x] Bimodal: same retarget with `HilbertTMFc`.
+- [x] Compile each retarget before deleting the replaced bodies.
+- [x] Confirm implicit `{Γ Δ φ}` binder adaptation on the first instance (Risk row 3) before
       propagating to the second.
+
+**Result**: Temporal 306L -> 299L, Bimodal 330L -> 325L. `#print axioms` (via `lean_run_code`,
+bypassing stale-LSP `lean_verify` results caused by a concurrently-broken unrelated file) confirms
+`listDerivToTreeFc`/`unfoldListImpInTreeFc`/`*_setMaxConsistent_iff_algebraic` for both logics
+depend only on `propext`/`Classical.choice` — zero-debt confirmed.
+
+**Deviation discovered**: Bimodal's `HilbertTree (F := ...) (...)` named-argument instance syntax
+(which worked verbatim for Temporal) produces a raw parser error in the Bimodal file because
+Bimodal's temporal `F` (future) notation shadows the bare identifier `F`, forcing Lean to
+auto-bind the class's implicit type parameter as the escaped `«F»`. Fixed by using the fully
+positional form `@HilbertTree (Bimodal.Formula Atom) _ (Bimodal.DerivationTree fc) where ...`
+instead of `HilbertTree (F := ...) (...) where ...`. Documented inline in the instance's docstring.
+
+**Environment note**: two `lake build` runs on the full project failed transiently in unrelated
+files (`Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean`,
+`Cslib/Logics/Temporal/Tableau/Saturation.lean`) due to concurrently-running tasks 439/317
+actively editing those files mid-session (confirmed via `git diff --stat` showing uncommitted
+changes to those files, unrelated to this task's diff). CI gate for this phase was verified via
+scoped `lake build` of all directly-touched and downstream-importing modules (all green), plus
+`lake exe lint-style` (clean) and `#print axioms` zero-debt checks. Full-project `lake build`/
+`lake test`/`checkInitImports` deferred to Phase 7 pending the concurrent tasks' completion.
 
 **Timing**: 1.5 hours
 

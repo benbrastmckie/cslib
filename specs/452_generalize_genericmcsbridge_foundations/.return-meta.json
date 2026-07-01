@@ -7,9 +7,9 @@
     "Cslib/Foundations/Logic/Metalogic/GenericMCS.lean"
   ],
   "partial_progress": {
-    "stage": "phase_3_done",
-    "details": "Phases 0-3 complete and committed. Temporal 370->306L, Bimodal 405->330L, Foundations GenericMCS 167->290L (+123L generic HilbertTree machinery). All zero-debt verified via lean_verify. Full CI green after each phase.",
-    "phases_completed": 4
+    "stage": "phase_4_done",
+    "details": "Phases 0-4 complete and committed. Temporal 370->299L, Bimodal 405->325L, Foundations GenericMCS 167->290L. HilbertTree instances added for Temporal/Bimodal; backward helpers + consistency lemmas retargeted to generic combinators. Discovered and fixed a Bimodal-only notation-shadowing issue (temporal F future operator shadows named-arg F). Full-repo lake build currently flaky due to concurrently-running tasks 317/439 editing unrelated Tableau files; verified via scoped builds + #print axioms instead.",
+    "phases_completed": 5
   },
   "metadata": {
     "session_id": "sess_452_implement",

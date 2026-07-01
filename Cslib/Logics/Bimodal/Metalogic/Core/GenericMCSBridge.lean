@@ -146,6 +146,21 @@ end HilbertTMFcInstances
     Metalogic.DerivationSystem (Bimodal.Formula Atom) :=
   @algebraicDerivationSystem (Bimodal.Formula Atom) _ _ (HilbertTMFc fc) _ _
 
+/-- `Bimodal.DerivationTree fc` is a `HilbertTree`: closed under assumption, modus ponens,
+weakening, and the K/S axiom schemata at the empty context. Feeds the generic backward
+combinators (`unfoldListImp`/`listDerivToTree`) below. Note: Bimodal's `imp_s`/`imp_k`
+axiom constructors are swapped relative to the K/S schema names (documented at their
+`HasAxiomImplyK`/`HasAxiomImplyS` instances above). The `@HilbertTree ... _ ...` positional
+form (rather than `(F := ...)`) is required here because Bimodal's temporal `F` (future)
+notation shadows the bare identifier `F` in this scope. -/
+instance (fc : FrameClass) :
+    @HilbertTree (Bimodal.Formula Atom) _ (Bimodal.DerivationTree fc) where
+  assumption {Γ a} h := .assumption Γ a h
+  mp {Γ φ ψ} d₁ d₂ := .modus_ponens Γ φ ψ d₁ d₂
+  weakening {Γ Δ φ} h d := .weakening Γ Δ φ d h
+  axiomK _ _ := .axiom [] _ (.imp_s _ _) (FrameClass.base_le fc)
+  axiomS _ _ _ := .axiom [] _ (.imp_k _ _ _) (FrameClass.base_le fc)
+
 /-! ## FC-Parameterized Forward Bridge -/
 
 /-- Forward bridge: `DerivationTree fc Γ φ → (bimodalAlgDSFc fc).Deriv Γ φ`.
@@ -197,41 +212,31 @@ lemma derivTreeToListFc {fc : FrameClass}
 /-! ## FC-Parameterized Backward Helper -/
 
 /-- Backward helper (fc-generalized): given `Γ ⊢[fc] listImp Ψ φ` and `Ψ ⊆ Γ`,
-produce `Γ ⊢[fc] φ` by iterating modus ponens with assumption trees. -/
+produce `Γ ⊢[fc] φ` by iterating modus ponens with assumption trees. Delegates to the
+generic `unfoldListImp` (Foundations), instantiated at `D := Bimodal.DerivationTree fc`
+via the `HilbertTree` instance above. -/
 noncomputable def unfoldListImpInTreeFc {fc : FrameClass}
     {Γ : Bimodal.Context Atom} {φ : Bimodal.Formula Atom}
     (Ψ : Bimodal.Context Atom)
     (d : Bimodal.DerivationTree fc Γ (listImp Ψ φ))
     (h_sub : ∀ a ∈ Ψ, a ∈ Γ) :
-    Bimodal.DerivationTree fc Γ φ := by
-  induction Ψ generalizing φ with
-  | nil =>
-    simp only [listImp_nil] at d; exact d
-  | cons a Ψ' ih =>
-    simp only [listImp_cons] at d
-    have ha_mem : a ∈ Γ := h_sub a (List.mem_cons.mpr (Or.inl rfl))
-    have d_a : Bimodal.DerivationTree fc Γ a :=
-      Bimodal.DerivationTree.assumption Γ a ha_mem
-    have d_tail : Bimodal.DerivationTree fc Γ (listImp Ψ' φ) :=
-      Bimodal.DerivationTree.modus_ponens Γ a (listImp Ψ' φ) d d_a
-    exact ih d_tail (fun x hx => h_sub x (List.mem_cons.mpr (Or.inr hx)))
+    Bimodal.DerivationTree fc Γ φ :=
+  GenericMCS.unfoldListImp Ψ d h_sub
 
 /-! ## FC-Parameterized Backward Bridge -/
 
 /-- Backward bridge: `(bimodalAlgDSFc fc).Deriv Γ φ → DerivationTree fc Γ φ`.
 
-Extracts `d₀ : [] ⊢[fc] listImp Γ φ` from the algebraic derivation, weakens to `Γ`,
-then applies `unfoldListImpInTreeFc`. -/
+Delegates to the generic `listDerivToTree` (Foundations), instantiated at
+`D := Bimodal.DerivationTree fc`: `(bimodalAlgDSFc fc).Deriv Γ φ` and `(treeAlgDS
+(Bimodal.DerivationTree fc)).Deriv Γ φ` are definitionally equal (both reduce to
+`Nonempty (DerivationTree fc [] (listImp Γ φ))`, since `HilbertTMFc fc` and
+`ClosedHilbert (Bimodal.DerivationTree fc)` share the same `derivation`). -/
 noncomputable def listDerivToTreeFc {fc : FrameClass}
     {Γ : Bimodal.Context Atom} {φ : Bimodal.Formula Atom}
     (h : (bimodalAlgDSFc fc (Atom := Atom)).Deriv Γ φ) :
-    Bimodal.DerivationTree fc Γ φ := by
-  simp only [bimodalAlgDSFc, algebraicDerivationSystem] at h
-  unfold ListDeriv at h
-  have d₀ : Bimodal.DerivationTree fc [] (listImp Γ φ) := h.toDerivation
-  have d_weak : Bimodal.DerivationTree fc Γ (listImp Γ φ) :=
-    Bimodal.DerivationTree.weakening [] Γ (listImp Γ φ) d₀ (List.nil_subset Γ)
-  exact unfoldListImpInTreeFc Γ d_weak (fun _a ha => ha)
+    Bimodal.DerivationTree fc Γ φ :=
+  GenericMCS.listDerivToTree (D := Bimodal.DerivationTree fc) h
 
 /-! ## FC-Parameterized Full Equivalence -/
 
@@ -301,30 +306,20 @@ theorem bimodal_deriv_iff_algebraic
 
 /-! ## MCS Equivalences -/
 
-/-- `SetConsistent` under `bimodalDerivationSystem` iff under `bimodalAlgDS`. -/
+/-- `SetConsistent` under `bimodalDerivationSystem` iff under `bimodalAlgDS`.
+Delegates to the generic `setConsistent_iff_congr` (Foundations). -/
 theorem bimodal_setConsistent_iff_algebraic
     {Ω : Set (Bimodal.Formula Atom)} :
     SetConsistent bimodalDerivationSystem Ω ↔
-    SetConsistent (bimodalAlgDS (Atom := Atom)) Ω := by
-  unfold SetConsistent Consistent
-  constructor
-  · intro h L hL hd
-    exact h L hL (bimodal_deriv_iff_algebraic.mpr hd)
-  · intro h L hL hd
-    exact h L hL (bimodal_deriv_iff_algebraic.mp hd)
+    SetConsistent (bimodalAlgDS (Atom := Atom)) Ω :=
+  GenericMCS.setConsistent_iff_congr (fun _ _ => bimodal_deriv_iff_algebraic)
 
-/-- `SetMaximalConsistent` under `bimodalDerivationSystem` iff under `bimodalAlgDS`. -/
+/-- `SetMaximalConsistent` under `bimodalDerivationSystem` iff under `bimodalAlgDS`.
+Delegates to the generic `setMaxConsistent_iff_congr` (Foundations). -/
 theorem bimodal_setMaxConsistent_iff_algebraic
     {Ω : Set (Bimodal.Formula Atom)} :
     SetMaximalConsistent bimodalDerivationSystem Ω ↔
-    SetMaximalConsistent (bimodalAlgDS (Atom := Atom)) Ω := by
-  unfold SetMaximalConsistent
-  constructor
-  · intro ⟨hcons, hmax⟩
-    refine ⟨bimodal_setConsistent_iff_algebraic.mp hcons, fun φ hφ hinsert => ?_⟩
-    exact hmax φ hφ (bimodal_setConsistent_iff_algebraic.mpr hinsert)
-  · intro ⟨hcons, hmax⟩
-    refine ⟨bimodal_setConsistent_iff_algebraic.mpr hcons, fun φ hφ hinsert => ?_⟩
-    exact hmax φ hφ (bimodal_setConsistent_iff_algebraic.mp hinsert)
+    SetMaximalConsistent (bimodalAlgDS (Atom := Atom)) Ω :=
+  GenericMCS.setMaxConsistent_iff_congr (fun _ _ => bimodal_deriv_iff_algebraic)
 
 end Cslib.Logic.Bimodal.Metalogic.Core

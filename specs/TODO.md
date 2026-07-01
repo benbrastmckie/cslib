@@ -11,7 +11,7 @@ next_project_number: 464
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,396,400,404,407,425,438,439,440,441,447,449,452,453,457,458,459,460,461,463 | -- | Foundations, Propositional Logic, Modal Logic, ... |
+| 1 | 36,37,181,226,300,317,396,400,404,407,425,438,440,441,447,449,452,453,457,458,459,460,461,463 | -- | Foundations, Propositional Logic, Modal Logic, ... |
 | 2 | 39,40,215,301,375,389,405,409,430,450,451,456,462 | 36,37,181,317,404,407,425,449,457,459 | Propositional Logic, Modal Logic, Temporal Logic, ... |
 | 3 | 41,391,392,413,444,454 | 39,40,375,389,450 | Foundations, Bimodal Logic, Code Hygiene |
 | 4 | 393,412,414 | 41,215,300,301,391,444 | Code Hygiene |
@@ -45,7 +45,6 @@ next_project_number: 464
 
 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
   └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
-439 [IMPLEMENTED] — Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_red
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -408,7 +407,7 @@ Definition of done: lake build, lake lint, lake exe lint-style green on every in
 
 ### 439. Refactor processnext to mutual def and prove instantstrict t
 - **Effort**: 3-5 hours
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 180

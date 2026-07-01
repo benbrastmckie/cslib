@@ -1,7 +1,7 @@
 # Implementation Plan: Task #439 — Refactor `processNext` to `mutual` def and prove run-level `InstantStrict`
 
 - **Task**: 439 - refactor_processnext_to_mutual_def_and_prove_instantstrict_t (Phase 3 of parent task 426)
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 5 hours
 - **Dependencies**: 180 (parent task 426 phases 1, 2, 4, 5 already DONE green). Territory: shares `Completeness.lean` with task 427 — serialize, never parallelize.
 - **Research Inputs**: specs/426_temporal_tableau_ordconstraints_redesign/reports/01_ordconstraints-redesign.md (Option B instant scheme); spawn-analysis (referenced in state.json artifacts)

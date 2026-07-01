@@ -397,6 +397,106 @@ first two close the highest-debt findings with ready-made substrates.
 
 ---
 
+## 9. Errata / Re-Verification (2026-07-01)
+
+**Anchors verified with drift.** Two days elapsed between this report's original verification
+pass (2026-06-29) and this re-verification (2026-07-01). In the interim, **all five Rank 1-5
+follow-on tasks proposed in §8 were already spawned as child tasks (416-420, `parent_task: 415`)
+and have all completed** (see §10 below). Several of those completions edited the very files this
+report cites, so a subset of line-number anchors have drifted. Every anchor was re-checked by
+direct `Read`/`grep`/`wc -l`; corrected anchors are recorded below with the causing task.
+
+**Anchors CONFIRMED, no drift:**
+- `Cslib/Logics/Propositional/Defs.lean:85` (`bot` constructor) — exact match.
+- `Cslib/Logics/Propositional/NaturalDeduction/Basic.lean:182` (`efq` gated `[IsIntuitionistic T]`) — exact match.
+- `Cslib/Logics/Propositional/SequentCalculus/LJ/Basic.lean:100` (`botL` gated) — exact match.
+- `Cslib/Logics/Modal/Metalogic/InterSystem/Lifting.lean:47` (`liftDerivation`) and `:66`
+  (`Derivable_mono`) — exact match (task 419 added new files `Conservativity.lean` and
+  `LiftViaMorphism.lean` alongside `Lifting.lean` but explicitly did not modify it).
+- `Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/Lifting.lean:636`
+  (`liftDerivationWith`), `:691` (`liftDerivationQfree`) — exact match.
+- `Cslib/Logics/Modal/Metalogic/ConservativeExtension.lean:54` (`modal_conservative_extension_param`) — exact match.
+- 15 per-system `Systems/{K,T,D,B,S4,S5,K4,K5,K45,KB5,D4,D5,D45,DB,TB}/ConservativeExtension.lean`
+  files confirmed (`find` count = 15); 16 files reference
+  `modal_conservative_extension_param` (`grep -rl` count = 16) — exact match.
+- The 9-file line-count table in §5 reproduced exactly via `wc -l`: MinLindenbaum 247,
+  IntLindenbaum 318, MinSoundness 121, IntSoundness 128, Soundness 93, MinStrongCompleteness 350,
+  IntStrongCompleteness 353, StrongCompleteness 570. `GenericLindenbaum.lean` grew 295 -> 301
+  lines (task 416's docstring rewrite, see §10).
+
+**Anchors DRIFTED (all caused by tasks 417/418, now completed — see §10):**
+
+| Symbol | Report cited | Now at | Cause |
+|---|---|---|---|
+| `modal_satisfies_toModal_iff_evaluate` | `:106` | `:85` | task 418: `toModal` became a thin `.embed` wrapper, shortening the preamble |
+| `tautology_iff_toModal_valid` | `:162` | `:141` | same |
+| `PL.Proposition.embedding_commutes` (Bimodal) | `:116` | `:105` | same (shared `PropositionalEmbedding` typeclass shortened the file) |
+| `temporal_conservative_extension` | `:87` | `:61` | task 417: file thinned to a `conservative_over_cpl` instance (74 lines total now) |
+| `bimodal_conservative_extension` | `:118` | `:97` | task 417: file thinned similarly (121 lines total now) |
+| `bimodal_truthAt_toBimodal_iff_evaluate` | `:60` | `:61` | negligible (off-by-one, same cause) |
+
+The Łukasiewicz `and`/`or` definitions cited at `Modal/FromPropositional.lean:58-63` (and the
+Temporal/Bimodal analogues) **no longer live in the per-logic files** — task 418 hoisted them
+into one shared definition, `PL.Proposition.embed` in
+`Cslib/Logics/Propositional/Embedding.lean:71-79` (the `PropositionalEmbedding` typeclass), and
+`toModal`/`toTemporal`/`toBimodal` are now thin wrappers (`:= φ.embed`) over it. The single
+classical-scope limitation note (previously triplicated) now lives once in
+`Embedding.lean:26-42`. This is exactly Rank 3's proposed shared-typeclass refactor, already
+landed.
+
+## 10. Post-Audit Update — All Five Spawn Candidates Already Exist and Are Complete
+
+**This is the most important correction to make before any downstream reader acts on §8.** A
+prior orchestration pass (`git` commit `ce9e3ef8`, "orchestrate tasks 416-420: complete
+orchestration (4/5 succeeded)") already created and ran all five §8 spawn candidates as child
+tasks with `parent_task: 415`. As of this re-verification, **all five report status
+`completed`** in `specs/state.json`/`specs/archive/state.json`:
+
+| Rank | Spawn candidate (§8) | Child task | Status | Outcome |
+|---|---|---|---|---|
+| 1 | Instantiate GenericLindenbaum (closes Finding 3) | **416** `instantiate_generic_lindenbaum_phase6` | completed | **Correction**: the code-level debt was *already closed* by task 407 phase 6 (commit `9242d243`), which pre-dates this audit. Finding 3's "~565 duplicated lines" claim was driven by a **stale docstring** in `GenericLindenbaum.lean:43-52` (which still said "additive... deferred to Phase 6") that was never updated after phase 6 landed. `MinLindenbaum`/`IntLindenbaum` already delegate to `generic_deriv_from_closure_to_S`/`generic_deriv_imp_of_union`/`generic_imp_witness` — verified by task 416's own re-derivation. 416's only actual deliverable was rewriting the stale docstring. A smaller residual (definitionally-equal closure-scaffolding defs, ~40 lines) remains and is explicitly left to task 393 (see below). |
+| 2 | Foundations-level parametric conservativity lift (closes Finding 2) | **417** `parametric_conservativity_lift_foundations` | completed | Delivered `Cslib/Logics/Propositional/Metalogic/ConservativityLift.lean` (`conservative_over_cpl` + `evaluate_iff_of_classicalBridge`); `temporal_conservative_extension`/`bimodal_conservative_extension` re-expressed as thin instances. CI green, 0 new sorry/axioms (per task completion record). |
+| 3 | Shared `PropositionalEmbedding` typeclass (supports Finding 1) | **418** `shared_propositional_embedding_typeclass` | completed | Delivered `Cslib/Logics/Propositional/Embedding.lean`; all `toX_*` simp/grind lemmas preserved as `rfl`; single limitation note. CI green, 0 new sorry/axioms. |
+| 4 | Cross-logic derivation-lifting spike | **419** `generalize_derivation_lifting_intersystem` | completed | Delivered `Foundations/Logic/Metalogic/ProofSystemMorphism.lean` (forward direction: `ProofSig`/`Deriv`/`ProofSigHom`/`Deriv.map` + functor laws); Modal and PL land as full `Equiv`s, Bimodal as forward map + `HEq` intertwining. Backward/full-Equiv direction for multi-closure Bimodal explicitly out of scope (Vision A), spun off to task 448 (also completed, verdict: NO-GO on the backward-map "Vision B" substrate — insufficient ROI). |
+| 5 | Documentation-only structure-preserving-embedding note | **420** `native_embedding_prerequisites_doc` | completed | Doc-only design note recording the four prerequisites, no Lean change, per spec. |
+
+**Implication for this task's remaining scope (Phase 3/4):** the §8 spawn manifest this plan's
+Phase 3 was to author has, in effect, already been executed end-to-end by a prior orchestration
+run. Phase 3 below is therefore written as a **retrospective** manifest (rank -> task -> outcome)
+rather than a prospective one, and Phase 4 requires **no new task creation** — there is nothing
+left in the original five-item list to spawn. See `reports/02_spawn-manifest.md` for the full
+retrospective manifest and the still-open task-393 cross-reference.
+
+## 11. Artifact Classification (internal vs upstream-facing)
+
+Per the CSLib/Mathlib AI usage policy, artifacts are classified below so no AI-authored prose is
+ever mistaken for upstream-ready text.
+
+| Artifact | Classification | Notes |
+|---|---|---|
+| This report (`reports/01_lifting-audit.md`), all sections except §8's scaffold block | **Internal** | AI-authored analysis for internal task-planning use; not intended for direct upstream posting. |
+| §8 Zulip summary draft (marked `[SCAFFOLD — human rewrite before posting]`) | **Upstream-facing (BLOCKED — human rewrite required)** | Must not be posted verbatim; a human author must reword it before any Zulip communication. |
+| `reports/02_spawn-manifest.md` (this task's Phase 3 deliverable) | **Internal** | Task-tracking artifact (rank -> task -> status mapping); not upstream-facing. |
+| Plan `plans/01_lifting-audit-spawn.md` | **Internal** | Task-management artifact. |
+| Summary `summaries/01_*.md` | **Internal** | Task-management artifact. |
+| Child tasks 416-420's own summaries/completion_summary fields | **Internal** | Already-completed task-tracking records; not reviewed for upstream-readiness here (out of this task's scope). |
+
+**Consistency check against Phase 1 re-verification:** the §7 met/partial/open matrix and the
+"where CSLib can SURPASS" statement (§7 closing paragraph) are **still internally consistent**
+after the Phase 1 anchor re-verification and the §10 post-audit update: the "OPEN" items (native
+`and`/`or`, structure-preserving embedding) remain open (task 420 only documented the
+prerequisites, did not implement them — confirmed no native `and`/`or` constructor exists on
+`Modal.Proposition`/`Temporal.Formula`/`Bimodal.Formula` as of this re-verification); the "MET
+(defined)" GenericLindenbaum row should be read together with §10's correction (the substrate was
+already both *defined and instantiated* before this audit, not merely *defined*); the Modal
+"MET" conservativity row is now matched by Temporal/Bimodal via task 417 (upgrading §7's
+"PARTIAL" conservativity-uniformity row to **MET**, since `conservative_over_cpl` now unifies all
+three). No AI-authored prose is presented as upstream-ready anywhere in this document; the §8
+scaffold retains its `[SCAFFOLD]` marker unmodified. Effort estimates in §8 match the spawn
+manifest built retrospectively in §10/`02_spawn-manifest.md` (all landed at their estimated
+efforts: M/M/S-M/L/S — task 416 downgraded to a trivial doc fix in practice, but was *scoped* at
+M going in, consistent with the estimate given the information available at spawn time).
+
 ## Appendix — Verification Method
 
 All file:line citations were obtained by reading source directly (Read tool) and by
@@ -408,3 +508,12 @@ block used a stale `Syntax/` path prefix; the live paths are
 `.../SequentCalculus/LJ/Basic.lean:100` (botL) — both verified. No lean-lsp goal/hover calls
 were needed since every claim was a definition/theorem statement readable in source; build state
 was not exercised (no code change). No Lean source was modified.
+
+**2026-07-01 re-verification appendix**: all §2/§3/§4/§5 anchors re-checked by direct `Read`,
+`grep -n`, `grep -rl`, `find`, and `wc -l` (see §9 for the full corrected table). No lean-lsp
+goal/hover calls were needed (all claims are definition/theorem-location or line-count facts
+readable directly from source and `git log`/`jq` on `specs/state.json` +
+`specs/archive/state.json`). No Lean source was modified in this re-verification pass
+(`git status` confirms only `specs/415_.../` artifacts changed, plus one pre-existing unrelated
+modification to `Cslib/Logics/Modal/Tableau/CompletenessLoop.lean` from a different task, present
+before this session started and untouched by it).

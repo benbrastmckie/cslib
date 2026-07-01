@@ -24,7 +24,7 @@
   ],
   "blockers": [],
   "sorry_inventory": [],
-  "commit": "PENDING_NEXT_COMMIT",
+  "commit": "af2369af",
   "session_id": "sess_1782868458_ecfcce",
   "notes": "modalExpMeasure_step_lt (the engine) required threading hb/hInv/hW (the same closure + accFreshInv + world-bound hypotheses used by P1's modalApplyOne_outputs_subset) as explicit hypotheses of the engine lemma itself -- this is the added-invariant deviation flagged in the dispatch prompt as expected/precedented (matches P2's ModalPotentialInv threading pattern). P5 will need to supply hb/hInv/hW at each call site of modalExpMeasure_step_lt (these are exactly the fields already carried by ModalPotentialInv, so P5a's combined-invariant bundle should thread them through unchanged)."
 }

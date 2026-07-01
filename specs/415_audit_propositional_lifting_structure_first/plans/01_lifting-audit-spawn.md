@@ -1,7 +1,7 @@
 # Implementation Plan: Task #415 — Propositional Lifting Audit Finalization + Spawn Manifest
 
 - **Task**: 415 - Audit propositional->modal/temporal/bimodal lifting vs structure-first vision
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 5 hours
 - **Dependencies**: None (research complete; report exists)
 - **Research Inputs**: specs/415_audit_propositional_lifting_structure_first/reports/01_lifting-audit.md

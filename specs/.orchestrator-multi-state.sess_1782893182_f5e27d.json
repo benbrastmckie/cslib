@@ -1,0 +1,37 @@
+{
+  "session_id": "sess_1782893182_f5e27d",
+  "task_numbers": [
+    390,
+    415
+  ],
+  "waves": [
+    [
+      390,
+      415
+    ]
+  ],
+  "max_cycles": 10,
+  "cycle_count": 3,
+  "failed_tasks": [],
+  "completed_tasks": [
+    390,
+    415
+  ],
+  "current_statuses": {
+    "390": "completed",
+    "415": "completed"
+  },
+  "task_dirs": {
+    "390": "specs/390_update_organisation_md",
+    "415": "specs/415_audit_propositional_lifting_structure_first"
+  },
+  "research_agents": {
+    "390": "cslib-research-agent",
+    "415": "cslib-research-agent"
+  },
+  "implement_agents": {
+    "390": "cslib-implementation-agent",
+    "415": "cslib-implementation-agent"
+  },
+  "status": "completed"
+}

@@ -1,7 +1,7 @@
 # Implementation Plan: Task #317 (v5 — Frame change + fuel raise for sorry-FREE intuitionistic tableau completeness, HARD mode)
 
 - **Task**: 317 - Close BOTH residual sorries (B1 `Scheme.lean:330` truthLemma T(→); B2 `Scheme.lean:986` `intExpandBranches_openBranch_sat` fuel=0) to reach a sorry-FREE intuitionistic tableau completeness
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED] — Phase 2 (foundation) hit STOP-gate R1; Phases 3–11 gated. Requires an architectural decision (plan v6 revising Postmortem 5 signature constraint, or `IForces`/`Kripke.lean` change) before proceeding. See Phase 2 for the two documented blockers.
 - **Effort**: 18 hours
 - **Dependencies**: 316 (soundness, landed — TERRITORY HAZARD, `Soundness.lean` + `Expansion.lean` fuel site). Downstream: 430 (atom-persistence upward closure — RESHAPED by this plan's frame change, see Roadmap Alignment), then 375 (proof-system TFAE edges, needs 430 + completeness green).
 - **Research Inputs**:

@@ -1,21 +1,53 @@
 {
-  "status": "planned",
-  "agent_type": "planner-hard-agent",
-  "task_number": 317,
-  "delegation_path": ["orchestrator", "plan", "planner-hard-agent"],
-  "plan_path": "specs/317_propositional_tableau_completeness/plans/05_frame-change-and-fuel-raise.md",
-  "plan_version": 5,
-  "phase_count": 11,
-  "estimated_hours": 18,
-  "postmortem_rules_count": 6,
-  "complexity": "complex",
-  "research_integrated": true,
-  "dependency_waves": [[1],[2],[3],[4,6,7],[5,8,9],[10],[11]],
-  "reports_integrated": [
-    {"path": "specs/317_propositional_tableau_completeness/reports/07_option-b-fuel-bound.md", "integrated_in_plan_version": 5, "integrated_date": "2026-07-01"},
-    {"path": "specs/317_propositional_tableau_completeness/reports/08_b1-truthlemma-timp.md", "integrated_in_plan_version": 5, "integrated_date": "2026-07-01"}
+  "status": "partial",
+  "started_at": "2026-07-01T00:00:00Z",
+  "requires_user_review": true,
+  "artifacts": [
+    {
+      "path": "specs/317_propositional_tableau_completeness/plans/05_frame-change-and-fuel-raise.md",
+      "type": "plan",
+      "summary": "Phase 1 [COMPLETED], Phase 2 [BLOCKED] with in-line STOP-gate a finding."
+    },
+    {
+      "path": "specs/317_propositional_tableau_completeness/summaries/05_frame-change-and-fuel-raise-summary.md",
+      "type": "summary",
+      "summary": "Dispatch summary with Plan Deviations section."
+    },
+    {
+      "path": "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
+      "type": "handoff",
+      "summary": "Structured H9 handoff: status blocked, sorry_inventory (4 entries), blockers (Phase 2 R1 + scope-ambiguity flag), continuation_context."
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "type": "lean",
+      "summary": "Phase 1: intExpandBranches_openBranch_sat widened to ∃ edges : IEdges, IBranchSaturation Atom b; openBranch_countermodel call site updated. Commit b646eb10."
+    }
   ],
-  "supersedes": ["plans/04_sfor-dedup-fuel-sufficiency.md (Phases 5/7 retired; Phases 1-4 preserved)"],
-  "h8_compliant": true,
-  "parallel_tracks": "B1 (Phases 4,5) and B2 (Phases 6-9) run in parallel after the frame change; converge at Phase 10 (intExpandBranches_openBranch_sat)"
+  "partial_progress": {
+    "stage": "phase-2-blocked",
+    "details": "Phase 1 of 11 COMPLETED and committed (b646eb10). Phase 2 (STOP-gated, highest-risk) BLOCKED: openBranch_countermodel/tableau_complete's byte-stable signatures pin IForces's World to bare Nat, resolving [Preorder Nat] to the global Nat.instPreorder (a total, unbounded order) at theorem-type elaboration time -- verified live via #synth Preorder Nat. This makes edge-accessibility unreachable via completeness-side-only edits; confirmed report 08's adversarial counterexample and established a stronger type-theoretic impossibility (total order cannot represent non-linear accessibility). Phases 3-11 not attempted (gated on Phase 2). Full finding in plan file + .orchestrator-handoff.json."
+  },
+  "phases_completed": 1,
+  "phases_total": 11,
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 4,
+    "sorry_count_in_scope": 2,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": false,
+    "ci_pipeline_note": "Only the scoped Scheme.lean build was run (Phase 1 verification); full CI pipeline (lake lint, lint-style, shake, mk_all, test) was not run since Phase 2 introduced no Lean changes to verify and status is not 'implemented'."
+  },
+  "memory_candidates": [
+    "IForces (Cslib Propositional Kripke.lean) resolves [Preorder World] via typeclass search at theorem-type elaboration time; instantiating at World=Nat locks in Nat.instPreorder (total, unbounded) with no possibility of local override via letI/haveI inside a proof body, since the goal type is already fixed before the proof starts.",
+    "A total (linear) Preorder instance cannot represent a non-linear (tree/DAG-shaped) Kripke accessibility relation, regardless of relabelling -- this is a hard type-theoretic limit, not a missing-proof gap. Relevant to any future intuitionistic/modal completeness development that tries to reuse a flat Nat-labelled carrier with the ambient order as accessibility."
+  ],
+  "metadata": {
+    "session_id": "sess_1782919268_2df8d8_317",
+    "agent_type": "cslib-implementation-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
+  }
 }

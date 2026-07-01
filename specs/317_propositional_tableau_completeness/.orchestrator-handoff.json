@@ -1,112 +1,71 @@
 {
-  "status": "partial",
-  "plan": "04_sfor-dedup-fuel-sufficiency",
-  "summary": "Phase 2 (implement + wire the Sfor-containment loop-check) of plan 04 COMPLETE. Replaced the Phase-1 `none`-stub `intFImpReuseWitness?` in Expansion.lean with a real implementation: reads psi as newForms's sole sign=.neg entry and Sfor(w') as newForms's sign=.pos sublist, then searches (bPers.map (.label)).eraseDups via List.findSome? for the first world label x such that isAccessible edges w x, Sfor(w') subseteq posFormulasAt bPers x (via List.contains), and psi not in posFormulasAt bPers x. Wired into go's `some (.linearResult newForms nw' newEdge, newExp)` branch: matching on newEdge, the `none` (alpha-rule) sub-case is unchanged; the `some e` (world-creating F(phi->psi)) sub-case now calls intFImpReuseWitness? bPers edges newForms e -- `some x` takes the no-new-world path (bPers unchanged, edges unchanged, world counter nw unchanged/unconsumed, F(phi->psi)@w still marked expanded via newExp), `none` creates w' exactly as before (Branch.extendMany, nw', edges ++ [e]). Expansion.lean builds GREEN with zero new sorries/axioms/vacuous defs. Signature-change question: NO -- intFImpRule/intApplyRuleFull/intStepBranch signatures are all unchanged; the entire check and its wiring live inside go, exactly as the Phase 1 GO verdict predicted. Preserved-Asset check: a scoped build of the downstream Soundness module surfaced exactly one broken lemma, intExpandBranches_closed_unsat (Soundness.lean, starts line 1083; unification failures at ~1396 and ~1461) -- its induction assumed every world-creating linearResult step strictly grows the branch (via Branch.extendMany / a new edge), which the reuse (some x) path no longer does. This is the EXPECTED fallout flagged by this phase's own instructions; it was NOT patched (no weakening, no sorry added) -- it is recorded here verbatim for Phase 3 (countermodel/Hintikka re-verification) and Phase 4 (soundness audit) to resolve. Scheme.lean sorries at lines 330 and 985 are unchanged (Phase 2 closes no sorry).",
-  "phases_completed": 2,
-  "phases_total": 7,
-  "build_green": true,
-  "signature_change_required": false,
-  "signature_change_reasoning": "Confirmed as predicted in Phase 1: go already carries bPers and edges (pre-extension) in its own parameter scope at the exact point the F(phi->psi) world-creating rule fires. intFImpRule, intApplyRuleFull, and intStepBranch keep their existing parameter lists unchanged. The reuse witness (intFImpReuseWitness? bPers edges newForms e) and its branch dispatch are implemented entirely inside go.",
-  "sorry_inventory": {
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean": [
-      330,
-      985
-    ],
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean": [
-      113
-    ],
-    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean": [
-      110
-    ]
-  },
-  "sorry_relocations": 0,
+  "status": "blocked",
+  "summary": "Phase 1 of plan v5 (11 phases) COMPLETED: widened intExpandBranches_openBranch_sat to existentially expose the branch's accumulated IEdges, reusing the single pre-existing sorry, zero new sorries. Phase 2 (highest-risk, STOP-gated) is BLOCKED: openBranch_countermodel/tableau_complete's byte-stable (Postmortem 5) signatures pin IForces's World argument to bare Nat, forcing Lean to resolve [Preorder Nat] to the unique global Nat.instPreorder (verified live via #synth Preorder Nat) -- a TOTAL, unbounded order. This makes the edge-accessibility frame change impossible via completeness-side-only edits, confirmed via report 08's adversarial counterexample (T(not-p -> q)@0, phantom world k) plus a new, stronger type-theoretic finding: a total order cannot represent the non-linear (tree/DAG-shaped) accessibility that general intuitionistic completeness requires (e.g. edge-incomparable beta-split siblings). No Lean edits were made for Phase 2; both sorries (330, 991) remain open and untouched. Phases 3-11 are gated on Phase 2 and were not attempted.",
+  "phases_completed": 1,
+  "phases_total": 11,
+  "sorry_inventory": [
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 330,
+      "context": "truthLemma T(phi->psi) forward (T-imp) case; unchanged this dispatch"
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 991,
+      "context": "intExpandBranches_openBranch_sat fuel=0 base case; line shifted from 986 to 991 by Phase 1's docstring/conclusion-type edits; underlying gap unchanged (fuel-sufficiency, Phase 10's job)"
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+      "line": 113,
+      "context": "intuitionisticTableau_complete: IValid phi -> per-branch forcing bridge; pre-existing, out of plan v5's 11-phase scope as literally written (flagged as a plan-scope gap, see blockers[])"
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+      "line": 110,
+      "context": "minimalTableau_complete: analogous IValid/MValid bridge; pre-existing, out of plan v5's 11-phase scope as literally written"
+    }
+  ],
   "blockers": [
     {
-      "phase": 3,
-      "risk": "R2",
+      "phase": 2,
+      "risk": "R1",
       "status": "BLOCKED",
-      "title": "intFImpReuseWitness? does not establish the sat_fimp Hintikka condition it is relied on to establish",
-      "detail": "IExpandedConsistent bPers newExp (Scheme.lean:502-503) requires sfSatisfied bPers sf for the discharged sf = <.neg, .imp phi psi, w>, which for the .neg/.imp case (Scheme.lean:495-498, matching IBranchSaturation.sat_fimp at Scheme.lean:91-95) demands an EXPLICIT F(psi)@w' branch entry at the witness world. intFImpReuseWitness? (Expansion.lean:248-267) only checks isAccessible, Sfor(w') subseteq posFormulasAt bPers x (gives T(phi)@x), and psi not in posFormulasAt bPers x (i.e. NOT T(psi)@x) -- this does not imply F(psi)@x is present; propagatePersistence only ever copies .pos-signed formulas (Rules.lean:139-141), so a reuse witness x can lack any signed entry for psi whatsoever.",
-      "counterexample": "Atom := Nat. bPers := [<.pos, atom 1, 1>, <.neg, atom 2, 1>] (world x=1 carries T(atomQ)@1, F(atomR)@1 only). edges := [(1,0)]. F(atomQ -> atomP)@0 fires at w=0 with newForms := [<.pos, atom 1, 2>, <.neg, atom 0, 2>] (Sfor(w')={atomQ}, obligation atomP), newEdge := (2,0). By hand-trace, intFImpReuseWitness? bPers edges newForms (2,0) = some 1 (isAccessible edges 0 1 = true; sfor=[atomQ] all contained in posFormulasAt bPers 1=[atomQ]; atomP not in posFormulasAt bPers 1). But bPers has no <.neg, atom 0 (atomP), 1> entry -- sat_fimp/sfSatisfied genuinely fails at x=1 for this sf, and no other world in the branch has both T(atomQ) and F(atomP).",
-      "recommendation": "Phase 1/2 revisit (NOT implemented in Phase 3 -- out of territory and explicitly forbidden to patch around in the countermodel lemma): tighten intFImpReuseWitness?'s third conjunct from `!(forcedAtX.contains psi)` to an explicit check `bPers.any (fun y => y.sign == .neg && y.formula == psi && y.label == x) = true`, i.e. only reuse witnesses that already carry a live F(psi) obligation, not merely witnesses that happen not to force psi positively. Re-dispatch Phase 3 against the tightened predicate afterward.",
-      "action_taken": "None. No Scheme.lean edit was made this dispatch (any edit would require either a new sorry or weakening sfSatisfied/IBranchSaturation, both forbidden). Scheme.lean is byte-identical to the 26508fe9 baseline.",
-      "also_noted": "intExpandBranches_openBranch_sat's succ case (Scheme.lean:1055-1074, as committed at 26508fe9) is separately stale relative to the current post-dedup go (Expansion.lean:320-355): it does not yet case-split on newEdge/intFImpReuseWitness? at all, so it will not typecheck against the current go shape regardless of the semantic blocker above. Both issues must be fixed together once the predicate is tightened."
+      "title": "Edge-accessibility frame cannot be installed without changing openBranch_countermodel/tableau_complete's byte-stable signatures, or IForces's definition",
+      "detail": "IForces (Kripke.lean:81) is generic over [Preorder World]; its .imp case resolves '<=' via typeclass search on World. openBranch_countermodel and tableau_complete (Scheme.lean:1320-1336, 1360-1368) both state IForces (intExtractValuation b) (S.modelBot b) 0 phi with intExtractValuation b : Nat -> Atom -> Prop (Soundness.lean:1811, unchanged type) and 0 : Nat, so World unifies to Nat and Lean resolves [Preorder Nat] to the unique global Nat.instPreorder -- confirmed live via '#synth Preorder Nat' (returns Nat.instPreorder) and 'example : (Preorder.toLE : LE Nat).le = (. <= .) := rfl' (typechecks). This resolution happens at theorem-type elaboration time, before any proof-body tactic (letI/haveI) could override it, so no completeness-side-only edit can install edge-accessibility for these two theorems without changing their stated types.",
+      "counterexample": "Report 08's adversarial example, re-verified: branch carries T((not p) -> q)@0 on an open saturated branch. Pick phantom world k strictly larger than every branch label. intExtractValuation b j p = False for every phantom j (nothing labeled j on the branch), so IForces k (not p) = (forall j>=k, IForces j p -> IForces j bot) is vacuously True (antecedent always False). But IForces k q = intExtractValuation b k q = False (phantom). So k witnesses IForces k (not p) and not(IForces k q), refuting 'forall w'>=0, w' forces (not p) -> w' forces q' -- i.e. the T(->) truth-lemma case (sorry 330) is genuinely FALSE at World=Nat/canonical order, for ANY branch containing this shape of T-implication.",
+      "new_finding_beyond_report_08": "Nat.instPreorder is a LINEAR (total) order; general intuitionistic Kripke-completeness requires NON-LINEAR (tree/DAG-shaped) frames in general (e.g. two beta-split sibling worlds are edge-incomparable, yet both receive SOME Nat label under a total order). No relabelling/retraction of edge-accessible worlds onto bare Nat can make a total order represent a genuinely non-linear accessibility relation. This rules out any 'clever reindexing' workaround within the existing World=Nat commitment, not just the current numeric-labelling scheme -- the obstruction is type-theoretic, not merely a missing proof.",
+      "recommendation": "Requires a human/orchestrator-level architectural decision before Phase 2 can proceed. Two escape routes, both outside 'completeness-side edits + read-only soundness machinery': (a) change openBranch_countermodel's/tableau_complete's stated conclusion types to quantify over a new World type carrying a custom edge-based Preorder instance -- a deliberate, tracked public-signature change, requiring Postmortem Constraint 5 to be revised in a plan v6, plus an audit of all Decidable/DecisionProcedure consumers; (b) change IForces's definition (Kripke.lean) to take an explicit accessibility relation parameter instead of relying on [Preorder World] -- a foundational semantics change rippling into the already-green tableau_sound (same file, task-316-adjacent) and other IForces consumers, forbidden without escalation per Postmortem 4.",
+      "action_taken": "None. No Lean files edited for Phase 2. Full finding recorded in plans/05_frame-change-and-fuel-raise.md Phase 2 section and in this handoff. Both sorries (330, 991) left open, untouched."
+    },
+    {
+      "phase": "N/A (plan-scope gap, not a phase failure)",
+      "risk": "scope-ambiguity",
+      "status": "FLAGGED",
+      "title": "Plan v5's 'Definition of done' (grep -n sorry over the four Intuitionistic tableau files returns nothing) is broader than its 11 enumerated phases, which only target Scheme.lean:330 and Scheme.lean:986",
+      "detail": "Completeness.lean:113 and Minimal/Completeness.lean:110 carry pre-existing 'IValid -> per-branch forcing' bridge sorries (their own docstrings call them 'part of the completeness obligations handed to task 317'), but no phase 1-11 in plan v5 targets them. They may become dischargeable once Phase 2's frame + Phase 10's measure work land (per Completeness.lean:97-105's own docstring reasoning about IValid instantiation), but this was not verified this dispatch since Phase 2 is blocked. Flagging for the plan owner to either add an explicit phase for these two lemmas or narrow the 'Definition of done' language to match the 11 phases as written.",
+      "recommendation": "No action needed until Phase 2 unblocks; revisit when re-planning."
     }
   ],
-  "preserved_asset_fallout": {
-    "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
-    "lemma": "intExpandBranches_closed_unsat",
-    "line_start": 1083,
-    "failing_unification_sites": [
-      1396,
-      1461
-    ],
-    "diagnosis": "The lemma's induction on intExpandBranches assumes that every `some (.linearResult newForms nw' (some newEdge), newExp)` step strictly extends the branch (Branch.extendMany bPers newForms) and appends the new edge. With the Sfor-containment reuse path now live, the `some x` witness case instead continues on `bPers` unchanged with `edges` unchanged and `nw` unconsumed -- a genuinely new case the induction does not yet cover.",
-    "expected": true,
-    "action_taken": "none (recorded only, per territory contract: Soundness.lean is out of scope for Phase 2 and Phase 3 alike)",
-    "suggested_resolution_for_phase_3_or_4": "Add an induction case for the reuse (`some x`) branch showing satisfiability is preserved: since Sfor(w') subseteq posFormulasAt bPers x (the ancestor x already forces everything the fresh world would have forced) and x is accessible from w, any model satisfying the branch at x also witnesses whatever `intBranchSatisfied` needs from the (never-created) w' -- no fresh `worldOf'` is needed because x already serves that role. This likely requires a monotonicity/containment lemma relating `posFormulasAt` containment to `intBranchSatisfied` preservation, analogous to the existing persistence-preservation argument."
-  },
-  "phase3": {
-    "status": "BLOCKED",
-    "verdict": "R2 materialized: intFImpReuseWitness? guarantees T(phi)@x at the reuse witness but not the explicit F(psi)@x entry that IBranchSaturation.sat_fimp/sfSatisfied's .neg/.imp case requires. See top-level blockers[] entry for the full counterexample and recommendation.",
-    "lemmas_enumerated": [
-      "IBranchSaturation (Scheme.lean:72-99, field sat_fimp at 91-95)",
-      "sfSatisfied / IExpandedConsistent (Scheme.lean:478-503)",
-      "IExpandedConsistent_sat (Scheme.lean:562-635, not re-proved -- subsumed by the blocker)",
-      "intExpandBranches_openBranch_sat (Scheme.lean:968-1095, where the break surfaces)",
-      "openBranch_countermodel (Scheme.lean:1245-1270, not reached -- blocked upstream)"
-    ],
-    "task_430_accessibility_delta": "Under the (currently broken) dedup design, a discharged F(phi->psi)@w no longer always produces a fresh leaf world with one incoming edge from w; it can instead be discharged by any already-accessible ancestor x, so a single world x can serve as the Hintikka witness for many unrelated F(->) obligations raised at different worlds/times, and edges stops growing on those steps. Task 430's intExtractValuation upward-closure argument will need to reason over this shared/converging witness structure (shallower, more heavily cross-referenced tree) rather than the pre-dedup one-obligation-one-child shape.",
-    "environment_note": "The lean-lsp MCP server in this session is configured against /home/benjamin/Projects/BimodalLogic, not cslib -- lean_run_code reports 'unknown module prefix Cslib' and lean_goal on cslib files returns null goals. The counterexample above was verified by direct hand-trace/inspection of the source, not by live execution. The orchestrator may want to fix this MCP misconfiguration before the next dispatch on this task.",
-    "scheme_lean_build_note": "Scoped build of Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme currently cannot reach Scheme.lean at all: it fails upstream at Intuitionistic/Soundness.lean (Phase 2's known/expected fallout, Phase 4's job), so Scheme.lean's own compile status is untested by lake in this dispatch. No edits were made to Scheme.lean."
-  },
   "continuation_context": {
-    "is_successor_expected": true,
-    "next_action_hint": "plan-revisit",
-    "resume_at": "Phase 1/2 revisit of plans/04_sfor-dedup-fuel-sufficiency.md to tighten intFImpReuseWitness? per the Phase 3 counterexample above, THEN re-dispatch Phase 3 (countermodel/Hintikka re-verification) against the tightened predicate. Phase 4 (soundness audit) may proceed independently in parallel as already scheduled.",
-    "last_good_commit": "619acd3a (Phase 2: implement Sfor-containment loop-check). No Phase 3 commit was made (blocked before any edit)."
+    "resume_at": "Phase 2 of plans/05_frame-change-and-fuel-raise.md is BLOCKED pending an architectural decision (see blockers[0]). Do NOT re-attempt Phase 2 without either (a) a plan v6 that revises Postmortem Constraint 5 to permit a signature change at openBranch_countermodel/tableau_complete plus a Decidable/DecisionProcedure consumer audit, or (b) an explicit decision to change IForces's definition in Kripke.lean with task-316/tableau_sound coordination. Phases 3-11 are all downstream of Phase 2 and cannot proceed until it unblocks.",
+    "last_good_commit": "ea452ce5 (Phase 1 complete + concurrent-session Phase-1 duplicate cleanup)",
+    "concurrent_session_note": "A concurrent session sess_1782919268_2df8d8_317b was also dispatched on this same task/plan during this window and independently reached Phase 1 (commit d6d78714, later self-removed as redundant against this session's b646eb10, commit ea452ce5). Check for further concurrent progress before re-dispatching to avoid duplicate work."
   },
-  "task_430_gate": "still gated on B2-fuel0 (sorry 985), which is gated on Phase 3-7 of plan 04 completing; Phase 3 is now BLOCKED pending a Phase 1/2 predicate tightening",
   "artifacts": [
     {
-      "path": "specs/317_propositional_tableau_completeness/plans/04_sfor-dedup-fuel-sufficiency.md",
+      "path": "specs/317_propositional_tableau_completeness/plans/05_frame-change-and-fuel-raise.md",
       "type": "plan",
-      "summary": "Phase 2 marked [COMPLETED] (unchanged this dispatch). Phase 3 marked [BLOCKED] with the full R2 counterexample, task-430 coordination note, and Phase 1/2 tightening recommendation recorded in its checklist."
+      "summary": "Phase 1 marked [COMPLETED], Phase 2 marked [BLOCKED] with the full STOP-gate a technical finding recorded in-line."
     },
     {
-      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+      "path": "specs/317_propositional_tableau_completeness/summaries/05_frame-change-and-fuel-raise-summary.md",
+      "type": "summary",
+      "summary": "Dispatch summary: Phase 1 implementation details, Phase 2 blocker finding, Plan Deviations section."
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
       "type": "lean",
-      "summary": "Unchanged this dispatch (Phase 2 artifact, read-only for Phase 3)."
-    },
-    {
-      "path": "specs/317_propositional_tableau_completeness/progress/phase-2-progress.json",
-      "type": "progress",
-      "summary": "Phase 2 objective-level progress tracking, all objectives done, including downstream_fallout record."
-    },
-    {
-      "path": "specs/317_propositional_tableau_completeness/progress/phase-3-progress.json",
-      "type": "progress",
-      "summary": "Phase 3 progress: BLOCKED at the Hintikka-condition re-verification step, with the R2 counterexample recorded."
+      "summary": "Phase 1 only: intExpandBranches_openBranch_sat widened to expose edges; openBranch_countermodel call site updated. Commit b646eb10."
     }
-  ],
-  "phase4": {
-    "status": "COMPLETED",
-    "verdict": "minimally-fixed",
-    "task_316_coordination_flag": true,
-    "summary": "Soundness.lean's intExpandBranches_closed_unsat broke exactly as Phase 2's preserved_asset_fallout predicted (failing unifications at the linearResult some-newEdge case, ~lines 1396/1461 pre-fix). Fixed by hoisting an explicit case split on newEdge and the intFImpReuseWitness? result (mirroring go's own structure) and adding the missing reuse sub-case: on reuse the recursive intExpandBranches call receives bPers unchanged, so applyPersistenceFixpoint_sat already gives intBranchSatisfied ... wo bPers and the fuel-induction hypothesis (ih) applies directly -- no new world, no intRule_preserves_sat, no new freshness lemma needed. All other soundness lemmas confirmed rule-level and untouched by the dedup.",
-    "commit": "8a5c0250eb8cf838233b43c7fc90d798738a554c",
-    "commit_message": "task 317 phase 4: minimal Soundness.lean fix for dedup (coordinates task 316)",
-    "files_touched": [
-      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean"
-    ],
-    "build_status": "green (lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Soundness)",
-    "sorry_count_in_file": 0,
-    "axioms": [
-      "propext",
-      "Classical.choice",
-      "Quot.sound"
-    ],
-    "note_re_phase3_blocker": "Phase 3's R2 blocker (intFImpReuseWitness? not guaranteeing the explicit F(psi)@x Hintikka entry) is a Scheme.lean/Completeness.lean semantic gap, orthogonal to this phase's fix -- Soundness.lean's fix does not resolve or depend on that blocker; Soundness.lean's induction only needed a structural (not semantic) case addition because it reasons about intBranchSatisfied, not about the Hintikka/countermodel conditions Scheme.lean's lemmas require.",
-    "progress_file": "specs/317_propositional_tableau_completeness/progress/phase-4-progress.json"
-  }
+  ]
 }

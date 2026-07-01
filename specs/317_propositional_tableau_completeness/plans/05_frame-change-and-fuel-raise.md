@@ -296,15 +296,15 @@ decisions. Items 1-6 carried forward verbatim from v4; items 7-11 encode the v5 
 
 ---
 
-### Phase 2: Install edge-accessibility as the completeness frame + `intExtractValuation` monotonicity [NOT STARTED]
+### Phase 2: Install edge-accessibility as the completeness frame + `intExtractValuation` monotonicity [BLOCKED]
 
 - **Goal:** Replace the ambient `Preorder ℕ` `≤` with the reflexive-transitive closure of
   `isAccessible edges` on the completeness carrier, and prove `intExtractValuation` monotone along it
   (required for the extracted model to be a `KripkeModel`, `Kripke.lean:64-65` `v_upward_closed`).
   This is the highest-risk phase (R1 / STOP-gate a).
 - **Tasks:**
-  - [ ] `git log -1 -- Scheme.lean`; scoped+grepped rebuild GREEN.
-  - [ ] Define the countermodel `Preorder` (or reachable-label subtype) as the RTC of
+  - [x] `git log -1 -- Scheme.lean`; scoped+grepped rebuild GREEN.
+  - [x] Define the countermodel `Preorder` (or reachable-label subtype) as the RTC of
         `isAccessible edges` (Phase 1's accessor). Read (windowed) `truthLemma` (`Scheme.lean:303`),
         `IForces`/`IForces_imp` (`Kripke.lean:81,100`), `intExtractValuation` (`Soundness.lean:1811`).
   - [ ] Prove `intExtractValuation` monotone along edges from `propagatePersistence`
@@ -312,15 +312,88 @@ decisions. Items 1-6 carried forward verbatim from v4; items 7-11 encode the v5 
         the DEDUP expansion** (report 08 §Q5: reuse must still propagate the parent's `T`-formulas;
         if reuse skips re-propagation, monotonicity along that edge could fail — verify the Option-A
         reuse path preserves the copy).
-  - [ ] Verify `IValid φ` still instantiates at this non-`≤` `Preorder` for `hvalid`
+  - [x] Verify `IValid φ` still instantiates at this non-`≤` `Preorder` for `hvalid`
         (`Scheme.lean:1348-1353`) — a real obligation (report 08 MEDIUM confidence), not a given.
+        **RESULT: it does NOT instantiate — see STOP-gate finding below.**
   - [ ] Verify `sat_fimp`'s `w ≤ w'` clause survives the dedup, or note it will be restated over the
         edge relation in Phase 4 (R8).
-  - [ ] **STOP-gate a**: if the frame cannot be installed / monotonicity cannot be proved using ONLY
+  - [x] **STOP-gate a**: if the frame cannot be installed / monotonicity cannot be proved using ONLY
         completeness-side edits + read-only soundness machinery, STOP, mark [BLOCKED], hand off which
         lemma resists and what `Soundness.lean` (task 316) edit it would require. Do NOT edit 316.
+        **TRIGGERED — see finding below.**
   - [ ] Scoped+grepped build GREEN; two sorries unchanged; commit `Scheme.lean` only:
         `task 317 phase 2: install edge-accessibility completeness frame + intExtractValuation monotone`.
+        **NOT REACHED — no Lean edits made this phase (analysis-only STOP, per the STOP-gate's own
+        instruction not to force a workaround).**
+
+#### STOP-gate a finding (2026-07-01, session `sess_1782919268_2df8d8_317`)
+
+**Claim: the frame change cannot be installed using completeness-side edits alone, because
+`openBranch_countermodel`/`tableau_complete`'s byte-stable (Postmortem 5) signatures pin
+`IForces`'s `World` type-class argument to `Nat`'s canonical, GLOBAL, TOTAL `Preorder` instance,
+and no completeness-side edit can override that instance for a *subset* of worlds without changing
+those two theorems' stated types.**
+
+**Mechanism (verified empirically, not just reasoned abstractly):**
+
+1. `IForces` (`Kripke.lean:81`) is defined generically over `[Preorder World]`; its `.imp` case
+   (`Kripke.lean:100-104`) unfolds to `∀ w', w ≤ w' → IForces v bot w' φ → IForces v bot w' ψ`,
+   where `≤` is resolved via **typeclass instance search on `World`**, not passed as a runtime
+   relation.
+2. `openBranch_countermodel`'s and `tableau_complete`'s conclusions (`Scheme.lean:1320-1336,
+   1360-1368`) both state `IForces (intExtractValuation b) (S.modelBot b) 0 φ` where
+   `intExtractValuation b : Nat → Atom → Prop` (`Soundness.lean:1811`, unchanged type). Since `0`
+   and `intExtractValuation b`'s domain are both bare `Nat`, `World` unifies to `Nat`, and Lean
+   resolves `[Preorder Nat]` to the **unique, globally-registered** `Nat.instPreorder` — confirmed
+   live via `#synth Preorder Nat` (returns `Nat.instPreorder`) and
+   `example : (Preorder.toLE : LE Nat).le = (· ≤ ·) := rfl` (typechecks), i.e. this instance's `≤`
+   is definitionally the standard, TOTAL, unbounded numeric order. This resolution happens at
+   THEOREM-TYPE elaboration time (before any proof-body `letI`/`haveI` could run), so it cannot be
+   locally overridden without changing `openBranch_countermodel`/`tableau_complete`'s stated types
+   — forbidden by Postmortem 5.
+3. Because `Nat.instPreorder` is TOTAL and unbounded, `∀ w' ≥ w` in the `.imp` case always ranges
+   over infinitely many "phantom" naturals that are never branch labels — report 08's own
+   adversarial counterexample (`T(¬p→q)@0`, phantom world `k` beyond every branch label) is a
+   genuine, re-verified proof that the T(→) truth-lemma case is **false** under this frame: at
+   phantom `k`, `IForces k (¬p) = True` (vacuous, since `intExtractValuation b j p = False` for
+   every phantom `j`) but `IForces k q = False` (phantom), refuting
+   `∀ w' ≥ w, IForces w' φ' → IForces w' ψ'`.
+4. **New finding beyond report 08**: this is not merely "hard to prove" but **type-theoretically
+   irreducible**. `Nat.instPreorder` is a *linear* (total) order. General intuitionistic
+   Kripke-completeness requires *non-linear* (branching/tree-shaped) frames in general — e.g. two
+   sibling worlds created by a β-split (`Scheme.lean` `branchingResult` case, `Expansion.lean`) are
+   edge-incomparable, yet both get *some* numeric label under Nat's *total* order. No retraction or
+   relabelling of edge-accessible worlds onto bare `Nat` can make Nat's canonical (total, chain-
+   shaped) order coincide with a genuinely tree/DAG-shaped edge-accessibility relation — a total
+   order cannot represent two incomparable elements. This rules out *any* "clever reindexing"
+   workaround within the existing `World = Nat` commitment, not just the specific numeric-labelling
+   scheme currently in place.
+
+**What would unblock this** (both options are OUTSIDE "completeness-side edits + read-only
+soundness machinery", i.e. both require STOP/escalate rather than unilateral action per Postmortem
+4/5):
+- **(a)** Change `openBranch_countermodel`'s/`tableau_complete`'s stated conclusion types to
+  quantify over a *different* `World` type (not bare `Nat`) carrying a custom `Preorder` instance
+  built from the branch's edge-accessibility. This is a deliberate, tracked **public signature
+  change** — directly forbidden by Postmortem 5 as currently written. If the orchestrator/user
+  decides this signature change is acceptable (it would need to thread through any
+  `Decidable`/`DecisionProcedure` consumers too — audit required), Postmortem 5 needs to be revised
+  for a re-planned Phase 2/3.
+- **(b)** Change `IForces`'s definition (`Kripke.lean`) to take an *explicit* accessibility
+  relation parameter instead of relying on `[Preorder World]` typeclass resolution. This is a
+  foundational semantics change rippling into the ALREADY-GREEN, task-316-adjacent `tableau_sound`
+  (`Scheme.lean:245-288`, same file) and potentially other `IForces` consumers across the
+  propositional development — squarely the kind of "edit soundness-adjacent machinery to force it
+  through" that Postmortem 4 forbids without STOP/escalation, and well outside `Scheme.lean`'s
+  owned-files scope for this phase.
+
+**Recommendation**: this requires a **human/orchestrator-level architectural decision** (likely a
+plan v6 that explicitly revises Postmortem Constraint 5 to permit a *deliberate, audited* signature
+change at `openBranch_countermodel`/`tableau_complete`, per option (a) above, with a companion
+audit of all `Decidable`/`DecisionProcedure` consumers) before Phase 2 can proceed. Both sorries
+(330, 991) remain open and untouched; no Lean files were edited this phase; no workaround, weakened
+lemma, or new sorry was introduced.
+
 - **Estimated output:** ~300-500 lines (largest foundation phase). If it exceeds ~450 lines, split
   into **2.1** (frame + `Preorder` install + `IValid` instantiation) and **2.2**
   (`intExtractValuation` monotonicity against the dedup expansion), committing each at green.

@@ -178,6 +178,77 @@ lemma intStepBranch_result_ne_notApplicable
       simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
       exact hsf.1.symm ▸ (by simp)
 
+/-! ## Sfor-Containment Loop-Check (Design — task 317, plan 04, Phase 1) -/
+
+/-- **Design specification only** (Phase 1 of `04_sfor-dedup-fuel-sufficiency.md`; the search
+this describes is implemented and wired into `go` in Phase 2). This is a trivial `none`-stub,
+not yet called from `intExpandBranches`.
+
+Following the `Sfor`-containment termination technique of Garg, Genovese & Negri,
+*Countermodels from Sequent Calculi in Multi-Modal Logics* (LICS 2012)
+[`GargGenoveseNegri2012`; BibKey added to `references.bib` in Phase 6], this helper will decide
+whether the `F(φ → ψ)`-triggered world-creation in `go`'s
+`some (.linearResult newForms nw' (some newEdge), newExp)` branch — the *only* world-creating
+case, produced solely by `intApplyRuleFull`'s `F(φ → ψ)` clause via `intFImpRule` — can be
+**reused** instead of performed, so that no two worlds on a branch ever end up with
+containment-equal forced-sets (which is what makes the existing `2^(2·complexity+2)` fuel
+bound, sized against the finite space of possible forced-sets, adequate).
+
+**Which set.** `intFImpRule φ ψ w nextWorld b` returns
+`newForms = [⟨.pos, φ, w'⟩, ⟨.neg, ψ, w'⟩] ++ propagatePersistence b w w'`, and
+`propagatePersistence b w w' = (posFormulasAt b w).map (labeled w')`. So the prospective
+forced-set at the would-be new world `w'`, `Sfor(w') = {φ} ∪ posFormulasAt bPers w`, is exactly
+the `sign = .pos` sub-list of `newForms`; the obligation `ψ` is the unique `sign = .neg` entry.
+Both are read directly off `newForms` — no need to thread `φ`/`ψ` separately.
+
+**Where it fires.** Inside `go` (the `intExpandBranches` inner loop), in the
+`some (.linearResult newForms nw' (some newEdge), newExp)` case, BEFORE
+`Branch.extendMany bPers newForms` and BEFORE `newEdge` is appended to `edges`. At that point
+`go` already has `bPers : IBranch Atom` and `edges : IEdges` (the pre-extension edge list) in
+its own parameters, and the source world `w = newEdge.2` (`intFImpRule` returns edge
+`(w', w)`). Consequently **no signature change to `intFImpRule`, `intApplyRuleFull`, or
+`intStepBranch` is required**: those keep exactly their current parameters
+(`φ ψ w nextWorld b` / `sf nextWorld b` / `b expanded nextWorld`); `edges` is available one
+level up, exactly where the check needs to run, so the design threads no new parameter through
+the rule layer at all.
+
+**What it returns.** `some x` for a world label `x` (search order: e.g. first match under
+`(bPers.map (·.label)).eraseDups`) such that:
+- `isAccessible edges w x` — `x` is reachable from `w` in the existing Kripke pre-order
+  (reuses `isAccessible` as-is; no new accessibility notion needed), AND
+- `Sfor(w') ⊆ posFormulasAt bPers x` — containment: everything that would hold at the fresh
+  world already holds at `x`, AND
+- `ψ ∉ posFormulasAt bPers x` — the obligation is still open at `x`, so reusing `x` does not
+  vacuously close the branch.
+
+When Phase 2 wires this in: `some x` means do NOT create `w'` — mark `F(φ → ψ)@w` expanded
+(already achieved via `newExp`) and continue on the SAME branch, calling `intExpandBranches`
+with `bPers` (not `Branch.extendMany bPers newForms`) and unmodified `edges` (not
+`edges ++ [newEdge]`). `none` means proceed exactly as today (create `w'` as normal).
+
+**Why not the worlds-free G4ip weight** (Dyckhoff 1992 / Negri–von Plato 2001 §5.5): that
+measure requires every rule's active formula to be strictly lighter than its principal
+formula, which `propagatePersistence` breaks by unconditionally copying ALL `T`-signed
+formulas at `w` — including compounds not yet expanded there — onto `w'` regardless of
+`complexity(φ → ψ)` (see blocker `R1-measure` in plan 03 / `.orchestrator-handoff.json`). The
+`Sfor`-containment check sidesteps this: instead of a per-step-decreasing measure over branch
+contents, it bounds the *number of distinct worlds* a branch can contain (`Sfor` takes values
+only in the finite lattice of subsets of `Sub(φ)` and grows monotonically along
+`isAccessible`), which is exactly the finite-model argument the `2^(2·complexity+2)` fuel bound
+already assumes.
+
+**GO verdict (R1 gate).** The check is fully expressible against the existing `IBranch`,
+`IEdges`, `posFormulasAt`, `isAccessible` primitives, using only quantities already in scope
+inside `go` (`bPers`, `edges`, `newForms`, `newEdge`). No new persistent field, no new
+structure, and no signature change anywhere in the rule layer is required. -/
+@[nolint unusedArguments]
+def intFImpReuseWitness? (_bPers : IBranch Atom) (_edges : IEdges)
+    (_newForms : List (ISF Atom)) (_newEdge : Nat × Nat) : Option Nat :=
+  -- Design stub only (Phase 1); parameter names document the intended signature (see
+  -- docstring above: `bPers`/`edges`/`newForms`/`newEdge` as available in `go`'s scope).
+  -- Phase 2 implements the search over accessible ancestors and wires the branch into `go`.
+  none
+
 /-! ## Expansion Loop -/
 
 /-- Expand a list of intuitionistic tableau branches with a fuel counter.

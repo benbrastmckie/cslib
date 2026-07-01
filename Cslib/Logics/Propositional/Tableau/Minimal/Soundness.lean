@@ -106,6 +106,7 @@ lemma minClosed_unsatisfiable {World : Type*} [Preorder World]
 
 /-! ## Main Soundness Theorem -/
 
+omit [Hashable Atom] in
 /-- **Minimal Tableau Soundness**: If `minimalTableau φ = closed`, then `MValid φ`.
 
 The proof instantiates `intExpandBranches_closed_unsat` with `isMinimallyClosed` and

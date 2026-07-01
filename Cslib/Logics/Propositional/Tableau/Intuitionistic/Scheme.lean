@@ -717,7 +717,7 @@ current next-world counter. Threaded alongside `IExpandedConsistent` to justify 
 private def ILabelBound (b : IBranch Atom) (nw : Nat) : Prop :=
   ∀ sf ∈ b, sf.label ≤ nw
 
-omit [Hashable Atom] in
+omit [Hashable Atom] [DecidableEq Atom] in
 /-- `ILabelBound` extends across `Branch.extendMany` when the new formulas' labels are
 bounded by the (possibly larger) new counter and the old counter only grows. -/
 private lemma ILabelBound_extendMany {b : IBranch Atom} {nw nw' : Nat}

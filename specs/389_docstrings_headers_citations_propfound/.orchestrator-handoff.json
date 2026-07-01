@@ -1,0 +1,72 @@
+{
+  "task": 389,
+  "session_id": "sess_1782924983_6bcecb_389",
+  "phase": "plan",
+  "status": "plan_complete",
+  "orchestrator_mode": false,
+  "plan": "specs/389_docstrings_headers_citations_propfound/plans/01_docstrings-headers-citations.md",
+  "report": "specs/389_docstrings_headers_citations_propfound/reports/01_docstrings-headers-citations.md",
+  "summary": "Small residual-work plan: task 389 is near-complete (a done by 406, b dropped, Classical c done by 460). Plan covers part (d) bib entry, part (c) safe-now omit in Minimal/Soundness, an optional (a) rename, and CI verification. Post-317 Completeness omit sweep is explicitly deferred and does NOT block 389.",
+  "phase_count": 4,
+  "estimated_hours": 1,
+  "complexity": "simple",
+  "dependency_waves": [[1, 2, 3], [4]],
+  "phases": [
+    {
+      "n": 1,
+      "name": "Add NegriVonPlato2001 to references.bib (part d)",
+      "depends_on": [],
+      "files": ["references.bib"],
+      "detail": "Append @book{NegriVonPlato2001,...} mirroring TroelstraSchwichtenberg2000 (references.bib:858). Verify DOI 10.1017/CBO9780511527340 or fall back to ISBN 978-0-521-79307-0.",
+      "safe": true
+    },
+    {
+      "n": 2,
+      "name": "omit for live unusedSectionVars (part c safe subset)",
+      "depends_on": [],
+      "files": [
+        "Cslib/Logics/Propositional/Tableau/Minimal/Soundness.lean",
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean (only if linter flags live)",
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean (only if linter flags live)"
+      ],
+      "detail": "Add 'omit [Hashable Atom] in' above minimalTableau_sound (locate by name, not line 118). Drive any extra sites from live 'lake build ... | grep -i unusedSectionVars' output, not report line numbers. Do NOT touch Completeness modules or any sorry-containing theorem.",
+      "safe": true
+    },
+    {
+      "n": 3,
+      "name": "OPTIONAL fld->himpFold rename (part a)",
+      "depends_on": [],
+      "files": ["Cslib/Foundations/Order/HilbertAlgebra/FreeMeetExtension.lean"],
+      "detail": "Zero lint value; cosmetic (task 395). Single-file replace_all if 395 still wants it; otherwise drop/abandon this phase.",
+      "optional": true
+    },
+    {
+      "n": 4,
+      "name": "CI verification and zero-debt check",
+      "depends_on": [1, 2, 3],
+      "files": [],
+      "detail": "lake build (full); lake exe checkInitImports; lake exe lint-style; unusedSectionVars grep on Minimal.Soundness/Minimal.Completeness/Intuitionistic.Completeness; confirm zero new sorry/axiom in diff.",
+      "safe": true
+    }
+  ],
+  "deferred_out_of_scope": {
+    "post_317_completeness_sweep": "Minimal/Intuitionistic Completeness unusedSectionVars omit sweep waits for task 317 (planned): the linter skips sorry-containing theorems, so warnings only appear once 317 fills sorries. This is a follow-up and MUST NOT block completion of 389.",
+    "unusedSimpArgs_soundness_135": "Minimal/Soundness:135:59 List.zip_nil_left unusedSimpArgs is out of scope (part c is unusedSectionVars only)."
+  },
+  "dependencies": {
+    "task_317": "planned; required only for the deferred Completeness sweep, NOT for any in-scope phase."
+  },
+  "verification_commands": [
+    "grep -n \"NegriVonPlato2001\" references.bib",
+    "lake build",
+    "lake exe checkInitImports",
+    "lake exe lint-style",
+    "lake build Cslib.Logics.Propositional.Tableau.Minimal.Soundness Cslib.Logics.Propositional.Tableau.Minimal.Completeness Cslib.Logics.Propositional.Tableau.Intuitionistic.Completeness 2>&1 | grep -i unusedSectionVars"
+  ],
+  "zero_debt": {
+    "sorries_introduced": 0,
+    "axioms_introduced": 0,
+    "notes": "All edits mechanical (bib entry, omit clauses, optional rename). Do not touch 317 sorries."
+  },
+  "recommended_next": "implement"
+}

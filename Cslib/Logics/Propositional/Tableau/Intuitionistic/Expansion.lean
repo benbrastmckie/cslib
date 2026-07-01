@@ -156,6 +156,7 @@ def intStepBranch (b : IBranch Atom) (expanded : List (ISF Atom)) (nextWorld : N
       | .notApplicable => none
       | result => some (result, expanded ++ [sf])
 
+omit [Hashable Atom] in
 /-- If `intStepBranch` returns `some (r, e')`, then `r ≠ .notApplicable`.
 The definition maps every `.notApplicable` result of `intApplyRuleFull` to `none`,
 so `.notApplicable` never appears as the first component of a `some` return value. -/

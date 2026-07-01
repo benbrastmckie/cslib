@@ -2400,6 +2400,95 @@ lemma modalStepBranch_potential_step
       rw [hmw, hstep1, hstep2, herase_eq, hstep2', ← hcore, hw'eq]
       ring
 
+/-! ## World-Count Bound (Phase 2 continuation, obligation e — final composition) -/
+
+private lemma modalSf_pos (φ0 : Proposition Atom) : 1 ≤ (modalSubfmls φ0).length :=
+  List.length_pos_iff.mpr (List.ne_nil_of_mem (modalSubfmls_self_mem φ0))
+
+/-- `Sf(φ0) := (modalSubfmls φ0).length` can only equal `1` when `φ0` has no proper structural
+subformula distinct from itself, i.e. `φ0` is an atom or `⊥` (`imp`/`box` both strictly grow the
+subformula list, since each of their immediate constituents already contributes `≥ 1` via
+`modalSubfmls_self_mem`) — both leaf shapes have `modalDepth = 0`. This is the fact
+`modalCap_le_pow`'s `hdeg` hypothesis needs. -/
+private lemma modalSf_one_imp_depth_zero (φ0 : Proposition Atom)
+    (h : (modalSubfmls φ0).length = 1) : modalDepth φ0 = 0 := by
+  cases φ0 with
+  | atom p => rfl
+  | bot => rfl
+  | imp a c =>
+    exfalso
+    simp only [modalSubfmls, List.length_cons, List.length_append] at h
+    have ha : 1 ≤ (modalSubfmls a).length :=
+      List.length_pos_iff.mpr (List.ne_nil_of_mem (modalSubfmls_self_mem a))
+    have hc : 1 ≤ (modalSubfmls c).length :=
+      List.length_pos_iff.mpr (List.ne_nil_of_mem (modalSubfmls_self_mem c))
+    omega
+  | box a =>
+    exfalso
+    simp only [modalSubfmls, List.length_cons] at h
+    have ha : 1 ≤ (modalSubfmls a).length :=
+      List.length_pos_iff.mpr (List.ne_nil_of_mem (modalSubfmls_self_mem a))
+    omega
+
+/-- **P2-obl-e (final)**: the a-priori world bound `modalWorldBound φ0` is preserved as a loop
+invariant of `modalStepBranch`, given the Φ-bound hypothesis `hPhiBound`
+(`Sf := (modalSubfmls φ0).length`) — the hand-verified invariant whose EXACT preservation
+(not merely non-increase) is `modalStepBranch_potential_step`'s payload. Chain: `Φ ≥ 0` (`Nat`)
+plus the exact Δ=0 identity give `modalMaxWorld b' + 1 ≤ modalCap Sf (modalDepth φ0)`, hence
+`modalMaxWorld b' < modalCap Sf (modalDepth φ0) ≤ Sf ^ (modalDepth φ0 + 1)` (`modalCap_le_pow`,
+using `Sf ≥ 1` unconditionally and `Sf = 1 → modalDepth φ0 = 0`), `≤ (2 · modalComplexity φ0 +
+1) ^ (modalDepth φ0 + 1)` (`modalSubfmls_length_le` + pow monotonicity in the base), `≤
+(2 · modalComplexity φ0 + 1) ^ (modalComplexity φ0 + 1)` (`modalDepth_le_complexity` + pow
+monotonicity in the exponent) `= modalWorldBound φ0`.
+
+This is a **documented deviation** from the plan's terse `hb + hW` loop-invariant target: the
+terse form (assuming only `modalMaxWorld b < modalWorldBound φ0` survives a step) is FALSE — a
+branch can carry a single not-yet-fired minting formula at label `modalWorldBound φ0 − 1`,
+satisfying the naive hypothesis, whose firing mints world `modalWorldBound φ0`, breaching the
+bound (see the doc-comment preceding `isMintingShaped` for the full counterexample argument).
+The invariant that actually survives a step is the `Φ`-bound proved here, carried via the
+`ModalPotentialInv` bundle (which P5a threads across the whole saturation-loop induction). -/
+lemma modalStepBranch_worldBound
+    (φ0 : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (rank : WorldIndex → Nat)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hinv : ModalPotentialInv φ0 b e acc rank)
+    (hPhiBound : modalMaxWorld b + modalPotential (modalSubfmls φ0).length b acc rank + 1 ≤
+      modalCap (modalSubfmls φ0).length (modalDepth φ0)) :
+    ∀ b' ∈ newBs, modalMaxWorld b' < modalWorldBound φ0 := by
+  obtain ⟨rank', -, -, -, hpotential⟩ :=
+    modalStepBranch_potential_step φ0 b e acc newBs newExps newAcc rank hstep hinv
+  intro b' hb'
+  have heq := hpotential b' hb'
+  have hcombined : modalMaxWorld b' + modalPotential (modalSubfmls φ0).length b' newAcc rank' + 1
+      ≤ modalCap (modalSubfmls φ0).length (modalDepth φ0) := by rw [heq]; exact hPhiBound
+  have hle : modalMaxWorld b' + 1 ≤
+      modalMaxWorld b' + modalPotential (modalSubfmls φ0).length b' newAcc rank' + 1 :=
+    Nat.add_le_add_right (Nat.le_add_right _ _) 1
+  have hmwlt : modalMaxWorld b' < modalCap (modalSubfmls φ0).length (modalDepth φ0) :=
+    Nat.lt_of_succ_le (le_trans hle hcombined)
+  have hSfpos : 1 ≤ (modalSubfmls φ0).length := modalSf_pos φ0
+  have hSfdeg : (modalSubfmls φ0).length = 1 → modalDepth φ0 = 0 :=
+    modalSf_one_imp_depth_zero φ0
+  have hcapbound : modalCap (modalSubfmls φ0).length (modalDepth φ0) ≤
+      (modalSubfmls φ0).length ^ (modalDepth φ0 + 1) := modalCap_le_pow hSfpos hSfdeg
+  have hSfle : (modalSubfmls φ0).length ≤ 2 * modalComplexity φ0 + 1 :=
+    modalSubfmls_length_le φ0
+  have hpow1 : (modalSubfmls φ0).length ^ (modalDepth φ0 + 1) ≤
+      (2 * modalComplexity φ0 + 1) ^ (modalDepth φ0 + 1) := Nat.pow_le_pow_left hSfle _
+  have hdc : modalDepth φ0 ≤ modalComplexity φ0 := modalDepth_le_complexity φ0
+  have hpow2 : (2 * modalComplexity φ0 + 1) ^ (modalDepth φ0 + 1) ≤
+      (2 * modalComplexity φ0 + 1) ^ (modalComplexity φ0 + 1) :=
+    Nat.pow_le_pow_right (by omega) (by omega)
+  have hWB : modalWorldBound φ0 = (2 * modalComplexity φ0 + 1) ^ (modalComplexity φ0 + 1) := rfl
+  calc modalMaxWorld b' < modalCap (modalSubfmls φ0).length (modalDepth φ0) := hmwlt
+    _ ≤ (modalSubfmls φ0).length ^ (modalDepth φ0 + 1) := hcapbound
+    _ ≤ (2 * modalComplexity φ0 + 1) ^ (modalDepth φ0 + 1) := hpow1
+    _ ≤ (2 * modalComplexity φ0 + 1) ^ (modalComplexity φ0 + 1) := hpow2
+    _ = modalWorldBound φ0 := hWB.symm
+
 end Cslib.Logic.Modal.Tableau
 
 end

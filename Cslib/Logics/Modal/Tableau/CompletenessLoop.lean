@@ -898,6 +898,300 @@ lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
                       rw [List.getElem?_cons_succ]; exact hai_restAs
               · exact hinner
 
+/-! ## Initial-Branch Membership Persistence (task 442 Phase 6) -/
+
+/-- One `modalStepBranch` step preserves membership of a fixed formula `sf` already on the
+branch: mirrors `modalLoop_bClosure`'s case split (every child branch is `newForms ++ b` or
+`br ++ b` for some `br`/`newForms`, so any pre-existing branch member survives via
+`List.mem_append_right`). -/
+private lemma modalStepBranch_mem_preserved
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (sf : SignedFormula (Proposition Atom) WorldIndex) (hsf : sf ∈ b)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc)) :
+    ∀ b' ∈ newBs, sf ∈ b' := by
+  simp only [modalStepBranch] at hstep
+  obtain ⟨sf_exp, hsfmem, hsf'⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf' with hexp
+  rcases hfstc : (modalApplyOne sf_exp b acc).fst with nf | brs | nf | _
+  · rw [hfstc] at hsf'
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf'
+    intro b' hb'
+    rw [← hsf'.1] at hb'
+    simp only [List.mem_singleton] at hb'
+    subst hb'
+    exact List.mem_append_right _ hsf
+  · rw [hfstc] at hsf'
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf'
+    intro b' hb'
+    rw [← hsf'.1] at hb'
+    obtain ⟨br, -, rfl⟩ := List.mem_map.mp hb'
+    exact List.mem_append_right _ hsf
+  · rw [hfstc] at hsf'
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf'
+    intro b' hb'
+    rw [← hsf'.1] at hb'
+    simp only [List.mem_singleton] at hb'
+    subst hb'
+    exact List.mem_append_right _ hsf
+  · rw [hfstc] at hsf'; simp at hsf'
+
+/-- Every formula in every initial branch appears in the open branch returned by
+`modalExpandBranches`. Mirrors the classical propositional tableau's
+`classicalExpandBranches_openBranch_initial_mem`
+(`Classical/Completeness.lean:1164`), extended with the per-branch `acc` parallel list. Used to
+show `F(φ0)@0` is on the countermodel branch (task 442 Phase 6). -/
+private lemma modalExpandBranches_openBranch_initial_mem (fuel : Nat)
+    (sf : SignedFormula (Proposition Atom) WorldIndex) :
+    ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility),
+      expandedSets.length = branches.length →
+      accs.length = branches.length →
+      (∀ b₀ ∈ branches, sf ∈ b₀) →
+      ∀ (bR : List (SignedFormula (Proposition Atom) WorldIndex)) (aR : Accessibility),
+        modalExpandBranches branches expandedSets accs fuel = .openBranch bR aR →
+        sf ∈ bR := by
+  induction fuel with
+  | zero =>
+    intro branches expandedSets accs _hlen _hlenA hAll bR aR h
+    simp only [modalExpandBranches] at h
+    cases hfs : (branches.zip accs).findSome? (fun (b, a) =>
+        if isModalClosed b then none else some (b, a)) with
+    | none => simp only [hfs] at h; exact absurd h (by simp)
+    | some p =>
+      obtain ⟨pb, pa⟩ := p
+      simp only [hfs] at h
+      injection h with hp1 hp2
+      obtain ⟨q, hqmem, hf⟩ := List.exists_of_findSome?_eq_some hfs
+      obtain ⟨qb, qa⟩ := q
+      simp only [] at hf
+      by_cases hcl : isModalClosed qb = true
+      · rw [if_pos hcl] at hf
+        exact absurd hf (by simp)
+      · rw [if_neg hcl] at hf
+        have hq0mem : qb ∈ branches := (List.of_mem_zip hqmem).1
+        have hqp : (qb, qa) = (pb, pa) := Option.some.inj hf
+        have hqfst : qb = bR := by
+          have : qb = pb := congrArg Prod.fst hqp
+          rw [this]; exact hp1
+        rw [hqfst] at hq0mem
+        exact hAll bR hq0mem
+  | succ fuel' ih =>
+    intro branches expandedSets accs hlen hlenA hAll bR aR h
+    simp only [modalExpandBranches] at h
+    suffices key : ∀ (pending pendingExp :
+          List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (pendingAccs : List Accessibility)
+        (done doneExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (doneAccs : List Accessibility),
+        pendingExp.length = pending.length →
+        pendingAccs.length = pending.length →
+        doneExp.length = done.length →
+        doneAccs.length = done.length →
+        (∀ bp ∈ pending, sf ∈ bp) →
+        (∀ bd ∈ done, sf ∈ bd) →
+        modalExpandBranches.processNext fuel' pending pendingExp pendingAccs done doneExp
+            doneAccs = .openBranch bR aR →
+        sf ∈ bR from
+      key branches expandedSets accs [] [] [] hlen hlenA rfl rfl hAll (by simp)
+        (by simpa [modalExpandBranches] using h)
+    intro pending
+    induction pending with
+    | nil =>
+      intro pendingExp pendingAccs done doneExp doneAccs _ _ _ _ _ _ hinner
+      simp [modalExpandBranches.processNext] at hinner
+    | cons bh bt ih_inner =>
+      intro pendingExp pendingAccs done doneExp doneAccs
+        hlength_p hlenP_accs hdlength hdAccs hAll_p hAll_d hinner
+      cases pendingAccs with
+      | nil => simp at hlenP_accs
+      | cons a restAs =>
+        cases pendingExp with
+        | nil => simp at hlength_p
+        | cons e es =>
+          simp only [List.length_cons, Nat.add_right_cancel_iff] at hlength_p hlenP_accs
+          simp only [modalExpandBranches.processNext] at hinner
+          by_cases hcl : isModalClosed bh = true
+          · rw [if_pos hcl] at hinner
+            have hAll_bt : ∀ bp ∈ bt, sf ∈ bp := fun bp hbp => hAll_p bp (by simp [hbp])
+            have hAll_done_bh : ∀ bd ∈ done ++ [bh], sf ∈ bd := by
+              intro bd hbd
+              simp only [List.mem_append, List.mem_singleton] at hbd
+              rcases hbd with hd | heq
+              · exact hAll_d bd hd
+              · subst heq; exact hAll_p bd (by simp)
+            exact ih_inner es restAs (done ++ [bh]) (doneExp ++ [e]) (doneAccs ++ [a])
+              hlength_p hlenP_accs (by simp [hdlength]) (by simp [hdAccs])
+              hAll_bt hAll_done_bh hinner
+          · simp only [Bool.not_eq_true] at hcl
+            rw [if_neg (by simp [hcl])] at hinner
+            cases hstep : modalStepBranch bh e a with
+            | none =>
+              rw [hstep] at hinner
+              have hbeq : bh = bR ∧ a = aR := by cases hinner; exact ⟨rfl, rfl⟩
+              exact hbeq.1 ▸ hAll_p bh (by simp)
+            | some step =>
+              obtain ⟨newBs, newExps, newAcc⟩ := step
+              rw [hstep] at hinner
+              have hbh_sf : sf ∈ bh := hAll_p bh (by simp)
+              have hNewBs_sf : ∀ b' ∈ newBs, sf ∈ b' :=
+                modalStepBranch_mem_preserved bh e a sf hbh_sf newBs newExps newAcc hstep
+              have hLenNBE : newExps.length = newBs.length := by
+                obtain ⟨newExp, hEq⟩ :=
+                  modalStepBranch_newExps_const bh e a newBs newExps newAcc hstep
+                simp [hEq]
+              exact ih (done ++ newBs ++ bt) (doneExp ++ newExps ++ es)
+                (doneAccs ++ List.replicate newBs.length newAcc ++ restAs)
+                (by simp [hdlength, hlength_p, hLenNBE])
+                (by simp [hdAccs, hlenP_accs])
+                (fun b' hb'_mem => by
+                  simp only [List.mem_append] at hb'_mem
+                  rcases hb'_mem with (hd | hn) | hbt
+                  · exact hAll_d b' hd
+                  · exact hNewBs_sf b' hn
+                  · exact hAll_p b' (by simp [hbt]))
+                bR aR hinner
+
+/-! ## Initial Loop Invariant and the Public Completeness/Decidability Results
+(task 442 Phase 6, FINAL) -/
+
+/-- The bundled loop invariant `ModalLoopInv` holds at the tableau's initial configuration:
+branch `[F(φ0)@0]`, empty expanded set, empty accessibility relation, and the constant rank
+map `fun _ => modalDepth φ0`. Every `ModalPotentialInv` field is either a direct computation
+(`bClosure`, `rankBound`) or vacuous over `e = []`/`acc = Accessibility.empty`
+(`eNodup`, `eClosure`, `accKnown`, `outDegEq`, `rankEdge`, and `ModalLoopInv`'s own
+`hintikkaInv`/`eBoxOnlyNeg`/`eBoxNegWitness`, all quantified over `e = []`); `phiBound` is an
+exact equality driven by `modalCap`'s defining recursion (`modalCap_succ`), not merely a bound. -/
+private lemma modalLoopInv_initial (φ0 : Proposition Atom) :
+    ModalLoopInv φ0 [(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] []
+      Accessibility.empty (fun _ => modalDepth φ0) := by
+  have hmemU : (⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalUniverse φ0 := by
+    have hw : (0 : WorldIndex) < modalWorldBound φ0 + 1 := Nat.succ_pos _
+    simp only [modalUniverse, List.mem_flatMap, List.mem_range]
+    exact ⟨0, hw, φ0, modalSubfmls_self_mem φ0, by simp⟩
+  have hmax : modalMaxWorld [(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] = 0 :=
+    by simp [modalMaxWorld]
+  have houtdeg0 : ∀ w : WorldIndex, outDeg Accessibility.empty w = 0 := fun w => rfl
+  refine ⟨⟨?_, List.nodup_nil, ?_, accFreshInv_empty _, ?_, ?_, ?_, ?_⟩, ?_, ?_, ?_, ?_⟩
+  · intro x hx
+    simp only [List.mem_singleton] at hx
+    subst hx
+    exact hmemU
+  · intro x hx
+    simp at hx
+  · intro w w' hedge
+    simp only [Accessibility.empty, Accessibility.hasEdge, List.any_nil] at hedge
+    exact absurd hedge (by decide)
+  · intro w
+    rw [houtdeg0 w]
+    simp
+  · intro x hx
+    simp only [List.mem_singleton] at hx
+    subst hx
+    exact Nat.le_refl (modalDepth φ0)
+  · intro w w' hedge
+    simp only [Accessibility.empty, Accessibility.hasEdge, List.any_nil] at hedge
+    exact absurd hedge (by decide)
+  · -- phiBound
+    have hpotEq : modalPotential (modalSubfmls φ0).length
+        [(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]
+        Accessibility.empty (fun _ => modalDepth φ0) =
+        modalPotentialTerm (modalSubfmls φ0).length Accessibility.empty
+          (fun _ => modalDepth φ0) 0 := by
+      simp [modalPotential, modalKnownWorlds]
+    have hterm : modalPotentialTerm (modalSubfmls φ0).length Accessibility.empty
+        (fun _ => modalDepth φ0) 0 + 1 = modalCap (modalSubfmls φ0).length (modalDepth φ0) := by
+      unfold modalPotentialTerm
+      simp only []
+      rcases hd : modalDepth φ0 with _ | k
+      · simp [hd]
+      · rw [if_neg (by omega), houtdeg0 0]
+        simp only [Nat.sub_zero, Nat.add_sub_cancel]
+        rw [modalCap_succ]
+        omega
+    rw [hmax, hpotEq]
+    have hbound : 0 + modalPotentialTerm (modalSubfmls φ0).length Accessibility.empty
+        (fun _ => modalDepth φ0) 0 + 1 ≤
+        modalPotentialTerm (modalSubfmls φ0).length Accessibility.empty
+          (fun _ => modalDepth φ0) 0 + 1 := by omega
+    exact hterm ▸ hbound
+  · intro sf hsf
+    simp at hsf
+  · intro sf hsf
+    simp at hsf
+  · intro sf hsf
+    simp at hsf
+
+/-- **K-completeness of the modal tableau** (task 442 Phase 6, FINAL): if the tableau on `φ0`
+returns an open branch, `φ0` is not K-valid. Combines the top-loop Hintikka lemma
+(`modalExpandBranches_hintikka`, Phase 5b) instantiated at the initial configuration (via
+`modalLoopInv_initial` and the fuel bridge `modalExpMeasure_entry_le_fuel`), the initial-branch
+membership persistence lemma (`modalExpandBranches_openBranch_initial_mem`, above) showing
+`F(φ0)@0` survives to the returned branch, and the countermodel extraction theorem
+(`modalOpenBranch_countermodel`, `Completeness.lean:561`). -/
+theorem modalTableau_complete (φ0 : Proposition Atom)
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {a : Accessibility}
+    (h : modalTableau φ0 = .openBranch b a) :
+    ¬ kValid φ0 := by
+  have h' : modalExpandBranches
+      [[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+      [Accessibility.empty] (modalFuel φ0) = .openBranch b a := by
+    simpa only [modalTableau] using h
+  have hmeas := modalExpMeasure_entry_le_fuel φ0
+  have hInv : ∀ (i : Nat) (bi ei : List (SignedFormula (Proposition Atom) WorldIndex))
+      (ai : Accessibility),
+      ([[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]])[i]? = some bi →
+      (([[]] : List (List (SignedFormula (Proposition Atom) WorldIndex))))[i]? = some ei →
+      ([Accessibility.empty])[i]? = some ai →
+      ∃ rank, ModalLoopInv φ0 bi ei ai rank := by
+    intro i bi ei ai hib hie hia
+    match i with
+    | 0 =>
+      simp only [List.getElem?_cons_zero, Option.some.injEq] at hib hie hia
+      subst hib; subst hie; subst hia
+      exact ⟨fun _ => modalDepth φ0, modalLoopInv_initial φ0⟩
+    | n + 1 => simp at hib
+  have hH : modalHintikkaSet b a :=
+    modalExpandBranches_hintikka φ0 (modalFuel φ0)
+      [[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]] [Accessibility.empty]
+      rfl rfl hmeas hInv b a h'
+  have hmemInit : (⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+    modalExpandBranches_openBranch_initial_mem (modalFuel φ0)
+      (⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)
+      [[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]] [Accessibility.empty]
+      rfl rfl
+      (fun b₀ hb₀ => by
+        simp only [List.mem_singleton] at hb₀
+        subst hb₀
+        simp)
+      b a h'
+  have hnot := modalOpenBranch_countermodel b a φ0 hH hmemInit
+  intro hkv
+  exact hnot (hkv WorldIndex (extractModel b a) 0)
+
+/-- **The modal K tableau decides K-validity** (task 442 Phase 6, FINAL): `modalTableau φ0`
+closes exactly when `φ0` is K-valid. Combines soundness (`modalTableau_sound`,
+`Soundness.lean:334`) with completeness (`modalTableau_complete`, above) via the two-constructor
+dichotomy of `ModalTableauResult`. -/
+theorem modalTableau_decides (φ0 : Proposition Atom) :
+    modalTableau φ0 = .closed ↔ kValid φ0 := by
+  constructor
+  · exact modalTableau_sound φ0
+  · intro hkv
+    cases htab : modalTableau φ0 with
+    | closed => rfl
+    | openBranch b a => exact absurd hkv (modalTableau_complete φ0 htab)
+
+/-- **K-validity is decidable** (task 442 Phase 6, FINAL): decide by running the modal K
+tableau and consulting `modalTableau_decides`. No `Fintype Atom` assumption is needed, since the
+tableau computation itself is the decision procedure. -/
+instance instDecidableKValid (φ0 : Proposition Atom) : Decidable (kValid φ0) :=
+  match h : modalTableau φ0 with
+  | .closed => .isTrue ((modalTableau_decides φ0).mp h)
+  | .openBranch _ _ => .isFalse (modalTableau_complete φ0 h)
+
 end Cslib.Logic.Modal.Tableau
 
 end

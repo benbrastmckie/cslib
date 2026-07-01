@@ -8,9 +8,16 @@
   "signature_change_required": false,
   "signature_change_reasoning": "Confirmed as predicted in Phase 1: go already carries bPers and edges (pre-extension) in its own parameter scope at the exact point the F(phi->psi) world-creating rule fires. intFImpRule, intApplyRuleFull, and intStepBranch keep their existing parameter lists unchanged. The reuse witness (intFImpReuseWitness? bPers edges newForms e) and its branch dispatch are implemented entirely inside go.",
   "sorry_inventory": {
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean": [330, 985],
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean": [113],
-    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean": [110]
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean": [
+      330,
+      985
+    ],
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean": [
+      113
+    ],
+    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean": [
+      110
+    ]
   },
   "sorry_relocations": 0,
   "blockers": [
@@ -30,7 +37,10 @@
     "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
     "lemma": "intExpandBranches_closed_unsat",
     "line_start": 1083,
-    "failing_unification_sites": [1396, 1461],
+    "failing_unification_sites": [
+      1396,
+      1461
+    ],
     "diagnosis": "The lemma's induction on intExpandBranches assumes that every `some (.linearResult newForms nw' (some newEdge), newExp)` step strictly extends the branch (Branch.extendMany bPers newForms) and appends the new edge. With the Sfor-containment reuse path now live, the `some x` witness case instead continues on `bPers` unchanged with `edges` unchanged and `nw` unconsumed -- a genuinely new case the induction does not yet cover.",
     "expected": true,
     "action_taken": "none (recorded only, per territory contract: Soundness.lean is out of scope for Phase 2 and Phase 3 alike)",
@@ -78,5 +88,25 @@
       "type": "progress",
       "summary": "Phase 3 progress: BLOCKED at the Hintikka-condition re-verification step, with the R2 counterexample recorded."
     }
-  ]
+  ],
+  "phase4": {
+    "status": "COMPLETED",
+    "verdict": "minimally-fixed",
+    "task_316_coordination_flag": true,
+    "summary": "Soundness.lean's intExpandBranches_closed_unsat broke exactly as Phase 2's preserved_asset_fallout predicted (failing unifications at the linearResult some-newEdge case, ~lines 1396/1461 pre-fix). Fixed by hoisting an explicit case split on newEdge and the intFImpReuseWitness? result (mirroring go's own structure) and adding the missing reuse sub-case: on reuse the recursive intExpandBranches call receives bPers unchanged, so applyPersistenceFixpoint_sat already gives intBranchSatisfied ... wo bPers and the fuel-induction hypothesis (ih) applies directly -- no new world, no intRule_preserves_sat, no new freshness lemma needed. All other soundness lemmas confirmed rule-level and untouched by the dedup.",
+    "commit": "8a5c0250eb8cf838233b43c7fc90d798738a554c",
+    "commit_message": "task 317 phase 4: minimal Soundness.lean fix for dedup (coordinates task 316)",
+    "files_touched": [
+      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean"
+    ],
+    "build_status": "green (lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Soundness)",
+    "sorry_count_in_file": 0,
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "note_re_phase3_blocker": "Phase 3's R2 blocker (intFImpReuseWitness? not guaranteeing the explicit F(psi)@x Hintikka entry) is a Scheme.lean/Completeness.lean semantic gap, orthogonal to this phase's fix -- Soundness.lean's fix does not resolve or depend on that blocker; Soundness.lean's induction only needed a structural (not semantic) case addition because it reasons about intBranchSatisfied, not about the Hintikka/countermodel conditions Scheme.lean's lemmas require.",
+    "progress_file": "specs/317_propositional_tableau_completeness/progress/phase-4-progress.json"
+  }
 }

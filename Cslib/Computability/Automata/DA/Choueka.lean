@@ -45,7 +45,7 @@ deterministic Muller automaton.
 namespace Cslib.Automata.DA
 
 open Set Filter Cslib.ωSequence Cslib.ωLanguage Cslib.Language Acceptor
-open scoped Cslib.FLTS Automata.DA.FinAcc
+open scoped Cslib.FLTS Automata.DA.FinAcc Computability
 
 -- `State` is restricted to `Type` (not `Type*`) to match `Language.IsRegular.iff_dfa`,
 -- the universe at which Mathlib's `Language.IsRegular` DFA characterization is stated.
@@ -329,5 +329,144 @@ theorem chouekaLang_omega_limit_subset_omega_power [Inhabited Symbol]
       rw [← append_extract_extract hle1 hle2, mtr_append, h_run (σ k),
         ← mtr_append, append_extract_extract (Nat.zero_le _) hle2]
       exact h_acc (σ (k + 1))
+
+/-- The ω-power of `l` is a subset of `l∗ * (chouekaLang da acc)↗ω`: the harder, Ramsey-based
+inclusion of the Choueka identity. Given `xs ∈ l^ω`, the strictly monotone decomposition points
+`φ` (with `φ 0 = 0`) witnessing `xs ∈ l^ω` are colored by the automaton state reached between
+consecutive points; a Ramsey argument on this coloring finds an infinite, pairwise-homogeneous
+subsequence of decomposition points, from which a single Choueka breakpoint (via a `Nat.find`
+search for the earliest matching "restart" point in each window) is extracted to build the
+witness decomposition `xs = (xs.extract 0 (φ (σ 0))) ++ω (xs.drop (φ (σ 0)))` with
+`xs.extract 0 (φ (σ 0)) ∈ l∗` and `xs.drop (φ (σ 0)) ∈ (chouekaLang da acc)↗ω`. Ported from
+`ctchou/AutomataTheory`'s `choueka_lang_omega_power_subset_omega_limit`. -/
+theorem chouekaLang_omega_power_subset_omega_limit [Inhabited Symbol] [Finite State]
+    (da : DA State Symbol) (acc : Set State) {l : Language Symbol}
+    (h_lang : language (FinAcc.mk da acc) = l∗) :
+    l^ω ⊆ l∗ * (chouekaLang da acc)↗ω := by
+  classical
+  rw [omegaPow_seq_prop]
+  rintro xs ⟨φ, h_φ_mono, h_φ_0, h_φ_l⟩
+  -- Step 2: extend `l`-membership over multiple `φ`-windows via the Kleene star.
+  have h_kstar : ∀ i n, xs.extract (φ i) (φ (i + n)) ∈ l∗ := by
+    intro i n
+    induction n with
+    | zero => simpa using Language.nil_mem_kstar l
+    | succ n ih =>
+      change xs.extract (φ i) (φ (i + n + 1)) ∈ l∗
+      have h1 : φ i ≤ φ (i + n) := h_φ_mono.monotone (by omega)
+      have h2 : φ (i + n) ≤ φ (i + n + 1) := le_of_lt (h_φ_mono (by omega))
+      rw [← append_extract_extract h1 h2]
+      exact (kstar_mul_le_kstar (a := l)) (Language.mem_mul.mpr ⟨_, ih, _, h_φ_l (i + n), rfl⟩)
+  -- Step 3: color windows by the automaton state reached.
+  let color (i j : ℕ) : State := da.mtr da.start (xs.extract i j)
+  have h_color : ∀ i j, i < j → color (φ i) (φ j) ∈ acc := by
+    intro i j hij
+    have hk := h_kstar i (j - i)
+    rw [show i + (j - i) = j by omega] at hk
+    rw [← h_lang] at hk
+    exact hk
+  -- Step 4: Ramsey coloring of the `φ`-window pairs.
+  let colIdx (t : Finset ℕ) : State :=
+    if h : t.Nonempty then color (φ (t.min' h)) (φ (t.max' h)) else color (φ 0) (φ 0)
+  obtain ⟨b, ns, h_ns, h_colIdx⟩ := infinite_graph_ramsey colIdx
+  obtain ⟨σ, h_σ_mono, rfl⟩ := strictMono_of_infinite h_ns
+  -- Pairwise homogeneity: any two indices in the homogeneous set color the same as `b`.
+  have hcol : ∀ i j : ℕ, i < j → color (φ (σ i)) (φ (σ j)) = b := by
+    intro i j hij
+    have hfij : σ i < σ j := h_σ_mono hij
+    have h_le : σ i ≤ σ j := le_of_lt hfij
+    have h_ne : σ i ≠ σ j := Nat.ne_of_lt hfij
+    have h_ne' : ({σ i, σ j} : Finset ℕ).Nonempty := Finset.insert_nonempty _ _
+    have h_card : ({σ i, σ j} : Finset ℕ).card = 2 := Finset.card_pair h_ne
+    have h_sub : (↑({σ i, σ j} : Finset ℕ) : Set ℕ) ⊆ Set.range σ := by
+      rw [Finset.coe_pair]; rintro x (rfl | rfl) <;> exact ⟨_, rfl⟩
+    have hbc := h_colIdx _ h_card h_sub
+    have heval : colIdx {σ i, σ j} = color (φ (σ i)) (φ (σ j)) := by
+      change (if h : ({σ i, σ j} : Finset ℕ).Nonempty then
+        color (φ (({σ i, σ j} : Finset ℕ).min' h)) (φ (({σ i, σ j} : Finset ℕ).max' h))
+        else color (φ 0) (φ 0)) = color (φ (σ i)) (φ (σ j))
+      rw [dif_pos h_ne', Finset.min'_pair, Finset.max'_pair, min_eq_left h_le, max_eq_right h_le]
+    rw [heval] at hbc
+    exact hbc
+  have hb_acc : b ∈ acc := by
+    rw [← hcol 0 1 (by omega)]
+    exact h_color (σ 0) (σ 1) (h_σ_mono (by omega))
+  -- Step 5: a `Nat.find`-based breakpoint search inside each `φ (σ ·)`-window.
+  let p (k j : ℕ) : Prop :=
+    φ (σ k) < j ∧ j ≤ φ (σ (k + 1)) ∧ color (φ (σ k)) j = color (φ (σ 0)) j
+  have h_p_ex : ∀ k, ∃ j, p k j := by
+    intro k
+    refine ⟨φ (σ (k + 1)), h_φ_mono (h_σ_mono (show k < k + 1 by omega)), le_refl _, ?_⟩
+    exact (hcol k (k + 1) (by omega)).trans (hcol 0 (k + 1) (by omega)).symm
+  let ξ (k : ℕ) : ℕ := Nat.find (h_p_ex k)
+  have h_ξ_spec : ∀ k, p k (ξ k) := fun k => Nat.find_spec (h_p_ex k)
+  have h_ξ_min : ∀ k j, j < ξ k → ¬ p k j := fun k j hj => Nat.find_min (h_p_ex k) hj
+  have h_p0_le_φσ : ∀ k, φ (σ 0) ≤ φ (σ k) := fun k =>
+    h_φ_mono.monotone (h_σ_mono.monotone (Nat.zero_le k))
+  have h_p0_lt_ξ : ∀ k, φ (σ 0) < ξ (k + 1) := by
+    intro k
+    have h1 := (h_ξ_spec (k + 1)).1
+    have h2 := h_p0_le_φσ (k + 1)
+    omega
+  refine mem_hmul.mpr
+    ⟨xs.extract 0 (φ (σ 0)), ?_, xs.drop (φ (σ 0)), ?_, append_extract_drop⟩
+  · simpa [h_φ_0] using h_kstar 0 (σ 0)
+  · rw [mem_omegaLim, frequently_iff_strictMono]
+    refine ⟨fun k => ξ (k + 1) - φ (σ 0), ?_, ?_⟩
+    · intro j k hjk
+      change ξ (j + 1) - φ (σ 0) < ξ (k + 1) - φ (σ 0)
+      have hj2 := (h_ξ_spec (j + 1)).2.1
+      have hk1 := (h_ξ_spec (k + 1)).1
+      have hmono : φ (σ (j + 1 + 1)) ≤ φ (σ (k + 1)) :=
+        h_φ_mono.monotone (h_σ_mono.monotone (by omega))
+      have hpj := h_p0_lt_ξ j
+      have hpk := h_p0_lt_ξ k
+      omega
+    · intro k
+      obtain ⟨hk1_lt, hk1_le, hk1_run⟩ := h_ξ_spec (k + 1)
+      have h_p0k1_lt : φ (σ 0) < φ (σ (k + 1)) := h_φ_mono (h_σ_mono (show 0 < k + 1 by omega))
+      obtain ⟨m, hm_def⟩ : ∃ m, m = φ (σ (k + 1)) - φ (σ 0) := ⟨_, rfl⟩
+      have hal_len : (xs.extract (φ (σ 0)) (ξ (k + 1))).length = ξ (k + 1) - φ (σ 0) :=
+        length_extract
+      have hm_le : m ≤ ξ (k + 1) - φ (σ 0) := by omega
+      have h_mem : xs.extract (φ (σ 0)) (ξ (k + 1)) ∈ chouekaLang da acc := by
+        refine ⟨m, by omega, by omega, ?_, ?_, ?_⟩
+        · rw [take_extract hm_le, show φ (σ 0) + m = φ (σ (k + 1)) by omega]
+          change color (φ (σ 0)) (φ (σ (k + 1))) ∈ acc
+          rw [hcol 0 (k + 1) (by omega)]
+          exact hb_acc
+        · rw [drop_extract hm_le, show φ (σ 0) + m = φ (σ (k + 1)) by omega]
+          change color (φ (σ (k + 1))) (ξ (k + 1)) = color (φ (σ 0)) (ξ (k + 1))
+          exact hk1_run
+        · intro k' hk'1 hk'2
+          rw [hal_len] at hk'2
+          rw [drop_extract hm_le, show φ (σ 0) + m = φ (σ (k + 1)) by omega]
+          have hk'_le : k' - m ≤ ξ (k + 1) - φ (σ (k + 1)) := by omega
+          rw [take_extract hk'_le, show φ (σ (k + 1)) + (k' - m) = φ (σ 0) + k' by omega,
+            take_extract (show k' ≤ ξ (k + 1) - φ (σ 0) by omega)]
+          change color (φ (σ (k + 1))) (φ (σ 0) + k') ≠ color (φ (σ 0)) (φ (σ 0) + k')
+          intro hcontra
+          exact h_ξ_min (k + 1) (φ (σ 0) + k') (by omega) ⟨by omega, by omega, hcontra⟩
+      have hlen_eq : φ (σ 0) + (ξ (k + 1) - φ (σ 0)) = ξ (k + 1) := by omega
+      rw [extract_drop, Nat.add_zero, hlen_eq]
+      exact h_mem
+
+/-- The Choueka identity: if `da` (with accept set `acc`) recognizes `l∗` for a regular
+language `l`, then `l^ω = l∗ * (chouekaLang da acc)↗ω`. Assembles the two inclusions
+`chouekaLang_omega_power_subset_omega_limit` and, via `chouekaLang_omega_limit_subset_omega_power`
+composed with `kstar_omegaPow_eq_omegaPow`/`kstar_hmul_omegaPow_eq_omegaPow`, the reverse
+direction. -/
+theorem chouekaLang_omega_power_eq_omega_limit [Inhabited Symbol] [Finite State]
+    (da : DA State Symbol) (acc : Set State) {l : Language Symbol}
+    (h_lang : language (FinAcc.mk da acc) = l∗) :
+    l^ω = l∗ * (chouekaLang da acc)↗ω := by
+  apply le_antisymm
+  · exact chouekaLang_omega_power_subset_omega_limit da acc h_lang
+  · have h1 : (chouekaLang da acc)↗ω ⊆ (l∗)^ω := by
+      rw [← h_lang]
+      exact chouekaLang_omega_limit_subset_omega_power da acc
+    have h2 : l∗ * (chouekaLang da acc)↗ω ⊆ l∗ * (l∗)^ω := le_hmul_congr (le_refl l∗) h1
+    rw [kstar_omegaPow_eq_omegaPow] at h2
+    rwa [kstar_hmul_omegaPow_eq_omegaPow] at h2
 
 end Cslib.Automata.DA

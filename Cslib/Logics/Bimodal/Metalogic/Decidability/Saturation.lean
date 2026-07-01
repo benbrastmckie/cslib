@@ -635,9 +635,6 @@ theorem foldl_preserves_findClosure
       (fun ob' ord' ap' h => tryBranch_inr fuelBound newOrd fc tracker applied' maxBranches branchesUsed' init hd ob' ord' ap' ih h_init h)
       h_result
 
-set_option maxHeartbeats 3200000 in
--- Soundness proof requires deep case analysis over recursive function + foldl;
--- the default heartbeat limit is insufficient.
 set_option linter.flexible false in
 /--
 General soundness: if `expandBranchWithFuel` returns an open branch,

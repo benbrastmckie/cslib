@@ -42,6 +42,8 @@ structural satisfaction clauses:
 - `allFuture_iff`, `allPast_iff`: Universal temporal operator characterizations (now definitional).
 - `neg_iff`, `top_true`: Derived connective lemmas.
 - `someFuture_iff`, `somePast_iff`: Existential temporal operator characterizations.
+- `sat_allFuture_iff_neg_someFuture_neg`, `sat_allPast_iff_neg_somePast_neg`: Semantic
+  bridge lemmas recovering the classical equivalences `𝐆φ ↔ ¬𝐅¬φ`, `𝐇φ ↔ ¬𝐏¬φ`.
 -/
 
 @[expose] public section
@@ -175,6 +177,42 @@ theorem allPast_iff (M : TemporalModel D Atom) (t : D)
     Satisfies M t (𝐇φ) ↔
       ∀ s, s < t → Satisfies M s φ :=
   Iff.rfl
+
+/-! ## Semantic Bridge Lemmas
+
+With `allFuture`/`allPast` as primitive constructors (task 180), the classical
+equivalences `𝐆φ ↔ ¬𝐅¬φ` and `𝐇φ ↔ ¬𝐏¬φ` are no longer definitional (they were a
+`defeq` abbreviation before this promotion). They remain semantically valid (classical
+logic on `Prop` justifies the quantifier-negation swap), so we record them here as
+theorems. These are the semantic-level counterparts of the `ProofSystem` bridge axioms
+(`Axioms.lean`) and are consumed by the TruthLemma reduction (P7). -/
+
+/-- Semantic bridge: primitive `𝐆φ` is equivalent to the classical `¬𝐅¬φ`.
+Proved via classical negation of the `someFuture` witness (not a `defeq`, since
+`allFuture` is now primitive). -/
+theorem sat_allFuture_iff_neg_someFuture_neg (M : TemporalModel D Atom) (t : D)
+    (φ : Formula Atom) :
+    Satisfies M t (𝐆φ) ↔ Satisfies M t (¬𝐅¬φ) := by
+  rw [allFuture_iff, neg_iff, someFuture_iff]
+  constructor
+  · rintro h ⟨s, hlt, hs⟩
+    exact (neg_iff M s φ).mp hs (h s hlt)
+  · intro h s hlt
+    by_contra hφ
+    exact h ⟨s, hlt, (neg_iff M s φ).mpr hφ⟩
+
+/-- Semantic bridge: primitive `𝐇φ` is equivalent to the classical `¬𝐏¬φ`.
+Past dual of `sat_allFuture_iff_neg_someFuture_neg`. -/
+theorem sat_allPast_iff_neg_somePast_neg (M : TemporalModel D Atom) (t : D)
+    (φ : Formula Atom) :
+    Satisfies M t (𝐇φ) ↔ Satisfies M t (¬𝐏¬φ) := by
+  rw [allPast_iff, neg_iff, somePast_iff]
+  constructor
+  · rintro h ⟨s, hlt, hs⟩
+    exact (neg_iff M s φ).mp hs (h s hlt)
+  · intro h s hlt
+    by_contra hφ
+    exact h ⟨s, hlt, (neg_iff M s φ).mpr hφ⟩
 
 end Satisfies
 

@@ -205,21 +205,21 @@ mention of `allFuture`, no constructor match — no change needed. No deviations
 
 ---
 
-### Phase 2: Semantics — structural Satisfies clauses scoped-green [NOT STARTED]
+### Phase 2: Semantics — structural Satisfies clauses scoped-green [COMPLETED]
 
 - **Goal:** Complete the WIP's `Satisfies.lean` edits so the structural G/H clauses are total and
   the characterization lemmas are definitional.
 - **Tasks:**
-  - [ ] `Satisfies.lean` `Satisfies`: ensure `| .allFuture φ => ∀ s, t < s → Satisfies M s φ` and
+  - [x] `Satisfies.lean` `Satisfies`: ensure `| .allFuture φ => ∀ s, t < s → Satisfies M s φ` and
     `| .allPast φ => ∀ s, s < t → Satisfies M s φ` are present and total.
-  - [ ] Re-prove `allFuture_iff` (`:151`) / `allPast_iff` (`:165`) structurally
+  - [x] Re-prove `allFuture_iff` (`:151`) / `allPast_iff` (`:165`) structurally
     (`simp only [Satisfies]` / `Iff.rfl`); statements unchanged. Keep `@[simp]` consistent with
     `someFuture_iff`/`somePast_iff`.
-  - [ ] Add the semantic bridge lemma
+  - [x] Add the semantic bridge lemma
     `sat_allFuture_iff_neg_someFuture_neg : Sat M t (𝐆φ) ↔ Sat M t (¬𝐅¬φ)` (and past dual) from
     `allFuture_iff` + `someFuture_iff` + `Classical.not_exists`/`not_not` (F3). This is consumed by
     the TruthLemma (P7) and mirrors the P4 soundness arms.
-  - [ ] `Semantics/Validity.lean` / `Model.lean`: verify no constructor match needs updating.
+  - [x] `Semantics/Validity.lean` / `Model.lean`: verify no constructor match needs updating.
 - **Timing:** 1.5-2 hours
 - **Depends on:** 1
 - **Estimated output:** ~100-200 lines
@@ -229,6 +229,23 @@ mention of `allFuture`, no constructor match — no change needed. No deviations
   - `lake build Cslib.Logics.Temporal.Semantics.Validity` green
   - `allFuture_iff`/`allPast_iff` reduce definitionally; `sat_allFuture_iff_neg_someFuture_neg`
     compiles with no `sorry`.
+
+**Phase 2 result:** `Satisfies.lean`'s `Satisfies` match already carried the total
+`.allFuture`/`.allPast` structural clauses from the P1 WIP apply, and `allFuture_iff`/`allPast_iff`
+were already `Iff.rfl` (stronger than the plan's `simp only [Satisfies]` fallback — both compile
+and reduce definitionally). Verified `lake build …Satisfies` green on the pre-existing content
+before adding new work. Added `sat_allFuture_iff_neg_someFuture_neg` and
+`sat_allPast_iff_neg_somePast_neg` (past dual) to `Satisfies.lean`, proved via `allFuture_iff`/
+`neg_iff`/`someFuture_iff` (resp. past duals) with classical `by_contra` — no `Classical.not_exists`
+import needed, `by_contra` sufficed. `lean_verify` on both: axioms = `{propext, Classical.choice,
+Quot.sound}` only (no new axioms). `Validity.lean`/`Model.lean` have no `Formula` constructor match
+— verified via grep, no change needed. Both scoped builds green:
+`lake build Cslib.Logics.Temporal.Semantics.Satisfies` (578 jobs) and
+`lake build Cslib.Logics.Temporal.Semantics.Validity` (638 jobs). No `sorry` in either file
+(grep-verified). `lake exe lint-style` flagged 2 pre-existing unrelated errors in
+`Cslib/Logics/Modal/Tableau/Completeness.lean` (space-before-semicolon) — confirmed via
+`git diff --stat` that only `Satisfies.lean` was touched this phase; the Modal errors predate this
+dispatch and are out of scope. No deviations from plan.
 
 ---
 

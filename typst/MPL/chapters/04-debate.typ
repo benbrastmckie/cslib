@@ -5,6 +5,6 @@
 
 #import "../template.typ": *
 
-= The Design Debate
+= The Design Debate <sec:debate>
 
 (stub)

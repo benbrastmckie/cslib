@@ -161,19 +161,19 @@ inductive with its symbol table.
 
 ---
 
-### Phase 3: Proof-theory chapter (Arguments 3 and 4) [NOT STARTED]
+### Phase 3: Proof-theory chapter (Arguments 3 and 4) [COMPLETED]
 
 **Goal**: Write `03-proof-theory.typ` covering Argument 3 (property modules) and Argument 4
 (Hilbert-vs-ND controversy resolved as Option C), including the four-times-instantiated gate
 table — the most mechanical, lowest-factual-risk content.
 
 **Tasks**:
-- [ ] Argument 3: `IsIntuitionistic`/`IsClassical` mixins (`Defs.lean:166-171`, `:175-180`, `isIntuitionisticIff ↔ IPL ⊆ T`), additivity (`instIsIntuitionisticExtension` `Defs.lean:190-191`), and the semantic mirror `HasLeastBot`/`HasInitialBot` (`BotProperties.lean:92-100,149-159`), noting the mixin-on-element vs typeclass-on-type distinction (`BotProperties.lean:61-64`).
-- [ ] Argument 4: the gate `[IsIntuitionistic T]` instantiated FOUR times — Hilbert (`MinPropAxiom`→`IntPropAxiom`+`efq`→`PropositionalAxiom`+`peirce`; `Axioms.lean:126-150/89-116/48-78`), ND (gated `efq` `Basic.lean:182-183`), sequent (gated `botL` `LJ/Basic.lean:98-100`), Curry-Howard (gated `abort` `CurryHoward/Defs.lean:102-103`) — as a single summary table (with an "Available at" MPL/IPL/CPL column, or a per-system table).
-- [ ] State the Option-C resolution with the decisive Curry-Howard/Prawitz subformula-property reason (one shared inductive ⇒ one metatheory proof; task 398), not aesthetics; cite structural `IsBotRuleFree` at `NaturalDeduction/Basic.lean:223-235` (`efq _ => False`) — NOT `mpl-base-design-note.md:42`.
-- [ ] Encode graded faithfulness: Hilbert purest (⊥-rule-free base predicate); ND/sequent structure-first up-to-gate; LK `botL` UNGATED (`LK/Basic.lean:76`) as a defensible classical/multi-conclusion exception.
-- [ ] State Option B as genuinely deferred (task 409) with real residual value, cited from `decisions.md:5-6` and the 407 reports; not dismissed.
-- [ ] Compile clean.
+- [x] Argument 3: `IsIntuitionistic`/`IsClassical` mixins (`Defs.lean:166-171`, `:175-180`, `isIntuitionisticIff ↔ IPL ⊆ T`), additivity (`instIsIntuitionisticExtension` `Defs.lean:190-191`), and the semantic mirror `HasLeastBot`/`HasInitialBot` (`BotProperties.lean:92-100,149-159`), noting the mixin-on-element vs typeclass-on-type distinction (`BotProperties.lean:61-64`). *(completed)*
+- [x] Argument 4: the gate `[IsIntuitionistic T]` instantiated FOUR times — Hilbert (`MinPropAxiom`→`IntPropAxiom`+`efq`→`PropositionalAxiom`+`peirce`; `Axioms.lean:126-150/89-116/48-78`), ND (gated `efq` `Basic.lean:182-183`), sequent (gated `botL` `LJ/Basic.lean:98-100`), Curry-Howard (gated `abort` `CurryHoward/Defs.lean:102-103`) — as a single summary table (with an "Available at" MPL/IPL/CPL column, or a per-system table). *(completed: single four-row gate table; CH constructor is `efq`)*
+- [x] State the Option-C resolution with the decisive Curry-Howard/Prawitz subformula-property reason (one shared inductive ⇒ one metatheory proof; task 398), not aesthetics; cite structural `IsBotRuleFree` at `NaturalDeduction/Basic.lean:223-235` (`efq _ => False`) — NOT `mpl-base-design-note.md:42`. *(completed: with explicit "stale document, corrected" remark)*
+- [x] Encode graded faithfulness: Hilbert purest (⊥-rule-free base predicate); ND/sequent structure-first up-to-gate; LK `botL` UNGATED (`LK/Basic.lean:76`) as a defensible classical/multi-conclusion exception. *(completed)*
+- [x] State Option B as genuinely deferred (task 409) with real residual value, cited from `decisions.md:5-6` and the 407 reports; not dismissed. *(completed)*
+- [x] Compile clean. *(completed: exit 0)*
 
 **Timing**: 1.5 hours
 

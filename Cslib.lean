@@ -421,6 +421,7 @@ public import Cslib.Logics.Modal.Tableau.Branch
 public import Cslib.Logics.Modal.Tableau.Closure
 public import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.Defs
+public import Cslib.Logics.Modal.Tableau.FmpMeasure
 public import Cslib.Logics.Modal.Tableau.LoopInduction
 public import Cslib.Logics.Modal.Tableau.Rules
 public import Cslib.Logics.Modal.Tableau.Saturation

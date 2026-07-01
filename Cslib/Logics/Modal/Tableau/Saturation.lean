@@ -36,13 +36,15 @@ monotonically; `boxPos`/`diamondNeg` (persistent) re-fire when new successors ar
 
 ### Fuel Bound
 
-The fuel bound `modalFuel φ` is derived from the finite model property for K:
-any satisfiable K formula has a model with at most as many worlds as there are
-distinct ◇-subformulas (or F(□)-occurrences) in φ. We conservatively bound by
-`(2 * modalComplexity φ + 1)^2`, which covers:
-- Up to `modalComplexity φ` new worlds created per diamond/box-neg rule
-- At most `2 * modalComplexity φ` branch expansion steps per world
-- The `+1` prevents division-by-zero
+The fuel bound `modalFuel φ` is a triple-exponential closed form over `modalComplexity φ`
+only: `3 ^ (4 * (2n+1) * ((2n+1)^(n+1) + 1))` where `n = modalComplexity φ`. It dominates
+the base-3 counting termination measure `modalExpMeasure` over the finite world-bounded
+signed-formula universe `modalUniverse φ` defined in `FmpMeasure.lean` (which imports this
+module, so `modalFuel` cannot itself reference `modalUniverse` without an import cycle).
+See `FmpMeasure.modalExpMeasure_entry_le_fuel` for the bridge lemma establishing
+sufficiency: the initial worklist measure is `≤ modalFuel φ`, and each saturation step
+strictly decreases the measure by at least 1, so `fuel = 0` is reached only once every
+branch is closed or saturated.
 
 ### World-Subset Blocking
 
@@ -84,11 +86,14 @@ inductive ModalTableauResult (Atom : Type*) : Type _ where
 
 /-- Fuel bound for the modal K tableau.
 
-Conservative bound based on the size of the formula. Sufficient for the FMP: any
-satisfiable K formula has a model with at most `modalComplexity φ + 1` worlds. -/
+Triple-exponential closed form over `modalComplexity φ` only (a `modalUniverse`-based
+`3 ^ (2 * |modalUniverse φ|)` bound would create an import cycle, since `modalUniverse`
+lives in `FmpMeasure.lean`, which imports this module). Sufficiency (not tightness) is
+the requirement: `FmpMeasure.modalExpMeasure_entry_le_fuel` proves this closed form
+dominates the counting-measure entry bound `3 ^ (2 * |modalUniverse φ|)`. -/
 def modalFuel (φ : Proposition Atom) : Nat :=
   let n := modalComplexity φ
-  (4 * n + 4) * (n + 2) + 2
+  3 ^ (4 * (2 * n + 1) * ((2 * n + 1) ^ (n + 1) + 1))
 
 /-! ## Branch Step -/
 

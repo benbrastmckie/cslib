@@ -13,8 +13,9 @@ next_project_number: 464
 |------|-------|------------|--------|
 | 1 | 36,37,181,226,300,317,396,400,405,407,425,438,440,441,449,461,462,463 | -- | Propositional Logic, Modal Logic, Temporal Logic, ... |
 | 2 | 39,40,215,301,375,389,409,430,450,451,456 | 36,37,181,317,407,425,449 | Propositional Logic, Temporal Logic, Bimodal Logic, ... |
-| 3 | 41,391,392,413,444,454 | 39,40,375,389,450 | Foundations, Bimodal Logic, Code Hygiene |
-| 4 | 393,412,414 | 41,215,300,301,391,444 | Code Hygiene |
+| 3 | 41,391,392,413,454 | 39,40,375,389,450 | Foundations, Bimodal Logic, Code Hygiene |
+| 4 | 393,412,444 | 41,391,454 | Code Hygiene |
+| 5 | 414 | 215,300,301,444 | Code Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -36,7 +37,7 @@ next_project_number: 464
 
 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
-405 [NOT STARTED] — Simplify the proof machinery in the task-402 modal tableau soundn
+405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 
 ### Temporal Logic
@@ -54,14 +55,14 @@ next_project_number: 464
   └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal (see above)
 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
   └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S
-    └─ 454 [NOT STARTED] — From review 2026-07-01-2 (MEDIUM, finding #3). Cslib/Logics/Bimod
+    └─ 454 [PLANNED] — From review 2026-07-01-2 (MEDIUM, finding #3). Cslib/Logics/Bimod
 449 [NOT STARTED] — Foundation for the corrected TM-over-temporal conservativity resu
   └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S (see above)
   └─ 451 [NOT STARTED] — Deeper metatheory for the metric tense logic BX+ (defined in task
 
 ### Code Hygiene
 
-389 [NOT STARTED] — [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAl
+389 [PLANNED] — [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAl
   └─ 391 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Remove internal task/process ja
     └─ 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
   └─ 392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls
@@ -176,10 +177,11 @@ next_project_number: 464
 ---
 
 ### 454. Consolidate duplicated Chronicle PointInsertion helper families across Bimodal and Temporal
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Bimodal Logic
 - **Dependencies**: Task 449, Task 450
+- **Research**: [454_consolidate_chronicle_pointinsertion_bimodal_temporal/reports/01_consolidate-chronicle-pointinsertion.md]
 
 **Description**: From review 2026-07-01-2 (MEDIUM, finding #3). Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/Since.lean (1019L) and Cslib/Logics/Temporal/Metalogic/Chronicle/PointInsertion/Since.lean (704L), plus sibling Burgess.lean and Seeds.lean in both trees, share an entire family of identically-named private helpers: lemma27SinceSeed, l27sC5EventList, l27sB5GuardList, l27s_c5_event_list_mem, l27s_b5_guard_list_mem, lemma24SinceWithGuard, lemma_2_7_since, lemma_2_8_since, lemma_2_7_since_seed_consistent, lemma_2_8_since_seed_consistent. Same duplication disease as the GenericMCSBridge work (task 452) but in the Chronicle point-insertion layer. The files have diverged (Bimodal is ~45% larger), so this is consolidation-with-care, not a mechanical merge: reconcile the diverged portions, then factor the shared lemma_2_7/lemma_2_8 seed-consistency helpers into a common Chronicle-support module parameterized over the frame/relation interface. NOT covered by task 415 (propositional->modal lifting stack) or 449-451 (which define a NEW base logic BX+ rather than dedup existing Chronicle machinery). IMPORTANT: coordinate with tasks 449-451 (BX+) since they may rewrite TemporalConservativity and adjacent Chronicle files -- best sequenced after the BX+ restructure settles, or done in lockstep. DoD: shared point-insertion helpers factored to one location, both logics reduced to thin instantiations of the common core, lake build/test/lint green, zero new sorries.
 
@@ -339,7 +341,7 @@ After edits, re-run: lake build, lake test, lake exe checkInitImports, lake exe 
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
-- **Dependencies**: Task 181, Task 449, Task 450
+- **Dependencies**: Task 181, Task 449, Task 450, Task 454
 
 **Description**: Vet fix for task 180 (High), elevated scope. Do not merely rename the two flagged defs; bring the task-180 diff to a single, uniform, mathlib-conformant standard.
 
@@ -629,10 +631,13 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 405. Proof style cleanup modal soundness
-- **Status**: [NOT STARTED]
+- **Status**: [PR READY]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 404
+- **Research**: [405_proof_style_cleanup_modal_soundness/reports/01_proof-style-cleanup-modal-soundness.md]
+- **Plan**: [405_proof_style_cleanup_modal_soundness/plans/01_proof-style-cleanup-modal-soundness.md]
+- **Summary**: [405_proof_style_cleanup_modal_soundness/summaries/01_proof-style-cleanup-modal-soundness-summary.md]
 
 **Description**: Simplify the proof machinery in the task-402 modal tableau soundness redesign before any upstream PR. Targets in Cslib/Logics/Modal/Tableau/Soundness.lean: modalApplyOne_fresh (uses unfold + extract_lets + `repeat first | Or.inl rfl | Or.inr ... | split` plus an apply_ite/ite_self cleanup) and the modalExpandBranches_closed_unsat per-branch accs/Forall2 reformulation. Improve readability/robustness without changing statements. Verify scoped + full lake build green, zero sorry, lint-style pass. Touches the same file as task 404 (sequence after it); overlaps code-hygiene task 321.
 
@@ -723,10 +728,11 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 389. Fix docBlame, barrel headers, unusedSectionVars, broken citation
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 317
+- **Research**: [389_docstrings_headers_citations_propfound/reports/01_docstrings-headers-citations.md]
 
 **Description**: [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAlgebra/FreeMeetExtension.lean: add docstrings to 7 undocumented def/abbrev (fld:50 also rename himpFold, fmeLe:106, fmeEquiv:123, fmeSetoid:125, FreeMeetExtension:152, mk:159, freeMeetEmbed:257) — only hard docBlame in Foundations. (b) DROPPED — the 4 Tableau barrels already carry copyright + import Cslib.Init (verified post-merge). (c) Add omit for 14 unusedSectionVars (mostly Tableau/Classical/Completeness, Minimal/Soundness:118, Minimal/Completeness:89). (d) Add references.bib entry NegriVonPlato2001 (Negri & von Plato, Structural Proof Theory, CUP 2001) cited by OrImpConservative.lean. Sequence the Tableau/Classical+Minimal Completeness edits AFTER task 317. Source: §4.3-4.6 + 395.
 

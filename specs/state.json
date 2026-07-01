@@ -264,9 +264,11 @@
       "dependencies": [
         181,
         449,
-        450
+        450,
+        454
       ],
-      "topic": "Code Hygiene"
+      "topic": "Code Hygiene",
+      "depends_on": []
     },
     {
       "project_number": 440,
@@ -302,19 +304,25 @@
     {
       "project_number": 389,
       "project_name": "docstrings_headers_citations_propfound",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "cslib",
       "title": "Fix docBlame, barrel headers, unusedSectionVars, broken citation",
       "description": "[Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAlgebra/FreeMeetExtension.lean: add docstrings to 7 undocumented def/abbrev (fld:50 also rename himpFold, fmeLe:106, fmeEquiv:123, fmeSetoid:125, FreeMeetExtension:152, mk:159, freeMeetEmbed:257) — only hard docBlame in Foundations. (b) DROPPED — the 4 Tableau barrels already carry copyright + import Cslib.Init (verified post-merge). (c) Add omit for 14 unusedSectionVars (mostly Tableau/Classical/Completeness, Minimal/Soundness:118, Minimal/Completeness:89). (d) Add references.bib entry NegriVonPlato2001 (Negri & von Plato, Structural Proof Theory, CUP 2001) cited by OrImpConservative.lean. Sequence the Tableau/Classical+Minimal Completeness edits AFTER task 317. Source: §4.3-4.6 + 395.",
       "created": "2026-06-28T12:53:27Z",
-      "last_updated": "2026-06-28T12:53:27Z",
+      "last_updated": "2026-07-01T17:11:00Z",
       "next_artifact_number": 1,
-      "artifacts": [],
-      "session_id": "sess_1782651207_1e893c_389",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/389_docstrings_headers_citations_propfound/reports/01_docstrings-headers-citations.md"
+        }
+      ],
+      "session_id": "sess_1782924983_6bcecb_389",
       "dependencies": [
         317
       ],
-      "topic": "Code Hygiene"
+      "topic": "Code Hygiene",
+      "depends_on": []
     },
     {
       "project_number": 390,
@@ -361,7 +369,8 @@
         317,
         389
       ],
-      "topic": "Code Hygiene"
+      "topic": "Code Hygiene",
+      "depends_on": []
     },
     {
       "project_number": 392,
@@ -938,15 +947,31 @@
     {
       "project_number": 405,
       "project_name": "proof_style_cleanup_modal_soundness",
-      "status": "not_started",
+      "status": "pr_ready",
       "task_type": "cslib",
       "description": "Simplify the proof machinery in the task-402 modal tableau soundness redesign before any upstream PR. Targets in Cslib/Logics/Modal/Tableau/Soundness.lean: modalApplyOne_fresh (uses unfold + extract_lets + `repeat first | Or.inl rfl | Or.inr ... | split` plus an apply_ite/ite_self cleanup) and the modalExpandBranches_closed_unsat per-branch accs/Forall2 reformulation. Improve readability/robustness without changing statements. Verify scoped + full lake build green, zero sorry, lint-style pass. Touches the same file as task 404 (sequence after it); overlaps code-hygiene task 321.",
       "dependencies": [
         404
       ],
       "parent_task": 402,
-      "last_updated": "2026-06-28T18:30:31Z",
-      "topic": "Modal Logic"
+      "last_updated": "2026-07-01T17:19:02Z",
+      "topic": "Modal Logic",
+      "session_id": "sess_1782924983_6bcecb_405",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/405_proof_style_cleanup_modal_soundness/reports/01_proof-style-cleanup-modal-soundness.md"
+        },
+        {
+          "type": "plan",
+          "path": "specs/405_proof_style_cleanup_modal_soundness/plans/01_proof-style-cleanup-modal-soundness.md"
+        },
+        {
+          "type": "summary",
+          "path": "specs/405_proof_style_cleanup_modal_soundness/summaries/01_proof-style-cleanup-modal-soundness-summary.md"
+        }
+      ],
+      "completion_summary": "Applied 3 verified stylistic edits (R1 structured split-proof, R2 merged cases-result arms, R3 omit [Hashable Atom]) to Cslib/Logics/Modal/Tableau/Soundness.lean. No signature changes; full lake build, lake test, lint-style, lake lint, and shake all clean; zero sorry; no new axioms."
     },
     {
       "project_number": 407,
@@ -1585,7 +1610,7 @@
     {
       "project_number": 454,
       "project_name": "consolidate_chronicle_pointinsertion_bimodal_temporal",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Bimodal Logic",
       "priority": "medium",
@@ -1596,9 +1621,15 @@
         450
       ],
       "created": "2026-07-01T07:42:45Z",
-      "last_updated": "2026-07-01T07:42:45Z",
+      "last_updated": "2026-07-01T17:11:06Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/454_consolidate_chronicle_pointinsertion_bimodal_temporal/reports/01_consolidate-chronicle-pointinsertion.md"
+        }
+      ],
+      "session_id": "sess_1782924983_6bcecb_454"
     }
   ],
   "repository_health": {

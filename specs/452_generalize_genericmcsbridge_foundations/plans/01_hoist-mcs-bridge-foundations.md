@@ -222,13 +222,13 @@ and `GenericMCS.lean` for the final elimination accounting. No source edits.
 
 ---
 
-### Phase 3: Part B core.1 — Add the generic `HilbertTree` module to Foundations [NOT STARTED]
+### Phase 3: Part B core.1 — Add the generic `HilbertTree` module to Foundations [COMPLETED]
 
 **Goal**: Extend the EXISTING `Cslib/Foundations/Logic/Metalogic/GenericMCS.lean` with the generic
 tree-bridge machinery and build it in isolation. No per-logic edits in this phase.
 
 **Tasks**:
-- [ ] Add into `namespace Cslib.Logic.Metalogic.GenericMCS` (signatures from §2.2-§2.3, §6):
+- [x] Add into `namespace Cslib.Logic.Metalogic.GenericMCS` (signatures from §2.2-§2.3, §6):
   - `class HilbertTree (D : List F → F → Type*)` — 5 fields
     (`assumption`, `mp`, `weakening`, `axiomK`, `axiomS`).
   - `structure ClosedHilbert (D)` + `InferenceSystem` / `ModusPonens` / `HasAxiomImplyK` /
@@ -238,12 +238,19 @@ tree-bridge machinery and build it in isolation. No per-logic edits in this phas
   - `theorem deriv_iff_algebraic_of_forward` (assembles the deriv-iff from a per-logic forward map).
   - `theorem setConsistent_iff_congr`, `theorem setMaxConsistent_iff_congr` (pure
     `DerivationSystem` transfer lemmas — no tree, zero-risk).
-- [ ] Confirm the universe check: `S := ClosedHilbert D` elaborates against
+- [x] Confirm the universe check: `S := ClosedHilbert D` elaborates against
       `algebraicDerivationSystem`'s `[InferenceSystem S F]` (Risk row 2); adjust universe
-      annotations if needed.
-- [ ] Do NOT create a sibling file and do NOT touch the barrel (extending an existing module means
+      annotations if needed. Compiled clean on first attempt, no universe annotations needed
+      (`InferenceSystem.derivation : α → Sort v` already accommodates `D [] φ : Type*`).
+- [x] Do NOT create a sibling file and do NOT touch the barrel (extending an existing module means
       no `lake exe mk_all --module` needed).
-- [ ] `lean_verify` each new def/theorem for zero axioms/sorries as soon as it compiles.
+- [x] `lean_verify` each new def/theorem for zero axioms/sorries as soon as it compiles.
+
+**Result**: 167L -> 290L (+123L; within the ~50L-plus-docstrings cost side of the elimination
+accounting). `lean_verify` on `unfoldListImp`, `listDerivToTree`, `deriv_iff_algebraic_of_forward`,
+`setConsistent_iff_congr`, `setMaxConsistent_iff_congr` all report only the standard trusted set
+(propext/Classical.choice) or empty — zero-debt confirmed. Full CI green (one transient
+filesystem I/O error on an unrelated file during the first `lake build`, resolved on retry).
 
 **Timing**: 1.5 hours
 

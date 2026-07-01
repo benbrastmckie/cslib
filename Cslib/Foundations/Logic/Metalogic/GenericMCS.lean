@@ -74,6 +74,23 @@ introduced; the generalization is conservative.
   deduction theorem `Bimodal/Metalogic/Core/DeductionTheorem.lean`.
 - **Bimodal (fc)**: tag `HilbertTMFc fc`; same bridge; fc deduction theorem in same file.
 
+## Generic `HilbertTree` Bridge (task 452)
+
+Beyond the predicate/type/seam architecture above, the four `GenericMCSBridge.lean` files
+(Propositional, Modal, Temporal, Bimodal) also share a near-verbatim **tree-bridge trio**:
+a backward helper (`unfoldListImpInTree`), the backward direction (`listDerivToTree`), and
+the two consistency/MCS transfer lemmas (`*_setConsistent_iff_algebraic`,
+`*_setMaxConsistent_iff_algebraic`). Unlike the predicate-level `HasMinimalAxioms` above,
+this material operates on a **`Type`-valued contextual derivation-tree family**
+`D : List F → F → Type*` with real `assumption`/`mp`/`weakening` constructors — the
+`HilbertTree` class below captures exactly that interface, and `ClosedHilbert D` is the
+generic analogue of each logic's per-file `HilbertOf`/`HilbertBX(Fc)`/`HilbertTM(Fc)` tag.
+
+The **forward** direction (`derivTreeToList`, structural induction on the concrete tree)
+stays per-logic: Lean's `induction d with | ctor ...` names concrete constructors, so it
+cannot be written over an abstract `D`. Each per-logic bridge supplies its own forward map
+and assembles the deriv-iff via `deriv_iff_algebraic_of_forward`.
+
 ## References
 
 * `Cslib.Foundations.Logic.Metalogic.ListDeduction` — `list_deduction_theorem` (the core lemma)
@@ -163,5 +180,111 @@ class HasMinimalAxioms (Axioms : F → Prop) : Prop where
   /-- S axiom (distribution): `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))` is an axiom. -/
   hasImplyS : ∀ φ ψ χ, Axioms (HasImp.imp (HasImp.imp φ (HasImp.imp ψ χ))
     (HasImp.imp (HasImp.imp φ ψ) (HasImp.imp φ χ)))
+
+/-! ## `HilbertTree`: Generic Type-Valued Derivation-Tree Bridge
+
+The material below is parametric over an abstract `D : List F → F → Type*` and imports no
+per-logic material — it is shared by every `GenericMCSBridge.lean` file (task 452). -/
+
+variable {D : List F → F → Type*}
+
+/-- A `Type`-valued contextual derivation-tree family closed under assumption, modus ponens,
+weakening, and containing the K and S axiom schemata at the empty context. This is exactly
+the interface the backward MCS-bridge direction needs; the forward direction (structural
+induction on the concrete tree) stays per-logic. -/
+class HilbertTree (D : List F → F → Type*) where
+  /-- Every member of the context is derivable by assumption. -/
+  assumption : ∀ {Γ : List F} {a : F}, a ∈ Γ → D Γ a
+  /-- Modus ponens: `Γ ⊢ φ → ψ` and `Γ ⊢ φ` give `Γ ⊢ ψ`. -/
+  mp : ∀ {Γ : List F} {φ ψ : F}, D Γ (HasImp.imp φ ψ) → D Γ φ → D Γ ψ
+  /-- Weakening: derivability is monotone in the context under `⊆`. -/
+  weakening : ∀ {Γ Δ : List F} {φ : F}, Γ ⊆ Δ → D Γ φ → D Δ φ
+  /-- The K axiom schema is derivable at the empty context. -/
+  axiomK : ∀ (φ ψ : F), D [] (HasImp.imp φ (HasImp.imp ψ φ))
+  /-- The S axiom schema is derivable at the empty context. -/
+  axiomS : ∀ (φ ψ χ : F), D [] (HasImp.imp (HasImp.imp φ (HasImp.imp ψ χ))
+    (HasImp.imp (HasImp.imp φ ψ) (HasImp.imp φ χ)))
+
+/-- Tag type for the inference system of closed `D`-derivations: `ClosedHilbert D`'s
+derivability at `φ` unfolds to `D [] φ`. The generic analogue of each per-logic
+`HilbertOf`/`HilbertBX(Fc)`/`HilbertTM(Fc)` tag. -/
+structure ClosedHilbert (D : List F → F → Type*) : Type where
+
+instance (D : List F → F → Type*) : InferenceSystem (ClosedHilbert D) F where
+  derivation φ := D [] φ
+
+instance (D : List F → F → Type*) [HilbertTree (F := F) D] :
+    ModusPonens (ClosedHilbert D) (F := F) where
+  mp h₁ h₂ := by
+    obtain ⟨d₁⟩ := h₁; obtain ⟨d₂⟩ := h₂
+    exact ⟨HilbertTree.mp d₁ d₂⟩
+
+instance (D : List F → F → Type*) [HilbertTree (F := F) D] :
+    HasAxiomImplyK (ClosedHilbert D) (F := F) where
+  implyK := ⟨HilbertTree.axiomK _ _⟩
+
+instance (D : List F → F → Type*) [HilbertTree (F := F) D] :
+    HasAxiomImplyS (ClosedHilbert D) (F := F) where
+  implyS := ⟨HilbertTree.axiomS _ _ _⟩
+
+instance (D : List F → F → Type*) [HilbertTree (F := F) D] :
+    MinimalHilbert (ClosedHilbert D) (F := F) where
+
+/-- The algebraic derivation system at the generic tag `ClosedHilbert D`. -/
+@[reducible] def treeAlgDS (D : List F → F → Type*) [HilbertTree (F := F) D] :
+    DerivationSystem F :=
+  algebraicDerivationSystem (S := ClosedHilbert D)
+
+/-- Generic backward helper (was `unfoldListImpInTree` × 4): given `Γ ⊢ listImp Ψ φ` and
+`Ψ ⊆ Γ`, produce `Γ ⊢ φ` by iterating modus ponens with assumption trees. -/
+noncomputable def unfoldListImp [HilbertTree (F := F) D] {Γ : List F} {φ : F} :
+    (Ψ : List F) → D Γ (listImp Ψ φ) → (∀ a ∈ Ψ, a ∈ Γ) → D Γ φ
+  | [], d, _ => by simpa only [listImp_nil] using d
+  | a :: Ψ', d, h_sub => by
+      simp only [listImp_cons] at d
+      have ha : a ∈ Γ := h_sub a (List.mem_cons.mpr (Or.inl rfl))
+      exact unfoldListImp Ψ' (HilbertTree.mp d (HilbertTree.assumption ha))
+        (fun x hx => h_sub x (List.mem_cons.mpr (Or.inr hx)))
+
+/-- Generic backward direction (was `listDerivToTree` × 4): extracts `d₀ : [] ⊢ listImp Γ φ`
+from the algebraic derivation, weakens to `Γ`, then applies `unfoldListImp` to eliminate the
+list-implication layers. -/
+noncomputable def listDerivToTree [HilbertTree (F := F) D] {Γ : List F} {φ : F}
+    (h : (treeAlgDS D).Deriv Γ φ) : D Γ φ := by
+  simp only [treeAlgDS, algebraicDerivationSystem] at h
+  unfold ListDeriv at h
+  have d₀ : D [] (listImp Γ φ) := h.toDerivation
+  exact unfoldListImp Γ (HilbertTree.weakening (List.nil_subset Γ) d₀) (fun _ ha => ha)
+
+/-- Generic assembler for the derivability iff, taking the per-logic forward direction
+(`forward`) and an identification of the per-logic tree system with `Nonempty (D Γ φ)`
+(`h_tree`). -/
+theorem deriv_iff_algebraic_of_forward [HilbertTree (F := F) D]
+    {treeSys : DerivationSystem F}
+    (h_tree : ∀ {Γ φ}, treeSys.Deriv Γ φ ↔ Nonempty (D Γ φ))
+    (forward : ∀ {Γ φ}, D Γ φ → (treeAlgDS D).Deriv Γ φ)
+    {Γ : List F} {φ : F} : treeSys.Deriv Γ φ ↔ (treeAlgDS D).Deriv Γ φ := by
+  rw [h_tree]
+  exact ⟨fun ⟨d⟩ => forward d, fun h => ⟨listDerivToTree h⟩⟩
+
+/-- Fully generic consistency transfer (was `*_setConsistent_iff_algebraic` × 4): a pure
+`DerivationSystem` corollary, independent of `HilbertTree`/`D`. -/
+theorem setConsistent_iff_congr {D₁ D₂ : DerivationSystem F}
+    (h : ∀ Γ φ, D₁.Deriv Γ φ ↔ D₂.Deriv Γ φ) {Ω : Set F} :
+    SetConsistent D₁ Ω ↔ SetConsistent D₂ Ω := by
+  unfold SetConsistent Consistent
+  exact ⟨fun hc L hL hd => hc L hL ((h _ _).mpr hd),
+         fun hc L hL hd => hc L hL ((h _ _).mp hd)⟩
+
+/-- Fully generic MCS transfer (was `*_setMaxConsistent_iff_algebraic` × 4): a pure
+`DerivationSystem` corollary, independent of `HilbertTree`/`D`. -/
+theorem setMaxConsistent_iff_congr {D₁ D₂ : DerivationSystem F}
+    (h : ∀ Γ φ, D₁.Deriv Γ φ ↔ D₂.Deriv Γ φ) {Ω : Set F} :
+    SetMaximalConsistent D₁ Ω ↔ SetMaximalConsistent D₂ Ω := by
+  unfold SetMaximalConsistent
+  exact ⟨fun ⟨hc, hm⟩ => ⟨(setConsistent_iff_congr h).mp hc,
+            fun φ hφ hi => hm φ hφ ((setConsistent_iff_congr h).mpr hi)⟩,
+         fun ⟨hc, hm⟩ => ⟨(setConsistent_iff_congr h).mpr hc,
+            fun φ hφ hi => hm φ hφ ((setConsistent_iff_congr h).mp hi)⟩⟩
 
 end Cslib.Logic.Metalogic.GenericMCS

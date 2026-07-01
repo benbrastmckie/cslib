@@ -151,7 +151,7 @@ and 3 (Propositional: Classical/Completeness) touch disjoint files once Phase 1 
 
 ---
 
-### Phase 3: Update Propositional consumer (Classical/Completeness) [NOT STARTED]
+### Phase 3: Update Propositional consumer (Classical/Completeness) [COMPLETED]
 
 - **Goal:** Delete the duplicate `pow3_*` copies from the classical file and repoint its call sites
   to the shared lemmas.

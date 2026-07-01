@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
+import Cslib.Foundations.Logic.Tableau.Measure
 public import Cslib.Logics.Propositional.Tableau.Classical.Soundness
 
 /-! # Classical Tableau Completeness
@@ -669,25 +670,6 @@ private lemma classicalExpMeasure_const_exp
     classicalExpMeasure newBs (newBs.map (fun _ => newExp))
       = (newBs.map (fun child => 3 ^ classicalBranchComplexity child newExp)).sum := by
   simp only [classicalExpMeasure, ← List.map_prod_left_eq_zip, List.map_map, Function.comp_def]
-
-/-- Base-3 decrease for a BETA step: two children of complexity ≤ C-1 plus the saved unit. -/
-private lemma pow3_two_add_one_le {a0 a1 C : Nat} (hC : 1 ≤ C) (h0 : a0 ≤ C - 1)
-    (h1 : a1 ≤ C - 1) :
-    3 ^ a0 + 3 ^ a1 + 1 ≤ 3 ^ C := by
-  have h0' : 3 ^ a0 ≤ 3 ^ (C - 1) := Nat.pow_le_pow_right (by omega) h0
-  have h1' : 3 ^ a1 ≤ 3 ^ (C - 1) := Nat.pow_le_pow_right (by omega) h1
-  have hone : 1 ≤ 3 ^ (C - 1) := Nat.one_le_pow _ _ (by omega)
-  rw [show C = C - 1 + 1 from (Nat.sub_add_cancel hC).symm, pow_succ]
-  omega
-
-/-- Base-3 decrease for an ALPHA step: one child of complexity ≤ C-1 plus the saved unit. -/
-private lemma pow3_add_one_le {a0 C : Nat} (hC : 1 ≤ C) (h0 : a0 ≤ C - 1) :
-    3 ^ a0 + 1 ≤ 3 ^ C := by
-  have h0' : 3 ^ a0 ≤ 3 ^ (C - 1) := Nat.pow_le_pow_right (by omega) h0
-  have hone : 1 ≤ 3 ^ (C - 1) := Nat.one_le_pow _ _ (by omega)
-  rw [show C = C - 1 + 1 from (Nat.sub_add_cancel hC).symm, pow_succ]
-  omega
-
 
 /-- When `classicalStepBranch b e = none`, every formula on `b` is either already in the
 expanded set `e` or has `classicalApplyOne` return `notApplicable` (the branch is saturated). -/

@@ -751,6 +751,72 @@ lemma modalApplyOne_outputs_subset
       · dsimp only
         exact modalApplyOne_boxNeg_outputs_subset φ0 b φ l hb hsf hW
 
+/-! ## World-Count Bound (Phase 2 — the CRUX)
+
+This section proves the a-priori world bound `modalWorldBound φ0` is a per-step loop
+invariant of `modalStepBranch`. The naive single-step statement (`modalMaxWorld b <
+modalWorldBound φ0` alone as loop invariant) is **not sufficient**: a branch could contain
+a single not-yet-fired minting formula at label `modalWorldBound φ0 - 1`, satisfying the
+naive hypothesis, whose firing mints world `modalWorldBound φ0`, breaching the bound. The
+fix (research §6/C3 contingency) is a proof-only **rank map** recording, for each world, a
+remaining modal-depth budget, plus a counting potential `modalCap` bounding how many further
+worlds a given budget can spawn. `modalCap Sf k` is the exact geometric sum `Σ_{i≤k} Sf^i`,
+via the standard `1 + Sf * modalCap Sf (k-1)` recursion (one root plus up to `Sf` subtrees of
+budget `k-1`). -/
+
+/-- The exact geometric-sum capacity: `modalCap Sf k = Σ_{i=0}^{k} Sf^i`, the maximum size of
+a tree with branching factor `≤ Sf` and depth `≤ k` (root included). Defined recursively
+(`1` plus `Sf` copies of the one-shallower capacity) rather than via `Finset.sum` to keep the
+per-step potential-drop arithmetic (`modalCap_succ`) a definitional unfold. -/
+def modalCap (Sf : Nat) : Nat → Nat
+  | 0 => 1
+  | k + 1 => 1 + Sf * modalCap Sf k
+
+@[simp] lemma modalCap_zero (Sf : Nat) : modalCap Sf 0 = 1 := rfl
+
+lemma modalCap_succ (Sf k : Nat) :
+    modalCap Sf (k + 1) = 1 + Sf * modalCap Sf k := rfl
+
+/-- For branching factor `Sf ≥ 2`, the capacity stays strictly below `Sf ^ (k+1)` (with room
+`≥ 1`, stated additively to avoid `Nat` truncated-subtraction pitfalls): the exact geometric
+sum `Σ_{i≤k} Sf^i` satisfies `Σ + 1 ≤ Sf^{k+1}` once the branching factor is `≥ 2`. -/
+lemma modalCap_add_one_le_pow {Sf : Nat} (hSf : 2 ≤ Sf) :
+    ∀ k, modalCap Sf k + 1 ≤ Sf ^ (k + 1)
+  | 0 => by simp only [modalCap_zero, Nat.zero_add, pow_one]; omega
+  | k + 1 => by
+    have ih := modalCap_add_one_le_pow hSf k
+    have hmul : Sf * (modalCap Sf k + 1) ≤ Sf * Sf ^ (k + 1) :=
+      Nat.mul_le_mul_left Sf ih
+    have heq : Sf * Sf ^ (k + 1) = Sf ^ (k + 2) := by ring
+    have hexpand : Sf * (modalCap Sf k + 1) = Sf * modalCap Sf k + Sf := by ring
+    have hkey : Sf * modalCap Sf k + Sf ≤ Sf ^ (k + 2) := by
+      rw [← heq, ← hexpand]; exact hmul
+    have hsucc : modalCap Sf (k + 1) + 1 = Sf * modalCap Sf k + 2 := by
+      rw [modalCap_succ]; ring
+    have hgoal : k + 1 + 1 = k + 2 := rfl
+    rw [hsucc, hgoal]
+    omega
+
+/-- Degenerate branching factor `Sf ≤ 1` forces capacity `1` regardless of `k` when `k = 0`
+(the only case this lemma is ever invoked with, since `Sf = 1` forces `modalDepth φ0 = 0` in
+the application below). -/
+lemma modalCap_zero_le_pow {Sf : Nat} (hSf : 1 ≤ Sf) : modalCap Sf 0 ≤ Sf ^ 1 := by
+  simp only [modalCap_zero, pow_one]; omega
+
+/-- Unconditional capacity bound feeding the world-bound proof: `modalCap Sf k ≤ Sf ^ (k+1)`,
+for any `Sf ≥ 1` with `Sf = 1 → k = 0` (the only shape that ever arises, since
+`Sf(φ0) = 1 → modalDepth φ0 = 0` structurally — see `modalWorldBound`). -/
+lemma modalCap_le_pow {Sf k : Nat} (hSf : 1 ≤ Sf) (hdeg : Sf = 1 → k = 0) :
+    modalCap Sf k ≤ Sf ^ (k + 1) := by
+  rcases Nat.lt_or_ge Sf 2 with hlt | hge
+  · have hSf1 : Sf = 1 := by omega
+    subst hSf1
+    have hk0 : k = 0 := hdeg rfl
+    subst hk0
+    simpa using modalCap_zero_le_pow (Sf := 1) (le_refl 1)
+  · have := modalCap_add_one_le_pow hge k
+    omega
+
 end Cslib.Logic.Modal.Tableau
 
 end

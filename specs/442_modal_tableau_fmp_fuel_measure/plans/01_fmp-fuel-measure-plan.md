@@ -23,7 +23,7 @@
 | P1a  | ✅ COMPLETED | `325a8e8a` | Subformula closure (world-preserving rules). Green, axiom-clean. **Added `import Completeness` into `FmpMeasure.lean`** to reuse `tryAllPropRules_*`/`modal*Of?_eq` → forces architecture adjustment below. |
 | P4   | ✅ COMPLETED | `3766e609` | Saturation characterisation (`Completeness.lean`). Green. Finding: Łukasiewicz diamond patterns never reach `acc`-dependent arms (prop dispatch exhaustive over `.imp`); only `boxNeg` needs invariant carve-out. |
 | P1b  | ✅ COMPLETED | `5d07fedf` | Fresh-world rule closure (`diamondPos`/`boxNeg`) + top-level `modalApplyOne_outputs_subset` dispatch. Green, axiom-clean (propext/Quot.sound only). Added `public import SoundnessStep` (acyclic) for `accFreshInv`; five small glue lemmas factored out (subformula transitivity, `modalUniverse` membership chars, `successorsOf`/`hasEdge` bridge, shared `boxProps`/`diaNegProps` closure). |
-| P2 (CRUX) | 🔄 IN PROGRESS | — | A-priori world bound as loop invariant. Primary: depth-stratification; fallback: per-world rank map (proof-only). |
+| P2 (CRUX) | BLOCKED | `<pending>` | Primary signature disproved by concrete counterexample (single-step invariant insufficient). Fallback (rank-map potential Φ) fully designed + hand-verified (Δ=0 recurrence), but not fully formalized — see BLOCKED note below. `modalCap` capacity theory landed green (sorry-free, axiom-clean): defs + `modalCap_add_one_le_pow`/`modalCap_zero_le_pow`/`modalCap_le_pow`. |
 | P3   | ⏳ pending | — | — |
 | P5a/P5b/P6 | ⏳ pending | — | Relocated to new `CompletenessLoop.lean` (see architecture adjustment). |
 
@@ -299,7 +299,7 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
 
 ---
 
-### Phase 2: World-count bound (CRUX — highest risk, isolated, serial) [IN PROGRESS]
+### Phase 2: World-count bound (CRUX — highest risk, isolated, serial) [BLOCKED]
 - **Goal:** Prove the a-priori world bound as a per-step loop invariant. This is the single
   research-hard obligation; it gates P3-P5. Isolated in its own phase with a generous budget.
 - **Territory:**
@@ -322,6 +322,49 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
 - **Depends on:** P1b (closure gives "emitted worlds are fresh/existing"; stratification gives the count cap)
 - **Timing:** ~5-8 h (~250-450 lines) — budget generously; adversarial audit before proceeding
 - **Done = green:** `lake build Cslib.Logics.Modal.Tableau.FmpMeasure` succeeds; `modalStepBranch_maxWorld_lt` sorry-free. Commit `task 442 phase 2: world-count bound (CRUX)`. **Gate: do not start P3 until this commit lands green.**
+- **BLOCKED (both primary and the in-plan contingency genuinely attempted; see `.handoff-P2.json` for
+  full detail):**
+  1. **Primary approach is mathematically false as literally specified.** Concrete counterexample:
+     `b = [⟨.pos, .imp (.box (.imp ψ .bot)) .bot, W-1⟩]` for any diamond-subformula `ψ` of `φ0`
+     (`W := modalWorldBound φ0`) satisfies `hb` and `hW : modalMaxWorld b < W` (`W-1 < W`), but
+     `modalStepBranch` fires `diamondPos` on the sole element, minting world `W`, giving
+     `modalMaxWorld b' = W`, which does **not** satisfy `< W`. A single-step invariant carrying only
+     "current `maxWorld < W`" cannot be strengthened to "next `maxWorld < W`" — confirmed exactly as
+     research §6/C3 flags ("NOT a one-step monotonicity"; residual risk realized).
+  2. **Contingency (rank-map) fully designed and hand-verified, not fully formalized.** The correct
+     invariant is a potential-function argument: a proof-only rank map `rank : WorldIndex → Nat`
+     (remaining modal-depth budget, frozen at world-creation as `parent_rank − 1`), an out-degree
+     counter derived from `acc`, and a scalar potential `Φ := Σ_w (Sf − outDeg w) · modalCap Sf
+     (rank w − 1)` (`Sf := (modalSubfmls φ0).length`). Hand-verified: `modalMaxWorld b + Φ ≤ modalCap
+     Sf (modalDepth φ0) − 1` is preserved with **exact `Δ = 0`** at every step — mint steps net to
+     zero via the recurrence `Sf · modalCap Sf k = modalCap Sf (k+1) − 1`; non-mint steps (prop
+     rules, `boxPos`, `diamondNeg`) touch neither `maxWorld`, `rank`, nor `outDeg`, so `Φ` is
+     structurally untouched (this is the key design choice: `Φ` depends only on `(rank, outDeg)`,
+     **not** on which minting-shaped formulas are currently visible in `b`, sidestepping the
+     "prop-rule reveals a new diamond subformula" growth hazard). An initial concern that
+     out-degree needs bound `2·Sf` (T-diamond and F-box shapes counted separately) was resolved:
+     both shapes are simply disjoint subsets of the *same* `modalSubfmls φ0` node list (which
+     already counts every node — box, imp, atom, bot — indiscriminately), so their combined count
+     is still `≤ (modalSubfmls φ0).length`, no factor-of-2 gap.
+  3. **What is committed and green** (`FmpMeasure.lean`, new `## World-Count Bound (Phase 2)`
+     section): `modalCap` (exact geometric-sum capacity, `modalCap Sf k := Σ_{i≤k} Sf^i` via the
+     `1 + Sf * modalCap Sf (k-1)` recursion) and its three closing numeric lemmas
+     (`modalCap_add_one_le_pow`, `modalCap_zero_le_pow`, `modalCap_le_pow`), giving
+     `modalCap Sf k ≤ Sf^(k+1)` unconditionally (handling the `Sf=1 ⟹ k=0` boundary case
+     separately, since `Sf=1` forces `modalComplexity φ0 = 0` hence `modalDepth φ0 = 0`). Sorry-free,
+     axiom-clean (`propext`/`Quot.sound` only).
+  4. **Remaining technical obligations** (not started; each is a genuine multi-case dispatch through
+     `modalStepBranch`'s five rule kinds, mirroring but extending P1a/P1b's ~350-line dispatch
+     pattern): (a) `b.Nodup` invariant maintenance; (b) `FormulaRankBound` (`∀x∈b, modalDepth
+     x.formula ≤ rank x.label`) invariant maintenance, assigning `rank` to freshly-minted worlds as
+     `parent_rank − 1`; (c) `outDeg(w) ≤ (modalSubfmls φ0).length` via an injective map "minting
+     signed formula at `w` ↦ its `.formula` component" into `modalSubfmls φ0`, using (a); (d) the
+     `Φ`-potential single-step `Δ=0` lemma (the hand-verified arithmetic above, formalized); (e)
+     final composition deriving `modalStepBranch_maxWorld_lt`'s conclusion from (a)-(d) plus
+     `modalCap_le_pow` and `modalSubfmls_length_le`. Estimated 300-500 additional lines.
+  5. **Escalating per plan's own protocol** ("If BOTH primary and fallback stall after genuine
+     attempts, mark P2 [BLOCKED] and escalate; do NOT weaken the bound, do NOT add a sorry, do NOT
+     proceed to P3"). No `sorry`, no new axiom, no datatype/rule change, no bound weakening.
 
 ---
 

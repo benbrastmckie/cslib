@@ -1,0 +1,33 @@
+{
+  "status": "blocked",
+  "phase_label": "P2",
+  "green": false,
+  "approach_used": "fallback",
+  "declarations_added": [
+    "modalCap",
+    "modalCap_zero",
+    "modalCap_succ",
+    "modalCap_add_one_le_pow",
+    "modalCap_zero_le_pow",
+    "modalCap_le_pow"
+  ],
+  "blockers": [
+    {
+      "target": "modalStepBranch_maxWorld_lt",
+      "verbatim_goal": "lemma modalStepBranch_maxWorld_lt (φ0) (hb : ∀ x∈b, x∈modalUniverse φ0) (hW : modalMaxWorld b < modalWorldBound φ0) (hstep : modalStepBranch b e acc = some (newBs,newExps,newAcc)) : ∀ b'∈newBs, modalMaxWorld b' < modalWorldBound φ0",
+      "reason": "This exact single-step signature is mathematically false. Concrete counterexample: let W := modalWorldBound φ0, and take b := [⟨.pos, .imp (.box (.imp ψ .bot)) .bot, W-1⟩] for any diamond-subformula ψ of φ0 (i.e. φ0 has ◇ψ as a subformula). This b satisfies hb (the single element is in modalUniverse φ0: its formula is a subformula of φ0 and its label W-1 ≤ W) and hW (modalMaxWorld b = W-1 < W). modalStepBranch b [] acc fires diamondPos on the sole element (linear rule, mints modalNextWorld b = W), giving newBs = [witness ++ b] with the witness at label W. So modalMaxWorld b' = W, which does NOT satisfy 'modalMaxWorld b' < W'. A single-step invariant carrying only 'current maxWorld < W' as premise cannot imply 'next maxWorld < W' -- this exactly matches research report section 6/C3's own flagged residual risk ('the danger is that the depth-stratification invariant is heavy to state against a flat maxWorld+1 naming scheme'), which materialized as outright falsity of the literal signature rather than mere formalization difficulty.",
+      "correct_design_verified_by_hand": "The correct invariant is a potential-function argument, NOT capturable by hb+hW alone. Requires threading a proof-only rank map rank : WorldIndex -> Nat (remaining modal-depth budget, frozen at world-creation time as parent_rank - 1) and an out-degree counter outDeg(w) := (acc.successorsOf w).length, combined into a scalar potential Phi := sum over existing worlds w of (Sf - outDeg w) * modalCap Sf (rank w - 1), where Sf := (modalSubfmls φ0).length. The invariant 'modalMaxWorld b + Phi <= modalCap Sf (modalDepth φ0) - 1' is preserved with EXACT delta=0 at every modalStepBranch step: (a) non-mint steps (prop rules, boxPos, diamondNeg) change neither maxWorld, rank, nor outDeg -- Phi is defined purely structurally from (rank, outDeg), NOT from which minting-shaped formulas are currently visible in b, so these steps leave the invariant untouched (this design choice specifically avoids a growth hazard where propositional decomposition reveals a new diamond/box subformula at an existing world); (b) mint steps (diamondPos, boxNeg) increase maxWorld by 1 and change Phi by exactly -1 via the algebraic identity Sf * modalCap Sf k = modalCap Sf (k+1) - 1, hand-verified for both the rank>=2 and rank=1 sub-cases (rank=1 case: child has rank 0, contributes remainingCap=0, matching '(modalCap Sf 0)-1=0' uniformly). A separate concern -- that out-degree needs bound 2*Sf because T-diamond-shaped and F-box-shaped minting formulas are both counted -- was investigated and RESOLVED: both shapes are disjoint subsets of the single modalSubfmls φ0 node list (which already lists every syntax node -- box, imp, atom, bot -- without deduplication by type), so their combined count is still <= (modalSubfmls φ0).length, no factor-of-2 gap. From the invariant, Phi >= 0 gives maxWorld <= modalCap Sf (modalDepth φ0) - 1 < modalCap Sf (modalDepth φ0) <= Sf^(modalDepth φ0 + 1) <= Sf^(modalComplexity φ0 + 1) = modalWorldBound φ0 (via modalDepth_le_complexity and modalCap_le_pow, both already available/proven).",
+      "remaining_obligations": [
+        "b.Nodup invariant maintenance across modalStepBranch's 5 rule-kind cases (needed for the out-degree injectivity argument)",
+        "FormulaRankBound (forall x in b, modalDepth x.formula <= rank x.label) invariant maintenance across the same 5 cases, assigning rank to freshly-minted worlds as parent_rank - 1",
+        "outDeg(w) <= (modalSubfmls φ0).length via an injective map 'minting-shaped signed formula at w -> its .formula component' into modalSubfmls φ0, using b.Nodup",
+        "the Phi-potential single-step delta=0 lemma (formalizing the hand-verified arithmetic above)",
+        "final composition deriving modalStepBranch_maxWorld_lt's conclusion (under a strengthened, rank/outDeg-carrying signature -- a documented deviation from the plan's terse hb+hW-only form, precedented by Phase 1b's own hsf/hInv additions) from the above plus modalCap_le_pow and modalSubfmls_length_le"
+      ],
+      "estimate": "300-500 additional lines, each piece a genuine multi-case dispatch mirroring but extending P1a/P1b's ~350-line modalApplyOne case-dispatch pattern"
+    }
+  ],
+  "sorry_inventory": [],
+  "commit": "<pending, see next commit after this file>",
+  "session_id": "sess_1782868458_ecfcce"
+}

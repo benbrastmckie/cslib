@@ -460,7 +460,7 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
 
 ---
 
-### Phase 5a: Combined-invariant single-step preservation [IN PROGRESS]
+### Phase 5a: Combined-invariant single-step preservation [COMPLETED]
 - **Goal:** Prove that one `modalStepBranch` preserves the full bundled loop invariant (lengths,
   `Forall₂ accFreshInv`, world-bound, measure bound, Hintikka expanded-set inv), consuming P2 + P3
   + P4. This is the heavy inductive step, isolated from the fuel recursion.
@@ -468,7 +468,7 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
   - [OWN] `Completeness.lean` (add `import Cslib.Logics.Modal.Tableau.FmpMeasure` here; new block)
   - [RO] `Soundness.lean:190-262` (the `processNext` inner shape), `LoopInduction.lean:44-104` (`forall₂_*`)
 - **Declarations to add** (research §3.6):
-  - [ ] `modalStep_preserves_invariant` — a single lemma (or small bundle) stating: given the combined invariant holds pre-step and `modalStepBranch = some (…)`, it holds on each child, AND `modalExpMeasure` drops by ≥1. Composes P2 (`modalStepBranch_maxWorld_lt`), P3 (`modalExpMeasure_step_lt`), P4 (`modalStepBranch_hintikka_inv`), and `modalStepBranch_preserves_accFreshInv` (green).
+  - [x] `modalStep_preserves_invariant` — a single lemma (or small bundle) stating: given the combined invariant holds pre-step and `modalStepBranch = some (…)`, it holds on each child, AND `modalExpMeasure` drops by ≥1. Composes P2 (`modalStepBranch_maxWorld_lt`), P3 (`modalExpMeasure_step_lt`), P4 (`modalStepBranch_hintikka_inv`), and `modalStepBranch_preserves_accFreshInv` (green). Implemented in new file `CompletenessLoop.lean` as `ModalLoopInv` + `modalStep_preserves_invariant`; sorry-free, axiom-clean.
 - **Reference template:** acc-threading shape of `modalExpandBranches_closed_unsat` (Soundness.lean:165, inner `processNext` :190-262); classical measure-carry of `classicalExpandBranches_hintikka` (:924).
 - **Depends on:** P3 (and transitively P2, P4)
 - **Timing:** ~3-4 h (~150-250 lines)

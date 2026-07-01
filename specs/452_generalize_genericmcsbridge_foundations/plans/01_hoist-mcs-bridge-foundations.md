@@ -190,16 +190,19 @@ and `GenericMCS.lean` for the final elimination accounting. No source edits.
 
 ---
 
-### Phase 2: Part A.2 — Bimodal base↔Fc collapse [NOT STARTED]
+### Phase 2: Part A.2 — Bimodal base↔Fc collapse [COMPLETED]
 
 **Goal**: Same collapse as Phase 1 applied to the Bimodal/Core bridge (`HilbertTMFc`), preserving
 `bimodal_deriv_iff_algebraic`, `bimodal_deriv_iff_algebraic_fc`, and `HilbertTMFc`.
 
 **Tasks**:
-- [ ] Move the Bimodal `_fc` block (currently ~L244-405) above the base block (~L66-243).
-- [ ] Rewrite the three base bodies as delegations to the `_fc` versions at `fc := .Base`.
-- [ ] Compile delegations before deleting old base bodies.
-- [ ] Preserve `bimodalAlgDS`, `bimodal_deriv_iff_algebraic(_fc)`, `HilbertTMFc`.
+- [x] Move the Bimodal `_fc` block (currently ~L244-405) above the base block (~L66-243).
+- [x] Rewrite the three base bodies as delegations to the `_fc` versions at `fc := .Base`.
+- [x] Compile delegations before deleting old base bodies.
+- [x] Preserve `bimodalAlgDS`, `bimodal_deriv_iff_algebraic(_fc)`, `HilbertTMFc`.
+
+**Result**: 405L -> 330L (75L reduction). `lean_verify` on `derivTreeToList`,
+`bimodal_deriv_iff_algebraic` report `["propext","Classical.choice"]` only (zero-debt).
 
 **Timing**: 1 hour
 

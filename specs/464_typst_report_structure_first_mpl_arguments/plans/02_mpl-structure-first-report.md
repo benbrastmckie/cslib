@@ -188,18 +188,18 @@ table — the most mechanical, lowest-factual-risk content.
 
 ---
 
-### Phase 4: Semantics chapter (Arguments 5 and 6) [NOT STARTED]
+### Phase 4: Semantics chapter (Arguments 5 and 6) [COMPLETED]
 
 **Goal**: Write `02-semantics.typ` covering Argument 5 (three-tier ⊥-ladder on one evaluator,
 corrected to two genuine strengths + classicality) and Argument 6 (conservative-extension
 results), with the informal-categorical caveat inline.
 
 **Tasks**:
-- [ ] Argument 5: `AlgEvaluate`/`bot_val` (`Algebra.lean:94-100`, `| .bot => bot_val` at :97) as the one evaluator serving all rungs; present as MPL (free `bot_val`) ▸ IPL (constrained-least, however presented) ▸ CPL (classical) per C2 — explicitly note `HasLeastBot`/`HasInitialBot`/canonical-`⊥` are three names for one IPL constraint (one instance-resolution chain via `instHasLeastBotOrderBot` `:98-100`), not three logical strengths.
-- [ ] Kripke witness: `IForces` with `botForces` (`Kripke.lean:81-98`, `IForces_bot` :95-98) as the second independent semantic witness that ⊥'s clause is constrained only by type at MPL.
-- [ ] Argument 6: `ConservativeChain` (`derivability_subsumption_chain` :152; fragment theorems :226/246/270), `MplConservativeChain` (:197/231/263, the MPL-as-top-of-its-own-chain claim, Zulip #606397657), and `HilbertCompleteness` one-theorem-three-corollaries (`:64/93/122/155`); `FragmentGeneric` (`ghaValid_iff_haValid_of_botFree` :174).
-- [ ] MANDATORY: place the informal-categorical caveat INLINE wherever "reflector"/"left adjoint"/"faithful functor"/"initial object" language appears (grep zero `Adjunction`/`Functor` hits; `BotProperties.lean:31-36` frames these as informal readings of order-theoretic facts).
-- [ ] Compile clean.
+- [x] Argument 5: `AlgEvaluate`/`bot_val` (`Algebra.lean:94-100`, `| .bot => bot_val` at :97) as the one evaluator serving all rungs; present as MPL (free `bot_val`) ▸ IPL (constrained-least, however presented) ▸ CPL (classical) per C2 — explicitly note `HasLeastBot`/`HasInitialBot`/canonical-`⊥` are three names for one IPL constraint (one instance-resolution chain via `instHasLeastBotOrderBot` `:98-100`), not three logical strengths. *(completed)*
+- [x] Kripke witness: `IForces` with `botForces` (`Kripke.lean:81-98`, `IForces_bot` :95-98) as the second independent semantic witness that ⊥'s clause is constrained only by type at MPL. *(completed)*
+- [x] Argument 6: `ConservativeChain` (`derivability_subsumption_chain` :152; fragment theorems :226/246/270), `MplConservativeChain` (:197/231/263, the MPL-as-top-of-its-own-chain claim, Zulip #606397657), and `HilbertCompleteness` one-theorem-three-corollaries (`:64/93/122/155`); `FragmentGeneric` (`ghaValid_iff_haValid_of_botFree` :174). *(completed)*
+- [x] MANDATORY: place the informal-categorical caveat INLINE wherever "reflector"/"left adjoint"/"faithful functor"/"initial object" language appears (grep zero `Adjunction`/`Functor` hits; `BotProperties.lean:31-36` frames these as informal readings of order-theoretic facts). *(completed: caveat remark at initial-object use + inline at faithful-functor use; also added KF6 keystone as <sec:kf6>)*
+- [x] Compile clean. *(completed: exit 0)*
 
 **Timing**: 2 hours
 

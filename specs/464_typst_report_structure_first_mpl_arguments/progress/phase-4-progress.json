@@ -1,0 +1,15 @@
+{
+  "phase": 4,
+  "phase_name": "Semantics chapter (Arguments 5 and 6)",
+  "last_updated": "2026-07-01T04:00:00Z",
+  "objectives": [
+    {"id": 1, "description": "Argument 5 one-evaluator bot-ladder; two strengths not three", "status": "done"},
+    {"id": 2, "description": "Kripke botForces second witness", "status": "done"},
+    {"id": 3, "description": "Argument 6 conservativity + completeness corollaries", "status": "done"},
+    {"id": 4, "description": "Informal-categorical caveat inline; KF6 keystone", "status": "done"},
+    {"id": 5, "description": "Compile clean", "status": "done"}
+  ],
+  "current_objective": null,
+  "deviations": [],
+  "handoff_count": 0
+}

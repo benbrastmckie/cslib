@@ -181,6 +181,12 @@ theorem bimodal_truthAt_toBimodal_iff_temporal_satisfies
       exact ⟨s, hst, (ih_φ s).mp h_φ, fun r hsr hrt => (ih_ψ r).mp (h_ψ r hsr hrt)⟩
     · rintro ⟨s, hst, h_φ, h_ψ⟩
       exact ⟨s, hst, (ih_φ s).mpr h_φ, fun r hsr hrt => (ih_ψ r).mpr (h_ψ r hsr hrt)⟩
+  | allFuture φ ih =>
+    simp only [Temporal.Formula.toBimodal_allFuture, Truth.future_iff, Temporal.Satisfies]
+    exact ⟨fun h s hts => (ih s).mp (h s hts), fun h s hts => (ih s).mpr (h s hts)⟩
+  | allPast φ ih =>
+    simp only [Temporal.Formula.toBimodal_allPast, Truth.past_iff, Temporal.Satisfies]
+    exact ⟨fun h s hst => (ih s).mp (h s hst), fun h s hst => (ih s).mpr (h s hst)⟩
 
 /-! ## Validity on AddCommGroup Domains -/
 

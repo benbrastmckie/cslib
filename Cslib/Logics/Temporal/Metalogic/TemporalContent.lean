@@ -177,9 +177,7 @@ theorem p_content_iff_not_neg_in_h_content {M : Set (Formula Atom)}
       have d_h := DerivationTree.temporal_duality _ d_g_swap
       have h_eq : (Formula.allFuture (phi.imp phi.neg.neg).swapTemporal).swapTemporal =
           Formula.allPast ((phi.imp phi.neg.neg).swapTemporal.swapTemporal) := by
-        simp only [Formula.allFuture, Formula.allPast, Formula.someFuture, Formula.somePast,
-          Formula.neg, PropositionalConnectives.neg, Formula.top, PropositionalConnectives.top,
-          Formula.swapTemporal]
+        simp only [Formula.swapTemporal]
       rw [Formula.swapTemporal_involution] at h_eq
       exact h_eq ▸ d_h
     have h_bx3p : DerivationTree FrameClass.Base [] ((phi.imp phi.neg.neg).allPast.imp
@@ -218,9 +216,7 @@ theorem p_content_iff_not_neg_in_h_content {M : Set (Formula Atom)}
       have d_h := DerivationTree.temporal_duality _ d_g_swap
       have h_eq : (Formula.allFuture (phi.neg.neg.imp phi).swapTemporal).swapTemporal =
           Formula.allPast ((phi.neg.neg.imp phi).swapTemporal.swapTemporal) := by
-        simp only [Formula.allFuture, Formula.allPast, Formula.someFuture, Formula.somePast,
-          Formula.neg, PropositionalConnectives.neg, Formula.top, PropositionalConnectives.top,
-          Formula.swapTemporal]
+        simp only [Formula.swapTemporal]
       rw [Formula.swapTemporal_involution] at h_eq
       exact h_eq ▸ d_h
     have h_bx3p : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allPast.imp

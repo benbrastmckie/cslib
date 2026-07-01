@@ -759,27 +759,41 @@ Cslib.Logics.Temporal.Tableau.Completeness` — 654/654 jobs, 0 errors, 0 warnin
 
 ---
 
-### Phase 9: Classical-equivalence theorems + Boudou2017 BibKey + FULL CI [NOT STARTED]
+### Phase 9: Classical-equivalence theorems + Boudou2017 BibKey + FULL CI [COMPLETED]
 
 - **Goal:** Package the classical equivalences as axiom-backed theorems, add the missing BibKey, run
   the downstream sweep, and pass the full CI pipeline. **This is the only phase that runs full
   `lake build`; full green returns here.**
 - **Tasks:**
-  - [ ] `Theorems.lean`: add
+  - [x] `Theorems.lean`: add
     `allFuture_iff_neg_someFuture_neg : DerivationTree FrameClass.Base [] (𝐆φ ↔ ¬𝐅¬φ)` and the past
     dual, as thin wrappers packaging the two bridge-axiom directions into an `Iff` (F8, D3). Note in
     the docstring the D3 honesty caveat: conservativity is asserted by (sound) axiom, not proved.
-  - [ ] `Completeness.lean` / `DenseCompleteness.lean`: verify they carry through unchanged once
-    TruthLemma is total (F7) — no constructor match; build-only.
-  - [ ] Add `Boudou2017` to `references.bib` (root): Boudou, Diéguez & Fernández-Duque (2017),
-    *A decidable intuitionistic temporal logic*, CSL 2017 (F0). Optionally flag the also-absent
-    Burgess 1982 (`TruthLemma.lean:34`) as a follow-up.
-  - [ ] Downstream sweep: build `Cslib.Logics.Bimodal.Embedding.TemporalEmbedding`, Bimodal
-    metalogic/syntax temporal files, `Cslib.Foundations.*Temporal*`. Fix mechanical breakage; log a
-    follow-up task if a consumer needs substantial rework.
-  - [ ] Update `Cslib.lean` barrel via `lake exe mk_all --module` if any file was added (none
-    expected).
-  - [ ] Run the full CI pipeline (below).
+  - [x] `Completeness.lean` / `DenseCompleteness.lean`: verify they carry through unchanged once
+    TruthLemma is total (F7) — no constructor match; build-only. **Deviation:** `Completeness.lean`
+    was unchanged as expected, but `DenseCompleteness.lean:203-210` had a genuine (not just
+    missing-case) defeq break: `limit_satisfies_c4` is stated in the raw `¬(ξ U η)` encoding, while
+    `g_dense_indicator_in_dense_mcs` now produces a `𝐆(¬utb)`-primitive membership. Fixed by routing
+    through the existing `mcs_allFuture_iff` bridge lemma (F4 pattern), not by touching
+    `limit_satisfies_c4` itself.
+  - [x] Add `Boudou2017` to `references.bib` (root): Boudou, Diéguez & Fernández-Duque (2017),
+    *A decidable intuitionistic temporal logic*, CSL 2017 (F0). Burgess 1982 (`TruthLemma.lean:34`)
+    remains absent from `references.bib` — flagged as a follow-up, not added (non-trivial: exact
+    publication details not verified against a citation database in this dispatch).
+  - [x] Downstream sweep: built `Cslib.Logics.Bimodal.Embedding.TemporalEmbedding`, Bimodal
+    metalogic/syntax temporal files (`Core.DerivationTree`, `Core.DeductionTheorem`,
+    `Core.GenericMCSBridge`, `ConservativeExtension.TemporalConservativity`,
+    `Embedding.PropositionalEmbedding`), `Cslib.Foundations.Data.OmegaSequence.Temporal`,
+    `Cslib.Foundations.Logic.Theorems.Temporal.TemporalDerived`. Two mechanical fixes required (both
+    "missing G/H constructor case" pattern, closed inline): `TemporalEmbedding.lean` (added
+    `allFuture`/`allPast` cases to `toBimodal`, mapping to Bimodal's own classical
+    `allFuture`/`allPast` abbrevs) and `TemporalConservativity.lean` (added the two induction cases
+    to `bimodal_truthAt_toBimodal_iff_temporal_satisfies`, using the pre-existing
+    `Truth.future_iff`/`Truth.past_iff` bimodal semantic lemmas). No consumer needed substantial
+    rework; no follow-up task required for the Bimodal/Foundations subtree.
+  - [x] Update `Cslib.lean` barrel via `lake exe mk_all --module` if any file was added (none
+    expected). No new files were added; barrel unchanged.
+  - [x] Run the full CI pipeline (below). All steps green.
 - **Timing:** 2.5-3.5 hours
 - **Depends on:** 7, 8
 - **Estimated output:** ~150-300 lines (theorems + BibKey + downstream fixups)
@@ -788,11 +802,19 @@ Cslib.Logics.Temporal.Tableau.Completeness` — 654/654 jobs, 0 errors, 0 warnin
   `references.bib`, `Cslib/Logics/Bimodal/**` and `Cslib/Foundations/**Temporal**` (as needed).
 - **Full CI verification (done when, in order):**
   - `lake exe cache get`
-  - `lake build` (whole project green — first full green since P1)
-  - `lake exe checkInitImports`
-  - `lake exe lint-style`
-  - `lake test`
-  - `lake shake --add-public --keep-implied --keep-prefix`
+  - `lake build` (whole project green — first full green since P1) — PASS (3186/3186 jobs)
+  - `lake exe checkInitImports` — PASS (no output)
+  - `lake exe lint-style` — PASS on all task-180-touched files (2 pre-existing, out-of-scope errors
+    remain in `Cslib/Logics/Modal/Tableau/Completeness.lean:432,491`, unrelated to task 180)
+  - `lake test` — PASS (9177/9177 jobs, CslibTests suite green)
+  - `lake shake --add-public --keep-implied --keep-prefix` — PASS: none of the task-180-touched
+    files (`Theorems.lean`, `TemporalContent.lean`, `DenseCompleteness.lean`,
+    `TemporalEmbedding.lean`, `TemporalConservativity.lean`) appear in the shake suggestion list;
+    all suggestions are pre-existing, in unrelated Propositional/Modal/LTL modules.
+  - `lean_verify` on `chronicle_truth_lemma`, `completeness`, `soundness_thderivable`,
+    `dense_indicator_in_all_limit_points`, `allFuture_iff_neg_someFuture_neg`,
+    `allPast_iff_neg_somePast_neg` — all report only `[propext, Classical.choice, Quot.sound]`
+    (standard Lean/Mathlib axioms); zero `sorry`, zero new custom axioms.
 
 ---
 
@@ -813,16 +835,18 @@ Per-phase (scoped, mandatory before marking any phase `[COMPLETED]`):
   continuation dispatch; zero `sorry`, zero warnings (see Phase 8 result above).
 
 Final (P9, full CI):
-- [ ] `lake build` green for the whole project.
-- [ ] `lake exe checkInitImports` passes.
-- [ ] `lake exe lint-style` clean on all modified files (docstrings on new constructors, axioms,
+- [x] `lake build` green for the whole project. (3186/3186 jobs)
+- [x] `lake exe checkInitImports` passes.
+- [x] `lake exe lint-style` clean on all modified files (docstrings on new constructors, axioms,
   theorems).
-- [ ] `lake test` (CslibTests) passes.
-- [ ] `lake shake --add-public --keep-implied --keep-prefix` — no import regressions.
-- [ ] `lean_verify` on TruthLemma, Completeness, Soundness, and the new equivalence theorems: no new
-  `sorry`; the only new axioms are the four intended bridge axioms.
-- [ ] Classical equivalences `𝐆φ ↔ ¬𝐅¬φ`, `𝐇φ ↔ ¬𝐏¬φ` derivable as theorems.
-- [ ] `Boudou2017` present in `references.bib`.
+- [x] `lake test` (CslibTests) passes. (9177/9177 jobs)
+- [x] `lake shake --add-public --keep-implied --keep-prefix` — no import regressions.
+- [x] `lean_verify` on TruthLemma, Completeness, Soundness, and the new equivalence theorems: no new
+  `sorry`; the only new axioms are the four intended bridge axioms (no `axiom`-keyword custom axioms
+  detected in `lean_verify` output — the four bridge axioms are `Axiom` inductive constructors, not
+  Lean `axiom` declarations).
+- [x] Classical equivalences `𝐆φ ↔ ¬𝐅¬φ`, `𝐇φ ↔ ¬𝐏¬φ` derivable as theorems.
+- [x] `Boudou2017` present in `references.bib`.
 
 ## Source-to-Implementation Mapping (H3, Tier 1)
 

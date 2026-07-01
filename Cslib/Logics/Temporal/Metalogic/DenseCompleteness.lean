@@ -202,10 +202,16 @@ theorem dense_indicator_in_all_limit_points
     have h_g := g_dense_indicator_in_dense_mcs h_dense_mcs
     have h_neg_until_g : utb.neg.allFuture ∈ limitF A h_base_mcs 0 := by
       rw [limit_f_zero]; exact h_g
+    -- `limit_satisfies_c4` is stated in the raw `¬(ξ U η)` encoding (task 180: `allFuture` is
+    -- now a primitive constructor, no longer defeq to `¬(⊤ U ¬·)`). Bridge via
+    -- `mcs_allFuture_iff` to convert the `𝐆(¬utb)` membership above into the raw form.
+    have h_mcs_zero := limit_c0 A h_base_mcs 0 h0
+    have h_neg_until_g' : (Formula.untl Formula.top utb.neg.neg).neg ∈ limitF A h_base_mcs 0 :=
+      (mcs_allFuture_iff h_mcs_zero).mp h_neg_until_g
     -- C4 at (0, x) with eta = neg neg utb, xi = top
     obtain ⟨z, hz_dom, _, _, h_neg_top_z⟩ :=
       limit_satisfies_c4 A h_base_mcs 0 x h0 hx hx_pos
-        Formula.top utb.neg.neg h_neg_until_g h_dblneg_until
+        Formula.top utb.neg.neg h_neg_until_g' h_dblneg_until
     have h_mcs_z := limit_c0 A h_base_mcs z hz_dom
     have h_top_z : Formula.top ∈ limitF A h_base_mcs z := by
       apply temporal_closed_under_derivation h_mcs_z (L := []) (fun _ h => nomatch h)

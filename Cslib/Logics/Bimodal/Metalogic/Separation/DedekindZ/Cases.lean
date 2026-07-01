@@ -433,7 +433,6 @@ theorem d21_sep_bool_only (a q A B : Formula Atom)
       (qZ A B (Formula.neg q)) A B h_replaced_uf
       (Q_Z_neg_q_U_free A B q hA hB hq) hA hB
 
-set_option maxHeartbeats 3200000 in
 /-- d21Sep is intEquiv to S(alpha, qZ) where alpha = case3Alpha(a∧U, q, A, B).
     This non-existential form allows using d21Sep in D3's event. -/
 theorem d21_sep_equiv (a q A B : Formula Atom)
@@ -546,7 +545,6 @@ theorem snce_combined_U_separable
 
 /-! ## Cases 5-8 Separability -/
 
-set_option maxHeartbeats 1600000 in
 /-- Generalized Case 5: S(a ^ U(A,B), q v U(A,B)) is separable.
     Drops S-free requirements on a and q (only A, B need S-freeness).
     The proof only uses S-freeness of A and B. -/
@@ -698,7 +696,6 @@ theorem neg_untl_event_equiv (a A B : Formula Atom) :
       exact (int_truth_and M t _ _).mpr ⟨ha,
         (neg_until_equiv A B M t).mpr ((int_truth_or M t _ _).mpr (Or.inr hU'))⟩
 
-set_option maxHeartbeats 3200000 in
 /-- S(ev, q∨U) is separable when ev is U-free.
     This is the core of Branch A and is like case5_separable_Z_gen but with
     the event already U-free (no U in the event), making it simpler. -/
@@ -895,7 +892,6 @@ a(s) and ¬U(A,B)(s) hold, with q∨U on (s,t). The formula is equivalent to:
 D1 is separated: S(a,q∧¬A) is U-free, ¬A is U-free, ¬(B∧U) is boolean of atoms/U.
 D2 uses eliminations (3) and (5): factor (q∨U) in event, apply since_distrib. -/
 
-set_option maxHeartbeats 3200000 in
 /-- GHR94 10.2.3 item 6: S(a∧¬U, q∨U) ↔ [S(a,q∧¬A)∧¬A∧¬(B∧U)] ∨ S(¬B∧¬A∧(q∨U)∧S(a,q∧¬A), q∨U).
     The decomposition considers when the first ¬B after the witness s occurs. -/
 theorem case6_equiv_Z (a q A B : Formula Atom) :
@@ -1214,7 +1210,6 @@ D1: further eliminated by distributing (q∨¬U) in event, then
 
 The first disjunct can be further eliminated by eliminations (8) and (4). -/
 
-set_option maxHeartbeats 3200000 in
 /-- GHR94 10.2.3 item 7: S(a∧U, q∨¬U) ↔ D1 ∨ D2 ∨ D3.
     The decomposition considers when the A from U(A,B) first occurs. -/
 theorem case7_equiv_Z (a q A B : Formula Atom) :
@@ -1338,7 +1333,6 @@ This avoids the multi-U-type problem because:
   - S(¬q∧U, ¬a∨U) is Case 5 (event has U, guard has U)
 -/
 
-set_option maxHeartbeats 1600000 in
 /-- GHR94 10.3.11.8 on Z: S(a∧¬U, q∨¬U) ↔ S(a∧¬U, ⊤) ∧ ¬S(¬q∧U, ¬a∨U). -/
 theorem case8_equiv_Z (a q A B : Formula Atom) :
     intEquiv (.snce (Formula.or q (Formula.neg (.untl B A)))
@@ -1493,7 +1487,6 @@ theorem snce_Ufree_event_qNotU_guard_separable (ev q A B : Formula Atom)
       exact hnotS1 ⟨s, hst, (int_truth_and M s _ _).mpr
         ⟨(int_truth_and M s _ _).mpr ⟨hna_s, hnotQ_s⟩, hU_s⟩, hguard⟩
 
-set_option maxHeartbeats 3200000 in
 /-- Case 7 separability for Z: S(a ^ U(A,B), q v ~U(A,B)) is separable.
     Uses GHR94 10.2.3 item 7 direct formula. -/
 theorem case7_separable_Z (a q A B : Formula Atom)

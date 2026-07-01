@@ -1,0 +1,41 @@
+{
+  "task": 452,
+  "phase": "implement",
+  "status": "implemented",
+  "updated_at": "2026-07-01T18:45:00Z",
+  "session_id": "sess_452_implement",
+  "agent_type": "cslib-implementation-agent",
+  "plan": "specs/452_generalize_genericmcsbridge_foundations/plans/01_hoist-mcs-bridge-foundations.md",
+  "summary_artifact": "specs/452_generalize_genericmcsbridge_foundations/summaries/01_hoist-mcs-bridge-foundations-summary.md",
+  "phases_completed": 8,
+  "phases_total": 8,
+  "optional_phases_run": [6],
+  "blockers": [],
+  "continuation_context": null,
+  "ci_state": {
+    "lake_build": "green (3188/3188)",
+    "lake_exe_checkInitImports": "green (exit 0)",
+    "lake_exe_lint_style": "green (exit 0, no output)",
+    "lake_test": "green (exit 0, full CslibTests suite)",
+    "lake_shake": "green (zero suggestions on all 5 touched files)"
+  },
+  "zero_debt": {
+    "new_sorries": 0,
+    "new_axioms": 0,
+    "verification_method": "#print axioms via lean_run_code on all new Foundations defs and all four preserved *_deriv_iff_algebraic(_fc) theorems -- only propext/Classical.choice; two lemmas depend on no axioms at all"
+  },
+  "line_elimination": {
+    "baseline_total": 1465,
+    "final_total": 1328,
+    "net_eliminated": 137,
+    "target_range": "300-330 (up to 385 with Phase 6)",
+    "target_met": false,
+    "note": "Bridges alone shrank 260L; Foundations grew 123L (vs ~50L estimated) due to mandatory docstrings and net-new per-logic HilbertTree instance boilerplate coexisting with kept Temporal/Bimodal tag machinery (Non-Goals). Qualitative goals (shared abstraction, thin instantiations, zero new debt, all public names preserved, full CI green) fully met."
+  },
+  "public_api_preserved": ["listDerivToTree", "temporalAlgDS", "temporal_deriv_iff_algebraic", "temporal_deriv_iff_algebraic_fc", "HilbertBXFc", "bimodal_deriv_iff_algebraic", "bimodal_deriv_iff_algebraic_fc", "HilbertTMFc", "modal_deriv_iff_algebraic", "pl_deriv_iff_algebraic", "propAlgDS", "modalAlgDS", "HilbertBX", "HilbertTM"],
+  "environment_notes": [
+    "Two full-repo lake build runs during Phases 4-5 failed transiently in files unrelated to this task (Propositional/Tableau/Intuitionistic/Scheme.lean, Temporal/Tableau/Saturation.lean, Temporal/Tableau/Completeness.lean) due to concurrently-running tasks 317/439 mid-editing those files (confirmed via git diff --stat, disjoint from this task's diff). Resolved by the time Phase 7 ran the final full pipeline; all green at completion."
+  ],
+  "next_action": "none -- task complete, ready for /pr or task status transition",
+  "requires_user_review": false
+}

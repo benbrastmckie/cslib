@@ -1,22 +1,43 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "started_at": "2026-07-01T15:24:23Z",
+  "completed_at": "2026-07-01T18:45:00Z",
   "artifacts": [
+    "Cslib/Foundations/Logic/Metalogic/GenericMCS.lean",
     "Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean",
     "Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean",
     "Cslib/Logics/Propositional/Metalogic/GenericMCSBridge.lean",
     "Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean",
-    "Cslib/Foundations/Logic/Metalogic/GenericMCS.lean"
+    "Cslib/Logics/Propositional/Metalogic/DeductionTheorem.lean",
+    "Cslib/Logics/Modal/Metalogic/DeductionTheorem.lean",
+    "specs/452_generalize_genericmcsbridge_foundations/summaries/01_hoist-mcs-bridge-foundations-summary.md"
   ],
   "partial_progress": {
-    "stage": "phase_5_done",
-    "details": "Phases 0-5 complete and committed. All four bridges retargeted: Temporal 370->299L, Bimodal 405->325L, PL 256->236L, Modal 267->246L, Foundations GenericMCS 167->290L. All public names preserved and downstream importers verified green. Zero-debt confirmed via #print axioms on all retargeted defs. Full-repo lake build still blocked intermittently by concurrently-running task 439 editing Cslib/Logics/Temporal/Tableau/Saturation.lean (unrelated file). Phase 6 (optional) and Phase 7 (final CI gate) remain.",
-    "phases_completed": 6
+    "stage": "all_phases_complete",
+    "details": "All 8 phases (0-7, including optional Phase 6) complete, committed per-phase, CI green.",
+    "phases_completed": 8
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true
+  },
+  "elimination_accounting": {
+    "baseline_total_lines": 1465,
+    "final_total_lines": 1328,
+    "net_eliminated_lines": 137,
+    "target_range": "300-330 (up to 385 with Phase 6)",
+    "target_met": false,
+    "explanation": "Bridges shrank 260L combined; Foundations grew 123L (vs ~50L estimated) due to mandatory docstrings and net-new per-logic HilbertTree instance boilerplate that coexists with (not replaces) the kept Temporal/Bimodal tag machinery per Non-Goals. Qualitative refactor goals fully met."
   },
   "metadata": {
     "session_id": "sess_452_implement",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

@@ -418,24 +418,74 @@ suggestions on all 5 touched files).
 
 ---
 
-### Phase 7: Final CI gate, zero-debt verification, and elimination accounting [IN PROGRESS]
+### Phase 7: Final CI gate, zero-debt verification, and elimination accounting [COMPLETED]
 
 **Goal**: Run the complete CI pipeline, verify zero new sorries/axioms on all moved/generic defs,
 and compute net line elimination against the Phase-0 baseline.
 
 **Tasks**:
-- [ ] Full pipeline: `lake build`, `lake test`, `lake exe checkInitImports`, `lake exe lint-style`,
+- [x] Full pipeline: `lake build`, `lake test`, `lake exe checkInitImports`, `lake exe lint-style`,
       `lake shake --add-public --keep-implied --keep-prefix`.
-- [ ] `lean_verify` (fully-qualified) on the generic defs and the preserved per-logic theorems, e.g.
+- [x] `lean_verify` (fully-qualified) on the generic defs and the preserved per-logic theorems, e.g.
       `Cslib.Logic.Metalogic.GenericMCS.listDerivToTree`,
       `Cslib.Logic.Metalogic.GenericMCS.unfoldListImp`,
       `Cslib.Logic.Metalogic.GenericMCS.setConsistent_iff_congr`,
       `Cslib.Logic.Metalogic.GenericMCS.setMaxConsistent_iff_congr`,
       `Cslib.Logic.Metalogic.GenericMCS.deriv_iff_algebraic_of_forward`, plus each
       `*_deriv_iff_algebraic(_fc)` — assert zero `sorry`/`axiom` beyond the standard trusted set.
-- [ ] `wc -l` the four bridges + `GenericMCS.lean`; compute net reduction vs the Phase-0 baseline
+      (Used `#print axioms` via `lean_run_code` for the definitive check, since `lean_verify` was
+      intermittently affected by stale LSP state from the concurrent tasks noted in Phase 4/5.)
+- [x] `wc -l` the four bridges + `GenericMCS.lean`; compute net reduction vs the Phase-0 baseline
       (target ~300-330 L eliminated, up to ~385 L if Phase 6 ran). Record in the summary.
-- [ ] Confirm the full external-reference set from Phase 0 still resolves.
+- [x] Confirm the full external-reference set from Phase 0 still resolves.
+
+**Final CI results** (all green):
+- `lake build`: 3188/3188 jobs, full project.
+- `lake exe checkInitImports`: exit 0.
+- `lake exe lint-style`: exit 0, no output.
+- `lake test`: exit 0, `CslibTests` full suite (9179 jobs).
+- `lake shake --add-public --keep-implied --keep-prefix`: zero suggestions on all 5 touched
+  files (one suggestion surfaced mid-Phase-5 for the PL bridge's import of `MCSProperties` vs
+  `GenericMCS`; fixed by switching the import and dropping the now-dead
+  `open ...MCSProperties`).
+
+**Zero-debt**: `#print axioms` on `GenericMCS.listDerivToTree`, `unfoldListImp`,
+`deriv_iff_algebraic_of_forward` (propext/Classical.choice), `setConsistent_iff_congr`/
+`setMaxConsistent_iff_congr` (no axioms at all — pure `DerivationSystem` corollaries), and all
+four preserved `*_deriv_iff_algebraic(_fc)` theorems (propext/Classical.choice only) — no
+`sorryAx`, no new axioms anywhere. Grep of all 5 touched files for `sorry`/`^axiom ` finds only
+prose mentions in docstrings (zero real occurrences).
+
+**External-reference re-verification**: all 8 names from the Phase-0 grep list
+(`listDerivToTree`, `temporalAlgDS`, `temporal_deriv_iff_algebraic(_fc)`, `HilbertBXFc`,
+`bimodal_deriv_iff_algebraic(_fc)`, `HilbertTMFc`, `modal_deriv_iff_algebraic`,
+`pl_deriv_iff_algebraic`) still resolve identically from their importers.
+
+**Elimination accounting** (baseline -> final, `wc -l`):
+| File | Baseline | Final | Δ |
+|------|----------|-------|---|
+| Propositional/Metalogic/GenericMCSBridge.lean | 256 | 201 | -55 |
+| Modal/Metalogic/GenericMCSBridge.lean | 267 | 213 | -54 |
+| Temporal/Metalogic/GenericMCSBridge.lean | 370 | 299 | -71 |
+| Bimodal/Metalogic/Core/GenericMCSBridge.lean | 405 | 325 | -80 |
+| Foundations/Logic/Metalogic/GenericMCS.lean | 167 | 290 | +123 |
+| **Total** | **1465** | **1328** | **-137** |
+
+**Target vs actual**: the plan targeted ~300-330 L eliminated (up to ~385 L with Phase 6). The
+actual measured net elimination is **137 L** (bridges alone shrank by 260 L; the Foundations
+module grew by 123 L to host the shared machinery, for a 137 L net). This falls short of the
+research report's estimate. Root cause, documented honestly rather than adjusted to fit the
+target: the report's "generic cost" line items (+10, +10, +14, "~+50 new Foundations L" total)
+significantly underestimated (a) the mandatory per-declaration docstrings required by CSLib's
+lint-prevention rules for every new `class`/`structure`/`instance`/`def`/`theorem` in the
+~10 new Foundations declarations, and (b) the per-logic `HilbertTree` instance boilerplate
+(~7-10 L with docstring × 4 logics = ~35 L) that is net-new code (Temporal/Bimodal keep their
+existing tag + `HasAxiomImplyK`/`HasAxiomImplyS` instances per the Non-Goals, so the K/S-axiom
+derivation logic is now duplicated between the kept tag instances and the new `HilbertTree`
+instance for those two logics -- an intentional, plan-sanctioned tradeoff since replacing the
+tags is explicitly out of scope, Non-Goals). The qualitative goals of the plan -- single shared
+abstraction, all four bridges as thin instantiations, zero new sorries/axioms, full CI green,
+every public name preserved -- are fully met; the quantitative line-count target was optimistic.
 
 **Timing**: 0.75 hours
 

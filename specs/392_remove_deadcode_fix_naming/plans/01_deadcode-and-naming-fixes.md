@@ -165,15 +165,15 @@ with its own verification gate.
 
 ---
 
-### Phase 3: `Extention` -> `Extension` typo rename [NOT STARTED]
+### Phase 3: `Extention` -> `Extension` typo rename [COMPLETED]
 
 **Goal**: Fix the misspelled instance-builder theorems and every reference so the build stays green.
 
 **Tasks**:
-- [ ] Rename `instIsIntuitionisticExtention` -> `instIsIntuitionisticExtension` (decl `Defs.lean:~190`); update call sites `NaturalDeduction/Basic.lean:~302` and `NaturalDeduction/AxiomAdmissibility.lean:~230`, and comment sites `Basic.lean:~215`, `Equivalence.lean:~256`.
-- [ ] Rename `instIsClassicalExtention` -> `instIsClassicalExtension` (decl `Defs.lean:~195`); update call site `AxiomAdmissibility.lean:~232` and comment `Equivalence.lean:~256`.
-- [ ] Rename `instIsMinimalExtention` -> `instIsMinimalExtension` (decl `Equivalence.lean:~257`; no external call/comment sites).
-- [ ] Re-grep `git grep -n Extention` before finishing; must return zero hits.
+- [x] Rename `instIsIntuitionisticExtention` -> `instIsIntuitionisticExtension` (decl `Defs.lean:~190`); update call sites `NaturalDeduction/Basic.lean:~302` and `NaturalDeduction/AxiomAdmissibility.lean:~230`, and comment sites `Basic.lean:~215`, `Equivalence.lean:~256`.
+- [x] Rename `instIsClassicalExtention` -> `instIsClassicalExtension` (decl `Defs.lean:~195`); update call site `AxiomAdmissibility.lean:~232` and comment `Equivalence.lean:~256`.
+- [x] Rename `instIsMinimalExtention` -> `instIsMinimalExtension` (decl `Equivalence.lean:~257`; no external call/comment sites).
+- [x] Re-grep `git grep -n Extention` before finishing; must return zero hits. *(Confirmed: 0 hits repo-wide after sed across all 4 files.)*
 
 **Timing**: ~30 minutes
 

@@ -253,8 +253,8 @@ omit [DecidableEq Atom] in
 /-- If a theory is minimal and is contained in a larger theory, the larger theory is also minimal.
 
 This is the monotone propagation of the `IsMinimal` predicate, mirroring
-`instIsIntuitionisticExtention` and `instIsClassicalExtention`. -/
-theorem instIsMinimalExtention {T T' : Theory Atom} [h : IsMinimal T]
+`instIsIntuitionisticExtension` and `instIsClassicalExtension`. -/
+theorem instIsMinimalExtension {T T' : Theory Atom} [h : IsMinimal T]
     (hsub : T ⊆ T') : IsMinimal T' :=
   (minimalAxioms_iff_forall_minPropAxiom _).mpr fun φ hφ =>
     hsub ((minimalAxioms_iff_forall_minPropAxiom _).mp h φ hφ)

@@ -187,12 +187,12 @@ instance instIsClassicalCPL : IsClassical (Atom := Atom) CPL where
 
 omit [DecidableEq Atom] in
 @[scoped grind →]
-theorem instIsIntuitionisticExtention {T T' : Theory Atom} [IsIntuitionistic T]
+theorem instIsIntuitionisticExtension {T T' : Theory Atom} [IsIntuitionistic T]
     (h : T ⊆ T') : IsIntuitionistic T' := by grind
 
 omit [DecidableEq Atom] in
 @[scoped grind →]
-theorem instIsClassicalExtention {T T' : Theory Atom} [IsClassical T] (h : T ⊆ T') :
+theorem instIsClassicalExtension {T T' : Theory Atom} [IsClassical T] (h : T ⊆ T') :
     IsClassical T' := by grind
 
 /-- Extend a theory T to an intuitionistic theory over a larger atom type by adding the principle

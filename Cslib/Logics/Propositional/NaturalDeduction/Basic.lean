@@ -212,7 +212,7 @@ The connection to the gate mechanism: `efq` requires `[IsIntuitionistic T]`; `MP
 admits no `IsIntuitionistic` instance (`IsIntuitionistic MPL` would require `IPL ⊆ ∅`,
 which is false). Hence every `MinimalDerivation` is automatically `IsBotRuleFree`.
 This is the operational content of `min_consistent : ¬ Derivable MinPropAxiom ⊥`
-(MinLindenbaum.lean) and `instIsIntuitionisticExtention` (Defs.lean): the `efq`
+(MinLindenbaum.lean) and `instIsIntuitionisticExtension` (Defs.lean): the `efq`
 constructor is structurally unconstructible at MPL strength, not merely inadmissible. -/
 
 /-- A derivation is `⊥`-rule-free if it does not appeal to the `efq` constructor.
@@ -299,7 +299,7 @@ def Theory.Derivation.weak {T T' : Theory Atom} {Γ Δ : Ctx Atom} {A : Proposit
   | @impI _ _ _ A B Γ D => impI (Δ) <| D.weak hTheory <| Finset.insert_subset_insert _ hCtx
   | impE D D' => impE (D.weak hTheory hCtx) (D'.weak hTheory hCtx)
   | efq D =>
-      haveI : IsIntuitionistic T' := instIsIntuitionisticExtention hTheory
+      haveI : IsIntuitionistic T' := instIsIntuitionisticExtension hTheory
       efq (D.weak hTheory hCtx)
 
 /-- Weakening the theory only. -/

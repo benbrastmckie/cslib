@@ -227,9 +227,9 @@ lemma intPropAxiom_admissible {φ : Proposition Atom} (h : IntPropAxiom φ) :
 lemma propositionalAxiom_admissible {φ : Proposition Atom} (h : PropositionalAxiom φ) :
     DerivableIn (IPL ∪ CPL : Theory Atom) (∅ ⊢ φ) := by
   haveI : IsIntuitionistic (IPL ∪ CPL : Theory Atom) :=
-    instIsIntuitionisticExtention Set.subset_union_left
+    instIsIntuitionisticExtension Set.subset_union_left
   haveI : IsClassical (IPL ∪ CPL : Theory Atom) :=
-    instIsClassicalExtention Set.subset_union_right
+    instIsClassicalExtension Set.subset_union_right
   cases h with
   | implyK A B => exact DerivableIn.weakTheory (Set.empty_subset _) (nd_derivable_K A B)
   | implyS A B C => exact DerivableIn.weakTheory (Set.empty_subset _) (nd_derivable_S A B C)

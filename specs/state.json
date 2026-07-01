@@ -637,7 +637,7 @@
     {
       "project_number": 180,
       "project_name": "temporal_primitive_always_historically",
-      "status": "partial",
+      "status": "researched",
       "task_type": "cslib",
       "dependencies": [
         406
@@ -658,11 +658,17 @@
           "path": "specs/180_temporal_primitive_always_historically/reports/02_implementation-attempt-status.md",
           "type": "report",
           "summary": "Where the parked implementation attempt left off; resume guidance for research/implement"
+        },
+        {
+          "path": "specs/180_temporal_primitive_always_historically/reports/03_metalogic-obligations-research.md",
+          "type": "report",
+          "summary": "Metalogic obligations for primitive allFuture/allPast: root cause is the load-bearing 𝐆φ≡¬𝐅¬φ defeq disconnecting MCS/Chronicle proofs; four WIP bridge axioms shown necessary for completeness; two reusable MCS lemmas + TruthLemma reduction de-risk Phase 6; per-file obligation table and 8-phase-plan critique."
         }
       ],
       "topic": "Temporal Logic",
-      "last_updated": "2026-06-30T17:08:52Z",
-      "session_id": "sess_1782838873_48a805"
+      "last_updated": "2026-06-30T17:40:00Z",
+      "session_id": "sess_1782865763_3c9819",
+      "next_artifact_number": 2
     },
     {
       "project_number": 181,

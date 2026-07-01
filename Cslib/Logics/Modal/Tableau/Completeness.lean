@@ -217,9 +217,14 @@ lemma modalImpOf?_eq {φ x y : Proposition Atom} (h : modalImpOf? φ = some (x, 
     φ = .imp x y := by
   unfold modalImpOf? at h
   split at h
-  · simp_all
-  · rename_i a b _
-    split at h <;> split at h <;> simp_all
+  · next a b =>
+    split at h
+    · simp at h
+    · split at h
+      · simp at h
+      · simp only [Option.some.injEq, Prod.mk.injEq] at h
+        obtain ⟨rfl, rfl⟩ := h; rfl
+  · simp at h
 
 /-- Inversion: if `modalNegOf? φ` succeeds then `φ` is the encoded negation `x → ⊥`. -/
 lemma modalNegOf?_eq {φ x : Proposition Atom} (h : modalNegOf? φ = some x) :
@@ -245,14 +250,10 @@ lemma tryAllPropRules_pos {F L : Type*}
             match negOf? φ with
             | some x => .linear [⟨.neg, x, l⟩]
             | none => .notApplicable := by
-  simp only [tryAllPropRules, List.map, List.find?, applyPropRule, RuleResult.isApplicable]
-  rcases hA : andOf? φ with _ | ⟨x, y⟩
-  · rcases hO : orOf? φ with _ | ⟨x, y⟩
-    · rcases hI : impOf? φ with _ | ⟨x, y⟩
-      · rcases hN : negOf? φ with _ | x <;> simp [hA, hO, hI]
-      · simp [hA, hO, hI]
-    · simp [hA, hO]
-  · simp [hA]
+  rcases hA : andOf? φ with _ | ⟨x, y⟩ <;> rcases hO : orOf? φ with _ | ⟨x, y⟩ <;>
+    rcases hI : impOf? φ with _ | ⟨x, y⟩ <;> rcases hN : negOf? φ with _ | x <;>
+    simp [tryAllPropRules, List.map, List.find?, applyPropRule, RuleResult.isApplicable,
+      SignedFormula.pos, SignedFormula.neg, hA, hO, hI, hN]
 
 /-- Reduction of `tryAllPropRules` on a negatively-signed formula. -/
 lemma tryAllPropRules_neg {F L : Type*}
@@ -272,14 +273,10 @@ lemma tryAllPropRules_neg {F L : Type*}
             match negOf? φ with
             | some x => .linear [⟨.pos, x, l⟩]
             | none => .notApplicable := by
-  simp only [tryAllPropRules, List.map, List.find?, applyPropRule, RuleResult.isApplicable]
-  rcases hA : andOf? φ with _ | ⟨x, y⟩
-  · rcases hO : orOf? φ with _ | ⟨x, y⟩
-    · rcases hI : impOf? φ with _ | ⟨x, y⟩
-      · rcases hN : negOf? φ with _ | x <;> simp [hA, hO, hI]
-      · simp [hA, hO, hI]
-    · simp [hA, hO]
-  · simp [hA]
+  rcases hA : andOf? φ with _ | ⟨x, y⟩ <;> rcases hO : orOf? φ with _ | ⟨x, y⟩ <;>
+    rcases hI : impOf? φ with _ | ⟨x, y⟩ <;> rcases hN : negOf? φ with _ | x <;>
+    simp [tryAllPropRules, List.map, List.find?, applyPropRule, RuleResult.isApplicable,
+      SignedFormula.pos, SignedFormula.neg, hA, hO, hI, hN]
 
 /-- When the propositional rules apply, `modalApplyOne` returns the propositional result. -/
 lemma modalApplyOne_eq_prop_of_applicable
@@ -307,8 +304,8 @@ lemma modalApplyOne_imp_pos (a c : Proposition Atom) (w : WorldIndex)
             match modalNegOf? (.imp a c) with
             | some x => .linear [⟨.neg, x, w⟩]
             | none => .notApplicable := by
-  rw [← tryAllPropRules_pos]
-  apply modalApplyOne_eq_prop_of_applicable
+  refine (modalApplyOne_eq_prop_of_applicable ⟨.pos, .imp a c, w⟩ b acc ?_).trans
+    (tryAllPropRules_pos modalAndOf? modalOrOf? modalImpOf? modalNegOf? (.imp a c) w)
   rw [tryAllPropRules_pos]
   rcases hA : modalAndOf? (.imp a c) with _ | ⟨x, y⟩
   · rcases hO : modalOrOf? (.imp a c) with _ | ⟨x, y⟩
@@ -337,8 +334,8 @@ lemma modalApplyOne_imp_neg (a c : Proposition Atom) (w : WorldIndex)
             match modalNegOf? (.imp a c) with
             | some x => .linear [⟨.pos, x, w⟩]
             | none => .notApplicable := by
-  rw [← tryAllPropRules_neg]
-  apply modalApplyOne_eq_prop_of_applicable
+  refine (modalApplyOne_eq_prop_of_applicable ⟨.neg, .imp a c, w⟩ b acc ?_).trans
+    (tryAllPropRules_neg modalAndOf? modalOrOf? modalImpOf? modalNegOf? (.imp a c) w)
   rw [tryAllPropRules_neg]
   rcases hA : modalAndOf? (.imp a c) with _ | ⟨x, y⟩
   · rcases hO : modalOrOf? (.imp a c) with _ | ⟨x, y⟩
@@ -423,14 +420,14 @@ lemma modalTruthLemma
                 simp only [hA, hO, hI, hN] at hcond
                 have hxmem : (⟨.neg, x, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
                   hcond ⟨.neg, x, w⟩ (by simp)
-                have hshape := modalNegOf?_eq hN
+                have hshape := (modalNegOf?_eq hN).symm
                 rw [Proposition.imp.injEq] at hshape
                 obtain ⟨rfl, rfl⟩ := hshape
                 exact (IH x (by rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_box,
                   modalComplexity_atom, modalComplexity_bot]; omega) w).2 hxmem
             · -- impPos: proper implication, branching [[F x],[T y]]
               simp only [hA, hO, hI] at hcond
-              have hshape := modalImpOf?_eq hI
+              have hshape := (modalImpOf?_eq hI).symm
               rw [Proposition.imp.injEq] at hshape
               obtain ⟨rfl, rfl⟩ := hshape
               intro hsx
@@ -444,7 +441,7 @@ lemma modalTruthLemma
                   modalComplexity_atom, modalComplexity_bot]; omega) w).1 (hbr ⟨.pos, y, w⟩ (by simp))
           · -- orPos: φ = x ∨ y, branching [[T x],[T y]]
             simp only [hA, hO] at hcond
-            have hshape := modalOrOf?_eq hO
+            have hshape := (modalOrOf?_eq hO).symm
             rw [Proposition.imp.injEq] at hshape
             obtain ⟨rfl, rfl⟩ := hshape
             intro hsx
@@ -458,7 +455,7 @@ lemma modalTruthLemma
                 modalComplexity_atom, modalComplexity_bot]; omega) w).1 (hbr ⟨.pos, y, w⟩ (by simp))
         · -- andPos: φ = x ∧ y, linear [T x, T y]
           simp only [hA] at hcond
-          have hshape := modalAndOf?_eq hA
+          have hshape := (modalAndOf?_eq hA).symm
           rw [Proposition.imp.injEq] at hshape
           obtain ⟨rfl, rfl⟩ := hshape
           intro hsa
@@ -481,7 +478,7 @@ lemma modalTruthLemma
                 simp only [hA, hO, hI, hN] at hcond
                 have hxmem : (⟨.pos, x, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
                   hcond ⟨.pos, x, w⟩ (by simp)
-                have hshape := modalNegOf?_eq hN
+                have hshape := (modalNegOf?_eq hN).symm
                 rw [Proposition.imp.injEq] at hshape
                 obtain ⟨rfl, rfl⟩ := hshape
                 intro hsa
@@ -493,7 +490,7 @@ lemma modalTruthLemma
                 hcond ⟨.pos, x, w⟩ (by simp)
               have hymem : (⟨.neg, y, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
                 hcond ⟨.neg, y, w⟩ (by simp)
-              have hshape := modalImpOf?_eq hI
+              have hshape := (modalImpOf?_eq hI).symm
               rw [Proposition.imp.injEq] at hshape
               obtain ⟨rfl, rfl⟩ := hshape
               intro hsa
@@ -507,7 +504,7 @@ lemma modalTruthLemma
               hcond ⟨.neg, x, w⟩ (by simp)
             have hymem : (⟨.neg, y, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
               hcond ⟨.neg, y, w⟩ (by simp)
-            have hshape := modalOrOf?_eq hO
+            have hshape := (modalOrOf?_eq hO).symm
             rw [Proposition.imp.injEq] at hshape
             obtain ⟨rfl, rfl⟩ := hshape
             intro hsa
@@ -517,7 +514,7 @@ lemma modalTruthLemma
                 modalComplexity_box, modalComplexity_atom, modalComplexity_bot]; omega) w).2 hxmem)))
         · -- andNeg: φ = x ∧ y, branching [[F x],[F y]]
           simp only [hA] at hcond
-          have hshape := modalAndOf?_eq hA
+          have hshape := (modalAndOf?_eq hA).symm
           rw [Proposition.imp.injEq] at hshape
           obtain ⟨rfl, rfl⟩ := hshape
           intro hsa

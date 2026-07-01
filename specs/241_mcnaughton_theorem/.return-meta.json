@@ -1,13 +1,19 @@
 {
   "status": "in_progress",
   "started_at": "2026-06-30T17:31:19-07:00",
-  "artifacts": [],
+  "artifacts": [
+    {
+      "type": "code",
+      "path": "Cslib/Computability/Languages/OmegaRegularLanguage.lean",
+      "summary": "Phase 1 complete: deleted subtask-434 sorry and unprovable proof_wanted; docstring updated to Choueka route; build green, sorry-free."
+    }
+  ],
   "partial_progress": {
-    "stage": "initializing",
-    "details": "Agent started, resuming plan v2 (Choueka route), beginning Phase 1",
+    "stage": "phase_2_or_4_in_progress",
+    "details": "Phase 1 committed (ce381c24). Moving to Phase 4 (DMA union closure, mechanical/independent) next, then Phase 2 (concat_language_eq) if budget allows.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 0
+    "phases_completed": 1
   },
   "metadata": {
     "session_id": "sess_1782865756_35420a",

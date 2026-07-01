@@ -6,7 +6,7 @@ next_project_number: 442
 
 ## Task Order
 
-*Updated 2026-06-30. Generated from state.json dependency graph.*
+*Updated 2026-07-01. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
@@ -47,7 +47,7 @@ next_project_number: 442
 
 ### Temporal Logic
 
-180 [PARTIAL] — Add allFuture (G) and allPast (H) as primitive constructors to Te
+180 [RESEARCHED] — Add allFuture (G) and allPast (H) as primitive constructors to Te
   └─ 439 [RESEARCHED] — Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_red
     └─ 426 [BLOCKED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
       └─ 427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
@@ -720,13 +720,14 @@ Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completenes
 ---
 
 ### 180. Temporal primitive always historically
-- **Status**: [PARTIAL]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 406
 - **Research**:
   - [180_temporal_primitive_always_historically/reports/01_primitive-always-historically-research.md]
   - [180_temporal_primitive_always_historically/reports/02_implementation-attempt-status.md]
+  - [180_temporal_primitive_always_historically/reports/03_metalogic-obligations-research.md]
 - **Plan**: [180_temporal_primitive_always_historically/plans/01_primitive-gh-implementation.md]
 
 **Description**: Add allFuture (G) and allPast (H) as primitive constructors to Temporal.Formula, giving {atom, bot, imp, and, or, untl, snce, allFuture, allPast}. Currently G is derived as neg(someFuture(neg phi)) and H as neg(somePast(neg phi)), which are only valid classically. Making them primitive enables intuitionistic temporal logics. Note: someFuture (F) and somePast (P) remain derivable without negation (F = top U phi, P = top S phi). Scope: (1) Syntax/Formula.lean: add .allFuture/.allPast constructors, update complexity, subst, atoms, encodeNat, temporalDepth, swapTemporal. (2) Semantics: structural clauses for universal future/past quantification. (3) ProofSystem: temporal axioms referencing G/H now use primitive constructors. (4) Metalogic: cases in Soundness, Chronicle/TruthLemma, MCS, Completeness. (5) Classical equivalences become theorems. Verify full CI. Reference: Boudou et al. for intuitionistic temporal logic.

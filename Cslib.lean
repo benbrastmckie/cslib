@@ -11,6 +11,7 @@ public import Cslib.Computability.Automata.DA.BuchiClosure
 public import Cslib.Computability.Automata.DA.Concat
 public import Cslib.Computability.Automata.DA.Congr
 public import Cslib.Computability.Automata.DA.Conversions
+public import Cslib.Computability.Automata.DA.MullerClosure
 public import Cslib.Computability.Automata.DA.Parity
 public import Cslib.Computability.Automata.DA.Prod
 public import Cslib.Computability.Automata.DA.Rabin

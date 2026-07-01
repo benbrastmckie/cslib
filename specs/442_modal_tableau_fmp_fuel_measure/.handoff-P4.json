@@ -1,0 +1,25 @@
+{
+  "status": "implemented",
+  "phase_label": "P4",
+  "declarations_added": [
+    "Cslib.Logic.Modal.Tableau.modalHintikkaClause (private def, shared invariant-clause helper)",
+    "Cslib.Logic.Modal.Tableau.modalApplyOne_fst_eq_of_not_box (private lemma, helper)",
+    "Cslib.Logic.Modal.Tableau.modalHintikkaClause_lift (private lemma, helper)",
+    "Cslib.Logic.Modal.Tableau.modalStepBranch_none_saturated (private lemma, target)",
+    "Cslib.Logic.Modal.Tableau.modalStepBranch_hintikka_inv (private lemma, target)"
+  ],
+  "green": true,
+  "blockers": [],
+  "sorry_inventory": [],
+  "commit": "8ba346f8",
+  "session_id": "sess_1782868458_ecfcce",
+  "notes": [
+    "Done=green criterion met: `lake build Cslib.Logics.Modal.Tableau.Completeness` succeeds; both target lemmas sorry-free, zero new axioms, zero vacuous definitions.",
+    "Design finding (documented in-file, section note before modalApplyOne_fst_eq_of_not_box): modalApplyOne's propositional dispatch (tryAllPropRules) has priority and is exhaustive over every `.imp _ _`-shaped formula (modalNegOf? unconditionally matches `.imp a .bot`). Consequence: the Lukasiewicz-encoded diamond patterns (`.pos`/`.neg, .imp (.box (.imp _ .bot)) .bot`) are ALWAYS decoded as a propositional negation rule, never reaching the branch/acc-dependent diamondPos/diamondNeg arms of modalApplyOne's modal-rule match (Rules.lean:91,142) -- those arms are dead code in practice. Only `.pos,.box _` (boxPos, persistent) and `.neg,.box _` (boxNeg, linear/fresh-world) ever reach the modal dispatch. This resolves an initial concern that a naive port of classicalStepBranch_hintikka_inv would be unprovable for diamond-typed formulas (it isn't an issue in practice, but IS a real reason boxNeg specifically must be excluded from the invariant's scope -- matching modalHintikkaSet's own conjunct-2 carve-out).",
+    "modalStepBranch_hintikka_inv's invariant/conclusion is expressed via a new private def `modalHintikkaClause s φ w X Y` (rather than repeating the inline `match φ with | .box _ => True | _ => match (modalApplyOne ...) ...` at each use site) -- an inline-match version triggered a Lean dependent-match elaboration mismatch (`match φ, hInv with ...` vs `match sf.formula with ...`) when the same clause shape was used as both a hypothesis in one lemma and a goal in another. Naming the clause as a def gave a single shared matcher and resolved it cleanly.",
+    "modalStepBranch_hintikka_inv's conclusion is stated over `newBs.zip newExps` pairs (rather than assuming a fixed correspondence) since modalStepBranch's branching arm produces newExps as `branches.map (fun _ => e ++ [sf])` -- a constant list, not obviously index-matched without the zip.",
+    "Concurrent P1a (commit 325a8e8a, per the plan's Execution Log) added `FmpMeasure.lean -> import Completeness.lean` and an architecture note relocating P5/P6 to a new CompletenessLoop.lean module (no import cycle). This does not affect P4's territory or output. Completeness.lean itself gained NO new imports in this dispatch.",
+    "Left plans/01_fmp-fuel-measure-plan.md untouched (concurrently owned by the orchestrator/other agents; explicitly out of my staging scope per dispatch instructions).",
+    "Project-wide `lake exe checkInitImports` currently fails for unrelated reasons (missing .olean for Cslib.Logics.Temporal.Tableau.Completeness, a module untouched by this dispatch) -- not a P4 blocker, scoped build is the Done=green criterion."
+  ]
+}

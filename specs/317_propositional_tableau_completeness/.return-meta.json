@@ -1,28 +1,24 @@
 {
-  "status": "researched",
-  "agent_type": "cslib-research-hard-agent",
+  "status": "planned",
   "task_number": 317,
-  "session_id": "sess_1782919268_2df8d8_317research",
-  "reference_grounding_tier": 1,
-  "adversarial_verification_triggered": true,
-  "findings_count": 5,
-  "bibkey_verification_status": {
-    "present": ["ChagrovZakharyaschev1997", "Fitting1983", "TroelstraSchwichtenberg2000"],
-    "absent_recommend_add": ["NegriVonPlato2001", "GargGenoveseNegri2012", "DershowitzManna1979"]
-  },
-  "artifact_path": "specs/317_propositional_tableau_completeness/reports/09_phase2-escape-routes.md",
-  "recommendation": "Route (a) (un-pin frame via intAccessPreorder); reject Route (b) (redefine IForces). Route (a) has ~zero public blast radius; necessary but not sufficient -- must combine with report-07 fuel raise. Not scopable to one wave.",
-  "memory_candidates": [
+  "artifacts": [
     {
-      "content": "In the CSLib intuitionistic propositional tableau completeness (Scheme.lean), the Decidable (IValid phi) instance discharges its .openBranch case via intuitionisticTableau_complete (the IValid->closed direction), NOT via the countermodel lemma intuitionisticOpenBranch_countermodel. The countermodel lemma has no live consumer (docstrings only), so restating its conclusion over a different Preorder instance has ~zero downstream blast radius.",
-      "keywords": ["cslib", "tableau", "completeness", "Decidable", "IValid", "blast-radius"],
-      "tags": ["cslib", "lean4", "task-317"]
-    },
-    {
-      "content": "IForces (Cslib/Logics/Propositional/Semantics/Kripke.lean) is the shared Kripke-forcing primitive (~205 refs across 13 files: all soundness, FMP decidability, strong completeness, algebra bridge). Its imp-case proof of iforces_persistence uses le_trans of the Preorder. To install a non-total accessibility for completeness, plug a custom Preorder INSTANCE (e.g. intAccessPreorder = Relation.ReflTransGen of edge-accessibility) into the existing IForces -- never redefine IForces itself.",
-      "keywords": ["cslib", "IForces", "Kripke", "Preorder", "intAccessPreorder", "iforces_persistence"],
-      "tags": ["cslib", "lean4", "semantics"]
+      "type": "plan",
+      "path": "specs/317_propositional_tableau_completeness/plans/06_route-a-frame-plumbing.md",
+      "summary": "Plan v6 (HARD): Route (a) frame plumbing (Wave A, Phases 1-4, B2-independent, lands independently) + report-07 fuel machinery and deferred-obligation discharge (Wave B, Phases 5-11). 11 phases across 9 dependency waves."
     }
   ],
-  "next_steps": "Run /plan 317 --hard to create a plan v6 (Wave 1: Route (a) frame plumbing; Wave 2+: report-07 fuel machinery + sat_timp + monotonicity)."
+  "next_steps": "Run /implement 317 --hard. Wave A (Phases 1-4) is independently committable green progress; Wave B (Phases 5-11) closes all four sorries. Re-plan tasks 430 and 375 after Wave A lands.",
+  "metadata": {
+    "session_id": "sess_1782919268_2df8d8_317plan",
+    "agent_type": "planner-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-hard-agent"],
+    "phase_count": 11,
+    "estimated_hours": 24,
+    "postmortem_rules_count": 7,
+    "dependency_waves": [[1], [2], [3], [4], [5, 6], [7, 8], [9], [10], [11]],
+    "plan_version": 6,
+    "reference_grounding_tier": 1
+  }
 }

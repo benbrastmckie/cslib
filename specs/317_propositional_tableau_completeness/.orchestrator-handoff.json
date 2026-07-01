@@ -1,34 +1,68 @@
 {
+  "status": "planned",
   "task_number": 317,
-  "status": "researched",
-  "agent_type": "cslib-research-hard-agent",
-  "session_id": "sess_1782919268_2df8d8_317research",
+  "agent_type": "planner-hard-agent",
+  "session_id": "sess_1782919268_2df8d8_317plan",
   "hard_mode": true,
+  "plan_version": 6,
+  "plan_artifact_path": "specs/317_propositional_tableau_completeness/plans/06_route-a-frame-plumbing.md",
+  "phase_count": 11,
+  "estimated_hours": 24,
   "reference_grounding_tier": 1,
-  "adversarial_verification_triggered": true,
-  "artifact_path": "specs/317_propositional_tableau_completeness/reports/09_phase2-escape-routes.md",
-  "recommendation": "Route (a): un-pin the completeness frame by restating the internal openBranch_countermodel and its two *OpenBranch_countermodel corollaries over the already-built intAccessPreorder edges instance of the EXISTING IForces. REJECT Route (b) (redefining IForces): category error, ~205 refs across 13 green files (all soundness + FMP decidability + strong completeness + algebra bridge) put at risk, and it advances the second blocker zero steps.",
-  "key_findings": [
-    "DECISIVE NEW FACT: Route (a)'s public blast radius is ~zero. instDecidableIValid (DecisionProcedure.lean:105-111) discharges .openBranch via intuitionisticTableau_complete (IValid->closed), never via the countermodel lemma. intuitionisticOpenBranch_countermodel / minOpenBranch_countermodel have NO live consumer (grep: docstrings only). The stable public contract (Decidable (IValid phi), tableau_complete: IValid->closed) does not change.",
-    "Both blockers share one root cause: IForces pins [Preorder Nat] to global Nat.instPreorder (total order), which cannot represent tree/DAG accessibility. truthLemma T-imp (Scheme.lean:409) and intExtractValuation monotonicity (Completeness.lean:113 / Minimal:110) are FALSE-as-stated at the global preorder, not merely hard.",
-    "Route (a) is NECESSARY BUT NOT SUFFICIENT: it converts both blockers from false to true-in-principle-but-fuel-entangled. Monotonicity + new sat_timp saturation both require the returned branch to be a genuine persistence fixpoint => require the report-07 fuel raise (2^(2c+2) -> 2^Theta(c^2) + intExpMeasure<=fuel). STOP-gate Scheme.lean:326-367 verified.",
-    "Route (b) breaks iforces_persistence (imp-case uses le_trans), invalidating every KripkeModel and cascading into all soundness/FMP proofs; also corrupts the meaning of IValid/MValid which must range over all preordered frames. Its least-bad 'add IForcesEdge' variant strictly reduces to Route (a) plus a redundant primitive.",
-    "Preserved assets intAccessPreorder + intAccessPreorder_le_of_isAccessible (Scheme.lean:309-323, committed green) already encode exactly the Negri-von Plato edge-accessibility frame Route (a) needs. Only genuinely new declaration: sat_timp field (a transcription of the soundness-side intTImpRule/applyAllTImpRules)."
-  ],
-  "second_blocker_resolution": "Route (a) resolves the FRAME half of both blockers (makes them stateable-and-true along edges via intAccessPreorder_le_of_isAccessible). It does NOT resolve the FUEL half: intExtractValuation edge-monotonicity and sat_timp saturation both need persistence-fixpoint completeness, which requires the raised fuel of report 07. The two halves must land jointly.",
-  "postmortem5_implication": "Postmortem Constraint 5 (byte-stable signatures) is in irreducible conflict with zero-debt: openBranch_countermodel's global-preorder conclusion is FALSE, closable only by sorry. Zero-debt dominates => Constraint 5 must be revised for exactly these two internal lemmas. This is principled and minimal (removes sorries, no thrash); public contract unchanged => CSLib-acceptable, no new sorries/axioms.",
-  "one_wave_scoping": "NO. Plan v6 = Route (a) frame plumbing (report 08 P1-P2, B2-independent, ~one wave, ~300-500 lines) UNION report-07 fuel machinery (P1-P6, multiple waves, ~1400-2900 lines) => ~9-11 H8-phases across >=2 waves, ~1700-3400 lines. A single wave can land only the frame plumbing, threading monotonicity + sat_timp as explicitly-deferred obligations (not sorries). If fuel may not rise: terminal state [BLOCKED] on fuel sufficiency after the frame wave.",
-  "sorry_inventory": [
-    "Scheme.lean:409 (truthLemma T(phi->psi) forward case)",
-    "Scheme.lean:1070 (intExpandBranches_openBranch_sat fuel-0 base case, B2)",
-    "Completeness.lean:113 (IValid->forcing bridge, needs intExtractValuation monotonicity)",
-    "Minimal/Completeness.lean:110 (MValid->forcing bridge, mirror)",
-    "STOP-gate Scheme.lean:326-367 (documented blocker, NOT a sorry)"
-  ],
-  "bibkey_verification_status": {
-    "present": ["ChagrovZakharyaschev1997", "Fitting1983", "TroelstraSchwichtenberg2000"],
-    "absent_recommend_add": ["NegriVonPlato2001 (Structural Proof Theory Ch.8 -- load-bearing citation for Route (a)'s edge-accessibility frame)", "GargGenoveseNegri2012", "DershowitzManna1979"]
+  "route_decision": "Route (a): un-pin completeness frame by restating internal openBranch_countermodel + its two *OpenBranch_countermodel corollaries over the existing intAccessPreorder edges instance of IForces. Route (b) (redefine IForces) REJECTED.",
+  "postmortem_5_revision": "REVISED for the internal countermodel family (openBranch_countermodel + intuitionisticOpenBranch_countermodel + minOpenBranch_countermodel): their conclusion may move to @IForces Nat _ (intAccessPreorder edges). Stable public contract stays byte-stable: tableau_complete/minimalTableau_complete (IValid/MValid->closed), Decidable (IValid phi), Decidable (Derivable IntPropAxiom phi), instDecidableIValid, all DecisionProcedure consumers. Justification (zero-debt): old global-preorder conclusion literally false (sorry-only closable); revision removes sorries, no new axioms, public contract and all soundness/FMP/strong-completeness/algebra code untouched.",
+  "waves": {
+    "A_frame_plumbing_independent": {
+      "phases": [1, 2, 3, 4],
+      "b2_independent": true,
+      "independently_committable": true,
+      "deferred_obligations": [
+        "intExtractValuation monotonicity along intAccessPreorder (carried as a private-bridge premise in Phase 4; discharged Phase 9, consumed Phase 10)",
+        "sat_timp field on IBranchSaturation (added + discharged Phase 9)"
+      ]
+    },
+    "B_fuel_machinery_and_discharge": {
+      "phases": [5, 6, 7, 8, 9, 10, 11],
+      "closes_all_four_sorries": true
+    }
   },
-  "zero_debt_compliant": true,
-  "next_steps": "Run /plan 317 --hard to create a plan v6 scoped as: Wave 1 = Route (a) frame plumbing (independent of B2); Wave 2+ = report-07 fuel machinery + sat_timp + monotonicity discharge closing all four sorries. Revise Postmortem Constraint 5 for the two *OpenBranch_countermodel lemmas."
+  "dependency_waves": [[1], [2], [3], [4], [5, 6], [7, 8], [9], [10], [11]],
+  "phase_titles": {
+    "1": "Re-thread truthLemma over intAccessPreorder edge frame (T-imp stays deferred sorry)",
+    "2": "Restate openBranch_countermodel conclusion over intAccessPreorder edges (Route a)",
+    "3": "Restate the two *OpenBranch_countermodel corollaries over the edge preorder",
+    "4": "Instantiate IValid/MValid at edge frame via deferred-monotonicity private bridge (public contract byte-stable); Wave A complete",
+    "5": "Raise fuel to intFuel + audit downstream callers (Expansion.lean; TERRITORY 316)",
+    "6": "intUniverse + intWork + linear world bound",
+    "7": "intExpMeasure_step_lt (per-step strict decrease; pre-split 7.1/7.2)",
+    "8": "intExpMeasure_init_le_fuel",
+    "9": "Add sat_timp + discharge, prove intExtractValuation monotonicity, close truthLemma T-imp (sorry 1)",
+    "10": "CONVERGENCE: reformulate intExpandBranches_openBranch_sat + close sorries 2-4 -> sorry-FREE",
+    "11": "Add load-bearing BibKeys (NegriVonPlato2001 et al.)"
+  },
+  "sorry_inventory_at_head": [
+    "Scheme.lean:409 truthLemma T-imp -> closes Phase 9",
+    "Scheme.lean:1070 intExpandBranches_openBranch_sat fuel-0 -> closes Phase 10",
+    "Completeness.lean:113 validity->forcing bridge -> closes Phase 10",
+    "Minimal/Completeness.lean:110 validity->forcing bridge -> closes Phase 10"
+  ],
+  "preserved_assets": [
+    "v5 Phase 1 [COMPLETED]: branch edges exposed (commit d6d78714-lineage)",
+    "intAccessPreorder + intAccessPreorder_le_of_isAccessible (commit a1883c4e, Scheme.lean:309-323)",
+    "Option-A dedup (4202d1df); soundness fix (8a5c0250); IAllConsistent invariant (26508fe9); IExpandedConsistent_sat"
+  ],
+  "bibkey_status": {
+    "present": ["ChagrovZakharyaschev1997", "Fitting1983", "TroelstraSchwichtenberg2000"],
+    "absent_add_phase_11": ["NegriVonPlato2001", "GargGenoveseNegri2012", "DershowitzManna1979"]
+  },
+  "territory_hazards": [
+    "task 316: Expansion.lean fuel site + Soundness.lean fuel-pinned callers (Phase 5) -> separate scoped commit; read-only unless fuel-raise forces a re-pin"
+  ],
+  "roadmap_alignment": {
+    "task_430_atom_persistence": "RESHAPED by the frame change; re-plan after Wave A lands + consume Phase 9 intExtractValuation monotonicity",
+    "task_375_tfae_edges": "gated on 430 + 317 completeness green; re-plan after Wave A lands"
+  },
+  "single_writer_per_file_note": "R7 concurrent live sessions: never two writers on the same file; all Scheme.lean phases serialize; only Phase 5 (Expansion.lean) is truly concurrent with a Scheme.lean phase (Phase 6).",
+  "postmortem_rules_count": 7,
+  "next_steps": "Run /implement 317 --hard. Wave A (Phases 1-4) is a valid independently-committable terminal state (frame plumbing green, four edge-framed sorries). Wave B (Phases 5-11) closes all four sorries to sorry-FREE. Re-plan tasks 430 and 375 after Wave A."
 }

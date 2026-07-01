@@ -78,8 +78,6 @@ def case1Psi (a q A B : Formula Atom) : Formula Atom :=
     (Formula.and (Formula.and A (.snce B a)) (.snce q a)))
     (.snce q (Formula.and (Formula.and (Formula.and A q) (.snce B a)) (.snce q a)))
 
-set_option maxHeartbeats 800000 in
--- Complex term elaboration requires extended heartbeats
 theorem elim_case_1 (a q A B : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hA : isUFree A = true) (hB : isUFree B = true)
@@ -176,8 +174,6 @@ theorem elim_case_1 (a q A B : Formula Atom)
     terms where `u_free_s_free_imp_separated` is applied)
 -/
 
-set_option maxHeartbeats 800000 in
--- Complex term elaboration requires extended heartbeats
 theorem elim_case_1_gen (a q A B : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hA : isUFree A = true) (hB : isUFree B = true)
@@ -260,8 +256,6 @@ theorem elim_case_1_gen (a q A B : Formula Atom)
     exact ⟨u_free_s_free_imp_separated B hB hB',
            u_free_s_free_imp_separated A hA hA'⟩
 
-set_option maxHeartbeats 800000 in
--- Complex term elaboration requires extended heartbeats
 /-- case1Psi is intEquiv to S(a∧U, q) and syntactically separated.
     This is the non-existential form of elim_case_1_gen for direct formula access. -/
 theorem case1_psi_properties (a q A B : Formula Atom)
@@ -374,8 +368,6 @@ def case2Psi (a q A B : Formula Atom) : Formula Atom :=
     (.snce (Formula.and (Formula.neg A) q) a))
   Formula.or (Formula.or d1 d2) d3
 
-set_option maxHeartbeats 3200000 in
--- Complex term elaboration requires extended heartbeats
 /-- case2Psi is intEquiv to S(a∧¬U, q) and syntactically separated.
     This is the non-existential form of elim_case_2_gen for direct formula access. -/
 theorem case2_psi_properties (a q A B : Formula Atom)
@@ -502,8 +494,6 @@ theorem case2_psi_properties (a q A B : Formula Atom)
       isSyntacticallySeparated, isUFree, isSFree, ha, hq, hA, hB, hA', hB',
       Bool.true_and, Bool.and_true, hsep_A, hsep_B]
 
-set_option maxHeartbeats 3200000 in
--- Complex term elaboration requires extended heartbeats
 /-- Case 2 generalized: S(a ∧ ¬U(A,B), q) → separated equivalent.
     Delegates to `case2_psi_properties` (non-existential form). -/
 theorem elim_case_2_gen (a q A B : Formula Atom)
@@ -530,8 +520,6 @@ theorem elim_case_2 (a q A B : Formula Atom)
 
 /-! ## Case 3: S(a, q v U(A,B)) -/
 
-set_option maxHeartbeats 1200000 in
--- Complex term elaboration requires extended heartbeats
 theorem elim_case_3 (a q A B : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hA : isUFree A = true) (hB : isUFree B = true)
@@ -589,8 +577,6 @@ theorem elim_case_3 (a q A B : Formula Atom)
 
 /-! ## Case 4: S(a, q v not U(A,B)) -/
 
-set_option maxHeartbeats 1200000 in
--- Complex term elaboration requires extended heartbeats
 theorem elim_case_4 (a q A B : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hA : isUFree A = true) (hB : isUFree B = true)
@@ -701,8 +687,6 @@ theorem elim_case_3_gen (a q A B : Formula Atom)
           ⟨(int_truth_and M s _ _).mpr ⟨hna_s, hnotQ_s⟩, hnotU_s⟩, hguard⟩
   · exact and_separated (neg_separated hsep_H) (neg_separated hsep2)
 
-set_option maxHeartbeats 1200000 in
--- Complex term elaboration requires extended heartbeats
 /-- Case 4 generalized: drops S-free requirements on a, q. Only needs S-free A, B.
     The proof replaces elim_case_1 with elim_case_1_gen. -/
 theorem elim_case_4_gen (a q A B : Formula Atom)

@@ -34,9 +34,6 @@ open Cslib.Logic.Temporal.Metalogic
 
 /-! ## Recursive Walks -/
 
-set_option maxHeartbeats 3200000 in
--- The recursive walk with well-founded termination on chronicle domain size requires
--- extended heartbeats due to large case splits over counterexample witness insertion.
 /-- Recursive walk that eliminates a C5 forward (Until) counterexample by inserting a new witness point. -/
 noncomputable def c5ForwardWalk
     (χ : Chronicle Atom) (h_c0 : χ.c0) (h_c2' : χ.c2')
@@ -577,9 +574,6 @@ decreasing_by
      This yields a single WF goal closed by simp_all + exact h_term. -/
   all_goals simp_all only [gt_iff_lt]
   all_goals exact h_term
-set_option maxHeartbeats 3200000 in
--- The recursive walk with well-founded termination on chronicle domain size requires
--- extended heartbeats due to large case splits over counterexample witness insertion.
 /-- Recursive walk that eliminates a C5 backward (Since) counterexample by inserting a new witness point. -/
 noncomputable def c5BackwardWalk
     (χ : Chronicle Atom) (h_c0 : χ.c0) (h_c2' : χ.c2')

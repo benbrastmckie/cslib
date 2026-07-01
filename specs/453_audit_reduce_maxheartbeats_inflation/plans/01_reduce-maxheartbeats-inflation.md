@@ -154,7 +154,7 @@ no declaration in these 15 files actually required extra heartbeat budget.
 
 ---
 
-### Phase 2: Bisect scoped ceilings (3.2M cluster) [IN PROGRESS]
+### Phase 2: Bisect scoped ceilings (3.2M cluster) [COMPLETED]
 
 **Goal**: Binary-search downward on the scoped 3.2M cluster (and other inflated scoped sites),
 setting each to the smallest passing round value with modest headroom.
@@ -164,19 +164,34 @@ at each step; set the option to the smallest passing round value (next power-of-
 800k or 1.6M). Round UP for CI-machine headroom. Do NOT lower below the measured passing value.
 
 **Tasks**:
-- [ ] Bisect `CompletenessHelpers.lean` 8 identical 3.2M sites (lines 81, 104, 122, 142, 162, 186,
+- [x] Bisect `CompletenessHelpers.lean` 8 identical 3.2M sites (lines 81, 104, 122, 142, 162, 186,
       210, 255) on `deriveDne`, `deriveHNec`, `deriveAndTopIntro`, `mcs_dne`, `mcs_ff_imp_f`,
-      `mcs_pp_imp_p`, `mcs_g_trans`, `mcs_h_trans`.
-- [ ] Bisect `DedekindZ/Cases.lean` 3.2M sites (436, 701, 898, 1217, 1496).
-- [ ] Bisect `Decidability/CountermodelExtraction.lean` 3.2M sites (666, 721, 776, 828) and lower
-      values (547, 598, 633).
-- [ ] Bisect remaining 3.2M sites: `Saturation.lean:638`, `DedekindZ/QLemma.lean:306`,
+      `mcs_pp_imp_p`, `mcs_g_trans`, `mcs_h_trans`. *(all 8 pass clean at default 200000 with
+      option deleted -- no scoped replacement needed)*
+- [x] Bisect `DedekindZ/Cases.lean` 3.2M sites (436, 701, 898, 1217, 1496). *(and the 2x1.6M sites
+      at 549, 1341, done together -- all 7 pass clean at default)*
+- [x] Bisect `Decidability/CountermodelExtraction.lean` 3.2M sites (666, 721, 776, 828) and lower
+      values (547, 598, 633). *(all 7 pass clean at default)*
+- [x] Bisect remaining 3.2M sites: `Saturation.lean:638`, `DedekindZ/QLemma.lean:306`,
       `Separation/Eliminations.lean` (377, 505), `Separation/Hierarchy/HierarchyCaseSep.lean`
-      (70, 104, 255), `RecursiveWalks.lean` (37, 580), `DenseCompleteness.lean:98`.
-- [ ] Also bisect obvious over-provisioned lower sites opportunistically (1.6M/1.2M/800k) where a
-      quick probe shows headroom, but do NOT touch sites already at their minimum.
-- [ ] Leave sites that survive at high values for Phase 3 (restructure) or Phase 4 (document).
-- [ ] Commit after each file's sites are green, so the phase is resumable.
+      (70, 104, 255), `RecursiveWalks.lean` (37, 580), `DenseCompleteness.lean:98`. *(all pass
+      clean at default, along with their co-located lower-value siblings in the same files)*
+- [x] Also bisect obvious over-provisioned lower sites opportunistically (1.6M/1.2M/800k) where a
+      quick probe shows headroom, but do NOT touch sites already at their minimum. *(opportunistic:
+      GeneralizedNecessitation.lean's 3x400k sites also probed -- all pass clean at default)*
+- [x] Leave sites that survive at high values for Phase 3 (restructure) or Phase 4 (document).
+      *(none survived at high values -- only MainElimination.lean:38 (6.4M) remains, reserved for
+      Phase 3 by design)*
+- [x] Commit after each file's sites are green, so the phase is resumable. *(9 commits, one per
+      file)*
+
+**Outcome note**: every scoped site probed in Phase 2 (45 of 49, all except MainElimination's 6.4M
+and the 3 GeneralizedNecessitation 400k sites which were also probed and removed) was pure
+defensive inflation -- ALL passed clean at the 200000 default with the option deleted entirely.
+Zero sites needed a lowered-but-nonzero scoped replacement value; bisection-to-a-value was never
+required because every ceiling probe went straight to "no option needed at all". After Phase 2,
+only 1 `maxHeartbeats` site remains in the two Metalogic trees: `MainElimination.lean:38` (6.4M),
+Phase 3's target.
 
 **Timing**: ~4 hours (each bisection is ~4–6 builds per site; ~20 sites).
 

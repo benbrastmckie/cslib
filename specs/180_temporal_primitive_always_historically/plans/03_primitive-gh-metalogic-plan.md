@@ -538,25 +538,25 @@ WIP); out of scope for this phase.
 
 ---
 
-### Phase 7: Metalogic — TruthLemma two cases via reduction [NOT STARTED]
+### Phase 7: Metalogic — TruthLemma two cases via reduction [COMPLETED]
 
 - **Goal:** Add the `allFuture`/`allPast` inductive cases to `chronicle_truth_lemma` by REDUCTION to
   the existing standalone case lemmas. **Re-graded medium (F6), not "highest risk" as in plan 01.**
 - **Tasks:**
-  - [ ] `Chronicle/TruthLemma.lean`: add `truth_lemma_allFuture` (F6 sketch): from the single IH
+  - [x] `Chronicle/TruthLemma.lean`: add `truth_lemma_allFuture` (F6 sketch): from the single IH
     `ih_φ`, derive IHs for `¬φ` and `⊤` (via MCS negation-completeness — enumerate the combinator
     with `lean_multi_attempt` first, Risk R3), assemble the compound `¬(⊤ U ¬φ)` truth lemma via
     `truth_lemma_imp` (`:75`) + `truth_lemma_untl_backward` (`:141`) + `truth_lemma_untl_forward`
     (`:120`) + `truth_lemma_bot` (`:66`), then bridge both sides to primitive `𝐆φ` via
     `sat_allFuture_iff_neg_someFuture_neg` (P2) and `mcs_allFuture_iff` (P5).
-  - [ ] `truth_lemma_allPast`: mirror via `truth_lemma_snce_forward/backward` (`:171,:189`) and
+  - [x] `truth_lemma_allPast`: mirror via `truth_lemma_snce_forward/backward` (`:171,:189`) and
     `mcs_allPast_iff`; or `swapTemporal` duality if a symmetry combinator exists.
-  - [ ] Add the two arms to `chronicle_truth_lemma` (`:216`):
+  - [x] Add the two arms to `chronicle_truth_lemma` (`:216`):
     `| allFuture φ ih_φ => exact truth_lemma_allFuture …`, `| allPast φ ih_φ => …`.
-  - [ ] Confirm the guard/event slot mapping `𝐅X = untl ⊤ X` against `someFuture φ = untl ⊤ φ`
+  - [x] Confirm the guard/event slot mapping `𝐅X = untl ⊤ X` against `someFuture φ = untl ⊤ φ`
     (`Formula.lean:68`) — the `truth_lemma_untl_*` lemmas are stated for `ψ U φ` with `φ` the event
     (F6 caveats).
-  - [ ] **No new canonical-model / coherence lemma** (D4): the coherence content is already
+  - [x] **No new canonical-model / coherence lemma** (D4): the coherence content is already
     discharged by `truth_lemma_untl_backward`.
 - **Timing:** 3-4 hours
 - **Depends on:** 6
@@ -568,6 +568,29 @@ WIP); out of scope for this phase.
     `sorry`, no axioms beyond those already accepted in the file.
   - If a single run stalls: mark `[PARTIAL]` with the exact open goal and missing combinator;
     re-dispatch `--hard`. Never insert `sorry`.
+
+**Phase 7 result:** Implemented exactly per the F6 sketch, no deviation from the plan needed. Both
+`truth_lemma_allFuture`/`truth_lemma_allPast` derive IHs for `¬φ` and `⊤` from the single `ih_φ` via
+`truth_lemma_imp` + `truth_lemma_bot` (φ.imp ⊥ = ¬φ, ⊥.imp ⊥ = ⊤, both defeq through the `abbrev`
+chain `Formula.neg`/`Formula.top` → `PropositionalConnectives.neg`/`.top`), assemble the compound
+`¬(⊤ U ¬φ)` (`untl`) / `¬(⊤ S ¬φ)` (`snce`) truth lemma, then bridge to the primitive `𝐆φ`/`𝐇φ` via
+`Satisfies.sat_allFuture_iff_neg_someFuture_neg`/`sat_allPast_iff_neg_somePast_neg` (semantic) and
+`mcs_allFuture_iff`/`mcs_allPast_iff` (MCS-level). Two mechanical fixups needed (both syntax, not
+design): (1) `𝐆φ ∈ limitF …`/`𝐇φ ∈ limitF …` required explicit parens `(𝐆φ) ∈ …` — without them the
+prefix-40 `𝐆`/`𝐇` notation greedily absorbed `φ ∈ limitF …` as its argument (a `Formula`-vs-`Prop`
+type mismatch), matching the parenthesization convention already used at `mcs_allFuture_iff`'s own
+statement; (2) `sat_allFuture_iff_neg_someFuture_neg`/`sat_allPast_iff_neg_somePast_neg` live inside
+the `Satisfies` namespace (declared after `def Satisfies` via a separate `namespace Satisfies`
+block, not a dot-notation extension of the recursive def) and needed the `Satisfies.` qualifier,
+matching the call convention already used in `Metalogic/Soundness.lean:316-325`. No new
+canonical-model/coherence lemma; no `sorry`; no vacuous definitions; no axioms beyond the standard
+`propext`/`Classical.choice`/`Quot.sound` trio (`lean_verify` confirmed clean on all three
+theorems). No `lean_multi_attempt` combinator search was needed in practice — the IH-derivation
+shape from the plan's F6 sketch (`truth_lemma_imp` + `truth_lemma_bot` reducing `¬φ`/`⊤` to
+`φ.imp ⊥`/`⊥.imp ⊥`) type-checked directly via `abbrev` defeq, so Risk R3's predicted combinator
+ambiguity did not materialize. Scoped build
+`lake build Cslib.Logics.Temporal.Metalogic.Chronicle.TruthLemma` GREEN (941/941 jobs); zero `sorry`
+in the file (grep-confirmed).
 
 ---
 
@@ -639,7 +662,7 @@ Per-phase (scoped, mandatory before marking any phase `[COMPLETED]`):
 - [ ] P4: `lake build …Metalogic.Soundness` and `…DenseSoundness` green.
 - [ ] P5: `lake build …Metalogic.MCS` and `…WitnessSeed` green.
 - [x] P6: `lake build …Chronicle.{RRelation, PointInsertion.Seeds, CounterexampleElimination.Structures}` green.
-- [ ] P7: `lake build …Chronicle.TruthLemma` green; `lean_verify` clean.
+- [x] P7: `lake build …Chronicle.TruthLemma` green; `lean_verify` clean.
 - [ ] P8: `lake build …Tableau.{Defs, Soundness, Completeness}` green.
 
 Final (P9, full CI):

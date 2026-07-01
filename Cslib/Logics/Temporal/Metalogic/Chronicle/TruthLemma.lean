@@ -206,6 +206,65 @@ theorem truth_lemma_snce_backward (A : Set (Formula Atom)) (h_mcs : Temporal.Set
   have h_psi_z := (ih_ψ ⟨z, hz_dom⟩).mp h_sat_z
   exact mcs_not_mem_of_neg (limit_c0 A h_mcs z hz_dom) h_psi_neg h_psi_z
 
+/-- AllFuture case (G): reduces to the compound formula `¬(⊤ U ¬φ)` (= `¬𝐅¬φ`) via the
+already-proven `untl`/`imp`/`bot` case lemmas, then bridges to the primitive `𝐆φ` via the
+semantic bridge `sat_allFuture_iff_neg_someFuture_neg` and the MCS bridge `mcs_allFuture_iff`.
+No new canonical-model/coherence lemma is required (F6, D4): the coherence content is already
+discharged by `truth_lemma_untl_backward`. -/
+theorem truth_lemma_allFuture (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaximalConsistent A)
+    (t : ChronicleSubtype A h_mcs) (φ : Formula Atom)
+    (ih_φ : ∀ s : ChronicleSubtype A h_mcs,
+      Satisfies (chronicleModel A h_mcs) s φ ↔ φ ∈ limitF A h_mcs s.val) :
+    Satisfies (chronicleModel A h_mcs) t (𝐆φ) ↔ (𝐆φ) ∈ limitF A h_mcs t.val := by
+  -- Step 1: derive IHs for ¬φ and ⊤ from the single ih_φ via truth_lemma_bot + truth_lemma_imp.
+  have ih_negphi : ∀ s : ChronicleSubtype A h_mcs,
+      Satisfies (chronicleModel A h_mcs) s (¬φ) ↔ (¬φ) ∈ limitF A h_mcs s.val :=
+    fun s => truth_lemma_imp A h_mcs s φ Formula.bot (ih_φ s) (truth_lemma_bot A h_mcs s)
+  have ih_top : ∀ s : ChronicleSubtype A h_mcs,
+      Satisfies (chronicleModel A h_mcs) s Formula.top ↔ Formula.top ∈ limitF A h_mcs s.val :=
+    fun s => truth_lemma_imp A h_mcs s Formula.bot Formula.bot
+      (truth_lemma_bot A h_mcs s) (truth_lemma_bot A h_mcs s)
+  -- Step 2: assemble the compound truth lemma for ¬(⊤ U ¬φ) = ¬𝐅¬φ.
+  have ih_untl : ∀ s : ChronicleSubtype A h_mcs,
+      Satisfies (chronicleModel A h_mcs) s (Formula.top U (¬φ)) ↔
+        (Formula.top U (¬φ)) ∈ limitF A h_mcs s.val :=
+    fun s => ⟨truth_lemma_untl_backward A h_mcs s (¬φ) Formula.top ih_negphi ih_top,
+      truth_lemma_untl_forward A h_mcs s (¬φ) Formula.top ih_negphi ih_top⟩
+  have ih_compound : Satisfies (chronicleModel A h_mcs) t (¬(Formula.top U (¬φ))) ↔
+      (¬(Formula.top U (¬φ))) ∈ limitF A h_mcs t.val :=
+    truth_lemma_imp A h_mcs t (Formula.top U (¬φ)) Formula.bot (ih_untl t)
+      (truth_lemma_bot A h_mcs t)
+  -- Step 3: bridge both sides to the primitive 𝐆φ.
+  have h_sem := Satisfies.sat_allFuture_iff_neg_someFuture_neg (chronicleModel A h_mcs) t φ
+  have h_mcs_bridge := mcs_allFuture_iff (φ := φ) (limit_c0 A h_mcs t.val t.property)
+  exact h_sem.trans (ih_compound.trans h_mcs_bridge.symm)
+
+/-- AllPast case (H): mirror of `truth_lemma_allFuture` via `snce`/`mcs_allPast_iff`. -/
+theorem truth_lemma_allPast (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaximalConsistent A)
+    (t : ChronicleSubtype A h_mcs) (φ : Formula Atom)
+    (ih_φ : ∀ s : ChronicleSubtype A h_mcs,
+      Satisfies (chronicleModel A h_mcs) s φ ↔ φ ∈ limitF A h_mcs s.val) :
+    Satisfies (chronicleModel A h_mcs) t (𝐇φ) ↔ (𝐇φ) ∈ limitF A h_mcs t.val := by
+  have ih_negphi : ∀ s : ChronicleSubtype A h_mcs,
+      Satisfies (chronicleModel A h_mcs) s (¬φ) ↔ (¬φ) ∈ limitF A h_mcs s.val :=
+    fun s => truth_lemma_imp A h_mcs s φ Formula.bot (ih_φ s) (truth_lemma_bot A h_mcs s)
+  have ih_top : ∀ s : ChronicleSubtype A h_mcs,
+      Satisfies (chronicleModel A h_mcs) s Formula.top ↔ Formula.top ∈ limitF A h_mcs s.val :=
+    fun s => truth_lemma_imp A h_mcs s Formula.bot Formula.bot
+      (truth_lemma_bot A h_mcs s) (truth_lemma_bot A h_mcs s)
+  have ih_snce : ∀ s : ChronicleSubtype A h_mcs,
+      Satisfies (chronicleModel A h_mcs) s (Formula.top S (¬φ)) ↔
+        (Formula.top S (¬φ)) ∈ limitF A h_mcs s.val :=
+    fun s => ⟨truth_lemma_snce_backward A h_mcs s (¬φ) Formula.top ih_negphi ih_top,
+      truth_lemma_snce_forward A h_mcs s (¬φ) Formula.top ih_negphi ih_top⟩
+  have ih_compound : Satisfies (chronicleModel A h_mcs) t (¬(Formula.top S (¬φ))) ↔
+      (¬(Formula.top S (¬φ))) ∈ limitF A h_mcs t.val :=
+    truth_lemma_imp A h_mcs t (Formula.top S (¬φ)) Formula.bot (ih_snce t)
+      (truth_lemma_bot A h_mcs t)
+  have h_sem := Satisfies.sat_allPast_iff_neg_somePast_neg (chronicleModel A h_mcs) t φ
+  have h_mcs_bridge := mcs_allPast_iff (φ := φ) (limit_c0 A h_mcs t.val t.property)
+  exact h_sem.trans (ih_compound.trans h_mcs_bridge.symm)
+
 /-! ## Main Truth Lemma -/
 
 /-- **Chronicle Truth Lemma**: For all formulas `φ` and points `t` in the
@@ -229,5 +288,9 @@ theorem chronicle_truth_lemma (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaxi
     constructor
     · exact truth_lemma_snce_backward A h_mcs t φ ψ ih_φ ih_ψ
     · exact truth_lemma_snce_forward A h_mcs t φ ψ ih_φ ih_ψ
+  | allFuture φ ih_φ =>
+    exact truth_lemma_allFuture A h_mcs t φ ih_φ
+  | allPast φ ih_φ =>
+    exact truth_lemma_allPast A h_mcs t φ ih_φ
 
 end Cslib.Logic.Temporal.Metalogic.Chronicle

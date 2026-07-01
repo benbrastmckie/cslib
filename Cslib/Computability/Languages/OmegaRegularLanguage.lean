@@ -539,71 +539,6 @@ private lemma buchiCongr_DMA_language_forward [Inhabited Symbol] {State : Type} 
   exact buchiCongr_DMA_accept_mem na xs hxs
 
 open NA.Buchi in
-/-- For any `xs` in the language of `buchiCongr_DMA na`, `xs` lies in `language na`.
-Backward inclusion of `buchiCongr_DMA_language_eq`: Muller acceptance unfolds to an
-accept-set witness, from which `buchiFamily_saturation` and `buchiFamily_cover` transfer
-language membership from the witness to `xs`. -/
-private lemma buchiCongr_DMA_language_backward [Inhabited Symbol] {State : Type} [Finite State]
-    (na : NA.Buchi State Symbol) :
-    language (buchiCongr_DMA na) ⊆ language na := by
-  intro xs hxs
-  change xs ∈ language na
-  change ((buchiCongr_DMA na).run xs).infOcc ∈ (buchiCongr_DMA na).accept at hxs
-  -- hxs : ((buchiCongr_DMA na).run xs).infOcc ∈ (buchiCongr_DMA na).accept
-  simp only [buchiCongr_DMA, Set.mem_setOf_eq] at hxs
-  obtain ⟨b, hb_inf, a, hfam⟩ := hxs
-  -- hb_inf : b ∈ ((buchiCongr_DMA na).run xs).infOcc
-  -- hfam : ((na.buchiFamily (a, b) ⊓ language na).toSet).Nonempty
-  -- b is a prefix class appearing infinitely often; buchiFamily_saturation makes the family a
-  -- subset of language na; obtain xs's own cover family and transfer membership.
-  have hsat := buchiFamily_saturation (na := na)
-  have hcover := buchiFamily_cover (na := na)
-  rw [mem_infOcc] at hb_inf
-  -- hb_inf : ∃ᶠ k in atTop, ((buchiCongr_DMA na).run xs) k = b
-  -- Convert via buchiCongr_DMA_run_eq: the run state at k is ⟦xs.extract 0 k⟧
-  have hb_prefix : ∃ᶠ k in atTop,
-      (⟦xs.extract 0 k⟧ : Quotient na.BuchiCongruence.eq) = b := by
-    apply hb_inf.mono
-    intro k hk
-    rw [← hk]
-    exact (buchiCongr_DMA_run_eq na xs k).symm
-  -- Get the cover decomposition: xs ∈ buchiFamily (a₀, b₀) for some (a₀, b₀)
-  have hxs_cover : xs ∈ (⨆ i, na.buchiFamily i) := by
-    rw [hcover]; trivial
-  rw [ωLanguage.mem_iSup] at hxs_cover
-  obtain ⟨⟨a₀, b₀⟩, hxs_fam⟩ := hxs_cover
-  -- Apply buchiFamily_saturation via saturates_eq_biUnion to reduce to finding a good cover index
-  change xs ∈ (language na).toSet
-  rw [show (language na).toSet =
-      ⋃ i ∈ {i | ((na.buchiFamily i).toSet ∩ (language na).toSet).Nonempty},
-        (na.buchiFamily i).toSet from
-      Set.saturates_eq_biUnion hsat (by
-        grind [ωLanguage.iSup_def, ωLanguage.top_def])]
-  simp only [Set.mem_iUnion, Set.mem_setOf_eq, exists_prop]
-  -- Use (b, a) from the accept witness as the good index
-  refine ⟨(b, a), ?_, ?_⟩
-  · -- (buchiFamily (b,a) ∩ language na).Nonempty: direct from hfam
-    simpa [ωLanguage.inf_def] using hfam
-  · -- xs ∈ buchiFamily (b, a): need to show from b ∈ infOcc(run xs)
-    sorry
-
-open NA.Buchi in
-/-- **[BLOCKED — Phase 4, task 241]**: `buchiCongr_DMA na` recognizes the same ω-language
-as the NBA `na`.
-
-**Proof sketch**: By `buchiFamily_cover`, every `xs` lies in some `na.buchiFamily (a, b)`.
-By `buchiFamily_saturation`, each family element is either ⊆ `language na` or disjoint from
-it. For `xs ∈ na.buchiFamily (a, b)` with the element ⊆ `language na`, the DMA run visits
-class `b` infinitely often (since `xs` is built from words in `eqvCls b`), so
-`b ∈ infOcc(run xs) =: S` and `(a, b)` witnesses `S ∈ buchiCongr_DMA.accept`.
-Conversely, if `S ∈ buchiCongr_DMA.accept`, there exist `b ∈ S` and `a : Q` with
-`na.buchiFamily (a, b) ⊆ language na`; since `b` recurs in `run xs`, one can decompose `xs`
-to lie in `na.buchiFamily (a, b) ⊆ language na`. -/
-proof_wanted buchiCongr_DMA_language_eq [Inhabited Symbol]
-    {State : Type} [Finite State] (na : NA.Buchi State Symbol) :
-    language (buchiCongr_DMA na) = language na
-
-open NA.Buchi in
 /-- Forward direction scaffold for McNaughton's theorem: ω-regular → DMA-recognizable.
 
 Reduces the forward direction of `IsRegular.iff_da_muller` to `h_pkg`: given any
@@ -644,12 +579,17 @@ private lemma IsRegular.to_da_muller_scaffold {Symbol : Type} [Inhabited Symbol]
 /-- McNaughton's Theorem: an ω-language is ω-regular (recognized by a finite-state NBA)
 if and only if it is recognized by a finite-state deterministic Muller automaton.
 
-**Proof**: The backward direction `(⇐)` follows from `IsRegular.of_da_muller`. The
-forward direction `(⇒)` is the genuine determinization content of McNaughton's theorem.
+**Proof**: The backward direction `(⇐)` follows from `IsRegular.of_da_muller`.
 
-**Status**: The forward direction `(⇒)` requires constructing the DMA over the Büchi
-congruence quotient (see `IsRegular.to_da_muller_scaffold` and `buchiFamily_component_isRegular`,
-task 241 phase 2). The DMA packaging step is deferred to task 241, phase 3. -/
+The forward direction `(⇒)` follows the **Choueka decomposition route** (ported from
+`ctchou/AutomataTheory`'s `DetMullerLang.lean`, which does *not* use a quotient-as-DMA
+construction): decompose `p = ⨆ i, (l i) * (m i)^ω` via `eq_fin_iSup_hmul_omegaPow`; show
+each `(m i)^ω` is DMA-recognizable via the Choueka identity `M^ω = M* · U↗ω` (regular `U`)
+combined with the ω-limit base case `omegaLim_da_muller`; concatenate with the regular
+prefix `l i` via the `DA.concat` flag-construction correctness lemma
+(`concat_language_eq`); and fold the finite family into one DMA via DMA finite-union
+closure (`DA.Muller.union`). See `IsRegular.to_da_muller` (task 241, phase 5) for the
+assembly. -/
 proof_wanted IsRegular.iff_da_muller [Inhabited Symbol] {p : ωLanguage Symbol} :
     p.IsRegular ↔
     ∃ (State : Type) (_ : Finite State) (da : DA.Muller State Symbol), language da = p

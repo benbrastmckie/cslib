@@ -1,29 +1,18 @@
 {
-  "status": "planned",
-  "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/241_mcnaughton_theorem/plans/02_mcnaughton-choueka-route.md",
-      "summary": "Plan v2: architectural pivot of the McNaughton forward direction to the Choueka decomposition route (eq_fin_iSup_hmul_omegaPow + DA.concat correctness + omegaPow_da_muller + DMA finite-union closure), routing around the buchiCongr_DMA quotient-as-DMA dead end (task 434 soundness gap). 6 phases; dead-cluster disposition stated; reverse direction and base case already green."
-    }
-  ],
-  "next_steps": "Run /implement 241 to execute plan v2. Phase 1 (delete the subtask-434 sorry + reference-DAG extraction), Phase 2 (DA.concat language correctness), and Phase 4 (DMA union closure) are independent and parallelizable.",
+  "status": "in_progress",
+  "started_at": "2026-06-30T17:31:19-07:00",
+  "artifacts": [],
+  "partial_progress": {
+    "stage": "initializing",
+    "details": "Agent started, resuming plan v2 (Choueka route), beginning Phase 1",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 0
+  },
   "metadata": {
-    "session_id": "sess_1782832881_8335e5",
-    "agent_type": "reviser-agent",
-    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
-    "phase_count": 6,
-    "estimated_hours": 12,
-    "reports_integrated": [
-      "02_mcnaughton-ctchou-port-path.md",
-      "01_ctchou-coordination-seed.md",
-      "434/.orchestrator-handoff.json",
-      "434/plans/01_backward-inclusion-buchicongr-dma.md"
-    ],
-    "revision_reason": "architectural pivot to Choueka route after buchiCongr_DMA backward-inclusion soundness gap (task 434)",
-    "orchestrator_mode": false,
-    "architectural_change": true,
-    "new_description": "Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller): an ω-language is ω-regular iff recognized by a finite-state deterministic Muller automaton. Reverse direction (DMA -> ω-regular, IsRegular.of_da_muller) and the base case (IsRegular.omegaLim_da_muller) are already green. Forward direction (ω-regular -> DMA) follows the Choueka decomposition route from ctchou/AutomataTheory: eq_fin_iSup_hmul_omegaPow + DA.concat flag-construction correctness + omegaPow_da_muller + DMA finite-union closure. The earlier buchiCongr_DMA quotient-as-DMA construction (subtasks 433-436) is abandoned: its backward inclusion (task 434) has a genuine soundness gap (linked-pair / companion-independence) absent from CSLib, and the reference proof does not use it. Dead buchiCongr_DMA cluster to be removed during implementation.",
-    "supersedes_plan": "specs/241_mcnaughton_theorem/plans/01_mcnaughton-da-muller.md"
+    "session_id": "sess_1782865756_35420a",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
   }
 }

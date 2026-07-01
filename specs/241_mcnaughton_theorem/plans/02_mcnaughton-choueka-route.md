@@ -178,7 +178,7 @@ files/declarations): Phase 1 edits the `buchiCongr_DMA` region of `OmegaRegularL
 Phase 2 edits `DA/Concat.lean`; Phase 4 adds a new `DA/MullerClosure.lean`. Phase 5 assembles in
 `OmegaRegularLanguage.lean` after Phases 2–4 land.
 
-### Phase 1: Deprecate the `buchiCongr_DMA` path; restore sorry-free build [NOT STARTED]
+### Phase 1: Deprecate the `buchiCongr_DMA` path; restore sorry-free build [COMPLETED]
 
 - **Goal:** Remove the soundness-gap `sorry` and the unprovable `proof_wanted`, update the target
   docstring to the Choueka route, and extract the reference lemma DAG for Phases 2–4.
@@ -202,6 +202,40 @@ Phase 2 edits `DA/Concat.lean`; Phase 4 adds a new `DA/MullerClosure.lean`. Phas
 - **Proof obligations:** none (deletions + docstring). Output: sorry-free build + reference DAG.
 - **Verification:** `lake build Cslib.Computability.Languages.OmegaRegularLanguage` green;
   `grep -n "sorry\|admit" …/OmegaRegularLanguage.lean` returns nothing; reference DAG recorded.
+
+**Phase 1 result (COMPLETED)**: Deleted `buchiCongr_DMA_language_backward` (the subtask-434
+`sorry`) and `proof_wanted buchiCongr_DMA_language_eq`. Build green
+(`lake build Cslib.Computability.Languages.OmegaRegularLanguage`), zero `sorry`/`admit` in the
+file. Docstring of `IsRegular.iff_da_muller` updated to describe the Choueka route. Remaining
+green cluster (`buchiCongr_DMA`, `buchiCongr_DMA_run_eq`, `buchiCongr_DMA_accept_mem`,
+`buchiCongr_DMA_language_forward`, `IsRegular.to_da_muller_scaffold`) left in place per
+disposition, to be removed in Phase 6.
+
+**Reference DAG (extracted from `ctchou/AutomataTheory`, cached copies of
+`Languages/DetMullerLang.lean` and `Languages/OmegaRegLang.lean` found in a prior session's
+scratchpad)**:
+
+| AutomataTheory node | Maps to CSLib | Status |
+|---|---|---|
+| `omega_reg_lang_iff_finite_union_form` | `IsRegular.eq_fin_iSup_hmul_omegaPow` | green (already in CSLib) |
+| `det_muller_lang_omega_limit` | `IsRegular.omegaLim_da_muller` | green (base case, already done) |
+| `choueka_lemma : L^ω = L* * L'↗ω` (L' regular) | **NEW**, needed by Phase 3 `omegaPow_da_muller` | missing — confirmed required (route (a) in Phase 3, not route (b)) |
+| `det_muller_lang_concat` (`M0.Concat acc0 M1` + `MullerAcc_Concat`) | `DA.concat` + `mullerAccConcat` correctness = **Phase 2 `concat_language_eq`** | construction present, correctness theorem missing |
+| `det_muller_lang_biUnion` / `det_muller_lang_union` (`Automata.DA.Prod` + `MullerAcc_Union`) | **Phase 4 `DA.Muller.union`** (new `MullerClosure.lean`, mirrors `DA.Buchi.union`) | missing |
+| `omega_reg_lang_imp_det_muller_lang` (assembly: biUnion over `det_muller_lang_concat (U i) ((V i)^ω)`) | **Phase 5 `IsRegular.to_da_muller`** | to assemble |
+| `omega_reg_lang_iff_det_muller_lang` | **Phase 6 `IsRegular.iff_da_muller`** | to assemble |
+
+**Choueka identity confirmed required**: the reference proof does NOT build the ω-iteration DMA
+directly (Phase 3 route (b)); it goes through `choueka_lemma : L^ω = L* * L'↗ω` for some *new*
+regular `L'` (route (a)), then `det_muller_lang_concat (L*) (L'↗ω)` using the already-green
+ω-limit base case. Phase 3 must therefore either port `choueka_lemma`'s content (a nontrivial
+regular-language construction over the determinized loop automaton — in AutomataTheory this is
+`M.ChouekaLang acc` via `Automata.choueka_lang_regular` /
+`Automata.choueka_lang_omega_power_eq_omega_limit`, neither of which exists in CSLib) or find an
+equivalent CSLib-native construction of `L'`. This is flagged as the deepest remaining risk,
+worse than stated in the original Phase 3 risk table: it is not just "may need the identity" —
+the reference proof structure **requires** it, and its supporting regular-language construction
+(`ChouekaLang`) is entirely new to CSLib, not just the top-level identity lemma.
 
 ### Phase 2: `DA.concat` language correctness (`concat_language_eq`) [NOT STARTED]
 

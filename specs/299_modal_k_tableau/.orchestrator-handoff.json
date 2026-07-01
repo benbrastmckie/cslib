@@ -1,30 +1,62 @@
 {
-  "task_number": 299,
+  "task": 299,
   "status": "partial",
+  "orchestrator_mode": true,
   "phases_completed": 5,
   "phases_total": 7,
-  "summary": "Encoding-based completion (plan v5) in progress. Soundness (phases 1-4) GREEN. Completeness (phase 5) truth lemma rewritten on the Lukasiewicz encoding using the user-confirmed option (b): the two FALSE uniform-imp bridge lemmas (hintikka_imp_pos/neg) are DELETED and replaced by an inline case analysis in modalTruthLemma, driven by a new modalComplexity measure with strong/well-founded induction (so encoded and/or/neg subterms get correct IHs). This is a 491-line diff to Completeness.lean (+321/-170), zero sorry/admit/axiom. Build is RED with 29 mechanical errors in the truth-lemma region (lines 220-514) where the inline case analysis is unfinished. The prior dispatch died on a network error (ECONNRESET), NOT a logic wall.",
-  "build_command": "lake build Cslib.Logics.Modal.Tableau.Completeness",
-  "current_build": "RED (29 errors, all in Completeness.lean lines 220-514; 85 unusedSimpArgs warnings are cosmetic)",
-  "zero_sorry_check": "PASSED (grep for sorry/admit/axiom in Cslib/Logics/Modal/Tableau/ is empty)",
-  "error_clusters": [
-    "220-222: unsolved goals + `split` failed on `none = some (x, y)` (decomposer-result case; needs cases/simp on the equation hypothesis, not split)",
-    "252-255, 279-282, 420, 478: unsolved goals in inline imp sub-cases",
-    "310, 340: `rewrite` pattern not found (simp/rw target shape mismatch — likely needs the modalComplexity/Satisfies reduction lemmas or a different rewrite target)",
-    "429-514: repeated `Unknown identifier x`/`y` — a destructuring (obtain/rcases/match) introduced binder names x,y that are not in scope at the use sites; rebind or use the correct pattern names"
-  ],
-  "blockers": [],
-  "continuation_context": {
-    "resume_file": "Cslib/Logics/Modal/Tableau/Completeness.lean (WIP, committed as a labeled RED checkpoint)",
-    "wip_backup": "/tmp/claude-1000/-home-benjamin-Projects-cslib/871b3d09-b288-4311-82e5-9afe0ac404fe/scratchpad/Completeness.WIP-backup.lean",
-    "build_log": "/tmp/claude-1000/-home-benjamin-Projects-cslib/871b3d09-b288-4311-82e5-9afe0ac404fe/scratchpad/build299.txt",
-    "approach": "Keep the option-(b) inline-imp-case + modalComplexity strong-induction rewrite. Do NOT revert and do NOT change the datatype (native-constructor refactor is deferred to task 441). Fix the 29 errors in lines 220-514 using lean_goal at each failing position; reuse the rule engine's modalAndOf?/modalOrOf?/modalImpOf?/modalNegOf? decomposers so the truth-lemma split matches the rule engine. Then apply the two verified mechanical fixes (Option.getD_some in the per-case simp set; List.mem_cons_self with no explicit args) to the proper-implication sub-case. After Completeness is GREEN: Phase 6 (LoopInduction modalExpandBranches_hintikka invariant), Phase 7 (modalTableau_complete/decides barrel + add Completeness to Cslib barrel via `lake exe mk_all --module`), then CI: lake build, checkInitImports, lint-style.",
-    "do_not": "No sorry/admit/axiom. No datatype change. No revert of the WIP."
+  "build_state": {
+    "target": "Cslib.Logics.Modal.Tableau.Completeness",
+    "result": "GREEN",
+    "errors_fixed": 30,
+    "errors_remaining": 0,
+    "note": "Truth-lemma region fully repaired: modalTruthLemma, modalApplyOne_imp_pos/neg, tryAllPropRules_pos/neg, modalImpOf?_eq all compile. Scoped build passes."
   },
-  "next_action_hint": "Resume with /orchestrate 299 (or /implement 299): fix the 29 listed errors in Completeness.lean lines 220-514 to green, then phases 6-7 and CI.",
-  "hard_requirements": "Zero sorry, zero new axioms. Currently satisfied.",
-  "related_followup_task": "441 (modal_proposition_native_refactor) holds the native-constructor refactor design (plan v6); depends on 299.",
+  "zero_sorry_check": {
+    "sorry": 0,
+    "admit": 0,
+    "new_axioms": 0,
+    "scope": "Cslib/Logics/Modal/Tableau/ (grep clean)"
+  },
+  "error_clusters_resolved": [
+    "modalImpOf?_eq: split-failed on none=some -> nested split + simp",
+    "tryAllPropRules_pos/neg: unified nested rcases with h-names + simp incl SignedFormula.pos/neg unfold",
+    "modalApplyOne_imp_pos/neg: replaced fragile rw[<-] / .trans with have-happ + rw + discriminant rcases <;> rfl",
+    "unknown identifier x/y (8 sites): added .symm to modalXOf?_eq so subst eliminates a/c and keeps x/y",
+    "exfalso all-none impossible (4 sites): nested rcases c/a with a-consequent casing"
+  ],
+  "blockers": [
+    {
+      "phase": 6,
+      "summary": "modalExpandBranches_hintikka requires a modal expansion-measure + fuel-sufficiency bound (accounting for K box-world-creation) that does not exist. At fuel=0 the loop returns an open-but-not-necessarily-saturated branch; proving it Hintikka needs measure <= modalFuel. All modal measure infra (modalExpMeasure, modalBranchComplexity, decrease lemma, modalStepBranch_none_saturated) is absent.",
+      "unblock_steps": [
+        "Define modalBranchComplexity / modalExpMeasure (count unexpanded formulas + worlds eligible for box re-firing)",
+        "Prove modalExpMeasure_step_lt (strict decrease; delicate diamondPos/boxNeg world-creation case)",
+        "Prove fuel bound: modalExpMeasure [initial] [[]] [empty] <= modalFuel phi (or revise modalFuel)",
+        "Prove modalStepBranch_none_saturated (modal analog of classicalStepBranch_none_saturated:694)",
+        "Prove modalExpandBranches_hintikka by fuel + Forall2-acc induction (mirror modalExpandBranches_closed_unsat)"
+      ],
+      "recommended_action": "/spawn 299 for a dedicated modal expansion-measure + fuel-sufficiency task (the true research-level blocker)"
+    }
+  ],
+  "pre_existing_issues_discovered": [
+    {
+      "file": "Cslib/Logics/Modal/Tableau/SoundnessStep.lean",
+      "lines": [82, 85, 91],
+      "kind": "Application type mismatch / type mismatch (3 errors)",
+      "note": "RED in committed baseline (WIP checkpoint), NOT modified this dispatch, NOT in Completeness import chain (Saturation does not import Soundness/SoundnessStep). Blocks full `lake build` / Soundness rebuild but not the Completeness deliverable. Likely fallout of the option-(b) encoding refactor; needs a separate fix."
+    }
+  ],
+  "continuation_context": {
+    "next_phase": 6,
+    "delivered_this_dispatch": "Phase 5c modalTruthLemma GREEN (30->0 errors), committed sorry-free",
+    "reduces_to": "modalOpenBranch_countermodel (5d) already reduces modalTableau_complete to modalExpandBranches_hintikka once Phase 6 item 5 lands",
+    "plan": "specs/299_modal_k_tableau/plans/05_modal-k-tableau-plan.md (Phase 6 now [BLOCKED] with full obligation)"
+  },
   "artifacts": [
-    { "type": "plan", "path": "specs/299_modal_k_tableau/plans/05_modal-k-tableau-plan.md", "summary": "Active encoding-based plan v5" }
+    "Cslib/Logics/Modal/Tableau/Completeness.lean",
+    "specs/299_modal_k_tableau/plans/05_modal-k-tableau-plan.md"
+  ],
+  "commits": [
+    "task 299 phase 5: completeness truth lemma GREEN (30 errors -> 0)"
   ]
 }

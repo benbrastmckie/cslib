@@ -272,7 +272,7 @@ repaired. The box bridges stay untouched.
 
 ---
 
-### Phase 5c: Truth lemma restructure — strong induction (modalTruthLemma) [NOT STARTED]
+### Phase 5c: Truth lemma restructure — strong induction (modalTruthLemma) [COMPLETED]
 
 **Goal**: Replace the blocked structural-induction truth lemma. Delete the two unprovable `imp`
 bridges and prove `modalTruthLemma` via STRONG induction on `sizeOf φ`, inlining the connective case
@@ -391,10 +391,55 @@ Phase 5c restructure preserves verbatim — only the proof body changes — so 5
 
 ---
 
-### Phase 6: Completeness loop invariant + final completeness [IN PROGRESS]
+### Phase 6: Completeness loop invariant + final completeness [BLOCKED]
 
 **Goal**: Prove `modalExpandBranches_hintikka` (returned open branch is a Hintikka set) and discharge
 `modalTableau_complete` fully.
+
+**BLOCKER** (Phase 6):
+- **What failed**: `modalExpandBranches_hintikka` cannot be stated/proved because the modal
+  expansion-**measure** infrastructure needed to discharge the `fuel = 0` branch of
+  `modalExpandBranches` does not exist. At `fuel = 0` the loop returns the first *open* (but not
+  necessarily *saturated*) branch, so `modalHintikkaSet b acc` is NOT provable for that branch
+  unless we know `fuel = 0` is never reached with an unsaturated open branch — i.e. that the fuel
+  bound `modalFuel φ = (4n+4)(n+2)+2` dominates a decreasing expansion measure.
+- **What was tried / verified**:
+  - Confirmed (grep) that NONE of the required modal infrastructure exists yet:
+    `modalExpMeasure`, `modalBranchComplexity`, a `modalExpMeasure_step_lt` decrease lemma,
+    `modalStepBranch_none_saturated`, `modalExpandBranches_hintikka`, `modalTableau_complete`.
+  - Confirmed the soundness proof (`modalExpandBranches_closed_unsat`) does NOT use any measure —
+    it works for arbitrary fuel because `closed ⇒ unsat` holds regardless of fuel. The measure is
+    ONLY needed for the completeness (`openBranch ⇒ Hintikka`) direction.
+  - Studied the classical template `classicalExpandBranches_hintikka`
+    (`…/Propositional/Tableau/Classical/Completeness.lean:924`): it threads a
+    `classicalExpMeasure branches expandedSets ≤ fuel` hypothesis and discharges `fuel = 0` by
+    showing `measure = 0 ⇒ branches = []` (each per-branch term `3^C ≥ 1`).
+- **Why it's stuck (root cause)**: The classical measure `3^(branchComplexity)` works because
+  classical tableaux create NO new worlds. The modal K procedure's `boxNeg`/`diamondPos` rules
+  create a FRESH world (`modalNextWorld b`) and `boxPos`/`diamondNeg` re-fire *persistently* as new
+  successors appear. A sound modal measure must therefore bound the TOTAL expansion steps INCLUDING
+  world creation and box re-firing, and one must prove `modalExpMeasure initial ≤ modalFuel φ`. This
+  world-creation-interleaving bound is the plan's flagged HIGH risk and is a genuinely hard,
+  research-level obligation — not a mechanical transcription.
+- **What is needed to unblock** (concrete, ordered):
+  1. Define `modalBranchComplexity` / `modalExpMeasure branches expandedSets accs` accounting for
+     unexpanded formulas AND worlds still eligible for box re-firing.
+  2. Prove `modalExpMeasure_step_lt`: every non-saturating `modalStepBranch` strictly decreases the
+     measure (the delicate case: `diamondPos`/`boxNeg` add a world but consume the existential).
+  3. Prove the fuel-sufficiency bound `modalExpMeasure [initial] [[]] [empty] ≤ modalFuel φ` (or
+     revise `modalFuel` if a gap is exposed).
+  4. Prove `modalStepBranch_none_saturated` (saturated ⇒ each `sf` is in `expanded` or yields
+     `notApplicable`) — modal analog of `classicalStepBranch_none_saturated`.
+  5. Prove `modalExpandBranches_hintikka` by fuel induction + inner `Forall₂`-acc induction (mirror
+     `modalExpandBranches_closed_unsat`), using items 1-4 to discharge `fuel = 0` and the saturated
+     leaf.
+- **Prohibited workarounds**: Do NOT use `sorry`, `admit`, `def X := True`, or any vacuous
+  placeholder, and do NOT introduce axioms. Recommend `/spawn 299` to create a dedicated task for
+  the modal expansion-measure + fuel-sufficiency proof (items 1-3), which is the true blocker.
+
+**Delivered before block**: Phase 5c `modalTruthLemma` is fully GREEN and committed sorry-free
+(30 compile errors → 0). `modalOpenBranch_countermodel` (5d) already reduces
+`modalTableau_complete` to `modalExpandBranches_hintikka` once item 5 lands.
 
 **Prerequisite refactor**: hoist the generic `forall₂_*` list helpers (`forall₂_of_zip_mem`
 `Soundness.lean:156`, `forall₂_replicate_right` `:177`, `forall₂_append_aux` `:197`, `forall₂_drop_aux`

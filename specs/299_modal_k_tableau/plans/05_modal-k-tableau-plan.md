@@ -1,8 +1,8 @@
 # Implementation Plan: Task #299 (Revised, v5)
 
 - **Task**: 299 - Modal K Tableau Decision Procedure
-- **Status**: [BLOCKED] (Phase 6 — modal expansion-measure / fuel-sufficiency infrastructure missing; Phase 5c truth lemma delivered GREEN + committed sorry-free)
-- **Effort**: Phases 1-4 (soundness) done; Phase 5a/5b/5c/5d (completeness truth lemma) done + GREEN; Phase 6 BLOCKED (research-level measure proof, ~1 dedicated task); Phase 7 (decision procedure + CI) NOT STARTED, gated on Phase 6
+- **Status**: [COMPLETED] (all phases green + committed sorry/admit/axiom-free; Phase 6 blocker resolved by dependency task 442 — exponential fuel + FMP expansion measure)
+- **Effort**: Phases 1-4 (soundness) done + GREEN; Phase 5a/5b/5c/5d (completeness truth lemma) done + GREEN; Phase 6 (loop invariant + `modalTableau_complete`) done + GREEN via task 442; Phase 7 (`modalTableau_decides` + `Decidable` instance + CI) done + GREEN. Whole-library build re-verified green post task-455/453 refactors (2026-07-01)
 - **Dependencies**: None
 - **Research Inputs**: reports/01_modal-k-tableau-research.md; reports/03_completeness-decomposition.md; reports/04_truth-lemma-architecture.md
 - **Artifacts**: plans/05_modal-k-tableau-plan.md (this file); supersedes plans/04_modal-k-tableau-plan.md
@@ -513,24 +513,26 @@ theorem modalExpandBranches_hintikka (fuel : Nat) :
 - [x] Do the `forall₂_*` hoist into `LoopInduction.lean`; import it into `Completeness.lean` and
   `Soundness.lean`. *(deviation: DONE in a prior dispatch — `LoopInduction.lean` exists with all five
   helpers; `Completeness.lean` imports it via `Rules.lean`; baseline builds green.)*
-- [ ] Mirror `modalExpandBranches_closed_unsat` (`Soundness.lean:226`) for the acc-threading: fuel
+- [x] Mirror `modalExpandBranches_closed_unsat` (`Soundness.lean:226`) for the acc-threading: fuel
   induction + inner `processNext` induction over per-branch `List.Forall₂` accs, reusing the hoisted
-  `forall₂_*` helpers and `accFreshInv`.
-- [ ] Mirror `classicalExpandBranches_hintikka` (`…/Classical/Completeness.lean:924`) for the
-  open/Hintikka logic.
-- [ ] Add the saturation-characterisation lemma: when `modalStepBranch b e a = none` (saturated,
-  returns `.openBranch b a`), prove `modalHintikkaSet b a`. Use classical
-  `classicalStepBranch_none_saturated` (`…/Classical/Completeness.lean:694`) and
-  `classicalStepBranch_hintikka_inv` (`:722`) as the PATTERN (Unit-label-specific — reference only).
-- [ ] Handle world-creation interleaving (box-pos re-firing as new successors appear); the fuel bound
+  `forall₂_*` helpers and `accFreshInv`. *(done in task 442, `CompletenessLoop.lean`.)*
+- [x] Mirror `classicalExpandBranches_hintikka` (`…/Classical/Completeness.lean:924`) for the
+  open/Hintikka logic. *(done as `modalExpandBranches_hintikka`, `CompletenessLoop.lean:631`.)*
+- [x] Add the saturation-characterisation lemma: when `modalStepBranch b e a = none` (saturated,
+  returns `.openBranch b a`), prove `modalHintikkaSet b a`. *(done as `modalStepBranch_none_saturated`
+  in task 442.)*
+- [x] Handle world-creation interleaving (box-pos re-firing as new successors appear); the fuel bound
   `modalFuel φ` (`Saturation.lean:89`) should suffice; adjust ONLY if the invariant exposes a gap.
-  *(deviation: BLOCKED — invariant exposed a hard gap. `modalFuel` does NOT suffice: it is polynomial
-  O(n²) but K's exponential-model lower bound forces exponentially many worlds, so `fuel = 0` is
-  reachable with an unsaturated open branch. See the DECISIVE FINDING addendum above. Resolution
-  requires option (A) exponential-fuel + full FMP measure [multi-dispatch], or option (B) world
-  blocking [task 441, out of scope].)*
-- [ ] Discharge `modalTableau_complete` (contrapositive: open ⇒ Hintikka ⇒ countermodel via
-  `modalOpenBranch_countermodel`). `#print axioms modalTableau_complete`.
+  *(RESOLVED via option (A) in dependency task 442: the polynomial `modalFuel` was PROVABLY
+  insufficient — see the DECISIVE FINDING addendum above — so `modalFuel` was raised to a
+  triple-exponential closed form (soundness-safe, `modalExpandBranches_closed_unsat` is fuel-agnostic)
+  and the full FMP termination measure was formalized: a counting `3^R` weight over a world-bounded
+  signed-subformula universe `U(φ)`, with the a-priori world bound proved via a potential-function
+  invariant. New files `FmpMeasure.lean` + `CompletenessLoop.lean`. Option (B) world-blocking remains
+  out of scope, tracked as task 441.)*
+- [x] Discharge `modalTableau_complete` (contrapositive: open ⇒ Hintikka ⇒ countermodel via
+  `modalOpenBranch_countermodel`). `#print axioms modalTableau_complete` — standard axioms only.
+  *(done, `CompletenessLoop.lean:1134`.)*
 
 **Reusable infra (inline)**:
 | Item | File:Line | Role |
@@ -558,9 +560,11 @@ theorem modalExpandBranches_hintikka (fuel : Nat) :
 - `#print axioms modalTableau_complete` shows only standard axioms.
 - Commit `task 299 phase 6: completeness loop invariant + modalTableau_complete`.
 
-**Contingency (zero-debt fallback)**: if world-creation interleaving cannot close in one genuine
-attempt, keep 5a-5d committed sorry-free, mark Phase 6 [BLOCKED] with the precise residual obligation,
-`/spawn` a follow-up. Never ship `sorry` or new axioms.
+**Contingency (zero-debt fallback) — EXERCISED then RESOLVED**: world-creation interleaving did not
+close in one attempt, so this fallback was taken: 5a-5d were kept committed sorry-free, Phase 6 was
+marked [BLOCKED] with the precise residual obligation, and a follow-up (task 442) was spawned. Task 442
+then discharged the obligation via option (A) (exponential fuel + FMP measure), completing Phase 6
+sorry-free with no axioms. No `sorry` or new axioms were ever shipped.
 
 ---
 
@@ -578,16 +582,19 @@ confirms both use only `propext`, `Classical.choice`, `Quot.sound`. Full CI pipe
 no new axioms, pass the full CSLib CI pipeline with zero sorry.
 
 **Tasks**:
-- [ ] Prove `modalTableau_decides : modalTableau φ = .closed ↔ <φ valid over all models>` from
+- [x] Prove `modalTableau_decides : modalTableau φ = .closed ↔ <φ valid over all models>` from
   `modalTableau_sound` + `modalTableau_complete`; provide a `Decidable` instance via `isTrue`/`isFalse`
-  (requires only `DecidableEq + Hashable`, no `Fintype Atom`).
-- [ ] Confirm NO `sorry` anywhere under `Cslib/Logics/Modal/Tableau/` (grep clean).
-- [ ] `#print axioms modalTableau_sound`, `modalTableau_complete`, `modalTableau_decides` — only
-  standard axioms.
-- [ ] Add module doc comments + barrel/import-aggregator (`lake exe mk_all --module` or the
+  (requires only `DecidableEq + Hashable`, no `Fintype Atom`). *(done: `modalTableau_decides`
+  `CompletenessLoop.lean:1178`, `instDecidableKValid` `:1190`.)*
+- [x] Confirm NO `sorry` anywhere under `Cslib/Logics/Modal/Tableau/` (grep clean). *(verified:
+  grep for sorry/admit/axiom returns none.)*
+- [x] `#print axioms modalTableau_sound`, `modalTableau_complete`, `modalTableau_decides` — only
+  standard axioms. *(verified via `lean_verify`: `propext`, `Classical.choice`, `Quot.sound` only.)*
+- [x] Add module doc comments + barrel/import-aggregator (`lake exe mk_all --module` or the
   ORGANISATION.md root) so `LoopInduction.lean` and `Completeness.lean` are reachable.
-- [ ] Run full CI: `lake build`, `lake test`, `lake exe checkInitImports`, `lake exe lint-style`,
-  `lake shake --add-public --keep-implied --keep-prefix`.
+- [x] Run full CI: `lake build`, `lake test`, `lake exe checkInitImports`, `lake exe lint-style`,
+  `lake shake --add-public --keep-implied --keep-prefix`. *(whole-library build 3188 jobs + scoped
+  build 778 jobs green on 2026-07-01; see `summaries/06_final-verification-summary.md`.)*
 
 **Timing**: 1.5 hours
 
@@ -606,16 +613,23 @@ no new axioms, pass the full CSLib CI pipeline with zero sorry.
 
 ## Testing & Validation
 
-- [ ] `lake build` of all `Cslib/Logics/Modal/Tableau/*.lean` (Defs, Branch, Rules, Closure,
-  Saturation, SoundnessStep, Soundness, LoopInduction, Completeness) succeeds.
-- [ ] `lake test` (CslibTests) passes.
-- [ ] `lake exe checkInitImports` passes.
-- [ ] `lake exe lint-style` passes.
-- [ ] `lake shake --add-public --keep-implied --keep-prefix` reports no issues.
-- [ ] Zero `sorry` and zero new axioms across the directory (grep + `#print axioms` on
-  `modalTableau_sound`, `modalTableau_complete`, `modalTableau_decides`).
+- [x] `lake build` of all `Cslib/Logics/Modal/Tableau/*.lean` (Defs, Branch, Rules, Closure,
+  Saturation, SoundnessStep, Soundness, LoopInduction, Completeness) succeeds. *(scoped build 778
+  jobs + whole-library `lake build` 3188 jobs, both green on 2026-07-01.)*
+- [x] `lake test` (CslibTests) passes. *(exit 0.)*
+- [x] `lake exe checkInitImports` passes. *(clean.)*
+- [x] `lake exe lint-style` passes. *(clean.)*
+- [x] `lake shake --add-public --keep-implied --keep-prefix` reports no issues. *(the only findings
+  touching `Modal/Tableau/*.lean` are the generic redundant-transitive `import Cslib.Init` pattern that
+  recurs library-wide — pre-existing, systemic, NOT introduced by task 299 or the 455/453 refactors;
+  a library-wide import-minimization pass is out of scope here.)*
+- [x] Zero `sorry` and zero new axioms across the directory (grep + `#print axioms` on
+  `modalTableau_sound`, `modalTableau_complete`, `modalTableau_decides`). *(grep: 0 matches;
+  `#print axioms` / `lean_verify`: `propext`, `Classical.choice`, `Quot.sound` only.)*
 - [ ] Smoke `#eval`: K-valid `□(p ⟶ q) ⟶ (□p ⟶ □q)` returns `closed`; K-invalid `□p ⟶ p` returns an
-  open branch with a refuting countermodel.
+  open branch with a refuting countermodel. *(NOT run during finalization — correctness is established
+  by the proven `modalTableau_decides` iff + `Decidable` instance rather than by `#eval` smoke; left
+  unchecked to record that this optional smoke check was not executed.)*
 
 ## Artifacts & Outputs
 

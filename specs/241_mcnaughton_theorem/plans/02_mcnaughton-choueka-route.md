@@ -277,19 +277,44 @@ the reference proof structure **requires** it, and its supporting regular-langua
 - **Verification:** `lake build` green for touched modules; `lean_verify` clean on the new lemma.
   **If unclosable:** mark [BLOCKED] with goal state; no `sorry`.
 
-### Phase 4: DMA finite-union closure (`Muller.union`) [NOT STARTED]
+### Phase 4: DMA finite-union closure (`Muller.union`) [COMPLETED]
 
 - **Goal:** DMAs are closed under (finite) union: `Muller.union` + `union_language_eq`, mirroring
   `DA.Buchi.union` over `DA.prod`.
 - **Tasks:**
-  - [ ] Define `DA.Muller.union (a1 : Muller S1) (a2 : Muller S2) : Muller (S1 × S2)` with
+  - [x] Define `DA.Muller.union (a1 : Muller S1) (a2 : Muller S2) : Muller (S1 × S2)` with
     `toDA := a1.toDA.prod a2.toDA` and accept `{S | π₁''S ∈ a1.accept ∨ π₂''S ∈ a2.accept}`
     (or the `infOcc`-correct formulation; verify against `prod_run_eq`).
-  - [ ] Prove `language (a1.union a2) = language a1 ⊔ language a2` via `prod_run_eq` and `infOcc`
+  - [x] Prove `language (a1.union a2) = language a1 ⊔ language a2` via `prod_run_eq` and `infOcc`
     of a product run (mirror `Buchi.union_language_eq`).
-  - [ ] Provide the finite `⨆ i, …` lift (fold over `Fin n`) used by Phase 5.
+  - [x] Provide the finite `⨆ i, …` lift (fold over `Fin n`) used by Phase 5. *(implemented as
+    `Muller.exists_iSup` / `Muller.exists_iSup_univ`, an existential-packaging lift mirroring
+    `IsRegular.iSup`'s `ncard` induction, rather than a concrete "big union" automaton — this is
+    the form Phase 5 actually needs to consume.)*
 - **Timing:** 2 hours
 - **Depends on:** none
+
+**Phase 4 result (COMPLETED)**: New file `Cslib/Computability/Automata/DA/MullerClosure.lean`
+(added to `Cslib.lean` via `lake exe mk_all --module`). Contains, all built green and sorry-free:
+- `prod_run_infOcc_fst` / `prod_run_infOcc_snd`: the `infOcc`/image pigeonhole facts (via
+  `ωSequence.frequently_in_finite_type`) connecting a product run's `infOcc` to each component's.
+- `Muller.union` + `Muller.union_language_eq` (`language (a1.union a2) = language a1 ⊔ language a2`,
+  requires `[Finite State1] [Finite State2]`).
+- `Muller.empty` + `Muller.empty_language_eq` (one-state DMA with `accept = ∅`, language `⊥`;
+  base case for the fold).
+- `Muller.exists_iSup` / `Muller.exists_iSup_univ`: the finite-union lift, proved by `Set.ncard`
+  induction exactly mirroring `IsRegular.iSup`.
+
+Verified: `lake build Cslib.Computability.Automata.DA.MullerClosure` green; zero `sorry`/`admit`;
+`lake lint` / `lake exe lint-style` / `lake shake` report nothing for this file.
+Committed as `task 241 phase 4: DMA finite-union closure (Muller.union)`.
+
+**Environment note**: at the time of this dispatch, an unrelated file
+(`Cslib/Logics/Modal/Tableau/SoundnessStep.lean`, belonging to a different in-flight task) was in
+a broken/mid-edit state in the shared working tree, which blocks `lake exe checkInitImports` and
+a full `lake build`/`lake test` run (both require the whole project to build). This is outside
+this task's scope and was not touched. `MullerClosure.lean`'s and `OmegaRegularLanguage.lean`'s
+own scoped builds are green independent of that unrelated breakage.
 - **Files to modify:** new `Cslib/Computability/Automata/DA/MullerClosure.lean` (sibling of
   `BuchiClosure.lean`); add to `mk_all` if new file.
 - **Proof obligations:** `language (Muller.union …) = ⊔`; finite-union lift.

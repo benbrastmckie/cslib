@@ -115,6 +115,14 @@ theorem axiom_sound_dense {D : Type*} [LinearOrder D] [DenselyOrdered D]
   | temp_linearity_past => exact axiom_sound (.temp_linearity_past _ _) (FrameClass.base_le _) M t
   | F_until_equiv => exact axiom_sound (.F_until_equiv _) (FrameClass.base_le _) M t
   | P_since_equiv => exact axiom_sound (.P_since_equiv _) (FrameClass.base_le _) M t
+  | allFuture_to_classic =>
+      exact axiom_sound (.allFuture_to_classic _) (FrameClass.base_le _) M t
+  | classic_to_allFuture =>
+      exact axiom_sound (.classic_to_allFuture _) (FrameClass.base_le _) M t
+  | allPast_to_classic =>
+      exact axiom_sound (.allPast_to_classic _) (FrameClass.base_le _) M t
+  | classic_to_allPast =>
+      exact axiom_sound (.classic_to_allPast _) (FrameClass.base_le _) M t
 
 end Cslib.Logic.Temporal
 

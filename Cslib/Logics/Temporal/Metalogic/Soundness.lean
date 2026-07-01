@@ -95,53 +95,36 @@ theorem axiom_sound {D : Type*} [LinearOrder D] [NoMaxOrder D] [NoMinOrder D]
     exact this
   | left_mono_until_G φ ψ χ =>
     -- G(φ→ψ) → (χ U φ → χ U ψ). Guard monotonicity.
-    -- Goal: G(φ→ψ) → (χ U φ → χ U ψ). All terms are formula constructors.
+    -- G(φ→ψ) unfolds definitionally (allFuture_iff, imp_iff) to
+    -- ∀ s > t, Satisfies M s φ → Satisfies M s ψ.
     intro hGimp huntl
-    -- hGimp unfolds to: ¬(∃ s > t, ¬(φ s → ψ s) ∧ ...) which is G(φ→ψ)
-    -- Let's work semantically: extract ∀ s > t, φ→ψ from G(φ→ψ)
-    have hG : ∀ s, t < s → Satisfies M s φ → Satisfies M s ψ := by
-      intro s hs hφ
-      by_contra hψ
-      exact hGimp ⟨s, hs, (fun h => hψ (h hφ)), fun _ _ _ h => h⟩
+    have hG : ∀ s, t < s → Satisfies M s φ → Satisfies M s ψ := hGimp
     obtain ⟨s, hlt, hev, hg⟩ := huntl
     exact ⟨s, hlt, hev, fun r hr1 hr2 => hG r hr1 (hg r hr1 hr2)⟩
   | left_mono_since_H φ ψ χ =>
     intro hHimp hsnce
-    have hH : ∀ s, s < t → Satisfies M s φ → Satisfies M s ψ := by
-      intro s hs hφ
-      by_contra hψ
-      exact hHimp ⟨s, hs, (fun h => hψ (h hφ)), fun _ _ _ h => h⟩
+    have hH : ∀ s, s < t → Satisfies M s φ → Satisfies M s ψ := hHimp
     obtain ⟨s, hlt, hev, hg⟩ := hsnce
     exact ⟨s, hlt, hev, fun r hr1 hr2 => hH r hr2 (hg r hr1 hr2)⟩
   | right_mono_until φ ψ χ =>
     -- G(φ→ψ) → (φ U χ → ψ U χ). Event changes from φ to ψ, guard χ stays.
     intro hGimp huntl
-    have hG : ∀ s, t < s → Satisfies M s φ → Satisfies M s ψ := by
-      intro s hs hφ
-      by_contra hψ
-      exact hGimp ⟨s, hs, (fun h => hψ (h hφ)), fun _ _ _ h => h⟩
+    have hG : ∀ s, t < s → Satisfies M s φ → Satisfies M s ψ := hGimp
     obtain ⟨s, hlt, hev, hg⟩ := huntl
     exact ⟨s, hlt, hG s hlt hev, hg⟩
   | right_mono_since φ ψ χ =>
     intro hHimp hsnce
-    have hH : ∀ s, s < t → Satisfies M s φ → Satisfies M s ψ := by
-      intro s hs hφ
-      by_contra hψ
-      exact hHimp ⟨s, hs, (fun h => hψ (h hφ)), fun _ _ _ h => h⟩
+    have hH : ∀ s, s < t → Satisfies M s φ → Satisfies M s ψ := hHimp
     obtain ⟨s, hlt, hev, hg⟩ := hsnce
     exact ⟨s, hlt, hH s hlt hev, hg⟩
   | connect_future φ =>
-    -- φ → G(P(φ)). G is ¬F¬, P is S(·,⊤).
-    intro hφ hF_neg_P
-    -- hF_neg_P : ∃ s > t, ¬P(φ) at s ∧ ...
-    -- ¬P(φ) at s means: ¬∃ s' < s, φ(s'), i.e., ∀ s' < s, ¬φ(s')
-    obtain ⟨s, hts, hnP, _⟩ := hF_neg_P
-    apply hnP; exact ⟨t, hts, hφ, fun _ _ _ h => h⟩
+    -- φ → G(P(φ)). G(X) unfolds definitionally to ∀ s > t, Satisfies M s X.
+    intro hφ s hts
+    exact (Satisfies.somePast_iff M s φ).mpr ⟨t, hts, hφ⟩
   | connect_past φ =>
-    -- φ → H(F(φ)). H is ¬P¬, F is U(·,⊤).
-    intro hφ hP_neg_F
-    obtain ⟨s, hst, hnF, _⟩ := hP_neg_F
-    apply hnF; exact ⟨t, hst, hφ, fun _ _ _ h => h⟩
+    -- φ → H(F(φ)). H(X) unfolds definitionally to ∀ s < t, Satisfies M s X.
+    intro hφ s hts
+    exact (Satisfies.someFuture_iff M s φ).mpr ⟨t, hts, hφ⟩
   | enrichment_until φ ψ p =>
     -- p ∧ (φ U ψ) → (φ U (ψ ∧ (φ S p)))
     -- GUARD=φ stays, EVENT enriched: ψ → ψ ∧ (φ S p)
@@ -328,6 +311,18 @@ theorem axiom_sound {D : Type*} [LinearOrder D] [NoMaxOrder D] [NoMinOrder D]
     intro hP
     obtain ⟨s, hlt, hφ⟩ := (Satisfies.somePast_iff M t φ).mp hP
     exact ⟨s, hlt, hφ, fun _ _ _ => Satisfies.top_true M _⟩
+  | allFuture_to_classic φ =>
+    -- 𝐆φ → ¬𝐅¬φ, via the P2 semantic bridge (allFuture_iff/someFuture_iff/neg_iff).
+    exact (Satisfies.sat_allFuture_iff_neg_someFuture_neg M t φ).mp
+  | classic_to_allFuture φ =>
+    -- ¬𝐅¬φ → 𝐆φ (classical direction), via the same bridge.
+    exact (Satisfies.sat_allFuture_iff_neg_someFuture_neg M t φ).mpr
+  | allPast_to_classic φ =>
+    -- 𝐇φ → ¬𝐏¬φ, via the P2 semantic bridge.
+    exact (Satisfies.sat_allPast_iff_neg_somePast_neg M t φ).mp
+  | classic_to_allPast φ =>
+    -- ¬𝐏¬φ → 𝐇φ (classical direction), via the same bridge.
+    exact (Satisfies.sat_allPast_iff_neg_somePast_neg M t φ).mpr
   | density _ => exact absurd _h_fc (by simp [Axiom.minFrameClass, LE.le])
   | dense_indicator => exact absurd _h_fc (by simp [Axiom.minFrameClass, LE.le])
 
@@ -369,6 +364,25 @@ theorem swapTemporal_dual {D : Type*} [LinearOrder D]
     · rintro ⟨s, hts, hα, hguard⟩
       exact ⟨OrderDual.ofDual s, hts, (ihα (OrderDual.ofDual s)).mpr hα,
         fun r hr1 hr2 => (ihβ r).mpr (hguard (OrderDual.toDual r) hr2 hr1)⟩
+  | allFuture φ ihφ =>
+    -- swap(𝐆φ) = 𝐇(swap φ). Both sides unfold definitionally (allFuture/allPast
+    -- structural clauses); the OrderDual `<` is definitionally reversed, so the
+    -- witnesses transfer via `OrderDual.toDual`/`OrderDual.ofDual` without a
+    -- named order lemma (matches the `untl`/`snce` cases above).
+    simp only [Formula.swapTemporal, Satisfies]
+    constructor
+    · intro h s' hs'
+      exact (ihφ (OrderDual.ofDual s')).mp (h (OrderDual.ofDual s') hs')
+    · intro h s hs
+      exact (ihφ s).mpr (h (OrderDual.toDual s) hs)
+  | allPast φ ihφ =>
+    -- swap(𝐇φ) = 𝐆(swap φ). Past dual of the `allFuture` case above.
+    simp only [Formula.swapTemporal, Satisfies]
+    constructor
+    · intro h s' hs'
+      exact (ihφ (OrderDual.ofDual s')).mp (h (OrderDual.ofDual s') hs')
+    · intro h s hs
+      exact (ihφ s).mpr (h (OrderDual.toDual s) hs)
 
 end Cslib.Logic.Temporal
 

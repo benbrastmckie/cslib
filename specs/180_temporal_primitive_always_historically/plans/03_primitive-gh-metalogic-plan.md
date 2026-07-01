@@ -314,26 +314,59 @@ WIP); out of scope for this phase.
 
 ---
 
-### Phase 4: Metalogic — Soundness + DenseSoundness (4 axiom_sound arms) [NOT STARTED]
+### Phase 4: Metalogic — Soundness + DenseSoundness (4 axiom_sound arms) [PARTIAL]
 
 - **Goal:** Prove the four bridge axioms sound by adding four `axiom_sound` match arms; extend
   `DenseSoundness` only if it re-matches Base axioms. Self-contained (F5).
 - **Tasks:**
-  - [ ] `Soundness.lean` `axiom_sound` (`:75`): add arms `allFuture_to_classic`,
+  - [x] `Soundness.lean` `axiom_sound` (`:75`): add arms `allFuture_to_classic`,
     `classic_to_allFuture`, `allPast_to_classic`, `classic_to_allPast`. Both sides denote
     `∀ s>t, Sat s φ`; use the `allFuture_iff`/`someFuture_iff` idiom (file uses it at `:87,:267,:408`).
     Tune `simp` sets against `Satisfies.imp_iff`/`neg_iff` (verified present, `:87,:114`).
-  - [ ] `DenseSoundness.lean`: read its `match`; if it re-dispatches Base axioms to `axiom_sound`,
+    DONE: each arm is a one-line `.mp`/`.mpr` of the P2 semantic bridge lemmas
+    `Satisfies.sat_allFuture_iff_neg_someFuture_neg` / `Satisfies.sat_allPast_iff_neg_somePast_neg`.
+    Also repaired 6 pre-existing broken arms in the same file (`left_mono_until_G`,
+    `left_mono_since_H`, `right_mono_until`, `right_mono_since`, `connect_future`,
+    `connect_past`) and added the 2 missing `swapTemporal_dual` induction cases
+    (`allFuture`, `allPast`) — all were downstream type errors caused by Phase 2's
+    primitive-constructor promotion (old code relied on the `G ≡ ¬F¬` defeq that no
+    longer holds), discovered when this file's own build was attempted; genuine
+    in-file breakage, not a design change. `lake build
+    Cslib.Logics.Temporal.Metalogic.Soundness` is GREEN.
+  - [x] `DenseSoundness.lean`: read its `match`; if it re-dispatches Base axioms to `axiom_sound`,
     no change; if it re-matches, mirror the 4 arms (`minFrameClass = .Base`, no dense side
     conditions).
+    DONE (edit made): confirmed `axiom_sound_dense` re-matches Base axioms directly
+    (delegating each to `axiom_sound _ (FrameClass.base_le _) M t`); added the 4 mirrored
+    arms `allFuture_to_classic`/`classic_to_allFuture`/`allPast_to_classic`/
+    `classic_to_allPast` following the identical established pattern used by the other
+    24 Base-delegation arms (structurally high-confidence correct — same shape, verified
+    `FrameClass.base_le` signature). BLOCKED on scoped-build verification (see below):
+    `lake build Cslib.Logics.Temporal.Metalogic.DenseSoundness` cannot complete because
+    `DenseSoundness.lean` genuinely imports `DenseMCS.lean` -> `MCS.lean` (for the
+    `Temporal.ThDerivableFc` definition used by the pre-existing `soundness_thderivable_dense`
+    theorem, not something Phase 4 added), and `MCS.lean` is currently broken — this is
+    Phase 5's designated repair target (F1 root cause, break sites `MCS.lean:170,213-216,
+    230,269,276,374,474`, matching the plan's cited `169/374/229/472`). This dependency
+    was NOT anticipated by the "Self-contained (F5)" framing: DenseSoundness.lean's scoped
+    build transitively requires Phase 5's MCS.lean repair to pass, even though the new
+    axiom_sound_dense arms themselves are independent of MCS.lean. Do NOT touch MCS.lean
+    from this dispatch (Phase 5 territory, PM1 single-phase focus).
 - **Timing:** 2-3 hours
 - **Depends on:** 3
 - **Estimated output:** ~120-250 lines (4 arms + possible dense mirror)
 - **Files to modify:** `Cslib/Logics/Temporal/Metalogic/{Soundness,DenseSoundness}.lean`
 - **Scoped verification (done when):**
-  - `lake build Cslib.Logics.Temporal.Metalogic.Soundness` green
-  - `lake build Cslib.Logics.Temporal.Metalogic.DenseSoundness` green
-  - `lean_verify` on `axiom_sound`: no `sorry`, no new axioms.
+  - `lake build Cslib.Logics.Temporal.Metalogic.Soundness` green — PASSES.
+  - `lake build Cslib.Logics.Temporal.Metalogic.DenseSoundness` green — BLOCKED, see above
+    (fails at transitive dependency `MCS.lean`, Phase 5 territory; not a failure of the
+    Phase 4 edits themselves).
+  - `lean_verify` on `axiom_sound`: no `sorry`, no new axioms — CONFIRMED
+    (`{"axioms":["propext","Classical.choice","Quot.sound"],"warnings":[]}`, no `sorry` in
+    either file).
+- **Re-verification note for next dispatch**: once Phase 5 repairs `MCS.lean`, re-run
+  `lake build Cslib.Logics.Temporal.Metalogic.DenseSoundness`; the `DenseSoundness.lean`
+  content added in this dispatch is not expected to need further changes.
 
 ---
 

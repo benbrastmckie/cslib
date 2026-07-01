@@ -1,44 +1,44 @@
 {
   "status": "partial",
-  "started_at": "2026-06-30T17:52:00Z",
+  "started_at": "2026-06-30T00:00:00Z",
   "artifacts": [
     {
-      "path": "Cslib/Logics/Temporal/ProofSystem/Instances.lean",
-      "type": "lean-source",
-      "summary": "Fixed seven broken typeclass instances (LeftMonoUntilG, LeftMonoSinceH, RightMonoUntil, RightMonoSince, ConnectFuture, ConnectPast, TemporalNecessitation): added missing intro, pinned fc explicitly, replaced underscore formula placeholders with concrete terms, replaced broken imp_k gymnastics with existing hyp_syl helper, replaced rwConclusion with direct triangle rewrite, deleted unused bridgeAllFutureAxiom dead code containing a sorry"
+      "path": "Cslib/Logics/Temporal/Metalogic/Soundness.lean",
+      "type": "lean_source",
+      "summary": "Added 4 axiom_sound bridge arms (allFuture_to_classic, classic_to_allFuture, allPast_to_classic, classic_to_allPast); repaired 6 pre-existing broken arms and 2 missing swapTemporal_dual cases caused by Phase 2's primitive-constructor promotion. Scoped build GREEN."
+    },
+    {
+      "path": "Cslib/Logics/Temporal/Metalogic/DenseSoundness.lean",
+      "type": "lean_source",
+      "summary": "Added 4 mirrored axiom_sound_dense arms delegating to axiom_sound. Scoped build blocked by pre-existing MCS.lean breakage (Phase 5 territory)."
     },
     {
       "path": "specs/180_temporal_primitive_always_historically/plans/03_primitive-gh-metalogic-plan.md",
       "type": "plan",
-      "summary": "Phase 3 marked [COMPLETED] with result notes"
-    },
-    {
-      "path": "specs/180_temporal_primitive_always_historically/.orchestrator-handoff.json",
-      "type": "handoff",
-      "summary": "Phase 3 -> Phase 4 continuation context"
+      "summary": "Phase 4 heading marked [PARTIAL] with detailed task-level documentation of what completed and the discovered MCS.lean dependency blocker."
     }
   ],
   "partial_progress": {
-    "stage": "phase-3-complete",
-    "details": "Phase 3 (ProofSystem) scoped-green; task-level status remains partial pending Phases 4-9"
+    "stage": "phase_4_partial",
+    "details": "axiom_sound (Soundness.lean) complete and scoped-build green. axiom_sound_dense (DenseSoundness.lean) arms added but scoped build blocked by transitive dependency on MCS.lean (Phase 5 territory)."
   },
   "phases_completed": 3,
   "phases_total": 9,
   "memory_candidates": [
-    {
-      "topic": "lean4-elaboration",
-      "note": "DerivationTree.axiom [] _ (...) trivial inside a let binding (not a directly expected-typed anonymous constructor) can strand the frame-class/index metavariable unresolved, causing `trivial : True` term-mode proofs to fail against an always-true but metavariable-headed goal. Fix: pin implicit index params explicitly (e.g. (fc := ...)) and supply concrete argument terms instead of `_` placeholders that are only unified by later usage."
-    }
+    "CSLib Temporal task 180: allFuture_iff/allPast_iff are Iff.rfl (definitional) once allFuture/allPast are primitive Satisfies constructors -- proofs that previously used by_contra/anonymous-constructor tricks to unfold the old G-as-neg-F-neg defeq can often be replaced by direct term-mode `:= hHyp` since the universal quantifier is now defeq-transparent through imp_iff too.",
+    "CSLib Temporal task 180: DenseSoundness.lean's scoped build transitively depends on MCS.lean via DenseMCS.lean (for Temporal.ThDerivableFc) even though axiom_sound_dense itself does not need MCS.lean -- Phase 4 and Phase 5 are not fully independent for build-verification purposes despite the plan's 'self-contained' framing."
   ],
   "verification": {
-    "verification_passed": true,
+    "verification_passed": false,
     "sorry_count": 0,
     "vacuous_count": 0,
     "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": false
+    "build_passed": false,
+    "ci_pipeline_passed": false,
+    "notes": "lake build Cslib.Logics.Temporal.Metalogic.Soundness: PASS. lake build Cslib.Logics.Temporal.Metalogic.DenseSoundness: FAIL (blocked by pre-existing Phase-5-territory MCS.lean breakage, not by this dispatch's edits). Full CSLib CI pipeline intentionally NOT run per PM2/dispatch instructions (Temporal build legitimately red until Phase 9)."
   },
   "metadata": {
+    "session_id": "sess_phase4_180",
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]

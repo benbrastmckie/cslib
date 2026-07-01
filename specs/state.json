@@ -641,7 +641,7 @@
     {
       "project_number": 180,
       "project_name": "temporal_primitive_always_historically",
-      "status": "implementing",
+      "status": "pr_ready",
       "task_type": "cslib",
       "dependencies": [
         406
@@ -670,7 +670,7 @@
         }
       ],
       "topic": "Temporal Logic",
-      "last_updated": "2026-07-01T00:51:12Z",
+      "last_updated": "2026-07-01T03:12:00Z",
       "session_id": "sess_1782866989_0251ee",
       "next_artifact_number": 2,
       "plan_metadata": {

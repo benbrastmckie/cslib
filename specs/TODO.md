@@ -48,7 +48,7 @@ next_project_number: 443
 
 ### Temporal Logic
 
-180 [IMPLEMENTING] — Add allFuture (G) and allPast (H) as primitive constructors to Te
+180 [PR READY] — Add allFuture (G) and allPast (H) as primitive constructors to Te
   └─ 439 [RESEARCHED] — Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_red
     └─ 426 [BLOCKED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
       └─ 427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
@@ -735,7 +735,7 @@ Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completenes
 ---
 
 ### 180. Temporal primitive always historically
-- **Status**: [IMPLEMENTING]
+- **Status**: [PR READY]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 406

@@ -95,3 +95,48 @@ not to force a workaround). Both sorries (330, 991) remain open and untouched.
 
 See `specs/317_propositional_tableau_completeness/.orchestrator-handoff.json` for the structured
 handoff (status `blocked`, `sorry_inventory`, `blockers`, `continuation_context`).
+
+## Addendum: concurrent dispatch `sess_1782919268_2df8d8_317b` (supplementary Phase 2 work)
+
+After this summary was written, the concurrent session referenced above (Phase 1's duplicate
+lemma) returned to Phase 2 independently and, before seeing this dispatch's BLOCKED verdict,
+implemented `intAccessPreorder`/`intAccessPreorder_le_of_isAccessible` in `Scheme.lean`
+(commit `a1883c4e`): a genuine, `lake build`-green `Preorder Nat` instance built as
+`Relation.ReflTransGen (fun x y => isAccessible edges x y = true)`. This sidesteps the need to
+separately prove `isAccessible` itself transitive (an initial fuel-based attempt hit a
+fuel-shrinking dead end: concatenating two `edges.length`-fuel DFS traversals needs
+`edges.length + edges.length` fuel, with no general way back down to `edges.length` short of a
+separate shortest-path argument). `Relation.ReflTransGen` gives reflexivity/transitivity for
+free, and `.single` lifts any raw `isAccessible edges w w' = true` fact (all `sat_fimp`/future
+`sat_timp` witnesses ever supply) directly into the order.
+
+This genuinely fulfills Phase 2's first checklist item ("define the countermodel `Preorder`...
+as the RTC of `isAccessible edges`") as real, tested code — a **Preserved Asset** for whichever
+re-plan route (option a or b above) is eventually chosen.
+
+That session then independently discovered a SECOND, additional blocker while attempting the
+monotonicity proof directly: even if the byte-stability/signature question is resolved,
+`intExtractValuation` monotonicity along edges is separately entangled with the B2
+fuel-sufficiency argument (Phase 6-10, not yet implemented). Verified against source:
+`intApplyRuleFull` (`Rules.lean:245-268`) maps every `.pos, .imp` signed formula (every
+`T(φ→ψ)`) to `.notApplicable` — `T(→)` is handled exclusively by the fuel-bounded
+`applyPersistenceFixpoint`, and `intStepBranch b e nw = none` (the only saturation witness for
+the returned branch) does not guarantee that fixpoint loop actually converged. Atom monotonicity
+for `T(→)`-triggered atoms co-inductively depends on the antecedent formula's own monotonicity,
+resolved only by repeated fixpoint passes — i.e. by fuel. This is a wave-ordering inversion:
+Phase 2 (Wave 2) becomes logically dependent on Phase 10's `intExpMeasure`/fuel-sufficiency
+machinery (Wave 6). Documented in-file (doc comment immediately after
+`intAccessPreorder_le_of_isAccessible`, no `sorry`) and in the plan file's Phase 2 section
+("Supplementary finding" subsection) and the `.orchestrator-handoff.json`.
+
+**Combined recommendation for the re-plan**: adopt option (a) or (b) to resolve the
+signature-pinning issue, AND restructure `intExtractValuation` monotonicity as a
+field/hypothesis threaded alongside `sat_timp` (Phase 4), discharged only once
+`measure ≤ fuel` (Phase 10) is available — mirroring R3's own anticipated fold for `sat_timp`'s
+succ-case, generalized to Phase 2's atom-monotonicity too. `intAccessPreorder` remains directly
+reusable once the signature question is resolved.
+
+No verdict change: Phase 2 remains [BLOCKED]. Build green throughout (662 jobs); sorries
+unchanged in content, shifted only by doc-comment/lemma insertions
+(330→409, 991→1070 in `Scheme.lean`; `Completeness.lean:113`, `Minimal/Completeness.lean:110`
+unchanged). No new axioms, no vacuous definitions, no weakened lemmas, no workaround `sorry`.

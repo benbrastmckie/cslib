@@ -1844,6 +1844,128 @@ private lemma modalMaxWorld_append_single
     have := label_le_modalMaxWorld (List.mem_append_left b hsf0)
     rwa [hxs sf0 hsf0] at this
 
+/-! ## `accTargetsKnown` Invariant and the Known-Worlds Dichotomy (Phase 2 continuation,
+obligation d — finish)
+
+`accTargetsKnown b acc` records that every accessibility-edge target is a label already
+appearing on the branch. This is needed to lift the `boxPos`/`diamondNeg` closure facts
+(`x.label ∈ acc.successorsOf w`) to `x.label ∈ modalKnownWorlds b`, which is what
+`modalPotential`'s summation domain tracks. -/
+
+/-- Every accessibility-edge target is a label already appearing on the branch. -/
+def accTargetsKnown (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) : Prop :=
+  ∀ w w', acc.hasEdge w w' → w' ∈ modalKnownWorlds b
+
+/-- **P2-obl-d prerequisite**: `modalStepBranch` preserves `accTargetsKnown`. Old edges' targets
+remain known since the branch only grows (`modalKnownWorlds_mono_append`); the one possible new
+edge (`boxNeg`'s mint step) targets the freshly-minted witness world, which is immediately
+present on the new branch. -/
+lemma modalStepBranch_preserves_accTargetsKnown
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hknown : accTargetsKnown b acc) :
+    ∀ b' ∈ newBs, accTargetsKnown b' newAcc := by
+  simp only [modalStepBranch] at hstep
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  have hbsub : ∀ b' ∈ newBs, modalKnownWorlds b ⊆ modalKnownWorlds b' := by
+    rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+    · rw [hfstc] at hsf
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      intro b' hb'
+      rw [← hsf.1] at hb'
+      simp only [List.mem_singleton] at hb'
+      subst hb'
+      exact modalKnownWorlds_mono_append nf b
+    · rw [hfstc] at hsf
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      intro b' hb'
+      rw [← hsf.1] at hb'
+      obtain ⟨br, hbr, rfl⟩ := List.mem_map.mp hb'
+      exact modalKnownWorlds_mono_append br b
+    · rw [hfstc] at hsf
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      intro b' hb'
+      rw [← hsf.1] at hb'
+      simp only [List.mem_singleton] at hb'
+      subst hb'
+      exact modalKnownWorlds_mono_append nf b
+    · rw [hfstc] at hsf; simp at hsf
+  have hnewAcc : newAcc = (modalApplyOne sf b acc).snd := by
+    rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+    · rw [hfstc] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.symm
+    · rw [hfstc] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.symm
+    · rw [hfstc] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.symm
+    · rw [hfstc] at hsf; simp at hsf
+  intro b' hb' w w' hedge
+  rw [hnewAcc] at hedge
+  rcases modalApplyOne_fresh_local sf b acc with hsame | ⟨wsf, rest, hfst, hsnd⟩
+  · rw [hsame] at hedge
+    exact hbsub b' hb' (hknown w w' hedge)
+  · rw [hsnd] at hedge
+    rcases hasEdge_addEdge_cases_local hedge with ⟨rfl, rfl⟩ | hold
+    · have hwsfmem : wsf ∈ b' := by
+        rw [hfst] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        exact List.mem_append_left _ List.mem_cons_self
+      rw [mem_modalKnownWorlds]
+      exact ⟨wsf, hwsfmem, rfl⟩
+    · exact hbsub b' hb' (hknown w w' hold)
+
+/-- Shared closure fact for the fresh-world-minting groups (`diamondPos`'s dead-code shape and
+`boxNeg`'s live shape, `Rules.lean:91-139`): every emitted formula's label is exactly
+`modalNextWorld b`, since the witness, `boxProps`, and `diaNegProps` are all constructed at that
+one fresh label. Parametrized over the witness's sign/formula so both rule shapes share one
+proof (mirrors `boxProps_outputs_subset`/`diaNegProps_outputs_subset`'s factoring). -/
+private lemma mintGroup_label_eq_freshWorld
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex)
+    (s0 : Sign) (ψ0 : Proposition Atom) :
+    ∀ x ∈ ((⟨s0, ψ0, modalNextWorld b⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) ::
+      (boxPositivesOf b).filterMap (fun (ψ, src) =>
+        if src == w then
+          let sf' : SignedFormula (Proposition Atom) WorldIndex :=
+            ⟨.pos, ψ, modalNextWorld b⟩
+          if b.any (· == sf') then none else some sf'
+        else none) ++
+      b.filterMap (fun sf' =>
+        if sf'.sign == .neg && sf'.label == w then
+          match sf'.formula with
+          | .imp (.box (.imp ψ .bot)) .bot =>
+            let prop : SignedFormula (Proposition Atom) WorldIndex :=
+              ⟨.neg, ψ, modalNextWorld b⟩
+            if b.any (· == prop) then none else some prop
+          | _ => none
+        else none)),
+    x.label = modalNextWorld b := by
+  intro x hx
+  simp only [List.mem_cons, List.mem_append] at hx
+  rcases hx with (rfl | hbox) | hdia
+  · rfl
+  · simp only [List.mem_filterMap] at hbox
+    obtain ⟨⟨ψ, src⟩, -, heq⟩ := hbox
+    split at heq
+    · split at heq
+      · simp at heq
+      · simp only [Option.some.injEq] at heq; subst heq; rfl
+    · simp at heq
+  · simp only [List.mem_filterMap] at hdia
+    obtain ⟨sf', -, heq⟩ := hdia
+    split at heq
+    · split at heq
+      · rename_i ψ hform
+        split at heq
+        · simp at heq
+        · simp only [Option.some.injEq] at heq; subst heq; rfl
+      · simp at heq
+    · simp at heq
+
 end Cslib.Logic.Modal.Tableau
 
 end

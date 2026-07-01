@@ -95,8 +95,7 @@ def qZ (A B C : Formula Atom) : Formula Atom :=
 
 /-! ## Q-Lemma Forward Direction -/
 
-set_option maxHeartbeats 800000 in
--- Ported from BimodalLogic, heartbeats needed for case analysis
+-- Ported from BimodalLogic.
 /-- Q-lemma forward direction for Z. -/
 theorem Q_lemma_Z_fwd (A B C : Formula Atom) (M : IntStructure Atom) (t0 t1 : ℤ)
     (_ht : t0 < t1)
@@ -130,8 +129,7 @@ theorem Q_lemma_Z_fwd (A B C : Formula Atom) (M : IntStructure Atom) (t0 t1 : �
 
 /-! ## Q-Lemma Backward Direction -/
 
-set_option maxHeartbeats 1600000 in
--- Ported from BimodalLogic, heartbeats needed for complex case analysis
+-- Ported from BimodalLogic.
 /-- Q-lemma backward direction for Z. -/
 theorem Q_lemma_Z_bwd (A B C : Formula Atom) (M : IntStructure Atom) (t0 t1 : ℤ)
     (_ht : t0 < t1)
@@ -220,7 +218,6 @@ def case3Rhs (a q A B : Formula Atom) : Formula Atom :=
 
 /-! ### Backward Direction: case3Rhs -> S(a, q v U(A,B)) -/
 
-set_option maxHeartbeats 1600000 in
 -- Ported from BimodalLogic
 /-- Case 3 backward direction. -/
 theorem case3_equiv_Z_bwd (a q A B : Formula Atom) (M : IntStructure Atom) (t : ℤ)
@@ -303,8 +300,7 @@ theorem case3_equiv_Z_bwd (a q A B : Formula Atom) (M : IntStructure Atom) (t : 
 
 /-! ### Forward Direction: S(a, q v U(A,B)) -> case3Rhs -/
 
-set_option maxHeartbeats 3200000 in
--- Ported from BimodalLogic, heartbeats needed for complex case analysis
+-- Ported from BimodalLogic.
 /-- Case 3 forward direction. -/
 theorem case3_equiv_Z_fwd (a q A B : Formula Atom) (M : IntStructure Atom) (t : ℤ)
     (h : intTruth M t (.snce (Formula.or q (.untl B A)) a)) :

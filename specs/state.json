@@ -10,9 +10,12 @@
       "description": "Vet fix for task 180 (Low), elevated scope. Bring every literature reference in the task-180 Temporal work to one uniform, unambiguous, elegant standard.\n\nCore fix: convert the plain-prose \"Burgess 1982\" citations in TruthLemma.lean (:34, :274), Soundness.lean (:28), DenseSoundness.lean (:28), and RRelation.lean (:21) to the bracket `[Description][BibKey]` format used elsewhere in the diff (e.g. Formula.lean's `[H. Kamp, ...][Kamp1968]`), disambiguating `Burgess1982I` (\"Since\"/\"Until\") vs `Burgess1982II` (\"Time Periods\") at every site.\n\nAmbitious cleanup:\n- Audit ALL reference sections and inline citations across the Temporal metalogic tree for consistency: uniform bracket-BibKey format, consistent author/title rendering, and a single house style for the top-of-file \"## References\" block.\n- Verify every cited BibKey actually resolves in references.bib; add any missing entries (e.g. confirm Boudou2017 is present and well-formed; add Burgess entries if the disambiguation reveals a gap). Cross-check that no citation points to a non-existent key.\n- Tidy the surrounding module docstrings so reference lists read cleanly and elegantly, matching the phrasing conventions used in the Syntax layer.\n\nDefinition of done: every literature citation in task-180 Temporal files uses uniform bracket-BibKey format with correct, resolvable keys; `lake build` green; references.bib validated against all cited keys.",
       "parent_task": 180,
       "created": "2026-07-01T05:12:18Z",
-      "last_updated": "2026-07-01T05:29:27Z",
+      "last_updated": "2026-07-01T05:38:47Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [],
+      "dependencies": [
+        445
+      ]
     },
     {
       "project_number": 445,
@@ -20,10 +23,10 @@
       "status": "not_started",
       "task_type": "cslib",
       "title": "Eliminate the domain-mismatch sorry in Bimodal to Temporal conservativity and refactor the model-transfer layer for generality",
-      "description": "Vet fix for task 180 (Medium severity, but PR-BLOCKING). HARD REQUIREMENT: absolutely no sorries are acceptable in any PR. `temporal_valid_of_bimodal_derivable` (TemporalConservativity.lean:269) must be proved outright and BOTH `set_option warn.sorry false in` (:248) and the `sorry` (:269) removed. Disclosure is NOT an acceptable outcome. (The sorry is pre-existing from task 277, but task 180's PR includes this file, so it must be closed here.)\n\nProve the model-transfer result described in the module's \"Domain Mismatch Resolution\" section: bimodal validity is established on AddCommGroup domains (`temporal_valid_on_addcommgroup`), while Temporal satisfaction is quantified over an arbitrary `Nontrivial`, `NoMaxOrder`, `NoMinOrder` `LinearOrder D`. Close the gap by transporting a countermodel: given a Temporal model over D falsifying φ, transfer it (via an order-embedding of the relevant sub-order into an ordered abelian group such as ℚ, or an order-completion/Hahn-embedding argument) to an AddCommGroup domain preserving `Satisfies`, then contrapose against `temporal_valid_on_addcommgroup` using the proven semantic bridge `bimodal_truthAt_toBimodal_iff_temporal_satisfies`.\n\nAmbitious refactor (not just plugging the hole):\n- State the transfer as a general, reusable lemma over any target domain meeting a clearly-specified order interface, so it is not welded to one concrete group; factor out the order-embedding and the satisfaction-transport as independent, named, docstringed lemmas.\n- Replace the current \"known gap\" prose in the module docstring with an elegant, self-contained account of the completed argument and the interface the transfer requires.\n- Sweep the surrounding conservativity development for uniformity with the rest of the Bimodal metalogic (naming, section variables, import minimality).\n\nVerification: `lean_verify` on `temporal_valid_of_bimodal_derivable` and `bimodal_conservative_over_temporal` must report only `[propext, Classical.choice, Quot.sound]` with zero sorry; full `lake build`/`lake lint`/`lake test` green. If a genuinely load-bearing mathematical obstruction is found, escalate to the user with the exact open goal state and candidate lemmas — do NOT reintroduce a sorry or a vacuous (`:= True`/`trivial`) placeholder.",
+      "description": "Vet fix for task 180 (Medium severity, PR-BLOCKING). HARD REQUIREMENT: absolutely no sorries are acceptable in any PR. `temporal_valid_of_bimodal_derivable` (TemporalConservativity.lean:269) must be proved outright and BOTH `set_option warn.sorry false in` (:248) and the `sorry` (:269) removed. Disclosure is NOT an acceptable outcome. (The sorry is pre-existing from task 277, but task 180's PR includes this file, so it must be closed here.)\n\nSUPERSEDES task #275 (abandoned): #275 (\"Prove Bimodal TM is conservative over Temporal BX\") was the original tracking task for exactly this theorem; its goal is fully subsumed here. Close out the conservativity story end-to-end.\n\nProve the model-transfer result described in the module's \"Domain Mismatch Resolution\" section: bimodal validity is established on AddCommGroup domains (`temporal_valid_on_addcommgroup`), while Temporal satisfaction is quantified over an arbitrary `Nontrivial`, `NoMaxOrder`, `NoMinOrder` `LinearOrder D`. Close the gap by transporting a countermodel: given a Temporal model over D falsifying phi, transfer it (via an order-embedding of the relevant sub-order into an ordered abelian group such as the rationals, or an order-completion/Hahn-embedding argument) to an AddCommGroup domain preserving `Satisfies`, then contrapose against `temporal_valid_on_addcommgroup` using the proven semantic bridge `bimodal_truthAt_toBimodal_iff_temporal_satisfies`.\n\nAmbitious refactor (not just plugging the hole):\n- State the transfer as a general, reusable lemma over any target domain meeting a clearly-specified order interface, so it is not welded to one concrete group; factor out the order-embedding and the satisfaction-transport as independent, named, docstringed lemmas.\n- Replace the current \"known gap\" prose in the module docstring with an elegant, self-contained account of the completed argument and the interface the transfer requires.\n- Sweep the surrounding conservativity development for uniformity with the rest of the Bimodal metalogic (naming, section variables, import minimality).\n\nVerification: `lean_verify` on `temporal_valid_of_bimodal_derivable` and `bimodal_conservative_over_temporal` must report only `[propext, Classical.choice, Quot.sound]` with zero sorry; full `lake build`/`lake lint`/`lake test` green. If a genuinely load-bearing mathematical obstruction is found, escalate to the user with the exact open goal state and candidate lemmas — do NOT reintroduce a sorry or a vacuous (`:= True`/`trivial`) placeholder.\n\nRoot of the 444/445/446 chain (no task deps): the foundational proof/refactor work; 446 (citations) then 444 (uniformity sweep) run after it.",
       "parent_task": 180,
       "created": "2026-07-01T05:12:18Z",
-      "last_updated": "2026-07-01T05:29:27Z",
+      "last_updated": "2026-07-01T05:38:47Z",
       "next_artifact_number": 1,
       "artifacts": []
     },
@@ -33,12 +36,15 @@
       "status": "not_started",
       "task_type": "cslib",
       "title": "Uniformity pass: mathlib-conformant naming, style, and docstrings across the entire task-180 Temporal diff",
-      "description": "Vet fix for task 180 (High), elevated scope. Do not merely rename the two flagged defs — bring the WHOLE task-180 diff to a single, uniform, mathlib-conformant standard.\n\nHard fix (blocks PR): rename `allFuture_iff_neg_someFuture_neg` (Theorems.lean:51) and `allPast_iff_neg_somePast_neg` (Theorems.lean:68) to lowerCamelCase (they are data-carrying `noncomputable def`s returning `DerivationTree`, not `theorem`/`lemma`), updating every call site.\n\nAmbitious cleanup:\n- Audit every declaration introduced or modified by task 180 across Cslib/Logics/Temporal/ (Syntax, Semantics, ProofSystem, Metalogic, Tableau, Theorems) and the two Bimodal consumers for naming uniformity: data-returning `def`s in lowerCamelCase; propositions as `theorem`/`lemma` in snake_case; one consistent convention for the bridge-axiom wrappers, the MCS bridge lemmas (`mcs_allFuture_iff` family), and the Chronicle/TruthLemma helpers.\n- Make `lake lint` fully green on all task-180 files for defsWithUnderscore, defLemma, docBlame, dupNamespace, topNamespace, simpNF, unusedSectionVars — not just the two flagged lines.\n- Ensure every public declaration (constructors, bridge axioms, wrapper theorems, bridge lemmas) carries a concise, elegant docstring in the house style; unify the phrasing of the recurring \"D3 honesty caveat\" comment so it reads identically wherever it appears.\n- Remove dead code, leftover scaffolding comments, and any `set_option` left over from development that is no longer needed.\n\nDefinition of done: `lake build`, `lake lint`, `lake exe lint-style` all green on every task-180-touched file; consistent naming and docstring style verified by inspection; no behavioural change to any proof (renames + docs only).",
+      "description": "Vet fix for task 180 (High), elevated scope. Do not merely rename the two flagged defs — bring the task-180 diff to a single, uniform, mathlib-conformant standard.\n\nHard fix (blocks PR): rename `allFuture_iff_neg_someFuture_neg` (Theorems.lean:51) and `allPast_iff_neg_somePast_neg` (Theorems.lean:68) to lowerCamelCase (they are data-carrying `noncomputable def`s returning `DerivationTree`, not `theorem`/`lemma`), updating every call site.\n\nAmbitious cleanup:\n- Audit every declaration introduced or modified by task 180 across Cslib/Logics/Temporal/{Syntax,Semantics,ProofSystem,Metalogic,Theorems} and the two Bimodal consumers (Embedding/TemporalEmbedding.lean, Metalogic/ConservativeExtension/TemporalConservativity.lean) for naming uniformity: data-returning `def`s in lowerCamelCase; propositions as `theorem`/`lemma` in snake_case; one consistent convention for the bridge-axiom wrappers, the MCS bridge lemmas (`mcs_allFuture_iff` family), and the Chronicle/TruthLemma helpers.\n- Make `lake lint` fully green on these files for defsWithUnderscore, defLemma, docBlame, dupNamespace, topNamespace, simpNF, unusedSectionVars — not just the two flagged lines.\n- Ensure every public declaration carries a concise, elegant docstring in the house style; unify the recurring \"D3 honesty caveat\" comment so it reads identically wherever it appears.\n- Remove dead code, leftover scaffolding comments, and any development-only `set_option`s no longer needed.\n\nSCOPE EXCLUSION (conflict avoidance): do NOT touch Cslib/Logics/Temporal/Tableau/ (Defs, Rules, Completeness, Saturation, ...). That subtree is being actively redesigned by the task-301 tableau line (426/439/425); its naming/style cleanup is owned there. Coordinate rather than double-edit.\n\nDepends on 446 (which depends on 445): run last so this sweep sees the final, settled declarations — including any new lemmas introduced by the #445 conservativity proof and the corrected citations from #446 — and can name/document them uniformly without churn.\n\nDefinition of done: `lake build`, `lake lint`, `lake exe lint-style` green on every in-scope task-180 file; consistent naming and docstrings verified by inspection; no behavioural change to any proof (renames + docs only).",
       "parent_task": 180,
       "created": "2026-07-01T05:12:18Z",
-      "last_updated": "2026-07-01T05:29:27Z",
+      "last_updated": "2026-07-01T05:38:47Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [],
+      "dependencies": [
+        446
+      ]
     },
     {
       "project_number": 443,
@@ -474,10 +480,10 @@
     {
       "project_number": 275,
       "project_name": "bimodal_tm_conservative_over_temporal_bx",
-      "status": "blocked",
+      "status": "abandoned",
       "task_type": "cslib",
       "description": "Prove that Bimodal TM is conservative over Temporal BX for temporal formulas (those using only until/since, no box). The Temporal.Formula.toBimodal embedding exists. The lift_derivation_qfree infrastructure in Bimodal/Metalogic/ConservativeExtension/ partially supports this. Requires verifying the lifting extends to temporal connectives.",
-      "last_updated": "2026-06-23T02:45:44Z",
+      "last_updated": "2026-07-01T05:38:47Z",
       "session_id": "sess_1782164778_60175c",
       "next_artifact_number": 4,
       "researched": "2026-06-23T02:34:30Z",
@@ -547,7 +553,9 @@
         36,
         39
       ],
-      "topic": "Bimodal Porting"
+      "topic": "Bimodal Porting",
+      "completion_summary": "Abandoned: goal (prove Bimodal TM conservative over Temporal BX) fully subsumed by task #445, which eliminates the load-bearing sorry in temporal_valid_of_bimodal_derivable / bimodal_conservative_over_temporal and refactors the model-transfer layer. See #445.",
+      "superseded_by": 445
     },
     {
       "project_number": 241,
@@ -1107,14 +1115,16 @@
         181,
         215,
         241,
-        275,
         299,
         300,
         301,
-        321
+        321,
+        444,
+        445,
+        446
       ],
       "created": "2026-06-29T22:13:39Z",
-      "last_updated": "2026-06-29T22:13:39Z"
+      "last_updated": "2026-07-01T05:38:47Z"
     },
     {
       "project_number": 415,

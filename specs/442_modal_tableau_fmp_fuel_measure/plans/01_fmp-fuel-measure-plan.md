@@ -26,8 +26,8 @@
 | P2 (CRUX) | ✅ COMPLETED | `2f7a4d22` | World-count bound proved via potential-function invariant (plan's terse target was disproved; strengthened signature used). Obligations a–e all green: `expandedNodup` (`9f9134ad`), `rank'` invariant (`cd1cf73a`), `outDeg≤Sf` (`00ad6986`), potential defs+recurrence (`cb0c3e76`), Δ=0 step lemma `modalStepBranch_potential_step` (`70ca9693`), final `modalStepBranch_worldBound` (`2f7a4d22`). Exports reusable `ModalPotentialInv` (8-field structure) for P5a. Zero sorry, standard axioms only. Two design corrections banked (isMintingShaped=boxNeg-only; potential term 0-at-leaf). |
 | P3   | ✅ COMPLETED | `af2369af` | Strict-decrease engine `modalExpMeasure_step_lt` green. Engine needs hb/hInv/hW hyps (P5a supplies via ModalPotentialInv + modalStepBranch_worldBound). |
 | P5a | ✅ COMPLETED | `728df02c` | `ModalLoopInv` bundled invariant + `modalStep_preserves_invariant` in NEW `CompletenessLoop.lean`. Green (777 jobs), axiom-clean. |
-| P5b | 🔄 IN PROGRESS | — | Fuel induction → `modalExpandBranches_hintikka` (CompletenessLoop.lean). |
-| P6 | ⏳ pending | — | Public theorems + Decidable + full CI (CompletenessLoop.lean). |
+| P5b | ✅ COMPLETED | `f239615c` | `modalExpandBranches_hintikka` proved by fuel induction (the original task-299 Phase 6 blocker). Extended `ModalLoopInv` with `eBoxOnlyNeg`/`eBoxNegWitness` fields (genuine gap fix). Green, axiom-clean. |
+| P6 | 🔄 IN PROGRESS | — | Public theorems + Decidable + full CI (CompletenessLoop.lean). |
 
 ### Architecture adjustment (settled during execution — supersedes P5 file placement)
 P1a introduced `FmpMeasure.lean → import Completeness.lean` (acyclic: Completeness does **not**
@@ -477,7 +477,7 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
 
 ---
 
-### Phase 5b: Top loop lemma modalExpandBranches_hintikka [IN PROGRESS]
+### Phase 5b: Top loop lemma modalExpandBranches_hintikka [COMPLETED]
 - **Goal:** Run the fuel / `processNext` induction to conclude that an open leaf returned before
   `fuel = 0` is a Hintikka set, discharging the entry measure bound via P0's bridge.
 - **Territory:**
@@ -492,7 +492,7 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
 
 ---
 
-### Phase 6: Public theorems + Decidable instance + full CI [NOT STARTED]
+### Phase 6: Public theorems + Decidable instance + full CI [IN PROGRESS]
 - **Goal:** Land the three public theorems and the `Decidable` instance; verify axiom-clean and
   whole-library + CI green.
 - **Territory:**

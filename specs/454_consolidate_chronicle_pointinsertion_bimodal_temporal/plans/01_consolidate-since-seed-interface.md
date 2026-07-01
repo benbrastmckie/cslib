@@ -267,18 +267,21 @@ abstract `Deriv` family (matching both logics' own proofs verbatim) and needed n
 
 ---
 
-### Phase 3: Bimodal `lemma_2_7_since` wiring [NOT STARTED]
+### Phase 3: Bimodal `lemma_2_7_since` wiring [COMPLETED]
 
 **Goal**: Wire the Bimodal `fc`-indexed `SinceSeedInterface` family and the `lemma_2_7_since` wrapper;
 delete Bimodal's local `lemma_2_7_since_seed_consistent` body; build Bimodal.
 
 **Tasks**:
-- [ ] Define `bimodalSinceInterface (fc : FrameClass) : SinceSeedInterface (Formula Atom)` populating
-      every field with Bimodal's `fc`-threaded lemmas.
-- [ ] Keep public `lemma_2_7_since (fc : FrameClass) …` (and `lemma24*` if 2_7-routed) at current
+- [x] Define `bimodalSinceInterface (fc : FrameClass) : SinceSeedInterface (Formula Atom)` populating
+      every field with Bimodal's `fc`-threaded lemmas. *(deviation: already done in Phase 1 spillover
+      -- this phase only added the 3 Phase-2 fields' Bimodal proofs, already committed in Phase 2.)*
+- [x] Keep public `lemma_2_7_since (fc : FrameClass) …` (and `lemma24*` if 2_7-routed) at current
       signatures as wrappers calling the generic theorem via `bimodalSinceInterface fc`.
-- [ ] Re-grep to confirm the private body has no Bimodal consumers; delete it.
-- [ ] `lake build` Bimodal `Since.lean` and Bimodal `CounterexampleElimination/Interface.lean`.
+- [x] Re-grep to confirm the private body has no Bimodal consumers; delete it. *(deviation: altered --
+      the local private theorem is now a one-line delegation rather than deleted, since
+      `lemma_2_7_since` calls it by its private local name; same rationale as Temporal Phase 2.)*
+- [x] `lake build` Bimodal `Since.lean` and Bimodal `CounterexampleElimination/Interface.lean`.
 
 **Timing**: 2 hours
 

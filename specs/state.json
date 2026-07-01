@@ -46,14 +46,25 @@
     {
       "project_number": 459,
       "project_name": "vet_299_longline_style",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Shorten >100-char lines in modal K tableau SoundnessStep + Completeness (task 299 vet)",
       "description": "Vet of task 299 found 57 lines exceeding the 100-char `linter.style.longLine` limit: Cslib/Logics/Modal/Tableau/SoundnessStep.lean (48 lines: 268,334,348,371,384,398,412,522,545,568,686,709,732,850,873,896,1086,1136,1149,1164,1204,1219,1234,1256,1274,1292,1310,1328,1346,1364,1384,1402,1420,1437,1438,1455,1456,1473,1474,1491,1492,1512,1530,1548,1566,1584,1602,1620 — mostly long `refine ⟨...⟩` case-bash terms) and Completeness.lean (9 lines: 118,128,169,177,195,455,477,479,529). Mechanically wrap/restructure; no proof-logic changes. Confirm `lake build` stays green.",
       "created": "2026-07-01T15:46:37Z",
-      "last_updated": "2026-07-01T16:19:55Z",
+      "last_updated": "2026-07-01T16:34:13Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "type": "plan",
+          "path": "specs/459_vet_299_longline_style/plans/01_longline-style-fix.md",
+          "summary": "Two-phase mechanical line-wrap plan (one file per phase) to bring 57 long lines under the 100-char limit with zero proof-logic change."
+        },
+        {
+          "type": "summary",
+          "path": "specs/459_vet_299_longline_style/summaries/01_longline-style-fix-summary.md",
+          "summary": "Implementation summary: 49 lines wrapped in SoundnessStep.lean, 9 in Completeness.lean; zero long lines remain; CI pipeline green; zero-debt."
+        }
+      ],
       "parent_task": 299,
       "vet_origin": {
         "session": "sess_1782919557_8a4cc2",
@@ -62,7 +73,8 @@
           455
         ]
       },
-      "session_id": "sess_1782921600_c97381_459"
+      "session_id": "sess_1782921600_c97381_459",
+      "completion_summary": "Wrapped all 49 over-length lines in SoundnessStep.lean and 9 in Completeness.lean to satisfy the 100-char linter.style.longLine limit found during the task 299 vet. Pure whitespace reflow at existing comma/operator/keyword boundaries -- zero proof-logic change (verified via whitespace-normalized diff). Full CI pipeline (build, checkInitImports, lint, lint-style, mk_all, test) passed; zero sorries/axioms/vacuous defs introduced."
     },
     {
       "project_number": 460,

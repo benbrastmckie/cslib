@@ -11,8 +11,8 @@ next_project_number: 464
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,396,400,405,407,425,438,440,441,449,459,460,461,463 | -- | Propositional Logic, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,215,301,375,389,409,430,450,451,456,462 | 36,37,181,317,407,425,449,459 | Propositional Logic, Temporal Logic, Bimodal Logic, ... |
+| 1 | 36,37,181,226,300,317,396,400,405,407,425,438,440,441,449,460,461,462,463 | -- | Propositional Logic, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,215,301,375,389,409,430,450,451,456 | 36,37,181,317,407,425,449 | Propositional Logic, Temporal Logic, Bimodal Logic, ... |
 | 3 | 41,391,392,413,444,454 | 39,40,375,389,450 | Foundations, Bimodal Logic, Code Hygiene |
 | 4 | 393,412,414 | 41,215,300,301,391,444 | Code Hygiene |
 
@@ -82,10 +82,9 @@ next_project_number: 464
 
 ### Uncategorized
 
-459 [IMPLEMENTING] — Vet of task 299 found 57 lines exceeding the 100-char `linter.sty
-  └─ 462 [NOT STARTED] — Vet of task 299 flagged two maintainability items (both non-block
 460 [PLANNED] — Vet of task 455 found lint warnings in the repointed consumer Csl
 461 [NOT STARTED] — Vet found 6 `linter.unusedSectionVars` warnings; add `omit [...] 
+462 [NOT STARTED] — Vet of task 299 flagged two maintainability items (both non-block
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 
 ## Tasks
@@ -127,9 +126,11 @@ next_project_number: 464
 ---
 
 ### 459. Shorten >100-char lines in modal K tableau SoundnessStep + Completeness (task 299 vet)
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
+- **Plan**: [459_vet_299_longline_style/plans/01_longline-style-fix.md]
+- **Summary**: [459_vet_299_longline_style/summaries/01_longline-style-fix-summary.md]
 
 **Description**: Vet of task 299 found 57 lines exceeding the 100-char `linter.style.longLine` limit: Cslib/Logics/Modal/Tableau/SoundnessStep.lean (48 lines: 268,334,348,371,384,398,412,522,545,568,686,709,732,850,873,896,1086,1136,1149,1164,1204,1219,1234,1256,1274,1292,1310,1328,1346,1364,1384,1402,1420,1437,1438,1455,1456,1473,1474,1491,1492,1512,1530,1548,1566,1584,1602,1620 — mostly long `refine ⟨...⟩` case-bash terms) and Completeness.lean (9 lines: 118,128,169,177,195,455,477,479,529). Mechanically wrap/restructure; no proof-logic changes. Confirm `lake build` stays green.
 

@@ -1,35 +1,8 @@
 {
-  "status": "implemented",
-  "started_at": "2026-07-01T02:33:16Z",
-  "completed_at": "2026-07-01T02:41:35Z",
-  "artifacts": [
-    "Cslib/Computability/Languages/OmegaRegularLanguage.lean",
-    "Cslib/Computability/Automata/DA/Concat.lean",
-    "specs/241_mcnaughton_theorem/plans/02_mcnaughton-choueka-route.md",
-    "specs/241_mcnaughton_theorem/.orchestrator-handoff.json"
-  ],
-  "partial_progress": {
-    "stage": "complete",
-    "details": "Phase 5 (IsRegular.to_da_muller) and Phase 6 (iff_da_muller theorem + dead buchiCongr_DMA cluster removal) both landed green, sorry-free, standard axioms only. Committed separately (5bbc1bea, bac6168c).",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 6
-  },
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count_new": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": "scoped_only",
-    "whole_project_ci_deferred": true,
-    "whole_project_ci_blocker": "Unrelated concurrent tasks 180/442 have mid-edit broken files (Cslib/Logics/Modal/Tableau/*, Cslib/Logics/Temporal/Tableau/Completeness.lean) blocking whole-project lake build/lake test/checkInitImports/lint/shake. Not owned by task 241, not touched by this dispatch."
-  },
+  "status": "completed",
   "metadata": {
-    "session_id": "sess_1782865756_35420a",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "passed"
+    "cycles_used": 5,
+    "final_state": "completed",
+    "multi_task_mode": false
   }
 }

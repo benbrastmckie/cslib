@@ -482,7 +482,7 @@
     {
       "project_number": 241,
       "project_name": "mcnaughton_theorem",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller): ω-regular ↔ deterministic Muller. ARCHITECTURE (plan v2): forward direction via the Choueka decomposition route — eq_fin_iSup_hmul_omegaPow finite-union decomposition + the existing DA.concat/mullerAccConcat flag construction + new omegaPow_da_muller + DMA finite-union closure — routing around the abandoned buchiCongr_DMA quotient-as-DMA construction (task 434 soundness gap). Backward direction reuses green IsRegular.of_da_muller. Missing analytic lemmas narrowed to three: concat_language_eq, omegaPow_da_muller, DA.Muller.union. See plans/02_mcnaughton-choueka-route.md.",
       "topic": "Temporal Logic",
@@ -520,7 +520,8 @@
         }
       ],
       "session_id": "sess_1782832881_8335e5",
-      "previous_status": "implementing"
+      "previous_status": "implementing",
+      "completion_summary": "McNaughton's theorem proved: IsRegular.iff_da_muller is a complete sorry-free theorem (ω-regular ↔ deterministic Muller), axiom-clean (propext, Classical.choice, Quot.sound). All 6 phases of plan v2 (Choueka decomposition route) green and committed: (1) deprecated abandoned buchiCongr_DMA path; (2) concat_language_eq (+fixed a latent DA.concat construction bug from task 432); (3) omegaPow_da_muller via new DA.Choueka.lean (Choueka identity M^ω=M*·U↗ω, Ramsey reverse inclusion); (4) DA.Muller.union finite-union closure (new MullerClosure.lean); (5) IsRegular.to_da_muller forward assembly; (6) final theorem + dead-cluster removal. Verified via scoped lake builds. CAVEAT: whole-project CI (lake test/checkInitImports/shake/lint-style) deferred — the shared tree has unrelated mid-edit breakage from tasks 180/442 (Logics/Modal/Tableau, Logics/Temporal). Follow-up: rerun full CI once tree unbreaks, then /vet 241 or /pr 241. Note: orphaned support lemma buchiCongruence_recurrentPrefixClass (ex-428/429 infra) remains — flag for /vet cleanup."
     },
     {
       "project_number": 226,

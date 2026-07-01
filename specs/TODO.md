@@ -11,13 +11,13 @@ next_project_number: 443
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,317,390,396,400,404,407,415,419,438,440,442 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,317,390,396,400,404,407,415,419,438,440,442 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 2 | 39,40,181,215,299,375,389,405,409,430,439 | 36,37,180,317,404,407,442 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,275,300,391,392,413,426,441 | 39,40,299,375,389,439 | Bimodal Porting, Foundations, Modal Logic, ... |
 | 4 | 393,412,427 | 41,391,426 | Foundations, Temporal Logic, PL-Hygiene |
 | 5 | 425 | 427 | Temporal Logic |
 | 6 | 301 | 425 | Temporal Logic |
-| 7 | 414 | 181,215,241,275,300,301 | Code Hygiene |
+| 7 | 414 | 181,215,275,300,301 | Code Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -54,7 +54,6 @@ next_project_number: 443
       └─ 427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
         └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
           └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
-241 [IMPLEMENTING] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -678,7 +677,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 241. Mcnaughton theorem
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 428, Task 429, Task 433, Task 434, Task 435, Task 436

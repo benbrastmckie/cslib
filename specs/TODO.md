@@ -1,5 +1,5 @@
 ---
-next_project_number: 442
+next_project_number: 443
 ---
 
 # TODO
@@ -11,9 +11,9 @@ next_project_number: 442
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,241,299,317,390,396,400,404,407,415,419,438,440 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,181,215,300,375,389,405,409,430,439,441 | 36,37,180,299,317,404,407 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,275,391,392,413,426 | 39,40,375,389,439 | Bimodal Porting, Foundations, Temporal Logic, ... |
+| 1 | 36,37,180,226,241,317,390,396,400,404,407,415,419,438,440,442 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,181,215,299,375,389,405,409,430,439 | 36,37,180,317,404,407,442 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 3 | 41,275,300,391,392,413,426,441 | 39,40,299,375,389,439 | Bimodal Porting, Foundations, Modal Logic, ... |
 | 4 | 393,412,427 | 41,391,426 | Foundations, Temporal Logic, PL-Hygiene |
 | 5 | 425 | 427 | Temporal Logic |
 | 6 | 301 | 425 | Temporal Logic |
@@ -37,13 +37,14 @@ next_project_number: 442
 
 ### Modal Logic
 
-299 [BLOCKED] — Implement tableau decision procedure for basic modal logic K with
-  └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
-  └─ 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 404 [RESEARCHED] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
   └─ 405 [NOT STARTED] — Simplify the proof machinery in the task-402 modal tableau soundn
 419 [BLOCKED] — [Spawned from task 415 audit — supports the structure-first visio
+442 [RESEARCHED] — Fix the Phase 6 blocker in task 299 (modal K tableau completeness
+  └─ 299 [BLOCKED] — Implement tableau decision procedure for basic modal logic K with
+    └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
+    └─ 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 
 ### Temporal Logic
 
@@ -105,6 +106,18 @@ next_project_number: 442
 438 [NOT STARTED] — Upstream the comment/docstring cleanups identified by the task 43
 
 ## Tasks
+
+### 442. Modal tableau fmp fuel measure
+- **Effort**: 400-800 lines, multiple dispatches
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+- **Research**: [299_modal_k_tableau/reports/06_spawn-analysis.md]
+
+**Description**: Fix the Phase 6 blocker in task 299 (modal K tableau completeness) by revising the fuel bound and formalizing the finite-model-property (FMP) termination measure. Constraints: ZERO sorry, ZERO new axioms; NO datatype or rule change (world-subset blocking is "option B", already tracked as task 441, and is explicitly OUT OF SCOPE here -- do not touch modalNextWorld's world-reuse behavior or any rule's output shape). Three-part scope: (1) Revise modalFuel (Cslib/Logics/Modal/Tableau/Saturation.lean:89) upward from the current polynomial O(n^2) to an exponential (or double-exponential, if the measure proof requires it) bound in the formula size. This step alone is soundness-safe: modalExpandBranches_closed_unsat (Soundness.lean:226) is fuel-agnostic (closed implies unsat holds for arbitrary fuel), so only the numeric value of modalFuel changes -- no soundness proof needs rework. (2) Formalize the FMP termination measure that discharges the fuel = 0 case of modalExpandBranches: an a-priori world-count / world-label bound (needed because modalNextWorld-minted labels are currently unbounded a priori); a finite signed-subformula universe U(phi); a subformula-closure lemma covering all four modal rules' outputs (witness + boxProps + diaNegProps) plus the propositional rule outputs, showing every formula produced during expansion lies in U(phi); output-disjointness (new formulas produced by a rule firing are fresh on the branch); and a per-branch weight ~3^R (where R measures unconsumed universe elements) to absorb the <=2-way propositional branching, mirroring the classical 3^complexity measure used in classicalExpandBranches_hintikka. (3) Prove modalStepBranch_none_saturated and then modalExpandBranches_hintikka by fuel induction plus inner Forall2-accessibility induction, mirroring classicalExpandBranches_hintikka (Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean:924) and reusing the acc-threading pattern already established in modalExpandBranches_closed_unsat (Cslib/Logics/Modal/Tableau/Soundness.lean:165). Then discharge modalTableau_complete via the already-proven modalOpenBranch_countermodel (task 299 Phase 5d, green), and finally modalTableau_decides plus its Decidable instance (task 299 Phase 7, currently gated on this work). Reference templates: classicalExpandBranches_hintikka (Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean:924), classicalStepBranch_none_saturated / classicalStepBranch_hintikka_inv (same file, lines 694/722), and the hoisted forall2_* worklist helpers already available in Cslib/Logics/Modal/Tableau/LoopInduction.lean. Full reference-signature detail and the precise per-rule dispatch obligations are recorded in task 299's plan (specs/299_modal_k_tableau/plans/05_modal-k-tableau-plan.md, Phase 6 "DECISIVE FINDING" addendum and "Precise residual obligation" list) and should be read as background before starting. Definition of done: modalStepBranch_none_saturated, modalExpandBranches_hintikka, modalTableau_complete, modalTableau_decides, and a Decidable instance all compile with ZERO sorry and ZERO new axioms; #print axioms on each shows only standard axioms; whole-library lake build stays green.
+
+---
 
 ### 441. Modal proposition native refactor
 - **Status**: [PLANNED]
@@ -589,7 +602,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: None
+- **Dependencies**: Task 442
 - **Research**:
   - [299_modal_k_tableau/reports/03_completeness-decomposition.md]
   - [299_modal_k_tableau/reports/04_truth-lemma-architecture.md]

@@ -239,7 +239,7 @@ worse than stated in the original Phase 3 risk table: it is not just "may need t
 the reference proof structure **requires** it, and its supporting regular-language construction
 (`ChouekaLang`) is entirely new to CSLib, not just the top-level identity lemma.
 
-### Phase 2: `DA.concat` language correctness (`concat_language_eq`) [NOT STARTED]
+### Phase 2: `DA.concat` language correctness (`concat_language_eq`) [IN PROGRESS]
 
 - **Goal:** Prove the top-level correctness theorem for the existing Choueka flag-construction
   concat automaton: `language (DA.concat da1 acc1 da2) = (language of L₁) * (Muller language of da2)`

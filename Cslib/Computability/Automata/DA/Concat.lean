@@ -105,17 +105,22 @@ private lemma antitone_fin_eventually {n : ℕ} {f : ℕ → Fin n} (h : Antiton
 /-! ## Pre-dedup intermediate array -/
 
 /-- The pre-deduplication intermediate flag array used inside the concat transition.
-Step 1 advances all active copies; step 2 adds a fresh copy when M1 enters `acc1`. -/
-private noncomputable def concatF2 (da1 : DA State1 Symbol) (acc1 : Set State1)
+Step 1 advances all active copies; step 2 adds a fresh copy — immediately advanced by the
+current symbol `a` — when M1's *current* (pre-transition) state `s1` is in `acc1`. Checking
+`s1` (rather than the post-transition `da1.tr s1 a`) and immediately advancing the fresh copy
+are both necessary so that the empty-prefix case (`da1.start ∈ acc1`, i.e. `acc1` entered with
+zero symbols consumed) is witnessed: activation triggered by the state *before* step `m` fires
+a fresh copy that is live from step `m + 1` onward, exactly tracking `da2`'s run on the symbols
+consumed from step `m` on. -/
+private noncomputable def concatF2 (_da1 : DA State1 Symbol) (acc1 : Set State1)
     (da2 : DA State2 Symbol) (s1 : State1)
     (f : Fin (Nat.card State2 + 2) → Option State2) (a : Symbol) :
     Fin (Nat.card State2 + 2) → Option State2 :=
   open Classical in
-  let s1' := da1.tr s1 a
   let f1 : Fin (Nat.card State2 + 2) → Option State2 := fun j => (f j).map (da2.tr · a)
-  if s1' ∈ acc1 then
+  if s1 ∈ acc1 then
     if h : ∃ j0 : Fin (Nat.card State2 + 2), f1 j0 = none then
-      Function.update f1 (Classical.choose h) (some da2.start)
+      Function.update f1 (Classical.choose h) (some (da2.tr da2.start a))
     else f1
   else f1
 
@@ -125,7 +130,9 @@ private noncomputable def concatF2 (da1 : DA State1 Symbol) (acc1 : Set State1)
 a flag array of `Nat.card State2 + 2` optional M2 copies. On each step:
 
 1. All active copies advance by one M2 transition.
-2. If M1 enters `acc1`, a fresh copy is started in the first free slot.
+2. If M1's *current* (pre-transition) state is in `acc1`, a fresh copy is started in a free
+   slot, immediately advanced by the current symbol (see `concatF2`'s docstring for why the
+   check is on the pre-transition state and the fresh copy is pre-advanced).
 3. Copies with the same M2 state are deduplicated (lowest index wins). -/
 noncomputable def concat (da1 : DA State1 Symbol) (acc1 : Set State1)
     (da2 : DA State2 Symbol) :
@@ -136,11 +143,12 @@ noncomputable def concat (da1 : DA State1 Symbol) (acc1 : Set State1)
     -- Step 1: Advance all active copies
     let f1 : Fin (Nat.card State2 + 2) → Option State2 :=
       fun j => (f j).map (da2.tr · a)
-    -- Step 2: If M1 enters acc1, activate a fresh copy in the first free slot
+    -- Step 2: If M1's pre-transition state is in acc1, activate a fresh copy (already
+    -- advanced by the current symbol) in the first free slot
     let f2 : Fin (Nat.card State2 + 2) → Option State2 :=
-      if s1' ∈ acc1 then
+      if s1 ∈ acc1 then
         if h : ∃ j : Fin (Nat.card State2 + 2), f1 j = none then
-          Function.update f1 (Classical.choose h) (some da2.start)
+          Function.update f1 (Classical.choose h) (some (da2.tr da2.start a))
         else f1
       else f1
     -- Step 3: Dedup — zero out any slot whose value also appears at a lower index
@@ -179,13 +187,12 @@ lemma concat_tr_snd (da1 : DA State1 Symbol) (acc1 : Set State1)
     (j : Fin (Nat.card State2 + 2)) :
     ((concat da1 acc1 da2).tr (s1, f) a).2 j =
       open Classical in
-      let s1' := da1.tr s1 a
       let f1 : Fin (Nat.card State2 + 2) → Option State2 :=
         fun j => (f j).map (da2.tr · a)
       let f2 : Fin (Nat.card State2 + 2) → Option State2 :=
-        if s1' ∈ acc1 then
+        if s1 ∈ acc1 then
           if h : ∃ j0 : Fin (Nat.card State2 + 2), f1 j0 = none then
-            Function.update f1 (Classical.choose h) (some da2.start)
+            Function.update f1 (Classical.choose h) (some (da2.tr da2.start a))
           else f1
         else f1
       if ∃ j' : Fin (Nat.card State2 + 2), j' < j ∧ f2 j' = f2 j ∧ (f2 j).isSome then
@@ -273,6 +280,128 @@ lemma concat_freeSlot [Finite State2] (da1 : DA State1 Symbol) (acc1 : Set State
     rcases lt_or_gt_of_ne hne with hlt | hlt
     · exact concat_tr_nodup da1 acc1 da2 _ _ _ j1 j2 hlt v hj1 hj2
     · exact concat_tr_nodup da1 acc1 da2 _ _ _ j2 j1 hlt v hj2 hj1
+
+/-! ## Per-slot characterization of `some`-valued outputs -/
+
+/-- If slot `i` was already active (holding `v0`) before the transition and remains `some`
+after it (i.e. survives dedup), its new value is exactly the `da2`-advance of `v0`. -/
+private lemma concat_tr_snd_of_some (da1 : DA State1 Symbol) (acc1 : Set State1)
+    (da2 : DA State2 Symbol) (s1 : State1)
+    (f : Fin (Nat.card State2 + 2) → Option State2) (a : Symbol)
+    (i : Fin (Nat.card State2 + 2)) (v0 v : State2)
+    (hf : f i = some v0)
+    (hout : ((concat da1 acc1 da2).tr (s1, f) a).2 i = some v) :
+    v = da2.tr v0 a := by
+  rw [concat_tr_snd'] at hout
+  by_cases hdedup : ∃ j' : Fin (Nat.card State2 + 2), j' < i ∧
+      concatF2 da1 acc1 da2 s1 f a j' = concatF2 da1 acc1 da2 s1 f a i ∧
+      (concatF2 da1 acc1 da2 s1 f a i).isSome
+  · rw [if_pos hdedup] at hout
+    simp at hout
+  · rw [if_neg hdedup] at hout
+    unfold concatF2 at hout
+    split_ifs at hout with h1 h2
+    · rw [Function.update_apply] at hout
+      split_ifs at hout with heq
+      · exfalso
+        have hchoose := h2.choose_spec
+        simp only [← heq, hf, Option.map_some, reduceCtorEq] at hchoose
+      · simp only [hf, Option.map_some] at hout
+        exact (Option.some.inj hout).symm
+    · simp only [hf, Option.map_some] at hout
+      exact (Option.some.inj hout).symm
+    · simp only [hf, Option.map_some] at hout
+      exact (Option.some.inj hout).symm
+
+/-- If slot `i` was inactive before the transition and becomes `some v` after it, the slot
+was freshly activated: `s1 ∈ acc1` and `v` is `da2.start` advanced by the current symbol. -/
+private lemma concat_tr_snd_of_none (da1 : DA State1 Symbol) (acc1 : Set State1)
+    (da2 : DA State2 Symbol) (s1 : State1)
+    (f : Fin (Nat.card State2 + 2) → Option State2) (a : Symbol)
+    (i : Fin (Nat.card State2 + 2)) (v : State2)
+    (hf : f i = none)
+    (hout : ((concat da1 acc1 da2).tr (s1, f) a).2 i = some v) :
+    s1 ∈ acc1 ∧ v = da2.tr da2.start a := by
+  rw [concat_tr_snd'] at hout
+  by_cases hdedup : ∃ j' : Fin (Nat.card State2 + 2), j' < i ∧
+      concatF2 da1 acc1 da2 s1 f a j' = concatF2 da1 acc1 da2 s1 f a i ∧
+      (concatF2 da1 acc1 da2 s1 f a i).isSome
+  · rw [if_pos hdedup] at hout
+    simp at hout
+  · rw [if_neg hdedup] at hout
+    unfold concatF2 at hout
+    split_ifs at hout with h1 h2
+    · rw [Function.update_apply] at hout
+      split_ifs at hout with heq
+      · exact ⟨h1, (Option.some.inj hout).symm⟩
+      · exfalso
+        simp only [hf, Option.map_none] at hout
+        exact absurd hout (by simp)
+    · exfalso
+      simp only [hf, Option.map_none] at hout
+      exact absurd hout (by simp)
+    · exfalso
+      simp only [hf, Option.map_none] at hout
+      exact absurd hout (by simp)
+
+/-! ## Run-level persistence: tracking `da2`'s run from a breakpoint -/
+
+/-- Run-level form of `concat_tr_snd_of_none`: if slot `i` is inactive at time `n` and active
+at time `n + 1`, then `da1` entered `acc1` at time `n` and the fresh value is `da2.start`
+advanced by the symbol read at time `n`. -/
+private lemma concat_run_activate (da1 : DA State1 Symbol) (acc1 : Set State1)
+    (da2 : DA State2 Symbol) (xs : ωSequence Symbol) (n : ℕ)
+    (i : Fin (Nat.card State2 + 2)) (v : State2)
+    (hnone : ((concat da1 acc1 da2).run xs n).2 i = none)
+    (hsome : ((concat da1 acc1 da2).run xs (n + 1)).2 i = some v) :
+    da1.run xs n ∈ acc1 ∧ v = da2.tr da2.start (xs n) := by
+  rw [concat_run_stabilizes] at hsome
+  have := concat_tr_snd_of_none da1 acc1 da2 ((concat da1 acc1 da2).run xs n).1
+    ((concat da1 acc1 da2).run xs n).2 (xs n) i v hnone hsome
+  rwa [concat_run_fst] at this
+
+/-- Run-level form of `concat_tr_snd_of_some`: if slot `i` holds `v0` at time `n` and holds
+`some v` at time `n + 1`, then `v` is `v0` advanced by the symbol read at time `n`. -/
+private lemma concat_run_advance (da1 : DA State1 Symbol) (acc1 : Set State1)
+    (da2 : DA State2 Symbol) (xs : ωSequence Symbol) (n : ℕ)
+    (i : Fin (Nat.card State2 + 2)) (v0 v : State2)
+    (hsome0 : ((concat da1 acc1 da2).run xs n).2 i = some v0)
+    (hsome1 : ((concat da1 acc1 da2).run xs (n + 1)).2 i = some v) :
+    v = da2.tr v0 (xs n) := by
+  rw [concat_run_stabilizes] at hsome1
+  exact concat_tr_snd_of_some da1 acc1 da2 ((concat da1 acc1 da2).run xs n).1
+    ((concat da1 acc1 da2).run xs n).2 (xs n) i v0 v hsome0 hsome1
+
+/-- If slot `i` is activated (holds `da2.start` advanced by one symbol) at time `n + 1` and
+never becomes inactive afterward, it exactly tracks `da2`'s run on `xs.drop n`, offset by one
+step, from then on: at time `n + 1 + k` it holds `da2.run (xs.drop n) (k + 1)`. -/
+private lemma concat_run_tracks (da1 : DA State1 Symbol) (acc1 : Set State1)
+    (da2 : DA State2 Symbol) (xs : ωSequence Symbol) (n : ℕ)
+    (i : Fin (Nat.card State2 + 2))
+    (hact : ((concat da1 acc1 da2).run xs (n + 1)).2 i = some (da2.tr da2.start (xs n)))
+    (hpersist : ∀ k, ((concat da1 acc1 da2).run xs (n + 1 + k)).2 i ≠ none) :
+    ∀ k, ((concat da1 acc1 da2).run xs (n + 1 + k)).2 i =
+      some (da2.run (xs.drop n) (k + 1)) := by
+  intro k
+  induction k with
+  | zero =>
+    have hrun1 : da2.run (xs.drop n) 1 = da2.tr da2.start (xs n) := by
+      rw [show (1 : ℕ) = 0 + 1 from rfl, run_succ, run_zero, ωSequence.get_drop]
+    simpa [hrun1] using hact
+  | succ k ih =>
+    have hne : ((concat da1 acc1 da2).run xs (n + 1 + (k + 1))).2 i ≠ none :=
+      hpersist (k + 1)
+    obtain ⟨v, hv⟩ := Option.isSome_iff_exists.mp (Option.isSome_iff_ne_none.mpr hne)
+    have hstep : v = da2.tr (da2.run (xs.drop n) (k + 1)) (xs (n + 1 + k)) :=
+      concat_run_advance da1 acc1 da2 xs (n + 1 + k) i (da2.run (xs.drop n) (k + 1)) v ih hv
+    have hrun : da2.run (xs.drop n) (k + 1 + 1) =
+        da2.tr (da2.run (xs.drop n) (k + 1)) (xs (n + 1 + k)) := by
+      rw [run_succ]
+      congr 1
+      rw [ωSequence.get_drop]
+      congr 1
+      omega
+    exact hv.trans (congrArg some (hstep.trans hrun.symm))
 
 /-! ## Finite instance -/
 

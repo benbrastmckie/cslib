@@ -1132,12 +1132,12 @@
     {
       "project_number": 427,
       "project_name": "temporal_tableau_propositional_truth_lemma",
-      "status": "partial",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Temporal Logic",
       "description": "[Decomposed from task 301, blocker B.] Prove temporalTruthLemma_propositional (atom/bot/imp cases) in Cslib/Logics/Temporal/Tableau/Completeness.lean sorry-free. This obligation is independently provable (no FMP, no dependence on the ordConstraints fix), but exceeds a single agent context window when attempted naively. KEY: the imp case requires generalized STRUCTURAL induction on the formula giving subformula induction hypotheses — NOT induction on the IsPropositional proof (which only yields IHs for the immediate subformulas phi/psi). Adapt the propositional truth lemma from Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean to the time-indexed temporalHintikkaSet/TBranch setting. Reuse already-proved base cases: extractModel_atomPos_sat, extractModel_atom_neg_notSat, extractModel_bot_false. A 1150-line prior attempt (with the structural difficulty diagnosed) is preserved at specs/301_temporal_tableau/.wip-Completeness-truthlemma-attempt.lean for reference. Start from green commit 7f052834. Scope strictly to this one lemma. Independent of tasks 423 and 425.",
       "created": "2026-06-30T10:57:13Z",
-      "last_updated": "2026-06-30T10:57:13Z",
+      "last_updated": "2026-07-01T05:02:54Z",
       "next_artifact_number": 1,
       "artifacts": [
         {
@@ -1157,7 +1157,8 @@
         180,
         426
       ],
-      "parent_task": 301
+      "parent_task": 301,
+      "completion_summary": "Closed as complete: the sole remaining obligation (imp case of temporalTruthLemma_propositional_aux in Cslib/Logics/Temporal/Tableau/Completeness.lean) was proved sorry-free as a side effect of task 180 phase 8 (commit 4a92f02c, \"Completeness aux lemma fixed\"), which rewrote the tableau subtree to be total over the new primitive G/H constructors. The lemma chain is sorry-free on current HEAD; task 180's CI verified completeness via lean_verify (zero sorry). No separate implementation needed."
     },
     {
       "project_number": 425,

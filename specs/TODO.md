@@ -14,10 +14,9 @@ next_project_number: 443
 | 1 | 36,37,180,226,317,390,396,400,404,407,415,419,438,440,442 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 2 | 39,40,181,215,299,375,389,405,409,430,439 | 36,37,180,317,404,407,442 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,275,300,391,392,413,426,441 | 39,40,299,375,389,439 | Bimodal Porting, Foundations, Modal Logic, ... |
-| 4 | 393,412,427 | 41,391,426 | Foundations, Temporal Logic, PL-Hygiene |
-| 5 | 425 | 427 | Temporal Logic |
-| 6 | 301 | 425 | Temporal Logic |
-| 7 | 414 | 181,215,275,300,301 | Code Hygiene |
+| 4 | 393,412,425 | 41,391,426 | Foundations, Temporal Logic, PL-Hygiene |
+| 5 | 301 | 425 | Temporal Logic |
+| 6 | 414 | 181,215,275,300,301 | Code Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -51,9 +50,8 @@ next_project_number: 443
 180 [PR READY] — Add allFuture (G) and allPast (H) as primitive constructors to Te
   └─ 439 [RESEARCHED] — Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_red
     └─ 426 [BLOCKED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
-      └─ 427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
-        └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
-          └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
+      └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
+        └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -308,7 +306,7 @@ After implementation:
 ---
 
 ### 427. Temporal tableau propositional truth lemma
-- **Status**: [PARTIAL]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 180, Task 426

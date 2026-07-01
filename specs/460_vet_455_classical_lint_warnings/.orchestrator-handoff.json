@@ -1,0 +1,47 @@
+{
+  "task_number": 460,
+  "session_id": "sess_1782921600_c97381_460",
+  "phase": "implement",
+  "status": "implemented",
+  "target_file": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean",
+  "phases_completed": 5,
+  "phases_total": 5,
+  "blocked_phase": null,
+  "build_status": "green",
+  "sorry_inventory": {
+    "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean": 0,
+    "Cslib/Logics/Propositional/Tableau/Classical/DecisionProcedure.lean": 0
+  },
+  "axiom_inventory": {
+    "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean": 0,
+    "Cslib/Logics/Propositional/Tableau/Classical/DecisionProcedure.lean": 0
+  },
+  "scoped_build_warnings": {
+    "Cslib.Logics.Propositional.Tableau.Classical.Completeness": 0,
+    "Cslib.Logics.Propositional.Tableau.Classical.DecisionProcedure": 0
+  },
+  "full_build_exit": 0,
+  "ci_checks": {
+    "lake_build": "pass",
+    "checkInitImports": "pass",
+    "lint_style": "pass",
+    "shake_scoped": "pass",
+    "lake_test": "pass"
+  },
+  "files_modified": [
+    "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Classical/DecisionProcedure.lean"
+  ],
+  "deviation_summary": "Live lake build was authoritative for line numbers (task 458 had shifted them by +1). Phase 2's 12 planned omit clauses cascaded into 8 additional unusedSectionVars sites within Completeness.lean plus one line in the adjacent DecisionProcedure.lean (classicalTableau_decides, sole caller of classicalTableau_complete), all fixed with the same 'omit [Hashable Atom] in' mechanical pattern. No proof-logic changes; no sorries or axioms introduced.",
+  "plan_file": "specs/460_vet_455_classical_lint_warnings/plans/01_classical-lint-cleanup.md",
+  "out_of_scope_confirmed_untouched": [
+    "Cslib/Foundations/Logic/Tableau/Measure.lean",
+    "all Modal files"
+  ],
+  "artifacts": [
+    "specs/460_vet_455_classical_lint_warnings/reports/01_classical-lint-warnings.md",
+    "specs/460_vet_455_classical_lint_warnings/plans/01_classical-lint-cleanup.md",
+    "specs/460_vet_455_classical_lint_warnings/summaries/01_classical-lint-cleanup-summary.md"
+  ],
+  "recommended_next": "Ready for /vet re-check or PR submission via /pr."
+}

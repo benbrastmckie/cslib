@@ -58,6 +58,7 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 
 /-! ## Tableau Decision Correctness -/
 
+omit [Hashable Atom] in
 /-- The classical tableau correctly decides tautologyhood:
 `classicalTableau φ = closed ↔ Tautology φ`.
 

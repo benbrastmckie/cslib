@@ -78,6 +78,7 @@ def classicalHintikkaSet (b : Branch (Proposition Atom) Unit) : Prop :=
 
 /-! ## Truth Lemma -/
 
+omit [Hashable Atom] in
 /-- Truth lemma for the extracted valuation.
 
 If `b` is a classical Hintikka set (every signed formula has its rule outputs on `b`),
@@ -117,7 +118,8 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
         simp only [Branch.hasContradiction, Branch.findContradiction, Option.isSome]
         cases hfind : b.findSome? (fun sf =>
             if sf.isPos then
-              if b.any fun sf' => sf'.sign == .neg && sf'.formula == sf.formula && sf'.label == sf.label
+              if b.any fun sf' =>
+                sf'.sign == .neg && sf'.formula == sf.formula && sf'.label == sf.label
               then some (sf.formula, sf.label)
               else none
             else none) with
@@ -138,7 +140,8 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
           Option.isSome_iff_exists]
         simp only [Branch.hasContradiction, Option.isSome_iff_exists] at hcont
         obtain ⟨⟨phi, l⟩, hfind⟩ := hcont
-        cases hfind_bot : b.find? (fun sf => sf.isPos && sf.formula == (HasBot.bot : Proposition Atom)) with
+        cases hfind_bot : b.find?
+            (fun sf => sf.isPos && sf.formula == (HasBot.bot : Proposition Atom)) with
         | some sf => exact ⟨_, rfl⟩
         | none => exact ⟨_, by rw [hfind]⟩
       simp [hclosed] at hopen
@@ -156,10 +159,13 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
         have hbot_form : sf.formula = (HasBot.bot : Proposition Atom) := eq_of_beq hsfcond.2
         have hpred : (sf.isPos && sf.formula == (HasBot.bot : Proposition Atom)) = true := by
           simp [SignedFormula.isPos, hsign, Sign.isPos, hbot_form]
-        cases hf : b.find? (fun sf' => sf'.isPos && sf'.formula == (HasBot.bot : Proposition Atom)) with
+        cases hf : b.find?
+            (fun sf' => sf'.isPos && sf'.formula == (HasBot.bot : Proposition Atom)) with
         | none =>
           exfalso
-          have hsome : (b.find? (fun sf' => sf'.isPos && sf'.formula == (HasBot.bot : Proposition Atom))).isSome = true := by
+          have hsome : (b.find?
+              (fun sf' => sf'.isPos && sf'.formula == (HasBot.bot : Proposition Atom))).isSome
+              = true := by
             rw [List.find?_isSome]
             exact ⟨sf, hsfmem, hpred⟩
           simp [hf] at hsome
@@ -216,7 +222,8 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
           rw [htval]; simp
       | imp b1 b2 =>
         have hca : classicalApplyOne sf =
-          .branching [[SignedFormula.neg a sf.label], [SignedFormula.pos (.imp b1 b2) sf.label]] := by
+          .branching [[SignedFormula.neg a sf.label],
+              [SignedFormula.pos (.imp b1 b2) sf.label]] := by
           obtain ⟨s, fm, l⟩ := sf; subst hsign hform hbot; rfl
         rw [hca] at hout
         obtain ⟨br, hbr_mem, hbr⟩ := hout
@@ -235,7 +242,8 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
           rw [htval]; simp
       | and b1 b2 =>
         have hca : classicalApplyOne sf =
-          .branching [[SignedFormula.neg a sf.label], [SignedFormula.pos (.and b1 b2) sf.label]] := by
+          .branching [[SignedFormula.neg a sf.label],
+              [SignedFormula.pos (.and b1 b2) sf.label]] := by
           obtain ⟨s, fm, l⟩ := sf; subst hsign hform hbot; rfl
         rw [hca] at hout
         obtain ⟨br, hbr_mem, hbr⟩ := hout
@@ -254,7 +262,8 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
           rw [htval]; simp
       | or b1 b2 =>
         have hca : classicalApplyOne sf =
-          .branching [[SignedFormula.neg a sf.label], [SignedFormula.pos (.or b1 b2) sf.label]] := by
+          .branching [[SignedFormula.neg a sf.label],
+              [SignedFormula.pos (.or b1 b2) sf.label]] := by
           obtain ⟨s, fm, l⟩ := sf; subst hsign hform hbot; rfl
         rw [hca] at hout
         obtain ⟨br, hbr_mem, hbr⟩ := hout
@@ -358,7 +367,8 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
       have hsign : sf.sign = .pos := eq_of_beq hsfcond.1
       have hform : sf.formula = .and a c := eq_of_beq hsfcond.2
       have hout := hrule sf hsfmem
-      have hca : classicalApplyOne sf = .linear [SignedFormula.pos a sf.label, SignedFormula.pos c sf.label] := by
+      have hca : classicalApplyOne sf =
+          .linear [SignedFormula.pos a sf.label, SignedFormula.pos c sf.label] := by
         obtain ⟨s, fm, l⟩ := sf; subst hsign hform; rfl
       rw [hca] at hout
       have hta_mem : SignedFormula.pos a sf.label ∈ b := hout _ (by simp)
@@ -375,7 +385,8 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
       have hsign : sf.sign = .neg := eq_of_beq hsfcond.1
       have hform : sf.formula = .and a c := eq_of_beq hsfcond.2
       have hout := hrule sf hsfmem
-      have hca : classicalApplyOne sf = .branching [[SignedFormula.neg a sf.label], [SignedFormula.neg c sf.label]] := by
+      have hca : classicalApplyOne sf =
+          .branching [[SignedFormula.neg a sf.label], [SignedFormula.neg c sf.label]] := by
         obtain ⟨s, fm, l⟩ := sf; subst hsign hform; rfl
       rw [hca] at hout
       obtain ⟨br, hbr_mem, hbr⟩ := hout
@@ -398,7 +409,8 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
       have hsign : sf.sign = .pos := eq_of_beq hsfcond.1
       have hform : sf.formula = .or a c := eq_of_beq hsfcond.2
       have hout := hrule sf hsfmem
-      have hca : classicalApplyOne sf = .branching [[SignedFormula.pos a sf.label], [SignedFormula.pos c sf.label]] := by
+      have hca : classicalApplyOne sf =
+          .branching [[SignedFormula.pos a sf.label], [SignedFormula.pos c sf.label]] := by
         obtain ⟨s, fm, l⟩ := sf; subst hsign hform; rfl
       rw [hca] at hout
       obtain ⟨br, hbr_mem, hbr⟩ := hout
@@ -419,7 +431,8 @@ lemma classicalTruthLemma (b : Branch (Proposition Atom) Unit)
       have hsign : sf.sign = .neg := eq_of_beq hsfcond.1
       have hform : sf.formula = .or a c := eq_of_beq hsfcond.2
       have hout := hrule sf hsfmem
-      have hca : classicalApplyOne sf = .linear [SignedFormula.neg a sf.label, SignedFormula.neg c sf.label] := by
+      have hca : classicalApplyOne sf =
+          .linear [SignedFormula.neg a sf.label, SignedFormula.neg c sf.label] := by
         obtain ⟨s, fm, l⟩ := sf; subst hsign hform; rfl
       rw [hca] at hout
       have hfa_mem : SignedFormula.neg a sf.label ∈ b := hout _ (by simp)
@@ -477,6 +490,7 @@ private def classicalBranchComplexity
     (e : List (SignedFormula (Proposition Atom) Unit)) : Nat :=
   ((b.filter fun sf => !(e.any (· == sf))).map fun sf => sf.formula.complexity).sum
 
+omit [Hashable Atom] in
 /-- `classicalBranchComplexity` is additive over branch concatenation. -/
 private lemma classicalBranchComplexity_append
     (b1 b2 : Branch (Proposition Atom) Unit)
@@ -485,6 +499,7 @@ private lemma classicalBranchComplexity_append
       classicalBranchComplexity b1 e + classicalBranchComplexity b2 e := by
   simp only [classicalBranchComplexity, List.filter_append, List.map_append, List.sum_append]
 
+omit [Hashable Atom] in
 /-- Expanding the set `e` by one formula cannot increase `classicalBranchComplexity`:
 any newly excluded formula was contributing a non-negative amount. -/
 private lemma classicalBranchComplexity_mono_expanded
@@ -506,6 +521,7 @@ private lemma classicalBranchComplexity_mono_expanded
   simp only [List.any_append, Bool.not_or, Bool.and_eq_true] at hx
   exact hx.1
 
+omit [Hashable Atom] in
 /-- Expanding `e` by `sf` (which is in `b` and not already in `e`) strictly decreases
 `classicalBranchComplexity` by at least `sf.formula.complexity`. -/
 private lemma classicalBranchComplexity_drop
@@ -523,10 +539,10 @@ private lemma classicalBranchComplexity_drop
     · -- head = sf: included in e-filter, excluded from (e++[sf])-filter
       have hfe : (sf :: xs).filter (fun z => !(e.any (· == z))) =
           sf :: xs.filter (fun z => !(e.any (· == z))) := by
-        simp [List.filter_cons, hne]
+        simp [hne]
       have hfesf : (sf :: xs).filter (fun z => !((e ++ [sf]).any (· == z))) =
           xs.filter (fun z => !((e ++ [sf]).any (· == z))) := by
-        simp [List.filter_cons, List.any_append, List.any_cons, hne]
+        simp [List.any_append, List.any_cons, hne]
       simp only [hfe, hfesf, List.map_cons, List.sum_cons]
       have hmono := classicalBranchComplexity_mono_expanded xs e sf
       simp only [classicalBranchComplexity] at hmono
@@ -537,19 +553,19 @@ private lemma classicalBranchComplexity_drop
         cases hsfx : sf == x
         · -- sf ≠ x: x passes both filters
           have hfe_x : (x :: xs).filter (fun z => !(e.any (· == z))) =
-              x :: xs.filter (fun z => !(e.any (· == z))) := by simp [List.filter_cons, hex]
+              x :: xs.filter (fun z => !(e.any (· == z))) := by simp [hex]
           have hfesf_x : (x :: xs).filter (fun z => !((e ++ [sf]).any (· == z))) =
               x :: xs.filter (fun z => !((e ++ [sf]).any (· == z))) := by
-            simp [List.filter_cons, List.any_append, List.any_cons, hex, hsfx]
+            simp [List.any_append, List.any_cons, hex, hsfx]
           simp only [hfe_x, hfesf_x, List.map_cons, List.sum_cons]
           have := ih hmem'
           omega
         · -- sf = x: x in e-filter, not in (e++[sf])-filter
           have hfe_x : (x :: xs).filter (fun z => !(e.any (· == z))) =
-              x :: xs.filter (fun z => !(e.any (· == z))) := by simp [List.filter_cons, hex]
+              x :: xs.filter (fun z => !(e.any (· == z))) := by simp [hex]
           have hfesf_x : (x :: xs).filter (fun z => !((e ++ [sf]).any (· == z))) =
               xs.filter (fun z => !((e ++ [sf]).any (· == z))) := by
-            simp [List.filter_cons, List.any_append, List.any_cons, hex, hsfx]
+            simp [List.any_append, List.any_cons, hex, hsfx]
           simp only [hfe_x, hfesf_x, List.map_cons, List.sum_cons]
           have hfml : sf.formula.complexity = x.formula.complexity := by
             have h : sf = x := LawfulBEq.eq_of_beq hsfx
@@ -559,13 +575,14 @@ private lemma classicalBranchComplexity_drop
           omega
       · -- x in e: filtered out in both
         have hfe_x : (x :: xs).filter (fun z => !(e.any (· == z))) =
-            xs.filter (fun z => !(e.any (· == z))) := by simp [List.filter_cons, hex]
+            xs.filter (fun z => !(e.any (· == z))) := by simp [hex]
         have hfesf_x : (x :: xs).filter (fun z => !((e ++ [sf]).any (· == z))) =
             xs.filter (fun z => !((e ++ [sf]).any (· == z))) := by
-          simp [List.filter_cons, List.any_append, hex]
+          simp [List.any_append, hex]
         simp only [hfe_x, hfesf_x]
         exact ih hmem'
 
+omit [Hashable Atom] in
 /-- `classicalBranchComplexity` is bounded by the total complexity of the branch. -/
 private lemma classicalBranchComplexity_le_mapsum
     (l : Branch (Proposition Atom) Unit)
@@ -582,6 +599,7 @@ private lemma classicalBranchComplexity_le_mapsum
   apply List.Sublist.map
   exact List.filter_sublist
 
+omit [Hashable Atom] in
 /-- `classicalBranchComplexity` of an extended branch splits into outputs + original. -/
 private lemma classicalBranchComplexity_extendMany
     (b : Branch (Proposition Atom) Unit) (out : List (SignedFormula (Proposition Atom) Unit))
@@ -591,6 +609,7 @@ private lemma classicalBranchComplexity_extendMany
   simp only [Branch.extendMany]
   exact classicalBranchComplexity_append out b e
 
+omit [Hashable Atom] in
 /-- A child branch (original `b` extended by rule outputs `out`, with `sf` newly expanded) has
 complexity at most `cBC b e - 1`, when the outputs' total complexity is `≤ complexity sf - 1`. -/
 private lemma classicalBranchComplexity_child_le
@@ -605,6 +624,7 @@ private lemma classicalBranchComplexity_child_le
   have h2 := classicalBranchComplexity_drop b e sf hmem hne
   omega
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- For an applicable signed formula, the total complexity of the output formulas equals
 `sf.formula.complexity - 1`, and the expanded formula has complexity ≥ 1.
 This identity drives strict decrease of `classicalExpMeasure` at each tableau step. -/
@@ -622,13 +642,11 @@ private lemma classicalApplyOne_output_complexity
         (formulas.map (·.formula.complexity)).sum = sf.formula.complexity - 1
     | .notApplicable => True) := by
   obtain ⟨s, φ, l⟩ := sf
-  simp only [SignedFormula.formula]
   rcases s <;> rcases φ with x | _ | ⟨a, b⟩ | ⟨a, b⟩ | ⟨a, b⟩ <;>
     (try rcases b with _ | _ | ⟨_, _⟩ | ⟨_, _⟩ | ⟨_, _⟩) <;>
     simp [classicalApplyOne, tryAllPropRules, applyPropRule, propAndOf?, propOrOf?,
       propImpOf?, propNegOf?, RuleResult.isApplicable, Proposition.complexity,
-      SignedFormula.neg, SignedFormula.pos, SignedFormula.formula,
-      complexity_atom, complexity_bot, complexity_imp, complexity_and, complexity_or] <;>
+      SignedFormula.neg, SignedFormula.pos] <;>
     omega
 
 /-- Beta-robust termination measure: base-3 exponential of per-branch complexity, summed.
@@ -639,7 +657,9 @@ private def classicalExpMeasure
     (expandedSets : List (List (SignedFormula (Proposition Atom) Unit))) : Nat :=
   ((branches.zip expandedSets).map fun p => 3 ^ classicalBranchComplexity p.1 p.2).sum
 
-/-- `classicalExpMeasure` splits over a single distinguished position, given length-aligned prefixes. -/
+omit [Hashable Atom] in
+/-- `classicalExpMeasure` splits over a single distinguished position, given length-aligned
+prefixes. -/
 private lemma classicalExpMeasure_split
     (done : List (Branch (Proposition Atom) Unit))
     (doneExp : List (List (SignedFormula (Proposition Atom) Unit)))
@@ -654,6 +674,7 @@ private lemma classicalExpMeasure_split
              List.map_append, List.map_cons, List.sum_append, List.sum_cons]
   omega
 
+omit [Hashable Atom] in
 /-- `classicalExpMeasure` is additive over append, given length-aligned first components. -/
 private lemma classicalExpMeasure_append
     (l1 l2 : List (Branch (Proposition Atom) Unit))
@@ -663,6 +684,7 @@ private lemma classicalExpMeasure_append
       = classicalExpMeasure l1 e1 + classicalExpMeasure l2 e2 := by
   simp only [classicalExpMeasure, List.zip_append h, List.map_append, List.sum_append]
 
+omit [Hashable Atom] in
 /-- When every new branch shares the same expanded set `newExp`, the measure is the sum of
 `3 ^ classicalBranchComplexity child newExp` over the new branches. -/
 private lemma classicalExpMeasure_const_exp
@@ -672,6 +694,7 @@ private lemma classicalExpMeasure_const_exp
       = (newBs.map (fun child => 3 ^ classicalBranchComplexity child newExp)).sum := by
   simp only [classicalExpMeasure, ← List.map_prod_left_eq_zip, List.map_map, Function.comp_def]
 
+omit [Hashable Atom] in
 /-- When `classicalStepBranch b e = none`, every formula on `b` is either already in the
 expanded set `e` or has `classicalApplyOne` return `notApplicable` (the branch is saturated). -/
 private lemma classicalStepBranch_none_saturated
@@ -691,7 +714,7 @@ private lemma classicalStepBranch_none_saturated
     exact heq ▸ hme
   · right
     simp only [Bool.not_eq_true] at hany
-    simp only [hany, ite_false] at hbody
+    simp only [hany] at hbody
     rcases hca : classicalApplyOne sf with out | brs | out | _
     all_goals simp only [hca] at hbody
     · exact absurd hbody (by simp)
@@ -699,6 +722,7 @@ private lemma classicalStepBranch_none_saturated
     · exact absurd hbody (by simp)
     · rfl
 
+omit [Hashable Atom] in
 /-- If the Hintikka invariant holds for branch `b` against expanded set `e`, then after one step
 `classicalStepBranch b e = some (newBs, newExp)`, the invariant holds for every new branch
 `b' ∈ newBs` against the new expanded set `newExp`. -/
@@ -797,6 +821,7 @@ private lemma classicalStepBranch_hintikka_inv
         exact Or.inl hsf'
     · simp at hfound
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- For classical propositional rules, every branching step produces exactly two new branches. -/
 private lemma classicalApplyOne_branching_length
     (sf : SignedFormula (Proposition Atom) Unit)
@@ -807,10 +832,10 @@ private lemma classicalApplyOne_branching_length
     (try rcases b with _ | _ | ⟨_, _⟩ | ⟨_, _⟩ | ⟨_, _⟩) <;>
     simp [classicalApplyOne, tryAllPropRules, applyPropRule, propAndOf?, propOrOf?,
       propImpOf?, propNegOf?, RuleResult.isApplicable,
-      SignedFormula.neg, SignedFormula.pos, SignedFormula.formula,
-      SignedFormula.sign, SignedFormula.label] at h <;>
+      SignedFormula.neg, SignedFormula.pos] at h <;>
     simp [← h]
 
+omit [Hashable Atom] in
 /-- One expansion step strictly decreases the exponential measure: when
 `classicalStepBranch bh e = some (newBs, newExp)`, the new configuration's measure plus
 one is at most the old configuration's measure. -/
@@ -835,7 +860,7 @@ private lemma classicalExpMeasure_step_lt
         (newBs.map (fun child => 3 ^ classicalBranchComplexity child newExp)).sum +
         classicalExpMeasure bt es := by
     have hlen1 : (done ++ newBs).length = (doneExp ++ newBs.map (fun _ => newExp)).length := by
-      simp [List.length_append, List.length_map, hdlen]
+      simp [List.length_append, hdlen]
     rw [classicalExpMeasure_append (done ++ newBs) bt
           (doneExp ++ newBs.map (fun _ => newExp)) es hlen1,
         classicalExpMeasure_append done newBs doneExp (newBs.map (fun _ => newExp)) hdlen,
@@ -895,6 +920,7 @@ private lemma classicalExpMeasure_step_lt
       (classicalBranchComplexity_child_le bh nf e sf hsfmem hany hsf1 (le_of_eq hout_eq))
   · simp at hfound
 
+omit [Hashable Atom] in
 /-- The open branch returned by `classicalExpandBranches` is a classical Hintikka set,
 provided `classicalExpMeasure branches expandedSets ≤ fuel`.
 
@@ -910,7 +936,8 @@ private lemma classicalExpandBranches_hintikka (fuel : Nat) :
       expandedSets.length = branches.length →
       classicalExpMeasure branches expandedSets ≤ fuel →
       -- Invariant: each branch satisfies Hintikka for its expanded formulas
-      (∀ (i : Nat) (b : Branch (Proposition Atom) Unit) (e : List (SignedFormula (Proposition Atom) Unit)),
+      (∀ (i : Nat) (b : Branch (Proposition Atom) Unit)
+          (e : List (SignedFormula (Proposition Atom) Unit)),
         branches[i]? = some b → expandedSets[i]? = some e →
         ∀ sf ∈ e, match classicalApplyOne sf with
           | .linear out => ∀ sf' ∈ out, sf' ∈ b
@@ -959,7 +986,8 @@ private lemma classicalExpandBranches_hintikka (fuel : Nat) :
         classicalExpMeasure (done ++ pending) (doneExp ++ pendingExp) ≤ fuel' + 1 →
         classicalExpandBranches.processNext fuel' pending pendingExp done doneExp = .openBranch b →
         classicalHintikkaSet b from
-      key branches expandedSets [] [] hlength rfl hInv hfuel (by simpa [classicalExpandBranches] using h)
+      key branches expandedSets [] [] hlength rfl hInv hfuel
+        (by simpa [classicalExpandBranches] using h)
     intro pending
     induction pending with
     | nil =>
@@ -977,7 +1005,8 @@ private lemma classicalExpandBranches_hintikka (fuel : Nat) :
         · -- Closed branch: skip and recurse on inner induction
           rw [if_pos hcl] at hinner
           apply ih_inner es (done ++ [bh]) (doneExp ++ [e])
-          · simp only [hpendingExp, List.length_cons, Nat.add_right_cancel_iff] at hlength_p; exact hlength_p
+          · simp only [hpendingExp, List.length_cons, Nat.add_right_cancel_iff] at hlength_p
+            exact hlength_p
           · simp only [List.length_append, List.length_singleton, hdlength]
           · intro i bi ei hi_bi hi_ei
             apply hInv_all i bi ei
@@ -985,7 +1014,8 @@ private lemma classicalExpandBranches_hintikka (fuel : Nat) :
               convert hi_bi using 2; simp
             · -- rewrite doneExp ++ [e] ++ es as doneExp ++ pendingExp in hi_ei
               rw [hpendingExp]; convert hi_ei using 2; simp
-          · -- classicalExpMeasure (done ++ [bh] ++ bt) ... = classicalExpMeasure (done ++ bh :: bt) ...
+          · -- classicalExpMeasure (done ++ [bh] ++ bt) ...
+            -- = classicalExpMeasure (done ++ bh :: bt) ...
             convert hmeas using 2 <;> simp
           · exact hinner
         · simp only [Bool.not_eq_true] at hcl
@@ -1098,6 +1128,7 @@ private lemma classicalExpandBranches_hintikka (fuel : Nat) :
                   · exact hsfin
             · exact hinner
 
+omit [Hashable Atom] in
 /-- Any formula on a branch is still present on every branch produced by `classicalStepBranch`.
 Uses `Branch.extendMany b x = x ++ b`. -/
 private lemma classicalStepBranch_mem_preserved
@@ -1142,6 +1173,7 @@ private lemma classicalStepBranch_mem_preserved
     · -- notApplicable: none — but hfound says some
       simp at hfound
 
+omit [Hashable Atom] in
 /-- Every formula in every initial branch appears in the open branch returned by
 `classicalExpandBranches`. Used to show F(φ) is on the countermodel branch. -/
 private lemma classicalExpandBranches_openBranch_initial_mem (fuel : Nat)
@@ -1244,6 +1276,7 @@ private lemma classicalExpandBranches_openBranch_initial_mem (fuel : Nat)
             · exact hNewBs_sf b' hn
             · exact hAll_p b' (by simp [hbt])
 
+omit [Hashable Atom] in
 /-- The open branch returned by the classical tableau is a classical Hintikka set.
 
 This is the key bridge between the expansion loop and the truth lemma. -/
@@ -1265,7 +1298,9 @@ lemma classicalTableau_hintikka (φ : Proposition Atom) (b : Branch (Proposition
       cases i with
       | zero =>
         -- he : [[]][0]? = some e, i.e., some [] = some e, so e = []
-        have heq : e = [] := by simp at he; exact he
+        have heq : e = [] := by
+          simp only [List.getElem?_cons_zero, Option.some.injEq] at he
+          exact he.symm
         simp [heq] at hsfin
       | succ n =>
         -- [[]][n+1]? = none ≠ some e
@@ -1274,6 +1309,7 @@ lemma classicalTableau_hintikka (φ : Proposition Atom) (b : Branch (Proposition
 
 /-! ## Countermodel Extraction -/
 
+omit [Hashable Atom] in
 /-- An open saturated branch from the classical tableau yields a Boolean countermodel.
 
 If the tableau returns `openBranch b`, then `b` is a classical Hintikka set, and
@@ -1302,6 +1338,7 @@ lemma classicalOpenBranch_countermodel (φ : Proposition Atom)
 
 /-! ## Main Completeness Theorem -/
 
+omit [Hashable Atom] in
 /-- **Classical Tableau Completeness**: If `φ` is a classical tautology,
 then the classical tableau closes on `φ`.
 

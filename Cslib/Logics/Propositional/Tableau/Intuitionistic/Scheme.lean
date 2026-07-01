@@ -842,15 +842,129 @@ private lemma intStepBranch_branch_preserves
             or_false] at hsf' <;>
           rcases hsf' with rfl | hsf' <;> first | exact hsfl | exact hLB sf' hsf'
 
+omit [Hashable Atom] in
+/-- `applyAllTImpRules` only introduces new formulas whose label already appears on `b`
+(drawn from `intTImpRule`'s `accessibleWorlds`, itself a subset of `b.map (·.label)`), so a
+single persistence-propagation step preserves `ILabelBound`. Mirrors the structural pattern of
+the (private, non-reusable) `intTImpRules_sat`-style proofs in `Soundness.lean`. -/
+private lemma ILabelBound_applyAllTImpRules {b : IBranch Atom} {edges : IEdges} {nw : Nat}
+    (h : ILabelBound b nw) : ILabelBound (applyAllTImpRules b edges) nw := by
+  intro sf hmem
+  simp only [applyAllTImpRules, List.mem_append] at hmem
+  rcases hmem with hmem | hmem
+  · exact h sf hmem
+  · simp only [List.mem_flatten, List.mem_filterMap] at hmem
+    obtain ⟨newForms, ⟨⟨sign_o, form_o, label_o⟩, hmem_outer, houter⟩, hmem_inner⟩ := hmem
+    cases sign_o with
+    | neg => simp only at houter; exact absurd houter (by simp)
+    | pos =>
+      cases form_o with
+      | atom _ => simp only at houter; exact absurd houter (by simp)
+      | bot => simp only at houter; exact absurd houter (by simp)
+      | and _ _ => simp only at houter; exact absurd houter (by simp)
+      | or _ _ => simp only at houter; exact absurd houter (by simp)
+      | imp φ ψ =>
+        simp only [] at houter
+        by_cases hemp : (intTImpRule φ ψ label_o edges b).isEmpty = true
+        · simp only [hemp, ite_true] at houter; exact absurd houter (by simp)
+        · simp only [Bool.false_eq_true, hemp, ite_false, Option.some.injEq] at houter
+          rw [← houter] at hmem_inner
+          simp only [intTImpRule, List.mem_filterMap] at hmem_inner
+          obtain ⟨w', hw'_acc, hw'_sf⟩ := hmem_inner
+          simp only [List.mem_filter, List.mem_eraseDups, List.mem_map] at hw'_acc
+          obtain ⟨⟨x, hxb, hxeq⟩, -⟩ := hw'_acc
+          by_cases hphi : (b.any fun sf =>
+              sf.sign == .pos && sf.formula == φ && sf.label == w') = true
+          · by_cases hpsi : (b.any fun sf =>
+                sf.sign == .pos && sf.formula == ψ && sf.label == w') = true
+            · simp [hphi, hpsi] at hw'_sf
+            · simp only [hphi, ↓reduceIte, hpsi, Bool.false_eq_true, Option.some.injEq] at hw'_sf
+              rw [← hw'_sf]
+              simpa [← hxeq] using h x hxb
+          · simp [hphi] at hw'_sf
+
+omit [Hashable Atom] in
+/-- `ILabelBound` is preserved by `applyPersistenceFixpoint` (any number of fixpoint
+iterations of `applyAllTImpRules`), by induction on the fuel counter. -/
+private lemma ILabelBound_applyPersistenceFixpoint {b : IBranch Atom} {edges : IEdges}
+    {nw : Nat} (fuel : Nat) (h : ILabelBound b nw) :
+    ILabelBound (applyPersistenceFixpoint b edges fuel) nw := by
+  induction fuel generalizing b with
+  | zero => simpa [applyPersistenceFixpoint] using h
+  | succ k ih =>
+    simp only [applyPersistenceFixpoint]
+    split_ifs with hlen
+    · exact h
+    · exact ih (ILabelBound_applyAllTImpRules h)
+
+/-- Combined per-branch invariant carrier: `IExpandedConsistent` and `ILabelBound` hold for
+every corresponding triple in three parallel lists (branches, expanded-sets, next-world
+counters). Defined by simultaneous recursion so any shape mismatch between the lists is
+automatically `False` (closeable via `simp [IAllConsistent] at h`), avoiding the need for a
+`List.Forall₃`-style combinator. -/
+private def IAllConsistent (bs : List (IBranch Atom)) (es : List (List (ISF Atom)))
+    (nws : List Nat) : Prop :=
+  match bs, es, nws with
+  | [], [], [] => True
+  | b :: bs', e :: es', nw :: nws' =>
+      IExpandedConsistent b e ∧ ILabelBound b nw ∧ IAllConsistent bs' es' nws'
+  | _, _, _ => False
+
+omit [Hashable Atom] in
+/-- `IAllConsistent` combines under list append (used to extend `done`/`doneExp`/`doneNW`
+with the just-processed branch, and to combine `done` with the still-`pending` tail). -/
+private lemma IAllConsistent_append {bs1 bs2 : List (IBranch Atom)}
+    {es1 es2 : List (List (ISF Atom))} {nws1 nws2 : List Nat}
+    (h1 : IAllConsistent bs1 es1 nws1) (h2 : IAllConsistent bs2 es2 nws2) :
+    IAllConsistent (bs1 ++ bs2) (es1 ++ es2) (nws1 ++ nws2) := by
+  induction bs1 generalizing es1 nws1 with
+  | nil =>
+    cases es1 with
+    | nil =>
+      cases nws1 with
+      | nil => simpa using h2
+      | cons nwh nwt => simp [IAllConsistent] at h1
+    | cons eh et => simp [IAllConsistent] at h1
+  | cons bh bt ih =>
+    cases es1 with
+    | nil => simp [IAllConsistent] at h1
+    | cons eh et =>
+      cases nws1 with
+      | nil => simp [IAllConsistent] at h1
+      | cons nwh nwt =>
+        simp only [IAllConsistent] at h1
+        obtain ⟨hIC, hLB, hrest⟩ := h1
+        simp only [List.cons_append]
+        exact ⟨hIC, hLB, ih hrest⟩
+
+omit [Hashable Atom] in
+/-- `IAllConsistent` holds along a uniform `map`: if every branch obtained by applying `f`
+to an element of `branches'` satisfies the same `IExpandedConsistent`/`ILabelBound` facts
+(the shape produced by a branching-rule step, where every sub-branch shares one `newExp`,
+`nw'`), then `IAllConsistent` holds of the mapped/replicated triple of lists. -/
+private lemma IAllConsistent_map {branches' : List (IBranch Atom)} (f : IBranch Atom → IBranch Atom)
+    {newExp : List (ISF Atom)} {nw' : Nat}
+    (h : ∀ br ∈ branches', IExpandedConsistent (f br) newExp ∧ ILabelBound (f br) nw') :
+    IAllConsistent (branches'.map f) (branches'.map (fun _ => newExp))
+      (branches'.map (fun _ => nw')) := by
+  induction branches' with
+  | nil => simp [IAllConsistent]
+  | cons bh bt ih =>
+    simp only [List.map_cons, IAllConsistent]
+    exact ⟨(h bh (List.mem_cons_self ..)).1, (h bh (List.mem_cons_self ..)).2,
+      ih fun br hbr => h br (List.mem_cons_of_mem _ hbr)⟩
+
 /-- If `intExpandBranches` returns `.openBranch b`, then `b` is Hintikka-saturated:
 every compound formula on `b` has its rule-outputs also on `b` (see `IBranchSaturation`).
 
 The proof mirrors `intExpandBranches_openBranch_closed`: induction on `fuel`, with inner
-induction on the `pending` list in the `go` helper. In the recursive cases (`linearResult`,
-`branchingResult`), the fuel IH closes the goal. In the leaf cases (`none`, `notApplicable`),
-the returned branch equals `bPers` directly; saturation of `bPers` requires analysing
-`intStepBranch`'s internal invariants and is left as `sorry` (task 317 phase-6 blocker).
-The fuel-0 base case has the same gap. -/
+induction on the `pending` list in the `go` helper, threading the combined `IAllConsistent`
+invariant (task 317 phase 1). In the recursive cases (`linearResult`, `branchingResult`), the
+fuel IH closes the goal once the invariant is re-established for the extended/branched state
+via `intStepBranch_linear_preserves`/`intStepBranch_branch_preserves`. In the `none` leaf case,
+the returned branch equals `bPers` directly and `IExpandedConsistent_sat` discharges saturation
+directly from the threaded invariant. The fuel-0 base case still has a gap (task 317 phase 2,
+`sorry`, entangled with the fuel-sufficiency argument, not this phase's scope). -/
 private lemma intExpandBranches_openBranch_sat (fuel : Nat)
     (branches : List (IBranch Atom))
     (expandedSets : List (List (ISF Atom)))
@@ -858,14 +972,16 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
     (edgeSets : List IEdges)
     (closurePred : IBranch Atom → Bool)
     (b : IBranch Atom)
+    (hAC : IAllConsistent branches expandedSets nextWorlds)
+    (hLen0 : branches.length = edgeSets.length)
     (h : intExpandBranches branches expandedSets nextWorlds edgeSets fuel closurePred
         = .openBranch b) :
     IBranchSaturation Atom b := by
-  induction fuel generalizing branches expandedSets nextWorlds edgeSets with
+  induction fuel generalizing branches expandedSets nextWorlds edgeSets hAC hLen0 with
   | zero =>
     -- fuel=0 base case: intExpandBranches returns the first open branch from the initial
-    -- list without saturating it. Proving IBranchSaturation here requires the expanded-set
-    -- invariant (task 317 phase-6 B2 blocker, entangled with the `none`-case sorry below).
+    -- list without saturating it. Proving IBranchSaturation here requires the
+    -- fuel-sufficiency argument (task 317 phase 2 blocker; out of scope for phase 1).
     sorry
   | succ fuel' ih =>
     simp only [intExpandBranches] at h
@@ -877,59 +993,101 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
         (doneExp : List (List (ISF Atom)))
         (doneNW : List Nat)
         (doneEdges : List IEdges),
+        IAllConsistent pending pendingExp pendingNW →
+        pending.length = pendingEdges.length →
+        IAllConsistent done doneExp doneNW →
+        done.length = doneEdges.length →
         intExpandBranches.go closurePred fuel' pending pendingExp pendingNW pendingEdges
             done doneExp doneNW doneEdges = .openBranch b →
         IBranchSaturation Atom b from
-      key branches expandedSets nextWorlds edgeSets [] [] [] [] h
+      key branches expandedSets nextWorlds edgeSets [] [] [] []
+        hAC hLen0 (by trivial) rfl h
     intro pending
     induction pending with
     | nil =>
-      intro _ _ _ _ _ _ _ hgo
+      intro _ _ _ _ _ _ _ _ _ _ _ hgo
       simp only [intExpandBranches.go] at hgo
       simp at hgo
     | cons bh bt ih_inner =>
-      intro pendingExp pendingNW pendingEdges done doneExp doneNW doneEdges hgo
+      intro pendingExp pendingNW pendingEdges done doneExp doneNW doneEdges
+        hPending hLenP hDone hLenD hgo
       cases hpE : pendingExp with
       | nil =>
-        rw [hpE] at hgo; simp only [intExpandBranches.go] at hgo
-        exact ih_inner [] [] [] done doneExp doneNW doneEdges hgo
+        simp only [hpE, IAllConsistent] at hPending
       | cons eH eT =>
         cases hpNW : pendingNW with
         | nil =>
-          rw [hpE, hpNW] at hgo; simp only [intExpandBranches.go] at hgo
-          exact ih_inner [] [] [] done doneExp doneNW doneEdges hgo
+          simp only [hpE, hpNW, IAllConsistent] at hPending
         | cons nwH nwT =>
           cases hpEdges : pendingEdges with
           | nil =>
-            rw [hpE, hpNW, hpEdges] at hgo; simp only [intExpandBranches.go] at hgo
-            exact ih_inner [] [] [] done doneExp doneNW doneEdges hgo
+            simp only [hpEdges, List.length_cons, List.length_nil] at hLenP
+            omega
           | cons edgesH edgesT =>
             rw [hpE, hpNW, hpEdges] at hgo
+            simp only [hpE, hpNW, IAllConsistent] at hPending
+            obtain ⟨hIC_bh_eH, hLB_bh_nwH, hPendingTail⟩ := hPending
+            simp only [hpEdges, List.length_cons, Nat.add_right_cancel_iff] at hLenP
             set bPers := applyPersistenceFixpoint bh edgesH (fuel' + 1) with hbPers_def
+            have hIC_bPers : IExpandedConsistent bPers eH :=
+              IExpandedConsistent_mono
+                (fun x hx => applyPersistenceFixpoint_mem_preserved bh edgesH (fuel' + 1) x hx)
+                hIC_bh_eH
+            have hLB_bPers : ILabelBound bPers nwH :=
+              ILabelBound_applyPersistenceFixpoint (fuel' + 1) hLB_bh_nwH
             simp only [intExpandBranches.go] at hgo
             by_cases hcl : closurePred bPers = true
             · rw [if_pos hcl] at hgo
-              exact ih_inner eT nwT edgesT
+              refine ih_inner eT nwT edgesT
                   (done ++ [bPers]) (doneExp ++ [eH]) (doneNW ++ [nwH]) (doneEdges ++ [edgesH])
-                  hgo
+                  hPendingTail hLenP
+                  (IAllConsistent_append hDone ⟨hIC_bPers, hLB_bPers, by trivial⟩)
+                  (by simp [hLenD]) hgo
             · simp only [Bool.not_eq_true] at hcl
               rw [if_neg (by simp [← hbPers_def, hcl])] at hgo
               cases hstep : intStepBranch bPers eH nwH with
               | none =>
                 rw [hstep] at hgo; injection hgo with heq; subst heq
-                -- b = bPers; intStepBranch returned none, meaning all compound
-                -- formulas in bPers have been expanded. Proving IBranchSaturation
-                -- requires analysing intStepBranch's none-condition internals.
-                -- Left as sorry (task 317 phase-6 blocker).
-                sorry
+                -- b = bPers; intStepBranch returned none, so every compound formula in
+                -- bPers is already recorded in eH (`intStepBranch_none_compound_mem`), and
+                -- `hIC_bPers` gives its rule-outputs on bPers -- exactly `IBranchSaturation`.
+                exact IExpandedConsistent_sat hstep hIC_bPers
               | some step =>
                 obtain ⟨result, newExp⟩ := step
                 rw [hstep] at hgo
                 cases result with
                 | linearResult newForms nw' newEdge =>
-                  simp only at hgo; exact ih _ _ _ _ hgo
+                  simp only at hgo
+                  obtain ⟨hIC_ext, hLB_ext⟩ :=
+                    intStepBranch_linear_preserves hIC_bPers hLB_bPers hstep
+                  have hAC' :
+                      IAllConsistent
+                        (done ++ [Branch.extendMany bPers newForms] ++ bt)
+                        (doneExp ++ [newExp] ++ eT) (doneNW ++ [nw'] ++ nwT) :=
+                    IAllConsistent_append
+                      (IAllConsistent_append hDone ⟨hIC_ext, hLB_ext, by trivial⟩) hPendingTail
+                  have hLen0' :
+                      (done ++ [Branch.extendMany bPers newForms] ++ bt).length =
+                        (doneEdges ++ [(match newEdge with
+                          | none => edgesH | some e => edgesH ++ [e])] ++ edgesT).length := by
+                    simp; omega
+                  exact ih _ _ _ _ hAC' hLen0' hgo
                 | branchingResult branches' nw' =>
-                  simp only at hgo; exact ih _ _ _ _ hgo
+                  simp only at hgo
+                  have hbr := intStepBranch_branch_preserves hIC_bPers hLB_bPers hstep
+                  have hAC' :
+                      IAllConsistent
+                        (done ++ branches'.map (Branch.extendMany bPers ·) ++ bt)
+                        (doneExp ++ branches'.map (fun _ => newExp) ++ eT)
+                        (doneNW ++ branches'.map (fun _ => nw') ++ nwT) :=
+                    IAllConsistent_append
+                      (IAllConsistent_append hDone
+                        (IAllConsistent_map (Branch.extendMany bPers ·) hbr)) hPendingTail
+                  have hLen0' :
+                      (done ++ branches'.map (Branch.extendMany bPers ·) ++ bt).length =
+                        (doneEdges ++ branches'.map (fun _ => edgesH) ++ edgesT).length := by
+                    simp; omega
+                  exact ih _ _ _ _ hAC' hLen0' hgo
                 | notApplicable =>
                   simp only at hgo; injection hgo with heq; subst heq
                   -- hstep : intStepBranch bPers eH nwH = some (.notApplicable, newExp)
@@ -1103,7 +1261,8 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
     exact List.any_eq_true.mpr ⟨_, hmem, by simp⟩
   -- Obtain saturation witness from the expansion structure.
   have hsat : IBranchSaturation Atom b :=
-    intExpandBranches_openBranch_sat _ _ _ _ _ _ _ h
+    intExpandBranches_openBranch_sat _ _ _ _ _ _ _
+      (by simp [IAllConsistent, IExpandedConsistent, ILabelBound]) rfl h
   -- Apply the truth lemma's F-branch direction.
   exact (truthLemma S b hopen hsat φ 0).2 hFmem
 

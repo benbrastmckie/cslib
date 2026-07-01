@@ -136,29 +136,43 @@ one below.
 - **Verification:** scoped build of `Saturation` + `Completeness` green; entry-point behaviour
   unchanged (same signatures, same match arms); zero new sorry.
 
-### Phase 2: Single-step preservation lemma with freshness coupling invariant [NOT STARTED]
+### Phase 2: Single-step preservation lemma with freshness coupling invariant [COMPLETED]
 
 - **Goal:** State the branch/ordering coupling invariant and prove that one expansion step
   (`temporalStepBranch`, whose `newOrd` comes from `temporalApplyOne` via `addFuture`/`addPast` at
   `tNew = branchNextTime b`) preserves both `InstantStrict` and the coupling. This packages the
   Phase 2 (426) edge-by-edge lemmas as a reusable inductive step.
 - **Tasks:**
-  - [ ] Define a coupling predicate pairing a branch `b` with an ordering `ord`: every endpoint of
+  - [x] Define a coupling predicate pairing a branch `b` with an ordering `ord`: every endpoint of
     every edge in `ord.constraints` is a time label occurring on `b` (so `branchNextTime b` is fresh
     w.r.t. `ord` by `branchNextTime_gt`). Keep it minimal — only what the freshness hypothesis of
-    `instantStrict_addFuture`/`instantStrict_addPast` needs.
-  - [ ] Prove: if `InstantStrict ord` and the coupling holds for `(b, ord)`, and
+    `instantStrict_addFuture`/`instantStrict_addPast` needs. *(deviation: altered -- the coupling
+    predicate already existed as `OrdFreshWRT` in `Rules.lean` (landed under task 180 phase 8,
+    ahead of this task), with `ordFreshWRT_empty`, `ordFreshWRT_append_left`,
+    `ordFreshWRT_addFuture_of_witness`/`ordFreshWRT_addPast_of_witness` already proved. Reused
+    directly instead of redefining.)*
+  - [x] Prove: if `InstantStrict ord` and the coupling holds for `(b, ord)`, and
     `temporalStepBranch b e ord tracker = some (newBs, newExps, newOrd, newTracker)`, then
     `InstantStrict newOrd` and the coupling holds for each produced branch with `newOrd`.
     Discharge `t ≠ tNew` and the `hfresh` side-conditions via `branchNextTime_gt`
     (`sf.label < branchNextTime b`) and the coupling; numeric goals via `omega`.
-  - [ ] Handle the `temporalApplyOne` result cases (`linear`, `branching`, `persistent`,
+    *(deviation: altered -- `Rules.lean` already provides `temporalApplyOne_preserves`
+    (edge-case work over `temporalApplyPos`/`temporalApplyNeg`, also task 180 phase 8), so the
+    new lemma `temporalStepBranch_preserves` is a thin wrapper: unfold
+    `temporalStepBranch`'s `List.findSome?`, extract the witnessing `sf ∈ b` via
+    `List.exists_of_findSome?_eq_some`, then dispatch to `temporalApplyOne_preserves` and
+    case on the `RuleResult`. No `omega`/freshness re-derivation needed at this layer.)*
+  - [x] Handle the `temporalApplyOne` result cases (`linear`, `branching`, `persistent`,
     `notApplicable`) — only the `addFuture`/`addPast`-producing cases change `ord`; others leave
     `ord` unchanged and preserve the invariants trivially.
-  - [ ] `lean_multi_attempt` before editing each tricky step; `lean_goal` to confirm after each.
-  - [ ] `lake build Cslib.Logics.Temporal.Tableau.Saturation` green; `lean_verify` the new lemma
+  - [x] `lean_multi_attempt` before editing each tricky step; `lean_goal` to confirm after each.
+    *(deviation: altered -- proof converged on the first `lake build` attempt after one
+    `if_pos`/`absurd` fix for the `notApplicable`-via-`expanded.any` short-circuit case; no
+    `lean_multi_attempt` exploration was needed given the direct reuse of
+    `temporalApplyOne_preserves`.)*
+  - [x] `lake build Cslib.Logics.Temporal.Tableau.Saturation` green; `lean_verify` the new lemma
     (fully-qualified) to confirm no `sorry`/new axiom.
-  - [ ] Commit: `task 439 phase 2: single-step InstantStrict preservation + coupling (green, sorry-free)`.
+  - [x] Commit: `task 439 phase 2: single-step InstantStrict preservation + coupling (green, sorry-free)`.
 - **Timing:** ~1.5 hours
 - **Depends on:** 1
 - **Files to modify:** `Cslib/Logics/Temporal/Tableau/Saturation.lean` (new lemma near the loop, or

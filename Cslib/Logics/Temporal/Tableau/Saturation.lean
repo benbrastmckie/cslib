@@ -165,6 +165,61 @@ def temporalStepBranch
         some ([newB], [expanded], newOrd, newTracker)
       | .notApplicable => none
 
+/-! ## Branch/Ordering Coupling: Single-Step Preservation -/
+
+omit [Hashable Atom] in
+/-- `temporalStepBranch` preserves `InstantStrict` and the `OrdFreshWRT` branch/ordering
+coupling invariant: if the current ordering `ord` is `InstantStrict` and fresh with
+respect to `b` (every constraint endpoint is `< branchNextTime b`), then whenever one
+expansion step succeeds, the resulting ordering `newOrd` is again `InstantStrict`, and
+every produced branch `nb ∈ newBs` is `OrdFreshWRT` with `newOrd`.
+
+`temporalStepBranch` only ever updates `ord` via a single call to `temporalApplyOne` on
+the found signed formula `sf ∈ b`, so this packages `temporalApplyOne_preserves`
+(Rules.lean) as the inductive step for the run-level `InstantStrict` threading proof
+(task #439 Phase 3). -/
+lemma temporalStepBranch_preserves
+    (b expanded : TBranch Atom) (ord : TimeOrdering) (tracker : EventualityTracker Atom)
+    (hIS : TimeOrdering.InstantStrict ord) (hOFW : OrdFreshWRT b ord)
+    (newBs newExps : List (TBranch Atom)) (newOrd : TimeOrdering)
+    (newTracker : EventualityTracker Atom)
+    (h : temporalStepBranch b expanded ord tracker = some (newBs, newExps, newOrd, newTracker)) :
+    TimeOrdering.InstantStrict newOrd ∧ ∀ nb ∈ newBs, OrdFreshWRT nb newOrd := by
+  unfold temporalStepBranch at h
+  obtain ⟨sf, hsfmem, hsfeq⟩ := List.exists_of_findSome?_eq_some h
+  by_cases hexp : expanded.any (· == sf) = true
+  · rw [if_pos hexp] at hsfeq
+    exact absurd hsfeq (by simp)
+  · rw [if_neg hexp] at hsfeq
+    rcases htA : temporalApplyOne sf b ord with ⟨result, newOrd'⟩
+    rw [htA] at hsfeq
+    obtain ⟨hISnew, hCase⟩ :=
+      temporalApplyOne_preserves sf b ord hIS hOFW hsfmem result newOrd' htA
+    cases result with
+    | linear newForms =>
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsfeq
+      obtain ⟨rfl, -, rfl, -⟩ := hsfeq
+      refine ⟨hISnew, fun nb hnb => ?_⟩
+      simp only [List.mem_singleton] at hnb
+      subst hnb
+      exact hCase newForms (by simp)
+    | branching branches =>
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsfeq
+      obtain ⟨rfl, -, rfl, -⟩ := hsfeq
+      refine ⟨hISnew, fun nb hnb => ?_⟩
+      simp only [List.mem_map] at hnb
+      obtain ⟨nf, hnf, rfl⟩ := hnb
+      exact hCase nf hnf
+    | persistent newForms =>
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsfeq
+      obtain ⟨rfl, -, rfl, -⟩ := hsfeq
+      refine ⟨hISnew, fun nb hnb => ?_⟩
+      simp only [List.mem_singleton] at hnb
+      subst hnb
+      exact hCase newForms (by simp)
+    | notApplicable =>
+      simp only [reduceCtorEq] at hsfeq
+
 /-! ## Main Expansion Loop -/
 
 mutual

@@ -35,13 +35,13 @@ theorem HasFresh.fresh_exists {α : Type u} [HasFresh α] (s : Finset α) : ∃ 
 export HasFresh (fresh fresh_notMem fresh_exists)
 
 /-- `HasFresh α` implies a computably infinite type. -/
-instance HasFresh.to_infinite (α : Type u) [HasFresh α] : Infinite α := by
+instance HasFresh.toInfinite (α : Type u) [HasFresh α] : Infinite α := by
   apply Infinite.of_not_fintype
   rintro ⟨elems, _⟩
   grind [fresh_notMem elems]
 
 /-- All infinite types have an associated (at least noncomputable) fresh function.
-This, in conjunction with `HasFresh.to_infinite`, characterizes `HasFresh`. -/
+This, in conjunction with `HasFresh.toInfinite`, characterizes `HasFresh`. -/
 noncomputable instance (α : Type u) [Infinite α] : HasFresh α where
   fresh s := Infinite.exists_notMem_finset s |>.choose
   fresh_notMem s := by grind

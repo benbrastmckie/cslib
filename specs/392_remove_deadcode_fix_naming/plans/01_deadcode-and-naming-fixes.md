@@ -135,15 +135,15 @@ with its own verification gate.
 
 ---
 
-### Phase 2: Small renames [NOT STARTED]
+### Phase 2: Small renames [COMPLETED]
 
 **Goal**: Apply 4 self-contained renames with word-boundary and capitalization care.
 
 **Tasks**:
-- [ ] `lift_int_to_cl` -> `liftIntToCl` in `Cslib/Logics/Propositional/Metalogic/IntLindenbaum.lean` (decl + all uses; report lists ~263/270/272/278). Update every call site; matches sibling `liftMinToCl`.
-- [ ] `goodSelection_seq` -> `goodSelectionSeq` in `Cslib/Foundations/Combinatorics/InfiniteGraphRamsey.lean` (decl + uses ~82,84,89,90,95,98,100,114,115,116,118). USE word-boundary matching `\bgoodSelection_seq\b` or edit each site individually. Do NOT corrupt the separate decl `goodSelection_seq_prop` (~88,118).
-- [ ] `HasFresh.to_infinite` -> `HasFresh.toInfinite` in `Cslib/Foundations/Data/HasFresh.lean` (instance decl ~38 + docstring ~44). Used via typeclass resolution so renaming the instance name is safe.
-- [ ] `emptyHrelation_apply` -> `emptyHRelation_apply` in `Cslib/Foundations/Relation/Domain.lean:~30` (capitalization fix `Hrelation`->`HRelation` to match `emptyHRelation`; KEEP trailing `_apply` Mathlib convention). Confirm exact expected name with `lake lint`.
+- [x] `lift_int_to_cl` -> `liftIntToCl` in `Cslib/Logics/Propositional/Metalogic/IntLindenbaum.lean` (decl + all uses; report lists ~263/270/272/278). Update every call site; matches sibling `liftMinToCl`.
+- [x] `goodSelection_seq` -> `goodSelectionSeq` in `Cslib/Foundations/Combinatorics/InfiniteGraphRamsey.lean` (decl + uses ~82,84,89,90,95,98,100,114,115,116,118). USE word-boundary matching `\bgoodSelection_seq\b` or edit each site individually. Do NOT corrupt the separate decl `goodSelection_seq_prop` (~88,118). *(Used `sed -E 's/\bgoodSelection_seq\b/goodSelectionSeq/g'`; verified `goodSelectionSeq_prop` has 0 hits and `goodSelection_seq_prop` remains intact with 2 hits.)*
+- [x] `HasFresh.to_infinite` -> `HasFresh.toInfinite` in `Cslib/Foundations/Data/HasFresh.lean` (instance decl ~38 + docstring ~44). Used via typeclass resolution so renaming the instance name is safe.
+- [x] `emptyHrelation_apply` -> `emptyHRelation_apply` in `Cslib/Foundations/Relation/Domain.lean:~30` (capitalization fix `Hrelation`->`HRelation` to match `emptyHRelation`; KEEP trailing `_apply` Mathlib convention). Confirm exact expected name with `lake lint`.
 
 **Timing**: ~45 minutes
 

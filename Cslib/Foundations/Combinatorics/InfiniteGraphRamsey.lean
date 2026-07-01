@@ -79,25 +79,25 @@ variable [Infinite Vertex]
 
 /-- Starting from the infinite set of all vertices, inductively make an infinite sequence
 of good selections. -/
-private noncomputable def goodSelection_seq : ℕ → Selection Vertex Color
+private noncomputable def goodSelectionSeq : ℕ → Selection Vertex Color
   | 0 => Classical.choose (goodSelection_exists color (InfVSet.mk univ infinite_univ))
-  | n + 1 => Classical.choose (goodSelection_exists color (goodSelection_seq n).vs)
+  | n + 1 => Classical.choose (goodSelection_exists color (goodSelectionSeq n).vs)
 
-/-- At every step, the `goodSelection_seq` makes a good selection and there are always
+/-- At every step, the `goodSelectionSeq` makes a good selection and there are always
 infinitely many vertices remaining to be selected. -/
 private lemma goodSelection_seq_prop (n : ℕ) :
-    ∃ ivs : InfVSet Vertex, GoodSelection color ivs (goodSelection_seq color n) ∧
-      (ivs.set = ⋂ m < n, (goodSelection_seq color m).vs.set) := by
+    ∃ ivs : InfVSet Vertex, GoodSelection color ivs (goodSelectionSeq color n) ∧
+      (ivs.set = ⋂ m < n, (goodSelectionSeq color m).vs.set) := by
   induction n
   case zero =>
     use (InfVSet.mk univ infinite_univ)
     simp
-    grind [goodSelection_seq]
+    grind [goodSelectionSeq]
   case succ n h_ind =>
     obtain ⟨_, _, h_eq⟩ := h_ind
-    use (goodSelection_seq color n).vs
+    use (goodSelectionSeq color n).vs
     constructor
-    · grind [goodSelection_seq]
+    · grind [goodSelectionSeq]
     · have h1 (m : ℕ) : m < n + 1 ↔ m < n ∨ m = n := by grind
       simp [h1, iInter_or, iInter_inter_distrib, ← h_eq]
       grind [GoodSelection]
@@ -111,9 +111,9 @@ private lemma good_selections_exist :
     ∃ vs : ℕ → Set Vertex, ∃ v : ℕ → Vertex, ∃ c : ℕ → Color,
     ∀ n, vs n ⊆ (⋂ m < n, vs m) ∧ v n ∈ (⋂ m < n, vs m) \ (vs n) ∧
       ∀ u ∈ vs n, color {v n, u} = c n := by
-  use (fun k ↦ (goodSelection_seq color k).vs.set)
-  use (fun k ↦ (goodSelection_seq color k).v)
-  use (fun k ↦ (goodSelection_seq color k).c)
+  use (fun k ↦ (goodSelectionSeq color k).vs.set)
+  use (fun k ↦ (goodSelectionSeq color k).v)
+  use (fun k ↦ (goodSelectionSeq color k).c)
   intro n
   obtain ⟨ivs, h_ivs, h_eq⟩ := goodSelection_seq_prop color n
   rw [← h_eq]

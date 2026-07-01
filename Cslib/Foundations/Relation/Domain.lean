@@ -27,7 +27,7 @@ namespace Relation
 theorem emptyHRelation_emptyRelation : (emptyHRelation : α → α → Prop) = emptyRelation := rfl
 
 @[simp, grind =]
-theorem emptyHrelation_apply (a : α) (b : β) : emptyHRelation a b ↔ False := .rfl
+theorem emptyHRelation_apply (a : α) (b : β) : emptyHRelation a b ↔ False := .rfl
 
 variable {β : Type*} {r : α → β → Prop}
 

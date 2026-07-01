@@ -261,22 +261,22 @@ theorem int_prime_exclusion {S : Set (PL.Proposition Atom)}
 
 /-- Lift an `IntPropAxiom` derivation tree to a `PropositionalAxiom` derivation tree,
 recursing through the tree via `IntPropAxiom.toPropAxiom` on the axiom leaves. -/
-private noncomputable def lift_int_to_cl {Γ : List (PL.Proposition Atom)} {φ : PL.Proposition Atom}
+private noncomputable def liftIntToCl {Γ : List (PL.Proposition Atom)} {φ : PL.Proposition Atom}
     (d : DerivationTree IntPropAxiom Γ φ) :
     DerivationTree PropositionalAxiom Γ φ := by
   match d with
   | .ax Γ ψ h_ax => exact .ax Γ ψ h_ax.toPropAxiom
   | .assumption Γ ψ h_mem => exact .assumption Γ ψ h_mem
   | .modus_ponens Γ ψ χ d₁ d₂ =>
-    exact .modus_ponens Γ ψ χ (lift_int_to_cl d₁) (lift_int_to_cl d₂)
+    exact .modus_ponens Γ ψ χ (liftIntToCl d₁) (liftIntToCl d₂)
   | .weakening Γ' Δ ψ d' h_sub =>
-    exact .weakening Γ' Δ ψ (lift_int_to_cl d') h_sub
+    exact .weakening Γ' Δ ψ (liftIntToCl d') h_sub
 
 /-- IntPropAxiom is consistent: `[] ⊬ ⊥`. -/
 theorem int_consistent :
     ¬ Derivable (Atom := Atom) IntPropAxiom (⊥ : PL.Proposition Atom) := by
   intro ⟨d⟩
-  have d_cl := lift_int_to_cl d
+  have d_cl := liftIntToCl d
   exact prop_soundness d_cl (fun _ => True) (fun _ h => nomatch h)
 
 /-- The set of IntPropAxiom-theorems `{ψ | Derivable IntPropAxiom ψ}` is a DCCS. -/

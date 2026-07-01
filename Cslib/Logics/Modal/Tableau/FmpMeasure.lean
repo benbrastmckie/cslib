@@ -1966,6 +1966,199 @@ private lemma mintGroup_label_eq_freshWorld
       · simp at heq
     · simp at heq
 
+/-- **P2-obl-d prerequisite**: the known-worlds/max-world dichotomy for a single
+`modalStepBranch` step. Either (non-mint: propositional rules, `boxPos`, `diamondNeg`) `acc` is
+unchanged and every child branch's known-worlds/max-world are unchanged (up to `Perm`); or
+(mint: `boxNeg`, `diamondPos`'s dead-code shape) `acc` gains exactly one edge from some known
+world `l` to the fresh world `modalNextWorld b`, and every child branch's known-worlds/max-world
+gain exactly that one fresh world. Same 5-way `modalApplyOne` case-split shape as (a)-(c),
+reusing the P1a closure lemmas (`modalApplyOne_boxPos_outputs_subset`,
+`modalApplyOne_diamondNeg_outputs_subset`) via `accTargetsKnown` for the successor-propagation
+cases, and `mintGroup_label_eq_freshWorld` for the two fresh-world cases. -/
+lemma modalStepBranch_knownWorlds
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hknown : accTargetsKnown b acc) :
+    (newAcc = acc ∧
+      ∀ b' ∈ newBs, modalMaxWorld b' = modalMaxWorld b ∧
+        (modalKnownWorlds b').Perm (modalKnownWorlds b)) ∨
+    (∃ l ∈ modalKnownWorlds b, newAcc = acc.addEdge l (modalNextWorld b) ∧
+      ∀ b' ∈ newBs, modalMaxWorld b' = modalNextWorld b ∧
+        (modalKnownWorlds b').Perm (modalNextWorld b :: modalKnownWorlds b)) := by
+  simp only [modalStepBranch] at hstep
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  have hcases :
+      ((modalApplyOne sf b acc).snd = acc ∧
+        (match (modalApplyOne sf b acc).fst with
+          | .linear formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+          | .branching branches => ∀ x ∈ branches.flatten, x.label ∈ modalKnownWorlds b
+          | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+          | .notApplicable => True)) ∨
+      ((modalApplyOne sf b acc).snd = acc.addEdge sf.label (modalNextWorld b) ∧
+        (match (modalApplyOne sf b acc).fst with
+          | .linear formulas => formulas ≠ [] ∧ ∀ x ∈ formulas, x.label = modalNextWorld b
+          | .branching _ => False
+          | .persistent _ => False
+          | .notApplicable => False)) := by
+    have hprop := modalApplyOne_prop_outputs_subset sf
+    unfold modalApplyOne
+    by_cases hpa :
+        (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf).isApplicable
+    · simp only [hpa, if_true]
+      refine Or.inl ⟨trivial, ?_⟩
+      rcases hpr : tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf with
+        formulas | branches | formulas | -
+      · rw [hpr] at hprop
+        intro z hz
+        obtain ⟨-, hzlabel⟩ := hprop z hz
+        rw [hzlabel, mem_modalKnownWorlds]; exact ⟨sf, hsfmem, rfl⟩
+      · rw [hpr] at hprop
+        intro z hz
+        obtain ⟨-, hzlabel⟩ := hprop z hz
+        rw [hzlabel, mem_modalKnownWorlds]; exact ⟨sf, hsfmem, rfl⟩
+      · rw [hpr] at hprop
+        intro z hz
+        obtain ⟨-, hzlabel⟩ := hprop z hz
+        rw [hzlabel, mem_modalKnownWorlds]; exact ⟨sf, hsfmem, rfl⟩
+      · rw [hpr] at hpa; simp [RuleResult.isApplicable] at hpa
+    · rw [if_neg hpa]
+      obtain ⟨s, ff, l⟩ := sf
+      rcases s with _ | _
+      · rcases ff with _ | _ | ⟨a, c⟩ | φ
+        · exact Or.inl ⟨rfl, trivial⟩
+        · exact Or.inl ⟨rfl, trivial⟩
+        · rcases a with _ | _ | ⟨a2, a3⟩ | a4
+          · exact Or.inl ⟨rfl, trivial⟩
+          · exact Or.inl ⟨rfl, trivial⟩
+          · exact Or.inl ⟨rfl, trivial⟩
+          · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
+            · exact Or.inl ⟨rfl, trivial⟩
+            · exact Or.inl ⟨rfl, trivial⟩
+            · rcases a6 with _ | _ | ⟨_, _⟩ | _
+              · exact Or.inl ⟨rfl, trivial⟩
+              · rcases c with _ | _ | ⟨_, _⟩ | _
+                · exact Or.inl ⟨rfl, trivial⟩
+                · dsimp only
+                  right
+                  refine ⟨rfl, List.cons_ne_nil _ _, ?_⟩
+                  exact fun x hx => mintGroup_label_eq_freshWorld b l Sign.pos a5 x hx
+                · exact Or.inl ⟨rfl, trivial⟩
+                · exact Or.inl ⟨rfl, trivial⟩
+              · exact Or.inl ⟨rfl, trivial⟩
+              · exact Or.inl ⟨rfl, trivial⟩
+            · exact Or.inl ⟨rfl, trivial⟩
+        · dsimp only
+          by_cases hemp : (boxPropagation b acc φ l).isEmpty = true
+          · simp only [if_pos hemp]; exact Or.inl ⟨trivial, trivial⟩
+          · simp only [if_neg hemp]
+            refine Or.inl ⟨trivial, ?_⟩
+            intro x hx
+            obtain ⟨-, hxsucc⟩ := modalApplyOne_boxPos_outputs_subset b acc φ l x hx
+            exact hknown l x.label (mem_successorsOf_hasEdge hxsucc)
+      · rcases ff with _ | _ | ⟨a, c⟩ | φ
+        · exact Or.inl ⟨rfl, trivial⟩
+        · exact Or.inl ⟨rfl, trivial⟩
+        · rcases a with _ | _ | ⟨a2, a3⟩ | a4
+          · exact Or.inl ⟨rfl, trivial⟩
+          · exact Or.inl ⟨rfl, trivial⟩
+          · exact Or.inl ⟨rfl, trivial⟩
+          · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
+            · exact Or.inl ⟨rfl, trivial⟩
+            · exact Or.inl ⟨rfl, trivial⟩
+            · rcases a6 with _ | _ | ⟨_, _⟩ | _
+              · exact Or.inl ⟨rfl, trivial⟩
+              · rcases c with _ | _ | ⟨_, _⟩ | _
+                · exact Or.inl ⟨rfl, trivial⟩
+                · dsimp only
+                  by_cases hemp : ((acc.successorsOf l).filterMap (fun w' =>
+                      if b.any (· == (⟨.neg, a5, w'⟩ :
+                          SignedFormula (Proposition Atom) WorldIndex))
+                      then none
+                      else some (⟨.neg, a5, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+                    ).isEmpty = true
+                  · simp only [if_pos hemp]; exact Or.inl ⟨trivial, trivial⟩
+                  · simp only [if_neg hemp]
+                    refine Or.inl ⟨trivial, ?_⟩
+                    intro x hx
+                    obtain ⟨-, hxsucc⟩ := modalApplyOne_diamondNeg_outputs_subset b acc a5 l x hx
+                    exact hknown l x.label (mem_successorsOf_hasEdge hxsucc)
+                · exact Or.inl ⟨rfl, trivial⟩
+                · exact Or.inl ⟨rfl, trivial⟩
+              · exact Or.inl ⟨rfl, trivial⟩
+              · exact Or.inl ⟨rfl, trivial⟩
+            · exact Or.inl ⟨rfl, trivial⟩
+        · dsimp only
+          right
+          refine ⟨rfl, List.cons_ne_nil _ _, ?_⟩
+          exact fun x hx => mintGroup_label_eq_freshWorld b l Sign.neg φ x hx
+  have hlknown : sf.label ∈ modalKnownWorlds b := by
+    rw [mem_modalKnownWorlds]; exact ⟨sf, hsfmem, rfl⟩
+  rcases hcases with ⟨hsame, hmatch⟩ | ⟨haddedge, hfreshall⟩
+  · left
+    have hnewAcc : newAcc = acc := by
+      rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _ <;>
+        · rw [hfstc] at hsf
+          simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+          first
+          | exact hsf.2.2.symm.trans hsame
+          | simp at hsf
+    refine ⟨hnewAcc, ?_⟩
+    rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+    · rw [hfstc] at hsf hmatch
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      intro b' hb'
+      rw [← hsf.1] at hb'
+      simp only [List.mem_singleton] at hb'
+      subst hb'
+      exact ⟨modalMaxWorld_append_eq_of_forall_le nf b
+          (fun x hx => modalKnownWorlds_le_modalMaxWorld (hmatch x hx)),
+        modalKnownWorlds_perm_append_of_subset nf b hmatch⟩
+    · rw [hfstc] at hsf hmatch
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      intro b' hb'
+      rw [← hsf.1] at hb'
+      obtain ⟨br, hbr, rfl⟩ := List.mem_map.mp hb'
+      have hbrknown : ∀ x ∈ br, x.label ∈ modalKnownWorlds b :=
+        fun x hx => hmatch x (List.mem_flatten.mpr ⟨br, hbr, hx⟩)
+      exact ⟨modalMaxWorld_append_eq_of_forall_le br b
+          (fun x hx => modalKnownWorlds_le_modalMaxWorld (hbrknown x hx)),
+        modalKnownWorlds_perm_append_of_subset br b hbrknown⟩
+    · rw [hfstc] at hsf hmatch
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      intro b' hb'
+      rw [← hsf.1] at hb'
+      simp only [List.mem_singleton] at hb'
+      subst hb'
+      exact ⟨modalMaxWorld_append_eq_of_forall_le nf b
+          (fun x hx => modalKnownWorlds_le_modalMaxWorld (hmatch x hx)),
+        modalKnownWorlds_perm_append_of_subset nf b hmatch⟩
+    · rw [hfstc] at hsf; simp at hsf
+  · right
+    refine ⟨sf.label, hlknown, ?_, ?_⟩
+    · rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _ <;>
+        · rw [hfstc] at hsf
+          simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+          first
+          | exact hsf.2.2.symm.trans haddedge
+          | simp at hsf
+    · rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+      · rw [hfstc] at hsf hfreshall
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        intro b' hb'
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        exact ⟨modalMaxWorld_append_single nf b (modalNextWorld b) hfreshall.1 hfreshall.2
+            (Nat.lt_succ_self _),
+          modalKnownWorlds_perm_append_single nf b (modalNextWorld b) hfreshall.1 hfreshall.2
+            (modalNextWorld_not_mem_modalKnownWorlds b)⟩
+      · rw [hfstc] at hfreshall; exact hfreshall.elim
+      · rw [hfstc] at hfreshall; exact hfreshall.elim
+      · rw [hfstc] at hsf; simp at hsf
+
 end Cslib.Logic.Modal.Tableau
 
 end

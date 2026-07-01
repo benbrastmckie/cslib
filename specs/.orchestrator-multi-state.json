@@ -11,12 +11,9 @@
     ]
   ],
   "max_cycles": 10,
-  "cycle_count": 2,
+  "cycle_count": 12,
   "failed_tasks": [],
-  "completed_tasks": [
-    404,
-    438
-  ],
+  "completed_tasks": [],
   "current_statuses": {
     "404": "pr_ready",
     "438": "pr_ready"
@@ -36,5 +33,15 @@
   "dependency_graph": {
     "404": [],
     "438": []
-  }
+  },
+  "current_wave": 0,
+  "last_updated": "2026-07-01T14:54:59Z",
+  "partial_tasks": [
+    317
+  ],
+  "gated_tasks": [
+    430,
+    375
+  ],
+  "result_note": "317 PARTIAL (main green, sound dedup, B2 fuel=0 sorry 986 still open). 430,375 gated on 986. lean-lsp fixed."
 }

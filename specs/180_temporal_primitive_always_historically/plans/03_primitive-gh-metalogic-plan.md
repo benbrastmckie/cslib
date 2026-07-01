@@ -594,24 +594,99 @@ in the file (grep-confirmed).
 
 ---
 
-### Phase 8: Tableau subtree scoped-green [NOT STARTED]
+### Phase 8: Tableau subtree scoped-green [PARTIAL]
 
 - **Goal:** Complete the WIP's Tableau edits and add G/H constructor cases. Independent of the
   metalogic chain (depends only on P3) — may be scheduled any time after P3.
 - **Tasks:**
-  - [ ] `Tableau/Defs.lean`: add `allFuture`/`allPast` arms to `temporalFormulaHash` and the
+  - [x] `Tableau/Defs.lean`: add `allFuture`/`allPast` arms to `temporalFormulaHash` and the
     decomposition matchers (the `.imp …`-pattern extractors near `:109-164`); decide the universal
     expansion rule for primitive G/H.
-  - [ ] `Tableau/Rules.lean` (WIP-edited), `Tableau/Completeness.lean` (WIP-edited),
-    `Tableau/{Closure,Branch,Saturation,Soundness,TimeOrdering}.lean`: add G/H handling where they
-    recurse on constructors or reference the abbreviations.
-- **Timing:** 2-3 hours
+    DONE: `temporalFormulaHash` got two new arms (tags 5/6). `asAllFuture?`/`asAllPast?` were
+    WIP-authored against the OLD `¬𝐅¬`/`¬𝐏¬` Lukasiewicz encoding (`(⊤ U ¬ψ) → ⊥` /
+    `(⊤ S ¬ψ) → ⊥`), which is no longer defeq to the primitive `𝐆ψ`/`𝐇ψ` constructor
+    (build error: "Not a definitional equality"). Rewrote both to match the primitive
+    constructor directly (`| .allFuture ψ => some ψ`); the universal-expansion rule itself
+    was already correctly primitive-constructor-shaped downstream in `Rules.lean`
+    (`allFuturePosAt`/`allPastPosAt` collect `T(φ)@t'` for all `t'` in `futureOf`/`pastOf`,
+    unchanged) — only the *decomposition adapter* needed the fix, not the expansion semantics.
+    `lake build Cslib.Logics.Temporal.Tableau.Defs` GREEN, no `sorry`.
+  - [x] `Tableau/Rules.lean` (WIP-edited): add G/H handling where it recurses on constructors or
+    references the abbreviations.
+    DONE, but the actual break was NOT missing G/H arms (the WIP's `temporalApplyPos`/
+    `temporalApplyNeg` already dispatch via `asAllFuture?`/`asAllPast?`, which Defs.lean now
+    fixes). The break was in the WIP's *proof* layer: `temporalApplyPos_preserves`,
+    `temporalApplyNeg_preserves`, `temporalApplyOne_preserves` all used
+    `rcases <expr> with _ | y` (non-hypothesis-expression case split) to case-split
+    `asAllFuture? sf.formula`/`asUntl? sf.formula`/`sf.sign`, then relied on later
+    `simp only at h` calls to reduce the already-computed hypothesis `h`. `rcases`/`cases` on a
+    bare expression (not a hypothesis) only generalizes the *goal target*, not other
+    hypotheses — so `h` never actually got simplified, and every downstream `simp only at h`
+    silently made no progress (confirmed via `lean_goal`: `goals_before`/`goals_after`
+    identical). This pre-dates task 180 as a *latent* bug — it was never exercised because the
+    file never compiled after the WIP patch was applied (Rules.lean was WIP-edited, "not
+    independently verified" per the Preserved-Assets table). Repaired by replacing every such
+    `rcases <expr> with _ | y` with `split at h` (which correctly case-splits and reduces `h`
+    itself), chained via `<;> try split at h` to fully unfold the case tree, then `rename_i`
+    to recover readable names (`inner`/`event`/`guard`) for the extracted formulas — care
+    needed here since `rename_i`'s "last n inaccessible" count must also consume the
+    auto-generated `heq✝`/intermediate `let`-binder names trailing each match, not just the
+    formula binders. Two more latent (pre-existing, unrelated to G/H) bugs surfaced once the
+    file elaborated far enough to reach them: `List.mem_cons_self` is now argument-free in
+    this Lean/Std version (WIP called it as `List.mem_cons_self _ _`); and
+    `simp only [List.mem_cons, List.mem_singleton] at hnf` left an unreduced `nf ∈ []`
+    residual for 2-branch `RuleResult.branching` results (needed `List.not_mem_nil, or_false`
+    added to the simp set). `lake build Cslib.Logics.Temporal.Tableau.Rules` GREEN, no `sorry`,
+    zero lint-style warnings (long-line/unused-simp-arg/unreachable-tactic warnings introduced
+    by the fix were cleaned in the same dispatch).
+  - [x] `Tableau/{Closure,Branch,Saturation,Soundness,TimeOrdering}.lean`: add G/H handling where
+    they recurse on constructors or reference the abbreviations.
+    DONE (verify-only, no edits needed): none of these five files pattern-match on
+    `Formula` constructors directly — all temporal-formula decomposition goes through the
+    `asAllFuture?`/`asAllPast?`/`asSomeFuture?`/etc. adapters in `Defs.lean`, so fixing those
+    adapters was sufficient. All five build GREEN with zero changes:
+    `lake build Cslib.Logics.Temporal.Tableau.{Closure,Branch,Saturation,Soundness,TimeOrdering}`.
+  - [ ] `Tableau/Completeness.lean` (WIP-edited): add G/H handling where it recurses on
+    constructors or references the abbreviations.
+    BLOCKED — NOT a G/H problem. `grep allFuture\|allPast` on this file returns **zero**
+    matches; the file's temporal-formula case analysis is entirely mediated through
+    `IsPropositional`/`Formula.complexity`, neither of which changed shape for `.imp`/`.atom`/
+    `.bot` (Phase 1 only *added* `allFuture`/`allPast` arms to `complexity`, it did not touch
+    the existing arithmetic). The break is a large, self-contained, PRE-EXISTING WIP bug in
+    `private lemma temporalTruthLemma_propositional_aux` (lines 403-767, ~360 lines, the single
+    largest lemma in the file) — this lemma was WIP-authored and, per the Preserved-Assets
+    table, never independently compiled ("Verified: No"). Root cause (confirmed via
+    `lean_goal`): `simp only [temporalApplyOne, tryAllPropRules, applyPropRule, ...] at hout`
+    (`:439-440`) delta-unfolds these definitions into `hout` *before* the subsequent
+    `cases hφ' with | atom p => ... | imp ha hb => ...` / `cases hψ' with ...` (`:441+`)
+    substitute concrete constructors for the (till-then-abstract) subformulas `φ'`/`ψ'`. Unlike
+    the Rules.lean bug, this `cases` IS on a genuine local hypothesis (`hφ' : IsPropositional
+    φ'`) so it *does* correctly propagate the substitution into `hout`'s type (confirmed: the
+    leaf goal at `:447` shows `hout`'s type with `φ'` concretely replaced by `Formula.atom p`) —
+    but the substitution alone does not force the now-concrete nested `match`/`if` expressions
+    inside `hout` to iota-reduce, so `hout` is left as a frozen, un-reduced term at every one of
+    the ~20 leaf branches. Every leaf's use of `hout` (`have hfp := hout _ (by simp)`,
+    `obtain ⟨br, hbr_mem, hbr⟩ := hout`, etc.) then fails with "unsolved goals" / "Application
+    type mismatch" / "omega could not prove the goal" (90 errors total, all inside this one
+    lemma, none past line 689). Fix requires re-running the `simp only [temporalApplyOne, ...]
+    at hout` unfold (or an equivalent `dsimp`/`decide`-style reduction) *after* each leaf's
+    `cases` resolves `φ'`/`ψ'` concretely — i.e. duplicated/moved into ~20 leaf sites across a
+    360-line lemma, not a small mechanical patch. Scoped **for its own dedicated re-dispatch**;
+    do NOT attempt to fold this into another phase's budget.
+- **Timing:** 2-3 hours (spent; Completeness.lean requires a separate re-dispatch, est. 2-4h)
 - **Depends on:** 3
-- **Estimated output:** ~150-300 lines
+- **Estimated output:** ~150-300 lines — actual: ~170 lines net across Defs.lean (+13/-9) and
+  Rules.lean (+151/-161, mostly proof-structure replacement, not net growth)
 - **Files to modify:** `Cslib/Logics/Temporal/Tableau/{Defs,Rules,Closure,Branch,Saturation,Soundness,Completeness,TimeOrdering}.lean` (as needed)
+  — actual: `Defs.lean`, `Rules.lean` edited; `Closure/Branch/Saturation/Soundness/TimeOrdering.lean`
+  verified with zero changes; `Completeness.lean` NOT fixed (see above), left as WIP-provided
+  (untouched by this dispatch, PM5-compliant — no edits attempted, no reverts).
 - **Scoped verification (done when):**
-  - `lake build Cslib.Logics.Temporal.Tableau.Defs` green
-  - `lake build Cslib.Logics.Temporal.Tableau.Soundness Cslib.Logics.Temporal.Tableau.Completeness` green
+  - `lake build Cslib.Logics.Temporal.Tableau.Defs` green — PASSES.
+  - `lake build Cslib.Logics.Temporal.Tableau.Soundness Cslib.Logics.Temporal.Tableau.Completeness`
+    green — Soundness PASSES; **Completeness FAILS** (90 errors, all confined to
+    `temporalTruthLemma_propositional_aux`, see above). Phase 8 marked `[PARTIAL]`, not
+    `[COMPLETED]`, per PM3/PM7 (never fake green).
 
 ---
 
@@ -663,7 +738,10 @@ Per-phase (scoped, mandatory before marking any phase `[COMPLETED]`):
 - [ ] P5: `lake build …Metalogic.MCS` and `…WitnessSeed` green.
 - [x] P6: `lake build …Chronicle.{RRelation, PointInsertion.Seeds, CounterexampleElimination.Structures}` green.
 - [x] P7: `lake build …Chronicle.TruthLemma` green; `lean_verify` clean.
-- [ ] P8: `lake build …Tableau.{Defs, Soundness, Completeness}` green.
+- [x] P8: `lake build …Tableau.{Defs, Soundness}` green (+ Rules/Closure/Branch/Saturation/
+  TimeOrdering, verify-only or repaired). `…Tableau.Completeness` still RED — pre-existing
+  WIP bug in `temporalTruthLemma_propositional_aux`, unrelated to G/H, needs dedicated
+  re-dispatch (see Phase 8 result above).
 
 Final (P9, full CI):
 - [ ] `lake build` green for the whole project.

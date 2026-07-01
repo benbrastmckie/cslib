@@ -74,7 +74,7 @@ abbrev TimeIndex := Nat
 
 /-- A hash function for `Formula Atom` using constructor-tag mixing.
 
-Constructor tags: atom=0, bot=1, imp=2, untl=3, snce=4.
+Constructor tags: atom=0, bot=1, imp=2, untl=3, snce=4, allFuture=5, allPast=6.
 Subformula hashes are combined with `mixHash`. -/
 def temporalFormulaHash [Hashable Atom] : Formula Atom → UInt64
   | .atom x => mixHash 0 (hash x)
@@ -82,6 +82,8 @@ def temporalFormulaHash [Hashable Atom] : Formula Atom → UInt64
   | .imp a b => mixHash (mixHash 2 (temporalFormulaHash a)) (temporalFormulaHash b)
   | .untl a b => mixHash (mixHash 3 (temporalFormulaHash a)) (temporalFormulaHash b)
   | .snce a b => mixHash (mixHash 4 (temporalFormulaHash a)) (temporalFormulaHash b)
+  | .allFuture a => mixHash 5 (temporalFormulaHash a)
+  | .allPast a => mixHash 6 (temporalFormulaHash a)
 
 /-- `Hashable` instance for `Formula Atom`, required by `SignedFormula` and `Branch`
 when the formula type is `Formula Atom`. -/
@@ -265,12 +267,13 @@ lemma asSomePast?_somePast (ψ : Formula Atom) :
 @[simp]
 lemma asSomePast?_atom (p : Atom) : asSomePast? (.atom p) = none := rfl
 
-/-- Decompose `φ` as all-future: `𝐆ψ = ¬𝐅¬ψ = (⊤ U (ψ → ⊥)) → ⊥`.
-
-Lean encoding: `allFuture ψ = imp (untl (.imp .bot .bot) (.imp ψ .bot)) .bot`. -/
+/-- Decompose `φ` as all-future: `𝐆ψ`, a primitive constructor since task #180. The classical
+equivalence `𝐆ψ ↔ ¬𝐅¬ψ` is recovered only as an axiom-backed theorem
+(`Axiom.allFuture_to_classic`/`classic_to_allFuture`), not definitionally, so this adapter
+pattern-matches the constructor directly rather than the old `¬𝐅¬` Lukasiewicz encoding. -/
 def asAllFuture? (φ : Formula Atom) : Option (Formula Atom) :=
   match φ with
-  | .imp (.untl (.imp .bot .bot) (.imp ψ .bot)) .bot => some ψ
+  | .allFuture ψ => some ψ
   | _ => none
 
 /-- `asAllFuture?` decomposes all-future formulas. -/
@@ -282,12 +285,13 @@ lemma asAllFuture?_allFuture (ψ : Formula Atom) :
 @[simp]
 lemma asAllFuture?_atom (p : Atom) : asAllFuture? (.atom p) = none := rfl
 
-/-- Decompose `φ` as all-past: `𝐇ψ = ¬𝐏¬ψ = (⊤ S (ψ → ⊥)) → ⊥`.
-
-Lean encoding: `allPast ψ = imp (snce (.imp .bot .bot) (.imp ψ .bot)) .bot`. -/
+/-- Decompose `φ` as all-past: `𝐇ψ`, a primitive constructor since task #180. The classical
+equivalence `𝐇ψ ↔ ¬𝐏¬ψ` is recovered only as an axiom-backed theorem
+(`Axiom.allPast_to_classic`/`classic_to_allPast`), not definitionally, so this adapter
+pattern-matches the constructor directly rather than the old `¬𝐏¬` Lukasiewicz encoding. -/
 def asAllPast? (φ : Formula Atom) : Option (Formula Atom) :=
   match φ with
-  | .imp (.snce (.imp .bot .bot) (.imp ψ .bot)) .bot => some ψ
+  | .allPast ψ => some ψ
   | _ => none
 
 /-- `asAllPast?` decomposes all-past formulas. -/

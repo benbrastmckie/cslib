@@ -1,40 +1,42 @@
 {
   "status": "partial",
-  "started_at": "2026-07-01T01:48:28Z",
+  "started_at": "2026-07-01T01:56:36Z",
+  "completed_at": "2026-07-01T02:45:00Z",
   "artifacts": [
     {
-      "path": "Cslib/Logics/Temporal/Metalogic/Chronicle/TruthLemma.lean",
-      "type": "lean_source",
-      "summary": "Added truth_lemma_allFuture/truth_lemma_allPast (reduction to the compound formula neg(top U neg-phi)/neg(top S neg-phi) via truth_lemma_imp/untl-or-snce-forward-backward/bot, then bridged to primitive GX/HX via Satisfies.sat_allFuture_iff_neg_someFuture_neg/sat_allPast_iff_neg_somePast_neg + mcs_allFuture_iff/mcs_allPast_iff) and wired both as new arms into chronicle_truth_lemma's induction. Scoped build GREEN, zero sorry, lean_verify clean (propext/Classical.choice/Quot.sound only)."
+      "path": "specs/180_temporal_primitive_always_historically/summaries/03_phase8-tableau-subtree-summary.md",
+      "type": "summary",
+      "summary": "Phase 8 (Tableau subtree) partial completion summary"
     },
     {
       "path": "specs/180_temporal_primitive_always_historically/plans/03_primitive-gh-metalogic-plan.md",
       "type": "plan",
-      "summary": "Phase 7 heading [NOT STARTED] -> [COMPLETED], all checklist items checked, Testing & Validation P7 row checked, Phase 7 result paragraph documenting the two mechanical (non-design) fixups needed."
+      "summary": "Phase 8 heading updated to [PARTIAL] with detailed result documentation"
     }
   ],
   "partial_progress": {
-    "stage": "phase_7_completed",
-    "details": "Chronicle/TruthLemma.lean scoped-build GREEN (941/941 jobs). Task 180 overall status remains partial (7 of 9 phases complete); Phases 8 (Tableau) and 9 (classical-equivalence theorems + BibKey + full CI) remain."
+    "stage": "phase_8_partial",
+    "details": "Defs.lean and Rules.lean fully repaired and scoped-green (zero sorry, zero lint warnings). Closure/Branch/Saturation/Soundness/TimeOrdering.lean verified green with zero edits. Completeness.lean blocked on a large pre-existing WIP bug in temporalTruthLemma_propositional_aux unrelated to G/H; requires dedicated re-dispatch.",
+    "phases_completed": 7,
+    "phases_total": 9
   },
   "phases_completed": 7,
   "phases_total": 9,
   "memory_candidates": [
-    "CSLib Temporal task 180: prefix-40 notations like 𝐆/𝐇 (Formula.allFuture/allPast) bind tighter than `∈`'s effective parse boundary in this precedence table -- `𝐆φ ∈ S` parses as `𝐆(φ ∈ S)` (a Formula-vs-Prop type mismatch), not `(𝐆φ) ∈ S`. Always parenthesize as `(𝐆φ) ∈ S` when stating MCS-membership facts about a G/H-headed formula, matching the convention already used in MCS.lean's mcs_allFuture_iff/mcs_allPast_iff statements.",
-    "CSLib Temporal task 180: `sat_allFuture_iff_neg_someFuture_neg`/`sat_allPast_iff_neg_somePast_neg` (Semantics/Satisfies.lean) are declared inside a `namespace Satisfies` block that follows the recursive `def Satisfies` (not accessible via dot-notation extension of the def itself) -- callers outside that file must qualify as `Satisfies.sat_allFuture_iff_neg_someFuture_neg`, matching the existing call site in Metalogic/Soundness.lean:316-325.",
-    "CSLib Temporal task 180: the F6 TruthLemma reduction sketch (deriving IHs for neg-phi/top from a single ih_phi via truth_lemma_imp + truth_lemma_bot, since Formula.neg/Formula.top are abbrevs unfolding to phi.imp bot / bot.imp bot) type-checks directly with zero combinator ambiguity -- the plan's Risk R3 concern (wrong MCS negation combinator, looping) did not materialize for this reduction shape because the IH derivation stays entirely at the Satisfies/limitF truth-lemma level, never touching the MCS negation-completeness combinators (mcs_neg_of_not_mem etc.) directly."
+    "Lean4: rcases/cases on a bare (non-hypothesis) expression only generalizes the goal target, not other hypotheses -- use `split at h` (not `rcases <expr> with ...`) when you need a match/if inside an already-computed hypothesis `h` to reduce.",
+    "Lean4: rename_i's 'last n inaccessible' count must include trailing auto-generated heq/let-binder names introduced by split/match compilation, not just the binders you actually want to name -- undercounting silently renames the wrong (later) inaccessible variable."
   ],
   "verification": {
-    "verification_passed": true,
+    "verification_passed": false,
     "sorry_count": 0,
     "vacuous_count": 0,
     "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": "scoped-only (lake build Cslib.Logics.Temporal.Metalogic.Chronicle.TruthLemma GREEN, 941/941 jobs; full CSLib CI pipeline intentionally NOT run per PM2/dispatch instructions -- Temporal build legitimately red until Phase 9)",
-    "notes": "lean_verify on chronicle_truth_lemma, truth_lemma_allFuture, truth_lemma_allPast: all report only propext/Classical.choice/Quot.sound, no new axioms beyond the 4 pre-existing bridge axioms from Phase 3. grep -rn sorry on TruthLemma.lean: zero matches."
+    "build_passed": false,
+    "ci_pipeline_passed": false,
+    "notes": "Cslib.Logics.Temporal.Tableau.{Defs,Rules,Closure,Branch,Saturation,Soundness,TimeOrdering} all GREEN. Cslib.Logics.Temporal.Tableau.Completeness RED (90 pre-existing errors unrelated to G/H, in temporalTruthLemma_propositional_aux). Full project build not attempted (build-exclusivity, PM2 -- only Phase 9 runs full lake build)."
   },
   "metadata": {
-    "session_id": "sess_180_phase7",
+    "session_id": "task180-phase8",
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]

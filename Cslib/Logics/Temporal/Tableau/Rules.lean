@@ -511,91 +511,86 @@ lemma temporalApplyPos_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeO
       | .notApplicable => []),
       OrdFreshWRT (nf ++ b) newOrd := by
   simp only [temporalApplyPos] at h
-  -- Case 1: asAllFuture?
-  rcases asAllFuture? sf.formula with _ | inner
-  · rcases asAllPast? sf.formula with _ | inner
-    · simp only at h
-      rcases asSomeFuture? sf.formula with _ | inner
-      · -- someFuturePos: addFuture, linear result
-        simp only at h
-        obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
-        refine ⟨TimeOrdering.instantStrict_addFuture ord sf.label (branchNextTime b) hIS ?_ ?_,
-                fun nf hnf => ?_⟩
-        · -- t ≠ t' (sf.label ≠ branchNextTime b): sf ∈ b so sf.label < branchNextTime b
-          exact Nat.ne_of_lt (branchNextTime_gt b sf hmem)
-        · -- hfresh: all constraint endpoints ≠ branchNextTime b
-          intro a c hac
-          exact ordFreshWRT_ne b ord hOFW a c hac
-        · -- OrdFreshWRT for the output branch
-          simp only [List.mem_singleton] at hnf
-          subst hnf
-          exact ordFreshWRT_addFuture_of_witness b ord sf.label sf hmem rfl hOFW _
-            ⟨⟨.pos, inner, branchNextTime b⟩, List.mem_cons_self _ _, rfl⟩
-      · simp only at h
-        rcases asSomePast? sf.formula with _ | inner
-        · -- somePastPos: addPast, linear result
-          simp only at h
-          obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
-          refine ⟨TimeOrdering.instantStrict_addPast ord sf.label (branchNextTime b) hIS ?_ ?_,
-                  fun nf hnf => ?_⟩
-          · exact Nat.ne_of_lt (branchNextTime_gt b sf hmem)
-          · intro a c hac; exact ordFreshWRT_ne b ord hOFW a c hac
-          · simp only [List.mem_singleton] at hnf; subst hnf
-            exact ordFreshWRT_addPast_of_witness b ord sf.label sf hmem rfl hOFW _
-              ⟨⟨.pos, inner, branchNextTime b⟩, List.mem_cons_self _ _, rfl⟩
-        · simp only at h
-          rcases asUntl? sf.formula with _ | ⟨event, guard⟩
-          · -- untlPos: addFuture, branching result
-            simp only at h
-            obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
-            refine ⟨TimeOrdering.instantStrict_addFuture ord sf.label (branchNextTime b) hIS ?_ ?_,
-                    fun nf hnf => ?_⟩
-            · exact Nat.ne_of_lt (branchNextTime_gt b sf hmem)
-            · intro a c hac; exact ordFreshWRT_ne b ord hOFW a c hac
-            · simp only [List.mem_cons, List.mem_singleton] at hnf
-              rcases hnf with rfl | rfl
-              · -- branch1 = [⟨.pos, event, t'⟩] ++ props
-                exact ordFreshWRT_addFuture_of_witness b ord sf.label sf hmem rfl hOFW _
-                  ⟨⟨.pos, event, branchNextTime b⟩, List.mem_cons_self _ _, rfl⟩
-              · -- branch2 = [⟨.pos, guard, t'⟩, ...] ++ props
-                exact ordFreshWRT_addFuture_of_witness b ord sf.label sf hmem rfl hOFW _
-                  ⟨⟨.pos, guard, branchNextTime b⟩, List.mem_cons_self _ _, rfl⟩
-          · simp only at h
-            rcases asSnce? sf.formula with _ | ⟨event, guard⟩
-            · -- sncePos: addPast, branching result
-              simp only at h
-              obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
-              refine ⟨TimeOrdering.instantStrict_addPast ord sf.label (branchNextTime b) hIS ?_ ?_,
-                      fun nf hnf => ?_⟩
-              · exact Nat.ne_of_lt (branchNextTime_gt b sf hmem)
-              · intro a c hac; exact ordFreshWRT_ne b ord hOFW a c hac
-              · simp only [List.mem_cons, List.mem_singleton] at hnf
-                rcases hnf with rfl | rfl
-                · exact ordFreshWRT_addPast_of_witness b ord sf.label sf hmem rfl hOFW _
-                    ⟨⟨.pos, event, branchNextTime b⟩, List.mem_cons_self _ _, rfl⟩
-                · exact ordFreshWRT_addPast_of_witness b ord sf.label sf hmem rfl hOFW _
-                    ⟨⟨.pos, guard, branchNextTime b⟩, List.mem_cons_self _ _, rfl⟩
-            · -- notApplicable: ord unchanged, no output branches
-              simp only at h
-              obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
-              exact ⟨hIS, fun nf hnf => by simp at hnf⟩
-    · -- allPast: ord unchanged, persistent result
-      simp only at h
-      split_ifs at h with hemp
-      · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
-        exact ⟨hIS, fun nf hnf => by simp at hnf⟩
-      · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
-        exact ⟨hIS, fun nf hnf => by
-          simp only [List.mem_singleton] at hnf; subst hnf
-          exact ordFreshWRT_append_left _ b ord hOFW⟩
-  · -- allFuture: ord unchanged, persistent result
-    split_ifs at h with hemp
-    · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
-      exact ⟨hIS, fun nf hnf => by simp at hnf⟩
-    · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
-      exact ⟨hIS, fun nf hnf => by
-        simp only [List.mem_singleton] at hnf; subst hnf
-        exact ordFreshWRT_append_left _ b ord hOFW⟩
+  -- `asAllFuture?`/`asAllPast?` are now primitive-constructor matches (task #180); the previous
+  -- `rcases X with _ | y` idiom does not propagate into `h` (it only generalizes the goal
+  -- target, not the hypothesis), so every subsequent `simp only at h` silently made no
+  -- progress. `split at h` correctly case-splits on the `match`/`if` inside `h` itself;
+  -- chained via `<;>` it fully unfolds the 9-way case tree (mirroring the original bullet
+  -- structure) regardless of branch depth.
+  split at h <;> try split at h <;> try split at h <;> try split at h <;> try split at h <;>
+    try split at h <;> try split at h
+  -- 1. allFuture, no fresh future obligations: notApplicable
+  · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    exact ⟨hIS, fun nf hnf => by simp at hnf⟩
+  -- 2. allFuture, some fresh future obligations: persistent, ord unchanged
+  · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    exact ⟨hIS, fun nf hnf => by
+      simp only [List.mem_singleton] at hnf; subst hnf
+      exact ordFreshWRT_append_left _ b ord hOFW⟩
+  -- 3. allPast, no fresh past obligations: notApplicable
+  · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    exact ⟨hIS, fun nf hnf => by simp at hnf⟩
+  -- 4. allPast, some fresh past obligations: persistent, ord unchanged
+  · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    exact ⟨hIS, fun nf hnf => by
+      simp only [List.mem_singleton] at hnf; subst hnf
+      exact ordFreshWRT_append_left _ b ord hOFW⟩
+  -- 5. someFuturePos: addFuture, linear result
+  · rename_i inner heq
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    refine ⟨TimeOrdering.instantStrict_addFuture ord sf.label (branchNextTime b) hIS ?_ ?_,
+            fun nf hnf => ?_⟩
+    · -- t ≠ t' (sf.label ≠ branchNextTime b): sf ∈ b so sf.label < branchNextTime b
+      exact Nat.ne_of_lt (branchNextTime_gt b sf hmem)
+    · -- hfresh: all constraint endpoints ≠ branchNextTime b
+      intro a c hac
+      exact ordFreshWRT_ne b ord hOFW a c hac
+    · -- OrdFreshWRT for the output branch
+      simp only [List.mem_singleton] at hnf
+      subst hnf
+      exact ordFreshWRT_addFuture_of_witness b ord sf.label sf hmem rfl hOFW _
+        ⟨⟨.pos, inner, branchNextTime b⟩, List.mem_cons_self, rfl⟩
+  -- 6. somePastPos: addPast, linear result
+  · rename_i inner heq
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    refine ⟨TimeOrdering.instantStrict_addPast ord sf.label (branchNextTime b) hIS ?_ ?_,
+            fun nf hnf => ?_⟩
+    · exact Nat.ne_of_lt (branchNextTime_gt b sf hmem)
+    · intro a c hac; exact ordFreshWRT_ne b ord hOFW a c hac
+    · simp only [List.mem_singleton] at hnf; subst hnf
+      exact ordFreshWRT_addPast_of_witness b ord sf.label sf hmem rfl hOFW _
+        ⟨⟨.pos, inner, branchNextTime b⟩, List.mem_cons_self, rfl⟩
+  -- 7. untlPos: addFuture, branching result
+  · rename_i event guard heq
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    refine ⟨TimeOrdering.instantStrict_addFuture ord sf.label (branchNextTime b) hIS ?_ ?_,
+            fun nf hnf => ?_⟩
+    · exact Nat.ne_of_lt (branchNextTime_gt b sf hmem)
+    · intro a c hac; exact ordFreshWRT_ne b ord hOFW a c hac
+    · simp only [List.mem_cons, List.not_mem_nil, or_false] at hnf
+      rcases hnf with rfl | rfl
+      · -- branch1 = [⟨.pos, event, t'⟩] ++ props
+        exact ordFreshWRT_addFuture_of_witness b ord sf.label sf hmem rfl hOFW _
+          ⟨⟨.pos, event, branchNextTime b⟩, List.mem_cons_self, rfl⟩
+      · -- branch2 = [⟨.pos, guard, t'⟩, ...] ++ props
+        exact ordFreshWRT_addFuture_of_witness b ord sf.label sf hmem rfl hOFW _
+          ⟨⟨.pos, guard, branchNextTime b⟩, List.mem_cons_self, rfl⟩
+  -- 8. sncePos: addPast, branching result
+  · rename_i event guard heq
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    refine ⟨TimeOrdering.instantStrict_addPast ord sf.label (branchNextTime b) hIS ?_ ?_,
+            fun nf hnf => ?_⟩
+    · exact Nat.ne_of_lt (branchNextTime_gt b sf hmem)
+    · intro a c hac; exact ordFreshWRT_ne b ord hOFW a c hac
+    · simp only [List.mem_cons, List.not_mem_nil, or_false] at hnf
+      rcases hnf with rfl | rfl
+      · exact ordFreshWRT_addPast_of_witness b ord sf.label sf hmem rfl hOFW _
+          ⟨⟨.pos, event, branchNextTime b⟩, List.mem_cons_self, rfl⟩
+      · exact ordFreshWRT_addPast_of_witness b ord sf.label sf hmem rfl hOFW _
+          ⟨⟨.pos, guard, branchNextTime b⟩, List.mem_cons_self, rfl⟩
+  -- 9. notApplicable: ord unchanged, no output branches
+  · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    exact ⟨hIS, fun nf hnf => by simp at hnf⟩
 
 omit [Hashable Atom] in
 /-- `temporalApplyNeg` preserves `InstantStrict` and `OrdFreshWRT`.
@@ -615,73 +610,62 @@ lemma temporalApplyNeg_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeO
       | .notApplicable => []),
       OrdFreshWRT (nf ++ b) newOrd := by
   simp only [temporalApplyNeg] at h
-  rcases asUntl? sf.formula with _ | ⟨event, guard⟩
-  · rcases asSnce? sf.formula with _ | ⟨event, guard⟩
-    · -- snceNeg
-      set pastTimes := ord.pastOf sf.label
-      set unprocessed := pastTimes.filter _
-      rcases hunproc : unprocessed with _ | ⟨t', rest⟩
-      · simp only [← hunproc] at h
-        -- unprocessed = []: either create fresh past time or notApplicable
-        split_ifs at h with hcond
-        · -- Fresh past time created: addPast
-          obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
-          refine ⟨TimeOrdering.instantStrict_addPast ord sf.label (branchNextTime b) hIS ?_ ?_,
-                  fun nf hnf => ?_⟩
-          · exact Nat.ne_of_lt (branchNextTime_gt b sf hmem)
-          · intro a c hac; exact ordFreshWRT_ne b ord hOFW a c hac
-          · simp only [List.mem_cons, List.mem_singleton] at hnf
-            rcases hnf with rfl | rfl
-            · -- branch1: [⟨.neg, event, t'⟩, sf] ++ props
-              exact ordFreshWRT_addPast_of_witness b ord sf.label sf hmem rfl hOFW _
-                ⟨⟨.neg, event, branchNextTime b⟩, List.mem_cons_self _ _, rfl⟩
-            · -- branch2: [⟨.neg, guard, t'⟩, ...] ++ props
-              exact ordFreshWRT_addPast_of_witness b ord sf.label sf hmem rfl hOFW _
-                ⟨⟨.neg, guard, branchNextTime b⟩, List.mem_cons_self _ _, rfl⟩
-        · -- notApplicable
-          obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
-          exact ⟨hIS, fun nf hnf => by simp at hnf⟩
-      · -- unprocessed = t' :: rest: branching at existing past time, ord unchanged
-        simp only [← hunproc] at h
-        obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
-        refine ⟨hIS, fun nf hnf => ?_⟩
-        simp only [List.mem_cons, List.mem_singleton] at hnf
-        rcases hnf with rfl | rfl
-        all_goals exact ordFreshWRT_append_left _ b ord hOFW
-    · -- notApplicable
-      obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
-      exact ⟨hIS, fun nf hnf => by simp at hnf⟩
-  · -- untlNeg
-    set futureTimes := ord.futureOf sf.label
-    set unprocessed := futureTimes.filter _
-    rcases hunproc : unprocessed with _ | ⟨t', rest⟩
-    · simp only [← hunproc] at h
-      -- unprocessed = []: either create fresh future time or notApplicable
-      split_ifs at h with hcond
-      · -- Fresh future time created: addFuture
-        obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
-        refine ⟨TimeOrdering.instantStrict_addFuture ord sf.label (branchNextTime b) hIS ?_ ?_,
-                fun nf hnf => ?_⟩
-        · exact Nat.ne_of_lt (branchNextTime_gt b sf hmem)
-        · intro a c hac; exact ordFreshWRT_ne b ord hOFW a c hac
-        · simp only [List.mem_cons, List.mem_singleton] at hnf
-          rcases hnf with rfl | rfl
-          · -- branch1: [⟨.neg, event, t'⟩, sf] ++ props
-            exact ordFreshWRT_addFuture_of_witness b ord sf.label sf hmem rfl hOFW _
-              ⟨⟨.neg, event, branchNextTime b⟩, List.mem_cons_self _ _, rfl⟩
-          · -- branch2: [⟨.neg, guard, t'⟩, ...] ++ props
-            exact ordFreshWRT_addFuture_of_witness b ord sf.label sf hmem rfl hOFW _
-              ⟨⟨.neg, guard, branchNextTime b⟩, List.mem_cons_self _ _, rfl⟩
-      · -- notApplicable
-        obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
-        exact ⟨hIS, fun nf hnf => by simp at hnf⟩
-    · -- unprocessed = t' :: rest: branching at existing future time, ord unchanged
-      simp only [← hunproc] at h
-      obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
-      refine ⟨hIS, fun nf hnf => ?_⟩
-      simp only [List.mem_cons, List.mem_singleton] at hnf
+  -- See `temporalApplyPos_preserves` for why `split at h` replaces the broken
+  -- `rcases X with _ | y` idiom (which does not propagate its case split into `h`).
+  split at h <;> try split at h <;> try split at h <;> try split at h
+  -- 1. untlNeg, co-decomposition at an already-unprocessed future time: branching, ord unchanged
+  · rename_i event guard _heqUntl _unprocessed _t' _tail _heqFilter
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    refine ⟨hIS, fun nf hnf => ?_⟩
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hnf
+    rcases hnf with rfl | rfl
+    all_goals exact ordFreshWRT_append_left _ b ord hOFW
+  -- 2. untlNeg, no unprocessed future time, fresh time created: branching, addFuture
+  · rename_i event guard _heqUntl _unprocessed _heqFilter _hcond
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    refine ⟨TimeOrdering.instantStrict_addFuture ord sf.label (branchNextTime b) hIS ?_ ?_,
+            fun nf hnf => ?_⟩
+    · exact Nat.ne_of_lt (branchNextTime_gt b sf hmem)
+    · intro a c hac; exact ordFreshWRT_ne b ord hOFW a c hac
+    · simp only [List.mem_cons, List.not_mem_nil, or_false] at hnf
       rcases hnf with rfl | rfl
-      all_goals exact ordFreshWRT_append_left _ b ord hOFW
+      · -- branch1: [⟨.neg, event, t'⟩, sf] ++ props
+        exact ordFreshWRT_addFuture_of_witness b ord sf.label sf hmem rfl hOFW _
+          ⟨⟨.neg, event, branchNextTime b⟩, List.mem_cons_self, rfl⟩
+      · -- branch2: [⟨.neg, guard, t'⟩, ...] ++ props
+        exact ordFreshWRT_addFuture_of_witness b ord sf.label sf hmem rfl hOFW _
+          ⟨⟨.neg, guard, branchNextTime b⟩, List.mem_cons_self, rfl⟩
+  -- 3. untlNeg, no unprocessed future time, depth limit reached: notApplicable
+  · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    exact ⟨hIS, fun nf hnf => by simp at hnf⟩
+  -- 4. snceNeg, co-decomposition at an already-unprocessed past time: branching, ord unchanged
+  · rename_i event guard _heqSnce _unprocessed _t' _tail _heqFilter
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    refine ⟨hIS, fun nf hnf => ?_⟩
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hnf
+    rcases hnf with rfl | rfl
+    all_goals exact ordFreshWRT_append_left _ b ord hOFW
+  -- 5. snceNeg, no unprocessed past time, fresh time created: branching, addPast
+  · rename_i event guard _heqSnce _unprocessed _heqFilter _hcond
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    refine ⟨TimeOrdering.instantStrict_addPast ord sf.label (branchNextTime b) hIS ?_ ?_,
+            fun nf hnf => ?_⟩
+    · exact Nat.ne_of_lt (branchNextTime_gt b sf hmem)
+    · intro a c hac; exact ordFreshWRT_ne b ord hOFW a c hac
+    · simp only [List.mem_cons, List.not_mem_nil, or_false] at hnf
+      rcases hnf with rfl | rfl
+      · -- branch1: [⟨.neg, event, t'⟩, sf] ++ props
+        exact ordFreshWRT_addPast_of_witness b ord sf.label sf hmem rfl hOFW _
+          ⟨⟨.neg, event, branchNextTime b⟩, List.mem_cons_self, rfl⟩
+      · -- branch2: [⟨.neg, guard, t'⟩, ...] ++ props
+        exact ordFreshWRT_addPast_of_witness b ord sf.label sf hmem rfl hOFW _
+          ⟨⟨.neg, guard, branchNextTime b⟩, List.mem_cons_self, rfl⟩
+  -- 6. snceNeg, no unprocessed past time, depth limit reached: notApplicable
+  · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    exact ⟨hIS, fun nf hnf => by simp at hnf⟩
+  -- 7. neither untl nor snce: notApplicable
+  · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    exact ⟨hIS, fun nf hnf => by simp at hnf⟩
 
 omit [Hashable Atom] in
 /-- `temporalApplyOne` preserves `InstantStrict` and `OrdFreshWRT`.
@@ -712,7 +696,9 @@ lemma temporalApplyOne_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeO
     exact ordFreshWRT_append_left nf b ord hOFW
   · -- No propositional rule fires: dispatch to pos/neg
     rw [if_neg hprop] at h
-    rcases sf.sign with _ | _
+    -- `rcases sf.sign with _ | _` does not propagate its case split into `h` (see
+    -- `temporalApplyPos_preserves`); `split at h` correctly reduces `h`'s `match sf.sign with ...`.
+    split at h
     · -- Positive: temporalApplyPos
       exact temporalApplyPos_preserves sf b ord hIS hOFW hmem result newOrd h
     · -- Negative: temporalApplyNeg

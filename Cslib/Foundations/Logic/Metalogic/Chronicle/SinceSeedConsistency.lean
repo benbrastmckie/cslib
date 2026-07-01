@@ -7,8 +7,9 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
-public import Mathlib.Order.Zorn
-public import Cslib.Foundations.Logic.Connectives
+public import Mathlib.Tactic.SetLike
+public import Mathlib.Data.Set.Basic
+public import Aesop
 
 /-! # Since Seed Consistency — Shared Chronicle Point-Insertion Interface
 
@@ -69,6 +70,10 @@ are ported in later phases (2/3/4/5 of the task-454 plan); see
 @[expose] public section
 
 namespace Cslib.Logic.Metalogic.Chronicle
+
+set_option linter.style.setOption false
+set_option linter.flexible false
+set_option linter.unusedSimpArgs false
 
 variable {F : Type*}
 
@@ -153,6 +158,12 @@ structure SinceSeedInterface (F : Type*) where
   untl : F → F → F
   /-- Since. -/
   snce : F → F → F
+  /-- Injectivity of `untl` (a genuine primitive `Formula` constructor in both logics). -/
+  untlInjective : ∀ {a b c d : F}, untl a b = untl c d → a = c ∧ b = d
+  /-- Injectivity of `and` (derived from the Lukasiewicz encoding `and φ ψ := imp (imp φ
+  (imp ψ bot)) bot` in both logics, hence injective via `imp`'s injectivity; kept as a
+  field rather than re-derived so `and` itself can stay an opaque primitive here). -/
+  andInjective : ∀ {a b c d : F}, and a b = and c d → a = c ∧ b = d
   /-- Some-past (`𝐏`). -/
   somePast : F → F
   /-- All-past (`𝐇`). -/
@@ -343,5 +354,95 @@ def gContent (I : SinceSeedInterface F) (M : Set F) : Set F := gContentOf I.allF
 
 /-- `hContent` w.r.t. `I`'s `allPast`. -/
 def hContent (I : SinceSeedInterface F) (M : Set F) : Set F := hContentOf I.allPast M
+
+/-! ## Since-Direction Seed and Small `l27s*` Helpers (task-454 Phase 1)
+
+Ported verbatim (modulo `I.*`-qualification) from the near-byte-identical
+`lemma27SinceSeed`/`l27s*` family shared by both logics' `Since.lean` files. These
+depend only on the formula operators (`and`, `untl`) and pure list plumbing — no
+Burgess/MCS apparatus — so they factor over `SinceSeedInterface` with no additional
+fields. The one non-mechanical proof-line divergence noted in the task-454 research
+(`simp only [Formula.and, Formula.neg]` in Bimodal vs. `simp only [Formula.and]` in
+Temporal, inside `l27s_b5_β_mem`) is resolved here by using `andInjective` directly
+instead of unfolding `and`/`neg` via `simp`, which sidesteps the divergence entirely. -/
+
+variable (I : SinceSeedInterface F)
+
+/-- Since-direction seed: `B ∪ {eta} ∪ {untl(β∧xi, γ) | β∈B, γ∈C}`. -/
+@[nolint unusedArguments]
+def lemma27SinceSeed (_A B C : Set F) (xi eta : F) : Set F :=
+  B ∪ {eta} ∪ {φ | ∃ β ∈ B, ∃ γ ∈ C, φ = I.untl (I.and β xi) γ}
+
+/-- Extract `γ'` events from component-3 elements (`untl(β∧xi, γ')`) of a list. -/
+noncomputable def l27sC5EventList (B C : Set F) (xi : F) (L : List F) : List F :=
+  L.filterMap (fun φ => by
+    classical
+    exact if h : ∃ β' ∈ B, ∃ γ ∈ C, φ = I.untl (I.and β' xi) γ then
+      some (Classical.choose (Classical.choose_spec h).2)
+    else none)
+
+/-- Elements of `l27sC5EventList` are in `C`. -/
+theorem l27s_c5_event_list_mem {B C : Set F} {xi : F}
+    {L : List F} {γ : F} (hγ : γ ∈ l27sC5EventList I B C xi L) : γ ∈ C := by
+  unfold l27sC5EventList at hγ
+  simp [List.mem_filterMap] at hγ
+  obtain ⟨φ, _, hγ_eq⟩ := hγ
+  by_cases h : ∃ β' ∈ B, ∃ γ' ∈ C, φ = I.untl (I.and β' xi) γ'
+  · simp [h] at hγ_eq; subst hγ_eq
+    exact (Classical.choose_spec (Classical.choose_spec h).2).1
+  · simp [h] at hγ_eq
+
+/-- Extract `β'` guards from component-3 elements of a list. -/
+noncomputable def l27sB5GuardList (B C : Set F) (xi : F) (L : List F) : List F :=
+  L.filterMap (fun φ => by
+    classical
+    exact if h : ∃ β' ∈ B, ∃ γ ∈ C, φ = I.untl (I.and β' xi) γ then
+      some (Classical.choose h)
+    else none)
+
+/-- Elements of `l27sB5GuardList` are in `B`. -/
+theorem l27s_b5_guard_list_mem {B C : Set F} {xi : F}
+    {L : List F} {β : F} (hβ : β ∈ l27sB5GuardList I B C xi L) : β ∈ B := by
+  unfold l27sB5GuardList at hβ
+  simp [List.mem_filterMap] at hβ
+  obtain ⟨φ, _, hβ_eq⟩ := hβ
+  by_cases h : ∃ β' ∈ B, ∃ γ' ∈ C, φ = I.untl (I.and β' xi) γ'
+  · simp [h] at hβ_eq; subst hβ_eq
+    exact (Classical.choose_spec h).1
+  · simp [h] at hβ_eq
+
+/-- For a component-3 element `untl(β'∧xi, γ')` in `L`, the extracted `γ'` is in
+`l27sC5EventList`. -/
+theorem l27s_c5_γ_mem {B C : Set F} {xi : F}
+    {L : List F} {β' γ' : F}
+    (hφ : I.untl (I.and β' xi) γ' ∈ L)
+    (hβ' : β' ∈ B) (hγ' : γ' ∈ C) :
+    γ' ∈ l27sC5EventList I B C xi L := by
+  unfold l27sC5EventList
+  simp only [List.mem_filterMap]
+  refine ⟨I.untl (I.and β' xi) γ', hφ, ?_⟩
+  have h : ∃ β'' ∈ B, ∃ γ'' ∈ C, I.untl (I.and β' xi) γ' =
+      I.untl (I.and β'' xi) γ'' := ⟨β', hβ', γ', hγ', rfl⟩
+  simp only [h, ↓reduceDIte]
+  have h_spec := (Classical.choose_spec (Classical.choose_spec h).2)
+  exact congr_arg some (I.untlInjective h_spec.2).2.symm
+
+/-- For a component-3 element `untl(β'∧xi, γ')` in `L`, the extracted `β'` is in
+`l27sB5GuardList`. -/
+theorem l27s_b5_β_mem {B C : Set F} {xi : F}
+    {L : List F} {β' γ' : F}
+    (hφ : I.untl (I.and β' xi) γ' ∈ L)
+    (hβ' : β' ∈ B) (hγ' : γ' ∈ C) :
+    β' ∈ l27sB5GuardList I B C xi L := by
+  unfold l27sB5GuardList
+  simp only [List.mem_filterMap]
+  refine ⟨I.untl (I.and β' xi) γ', hφ, ?_⟩
+  have h : ∃ β'' ∈ B, ∃ γ'' ∈ C, I.untl (I.and β' xi) γ' =
+      I.untl (I.and β'' xi) γ'' := ⟨β', hβ', γ', hγ', rfl⟩
+  simp only [h, ↓reduceDIte]
+  have h_spec := Classical.choose_spec h
+  obtain ⟨_, γ'', _, h_formula_eq⟩ := h_spec
+  have h_inj := I.untlInjective h_formula_eq
+  exact congr_arg some (I.andInjective h_inj.1).1.symm
 
 end Cslib.Logic.Metalogic.Chronicle

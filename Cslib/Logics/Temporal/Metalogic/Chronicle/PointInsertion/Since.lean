@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.PointInsertion.Splitting
+public import Cslib.Foundations.Logic.Metalogic.Chronicle.SinceSeedConsistency
 
 /-! # Since — Enriched Lemma 2.4 and Since-Direction Mirrors
 
@@ -63,83 +64,125 @@ lemma lemma24WithGuard {A : Set (Formula Atom)}
 
 /-! ## Phase 4: Since-Direction Mirrors -/
 
-/-- Since-direction seed: B ∪ {eta} ∪ {untl(γ, β∧xi) | β∈B, γ∈C}. -/
-@[nolint unusedArguments]
-private def lemma27SinceSeed (_A B C : Set (Formula Atom)) (xi eta : Formula Atom) : Set (Formula Atom) :=
-  B ∪ {eta} ∪ {φ | ∃ β ∈ B, ∃ γ ∈ C, φ = Formula.untl (Formula.and β xi) γ}
+/-- The `SinceSeedInterface` instance for Temporal (task 454): populates every field of the
+shared Foundations interface with Temporal's own apparatus at `FrameClass.Base`. Used to
+delegate to the generic `lemma27SinceSeed`/`l27s*` helpers
+(`Cslib.Foundations.Logic.Metalogic.Chronicle.SinceSeedConsistency`) instead of duplicating
+them locally (task-454 Phase 1). -/
+private noncomputable def temporalSinceInterface : Cslib.Logic.Metalogic.Chronicle.SinceSeedInterface (Formula Atom) where
+  bot := Formula.bot
+  imp := Formula.imp
+  and := Formula.and
+  untl := Formula.untl
+  snce := Formula.snce
+  somePast := Formula.somePast
+  allPast := Formula.allPast
+  allFuture := Formula.allFuture
+  Deriv := DerivationTree FrameClass.Base
+  untlInjective := fun h => Formula.untl.inj h
+  andInjective := by
+    intro a b c d h
+    simp only [Formula.and] at h
+    have h1 := Formula.imp.inj h
+    have h2 := Formula.imp.inj h1.1
+    exact ⟨h2.1, (Formula.imp.inj h2.2).1⟩
+  assumption := fun h => DerivationTree.assumption _ _ h
+  modusPonens := fun h1 h2 => DerivationTree.modus_ponens _ _ _ h1 h2
+  weakening := fun Γ Δ φ d hsub => DerivationTree.weakening Γ Δ φ d hsub
+  deductionTheorem := fun Γ φ ψ d => deductionTheorem Γ φ ψ d
+  identity' := fun φ => identity' φ
+  impTrans := fun h1 h2 => impTrans h1 h2
+  lceImp := fun φ ψ => lceImp φ ψ
+  rceImp := fun φ ψ => rceImp φ ψ
+  combineImpConj := fun h1 h2 => combineImpConj h1 h2
+  untlLeftMonoDeriv := fun g1 e g2 h => untlLeftMonoDeriv g1 e g2 h
+  pastNecessitation := fun φ d => pastNecessitation φ d
+  theoremInMcs := by intro _ hmcs _ hd; exact theoremInMcs hmcs hd
+  negationComplete := fun hmcs φ => temporal_negation_complete hmcs φ
+  negExcludes := by intro _ hmcs _ hneg hmem; exact mcs_not_mem_of_neg hmcs hneg hmem
+  cudContainsTheorems := by intro _ hcud _ hd; exact cud_contains_theorems hcud hd
+  selfAccumSinceMcs := fun hmcs γ β h => self_accum_since_mcs hmcs γ β h
+  linearSinceMcs := fun hmcs φ ψ χ θ h1 h2 => linear_since_mcs hmcs φ ψ χ θ h1 h2
+  rightMonoSinceMcs := by intro _ hmcs _ _ _ hi hs; exact right_mono_since_mcs hmcs hi hs
+  sinceImpliesP := by intro _ hmcs _ _ h; exact since_implies_P_in_mcs hmcs h
+  consistentOfPMem := fun hmcs φ h => consistent_of_P_mem hmcs φ h
+  inconsistentSingletonFalse := by intro _ hcons d; exact inconsistent_singleton_false hcons d
+  derivationFromImplied := fun Γ L ψ h d => derivationFromImplied Γ L ψ h d
+  dcDeltaBControlled := by intro _ hcud _ _ _ hLsub hd; exact dc_delta_B_controlled hcud hLsub hd
+  iteratedEnrichmentSince := fun hmcs guard gammas hgammas event hsnce => by
+    have evt := iteratedEnrichmentSince hmcs guard gammas hgammas event hsnce
+    exact ⟨evt.event', evt.hSnce, evt.hImpl, evt.hUntl⟩
+  xuLemma321Until := by
+    intro _ _ _ hA hC hR3M beta hbeta gamma hgamma
+    exact xu_lemma_3_2_1_until hA hC hR3M hbeta hgamma
+  xuLemma321Since := by
+    intro _ _ _ hA hC hR3M beta hbeta alpha halpha
+    exact xu_lemma_3_2_1_since hA hC hR3M hbeta halpha
+  burgessRImpliesBurgessRSince := by
+    intro _ _ hA hC beta hR; exact burgessR_implies_burgessRSince hA hC hR
+  burgessRSinceImpliesBurgessR := by
+    intro _ _ hA hC beta hR; exact burgessRSince_implies_burgessR hA hC hR
+  burgessRConj := by intro _ _ hA α β ha hb; exact burgessR_conj hA ha hb
+  burgessRSinceConj := by intro _ _ hC α β ha hb; exact burgessRSince_conj hC ha hb
+  burgessR3MaximalExtensionFails := by
+    intro _ _ _ hR3M delta hnotmem; exact BurgessR3Maximal_extension_fails hR3M hnotmem
+  dcDeltaBBurgessR3 := by
+    intro _ _ _ hA hC hcud hr3 delta huntl hsince
+    exact dc_delta_B_burgessR3 hA hC hcud hr3 huntl hsince
+  burgessR3MaximalExtensionExists := by
+    intro _ _ _ hA hC hcud hr3
+    obtain ⟨B, hsub, hmax⟩ := burgessR3Maximal_extension_exists hA hC hcud hr3
+    exact ⟨B, hsub, hmax⟩
+  listConj := listConj
+  listConjMemDcs := fun hcud L hL => list_conj_mem_dcs hcud L hL
+  listConjMemMcs := fun hmcs L hL => list_conj_mem_mcs hmcs L hL
+  listConjImpliesElem := fun L φ h => listConjImpliesElem L φ h
 
-/-- Extract γ' events from component 3 elements of a list. -/
+/-- Since-direction seed: B ∪ {eta} ∪ {untl(γ, β∧xi) | β∈B, γ∈C}. Relocated (task-454
+Phase 1) to the shared `Cslib.Foundations.Logic.Metalogic.Chronicle.SinceSeedConsistency`
+module; this is a thin alias fixing Temporal's interface instance. -/
+@[nolint unusedArguments]
+private def lemma27SinceSeed (_A B C : Set (Formula Atom)) (xi eta : Formula Atom) :
+    Set (Formula Atom) :=
+  Cslib.Logic.Metalogic.Chronicle.lemma27SinceSeed temporalSinceInterface _A B C xi eta
+
+/-- Extract γ' events from component 3 elements of a list. Relocated (task-454 Phase 1). -/
 private noncomputable def l27sC5EventList (B C : Set (Formula Atom)) (xi : Formula Atom)
     (L : List (Formula Atom)) : List (Formula Atom) :=
-  L.filterMap (fun φ => by
-    classical
-    exact if h : ∃ β' ∈ B, ∃ γ ∈ C, φ = Formula.untl (Formula.and β' xi) γ then
-      some (Classical.choose (Classical.choose_spec h).2)
-    else none)
+  Cslib.Logic.Metalogic.Chronicle.l27sC5EventList temporalSinceInterface B C xi L
 
-/-- Elements of l27sC5EventList are in C. -/
+/-- Elements of l27sC5EventList are in C. Relocated (task-454 Phase 1). -/
 private theorem l27s_c5_event_list_mem {B C : Set (Formula Atom)} {xi : Formula Atom}
-    {L : List (Formula Atom)} {γ : Formula Atom} (hγ : γ ∈ l27sC5EventList B C xi L) : γ ∈ C := by
-  unfold l27sC5EventList at hγ
-  simp [List.mem_filterMap] at hγ
-  obtain ⟨φ, _, hγ_eq⟩ := hγ
-  by_cases h : ∃ β' ∈ B, ∃ γ' ∈ C, φ = Formula.untl (Formula.and β' xi) γ'
-  · simp [h] at hγ_eq; subst hγ_eq
-    exact (Classical.choose_spec (Classical.choose_spec h).2).1
-  · simp [h] at hγ_eq
+    {L : List (Formula Atom)} {γ : Formula Atom} (hγ : γ ∈ l27sC5EventList B C xi L) : γ ∈ C :=
+  Cslib.Logic.Metalogic.Chronicle.l27s_c5_event_list_mem temporalSinceInterface hγ
 
-/-- Extract β' guards from component 3 elements. -/
+/-- Extract β' guards from component 3 elements. Relocated (task-454 Phase 1). -/
 private noncomputable def l27sB5GuardList (B C : Set (Formula Atom)) (xi : Formula Atom)
     (L : List (Formula Atom)) : List (Formula Atom) :=
-  L.filterMap (fun φ => by
-    classical
-    exact if h : ∃ β' ∈ B, ∃ γ ∈ C, φ = Formula.untl (Formula.and β' xi) γ then
-      some (Classical.choose h)
-    else none)
+  Cslib.Logic.Metalogic.Chronicle.l27sB5GuardList temporalSinceInterface B C xi L
 
-/-- Elements of l27sB5GuardList are in B. -/
+/-- Elements of l27sB5GuardList are in B. Relocated (task-454 Phase 1). -/
 private theorem l27s_b5_guard_list_mem {B C : Set (Formula Atom)} {xi : Formula Atom}
-    {L : List (Formula Atom)} {β : Formula Atom} (hβ : β ∈ l27sB5GuardList B C xi L) : β ∈ B := by
-  unfold l27sB5GuardList at hβ
-  simp [List.mem_filterMap] at hβ
-  obtain ⟨φ, _, hβ_eq⟩ := hβ
-  by_cases h : ∃ β' ∈ B, ∃ γ' ∈ C, φ = Formula.untl (Formula.and β' xi) γ'
-  · simp [h] at hβ_eq; subst hβ_eq
-    exact (Classical.choose_spec h).1
-  · simp [h] at hβ_eq
+    {L : List (Formula Atom)} {β : Formula Atom} (hβ : β ∈ l27sB5GuardList B C xi L) : β ∈ B :=
+  Cslib.Logic.Metalogic.Chronicle.l27s_b5_guard_list_mem temporalSinceInterface hβ
 
-/-- For a component 3 element, the extracted γ' is in c5_event_list. -/
+/-- For a component 3 element, the extracted γ' is in c5_event_list. Relocated
+(task-454 Phase 1). -/
 private theorem l27s_c5_γ_mem {B C : Set (Formula Atom)} {xi : Formula Atom}
     {L : List (Formula Atom)} {β' γ' : Formula Atom}
     (hφ : Formula.untl (Formula.and β' xi) γ' ∈ L)
     (hβ' : β' ∈ B) (hγ' : γ' ∈ C) :
-    γ' ∈ l27sC5EventList B C xi L := by
-  unfold l27sC5EventList
-  simp only [List.mem_filterMap]
-  refine ⟨Formula.untl (Formula.and β' xi) γ', hφ, ?_⟩
-  have h : ∃ β'' ∈ B, ∃ γ'' ∈ C, Formula.untl (Formula.and β' xi) γ' =
-      Formula.untl (Formula.and β'' xi) γ'' := ⟨β', hβ', γ', hγ', rfl⟩
-  simp only [h, ↓reduceDIte]
-  have h_spec := (Classical.choose_spec (Classical.choose_spec h).2)
-  exact congr_arg some (Formula.untl.inj h_spec.2).2.symm
+    γ' ∈ l27sC5EventList B C xi L :=
+  Cslib.Logic.Metalogic.Chronicle.l27s_c5_γ_mem temporalSinceInterface hφ hβ' hγ'
 
-/-- For a component 3 element, the extracted β' is in b5_guard_list. -/
+/-- For a component 3 element, the extracted β' is in b5_guard_list. Relocated
+(task-454 Phase 1). -/
 private theorem l27s_b5_β_mem {B C : Set (Formula Atom)} {xi : Formula Atom}
     {L : List (Formula Atom)} {β' γ' : Formula Atom}
     (hφ : Formula.untl (Formula.and β' xi) γ' ∈ L)
     (hβ' : β' ∈ B) (hγ' : γ' ∈ C) :
-    β' ∈ l27sB5GuardList B C xi L := by
-  unfold l27sB5GuardList
-  simp only [List.mem_filterMap]
-  refine ⟨Formula.untl (Formula.and β' xi) γ', hφ, ?_⟩
-  have h : ∃ β'' ∈ B, ∃ γ'' ∈ C, Formula.untl (Formula.and β' xi) γ' =
-      Formula.untl (Formula.and β'' xi) γ'' := ⟨β', hβ', γ', hγ', rfl⟩
-  simp only [h, ↓reduceDIte]
-  have h_spec := Classical.choose_spec h
-  obtain ⟨_, γ'', _, h_formula_eq⟩ := h_spec
-  have h_inj := Formula.untl.inj h_formula_eq
-  simp only [Formula.and] at h_inj
-  exact congr_arg some ((Formula.imp.inj (Formula.imp.inj h_inj.1).1).1).symm
+    β' ∈ l27sB5GuardList B C xi L :=
+  Cslib.Logic.Metalogic.Chronicle.l27s_b5_β_mem temporalSinceInterface hφ hβ' hγ'
 
 /-- Since-direction seed consistency. Uses BX5'+BX7'+BX13' chain. -/
 private theorem lemma_2_7_since_seed_consistent {A B C : Set (Formula Atom)}
@@ -268,7 +311,7 @@ private theorem lemma_2_7_since_seed_consistent {A B C : Set (Formula Atom)}
               (DerivationTree.weakening [] _ _ h_chain (List.nil_subset _))
               (DerivationTree.assumption _ _ (by exact List.mem_singleton.mpr rfl))
           · exfalso
-            simp only [lemma27SinceSeed, Set.mem_union, Set.mem_setOf_eq,
+            simp only [lemma27SinceSeed, Cslib.Logic.Metalogic.Chronicle.lemma27SinceSeed, Set.mem_union, Set.mem_setOf_eq,
               Set.mem_singleton_iff] at h_φ_seed
             rcases h_φ_seed with ((h1 | h2) | h5)
             · exact h_B_case h1
@@ -354,10 +397,10 @@ theorem lemma_2_7_since {A B C : Set (Formula Atom)}
   obtain ⟨D, h_sup, h_D_mcs⟩ := temporal_lindenbaum h_seed_cons
   have h_eta_D : eta ∈ D := by
     apply h_sup; show eta ∈ lemma27SinceSeed A B C xi eta
-    simp [lemma27SinceSeed]
+    simp [lemma27SinceSeed, Cslib.Logic.Metalogic.Chronicle.lemma27SinceSeed]
   have h_B_sub_D : B ⊆ D := by
     intro φ hφ; apply h_sup
-    show φ ∈ lemma27SinceSeed A B C xi eta; simp [lemma27SinceSeed, hφ]
+    show φ ∈ lemma27SinceSeed A B C xi eta; simp [lemma27SinceSeed, Cslib.Logic.Metalogic.Chronicle.lemma27SinceSeed, hφ]
   have h_untl_D : ∀ β ∈ B, ∀ γ ∈ C, (β U γ) ∈ D := by
     intro β hβ γ hγ
     exact h_B_sub_D (xu_lemma_3_2_1_until h_mcs_A h_mcs_C h_r3m hβ hγ)
@@ -377,7 +420,7 @@ theorem lemma_2_7_since {A B C : Set (Formula Atom)}
   have h_untl_conj_xi_D : ∀ β ∈ B, ∀ γ ∈ C, Formula.untl (Formula.and β xi) γ ∈ D := by
     intro β hβ γ hγ; apply h_sup
     show Formula.untl (Formula.and β xi) γ ∈ lemma27SinceSeed A B C xi eta
-    simp only [lemma27SinceSeed, Set.mem_union, Set.mem_setOf_eq]
+    simp only [lemma27SinceSeed, Cslib.Logic.Metalogic.Chronicle.lemma27SinceSeed, Set.mem_union, Set.mem_setOf_eq]
     right; exact ⟨β, hβ, γ, hγ, rfl⟩
   have h_B_nonempty : ∃ β₀ : Formula Atom, β₀ ∈ B := by
     exact ⟨Formula.bot.imp Formula.bot, cud_contains_theorems h_r3m.1
@@ -519,7 +562,7 @@ private theorem lemma_2_8_since_seed_consistent {A B C : Set (Formula Atom)}
               (DerivationTree.weakening [] _ _ h_chain (List.nil_subset _))
               (DerivationTree.assumption _ _ (by exact List.mem_singleton.mpr rfl))
           · exfalso
-            simp only [lemma27SinceSeed, Set.mem_union, Set.mem_setOf_eq,
+            simp only [lemma27SinceSeed, Cslib.Logic.Metalogic.Chronicle.lemma27SinceSeed, Set.mem_union, Set.mem_setOf_eq,
               Set.mem_singleton_iff] at h_φ_seed
             rcases h_φ_seed with ((h1 | h2) | h5)
             · exact h_B_case h1
@@ -621,10 +664,10 @@ theorem lemma_2_8_since {A B C : Set (Formula Atom)}
   obtain ⟨D, h_sup, h_D_mcs⟩ := temporal_lindenbaum h_seed_cons
   have h_eta_D : eta ∈ D := by
     apply h_sup; show eta ∈ lemma27SinceSeed A B C xi eta
-    simp [lemma27SinceSeed]
+    simp [lemma27SinceSeed, Cslib.Logic.Metalogic.Chronicle.lemma27SinceSeed]
   have h_B_sub_D : B ⊆ D := by
     intro φ hφ; apply h_sup
-    show φ ∈ lemma27SinceSeed A B C xi eta; simp [lemma27SinceSeed, hφ]
+    show φ ∈ lemma27SinceSeed A B C xi eta; simp [lemma27SinceSeed, Cslib.Logic.Metalogic.Chronicle.lemma27SinceSeed, hφ]
   have h_untl_D : ∀ β ∈ B, ∀ γ ∈ C, (β U γ) ∈ D := by
     intro β hβ γ hγ
     exact h_B_sub_D (xu_lemma_3_2_1_until h_mcs_A h_mcs_C h_r3m hβ hγ)
@@ -644,7 +687,7 @@ theorem lemma_2_8_since {A B C : Set (Formula Atom)}
   have h_untl_conj_xi_D : ∀ β ∈ B, ∀ γ ∈ C, Formula.untl (Formula.and β xi) γ ∈ D := by
     intro β hβ γ hγ; apply h_sup
     show Formula.untl (Formula.and β xi) γ ∈ lemma27SinceSeed A B C xi eta
-    simp only [lemma27SinceSeed, Set.mem_union, Set.mem_setOf_eq]
+    simp only [lemma27SinceSeed, Cslib.Logic.Metalogic.Chronicle.lemma27SinceSeed, Set.mem_union, Set.mem_setOf_eq]
     right; exact ⟨β, hβ, γ, hγ, rfl⟩
   have h_B_nonempty : ∃ β₀ : Formula Atom, β₀ ∈ B := by
     exact ⟨Formula.bot.imp Formula.bot, cud_contains_theorems h_r3m.1

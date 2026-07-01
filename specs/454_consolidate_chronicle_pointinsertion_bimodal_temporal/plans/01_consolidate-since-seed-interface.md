@@ -150,7 +150,24 @@ build, it MUST be removed within the same wave before that phase is marked compl
 
 ---
 
-### Phase 1: Relocate small `l27s*` formula-operator helpers [NOT STARTED]
+### Phase 1: Relocate small `l27s*` formula-operator helpers [COMPLETED]
+
+**Deviation (beneficial, ahead of schedule)**: to retarget the `l27s*` helpers this phase
+also had to define the *full* `temporalSinceInterface` / `bimodalSinceInterface (fc)`
+instances (originally scheduled for Phases 2/3), since the relocated helpers need a
+concrete `SinceSeedInterface` value to pass to the shared module's generic defs. Both
+instances are now complete, verified, and committed in the two `Since.lean` files —
+Phase 2/3/4/5 can wire the ported generic theorems directly against
+`temporalSinceInterface`/`bimodalSinceInterface fc` with no further instance-construction
+work required. Two interface fields not anticipated in the Phase-0 sketch were added
+during this phase: `untlInjective`/`andInjective` (needed because `l27s_c5_γ_mem`/
+`l27s_b5_β_mem` rely on injectivity of the concrete `Formula.untl`/`Formula.and`
+constructors, which cannot be recovered generically over an abstract `F`). Both are
+proved trivially by each logic (`Formula.untl.inj`; `Formula.and`'s Lukasiewicz-unfold +
+`Formula.imp.inj` composed twice) and verified building in both trees. The
+formula-operator-only `l27s*` helpers do not depend on `fc` at all, so Bimodal's relocated
+wrappers use `bimodalSinceInterface FrameClass.Base` internally (arbitrary index) and keep
+their original no-`fc` signatures verbatim -- zero call-site changes elsewhere in the file.
 
 **Goal**: Move `lemma27SinceSeed` + the small `l27s*` helpers (near byte-identical, formula-operator
 only, zero external consumers) into the shared module; retarget both `Since.lean` files to the shared
@@ -185,16 +202,30 @@ copies; both logics build.
 
 ### Phase 2: Port `lemma_2_7_since_seed_consistent` (generic) + Temporal wiring [NOT STARTED]
 
-**Goal**: Port the `lemma_2_7_since_seed_consistent` proof body into the shared module as the generic
-`SinceSeedInterface`-consuming theorem; define the Temporal instance; wire `lemma_2_7_since` (and its
-`lemma24*` guard wrappers if they depend on 2_7) as thin wrappers; delete Temporal's local private
-body; build Temporal + its `CounterexampleElimination`.
+**Groundwork already done (Phase 1 spillover)**: `temporalSinceInterface`/`bimodalSinceInterface fc`
+are ALREADY fully defined, verified, and committed (in the two `Since.lean` files) with every field of
+`SinceSeedInterface` populated -- this phase does NOT need to construct either instance. Only the
+generic proof body itself remains to be ported. `lemma24WithGuard`/`lemma24SinceWithGuard` do **not**
+route through `lemma_2_7_since_seed_consistent`'s body mechanically (their proof strategies genuinely
+diverge between logics -- Bimodal uses `until_witness_enriched_seed_consistent`/
+`since_witness_enriched_seed_consistent` directly; Temporal uses `past_temporal_witness_seed_consistent`
++ a recursive call into `lemma_2_7_since`), so they are OUT of scope for this phase and need zero
+edits -- they already compile unchanged as long as `lemma_2_7_since`'s public signature is preserved.
+
+**Goal**: Port the `lemma_2_7_since_seed_consistent` proof body **and** the `lemma_2_7_since` wrapper
+body (both diverge 100% mechanically per the research; both collapse into ONE generic theorem) into
+the shared module as the generic `SinceSeedInterface`-consuming theorem(s); wire Temporal's public
+`lemma_2_7_since` as a thin one-line delegation to the generic theorem via `temporalSinceInterface`;
+delete Temporal's local private body; build Temporal + its `CounterexampleElimination`.
 
 **Tasks**:
 - [ ] Transcribe the Temporal `lemma_2_7_since_seed_consistent` body (the `fc := .Base` reading, §1.3)
       into the generic theorem, replacing every concrete `f …` with `I.f …`.
-- [ ] Define `temporalSinceInterface : SinceSeedInterface (Formula Atom)` populating every field with
-      Temporal's existing lemmas.
+- [ ] Also transcribe the Temporal `lemma_2_7_since` wrapper body (lines 334-414 of
+      `Cslib/Logics/Temporal/Metalogic/Chronicle/PointInsertion/Since.lean` as of the Phase-1 commit)
+      into a second generic theorem (or fold both into one) -- it diverges 100% mechanically too (see
+      research §1.3 wrapper row), so it should collapse the same way rather than staying a per-logic
+      ~80-line body.
 - [ ] Keep public `lemma_2_7_since` (and `lemma24SinceWithGuard`/`lemma24WithGuard` if they route
       through 2_7) at current signatures as wrappers calling the generic theorem via the instance.
 - [ ] Re-grep to confirm `lemma_2_7_since_seed_consistent` (private) has no Temporal consumers; delete

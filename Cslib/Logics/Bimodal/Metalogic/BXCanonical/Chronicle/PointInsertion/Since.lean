@@ -73,6 +73,7 @@ private noncomputable def bimodalSinceInterface (fc : FrameClass) :
   somePast := Formula.somePast
   allPast := Formula.allPast
   allFuture := Formula.allFuture
+  or := Formula.or
   Deriv := DerivationTree fc
   untlInjective := fun h => Formula.untl.inj h
   andInjective := by
@@ -137,6 +138,10 @@ private noncomputable def bimodalSinceInterface (fc : FrameClass) :
   untlLeftMonoThm := by intro _ hmcs _ _ _ hi hu; exact untl_left_mono_thm fc hmcs hi hu
   snceLeftMonoThm := by intro _ hmcs _ _ _ hi hs; exact snce_left_mono_thm fc hmcs hi hs
   lindenbaum := by intro _ hcons; exact set_lindenbaum_fc hcons
+  demorganDisjNegForward := fun A B => liftBase fc (demorganDisjNegForward A B)
+  pMonoMcs := by intro _ hmcs _ _ hi hp; exact P_mono_mcs fc hmcs hi hp
+  somePastAllPastNegAbsurd := by
+    intro _ hmcs psi hp hh; exact somePast_allPast_neg_absurd hmcs psi hp hh
 
 /-- Since-direction seed, simplified via Xu 3.2.1:
 B ∪ {eta} ∪ {untl(γ, β∧xi) | β∈B, γ∈C}.

@@ -298,20 +298,29 @@ delete Bimodal's local `lemma_2_7_since_seed_consistent` body; build Bimodal.
 
 ---
 
-### Phase 4: Port `lemma_2_8_since_seed_consistent` (generic) + Temporal wiring [NOT STARTED]
+### Phase 4: Port `lemma_2_8_since_seed_consistent` (generic) + Temporal wiring [COMPLETED]
 
 **Goal**: Repeat the Phase-2 pattern for `lemma_2_8_since_seed_consistent`: generic body + Temporal
 instance field(s) + `lemma_2_8_since` wrapper; delete Temporal's local 2_8 body; build Temporal + CEE.
 
 **Tasks**:
-- [ ] Transcribe the Temporal `lemma_2_8_since_seed_consistent` body into a generic
+- [x] Transcribe the Temporal `lemma_2_8_since_seed_consistent` body into a generic
       `SinceSeedInterface`-consuming theorem (add any additional interface fields it needs — extend the
       structure if 2_8 invokes apparatus not covered in Phase 0; re-verify field types via `lean_hover_info`).
-- [ ] Extend `temporalSinceInterface` with any new fields; keep public `lemma_2_8_since` (and
+      *(deviation: 5 new fields added -- `or`, `demorganDisjNegForward`, `pMonoMcs`,
+      `somePastAllPastNegAbsurd`, plus discovering that negation must stay INLINE as `imp _ bot`
+      rather than an opaque `neg` field -- an opaque `neg` blocks `modusPonens`/`deductionTheorem`
+      steps that need to see the negation as a literal implication. An initial attempt added an
+      opaque `neg` field and a `negBotIdentity` field; both were reverted after hitting exactly this
+      wall, in favor of writing `imp _ bot` inline everywhere Temporal/Bimodal use `.neg`.)*
+- [x] Extend `temporalSinceInterface` with any new fields; keep public `lemma_2_8_since` (and
       `lemma24*` if 2_8-routed) as thin wrappers.
-- [ ] Re-grep zero consumers of the private 2_8 body; delete Temporal's local body.
-- [ ] `lean_verify` the generic `lemma_2_8_since_seed_consistent`.
-- [ ] `lake build` Temporal `Since.lean` + `CounterexampleElimination/*`.
+- [x] Re-grep zero consumers of the private 2_8 body; delete Temporal's local body. *(deviation:
+      altered -- one-line delegation retained under the private name, same rationale as Phase 2/3.)*
+- [x] `lean_verify` the generic `lemma_2_8_since_seed_consistent`. *(build-clean verified via
+      `lake build`; MCP `lean_verify` tool not loaded this session -- grep-verified zero
+      `sorry`/`axiom` in touched files instead, see Phase 6.)*
+- [x] `lake build` Temporal `Since.lean` + `CounterexampleElimination/*`.
 
 **Timing**: 2 hours
 

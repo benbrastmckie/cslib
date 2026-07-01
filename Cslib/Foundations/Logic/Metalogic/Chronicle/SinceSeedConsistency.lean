@@ -171,6 +171,12 @@ structure SinceSeedInterface (F : Type*) where
   allPast : F → F
   /-- All-future (`𝐆`), needed only for `gContent`'s definitional shape. -/
   allFuture : F → F
+  /-- Disjunction (task-454 Phase 4: needed by `lemma_2_8_since`'s `α'` construction).
+  Negation is NOT a separate field -- both logics' `Formula.neg` is the transparent
+  Lukasiewicz encoding `imp _ bot`, so it is always written inline as `imp _ bot` rather
+  than through an opaque projection (an opaque `neg` field would block `modusPonens`/
+  `deductionTheorem` steps that need to see through it as an implication). -/
+  or : F → F → F
   /-- Abstract `Type`-valued contextual derivation family (mirrors `DerivationTree fc` /
   `DerivationTree FrameClass.Base`). -/
   Deriv : List F → F → Type*
@@ -318,6 +324,20 @@ structure SinceSeedInterface (F : Type*) where
   superset. -/
   lindenbaum : ∀ {S : Set F}, isSetConsistent Deriv bot S →
     ∃ M, S ⊆ M ∧ isSetMaximalConsistent Deriv bot M
+  /-- De Morgan for disjunction negation (task-454 Phase 4), written with `imp _ bot`
+  standing for negation throughout (see the `or` field docstring):
+  `⊢ ¬(A ∨ B) → ¬A ∧ ¬B`. -/
+  demorganDisjNegForward : ∀ (A B : F),
+    Deriv [] (imp (imp (or A B) bot) (and (imp A bot) (imp B bot)))
+  /-- Right monotonicity of `somePast`-membership under empty-context implication
+  (task-454 Phase 4; mirrors `rightMonoSinceMcs` but for the derived `somePast`
+  operator, which is not assumed reducible to `snce` generically). -/
+  pMonoMcs : ∀ {C : Set F}, isSetMaximalConsistent Deriv bot C →
+    ∀ {phi psi : F}, Deriv [] (imp phi psi) → somePast phi ∈ C → somePast psi ∈ C
+  /-- `somePast psi ∈ M` and `allPast ¬psi ∈ M` (with `¬psi := imp psi bot`) cannot both
+  hold in an MCS (task-454 Phase 4). -/
+  somePastAllPastNegAbsurd : ∀ {M : Set F}, isSetMaximalConsistent Deriv bot M →
+    ∀ (psi : F), somePast psi ∈ M → allPast (imp psi bot) ∈ M → False
 
 /-! ## Convenience wrappers over an interface value
 
@@ -778,6 +798,275 @@ theorem lemma_2_7_since {A B C : Set F}
     subsetDeductiveClosure I _ (Set.mem_union_left _ (Set.mem_singleton xi))
   have h_xi_in_B'' : xi ∈ B'' := h_DC_sub_B'' h_xi_in_DC
   exact ⟨B', D, B'', h_B'_max, h_B''_max, h_D_mcs, h_eta_D, h_B_sub_B', h_B_sub_D,
+    h_B_sub_B'', h_xi_in_B''⟩
+
+/-! ## Generic `lemma_2_8_since_seed_consistent` / `lemma_2_8_since` (task-454 Phase 4)
+
+Ported from Temporal's `fc := .Base` reading, mirroring the `lemma_2_7_since` port above.
+Uses the same BX5'+BX7'+BX13' chain but eliminates the D1/D2 cases via `α'` (the negated
+disjunction `¬(eta ∨ (xi ∧ snce(xi, eta)))`) instead of `xi ∉ B`. -/
+
+/-- Since-direction seed consistency for Lemma 2.8: same seed as `lemma_2_7_since_seed_consistent`
+but proved via `¬(eta ∨ (xi ∧ snce(xi, eta))) ∈ A` instead of `xi ∉ B`. -/
+theorem lemma_2_8_since_seed_consistent {A B C : Set F}
+    (h_mcs_A : SetMaximalConsistent I A)
+    (h_mcs_C : SetMaximalConsistent I C)
+    (h_r3m : BurgessR3Maximal I A B C)
+    (h_B_dcs : ClosedUnderDerivation I B)
+    (_h_gc : gContent I A ⊆ C)
+    (xi eta : F)
+    (h_since : I.snce xi eta ∈ C)
+    (h_neg_disj : I.imp (I.or eta (I.and xi (I.snce xi eta))) I.bot ∈ A) :
+    SetConsistent I (lemma27SinceSeed I A B C xi eta) := by
+  have h_r3 : burgessR3 I A B C := h_r3m.2.1
+  set α' := I.imp (I.or eta (I.and xi (I.snce xi eta))) I.bot with α'_def
+  have h_α'_to_neg_eta : I.Deriv [] (I.imp α' (I.imp eta I.bot)) :=
+    I.impTrans (I.demorganDisjNegForward eta (I.and xi (I.snce xi eta)))
+      (I.lceImp (I.imp eta I.bot) (I.imp (I.and xi (I.snce xi eta)) I.bot))
+  have h_α'_to_neg_chi : I.Deriv [] (I.imp α' (I.imp (I.and xi (I.snce xi eta)) I.bot)) :=
+    I.impTrans (I.demorganDisjNegForward eta (I.and xi (I.snce xi eta)))
+      (I.rceImp (I.imp eta I.bot) (I.imp (I.and xi (I.snce xi eta)) I.bot))
+  have h_bx5_xe := I.selfAccumSinceMcs h_mcs_C xi eta h_since
+  suffices h_key : ∀ (b : F) (hb : b ∈ B)
+      (α_hat : F) (hα : α_hat ∈ A) (h_α_to_α' : I.Deriv [] (I.imp α_hat α'))
+      (gamma_list : List F) (h_gammas : ∀ γ ∈ gamma_list, γ ∈ C),
+      Σ' (event : F),
+        I.somePast event ∈ C ×'
+        I.Deriv [] (I.imp event b) ×'
+        I.Deriv [] (I.imp event eta) ×'
+        I.Deriv [] (I.imp event (I.snce b α_hat)) ×'
+        (∀ γ ∈ gamma_list,
+          I.Deriv [] (I.imp event (I.untl (I.and b (I.and xi (I.snce xi eta))) γ))) by
+    intro L hL ⟨d⟩
+    haveI : DecidablePred (· ∈ B) := fun _ => Classical.dec _
+    let b_list_5 := l27sB5GuardList I B C xi L
+    have hb_list_5 : ∀ g ∈ b_list_5, g ∈ B := fun g hg => l27s_b5_guard_list_mem I hg
+    let c_list := l27sC5EventList I B C xi L
+    have hc_list : ∀ γ ∈ c_list, γ ∈ C := fun γ hγ => l27s_c5_event_list_mem I hγ
+    let b_list_B := L.filter (· ∈ B)
+    have hb_list_B : ∀ g ∈ b_list_B, g ∈ B := by
+      intro g hg; exact decide_eq_true_eq.mp (List.mem_filter.mp hg).2
+    let b_list := (I.imp I.bot I.bot) :: (b_list_B ++ b_list_5)
+    have hb_list' : ∀ g ∈ b_list, g ∈ B := by
+      intro g hg; rcases List.mem_cons.mp hg with rfl | h
+      · exact I.cudContainsTheorems h_B_dcs (I.identity' I.bot)
+      · rcases List.mem_append.mp h with h1 | h2
+        · exact hb_list_B g h1
+        · exact hb_list_5 g h2
+    let a_list : List F := [α']
+    have ha_list : ∀ α_elem ∈ a_list, α_elem ∈ A := by
+      intro α_elem hα_elem; simp [a_list] at hα_elem; subst hα_elem; exact h_neg_disj
+    let b := I.listConj b_list
+    let α_hat := I.listConj a_list
+    have hb_B : b ∈ B := I.listConjMemDcs h_B_dcs b_list hb_list'
+    have hα_A : α_hat ∈ A := I.listConjMemMcs h_mcs_A a_list ha_list
+    have h_αhat_to_α' : I.Deriv [] (I.imp α_hat α') :=
+      I.listConjImpliesElem a_list α' (by simp [a_list])
+    obtain ⟨event, h_P_event, h_ev_b, h_ev_eta, _h_ev_snce, h_ev_untl⟩ :=
+      h_key b hb_B α_hat hα_A h_αhat_to_α' c_list hc_list
+    let χ_gen := I.and xi (I.snce xi eta)
+    have h_event_implies_L : ∀ φ ∈ L, I.Deriv [event] φ := by
+      intro φ hφ
+      have h_φ_seed := hL φ hφ
+      by_cases h_B_case : φ ∈ B
+      · have h_φ_in_B_list : φ ∈ b_list_B :=
+          List.mem_filter.mpr ⟨hφ, decide_eq_true_eq.mpr h_B_case⟩
+        have h_φ_in_b : φ ∈ b_list :=
+          List.mem_cons.mpr (Or.inr (List.mem_append.mpr (Or.inl h_φ_in_B_list)))
+        have h_b_to_φ := I.listConjImpliesElem b_list φ h_φ_in_b
+        have h_ev_to_φ := I.impTrans h_ev_b h_b_to_φ
+        exact I.modusPonens
+          (I.weakening [] _ _ h_ev_to_φ (List.nil_subset _))
+          (I.assumption (by exact List.mem_singleton.mpr rfl))
+      · by_cases h_eta_case : φ = eta
+        · subst h_eta_case
+          exact I.modusPonens
+            (I.weakening [] _ _ h_ev_eta (List.nil_subset _))
+            (I.assumption (by exact List.mem_singleton.mpr rfl))
+        · by_cases h_comp5 : ∃ β' ∈ B, ∃ γ' ∈ C, φ = I.untl (I.and β' xi) γ'
+          · let β' := Classical.choose h_comp5
+            have hβ' : β' ∈ B := (Classical.choose_spec h_comp5).1
+            let γ' := Classical.choose (Classical.choose_spec h_comp5).2
+            have hγ' : γ' ∈ C :=
+              (Classical.choose_spec (Classical.choose_spec h_comp5).2).1
+            have h_eq : φ = I.untl (I.and β' xi) γ' :=
+              (Classical.choose_spec (Classical.choose_spec h_comp5).2).2
+            rw [h_eq]
+            have h_φ_eq : I.untl (I.and β' xi) γ' ∈ L := by
+              rw [← h_eq]; exact hφ
+            have h_β'_in_5 := l27s_b5_β_mem I h_φ_eq hβ' hγ'
+            have h_β'_in_b : β' ∈ b_list :=
+              List.mem_cons.mpr (Or.inr (List.mem_append.mpr (Or.inr h_β'_in_5)))
+            have h_b_to_β' := I.listConjImpliesElem b_list β' h_β'_in_b
+            have h_γ'_in_c := l27s_c5_γ_mem I h_φ_eq hβ' hγ'
+            have h_ev_untl_γ' := h_ev_untl γ' h_γ'_in_c
+            have h_bχ_to_β'xi : I.Deriv [] (I.imp (I.and b χ_gen) (I.and β' xi)) := by
+              have h1 := I.impTrans (I.lceImp b χ_gen) h_b_to_β'
+              have h2 : I.Deriv [] (I.imp (I.and b χ_gen) xi) :=
+                I.impTrans (I.rceImp b χ_gen) (I.lceImp xi (I.snce xi eta))
+              exact I.combineImpConj h1 h2
+            have h_left := I.untlLeftMonoDeriv (I.and b χ_gen) γ'
+              (I.and β' xi) h_bχ_to_β'xi
+            have h_chain := I.impTrans h_ev_untl_γ' h_left
+            exact I.modusPonens
+              (I.weakening [] _ _ h_chain (List.nil_subset _))
+              (I.assumption (by exact List.mem_singleton.mpr rfl))
+          · exfalso
+            simp only [lemma27SinceSeed, Set.mem_union, Set.mem_setOf_eq,
+              Set.mem_singleton_iff] at h_φ_seed
+            rcases h_φ_seed with ((h1 | h2) | h5)
+            · exact h_B_case h1
+            · exact h_eta_case h2
+            · exact h_comp5 h5
+    have d_event : I.Deriv [event] I.bot :=
+      I.derivationFromImplied [event] L I.bot h_event_implies_L d
+    have h_event_cons := I.consistentOfPMem h_mcs_C event h_P_event
+    exact I.inconsistentSingletonFalse h_event_cons d_event
+  -- Prove h_key: BX5'+BX7'+BX13' chain with D1/D2 eliminated via α'
+  intro b hb α_hat hα h_α_to_α' gamma_list h_gammas
+  have h_snce_ba : I.snce b α_hat ∈ C := h_r3.2 b hb α_hat hα
+  have h_bx5_ba := I.selfAccumSinceMcs h_mcs_C b α_hat h_snce_ba
+  let φ_gen := I.and b (I.snce b α_hat)
+  let χ_gen := I.and xi (I.snce xi eta)
+  have h_bx7_gen := I.linearSinceMcs h_mcs_C φ_gen α_hat χ_gen eta h_bx5_ba h_bx5_xe
+  have h_D3_gen : I.snce (I.and φ_gen χ_gen) (I.and φ_gen eta) ∈ C := by
+    rcases h_bx7_gen with h_D1 | h_D2 | h_D3
+    · exfalso
+      have h_event_to_bot : I.Deriv [] (I.imp (I.and α_hat eta) I.bot) := by
+        have h1 : I.Deriv [] (I.imp (I.and α_hat eta) (I.imp eta I.bot)) :=
+          I.impTrans (I.lceImp α_hat eta) (I.impTrans h_α_to_α' h_α'_to_neg_eta)
+        have h2 : I.Deriv [] _ := I.rceImp α_hat eta
+        let PConj := I.and α_hat eta
+        have d1 : I.Deriv [PConj] (I.imp eta I.bot) := I.modusPonens
+          (I.weakening [] _ _ h1 (List.nil_subset _))
+          (I.assumption (φ := PConj) (by simp))
+        have d2 : I.Deriv [PConj] eta := I.modusPonens
+          (I.weakening [] _ _ h2 (List.nil_subset _))
+          (I.assumption (φ := PConj) (by simp))
+        exact I.deductionTheorem [] PConj I.bot (I.modusPonens d1 d2)
+      have h_P_bot := I.pMonoMcs h_mcs_C h_event_to_bot (I.sinceImpliesP h_mcs_C h_D1)
+      have h_H_top : I.allPast (I.imp I.bot I.bot) ∈ C :=
+        I.theoremInMcs h_mcs_C (I.pastNecessitation _ (I.identity' I.bot))
+      exact I.somePastAllPastNegAbsurd h_mcs_C I.bot h_P_bot h_H_top
+    · exfalso
+      have h_event_to_bot : I.Deriv [] (I.imp (I.and α_hat χ_gen) I.bot) := by
+        have h1 : I.Deriv [] (I.imp (I.and α_hat χ_gen) (I.imp χ_gen I.bot)) :=
+          I.impTrans (I.lceImp α_hat χ_gen) (I.impTrans h_α_to_α' h_α'_to_neg_chi)
+        have h2 : I.Deriv [] _ := I.rceImp α_hat χ_gen
+        let PConj := I.and α_hat χ_gen
+        have d1 : I.Deriv [PConj] (I.imp χ_gen I.bot) := I.modusPonens
+          (I.weakening [] _ _ h1 (List.nil_subset _))
+          (I.assumption (φ := PConj) (by simp))
+        have d2 : I.Deriv [PConj] χ_gen := I.modusPonens
+          (I.weakening [] _ _ h2 (List.nil_subset _))
+          (I.assumption (φ := PConj) (by simp))
+        exact I.deductionTheorem [] PConj I.bot (I.modusPonens d1 d2)
+      have h_P_bot := I.pMonoMcs h_mcs_C h_event_to_bot (I.sinceImpliesP h_mcs_C h_D2)
+      have h_H_top : I.allPast (I.imp I.bot I.bot) ∈ C :=
+        I.theoremInMcs h_mcs_C (I.pastNecessitation _ (I.identity' I.bot))
+      exact I.somePastAllPastNegAbsurd h_mcs_C I.bot h_P_bot h_H_top
+    · exact h_D3
+  let guard := I.and φ_gen χ_gen
+  let base_event := I.and φ_gen eta
+  let evt := I.iteratedEnrichmentSince h_mcs_C guard gamma_list h_gammas base_event h_D3_gen
+  let event := evt.1
+  have h_P_event : I.somePast event ∈ C := I.sinceImpliesP h_mcs_C evt.2.1
+  have h_ev_base := evt.2.2.1
+  have h_ev_b : I.Deriv [] (I.imp event b) :=
+    I.impTrans h_ev_base (I.impTrans (I.lceImp φ_gen eta) (I.lceImp b (I.snce b α_hat)))
+  have h_ev_eta : I.Deriv [] (I.imp event eta) :=
+    I.impTrans h_ev_base (I.rceImp φ_gen eta)
+  have h_ev_snce_ba : I.Deriv [] (I.imp event (I.snce b α_hat)) :=
+    I.impTrans h_ev_base (I.impTrans (I.lceImp φ_gen eta) (I.rceImp b (I.snce b α_hat)))
+  have h_ev_untl : ∀ γ ∈ gamma_list,
+      I.Deriv [] (I.imp event (I.untl (I.and b χ_gen) γ)) := by
+    intro γ hγ
+    have h_untl_guard := evt.2.2.2 γ hγ
+    have h_guard_to_bχ : I.Deriv [] (I.imp guard (I.and b χ_gen)) := by
+      have h1 : I.Deriv [] _ := I.impTrans (I.lceImp φ_gen χ_gen) (I.lceImp b (I.snce b α_hat))
+      have h2 : I.Deriv [] _ := I.rceImp φ_gen χ_gen
+      exact I.combineImpConj h1 h2
+    exact I.impTrans h_untl_guard (I.untlLeftMonoDeriv guard γ (I.and b χ_gen) h_guard_to_bχ)
+  exact ⟨event, h_P_event, h_ev_b, h_ev_eta, h_ev_snce_ba, h_ev_untl⟩
+
+/-- **Lemma 2.8 (Since direction)**, generic over `I`: given `BurgessR3Maximal(A, B, C)`
+with `snce(xi, eta) ∈ C` and `¬(eta ∨ (xi ∧ snce(xi, eta))) ∈ A`, construct MCS `D` with
+`eta ∈ D` splitting the R3 pair. -/
+theorem lemma_2_8_since {A B C : Set F}
+    (h_mcs_A : SetMaximalConsistent I A)
+    (h_mcs_C : SetMaximalConsistent I C)
+    (h_r3m : BurgessR3Maximal I A B C)
+    (h_B_dcs : ClosedUnderDerivation I B)
+    (h_gc : gContent I A ⊆ C)
+    (xi eta : F)
+    (h_since : I.snce xi eta ∈ C)
+    (h_neg_disj : I.imp (I.or eta (I.and xi (I.snce xi eta))) I.bot ∈ A) :
+    ∃ B' D B'' : Set F,
+      BurgessR3Maximal I A B' D ∧
+      BurgessR3Maximal I D B'' C ∧
+      SetMaximalConsistent I D ∧
+      eta ∈ D ∧
+      B ⊆ D ∧
+      B ⊆ B' ∧
+      B ⊆ B'' ∧
+      xi ∈ B'' := by
+  have h_seed_cons := lemma_2_8_since_seed_consistent I h_mcs_A h_mcs_C h_r3m h_B_dcs h_gc
+    xi eta h_since h_neg_disj
+  obtain ⟨D, h_sup, h_D_mcs⟩ := I.lindenbaum h_seed_cons
+  have h_eta_D : eta ∈ D := by
+    apply h_sup; show eta ∈ lemma27SinceSeed I A B C xi eta
+    simp [lemma27SinceSeed]
+  have h_B_sub_D : B ⊆ D := by
+    intro φ hφ; apply h_sup
+    show φ ∈ lemma27SinceSeed I A B C xi eta; simp [lemma27SinceSeed, hφ]
+  have h_untl_D : ∀ β ∈ B, ∀ γ ∈ C, I.untl β γ ∈ D := by
+    intro β hβ γ hγ
+    exact h_B_sub_D (I.xuLemma321Until h_mcs_A h_mcs_C h_r3m hβ hγ)
+  have h_snce_D : ∀ β ∈ B, ∀ α ∈ A, I.snce β α ∈ D := by
+    intro β hβ α hα
+    exact h_B_sub_D (I.xuLemma321Since h_mcs_A h_mcs_C h_r3m hβ hα)
+  have h_rSet_D : burgessRSet I D B C := fun β hβ γ hγ => h_untl_D β hβ γ hγ
+  have h_rSetSince_D : burgessRSetSince I C B D := by
+    intro β hβ
+    exact I.burgessRImpliesBurgessRSince h_D_mcs h_mcs_C (h_rSet_D β hβ)
+  have h_r3_DBC : burgessR3 I D B C := ⟨h_rSet_D, h_rSetSince_D⟩
+  have h_rSetSince_A : burgessRSetSince I D B A := fun β hβ α hα => h_snce_D β hβ α hα
+  have h_rSet_A : burgessRSet I A B D := by
+    intro β hβ
+    exact I.burgessRSinceImpliesBurgessR h_mcs_A h_D_mcs (h_rSetSince_A β hβ)
+  have h_r3_ABD : burgessR3 I A B D := ⟨h_rSet_A, h_rSetSince_A⟩
+  have h_untl_conj_xi_D : ∀ β ∈ B, ∀ γ ∈ C, I.untl (I.and β xi) γ ∈ D := by
+    intro β hβ γ hγ; apply h_sup
+    show I.untl (I.and β xi) γ ∈ lemma27SinceSeed I A B C xi eta
+    simp only [lemma27SinceSeed, Set.mem_union, Set.mem_setOf_eq]
+    right; exact ⟨β, hβ, γ, hγ, rfl⟩
+  have h_B_nonempty : ∃ β₀ : F, β₀ ∈ B := by
+    exact ⟨I.imp I.bot I.bot, I.cudContainsTheorems h_r3m.1 (I.identity' I.bot)⟩
+  obtain ⟨β₀, hβ₀⟩ := h_B_nonempty
+  have h_untl_xi_D : ∀ γ ∈ C, I.untl xi γ ∈ D := by
+    intro γ hγ
+    exact I.untlLeftMonoThm h_D_mcs (I.rceImp β₀ xi) (h_untl_conj_xi_D β₀ hβ₀ γ hγ)
+  have h_burgessR_xi : burgessR I D xi C := h_untl_xi_D
+  have h_burgessRSince_xi : burgessRSince I C xi D :=
+    I.burgessRImpliesBurgessRSince h_D_mcs h_mcs_C h_burgessR_xi
+  have h_snce_conj_xi_C : ∀ β ∈ B, ∀ δ ∈ D, I.snce (I.and β xi) δ ∈ C := by
+    intro β hβ δ hδ
+    exact (I.burgessRSinceConj h_mcs_C (h_rSetSince_D β hβ) h_burgessRSince_xi) δ hδ
+  have h_r3_DC_DBC : burgessR3 I D (deductiveClosure I ({xi} ∪ B)) C :=
+    I.dcDeltaBBurgessR3 h_D_mcs h_mcs_C h_B_dcs h_r3_DBC h_untl_conj_xi_D h_snce_conj_xi_C
+  have h_DC_cud : ClosedUnderDerivation I (deductiveClosure I ({xi} ∪ B)) :=
+    deductiveClosureClosedUnderDerivation I _
+  obtain ⟨B', h_B_sub_B', h_B'_max⟩ := I.burgessR3MaximalExtensionExists h_mcs_A h_D_mcs
+    h_B_dcs h_r3_ABD
+  obtain ⟨B'', h_DC_sub_B'', h_B''_max⟩ := I.burgessR3MaximalExtensionExists h_D_mcs h_mcs_C
+    h_DC_cud h_r3_DC_DBC
+  have h_B_sub_DC : B ⊆ deductiveClosure I ({xi} ∪ B) :=
+    fun φ hφ => subsetDeductiveClosure I _ (Set.mem_union_right _ hφ)
+  have h_B_sub_B'' : B ⊆ B'' := Set.Subset.trans h_B_sub_DC h_DC_sub_B''
+  have h_xi_in_DC : xi ∈ deductiveClosure I ({xi} ∪ B) :=
+    subsetDeductiveClosure I _ (Set.mem_union_left _ (Set.mem_singleton xi))
+  have h_xi_in_B'' : xi ∈ B'' := h_DC_sub_B'' h_xi_in_DC
+  exact ⟨B', D, B'', h_B'_max, h_B''_max, h_D_mcs, h_eta_D, h_B_sub_D, h_B_sub_B',
     h_B_sub_B'', h_xi_in_B''⟩
 
 end Cslib.Logic.Metalogic.Chronicle

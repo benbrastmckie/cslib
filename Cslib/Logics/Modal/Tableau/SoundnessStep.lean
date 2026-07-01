@@ -265,7 +265,8 @@ theorem modalStepBranch_preserves_sat
               Option.some.injEq, Prod.mk.injEq] at hsf
             obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
             subst hnewBs hnewAcc
-            refine ⟨[⟨.neg, Proposition.atom name, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+            refine ⟨[⟨.neg, Proposition.atom name, lbl⟩] ++ b,
+              List.mem_cons_self, W, m, f, hacc, ?_⟩
             intro sf' hmem'
             simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
             rcases hmem' with rfl | hmem_old
@@ -331,7 +332,8 @@ theorem modalStepBranch_preserves_sat
                 Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
-              refine ⟨[⟨.neg, Proposition.imp a1 (Proposition.atom a2n), lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+              refine ⟨[⟨.neg, Proposition.imp a1 (Proposition.atom a2n), lbl⟩] ++ b,
+                List.mem_cons_self, W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
               rcases hmem' with rfl | hmem_old
@@ -345,7 +347,8 @@ theorem modalStepBranch_preserves_sat
                 Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
-              refine ⟨[⟨.neg, Proposition.imp a1 (Proposition.box a2b), lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+              refine ⟨[⟨.neg, Proposition.imp a1 (Proposition.box a2b), lbl⟩] ++ b,
+                List.mem_cons_self, W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
               rcases hmem' with rfl | hmem_old
@@ -368,7 +371,8 @@ theorem modalStepBranch_preserves_sat
                 have hb1 : Satisfies m (f lbl) b1 := by
                   by_contra h
                   exact hpos (fun _ hbb => absurd hbb h)
-                refine ⟨[⟨.pos, a1, lbl⟩, ⟨.pos, b1, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+                refine ⟨[⟨.pos, a1, lbl⟩, ⟨.pos, b1, lbl⟩] ++ b,
+                  List.mem_cons_self, W, m, f, hacc, ?_⟩
                 intro sf' hmem'
                 simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
                 rcases hmem' with (rfl | rfl) | hmem_old
@@ -381,7 +385,9 @@ theorem modalStepBranch_preserves_sat
                   Option.some.injEq, Prod.mk.injEq] at hsf
                 obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
                 subst hnewBs hnewAcc
-                refine ⟨[⟨.neg, Proposition.imp a1 (Proposition.imp b1 (Proposition.atom b2n)), lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+                refine ⟨[⟨.neg,
+                    Proposition.imp a1 (Proposition.imp b1 (Proposition.atom b2n)), lbl⟩] ++ b,
+                  List.mem_cons_self, W, m, f, hacc, ?_⟩
                 intro sf' hmem'
                 simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
                 rcases hmem' with rfl | hmem_old
@@ -395,7 +401,9 @@ theorem modalStepBranch_preserves_sat
                   Option.some.injEq, Prod.mk.injEq] at hsf
                 obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
                 subst hnewBs hnewAcc
-                refine ⟨[⟨.neg, Proposition.imp a1 (Proposition.imp b1 (Proposition.box b2b)), lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+                refine ⟨[⟨.neg,
+                    Proposition.imp a1 (Proposition.imp b1 (Proposition.box b2b)), lbl⟩] ++ b,
+                  List.mem_cons_self, W, m, f, hacc, ?_⟩
                 intro sf' hmem'
                 simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
                 rcases hmem' with rfl | hmem_old
@@ -409,7 +417,9 @@ theorem modalStepBranch_preserves_sat
                   Option.some.injEq, Prod.mk.injEq] at hsf
                 obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
                 subst hnewBs hnewAcc
-                refine ⟨[⟨.neg, Proposition.imp a1 (Proposition.imp b1 (Proposition.imp b3 b4)), lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+                refine ⟨[⟨.neg,
+                    Proposition.imp a1 (Proposition.imp b1 (Proposition.imp b3 b4)), lbl⟩] ++ b,
+                  List.mem_cons_self, W, m, f, hacc, ?_⟩
                 intro sf' hmem'
                 simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
                 rcases hmem' with rfl | hmem_old
@@ -519,7 +529,8 @@ theorem modalStepBranch_preserves_sat
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
               simp only [Satisfies] at hpos
-              rcases Classical.em (Satisfies m (f lbl) (Proposition.imp a1 (Proposition.atom a2n))) with ha | ha
+              rcases Classical.em (Satisfies m (f lbl) (Proposition.imp a1 (Proposition.atom a2n)))
+                with ha | ha
               · refine ⟨[⟨.pos, Proposition.atom cn, lbl⟩] ++ b,
                   List.mem_cons_of_mem _ List.mem_cons_self,
                   W, m, f, hacc, ?_⟩
@@ -542,7 +553,8 @@ theorem modalStepBranch_preserves_sat
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
               simp only [Satisfies] at hpos
-              rcases Classical.em (Satisfies m (f lbl) (Proposition.imp a1 (Proposition.box a2b))) with ha | ha
+              rcases Classical.em (Satisfies m (f lbl) (Proposition.imp a1 (Proposition.box a2b)))
+                with ha | ha
               · refine ⟨[⟨.pos, Proposition.atom cn, lbl⟩] ++ b,
                   List.mem_cons_of_mem _ List.mem_cons_self,
                   W, m, f, hacc, ?_⟩
@@ -565,7 +577,8 @@ theorem modalStepBranch_preserves_sat
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
               simp only [Satisfies] at hpos
-              rcases Classical.em (Satisfies m (f lbl) (Proposition.imp a1 (Proposition.imp b1 b2))) with ha | ha
+              rcases Classical.em (Satisfies m (f lbl) (Proposition.imp a1 (Proposition.imp b1 b2)))
+                with ha | ha
               · refine ⟨[⟨.pos, Proposition.atom cn, lbl⟩] ++ b,
                   List.mem_cons_of_mem _ List.mem_cons_self,
                   W, m, f, hacc, ?_⟩
@@ -683,7 +696,8 @@ theorem modalStepBranch_preserves_sat
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
               simp only [Satisfies] at hpos
-              rcases Classical.em (Satisfies m (f lbl) (Proposition.imp a1 (Proposition.atom a2n))) with ha | ha
+              rcases Classical.em (Satisfies m (f lbl) (Proposition.imp a1 (Proposition.atom a2n)))
+                with ha | ha
               · refine ⟨[⟨.pos, Proposition.imp c1 c2, lbl⟩] ++ b,
                   List.mem_cons_of_mem _ List.mem_cons_self,
                   W, m, f, hacc, ?_⟩
@@ -706,7 +720,8 @@ theorem modalStepBranch_preserves_sat
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
               simp only [Satisfies] at hpos
-              rcases Classical.em (Satisfies m (f lbl) (Proposition.imp a1 (Proposition.box a2b))) with ha | ha
+              rcases Classical.em (Satisfies m (f lbl) (Proposition.imp a1 (Proposition.box a2b)))
+                with ha | ha
               · refine ⟨[⟨.pos, Proposition.imp c1 c2, lbl⟩] ++ b,
                   List.mem_cons_of_mem _ List.mem_cons_self,
                   W, m, f, hacc, ?_⟩
@@ -729,7 +744,8 @@ theorem modalStepBranch_preserves_sat
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
               simp only [Satisfies] at hpos
-              rcases Classical.em (Satisfies m (f lbl) (Proposition.imp a1 (Proposition.imp b1 b2))) with ha | ha
+              rcases Classical.em (Satisfies m (f lbl) (Proposition.imp a1 (Proposition.imp b1 b2)))
+                with ha | ha
               · refine ⟨[⟨.pos, Proposition.imp c1 c2, lbl⟩] ++ b,
                   List.mem_cons_of_mem _ List.mem_cons_self,
                   W, m, f, hacc, ?_⟩
@@ -847,7 +863,8 @@ theorem modalStepBranch_preserves_sat
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
               simp only [Satisfies] at hpos
-              rcases Classical.em (Satisfies m (f lbl) (Proposition.imp a1 (Proposition.atom a2n))) with ha | ha
+              rcases Classical.em (Satisfies m (f lbl) (Proposition.imp a1 (Proposition.atom a2n)))
+                with ha | ha
               · refine ⟨[⟨.pos, Proposition.box cb, lbl⟩] ++ b,
                   List.mem_cons_of_mem _ List.mem_cons_self,
                   W, m, f, hacc, ?_⟩
@@ -870,7 +887,8 @@ theorem modalStepBranch_preserves_sat
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
               simp only [Satisfies] at hpos
-              rcases Classical.em (Satisfies m (f lbl) (Proposition.imp a1 (Proposition.box a2b))) with ha | ha
+              rcases Classical.em (Satisfies m (f lbl) (Proposition.imp a1 (Proposition.box a2b)))
+                with ha | ha
               · refine ⟨[⟨.pos, Proposition.box cb, lbl⟩] ++ b,
                   List.mem_cons_of_mem _ List.mem_cons_self,
                   W, m, f, hacc, ?_⟩
@@ -893,7 +911,8 @@ theorem modalStepBranch_preserves_sat
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
               simp only [Satisfies] at hpos
-              rcases Classical.em (Satisfies m (f lbl) (Proposition.imp a1 (Proposition.imp b1 b2))) with ha | ha
+              rcases Classical.em (Satisfies m (f lbl) (Proposition.imp a1 (Proposition.imp b1 b2)))
+                with ha | ha
               · refine ⟨[⟨.pos, Proposition.box cb, lbl⟩] ++ b,
                   List.mem_cons_of_mem _ List.mem_cons_self,
                   W, m, f, hacc, ?_⟩
@@ -1083,7 +1102,8 @@ theorem modalStepBranch_preserves_sat
               Option.some.injEq, Prod.mk.injEq] at hsf
             obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
             subst hnewBs hnewAcc
-            refine ⟨[⟨.pos, Proposition.atom name, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+            refine ⟨[⟨.pos, Proposition.atom name, lbl⟩] ++ b,
+              List.mem_cons_self, W, m, f, hacc, ?_⟩
             intro sf' hmem'
             simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
             rcases hmem' with rfl | hmem_old
@@ -1133,7 +1153,8 @@ theorem modalStepBranch_preserves_sat
               simp only [Satisfies] at hneg
               have hna1 : ¬Satisfies m (f lbl) (a1) := fun ha1 => hneg (fun hcon => absurd ha1 hcon)
               have hnc : ¬Satisfies m (f lbl) (Proposition.bot) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.neg, a1, lbl⟩, ⟨.neg, Proposition.bot, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+              refine ⟨[⟨.neg, a1, lbl⟩, ⟨.neg, Proposition.bot, lbl⟩] ++ b,
+                List.mem_cons_self, W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
               rcases hmem' with (rfl | rfl) | hmem_old
@@ -1146,7 +1167,8 @@ theorem modalStepBranch_preserves_sat
                 Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.atom a2n), lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.atom a2n), lbl⟩] ++ b,
+                List.mem_cons_self, W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
               rcases hmem' with rfl | hmem_old
@@ -1161,7 +1183,8 @@ theorem modalStepBranch_preserves_sat
                 Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.box a2b), lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.box a2b), lbl⟩] ++ b,
+                List.mem_cons_self, W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
               rcases hmem' with rfl | hmem_old
@@ -1201,7 +1224,9 @@ theorem modalStepBranch_preserves_sat
                   Option.some.injEq, Prod.mk.injEq] at hsf
                 obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
                 subst hnewBs hnewAcc
-                refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.imp b1 (Proposition.atom b2n)), lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+                refine ⟨[⟨.pos,
+                    Proposition.imp a1 (Proposition.imp b1 (Proposition.atom b2n)), lbl⟩] ++ b,
+                  List.mem_cons_self, W, m, f, hacc, ?_⟩
                 intro sf' hmem'
                 simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
                 rcases hmem' with rfl | hmem_old
@@ -1216,7 +1241,9 @@ theorem modalStepBranch_preserves_sat
                   Option.some.injEq, Prod.mk.injEq] at hsf
                 obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
                 subst hnewBs hnewAcc
-                refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.imp b1 (Proposition.box b2b)), lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+                refine ⟨[⟨.pos,
+                    Proposition.imp a1 (Proposition.imp b1 (Proposition.box b2b)), lbl⟩] ++ b,
+                  List.mem_cons_self, W, m, f, hacc, ?_⟩
                 intro sf' hmem'
                 simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
                 rcases hmem' with rfl | hmem_old
@@ -1231,7 +1258,9 @@ theorem modalStepBranch_preserves_sat
                   Option.some.injEq, Prod.mk.injEq] at hsf
                 obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
                 subst hnewBs hnewAcc
-                refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.imp b1 (Proposition.imp b3 b4)), lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+                refine ⟨[⟨.pos,
+                    Proposition.imp a1 (Proposition.imp b1 (Proposition.imp b3 b4)), lbl⟩] ++ b,
+                  List.mem_cons_self, W, m, f, hacc, ?_⟩
                 intro sf' hmem'
                 simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
                 rcases hmem' with rfl | hmem_old
@@ -1253,7 +1282,9 @@ theorem modalStepBranch_preserves_sat
               by_contra h
               exact hneg (fun ha => absurd ha h)
             have hnc : ¬Satisfies m (f lbl) (Proposition.atom cn) := fun hC => hneg (fun _ => hC)
-            refine ⟨[⟨.pos, Proposition.atom an, lbl⟩, ⟨.neg, Proposition.atom cn, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+            refine ⟨[⟨.pos, Proposition.atom an, lbl⟩,
+                ⟨.neg, Proposition.atom cn, lbl⟩] ++ b,
+              List.mem_cons_self, W, m, f, hacc, ?_⟩
             intro sf' hmem'
             simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
             rcases hmem' with (rfl | rfl) | hmem_old
@@ -1271,7 +1302,9 @@ theorem modalStepBranch_preserves_sat
               by_contra h
               exact hneg (fun ha => absurd ha h)
             have hnc : ¬Satisfies m (f lbl) (Proposition.atom cn) := fun hC => hneg (fun _ => hC)
-            refine ⟨[⟨.pos, Proposition.bot, lbl⟩, ⟨.neg, Proposition.atom cn, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+            refine ⟨[⟨.pos, Proposition.bot, lbl⟩,
+                ⟨.neg, Proposition.atom cn, lbl⟩] ++ b,
+              List.mem_cons_self, W, m, f, hacc, ?_⟩
             intro sf' hmem'
             simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
             rcases hmem' with (rfl | rfl) | hmem_old
@@ -1289,7 +1322,9 @@ theorem modalStepBranch_preserves_sat
               by_contra h
               exact hneg (fun ha => absurd ha h)
             have hnc : ¬Satisfies m (f lbl) (Proposition.atom cn) := fun hC => hneg (fun _ => hC)
-            refine ⟨[⟨.pos, Proposition.box ab, lbl⟩, ⟨.neg, Proposition.atom cn, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+            refine ⟨[⟨.pos, Proposition.box ab, lbl⟩,
+                ⟨.neg, Proposition.atom cn, lbl⟩] ++ b,
+              List.mem_cons_self, W, m, f, hacc, ?_⟩
             intro sf' hmem'
             simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
             rcases hmem' with (rfl | rfl) | hmem_old
@@ -1307,7 +1342,9 @@ theorem modalStepBranch_preserves_sat
               simp only [Satisfies] at hneg
               have hna1 : ¬Satisfies m (f lbl) (a1) := fun ha1 => hneg (fun hcon => absurd ha1 hcon)
               have hnc : ¬Satisfies m (f lbl) (Proposition.atom cn) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.neg, a1, lbl⟩, ⟨.neg, Proposition.atom cn, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+              refine ⟨[⟨.neg, a1, lbl⟩,
+                  ⟨.neg, Proposition.atom cn, lbl⟩] ++ b,
+                List.mem_cons_self, W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
               rcases hmem' with (rfl | rfl) | hmem_old
@@ -1325,7 +1362,9 @@ theorem modalStepBranch_preserves_sat
                 by_contra h
                 exact hneg (fun ha => absurd ha h)
               have hnc : ¬Satisfies m (f lbl) (Proposition.atom cn) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.atom a2n), lbl⟩, ⟨.neg, Proposition.atom cn, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.atom a2n), lbl⟩,
+                  ⟨.neg, Proposition.atom cn, lbl⟩] ++ b,
+                List.mem_cons_self, W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
               rcases hmem' with (rfl | rfl) | hmem_old
@@ -1343,7 +1382,9 @@ theorem modalStepBranch_preserves_sat
                 by_contra h
                 exact hneg (fun ha => absurd ha h)
               have hnc : ¬Satisfies m (f lbl) (Proposition.atom cn) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.box a2b), lbl⟩, ⟨.neg, Proposition.atom cn, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.box a2b), lbl⟩,
+                  ⟨.neg, Proposition.atom cn, lbl⟩] ++ b,
+                List.mem_cons_self, W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
               rcases hmem' with (rfl | rfl) | hmem_old
@@ -1361,7 +1402,9 @@ theorem modalStepBranch_preserves_sat
                 by_contra h
                 exact hneg (fun ha => absurd ha h)
               have hnc : ¬Satisfies m (f lbl) (Proposition.atom cn) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.imp b1 b2), lbl⟩, ⟨.neg, Proposition.atom cn, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.imp b1 b2), lbl⟩,
+                  ⟨.neg, Proposition.atom cn, lbl⟩] ++ b,
+                List.mem_cons_self, W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
               rcases hmem' with (rfl | rfl) | hmem_old
@@ -1381,7 +1424,9 @@ theorem modalStepBranch_preserves_sat
               by_contra h
               exact hneg (fun ha => absurd ha h)
             have hnc : ¬Satisfies m (f lbl) (Proposition.imp c1 c2) := fun hC => hneg (fun _ => hC)
-            refine ⟨[⟨.pos, Proposition.atom an, lbl⟩, ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+            refine ⟨[⟨.pos, Proposition.atom an, lbl⟩,
+                ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b,
+              List.mem_cons_self, W, m, f, hacc, ?_⟩
             intro sf' hmem'
             simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
             rcases hmem' with (rfl | rfl) | hmem_old
@@ -1399,7 +1444,9 @@ theorem modalStepBranch_preserves_sat
               by_contra h
               exact hneg (fun ha => absurd ha h)
             have hnc : ¬Satisfies m (f lbl) (Proposition.imp c1 c2) := fun hC => hneg (fun _ => hC)
-            refine ⟨[⟨.pos, Proposition.bot, lbl⟩, ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+            refine ⟨[⟨.pos, Proposition.bot, lbl⟩,
+                ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b,
+              List.mem_cons_self, W, m, f, hacc, ?_⟩
             intro sf' hmem'
             simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
             rcases hmem' with (rfl | rfl) | hmem_old
@@ -1417,7 +1464,9 @@ theorem modalStepBranch_preserves_sat
               by_contra h
               exact hneg (fun ha => absurd ha h)
             have hnc : ¬Satisfies m (f lbl) (Proposition.imp c1 c2) := fun hC => hneg (fun _ => hC)
-            refine ⟨[⟨.pos, Proposition.box ab, lbl⟩, ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+            refine ⟨[⟨.pos, Proposition.box ab, lbl⟩,
+                ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b,
+              List.mem_cons_self, W, m, f, hacc, ?_⟩
             intro sf' hmem'
             simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
             rcases hmem' with (rfl | rfl) | hmem_old
@@ -1434,8 +1483,11 @@ theorem modalStepBranch_preserves_sat
               subst hnewBs hnewAcc
               simp only [Satisfies] at hneg
               have hna1 : ¬Satisfies m (f lbl) (a1) := fun ha1 => hneg (fun hcon => absurd ha1 hcon)
-              have hnc : ¬Satisfies m (f lbl) (Proposition.imp c1 c2) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.neg, a1, lbl⟩, ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+              have hnc : ¬Satisfies m (f lbl) (Proposition.imp c1 c2) :=
+                fun hC => hneg (fun _ => hC)
+              refine ⟨[⟨.neg, a1, lbl⟩,
+                ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b,
+                List.mem_cons_self, W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
               rcases hmem' with (rfl | rfl) | hmem_old
@@ -1452,8 +1504,11 @@ theorem modalStepBranch_preserves_sat
               have hsa : Satisfies m (f lbl) (Proposition.imp a1 (Proposition.atom a2n)) := by
                 by_contra h
                 exact hneg (fun ha => absurd ha h)
-              have hnc : ¬Satisfies m (f lbl) (Proposition.imp c1 c2) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.atom a2n), lbl⟩, ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+              have hnc : ¬Satisfies m (f lbl) (Proposition.imp c1 c2) :=
+                fun hC => hneg (fun _ => hC)
+              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.atom a2n), lbl⟩,
+                ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b,
+                List.mem_cons_self, W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
               rcases hmem' with (rfl | rfl) | hmem_old
@@ -1470,8 +1525,11 @@ theorem modalStepBranch_preserves_sat
               have hsa : Satisfies m (f lbl) (Proposition.imp a1 (Proposition.box a2b)) := by
                 by_contra h
                 exact hneg (fun ha => absurd ha h)
-              have hnc : ¬Satisfies m (f lbl) (Proposition.imp c1 c2) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.box a2b), lbl⟩, ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+              have hnc : ¬Satisfies m (f lbl) (Proposition.imp c1 c2) :=
+                fun hC => hneg (fun _ => hC)
+              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.box a2b), lbl⟩,
+                ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b,
+                List.mem_cons_self, W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
               rcases hmem' with (rfl | rfl) | hmem_old
@@ -1488,8 +1546,11 @@ theorem modalStepBranch_preserves_sat
               have hsa : Satisfies m (f lbl) (Proposition.imp a1 (Proposition.imp b1 b2)) := by
                 by_contra h
                 exact hneg (fun ha => absurd ha h)
-              have hnc : ¬Satisfies m (f lbl) (Proposition.imp c1 c2) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.imp b1 b2), lbl⟩, ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+              have hnc : ¬Satisfies m (f lbl) (Proposition.imp c1 c2) :=
+                fun hC => hneg (fun _ => hC)
+              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.imp b1 b2), lbl⟩,
+                ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b,
+                List.mem_cons_self, W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
               rcases hmem' with (rfl | rfl) | hmem_old
@@ -1509,7 +1570,9 @@ theorem modalStepBranch_preserves_sat
               by_contra h
               exact hneg (fun ha => absurd ha h)
             have hnc : ¬Satisfies m (f lbl) (Proposition.box cb) := fun hC => hneg (fun _ => hC)
-            refine ⟨[⟨.pos, Proposition.atom an, lbl⟩, ⟨.neg, Proposition.box cb, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+            refine ⟨[⟨.pos, Proposition.atom an, lbl⟩,
+              ⟨.neg, Proposition.box cb, lbl⟩] ++ b,
+              List.mem_cons_self, W, m, f, hacc, ?_⟩
             intro sf' hmem'
             simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
             rcases hmem' with (rfl | rfl) | hmem_old
@@ -1527,7 +1590,9 @@ theorem modalStepBranch_preserves_sat
               by_contra h
               exact hneg (fun ha => absurd ha h)
             have hnc : ¬Satisfies m (f lbl) (Proposition.box cb) := fun hC => hneg (fun _ => hC)
-            refine ⟨[⟨.pos, Proposition.bot, lbl⟩, ⟨.neg, Proposition.box cb, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+            refine ⟨[⟨.pos, Proposition.bot, lbl⟩,
+              ⟨.neg, Proposition.box cb, lbl⟩] ++ b,
+              List.mem_cons_self, W, m, f, hacc, ?_⟩
             intro sf' hmem'
             simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
             rcases hmem' with (rfl | rfl) | hmem_old
@@ -1545,7 +1610,9 @@ theorem modalStepBranch_preserves_sat
               by_contra h
               exact hneg (fun ha => absurd ha h)
             have hnc : ¬Satisfies m (f lbl) (Proposition.box cb) := fun hC => hneg (fun _ => hC)
-            refine ⟨[⟨.pos, Proposition.box ab, lbl⟩, ⟨.neg, Proposition.box cb, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+            refine ⟨[⟨.pos, Proposition.box ab, lbl⟩,
+              ⟨.neg, Proposition.box cb, lbl⟩] ++ b,
+              List.mem_cons_self, W, m, f, hacc, ?_⟩
             intro sf' hmem'
             simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
             rcases hmem' with (rfl | rfl) | hmem_old
@@ -1563,7 +1630,9 @@ theorem modalStepBranch_preserves_sat
               simp only [Satisfies] at hneg
               have hna1 : ¬Satisfies m (f lbl) (a1) := fun ha1 => hneg (fun hcon => absurd ha1 hcon)
               have hnc : ¬Satisfies m (f lbl) (Proposition.box cb) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.neg, a1, lbl⟩, ⟨.neg, Proposition.box cb, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+              refine ⟨[⟨.neg, a1, lbl⟩,
+                ⟨.neg, Proposition.box cb, lbl⟩] ++ b,
+                List.mem_cons_self, W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
               rcases hmem' with (rfl | rfl) | hmem_old
@@ -1581,7 +1650,9 @@ theorem modalStepBranch_preserves_sat
                 by_contra h
                 exact hneg (fun ha => absurd ha h)
               have hnc : ¬Satisfies m (f lbl) (Proposition.box cb) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.atom a2n), lbl⟩, ⟨.neg, Proposition.box cb, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.atom a2n), lbl⟩,
+                ⟨.neg, Proposition.box cb, lbl⟩] ++ b,
+                List.mem_cons_self, W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
               rcases hmem' with (rfl | rfl) | hmem_old
@@ -1599,7 +1670,9 @@ theorem modalStepBranch_preserves_sat
                 by_contra h
                 exact hneg (fun ha => absurd ha h)
               have hnc : ¬Satisfies m (f lbl) (Proposition.box cb) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.box a2b), lbl⟩, ⟨.neg, Proposition.box cb, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.box a2b), lbl⟩,
+                ⟨.neg, Proposition.box cb, lbl⟩] ++ b,
+                List.mem_cons_self, W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
               rcases hmem' with (rfl | rfl) | hmem_old
@@ -1617,7 +1690,9 @@ theorem modalStepBranch_preserves_sat
                 by_contra h
                 exact hneg (fun ha => absurd ha h)
               have hnc : ¬Satisfies m (f lbl) (Proposition.box cb) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.imp b1 b2), lbl⟩, ⟨.neg, Proposition.box cb, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
+              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.imp b1 b2), lbl⟩,
+                ⟨.neg, Proposition.box cb, lbl⟩] ++ b,
+                List.mem_cons_self, W, m, f, hacc, ?_⟩
               intro sf' hmem'
               simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
               rcases hmem' with (rfl | rfl) | hmem_old

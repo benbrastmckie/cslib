@@ -114,7 +114,8 @@ lemma openBranch_noContradiction
     (⟨.neg, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ b := by
   intro hneg
   simp only [isModalClosed, ClosureCondition.isClosed, ClosureCondition.findClosure] at hopen
-  cases hfind_bot : b.find? (fun sf => sf.isPos && sf.formula == (HasBot.bot : Proposition Atom)) with
+  cases hfind_bot : b.find? (fun sf => sf.isPos && sf.formula == (HasBot.bot : Proposition Atom))
+    with
   | some _ => simp [hfind_bot] at hopen
   | none =>
     simp only [hfind_bot] at hopen
@@ -124,7 +125,8 @@ lemma openBranch_noContradiction
       simp only [Branch.findContradiction, List.findSome?_eq_none_iff] at hcontra
       have hno := hcontra ⟨.pos, φ, w⟩ hpos
       simp only [SignedFormula.isPos, Sign.isPos, ↓reduceIte] at hno
-      have hany : b.any (fun sf' => sf'.sign == .neg && sf'.formula == φ && sf'.label == w) = true :=
+      have hany :
+          b.any (fun sf' => sf'.sign == .neg && sf'.formula == φ && sf'.label == w) = true :=
         List.any_eq_true.mpr ⟨⟨.neg, φ, w⟩, hneg, by simp⟩
       simp [hany] at hno
 
@@ -165,7 +167,8 @@ lemma hintikka_box_pos
   · -- hemp : boxPropagation b acc ψ w = [] → every successor already has T(ψ) in b
     simp only [boxPropagation, List.filterMap_eq_nil_iff] at hemp
     have hnil := hemp w' hw'_succ
-    by_cases hinb : (b.any fun x => x == (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex)) = true
+    by_cases hinb :
+        (b.any fun x => x == (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex)) = true
     · -- T(ψ)@w' already in b
       simp only [List.any_eq_true, beq_iff_eq] at hinb
       obtain ⟨sf', hsf'mem, rfl⟩ := hinb
@@ -173,7 +176,8 @@ lemma hintikka_box_pos
     · simp [if_neg hinb] at hnil
       exact hnil
   · -- hemp : boxPropagation ≠ [] → hcond : ∀ sf' ∈ boxPropagation, sf' ∈ b
-    by_cases hinb : (b.any fun x => x == (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex)) = true
+    by_cases hinb :
+        (b.any fun x => x == (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex)) = true
     · -- T(ψ)@w' already in b
       simp only [List.any_eq_true, beq_iff_eq] at hinb
       obtain ⟨sf', hsf'mem, rfl⟩ := hinb
@@ -191,7 +195,8 @@ lemma hintikka_box_neg
     (acc : Accessibility) (hH : modalHintikkaSet b acc)
     (ψ : Proposition Atom) (w : WorldIndex)
     (hmem : (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
-    ∃ w', acc.hasEdge w w' = true ∧ (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+    ∃ w', acc.hasEdge w w' = true ∧
+      (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
   hH.2.2 ψ w hmem
 
 /-! ## Propositional Rule Reduction (encoding-aware)
@@ -451,7 +456,8 @@ lemma modalTruthLemma
                   modalComplexity_box, modalComplexity_atom, modalComplexity_bot]; omega) w).2
                   (hbr ⟨.neg, x, w⟩ (by simp)))
               · exact (IH y (by rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_box,
-                  modalComplexity_atom, modalComplexity_bot]; omega) w).1 (hbr ⟨.pos, y, w⟩ (by simp))
+                  modalComplexity_atom, modalComplexity_bot]; omega) w).1
+                  (hbr ⟨.pos, y, w⟩ (by simp))
           · -- orPos: φ = x ∨ y, branching [[T x],[T y]]
             simp only [hA, hO] at hcond
             have hshape := (modalOrOf?_eq hO).symm
@@ -473,9 +479,11 @@ lemma modalTruthLemma
           obtain ⟨rfl, rfl⟩ := hshape
           intro hsa
           exact hsa ((IH x (by rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_box,
-              modalComplexity_atom, modalComplexity_bot]; omega) w).1 (hcond ⟨.pos, x, w⟩ (by simp)))
+              modalComplexity_atom, modalComplexity_bot]; omega) w).1
+              (hcond ⟨.pos, x, w⟩ (by simp)))
             ((IH y (by rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_box,
-              modalComplexity_atom, modalComplexity_bot]; omega) w).1 (hcond ⟨.pos, y, w⟩ (by simp)))
+              modalComplexity_atom, modalComplexity_bot]; omega) w).1
+              (hcond ⟨.pos, y, w⟩ (by simp)))
       · -- F(imp a c)@w ∈ b → ¬ Satisfies w (imp a c)
         intro hmem
         have hcond := hH.2.1 ⟨.neg, .imp a c, w⟩ hmem
@@ -525,7 +533,8 @@ lemma modalTruthLemma
             exact (IH y (by rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_box,
               modalComplexity_atom, modalComplexity_bot]; omega) w).2 hymem
               (hsa (fun hsx => absurd hsx ((IH x (by rw [← hφ]; simp only [modalComplexity_imp,
-                modalComplexity_box, modalComplexity_atom, modalComplexity_bot]; omega) w).2 hxmem)))
+                modalComplexity_box, modalComplexity_atom, modalComplexity_bot]; omega) w).2
+                hxmem)))
         · -- andNeg: φ = x ∧ y, branching [[F x],[F y]]
           simp only [hA] at hcond
           have hshape := (modalAndOf?_eq hA).symm

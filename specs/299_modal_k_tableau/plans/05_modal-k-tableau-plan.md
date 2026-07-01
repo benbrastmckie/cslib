@@ -391,7 +391,13 @@ Phase 5c restructure preserves verbatim — only the proof body changes — so 5
 
 ---
 
-### Phase 6: Completeness loop invariant + final completeness [BLOCKED]
+### Phase 6: Completeness loop invariant + final completeness [COMPLETED]
+
+**Resolution note (post-verification)**: The blocker below was resolved by task 442 (exponential
+fuel + FMP expansion-measure architecture, `FmpMeasure.lean`, `LoopInduction.lean`). Task 442
+delivered `modalExpandBranches_hintikka` (`CompletenessLoop.lean:631`) and `modalTableau_complete`
+(`CompletenessLoop.lean:1134`), both sorry/admit/axiom-free. Re-verified green post task-455/453
+refactors on 2026-07-01 (see `specs/299_modal_k_tableau/summaries/06_final-verification-summary.md`).
 
 **Goal**: Prove `modalExpandBranches_hintikka` (returned open branch is a Hintikka set) and discharge
 `modalTableau_complete` fully.
@@ -558,7 +564,15 @@ attempt, keep 5a-5d committed sorry-free, mark Phase 6 [BLOCKED] with the precis
 
 ---
 
-### Phase 7: Decision procedure, barrel, and CI verification [NOT STARTED]
+### Phase 7: Decision procedure, barrel, and CI verification [COMPLETED]
+
+**Resolution note (post-verification)**: `modalTableau_decides` (`CompletenessLoop.lean:1178`) and
+`instDecidableKValid` (`CompletenessLoop.lean:1190`) are proven and sorry/admit-free; `lean_verify`
+confirms both use only `propext`, `Classical.choice`, `Quot.sound`. Full CI pipeline re-run on
+2026-07-01: scoped build (778 jobs), whole-library `lake build` (3188 jobs), `lake test`,
+`lake exe checkInitImports`, `lake exe lint-style` all green. No reverse dependents exist outside
+`Cslib/Logics/Modal/Tableau/`. See
+`specs/299_modal_k_tableau/summaries/06_final-verification-summary.md` for full results.
 
 **Goal**: Package the iff + `Decidable` instance, add the module barrel, confirm `#print axioms` shows
 no new axioms, pass the full CSLib CI pipeline with zero sorry.

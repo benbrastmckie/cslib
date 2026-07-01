@@ -674,6 +674,99 @@ private lemma intStepBranch_some_exists
       simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
       exact ⟨sf, hsfb, hint.trans hsf.1, hsf.2.symm⟩
 
+omit [Hashable Atom] in
+/-- A `linearResult` step preserves `IExpandedConsistent` and `ILabelBound`: the
+processed formula's rule outputs are exactly the new formulas added to the branch, so
+`sfSatisfied` holds for it, and old formulas persist their satisfaction/bound since
+`Branch.extendMany` only prepends. -/
+private lemma intStepBranch_linear_preserves
+    {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
+    {newForms : List (ISF Atom)} {nw' : Nat} {newEdge : Option (Nat × Nat)}
+    {newExp : List (ISF Atom)}
+    (hIC : IExpandedConsistent b e) (hLB : ILabelBound b nw)
+    (hstep : intStepBranch b e nw = some (.linearResult newForms nw' newEdge, newExp)) :
+    IExpandedConsistent (Branch.extendMany b newForms) newExp ∧
+      ILabelBound (Branch.extendMany b newForms) nw' := by
+  obtain ⟨sf, hsfb, hint, hnewExp⟩ := intStepBranch_some_exists hstep
+  have hsfl : sf.label ≤ nw := hLB sf hsfb
+  obtain ⟨s, ff, l⟩ := sf
+  simp only at hsfl hint
+  have hmemOld : ∀ sf₀ ∈ b, sf₀ ∈ Branch.extendMany b newForms := fun sf₀ hsf₀ => by
+    simp only [Branch.extendMany, List.mem_append]; exact Or.inr hsf₀
+  have hmemNew : ∀ sf₀ ∈ newForms, sf₀ ∈ Branch.extendMany b newForms := fun sf₀ hsf₀ => by
+    simp only [Branch.extendMany, List.mem_append]; exact Or.inl hsf₀
+  cases s with
+  | pos =>
+    cases ff with
+    | atom x => simp [intApplyRuleFull] at hint
+    | bot => simp [intApplyRuleFull] at hint
+    | imp φ ψ => simp [intApplyRuleFull] at hint
+    | or φ ψ => simp [intApplyRuleFull] at hint
+    | and φ ψ =>
+      simp only [intApplyRuleFull, IntRuleResult.linearResult.injEq] at hint
+      obtain ⟨hnf, hnw', -⟩ := hint
+      subst hnw'; subst hnewExp
+      refine ⟨?_, ILabelBound_extendMany (le_refl nw) hLB ?_⟩
+      · intro sf' hsf'
+        rw [List.mem_append, List.mem_singleton] at hsf'
+        rcases hsf' with hsf' | rfl
+        · exact sfSatisfied_mono hmemOld (hIC sf' hsf')
+        · show sfSatisfied (Branch.extendMany b newForms) ⟨.pos, .and φ ψ, l⟩
+          simp only [sfSatisfied]
+          refine ⟨List.any_eq_true.mpr ⟨⟨.pos, φ, l⟩, hmemNew _ ?_, by simp⟩,
+                  List.any_eq_true.mpr ⟨⟨.pos, ψ, l⟩, hmemNew _ ?_, by simp⟩⟩ <;>
+            rw [← hnf] <;> simp
+      · intro sf' hsf'
+        rw [← hnf] at hsf'
+        simp only [List.mem_cons, List.mem_nil_iff, or_false] at hsf'
+        rcases hsf' with rfl | rfl <;> simpa using hsfl
+  | neg =>
+    cases ff with
+    | atom x => simp [intApplyRuleFull] at hint
+    | bot => simp [intApplyRuleFull] at hint
+    | and φ ψ => simp [intApplyRuleFull] at hint
+    | or φ ψ =>
+      simp only [intApplyRuleFull, IntRuleResult.linearResult.injEq] at hint
+      obtain ⟨hnf, hnw', -⟩ := hint
+      subst hnw'; subst hnewExp
+      refine ⟨?_, ILabelBound_extendMany (le_refl nw) hLB ?_⟩
+      · intro sf' hsf'
+        rw [List.mem_append, List.mem_singleton] at hsf'
+        rcases hsf' with hsf' | rfl
+        · exact sfSatisfied_mono hmemOld (hIC sf' hsf')
+        · show sfSatisfied (Branch.extendMany b newForms) ⟨.neg, .or φ ψ, l⟩
+          simp only [sfSatisfied]
+          refine ⟨List.any_eq_true.mpr ⟨⟨.neg, φ, l⟩, hmemNew _ ?_, by simp⟩,
+                  List.any_eq_true.mpr ⟨⟨.neg, ψ, l⟩, hmemNew _ ?_, by simp⟩⟩ <;>
+            rw [← hnf] <;> simp
+      · intro sf' hsf'
+        rw [← hnf] at hsf'
+        simp only [List.mem_cons, List.mem_nil_iff, or_false] at hsf'
+        rcases hsf' with rfl | rfl <;> simpa using hsfl
+    | imp φ ψ =>
+      simp only [intApplyRuleFull, intFImpRule, IntRuleResult.linearResult.injEq] at hint
+      obtain ⟨hnf, hnw', -⟩ := hint
+      subst hnw'; subst hnewExp
+      refine ⟨?_, ILabelBound_extendMany (Nat.le_succ nw) hLB ?_⟩
+      · intro sf' hsf'
+        rw [List.mem_append, List.mem_singleton] at hsf'
+        rcases hsf' with hsf' | rfl
+        · exact sfSatisfied_mono hmemOld (hIC sf' hsf')
+        · show sfSatisfied (Branch.extendMany b newForms) ⟨.neg, .imp φ ψ, l⟩
+          simp only [sfSatisfied]
+          refine ⟨nw, hsfl, List.any_eq_true.mpr ⟨⟨.pos, φ, nw⟩, hmemNew _ ?_, by simp⟩,
+                  List.any_eq_true.mpr ⟨⟨.neg, ψ, nw⟩, hmemNew _ ?_, by simp⟩⟩ <;>
+            rw [← hnf] <;> simp
+      · intro sf' hsf'
+        rw [← hnf] at hsf'
+        simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hsf'
+        rcases hsf' with (rfl | rfl) | hpers
+        · exact Nat.le_succ nw
+        · exact Nat.le_succ nw
+        · simp only [propagatePersistence, List.mem_map] at hpers
+          obtain ⟨a, -, rfl⟩ := hpers
+          exact Nat.le_succ nw
+
 /-- If `intExpandBranches` returns `.openBranch b`, then `b` is Hintikka-saturated:
 every compound formula on `b` has its rule-outputs also on `b` (see `IBranchSaturation`).
 

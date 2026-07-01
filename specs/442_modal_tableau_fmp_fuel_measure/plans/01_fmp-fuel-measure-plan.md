@@ -323,7 +323,18 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
 >   `modalDepth_le_of_mem_modalSubfmls`, `boxProps_rank_bound`, `diaNegProps_rank_bound`,
 >   `boxPos_rank_bound`, `diamondNeg_rank_bound`, `hasEdge_addEdge_cases_local`.
 >   Commit (task 442 phase 2b).
-> - [ ] **P2-obl-c** `outDeg w ≤ (modalSubfmls φ0).length` via injective "minting sf at w ↦ its `.formula`" into `modalSubfmls φ0` (uses P2-obl-a).
+> - [x] **P2-obl-c** landed as `modalStepBranch_preserves_outDegEq` +
+>   `outDeg_le_of_expandedNodup` (`FmpMeasure.lean`). Design correction discovered and applied
+>   during formalization: `diamondPos`/`diamondNeg` are dead code — `modalNegOf?` matches
+>   `.imp _ .bot` unconditionally (`Defs.lean:110-113`, no exclusion for a `.box` antecedent),
+>   so `tryAllPropRules`'s `negPos`/`negNeg` arms are *always* applicable first for the
+>   T-diamond shape (verified by `rfl`, both directions checked computationally); only
+>   `boxNeg`'s `.neg, .box _` shape ever mutates `acc`. `isMintingShaped` (P2-obl-a's file
+>   section) is corrected to track only this one shape (was: both shapes, "no factor of 2"
+>   merge — now provably unnecessary, not merely simplified: the T-diamond shape would have
+>   broken the exact-equality invariant, since it fires via a non-edge-creating prop rule).
+>   Same overall `outDeg ≤ Sf` bound, no bound weakened, no sorry/axiom added. Commit
+>   (task 442 phase 2c).
 > - [ ] **P2-obl-d** `Φ`-potential single-step `Δ=0` lemma (formalize the hand-verified arithmetic; recurrence `Sf·modalCap Sf k = modalCap Sf (k+1)−1`).
 > - [ ] **P2-obl-e** final composition → world bound `modalMaxWorld b' < modalWorldBound φ0` under the strengthened rank/outDeg-carrying signature, from (a)–(d) + `modalCap_le_pow` + `modalSubfmls_length_le` + `modalDepth_le_complexity`.
 >

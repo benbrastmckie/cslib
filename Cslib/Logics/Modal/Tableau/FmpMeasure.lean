@@ -9,6 +9,7 @@ module
 import Cslib.Init
 import Mathlib.Tactic.Ring
 import Mathlib.Data.List.Nodup
+import Batteries.Data.List.Perm
 import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.SoundnessStep
 public import Cslib.Logics.Modal.Tableau.Saturation
@@ -826,13 +827,21 @@ The remaining Phase 2 obligations formalize the hand-verified potential-function
 counter derived from `acc`, and a **potential** `Φ` combining them that offsets `modalMaxWorld`'s
 growth exactly. This section is obligations (a)-(c): the supporting invariants. -/
 
-/-- `true` when `sf` matches one of the two fresh-world-minting rule shapes: `diamondPos`'s
-T-diamond encoding `T((□(φ→⊥))→⊥)@w` or `boxNeg`'s F-box shape `F(□φ)@w`
-(`Rules.lean:91-139`). Firing either shape via `modalApplyOne` creates a brand-new world; all
-other shapes (propositional rules, `boxPos`, `diamondNeg`) never touch `acc`. -/
+/-- `true` when `sf` matches `boxNeg`'s F-box shape `F(□φ)@w` (`Rules.lean:117-139`), the
+**only** rule shape that actually mints a fresh world at runtime. `diamondPos`'s T-diamond
+encoding `T((□(φ→⊥))→⊥)@w` (`Rules.lean:91-114`) is syntactically a `.imp _ .bot` pattern,
+which `modalNegOf?` matches *unconditionally* (`Defs.lean:110-113`, no exclusion for a `.box`
+antecedent), so `tryAllPropRules`'s `negPos` arm is *always* applicable first for this shape
+(verified: `(tryAllPropRules … ⟨.pos, .imp (.box (.imp φ .bot)) .bot, w⟩).isApplicable = true`
+unconditionally) — `modalApplyOne`'s `diamondPos` match arm is consequently dead code, never
+reached (`T(◇φ)@w` is instead decoded by `negPos` into `F(□¬φ)@w`, which fires `boxNeg`,
+matching the diamond's semantics via a 2-step composition). Symmetrically `diamondNeg`'s shape
+`F((□(φ→⊥))→⊥)@w` is always intercepted by `negNeg` (decoding into `T(□¬φ)@w`, firing `boxPos`).
+Only `boxNeg`'s `.neg, .box _` shape is never matched by any propositional rule (`.box` is a
+distinct top-level constructor from every prop-rule pattern's `.imp`-headed shape), so it alone
+correctly tracks every `acc`-mutating step. -/
 def isMintingShaped (sf : SignedFormula (Proposition Atom) WorldIndex) : Bool :=
   match sf.sign, sf.formula with
-  | .pos, .imp (.box (.imp _ .bot)) .bot => true
   | .neg, .box _ => true
   | _, _ => false
 
@@ -1313,6 +1322,307 @@ lemma modalStepBranch_exists_rank'
       rw [hragree x.label hxlab]
       exact hbound x hx
   · rw [hfstc] at hsf; simp at hsf
+
+
+/-! ## Out-Degree Bound (Phase 2 continuation, obligation c)
+
+`boxNeg` (`F(□φ)@w`) is the **only** rule shape that ever mutates `acc` at runtime (see
+`isMintingShaped`'s doc comment for the dead-code argument ruling out `diamondPos`/`diamondNeg`).
+This section proves the exact counting correspondence `outDeg acc w = |{formulas in e matching
+isMintingShaped at w}|`, then derives `outDeg acc w ≤ Sf` from `e`'s `Nodup`-ness
+(`modalStepBranch_preserves_expandedNodup`, P2-obl-a) and the closure fact
+`e ⊆ modalUniverse φ0`. -/
+
+omit [Hashable Atom] in
+/-- A `isMintingShaped` (i.e. `boxNeg`-shaped, `.neg, .box _`) formula can never fire via a
+propositional rule: `.box` is a distinct top-level constructor from every prop-rule pattern's
+`.imp`-headed shape, so all 8 `applyPropRule` cases return `notApplicable`. Verified by `rfl`
+(a purely structural computation, independent of the box's body). -/
+private lemma isMintingShaped_not_prop_applicable
+    (sf : SignedFormula (Proposition Atom) WorldIndex) (h : isMintingShaped sf = true) :
+    (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf).isApplicable = false := by
+  unfold isMintingShaped at h
+  obtain ⟨s, ff, l⟩ := sf
+  rcases s with _ | _
+  · simp at h
+  · rcases ff with _ | _ | ⟨a, c⟩ | φ
+    · simp at h
+    · simp at h
+    · simp at h
+    · rfl
+
+omit [Hashable Atom] in
+/-- The `diamondPos` T-diamond shape `T((□(φ→⊥))→⊥)@w` always has an applicable propositional
+rule (`negPos`, since `modalNegOf?` matches `.imp _ .bot` unconditionally): verified by `rfl`,
+independent of `φ`. Used to discharge the vacuous `diamondPos` case-split leaf (dead code: this
+shape's `modalApplyOne` arm is never reached, since `tryAllPropRules` always intercepts it
+first). -/
+private lemma diamondPos_shape_prop_applicable
+    (φ : Proposition Atom) (l : WorldIndex) :
+    (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+      (⟨.pos, .imp (.box (.imp φ .bot)) .bot, l⟩ :
+        SignedFormula (Proposition Atom) WorldIndex)).isApplicable = true := by
+  rfl
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Appending a non-minting-shaped formula to the expanded set leaves the minting-filtered
+count unchanged, for every world `w` simultaneously (the predicate ignores the label when
+`isMintingShaped` fails). -/
+private lemma filter_minting_append_of_not_minting
+    (e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (sf : SignedFormula (Proposition Atom) WorldIndex) (w : WorldIndex)
+    (h : isMintingShaped sf = false) :
+    (e ++ [sf]).filter (fun x => x.label == w && isMintingShaped x) =
+      e.filter (fun x => x.label == w && isMintingShaped x) := by
+  rw [List.filter_append]
+  simp [h]
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Appending a minting-shaped formula at label `w` to the expanded set extends the
+minting-filtered count at `w` by exactly the singleton `[sf]`. -/
+private lemma filter_minting_append_of_minting_at
+    (e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (h : isMintingShaped sf = true) :
+    (e ++ [sf]).filter (fun x => x.label == sf.label && isMintingShaped x) =
+      e.filter (fun x => x.label == sf.label && isMintingShaped x) ++ [sf] := by
+  rw [List.filter_append]
+  simp [h]
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Appending a minting-shaped formula at label `sf.label` to the expanded set leaves the
+minting-filtered count at any *other* world `w` unchanged. -/
+private lemma filter_minting_append_of_minting_ne
+    (e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (sf : SignedFormula (Proposition Atom) WorldIndex) (w : WorldIndex)
+    (hw : w ≠ sf.label) :
+    (e ++ [sf]).filter (fun x => x.label == w && isMintingShaped x) =
+      e.filter (fun x => x.label == w && isMintingShaped x) := by
+  rw [List.filter_append]
+  have : (sf.label == w) = false := by
+    simp only [beq_eq_false_iff_ne]; exact fun h => hw h.symm
+  simp [this]
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `outDeg` under `addEdge` at the matching source: extends the successor list by exactly the
+new target, incrementing `outDeg` by 1. -/
+private lemma outDeg_addEdge_self (acc : Accessibility) (w wf : WorldIndex) :
+    outDeg (acc.addEdge w wf) w = outDeg acc w + 1 := by
+  simp [outDeg, Accessibility.successorsOf, Accessibility.addEdge]
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `outDeg` under `addEdge` is unchanged at any world other than the edge's source. -/
+private lemma outDeg_addEdge_ne (acc : Accessibility) (w wf w' : WorldIndex) (h : w' ≠ w) :
+    outDeg (acc.addEdge w wf) w' = outDeg acc w' := by
+  simp only [outDeg, Accessibility.successorsOf, Accessibility.addEdge, List.filterMap_cons]
+  have : (w == w') = false := by simp only [beq_eq_false_iff_ne]; exact fun heq => h heq.symm
+  simp [this]
+
+
+/-- **P2-obl-c** supporting invariant: `modalStepBranch` preserves the out-degree/expanded-set
+correspondence `outDeg acc w = |{formulas in e matching isMintingShaped at w}|` for every world
+`w`. Maintained by the same case-split shape as P2-obl-a/b: propositional-rule steps never fire
+on a minting-shaped formula (`isMintingShaped_not_prop_applicable`), so the filtered count is
+unaffected; `boxPos`/`diamondNeg` (persistent) touch neither `acc` nor `e`; the `diamondPos`
+shape is dead code (`diamondPos_shape_prop_applicable`, discharged by contradiction); only
+`boxNeg` mints, incrementing both sides by exactly 1 at `w = sf.label`. -/
+lemma modalStepBranch_preserves_outDegEq
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (houtdeg : ∀ w, outDeg acc w =
+      (e.filter (fun x => x.label == w && isMintingShaped x)).length) :
+    ∀ e' ∈ newExps, ∀ w, outDeg newAcc w =
+      (e'.filter (fun x => x.label == w && isMintingShaped x)).length := by
+  simp only [modalStepBranch] at hstep
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  have hcases : ∀ w, outDeg (modalApplyOne sf b acc).snd w =
+      (List.filter (fun x => x.label == w && isMintingShaped x)
+        (match (modalApplyOne sf b acc).fst with
+          | .linear _ => e ++ [sf]
+          | .branching _ => e ++ [sf]
+          | .persistent _ => e
+          | .notApplicable =>
+            (e : List (SignedFormula (Proposition Atom) WorldIndex)))).length := by
+    intro w
+    unfold modalApplyOne
+    by_cases hpa :
+        (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf).isApplicable
+    · simp only [hpa, if_true]
+      have hnm : isMintingShaped sf = false := by
+        by_contra hc
+        simp only [Bool.not_eq_false] at hc
+        have hcontra := isMintingShaped_not_prop_applicable sf hc
+        rw [hcontra] at hpa
+        simp at hpa
+      rcases hpr : tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf with
+        formulas | branches | formulas | -
+      · rw [filter_minting_append_of_not_minting e sf w hnm]; exact houtdeg w
+      · rw [filter_minting_append_of_not_minting e sf w hnm]; exact houtdeg w
+      · exact houtdeg w
+      · rw [hpr] at hpa; simp [RuleResult.isApplicable] at hpa
+    · rw [if_neg hpa]
+      obtain ⟨s, ff, l⟩ := sf
+      rcases s with _ | _
+      · rcases ff with _ | _ | ⟨a, c⟩ | φ
+        · exact houtdeg w
+        · exact houtdeg w
+        · rcases a with _ | _ | ⟨a2, a3⟩ | a4
+          · exact houtdeg w
+          · exact houtdeg w
+          · exact houtdeg w
+          · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
+            · exact houtdeg w
+            · exact houtdeg w
+            · rcases a6 with _ | _ | ⟨_, _⟩ | _
+              · exact houtdeg w
+              · rcases c with _ | _ | ⟨_, _⟩ | _
+                · exact houtdeg w
+                · dsimp only
+                  exact absurd (diamondPos_shape_prop_applicable a5 l) hpa
+                · exact houtdeg w
+                · exact houtdeg w
+              · exact houtdeg w
+              · exact houtdeg w
+            · exact houtdeg w
+        · dsimp only
+          split <;> exact houtdeg w
+      · rcases ff with _ | _ | ⟨a, c⟩ | φ
+        · exact houtdeg w
+        · exact houtdeg w
+        · rcases a with _ | _ | ⟨a2, a3⟩ | a4
+          · exact houtdeg w
+          · exact houtdeg w
+          · exact houtdeg w
+          · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
+            · exact houtdeg w
+            · exact houtdeg w
+            · rcases a6 with _ | _ | ⟨_, _⟩ | _
+              · exact houtdeg w
+              · rcases c with _ | _ | ⟨_, _⟩ | _
+                · exact houtdeg w
+                · dsimp only
+                  split <;> exact houtdeg w
+                · exact houtdeg w
+                · exact houtdeg w
+              · exact houtdeg w
+              · exact houtdeg w
+            · exact houtdeg w
+        · dsimp only
+          by_cases hw : w = l
+          · rw [hw]
+            rw [outDeg_addEdge_self,
+              filter_minting_append_of_minting_at e ⟨.neg, Proposition.box φ, l⟩ (by rfl)]
+            simp only [List.length_append, List.length_singleton]
+            rw [houtdeg l]
+          · rw [outDeg_addEdge_ne acc l (modalNextWorld b) w hw]
+            rw [filter_minting_append_of_minting_ne e _ w (by simpa using hw)]
+            exact houtdeg w
+
+  rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+  · rw [hfstc] at hsf hcases
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    rw [hsf.2.2] at hcases
+    intro e' he'
+    rw [← hsf.2.1] at he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    exact hcases
+  · rw [hfstc] at hsf hcases
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    rw [hsf.2.2] at hcases
+    intro e' he'
+    rw [← hsf.2.1] at he'
+    obtain ⟨br, -, rfl⟩ := List.mem_map.mp he'
+    exact hcases
+  · rw [hfstc] at hsf hcases
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    rw [hsf.2.2] at hcases
+    intro e' he'
+    rw [← hsf.2.1] at he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    exact hcases
+  · rw [hfstc] at hsf; simp at hsf
+
+
+omit [Hashable Atom] in
+/-- Inversion for `isMintingShaped`: a minting-shaped signed formula has sign `.neg` and its
+formula component is a box. -/
+private lemma isMintingShaped_inv
+    {sf : SignedFormula (Proposition Atom) WorldIndex} (h : isMintingShaped sf = true) :
+    sf.sign = .neg ∧ ∃ ψ, sf.formula = .box ψ := by
+  unfold isMintingShaped at h
+  obtain ⟨s, ff, l⟩ := sf
+  rcases s with _ | _ <;> rcases ff with _ | _ | ⟨_, _⟩ | ψ <;> simp_all
+
+omit [Hashable Atom] in
+/-- Bridging fact: filtering then mapping equals a single `filterMap` with the predicate
+folded into the `Option`-valued function. Used to invoke `List.Nodup.filterMap`'s
+injective-on-domain hypothesis (weaker than `List.Nodup.map`'s global injectivity) for the
+`outDeg ≤ Sf` bound below. -/
+private lemma filter_map_eq_filterMap
+    {β : Type*} (l : List (SignedFormula (Proposition Atom) WorldIndex))
+    (p : SignedFormula (Proposition Atom) WorldIndex → Bool)
+    (f : SignedFormula (Proposition Atom) WorldIndex → β) :
+    (l.filter p).map f = l.filterMap (fun x => if p x then some (f x) else none) := by
+  induction l with
+  | nil => simp
+  | cons x xs ih =>
+    by_cases h : p x = true
+    · simp [List.filter_cons, List.filterMap_cons, h, ih]
+    · simp [List.filter_cons, List.filterMap_cons, h, ih]
+
+omit [Hashable Atom] in
+/-- **P2-obl-c** (final): given `e.Nodup` (P2-obl-a) and the closure fact `e ⊆ modalUniverse φ0`,
+`outDeg acc w` is bounded by `Sf(φ0) := (modalSubfmls φ0).length`. The injective map is
+`x ↦ x.formula` on `{x ∈ e : x.label = w ∧ isMintingShaped x}`: `isMintingShaped` fixes
+`x.sign = .neg` and the shape `.box _`, and the filter fixes `x.label = w`, so `x.formula`
+determines `x` uniquely on this set (structure equality) — the injectivity hypothesis of
+`List.Nodup.filterMap`. -/
+lemma outDeg_le_of_expandedNodup
+    (φ0 : Proposition Atom) (e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (w : WorldIndex)
+    (hnodup : e.Nodup) (hclosure : ∀ x ∈ e, x ∈ modalUniverse φ0)
+    (houtdeg : outDeg acc w = (e.filter (fun x => x.label == w && isMintingShaped x)).length) :
+    outDeg acc w ≤ (modalSubfmls φ0).length := by
+  rw [houtdeg, ← List.length_map (fun x => x.formula), filter_map_eq_filterMap]
+  have hfmnodup : (e.filterMap (fun x =>
+      if x.label == w && isMintingShaped x then some x.formula else none)).Nodup := by
+    apply hnodup.filterMap
+    intro a a' ψ ha ha'
+    simp only [Option.mem_def, Option.ite_none_right_eq_some, Option.some.injEq] at ha ha'
+    obtain ⟨hacond, haeq⟩ := ha
+    obtain ⟨ha'cond, ha'eq⟩ := ha'
+    simp only [Bool.and_eq_true] at hacond ha'cond
+    obtain ⟨halw, hamint⟩ := hacond
+    obtain ⟨ha'lw, ha'mint⟩ := ha'cond
+    obtain ⟨hasign, -, -⟩ := isMintingShaped_inv hamint
+    obtain ⟨ha'sign, -, -⟩ := isMintingShaped_inv ha'mint
+    have hlab : a.label = a'.label :=
+      (beq_iff_eq.mp halw).trans (beq_iff_eq.mp ha'lw).symm
+    have hform : a.formula = a'.formula := haeq.trans ha'eq.symm
+    obtain ⟨as, af, al⟩ := a
+    obtain ⟨a's, a'f, a'l⟩ := a'
+    simp only [SignedFormula.sign] at hasign ha'sign
+    simp only [SignedFormula.formula] at hform
+    simp only [SignedFormula.label] at hlab
+    subst hasign; subst ha'sign; subst hform; subst hlab
+    rfl
+  have hsub : ∀ x ∈ e.filterMap (fun x =>
+      if x.label == w && isMintingShaped x then some x.formula else none),
+      x ∈ modalSubfmls φ0 := by
+    intro ψ hψ
+    simp only [List.mem_filterMap] at hψ
+    obtain ⟨x, hxmem, hxeq⟩ := hψ
+    split at hxeq
+    · simp only [Option.some.injEq] at hxeq
+      subst hxeq
+      exact modalUniverse_mem_formula (hclosure x hxmem)
+    · simp at hxeq
+  exact (List.subperm_of_subset hfmnodup hsub).length_le
 
 end Cslib.Logic.Modal.Tableau
 

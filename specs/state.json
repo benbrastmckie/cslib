@@ -4,7 +4,7 @@
     {
       "project_number": 447,
       "project_name": "apply_shake_import_minimization_fixes_tasks_321_406_431",
-      "status": "implementing",
+      "status": "planned",
       "task_type": "cslib",
       "title": "Apply lake shake import-minimization fixes to files touched by tasks 321/406/431",
       "description": "Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public --keep-implied --keep-prefix import-minimization suggestions across files touched by tasks 321, 406, and 431. CI otherwise passes (build/test/checkInitImports green; zero sorries). Apply the genuine import-hygiene fixes and verify (do NOT blindly --fix):\n\nFALSE-POSITIVE CANDIDATES (import Cslib.Init removals -- Cslib.Init sets up default linting/tactics, not a term-level dependency; verify, and if legitimately needed add the shake preserve-comment per 'lake shake --help' rather than removing):\n- Cslib/Foundations/Logic/Metalogic/DeductionCharacterization.lean (remove import Cslib.Init)\n- Cslib/Logics/Modal/Tableau/Saturation.lean (remove import Cslib.Init; add public import Cslib.Logics.Modal.Tableau.Rules)\n- Cslib/Logics/Modal/Tableau/LoopInduction.lean (remove import Cslib.Init + public import ...Saturation; add public import Cslib.Logics.Modal.Basic, Batteries.Data.List.Basic)\n- Cslib/Logics/Modal/Tableau/Soundness.lean (remove import Cslib.Init)\n- Cslib/Logics/Temporal/Tableau/Rules.lean (remove import Cslib.Init; add public import Cslib.Foundations.Logic.Tableau.PropositionalRules)\n- Cslib/Logics/Temporal/Tableau/Saturation.lean (remove import Cslib.Init)\n\nGENUINE IMPORT-HYGIENE FIXES:\n- Cslib/Foundations/Order/HilbertAlgebra/FreeMeetExtension.lean (remove public import Mathlib.Data.Multiset.Basic)\n- Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean (swap MCSProperties -> GenericMCS)\n- Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean (swap MCSProperties -> GenericMCS)\n- Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean (swap MCSProperties -> GenericMCS)\n- Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/BurgessHelpers.lean (remove Finset.Max + Tactic.Linarith; add Tactic.NormNum)\n- Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean (remove re-export of ...Elimination -- verify barrel still builds)\n- Cslib/Logics/Temporal/Metalogic/Chronicle/CounterexampleElimination/Structures.lean (remove Mathlib.Logic.Encodable.Basic) paired with Elimination.lean (add Mathlib.Logic.Encodable.Basic)\n- Cslib/Logics/LTL/Semantics/GNBA/Closure.lean (remove Satisfies + Set.Finite.Powerset + Set.Finite.Lattice; add LTL.Syntax.Formula) paired with GNBA/Atoms.lean (add Satisfies)\n- Cslib/Logics/Temporal/Metalogic/DenseMCS.lean (remove DeductionHelpers)\n\nAfter edits, re-run: lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake --add-public --keep-implied --keep-prefix on the touched files to confirm the suggestions are resolved. Scope is limited to these files only -- do NOT attempt the codebase-wide shake backlog. Source: /vet session sess_1782884590_732b0b.",
@@ -976,7 +976,7 @@
       "project_number": 419,
       "project_name": "generalize_derivation_lifting_intersystem",
       "title": "Generalize derivation lifting to a cross-logic InferenceSystem layer (spike)",
-      "status": "not_started",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "parent_task": 415,
@@ -996,7 +996,7 @@
         }
       ],
       "created": "2026-06-29T22:35:38Z",
-      "last_updated": "2026-06-30T05:11:13Z",
+      "last_updated": "2026-07-01T06:20:00Z",
       "blockers": "SPIKE verdict: cross-logic axiom-subsumption derivation lift is NOT cleanly abstractable as specified. Forward-direction lifts for PL+Modal+Bimodal DID land as Deriv.map corollaries on the shared ProofSystemMorphism scaffold (committed phases 1-4, sorry-free). The full payload resists: (1) Bimodal's subsumption axis is frame-class inclusion (DerivationTree.lift {fc1<=fc2}, Derivation.lean:92) over a single concrete Axiom inductive gated by minFrameClass<=fc (Derivation.lean:53,59), NOT axiom-predicate inclusion like Modal/PL -- so no single instantiable result covers all three; (2) Bimodal backward map (ofDeriv/bimodalEquiv) requires reconstructing erased Axiom+h_fc gate data and could only be written with sorry (WIP build failed, sorry at LiftViaMorphism.lean:217,224); (3) cross-syntax liftDerivationWith is fresh-atom unembedding (Bimodal/Metalogic/ConservativeExtension/Lifting.lean:636), a different operation, not an axiom subsumption. Per SPIKE rule: documented, stopped, no sorry. WIP refactor reverted; committed phases 1-4 retained.",
       "updated": "2026-06-30T05:11:13Z",
       "session_id": "sess_1782772776_909541_419"

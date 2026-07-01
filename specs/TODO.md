@@ -104,12 +104,12 @@ next_project_number: 448
   └─ 414 [NOT STARTED] — (Code Hygiene: [Split from task 278.] Simplify Modal/, ) (see above)
 445 [BLOCKED] — Vet fix for task 180 (Medium severity, PR-BLOCKING). HARD REQUIRE
   └─ 414 [NOT STARTED] — (Code Hygiene: [Split from task 278.] Simplify Modal/, ) (see above)
-447 [IMPLEMENTING] — Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public 
+447 [PLANNED] — Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public 
 
 ## Tasks
 
 ### 447. Apply lake shake import-minimization fixes to files touched by tasks 321/406/431
-- **Status**: [IMPLEMENTING]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Dependencies**: None
 - **Research**: [447_apply_shake_import_minimization_fixes_tasks_321_406_431/reports/01_shake-import-minimization-verification.md]

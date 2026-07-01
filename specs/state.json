@@ -1,18 +1,64 @@
 {
-  "next_project_number": 444,
+  "next_project_number": 447,
   "active_projects": [
+    {
+      "project_number": 446,
+      "project_name": "fix_temporal_burgess_citation_hygiene",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Standardize Burgess 1982 citation format in Temporal metalogic modules",
+      "description": "Vet fix for task 180 (Low). Update References sections of TruthLemma.lean (:34,:274), Soundness.lean (:28), DenseSoundness.lean (:28) and the prose citation in RRelation.lean (:21) to use the bracket [Description][BibKey] format used elsewhere in the diff, disambiguating Burgess1982I ('Since'/'Until') vs Burgess1982II ('Time Periods') wherever '[Burgess 1982]' appears unqualified. RRelation.lean already identifies II in prose; the others do not disambiguate.",
+      "parent_task": 180,
+      "created": "2026-07-01T05:12:18Z",
+      "last_updated": "2026-07-01T05:12:18Z",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 445,
+      "project_name": "fix_temporal_conservativity_domain_mismatch_sorry",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Resolve or explicitly disclose the domain-mismatch sorry in Bimodal-Temporal conservativity proof",
+      "description": "Vet fix for task 180 (Medium). TemporalConservativity.lean:269 (`temporal_valid_of_bimodal_derivable`) contains a live `sorry` gated by `set_option warn.sorry false`, so it builds green but is not sorry-free; `bimodal_conservative_over_temporal` transitively depends on it. The gap is the AddCommGroup-domain soundness vs. arbitrary-serial-linear-order completeness mismatch (documented in the module's 'Domain Mismatch Resolution' section). Either (a) prove the model-transfer result, or (b) explicitly disclose this remaining sorry in the task-180 PR description rather than merging as if conservativity were complete.",
+      "parent_task": 180,
+      "created": "2026-07-01T05:12:18Z",
+      "last_updated": "2026-07-01T05:12:18Z",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 444,
+      "project_name": "fix_temporal_theorems_underscore_lint",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Rename underscored defs in Temporal/Theorems.lean to satisfy defsWithUnderscore lint",
+      "description": "Vet fix for task 180 (High). Rename `allFuture_iff_neg_someFuture_neg` (Theorems.lean:51) and `allPast_iff_neg_somePast_neg` (Theorems.lean:68) to lowerCamelCase (e.g. allFutureIffNegSomeFutureNeg, allPastIffNegSomePastNeg) since they are noncomputable defs returning DerivationTree, not theorem/lemma. Update all call sites and re-run `lake lint` to confirm the two defsWithUnderscore errors clear with no new violations. These are the only in-scope CI (lake lint) failures for task 180.",
+      "parent_task": 180,
+      "created": "2026-07-01T05:12:18Z",
+      "last_updated": "2026-07-01T05:12:18Z",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
     {
       "project_number": 443,
       "project_name": "fix_lint_mcnaughton_choueka_concat",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "title": "Fix lint violations in McNaughton-theorem Choueka/Concat route (task 241)",
       "description": "Address the 2 lake lint violations introduced by task 241: rename the underscored instance buchiCongruence_instMonoid in Cslib/Computability/Languages/Congruences/BuchiCongruence.lean:263 (defsWithUnderscore), and silence or restructure the unused-argument warning on mullerAccConcat in Cslib/Computability/Automata/DA/Concat.lean:159 (unusedArguments). Verify with lake lint and lake build afterward; ensure no downstream call sites reference the renamed instance directly.",
       "parent_task": 241,
       "created": "2026-07-01T05:04:42Z",
-      "last_updated": "2026-07-01T05:04:42Z",
+      "last_updated": "2026-07-01T05:11:15Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [
+        {
+          "path": "specs/443_fix_lint_mcnaughton_choueka_concat/reports/01_lint-fix-241.md",
+          "type": "report",
+          "summary": "Lint fix research for task 241 violations"
+        }
+      ],
+      "session_id": "sess_1782882476_455d76"
     },
     {
       "project_number": 440,

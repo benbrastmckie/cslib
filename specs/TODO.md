@@ -1,5 +1,5 @@
 ---
-next_project_number: 444
+next_project_number: 447
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 444
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,317,390,396,400,404,407,415,419,438,440,442,443 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,317,390,396,400,404,407,415,419,438,440,442,443,444,445,446 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 2 | 39,40,181,215,299,375,389,405,409,430,439 | 36,37,180,317,404,407,442 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,275,300,391,392,413,426,441 | 39,40,299,375,389,439 | Bimodal Porting, Foundations, Modal Logic, ... |
 | 4 | 393,412,425 | 41,391,426 | Foundations, Temporal Logic, PL-Hygiene |
@@ -101,14 +101,45 @@ next_project_number: 444
 ### Uncategorized
 
 438 [NOT STARTED] — Upstream the comment/docstring cleanups identified by the task 43
-443 [NOT STARTED] — Address the 2 lake lint violations introduced by task 241: rename
+443 [RESEARCHED] — Address the 2 lake lint violations introduced by task 241: rename
+444 [NOT STARTED] — Vet fix for task 180 (High). Rename `allFuture_iff_neg_someFuture
+445 [NOT STARTED] — Vet fix for task 180 (Medium). TemporalConservativity.lean:269 (`
+446 [NOT STARTED] — Vet fix for task 180 (Low). Update References sections of TruthLe
 
 ## Tasks
 
-### 443. Fix lint violations in McNaughton-theorem Choueka/Concat route (task 241)
+### 446. Standardize Burgess 1982 citation format in Temporal metalogic modules
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Dependencies**: None
+
+**Description**: Vet fix for task 180 (Low). Update References sections of TruthLemma.lean (:34,:274), Soundness.lean (:28), DenseSoundness.lean (:28) and the prose citation in RRelation.lean (:21) to use the bracket [Description][BibKey] format used elsewhere in the diff, disambiguating Burgess1982I ('Since'/'Until') vs Burgess1982II ('Time Periods') wherever '[Burgess 1982]' appears unqualified. RRelation.lean already identifies II in prose; the others do not disambiguate.
+
+---
+
+### 445. Resolve or explicitly disclose the domain-mismatch sorry in Bimodal-Temporal conservativity proof
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Vet fix for task 180 (Medium). TemporalConservativity.lean:269 (`temporal_valid_of_bimodal_derivable`) contains a live `sorry` gated by `set_option warn.sorry false`, so it builds green but is not sorry-free; `bimodal_conservative_over_temporal` transitively depends on it. The gap is the AddCommGroup-domain soundness vs. arbitrary-serial-linear-order completeness mismatch (documented in the module's 'Domain Mismatch Resolution' section). Either (a) prove the model-transfer result, or (b) explicitly disclose this remaining sorry in the task-180 PR description rather than merging as if conservativity were complete.
+
+---
+
+### 444. Rename underscored defs in Temporal/Theorems.lean to satisfy defsWithUnderscore lint
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Vet fix for task 180 (High). Rename `allFuture_iff_neg_someFuture_neg` (Theorems.lean:51) and `allPast_iff_neg_somePast_neg` (Theorems.lean:68) to lowerCamelCase (e.g. allFutureIffNegSomeFutureNeg, allPastIffNegSomePastNeg) since they are noncomputable defs returning DerivationTree, not theorem/lemma. Update all call sites and re-run `lake lint` to confirm the two defsWithUnderscore errors clear with no new violations. These are the only in-scope CI (lake lint) failures for task 180.
+
+---
+
+### 443. Fix lint violations in McNaughton-theorem Choueka/Concat route (task 241)
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Dependencies**: None
+- **Research**: [443_fix_lint_mcnaughton_choueka_concat/reports/01_lint-fix-241.md]
 
 **Description**: Address the 2 lake lint violations introduced by task 241: rename the underscored instance buchiCongruence_instMonoid in Cslib/Computability/Languages/Congruences/BuchiCongruence.lean:263 (defsWithUnderscore), and silence or restructure the unused-argument warning on mullerAccConcat in Cslib/Computability/Automata/DA/Concat.lean:159 (unusedArguments). Verify with lake lint and lake build afterward; ensure no downstream call sites reference the renamed instance directly.
 

@@ -1,51 +1,28 @@
 {
-  "status": "partial",
-  "started_at": "2026-07-01T00:00:00Z",
-  "requires_user_review": true,
-  "artifacts": [
+  "status": "researched",
+  "agent_type": "cslib-research-hard-agent",
+  "task_number": 317,
+  "session_id": "sess_1782919268_2df8d8_317research",
+  "reference_grounding_tier": 1,
+  "adversarial_verification_triggered": true,
+  "findings_count": 5,
+  "bibkey_verification_status": {
+    "present": ["ChagrovZakharyaschev1997", "Fitting1983", "TroelstraSchwichtenberg2000"],
+    "absent_recommend_add": ["NegriVonPlato2001", "GargGenoveseNegri2012", "DershowitzManna1979"]
+  },
+  "artifact_path": "specs/317_propositional_tableau_completeness/reports/09_phase2-escape-routes.md",
+  "recommendation": "Route (a) (un-pin frame via intAccessPreorder); reject Route (b) (redefine IForces). Route (a) has ~zero public blast radius; necessary but not sufficient -- must combine with report-07 fuel raise. Not scopable to one wave.",
+  "memory_candidates": [
     {
-      "path": "specs/317_propositional_tableau_completeness/plans/05_frame-change-and-fuel-raise.md",
-      "type": "plan",
-      "summary": "Phase 1 [COMPLETED]; Phase 2 [BLOCKED] with the combined STOP-gate a finding (both concurrent sessions' evidence) recorded in-line."
+      "content": "In the CSLib intuitionistic propositional tableau completeness (Scheme.lean), the Decidable (IValid phi) instance discharges its .openBranch case via intuitionisticTableau_complete (the IValid->closed direction), NOT via the countermodel lemma intuitionisticOpenBranch_countermodel. The countermodel lemma has no live consumer (docstrings only), so restating its conclusion over a different Preorder instance has ~zero downstream blast radius.",
+      "keywords": ["cslib", "tableau", "completeness", "Decidable", "IValid", "blast-radius"],
+      "tags": ["cslib", "lean4", "task-317"]
     },
     {
-      "path": "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
-      "type": "handoff",
-      "summary": "Structured H9 handoff: status blocked, sorry_inventory (4 entries), blockers (Phase 2 R1 + supplementary fuel-entanglement finding + scope-ambiguity flag), continuation_context, Preserved Asset note (intAccessPreorder)."
-    },
-    {
-      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "type": "lean",
-      "summary": "Phase 1 (concurrent session, b646eb10): intExpandBranches_openBranch_sat widened to expose edges. Phase 2 (this dispatch, a1883c4e): intAccessPreorder / intAccessPreorder_le_of_isAccessible added (green, reusable). Redundant duplicate Phase-1 lemma from this dispatch's own first attempt removed (ea452ce5)."
+      "content": "IForces (Cslib/Logics/Propositional/Semantics/Kripke.lean) is the shared Kripke-forcing primitive (~205 refs across 13 files: all soundness, FMP decidability, strong completeness, algebra bridge). Its imp-case proof of iforces_persistence uses le_trans of the Preorder. To install a non-total accessibility for completeness, plug a custom Preorder INSTANCE (e.g. intAccessPreorder = Relation.ReflTransGen of edge-accessibility) into the existing IForces -- never redefine IForces itself.",
+      "keywords": ["cslib", "IForces", "Kripke", "Preorder", "intAccessPreorder", "iforces_persistence"],
+      "tags": ["cslib", "lean4", "semantics"]
     }
   ],
-  "partial_progress": {
-    "stage": "phase-2-blocked",
-    "details": "Phase 1 of 11 COMPLETE (reconciled across two concurrent sessions on this task). Phase 2 (STOP-gated, highest-risk) BLOCKED, confirmed independently twice: (1) concurrent session: openBranch_countermodel/tableau_complete's byte-stable signatures pin IForces's World to bare Nat, resolving [Preorder Nat] to the global Nat.instPreorder (a total, unbounded order) at theorem-type elaboration time -- verified live via #synth Preorder Nat; report 08's adversarial counterexample re-confirmed; total order cannot represent non-linear accessibility (new type-theoretic finding). (2) this dispatch: even if the signature question is resolved, intExtractValuation monotonicity is separately entangled with the B2 fuel-sufficiency argument (Phase 6-10, not yet implemented) -- intApplyRuleFull maps every T(phi->psi) to .notApplicable, so intStepBranch=none does not guarantee persistence-fixpoint convergence. This dispatch built intAccessPreorder (a genuine, green Preorder Nat from Relation.ReflTransGen (isAccessible edges)) as a reusable Preserved Asset for the eventual re-plan. Phases 3-11 not attempted (gated on Phase 2). Full findings in plan file + .orchestrator-handoff.json."
-  },
-  "phases_completed": 1,
-  "phases_total": 11,
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 4,
-    "sorry_count_in_scope": 2,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": false,
-    "ci_pipeline_note": "Scoped Scheme.lean build run repeatedly and green throughout (662 jobs, no errors). Full `lake exe checkInitImports` was attempted but failed due to an UNRELATED concurrent session's unbuilt module (Cslib.Logics.Temporal.Tableau.Saturation) elsewhere in the build graph -- not caused by this dispatch's changes. Full CI pipeline (lake lint, lint-style, shake, mk_all, test) was not run since status is not 'implemented' (Phase 2 blocked, no phase-completing changes to verify beyond the scoped Preorder addition)."
-  },
-  "memory_candidates": [
-    "IForces (Cslib Propositional Kripke.lean) resolves [Preorder World] via typeclass search at theorem-type elaboration time; instantiating at World=Nat locks in Nat.instPreorder (total, unbounded) with no possibility of local override via letI/haveI inside a proof body, since the goal type is already fixed before the proof starts.",
-    "A total (linear) Preorder instance cannot represent a non-linear (tree/DAG-shaped) Kripke accessibility relation, regardless of relabelling -- this is a hard type-theoretic limit, not a missing-proof gap. Relevant to any future intuitionistic/modal completeness development that tries to reuse a flat Nat-labelled carrier with the ambient order as accessibility.",
-    "To build a Preorder instance from a Bool-valued fuel-bounded reachability check (like isAccessible edges), wrap it in Relation.ReflTransGen rather than separately proving the raw Bool function is itself transitive -- ReflTransGen gives refl/trans for free via Mathlib, and .single lifts any one raw fact into the closure. Proving fuel-bounded DFS transitivity directly (via path concatenation across two fuel budgets) hits a fuel-shrinking dead end: concatenating two edges.length-fuel traversals needs edges.length+edges.length fuel, and there is no general way to shrink back down to edges.length without a separate shortest-path/simple-path argument.",
-    "When a tableau's persistent (T-imp-style) rule is handled entirely OUTSIDE the branch's step-saturation check (i.e. intApplyRuleFull maps it to .notApplicable, so intStepBranch never reports it), 'intStepBranch = none' does NOT imply that persistence/fixpoint propagation has converged -- convergence is a separate, fuel-bounded property that needs its own sufficiency argument (measure <= fuel) before any monotonicity-along-accessibility claim about the returned branch can be proved."
-  ],
-  "metadata": {
-    "session_id": "sess_1782919268_2df8d8_317b",
-    "agent_type": "cslib-implementation-hard-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
-    "concurrent_session": "sess_1782919268_2df8d8_317 (same task, overlapping window; reconciled per R6)"
-  }
+  "next_steps": "Run /plan 317 --hard to create a plan v6 (Wave 1: Route (a) frame plumbing; Wave 2+: report-07 fuel machinery + sat_timp + monotonicity)."
 }

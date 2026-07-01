@@ -3,7 +3,7 @@
   "plan": "04_sfor-dedup-fuel-sufficiency",
   "summary": "Phase 1 (design gate) of plan 04 COMPLETE with GO verdict. Recorded the Garg-Genovese-Negri Sfor-containment loop-check design as a docstring + trivial none-returning stub `intFImpReuseWitness?` in Expansion.lean. The check is fully expressible against existing IBranch/IEdges/posFormulasAt/isAccessible primitives using values already in go's own scope (bPers, edges, newForms, newEdge) -- no new persistent field, no new structure, and NO signature change to intFImpRule/intApplyRuleFull/intStepBranch is required. edges is available one level up (in go, the intExpandBranches inner loop) from where the F(phi->psi) world-creating rule fires, exactly where the reuse decision must be made. Sfor(w') and the obligation psi are read directly off the already-computed newForms (no recomputation needed). Phase 2 (implement + wire into go) is next; not started. No sorry closed or created this phase (design-only, per plan). GargGenoveseNegri2012 BibKey cited in the docstring but not yet added to references.bib -- that is explicitly Phase 6 of this same plan, not a blocker for Phase 1 or 2. This supersedes the plan-03 R1-measure blocker recorded below (that blocker was against the abandoned decreasing-measure approach; this plan (04) uses the Sfor-containment approach instead and its own R1 gate is GO).",
   "phases_completed": 1,
-  "phases_total": 6,
+  "phases_total": 7,
   "build_green": true,
   "sorry_inventory": {
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean": [330, 985],
@@ -29,7 +29,7 @@
     "resume_at": "Phase 2 of plans/04_sfor-dedup-fuel-sufficiency.md: implement intFImpReuseWitness? for real (replace the `none` stub with the search over (bPers.map (.label)).eraseDups filtered by isAccessible/containment/obligation-open, per the docstring in Expansion.lean) and wire the branch into go's .linearResult case. Phase 1 design doc lives on intFImpReuseWitness? in Expansion.lean.",
     "last_good_commit": "26508fe9 (baseline before this dispatch's phase-1 design commit; see this dispatch's final response for the new commit hash)"
   },
-  "task_430_gate": "still gated on B2-fuel0 (sorry 985), which is gated on Phase 2-5 of plan 04 completing",
+  "task_430_gate": "still gated on B2-fuel0 (sorry 985), which is gated on Phase 2-7 of plan 04 completing",
   "artifacts": [
     {
       "path": "specs/317_propositional_tableau_completeness/plans/04_sfor-dedup-fuel-sufficiency.md",

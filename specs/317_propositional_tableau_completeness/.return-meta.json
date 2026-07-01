@@ -1,48 +1,49 @@
 {
   "status": "partial",
-  "started_at": "2026-07-01T00:00:00Z",
-  "requires_user_review": true,
+  "agent_type": "cslib-implementation-hard-agent",
+  "task_number": 317,
+  "task_slug": "propositional_tableau_completeness",
+  "session_id": "sess_1782890716_9a7f59",
+  "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
+  "plan_path": "specs/317_propositional_tableau_completeness/plans/04_sfor-dedup-fuel-sufficiency.md",
+  "phase_number": 1,
   "phases_completed": 1,
-  "phases_total": 4,
+  "phases_total": 7,
+  "phase_1_verdict": "GO",
+  "commit": "272ab4f7",
+  "memory_candidates": [
+    "In Cslib/Logics/Propositional/Tableau/Intuitionistic, go (intExpandBranches inner loop) already carries bPers and edges in scope at the exact point the F(phi->psi) world-creating rule fires (the .linearResult newForms nw' (some newEdge) branch), so any dedup/loop-check logic gated on accessibility (isAccessible edges w x) can live entirely in go without changing intFImpRule/intApplyRuleFull/intStepBranch signatures.",
+    "intFImpRule's newForms already contains Sfor(w') = {phi} union posFormulasAt bPers w as its sign=.pos sublist (via propagatePersistence), and the obligation psi as its sole sign=.neg entry -- both readable directly off newForms without recomputation."
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": "partial (scoped module build GREEN; full checkInitImports skipped due to unrelated missing .olean for Minimal/Soundness.lean from concurrent working-tree state; not a regression introduced by this phase)"
+  },
   "artifacts": [
     {
-      "path": "specs/317_propositional_tableau_completeness/plans/03_b2-fuel-sufficiency.md",
+      "path": "specs/317_propositional_tableau_completeness/plans/04_sfor-dedup-fuel-sufficiency.md",
       "type": "plan",
-      "summary": "Phase 2a marked [BLOCKED] with detailed R1 gate failure analysis (propagatePersistence duplication onto fresh worlds) and candidate future directions."
+      "summary": "Phase 1 marked [COMPLETED] with GO verdict"
     },
     {
-      "path": "specs/317_propositional_tableau_completeness/progress/phase-2a-progress.json",
-      "type": "progress",
-      "summary": "Phase 2a progress tracking showing the exact R1 gate block point."
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+      "type": "lean",
+      "summary": "Design docstring + none-stub intFImpReuseWitness?"
+    },
+    {
+      "path": "specs/317_propositional_tableau_completeness/summaries/04_sfor-dedup-phase1-summary.md",
+      "type": "summary",
+      "summary": "Phase 1 execution summary with Plan Deviations section (none)"
     },
     {
       "path": "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
       "type": "handoff",
-      "summary": "Orchestrator handoff: status blocked, blocker R1-measure (severity high, tractable false), next_action_hint research."
+      "summary": "H9 orchestrator handoff: status partial, next_action_hint implement (Phase 2)"
     }
   ],
-  "partial_progress": {
-    "stage": "R1_gate_blocked",
-    "details": "Phase 2a measure spike (read-only) completed; R1 gate evaluated the two plan-proposed measure candidates against the F(phi->psi) world-creating rule and both fail: propagatePersistence (Rules.lean:139-141) unconditionally duplicates all T-formulas at the parent world (including already-expanded compounds) onto the fresh world, unbounded by complexity(phi->psi). No Scheme.lean edit was made; build remains GREEN at baseline 26508fe9. Per plan instructions (Postmortem Constraint 5, ZERO-DEBT, and the explicit R1 escalation gate), this is a legitimate blocked outcome, not a defect."
-  },
-  "memory_candidates": [
-    {
-      "content": "In the CSLib intuitionistic propositional tableau (Cslib/Logics/Propositional/Tableau/Intuitionistic/), the world-creating F(phi->psi) rule's propagatePersistence (Rules.lean:139-141) duplicates ALL T-formulas at the parent world onto the fresh world, including already-expanded compounds. This means no simple per-step-decreasing raw-complexity Nat measure (the classical-tableau-style Sigma 3^complexity measure) can prove fuel-sufficiency for the INT expansion loop, unlike the classical propositional tableau where classicalExpMeasure works cleanly. Any future fuel-sufficiency proof for intExpandBranches needs a measure over the bounded subformula x world closure, or a measure incorporating remaining world-creation budget as a primary component -- not a direct transplant of the classical per-branch complexity-sum approach."
-    }
-  ],
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 4,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": "not_run_no_scheme_lean_change",
-    "note": "sorry_count=4 is the pre-existing total across the whole repo scope tracked by this task (Scheme.lean:330,985; Intuitionistic/Completeness.lean:113; Minimal/Completeness.lean:110) -- unchanged from baseline. No new sorry introduced. Full CSLib CI pipeline (lake lint, lint-style, shake, mk_all, test) was not run since Scheme.lean (the only file in this phase's territory) was not modified -- baseline scoped build was reconfirmed GREEN instead."
-  },
-  "metadata": {
-    "session_id": "sess_1782890716_9a7f59",
-    "agent_type": "cslib-implementation-hard-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
-  }
+  "next_steps": "Run /implement 317 --hard to execute Phase 2 (implement intFImpReuseWitness? and wire into go)."
 }

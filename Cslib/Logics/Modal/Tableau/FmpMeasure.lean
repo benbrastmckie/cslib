@@ -2489,6 +2489,340 @@ lemma modalStepBranch_worldBound
     _ ≤ (2 * modalComplexity φ0 + 1) ^ (modalComplexity φ0 + 1) := hpow2
     _ = modalWorldBound φ0 := hWB.symm
 
+/-! ## Output-Freshness and Per-Rule R-Drop (Phase 3)
+
+This section proves the counting measure `modalWork`/`modalExpMeasure` (§3.2) strictly
+decreases on every `some` step of `modalStepBranch`, completing the port of
+`classicalExpMeasure_step_lt` (`Classical/Completeness.lean:834`). The combinatorial core is a
+`List.countP`-drop lemma (`modalCount_notMem_append_drop`) mirroring
+`classicalBranchComplexity_drop` (`:509`) at unit weight (a pure count, not a complexity sum);
+composed with a weak monotonicity lemma (`modalCount_notMem_mono`, the branch-growth direction),
+it gives the two per-rule-kind drop lemmas `modalWork_drop_linear`/`modalWork_drop_persistent`
+(research §2.2/§3.4). The `.persistent`-producing rules' freshness/nonemptiness fact
+(`modalApplyOne_persistent_props`, research §3.4) is proved directly over the `boxPropagation`/
+successor-`filterMap` raw expressions (mirroring `modalApplyOne_boxPos_outputs_subset`/
+`modalApplyOne_diamondNeg_outputs_subset`'s style), assembled via the same top-level case
+dispatch as `modalApplyOne_outputs_subset`, before driving the engine `modalExpMeasure_step_lt`
+(port of `:834`). -/
+
+/-- **Combinatorial core** (generic over any `BEq`/`LawfulBEq` type, mirroring
+`classicalBranchComplexity_drop`, `Classical/Completeness.lean:509`, at unit weight): appending
+`x` (a member of `U`, not yet in `l`) to the exclusion list `l` strictly drops, by at least
+one, the count of `U`-members excluded by `l`. Proved by induction on `U`, tracking whether the
+head element is `x` itself (drops by exactly one), already excluded by `l` (unaffected by the
+extra exclusion), or distinct from `x` and not yet excluded (passes both filters, deferred to
+the tail via the induction hypothesis). -/
+private lemma modalCount_notMem_append_drop
+    {α : Type*} [BEq α] [LawfulBEq α]
+    (U l : List α) (x : α)
+    (hxU : x ∈ U) (hxl : l.any (· == x) = false) :
+    U.countP (fun y => !((l ++ [x]).any (· == y))) + 1 ≤
+      U.countP (fun y => !(l.any (· == y))) := by
+  induction U with
+  | nil => simp at hxU
+  | cons u us ih =>
+    rcases List.mem_cons.mp hxU with rfl | hxU'
+    · have h1 : (x :: us).countP (fun y => !(l.any (· == y))) =
+          us.countP (fun y => !(l.any (· == y))) + 1 := by
+        rw [List.countP_cons]; simp [hxl]
+      have h2 : (x :: us).countP (fun y => !((l ++ [x]).any (· == y))) =
+          us.countP (fun y => !((l ++ [x]).any (· == y))) := by
+        rw [List.countP_cons]; simp [List.any_append]
+      have hmono : us.countP (fun y => !((l ++ [x]).any (· == y))) ≤
+          us.countP (fun y => !(l.any (· == y))) := by
+        have hsub : List.Sublist (us.filter (fun y => !((l ++ [x]).any (· == y))))
+            (us.filter (fun y => !(l.any (· == y)))) := by
+          apply List.monotone_filter_right
+          intro y hy
+          simp only [List.any_append, List.any_cons, List.any_nil, Bool.or_false,
+            Bool.not_or, Bool.and_eq_true] at hy
+          exact hy.1
+        simpa [List.countP_eq_length_filter] using hsub.length_le
+      omega
+    · by_cases hlu : l.any (· == u)
+      · have h1 : (u :: us).countP (fun y => !(l.any (· == y))) =
+            us.countP (fun y => !(l.any (· == y))) := by
+          rw [List.countP_cons]; simp [hlu]
+        have hlu' : (l ++ [x]).any (· == u) = true := by
+          rw [List.any_append, hlu, Bool.true_or]
+        have h2 : (u :: us).countP (fun y => !((l ++ [x]).any (· == y))) =
+            us.countP (fun y => !((l ++ [x]).any (· == y))) := by
+          rw [List.countP_cons, hlu']; simp
+        have := ih hxU'
+        omega
+      · by_cases hux : u == x
+        · have hux' : u = x := LawfulBEq.eq_of_beq hux
+          subst hux'
+          have h1 : (u :: us).countP (fun y => !(l.any (· == y))) =
+              us.countP (fun y => !(l.any (· == y))) + 1 := by
+            rw [List.countP_cons]; simp [hlu]
+          have h2 : (u :: us).countP (fun y => !((l ++ [u]).any (· == y))) =
+              us.countP (fun y => !((l ++ [u]).any (· == y))) := by
+            rw [List.countP_cons]; simp [List.any_append]
+          have hmono : us.countP (fun y => !((l ++ [u]).any (· == y))) ≤
+              us.countP (fun y => !(l.any (· == y))) := by
+            have hsub : List.Sublist (us.filter (fun y => !((l ++ [u]).any (· == y))))
+                (us.filter (fun y => !(l.any (· == y)))) := by
+              apply List.monotone_filter_right
+              intro y hy
+              simp only [List.any_append, List.any_cons, List.any_nil, Bool.or_false,
+                Bool.not_or, Bool.and_eq_true] at hy
+              exact hy.1
+            simpa [List.countP_eq_length_filter] using hsub.length_le
+          omega
+        · simp only [Bool.not_eq_true] at hlu
+          have h1 : (u :: us).countP (fun y => !(l.any (· == y))) =
+              us.countP (fun y => !(l.any (· == y))) + 1 := by
+            rw [List.countP_cons]; simp [hlu]
+          have hlux' : (l ++ [x]).any (· == u) = false := by
+            rw [List.any_append, hlu, Bool.false_or, List.any_cons, List.any_nil,
+              Bool.or_false, beq_eq_false_iff_ne]
+            simp only [beq_iff_eq] at hux
+            exact fun h => hux h.symm
+          have h2 : (u :: us).countP (fun y => !((l ++ [x]).any (· == y))) =
+              us.countP (fun y => !((l ++ [x]).any (· == y))) + 1 := by
+            rw [List.countP_cons]; simp [hlux']
+          have := ih hxU'
+          omega
+
+/-- **Weak monotonicity**: growing the exclusion list's underlying membership set (`b ⊆ b'`)
+can only decrease (never increase) the count of `U`-members excluded by it. Used for the
+`|U \ b|` term, which the linear/branching/persistent rules can only ever help (branch formulas
+are only ever prepended, never removed). -/
+private lemma modalCount_notMem_mono
+    {α : Type*} [BEq α] [LawfulBEq α]
+    (U b b' : List α)
+    (hsub : ∀ z ∈ b, z ∈ b') :
+    U.countP (fun y => !(b'.any (· == y))) ≤ U.countP (fun y => !(b.any (· == y))) := by
+  have hsubf : List.Sublist (U.filter (fun y => !(b'.any (· == y))))
+      (U.filter (fun y => !(b.any (· == y)))) := by
+    apply List.monotone_filter_right
+    intro y hy
+    rw [Bool.not_eq_true'] at hy ⊢
+    rw [List.any_eq_false] at hy ⊢
+    intro z hz
+    exact hy z (hsub z hz)
+  simpa [List.countP_eq_length_filter] using hsubf.length_le
+
+/-- **`R`-drop, linear/branching case** (research §2.2): when the fired formula `sf` is added
+to the expanded set (`e' = e ++ [sf]`) and the child branch `b'` weakly extends `b` (every rule
+child is `newForms ++ b` for some `newForms`, `Saturation.lean:104-123`), the counting measure
+strictly drops by at least one. No `U`-membership of `newForms` is required: growing `b` to `b'`
+can only help the `|U \ b|` term (`modalCount_notMem_mono`), and `sf ∈ U`, `sf ∉ e` gives the
+exact unit drop in `|U \ e|` (`modalCount_notMem_append_drop`). -/
+private lemma modalWork_drop_linear
+    (U b b' e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (hsfU : sf ∈ U) (hsfe : e.any (· == sf) = false) (hsub : ∀ z ∈ b, z ∈ b') :
+    modalWork U b' (e ++ [sf]) + 1 ≤ modalWork U b e := by
+  unfold modalWork
+  have hb := modalCount_notMem_mono U b b' hsub
+  have he := modalCount_notMem_append_drop U e sf hsfU hsfe
+  omega
+
+/-- **`R`-drop, persistent case** (research §2.2/§3.4): when the expanded set is unchanged
+(`boxPos`/`diamondNeg`) but the child branch `b'` contains a fresh `U`-member `x0` not on `b`
+(guaranteed by `modalApplyOne_persistent_props` below, since persistent rules only ever emit
+nonempty output whose formulas are `∉ b`), the counting measure strictly drops by at least one:
+the `|U \ e|` term is unchanged, and the `|U \ b|` term strictly drops via the same
+`modalCount_notMem_append_drop` core applied to the single witness `x0`. -/
+private lemma modalWork_drop_persistent
+    (U b b' e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (x0 : SignedFormula (Proposition Atom) WorldIndex)
+    (hx0U : x0 ∈ U) (hx0b : x0 ∉ b) (hx0b' : x0 ∈ b') (hsub : ∀ z ∈ b, z ∈ b') :
+    modalWork U b' e + 1 ≤ modalWork U b e := by
+  unfold modalWork
+  have hstep : ∀ z ∈ b ++ [x0], z ∈ b' := by
+    intro z hz
+    rcases List.mem_append.mp hz with hz | hz
+    · exact hsub z hz
+    · rwa [List.mem_singleton.mp hz]
+  have hmono := modalCount_notMem_mono U (b ++ [x0]) b' hstep
+  have hx0notin : b.any (· == x0) = false := by
+    rw [Bool.eq_false_iff]
+    intro hcon
+    obtain ⟨z, hz, heq⟩ := List.any_eq_true.mp hcon
+    exact hx0b ((LawfulBEq.eq_of_beq heq) ▸ hz)
+  have hdrop := modalCount_notMem_append_drop U b x0 hx0U hx0notin
+  omega
+
+/-- Every propositional tableau rule (`Rules.lean`'s `applyPropRule`, the 8 Smullyan rules)
+never produces a `.persistent` result: each of the 8 explicit `(rule, sign, connective)` match
+arms returns `.linear`, `.branching`, or `.notApplicable` (`PropositionalRules.lean:99-145`),
+and the wildcard fallback returns `.notApplicable`. Generic over the formula/label types. -/
+private lemma applyPropRule_ne_persistent {F L : Type*}
+    (andOf? : F → Option (F × F)) (orOf? : F → Option (F × F))
+    (impOf? : F → Option (F × F)) (negOf? : F → Option F)
+    (sf : SignedFormula F L) (rule : PropTableauRule)
+    (nf : List (SignedFormula F L)) :
+    applyPropRule andOf? orOf? impOf? negOf? sf rule ≠ .persistent nf := by
+  unfold applyPropRule
+  obtain ⟨s, φ, l⟩ := sf
+  cases rule <;> rcases s with _ | _ <;> simp <;>
+    first
+      | (rcases andOf? φ with _ | ⟨_, _⟩ <;> simp)
+      | (rcases orOf? φ with _ | ⟨_, _⟩ <;> simp)
+      | (rcases impOf? φ with _ | ⟨_, _⟩ <;> simp)
+      | (rcases negOf? φ with _ | _ <;> simp)
+
+/-- `tryAllPropRules` (the first-applicable dispatcher over the 8 propositional rules,
+`PropositionalRules.lean:147-155`) never produces `.persistent`, since every candidate result
+in its search list is an `applyPropRule` output (`applyPropRule_ne_persistent`) and the
+not-found default is `.notApplicable`. -/
+private lemma tryAllPropRules_ne_persistent {F L : Type*}
+    (andOf? : F → Option (F × F)) (orOf? : F → Option (F × F))
+    (impOf? : F → Option (F × F)) (negOf? : F → Option F)
+    (sf : SignedFormula F L) (nf : List (SignedFormula F L)) :
+    tryAllPropRules andOf? orOf? impOf? negOf? sf ≠ .persistent nf := by
+  simp only [tryAllPropRules]
+  rcases hfind :
+      ([PropTableauRule.andPos, .andNeg, .orPos, .orNeg, .impPos, .impNeg, .negPos, .negNeg].map
+        (applyPropRule andOf? orOf? impOf? negOf? sf ·)).find? (·.isApplicable) with _ | r
+  · rw [hfind]; simp
+  · simp only [hfind, Option.getD_some]
+    have hmem := List.mem_of_find?_eq_some hfind
+    simp only [List.mem_map] at hmem
+    obtain ⟨rule, -, hrule⟩ := hmem
+    rw [← hrule]
+    exact applyPropRule_ne_persistent andOf? orOf? impOf? negOf? sf rule nf
+
+omit [Hashable Atom] in
+/-- Every formula emitted by `boxPropagation` (`Branch.lean:194-199`, the `boxPos` rule's
+consequence generator) is fresh: not already on the branch. The `filterMap` guard
+`if b.any (· == sf) then none else some sf` excludes anything already present. -/
+private lemma boxPropagation_fresh
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex) :
+    ∀ x ∈ boxPropagation b acc ψ w, x ∉ b := by
+  intro x hx
+  simp only [boxPropagation, List.mem_filterMap] at hx
+  obtain ⟨w', -, hxeq⟩ := hx
+  by_cases hcond :
+      b.any (· == (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex)) = true
+  · rw [if_pos hcond] at hxeq
+    simp at hxeq
+  · rw [if_neg hcond] at hxeq
+    simp only [Option.some.injEq] at hxeq
+    subst hxeq
+    intro hxb
+    simp only [Bool.not_eq_true] at hcond
+    rw [List.any_eq_false] at hcond
+    exact hcond _ hxb (by simp)
+
+omit [Hashable Atom] in
+/-- Every formula emitted by the `diamondNeg` rule's successor-propagation `filterMap`
+(`Rules.lean:144-147`, the raw expression underlying `modalApplyOne_diamondNeg_outputs_subset`)
+is fresh: not already on the branch, by the same `filterMap` guard. -/
+private lemma diamondNeg_filterMap_fresh
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    ∀ x ∈ (acc.successorsOf w).filterMap (fun w' =>
+        let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, φ, w'⟩
+        if b.any (· == sf') then none else some sf'), x ∉ b := by
+  intro x hx
+  simp only [List.mem_filterMap] at hx
+  obtain ⟨w', -, hxeq⟩ := hx
+  by_cases hcond :
+      b.any (· == (⟨.neg, φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex)) = true
+  · rw [if_pos hcond] at hxeq
+    simp at hxeq
+  · rw [if_neg hcond] at hxeq
+    simp only [Option.some.injEq] at hxeq
+    subst hxeq
+    intro hxb
+    simp only [Bool.not_eq_true] at hcond
+    rw [List.any_eq_false] at hcond
+    exact hcond _ hxb (by simp)
+
+omit [Hashable Atom] in
+/-- **Persistent-rule nonemptiness and freshness** (research §3.4): whenever
+`modalApplyOne sf b acc` produces a `.persistent` result, the emitted formulas `nf` are both
+nonempty (the `isEmpty` guard in `boxPos`/`diamondNeg`, `Rules.lean:83-88,142-151`, routes the
+empty case to `.notApplicable` instead) and fresh (`∀ x ∈ nf, x ∉ b`, by the underlying
+`filterMap` guards). These are the only two rule kinds that can produce `.persistent`:
+propositional rules cannot (`tryAllPropRules_ne_persistent`), and the two fresh-world rules
+`diamondPos`/`boxNeg` are `.linear`, dismissed by contradiction with `hca`. Mirrors
+`modalApplyOne_outputs_subset`'s case-dispatch skeleton. -/
+lemma modalApplyOne_persistent_props
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (nf : List (SignedFormula (Proposition Atom) WorldIndex))
+    (hca : (modalApplyOne sf b acc).fst = .persistent nf) :
+    nf ≠ [] ∧ ∀ x ∈ nf, x ∉ b := by
+  unfold modalApplyOne at hca
+  by_cases hpa :
+      (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf).isApplicable
+  · exfalso
+    simp only [hpa, if_true] at hca
+    exact tryAllPropRules_ne_persistent modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf nf hca
+  · rw [if_neg hpa] at hca
+    obtain ⟨s, ff, l⟩ := sf
+    rcases s with _ | _
+    · rcases ff with _ | _ | ⟨a, c⟩ | φ
+      · simp at hca
+      · simp at hca
+      · rcases a with _ | _ | ⟨a2, a3⟩ | a4
+        · simp at hca
+        · simp at hca
+        · simp at hca
+        · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
+          · simp at hca
+          · simp at hca
+          · rcases a6 with _ | _ | ⟨_, _⟩ | _
+            · simp at hca
+            · rcases c with _ | _ | ⟨_, _⟩ | _
+              · simp at hca
+              · dsimp only at hca; simp at hca
+              · simp at hca
+              · simp at hca
+            · simp at hca
+            · simp at hca
+          · simp at hca
+      · -- boxPos: T(box φ)@l
+        dsimp only at hca
+        by_cases hemp : (boxPropagation b acc φ l).isEmpty = true
+        · simp only [if_pos hemp] at hca; simp at hca
+        · simp only [if_neg hemp] at hca
+          simp only [RuleResult.persistent.injEq] at hca
+          subst hca
+          refine ⟨?_, boxPropagation_fresh b acc φ l⟩
+          simp only [Bool.not_eq_true] at hemp
+          exact List.isEmpty_eq_false_iff.mp hemp
+    · rcases ff with _ | _ | ⟨a, c⟩ | φ
+      · simp at hca
+      · simp at hca
+      · rcases a with _ | _ | ⟨a2, a3⟩ | a4
+        · simp at hca
+        · simp at hca
+        · simp at hca
+        · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
+          · simp at hca
+          · simp at hca
+          · rcases a6 with _ | _ | ⟨_, _⟩ | _
+            · simp at hca
+            · rcases c with _ | _ | ⟨_, _⟩ | _
+              · simp at hca
+              · dsimp only at hca
+                by_cases hemp : ((acc.successorsOf l).filterMap (fun w' =>
+                    if b.any (· == (⟨.neg, a5, w'⟩ :
+                        SignedFormula (Proposition Atom) WorldIndex))
+                    then none
+                    else some (⟨.neg, a5, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+                  ).isEmpty = true
+                · simp only [if_pos hemp] at hca; simp at hca
+                · simp only [if_neg hemp] at hca
+                  simp only [RuleResult.persistent.injEq] at hca
+                  subst hca
+                  refine ⟨?_, diamondNeg_filterMap_fresh b acc a5 l⟩
+                  simp only [Bool.not_eq_true] at hemp
+                  exact List.isEmpty_eq_false_iff.mp hemp
+              · simp at hca
+              · simp at hca
+            · simp at hca
+            · simp at hca
+          · simp at hca
+      · dsimp only at hca; simp at hca
+
 end Cslib.Logic.Modal.Tableau
 
 end

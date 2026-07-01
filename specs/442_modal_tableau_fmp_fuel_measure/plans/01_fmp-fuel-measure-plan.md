@@ -23,7 +23,7 @@
 | P1a  | ✅ COMPLETED | `325a8e8a` | Subformula closure (world-preserving rules). Green, axiom-clean. **Added `import Completeness` into `FmpMeasure.lean`** to reuse `tryAllPropRules_*`/`modal*Of?_eq` → forces architecture adjustment below. |
 | P4   | ✅ COMPLETED | `3766e609` | Saturation characterisation (`Completeness.lean`). Green. Finding: Łukasiewicz diamond patterns never reach `acc`-dependent arms (prop dispatch exhaustive over `.imp`); only `boxNeg` needs invariant carve-out. |
 | P1b  | ✅ COMPLETED | `5d07fedf` | Fresh-world rule closure (`diamondPos`/`boxNeg`) + top-level `modalApplyOne_outputs_subset` dispatch. Green, axiom-clean (propext/Quot.sound only). Added `public import SoundnessStep` (acyclic) for `accFreshInv`; five small glue lemmas factored out (subformula transitivity, `modalUniverse` membership chars, `successorsOf`/`hasEdge` bridge, shared `boxProps`/`diaNegProps` closure). |
-| P2 (CRUX) | BLOCKED | `<pending>` | Primary signature disproved by concrete counterexample (single-step invariant insufficient). Fallback (rank-map potential Φ) fully designed + hand-verified (Δ=0 recurrence), but not fully formalized — see BLOCKED note below. `modalCap` capacity theory landed green (sorry-free, axiom-clean): defs + `modalCap_add_one_le_pow`/`modalCap_zero_le_pow`/`modalCap_le_pow`. |
+| P2 (CRUX) | 🔄 IN PROGRESS (design done) | `672a940e` (partial) | Primary signature disproved by counterexample; fallback (rank-map potential Φ) **fully designed + hand-verified (Δ=0)**. `modalCap` capacity theory landed green. Now formalizing the 5 remaining obligations incrementally (see Phase 2 → "Continuation" below). NOT a dead-end — design-complete, formalization-pending. |
 | P3   | ⏳ pending | — | — |
 | P5a/P5b/P6 | ⏳ pending | — | Relocated to new `CompletenessLoop.lean` (see architecture adjustment). |
 
@@ -299,7 +299,26 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
 
 ---
 
-### Phase 2: World-count bound (CRUX — highest risk, isolated, serial) [BLOCKED]
+### Phase 2: World-count bound (CRUX — highest risk, isolated, serial) [IN PROGRESS]
+
+> **CONTINUATION (supersedes the [BLOCKED] escalation below — design is complete + hand-verified, so
+> per H8 we split the formalization rather than escalate to the user).** The plan's original terse
+> target `modalStepBranch_maxWorld_lt` (hb+hW only) is FALSE; the corrected target carries the
+> rank/out-degree invariant (a documented, precedented signature deviation — cf. P1b's added
+> hypotheses). Formalize the verified potential-function fallback in dependency order, **committing
+> after each obligation compiles green** (banked/resumable). The same rank/out-degree invariant will
+> be threaded by P5a, so define its predicate(s) cleanly for reuse.
+>
+> - [ ] **P2-obl-a** `modalBranchNodup`: `b.Nodup` maintained across `modalStepBranch`'s 5 rule cases.
+> - [ ] **P2-obl-b** `FormulaRankBound` (`∀x∈b, modalDepth x.formula ≤ rank x.label`) maintained; fresh worlds get `rank := parent_rank − 1`.
+> - [ ] **P2-obl-c** `outDeg w ≤ (modalSubfmls φ0).length` via injective "minting sf at w ↦ its `.formula`" into `modalSubfmls φ0` (uses P2-obl-a).
+> - [ ] **P2-obl-d** `Φ`-potential single-step `Δ=0` lemma (formalize the hand-verified arithmetic; recurrence `Sf·modalCap Sf k = modalCap Sf (k+1)−1`).
+> - [ ] **P2-obl-e** final composition → world bound `modalMaxWorld b' < modalWorldBound φ0` under the strengthened rank/outDeg-carrying signature, from (a)–(d) + `modalCap_le_pow` + `modalSubfmls_length_le` + `modalDepth_le_complexity`.
+>
+> **Done = green (revised):** `lake build …FmpMeasure` succeeds; the strengthened world-bound lemma
+> sorry-free + axiom-clean. Escalate to user ONLY if a NEW mathematical falsity is found in the
+> hand-verified design (not mere formalization effort).
+
 - **Goal:** Prove the a-priori world bound as a per-step loop invariant. This is the single
   research-hard obligation; it gates P3-P5. Isolated in its own phase with a generous budget.
 - **Territory:**

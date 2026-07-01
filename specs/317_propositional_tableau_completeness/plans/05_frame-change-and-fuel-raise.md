@@ -391,8 +391,45 @@ soundness machinery", i.e. both require STOP/escalate rather than unilateral act
 plan v6 that explicitly revises Postmortem Constraint 5 to permit a *deliberate, audited* signature
 change at `openBranch_countermodel`/`tableau_complete`, per option (a) above, with a companion
 audit of all `Decidable`/`DecisionProcedure` consumers) before Phase 2 can proceed. Both sorries
-(330, 991) remain open and untouched; no Lean files were edited this phase; no workaround, weakened
-lemma, or new sorry was introduced.
+(330, 991) remain open and untouched; no workaround, weakened lemma, or new sorry was introduced.
+
+#### Supplementary finding (2026-07-01, session `sess_1782919268_2df8d8_317b`, concurrent dispatch)
+
+A second, independent dispatch on this same phase (R6 concurrent-edit — both sessions landed
+commits) reached the SAME [BLOCKED] verdict via a partially overlapping but distinct route, and
+made two concrete additions worth preserving:
+
+1. **`intAccessPreorder`/`intAccessPreorder_le_of_isAccessible` (`Scheme.lean`, committed
+   `a1883c4e`) — a genuine, real, `lake build`-green `Preorder Nat` instance built from
+   `Relation.ReflTransGen (isAccessible edges · · = true)`, sidestepping the need to separately
+   prove `isAccessible` itself transitive.** This DOES fulfill the checklist's first task ("Define
+   the countermodel `Preorder`... as the RTC of `isAccessible edges`") as *working Lean code*, not
+   just analysis — correcting this section's earlier "no Lean files were edited" note (true for the
+   FIRST dispatch, not the second). This artifact is a **Preserved Asset for the eventual re-plan**:
+   if option (a) above is adopted (revise Postmortem 5, thread a custom `World`/`Preorder` through
+   `openBranch_countermodel`/`tableau_complete`), `intAccessPreorder` is exactly the `Preorder`
+   instance that re-plan would install.
+2. **A second, independent blocker, deeper than the signature-pinning issue, found by attempting
+   the monotonicity proof directly against `intAccessPreorder` (documented in-file, no `sorry`,
+   at `Scheme.lean` immediately after `intAccessPreorder_le_of_isAccessible`)**: EVEN IF option (a)
+   or (b) above is adopted and the signature-pinning issue is resolved, `intExtractValuation`
+   monotonicity is SEPARATELY entangled with the B2 fuel-sufficiency argument (Phase 6-10, not yet
+   implemented). Verified via source: `intApplyRuleFull` (`Rules.lean:245-268`) maps every
+   `T(φ→ψ)` to `.notApplicable` — `T(→)` is handled exclusively by the fuel-bounded
+   `applyPersistenceFixpoint`, whose convergence `intStepBranch b e nw = none` does NOT guarantee.
+   Atom monotonicity for `T(→)`-triggered atoms co-inductively depends on the antecedent's OWN
+   monotonicity, resolved only by repeated fixpoint passes (i.e. by fuel). This means Phase 2's
+   monotonicity sub-task has a WAVE-ORDERING inversion (Wave 2 depending on Wave 6) independent of
+   the signature question — so option (a)/(b) alone would NOT fully unblock Phase 2; the
+   monotonicity discharge itself likely needs folding into Phase 10 (mirroring R3's existing
+   anticipated fold for `sat_timp`'s succ-case), regardless of which signature-change route is
+   chosen.
+
+**Combined recommendation for the re-plan**: adopt option (a) (or (b)) to resolve the
+signature-pinning issue, AND additionally restructure so `intExtractValuation` monotonicity is
+NOT a standalone Phase 2 deliverable but a field/hypothesis threaded alongside `sat_timp` (Phase 4)
+and discharged only once `measure ≤ fuel` (Phase 10) is available. `intAccessPreorder` remains
+directly reusable once the signature question is resolved.
 
 - **Estimated output:** ~300-500 lines (largest foundation phase). If it exceeds ~450 lines, split
   into **2.1** (frame + `Preorder` install + `IValid` instantiation) and **2.2**

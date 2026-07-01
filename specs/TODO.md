@@ -1,5 +1,5 @@
 ---
-next_project_number: 464
+next_project_number: 465
 ---
 
 # TODO
@@ -11,10 +11,10 @@ next_project_number: 464
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463 | -- | Propositional Logic, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456 | 36,37,181,317,407,425,449 | Propositional Logic, Temporal Logic, Bimodal Logic, ... |
-| 3 | 41,413,414 | 39,40,181,215,300,301,375 | Foundations, Code Hygiene |
-| 4 | 412 | 41 | Code Hygiene |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,464 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456 | 36,37,181,317,407,425,449 | propositional logic, temporal logic, bimodal logic, ... |
+| 3 | 41,413,414 | 39,40,181,215,300,301,375 | foundations, code hygiene |
+| 4 | 412 | 41 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -26,11 +26,12 @@ next_project_number: 464
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 317 [PLANNED] — Fill the propositional tableau completeness sorries (7 real sorri
-  └─ 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
-  └─ 430 [RESEARCHED] — Prove the atom-persistence / upward-closure structural lemma for 
 400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 407 [PR READY] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
-  └─ 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
+464 [NOT STARTED] — Create a Typst report presenting the best arguments in support of
+375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
+409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
+430 [RESEARCHED] — Prove the atom-persistence / upward-closure structural lemma for 
 
 ### Modal Logic
 
@@ -42,21 +43,19 @@ next_project_number: 464
 ### Temporal Logic
 
 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
-  └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
+301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 
 ### Bimodal Logic
 
 36 [BLOCKED] — Port discrete completeness (completeness_discrete theorem) and We
-  └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal
 37 [BLOCKED] — Port continuous extension completeness once developed upstream. T
-  └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal (see above)
 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
-  └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S
 449 [NOT STARTED] — Foundation for the corrected TM-over-temporal conservativity resu
-  └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S (see above)
-  └─ 451 [NOT STARTED] — Deeper metatheory for the metric tense logic BX+ (defined in task
+215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal
+450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S
+451 [NOT STARTED] — Deeper metatheory for the metric tense logic BX+ (defined in task
 
 ### Code Hygiene
 
@@ -65,7 +64,7 @@ next_project_number: 464
 413 [NOT STARTED] — [Split from task 278.] Simplify Propositional/ proofs that use ma
 414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p
 
-### PR & Upstreaming
+### Pr & Upstreaming
 
 438 [PR READY] — Upstream the comment/docstring cleanups identified by the task 43
 440 [NOT STARTED] — PR review: GitHub PR https://github.com/leanprover/cslib/pull/648
@@ -81,6 +80,26 @@ next_project_number: 464
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 
 ## Tasks
+
+### 464. Typst report structure first mpl arguments
+- **Status**: [NOT STARTED]
+- **Task Type**: general
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Create a Typst report presenting the best arguments in support of the structure-first MPL design, output to /home/benjamin/Projects/cslib/typst/MPL/ (directory to be created; this is a document-writing/synthesis task — the deliverable is a compiled-clean Typst document, not Lean proofs).
+
+THESIS TO ARGUE FOR: MPL (Minimal Propositional Logic) as the base logic in which bot (falsum) is a designated but TOTALLY UNCONSTRAINED nullary operator, added purely to keep the SAME SIGNATURE {bot, ->, and, or} as IPL — so at MPL strength bot is constrained only by type, carries NO proof rule, and its semantic clause is effectively vacuous (a free designated element bot_val : H). IPL = MPL PLUS a substantive semantic constraint (leastness: bot_val <= a for all a) AND a proof rule (efq: bot -> A). CPL adds classicality (peirce / double-negation elimination). Present and defend the conservative-extension ladder MPL < IPL < CPL.
+
+KEY ARGUMENTS (already established in the codebase — synthesis, not new research): (1) substitution-invariance / free-monad argument: Proposition Atom is the free monad on {bot,->,and,or}, so bot is an ELEMENT of the algebra, not meta-syntax — rules out a bot-free MPL language (Design B1) and encoding bot as a distinguished atom (Design B2); decisive case for shared-signature Design A. (2) structure-first vs language-first (core CSLib Zulip debate): fix ONE language, interpret bot weakly, strengthen conservatively — preserves a single foundational architecture across the broader programme (identity, induced orders, hyperintensionality, tense, modality, categorical semantics). (3) modularity around properties, not connectives (explosion/leastness/initiality as independent typeclass/mixin modules). (4) the Hilbert-vs-ND definitional controversy and its resolution: Option C (re-frame task-398's [IsIntuitionistic T]-gated efq constructor as the explosion property module; MPL = the theory where efq is structurally unconstructible) over Option B (physically bot-rule-free MinDerivation base + Explosion extension, which re-opens the Curry-Howard/Prawitz subformula-property difficulty). (5) three-tier semantic ladder: designated bot (GHAValid=MPL) / HasLeastBot (IPL) / canonical bot from OrderBot (IPL/CPL via Heyting/Boolean). (6) conservative-extension results already formalized (ConservativeChain; per-class completeness over GHA/Heyting/Boolean).
+
+SOURCE MATERIAL: CSLib Zulip "Propositional Logic" thread https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic (captured JSON snapshot at specs/407_mpl_base_structure_first_redesign/reports/zulip-propositional-logic.json — primary context for the debate); task-407 artifacts (mpl-base-design-note.md, reports/01-03, decisions.md); supporting audits task 415 (reports/01_lifting-audit.md) and task 419 (reports/04_abstract-picture-and-result-inventory.md); Lean source anchors for citing the realized design: Cslib/Logics/Propositional/Defs.lean, ProofSystem/Axioms.lean, NaturalDeduction/Basic.lean, Semantics/Algebra.lean + Semantics/Algebra/BotProperties.lean.
+
+TYPST CONVENTIONS: follow the template, structure, and notation macros from /home/benjamin/Projects/BimodalLogic/Theories/Bimodal/typst/ — BimodalReference.typ, template.typ, notation/bimodal-notation.typ, chapters/ layout, README.md. Match notation macros and document conventions; adapt the notation file for propositional-logic symbols. DoD: typst compile clean under /home/benjamin/Projects/cslib/typst/MPL/.
+
+CSLib Zulip AI policy: any prose intended for upstream posting must be human-authored; this document is an internal report.
+
+---
 
 ### 463. Docs: update ORGANISATION.md Tableau/ tree sketches + strip internal task refs from public docstrings (task 299/455 vet)
 - **Status**: [NOT STARTED]

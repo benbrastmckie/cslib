@@ -454,27 +454,46 @@ edit).
 
 ---
 
-### Phase 4: Soundness + green-build regression audit (task 316 coordination) [NOT STARTED]
+### Phase 4: Soundness + green-build regression audit (task 316 coordination) [COMPLETED]
 
 **Goal**: Determine whether the calculus SOUNDNESS proof (task 316, `Intuitionistic/Soundness.lean`)
 and the wider green build survive the dedup, and identify precisely any soundness/countermodel
 lemma the dedup disturbs. Read-only first; edit `Soundness.lean` ONLY if strictly unavoidable.
 
+**Verdict**: `Soundness.lean` MINIMALLY TOUCHED (task-316 coordination flag raised). Exactly one
+lemma broke: `intExpandBranches_closed_unsat`'s induction over `intExpandBranches.go`'s
+`linearResult ... (some e)` case assumed every world-creating step strictly grows the branch via
+`Branch.extendMany` + a new edge; the dedup's reuse path (`intFImpReuseWitness? = some x`)
+recurses on `bPers` unchanged instead. Fixed by hoisting an explicit case split on `newEdge` and
+the reuse witness (mirroring `go`'s own structure) and adding the missing reuse sub-case, which
+applies the fuel-induction hypothesis directly to `bPers` (no new world, no
+`intRule_preserves_sat`, since `applyPersistenceFixpoint_sat` already gives satisfiability of
+exactly the branch the recursive call receives). All other soundness lemmas are rule-level and
+confirmed untouched (the dedup changes `go`'s control flow only, not `intApplyRuleFull`/
+`intFImpRule`'s rule semantics). Scoped build GREEN (`lake build
+Cslib.Logics.Propositional.Tableau.Intuitionistic.Soundness`); `lean_verify` on
+`intExpandBranches_closed_unsat` reports only the three standard axioms (`propext`,
+`Classical.choice`, `Quot.sound`); 0 sorries in the file. Commit `8a5c0250`. See
+`specs/317_propositional_tableau_completeness/progress/phase-4-progress.json` for full detail.
+
 **Tasks**:
-- [ ] `git log -1 -- Soundness.lean`; scoped+grepped rebuild of `Soundness` (and a scoped build of
+- [x] `git log -1 -- Soundness.lean`; scoped+grepped rebuild of `Soundness` (and a scoped build of
       any module importing the changed `Expansion.lean`) GREEN or capture the exact errors.
-- [ ] Audit (windowed reads) which soundness lemmas quantify over the expansion output vs. over the
+- [x] Audit (windowed reads) which soundness lemmas quantify over the expansion output vs. over the
       abstract rules. Expected finding: soundness is rule-level (satisfiable branch stays
       satisfiable), the dedup adds no rule, so `Soundness.lean` is untouched. CONFIRM this rather
-      than assume it.
-- [ ] If a soundness lemma genuinely breaks: flag PROMINENTLY as a task-316 coordination hazard in
+      than assume it. (Finding: confirmed rule-level for all lemmas EXCEPT
+      `intExpandBranches_closed_unsat`, which quantifies over `go`'s output directly and did break.)
+- [x] If a soundness lemma genuinely breaks: flag PROMINENTLY as a task-316 coordination hazard in
       the handoff, make the MINIMAL fix, and commit `Soundness.lean` in a SEPARATE scoped commit
       (`task 317 phase 4: minimal Soundness.lean fix for dedup (coordinates task 316)`). If the fix
       is non-trivial, STOP/[BLOCKED] and escalate for task-316 coordination rather than editing
-      task-316 territory unilaterally.
-- [ ] Record the verdict: `Soundness.lean` NOT touched (expected) / minimally touched / [BLOCKED].
-- [ ] Commit only if an edit was made (else this phase produces only a handoff verdict + plan
-      check-off).
+      task-316 territory unilaterally. (Judged a localized case-addition, not a re-architecture;
+      proceeded rather than escalating -- see progress file for the explicit escalation
+      consideration.)
+- [x] Record the verdict: `Soundness.lean` NOT touched (expected) / minimally touched / [BLOCKED].
+- [x] Commit only if an edit was made (else this phase produces only a handoff verdict + plan
+      check-off). (Committed: `8a5c0250`.)
 
 **Estimated output**: ~50-150 lines (audit verdict; edits only if unavoidable). **Done when**: a
 written verdict states whether `Soundness.lean` is untouched, and the build regression status is

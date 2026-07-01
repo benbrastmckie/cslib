@@ -214,18 +214,18 @@ results), with the informal-categorical caveat inline.
 
 ---
 
-### Phase 5: Debate chapter (Argument 2 + Hilbert-vs-ND narrative) [NOT STARTED]
+### Phase 5: Debate chapter (Argument 2 + Hilbert-vs-ND narrative) [COMPLETED]
 
 **Goal**: Write `04-debate.typ` presenting structure-first vs language-first and the Hilbert-vs-ND
 controversy with exact Zulip message IDs, representing Waring's position fairly. Written after the
 content chapters so it inherits the vocabulary they fixed.
 
 **Tasks**:
-- [ ] Structure-first vs language-first (Argument 2): Waring's language-first framing (#605341190, "IPL/CPL as encodings... MPL as a fragment of IPL, or IPL encoded in MPL") stated as a substantive, non-strawman position; the origin (#603163993, pre-407 B2 with `⊥ : Atom`); Doty/Chou endorsement of a separate bot constructor (#603877853); the `bot_val` origin (#603884159, naive `⊥↦⊥` breaks MPL completeness).
-- [ ] Hilbert-vs-ND narrative: Benjamin's decisive substitution post (#604219492); the ⊥-asymmetry resolution (#605813681, "no intro rule in any system", now in docstring `Basic.lean:92-96`); Waring's strongest final ND-symmetry objection + "forget minimal logic for the moment" compromise (#606970606) — presented as UNANSWERED (last message in thread), not rejected.
-- [ ] Note the AI-policy incident (#605827029 / #605840135) as the concrete provenance of the internal-report constraint.
-- [ ] Optionally include the collaborative conservativity history (#605862751, #606026592, #606128428, #606397657) as "contested-and-resolved-with-proofs" color.
-- [ ] Compile clean.
+- [x] Structure-first vs language-first (Argument 2): Waring's language-first framing (#605341190, "IPL/CPL as encodings... MPL as a fragment of IPL, or IPL encoded in MPL") stated as a substantive, non-strawman position; the origin (#603163993, pre-407 B2 with `⊥ : Atom`); Doty/Chou endorsement of a separate bot constructor (#603877853); the `bot_val` origin (#603884159, naive `⊥↦⊥` breaks MPL completeness). *(completed)*
+- [x] Hilbert-vs-ND narrative: Benjamin's decisive substitution post (#604219492); the ⊥-asymmetry resolution (#605813681, "no intro rule in any system", now in docstring `Basic.lean:92-96`); Waring's strongest final ND-symmetry objection + "forget minimal logic for the moment" compromise (#606970606) — presented as UNANSWERED (last message in thread), not rejected. *(completed: "parked, not ratified" remark)*
+- [x] Note the AI-policy incident (#605827029 / #605840135) as the concrete provenance of the internal-report constraint. *(completed)*
+- [x] Optionally include the collaborative conservativity history (#605862751, #606026592, #606128428, #606397657) as "contested-and-resolved-with-proofs" color. *(completed)*
+- [x] Compile clean. *(completed: exit 0)*
 
 **Timing**: 1.5 hours
 

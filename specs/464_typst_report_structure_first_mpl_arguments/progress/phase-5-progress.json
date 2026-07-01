@@ -1,0 +1,15 @@
+{
+  "phase": 5,
+  "phase_name": "Debate chapter (Argument 2 + Hilbert-vs-ND)",
+  "last_updated": "2026-07-01T05:00:00Z",
+  "objectives": [
+    {"id": 1, "description": "Structure-first vs language-first with message IDs", "status": "done"},
+    {"id": 2, "description": "Hilbert-vs-ND narrative; #606970606 unanswered", "status": "done"},
+    {"id": 3, "description": "AI-policy incident noted", "status": "done"},
+    {"id": 4, "description": "Conservativity collaborative history", "status": "done"},
+    {"id": 5, "description": "Compile clean", "status": "done"}
+  ],
+  "current_objective": null,
+  "deviations": [],
+  "handoff_count": 0
+}

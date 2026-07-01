@@ -1,5 +1,5 @@
 ---
-next_project_number: 448
+next_project_number: 449
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 448
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,317,390,396,400,404,407,415,419,438,440,442,444,445,447 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,317,390,396,400,404,407,415,438,440,442,444,445,447,448 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
 | 2 | 39,40,181,215,299,375,389,405,409,430,439 | 36,37,180,317,404,407,442 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,300,391,392,413,426,441 | 39,40,299,375,389,439 | Foundations, Modal Logic, Temporal Logic, ... |
 | 4 | 393,412,425 | 41,391,426 | Foundations, Temporal Logic, PL-Hygiene |
@@ -30,6 +30,7 @@ next_project_number: 448
 
 ### Foundations
 
+448 [NOT STARTED] — Study whether to elevate the committed forward-only proof-system-
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
   └─ 412 [NOT STARTED] — [Split from task 278.] Simplify proofs in Foundations/Logic/ that
 
@@ -38,7 +39,6 @@ next_project_number: 448
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 404 [RESEARCHED] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
   └─ 405 [NOT STARTED] — Simplify the proof machinery in the task-402 modal tableau soundn
-419 [BLOCKED] — [Spawned from task 415 audit — supports the structure-first visio
 442 [IMPLEMENTING] — Fix the Phase 6 blocker in task 299 (modal K tableau completeness
   └─ 299 [BLOCKED] — Implement tableau decision procedure for basic modal logic K with
     └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
@@ -107,6 +107,26 @@ next_project_number: 448
 447 [PLANNED] — Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public 
 
 ## Tasks
+
+### 448. Study Deriv σ as a shared-metatheory substrate (proof-system morphism Vision B)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Foundations
+- **Dependencies**: None
+
+**Description**: Study whether to elevate the committed forward-only proof-system-morphism layer (delivered by task 419) into a genuine SHARED-METATHEORY SUBSTRATE over Deriv sigma, and if so, do it in ROI-gated phases. Reference the definitive analysis in specs/419_generalize_derivation_lifting_intersystem/reports/04_abstract-picture-and-result-inventory.md (fork framing, representation options R1/R2/R3, and the full result lattice Layers 0-3).
+
+Background: task 419 delivered ProofSig/Deriv/ProofSigHom/Deriv.map + functor laws (Foundations/Logic/Metalogic/ProofSystemMorphism.lean) with Modal+PL full Equiv and Bimodal forward+HEq, all sorry-free. The one open boundary is backward maps / full Equiv for multi-closure logics (Bimodal), blocked because Deriv.close carries closure-membership as a Prop (List.Mem, head/tail) so backward dispatch needs kernel-forbidden large elimination into Type.
+
+Phase 1 (R1, surgical, sorry-free): change Deriv.close to carry a Fin (closures.length) index (data) instead of the Prop membership proof; update clMap to an index map with naturality, Deriv.map, and the three LiftViaMorphism overlays. Non-invasive: touches only the Foundations file + 3 overlays, no native DerivationTree inductive. Acceptance: functor laws re-proved, scoped build green, zero sorry.
+
+Phase 2: define Bimodal ofDeriv and bimodalEquiv (DerivationTree fc Gamma phi = Deriv (bimodalSig fc) Gamma phi) now that backward dispatch is legal; make Modal/PL Equivs uniform with it (remove the singleton-closure special-casing). Optionally exhibit liftDerivationWith as a Deriv.map instance (pure assembly; all naturality lemmas already exist). Acceptance: round-trips proved, zero sorry.
+
+Phase 3 (THE ROI GATE — do NOT land Phases 1-2 without this): identify and prove the FIRST genuinely-reusable generic metatheorem on Deriv sigma and transport it to at least one concrete logic via the Equiv. Candidates: a generic deduction theorem; a generic height/subformula induction principle; a soundness skeleton parameterized by a semantic algebra + axiom-soundness + per-closure soundness. This phase justifies the whole substrate; if no such consumer is found worthwhile, STOP and keep the forward-only layer as-is.
+
+ANTI-GOALS (never pursue): A2 maximal inductive replacement (replacing native DerivationTree by Deriv sigma across ~193 files — regressive, exhaustiveness lost, zero proof payoff); Prop-ifying Bimodal's Type-valued Axiom family (breaks liftDerivationWith/conservativity); Classical.choice backward maps (noncomputable, round-trip unprovable). Zero-debt: every phase independently buildable and sorry-free, or [BLOCKED] and reported. Follows task 419 (completed).
+
+---
 
 ### 447. Apply lake shake import-minimization fixes to files touched by tasks 321/406/431
 - **Status**: [PLANNED]
@@ -374,7 +394,7 @@ After implementation:
 ---
 
 ### 419. Generalize derivation lifting to a cross-logic InferenceSystem layer (spike)
-- **Status**: [BLOCKED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

@@ -1,5 +1,5 @@
 {
-  "next_project_number": 448,
+  "next_project_number": 449,
   "active_projects": [
     {
       "project_number": 447,
@@ -976,7 +976,7 @@
       "project_number": 419,
       "project_name": "generalize_derivation_lifting_intersystem",
       "title": "Generalize derivation lifting to a cross-logic InferenceSystem layer (spike)",
-      "status": "blocked",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "parent_task": 415,
@@ -1001,10 +1001,10 @@
         }
       ],
       "created": "2026-06-29T22:35:38Z",
-      "last_updated": "2026-07-01T06:35:00Z",
-      "blockers": "RESOLVED TO A DESIGN FORK (see reports/04). The forward derivation-lifting unification is DONE and green for all three logics: ProofSig/Deriv/ProofSigHom/Deriv.map + functor laws (Foundations/Logic/Metalogic/ProofSystemMorphism.lean), with Modal+PL full Equiv and Bimodal forward+HEq overlays committed sorry-free. Task 419's literal payload (ONE lift reusable by Modal/Bimodal/PL) is met in the forward direction. The only open item is the OPTIONAL backward-map/full-Equiv layer for multi-closure Bimodal, gated by exactly one representation choice: Deriv.close carries closure-membership as a Prop (List.Mem, head/tail), so a backward map needs large elimination of a non-singleton Prop into Type (kernel-forbidden); Classical.choice makes it noncomputable with an unprovable round-trip. Fix R1 (surgical, sorry-free): make close carry a Fin (closures.length) index (data) instead of Prop membership. DECISION FOR USER: Vision A (lifting device) = already complete, mark 419 done with backward-Equiv explicitly out of scope; Vision B (shared-metatheory substrate) = spawn a bounded task whose Phase 1 is R1, Phase 2 the Bimodal Equiv, Phase 3 the FIRST real generic metatheorem consumed downstream (the ROI gate). Anti-goals (never do): A2 inductive replacement (193 files, regressive), Prop-axiom-ify Bimodal, Classical.choice backward map.",
+      "last_updated": "2026-07-01T06:40:00Z",
       "updated": "2026-06-30T05:11:13Z",
-      "session_id": "sess_1782772776_909541_419"
+      "session_id": "sess_1782772776_909541_419",
+      "completion_summary": "Forward derivation-lifting unification delivered and committed sorry-free: the morphism-of-proof-systems layer (ProofSig/Deriv/ProofSigHom/Deriv.map + functor laws map_id/map_comp/map_height in Foundations/Logic/Metalogic/ProofSystemMorphism.lean) exhibits all four native CSLib lifts as instances of one functor. Modal and PL land as full Equivs; Bimodal as forward map + HEq intertwining (DerivationTree.lift). 419's stated payload (ONE axiom-subsumption derivation lift reusable by Modal/Bimodal/PL) is met in the forward direction. Backward maps / full Equiv for multi-closure Bimodal are deliberately OUT OF SCOPE (Vision A): they require a representation change (index Deriv.close by Fin closures.length instead of Prop List.Mem membership) justified only by a shared-metatheory substrate goal, spun off to a dedicated study task. Definitive analysis, result lattice, and anti-goals in reports/04_abstract-picture-and-result-inventory.md."
     },
     {
       "project_number": 426,
@@ -1216,6 +1216,21 @@
           }
         ]
       }
+    },
+    {
+      "project_number": 448,
+      "project_name": "study_deriv_shared_metatheory_substrate",
+      "title": "Study Deriv σ as a shared-metatheory substrate (proof-system morphism Vision B)",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Foundations",
+      "parent_task": 419,
+      "description": "Study whether to elevate the committed forward-only proof-system-morphism layer (delivered by task 419) into a genuine SHARED-METATHEORY SUBSTRATE over Deriv sigma, and if so, do it in ROI-gated phases. Reference the definitive analysis in specs/419_generalize_derivation_lifting_intersystem/reports/04_abstract-picture-and-result-inventory.md (fork framing, representation options R1/R2/R3, and the full result lattice Layers 0-3).\n\nBackground: task 419 delivered ProofSig/Deriv/ProofSigHom/Deriv.map + functor laws (Foundations/Logic/Metalogic/ProofSystemMorphism.lean) with Modal+PL full Equiv and Bimodal forward+HEq, all sorry-free. The one open boundary is backward maps / full Equiv for multi-closure logics (Bimodal), blocked because Deriv.close carries closure-membership as a Prop (List.Mem, head/tail) so backward dispatch needs kernel-forbidden large elimination into Type.\n\nPhase 1 (R1, surgical, sorry-free): change Deriv.close to carry a Fin (closures.length) index (data) instead of the Prop membership proof; update clMap to an index map with naturality, Deriv.map, and the three LiftViaMorphism overlays. Non-invasive: touches only the Foundations file + 3 overlays, no native DerivationTree inductive. Acceptance: functor laws re-proved, scoped build green, zero sorry.\n\nPhase 2: define Bimodal ofDeriv and bimodalEquiv (DerivationTree fc Gamma phi = Deriv (bimodalSig fc) Gamma phi) now that backward dispatch is legal; make Modal/PL Equivs uniform with it (remove the singleton-closure special-casing). Optionally exhibit liftDerivationWith as a Deriv.map instance (pure assembly; all naturality lemmas already exist). Acceptance: round-trips proved, zero sorry.\n\nPhase 3 (THE ROI GATE — do NOT land Phases 1-2 without this): identify and prove the FIRST genuinely-reusable generic metatheorem on Deriv sigma and transport it to at least one concrete logic via the Equiv. Candidates: a generic deduction theorem; a generic height/subformula induction principle; a soundness skeleton parameterized by a semantic algebra + axiom-soundness + per-closure soundness. This phase justifies the whole substrate; if no such consumer is found worthwhile, STOP and keep the forward-only layer as-is.\n\nANTI-GOALS (never pursue): A2 maximal inductive replacement (replacing native DerivationTree by Deriv sigma across ~193 files — regressive, exhaustiveness lost, zero proof payoff); Prop-ifying Bimodal's Type-valued Axiom family (breaks liftDerivationWith/conservativity); Classical.choice backward maps (noncomputable, round-trip unprovable). Zero-debt: every phase independently buildable and sorry-free, or [BLOCKED] and reported. Follows task 419 (completed).",
+      "dependencies": [],
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "created": "2026-07-01T06:40:00Z",
+      "last_updated": "2026-07-01T06:40:00Z"
     }
   ],
   "repository_health": {

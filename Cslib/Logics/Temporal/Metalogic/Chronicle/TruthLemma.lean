@@ -37,7 +37,6 @@ The proof proceeds by structural induction on `φ` with five cases:
 set_option linter.style.setOption false
 set_option linter.style.longLine false
 set_option linter.flexible false
-set_option maxHeartbeats 3200000
 
 @[expose] public section
 

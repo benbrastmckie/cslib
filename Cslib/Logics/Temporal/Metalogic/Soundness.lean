@@ -29,7 +29,6 @@ over all serial linear orders (linear orders with `NoMaxOrder` and `NoMinOrder`)
 -/
 
 set_option linter.style.setOption false
-set_option maxHeartbeats 1600000
 
 @[expose] public section
 

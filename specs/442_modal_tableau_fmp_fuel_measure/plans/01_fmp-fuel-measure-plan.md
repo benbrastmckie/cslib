@@ -23,8 +23,8 @@
 | P1a  | ✅ COMPLETED | `325a8e8a` | Subformula closure (world-preserving rules). Green, axiom-clean. **Added `import Completeness` into `FmpMeasure.lean`** to reuse `tryAllPropRules_*`/`modal*Of?_eq` → forces architecture adjustment below. |
 | P4   | ✅ COMPLETED | `3766e609` | Saturation characterisation (`Completeness.lean`). Green. Finding: Łukasiewicz diamond patterns never reach `acc`-dependent arms (prop dispatch exhaustive over `.imp`); only `boxNeg` needs invariant carve-out. |
 | P1b  | ✅ COMPLETED | `5d07fedf` | Fresh-world rule closure (`diamondPos`/`boxNeg`) + top-level `modalApplyOne_outputs_subset` dispatch. Green, axiom-clean (propext/Quot.sound only). Added `public import SoundnessStep` (acyclic) for `accFreshInv`; five small glue lemmas factored out (subformula transitivity, `modalUniverse` membership chars, `successorsOf`/`hasEdge` bridge, shared `boxProps`/`diaNegProps` closure). |
-| P2 (CRUX) | 🔄 IN PROGRESS (a-c done, d partial) | `cb0c3e76` | Primary signature disproved by counterexample; fallback (rank-map potential Φ) **fully designed + hand-verified (Δ=0)**, with two design corrections found during formalization (see `.handoff-P2.json`): `isMintingShaped` narrowed to `boxNeg`-only (`diamondPos`/`diamondNeg` are dead code — always intercepted by `negPos`/`negNeg`), and `modalPotentialTerm` corrected to `0` at `rank=0` (Nat-truncation artifact). Obligations (a) `expandedNodup`, (b) `rank'` invariant, (c) `outDeg ≤ Sf` are GREEN and committed. (d) has definitions + the recurrence identity landed; the single-step Δ=0 lemma itself and (e) final composition remain. NOT a dead-end — design-complete (corrected), ~60% formalized. |
-| P3   | ⏳ pending | — | — |
+| P2 (CRUX) | ✅ COMPLETED | `2f7a4d22` | World-count bound proved via potential-function invariant (plan's terse target was disproved; strengthened signature used). Obligations a–e all green: `expandedNodup` (`9f9134ad`), `rank'` invariant (`cd1cf73a`), `outDeg≤Sf` (`00ad6986`), potential defs+recurrence (`cb0c3e76`), Δ=0 step lemma `modalStepBranch_potential_step` (`70ca9693`), final `modalStepBranch_worldBound` (`2f7a4d22`). Exports reusable `ModalPotentialInv` (8-field structure) for P5a. Zero sorry, standard axioms only. Two design corrections banked (isMintingShaped=boxNeg-only; potential term 0-at-leaf). |
+| P3   | 🔄 IN PROGRESS | — | Strict-decrease engine `modalExpMeasure_step_lt` (port of classical :834). |
 | P5a/P5b/P6 | ⏳ pending | — | Relocated to new `CompletenessLoop.lean` (see architecture adjustment). |
 
 ### Architecture adjustment (settled during execution — supersedes P5 file placement)
@@ -299,7 +299,7 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
 
 ---
 
-### Phase 2: World-count bound (CRUX — highest risk, isolated, serial) [IN PROGRESS]
+### Phase 2: World-count bound (CRUX — highest risk, isolated, serial) [COMPLETED]
 
 > **CONTINUATION (supersedes the [BLOCKED] escalation below — design is complete + hand-verified, so
 > per H8 we split the formalization rather than escalate to the user).** The plan's original terse
@@ -424,7 +424,7 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
 
 ---
 
-### Phase 3: Output-freshness + per-rule R-drop + strict-decrease [NOT STARTED]
+### Phase 3: Output-freshness + per-rule R-drop + strict-decrease [IN PROGRESS]
 - **Goal:** Prove the counting measure strictly decreases on every `some` step (the engine), using
   closure (P1) and the world bound (P2).
 - **Territory:**

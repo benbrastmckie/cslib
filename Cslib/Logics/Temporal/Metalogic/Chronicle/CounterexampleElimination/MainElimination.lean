@@ -35,9 +35,8 @@ open Cslib.Logic.Temporal.Metalogic
 
 /-! ## Main Elimination Function -/
 
-set_option maxHeartbeats 6400000 in
 -- Dispatches across all counterexample kinds (C5 forward/backward, C6 forward/backward)
--- and chains the corresponding recursive walks, requiring extended heartbeats.
+-- and chains the corresponding recursive walks.
 /-- Eliminates a single potential counterexample from a chronicle, returning an extended chronicle with the counterexample resolved. -/
 noncomputable def eliminatePotentialCounterexample
     (χ : Chronicle Atom) (h_c0 : χ.c0) (h_c2' : χ.c2')

@@ -1,5 +1,5 @@
 ---
-next_project_number: 447
+next_project_number: 448
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 447
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,317,390,396,400,404,407,415,419,438,440,442,445 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,317,390,396,400,404,407,415,419,438,440,442,445,447 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 2 | 39,40,181,215,299,375,389,405,409,430,439,446 | 36,37,180,317,404,407,442,445 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,300,391,392,413,426,441,444 | 39,40,299,375,389,439,446 | Foundations, Modal Logic, Temporal Logic, ... |
 | 4 | 393,412,425 | 41,391,426 | Foundations, Temporal Logic, PL-Hygiene |
@@ -100,12 +100,43 @@ next_project_number: 447
 ### Uncategorized
 
 438 [NOT STARTED] — Upstream the comment/docstring cleanups identified by the task 43
-445 [NOT STARTED] — Vet fix for task 180 (Medium severity, PR-BLOCKING). HARD REQUIRE
+445 [RESEARCHED] — Vet fix for task 180 (Medium severity, PR-BLOCKING). HARD REQUIRE
   └─ 446 [NOT STARTED] — Vet fix for task 180 (Low), elevated scope. Bring every literatur
     └─ 444 [NOT STARTED] — Vet fix for task 180 (High), elevated scope. Do not merely rename
       └─ 414 [NOT STARTED] — (Code Hygiene: [Split from task 278.] Simplify Modal/, ) (see above)
+447 [NOT STARTED] — Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public 
 
 ## Tasks
+
+### 447. Apply lake shake import-minimization fixes to files touched by tasks 321/406/431
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public --keep-implied --keep-prefix import-minimization suggestions across files touched by tasks 321, 406, and 431. CI otherwise passes (build/test/checkInitImports green; zero sorries). Apply the genuine import-hygiene fixes and verify (do NOT blindly --fix):
+
+FALSE-POSITIVE CANDIDATES (import Cslib.Init removals -- Cslib.Init sets up default linting/tactics, not a term-level dependency; verify, and if legitimately needed add the shake preserve-comment per 'lake shake --help' rather than removing):
+- Cslib/Foundations/Logic/Metalogic/DeductionCharacterization.lean (remove import Cslib.Init)
+- Cslib/Logics/Modal/Tableau/Saturation.lean (remove import Cslib.Init; add public import Cslib.Logics.Modal.Tableau.Rules)
+- Cslib/Logics/Modal/Tableau/LoopInduction.lean (remove import Cslib.Init + public import ...Saturation; add public import Cslib.Logics.Modal.Basic, Batteries.Data.List.Basic)
+- Cslib/Logics/Modal/Tableau/Soundness.lean (remove import Cslib.Init)
+- Cslib/Logics/Temporal/Tableau/Rules.lean (remove import Cslib.Init; add public import Cslib.Foundations.Logic.Tableau.PropositionalRules)
+- Cslib/Logics/Temporal/Tableau/Saturation.lean (remove import Cslib.Init)
+
+GENUINE IMPORT-HYGIENE FIXES:
+- Cslib/Foundations/Order/HilbertAlgebra/FreeMeetExtension.lean (remove public import Mathlib.Data.Multiset.Basic)
+- Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean (swap MCSProperties -> GenericMCS)
+- Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean (swap MCSProperties -> GenericMCS)
+- Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean (swap MCSProperties -> GenericMCS)
+- Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/BurgessHelpers.lean (remove Finset.Max + Tactic.Linarith; add Tactic.NormNum)
+- Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean (remove re-export of ...Elimination -- verify barrel still builds)
+- Cslib/Logics/Temporal/Metalogic/Chronicle/CounterexampleElimination/Structures.lean (remove Mathlib.Logic.Encodable.Basic) paired with Elimination.lean (add Mathlib.Logic.Encodable.Basic)
+- Cslib/Logics/LTL/Semantics/GNBA/Closure.lean (remove Satisfies + Set.Finite.Powerset + Set.Finite.Lattice; add LTL.Syntax.Formula) paired with GNBA/Atoms.lean (add Satisfies)
+- Cslib/Logics/Temporal/Metalogic/DenseMCS.lean (remove DeductionHelpers)
+
+After edits, re-run: lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake --add-public --keep-implied --keep-prefix on the touched files to confirm the suggestions are resolved. Scope is limited to these files only -- do NOT attempt the codebase-wide shake backlog. Source: /vet session sess_1782884590_732b0b.
+
+---
 
 ### 446. Comprehensive citation and reference-section hygiene across the Temporal metalogic modules
 - **Status**: [NOT STARTED]
@@ -126,9 +157,10 @@ Definition of done: every literature citation in task-180 Temporal files uses un
 ---
 
 ### 445. Eliminate the domain-mismatch sorry in Bimodal to Temporal conservativity and refactor the model-transfer layer for generality
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Dependencies**: None
+- **Research**: [445_fix_temporal_conservativity_domain_mismatch_sorry/reports/01_domain-mismatch-transfer-feasibility.md]
 
 **Description**: Vet fix for task 180 (Medium severity, PR-BLOCKING). HARD REQUIREMENT: absolutely no sorries are acceptable in any PR. `temporal_valid_of_bimodal_derivable` (TemporalConservativity.lean:269) must be proved outright and BOTH `set_option warn.sorry false in` (:248) and the `sorry` (:269) removed. Disclosure is NOT an acceptable outcome. (The sorry is pre-existing from task 277, but task 180's PR includes this file, so it must be closed here.)
 

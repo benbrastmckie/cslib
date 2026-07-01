@@ -377,17 +377,29 @@ task 439 Saturation.lean issue noted in Phase 4 (unrelated file, unrelated to th
 
 ---
 
-### Phase 6: (Optional) PL/Modal adopt the `ClosedHilbert` tag [NOT STARTED]
+### Phase 6: (Optional) PL/Modal adopt the `ClosedHilbert` tag [COMPLETED]
 
 **Goal**: If budget allows, retire the remaining PL/Modal tag + `MinimalHilbert` boilerplate by
 adopting the generic `ClosedHilbert (DerivationTree Axioms)` tag (their `HilbertOf` tags have no
 external references, §4.4), for a further ~55 L saving. Higher-touch; skip if time-constrained.
 
 **Tasks**:
-- [ ] PL: replace the local `HilbertOf` tag + instance bundle with the generic `ClosedHilbert`
+- [x] PL: replace the local `HilbertOf` tag + instance bundle with the generic `ClosedHilbert`
       tag/instances; keep `pl_deriv_iff_algebraic` and `propAlgDS` as thin re-exports.
-- [ ] Modal: same, keeping `modal_deriv_iff_algebraic` and `modalAlgDS`.
-- [ ] Confirm no external caller referenced the retired `HilbertOf` tag (grep).
+- [x] Modal: same, keeping `modal_deriv_iff_algebraic` and `modalAlgDS`.
+- [x] Confirm no external caller referenced the retired `HilbertOf` tag (grep).
+
+**Result**: PL 235L -> 201L (34L further reduction), Modal 246L -> 213L (33L further
+reduction); 67L total from Phase 6. `propAlgDS`/`modalAlgDS` became one-line aliases to
+`treeAlgDS (...DerivationTree Axioms)`. Discovered the same Lean-scoping requirement as
+Phase 1/2: the `HilbertTree` instance must be declared BEFORE `propAlgDS`/`modalAlgDS`
+(which now call `treeAlgDS`, requiring the instance in scope) -- reordered accordingly.
+`#print axioms` on `pl_deriv_iff_algebraic`, `derivTreeToList`, `listDerivToTree` (both
+logics): only `propext`/`Classical.choice` -- zero-debt confirmed. Grep confirms zero
+remaining code references to the retired `HilbertOf` tag in either logic (only doc-comment
+mentions, which were updated to reference `ClosedHilbert`). Full CI green: `lake build`,
+`lake exe checkInitImports`, `lake exe lint-style`, `lake test`, `lake shake` (zero
+suggestions on all 5 touched files).
 
 **Timing**: 1 hour
 
@@ -406,7 +418,7 @@ external references, §4.4), for a further ~55 L saving. Higher-touch; skip if t
 
 ---
 
-### Phase 7: Final CI gate, zero-debt verification, and elimination accounting [NOT STARTED]
+### Phase 7: Final CI gate, zero-debt verification, and elimination accounting [IN PROGRESS]
 
 **Goal**: Run the complete CI pipeline, verify zero new sorries/axioms on all moved/generic defs,
 and compute net line elimination against the Phase-0 baseline.

@@ -7,19 +7,19 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Propositional.ProofSystem.Derivation
-public import Cslib.Foundations.Logic.Metalogic.MCSProperties
+public import Cslib.Foundations.Logic.Metalogic.GenericMCS
 
 /-! # GenericMCS Bridge for Propositional Logic
 
 This module proves the bidirectional equivalence between the tree-based
 `propDerivationSystem Axioms` and the algebraic `algebraicDerivationSystem` instantiated
-at `S := HilbertOf Axioms`, for any axiom predicate satisfying `HasMinimalAxioms`.
+at `S := ClosedHilbert (PL.DerivationTree Axioms)`, for any axiom predicate satisfying
+`HasMinimalAxioms`.
 
 ## Main Results
 
-- `HilbertOf Axioms`: Empty inductive tag type whose `InferenceSystem` maps derivability
-  to `Nonempty (DerivationTree Axioms [] φ)`.
-- `MinimalHilbert (HilbertOf Axioms)`: Synthesised from `[HasMinimalAxioms Axioms]`.
+- `HilbertTree (PL.DerivationTree Axioms)`: instance feeding the generic `ClosedHilbert`
+  tag (Foundations) and the generic backward combinators.
 - `derivTreeToList`: `DerivationTree Axioms Γ φ → (propAlgDS Axioms).Deriv Γ φ`
   (forward, structural induction on the tree; 4 arms, no necessitation).
 - `unfoldListImpInTree`: `Γ ⊢ listImp Ψ φ → Ψ ⊆ Γ → Γ ⊢ φ`
@@ -36,10 +36,9 @@ at `S := HilbertOf Axioms`, for any axiom predicate satisfying `HasMinimalAxioms
   `= Nonempty (DerivationTree Axioms Γ φ)`
 
 `(propAlgDS Axioms).Deriv Γ φ`
-  `= ListDeriv Γ φ` (with `S` inferred as `HilbertOf Axioms`)
-  `= InferenceSystem.DerivableIn (HilbertOf Axioms) (listImp Γ φ)`
-  `= Nonempty ((HilbertOf Axioms)⇓(listImp Γ φ))`
-  `= Nonempty (DerivationTree Axioms [] (listImp Γ φ))`
+  `= ListDeriv Γ φ` (with `S` inferred as `ClosedHilbert (PL.DerivationTree Axioms)`)
+  `= InferenceSystem.DerivableIn (ClosedHilbert (PL.DerivationTree Axioms)) (listImp Γ φ)`
+  `= Nonempty (PL.DerivationTree Axioms [] (listImp Γ φ))`
 
 **Forward** (tree → algebraic): structural induction on `DerivationTree`. Propositional
 logic has 4 constructors (ax, assumption, modus_ponens, weakening); there is no
@@ -48,12 +47,16 @@ logic has 4 constructors (ax, assumption, modus_ponens, weakening); there is no
 **Backward** (algebraic → tree): extract `d₀ : [] ⊢ listImp Γ φ`, weaken to
 `Γ ⊢ listImp Γ φ`, then apply `unfoldListImpInTree` to eliminate each layer.
 
-## Design Note
+## Design Note (task 452, Phase 6)
 
-This file does NOT import `Propositional/Metalogic/DeductionTheorem.lean`. The equivalence
-is derived directly from the `InferenceSystem` and `MinimalHilbert` instances for
-`HilbertOf Axioms` registered below. This ensures `DeductionTheorem.lean` can import
-this bridge without creating a cycle.
+This file previously defined a local `HilbertOf Axioms` tag with its own `InferenceSystem`/
+`ModusPonens`/`HasAxiomImplyK`/`HasAxiomImplyS`/`MinimalHilbert` instance bundle. Since
+`HilbertOf Axioms` has no external references (grep-confirmed), this bundle is now retired
+in favor of the generic `ClosedHilbert (PL.DerivationTree Axioms)` tag (Foundations), whose
+`InferenceSystem`/`ModusPonens`/`HasAxiomImplyK`/`HasAxiomImplyS`/`MinimalHilbert` instances
+are supplied automatically from the `HilbertTree (PL.DerivationTree Axioms)` instance below.
+This file still does NOT import `Propositional/Metalogic/DeductionTheorem.lean`, preserving
+the no-cycle property.
 
 ## References
 
@@ -72,66 +75,16 @@ open Cslib.Logic
 open Cslib.Logic.Metalogic.ListImplication
 open Cslib.Logic.Metalogic.ListDeduction
 open Cslib.Logic.Metalogic.GenericMCS
-open Cslib.Logic.Metalogic.MCSProperties
 open Cslib.Logic.Metalogic
 
 variable {Atom : Type*}
 variable {Axioms : PL.Proposition Atom → Prop}
 
-/-! ## HilbertOf Tag Type -/
-
-/-- Empty tag type whose `InferenceSystem` maps `HilbertOf Axioms`-derivability to
-`Nonempty (DerivationTree Axioms [] φ)`. This is a pure infrastructure type with no
-constructors; all proof content lives in the `InferenceSystem` and `MinimalHilbert`
-instances below. -/
-inductive HilbertOf (Axioms : PL.Proposition Atom → Prop) : Type
-
-/-! ## InferenceSystem Instance -/
-
-/-- `(HilbertOf Axioms)⇓φ` is a `DerivationTree Axioms [] φ` — a closed derivation tree
-(from empty context) using axioms satisfying `Axioms`. -/
-instance : InferenceSystem (HilbertOf Axioms) (PL.Proposition Atom) where
-  derivation φ := PL.DerivationTree Axioms [] φ
-
-/-! ## ModusPonens Instance -/
-
-/-- Modus ponens for `HilbertOf Axioms`: from `⊢ φ → ψ` and `⊢ φ`, derive `⊢ ψ`
-using the tree `modus_ponens` constructor at empty context. -/
-instance : ModusPonens (HilbertOf Axioms) (F := PL.Proposition Atom) where
-  mp := fun h₁ h₂ => by
-    obtain ⟨d₁⟩ := h₁; obtain ⟨d₂⟩ := h₂
-    exact ⟨PL.DerivationTree.modus_ponens [] _ _ d₁ d₂⟩
-
-/-! ## Conditional Axiom Instances -/
-
-/-- `HilbertOf Axioms` proves the K axiom whenever `Axioms` satisfies `HasMinimalAxioms`. -/
-instance [h : HasMinimalAxioms Axioms] :
-    HasAxiomImplyK (HilbertOf Axioms) (F := PL.Proposition Atom) where
-  implyK := ⟨PL.DerivationTree.ax [] _ (h.hasImplyK _ _)⟩
-
-/-- `HilbertOf Axioms` proves the S axiom whenever `Axioms` satisfies `HasMinimalAxioms`. -/
-instance [h : HasMinimalAxioms Axioms] :
-    HasAxiomImplyS (HilbertOf Axioms) (F := PL.Proposition Atom) where
-  implyS := ⟨PL.DerivationTree.ax [] _ (h.hasImplyS _ _ _)⟩
-
-/-- `HilbertOf Axioms` is a `MinimalHilbert` system whenever `Axioms` satisfies
-`HasMinimalAxioms`. Synthesised automatically from `ModusPonens`, `HasAxiomImplyK`,
-`HasAxiomImplyS` instances above. -/
-instance [HasMinimalAxioms Axioms] :
-    MinimalHilbert (HilbertOf Axioms) (F := PL.Proposition Atom) where
-
-/-! ## Algebraic DS Alias -/
-
-/-- Shorthand for the algebraic derivation system at `HilbertOf Axioms`. -/
-@[reducible] def propAlgDS (Axioms : PL.Proposition Atom → Prop)
-    [HasMinimalAxioms Axioms] :
-    Metalogic.DerivationSystem (PL.Proposition Atom) :=
-  @algebraicDerivationSystem (PL.Proposition Atom) _ _ (HilbertOf Axioms) _ _
-
 /-- `PL.DerivationTree Axioms` is a `HilbertTree` whenever `Axioms` satisfies
 `HasMinimalAxioms`: closed under assumption, modus ponens, weakening, and the K/S axiom
-schemata at the empty context. Feeds the generic backward combinators
-(`unfoldListImp`/`listDerivToTree`) below. -/
+schemata at the empty context. Feeds the generic `ClosedHilbert` tag and backward
+combinators (`unfoldListImp`/`listDerivToTree`) below. Must precede `propAlgDS` (Lean
+scoping: `treeAlgDS` requires this instance in scope). -/
 instance [h : HasMinimalAxioms Axioms] :
     HilbertTree (F := PL.Proposition Atom) (PL.DerivationTree Axioms) where
   assumption {Γ a} hmem := .assumption Γ a hmem
@@ -140,12 +93,24 @@ instance [h : HasMinimalAxioms Axioms] :
   axiomK φ ψ := .ax [] _ (h.hasImplyK φ ψ)
   axiomS φ ψ χ := .ax [] _ (h.hasImplyS φ ψ χ)
 
+/-! ## Algebraic DS Alias -/
+
+/-- Shorthand for the algebraic derivation system at the generic `ClosedHilbert
+(PL.DerivationTree Axioms)` tag. A thin re-export: the underlying tag changed from the
+retired local `HilbertOf Axioms` to `ClosedHilbert`, but the name and signature are
+unchanged (task 452, Phase 6). -/
+@[reducible] def propAlgDS (Axioms : PL.Proposition Atom → Prop)
+    [HasMinimalAxioms Axioms] :
+    Metalogic.DerivationSystem (PL.Proposition Atom) :=
+  treeAlgDS (PL.DerivationTree Axioms)
+
 /-! ## Forward Direction: DerivationTree → Algebraic Deriv -/
 
 /-- Forward bridge: given `d : DerivationTree Axioms Γ φ` and `[HasMinimalAxioms Axioms]`,
 produce `(propAlgDS Axioms).Deriv Γ φ` by structural induction on the derivation tree.
 
-- **ax**: the axiom `⊢ ψ` in `HilbertOf Axioms` lifts to `Deriv Γ ψ` via K-weakening.
+- **ax**: the axiom `⊢ ψ` in `ClosedHilbert (PL.DerivationTree Axioms)` lifts to `Deriv Γ ψ`
+  via K-weakening.
 - **assumption**: reflected directly.
 - **modus_ponens**: contextual modus ponens.
 - **weakening**: monotone in the context. -/
@@ -155,21 +120,21 @@ lemma derivTreeToList [HasMinimalAxioms Axioms]
     (propAlgDS Axioms (Atom := Atom)).Deriv Γ φ := by
   induction d with
   | ax Γ ψ h_ax =>
-    -- ψ is a HilbertOf Axioms theorem (tree at empty context)
-    have h_thm : InferenceSystem.DerivableIn (HilbertOf Axioms) ψ :=
+    -- ψ is a ClosedHilbert (PL.DerivationTree Axioms) theorem (tree at empty context)
+    have h_thm : InferenceSystem.DerivableIn (ClosedHilbert (PL.DerivationTree Axioms)) ψ :=
       ⟨PL.DerivationTree.ax [] ψ h_ax⟩
     -- Lift to the algebraic system via K-weakening: ⊢ ψ → listImp Γ ψ, then MP
-    simp only [propAlgDS, algebraicDerivationSystem]
+    simp only [propAlgDS, treeAlgDS, algebraicDerivationSystem]
     unfold ListDeriv
     exact ModusPonens.mp (listImp_axiom_k ψ Γ) h_thm
   | assumption Γ ψ h_mem =>
-    simp only [propAlgDS, algebraicDerivationSystem]
+    simp only [propAlgDS, treeAlgDS, algebraicDerivationSystem]
     exact list_deriv_reflection h_mem
   | @modus_ponens Γ χ ψ _d₁ _d₂ ih₁ ih₂ =>
-    simp only [propAlgDS, algebraicDerivationSystem] at *
+    simp only [propAlgDS, treeAlgDS, algebraicDerivationSystem] at *
     exact list_deriv_mp ih₁ ih₂
   | @weakening Γ' Γ ψ _d h_sub ih =>
-    simp only [propAlgDS, algebraicDerivationSystem] at *
+    simp only [propAlgDS, treeAlgDS, algebraicDerivationSystem] at *
     exact list_deriv_monotonic h_sub ih
 
 /-! ## Backward Helper: Unfold listImp Using Assumptions -/
@@ -202,8 +167,8 @@ noncomputable def listDerivToTree [HasMinimalAxioms Axioms]
 /-! ## Full Derivability Equivalence -/
 
 /-- Bidirectional derivability equivalence between `propDerivationSystem Axioms` and
-the algebraic derivation system at `S := HilbertOf Axioms`, for any `Axioms` satisfying
-`HasMinimalAxioms`. -/
+the algebraic derivation system at `S := ClosedHilbert (PL.DerivationTree Axioms)`, for
+any `Axioms` satisfying `HasMinimalAxioms`. -/
 theorem pl_deriv_iff_algebraic [HasMinimalAxioms Axioms]
     {Γ : List (PL.Proposition Atom)} {φ : PL.Proposition Atom} :
     (propDerivationSystem Axioms).Deriv Γ φ ↔

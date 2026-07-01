@@ -30,8 +30,8 @@ if `A :: Γ ⊢ B` then `Γ ⊢ A → B`.
 
 All results are re-routed through the algebraic deduction theorem
 (`algebraic_has_deduction_theorem`) via the `pl_deriv_iff_algebraic` bridge
-from `GenericMCSBridge.lean`. The bridge instantiates `HilbertOf Axioms` as a
-`MinimalHilbert` system whenever `HasMinimalAxioms Axioms` holds, which is
+from `GenericMCSBridge.lean`. The bridge instantiates `ClosedHilbert (PL.DerivationTree
+Axioms)` as a `MinimalHilbert` system whenever `HasMinimalAxioms Axioms` holds, which is
 synthesised inline from the explicit `h_implyK`/`h_implyS` witnesses.
 `deductionWithMem` wraps `deductionTheorem` with a single weakening step,
 using `removeAll` to clear all occurrences of the discharged hypothesis from

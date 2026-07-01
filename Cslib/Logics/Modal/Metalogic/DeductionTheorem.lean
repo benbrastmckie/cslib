@@ -27,8 +27,8 @@ provided `Axioms` includes `implyK` and `implyS`.
 
 All results are re-routed through the algebraic deduction theorem
 (`algebraic_has_deduction_theorem`) via the `modal_deriv_iff_algebraic` bridge
-from `GenericMCSBridge.lean`. The bridge instantiates `HilbertOf Axioms` as a
-`MinimalHilbert` system whenever `HasMinimalAxioms Axioms` holds, which is
+from `GenericMCSBridge.lean`. The bridge instantiates `ClosedHilbert (DerivationTree
+Axioms)` as a `MinimalHilbert` system whenever `HasMinimalAxioms Axioms` holds, which is
 synthesised inline from the explicit `h_implyK`/`h_implyS` witnesses.
 `deductionWithMem` is implemented via `deductionTheorem` with a single weakening
 step.

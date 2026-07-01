@@ -13,6 +13,7 @@ public import Cslib.Foundations.Logic.Tableau.RuleResult
 public import Cslib.Foundations.Logic.Tableau.Branch
 public import Cslib.Foundations.Logic.Tableau.Closure
 public import Cslib.Foundations.Logic.Tableau.ClosureCondition
+public import Cslib.Foundations.Logic.Tableau.Measure
 public import Cslib.Foundations.Logic.Tableau.PropositionalRules
 
 /-! # Shared Tableau Infrastructure
@@ -29,5 +30,7 @@ minimal, modal, and temporal tableau calculi.
 - `Branch`: Branch type with label-generic operations.
 - `ClosureReason`: Inductive type explaining why a branch is closed.
 - `ClosureCondition`: Typeclass for branch closure with classical/intuitionistic/minimal instances.
+- `Measure`: Logic-agnostic termination-measure arithmetic (`geomCap`, base-3 decrease lemmas)
+  shared across tableau calculi.
 - `PropTableauRule`, `applyPropRule`, `tryAllPropRules`: Classical propositional rules.
 -/

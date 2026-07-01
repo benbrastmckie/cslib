@@ -101,6 +101,7 @@ public import Cslib.Foundations.Logic.Tableau
 public import Cslib.Foundations.Logic.Tableau.Branch
 public import Cslib.Foundations.Logic.Tableau.Closure
 public import Cslib.Foundations.Logic.Tableau.ClosureCondition
+public import Cslib.Foundations.Logic.Tableau.Measure
 public import Cslib.Foundations.Logic.Tableau.PropositionalRules
 public import Cslib.Foundations.Logic.Tableau.RuleResult
 public import Cslib.Foundations.Logic.Tableau.Sign

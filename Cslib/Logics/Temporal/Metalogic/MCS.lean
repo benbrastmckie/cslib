@@ -131,6 +131,52 @@ theorem mcs_mem_iff_neg_not_mem
     {φ : Formula Atom} : φ ∈ Ω ↔ (¬φ) ∉ Ω :=
   MCSProperties.mcs_mem_iff_neg_not_mem (temporal_setMaxConsistent_iff_algebraic.mp h_mcs)
 
+/-! ## Classical bridge lemmas (task 180, F4)
+
+Before task 180, `𝐆φ ≡ ¬𝐅¬φ` was a *definitional* equality, so MCS proofs could freely
+`change` between the two forms. Now that `allFuture`/`allPast` are primitive `Formula`
+constructors (no longer derived from `someFuture`/`neg`), this equivalence is a *theorem*,
+proved here from the four `allFuture_to_classic`/`classic_to_allFuture`/`allPast_to_classic`/
+`classic_to_allPast` bridge axioms (`ProofSystem/Axioms.lean`). Every MCS-level site that
+used to rely on the old defeq is repaired by routing through `mcs_allFuture_iff` /
+`mcs_allPast_iff` (or their negated-form companions below) instead. -/
+
+/-- MCS-level bridge: `𝐆φ ∈ Ω ↔ ¬𝐅¬φ ∈ Ω`, derived from the `allFuture_to_classic`/
+`classic_to_allFuture` bridge axioms. The central reconnection lemma for sites broken by
+promoting `allFuture` to a primitive constructor (D2: exactly two reusable MCS lemmas). -/
+theorem mcs_allFuture_iff
+    {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistent Ω)
+    {φ : Formula Atom} :
+    (𝐆φ) ∈ Ω ↔ Formula.neg (Formula.someFuture (Formula.neg φ)) ∈ Ω := by
+  constructor
+  · intro h; exact mcs_mp_axiom h_mcs h (.allFuture_to_classic φ)
+  · intro h; exact mcs_mp_axiom h_mcs h (.classic_to_allFuture φ)
+
+/-- Past dual of `mcs_allFuture_iff`, via `allPast_to_classic`/`classic_to_allPast`. -/
+theorem mcs_allPast_iff
+    {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistent Ω)
+    {φ : Formula Atom} :
+    (𝐇φ) ∈ Ω ↔ Formula.neg (Formula.somePast (Formula.neg φ)) ∈ Ω := by
+  constructor
+  · intro h; exact mcs_mp_axiom h_mcs h (.allPast_to_classic φ)
+  · intro h; exact mcs_mp_axiom h_mcs h (.classic_to_allPast φ)
+
+/-- Negated-form companion of `mcs_allFuture_iff` (Risk R2): `𝐆φ ∉ Ω ↔ 𝐅(¬φ) ∈ Ω`, obtained
+by combining the bridge with negation-completeness (`mcs_mem_iff_neg_not_mem`). Used at sites
+that hold the *negated* membership form (`𝐆φ ∉ Ω`) rather than a positive witness. -/
+theorem mcs_not_allFuture_iff
+    {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistent Ω)
+    {φ : Formula Atom} :
+    (𝐆φ) ∉ Ω ↔ Formula.someFuture (Formula.neg φ) ∈ Ω :=
+  (not_congr (mcs_allFuture_iff h_mcs)).trans (mcs_mem_iff_neg_not_mem h_mcs).symm
+
+/-- Past dual of `mcs_not_allFuture_iff`. -/
+theorem mcs_not_allPast_iff
+    {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistent Ω)
+    {φ : Formula Atom} :
+    (𝐇φ) ∉ Ω ↔ Formula.somePast (Formula.neg φ) ∈ Ω :=
+  (not_congr (mcs_allPast_iff h_mcs)).trans (mcs_mem_iff_neg_not_mem h_mcs).symm
+
 /-! ## G-distribution (key lemma) -/
 
 /-- Build a DerivationTree for the contrapositive: `⊢ (A→B)→(¬B→¬A)`. -/
@@ -167,7 +213,7 @@ theorem mcs_g_mp
   -- Assume G(ψ) ∉ Ω, giving F(¬ψ) ∈ Ω
   by_contra h_not_g_psi
   have h_f_neg_psi : Formula.someFuture (Formula.neg ψ) ∈ Ω :=
-    (mcs_mem_iff_neg_not_mem h_mcs).mpr h_not_g_psi
+    (mcs_not_allFuture_iff h_mcs).mp h_not_g_psi
   -- Derive ⊢ (φ→ψ) → (¬ψ → ¬φ) (contrapositive)
   have d_contra := deriveContrapositive φ ψ
   -- Necessitation: ⊢ G((φ→ψ) → (¬ψ → ¬φ))
@@ -210,10 +256,11 @@ theorem mcs_g_mp
   -- via h_bx3_imp; but G(φ→ψ) ∈ S. Contradiction.
   have h_g_contra_psi_phi : Formula.allFuture (ψ.neg.imp φ.neg) ∈ Ω := by
     by_contra h_not
-    exact mcs_not_mem_of_neg h_mcs h_g_imp
-      (temporal_implication_property h_mcs h_bx3_imp ((mcs_mem_iff_neg_not_mem h_mcs).mpr h_not))
+    exact mcs_not_mem_of_neg h_mcs ((mcs_allFuture_iff h_mcs).mp h_g_imp)
+      (temporal_implication_property h_mcs h_bx3_imp
+        ((mcs_not_allFuture_iff h_mcs).mp h_not))
   -- BX3: G(¬ψ→¬φ) → F(¬ψ) → F(¬φ). We have both antecedents; F(¬φ) contradicts G(φ) ∈ S.
-  exact mcs_not_mem_of_neg h_mcs h_g_phi
+  exact mcs_not_mem_of_neg h_mcs ((mcs_allFuture_iff h_mcs).mp h_g_phi)
     (temporal_implication_property h_mcs
       (mcs_mp_axiom h_mcs h_g_contra_psi_phi (.right_mono_until ψ.neg φ.neg Formula.top))
       h_f_neg_psi)
@@ -227,7 +274,7 @@ theorem mcs_h_mp
   -- Same structure as mcs_g_mp but using BX3' (right_mono_since) and temporal_duality.
   by_contra h_not_h_psi
   have h_p_neg_psi : Formula.somePast (Formula.neg ψ) ∈ Ω :=
-    (mcs_mem_iff_neg_not_mem h_mcs).mpr h_not_h_psi
+    (mcs_not_allPast_iff h_mcs).mp h_not_h_psi
   -- Derive ¬(¬ψ→¬φ) → ¬(φ→ψ) same as before
   have d_neg_equiv : DerivationTree FrameClass.Base []
       ((ψ.neg.imp φ.neg).neg.imp (φ.imp ψ).neg) := by
@@ -266,14 +313,14 @@ theorem mcs_h_mp
       (.right_mono_since (ψ.neg.imp φ.neg).neg (φ.imp ψ).neg Formula.top)
   have h_h_contra : Formula.allPast (ψ.neg.imp φ.neg) ∈ Ω := by
     by_contra h_not
-    have h_p := (mcs_mem_iff_neg_not_mem h_mcs).mpr h_not
+    have h_p := (mcs_not_allPast_iff h_mcs).mp h_not
     have h_p2 := temporal_implication_property h_mcs h_bx3_imp h_p
-    exact mcs_not_mem_of_neg h_mcs h_h_imp h_p2
+    exact mcs_not_mem_of_neg h_mcs ((mcs_allPast_iff h_mcs).mp h_h_imp) h_p2
   have h_bx3_2 : Formula.imp (Formula.somePast ψ.neg) (Formula.somePast φ.neg) ∈ Ω :=
     mcs_mp_axiom h_mcs h_h_contra
       (.right_mono_since ψ.neg φ.neg Formula.top)
   have h_p_neg_phi := temporal_implication_property h_mcs h_bx3_2 h_p_neg_psi
-  exact mcs_not_mem_of_neg h_mcs h_h_phi h_p_neg_phi
+  exact mcs_not_mem_of_neg h_mcs ((mcs_allPast_iff h_mcs).mp h_h_phi) h_p_neg_phi
 
 /-! ## G-witness and H-witness -/
 
@@ -366,12 +413,15 @@ theorem mcs_g_witness
         · exact h
         · exact absurd (h ▸ hx) h_neg_in
       have h_g_bot := derive_g_contradiction h_mcs h_all_g d_bot
-      -- G(⊥) = ¬F(⊤). serial_future gives F(⊤) ∈ S. Contradiction.
+      -- G(⊥) = ¬F(¬⊥) = ¬F(⊤) (neg ⊥ ≡ ⊤ by the Lukasiewicz encoding). serial_future gives
+      -- F(⊤) ∈ S. Contradiction.
+      have h_g_bot' : Formula.neg (Formula.someFuture Formula.top) ∈ Ω :=
+        (mcs_allFuture_iff h_mcs).mp h_g_bot
       have h_top : Formula.top ∈ Ω := by
         apply temporal_closed_under_derivation h_mcs (L := []) (fun _ h => nomatch h)
         unfold temporalDerivationSystem Temporal.Deriv
         exact ⟨.axiom [] _ (.efq Formula.bot) trivial⟩
-      exact mcs_not_mem_of_neg h_mcs h_g_bot (mcs_mp_axiom h_mcs h_top .serial_future)
+      exact mcs_not_mem_of_neg h_mcs h_g_bot' (mcs_mp_axiom h_mcs h_top .serial_future)
   obtain ⟨T, hWT, hT_mcs⟩ := temporal_lindenbaum hW
   refine ⟨T, hT_mcs, ?_, ?_⟩
   · intro ψ h_g; exact hWT (Set.mem_union_left _ h_g)
@@ -465,13 +515,16 @@ theorem mcs_h_witness
         · exact h
         · exact absurd (h ▸ hx) h_neg_in
       have h_h_bot := derive_h_contradiction h_mcs h_all_h d_bot
+      -- H(⊥) = ¬P(¬⊥) = ¬P(⊤) (neg ⊥ ≡ ⊤ by the Lukasiewicz encoding).
+      have h_h_bot' : Formula.neg (Formula.somePast Formula.top) ∈ Ω :=
+        (mcs_allPast_iff h_mcs).mp h_h_bot
       have h_top : Formula.top ∈ Ω := by
         apply temporal_closed_under_derivation h_mcs (L := []) (fun _ h => nomatch h)
         unfold temporalDerivationSystem Temporal.Deriv
         exact ⟨.axiom [] _ (.efq Formula.bot) trivial⟩
       have h_p_top : Formula.somePast Formula.top ∈ Ω :=
         mcs_mp_axiom h_mcs h_top .serial_past
-      exact mcs_not_mem_of_neg h_mcs h_h_bot h_p_top
+      exact mcs_not_mem_of_neg h_mcs h_h_bot' h_p_top
   obtain ⟨T, hWT, hT_mcs⟩ := temporal_lindenbaum hW
   refine ⟨T, hT_mcs, ?_, ?_⟩
   · intro ψ h_h; exact hWT (Set.mem_union_left _ h_h)

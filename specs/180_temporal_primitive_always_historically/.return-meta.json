@@ -1,44 +1,55 @@
 {
   "status": "partial",
-  "started_at": "2026-06-30T00:00:00Z",
+  "started_at": "2026-07-01T01:21:37Z",
   "artifacts": [
     {
-      "path": "Cslib/Logics/Temporal/Metalogic/Soundness.lean",
+      "path": "Cslib/Logics/Temporal/Metalogic/MCS.lean",
       "type": "lean_source",
-      "summary": "Added 4 axiom_sound bridge arms (allFuture_to_classic, classic_to_allFuture, allPast_to_classic, classic_to_allPast); repaired 6 pre-existing broken arms and 2 missing swapTemporal_dual cases caused by Phase 2's primitive-constructor promotion. Scoped build GREEN."
+      "summary": "Added mcs_allFuture_iff / mcs_allPast_iff bridge lemmas + mcs_not_allFuture_iff / mcs_not_allPast_iff negated-form companions; repaired all 8 F1 defeq-break sites (mcs_g_mp x2, mcs_h_mp x2, mcs_g_witness/mcs_h_witness G-bot/H-bot x2). Scoped build GREEN, no sorry."
     },
     {
-      "path": "Cslib/Logics/Temporal/Metalogic/DenseSoundness.lean",
+      "path": "Cslib/Logics/Temporal/Metalogic/WitnessSeed.lean",
       "type": "lean_source",
-      "summary": "Added 4 mirrored axiom_sound_dense arms delegating to axiom_sound. Scoped build blocked by pre-existing MCS.lean breakage (Phase 5 territory)."
+      "summary": "PM8 canary: repaired someFuture_allFuture_neg_absurd and somePast_allPast_neg_absurd via mcs_allFuture_iff/mcs_allPast_iff conversion. Signatures unchanged (D4). Scoped build GREEN, no sorry."
+    },
+    {
+      "path": "Cslib/Logics/Temporal/Metalogic/TemporalContent.lean",
+      "type": "lean_source",
+      "summary": "Audited and repaired 4 F1 defeq sites in g_content_iff_not_neg_in_f_content / p_content_iff_not_neg_in_h_content via the MCS bridge lemmas. Scoped build GREEN."
+    },
+    {
+      "path": "Cslib/Logics/Temporal/Metalogic/GeneralizedNecessitation.lean",
+      "type": "lean_source",
+      "summary": "Undiscovered transitive dependency of WitnessSeed.lean. Repaired tempKDistDerived's nested-implication F1 break (Chi -> (notF-form) needed lifting to Chi -> (G-form) under fixed antecedent) via dedicated deduction. Scoped build GREEN, no sorry."
     },
     {
       "path": "specs/180_temporal_primitive_always_historically/plans/03_primitive-gh-metalogic-plan.md",
       "type": "plan",
-      "summary": "Phase 4 heading marked [PARTIAL] with detailed task-level documentation of what completed and the discovered MCS.lean dependency blocker."
+      "summary": "Phase 5 heading marked [COMPLETED] with detailed task-level documentation. Phase 4 heading flipped [PARTIAL] -> [COMPLETED] since the deferred DenseSoundness gate closed."
     }
   ],
   "partial_progress": {
-    "stage": "phase_4_partial",
-    "details": "axiom_sound (Soundness.lean) complete and scoped-build green. axiom_sound_dense (DenseSoundness.lean) arms added but scoped build blocked by transitive dependency on MCS.lean (Phase 5 territory)."
+    "stage": "phase_5_completed",
+    "details": "MCS.lean, WitnessSeed.lean, TemporalContent.lean, GeneralizedNecessitation.lean, DenseMCS.lean, GenericMCSBridge.lean, DenseSoundness.lean all scoped-build GREEN. Task 180 overall status remains partial (5 of 9 phases complete); Phases 6-9 (Chronicle defeq repairs, TruthLemma reduction, Tableau, classical-equivalence + full CI) remain."
   },
-  "phases_completed": 3,
+  "phases_completed": 5,
   "phases_total": 9,
   "memory_candidates": [
-    "CSLib Temporal task 180: allFuture_iff/allPast_iff are Iff.rfl (definitional) once allFuture/allPast are primitive Satisfies constructors -- proofs that previously used by_contra/anonymous-constructor tricks to unfold the old G-as-neg-F-neg defeq can often be replaced by direct term-mode `:= hHyp` since the universal quantifier is now defeq-transparent through imp_iff too.",
-    "CSLib Temporal task 180: DenseSoundness.lean's scoped build transitively depends on MCS.lean via DenseMCS.lean (for Temporal.ThDerivableFc) even though axiom_sound_dense itself does not need MCS.lean -- Phase 4 and Phase 5 are not fully independent for build-verification purposes despite the plan's 'self-contained' framing."
+    "CSLib Temporal task 180: the Lukasiewicz PropositionalConnectives defaults (neg phi := phi -> bot, top := bot -> bot) mean `Formula.neg Formula.bot` and `Formula.top` unfold to the identical term `HasImp.imp HasBot.bot HasBot.bot` -- so 'G-bot' sites needing 'neg bot = top' typecheck by plain defeq once passed through the mcs_allFuture_iff/mcs_allPast_iff bridge, no explicit simp lemma needed despite the plan predicting one.",
+    "CSLib Temporal task 180: when repairing an F1-class defeq break at the *DerivationTree* (pure syntactic derivability) level rather than the MCS-membership level, ordinary transitivity (impTransBase/impTrans chaining) only works when the conversion is a top-level arrow A->B->C; if the classic-form fact you need to convert is *nested* inside another implication's codomain (Chi -> (A->B) needing lift to Chi -> (A'->B')), you need a dedicated deductionTheorem/assumption/modus_ponens derivation under the extended context [A', Chi], not a post-composition trick. Hit this in GeneralizedNecessitation.lean's tempKDistDerived.",
+    "CSLib Temporal task 180: the F1 root-cause defeq break (G/H no longer defeq to neg-someFuture/somePast-neg after becoming primitive constructors) fans out through transitive imports beyond the plan's named file list -- WitnessSeed.lean's import of GeneralizedNecessitation.lean carried its own independent break not anticipated in Phase 5's file scope. When auditing a phase's named files, also check their transitive Metalogic imports for the same error pattern before declaring the phase done."
   ],
   "verification": {
-    "verification_passed": false,
+    "verification_passed": true,
     "sorry_count": 0,
     "vacuous_count": 0,
     "axiom_count": 0,
-    "build_passed": false,
-    "ci_pipeline_passed": false,
-    "notes": "lake build Cslib.Logics.Temporal.Metalogic.Soundness: PASS. lake build Cslib.Logics.Temporal.Metalogic.DenseSoundness: FAIL (blocked by pre-existing Phase-5-territory MCS.lean breakage, not by this dispatch's edits). Full CSLib CI pipeline intentionally NOT run per PM2/dispatch instructions (Temporal build legitimately red until Phase 9)."
+    "build_passed": true,
+    "ci_pipeline_passed": "scoped-only (7 module builds green: MCS, WitnessSeed, TemporalContent, GeneralizedNecessitation, DenseMCS, GenericMCSBridge, DenseSoundness); full CSLib CI pipeline intentionally NOT run per PM2/dispatch instructions (Temporal build legitimately red until Phase 9)",
+    "notes": "lean_verify on mcs_allFuture_iff, mcs_allPast_iff, mcs_g_witness, someFuture_allFuture_neg_absurd: all report only propext/Classical.choice/Quot.sound, no new axioms beyond the 4 pre-existing bridge axioms from Phase 3."
   },
   "metadata": {
-    "session_id": "sess_phase4_180",
+    "session_id": "sess_phase5_180",
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]

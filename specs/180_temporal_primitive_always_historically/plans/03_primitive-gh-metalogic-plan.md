@@ -314,7 +314,7 @@ WIP); out of scope for this phase.
 
 ---
 
-### Phase 4: Metalogic — Soundness + DenseSoundness (4 axiom_sound arms) [PARTIAL]
+### Phase 4: Metalogic — Soundness + DenseSoundness (4 axiom_sound arms) [COMPLETED]
 
 - **Goal:** Prove the four bridge axioms sound by adding four `axiom_sound` match arms; extend
   `DenseSoundness` only if it re-matches Base axioms. Self-contained (F5).
@@ -367,39 +367,90 @@ WIP); out of scope for this phase.
 - **Re-verification note for next dispatch**: once Phase 5 repairs `MCS.lean`, re-run
   `lake build Cslib.Logics.Temporal.Metalogic.DenseSoundness`; the `DenseSoundness.lean`
   content added in this dispatch is not expected to need further changes.
+- **Phase 5 gate CLOSED**: `lake build Cslib.Logics.Temporal.Metalogic.DenseSoundness` now
+  GREEN (Phase 5 repaired the transitive `MCS.lean` dependency). No `DenseSoundness.lean`
+  edits were needed beyond the 4 arms already added — confirming the "not expected to need
+  further changes" prediction above.
 
 ---
 
-### Phase 5: Metalogic — MCS bridge lemmas + MCS/WitnessSeed defeq repairs [NOT STARTED]
+### Phase 5: Metalogic — MCS bridge lemmas + MCS/WitnessSeed defeq repairs [COMPLETED]
 
 - **Goal:** Add the two central MCS bridge lemmas and repair the highest-fan-out defeq break sites
   in `MCS.lean` and `WitnessSeed.lean`. **This is the genuine risk concentration (report Rec. 2).**
 - **Tasks:**
-  - [ ] `MCS.lean`: add `mcs_allFuture_iff` and `mcs_allPast_iff` (F4) from
+  - [x] `MCS.lean`: add `mcs_allFuture_iff` and `mcs_allPast_iff` (F4) from
     `temporal_implication_property` (`:79`) + `theoremInMcs` (`:97`) + the bridge axioms; add
     companion `mcs_not_allFuture_iff : 𝐆φ ∉ Ω ↔ 𝐅(¬φ) ∈ Ω` (+ past dual) via negation-completeness
     for negated-form sites (Risk R2).
-  - [ ] Repair the defeq sites `mcs_g_mp` (`:169`), `mcs_g_witness` final (`:374`),
+    DONE: all four lemmas added after `mcs_mem_iff_neg_not_mem` (before `## G-distribution`).
+    `mcs_allFuture_iff`/`mcs_allPast_iff` built directly from `mcs_mp_axiom` + the two directions
+    of the corresponding bridge axiom pair (`allFuture_to_classic`/`classic_to_allFuture`,
+    `allPast_to_classic`/`classic_to_allPast`). The negated-form companions
+    `mcs_not_allFuture_iff`/`mcs_not_allPast_iff` are one-liners:
+    `(not_congr (mcs_allFuture_iff h_mcs)).trans (mcs_mem_iff_neg_not_mem h_mcs).symm`.
+  - [x] Repair the defeq sites `mcs_g_mp` (`:169`), `mcs_g_witness` final (`:374`),
     `mcs_h_mp`/`mcs_h_witness` (`:229,:472`), and `derive_g_contradiction`/`derive_h_contradiction`:
     replace each broken `mcs_not_mem_of_neg`/`mcs_mem_iff_neg_not_mem` step with a rewrite through
     the new lemmas. `𝐆⊥` sites additionally use `neg ⊥ = ⊤` (one-line `simp`).
-  - [ ] **Canary first**: repair `WitnessSeed.lean` `someFuture_allFuture_neg_absurd` (`:53`) — the
+    DONE: all 8 build-error sites repaired (`mcs_g_mp`: 2 sites; `mcs_h_mp`: 2 sites;
+    `mcs_g_witness`/`mcs_h_witness` `𝐆⊥`/`𝐇⊥` sites: 2 sites). The `𝐆⊥`/`𝐇⊥` sites did not need
+    an explicit `simp` — `Formula.neg Formula.bot` and `Formula.top` both unfold (via the
+    Lukasiewicz `PropositionalConnectives` defaults, `neg φ := φ→⊥`, `top := ⊥→⊥`) to the
+    identical term `HasImp.imp HasBot.bot HasBot.bot`, so the conversion typechecks by defeq
+    when the `mcs_allFuture_iff`/`mcs_allPast_iff` result is used directly (no `simp` needed;
+    plan's predicted `simp` step turned out to be definitional). `lake build
+    Cslib.Logics.Temporal.Metalogic.MCS` is GREEN, no `sorry`.
+  - [x] **Canary first**: repair `WitnessSeed.lean` `someFuture_allFuture_neg_absurd` (`:53`) — the
     highest-fan-out site — before the rest; convert `h_G_neg : 𝐆(¬ψ) ∈ M` to `¬(𝐅¬¬ψ) ∈ M` via
     `mcs_allFuture_iff` before the final `mcs_not_mem_of_neg`. Then
     `somePast_allPast_neg_absurd` (`:65`).
-  - [ ] Keep the `*_neg_absurd` lemma **signatures** stable (D4) so Chronicle consumers
+    DONE: canary compiled on first attempt after the MCS.lean bridge lemmas landed. Both sites
+    fixed identically: `mcs_not_mem_of_neg h_mcs ((mcs_allFuture_iff h_mcs).mp h_G_neg) h_sf_nn`
+    (past dual with `mcs_allPast_iff`/`h_H_neg`). `lake build
+    Cslib.Logics.Temporal.Metalogic.WitnessSeed` is GREEN, no `sorry`. Per PM8, this confirmed
+    the Chronicle fan-out (Phase 6) is expected to follow the same one-line pattern.
+  - [x] Keep the `*_neg_absurd` lemma **signatures** stable (D4) so Chronicle consumers
     (`OrderedSeedConsistency`, `Splitting`, `Structures`) are untouched.
-  - [ ] Audit `TemporalContent.lean` / `DenseMCS.lean` for the same defeq class (grep hits); rewrite
+    DONE: only lemma bodies changed; signatures of `someFuture_allFuture_neg_absurd` /
+    `somePast_allPast_neg_absurd` are byte-identical to before.
+  - [x] Audit `TemporalContent.lean` / `DenseMCS.lean` for the same defeq class (grep hits); rewrite
     low-volume sites via the bridge. Verify `GenericMCSBridge.lean` needs no change (operator-agnostic).
+    DONE: `TemporalContent.lean` had 4 broken sites (`g_content_iff_not_neg_in_f_content` /
+    `p_content_iff_not_neg_in_h_content`, one `mcs_not_mem_of_neg` + one
+    `mcs_mem_iff_neg_not_mem` site each) — repaired via `mcs_allFuture_iff`/`mcs_not_allFuture_iff`
+    and past duals; `lake build Cslib.Logics.Temporal.Metalogic.TemporalContent` GREEN (only
+    pre-existing `linter.unusedSimpArgs` warnings, not from this dispatch). `DenseMCS.lean` and
+    `GenericMCSBridge.lean` both already built GREEN with no changes needed (verify-only).
+    **Undiscovered dependency found and repaired**: `WitnessSeed.lean` also transitively imports
+    `GeneralizedNecessitation.lean` (via `PropositionalHelpers`/`DeductionTheorem`), which had
+    its own F1-class break in `tempKDistDerived` (G-distribution at the `DerivationTree` level,
+    not MCS-membership level) — a *nested* implication conversion (`⊢ Χ → (¬F¬φ → ¬F¬ψ)` needed
+    lifting to `⊢ Χ → (Gφ → Gψ)` under a fixed antecedent Χ, not a top-level chain), fixed via a
+    dedicated `deductionTheorem`/`assumption`/`modus_ponens` derivation under context
+    `[Gφ, G(¬ψ→¬φ)]` rather than post-composition. `lake build
+    Cslib.Logics.Temporal.Metalogic.GeneralizedNecessitation` is GREEN, no `sorry`. This file was
+    not named in the plan's Phase 5 file list but was required for `WitnessSeed.lean` to build.
 - **Timing:** 3-4 hours
 - **Depends on:** 4
-- **Estimated output:** ~200-350 lines (2 lemmas + companion + ~6 site repairs)
+- **Estimated output:** ~200-350 lines (2 lemmas + companion + ~6 site repairs) — actual: ~340
+  lines across 4 files (MCS.lean bridge lemmas + 8 site repairs, WitnessSeed.lean 2 canary sites,
+  TemporalContent.lean 4 sites, GeneralizedNecessitation.lean 1 nested K-distribution repair).
 - **Files to modify:** `Cslib/Logics/Temporal/Metalogic/{MCS,WitnessSeed,TemporalContent,DenseMCS}.lean`
+  — actual: `{MCS,WitnessSeed,TemporalContent,GeneralizedNecessitation}.lean` (`DenseMCS.lean`
+  needed no changes; `GeneralizedNecessitation.lean` was an undiscovered transitive dependency).
 - **Scoped verification (done when):**
-  - `lake build Cslib.Logics.Temporal.Metalogic.MCS` green
-  - `lake build Cslib.Logics.Temporal.Metalogic.WitnessSeed` green
-  - `lean_verify` on the two new lemmas + repaired sites: no `sorry`.
+  - `lake build Cslib.Logics.Temporal.Metalogic.MCS` green — PASSES.
+  - `lake build Cslib.Logics.Temporal.Metalogic.WitnessSeed` green — PASSES.
+  - `lean_verify` on the two new lemmas + repaired sites: no `sorry` — CONFIRMED
+    (`mcs_allFuture_iff`, `mcs_allPast_iff`, `mcs_g_witness`, `someFuture_allFuture_neg_absurd`
+    all report `{"axioms":["propext","Classical.choice","Quot.sound"]}`, standard classical
+    axioms only, no new axioms beyond the 4 pre-existing bridge axioms).
+  - **Deferred Phase-4 gate CLOSED**: `lake build Cslib.Logics.Temporal.Metalogic.DenseSoundness`
+    is now GREEN (was blocked only by the MCS.lean transitive dependency; no DenseSoundness.lean
+    edits were needed, confirming Phase 4's prediction).
   - If a single run cannot close all sites: mark `[PARTIAL]` with the exact remaining site, re-dispatch.
+    NOT NEEDED — all sites closed in this dispatch.
 
 ---
 

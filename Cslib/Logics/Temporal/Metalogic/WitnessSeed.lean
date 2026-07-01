@@ -50,7 +50,9 @@ lemma someFuture_allFuture_neg_absurd {M : Set (Formula Atom)}
   have hImpl := DerivationTree.modus_ponens [] _ _ h_bx3
     (DerivationTree.temporal_necessitation _ (dni psi))
   have h_sf_nn := temporal_implication_property h_mcs (theoremInMcs h_mcs hImpl) h_F
-  exact mcs_not_mem_of_neg h_mcs h_G_neg h_sf_nn
+  -- Task 180 canary (PM8, highest-fan-out site): h_G_neg : G(¬ψ) ∈ M is no longer defeq to
+  -- ¬F(¬¬ψ) ∈ M now that G is primitive; convert via mcs_allFuture_iff before applying.
+  exact mcs_not_mem_of_neg h_mcs ((mcs_allFuture_iff h_mcs).mp h_G_neg) h_sf_nn
 
 lemma somePast_allPast_neg_absurd {M : Set (Formula Atom)}
     (h_mcs : Temporal.SetMaximalConsistent M) (psi : Formula Atom)
@@ -62,7 +64,8 @@ lemma somePast_allPast_neg_absurd {M : Set (Formula Atom)}
   have hImpl := DerivationTree.modus_ponens [] _ _ h_bx3
     (pastNecessitation _ (dni psi))
   have h_sp_nn := temporal_implication_property h_mcs (theoremInMcs h_mcs hImpl) h_P
-  exact mcs_not_mem_of_neg h_mcs h_H_neg h_sp_nn
+  -- Past dual of the canary above: convert via mcs_allPast_iff.
+  exact mcs_not_mem_of_neg h_mcs ((mcs_allPast_iff h_mcs).mp h_H_neg) h_sp_nn
 
 /-! ## Shared helper for G(¬X) extraction from seed inconsistency -/
 

@@ -1,8 +1,9 @@
 {
   "total_churn": 1,
   "target_churn": {
-    "DenseSoundness_imports_MCS": 1
+    "DenseSoundness_imports_MCS": 0
   },
   "adversarial_triggers": 0,
-  "audit_dispatches": 0
+  "audit_dispatches": 0,
+  "notes": "P5 closed the DenseSoundness/MCS dependency; unusedSimpArgs lint warning (PropositionalConnectives.top in swapTemporal simp) flagged for P9 lint sweep"
 }

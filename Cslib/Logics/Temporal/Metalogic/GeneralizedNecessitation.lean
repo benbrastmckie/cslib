@@ -106,10 +106,50 @@ noncomputable def tempKDistDerived (φ ψ : Formula Atom) :
         (Axiom.right_mono_until (ψ.neg.imp φ.neg).neg (φ.imp ψ).neg Formula.top) trivial)
       (DerivationTree.temporal_necessitation _ neg_contra)
   have G_contra := contraposition F_step
+  -- G_contra : ⊢ ¬F¬(φ→ψ) → ¬F¬(¬ψ→¬φ). Task 180: F is no longer defeq to ¬G¬, so convert
+  -- both ends to G-form via the bridge axioms (top-level chain, ordinary transitivity).
+  have G_contra' : DerivationTree FrameClass.Base []
+      ((φ.imp ψ).allFuture.imp (ψ.neg.imp φ.neg).allFuture) :=
+    impTransBase
+      (impTransBase
+        (DerivationTree.axiom [] _ (Axiom.allFuture_to_classic (φ.imp ψ)) trivial) G_contra)
+      (DerivationTree.axiom [] _ (Axiom.classic_to_allFuture (ψ.neg.imp φ.neg)) trivial)
   have G_to_GK := impTransBase
     (DerivationTree.axiom [] _ (Axiom.right_mono_until ψ.neg φ.neg Formula.top) trivial)
     (contraposeImp (Formula.someFuture ψ.neg) (Formula.someFuture φ.neg))
-  exact impTransBase G_contra G_to_GK
+  -- G_to_GK : ⊢ G(¬ψ→¬φ) → (¬F¬φ → ¬F¬ψ). The consequent arrow needs converting to G-form
+  -- while keeping the antecedent fixed, so build it directly via deduction under the two
+  -- hypotheses [Gφ, G(¬ψ→¬φ)] rather than post-composing (the conversion is nested, not
+  -- top-level, so ordinary transitivity does not apply).
+  have G_to_GK' : DerivationTree FrameClass.Base []
+      ((ψ.neg.imp φ.neg).allFuture.imp (φ.allFuture.imp ψ.allFuture)) := by
+    let ctxΧA := [φ.allFuture, (ψ.neg.imp φ.neg).allFuture]
+    have hΧ_assum : DerivationTree FrameClass.Base ctxΧA (ψ.neg.imp φ.neg).allFuture :=
+      .assumption ctxΧA _ (by simp [List.mem_cons, ctxΧA])
+    have hA_assum : DerivationTree FrameClass.Base ctxΧA φ.allFuture :=
+      .assumption ctxΧA _ (by simp [List.mem_cons, ctxΧA])
+    have h_inner : DerivationTree FrameClass.Base ctxΧA
+        ((Formula.neg (Formula.someFuture φ.neg)).imp (Formula.neg (Formula.someFuture ψ.neg))) :=
+      .modus_ponens ctxΧA _ _
+        (.weakening [] ctxΧA _ G_to_GK (fun _ h => nomatch h)) hΧ_assum
+    have h_nF_phi : DerivationTree FrameClass.Base ctxΧA (Formula.neg (Formula.someFuture φ.neg)) :=
+      .modus_ponens ctxΧA _ _
+        (.weakening [] ctxΧA _
+          (DerivationTree.axiom [] _ (Axiom.allFuture_to_classic φ) trivial)
+          (fun _ h => nomatch h))
+        hA_assum
+    have h_nF_psi : DerivationTree FrameClass.Base ctxΧA
+        (Formula.neg (Formula.someFuture ψ.neg)) :=
+      .modus_ponens ctxΧA _ _ h_inner h_nF_phi
+    have h_Gψ : DerivationTree FrameClass.Base ctxΧA ψ.allFuture :=
+      .modus_ponens ctxΧA _ _
+        (.weakening [] ctxΧA _
+          (DerivationTree.axiom [] _ (Axiom.classic_to_allFuture ψ) trivial)
+          (fun _ h => nomatch h))
+        h_nF_psi
+    have d1 := deductionTheorem [(ψ.neg.imp φ.neg).allFuture] φ.allFuture ψ.allFuture h_Gψ
+    exact deductionTheorem [] (ψ.neg.imp φ.neg).allFuture (φ.allFuture.imp ψ.allFuture) d1
+  exact impTransBase G_contra' G_to_GK'
 
 set_option linter.unusedSimpArgs false in
 set_option maxHeartbeats 400000 in

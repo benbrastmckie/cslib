@@ -116,13 +116,13 @@ theorem f_content_iff_not_neg_in_g_content {M : Set (Formula Atom)}
     have h_sf_nn_in : Formula.someFuture phi.neg.neg ∈ M :=
       temporal_implication_property h_mcs (theoremInMcs h_mcs h_sf_impl) h_sf_in
     -- G(¬φ) = ¬F(¬¬φ). So ¬F(¬¬φ) ∈ M and F(¬¬φ) ∈ M. Contradiction.
-    exact mcs_not_mem_of_neg h_mcs h_af_in h_sf_nn_in
+    exact mcs_not_mem_of_neg h_mcs ((mcs_allFuture_iff h_mcs).mp h_af_in) h_sf_nn_in
   · intro h_af_not_in
     -- ¬φ ∉ gContent(M) means G(¬φ) ∉ M.
     -- G(¬φ) = ¬F(¬¬φ). So ¬F(¬¬φ) ∉ M. By negation completeness, F(¬¬φ) ∈ M.
     -- Then derive F(φ) from F(¬¬φ) via BX3 + DNE.
     have h_F_nn : Formula.someFuture phi.neg.neg ∈ M :=
-      (mcs_mem_iff_neg_not_mem h_mcs).mpr h_af_not_in
+      (mcs_not_allFuture_iff h_mcs).mp h_af_not_in
     have h_dne : DerivationTree FrameClass.Base [] (phi.neg.neg.imp phi) := by
       let ctx := [Formula.neg (Formula.neg phi)]
       have d_peirce : DerivationTree FrameClass.Base ctx
@@ -190,10 +190,10 @@ theorem p_content_iff_not_neg_in_h_content {M : Set (Formula Atom)}
       DerivationTree.modus_ponens [] _ _ h_bx3p h_H_dni
     have h_sp_nn_in : Formula.somePast phi.neg.neg ∈ M :=
       temporal_implication_property h_mcs (theoremInMcs h_mcs h_sp_impl) h_sp_in
-    exact mcs_not_mem_of_neg h_mcs h_ap_in h_sp_nn_in
+    exact mcs_not_mem_of_neg h_mcs ((mcs_allPast_iff h_mcs).mp h_ap_in) h_sp_nn_in
   · intro h_ap_not_in
     have h_P_nn : Formula.somePast phi.neg.neg ∈ M :=
-      (mcs_mem_iff_neg_not_mem h_mcs).mpr h_ap_not_in
+      (mcs_not_allPast_iff h_mcs).mp h_ap_not_in
     have h_dne : DerivationTree FrameClass.Base [] (phi.neg.neg.imp phi) := by
       let ctx := [Formula.neg (Formula.neg phi)]
       have d_peirce : DerivationTree FrameClass.Base ctx

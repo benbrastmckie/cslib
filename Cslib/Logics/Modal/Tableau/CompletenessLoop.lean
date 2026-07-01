@@ -66,6 +66,15 @@ structure ModalLoopInv (φ0 : Proposition Atom)
     modalCap (modalSubfmls φ0).length (modalDepth φ0)
   /-- Every already-expanded formula's Hintikka witness obligation is already met on `b`. -/
   hintikkaInv : ∀ sf ∈ e, modalHintikkaClause sf.sign sf.formula sf.label b acc
+  /-- Every box-shaped formula in the expanded set `e` has sign `.neg` (i.e. is `boxNeg`-shaped,
+  `F(□φ)@w`). Needed because `modalHintikkaClause` (used by `hintikkaInv`) is vacuously `True`
+  for *any* box-shaped formula regardless of sign, whereas `modalHintikkaSet`'s second conjunct
+  only carves out `.neg, .box _`; the `.pos, .box _` (`boxPos`) case genuinely needs its
+  `.persistent` clause discharged. This is sound because `boxPos`'s own `modalApplyOne` result
+  is always `.notApplicable` or `.persistent` (never `.linear`/`.branching`,
+  `modalApplyOne_posBox_eq` below), so a `boxPos`-shaped formula can never be the `sf_exp` that
+  gets appended to `e` by a `modalStepBranch` step. -/
+  eBoxOnlyNeg : ∀ sf ∈ e, ∀ ψ, sf.formula = .box ψ → sf.sign = .neg
 
 /-! ## Local Helper Lemmas
 
@@ -265,6 +274,97 @@ private lemma modalStepBranch_newExps_const
     exact ⟨e, rfl⟩
   · rw [hfstc] at hsf; simp at hsf
 
+/-- `boxPos`'s own rule-application result is always `.notApplicable` or `.persistent`, never
+`.linear`/`.branching`: a formula with sign `.pos` and formula-component `.box ψ` never matches
+any of the four Lukasiewicz-encoded propositional decomposers (all match only `.imp`-headed
+formulas, `Defs.lean:110-172`), so `tryAllPropRules` is not applicable and `modalApplyOne` falls
+through to the `boxPos` dispatch arm (`Rules.lean:83-88`), which only ever produces
+`.notApplicable` or `.persistent`. Stated against an opaque `sf` (rather than a literal
+`⟨.pos, .box ψ, w⟩` constructor) so call sites never need to destructure a signed formula whose
+components are entangled with an unrelated `rfl`-substitution elsewhere in the proof. -/
+private lemma modalApplyOne_posBox_eq
+    (sf : SignedFormula (Proposition Atom) WorldIndex) (hsign : sf.sign = .pos)
+    (ψ : Proposition Atom) (hform : sf.formula = .box ψ)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOne sf b acc).1 = .notApplicable ∨
+      (modalApplyOne sf b acc).1 = .persistent (boxPropagation b acc ψ sf.label) := by
+  obtain ⟨s, φ, l⟩ := sf
+  simp only at hsign hform
+  subst hsign; subst hform
+  simp only [modalApplyOne]
+  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+      (⟨.pos, .box ψ, l⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable = false := by
+    rw [tryAllPropRules_pos]
+    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
+  rw [if_neg (by simp [htry])]
+  split_ifs with hemp
+  · left; rfl
+  · right; rfl
+
+/-- Preservation of the `eBoxOnlyNeg` invariant across a `modalStepBranch` step: mirrors
+`modalLoop_eClosure`'s case split, but for the persistent case the new expanded set is exactly
+the old one (`eBoxOnlyNeg` transfers directly), while for the linear/branching cases the freshly
+appended `sf_exp` must itself have sign `.neg` whenever its formula is box-shaped — since if
+`sf_exp` were `.pos`-box-shaped, `modalApplyOne_posBox_eq` would force its own result to be
+`.notApplicable`/`.persistent`, contradicting the linear/branching case split. -/
+private lemma modalLoop_eBoxOnlyNeg
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (he : ∀ sf ∈ e, ∀ ψ, sf.formula = .box ψ → sf.sign = .neg) :
+    ∀ e' ∈ newExps, ∀ sf ∈ e', ∀ ψ, sf.formula = .box ψ → sf.sign = .neg := by
+  simp only [modalStepBranch] at hstep
+  obtain ⟨sf_exp, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  rcases hfstc : (modalApplyOne sf_exp b acc).fst with nf | brs | nf | _
+  · -- linear: newExps = [e ++ [sf_exp]]
+    rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro e' he'
+    rw [← hsf.2.1] at he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    intro sf hsfin ψ hψ
+    simp only [List.mem_append, List.mem_singleton] at hsfin
+    rcases hsfin with hsfin | heq
+    · exact he sf hsfin ψ hψ
+    · by_contra hcon
+      have hspos : sf.sign = .pos := by cases hs : sf.sign with
+        | pos => rfl
+        | neg => exact absurd hs hcon
+      have hform_exp : sf_exp.formula = Proposition.box ψ := by rw [← heq]; exact hψ
+      have hsign_exp : sf_exp.sign = Sign.pos := by rw [← heq]; exact hspos
+      rcases modalApplyOne_posBox_eq sf_exp hsign_exp ψ hform_exp b acc with h | h <;>
+        rw [h] at hfstc <;> simp at hfstc
+  · -- branching: newExps = brs.map (fun _ => e ++ [sf_exp])
+    rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro e' he'
+    rw [← hsf.2.1] at he'
+    obtain ⟨br, -, rfl⟩ := List.mem_map.mp he'
+    intro sf hsfin ψ hψ
+    simp only [List.mem_append, List.mem_singleton] at hsfin
+    rcases hsfin with hsfin | heq
+    · exact he sf hsfin ψ hψ
+    · by_contra hcon
+      have hspos : sf.sign = .pos := by cases hs : sf.sign with
+        | pos => rfl
+        | neg => exact absurd hs hcon
+      have hform_exp : sf_exp.formula = Proposition.box ψ := by rw [← heq]; exact hψ
+      have hsign_exp : sf_exp.sign = Sign.pos := by rw [← heq]; exact hspos
+      rcases modalApplyOne_posBox_eq sf_exp hsign_exp ψ hform_exp b acc with h | h <;>
+        rw [h] at hfstc <;> simp at hfstc
+  · -- persistent: newExps = [e] (unchanged)
+    rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro e' he'
+    rw [← hsf.2.1] at he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    exact he
+  · rw [hfstc] at hsf; simp at hsf
+
 /-! ## The Combined-Invariant Single-Step Preservation Lemma -/
 
 /-- **Combined-invariant single-step preservation** (task 442 Phase 5a): given the bundled loop
@@ -286,7 +386,7 @@ lemma modalStep_preserves_invariant
       (∀ p ∈ newBs.zip newExps, ModalLoopInv φ0 p.1 p.2 newAcc rank') ∧
       modalExpMeasure (modalUniverse φ0) newBs newExps + 1 ≤
         modalExpMeasure (modalUniverse φ0) [b] [e] := by
-  obtain ⟨hpot, hphi, hhint⟩ := hinv
+  obtain ⟨hpot, hphi, hhint, hboxneg⟩ := hinv
   have hWb : modalMaxWorld b < modalWorldBound φ0 :=
     modalMaxWorld_lt_worldBound_of_phiBound φ0 b _ hphi
   obtain ⟨rank', -, hrb', hre', hpotential⟩ :=
@@ -305,12 +405,13 @@ lemma modalStep_preserves_invariant
   have hEClosureAll : ∀ e' ∈ newExps, ∀ x ∈ e', x ∈ modalUniverse φ0 :=
     modalLoop_eClosure φ0 b e acc newBs newExps newAcc hstep hpot.bClosure hpot.eClosure
   have hHintikkaAll := modalStepBranch_hintikka_inv b e acc newBs newExps newAcc hstep hhint
+  have hBoxNegAll := modalLoop_eBoxOnlyNeg b e acc newBs newExps newAcc hstep hboxneg
   refine ⟨rank', ?_, ?_⟩
   · intro p hp
     obtain ⟨hp1, hp2⟩ := List.of_mem_zip hp
     exact ⟨⟨hBClosureAll p.1 hp1, hNodupAll p.2 hp2, hEClosureAll p.2 hp2,
         hFreshAll p.1 hp1, hKnownAll p.1 hp1, hOutDegAll p.2 hp2, hrb' p.1 hp1, hre'⟩,
-      by rw [hpotential p.1 hp1]; exact hphi, hHintikkaAll p hp⟩
+      by rw [hpotential p.1 hp1]; exact hphi, hHintikkaAll p hp, hBoxNegAll p.2 hp2⟩
   · obtain ⟨newExp, hNewExpEq⟩ :=
       modalStepBranch_newExps_const b e acc newBs newExps newAcc hstep
     have hstep' : modalStepBranch b e acc = some (newBs, newBs.map (fun _ => newExp), newAcc) := by

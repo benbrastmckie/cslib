@@ -1,6 +1,19 @@
 {
-  "next_project_number": 443,
+  "next_project_number": 444,
   "active_projects": [
+    {
+      "project_number": 443,
+      "project_name": "fix_lint_mcnaughton_choueka_concat",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Fix lint violations in McNaughton-theorem Choueka/Concat route (task 241)",
+      "description": "Address the 2 lake lint violations introduced by task 241: rename the underscored instance buchiCongruence_instMonoid in Cslib/Computability/Languages/Congruences/BuchiCongruence.lean:263 (defsWithUnderscore), and silence or restructure the unused-argument warning on mullerAccConcat in Cslib/Computability/Automata/DA/Concat.lean:159 (unusedArguments). Verify with lake lint and lake build afterward; ensure no downstream call sites reference the renamed instance directly.",
+      "parent_task": 241,
+      "created": "2026-07-01T05:04:42Z",
+      "last_updated": "2026-07-01T05:04:42Z",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
     {
       "project_number": 440,
       "project_name": "review_pr_leanprover_cslib_648",

@@ -1,5 +1,5 @@
 ---
-next_project_number: 443
+next_project_number: 444
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 443
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,317,390,396,400,404,407,415,419,438,440,442 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,317,390,396,400,404,407,415,419,438,440,442,443 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 2 | 39,40,181,215,299,375,389,405,409,430,439 | 36,37,180,317,404,407,442 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,275,300,391,392,413,426,441 | 39,40,299,375,389,439 | Bimodal Porting, Foundations, Modal Logic, ... |
 | 4 | 393,412,425 | 41,391,426 | Foundations, Temporal Logic, PL-Hygiene |
@@ -101,8 +101,18 @@ next_project_number: 443
 ### Uncategorized
 
 438 [NOT STARTED] — Upstream the comment/docstring cleanups identified by the task 43
+443 [NOT STARTED] — Address the 2 lake lint violations introduced by task 241: rename
 
 ## Tasks
+
+### 443. Fix lint violations in McNaughton-theorem Choueka/Concat route (task 241)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Address the 2 lake lint violations introduced by task 241: rename the underscored instance buchiCongruence_instMonoid in Cslib/Computability/Languages/Congruences/BuchiCongruence.lean:263 (defsWithUnderscore), and silence or restructure the unused-argument warning on mullerAccConcat in Cslib/Computability/Automata/DA/Concat.lean:159 (unusedArguments). Verify with lake lint and lake build afterward; ensure no downstream call sites reference the renamed instance directly.
+
+---
 
 ### 442. Modal tableau fmp fuel measure
 - **Effort**: 400-800 lines, multiple dispatches

@@ -982,7 +982,7 @@
       "parent_task": 415,
       "description": "[Spawned from task 415 audit — supports the structure-first vision; SPIKE.] Investigate hoisting liftDerivation / Derivable_mono (Modal/Metalogic/InterSystem/Lifting.lean:47) and Bimodal's liftDerivationWith onto the shared InferenceSystem / algebraicDerivationSystem abstraction already used by GenericMCSBridge, yielding ONE axiom-subsumption derivation-lifting result reusable by Modal, Bimodal, and PL. SPIKE FIRST: commit only if the necessitation / temporal_duality constructor variance is cleanly abstractable; otherwise document precisely why and stop (mark BLOCKED, never sorry). Benefits from task 417's Foundations placement (soft dependency). Effort L (abstraction risk). CI green if landed. Source: report §6, Rank 4.",
       "dependencies": [],
-      "next_artifact_number": 1,
+      "next_artifact_number": 5,
       "artifacts": [
         {
           "path": "specs/419_generalize_derivation_lifting_intersystem/reports/02_virtuous-unification.md",
@@ -993,11 +993,16 @@
           "path": "specs/419_generalize_derivation_lifting_intersystem/plans/02_proof-system-morphism-overlay.md",
           "type": "plan",
           "summary": ""
+        },
+        {
+          "number": 4,
+          "type": "report",
+          "path": "specs/419_generalize_derivation_lifting_intersystem/reports/04_abstract-picture-and-result-inventory.md"
         }
       ],
       "created": "2026-06-29T22:35:38Z",
-      "last_updated": "2026-07-01T06:20:00Z",
-      "blockers": "SPIKE verdict: cross-logic axiom-subsumption derivation lift is NOT cleanly abstractable as specified. Forward-direction lifts for PL+Modal+Bimodal DID land as Deriv.map corollaries on the shared ProofSystemMorphism scaffold (committed phases 1-4, sorry-free). The full payload resists: (1) Bimodal's subsumption axis is frame-class inclusion (DerivationTree.lift {fc1<=fc2}, Derivation.lean:92) over a single concrete Axiom inductive gated by minFrameClass<=fc (Derivation.lean:53,59), NOT axiom-predicate inclusion like Modal/PL -- so no single instantiable result covers all three; (2) Bimodal backward map (ofDeriv/bimodalEquiv) requires reconstructing erased Axiom+h_fc gate data and could only be written with sorry (WIP build failed, sorry at LiftViaMorphism.lean:217,224); (3) cross-syntax liftDerivationWith is fresh-atom unembedding (Bimodal/Metalogic/ConservativeExtension/Lifting.lean:636), a different operation, not an axiom subsumption. Per SPIKE rule: documented, stopped, no sorry. WIP refactor reverted; committed phases 1-4 retained.",
+      "last_updated": "2026-07-01T06:35:00Z",
+      "blockers": "RESOLVED TO A DESIGN FORK (see reports/04). The forward derivation-lifting unification is DONE and green for all three logics: ProofSig/Deriv/ProofSigHom/Deriv.map + functor laws (Foundations/Logic/Metalogic/ProofSystemMorphism.lean), with Modal+PL full Equiv and Bimodal forward+HEq overlays committed sorry-free. Task 419's literal payload (ONE lift reusable by Modal/Bimodal/PL) is met in the forward direction. The only open item is the OPTIONAL backward-map/full-Equiv layer for multi-closure Bimodal, gated by exactly one representation choice: Deriv.close carries closure-membership as a Prop (List.Mem, head/tail), so a backward map needs large elimination of a non-singleton Prop into Type (kernel-forbidden); Classical.choice makes it noncomputable with an unprovable round-trip. Fix R1 (surgical, sorry-free): make close carry a Fin (closures.length) index (data) instead of Prop membership. DECISION FOR USER: Vision A (lifting device) = already complete, mark 419 done with backward-Equiv explicitly out of scope; Vision B (shared-metatheory substrate) = spawn a bounded task whose Phase 1 is R1, Phase 2 the Bimodal Equiv, Phase 3 the FIRST real generic metatheorem consumed downstream (the ROI gate). Anti-goals (never do): A2 inductive replacement (193 files, regressive), Prop-axiom-ify Bimodal, Classical.choice backward map.",
       "updated": "2026-06-30T05:11:13Z",
       "session_id": "sess_1782772776_909541_419"
     },

@@ -304,19 +304,25 @@ lemma modalApplyOne_imp_pos (a c : Proposition Atom) (w : WorldIndex)
             match modalNegOf? (.imp a c) with
             | some x => .linear [⟨.neg, x, w⟩]
             | none => .notApplicable := by
-  refine (modalApplyOne_eq_prop_of_applicable ⟨.pos, .imp a c, w⟩ b acc ?_).trans
-    (tryAllPropRules_pos modalAndOf? modalOrOf? modalImpOf? modalNegOf? (.imp a c) w)
-  rw [tryAllPropRules_pos]
-  rcases hA : modalAndOf? (.imp a c) with _ | ⟨x, y⟩
-  · rcases hO : modalOrOf? (.imp a c) with _ | ⟨x, y⟩
-    · rcases hI : modalImpOf? (.imp a c) with _ | ⟨x, y⟩
-      · rcases hN : modalNegOf? (.imp a c) with _ | x
-        · exfalso; revert hA hO hI hN
-          cases c <;> cases a <;> simp_all [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?]
-        · simp [hA, hO, hI, hN, RuleResult.isApplicable]
-      · simp [hA, hO, hI, RuleResult.isApplicable]
-    · simp [hA, hO, RuleResult.isApplicable]
-  · simp [hA, RuleResult.isApplicable]
+  have happ : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+      (⟨.pos, .imp a c, w⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable = true := by
+    rw [tryAllPropRules_pos]
+    rcases hA : modalAndOf? (.imp a c) with _ | ⟨x, y⟩
+    · rcases hO : modalOrOf? (.imp a c) with _ | ⟨x, y⟩
+      · rcases hI : modalImpOf? (.imp a c) with _ | ⟨x, y⟩
+        · rcases hN : modalNegOf? (.imp a c) with _ | x
+          · exfalso
+            rcases c with _|_|_|_ <;> rcases a with _|_|⟨a1, _|_|_|_⟩|_ <;>
+              simp_all [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?]
+          · simp [hA, hO, hI, hN, RuleResult.isApplicable]
+        · simp [hA, hO, hI, RuleResult.isApplicable]
+      · simp [hA, hO, RuleResult.isApplicable]
+    · simp [hA, RuleResult.isApplicable]
+  rw [modalApplyOne_eq_prop_of_applicable ⟨.pos, .imp a c, w⟩ b acc happ, tryAllPropRules_pos]
+  rcases modalAndOf? (.imp a c) with _ | ⟨x, y⟩ <;>
+    rcases modalOrOf? (.imp a c) with _ | ⟨x, y⟩ <;>
+    rcases modalImpOf? (.imp a c) with _ | ⟨x, y⟩ <;>
+    rcases modalNegOf? (.imp a c) with _ | x <;> rfl
 
 /-- Reduction of `modalApplyOne` on a negative implication to a decomposer case split. -/
 lemma modalApplyOne_imp_neg (a c : Proposition Atom) (w : WorldIndex)
@@ -334,19 +340,25 @@ lemma modalApplyOne_imp_neg (a c : Proposition Atom) (w : WorldIndex)
             match modalNegOf? (.imp a c) with
             | some x => .linear [⟨.pos, x, w⟩]
             | none => .notApplicable := by
-  refine (modalApplyOne_eq_prop_of_applicable ⟨.neg, .imp a c, w⟩ b acc ?_).trans
-    (tryAllPropRules_neg modalAndOf? modalOrOf? modalImpOf? modalNegOf? (.imp a c) w)
-  rw [tryAllPropRules_neg]
-  rcases hA : modalAndOf? (.imp a c) with _ | ⟨x, y⟩
-  · rcases hO : modalOrOf? (.imp a c) with _ | ⟨x, y⟩
-    · rcases hI : modalImpOf? (.imp a c) with _ | ⟨x, y⟩
-      · rcases hN : modalNegOf? (.imp a c) with _ | x
-        · exfalso; revert hA hO hI hN
-          cases c <;> cases a <;> simp_all [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?]
-        · simp [hA, hO, hI, hN, RuleResult.isApplicable]
-      · simp [hA, hO, hI, RuleResult.isApplicable]
-    · simp [hA, hO, RuleResult.isApplicable]
-  · simp [hA, RuleResult.isApplicable]
+  have happ : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+      (⟨.neg, .imp a c, w⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable = true := by
+    rw [tryAllPropRules_neg]
+    rcases hA : modalAndOf? (.imp a c) with _ | ⟨x, y⟩
+    · rcases hO : modalOrOf? (.imp a c) with _ | ⟨x, y⟩
+      · rcases hI : modalImpOf? (.imp a c) with _ | ⟨x, y⟩
+        · rcases hN : modalNegOf? (.imp a c) with _ | x
+          · exfalso
+            rcases c with _|_|_|_ <;> rcases a with _|_|⟨a1, _|_|_|_⟩|_ <;>
+              simp_all [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?]
+          · simp [hA, hO, hI, hN, RuleResult.isApplicable]
+        · simp [hA, hO, hI, RuleResult.isApplicable]
+      · simp [hA, hO, RuleResult.isApplicable]
+    · simp [hA, RuleResult.isApplicable]
+  rw [modalApplyOne_eq_prop_of_applicable ⟨.neg, .imp a c, w⟩ b acc happ, tryAllPropRules_neg]
+  rcases modalAndOf? (.imp a c) with _ | ⟨x, y⟩ <;>
+    rcases modalOrOf? (.imp a c) with _ | ⟨x, y⟩ <;>
+    rcases modalImpOf? (.imp a c) with _ | ⟨x, y⟩ <;>
+    rcases modalNegOf? (.imp a c) with _ | x <;> rfl
 
 /-! ## Modal Truth Lemma (Phase 5c) -/
 
@@ -414,8 +426,9 @@ lemma modalTruthLemma
         · rcases hO : modalOrOf? (.imp a c) with _ | ⟨x, y⟩
           · rcases hI : modalImpOf? (.imp a c) with _ | ⟨x, y⟩
             · rcases hN : modalNegOf? (.imp a c) with _ | x
-              · exfalso; revert hA hO hI hN
-                cases c <;> cases a <;> simp_all [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?]
+              · exfalso
+                rcases c with _|_|_|_ <;> rcases a with _|_|⟨a1, _|_|_|_⟩|_ <;>
+                  simp_all [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?]
               · -- negPos: φ = ¬x ; rule gives F(x)@w
                 simp only [hA, hO, hI, hN] at hcond
                 have hxmem : (⟨.neg, x, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
@@ -472,8 +485,9 @@ lemma modalTruthLemma
         · rcases hO : modalOrOf? (.imp a c) with _ | ⟨x, y⟩
           · rcases hI : modalImpOf? (.imp a c) with _ | ⟨x, y⟩
             · rcases hN : modalNegOf? (.imp a c) with _ | x
-              · exfalso; revert hA hO hI hN
-                cases c <;> cases a <;> simp_all [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?]
+              · exfalso
+                rcases c with _|_|_|_ <;> rcases a with _|_|⟨a1, _|_|_|_⟩|_ <;>
+                  simp_all [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?]
               · -- negNeg: φ = ¬x ; rule gives T(x)@w
                 simp only [hA, hO, hI, hN] at hcond
                 have hxmem : (⟨.pos, x, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=

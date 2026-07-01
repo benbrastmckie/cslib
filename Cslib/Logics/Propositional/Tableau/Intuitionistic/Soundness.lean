@@ -1293,174 +1293,345 @@ lemma intExpandBranches_closed_unsat
                   -- Freshness: all labels in bPers are < nwH, hence ≠ nwH
                   have hfresh : ∀ sf' ∈ bPers, sf'.label ≠ nwH :=
                     fun sf' hmem' => Nat.ne_of_lt (hfreshAbove_pers.1 sf' hmem')
-                  -- edges' is shared across both sub-cases of hzip_p
-                  set edges' := match newEdge with | none => edgesH | some e => edgesH ++ [e]
-                      with hedges'_def
                   rcases hzip_p with ⟨rfl, rfl⟩ | hmem_rest
                   · -- linearResult bp=bh case: apply intRule_preserves_sat + ih
-                    simp only [] at hgo
-                    -- Satisfaction of bPers under wo
-                    have hsat_pers : intBranchSatisfied val botForces wo bPers :=
-                      applyPersistenceFixpoint_sat val botForces v_uc bf_uc wo bh edgesP
-                        (fuel'' + 1) hsat_p hmono_p
-                    -- Apply intRule_preserves_sat to get worldOf' with agreement and ordering
-                    have hpres := intRule_preserves_sat val botForces v_uc bf_uc wo bPers sf
-                        hsf_mem hsat_pers nwH hfresh
-                    rw [hresult_sf] at hpres
-                    obtain ⟨worldOf', hagree, hsat_new, hord⟩ := hpres
-                    -- Freshness for the expanded branch
-                    have hfreshNew : FreshAbove (Branch.extendMany bPers newForms) edges' nw' := by
-                      rcases hnE : newEdge with _ | e_val
-                      · rw [hnE] at hresult_sf
-                        have hnw'eq :=
-                          intApplyRuleFull_none_nw sf nwH bPers newForms nw' hresult_sf
-                        have hlabels :=
-                          intApplyRuleFull_none_labels sf nwH bPers newForms nw' hresult_sf
-                        rw [show edges' = edgesP from by simp [hedges'_def, hnE], hnw'eq]
+                    -- Task 317 phase 4 fix: the dedup (Expansion.lean, `intFImpReuseWitness?`)
+                    -- makes the `newEdge = some e` sub-case branch further on whether an
+                    -- accessible ancestor can be reused, so `newEdge`/the reuse-witness must be
+                    -- resolved here before `hgo` can be matched against the actual recursive call.
+                    rcases hnE : newEdge with _ | e_val
+                    · -- Alpha-rule: newEdge = none (unchanged from pre-dedup proof)
+                      rw [hnE] at hgo hresult_sf
+                      simp only [] at hgo
+                      have hsat_pers : intBranchSatisfied val botForces wo bPers :=
+                        applyPersistenceFixpoint_sat val botForces v_uc bf_uc wo bh edgesP
+                          (fuel'' + 1) hsat_p hmono_p
+                      have hpres := intRule_preserves_sat val botForces v_uc bf_uc wo bPers sf
+                          hsf_mem hsat_pers nwH hfresh
+                      rw [hresult_sf] at hpres
+                      obtain ⟨worldOf', hagree, hsat_new, hord⟩ := hpres
+                      have hnw'eq := intApplyRuleFull_none_nw sf nwH bPers newForms nw' hresult_sf
+                      have hlabels :=
+                        intApplyRuleFull_none_labels sf nwH bPers newForms nw' hresult_sf
+                      have hfreshNew : FreshAbove (Branch.extendMany bPers newForms) edgesP nw' := by
+                        rw [hnw'eq]
                         exact freshAbove_extendMany bPers edgesP nwH newForms hfreshAbove_pers
                           (fun sf' h' => hlabels sf' h' ▸ hfreshAbove_pers.1 sf hsf_mem)
-                      · rw [hnE] at hresult_sf
+                      have hfreshCombLin : ∀ b e nw,
+                          ((b, e), nw) ∈ ((done ++ [Branch.extendMany bPers newForms] ++ bt).zip
+                                          (doneEdges ++ [edgesP] ++ edgesT)).zip
+                                         (doneNW ++ [nw'] ++ nwT) → FreshAbove b e nw := by
+                        intro b e nw hmem
+                        have hlen1 : (done ++ [Branch.extendMany bPers newForms]).length =
+                                     (doneEdges ++ [edgesP]).length := by simp; omega
+                        have hlen2 : (done ++ [Branch.extendMany bPers newForms]).length =
+                                     (doneNW ++ [nw']).length := by simp; omega
+                        rw [List.zip_append hlen1] at hmem
+                        have hlen2_adj :
+                            ((done ++ [Branch.extendMany bPers newForms]).zip
+                             (doneEdges ++ [edgesP])).length =
+                             (doneNW ++ [nw']).length := by
+                          rw [List.length_zip,
+                              Nat.min_eq_left (Nat.le_of_eq hlen1)]; exact hlen2
+                        rw [List.zip_append hlen2_adj, List.mem_append] at hmem
+                        rcases hmem with h_front | h_back
+                        · have hlen_de : done.length = doneEdges.length := by omega
+                          have hlen_denz : (done.zip doneEdges).length = doneNW.length := by
+                            rw [List.length_zip]
+                            exact (Nat.min_eq_left (by omega)).trans (by omega)
+                          rw [List.zip_append hlen_de, List.zip_append hlen_denz,
+                              List.mem_append] at h_front
+                          simp only [List.zip_cons_cons, List.zip_nil_right, List.mem_cons,
+                                     List.mem_nil_iff, or_false, Prod.mk.injEq] at h_front
+                          rcases h_front with h1 | ⟨⟨rfl, rfl⟩, rfl⟩
+                          · exact hfreshDone b e nw h1
+                          · exact hfreshNew
+                        · exact hfreshTail b e nw h_back
+                      have hmono_new : MonotoneEdges worldOf' edgesP :=
+                        monotoneEdges_of_agree wo worldOf' edgesP nwH hfreshAbove_pers.2 hagree
+                          hmono_p
+                      refine absurd hsat_new
+                          (ih _ _ _ _ (by simp [hdlength_exp, hlength_exp])
+                            (by simp [hdlength_nw, hlength_nw])
+                            (by simp [hdlength_edges, hlength_edges])
+                            hfreshCombLin hgo (Branch.extendMany bPers newForms) edgesP ?_
+                            worldOf' hmono_new)
+                      rw [List.zip_append (by simp [hdlength_edges]), List.mem_append]
+                      apply Or.inl
+                      rw [List.zip_append (by omega : done.length = doneEdges.length),
+                          List.mem_append]
+                      exact Or.inr (by simp)
+                    · -- World-creating F(φ → ψ) rule: newEdge = some e_val. Run the
+                      -- Sfor-containment loop-check (task 317 plan 04) exactly as `go` does.
+                      rw [hnE] at hgo hresult_sf
+                      simp only [] at hgo
+                      rcases hwit : intFImpReuseWitness? bPers edgesP newForms e_val with _ | x
+                      · -- No reusable ancestor: create w' exactly as pre-dedup.
+                        rw [hwit] at hgo
+                        simp only [] at hgo
+                        have hsat_pers : intBranchSatisfied val botForces wo bPers :=
+                          applyPersistenceFixpoint_sat val botForces v_uc bf_uc wo bh edgesP
+                            (fuel'' + 1) hsat_p hmono_p
+                        have hpres := intRule_preserves_sat val botForces v_uc bf_uc wo bPers sf
+                            hsf_mem hsat_pers nwH hfresh
+                        rw [hresult_sf] at hpres
+                        obtain ⟨worldOf', hagree, hsat_new, hord⟩ := hpres
                         obtain ⟨he, hnw'eq, hlabels⟩ :=
                           intApplyRuleFull_some_info sf nwH bPers newForms nw' e_val hresult_sf
-                        rw [show edges' = edgesP ++ [e_val] from by simp [hedges'_def, hnE],
-                            he, hnw'eq]
-                        exact freshAbove_world_create bPers edgesP nwH sf.label newForms
-                          hfreshAbove_pers (hfreshAbove_pers.1 sf hsf_mem)
-                          (fun sf' h' => Nat.le_of_eq (hlabels sf' h'))
-                    -- Combined freshness for done ++ [extendMany bPers newForms] ++ bt
-                    have hfreshCombLin : ∀ b e nw,
-                        ((b, e), nw) ∈ ((done ++ [Branch.extendMany bPers newForms] ++ bt).zip
-                                        (doneEdges ++ [edges'] ++ edgesT)).zip
-                                       (doneNW ++ [nw'] ++ nwT) → FreshAbove b e nw := by
-                      intro b e nw hmem
-                      have hlen1 : (done ++ [Branch.extendMany bPers newForms]).length =
-                                   (doneEdges ++ [edges']).length := by simp; omega
-                      have hlen2 : (done ++ [Branch.extendMany bPers newForms]).length =
-                                   (doneNW ++ [nw']).length := by simp; omega
-                      rw [List.zip_append hlen1] at hmem
-                      have hlen2_adj :
-                          ((done ++ [Branch.extendMany bPers newForms]).zip
-                           (doneEdges ++ [edges'])).length =
-                           (doneNW ++ [nw']).length := by
-                        rw [List.length_zip,
-                            Nat.min_eq_left (Nat.le_of_eq hlen1)]; exact hlen2
-                      rw [List.zip_append hlen2_adj, List.mem_append] at hmem
-                      rcases hmem with h_front | h_back
-                      · have hlen_de : done.length = doneEdges.length := by omega
-                        have hlen_denz : (done.zip doneEdges).length = doneNW.length := by
-                          rw [List.length_zip]
-                          exact (Nat.min_eq_left (by omega)).trans (by omega)
-                        rw [List.zip_append hlen_de, List.zip_append hlen_denz,
-                            List.mem_append] at h_front
-                        simp only [List.zip_cons_cons, List.zip_nil_right, List.mem_cons,
-                                   List.mem_nil_iff, or_false, Prod.mk.injEq] at h_front
-                        rcases h_front with h1 | ⟨⟨rfl, rfl⟩, rfl⟩
-                        · exact hfreshDone b e nw h1
-                        · exact hfreshNew
-                      · exact hfreshTail b e nw h_back
-                    -- Monotonicity of worldOf' for edges'
-                    have hmono_new : MonotoneEdges worldOf' edges' := by
-                      rcases hnE : newEdge with _ | ⟨c, p⟩
-                      · -- None: edges' = edgesP; worldOf' agrees with wo on edgesP
-                        rw [show edges' = edgesP from by simp [hedges'_def, hnE]]
-                        exact monotoneEdges_of_agree wo worldOf' edgesP nwH
-                            hfreshAbove_pers.2 hagree hmono_p
-                      · -- Some (c, p): edges' = edgesP ++ [(c, p)]
-                        rw [hnE] at hresult_sf
-                        obtain ⟨he_val, _, _⟩ :=
-                          intApplyRuleFull_some_info sf nwH bPers newForms nw' (c, p)
-                            hresult_sf
-                        simp only [Prod.mk.injEq] at he_val
-                        obtain ⟨hc, hp⟩ := he_val
-                        subst hc; subst hp
-                        -- hord reduces to wo sf.label ≤ worldOf' c
-                        simp only [hnE] at hord
-                        rw [show edges' = edgesP ++ [(c, sf.label)] from
-                            by simp [hedges'_def, hnE]]
-                        -- worldOf' = Function.update wo c (worldOf' c) by hagree
-                        have hwo'_eq : worldOf' = Function.update wo c (worldOf' c) := by
-                          funext k
-                          by_cases hk : k = c
-                          · subst hk; simp
-                          · rw [Function.update_of_ne hk, hagree k hk]
-                        rw [hwo'_eq]
-                        exact monotoneEdges_update wo edgesP c sf.label (worldOf' c)
-                            (fun par h =>
-                              absurd (hfreshAbove_pers.2 c par h).1 (Nat.lt_irrefl _))
-                            (fun ch h =>
-                              absurd (hfreshAbove_pers.2 ch c h).2 (Nat.lt_irrefl _))
-                            (Nat.ne_of_lt (hfreshAbove_pers.1 sf hsf_mem))
-                            hmono_p hord
-                    -- Apply ih to get contradiction from hsat_new
-                    refine absurd hsat_new
-                        (ih _ _ _ _ (by simp [hdlength_exp, hlength_exp])
-                          (by simp [hdlength_nw, hlength_nw])
-                          (by simp [hdlength_edges, hlength_edges])
-                          hfreshCombLin hgo (Branch.extendMany bPers newForms) edges' ?_
-                          worldOf' hmono_new)
-                    rw [List.zip_append (by simp [hdlength_edges]), List.mem_append]
-                    apply Or.inl
-                    rw [List.zip_append (by omega : done.length = doneEdges.length),
-                        List.mem_append]
-                    exact Or.inr (by simp)
+                        have hfreshNew : FreshAbove (Branch.extendMany bPers newForms)
+                            (edgesP ++ [e_val]) nw' := by
+                          rw [he, hnw'eq]
+                          exact freshAbove_world_create bPers edgesP nwH sf.label newForms
+                            hfreshAbove_pers (hfreshAbove_pers.1 sf hsf_mem)
+                            (fun sf' h' => Nat.le_of_eq (hlabels sf' h'))
+                        have hfreshCombLin : ∀ b e nw,
+                            ((b, e), nw) ∈ ((done ++ [Branch.extendMany bPers newForms] ++ bt).zip
+                                            (doneEdges ++ [edgesP ++ [e_val]] ++ edgesT)).zip
+                                           (doneNW ++ [nw'] ++ nwT) → FreshAbove b e nw := by
+                          intro b e nw hmem
+                          have hlen1 : (done ++ [Branch.extendMany bPers newForms]).length =
+                                       (doneEdges ++ [edgesP ++ [e_val]]).length := by simp; omega
+                          have hlen2 : (done ++ [Branch.extendMany bPers newForms]).length =
+                                       (doneNW ++ [nw']).length := by simp; omega
+                          rw [List.zip_append hlen1] at hmem
+                          have hlen2_adj :
+                              ((done ++ [Branch.extendMany bPers newForms]).zip
+                               (doneEdges ++ [edgesP ++ [e_val]])).length =
+                               (doneNW ++ [nw']).length := by
+                            rw [List.length_zip,
+                                Nat.min_eq_left (Nat.le_of_eq hlen1)]; exact hlen2
+                          rw [List.zip_append hlen2_adj, List.mem_append] at hmem
+                          rcases hmem with h_front | h_back
+                          · have hlen_de : done.length = doneEdges.length := by omega
+                            have hlen_denz : (done.zip doneEdges).length = doneNW.length := by
+                              rw [List.length_zip]
+                              exact (Nat.min_eq_left (by omega)).trans (by omega)
+                            rw [List.zip_append hlen_de, List.zip_append hlen_denz,
+                                List.mem_append] at h_front
+                            simp only [List.zip_cons_cons, List.zip_nil_right, List.mem_cons,
+                                       List.mem_nil_iff, or_false, Prod.mk.injEq] at h_front
+                            rcases h_front with h1 | ⟨⟨rfl, rfl⟩, rfl⟩
+                            · exact hfreshDone b e nw h1
+                            · exact hfreshNew
+                          · exact hfreshTail b e nw h_back
+                        have hmono_new : MonotoneEdges worldOf' (edgesP ++ [e_val]) := by
+                          rw [he]
+                          simp only [hnE, he] at hord
+                          have hwo'_eq : worldOf' = Function.update wo nwH (worldOf' nwH) := by
+                            funext k
+                            by_cases hk : k = nwH
+                            · subst hk; simp
+                            · rw [Function.update_of_ne hk, hagree k hk]
+                          rw [hwo'_eq]
+                          exact monotoneEdges_update wo edgesP nwH sf.label (worldOf' nwH)
+                              (fun par h =>
+                                absurd (hfreshAbove_pers.2 nwH par h).1 (Nat.lt_irrefl _))
+                              (fun ch h =>
+                                absurd (hfreshAbove_pers.2 ch nwH h).2 (Nat.lt_irrefl _))
+                              (Nat.ne_of_lt (hfreshAbove_pers.1 sf hsf_mem))
+                              hmono_p hord
+                        refine absurd hsat_new
+                            (ih _ _ _ _ (by simp [hdlength_exp, hlength_exp])
+                              (by simp [hdlength_nw, hlength_nw])
+                              (by simp [hdlength_edges, hlength_edges])
+                              hfreshCombLin hgo (Branch.extendMany bPers newForms)
+                              (edgesP ++ [e_val]) ?_ worldOf' hmono_new)
+                        rw [List.zip_append (by simp [hdlength_edges]), List.mem_append]
+                        apply Or.inl
+                        rw [List.zip_append (by omega : done.length = doneEdges.length),
+                            List.mem_append]
+                        exact Or.inr (by simp)
+                      · -- Reuse: an accessible ancestor already contains Sfor(w') and lacks ψ,
+                        -- so F(φ → ψ)@w is discharged without creating w'. Task 317 phase 4 fix:
+                        -- the branch is literally `bPers` (unchanged), so the IH applies directly
+                        -- to `bPers` itself — no new world/edge, no `intRule_preserves_sat`
+                        -- machinery needed, since `hsat_pers` already witnesses satisfaction of
+                        -- exactly the branch the recursive call receives.
+                        rw [hwit] at hgo
+                        simp only [] at hgo
+                        have hsat_pers : intBranchSatisfied val botForces wo bPers :=
+                          applyPersistenceFixpoint_sat val botForces v_uc bf_uc wo bh edgesP
+                            (fuel'' + 1) hsat_p hmono_p
+                        have hfreshCombReuse : ∀ b e nw,
+                            ((b, e), nw) ∈ ((done ++ [bPers] ++ bt).zip
+                                            (doneEdges ++ [edgesP] ++ edgesT)).zip
+                                           (doneNW ++ [nwH] ++ nwT) → FreshAbove b e nw := by
+                          intro b e nw hmem
+                          have hlen1 : (done ++ [bPers]).length =
+                                       (doneEdges ++ [edgesP]).length := by simp; omega
+                          have hlen2 : (done ++ [bPers]).length =
+                                       (doneNW ++ [nwH]).length := by simp; omega
+                          rw [List.zip_append hlen1] at hmem
+                          have hlen2_adj :
+                              ((done ++ [bPers]).zip (doneEdges ++ [edgesP])).length =
+                               (doneNW ++ [nwH]).length := by
+                            rw [List.length_zip,
+                                Nat.min_eq_left (Nat.le_of_eq hlen1)]; exact hlen2
+                          rw [List.zip_append hlen2_adj, List.mem_append] at hmem
+                          rcases hmem with h_front | h_back
+                          · have hlen_de : done.length = doneEdges.length := by omega
+                            have hlen_denz : (done.zip doneEdges).length = doneNW.length := by
+                              rw [List.length_zip]
+                              exact (Nat.min_eq_left (by omega)).trans (by omega)
+                            rw [List.zip_append hlen_de, List.zip_append hlen_denz,
+                                List.mem_append] at h_front
+                            simp only [List.zip_cons_cons, List.zip_nil_right, List.mem_cons,
+                                       List.mem_nil_iff, or_false, Prod.mk.injEq] at h_front
+                            rcases h_front with h1 | ⟨⟨rfl, rfl⟩, rfl⟩
+                            · exact hfreshDone b e nw h1
+                            · exact hfreshAbove_pers
+                          · exact hfreshTail b e nw h_back
+                        refine absurd hsat_pers
+                            (ih _ _ _ _ (by simp [hdlength_exp, hlength_exp])
+                              (by simp [hdlength_nw, hlength_nw])
+                              (by simp [hdlength_edges, hlength_edges])
+                              hfreshCombReuse hgo bPers edgesP ?_ wo hmono_p)
+                        rw [List.zip_append (by simp [hdlength_edges]), List.mem_append]
+                        apply Or.inl
+                        rw [List.zip_append (by omega : done.length = doneEdges.length),
+                            List.mem_append]
+                        exact Or.inr (by simp)
                   · -- linearResult bp∈bt case: bp is in the tail bt with edges edgesT;
                     -- after expanding, bp is still in the new branch list at the same position.
-                    simp only [] at hgo
-                    -- Build freshness for done ++ [extendMany bPers newForms] ++ bt
-                    have hfreshNew : FreshAbove (Branch.extendMany bPers newForms) edges' nw' := by
-                      rcases hnE : newEdge with _ | e_val
-                      · rw [hnE] at hresult_sf
-                        have hnw'eq :=
-                          intApplyRuleFull_none_nw sf nwH bPers newForms nw' hresult_sf
-                        have hlabels :=
-                          intApplyRuleFull_none_labels sf nwH bPers newForms nw' hresult_sf
-                        rw [show edges' = edgesH from by simp [hedges'_def, hnE], hnw'eq]
+                    rcases hnE : newEdge with _ | e_val
+                    · -- Alpha-rule: newEdge = none (unchanged from pre-dedup proof)
+                      rw [hnE] at hgo hresult_sf
+                      simp only [] at hgo
+                      have hnw'eq := intApplyRuleFull_none_nw sf nwH bPers newForms nw' hresult_sf
+                      have hlabels :=
+                        intApplyRuleFull_none_labels sf nwH bPers newForms nw' hresult_sf
+                      have hfreshNew : FreshAbove (Branch.extendMany bPers newForms) edgesH nw' := by
+                        rw [hnw'eq]
                         exact freshAbove_extendMany bPers edgesH nwH newForms hfreshAbove_pers
                           (fun sf' h' => hlabels sf' h' ▸ hfreshAbove_pers.1 sf hsf_mem)
-                      · rw [hnE] at hresult_sf
+                      have hfreshCombLin : ∀ b e nw,
+                          ((b, e), nw) ∈ ((done ++ [Branch.extendMany bPers newForms] ++ bt).zip
+                                          (doneEdges ++ [edgesH] ++ edgesT)).zip
+                                         (doneNW ++ [nw'] ++ nwT) → FreshAbove b e nw := by
+                        intro b e nw hmem
+                        have hlen1 : (done ++ [Branch.extendMany bPers newForms]).length =
+                                     (doneEdges ++ [edgesH]).length := by simp; omega
+                        have hlen2 : (done ++ [Branch.extendMany bPers newForms]).length =
+                                     (doneNW ++ [nw']).length := by simp; omega
+                        rw [List.zip_append hlen1] at hmem
+                        have hlen2_adj :
+                            ((done ++ [Branch.extendMany bPers newForms]).zip
+                             (doneEdges ++ [edgesH])).length =
+                             (doneNW ++ [nw']).length := by
+                          rw [List.length_zip,
+                              Nat.min_eq_left (Nat.le_of_eq hlen1)]; exact hlen2
+                        rw [List.zip_append hlen2_adj, List.mem_append] at hmem
+                        rcases hmem with h_front | h_back
+                        · have hlen_de : done.length = doneEdges.length := by omega
+                          have hlen_denz : (done.zip doneEdges).length = doneNW.length := by
+                            rw [List.length_zip]
+                            exact (Nat.min_eq_left (by omega)).trans (by omega)
+                          rw [List.zip_append hlen_de, List.zip_append hlen_denz,
+                              List.mem_append] at h_front
+                          simp only [List.zip_cons_cons, List.zip_nil_right, List.mem_cons,
+                                     List.mem_nil_iff, or_false, Prod.mk.injEq] at h_front
+                          rcases h_front with h1 | ⟨⟨rfl, rfl⟩, rfl⟩
+                          · exact hfreshDone b e nw h1
+                          · exact hfreshNew
+                        · exact hfreshTail b e nw h_back
+                      refine ih _ _ _ _ (by simp [hdlength_exp, hlength_exp])
+                          (by simp [hdlength_nw, hlength_nw])
+                          (by simp [hdlength_edges, hlength_edges])
+                          hfreshCombLin hgo bp edgesP ?_ wo hmono_p hsat_p
+                      rw [List.zip_append (by simp [hdlength_edges]), List.mem_append]
+                      exact Or.inr hmem_rest
+                    · -- World-creating F(φ → ψ) rule: newEdge = some e_val.
+                      rw [hnE] at hgo hresult_sf
+                      simp only [] at hgo
+                      rcases hwit : intFImpReuseWitness? bPers edgesH newForms e_val with _ | x
+                      · -- No reusable ancestor: create w' exactly as pre-dedup.
+                        rw [hwit] at hgo
+                        simp only [] at hgo
                         obtain ⟨he, hnw'eq, hlabels⟩ :=
                           intApplyRuleFull_some_info sf nwH bPers newForms nw' e_val hresult_sf
-                        rw [show edges' = edgesH ++ [e_val] from by simp [hedges'_def, hnE],
-                            he, hnw'eq]
-                        exact freshAbove_world_create bPers edgesH nwH sf.label newForms
-                          hfreshAbove_pers (hfreshAbove_pers.1 sf hsf_mem)
-                          (fun sf' h' => Nat.le_of_eq (hlabels sf' h'))
-                    have hfreshCombLin : ∀ b e nw,
-                        ((b, e), nw) ∈ ((done ++ [Branch.extendMany bPers newForms] ++ bt).zip
-                                        (doneEdges ++ [edges'] ++ edgesT)).zip
-                                       (doneNW ++ [nw'] ++ nwT) → FreshAbove b e nw := by
-                      intro b e nw hmem
-                      have hlen1 : (done ++ [Branch.extendMany bPers newForms]).length =
-                                   (doneEdges ++ [edges']).length := by simp; omega
-                      have hlen2 : (done ++ [Branch.extendMany bPers newForms]).length =
-                                   (doneNW ++ [nw']).length := by simp; omega
-                      rw [List.zip_append hlen1] at hmem
-                      have hlen2_adj :
-                          ((done ++ [Branch.extendMany bPers newForms]).zip
-                           (doneEdges ++ [edges'])).length =
-                           (doneNW ++ [nw']).length := by
-                        rw [List.length_zip,
-                            Nat.min_eq_left (Nat.le_of_eq hlen1)]; exact hlen2
-                      rw [List.zip_append hlen2_adj, List.mem_append] at hmem
-                      rcases hmem with h_front | h_back
-                      · have hlen_de : done.length = doneEdges.length := by omega
-                        have hlen_denz : (done.zip doneEdges).length = doneNW.length := by
-                          rw [List.length_zip]
-                          exact (Nat.min_eq_left (by omega)).trans (by omega)
-                        rw [List.zip_append hlen_de, List.zip_append hlen_denz,
-                            List.mem_append] at h_front
-                        simp only [List.zip_cons_cons, List.zip_nil_right, List.mem_cons,
-                                   List.mem_nil_iff, or_false, Prod.mk.injEq] at h_front
-                        rcases h_front with h1 | ⟨⟨rfl, rfl⟩, rfl⟩
-                        · exact hfreshDone b e nw h1
-                        · exact hfreshNew
-                      · exact hfreshTail b e nw h_back
-                    refine ih _ _ _ _ (by simp [hdlength_exp, hlength_exp])
-                        (by simp [hdlength_nw, hlength_nw])
-                        (by simp [hdlength_edges, hlength_edges])
-                        hfreshCombLin hgo bp edgesP ?_ wo hmono_p hsat_p
-                    rw [List.zip_append (by simp [hdlength_edges]), List.mem_append]
-                    exact Or.inr hmem_rest
+                        have hfreshNew : FreshAbove (Branch.extendMany bPers newForms)
+                            (edgesH ++ [e_val]) nw' := by
+                          rw [he, hnw'eq]
+                          exact freshAbove_world_create bPers edgesH nwH sf.label newForms
+                            hfreshAbove_pers (hfreshAbove_pers.1 sf hsf_mem)
+                            (fun sf' h' => Nat.le_of_eq (hlabels sf' h'))
+                        have hfreshCombLin : ∀ b e nw,
+                            ((b, e), nw) ∈ ((done ++ [Branch.extendMany bPers newForms] ++ bt).zip
+                                            (doneEdges ++ [edgesH ++ [e_val]] ++ edgesT)).zip
+                                           (doneNW ++ [nw'] ++ nwT) → FreshAbove b e nw := by
+                          intro b e nw hmem
+                          have hlen1 : (done ++ [Branch.extendMany bPers newForms]).length =
+                                       (doneEdges ++ [edgesH ++ [e_val]]).length := by simp; omega
+                          have hlen2 : (done ++ [Branch.extendMany bPers newForms]).length =
+                                       (doneNW ++ [nw']).length := by simp; omega
+                          rw [List.zip_append hlen1] at hmem
+                          have hlen2_adj :
+                              ((done ++ [Branch.extendMany bPers newForms]).zip
+                               (doneEdges ++ [edgesH ++ [e_val]])).length =
+                               (doneNW ++ [nw']).length := by
+                            rw [List.length_zip,
+                                Nat.min_eq_left (Nat.le_of_eq hlen1)]; exact hlen2
+                          rw [List.zip_append hlen2_adj, List.mem_append] at hmem
+                          rcases hmem with h_front | h_back
+                          · have hlen_de : done.length = doneEdges.length := by omega
+                            have hlen_denz : (done.zip doneEdges).length = doneNW.length := by
+                              rw [List.length_zip]
+                              exact (Nat.min_eq_left (by omega)).trans (by omega)
+                            rw [List.zip_append hlen_de, List.zip_append hlen_denz,
+                                List.mem_append] at h_front
+                            simp only [List.zip_cons_cons, List.zip_nil_right, List.mem_cons,
+                                       List.mem_nil_iff, or_false, Prod.mk.injEq] at h_front
+                            rcases h_front with h1 | ⟨⟨rfl, rfl⟩, rfl⟩
+                            · exact hfreshDone b e nw h1
+                            · exact hfreshNew
+                          · exact hfreshTail b e nw h_back
+                        refine ih _ _ _ _ (by simp [hdlength_exp, hlength_exp])
+                            (by simp [hdlength_nw, hlength_nw])
+                            (by simp [hdlength_edges, hlength_edges])
+                            hfreshCombLin hgo bp edgesP ?_ wo hmono_p hsat_p
+                        rw [List.zip_append (by simp [hdlength_edges]), List.mem_append]
+                        exact Or.inr hmem_rest
+                      · -- Reuse: F(φ → ψ)@w discharged without creating w'. Task 317 phase 4:
+                        -- `bp` is unaffected (lives in `bt`), so this is the same shape as the
+                        -- `none`/`create` bp∈bt cases above, just carrying `bPers`/`edgesH`/`nwH`
+                        -- through unchanged instead of an extended branch.
+                        rw [hwit] at hgo
+                        simp only [] at hgo
+                        have hfreshCombReuse : ∀ b e nw,
+                            ((b, e), nw) ∈ ((done ++ [bPers] ++ bt).zip
+                                            (doneEdges ++ [edgesH] ++ edgesT)).zip
+                                           (doneNW ++ [nwH] ++ nwT) → FreshAbove b e nw := by
+                          intro b e nw hmem
+                          have hlen1 : (done ++ [bPers]).length =
+                                       (doneEdges ++ [edgesH]).length := by simp; omega
+                          have hlen2 : (done ++ [bPers]).length =
+                                       (doneNW ++ [nwH]).length := by simp; omega
+                          rw [List.zip_append hlen1] at hmem
+                          have hlen2_adj :
+                              ((done ++ [bPers]).zip (doneEdges ++ [edgesH])).length =
+                               (doneNW ++ [nwH]).length := by
+                            rw [List.length_zip,
+                                Nat.min_eq_left (Nat.le_of_eq hlen1)]; exact hlen2
+                          rw [List.zip_append hlen2_adj, List.mem_append] at hmem
+                          rcases hmem with h_front | h_back
+                          · have hlen_de : done.length = doneEdges.length := by omega
+                            have hlen_denz : (done.zip doneEdges).length = doneNW.length := by
+                              rw [List.length_zip]
+                              exact (Nat.min_eq_left (by omega)).trans (by omega)
+                            rw [List.zip_append hlen_de, List.zip_append hlen_denz,
+                                List.mem_append] at h_front
+                            simp only [List.zip_cons_cons, List.zip_nil_right, List.mem_cons,
+                                       List.mem_nil_iff, or_false, Prod.mk.injEq] at h_front
+                            rcases h_front with h1 | ⟨⟨rfl, rfl⟩, rfl⟩
+                            · exact hfreshDone b e nw h1
+                            · exact hfreshAbove_pers
+                          · exact hfreshTail b e nw h_back
+                        refine ih _ _ _ _ (by simp [hdlength_exp, hlength_exp])
+                            (by simp [hdlength_nw, hlength_nw])
+                            (by simp [hdlength_edges, hlength_edges])
+                            hfreshCombReuse hgo bp edgesP ?_ wo hmono_p hsat_p
+                        rw [List.zip_append (by simp [hdlength_edges]), List.mem_append]
+                        exact Or.inr hmem_rest
                 | branchingResult branches' nw' =>
                   rw [hresult] at hgo hstep hresult_sf
                   -- Freshness: all labels in bPers are < nwH, hence ≠ nwH

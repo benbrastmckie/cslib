@@ -1624,6 +1624,44 @@ lemma outDeg_le_of_expandedNodup
     · simp at hxeq
   exact (List.subperm_of_subset hfmnodup hsub).length_le
 
+
+/-! ## Potential Function Φ (Phase 2 continuation, obligation d — DEFINITIONS ONLY)
+
+The scalar potential offsetting `modalMaxWorld`'s growth. **Design correction discovered
+during formalization** (documented here for the next dispatch): the naive per-world term
+`(Sf − outDeg acc w) * modalCap Sf (rank w − 1)` is WRONG at a rank-0 ("leaf") world, because
+`Nat`'s truncated subtraction silently turns `rank w − 1` into `0` when `rank w = 0`, giving
+`modalCap Sf 0 = 1` and a spurious nonzero term `Sf * 1 = Sf` instead of the mathematically
+correct `0` (a leaf has no remaining capacity to contribute). This breaks the hand-verified
+"exact Δ = 0" step lemma in the `rank = 1`-child (i.e. `rank = 0`) sub-case: hand-tracing the
+mint step shows `Δ(maxWorld) + Δ(Φ) = 1 + (Sf − 1) = Sf ≠ 0` with the naive term, vs.
+`1 + (−1) = 0` with the corrected piecewise term below. The `rank ≥ 2` sub-case is unaffected
+either way (both formulas agree there) and closes via `modalCap_mul_eq_succ_sub_one`. -/
+
+/-- The per-world potential term, corrected for the `rank = 0` (leaf) boundary case: `0` when
+`w` has no remaining rank budget (a leaf can mint no further worlds), otherwise
+`(Sf − outDeg acc w) * modalCap Sf (rank w − 1)` (remaining successor slots times the capacity
+each could still spawn). See the section doc comment for why the `rank = 0` case must be `0`
+rather than the naive formula's Nat-truncation artifact. -/
+def modalPotentialTerm (Sf : Nat) (acc : Accessibility) (rank : WorldIndex → Nat)
+    (w : WorldIndex) : Nat :=
+  if rank w = 0 then 0 else (Sf - outDeg acc w) * modalCap Sf (rank w - 1)
+
+/-- The scalar potential `Φ := Σ_{w ∈ modalKnownWorlds b} modalPotentialTerm Sf acc rank w`,
+summing over the branch's distinct known world labels (`modalKnownWorlds`, `Branch.lean:87-89`).
+-/
+def modalPotential (Sf : Nat) (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (rank : WorldIndex → Nat) : Nat :=
+  ((modalKnownWorlds b).map (modalPotentialTerm Sf acc rank)).sum
+
+/-- The key arithmetic identity closing the mint-step potential-drop computation (the `rank ≥ 2`
+sub-case, and — via `modalCap_zero`, `Sf * 1 = Sf * modalCap Sf 0 = modalCap Sf 1 - 1` — also
+usable as the base case): `Sf * modalCap Sf k = modalCap Sf (k+1) - 1`, an immediate unfold of
+`modalCap`'s defining recursion. -/
+lemma modalCap_mul_eq_succ_sub_one (Sf k : Nat) :
+    Sf * modalCap Sf k = modalCap Sf (k + 1) - 1 := by
+  rw [modalCap_succ]; omega
+
 end Cslib.Logic.Modal.Tableau
 
 end

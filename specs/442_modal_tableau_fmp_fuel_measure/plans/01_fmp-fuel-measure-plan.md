@@ -335,7 +335,21 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
 >   broken the exact-equality invariant, since it fires via a non-edge-creating prop rule).
 >   Same overall `outDeg ≤ Sf` bound, no bound weakened, no sorry/axiom added. Commit
 >   (task 442 phase 2c).
-> - [ ] **P2-obl-d** `Φ`-potential single-step `Δ=0` lemma (formalize the hand-verified arithmetic; recurrence `Sf·modalCap Sf k = modalCap Sf (k+1)−1`).
+> - [~] **P2-obl-d** PARTIAL: `modalPotentialTerm`, `modalPotential`, and
+>   `modalCap_mul_eq_succ_sub_one` (the recurrence identity) landed in `FmpMeasure.lean`
+>   (definitions + one closed numeric lemma, sorry-free, green). **Design correction found and
+>   fixed** (documented in the section doc comment): the naive term
+>   `(Sf−outDeg w)·modalCap Sf(rank w−1)` is WRONG at a rank-0 leaf world — `Nat` truncated
+>   subtraction silently turns `rank w−1` into `0`, giving a spurious nonzero term `Sf` instead
+>   of `0`, which would break the hand-verified "exact Δ=0" claim specifically in the
+>   `rank=1`-parent/`rank=0`-child mint sub-case (hand-traced: naive gives net Δ=`Sf≠0`, fixed
+>   piecewise term gives net Δ=`0`, matching the design). `modalPotentialTerm` now returns `0`
+>   when `rank w = 0`. **Remaining for this obligation**: the single-step lemma itself
+>   (`modalStepBranch`-preserves `modalMaxWorld b + modalPotential Sf b acc rank` exactly,
+>   composing P2-obl-b's `rank'` and P2-obl-c's `outDegEq` — needs an additional
+>   `modalKnownWorlds`-under-`modalStepBranch` lemma: unchanged for non-mint steps, prepends
+>   `modalNextWorld b` for the one mint step). Estimated 150-250 more lines, same case-split
+>   shape as (a)-(c). Commit (task 442 phase 2d partial).
 > - [ ] **P2-obl-e** final composition → world bound `modalMaxWorld b' < modalWorldBound φ0` under the strengthened rank/outDeg-carrying signature, from (a)–(d) + `modalCap_le_pow` + `modalSubfmls_length_le` + `modalDepth_le_complexity`.
 >
 > **Done = green (revised):** `lake build …FmpMeasure` succeeds; the strengthened world-bound lemma

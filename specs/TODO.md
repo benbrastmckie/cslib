@@ -11,7 +11,7 @@ next_project_number: 464
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,396,400,404,407,425,438,440,441,447,449,452,453,457,458,459,460,461,463 | -- | Foundations, Propositional Logic, Modal Logic, ... |
+| 1 | 36,37,181,226,300,317,396,400,404,407,425,438,440,441,447,449,453,457,458,459,460,461,463 | -- | Propositional Logic, Modal Logic, Temporal Logic, ... |
 | 2 | 39,40,215,301,375,389,405,409,430,450,451,456,462 | 36,37,181,317,404,407,425,449,457,459 | Propositional Logic, Modal Logic, Temporal Logic, ... |
 | 3 | 41,391,392,413,444,454 | 39,40,375,389,450 | Foundations, Bimodal Logic, Code Hygiene |
 | 4 | 393,412,414 | 41,215,300,301,391,444 | Code Hygiene |
@@ -20,7 +20,6 @@ next_project_number: 464
 
 ### Foundations
 
-452 [IMPLEMENTING] — From review 2026-07-01-2 (HIGH). The four GenericMCSBridge.lean f
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Propositional Logic
@@ -206,7 +205,7 @@ next_project_number: 464
 ---
 
 ### 452. Generalize GenericMCSBridge: hoist shared MCS-bridge trio into Foundations and collapse base/Fc duplication
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None

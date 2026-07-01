@@ -1,7 +1,7 @@
 # Implementation Plan: Generalize GenericMCSBridge — hoist the shared MCS-bridge trio into Foundations
 
 - **Task**: 452 - Generalize GenericMCSBridge: hoist shared MCS-bridge trio into Foundations and collapse base/Fc duplication
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 8 hours (7 hours excluding the optional Phase 6)
 - **Dependencies**: None (task-level). Coordinate ordering with 441 (Modal native refactor) and 449-451 (BX+); see Risks.
 - **Research Inputs**: reports/01_generalize-genericmcsbridge.md

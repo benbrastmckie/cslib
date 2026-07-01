@@ -122,6 +122,8 @@ Propositional/
 │   └── LK/                      -- Classical sequent calculus
 │       └── Basic, Soundness, Completeness, CutFreeCompleteness,
 │           CutElimination, SubformulaProperty, Interpolation, Decidability
+├── CurryHoward/               -- Curry-Howard correspondence (proofs-as-programs)
+│   └── Defs.lean, Isomorphism.lean, Reduction.lean
 ├── Tableau/                    -- Tableau decision procedures
 │   ├── Defs.lean
 │   ├── Classical/              -- Expansion, Soundness, Completeness, DecisionProcedure

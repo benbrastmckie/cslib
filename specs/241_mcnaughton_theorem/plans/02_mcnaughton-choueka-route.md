@@ -332,22 +332,104 @@ prevention), names are lowerCamelCase, no new axioms (`lean_verify`), and the fi
 imports are unchanged from the version that already passed `checkInitImports` at commit
 `068f91cf`.
 
-### Phase 3: `omegaPow_da_muller` — `Mᵒᵐᵉᵍᵃ` is DMA-recognizable [NOT STARTED]
+### Phase 3: `omegaPow_da_muller` — `Mᵒᵐᵉᵍᵃ` is DMA-recognizable [PARTIAL]
 
 - **Goal:** Prove that for a regular language `M`, the ω-power `M^ω` is recognized by a
   finite-state DMA: `(M.IsRegular) → ∃ (S) (_ : Finite S) (da : DA.Muller S Symbol), language da = M^ω`
   (or the exact shape the assembly consumes).
 - **Tasks:**
-  - [ ] Per Phase 1's DAG decision, either (a) prove the Choueka identity
+  - [x] Per Phase 1's DAG decision route (a): prove the Choueka identity
     `M^ω = M* · U↗ᵒᵐᵉᵍᵃ` (NEW sub-lemma, regular `U`) and combine `regular_omegaLim` /
-    `omegaLim_da_muller` (base case, already green) with `concat_language_eq` (Phase 2); or
-    (b) build the omega-iteration DMA directly via the `DA.concat` flag construction.
-  - [ ] Discharge `Finite` of the resulting state space.
-  - [ ] `lean_goal` / `lean_multi_attempt` throughout.
-- **Timing:** 3 hours
+    `omegaLim_da_muller` (base case, already green) with `concat_language_eq` (Phase 2).
+    *(deviation: split into 3 milestones, only the first 2 landed this dispatch — see below)*
+  - [ ] Discharge `Finite` of the resulting state space. *(deferred: blocked on the identity
+    theorem below)*
+  - [x] `lean_goal` / `lean_multi_attempt` throughout (used via lean-lsp MCP during the
+    milestones that landed).
+
+**Milestone 1/3 (COMPLETED, committed `11807051`)**: New file
+`Cslib/Computability/Automata/DA/Choueka.lean` — `DA.chouekaLang` (the Choueka language of a
+`DA`/accept-set pair, ported from `ctchou/AutomataTheory`'s `ChouekaLemma.lean`) and
+`DA.chouekaLang_regular` (regularity, via an algebraic decomposition
+`chouekaLang = ⨆ s ∈ acc, chouekaA s * (chouekaB s ⊓ (chouekaB s * 1ᶜ)ᶜ)` into finitary
+regular-language operations). Scoped build green, sorry-free, standard axioms only.
+
+**Milestone 2/3 (COMPLETED, committed `602293de`)**: Added `greater_subseq` (interleaving
+lemma for a strictly monotone/injective pair of breakpoint sequences) and
+`DA.chouekaLang_omega_limit_subset_omega_power` — the *easier* inclusion of the Choueka
+identity: `(chouekaLang da acc)↗ω ⊆ (language (FinAcc.mk da acc))^ω`, requiring no finiteness
+of `State`. Uses CSLib's `ωSequence.frequently_iff_strictMono`, `omegaPow_seq_prop`,
+`take_extract`/`drop_extract`/`length_extract`/`append_extract_extract`. Scoped build green,
+sorry-free, standard axioms only.
+
+**Milestone 3/3 (NOT STARTED — this is the remaining blocker)**: The harder, Ramsey-based
+reverse inclusion `DA.chouekaLang_omega_power_subset_omega_limit` was **not** attempted this
+dispatch (assessed as comparably deep to Phase 2's ~20-lemma proof, and riskier to rush within
+one dispatch than to hand off precisely). Exact target statement and proof route (fully worked
+out, ready to transcribe — mirrors `ctchou/AutomataTheory`'s
+`choueka_lang_omega_power_subset_omega_limit`, cross-referenced against CSLib's own
+`buchiCongr_DMA_accept_mem`/`buchiFamily_cover` Ramsey idiom in `OmegaRegularLanguage.lean`
+and `BuchiCongruence.lean`, which already use `infinite_graph_ramsey` on a `Finset ℕ`-indexed
+`min'`/`max'` coloring — the exact pattern needed here):
+
+```lean
+theorem chouekaLang_omega_power_subset_omega_limit [Inhabited Symbol] [Finite State]
+    (da : DA State Symbol) (acc : Set State) {l : Language Symbol}
+    (h_lang : language (FinAcc.mk da acc) = l∗) :
+    l^ω ⊆ l∗ * (chouekaLang da acc)↗ω
+```
+
+Proof route (steps 1-4 are mechanical/short; step 5 is the deep part):
+1. `rw [omegaPow_seq_prop] ; rintro xs ⟨φ, h_φ_mono, h_φ_0, h_φ_l⟩` — destructure `xs ∈ l^ω`.
+2. `h_kstar : ∀ i n, xs.extract (φ i) (φ (i + n)) ∈ l∗` by induction on `n`: base case
+   `Language.nil_mem_kstar`; step case via `append_extract_extract` (already imported) +
+   `KleeneAlgebra.kstar_mul_le_kstar l : l∗ * l ≤ l∗` (Mathlib, confirmed to exist) applied to
+   `Language.mem_mul.mpr ⟨_, ih, _, h_φ_l (i+n), rfl⟩`.
+3. `color i j := da.mtr da.start (xs.extract i j) : State` ; `h_color : ∀ i j, i < j →
+   color (φ i) (φ j) ∈ acc` via `h_kstar i (j-i)` (rewrite `i+(j-i)=j`) then `rw [← h_lang]`
+   (turns `∈ l∗` into `∈ language (FinAcc.mk da acc)`, defeq to `∈ acc` via `Acceptor.Accepts`).
+4. Ramsey step: `colIdx (t : Finset ℕ) := if h : t.Nonempty then
+   color (φ (t.min' h)) (φ (t.max' h)) else color (φ 0) (φ 0)` ; `infinite_graph_ramsey colIdx`
+   gives `⟨b, ns, h_ns, h_colIdx⟩` ; `strictMono_of_infinite h_ns` gives `⟨σ, h_σ_mono, rfl⟩`
+   (`range σ = ns`). Derive `hcol : ∀ i j, i < j → color (φ (σ i)) (φ (σ j)) = b` by **copying
+   the `hcol` block of `buchiCongr_DMA_accept_mem`** (`OmegaRegularLanguage.lean:456-474`)
+   verbatim, substituting `φ ∘ σ` for its `f` and `color` for its `⟦xs.extract · ·⟧` (same
+   `Finset.card_pair`/`Finset.min'_pair`/`Finset.max'_pair`/`min_eq_left`/`max_eq_right` steps).
+   Then `hb_acc : b ∈ acc` via `h_color (σ 0) (σ 1) (h_σ_mono (by omega))` rewritten by
+   `hcol 0 1 (by omega)`.
+5. **The hard part** — construct the witness `⟨xs.extract 0 (φ (σ 0)), _, xs.drop (φ (σ 0)), _, append_extract_drop⟩`:
+   - First component `∈ l∗`: `h_kstar 0 (σ 0)` + `h_φ_0 : φ 0 = 0`.
+   - Second component `∈ (chouekaLang da acc)↗ω`: via `frequently_iff_strictMono`, witness
+     `g k := φ (σ (k+1)) - φ (σ 0)`, reducing (via `extract_drop`) to showing
+     `xs.extract (φ (σ 0)) (φ (σ (k+1))) ∈ chouekaLang da acc` for each `k`. This needs an
+     explicit breakpoint inside that window — port the reference's `Nat.find`-based
+     construction (`ξ k' := Nat.find (h_p_ex k')`, where `p k' j := φ (σ k') < j ∧
+     j ≤ φ (σ (k'+1)) ∧ da.mtr da.start (xs.extract (φ (σ k')) j) = da.mtr da.start
+     (xs.extract (φ (σ 0)) j)`, witnessed at `j := φ (σ (k'+1))` via `hcol k' (k'+1)` and
+     `hcol 0 (k'+1)` both `= b`) — this is
+     `AutomataTheory/Languages/ChouekaLemma.lean:187-212` (cached at
+     `/tmp/claude-1000/-home-benjamin-Projects-cslib-refactor-prop-logic/f23f339a-287d-446f-96b9-dad43b56c569/scratchpad/Languages_ChouekaLemma.lean`,
+     lines 181-212) — transcribe using `da.mtr`/`List.take`/`List.drop` in place of `M.RunOn`/
+     `extract`, following the same pattern as the `mtr_append`-based composition already used
+     throughout `Choueka.lean`'s Milestone 1/2 proofs.
+6. Once step 5 lands: `chouekaLang_omega_power_eq_omega_limit` (the full `=`, via
+   `Subset.antisymm` + `kstar_omegaPow_eq_omegaPow`/`kstar_hmul_omegaPow_eq_omegaPow`, both
+   **already in CSLib** at `OmegaLanguage.lean:443,449` — no new lemma needed here) is a
+   ~10-line assembly.
+7. Then `omegaPow_da_muller` in `OmegaRegularLanguage.lean`: given `l.IsRegular`, obtain
+   `dfa : DA.FinAcc State Symbol` with `language dfa = l∗` via
+   `Language.IsRegular.iff_dfa.mp (Language.IsRegular.kstar h)`; let
+   `U := chouekaLang dfa.toDA dfa.accept` (regular via `chouekaLang_regular`); obtain a DMA for
+   `U↗ω` via `IsRegular.omegaLim_da_muller` (already green); combine with the DFA for `l∗` via
+   `DA.concat_language_eq` (Phase 2, already green) to get a DMA for
+   `l∗ * U↗ω = l^ω` (via `chouekaLang_omega_power_eq_omega_limit`, step 6). `Finite` bookkeeping
+   threads through `Language.IsRegular.iff_dfa`'s existential and `omegaLim_da_muller`'s.
+
+**Timing:** 3 hours (original estimate for the whole phase; consumed on Milestones 1-2; the
+remaining Milestone 3 + assembly is estimated at 2-3 more hours, comparable to Phase 2's depth).
 - **Depends on:** 2
-- **Files to modify:** `Cslib/Computability/Languages/OmegaRegularLanguage.lean` (and/or a helper
-  in `DA/Concat.lean` if the identity is proved at the automaton level).
+- **Files to modify:** `Cslib/Computability/Automata/DA/Choueka.lean` (Milestone 3);
+  `Cslib/Computability/Languages/OmegaRegularLanguage.lean` (final `omegaPow_da_muller`, step 7).
 - **Proof obligations:** `language (assembled DMA) = M^ω`; `Finite` of the state space.
 - **Verification:** `lake build` green for touched modules; `lean_verify` clean on the new lemma.
   **If unclosable:** mark [BLOCKED] with goal state; no `sorry`.

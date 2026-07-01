@@ -1,21 +1,63 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "started_at": "2026-07-01T00:00:00Z",
+  "completed_at": "2026-07-01T00:30:00Z",
   "artifacts": [
-    {"type": "bib_entry", "path": "references.bib", "summary": "Added NegriVonPlato2001 @book entry"},
-    {"type": "lean_edit", "path": "Cslib/Logics/Propositional/Tableau/Minimal/Soundness.lean", "summary": "omit [Hashable Atom] in above minimalTableau_sound"},
-    {"type": "lean_edit", "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean", "summary": "omit [Hashable Atom] in above intStepBranch_result_ne_notApplicable"},
-    {"type": "lean_edit", "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean", "summary": "extended omit clause to [Hashable Atom] [DecidableEq Atom] above ILabelBound_extendMany"}
+    {
+      "type": "bib_entry",
+      "path": "references.bib",
+      "summary": "Added NegriVonPlato2001 @book entry (Negri & von Plato, Structural Proof Theory, CUP 2001); DOI verified live via WebFetch"
+    },
+    {
+      "type": "lean_edit",
+      "path": "Cslib/Logics/Propositional/Tableau/Minimal/Soundness.lean",
+      "summary": "omit [Hashable Atom] in above minimalTableau_sound"
+    },
+    {
+      "type": "lean_edit",
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+      "summary": "omit [Hashable Atom] in above intStepBranch_result_ne_notApplicable"
+    },
+    {
+      "type": "lean_edit",
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "summary": "extended omit [Hashable Atom] in to omit [Hashable Atom] [DecidableEq Atom] in above ILabelBound_extendMany"
+    },
+    {
+      "type": "summary",
+      "path": "specs/389_docstrings_headers_citations_propfound/summaries/01_docstrings-headers-citations-summary.md"
+    }
   ],
   "partial_progress": {
-    "stage": "phase_4_verification",
-    "details": "Phases 1-2 complete, Phase 3 abandoned (optional/droppable), running Phase 4 CI verification",
-    "phases_completed": 3
+    "stage": "done",
+    "phases_completed": 4,
+    "last_completed_phase": "Phase 4: CI verification and zero-debt check"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count_delta": 0,
+    "vacuous_count": 0,
+    "axiom_count_delta": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "notes": "Full lake build (3188 jobs) green; checkInitImports clean; lint-style clean; lake lint scoped to touched files clean; lake test no failures; mk_all no update necessary; lake shake shows pre-existing repo-wide import-hygiene debt unrelated to this task's edits (verified via stash comparison), out of scope for 389."
+  },
+  "phases": {
+    "1_references_bib": "completed",
+    "2_omit_clauses": "completed",
+    "3_fld_rename": "abandoned (optional/droppable per delegation scope)",
+    "4_ci_verification": "completed"
   },
   "metadata": {
     "session_id": "sess_1782924983_6bcecb_389",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
-  }
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  },
+  "next_steps": "Task 389 implementation complete. Deferred post-317 Minimal/Intuitionistic Completeness unusedSectionVars sweep remains a follow-up gated on task 317 landing (not blocking 389 completion).",
+  "memory_candidates": [
+    "omit [Instance] in must be placed BEFORE the docstring, not between the docstring and the theorem/lemma keyword -- placing it after the docstring causes 'unexpected token omit; expected lemma' parse error.",
+    "Only one omit ... in modifier is permitted immediately before a declaration; to omit multiple instances found live by the linter, widen the single omit clause's instance list rather than stacking separate omit clauses."
+  ]
 }

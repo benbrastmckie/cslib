@@ -10,6 +10,9 @@ import Cslib.Init
 import Mathlib.Tactic.Ring
 import Mathlib.Data.List.Nodup
 import Batteries.Data.List.Perm
+import Mathlib.Data.Finset.Dedup
+import Mathlib.Data.Finset.Lattice.Lemmas
+import Mathlib.Algebra.BigOperators.Group.List.Basic
 import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.SoundnessStep
 public import Cslib.Logics.Modal.Tableau.Saturation
@@ -1661,6 +1664,185 @@ usable as the base case): `Sf * modalCap Sf k = modalCap Sf (k+1) - 1`, an immed
 lemma modalCap_mul_eq_succ_sub_one (Sf k : Nat) :
     Sf * modalCap Sf k = modalCap Sf (k + 1) - 1 := by
   rw [modalCap_succ]; omega
+
+/-! ## Known-Worlds and Max-World Bookkeeping (Phase 2 continuation, obligation d — finish)
+
+General, `modalStepBranch`-independent facts about `modalKnownWorlds`/`modalMaxWorld` under list
+append, needed to show the potential `Φ` is exactly preserved (up to the single fresh-world
+term) across a step. -/
+
+private lemma modalKnownWorlds_fold_spec
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (ws0 : List WorldIndex)
+    (hws0 : ws0.Nodup) :
+    (l.foldl (fun ws sf => if ws.any (· == sf.label) then ws else sf.label :: ws) ws0).Nodup ∧
+    ∀ x, x ∈ l.foldl (fun ws sf => if ws.any (· == sf.label) then ws else sf.label :: ws) ws0 ↔
+      x ∈ ws0 ∨ ∃ sf ∈ l, sf.label = x := by
+  induction l generalizing ws0 with
+  | nil => exact ⟨hws0, by simp⟩
+  | cons sf rest ih =>
+    by_cases hc : ws0.any (· == sf.label)
+    · simp only [List.foldl_cons, if_pos hc]
+      have hmemws0 : sf.label ∈ ws0 := by simpa [List.any_eq_true] using hc
+      obtain ⟨hnodup, hmem⟩ := ih ws0 hws0
+      refine ⟨hnodup, fun x => ?_⟩
+      rw [hmem]
+      constructor
+      · rintro (h | ⟨sf', hsf', rfl⟩)
+        · exact Or.inl h
+        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
+      · rintro (h | ⟨sf', hsf', hfeq⟩)
+        · exact Or.inl h
+        · rcases List.mem_cons.mp hsf' with rfl | hsf'
+          · exact Or.inl (hfeq ▸ hmemws0)
+          · exact Or.inr ⟨sf', hsf', hfeq⟩
+    · simp only [List.foldl_cons, if_neg hc]
+      have hnotmem : sf.label ∉ ws0 := by simpa [List.any_eq_true] using hc
+      have hws0' : (sf.label :: ws0).Nodup := List.nodup_cons.mpr ⟨hnotmem, hws0⟩
+      obtain ⟨hnodup, hmem⟩ := ih (sf.label :: ws0) hws0'
+      refine ⟨hnodup, fun x => ?_⟩
+      rw [hmem]
+      constructor
+      · rintro (h | ⟨sf', hsf', rfl⟩)
+        · rcases List.mem_cons.mp h with rfl | h
+          · exact Or.inr ⟨sf, List.mem_cons_self, rfl⟩
+          · exact Or.inl h
+        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
+      · rintro (h | ⟨sf', hsf', hfeq⟩)
+        · exact Or.inl (List.mem_cons_of_mem _ h)
+        · rcases List.mem_cons.mp hsf' with rfl | hsf'
+          · exact Or.inl (hfeq ▸ List.mem_cons_self)
+          · exact Or.inr ⟨sf', hsf', hfeq⟩
+
+private lemma modalKnownWorlds_nodup
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) : (modalKnownWorlds l).Nodup :=
+  (modalKnownWorlds_fold_spec l [] List.nodup_nil).1
+
+private lemma mem_modalKnownWorlds
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (x : WorldIndex) :
+    x ∈ modalKnownWorlds l ↔ ∃ sf ∈ l, sf.label = x := by
+  unfold modalKnownWorlds
+  have h := (modalKnownWorlds_fold_spec l [] List.nodup_nil).2 x
+  simpa using h
+
+private lemma modalKnownWorlds_le_modalMaxWorld
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {w : WorldIndex}
+    (h : w ∈ modalKnownWorlds b) : w ≤ modalMaxWorld b := by
+  rw [mem_modalKnownWorlds] at h
+  obtain ⟨sf, hsf, rfl⟩ := h
+  exact label_le_modalMaxWorld hsf
+
+private lemma modalNextWorld_not_mem_modalKnownWorlds
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    modalNextWorld b ∉ modalKnownWorlds b := by
+  intro hmem
+  have hle := modalKnownWorlds_le_modalMaxWorld hmem
+  unfold modalNextWorld at hle
+  exact Nat.not_succ_le_self _ hle
+
+private lemma modalKnownWorlds_toFinset_append
+    (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    (modalKnownWorlds (xs ++ b)).toFinset =
+      (xs.map SignedFormula.label).toFinset ∪ (modalKnownWorlds b).toFinset := by
+  ext x
+  simp only [Finset.mem_union, List.mem_toFinset, mem_modalKnownWorlds, List.mem_append,
+    List.mem_map]
+  constructor
+  · rintro ⟨sf, hsf | hsf, rfl⟩
+    · exact Or.inl ⟨sf, hsf, rfl⟩
+    · exact Or.inr ⟨sf, hsf, rfl⟩
+  · rintro (⟨sf, hsf, rfl⟩ | ⟨sf, hsf, rfl⟩)
+    · exact ⟨sf, Or.inl hsf, rfl⟩
+    · exact ⟨sf, Or.inr hsf, rfl⟩
+
+private lemma modalKnownWorlds_mono_append
+    (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    modalKnownWorlds b ⊆ modalKnownWorlds (xs ++ b) := by
+  intro x hx
+  rw [mem_modalKnownWorlds] at hx ⊢
+  obtain ⟨sf, hsf, rfl⟩ := hx
+  exact ⟨sf, List.mem_append_right _ hsf, rfl⟩
+
+/-- If all labels of `xs` are already known worlds of `b`, appending `xs` doesn't change the
+known-worlds set (up to `Perm`). -/
+private lemma modalKnownWorlds_perm_append_of_subset
+    (xs b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (h : ∀ sf ∈ xs, sf.label ∈ modalKnownWorlds b) :
+    (modalKnownWorlds (xs ++ b)).Perm (modalKnownWorlds b) := by
+  apply List.perm_of_nodup_nodup_toFinset_eq (modalKnownWorlds_nodup _) (modalKnownWorlds_nodup _)
+  rw [modalKnownWorlds_toFinset_append]
+  have hsub : (xs.map SignedFormula.label).toFinset ⊆ (modalKnownWorlds b).toFinset := by
+    intro x hx
+    simp only [List.mem_toFinset, List.mem_map] at hx
+    obtain ⟨sf, hsf, rfl⟩ := hx
+    simpa using h sf hsf
+  exact Finset.union_eq_right.mpr hsub
+
+/-- If `xs` is nonempty and all its labels equal a fresh world `w'` not already known,
+appending `xs` prepends `w'` to the known-worlds set (up to `Perm`). -/
+private lemma modalKnownWorlds_perm_append_single
+    (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) (w' : WorldIndex)
+    (hxsne : xs ≠ []) (hxs : ∀ sf ∈ xs, sf.label = w') (hw' : w' ∉ modalKnownWorlds b) :
+    (modalKnownWorlds (xs ++ b)).Perm (w' :: modalKnownWorlds b) := by
+  apply List.perm_of_nodup_nodup_toFinset_eq (modalKnownWorlds_nodup _)
+    (List.nodup_cons.mpr ⟨hw', modalKnownWorlds_nodup _⟩)
+  rw [modalKnownWorlds_toFinset_append]
+  have hxseq : (xs.map SignedFormula.label).toFinset = {w'} := by
+    ext x
+    simp only [List.mem_toFinset, List.mem_map, Finset.mem_singleton]
+    constructor
+    · rintro ⟨sf, hsf, rfl⟩; exact hxs sf hsf
+    · intro hxeq
+      obtain ⟨sf, hsf⟩ := List.exists_mem_of_ne_nil xs hxsne
+      exact ⟨sf, hsf, hxeq ▸ (hxs sf hsf)⟩
+  rw [hxseq, List.toFinset_cons, Finset.singleton_union]
+
+/-- Bound on a `max`-fold: if the accumulator and every element's label are `≤ M`, the fold
+stays `≤ M`. -/
+private lemma modalMaxWorld_foldl_le
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (c M : Nat) (hc : c ≤ M)
+    (h : ∀ sf ∈ l, sf.label ≤ M) :
+    l.foldl (fun mx sf => max mx sf.label) c ≤ M := by
+  induction l generalizing c with
+  | nil => simpa using hc
+  | cons sf rest ih =>
+    simp only [List.foldl_cons]
+    exact ih (max c sf.label) (max_le hc (h sf List.mem_cons_self))
+      (fun x hx => h x (List.mem_cons_of_mem _ hx))
+
+private lemma modalMaxWorld_le_of_forall_le
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (M : Nat)
+    (h : ∀ sf ∈ l, sf.label ≤ M) : modalMaxWorld l ≤ M :=
+  modalMaxWorld_foldl_le l 0 M (Nat.zero_le _) h
+
+/-- If every label of `xs` is already `≤ modalMaxWorld b`, appending `xs` doesn't change
+`modalMaxWorld`. -/
+private lemma modalMaxWorld_append_eq_of_forall_le
+    (xs b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (h : ∀ sf ∈ xs, sf.label ≤ modalMaxWorld b) :
+    modalMaxWorld (xs ++ b) = modalMaxWorld b := by
+  apply le_antisymm
+  · apply modalMaxWorld_le_of_forall_le
+    intro sf hsf
+    rcases List.mem_append.mp hsf with hxs | hb
+    · exact h sf hxs
+    · exact label_le_modalMaxWorld hb
+  · exact modalMaxWorld_le_append xs b
+
+/-- If `xs` is nonempty and all its labels equal a fresh world `w'` strictly greater than
+`modalMaxWorld b`, appending `xs` sets `modalMaxWorld` to exactly `w'`. -/
+private lemma modalMaxWorld_append_single
+    (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) (w' : WorldIndex)
+    (hxsne : xs ≠ []) (hxs : ∀ sf ∈ xs, sf.label = w') (hgt : modalMaxWorld b < w') :
+    modalMaxWorld (xs ++ b) = w' := by
+  apply le_antisymm
+  · apply modalMaxWorld_le_of_forall_le
+    intro sf hsf
+    rcases List.mem_append.mp hsf with hxs' | hb
+    · exact le_of_eq (hxs sf hxs')
+    · exact le_of_lt (lt_of_le_of_lt (label_le_modalMaxWorld hb) hgt)
+  · obtain ⟨sf0, hsf0⟩ := List.exists_mem_of_ne_nil xs hxsne
+    have := label_le_modalMaxWorld (List.mem_append_left b hsf0)
+    rwa [hxs sf0 hsf0] at this
 
 end Cslib.Logic.Modal.Tableau
 

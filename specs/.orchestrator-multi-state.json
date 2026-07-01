@@ -1,63 +1,18 @@
 {
-  "session_id": "sess_1782850760_91e823",
-  "task_numbers": [
-    434,
-    436,
-    241
-  ],
-  "waves": [
-    [
-      434
-    ],
-    [
-      436
-    ],
-    [
-      241
-    ]
-  ],
-  "dependency_graph": {
-    "434": [],
-    "436": [
-      "434"
-    ],
-    "241": [
-      "434",
-      "436"
-    ]
-  },
+  "session_id": "sess_1782884528_21222e",
+  "task_numbers": [445, 446, 444],
+  "waves": [[445], [446], [444]],
+  "dependency_graph": {"444": ["446"], "445": [], "446": ["445"]},
   "max_cycles": 15,
-  "cycle_count": 1,
+  "cycle_count": 0,
   "failed_tasks": [],
-  "completed_tasks": [
-    433,
-    435
-  ],
-  "current_statuses": {
-    "433": "completed",
-    "434": "abandoned",
-    "435": "completed",
-    "436": "abandoned",
-    "241": "planned"
-  },
+  "completed_tasks": [],
+  "current_statuses": {"445": "not_started", "446": "not_started", "444": "not_started"},
   "task_dirs": {
-    "434": "specs/434_prove_backward_inclusion_buchicongr_dma_language_backward",
-    "436": "specs/436_combine_inclusions_into_buchicongr_dma_language_eq_and_close",
-    "241": "specs/241_mcnaughton_theorem"
+    "445": "specs/445_fix_temporal_conservativity_domain_mismatch_sorry",
+    "446": "specs/446_fix_temporal_burgess_citation_hygiene",
+    "444": "specs/444_fix_temporal_theorems_underscore_lint"
   },
-  "research_agents": {
-    "434": "cslib-research-agent",
-    "436": "cslib-research-agent",
-    "241": "cslib-research-agent"
-  },
-  "implement_agents": {
-    "434": "cslib-implementation-agent",
-    "436": "cslib-implementation-agent",
-    "241": "cslib-implementation-agent"
-  },
-  "abandoned_tasks": [
-    434,
-    436
-  ],
-  "final_disposition": "2 completed (433,435); 2 abandoned as obsolete under 241 Choueka pivot (434,436); 241 replanned to Choueka route, held at planned per user"
+  "research_agents": {"445": "cslib-research-agent", "446": "cslib-research-agent", "444": "cslib-research-agent"},
+  "implement_agents": {"445": "cslib-implementation-agent", "446": "cslib-implementation-agent", "444": "cslib-implementation-agent"}
 }

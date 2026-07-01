@@ -1,0 +1,24 @@
+{
+  "status": "implemented",
+  "summary": "Vetted task 241 (mcnaughton_theorem). Found 2 violations across 5 files. CI: FAILED (lake lint only; build/test/checkInitImports/lint-style/shake all PASS for the 5 in-scope files).",
+  "ci_passed": false,
+  "violations_found": 2,
+  "files_analyzed": 5,
+  "findings_path": "specs/241_mcnaughton_theorem/.vet-findings.json",
+  "metadata": {
+    "session_id": "sess_1782881891_1d0fd0",
+    "agent_type": "cslib-vet-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "vet", "skill-cslib-vet"],
+    "tasks_vetted": [241],
+    "verification": {
+      "ci_pipeline_passed": false,
+      "lake_build": "PASS",
+      "lake_test": "PASS",
+      "lake_exe_checkInitImports": "PASS",
+      "lake_exe_lint_style": "PASS (for task 241 files)",
+      "lake_shake": "PASS (for task 241 files)",
+      "lake_lint": "FAIL (2 in-scope violations: defsWithUnderscore in BuchiCongruence.lean, unusedArguments in Concat.lean)"
+    }
+  }
+}

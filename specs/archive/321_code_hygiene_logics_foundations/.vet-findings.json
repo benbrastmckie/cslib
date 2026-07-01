@@ -1,0 +1,203 @@
+{
+  "tasks_vetted": [321, 406, 431, 433, 435],
+  "files_analyzed": [
+    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/BurgessHelpers.lean",
+    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Elimination.lean",
+    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean",
+    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination.lean",
+    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Structures.lean",
+    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/Burgess.lean",
+    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion.lean",
+    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/Seeds.lean",
+    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/Since.lean",
+    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/XuGuard.lean",
+    "Cslib/Logics/LTL/Semantics/GNBA/Atoms.lean",
+    "Cslib/Logics/LTL/Semantics/GNBA/Closure.lean",
+    "Cslib/Logics/LTL/Semantics/GNBA/Construction.lean",
+    "Cslib/Logics/LTL/Semantics/GNBA/Correctness.lean",
+    "Cslib/Logics/LTL/Semantics/GNBA.lean",
+    "Cslib/Logics/Temporal/Metalogic/Chronicle/CounterexampleElimination/Elimination.lean",
+    "Cslib/Logics/Temporal/Metalogic/Chronicle/CounterexampleElimination.lean",
+    "Cslib/Logics/Temporal/Metalogic/Chronicle/CounterexampleElimination/MainElimination.lean",
+    "Cslib/Logics/Temporal/Metalogic/Chronicle/CounterexampleElimination/RecursiveWalks.lean",
+    "Cslib/Logics/Temporal/Metalogic/Chronicle/CounterexampleElimination/Structures.lean",
+    "Cslib/Logics/Temporal/Metalogic/Chronicle/PointInsertion/Burgess.lean",
+    "Cslib/Logics/Temporal/Metalogic/Chronicle/PointInsertion/Seeds.lean",
+    "Cslib/Foundations/Logic/Metalogic/DeductionCharacterization.lean",
+    "Cslib/Foundations/Order/HilbertAlgebra/FreeMeetExtension.lean",
+    "Cslib/Logics/Bimodal/Metalogic/Core/DeductionTheorem.lean",
+    "Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean",
+    "Cslib/Logics/Modal/Metalogic/DeductionTheorem.lean",
+    "Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean",
+    "Cslib/Logics/Modal/Tableau/Saturation.lean",
+    "Cslib/Logics/Temporal/Metalogic/DenseMCS.lean",
+    "Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean",
+    "Cslib/Logics/Temporal/Tableau/Saturation.lean",
+    "Cslib/Logics/Modal/Tableau/LoopInduction.lean",
+    "Cslib/Logics/Modal/Tableau/Soundness.lean",
+    "Cslib/Logics/Temporal/Tableau/Rules.lean",
+    "Cslib/Computability/Languages/OmegaRegularLanguage.lean"
+  ],
+  "ci_passed": true,
+  "ci_results": {
+    "lake_build": "PASS",
+    "lake_test": "PASS",
+    "checkInitImports": "PASS",
+    "lake_lint": "PASS (scoped to changed files; 2 pre-existing unrelated errors elsewhere in codebase)",
+    "lint_style": "PASS (scoped to changed files; 2 pre-existing unrelated errors elsewhere in codebase)",
+    "lake_shake": "FINDINGS (17 of the changed files have import-minimization suggestions; codebase-wide backlog of ~4700 lines of shake output, not introduced by these 5 tasks)"
+  },
+  "notes": {
+    "sorry_check": "grep for 'sorry' across all 35 changed files returned zero matches. Tasks 431/433/435 (sorry-elimination goals) are confirmed sorry-free in their touched files. The only remaining 'declaration uses sorry' warnings in the full lake build/test output are in Cslib/Logics/Propositional/Tableau/{Intuitionistic,Minimal}/{Scheme,Completeness}.lean, which are NOT in any of the 5 tasks' changed_files lists -- out of scope for this vet.",
+    "unrelated_preexisting_issues": [
+      "lake lint reports 2 defsWithUnderscore errors in Cslib/Logics/Temporal/Theorems.lean (allFuture_iff_neg_someFuture_neg, allPast_iff_neg_somePast_neg) -- not a changed file for any of the 5 vetted tasks.",
+      "lake exe lint-style reports 2 'space before semicolon' errors in Cslib/Logics/Modal/Tableau/Completeness.lean:432,491 -- not a changed file for any of the 5 vetted tasks (task 431 touched LoopInduction.lean/Soundness.lean/Rules.lean in the same directory tree, but not Completeness.lean)."
+    ]
+  },
+  "categories": [
+    {
+      "name": "CI Failures",
+      "severity": "Critical",
+      "violations": []
+    },
+    {
+      "name": "Import Minimization (lake shake)",
+      "severity": "Medium",
+      "violations": [
+        {
+          "file": "Cslib/Foundations/Logic/Metalogic/DeductionCharacterization.lean",
+          "standard": "CONTRIBUTING.md#Imports",
+          "description": "shake suggests: remove #[import Cslib.Init] (likely a false positive -- Cslib.Init sets up default linting/tactics, not a term-level dependency; verify before removing, add shake-preserve comment if legitimately needed).",
+          "fix_hint": "Run `lake shake --add-public --keep-implied --keep-prefix` on this file; if Cslib.Init is intentionally kept for linter setup, add the special preserve-comment documented in `lake shake --help` instead of removing it."
+        },
+        {
+          "file": "Cslib/Foundations/Order/HilbertAlgebra/FreeMeetExtension.lean",
+          "standard": "CONTRIBUTING.md#Imports",
+          "description": "shake suggests: remove #[public import Mathlib.Data.Multiset.Basic] (appears unused after Multiset.MapFold covers the needed API).",
+          "fix_hint": "Verify and remove the unused import."
+        },
+        {
+          "file": "Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean",
+          "standard": "CONTRIBUTING.md#Imports",
+          "description": "shake suggests: remove #[public import Cslib.Foundations.Logic.Metalogic.MCSProperties], add #[public import Cslib.Foundations.Logic.Metalogic.GenericMCS] (transitive re-export mismatch).",
+          "fix_hint": "Swap the import per shake's suggestion; re-verify build after change."
+        },
+        {
+          "file": "Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean",
+          "standard": "CONTRIBUTING.md#Imports",
+          "description": "shake suggests: remove #[public import Cslib.Foundations.Logic.Metalogic.MCSProperties], add #[public import Cslib.Foundations.Logic.Metalogic.GenericMCS].",
+          "fix_hint": "Swap the import per shake's suggestion."
+        },
+        {
+          "file": "Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean",
+          "standard": "CONTRIBUTING.md#Imports",
+          "description": "shake suggests: remove #[public import Cslib.Foundations.Logic.Metalogic.MCSProperties], add #[public import Cslib.Foundations.Logic.Metalogic.GenericMCS].",
+          "fix_hint": "Swap the import per shake's suggestion."
+        },
+        {
+          "file": "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/BurgessHelpers.lean",
+          "standard": "CONTRIBUTING.md#Imports",
+          "description": "shake suggests: remove #[public import Mathlib.Data.Finset.Max, public import Mathlib.Tactic.Linarith], add #[public import Mathlib.Tactic.NormNum].",
+          "fix_hint": "Verify tactic usage (linarith calls appear in the file body via omit-guarded lemmas) before applying; may be a shake false-positive given local `linarith` calls elsewhere in the barrel-split submodules."
+        },
+        {
+          "file": "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean",
+          "standard": "CONTRIBUTING.md#Imports",
+          "description": "shake suggests: remove #[public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.CounterexampleElimination.Elimination] (re-export not directly used by declarations in this file, though used transitively by the barrel).",
+          "fix_hint": "Check whether Interface.lean genuinely needs Elimination.lean's declarations directly, or only via the barrel re-export; adjust accordingly."
+        },
+        {
+          "file": "Cslib/Logics/Temporal/Metalogic/Chronicle/CounterexampleElimination/Structures.lean",
+          "standard": "CONTRIBUTING.md#Imports",
+          "description": "shake suggests: remove #[public import Mathlib.Logic.Encodable.Basic] (used in Elimination.lean instead, per shake's paired suggestion to add it there).",
+          "fix_hint": "Move the Encodable.Basic import from Structures.lean to Elimination.lean per shake's cross-file suggestion."
+        },
+        {
+          "file": "Cslib/Logics/Temporal/Metalogic/Chronicle/CounterexampleElimination/Elimination.lean",
+          "standard": "CONTRIBUTING.md#Imports",
+          "description": "shake suggests: add #[public import Mathlib.Logic.Encodable.Basic] (paired with the removal suggested in Structures.lean).",
+          "fix_hint": "Add the import here (currently relying on transitive re-export from Structures.lean)."
+        },
+        {
+          "file": "Cslib/Logics/LTL/Semantics/GNBA/Closure.lean",
+          "standard": "CONTRIBUTING.md#Imports",
+          "description": "shake suggests: remove #[public import Cslib.Logics.LTL.Semantics.Satisfies, public import Mathlib.Data.Set.Finite.Powerset, public import Mathlib.Data.Set.Finite.Lattice], add #[public import Cslib.Logics.LTL.Syntax.Formula].",
+          "fix_hint": "Apply shake's suggested import swap; verify Satisfies is genuinely unused directly in Closure.lean (it is re-exported for Atoms.lean's use, per the paired 'add' suggestion there)."
+        },
+        {
+          "file": "Cslib/Logics/LTL/Semantics/GNBA/Atoms.lean",
+          "standard": "CONTRIBUTING.md#Imports",
+          "description": "shake suggests: add #[public import Cslib.Logics.LTL.Semantics.Satisfies] (currently relies on transitive re-export from Closure.lean).",
+          "fix_hint": "Add the direct import since Atoms.lean uses `Satisfies` directly in `canonicalAtom`."
+        },
+        {
+          "file": "Cslib/Logics/Modal/Tableau/Saturation.lean",
+          "standard": "CONTRIBUTING.md#Imports",
+          "description": "shake suggests: remove #[import Cslib.Init], add #[public import Cslib.Logics.Modal.Tableau.Rules] (Rules currently only reached transitively via Closure -> ... ).",
+          "fix_hint": "Verify whether Cslib.Init removal is safe (it likely is not -- see CONTRIBUTING.md's note on the shake preserve-comment syntax for Cslib.Init-style setup imports); add the Rules import if genuinely used directly."
+        },
+        {
+          "file": "Cslib/Logics/Modal/Tableau/LoopInduction.lean",
+          "standard": "CONTRIBUTING.md#Imports",
+          "description": "shake suggests: remove #[import Cslib.Init, public import Cslib.Logics.Modal.Tableau.Saturation], add #[public import Cslib.Logics.Modal.Basic, public import Batteries.Data.List.Basic].",
+          "fix_hint": "LoopInduction.lean only needs Saturation.lean for the `Accessibility`/`WorldIndex` types it references in signatures -- check if a narrower import (Modal.Basic directly) suffices per shake's suggestion."
+        },
+        {
+          "file": "Cslib/Logics/Modal/Tableau/Soundness.lean",
+          "standard": "CONTRIBUTING.md#Imports",
+          "description": "shake suggests: remove #[import Cslib.Init].",
+          "fix_hint": "Same Cslib.Init caveat as above; verify before removing."
+        },
+        {
+          "file": "Cslib/Logics/Temporal/Tableau/Rules.lean",
+          "standard": "CONTRIBUTING.md#Imports",
+          "description": "shake suggests: remove #[import Cslib.Init], add #[public import Cslib.Foundations.Logic.Tableau.PropositionalRules].",
+          "fix_hint": "Add the PropositionalRules import (used by `tryAllPropRules` in this file); verify Cslib.Init removal separately."
+        },
+        {
+          "file": "Cslib/Logics/Temporal/Tableau/Saturation.lean",
+          "standard": "CONTRIBUTING.md#Imports",
+          "description": "shake suggests: remove #[import Cslib.Init].",
+          "fix_hint": "Same Cslib.Init caveat as above."
+        },
+        {
+          "file": "Cslib/Logics/Temporal/Metalogic/DenseMCS.lean",
+          "standard": "CONTRIBUTING.md#Imports",
+          "description": "shake suggests: remove #[public import Cslib.Foundations.Logic.Metalogic.DeductionHelpers] (appears unused directly).",
+          "fix_hint": "Verify and remove if genuinely unused."
+        }
+      ]
+    },
+    {
+      "name": "Documentation Gaps",
+      "severity": "High",
+      "violations": []
+    },
+    {
+      "name": "Notation Inconsistencies",
+      "severity": "Medium",
+      "violations": []
+    },
+    {
+      "name": "Organization Issues",
+      "severity": "Medium",
+      "violations": []
+    },
+    {
+      "name": "Design Improvements",
+      "severity": "Low",
+      "violations": []
+    }
+  ],
+  "suggested_fix_tasks": [
+    {
+      "title": "Apply lake shake import-minimization fixes to files touched by tasks 321/406/431",
+      "slug": "fix_shake_imports_logics_hygiene",
+      "description": "17 files touched by tasks 321, 406, and 431 have `lake shake --add-public --keep-implied --keep-prefix` suggestions (add/remove public import lines). Several suggestions involve `import Cslib.Init` removal, which per CONTRIBUTING.md's CI section may be a false positive (Cslib.Init sets up default linting/tactics rather than being a term-level dependency) -- these need the special shake preserve-comment (see `lake shake --help`) rather than blind removal. The remaining suggestions (GenericMCSBridge.lean x3 swapping MCSProperties->GenericMCS, Encodable.Basic move between Structures.lean/Elimination.lean, Satisfies import move between Closure.lean/Atoms.lean, etc.) are genuine import-hygiene fixes. This is scoped narrowly to files touched by the 5 vetted tasks; it does not attempt to fix the codebase-wide shake backlog (~4700 lines of output across files unrelated to these tasks).",
+      "task_type": "cslib",
+      "severity": "Medium",
+      "parent_task_numbers": [321, 406, 431],
+      "violation_count": 17
+    }
+  ]
+}

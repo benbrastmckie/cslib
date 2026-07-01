@@ -1,0 +1,24 @@
+{
+  "status": "implemented",
+  "summary": "Vetted task 180 (temporal_primitive_always_historically). Analyzed 23 changed Lean files against CONTRIBUTING.md, NOTATION.md, ORGANISATION.md, CODE_OF_CONDUCT.md and ran the full CSLib CI pipeline. Found 8 violations across 3 categories: 2 High (defsWithUnderscore lint errors in Theorems.lean, introduced by this task), 1 Medium (documented but live sorry in Bimodal-Temporal conservativity proof, TemporalConservativity.lean:269), and 5 Low (Burgess 1982 citation-format/disambiguation inconsistencies across 5 files). CI: FAILED overall, but the only in-scope failure attributable to task 180 is the defsWithUnderscore lint error; the two lint-style errors and two other lint errors found belong to files explicitly excluded from task 180's scope (Modal/Tableau/Completeness.lean, BuchiCongruence.lean, DA/Concat.lean) and were not counted against this task. lake build, checkInitImports, and lake test all pass cleanly.",
+  "ci_passed": false,
+  "violations_found": 8,
+  "files_analyzed": 23,
+  "findings_path": "specs/180_temporal_primitive_always_historically/.vet-findings.json",
+  "metadata": {
+    "session_id": "sess_1782882070_293303",
+    "agent_type": "cslib-vet-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "vet", "skill-cslib-vet"],
+    "tasks_vetted": [180],
+    "verification": {
+      "ci_pipeline_passed": false,
+      "lake_build": "PASS",
+      "lake_test": "PASS",
+      "lake_exe_checkInitImports": "PASS",
+      "lake_lint": "FAIL (2 in-scope errors: defsWithUnderscore in Theorems.lean; 2 out-of-scope pre-existing errors elsewhere)",
+      "lake_exe_lint_style": "FAIL (2 errors, both out-of-scope in Modal/Tableau/Completeness.lean; zero in-scope)",
+      "lake_shake": "reports suggestions (project-wide pre-existing pattern, not task-180-specific regression)"
+    }
+  }
+}

@@ -1,0 +1,166 @@
+{
+  "tasks_vetted": [180],
+  "files_analyzed": [
+    "Cslib/Logics/Temporal/Syntax/Formula.lean",
+    "Cslib/Logics/Temporal/Syntax/Subformulas.lean",
+    "Cslib/Logics/Temporal/Semantics/Satisfies.lean",
+    "Cslib/Logics/Temporal/ProofSystem/Axioms.lean",
+    "Cslib/Logics/Temporal/ProofSystem/Instances.lean",
+    "Cslib/Logics/Temporal/Metalogic/Soundness.lean",
+    "Cslib/Logics/Temporal/Metalogic/DenseSoundness.lean",
+    "Cslib/Logics/Temporal/Metalogic/MCS.lean",
+    "Cslib/Logics/Temporal/Metalogic/WitnessSeed.lean",
+    "Cslib/Logics/Temporal/Metalogic/TemporalContent.lean",
+    "Cslib/Logics/Temporal/Metalogic/GeneralizedNecessitation.lean",
+    "Cslib/Logics/Temporal/Metalogic/CompletenessHelpers.lean",
+    "Cslib/Logics/Temporal/Metalogic/DenseCompleteness.lean",
+    "Cslib/Logics/Temporal/Metalogic/Chronicle/RRelation.lean",
+    "Cslib/Logics/Temporal/Metalogic/Chronicle/Frame.lean",
+    "Cslib/Logics/Temporal/Metalogic/Chronicle/TruthLemma.lean",
+    "Cslib/Logics/Temporal/Metalogic/Chronicle/PointInsertion/Seeds.lean",
+    "Cslib/Logics/Temporal/Tableau/Defs.lean",
+    "Cslib/Logics/Temporal/Tableau/Rules.lean",
+    "Cslib/Logics/Temporal/Tableau/Completeness.lean",
+    "Cslib/Logics/Temporal/Theorems.lean",
+    "Cslib/Logics/Bimodal/Embedding/TemporalEmbedding.lean",
+    "Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/TemporalConservativity.lean"
+  ],
+  "excluded_files_note": "Cslib/Computability/Automata/DA/MullerClosure.lean and Cslib/Logics/Modal/Tableau/Completeness.lean were surfaced by git history but are out of scope for task 180 (belong to tasks 241/299/442) and were NOT analyzed or included in findings below, even though lake lint / lake exe lint-style report pre-existing issues in them.",
+  "ci_passed": false,
+  "ci_results": {
+    "lake_build": "PASS",
+    "checkInitImports": "PASS",
+    "lake_lint": "FAIL (4 total project errors; 2 are in-scope for task 180 — see Lint Violations category; 2 are pre-existing out-of-scope errors in Cslib/Computability/Languages/Congruences/BuchiCongruence.lean and Cslib/Computability/Automata/DA/Concat.lean, unrelated to task 180)",
+    "lint_style": "FAIL (2 total project errors, both in Cslib/Logics/Modal/Tableau/Completeness.lean, which is explicitly out of scope for task 180 per delegation note; zero lint-style errors in task-180 files)",
+    "lake_shake": "REPORTS SUGGESTIONS (project-wide, pre-existing; dozens of unrelated files across the whole repo are flagged, mostly a systemic 'remove import Cslib.Init' false positive that is intentional per CONTRIBUTING.md's Cslib.Init requirement; four task-180 Tableau files — Defs.lean, Rules.lean, Soundness.lean, Completeness.lean — appear in the suggestion list but this reflects pre-existing project-wide shake debt, not a regression introduced by task 180's diff; not creating a fix task for this)",
+    "lake_test": "PASS (lake test replay completed with only pre-existing warnings in unrelated Propositional/Tableau files; no test failures)"
+  },
+  "categories": [
+    {
+      "name": "Lint Violations",
+      "severity": "High",
+      "count": 2,
+      "description": "lake lint's defsWithUnderscore linter flags two new theorem-like `def`s introduced by task 180 in Theorems.lean. Both declarations are `noncomputable def`s (not `theorem`/`lemma`, since they return a data-carrying `DerivationTree`), and CSLib's established convention for such DerivationTree-returning defs elsewhere in this same task's diff (e.g. `tempKDistDerived`, `pastKDist` in GeneralizedNecessitation.lean) already uses lowerCamelCase without underscores. These two new names break that established local convention.",
+      "violations": [
+        {
+          "file": "Cslib/Logics/Temporal/Theorems.lean",
+          "line": 51,
+          "check": "defsWithUnderscore",
+          "standard": "CONTRIBUTING.md (mathlib naming convention)",
+          "description": "`def allFuture_iff_neg_someFuture_neg` contains underscores; mathlib convention requires lowerCamelCase for `def` declarations (underscores are only idiomatic for `theorem`/`lemma`).",
+          "fix_hint": "Rename to lowerCamelCase, e.g. `allFutureIffNegSomeFutureNeg`, and update all call sites (Chronicle/TruthLemma.lean references `mcs_allFuture_iff`, not this def directly — but check for any other references)."
+        },
+        {
+          "file": "Cslib/Logics/Temporal/Theorems.lean",
+          "line": 68,
+          "check": "defsWithUnderscore",
+          "standard": "CONTRIBUTING.md (mathlib naming convention)",
+          "description": "`def allPast_iff_neg_somePast_neg` contains underscores; same issue as above (past dual).",
+          "fix_hint": "Rename to lowerCamelCase, e.g. `allPastIffNegSomePastNeg`, and update all call sites."
+        }
+      ]
+    },
+    {
+      "name": "Proof Completeness / Honesty",
+      "severity": "Medium",
+      "count": 1,
+      "description": "A live (non-comment) `sorry` exists in `temporal_valid_of_bimodal_derivable` in TemporalConservativity.lean, guarded by `set_option warn.sorry false in`. This is thoroughly documented in the module docstring (module 'Domain Mismatch Resolution' section explains the AddCommGroup vs. arbitrary-serial-linear-order gap and two candidate resolution strategies) and is NOT one of the four intended bridge Axiom constructors — it is a genuine open proof obligation. This is honest/disclosed per CONTRIBUTING.md's spirit (documented rather than hidden), but it means `bimodal_conservative_over_temporal` (the main conservativity theorem) is not yet a complete, sorry-free proof. Distinct from the FMP-blocked `sorry`s in Tableau/Completeness.lean, which are all inside markdown code-fence comments (verified: only 4 occurrences of the literal token `sorry` outside comments were checked; Tableau/Completeness.lean's are all in commented-out ```lean blocks documenting blocked obligations, not live code).",
+      "violations": [
+        {
+          "file": "Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/TemporalConservativity.lean",
+          "line": 269,
+          "check": "live-sorry",
+          "standard": "CONTRIBUTING.md (proof style) / cslib.md (Vacuous Definitions / honesty)",
+          "description": "`temporal_valid_of_bimodal_derivable` ends in `sorry`, gated by `set_option warn.sorry false in` to suppress the build warning. The gap (AddCommGroup-domain soundness vs. arbitrary-serial-linear-order completeness) is well documented but unresolved, so `bimodal_conservative_over_temporal` transitively depends on this sorry.",
+          "fix_hint": "Either (a) prove the model-transfer result described in the 'Domain Mismatch Resolution' docstring section (order-isomorphism from ChronicleSubtype to a domain with AddCommGroup, or a direct satisfaction-preservation argument), or (b) if genuinely blocked, ensure the task's PR description discloses this remaining sorry explicitly (per AI/limitations disclosure norms) rather than leaving it implicit in code comments only."
+        }
+      ]
+    },
+    {
+      "name": "Documentation / Citation Hygiene",
+      "severity": "Low",
+      "count": 5,
+      "description": "Several Temporal metalogic module docstrings cite 'Burgess 1982' / 'Burgess (1982)' in plain prose without the bracket `[Description][BibKey]` citation format used elsewhere in this same task's diff (e.g. Formula.lean's `[H. Kamp, ...][Kamp1968]`, `[D. Gabbay, A. Pnueli, S. Shelah, J. Stavi, ...][GPSS1980]`). `references.bib` contains two distinct 1982 Burgess entries — `Burgess1982I` ('Since'/'Until') and `Burgess1982II` ('Time Periods') — and only `RRelation.lean` disambiguates which paper it means (matching `Burgess1982II`'s title in prose). The other three citing files do not specify I vs II, leaving the citation ambiguous even though the correct bib entries exist.",
+      "violations": [
+        {
+          "file": "Cslib/Logics/Temporal/Metalogic/Chronicle/TruthLemma.lean",
+          "line": 34,
+          "check": "citation-format",
+          "standard": "CONTRIBUTING.md (Documentation: 'reference the resource in your documentation')",
+          "description": "'* Burgess 1982: Section 2, Claim 2.11' does not use bracket-BibKey format and does not disambiguate Burgess1982I vs Burgess1982II.",
+          "fix_hint": "Change to '* [J. Burgess, Axioms for Tense Logic II: Time Periods][Burgess1982II]' (Claim 2.11 corresponds to the 'Time Periods' paper per RRelation.lean's citation of the same source's Lemmas 2.2-2.5)."
+        },
+        {
+          "file": "Cslib/Logics/Temporal/Metalogic/Chronicle/TruthLemma.lean",
+          "line": 274,
+          "check": "citation-format",
+          "standard": "CONTRIBUTING.md (Documentation)",
+          "description": "In-body docstring reference to 'Claim 2.11 of Burgess 1982' repeats the same ambiguity as line 34.",
+          "fix_hint": "Reference the disambiguated BibKey established at the top-of-file References section once fixed."
+        },
+        {
+          "file": "Cslib/Logics/Temporal/Metalogic/Soundness.lean",
+          "line": 28,
+          "check": "citation-format",
+          "standard": "CONTRIBUTING.md (Documentation)",
+          "description": "'* Burgess (1982) — BX axiom system' does not disambiguate I vs II or use bracket-BibKey format.",
+          "fix_hint": "Disambiguate and use bracket format, e.g. '* [J. Burgess, Axioms for Tense Logic I/II][Burgess1982I][Burgess1982II]' if the BX system draws on both papers, or pick the specific one."
+        },
+        {
+          "file": "Cslib/Logics/Temporal/Metalogic/DenseSoundness.lean",
+          "line": 28,
+          "check": "citation-format",
+          "standard": "CONTRIBUTING.md (Documentation)",
+          "description": "'- Burgess (1982): BX axiom system for temporal logic' has the same ambiguity/format inconsistency.",
+          "fix_hint": "Same fix as Soundness.lean."
+        },
+        {
+          "file": "Cslib/Logics/Temporal/Metalogic/Chronicle/RRelation.lean",
+          "line": 21,
+          "check": "citation-format",
+          "severity_note": "Lowest priority of the five — already correctly disambiguates (II, 'Time Periods') in prose, just not in bracket-BibKey format.",
+          "standard": "CONTRIBUTING.md (Documentation)",
+          "description": "'* Burgess 1982: \"Axioms for tense logic II: Time periods\"' correctly identifies the paper but does not use the bracket-BibKey format used elsewhere in the same diff.",
+          "fix_hint": "Change to '* [J. Burgess, Axioms for Tense Logic II: Time Periods][Burgess1982II]' for consistency with Formula.lean's citation style."
+        }
+      ]
+    }
+  ],
+  "no_violations_found": [
+    "ORGANISATION.md: All new/changed files are correctly placed per the documented Logics/Temporal and Logics/Bimodal module trees; namespace `Cslib.Logic.Temporal` / `Cslib.Logic.Bimodal` usage is consistent.",
+    "NOTATION.md: 𝐆/𝐇/𝐅/𝐏/△/▽ notation is unchanged from the pre-existing module convention (task 180 only changes whether allFuture/allPast are primitive constructors vs. derived abbreviations; the notation bindings and Pnueli guard/event convention for untl/snce are preserved and documented).",
+    "CONTRIBUTING.md Documentation: every new/changed public declaration (Formula.allFuture, Formula.allPast constructors, the four bridge Axiom constructors allFuture_to_classic/classic_to_allFuture/allPast_to_classic/classic_to_allPast, and the Theorems.lean wrapper theorems) has a docstring, including an explicit 'D3 honesty caveat' explaining that the classical equivalence is packaged from axioms rather than derived from a smaller axiom set.",
+    "CONTRIBUTING.md Axiom usage: the four bridge axioms are legitimate `Axiom` inductive constructors (not Lean `axiom` declarations) and are proved sound in Soundness.lean/DenseSoundness.lean; per delegation instructions these are NOT flagged as illegitimate.",
+    "lake lint docBlame/defLemma/simpNF/unusedSectionVars/topNamespace/dupNamespace: zero violations found in task-180 files (only defsWithUnderscore, reported above).",
+    "Tableau/Completeness.lean sorry check: all 'sorry' tokens in this file are inside commented-out ```lean code blocks documenting FMP-blocked future work, not live proof code (verified via grep + manual inspection of surrounding context)."
+  ],
+  "suggested_fix_tasks": [
+    {
+      "title": "Rename underscored defs in Temporal/Theorems.lean to satisfy defsWithUnderscore lint",
+      "slug": "fix_temporal_theorems_underscore_lint",
+      "description": "Rename `allFuture_iff_neg_someFuture_neg` and `allPast_iff_neg_somePast_neg` in Cslib/Logics/Temporal/Theorems.lean to lowerCamelCase (e.g. `allFutureIffNegSomeFutureNeg`, `allPastIffNegSomePastNeg`), update any call sites, and re-run `lake lint` to confirm the defsWithUnderscore errors are cleared without introducing new ones.",
+      "task_type": "cslib",
+      "severity": "High",
+      "parent_task_numbers": [180],
+      "violation_refs": ["Theorems.lean:51", "Theorems.lean:68"]
+    },
+    {
+      "title": "Standardize Burgess 1982 citation format in Temporal metalogic modules",
+      "slug": "fix_temporal_burgess_citation_hygiene",
+      "description": "Update the References sections of TruthLemma.lean, Soundness.lean, and DenseSoundness.lean (and the prose citation in RRelation.lean) to use the bracket `[Description][BibKey]` format consistently, disambiguating between `Burgess1982I` ('Since'/'Until') and `Burgess1982II` ('Time Periods') wherever '[Burgess 1982]' currently appears unqualified.",
+      "task_type": "cslib",
+      "severity": "Low",
+      "parent_task_numbers": [180],
+      "violation_refs": ["TruthLemma.lean:34", "TruthLemma.lean:274", "Soundness.lean:28", "DenseSoundness.lean:28", "RRelation.lean:21"]
+    },
+    {
+      "title": "Resolve or explicitly disclose the domain-mismatch sorry in Bimodal-Temporal conservativity proof",
+      "slug": "fix_temporal_conservativity_domain_mismatch_sorry",
+      "description": "TemporalConservativity.lean's `temporal_valid_of_bimodal_derivable` contains a live, documented `sorry` for the AddCommGroup-domain vs. arbitrary-serial-linear-order gap. Either complete the model-transfer proof described in the module's 'Domain Mismatch Resolution' section, or ensure this remaining gap is explicitly called out in the task's PR description / follow-up tracking so it is not silently merged as if the conservativity theorem were complete.",
+      "task_type": "cslib",
+      "severity": "Medium",
+      "parent_task_numbers": [180],
+      "violation_refs": ["TemporalConservativity.lean:269"]
+    }
+  ]
+}

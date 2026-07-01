@@ -170,18 +170,6 @@ Definition of done: `lake build`, `lake lint`, `lake exe lint-style` green on ev
 
 ---
 
-### 443. Fix lint violations in McNaughton-theorem Choueka/Concat route (task 241)
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Dependencies**: None
-- **Research**: [443_fix_lint_mcnaughton_choueka_concat/reports/01_lint-fix-241.md]
-- **Plan**: [443_fix_lint_mcnaughton_choueka_concat/plans/01_lint-fix-241.md]
-- **Summary**: [443_fix_lint_mcnaughton_choueka_concat/summaries/01_lint-fix-241-summary.md]
-
-**Description**: Address the 2 lake lint violations introduced by task 241: rename the underscored instance buchiCongruence_instMonoid in Cslib/Computability/Languages/Congruences/BuchiCongruence.lean:263 (defsWithUnderscore), and silence or restructure the unused-argument warning on mullerAccConcat in Cslib/Computability/Automata/DA/Concat.lean:159 (unusedArguments). Verify with lake lint and lake build afterward; ensure no downstream call sites reference the renamed instance directly.
-
----
-
 ### 442. Modal tableau fmp fuel measure
 - **Effort**: 400-800 lines, multiple dispatches
 - **Status**: [IMPLEMENTING]
@@ -246,64 +234,6 @@ Reference: specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-st
 - **Dependencies**: None
 
 **Description**: Upstream the comment/docstring cleanups identified by the task 431 audit via a CSLib PR. The edits are already applied and committed locally at 35436d7e (chore): (1) deleted the commented-out Term.subst_comm TODO stub in Cslib/Languages/LambdaCalculus/Named/Untyped/Basic.lean, (2) reworded the stale 'removing the sorry' docstring in Cslib/Logics/LTL/Semantics/GNBA.lean:37 to past tense. Both are comment-only (no proof/build impact). Remaining work: submit to leanprover/cslib via /pr (user-only command) with a 'chore'/'doc' prefixed title. Optionally bundle any further doc-hygiene found in those two modules. Source: task 431 audit.
-
----
-
-### 436. Combine inclusions into buchicongr dma language eq and close
-- **Effort**: 1-2 hours
-- **Status**: [ABANDONED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: Task 435, Task 434
-- **Research**: [241_mcnaughton_theorem/reports/03_spawn-analysis.md]
-
-**Description**: Combine the forward inclusion (buchiCongr_DMA_language_forward, from task index 1) and backward inclusion (buchiCongr_DMA_language_backward, from task index 2) via Set / ωLanguage antisymmetry (le_antisymm or Set.Subset.antisymm) to prove `buchiCongr_DMA_language_eq` in Cslib/Computability/Languages/OmegaRegularLanguage.lean. Then: (1) wire the h_pkg obligation in to_da_muller_scaffold (Phase 5 of the original plan); (2) close IsRegular.iff_da_muller (~line 497 of OmegaRegularLanguage.lean, Phase 6 of the original plan); (3) run the full CSLib CI pipeline to green. Full CI pipeline: lake build, lake exe checkInitImports, lake lint, lake exe lint-style, lake test, lake shake --add-public --keep-implied --keep-prefix; lean_verify Cslib.ωLanguage.IsRegular.iff_da_muller (zero sorries, zero new axioms). Add docstrings to all new public lemmas. This task directly applies both named inclusions — the implementer needs their exact types before writing the antisymmetry combination. Topic: Temporal Logic. Parent task: 241.
-
----
-
-### 435. Replace sorry in buchicongr dma language forward using accep
-- **Effort**: 1-2 hours
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: Task 433, Task 434
-- **Research**: [241_mcnaughton_theorem/reports/03_spawn-analysis.md]
-
-**Description**: Replace the sorry-stub `buchiCongr_DMA_language_forward` (language na ⊆ language (buchiCongr_DMA na)) at approximately line 435 of Cslib/Computability/Languages/OmegaRegularLanguage.lean. Apply the accept-membership lemma produced by task index 0 (SUB-A: buchiCongr_DMA_accept_mem or equivalent) and unfold the DA.Muller language definition (language da xs ↔ (da.run xs).infOcc ∈ da.accept, DA/Basic.lean:117), matching infOcc((buchiCongr_DMA na).run xs) against the accept set `{S | ∃ b ∈ S, ∃ a, ((buchiFamily (a,b) ⊓ language na).toSet).Nonempty}`. The implementer must read the exact statement committed by SUB-A to determine the correct existential witnesses and unfolding sequence. CI must pass green (lake build, lean_verify on buchiCongr_DMA_language_forward) with zero sorries. Topic: Temporal Logic. Parent task: 241.
-
----
-
-### 434. Prove backward inclusion buchicongr dma language backward
-- **Effort**: 1-2 hours
-- **Status**: [ABANDONED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: Task 433
-- **Research**: [241_mcnaughton_theorem/reports/03_spawn-analysis.md]
-
-**Description**: Prove the backward inclusion `buchiCongr_DMA_language_backward` (language (buchiCongr_DMA na) ⊆ language na) in Cslib/Computability/Languages/OmegaRegularLanguage.lean. Proceed from accept-set membership: if infOcc(run xs) ∈ accept, there exists b ∈ infOcc(run xs) and a such that (buchiFamily (a,b) ⊓ language na).Nonempty, giving a witness ys ∈ language na. Then use buchiFamily_saturation (BuchiCongruence.lean:181) to lift from the witness to xs ∈ language na. This direction does not depend on the Ramsey/recurrence argument for the forward direction — it can be proven in any order relative to tasks 0 and 1. Exact API: accept set definition of buchiCongr_DMA; buchiFamily_saturation (BuchiCongruence.lean:181); mem_buchiFamily (BuchiCongruence.lean:107). CI must pass green (lake build, lean_verify on buchiCongr_DMA_language_backward) with zero sorries. Topic: Temporal Logic. Parent task: 241.
-
----
-
-### 433. Prove acceptmembership ramsey lemma for buchicongr dma forwa
-- **Effort**: 2-3 hours
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: None
-- **Research**: [241_mcnaughton_theorem/reports/03_spawn-analysis.md]
-
-**Description**: Prove a private named lemma (e.g. `buchiCongr_DMA_accept_mem`) in OmegaRegularLanguage.lean establishing: for any `xs ∈ language na`, the set `infOcc((buchiCongr_DMA na).run xs)` contains a class `b` for which `∃ a, (buchiFamily (a,b) ⊓ language na).Nonempty`. This is the core Ramsey/recurrence argument for the forward inclusion of McNaughton's theorem. Use `buchiCongr_recurrentClass` (private, OmegaRegularLanguage.lean) to extract idempotent `b` and absorbing `a` with `a ∈ infOcc(run xs)`; use `buchiCongr_DMA_run_eq` to connect run states to congruence classes; use `buchiFamily_saturation` (BuchiCongruence.lean:181) and `mem_buchiFamily` (BuchiCongruence.lean:107) to conclude nonemptiness. Exact API map from orchestrator handoff: DA.Muller language at DA/Basic.lean:117; `buchiCongr_recurrentClass` gives a,b with b*b=b, a*b=a, a ∈ infOcc(run xs); `buchiCongr_DMA_run_eq`: (buchiCongr_DMA na).run xs n = ⟦xs.extract 0 n⟧; `buchiFamily_saturation` at BuchiCongruence.lean:181; `mem_infOcc` at InfOcc.lean:88; `frequently_in_finite_type` at InfOcc.lean:46. CI must pass green (lake build, lean_verify on the new lemma) with zero sorries. Topic: Temporal Logic. Parent task: 241.
-
----
-
-### 431. Audit unowned foundational sorries
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Dependencies**: None
-- **Research**: [431_audit_unowned_foundational_sorries/reports/01_unowned-sorries-audit.md]
-
-**Description**: Audit the ~6 'sorry' occurrences that the 2026-06-30 review found with no clear owning task: Cslib/Foundations/Order/HilbertAlgebra.lean, Cslib/Foundations/Logic/Metalogic/GenericMCS.lean, Cslib/Languages/LambdaCalculus/Named/Untyped/Basic.lean, Cslib/Logics/Propositional/Semantics/Algebra/CanAlgComplete.lean, Cslib/Logics/LTL/Semantics/GNBA.lean, and Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean (2). For each: determine whether it is covered by an existing blocked task (36/37/215/275/317/425-427); if genuinely unowned, either close it or document a deferral pointer. Foundational sorries can leak sorryAx into downstream #print axioms checks (CanAlgComplete/GNBA feed completeness/automata). Source: specs/reviews/review-2026-06-30.md medium issue 2.
 
 ---
 
@@ -380,19 +310,6 @@ After implementation:
 - `grep -n sorry Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean` returns nothing.
 - `grep -n sorry Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean` returns nothing.
 - Build remains green (no regressions in Scheme.lean or Soundness files).
-
----
-
-### 427. Temporal tableau propositional truth lemma
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: Task 180, Task 426
-- **Research**: [427_temporal_tableau_propositional_truth_lemma/reports/01_propositional-truth-lemma.md]
-- **Plan**: [427_temporal_tableau_propositional_truth_lemma/plans/02_imp-case-streamlined.md]
-- **Summary**: [427_temporal_tableau_propositional_truth_lemma/summaries/01_partial-summary.md]
-
-**Description**: [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_propositional (atom/bot/imp cases) in Cslib/Logics/Temporal/Tableau/Completeness.lean sorry-free. This obligation is independently provable (no FMP, no dependence on the ordConstraints fix), but exceeds a single agent context window when attempted naively. KEY: the imp case requires generalized STRUCTURAL induction on the formula giving subformula induction hypotheses — NOT induction on the IsPropositional proof (which only yields IHs for the immediate subformulas phi/psi). Adapt the propositional truth lemma from Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean to the time-indexed temporalHintikkaSet/TBranch setting. Reuse already-proved base cases: extractModel_atomPos_sat, extractModel_atom_neg_notSat, extractModel_bot_false. A 1150-line prior attempt (with the structural difficulty diagnosed) is preserved at specs/301_temporal_tableau/.wip-Completeness-truthlemma-attempt.lean for reference. Start from green commit 7f052834. Scope strictly to this one lemma. Independent of tasks 423 and 425.
 
 ---
 
@@ -510,18 +427,6 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 
 ---
 
-### 406. Fix cross-cutting lake lint across Modal/Temporal/Bimodal/Foundations (33)
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Code Hygiene
-- **Dependencies**: None
-- **Research**: [406_fix_crosscutting_lint_modal_temporal_bimodal_foundations/reports/01_crosscutting-lint-fixes.md]
-- **Plan**: [406_fix_crosscutting_lint_modal_temporal_bimodal_foundations/plans/01_crosscutting-lint-fixes.md]
-
-**Description**: NEW from post-merge vet (sess_1782671052_6af6a1). Fix 33 pre-existing lake lint violations (not introduced by the merges but blocking CI globally -> hard repo push gate). Same pattern as the PL GenericMCSBridge/DeductionTheorem fixes (task 386). Modal: Metalogic/GenericMCSBridge.lean defLemma x1 + defsWithUnderscore x3 (deriv_tree_to_list, unfold_listImp_in_tree, list_deriv_to_tree), Tableau/Saturation.lean docBlame x1 (modalExpandBranches.processNext), Metalogic/DeductionTheorem.lean unusedArguments x1 (deductionWithMem arg9). Temporal: Metalogic/GenericMCSBridge.lean defLemma x2 + defsWithUnderscore x5, Tableau/Saturation.lean docBlame x1, Metalogic/DenseMCS.lean unusedArguments x1. Bimodal: Metalogic/Core/GenericMCSBridge.lean defLemma x2 + defsWithUnderscore x6, Metalogic/Core/DeductionTheorem.lean unusedArguments x1. Foundations: HilbertAlgebra/FreeMeetExtension.lean docBlame x7 (fld, fmeLe, fmeEquiv, fmeSetoid, FreeMeetExtension, mk, freeMeetEmbed), Logic/Metalogic/DeductionCharacterization.lean:109 defsWithUnderscore x1 (dt_inference_system). Rename underscores->lowerCamelCase, def->lemma, @[nolint unusedArguments]+comments, add docstrings. ABSORBS stale task 394 (foundations_logic_cleanup). Best coordinated with task 386's GenericMCSBridge renames. Verify `lake lint` green. Source: vet findings.
-
----
-
 ### 405. Proof style cleanup modal soundness
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
@@ -585,7 +490,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: PL-Hygiene
-- **Dependencies**: Task 386, Task 387, Task 389, Task 395
+- **Dependencies**: Task 317, Task 386, Task 387, Task 389, Task 395
 
 **Description**: [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls: Tableau/Classical/Soundness.lean:73-136 (12 classicalApplyOne_* private simp lemmas, 0 calls) + :486, Classical/Completeness.lean:435/447, Tableau/Defs.lean:81 propImpOrNegOf?, Intuitionistic/Rules.lean:114/203, Intuitionistic/Soundness.lean:431/505, NaturalDeduction/Equivalence.lean:305 hilbertAxiomToND, LK/Completeness.lean:69/73 mem_insert_*. Fix Extention->Extension typo (Equivalence.lean:256-257, Defs.lean:190/195). Rename underscore defs: modus_ponens constructor (Derivation.lean:77), lift_int_to_cl, goodSelection_seq, HasFresh to_infinite, emptyHrelation_apply. The LK/LJ cutAdm_*/ljCutAdm_* renames are DROPPED from this task — task 386 OWNS them (defsWithUnderscore). Sequence after 386. Source: §5.3-5.4 + 395.
 
@@ -628,18 +533,6 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Dependencies**: Task 317, Task 363
 
 **Description**: Complete the cross-system equivalence story by folding the tableau (and remaining sequent) decision systems into the proof-system TFAE. Cslib/Logics/Propositional/ProofSystemEquivalence.lean currently proves Hilbert<->ND<->LK for CPL (cplProofSystemsTfae) and Hilbert<->ND<->LJ for IPL (iplProofSystemsTfae), plus the MPL Hilbert<->ND two-way. Add the missing edges so the equivalence is genuinely complete across all proof systems: classical Tautology <-> LK provability <-> closed classical tableau, and intuitionistic validity <-> LJ provability <-> closed intuitionistic tableau, extending the TFAE lists accordingly. Requires the tableau soundness+completeness to be green (task 316 done for soundness; task 317 for completeness) and the classical tableau build repaired (task 363). No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 317, 363.
-
----
-
-### 321. Code hygiene logics foundations
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Code Hygiene
-- **Dependencies**: Task 301
-- **Research**: [321_code_hygiene_logics_foundations/reports/01_code-hygiene-survey.md]
-- **Plan**: [321_code_hygiene_logics_foundations/plans/01_code-hygiene-refactor.md]
-
-**Description**: Review file size and structure throughout Logics/ and Foundations/ to identify and refactor files that are too long or poorly structured. Abstract and expose all and only what should be abstracted/exposed, maintaining the highest standards for code hygiene. Survey file lengths, identify candidates over ~400 lines, check for proper module boundaries, unnecessary public exports, missing abstraction barriers, and violations of single-responsibility principle. Produce a refactoring plan with prioritized actions
 
 ---
 
@@ -726,44 +619,6 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Dependencies**: Task 41, Task 180, Task 181, Task 299, Task 301, Task 317, Task 321, Task 370, Task 375
 
 **Description**: Simplify proofs using new simp/grind normalization tags. After task 268 adds @[simp, scoped grind =] tags to Hilbert system definitional lemmas, audit all proofs in Propositional/, Modal/, Temporal/, and Bimodal/ that use manual `simp only [listImp_nil, listImp_cons, bigconj_nil, ...]` or verbose tactic chains involving these normalization lemmas. Replace with `grind` or `simp` where the new tags make the explicit lemma lists redundant. Also check Foundations/Logic/ proofs. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake
-
----
-
-### 275. Bimodal tm conservative over temporal bx
-- **Status**: [ABANDONED]
-- **Task Type**: cslib
-- **Topic**: Bimodal Porting
-- **Dependencies**: Task 36, Task 39
-- **Research**:
-  - [275_bimodal_tm_conservative_over_temporal_bx/reports/02_team-research.md]
-  - [275_bimodal_tm_conservative_over_temporal_bx/reports/03_team-research.md]
-  - [275_bimodal_tm_conservative_over_temporal_bx/reports/01_tm-over-bx-conservativity.md]
-  - [275_bimodal_tm_conservative_over_temporal_bx/reports/02_teammate-a-findings.md]
-  - [275_bimodal_tm_conservative_over_temporal_bx/reports/02_teammate-b-findings.md]
-  - [275_bimodal_tm_conservative_over_temporal_bx/reports/02_teammate-c-findings.md]
-  - [275_bimodal_tm_conservative_over_temporal_bx/reports/02_teammate-d-findings.md]
-  - [275_bimodal_tm_conservative_over_temporal_bx/reports/03_teammate-a-findings.md]
-  - [275_bimodal_tm_conservative_over_temporal_bx/reports/03_teammate-b-findings.md]
-  - [275_bimodal_tm_conservative_over_temporal_bx/reports/03_teammate-c-findings.md]
-  - [275_bimodal_tm_conservative_over_temporal_bx/reports/03_teammate-d-findings.md]
-- **Plan**: [275_bimodal_tm_conservative_over_temporal_bx/plans/01_tm-over-bx-plan.md]
-
-**Description**: Prove that Bimodal TM is conservative over Temporal BX for temporal formulas (those using only until/since, no box). The Temporal.Formula.toBimodal embedding exists. The lift_derivation_qfree infrastructure in Bimodal/Metalogic/ConservativeExtension/ partially supports this. Requires verifying the lifting extends to temporal connectives.
-
----
-
-### 241. Mcnaughton theorem
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Temporal Logic
-- **Dependencies**: Task 428, Task 429, Task 433, Task 434, Task 435, Task 436
-- **Research**:
-  - [241_mcnaughton_theorem/reports/01_ctchou-coordination-seed.md]
-  - [241_mcnaughton_theorem/reports/02_mcnaughton-ctchou-port-path.md]
-- **Plan**: [241_mcnaughton_theorem/plans/01_mcnaughton-da-muller.md]
-- **Summary**: [241_mcnaughton_theorem/summaries/01_mcnaughton-da-muller-summary.md]
-
-**Description**: Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller): ω-regular ↔ deterministic Muller. ARCHITECTURE (plan v2): forward direction via the Choueka decomposition route — eq_fin_iSup_hmul_omegaPow finite-union decomposition + the existing DA.concat/mullerAccConcat flag construction + new omegaPow_da_muller + DMA finite-union closure — routing around the abandoned buchiCongr_DMA quotient-as-DMA construction (task 434 soundness gap). Backward direction reuses green IsRegular.of_da_muller. Missing analytic lemmas narrowed to three: concat_language_eq, omegaPow_da_muller, DA.Muller.union. See plans/02_mcnaughton-choueka-route.md.
 
 ---
 

@@ -47,37 +47,6 @@
       ]
     },
     {
-      "project_number": 443,
-      "project_name": "fix_lint_mcnaughton_choueka_concat",
-      "status": "completed",
-      "task_type": "cslib",
-      "title": "Fix lint violations in McNaughton-theorem Choueka/Concat route (task 241)",
-      "description": "Address the 2 lake lint violations introduced by task 241: rename the underscored instance buchiCongruence_instMonoid in Cslib/Computability/Languages/Congruences/BuchiCongruence.lean:263 (defsWithUnderscore), and silence or restructure the unused-argument warning on mullerAccConcat in Cslib/Computability/Automata/DA/Concat.lean:159 (unusedArguments). Verify with lake lint and lake build afterward; ensure no downstream call sites reference the renamed instance directly.",
-      "parent_task": 241,
-      "created": "2026-07-01T05:04:42Z",
-      "last_updated": "2026-07-01T05:17:06Z",
-      "next_artifact_number": 1,
-      "artifacts": [
-        {
-          "path": "specs/443_fix_lint_mcnaughton_choueka_concat/reports/01_lint-fix-241.md",
-          "type": "report",
-          "summary": "Lint fix research for task 241 violations"
-        },
-        {
-          "path": "specs/443_fix_lint_mcnaughton_choueka_concat/plans/01_lint-fix-241.md",
-          "type": "plan",
-          "summary": "Single-phase lint fix plan for task 241 violations"
-        },
-        {
-          "path": "specs/443_fix_lint_mcnaughton_choueka_concat/summaries/01_lint-fix-241-summary.md",
-          "type": "summary",
-          "summary": "Lint fix implementation summary"
-        }
-      ],
-      "session_id": "sess_1782882476_455d76",
-      "completion_summary": "Cleared 2 lake lint violations from task 241: renamed instance buchiCongruence_instMonoid -> buchiCongruenceMonoid (defsWithUnderscore) and added @[nolint unusedArguments] to mullerAccConcat (unusedArguments). All scoped builds + lake lint + full lake build pass."
-    },
-    {
       "project_number": 440,
       "project_name": "review_pr_leanprover_cslib_648",
       "status": "not_started",
@@ -106,33 +75,6 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "topic": "pr-review"
-    },
-    {
-      "project_number": 406,
-      "project_name": "fix_crosscutting_lint_modal_temporal_bimodal_foundations",
-      "status": "completed",
-      "task_type": "cslib",
-      "title": "Fix cross-cutting lake lint across Modal/Temporal/Bimodal/Foundations (33)",
-      "description": "NEW from post-merge vet (sess_1782671052_6af6a1). Fix 33 pre-existing lake lint violations (not introduced by the merges but blocking CI globally -> hard repo push gate). Same pattern as the PL GenericMCSBridge/DeductionTheorem fixes (task 386). Modal: Metalogic/GenericMCSBridge.lean defLemma x1 + defsWithUnderscore x3 (deriv_tree_to_list, unfold_listImp_in_tree, list_deriv_to_tree), Tableau/Saturation.lean docBlame x1 (modalExpandBranches.processNext), Metalogic/DeductionTheorem.lean unusedArguments x1 (deductionWithMem arg9). Temporal: Metalogic/GenericMCSBridge.lean defLemma x2 + defsWithUnderscore x5, Tableau/Saturation.lean docBlame x1, Metalogic/DenseMCS.lean unusedArguments x1. Bimodal: Metalogic/Core/GenericMCSBridge.lean defLemma x2 + defsWithUnderscore x6, Metalogic/Core/DeductionTheorem.lean unusedArguments x1. Foundations: HilbertAlgebra/FreeMeetExtension.lean docBlame x7 (fld, fmeLe, fmeEquiv, fmeSetoid, FreeMeetExtension, mk, freeMeetEmbed), Logic/Metalogic/DeductionCharacterization.lean:109 defsWithUnderscore x1 (dt_inference_system). Rename underscores->lowerCamelCase, def->lemma, @[nolint unusedArguments]+comments, add docstrings. ABSORBS stale task 394 (foundations_logic_cleanup). Best coordinated with task 386's GenericMCSBridge renames. Verify `lake lint` green. Source: vet findings.",
-      "created": "2026-06-28T18:34:49Z",
-      "last_updated": "2026-06-30T17:53:09Z",
-      "next_artifact_number": 1,
-      "artifacts": [
-        {
-          "path": "specs/406_fix_crosscutting_lint_modal_temporal_bimodal_foundations/reports/01_crosscutting-lint-fixes.md",
-          "type": "report",
-          "summary": "Mapped all 33 lint violations to exact locations and mechanical fix recipes (task 386 pattern)"
-        },
-        {
-          "path": "specs/406_fix_crosscutting_lint_modal_temporal_bimodal_foundations/plans/01_crosscutting-lint-fixes.md",
-          "type": "plan",
-          "summary": "5-phase plan clearing all 33 lint violations grouped by area with final build-then-lint gate"
-        }
-      ],
-      "session_id": "sess_1782838873_48a805",
-      "dependencies": [],
-      "topic": "Code Hygiene",
-      "completion_summary": "Cleared all 33 pre-existing lake lint violations across Modal/Temporal/Bimodal/Foundations (snake_case→camelCase renames, def→lemma, @[nolint] attrs, docstrings); generalizes task 386 pattern. All 9 target modules build clean, zero sorries. Committed d11d0692."
     },
     {
       "project_number": 389,
@@ -202,6 +144,7 @@
       "artifacts": [],
       "session_id": "sess_1782651207_1e893c_392",
       "dependencies": [
+        317,
         386,
         387,
         389,
@@ -227,33 +170,6 @@
         395
       ],
       "topic": "PL-Hygiene"
-    },
-    {
-      "project_number": 321,
-      "project_name": "code_hygiene_logics_foundations",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "Review file size and structure throughout Logics/ and Foundations/ to identify and refactor files that are too long or poorly structured. Abstract and expose all and only what should be abstracted/exposed, maintaining the highest standards for code hygiene. Survey file lengths, identify candidates over ~400 lines, check for proper module boundaries, unnecessary public exports, missing abstraction barriers, and violations of single-responsibility principle. Produce a refactoring plan with prioritized actions",
-      "topic": "Code Hygiene",
-      "created": "2026-06-24T10:46:01Z",
-      "last_updated": "2026-06-30T20:58:38Z",
-      "session_id": "sess_1782838873_48a805",
-      "artifacts": [
-        {
-          "path": "specs/321_code_hygiene_logics_foundations/reports/01_code-hygiene-survey.md",
-          "type": "report",
-          "summary": "Size-debt survey: 85 files >400 lines, four 2700-3566-line Chronicle mega-files, zero-private metalogic gap"
-        },
-        {
-          "path": "specs/321_code_hygiene_logics_foundations/plans/01_code-hygiene-refactor.md",
-          "type": "plan",
-          "summary": "7-phase incremental refactor: privatize helpers, validate barrel-split, split 4 Chronicle mega-files one per phase"
-        }
-      ],
-      "dependencies": [
-        301
-      ],
-      "completion_summary": "Split all four Bimodal/Temporal Chronicle mega-files (2731-3566 lines) into barrel + submodules and privatized internal helpers across 7 phases; public API preserved via original module paths, each phase committed green, zero sorries/axioms. Deferred: Bimodal/Temporal Chronicle divergence investigation and second-tier 1000-1700 line splits."
     },
     {
       "project_number": 317,
@@ -476,130 +392,6 @@
         413,
         414
       ]
-    },
-    {
-      "project_number": 275,
-      "project_name": "bimodal_tm_conservative_over_temporal_bx",
-      "status": "abandoned",
-      "task_type": "cslib",
-      "description": "Prove that Bimodal TM is conservative over Temporal BX for temporal formulas (those using only until/since, no box). The Temporal.Formula.toBimodal embedding exists. The lift_derivation_qfree infrastructure in Bimodal/Metalogic/ConservativeExtension/ partially supports this. Requires verifying the lifting extends to temporal connectives.",
-      "last_updated": "2026-07-01T05:38:47Z",
-      "session_id": "sess_1782164778_60175c",
-      "next_artifact_number": 4,
-      "researched": "2026-06-23T02:34:30Z",
-      "artifacts": [
-        {
-          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/02_team-research.md",
-          "type": "research",
-          "summary": "Team research with 4 teammates — domain mismatch analysis and resolution strategies"
-        },
-        {
-          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/03_team-research.md",
-          "type": "research",
-          "summary": "Team research with 4 teammates: semantic transfer via order isomorphism identified as correct approach; base BX ChronicleSubtype density is the critical open question"
-        },
-        {
-          "type": "report",
-          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/01_tm-over-bx-conservativity.md",
-          "summary": "Research Report: Bimodal TM Conservative over Temporal BX"
-        },
-        {
-          "type": "report",
-          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/02_teammate-a-findings.md",
-          "summary": "Task 275 Research: Contrapositive Approach via Completeness Internals"
-        },
-        {
-          "type": "report",
-          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/02_teammate-b-findings.md",
-          "summary": "Teammate B Research Findings: Alternative Strategies for Task 275"
-        },
-        {
-          "type": "report",
-          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/02_teammate-c-findings.md",
-          "summary": "Task 275: Critic Findings — Bimodal TM Conservative over Temporal BX"
-        },
-        {
-          "type": "report",
-          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/02_teammate-d-findings.md",
-          "summary": "Horizons Research: Task 275 Strategic Context"
-        },
-        {
-          "type": "report",
-          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/03_teammate-a-findings.md",
-          "summary": "Teammate A Findings: Primary Approach for Temporal Conservativity"
-        },
-        {
-          "type": "report",
-          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/03_teammate-b-findings.md",
-          "summary": "Task 275 Teammate B Findings: Alternative Approaches to Temporal Conservativity"
-        },
-        {
-          "type": "report",
-          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/03_teammate-c-findings.md",
-          "summary": "Critic Findings: Task 275 — Bimodal TM Conservative over Temporal BX"
-        },
-        {
-          "type": "report",
-          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/reports/03_teammate-d-findings.md",
-          "summary": "Strategic Horizons: Task 275 — Bimodal TM Conservative over Temporal BX"
-        },
-        {
-          "type": "plan",
-          "path": "specs/275_bimodal_tm_conservative_over_temporal_bx/plans/01_tm-over-bx-plan.md",
-          "summary": "Implementation Plan: Task #275 -- Bimodal TM Conservative over Temporal BX"
-        }
-      ],
-      "dependencies": [
-        36,
-        39
-      ],
-      "topic": "Bimodal Porting",
-      "completion_summary": "Abandoned: goal (prove Bimodal TM conservative over Temporal BX) fully subsumed by task #445, which eliminates the load-bearing sorry in temporal_valid_of_bimodal_derivable / bimodal_conservative_over_temporal and refactors the model-transfer layer. See #445.",
-      "superseded_by": 445
-    },
-    {
-      "project_number": 241,
-      "project_name": "mcnaughton_theorem",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller): ω-regular ↔ deterministic Muller. ARCHITECTURE (plan v2): forward direction via the Choueka decomposition route — eq_fin_iSup_hmul_omegaPow finite-union decomposition + the existing DA.concat/mullerAccConcat flag construction + new omegaPow_da_muller + DMA finite-union closure — routing around the abandoned buchiCongr_DMA quotient-as-DMA construction (task 434 soundness gap). Backward direction reuses green IsRegular.of_da_muller. Missing analytic lemmas narrowed to three: concat_language_eq, omegaPow_da_muller, DA.Muller.union. See plans/02_mcnaughton-choueka-route.md.",
-      "topic": "Temporal Logic",
-      "created": "2026-06-19T05:20:19Z",
-      "last_updated": "2026-06-30T21:09:38Z",
-      "dependencies": [
-        428,
-        429,
-        433,
-        434,
-        435,
-        436
-      ],
-      "next_artifact_number": 5,
-      "artifacts": [
-        {
-          "type": "report",
-          "path": "specs/241_mcnaughton_theorem/reports/01_ctchou-coordination-seed.md",
-          "summary": "Seed report: ctchou/AutomataTheory coordination assessment for McNaughton theorem"
-        },
-        {
-          "type": "report",
-          "path": "specs/241_mcnaughton_theorem/reports/02_mcnaughton-ctchou-port-path.md",
-          "summary": "ctchou=Chou is core CSLib contributor; CSLib automata stack is his AutomataTheory port. Complete first-party port via Choueka congruence machinery."
-        },
-        {
-          "type": "plan",
-          "path": "specs/241_mcnaughton_theorem/plans/01_mcnaughton-da-muller.md",
-          "summary": "6-phase plan: reverse DMA→NBA first, then forward determinization via Choueka saturation. Zero-debt; BLOCKED contingency."
-        },
-        {
-          "type": "summary",
-          "path": "specs/241_mcnaughton_theorem/summaries/01_mcnaughton-da-muller-summary.md",
-          "summary": "Phase 1 committed (c4d3869d): reverse direction IsRegular.of_da_muller proved sorry-free. Forward direction remains proof_wanted."
-        }
-      ],
-      "session_id": "sess_1782832881_8335e5",
-      "previous_status": "implementing",
-      "completion_summary": "McNaughton's theorem proved: IsRegular.iff_da_muller is a complete sorry-free theorem (ω-regular ↔ deterministic Muller), axiom-clean (propext, Classical.choice, Quot.sound). All 6 phases of plan v2 (Choueka decomposition route) green and committed: (1) deprecated abandoned buchiCongr_DMA path; (2) concat_language_eq (+fixed a latent DA.concat construction bug from task 432); (3) omegaPow_da_muller via new DA.Choueka.lean (Choueka identity M^ω=M*·U↗ω, Ramsey reverse inclusion); (4) DA.Muller.union finite-union closure (new MullerClosure.lean); (5) IsRegular.to_da_muller forward assembly; (6) final theorem + dead-cluster removal. Verified via scoped lake builds. CAVEAT: whole-project CI (lake test/checkInitImports/shake/lint-style) deferred — the shared tree has unrelated mid-edit breakage from tasks 180/442 (Logics/Modal/Tableau, Logics/Temporal). Follow-up: rerun full CI once tree unbreaks, then /vet 241 or /pr 241. Note: orphaned support lemma buchiCongruence_recurrentPrefixClass (ex-428/429 infra) remains — flag for /vet cleanup."
     },
     {
       "project_number": 226,
@@ -1210,37 +1002,6 @@
       "previous_status": "partial"
     },
     {
-      "project_number": 427,
-      "project_name": "temporal_tableau_propositional_truth_lemma",
-      "status": "completed",
-      "task_type": "cslib",
-      "topic": "Temporal Logic",
-      "description": "[Decomposed from task 301, blocker B.] Prove temporalTruthLemma_propositional (atom/bot/imp cases) in Cslib/Logics/Temporal/Tableau/Completeness.lean sorry-free. This obligation is independently provable (no FMP, no dependence on the ordConstraints fix), but exceeds a single agent context window when attempted naively. KEY: the imp case requires generalized STRUCTURAL induction on the formula giving subformula induction hypotheses — NOT induction on the IsPropositional proof (which only yields IHs for the immediate subformulas phi/psi). Adapt the propositional truth lemma from Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean to the time-indexed temporalHintikkaSet/TBranch setting. Reuse already-proved base cases: extractModel_atomPos_sat, extractModel_atom_neg_notSat, extractModel_bot_false. A 1150-line prior attempt (with the structural difficulty diagnosed) is preserved at specs/301_temporal_tableau/.wip-Completeness-truthlemma-attempt.lean for reference. Start from green commit 7f052834. Scope strictly to this one lemma. Independent of tasks 423 and 425.",
-      "created": "2026-06-30T10:57:13Z",
-      "last_updated": "2026-07-01T05:02:54Z",
-      "next_artifact_number": 1,
-      "artifacts": [
-        {
-          "type": "report",
-          "path": "specs/427_temporal_tableau_propositional_truth_lemma/reports/01_propositional-truth-lemma.md"
-        },
-        {
-          "type": "plan",
-          "path": "specs/427_temporal_tableau_propositional_truth_lemma/plans/02_imp-case-streamlined.md"
-        },
-        {
-          "type": "summary",
-          "path": "specs/427_temporal_tableau_propositional_truth_lemma/summaries/01_partial-summary.md"
-        }
-      ],
-      "dependencies": [
-        180,
-        426
-      ],
-      "parent_task": 301,
-      "completion_summary": "Closed as complete: the sole remaining obligation (imp case of temporalTruthLemma_propositional_aux in Cslib/Logics/Temporal/Tableau/Completeness.lean) was proved sorry-free as a side effect of task 180 phase 8 (commit 4a92f02c, \"Completeness aux lemma fixed\"), which rewrote the tableau subtree to be total over the new primitive G/H constructors. The lemma chain is sorry-free on current HEAD; task 180's CI verified completeness via lean_verify (zero sorry). No separate implementation needed."
-    },
-    {
       "project_number": 425,
       "project_name": "temporal_tableau_ptl_fmp_decidability",
       "status": "not_started",
@@ -1291,120 +1052,6 @@
       "session_id": "sess_1782818058_465873",
       "researched": "2026-06-30T11:25:59Z",
       "next_artifact_number": 4
-    },
-    {
-      "project_number": 431,
-      "project_name": "audit_unowned_foundational_sorries",
-      "status": "completed",
-      "task_type": "cslib",
-      "priority": "medium",
-      "description": "Audit the ~6 'sorry' occurrences that the 2026-06-30 review found with no clear owning task: Cslib/Foundations/Order/HilbertAlgebra.lean, Cslib/Foundations/Logic/Metalogic/GenericMCS.lean, Cslib/Languages/LambdaCalculus/Named/Untyped/Basic.lean, Cslib/Logics/Propositional/Semantics/Algebra/CanAlgComplete.lean, Cslib/Logics/LTL/Semantics/GNBA.lean, and Cslib/Logics/Propositional/NaturalDeduction/Normalization/Termination.lean (2). For each: determine whether it is covered by an existing blocked task (36/37/215/275/317/425-427); if genuinely unowned, either close it or document a deferral pointer. Foundational sorries can leak sorryAx into downstream #print axioms checks (CanAlgComplete/GNBA feed completeness/automata). Source: specs/reviews/review-2026-06-30.md medium issue 2.",
-      "created": "2026-06-30T11:17:18Z",
-      "last_updated": "2026-06-30T15:26:42Z",
-      "session_id": "sess_1782832854_3aada0",
-      "completion_summary": "Audit complete: zero genuine sorry debt. All 7 review-flagged occurrences across the 6 files are docstring/comment text or a commented-out TODO stub, not live sorries. lean_verify confirmed axioms:[] (no sorryAx) on the two propagation-risk theorems Cslib.Logic.LTL.Formula.isRegular and Cslib.Logic.PL.canAlgComplete_iff. None owned by tasks 36/37/215/275/317/425-427 (those own real sorries in Bimodal/Tableau/Temporal files, no overlap). Review Medium issue 2 was a raw-text census false positive; root cause is census tooling counting comment/docstring lines. No new tracking task warranted. Optional low-priority cosmetic cleanups noted in report.",
-      "completed_date": "2026-06-30T15:27:11Z",
-      "artifacts": [
-        {
-          "type": "report",
-          "path": "specs/431_audit_unowned_foundational_sorries/reports/01_unowned-sorries-audit.md",
-          "summary": "Per-sorry ownership map and disposition: all 7 occurrences are non-debt comment/docstring text"
-        }
-      ]
-    },
-    {
-      "project_number": 433,
-      "project_name": "prove_acceptmembership_ramsey_lemma_for_buchicongr_dma_forwa",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "Prove a private named lemma (e.g. `buchiCongr_DMA_accept_mem`) in OmegaRegularLanguage.lean establishing: for any `xs ∈ language na`, the set `infOcc((buchiCongr_DMA na).run xs)` contains a class `b` for which `∃ a, (buchiFamily (a,b) ⊓ language na).Nonempty`. This is the core Ramsey/recurrence argument for the forward inclusion of McNaughton's theorem. Use `buchiCongr_recurrentClass` (private, OmegaRegularLanguage.lean) to extract idempotent `b` and absorbing `a` with `a ∈ infOcc(run xs)`; use `buchiCongr_DMA_run_eq` to connect run states to congruence classes; use `buchiFamily_saturation` (BuchiCongruence.lean:181) and `mem_buchiFamily` (BuchiCongruence.lean:107) to conclude nonemptiness. Exact API map from orchestrator handoff: DA.Muller language at DA/Basic.lean:117; `buchiCongr_recurrentClass` gives a,b with b*b=b, a*b=a, a ∈ infOcc(run xs); `buchiCongr_DMA_run_eq`: (buchiCongr_DMA na).run xs n = ⟦xs.extract 0 n⟧; `buchiFamily_saturation` at BuchiCongruence.lean:181; `mem_infOcc` at InfOcc.lean:88; `frequently_in_finite_type` at InfOcc.lean:46. CI must pass green (lake build, lean_verify on the new lemma) with zero sorries. Topic: Temporal Logic. Parent task: 241.",
-      "effort": "2-3 hours",
-      "parent_task": 241,
-      "topic": "Temporal Logic",
-      "dependencies": [],
-      "created": "2026-06-30T15:25:41Z",
-      "last_updated": "2026-06-30T20:20:25Z",
-      "artifacts": [
-        {
-          "type": "research",
-          "path": "specs/241_mcnaughton_theorem/reports/03_spawn-analysis.md",
-          "summary": "Spawn analysis from parent task 241"
-        }
-      ],
-      "session_id": "sess_1782843132_748805_433",
-      "completion_summary": "Proved private lemma buchiCongr_DMA_accept_mem in OmegaRegularLanguage.lean — the Ramsey/recurrence core of McNaughton forward inclusion: for xs ∈ language na, infOcc of the buchiCongr_DMA run contains a recurrent prefix class a paired with some b giving a nonempty buchiFamily(a,b) ⊓ language na. Uses infinite_graph_ramsey on the prefix coloring to extract idempotent b, absorbing a, and a concrete buchiFamily decomposition of xs. Sorry-free; axioms [propext, Classical.choice, Quot.sound]. Module builds green."
-    },
-    {
-      "project_number": 434,
-      "project_name": "prove_backward_inclusion_buchicongr_dma_language_backward",
-      "status": "abandoned",
-      "task_type": "cslib",
-      "description": "Prove the backward inclusion `buchiCongr_DMA_language_backward` (language (buchiCongr_DMA na) ⊆ language na) in Cslib/Computability/Languages/OmegaRegularLanguage.lean. Proceed from accept-set membership: if infOcc(run xs) ∈ accept, there exists b ∈ infOcc(run xs) and a such that (buchiFamily (a,b) ⊓ language na).Nonempty, giving a witness ys ∈ language na. Then use buchiFamily_saturation (BuchiCongruence.lean:181) to lift from the witness to xs ∈ language na. This direction does not depend on the Ramsey/recurrence argument for the forward direction — it can be proven in any order relative to tasks 0 and 1. Exact API: accept set definition of buchiCongr_DMA; buchiFamily_saturation (BuchiCongruence.lean:181); mem_buchiFamily (BuchiCongruence.lean:107). CI must pass green (lake build, lean_verify on buchiCongr_DMA_language_backward) with zero sorries. Topic: Temporal Logic. Parent task: 241.",
-      "effort": "1-2 hours",
-      "parent_task": 241,
-      "topic": "Temporal Logic",
-      "dependencies": [
-        433
-      ],
-      "created": "2026-06-30T15:25:41Z",
-      "last_updated": "2026-06-30T22:49:14Z",
-      "artifacts": [
-        {
-          "type": "research",
-          "path": "specs/241_mcnaughton_theorem/reports/03_spawn-analysis.md",
-          "summary": "Spawn analysis from parent task 241"
-        }
-      ],
-      "session_id": "sess_1782850760_91e823_434",
-      "completion_summary": "Abandoned: obsolete under task 241 plan v2 (Choueka-route pivot). The buchiCongr_DMA quotient-as-DMA construction this task's backward inclusion targeted is being deleted; the accept set was unsound for the ⊆ direction. McNaughton backward direction now reuses green IsRegular.of_da_muller instead."
-    },
-    {
-      "project_number": 435,
-      "project_name": "replace_sorry_in_buchicongr_dma_language_forward_using_accep",
-      "status": "completed",
-      "task_type": "cslib",
-      "description": "Replace the sorry-stub `buchiCongr_DMA_language_forward` (language na ⊆ language (buchiCongr_DMA na)) at approximately line 435 of Cslib/Computability/Languages/OmegaRegularLanguage.lean. Apply the accept-membership lemma produced by task index 0 (SUB-A: buchiCongr_DMA_accept_mem or equivalent) and unfold the DA.Muller language definition (language da xs ↔ (da.run xs).infOcc ∈ da.accept, DA/Basic.lean:117), matching infOcc((buchiCongr_DMA na).run xs) against the accept set `{S | ∃ b ∈ S, ∃ a, ((buchiFamily (a,b) ⊓ language na).toSet).Nonempty}`. The implementer must read the exact statement committed by SUB-A to determine the correct existential witnesses and unfolding sequence. CI must pass green (lake build, lean_verify on buchiCongr_DMA_language_forward) with zero sorries. Topic: Temporal Logic. Parent task: 241.",
-      "effort": "1-2 hours",
-      "parent_task": 241,
-      "topic": "Temporal Logic",
-      "dependencies": [
-        433,
-        434
-      ],
-      "created": "2026-06-30T15:25:42Z",
-      "last_updated": "2026-06-30T20:20:25Z",
-      "artifacts": [
-        {
-          "type": "research",
-          "path": "specs/241_mcnaughton_theorem/reports/03_spawn-analysis.md",
-          "summary": "Spawn analysis from parent task 241"
-        }
-      ],
-      "completion_summary": "Replaced the sorry in buchiCongr_DMA_language_forward (language na ⊆ language (buchiCongr_DMA na)). After fixing the ωLanguage→Set coercion (change/simp only [buchiCongr_DMA, Set.mem_setOf_eq] instead of the broken rw [ωAcceptor.mem_language]), the forward inclusion closes directly via exact buchiCongr_DMA_accept_mem na xs hxs. Sorry-free; module builds green."
-    },
-    {
-      "project_number": 436,
-      "project_name": "combine_inclusions_into_buchicongr_dma_language_eq_and_close",
-      "status": "abandoned",
-      "task_type": "cslib",
-      "description": "Combine the forward inclusion (buchiCongr_DMA_language_forward, from task index 1) and backward inclusion (buchiCongr_DMA_language_backward, from task index 2) via Set / ωLanguage antisymmetry (le_antisymm or Set.Subset.antisymm) to prove `buchiCongr_DMA_language_eq` in Cslib/Computability/Languages/OmegaRegularLanguage.lean. Then: (1) wire the h_pkg obligation in to_da_muller_scaffold (Phase 5 of the original plan); (2) close IsRegular.iff_da_muller (~line 497 of OmegaRegularLanguage.lean, Phase 6 of the original plan); (3) run the full CSLib CI pipeline to green. Full CI pipeline: lake build, lake exe checkInitImports, lake lint, lake exe lint-style, lake test, lake shake --add-public --keep-implied --keep-prefix; lean_verify Cslib.ωLanguage.IsRegular.iff_da_muller (zero sorries, zero new axioms). Add docstrings to all new public lemmas. This task directly applies both named inclusions — the implementer needs their exact types before writing the antisymmetry combination. Topic: Temporal Logic. Parent task: 241.",
-      "effort": "1-2 hours",
-      "parent_task": 241,
-      "topic": "Temporal Logic",
-      "dependencies": [
-        435,
-        434
-      ],
-      "created": "2026-06-30T15:25:42Z",
-      "last_updated": "2026-06-30T22:49:14Z",
-      "artifacts": [
-        {
-          "type": "research",
-          "path": "specs/241_mcnaughton_theorem/reports/03_spawn-analysis.md",
-          "summary": "Spawn analysis from parent task 241"
-        }
-      ],
-      "completion_summary": "Abandoned: obsolete under task 241 plan v2 (Choueka-route pivot). The proof_wanted buchiCongr_DMA_language_eq this task aimed to combine inclusions into is being deleted; language equality is now obtained compositionally via the Choueka decomposition (eq_fin_iSup_hmul_omegaPow + DA.concat + omegaPow_da_muller + DMA union)."
     },
     {
       "project_number": 438,
@@ -1537,10 +1184,11 @@
     }
   ],
   "repository_health": {
-    "last_assessed": "2026-06-30T14:52:24Z",
-    "status": "healthy",
-    "todo_count": 22,
-    "fixme_count": 0
+    "last_assessed": "2026-07-01T05:49:41Z",
+    "todo_count": 23,
+    "fixme_count": 0,
+    "build_errors": 1,
+    "status": "needs_attention"
   },
   "active_topics": [
     "Bimodal Porting",

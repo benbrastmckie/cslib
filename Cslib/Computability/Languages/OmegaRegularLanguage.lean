@@ -8,6 +8,8 @@ module
 
 public import Cslib.Computability.Automata.DA.Buchi
 public import Cslib.Computability.Automata.DA.BuchiChar
+public import Cslib.Computability.Automata.DA.Choueka
+public import Cslib.Computability.Automata.DA.Concat
 public import Cslib.Computability.Automata.NA.BuchiEquiv
 public import Cslib.Computability.Automata.NA.BuchiInter
 public import Cslib.Computability.Automata.NA.Sum
@@ -84,6 +86,30 @@ theorem IsRegular.omegaLim_da_muller {l : Language Symbol} (h : l.IsRegular) :
   obtain ⟨State, _, ⟨da, acc⟩, rfl⟩ := Language.IsRegular.iff_dfa.mp h
   exact ⟨State, inferInstance, (DA.Buchi.mk da acc).toMuller,
     by grind [DA.Buchi.toMuller_language_eq, DA.buchi_eq_finAcc_omegaLim]⟩
+
+/-- The ω-power of a regular language is recognized by a finite-state deterministic Muller
+automaton, via the Choueka route (task 241, McNaughton's theorem, Phase 3): decompose `l∗` as
+a DFA language, take its Choueka language `U` (regular, via `DA.chouekaLang_regular`), obtain a
+DMA for `U↗ω` (the base case, `omegaLim_da_muller` above), and combine the two via the Choueka
+identity `DA.chouekaLang_omega_power_eq_omega_limit` and the concat-automaton correctness
+`DA.concat_language_eq` (Phase 2). -/
+theorem IsRegular.omegaPow_da_muller [Inhabited Symbol] {l : Language Symbol}
+    (h : l.IsRegular) :
+    ∃ (State : Type) (_ : Finite State) (da : DA.Muller State Symbol),
+      language da = l^ω := by
+  obtain ⟨State1, hfin1, dfa, hdfa⟩ := Language.IsRegular.iff_dfa.mp (Language.IsRegular.kstar h)
+  haveI := hfin1
+  have hU_reg : (DA.chouekaLang dfa.toDA dfa.accept).IsRegular :=
+    DA.chouekaLang_regular dfa.toDA dfa.accept
+  obtain ⟨State2, hfin2, da2, hda2⟩ := IsRegular.omegaLim_da_muller hU_reg
+  haveI := hfin2
+  refine ⟨State1 × (Fin (Nat.card State2 + 2) → Option State2), inferInstance,
+    DA.Muller.mk (DA.concat dfa.toDA dfa.accept da2.toDA)
+      (DA.mullerAccConcat dfa.toDA dfa.accept da2.toDA da2.accept), ?_⟩
+  rw [DA.concat_language_eq]
+  rw [show DA.FinAcc.mk dfa.toDA dfa.accept = dfa from rfl, hdfa,
+    show DA.Muller.mk da2.toDA da2.accept = da2 from rfl, hda2]
+  exact (DA.chouekaLang_omega_power_eq_omega_limit dfa.toDA dfa.accept hdfa).symm
 
 open ωLanguage in
 /-- The empty language is ω-regular. -/

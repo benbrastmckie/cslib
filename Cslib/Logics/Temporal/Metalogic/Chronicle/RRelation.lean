@@ -480,11 +480,20 @@ theorem neg_allPast_neg_to_somePast {M : Set (Formula Atom)}
     (h_mcs : Temporal.SetMaximalConsistent M) (α : Formula Atom)
     (h : Formula.neg (Formula.allPast (Formula.neg α)) ∈ M) :
     (𝐏α) ∈ M := by
+  -- Task 180 (F1): h : ¬H(¬α) ∈ M is no longer defeq to ¬¬P(¬¬α) ∈ M now that H is
+  -- primitive; convert via mcs_not_allPast_iff (through mcs_not_mem_of_neg) before the
+  -- unchanged DNE + BX3' body below.
+  have h_not_H : Formula.allPast α.neg ∉ M := mcs_not_mem_of_neg h_mcs h
+  have h_P_nn : Formula.somePast α.neg.neg ∈ M := (mcs_not_allPast_iff h_mcs).mp h_not_H
+  have h' : Formula.neg (Formula.neg (Formula.somePast α.neg.neg)) ∈ M := by
+    have h_dni' : DerivationTree FrameClass.Base [] ((Formula.somePast α.neg.neg).imp (Formula.somePast α.neg.neg).neg.neg) :=
+      dni (Formula.somePast α.neg.neg)
+    exact temporal_implication_property h_mcs (theoremInMcs h_mcs h_dni') h_P_nn
   -- ¬H(¬α) gives P(¬¬α) by DNE, then BX3' converts to P(α)
   have h_dne_P : Formula.somePast (α.neg.neg) ∈ M := by
     have h_dne : DerivationTree FrameClass.Base [] ((Formula.somePast α.neg.neg).neg.neg.imp (Formula.somePast α.neg.neg)) :=
       doubleNegation (Formula.somePast α.neg.neg)
-    exact temporal_implication_property h_mcs (theoremInMcs h_mcs h_dne) h
+    exact temporal_implication_property h_mcs (theoremInMcs h_mcs h_dne) h'
   have h_dne_ax : DerivationTree FrameClass.Base [] (α.neg.neg.imp α) := doubleNegation α
   have h_H_dne : DerivationTree FrameClass.Base [] ((α.neg.neg.imp α).allPast) :=
     pastNecessitation _ h_dne_ax
@@ -500,10 +509,19 @@ theorem neg_allFuture_neg_to_someFuture {M : Set (Formula Atom)}
     (h_mcs : Temporal.SetMaximalConsistent M) (γ : Formula Atom)
     (h : Formula.neg (Formula.allFuture (Formula.neg γ)) ∈ M) :
     (𝐅γ) ∈ M := by
+  -- Task 180 (F1): h : ¬G(¬γ) ∈ M is no longer defeq to ¬¬F(¬¬γ) ∈ M now that G is
+  -- primitive; convert via mcs_not_allFuture_iff (through mcs_not_mem_of_neg) before the
+  -- unchanged DNE + BX3 body below.
+  have h_not_G : Formula.allFuture γ.neg ∉ M := mcs_not_mem_of_neg h_mcs h
+  have h_F_nn : Formula.someFuture γ.neg.neg ∈ M := (mcs_not_allFuture_iff h_mcs).mp h_not_G
+  have h' : Formula.neg (Formula.neg (Formula.someFuture γ.neg.neg)) ∈ M := by
+    have h_dni' : DerivationTree FrameClass.Base [] ((Formula.someFuture γ.neg.neg).imp (Formula.someFuture γ.neg.neg).neg.neg) :=
+      dni (Formula.someFuture γ.neg.neg)
+    exact temporal_implication_property h_mcs (theoremInMcs h_mcs h_dni') h_F_nn
   have h_dne_F : Formula.someFuture (γ.neg.neg) ∈ M := by
     have h_dne : DerivationTree FrameClass.Base [] ((Formula.someFuture γ.neg.neg).neg.neg.imp (Formula.someFuture γ.neg.neg)) :=
       doubleNegation (Formula.someFuture γ.neg.neg)
-    exact temporal_implication_property h_mcs (theoremInMcs h_mcs h_dne) h
+    exact temporal_implication_property h_mcs (theoremInMcs h_mcs h_dne) h'
   have h_dne_ax : DerivationTree FrameClass.Base [] (γ.neg.neg.imp γ) := doubleNegation γ
   have h_G_dne : DerivationTree FrameClass.Base [] ((γ.neg.neg.imp γ).allFuture) :=
     DerivationTree.temporal_necessitation _ h_dne_ax
@@ -530,8 +548,16 @@ theorem someFuture_H_neg_G_P_absurd {M : Set (Formula Atom)}
     DerivationTree.modus_ponens [] _ _ h_bx3' h_H_dni
   have h_dni_P : DerivationTree FrameClass.Base [] ((Formula.somePast α.neg.neg).imp (Formula.somePast α.neg.neg).neg.neg) :=
     dni (Formula.somePast α.neg.neg)
+  -- Task 180 (F1): ¬¬P(¬¬α) → ¬H(¬α) is no longer defeq (H is now primitive); derive it as
+  -- the contrapositive of the bridge axiom allPast_to_classic (¬α) : H(¬α) → ¬P(¬¬α).
+  have h_bridge_H : DerivationTree FrameClass.Base [] ((Formula.allPast α.neg).imp
+      (Formula.neg (Formula.somePast α.neg.neg))) :=
+    DerivationTree.axiom [] _ (Axiom.allPast_to_classic α.neg) trivial
+  have h_nn_to_neg_H : DerivationTree FrameClass.Base [] ((Formula.somePast α.neg.neg).neg.neg.imp
+      (Formula.neg (Formula.allPast (Formula.neg α)))) :=
+    contraposition h_bridge_H
   have h_P_to_neg_H : DerivationTree FrameClass.Base [] ((Formula.somePast α).imp (Formula.neg (Formula.allPast (Formula.neg α)))) :=
-    impTrans h_P_to_Pnn h_dni_P
+    impTrans h_P_to_Pnn (impTrans h_dni_P h_nn_to_neg_H)
   have h_G_imp : DerivationTree FrameClass.Base [] (Formula.allFuture ((Formula.somePast α).imp (Formula.neg (Formula.allPast (Formula.neg α))))) :=
     DerivationTree.temporal_necessitation _ h_P_to_neg_H
   have h_kd : DerivationTree FrameClass.Base [] (((Formula.somePast α).imp (Formula.neg (Formula.allPast (Formula.neg α)))).allFuture.imp
@@ -559,8 +585,16 @@ theorem somePast_G_neg_H_F_absurd {M : Set (Formula Atom)}
     DerivationTree.modus_ponens [] _ _ h_bx3 h_G_dni
   have h_dni_F : DerivationTree FrameClass.Base [] ((Formula.someFuture γ.neg.neg).imp (Formula.someFuture γ.neg.neg).neg.neg) :=
     dni (Formula.someFuture γ.neg.neg)
+  -- Task 180 (F1): ¬¬F(¬¬γ) → ¬G(¬γ) is no longer defeq (G is now primitive); derive it as
+  -- the contrapositive of the bridge axiom allFuture_to_classic (¬γ) : G(¬γ) → ¬F(¬¬γ).
+  have h_bridge_G : DerivationTree FrameClass.Base [] ((Formula.allFuture γ.neg).imp
+      (Formula.neg (Formula.someFuture γ.neg.neg))) :=
+    DerivationTree.axiom [] _ (Axiom.allFuture_to_classic γ.neg) trivial
+  have h_nn_to_neg_G : DerivationTree FrameClass.Base [] ((Formula.someFuture γ.neg.neg).neg.neg.imp
+      (Formula.neg (Formula.allFuture (Formula.neg γ)))) :=
+    contraposition h_bridge_G
   have h_F_to_neg_G : DerivationTree FrameClass.Base [] ((Formula.someFuture γ).imp (Formula.neg (Formula.allFuture (Formula.neg γ)))) :=
-    impTrans h_F_to_Fnn h_dni_F
+    impTrans h_F_to_Fnn (impTrans h_dni_F h_nn_to_neg_G)
   have h_H_imp : DerivationTree FrameClass.Base [] (Formula.allPast ((Formula.someFuture γ).imp (Formula.neg (Formula.allFuture (Formula.neg γ))))) :=
     pastNecessitation _ h_F_to_neg_G
   have h_kd : DerivationTree FrameClass.Base [] (((Formula.someFuture γ).imp (Formula.neg (Formula.allFuture (Formula.neg γ)))).allPast.imp

@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Temporal.Metalogic.MCS
+public import Cslib.Logics.Temporal.Metalogic.GeneralizedNecessitation
 
 /-! # Completeness Helpers for Temporal Logic BX
 
@@ -61,14 +62,20 @@ theorem mcs_g_bot_not_mem
     {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistent Ω) :
     Formula.allFuture Formula.bot ∉ Ω := by
   intro h_g_bot
-  exact mcs_bot_not_mem h_mcs (temporal_implication_property h_mcs h_g_bot (mcs_f_top_mem h_mcs))
+  -- Task 180 (F1): G(⊥) ∈ Ω is no longer defeq to ¬F(¬⊥) ∈ Ω now that G is primitive;
+  -- convert via mcs_allFuture_iff (neg bot / top coincide definitionally, Phase 5 note).
+  have h' := (mcs_allFuture_iff h_mcs).mp h_g_bot
+  exact mcs_bot_not_mem h_mcs (temporal_implication_property h_mcs h' (mcs_f_top_mem h_mcs))
 
 /-- H(⊥) ∉ any MCS. H(⊥) = ¬P(⊤) and P(⊤) ∈ Ω. -/
 theorem mcs_h_bot_not_mem
     {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistent Ω) :
     Formula.allPast Formula.bot ∉ Ω := by
   intro h_h_bot
-  exact mcs_bot_not_mem h_mcs (temporal_implication_property h_mcs h_h_bot (mcs_p_top_mem h_mcs))
+  -- Task 180 (F1): H(⊥) ∈ Ω is no longer defeq to ¬P(¬⊥) ∈ Ω now that H is primitive;
+  -- convert via mcs_allPast_iff.
+  have h' := (mcs_allPast_iff h_mcs).mp h_h_bot
+  exact mcs_bot_not_mem h_mcs (temporal_implication_property h_mcs h' (mcs_p_top_mem h_mcs))
 
 set_option linter.unusedSimpArgs false in
 set_option maxHeartbeats 3200000 in
@@ -209,10 +216,30 @@ theorem mcs_g_trans
     (h_g : (𝐆ψ) ∈ Ω) : Formula.allFuture (Formula.allFuture ψ) ∈ Ω := by
   by_contra h_not_gg
   let X := Formula.someFuture (Formula.neg ψ)
-  have h_neg_gg : Formula.neg (Formula.allFuture (Formula.allFuture ψ)) ∈ Ω :=
-    mcs_neg_of_not_mem h_mcs h_not_gg
-  have h_f_neg_g : Formula.someFuture (Formula.neg (Formula.allFuture ψ)) ∈ Ω :=
-    (mcs_dne h_mcs).mp h_neg_gg
+  -- Task 180 (F1): ¬(G(Gψ)) ∈ Ω is no longer defeq to F(¬¬X) ∈ Ω now that G is primitive
+  -- (𝐆ψ is no longer defeq to ¬X). Two-stage repair:
+  -- Stage A: G(Gψ) ∉ Ω gives F(¬(Gψ)) ∈ Ω via mcs_not_allFuture_iff.
+  have h_stepA : Formula.someFuture (Formula.neg (Formula.allFuture ψ)) ∈ Ω :=
+    (mcs_not_allFuture_iff h_mcs).mp h_not_gg
+  -- Stage B: lift the derivable fact ¬(Gψ) → ¬¬X (contrapositive of the bridge axiom
+  -- classic_to_allFuture ψ : ¬X → Gψ) through F via necessitation + right_mono_until,
+  -- converting F(¬(Gψ)) into the F(¬¬X) form the rest of this proof (unchanged below)
+  -- was written against.
+  have h_bridge : DerivationTree FrameClass.Base [] ((Formula.neg X).imp (Formula.allFuture ψ)) :=
+    DerivationTree.axiom [] _ (Axiom.classic_to_allFuture ψ) trivial
+  have h_contra : DerivationTree FrameClass.Base []
+      ((Formula.allFuture ψ).neg.imp (Formula.neg X).neg) :=
+    Metalogic.contraposition h_bridge
+  have h_g_contra : Formula.allFuture ((Formula.allFuture ψ).neg.imp (Formula.neg X).neg) ∈ Ω := by
+    apply temporal_closed_under_derivation h_mcs (L := []) (fun _ h => nomatch h)
+    unfold temporalDerivationSystem Temporal.Deriv
+    exact ⟨.temporal_necessitation _ h_contra⟩
+  have h_bx3_A : (Formula.someFuture (Formula.allFuture ψ).neg).imp
+      (Formula.someFuture (Formula.neg X).neg) ∈ Ω :=
+    mcs_mp_axiom h_mcs h_g_contra
+      (.right_mono_until (Formula.allFuture ψ).neg (Formula.neg X).neg Formula.top)
+  have h_f_neg_g : Formula.someFuture (Formula.neg (Formula.neg X)) ∈ Ω :=
+    temporal_implication_property h_mcs h_bx3_A h_stepA
   have h_g_dne : Formula.allFuture ((Formula.neg (Formula.neg X)).imp X) ∈ Ω := by
     apply temporal_closed_under_derivation h_mcs (L := []) (fun _ h => nomatch h)
     unfold temporalDerivationSystem Temporal.Deriv
@@ -222,7 +249,8 @@ theorem mcs_g_trans
     mcs_mp_axiom h_mcs h_g_dne
       (.right_mono_until (Formula.neg (Formula.neg X)) X Formula.top)
   have h_ff := temporal_implication_property h_mcs h_bx3 h_f_neg_g
-  exact mcs_not_mem_of_neg h_mcs h_g (mcs_ff_imp_f h_mcs h_ff)
+  -- Task 180 (F1): h_g : Gψ ∈ Ω is no longer defeq to ¬X ∈ Ω; convert via mcs_allFuture_iff.
+  exact mcs_not_mem_of_neg h_mcs ((mcs_allFuture_iff h_mcs).mp h_g) (mcs_ff_imp_f h_mcs h_ff)
 
 set_option maxHeartbeats 3200000 in
 -- Extended heartbeats: by_contra + contradiction via P-idempotency
@@ -233,10 +261,24 @@ theorem mcs_h_trans
     (h_h : (𝐇ψ) ∈ Ω) : Formula.allPast (Formula.allPast ψ) ∈ Ω := by
   by_contra h_not_hh
   let X := Formula.somePast (Formula.neg ψ)
-  have h_neg_hh : Formula.neg (Formula.allPast (Formula.allPast ψ)) ∈ Ω :=
-    mcs_neg_of_not_mem h_mcs h_not_hh
-  have h_p_neg_h : Formula.somePast (Formula.neg (Formula.allPast ψ)) ∈ Ω :=
-    (mcs_dne h_mcs).mp h_neg_hh
+  -- Task 180 (F1): past dual of mcs_g_trans's Stage A/B repair.
+  have h_stepA : Formula.somePast (Formula.neg (Formula.allPast ψ)) ∈ Ω :=
+    (mcs_not_allPast_iff h_mcs).mp h_not_hh
+  have h_bridge : DerivationTree FrameClass.Base [] ((Formula.neg X).imp (Formula.allPast ψ)) :=
+    DerivationTree.axiom [] _ (Axiom.classic_to_allPast ψ) trivial
+  have h_contra : DerivationTree FrameClass.Base []
+      ((Formula.allPast ψ).neg.imp (Formula.neg X).neg) :=
+    Metalogic.contraposition h_bridge
+  have h_h_contra : Formula.allPast ((Formula.allPast ψ).neg.imp (Formula.neg X).neg) ∈ Ω := by
+    apply temporal_closed_under_derivation h_mcs (L := []) (fun _ h => nomatch h)
+    unfold temporalDerivationSystem Temporal.Deriv
+    exact ⟨deriveHNec _ h_contra⟩
+  have h_bx3_A : (Formula.somePast (Formula.allPast ψ).neg).imp
+      (Formula.somePast (Formula.neg X).neg) ∈ Ω :=
+    mcs_mp_axiom h_mcs h_h_contra
+      (.right_mono_since (Formula.allPast ψ).neg (Formula.neg X).neg Formula.top)
+  have h_p_neg_h : Formula.somePast (Formula.neg (Formula.neg X)) ∈ Ω :=
+    temporal_implication_property h_mcs h_bx3_A h_stepA
   have h_h_dne : Formula.allPast ((Formula.neg (Formula.neg X)).imp X) ∈ Ω := by
     apply temporal_closed_under_derivation h_mcs (L := []) (fun _ h => nomatch h)
     unfold temporalDerivationSystem Temporal.Deriv
@@ -246,7 +288,8 @@ theorem mcs_h_trans
     mcs_mp_axiom h_mcs h_h_dne
       (.right_mono_since (Formula.neg (Formula.neg X)) X Formula.top)
   have h_pp := temporal_implication_property h_mcs h_bx3 h_p_neg_h
-  exact mcs_not_mem_of_neg h_mcs h_h (mcs_pp_imp_p h_mcs h_pp)
+  -- Task 180 (F1): h_h : Hψ ∈ Ω is no longer defeq to ¬X ∈ Ω; convert via mcs_allPast_iff.
+  exact mcs_not_mem_of_neg h_mcs ((mcs_allPast_iff h_mcs).mp h_h) (mcs_pp_imp_p h_mcs h_pp)
 
 /-- If futureSet(Ω₁) ⊆ Ω₂, then pastSet(Ω₂) ⊆ Ω₁. Uses BX4. -/
 theorem past_of_future_subset
@@ -257,7 +300,10 @@ theorem past_of_future_subset
     ∀ ψ, (𝐇ψ) ∈ Ω₂ → ψ ∈ Ω₁ := by
   intro ψ h_h
   by_contra h_not
-  exact mcs_not_mem_of_neg h_mcs₂ h_h
+  -- Task 180 (F1): h_h : Hψ ∈ Ω₂ is no longer defeq to ¬P(¬ψ) ∈ Ω₂ now that H is primitive.
+  have h_h' : Formula.neg (Formula.somePast (Formula.neg ψ)) ∈ Ω₂ :=
+    (mcs_allPast_iff h_mcs₂).mp h_h
+  exact mcs_not_mem_of_neg h_mcs₂ h_h'
     (h_future _ (mcs_mp_axiom h_mcs₁ (mcs_neg_of_not_mem h_mcs₁ h_not)
       (.connect_future (Formula.neg ψ))))
 
@@ -270,7 +316,10 @@ theorem future_of_past_subset
     ∀ ψ, (𝐆ψ) ∈ Ω₂ → ψ ∈ Ω₁ := by
   intro ψ h_g
   by_contra h_not
-  exact mcs_not_mem_of_neg h_mcs₂ h_g
+  -- Task 180 (F1): h_g : Gψ ∈ Ω₂ is no longer defeq to ¬F(¬ψ) ∈ Ω₂ now that G is primitive.
+  have h_g' : Formula.neg (Formula.someFuture (Formula.neg ψ)) ∈ Ω₂ :=
+    (mcs_allFuture_iff h_mcs₂).mp h_g
+  exact mcs_not_mem_of_neg h_mcs₂ h_g'
     (h_past _ (mcs_mp_axiom h_mcs₁ (mcs_neg_of_not_mem h_mcs₁ h_not)
       (.connect_past (Formula.neg ψ))))
 

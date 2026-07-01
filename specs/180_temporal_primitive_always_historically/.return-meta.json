@@ -1,43 +1,49 @@
 {
   "status": "partial",
-  "started_at": "2026-07-01T01:21:37Z",
+  "started_at": "2026-06-30T18:34:00-07:00",
   "artifacts": [
     {
-      "path": "Cslib/Logics/Temporal/Metalogic/MCS.lean",
+      "path": "Cslib/Logics/Temporal/Metalogic/Chronicle/RRelation.lean",
       "type": "lean_source",
-      "summary": "Added mcs_allFuture_iff / mcs_allPast_iff bridge lemmas + mcs_not_allFuture_iff / mcs_not_allPast_iff negated-form companions; repaired all 8 F1 defeq-break sites (mcs_g_mp x2, mcs_h_mp x2, mcs_g_witness/mcs_h_witness G-bot/H-bot x2). Scoped build GREEN, no sorry."
+      "summary": "Repaired 4 F1 defeq-break sites: neg_allFuture_neg_to_someFuture/neg_allPast_neg_to_somePast (MCS-membership level, via mcs_not_allFuture_iff/mcs_not_allPast_iff) and someFuture_H_neg_G_P_absurd/somePast_G_neg_H_F_absurd (DerivationTree level, via bridge-axiom contrapositive + impTrans). Scoped build GREEN, no sorry."
     },
     {
-      "path": "Cslib/Logics/Temporal/Metalogic/WitnessSeed.lean",
+      "path": "Cslib/Logics/Temporal/Metalogic/Chronicle/PointInsertion/Seeds.lean",
       "type": "lean_source",
-      "summary": "PM8 canary: repaired someFuture_allFuture_neg_absurd and somePast_allPast_neg_absurd via mcs_allFuture_iff/mcs_allPast_iff conversion. Signatures unchanged (D4). Scoped build GREEN, no sorry."
+      "summary": "Repaired F_neg_of_G_not/P_neg_of_H_not (mcs_allFuture_iff/mcs_allPast_iff .mpr) and F_mem_of_g_content_sub (DerivationTree-level bridge via classic_to_allFuture + impTrans, not named in plan). Scoped build GREEN, no sorry."
     },
     {
-      "path": "Cslib/Logics/Temporal/Metalogic/TemporalContent.lean",
+      "path": "Cslib/Logics/Temporal/Metalogic/Chronicle/CounterexampleElimination/Structures.lean",
       "type": "lean_source",
-      "summary": "Audited and repaired 4 F1 defeq sites in g_content_iff_not_neg_in_f_content / p_content_iff_not_neg_in_h_content via the MCS bridge lemmas. Scoped build GREEN."
+      "summary": "No changes needed -- the plan's named :157 site unfolds gContent's own definition, not the old defeq. Scoped build GREEN, no sorry."
     },
     {
-      "path": "Cslib/Logics/Temporal/Metalogic/GeneralizedNecessitation.lean",
+      "path": "Cslib/Logics/Temporal/Metalogic/Chronicle/Frame.lean",
       "type": "lean_source",
-      "summary": "Undiscovered transitive dependency of WitnessSeed.lean. Repaired tempKDistDerived's nested-implication F1 break (Chi -> (notF-form) needed lifting to Chi -> (G-form) under fixed antecedent) via dedicated deduction. Scoped build GREEN, no sorry."
+      "summary": "Plan predicted verify-only; actually had 2 F1 breaks (g_content_set_consistent/h_content_set_consistent, G(bot)/H(bot) pattern) repaired via mcs_allFuture_iff/mcs_allPast_iff .mp. Build GREEN, no sorry."
+    },
+    {
+      "path": "Cslib/Logics/Temporal/Metalogic/CompletenessHelpers.lean",
+      "type": "lean_source",
+      "summary": "Undiscovered transitive dependency of Seeds.lean (mirrors Phase 5's GeneralizedNecessitation finding). 10 F1 sites repaired across mcs_g_bot_not_mem/mcs_h_bot_not_mem, mcs_g_trans/mcs_h_trans (new two-stage MCS+DerivationTree bridge pattern), past_of_future_subset/future_of_past_subset. Added import of GeneralizedNecessitation.lean for the contraposition helper (no cycle). Build GREEN, no sorry."
     },
     {
       "path": "specs/180_temporal_primitive_always_historically/plans/03_primitive-gh-metalogic-plan.md",
       "type": "plan",
-      "summary": "Phase 5 heading marked [COMPLETED] with detailed task-level documentation. Phase 4 heading flipped [PARTIAL] -> [COMPLETED] since the deferred DenseSoundness gate closed."
+      "summary": "Phase 6 heading flipped [NOT STARTED] -> [COMPLETED] with full task-level documentation of deviations from the plan's predicted site list; Testing & Validation P6 checkbox marked."
     }
   ],
   "partial_progress": {
-    "stage": "phase_5_completed",
-    "details": "MCS.lean, WitnessSeed.lean, TemporalContent.lean, GeneralizedNecessitation.lean, DenseMCS.lean, GenericMCSBridge.lean, DenseSoundness.lean all scoped-build GREEN. Task 180 overall status remains partial (5 of 9 phases complete); Phases 6-9 (Chronicle defeq repairs, TruthLemma reduction, Tableau, classical-equivalence + full CI) remain."
+    "stage": "phase_6_completed",
+    "details": "RRelation.lean, PointInsertion/Seeds.lean, CounterexampleElimination/Structures.lean (plan-required scoped-green gates) plus Frame.lean, OrderedSeedConsistency.lean, PointInsertion/Splitting.lean, PointInsertion/Since.lean (bonus verification) all scoped-build GREEN. Task 180 overall status remains partial (6 of 9 phases complete); Phases 7-9 (TruthLemma reduction, Tableau, classical-equivalence + full CI) remain."
   },
-  "phases_completed": 5,
+  "phases_completed": 6,
   "phases_total": 9,
   "memory_candidates": [
-    "CSLib Temporal task 180: the Lukasiewicz PropositionalConnectives defaults (neg phi := phi -> bot, top := bot -> bot) mean `Formula.neg Formula.bot` and `Formula.top` unfold to the identical term `HasImp.imp HasBot.bot HasBot.bot` -- so 'G-bot' sites needing 'neg bot = top' typecheck by plain defeq once passed through the mcs_allFuture_iff/mcs_allPast_iff bridge, no explicit simp lemma needed despite the plan predicting one.",
-    "CSLib Temporal task 180: when repairing an F1-class defeq break at the *DerivationTree* (pure syntactic derivability) level rather than the MCS-membership level, ordinary transitivity (impTransBase/impTrans chaining) only works when the conversion is a top-level arrow A->B->C; if the classic-form fact you need to convert is *nested* inside another implication's codomain (Chi -> (A->B) needing lift to Chi -> (A'->B')), you need a dedicated deductionTheorem/assumption/modus_ponens derivation under the extended context [A', Chi], not a post-composition trick. Hit this in GeneralizedNecessitation.lean's tempKDistDerived.",
-    "CSLib Temporal task 180: the F1 root-cause defeq break (G/H no longer defeq to neg-someFuture/somePast-neg after becoming primitive constructors) fans out through transitive imports beyond the plan's named file list -- WitnessSeed.lean's import of GeneralizedNecessitation.lean carried its own independent break not anticipated in Phase 5's file scope. When auditing a phase's named files, also check their transitive Metalogic imports for the same error pattern before declaring the phase done."
+    "CSLib Temporal task 180: when an F1-class defeq break occurs on a formula NESTED under a temporal modality (inside G(...)/H(...) or under someFuture/somePast) or nested inside another implication's codomain -- not a top-level MCS-membership site -- the mcs_allFuture_iff/mcs_allPast_iff MCS-level bridge lemmas are NOT sufficient by themselves. The fix requires a DerivationTree-level bridge: take the relevant bridge axiom (allFuture_to_classic/classic_to_allFuture/allPast_to_classic/classic_to_allPast), optionally its contrapositive via a `contraposition` helper, then lift it through the temporal modality via necessitation (temporal_necessitation/pastNecessitation) + the monotonicity axiom (right_mono_until/right_mono_since) + modus_ponens -- mirroring the existing DNE-lifting idiom already present in these files (e.g. RRelation.lean's h_g_dne/h_bx3 block).",
+    "CSLib Temporal task 180: `contraposition` (A->B gives ¬B->¬A on DerivationTree) lives in Cslib.Logic.Temporal.Metalogic namespace (GeneralizedNecessitation.lean). Files whose own namespace is only Cslib.Logic.Temporal (not .Metalogic), e.g. CompletenessHelpers.lean, must call it as `Metalogic.contraposition` or add an `open Cslib.Logic.Temporal.Metalogic` -- plain `contraposition` resolves to 'unknown identifier'.",
+    "CSLib Temporal task 180: the F1 root-cause defeq break continues to fan out through transitive imports beyond each phase's named file list -- Phase 5 found GeneralizedNecessitation.lean via WitnessSeed.lean's import chain; Phase 6 found CompletenessHelpers.lean via Chronicle/PointInsertion/Seeds.lean's import chain (10 further break sites, including 2 requiring the new nested-modality DerivationTree-bridge pattern in mcs_g_trans/mcs_h_trans). When a named file's scoped build still fails after fixing all named sites, check for an unnamed transitive dependency with the same F1 pattern before declaring the phase blocked.",
+    "CSLib Temporal task 180: not every `change Formula.allFuture phi in A`-style site flagged by static grep in a pre-dispatch plan is actually broken -- Chronicle/CounterexampleElimination/Structures.lean:157's `change` unfolds gContent's OWN set-builder definition (which is stated directly in terms of the primitive allFuture constructor, not the old G-equiv-negF-neg defeq), so it needed zero changes. Verify each named site against an actual `lake build` error before editing; do not blind-fix predicted sites."
   ],
   "verification": {
     "verification_passed": true,
@@ -45,11 +51,11 @@
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": true,
-    "ci_pipeline_passed": "scoped-only (7 module builds green: MCS, WitnessSeed, TemporalContent, GeneralizedNecessitation, DenseMCS, GenericMCSBridge, DenseSoundness); full CSLib CI pipeline intentionally NOT run per PM2/dispatch instructions (Temporal build legitimately red until Phase 9)",
-    "notes": "lean_verify on mcs_allFuture_iff, mcs_allPast_iff, mcs_g_witness, someFuture_allFuture_neg_absurd: all report only propext/Classical.choice/Quot.sound, no new axioms beyond the 4 pre-existing bridge axioms from Phase 3."
+    "ci_pipeline_passed": "scoped-only (7 module builds green: Chronicle.RRelation, Chronicle.PointInsertion.Seeds, Chronicle.CounterexampleElimination.Structures, Chronicle.Frame, Chronicle.OrderedSeedConsistency, Chronicle.PointInsertion.Splitting, Chronicle.PointInsertion.Since, plus Metalogic.CompletenessHelpers; full CSLib CI pipeline intentionally NOT run per PM2/dispatch instructions -- Temporal build legitimately red until Phase 9)",
+    "notes": "lean_verify on neg_allFuture_neg_to_someFuture (RRelation.lean) and mcs_g_trans (CompletenessHelpers.lean): both report only propext/Classical.choice/Quot.sound, no new axioms beyond the 4 pre-existing bridge axioms from Phase 3. grep -rn sorry across the entire Chronicle/ tree plus CompletenessHelpers.lean: zero matches."
   },
   "metadata": {
-    "session_id": "sess_phase5_180",
+    "session_id": "sess_180_phase6",
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]

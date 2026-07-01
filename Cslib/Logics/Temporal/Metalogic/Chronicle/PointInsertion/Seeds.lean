@@ -51,9 +51,9 @@ private theorem F_neg_of_G_not {A : Set (Formula Atom)}
     (𝐅(¬φ)) ∈ A := by
   rcases temporal_negation_complete h_mcs (Formula.someFuture φ.neg) with h | h
   · exact h
-  · -- h : (someFuture φ.neg).neg ∈ A, which is definitionally allFuture φ ∈ A.
-    -- Contradiction with h_Gφ_not.
-    exact absurd h h_Gφ_not
+  · -- Task 180 (F1): h : (someFuture φ.neg).neg ∈ A is no longer definitionally allFuture φ
+    -- ∈ A now that G is primitive; convert via mcs_allFuture_iff before the contradiction.
+    exact absurd ((mcs_allFuture_iff h_mcs).mpr h) h_Gφ_not
 
 /-- If H(φ) ∉ MCS A, then P(¬φ) ∈ A. Dual of `F_neg_of_G_not`. -/
 private theorem P_neg_of_H_not {A : Set (Formula Atom)}
@@ -62,8 +62,9 @@ private theorem P_neg_of_H_not {A : Set (Formula Atom)}
     (𝐏(¬φ)) ∈ A := by
   rcases temporal_negation_complete h_mcs (Formula.somePast φ.neg) with h | h
   · exact h
-  · -- ¬P(¬φ) ∈ A is the same as H(φ) ∈ A (by definition), contradicting h_Hφ_not.
-    exact absurd h h_Hφ_not
+  · -- Task 180 (F1): h : ¬P(¬φ) ∈ A is no longer definitionally H(φ) ∈ A now that H is
+    -- primitive; convert via mcs_allPast_iff before the contradiction.
+    exact absurd ((mcs_allPast_iff h_mcs).mpr h) h_Hφ_not
 
 /-! ## Lemma 2.4: Until Witness Endpoint Construction -/
 
@@ -100,8 +101,13 @@ private theorem F_mem_of_g_content_sub {A C : Set (Formula Atom)}
     -- Contrapositive: ⊢ ¬F(γ) → ¬F(¬¬γ)
     have h_contra : DerivationTree FrameClass.Base [] ((Formula.someFuture γ).neg.imp (Formula.someFuture γ.neg.neg).neg) :=
       contraposition h_F_mono
-    -- ¬F(γ) ∈ A → ¬F(¬¬γ) ∈ A = allFuture(γ.neg) ∈ A
-    exact temporal_implication_property h_mcs_A (theoremInMcs h_mcs_A h_contra) h_neg_F
+    -- Task 180 (F1): ¬F(¬¬γ) → G(¬γ) is no longer defeq (G is now primitive); bridge via
+    -- the classic_to_allFuture axiom, then compose with the contrapositive above.
+    have h_bridge : DerivationTree FrameClass.Base [] ((Formula.someFuture γ.neg.neg).neg.imp
+        (Formula.allFuture γ.neg)) :=
+      DerivationTree.axiom [] _ (Axiom.classic_to_allFuture γ.neg) trivial
+    -- ¬F(γ) ∈ A → G(¬γ) ∈ A
+    exact temporal_implication_property h_mcs_A (theoremInMcs h_mcs_A (impTrans h_contra h_bridge)) h_neg_F
   have h_neg_C : (¬γ) ∈ C := h_gc h_G_neg
   exact mcs_not_mem_of_neg h_mcs_C h_neg_C h_γ
 

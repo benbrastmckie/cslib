@@ -454,34 +454,87 @@ WIP); out of scope for this phase.
 
 ---
 
-### Phase 6: Metalogic — Chronicle defeq-site repairs (RRelation/Seeds/Structures) [NOT STARTED]
+### Phase 6: Metalogic — Chronicle defeq-site repairs (RRelation/Seeds/Structures) [COMPLETED]
 
 - **Goal:** Route the remaining Chronicle defeq breaks through the P5 bridge lemmas; the proof
   bodies are otherwise unchanged (F3).
 - **Tasks:**
-  - [ ] `Chronicle/RRelation.lean`: `neg_allFuture_neg_to_someFuture` (`:499`),
+  - [x] `Chronicle/RRelation.lean`: `neg_allFuture_neg_to_someFuture` (`:499`),
     `neg_allPast_neg_to_somePast` (`:479`) — insert `mcs_allFuture_iff`/`mcs_allPast_iff` to convert
     the input membership `¬(𝐆¬γ) ∈ M` back into the U/S world; the DNE + `right_mono_until` body
     (`:503-515`) is unchanged.
-  - [ ] `Chronicle/PointInsertion/Seeds.lean`: `:54` replace the "definitionally allFuture φ ∈ A"
+    DONE: 4 error sites found (not 2) — the two MCS-membership sites named in the plan plus two
+    additional DerivationTree-level sites in `someFuture_H_neg_G_P_absurd` /
+    `somePast_G_neg_H_F_absurd` where a *proof-level* (not MCS-membership) conversion
+    `¬¬F(¬¬γ) → ¬G(¬γ)` was needed. The MCS-membership sites were repaired exactly as
+    predicted (`mcs_not_allFuture_iff`/`mcs_not_allPast_iff` via `mcs_not_mem_of_neg`, feeding
+    the unchanged DNE body). The two DerivationTree-level sites were repaired via the
+    contrapositive of the bridge axioms (`Axiom.allFuture_to_classic`/`allPast_to_classic`)
+    composed with `contraposition` (from `GeneralizedNecessitation.lean`, already transitively
+    imported via `WitnessSeed.lean`) — not predicted by the plan but the same "bridge axiom +
+    contrapositive" idiom used elsewhere in the file. `lake build
+    Cslib.Logics.Temporal.Metalogic.Chronicle.RRelation` GREEN, no `sorry`.
+  - [x] `Chronicle/PointInsertion/Seeds.lean`: `:54` replace the "definitionally allFuture φ ∈ A"
     defeq conversion with `mcs_allFuture_iff`; `:92-113` G-DNE seed steps already use
     `right_mono_until` + necessitation — only the defeq membership hop breaks.
-  - [ ] `Chronicle/CounterexampleElimination/Structures.lean`: `:157` replace
+    DONE: `F_neg_of_G_not`/`P_neg_of_H_not` (`:47-66`) repaired via `mcs_allFuture_iff`/
+    `mcs_allPast_iff` `.mpr` as predicted. `F_mem_of_g_content_sub` (`:82-107`, not explicitly
+    named in the plan) needed an additional DerivationTree-level bridge-axiom composition
+    (`Axiom.classic_to_allFuture` + `impTrans`) to convert `¬F(¬¬γ) → G(¬γ)`, mirroring the
+    RRelation.lean DerivationTree-level pattern. `lake build
+    Cslib.Logics.Temporal.Metalogic.Chronicle.PointInsertion.Seeds` GREEN, no `sorry`.
+  - [x] `Chronicle/CounterexampleElimination/Structures.lean`: `:157` replace
     `change Formula.allFuture φ ∈ A` with `(mcs_allFuture_iff …).mp/.mpr`.
-  - [ ] `Chronicle/Frame.lean` (`:62,:72`): verify only — structural map over the constructor still
+    DONE (no change needed): the `:157` `change` unfolds `gContent`'s own definition (which is
+    stated directly in terms of the primitive `allFuture` constructor), not the old G≡¬F¬neg
+    defeq — this site was never actually broken. `lake build
+    Cslib.Logics.Temporal.Metalogic.Chronicle.CounterexampleElimination.Structures` GREEN
+    (verify-only), no `sorry`.
+  - [x] `Chronicle/Frame.lean` (`:62,:72`): verify only — structural map over the constructor still
     works.
-  - [ ] Verify consumers `OrderedSeedConsistency.lean`, `PointInsertion/Splitting.lean`,
+    DONE (edit required, plan's "verify only" was optimistic): `g_content_set_consistent`/
+    `h_content_set_consistent` (`:79-102`) had the same F1 G(⊥)/H(⊥) defeq break already seen in
+    `CompletenessHelpers.mcs_g_bot_not_mem`/`mcs_h_bot_not_mem` (Phase 5-adjacent); repaired via
+    `mcs_allFuture_iff`/`mcs_allPast_iff` `.mp`. `lake build
+    Cslib.Logics.Temporal.Metalogic.Chronicle.Frame` GREEN, no `sorry`.
+  - [x] Verify consumers `OrderedSeedConsistency.lean`, `PointInsertion/Splitting.lean`,
     `PointInsertion/Since.lean` are untouched (signatures preserved in P5).
+    DONE: all three build GREEN with zero edits, confirming D4 signature stability.
+  - **Undiscovered transitive dependency (mirrors Phase 5's GeneralizedNecessitation.lean
+    finding)**: `Chronicle/PointInsertion/Seeds.lean` imports `Metalogic/CompletenessHelpers.lean`
+    (via `Metalogic/CompletenessHelpers.lean`, not named in the plan's Phase 6 file list), which
+    had 10 of its own F1-class breaks: `mcs_g_bot_not_mem`/`mcs_h_bot_not_mem` (⊥ sites, same
+    pattern as the Phase 5 canary), `mcs_g_trans`/`mcs_h_trans` (a genuinely new two-stage
+    "MCS-level bridge + DerivationTree-level bridge-axiom-contrapositive-under-F/H-monotonicity"
+    repair, since the broken step was nested under a `someFuture`/`somePast` operator — the same
+    "nested implication under a fixed context" risk class flagged for
+    `GeneralizedNecessitation.tempKDistDerived` in Phase 5, but here nested under a temporal
+    modality rather than a propositional antecedent), and `past_of_future_subset`/
+    `future_of_past_subset` (simple `mcs_allFuture_iff`/`mcs_allPast_iff` `.mp` conversions).
+    Required adding `public import Cslib.Logics.Temporal.Metalogic.GeneralizedNecessitation` to
+    `CompletenessHelpers.lean` to bring `contraposition` into scope (no import cycle: `Generalized
+    Necessitation.lean` imports only `PropositionalHelpers`/`DeductionTheorem`, neither of which
+    imports `CompletenessHelpers.lean` or `MCS.lean`). `lake build
+    Cslib.Logics.Temporal.Metalogic.CompletenessHelpers` GREEN, no `sorry`.
 - **Timing:** 2.5-3.5 hours
 - **Depends on:** 5
-- **Estimated output:** ~150-300 lines (targeted site rewrites)
+- **Estimated output:** ~150-300 lines (targeted site rewrites) — actual: ~230 lines across 5 files
+  (RRelation.lean, Seeds.lean, Structures.lean unchanged, Frame.lean, and the undiscovered
+  CompletenessHelpers.lean dependency).
 - **Files to modify:** `Cslib/Logics/Temporal/Metalogic/Chronicle/{RRelation,Frame}.lean`,
   `Chronicle/PointInsertion/Seeds.lean`, `Chronicle/CounterexampleElimination/Structures.lean`
+  — actual: `Structures.lean` needed no edits; `Metalogic/CompletenessHelpers.lean` was an
+  undiscovered transitive dependency requiring repair.
 - **Scoped verification (done when):**
-  - `lake build Cslib.Logics.Temporal.Metalogic.Chronicle.RRelation` green
-  - `lake build Cslib.Logics.Temporal.Metalogic.Chronicle.PointInsertion.Seeds` green
-  - `lake build Cslib.Logics.Temporal.Metalogic.Chronicle.CounterexampleElimination.Structures` green
-  - No `sorry` introduced.
+  - `lake build Cslib.Logics.Temporal.Metalogic.Chronicle.RRelation` green — PASSES.
+  - `lake build Cslib.Logics.Temporal.Metalogic.Chronicle.PointInsertion.Seeds` green — PASSES.
+  - `lake build Cslib.Logics.Temporal.Metalogic.Chronicle.CounterexampleElimination.Structures`
+    green — PASSES.
+  - No `sorry` introduced — CONFIRMED (grep across the full Chronicle tree + CompletenessHelpers.lean).
+  - Bonus (not gate-required but verified): `Chronicle.Frame`, `Chronicle.OrderedSeedConsistency`,
+    `Chronicle.PointInsertion.Splitting`, `Chronicle.PointInsertion.Since` all GREEN.
+  - `lean_verify` on `neg_allFuture_neg_to_someFuture` and `mcs_g_trans`: only
+    `{propext, Classical.choice, Quot.sound}`, no new axioms beyond the 4 pre-existing bridge axioms.
 
 ---
 
@@ -585,7 +638,7 @@ Per-phase (scoped, mandatory before marking any phase `[COMPLETED]`):
 - [ ] P3: `lake build …ProofSystem` green; bridge axioms usable.
 - [ ] P4: `lake build …Metalogic.Soundness` and `…DenseSoundness` green.
 - [ ] P5: `lake build …Metalogic.MCS` and `…WitnessSeed` green.
-- [ ] P6: `lake build …Chronicle.{RRelation, PointInsertion.Seeds, CounterexampleElimination.Structures}` green.
+- [x] P6: `lake build …Chronicle.{RRelation, PointInsertion.Seeds, CounterexampleElimination.Structures}` green.
 - [ ] P7: `lake build …Chronicle.TruthLemma` green; `lean_verify` clean.
 - [ ] P8: `lake build …Tableau.{Defs, Soundness, Completeness}` green.
 

@@ -87,7 +87,9 @@ theorem g_content_set_consistent {Omega : Set (Formula Atom)}
   have h_f_top : Formula.someFuture Formula.top ∈ Omega :=
     temporal_implication_property h_mcs
       (theoremInMcs h_mcs (DerivationTree.axiom [] _ .serial_future trivial)) h_top
-  exact mcs_not_mem_of_neg h_mcs h_G_bot h_f_top
+  -- Task 180 (F1): h_G_bot : G(⊥) ∈ Omega is no longer defeq to ¬F(⊤) ∈ Omega now that G is
+  -- primitive; convert via mcs_allFuture_iff (neg bot / top coincide definitionally).
+  exact mcs_not_mem_of_neg h_mcs ((mcs_allFuture_iff h_mcs).mp h_G_bot) h_f_top
 
 theorem h_content_set_consistent {Omega : Set (Formula Atom)}
     (h_mcs : Temporal.SetMaximalConsistent Omega) :
@@ -99,7 +101,9 @@ theorem h_content_set_consistent {Omega : Set (Formula Atom)}
   have h_p_top : Formula.somePast Formula.top ∈ Omega :=
     temporal_implication_property h_mcs
       (theoremInMcs h_mcs (DerivationTree.axiom [] _ .serial_past trivial)) h_top
-  exact mcs_not_mem_of_neg h_mcs h_H_bot h_p_top
+  -- Task 180 (F1): h_H_bot : H(⊥) ∈ Omega is no longer defeq to ¬P(⊤) ∈ Omega now that H is
+  -- primitive; convert via mcs_allPast_iff.
+  exact mcs_not_mem_of_neg h_mcs ((mcs_allPast_iff h_mcs).mp h_H_bot) h_p_top
 
 /-! ## Transitivity -/
 

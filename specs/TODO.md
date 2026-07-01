@@ -101,36 +101,64 @@ next_project_number: 447
 ### Uncategorized
 
 438 [NOT STARTED] — Upstream the comment/docstring cleanups identified by the task 43
-444 [NOT STARTED] — Vet fix for task 180 (High). Rename `allFuture_iff_neg_someFuture
-445 [NOT STARTED] — Vet fix for task 180 (Medium). TemporalConservativity.lean:269 (`
-446 [NOT STARTED] — Vet fix for task 180 (Low). Update References sections of TruthLe
+444 [NOT STARTED] — Vet fix for task 180 (High), elevated scope. Do not merely rename
+445 [NOT STARTED] — Vet fix for task 180 (Medium severity, but PR-BLOCKING). HARD REQ
+446 [NOT STARTED] — Vet fix for task 180 (Low), elevated scope. Bring every literatur
 
 ## Tasks
 
-### 446. Standardize Burgess 1982 citation format in Temporal metalogic modules
+### 446. Comprehensive citation and reference-section hygiene across the Temporal metalogic modules
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
-**Description**: Vet fix for task 180 (Low). Update References sections of TruthLemma.lean (:34,:274), Soundness.lean (:28), DenseSoundness.lean (:28) and the prose citation in RRelation.lean (:21) to use the bracket [Description][BibKey] format used elsewhere in the diff, disambiguating Burgess1982I ('Since'/'Until') vs Burgess1982II ('Time Periods') wherever '[Burgess 1982]' appears unqualified. RRelation.lean already identifies II in prose; the others do not disambiguate.
+**Description**: Vet fix for task 180 (Low), elevated scope. Bring every literature reference in the task-180 Temporal work to one uniform, unambiguous, elegant standard.
+
+Core fix: convert the plain-prose "Burgess 1982" citations in TruthLemma.lean (:34, :274), Soundness.lean (:28), DenseSoundness.lean (:28), and RRelation.lean (:21) to the bracket `[Description][BibKey]` format used elsewhere in the diff (e.g. Formula.lean's `[H. Kamp, ...][Kamp1968]`), disambiguating `Burgess1982I` ("Since"/"Until") vs `Burgess1982II` ("Time Periods") at every site.
+
+Ambitious cleanup:
+- Audit ALL reference sections and inline citations across the Temporal metalogic tree for consistency: uniform bracket-BibKey format, consistent author/title rendering, and a single house style for the top-of-file "## References" block.
+- Verify every cited BibKey actually resolves in references.bib; add any missing entries (e.g. confirm Boudou2017 is present and well-formed; add Burgess entries if the disambiguation reveals a gap). Cross-check that no citation points to a non-existent key.
+- Tidy the surrounding module docstrings so reference lists read cleanly and elegantly, matching the phrasing conventions used in the Syntax layer.
+
+Definition of done: every literature citation in task-180 Temporal files uses uniform bracket-BibKey format with correct, resolvable keys; `lake build` green; references.bib validated against all cited keys.
 
 ---
 
-### 445. Resolve or explicitly disclose the domain-mismatch sorry in Bimodal-Temporal conservativity proof
+### 445. Eliminate the domain-mismatch sorry in Bimodal to Temporal conservativity and refactor the model-transfer layer for generality
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
-**Description**: Vet fix for task 180 (Medium). TemporalConservativity.lean:269 (`temporal_valid_of_bimodal_derivable`) contains a live `sorry` gated by `set_option warn.sorry false`, so it builds green but is not sorry-free; `bimodal_conservative_over_temporal` transitively depends on it. The gap is the AddCommGroup-domain soundness vs. arbitrary-serial-linear-order completeness mismatch (documented in the module's 'Domain Mismatch Resolution' section). Either (a) prove the model-transfer result, or (b) explicitly disclose this remaining sorry in the task-180 PR description rather than merging as if conservativity were complete.
+**Description**: Vet fix for task 180 (Medium severity, but PR-BLOCKING). HARD REQUIREMENT: absolutely no sorries are acceptable in any PR. `temporal_valid_of_bimodal_derivable` (TemporalConservativity.lean:269) must be proved outright and BOTH `set_option warn.sorry false in` (:248) and the `sorry` (:269) removed. Disclosure is NOT an acceptable outcome. (The sorry is pre-existing from task 277, but task 180's PR includes this file, so it must be closed here.)
+
+Prove the model-transfer result described in the module's "Domain Mismatch Resolution" section: bimodal validity is established on AddCommGroup domains (`temporal_valid_on_addcommgroup`), while Temporal satisfaction is quantified over an arbitrary `Nontrivial`, `NoMaxOrder`, `NoMinOrder` `LinearOrder D`. Close the gap by transporting a countermodel: given a Temporal model over D falsifying φ, transfer it (via an order-embedding of the relevant sub-order into an ordered abelian group such as ℚ, or an order-completion/Hahn-embedding argument) to an AddCommGroup domain preserving `Satisfies`, then contrapose against `temporal_valid_on_addcommgroup` using the proven semantic bridge `bimodal_truthAt_toBimodal_iff_temporal_satisfies`.
+
+Ambitious refactor (not just plugging the hole):
+- State the transfer as a general, reusable lemma over any target domain meeting a clearly-specified order interface, so it is not welded to one concrete group; factor out the order-embedding and the satisfaction-transport as independent, named, docstringed lemmas.
+- Replace the current "known gap" prose in the module docstring with an elegant, self-contained account of the completed argument and the interface the transfer requires.
+- Sweep the surrounding conservativity development for uniformity with the rest of the Bimodal metalogic (naming, section variables, import minimality).
+
+Verification: `lean_verify` on `temporal_valid_of_bimodal_derivable` and `bimodal_conservative_over_temporal` must report only `[propext, Classical.choice, Quot.sound]` with zero sorry; full `lake build`/`lake lint`/`lake test` green. If a genuinely load-bearing mathematical obstruction is found, escalate to the user with the exact open goal state and candidate lemmas — do NOT reintroduce a sorry or a vacuous (`:= True`/`trivial`) placeholder.
 
 ---
 
-### 444. Rename underscored defs in Temporal/Theorems.lean to satisfy defsWithUnderscore lint
+### 444. Uniformity pass: mathlib-conformant naming, style, and docstrings across the entire task-180 Temporal diff
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
-**Description**: Vet fix for task 180 (High). Rename `allFuture_iff_neg_someFuture_neg` (Theorems.lean:51) and `allPast_iff_neg_somePast_neg` (Theorems.lean:68) to lowerCamelCase (e.g. allFutureIffNegSomeFutureNeg, allPastIffNegSomePastNeg) since they are noncomputable defs returning DerivationTree, not theorem/lemma. Update all call sites and re-run `lake lint` to confirm the two defsWithUnderscore errors clear with no new violations. These are the only in-scope CI (lake lint) failures for task 180.
+**Description**: Vet fix for task 180 (High), elevated scope. Do not merely rename the two flagged defs — bring the WHOLE task-180 diff to a single, uniform, mathlib-conformant standard.
+
+Hard fix (blocks PR): rename `allFuture_iff_neg_someFuture_neg` (Theorems.lean:51) and `allPast_iff_neg_somePast_neg` (Theorems.lean:68) to lowerCamelCase (they are data-carrying `noncomputable def`s returning `DerivationTree`, not `theorem`/`lemma`), updating every call site.
+
+Ambitious cleanup:
+- Audit every declaration introduced or modified by task 180 across Cslib/Logics/Temporal/ (Syntax, Semantics, ProofSystem, Metalogic, Tableau, Theorems) and the two Bimodal consumers for naming uniformity: data-returning `def`s in lowerCamelCase; propositions as `theorem`/`lemma` in snake_case; one consistent convention for the bridge-axiom wrappers, the MCS bridge lemmas (`mcs_allFuture_iff` family), and the Chronicle/TruthLemma helpers.
+- Make `lake lint` fully green on all task-180 files for defsWithUnderscore, defLemma, docBlame, dupNamespace, topNamespace, simpNF, unusedSectionVars — not just the two flagged lines.
+- Ensure every public declaration (constructors, bridge axioms, wrapper theorems, bridge lemmas) carries a concise, elegant docstring in the house style; unify the phrasing of the recurring "D3 honesty caveat" comment so it reads identically wherever it appears.
+- Remove dead code, leftover scaffolding comments, and any `set_option` left over from development that is no longer needed.
+
+Definition of done: `lake build`, `lake lint`, `lake exe lint-style` all green on every task-180-touched file; consistent naming and docstring style verified by inspection; no behavioural change to any proof (renames + docs only).
 
 ---
 

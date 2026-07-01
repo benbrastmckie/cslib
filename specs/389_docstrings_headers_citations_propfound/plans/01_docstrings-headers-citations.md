@@ -1,7 +1,7 @@
 # Implementation Plan: Task #389 — Docstrings, Headers, Citations (Prop/Foundations Tier-2)
 
 - **Task**: 389 - Fix docBlame, barrel headers, unusedSectionVars, broken citation
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 1 hour
 - **Dependencies**: Task 317 (planned) — required ONLY for the deferred post-317 Completeness `omit` sweep, which is explicitly out-of-scope for this plan. None of the in-scope phases below depend on 317.
 - **Research Inputs**: reports/01_docstrings-headers-citations.md

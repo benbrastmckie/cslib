@@ -1,7 +1,7 @@
 # Implementation Plan: Task #444
 
 - **Task**: 444 - Uniformity pass: mathlib-conformant naming, style, and docstrings across the task-180 Temporal diff (narrowed for this run to the live in-scope lint findings)
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 0.5 hours
 - **Dependencies**: None actionable now (449, 450 not_started -> their decls out of scope; 454 completed/settled; report already delivered)
 - **Research Inputs**: specs/444_fix_temporal_theorems_underscore_lint/reports/01_temporal-naming-lint-uniformity.md

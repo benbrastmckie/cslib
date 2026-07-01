@@ -252,13 +252,13 @@
     {
       "project_number": 444,
       "project_name": "fix_temporal_theorems_underscore_lint",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Uniformity pass: mathlib-conformant naming, style, and docstrings across the entire task-180 Temporal diff",
       "description": "Vet fix for task 180 (High), elevated scope. Do not merely rename the two flagged defs; bring the task-180 diff to a single, uniform, mathlib-conformant standard.\n\nHard fix (blocks PR): rename allFuture_iff_neg_someFuture_neg (Theorems.lean:51) and allPast_iff_neg_somePast_neg (Theorems.lean:68) to lowerCamelCase (they are data-carrying noncomputable defs returning DerivationTree, not theorem/lemma), updating every call site.\n\nAmbitious cleanup:\n- Audit every declaration introduced or modified by task 180 across Cslib/Logics/Temporal/{Syntax,Semantics,ProofSystem,Metalogic,Theorems} and the two Bimodal consumers (Embedding/TemporalEmbedding.lean, Metalogic/ConservativeExtension/TemporalConservativity.lean) for naming uniformity: data-returning defs in lowerCamelCase; propositions as theorem/lemma in snake_case; one consistent convention for the bridge-axiom wrappers, the MCS bridge lemmas (mcs_allFuture_iff family), and the Chronicle/TruthLemma helpers. INCLUDE the new declarations introduced by tasks 449 (BX+ / FrameClass.Metric axioms) and 450 (eraseBox, restated conservativity) in the uniformity sweep.\n- Make lake lint fully green on these files for defsWithUnderscore, defLemma, docBlame, dupNamespace, topNamespace, simpNF, unusedSectionVars, not just the two flagged lines.\n- Ensure every public declaration carries a concise, elegant docstring in the house style; unify the recurring \"D3 honesty caveat\" comment so it reads identically wherever it appears.\n- Remove dead code, leftover scaffolding comments, and any development-only set_options no longer needed.\n\nSCOPE EXCLUSION (conflict avoidance): do NOT touch Cslib/Logics/Temporal/Tableau/ (Defs, Rules, Completeness, Saturation, ...). That subtree is being actively redesigned by the task-301 tableau line (426/439/425); its naming/style cleanup is owned there. Coordinate rather than double-edit.\n\nSEQUENCING: Depends on 449 (define BX+) and 450 (conservativity proof + close sorry). Run last so this sweep sees the final, settled declarations, including the new BX+ axioms from 449 and the restated conservativity theorem from 450. NOTE: TemporalConservativity.lean is REWRITTEN by task 450 (which removes the sorry and restates the theorem over BX+); once 450 is complete this file is settled and IS in scope for 444's naming/docstring sweep (it was excluded only while 450 was in flight). Task 446 (citation hygiene) is already COMPLETED. Original task 445 was ABANDONED (its theorem was proved false; superseded by 449/450).\n\nDefinition of done: lake build, lake lint, lake exe lint-style green on every in-scope task-180 file; consistent naming and docstrings verified by inspection; no behavioural change to any proof (renames + docs only).\n",
       "parent_task": 180,
       "created": "2026-07-01T05:12:18Z",
-      "last_updated": "2026-07-01T07:00:00Z",
+      "last_updated": "2026-07-01T18:34:53Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "dependencies": [
@@ -268,7 +268,8 @@
         454
       ],
       "topic": "Code Hygiene",
-      "depends_on": []
+      "depends_on": [],
+      "session_id": "sess_1782924983_6bcecb_444"
     },
     {
       "project_number": 440,

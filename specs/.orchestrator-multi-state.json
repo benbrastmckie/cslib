@@ -35,13 +35,14 @@
     "454": []
   },
   "max_cycles": 25,
-  "cycle_count": 5,
+  "cycle_count": 6,
   "failed_tasks": [],
   "completed_tasks": [
     389,
     391,
     392,
     405,
+    444,
     454
   ],
   "current_statuses": {
@@ -49,7 +50,7 @@
     "391": "completed",
     "392": "completed",
     "405": "pr_ready",
-    "444": "not_started",
+    "444": "completed",
     "454": "completed"
   },
   "task_dirs": {

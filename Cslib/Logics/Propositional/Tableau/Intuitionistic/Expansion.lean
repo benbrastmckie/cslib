@@ -218,8 +218,22 @@ the rule layer at all.
   (reuses `isAccessible` as-is; no new accessibility notion needed), AND
 - `Sfor(w') ⊆ posFormulasAt bPers x` — containment: everything that would hold at the fresh
   world already holds at `x`, AND
-- `ψ ∉ posFormulasAt bPers x` — the obligation is still open at `x`, so reusing `x` does not
-  vacuously close the branch.
+- `ψ ∉ posFormulasAt bPers x` — the obligation is still open at `x` (no `T(ψ)@x`, so reusing
+  `x` does not vacuously close the branch), AND
+- **`F(ψ)@x` is already an explicit entry on `bPers`** (Option A, task 317 plan 04 post-Phase-3
+  fix). This is the load-bearing conjunct for soundness: `IBranchSaturation.sat_fimp`/
+  `sfSatisfied`'s `.neg, .imp` case demands an *explicit* `F(ψ)@x` entry, not merely
+  `ψ ∉ posFormulasAt bPers x` — Phase 3 found a concrete counterexample where the latter alone
+  holds but no `F(ψ)@x` entry exists, breaking the Hintikka condition at the reused witness.
+  Requiring `F(ψ)@x` to already be *literally present* on `bPers` closes that gap for free,
+  with NO branch modification on reuse (the alternative, Option B — appending a fresh `F(ψ)@x`
+  entry unconditionally — was tried and found UNSOUND: `intExpandBranches_closed_unsat`
+  (`Soundness.lean`) needs `intBranchSatisfied` for whatever branch `go` recurses on, and an
+  arbitrary satisfying Kripke model has no obligation to falsify `ψ` at the model-world already
+  assigned to `x` merely because `ψ` is not yet *forced on the branch* — that model-world's
+  value was already pinned by earlier steps, unlike a genuinely fresh label. Requiring `F(ψ)@x`
+  to pre-exist sidesteps this entirely: nothing new is asserted, so the already-established
+  `intBranchSatisfied` witness for `bPers` continues to apply unchanged).
 
 When Phase 2 wires this in: `some x` means do NOT create `w'` — mark `F(φ → ψ)@w` expanded
 (already achieved via `newExp`) and continue on the SAME branch, calling `intExpandBranches`
@@ -259,12 +273,57 @@ def intFImpReuseWitness? (bPers : IBranch Atom) (edges : IEdges)
     let candidates := (bPers.map (·.label)).eraseDups
     candidates.findSome? fun x =>
       let forcedAtX := posFormulasAt bPers x
+      -- `w.ble x` (`w ≤ x`) is a cheap, purely computable, redundant-in-valid-runs check:
+      -- `isAccessible edges w x` already semantically implies `w ≤ x` (descendants get
+      -- strictly larger labels than ancestors), but proving that from `isAccessible`'s raw
+      -- reachability definition would require threading a brand-new "edges are label-ordered"
+      -- invariant through the whole expansion induction. Checking `w ≤ x` directly here makes
+      -- the `sat_fimp`/`sfSatisfied` obligation `w ≤ w'` immediately available at the witness
+      -- `x` with zero new invariant machinery.
       if isAccessible edges w x
+          && w.ble x
           && sfor.all (forcedAtX.contains ·)
-          && !(forcedAtX.contains ψ) then
+          && !(forcedAtX.contains ψ)
+          && bPers.any (fun y => y.sign == .neg && y.formula == ψ && y.label == x) then
         some x
       else
         none
+
+omit [Hashable Atom] in
+/-- Specification lemma for `intFImpReuseWitness?` (task 317 plan 04, post-Phase-3 fix):
+when it returns `some x` for the `.neg`-signed obligation `ψ` read off `newForms`, `x`
+satisfies all five search conditions, including the load-bearing Option-A conjunct
+`F(ψ)@x ∈ bPers` (an explicit branch entry, not merely "not forced"). This is the fact
+`Scheme.lean`'s `intExpandBranches_openBranch_sat` reuse case needs to discharge
+`sfSatisfied`/`sat_fimp` at the reused witness without any new invariant machinery. -/
+lemma intFImpReuseWitness?_spec {bPers : IBranch Atom} {edges : IEdges}
+    {newForms : List (ISF Atom)} {newEdge : Nat × Nat} {x : Nat} {ψ : Proposition Atom}
+    (hψ : newForms.findSome? (fun sf => if sf.sign == .neg then some sf.formula else none)
+        = some ψ)
+    (h : intFImpReuseWitness? bPers edges newForms newEdge = some x) :
+    isAccessible edges newEdge.2 x = true ∧
+    newEdge.2 ≤ x ∧
+    (newForms.filterMap fun sf => if sf.sign == .pos then some sf.formula else none).all
+      ((posFormulasAt bPers x).contains ·) = true ∧
+    ¬ (posFormulasAt bPers x).contains ψ ∧
+    bPers.any (fun y => y.sign == .neg && y.formula == ψ && y.label == x) = true := by
+  simp only [intFImpReuseWitness?, hψ] at h
+  obtain ⟨x', _hx'mem, hif⟩ := List.exists_of_findSome?_eq_some h
+  by_cases hcond : (isAccessible edges newEdge.2 x'
+      && newEdge.2.ble x'
+      && (newForms.filterMap fun sf => if sf.sign == .pos then some sf.formula else none).all
+        ((posFormulasAt bPers x').contains ·)
+      && !(posFormulasAt bPers x').contains ψ
+      && bPers.any (fun y => y.sign == .neg && y.formula == ψ && y.label == x')) = true
+  · simp only [hcond, if_true] at hif
+    injection hif with hif
+    subst hif
+    simp only [Bool.and_eq_true, Bool.not_eq_true'] at hcond
+    obtain ⟨⟨⟨⟨h1, h2⟩, h3⟩, h4⟩, h5⟩ := hcond
+    exact ⟨h1, Nat.le_of_ble_eq_true h2, h3, by simpa using h4, h5⟩
+  · simp only [Bool.not_eq_true] at hcond
+    simp only [hcond] at hif
+    simp at hif
 
 /-! ## Expansion Loop -/
 

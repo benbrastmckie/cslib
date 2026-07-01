@@ -467,7 +467,8 @@ private lemma intExpandBranches_openBranch_closed (fuel : Nat)
                 rw [hstep] at hgo
                 cases result with
                 | linearResult newForms nw' newEdge =>
-                  simp only at hgo; exact ih _ _ _ _ hgo
+                  simp only at hgo
+                  split at hgo <;> (try split at hgo) <;> exact ih _ _ _ _ hgo
                 | branchingResult branches' nw' =>
                   simp only at hgo; exact ih _ _ _ _ hgo
                 | notApplicable =>
@@ -1071,7 +1072,71 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
                         (doneEdges ++ [(match newEdge with
                           | none => edgesH | some e => edgesH ++ [e])] ++ edgesT).length := by
                     simp; omega
-                  exact ih _ _ _ _ hAC' hLen0' hgo
+                  split at hgo <;> (try split at hgo) <;>
+                    first
+                    | exact ih _ _ _ _ hAC' hLen0' hgo
+                    | (rename_i newEdgeVar edgeVar deadVar x heq
+                       obtain ⟨sf, hsfb, hint, hnewExp⟩ := intStepBranch_some_exists hstep
+                       obtain ⟨s, ff, l⟩ := sf
+                       cases s with
+                       | pos =>
+                         cases ff with
+                         | atom _ => simp [intApplyRuleFull] at hint
+                         | bot => simp [intApplyRuleFull] at hint
+                         | imp _ _ => simp [intApplyRuleFull] at hint
+                         | or _ _ => simp [intApplyRuleFull] at hint
+                         | and _ _ => simp [intApplyRuleFull] at hint
+                       | neg =>
+                         cases ff with
+                         | atom _ => simp [intApplyRuleFull] at hint
+                         | bot => simp [intApplyRuleFull] at hint
+                         | and _ _ => simp [intApplyRuleFull] at hint
+                         | or _ _ => simp [intApplyRuleFull] at hint
+                         | imp φ ψ₀ =>
+                           simp only [intApplyRuleFull, intFImpRule,
+                             IntRuleResult.linearResult.injEq, Option.some.injEq] at hint
+                           obtain ⟨hnf, hnw', hed⟩ := hint
+                           obtain rfl := hed.symm
+                           have hψ : newForms.findSome?
+                               (fun sf => if sf.sign == .neg then some sf.formula else none)
+                               = some ψ₀ := by rw [← hnf]; simp [propagatePersistence]
+                           obtain ⟨hacc, hle, hcont, hnotmem, hFpsi⟩ :=
+                             intFImpReuseWitness?_spec hψ heq
+                           have hmemsfor : φ ∈ (newForms.filterMap fun sf =>
+                               if sf.sign == .pos then some sf.formula else none) := by
+                             rw [← hnf]; simp [propagatePersistence]
+                           have hphi : (posFormulasAt bPers x).contains φ = true :=
+                             List.all_eq_true.mp hcont φ hmemsfor
+                           have houtPhi : bPers.any
+                               (fun y => y.sign == .pos && y.formula == φ && y.label == x)
+                               = true := by
+                             rw [List.contains_iff_mem] at hphi
+                             simp only [posFormulasAt, List.mem_filterMap] at hphi
+                             obtain ⟨y, hy_mem, hy_cond⟩ := hphi
+                             rw [List.any_eq_true]
+                             refine ⟨y, hy_mem, ?_⟩
+                             by_cases hs : y.sign == .pos && y.label == x
+                             · simp only [hs, if_true, Option.some.injEq] at hy_cond
+                               simp only [Bool.and_eq_true] at hs
+                               simp [hs.1, hs.2, hy_cond]
+                             · simp [hs] at hy_cond
+                           have hIC_reuse : IExpandedConsistent bPers newExp := by
+                             rw [hnewExp]
+                             intro sf' hsf'
+                             rw [List.mem_append, List.mem_singleton] at hsf'
+                             rcases hsf' with hsf' | rfl
+                             · exact hIC_bPers sf' hsf'
+                             · show sfSatisfied bPers ⟨.neg, .imp φ ψ₀, l⟩
+                               simp only [sfSatisfied]
+                               exact ⟨x, hle, houtPhi, hFpsi⟩
+                           have hAC'' : IAllConsistent (done ++ [bPers] ++ bt)
+                               (doneExp ++ [newExp] ++ eT) (doneNW ++ [nwH] ++ nwT) :=
+                             IAllConsistent_append
+                               (IAllConsistent_append hDone ⟨hIC_reuse, hLB_bPers, trivial⟩)
+                               hPendingTail
+                           have hLen0'' : (done ++ [bPers] ++ bt).length =
+                               (doneEdges ++ [edgesH] ++ edgesT).length := by simp; omega
+                           exact ih _ _ _ _ hAC'' hLen0'' hgo)
                 | branchingResult branches' nw' =>
                   simp only at hgo
                   have hbr := intStepBranch_branch_preserves hIC_bPers hLB_bPers hstep
@@ -1198,13 +1263,17 @@ private lemma intExpandBranches_openBranch_initial_mem (fuel : Nat)
                 cases result with
                 | linearResult newForms nw' newEdge =>
                   simp only at hgo
-                  refine ih _ _ _ _ _ ?_ b hgo
-                  intro b₀ hb₀
-                  simp only [List.mem_append, List.mem_singleton] at hb₀
-                  rcases hb₀ with ((hd | rfl) | hbt)
-                  · exact hDone b₀ hd
-                  · simp only [Branch.extendMany, List.mem_append]; exact Or.inr hbPers_sf
-                  · exact hPend b₀ (List.mem_cons_of_mem _ hbt)
+                  split at hgo <;> (try split at hgo) <;>
+                    (refine ih _ _ _ _ _ ?_ b hgo
+                     intro b₀ hb₀
+                     simp only [List.mem_append, List.mem_singleton] at hb₀
+                     rcases hb₀ with ((hd | rfl) | hbt)
+                     · exact hDone b₀ hd
+                     · first
+                       | exact hbPers_sf
+                       | (simp only [Branch.extendMany, List.mem_append]
+                          exact Or.inr hbPers_sf)
+                     · exact hPend b₀ (List.mem_cons_of_mem _ hbt))
                 | branchingResult branches' nw' =>
                   simp only at hgo
                   refine ih _ _ _ _ _ ?_ b hgo

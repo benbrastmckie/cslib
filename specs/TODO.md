@@ -1,5 +1,5 @@
 ---
-next_project_number: 455
+next_project_number: 457
 ---
 
 # TODO
@@ -11,8 +11,8 @@ next_project_number: 455
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,299,317,396,400,404,407,438,439,440,447,449,452,453 | -- | Foundations, Propositional Logic, Modal Logic, ... |
-| 2 | 39,40,215,300,375,389,405,409,426,430,441,450,451 | 36,37,181,299,317,404,407,439,449 | Propositional Logic, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,181,226,299,317,396,400,404,407,438,439,440,447,449,452,453,455 | -- | Foundations, Propositional Logic, Modal Logic, ... |
+| 2 | 39,40,215,300,375,389,405,409,426,430,441,450,451,456 | 36,37,181,299,317,404,407,439,449 | Propositional Logic, Modal Logic, Temporal Logic, ... |
 | 3 | 41,391,392,413,425,444,454 | 39,40,375,389,426,450 | Foundations, Temporal Logic, Bimodal Logic, ... |
 | 4 | 301,393,412 | 41,391,425 | Temporal Logic, Code Hygiene |
 | 5 | 414 | 215,300,301,444 | Code Hygiene |
@@ -84,7 +84,32 @@ next_project_number: 455
 440 [NOT STARTED] — PR review: GitHub PR https://github.com/leanprover/cslib/pull/648
 447 [PR READY] — Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public 
 
+### Tableau Infrastructure
+
+455 [NOT STARTED] — Extract the logic-agnostic measure arithmetic duplicated across t
+456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
+
 ## Tasks
+
+### 456. Shared tableau containment blocking
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Tableau Infrastructure
+- **Dependencies**: Task 317
+
+**Description**: Generalize the Sfor-containment / subset-blocking device recurring across tableau developments into a single label-generic module Cslib/Foundations/Logic/Tableau/Blocking.lean, built on the existing Branch.formulasAt (Foundations/Logic/Tableau/Branch.lean:81). Lift Temporal's timeType/isSubsetBlocked/isTemporallyBlocked (Temporal/Tableau/Branch.lean:101-174) and task 317's Sfor/containment check to: Branch.typeAt (deduplicated (Sign x F) forced-type at a label), Branch.containmentBlocked (containment test), and the once-proven core lemma Tableau.distinctTypes_le_pow ((b.labels.map b.typeAt).eraseDups.length <= 2^U.length for a subformula-closed universe U). Highest-value payoff: distinctTypes_le_pow is the shared core of BOTH task 317's intExpandBranches_world_bound_dedup (plan 04 Phase 5.1) AND the currently-[BLOCKED] Temporal soundness obligation (Temporal/Tableau/Soundness.lean:23-54, '<= 2^n time types' / loop-detection) - proving it once could unblock Temporal Phase 7. The definitional lift is cheap; the soundness lemma (blocking => bounded => countermodel) is the hard part, but hard exactly once instead of 2-3 times. DEPENDS ON task 317 landing first (so the (psi not in forced(x)) side-condition shape is settled); ideally co-scoped with the Temporal soundness unblock. Also add missing references.bib entries GargGenoveseNegri2012 and DershowitzManna1979 (ready in report 05 Q4). Source: task 317 reuse/abstraction research report 06 (R2). Verify scoped + full lake build green, checkInitImports/lint-style/shake pass, zero sorry.
+
+---
+
+### 455. Extract tableau measure arithmetic
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Tableau Infrastructure
+- **Dependencies**: None
+
+**Description**: Extract the logic-agnostic measure arithmetic duplicated across the Modal K FMP measure (task 442) and the Classical propositional tableau into a new shared module Cslib/Foundations/Logic/Tableau/Measure.lean. Move: sum_map_le_length_mul (FmpMeasure.lean:131), the geometric-sum capacity family modalCap/modalCap_le_pow (FmpMeasure.lean:776-833), and a small base-3 domination API (3^a<=3^C, 1<=3^C, 3^a+3^b<=3^(1+max)) currently hand-rolled inline in Classical/Completeness.lean:677-687 and FmpMeasure.lean:238. Target API (all F/L-free, pure Nat/List): Tableau.sum_map_le_length_mul, Tableau.geomCap (Sum_{i<=k} base^i), Tableau.geomCap_le_pow. ~80-150 lines moved; zero semantic risk (pure arithmetic); de-duplicates modal<->classical and updates call sites to the shared lemmas. Independent of task 317 - can run anytime. Source: task 317 reuse/abstraction research report 06 (R1), specs/317_propositional_tableau_completeness/reports/06_sfor-dedup-reuse-abstraction.md. Verify scoped + full lake build green, checkInitImports/lint-style/shake pass, zero sorry.
+
+---
 
 ### 454. Consolidate duplicated Chronicle PointInsertion helper families across Bimodal and Temporal
 - **Status**: [NOT STARTED]

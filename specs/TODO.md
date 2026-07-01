@@ -38,7 +38,7 @@ next_project_number: 448
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 404 [RESEARCHED] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
   └─ 405 [NOT STARTED] — Simplify the proof machinery in the task-402 modal tableau soundn
-419 [BLOCKED] — [Spawned from task 415 audit — supports the structure-first visio
+419 [NOT STARTED] — [Spawned from task 415 audit — supports the structure-first visio
 442 [IMPLEMENTING] — Fix the Phase 6 blocker in task 299 (modal K tableau completeness
   └─ 299 [BLOCKED] — Implement tableau decision procedure for basic modal logic K with
     └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
@@ -369,7 +369,7 @@ After implementation:
 ---
 
 ### 419. Generalize derivation lifting to a cross-logic InferenceSystem layer (spike)
-- **Status**: [BLOCKED]
+- **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

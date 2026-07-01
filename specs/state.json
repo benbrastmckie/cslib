@@ -944,7 +944,7 @@
       "project_number": 419,
       "project_name": "generalize_derivation_lifting_intersystem",
       "title": "Generalize derivation lifting to a cross-logic InferenceSystem layer (spike)",
-      "status": "blocked",
+      "status": "not_started",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "parent_task": 415,

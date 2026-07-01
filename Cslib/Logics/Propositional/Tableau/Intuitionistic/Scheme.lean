@@ -631,6 +631,49 @@ private lemma IExpandedConsistent_sat
     rw [hsfeq] at hsat; simp only [sfSatisfied] at hsat
     exact hsat
 
+/-- Label-boundedness invariant: every formula on `b` has a label at most `nw`, the
+current next-world counter. Threaded alongside `IExpandedConsistent` to justify the
+`w ≤ w'` witness ordering required by `sat_fimp` when discharging the `F(φ→ψ)` case. -/
+private def ILabelBound (b : IBranch Atom) (nw : Nat) : Prop :=
+  ∀ sf ∈ b, sf.label ≤ nw
+
+omit [Hashable Atom] in
+/-- `ILabelBound` extends across `Branch.extendMany` when the new formulas' labels are
+bounded by the (possibly larger) new counter and the old counter only grows. -/
+private lemma ILabelBound_extendMany {b : IBranch Atom} {nw nw' : Nat}
+    {newForms : List (ISF Atom)}
+    (hle : nw ≤ nw') (h : ILabelBound b nw)
+    (hnew : ∀ sf ∈ newForms, sf.label ≤ nw') :
+    ILabelBound (Branch.extendMany b newForms) nw' := by
+  intro sf hsf
+  simp only [Branch.extendMany, List.mem_append] at hsf
+  rcases hsf with hsf | hsf
+  · exact hnew sf hsf
+  · exact (h sf hsf).trans hle
+
+omit [Hashable Atom] in
+/-- Extracts the processed formula from a `some` result of `intStepBranch`: some
+`sf ∈ b` had `intApplyRuleFull sf nw b = result` and `newExp = e ++ [sf]`. -/
+private lemma intStepBranch_some_exists
+    {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
+    {result : IntRuleResult Atom} {newExp : List (ISF Atom)}
+    (hstep : intStepBranch b e nw = some (result, newExp)) :
+    ∃ sf, sf ∈ b ∧ intApplyRuleFull sf nw b = result ∧ newExp = e ++ [sf] := by
+  simp only [intStepBranch] at hstep
+  obtain ⟨sf, hsfb, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  by_cases hexp : (e.any (· == sf)) = true
+  · simp [hexp] at hsf
+  · simp only [Bool.not_eq_true] at hexp
+    simp only [hexp, Bool.false_eq_true, if_false] at hsf
+    cases hint : intApplyRuleFull sf nw b with
+    | notApplicable => simp [hint] at hsf
+    | linearResult fs nw' ed =>
+      simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
+      exact ⟨sf, hsfb, hint.trans hsf.1, hsf.2.symm⟩
+    | branchingResult bs nw' =>
+      simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
+      exact ⟨sf, hsfb, hint.trans hsf.1, hsf.2.symm⟩
+
 /-- If `intExpandBranches` returns `.openBranch b`, then `b` is Hintikka-saturated:
 every compound formula on `b` has its rule-outputs also on `b` (see `IBranchSaturation`).
 

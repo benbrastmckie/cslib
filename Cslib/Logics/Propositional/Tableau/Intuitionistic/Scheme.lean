@@ -287,6 +287,85 @@ theorem tableau_sound.{u_world} (S : IntMinScheme Atom)
       · simp [isAccessible.go] at hacc
   · exact hsat
 
+/-! ## Edge-Accessibility Preorder (task 317 plan v5 Phase 2)
+
+`isAccessible edges` (`Rules.lean:87-102`) already computes multi-hop reachability over the
+parent-child `edges` list (a fuel-bounded DFS). Rather than re-proving `isAccessible` itself is
+transitive (a nontrivial graph-reachability fact about its fuel-bounded implementation), the
+completeness frame is defined as `Relation.ReflTransGen (isAccessible edges · · = true)`:
+Mathlib's reflexive-transitive closure of `isAccessible edges` treated as a base step relation.
+This is sound regardless of whether `isAccessible edges` is "already" transitive (it gives AT
+LEAST as much accessibility as needed, and `Relation.ReflTransGen.single` lifts any ONE
+`isAccessible edges w w' = true` fact — which is all `sat_fimp`/`sat_timp` witnesses ever
+supply — directly into the closure). This replaces the ambient numeric `≤` (report 08's finding:
+the ambient `(ℕ,≤)` frame admits "phantom" worlds not on the branch, falsifying the T(→)
+truth-lemma case; edge-reachability restricts `≤` to worlds the expansion actually
+constructed). -/
+
+/-- The edge-accessibility `Preorder Nat` for a fixed edge set: `w ≤ w'` iff `w'` is reachable
+from `w` via the reflexive-transitive closure of `isAccessible edges`. This is the completeness
+countermodel's frame, installed locally (via `letI`/an explicit instance argument at use sites)
+rather than as a global instance, since `Preorder Nat` varies per branch's edge set. -/
+@[reducible] def intAccessPreorder (edges : IEdges) : Preorder Nat where
+  le w w' := Relation.ReflTransGen (fun x y => isAccessible edges x y = true) w w'
+  lt w w' := Relation.ReflTransGen (fun x y => isAccessible edges x y = true) w w' ∧
+    ¬ Relation.ReflTransGen (fun x y => isAccessible edges x y = true) w' w
+  le_refl _ := Relation.ReflTransGen.refl
+  le_trans _ _ _ := Relation.ReflTransGen.trans
+  lt_iff_le_not_ge _ _ := Iff.rfl
+
+/-- Any direct `isAccessible` fact lifts into the `intAccessPreorder` order. This is the
+single bridging fact `sat_fimp`/`sat_timp` witnesses need: both only ever supply a raw
+`isAccessible edges w w' = true` fact (never an explicit multi-hop chain), and this lemma
+lifts it to the `Preorder`'s `≤` directly via `Relation.ReflTransGen.single`. -/
+lemma intAccessPreorder_le_of_isAccessible {edges : IEdges} {w w' : Nat}
+    (h : isAccessible edges w w' = true) :
+    @LE.le Nat (intAccessPreorder edges).toLE w w' :=
+  Relation.ReflTransGen.single h
+
+/-! ### `intExtractValuation` monotonicity — STOP-gate finding (task 317 plan v5 Phase 2, R1)
+
+**Blocker (documented, not a `sorry`; no lemma is stated below).** The remaining Phase 2 task —
+"prove `intExtractValuation` monotone along `intAccessPreorder edges`" (needed both for a
+genuine `KripkeModel.v_upward_closed` field AND for instantiating `IValid`'s
+`∀{w w'} p, w≤w' → val w p → val w' p` hypothesis, `Kripke.lean:145-148`, which is exactly the
+`sorry` at `Completeness.lean:113`/`Minimal/Completeness.lean:110`) is **entangled with the B2
+fuel-sufficiency argument (Phase 6-10), not completable from completeness-side machinery alone**.
+
+Evidence (verified against source, not assumed):
+- `intApplyRuleFull` (`Rules.lean:245-268`) maps EVERY `.pos, .imp` signed formula (i.e. every
+  `T(φ→ψ)`) to `.notApplicable` — `T(φ→ψ)` is NEVER processed by `intStepBranch`. It is handled
+  EXCLUSIVELY by `applyPersistenceFixpoint`/`applyAllTImpRules` (`Expansion.lean:118-139`), run
+  BEFORE each `intStepBranch` check, bounded by a fuel parameter (`fuel'+1`, the OUTER
+  expansion's remaining fuel budget at that step).
+- Consequently `intStepBranch b e nw = none` (the "none leaf" structural fact used to produce
+  the FINAL returned branch, `intExpandBranches_openBranch_sat`'s only saturation witness)
+  provides NO guarantee that `applyPersistenceFixpoint` reached a TRUE fixpoint of
+  `applyAllTImpRules` — only that no alpha/beta/world-creation rule remains applicable.
+- `T(atom p)@w` monotonicity along edges requires, for `T(atom p)` introduced via a
+  `T(φ→atom p)`-triggered `intTImpRule` application at an accessible descendant, that the
+  ANTECEDENT `φ`'s OWN monotonicity has ALREADY propagated to that descendant — a
+  co-inductive dependency on formula complexity resolved only by REPEATED
+  `applyPersistenceFixpoint` passes, i.e. by fuel. This is not a completeness-side gap fixable
+  by a `Soundness.lean` edit (Postmortem 4 does not apply); it is a genuine WAVE-ORDERING
+  inversion: Phase 2 (Wave 2) becomes logically dependent on Phase 10's
+  `intExpMeasure`/fuel-sufficiency machinery (Wave 6), which does not exist yet.
+
+**What IS complete and unconditionally true** (committed above, `lake build` green,
+zero new sorries): `intAccessPreorder` (a genuine `Preorder Nat` from edge-reachability, via
+`Relation.ReflTransGen (isAccessible edges · · = true)`, sidestepping the need to prove
+`isAccessible` itself transitive) and `intAccessPreorder_le_of_isAccessible` (lifting any raw
+`sat_fimp`/future-`sat_timp` witness into that order). `sat_fimp`'s numeric `w ≤ w'` clause
+(R8) is UNCHANGED here per the plan's own allowance ("or note it will be restated over the edge
+relation in Phase 4") — deferred to Phase 4, not a Phase 2 blocker.
+
+**Recommendation for continuation**: either (a) reorder so Phase 2's monotonicity discharge is
+FOLDED INTO Phase 10 (mirroring R3's own anticipated fold for `sat_timp`'s succ-case, generalized
+to Phase 2's atom-monotonicity too — i.e. state monotonicity as a NEW field/hypothesis threaded
+alongside `sat_timp`, discharged only once `measure ≤ fuel` is available), or (b) have the
+orchestrator re-plan Phase 2/4/10's dependency edges to reflect this inversion before further
+dispatch. Do NOT attempt to force monotonicity via a weakened/vacuous statement or a `sorry`. -/
+
 /-! ## Parametric Truth Lemma -/
 
 /-- Parametric truth lemma (the single deferred completeness obligation, task 317).

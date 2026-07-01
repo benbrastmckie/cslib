@@ -43,6 +43,13 @@ constructor maps to a corresponding algebraic derivation operation.
 **Backward** (algebraic → tree): extract `d₀ : [] ⊢ listImp Γ φ`, weaken to
 `Γ ⊢ listImp Γ φ`, then apply `unfoldListImpInTree` to eliminate each layer.
 
+The base (`fc := .Base`) bridge is defined below as a thin delegation to the
+`fc`-parameterized bridge (`*Fc` names): `temporalAlgDS.Deriv Γ φ` and
+`temporalAlgDSFc .Base .Deriv Γ φ` are definitionally equal (both reduce to
+`Nonempty (DerivationTree .Base [] (listImp Γ φ))`), so the base helpers below are
+one-line delegations to the `_fc` versions at `fc := .Base`. The `_fc` machinery must
+therefore be defined first (Lean scoping).
+
 ## References
 
 * Cslib/Logics/Temporal/Metalogic/DeductionTheorem.lean
@@ -63,162 +70,6 @@ open Cslib.Logic.Metalogic
 
 variable {Atom : Type*}
 
-/-- Shorthand for the algebraic derivation system at `Temporal.HilbertBX`. -/
-@[reducible] def temporalAlgDS : Metalogic.DerivationSystem (Formula Atom) :=
-  @algebraicDerivationSystem (Formula Atom) _ _ Temporal.HilbertBX _ _
-
-/-! ## Forward Direction: DerivationTree → Algebraic Deriv -/
-
-/-- Forward bridge: given `d : DerivationTree FrameClass.Base Γ φ`, produce
-`temporalAlgDS.Deriv Γ φ` by structural induction on the derivation tree.
-
-- **axiom**: the axiom `⊢ ψ` in `HilbertBX` lifts to `Deriv Γ ψ` via K-weakening.
-- **assumption**: reflected directly.
-- **modus_ponens**: contextual modus ponens.
-- **temporal_necessitation**: G-necessitation gives `⊢ G(ψ)` in `HilbertBX`.
-- **temporal_duality**: construct the dual tree using `temporal_duality`.
-- **weakening**: monotone in the context. -/
-lemma derivTreeToList
-    {Γ : Context Atom} {φ : Formula Atom}
-    (d : DerivationTree FrameClass.Base Γ φ) :
-    (temporalAlgDS (Atom := Atom)).Deriv Γ φ := by
-  induction d with
-  | «axiom» Γ ψ h_ax h_fc =>
-    -- ψ is a HilbertBX theorem
-    have h_thm : InferenceSystem.DerivableIn Temporal.HilbertBX ψ :=
-      ⟨DerivationTree.axiom [] ψ h_ax h_fc⟩
-    -- Lift to the algebraic system via K-weakening: ⊢ ψ → listImp Γ ψ, then MP
-    simp only [temporalAlgDS, algebraicDerivationSystem]
-    unfold ListDeriv
-    exact ModusPonens.mp (listImp_axiom_k ψ Γ) h_thm
-  | assumption Γ ψ h_mem =>
-    simp only [temporalAlgDS, algebraicDerivationSystem]
-    exact list_deriv_reflection h_mem
-  | @modus_ponens Γ χ ψ _d₁ _d₂ ih₁ ih₂ =>
-    simp only [temporalAlgDS, algebraicDerivationSystem] at *
-    exact list_deriv_mp ih₁ ih₂
-  | @temporal_necessitation ψ _d ih =>
-    -- ih : algDS.Deriv [] ψ = ListDeriv [] ψ = DerivableIn HilbertBX ψ
-    simp only [temporalAlgDS, algebraicDerivationSystem] at *
-    have h_thm : InferenceSystem.DerivableIn Temporal.HilbertBX ψ := by
-      unfold ListDeriv at ih
-      simp only [listImp_nil] at ih
-      exact ih
-    -- G-necessitation: ⊢ ψ → ⊢ G(ψ) in HilbertBX
-    unfold ListDeriv
-    simp only [listImp_nil]
-    -- Construct G(ψ) derivation directly using the tree constructor
-    exact ⟨DerivationTree.temporal_necessitation ψ h_thm.toDerivation⟩
-  | @temporal_duality ψ _d ih =>
-    -- ih : algDS.Deriv [] ψ = ListDeriv [] ψ = DerivableIn HilbertBX ψ
-    simp only [temporalAlgDS, algebraicDerivationSystem] at *
-    have h_thm : InferenceSystem.DerivableIn Temporal.HilbertBX ψ := by
-      unfold ListDeriv at ih
-      simp only [listImp_nil] at ih
-      exact ih
-    -- Construct the dual derivation
-    have h_dual : InferenceSystem.DerivableIn Temporal.HilbertBX ψ.swapTemporal :=
-      ⟨DerivationTree.temporal_duality ψ h_thm.toDerivation⟩
-    unfold ListDeriv
-    simp only [listImp_nil]
-    exact h_dual
-  | @weakening Γ' Γ ψ _d h_sub ih =>
-    simp only [temporalAlgDS, algebraicDerivationSystem] at *
-    exact list_deriv_monotonic h_sub ih
-
-/-! ## Backward Helper: Unfold listImp Using Assumptions -/
-
-/-- Backward helper: given `Γ ⊢ listImp Ψ φ` (tree) and `Ψ ⊆ Γ`,
-produce `Γ ⊢ φ` by iterating modus ponens with assumption trees.
-
-Induction on `Ψ`: in the cons case, `a ∈ Γ` gives `Γ ⊢ a` by assumption,
-then MP reduces `listImp (a :: Ψ') φ` to `listImp Ψ' φ`. -/
-noncomputable def unfoldListImpInTree
-    {Γ : Context Atom} {φ : Formula Atom}
-    (Ψ : Context Atom)
-    (d : DerivationTree FrameClass.Base Γ (listImp Ψ φ))
-    (h_sub : ∀ a ∈ Ψ, a ∈ Γ) :
-    DerivationTree FrameClass.Base Γ φ := by
-  induction Ψ generalizing φ with
-  | nil =>
-    simp only [listImp_nil] at d
-    exact d
-  | cons a Ψ' ih =>
-    simp only [listImp_cons] at d
-    -- d : Γ ⊢ a → listImp Ψ' φ
-    have ha_mem : a ∈ Γ := h_sub a (List.mem_cons.mpr (Or.inl rfl))
-    have d_a : DerivationTree FrameClass.Base Γ a :=
-      DerivationTree.assumption Γ a ha_mem
-    have d_tail : DerivationTree FrameClass.Base Γ (listImp Ψ' φ) :=
-      DerivationTree.modus_ponens Γ a (listImp Ψ' φ) d d_a
-    exact ih d_tail (fun x hx => h_sub x (List.mem_cons.mpr (Or.inr hx)))
-
-/-! ## Backward Direction: Algebraic Deriv → DerivationTree -/
-
-/-- Backward bridge: `temporalAlgDS.Deriv Γ φ → DerivationTree .Base Γ φ`.
-
-Extracts `d₀ : [] ⊢ listImp Γ φ` from the algebraic derivation, weakens to `Γ`,
-then applies `unfoldListImpInTree` to eliminate the list-implication layers. -/
-noncomputable def listDerivToTree
-    {Γ : Context Atom} {φ : Formula Atom}
-    (h : (temporalAlgDS (Atom := Atom)).Deriv Γ φ) :
-    DerivationTree FrameClass.Base Γ φ := by
-  simp only [temporalAlgDS, algebraicDerivationSystem] at h
-  unfold ListDeriv at h
-  -- h : InferenceSystem.DerivableIn HilbertBX (listImp Γ φ)
-  -- = Nonempty (HilbertBX ⇓ listImp Γ φ)
-  -- = Nonempty (DerivationTree .Base [] (listImp Γ φ))
-  -- Extract the tree using Classical.choice (since DerivationTree is Type-valued)
-  have d₀ : DerivationTree FrameClass.Base [] (listImp Γ φ) := h.toDerivation
-  -- Weaken from [] to Γ
-  have d_weak : DerivationTree FrameClass.Base Γ (listImp Γ φ) :=
-    DerivationTree.weakening [] Γ (listImp Γ φ) d₀ (List.nil_subset Γ)
-  -- Eliminate listImp using assumption trees
-  exact unfoldListImpInTree Γ d_weak (fun _a ha => ha)
-
-/-! ## Full Derivability Equivalence -/
-
-/-- Bidirectional derivability equivalence between `temporalDerivationSystem` and
-the algebraic derivation system at `S := Temporal.HilbertBX`. -/
-theorem temporal_deriv_iff_algebraic
-    {Γ : Context Atom} {φ : Formula Atom} :
-    temporalDerivationSystem.Deriv Γ φ ↔
-    (temporalAlgDS (Atom := Atom)).Deriv Γ φ := by
-  unfold temporalDerivationSystem Temporal.Deriv
-  constructor
-  · intro ⟨d⟩
-    exact derivTreeToList d
-  · intro h
-    exact ⟨listDerivToTree h⟩
-
-/-! ## MCS Equivalences -/
-
-/-- `SetConsistent` under `temporalDerivationSystem` iff under `temporalAlgDS`. -/
-theorem temporal_setConsistent_iff_algebraic
-    {Ω : Set (Formula Atom)} :
-    SetConsistent temporalDerivationSystem Ω ↔
-    SetConsistent (temporalAlgDS (Atom := Atom)) Ω := by
-  unfold SetConsistent Consistent
-  constructor
-  · intro h L hL hd
-    exact h L hL (temporal_deriv_iff_algebraic.mpr hd)
-  · intro h L hL hd
-    exact h L hL (temporal_deriv_iff_algebraic.mp hd)
-
-/-- `SetMaximalConsistent` under `temporalDerivationSystem` iff under `temporalAlgDS`. -/
-theorem temporal_setMaxConsistent_iff_algebraic
-    {Ω : Set (Formula Atom)} :
-    SetMaximalConsistent temporalDerivationSystem Ω ↔
-    SetMaximalConsistent (temporalAlgDS (Atom := Atom)) Ω := by
-  unfold SetMaximalConsistent
-  constructor
-  · intro ⟨hcons, hmax⟩
-    refine ⟨temporal_setConsistent_iff_algebraic.mp hcons, fun φ hφ hinsert => ?_⟩
-    exact hmax φ hφ (temporal_setConsistent_iff_algebraic.mpr hinsert)
-  · intro ⟨hcons, hmax⟩
-    refine ⟨temporal_setConsistent_iff_algebraic.mpr hcons, fun φ hφ hinsert => ?_⟩
-    exact hmax φ hφ (temporal_setConsistent_iff_algebraic.mp hinsert)
-
 /-! ## FC-Parameterized Bridge: HilbertBXFc Tag Type
 
 To reroute the fc-polymorphic deduction theorem in `DenseMCS.lean` through the
@@ -234,6 +85,9 @@ algebraic seam, we need a `MinimalHilbert` instance parameterized by an arbitrar
 
 This gives `algebraic_has_deduction_theorem` for any `fc`, enabling `deductionTheoremFc`
 and `deductionWithMemFc` in `DenseMCS.lean` to be rerouted without structural recursion.
+
+This `fc`-parameterized bridge is defined first (before the base bridge) because the
+base (`fc := .Base`) helpers below are thin delegations to these `_fc` definitions.
 -/
 
 /-- Empty tag type for the fc-parameterized algebraic derivation system.
@@ -366,5 +220,87 @@ theorem temporal_deriv_iff_algebraic_fc {fc : FrameClass}
   constructor
   · intro ⟨d⟩; exact derivTreeToListFc d
   · intro h; exact ⟨listDerivToTreeFc h⟩
+
+/-! ## Base Bridge (fc := .Base)
+
+`temporalAlgDS.Deriv Γ φ` and `(temporalAlgDSFc .Base).Deriv Γ φ` are definitionally
+equal: both reduce to `Nonempty (DerivationTree .Base [] (listImp Γ φ))`, since
+`Temporal.HilbertBX`'s `InferenceSystem.derivation φ := DerivationTree .Base [] φ`
+literally matches `HilbertBXFc .Base`'s. The base helpers below are therefore
+one-line delegations to their `_fc` counterparts at `fc := .Base`. -/
+
+/-- Shorthand for the algebraic derivation system at `Temporal.HilbertBX`. -/
+@[reducible] def temporalAlgDS : Metalogic.DerivationSystem (Formula Atom) :=
+  @algebraicDerivationSystem (Formula Atom) _ _ Temporal.HilbertBX _ _
+
+/-- Forward bridge: given `d : DerivationTree FrameClass.Base Γ φ`, produce
+`temporalAlgDS.Deriv Γ φ`. Delegates to `derivTreeToListFc` at `fc := .Base`
+(definitionally equal target, §3.2). -/
+lemma derivTreeToList
+    {Γ : Context Atom} {φ : Formula Atom}
+    (d : DerivationTree FrameClass.Base Γ φ) :
+    (temporalAlgDS (Atom := Atom)).Deriv Γ φ :=
+  derivTreeToListFc d
+
+/-- Backward helper: given `Γ ⊢ listImp Ψ φ` (tree) and `Ψ ⊆ Γ`,
+produce `Γ ⊢ φ`. Delegates to `unfoldListImpInTreeFc` at `fc := .Base`. -/
+noncomputable def unfoldListImpInTree
+    {Γ : Context Atom} {φ : Formula Atom}
+    (Ψ : Context Atom)
+    (d : DerivationTree FrameClass.Base Γ (listImp Ψ φ))
+    (h_sub : ∀ a ∈ Ψ, a ∈ Γ) :
+    DerivationTree FrameClass.Base Γ φ :=
+  unfoldListImpInTreeFc (fc := .Base) Ψ d h_sub
+
+/-- Backward bridge: `temporalAlgDS.Deriv Γ φ → DerivationTree .Base Γ φ`.
+Delegates to `listDerivToTreeFc` at `fc := .Base` (definitionally equal source, §3.2). -/
+noncomputable def listDerivToTree
+    {Γ : Context Atom} {φ : Formula Atom}
+    (h : (temporalAlgDS (Atom := Atom)).Deriv Γ φ) :
+    DerivationTree FrameClass.Base Γ φ :=
+  listDerivToTreeFc (fc := .Base) h
+
+/-! ## Full Derivability Equivalence -/
+
+/-- Bidirectional derivability equivalence between `temporalDerivationSystem` and
+the algebraic derivation system at `S := Temporal.HilbertBX`. -/
+theorem temporal_deriv_iff_algebraic
+    {Γ : Context Atom} {φ : Formula Atom} :
+    temporalDerivationSystem.Deriv Γ φ ↔
+    (temporalAlgDS (Atom := Atom)).Deriv Γ φ := by
+  unfold temporalDerivationSystem Temporal.Deriv
+  constructor
+  · intro ⟨d⟩
+    exact derivTreeToList d
+  · intro h
+    exact ⟨listDerivToTree h⟩
+
+/-! ## MCS Equivalences -/
+
+/-- `SetConsistent` under `temporalDerivationSystem` iff under `temporalAlgDS`. -/
+theorem temporal_setConsistent_iff_algebraic
+    {Ω : Set (Formula Atom)} :
+    SetConsistent temporalDerivationSystem Ω ↔
+    SetConsistent (temporalAlgDS (Atom := Atom)) Ω := by
+  unfold SetConsistent Consistent
+  constructor
+  · intro h L hL hd
+    exact h L hL (temporal_deriv_iff_algebraic.mpr hd)
+  · intro h L hL hd
+    exact h L hL (temporal_deriv_iff_algebraic.mp hd)
+
+/-- `SetMaximalConsistent` under `temporalDerivationSystem` iff under `temporalAlgDS`. -/
+theorem temporal_setMaxConsistent_iff_algebraic
+    {Ω : Set (Formula Atom)} :
+    SetMaximalConsistent temporalDerivationSystem Ω ↔
+    SetMaximalConsistent (temporalAlgDS (Atom := Atom)) Ω := by
+  unfold SetMaximalConsistent
+  constructor
+  · intro ⟨hcons, hmax⟩
+    refine ⟨temporal_setConsistent_iff_algebraic.mp hcons, fun φ hφ hinsert => ?_⟩
+    exact hmax φ hφ (temporal_setConsistent_iff_algebraic.mpr hinsert)
+  · intro ⟨hcons, hmax⟩
+    refine ⟨temporal_setConsistent_iff_algebraic.mpr hcons, fun φ hφ hinsert => ?_⟩
+    exact hmax φ hφ (temporal_setConsistent_iff_algebraic.mp hinsert)
 
 end Cslib.Logic.Temporal

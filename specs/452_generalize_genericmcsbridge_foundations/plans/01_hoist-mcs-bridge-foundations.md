@@ -153,20 +153,23 @@ and `GenericMCS.lean` for the final elimination accounting. No source edits.
 
 ---
 
-### Phase 1: Part A.1 — Temporal base↔Fc collapse [NOT STARTED]
+### Phase 1: Part A.1 — Temporal base↔Fc collapse [COMPLETED]
 
 **Goal**: Reorder the Temporal `_fc` block above the base block and rewrite the three base bodies
 (`derivTreeToList`, `unfoldListImpInTree`, `listDerivToTree`) as one-line delegations to their
 `_fc` counterparts at `fc := .Base`, preserving all public names and statements.
 
 **Tasks**:
-- [ ] Move the `_fc` block (currently ~L239-370) above the base block (currently ~L66-221) so the
+- [x] Move the `_fc` block (currently ~L239-370) above the base block (currently ~L66-221) so the
       `_fc` definitions are in scope first (Lean scoping requirement, §3.3).
-- [ ] Rewrite base `derivTreeToList d := derivTreeToListFc d`, `unfoldListImpInTree Ψ d h_sub :=
+- [x] Rewrite base `derivTreeToList d := derivTreeToListFc d`, `unfoldListImpInTree Ψ d h_sub :=
       unfoldListImpInTreeFc (fc := .Base) Ψ d h_sub`, `listDerivToTree h := listDerivToTreeFc
       (fc := .Base) h` (bodies from §3.3; each typechecks by the §3.2 defeq).
-- [ ] Compile the delegations BEFORE deleting the old base bodies; only then remove the old bodies.
-- [ ] Keep `temporalAlgDS`, `temporal_deriv_iff_algebraic`, and all `_fc` names/statements intact.
+- [x] Compile the delegations BEFORE deleting the old base bodies; only then remove the old bodies.
+- [x] Keep `temporalAlgDS`, `temporal_deriv_iff_algebraic`, and all `_fc` names/statements intact.
+
+**Result**: 370L -> 306L (64L reduction). `lean_verify` on `derivTreeToList`, `listDerivToTree`,
+`temporal_deriv_iff_algebraic` all report `["propext","Classical.choice"]` only (zero-debt).
 
 **Timing**: 1 hour
 

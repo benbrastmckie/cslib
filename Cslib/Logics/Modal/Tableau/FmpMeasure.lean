@@ -2159,6 +2159,247 @@ lemma modalStepBranch_knownWorlds
       · rw [hfstc] at hfreshall; exact hfreshall.elim
       · rw [hfstc] at hsf; simp at hsf
 
+/-- The expanded set's `modalUniverse` closure is preserved across a `modalStepBranch` step:
+`e'` is either `e` unchanged (persistent rules) or `e ++ [sf]` (linear/branching rules), and in
+the latter case `sf ∈ modalUniverse φ0` follows from `sf ∈ b` and the branch closure `hb`. Same
+shallow (top-level `RuleResult`-constructor-only) case split as P2-obl-a. -/
+private lemma modalStepBranch_eClosure
+    (φ0 : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hb : ∀ x ∈ b, x ∈ modalUniverse φ0)
+    (heclosure : ∀ x ∈ e, x ∈ modalUniverse φ0) :
+    ∀ e' ∈ newExps, ∀ x ∈ e', x ∈ modalUniverse φ0 := by
+  simp only [modalStepBranch] at hstep
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  have hsfU : sf ∈ modalUniverse φ0 := hb sf hsfmem
+  rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+  · rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro e' he'
+    rw [← hsf.2.1] at he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    intro x hx
+    simp only [List.mem_append, List.mem_singleton] at hx
+    rcases hx with hx | rfl
+    · exact heclosure x hx
+    · exact hsfU
+  · rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro e' he'
+    rw [← hsf.2.1] at he'
+    obtain ⟨br, -, rfl⟩ := List.mem_map.mp he'
+    intro x hx
+    simp only [List.mem_append, List.mem_singleton] at hx
+    rcases hx with hx | rfl
+    · exact heclosure x hx
+    · exact hsfU
+  · rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro e' he'
+    rw [← hsf.2.1] at he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    exact heclosure
+  · rw [hfstc] at hsf; simp at hsf
+
+/-- **Reusable invariant bundle** (P2-obl-d/e, threaded onward by P5a across the whole
+saturation-loop induction): the branch/expanded-set closure facts, the freshness and
+successor-known invariants on `acc`, the out-degree/expanded-set correspondence, and the
+rank-map invariants, all together. Bundling these lets P5a carry a single hypothesis through
+its induction instead of eight separate ones. -/
+structure ModalPotentialInv (φ0 : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (rank : WorldIndex → Nat) : Prop where
+  /-- Every branch formula is a member of the fixed finite universe `U(φ0)`. -/
+  bClosure : ∀ x ∈ b, x ∈ modalUniverse φ0
+  /-- The expanded set has no duplicate entries (P2-obl-a). -/
+  eNodup : e.Nodup
+  /-- Every expanded-set formula is a member of `U(φ0)`. -/
+  eClosure : ∀ x ∈ e, x ∈ modalUniverse φ0
+  /-- All of `acc`'s recorded worlds are `< modalNextWorld b`. -/
+  accFresh : accFreshInv b acc
+  /-- Every `acc`-edge target is a label already appearing on the branch. -/
+  accKnown : accTargetsKnown b acc
+  /-- `outDeg` exactly counts the minting-shaped formulas in `e` at each world (P2-obl-c). -/
+  outDegEq : ∀ w, outDeg acc w = (e.filter (fun x => x.label == w && isMintingShaped x)).length
+  /-- The rank map bounds every branch formula's modal depth (P2-obl-b). -/
+  rankBound : ∀ x ∈ b, modalDepth x.formula ≤ rank x.label
+  /-- The rank map decreases by exactly 1 across every recorded accessibility edge (P2-obl-b). -/
+  rankEdge : ∀ w w', acc.hasEdge w w' → rank w' + 1 = rank w
+
+/-- **P2-obl-d (finish)**: the exact single-step potential-drop identity. `modalStepBranch`
+preserves `modalMaxWorld b + modalPotential Sf b acc rank` EXACTLY (`Sf := (modalSubfmls
+φ0).length`), composing `modalStepBranch_exists_rank'` (P2-obl-b) for the rank map and
+`modalStepBranch_knownWorlds` (this file, above) for the known-worlds/max-world bookkeeping.
+The fresh-world case's `modalMaxWorld` increment of exactly `1` is offset by an exact `Φ`
+decrement of exactly `1`: writing `k := rank' (modalNextWorld b)` (pinned down exactly via
+`rank'`'s edge invariant applied to the new edge, composed with its off-fresh-point agreement
+with `rank`), the per-world potential term at the mint source `l` drops by exactly
+`modalCap Sf k`, which equals the fresh world's own potential term plus `1`
+(`modalCap_zero`/`modalCap_succ`, matching the two rank sub-cases `k = 0` and `k = k' + 1`). -/
+lemma modalStepBranch_potential_step
+    (φ0 : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (rank : WorldIndex → Nat)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hinv : ModalPotentialInv φ0 b e acc rank) :
+    ∃ rank' : WorldIndex → Nat,
+      (∀ w, w ≠ modalNextWorld b → rank' w = rank w) ∧
+      (∀ b' ∈ newBs, ∀ x ∈ b', modalDepth x.formula ≤ rank' x.label) ∧
+      (∀ w w', newAcc.hasEdge w w' → rank' w' + 1 = rank' w) ∧
+      (∀ b' ∈ newBs,
+        modalMaxWorld b' + modalPotential (modalSubfmls φ0).length b' newAcc rank' =
+          modalMaxWorld b + modalPotential (modalSubfmls φ0).length b acc rank) := by
+  obtain ⟨hb, hnodup, heclosure, hInv, hknown, houtdeg, hrankbound, hrankedge⟩ := hinv
+  obtain ⟨rank', hragree, hrb', hre'⟩ :=
+    modalStepBranch_exists_rank' b e acc newBs newExps newAcc hstep hInv rank hrankbound
+      hrankedge
+  refine ⟨rank', hragree, hrb', hre', ?_⟩
+  set Sf := (modalSubfmls φ0).length with hSfdef
+  have hnextne : ∀ w ∈ modalKnownWorlds b, w ≠ modalNextWorld b := fun w hw heq =>
+    modalNextWorld_not_mem_modalKnownWorlds b (heq ▸ hw)
+  rcases modalStepBranch_knownWorlds b e acc newBs newExps newAcc hstep hknown with
+    ⟨hsame, hmax⟩ | ⟨l, hlknown, haddedge, hmax⟩
+  · -- non-mint: acc and rank are unchanged on the relevant domain
+    intro b' hb'
+    obtain ⟨hmw, hperm⟩ := hmax b' hb'
+    have hmapeq : (modalKnownWorlds b).map (modalPotentialTerm Sf acc rank') =
+        (modalKnownWorlds b).map (modalPotentialTerm Sf acc rank) :=
+      List.map_congr_left (fun w hw => by
+        unfold modalPotentialTerm; rw [hragree w (hnextne w hw)])
+    have hpermterm : modalPotential Sf b' acc rank' = modalPotential Sf b acc rank' := by
+      unfold modalPotential; exact (hperm.map (modalPotentialTerm Sf acc rank')).sum_eq
+    have hrankeq : modalPotential Sf b acc rank' = modalPotential Sf b acc rank := by
+      unfold modalPotential; rw [hmapeq]
+    rw [hmw, hsame, hpermterm, hrankeq]
+  · -- mint: acc gains one edge l → modalNextWorld b; Φ drops by exactly modalCap Sf k + 1 - ... = 1
+    intro b' hb'
+    obtain ⟨hmw, hperm⟩ := hmax b' hb'
+    have hlne : l ≠ modalNextWorld b := hnextne l hlknown
+    have hrankl : rank' l = rank l := hragree l hlne
+    have hedgenew : newAcc.hasEdge l (modalNextWorld b) = true := by
+      rw [haddedge]; simp [Accessibility.hasEdge, Accessibility.addEdge]
+    have hrankw' : rank' (modalNextWorld b) + 1 = rank l := by
+      have h1 := hre' l (modalNextWorld b) hedgenew
+      rwa [hrankl] at h1
+    have houtdeg_l : outDeg newAcc l = outDeg acc l + 1 := by
+      rw [haddedge]; exact outDeg_addEdge_self acc l (modalNextWorld b)
+    have houtdeg_fresh0 : outDeg acc (modalNextWorld b) = 0 := by
+      rcases Nat.eq_zero_or_pos (outDeg acc (modalNextWorld b)) with h0 | hpos
+      · exact h0
+      · exfalso
+        obtain ⟨w1, hw1⟩ := List.exists_mem_of_ne_nil (acc.successorsOf (modalNextWorld b))
+          (fun hz => by simp [outDeg, hz] at hpos)
+        have hedgeacc : acc.hasEdge (modalNextWorld b) w1 = true := mem_successorsOf_hasEdge hw1
+        exact absurd (hInv (modalNextWorld b) w1 hedgeacc).1 (lt_irrefl _)
+    have houtdeg_fresh : outDeg newAcc (modalNextWorld b) = 0 := by
+      rw [haddedge, outDeg_addEdge_ne acc l (modalNextWorld b) (modalNextWorld b) hlne.symm]
+      exact houtdeg_fresh0
+    -- bound outDeg acc l < Sf via the post-state e' and P2-obl-c
+    have heclosure' := modalStepBranch_eClosure φ0 b e acc newBs newExps newAcc hstep hb heclosure
+    have hnodup' := modalStepBranch_preserves_expandedNodup b e acc newBs newExps newAcc hstep
+      hnodup
+    have houtdegeq' := modalStepBranch_preserves_outDegEq b e acc newBs newExps newAcc hstep
+      houtdeg
+    have hstepcopy := hstep
+    simp only [modalStepBranch] at hstepcopy
+    obtain ⟨sf, hsfmem, hsf0⟩ := List.exists_of_findSome?_eq_some hstepcopy
+    split_ifs at hsf0 with hexp
+    have hsfU : sf ∈ modalUniverse φ0 := hb sf hsfmem
+    have hnewAccne : newAcc ≠ acc := by
+      rw [haddedge]
+      intro heq
+      have hedges : acc.edges = (l, modalNextWorld b) :: acc.edges :=
+        congrArg Accessibility.edges heq.symm
+      have hlen := congrArg List.length hedges
+      simp only [List.length_cons] at hlen
+      omega
+    rcases modalApplyOne_fresh_local sf b acc with hsame | ⟨wsf, rest, hfst, hsnd⟩
+    · exfalso
+      apply hnewAccne
+      rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+      · rw [hfstc] at hsf0; simp only [Option.some.injEq, Prod.mk.injEq] at hsf0
+        exact hsf0.2.2.symm.trans hsame
+      · rw [hfstc] at hsf0; simp only [Option.some.injEq, Prod.mk.injEq] at hsf0
+        exact hsf0.2.2.symm.trans hsame
+      · rw [hfstc] at hsf0; simp only [Option.some.injEq, Prod.mk.injEq] at hsf0
+        exact hsf0.2.2.symm.trans hsame
+      · rw [hfstc] at hsf0; simp at hsf0
+    · rw [hfst] at hsf0
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf0
+      have he'mem : (e ++ [sf]) ∈ newExps := by
+        rw [← hsf0.2.1]; exact List.mem_singleton_self _
+      have hnodupE' : (e ++ [sf]).Nodup := hnodup' _ he'mem
+      have hclosureE' : ∀ x ∈ e ++ [sf], x ∈ modalUniverse φ0 := heclosure' _ he'mem
+      have houtdegE'l : outDeg newAcc l =
+          ((e ++ [sf]).filter (fun x => x.label == l && isMintingShaped x)).length :=
+        houtdegeq' _ he'mem l
+      have hSfbound : outDeg newAcc l ≤ Sf :=
+        outDeg_le_of_expandedNodup φ0 (e ++ [sf]) newAcc l hnodupE' hclosureE' houtdegE'l
+      -- core identity at the mint point: the drop in the term at `l` equals the fresh term
+      -- plus exactly 1 (modalCap's recurrence), matching Δ(maxWorld) = 1 exactly.
+      have hlz : rank l ≠ 0 := by omega
+      have hrank'l : rank' l ≠ 0 := by rw [hrankl]; exact hlz
+      have hdSf : outDeg acc l + 1 ≤ Sf := by rw [← houtdeg_l]; exact hSfbound
+      have hcore : modalPotentialTerm Sf newAcc rank' (modalNextWorld b) +
+          modalPotentialTerm Sf newAcc rank' l + 1 = modalPotentialTerm Sf acc rank l := by
+        unfold modalPotentialTerm
+        rw [if_neg hrank'l, if_neg hlz, houtdeg_fresh, houtdeg_l, hrankl, Nat.sub_add_eq]
+        rcases Nat.eq_zero_or_pos (rank' (modalNextWorld b)) with hk0 | hkpos
+        · rw [if_pos hk0]
+          have hl1 : rank l = 1 := by omega
+          rw [hl1, show (1 : Nat) - 1 = 0 from rfl, modalCap_zero]
+          omega
+        · have hne0 : rank' (modalNextWorld b) ≠ 0 := Nat.pos_iff_ne_zero.mp hkpos
+          rw [if_neg hne0]
+          obtain ⟨k', hk'⟩ := Nat.exists_eq_succ_of_ne_zero hne0
+          have hrl : rank l - 1 = k' + 1 := by omega
+          rw [hrl, hk']
+          simp only [Nat.sub_zero, Nat.succ_sub_one]
+          rw [modalCap_succ]
+          set D := Sf - outDeg acc l - 1 with hDdef
+          have hSfeq : Sf - outDeg acc l = D + 1 := by omega
+          rw [hSfeq]
+          ring
+      -- assemble via the erase-decomposition of the sum over modalKnownWorlds b
+      have hpe : (modalKnownWorlds b).Perm (l :: (modalKnownWorlds b).erase l) :=
+        List.perm_cons_erase hlknown
+      have hstep1 : modalPotential Sf b' newAcc rank' =
+          modalPotentialTerm Sf newAcc rank' (modalNextWorld b) +
+          ((modalKnownWorlds b).map (modalPotentialTerm Sf newAcc rank')).sum := by
+        unfold modalPotential
+        rw [(hperm.map (modalPotentialTerm Sf newAcc rank')).sum_eq, List.map_cons,
+          List.sum_cons]
+      have hstep2 : ((modalKnownWorlds b).map (modalPotentialTerm Sf newAcc rank')).sum =
+          modalPotentialTerm Sf newAcc rank' l +
+          (((modalKnownWorlds b).erase l).map (modalPotentialTerm Sf newAcc rank')).sum := by
+        rw [(hpe.map (modalPotentialTerm Sf newAcc rank')).sum_eq, List.map_cons, List.sum_cons]
+      have hstep2' : modalPotential Sf b acc rank = modalPotentialTerm Sf acc rank l +
+          (((modalKnownWorlds b).erase l).map (modalPotentialTerm Sf acc rank)).sum := by
+        unfold modalPotential
+        rw [(hpe.map (modalPotentialTerm Sf acc rank)).sum_eq, List.map_cons, List.sum_cons]
+      have herase_eq :
+          (((modalKnownWorlds b).erase l).map (modalPotentialTerm Sf newAcc rank')).sum =
+          (((modalKnownWorlds b).erase l).map (modalPotentialTerm Sf acc rank)).sum := by
+        congr 1
+        apply List.map_congr_left
+        intro w hw
+        have hwne_l : w ≠ l :=
+          ((modalKnownWorlds_nodup b).mem_erase_iff.mp hw).1
+        have hwmem : w ∈ modalKnownWorlds b := List.mem_of_mem_erase hw
+        have hwne_fresh : w ≠ modalNextWorld b := hnextne w hwmem
+        unfold modalPotentialTerm
+        rw [hragree w hwne_fresh, haddedge, outDeg_addEdge_ne acc l (modalNextWorld b) w hwne_l]
+      have hw'eq : modalNextWorld b = modalMaxWorld b + 1 := rfl
+      rw [hmw, hstep1, hstep2, herase_eq, hstep2', ← hcore, hw'eq]
+      ring
+
 end Cslib.Logic.Modal.Tableau
 
 end

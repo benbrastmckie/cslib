@@ -233,7 +233,7 @@
       "dependencies": [],
       "parent_task": 296,
       "session_id": "sess_1782849708_71fa88",
-      "blockers": "Encoding-based completion (plan v5) in progress. Soundness 1-4 GREEN. Completeness truth lemma rewritten via option (b): false uniform-imp bridge lemmas deleted, inline imp case in modalTruthLemma + modalComplexity strong induction. RED with 29 mechanical errors in Completeness.lean lines 220-514 (unsolved goals, split on decomposer result, Unknown identifier x/y from destructuring, rewrite mismatches). Prior dispatch died on network ECONNRESET, not a logic wall. Zero sorry/axiom. WIP committed as labeled checkpoint. See .orchestrator-handoff.json. Datatype refactor deferred to task 441."
+      "blockers": "Phase 5c (completeness truth lemma) DELIVERED GREEN + committed sorry-free: modalTruthLemma repaired 30->0 errors on the option-(b) Lukasiewicz encoding with modalComplexity strong induction; lake build Cslib.Logics.Modal.Tableau.Completeness passes; zero sorry/admit/axiom. Phase 6 BLOCKED (research-level, not mechanical): modalExpandBranches_hintikka needs a modal expansion-measure (modalExpMeasure/modalBranchComplexity) + strict-decrease lemma + fuel-sufficiency bound (measure <= modalFuel, accounting for K box-world-creation) + modalStepBranch_none_saturated + the final Forall2-acc induction. None of this infra exists. Phase 7 (decision procedure + barrel + CI) gated on Phase 6. Pre-existing (out of scope): SoundnessStep.lean RED at lines 82/85/91 (3 type mismatches) blocks full lake build. See .orchestrator-handoff.json."
     },
     {
       "project_number": 300,
@@ -637,7 +637,7 @@
     {
       "project_number": 180,
       "project_name": "temporal_primitive_always_historically",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "dependencies": [
         406
@@ -666,8 +666,8 @@
         }
       ],
       "topic": "Temporal Logic",
-      "last_updated": "2026-06-30T17:48:00Z",
-      "session_id": "sess_1782866590_849a21",
+      "last_updated": "2026-07-01T00:51:12Z",
+      "session_id": "sess_1782866989_0251ee",
       "next_artifact_number": 2,
       "plan_metadata": {
         "phases": 9,

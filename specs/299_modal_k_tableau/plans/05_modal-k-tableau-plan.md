@@ -1,8 +1,8 @@
-# Implementation Plan: Task #299 (Revised, v4)
+# Implementation Plan: Task #299 (Revised, v5)
 
 - **Task**: 299 - Modal K Tableau Decision Procedure
-- **Status**: [IN PROGRESS]
-- **Effort**: ~6 hours remaining (Phase 5c restructure + Phases 6-7; soundness Phases 1-4 and completeness 5a/5b-box/5d done)
+- **Status**: [BLOCKED] (Phase 6 — modal expansion-measure / fuel-sufficiency infrastructure missing; Phase 5c truth lemma delivered GREEN + committed sorry-free)
+- **Effort**: Phases 1-4 (soundness) done; Phase 5a/5b/5c/5d (completeness truth lemma) done + GREEN; Phase 6 BLOCKED (research-level measure proof, ~1 dedicated task); Phase 7 (decision procedure + CI) NOT STARTED, gated on Phase 6
 - **Dependencies**: None
 - **Research Inputs**: reports/01_modal-k-tableau-research.md; reports/03_completeness-decomposition.md; reports/04_truth-lemma-architecture.md
 - **Artifacts**: plans/05_modal-k-tableau-plan.md (this file); supersedes plans/04_modal-k-tableau-plan.md
@@ -279,9 +279,9 @@ bridges and prove `modalTruthLemma` via STRONG induction on `sizeOf φ`, inlinin
 analysis for the `imp` case. This is the core of the v4 revision and the entire remaining blocker.
 
 **Tasks**:
-- [ ] **Delete** `hintikka_imp_pos` and `hintikka_imp_neg` from `Completeness.lean`; confirm no
+- [x] **Delete** `hintikka_imp_pos` and `hintikka_imp_neg` from `Completeness.lean`; confirm no
   remaining references (`grep -n hintikka_imp Cslib/Logics/Modal/Tableau/Completeness.lean` empty).
-- [ ] Introduce the size-bounded helper `modalTruthLemma_aux` (report 04 §4.2):
+- [x] Introduce the size-bounded helper `modalTruthLemma_aux` (report 04 §4.2):
   ```lean
   private lemma modalTruthLemma_aux
       (b : List (SignedFormula (Proposition Atom) WorldIndex))
@@ -311,7 +311,7 @@ analysis for the `imp` case. This is the core of the v4 revision and the entire 
   Discharge each `sizeOf ψ ≤ n` obligation from `hsz : sizeOf φ ≤ n+1` via
   `simp only [Proposition.imp.sizeOf_spec, …] at hsz ⊢; omega` (every strict subformula is strictly
   smaller). For `atom`/`bot`/`box`, port the current case bodies (they only ever use child IH).
-- [ ] **`imp a c` POSITIVE leaf** (`T(imp a c)@w ∈ b → Satisfies M w (imp a c)`, `M := extractModel b acc`).
+- [x] **`imp a c` POSITIVE leaf** (`T(imp a c)@w ∈ b → Satisfies M w (imp a c)`, `M := extractModel b acc`).
   Open with the shared extraction: `have hcond := (hH.2.1) ⟨.pos, .imp a c, w⟩ hmem`; unfold with
   `simp only [modalApplyOne, tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?, modalImpOf?,
   modalNegOf?, RuleResult.isApplicable, Option.getD_some] at hcond` (**`Option.getD_some` is
@@ -328,7 +328,7 @@ analysis for the `imp` case. This is the core of the v4 revision and the entire 
      `[F(a)]` → `(ih a _ w).2`; `[T(c)]` → `(ih c _ w).1` (child IH only).
   4. **Negation** `c = bot`, `a` not and-shape and not `imp _ bot` → `negPos` `.linear [F(a)@w]`.
      `(ih a _ w).2`; close `Sat a → False`. (Note `T(◇φ)=T(¬□¬φ)` lands here with `a = □(φ→⊥)`.)
-- [ ] **`imp a c` NEGATIVE leaf** (`F(imp a c)@w ∈ b → ¬Satisfies M w (imp a c)`), same shape split,
+- [x] **`imp a c` NEGATIVE leaf** (`F(imp a c)@w ∈ b → ¬Satisfies M w (imp a c)`), same shape split,
   priority `andNeg > orNeg > impNeg > negNeg`:
   1. **Conjunction** → `andNeg` `.branching [[F(a')@w],[F(b')@w]]`; deep IH `(ih a' _ w).2` /
      `(ih b' _ w).2`; close `¬Satisfies M w (a'∧b')`.
@@ -337,7 +337,7 @@ analysis for the `imp` case. This is the core of the v4 revision and the entire 
   3. **Proper imp** → `impNeg` `.linear [T(a)@w, F(c)@w]`; `(ih a _ w).1`, `(ih c _ w).2`; close
      `¬(Sat a → Sat c)` with `fun hf => absurd (hf ‹Sat a›) ‹¬Sat c›`.
   4. **Negation** → `negNeg` `.linear [T(a)@w]`; `(ih a _ w).1`; close `¬(Sat a → False)`.
-- [ ] Throughout, write `List.mem_cons_self` with **NO explicit args** (verified fix #2); build
+- [x] Throughout, write `List.mem_cons_self` with **NO explicit args** (verified fix #2); build
   `any`-witnesses with `List.any_eq_true.mpr ⟨_, hmem_fact, by simp [SignedFormula.pos]⟩` (the
   existing idiom from the box bridges). Reuse the `@[simp]` classifiers, not re-derivations.
 

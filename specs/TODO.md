@@ -30,7 +30,7 @@ next_project_number: 449
 
 ### Foundations
 
-448 [RESEARCHING] — Study whether to elevate the committed forward-only proof-system-
+448 [RESEARCHED] — Study whether to elevate the committed forward-only proof-system-
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
   └─ 412 [NOT STARTED] — [Split from task 278.] Simplify proofs in Foundations/Logic/ that
 
@@ -109,10 +109,11 @@ next_project_number: 449
 ## Tasks
 
 ### 448. Study Deriv σ as a shared-metatheory substrate (proof-system morphism Vision B)
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
+- **Research**: [448_study_deriv_shared_metatheory_substrate/reports/01_team-research.md]
 
 **Description**: Study whether to elevate the committed forward-only proof-system-morphism layer (delivered by task 419) into a genuine SHARED-METATHEORY SUBSTRATE over Deriv sigma, and if so, do it in ROI-gated phases. Reference the definitive analysis in specs/419_generalize_derivation_lifting_intersystem/reports/04_abstract-picture-and-result-inventory.md (fork framing, representation options R1/R2/R3, and the full result lattice Layers 0-3).
 

@@ -1,37 +1,40 @@
 {
   "status": "implemented",
-  "phases_completed": 4,
+  "phases_completed": 6,
   "phases_total": 6,
-  "summary": "Phase 3 (omegaPow_da_muller, Choueka route) is now fully complete. This dispatch landed the remaining Milestone 3/3: DA.chouekaLang_omega_power_subset_omega_limit (the harder, Ramsey-based reverse inclusion of the Choueka identity, via infinite_graph_ramsey plus a Nat.find-based breakpoint search, mirroring buchiCongr_DMA_accept_mem's hcol idiom) and DA.chouekaLang_omega_power_eq_omega_limit (the full identity, via antisymmetry) in Cslib/Computability/Automata/DA/Choueka.lean, followed by the final IsRegular.omegaPow_da_muller assembly in Cslib/Computability/Languages/OmegaRegularLanguage.lean. Phases 1, 2, 3, 4 are all green and committed. Phase 5 (IsRegular.to_da_muller forward assembly) and Phase 6 (final iff_da_muller theorem + buchiCongr_DMA dead-cluster removal) remain.",
-  "blockers": null,
+  "summary": "Completed Phases 5 and 6 of plan v2 (Choueka route), finishing McNaughton's theorem. Phase 5 added IsRegular.to_da_muller (forward assembly: eq_fin_iSup_hmul_omegaPow decomposition + per-component DFA/omegaPow_da_muller/concat_language_eq assembly + DA.Muller.exists_iSup_univ finite-union fold). Phase 6 replaced proof_wanted IsRegular.iff_da_muller with the complete theorem (to_da_muller for (=>), of_da_muller for (<=)) and deleted the dead buchiCongr_DMA cluster (def, run_eq, recurrentClass, accept_mem, language_forward, to_da_muller_scaffold). Both phases committed as separate green, sorry-free milestones.",
+  "blockers": [],
   "continuation_context": {
     "what_is_done": [
-      "Milestone 1/3 (commit 11807051, prior dispatch): Cslib/Computability/Automata/DA/Choueka.lean created with DA.chouekaLang (def) and DA.chouekaLang_regular (theorem).",
-      "Milestone 2/3 (commit 602293de, prior dispatch): DA.greater_subseq (private helper) and DA.chouekaLang_omega_limit_subset_omega_power (the easier inclusion).",
-      "Milestone 3/3 (commit 8ba346f8, this dispatch): DA.chouekaLang_omega_power_subset_omega_limit (the Ramsey-based reverse inclusion) and DA.chouekaLang_omega_power_eq_omega_limit (the full Choueka identity). Scoped build green, sorry-free, standard axioms only.",
-      "Phase 3 final assembly (commit 29ba3eb2, this dispatch): IsRegular.omegaPow_da_muller in Cslib/Computability/Languages/OmegaRegularLanguage.lean, combining Language.IsRegular.kstar + Language.IsRegular.iff_dfa + DA.chouekaLang_regular + IsRegular.omegaLim_da_muller (already green) + DA.concat_language_eq (Phase 2, already green) + DA.chouekaLang_omega_power_eq_omega_limit. Added DA.Choueka and DA.Concat as new imports. Scoped build green, sorry-free, standard axioms only.",
-      "Plan update (this dispatch): specs/241_mcnaughton_theorem/plans/02_mcnaughton-choueka-route.md Phase 3 section updated to [COMPLETED] with full Milestone 3/3 writeup, checklist items ticked, and the 'New Supporting Lemmas Flagged' item 2 marked DONE.",
-      "Handoff (this dispatch): specs/241_mcnaughton_theorem/handoffs/phase3-complete-handoff.md written, superseding phase3-partial-handoff.md, documenting two reusable build-fix notes (scoped Computability notation for kstar; le_antisymm vs Set.Subset.antisymm for ωLanguage equalities)."
+      "IsRegular.to_da_muller (OmegaRegularLanguage.lean) -- forward direction, green, sorry-free, standard axioms only (commit 5bbc1bea)",
+      "IsRegular.iff_da_muller (OmegaRegularLanguage.lean) -- complete McNaughton theorem, replaces proof_wanted, green, sorry-free, standard axioms only (commit bac6168c)",
+      "Dead buchiCongr_DMA cluster removed: buchiCongr_DMA def, buchiCongr_DMA_run_eq, buchiCongr_recurrentClass (not itemized in the plan's Disposition table but depended on buchiCongr_DMA so removed alongside it), buchiCongr_DMA_accept_mem, buchiCongr_DMA_language_forward, IsRegular.to_da_muller_scaffold",
+      "buchiFamily_component_isRegular retained per Disposition default (now unreferenced in-file since its only consumer was the deleted scaffold; could not confirm via project-wide lake lint/shake due to environment breakage, so left in place conservatively)",
+      "Fixed one incidental unused-import finding from a scoped lake shake run: removed 'public import Cslib.Computability.Automata.DA.Prod' from Concat.lean (a Phase 2 file; Concat.lean never calls DA.prod)",
+      "Corollary comment block above iff_da_muller updated from 'Once McNaughton's theorem is proved' to 'Now that McNaughton's theorem is proved'",
+      "Plan file specs/241_mcnaughton_theorem/plans/02_mcnaughton-choueka-route.md: Phase 5 and Phase 6 headers marked [COMPLETED] with full completion notes; top-level Status marked [COMPLETED]"
     ],
     "what_remains": [
-      "Phase 5: IsRegular.to_da_muller (forward assembly) in OmegaRegularLanguage.lean -- obtain the finite-union-of-(l_i * m_i^omega) decomposition via IsRegular.eq_fin_iSup_hmul_omegaPow, use IsRegular.omegaPow_da_muller (now green) + DA.concat_language_eq (Phase 2, green) per component, then fold via DA.Muller.exists_iSup/exists_iSup_univ (Phase 4, green, in MullerClosure.lean).",
-      "Phase 6: assemble the final IsRegular.iff_da_muller theorem (replacing the proof_wanted), delete the dead buchiCongr_DMA cluster (5 declarations, self-contained per the plan's Disposition section), and run the full CSLib CI pipeline once the shared-tree environment issue (concurrent tasks 180/442 mid-edit) clears."
+      "Whole-project CI (lake build, lake test, lake exe checkInitImports, project-wide lake lint, project-wide lake shake) deferred -- see whole_project_ci_status",
+      "Explicit non-goals, unchanged and out of scope for task 241: IsRegular.iff_da_rabin, IsRegular.iff_da_parity (separate proof_wanted corollaries), any Safra-style determinization",
+      "Optional follow-up: re-run project-wide lake lint/shake once the concurrent-task tree is unbroken, to confirm buchiFamily_component_isRegular is not flagged as dead/unused (remove it then if flagged, per the plan's Disposition)"
     ],
     "key_files": [
-      "Cslib/Computability/Automata/DA/Choueka.lean (Milestone 3 additions this dispatch, ~150 lines at the end of the file)",
-      "Cslib/Computability/Languages/OmegaRegularLanguage.lean (IsRegular.omegaPow_da_muller inserted right after IsRegular.omegaLim_da_muller, ~line 96; IsRegular.eq_fin_iSup_hmul_omegaPow at ~line 205 is Phase 5's starting point; dead buchiCongr_DMA cluster untouched, ~lines 388-560)",
-      "Cslib/Computability/Automata/DA/Concat.lean (Phase 2, unchanged, already green)",
-      "Cslib/Computability/Automata/DA/MullerClosure.lean (Phase 4, unchanged, already green)",
-      "specs/241_mcnaughton_theorem/plans/02_mcnaughton-choueka-route.md (Phase 3 now [COMPLETED]; Phase 5 section has the next recipe)",
-      "specs/241_mcnaughton_theorem/handoffs/phase3-complete-handoff.md (this dispatch's detailed handoff, supersedes phase3-partial-handoff.md)"
+      "Cslib/Computability/Languages/OmegaRegularLanguage.lean",
+      "Cslib/Computability/Automata/DA/Concat.lean",
+      "Cslib/Computability/Automata/DA/MullerClosure.lean",
+      "Cslib/Computability/Automata/DA/Choueka.lean",
+      "specs/241_mcnaughton_theorem/plans/02_mcnaughton-choueka-route.md"
     ],
-    "new_lemmas_committed": [
-      "Cslib.Automata.DA.chouekaLang_omega_power_subset_omega_limit (commit 8ba346f8)",
-      "Cslib.Automata.DA.chouekaLang_omega_power_eq_omega_limit (commit 8ba346f8)",
-      "Cslib.ωLanguage.IsRegular.omegaPow_da_muller (commit 29ba3eb2)"
-    ]
+    "scoped_builds_run_green": [
+      "lake build Cslib.Computability.Languages.OmegaRegularLanguage",
+      "lake build Cslib.Computability.Automata.DA.Choueka Cslib.Computability.Automata.DA.Concat Cslib.Computability.Automata.DA.MullerClosure Cslib.Computability.Languages.OmegaRegularLanguage",
+      "lake exe lint-style Cslib.Computability.Languages.OmegaRegularLanguage Cslib.Computability.Automata.DA.Concat Cslib.Computability.Automata.DA.MullerClosure Cslib.Computability.Automata.DA.Choueka (no findings)",
+      "lake shake --add-public --keep-implied --keep-prefix --force <same four modules> (found and fixed one unused import in Concat.lean; re-run confirmed clean)",
+      "lake exe mk_all --module (no update necessary; git diff --stat Cslib.lean empty)"
+    ],
+    "whole_project_ci_status": "DEFERRED. Whole-project lake build / lake test / lake exe checkInitImports could not be run this dispatch: the shared working tree currently has unrelated, concurrently-edited files in a broken/mid-edit state belonging to tasks 180 and 442 (Cslib/Logics/Modal/Tableau/*, Cslib/Logics/Temporal/Tableau/Completeness.lean -- confirmed via 'lake exe checkInitImports' failing with a missing .olean for Cslib.Logics.Temporal.Tableau.Completeness, unrelated to and not touched by this dispatch). None of task 241's four touched files were implicated in that failure. Scoped builds/lint-style/shake on exactly the four files this dispatch touches (plus their Phase 2-4 siblings) are all green. Re-run the full CSLib CI pipeline once the concurrent-task tree is fixed."
   },
   "sorry_inventory": [],
-  "next_action_hint": "Dispatch a fresh cslib-implementation-agent for Phase 5 (IsRegular.to_da_muller), pointing it at specs/241_mcnaughton_theorem/plans/02_mcnaughton-choueka-route.md's Phase 5 section. Phase 5 depends on Phases 2, 3, 4, all of which are now green, so it is fully unblocked.",
-  "environment_note": "An unrelated concurrent-task file set (Cslib/Logics/Modal/Tableau/*, Cslib/Logics/Temporal/*, Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean, tasks 180/442) is mid-edit in this shared working tree, blocking lake exe checkInitImports, whole-project lake build/lake test, and lake shake/lake lint. This blocked full-pipeline verification this dispatch (same issue flagged by the Phase 1/2/4 completion notes). Scoped lake build of all Phase-3-relevant modules (Choueka, Concat, MullerClosure, OmegaRegularLanguage) together is green independent of that unrelated breakage."
+  "next_action_hint": "Run full CSLib CI once the concurrent-task tree breakage (tasks 180/442) is resolved, then /vet 241 or /pr 241."
 }

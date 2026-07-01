@@ -241,12 +241,12 @@
     {
       "project_number": 317,
       "project_name": "propositional_tableau_completeness",
-      "status": "planning",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Fill the propositional tableau completeness sorries (7 real sorries; soundness is already sorry-free after task 316). The open obligations are the truth-lemma / countermodel-extraction proofs in the three Completeness modules. Classical (Tableau/Classical/Completeness.lean): classicalExpandBranches_hintikka (line ~462) -- note the module's separate build break (bad Mathlib lemma ref + unsolved goals) is repaired first under task 363. Intuitionistic (Tableau/Intuitionistic/Completeness.lean): intTruthLemma (line ~89), intuitionisticOpenBranch_countermodel (~98), intuitionisticTableau_complete (~112). Minimal (Tableau/Minimal/Completeness.lean): minTruthLemma (~168), minOpenBranch_countermodel (~179), minimalTableau_complete (~190). Core technique: Hintikka-set argument -- a saturated open branch satisfies Hintikka conditions, from which a countermodel is extracted (a Boolean valuation for classical; a finite Kripke model for intuitionistic/minimal) and a truth lemma by formula induction matches forced/not-forced to the signed formulas at each world. Because task 369 parameterizes the intuitionistic and minimal tableau over (closurePred, modelBot), the int and min cases should be discharged ONCE as a single parametric truth-lemma/countermodel pair rather than duplicated. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 316, 323, 363, 369.",
       "created": "2026-06-23T19:55:52Z",
-      "last_updated": "2026-07-01T15:10:01Z",
+      "last_updated": "2026-07-01T15:23:55Z",
       "next_artifact_number": 3,
       "artifacts": [
         {
@@ -257,7 +257,7 @@
       ],
       "dependencies": [],
       "parent_task": 298,
-      "session_id": "sess_1782890716_9a7f59"
+      "session_id": "sess_1782919268_2df8d8_317"
     },
     {
       "project_number": 299,
@@ -1364,7 +1364,7 @@
     {
       "project_number": 452,
       "project_name": "generalize_genericmcsbridge_foundations",
-      "status": "researched",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Foundations",
       "priority": "high",
@@ -1372,7 +1372,7 @@
       "description": "From review 2026-07-01-2 (HIGH). The four GenericMCSBridge.lean files (Propositional 256L, Modal 267L, Temporal 370L, Bimodal/Core 405L; 1298L total) share a near-verbatim skeleton: HilbertOf tag type -> InferenceSystem/ModusPonens/HasAxiomImplyK/HasAxiomImplyS/MinimalHilbert instances -> AlgDS alias -> derivTreeToList -> unfoldListImpInTree (~19L) -> listDerivToTree (~15L) -> {logic}_deriv_iff_algebraic / _setConsistent_iff_algebraic / _setMaxConsistent_iff_algebraic. The trio uses only assumption/modus_ponens/weakening (no logic-specific content). Temporal and Bimodal ADDITIONALLY duplicate their own base/Fc sections internally (e.g. Temporal L66-221 vs L239-370). Approach: (1) collapse Temporal's and Bimodal's intra-file base/Fc duplication first by making the base bridge a specialization of the Fc-parameterized one (fc := .Base) -- ~130-150L each, lowest risk, no cross-logic abstraction; (2) extract unfoldListImpInTree, listDerivToTree, and the three iff-theorems into Cslib/Foundations/Logic/Metalogic/GenericMCS.lean, parameterized over a typeclass capturing 'tree-shaped derivation with ax/assumption/mp/weakening constructors', with extra rules (necessitation, temporal duality) passed as an optional hypothesis/callback. Est. elimination ~300-450 lines. NOT covered by tasks 415/393/439 (which build ON the bridge as infrastructure, verified against their reports). Sequence to avoid collision with in-flight tasks 441/442 (Modal refactor) and 449-451 (BX+). DoD: shared abstraction in Foundations, all four per-logic bridges reduced to thin instantiations, lake build/test/lint green, zero new sorries or axioms.",
       "dependencies": [],
       "created": "2026-07-01T07:42:45Z",
-      "last_updated": "2026-07-01T15:18:32Z",
+      "last_updated": "2026-07-01T15:23:37Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782893288_776f6c"
@@ -1380,7 +1380,7 @@
     {
       "project_number": 453,
       "project_name": "audit_reduce_maxheartbeats_inflation",
-      "status": "implementing",
+      "status": "pr_ready",
       "task_type": "cslib",
       "topic": "Code Hygiene",
       "priority": "medium",
@@ -1388,10 +1388,27 @@
       "description": "From review 2026-07-01-2 (MEDIUM+LOW, findings #2+#4). 72 set_option maxHeartbeats sites in Cslib/Logics/{Bimodal,Temporal}/Metalogic/**, up to 32x the 200000 default: 3200000 x33, 1600000 x13, 800000 x12, 1200000 x3, 400000 x5, and 6400000 x1 (Temporal/Metalogic/Chronicle/CounterexampleElimination/MainElimination.lean:38). The mature upstream dirs (Foundations/Computability/Languages/Crypto) have ZERO maxHeartbeats settings -- this inflation is entirely in the active logic area and signals proof terms/tactics that should be restructured (intermediate haves, lemma extraction) rather than given more budget. ALSO (finding #4, LOW): 15 sites use file-wide unscoped 'set_option maxHeartbeats N' (masking which declaration is expensive) vs 54 declaration-scoped 'set_option ... in'; unscoped sites include Bimodal/Metalogic/Algebraic/{UltrafilterMCS.lean:34,BooleanStructure.lean:33} and Temporal/Metalogic/{Chronicle/TruthLemma.lean:40,Chronicle/RRelation.lean:29,DenseSoundness.lean:32,Completeness.lean:47,Soundness.lean:32,MCS.lean:38,WitnessSeed.lean:29,Chronicle/Frame.lean:28,Chronicle/PointInsertion/{Seeds,Burgess,Splitting,Since}.lean}. Approach: audit the 3.2M/6.4M offenders, restructure the worst to lower the ceiling (or document why irreducible); convert all unscoped sites to 'set_option ... in' on the specific expensive declaration. NOT covered by 412-414 (which target simp only [listImp_*, bigconj_*] lists, not heartbeat budgets). Self-contained, independent of other tasks. DoD: heartbeat ceilings reduced where feasible, all remaining high budgets documented, unscoped sites converted to scoped, lake build/test green.",
       "dependencies": [],
       "created": "2026-07-01T07:42:45Z",
-      "last_updated": "2026-07-01T08:29:09Z",
+      "last_updated": "2026-07-01T15:28:09Z",
       "next_artifact_number": 1,
-      "artifacts": [],
-      "session_id": "sess_1782893289_453aaa"
+      "artifacts": [
+        {
+          "type": "plan",
+          "path": "plans/01_reduce-maxheartbeats-inflation.md",
+          "summary": "4-phase build-probe plan"
+        },
+        {
+          "type": "report",
+          "path": "reports/01_maxheartbeats-audit.md",
+          "summary": "64-site maxHeartbeats inventory audit"
+        },
+        {
+          "type": "summary",
+          "path": "summaries/01_reduce-maxheartbeats-inflation-summary.md",
+          "summary": "All 64 sites eliminated; zero-debt reduction"
+        }
+      ],
+      "session_id": "sess_1782893289_453aaa",
+      "completion_summary": "Eliminated all 64 set_option maxHeartbeats sites (15 unscoped + 49 scoped) across Cslib/Logics/{Bimodal,Temporal}/Metalogic/**; every site was pure defensive inflation confirmed by build-probe. Zero sites remain. Full CI green. See summaries/01_reduce-maxheartbeats-inflation-summary.md."
     },
     {
       "project_number": 454,

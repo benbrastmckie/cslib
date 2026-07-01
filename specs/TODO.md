@@ -53,7 +53,7 @@ next_project_number: 442
       └─ 427 [PARTIAL] — [Decomposed from task 301, blocker B.] Prove temporalTruthLemma_p
         └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
           └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
-241 [PLANNED] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
+241 [IMPLEMENTING] — Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller)
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -662,7 +662,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 241. Mcnaughton theorem
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 428, Task 429, Task 433, Task 434, Task 435, Task 436

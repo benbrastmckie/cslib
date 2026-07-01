@@ -183,19 +183,21 @@ Phase 2 edits `DA/Concat.lean`; Phase 4 adds a new `DA/MullerClosure.lean`. Phas
 - **Goal:** Remove the soundness-gap `sorry` and the unprovable `proof_wanted`, update the target
   docstring to the Choueka route, and extract the reference lemma DAG for Phases 2–4.
 - **Tasks:**
-  - [ ] Read `AutomataTheory/Languages/DetMullerLang.lean` (and `OmegaRegLang.lean`) for the
+  - [x] Read `AutomataTheory/Languages/DetMullerLang.lean` (and `OmegaRegLang.lean`) for the
     reference McNaughton forward proof; extract the exact lemma DAG and map each node to: an
     existing CSLib lemma, or a Phase 2/3/4 obligation. Record the 5-column mapping in the
     completion summary scaffold. Confirm whether `M^ω` recognizability goes via the Choueka
     identity `M^ω = M*·U↗ᵒᵐᵉᵍᵃ` or a direct `DA.concat`-based omega construction (drives Phase 3).
-  - [ ] Delete `buchiCongr_DMA_language_backward` (the `sorry` at :588) and
-    `proof_wanted buchiCongr_DMA_language_eq` (:602).
-  - [ ] Update the `IsRegular.iff_da_muller` docstring (:647–652) to describe the Choueka route
+    *(Done: reference DAG recorded below; confirmed route (a) — the Choueka identity `M^ω = M*·U↗ᵒᵐᵉᵍᵃ` — is required for Phase 3.)*
+  - [x] Delete `buchiCongr_DMA_language_backward` (the `sorry` at :588) and
+    `proof_wanted buchiCongr_DMA_language_eq` (:602). *(Committed ce381c24.)*
+  - [x] Update the `IsRegular.iff_da_muller` docstring (:647–652) to describe the Choueka route
     (decomposition → concat → omega-power → finite union) and drop the `to_da_muller_scaffold` /
-    quotient references.
-  - [ ] Leave the remaining green cluster (`buchiCongr_DMA` def, `run_eq`, `accept_mem`,
+    quotient references. *(Committed ce381c24.)*
+  - [x] Leave the remaining green cluster (`buchiCongr_DMA` def, `run_eq`, `accept_mem`,
     `language_forward`, `to_da_muller_scaffold`) in place **for now** (removed in Phase 6). If
     `lake build` / `lake lint` flags any as unused after deleting `language_eq`, delete it here.
+    *(Done: cluster retained for Phase 6 removal; build green sorry-free.)*
 - **Timing:** 1.5 hours
 - **Depends on:** none
 - **Files to modify:** `Cslib/Computability/Languages/OmegaRegularLanguage.lean`

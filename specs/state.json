@@ -479,7 +479,7 @@
     {
       "project_number": 241,
       "project_name": "mcnaughton_theorem",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Prove McNaughton's theorem (proof_wanted IsRegular.iff_da_muller): ω-regular ↔ deterministic Muller. ARCHITECTURE (plan v2): forward direction via the Choueka decomposition route — eq_fin_iSup_hmul_omegaPow finite-union decomposition + the existing DA.concat/mullerAccConcat flag construction + new omegaPow_da_muller + DMA finite-union closure — routing around the abandoned buchiCongr_DMA quotient-as-DMA construction (task 434 soundness gap). Backward direction reuses green IsRegular.of_da_muller. Missing analytic lemmas narrowed to three: concat_language_eq, omegaPow_da_muller, DA.Muller.union. See plans/02_mcnaughton-choueka-route.md.",
       "topic": "Temporal Logic",

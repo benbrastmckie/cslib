@@ -1,0 +1,22 @@
+{
+  "phase": 1,
+  "phase_name": "Scaffold and toolchain de-risk",
+  "started_at": "2026-07-01T00:00:00Z",
+  "last_updated": "2026-07-01T01:00:00Z",
+  "objectives": [
+    {"id": 1, "description": "Create typst/MPL/{notation,chapters} directories", "status": "done"},
+    {"id": 2, "description": "Copy+re-point template.typ", "status": "done"},
+    {"id": 3, "description": "Copy shared-notation.typ verbatim", "status": "done"},
+    {"id": 4, "description": "Write mpl-notation.typ", "status": "done"},
+    {"id": 5, "description": "Create MplReport.typ front matter + include chain", "status": "done"},
+    {"id": 6, "description": "Create six stub chapters + READMEs", "status": "done"},
+    {"id": 7, "description": "Copy .gitignore", "status": "done"},
+    {"id": 8, "description": "Minimal typst compile clean", "status": "done"}
+  ],
+  "current_objective": null,
+  "approaches_tried": [],
+  "deviations": [
+    {"task_id": "1.6", "description": "Create stub chapters 00-05", "type": "altered", "reason": "Also created 06-appendix.typ stub and wired into include chain now rather than in Phase 6, to avoid editing the include chain later", "annotation": "*(deviation: altered — pulled 06-appendix forward from Phase 6)*"}
+  ],
+  "handoff_count": 0
+}

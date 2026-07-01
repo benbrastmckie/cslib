@@ -1,23 +1,12 @@
 {
-  "status": "planned",
-  "agent_type": "planner-agent",
-  "session_id": "sess_1782935036_cd76ac",
-  "delegation_path": ["orchestrator", "plan", "planner-agent"],
+  "status": "in_progress",
+  "agent_type": "general-implementation-agent",
+  "delegation_path": ["orchestrator", "implement", "general-implementation-agent"],
+  "session_id": "sess_1782935591_308002",
   "task_number": 464,
   "task_name": "typst_report_structure_first_mpl_arguments",
   "artifact_number": "02",
-  "artifact_path": "specs/464_typst_report_structure_first_mpl_arguments/plans/02_mpl-structure-first-report.md",
-  "artifact_type": "plan",
-  "summary": "Phased plan for a compiled-clean Typst report under typst/MPL/ arguing the structure-first MPL design across two axes (narrative elegance / KF6 keystone; full Lean 4 engineering fidelity). 7 phases with compile-clean-per-phase discipline, integrating both research reports (KF6 keystone, O1-O5 honesty ledger, C1-C4 resolutions, verified anchors, Zulip message IDs, BimodalLogic scaffold adaptation).",
-  "phase_count": 7,
-  "estimated_hours": 11,
-  "dependency_waves": [
-    {"wave": 1, "phases": [1]},
-    {"wave": 2, "phases": [2, 3, 4]},
-    {"wave": 3, "phases": [5]},
-    {"wave": 4, "phases": [6]},
-    {"wave": 5, "phases": [7]}
-  ],
-  "memory_candidates": [],
-  "next_steps": "Run /implement 464 to execute the plan"
+  "phases_completed": 0,
+  "phases_total": 7,
+  "started_at": "2026-07-01T00:00:00Z"
 }

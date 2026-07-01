@@ -1,7 +1,7 @@
 # Implementation Plan: Structure-First MPL Typst Report
 
 - **Task**: 464 - Typst report presenting the best arguments for the structure-first MPL design
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 11 hours
 - **Dependencies**: None
 - **Research Inputs**: reports/01_team-research.md; reports/02_grounding-and-typst-scaffold.md
@@ -101,20 +101,20 @@ chain (with stub chapters), so each Wave-2 phase edits only its own chapter body
 
 ---
 
-### Phase 1: Scaffold and toolchain de-risk [NOT STARTED]
+### Phase 1: Scaffold and toolchain de-risk [COMPLETED]
 
 **Goal**: Establish the `typst/MPL/` directory mirroring the BimodalLogic scaffold and achieve a
 MINIMAL clean `typst compile` before any content is written, surfacing font/package issues early.
 
 **Tasks**:
-- [ ] Create `/home/benjamin/Projects/cslib/typst/MPL/` and `typst/MPL/{notation,chapters}/`.
-- [ ] Copy `template.typ` from `/home/benjamin/Projects/BimodalLogic/Theories/Bimodal/typst/` near-verbatim; re-point its notation import to `notation/mpl-notation.typ`.
-- [ ] Copy `notation/shared-notation.typ` verbatim (reuses `imp`, `lneg`, `falsum`, `proves`, `ctx`, `metaphi`/`metapsi`/`metachi`, `leansrc`/`leanref`).
-- [ ] Write initial `notation/mpl-notation.typ` importing `shared-notation.typ` and pre-seeding common macros: `∧`/`∨` (`land`/`lor` or verify Typst built-in `and`/`or`), an `efq` schema macro, and inline macros for `bot_val`/`HasLeastBot`/`HasInitialBot`/`IsIntuitionistic` as needed.
-- [ ] Create `MplReport.typ` (mirrors `BimodalReference.typ`): package imports, `#set document/text/heading/par/page`, title page ("MPL: Arguments for a Structure-First Design" or similar), abstract page with thesis one-liner + the MPL ⊂ IPL ⊂ CPL ladder table (columns: Logic | Constraint on ⊥ | Proof rule added | Lean theory), `#outline`, and the full `#include` chain pointing at all six stub chapters.
-- [ ] Create stub `chapters/{00-introduction,01-syntax,02-semantics,03-proof-theory,04-debate,05-honest-limits}.typ` (each a heading + one line) and `chapters/README.md`, `notation/README.md`.
-- [ ] Copy `.gitignore` (`build/`, `*.pdf`).
-- [ ] Run `typst compile MplReport.typ build/MplReport.pdf` from `typst/MPL/`; resolve any font/package/network issue before proceeding.
+- [x] Create `/home/benjamin/Projects/cslib/typst/MPL/` and `typst/MPL/{notation,chapters}/`. *(completed)*
+- [x] Copy `template.typ` from `/home/benjamin/Projects/BimodalLogic/Theories/Bimodal/typst/` near-verbatim; re-point its notation import to `notation/mpl-notation.typ`. *(completed)*
+- [x] Copy `notation/shared-notation.typ` verbatim (reuses `imp`, `lneg`, `falsum`, `proves`, `ctx`, `metaphi`/`metapsi`/`metachi`, `leansrc`/`leanref`). *(completed)*
+- [x] Write initial `notation/mpl-notation.typ` importing `shared-notation.typ` and pre-seeding common macros: `∧`/`∨` (`land`/`lor` or verify Typst built-in `and`/`or`), an `efq` schema macro, and inline macros for `bot_val`/`HasLeastBot`/`HasInitialBot`/`IsIntuitionistic` as needed. *(completed: pand/por/efqschema/meet/join/lean() macros; Lean identifiers rendered via `lean()`/`leanref` raw)*
+- [x] Create `MplReport.typ` (mirrors `BimodalReference.typ`): package imports, `#set document/text/heading/par/page`, title page ("MPL: Arguments for a Structure-First Design" or similar), abstract page with thesis one-liner + the MPL ⊂ IPL ⊂ CPL ladder table (columns: Logic | Constraint on ⊥ | Proof rule added | Lean theory), `#outline`, and the full `#include` chain pointing at all six stub chapters. *(completed)*
+- [x] Create stub `chapters/{00-introduction,01-syntax,02-semantics,03-proof-theory,04-debate,05-honest-limits}.typ` (each a heading + one line) and `chapters/README.md`, `notation/README.md`. *(completed: also created 06-appendix.typ stub and wired it into the include chain now — deviation: pulled forward from Phase 6 to avoid editing the include chain later)*
+- [x] Copy `.gitignore` (`build/`, `*.pdf`). *(completed)*
+- [x] Run `typst compile MplReport.typ build/MplReport.pdf` from `typst/MPL/`; resolve any font/package/network issue before proceeding. *(completed: clean compile; thmbox 0.3.0 fetched, "New Computer Modern" resolved from Typst's bundled fonts; build/ dir must be created first)*
 
 **Timing**: 1.5 hours
 

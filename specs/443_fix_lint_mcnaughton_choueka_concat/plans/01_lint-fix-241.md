@@ -72,24 +72,24 @@ No ROADMAP.md consulted for this scoped fix task (roadmap_flag not set).
 
 Single phase; both edits are independent and verified together.
 
-### Phase 1: Apply both lint fixes and verify [IN PROGRESS]
+### Phase 1: Apply both lint fixes and verify [COMPLETED]
 
 **Goal**: Rename the Buchi congruence `Monoid` instance and add the `nolint` attribute to
 `mullerAccConcat`, then confirm `lake lint` and `lake build` are clean.
 
 **Tasks**:
-- [ ] Edit `Cslib/Computability/Languages/Congruences/BuchiCongruence.lean:268`: rename
+- [x] Edit `Cslib/Computability/Languages/Congruences/BuchiCongruence.lean:268`: rename
       `instance buchiCongruence_instMonoid` to `instance buchiCongruenceMonoid` (no other change on
       the line; body unchanged).
-- [ ] Edit `Cslib/Computability/Automata/DA/Concat.lean:162`: add the line
+- [x] Edit `Cslib/Computability/Automata/DA/Concat.lean:162`: add the line
       `@[nolint unusedArguments]` directly above `noncomputable def mullerAccConcat ...`. Leave the
       three `_` binders and the signature exactly as-is.
-- [ ] Run scoped build: `lake build Cslib.Computability.Languages.Congruences.BuchiCongruence`.
-- [ ] Run scoped build: `lake build Cslib.Computability.Automata.DA.Concat`.
-- [ ] Run scoped build of consumer: `lake build Cslib.Computability.Languages.OmegaRegularLanguage`.
-- [ ] Run `lake lint` and confirm zero `defsWithUnderscore` and zero `unusedArguments` warnings for
+- [x] Run scoped build: `lake build Cslib.Computability.Languages.Congruences.BuchiCongruence`.
+- [x] Run scoped build: `lake build Cslib.Computability.Automata.DA.Concat`.
+- [x] Run scoped build of consumer: `lake build Cslib.Computability.Languages.OmegaRegularLanguage`.
+- [x] Run `lake lint` and confirm zero `defsWithUnderscore` and zero `unusedArguments` warnings for
       these two declarations.
-- [ ] Run full `lake build` for CI parity.
+- [x] Run full `lake build` for CI parity.
 
 **Timing**: 0.5 hours (dominated by build/lint time, not editing)
 
@@ -110,11 +110,11 @@ Single phase; both edits are independent and verified together.
 
 ## Testing & Validation
 
-- [ ] `lake build Cslib.Computability.Languages.Congruences.BuchiCongruence` succeeds.
-- [ ] `lake build Cslib.Computability.Automata.DA.Concat` succeeds.
-- [ ] `lake build Cslib.Computability.Languages.OmegaRegularLanguage` succeeds.
-- [ ] `lake lint` clears both violation categories at the two edited sites.
-- [ ] `lake build` (full) succeeds (CI parity).
+- [x] `lake build Cslib.Computability.Languages.Congruences.BuchiCongruence` succeeds.
+- [x] `lake build Cslib.Computability.Automata.DA.Concat` succeeds.
+- [x] `lake build Cslib.Computability.Languages.OmegaRegularLanguage` succeeds.
+- [x] `lake lint` clears both violation categories at the two edited sites.
+- [x] `lake build` (full) succeeds (CI parity).
 
 ## Artifacts & Outputs
 

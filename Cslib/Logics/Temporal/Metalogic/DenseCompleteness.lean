@@ -95,8 +95,6 @@ theorem neg_consistent_of_not_derivable_dense
 variable [Denumerable (Formula Atom)]
 
 set_option linter.unusedSimpArgs false in
-set_option maxHeartbeats 3200000 in
--- Extended heartbeats: three-branch proof over rational chronicle domain
 /-- neg U(top, bot) in limitF(x) for all x in the limit domain.
 
 For x = 0: limitF(0) = A is Dense-MCS containing neg U(top, bot).

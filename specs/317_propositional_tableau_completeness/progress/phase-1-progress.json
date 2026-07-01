@@ -1,0 +1,21 @@
+{
+  "phase": 1,
+  "status": "completed",
+  "started_at": "2026-07-01T07:55:21Z",
+  "finished_at": "2026-07-01T08:40:00Z",
+  "objectives": [
+    {"id": "step1_IAllConsistent_def", "done": true},
+    {"id": "step2_append_map_lemmas", "done": true},
+    {"id": "step3_hLenP_thread", "done": true},
+    {"id": "step4_signature_change", "done": true},
+    {"id": "step5_suffices_key_hyps", "done": true},
+    {"id": "step6_cons_case_wiring", "done": true},
+    {"id": "step7_hIC_hLB_bPers", "done": true},
+    {"id": "step8_none_case_close", "done": true},
+    {"id": "step9_linear_branch_cases", "done": true},
+    {"id": "step10_call_site_update", "done": true}
+  ],
+  "build_green": true,
+  "sorry_324_none_case_closed": true,
+  "commit": "26508fe9"
+}

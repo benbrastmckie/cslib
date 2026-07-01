@@ -11,8 +11,8 @@ next_project_number: 457
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,299,317,396,400,404,407,438,439,440,447,449,452,453,455 | -- | Foundations, Propositional Logic, Modal Logic, ... |
-| 2 | 39,40,215,300,375,389,405,409,426,430,441,450,451,456 | 36,37,181,299,317,404,407,439,449 | Propositional Logic, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,181,226,299,317,396,400,404,407,438,439,440,447,449,452,453 | -- | Foundations, Propositional Logic, Modal Logic, ... |
+| 2 | 39,40,215,300,375,389,405,409,426,430,441,450,451,455,456 | 36,37,181,299,317,404,407,439,449 | Propositional Logic, Modal Logic, Temporal Logic, ... |
 | 3 | 41,391,392,413,425,444,454 | 39,40,375,389,426,450 | Foundations, Temporal Logic, Bimodal Logic, ... |
 | 4 | 301,393,412 | 41,391,425 | Temporal Logic, Code Hygiene |
 | 5 | 414 | 215,300,301,444 | Code Hygiene |
@@ -86,7 +86,7 @@ next_project_number: 457
 
 ### Tableau Infrastructure
 
-455 [NOT STARTED] — Extract the logic-agnostic measure arithmetic duplicated across t
+455 [BLOCKED] — Extract the logic-agnostic measure arithmetic duplicated across t
 456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
 
 ## Tasks
@@ -102,10 +102,12 @@ next_project_number: 457
 ---
 
 ### 455. Extract tableau measure arithmetic
-- **Status**: [NOT STARTED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Tableau Infrastructure
-- **Dependencies**: None
+- **Dependencies**: Task 317
+- **Research**: [455_extract_tableau_measure_arithmetic/reports/01_tableau-measure-arithmetic-extraction.md]
+- **Plan**: [455_extract_tableau_measure_arithmetic/plans/01_measure-arithmetic-extraction.md]
 
 **Description**: Extract the logic-agnostic measure arithmetic duplicated across the Modal K FMP measure (task 442) and the Classical propositional tableau into a new shared module Cslib/Foundations/Logic/Tableau/Measure.lean. Move: sum_map_le_length_mul (FmpMeasure.lean:131), the geometric-sum capacity family modalCap/modalCap_le_pow (FmpMeasure.lean:776-833), and a small base-3 domination API (3^a<=3^C, 1<=3^C, 3^a+3^b<=3^(1+max)) currently hand-rolled inline in Classical/Completeness.lean:677-687 and FmpMeasure.lean:238. Target API (all F/L-free, pure Nat/List): Tableau.sum_map_le_length_mul, Tableau.geomCap (Sum_{i<=k} base^i), Tableau.geomCap_le_pow. ~80-150 lines moved; zero semantic risk (pure arithmetic); de-duplicates modal<->classical and updates call sites to the shared lemmas. Independent of task 317 - can run anytime. Source: task 317 reuse/abstraction research report 06 (R1), specs/317_propositional_tableau_completeness/reports/06_sfor-dedup-reuse-abstraction.md. Verify scoped + full lake build green, checkInitImports/lint-style/shake pass, zero sorry.
 

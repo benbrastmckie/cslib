@@ -42,7 +42,6 @@ noncomputable abbrev impTransBase {A B C : Formula Atom}
   impTrans h1 h2
 
 set_option linter.flexible false in
-set_option maxHeartbeats 400000 in
 -- Extended heartbeats: weakening + assumption combination in by block
 /-- Reverse deduction: from Γ ⊢ A → B derive A :: Γ ⊢ B. -/
 noncomputable def reverseDeduction {Γ : Context Atom} {A B : Formula Atom}
@@ -74,7 +73,6 @@ noncomputable def contraposition {A B : Formula Atom}
 /-! ## Past Necessitation -/
 
 set_option linter.unusedSimpArgs false in
-set_option maxHeartbeats 400000 in
 -- Extended heartbeats: simp-based swapTemporal rewrite chain
 /-- Past necessitation: from ⊢ φ derive ⊢ H(φ). -/
 noncomputable def pastNecessitation (φ : Formula Atom)
@@ -152,7 +150,6 @@ noncomputable def tempKDistDerived (φ ψ : Formula Atom) :
   exact impTransBase G_contra' G_to_GK'
 
 set_option linter.unusedSimpArgs false in
-set_option maxHeartbeats 400000 in
 -- Extended heartbeats: swapTemporal simp chain for H-distribution
 /-- H-distribution at DerivationTree level: ⊢ H(φ→ψ) → (H(φ) → H(ψ)). -/
 noncomputable def pastKDist (A B : Formula Atom) :

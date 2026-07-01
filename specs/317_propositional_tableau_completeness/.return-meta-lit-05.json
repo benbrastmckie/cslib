@@ -1,0 +1,39 @@
+{
+  "status": "researched",
+  "agent_type": "cslib-research-hard-agent",
+  "task_number": 317,
+  "task_slug": "propositional_tableau_completeness",
+  "session_id": "unknown",
+  "spike": "literature-prior-art (B2 fuel-sufficiency)",
+  "report_path": "specs/317_propositional_tableau_completeness/reports/05_fuel-sufficiency-literature.md",
+  "note_on_metadata_file": "Written to .return-meta-lit-05.json (NOT .return-meta.json) to avoid clobbering the parallel source-level spike's metadata, which points to report 04 and was still active when this spike ran.",
+  "verdict": "NEEDS-DESIGN-CHANGE (Sfor-containment dedup OR fuel raise); termination provable, but 2^(2c+2) fuel is insufficient for the current un-deduplicated code",
+  "reference_grounding_tier": 1,
+  "findings_count": 12,
+  "adversarial_verification_triggered": true,
+  "adversarial_revisions": 2,
+  "converges_with_sibling_spike": true,
+  "bibkey_verification_status": "PRESENT+verified: TroelstraSchwichtenberg2000, Fitting1983, Fitting1969, ChagrovZakharyaschev1997, TroelstraVanDalen1988. MISSING (entries supplied in report Q4): NegriVonPlato2001, Dyckhoff1992, Hudelmaier1993, Caleiro2013, DershowitzManna1979, GargGenoveseNegri2012, Negri2005, FellinNegri2025, IemhoffJalali2022, Svejdar2006",
+  "key_results": [
+    "Standard measure: contraction-free G4ip formula-weight (Dershowitz-Manna multiset) per Negri&vonPlato 2001 §5.5 and Troelstra&Schwichtenberg 2000 §4.3 -- but WORLDS-FREE, does not model persistence duplication",
+    "World-creating labelled procedures use a lexicographic / Sfor-set-containment measure with worlds bounded by 2^|subformulas|: Garg-Genovese-Negri LICS 2012 is the exactly-on-point source",
+    "World count bound YES = 2^|subformulas| (FMP filtration; Caleiro mosaic O(2^(2n))); fuel 2^(2c+2) matches the DEDUPLICATED model size intent",
+    "CRUX (converges with sibling spike report 04): current loop-check-free code has step count 2^Theta(complexity^2) because persistence-copied T-or compounds re-split at every world; this EXCEEDS 2^(2c+2) fuel",
+    "F-formulas are never persistence-copied (posFormulasAt filters .pos) so world tree is a priori finite (worlds <= complexity+1); but finite world COUNT does not bound step/branch count",
+    "Fix: (A) add Sfor-containment dedup to Rules.lean/Expansion.lean (preferred; step count collapses to model size, existing fuel adequate) OR (B) raise fuel formula to 2^Theta(c^2)"
+  ],
+  "escalation": "Architectural A-vs-B decision required (same as sibling spike, now literature-backed): (A) Sfor-containment dedup [preferred] or (B) fuel raise. Both need a plan revision widening territory beyond Scheme.lean. Do NOT attempt a Scheme.lean-only measure with current fuel -- provably insufficient.",
+  "memory_candidates": [
+    {
+      "text": "For labelled/Kripke-world tableau termination where a world-creating rule (F(A->B)) copies parent formulas via persistence, the literature-standard measure is a LEXICOGRAPHIC / Dershowitz-Manna multiset order with the number of created worlds (bounded by 2^|subformulas|) as the dominant component -- NOT a flat count of unexpanded compounds. Canonical source: Garg, Genovese & Negri, 'Countermodels from Sequent Calculi in Multi-Modal Logics', LICS 2012 (Sfor-set-containment). The worlds-free G4ip formula-weight measure (Dyckhoff 1992; Troelstra-Schwichtenberg Basic Proof Theory 2nd ed 4.3; Negri-von Plato Structural Proof Theory 5.5) does NOT transfer because it has no worlds.",
+      "keywords": ["labelled tableau", "termination measure", "lexicographic", "Dershowitz-Manna", "Kripke worlds", "intuitionistic", "Garg-Negri"],
+      "topic": "cslib-tableau-completeness"
+    },
+    {
+      "text": "The 2^(2n) finite-model / mosaic bound (Caleiro-Vigano-Volpe 2013; filtration in Chagrov-Zakharyaschev) bounds the DEDUPLICATED model size (distinct worlds x forced-sets), NOT the raw step count of an un-deduplicated tableau. A labelled procedure without a loop-check / Sfor-containment dedup can take 2^Theta(n^2) steps because compounds copied by persistence re-expand at every world and the beta-branchings multiply. The literature's dedup is precisely what makes step-count = model-size; without it, fuel of order 2^(2n) is insufficient. This is why intuitionistic tableau decision procedures deduplicate.",
+      "keywords": ["finite model property", "mosaic", "deduplication", "loop check", "step count", "fuel sufficiency", "2^(2n)", "intuitionistic tableau"],
+      "topic": "cslib-tableau-completeness"
+    }
+  ],
+  "next_steps": "Run /plan 317 (after user decides Option A dedup vs Option B fuel raise). Both spikes (04 source-level, 05 literature) agree: Phase 2a stays [BLOCKED] for a Scheme.lean-only approach; a plan revision widening territory is required."
+}

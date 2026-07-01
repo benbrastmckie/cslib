@@ -1,0 +1,20 @@
+{
+  "task": 453,
+  "phase": "plan",
+  "status": "planned",
+  "plan": "specs/453_audit_reduce_maxheartbeats_inflation/plans/01_reduce-maxheartbeats-inflation.md",
+  "report": "specs/453_audit_reduce_maxheartbeats_inflation/reports/01_maxheartbeats-audit.md",
+  "phase_count": 4,
+  "estimated_hours": 12,
+  "dependency_waves": [[1], [2], [3], [4]],
+  "summary": "4-phase, fully-sequential, green-gated plan to reduce maxHeartbeats inflation across Bimodal/Temporal Metalogic (64 sites). P1: build-probe 15 unscoped->scoped. P2: bisect the 33x 3.2M scoped cluster (incl CompletenessHelpers 8x). P3 (isolated, med-high risk): lemma-extract the 6.4M eliminatePotentialCounterexample 4 arms + profile-then-extract residual monolithic 3.2M. P4: document >=1.6M irreducibles + final CI gate. Each phase sized to one implementation run with per-file/per-site incremental commits for resumability.",
+  "phases": [
+    {"phase": 1, "name": "unscoped->scoped conversions (build-probe)", "risk": "low", "depends_on": [], "ci_gate": ["lake build", "lake test", "lake exe checkInitImports", "lake exe lint-style"]},
+    {"phase": 2, "name": "bisect scoped 3.2M ceilings", "risk": "low-medium", "depends_on": [1], "ci_gate": ["lake build", "lake test", "lake exe checkInitImports", "lake exe lint-style"]},
+    {"phase": 3, "name": "restructure 6.4M + residual monolithic 3.2M", "risk": "medium-high", "depends_on": [2], "ci_gate": ["lake build", "lake test", "lake exe checkInitImports", "lake exe lint-style"]},
+    {"phase": 4, "name": "document irreducibles + final CI gate", "risk": "low", "depends_on": [3], "ci_gate": ["lake build", "lake test", "lake exe checkInitImports", "lake exe lint-style"]}
+  ],
+  "constraints": ["zero-debt: no proof weakening, no sorry, no axioms, no statement changes", "lake build and lake test must stay green after every phase and every intra-phase commit", "build-driven verification required (no pre-computed minimal values); heavy slow builds", "out of scope: 5 further maxHeartbeats sites elsewhere under Cslib/Logics/ - flag as follow-up, do not touch"],
+  "coordination": "Do NOT run concurrently with task 414 on shared Modal/Temporal/Bimodal files (disjoint concern: simp lists vs heartbeats; low conflict risk but sequence, do not parallelize).",
+  "next_command": "/implement 453"
+}

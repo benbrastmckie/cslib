@@ -4,17 +4,31 @@
     {
       "project_number": 455,
       "project_name": "extract_tableau_measure_arithmetic",
-      "status": "not_started",
+      "status": "blocked",
       "task_type": "cslib",
       "priority": "low",
       "description": "Extract the logic-agnostic measure arithmetic duplicated across the Modal K FMP measure (task 442) and the Classical propositional tableau into a new shared module Cslib/Foundations/Logic/Tableau/Measure.lean. Move: sum_map_le_length_mul (FmpMeasure.lean:131), the geometric-sum capacity family modalCap/modalCap_le_pow (FmpMeasure.lean:776-833), and a small base-3 domination API (3^a<=3^C, 1<=3^C, 3^a+3^b<=3^(1+max)) currently hand-rolled inline in Classical/Completeness.lean:677-687 and FmpMeasure.lean:238. Target API (all F/L-free, pure Nat/List): Tableau.sum_map_le_length_mul, Tableau.geomCap (Sum_{i<=k} base^i), Tableau.geomCap_le_pow. ~80-150 lines moved; zero semantic risk (pure arithmetic); de-duplicates modal<->classical and updates call sites to the shared lemmas. Independent of task 317 - can run anytime. Source: task 317 reuse/abstraction research report 06 (R1), specs/317_propositional_tableau_completeness/reports/06_sfor-dedup-reuse-abstraction.md. Verify scoped + full lake build green, checkInitImports/lint-style/shake pass, zero sorry.",
       "created": "2026-07-01T13:59:22Z",
-      "last_updated": "2026-07-01T13:59:22Z",
-      "session_id": "sess_1782914362_65e1c0",
-      "dependencies": [],
+      "last_updated": "2026-07-01T14:11:27Z",
+      "session_id": "sess_1782914538_c0d5ee",
+      "dependencies": [
+        317
+      ],
       "parent_task": 317,
       "topic": "Tableau Infrastructure",
-      "artifacts": []
+      "artifacts": [
+        {
+          "path": "specs/455_extract_tableau_measure_arithmetic/reports/01_tableau-measure-arithmetic-extraction.md",
+          "type": "report",
+          "summary": "Extraction blueprint: 10 decls to shared Tableau/Measure.lean"
+        },
+        {
+          "path": "specs/455_extract_tableau_measure_arithmetic/plans/01_measure-arithmetic-extraction.md",
+          "type": "plan",
+          "summary": "4-phase extraction plan (Approach A full rename)"
+        }
+      ],
+      "blockers": "Own deliverables complete & green (Measure.lean + all consumers build, lint-style clean, 0 sorry). Whole-library CI (lake build/checkInitImports/shake/test) blocked by pre-existing task 317 break in Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean (Application type mismatch @470/1074/1201, untouched by 455). Re-run Phase 4 CI once task 317 lands Scheme.lean; no 455-file edits expected."
     },
     {
       "project_number": 456,

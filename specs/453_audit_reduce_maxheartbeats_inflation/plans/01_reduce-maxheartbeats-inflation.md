@@ -154,7 +154,7 @@ no declaration in these 15 files actually required extra heartbeat budget.
 
 ---
 
-### Phase 2: Bisect scoped ceilings (3.2M cluster) [NOT STARTED]
+### Phase 2: Bisect scoped ceilings (3.2M cluster) [IN PROGRESS]
 
 **Goal**: Binary-search downward on the scoped 3.2M cluster (and other inflated scoped sites),
 setting each to the smallest passing round value with modest headroom.

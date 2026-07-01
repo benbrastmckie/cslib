@@ -1,0 +1,11 @@
+{
+  "total_churn": 4,
+  "target_churn": {
+    "B2-none": 0,
+    "B2-fuel0": 1,
+    "dedup-design": 2
+  },
+  "adversarial_triggers": 0,
+  "audit_dispatches": 0,
+  "blocker_escalations": 1
+}

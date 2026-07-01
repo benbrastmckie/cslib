@@ -1,0 +1,52 @@
+{
+  "status": "implemented",
+  "started_at": "2026-06-30T00:00:00Z",
+  "phases_completed": 1,
+  "phases_total": 9,
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Modal/Tableau/FmpMeasure.lean",
+      "type": "lean_source",
+      "summary": "New module: modalSubfmls, modalDepth, modalWorldBound, modalUniverse, modalWork, modalExpMeasure, three size-bound lemmas, and the modalExpMeasure_entry_le_fuel bridge lemma."
+    },
+    {
+      "path": "Cslib/Logics/Modal/Tableau/Saturation.lean",
+      "type": "lean_source",
+      "summary": "modalFuel redefined to the triple-exponential closed form over modalComplexity only."
+    },
+    {
+      "path": "Cslib.lean",
+      "type": "lean_source",
+      "summary": "Added FmpMeasure to the module import aggregator."
+    },
+    {
+      "path": "specs/442_modal_tableau_fmp_fuel_measure/plans/01_fmp-fuel-measure-plan.md",
+      "type": "plan",
+      "summary": "Phase 0 marked [COMPLETED]; checklist items checked; deviation note documenting the pre-existing SoundnessStep.lean blocker added."
+    }
+  ],
+  "partial_progress": {
+    "stage": "phase_0_complete",
+    "details": "Phase 0 (universe/measure definitions + exponential modalFuel) landed green. Stopped per single-phase dispatch scope; P1a is next."
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": false,
+    "ci_pipeline_note": "lake build Cslib.Logics.Modal.Tableau.FmpMeasure green; lake build Cslib.Logics.Modal.Tableau.Soundness fails due to a pre-existing, unrelated compile error in SoundnessStep.lean (task 384 residue), verified via git stash to predate this phase's edit. lake exe checkInitImports could not complete for the same reason (requires all module oleans)."
+  },
+  "memory_candidates": [
+    "Lean4 v4.31.0 in this repo: `ring` tactic requires an explicit `import Mathlib.Tactic.Ring` -- it is NOT transitively available via `Cslib.Init` (which only pulls `Mathlib.Tactic.Common`). Symptom is a confusing 'unknown tactic' error at the `ring` call site.",
+    "Cslib/Logics/Modal/Tableau/SoundnessStep.lean has a pre-existing build-breaking Application type mismatch in the private `Proposition.beqToEq` helper (lines 82/85/91), from task 384's split of Soundness.lean. This blocks `lake build Cslib.Logics.Modal.Tableau.Soundness` and `lake exe checkInitImports` project-wide. Unrelated to task 442; needs its own fix task.",
+    "DecidableEq alpha gives BEq alpha for free via Lean4 core's generic instBEqOfDecidableEq, so `SignedFormula` (deriving only DecidableEq, Hashable) still supports `.any (· == sf)` list operations without an explicit BEq derive."
+  ],
+  "metadata": {
+    "session_id": "sess_1782868458_ecfcce",
+    "agent_type": "cslib-implementation-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "status": "phase_complete",
+  "phases_completed": 1,
+  "phases_total": 9,
+  "phase_label": "P0",
+  "blockers": [],
+  "continuation_path": "P1a: subformula-closure (world-preserving/existing-world rules) in FmpMeasure.lean, depends on P0 (landed). See plan Phase 1a.",
+  "sorry_inventory": [],
+  "session_id": "sess_1782868458_ecfcce",
+  "commit": "ef68c642d0e41f9e3b6a4363c4850eaacc5b2bd0",
+  "notes": [
+    "Phase 0 fully green: lake build Cslib.Logics.Modal.Tableau.FmpMeasure succeeds, zero sorry, zero new axioms (modalExpMeasure_entry_le_fuel: propext, Quot.sound only).",
+    "modalFuel redefined in Saturation.lean (line ~94) to 3 ^ (4 * (2n+1) * ((2n+1)^(n+1) + 1)), n = modalComplexity phi, over modalComplexity only (no import-cycle dependency on modalUniverse).",
+    "NON-BLOCKING PRE-EXISTING ISSUE (out of task 442 territory): lake build Cslib.Logics.Modal.Tableau.Soundness fails due to a pre-existing Application type mismatch in Cslib/Logics/Modal/Tableau/SoundnessStep.lean (private Proposition.beqToEq, lines 82/85/91), introduced by task 384's split of Soundness.lean. Verified via git stash on Saturation.lean that this error reproduces identically with modalFuel reverted to its original polynomial value -- it predates and is independent of this phase's edit. grep -rn \"modalFuel\" Cslib/Logics/Modal/Tableau/ confirms the only proof-context use (Soundness.lean:347) passes modalFuel as an opaque Nat and never unfolds it, matching the plan's expectation (research section 6/C6). Recommend a separate task to fix SoundnessStep.lean's Proposition.beqToEq before task 442 can claim a fully green Soundness.lean rebuild. Import graph confirms this does not block P1a/P1b/P2/P3/P4: FmpMeasure -> Saturation/LoopInduction -> Closure/Rules, none reach Soundness/SoundnessStep.",
+    "FmpMeasure.lean added to Cslib.lean import aggregator (alphabetical position between Defs and LoopInduction) so it participates in the whole-library build and checkInitImports once run project-wide.",
+    "lake exe checkInitImports could not be run to completion in this dispatch because it requires ALL modules (including the pre-existing broken SoundnessStep.lean) to have built oleans; FmpMeasure.lean itself begins with `import Cslib.Init` per convention."
+  ]
+}

@@ -1,7 +1,7 @@
 # Implementation Plan: Modal K Tableau FMP Fuel Measure (Task 442)
 
 - **Task**: 442 - Modal K Tableau FMP Fuel Measure (unblocks task 299 Phase 6/7)
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: ~18-26 hours across 9 phase dispatches (~1500-2600 lines Lean)
 - **Dependencies**: None (parent task 299 is [BLOCKED] pending this work)
 - **Research Inputs**: reports/01_fmp-fuel-measure-research.md (Tier 1, adversarially verified)
@@ -13,6 +13,31 @@
   - .claude/rules/git-workflow.md
 - **Type**: cslib
 - **Mode**: --hard (H7 territory, H8 phase sizing, postmortem constraints, wave declarations)
+
+## Execution Log (updated as phases finish)
+
+| Phase | Status | Commit | Notes |
+|-------|--------|--------|-------|
+| Pre  | repair | `4153f885` | Pre-existing task-384 regression in `SoundnessStep.lean` (`Proposition.beqToEq`) fixed — `Proposition` derives `DecidableEq` not `BEq`; replaced hand-rolled recursion with `LawfulBEq.eq_of_beq`. `Soundness`/`SoundnessStep` now green (required for P6 whole-library green). Not in original plan; discovered during Wave 2. |
+| P0   | ✅ COMPLETED | `ef68c642` | FmpMeasure defs + exponential `modalFuel`; entry bridge lemma. Green, axiom-clean. `import Mathlib.Tactic.Ring` added (ring not transitive via Init). |
+| P1a  | ✅ COMPLETED | `325a8e8a` | Subformula closure (world-preserving rules). Green, axiom-clean. **Added `import Completeness` into `FmpMeasure.lean`** to reuse `tryAllPropRules_*`/`modal*Of?_eq` → forces architecture adjustment below. |
+| P4   | ✅ COMPLETED | `3766e609` | Saturation characterisation (`Completeness.lean`). Green. Finding: Łukasiewicz diamond patterns never reach `acc`-dependent arms (prop dispatch exhaustive over `.imp`); only `boxNeg` needs invariant carve-out. |
+| P1b  | 🔄 next | — | Serialized after P4 (FmpMeasure now imports Completeness → no concurrent Completeness edits). |
+| P2 (CRUX) | ⏳ pending | — | — |
+| P3   | ⏳ pending | — | — |
+| P5a/P5b/P6 | ⏳ pending | — | Relocated to new `CompletenessLoop.lean` (see architecture adjustment). |
+
+### Architecture adjustment (settled during execution — supersedes P5 file placement)
+P1a introduced `FmpMeasure.lean → import Completeness.lean` (acyclic: Completeness does **not**
+import FmpMeasure). The plan's original P5 placed `modalExpandBranches_hintikka` in
+`Completeness.lean` *using* the measure, which would require `Completeness → FmpMeasure` and create
+an **import cycle**. Resolution: **P5a, P5b, and P6 targets** (`modalExpandBranches_hintikka`,
+`modalTableau_complete`, `modalTableau_decides`, `instance Decidable (kValid φ)`, and the
+combined-invariant preservation lemma) land in a **new module
+`Cslib/Logics/Modal/Tableau/CompletenessLoop.lean`** importing `FmpMeasure` + `Completeness` +
+`Soundness`, added to the `Cslib.lean` aggregator. The Definition of Done only requires these
+theorems to compile sorry-/axiom-free; their file location is not load-bearing. P4 remains in
+`Completeness.lean` and does **not** import `FmpMeasure`.
 
 ## Overview
 
@@ -226,7 +251,7 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
 
 ---
 
-### Phase 1a: Subformula-closure — world-preserving / existing-world rules [NOT STARTED]
+### Phase 1a: Subformula-closure — world-preserving / existing-world rules [COMPLETED]
 - **Goal:** Prove per-rule closure for the rule kinds that do NOT mint a fresh world (they cannot
   breach the world bound), so no world-bound hypothesis is consumed yet.
 - **Territory:**
@@ -305,7 +330,7 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
 
 ---
 
-### Phase 4: Saturation characterisation (PARALLEL with Wave 2) [NOT STARTED]
+### Phase 4: Saturation characterisation (PARALLEL with Wave 2) [COMPLETED]
 - **Goal:** Prove the saturated-leaf characterisation and the single-step Hintikka expanded-set
   invariant. Disjoint from the P1-P3 critical path.
 - **Territory:**

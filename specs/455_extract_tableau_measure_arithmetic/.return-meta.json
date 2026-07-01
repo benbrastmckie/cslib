@@ -1,10 +1,7 @@
 {
-  "status": "partial",
+  "status": "completed",
   "metadata": {
-    "cycles_used": 3,
-    "final_state": "blocked",
-    "blocked_on": [
-      317
-    ]
+    "cycles_used": 4,
+    "final_state": "completed"
   }
 }

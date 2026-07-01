@@ -214,7 +214,7 @@ Phase 3's target.
 
 ---
 
-### Phase 3: Restructure the 6.4M and residual monolithic 3.2M offenders [NOT STARTED]
+### Phase 3: Restructure the 6.4M and residual monolithic 3.2M offenders [IN PROGRESS]
 
 **Goal**: Lower the ceilings of the offenders that survive bisection by restructuring proof
 structure — the ONLY phase that changes proofs. Highest regression risk; isolated; done one

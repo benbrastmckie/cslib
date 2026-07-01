@@ -12,7 +12,7 @@ next_project_number: 457
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,181,226,300,317,396,400,404,407,438,439,440,441,447,449,452,453 | -- | Foundations, Propositional Logic, Modal Logic, ... |
-| 2 | 39,40,215,375,389,405,409,426,430,450,451,455,456 | 36,37,181,317,404,407,439,449 | Propositional Logic, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,215,375,389,405,409,426,430,450,451,456 | 36,37,181,317,404,407,439,449 | Propositional Logic, Modal Logic, Temporal Logic, ... |
 | 3 | 41,391,392,413,425,444,454 | 39,40,375,389,426,450 | Foundations, Temporal Logic, Bimodal Logic, ... |
 | 4 | 301,393,412 | 41,391,425 | Temporal Logic, Code Hygiene |
 | 5 | 414 | 215,300,301,444 | Code Hygiene |
@@ -85,7 +85,6 @@ next_project_number: 457
 
 ### Tableau Infrastructure
 
-455 [BLOCKED] — Extract the logic-agnostic measure arithmetic duplicated across t
 456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
 
 ## Tasks
@@ -101,7 +100,7 @@ next_project_number: 457
 ---
 
 ### 455. Extract tableau measure arithmetic
-- **Status**: [BLOCKED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Tableau Infrastructure
 - **Dependencies**: Task 317

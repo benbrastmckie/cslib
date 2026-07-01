@@ -595,7 +595,7 @@ branch/`acc`-dependent `diamondPos`/`diamondNeg` arms of `modalApplyOne`'s modal
 Factored into a named `def` (rather than an inline `match` repeated at each use site) so that
 Lean's equation compiler produces one shared matcher, avoiding spurious dependent-match
 mismatches when the same clause is used as both a hypothesis and a goal across lemmas. -/
-private def modalHintikkaClause (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
+def modalHintikkaClause (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
     (X : List (SignedFormula (Proposition Atom) WorldIndex)) (Y : Accessibility) : Prop :=
   match φ with
   | .box _ => True
@@ -717,7 +717,7 @@ case leaves the expanded set unchanged (`newExp = e`, not `e ++ [sf_exp]`), sinc
 re-fires when new successors are added and is never marked expanded
 (`Saturation.lean:116-117`) — so unlike the classical port's `.persistent` case (identical
 to `.linear`), here there is no `sf = sf_exp` sub-case to discharge at all. -/
-private lemma modalStepBranch_hintikka_inv
+lemma modalStepBranch_hintikka_inv
     (b e : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))

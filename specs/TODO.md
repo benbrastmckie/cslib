@@ -102,17 +102,18 @@ next_project_number: 448
 438 [NOT STARTED] — Upstream the comment/docstring cleanups identified by the task 43
 444 [NOT STARTED] — Vet fix for task 180 (High), elevated scope. Do not merely rename
   └─ 414 [NOT STARTED] — (Code Hygiene: [Split from task 278.] Simplify Modal/, ) (see above)
-445 [RESEARCHED] — Vet fix for task 180 (Medium severity, PR-BLOCKING). HARD REQUIRE
+445 [BLOCKED] — Vet fix for task 180 (Medium severity, PR-BLOCKING). HARD REQUIRE
   └─ 414 [NOT STARTED] — (Code Hygiene: [Split from task 278.] Simplify Modal/, ) (see above)
-447 [RESEARCHED] — Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public 
+447 [IMPLEMENTING] — Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public 
 
 ## Tasks
 
 ### 447. Apply lake shake import-minimization fixes to files touched by tasks 321/406/431
-- **Status**: [RESEARCHED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Dependencies**: None
 - **Research**: [447_apply_shake_import_minimization_fixes_tasks_321_406_431/reports/01_shake-import-minimization-verification.md]
+- **Plan**: [447_apply_shake_import_minimization_fixes_tasks_321_406_431/plans/01_apply-shake-import-fixes.md]
 
 **Description**: Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public --keep-implied --keep-prefix import-minimization suggestions across files touched by tasks 321, 406, and 431. CI otherwise passes (build/test/checkInitImports green; zero sorries). Apply the genuine import-hygiene fixes and verify (do NOT blindly --fix):
 
@@ -161,10 +162,10 @@ Definition of done: every literature citation in task-180 Temporal files uses un
 ---
 
 ### 445. Eliminate the domain-mismatch sorry in Bimodal to Temporal conservativity and refactor the model-transfer layer for generality
-- **Status**: [RESEARCHED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Dependencies**: None
-- **Research**: [445_fix_temporal_conservativity_domain_mismatch_sorry/reports/01_domain-mismatch-transfer-feasibility.md]
+- **Research**: [445_fix_temporal_conservativity_domain_mismatch_sorry/reports/02_literature-grounded-conservativity-obstruction.md]
 
 **Description**: Vet fix for task 180 (Medium severity, PR-BLOCKING). HARD REQUIREMENT: absolutely no sorries are acceptable in any PR. `temporal_valid_of_bimodal_derivable` (TemporalConservativity.lean:269) must be proved outright and BOTH `set_option warn.sorry false in` (:248) and the `sorry` (:269) removed. Disclosure is NOT an acceptable outcome. (The sorry is pre-existing from task 277, but task 180's PR includes this file, so it must be closed here.)
 

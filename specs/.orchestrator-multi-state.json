@@ -23,12 +23,21 @@
   },
   "max_cycles": 15,
   "cycle_count": 2,
-  "failed_tasks": [],
+  "failed_tasks": [
+    {
+      "task": 444,
+      "reason": "research incomplete: account weekly usage limit (resets Jul 6 7am PT)"
+    },
+    {
+      "task": 445,
+      "reason": "blocked: theorem false, awaiting user route decision"
+    }
+  ],
   "completed_tasks": [
     446
   ],
   "current_statuses": {
-    "445": "researched",
+    "445": "blocked",
     "446": "completed",
     "444": "not_started"
   },
@@ -47,5 +56,5 @@
     "446": "cslib-implementation-agent",
     "444": "cslib-implementation-agent"
   },
-  "notes": "445 decoupled to deep-research track (--lit + online) per user escalation; 446/444 run independently"
+  "notes": "446 completed. 445 blocked (theorem false, needs user decision). 444 research stalled on weekly usage limit."
 }

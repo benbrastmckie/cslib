@@ -1,0 +1,49 @@
+{
+  "task": 445,
+  "round": 2,
+  "status": "researched",
+  "agent_type": "cslib-research-hard-agent",
+  "session_id": "sess_445_research_r2",
+  "verdict": "THEOREM_FALSE",
+  "headline": "bimodal_conservative_over_temporal (and temporal_valid_of_bimodal_derivable, sorry at TemporalConservativity.lean:269) is FALSE as stated; the sorry cannot be closed.",
+  "counterexample": {
+    "temporal_formula": "phiT = (untl bot top) -> allFuture (untl bot top)  [atom-free; 'has immediate successor -> always-future has immediate successor']",
+    "bimodal_side": "Bimodal.ThDerivable phiT.toBimodal is TRUE: phiT.toBimodal is definitionally the base axiom Bimodal.Axiom.discrete_propagate_fwd (Axioms.lean:261, minFrameClass=.Base). MACHINE-VERIFIED via `lake env lean` (exit 0): example : Bimodal.ThDerivable phiT.toBimodal := <.axiom [] _ Bimodal.Axiom.discrete_propagate_fwd (le_refl _)>.",
+    "temporal_side": "Temporal.ThDerivable phiT is FALSE: refuted (under all valuations, phiT is atom-free) on the doubled rationals D = Lex (Rat x Bool) at (q,false); Temporal.soundness (Soundness.lean:409) holds over all serial linear orders and every Temporal Base axiom is valid on D, so derivability would contradict soundness. Pen-and-paper rigorous; not yet machine-checked (would need Mathlib Lex order instances)."
+  },
+  "root_cause": "Bimodal TM FrameClass.Base includes five 'Uniformity Axioms' (Axioms.lean:248-276: discrete_symm_fwd/bwd, discrete_propagate_fwd/bwd, discrete_box_necessity), all mapped to .Base. They are sound on the AddCommGroup (homogeneous) TaskFrame semantics but are NOT theorems of the pure Burgess/Xu Temporal BX Base (which is sound/complete over ALL serial linear orders, including non-homogeneous ones). Hence TM's temporal fragment strictly exceeds BX: TM is NOT conservative over BX.",
+  "routes": {
+    "A_orderiso_transfer": "DEAD: needs the false lemma Th(AddCommGroup) subset Th(serial linear); phiT witnesses Th(oag) strictly contains BX.",
+    "B_bx_complete_over_oag": "DEAD: target Th(oag)=BX is FALSE (phiT in Th(oag)\\BX).",
+    "C_syntactic_box_erasure": "Does not save the stated (false) theorem; mechanically reproduces the failure. Becomes a valid proof only for a corrected target that includes the uniformity axioms."
+  },
+  "recommendations": [
+    {"rank": 1, "action": "Restate conservativity over a metric/uniform temporal base BX+ (Temporal Base + temporal copies of the five uniformity axioms). Then prove via box-erasure induction on the TM derivation (eraseBox: Bimodal.Formula -> Temporal.Formula; Bimodal.Deriv Gamma phi -> Temporal.Deriv (map eraseBox Gamma) (eraseBox phi)); eraseBox(phi.toBimodal)=phi. ~150-300 lines, sorry-free, no AddCommGroup transfer. Matches Burgess1984 sec6.1 metric tense logic and Thomason1984 pattern."},
+    {"rank": 2, "action": "Move the five uniformity axioms out of bimodal FrameClass.Base into a new FrameClass.Metric/.Uniform (>= Base); then original theorem holds over base. Larger refactor; must audit all discrete_* uses at Base and re-check bimodal soundness/completeness."},
+    {"rank": 3, "action": "Delete temporal_valid_of_bimodal_derivable and bimodal_conservative_over_temporal (and the set_option warn.sorry false); document non-conservativity with the phiT counterexample. Zero-debt, loses the result."}
+  ],
+  "do_not": [
+    "Do NOT attempt to close the sorry (statement is false).",
+    "Do NOT add an axiom or vacuous placeholder.",
+    "Do NOT keep the current statement under any route."
+  ],
+  "lean_anchors": {
+    "sorry": "Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/TemporalConservativity.lean:269",
+    "bimodal_axioms": "Cslib/Logics/Bimodal/ProofSystem/Axioms.lean (Layer5 uniformity 248-276; minFrameClass 305)",
+    "temporal_axioms": "Cslib/Logics/Temporal/ProofSystem/Axioms.lean (no uniformity axioms; minFrameClass 256)",
+    "temporal_soundness": "Cslib/Logics/Temporal/Metalogic/Soundness.lean:409",
+    "toBimodal": "Cslib/Logics/Bimodal/Embedding/TemporalEmbedding.lean",
+    "thderivable_base": "Cslib/Logics/Bimodal/Metalogic/Core/DerivationTree.lean:56 ; Cslib/Logics/Temporal/Metalogic/DerivationTree.lean:102"
+  },
+  "reference_grounding_tier": 1,
+  "bibkey_verification_status": {
+    "present": ["Xu1988", "Burgess1982I", "Burgess1982II", "Burgess1984", "Kamp1968", "GPSS1980", "Venema1993SinceUntil", "GHR94", "Reynolds1994", "Blackburn2001"],
+    "missing_recommend_add": ["Thomason1984 (local sources/thomason_1984 present; canonical conservativity precedent)"],
+    "optional_add": ["Reynolds1992", "GabbayHodkinson1990"],
+    "task_brief_corrections": "references.bib already contains the keys (brief assumed absent); local goldblatt_2003 is Goldblatt-Hodkinson-Venema 'Erdos graphs resolve Fine canonicity' NOT 'Logics of Time and Computation'; correct textbook key is Blackburn2001 (local blackburn_2002)."
+  },
+  "artifacts": [
+    "specs/445_fix_temporal_conservativity_domain_mismatch_sorry/reports/02_literature-grounded-conservativity-obstruction.md"
+  ],
+  "next_steps": "Escalate verdict to user; then run /plan 445 to plan the chosen resolution (recommend option 1: BX+ restatement + box-erasure proof)."
+}

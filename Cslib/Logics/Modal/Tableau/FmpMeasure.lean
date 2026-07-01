@@ -3015,7 +3015,7 @@ the four `modalApplyOne` outcomes exactly as the classical template, replacing
 `classicalBranchComplexity`'s per-output complexity accounting with the counting `R`-drop
 lemmas (`modalWork_drop_linear`/`_persistent`), whose `+1 ≤` shape supplies both the
 `1 ≤ R`-parent bound and the `child ≤ R-1` bound the `pow3_*` lemmas need in one step. -/
-private lemma modalExpMeasure_step_lt
+lemma modalExpMeasure_step_lt
     (φ0 : Proposition Atom)
     (done bt newBs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (doneExp es : List (List (SignedFormula (Proposition Atom) WorldIndex)))

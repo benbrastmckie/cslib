@@ -1,0 +1,15 @@
+{
+  "status": "in_progress",
+  "started_at": "2026-07-01T06:21:40Z",
+  "artifacts": [],
+  "partial_progress": {
+    "stage": "initializing",
+    "details": "Agent started, parsing delegation context for task 444"
+  },
+  "metadata": {
+    "session_id": "sess_task444",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  }
+}

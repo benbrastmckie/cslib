@@ -1,18 +1,40 @@
 {
-  "status": "in_progress",
-  "started_at": "2026-06-30T00:00:00Z",
+  "status": "researched",
   "round": 2,
+  "started_at": "2026-06-30T00:00:00Z",
+  "finished_at": "2026-06-30T00:00:00Z",
   "artifacts": [
-    "specs/445_fix_temporal_conservativity_domain_mismatch_sorry/reports/01_domain-mismatch-transfer-feasibility.md"
+    "specs/445_fix_temporal_conservativity_domain_mismatch_sorry/reports/01_domain-mismatch-transfer-feasibility.md",
+    "specs/445_fix_temporal_conservativity_domain_mismatch_sorry/reports/02_literature-grounded-conservativity-obstruction.md"
   ],
-  "partial_progress": {
-    "stage": "literature_consultation",
-    "details": "Round 2 deep literature-grounded research. Mining local corpus (xu_1988, burgess_1982_i/ii, reynolds_2001, venema_1993, gabbay_1993, blackburn_2002, goldblatt_2003) and online sources for the conservativity/completeness obstruction."
+  "findings_count": 5,
+  "adversarial_verification_triggered": true,
+  "reference_grounding_tier": 1,
+  "verdict": "theorem_false_sorry_uncloseable",
+  "bibkey_verification_status": {
+    "present": ["Xu1988", "Burgess1982I", "Burgess1982II", "Burgess1984", "Kamp1968", "GPSS1980", "Venema1993SinceUntil", "GHR94", "Reynolds1994", "Blackburn2001"],
+    "missing_recommend_add": ["Thomason1984"],
+    "optional_add": ["Reynolds1992", "GabbayHodkinson1990"]
   },
+  "key_result": "bimodal_conservative_over_temporal is FALSE. Machine-verified (lake env lean exit 0) that phiT.toBimodal = discrete_propagate_fwd base axiom is Bimodal.ThDerivable, while phiT = (untl bot top -> G(untl bot top)) is refuted on doubled-rationals hence not Temporal.ThDerivable. Root cause: bimodal FrameClass.Base carries 5 'Uniformity Axioms' (homogeneity of AddCommGroup time) absent from Temporal BX Base.",
+  "recommended_resolution": "Restate conservativity over a metric/uniform temporal base BX+ (Temporal Base + uniformity axioms) and prove by box-erasure induction; OR relocate uniformity axioms to a Metric frame class; OR delete the theorem. Mark implementation [BLOCKED] pending user decision.",
+  "memory_candidates": [
+    {
+      "content": "CSLib Bimodal TM FrameClass.Base includes 5 'Uniformity Axioms' (discrete_symm/propagate/box_necessity, Axioms.lean Layer 5, all minFrameClass .Base) encoding homogeneity of the AddCommGroup TaskFrame time; the pure Temporal BX FrameClass.Base has none. Therefore TM is NOT conservative over Temporal BX: discrete_propagate_fwd = (untl bot top -> G(untl bot top)) is a Bimodal base theorem whose temporal reduct is refutable on the doubled-rationals serial linear order.",
+      "keywords": ["bimodal", "temporal", "conservativity", "uniformity axioms", "ordered abelian group", "homogeneity", "discrete_propagate_fwd", "doubled rationals"],
+      "topic": "cslib-bimodal-metalogic"
+    },
+    {
+      "content": "To disprove a Temporal.ThDerivable claim in CSLib, use Temporal.soundness (Soundness.lean:409, valid over all [LinearOrder][NoMaxOrder][NoMinOrder]) plus an atom-free countermodel; the doubled rationals Lex(Rat x Bool) is a serial linear order distinguishing 'has immediate successor' (untl bot top) non-homogeneously, refuting metric/uniformity tense formulas that hold on all ordered abelian groups.",
+      "keywords": ["Temporal.soundness", "countermodel", "doubled rationals", "untl bot top", "immediate successor", "non-derivability"],
+      "topic": "cslib-temporal-metalogic"
+    }
+  ],
   "metadata": {
     "session_id": "sess_445_research_r2",
     "agent_type": "cslib-research-hard-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "research", "cslib-research-hard-agent"]
-  }
+  },
+  "next_steps": "Run /plan 445 to create implementation plan (recommend option 1: BX+ restatement + box-erasure proof)"
 }

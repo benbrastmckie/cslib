@@ -1,13 +1,14 @@
 {
-  "status": "researched",
-  "summary": "Reproduced `lake shake --add-public --keep-implied --keep-prefix` on the touched modules (full build first, --force to bypass an out-of-date-oleans check caused by uncommitted FmpMeasure WIP). All 17 listed suggestions confirmed as current shake output. Correction to task framing: the 6 `import Cslib.Init` removals are NOT false positives -- Init's linters/tactics stay active transitively and checkInitImports only needs a transitive Init import, so REMOVE (gated on `lake exe checkInitImports` staying green; keep with `-- shake: keep` only if it regresses). Hazard: the 3 GenericMCS swaps each also have an `open Cslib.Logic.Metalogic.MCSProperties` line that shake does not model and that must be removed with the import (else `unknown namespace`). Structures->Elimination Encodable move and Closure->Atoms Satisfies move verified genuine. Scope discrepancy: shake reports MORE suggestions than task lists (Defs/Branch/Closure/SoundnessStep/TimeOrdering/MCS.lean) -- out of scope; verification must confirm the 17 listed suggestions are gone, not that shake is fully clean. Baseline CI green.",
+  "status": "planned",
+  "summary": "6-phase plan for the 17 verified shake import-minimization edits. Order: (1) baseline build + shake reproduction (FmpMeasure WIP needs --force locally); (2) independent leaf edits (#7 FreeMeetExtension, #11 BurgessHelpers, #13/#14 Encodable move, #15/#16 Satisfies move); (3) 3 GenericMCS bridge swaps WITH removal of the dead `open MCSProperties` line (else unknown namespace); (4) 6 Cslib.Init removals gated on `lake exe checkInitImports`; (5) Interface barrel + DenseMCS re-export removals; (6) scoped shake confirming the 17 listed suggestions resolved (NOT full shake cleanliness) + full CI (build/test/checkInitImports/lint-style). Build between groups so breaks localize.",
   "artifacts": [
     {
-      "path": "specs/447_apply_shake_import_minimization_fixes_tasks_321_406_431/reports/01_shake-import-minimization-verification.md",
-      "type": "report",
-      "summary": "Per-file verdict table (17 edits), Cslib.Init mechanism, GenericMCS open hazard, scope discrepancy, verification commands."
+      "path": "specs/447_apply_shake_import_minimization_fixes_tasks_321_406_431/plans/01_apply-shake-import-fixes.md",
+      "type": "plan",
+      "summary": "Phased plan applying 17 shake import edits with per-phase build gates and final scoped-shake + CI verification."
     }
   ],
   "blockers": [],
-  "next_action_hint": "Proceed to /plan 447. Plan should: (1) apply leaf edits first, bridges next (removing dead `open MCSProperties`), Init removals last; (2) build between groups; (3) gate Init removals on `lake exe checkInitImports`; (4) verify the 17 listed shake suggestions are resolved (not full shake cleanliness). Note uncommitted FmpMeasure WIP in working tree."
+  "phases_total": 6,
+  "next_action_hint": "Run /implement 447. Watch the GenericMCS open-line removal (Phase 3) and the checkInitImports gate (Phase 4)."
 }

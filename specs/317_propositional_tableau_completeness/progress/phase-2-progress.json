@@ -1,0 +1,27 @@
+{
+  "phase": 2,
+  "phase_name": "Implement the Sfor-containment loop-check",
+  "status": "completed",
+  "objectives": [
+    {"task": "git log -1 + scoped rebuild baseline", "status": "done"},
+    {"task": "implement intFImpReuseWitness?", "status": "done"},
+    {"task": "wire witness into go's linearResult/some newEdge branch", "status": "done"},
+    {"task": "answer signature-change question", "status": "done", "answer": "NO — confined to go"},
+    {"task": "confirm Preserved-Asset lemmas typecheck", "status": "done", "result": "one breakage found: intExpandBranches_closed_unsat in Soundness.lean (expected, deferred to Phase 3/4)"},
+    {"task": "scoped+grepped build Expansion GREEN, no new sorries", "status": "done"},
+    {"task": "commit Expansion.lean only", "status": "done"}
+  ],
+  "files_modified": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean"
+  ],
+  "build_result": "GREEN (lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Expansion)",
+  "sorry_count_delta": 0,
+  "downstream_fallout": {
+    "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
+    "lemma": "intExpandBranches_closed_unsat",
+    "line_start": 1083,
+    "failing_sites": [1396, 1461],
+    "cause": "induction assumed every world-creating linearResult step grows the branch/edge set; the reuse (some x) path no longer does",
+    "action_taken": "none — recorded for Phase 3/4 per territory and postmortem constraints"
+  }
+}

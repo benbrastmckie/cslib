@@ -1,19 +1,26 @@
 {
   "status": "partial",
+  "started_at": "2026-07-01T13:39:45Z",
   "agent_type": "cslib-implementation-hard-agent",
   "task_number": 317,
   "task_slug": "propositional_tableau_completeness",
   "session_id": "sess_1782890716_9a7f59",
   "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
   "plan_path": "specs/317_propositional_tableau_completeness/plans/04_sfor-dedup-fuel-sufficiency.md",
-  "phase_number": 1,
-  "phases_completed": 1,
+  "phase_number": 2,
+  "phases_completed": 2,
   "phases_total": 7,
-  "phase_1_verdict": "GO",
-  "commit": "272ab4f7",
+  "phase_2_verdict": "COMPLETED — Expansion.lean GREEN, dedup live, no signature change",
+  "commit": "272ab4f7 (phase 1); phase 2 commit hash reported in final response",
+  "partial_progress": {
+    "stage": "complete",
+    "details": "Phase 2 complete: intFImpReuseWitness? implemented and wired into go. Downstream Preserved-Asset fallout in Soundness.lean (intExpandBranches_closed_unsat) recorded for Phase 3/4, not fixed (out of territory)."
+  },
   "memory_candidates": [
     "In Cslib/Logics/Propositional/Tableau/Intuitionistic, go (intExpandBranches inner loop) already carries bPers and edges in scope at the exact point the F(phi->psi) world-creating rule fires (the .linearResult newForms nw' (some newEdge) branch), so any dedup/loop-check logic gated on accessibility (isAccessible edges w x) can live entirely in go without changing intFImpRule/intApplyRuleFull/intStepBranch signatures.",
-    "intFImpRule's newForms already contains Sfor(w') = {phi} union posFormulasAt bPers w as its sign=.pos sublist (via propagatePersistence), and the obligation psi as its sole sign=.neg entry -- both readable directly off newForms without recomputation."
+    "intFImpRule's newForms already contains Sfor(w') = {phi} union posFormulasAt bPers w as its sign=.pos sublist (via propagatePersistence), and the obligation psi as its sole sign=.neg entry -- both readable directly off newForms without recomputation.",
+    "Proposition Atom derives DecidableEq (not BEq) but Lean 4 core auto-derives a BEq instance from DecidableEq (instBEqOfDecidableEq), so `==`/`List.contains` work fine on Proposition Atom without an explicit BEq derivation.",
+    "Wiring a reuse/dedup path into intExpandBranches's go recursion breaks intExpandBranches_closed_unsat in Soundness.lean (induction assumed every world-creating step strictly grows the branch/edge set) -- this is expected fallout for any change that makes world-creation conditional, and must be fixed by adding an induction case for the reuse path, not by weakening the invariant."
   ],
   "verification": {
     "verification_passed": true,
@@ -21,29 +28,34 @@
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": true,
-    "ci_pipeline_passed": "partial (scoped module build GREEN; full checkInitImports skipped due to unrelated missing .olean for Minimal/Soundness.lean from concurrent working-tree state; not a regression introduced by this phase)"
+    "ci_pipeline_passed": "partial (scoped Expansion module build GREEN, 0 new sorries/axioms/vacuous defs; downstream Soundness module build FAILS due to expected Preserved-Asset fallout in intExpandBranches_closed_unsat, recorded for Phase 3/4, not fixed per territory scope of this phase; full checkInitImports/lake lint/lake test not run this dispatch per scoped+grepped-only discipline)"
   },
   "artifacts": [
     {
       "path": "specs/317_propositional_tableau_completeness/plans/04_sfor-dedup-fuel-sufficiency.md",
       "type": "plan",
-      "summary": "Phase 1 marked [COMPLETED] with GO verdict"
+      "summary": "Phase 2 marked [COMPLETED] with full findings including Preserved-Asset fallout"
     },
     {
       "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
       "type": "lean",
-      "summary": "Design docstring + none-stub intFImpReuseWitness?"
+      "summary": "intFImpReuseWitness? implemented for real (was none-stub) and wired into go's linearResult/some-newEdge branch"
     },
     {
-      "path": "specs/317_propositional_tableau_completeness/summaries/04_sfor-dedup-phase1-summary.md",
+      "path": "specs/317_propositional_tableau_completeness/summaries/04_sfor-dedup-phase2-summary.md",
       "type": "summary",
-      "summary": "Phase 1 execution summary with Plan Deviations section (none)"
+      "summary": "Phase 2 execution summary with Plan Deviations section (none)"
+    },
+    {
+      "path": "specs/317_propositional_tableau_completeness/progress/phase-2-progress.json",
+      "type": "progress",
+      "summary": "Phase 2 objective-level progress tracking"
     },
     {
       "path": "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
       "type": "handoff",
-      "summary": "H9 orchestrator handoff: status partial, next_action_hint implement (Phase 2)"
+      "summary": "H9 orchestrator handoff: status partial, next_action_hint implement (Phase 3, parallel with Phase 4 soundness audit)"
     }
   ],
-  "next_steps": "Run /implement 317 --hard to execute Phase 2 (implement intFImpReuseWitness? and wire into go)."
+  "next_steps": "Run /implement 317 --hard to execute Phase 3 (re-verify countermodel/Hintikka for reused worlds) and/or Phase 4 (soundness audit fixing intExpandBranches_closed_unsat)."
 }

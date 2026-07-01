@@ -262,29 +262,38 @@ decision needs to be made. Phase 2 implements the search (`isAccessible edges w 
 
 ---
 
-### Phase 2: Implement the `Sfor`-containment loop-check [NOT STARTED]
+### Phase 2: Implement the `Sfor`-containment loop-check [COMPLETED]
 
 **Goal**: Implement the dedup helper and wire it into `go`, without breaking any Preserved Asset
 or the public `openBranch_countermodel` signature.
 
 **Tasks**:
-- [ ] `git log -1`; scoped+grepped rebuild GREEN.
-- [ ] Implement `intFImpReuseWitness? (φ ψ) (w) (edges) (b) : Option Nat` (returns the reusable
+- [x] `git log -1`; scoped+grepped rebuild GREEN.
+- [x] Implement `intFImpReuseWitness? (bPers : IBranch Atom) (edges : IEdges)
+      (newForms : List (ISF Atom)) (newEdge : Nat × Nat) : Option Nat` (returns the reusable
       ancestor label, or `none`) exactly per the Phase 1 spec, using `posFormulasAt` +
-      `isAccessible` + list-containment (`List.Subset`/`.all (· ∈ ·)`).
-- [ ] Wire it into `go`'s `.linearResult`+`some newEdge` branch: when the witness is `some x`,
-      take the no-new-world path (mark expanded, continue same branch, no edge append); when
-      `none`, keep the existing world-creating path verbatim.
-- [ ] Flag EXPLICITLY in the commit/handoff whether any `intExpandBranches`/`intStepBranch`/
-      `intFImpRule` **signature** had to change (e.g. threading `edges` into `intFImpRule`) and
-      what depends on it. Prefer confining the change to `go` so `intFImpRule`'s signature is
-      stable; if `intFImpRule` must consult the check, note the call sites.
-- [ ] Confirm the Preserved-Asset lemmas still typecheck (the invariant machinery and
-      `IExpandedConsistent_sat` must survive; if a preservation lemma breaks because the branch
-      no longer grows on a reused F(→), that is expected — record it for Phase 3, do NOT patch by
-      weakening).
-- [ ] Scoped+grepped build of `Expansion` GREEN; no new sorries.
-- [ ] Commit `Expansion.lean` (+ `Rules.lean` only if `intFImpRule` had to change) only:
+      `isAccessible` + list-containment (`List.contains`, `List.all`). (Signature matches the
+      Phase-1-settled stub exactly — `bPers`/`edges`/`newForms`/`newEdge`, not the `φ ψ w edges b`
+      form sketched in the Phase 2 header, per the "do not redesign" instruction.)
+- [x] Wired into `go`'s `.linearResult`+`some newEdge` branch: witness `some x` takes the
+      no-new-world path (mark expanded via `newExp`, continue same branch on `bPers`, `edges`,
+      and `nw` unchanged — no edge append, world counter not consumed); `none` keeps the existing
+      world-creating path verbatim (`Branch.extendMany bPers newForms`, `nw'`, `edges ++ [e]`).
+- [x] **Signature-change answer: NO.** `intFImpRule`, `intApplyRuleFull`, and `intStepBranch` are
+      unchanged. The reuse check and its wiring are confined entirely to `go` inside
+      `intExpandBranches`, exactly as the Phase 1 GO verdict predicted.
+- [x] Confirmed Preserved-Asset lemmas: scoped build of the downstream `Soundness` module surfaced
+      exactly ONE broken lemma, `intExpandBranches_closed_unsat` (Soundness.lean, starts line 1083;
+      failing unification sites at ~1396 and ~1461) — its induction assumed every world-creating
+      step strictly grows the branch via `Branch.extendMany`/new edge, which the reuse path no
+      longer does. This is EXPECTED per this phase's instructions (branch no longer always grows
+      on a reused `F(→)`); NOT patched here — recorded verbatim for Phase 3/4. No other Preserved
+      Asset (in `Expansion.lean` itself) regressed; `IExpandedConsistent_sat` and
+      `intStepBranch_linear_preserves` were not touched by this diff (both live in `Expansion.lean`
+      above the `go` recursion and do not reason about `go`'s internal branch-growth pattern).
+- [x] Scoped+grepped build of `Expansion` GREEN; no new sorries (verified: `Scheme.lean` sorries
+      at lines 330/985 unchanged; zero sorries in `Expansion.lean`).
+- [x] Commit `Expansion.lean` only (no `Rules.lean` change needed):
       `task 317 phase 2: implement Sfor-containment loop-check`.
 
 **Estimated output**: ~200-300 lines (helper + `go` wiring + fallout fixes). **Done when**:
@@ -292,6 +301,14 @@ or the public `openBranch_countermodel` signature.
 the handoff, and no Preserved Asset is deleted.
 
 **Timing**: 2.5 hours. **Depends on**: 1.
+
+**Phase 2 result**: `Expansion.lean` GREEN with the dedup live (no signature change to the rule
+layer). One Preserved-Asset lemma, `intExpandBranches_closed_unsat` in `Soundness.lean`, now
+fails to typecheck — this is the expected soundness-side fallout flagged for Phase 3/4 (the
+induction must be revised to handle the no-new-world reuse case, likely by adding a case showing
+that reusing an ancestor whose forced-set already contains `Sfor(w')` preserves satisfiability
+without needing a fresh `worldOf'`). No sorry was introduced or removed; no vacuous definition;
+no new axiom.
 
 **Files to modify**: `Expansion.lean` (+ possibly `Rules.lean`).
 

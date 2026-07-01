@@ -178,11 +178,11 @@ lemma intStepBranch_result_ne_notApplicable
       simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
       exact hsf.1.symm ▸ (by simp)
 
-/-! ## Sfor-Containment Loop-Check (Design — task 317, plan 04, Phase 1) -/
+/-! ## Sfor-Containment Loop-Check (task 317, plan 04) -/
 
-/-- **Design specification only** (Phase 1 of `04_sfor-dedup-fuel-sufficiency.md`; the search
-this describes is implemented and wired into `go` in Phase 2). This is a trivial `none`-stub,
-not yet called from `intExpandBranches`.
+/-- The `Sfor`-containment loop-check (Phase 2 of `04_sfor-dedup-fuel-sufficiency.md`; design
+settled in Phase 1, GO verdict). Wired into `go`'s `some (.linearResult newForms nw' (some
+newEdge), newExp)` branch (see `intExpandBranches` below).
 
 Following the `Sfor`-containment termination technique of Garg, Genovese & Negri,
 *Countermodels from Sequent Calculi in Multi-Modal Logics* (LICS 2012)
@@ -240,14 +240,31 @@ already assumes.
 **GO verdict (R1 gate).** The check is fully expressible against the existing `IBranch`,
 `IEdges`, `posFormulasAt`, `isAccessible` primitives, using only quantities already in scope
 inside `go` (`bPers`, `edges`, `newForms`, `newEdge`). No new persistent field, no new
-structure, and no signature change anywhere in the rule layer is required. -/
-@[nolint unusedArguments]
-def intFImpReuseWitness? (_bPers : IBranch Atom) (_edges : IEdges)
-    (_newForms : List (ISF Atom)) (_newEdge : Nat × Nat) : Option Nat :=
-  -- Design stub only (Phase 1); parameter names document the intended signature (see
-  -- docstring above: `bPers`/`edges`/`newForms`/`newEdge` as available in `go`'s scope).
-  -- Phase 2 implements the search over accessible ancestors and wires the branch into `go`.
-  none
+structure, and no signature change anywhere in the rule layer is required.
+
+**Search order.** Candidates are the distinct world labels appearing on `bPers`
+(`(bPers.map (·.label)).eraseDups`), in branch order; `List.findSome?` returns the first
+label satisfying all three conditions, or `none` if no label does. -/
+def intFImpReuseWitness? (bPers : IBranch Atom) (edges : IEdges)
+    (newForms : List (ISF Atom)) (newEdge : Nat × Nat) : Option Nat :=
+  -- `w` is the source world of the would-be world-creating edge (`intFImpRule` returns
+  -- edge `(w', w)`, so `newEdge.2 = w`).
+  let w := newEdge.2
+  match newForms.findSome? (fun sf => if sf.sign == .neg then some sf.formula else none) with
+  | none => none  -- malformed input: no obligation entry (should not happen for this rule)
+  | some ψ =>
+    -- Sfor(w') = {φ} ∪ posFormulasAt bPers w, read off newForms's sign = .pos sublist.
+    let sfor : List (Proposition Atom) :=
+      newForms.filterMap fun sf => if sf.sign == .pos then some sf.formula else none
+    let candidates := (bPers.map (·.label)).eraseDups
+    candidates.findSome? fun x =>
+      let forcedAtX := posFormulasAt bPers x
+      if isAccessible edges w x
+          && sfor.all (forcedAtX.contains ·)
+          && !(forcedAtX.contains ψ) then
+        some x
+      else
+        none
 
 /-! ## Expansion Loop -/
 
@@ -302,16 +319,40 @@ def intExpandBranches
             .openBranch bPers
           | some (.linearResult newForms nw' newEdge, newExp) =>
             -- Alpha-rule or world-creation: extend branch
-            let edges' := match newEdge with
-              | none => edges
-              | some e => edges ++ [e]
-            intExpandBranches
-              (done ++ [Branch.extendMany bPers newForms] ++ restBs)
-              (doneExp ++ [newExp] ++ restEs)
-              (doneNW ++ [nw'] ++ restNW)
-              (doneEdges ++ [edges'] ++ restEdges)
-              fuel'
-              closurePred
+            match newEdge with
+            | none =>
+              -- Alpha-rule: no new world, edges unchanged.
+              intExpandBranches
+                (done ++ [Branch.extendMany bPers newForms] ++ restBs)
+                (doneExp ++ [newExp] ++ restEs)
+                (doneNW ++ [nw'] ++ restNW)
+                (doneEdges ++ [edges] ++ restEdges)
+                fuel'
+                closurePred
+            | some e =>
+              -- World-creating F(φ → ψ) rule: run the Sfor-containment loop-check
+              -- (task 317 plan 04) before committing to a fresh world w' = e.1.
+              match intFImpReuseWitness? bPers edges newForms e with
+              | some _x =>
+                -- Reuse: an accessible ancestor already contains Sfor(w') and lacks ψ, so
+                -- F(φ → ψ)@w is discharged without creating w'. No new world, no new edge;
+                -- the world counter is left at `nw` (unconsumed) since w' was never built.
+                intExpandBranches
+                  (done ++ [bPers] ++ restBs)
+                  (doneExp ++ [newExp] ++ restEs)
+                  (doneNW ++ [nw] ++ restNW)
+                  (doneEdges ++ [edges] ++ restEdges)
+                  fuel'
+                  closurePred
+              | none =>
+                -- No reusable ancestor: create w' exactly as before.
+                intExpandBranches
+                  (done ++ [Branch.extendMany bPers newForms] ++ restBs)
+                  (doneExp ++ [newExp] ++ restEs)
+                  (doneNW ++ [nw'] ++ restNW)
+                  (doneEdges ++ [edges ++ [e]] ++ restEdges)
+                  fuel'
+                  closurePred
           | some (.branchingResult branches' nw', newExp) =>
             -- Beta-rule: split into sub-branches (each inherits current edge set)
             intExpandBranches

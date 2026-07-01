@@ -1,0 +1,17 @@
+{
+  "status": "in_progress",
+  "started_at": "2026-06-30T00:00:00Z",
+  "artifacts": [
+    {
+      "path": "specs/447_apply_shake_import_minimization_fixes_tasks_321_406_431/reports/01_shake-import-minimization-verification.md",
+      "type": "report",
+      "summary": "Per-file verification of all 17 shake import-minimization suggestions; verdicts, hazards, and verification pipeline."
+    }
+  ],
+  "metadata": {
+    "session_id": "sess_1782886187_0ef015",
+    "agent_type": "planner-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-agent"]
+  }
+}

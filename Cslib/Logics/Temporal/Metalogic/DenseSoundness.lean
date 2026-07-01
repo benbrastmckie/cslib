@@ -25,7 +25,7 @@ base soundness theorem to `FrameClass.Dense`.
 
 ## References
 
-- Burgess (1982): BX axiom system for temporal logic
+* [J. Burgess, *Axioms for Tense Logic I: Since and Until*][Burgess1982I] — BX axioms (dense case)
 -/
 
 set_option linter.style.setOption false

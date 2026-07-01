@@ -31,7 +31,7 @@ The proof proceeds by structural induction on `φ` with five cases:
 
 ## References
 
-- Burgess 1982: Section 2, Claim 2.11
+* [J. Burgess, *Axioms for Tense Logic II: Time Periods*][Burgess1982II] — Section 2, Claim 2.11
 -/
 
 set_option linter.style.setOption false
@@ -271,7 +271,7 @@ theorem truth_lemma_allPast (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaxima
 chronicle subtype, satisfaction in the chronicle model corresponds exactly
 to membership in the limit point function.
 
-This is Claim 2.11 of Burgess 1982, adapted to the temporal logic setting. -/
+This is Claim 2.11 of Burgess (see [Burgess1982II]), adapted to the temporal logic setting. -/
 theorem chronicle_truth_lemma (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaximalConsistent A)
     (t : ChronicleSubtype A h_mcs) (φ : Formula Atom) :
     Satisfies (chronicleModel A h_mcs) t φ ↔ φ ∈ limitF A h_mcs t.val := by

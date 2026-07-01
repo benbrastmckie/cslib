@@ -1,0 +1,49 @@
+{
+  "task": 446,
+  "phase": "implement",
+  "status": "implemented",
+  "task_type": "cslib",
+  "session_id": "sess_446_burgess_citation_hygiene",
+  "summary": "All 12 Burgess/Xu prose citations in Cslib/Logics/Temporal/Metalogic/ converted to bracket house style ([Description][BibKey]), disambiguating Burgess1982I (BX axiom system -- Since and Until) from Burgess1982II (chronicle construction -- Time Periods); Completeness.lean:40 split into two bullets (Burgess1982I + Burgess1982II) plus the pre-existing Xu1988 bullet. Full CSLib CI pipeline (build, checkInitImports, lint, lint-style, shake, mk_all, test) is green. Two bullets (DenseSoundness.lean:28 and the Completeness.lean Burgess1982II line) were shortened from the report's exact 110-char target strings to satisfy the 100-char lint-style line limit -- documented as deviations in the plan's Phase 2 checklist and in the implementation summary.",
+  "plan": "specs/446_fix_temporal_burgess_citation_hygiene/plans/01_burgess-citation-hygiene.md",
+  "report": "specs/446_fix_temporal_burgess_citation_hygiene/reports/01_burgess-citation-hygiene.md",
+  "summary_artifact": "specs/446_fix_temporal_burgess_citation_hygiene/summaries/01_burgess-citation-hygiene-summary.md",
+  "zero_debt": {
+    "sorry_introduced": false,
+    "axioms_introduced": false,
+    "vacuous_defs_introduced": false,
+    "note": "Pure docstring/comment task; no proof obligations. Verified zero sorry/vacuous-def/new-axiom hits across all 10 edited files."
+  },
+  "phases": [
+    {"phase": 1, "name": "Chronicle/ subtree conversions (Burgess1982II)", "status": "COMPLETED", "sites": [1, 2, 5, 6, 7, 8, 9, 10], "files": 7, "depends_on": []},
+    {"phase": 2, "name": "Metalogic top-level (Burgess1982I, Completeness split, Xu1988)", "status": "COMPLETED", "sites": [3, 4, 11, 12], "files": 3, "depends_on": [], "deviations": 2},
+    {"phase": 3, "name": "Build + grep-guard verification", "status": "COMPLETED", "depends_on": [1, 2]}
+  ],
+  "dependency_waves": [[1, 2], [3]],
+  "phases_completed": 3,
+  "phases_total": 3,
+  "deviations": [
+    {"site": "DenseSoundness.lean:28", "type": "altered", "reason": "Report target string was 110 chars, exceeding the 100-char lake exe lint-style limit (only discoverable at Phase 3 build time). Shortened trailing description to \"-- BX axioms (dense case)\" (98 chars), preserving the [Burgess1982I] citation."},
+    {"site": "Completeness.lean (Burgess1982II bullet)", "type": "altered", "reason": "Same 100-char overflow (110 chars in report target). Shortened to \"-- completeness, Claim 2.11\" (99 chars), preserving [Burgess1982II] citation and Claim 2.11 reference."}
+  ],
+  "ci_pipeline": {
+    "cache_get": "no-op (already warm)",
+    "build": "green (full lake build, exit 0)",
+    "checkInitImports": "no violations",
+    "lint": "2 pre-existing defsWithUnderscore errors in Cslib/Logics/Temporal/Theorems.lean -- file untouched by this task, out of scope",
+    "lint_style": "2 pre-existing space-before-semicolon errors in Cslib/Logics/Modal/Tableau/Completeness.lean -- file untouched by this task, out of scope; zero long-line warnings remain in the 10 edited files",
+    "shake": "extensive pre-existing import-minimization suggestions codebase-wide (tracked by task 447); none of the 10 files edited by task 446 appear in the report",
+    "mk_all": "no update necessary",
+    "test": "lake test exit code 0, full CslibTests/ suite passes"
+  },
+  "verification": {
+    "grep_guard": "grep -rn 'Burgess (19|Burgess 1982:' Cslib/Logics/Temporal/Metalogic/ returns zero hits",
+    "git_diff_scope": "all 10 file diffs confined to ## References doc-comment bullets or one inline doc sentence (TruthLemma.lean:274); zero behavioural change",
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "new_axiom_count": 0
+  },
+  "exclusions_honored": "Lean identifiers (BurgessR3Maximal, burgessR*), module PointInsertion.Burgess, section-header shorthand (Burgess Lemma 2.3, Burgess C4a/C5a, Burgess 2.x comments), and 'Burgess-Xu (BX)' system naming were all left untouched.",
+  "out_of_scope": "Reynolds1994 description mismatch in Tableau/* was NOT addressed (separate bib-hygiene task), per plan.",
+  "next_action": "none"
+}

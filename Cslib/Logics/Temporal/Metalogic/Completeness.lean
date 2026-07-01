@@ -37,8 +37,9 @@ construction.
 
 ## References
 
-* Burgess (1982) — BX axiom system and completeness
-* Xu (1988) — Temporal completeness proofs
+* [J. Burgess, *Axioms for Tense Logic I: Since and Until*][Burgess1982I] — BX axiom system
+* [J. Burgess, *Axioms for Tense Logic II: Time Periods*][Burgess1982II] — completeness, Claim 2.11
+* [M. Xu, *On Some U,S-Tense Logics*][Xu1988] — temporal completeness proofs
 * Cslib/Logics/Modal/Metalogic/Completeness.lean — structural template
 -/
 

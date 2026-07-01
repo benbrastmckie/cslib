@@ -4,14 +4,21 @@
     {
       "project_number": 447,
       "project_name": "apply_shake_import_minimization_fixes_tasks_321_406_431",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "title": "Apply lake shake import-minimization fixes to files touched by tasks 321/406/431",
       "description": "Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public --keep-implied --keep-prefix import-minimization suggestions across files touched by tasks 321, 406, and 431. CI otherwise passes (build/test/checkInitImports green; zero sorries). Apply the genuine import-hygiene fixes and verify (do NOT blindly --fix):\n\nFALSE-POSITIVE CANDIDATES (import Cslib.Init removals -- Cslib.Init sets up default linting/tactics, not a term-level dependency; verify, and if legitimately needed add the shake preserve-comment per 'lake shake --help' rather than removing):\n- Cslib/Foundations/Logic/Metalogic/DeductionCharacterization.lean (remove import Cslib.Init)\n- Cslib/Logics/Modal/Tableau/Saturation.lean (remove import Cslib.Init; add public import Cslib.Logics.Modal.Tableau.Rules)\n- Cslib/Logics/Modal/Tableau/LoopInduction.lean (remove import Cslib.Init + public import ...Saturation; add public import Cslib.Logics.Modal.Basic, Batteries.Data.List.Basic)\n- Cslib/Logics/Modal/Tableau/Soundness.lean (remove import Cslib.Init)\n- Cslib/Logics/Temporal/Tableau/Rules.lean (remove import Cslib.Init; add public import Cslib.Foundations.Logic.Tableau.PropositionalRules)\n- Cslib/Logics/Temporal/Tableau/Saturation.lean (remove import Cslib.Init)\n\nGENUINE IMPORT-HYGIENE FIXES:\n- Cslib/Foundations/Order/HilbertAlgebra/FreeMeetExtension.lean (remove public import Mathlib.Data.Multiset.Basic)\n- Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean (swap MCSProperties -> GenericMCS)\n- Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean (swap MCSProperties -> GenericMCS)\n- Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean (swap MCSProperties -> GenericMCS)\n- Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/BurgessHelpers.lean (remove Finset.Max + Tactic.Linarith; add Tactic.NormNum)\n- Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean (remove re-export of ...Elimination -- verify barrel still builds)\n- Cslib/Logics/Temporal/Metalogic/Chronicle/CounterexampleElimination/Structures.lean (remove Mathlib.Logic.Encodable.Basic) paired with Elimination.lean (add Mathlib.Logic.Encodable.Basic)\n- Cslib/Logics/LTL/Semantics/GNBA/Closure.lean (remove Satisfies + Set.Finite.Powerset + Set.Finite.Lattice; add LTL.Syntax.Formula) paired with GNBA/Atoms.lean (add Satisfies)\n- Cslib/Logics/Temporal/Metalogic/DenseMCS.lean (remove DeductionHelpers)\n\nAfter edits, re-run: lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake --add-public --keep-implied --keep-prefix on the touched files to confirm the suggestions are resolved. Scope is limited to these files only -- do NOT attempt the codebase-wide shake backlog. Source: /vet session sess_1782884590_732b0b.",
       "created": "2026-07-01T05:56:04Z",
-      "last_updated": "2026-07-01T05:56:04Z",
-      "next_artifact_number": 1,
-      "artifacts": [],
+      "last_updated": "2026-07-01T06:17:00Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "number": 1,
+          "type": "report",
+          "path": "specs/447_apply_shake_import_minimization_fixes_tasks_321_406_431/reports/01_shake-import-minimization-verification.md",
+          "created": "2026-07-01T06:17:00Z"
+        }
+      ],
       "parent_tasks": [
         321,
         406,
@@ -22,18 +29,35 @@
     {
       "project_number": 446,
       "project_name": "fix_temporal_burgess_citation_hygiene",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Comprehensive citation and reference-section hygiene across the Temporal metalogic modules",
       "description": "Vet fix for task 180 (Low), elevated scope. Bring every literature reference in the task-180 Temporal work to one uniform, unambiguous, elegant standard.\n\nCore fix: convert the plain-prose \"Burgess 1982\" citations in TruthLemma.lean (:34, :274), Soundness.lean (:28), DenseSoundness.lean (:28), and RRelation.lean (:21) to the bracket `[Description][BibKey]` format used elsewhere in the diff (e.g. Formula.lean's `[H. Kamp, ...][Kamp1968]`), disambiguating `Burgess1982I` (\"Since\"/\"Until\") vs `Burgess1982II` (\"Time Periods\") at every site.\n\nAmbitious cleanup:\n- Audit ALL reference sections and inline citations across the Temporal metalogic tree for consistency: uniform bracket-BibKey format, consistent author/title rendering, and a single house style for the top-of-file \"## References\" block.\n- Verify every cited BibKey actually resolves in references.bib; add any missing entries (e.g. confirm Boudou2017 is present and well-formed; add Burgess entries if the disambiguation reveals a gap). Cross-check that no citation points to a non-existent key.\n- Tidy the surrounding module docstrings so reference lists read cleanly and elegantly, matching the phrasing conventions used in the Syntax layer.\n\nDefinition of done: every literature citation in task-180 Temporal files uses uniform bracket-BibKey format with correct, resolvable keys; `lake build` green; references.bib validated against all cited keys.",
       "parent_task": 180,
       "created": "2026-07-01T05:12:18Z",
-      "last_updated": "2026-07-01T05:38:47Z",
+      "last_updated": "2026-07-01T06:20:44Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/446_fix_temporal_burgess_citation_hygiene/reports/01_burgess-citation-hygiene.md",
+          "type": "report",
+          "summary": "12 citation sites mapped to bracket-BibKey house style; references.bib validated clean"
+        },
+        {
+          "path": "specs/446_fix_temporal_burgess_citation_hygiene/plans/01_burgess-citation-hygiene.md",
+          "type": "plan",
+          "summary": "3-phase citation-hygiene plan with verbatim conversion strings"
+        },
+        {
+          "path": "specs/446_fix_temporal_burgess_citation_hygiene/summaries/01_burgess-citation-hygiene-summary.md",
+          "type": "summary",
+          "summary": "12 citations converted to bracket-BibKey house style; full CI green, zero-debt"
+        }
+      ],
       "dependencies": [
         445
-      ]
+      ],
+      "session_id": "sess_1782884528_21222e_446"
     },
     {
       "project_number": 445,

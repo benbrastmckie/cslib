@@ -1,15 +1,18 @@
 {
   "status": "in_progress",
-  "started_at": "2026-07-01T05:43:10Z",
-  "artifacts": [],
+  "started_at": "2026-06-30T00:00:00Z",
+  "round": 2,
+  "artifacts": [
+    "specs/445_fix_temporal_conservativity_domain_mismatch_sorry/reports/01_domain-mismatch-transfer-feasibility.md"
+  ],
   "partial_progress": {
-    "stage": "investigating",
-    "details": "Read target file; exploring Temporal semantics and Mathlib order-embedding API"
+    "stage": "literature_consultation",
+    "details": "Round 2 deep literature-grounded research. Mining local corpus (xu_1988, burgess_1982_i/ii, reynolds_2001, venema_1993, gabbay_1993, blackburn_2002, goldblatt_2003) and online sources for the conservativity/completeness obstruction."
   },
   "metadata": {
-    "session_id": "sess_445_research",
-    "agent_type": "cslib-research-agent",
+    "session_id": "sess_445_research_r2",
+    "agent_type": "cslib-research-hard-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+    "delegation_path": ["orchestrator", "research", "cslib-research-hard-agent"]
   }
 }

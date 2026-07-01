@@ -37,5 +37,5 @@ The construction proceeds in four phases:
 
 ## References
 
-- Burgess 1982: "Axioms for tense logic II: Time periods", Section 2
+* [J. Burgess, *Axioms for Tense Logic II: Time Periods*][Burgess1982II] — Section 2
 -/

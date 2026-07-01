@@ -1,18 +1,51 @@
 {
   "session_id": "sess_1782884528_21222e",
-  "task_numbers": [445, 446, 444],
-  "waves": [[445], [446], [444]],
-  "dependency_graph": {"444": ["446"], "445": [], "446": ["445"]},
+  "task_numbers": [
+    445,
+    446,
+    444
+  ],
+  "waves": [
+    [
+      446,
+      445
+    ],
+    [
+      444
+    ]
+  ],
+  "dependency_graph": {
+    "444": [
+      "446"
+    ],
+    "446": [],
+    "445": []
+  },
   "max_cycles": 15,
-  "cycle_count": 0,
+  "cycle_count": 2,
   "failed_tasks": [],
-  "completed_tasks": [],
-  "current_statuses": {"445": "not_started", "446": "not_started", "444": "not_started"},
+  "completed_tasks": [
+    446
+  ],
+  "current_statuses": {
+    "445": "researched",
+    "446": "completed",
+    "444": "not_started"
+  },
   "task_dirs": {
     "445": "specs/445_fix_temporal_conservativity_domain_mismatch_sorry",
     "446": "specs/446_fix_temporal_burgess_citation_hygiene",
     "444": "specs/444_fix_temporal_theorems_underscore_lint"
   },
-  "research_agents": {"445": "cslib-research-agent", "446": "cslib-research-agent", "444": "cslib-research-agent"},
-  "implement_agents": {"445": "cslib-implementation-agent", "446": "cslib-implementation-agent", "444": "cslib-implementation-agent"}
+  "research_agents": {
+    "445": "cslib-research-agent",
+    "446": "cslib-research-agent",
+    "444": "cslib-research-agent"
+  },
+  "implement_agents": {
+    "445": "cslib-implementation-agent",
+    "446": "cslib-implementation-agent",
+    "444": "cslib-implementation-agent"
+  },
+  "notes": "445 decoupled to deep-research track (--lit + online) per user escalation; 446/444 run independently"
 }

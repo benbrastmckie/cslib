@@ -18,7 +18,7 @@ definitions for the temporal chronicle construction.
 ## References
 
 * Ported from Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleTypes.lean
-* Burgess 1982: "Axioms for tense logic II: Time periods"
+* [J. Burgess, *Axioms for Tense Logic II: Time Periods*][Burgess1982II]
 -/
 
 set_option linter.style.emptyLine false

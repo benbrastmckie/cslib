@@ -1,0 +1,14 @@
+{
+  "version": "2.0",
+  "description": "Per-repo literature sub-index for cslib Temporal/Bimodal metalogic work (tasks 180, 444-446). Reference-only doc_id pointers into the global Literature/ repo.",
+  "entries": [
+    { "doc_id": "burgess_1982_i", "relevance": "Burgess 'Axioms for tense logic I: Since and Until' — primary source for the Since/Until axiomatization (Burgess1982I citations in task 446)." },
+    { "doc_id": "burgess_1982_ii", "relevance": "Burgess 'Axioms for tense logic II: Time periods' — Burgess1982II disambiguation for task 446 citation hygiene." },
+    { "doc_id": "reynolds_2001", "relevance": "Reynolds — the Burgess-Xu completeness result and IRR rule; directly relevant to base-BX completeness w.r.t. serial/ordered domains (task 445 obstruction)." },
+    { "doc_id": "venema_1993_since_until", "relevance": "Venema on Since/Until conservativity and completeness over classes of linear orders (task 445 conservativity)." },
+    { "doc_id": "venema_1993_anti_axioms", "relevance": "Venema anti-axioms / conservativity questions for temporal logics." },
+    { "doc_id": "gabbay_1993", "relevance": "Gabbay — irreflexivity rule and axiomatization of U,S over general linear time; completeness machinery for the domain-transfer question (task 445)." },
+    { "doc_id": "blackburn_2001", "relevance": "Blackburn et al., Modal Logic — Loewenheim-Skolem, bounded morphisms, model-theoretic transfer methods relevant to the countermodel-transport strategy (task 445)." },
+    { "doc_id": "goldblatt_2003", "relevance": "Goldblatt, Logics of Time and Computation — completeness of temporal logics over ordered domains; frame classes and correspondence." }
+  ]
+}

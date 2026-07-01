@@ -1,16 +1,25 @@
 {
-  "status": "in_progress",
-  "started_at": "2026-06-30T00:00:00Z",
+  "status": "implemented",
+  "summary": "Vetted 5 task(s): 321, 406, 431, 433, 435. Analyzed 35 changed Lean files across Logics/Modal, Logics/Temporal, Logics/Bimodal, Logics/LTL, Computability/Languages, and Foundations. Full CI pipeline passed: lake build (3186 jobs, success), lake test (exit 0), lake exe checkInitImports (exit 0). lake lint and lake exe lint-style each report exactly 2 pre-existing errors, both outside the scope of these 5 tasks' changed files (Cslib/Logics/Temporal/Theorems.lean and Cslib/Logics/Modal/Tableau/Completeness.lean respectively). Zero sorry occurrences found in any of the 35 changed files (confirms tasks 431/433/435 sorry-elimination goals were met). lake shake found import-minimization suggestions on 17 of the 35 changed files -- a Medium-severity, narrowly-scoped finding (part of a much larger, pre-existing codebase-wide shake backlog not caused by these tasks). No docBlame/defLemma/defsWithUnderscore/simpNF/unusedSectionVars/topNamespace/dupNamespace lint violations in any changed file. Documentation, notation, and organisation all conform to CONTRIBUTING.md/NOTATION.md/ORGANISATION.md. Note: task directory 321_code_hygiene_logics_foundations was archived (moved to specs/archive/) during this vet run by a concurrent process; findings/metadata were written to the archived path.",
+  "ci_passed": true,
+  "violations_found": 17,
+  "files_analyzed": 35,
+  "findings_path": "specs/archive/321_code_hygiene_logics_foundations/.vet-findings.json",
   "fix_tasks_created": 0,
-  "artifacts": [],
-  "partial_progress": {
-    "stage": "initializing",
-    "details": "cslib-vet-agent started, parsing delegation context"
-  },
+  "artifacts": ["specs/archive/321_code_hygiene_logics_foundations/.vet-findings.json"],
   "metadata": {
     "session_id": "sess_1782884590_732b0b",
     "agent_type": "cslib-vet-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "vet", "skill-cslib-vet"]
+    "delegation_path": ["orchestrator", "vet", "skill-cslib-vet"],
+    "tasks_vetted": [321, 406, 431, 433, 435],
+    "verification": {
+      "ci_pipeline_passed": true,
+      "lake_build": "PASS",
+      "lake_test": "PASS",
+      "lake_exe_checkInitImports": "PASS",
+      "lake_exe_lint_style": "PASS (scoped; 2 pre-existing errors outside changed files)",
+      "lake_shake": "FINDINGS (17 changed files with import-minimization suggestions)"
+    }
   }
 }

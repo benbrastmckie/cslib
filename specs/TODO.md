@@ -11,12 +11,12 @@ next_project_number: 448
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,317,390,396,400,404,407,415,419,438,440,442,445,447 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,181,215,299,375,389,405,409,430,439,446 | 36,37,180,317,404,407,442,445 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,300,391,392,413,426,441,444 | 39,40,299,375,389,439,446 | Foundations, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,180,226,317,390,396,400,404,407,415,419,438,440,442,444,445,447 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,181,215,299,375,389,405,409,430,439 | 36,37,180,317,404,407,442 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
+| 3 | 41,300,391,392,413,426,441 | 39,40,299,375,389,439 | Foundations, Modal Logic, Temporal Logic, ... |
 | 4 | 393,412,425 | 41,391,426 | Foundations, Temporal Logic, PL-Hygiene |
 | 5 | 301 | 425 | Temporal Logic |
-| 6 | 414 | 181,215,300,301,444 | Code Hygiene |
+| 6 | 414 | 181,215,300,301,444,445 | Code Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -100,18 +100,19 @@ next_project_number: 448
 ### Uncategorized
 
 438 [NOT STARTED] — Upstream the comment/docstring cleanups identified by the task 43
+444 [NOT STARTED] — Vet fix for task 180 (High), elevated scope. Do not merely rename
+  └─ 414 [NOT STARTED] — (Code Hygiene: [Split from task 278.] Simplify Modal/, ) (see above)
 445 [RESEARCHED] — Vet fix for task 180 (Medium severity, PR-BLOCKING). HARD REQUIRE
-  └─ 446 [NOT STARTED] — Vet fix for task 180 (Low), elevated scope. Bring every literatur
-    └─ 444 [NOT STARTED] — Vet fix for task 180 (High), elevated scope. Do not merely rename
-      └─ 414 [NOT STARTED] — (Code Hygiene: [Split from task 278.] Simplify Modal/, ) (see above)
-447 [NOT STARTED] — Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public 
+  └─ 414 [NOT STARTED] — (Code Hygiene: [Split from task 278.] Simplify Modal/, ) (see above)
+447 [RESEARCHED] — Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public 
 
 ## Tasks
 
 ### 447. Apply lake shake import-minimization fixes to files touched by tasks 321/406/431
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Dependencies**: None
+- **Research**: [447_apply_shake_import_minimization_fixes_tasks_321_406_431/reports/01_shake-import-minimization-verification.md]
 
 **Description**: Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public --keep-implied --keep-prefix import-minimization suggestions across files touched by tasks 321, 406, and 431. CI otherwise passes (build/test/checkInitImports green; zero sorries). Apply the genuine import-hygiene fixes and verify (do NOT blindly --fix):
 
@@ -139,9 +140,12 @@ After edits, re-run: lake build, lake test, lake exe checkInitImports, lake exe 
 ---
 
 ### 446. Comprehensive citation and reference-section hygiene across the Temporal metalogic modules
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: Task 445
+- **Research**: [446_fix_temporal_burgess_citation_hygiene/reports/01_burgess-citation-hygiene.md]
+- **Plan**: [446_fix_temporal_burgess_citation_hygiene/plans/01_burgess-citation-hygiene.md]
+- **Summary**: [446_fix_temporal_burgess_citation_hygiene/summaries/01_burgess-citation-hygiene-summary.md]
 
 **Description**: Vet fix for task 180 (Low), elevated scope. Bring every literature reference in the task-180 Temporal work to one uniform, unambiguous, elegant standard.
 

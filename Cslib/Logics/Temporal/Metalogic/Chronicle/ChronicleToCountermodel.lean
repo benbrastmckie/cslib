@@ -30,7 +30,7 @@ and a point function `limitF`. We define:
 
 ## References
 
-- Burgess 1982: Section 2, Claim 2.11
+* [J. Burgess, *Axioms for Tense Logic II: Time Periods*][Burgess1982II] — Section 2, Claim 2.11
 -/
 
 set_option linter.style.setOption false

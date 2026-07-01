@@ -38,5 +38,5 @@ The construction proceeds in four phases:
 ## References
 
 * Ported from Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion.lean
-* Burgess 1982: "Axioms for tense logic II: Time periods"
+* [J. Burgess, *Axioms for Tense Logic II: Time Periods*][Burgess1982II]
 -/

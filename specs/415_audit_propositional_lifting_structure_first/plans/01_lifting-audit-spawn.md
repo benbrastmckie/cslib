@@ -177,34 +177,44 @@ Read-only; no source edits.
 
 ---
 
-### Phase 3: Spawn Manifest — Follow-On Task Specifications [NOT STARTED]
+### Phase 3: Spawn Manifest — Follow-On Task Specifications [COMPLETED]
 
 **Goal**: Lift report §8 Ranks 1-5 into fully-specified, ready-to-create task entries with
 scope, effort, dependencies, priority, internal/upstream classification, and the 393
 cross-reference. Written as a standalone manifest artifact.
 
 **Tasks**:
-- [ ] Specify **Spawn A (Rank 1)** — Instantiate GenericLindenbaum (Phase-6 debt, closes Finding
+- [x] Specify **Spawn A (Rank 1)** — Instantiate GenericLindenbaum (Phase-6 debt, closes Finding
       3): scope (re-derive `MinTheory`/`IntDCCS` off `GenericTheory`), effort M, deps none-hard,
       coordinate-only with 393, not Zulip-gated (confirm with 393 owner), CI-green requirement.
-- [ ] Specify **Spawn B (Rank 2)** — Foundations-level parametric conservativity lift (closes
+      *(deviation: already exists as completed task 416; manifest §1-2 documents actual outcome
+      — code debt was pre-closed by task 407 phase 6, task 416 delivered a doc-only fix instead.)*
+- [x] Specify **Spawn B (Rank 2)** — Foundations-level parametric conservativity lift (closes
       Finding 2): scope (`Foundations/Logic/Metalogic/ConservativityLift.lean`, `conservative_over_cpl`),
       effort M, deps none-hard, synergistic with Spawn A, direct Zulip-ask hit.
-- [ ] Specify **Spawn C (Rank 3)** — Shared `PropositionalEmbedding` typeclass + single
+      *(deviation: already exists as completed task 417; manifest §1-2 documents delivery.)*
+- [x] Specify **Spawn C (Rank 3)** — Shared `PropositionalEmbedding` typeclass + single
       limitation note (supports Finding 1): scope, effort S-M, deps none, note that it does NOT
-      itself enable the intuitionistic lift.
-- [ ] Specify **Spawn D (Rank 4)** — Cross-logic derivation-lifting spike (InterSystem): scope
+      itself enable the intuitionistic lift. *(deviation: already exists as completed task 418;
+      manifest §1-2 documents delivery.)*
+- [x] Specify **Spawn D (Rank 4)** — Cross-logic derivation-lifting spike (InterSystem): scope
       (hoist `liftDerivation`/`liftDerivationWith` onto `InferenceSystem`), effort L, flagged as
       spike (commit only if constructor variance abstracts cleanly), benefits from Spawn B.
-- [ ] Specify **Spawn E (Rank 5)** — Documentation-only structure-preserving-embedding
+      *(deviation: already exists as completed task 419 (forward direction); backward direction
+      spun off to completed study task 448, verdict NO-GO. Manifest §1-2 documents delivery.)*
+- [x] Specify **Spawn E (Rank 5)** — Documentation-only structure-preserving-embedding
       requirement note (closes Finding 1 design question): the four prerequisites for a native
       intuitionistic-faithful embedding; effort S; no Lean change; XL native embedding itself
-      deferred (gated on a future intuitionistic modal logic).
-- [ ] Record the task-393 relationship explicitly: Spawn A (deductive-closure Min/Int axis) is a
+      deferred (gated on a future intuitionistic modal logic). *(deviation: already exists as
+      completed task 420; manifest §1-2 documents delivery.)*
+- [x] Record the task-393 relationship explicitly: Spawn A (deductive-closure Min/Int axis) is a
       sibling of 393's (a)/(b) (quotient/algebraic + Classical-completeness axis) sharing
       `GenericMCSBridge`; recommend Spawn A lands first; 393's "(c)" folds in Spawn B.
-- [ ] Draw the spawn dependency/priority ordering (A and B first, highest debt with ready
-      substrates; C light-touch; D spike; E doc).
+      *(done: manifest §4 — 393 remains not_started, unaffected in scope/deps, informational
+      cross-reference only.)*
+- [x] Draw the spawn dependency/priority ordering (A and B first, highest debt with ready
+      substrates; C light-touch; D spike; E doc). *(moot — all five already landed; manifest §1
+      records actual execution order/effort instead of a prospective ordering.)*
 
 **Timing**: 1.5 hours
 
@@ -221,7 +231,7 @@ cross-reference. Written as a standalone manifest artifact.
 
 ---
 
-### Phase 4: Follow-On Task Creation & Dependency Wiring [NOT STARTED]
+### Phase 4: Follow-On Task Creation & Dependency Wiring [COMPLETED]
 
 **Goal**: Create the selected follow-on tasks per the multi-task creation standard (interactive
 selection + explicit user confirmation), wiring dependencies and the 393 cross-reference into
@@ -229,15 +239,38 @@ their descriptions. This phase is executed via `/task` with confirmation, not by
 state.json edits without consent.
 
 **Tasks**:
-- [ ] Present the five spawn candidates for interactive selection (multiSelect); user chooses
+- [x] Present the five spawn candidates for interactive selection (multiSelect); user chooses
       which to create (default recommendation: A and B now; C, E soon; D as spike).
+      *(deviation: skipped -- Phase 1's re-verification discovered all five candidates already
+      exist as completed child tasks 416-420 (parent_task 415), created by a prior orchestration
+      pass before this implementation dispatch began. There is nothing left to select or create;
+      presenting the five candidates for selection would offer to re-create already-completed
+      work. See report §10 and manifest §0/§1.)*
 - [ ] On explicit user confirmation ("Yes, create tasks"), create the selected tasks via the
       standard task-creation path (state.json + `generate-todo.sh`), each `task_type: cslib`,
       `topic: Foundations`, with the report path referenced in the description.
-- [ ] Wire dependencies: Spawn D references Spawn B; all reference the 415 report; Spawn A and
+      *(deviation: skipped -- no new tasks to create; all five already exist and are completed.
+      Creating duplicates would violate the "no task created without explicit user confirmation"
+      verification bar in spirit, since there is nothing genuinely new to confirm. Flagged in the
+      orchestrator handoff for explicit user visibility rather than silently closed.)*
+- [x] Wire dependencies: Spawn D references Spawn B; all reference the 415 report; Spawn A and
       the 393 cross-reference recorded in Spawn A's description.
-- [ ] Confirm no upstream Zulip action is taken; any upstream coordination (393 owner, Zulip
+      *(confirmed already true of the existing tasks 416-420: each description cites
+      `specs/415_audit_propositional_lifting_structure_first/reports/01_lifting-audit.md` and the
+      relevant report section/rank; task 416's description records the 393 cross-reference; task
+      419's description records the 417 soft-dependency. No further wiring needed.)*
+- [x] Confirm no upstream Zulip action is taken; any upstream coordination (393 owner, Zulip
       thread) is flagged as a human-authored follow-up, not performed here.
+      *(confirmed: no Zulip action taken by this task; report §8's `[SCAFFOLD]` block remains
+      unmodified and flagged for human rewrite; task 393 itself remains Zulip-first per
+      CONTRIBUTING and is untouched by this task.)*
+
+**Disposition**: Phase 4 is marked `[COMPLETED]` on the basis that its verifiable objective —
+"the follow-on tasks from this audit exist, are correctly scoped/wired, and no unconfirmed task
+creation occurs" — is satisfied by the pre-existing state of tasks 416-420, not by new action
+taken in this dispatch. No `specs/state.json`/`specs/TODO.md` task-creation edits were made by
+this task. This is flagged explicitly in the orchestrator handoff (`next_action_hint`) so the
+user/orchestrator is aware no confirmation prompt occurred (none was needed).
 
 **Timing**: 1 hour
 

@@ -1,34 +1,34 @@
 {
-  "status": "partial",
-  "started_at": "2026-06-30T18:29:20-07:00",
+  "status": "implemented",
+  "started_at": "2026-07-01T02:06:26Z",
   "artifacts": [
     "Cslib/Computability/Automata/DA/Choueka.lean",
+    "Cslib/Computability/Languages/OmegaRegularLanguage.lean",
     "specs/241_mcnaughton_theorem/plans/02_mcnaughton-choueka-route.md",
-    "specs/241_mcnaughton_theorem/handoffs/phase3-partial-handoff.md",
+    "specs/241_mcnaughton_theorem/handoffs/phase3-complete-handoff.md",
     "specs/241_mcnaughton_theorem/.orchestrator-handoff.json"
   ],
   "partial_progress": {
-    "stage": "phase_3_partial",
-    "details": "Phase 3 (omegaPow_da_muller): 2 of 3 planned milestones landed green and committed in new file Cslib/Computability/Automata/DA/Choueka.lean (chouekaLang + chouekaLang_regular; chouekaLang_omega_limit_subset_omega_power + greater_subseq helper). The harder Ramsey-based reverse inclusion and final assembly were not attempted -- deferred with a precise, worked-out continuation route in the plan file and handoff doc. Phases 1, 2, 4 remain green/committed from prior dispatches.",
+    "stage": "phase_3_complete",
+    "details": "Phase 3 (omegaPow_da_muller) fully completed this dispatch. Milestone 3/3 (DA.chouekaLang_omega_power_subset_omega_limit, the Ramsey-based reverse inclusion, plus DA.chouekaLang_omega_power_eq_omega_limit, the identity assembly) landed in Cslib/Computability/Automata/DA/Choueka.lean (commit 8ba346f8). The final IsRegular.omegaPow_da_muller assembly landed in Cslib/Computability/Languages/OmegaRegularLanguage.lean (commit 29ba3eb2). Phases 1, 2, 3, 4 are now all green and committed; Phase 5 (IsRegular.to_da_muller) and Phase 6 (final iff_da_muller assembly + dead-cluster removal) remain.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 3
+    "phases_completed": 4
   },
   "verification": {
-    "verification_passed": false,
+    "verification_passed": true,
     "sorry_count": 0,
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": true,
-    "ci_pipeline_passed": "partial (scoped build of Choueka.lean + Concat.lean + MullerClosure.lean + OmegaRegularLanguage.lean together is green; lean_verify clean on both new theorems, standard axioms only; lake exe checkInitImports / lake lint / lake shake / lake test could not run project-wide due to unrelated concurrent-task breakage in the shared tree -- same issue noted by Phase 2 and Phase 4 completion notes)"
+    "ci_pipeline_passed": "scoped (Choueka.lean + Concat.lean + MullerClosure.lean + OmegaRegularLanguage.lean build green together; lean_verify / #print axioms clean -- propext, Classical.choice, Quot.sound only -- on all 3 new theorems; grep for sorry/admit returns nothing). Project-wide lake build/test/lint/shake/checkInitImports were intentionally NOT run per dispatch instructions, since an unrelated concurrent task (180/442, Logics/Modal/Temporal/Propositional Tableau files) is mid-edit in this shared working tree and would block any whole-project command; this is the same environment issue flagged by the Phase 1/2/4 completion notes."
   },
   "metadata": {
     "session_id": "sess_1782865756_35420a",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "partial -- status is partial (not implemented) because Phase 3 is not fully green; requires_user_review recommended for orchestrator to schedule a Phase 3 continuation dispatch"
+    "compliance_check": "passed -- Phase 3 fully green and committed incrementally (2 separate commits, one per milestone group), zero sorry, zero new axioms, plan file and handoff updated"
   },
-  "requires_user_review": true,
-  "review_reason": "Phase 3 (omegaPow_da_muller) is only partially complete. 2 of 3 milestones landed green and committed; the remaining Ramsey-based reverse inclusion theorem and final assembly were deferred to a fresh dispatch per the decomposition discipline (avoid risking an incomplete/broken rush on the hardest remaining piece). Full continuation is documented in specs/241_mcnaughton_theorem/plans/02_mcnaughton-choueka-route.md (Phase 3 section) and specs/241_mcnaughton_theorem/handoffs/phase3-partial-handoff.md."
+  "requires_user_review": false
 }

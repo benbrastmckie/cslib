@@ -1,40 +1,37 @@
 {
-  "status": "partial",
-  "phases_completed": 3,
+  "status": "implemented",
+  "phases_completed": 4,
   "phases_total": 6,
-  "summary": "Phase 3 (omegaPow_da_muller, Choueka route) partially landed: 2 of 3 planned milestones are green and committed in a new Cslib/Computability/Automata/DA/Choueka.lean file (DA.chouekaLang definition + regularity; the easier omega-limit-subset-omega-power inclusion direction of the Choueka identity). The harder Ramsey-based reverse inclusion (chouekaLang_omega_power_subset_omega_limit) and the final omegaPow_da_muller assembly were not attempted -- the full proof route (with exact CSLib lemma names) is documented in the plan file's Phase 3 section and in specs/241_mcnaughton_theorem/handoffs/phase3-partial-handoff.md. Phases 1, 2, 4 remain green/committed as before this dispatch; Phase 3 header is now [PARTIAL] (was [NOT STARTED]).",
-  "blockers": {
-    "phase": 3,
-    "note": "Not a hard blocker (no goal state to report -- the remaining theorem was not yet attempted, not stuck mid-proof). The remaining work is assessed as comparably deep to Phase 2's ~20-lemma proof (Ramsey argument + Nat.find-based breakpoint search), and was deferred to a fresh dispatch rather than rushed within this one's remaining budget, per the decomposition discipline in the dispatch instructions."
-  },
+  "summary": "Phase 3 (omegaPow_da_muller, Choueka route) is now fully complete. This dispatch landed the remaining Milestone 3/3: DA.chouekaLang_omega_power_subset_omega_limit (the harder, Ramsey-based reverse inclusion of the Choueka identity, via infinite_graph_ramsey plus a Nat.find-based breakpoint search, mirroring buchiCongr_DMA_accept_mem's hcol idiom) and DA.chouekaLang_omega_power_eq_omega_limit (the full identity, via antisymmetry) in Cslib/Computability/Automata/DA/Choueka.lean, followed by the final IsRegular.omegaPow_da_muller assembly in Cslib/Computability/Languages/OmegaRegularLanguage.lean. Phases 1, 2, 3, 4 are all green and committed. Phase 5 (IsRegular.to_da_muller forward assembly) and Phase 6 (final iff_da_muller theorem + buchiCongr_DMA dead-cluster removal) remain.",
+  "blockers": null,
   "continuation_context": {
     "what_is_done": [
-      "Milestone 1/3 (commit 11807051): Cslib/Computability/Automata/DA/Choueka.lean created with DA.chouekaLang (def) and DA.chouekaLang_regular (theorem). Scoped build green, sorry-free, standard axioms only.",
-      "Milestone 2/3 (commit 602293de): same file, added DA.greater_subseq (private helper lemma) and DA.chouekaLang_omega_limit_subset_omega_power (theorem, the easier inclusion). Scoped build green, sorry-free, standard axioms only.",
-      "Plan update (commit 6a1476d1): specs/241_mcnaughton_theorem/plans/02_mcnaughton-choueka-route.md Phase 3 section updated to [PARTIAL] with the full 7-step remaining proof route, exact lemma names, and a pointer to the cached ctchou/AutomataTheory reference file for the hardest step."
+      "Milestone 1/3 (commit 11807051, prior dispatch): Cslib/Computability/Automata/DA/Choueka.lean created with DA.chouekaLang (def) and DA.chouekaLang_regular (theorem).",
+      "Milestone 2/3 (commit 602293de, prior dispatch): DA.greater_subseq (private helper) and DA.chouekaLang_omega_limit_subset_omega_power (the easier inclusion).",
+      "Milestone 3/3 (commit 8ba346f8, this dispatch): DA.chouekaLang_omega_power_subset_omega_limit (the Ramsey-based reverse inclusion) and DA.chouekaLang_omega_power_eq_omega_limit (the full Choueka identity). Scoped build green, sorry-free, standard axioms only.",
+      "Phase 3 final assembly (commit 29ba3eb2, this dispatch): IsRegular.omegaPow_da_muller in Cslib/Computability/Languages/OmegaRegularLanguage.lean, combining Language.IsRegular.kstar + Language.IsRegular.iff_dfa + DA.chouekaLang_regular + IsRegular.omegaLim_da_muller (already green) + DA.concat_language_eq (Phase 2, already green) + DA.chouekaLang_omega_power_eq_omega_limit. Added DA.Choueka and DA.Concat as new imports. Scoped build green, sorry-free, standard axioms only.",
+      "Plan update (this dispatch): specs/241_mcnaughton_theorem/plans/02_mcnaughton-choueka-route.md Phase 3 section updated to [COMPLETED] with full Milestone 3/3 writeup, checklist items ticked, and the 'New Supporting Lemmas Flagged' item 2 marked DONE.",
+      "Handoff (this dispatch): specs/241_mcnaughton_theorem/handoffs/phase3-complete-handoff.md written, superseding phase3-partial-handoff.md, documenting two reusable build-fix notes (scoped Computability notation for kstar; le_antisymm vs Set.Subset.antisymm for ωLanguage equalities)."
     ],
     "what_remains": [
-      "DA.chouekaLang_omega_power_subset_omega_limit (Ramsey-based reverse inclusion) in Choueka.lean -- see plan Phase 3 steps 1-5 for the worked-out route (induction for h_kstar via Language.nil_mem_kstar + KleeneAlgebra.kstar_mul_le_kstar; Ramsey step via infinite_graph_ramsey mirroring OmegaRegularLanguage.lean's buchiCongr_DMA_accept_mem hcol block; Nat.find-based breakpoint search ported from AutomataTheory's ChouekaLemma.lean:187-212).",
-      "DA.chouekaLang_omega_power_eq_omega_limit -- trivial Subset.antisymm assembly once the above lands, using already-green kstar_omegaPow_eq_omegaPow / kstar_hmul_omegaPow_eq_omegaPow (OmegaLanguage.lean:443,449).",
-      "IsRegular.omegaPow_da_muller in OmegaRegularLanguage.lean -- final assembly per plan Phase 3 step 7, combining Language.IsRegular.kstar + Language.IsRegular.iff_dfa + chouekaLang_regular + IsRegular.omegaLim_da_muller (already green) + DA.concat_language_eq (Phase 2, already green).",
-      "Once Phase 3 fully lands: Phase 5 (IsRegular.to_da_muller) and Phase 6 (final iff_da_muller theorem + buchiCongr_DMA dead-cluster removal) proceed as originally planned."
+      "Phase 5: IsRegular.to_da_muller (forward assembly) in OmegaRegularLanguage.lean -- obtain the finite-union-of-(l_i * m_i^omega) decomposition via IsRegular.eq_fin_iSup_hmul_omegaPow, use IsRegular.omegaPow_da_muller (now green) + DA.concat_language_eq (Phase 2, green) per component, then fold via DA.Muller.exists_iSup/exists_iSup_univ (Phase 4, green, in MullerClosure.lean).",
+      "Phase 6: assemble the final IsRegular.iff_da_muller theorem (replacing the proof_wanted), delete the dead buchiCongr_DMA cluster (5 declarations, self-contained per the plan's Disposition section), and run the full CSLib CI pipeline once the shared-tree environment issue (concurrent tasks 180/442 mid-edit) clears."
     ],
     "key_files": [
-      "Cslib/Computability/Automata/DA/Choueka.lean (new, 333 lines, this dispatch)",
+      "Cslib/Computability/Automata/DA/Choueka.lean (Milestone 3 additions this dispatch, ~150 lines at the end of the file)",
+      "Cslib/Computability/Languages/OmegaRegularLanguage.lean (IsRegular.omegaPow_da_muller inserted right after IsRegular.omegaLim_da_muller, ~line 96; IsRegular.eq_fin_iSup_hmul_omegaPow at ~line 205 is Phase 5's starting point; dead buchiCongr_DMA cluster untouched, ~lines 388-560)",
       "Cslib/Computability/Automata/DA/Concat.lean (Phase 2, unchanged, already green)",
       "Cslib/Computability/Automata/DA/MullerClosure.lean (Phase 4, unchanged, already green)",
-      "Cslib/Computability/Languages/OmegaRegularLanguage.lean (unchanged this dispatch; buchiCongr_DMA_accept_mem lines ~447-527 is the Ramsey idiom to mirror)",
-      "specs/241_mcnaughton_theorem/plans/02_mcnaughton-choueka-route.md (Phase 3 section has the full remaining route)",
-      "specs/241_mcnaughton_theorem/handoffs/phase3-partial-handoff.md (this dispatch's detailed handoff)"
+      "specs/241_mcnaughton_theorem/plans/02_mcnaughton-choueka-route.md (Phase 3 now [COMPLETED]; Phase 5 section has the next recipe)",
+      "specs/241_mcnaughton_theorem/handoffs/phase3-complete-handoff.md (this dispatch's detailed handoff, supersedes phase3-partial-handoff.md)"
     ],
     "new_lemmas_committed": [
-      "Cslib.Automata.DA.chouekaLang",
-      "Cslib.Automata.DA.chouekaLang_regular",
-      "Cslib.Automata.DA.greater_subseq (private)",
-      "Cslib.Automata.DA.chouekaLang_omega_limit_subset_omega_power"
+      "Cslib.Automata.DA.chouekaLang_omega_power_subset_omega_limit (commit 8ba346f8)",
+      "Cslib.Automata.DA.chouekaLang_omega_power_eq_omega_limit (commit 8ba346f8)",
+      "Cslib.ωLanguage.IsRegular.omegaPow_da_muller (commit 29ba3eb2)"
     ]
   },
   "sorry_inventory": [],
-  "next_action_hint": "Dispatch a fresh cslib-implementation-agent for Phase 3 continuation, pointing it at specs/241_mcnaughton_theorem/plans/02_mcnaughton-choueka-route.md's Phase 3 section (steps 1-7) and specs/241_mcnaughton_theorem/handoffs/phase3-partial-handoff.md. It should add chouekaLang_omega_power_subset_omega_limit + chouekaLang_omega_power_eq_omega_limit to Choueka.lean, then omegaPow_da_muller to OmegaRegularLanguage.lean, committing each as a separate green milestone.",
-  "environment_note": "An unrelated concurrent-task file (e.g. Cslib/Logics/Modal/Tableau/SoundnessStep.lean and/or Logics/Temporal/Propositional files with pre-existing sorries/out-of-date oleans) may be in a broken/mid-edit state in the shared working tree, blocking lake exe checkInitImports, whole-project lake build/lake test, and lake shake/lake lint. This blocked full-pipeline verification this dispatch (same issue flagged by Phase 2 and Phase 4 completion notes). Scoped `lake build` of all Phase-3-relevant modules (Choueka, Concat, MullerClosure, OmegaRegularLanguage) together is green independent of that unrelated breakage."
+  "next_action_hint": "Dispatch a fresh cslib-implementation-agent for Phase 5 (IsRegular.to_da_muller), pointing it at specs/241_mcnaughton_theorem/plans/02_mcnaughton-choueka-route.md's Phase 5 section. Phase 5 depends on Phases 2, 3, 4, all of which are now green, so it is fully unblocked.",
+  "environment_note": "An unrelated concurrent-task file set (Cslib/Logics/Modal/Tableau/*, Cslib/Logics/Temporal/*, Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean, tasks 180/442) is mid-edit in this shared working tree, blocking lake exe checkInitImports, whole-project lake build/lake test, and lake shake/lake lint. This blocked full-pipeline verification this dispatch (same issue flagged by the Phase 1/2/4 completion notes). Scoped lake build of all Phase-3-relevant modules (Choueka, Concat, MullerClosure, OmegaRegularLanguage) together is green independent of that unrelated breakage."
 }

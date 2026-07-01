@@ -1,0 +1,40 @@
+{
+  "status": "completed",
+  "violations_found": 26,
+  "files_analyzed": 15,
+  "ci_passed": true,
+  "findings_path": "specs/299_modal_k_tableau/.vet-findings.json",
+  "summary": "Vetted the union of task 299 (modal K tableau, 11 files under Cslib/Logics/Modal/Tableau/) and task 455 (shared tableau measure module: 2 new Foundations files, 2 shared touch-points CompletenessLoop.lean/FmpMeasure.lean, 2 repointed consumers) against CONTRIBUTING.md, NOTATION.md, ORGANISATION.md, and CODE_OF_CONDUCT.md. CI is green: scoped build (889 jobs) and whole-library build (9179 jobs via lake test) both pass with zero errors; lake test, checkInitImports, and lint-style all pass cleanly; zero sorry/admit/axiom confirmed across all 15 files (grep + lake lint). docBlame/defLemma/defsWithUnderscore (lake lint) are clean for this scope -- the only library-wide lake lint finding (Temporal/Theorems.lean, defsWithUnderscore) is confirmed out of scope for tasks 299/455. Namespace conventions (Cslib.Logic.Modal.Tableau, Cslib.Logic.Tableau, Cslib.Logic.PL) and directory placement (Foundations/Logic/Tableau/ as shared infrastructure, Modal/Tableau/ mirroring the existing Propositional/Tableau and Temporal/Tableau pattern) are correct and idiomatic; no notation violations. 26 non-blocking violations found, none Critical and none High: (1) 3 files / 73 lines exceed the 100-character linter.style.longLine limit (Medium) -- a lake-build syntax linter, distinct from the passing lake exe lint-style text-linter check; (2) 8 files have lake-shake import-minimization findings specific to these tasks (Medium), separate from the confirmed pre-existing, out-of-scope, library-wide 'redundant Cslib.Init' pattern; (3) 6 unusedSectionVars warnings (Low) inconsistent with an omit-pattern already used elsewhere in the same files; (4) 4 additional lake-build lint warnings in Classical/Completeness.lean -- unusedDecidableInType, unusedSimpArgs x2, flexible tactic (Low); (5) one proof-style finding: ~15 near-duplicated case-arm leaves in SoundnessStep.lean's modalStepBranch_preserves_sat (Medium, CONTRIBUTING proof-style/readability); (6) one design/reuse finding: CompletenessLoop.lean re-derives a private lemma from Completeness.lean verbatim because Lean visibility blocks cross-file reuse (Medium, CONTRIBUTING reuse principle); (7) one documentation-durability finding: permanent public docstrings in CompletenessLoop.lean embed internal task/phase-tracking references (Low); (8) 2 ORGANISATION.md documentation gaps: its Modal/ and Foundations/Logic/ tree sketches are stale and omit the (correctly placed) Tableau/ subdirectories (Low). Seven suggested fix tasks are recorded in .vet-findings.json, none blocking merge.",
+  "metadata": {
+    "session_id": "sess_1782919557_8a4cc2",
+    "agent_type": "cslib-vet-agent",
+    "delegation_depth": 1,
+    "delegation_path": [
+      "orchestrator",
+      "vet",
+      "skill-cslib-vet"
+    ],
+    "tasks_vetted": [
+      299,
+      455
+    ],
+    "verification": {
+      "ci_pipeline_passed": true,
+      "lake_build": "PASS",
+      "lake_test": "PASS",
+      "lake_exe_checkInitImports": "PASS",
+      "lake_exe_lint_style": "PASS",
+      "lake_shake": "FINDINGS_NONBLOCKING"
+    }
+  },
+  "fix_tasks_created": [
+    457,
+    458,
+    459,
+    460,
+    461,
+    462,
+    463
+  ],
+  "vet_session": "sess_1782919557_8a4cc2"
+}

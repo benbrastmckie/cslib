@@ -1,5 +1,5 @@
 ---
-next_project_number: 457
+next_project_number: 464
 ---
 
 # TODO
@@ -11,8 +11,8 @@ next_project_number: 457
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,396,400,404,407,438,439,440,441,447,449,452,453 | -- | Foundations, Propositional Logic, Modal Logic, ... |
-| 2 | 39,40,215,375,389,405,409,426,430,450,451,456 | 36,37,181,317,404,407,439,449 | Propositional Logic, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,181,226,300,317,396,400,404,407,438,439,440,441,447,449,452,453,457,458,459,460,461,463 | -- | Foundations, Propositional Logic, Modal Logic, ... |
+| 2 | 39,40,215,375,389,405,409,426,430,450,451,456,462 | 36,37,181,317,404,407,439,449,457,459 | Propositional Logic, Modal Logic, Temporal Logic, ... |
 | 3 | 41,391,392,413,425,444,454 | 39,40,375,389,426,450 | Foundations, Temporal Logic, Bimodal Logic, ... |
 | 4 | 301,393,412 | 41,391,425 | Temporal Logic, Code Hygiene |
 | 5 | 414 | 215,300,301,444 | Code Hygiene |
@@ -44,7 +44,7 @@ next_project_number: 457
 
 ### Temporal Logic
 
-439 [RESEARCHED] — Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_red
+439 [PLANNED] — Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_red
   └─ 426 [BLOCKED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
     └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
       └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
@@ -87,7 +87,81 @@ next_project_number: 457
 
 456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
 
+### Uncategorized
+
+457 [NOT STARTED] — Vet of task 299 (session sess_1782919557_8a4cc2) found 6 lake sha
+  └─ 462 [NOT STARTED] — Vet of task 299 flagged two maintainability items (both non-block
+458 [NOT STARTED] — Vet of task 455 (session sess_1782919557_8a4cc2) found 2 lake sha
+459 [NOT STARTED] — Vet of task 299 found 57 lines exceeding the 100-char `linter.sty
+  └─ 462 [NOT STARTED] — Vet of task 299 flagged two maintainability items (both non-block (see above)
+460 [NOT STARTED] — Vet of task 455 found lint warnings in the repointed consumer Csl
+461 [NOT STARTED] — Vet found 6 `linter.unusedSectionVars` warnings; add `omit [...] 
+463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
+
 ## Tasks
+
+### 463. Docs: update ORGANISATION.md Tableau/ tree sketches + strip internal task refs from public docstrings (task 299/455 vet)
+- **Status**: [NOT STARTED]
+- **Task Type**: markdown
+- **Dependencies**: None
+
+**Description**: Vet found low-severity documentation gaps (code placement itself is correct/idiomatic): (1) ORGANISATION.md:148 Modal/ tree sketch omits the `Tableau/` subdirectory; ORGANISATION.md:26 Foundations/Logic/ tree sketch omits `Tableau/` (Sign.lean, SignedFormula.lean, RuleResult.lean, Branch.lean, Closure.lean, ClosureCondition.lean, Measure.lean, PropositionalRules.lean) — add these entries to document existing placement. (2) Cslib/Logics/Modal/Tableau/CompletenessLoop.lean:1178 and nearby: permanent public docstrings for `modalTableau_complete`/`modalTableau_decides` embed ephemeral internal notes like '(task 442 Phase 6, FINAL)', '(task 442 Phase 5a)' — replace with plain, durable mathematical descriptions.
+
+---
+
+### 462. Refactor duplicated case-arms + eliminate private-lemma re-derivation in modal tableau (task 299 vet)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: Task 457, Task 459
+
+**Description**: Vet of task 299 flagged two maintainability items (both non-blocking, build/lint green): (1) `modalStepBranch_preserves_sat` (Cslib/Logics/Modal/Tableau/SoundnessStep.lean:178-1626, ~1450 lines) has ~15 near-verbatim duplicated leaf case-arms (identical simp skeletons differing only by Proposition constructor, e.g. 1402-1626 repeat a 12-line pattern ~15×) — extract a shared helper lemma/tactic to collapse them. (2) CompletenessLoop.lean:91-131 re-derives `modalLoop_stepBranch_none_saturated` as a local copy of the `private modalStepBranch_none_saturated` (Completeness.lean:683) plus bClosure/eClosure/worldBound facts, solely because `private` blocks cross-file reuse — mark those lemmas `protected` in Completeness.lean/FmpMeasure.lean and import/reuse them. Preserve zero sorry/axioms; confirm scoped `lake build` green.
+
+---
+
+### 461. Add omit [...] annotations for unused section variables in tableau proofs (task 299/455 vet)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Vet found 6 `linter.unusedSectionVars` warnings; add `omit [...] in` before each flagged lemma (matching the existing pattern already used elsewhere in these files): Cslib/Logics/Modal/Tableau/Branch.lean:104 (`modalNextWorld_gt`, omit [DecidableEq Atom] [Hashable Atom]), Branch.lean:132 (`label_le_modalMaxWorld`, omit [DecidableEq Atom]), Completeness.lean:71 (`extractModel_atom_sat_iff`, omit [Hashable Atom]), Completeness.lean:88 (`extractModel_bot_false`, omit [Hashable Atom]), SoundnessStep.lean:92 (`modalClosed_unsat`), and Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean:1102 (`classicalStepBranch_mem_preserved`, omit [Hashable Atom]). Low severity, non-blocking.
+
+---
+
+### 460. Fix lake-build lint warnings in Classical/Completeness.lean (task 455 vet)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Vet of task 455 found lint warnings in the repointed consumer Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean: wrap 16 flagged >100-char lines (119,140,158,161,218,237,256,360,377,400,421,641,912,961,979,987); line 799 drop unused `[DecidableEq Atom]` from `classicalApplyOne_branching_length` (or use `classical`); lines 810,837 trim unused simp args per `simp?`; line 1102 add `omit [Hashable Atom] in` before `classicalStepBranch_mem_preserved`; line 1267 replace `simp at he` with `simp only [...]` (linter.flexible). Non-blocking; confirm `lake build` green.
+
+---
+
+### 459. Shorten >100-char lines in modal K tableau SoundnessStep + Completeness (task 299 vet)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Vet of task 299 found 57 lines exceeding the 100-char `linter.style.longLine` limit: Cslib/Logics/Modal/Tableau/SoundnessStep.lean (48 lines: 268,334,348,371,384,398,412,522,545,568,686,709,732,850,873,896,1086,1136,1149,1164,1204,1219,1234,1256,1274,1292,1310,1328,1346,1364,1384,1402,1420,1437,1438,1455,1456,1473,1474,1491,1492,1512,1530,1548,1566,1584,1602,1620 — mostly long `refine ⟨...⟩` case-bash terms) and Completeness.lean (9 lines: 118,128,169,177,195,455,477,479,529). Mechanically wrap/restructure; no proof-logic changes. Confirm `lake build` stays green.
+
+---
+
+### 458. Fix lake shake import findings in shared Measure module + Classical consumer (task 455 vet)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Vet of task 455 (session sess_1782919557_8a4cc2) found 2 lake shake import findings. Cslib/Foundations/Logic/Tableau/Measure.lean:11 remove unused `import Mathlib.Algebra.BigOperators.Group.List.Basic`. Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean:1 remove `public import Cslib.Logics.Propositional.Tableau.Classical.Soundness`, add `public import Cslib.Logics.Propositional.Tableau.Classical.Expansion` and `Cslib.Logics.Propositional.Semantics.Bool`. Re-run scoped `lake build` + `lake shake` to confirm. Non-blocking; CONTRIBUTING.md shake cleanliness.
+
+---
+
+### 457. Fix lake shake import findings in modal K tableau files (task 299 vet)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Vet of task 299 (session sess_1782919557_8a4cc2) found 6 lake shake import-hygiene findings (beyond the pre-existing systemic Cslib.Init pattern) in Cslib/Logics/Modal/Tableau/. Apply the shake-suggested add/remove: Defs.lean:17 remove unused `public import Cslib.Foundations.Logic.Tableau.PropositionalRules`; Branch.lean:10 add missing `public import Cslib.Foundations.Logic.Tableau.SignedFormula`; Rules.lean:10 add missing `public import Cslib.Foundations.Logic.Tableau.PropositionalRules`; Closure.lean:10 remove `...Modal.Tableau.Rules`, add `...Modal.Tableau.Defs`; Completeness.lean:10 remove `...Modal.Tableau.LoopInduction`; FmpMeasure.lean:20 remove `...Modal.Tableau.LoopInduction`. Then `lake build` the scoped modules to confirm no regressions and re-run `lake shake --add-public --keep-implied --keep-prefix`. Non-blocking; CONTRIBUTING.md shake cleanliness for upstream PR.
+
+---
 
 ### 456. Shared tableau containment blocking
 - **Status**: [NOT STARTED]
@@ -336,11 +410,12 @@ Definition of done: lake build, lake lint, lake exe lint-style green on every in
 
 ### 439. Refactor processnext to mutual def and prove instantstrict t
 - **Effort**: 3-5 hours
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 180
 - **Research**: [426_temporal_tableau_ordconstraints_redesign/reports/03_spawn-analysis.md]
+- **Plan**: [439_refactor_processnext_to_mutual_def_and_prove_instantstrict_t/plans/01_processnext-mutual-instantstrict.md]
 
 **Description**: Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_redesign). Phases 1, 2, 4, 5 are already done and green. Only Phase 3 remains.
 

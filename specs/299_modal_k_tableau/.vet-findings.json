@@ -1,0 +1,177 @@
+{
+  "ci_results": {
+    "build": "PASS — scoped build of all 15 files (889 jobs) succeeds with zero errors. Whole-library rebuild (triggered via `lake test`, 9179 jobs) also succeeds with zero errors, warnings only. Matches the same-day 06_final-verification-summary.md whole-library result (3188/3619 jobs green).",
+    "test": "PASS — `lake test` exit code 0.",
+    "checkInitImports": "PASS — no output.",
+    "lint_style": "PASS — `lake exe lint-style` (text linters) produced no output. Note: this executable does NOT check line length; that is a separate `lake build` syntax linter (`linter.style.longLine`), which does surface findings (see below).",
+    "shake": "FINDINGS (exit 1) — the pre-existing systemic 'redundant import Cslib.Init' pattern recurs library-wide and is confirmed out of scope (unchanged from prior verification, present in hundreds of unrelated files). However, 8 files in this task's scope have shake findings BEYOND that generic pattern (missing or removable non-Cslib.Init imports) — see 'Import Minimization' category below. Non-blocking for CI (exit 1 is shake's normal 'findings present' status, not a hard CI gate per the prior verification's precedent) but represents real import-hygiene debt introduced or exposed by these two tasks."
+  },
+  "categories": [
+    {
+      "name": "Line length exceeds 100-character limit (linter.style.longLine)",
+      "severity": "Medium",
+      "count": 3,
+      "description": "The `lake build` syntax linter `linter.style.longLine` (CONTRIBUTING.md 'syntax linters', which 'give warnings in lake build') flags lines over 100 characters. Independently confirmed via a direct `awk 'length($0) > 100'` scan of each file, cross-checked against the `lake build` warning output. Non-blocking (build exits 0) but genuine unaddressed style debt in these tasks' files.",
+      "violations": [
+        {
+          "file": "Cslib/Logics/Modal/Tableau/SoundnessStep.lean",
+          "line": 268,
+          "detail": "48 lines exceed 100 chars: 268, 334, 348, 371, 384, 398, 412, 522, 545, 568, 686, 709, 732, 850, 873, 896, 1086, 1136, 1149, 1164, 1204, 1219, 1234, 1256, 1274, 1292, 1310, 1328, 1346, 1364, 1384, 1402, 1420, 1437, 1438, 1455, 1456, 1473, 1474, 1491, 1492, 1512, 1530, 1548, 1566, 1584, 1602, 1620 (mostly long `refine ⟨...⟩` case-bash terms in `modalStepBranch_preserves_sat`)",
+          "standard": "CONTRIBUTING",
+          "task": 299
+        },
+        {
+          "file": "Cslib/Logics/Modal/Tableau/Completeness.lean",
+          "line": 118,
+          "detail": "9 lines exceed 100 chars: 118, 128, 169, 177, 195, 455, 477, 479, 529",
+          "standard": "CONTRIBUTING",
+          "task": 299
+        },
+        {
+          "file": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean",
+          "line": 119,
+          "detail": "16 lines exceed 100 chars: 119, 140, 158, 161, 218, 237, 256, 360, 377, 400, 421, 641, 912, 961, 979, 987",
+          "standard": "CONTRIBUTING",
+          "task": 455
+        }
+      ]
+    },
+    {
+      "name": "Import Minimization (lake shake findings beyond generic Cslib.Init pattern)",
+      "severity": "Medium",
+      "count": 8,
+      "description": "CONTRIBUTING.md requires `lake shake --add-public --keep-implied --keep-prefix` cleanliness. These files have shake findings specific to their own import lists (unused or missing non-Cslib.Init imports), distinct from and additional to the library-wide pre-existing 'redundant import Cslib.Init' pattern which is explicitly out of scope per the delegation context.",
+      "violations": [
+        { "file": "Cslib/Foundations/Logic/Tableau/Measure.lean", "line": 11, "detail": "shake: remove unused `import Mathlib.Algebra.BigOperators.Group.List.Basic`", "standard": "CONTRIBUTING", "task": 455 },
+        { "file": "Cslib/Logics/Modal/Tableau/Defs.lean", "line": 17, "detail": "shake: remove unused `public import Cslib.Foundations.Logic.Tableau.PropositionalRules`", "standard": "CONTRIBUTING", "task": 299 },
+        { "file": "Cslib/Logics/Modal/Tableau/Branch.lean", "line": 10, "detail": "shake: add missing `public import Cslib.Foundations.Logic.Tableau.SignedFormula` (relied on transitively)", "standard": "CONTRIBUTING", "task": 299 },
+        { "file": "Cslib/Logics/Modal/Tableau/Rules.lean", "line": 10, "detail": "shake: add missing `public import Cslib.Foundations.Logic.Tableau.PropositionalRules` (relied on transitively)", "standard": "CONTRIBUTING", "task": 299 },
+        { "file": "Cslib/Logics/Modal/Tableau/Closure.lean", "line": 10, "detail": "shake: remove `public import Cslib.Logics.Modal.Tableau.Rules`, add `public import Cslib.Logics.Modal.Tableau.Defs`", "standard": "CONTRIBUTING", "task": 299 },
+        { "file": "Cslib/Logics/Modal/Tableau/Completeness.lean", "line": 10, "detail": "shake: remove `public import Cslib.Logics.Modal.Tableau.LoopInduction`", "standard": "CONTRIBUTING", "task": 299 },
+        { "file": "Cslib/Logics/Modal/Tableau/FmpMeasure.lean", "line": 20, "detail": "shake: remove `public import Cslib.Logics.Modal.Tableau.LoopInduction`", "standard": "CONTRIBUTING", "task": 299 },
+        { "file": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean", "line": 1, "detail": "shake: remove `public import Cslib.Logics.Propositional.Tableau.Classical.Soundness`, add `public import Cslib.Logics.Propositional.Tableau.Classical.Expansion, Cslib.Logics.Propositional.Semantics.Bool`", "standard": "CONTRIBUTING", "task": 455 }
+      ]
+    },
+    {
+      "name": "Unused section variables inconsistently annotated (linter.unusedSectionVars)",
+      "severity": "Low",
+      "count": 6,
+      "description": "Non-blocking `lake build` syntax-linter warnings for theorems that don't use all `variable`-scoped typeclass hypotheses. The same files (and the same broader tableau family, e.g. Branch.lean:141,164) already use the `omit [...] in` pattern for other similarly-affected lemmas, so these are a minor internal-consistency gap rather than a new pattern.",
+      "violations": [
+        { "file": "Cslib/Logics/Modal/Tableau/Branch.lean", "line": 104, "detail": "`modalNextWorld_gt` does not use [DecidableEq Atom] [Hashable Atom]", "standard": "CONTRIBUTING", "task": 299 },
+        { "file": "Cslib/Logics/Modal/Tableau/Branch.lean", "line": 132, "detail": "`label_le_modalMaxWorld` does not use [DecidableEq Atom]", "standard": "CONTRIBUTING", "task": 299 },
+        { "file": "Cslib/Logics/Modal/Tableau/Completeness.lean", "line": 71, "detail": "`extractModel_atom_sat_iff` does not use [Hashable Atom]", "standard": "CONTRIBUTING", "task": 299 },
+        { "file": "Cslib/Logics/Modal/Tableau/Completeness.lean", "line": 88, "detail": "`extractModel_bot_false` does not use [Hashable Atom]", "standard": "CONTRIBUTING", "task": 299 },
+        { "file": "Cslib/Logics/Modal/Tableau/SoundnessStep.lean", "line": 92, "detail": "`modalClosed_unsat` does not use section variable(s)", "standard": "CONTRIBUTING", "task": 299 },
+        { "file": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean", "line": 1102, "detail": "`classicalStepBranch_mem_preserved` does not use [Hashable Atom]; consider `omit [Hashable Atom] in theorem ...`", "standard": "CONTRIBUTING", "task": 455 }
+      ]
+    },
+    {
+      "name": "Other lake-build lint warnings in Classical/Completeness.lean (unusedSimpArgs, unusedDecidableInType, flexible tactic)",
+      "severity": "Low",
+      "count": 4,
+      "description": "Additional non-blocking `lake build` syntax-linter warnings confirmed directly in scoped-build output for Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean, a task-455 repointed consumer.",
+      "violations": [
+        { "file": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean", "line": 799, "detail": "`classicalApplyOne_branching_length` does not use hypothesis [DecidableEq Atom] in its type (linter.unusedDecidableInType) — consider `classical` in the proof or `open scoped Classical in`", "standard": "CONTRIBUTING", "task": 455 },
+        { "file": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean", "line": 810, "detail": "unused simp arguments `SignedFormula.sign`, `SignedFormula.label` in a `simp [...]` call (linter.unusedSimpArgs)", "standard": "CONTRIBUTING", "task": 455 },
+        { "file": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean", "line": 837, "detail": "unused simp argument `List.length_map` (linter.unusedSimpArgs)", "standard": "CONTRIBUTING", "task": 455 },
+        { "file": "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean", "line": 1267, "detail": "`simp at he` is a flexible tactic modifying `he` (linter.flexible) — use `simp only [...]` per `simp?` suggestion", "standard": "CONTRIBUTING", "task": 455 }
+      ]
+    },
+    {
+      "name": "Proof style — repeated near-duplicate case-arm logic",
+      "severity": "Medium",
+      "count": 1,
+      "description": "CONTRIBUTING.md 'Proof style and golfing' asks that proofs remain easy to follow and non-repetitive.",
+      "violations": [
+        { "file": "Cslib/Logics/Modal/Tableau/SoundnessStep.lean", "line": 178, "detail": "Theorem `modalStepBranch_preserves_sat` (lines 178-1626, ~1450 of the file's 1629 lines) is a deep nested case-split with ~15+ near-verbatim duplicated leaf arms (identical simp-call skeletons differing only in which Proposition constructor is plugged in, e.g. lines 1402-1626 repeat the same 12-line pattern ~15 times). Not a correctness issue (build/lint green), but a maintainability/readability concern.", "standard": "CONTRIBUTING", "task": 299 }
+      ]
+    },
+    {
+      "name": "Design/Reuse — private lemma re-derived across files",
+      "severity": "Medium",
+      "count": 1,
+      "description": "CONTRIBUTING.md 'Design principles / Reuse' asks that new definitions instantiate/reuse existing abstractions rather than reinventing them.",
+      "violations": [
+        { "file": "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean", "line": 91, "detail": "`modalLoop_stepBranch_none_saturated` (lines 91-106) is, by the module's own comment, 'a local copy of the private `modalStepBranch_none_saturated`' from Completeness.lean:683, reproduced solely because Lean's `private` visibility blocks cross-file reuse. Two further similarly-labeled re-derivations exist nearby (bClosure/eClosure survival, worldBound calc, lines 107-131).", "standard": "CONTRIBUTING", "task": 299 }
+      ]
+    },
+    {
+      "name": "Documentation durability — internal task/phase references embedded in public docstrings",
+      "severity": "Low",
+      "count": 1,
+      "description": "CONTRIBUTING.md 'Documentation' asks that definitions be documented to ease use and reviewing; docstrings should be self-contained and durable, not reference ephemeral internal task-tracking metadata.",
+      "violations": [
+        { "file": "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean", "line": 1178, "detail": "Public docstrings for permanent declarations (e.g. `modalTableau_complete`, `modalTableau_decides`) embed internal phase-tracking notes like '(task 442 Phase 6, FINAL)', '(task 442 Phase 5a)' which become meaningless once specs/ task directories are archived.", "standard": "CONTRIBUTING", "task": 299 }
+      ]
+    },
+    {
+      "name": "ORGANISATION.md directory-tree sketches stale for Tableau/ subdirectories",
+      "severity": "Low",
+      "count": 2,
+      "description": "ORGANISATION.md's tree sketches for `Modal/` and `Foundations/Logic/` do not list a `Tableau/` subdirectory, even though both task 299 (`Logics/Modal/Tableau/`) and task 455 (`Foundations/Logic/Tableau/` + `Tableau.lean` barrel) correctly follow the pre-existing convention already used by `Logics/Propositional/Tableau/` and `Logics/Temporal/Tableau/`. This is a documentation gap, not a code violation — the code placement itself is correct and idiomatic.",
+      "violations": [
+        { "file": "ORGANISATION.md", "line": 148, "detail": "Modal/ tree sketch omits Tableau/ subdirectory (present on disk, correctly placed)", "standard": "ORGANISATION", "task": 299 },
+        { "file": "ORGANISATION.md", "line": 26, "detail": "Foundations/Logic/ tree sketch omits Tableau/ subdirectory containing Sign.lean, SignedFormula.lean, RuleResult.lean, Branch.lean, Closure.lean, ClosureCondition.lean, Measure.lean, PropositionalRules.lean (correctly placed)", "standard": "ORGANISATION", "task": 455 }
+      ]
+    }
+  ],
+  "suggested_fix_tasks": [
+    {
+      "title": "Shorten >100-character lines in modal K tableau soundness/completeness proofs (task 299)",
+      "type": "cslib",
+      "severity": "Medium",
+      "violation_refs": ["SoundnessStep.lean:48-lines", "Completeness.lean:9-lines"],
+      "description": "Wrap or restructure the 57 flagged long `refine ⟨...⟩`/tactic lines in Cslib/Logics/Modal/Tableau/SoundnessStep.lean and Completeness.lean to satisfy the 100-character `linter.style.longLine` syntax linter. Mechanical line-splitting; no proof-logic changes needed.",
+      "task_scope": 299
+    },
+    {
+      "title": "Fix lake-build lint warnings in Classical/Completeness.lean (task 455 repointed consumer)",
+      "type": "cslib",
+      "severity": "Medium",
+      "violation_refs": ["Classical/Completeness.lean:16-longLines", "Classical/Completeness.lean:799", "Classical/Completeness.lean:810", "Classical/Completeness.lean:837", "Classical/Completeness.lean:1102", "Classical/Completeness.lean:1267"],
+      "description": "In Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean: wrap the 16 flagged >100-char lines; drop the unused `[DecidableEq Atom]` hypothesis from `classicalApplyOne_branching_length` (line 799) or use `classical` in the proof; trim unused simp args at lines 810 and 837 per `simp?` suggestions; add `omit [Hashable Atom] in` before `classicalStepBranch_mem_preserved` (line 1102); replace `simp at he` with `simp only [...]` at line 1267.",
+      "task_scope": 455
+    },
+    {
+      "title": "Run `lake shake --fix` for modal tableau files (task 299)",
+      "type": "cslib",
+      "severity": "Medium",
+      "violation_refs": ["Defs.lean", "Branch.lean", "Rules.lean", "Closure.lean", "Completeness.lean", "FmpMeasure.lean"],
+      "description": "Apply the shake-suggested import additions/removals to Cslib/Logics/Modal/Tableau/{Defs,Branch,Rules,Closure,Completeness,FmpMeasure}.lean, then re-run `lake build` on the scoped module set to confirm no regressions.",
+      "task_scope": 299
+    },
+    {
+      "title": "Run `lake shake --fix` for shared Measure module and Classical Completeness consumer (task 455)",
+      "type": "cslib",
+      "severity": "Medium",
+      "violation_refs": ["Foundations/Logic/Tableau/Measure.lean", "Classical/Completeness.lean"],
+      "description": "Apply the shake-suggested import fix to Cslib/Foundations/Logic/Tableau/Measure.lean (remove unused Mathlib.Algebra.BigOperators.Group.List.Basic) and Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean (swap Soundness import for Expansion + Semantics.Bool).",
+      "task_scope": 455
+    },
+    {
+      "title": "Add omit [...] in annotations for unused section variables (tasks 299/455)",
+      "type": "cslib",
+      "severity": "Low",
+      "violation_refs": ["Branch.lean:104", "Branch.lean:132", "Completeness.lean:71", "Completeness.lean:88", "SoundnessStep.lean:92", "Classical/Completeness.lean:1102"],
+      "description": "Add `omit [...] in` before the six flagged lemmas, matching the existing pattern already used elsewhere in these files, to silence the unusedSectionVars warnings.",
+      "task_scope": 299
+    },
+    {
+      "title": "Refactor duplicated case-arm logic and eliminate private-lemma re-derivation in modal tableau proofs (task 299)",
+      "type": "cslib",
+      "severity": "Medium",
+      "violation_refs": ["SoundnessStep.lean:178", "CompletenessLoop.lean:91-131"],
+      "description": "Two related maintainability improvements, both non-blocking: (1) extract a shared helper lemma/tactic to collapse the ~15 near-duplicated leaf case-arms in `modalStepBranch_preserves_sat` (SoundnessStep.lean:178-1626); (2) mark the relevant lemmas `protected` (not `private`) in Completeness.lean/FmpMeasure.lean and import them in CompletenessLoop.lean instead of re-deriving `modalLoop_stepBranch_none_saturated` and related bClosure/eClosure/worldBound facts (CompletenessLoop.lean:91-131).",
+      "task_scope": 299
+    },
+    {
+      "title": "Documentation touch-ups: update ORGANISATION.md tree sketches and remove internal task/phase references from public docstrings (tasks 299/455)",
+      "type": "markdown",
+      "severity": "Low",
+      "violation_refs": ["ORGANISATION.md:148", "ORGANISATION.md:26", "CompletenessLoop.lean:1178"],
+      "description": "Add `Tableau/` entries to ORGANISATION.md's Modal/ and Foundations/Logic/ directory-tree sketches (documenting the existing, correct placement of Cslib/Logics/Modal/Tableau/ and Cslib/Foundations/Logic/Tableau/), and strip internal phase-tracking notes like '(task 442 Phase 6, FINAL)' from permanent public docstrings in CompletenessLoop.lean, replacing with plain mathematical descriptions.",
+      "task_scope": 299
+    }
+  ]
+}

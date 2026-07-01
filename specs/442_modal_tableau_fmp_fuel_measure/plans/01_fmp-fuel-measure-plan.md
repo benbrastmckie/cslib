@@ -1,7 +1,7 @@
 # Implementation Plan: Modal K Tableau FMP Fuel Measure (Task 442)
 
 - **Task**: 442 - Modal K Tableau FMP Fuel Measure (unblocks task 299 Phase 6/7)
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: ~18-26 hours across 9 phase dispatches (~1500-2600 lines Lean)
 - **Dependencies**: None (parent task 299 is [BLOCKED] pending this work)
 - **Research Inputs**: reports/01_fmp-fuel-measure-research.md (Tier 1, adversarially verified)
@@ -27,7 +27,7 @@
 | P3   | ✅ COMPLETED | `af2369af` | Strict-decrease engine `modalExpMeasure_step_lt` green. Engine needs hb/hInv/hW hyps (P5a supplies via ModalPotentialInv + modalStepBranch_worldBound). |
 | P5a | ✅ COMPLETED | `728df02c` | `ModalLoopInv` bundled invariant + `modalStep_preserves_invariant` in NEW `CompletenessLoop.lean`. Green (777 jobs), axiom-clean. |
 | P5b | ✅ COMPLETED | `f239615c` | `modalExpandBranches_hintikka` proved by fuel induction (the original task-299 Phase 6 blocker). Extended `ModalLoopInv` with `eBoxOnlyNeg`/`eBoxNegWitness` fields (genuine gap fix). Green, axiom-clean. |
-| P6 | 🔄 IN PROGRESS | — | Public theorems + Decidable + full CI (CompletenessLoop.lean). |
+| P6 | ✅ COMPLETED | `516335d4` | `modalTableau_complete`, `modalTableau_decides`, `instDecidableKValid` + initial-ModalLoopInv construction. Whole-library `lake build` green (3187 jobs); full CI (checkInitImports/lint/lint-style/shake/test) green; all 5 targets axiom-clean (propext/Classical.choice/Quot.sound). |
 
 ### Architecture adjustment (settled during execution — supersedes P5 file placement)
 P1a introduced `FmpMeasure.lean → import Completeness.lean` (acyclic: Completeness does **not**
@@ -492,7 +492,7 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
 
 ---
 
-### Phase 6: Public theorems + Decidable instance + full CI [IN PROGRESS]
+### Phase 6: Public theorems + Decidable instance + full CI [COMPLETED]
 - **Goal:** Land the three public theorems and the `Decidable` instance; verify axiom-clean and
   whole-library + CI green.
 - **Territory:**

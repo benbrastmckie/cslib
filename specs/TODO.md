@@ -11,9 +11,9 @@ next_project_number: 455
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,396,400,404,407,415,438,439,440,442,447,449,452,453 | -- | Foundations, Propositional Logic, Modal Logic, ... |
-| 2 | 39,40,215,299,375,389,405,409,426,430,450,451 | 36,37,181,317,404,407,439,442,449 | Propositional Logic, Modal Logic, Temporal Logic, ... |
-| 3 | 41,300,391,392,413,425,441,444,454 | 39,40,299,375,389,426,450 | Foundations, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,181,226,299,317,396,400,404,407,438,439,440,447,449,452,453 | -- | Foundations, Propositional Logic, Modal Logic, ... |
+| 2 | 39,40,215,300,375,389,405,409,426,430,441,450,451 | 36,37,181,299,317,404,407,439,449 | Propositional Logic, Modal Logic, Temporal Logic, ... |
+| 3 | 41,391,392,413,425,444,454 | 39,40,375,389,426,450 | Foundations, Temporal Logic, Bimodal Logic, ... |
 | 4 | 301,393,412 | 41,391,425 | Temporal Logic, Code Hygiene |
 | 5 | 414 | 215,300,301,444 | Code Hygiene |
 
@@ -21,7 +21,6 @@ next_project_number: 455
 
 ### Foundations
 
-415 [PLANNED] — Audit how the structure-first propositional base (MPL/IPL/CPL: pr
 452 [NOT STARTED] — From review 2026-07-01-2 (HIGH). The four GenericMCSBridge.lean f
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
@@ -37,13 +36,12 @@ next_project_number: 455
 
 ### Modal Logic
 
+299 [BLOCKED] — Implement tableau decision procedure for basic modal logic K with
+  └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
+  └─ 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 404 [RESEARCHED] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
   └─ 405 [NOT STARTED] — Simplify the proof machinery in the task-402 modal tableau soundn
-442 [IMPLEMENTING] — Fix the Phase 6 blocker in task 299 (modal K tableau completeness
-  └─ 299 [BLOCKED] — Implement tableau decision procedure for basic modal logic K with
-    └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
-    └─ 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 
 ### Temporal Logic
 
@@ -69,7 +67,7 @@ next_project_number: 455
 
 ### Code Hygiene
 
-453 [NOT STARTED] — From review 2026-07-01-2 (MEDIUM+LOW, findings #2+#4). 72 set_opt
+453 [RESEARCHED] — From review 2026-07-01-2 (MEDIUM+LOW, findings #2+#4). 72 set_opt
 389 [NOT STARTED] — [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAl
   └─ 391 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Remove internal task/process ja
     └─ 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
@@ -99,7 +97,7 @@ next_project_number: 455
 ---
 
 ### 453. Audit and reduce maxHeartbeats inflation across Bimodal/Temporal metalogic; normalize scoping to 'in'-scoped
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
@@ -271,7 +269,7 @@ Definition of done: lake build, lake lint, lake exe lint-style green on every in
 
 ### 442. Modal tableau fmp fuel measure
 - **Effort**: 400-800 lines, multiple dispatches
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -279,6 +277,9 @@ Definition of done: lake build, lake lint, lake exe lint-style green on every in
   - [299_modal_k_tableau/reports/06_spawn-analysis.md]
   - [442_modal_tableau_fmp_fuel_measure/reports/01_fmp-fuel-measure-research.md]
 - **Plan**: [442_modal_tableau_fmp_fuel_measure/plans/01_fmp-fuel-measure-plan.md]
+- **Summary**:
+  - [Cslib/Logics/Modal/Tableau/CompletenessLoop.lean]
+  - [Cslib/Logics/Modal/Tableau/FmpMeasure.lean]
 
 **Description**: Fix the Phase 6 blocker in task 299 (modal K tableau completeness) by revising the fuel bound and formalizing the finite-model-property (FMP) termination measure. Constraints: ZERO sorry, ZERO new axioms; NO datatype or rule change (world-subset blocking is "option B", already tracked as task 441, and is explicitly OUT OF SCOPE here -- do not touch modalNextWorld's world-reuse behavior or any rule's output shape). Three-part scope: (1) Revise modalFuel (Cslib/Logics/Modal/Tableau/Saturation.lean:89) upward from the current polynomial O(n^2) to an exponential (or double-exponential, if the measure proof requires it) bound in the formula size. This step alone is soundness-safe: modalExpandBranches_closed_unsat (Soundness.lean:226) is fuel-agnostic (closed implies unsat holds for arbitrary fuel), so only the numeric value of modalFuel changes -- no soundness proof needs rework. (2) Formalize the FMP termination measure that discharges the fuel = 0 case of modalExpandBranches: an a-priori world-count / world-label bound (needed because modalNextWorld-minted labels are currently unbounded a priori); a finite signed-subformula universe U(phi); a subformula-closure lemma covering all four modal rules' outputs (witness + boxProps + diaNegProps) plus the propositional rule outputs, showing every formula produced during expansion lies in U(phi); output-disjointness (new formulas produced by a rule firing are fresh on the branch); and a per-branch weight ~3^R (where R measures unconsumed universe elements) to absorb the <=2-way propositional branching, mirroring the classical 3^complexity measure used in classicalExpandBranches_hintikka. (3) Prove modalStepBranch_none_saturated and then modalExpandBranches_hintikka by fuel induction plus inner Forall2-accessibility induction, mirroring classicalExpandBranches_hintikka (Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean:924) and reusing the acc-threading pattern already established in modalExpandBranches_closed_unsat (Cslib/Logics/Modal/Tableau/Soundness.lean:165). Then discharge modalTableau_complete via the already-proven modalOpenBranch_countermodel (task 299 Phase 5d, green), and finally modalTableau_decides plus its Decidable instance (task 299 Phase 7, currently gated on this work). Reference templates: classicalExpandBranches_hintikka (Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean:924), classicalStepBranch_none_saturated / classicalStepBranch_hintikka_inv (same file, lines 694/722), and the hoisted forall2_* worklist helpers already available in Cslib/Logics/Modal/Tableau/LoopInduction.lean. Full reference-signature detail and the precise per-rule dispatch obligations are recorded in task 299's plan (specs/299_modal_k_tableau/plans/05_modal-k-tableau-plan.md, Phase 6 "DECISIVE FINDING" addendum and "Precise residual obligation" list) and should be read as background before starting. Definition of done: modalStepBranch_none_saturated, modalExpandBranches_hintikka, modalTableau_complete, modalTableau_decides, and a Decidable instance all compile with ZERO sorry and ZERO new axioms; #print axioms on each shows only standard axioms; whole-library lake build stays green.
 
@@ -451,7 +452,7 @@ After implementation:
 ---
 
 ### 415. Audit propositional->modal/temporal/bimodal lifting vs structure-first vision
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None

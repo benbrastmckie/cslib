@@ -1,47 +1,10 @@
 {
-  "status": "implemented",
-  "started_at": "2026-06-30T19:47:00Z",
-  "phases_completed": 3,
+  "task_number": 442,
+  "status": "completed",
+  "session_id": "sess_1782868458_ecfcce",
+  "phases_completed": 9,
   "phases_total": 9,
-  "artifacts": [
-    {
-      "path": "Cslib/Logics/Modal/Tableau/FmpMeasure.lean",
-      "type": "lean_source",
-      "summary": "Phase 1b addition: modalApplyOne_diamondPos_outputs_subset, modalApplyOne_boxNeg_outputs_subset, and the top-level dispatch lemma modalApplyOne_outputs_subset, plus supporting private glue lemmas (modalSubfmls_trans, modalUniverse membership characterization, boxPositivesOf/successorsOf inversion helpers, shared boxProps/diaNegProps closure)."
-    },
-    {
-      "path": "specs/442_modal_tableau_fmp_fuel_measure/plans/01_fmp-fuel-measure-plan.md",
-      "type": "plan",
-      "summary": "Phase 1b marked [COMPLETED]; checklist items checked; Execution Log row updated; deviations from the terse plan signature documented (added hsf/hInv hypotheses and five glue lemmas, not a design change)."
-    },
-    {
-      "path": "specs/442_modal_tableau_fmp_fuel_measure/.handoff-P1b.json",
-      "type": "handoff",
-      "summary": "Phase 1b handoff: declarations_added list, green=true, sorry_inventory=[]."
-    }
-  ],
-  "partial_progress": {
-    "stage": "phase_1b_complete",
-    "details": "Phase 1b (fresh-world rule closure + top-level modalApplyOne_outputs_subset dispatch) landed green. Stopped per single-phase dispatch scope; Phase 2 (world-count bound, CRUX) is next."
-  },
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": true,
-    "ci_pipeline_note": "lake build Cslib.Logics.Modal.Tableau.FmpMeasure green; lake exe checkInitImports passed (exit 0); lean_verify on modalApplyOne_outputs_subset, modalApplyOne_diamondPos_outputs_subset, modalApplyOne_boxNeg_outputs_subset all report only {propext, Quot.sound} (standard, no new axioms). No sorry in FmpMeasure.lean."
-  },
-  "memory_candidates": [
-    "In this Lean4/Mathlib setup, `List.mem_cons`+`List.mem_append` applied via `simp only` to `x ∈ a :: (l1 ++ l2)` produces a LEFT-associated disjunction `(x = a ∨ x ∈ l1) ∨ x ∈ l2`, not right-associated. `rcases h with rfl | h1 | h2` silently mis-splits (tries to subst the whole inl compound); use `rcases h with (rfl | h1) | h2` instead.",
-    "`split` tactic on a goal shaped `match (bigExpr).fst with | RuleResultCtor => ...` prefers to split on the OUTER match (over the result's own constructor, introducing an opaque equation hypothesis) rather than descending into `bigExpr`'s own internal match/if — even after `dsimp only` reduces `bigExpr` to a clean `if`/`match`. To target the inner conditional, use `by_cases`/`rcases ... with` explicitly on the inner discriminant instead of relying on `split` to find it.",
-    "Lean's `omega` occasionally fails on trivially-true goals (`w ≤ B ⊢ w < B + 1`) inside `have h := by omega` when embedded inside certain anonymous-constructor/tactic-block positions in this codebase (root cause not fully diagnosed — possibly elaboration-order/metavariable postponement related to nested `refine`/`exact ⟨_, by omega, _⟩`). When `omega` inexplicably fails on an obviously-true Nat goal, fall back to explicit lemmas (`Nat.lt_succ_of_le`, `Nat.lt_succ_iff.mp`) which are unaffected."
-  ],
-  "metadata": {
-    "session_id": "sess_1782868458_ecfcce",
-    "agent_type": "cslib-implementation-hard-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
-  }
+  "definition_of_done_met": true,
+  "axiom_clean": true,
+  "whole_library_green": true
 }

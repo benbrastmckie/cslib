@@ -1,9 +1,0 @@
-{
-  "total_churn": 3,
-  "target_churn": {
-    "P1b": 0,
-    "P2": 1
-  },
-  "adversarial_triggers": 0,
-  "audit_dispatches": 0
-}

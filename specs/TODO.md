@@ -59,7 +59,7 @@ next_project_number: 452
 
 ### PL Tableau
 
-317 [PLANNED] — Fill the propositional tableau completeness sorries (7 real sorri
+317 [IMPLEMENTING] — Fill the propositional tableau completeness sorries (7 real sorri
   └─ 430 [RESEARCHED] — Prove the atom-persistence / upward-closure structural lemma for 
 
 ### Pr Review
@@ -228,50 +228,6 @@ GENUINE IMPORT-HYGIENE FIXES:
 - Cslib/Logics/Temporal/Metalogic/DenseMCS.lean (remove DeductionHelpers)
 
 After edits, re-run: lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake --add-public --keep-implied --keep-prefix on the touched files to confirm the suggestions are resolved. Scope is limited to these files only -- do NOT attempt the codebase-wide shake backlog. Source: /vet session sess_1782884590_732b0b.
-
----
-
-### 446. Comprehensive citation and reference-section hygiene across the Temporal metalogic modules
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Dependencies**: Task 445
-- **Research**: [446_fix_temporal_burgess_citation_hygiene/reports/01_burgess-citation-hygiene.md]
-- **Plan**: [446_fix_temporal_burgess_citation_hygiene/plans/01_burgess-citation-hygiene.md]
-- **Summary**: [446_fix_temporal_burgess_citation_hygiene/summaries/01_burgess-citation-hygiene-summary.md]
-
-**Description**: Vet fix for task 180 (Low), elevated scope. Bring every literature reference in the task-180 Temporal work to one uniform, unambiguous, elegant standard.
-
-Core fix: convert the plain-prose "Burgess 1982" citations in TruthLemma.lean (:34, :274), Soundness.lean (:28), DenseSoundness.lean (:28), and RRelation.lean (:21) to the bracket `[Description][BibKey]` format used elsewhere in the diff (e.g. Formula.lean's `[H. Kamp, ...][Kamp1968]`), disambiguating `Burgess1982I` ("Since"/"Until") vs `Burgess1982II` ("Time Periods") at every site.
-
-Ambitious cleanup:
-- Audit ALL reference sections and inline citations across the Temporal metalogic tree for consistency: uniform bracket-BibKey format, consistent author/title rendering, and a single house style for the top-of-file "## References" block.
-- Verify every cited BibKey actually resolves in references.bib; add any missing entries (e.g. confirm Boudou2017 is present and well-formed; add Burgess entries if the disambiguation reveals a gap). Cross-check that no citation points to a non-existent key.
-- Tidy the surrounding module docstrings so reference lists read cleanly and elegantly, matching the phrasing conventions used in the Syntax layer.
-
-Definition of done: every literature citation in task-180 Temporal files uses uniform bracket-BibKey format with correct, resolvable keys; `lake build` green; references.bib validated against all cited keys.
-
----
-
-### 445. Eliminate the domain-mismatch sorry in Bimodal to Temporal conservativity and refactor the model-transfer layer for generality
-- **Status**: [ABANDONED]
-- **Task Type**: cslib
-- **Dependencies**: None
-- **Research**: [445_fix_temporal_conservativity_domain_mismatch_sorry/reports/02_literature-grounded-conservativity-obstruction.md]
-
-**Description**: Vet fix for task 180 (Medium severity, PR-BLOCKING). HARD REQUIREMENT: absolutely no sorries are acceptable in any PR. `temporal_valid_of_bimodal_derivable` (TemporalConservativity.lean:269) must be proved outright and BOTH `set_option warn.sorry false in` (:248) and the `sorry` (:269) removed. Disclosure is NOT an acceptable outcome. (The sorry is pre-existing from task 277, but task 180's PR includes this file, so it must be closed here.)
-
-SUPERSEDES task #275 (abandoned): #275 ("Prove Bimodal TM is conservative over Temporal BX") was the original tracking task for exactly this theorem; its goal is fully subsumed here. Close out the conservativity story end-to-end.
-
-Prove the model-transfer result described in the module's "Domain Mismatch Resolution" section: bimodal validity is established on AddCommGroup domains (`temporal_valid_on_addcommgroup`), while Temporal satisfaction is quantified over an arbitrary `Nontrivial`, `NoMaxOrder`, `NoMinOrder` `LinearOrder D`. Close the gap by transporting a countermodel: given a Temporal model over D falsifying phi, transfer it (via an order-embedding of the relevant sub-order into an ordered abelian group such as the rationals, or an order-completion/Hahn-embedding argument) to an AddCommGroup domain preserving `Satisfies`, then contrapose against `temporal_valid_on_addcommgroup` using the proven semantic bridge `bimodal_truthAt_toBimodal_iff_temporal_satisfies`.
-
-Ambitious refactor (not just plugging the hole):
-- State the transfer as a general, reusable lemma over any target domain meeting a clearly-specified order interface, so it is not welded to one concrete group; factor out the order-embedding and the satisfaction-transport as independent, named, docstringed lemmas.
-- Replace the current "known gap" prose in the module docstring with an elegant, self-contained account of the completed argument and the interface the transfer requires.
-- Sweep the surrounding conservativity development for uniformity with the rest of the Bimodal metalogic (naming, section variables, import minimality).
-
-Verification: `lean_verify` on `temporal_valid_of_bimodal_derivable` and `bimodal_conservative_over_temporal` must report only `[propext, Classical.choice, Quot.sound]` with zero sorry; full `lake build`/`lake lint`/`lake test` green. If a genuinely load-bearing mathematical obstruction is found, escalate to the user with the exact open goal state and candidate lemmas — do NOT reintroduce a sorry or a vacuous (`:= True`/`trivial`) placeholder.
-
-Root of the 444/445/446 chain (no task deps): the foundational proof/refactor work; 446 (citations) then 444 (uniformity sweep) run after it.
 
 ---
 
@@ -667,7 +623,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: PL-Tableau
 - **Dependencies**: None

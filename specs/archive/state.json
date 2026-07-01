@@ -5813,7 +5813,66 @@
       ],
       "completion_summary": "Abandoned: obsolete under task 241 plan v2 (Choueka-route pivot). The proof_wanted buchiCongr_DMA_language_eq this task aimed to combine inclusions into is being deleted; language equality is now obtained compositionally via the Choueka decomposition (eq_fin_iSup_hmul_omegaPow + DA.concat + omegaPow_da_muller + DMA union).",
       "archived": "2026-07-01T05:49:11Z"
+    },
+    {
+      "project_number": 446,
+      "project_name": "fix_temporal_burgess_citation_hygiene",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "Comprehensive citation and reference-section hygiene across the Temporal metalogic modules",
+      "description": "Vet fix for task 180 (Low), elevated scope. Bring every literature reference in the task-180 Temporal work to one uniform, unambiguous, elegant standard.\n\nCore fix: convert the plain-prose \"Burgess 1982\" citations in TruthLemma.lean (:34, :274), Soundness.lean (:28), DenseSoundness.lean (:28), and RRelation.lean (:21) to the bracket `[Description][BibKey]` format used elsewhere in the diff (e.g. Formula.lean's `[H. Kamp, ...][Kamp1968]`), disambiguating `Burgess1982I` (\"Since\"/\"Until\") vs `Burgess1982II` (\"Time Periods\") at every site.\n\nAmbitious cleanup:\n- Audit ALL reference sections and inline citations across the Temporal metalogic tree for consistency: uniform bracket-BibKey format, consistent author/title rendering, and a single house style for the top-of-file \"## References\" block.\n- Verify every cited BibKey actually resolves in references.bib; add any missing entries (e.g. confirm Boudou2017 is present and well-formed; add Burgess entries if the disambiguation reveals a gap). Cross-check that no citation points to a non-existent key.\n- Tidy the surrounding module docstrings so reference lists read cleanly and elegantly, matching the phrasing conventions used in the Syntax layer.\n\nDefinition of done: every literature citation in task-180 Temporal files uses uniform bracket-BibKey format with correct, resolvable keys; `lake build` green; references.bib validated against all cited keys.",
+      "parent_task": 180,
+      "created": "2026-07-01T05:12:18Z",
+      "last_updated": "2026-07-01T06:20:44Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/446_fix_temporal_burgess_citation_hygiene/reports/01_burgess-citation-hygiene.md",
+          "type": "report",
+          "summary": "12 citation sites mapped to bracket-BibKey house style; references.bib validated clean"
+        },
+        {
+          "path": "specs/446_fix_temporal_burgess_citation_hygiene/plans/01_burgess-citation-hygiene.md",
+          "type": "plan",
+          "summary": "3-phase citation-hygiene plan with verbatim conversion strings"
+        },
+        {
+          "path": "specs/446_fix_temporal_burgess_citation_hygiene/summaries/01_burgess-citation-hygiene-summary.md",
+          "type": "summary",
+          "summary": "12 citations converted to bracket-BibKey house style; full CI green, zero-debt"
+        }
+      ],
+      "dependencies": [
+        445
+      ],
+      "session_id": "sess_1782884528_21222e_446",
+      "archived": "2026-07-01T07:26:56Z"
     }
   ],
-  "archived_at": "2026-06-28T18:47:30Z"
+  "archived_at": "2026-06-28T18:47:30Z",
+  "archived_projects": [
+    {
+      "project_number": 445,
+      "project_name": "fix_temporal_conservativity_domain_mismatch_sorry",
+      "status": "abandoned",
+      "task_type": "cslib",
+      "title": "Eliminate the domain-mismatch sorry in Bimodal to Temporal conservativity and refactor the model-transfer layer for generality",
+      "description": "Vet fix for task 180 (Medium severity, PR-BLOCKING). HARD REQUIREMENT: absolutely no sorries are acceptable in any PR. `temporal_valid_of_bimodal_derivable` (TemporalConservativity.lean:269) must be proved outright and BOTH `set_option warn.sorry false in` (:248) and the `sorry` (:269) removed. Disclosure is NOT an acceptable outcome. (The sorry is pre-existing from task 277, but task 180's PR includes this file, so it must be closed here.)\n\nSUPERSEDES task #275 (abandoned): #275 (\"Prove Bimodal TM is conservative over Temporal BX\") was the original tracking task for exactly this theorem; its goal is fully subsumed here. Close out the conservativity story end-to-end.\n\nProve the model-transfer result described in the module's \"Domain Mismatch Resolution\" section: bimodal validity is established on AddCommGroup domains (`temporal_valid_on_addcommgroup`), while Temporal satisfaction is quantified over an arbitrary `Nontrivial`, `NoMaxOrder`, `NoMinOrder` `LinearOrder D`. Close the gap by transporting a countermodel: given a Temporal model over D falsifying phi, transfer it (via an order-embedding of the relevant sub-order into an ordered abelian group such as the rationals, or an order-completion/Hahn-embedding argument) to an AddCommGroup domain preserving `Satisfies`, then contrapose against `temporal_valid_on_addcommgroup` using the proven semantic bridge `bimodal_truthAt_toBimodal_iff_temporal_satisfies`.\n\nAmbitious refactor (not just plugging the hole):\n- State the transfer as a general, reusable lemma over any target domain meeting a clearly-specified order interface, so it is not welded to one concrete group; factor out the order-embedding and the satisfaction-transport as independent, named, docstringed lemmas.\n- Replace the current \"known gap\" prose in the module docstring with an elegant, self-contained account of the completed argument and the interface the transfer requires.\n- Sweep the surrounding conservativity development for uniformity with the rest of the Bimodal metalogic (naming, section variables, import minimality).\n\nVerification: `lean_verify` on `temporal_valid_of_bimodal_derivable` and `bimodal_conservative_over_temporal` must report only `[propext, Classical.choice, Quot.sound]` with zero sorry; full `lake build`/`lake lint`/`lake test` green. If a genuinely load-bearing mathematical obstruction is found, escalate to the user with the exact open goal state and candidate lemmas — do NOT reintroduce a sorry or a vacuous (`:= True`/`trivial`) placeholder.\n\nRoot of the 444/445/446 chain (no task deps): the foundational proof/refactor work; 446 (citations) then 444 (uniformity sweep) run after it.",
+      "parent_task": 180,
+      "created": "2026-07-01T05:12:18Z",
+      "last_updated": "2026-07-01T07:00:00Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/445_fix_temporal_conservativity_domain_mismatch_sorry/reports/02_literature-grounded-conservativity-obstruction.md",
+          "type": "report",
+          "summary": "Machine-verified: bimodal_conservative_over_temporal is FALSE (TM non-conservative over BX); recommend restate over metric base BX+"
+        }
+      ],
+      "session_id": "sess_1782884528_21222e_445",
+      "dependencies": [],
+      "completion_summary": "ABANDONED (superseded). Deep research proved the target theorem bimodal_conservative_over_temporal FALSE: TM is genuinely non-conservative over plain Burgess/Xu BX (witness phi_T=(untl bot top)->G(untl bot top) on doubled rationals). The original framing (domain mismatch fixable by model transfer) rested on a false premise. Research reports preserved under specs/445_.../reports/ and cited by successor tasks 449 (define BX+) and 450 (prove conservativity over BX+, close the sorry).",
+      "archived": "2026-07-01T07:26:56Z"
+    }
+  ]
 }

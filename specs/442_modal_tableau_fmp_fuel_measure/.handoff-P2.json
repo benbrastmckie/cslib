@@ -1,38 +1,47 @@
 {
-  "status": "partial",
+  "status": "phase_complete",
   "phase_label": "P2",
-  "green": false,
+  "green": true,
   "obligations_done": [
-    "P2-obl-a: modalStepBranch_preserves_expandedNodup (e.Nodup invariant; precision refinement of plan's 'branch Nodup' shorthand)",
-    "P2-obl-b: modalStepBranch_exists_rank' (FormulaRankBound + rank-edge 'frozen at parent_rank-1' invariant, via Function.update at the mint point)",
-    "P2-obl-c: modalStepBranch_preserves_outDegEq + outDeg_le_of_expandedNodup (outDeg w <= Sf bound; design correction: isMintingShaped narrowed to only boxNeg's shape, diamondPos/diamondNeg proven dead code)",
-    "P2-obl-d (partial): modalPotentialTerm, modalPotential, modalCap_mul_eq_succ_sub_one (potential definitions + recurrence identity only; design correction: rank=0 leaf term must be 0, not the Nat-truncation artifact Sf)"
+    "P2-obl-a: modalStepBranch_preserves_expandedNodup (committed prior dispatch)",
+    "P2-obl-b: modalStepBranch_exists_rank' (committed prior dispatch)",
+    "P2-obl-c: modalStepBranch_preserves_outDegEq + outDeg_le_of_expandedNodup (committed prior dispatch)",
+    "P2-obl-d (finish): known-worlds/max-world append bookkeeping (modalKnownWorlds_fold_spec, modalKnownWorlds_nodup, mem_modalKnownWorlds, modalKnownWorlds_toFinset_append, modalKnownWorlds_perm_append_of_subset, modalKnownWorlds_perm_append_single, modalMaxWorld_foldl_le, modalMaxWorld_le_of_forall_le, modalMaxWorld_append_eq_of_forall_le, modalMaxWorld_append_single); accTargetsKnown invariant + modalStepBranch_preserves_accTargetsKnown; mintGroup_label_eq_freshWorld; modalStepBranch_knownWorlds (the known-worlds/max-world dichotomy); modalStepBranch_eClosure; ModalPotentialInv (reusable invariant bundle); modalStepBranch_potential_step (the exact single-step Delta=0 potential-drop identity, composing modalStepBranch_exists_rank' with the known-worlds dichotomy and a direct mint-point arithmetic argument using the rank-edge invariant applied to the new edge)",
+    "P2-obl-e (final): modalStepBranch_worldBound (world-count bound derived from the Phi-bound invariant + modalCap_le_pow + modalSubfmls_length_le + modalDepth_le_complexity; includes modalSf_pos and modalSf_one_imp_depth_zero as the small supporting facts modalCap_le_pow's hypotheses need)"
   ],
-  "obligations_remaining": [
-    "P2-obl-d (finish): the single-step lemma that modalStepBranch preserves `modalMaxWorld b + modalPotential Sf b acc rank` exactly (Delta=0), composing modalStepBranch_exists_rank' (P2-obl-b) and modalStepBranch_preserves_outDegEq (P2-obl-c). Also needs a new modalKnownWorlds-under-modalStepBranch lemma (unchanged for non-mint steps; prepends modalNextWorld b for the one mint step, boxNeg). Estimated 150-250 lines, same 5-way modalStepBranch case-split shape as (a)-(c), reusing modalCap_mul_eq_succ_sub_one for the mint-step arithmetic (both the rank>=2 sub-case via the identity directly, and the rank=1/child-rank=0 sub-case via modalPotentialTerm's corrected 0-case).",
-    "P2-obl-e: final composition -- modalStepBranch_maxWorld_lt (or the renamed/strengthened equivalent carrying rank/outDeg/Nodup/Phi hypotheses) deriving `modalMaxWorld b' < modalWorldBound φ0` from (a)-(d) + modalCap_le_pow + modalSubfmls_length_le + modalDepth_le_complexity. Fully blocked on P2-obl-d's single-step lemma."
+  "obligations_remaining": [],
+  "design_deviation": {
+    "deviation": "modalStepBranch_worldBound's signature carries the rank/outDeg/Nodup/accKnown/closure hypotheses via ModalPotentialInv plus an explicit Phi-bound hypothesis (modalMaxWorld b + modalPotential Sf b acc rank + 1 <= modalCap Sf (modalDepth phi0)), rather than the plan's terse hb+hW (modalMaxWorld b < modalWorldBound phi0 alone) loop-invariant target.",
+    "reason": "The terse form is FALSE: a branch can carry a single not-yet-fired minting formula at label modalWorldBound phi0 - 1, satisfying the naive hypothesis, whose firing mints world modalWorldBound phi0, breaching the bound. This was documented in the committed P2-obl-c/d design-correction notes from the prior dispatch. The Phi-bound invariant is the one that actually survives a step EXACTLY (Delta=0), proved by modalStepBranch_potential_step.",
+    "affects": "P2-obl-e (modalStepBranch_worldBound); P5a will need to establish the Phi-bound invariant holds at the tableau's initial state and thread it (via ModalPotentialInv) across the whole saturation-loop induction using modalStepBranch_potential_step's Delta=0 result."
+  },
+  "invariant_def_name": "ModalPotentialInv",
+  "invariant_def_location": "Cslib/Logics/Modal/Tableau/FmpMeasure.lean (structure ModalPotentialInv, bundling bClosure, eNodup, eClosure, accFresh, accKnown, outDegEq, rankBound, rankEdge)",
+  "key_lemmas_for_P5a": [
+    "modalStepBranch_potential_step: exact Delta=0 identity for modalMaxWorld + modalPotential across one step, given ModalPotentialInv",
+    "modalStepBranch_worldBound: derives modalMaxWorld b' < modalWorldBound phi0 given ModalPotentialInv + the Phi-bound hypothesis",
+    "modalStepBranch_preserves_accTargetsKnown, modalStepBranch_eClosure: needed alongside the already-committed P2-obl-a/b/c preservation lemmas to maintain all eight ModalPotentialInv fields across steps"
   ],
-  "design_corrections_found_during_formalization": [
-    {
-      "correction": "isMintingShaped narrowed from {diamondPos T-diamond shape, boxNeg F-box shape} to {boxNeg F-box shape only}",
-      "reason": "modalNegOf? (Defs.lean:110-113) matches `.imp _ .bot` unconditionally (no exclusion for a `.box` antecedent), so tryAllPropRules's negPos/negNeg arms are ALWAYS applicable first for the diamondPos/diamondNeg shapes (verified computationally via lean_run_code, both directions, `rfl`-provable generically over the box's body). modalApplyOne's diamondPos/diamondNeg match arms are consequently dead code, never reached at runtime -- T(dia phi)@w is instead decoded by negPos into F(box(not phi))@w, which fires boxNeg (2-step composition achieving the same semantics). Only boxNeg's `.neg, .box _` shape is never intercepted by any propositional rule pattern (`.box` is a distinct top-level constructor from every prop-rule pattern's `.imp`-headed shape). This does NOT weaken the outDeg<=Sf bound -- it makes the bound's supporting invariant actually TRUE (the original two-shape version would have been FALSE, since a T-diamond-shaped formula firing via negPos is a non-edge-creating step that would still have inflated the naive filtered count).",
-      "affects": "P2-obl-c (landed, fixed) -- isMintingShaped def in FmpMeasure.lean; P2-obl-b (already correct, unaffected since it never used isMintingShaped)"
-    },
-    {
-      "correction": "modalPotentialTerm must return 0 when rank w = 0 (leaf world), not the naive (Sf-outDeg w)*modalCap Sf(rank w - 1) formula",
-      "reason": "Nat's truncated subtraction turns `rank w - 1` into `0` when `rank w = 0`, giving `modalCap Sf 0 = 1` and a spurious nonzero term `Sf * 1 = Sf` where the mathematically correct contribution is 0 (a leaf has no remaining minting capacity). Hand-tracing the mint step in the rank=1-parent/rank=0-child sub-case: the naive formula nets Delta(maxWorld)+Delta(Phi) = 1 + (Sf-1) = Sf =/= 0, contradicting the hand-verified 'exact Delta=0' design claim; the corrected piecewise term nets 1 + (-1) = 0, matching. The rank>=2 sub-case is identical under both formulas (unaffected).",
-      "affects": "P2-obl-d (landed the fix in modalPotentialTerm's definition; the not-yet-written single-step lemma must use this corrected definition)"
-    }
-  ],
+  "blockers": [],
   "sorry_inventory": [],
   "new_axioms": [],
   "vacuous_definitions": [],
-  "commit": "cb0c3e76",
+  "commit": "2f7a4d22",
   "commits_this_dispatch": [
-    "9f9134ad task 442 phase 2a: branch Nodup invariant",
-    "cd1cf73a task 442 phase 2b: formula-rank-bound invariant",
-    "00ad6986 task 442 phase 2c: out-degree bound",
-    "cb0c3e76 task 442 phase 2d (partial): potential-function definitions + recurrence"
+    "68b3f907 task 442 phase 2d: known-worlds and max-world append bookkeeping lemmas",
+    "33bc4277 task 442 phase 2d: accTargetsKnown invariant and mint-group label lemma",
+    "db9fc8a6 task 442 phase 2d: known-worlds/max-world dichotomy for modalStepBranch",
+    "70ca9693 task 442 phase 2d: potential Δ=0 single-step lemma (complete)",
+    "2f7a4d22 task 442 phase 2e: world-count bound (final composition)"
   ],
+  "verification": {
+    "sorry_count": 0,
+    "axioms": ["propext", "Classical.choice", "Quot.sound"],
+    "build_passed": true,
+    "checkInitImports_passed": true,
+    "lint_style_passed": true,
+    "lake_lint_errors_in_touched_file": 0,
+    "lake_lint_note": "lake lint --builtin-lint found 2 pre-existing errors in Cslib/Logics/Temporal/Theorems.lean (unrelated file, unrelated task); zero errors in FmpMeasure.lean"
+  },
   "session_id": "sess_1782868458_ecfcce"
 }

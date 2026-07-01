@@ -134,6 +134,9 @@ private noncomputable def bimodalSinceInterface (fc : FrameClass) :
   listConjMemDcs := fun hcud L hL => list_conj_mem_dcs fc hcud L hL
   listConjMemMcs := fun hmcs L hL => list_conj_mem_mcs fc hmcs L hL
   listConjImpliesElem := fun L φ h => listConjImpliesElem fc L φ h
+  untlLeftMonoThm := by intro _ hmcs _ _ _ hi hu; exact untl_left_mono_thm fc hmcs hi hu
+  snceLeftMonoThm := by intro _ hmcs _ _ _ hi hs; exact snce_left_mono_thm fc hmcs hi hs
+  lindenbaum := by intro _ hcons; exact set_lindenbaum_fc hcons
 
 /-- Since-direction seed, simplified via Xu 3.2.1:
 B ∪ {eta} ∪ {untl(γ, β∧xi) | β∈B, γ∈C}.

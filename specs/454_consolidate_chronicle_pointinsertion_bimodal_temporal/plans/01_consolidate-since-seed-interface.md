@@ -200,7 +200,7 @@ copies; both logics build.
 
 ---
 
-### Phase 2: Port `lemma_2_7_since_seed_consistent` (generic) + Temporal wiring [NOT STARTED]
+### Phase 2: Port `lemma_2_7_since_seed_consistent` (generic) + Temporal wiring [COMPLETED]
 
 **Groundwork already done (Phase 1 spillover)**: `temporalSinceInterface`/`bimodalSinceInterface fc`
 are ALREADY fully defined, verified, and committed (in the two `Since.lean` files) with every field of
@@ -219,20 +219,38 @@ the shared module as the generic `SinceSeedInterface`-consuming theorem(s); wire
 delete Temporal's local private body; build Temporal + its `CounterexampleElimination`.
 
 **Tasks**:
-- [ ] Transcribe the Temporal `lemma_2_7_since_seed_consistent` body (the `fc := .Base` reading, §1.3)
+- [x] Transcribe the Temporal `lemma_2_7_since_seed_consistent` body (the `fc := .Base` reading, §1.3)
       into the generic theorem, replacing every concrete `f …` with `I.f …`.
-- [ ] Also transcribe the Temporal `lemma_2_7_since` wrapper body (lines 334-414 of
+- [x] Also transcribe the Temporal `lemma_2_7_since` wrapper body (lines 334-414 of
       `Cslib/Logics/Temporal/Metalogic/Chronicle/PointInsertion/Since.lean` as of the Phase-1 commit)
       into a second generic theorem (or fold both into one) -- it diverges 100% mechanically too (see
       research §1.3 wrapper row), so it should collapse the same way rather than staying a per-logic
       ~80-line body.
-- [ ] Keep public `lemma_2_7_since` (and `lemma24SinceWithGuard`/`lemma24WithGuard` if they route
+- [x] Keep public `lemma_2_7_since` (and `lemma24SinceWithGuard`/`lemma24WithGuard` if they route
       through 2_7) at current signatures as wrappers calling the generic theorem via the instance.
-- [ ] Re-grep to confirm `lemma_2_7_since_seed_consistent` (private) has no Temporal consumers; delete
-      the local body.
-- [ ] `lean_verify` the generic `lemma_2_7_since_seed_consistent` (axiom check: no new axioms/sorries).
-- [ ] `lake build` Temporal `Since.lean` and `…/Temporal/…/CounterexampleElimination/{RecursiveWalks,
+- [x] Re-grep to confirm `lemma_2_7_since_seed_consistent` (private) has no Temporal consumers; delete
+      the local body. *(deviation: altered -- the local private theorem is now itself a one-line
+      delegation to the generic theorem rather than deleted outright, since Temporal's `lemma_2_7_since`
+      wrapper calls it by its private local name; this preserves zero call-site churn elsewhere in the
+      file while still eliminating the ~185-line duplicated body.)*
+- [x] `lean_verify` the generic `lemma_2_7_since_seed_consistent` (axiom check: no new axioms/sorries).
+      *(build-clean verified via `lake build`; MCP `lean_verify` tool not loaded this session --
+      grep-verified zero `sorry`/`axiom` in touched files instead, see Phase 6.)*
+- [x] `lake build` Temporal `Since.lean` and `…/Temporal/…/CounterexampleElimination/{RecursiveWalks,
       MainElimination}.lean`.
+
+**Deviation -- 3 additional interface fields required**: transcription required 3 fields not
+anticipated in Phase 0/1: `untlLeftMonoThm`, `snceLeftMonoThm` (MCS-membership-level left
+monotonicity for `untl`/`snce`, used by the seed-consistency proof; not derivable from the existing
+`untlLeftMonoDeriv` field alone since they additionally thread `theoremInMcs`/necessitation), and
+`lindenbaum` (flagged as a possible-need in the Phase-0/1 handoff; confirmed needed by the
+`lemma_2_7_since` wrapper, which calls Temporal's `temporal_lindenbaum` / Bimodal's
+`set_lindenbaum_fc`). All three were added to `SinceSeedInterface` AND supplied in both
+`temporalSinceInterface` and `bimodalSinceInterface fc` in the same commit (keeping both logics
+green at every checkpoint), even though Bimodal's *wiring* to the generic theorem is Phase 3's job.
+Two module-level generic lemmas (`subsetDeductiveClosure`, `deductiveClosureClosedUnderDerivation`)
+were added alongside the seed-consistency/wrapper theorems -- these are pure consequences of the
+abstract `Deriv` family (matching both logics' own proofs verbatim) and needed no new fields.
 
 **Timing**: 2 hours
 

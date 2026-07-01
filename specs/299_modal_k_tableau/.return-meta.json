@@ -1,18 +1,12 @@
 {
-  "status": "researched",
-  "artifacts": [
-    {
-      "type": "report",
-      "path": "specs/299_modal_k_tableau/reports/06_spawn-analysis.md",
-      "summary": "Blocker analysis for task 299 Phase 6: polynomial modalFuel is provably insufficient for modal K; proposes one new cslib task to revise fuel and formalize the FMP measure"
-    }
-  ],
-  "next_steps": "Skill postflight will create tasks from .spawn-return.json",
+  "status": "partial",
+  "requires_user_review": true,
+  "review_reason": "Task 299 BLOCKED: Phase 6 modalExpandBranches_hintikka is false as stated under the polynomial modalFuel. Delivered Phase 5c truth lemma GREEN sorry-free. Spawned task 442 (exponential fuel + FMP measure) as the unblock; 299 now depends on 442.",
+  "blocked_phase": 6,
   "metadata": {
-    "session_id": "sess_1782865757_cb015d",
-    "agent_type": "spawn-agent",
-    "delegation_depth": 3,
-    "delegation_path": ["orchestrator", "spawn", "skill-spawn", "spawn-agent"],
-    "proposed_task_count": 1
+    "cycles_used": 2,
+    "final_state": "blocked",
+    "spawned_task": 442,
+    "delivered": "Phase 5c modalTruthLemma GREEN + committed sorry-free"
   }
 }

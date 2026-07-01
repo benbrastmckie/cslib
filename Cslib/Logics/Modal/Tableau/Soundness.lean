@@ -9,6 +9,7 @@ module
 public import Cslib.Logics.Modal.Tableau.Saturation
 public import Cslib.Logics.Modal.Tableau.SoundnessStep
 public import Cslib.Logics.Modal.Tableau.LoopInduction
+import Mathlib.Data.List.Forall2
 
 /-! # Modal K Tableau Soundness
 
@@ -176,7 +177,7 @@ theorem modalExpandBranches_closed_unsat (fuel : Nat) :
     split at h
     · simp at h
     · rename_i hfind
-      apply forall₂_of_zip_mem hlength_accs.symm
+      refine List.forall₂_iff_zip.mpr ⟨hlength_accs.symm, ?_⟩
       intro b a hmem
       have hfn := (List.findSome?_eq_none_iff.mp hfind) _ hmem
       have hcl : isModalClosed b = true := by
@@ -234,7 +235,7 @@ theorem modalExpandBranches_closed_unsat (fuel : Nat) :
                     (by simp [hdoneExpLen])
                     (by simp [hdoneAccsLen])
                     hFresh_rest
-                    (forall₂_append_aux hFresh_done
+                    (List.rel_append hFresh_done
                       (List.Forall₂.cons hInv_bh List.Forall₂.nil))
                     hinner
             · -- Branch is open: expand it
@@ -273,7 +274,7 @@ theorem modalExpandBranches_closed_unsat (fuel : Nat) :
                 have hFreshAll : List.Forall₂ (fun b a => accFreshInv b a)
                     (done ++ newBs ++ bt)
                     (doneAccs ++ List.replicate newBs.length newAcc ++ restAs) :=
-                  forall₂_append_aux (forall₂_append_aux hFresh_done hFreshNew) hFresh_rest
+                  List.rel_append (List.rel_append hFresh_done hFreshNew) hFresh_rest
                 -- Apply the fuel induction hypothesis
                 have hunsat_all :
                     List.Forall₂ (fun b a => ¬branchSatisfiable.{v, u} b a)
@@ -288,7 +289,7 @@ theorem modalExpandBranches_closed_unsat (fuel : Nat) :
                 have hunsat_newBs_bt :
                     List.Forall₂ (fun b a => ¬branchSatisfiable.{v, u} b a)
                     (newBs ++ bt) (List.replicate newBs.length newAcc ++ restAs) := by
-                  have h := forall₂_drop_aux done.length hunsat_all
+                  have h := List.forall₂_drop done.length hunsat_all
                   rw [List.append_assoc done newBs bt, List.drop_left,
                       List.append_assoc doneAccs (List.replicate newBs.length newAcc) restAs,
                       List.drop_left' hdoneAccsLen] at h
@@ -297,7 +298,7 @@ theorem modalExpandBranches_closed_unsat (fuel : Nat) :
                 have hunsat_bt :
                     List.Forall₂ (fun b a => ¬branchSatisfiable.{v, u} b a)
                     bt restAs := by
-                  have h := forall₂_drop_aux newBs.length hunsat_newBs_bt
+                  have h := List.forall₂_drop newBs.length hunsat_newBs_bt
                   rw [List.drop_left,
                       List.drop_left' List.length_replicate] at h
                   exact h
@@ -305,7 +306,7 @@ theorem modalExpandBranches_closed_unsat (fuel : Nat) :
                 have hunsat_newBs :
                     List.Forall₂ (fun b a => ¬branchSatisfiable.{v, u} b a)
                     newBs (List.replicate newBs.length newAcc) := by
-                  have h := forall₂_take_aux newBs.length hunsat_newBs_bt
+                  have h := List.forall₂_take newBs.length hunsat_newBs_bt
                   rw [List.take_left,
                       List.take_left' List.length_replicate] at h
                   exact h

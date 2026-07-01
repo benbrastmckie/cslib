@@ -1,0 +1,17 @@
+{
+  "phase": 6,
+  "phase_name": "Honest-Limits chapter and appendix anchor table",
+  "last_updated": "2026-07-01T06:00:00Z",
+  "objectives": [
+    {"id": 1, "description": "O1-O5 concessions stated", "status": "done"},
+    {"id": 2, "description": "Two round-2 caveats", "status": "done"},
+    {"id": 3, "description": "Design B norm + pointed-GHA naming", "status": "done"},
+    {"id": 4, "description": "06-notes style: definitions, table, Trade-offs Accepted", "status": "done"},
+    {"id": 5, "description": "Appendix anchor table + Zulip index", "status": "done"},
+    {"id": 6, "description": "Grep IsBotRuleFree / design-note check", "status": "done"},
+    {"id": 7, "description": "Compile clean", "status": "done"}
+  ],
+  "current_objective": null,
+  "deviations": [],
+  "handoff_count": 0
+}

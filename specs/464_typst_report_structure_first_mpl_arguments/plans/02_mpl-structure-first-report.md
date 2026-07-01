@@ -239,20 +239,20 @@ content chapters so it inherits the vocabulary they fixed.
 
 ---
 
-### Phase 6: Honest-Limits chapter and appendix anchor table [NOT STARTED]
+### Phase 6: Honest-Limits chapter and appendix anchor table [COMPLETED]
 
 **Goal**: Write `05-honest-limits.typ` — the O1–O5 ledger plus round-2's two added caveats —
 styled on the Bimodal `06-notes.typ` "Design Choices" pattern, and assemble the appendix anchor
 table. This is what makes the report credible.
 
 **Tasks**:
-- [ ] State the mandatory concessions explicitly: substitution argument is pragmatic-not-decisive (O1); MPL proves vacuous well-typed ⊥-theorems (⊥ behaves like an atom at MPL) — a cost (O2); "property module" is partly a re-description, `efq` is a lexical constructor (O4); sorry-free ONLY at Hilbert/algebraic layer — name task-317 tableau sorries and task-410 open genericity (O3); downstream modal/temporal/bimodal payoff is CPL-only today (task 415) with shared-metatheory substrate NO-GO (task 448) (O5).
-- [ ] Add round-2's two caveats: no `LawfulMonad` / no formalized `Adjunction` (grep-verified); Zulip message #606970606 is unanswered (thread PARKED, did not ratify Design A).
-- [ ] Note Design B is the conventional textbook/formalization norm (Design A a deliberate minority choice) and the "pointed GHA / Johansson algebra" precise naming (not bare GHA).
-- [ ] Style per `06-notes.typ`: paired `#definition` boxes for competing designs (A vs B1/B2), a comparison `#figure(table(...))`, and a `#remark("Trade-offs Accepted")` listing costs with justification.
-- [ ] Assemble an appendix anchor table (either `06-appendix.typ` or an end table): file | line range | declaration | argument supported — from the per-argument citations in report 02 Findings §1 / Appendix.
-- [ ] Grep the whole draft for `IsBotRuleFree` and confirm every occurrence cites `Basic.lean:223-235`, never `mpl-base-design-note.md:42`.
-- [ ] Compile clean.
+- [x] State the mandatory concessions explicitly: substitution argument is pragmatic-not-decisive (O1); MPL proves vacuous well-typed ⊥-theorems (⊥ behaves like an atom at MPL) — a cost (O2); "property module" is partly a re-description, `efq` is a lexical constructor (O4); sorry-free ONLY at Hilbert/algebraic layer — name task-317 tableau sorries and task-410 open genericity (O3); downstream modal/temporal/bimodal payoff is CPL-only today (task 415) with shared-metatheory substrate NO-GO (task 448) (O5). *(completed: O1-O5 as remark boxes)*
+- [x] Add round-2's two caveats: no `LawfulMonad` / no formalized `Adjunction` (grep-verified); Zulip message #606970606 is unanswered (thread PARKED, did not ratify Design A). *(completed)*
+- [x] Note Design B is the conventional textbook/formalization norm (Design A a deliberate minority choice) and the "pointed GHA / Johansson algebra" precise naming (not bare GHA). *(completed)*
+- [x] Style per `06-notes.typ`: paired `#definition` boxes for competing designs (A vs B1/B2), a comparison `#figure(table(...))`, and a `#remark("Trade-offs Accepted")` listing costs with justification. *(completed)*
+- [x] Assemble an appendix anchor table (either `06-appendix.typ` or an end table): file | line range | declaration | argument supported — from the per-argument citations in report 02 Findings §1 / Appendix. *(completed: 06-appendix.typ with anchor table + Zulip index)*
+- [x] Grep the whole draft for `IsBotRuleFree` and confirm every occurrence cites `Basic.lean:223-235`, never `mpl-base-design-note.md:42`. *(completed: verified; both design-note mentions are explicit stale-corrections)*
+- [x] Compile clean. *(completed: exit 0)*
 
 **Timing**: 1.5 hours
 

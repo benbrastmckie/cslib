@@ -1,60 +1,40 @@
 {
-  "session_id": "sess_1782884528_21222e",
+  "session_id": "sess_1782912232_20267a",
   "task_numbers": [
-    445,
-    446,
-    444
+    404,
+    438
   ],
   "waves": [
     [
-      446,
-      445
-    ],
-    [
-      444
+      404,
+      438
     ]
   ],
-  "dependency_graph": {
-    "444": [
-      "446"
-    ],
-    "446": [],
-    "445": []
-  },
-  "max_cycles": 15,
+  "max_cycles": 10,
   "cycle_count": 2,
-  "failed_tasks": [
-    {
-      "task": 444,
-      "reason": "research incomplete: account weekly usage limit (resets Jul 6 7am PT)"
-    },
-    {
-      "task": 445,
-      "reason": "blocked: theorem false, awaiting user route decision"
-    }
-  ],
+  "failed_tasks": [],
   "completed_tasks": [
-    446
+    404,
+    438
   ],
   "current_statuses": {
-    "445": "blocked",
-    "446": "completed",
-    "444": "not_started"
+    "404": "pr_ready",
+    "438": "pr_ready"
   },
   "task_dirs": {
-    "445": "specs/445_fix_temporal_conservativity_domain_mismatch_sorry",
-    "446": "specs/446_fix_temporal_burgess_citation_hygiene",
-    "444": "specs/444_fix_temporal_theorems_underscore_lint"
+    "404": "specs/404_forall2_mathlib_cleanup_soundness",
+    "438": "specs/438_pr_task431_comment_cleanups"
   },
   "research_agents": {
-    "445": "cslib-research-agent",
-    "446": "cslib-research-agent",
-    "444": "cslib-research-agent"
+    "404": "cslib-research-agent",
+    "438": "cslib-research-agent"
   },
   "implement_agents": {
-    "445": "cslib-implementation-agent",
-    "446": "cslib-implementation-agent",
-    "444": "cslib-implementation-agent"
+    "404": "cslib-implementation-agent",
+    "438": "cslib-implementation-agent"
   },
-  "notes": "446 completed. 445 blocked (theorem false, needs user decision). 444 research stalled on weekly usage limit."
+  "dependency_graph": {
+    "404": [],
+    "438": []
+  }
 }

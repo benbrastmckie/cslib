@@ -1,0 +1,27 @@
+{
+  "status": "pr_ready",
+  "pr_ready": true,
+  "summary": "Verified the Term.subst_comm stale-sorry-stub deletion in Basic.lean is present at HEAD, comment-only, and produces a clean 0-insertion/9-deletion diff against re-fetched upstream/main. Reconfirmed GNBA.lean is absent from upstream/main and correctly excluded from PR scope. Authored pr-description.md with the recommended title, comment-only-impact statement, task 431 reference, AI disclosure, single-file scope statement, and fresh-branch construction recipe (build off re-fetched upstream/main + git checkout 35436d7e -- Basic.lean; do NOT cherry-pick 35436d7e directly). Task transitioned to [PR READY].",
+  "artifacts": [
+    {
+      "path": "specs/438_pr_task431_comment_cleanups/pr-description.md",
+      "type": "pr_description",
+      "summary": "PR title chore(LambdaCalculus): remove stale Term.subst_comm sorry stub; comment-only single-file scope, AI disclosure, task 431 reference, fresh-branch construction recipe."
+    },
+    {
+      "path": "specs/438_pr_task431_comment_cleanups/summaries/01_pr-prep-comment-cleanups-summary.md",
+      "type": "summary",
+      "summary": "Execution summary: Phase 1 verification (clean 0/9 diff, GNBA.lean confirmed absent upstream) and Phase 2 pr-description.md authoring; task transitioned to PR READY."
+    },
+    {
+      "path": "specs/438_pr_task431_comment_cleanups/plans/01_pr-prep-comment-cleanups.md",
+      "type": "plan",
+      "summary": "Plan updated with both phases marked [COMPLETED], inline verification results, and Testing & Validation checklist checked off."
+    }
+  ],
+  "next_action_hint": "User should run /pr 438 to build the fresh branch off re-fetched upstream/main per the recipe in pr-description.md, run CI, and submit to leanprover/cslib.",
+  "phases_completed": 2,
+  "phases_total": 2,
+  "blockers": [],
+  "continuation_context": null
+}

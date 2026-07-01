@@ -167,6 +167,8 @@ def temporalStepBranch
 
 /-! ## Main Expansion Loop -/
 
+mutual
+
 /-- Fuel-based expansion of a list of temporal tableau branches.
 
 Processes each branch in a worklist:
@@ -175,7 +177,14 @@ Processes each branch in a worklist:
   skip it (eventuality-defect closure).
 - If the branch has no more applicable rules (saturated and open), return it as a
   countermodel together with the current time ordering.
-- Otherwise apply one expansion step and recurse with remaining fuel. -/
+- Otherwise apply one expansion step and recurse with remaining fuel.
+
+Mutually recursive with `processNext`, which drains the current worklist one branch at
+a time (structurally on `pending`) before `temporalExpandBranches` is re-entered with
+strictly smaller `fuel`. Lifted to a top-level `mutual` block (task #439) so that both
+functions get a standalone equation/induction principle -- the previous `let rec`
+nesting inside `temporalExpandBranches` had none, blocking the run-level `InstantStrict`
+threading proof. -/
 def temporalExpandBranches
     (branches : List (TBranch Atom))
     (expandedSets : List (TBranch Atom))
@@ -191,43 +200,62 @@ def temporalExpandBranches
     | some (b, ord) => .openBranch b ord
     | none => .closed
   | fuel' + 1 =>
-    let rec @[nolint docBlame] processNext
-        (pending : List (TBranch Atom))
-        (pendingExp : List (TBranch Atom))
-        (pendingOrd : List TimeOrdering)
-        (pendingTrack : List (EventualityTracker Atom))
-        (done : List (TBranch Atom))
-        (doneExp : List (TBranch Atom))
-        (doneOrd : List TimeOrdering)
-        (doneTrack : List (EventualityTracker Atom))
-        : TemporalTableauResult Atom :=
-      match pending, pendingExp, pendingOrd, pendingTrack with
-      | [], _, _, _ => .closed  -- All branches closed
-      | b :: restBs, e :: restEs, ord :: restOrds, tracker :: restTracks =>
-        if isTemporalClosed b ord tracker then
-          -- Branch is closed (classical or eventuality-defect): skip it
-          processNext restBs restEs restOrds restTracks
-            (done ++ [b]) (doneExp ++ [e]) (doneOrd ++ [ord]) (doneTrack ++ [tracker])
-        else
-          match temporalStepBranch b e ord tracker with
-          | none =>
-            -- Branch is saturated and open: return countermodel
-            .openBranch b ord
-          | some (newBs, newExps, newOrd, newTracker) =>
-            -- Expanded: recurse with new branches
-            temporalExpandBranches
-              (done ++ newBs ++ restBs)
-              (doneExp ++ newExps ++ restEs)
-              (doneOrd ++ newBs.map (fun _ => newOrd) ++ restOrds)
-              (doneTrack ++ newBs.map (fun _ => newTracker) ++ restTracks)
-              fuel'
-      | _ :: restBs, [], _, _ =>
-        processNext restBs [] [] [] done doneExp doneOrd doneTrack
-      | _ :: restBs, _, [], _ =>
-        processNext restBs [] [] [] done doneExp doneOrd doneTrack
-      | _ :: restBs, _, _, [] =>
-        processNext restBs [] [] [] done doneExp doneOrd doneTrack
-    processNext branches expandedSets orderings trackers [] [] [] []
+    processNext branches expandedSets orderings trackers [] [] [] [] fuel'
+termination_by (fuel, 0)
+
+/-- Process the pending worklist for one fuel-step of `temporalExpandBranches`,
+accumulating already-handled `(branch, expandedSet, ordering, tracker)` tuples in the
+`done*` accumulators.
+
+- If `pending` is empty, every branch in this worklist closed: return `.closed`.
+- If the head branch is (classically or eventuality-)closed, skip it and continue
+  with the tail.
+- Otherwise, apply one expansion step (`temporalStepBranch`): if the branch is already
+  saturated and open, return it as a countermodel; if it expanded, hand the updated
+  worklist back to `temporalExpandBranches` with the decremented fuel `fuel'`.
+- The mismatched-length fallback arms (`pendingExp`/`pendingOrd`/`pendingTrack` empty
+  while `pending` is not) are defensive: the caller always keeps the four worklists in
+  lock-step, so these arms are unreachable in practice but are needed for
+  exhaustiveness; they skip the head branch and continue. -/
+def processNext
+    (pending : List (TBranch Atom))
+    (pendingExp : List (TBranch Atom))
+    (pendingOrd : List TimeOrdering)
+    (pendingTrack : List (EventualityTracker Atom))
+    (done : List (TBranch Atom))
+    (doneExp : List (TBranch Atom))
+    (doneOrd : List TimeOrdering)
+    (doneTrack : List (EventualityTracker Atom))
+    (fuel' : Nat) : TemporalTableauResult Atom :=
+  match pending, pendingExp, pendingOrd, pendingTrack with
+  | [], _, _, _ => .closed  -- All branches closed
+  | b :: restBs, e :: restEs, ord :: restOrds, tracker :: restTracks =>
+    if isTemporalClosed b ord tracker then
+      -- Branch is closed (classical or eventuality-defect): skip it
+      processNext restBs restEs restOrds restTracks
+        (done ++ [b]) (doneExp ++ [e]) (doneOrd ++ [ord]) (doneTrack ++ [tracker]) fuel'
+    else
+      match temporalStepBranch b e ord tracker with
+      | none =>
+        -- Branch is saturated and open: return countermodel
+        .openBranch b ord
+      | some (newBs, newExps, newOrd, newTracker) =>
+        -- Expanded: recurse with new branches
+        temporalExpandBranches
+          (done ++ newBs ++ restBs)
+          (doneExp ++ newExps ++ restEs)
+          (doneOrd ++ newBs.map (fun _ => newOrd) ++ restOrds)
+          (doneTrack ++ newBs.map (fun _ => newTracker) ++ restTracks)
+          fuel'
+  | _ :: restBs, [], _, _ =>
+    processNext restBs [] [] [] done doneExp doneOrd doneTrack fuel'
+  | _ :: restBs, _, [], _ =>
+    processNext restBs [] [] [] done doneExp doneOrd doneTrack fuel'
+  | _ :: restBs, _, _, [] =>
+    processNext restBs [] [] [] done doneExp doneOrd doneTrack fuel'
+termination_by (fuel', pending.length)
+
+end
 
 /-! ## Entry Point -/
 

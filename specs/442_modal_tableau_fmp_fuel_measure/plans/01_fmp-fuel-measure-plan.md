@@ -23,7 +23,7 @@
 | P1a  | ✅ COMPLETED | `325a8e8a` | Subformula closure (world-preserving rules). Green, axiom-clean. **Added `import Completeness` into `FmpMeasure.lean`** to reuse `tryAllPropRules_*`/`modal*Of?_eq` → forces architecture adjustment below. |
 | P4   | ✅ COMPLETED | `3766e609` | Saturation characterisation (`Completeness.lean`). Green. Finding: Łukasiewicz diamond patterns never reach `acc`-dependent arms (prop dispatch exhaustive over `.imp`); only `boxNeg` needs invariant carve-out. |
 | P1b  | ✅ COMPLETED | `5d07fedf` | Fresh-world rule closure (`diamondPos`/`boxNeg`) + top-level `modalApplyOne_outputs_subset` dispatch. Green, axiom-clean (propext/Quot.sound only). Added `public import SoundnessStep` (acyclic) for `accFreshInv`; five small glue lemmas factored out (subformula transitivity, `modalUniverse` membership chars, `successorsOf`/`hasEdge` bridge, shared `boxProps`/`diaNegProps` closure). |
-| P2 (CRUX) | ⏳ pending | — | — |
+| P2 (CRUX) | 🔄 IN PROGRESS | — | A-priori world bound as loop invariant. Primary: depth-stratification; fallback: per-world rank map (proof-only). |
 | P3   | ⏳ pending | — | — |
 | P5a/P5b/P6 | ⏳ pending | — | Relocated to new `CompletenessLoop.lean` (see architecture adjustment). |
 
@@ -299,7 +299,7 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
 
 ---
 
-### Phase 2: World-count bound (CRUX — highest risk, isolated, serial) [NOT STARTED]
+### Phase 2: World-count bound (CRUX — highest risk, isolated, serial) [IN PROGRESS]
 - **Goal:** Prove the a-priori world bound as a per-step loop invariant. This is the single
   research-hard obligation; it gates P3-P5. Isolated in its own phase with a generous budget.
 - **Territory:**

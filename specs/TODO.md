@@ -1,5 +1,5 @@
 ---
-next_project_number: 452
+next_project_number: 455
 ---
 
 # TODO
@@ -11,27 +11,30 @@ next_project_number: 452
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,317,390,396,400,404,407,415,438,440,442,447,449 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,181,215,299,375,389,405,409,430,439,450,451 | 36,37,180,317,404,407,442,449 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
-| 3 | 41,300,391,392,413,426,441,444 | 39,40,299,375,389,439,450 | Foundations, Modal Logic, Temporal Logic, ... |
-| 4 | 393,412,425 | 41,391,426 | Foundations, Temporal Logic, PL-Hygiene |
+| 1 | 36,37,180,226,317,390,396,400,404,407,415,438,440,442,447,449,452,453 | -- | Foundations, Propositional Logic, Modal Logic, ... |
+| 2 | 39,40,181,215,299,375,389,405,409,430,439,450,451 | 36,37,180,317,404,407,442,449 | Propositional Logic, Modal Logic, Temporal Logic, ... |
+| 3 | 41,300,391,392,413,426,441,444,454 | 39,40,299,375,389,439,450 | Foundations, Modal Logic, Temporal Logic, ... |
+| 4 | 393,412,425 | 41,391,426 | Temporal Logic, Code Hygiene |
 | 5 | 301 | 425 | Temporal Logic |
 | 6 | 414 | 181,215,300,301,444 | Code Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
-### Bimodal Porting
-
-36 [BLOCKED] — Port discrete completeness (completeness_discrete theorem) and We
-  └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal
-37 [BLOCKED] — Port continuous extension completeness once developed upstream. T
-  └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal (see above)
-181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
-
 ### Foundations
 
+415 [RESEARCHED] — Audit how the structure-first propositional base (MPL/IPL/CPL: pr
+452 [NOT STARTED] — From review 2026-07-01-2 (HIGH). The four GenericMCSBridge.lean f
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
-  └─ 412 [NOT STARTED] — [Split from task 278.] Simplify proofs in Foundations/Logic/ that
+
+### Propositional Logic
+
+226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
+317 [IMPLEMENTING] — Fill the propositional tableau completeness sorries (7 real sorri
+  └─ 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
+  └─ 430 [RESEARCHED] — Prove the atom-persistence / upward-closure structural lemma for 
+400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
+407 [PR READY] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
+  └─ 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 
 ### Modal Logic
 
@@ -53,64 +56,74 @@ next_project_number: 452
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
-### Code Hygiene
+### Bimodal Logic
 
-414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p
-
-### PL Tableau
-
-317 [IMPLEMENTING] — Fill the propositional tableau completeness sorries (7 real sorri
-  └─ 430 [RESEARCHED] — Prove the atom-persistence / upward-closure structural lemma for 
-
-### Pr Review
-
-440 [NOT STARTED] — PR review: GitHub PR https://github.com/leanprover/cslib/pull/648
-
-### PL Docs
-
-390 [NOT STARTED] — [Refreshed post-merge vet.] The Propositional section (~ORGANISAT
-389 [NOT STARTED] — [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAl
-  └─ 391 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Remove internal task/process ja
-
-### PL Hygiene
-
-392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls
-393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
-413 [NOT STARTED] — [Split from task 278.] Simplify Propositional/ proofs that use ma
-
-### PL Semantics
-
-226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-
-### PL Equivalence
-
-375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
-
-### PL Connectives
-
-400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
-
-### PL Base
-
-407 [PR READY] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
-  └─ 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-415 [RESEARCHED] — Audit how the structure-first propositional base (MPL/IPL/CPL: pr
-
-### Uncategorized
-
-438 [NOT STARTED] — Upstream the comment/docstring cleanups identified by the task 43
-447 [PR READY] — Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public 
+36 [BLOCKED] — Port discrete completeness (completeness_discrete theorem) and We
+  └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal
+37 [BLOCKED] — Port continuous extension completeness once developed upstream. T
+  └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal (see above)
 449 [NOT STARTED] — Foundation for the corrected TM-over-temporal conservativity resu
   └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S
-    └─ 444 [NOT STARTED] — Vet fix for task 180 (High), elevated scope. Do not merely rename
-      └─ 414 [NOT STARTED] — (Code Hygiene: [Split from task 278.] Simplify Modal/, ) (see above)
+    └─ 454 [NOT STARTED] — From review 2026-07-01-2 (MEDIUM, finding #3). Cslib/Logics/Bimod
   └─ 451 [NOT STARTED] — Deeper metatheory for the metric tense logic BX+ (defined in task
+181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
+
+### Code Hygiene
+
+390 [NOT STARTED] — [Refreshed post-merge vet.] The Propositional section (~ORGANISAT
+453 [NOT STARTED] — From review 2026-07-01-2 (MEDIUM+LOW, findings #2+#4). 72 set_opt
+389 [NOT STARTED] — [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAl
+  └─ 391 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Remove internal task/process ja
+    └─ 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
+  └─ 392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls
+412 [NOT STARTED] — [Split from task 278.] Simplify proofs in Foundations/Logic/ that
+413 [NOT STARTED] — [Split from task 278.] Simplify Propositional/ proofs that use ma
+414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p
+444 [NOT STARTED] — Vet fix for task 180 (High), elevated scope. Do not merely rename
+  └─ 414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p (see above)
+
+### PR & Upstreaming
+
+438 [NOT STARTED] — Upstream the comment/docstring cleanups identified by the task 43
+440 [NOT STARTED] — PR review: GitHub PR https://github.com/leanprover/cslib/pull/648
+447 [PR READY] — Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public 
 
 ## Tasks
+
+### 454. Consolidate duplicated Chronicle PointInsertion helper families across Bimodal and Temporal
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Bimodal Logic
+- **Dependencies**: Task 449, Task 450
+
+**Description**: From review 2026-07-01-2 (MEDIUM, finding #3). Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/Since.lean (1019L) and Cslib/Logics/Temporal/Metalogic/Chronicle/PointInsertion/Since.lean (704L), plus sibling Burgess.lean and Seeds.lean in both trees, share an entire family of identically-named private helpers: lemma27SinceSeed, l27sC5EventList, l27sB5GuardList, l27s_c5_event_list_mem, l27s_b5_guard_list_mem, lemma24SinceWithGuard, lemma_2_7_since, lemma_2_8_since, lemma_2_7_since_seed_consistent, lemma_2_8_since_seed_consistent. Same duplication disease as the GenericMCSBridge work (task 452) but in the Chronicle point-insertion layer. The files have diverged (Bimodal is ~45% larger), so this is consolidation-with-care, not a mechanical merge: reconcile the diverged portions, then factor the shared lemma_2_7/lemma_2_8 seed-consistency helpers into a common Chronicle-support module parameterized over the frame/relation interface. NOT covered by task 415 (propositional->modal lifting stack) or 449-451 (which define a NEW base logic BX+ rather than dedup existing Chronicle machinery). IMPORTANT: coordinate with tasks 449-451 (BX+) since they may rewrite TemporalConservativity and adjacent Chronicle files -- best sequenced after the BX+ restructure settles, or done in lockstep. DoD: shared point-insertion helpers factored to one location, both logics reduced to thin instantiations of the common core, lake build/test/lint green, zero new sorries.
+
+---
+
+### 453. Audit and reduce maxHeartbeats inflation across Bimodal/Temporal metalogic; normalize scoping to 'in'-scoped
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Code Hygiene
+- **Dependencies**: None
+
+**Description**: From review 2026-07-01-2 (MEDIUM+LOW, findings #2+#4). 72 set_option maxHeartbeats sites in Cslib/Logics/{Bimodal,Temporal}/Metalogic/**, up to 32x the 200000 default: 3200000 x33, 1600000 x13, 800000 x12, 1200000 x3, 400000 x5, and 6400000 x1 (Temporal/Metalogic/Chronicle/CounterexampleElimination/MainElimination.lean:38). The mature upstream dirs (Foundations/Computability/Languages/Crypto) have ZERO maxHeartbeats settings -- this inflation is entirely in the active logic area and signals proof terms/tactics that should be restructured (intermediate haves, lemma extraction) rather than given more budget. ALSO (finding #4, LOW): 15 sites use file-wide unscoped 'set_option maxHeartbeats N' (masking which declaration is expensive) vs 54 declaration-scoped 'set_option ... in'; unscoped sites include Bimodal/Metalogic/Algebraic/{UltrafilterMCS.lean:34,BooleanStructure.lean:33} and Temporal/Metalogic/{Chronicle/TruthLemma.lean:40,Chronicle/RRelation.lean:29,DenseSoundness.lean:32,Completeness.lean:47,Soundness.lean:32,MCS.lean:38,WitnessSeed.lean:29,Chronicle/Frame.lean:28,Chronicle/PointInsertion/{Seeds,Burgess,Splitting,Since}.lean}. Approach: audit the 3.2M/6.4M offenders, restructure the worst to lower the ceiling (or document why irreducible); convert all unscoped sites to 'set_option ... in' on the specific expensive declaration. NOT covered by 412-414 (which target simp only [listImp_*, bigconj_*] lists, not heartbeat budgets). Self-contained, independent of other tasks. DoD: heartbeat ceilings reduced where feasible, all remaining high budgets documented, unscoped sites converted to scoped, lake build/test green.
+
+---
+
+### 452. Generalize GenericMCSBridge: hoist shared MCS-bridge trio into Foundations and collapse base/Fc duplication
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Foundations
+- **Dependencies**: None
+
+**Description**: From review 2026-07-01-2 (HIGH). The four GenericMCSBridge.lean files (Propositional 256L, Modal 267L, Temporal 370L, Bimodal/Core 405L; 1298L total) share a near-verbatim skeleton: HilbertOf tag type -> InferenceSystem/ModusPonens/HasAxiomImplyK/HasAxiomImplyS/MinimalHilbert instances -> AlgDS alias -> derivTreeToList -> unfoldListImpInTree (~19L) -> listDerivToTree (~15L) -> {logic}_deriv_iff_algebraic / _setConsistent_iff_algebraic / _setMaxConsistent_iff_algebraic. The trio uses only assumption/modus_ponens/weakening (no logic-specific content). Temporal and Bimodal ADDITIONALLY duplicate their own base/Fc sections internally (e.g. Temporal L66-221 vs L239-370). Approach: (1) collapse Temporal's and Bimodal's intra-file base/Fc duplication first by making the base bridge a specialization of the Fc-parameterized one (fc := .Base) -- ~130-150L each, lowest risk, no cross-logic abstraction; (2) extract unfoldListImpInTree, listDerivToTree, and the three iff-theorems into Cslib/Foundations/Logic/Metalogic/GenericMCS.lean, parameterized over a typeclass capturing 'tree-shaped derivation with ax/assumption/mp/weakening constructors', with extra rules (necessitation, temporal duality) passed as an optional hypothesis/callback. Est. elimination ~300-450 lines. NOT covered by tasks 415/393/439 (which build ON the bridge as infrastructure, verified against their reports). Sequence to avoid collision with in-flight tasks 441/442 (Modal refactor) and 449-451 (BX+). DoD: shared abstraction in Foundations, all four per-logic bridges reduced to thin instantiations, lake build/test/lint green, zero new sorries or axioms.
+
+---
 
 ### 451. BX+ completeness over ordered-abelian-group time flows
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
+- **Topic**: Bimodal Logic
 - **Dependencies**: Task 449
 
 **Description**: Deeper metatheory for the metric tense logic BX+ (defined in task 449). Optional-but-desired for rigor; also unlocks the semantic proof route for task 450. Depends on task 449.
@@ -129,6 +142,7 @@ Zero-debt: no sorry, no vacuous defs; full CI green. If completeness turns out t
 ### 450. Prove TM (Bimodal Base) conservative over BX+ and close the TemporalConservativity sorry
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
+- **Topic**: Bimodal Logic
 - **Dependencies**: Task 449
 
 **Description**: Core corrected conservativity result. PR-BLOCKING for task 180. Supersedes abandoned task 445 and inherits its research: specs/445_fix_temporal_conservativity_domain_mismatch_sorry/reports/01_domain-mismatch-transfer-feasibility.md and 02_literature-grounded-conservativity-obstruction.md. Depends on task 449 (BX+ definition).
@@ -150,6 +164,7 @@ Zero-debt: lean_verify on the restated bimodal_conservative_over_temporal must r
 ### 449. Define BX+ (metric tense logic): temporal uniformity axioms, Metric frame class, and soundness over ordered-abelian-group flows
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
+- **Topic**: Bimodal Logic
 - **Dependencies**: None
 
 **Description**: Foundation for the corrected TM-over-temporal conservativity result. Supersedes abandoned task 445; inherits its research at specs/445_fix_temporal_conservativity_domain_mismatch_sorry/reports/01_domain-mismatch-transfer-feasibility.md and 02_literature-grounded-conservativity-obstruction.md.
@@ -201,6 +216,7 @@ ANTI-GOALS (never pursue): A2 maximal inductive replacement (replacing native De
 ### 447. Apply lake shake import-minimization fixes to files touched by tasks 321/406/431
 - **Status**: [PR READY]
 - **Task Type**: cslib
+- **Topic**: PR & Upstreaming
 - **Dependencies**: None
 - **Research**: [447_apply_shake_import_minimization_fixes_tasks_321_406_431/reports/01_shake-import-minimization-verification.md]
 - **Plan**: [447_apply_shake_import_minimization_fixes_tasks_321_406_431/plans/01_apply-shake-import-fixes.md]
@@ -234,6 +250,7 @@ After edits, re-run: lake build, lake test, lake exe checkInitImports, lake exe 
 ### 444. Uniformity pass: mathlib-conformant naming, style, and docstrings across the entire task-180 Temporal diff
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
+- **Topic**: Code Hygiene
 - **Dependencies**: Task 449, Task 450
 
 **Description**: Vet fix for task 180 (High), elevated scope. Do not merely rename the two flagged defs; bring the task-180 diff to a single, uniform, mathlib-conformant standard.
@@ -283,7 +300,7 @@ Definition of done: lake build, lake lint, lake exe lint-style green on every in
 ### 440. Review pr leanprover cslib 648
 - **Status**: [NOT STARTED]
 - **Task Type**: pr
-- **Topic**: pr-review
+- **Topic**: PR & Upstreaming
 - **Dependencies**: None
 
 **Description**: PR review: GitHub PR https://github.com/leanprover/cslib/pull/648 — address ctchou CHANGES_REQUESTED feedback (Gentzen/Avigad references, Semantics restructuring confirmation, reviewer reply, coordinate #587/#607)
@@ -315,6 +332,7 @@ Reference: specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-st
 ### 438. Pr task431 comment cleanups
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
+- **Topic**: PR & Upstreaming
 - **Dependencies**: None
 
 **Description**: Upstream the comment/docstring cleanups identified by the task 431 audit via a CSLib PR. The edits are already applied and committed locally at 35436d7e (chore): (1) deleted the commented-out Term.subst_comm TODO stub in Cslib/Languages/LambdaCalculus/Named/Untyped/Basic.lean, (2) reworded the stale 'removing the sorry' docstring in Cslib/Logics/LTL/Semantics/GNBA.lean:37 to past tense. Both are comment-only (no proof/build impact). Remaining work: submit to leanprover/cslib via /pr (user-only command) with a 'chore'/'doc' prefixed title. Optionally bundle any further doc-hygiene found in those two modules. Source: task 431 audit.
@@ -325,7 +343,7 @@ Reference: specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-st
 - **Effort**: 2-3 hours
 - **Status**: [RESEARCHED]
 - **Task Type**: cslib
-- **Topic**: PL-Tableau
+- **Topic**: Propositional Logic
 - **Dependencies**: Task 317
 - **Research**:
   - [430_prove_atom_persistence_upward_closure_for_intexpan/reports/01_atom-persistence-upward-closure.md]
@@ -423,7 +441,7 @@ After implementation:
 ### 419. Generalize derivation lifting to a cross-logic InferenceSystem layer (spike)
 - **Status**: [COMPLETED]
 - **Task Type**: cslib
-- **Topic**: Modal Logic
+- **Topic**: Foundations
 - **Dependencies**: None
 - **Research**:
   - [419_generalize_derivation_lifting_intersystem/reports/02_virtuous-unification.md]
@@ -437,7 +455,7 @@ After implementation:
 ### 415. Audit propositional->modal/temporal/bimodal lifting vs structure-first vision
 - **Status**: [RESEARCHED]
 - **Task Type**: cslib
-- **Topic**: PL-Base
+- **Topic**: Foundations
 - **Dependencies**: None
 - **Research**: [415_audit_propositional_lifting_structure_first/reports/01_lifting-audit.md]
 
@@ -458,7 +476,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
-- **Dependencies**: Task 180, Task 181, Task 215, Task 299, Task 300, Task 301, Task 444, Task 445, Task 446
+- **Dependencies**: Task 180, Task 181, Task 215, Task 299, Task 300, Task 301, Task 444
 
 **Description**: [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ proofs that use manual `simp only [listImp_*, bigconj_*, toTemporal_*, toBimodal_*]` lists or verbose tactic chains over the task-268 normalization lemmas (including the Temporal/FromPropositional and Bimodal/Embedding/TemporalEmbedding embedding simp lemmas); replace with `grind`/`simp` where the new co-tags make the explicit lists redundant. Sequence after the modal-family proof-development settles: Modal 299/300; Temporal 180 (G/H primitives rewrite FromPropositional.lean), 241, 301; Bimodal 181 (propagates constructors through TemporalEmbedding.lean), 215, 275; plus the file-structure pass 321. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake.
 
@@ -467,7 +485,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ### 413. Simplify proofs normalization propositional
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
-- **Topic**: PL-Hygiene
+- **Topic**: Code Hygiene
 - **Dependencies**: Task 317, Task 375
 
 **Description**: [Split from task 278.] Simplify Propositional/ proofs that use manual `simp only [listImp_*, bigconj_*]` lists or verbose tactic chains over the task-268 normalization lemmas; replace with `grind`/`simp` where the new co-tags make the explicit lists redundant. Covers Hilbert/ND/completeness/decidability proof sites in Cslib/Logics/Propositional/. Sequence after the major PL proof-development tasks land (317 tableau completeness, 370 int/min decidability, 375 proof-system equivalence) and the Logics/Foundations file-structure pass (321). Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake.
@@ -477,7 +495,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ### 412. Simplify proofs normalization foundations
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
-- **Topic**: Foundations
+- **Topic**: Code Hygiene
 - **Dependencies**: Task 41
 
 **Description**: [Split from task 278.] Simplify proofs in Foundations/Logic/ that use manual `simp only [listImp_nil, listImp_cons, bigconj_nil, bigconj_singleton, bigconj_cons_cons, negBigconj_def, ...]` or verbose tactic chains over the task-268 normalization lemmas; replace with `grind`/`simp` where the @[simp, scoped grind =] co-tags (ListImplication.lean, Theorems/BigConj.lean) make the explicit lemma lists redundant. Audit ListImplication, BigConj, and downstream Foundations/Logic proof sites. Sequence after the Foundations completeness-infra abstraction (41) and the Logics/Foundations file-structure pass (321) to avoid re-sweeping moved code. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake.
@@ -487,7 +505,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ### 409. Literal ⊥-rule-free base ND inductive (option B): split MinDerivation + Explosion; re-cut Curry-Howard & normalization
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
-- **Topic**: PL-Base
+- **Topic**: Propositional Logic
 - **Dependencies**: Task 407
 
 **Description**: SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- OPTIONAL / advanced. Task 407 adopts option C (re-frame the task-398 gated efq constructor as the explosion property module; the base relation is ⊥-rule-free UP TO the IsIntuitionistic gate). Option B is the LITERAL structure-first ND: split Theory.Derivation into a genuinely ⊥-rule-free base inductive MinDerivation (no efq constructor) plus an Explosion extension, prove all structural metatheory once on the base, and recover IPL-ND by adjoining efq. TRIGGER CONDITION: only pursue if a concrete downstream consumer needs a physically ⊥-free derivation object (e.g. a minimal-ND normalization theorem, or a lambda-calculus without an abort/efq combinator). COST/RISK: re-opens the single genuinely hard point from task 398 -- the subformula property under efq -- and forces re-cutting Curry-Howard (Theory.Term mirror) and Prawitz normalization (Basic/Reduction/Termination/SubformulaProperty) against the split. Reuse the task-398 decided strategy (atomic restriction + permutation conversions); treat any non-green proof as [BLOCKED], never sorry. HIGH effort -- use --hard. Depends on 407 (and ideally 408). Source: task 407 report 01 §5 option B / §7 W6, report 02 §5. ALIGNMENT NOTE: this two-inductive split is the Design-B-flavored route that the universal-algebra approach (task 407 option C) deliberately AVOIDS, because it duplicates derivation structure (exclude-then-add at the derivation level). Default remains task 407 option C: ONE derivation type with explosion as a property module. Pursue 409 ONLY if the trigger condition above fires.
@@ -497,7 +515,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ### 407. Research & design: make MPL the structure-first base logic (⊥ as nullary connective; explosion/leastness/initiality as independent property modules)
 - **Status**: [PR READY]
 - **Task Type**: cslib
-- **Topic**: PL-Base
+- **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**:
   - [407_mpl_base_structure_first_redesign/reports/01_mpl-base-structure-first.md]
@@ -537,7 +555,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ### 400. Unbundle connective typeclasses; reconcile with fmontesi PR #607 (Waring's flag a)
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
-- **Topic**: PL-Connectives
+- **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**:
   - [400_reconcile_connectives_pr607/reports/01_pr607-engagement.md]
@@ -565,7 +583,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ### 393. Consolidate duplicated Lindenbaum/Classical/conservativity constructions (Zulip first)
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
-- **Topic**: PL-Hygiene
+- **Topic**: Code Hygiene
 - **Dependencies**: Task 391
 
 **Description**: Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING before refactor. (a) Factor one generic quotient-Lindenbaum construction over the 3 parallel builds (~2100 lines): HilbertLindenbaum, HilbertLindenbaumRel, HilbertAlgCompleteness (4th in Bimodal). (b) Make litCtx_congr public and parameterize the 3 Classical completeness files (~700 lines, litCtx_congr' copied 3x) over the axiom predicate via GenericMCSBridge/HasMinimalAxioms. (c) Assess 3 Soundness modules + 8 conservativity modules + LJ/LK helper duplication. Source: §5.5.
@@ -575,7 +593,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ### 392. Remove dead declarations and fix underscore/Extention naming
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
-- **Topic**: PL-Hygiene
+- **Topic**: Code Hygiene
 - **Dependencies**: Task 317, Task 389
 
 **Description**: [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls: Tableau/Classical/Soundness.lean:73-136 (12 classicalApplyOne_* private simp lemmas, 0 calls) + :486, Classical/Completeness.lean:435/447, Tableau/Defs.lean:81 propImpOrNegOf?, Intuitionistic/Rules.lean:114/203, Intuitionistic/Soundness.lean:431/505, NaturalDeduction/Equivalence.lean:305 hilbertAxiomToND, LK/Completeness.lean:69/73 mem_insert_*. Fix Extention->Extension typo (Equivalence.lean:256-257, Defs.lean:190/195). Rename underscore defs: modus_ponens constructor (Derivation.lean:77), lift_int_to_cl, goodSelection_seq, HasFresh to_infinite, emptyHrelation_apply. The LK/LJ cutAdm_*/ljCutAdm_* renames are DROPPED from this task — task 386 OWNS them (defsWithUnderscore). Sequence after 386. Source: §5.3-5.4 + 395.
@@ -585,7 +603,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ### 391. Strip task-number jargon and fix stale docstrings
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
-- **Topic**: PL-Docs
+- **Topic**: Code Hygiene
 - **Dependencies**: Task 317, Task 389
 
 **Description**: [Reconciled by task 395.] Tier-3. Remove internal task/process jargon from public docstrings: ClassicalConjImpCompleteness.lean (task 352, CL-B rung), ClassicalConjImpBotCompleteness.lean (task 378, CL-C rung), ConservativeChain.lean:44-45, HilbertLindenbaumRel.lean:21-23 (Route A2, 341 proof files), Tableau/RuleResult.lean:35, Foundations/Logic/Tableau/PropositionalTableau.lean:7, ListImplication.lean:83-139. Connectives.lean jargon (PR#607/task 340/173) is OWNED by task 400 (Connectives owner) — coordinate, do NOT double-edit. Stale-count fixes: re-verify post-task-398. NOTE StrongCompleteness 3-case counts (atom/bot/imp) remain CORRECT (398 changed derivation constructors, not formula structure). Fix only genuinely-stale counts: IntSoundness, MinSoundness, IntLindenbaum:320 misattached docstring, Tableau Int/Min DecisionProcedure sorry counts, Minimal/Completeness:50-51. Source: §5.1-5.2 + 395.
@@ -595,7 +613,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ### 390. Update ORGANISATION.md Propositional section (post-merge tree)
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
-- **Topic**: PL-Docs
+- **Topic**: Code Hygiene
 - **Dependencies**: None
 
 **Description**: [Refreshed post-merge vet.] The Propositional section (~ORGANISATION.md:100-105) is a 4-item stub. Update to reflect the actual 95+-file tree: SequentCalculus/{LJ,LK} (Interpolation, CutElimination, SubformulaProperty, Decidability); CurryHoward/{Defs,Isomorphism,Reduction}; Semantics/Algebra (25+ files: Brouwerian, HilbertAlgebra, Kripke, Glivenko, Conservative variants); Tableau/{Classical,Intuitionistic,Minimal} (Completeness/Soundness/DecisionProcedure); Subformula.lean; ProofSystemEquivalence.lean. Also update the Namespace Convention section re Cslib.Logic.PL vs Cslib.Logic.Propositional (task 387). Do before the PR lands.
@@ -605,7 +623,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ### 389. Fix docBlame, barrel headers, unusedSectionVars, broken citation
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
-- **Topic**: PL-Docs
+- **Topic**: Code Hygiene
 - **Dependencies**: Task 317
 
 **Description**: [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAlgebra/FreeMeetExtension.lean: add docstrings to 7 undocumented def/abbrev (fld:50 also rename himpFold, fmeLe:106, fmeEquiv:123, fmeSetoid:125, FreeMeetExtension:152, mk:159, freeMeetEmbed:257) — only hard docBlame in Foundations. (b) DROPPED — the 4 Tableau barrels already carry copyright + import Cslib.Init (verified post-merge). (c) Add omit for 14 unusedSectionVars (mostly Tableau/Classical/Completeness, Minimal/Soundness:118, Minimal/Completeness:89). (d) Add references.bib entry NegriVonPlato2001 (Negri & von Plato, Structural Proof Theory, CUP 2001) cited by OrImpConservative.lean. Sequence the Tableau/Classical+Minimal Completeness edits AFTER task 317. Source: §4.3-4.6 + 395.
@@ -615,7 +633,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ### 375. Proof system equivalence tableau sequent edges
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
-- **Topic**: PL-Equivalence
+- **Topic**: Propositional Logic
 - **Dependencies**: Task 317
 
 **Description**: Complete the cross-system equivalence story by folding the tableau (and remaining sequent) decision systems into the proof-system TFAE. Cslib/Logics/Propositional/ProofSystemEquivalence.lean currently proves Hilbert<->ND<->LK for CPL (cplProofSystemsTfae) and Hilbert<->ND<->LJ for IPL (iplProofSystemsTfae), plus the MPL Hilbert<->ND two-way. Add the missing edges so the equivalence is genuinely complete across all proof systems: classical Tautology <-> LK provability <-> closed classical tableau, and intuitionistic validity <-> LJ provability <-> closed intuitionistic tableau, extending the TFAE lists accordingly. Requires the tableau soundness+completeness to be green (task 316 done for soundness; task 317 for completeness) and the classical tableau build repaired (task 363). No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 317, 363.
@@ -625,7 +643,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ### 317. Propositional tableau completeness
 - **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
-- **Topic**: PL-Tableau
+- **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Plan**: [plans/03_b2-fuel-sufficiency.md]
 
@@ -684,7 +702,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ### 279. Propositional sequent calculus lk lj
 - **Status**: [EXPANDED]
 - **Task Type**: cslib
-- **Topic**: PL-Base
+- **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**:
   - [279_propositional_sequent_calculus_lk_lj/reports/01_teammate-a-findings.md]
@@ -701,8 +719,8 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ### 278. Simplify proofs with normalization tags
 - **Status**: [EXPANDED]
 - **Task Type**: cslib
-- **Topic**: Foundations
-- **Dependencies**: Task 41, Task 180, Task 181, Task 299, Task 301, Task 317, Task 321, Task 370, Task 375
+- **Topic**: Code Hygiene
+- **Dependencies**: Task 41, Task 180, Task 181, Task 299, Task 301, Task 317, Task 375
 
 **Description**: Simplify proofs using new simp/grind normalization tags. After task 268 adds @[simp, scoped grind =] tags to Hilbert system definitional lemmas, audit all proofs in Propositional/, Modal/, Temporal/, and Bimodal/ that use manual `simp only [listImp_nil, listImp_cons, bigconj_nil, ...]` or verbose tactic chains involving these normalization lemmas. Replace with `grind` or `simp` where the new tags make the explicit lemma lists redundant. Also check Foundations/Logic/ proofs. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake
 
@@ -711,7 +729,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ### 226. Propositional semantics upstream pr
 - **Status**: [RESEARCHED]
 - **Task Type**: cslib
-- **Topic**: PL-Semantics
+- **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**:
   - [226_propositional_semantics_upstream_pr/reports/01_upstream-pr-research.md]
@@ -724,7 +742,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ### 215. Fill sorry declarations in Bimodal BXCanonical and Bundle files
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
-- **Topic**: Bimodal Porting
+- **Topic**: Bimodal Logic
 - **Dependencies**: Task 36, Task 37
 - **Research**: [215_fill_bimodal_sorries/reports/01_sorry-analysis.md]
 
@@ -743,7 +761,7 @@ Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completenes
 ### 181. Bimodal primitive dia always historically
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
-- **Topic**: Bimodal Porting
+- **Topic**: Bimodal Logic
 - **Dependencies**: Task 180
 - **Research**: [181_bimodal_primitive_dia_always_historically/reports/01_bimodal-primitive-expansion-research.md]
 
@@ -830,7 +848,7 @@ Estimated scope: ~500-700 lines (new axioms + discrete soundness + discrete comp
 ### 37. Port continuous completeness bimodal
 - **Status**: [BLOCKED]
 - **Task Type**: lean4
-- **Topic**: Bimodal Porting
+- **Topic**: Bimodal Logic
 - **Dependencies**: Task BimodalLogic:continuous_extension
 
 **Description**: Port continuous extension completeness once developed upstream. The continuous case (FrameClass for continuous/real-valued time) has not been started in BimodalLogic. This task is blocked pending upstream development of continuous frame completeness.
@@ -845,7 +863,7 @@ Estimated scope: ~500-700 lines (new axioms + discrete soundness + discrete comp
 ### 36. Port discrete completeness bimodal
 - **Status**: [BLOCKED]
 - **Task Type**: lean4
-- **Topic**: Bimodal Porting
+- **Topic**: Bimodal Logic
 - **Dependencies**: Task BimodalLogic:discrete_sorry_elimination
 
 **Description**: Port discrete completeness (completeness_discrete theorem) and WeakCanonical/IntegerModel/ infrastructure (~6 files). The discrete branch constructs countermodels on Int via the Reynolds pipeline. Currently blocked: upstream BimodalLogic has sorryAx tracing through chronicle_gap_contradiction → succ_cofinal → limitDomSubtype_isSuccArchimedean → succ_embed_surjective. Port after upstream sorry elimination completes.

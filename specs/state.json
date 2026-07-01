@@ -1,5 +1,5 @@
 {
-  "next_project_number": 452,
+  "next_project_number": 455,
   "active_projects": [
     {
       "project_number": 447,
@@ -39,7 +39,8 @@
       ],
       "dependencies": [],
       "session_id": "sess_1782886187_0ef015",
-      "completion_summary": "Applied all 17 verified lake shake import-minimization edits (tasks 321/406/431 backlog) across 19 files (17 primary + 2 downstream-consumer deviation fixes for MCS.lean and Completeness.lean). Full CI gate green: build, test, checkInitImports, lint-style. Zero sorries, zero new axioms. Recovered from concurrent-session file-write interference (task 442) that twice reverted 3 of the edits mid-run. Ready for /pr."
+      "completion_summary": "Applied all 17 verified lake shake import-minimization edits (tasks 321/406/431 backlog) across 19 files (17 primary + 2 downstream-consumer deviation fixes for MCS.lean and Completeness.lean). Full CI gate green: build, test, checkInitImports, lint-style. Zero sorries, zero new axioms. Recovered from concurrent-session file-write interference (task 442) that twice reverted 3 of the edits mid-run. Ready for /pr.",
+      "topic": "PR & Upstreaming"
     },
     {
       "project_number": 444,
@@ -56,7 +57,8 @@
       "dependencies": [
         449,
         450
-      ]
+      ],
+      "topic": "Code Hygiene"
     },
     {
       "project_number": 440,
@@ -86,7 +88,7 @@
       "last_updated": "2026-06-30T17:38:50Z",
       "next_artifact_number": 1,
       "artifacts": [],
-      "topic": "pr-review",
+      "topic": "PR & Upstreaming",
       "dependencies": []
     },
     {
@@ -104,7 +106,7 @@
       "dependencies": [
         317
       ],
-      "topic": "PL-Docs"
+      "topic": "Code Hygiene"
     },
     {
       "project_number": 390,
@@ -119,7 +121,7 @@
       "artifacts": [],
       "session_id": "sess_1782651207_1e893c_390",
       "dependencies": [],
-      "topic": "PL-Docs"
+      "topic": "Code Hygiene"
     },
     {
       "project_number": 391,
@@ -137,7 +139,7 @@
         317,
         389
       ],
-      "topic": "PL-Docs"
+      "topic": "Code Hygiene"
     },
     {
       "project_number": 392,
@@ -155,7 +157,7 @@
         317,
         389
       ],
-      "topic": "PL-Hygiene"
+      "topic": "Code Hygiene"
     },
     {
       "project_number": 393,
@@ -172,14 +174,14 @@
       "dependencies": [
         391
       ],
-      "topic": "PL-Hygiene"
+      "topic": "Code Hygiene"
     },
     {
       "project_number": 317,
       "project_name": "propositional_tableau_completeness",
       "status": "implementing",
       "task_type": "cslib",
-      "topic": "PL-Tableau",
+      "topic": "Propositional Logic",
       "description": "Fill the propositional tableau completeness sorries (7 real sorries; soundness is already sorry-free after task 316). The open obligations are the truth-lemma / countermodel-extraction proofs in the three Completeness modules. Classical (Tableau/Classical/Completeness.lean): classicalExpandBranches_hintikka (line ~462) -- note the module's separate build break (bad Mathlib lemma ref + unsolved goals) is repaired first under task 363. Intuitionistic (Tableau/Intuitionistic/Completeness.lean): intTruthLemma (line ~89), intuitionisticOpenBranch_countermodel (~98), intuitionisticTableau_complete (~112). Minimal (Tableau/Minimal/Completeness.lean): minTruthLemma (~168), minOpenBranch_countermodel (~179), minimalTableau_complete (~190). Core technique: Hintikka-set argument -- a saturated open branch satisfies Hintikka conditions, from which a countermodel is extracted (a Boolean valuation for classical; a finite Kripke model for intuitionistic/minimal) and a truth lemma by formula induction matches forced/not-forced to the signed formulas at each world. Because task 369 parameterizes the intuitionistic and minimal tableau over (closurePred, modelBot), the int and min cases should be discharged ONCE as a single parametric truth-lemma/countermodel pair rather than duplicated. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 316, 323, 363, 369.",
       "created": "2026-06-23T19:55:52Z",
       "last_updated": "2026-07-01T07:27:12Z",
@@ -312,7 +314,7 @@
       "status": "expanded",
       "task_type": "cslib",
       "description": "Implement a two-sided Gentzen-style sequent calculus (LK for classical, LJ for intuitionistic) for propositional logic with cut elimination. Use Finset-based contexts on both sides, following the CLL sequent calculus in Cslib/Logics/LinearLogic/CLL/Basic.lean as a template. Prove soundness, completeness, cut elimination (Hauptsatz), and equivalence bridges to the existing Hilbert and natural deduction systems (hilbert_iff_lk, nd_iff_lk). This completes the proof-system triad (Hilbert + ND + SC) for propositional logic and would be the first LK/LJ formalization in Lean 4.",
-      "topic": "PL-Base",
+      "topic": "Propositional Logic",
       "created": "2026-06-23T02:57:39Z",
       "last_updated": "2026-06-23T19:33:50Z",
       "next_artifact_number": 2,
@@ -358,7 +360,7 @@
       "project_name": "simplify_proofs_with_normalization_tags",
       "status": "expanded",
       "task_type": "cslib",
-      "topic": "Foundations",
+      "topic": "Code Hygiene",
       "description": "Simplify proofs using new simp/grind normalization tags. After task 268 adds @[simp, scoped grind =] tags to Hilbert system definitional lemmas, audit all proofs in Propositional/, Modal/, Temporal/, and Bimodal/ that use manual `simp only [listImp_nil, listImp_cons, bigconj_nil, ...]` or verbose tactic chains involving these normalization lemmas. Replace with `grind` or `simp` where the new tags make the explicit lemma lists redundant. Also check Foundations/Logic/ proofs. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake",
       "depends_on": [
         41,
@@ -380,8 +382,6 @@
         299,
         301,
         317,
-        321,
-        370,
         375
       ],
       "expanded_into": [
@@ -396,7 +396,7 @@
       "status": "researched",
       "task_type": "cslib",
       "description": "Cherry-pick propositional semantics from the local codebase into a <500 LOC follow-up PR stacked on PR #648. PR #648 contributes the formula type and natural deduction; this follow-up adds the semantics layer. Scope: (1) Semantics/Algebra.lean — GHA evaluation with bot_val parameter for minimal/intuitionistic/classical logic. (2) Semantics/Bool.lean — BoolEvaluate with bridge to AlgEvaluate. (3) Semantics/SemanticConsequence.lean — semantic consequence and tautology definitions. (4) Semantics/Kripke.lean — Kripke semantics with botForces for minimal logic (include if LOC budget permits). All four files already exist locally with full implementations. Task is to select, trim, and package for upstream submission. Ensure lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake all pass on the PR branch. Write PR description referencing the Zulip Propositional Logic thread.",
-      "topic": "PL-Semantics",
+      "topic": "Propositional Logic",
       "dependencies": [],
       "created": "2026-06-16T23:00:00Z",
       "last_updated": "2026-06-17T00:00:00Z",
@@ -422,7 +422,7 @@
       "task_type": "cslib",
       "title": "Fill sorry declarations in Bimodal BXCanonical and Bundle files",
       "description": "Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal/Metalogic/:\n- Bundle/SuccRelation.lean: 7 sorries (lines 253, 258, 263, 269, 275, 281, 285)\n- BXCanonical/Chronicle/ChronicleToCountermodel.lean: 10 sorries (lines 66, 143, 144, 147, 153, 157, 163, 171, 172, 177)\n- Bundle/UntilSinceCoherence.lean: 2 sorries (lines 37, 41)\n- BXCanonical/Frame.lean: 1 sorry (line 159)\n\nNote: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completeness_dense (Dense.lean:122) carved off to task 231.\n\n9 sorries blocked on task 37 (strict Until/Since semantics gap: BX8/BX9/temporal-T axioms removed as unsound). 11 sorries blocked on task 36 (discrete completeness pipeline requires unported GoodStructuresModelSurgery infrastructure).",
-      "topic": "Bimodal Porting",
+      "topic": "Bimodal Logic",
       "created": "2026-06-15T17:59:27Z",
       "last_updated": "2026-06-17T00:00:00Z",
       "session_id": "sess_1750098000_a7b3c1",
@@ -490,7 +490,7 @@
         "BimodalLogic:discrete_sorry_elimination"
       ],
       "description": "Port discrete completeness (completeness_discrete theorem) and WeakCanonical/IntegerModel/ infrastructure (~6 files). The discrete branch constructs countermodels on Int via the Reynolds pipeline. Currently blocked: upstream BimodalLogic has sorryAx tracing through chronicle_gap_contradiction → succ_cofinal → limitDomSubtype_isSuccArchimedean → succ_embed_surjective. Port after upstream sorry elimination completes.\n\n**Source**: BimodalLogic/Theories/Bimodal/Metalogic/WeakCanonical/IntegerModel/ (~6 files), discrete branch of BXCanonical/Completeness.lean\n**Target**: Cslib/Logics/Bimodal/Metalogic/\n**Blocker**: Upstream BimodalLogic discrete completeness sorry elimination (36 sorries across IntegerModel/)\n**Parent task**: 8 (expanded)",
-      "topic": "Bimodal Porting"
+      "topic": "Bimodal Logic"
     },
     {
       "project_number": 37,
@@ -503,7 +503,7 @@
         "BimodalLogic:continuous_extension"
       ],
       "description": "Port continuous extension completeness once developed upstream. The continuous case (FrameClass for continuous/real-valued time) has not been started in BimodalLogic. This task is blocked pending upstream development of continuous frame completeness.\n\n**Source**: Not yet developed in BimodalLogic\n**Target**: Cslib/Logics/Bimodal/Metalogic/\n**Blocker**: Upstream BimodalLogic continuous extension development\n**Parent task**: 8 (expanded)",
-      "topic": "Bimodal Porting"
+      "topic": "Bimodal Logic"
     },
     {
       "project_number": 180,
@@ -589,7 +589,7 @@
           "summary": "11-primitive justification, extension architecture, scope assessment, task 177 lessons, interaction analysis"
         }
       ],
-      "topic": "Bimodal Porting",
+      "topic": "Bimodal Logic",
       "last_updated": "2026-06-14T17:54:05Z"
     },
     {
@@ -597,7 +597,7 @@
       "project_name": "proof_system_equivalence_tableau_sequent_edges",
       "status": "not_started",
       "task_type": "cslib",
-      "topic": "PL-Equivalence",
+      "topic": "Propositional Logic",
       "description": "Complete the cross-system equivalence story by folding the tableau (and remaining sequent) decision systems into the proof-system TFAE. Cslib/Logics/Propositional/ProofSystemEquivalence.lean currently proves Hilbert<->ND<->LK for CPL (cplProofSystemsTfae) and Hilbert<->ND<->LJ for IPL (iplProofSystemsTfae), plus the MPL Hilbert<->ND two-way. Add the missing edges so the equivalence is genuinely complete across all proof systems: classical Tautology <-> LK provability <-> closed classical tableau, and intuitionistic validity <-> LJ provability <-> closed intuitionistic tableau, extending the TFAE lists accordingly. Requires the tableau soundness+completeness to be green (task 316 done for soundness; task 317 for completeness) and the classical tableau build repaired (task 363). No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 317, 363.",
       "dependencies": [
         317
@@ -673,7 +673,7 @@
       ],
       "session_id": "sess_1782759395_5a8840",
       "dependencies": [],
-      "topic": "PL-Connectives",
+      "topic": "Propositional Logic",
       "blockers": "Phases 1-4 (agent scaffolding) complete: comparison tables, verified falsum/verum derived-neg bridge (reuse Mathlib Bot/Top, no new HasBot), empirical grind-direction finding (notation->constructor helps; constructor->notation worsens upstream case), consolidated review packet. Phases 5-8 are human/external gates: (5) human must author+post the #607/Zulip review (AI policy - agent cannot write prose); (6) await upstream maintainer resolution of the falsum question; (7-8) conditional Lean registration of PL.Proposition instances + NOTATION/ORGANISATION updates, gated on upstream agreement."
     },
     {
@@ -757,7 +757,7 @@
       ],
       "session_id": "sess_1782750230_3ec4a4_407plan",
       "dependencies": [],
-      "topic": "PL-Base",
+      "topic": "Propositional Logic",
       "plan_metadata": {
         "phases": 9,
         "total_effort_hours": 18,
@@ -830,7 +830,7 @@
       "dependencies": [
         407
       ],
-      "topic": "PL-Base",
+      "topic": "Propositional Logic",
       "parent_task": 407
     },
     {
@@ -838,7 +838,7 @@
       "project_name": "simplify_proofs_normalization_foundations",
       "status": "not_started",
       "task_type": "cslib",
-      "topic": "Foundations",
+      "topic": "Code Hygiene",
       "parent_task": 278,
       "description": "[Split from task 278.] Simplify proofs in Foundations/Logic/ that use manual `simp only [listImp_nil, listImp_cons, bigconj_nil, bigconj_singleton, bigconj_cons_cons, negBigconj_def, ...]` or verbose tactic chains over the task-268 normalization lemmas; replace with `grind`/`simp` where the @[simp, scoped grind =] co-tags (ListImplication.lean, Theorems/BigConj.lean) make the explicit lemma lists redundant. Audit ListImplication, BigConj, and downstream Foundations/Logic proof sites. Sequence after the Foundations completeness-infra abstraction (41) and the Logics/Foundations file-structure pass (321) to avoid re-sweeping moved code. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake.",
       "depends_on": [
@@ -856,7 +856,7 @@
       "project_name": "simplify_proofs_normalization_propositional",
       "status": "not_started",
       "task_type": "cslib",
-      "topic": "PL-Hygiene",
+      "topic": "Code Hygiene",
       "parent_task": 278,
       "description": "[Split from task 278.] Simplify Propositional/ proofs that use manual `simp only [listImp_*, bigconj_*]` lists or verbose tactic chains over the task-268 normalization lemmas; replace with `grind`/`simp` where the new co-tags make the explicit lists redundant. Covers Hilbert/ND/completeness/decidability proof sites in Cslib/Logics/Propositional/. Sequence after the major PL proof-development tasks land (317 tableau completeness, 370 int/min decidability, 375 proof-system equivalence) and the Logics/Foundations file-structure pass (321). Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake.",
       "depends_on": [
@@ -898,9 +898,7 @@
         299,
         300,
         301,
-        444,
-        445,
-        446
+        444
       ],
       "created": "2026-06-29T22:13:39Z",
       "last_updated": "2026-07-01T05:38:47Z"
@@ -911,7 +909,7 @@
       "title": "Audit propositional->modal/temporal/bimodal lifting vs structure-first vision",
       "status": "researched",
       "task_type": "cslib",
-      "topic": "PL-Base",
+      "topic": "Foundations",
       "description": "Audit how the structure-first propositional base (MPL/IPL/CPL: primitive nullary bot, gated efq/botL, property-module typeclasses) actually LIFTS into the Modal, Temporal, and Bimodal logics, and assess the result against the CSLib Zulip \"Propositional Logic\" thread (606970606) structure-first / fragment-genericity expectations -- with the explicit goal of identifying where the architecture can SURPASS those expectations. This is an infrastructure-verification (research/review) task; it produces a report and SPAWNS concrete follow-on implementation tasks, it does not itself refactor proofs.\n\nTHREE SEED FINDINGS to verify and deepen (from prior exploration):\n1. CPL-ONLY EMBEDDING: toModal/toTemporal/toBimodal encode and/or via Lukasiewicz (Modal/FromPropositional.lean:35-41, Temporal/FromPropositional.lean:34-40, Bimodal/Embedding/PropositionalEmbedding.lean:33-41) -- classically valid but NOT intuitionistically valid. So only the CLASSICAL collapse of the propositional base lifts; the minimal/intuitionistic structure-first base does NOT survive the lift. Confirm with exact embedding defs + the semantic-preservation theorem statements (modal_satisfies_toModal_iff_evaluate:106 etc.), and characterize precisely what a structure-preserving (native and/or) embedding would require.\n2. CONSERVATIVITY ASYMMETRY: Modal uses a PARAMETRIC conservativity lemma (modal_conservative_extension_param, Modal/Metalogic/ConservativeExtension.lean:54) while Temporal (ConservativeExtension.lean:87) and Bimodal (Metalogic/ConservativeExtension/PropositionalConservativity.lean:60) re-prove it CONCRETELY. Assess whether a single parametric/Foundations-level conservativity-lift framework can subsume all three.\n3. GENERICLINDENBAUM DEBT: GenericLindenbaum.lean:47 defines a parametric explosion-parameterized substrate but Min/Int Lindenbaum, soundness, and strong-completeness remain ~50% duplicated; re-instantiation is \"deferred to Phase 6\" (task 407 residual). Scope the consolidation and its overlap with task 393.\n\nALSO: check the InterSystem liftDerivation (Modal/Metalogic/InterSystem/Lifting.lean:47) and whether the per-system structural metatheory (weakening/subst/cut across ND/LJ/LK) admits a shared parametric layer.\n\nDELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes each finding with file:line evidence, (b) maps the lift architecture against the Zulip structure-first vision (met / partial / open), (c) for each gap gives a concrete Lean-level sketch of the fix and an effort estimate, and (d) proposes a prioritized set of spawnable follow-on tasks (e.g. structure-preserving embedding; unify conservativity; GenericLindenbaum Phase-6). Honor the Zulip AI policy (any prose intended for upstream must be human-authored). No code changes in this task.",
       "dependencies": [],
       "next_artifact_number": 2,
@@ -932,7 +930,7 @@
       "title": "Generalize derivation lifting to a cross-logic InferenceSystem layer (spike)",
       "status": "completed",
       "task_type": "cslib",
-      "topic": "Modal Logic",
+      "topic": "Foundations",
       "parent_task": 415,
       "description": "[Spawned from task 415 audit — supports the structure-first vision; SPIKE.] Investigate hoisting liftDerivation / Derivable_mono (Modal/Metalogic/InterSystem/Lifting.lean:47) and Bimodal's liftDerivationWith onto the shared InferenceSystem / algebraicDerivationSystem abstraction already used by GenericMCSBridge, yielding ONE axiom-subsumption derivation-lifting result reusable by Modal, Bimodal, and PL. SPIKE FIRST: commit only if the necessitation / temporal_duality constructor variance is cleanly abstractable; otherwise document precisely why and stop (mark BLOCKED, never sorry). Benefits from task 417's Foundations placement (soft dependency). Effort L (abstraction risk). CI green if landed. Source: report §6, Rank 4.",
       "dependencies": [],
@@ -1015,7 +1013,7 @@
       "description": "Prove the atom-persistence / upward-closure structural lemma for open branches produced by `intExpandBranches`, and use it to discharge the two validity-bridge sorries in task 317.\n\n## Context\n\nTask 317 has two remaining validity-bridge sorries:\n- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:112` (`intuitionisticTableau_complete`): needs `IValid φ → ∀ b, IForces (intExtractValuation b) (fun _ => False) 0 φ`.\n- `Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:109` (`minimalTableau_complete`): needs `MValid φ → ∀ b, IForces (intExtractValuation b) (minBranchBotForces b) 0 φ`.\n\nInstantiating `IValid`/`MValid` at the branch model (World = Nat, val = intExtractValuation b) requires supplying upward-closure of `intExtractValuation b`:\n  `T(atom p)@w ∈ b ∧ w ≤ w' → T(atom p)@w' ∈ b`\n\nThis atom-persistence property is NOT in `IBranchSaturation` (which covers compound-formula saturation only). The orchestrator handoff `.orchestrator-handoff.json` identifies this as blocker B3.\n\n## What needs to be proved\n\nProve `intExpandBranches_openBranch_atom_persist` (or equivalent): if `intExpandBranches ... = .openBranch b`, then `intExtractValuation b` is upward-closed under the appropriate world accessibility relation.\n\nKey structural facts to use:\n- `propagatePersistence` (Rules.lean) copies ALL T(α) from parent world w to fresh child world w' when F(φ→ψ)@w fires (`intFImpRule`). So atoms propagate from direct parents to direct children.\n- `applyAllTImpRules`/`applyPersistenceFixpoint` (Expansion.lean) run the T(φ→ψ) modus-ponens fixpoint across the edge list. Atoms are not directly handled here, but the T(→) consequences of atom propagation are.\n- The explicit edge list `edges : IEdges` tracks `(child, parent)` pairs; `isAccessible edges w w'` is the reachability relation.\n\n## Design decision the implementer must make\n\nThere are two viable paths:\n\n**Path A (recommended if provable)**: Prove upward-closure under `≤` on Nat. This is the current countermodel's Preorder. Requires showing that whenever `T(atom p)@w ∈ b` and `w' > w` is a world on the branch, then `T(atom p)@w' ∈ b`. This follows from transitivity of `propagatePersistence` across the world tree, because new worlds are assigned strictly increasing labels and each inherits all T(α) from its parent. Verify with `lean_goal` at the sorry site whether this holds for the expansion invariant.\n\n**Path B (fallback)**: If `≤` on Nat does not match the edge-list accessibility (sibling worlds may share `≤` ordering but not be accessible to each other), define the countermodel Kripke accessibility using `isAccessible edges` instead of `≤`. This requires:\n- Defining a custom `Preorder` on Nat for the specific branch `b` and its edge list (or passing the edge list from `openBranch_countermodel` down to the validity bridges).\n- Proving `intExtractValuation b` is upward-closed under `isAccessible edges`.\n- Updating `openBranch_countermodel` to pass the edge list and use `isAccessible`-based Preorder.\n\n## Exposition target\n\nExpose the atom-persistence fact as ONE of:\n1. A new field `sat_atom_persist` in `IBranchSaturation` (simplest if it can be proved from the expansion).\n2. A standalone `private lemma intExpandBranches_openBranch_atom_persist` in `Scheme.lean`.\n3. A wrapper helper `intExtractValuation_uc` proved inline at the sorry sites.\n\nThe chosen form must be sufficient to supply the upward-closure argument to `IValid`/`MValid` instantiation in both `intuitionisticTableau_complete` and `minimalTableau_complete`.\n\n## Files to modify\n\n- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` — add the persistence structural lemma (or new `IBranchSaturation` field + proof in `intExpandBranches_openBranch_sat`).\n- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean` — fill sorry at ~L112.\n- `Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean` — fill sorry at ~L109.\n- Possibly `Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean` and/or `Rules.lean` if invariants need to be stated there.\n\n## Non-goals\n\n- Do NOT touch the T(imp) sorry at Scheme.lean:330 (task 317's remaining obligation).\n- Do NOT touch the `intExpandBranches_openBranch_sat` leaf sorries at Scheme.lean:481/536/550 (task 317's remaining obligation).\n- Do NOT touch `*/Soundness.lean` (task 316 territory).\n\n## Verification\n\nAfter implementation:\n- `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Completeness` and `…Minimal.Completeness` succeed with the two validity-bridge sorries gone.\n- `grep -n sorry Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean` returns nothing.\n- `grep -n sorry Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean` returns nothing.\n- Build remains green (no regressions in Scheme.lean or Soundness files).",
       "effort": "2-3 hours",
       "parent_task": 317,
-      "topic": "PL-Tableau",
+      "topic": "Propositional Logic",
       "dependencies": [
         317
       ],
@@ -1053,7 +1051,8 @@
       "last_updated": "2026-06-30T16:29:40Z",
       "session_id": "sess_1782832854_3aada0",
       "dependencies": [],
-      "parent_task": 431
+      "parent_task": 431,
+      "topic": "PR & Upstreaming"
     },
     {
       "project_number": 439,
@@ -1211,7 +1210,8 @@
       "last_updated": "2026-07-01T07:00:00Z",
       "next_artifact_number": 1,
       "artifacts": [],
-      "dependencies": []
+      "dependencies": [],
+      "topic": "Bimodal Logic"
     },
     {
       "project_number": 450,
@@ -1227,7 +1227,8 @@
       "artifacts": [],
       "dependencies": [
         449
-      ]
+      ],
+      "topic": "Bimodal Logic"
     },
     {
       "project_number": 451,
@@ -1243,7 +1244,56 @@
       "artifacts": [],
       "dependencies": [
         449
-      ]
+      ],
+      "topic": "Bimodal Logic"
+    },
+    {
+      "project_number": 452,
+      "project_name": "generalize_genericmcsbridge_foundations",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Foundations",
+      "priority": "high",
+      "title": "Generalize GenericMCSBridge: hoist shared MCS-bridge trio into Foundations and collapse base/Fc duplication",
+      "description": "From review 2026-07-01-2 (HIGH). The four GenericMCSBridge.lean files (Propositional 256L, Modal 267L, Temporal 370L, Bimodal/Core 405L; 1298L total) share a near-verbatim skeleton: HilbertOf tag type -> InferenceSystem/ModusPonens/HasAxiomImplyK/HasAxiomImplyS/MinimalHilbert instances -> AlgDS alias -> derivTreeToList -> unfoldListImpInTree (~19L) -> listDerivToTree (~15L) -> {logic}_deriv_iff_algebraic / _setConsistent_iff_algebraic / _setMaxConsistent_iff_algebraic. The trio uses only assumption/modus_ponens/weakening (no logic-specific content). Temporal and Bimodal ADDITIONALLY duplicate their own base/Fc sections internally (e.g. Temporal L66-221 vs L239-370). Approach: (1) collapse Temporal's and Bimodal's intra-file base/Fc duplication first by making the base bridge a specialization of the Fc-parameterized one (fc := .Base) -- ~130-150L each, lowest risk, no cross-logic abstraction; (2) extract unfoldListImpInTree, listDerivToTree, and the three iff-theorems into Cslib/Foundations/Logic/Metalogic/GenericMCS.lean, parameterized over a typeclass capturing 'tree-shaped derivation with ax/assumption/mp/weakening constructors', with extra rules (necessitation, temporal duality) passed as an optional hypothesis/callback. Est. elimination ~300-450 lines. NOT covered by tasks 415/393/439 (which build ON the bridge as infrastructure, verified against their reports). Sequence to avoid collision with in-flight tasks 441/442 (Modal refactor) and 449-451 (BX+). DoD: shared abstraction in Foundations, all four per-logic bridges reduced to thin instantiations, lake build/test/lint green, zero new sorries or axioms.",
+      "dependencies": [],
+      "created": "2026-07-01T07:42:45Z",
+      "last_updated": "2026-07-01T07:42:45Z",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 453,
+      "project_name": "audit_reduce_maxheartbeats_inflation",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Code Hygiene",
+      "priority": "medium",
+      "title": "Audit and reduce maxHeartbeats inflation across Bimodal/Temporal metalogic; normalize scoping to 'in'-scoped",
+      "description": "From review 2026-07-01-2 (MEDIUM+LOW, findings #2+#4). 72 set_option maxHeartbeats sites in Cslib/Logics/{Bimodal,Temporal}/Metalogic/**, up to 32x the 200000 default: 3200000 x33, 1600000 x13, 800000 x12, 1200000 x3, 400000 x5, and 6400000 x1 (Temporal/Metalogic/Chronicle/CounterexampleElimination/MainElimination.lean:38). The mature upstream dirs (Foundations/Computability/Languages/Crypto) have ZERO maxHeartbeats settings -- this inflation is entirely in the active logic area and signals proof terms/tactics that should be restructured (intermediate haves, lemma extraction) rather than given more budget. ALSO (finding #4, LOW): 15 sites use file-wide unscoped 'set_option maxHeartbeats N' (masking which declaration is expensive) vs 54 declaration-scoped 'set_option ... in'; unscoped sites include Bimodal/Metalogic/Algebraic/{UltrafilterMCS.lean:34,BooleanStructure.lean:33} and Temporal/Metalogic/{Chronicle/TruthLemma.lean:40,Chronicle/RRelation.lean:29,DenseSoundness.lean:32,Completeness.lean:47,Soundness.lean:32,MCS.lean:38,WitnessSeed.lean:29,Chronicle/Frame.lean:28,Chronicle/PointInsertion/{Seeds,Burgess,Splitting,Since}.lean}. Approach: audit the 3.2M/6.4M offenders, restructure the worst to lower the ceiling (or document why irreducible); convert all unscoped sites to 'set_option ... in' on the specific expensive declaration. NOT covered by 412-414 (which target simp only [listImp_*, bigconj_*] lists, not heartbeat budgets). Self-contained, independent of other tasks. DoD: heartbeat ceilings reduced where feasible, all remaining high budgets documented, unscoped sites converted to scoped, lake build/test green.",
+      "dependencies": [],
+      "created": "2026-07-01T07:42:45Z",
+      "last_updated": "2026-07-01T07:42:45Z",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 454,
+      "project_name": "consolidate_chronicle_pointinsertion_bimodal_temporal",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Bimodal Logic",
+      "priority": "medium",
+      "title": "Consolidate duplicated Chronicle PointInsertion helper families across Bimodal and Temporal",
+      "description": "From review 2026-07-01-2 (MEDIUM, finding #3). Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/Since.lean (1019L) and Cslib/Logics/Temporal/Metalogic/Chronicle/PointInsertion/Since.lean (704L), plus sibling Burgess.lean and Seeds.lean in both trees, share an entire family of identically-named private helpers: lemma27SinceSeed, l27sC5EventList, l27sB5GuardList, l27s_c5_event_list_mem, l27s_b5_guard_list_mem, lemma24SinceWithGuard, lemma_2_7_since, lemma_2_8_since, lemma_2_7_since_seed_consistent, lemma_2_8_since_seed_consistent. Same duplication disease as the GenericMCSBridge work (task 452) but in the Chronicle point-insertion layer. The files have diverged (Bimodal is ~45% larger), so this is consolidation-with-care, not a mechanical merge: reconcile the diverged portions, then factor the shared lemma_2_7/lemma_2_8 seed-consistency helpers into a common Chronicle-support module parameterized over the frame/relation interface. NOT covered by task 415 (propositional->modal lifting stack) or 449-451 (which define a NEW base logic BX+ rather than dedup existing Chronicle machinery). IMPORTANT: coordinate with tasks 449-451 (BX+) since they may rewrite TemporalConservativity and adjacent Chronicle files -- best sequenced after the BX+ restructure settles, or done in lockstep. DoD: shared point-insertion helpers factored to one location, both logics reduced to thin instantiations of the common core, lake build/test/lint green, zero new sorries.",
+      "dependencies": [
+        449,
+        450
+      ],
+      "created": "2026-07-01T07:42:45Z",
+      "last_updated": "2026-07-01T07:42:45Z",
+      "next_artifact_number": 1,
+      "artifacts": []
     }
   ],
   "repository_health": {
@@ -1254,18 +1304,13 @@
     "status": "needs_attention"
   },
   "active_topics": [
-    "Bimodal Porting",
     "Foundations",
-    "Modal Logic",
-    "Project Management",
     "Propositional Logic",
+    "Modal Logic",
     "Temporal Logic",
-    "pr",
-    "agent-system",
+    "Bimodal Logic",
     "Code Hygiene",
-    "Algebraic Semantics",
-    "PL-Tableau",
-    "pr-review"
+    "PR & Upstreaming"
   ],
   "_last_updated": "2026-06-27T18:18:00Z"
 }

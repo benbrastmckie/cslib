@@ -315,7 +315,14 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
 >   duplicate an already-present formula), but the invariant actually load-bearing for P2-obl-c
 >   is `Nodup` of the **expanded set** `e`, which IS exactly maintained (append-gated by
 >   `¬(expanded.any (·==sf))`). Commit `672a940e`+1 (task 442 phase 2a).
-> - [ ] **P2-obl-b** `FormulaRankBound` (`∀x∈b, modalDepth x.formula ≤ rank x.label`) maintained; fresh worlds get `rank := parent_rank − 1`.
+> - [x] **P2-obl-b** landed as `modalStepBranch_exists_rank'` (`FmpMeasure.lean`): given `rank`
+>   satisfying `rankBound` (`∀x∈b, modalDepth x.formula ≤ rank x.label`) and `rankEdge`
+>   (`∀w w', acc.hasEdge w w' → rank w'+1 = rank w`, the "frozen at creation" fact), produces
+>   `rank'` satisfying both on every child branch / `newAcc`, updating only at the fresh point
+>   `modalNextWorld b` via `Function.update` when `diamondPos`/`boxNeg` mint. Supporting lemmas:
+>   `modalDepth_le_of_mem_modalSubfmls`, `boxProps_rank_bound`, `diaNegProps_rank_bound`,
+>   `boxPos_rank_bound`, `diamondNeg_rank_bound`, `hasEdge_addEdge_cases_local`.
+>   Commit (task 442 phase 2b).
 > - [ ] **P2-obl-c** `outDeg w ≤ (modalSubfmls φ0).length` via injective "minting sf at w ↦ its `.formula`" into `modalSubfmls φ0` (uses P2-obl-a).
 > - [ ] **P2-obl-d** `Φ`-potential single-step `Δ=0` lemma (formalize the hand-verified arithmetic; recurrence `Sf·modalCap Sf k = modalCap Sf (k+1)−1`).
 > - [ ] **P2-obl-e** final composition → world bound `modalMaxWorld b' < modalWorldBound φ0` under the strengthened rank/outDeg-carrying signature, from (a)–(d) + `modalCap_le_pow` + `modalSubfmls_length_le` + `modalDepth_le_complexity`.

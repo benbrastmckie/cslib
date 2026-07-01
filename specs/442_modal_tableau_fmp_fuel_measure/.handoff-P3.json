@@ -1,0 +1,30 @@
+{
+  "status": "phase_complete",
+  "phase_label": "P3",
+  "green": true,
+  "declarations_added": [
+    "modalCount_notMem_append_drop",
+    "modalCount_notMem_mono",
+    "modalWork_drop_linear",
+    "modalWork_drop_persistent",
+    "applyPropRule_ne_persistent",
+    "tryAllPropRules_ne_persistent",
+    "applyPropRule_branching_length",
+    "tryAllPropRules_branching_length",
+    "boxPropagation_fresh",
+    "diamondNeg_filterMap_fresh",
+    "modalApplyOne_persistent_props",
+    "modalApplyOne_branching_length",
+    "modalExpMeasure_split",
+    "modalExpMeasure_append",
+    "modalExpMeasure_const_exp",
+    "pow3_two_add_one_le",
+    "pow3_add_one_le",
+    "modalExpMeasure_step_lt"
+  ],
+  "blockers": [],
+  "sorry_inventory": [],
+  "commit": "PENDING_NEXT_COMMIT",
+  "session_id": "sess_1782868458_ecfcce",
+  "notes": "modalExpMeasure_step_lt (the engine) required threading hb/hInv/hW (the same closure + accFreshInv + world-bound hypotheses used by P1's modalApplyOne_outputs_subset) as explicit hypotheses of the engine lemma itself -- this is the added-invariant deviation flagged in the dispatch prompt as expected/precedented (matches P2's ModalPotentialInv threading pattern). P5 will need to supply hb/hInv/hW at each call site of modalExpMeasure_step_lt (these are exactly the fields already carried by ModalPotentialInv, so P5a's combined-invariant bundle should thread them through unchanged)."
+}

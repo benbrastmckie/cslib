@@ -2604,6 +2604,7 @@ private lemma modalCount_notMem_mono
     exact hy z (hsub z hz)
   simpa [List.countP_eq_length_filter] using hsubf.length_le
 
+omit [Hashable Atom] in
 /-- **`R`-drop, linear/branching case** (research §2.2): when the fired formula `sf` is added
 to the expanded set (`e' = e ++ [sf]`) and the child branch `b'` weakly extends `b` (every rule
 child is `newForms ++ b` for some `newForms`, `Saturation.lean:104-123`), the counting measure
@@ -2620,6 +2621,7 @@ private lemma modalWork_drop_linear
   have he := modalCount_notMem_append_drop U e sf hsfU hsfe
   omega
 
+omit [Hashable Atom] in
 /-- **`R`-drop, persistent case** (research §2.2/§3.4): when the expanded set is unchanged
 (`boxPos`/`diamondNeg`) but the child branch `b'` contains a fresh `U`-member `x0` not on `b`
 (guaranteed by `modalApplyOne_persistent_props` below, since persistent rules only ever emit
@@ -2685,6 +2687,47 @@ private lemma tryAllPropRules_ne_persistent {F L : Type*}
     obtain ⟨rule, -, hrule⟩ := hmem
     rw [← hrule]
     exact applyPropRule_ne_persistent andOf? orOf? impOf? negOf? sf rule nf
+
+/-- Every propositional tableau rule that produces `.branching` produces exactly two
+sub-branches (the 3 branching rules `andNeg`/`orPos`/`impPos`, `PropositionalRules.lean:108-127`,
+each construct a 2-element `.branching [_, _]` literal). Generic over the formula/label types. -/
+private lemma applyPropRule_branching_length {F L : Type*}
+    (andOf? : F → Option (F × F)) (orOf? : F → Option (F × F))
+    (impOf? : F → Option (F × F)) (negOf? : F → Option F)
+    (sf : SignedFormula F L) (rule : PropTableauRule)
+    (brs : List (List (SignedFormula F L)))
+    (h : applyPropRule andOf? orOf? impOf? negOf? sf rule = .branching brs) :
+    brs.length = 2 := by
+  unfold applyPropRule at h
+  obtain ⟨s, φ, l⟩ := sf
+  revert h
+  cases rule <;> rcases s with _ | _ <;> simp <;>
+    first
+      | (rcases andOf? φ with _ | ⟨_, _⟩ <;> simp)
+      | (rcases orOf? φ with _ | ⟨_, _⟩ <;> simp)
+      | (rcases impOf? φ with _ | ⟨_, _⟩ <;> simp)
+      | (rcases negOf? φ with _ | _ <;> simp)
+  all_goals (intro h; simp [← h])
+
+/-- `tryAllPropRules`'s branching results always have exactly two sub-branches, since every
+candidate is an `applyPropRule` output (`applyPropRule_branching_length`). -/
+private lemma tryAllPropRules_branching_length {F L : Type*}
+    (andOf? : F → Option (F × F)) (orOf? : F → Option (F × F))
+    (impOf? : F → Option (F × F)) (negOf? : F → Option F)
+    (sf : SignedFormula F L) (brs : List (List (SignedFormula F L)))
+    (h : tryAllPropRules andOf? orOf? impOf? negOf? sf = .branching brs) :
+    brs.length = 2 := by
+  simp only [tryAllPropRules] at h
+  rcases hfind :
+      ([PropTableauRule.andPos, .andNeg, .orPos, .orNeg, .impPos, .impNeg, .negPos, .negNeg].map
+        (applyPropRule andOf? orOf? impOf? negOf? sf ·)).find? (·.isApplicable) with _ | r
+  · rw [hfind] at h; simp at h
+  · simp only [hfind, Option.getD_some] at h
+    have hmem := List.mem_of_find?_eq_some hfind
+    simp only [List.mem_map] at hmem
+    obtain ⟨rule, -, hrule⟩ := hmem
+    rw [← hrule] at h
+    exact applyPropRule_branching_length andOf? orOf? impOf? negOf? sf rule brs h
 
 omit [Hashable Atom] in
 /-- Every formula emitted by `boxPropagation` (`Branch.lean:194-199`, the `boxPos` rule's
@@ -2822,6 +2865,239 @@ lemma modalApplyOne_persistent_props
             · simp at hca
           · simp at hca
       · dsimp only at hca; simp at hca
+
+omit [Hashable Atom] in
+/-- Whenever `modalApplyOne sf b acc` produces a `.branching` result, the result has exactly
+two sub-branches. The only rule kind that can produce `.branching` is the propositional
+dispatch (`tryAllPropRules_branching_length`); the four modal rules (`boxPos`/`diamondPos`/
+`boxNeg`/`diamondNeg`) are `.persistent`/`.linear`, dismissed by contradiction with `hca`.
+Mirrors `modalApplyOne_persistent_props`'s case-dispatch skeleton. -/
+lemma modalApplyOne_branching_length
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (brs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (hca : (modalApplyOne sf b acc).fst = .branching brs) :
+    brs.length = 2 := by
+  unfold modalApplyOne at hca
+  by_cases hpa :
+      (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf).isApplicable
+  · simp only [hpa, if_true] at hca
+    exact tryAllPropRules_branching_length modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf brs
+      hca
+  · rw [if_neg hpa] at hca
+    obtain ⟨s, ff, l⟩ := sf
+    rcases s with _ | _
+    · rcases ff with _ | _ | ⟨a, c⟩ | φ
+      · simp at hca
+      · simp at hca
+      · rcases a with _ | _ | ⟨a2, a3⟩ | a4
+        · simp at hca
+        · simp at hca
+        · simp at hca
+        · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
+          · simp at hca
+          · simp at hca
+          · rcases a6 with _ | _ | ⟨_, _⟩ | _
+            · simp at hca
+            · rcases c with _ | _ | ⟨_, _⟩ | _
+              · simp at hca
+              · dsimp only at hca; simp at hca
+              · simp at hca
+              · simp at hca
+            · simp at hca
+            · simp at hca
+          · simp at hca
+      · dsimp only at hca
+        by_cases hemp : (boxPropagation b acc φ l).isEmpty = true
+        · simp only [if_pos hemp] at hca; simp at hca
+        · simp only [if_neg hemp] at hca; simp at hca
+    · rcases ff with _ | _ | ⟨a, c⟩ | φ
+      · simp at hca
+      · simp at hca
+      · rcases a with _ | _ | ⟨a2, a3⟩ | a4
+        · simp at hca
+        · simp at hca
+        · simp at hca
+        · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
+          · simp at hca
+          · simp at hca
+          · rcases a6 with _ | _ | ⟨_, _⟩ | _
+            · simp at hca
+            · rcases c with _ | _ | ⟨_, _⟩ | _
+              · simp at hca
+              · dsimp only at hca
+                by_cases hemp : ((acc.successorsOf l).filterMap (fun w' =>
+                    if b.any (· == (⟨.neg, a5, w'⟩ :
+                        SignedFormula (Proposition Atom) WorldIndex))
+                    then none
+                    else some (⟨.neg, a5, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+                  ).isEmpty = true
+                · simp only [if_pos hemp] at hca; simp at hca
+                · simp only [if_neg hemp] at hca; simp at hca
+              · simp at hca
+              · simp at hca
+            · simp at hca
+            · simp at hca
+          · simp at hca
+      · dsimp only at hca; simp at hca
+
+/-! ## Strict-Decrease Engine (Phase 3) -/
+
+omit [Hashable Atom] in
+/-- `classicalExpMeasure_split`-style additivity (`Classical/Completeness.lean:641`), adapted
+to `modalExpMeasure`/`modalWork`: the measure splits over a single distinguished position,
+given length-aligned prefixes. -/
+private lemma modalExpMeasure_split
+    (U : List (SignedFormula (Proposition Atom) WorldIndex))
+    (done : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (doneExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (bh e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (rest : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (restEs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (hlen : done.length = doneExp.length) :
+    modalExpMeasure U (done ++ bh :: rest) (doneExp ++ e :: restEs)
+      = modalExpMeasure U done doneExp + 3 ^ modalWork U bh e
+        + modalExpMeasure U rest restEs := by
+  simp only [modalExpMeasure, List.zip_append hlen, List.zip_cons_cons,
+             List.map_append, List.map_cons, List.sum_append, List.sum_cons]
+  omega
+
+omit [Hashable Atom] in
+/-- `classicalExpMeasure_append`-style additivity (`:656`), adapted to `modalExpMeasure`. -/
+private lemma modalExpMeasure_append
+    (U : List (SignedFormula (Proposition Atom) WorldIndex))
+    (l1 l2 : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (e1 e2 : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (h : l1.length = e1.length) :
+    modalExpMeasure U (l1 ++ l2) (e1 ++ e2)
+      = modalExpMeasure U l1 e1 + modalExpMeasure U l2 e2 := by
+  simp only [modalExpMeasure, List.zip_append h, List.map_append, List.sum_append]
+
+omit [Hashable Atom] in
+/-- `classicalExpMeasure_const_exp`-style identity (`:666`), adapted to `modalExpMeasure`: when
+every new branch shares the same expanded set `newExp`, the measure is the sum of
+`3 ^ modalWork U child newExp` over the new branches. -/
+private lemma modalExpMeasure_const_exp
+    (U : List (SignedFormula (Proposition Atom) WorldIndex))
+    (newBs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newExp : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    modalExpMeasure U newBs (newBs.map (fun _ => newExp))
+      = (newBs.map (fun child => 3 ^ modalWork U child newExp)).sum := by
+  simp only [modalExpMeasure, ← List.map_prod_left_eq_zip, List.map_map, Function.comp_def]
+
+/-- Base-3 decrease for a BETA (prop-branching) step (`Classical/Completeness.lean:674`,
+generic Nat fact, re-proved locally since the classical declaration is `private` to a
+different file): two children of `R`-value `≤ C - 1` plus the saved unit. -/
+private lemma pow3_two_add_one_le {a0 a1 C : Nat} (hC : 1 ≤ C) (h0 : a0 ≤ C - 1)
+    (h1 : a1 ≤ C - 1) :
+    3 ^ a0 + 3 ^ a1 + 1 ≤ 3 ^ C := by
+  have h0' : 3 ^ a0 ≤ 3 ^ (C - 1) := Nat.pow_le_pow_right (by omega) h0
+  have h1' : 3 ^ a1 ≤ 3 ^ (C - 1) := Nat.pow_le_pow_right (by omega) h1
+  have hone : 1 ≤ 3 ^ (C - 1) := Nat.one_le_pow _ _ (by omega)
+  rw [show C = C - 1 + 1 from (Nat.sub_add_cancel hC).symm, pow_succ]
+  omega
+
+/-- Base-3 decrease for an ALPHA/persistent step (`:684`, generic Nat fact, re-proved locally):
+one child of `R`-value `≤ C - 1` plus the saved unit. -/
+private lemma pow3_add_one_le {a0 C : Nat} (hC : 1 ≤ C) (h0 : a0 ≤ C - 1) :
+    3 ^ a0 + 1 ≤ 3 ^ C := by
+  have h0' : 3 ^ a0 ≤ 3 ^ (C - 1) := Nat.pow_le_pow_right (by omega) h0
+  have hone : 1 ≤ 3 ^ (C - 1) := Nat.one_le_pow _ _ (by omega)
+  rw [show C = C - 1 + 1 from (Nat.sub_add_cancel hC).symm, pow_succ]
+  omega
+
+/-- **The strict-decrease engine** (research §3.6, port of `classicalExpMeasure_step_lt`,
+`Classical/Completeness.lean:834`): one `modalStepBranch` step strictly decreases the base-3
+damped worklist measure by at least one, given the branch-closure (`hb`), freshness-invariant
+(`hInv`), and world-bound (`hW`) hypotheses that place every newly emitted formula inside the
+fixed universe `U := modalUniverse φ0` (`modalApplyOne_outputs_subset`, P1). Case-splits over
+the four `modalApplyOne` outcomes exactly as the classical template, replacing
+`classicalBranchComplexity`'s per-output complexity accounting with the counting `R`-drop
+lemmas (`modalWork_drop_linear`/`_persistent`), whose `+1 ≤` shape supplies both the
+`1 ≤ R`-parent bound and the `child ≤ R-1` bound the `pow3_*` lemmas need in one step. -/
+private lemma modalExpMeasure_step_lt
+    (φ0 : Proposition Atom)
+    (done bt newBs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (doneExp es : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newExp : List (SignedFormula (Proposition Atom) WorldIndex))
+    (bh e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc newAcc : Accessibility)
+    (hdlen : done.length = doneExp.length)
+    (hb : ∀ x ∈ bh, x ∈ modalUniverse φ0)
+    (hInv : accFreshInv bh acc)
+    (hW : modalMaxWorld bh < modalWorldBound φ0)
+    (hstep : modalStepBranch bh e acc = some (newBs, newBs.map (fun _ => newExp), newAcc)) :
+    modalExpMeasure (modalUniverse φ0) (done ++ newBs ++ bt)
+        (doneExp ++ newBs.map (fun _ => newExp) ++ es) + 1
+      ≤ modalExpMeasure (modalUniverse φ0) (done ++ bh :: bt) (doneExp ++ e :: es) := by
+  set U := modalUniverse φ0 with hUdef
+  have hrhs : modalExpMeasure U (done ++ bh :: bt) (doneExp ++ e :: es) =
+      modalExpMeasure U done doneExp + 3 ^ modalWork U bh e + modalExpMeasure U bt es :=
+    modalExpMeasure_split U done doneExp bh e bt es hdlen
+  have hlhs : modalExpMeasure U (done ++ newBs ++ bt)
+        (doneExp ++ newBs.map (fun _ => newExp) ++ es) =
+      modalExpMeasure U done doneExp +
+        (newBs.map (fun child => 3 ^ modalWork U child newExp)).sum +
+        modalExpMeasure U bt es := by
+    have hlen1 : (done ++ newBs).length = (doneExp ++ newBs.map (fun _ => newExp)).length := by
+      simp [List.length_append, hdlen]
+    rw [modalExpMeasure_append U (done ++ newBs) bt
+          (doneExp ++ newBs.map (fun _ => newExp)) es hlen1,
+        modalExpMeasure_append U done newBs doneExp (newBs.map (fun _ => newExp)) hdlen,
+        modalExpMeasure_const_exp U newBs newExp]
+  rw [hrhs, hlhs]
+  suffices h : (newBs.map (fun child => 3 ^ modalWork U child newExp)).sum + 1 ≤
+      3 ^ modalWork U bh e by omega
+  simp only [modalStepBranch] at hstep
+  obtain ⟨sf, hsfmem, hfound⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hfound with hany
+  simp only [Bool.not_eq_true] at hany
+  have hsfU : sf ∈ U := hb sf hsfmem
+  rcases hca : (modalApplyOne sf bh acc).1 with nf | brs | nf | -
+  · -- linear
+    rw [hca] at hfound
+    obtain ⟨rfl, hne, -⟩ := Option.some.inj hfound
+    have hdrop : modalWork U (nf ++ bh) (e ++ [sf]) + 1 ≤ modalWork U bh e :=
+      modalWork_drop_linear U bh (nf ++ bh) e sf hsfU hany (fun z hz => List.mem_append_right nf hz)
+    have hC : 1 ≤ modalWork U bh e := by omega
+    have h0 : modalWork U (nf ++ bh) (e ++ [sf]) ≤ modalWork U bh e - 1 := by omega
+    simp only [List.map_singleton, List.sum_singleton]
+    exact pow3_add_one_le hC h0
+  · -- branching
+    have hlen2 : brs.length = 2 := modalApplyOne_branching_length sf bh acc brs hca
+    obtain ⟨b0, b1, hbrs⟩ : ∃ b0 b1, brs = [b0, b1] := by
+      match brs, hlen2 with
+      | [b0, b1], _ => exact ⟨b0, b1, rfl⟩
+    subst hbrs
+    rw [hca] at hfound
+    obtain ⟨rfl, hne, -⟩ := Option.some.inj hfound
+    simp only [List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, Nat.add_zero]
+    have hdrop0 : modalWork U (b0 ++ bh) (e ++ [sf]) + 1 ≤ modalWork U bh e :=
+      modalWork_drop_linear U bh (b0 ++ bh) e sf hsfU hany (fun z hz => List.mem_append_right b0 hz)
+    have hdrop1 : modalWork U (b1 ++ bh) (e ++ [sf]) + 1 ≤ modalWork U bh e :=
+      modalWork_drop_linear U bh (b1 ++ bh) e sf hsfU hany (fun z hz => List.mem_append_right b1 hz)
+    have hC : 1 ≤ modalWork U bh e := by omega
+    have h0 : modalWork U (b0 ++ bh) (e ++ [sf]) ≤ modalWork U bh e - 1 := by omega
+    have h1 : modalWork U (b1 ++ bh) (e ++ [sf]) ≤ modalWork U bh e - 1 := by omega
+    exact pow3_two_add_one_le hC h0 h1
+  · -- persistent
+    rw [hca] at hfound
+    obtain ⟨rfl, hne, -⟩ := Option.some.inj hfound
+    obtain ⟨hnfne, hnffresh⟩ := modalApplyOne_persistent_props sf bh acc nf hca
+    obtain ⟨x0, hx0mem⟩ := List.exists_mem_of_ne_nil nf hnfne
+    have hclosure := modalApplyOne_outputs_subset φ0 sf bh acc hb hsfmem hInv hW
+    rw [hca] at hclosure
+    have hx0U : x0 ∈ U := hclosure x0 hx0mem
+    have hx0b : x0 ∉ bh := hnffresh x0 hx0mem
+    have hx0b' : x0 ∈ nf ++ bh := List.mem_append_left bh hx0mem
+    have hdrop : modalWork U (nf ++ bh) newExp + 1 ≤ modalWork U bh newExp :=
+      modalWork_drop_persistent U bh (nf ++ bh) newExp x0 hx0U hx0b hx0b'
+        (fun z hz => List.mem_append_right nf hz)
+    have hC : 1 ≤ modalWork U bh newExp := by omega
+    have h0 : modalWork U (nf ++ bh) newExp ≤ modalWork U bh newExp - 1 := by omega
+    simp only [List.map_singleton, List.sum_singleton]
+    exact pow3_add_one_le hC h0
+  · rw [hca] at hfound; simp at hfound
 
 end Cslib.Logic.Modal.Tableau
 

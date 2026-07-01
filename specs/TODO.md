@@ -11,8 +11,8 @@ next_project_number: 464
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,396,400,404,407,425,438,440,441,447,449,453,459,460,461,463 | -- | Propositional Logic, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,215,301,375,389,405,409,430,450,451,456,462 | 36,37,181,317,404,407,425,449,459 | Propositional Logic, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,181,226,300,317,396,400,405,407,425,438,440,441,449,459,460,461,463 | -- | Propositional Logic, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,215,301,375,389,409,430,450,451,456,462 | 36,37,181,317,407,425,449,459 | Propositional Logic, Temporal Logic, Bimodal Logic, ... |
 | 3 | 41,391,392,413,444,454 | 39,40,375,389,450 | Foundations, Bimodal Logic, Code Hygiene |
 | 4 | 393,412,414 | 41,215,300,301,391,444 | Code Hygiene |
 
@@ -36,8 +36,7 @@ next_project_number: 464
 
 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
-404 [PR READY] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
-  └─ 405 [NOT STARTED] — Simplify the proof machinery in the task-402 modal tableau soundn
+405 [NOT STARTED] — Simplify the proof machinery in the task-402 modal tableau soundn
 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 
 ### Temporal Logic
@@ -62,7 +61,6 @@ next_project_number: 464
 
 ### Code Hygiene
 
-453 [PR READY] — From review 2026-07-01-2 (MEDIUM+LOW, findings #2+#4). 72 set_opt
 389 [NOT STARTED] — [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAl
   └─ 391 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Remove internal task/process ja
     └─ 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
@@ -77,7 +75,6 @@ next_project_number: 464
 
 438 [PR READY] — Upstream the comment/docstring cleanups identified by the task 43
 440 [NOT STARTED] — PR review: GitHub PR https://github.com/leanprover/cslib/pull/648
-447 [PR READY] — Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public 
 
 ### Tableau Infrastructure
 
@@ -85,7 +82,7 @@ next_project_number: 464
 
 ### Uncategorized
 
-459 [PLANNED] — Vet of task 299 found 57 lines exceeding the 100-char `linter.sty
+459 [IMPLEMENTING] — Vet of task 299 found 57 lines exceeding the 100-char `linter.sty
   └─ 462 [NOT STARTED] — Vet of task 299 flagged two maintainability items (both non-block
 460 [PLANNED] — Vet of task 455 found lint warnings in the repointed consumer Csl
 461 [NOT STARTED] — Vet found 6 `linter.unusedSectionVars` warnings; add `omit [...] 
@@ -130,7 +127,7 @@ next_project_number: 464
 ---
 
 ### 459. Shorten >100-char lines in modal K tableau SoundnessStep + Completeness (task 299 vet)
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -189,7 +186,7 @@ next_project_number: 464
 ---
 
 ### 453. Audit and reduce maxHeartbeats inflation across Bimodal/Temporal metalogic; normalize scoping to 'in'-scoped
-- **Status**: [PR READY]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
@@ -305,7 +302,7 @@ ANTI-GOALS (never pursue): A2 maximal inductive replacement (replacing native De
 ---
 
 ### 447. Apply lake shake import-minimization fixes to files touched by tasks 321/406/431
-- **Status**: [PR READY]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: PR & Upstreaming
 - **Dependencies**: None
@@ -642,7 +639,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 404. Forall2 mathlib cleanup soundness
-- **Status**: [PR READY]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

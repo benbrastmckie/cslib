@@ -46,12 +46,12 @@
     {
       "project_number": 459,
       "project_name": "vet_299_longline_style",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "Shorten >100-char lines in modal K tableau SoundnessStep + Completeness (task 299 vet)",
       "description": "Vet of task 299 found 57 lines exceeding the 100-char `linter.style.longLine` limit: Cslib/Logics/Modal/Tableau/SoundnessStep.lean (48 lines: 268,334,348,371,384,398,412,522,545,568,686,709,732,850,873,896,1086,1136,1149,1164,1204,1219,1234,1256,1274,1292,1310,1328,1346,1364,1384,1402,1420,1437,1438,1455,1456,1473,1474,1491,1492,1512,1530,1548,1566,1584,1602,1620 — mostly long `refine ⟨...⟩` case-bash terms) and Completeness.lean (9 lines: 118,128,169,177,195,455,477,479,529). Mechanically wrap/restructure; no proof-logic changes. Confirm `lake build` stays green.",
       "created": "2026-07-01T15:46:37Z",
-      "last_updated": "2026-07-01T16:09:22Z",
+      "last_updated": "2026-07-01T16:19:55Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "parent_task": 299,
@@ -199,7 +199,7 @@
     {
       "project_number": 447,
       "project_name": "apply_shake_import_minimization_fixes_tasks_321_406_431",
-      "status": "pr_ready",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Apply lake shake import-minimization fixes to files touched by tasks 321/406/431",
       "description": "Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public --keep-implied --keep-prefix import-minimization suggestions across files touched by tasks 321, 406, and 431. CI otherwise passes (build/test/checkInitImports green; zero sorries). Apply the genuine import-hygiene fixes and verify (do NOT blindly --fix):\n\nFALSE-POSITIVE CANDIDATES (import Cslib.Init removals -- Cslib.Init sets up default linting/tactics, not a term-level dependency; verify, and if legitimately needed add the shake preserve-comment per 'lake shake --help' rather than removing):\n- Cslib/Foundations/Logic/Metalogic/DeductionCharacterization.lean (remove import Cslib.Init)\n- Cslib/Logics/Modal/Tableau/Saturation.lean (remove import Cslib.Init; add public import Cslib.Logics.Modal.Tableau.Rules)\n- Cslib/Logics/Modal/Tableau/LoopInduction.lean (remove import Cslib.Init + public import ...Saturation; add public import Cslib.Logics.Modal.Basic, Batteries.Data.List.Basic)\n- Cslib/Logics/Modal/Tableau/Soundness.lean (remove import Cslib.Init)\n- Cslib/Logics/Temporal/Tableau/Rules.lean (remove import Cslib.Init; add public import Cslib.Foundations.Logic.Tableau.PropositionalRules)\n- Cslib/Logics/Temporal/Tableau/Saturation.lean (remove import Cslib.Init)\n\nGENUINE IMPORT-HYGIENE FIXES:\n- Cslib/Foundations/Order/HilbertAlgebra/FreeMeetExtension.lean (remove public import Mathlib.Data.Multiset.Basic)\n- Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean (swap MCSProperties -> GenericMCS)\n- Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean (swap MCSProperties -> GenericMCS)\n- Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean (swap MCSProperties -> GenericMCS)\n- Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/BurgessHelpers.lean (remove Finset.Max + Tactic.Linarith; add Tactic.NormNum)\n- Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean (remove re-export of ...Elimination -- verify barrel still builds)\n- Cslib/Logics/Temporal/Metalogic/Chronicle/CounterexampleElimination/Structures.lean (remove Mathlib.Logic.Encodable.Basic) paired with Elimination.lean (add Mathlib.Logic.Encodable.Basic)\n- Cslib/Logics/LTL/Semantics/GNBA/Closure.lean (remove Satisfies + Set.Finite.Powerset + Set.Finite.Lattice; add LTL.Syntax.Formula) paired with GNBA/Atoms.lean (add Satisfies)\n- Cslib/Logics/Temporal/Metalogic/DenseMCS.lean (remove DeductionHelpers)\n\nAfter edits, re-run: lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake --add-public --keep-implied --keep-prefix on the touched files to confirm the suggestions are resolved. Scope is limited to these files only -- do NOT attempt the codebase-wide shake backlog. Source: /vet session sess_1782884590_732b0b.",
@@ -234,7 +234,7 @@
       ],
       "dependencies": [],
       "session_id": "sess_1782886187_0ef015",
-      "completion_summary": "Applied all 17 verified lake shake import-minimization edits (tasks 321/406/431 backlog) across 19 files (17 primary + 2 downstream-consumer deviation fixes for MCS.lean and Completeness.lean). Full CI gate green: build, test, checkInitImports, lint-style. Zero sorries, zero new axioms. Recovered from concurrent-session file-write interference (task 442) that twice reverted 3 of the edits mid-run. Ready for /pr.",
+      "completion_summary": "Applied 17 lake shake --add-public import-minimization fixes surfaced by vet of tasks 321/406/431/433/435; CI green. (Status corrected from erroneous pr_ready: cslib task, no PR-prep artifact.)",
       "topic": "PR & Upstreaming"
     },
     {
@@ -897,7 +897,7 @@
     {
       "project_number": 404,
       "project_name": "forall2_mathlib_cleanup_soundness",
-      "status": "pr_ready",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Replace the local private re-proofs of List.Forall2 lemmas in Cslib/Logics/Modal/Tableau/Soundness.lean (forall2_append_aux, forall2_drop_aux, forall2_take_aux, forall2_of_zip_mem) with canonical Mathlib lemmas. These were added during task 402 because Mathlib.Data.List.Forall2 is not transitively imported by Cslib.Init. Either add the Mathlib import and switch call sites to library lemmas (List.Forall2.append/length_eq/etc.), or document why the local helpers are kept. Verify scoped + full lake build green, zero sorry, lint-style pass. Low-priority polish; helpers are correct as-is.",
       "dependencies": [],
@@ -922,7 +922,7 @@
           "summary": "Execution summary: replaced four local List.Forall2 helpers with canonical Mathlib lemmas; full CI pipeline green; zero sorry/axioms/vacuous defs."
         }
       ],
-      "completion_summary": "Replaced the four local List.Forall2 helper lemmas in Cslib/Logics/Modal/Tableau/Soundness.lean and LoopInduction.lean with canonical Mathlib lemmas (List.forall2_iff_zip.mpr, List.rel_append, List.forall2_drop, List.forall2_take) via a single import Mathlib.Data.List.Forall2. forall2_replicate_right retained (no Mathlib drop-in). Full CI gate green: build, test, checkInitImports, lint-style, shake (confirmed no changes needed for the two modified files). Zero sorry, zero new axioms, zero vacuous definitions. Ready for /pr."
+      "completion_summary": "Replaced local private re-proofs of List.Forall2 lemmas in Cslib modal soundness with Mathlib API; CI green. (Status corrected from erroneous pr_ready: cslib task, no PR-prep artifact.)"
     },
     {
       "project_number": 405,
@@ -1541,7 +1541,7 @@
     {
       "project_number": 453,
       "project_name": "audit_reduce_maxheartbeats_inflation",
-      "status": "pr_ready",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Code Hygiene",
       "priority": "medium",
@@ -1569,7 +1569,7 @@
         }
       ],
       "session_id": "sess_1782893289_453aaa",
-      "completion_summary": "Eliminated all 64 set_option maxHeartbeats sites (15 unscoped + 49 scoped) across Cslib/Logics/{Bimodal,Temporal}/Metalogic/**; every site was pure defensive inflation confirmed by build-probe. Zero sites remain. Full CI green. See summaries/01_reduce-maxheartbeats-inflation-summary.md."
+      "completion_summary": "Eliminated all 64 set_option maxHeartbeats sites across Bimodal/Temporal Metalogic (pure defensive inflation, each verified by lake build at default budget); CI green, zero new sorries/axioms. (Status corrected from erroneous pr_ready: cslib task, no PR-prep artifact.)"
     },
     {
       "project_number": 454,

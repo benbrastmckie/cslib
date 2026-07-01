@@ -55,6 +55,7 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "dependencies": [
+        181,
         449,
         450
       ],
@@ -111,17 +112,31 @@
     {
       "project_number": 390,
       "project_name": "update_organisation_md",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Update ORGANISATION.md Propositional section (post-merge tree)",
       "description": "[Refreshed post-merge vet.] The Propositional section (~ORGANISATION.md:100-105) is a 4-item stub. Update to reflect the actual 95+-file tree: SequentCalculus/{LJ,LK} (Interpolation, CutElimination, SubformulaProperty, Decidability); CurryHoward/{Defs,Isomorphism,Reduction}; Semantics/Algebra (25+ files: Brouwerian, HilbertAlgebra, Kripke, Glivenko, Conservative variants); Tableau/{Classical,Intuitionistic,Minimal} (Completeness/Soundness/DecisionProcedure); Subformula.lean; ProofSystemEquivalence.lean. Also update the Namespace Convention section re Cslib.Logic.PL vs Cslib.Logic.Propositional (task 387). Do before the PR lands.",
       "created": "2026-06-28T12:53:27Z",
-      "last_updated": "2026-06-28T18:34:49Z",
+      "last_updated": "2026-07-01T08:17:48Z",
       "next_artifact_number": 1,
-      "artifacts": [],
-      "session_id": "sess_1782651207_1e893c_390",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/390_update_organisation_md/reports/01_update-propositional-organisation.md"
+        },
+        {
+          "type": "plan",
+          "path": "specs/390_update_organisation_md/plans/01_update-propositional-organisation.md"
+        },
+        {
+          "type": "summary",
+          "path": "specs/390_update_organisation_md/summaries/01_update-propositional-organisation-summary.md"
+        }
+      ],
+      "session_id": "sess_1782893182_f5e27d_390",
       "dependencies": [],
-      "topic": "Code Hygiene"
+      "topic": "Code Hygiene",
+      "completion_summary": "Replaced the stale 4-item Propositional Logic stub in ORGANISATION.md with the expanded 7-subdirectory tree (ProofSystem, NaturalDeduction, SequentCalculus, Tableau, Semantics, Metalogic) transcribed verbatim from the research report, matching the abbreviated Modal/Temporal style. Namespace Convention section left untouched (already correct per task 387). Note: CurryHoward/ exists on disk but was not included in the research report's AFTER tree text -- a known gap in the source research, not an implementation deviation; may warrant a small follow-up edit."
     },
     {
       "project_number": 391,
@@ -508,7 +523,7 @@
     {
       "project_number": 180,
       "project_name": "temporal_primitive_always_historically",
-      "status": "pr_ready",
+      "status": "completed",
       "task_type": "cslib",
       "dependencies": [],
       "description": "Add allFuture (G) and allPast (H) as primitive constructors to Temporal.Formula, giving {atom, bot, imp, and, or, untl, snce, allFuture, allPast}. Currently G is derived as neg(someFuture(neg phi)) and H as neg(somePast(neg phi)), which are only valid classically. Making them primitive enables intuitionistic temporal logics. Note: someFuture (F) and somePast (P) remain derivable without negation (F = top U phi, P = top S phi). Scope: (1) Syntax/Formula.lean: add .allFuture/.allPast constructors, update complexity, subst, atoms, encodeNat, temporalDepth, swapTemporal. (2) Semantics: structural clauses for universal future/past quantification. (3) ProofSystem: temporal axioms referencing G/H now use primitive constructors. (4) Metalogic: cases in Soundness, Chronicle/TruthLemma, MCS, Completeness. (5) Classical equivalences become theorems. Verify full CI. Reference: Boudou et al. for intuitionistic temporal logic.",
@@ -535,7 +550,7 @@
         }
       ],
       "topic": "Temporal Logic",
-      "last_updated": "2026-07-01T03:12:00Z",
+      "last_updated": "2026-07-01T07:43:58Z",
       "session_id": "sess_1782866989_0251ee",
       "next_artifact_number": 2,
       "plan_metadata": {
@@ -571,7 +586,8 @@
             9
           ]
         ]
-      }
+      },
+      "completion_summary": "G (allFuture) and allPast (H) added as primitive constructors to Temporal.Formula, giving {atom,bot,imp,and,or,untl,snce,allFuture,allPast}; F/P remain negation-free derived forms. Propagated through Syntax, Semantics (universal future/past truth clauses), ProofSystem axioms, and the Bimodal TemporalEmbedding. Implementation complete and green (zero sorry); PR-ready. Marked completed to release the dependency gate for tasks 439/181; PR-blocking conservativity cleanup tracked separately via 449->450->444."
     },
     {
       "project_number": 181,
@@ -907,7 +923,7 @@
       "project_number": 415,
       "project_name": "audit_propositional_lifting_structure_first",
       "title": "Audit propositional->modal/temporal/bimodal lifting vs structure-first vision",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Foundations",
       "description": "Audit how the structure-first propositional base (MPL/IPL/CPL: primitive nullary bot, gated efq/botL, property-module typeclasses) actually LIFTS into the Modal, Temporal, and Bimodal logics, and assess the result against the CSLib Zulip \"Propositional Logic\" thread (606970606) structure-first / fragment-genericity expectations -- with the explicit goal of identifying where the architecture can SURPASS those expectations. This is an infrastructure-verification (research/review) task; it produces a report and SPAWNS concrete follow-on implementation tasks, it does not itself refactor proofs.\n\nTHREE SEED FINDINGS to verify and deepen (from prior exploration):\n1. CPL-ONLY EMBEDDING: toModal/toTemporal/toBimodal encode and/or via Lukasiewicz (Modal/FromPropositional.lean:35-41, Temporal/FromPropositional.lean:34-40, Bimodal/Embedding/PropositionalEmbedding.lean:33-41) -- classically valid but NOT intuitionistically valid. So only the CLASSICAL collapse of the propositional base lifts; the minimal/intuitionistic structure-first base does NOT survive the lift. Confirm with exact embedding defs + the semantic-preservation theorem statements (modal_satisfies_toModal_iff_evaluate:106 etc.), and characterize precisely what a structure-preserving (native and/or) embedding would require.\n2. CONSERVATIVITY ASYMMETRY: Modal uses a PARAMETRIC conservativity lemma (modal_conservative_extension_param, Modal/Metalogic/ConservativeExtension.lean:54) while Temporal (ConservativeExtension.lean:87) and Bimodal (Metalogic/ConservativeExtension/PropositionalConservativity.lean:60) re-prove it CONCRETELY. Assess whether a single parametric/Foundations-level conservativity-lift framework can subsume all three.\n3. GENERICLINDENBAUM DEBT: GenericLindenbaum.lean:47 defines a parametric explosion-parameterized substrate but Min/Int Lindenbaum, soundness, and strong-completeness remain ~50% duplicated; re-instantiation is \"deferred to Phase 6\" (task 407 residual). Scope the consolidation and its overlap with task 393.\n\nALSO: check the InterSystem liftDerivation (Modal/Metalogic/InterSystem/Lifting.lean:47) and whether the per-system structural metatheory (weakening/subst/cut across ND/LJ/LK) admits a shared parametric layer.\n\nDELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes each finding with file:line evidence, (b) maps the lift architecture against the Zulip structure-first vision (met / partial / open), (c) for each gap gives a concrete Lean-level sketch of the fix and an effort estimate, and (d) proposes a prioritized set of spawnable follow-on tasks (e.g. structure-preserving embedding; unify conservativity; GenericLindenbaum Phase-6). Honor the Zulip AI policy (any prose intended for upstream must be human-authored). No code changes in this task.",
@@ -921,8 +937,8 @@
         }
       ],
       "created": "2026-06-29T22:27:24Z",
-      "last_updated": "2026-06-29T22:32:56Z",
-      "session_id": "sess_1782772044_2323b7"
+      "last_updated": "2026-07-01T08:10:16Z",
+      "session_id": "sess_1782893182_f5e27d_415"
     },
     {
       "project_number": 419,
@@ -1226,6 +1242,7 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "dependencies": [
+        181,
         449
       ],
       "topic": "Bimodal Logic"

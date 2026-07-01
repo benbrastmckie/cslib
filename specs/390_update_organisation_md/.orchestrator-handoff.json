@@ -1,0 +1,37 @@
+{
+  "task_number": 390,
+  "session_id": "sess_1782893182_f5e27d_390",
+  "phase": "implement",
+  "status": "implemented",
+  "task_type": "cslib",
+  "agent_type": "cslib-implementation-agent",
+  "artifacts": [
+    "specs/390_update_organisation_md/reports/01_update-propositional-organisation.md",
+    "specs/390_update_organisation_md/plans/01_update-propositional-organisation.md",
+    "specs/390_update_organisation_md/summaries/01_update-propositional-organisation-summary.md",
+    "ORGANISATION.md"
+  ],
+  "summary": "Phase 1 (only phase) completed. Replaced the stale 4-item Propositional Logic stub (ORGANISATION.md:99-106) with the expanded 7-subdirectory tree transcribed verbatim from research report section 3 (AFTER), in the abbreviated Modal/Temporal style. Optional section 4 Namespace-Convention clarifying note was omitted per plan default; lines 254-264 left untouched. No other ORGANISATION.md sections touched. No Lean files modified; standard CSLib CI pipeline skipped by design (docs-only task).",
+  "plan": {
+    "phase_count": 1,
+    "phases_completed": 1,
+    "estimated_hours": 0.4,
+    "dependency_waves": [
+      { "wave": 1, "phases": [1], "blocked_by": [] }
+    ],
+    "open_decision_resolved": "Optional section 4 Namespace-Convention clarifying note OMITTED (default taken; section already correct).",
+    "edit_target": "ORGANISATION.md:99-106 (Propositional Logic fenced tree block) -- replaced with expanded tree now at lines 99-141",
+    "lean_source_changes": false,
+    "ci_impact": false,
+    "sorry_inventory": [],
+    "urgency": "Done before the PR lands"
+  },
+  "verification": {
+    "verification_passed": true,
+    "mode": "docs_only",
+    "git_status_scope": "only ORGANISATION.md modified by this session (40 insertions/5 deletions); other dirty files in working tree are pre-existing unrelated concurrent task work"
+  },
+  "next_action": "Task 390 implementation complete; ready for PR / status transition to [PR READY] or [COMPLETED] per orchestrator policy",
+  "created_at": "2026-07-01T08:12:00Z",
+  "updated_at": "2026-07-01T08:20:00Z"
+}

@@ -11,18 +11,17 @@ next_project_number: 455
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,317,390,396,400,404,407,415,438,440,442,447,449,452,453 | -- | Foundations, Propositional Logic, Modal Logic, ... |
-| 2 | 39,40,181,215,299,375,389,405,409,430,439,450,451 | 36,37,180,317,404,407,442,449 | Propositional Logic, Modal Logic, Temporal Logic, ... |
-| 3 | 41,300,391,392,413,426,441,444,454 | 39,40,299,375,389,439,450 | Foundations, Modal Logic, Temporal Logic, ... |
-| 4 | 393,412,425 | 41,391,426 | Temporal Logic, Code Hygiene |
-| 5 | 301 | 425 | Temporal Logic |
-| 6 | 414 | 181,215,300,301,444 | Code Hygiene |
+| 1 | 36,37,181,226,317,396,400,404,407,415,438,439,440,442,447,449,452,453 | -- | Foundations, Propositional Logic, Modal Logic, ... |
+| 2 | 39,40,215,299,375,389,405,409,426,430,450,451 | 36,37,181,317,404,407,439,442,449 | Propositional Logic, Modal Logic, Temporal Logic, ... |
+| 3 | 41,300,391,392,413,425,441,444,454 | 39,40,299,375,389,426,450 | Foundations, Modal Logic, Temporal Logic, ... |
+| 4 | 301,393,412 | 41,391,425 | Temporal Logic, Code Hygiene |
+| 5 | 414 | 215,300,301,444 | Code Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
 ### Foundations
 
-415 [RESEARCHED] — Audit how the structure-first propositional base (MPL/IPL/CPL: pr
+415 [PLANNED] — Audit how the structure-first propositional base (MPL/IPL/CPL: pr
 452 [NOT STARTED] — From review 2026-07-01-2 (HIGH). The four GenericMCSBridge.lean f
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
@@ -48,11 +47,10 @@ next_project_number: 455
 
 ### Temporal Logic
 
-180 [PR READY] — Add allFuture (G) and allPast (H) as primitive constructors to Te
-  └─ 439 [RESEARCHED] — Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_red
-    └─ 426 [BLOCKED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
-      └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
-        └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
+439 [RESEARCHED] — Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_red
+  └─ 426 [BLOCKED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
+    └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
+      └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -62,15 +60,15 @@ next_project_number: 455
   └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal
 37 [BLOCKED] — Port continuous extension completeness once developed upstream. T
   └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal (see above)
-449 [NOT STARTED] — Foundation for the corrected TM-over-temporal conservativity resu
+181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
   └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S
     └─ 454 [NOT STARTED] — From review 2026-07-01-2 (MEDIUM, finding #3). Cslib/Logics/Bimod
+449 [NOT STARTED] — Foundation for the corrected TM-over-temporal conservativity resu
+  └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S (see above)
   └─ 451 [NOT STARTED] — Deeper metatheory for the metric tense logic BX+ (defined in task
-181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
 
 ### Code Hygiene
 
-390 [NOT STARTED] — [Refreshed post-merge vet.] The Propositional section (~ORGANISAT
 453 [NOT STARTED] — From review 2026-07-01-2 (MEDIUM+LOW, findings #2+#4). 72 set_opt
 389 [NOT STARTED] — [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAl
   └─ 391 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Remove internal task/process ja
@@ -143,7 +141,7 @@ Zero-debt: no sorry, no vacuous defs; full CI green. If completeness turns out t
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Bimodal Logic
-- **Dependencies**: Task 449
+- **Dependencies**: Task 181, Task 449
 
 **Description**: Core corrected conservativity result. PR-BLOCKING for task 180. Supersedes abandoned task 445 and inherits its research: specs/445_fix_temporal_conservativity_domain_mismatch_sorry/reports/01_domain-mismatch-transfer-feasibility.md and 02_literature-grounded-conservativity-obstruction.md. Depends on task 449 (BX+ definition).
 
@@ -251,7 +249,7 @@ After edits, re-run: lake build, lake test, lake exe checkInitImports, lake exe 
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
-- **Dependencies**: Task 449, Task 450
+- **Dependencies**: Task 181, Task 449, Task 450
 
 **Description**: Vet fix for task 180 (High), elevated scope. Do not merely rename the two flagged defs; bring the task-180 diff to a single, uniform, mathlib-conformant standard.
 
@@ -453,7 +451,7 @@ After implementation:
 ---
 
 ### 415. Audit propositional->modal/temporal/bimodal lifting vs structure-first vision
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
@@ -611,10 +609,13 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 390. Update ORGANISATION.md Propositional section (post-merge tree)
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
+- **Research**: [390_update_organisation_md/reports/01_update-propositional-organisation.md]
+- **Plan**: [390_update_organisation_md/plans/01_update-propositional-organisation.md]
+- **Summary**: [390_update_organisation_md/summaries/01_update-propositional-organisation-summary.md]
 
 **Description**: [Refreshed post-merge vet.] The Propositional section (~ORGANISATION.md:100-105) is a 4-item stub. Update to reflect the actual 95+-file tree: SequentCalculus/{LJ,LK} (Interpolation, CutElimination, SubformulaProperty, Decidability); CurryHoward/{Defs,Isomorphism,Reduction}; Semantics/Algebra (25+ files: Brouwerian, HilbertAlgebra, Kripke, Glivenko, Conservative variants); Tableau/{Classical,Intuitionistic,Minimal} (Completeness/Soundness/DecisionProcedure); Subformula.lean; ProofSystemEquivalence.lean. Also update the Namespace Convention section re Cslib.Logic.PL vs Cslib.Logic.Propositional (task 387). Do before the PR lands.
 
@@ -770,7 +771,7 @@ Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completenes
 ---
 
 ### 180. Temporal primitive always historically
-- **Status**: [PR READY]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None

@@ -1,0 +1,44 @@
+{
+  "status": "implemented",
+  "started_at": "2026-07-01T08:14:18Z",
+  "completed_at": "2026-07-01T08:20:00Z",
+  "artifacts": [
+    "specs/390_update_organisation_md/reports/01_update-propositional-organisation.md",
+    "specs/390_update_organisation_md/plans/01_update-propositional-organisation.md",
+    "specs/390_update_organisation_md/summaries/01_update-propositional-organisation-summary.md",
+    "ORGANISATION.md"
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "details": "Phase 1 (only phase) completed and verified; ORGANISATION.md Propositional section rewritten",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 1,
+    "last_completed_phase": "Replace Propositional tree stub in ORGANISATION.md"
+  },
+  "verification": {
+    "verification_passed": true,
+    "mode": "docs_only",
+    "note": "No Lean files touched; standard CSLib CI pipeline (lake build/test/lint/checkInitImports/lint-style/shake/mk_all) skipped per plan and task instructions",
+    "sorry_count": "N/A (no Lean files touched)",
+    "vacuous_count": "N/A (no Lean files touched)",
+    "axiom_count": "N/A (no Lean files touched)",
+    "build_passed": "N/A (docs-only)",
+    "ci_pipeline_passed": "N/A (docs-only, skipped by design)",
+    "checks_performed": [
+      "grep -n \"NaturalDeduction/\" ORGANISATION.md -- stub gone, expanded subtree present",
+      "grep -n \"SequentCalculus/|Tableau/|CurryHoward|Subformula.lean|ProofSystemEquivalence\" ORGANISATION.md -- confirmed present (CurryHoward absent from tree text by design, matches report §3 verbatim)",
+      "find Cslib/Logics/Propositional -maxdepth 1 | sort -- cross-checked all named subdirectories exist on disk",
+      "ls Cslib/Logics/Propositional/ -- confirmed",
+      "markdown fence balance confirmed (open line 99, close line 141, one blank line before ### Modal Logic)",
+      "git status --porcelain -- only ORGANISATION.md modified by this session (40 insertions/5 deletions); other dirty files are pre-existing unrelated concurrent work"
+    ]
+  },
+  "metadata": {
+    "session_id": "sess_1782893182_f5e27d_390",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
+}

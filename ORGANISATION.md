@@ -98,11 +98,46 @@ Foundations/Logic  (abstract infrastructure)
 
 ```
 Propositional/
-├── Defs.lean                  -- Formula type, proof system instances
-├── NaturalDeduction/          -- Natural deduction proof system
-│   └── Basic.lean
-├── ProofSystem/               -- Hilbert-style proof system
-└── Metalogic/                 -- Completeness, soundness
+├── Defs.lean                   -- Proposition (formula) type, HasImp/HasBot/HasAnd/HasOr instances
+├── Subformula.lean             -- Subformula relation
+├── Embedding.lean               -- Fragment embeddings (MPL/IPL/CPL)
+├── ProofSystemEquivalence.lean -- Equivalence between the proof systems below
+├── ProofSystem/                -- Hilbert-style proof system
+│   ├── Axioms.lean
+│   ├── Derivation.lean
+│   ├── Instances.lean          -- Typeclass instances (MinimalHilbert, etc.)
+│   ├── IntMinInstances.lean    -- Intuitionistic / minimal instances
+│   └── Fragment{Axioms,Instances}.lean
+├── NaturalDeduction/           -- Natural deduction proof system
+│   ├── Basic.lean
+│   ├── DerivedRules.lean, HilbertDerivedRules.lean
+│   ├── AxiomAdmissibility.lean, Equivalence.lean, FromHilbert.lean
+│   └── Normalization/          -- Normalization + subformula property
+│       └── Basic.lean, Reduction.lean, Termination.lean, SubformulaProperty.lean
+├── SequentCalculus/            -- Gentzen sequent calculi
+│   ├── Defs.lean
+│   ├── LJ/                      -- Intuitionistic sequent calculus
+│   │   └── Basic, Soundness, Completeness, CutElimination,
+│   │       SubformulaProperty, Interpolation, Decidability
+│   └── LK/                      -- Classical sequent calculus
+│       └── Basic, Soundness, Completeness, CutFreeCompleteness,
+│           CutElimination, SubformulaProperty, Interpolation, Decidability
+├── Tableau/                    -- Tableau decision procedures
+│   ├── Defs.lean
+│   ├── Classical/              -- Expansion, Soundness, Completeness, DecisionProcedure
+│   ├── Intuitionistic/         -- Rules, Scheme, Expansion, Soundness, Completeness, DecisionProcedure
+│   └── Minimal/                -- Soundness, Completeness, DecisionProcedure
+├── Semantics/                  -- Semantics
+│   ├── Bool.lean               -- Boolean (classical) valuations
+│   ├── Kripke.lean             -- Kripke semantics (intuitionistic)
+│   ├── SemanticConsequence.lean
+│   └── Algebra/                -- Algebraic semantics (Brouwerian/Heyting + Hilbert
+│                                  algebras, Glivenko, Kripke bridge, conservativity — 32 files)
+└── Metalogic/                  -- Soundness, completeness, decidability
+    ├── Soundness.lean, StrongCompleteness.lean, DeductionTheorem.lean, MCS.lean
+    ├── Int*.lean, Min*.lean    -- intuitionistic / minimal variants
+    ├── Classical*Completeness.lean -- fragment completeness (Imp, ConjImp, ConjImpBot)
+    └── Generic{Lindenbaum,MCSBridge}.lean, ConservativityLift.lean
 ```
 
 ### Modal Logic (`Logics/Modal/`)

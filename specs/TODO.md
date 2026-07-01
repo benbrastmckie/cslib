@@ -30,7 +30,7 @@ next_project_number: 449
 
 ### Foundations
 
-448 [NOT STARTED] — Study whether to elevate the committed forward-only proof-system-
+448 [RESEARCHING] — Study whether to elevate the committed forward-only proof-system-
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
   └─ 412 [NOT STARTED] — [Split from task 278.] Simplify proofs in Foundations/Logic/ that
 
@@ -104,12 +104,12 @@ next_project_number: 449
   └─ 414 [NOT STARTED] — (Code Hygiene: [Split from task 278.] Simplify Modal/, ) (see above)
 445 [BLOCKED] — Vet fix for task 180 (Medium severity, PR-BLOCKING). HARD REQUIRE
   └─ 414 [NOT STARTED] — (Code Hygiene: [Split from task 278.] Simplify Modal/, ) (see above)
-447 [PLANNED] — Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public 
+447 [PR READY] — Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public 
 
 ## Tasks
 
 ### 448. Study Deriv σ as a shared-metatheory substrate (proof-system morphism Vision B)
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
@@ -129,11 +129,12 @@ ANTI-GOALS (never pursue): A2 maximal inductive replacement (replacing native De
 ---
 
 ### 447. Apply lake shake import-minimization fixes to files touched by tasks 321/406/431
-- **Status**: [PLANNED]
+- **Status**: [PR READY]
 - **Task Type**: cslib
 - **Dependencies**: None
 - **Research**: [447_apply_shake_import_minimization_fixes_tasks_321_406_431/reports/01_shake-import-minimization-verification.md]
 - **Plan**: [447_apply_shake_import_minimization_fixes_tasks_321_406_431/plans/01_apply-shake-import-fixes.md]
+- **Summary**: [447_apply_shake_import_minimization_fixes_tasks_321_406_431/summaries/01_apply-shake-import-fixes-summary.md]
 
 **Description**: Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public --keep-implied --keep-prefix import-minimization suggestions across files touched by tasks 321, 406, and 431. CI otherwise passes (build/test/checkInitImports green; zero sorries). Apply the genuine import-hygiene fixes and verify (do NOT blindly --fix):
 

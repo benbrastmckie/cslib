@@ -8,6 +8,7 @@ module
 
 public import Cslib.Logics.LTL.Semantics.GNBA.Closure
 public import Cslib.Foundations.Data.OmegaSequence.Init
+public import Cslib.Logics.LTL.Semantics.Satisfies
 
 /-! # GNBA Atoms — Atom Predicate and Canonical Atoms
 

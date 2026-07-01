@@ -12,8 +12,7 @@ public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.PointInsertio
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.CanonicalModel
 public import Mathlib.Data.Rat.Defs
 public import Mathlib.Algebra.Order.Ring.Rat
-public import Mathlib.Data.Finset.Max
-public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.NormNum
 
 /-! # BurgessR3Maximal fc Helper Lemmas
 

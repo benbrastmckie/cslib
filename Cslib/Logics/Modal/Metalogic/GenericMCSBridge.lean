@@ -7,7 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Modal.Metalogic.DerivationTree
-public import Cslib.Foundations.Logic.Metalogic.MCSProperties
+public import Cslib.Foundations.Logic.Metalogic.GenericMCS
 
 /-! # GenericMCS Bridge for Normal Modal Logics
 
@@ -71,7 +71,6 @@ open Cslib.Logic
 open Cslib.Logic.Metalogic.ListImplication
 open Cslib.Logic.Metalogic.ListDeduction
 open Cslib.Logic.Metalogic.GenericMCS
-open Cslib.Logic.Metalogic.MCSProperties
 open Cslib.Logic.Metalogic
 
 variable {Atom : Type*}

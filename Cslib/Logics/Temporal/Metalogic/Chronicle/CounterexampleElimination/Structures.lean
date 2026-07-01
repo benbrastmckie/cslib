@@ -12,7 +12,6 @@ public import Cslib.Logics.Temporal.Metalogic.Chronicle.PointInsertion
 public import Mathlib.Data.Rat.Defs
 public import Mathlib.Algebra.Order.Ring.Rat
 public import Mathlib.Data.Finset.Max
-public import Mathlib.Logic.Encodable.Basic
 public import Mathlib.Tactic.Linarith
 
 /-! # C5/C5' Counterexample Structures and Fresh-Rational Helpers

@@ -6,9 +6,9 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Temporal.Tableau.Defs
 public import Cslib.Logics.Temporal.Tableau.TimeOrdering
+public import Cslib.Foundations.Logic.Tableau.PropositionalRules
 
 /-! # Temporal Tableau Rules
 

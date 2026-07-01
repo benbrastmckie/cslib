@@ -9,7 +9,6 @@ module
 import Cslib.Init
 
 public import Cslib.Foundations.Order.HilbertAlgebra
-public import Mathlib.Data.Multiset.Basic
 public import Mathlib.Data.Multiset.MapFold
 
 /-! # Free BrouwerianSemilattice over a HilbertAlgebra

@@ -1,8 +1,7 @@
 {
-  "status": "partial",
+  "status": "completed",
   "metadata": {
-    "cycles_used": 3,
-    "final_state": "planned",
-    "halt_reason": "weekly_usage_limit"
+    "cycles_used": 4,
+    "final_state": "pr_ready"
   }
 }

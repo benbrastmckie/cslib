@@ -8,7 +8,6 @@ module
 
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.CounterexampleElimination.Structures
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.CounterexampleElimination.BurgessHelpers
-public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.CounterexampleElimination.Elimination
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.ChronicleTypes
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.RRelation
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.PointInsertion

@@ -6,10 +6,8 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.LTL.Semantics.Satisfies
+public import Cslib.Logics.LTL.Syntax.Formula
 public import Mathlib.Data.Set.Finite.Basic
-public import Mathlib.Data.Set.Finite.Powerset
-public import Mathlib.Data.Set.Finite.Lattice
 
 /-! # GNBA Closure — Subformulas and Fischer-Ladner Closure
 

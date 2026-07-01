@@ -8,6 +8,7 @@ module
 
 public import Cslib.Logics.Temporal.Metalogic.DeductionTheorem
 public import Cslib.Logics.Temporal.Metalogic.GenericMCSBridge
+public import Cslib.Foundations.Logic.Metalogic.MCSProperties
 
 /-! # Maximal Consistent Sets for Temporal Logic BX
 

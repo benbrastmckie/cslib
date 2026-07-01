@@ -6,8 +6,8 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
-public import Cslib.Logics.Modal.Tableau.Saturation
+public import Cslib.Logics.Modal.Basic
+public import Batteries.Data.List.Basic
 
 /-! # Modal K Tableau Loop Induction Helpers
 

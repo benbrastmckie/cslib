@@ -8,7 +8,6 @@ module
 
 public import Cslib.Logics.Temporal.Metalogic.MCS
 public import Cslib.Foundations.Data.ListHelpers
-public import Cslib.Foundations.Logic.Metalogic.DeductionHelpers
 
 /-! # FC-Parameterized MCS Infrastructure for Temporal Logic
 

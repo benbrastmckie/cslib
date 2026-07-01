@@ -8,6 +8,7 @@ module
 
 import Cslib.Init
 public import Cslib.Logics.Modal.Tableau.LoopInduction
+public import Cslib.Logics.Modal.Tableau.Saturation
 
 /-! # Modal K Tableau Completeness
 
@@ -429,7 +430,7 @@ lemma modalTruthLemma
               · exfalso
                 rcases c with _|_|_|_ <;> rcases a with _|_|⟨a1, _|_|_|_⟩|_ <;>
                   simp_all [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?]
-              · -- negPos: φ = ¬x ; rule gives F(x)@w
+              · -- negPos: φ = ¬x; rule gives F(x)@w
                 simp only [hA, hO, hI, hN] at hcond
                 have hxmem : (⟨.neg, x, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
                   hcond ⟨.neg, x, w⟩ (by simp)
@@ -488,7 +489,7 @@ lemma modalTruthLemma
               · exfalso
                 rcases c with _|_|_|_ <;> rcases a with _|_|⟨a1, _|_|_|_⟩|_ <;>
                   simp_all [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?]
-              · -- negNeg: φ = ¬x ; rule gives T(x)@w
+              · -- negNeg: φ = ¬x; rule gives T(x)@w
                 simp only [hA, hO, hI, hN] at hcond
                 have hxmem : (⟨.pos, x, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
                   hcond ⟨.pos, x, w⟩ (by simp)

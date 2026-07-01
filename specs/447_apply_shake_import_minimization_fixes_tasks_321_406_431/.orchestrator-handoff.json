@@ -1,14 +1,21 @@
 {
-  "status": "planned",
-  "summary": "6-phase plan for the 17 verified shake import-minimization edits. Order: (1) baseline build + shake reproduction (FmpMeasure WIP needs --force locally); (2) independent leaf edits (#7 FreeMeetExtension, #11 BurgessHelpers, #13/#14 Encodable move, #15/#16 Satisfies move); (3) 3 GenericMCS bridge swaps WITH removal of the dead `open MCSProperties` line (else unknown namespace); (4) 6 Cslib.Init removals gated on `lake exe checkInitImports`; (5) Interface barrel + DenseMCS re-export removals; (6) scoped shake confirming the 17 listed suggestions resolved (NOT full shake cleanliness) + full CI (build/test/checkInitImports/lint-style). Build between groups so breaks localize.",
+  "status": "implemented",
+  "summary": "Applied all 17 verified lake shake import-minimization edits across 19 files (17 primary + 2 downstream-consumer deviation fixes: MCS.lean, Completeness.lean). Full CI gate green (build/test/checkInitImports/lint-style); zero sorries/new axioms. Recovered twice from concurrent-session file-write interference (task 442 actively editing the same Modal/Tableau files) -- see environmental note.",
   "artifacts": [
+    {
+      "path": "specs/447_apply_shake_import_minimization_fixes_tasks_321_406_431/summaries/01_apply-shake-import-fixes-summary.md",
+      "type": "summary",
+      "summary": "Full implementation summary: 6 phases, per-phase edits, 2 deviation fixes, CI results, and a detailed environmental note on concurrent-session interference with a pre-commit spot-check recommendation."
+    },
     {
       "path": "specs/447_apply_shake_import_minimization_fixes_tasks_321_406_431/plans/01_apply-shake-import-fixes.md",
       "type": "plan",
-      "summary": "Phased plan applying 17 shake import edits with per-phase build gates and final scoped-shake + CI verification."
+      "summary": "All 6 phases marked COMPLETED with inline deviation annotations."
     }
   ],
   "blockers": [],
+  "continuation_context": null,
+  "phases_completed": 6,
   "phases_total": 6,
-  "next_action_hint": "Run /implement 447. Watch the GenericMCS open-line removal (Phase 3) and the checkInitImports gate (Phase 4)."
+  "next_action_hint": "Ready for /pr 447. IMPORTANT: before committing, spot-check that Cslib/Logics/Modal/Tableau/{Saturation,LoopInduction,Soundness}.lean do not contain 'import Cslib.Init' and that Completeness.lean still has its added 'public import Cslib.Logics.Modal.Tableau.Saturation' line -- a concurrent session (task 442) was observed reverting these exact files twice during this run."
 }

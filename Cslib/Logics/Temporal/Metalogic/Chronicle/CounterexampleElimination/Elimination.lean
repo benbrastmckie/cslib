@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.CounterexampleElimination.Structures
+public import Mathlib.Logic.Encodable.Basic
 
 /-! # C5 Counterexample Elimination and Potential Counterexample Interface
 

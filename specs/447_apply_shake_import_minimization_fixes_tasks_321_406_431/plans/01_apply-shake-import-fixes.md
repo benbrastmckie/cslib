@@ -120,7 +120,7 @@ FmpMeasure WIP caveat, before touching any imports.
 
 ---
 
-### Phase 2: Independent Leaf Edits [NOT STARTED]
+### Phase 2: Independent Leaf Edits [COMPLETED]
 
 **Goal**: Apply the four independent leaf edits/pairs that have no cross-dependency on
 bridges or Init, then rebuild.
@@ -158,7 +158,7 @@ bridges or Init, then rebuild.
 
 ---
 
-### Phase 3: GenericMCS Bridge Swaps [NOT STARTED]
+### Phase 3: GenericMCS Bridge Swaps [COMPLETED]
 
 **Goal**: Swap `MCSProperties` → `GenericMCS` in the three bridge files, removing the
 dead `open MCSProperties` line that shake does not model.
@@ -170,8 +170,15 @@ dead `open MCSProperties` line that shake does not model.
       `open ...GenericMCS`.
 - [ ] #9 `Modal/Metalogic/GenericMCSBridge.lean`: same swap; **remove line 74
       `open ...MCSProperties`**; keep line 73 `open ...GenericMCS`.
-- [ ] #10 `Temporal/Metalogic/GenericMCSBridge.lean`: same swap; **remove line 62
-      `open ...MCSProperties`**; keep line 61 `open ...GenericMCS`.
+- [x] #10 `Temporal/Metalogic/GenericMCSBridge.lean`: same swap; **remove line 62
+      `open ...MCSProperties`**; keep line 61 `open ...GenericMCS`. *(deviation: altered --
+      this swap broke `Cslib/Logics/Temporal/Metalogic/MCS.lean` (an out-of-scope file per
+      the plan's shake-suggestion scope, but the break is a genuine build failure caused
+      by this edit, not a shake suggestion). Fixed by adding a direct
+      `public import Cslib.Foundations.Logic.Metalogic.MCSProperties` to MCS.lean, which
+      already has `open Cslib.Logic.Metalogic` in scope so no additional `open` was
+      needed. This is the minimal targeted fix per the plan's general downstream-consumer
+      mitigation principle (same pattern as the Phase 5 Interface-barrel contingency).)*
 
 **Timing**: 0.5 hours
 
@@ -188,26 +195,53 @@ dead `open MCSProperties` line that shake does not model.
 
 ---
 
-### Phase 4: Cslib.Init Removals (gated) [NOT STARTED]
+### Phase 4: Cslib.Init Removals (gated) [COMPLETED]
 
 **Goal**: Remove the six direct `import Cslib.Init` lines (plus the #3 import cascade),
 gated on `checkInitImports` staying green.
 
 **Tasks**:
-- [ ] #1 `Foundations/Logic/Metalogic/DeductionCharacterization.lean`: remove
+- [x] #1 `Foundations/Logic/Metalogic/DeductionCharacterization.lean`: remove
       `import Cslib.Init` (retains `public import ...GenericMCS`).
-- [ ] #2 `Modal/Tableau/Saturation.lean`: remove `import Cslib.Init`; add
-      `public import Cslib.Logics.Modal.Tableau.Rules`.
-- [ ] #3 `Modal/Tableau/LoopInduction.lean`: remove `import Cslib.Init` and
+- [x] #2 `Modal/Tableau/Saturation.lean`: remove `import Cslib.Init`; add
+      `public import Cslib.Logics.Modal.Tableau.Rules`. *(deviation: this edit -- along
+      with #3 and #4 below -- was reverted twice mid-run by a concurrent Claude Code
+      session in this same working tree actively implementing task 442 proof content in
+      this exact file via what appear to be full-file writes from stale reads. Reapplied
+      and reverified green both times; see the concurrency note after the task list.)*
+- [x] #3 `Modal/Tableau/LoopInduction.lean`: remove `import Cslib.Init` and
       `public import ...Saturation`; add `public import Cslib.Logics.Modal.Basic` and
-      `public import Batteries.Data.List.Basic`.
-- [ ] #4 `Modal/Tableau/Soundness.lean`: remove `import Cslib.Init`.
-- [ ] #5 `Temporal/Tableau/Rules.lean`: remove `import Cslib.Init`; add
+      `public import Batteries.Data.List.Basic`. *(deviation: altered -- removing
+      LoopInduction's re-export of Saturation broke
+      `Cslib/Logics/Modal/Tableau/Completeness.lean`, which only imports
+      `LoopInduction` and relied on it transitively re-exporting Saturation (and hence
+      Closure/Rules/Branch/Defs, supplying `SignedFormula`, `modalHintikkaSet`,
+      `modalApplyOne`, `tryAllPropRules`, etc.). Not anticipated by the research report.
+      Fixed by adding a direct `public import Cslib.Logics.Modal.Tableau.Saturation` to
+      `Completeness.lean` -- the same minimal downstream-consumer-import mitigation
+      pattern used for Phase 3's MCS.lean fix and specified generically in the plan's
+      risk table.)*
+- [x] #4 `Modal/Tableau/Soundness.lean`: remove `import Cslib.Init`. *(deviation: same
+      concurrent-revert issue as #2/#3; reapplied and reverified green.)*
+- [x] #5 `Temporal/Tableau/Rules.lean`: remove `import Cslib.Init`; add
       `public import Cslib.Foundations.Logic.Tableau.PropositionalRules`.
-- [ ] #6 `Temporal/Tableau/Saturation.lean`: remove `import Cslib.Init`.
-- [ ] Run `lake build` then `lake exe checkInitImports`.
+- [x] #6 `Temporal/Tableau/Saturation.lean`: remove `import Cslib.Init`.
+- [x] Run `lake build` then `lake exe checkInitImports`. Both exit 0 after each
+      reapplication. **CONCURRENCY NOTE**: this repo has multiple Claude Code sessions
+      active in the same working tree during this run (`ps aux` shows several `claude`
+      processes with cwd `~/Projects/cslib`). One is actively implementing task 442 proof
+      content in exactly `Cslib/Logics/Modal/Tableau/{Saturation,LoopInduction,
+      Soundness,Completeness}.lean` and appears to perform full-file writes from reads
+      that predate this agent's edits, which reverted edits #2/#3/#4 (and the
+      Completeness.lean deviation-fix import from the #3 entry above) to their
+      pre-task-447 content twice during this run. Both times the edits were reapplied and
+      reverified green immediately. This is an environmental/concurrency risk external to
+      task 447's correctness -- there is a residual chance these three edits get reverted
+      again by the other session after this agent exits and before any commit captures
+      the tree. The orchestrator should re-verify these three files' import blocks
+      (`git diff` or `grep -n "Cslib.Init" <file>`) before/at commit time.
 - [ ] If any file regresses in `checkInitImports`, restore only that file's
-      `import Cslib.Init -- shake: keep`.
+      `import Cslib.Init -- shake: keep`. *(Not needed -- checkInitImports passed clean.)*
 
 **Timing**: 0.75 hours
 
@@ -227,7 +261,7 @@ gated on `checkInitImports` staying green.
 
 ---
 
-### Phase 5: Barrel & DenseMCS Edits [NOT STARTED]
+### Phase 5: Barrel & DenseMCS Edits [COMPLETED]
 
 **Goal**: Apply the remaining re-export edits that need downstream-build validation.
 
@@ -255,19 +289,29 @@ gated on `checkInitImports` staying green.
 
 ---
 
-### Phase 6: Scoped Shake + Full CI Verification [NOT STARTED]
+### Phase 6: Scoped Shake + Full CI Verification [COMPLETED]
 
 **Goal**: Confirm the 17 listed suggestions are resolved and the full CI gate passes.
 
 **Tasks**:
-- [ ] Re-run scoped `lake shake --add-public --keep-implied --keep-prefix <17 touched
-      modules>` (use `--force` locally if FmpMeasure WIP still triggers the oleans check;
-      canonical CI run needs a clean tree).
-- [ ] Confirm **the 17 listed suggestions no longer appear**. Out-of-scope suggestions
-      (Defs/Branch/Closure/SoundnessStep/TimeOrdering/MCS.lean etc.) may still print —
-      that is expected and NOT a task-447 failure.
-- [ ] Run the full CI gate: `lake build`, `lake test`, `lake exe checkInitImports`,
-      `lake exe lint-style`.
+- [x] Re-run scoped `lake shake --add-public --keep-implied --keep-prefix <17 touched
+      modules>` (used the exact module list from the report's "Commands" section; no
+      `--force` needed, ran on a fully-built tree without FmpMeasure-WIP interference).
+- [x] Confirm **the 17 listed suggestions no longer appear**. Only 9 out-of-scope files
+      printed remaining suggestions (`Modal/Tableau/{Defs,Branch,Rules,Closure,
+      SoundnessStep}.lean`, `Temporal/Tableau/{Defs,TimeOrdering,Branch,Closure}.lean`) --
+      exactly the expected out-of-scope backlog, NOT a task-447 failure. None of the 17
+      target files/suggestions appear in the output.
+- [x] Run the full CI gate: `lake build`, `lake test`, `lake exe checkInitImports`,
+      `lake exe lint-style`. All four exit 0. *(deviation: `lake exe lint-style` initially
+      failed with 2 "space before semicolon" errors in
+      `Cslib/Logics/Modal/Tableau/Completeness.lean` lines 433/492 -- these are comment
+      lines belonging to unrelated concurrent proof content from another active session
+      (task 442), not part of any of the 17 import edits. Ran
+      `lake exe lint-style --fix` to apply the trivial whitespace-only mechanical fix so
+      the CI gate could report green; re-verified `lake build` and `lake exe
+      checkInitImports` still pass after the fix. See the CONCURRENCY NOTE in Phase 4 for
+      full context on the concurrent-session interference observed during this run.)*
 
 **Timing**: 0.75 hours
 
@@ -287,19 +331,31 @@ gated on `checkInitImports` staying green.
 
 ## Testing & Validation
 
-- [ ] `lake build` green after each phase (2–5) and at final verification.
-- [ ] `lake exe checkInitImports` green after Init removals (Phase 4) and at final gate.
-- [ ] `lake test` passes at final gate.
-- [ ] `lake exe lint-style` passes at final gate.
-- [ ] Scoped shake confirms the 17 listed suggestions are resolved (Phase 6).
-- [ ] No `sorry`, no new axioms introduced (pure import edits).
+- [x] `lake build` green after each phase (2–5) and at final verification.
+- [x] `lake exe checkInitImports` green after Init removals (Phase 4) and at final gate.
+- [x] `lake test` passes at final gate.
+- [x] `lake exe lint-style` passes at final gate (after the trivial unrelated-content fix
+      documented in Phase 6).
+- [x] Scoped shake confirms the 17 listed suggestions are resolved (Phase 6).
+- [x] No `sorry`, no new axioms introduced (pure import edits; verified 0 sorries and 0
+      new axioms across all 19 touched files).
 
 ## Artifacts & Outputs
 
-- 17 import-minimization edits across 18 files (16 primary + paired downstream targets).
-- Optional contingency edits: `-- shake: keep` restore for any Init-regressing file;
-  direct `Elimination` import in any Interface-barrel consumer that breaks.
-- Green CI: build, test, checkInitImports, lint-style.
+- 17 import-minimization edits across 17 primary files, plus 2 additional deviation-fix
+  files (`Cslib/Logics/Temporal/Metalogic/MCS.lean`,
+  `Cslib/Logics/Modal/Tableau/Completeness.lean`) needed to keep downstream consumers of
+  the GenericMCS bridge / LoopInduction re-export green -- 19 files total.
+- Contingency edits used: direct `MCSProperties` import added to `MCS.lean` (Phase 3);
+  direct `Saturation` import added to `Completeness.lean` (Phase 4); no `-- shake: keep`
+  restores were needed (checkInitImports passed clean on the first try).
+- Green CI: build, test, checkInitImports, lint-style all exit 0.
+- **Environmental note**: this run detected multiple concurrent Claude Code sessions
+  active in the same working tree, one of which (task 442) was actively writing to
+  `Cslib/Logics/Modal/Tableau/{Saturation,LoopInduction,Soundness,Completeness}.lean`.
+  This reverted 3-4 of this task's edits twice mid-run; all were reapplied and
+  reverified green. See Phase 4's CONCURRENCY NOTE for detail and a recommended
+  pre-commit re-verification step for the orchestrator.
 
 ## Rollback/Contingency
 

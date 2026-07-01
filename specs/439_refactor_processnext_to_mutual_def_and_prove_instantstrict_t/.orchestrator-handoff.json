@@ -1,0 +1,24 @@
+{
+  "task_number": 439,
+  "task_slug": "refactor_processnext_to_mutual_def_and_prove_instantstrict_t",
+  "orchestrator_mode": true,
+  "final_status": "implemented",
+  "phases_completed": 4,
+  "phases_total": 4,
+  "blockers": [],
+  "continuation_context": "Task 439 (parent task 426 Phase 3) is fully complete. All 4 phases landed green and sorry-free: (1) lifted processNext out of its let-rec nesting into a top-level mutual block with explicit termination_by measures; (2) proved temporalStepBranch_preserves (single-step InstantStrict + OrdFreshWRT preservation), reusing existing Rules.lean infrastructure (temporalApplyOne_preserves, OrdFreshWRT) that had already landed under task 180 phase 8; (3) proved the run-level corollary temporalTableau_instantStrict via strong induction on fuel + nested structural induction on the worklist, introducing WorklistInv/ResultInv/processNext_mismatch_closed as supporting infrastructure; (4) wired the resolved order-preservation component into Completeness.lean's openBranch_branchSat documentation block and finalized parent task 426 as completed in state.json. Full CI is green: lake build (3188/3188), lake test (9179/9179), checkInitImports, lint-style, lake lint (clean on touched files). No new sorry, no new axioms, no vacuous definitions. Remaining work (temporalTruthLemma for Until/Since, requiring PTL's Finite Model Property) is out of scope for this task and remains documented as a blocked comment sketch in Completeness.lean -- a follow-up task would need to formalize FMP for PTL before openBranch_branchSat/temporalTableau_complete/instDecidableValid can be completed.",
+  "summary": "Refactored the temporal tableau's processNext from a nested let-rec into a top-level mutual definition, then proved and wired the run-level InstantStrict time-ordering invariant through the full saturation loop, closing out parent task 426.",
+  "artifacts": [
+    "specs/439_refactor_processnext_to_mutual_def_and_prove_instantstrict_t/plans/01_processnext-mutual-instantstrict.md",
+    "specs/439_refactor_processnext_to_mutual_def_and_prove_instantstrict_t/summaries/01_processnext-mutual-instantstrict-summary.md",
+    "Cslib/Logics/Temporal/Tableau/Saturation.lean",
+    "Cslib/Logics/Temporal/Tableau/Completeness.lean"
+  ],
+  "commits": [
+    "task 439 phase 1: lift processNext into mutual block (green refactor)",
+    "task 439 phase 2: single-step InstantStrict preservation + coupling (green, sorry-free)",
+    "task 439 phase 3: run-level InstantStrict threaded through saturation (green, sorry-free)",
+    "task 439: complete (426 phase 3 -- run-level InstantStrict threaded and wired)"
+  ],
+  "requires_user_review": false
+}

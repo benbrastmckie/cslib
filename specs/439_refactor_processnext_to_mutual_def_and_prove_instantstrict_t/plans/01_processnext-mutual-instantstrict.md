@@ -225,28 +225,43 @@ one below.
 - **Verification:** run-level lemma + entry-point corollary build green and `sorry`-free by
   `lean_verify`; the corollary is stated in the `openBranch`-yields-`InstantStrict` form Phase 4 needs.
 
-### Phase 4: Wire into `openBranch_branchSat` and finalize [NOT STARTED]
+### Phase 4: Wire into `openBranch_branchSat` and finalize [COMPLETED]
 
 - **Goal:** Use the run-level `InstantStrict` corollary to discharge the order-preservation
   component (`hInst`) of `openBranch_branchSat` for the `D = ℤ / f = ord.instant` model, as far as
   the FMP boundary allows; run full CI; finalize parent task 426.
 - **Tasks:**
-  - [ ] Territory check: confirm no concurrent task-427 work on `Completeness.lean` before editing.
-  - [ ] In `Cslib/Logics/Temporal/Tableau/Completeness.lean`, supply `hInst : TimeOrdering.InstantStrict
+  - [x] Territory check: confirm no concurrent task-427 work on `Completeness.lean` before editing.
+    *(task 427 not present in `specs/state.json` active_projects; no recent commits touching
+    `Completeness.lean` from that task; territory clear.)*
+  - [x] In `Cslib/Logics/Temporal/Tableau/Completeness.lean`, supply `hInst : TimeOrdering.InstantStrict
     ord` in the `openBranch_branchSat` order-preservation region (currently a documented sketch,
     lines ~980-1005) from the Phase 3 entry-point corollary, for the `D = ℤ`, `f = ord.instant`
     choice. Advance only the order-preservation component; leave the FMP-blocked
     `temporalTruthLemma`/Until/Since parts documented as blocked (no `sorry`).
-  - [ ] Update the surrounding blocker documentation so it reflects that the run-level
+    *(deviation: altered -- `openBranch_branchSat` itself remains a commented sketch, not real
+    code: it cannot be stated as an actual theorem while `temporalTruthLemma` is FMP-blocked,
+    since `branchSat`'s existential witness needs both components at once. Updated the sketch's
+    `hInst` field to a concrete call `temporalTableau_instantStrict φ b ord hresult` instead of an
+    assumed hypothesis, and updated the surrounding prose from "BLOCKED" to "RESOLVED" for the
+    order-preservation component.)*
+  - [x] Update the surrounding blocker documentation so it reflects that the run-level
     `InstantStrict` (task 426 Phase 3) is now RESOLVED and only FMP remains.
-  - [ ] Full CI, in order: `lake build`; `lake exe checkInitImports`; `lake exe lint-style`;
+  - [x] Full CI, in order: `lake build`; `lake exe checkInitImports`; `lake exe lint-style`;
     `lake test 2>&1 | tail -5` (expect the 9152/9152 suite green). Confirm no active `sorry`
     introduced by 439 (`grep -n "sorry"` on both touched files; the pre-existing 427 imp-case sorry,
     if present, is the only allowed one and must be unchanged).
-  - [ ] Update `specs/state.json`: mark parent task 426 status `completed` with `completion_summary`
+    *(deviation: altered -- suite is now 9179/9179 (grew since the plan's 9152 estimate from
+    unrelated concurrent work); also ran `lake lint` and `lake shake`/`lake exe mk_all` per the
+    full CSLib CI order. Two transient full-build/test failures were observed and resolved by
+    retry -- caused by a concurrently running session (task 452) editing
+    `GenericMCSBridge.lean`/`GenericMCS.lean` in the same shared working tree, unrelated to task
+    439; confirmed via `git status`/`git stash` isolation that task 439's own files were
+    unaffected and the failures were not caused by this task's changes.)*
+  - [x] Update `specs/state.json`: mark parent task 426 status `completed` with `completion_summary`
     (Phase 3 threaded: run-level `InstantStrict` proved and wired into `openBranch_branchSat`); mark
     task 439 `implemented`. Regenerate TODO.md via `bash .claude/scripts/generate-todo.sh`.
-  - [ ] Write/update the task summary and commit:
+  - [x] Write/update the task summary and commit:
     `task 439: complete (426 phase 3 — run-level InstantStrict threaded and wired)`.
 - **Timing:** ~0.5-1 hour
 - **Depends on:** 3

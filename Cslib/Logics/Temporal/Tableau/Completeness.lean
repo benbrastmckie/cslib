@@ -393,9 +393,19 @@ through every `addFuture`/`addPast` (proved sorry-free in TimeOrdering.lean).
 **Order-preservation choice**: `D = ℤ`, `f = ord.instant`. The corrected
 `openBranch_branchSat` sketch (below) uses `⟨ℤ, inferInstance, inferInstance,
 extractModelℤ b ord, ord.instant, hInst, …⟩` where `hInst` is the run-level
-`InstantStrict ord` lemma. Proving `hInst` requires threading the invariant through
-`temporalExpandBranches` (see Phase 3 blocker in task 426's plan — the inner `let rec
-processNext` cannot be targeted by standard induction tactics until factored out).
+`InstantStrict ord` lemma.
+
+**RESOLVED (task 439, task 426 Phase 3)**: `hInst` is now a concrete, sorry-free theorem:
+`Cslib.Logic.Temporal.Tableau.temporalTableau_instantStrict` (`Saturation.lean`). The
+blocker was structural: `processNext` was a `let rec` nested inside `temporalExpandBranches`,
+so Lean generated no standalone recursion/induction principle for it. Task 439 (1) lifted the
+pair into a top-level `mutual … end` block with an explicit lexicographic `termination_by`
+(`Saturation.lean`), (2) proved a single-step preservation lemma
+(`temporalStepBranch_preserves`) packaging the edge-by-edge `InstantStrict`/`OrdFreshWRT`
+lemmas as the inductive step, and (3) threaded the invariant through the run via strong
+induction on `fuel` plus structural induction on the worklist
+(`temporalTableau_instantStrict`). The order-preservation component of `openBranch_branchSat`
+is thus fully dischargeable; only the FMP-blocked truth lemma below remains.
 
 **Why `ordConstraints_strict` is false**: `addPast t tNew` records `(tNew, t)` with
 `tNew = branchNextTime b > t` (by `branchNextTime_gt`). So `(tNew, t) ∈ constraints`
@@ -979,24 +989,31 @@ lemma temporalTruthLemma_propositional
 
 ### Blocked: Open Branch Satisfiability
 
-Order-preservation component: UNLOCKED by task 426 (uses `D = ℤ`, `f = ord.instant`,
-`hInst` from the run-level `InstantStrict` lemma). Remaining blocker: the full
-`temporalTruthLemma` (FMP-blocked) and the run-level `InstantStrict` proof (Phase 3
-of task 426, requires factoring out `processNext`).
+Order-preservation component: RESOLVED (task 439, task 426 Phase 3). `hInst` is no longer
+an assumed hypothesis -- it is the concrete theorem
+`Cslib.Logic.Temporal.Tableau.temporalTableau_instantStrict` (`Saturation.lean`), proved by
+threading `InstantStrict` through the run-level saturation loop (`mutual`-lifted
+`temporalExpandBranches`/`processNext`, single-step preservation, strong induction on fuel +
+structural induction on the worklist). Remaining blocker: only the full `temporalTruthLemma`
+(FMP-blocked -- Until/Since fulfilment requires PTL's Finite Model Property, not yet
+formalized) prevents `openBranch_branchSat` from being stated as a real theorem, since its
+`branchSat` witness needs both components simultaneously.
 
 ```lean
--- BLOCKED: full temporalTruthLemma requires PTL FMP.
--- Order-preservation component is NOW CORRECT with D=ℤ, f=ord.instant, hInst=InstantStrict.
--- Phase 3 of task 426 (run-level InstantStrict) remains BLOCKED pending processNext refactor.
+-- BLOCKED: full temporalTruthLemma requires PTL FMP (Until/Since fulfilment).
+-- Order-preservation component is FULLY RESOLVED: D=ℤ, f=ord.instant,
+-- hInst=temporalTableau_instantStrict (task 439 / task 426 Phase 3, sorry-free).
 --
 -- lemma openBranch_branchSat
---     (b : TBranch Atom) (ord : TimeOrdering) (tracker : EventualityTracker Atom)
---     (hH : temporalHintikkaSet b ord tracker)
---     (hInst : TimeOrdering.InstantStrict ord) :   -- from run-level invariant (task 426 Ph3)
+--     (φ : Formula Atom) (b : TBranch Atom) (ord : TimeOrdering)
+--     (tracker : EventualityTracker Atom)
+--     (hresult : temporalTableau φ = .openBranch b ord)
+--     (hH : temporalHintikkaSet b ord tracker) :
 --     branchSat b ord :=
 --   ⟨ℤ, inferInstance, inferInstance, extractModelℤ b ord, ord.instant,
---    fun t t' hconstr => hInst t t' hconstr,         -- order-preservation: PROVABLE
---    fun sf hmem => temporalTruthLemma … ⟩           -- truth lemma: BLOCKED (FMP)
+--    fun t t' hconstr =>
+--      temporalTableau_instantStrict φ b ord hresult t t' hconstr,  -- order-preservation: PROVEN
+--    fun sf hmem => temporalTruthLemma … ⟩                          -- truth lemma: BLOCKED (FMP)
 ```
 
 ### Blocked: Completeness Theorem

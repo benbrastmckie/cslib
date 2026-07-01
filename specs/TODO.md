@@ -11,11 +11,10 @@ next_project_number: 464
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,396,400,404,407,438,439,440,441,447,449,452,453,457,458,459,460,461,463 | -- | Foundations, Propositional Logic, Modal Logic, ... |
-| 2 | 39,40,215,375,389,405,409,426,430,450,451,456,462 | 36,37,181,317,404,407,439,449,457,459 | Propositional Logic, Modal Logic, Temporal Logic, ... |
-| 3 | 41,391,392,413,425,444,454 | 39,40,375,389,426,450 | Foundations, Temporal Logic, Bimodal Logic, ... |
-| 4 | 301,393,412 | 41,391,425 | Temporal Logic, Code Hygiene |
-| 5 | 414 | 215,300,301,444 | Code Hygiene |
+| 1 | 36,37,181,226,300,317,396,400,404,407,425,438,439,440,441,447,449,452,453,457,458,459,460,461,463 | -- | Foundations, Propositional Logic, Modal Logic, ... |
+| 2 | 39,40,215,301,375,389,405,409,430,450,451,456,462 | 36,37,181,317,404,407,425,449,457,459 | Propositional Logic, Modal Logic, Temporal Logic, ... |
+| 3 | 41,391,392,413,444,454 | 39,40,375,389,450 | Foundations, Bimodal Logic, Code Hygiene |
+| 4 | 393,412,414 | 41,215,300,301,391,444 | Code Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -44,10 +43,9 @@ next_project_number: 464
 
 ### Temporal Logic
 
-439 [PLANNED] — Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_red
-  └─ 426 [BLOCKED] — [Decomposed from task 301, blocker A.] Redesign the time-ordering
-    └─ 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
-      └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
+425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
+  └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
+439 [IMPLEMENTED] — Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_red
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -89,12 +87,12 @@ next_project_number: 464
 
 ### Uncategorized
 
-457 [NOT STARTED] — Vet of task 299 (session sess_1782919557_8a4cc2) found 6 lake sha
+457 [PLANNED] — Vet of task 299 (session sess_1782919557_8a4cc2) found 6 lake sha
   └─ 462 [NOT STARTED] — Vet of task 299 flagged two maintainability items (both non-block
-458 [NOT STARTED] — Vet of task 455 (session sess_1782919557_8a4cc2) found 2 lake sha
-459 [NOT STARTED] — Vet of task 299 found 57 lines exceeding the 100-char `linter.sty
+458 [PLANNED] — Vet of task 455 (session sess_1782919557_8a4cc2) found 2 lake sha
+459 [PLANNED] — Vet of task 299 found 57 lines exceeding the 100-char `linter.sty
   └─ 462 [NOT STARTED] — Vet of task 299 flagged two maintainability items (both non-block (see above)
-460 [NOT STARTED] — Vet of task 455 found lint warnings in the repointed consumer Csl
+460 [PLANNED] — Vet of task 455 found lint warnings in the repointed consumer Csl
 461 [NOT STARTED] — Vet found 6 `linter.unusedSectionVars` warnings; add `omit [...] 
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 
@@ -128,7 +126,7 @@ next_project_number: 464
 ---
 
 ### 460. Fix lake-build lint warnings in Classical/Completeness.lean (task 455 vet)
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -137,7 +135,7 @@ next_project_number: 464
 ---
 
 ### 459. Shorten >100-char lines in modal K tableau SoundnessStep + Completeness (task 299 vet)
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -146,7 +144,7 @@ next_project_number: 464
 ---
 
 ### 458. Fix lake shake import findings in shared Measure module + Classical consumer (task 455 vet)
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -155,7 +153,7 @@ next_project_number: 464
 ---
 
 ### 457. Fix lake shake import findings in modal K tableau files (task 299 vet)
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Dependencies**: None
 
@@ -410,12 +408,13 @@ Definition of done: lake build, lake lint, lake exe lint-style green on every in
 
 ### 439. Refactor processnext to mutual def and prove instantstrict t
 - **Effort**: 3-5 hours
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 180
 - **Research**: [426_temporal_tableau_ordconstraints_redesign/reports/03_spawn-analysis.md]
 - **Plan**: [439_refactor_processnext_to_mutual_def_and_prove_instantstrict_t/plans/01_processnext-mutual-instantstrict.md]
+- **Summary**: [439_refactor_processnext_to_mutual_def_and_prove_instantstrict_t/summaries/01_processnext-mutual-instantstrict-summary.md]
 
 **Description**: Complete Phase 3 of task 426 (temporal_tableau_ordconstraints_redesign). Phases 1, 2, 4, 5 are already done and green. Only Phase 3 remains.
 
@@ -522,7 +521,7 @@ After implementation:
 ---
 
 ### 426. Temporal tableau ordconstraints redesign
-- **Status**: [BLOCKED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 439

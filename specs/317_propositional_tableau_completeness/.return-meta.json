@@ -1,11 +1,21 @@
 {
-  "status": "in_progress",
+  "status": "planned",
   "agent_type": "planner-hard-agent",
   "task_number": 317,
   "delegation_path": ["orchestrator", "plan", "planner-hard-agent"],
   "plan_path": "specs/317_propositional_tableau_completeness/plans/05_frame-change-and-fuel-raise.md",
+  "plan_version": 5,
+  "phase_count": 11,
+  "estimated_hours": 18,
+  "postmortem_rules_count": 6,
+  "complexity": "complex",
+  "research_integrated": true,
+  "dependency_waves": [[1],[2],[3],[4,6,7],[5,8,9],[10],[11]],
   "reports_integrated": [
-    "specs/317_propositional_tableau_completeness/reports/07_option-b-fuel-bound.md",
-    "specs/317_propositional_tableau_completeness/reports/08_b1-truthlemma-timp.md"
-  ]
+    {"path": "specs/317_propositional_tableau_completeness/reports/07_option-b-fuel-bound.md", "integrated_in_plan_version": 5, "integrated_date": "2026-07-01"},
+    {"path": "specs/317_propositional_tableau_completeness/reports/08_b1-truthlemma-timp.md", "integrated_in_plan_version": 5, "integrated_date": "2026-07-01"}
+  ],
+  "supersedes": ["plans/04_sfor-dedup-fuel-sufficiency.md (Phases 5/7 retired; Phases 1-4 preserved)"],
+  "h8_compliant": true,
+  "parallel_tracks": "B1 (Phases 4,5) and B2 (Phases 6-9) run in parallel after the frame change; converge at Phase 10 (intExpandBranches_openBranch_sat)"
 }

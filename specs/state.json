@@ -1364,7 +1364,7 @@
     {
       "project_number": 452,
       "project_name": "generalize_genericmcsbridge_foundations",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Foundations",
       "priority": "high",
@@ -1372,9 +1372,10 @@
       "description": "From review 2026-07-01-2 (HIGH). The four GenericMCSBridge.lean files (Propositional 256L, Modal 267L, Temporal 370L, Bimodal/Core 405L; 1298L total) share a near-verbatim skeleton: HilbertOf tag type -> InferenceSystem/ModusPonens/HasAxiomImplyK/HasAxiomImplyS/MinimalHilbert instances -> AlgDS alias -> derivTreeToList -> unfoldListImpInTree (~19L) -> listDerivToTree (~15L) -> {logic}_deriv_iff_algebraic / _setConsistent_iff_algebraic / _setMaxConsistent_iff_algebraic. The trio uses only assumption/modus_ponens/weakening (no logic-specific content). Temporal and Bimodal ADDITIONALLY duplicate their own base/Fc sections internally (e.g. Temporal L66-221 vs L239-370). Approach: (1) collapse Temporal's and Bimodal's intra-file base/Fc duplication first by making the base bridge a specialization of the Fc-parameterized one (fc := .Base) -- ~130-150L each, lowest risk, no cross-logic abstraction; (2) extract unfoldListImpInTree, listDerivToTree, and the three iff-theorems into Cslib/Foundations/Logic/Metalogic/GenericMCS.lean, parameterized over a typeclass capturing 'tree-shaped derivation with ax/assumption/mp/weakening constructors', with extra rules (necessitation, temporal duality) passed as an optional hypothesis/callback. Est. elimination ~300-450 lines. NOT covered by tasks 415/393/439 (which build ON the bridge as infrastructure, verified against their reports). Sequence to avoid collision with in-flight tasks 441/442 (Modal refactor) and 449-451 (BX+). DoD: shared abstraction in Foundations, all four per-logic bridges reduced to thin instantiations, lake build/test/lint green, zero new sorries or axioms.",
       "dependencies": [],
       "created": "2026-07-01T07:42:45Z",
-      "last_updated": "2026-07-01T07:42:45Z",
+      "last_updated": "2026-07-01T15:18:32Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [],
+      "session_id": "sess_1782893288_776f6c"
     },
     {
       "project_number": 453,

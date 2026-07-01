@@ -21,7 +21,7 @@ next_project_number: 457
 
 ### Foundations
 
-452 [NOT STARTED] — From review 2026-07-01-2 (HIGH). The four GenericMCSBridge.lean f
+452 [RESEARCHED] — From review 2026-07-01-2 (HIGH). The four GenericMCSBridge.lean f
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Propositional Logic
@@ -132,7 +132,7 @@ next_project_number: 457
 ---
 
 ### 452. Generalize GenericMCSBridge: hoist shared MCS-bridge trio into Foundations and collapse base/Fc duplication
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None

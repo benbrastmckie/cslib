@@ -309,7 +309,12 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
 > after each obligation compiles green** (banked/resumable). The same rank/out-degree invariant will
 > be threaded by P5a, so define its predicate(s) cleanly for reuse.
 >
-> - [ ] **P2-obl-a** `modalBranchNodup`: `b.Nodup` maintained across `modalStepBranch`'s 5 rule cases.
+> - [x] **P2-obl-a** `modalBranchNodup`: landed as `modalStepBranch_preserves_expandedNodup`
+>   (`FmpMeasure.lean`) — a precision refinement of the plan's "branch Nodup" shorthand: `b`
+>   itself is NOT generally `Nodup` (unfiltered propositional α/β outputs, e.g. `andPos`, can
+>   duplicate an already-present formula), but the invariant actually load-bearing for P2-obl-c
+>   is `Nodup` of the **expanded set** `e`, which IS exactly maintained (append-gated by
+>   `¬(expanded.any (·==sf))`). Commit `672a940e`+1 (task 442 phase 2a).
 > - [ ] **P2-obl-b** `FormulaRankBound` (`∀x∈b, modalDepth x.formula ≤ rank x.label`) maintained; fresh worlds get `rank := parent_rank − 1`.
 > - [ ] **P2-obl-c** `outDeg w ≤ (modalSubfmls φ0).length` via injective "minting sf at w ↦ its `.formula`" into `modalSubfmls φ0` (uses P2-obl-a).
 > - [ ] **P2-obl-d** `Φ`-potential single-step `Δ=0` lemma (formalize the hand-verified arithmetic; recurrence `Sf·modalCap Sf k = modalCap Sf (k+1)−1`).

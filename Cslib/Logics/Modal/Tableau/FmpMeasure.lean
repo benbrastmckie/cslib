@@ -8,6 +8,7 @@ module
 
 import Cslib.Init
 import Mathlib.Tactic.Ring
+import Mathlib.Data.List.Nodup
 import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.SoundnessStep
 public import Cslib.Logics.Modal.Tableau.Saturation
@@ -816,6 +817,98 @@ lemma modalCap_le_pow {Sf k : Nat} (hSf : 1 ≤ Sf) (hdeg : Sf = 1 → k = 0) :
     simpa using modalCap_zero_le_pow (Sf := 1) (le_refl 1)
   · have := modalCap_add_one_le_pow hge k
     omega
+
+/-! ## World-Count Bound (Phase 2 continuation): out-degree and rank-map bookkeeping
+
+The remaining Phase 2 obligations formalize the hand-verified potential-function argument
+(see the plan's "Continuation" checklist under Phase 2): a proof-only per-world **rank map**
+(remaining modal-depth budget, frozen at world creation as `parent_rank − 1`), an **out-degree**
+counter derived from `acc`, and a **potential** `Φ` combining them that offsets `modalMaxWorld`'s
+growth exactly. This section is obligations (a)-(c): the supporting invariants. -/
+
+/-- `true` when `sf` matches one of the two fresh-world-minting rule shapes: `diamondPos`'s
+T-diamond encoding `T((□(φ→⊥))→⊥)@w` or `boxNeg`'s F-box shape `F(□φ)@w`
+(`Rules.lean:91-139`). Firing either shape via `modalApplyOne` creates a brand-new world; all
+other shapes (propositional rules, `boxPos`, `diamondNeg`) never touch `acc`. -/
+def isMintingShaped (sf : SignedFormula (Proposition Atom) WorldIndex) : Bool :=
+  match sf.sign, sf.formula with
+  | .pos, .imp (.box (.imp _ .bot)) .bot => true
+  | .neg, .box _ => true
+  | _, _ => false
+
+/-- Out-degree of world `w`: the number of successors recorded for `w` in `acc`. -/
+def outDeg (acc : Accessibility) (w : WorldIndex) : Nat := (acc.successorsOf w).length
+
+omit [Hashable Atom] in
+/-- Structural dispatch of `modalApplyOne`'s accessibility output, restated locally (mirrors
+the private `modalApplyOne_fresh` in `Soundness.lean:87`, which cannot be imported across
+files): the result is either `acc` unchanged, or `acc.addEdge sf.label wsf.label` with a
+`.linear` result headed by the fresh witness `wsf`. -/
+private lemma modalApplyOne_fresh_local
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    (modalApplyOne sf b acc).snd = acc ∨
+    (∃ wsf rest, (modalApplyOne sf b acc).fst = RuleResult.linear (wsf :: rest)
+      ∧ (modalApplyOne sf b acc).snd = acc.addEdge sf.label wsf.label) := by
+  unfold modalApplyOne
+  extract_lets w propResult
+  repeat' first
+    | exact Or.inl rfl
+    | exact Or.inr ⟨_, _, rfl, rfl⟩
+    | split
+  all_goals first
+    | exact Or.inl rfl
+    | exact Or.inr ⟨_, _, rfl, rfl⟩
+    | (left; simp only [apply_ite Prod.snd, ite_self])
+
+omit [Hashable Atom] in
+/-- **P2-obl-a** (precision refinement of the plan's "branch Nodup" shorthand): `modalStepBranch`
+preserves `Nodup`-ness of the **expanded set** `e`, not the raw branch `b`. This is the
+mathematically load-bearing fact for the out-degree bound (P2-obl-c): `b` itself is NOT
+generally `Nodup` (propositional α/β rule outputs, e.g. `andPos`'s `T(φ∧ψ)@w ↦ [T(φ)@w,
+T(ψ)@w]`, are emitted unconditionally with no `b`-membership filter, so duplicate branch
+entries can arise when `φ` or `ψ` coincides with an already-present formula — unlike the modal
+rules, which all filter their outputs against `b`). `e`, by contrast, IS exactly `Nodup`: a
+formula is appended to `e` only after the `¬(expanded.any (· == sf))` gate confirms it is not
+already present, so every append extends a `Nodup` list by a genuinely-new element. -/
+lemma modalStepBranch_preserves_expandedNodup
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hnodup : e.Nodup) :
+    ∀ e' ∈ newExps, e'.Nodup := by
+  simp only [modalStepBranch] at hstep
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  have hsfnotmem : sf ∉ e := by
+    intro hmem
+    exact hexp (by simp only [List.any_eq_true]; exact ⟨sf, hmem, by simp⟩)
+  rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+  · rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨-, rfl, -⟩ := hsf
+    intro e' he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    exact List.Nodup.append hnodup (List.nodup_singleton sf)
+      (fun a ha hmem => by simp only [List.mem_singleton] at hmem; exact hsfnotmem (hmem ▸ ha))
+  · rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨-, rfl, -⟩ := hsf
+    intro e' he'
+    obtain ⟨x, -, rfl⟩ := List.mem_map.mp he'
+    exact List.Nodup.append hnodup (List.nodup_singleton sf)
+      (fun a ha hmem => by simp only [List.mem_singleton] at hmem; exact hsfnotmem (hmem ▸ ha))
+  · rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨-, rfl, -⟩ := hsf
+    intro e' he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    exact hnodup
+  · rw [hfstc] at hsf; simp at hsf
 
 end Cslib.Logic.Modal.Tableau
 

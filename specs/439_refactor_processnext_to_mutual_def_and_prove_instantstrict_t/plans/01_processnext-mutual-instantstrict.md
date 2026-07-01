@@ -180,27 +180,42 @@ one below.
 - **Verification:** new lemma builds green and is `sorry`-free by `lean_verify`; coupling predicate
   is discharged for `TimeOrdering.empty` + initial branch (base case sanity check).
 
-### Phase 3: Run-level `InstantStrict` threading by induction [NOT STARTED]
+### Phase 3: Run-level `InstantStrict` threading by induction [COMPLETED]
 
 - **Goal:** Prove that the `TimeOrdering` returned by `temporalExpandBranches` (and its mutually
   recursive `processNext`) satisfies `InstantStrict`, given the initial `InstantStrict` + coupling,
   using the now-available recursion principle and the Phase 2 single-step lemma as the step.
 - **Tasks:**
-  - [ ] State the run-level lemma over the `mutual` pair: assuming every `(branch, ord)` pair in the
+  - [x] State the run-level lemma over the `mutual` pair: assuming every `(branch, ord)` pair in the
     worklist satisfies `InstantStrict ord` + the coupling, the ordering carried in the
     `.openBranch b ord` result satisfies `InstantStrict ord` (mirror for `processNext`'s
-    accumulators/pending lists).
-  - [ ] Prove by the `mutual`-generated induction: `temporalExpandBranches` by induction on `fuel`
+    accumulators/pending lists). *(deviation: altered -- introduced `WorklistInv` (list-level
+    pairing of `InstantStrict`+`OrdFreshWRT` per branch/ordering position) and `ResultInv`
+    (`.closed ↦ True`, `.openBranch _ ord ↦ InstantStrict ord`) as the two motives `P1`/`P2`,
+    rather than an ad hoc index-based statement.)*
+  - [x] Prove by the `mutual`-generated induction: `temporalExpandBranches` by induction on `fuel`
     (fuel-0 base case returns an existing worklist ordering; `fuel'+1` delegates to `processNext`);
     `processNext` by structural induction on `pending`, using the Phase 2 single-step lemma to carry
     the invariant across each `addFuture`/`addPast` and across the cross-call to
-    `temporalExpandBranches … fuel'`.
-  - [ ] Instantiate at the `temporalTableau` entry point (initial ordering `TimeOrdering.empty` via
+    `temporalExpandBranches … fuel'`. *(deviation: altered -- confirmed Lean auto-generates
+    `temporalExpandBranches.induct`/`processNext.induct` for the `mutual` well-founded pair
+    (verified via `#check`), but its raw case shapes (dependent-if encodings of the `fuel=0`
+    `findSome?` search) were awkward to discharge directly. Used a hand-rolled equivalent instead:
+    `Nat.strong_induction_on` on `fuel` (giving `P1 fuel` for all smaller `fuel` as `ih`), with a
+    nested `induction pending` to establish `P2 fuel'` inside the `fuel'+1` case, citing the outer
+    `ih` at the *same* `fuel'` for the processNext→temporalExpandBranches cross-call. Also added
+    `processNext_mismatch_closed`: the three length-mismatch fallback arms of `processNext`
+    (defensive/unreachable in practice) always drain to `.closed` regardless of any invariant,
+    which sidesteps needing extra length-matching hypotheses on `pendingExp`/`pendingTrack`.)*
+  - [x] Instantiate at the `temporalTableau` entry point (initial ordering `TimeOrdering.empty` via
     `instantStrict_empty`, initial branch coupling trivial) to obtain: whenever `temporalTableau φ =
-    .openBranch b ord`, `InstantStrict ord` holds.
-  - [ ] `lean_multi_attempt`/`lean_goal` throughout; `lake build Cslib.Logics.Temporal.Tableau.Saturation`
-    green; `lean_verify` the run-level lemma for `sorry`/axiom cleanliness.
-  - [ ] Commit: `task 439 phase 3: run-level InstantStrict threaded through saturation (green, sorry-free)`.
+    .openBranch b ord`, `InstantStrict ord` holds. *(landed as `temporalTableau_instantStrict`.)*
+  - [x] `lean_multi_attempt`/`lean_goal` throughout; `lake build Cslib.Logics.Temporal.Tableau.Saturation`
+    green; `lean_verify` the run-level lemma for `sorry`/axiom cleanliness. *(deviation: altered --
+    given the proof shape (heavy `simp only`/structural case-splitting rather than exploratory
+    tactic search), iterated primarily via `lake build` error messages instead of
+    `lean_multi_attempt`; `lean_verify` confirmed `propext`/`Quot.sound` only, no `sorry`/new axiom.)*
+  - [x] Commit: `task 439 phase 3: run-level InstantStrict threaded through saturation (green, sorry-free)`.
   - [ ] **Zero-debt fallback (only if it cannot close):** keep Phases 1-2 committed green, mark this
     phase [BLOCKED], document the exact remaining goal state and what is needed — do NOT introduce
     `sorry` or a vacuous def; return `partial`.

@@ -312,6 +312,217 @@ termination_by (fuel', pending.length)
 
 end
 
+/-! ## Run-Level `InstantStrict` Threading -/
+
+/-- Worklist invariant: parallel lists `bs` (branches) and `ords` (orderings) satisfy,
+position-by-position, `InstantStrict` on the ordering and the `OrdFreshWRT` branch/ordering
+coupling. Mismatched-length lists are vacuously excluded (`False`) -- by construction,
+`temporalExpandBranches`/`processNext` always keep their branch and ordering worklists the
+same length, so this never blocks a genuine derivation. -/
+def WorklistInv : List (TBranch Atom) → List TimeOrdering → Prop
+  | [], [] => True
+  | b :: bs, ord :: ords => TimeOrdering.InstantStrict ord ∧ OrdFreshWRT b ord ∧ WorklistInv bs ords
+  | _, _ => False
+
+/-- Result invariant: an `.openBranch b ord` result carries an `InstantStrict` ordering;
+`.closed` carries no ordering and is vacuously fine. -/
+def ResultInv : TemporalTableauResult Atom → Prop
+  | .closed => True
+  | .openBranch _ ord => TimeOrdering.InstantStrict ord
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `WorklistInv` is preserved by list append (paired componentwise). -/
+lemma worklistInv_append {l1 l2 : List (TBranch Atom)} {o1 o2 : List TimeOrdering}
+    (h1 : WorklistInv l1 o1) (h2 : WorklistInv l2 o2) : WorklistInv (l1 ++ l2) (o1 ++ o2) := by
+  induction l1 generalizing o1 with
+  | nil =>
+    cases o1 with
+    | nil => simpa using h2
+    | cons _ _ => simp only [WorklistInv] at h1
+  | cons b bs ih =>
+    cases o1 with
+    | nil => simp only [WorklistInv] at h1
+    | cons ord os =>
+      obtain ⟨hIS, hOFW, hrest⟩ := h1
+      exact ⟨hIS, hOFW, ih hrest⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `WorklistInv` holds for a list paired with a constant-ordering replication, given the
+ordering is `InstantStrict` and every branch in the list is `OrdFreshWRT` it. -/
+lemma worklistInv_map_const (bs : List (TBranch Atom)) (ord : TimeOrdering)
+    (hIS : TimeOrdering.InstantStrict ord) (hOFW : ∀ nb ∈ bs, OrdFreshWRT nb ord) :
+    WorklistInv bs (bs.map (fun _ => ord)) := by
+  induction bs with
+  | nil => simp [WorklistInv]
+  | cons b bs ih =>
+    simp only [List.map_cons, WorklistInv]
+    exact ⟨hIS, hOFW b List.mem_cons_self, ih (fun nb hnb => hOFW nb (List.mem_cons_of_mem _ hnb))⟩
+
+omit [Hashable Atom] in
+/-- The `fuel = 0` base case: if `WorklistInv` holds for the worklist and the fuel-exhausted
+search finds an open branch `(b, ord)`, then `InstantStrict ord`. -/
+lemma worklistInv_findSome_zero
+    (branches expandedSets : List (TBranch Atom)) (orderings : List TimeOrdering)
+    (trackers : List (EventualityTracker Atom)) (b : TBranch Atom) (ord : TimeOrdering)
+    (hInv : WorklistInv branches orderings)
+    (h : (branches.zip expandedSets |>.zip (orderings.zip trackers)).findSome?
+        (fun ((b, _), (ord, tracker)) =>
+          if isTemporalClosed b ord tracker then none else some (b, ord)) = some (b, ord)) :
+    TimeOrdering.InstantStrict ord := by
+  induction branches generalizing expandedSets orderings trackers with
+  | nil => simp at h
+  | cons bh bt ih =>
+    cases expandedSets with
+    | nil => simp at h
+    | cons eh et =>
+      cases orderings with
+      | nil => simp only [WorklistInv] at hInv
+      | cons oh ot =>
+        obtain ⟨hISoh, -, hrest⟩ := hInv
+        cases trackers with
+        | nil => simp at h
+        | cons th tt =>
+          simp only [List.zip_cons_cons, List.findSome?_cons] at h
+          by_cases hclosed : isTemporalClosed bh oh th
+          · simp only [hclosed, if_true] at h
+            exact ih et ot tt hrest h
+          · simp only [hclosed] at h
+            obtain ⟨rfl, rfl⟩ := h
+            exact hISoh
+
+/-- Run-level threading target for `temporalExpandBranches`: assuming the branch/ordering
+worklist satisfies `WorklistInv`, the result satisfies `ResultInv`. -/
+private def P1 (fuel : Nat) : Prop :=
+  ∀ (branches expandedSets : List (TBranch Atom)) (orderings : List TimeOrdering)
+    (trackers : List (EventualityTracker Atom)),
+    WorklistInv branches orderings →
+    ResultInv (temporalExpandBranches branches expandedSets orderings trackers fuel)
+
+/-- Run-level threading target for `processNext`: assuming both the pending and the
+accumulated (`done`) worklists satisfy `WorklistInv`, the result satisfies `ResultInv`. The
+auxiliary `pendingExp`/`pendingTrack` lists carry no invariant requirement: if either is
+shorter than `pending`, `processNext`'s defensive length-mismatch arms fire, which
+(`processNext_mismatch_closed`) unconditionally drain to `.closed`. -/
+private def P2 (fuel' : Nat) : Prop :=
+  ∀ (pending pendingExp : List (TBranch Atom)) (pendingOrd : List TimeOrdering)
+    (pendingTrack : List (EventualityTracker Atom))
+    (done doneExp : List (TBranch Atom)) (doneOrd : List TimeOrdering)
+    (doneTrack : List (EventualityTracker Atom)),
+    WorklistInv pending pendingOrd → WorklistInv done doneOrd →
+    ResultInv (processNext pending pendingExp pendingOrd pendingTrack
+      done doneExp doneOrd doneTrack fuel')
+
+omit [Hashable Atom] in
+/-- If any of `processNext`'s length-mismatch side conditions holds (`pendingExp`,
+`pendingOrd`, or `pendingTrack` is `[]` while `pending` need not be), the defensive fallback
+arms fire and propagate the same mismatch until `pending` is drained, always reaching
+`.closed` -- `ResultInv .closed` holds unconditionally, with no invariant needed on `pending`,
+`pendingOrd`, or `done`. -/
+lemma processNext_mismatch_closed
+    (pending pendingExp : List (TBranch Atom)) (pendingOrd : List TimeOrdering)
+    (pendingTrack : List (EventualityTracker Atom))
+    (done doneExp : List (TBranch Atom)) (doneOrd : List TimeOrdering)
+    (doneTrack : List (EventualityTracker Atom)) (fuel' : Nat)
+    (hmis : pendingExp = [] ∨ pendingOrd = [] ∨ pendingTrack = []) :
+    ResultInv (processNext pending pendingExp pendingOrd pendingTrack
+      done doneExp doneOrd doneTrack fuel') := by
+  induction pending generalizing pendingExp pendingOrd pendingTrack done doneExp doneOrd doneTrack
+      with
+  | nil => simp only [processNext, ResultInv]
+  | cons b restBs ih =>
+    cases pendingExp with
+    | nil =>
+      simp only [processNext]
+      exact ih [] [] [] done doneExp doneOrd doneTrack (Or.inl rfl)
+    | cons e restEs =>
+      cases pendingOrd with
+      | nil =>
+        simp only [processNext]
+        exact ih [] [] [] done doneExp doneOrd doneTrack (Or.inl rfl)
+      | cons ord restOrds =>
+        cases pendingTrack with
+        | nil =>
+          simp only [processNext]
+          exact ih [] [] [] done doneExp doneOrd doneTrack (Or.inl rfl)
+        | cons tracker restTracks =>
+          rcases hmis with h | h | h <;> simp_all
+
+omit [Hashable Atom] in
+/-- Run-level `InstantStrict` threading (task #439 Phase 3): for every `fuel`, `P1 fuel`
+holds. Proved by strong induction on `fuel`; the `fuel'+1` step establishes `P2 fuel'` by a
+nested structural induction on `pending`, using `temporalStepBranch_preserves` (Phase 2) at
+the branch-expansion step and the outer strong-induction hypothesis (at the *same* `fuel'`)
+to close the cross-call back into `temporalExpandBranches`. -/
+private lemma run_level_P1 : ∀ fuel : Nat, P1 (Atom := Atom) fuel := by
+  intro fuel
+  induction fuel using Nat.strong_induction_on with
+  | _ fuel ih =>
+    rcases fuel with _ | fuel'
+    · -- fuel = 0
+      intro branches expandedSets orderings trackers hInv
+      show ResultInv (temporalExpandBranches branches expandedSets orderings trackers 0)
+      simp only [temporalExpandBranches]
+      cases h : (branches.zip expandedSets |>.zip (orderings.zip trackers)).findSome?
+          (fun ((b, _), (ord, tracker)) =>
+            if isTemporalClosed b ord tracker then none else some (b, ord)) with
+      | none => simp [ResultInv]
+      | some x =>
+        obtain ⟨b, ord⟩ := x
+        simp only [ResultInv]
+        exact worklistInv_findSome_zero branches expandedSets orderings trackers b ord hInv h
+    · -- fuel = fuel' + 1
+      have hP1fuel' : P1 fuel' := ih fuel' (Nat.lt_succ_self fuel')
+      have hP2fuel' : P2 (Atom := Atom) fuel' := by
+        intro pending
+        induction pending with
+        | nil =>
+          intro pendingExp pendingOrd pendingTrack done doneExp doneOrd doneTrack _ _
+          simp only [processNext, ResultInv]
+        | cons b restBs ihp =>
+          intro pendingExp pendingOrd pendingTrack done doneExp doneOrd doneTrack hpInv hdInv
+          cases pendingExp with
+          | nil =>
+            exact processNext_mismatch_closed (b :: restBs) [] pendingOrd pendingTrack
+              done doneExp doneOrd doneTrack fuel' (Or.inl rfl)
+          | cons e restEs =>
+            cases pendingOrd with
+            | nil => simp only [WorklistInv] at hpInv
+            | cons ord restOrds =>
+              cases pendingTrack with
+              | nil =>
+                exact processNext_mismatch_closed (b :: restBs) (e :: restEs) (ord :: restOrds) []
+                  done doneExp doneOrd doneTrack fuel' (Or.inr (Or.inr rfl))
+              | cons tracker restTracks =>
+                obtain ⟨hIS, hOFW, hpInvRest⟩ := hpInv
+                simp only [processNext]
+                by_cases hclosed : isTemporalClosed b ord tracker
+                · simp only [hclosed, if_true]
+                  exact ihp restEs restOrds restTracks (done ++ [b]) (doneExp ++ [e])
+                    (doneOrd ++ [ord]) (doneTrack ++ [tracker]) hpInvRest
+                    (worklistInv_append hdInv ⟨hIS, hOFW, trivial⟩)
+                · simp only [hclosed]
+                  cases hstep : temporalStepBranch b e ord tracker with
+                  | none => simp only [ResultInv]; exact hIS
+                  | some x =>
+                    obtain ⟨newBs, newExps, newOrd, newTracker⟩ := x
+                    obtain ⟨hISnew, hOFWnew⟩ :=
+                      temporalStepBranch_preserves b e ord tracker hIS hOFW
+                        newBs newExps newOrd newTracker hstep
+                    have hWorklistNew : WorklistInv (done ++ newBs ++ restBs)
+                        (doneOrd ++ newBs.map (fun _ => newOrd) ++ restOrds) :=
+                      worklistInv_append
+                        (worklistInv_append hdInv
+                          (worklistInv_map_const newBs newOrd hISnew hOFWnew))
+                        hpInvRest
+                    exact hP1fuel' (done ++ newBs ++ restBs) (doneExp ++ newExps ++ restEs)
+                      (doneOrd ++ newBs.map (fun _ => newOrd) ++ restOrds)
+                      (doneTrack ++ newBs.map (fun _ => newTracker) ++ restTracks) hWorklistNew
+      intro branches expandedSets orderings trackers hInv
+      show ResultInv (temporalExpandBranches branches expandedSets orderings trackers (fuel' + 1))
+      simp only [temporalExpandBranches]
+      exact hP2fuel' branches expandedSets orderings trackers [] [] [] [] hInv
+        (by simp [WorklistInv])
+
 /-! ## Entry Point -/
 
 /-- The temporal tableau decision procedure.
@@ -325,6 +536,22 @@ def temporalTableau (φ : Formula Atom) : TemporalTableauResult Atom :=
   temporalExpandBranches
     [initialBranch] [[]] [TimeOrdering.empty] [EventualityTracker.empty]
     (temporalFuel φ)
+
+omit [Hashable Atom] in
+/-- Entry-point corollary of the run-level `InstantStrict` threading (task #439 Phase 3,
+task #426 Phase 3): whenever `temporalTableau` returns an open branch, its time ordering is
+`InstantStrict`. This is the `hInst` hypothesis needed by `openBranch_branchSat`'s
+order-preservation component in `Completeness.lean` (`D = ℤ`, `f = ord.instant`). -/
+theorem temporalTableau_instantStrict (φ : Formula Atom) (b : TBranch Atom) (ord : TimeOrdering)
+    (h : temporalTableau φ = .openBranch b ord) : TimeOrdering.InstantStrict ord := by
+  unfold temporalTableau at h
+  have hInv : WorklistInv (Atom := Atom)
+      [([⟨.neg, φ, 0⟩] : TBranch Atom)] [TimeOrdering.empty] := by
+    simp [WorklistInv, TimeOrdering.instantStrict_empty, ordFreshWRT_empty]
+  have hResult := run_level_P1 (Atom := Atom) (temporalFuel φ)
+    [([⟨.neg, φ, 0⟩] : TBranch Atom)] [[]] [TimeOrdering.empty] [EventualityTracker.empty] hInv
+  rw [h] at hResult
+  exact hResult
 
 /-! ## Hintikka Set Predicate -/
 

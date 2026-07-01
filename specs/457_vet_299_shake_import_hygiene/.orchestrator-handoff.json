@@ -1,0 +1,36 @@
+{
+  "task_number": 457,
+  "session_id": "sess_1782921600_c97381_457",
+  "phase": "implement",
+  "status": "implemented",
+  "summary": "Applied 5 of 6 verified shake import-hygiene edits across Cslib/Logics/Modal/Tableau/ (Branch, Rules, Closure, Completeness, FmpMeasure). The 6th edit (removing PropositionalRules from Defs.lean) was reverted after confirming it broke the build: Defs.lean has `open Cslib.Logic.Tableau` with no member usage after it, which shake's static analysis does not track, so the import is needed even though shake reports it unused. Net diff for Defs.lean is empty. Full lake build (3188/3188 jobs) and lake test both pass with exit 0. lake exe checkInitImports passes. lake exe shake was run with the tool's actually-supported flags (--add-public/--keep-implied/--keep-prefix are not recognized by the installed binary) and confirms the 5 applied edits hold with no further reductions suggested on those 5 files.",
+  "phases_completed": 2,
+  "phases_total": 2,
+  "plan_path": "specs/457_vet_299_shake_import_hygiene/plans/01_shake-import-hygiene.md",
+  "files_modified": [
+    "Cslib/Logics/Modal/Tableau/Branch.lean",
+    "Cslib/Logics/Modal/Tableau/Rules.lean",
+    "Cslib/Logics/Modal/Tableau/Closure.lean",
+    "Cslib/Logics/Modal/Tableau/Completeness.lean",
+    "Cslib/Logics/Modal/Tableau/FmpMeasure.lean"
+  ],
+  "files_untouched_deviation": [
+    "Cslib/Logics/Modal/Tableau/Defs.lean (edit reverted -- confirmed shake false-positive, no net diff)"
+  ],
+  "sorry_inventory": {
+    "sorries_in_scope_files": 0,
+    "sorries_introduced": 0,
+    "note": "Only import lines were changed in the 5 modified files; no definitions or proofs were touched."
+  },
+  "verification": {
+    "build_passed": true,
+    "build_jobs": "3188/3188",
+    "lake_test_passed": true,
+    "checkInitImports_passed": true,
+    "shake_scoped_findings_resolved": "5/6 (Defs.lean reverted as false-positive)",
+    "axiom_count_new": 0,
+    "vacuous_count": 0
+  },
+  "requires_user_review": false,
+  "next_steps": "Task 457 complete. Note for any future shake-hygiene tasks: the installed lake exe shake binary in this environment does not support --add-public/--keep-implied/--keep-prefix; use --force/--no-downstream/--cfg instead, and be aware shake does not detect bare `open Namespace` usage (false positives possible when a file opens a namespace without referencing its members by name)."
+}

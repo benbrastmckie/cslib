@@ -1,0 +1,26 @@
+{
+  "status": "implemented",
+  "phase_label": "P5b",
+  "green": true,
+  "declarations_added": [
+    "ModalLoopInv.eBoxOnlyNeg (new field)",
+    "ModalLoopInv.eBoxNegWitness (new field)",
+    "modalApplyOne_posBox_eq",
+    "modalLoop_eBoxOnlyNeg",
+    "hasEdge_addEdge_mono",
+    "modalLoop_snd_eq_or_addEdge",
+    "modalApplyOne_hasEdge_mono",
+    "modalApplyOne_boxNeg_witness",
+    "modalLoop_eBoxNegWitness",
+    "modalLoop_stepBranch_none_saturated",
+    "modalExpandBranches_hintikka"
+  ],
+  "blockers": [],
+  "sorry_inventory": [],
+  "deviations": [
+    "Extended ModalLoopInv with two new fields (eBoxOnlyNeg, eBoxNegWitness) beyond P5a's 3-field bundle, and updated modalStep_preserves_invariant to thread them. This was necessary because modalHintikkaClause (used by hintikkaInv) is vacuously True for all box-shaped formulas regardless of sign, which is insufficient to discharge modalHintikkaSet's second conjunct (boxPos/.pos-box case needs its real persistent clause) and third conjunct (boxNeg/.neg-box witness existence is a genuine existential claim not captured by hintikkaInv at all). Both new fields are proven sound and preserved across modalStepBranch steps.",
+    "modalStepBranch_none_saturated is declared private in Completeness.lean; added a local copy (modalLoop_stepBranch_none_saturated) since private declarations are not visible across files."
+  ],
+  "commit": "pending (see final message)",
+  "session_id": "sess_1782868458_ecfcce"
+}

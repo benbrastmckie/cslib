@@ -283,6 +283,25 @@ lemma concat_freeSlot [Finite State2] (da1 : DA State1 Symbol) (acc1 : Set State
 
 /-! ## Per-slot characterization of `some`-valued outputs -/
 
+/-- If slot `i` is active (holding `v0`) before the transition, its pre-dedup value is exactly
+the `da2`-advance of `v0` — unconditionally, since an already-active slot can never be the
+slot freshly chosen for activation (that slot's pre-dedup value must start `none`). -/
+private lemma concatF2_of_some (da1 : DA State1 Symbol) (acc1 : Set State1)
+    (da2 : DA State2 Symbol) (s1 : State1)
+    (f : Fin (Nat.card State2 + 2) → Option State2) (a : Symbol)
+    (i : Fin (Nat.card State2 + 2)) (v0 : State2) (hf : f i = some v0) :
+    concatF2 da1 acc1 da2 s1 f a i = some (da2.tr v0 a) := by
+  unfold concatF2
+  split_ifs with h1 h2
+  · rw [Function.update_apply]
+    split_ifs with heq
+    · exfalso
+      have hchoose := h2.choose_spec
+      simp only [← heq, hf, Option.map_some, reduceCtorEq] at hchoose
+    · simp [hf]
+  · simp [hf]
+  · simp [hf]
+
 /-- If slot `i` was already active (holding `v0`) before the transition and remains `some`
 after it (i.e. survives dedup), its new value is exactly the `da2`-advance of `v0`. -/
 private lemma concat_tr_snd_of_some (da1 : DA State1 Symbol) (acc1 : Set State1)
@@ -344,6 +363,31 @@ private lemma concat_tr_snd_of_none (da1 : DA State1 Symbol) (acc1 : Set State1)
       simp only [hf, Option.map_none] at hout
       exact absurd hout (by simp)
 
+/-- If the pre-dedup array `concatF2 …` attains value `some v` somewhere, the post-dedup
+transition output also attains `some v` at some index `≤ j0` (the least index with this
+pre-dedup value, which survives dedup unconditionally). Used to show a tracked value is never
+lost across a transition, even if the specific slot holding it changes; the `≤ j0` bound is
+used to show the witness sequence is antitone (`concat_ptr_antitone`). -/
+private lemma concat_dedup_exists_of_f2 (da1 : DA State1 Symbol) (acc1 : Set State1)
+    (da2 : DA State2 Symbol) (s1 : State1)
+    (f : Fin (Nat.card State2 + 2) → Option State2) (a : Symbol) (v : State2)
+    (j0 : Fin (Nat.card State2 + 2)) (hj0 : concatF2 da1 acc1 da2 s1 f a j0 = some v) :
+    ∃ j ≤ j0, ((concat da1 acc1 da2).tr (s1, f) a).2 j = some v := by
+  classical
+  have hSne : {j : Fin (Nat.card State2 + 2) | concatF2 da1 acc1 da2 s1 f a j = some v}.Nonempty :=
+    ⟨j0, hj0⟩
+  have hSfin : {j : Fin (Nat.card State2 + 2) | concatF2 da1 acc1 da2 s1 f a j = some v}.Finite :=
+    Set.toFinite _
+  obtain ⟨j, hjMin⟩ := hSfin.exists_minimal hSne
+  rw [minimal_iff_isLeast] at hjMin
+  obtain ⟨hjS, hjLB⟩ := hjMin
+  refine ⟨j, hjLB hj0, ?_⟩
+  rw [concat_tr_snd', if_neg]
+  · exact hjS
+  · rintro ⟨j', hj'lt, hj'eq, -⟩
+    have hj'val : concatF2 da1 acc1 da2 s1 f a j' = some v := by rw [hj'eq, hjS]
+    exact absurd (hjLB hj'val) (not_le.mpr hj'lt)
+
 /-! ## Run-level persistence: tracking `da2`'s run from a breakpoint -/
 
 /-- Run-level form of `concat_tr_snd_of_none`: if slot `i` is inactive at time `n` and active
@@ -372,6 +416,150 @@ private lemma concat_run_advance (da1 : DA State1 Symbol) (acc1 : Set State1)
   exact concat_tr_snd_of_some da1 acc1 da2 ((concat da1 acc1 da2).run xs n).1
     ((concat da1 acc1 da2).run xs n).2 (xs n) i v0 v hsome0 hsome1
 
+/-- If `da1` enters `acc1` at time `n`, some slot is activated (holds `da2.start` advanced by
+the symbol read at time `n`) at time `n + 1`. Unlike `concat_run_activate`, this does not
+require knowing in advance which slot was free — any free slot certifies the activation
+branch fires, and `concat_dedup_exists_of_f2` shows the resulting value survives dedup
+somewhere. -/
+private lemma concat_run_activate_exists [Finite State2] (da1 : DA State1 Symbol)
+    (acc1 : Set State1) (da2 : DA State2 Symbol) (xs : ωSequence Symbol) (n : ℕ)
+    (hacc : da1.run xs n ∈ acc1) :
+    ∃ j, ((concat da1 acc1 da2).run xs (n + 1)).2 j = some (da2.tr da2.start (xs n)) := by
+  classical
+  have hs1acc : ((concat da1 acc1 da2).run xs n).1 ∈ acc1 := by
+    rw [concat_run_fst]; exact hacc
+  obtain ⟨j0, hj0⟩ := concat_freeSlot da1 acc1 da2 xs n
+  have hex : ∃ j' : Fin (Nat.card State2 + 2),
+      (((concat da1 acc1 da2).run xs n).2 j').map (da2.tr · (xs n)) = none :=
+    ⟨j0, by rw [hj0, Option.map_none]⟩
+  have hval : concatF2 da1 acc1 da2 ((concat da1 acc1 da2).run xs n).1
+      ((concat da1 acc1 da2).run xs n).2 (xs n) (Classical.choose hex) =
+      some (da2.tr da2.start (xs n)) := by
+    unfold concatF2
+    rw [if_pos hs1acc, dif_pos hex, Function.update_self]
+  obtain ⟨j, -, hj⟩ := concat_dedup_exists_of_f2 da1 acc1 da2
+    ((concat da1 acc1 da2).run xs n).1 ((concat da1 acc1 da2).run xs n).2 (xs n)
+    (da2.tr da2.start (xs n)) (Classical.choose hex) hval
+  exact ⟨j, concat_run_stabilizes .. ▸ hj⟩
+
+/-- For every `k`, some slot holds `da2.run (xs.drop n) (k + 1)` at time `n + 1 + k`, given
+`da1` entered `acc1` at time `n`. The witness slot may differ across `k` (dedup can retarget
+which slot carries the value); `ConcatPtr` below picks a canonical (least) witness at each `k`
+and shows it eventually stabilizes. -/
+private lemma concat_ptr_exists [Finite State2] (da1 : DA State1 Symbol) (acc1 : Set State1)
+    (da2 : DA State2 Symbol) (xs : ωSequence Symbol) (n : ℕ) (hacc : da1.run xs n ∈ acc1) :
+    ∀ k, ∃ j : Fin (Nat.card State2 + 2),
+      ((concat da1 acc1 da2).run xs (n + 1 + k)).2 j = some (da2.run (xs.drop n) (k + 1)) := by
+  intro k
+  induction k with
+  | zero =>
+    obtain ⟨j, hj⟩ := concat_run_activate_exists da1 acc1 da2 xs n hacc
+    refine ⟨j, ?_⟩
+    have hrun1 : da2.run (xs.drop n) 1 = da2.tr da2.start (xs n) := by
+      rw [show (1 : ℕ) = 0 + 1 from rfl, run_succ, run_zero, ωSequence.get_drop, Nat.add_zero]
+    simpa [hrun1] using hj
+  | succ k ih =>
+    obtain ⟨j, hj⟩ := ih
+    have hj1 : concatF2 da1 acc1 da2 ((concat da1 acc1 da2).run xs (n + 1 + k)).1
+        ((concat da1 acc1 da2).run xs (n + 1 + k)).2 (xs (n + 1 + k)) j =
+        some (da2.run (xs.drop n) (k + 1 + 1)) := by
+      have hj' : ((concat da1 acc1 da2).run xs (n + 1 + k)).2 j =
+          some (da2.run (xs.drop n) (k + 1)) := hj
+      have hadv := concatF2_of_some da1 acc1 da2 ((concat da1 acc1 da2).run xs (n + 1 + k)).1
+        ((concat da1 acc1 da2).run xs (n + 1 + k)).2 (xs (n + 1 + k)) j
+        (da2.run (xs.drop n) (k + 1)) hj'
+      have hrun : da2.run (xs.drop n) (k + 1 + 1) =
+          da2.tr (da2.run (xs.drop n) (k + 1)) (xs (n + 1 + k)) := by
+        rw [run_succ]
+        congr 1
+        rw [ωSequence.get_drop]
+        congr 1
+        omega
+      rw [hadv, hrun]
+    obtain ⟨j', -, hj'⟩ := concat_dedup_exists_of_f2 da1 acc1 da2
+      ((concat da1 acc1 da2).run xs (n + 1 + k)).1 ((concat da1 acc1 da2).run xs (n + 1 + k)).2
+      (xs (n + 1 + k)) (da2.run (xs.drop n) (k + 1 + 1)) j hj1
+    refine ⟨j', ?_⟩
+    exact (concat_run_stabilizes .. ▸ hj' : _)
+
+/-- At any given run time, at most one slot can hold a given value: this is the dedup
+invariant (`concat_tr_nodup`) transported to the `run` level. -/
+private lemma concat_run_unique_of_some [Finite State2] (da1 : DA State1 Symbol)
+    (acc1 : Set State1) (da2 : DA State2 Symbol) (xs : ωSequence Symbol) (m : ℕ)
+    (i1 i2 : Fin (Nat.card State2 + 2)) (v : State2)
+    (h1 : ((concat da1 acc1 da2).run xs m).2 i1 = some v)
+    (h2 : ((concat da1 acc1 da2).run xs m).2 i2 = some v) : i1 = i2 := by
+  cases m with
+  | zero => simp [concat] at h1
+  | succ m =>
+    rw [concat_run_stabilizes] at h1 h2
+    by_contra hne
+    rcases lt_or_gt_of_ne hne with hlt | hlt
+    · exact concat_tr_nodup da1 acc1 da2 _ _ _ i1 i2 hlt v h1 h2
+    · exact concat_tr_nodup da1 acc1 da2 _ _ _ i2 i1 hlt v h2 h1
+
+/-- The canonical (least, at each time) witness slot tracking `da2`'s run on `xs.drop n` from
+breakpoint `n`, defined by choice from `concat_ptr_exists`. Its identity may shift across `k`
+(dedup can retarget which slot survives), but `concat_ptr_antitone` shows the sequence of
+indices is non-increasing, hence eventually constant. -/
+private noncomputable def ConcatPtr [Finite State2] (da1 : DA State1 Symbol) (acc1 : Set State1)
+    (da2 : DA State2 Symbol) (xs : ωSequence Symbol) (n : ℕ) (hacc : da1.run xs n ∈ acc1)
+    (k : ℕ) : Fin (Nat.card State2 + 2) :=
+  Classical.choose (concat_ptr_exists da1 acc1 da2 xs n hacc k)
+
+/-- Defining property of `ConcatPtr`: it tracks the target value at each time. -/
+private lemma concat_ptr_spec [Finite State2] (da1 : DA State1 Symbol) (acc1 : Set State1)
+    (da2 : DA State2 Symbol) (xs : ωSequence Symbol) (n : ℕ) (hacc : da1.run xs n ∈ acc1)
+    (k : ℕ) :
+    ((concat da1 acc1 da2).run xs (n + 1 + k)).2 (ConcatPtr da1 acc1 da2 xs n hacc k) =
+      some (da2.run (xs.drop n) (k + 1)) :=
+  Classical.choose_spec (concat_ptr_exists da1 acc1 da2 xs n hacc k)
+
+/-- `ConcatPtr` is antitone: the witness slot's index never increases. The slot at step `k`
+survives (via `concatF2_of_some`) as a valid pre-dedup candidate at step `k + 1`, so
+`concat_dedup_exists_of_f2` produces a survivor `≤` it; uniqueness of the value-to-slot
+correspondence at each time identifies that survivor with `ConcatPtr (k + 1)`. -/
+private lemma concat_ptr_antitone [Finite State2] (da1 : DA State1 Symbol) (acc1 : Set State1)
+    (da2 : DA State2 Symbol) (xs : ωSequence Symbol) (n : ℕ) (hacc : da1.run xs n ∈ acc1) :
+    Antitone (ConcatPtr da1 acc1 da2 xs n hacc) := by
+  apply antitone_nat_of_succ_le
+  intro k
+  set jk := ConcatPtr da1 acc1 da2 xs n hacc k with hjk
+  have hjkspec := concat_ptr_spec da1 acc1 da2 xs n hacc k
+  have hj1 : concatF2 da1 acc1 da2 ((concat da1 acc1 da2).run xs (n + 1 + k)).1
+      ((concat da1 acc1 da2).run xs (n + 1 + k)).2 (xs (n + 1 + k)) jk =
+      some (da2.run (xs.drop n) (k + 1 + 1)) := by
+    have hadv := concatF2_of_some da1 acc1 da2 ((concat da1 acc1 da2).run xs (n + 1 + k)).1
+      ((concat da1 acc1 da2).run xs (n + 1 + k)).2 (xs (n + 1 + k)) jk
+      (da2.run (xs.drop n) (k + 1)) hjkspec
+    have hrun : da2.run (xs.drop n) (k + 1 + 1) =
+        da2.tr (da2.run (xs.drop n) (k + 1)) (xs (n + 1 + k)) := by
+      rw [run_succ]
+      congr 1
+      rw [ωSequence.get_drop]
+      congr 1
+      omega
+    rw [hadv, hrun]
+  obtain ⟨j', hj'le, hj'⟩ := concat_dedup_exists_of_f2 da1 acc1 da2
+    ((concat da1 acc1 da2).run xs (n + 1 + k)).1 ((concat da1 acc1 da2).run xs (n + 1 + k)).2
+    (xs (n + 1 + k)) (da2.run (xs.drop n) (k + 1 + 1)) jk hj1
+  have hj'run : ((concat da1 acc1 da2).run xs (n + 1 + (k + 1))).2 j' =
+      some (da2.run (xs.drop n) (k + 1 + 1)) := concat_run_stabilizes .. ▸ hj'
+  have hspec1 := concat_ptr_spec da1 acc1 da2 xs n hacc (k + 1)
+  have heq : j' = ConcatPtr da1 acc1 da2 xs n hacc (k + 1) :=
+    concat_run_unique_of_some da1 acc1 da2 xs (n + 1 + (k + 1)) j'
+      (ConcatPtr da1 acc1 da2 xs n hacc (k + 1)) (da2.run (xs.drop n) (k + 1 + 1))
+      hj'run hspec1
+  rwa [heq] at hj'le
+
+/-- `ConcatPtr` eventually stabilizes at some value `i`, since it is an antitone sequence
+valued in a finite type. -/
+private lemma concat_ptr_eventually [Finite State2] (da1 : DA State1 Symbol) (acc1 : Set State1)
+    (da2 : DA State2 Symbol) (xs : ωSequence Symbol) (n : ℕ) (hacc : da1.run xs n ∈ acc1) :
+    ∃ i : Fin (Nat.card State2 + 2), ∃ m,
+      ∀ k ≥ m, ConcatPtr da1 acc1 da2 xs n hacc k = i :=
+  antitone_fin_eventually (concat_ptr_antitone da1 acc1 da2 xs n hacc)
+
 /-- If slot `i` is activated (holds `da2.start` advanced by one symbol) at time `n + 1` and
 never becomes inactive afterward, it exactly tracks `da2`'s run on `xs.drop n`, offset by one
 step, from then on: at time `n + 1 + k` it holds `da2.run (xs.drop n) (k + 1)`. -/
@@ -386,7 +574,7 @@ private lemma concat_run_tracks (da1 : DA State1 Symbol) (acc1 : Set State1)
   induction k with
   | zero =>
     have hrun1 : da2.run (xs.drop n) 1 = da2.tr da2.start (xs n) := by
-      rw [show (1 : ℕ) = 0 + 1 from rfl, run_succ, run_zero, ωSequence.get_drop]
+      rw [show (1 : ℕ) = 0 + 1 from rfl, run_succ, run_zero, ωSequence.get_drop, Nat.add_zero]
     simpa [hrun1] using hact
   | succ k ih =>
     have hne : ((concat da1 acc1 da2).run xs (n + 1 + (k + 1))).2 i ≠ none :=
@@ -403,6 +591,41 @@ private lemma concat_run_tracks (da1 : DA State1 Symbol) (acc1 : Set State1)
       omega
     exact hv.trans (congrArg some (hstep.trans hrun.symm))
 
+/-- If slot `i` is active (`isSome`) at every time `≥ N`, there is a breakpoint `n` at which
+`da1` entered `acc1` and slot `i` tracks `da2`'s run on `xs.drop n` (offset by one) forever
+after. Found via `Nat.findGreatest` of "slot `i` is inactive", using that slot `i` starts
+inactive at time `0`. -/
+private lemma concat_persist_from_activity (da1 : DA State1 Symbol) (acc1 : Set State1)
+    (da2 : DA State2 Symbol) (xs : ωSequence Symbol) (i : Fin (Nat.card State2 + 2)) (N : ℕ)
+    (h : ∀ k ≥ N, (((concat da1 acc1 da2).run xs k).2 i).isSome) :
+    ∃ n, da1.run xs n ∈ acc1 ∧
+      ∀ k, ((concat da1 acc1 da2).run xs (n + 1 + k)).2 i = some (da2.run (xs.drop n) (k + 1)) := by
+  classical
+  have hP0 : ((concat da1 acc1 da2).run xs 0).2 i = none := by simp [concat]
+  set m := Nat.findGreatest (fun k => ((concat da1 acc1 da2).run xs k).2 i = none) N with hmdef
+  have hPm : ((concat da1 acc1 da2).run xs m).2 i = none :=
+    Nat.findGreatest_spec (P := fun k => ((concat da1 acc1 da2).run xs k).2 i = none)
+      (Nat.zero_le N) hP0
+  have hmN : m ≤ N := Nat.findGreatest_le N
+  have hmlt : m < N := by
+    rcases lt_or_eq_of_le hmN with hlt | heq
+    · exact hlt
+    · exact absurd (heq ▸ hPm) (Option.isSome_iff_ne_none.mp (h N le_rfl))
+  have hact_ne : ((concat da1 acc1 da2).run xs (m + 1)).2 i ≠ none :=
+    Nat.findGreatest_is_greatest (P := fun k => ((concat da1 acc1 da2).run xs k).2 i = none)
+      (k := m + 1) (n := N) (by omega) (by omega)
+  obtain ⟨v, hv⟩ := Option.isSome_iff_exists.mp (Option.isSome_iff_ne_none.mpr hact_ne)
+  obtain ⟨hacc, hveq⟩ := concat_run_activate da1 acc1 da2 xs m i v hPm hv
+  refine ⟨m, hacc, ?_⟩
+  have hpersist : ∀ k, ((concat da1 acc1 da2).run xs (m + 1 + k)).2 i ≠ none := by
+    intro k
+    by_cases hle : m + 1 + k ≤ N
+    · exact Nat.findGreatest_is_greatest
+        (P := fun k => ((concat da1 acc1 da2).run xs k).2 i = none)
+        (k := m + 1 + k) (n := N) (by omega) hle
+    · exact Option.isSome_iff_ne_none.mp (h (m + 1 + k) (by omega))
+  exact concat_run_tracks da1 acc1 da2 xs m i (hveq ▸ hv) hpersist
+
 /-! ## Finite instance -/
 
 /-- The state type of the concat automaton is finite whenever both component state types
@@ -411,5 +634,129 @@ results used by the direction lemmas. -/
 instance [Finite State1] [Finite State2] :
     Finite (State1 × (Fin (Nat.card State2 + 2) → Option State2)) :=
   inferInstance
+
+/-! ## Backward-direction assembly: `infOcc` and eventual membership -/
+
+/-- In a finite-state run, the current state is eventually always one that occurs infinitely
+often: all states that occur only finitely many times have a last occurrence, and the state
+space being finite makes their maximum last-occurrence time well-defined. -/
+private lemma eventually_mem_infOcc {α : Type*} [Finite α] (ys : ωSequence α) :
+    ∀ᶠ k in atTop, ys k ∈ ys.infOcc := by
+  have hfin : {x : α | ¬ ∃ᶠ k in atTop, ys k = x}.Finite := Set.toFinite _
+  have heach : ∀ x ∈ {x : α | ¬ ∃ᶠ k in atTop, ys k = x}, ∀ᶠ k in atTop, ys k ≠ x := by
+    intro x hx
+    exact Filter.not_frequently.mp hx
+  have hall : ∀ᶠ k in atTop, ∀ x ∈ {x : α | ¬ ∃ᶠ k in atTop, ys k = x}, ys k ≠ x :=
+    (Set.Finite.eventually_all hfin).mpr heach
+  filter_upwards [hall] with k hk
+  by_contra hcon
+  exact hk (ys k) hcon rfl
+
+/-- The set of values `s2` such that some slot-`i`-tagged concat state recurs infinitely often
+equals `infOcc` of `da2`'s run on `xs.drop n`, whenever slot `i` tracks that run (offset by
+one) forever after some time `n + 1 + m0`. The bound `m0` lets this serve both the backward
+direction (`m0 = 0`, tracking holds from the very start) and the forward direction (`m0` = the
+time a possibly-shifting witness slot stabilizes). Both state spaces must be finite for the
+pigeonhole argument `frequently_in_finite_type` to apply. -/
+private lemma concat_slot_infOcc_eq [Finite State1] [Finite State2]
+    (da1 : DA State1 Symbol) (acc1 : Set State1) (da2 : DA State2 Symbol)
+    (xs : ωSequence Symbol) (n m0 : ℕ) (i : Fin (Nat.card State2 + 2))
+    (hpersist : ∀ k ≥ m0, ((concat da1 acc1 da2).run xs (n + 1 + k)).2 i =
+      some (da2.run (xs.drop n) (k + 1))) :
+    {s2 | ∃ s ∈ ((concat da1 acc1 da2).run xs).infOcc, s.2 i = some s2} =
+      (da2.run (xs.drop n)).infOcc := by
+  ext s2
+  simp only [Set.mem_setOf_eq, mem_infOcc]
+  constructor
+  · rintro ⟨s, hs_inf, hs_i⟩
+    apply frequently_atTop.mpr
+    intro l
+    obtain ⟨k, hk, hkeq⟩ := frequently_atTop.mp hs_inf (n + 1 + max l m0)
+    obtain ⟨j, rfl⟩ : ∃ j, k = n + 1 + j := ⟨k - (n + 1), by omega⟩
+    refine ⟨j + 1, by omega, ?_⟩
+    have := hpersist j (by omega)
+    rw [hkeq] at this
+    rw [hs_i] at this
+    exact (Option.some.inj this).symm
+  · intro hfreq
+    have hfreq' : ∃ᶠ k in atTop,
+        (concat da1 acc1 da2).run xs k ∈
+          {s : State1 × (Fin (Nat.card State2 + 2) → Option State2) | s.2 i = some s2} := by
+      apply frequently_atTop.mpr
+      intro l
+      obtain ⟨j, hj, hjeq⟩ := frequently_atTop.mp hfreq (max l (m0 + 1))
+      obtain ⟨j', rfl⟩ : ∃ j', j = j' + 1 := ⟨j - 1, by omega⟩
+      refine ⟨n + 1 + j', by omega, ?_⟩
+      simp only [Set.mem_setOf_eq]
+      rw [hpersist j' (by omega), hjeq]
+    rw [ωSequence.frequently_in_finite_type] at hfreq'
+    obtain ⟨s, hs_mem, hs_freq⟩ := hfreq'
+    exact ⟨s, mem_infOcc.mpr hs_freq, hs_mem⟩
+
+/-! ## Top-level language correctness -/
+
+/-- If a slot tracks `da2`'s run (offset by one) from some time `n + 1 + m0` onward, every
+recurring state of the concat run is active at that slot: any state occurring infinitely
+often occurs at some time `≥ n + 1 + m0`, where the slot is `isSome` by the tracking formula. -/
+private lemma concat_slot_isSome_of_infOcc [Finite State1] [Finite State2]
+    (da1 : DA State1 Symbol) (acc1 : Set State1) (da2 : DA State2 Symbol)
+    (xs : ωSequence Symbol) (n m0 : ℕ) (i : Fin (Nat.card State2 + 2))
+    (hpersist : ∀ k ≥ m0, ((concat da1 acc1 da2).run xs (n + 1 + k)).2 i =
+      some (da2.run (xs.drop n) (k + 1)))
+    (s : State1 × (Fin (Nat.card State2 + 2) → Option State2))
+    (hs : s ∈ ((concat da1 acc1 da2).run xs).infOcc) :
+    (s.2 i).isSome := by
+  rw [mem_infOcc] at hs
+  obtain ⟨t, ht, hteq⟩ := frequently_atTop.mp hs (n + 1 + m0)
+  obtain ⟨j, rfl⟩ : ∃ j, t = n + 1 + j := ⟨t - (n + 1), by omega⟩
+  rw [← hteq, hpersist j (by omega)]
+  exact Option.isSome_some
+
+/-- Top-level language correctness of the Choueka flag-construction concat automaton:
+`concat da1 acc1 da2`, accepted under `mullerAccConcat`, recognizes exactly the concatenation
+of `da1`'s finite-string language with `da2`'s Muller ω-language. This is the key correctness
+theorem enabling the forward (ω-regular ⊆ DMA) direction of McNaughton's theorem via the
+Choueka decomposition route (task 241). -/
+theorem concat_language_eq [Finite State1] [Finite State2]
+    (da1 : DA State1 Symbol) (acc1 : Set State1) (da2 : DA State2 Symbol)
+    (accSet2 : Set (Set State2)) :
+    language (Muller.mk (concat da1 acc1 da2) (mullerAccConcat da1 acc1 da2 accSet2)) =
+      language (FinAcc.mk da1 acc1) * language (Muller.mk da2 accSet2) := by
+  apply mem_ext
+  intro xs
+  rw [Cslib.ωLanguage.mem_hmul]
+  simp only [ωAcceptor.mem_language, mullerAccConcat]
+  constructor
+  · rintro ⟨i, hAccSet, hAllSome⟩
+    obtain ⟨N, hN⟩ := (eventually_mem_infOcc ((concat da1 acc1 da2).run xs)).exists_forall_of_atTop
+    have hSomeAt : ∀ k ≥ N, (((concat da1 acc1 da2).run xs k).2 i).isSome := by
+      intro k hk
+      exact hAllSome _ (hN k hk)
+    obtain ⟨n, hacc, hpersist⟩ :=
+      concat_persist_from_activity da1 acc1 da2 xs i N hSomeAt
+    refine ⟨xs.extract 0 n, ?_, xs.drop n, ?_, by simp⟩
+    · change da1.mtr da1.start (xs.extract 0 n) ∈ acc1
+      rwa [mtr_extract_eq_run]
+    · change (da2.run (xs.drop n)).infOcc ∈ accSet2
+      rw [← concat_slot_infOcc_eq da1 acc1 da2 xs n 0 i (fun k _ => hpersist k)]
+      exact hAccSet
+  · rintro ⟨u, hu, ys, hys, rfl⟩
+    have hextract : (u ++ω ys).extract 0 u.length = u := by
+      rw [extract_append_zero_right (le_refl _)]
+      simp
+    have hn : da1.run (u ++ω ys) u.length ∈ acc1 := by
+      rw [← mtr_extract_eq_run, hextract]
+      exact hu
+    have hys' : (da2.run ((u ++ω ys).drop u.length)).infOcc ∈ accSet2 := by
+      rwa [drop_append_ωSequence]
+    obtain ⟨i, m, hi⟩ := concat_ptr_eventually da1 acc1 da2 (u ++ω ys) u.length hn
+    have hpersist : ∀ k ≥ m, ((concat da1 acc1 da2).run (u ++ω ys)
+        (u.length + 1 + k)).2 i = some (da2.run ((u ++ω ys).drop u.length) (k + 1)) := by
+      intro k hk
+      rw [← hi k hk]
+      exact concat_ptr_spec da1 acc1 da2 (u ++ω ys) u.length hn k
+    refine ⟨i, ?_, ?_⟩
+    · rwa [concat_slot_infOcc_eq da1 acc1 da2 (u ++ω ys) u.length m i hpersist]
+    · exact concat_slot_isSome_of_infOcc da1 acc1 da2 (u ++ω ys) u.length m i hpersist
 
 end Cslib.Automata.DA

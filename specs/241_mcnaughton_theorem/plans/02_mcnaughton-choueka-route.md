@@ -87,7 +87,7 @@ subtasks 433–435 landed):
 | `DA.buchi_eq_finAcc_omegaLim` | DA/Buchi.lean:26 | DA/Buchi.lean:26 | green |
 | `DA.Buchi.toMuller` / `…_language_eq` | DA/BuchiChar.lean:88 | DA/BuchiChar.lean:76 / :88 | green |
 | `DA.Rabin.toMuller_language_eq` | DA/Rabin.lean:163 | DA/Rabin.lean:163 | green |
-| `DA.concat` / `mullerAccConcat` | (not noted) | DA/Concat.lean:130 / :155 | construction present, **no language_eq** |
+| `DA.concat` / `mullerAccConcat` | (not noted) | DA/Concat.lean:137 / :163 | green — `concat_language_eq` proved in Phase 2 (construction itself fixed for an empty-prefix bug; see Phase 2 completion note) |
 | `DA.prod` / `prod_run_eq` | (not noted) | DA/Prod.lean:27 / :41 | green |
 | `DA.Buchi.union` / `…_language_eq` | (not noted) | DA/BuchiClosure.lean:44 / :54 | green (template for Muller union) |
 | `toNABuchi` / `…_language_eq` | DA/ToNA.lean:74/80 | DA/ToNA.lean:74 / :80 | green |
@@ -222,7 +222,7 @@ scratchpad)**:
 | `omega_reg_lang_iff_finite_union_form` | `IsRegular.eq_fin_iSup_hmul_omegaPow` | green (already in CSLib) |
 | `det_muller_lang_omega_limit` | `IsRegular.omegaLim_da_muller` | green (base case, already done) |
 | `choueka_lemma : L^ω = L* * L'↗ω` (L' regular) | **NEW**, needed by Phase 3 `omegaPow_da_muller` | missing — confirmed required (route (a) in Phase 3, not route (b)) |
-| `det_muller_lang_concat` (`M0.Concat acc0 M1` + `MullerAcc_Concat`) | `DA.concat` + `mullerAccConcat` correctness = **Phase 2 `concat_language_eq`** | construction present, correctness theorem missing |
+| `det_muller_lang_concat` (`M0.Concat acc0 M1` + `MullerAcc_Concat`) | `DA.concat` + `mullerAccConcat` correctness = **Phase 2 `concat_language_eq`** | green — proved in Phase 2 |
 | `det_muller_lang_biUnion` / `det_muller_lang_union` (`Automata.DA.Prod` + `MullerAcc_Union`) | **Phase 4 `DA.Muller.union`** (new `MullerClosure.lean`, mirrors `DA.Buchi.union`) | missing |
 | `omega_reg_lang_imp_det_muller_lang` (assembly: biUnion over `det_muller_lang_concat (U i) ((V i)^ω)`) | **Phase 5 `IsRegular.to_da_muller`** | to assemble |
 | `omega_reg_lang_iff_det_muller_lang` | **Phase 6 `IsRegular.iff_da_muller`** | to assemble |
@@ -239,17 +239,20 @@ worse than stated in the original Phase 3 risk table: it is not just "may need t
 the reference proof structure **requires** it, and its supporting regular-language construction
 (`ChouekaLang`) is entirely new to CSLib, not just the top-level identity lemma.
 
-### Phase 2: `DA.concat` language correctness (`concat_language_eq`) [IN PROGRESS]
+### Phase 2: `DA.concat` language correctness (`concat_language_eq`) [COMPLETED]
 
 - **Goal:** Prove the top-level correctness theorem for the existing Choueka flag-construction
   concat automaton: `language (DA.concat da1 acc1 da2) = (language of L₁) * (Muller language of da2)`
   (exact statement per `DetMullerLang.lean` reference and the `mullerAccConcat` accept family).
 - **Tasks:**
-  - [ ] State `concat_language_eq` for `DA.concat da1 acc1 da2` with accept `mullerAccConcat …`.
-  - [ ] Prove using the existing structural helpers: `concat_run_fst` (first component = `da1` run),
+  - [x] State `concat_language_eq` for `DA.concat da1 acc1 da2` with accept `mullerAccConcat …`.
+  - [x] Prove using the existing structural helpers: `concat_run_fst` (first component = `da1` run),
     `concat_run_stabilizes`, `concat_freeSlot`, `concat_tr_snd'` (flag dedup), plus
     `option_some_pigeonhole` / `antitone_fin_eventually` (already in the file).
-  - [ ] `lean_goal` at each step; `lean_multi_attempt` before edits.
+    *(deviation: also required fixing a genuine off-by-one bug in the `concat`/`concatF2`
+    construction itself — see completion note below — plus ~20 new private lemmas beyond the
+    ones the plan anticipated reusing.)*
+  - [x] `lean_goal` at each step; `lean_multi_attempt` before edits.
 - **Timing:** 4 hours (deepest single proof)
 - **Depends on:** none (uses only existing Concat.lean helpers; Phase 1's DAG is advisory)
 - **Files to modify:** `Cslib/Computability/Automata/DA/Concat.lean`
@@ -259,43 +262,75 @@ the reference proof structure **requires** it, and its supporting regular-langua
   `lean_verify` on `concat_language_eq` shows no `sorry`/new axioms. **If unclosable:** mark
   [BLOCKED] with the `lean_goal` state; do not add `sorry`.
 
-**Phase 2 status: NOT STARTED (not attempted this dispatch).** Read `DA/Concat.lean` in full
-(the flag-construction `concat`, `mullerAccConcat`, and the existing helpers
-`concat_run_fst`, `concat_tr_snd'`, `concat_run_stabilizes`, `concat_freeSlot`,
-`option_some_pigeonhole`, `antitone_fin_eventually`) and confirmed it is a genuinely deep,
-multi-step proof (flag-array dedup dynamics, breakpoint extraction from stabilization) matching
-the plan's own "4 hours, deepest single proof" estimate. Given Phases 1 and 4 were the safe,
-independent, mechanical wins for this dispatch, Phase 2 was deliberately left for a dedicated
-follow-up dispatch rather than risking an incomplete/`sorry`-laden attempt. **No code was added
-to `Concat.lean`** (no speculative `proof_wanted` stub either, to avoid repeating the
-scaffold-then-abandon pattern already flagged for cleanup in this plan's Disposition section).
+**Phase 2 result (COMPLETED)**: `concat_language_eq` proved and committed. Build green
+(`lake build Cslib.Computability.Automata.DA.Concat`), zero `sorry`/`admit` in the file,
+`lean_verify` reports only the standard axioms (`propext`, `Classical.choice`, `Quot.sound`).
 
-Recommended exact statement for the next dispatch (matches `mullerAccConcat`'s shape and the
-`FinAcc`/`Muller` `Acceptor`/`ωAcceptor` instances already in scope):
-```
-theorem concat_language_eq [Finite State1] [Finite State2]
-    (da1 : DA State1 Symbol) (acc1 : Set State1) (da2 : DA State2 Symbol)
-    (accSet2 : Set (Set State2)) :
-    language (Muller.mk (concat da1 acc1 da2) (mullerAccConcat da1 acc1 da2 accSet2)) =
-      language (FinAcc.mk da1 acc1) * language (Muller.mk da2 accSet2)
-```
-Proof sketch (forward, `⊇`): given `xs = u ++ω ys` with `u ∈ language (FinAcc.mk da1 acc1)`
-(i.e. `da1.mtr da1.start u ∈ acc1`, so `da1` reaches `acc1` at `n = u.length`) and
-`ys ∈ language (Muller.mk da2 accSet2)` (i.e. `(da2.run ys).infOcc ∈ accSet2`), show the slot
-that gets allocated for `ys` at breakpoint `n` (via `concat_freeSlot`) survives dedup forever
-after (since `da1` only enters `acc1` once more matters for *this* slot's persistence — actually
-need: the slot allocated at the LAST time `da1` enters `acc1` at/after `n` before settling; more
-carefully, since only one copy of `da2` ultimately needs to track `ys` from position `n` on,
-identify the slot tracking `da2`'s run on `ys` from `n` onward and show it is never zeroed by
-dedup beyond some point, then show `mullerAccConcat`'s witness `i` = that slot). Proof sketch
-(backward, `⊆`): given `mullerAccConcat` accepts (witness slot `i` persistently active with
-`{s2 | ∃ s ∈ infOcc, s.2 i = some s2} ∈ accSet2`), use `antitone_fin_eventually`-style reasoning
-to find the last time slot `i` was *freshly allocated* (i.e. the most recent `da1`-entry to
-`acc1` that started slot `i`'s current unbroken run) — call this breakpoint `n` — then show
-`xs.extract 0 n ∈ language (FinAcc.mk da1 acc1)` and `xs.drop n ∈ language (Muller.mk da2 accSet2)`
-by relating slot `i`'s post-`n` values to `da2.run (xs.drop n)` via `concat_tr_snd'`/`concatF2`.
-This backward direction is the harder half (must extract the breakpoint from the *infinite*
-accepted run) and is where the deepest new lemma-writing is needed.
+**Construction bug found and fixed (deviation from the plan's "prove using the existing
+construction unchanged" framing)**: before writing the correctness proof, a concrete
+counterexample was constructed and checked: let `da1` be a 2-state automaton whose *only*
+accepted string is `[]` (start state in `acc1`, every transition leaves `acc1` forever), and
+let `da2` be a trivial single-state DMA with `accSet2 = {univ}` (accepts everything). Then
+`language (FinAcc.mk da1 acc1) * language (Muller.mk da2 accSet2) = univ` (via the empty-prefix
+decomposition), but the *original* `concat`/`concatF2` (as committed by task 432) checked the
+**post**-transition M1 state (`da1.tr s1 a ∈ acc1`) to decide slot activation, which can never
+fire from the automaton's very first step — so it could never witness `da1.start ∈ acc1`
+accepting the empty prefix, making its language `∅ ≠ univ`. This traces to a genuine deviation
+from the reference construction (`ctchou/AutomataTheory`'s `DA.Concat`, cached at
+`/tmp/Automata_DetConcat.lean`), which checks the **pre**-transition state `s1 ∈ acc1` and
+immediately advances the freshly-activated copy by the current symbol (`M2.next M2.init a`,
+not raw `M2.init`) — the two changes exactly compensate for each other's off-by-one.
+Fixed `concatF2` and `concat`'s `tr` field accordingly (check `s1 ∈ acc1` instead of
+`da1.tr s1 a ∈ acc1`; activate with `some (da2.tr da2.start a)` instead of `some da2.start`);
+updated `concat_tr_snd`/`concat_tr_snd'` to match (still `rfl`); `concat_tr_nodup` and
+`concat_freeSlot`'s existing proofs were unaffected (activation-condition-agnostic) and
+required no changes. This fix is confined to `Concat.lean`, self-contained, and necessary for
+`concat_language_eq` to be true as a general (unconditional) equality — the alternative
+(adding a side condition excluding `da1.start ∈ acc1`) would have propagated a hole into
+Phase 5's assembly, since components of the `eq_fin_iSup_hmul_omegaPow` decomposition may
+contain the empty word.
+
+**New private lemmas added** (all sorry-free, docstring-complete, mirroring
+`ctchou/AutomataTheory`'s `DetConcat.lean` proof strategy but re-derived against CSLib's actual
+flag-array/dedup encoding, which differs structurally from the reference's per-slot recursive
+`next`): `concatF2_of_some`, `concat_tr_snd_of_some`, `concat_tr_snd_of_none` (per-slot
+characterization of transition outputs), `concat_dedup_exists_of_f2` (dedup preserves
+existence of any pre-dedup value, at an index `≤` the input witness), `concat_run_activate`,
+`concat_run_advance`, `concat_run_activate_exists`, `concat_run_tracks` (run-level
+persistence/tracking lemmas), `concat_ptr_exists`, `concat_run_unique_of_some`, `ConcatPtr` +
+`concat_ptr_spec`, `concat_ptr_antitone`, `concat_ptr_eventually` (the forward-direction
+"shifting witness slot stabilizes" argument, via `antitone_fin_eventually`), `concat_persist_from_activity`
+(backward-direction breakpoint extraction via `Nat.findGreatest`), `eventually_mem_infOcc`
+(general finite-state fact: the run is eventually always in its own `infOcc`),
+`concat_slot_infOcc_eq`, `concat_slot_isSome_of_infOcc` (assembly glue for both directions).
+
+**Proof structure actually used** (differs from the plan's sketch in using a `Nat.findGreatest`
+breakpoint search for the backward direction, and an antitone-stabilizing-pointer construction
+for the forward direction, rather than the plan's more informal "last activation"/"most recent
+entry" framing — same underlying mathematical content as `ctchou/AutomataTheory`'s
+`da_concat_det_run_2`/`da_concat_ptr2_exists`, ported to CSLib's construction):
+- **Forward** (`⊇`, given `n` with `da1.run xs n ∈ acc1` and `da2.run (xs.drop n)` Muller-accepted):
+  `concat_ptr_eventually` produces a witness slot `i` that stabilizes from some time `m` onward;
+  `concat_slot_infOcc_eq` (parameterized by a bound `m0`, here `m`) transports the `accSet2`
+  membership; `concat_slot_isSome_of_infOcc` shows every recurring state has `i` active.
+- **Backward** (`⊆`, given a `mullerAccConcat` witness slot `i`): `eventually_mem_infOcc` gives a
+  time `N` after which the run is always in its own `infOcc` (hence slot `i` is `isSome` from
+  `N` on); `concat_persist_from_activity` uses `Nat.findGreatest` (the latest inactivity of
+  slot `i` at or before `N`) to extract the breakpoint `n`; `concat_slot_infOcc_eq` (with
+  `m0 = 0`) transports the `accSet2` membership back.
+
+Full CI for this module: `lake build Cslib.Computability.Automata.DA.Concat` green;
+`lake exe lint-style` reports 2 pre-existing errors in `Cslib/Logics/Modal/Tableau/Completeness.lean`,
+a file untouched by this dispatch and not in `git status` as modified — belongs to a concurrent
+task in this shared working tree (same pattern flagged by the Phase 1/4 dispatch for
+`SoundnessStep.lean`). `lake lint`/`lake shake` could not be run project-wide this dispatch:
+the shared tree currently has out-of-date/broken oleans in unrelated modules
+(`Cslib.Logics.Temporal.*`, `Cslib.Logics.Propositional.Tableau.Minimal.Completeness` has an
+existing `sorry`) belonging to other concurrent tasks, so any whole-project command fails before
+reaching our file. Manually verified instead: every new declaration has a docstring (docBlame
+prevention), names are lowerCamelCase, no new axioms (`lean_verify`), and the file's own
+imports are unchanged from the version that already passed `checkInitImports` at commit
+`068f91cf`.
 
 ### Phase 3: `omegaPow_da_muller` — `Mᵒᵐᵉᵍᵃ` is DMA-recognizable [NOT STARTED]
 
@@ -406,8 +441,10 @@ own scoped builds are green independent of that unrelated breakage.
 
 These do not yet exist in CSLib and are built by this plan:
 
-1. **`concat_language_eq`** (Phase 2, `DA/Concat.lean`) — top-level correctness of the existing
-   `DA.concat` flag construction. *Construction present; correctness theorem missing.*
+1. **`concat_language_eq`** (Phase 2, `DA/Concat.lean`) — top-level correctness of the
+   `DA.concat` flag construction. **DONE (green, sorry-free).** Required fixing a genuine
+   empty-prefix bug in `concat`/`concatF2` itself (see Phase 2 completion note) in addition to
+   the correctness theorem.
 2. **`omegaPow_da_muller`** (Phase 3, `OmegaRegularLanguage.lean`) — `M^ω` DMA-recognizable, the
    omega-iteration core. May require a NEW **Choueka identity** sub-lemma
    `M^ω = M* · U↗ᵒᵐᵉᵍᵃ` (regular `U`) — confirm in Phase 1 from Chou's source.

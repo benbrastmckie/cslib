@@ -421,6 +421,7 @@ public import Cslib.Logics.Modal.ProofSystem.Instances.TB
 public import Cslib.Logics.Modal.Tableau.Branch
 public import Cslib.Logics.Modal.Tableau.Closure
 public import Cslib.Logics.Modal.Tableau.Completeness
+public import Cslib.Logics.Modal.Tableau.CompletenessLoop
 public import Cslib.Logics.Modal.Tableau.Defs
 public import Cslib.Logics.Modal.Tableau.FmpMeasure
 public import Cslib.Logics.Modal.Tableau.LoopInduction

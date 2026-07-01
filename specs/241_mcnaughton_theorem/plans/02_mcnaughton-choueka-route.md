@@ -1,7 +1,7 @@
 # Implementation Plan: McNaughton's Theorem — Choueka Route (Task #241, v2)
 
 - **Task**: 241 - mcnaughton_theorem
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 12 hours
 - **Dependencies**: None blocking. All prerequisite CSLib infrastructure compiles. This plan
   **supersedes the `buchiCongr_DMA`-quotient implementation path** taken by subtasks 433–436
@@ -544,22 +544,41 @@ edit and removed in Phase 6). Zero `sorry`/`admit` in the file.
 theorem-name validator rejects the `ω` in the namespace) reports only `propext`,
 `Classical.choice`, `Quot.sound`.
 
-### Phase 6: Assemble `iff_da_muller`, delete dead cluster, full CI [NOT STARTED]
+### Phase 6: Assemble `iff_da_muller`, delete dead cluster, full CI [COMPLETED]
 
 - **Goal:** Replace the `proof_wanted` with the complete theorem, remove the dead `buchiCongr_DMA`
   cluster, and green the full pipeline.
 - **Tasks:**
-  - [ ] Replace `proof_wanted IsRegular.iff_da_muller` (:653) with
+  - [x] Replace `proof_wanted IsRegular.iff_da_muller` (:653) with
     `theorem … := ⟨fun hp => IsRegular.to_da_muller hp, fun ⟨_,_,da,h⟩ => h ▸ IsRegular.of_da_muller da⟩`
     (exact binder shape per the original signature; namespace `Cslib.ωLanguage`).
-  - [ ] Delete the dead cluster per the Disposition: `buchiCongr_DMA`, `buchiCongr_DMA_run_eq`,
+    *(deviation: had to explicitly re-bind `{Symbol : Type}` on `iff_da_muller` — shadowing the
+    file's ambient `variable {Symbol : Type*}` — because `IsRegular.of_da_muller`'s `Symbol` is
+    fixed at `Type` (not universe-polymorphic); without this the `▸ IsRegular.of_da_muller da`
+    branch fails with a universe mismatch. Mirrors the same explicit `{Symbol : Type}` rebinding
+    already used by `IsRegular.compl`.)*
+  - [x] Delete the dead cluster per the Disposition: `buchiCongr_DMA`, `buchiCongr_DMA_run_eq`,
     `buchiCongr_DMA_accept_mem`, `buchiCongr_DMA_language_forward`, `to_da_muller_scaffold`.
     Re-check `buchiFamily_component_isRegular`: keep if still referenced/independently useful, else
     delete. Confirm no dangling references.
-  - [ ] Update the corollary comment block (:658–664) if the "Once McNaughton's theorem is proved"
-    phrasing should now read as proved.
-  - [ ] Run the full CSLib CI pipeline (Testing & Validation) and fix lint/style/shake findings.
-- **Timing:** 1.5 hours
+    *(deviation: also deleted `buchiCongr_recurrentClass` — a `buchiCongr_DMA`-dependent private
+    lemma omitted from the plan's Disposition table (an oversight there), which would otherwise
+    dangle on the deleted `buchiCongr_DMA` def. `buchiFamily_component_isRegular` retained per
+    the Disposition's default; it is now unreferenced anywhere in the file since its only
+    consumer, `to_da_muller_scaffold`, was removed, but project-wide `lake lint`/`shake` — the
+    stated trigger for removing it — could not be run this dispatch due to the known concurrent-
+    task tree breakage (see Environment note below), so it is left in place per the
+    conservative default.)*
+  - [x] Update the corollary comment block (:658–664) if the "Once McNaughton's theorem is proved"
+    phrasing should now read as proved. *(Changed "Once McNaughton's theorem is proved" to "Now
+    that McNaughton's theorem is proved".)*
+  - [x] Run the full CSLib CI pipeline (Testing & Validation) and fix lint/style/shake findings.
+    *(deviation: whole-project `lake build`/`lake test`/`checkInitImports` are blocked by
+    unrelated concurrent tasks' broken files, per the known environment issue — see Verification
+    below for the scoped substitute actually run, including a `lake shake --force` scoped run
+    that found and fixed one pre-existing unused import in `Concat.lean` (Phase 2's file,
+    `Cslib.Computability.Automata.DA.Prod`, unused since Concat.lean never calls `DA.prod`).)*
+- **Timing:** 1.5 hours (actual: single dispatch alongside Phase 5, no blockers)
 - **Depends on:** 1, 5
 - **Files to modify:** `Cslib/Computability/Languages/OmegaRegularLanguage.lean` (+ any file with
   lint/shake fixes).
@@ -567,6 +586,36 @@ theorem-name validator rejects the `ω` in the namespace) reports only `propext`
 - **Verification:** full pipeline green;
   `lean_verify Cslib.ωLanguage.IsRegular.iff_da_muller` — zero `sorry`, zero new axioms;
   `grep -n "sorry\|admit\|buchiCongr_DMA" …/OmegaRegularLanguage.lean` returns nothing.
+
+**Phase 6 result (COMPLETED, committed)**: `IsRegular.iff_da_muller` is now a complete, sorry-free
+`theorem` (McNaughton's theorem). The dead `buchiCongr_DMA` cluster (def, `run_eq`,
+`recurrentClass`, `accept_mem`, `language_forward`) and `to_da_muller_scaffold` were deleted
+(182 lines removed net). `buchiFamily_component_isRegular` retained per Disposition default.
+
+**Verification actually run** (scoped, due to the documented environment issue — see below):
+- `lake build Cslib.Computability.Automata.DA.Choueka Cslib.Computability.Automata.DA.Concat
+  Cslib.Computability.Automata.DA.MullerClosure Cslib.Computability.Languages.OmegaRegularLanguage`
+  — green, zero warnings.
+- `lake exe lint-style` on the same four modules — no findings.
+- `lake shake --add-public --keep-implied --keep-prefix --force` on the same four modules —
+  found and fixed one unused import (`Concat.lean`'s `DA.Prod` import); re-run confirms clean.
+- `lake exe mk_all --module` — "No update necessary"; `git diff --stat Cslib.lean` empty.
+- `grep -n "sorry\|admit"` across all four touched files — no matches.
+- `grep -n "^axiom "` across all four touched files — no matches (no new axioms introduced).
+- `#print axioms Cslib.ωLanguage.IsRegular.iff_da_muller` (via `lean_run_code`, since
+  `lean_verify`'s theorem-name validator rejects the `ω` in the namespace) — only `propext`,
+  `Classical.choice`, `Quot.sound`.
+- `lake exe checkInitImports` — attempted; fails with `object file
+  .../Cslib/Logics/Temporal/Tableau/Completeness.olean does not exist`, an unrelated concurrent
+  task's broken file (tasks 180/442), not touched by this dispatch. No mention of any of the
+  four files this dispatch modified.
+
+**Deferred to the orchestrator**: whole-project `lake build`, `lake test`,
+`lake exe checkInitImports`, project-wide `lake lint`, and project-wide `lake shake` could not be
+run this dispatch because the shared working tree currently has unrelated, concurrently-edited
+files in a broken/mid-edit state (`Cslib/Logics/Modal/Tableau/*`, `Cslib/Logics/Temporal/*`,
+belonging to tasks 180 and 442 — not owned by task 241 and not touched by this dispatch). Once
+those trees are fixed, run the full CSLib CI pipeline for a final whole-project confirmation.
 
 ## New Supporting Lemmas Flagged (directive #4)
 

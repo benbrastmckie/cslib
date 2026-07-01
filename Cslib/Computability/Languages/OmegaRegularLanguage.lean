@@ -397,174 +397,6 @@ private lemma buchiFamily_component_isRegular {Symbol : Type} [Inhabited Symbol]
   have := Language.IsRegular.congr_fin_index (c := na.BuchiCongruence)
   grind [buchiFamily, IsRegular.hmul, IsRegular.omegaPow]
 
-open NA.Buchi in
-/-- Concrete deterministic Muller automaton (DMA) over the Büchi congruence quotient of `na`.
-
-**Components** (Phase 3, task 241):
-- **State space**: `Q = Quotient na.BuchiCongruence.eq`, finite by `buchiCongruence_fin_index`.
-- **Initial state**: `Quotient.mk na.BuchiCongruence.eq []`, the class of the empty word.
-- **Transition**: `δ(q, a) = ⟦u ++ [a]⟧` for the representative `u` of class `q`, well-defined
-  by `BuchiCongruence.right_cov` (right-appending a single symbol preserves Büchi congruence).
-- **Accept set**: `{S : Set Q | ∃ a ∈ S, ∃ b : Q, (buchiFamily (a, b) ∩ language na).Nonempty}`.
-  A Muller set `S` is accepting iff it contains a recurrent prefix class `a` (the first,
-  prefix index of `buchiFamily`, which is what the run's `infOcc` actually contains) such that
-  some Büchi family element `buchiFamily (a, b)` intersects `language na`; by
-  `buchiFamily_saturation` this is equivalent to `buchiFamily (a, b) ⊆ language na`.
-
-The language equality is stated as `buchiCongr_DMA_language_eq` below (BLOCKED, Phase 4). -/
-private noncomputable def buchiCongr_DMA [Inhabited Symbol]
-    {State : Type} (na : NA.Buchi State Symbol) :
-    DA.Muller (Quotient na.BuchiCongruence.eq) Symbol where
-  tr q a := Quotient.liftOn q
-    (fun u => Quotient.mk na.BuchiCongruence.eq (u ++ [a]))
-    (fun _ _ h => Quotient.sound (na.BuchiCongruence.right_cov.elim [a] h))
-  start := Quotient.mk na.BuchiCongruence.eq []
-  accept := {S : Set (Quotient na.BuchiCongruence.eq) |
-    ∃ a ∈ S, ∃ b : Quotient na.BuchiCongruence.eq,
-      ((na.buchiFamily (a, b) ⊓ language na).toSet).Nonempty}
-
-open NA.Buchi in
-/-- The state of `buchiCongr_DMA na` after reading the first `n` symbols of `xs` equals
-the Büchi congruence class of the length-`n` prefix `xs.extract 0 n`.
-
-This is the key run-state lemma for proving `buchiCongr_DMA_language_eq`: it connects
-the DMA run to the congruence classes of prefixes, enabling both directions of the
-language equality proof. -/
-private lemma buchiCongr_DMA_run_eq [Inhabited Symbol] {State : Type}
-    (na : NA.Buchi State Symbol) (xs : ωSequence Symbol) (n : ℕ) :
-    (buchiCongr_DMA na).run xs n =
-      Quotient.mk na.BuchiCongruence.eq (xs.extract 0 n) := by
-  induction n with
-  | zero =>
-    simp only [DA.run_zero, buchiCongr_DMA, extract_eq_nil]
-  | succ n ih =>
-    rw [DA.run_succ, ih]
-    simp only [buchiCongr_DMA, Quotient.liftOn_mk]
-    congr 1
-    exact (extract_succ_right (Nat.zero_le n)).symm
-
-open NA.Buchi in
-/-- Recurrent-class lemma for the Büchi-congruence DMA run: for `[Finite State]` and any
-`xs`, there exist congruence classes `a b` with `b` idempotent (`b * b = b`), `a` absorbing
-(`a * b = a`), and `a` occurring infinitely often in `(buchiCongr_DMA na).run xs`.
-
-Bridges from `buchiCongruence_recurrentPrefixClass` (the pure prefix-class core lemma) via
-`buchiCongr_DMA_run_eq`. Used by Phase 4 of the McNaughton theorem (task 241) to close the
-forward direction of `buchiCongr_DMA_language_eq`. -/
-private lemma buchiCongr_recurrentClass [Inhabited Symbol] {State : Type} [Finite State]
-    (na : NA.Buchi State Symbol) (xs : ωSequence Symbol) :
-    ∃ a b : Quotient na.BuchiCongruence.eq, b * b = b ∧ a * b = a ∧
-      a ∈ ((buchiCongr_DMA na).run xs).infOcc := by
-  obtain ⟨a, b, hbb, hab, hfreq⟩ := buchiCongruence_recurrentPrefixClass na xs
-  exact ⟨a, b, hbb, hab, mem_infOcc.mpr
-    (hfreq.mono fun k hk => (buchiCongr_DMA_run_eq na xs k).trans hk)⟩
-
-open Finset NA.Buchi in
-/-- For any `xs ∈ language na`, the infimum-occurrence set of the Büchi-congruence DMA run
-contains a state that, paired with some partner state, gives a Büchi family element
-intersecting `language na`. This is the Ramsey/recurrence core of the forward inclusion of
-McNaughton's theorem, establishing `infOcc(run xs) ∈ (buchiCongr_DMA na).accept`.
-
-The proof re-runs the Ramsey argument of `buchiCongruence_recurrentPrefixClass`/
-`buchiFamily_cover` locally: a single application of `infinite_graph_ramsey` to the prefix
-coloring of `xs` yields both the recurring absorbing class `a` (via the exposed pairwise
-homogeneity `hcol`, not just the single-point recurrence exposed by `buchiCongr_recurrentClass`)
-*and* a concrete decomposition of `xs` itself into `na.buchiFamily (a, b)`, so the recurring
-class and the family witness come from the same Ramsey witness and are guaranteed consistent. -/
-private lemma buchiCongr_DMA_accept_mem [Inhabited Symbol] {State : Type} [Finite State]
-    (na : NA.Buchi State Symbol) (xs : ωSequence Symbol) (hxs : xs ∈ language na) :
-    ∃ a ∈ ((buchiCongr_DMA na).run xs).infOcc,
-      ∃ b, ((na.buchiFamily (a, b) ⊓ language na).toSet).Nonempty := by
-  have : Finite (Quotient na.BuchiCongruence.eq) := buchiCongruence_fin_index
-  let color (t : Finset ℕ) : Quotient na.BuchiCongruence.eq :=
-    if h : t.Nonempty then ⟦ xs.extract (t.min' h) (t.max' h) ⟧ else ⟦ [] ⟧
-  obtain ⟨b, ns, h_ns, h_color⟩ := infinite_graph_ramsey color
-  obtain ⟨f, h_mono, rfl⟩ := strictMono_of_infinite h_ns
-  -- Pairwise homogeneity: any two indices in the homogeneous set color the same as `b`.
-  have hcol : ∀ i j : ℕ, i < j →
-      (⟦xs.extract (f i) (f j)⟧ : Quotient na.BuchiCongruence.eq) = b := by
-    intro i j hij
-    have hfij : f i < f j := h_mono hij
-    have h_le : f i ≤ f j := le_of_lt hfij
-    have h_ne : f i ≠ f j := Nat.ne_of_lt hfij
-    have h_ne' : ({f i, f j} : Finset ℕ).Nonempty := insert_nonempty _ _
-    have h_card : ({f i, f j} : Finset ℕ).card = 2 := card_pair h_ne
-    have h_sub : ↑({f i, f j} : Finset ℕ) ⊆ Set.range f := by
-      rw [coe_pair]; rintro x (rfl | rfl) <;> exact ⟨_, rfl⟩
-    have hbc := h_color _ h_card h_sub
-    have heval : color {f i, f j} = ⟦xs.extract (f i) (f j)⟧ := by
-      change (if h : ({f i, f j} : Finset ℕ).Nonempty then
-        ⟦xs.extract (({f i, f j} : Finset ℕ).min' h) (({f i, f j} : Finset ℕ).max' h)⟧
-        else ⟦[]⟧) = ⟦xs.extract (f i) (f j)⟧
-      rw [dif_pos h_ne', min'_pair, max'_pair, min_eq_left h_le, max_eq_right h_le]
-    rw [heval] at hbc
-    exact hbc
-  -- `b` is idempotent (the same 3-point argument as `buchiCongruence_recurrentPrefixClass`).
-  have hbb : b * b = b := calc
-    b * b
-        = ⟦xs.extract (f 0) (f 1)⟧ * ⟦xs.extract (f 1) (f 2)⟧ := by
-            rw [hcol 0 1 (by omega), hcol 1 2 (by omega)]
-      _ = ⟦xs.extract (f 0) (f 1) ++ xs.extract (f 1) (f 2)⟧ :=
-            (buchiCongruence_mk_append _ _).symm
-      _ = ⟦xs.extract (f 0) (f 2)⟧ := by
-            rw [append_extract_extract (le_of_lt (h_mono (by omega : 0 < 1)))
-                                       (le_of_lt (h_mono (by omega : 1 < 2)))]
-      _ = b := hcol 0 2 (by omega)
-  -- `a` is the prefix class right after the first loop iteration: it recurs at every later
-  -- breakpoint, and (unlike `b`) is literally attained by `(buchiCongr_DMA na).run xs`.
-  set a := (⟦xs.extract 0 (f 1)⟧ : Quotient na.BuchiCongruence.eq) with ha_def
-  have ha0b : a = ⟦xs.extract 0 (f 0)⟧ * b := by
-    rw [ha_def, show xs.extract 0 (f 1) = xs.extract 0 (f 0) ++ xs.extract (f 0) (f 1)
-          from (append_extract_extract (Nat.zero_le _)
-            (le_of_lt (h_mono (by omega : 0 < 1)))).symm,
-        buchiCongruence_mk_append, hcol 0 1 (by omega)]
-  have hab : a * b = a := by rw [ha0b, mul_assoc, hbb]
-  -- `a` recurs as a prefix class infinitely often.
-  have hfreq : ∃ᶠ k in atTop, (⟦xs.extract 0 k⟧ : Quotient na.BuchiCongruence.eq) = a := by
-    rw [frequently_iff_strictMono]
-    refine ⟨fun m => f (m + 1), fun i j h => h_mono (Nat.succ_lt_succ h), fun m => ?_⟩
-    rw [show xs.extract 0 (f (m + 1)) = xs.extract 0 (f 0) ++ xs.extract (f 0) (f (m + 1))
-          from (append_extract_extract (Nat.zero_le _)
-            (h_mono.monotone (Nat.zero_le _))).symm,
-        buchiCongruence_mk_append, hcol 0 (m + 1) (Nat.zero_lt_succ m), ← ha0b]
-  -- Transport `hfreq` to `infOcc` of the DMA run via `buchiCongr_DMA_run_eq`.
-  have ha_infOcc : a ∈ ((buchiCongr_DMA na).run xs).infOcc :=
-    mem_infOcc.mpr (hfreq.mono fun k hk => (buchiCongr_DMA_run_eq na xs k).trans hk)
-  -- `xs` itself decomposes into `na.buchiFamily (a, b)`: prefix up to the second breakpoint
-  -- has class `a`, and every later segment (between consecutive breakpoints) has class `b`.
-  have hg_mono : StrictMono (fun k => f (k + 1)) := fun i j h => h_mono (Nat.succ_lt_succ h)
-  have hmem : xs ∈ na.buchiFamily (a, b) := by
-    apply mem_buchiFamily.mpr
-    refine ⟨xs.take (f 1), (xs.drop (f 1)).toSegs (fun k => f (k + 1) - f 1), ?_, ?_, ?_⟩
-    · show xs.take (f 1) ∈ na.BuchiCongruence.eqvCls a
-      simp only [RightCongruence.eqvCls, ha_def, extract_eq_take]
-      exact Set.mem_preimage.mpr rfl
-    · intro k
-      have h_le : f 1 ≤ f (k + 1) := hg_mono.monotone (Nat.zero_le _)
-      have h_le' : f 1 ≤ f (k + 2) := hg_mono.monotone (by omega)
-      have h_eq1 : f 1 + (f (k + 1) - f 1) = f (k + 1) := by omega
-      have h_eq2 : f 1 + (f (k + 2) - f 1) = f (k + 2) := by omega
-      simp only [Language.mem_sub_one, toSegs_def, extract_drop, h_eq1, h_eq2]
-      refine ⟨?_, ?_⟩
-      · show (⟦xs.extract (f (k + 1)) (f (k + 2))⟧ : Quotient na.BuchiCongruence.eq) = b
-        exact hcol (k + 1) (k + 2) (by omega)
-      · simp only [ne_eq, extract_eq_nil_iff, not_le]
-        exact h_mono (by omega)
-    · grind [Nat.base_zero_strictMono hg_mono]
-  exact ⟨a, ha_infOcc, b, xs, hmem, hxs⟩
-
-open NA.Buchi in
-private lemma buchiCongr_DMA_language_forward [Inhabited Symbol] {State : Type} [Finite State]
-    (na : NA.Buchi State Symbol) :
-    language na ⊆ language (buchiCongr_DMA na) := by
-  intro xs hxs
-  change ((buchiCongr_DMA na).run xs).infOcc ∈ (buchiCongr_DMA na).accept
-  -- The accept condition is exactly the Ramsey/recurrence statement: the run's `infOcc`
-  -- contains a recurrent prefix class `a` (first `buchiFamily` index) paired with some `b`
-  -- such that `buchiFamily (a, b)` meets `language na`.
-  simp only [buchiCongr_DMA, Set.mem_setOf_eq]
-  exact buchiCongr_DMA_accept_mem na xs hxs
-
 /-- Every ω-regular language is recognized by a finite-state deterministic Muller automaton
 (the forward direction `(⇒)` of McNaughton's theorem, task 241, Phase 5, Choueka route).
 
@@ -592,63 +424,25 @@ theorem IsRegular.to_da_muller [Inhabited Symbol] {p : ωLanguage Symbol}
   rw [show DA.FinAcc.mk dfa1.toDA dfa1.accept = dfa1 from rfl, hdfa1,
     show DA.Muller.mk da2.toDA da2.accept = da2 from rfl, hda2]
 
-open NA.Buchi in
-/-- Forward direction scaffold for McNaughton's theorem: ω-regular → DMA-recognizable.
+/-- **McNaughton's Theorem** (task 241): an ω-language is ω-regular (recognized by a
+finite-state nondeterministic Büchi automaton) if and only if it is recognized by a
+finite-state deterministic Muller automaton.
 
-Reduces the forward direction of `IsRegular.iff_da_muller` to `h_pkg`: given any
-finite-state NBA `na`, there exists a finite-state DMA over the Büchi congruence quotient
-`Q = Quotient na.BuchiCongruence.eq` whose language equals `language na`.
-
-**BLOCKED (Phase 3)**: Prove `h_pkg` by constructing the explicit `DA.Muller` record with:
-- State space: `Q = Quotient na.BuchiCongruence.eq` (finite by `buchiCongruence_fin_index`)
-- Initial state: `⟦[]⟧` (class of the empty word)
-- Transition: `δ([u], a) = [u ++ [a]]` (right multiplication in the congruence quotient)
-- Accept set: `{S : Set Q | ∃ b : Q, b ∈ S ∧ (⟦[]⟧, b) ∈ good_pairs na}` where
-  `good_pairs na = {(a, b) | (na.buchiFamily (a, b) ∩ language na).Nonempty}`
-  (equivalently, by `buchiFamily_saturation`, pairs whose family is ⊆ `language na`).
-
-The language equality `language dm = language na` uses:
-- `buchiFamily_saturation`: the Büchi family saturates `language na`
-- `buchiFamily_cover`: the Büchi family covers all ω-sequences
-- `buchiFamily_component_isRegular`: each component is ω-regular -/
-private lemma IsRegular.to_da_muller_scaffold {Symbol : Type} [Inhabited Symbol]
-    {p : ωLanguage Symbol}
-    (h : p.IsRegular)
-    (h_pkg : ∀ {State : Type} [Finite State] (na : NA.Buchi State Symbol),
-        ∃ (dm : DA.Muller (Quotient na.BuchiCongruence.eq) Symbol),
-          language dm = language na) :
-    ∃ (State : Type) (_ : Finite State) (da : DA.Muller State Symbol), language da = p := by
-  obtain ⟨State, h_fin, na, rfl⟩ := h
-  -- The Büchi congruence quotient Q is finite
-  haveI h_qfin : Finite (Quotient na.BuchiCongruence.eq) := buchiCongruence_fin_index
-  -- The Büchi family saturates and covers language na (established here for Phase 3 reference)
-  have _h_sat := buchiFamily_saturation (na := na)
-  have _h_cov := buchiFamily_cover (na := na)
-  -- Each Büchi family component is ω-regular (Phase 3 uses this in the language equality proof)
-  have _h_comp : ∀ i, (na.buchiFamily i).IsRegular := buchiFamily_component_isRegular
-  -- Phase 3 obligation: obtain the DMA over Q with language na
-  obtain ⟨dm, h_dm⟩ := h_pkg na
-  exact ⟨Quotient na.BuchiCongruence.eq, h_qfin, dm, h_dm⟩
-
-/-- McNaughton's Theorem: an ω-language is ω-regular (recognized by a finite-state NBA)
-if and only if it is recognized by a finite-state deterministic Muller automaton.
-
-**Proof**: The backward direction `(⇐)` follows from `IsRegular.of_da_muller`.
-
-The forward direction `(⇒)` follows the **Choueka decomposition route** (ported from
+**Proof**: The backward direction `(⇐)` follows from `IsRegular.of_da_muller`. The forward
+direction `(⇒)` follows the **Choueka decomposition route** (ported from
 `ctchou/AutomataTheory`'s `DetMullerLang.lean`, which does *not* use a quotient-as-DMA
-construction): decompose `p = ⨆ i, (l i) * (m i)^ω` via `eq_fin_iSup_hmul_omegaPow`; show
-each `(m i)^ω` is DMA-recognizable via the Choueka identity `M^ω = M* · U↗ω` (regular `U`)
-combined with the ω-limit base case `omegaLim_da_muller`; concatenate with the regular
-prefix `l i` via the `DA.concat` flag-construction correctness lemma
-(`concat_language_eq`); and fold the finite family into one DMA via DMA finite-union
-closure (`DA.Muller.union`). See `IsRegular.to_da_muller` (task 241, phase 5) for the
-assembly. -/
-proof_wanted IsRegular.iff_da_muller [Inhabited Symbol] {p : ωLanguage Symbol} :
+construction): `IsRegular.to_da_muller` decomposes `p = ⨆ i, (l i) * (m i)^ω` via
+`eq_fin_iSup_hmul_omegaPow`; shows each `(m i)^ω` is DMA-recognizable via the Choueka identity
+`M^ω = M* · U↗ω` (regular `U`, `omegaPow_da_muller`) combined with the ω-limit base case
+(`omegaLim_da_muller`); concatenates with the regular prefix `l i` via the `DA.concat`
+flag-construction correctness lemma (`concat_language_eq`); and folds the finite family into
+one DMA via the DMA finite-union closure lift (`DA.Muller.exists_iSup_univ`). -/
+theorem IsRegular.iff_da_muller {Symbol : Type} [Inhabited Symbol] {p : ωLanguage Symbol} :
     p.IsRegular ↔
-    ∃ (State : Type) (_ : Finite State) (da : DA.Muller State Symbol), language da = p
+    ∃ (State : Type) (_ : Finite State) (da : DA.Muller State Symbol), language da = p :=
+  ⟨fun hp => IsRegular.to_da_muller hp, fun ⟨_, _, da, h⟩ => h ▸ IsRegular.of_da_muller da⟩
 
--- Once McNaughton's theorem is proved (task 241), the following corollaries follow from the
+-- Now that McNaughton's theorem is proved (task 241), the following corollaries follow from the
 -- conversion chain in `Cslib.Computability.Automata.DA.Conversions`:
 --
 --   `IsRegular.iff_da_rabin`: ω-regularity ↔ recognizable by a finite-state DRA.

@@ -7,7 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Computability.Automata.DA.Basic
-public import Cslib.Computability.Automata.DA.Prod
 public import Cslib.Foundations.Data.OmegaSequence.InfOcc
 public import Cslib.Foundations.Data.OmegaSequence.Init
 public import Cslib.Computability.Languages.OmegaLanguage

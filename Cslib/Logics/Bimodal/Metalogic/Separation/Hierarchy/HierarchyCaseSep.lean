@@ -55,8 +55,6 @@ theorem case2_psi_has_single_U_type (a q x y : Formula Atom)
 
 /-! ### Case-specific isSeparableWithUType -/
 
-set_option maxHeartbeats 800000 in
--- Unfolding case1Psi properties requires extended heartbeats due to nested formula structure.
 /-- Case 1 with U-type preservation: S(a∧U(A,B), q) is separable_with_U_type. -/
 theorem case1_sep_with_U_type_gen (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
@@ -67,8 +65,6 @@ theorem case1_sep_with_U_type_gen (a q x y : Formula Atom)
   exact ⟨case1Psi a q x y, hsep, hequiv,
     case1_psi_has_single_U_type a q x y ha hq hx hy⟩
 
-set_option maxHeartbeats 3200000 in
--- Unfolding case2Psi properties requires extended heartbeats due to nested formula structure.
 /-- Case 2 with U-type preservation: S(a∧¬U(A,B), q) is separable_with_U_type. -/
 theorem case2_sep_with_U_type_gen (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
@@ -81,8 +77,6 @@ theorem case2_sep_with_U_type_gen (a q x y : Formula Atom)
 
 /-! ### Combined Helpers with U-type Preservation -/
 
-set_option maxHeartbeats 800000 in
--- Replacement and equivalence chain through snce_event_congr requires extended heartbeats.
 /-- S(COMBINED ∧ U(A,B), guard) is separable_with_U_type A B when COMBINED
     satisfies untlUnderBoolOnly and guard is U-free. -/
 theorem snce_combined_U_sep_with_U_type
@@ -101,8 +95,6 @@ theorem snce_combined_U_sep_with_U_type
   exact ⟨case1Psi combined' guard x y, hsep, hequiv,
     case1_psi_has_single_U_type combined' guard x y h_uf hg_uf hx hy⟩
 
-set_option maxHeartbeats 3200000 in
--- Replacement and equivalence chain through snce_event_congr requires extended heartbeats.
 /-- S(COMBINED ∧ ¬U(A,B), guard) is separable_with_U_type A B when COMBINED
     satisfies untlUnderBoolOnly and guard is U-free. -/
 theorem snce_combined_notU_sep_with_U_type
@@ -149,7 +141,6 @@ theorem snce_event_congr_hier {φ₁ φ₂ ψ : Formula Atom} (h : intEquiv φ�
 
 /-! ### Cases 5-8 with U-type Preservation -/
 
-set_option maxHeartbeats 1600000 in
 -- Deep recursive separability proof with multiple equivalence and distribution steps.
 /-- Case 5 with U-type: S(a∧U(A,B), q∨U(A,B)) is separable_with_U_type A B. -/
 theorem case5_sep_with_U_type_Z_gen (a q x y : Formula Atom)
@@ -252,7 +243,6 @@ theorem case8_sep_with_U_type_Z_gen (a q x y : Formula Atom)
     have hna_uf : isUFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
     exact case5_sep_with_U_type_Z_gen (Formula.neg q) (Formula.neg a) x y hnq_uf hna_uf hx hy hx' hy'
 
-set_option maxHeartbeats 3200000 in
 -- Deep recursive separability proof with distribution, case splitting, and vacuous elimination.
 /-- S(ev, q∨U(A,B)) is separable_with_U_type A B when ev is U-free. -/
 theorem snce_Ufree_event_qU_guard_sep_with_U_type (ev q x y : Formula Atom)
@@ -522,7 +512,6 @@ theorem snce_Ufree_event_qNotU_guard_sep_with_U_type (ev q x y : Formula Atom)
       exact hnotS1 ⟨s, hst, int_truth_and_iff.mpr
         ⟨int_truth_and_iff.mpr ⟨hna_s, hnotQ_s⟩, hnotNotU_s⟩, hguard⟩
 
-set_option maxHeartbeats 1600000 in
 -- Deep recursive separability proof with rearrangement, distribution, and case 8 subcase.
 /-- Case 7 with U-type: S(a∧U, q∨¬U) is separable_with_U_type A B. -/
 theorem case7_sep_with_U_type_Z_gen (a q x y : Formula Atom)

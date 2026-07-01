@@ -594,7 +594,7 @@ in the file (grep-confirmed).
 
 ---
 
-### Phase 8: Tableau subtree scoped-green [PARTIAL]
+### Phase 8: Tableau subtree scoped-green [COMPLETED]
 
 - **Goal:** Complete the WIP's Tableau edits and add G/H constructor cases. Independent of the
   metalogic chain (depends only on P3) — may be scheduled any time after P3.
@@ -684,9 +684,78 @@ in the file (grep-confirmed).
 - **Scoped verification (done when):**
   - `lake build Cslib.Logics.Temporal.Tableau.Defs` green — PASSES.
   - `lake build Cslib.Logics.Temporal.Tableau.Soundness Cslib.Logics.Temporal.Tableau.Completeness`
-    green — Soundness PASSES; **Completeness FAILS** (90 errors, all confined to
-    `temporalTruthLemma_propositional_aux`, see above). Phase 8 marked `[PARTIAL]`, not
-    `[COMPLETED]`, per PM3/PM7 (never fake green).
+    green — PASSES (both).
+
+**Phase 8 continuation result (Completeness.lean, re-dispatch):** Closed all 90 errors in
+`temporalTruthLemma_propositional_aux`, confirming the PM5-preserved diagnosis (pure pre-existing
+WIP bug, zero G/H references) and finding two additional co-located, previously-undiagnosed defect
+classes in the same lemma once the primary one was peeled back:
+1. **Root cause (frozen `hout`, as diagnosed):** the pre-`cases` `simp only [temporalApplyOne,
+   tryAllPropRules, applyPropRule, List.map, List.find?, tempAndOf?, tempOrOf?, tempImpOf?,
+   tempNegOf?, RuleResult.isApplicable] at hout` left `hout` as an un-iota-reduced nested
+   `match`/`if`. Fix: deleted the two pre-`cases` occurrences (T-direction and F-direction) and
+   inserted the (extended) simp call at each of the ~35 leaf sites instead, immediately before
+   `hout`'s first use — but the originally-named lemma set was insufficient by itself; it also
+   needed `Option.getD, reduceIte` (the `if`/`Option.getD` reduction chain feeding
+   `temporalApplyOne`'s dispatch) to fully collapse `hout` to the expected `∀ sf' ∈ newForms, …` /
+   `∃ br ∈ branches, …` shape.
+2. **New: `Formula.complexity` match ambiguity on abstract propositional sub-formulas.** Wherever
+   an `IsPropositional`-bound sub-formula `φ` is still syntactically opaque (not yet `cases`-split)
+   and appears as `(φ.imp ψ).complexity` with `ψ` literally `Formula.bot`, `Formula.complexity`'s
+   R(φ,ψ)/T(φ,ψ) Łukasiewicz special-case patterns (`.imp (.untl (.imp _ .bot) (.imp _ .bot))
+   .bot`) cannot be ruled out by `simp`/`omega` alone — checking "is the LHS `.untl`-shaped"
+   requires knowing φ's top constructor. Added a private helper
+   `IsPropositional.complexity_imp_eq {φ ψ} (hφ : IsPropositional φ) (hψ : IsPropositional ψ) :
+   (φ.imp ψ).complexity = 1 + φ.complexity + ψ.complexity := by cases hφ <;> cases hψ <;> rfl`
+   (placed after the `IsPropositional` inductive) and supplied it explicitly (with the matching
+   local `ha`/`hc`/`IsPropositional.bot` witnesses) at each of the ~7 `by simp
+   only [Formula.complexity, IsPropositional.complexity_imp_eq, …] at hle ⊢; omega` sites where
+   plain `Formula.complexity` unfolding stalled. (`cases`-ing the ambient `ha`/`hc` hypothesis
+   directly inside the nested `by`-block was tried first and rejected: it corrupts the *outer*
+   term's later reference to the same hypothesis via shared-context metavariable capture — the
+   lemma-based rewrite avoids this since it is a separate, already-closed proof.)
+3. **New: argument-order bug, `ih _ X (by …) t` vs `ih _ (by …) X t`.** `ih`'s signature is
+   `∀ φ, φ.complexity ≤ n → IsPropositional φ → ∀ t, …` (complexity proof *before* the
+   `IsPropositional` proof), but ~56 call sites across both directions had the two swapped
+   (`ih _ ha (by …) t` instead of `ih _ (by …) ha t`). Fixed by a script that located every
+   `(by simp only [Formula.complexity] at hle ⊢; omega)` occurrence and swapped it with its
+   immediately-preceding argument (balanced-paren or identifier scan) — except the `ih (.atom p)
+   (by …) (.atom p) t` calls, which were *already* correctly ordered (φ explicit, not `_`) and
+   needed reverting from the first blind pass.
+4. **New: bare `.atom` used as an under-applied `IsPropositional` proof term.** `IsPropositional.atom`
+   takes an explicit `Atom` argument (`atom (p : Atom) : IsPropositional (.atom p)`); ~28 sites
+   wrote bare `.atom` (0 args) where `IsPropositional (Formula.atom p)` was expected. Fixed by
+   supplying the matching bound atom name (`.atom p`/`.atom q`/`.atom r`/`.atom s`) reused from the
+   sibling `ih (.atom X) …` call or the enclosing `| atom X =>` case binder.
+5. **New: `hψ'` referenced after being destructed.** 10 sites did `cases hψ' with | imp _ _ =>
+   … hψ' …` — `cases` on `hψ'` itself eliminates it, so the anonymous-pattern arm's body could not
+   legally reference `hψ'` afterward (this compiled as far as it did only because the surrounding
+   90-error avalanche masked it). Fixed by naming the constructor arm (`| imp hψc hψd =>`) and
+   reconstructing `IsPropositional.imp hψc hψd` in place of `hψ'`.
+6. **New: 2-element `RuleResult.linear` `obtain` arity bug.** `hout : ∀ sf' ∈ [a, b], sf' ∈ b`
+   reduces via `List.forall_mem_cons` to a *3-part* nested conjunction `a∈b ∧ (b∈b ∧ ∀x∈[],x∈b)`,
+   not the 2-part `a∈b ∧ b∈b` the WIP's `obtain ⟨ht_a, ht_c⟩` expected — the trailing
+   `∀ x ∈ [], x ∈ b` silently attached to the second binder. Fixed 12 sites with
+   `obtain ⟨ht_a, ht_c, -⟩ := hout` (discarding the trivial tail) and simplified the preceding simp
+   call to just `[List.forall_mem_cons] at hout` (the `List.forall_mem_nil`/`List.forall_mem_singleton`/
+   `and_true` lemmas became unused once the tail is discarded rather than closed away).
+7. **Minor: `List.mem_singleton_self` used against a 2-element list.** 3 F-direction `hφ'=bot`
+   leaves needed the *head* of a 2-element list (`T(bot)@t`), not a singleton; fixed with
+   `List.mem_cons_self` (argument-free in this Lean/Std version, matching the same finding already
+   recorded from Phase 8's `Rules.lean` repair).
+8. **Lint cleanup (in-dispatch, not deferred to P9):** re-wrapped ~53 lines that exceeded the
+   100-char style limit (mostly from the `Option.getD, reduceIte` simp-arg append and the
+   argument-order swap) and added `omit [Hashable Atom] in` to `temporalTruthLemma_propositional_aux`
+   and `temporalTruthLemma_propositional` (both flagged by `linter.unusedSectionVars` once the file
+   compiled far enough to reach them) — `lake build` now reports **zero warnings**, not just zero
+   errors.
+
+No `sorry`, no vacuous definitions, no new axioms (`lean_verify` on `temporalTruthLemma_propositional`
+and the new `IsPropositional.complexity_imp_eq` helper: `{propext, Classical.choice, Quot.sound}` /
+`{propext}` respectively — both within the pre-existing standard classical set). `Defs.lean`/
+`Rules.lean` untouched (PM5 preserved-work bar honored). Full Phase 8 gate now green:
+`lake build Cslib.Logics.Temporal.Tableau.Defs Cslib.Logics.Temporal.Tableau.Soundness
+Cslib.Logics.Temporal.Tableau.Completeness` — 654/654 jobs, 0 errors, 0 warnings.
 
 ---
 
@@ -738,10 +807,10 @@ Per-phase (scoped, mandatory before marking any phase `[COMPLETED]`):
 - [ ] P5: `lake build …Metalogic.MCS` and `…WitnessSeed` green.
 - [x] P6: `lake build …Chronicle.{RRelation, PointInsertion.Seeds, CounterexampleElimination.Structures}` green.
 - [x] P7: `lake build …Chronicle.TruthLemma` green; `lean_verify` clean.
-- [x] P8: `lake build …Tableau.{Defs, Soundness}` green (+ Rules/Closure/Branch/Saturation/
-  TimeOrdering, verify-only or repaired). `…Tableau.Completeness` still RED — pre-existing
-  WIP bug in `temporalTruthLemma_propositional_aux`, unrelated to G/H, needs dedicated
-  re-dispatch (see Phase 8 result above).
+- [x] P8: `lake build …Tableau.{Defs, Soundness, Completeness}` green (+ Rules/Closure/Branch/
+  Saturation/TimeOrdering, verify-only or repaired). Completeness's pre-existing WIP bug in
+  `temporalTruthLemma_propositional_aux` (90 errors, unrelated to G/H) closed in the Phase 8
+  continuation dispatch; zero `sorry`, zero warnings (see Phase 8 result above).
 
 Final (P9, full CI):
 - [ ] `lake build` green for the whole project.

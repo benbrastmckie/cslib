@@ -320,6 +320,18 @@ private lemma Formula.one_le_complexity (φ : Formula Atom) : 1 ≤ φ.complexit
   unfold Formula.complexity
   split <;> omega
 
+omit [Hashable Atom] [DecidableEq Atom] in
+/-- For propositional `φ`/`ψ`, `(φ.imp ψ).complexity` always takes the "generic imp" branch
+of `Formula.complexity` (never the R(φ,ψ)/T(φ,ψ) special-cased overhead-1 patterns, which
+require a `.untl`/`.snce` sub-term that `IsPropositional` excludes). Used to unstick
+`Formula.complexity`'s pattern match when the operands are still symbolic in strong-induction
+proofs: without this, `simp [Formula.complexity]` cannot determine which match arm fires for an
+abstract `φ.imp ψ`. -/
+private lemma IsPropositional.complexity_imp_eq {φ ψ : Formula Atom}
+    (hφ : IsPropositional φ) (hψ : IsPropositional ψ) :
+    (φ.imp ψ).complexity = 1 + φ.complexity + ψ.complexity := by
+  cases hφ <;> cases hψ <;> rfl
+
 omit [Hashable Atom] in
 /-- Convert a `b.any` positive membership witness to list membership. -/
 private lemma any_pos_mem (b : TBranch Atom) (t : TimeIndex) (φ : Formula Atom)
@@ -395,6 +407,7 @@ a semantic time value; `ord.instant` carries the semantic order instead.
 The Until/Since (`untl`/`snce`) cases remain FMP-blocked (see below); the propositional
 fragment (atom/bot/imp) is handled here by strong induction on `Formula.complexity`. -/
 
+omit [Hashable Atom] in
 /-- Auxiliary truth lemma for the propositional fragment, bounded by a `Nat` fuel `n` so
 that the proof can use strong (well-founded) induction on `Formula.complexity`: every strict
 subformula of a propositional formula has strictly smaller complexity, so the single
@@ -436,78 +449,105 @@ private lemma temporalTruthLemma_propositional_aux
         intro hφ_sat
         have hmem := any_pos_mem b t _ hpos
         have hout := hrule _ hmem
-        simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map, List.find?,
-          tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?, RuleResult.isApplicable] at hout
         cases hφ' with
         | bot => exact absurd hφ_sat (Satisfies.bot_false _ _)
         | atom p =>
           cases hψ' with
           | bot =>
             -- negPos fires: linear [F(atom p)@t]
-            have hfp := hout _ (by simp)
+            simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map, List.find?,
+              tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+              RuleResult.isApplicable, Option.getD, reduceIte] at hout
+            have hfp := hout _ (List.mem_singleton_self _)
             exact absurd hφ_sat ((ih (.atom p)
-              (by simp only [Formula.complexity] at hle; omega) .atom t).2
+              (by simp only [Formula.complexity] at hle ⊢; omega) (.atom p) t).2
               (mem_to_any_neg b t _ hfp))
           | atom q =>
             -- impPos fires: branching [[F(atom p)], [T(atom q)]]
+            simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map, List.find?,
+              tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+              RuleResult.isApplicable, Option.getD, reduceIte] at hout
             obtain ⟨br, hbr_mem, hbr⟩ := hout
-            simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+            simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr_mem
             rcases hbr_mem with rfl | rfl
             · exact absurd hφ_sat ((ih (.atom p)
-                (by simp only [Formula.complexity] at hle; omega) .atom t).2
-                (mem_to_any_neg b t _ (hbr _ (by simp))))
-            · exact (ih (.atom q) (by simp only [Formula.complexity] at hle; omega) .atom t).1
-                (mem_to_any_pos b t _ (hbr _ (by simp)))
-          | imp _ _ =>
+              (by simp only [Formula.complexity] at hle ⊢; omega) (.atom p) t).2
+                (mem_to_any_neg b t _ (hbr _ (List.mem_singleton_self _))))
+            · exact (ih (.atom q) (by simp only [Formula.complexity] at hle ⊢; omega) (.atom q) t).1
+                (mem_to_any_pos b t _ (hbr _ (List.mem_singleton_self _)))
+          | imp hψc hψd =>
             -- impPos fires: branching [[F(atom p)], [T(imp _ _)]]
+            simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map, List.find?,
+              tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+              RuleResult.isApplicable, Option.getD, reduceIte] at hout
             obtain ⟨br, hbr_mem, hbr⟩ := hout
-            simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+            simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr_mem
             rcases hbr_mem with rfl | rfl
             · exact absurd hφ_sat ((ih (.atom p)
-                (by simp only [Formula.complexity] at hle; omega) .atom t).2
-                (mem_to_any_neg b t _ (hbr _ (by simp))))
-            · exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).1
-                (mem_to_any_pos b t _ (hbr _ (by simp)))
+              (by simp only [Formula.complexity] at hle ⊢; omega) (.atom p) t).2
+                (mem_to_any_neg b t _ (hbr _ (List.mem_singleton_self _))))
+            · exact (ih _
+              (by simp only [Formula.complexity] at hle ⊢; omega) (IsPropositional.imp hψc hψd) t).1
+                (mem_to_any_pos b t _ (hbr _ (List.mem_singleton_self _)))
         | imp ha hb =>
           cases hb with
           | bot =>
             -- φ' = imp a bot (neg-shape): orPos fires: [[T(a)@t], [T(ψ')@t]]
+            simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map, List.find?,
+              tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+              RuleResult.isApplicable, Option.getD, reduceIte] at hout
             obtain ⟨br, hbr_mem, hbr⟩ := hout
-            simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+            simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr_mem
             rcases hbr_mem with rfl | rfl
             · -- br = [T(a)@t]: sat a contradicts hφ_sat : sat a → False
-              have ht_a := hbr _ (by simp)
-              exact absurd ((ih _ ha (by simp only [Formula.complexity] at hle; omega) t).1
-                (mem_to_any_pos b t _ ht_a)) hφ_sat
+              have ht_a := hbr _ (List.mem_singleton_self _)
+              exact absurd ((ih _ (by simp only [Formula.complexity,
+                IsPropositional.complexity_imp_eq, ha, IsPropositional.bot] at hle ⊢; omega) ha
+                t).1 (mem_to_any_pos b t _ ht_a)) hφ_sat
             · -- br = [T(ψ')@t]: sat ψ'
-              exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).1
-                (mem_to_any_pos b t _ (hbr _ (by simp)))
+              exact (ih _ (by simp only [Formula.complexity] at hle ⊢; omega) hψ' t).1
+                (mem_to_any_pos b t _ (hbr _ (List.mem_singleton_self _)))
           | atom q =>
             -- φ' = imp a (atom q): impPos (ψ'≠bot) or negPos (ψ'=bot)
             cases hψ' with
             | bot =>
-              have hf := hout _ (by simp)
-              exact absurd hφ_sat ((ih _ (IsPropositional.imp ha .atom)
-                (by simp only [Formula.complexity] at hle; omega) t).2
+              simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                RuleResult.isApplicable, Option.getD, reduceIte] at hout
+              have hf := hout _ (List.mem_singleton_self _)
+              exact absurd hφ_sat ((ih _
+                (by simp only [Formula.complexity] at hle ⊢; omega)
+                  (IsPropositional.imp ha (.atom q)) t).2
                 (mem_to_any_neg b t _ hf))
             | atom r =>
+              simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                RuleResult.isApplicable, Option.getD, reduceIte] at hout
               obtain ⟨br, hbr_mem, hbr⟩ := hout
-              simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+              simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr_mem
               rcases hbr_mem with rfl | rfl
-              · exact absurd hφ_sat ((ih _ (IsPropositional.imp ha .atom)
-                  (by simp only [Formula.complexity] at hle; omega) t).2
-                  (mem_to_any_neg b t _ (hbr _ (by simp))))
-              · exact (ih (.atom r) (by simp only [Formula.complexity] at hle; omega) .atom t).1
-                  (mem_to_any_pos b t _ (hbr _ (by simp)))
-            | imp _ _ =>
+              · exact absurd hφ_sat ((ih _
+                (by simp only [Formula.complexity] at hle ⊢; omega)
+                  (IsPropositional.imp ha (.atom q)) t).2
+                  (mem_to_any_neg b t _ (hbr _ (List.mem_singleton_self _))))
+              · exact (ih (.atom r)
+                (by simp only [Formula.complexity] at hle ⊢; omega) (.atom r) t).1
+                  (mem_to_any_pos b t _ (hbr _ (List.mem_singleton_self _)))
+            | imp hψc hψd =>
+              simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                RuleResult.isApplicable, Option.getD, reduceIte] at hout
               obtain ⟨br, hbr_mem, hbr⟩ := hout
-              simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+              simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr_mem
               rcases hbr_mem with rfl | rfl
-              · exact absurd hφ_sat ((ih _ (IsPropositional.imp ha .atom)
-                  (by simp only [Formula.complexity] at hle; omega) t).2
-                  (mem_to_any_neg b t _ (hbr _ (by simp))))
-              · exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).1
-                  (mem_to_any_pos b t _ (hbr _ (by simp)))
+              · exact absurd hφ_sat ((ih _
+                (by simp only [Formula.complexity] at hle ⊢; omega)
+                  (IsPropositional.imp ha (.atom q)) t).2
+                  (mem_to_any_neg b t _ (hbr _ (List.mem_singleton_self _))))
+              · exact (ih _
+                (by simp only [Formula.complexity] at hle ⊢; omega)
+                  (IsPropositional.imp hψc hψd) t).1
+                  (mem_to_any_pos b t _ (hbr _ (List.mem_singleton_self _)))
           | imp hc hd =>
             cases hd with
             | bot =>
@@ -515,162 +555,249 @@ private lemma temporalTruthLemma_propositional_aux
               cases hψ' with
               | bot =>
                 -- andPos fires: linear [T(a)@t, T(c)@t]
-                simp only [List.forall_mem_cons, List.forall_mem_nil,
-                  List.forall_mem_singleton, and_true] at hout
-                obtain ⟨ht_a, ht_c⟩ := hout
+                simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                  List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                  RuleResult.isApplicable, Option.getD, reduceIte] at hout
+                simp only [List.forall_mem_cons] at hout
+                obtain ⟨ht_a, ht_c, -⟩ := hout
                 exact hφ_sat
-                  ((ih _ ha (by simp only [Formula.complexity] at hle; omega) t).1
+                  ((ih _ (by simp only [Formula.complexity, IsPropositional.complexity_imp_eq,
+                    hc, IsPropositional.bot] at hle ⊢; omega) ha t).1
                     (mem_to_any_pos b t _ ht_a))
-                  ((ih _ hc (by simp only [Formula.complexity] at hle; omega) t).1
+                  ((ih _ (by simp only [Formula.complexity, IsPropositional.complexity_imp_eq,
+                    hc, IsPropositional.bot] at hle ⊢; omega) hc t).1
                     (mem_to_any_pos b t _ ht_c))
               | atom r =>
                 -- impPos fires
+                simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                  List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                  RuleResult.isApplicable, Option.getD, reduceIte] at hout
                 obtain ⟨br, hbr_mem, hbr⟩ := hout
-                simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+                simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr_mem
                 rcases hbr_mem with rfl | rfl
-                · exact absurd hφ_sat ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .bot))
-                    (by simp only [Formula.complexity] at hle; omega) t).2
-                    (mem_to_any_neg b t _ (hbr _ (by simp))))
-                · exact (ih (.atom r) (by simp only [Formula.complexity] at hle; omega) .atom t).1
-                    (mem_to_any_pos b t _ (hbr _ (by simp)))
-              | imp _ _ =>
+                · exact absurd hφ_sat ((ih _
+                  (by simp only [Formula.complexity] at hle ⊢; omega)
+                    (IsPropositional.imp ha (IsPropositional.imp hc .bot)) t).2
+                    (mem_to_any_neg b t _ (hbr _ (List.mem_singleton_self _))))
+                · exact (ih (.atom r)
+                  (by simp only [Formula.complexity] at hle ⊢; omega) (.atom r) t).1
+                    (mem_to_any_pos b t _ (hbr _ (List.mem_singleton_self _)))
+              | imp hψc hψd =>
+                simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                  List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                  RuleResult.isApplicable, Option.getD, reduceIte] at hout
                 obtain ⟨br, hbr_mem, hbr⟩ := hout
-                simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+                simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr_mem
                 rcases hbr_mem with rfl | rfl
-                · exact absurd hφ_sat ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .bot))
-                    (by simp only [Formula.complexity] at hle; omega) t).2
-                    (mem_to_any_neg b t _ (hbr _ (by simp))))
-                · exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).1
-                    (mem_to_any_pos b t _ (hbr _ (by simp)))
+                · exact absurd hφ_sat ((ih _
+                  (by simp only [Formula.complexity] at hle ⊢; omega)
+                    (IsPropositional.imp ha (IsPropositional.imp hc .bot)) t).2
+                    (mem_to_any_neg b t _ (hbr _ (List.mem_singleton_self _))))
+                · exact (ih _
+                  (by simp only [Formula.complexity] at hle ⊢; omega)
+                    (IsPropositional.imp hψc hψd) t).1
+                    (mem_to_any_pos b t _ (hbr _ (List.mem_singleton_self _)))
             | atom r =>
               -- φ' = imp a (imp c (atom r)): impPos or negPos
               cases hψ' with
               | bot =>
-                have hf := hout _ (by simp)
-                exact absurd hφ_sat ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .atom))
-                  (by simp only [Formula.complexity] at hle; omega) t).2
+                simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                  List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                  RuleResult.isApplicable, Option.getD, reduceIte] at hout
+                have hf := hout _ (List.mem_singleton_self _)
+                exact absurd hφ_sat ((ih _
+                  (by simp only [Formula.complexity] at hle ⊢; omega)
+                    (IsPropositional.imp ha (IsPropositional.imp hc (.atom r))) t).2
                   (mem_to_any_neg b t _ hf))
               | atom s =>
+                simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                  List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                  RuleResult.isApplicable, Option.getD, reduceIte] at hout
                 obtain ⟨br, hbr_mem, hbr⟩ := hout
-                simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+                simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr_mem
                 rcases hbr_mem with rfl | rfl
-                · exact absurd hφ_sat ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .atom))
-                    (by simp only [Formula.complexity] at hle; omega) t).2
-                    (mem_to_any_neg b t _ (hbr _ (by simp))))
-                · exact (ih (.atom s) (by simp only [Formula.complexity] at hle; omega) .atom t).1
-                    (mem_to_any_pos b t _ (hbr _ (by simp)))
-              | imp _ _ =>
+                · exact absurd hφ_sat ((ih _
+                  (by simp only [Formula.complexity] at hle ⊢; omega)
+                    (IsPropositional.imp ha (IsPropositional.imp hc (.atom r))) t).2
+                    (mem_to_any_neg b t _ (hbr _ (List.mem_singleton_self _))))
+                · exact (ih (.atom s)
+                  (by simp only [Formula.complexity] at hle ⊢; omega) (.atom s) t).1
+                    (mem_to_any_pos b t _ (hbr _ (List.mem_singleton_self _)))
+              | imp hψc hψd =>
+                simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                  List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                  RuleResult.isApplicable, Option.getD, reduceIte] at hout
                 obtain ⟨br, hbr_mem, hbr⟩ := hout
-                simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+                simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr_mem
                 rcases hbr_mem with rfl | rfl
-                · exact absurd hφ_sat ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .atom))
-                    (by simp only [Formula.complexity] at hle; omega) t).2
-                    (mem_to_any_neg b t _ (hbr _ (by simp))))
-                · exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).1
-                    (mem_to_any_pos b t _ (hbr _ (by simp)))
+                · exact absurd hφ_sat ((ih _
+                  (by simp only [Formula.complexity] at hle ⊢; omega)
+                    (IsPropositional.imp ha (IsPropositional.imp hc (.atom r))) t).2
+                    (mem_to_any_neg b t _ (hbr _ (List.mem_singleton_self _))))
+                · exact (ih _
+                  (by simp only [Formula.complexity] at hle ⊢; omega)
+                    (IsPropositional.imp hψc hψd) t).1
+                    (mem_to_any_pos b t _ (hbr _ (List.mem_singleton_self _)))
             | imp he hf =>
               -- φ' = imp a (imp c (imp e f)): impPos or negPos
               cases hψ' with
               | bot =>
-                have hf' := hout _ (by simp)
+                simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                  List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                  RuleResult.isApplicable, Option.getD, reduceIte] at hout
+                have hf' := hout _ (List.mem_singleton_self _)
                 exact absurd hφ_sat
-                  ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc (IsPropositional.imp he hf)))
-                    (by simp only [Formula.complexity] at hle; omega) t).2
+                  ((ih _
+                    (by simp only [Formula.complexity] at hle ⊢; omega)
+                      (IsPropositional.imp ha (IsPropositional.imp hc (IsPropositional.imp he hf)))
+                      t).2
                     (mem_to_any_neg b t _ hf'))
               | atom s =>
+                simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                  List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                  RuleResult.isApplicable, Option.getD, reduceIte] at hout
                 obtain ⟨br, hbr_mem, hbr⟩ := hout
-                simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+                simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr_mem
                 rcases hbr_mem with rfl | rfl
                 · exact absurd hφ_sat
-                    ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc (IsPropositional.imp he hf)))
-                      (by simp only [Formula.complexity] at hle; omega) t).2
-                      (mem_to_any_neg b t _ (hbr _ (by simp))))
-                · exact (ih (.atom s) (by simp only [Formula.complexity] at hle; omega) .atom t).1
-                    (mem_to_any_pos b t _ (hbr _ (by simp)))
-              | imp _ _ =>
+                    ((ih _
+                      (by simp only [Formula.complexity] at hle ⊢; omega)
+                        (IsPropositional.imp ha (IsPropositional.imp hc
+                          (IsPropositional.imp he hf)))
+                        t).2
+                      (mem_to_any_neg b t _ (hbr _ (List.mem_singleton_self _))))
+                · exact (ih (.atom s)
+                  (by simp only [Formula.complexity] at hle ⊢; omega) (.atom s) t).1
+                    (mem_to_any_pos b t _ (hbr _ (List.mem_singleton_self _)))
+              | imp hψc hψd =>
+                simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                  List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                  RuleResult.isApplicable, Option.getD, reduceIte] at hout
                 obtain ⟨br, hbr_mem, hbr⟩ := hout
-                simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+                simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr_mem
                 rcases hbr_mem with rfl | rfl
                 · exact absurd hφ_sat
-                    ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc (IsPropositional.imp he hf)))
-                      (by simp only [Formula.complexity] at hle; omega) t).2
-                      (mem_to_any_neg b t _ (hbr _ (by simp))))
-                · exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).1
-                    (mem_to_any_pos b t _ (hbr _ (by simp)))
+                    ((ih _
+                      (by simp only [Formula.complexity] at hle ⊢; omega)
+                        (IsPropositional.imp ha (IsPropositional.imp hc
+                          (IsPropositional.imp he hf)))
+                        t).2
+                      (mem_to_any_neg b t _ (hbr _ (List.mem_singleton_self _))))
+                · exact (ih _
+                  (by simp only [Formula.complexity] at hle ⊢; omega)
+                    (IsPropositional.imp hψc hψd) t).1
+                    (mem_to_any_pos b t _ (hbr _ (List.mem_singleton_self _)))
       · -- F-direction: ¬ Satisfies m t (imp φ' ψ')
         simp only [Satisfies.imp_iff]
         intro hφ_to_ψ
         have hmem := any_neg_mem b t _ hneg
         have hout := hrule _ hmem
-        simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map, List.find?,
-          tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?, RuleResult.isApplicable] at hout
         cases hφ' with
         | bot =>
           -- negNeg/impNeg both output T(bot)@t, contradicting openBranch
           cases hψ' with
-          | bot => exact absurd ⟨t, hout _ (by simp)⟩ (openBranch_noBotPos b ord tracker hopen)
-          | atom _ => exact absurd ⟨t, hout _ (by simp)⟩ (openBranch_noBotPos b ord tracker hopen)
-          | imp _ _ => exact absurd ⟨t, hout _ (by simp)⟩ (openBranch_noBotPos b ord tracker hopen)
+          | bot =>
+              simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                RuleResult.isApplicable, Option.getD, reduceIte] at hout
+              exact absurd ⟨t, hout _ List.mem_cons_self⟩ (openBranch_noBotPos b ord tracker hopen)
+          | atom _ =>
+              simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                RuleResult.isApplicable, Option.getD, reduceIte] at hout
+              exact absurd ⟨t, hout _ List.mem_cons_self⟩ (openBranch_noBotPos b ord tracker hopen)
+          | imp _ _ =>
+              simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                RuleResult.isApplicable, Option.getD, reduceIte] at hout
+              exact absurd ⟨t, hout _ List.mem_cons_self⟩ (openBranch_noBotPos b ord tracker hopen)
         | atom p =>
           cases hψ' with
           | bot =>
             -- negNeg fires: linear [T(atom p)@t]
-            have ht_p := hout _ (by simp)
-            exact hφ_to_ψ ((ih (.atom p) (by simp only [Formula.complexity] at hle; omega)
-              .atom t).1 (mem_to_any_pos b t _ ht_p))
+            simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map, List.find?,
+              tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+              RuleResult.isApplicable, Option.getD, reduceIte] at hout
+            have ht_p := hout _ (List.mem_singleton_self _)
+            exact hφ_to_ψ ((ih (.atom p)
+              (by simp only [Formula.complexity] at hle ⊢; omega)
+                (.atom p) t).1 (mem_to_any_pos b t _ ht_p))
           | atom q =>
             -- impNeg fires: linear [T(atom p)@t, F(atom q)@t]
-            simp only [List.forall_mem_cons, List.forall_mem_nil,
-              List.forall_mem_singleton, and_true] at hout
-            obtain ⟨ht_p, hf_q⟩ := hout
-            exact (ih (.atom q) (by simp only [Formula.complexity] at hle; omega) .atom t).2
+            simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map, List.find?,
+              tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+              RuleResult.isApplicable, Option.getD, reduceIte] at hout
+            simp only [List.forall_mem_cons] at hout
+            obtain ⟨ht_p, hf_q, -⟩ := hout
+            exact (ih (.atom q) (by simp only [Formula.complexity] at hle ⊢; omega) (.atom q) t).2
               (mem_to_any_neg b t _ hf_q)
-              (hφ_to_ψ ((ih (.atom p) (by simp only [Formula.complexity] at hle; omega) .atom t).1
+              (hφ_to_ψ ((ih (.atom p)
+                (by simp only [Formula.complexity] at hle ⊢; omega) (.atom p) t).1
                 (mem_to_any_pos b t _ ht_p)))
-          | imp _ _ =>
-            simp only [List.forall_mem_cons, List.forall_mem_nil,
-              List.forall_mem_singleton, and_true] at hout
-            obtain ⟨ht_p, hf_ψ⟩ := hout
-            exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).2
+          | imp hψc hψd =>
+            simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map, List.find?,
+              tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+              RuleResult.isApplicable, Option.getD, reduceIte] at hout
+            simp only [List.forall_mem_cons] at hout
+            obtain ⟨ht_p, hf_ψ, -⟩ := hout
+            exact (ih _
+              (by simp only [Formula.complexity] at hle ⊢; omega) (IsPropositional.imp hψc hψd) t).2
               (mem_to_any_neg b t _ hf_ψ)
-              (hφ_to_ψ ((ih (.atom p) (by simp only [Formula.complexity] at hle; omega) .atom t).1
+              (hφ_to_ψ ((ih (.atom p)
+                (by simp only [Formula.complexity] at hle ⊢; omega) (.atom p) t).1
                 (mem_to_any_pos b t _ ht_p)))
         | imp ha hb =>
           cases hb with
           | bot =>
             -- φ' = imp a bot: orNeg fires: linear [F(a)@t, F(ψ')@t]
-            simp only [List.forall_mem_cons, List.forall_mem_nil,
-              List.forall_mem_singleton, and_true] at hout
-            obtain ⟨hf_a, hf_ψ⟩ := hout
-            exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).2
+            simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map, List.find?,
+              tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+              RuleResult.isApplicable, Option.getD, reduceIte] at hout
+            simp only [List.forall_mem_cons] at hout
+            obtain ⟨hf_a, hf_ψ, -⟩ := hout
+            exact (ih _ (by simp only [Formula.complexity, IsPropositional.complexity_imp_eq,
+              ha, IsPropositional.bot] at hle ⊢; omega) hψ' t).2
               (mem_to_any_neg b t _ hf_ψ)
-              (hφ_to_ψ ((ih _ ha (by simp only [Formula.complexity] at hle; omega) t).2
-                (mem_to_any_neg b t _ hf_a)))
+              (hφ_to_ψ ((ih _ (by simp only [Formula.complexity,
+                IsPropositional.complexity_imp_eq, ha, IsPropositional.bot] at hle ⊢; omega) ha
+                t).2 (mem_to_any_neg b t _ hf_a)))
           | atom q =>
             -- φ' = imp a (atom q): negNeg (ψ'=bot) or impNeg (ψ'≠bot)
             cases hψ' with
             | bot =>
-              have ht := hout _ (by simp)
-              exact hφ_to_ψ ((ih _ (IsPropositional.imp ha .atom)
-                (by simp only [Formula.complexity] at hle; omega) t).1
+              simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                RuleResult.isApplicable, Option.getD, reduceIte] at hout
+              have ht := hout _ (List.mem_singleton_self _)
+              exact hφ_to_ψ ((ih _
+                (by simp only [Formula.complexity] at hle ⊢; omega)
+                  (IsPropositional.imp ha (.atom q)) t).1
                 (mem_to_any_pos b t _ ht))
             | atom r =>
-              simp only [List.forall_mem_cons, List.forall_mem_nil,
-                List.forall_mem_singleton, and_true] at hout
-              obtain ⟨ht_φ, hf_ψ⟩ := hout
-              exact (ih (.atom r) (by simp only [Formula.complexity] at hle; omega) .atom t).2
+              simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                RuleResult.isApplicable, Option.getD, reduceIte] at hout
+              simp only [List.forall_mem_cons] at hout
+              obtain ⟨ht_φ, hf_ψ, -⟩ := hout
+              exact (ih (.atom r) (by simp only [Formula.complexity] at hle ⊢; omega) (.atom r) t).2
                 (mem_to_any_neg b t _ hf_ψ)
-                (hφ_to_ψ ((ih _ (IsPropositional.imp ha .atom)
-                  (by simp only [Formula.complexity] at hle; omega) t).1
+                (hφ_to_ψ ((ih _
+                  (by simp only [Formula.complexity] at hle ⊢; omega)
+                    (IsPropositional.imp ha (.atom q)) t).1
                   (mem_to_any_pos b t _ ht_φ)))
-            | imp _ _ =>
-              simp only [List.forall_mem_cons, List.forall_mem_nil,
-                List.forall_mem_singleton, and_true] at hout
-              obtain ⟨ht_φ, hf_ψ⟩ := hout
-              exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).2
+            | imp hψc hψd =>
+              simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                RuleResult.isApplicable, Option.getD, reduceIte] at hout
+              simp only [List.forall_mem_cons] at hout
+              obtain ⟨ht_φ, hf_ψ, -⟩ := hout
+              exact (ih _
+                (by simp only [Formula.complexity] at hle ⊢; omega)
+                  (IsPropositional.imp hψc hψd) t).2
                 (mem_to_any_neg b t _ hf_ψ)
-                (hφ_to_ψ ((ih _ (IsPropositional.imp ha .atom)
-                  (by simp only [Formula.complexity] at hle; omega) t).1
+                (hφ_to_ψ ((ih _
+                  (by simp only [Formula.complexity] at hle ⊢; omega)
+                    (IsPropositional.imp ha (.atom q)) t).1
                   (mem_to_any_pos b t _ ht_φ)))
           | imp hc hd =>
             cases hd with
@@ -679,89 +806,131 @@ private lemma temporalTruthLemma_propositional_aux
               cases hψ' with
               | bot =>
                 -- andNeg: branching [[F(a)@t], [F(c)@t]]
+                simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                  List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                  RuleResult.isApplicable, Option.getD, reduceIte] at hout
                 obtain ⟨br, hbr_mem, hbr⟩ := hout
-                simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+                simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr_mem
                 rcases hbr_mem with rfl | rfl
-                · have hf_a := hbr _ (by simp)
-                  exact hφ_to_ψ (fun h_a => absurd h_a ((ih _ ha
-                    (by simp only [Formula.complexity] at hle; omega) t).2
-                    (mem_to_any_neg b t _ hf_a)))
-                · have hf_c := hbr _ (by simp)
-                  exact hφ_to_ψ (fun _ h_c => absurd h_c ((ih _ hc
-                    (by simp only [Formula.complexity] at hle; omega) t).2
-                    (mem_to_any_neg b t _ hf_c)))
+                · have hf_a := hbr _ (List.mem_singleton_self _)
+                  exact hφ_to_ψ (fun h_a => absurd h_a ((ih _ (by simp only [Formula.complexity,
+                    IsPropositional.complexity_imp_eq, hc, IsPropositional.bot] at hle ⊢; omega)
+                    ha t).2 (mem_to_any_neg b t _ hf_a)))
+                · have hf_c := hbr _ (List.mem_singleton_self _)
+                  exact hφ_to_ψ (fun _ h_c => absurd h_c ((ih _ (by simp only [Formula.complexity,
+                    IsPropositional.complexity_imp_eq, hc, IsPropositional.bot] at hle ⊢; omega)
+                    hc t).2 (mem_to_any_neg b t _ hf_c)))
               | atom r =>
-                simp only [List.forall_mem_cons, List.forall_mem_nil,
-                  List.forall_mem_singleton, and_true] at hout
-                obtain ⟨ht_φ, hf_ψ⟩ := hout
-                exact (ih (.atom r) (by simp only [Formula.complexity] at hle; omega) .atom t).2
+                simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                  List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                  RuleResult.isApplicable, Option.getD, reduceIte] at hout
+                simp only [List.forall_mem_cons] at hout
+                obtain ⟨ht_φ, hf_ψ, -⟩ := hout
+                exact (ih (.atom r)
+                  (by simp only [Formula.complexity] at hle ⊢; omega) (.atom r) t).2
                   (mem_to_any_neg b t _ hf_ψ)
-                  (hφ_to_ψ ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .bot))
-                    (by simp only [Formula.complexity] at hle; omega) t).1
+                  (hφ_to_ψ ((ih _
+                    (by simp only [Formula.complexity] at hle ⊢; omega)
+                      (IsPropositional.imp ha (IsPropositional.imp hc .bot)) t).1
                     (mem_to_any_pos b t _ ht_φ)))
-              | imp _ _ =>
-                simp only [List.forall_mem_cons, List.forall_mem_nil,
-                  List.forall_mem_singleton, and_true] at hout
-                obtain ⟨ht_φ, hf_ψ⟩ := hout
-                exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).2
+              | imp hψc hψd =>
+                simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                  List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                  RuleResult.isApplicable, Option.getD, reduceIte] at hout
+                simp only [List.forall_mem_cons] at hout
+                obtain ⟨ht_φ, hf_ψ, -⟩ := hout
+                exact (ih _
+                  (by simp only [Formula.complexity] at hle ⊢; omega)
+                    (IsPropositional.imp hψc hψd) t).2
                   (mem_to_any_neg b t _ hf_ψ)
-                  (hφ_to_ψ ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .bot))
-                    (by simp only [Formula.complexity] at hle; omega) t).1
+                  (hφ_to_ψ ((ih _
+                    (by simp only [Formula.complexity] at hle ⊢; omega)
+                      (IsPropositional.imp ha (IsPropositional.imp hc .bot)) t).1
                     (mem_to_any_pos b t _ ht_φ)))
             | atom r =>
               -- φ' = imp a (imp c (atom r)): negNeg or impNeg
               cases hψ' with
               | bot =>
-                have ht := hout _ (by simp)
-                exact hφ_to_ψ ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .atom))
-                  (by simp only [Formula.complexity] at hle; omega) t).1
+                simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                  List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                  RuleResult.isApplicable, Option.getD, reduceIte] at hout
+                have ht := hout _ (List.mem_singleton_self _)
+                exact hφ_to_ψ ((ih _
+                  (by simp only [Formula.complexity] at hle ⊢; omega)
+                    (IsPropositional.imp ha (IsPropositional.imp hc (.atom r))) t).1
                   (mem_to_any_pos b t _ ht))
               | atom s =>
-                simp only [List.forall_mem_cons, List.forall_mem_nil,
-                  List.forall_mem_singleton, and_true] at hout
-                obtain ⟨ht_φ, hf_ψ⟩ := hout
-                exact (ih (.atom s) (by simp only [Formula.complexity] at hle; omega) .atom t).2
+                simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                  List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                  RuleResult.isApplicable, Option.getD, reduceIte] at hout
+                simp only [List.forall_mem_cons] at hout
+                obtain ⟨ht_φ, hf_ψ, -⟩ := hout
+                exact (ih (.atom s)
+                  (by simp only [Formula.complexity] at hle ⊢; omega) (.atom s) t).2
                   (mem_to_any_neg b t _ hf_ψ)
-                  (hφ_to_ψ ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .atom))
-                    (by simp only [Formula.complexity] at hle; omega) t).1
+                  (hφ_to_ψ ((ih _
+                    (by simp only [Formula.complexity] at hle ⊢; omega)
+                      (IsPropositional.imp ha (IsPropositional.imp hc (.atom r))) t).1
                     (mem_to_any_pos b t _ ht_φ)))
-              | imp _ _ =>
-                simp only [List.forall_mem_cons, List.forall_mem_nil,
-                  List.forall_mem_singleton, and_true] at hout
-                obtain ⟨ht_φ, hf_ψ⟩ := hout
-                exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).2
+              | imp hψc hψd =>
+                simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                  List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                  RuleResult.isApplicable, Option.getD, reduceIte] at hout
+                simp only [List.forall_mem_cons] at hout
+                obtain ⟨ht_φ, hf_ψ, -⟩ := hout
+                exact (ih _
+                  (by simp only [Formula.complexity] at hle ⊢; omega)
+                    (IsPropositional.imp hψc hψd) t).2
                   (mem_to_any_neg b t _ hf_ψ)
-                  (hφ_to_ψ ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .atom))
-                    (by simp only [Formula.complexity] at hle; omega) t).1
+                  (hφ_to_ψ ((ih _
+                    (by simp only [Formula.complexity] at hle ⊢; omega)
+                      (IsPropositional.imp ha (IsPropositional.imp hc (.atom r))) t).1
                     (mem_to_any_pos b t _ ht_φ)))
             | imp he hf =>
               -- φ' = imp a (imp c (imp e f)): negNeg or impNeg
               cases hψ' with
               | bot =>
-                have ht := hout _ (by simp)
+                simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                  List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                  RuleResult.isApplicable, Option.getD, reduceIte] at hout
+                have ht := hout _ (List.mem_singleton_self _)
                 exact hφ_to_ψ
-                  ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc (IsPropositional.imp he hf)))
-                    (by simp only [Formula.complexity] at hle; omega) t).1
+                  ((ih _
+                    (by simp only [Formula.complexity] at hle ⊢; omega)
+                      (IsPropositional.imp ha (IsPropositional.imp hc (IsPropositional.imp he hf)))
+                      t).1
                     (mem_to_any_pos b t _ ht))
               | atom s =>
-                simp only [List.forall_mem_cons, List.forall_mem_nil,
-                  List.forall_mem_singleton, and_true] at hout
-                obtain ⟨ht_φ, hf_ψ⟩ := hout
-                exact (ih (.atom s) (by simp only [Formula.complexity] at hle; omega) .atom t).2
+                simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                  List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                  RuleResult.isApplicable, Option.getD, reduceIte] at hout
+                simp only [List.forall_mem_cons] at hout
+                obtain ⟨ht_φ, hf_ψ, -⟩ := hout
+                exact (ih (.atom s)
+                  (by simp only [Formula.complexity] at hle ⊢; omega) (.atom s) t).2
                   (mem_to_any_neg b t _ hf_ψ)
-                  (hφ_to_ψ ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc (IsPropositional.imp he hf)))
-                    (by simp only [Formula.complexity] at hle; omega) t).1
+                  (hφ_to_ψ ((ih _
+                    (by simp only [Formula.complexity] at hle ⊢; omega)
+                      (IsPropositional.imp ha (IsPropositional.imp hc (IsPropositional.imp he hf)))
+                      t).1
                     (mem_to_any_pos b t _ ht_φ)))
-              | imp _ _ =>
-                simp only [List.forall_mem_cons, List.forall_mem_nil,
-                  List.forall_mem_singleton, and_true] at hout
-                obtain ⟨ht_φ, hf_ψ⟩ := hout
-                exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).2
+              | imp hψc hψd =>
+                simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map,
+                  List.find?, tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?,
+                  RuleResult.isApplicable, Option.getD, reduceIte] at hout
+                simp only [List.forall_mem_cons] at hout
+                obtain ⟨ht_φ, hf_ψ, -⟩ := hout
+                exact (ih _
+                  (by simp only [Formula.complexity] at hle ⊢; omega)
+                    (IsPropositional.imp hψc hψd) t).2
                   (mem_to_any_neg b t _ hf_ψ)
-                  (hφ_to_ψ ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc (IsPropositional.imp he hf)))
-                    (by simp only [Formula.complexity] at hle; omega) t).1
+                  (hφ_to_ψ ((ih _
+                    (by simp only [Formula.complexity] at hle ⊢; omega)
+                      (IsPropositional.imp ha (IsPropositional.imp hc (IsPropositional.imp he hf)))
+                      t).1
                     (mem_to_any_pos b t _ ht_φ)))
 
+omit [Hashable Atom] in
 /-- Truth lemma for the propositional fragment (atom, ⊥, →) of the temporal tableau:
 for a propositional `φ`, every `T(φ)@t` on a temporal Hintikka branch is satisfied in the
 extracted model, and every `F(φ)@t` is not. Until/Since are excluded by `IsPropositional`. -/

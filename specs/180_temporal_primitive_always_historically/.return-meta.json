@@ -1,42 +1,45 @@
 {
   "status": "partial",
-  "started_at": "2026-07-01T01:56:36Z",
-  "completed_at": "2026-07-01T02:45:00Z",
+  "started_at": "2026-07-01T02:20:49Z",
+  "completed_at": "2026-07-01T03:10:00Z",
   "artifacts": [
-    {
-      "path": "specs/180_temporal_primitive_always_historically/summaries/03_phase8-tableau-subtree-summary.md",
-      "type": "summary",
-      "summary": "Phase 8 (Tableau subtree) partial completion summary"
-    },
     {
       "path": "specs/180_temporal_primitive_always_historically/plans/03_primitive-gh-metalogic-plan.md",
       "type": "plan",
-      "summary": "Phase 8 heading updated to [PARTIAL] with detailed result documentation"
+      "summary": "Phase 8 heading flipped [PARTIAL] -> [COMPLETED]; detailed continuation result appended documenting six co-located pre-existing defect classes found and fixed in temporalTruthLemma_propositional_aux"
+    },
+    {
+      "path": "Cslib/Logics/Temporal/Tableau/Completeness.lean",
+      "type": "source",
+      "summary": "temporalTruthLemma_propositional_aux: 90 build errors -> 0. Added private helper IsPropositional.complexity_imp_eq. Zero sorry, zero new axioms, zero lint-style warnings."
     }
   ],
   "partial_progress": {
-    "stage": "phase_8_partial",
-    "details": "Defs.lean and Rules.lean fully repaired and scoped-green (zero sorry, zero lint warnings). Closure/Branch/Saturation/Soundness/TimeOrdering.lean verified green with zero edits. Completeness.lean blocked on a large pre-existing WIP bug in temporalTruthLemma_propositional_aux unrelated to G/H; requires dedicated re-dispatch.",
-    "phases_completed": 7,
+    "stage": "phase_8_completed",
+    "details": "Completeness.lean's sole remaining blocker (temporalTruthLemma_propositional_aux, 90 errors) fully closed. Full Phase 8 gate green: lake build Defs + Soundness + Completeness together. Defs.lean/Rules.lean untouched (PM5). Task 180 now at 8/9 phases complete; Phase 9 (Theorems.lean wrappers, Boudou2017 BibKey, downstream sweep, full CI) remains.",
+    "phases_completed": 8,
     "phases_total": 9
   },
-  "phases_completed": 7,
+  "phases_completed": 8,
   "phases_total": 9,
   "memory_candidates": [
-    "Lean4: rcases/cases on a bare (non-hypothesis) expression only generalizes the goal target, not other hypotheses -- use `split at h` (not `rcases <expr> with ...`) when you need a match/if inside an already-computed hypothesis `h` to reduce.",
-    "Lean4: rename_i's 'last n inaccessible' count must include trailing auto-generated heq/let-binder names introduced by split/match compilation, not just the binders you actually want to name -- undercounting silently renames the wrong (later) inaccessible variable."
+    "Lean4: a `simp only [defName1, defName2, ...] at h` that unfolds a function definition may still leave the result frozen at an `if`/`Option.getD` layer if those specific reduction lemmas aren't in the given list -- `simp only [..., Option.getD, reduceIte] at h` (or just unrestricted `simp at h`) is often needed in addition to the definition names themselves.",
+    "Lean4: `Formula.complexity`-style recursive functions with special-cased nested match patterns (e.g. Lukasiewicz-encoded operators) get stuck reducing `(phi.imp psi).complexity` when phi is a still-abstract IsPropositional-bound variable and psi is literally a concrete constructor like `.bot` -- the match can't rule out phi being shaped like the special pattern's required sub-term. Fix: a dedicated lemma `cases hphi <;> cases hpsi <;> rfl` proven once, applied explicitly (not via bare unqualified simp, which won't auto-discharge the IsPropositional side-conditions) at each stuck site.",
+    "Lean4: do NOT `cases` an ambient hypothesis inside a nested `(by ...)` tactic-block argument if that same hypothesis is ALSO referenced elsewhere in the surrounding term -- the destructive cases corrupts the outer term's later reference via shared local-context/metavariable capture, even though the `by` block's own goal is nominally isolated.",
+    "Lean4: `cases hpsi' with | imp _ _ => ... hpsi' ...` is a hard error -- cases on a hypothesis destroys it, so anonymous-pattern arms (`_ _`) that don't bind the constructor's components cannot reconstruct the original hypothesis afterward. Name the components (`| imp hc hd =>`) and rebuild via the constructor (`IsPropositional.imp hc hd`) if the original proof term is still needed.",
+    "Lean4: `List.forall_mem_cons` applied to a 2-element list `[a, b]` produces a 3-part nested conjunction `a-in-b and (b-in-b and (forall x in [], x-in-b))`, not a flat 2-part pair -- `obtain <x, y> := h` silently mis-binds `y` to the whole trailing pair. Use `obtain <x, y, -> := h` to discard the trivial tail."
   ],
   "verification": {
-    "verification_passed": false,
+    "verification_passed": true,
     "sorry_count": 0,
     "vacuous_count": 0,
     "axiom_count": 0,
-    "build_passed": false,
+    "build_passed": true,
     "ci_pipeline_passed": false,
-    "notes": "Cslib.Logics.Temporal.Tableau.{Defs,Rules,Closure,Branch,Saturation,Soundness,TimeOrdering} all GREEN. Cslib.Logics.Temporal.Tableau.Completeness RED (90 pre-existing errors unrelated to G/H, in temporalTruthLemma_propositional_aux). Full project build not attempted (build-exclusivity, PM2 -- only Phase 9 runs full lake build)."
+    "notes": "Cslib.Logics.Temporal.Tableau.{Defs,Rules,Closure,Branch,Saturation,Soundness,TimeOrdering,Completeness} ALL GREEN (scoped build, 654/654 jobs, 0 errors, 0 warnings on Completeness.lean). lean_verify on temporalTruthLemma_propositional and the new IsPropositional.complexity_imp_eq helper: standard classical axioms only (propext/Classical.choice/Quot.sound, and propext alone respectively), no new axioms. Full project lake build / checkInitImports / lint-style / test / shake NOT run this dispatch (build-exclusivity, PM2 -- only Phase 9 runs full CI)."
   },
   "metadata": {
-    "session_id": "task180-phase8",
+    "session_id": "task180-phase8-continuation",
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]

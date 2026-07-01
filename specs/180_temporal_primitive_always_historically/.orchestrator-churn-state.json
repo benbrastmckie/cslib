@@ -2,7 +2,7 @@
   "total_churn": 2,
   "target_churn": {
     "DenseSoundness_imports_MCS": 0,
-    "Tableau.Completeness_aux": 1
+    "Tableau.Completeness_aux": 0
   },
   "adversarial_triggers": 0,
   "audit_dispatches": 0,

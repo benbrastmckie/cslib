@@ -249,20 +249,20 @@ dispatch and are out of scope. No deviations from plan.
 
 ---
 
-### Phase 3: ProofSystem — bridge axioms + Instances scoped-green [NOT STARTED]
+### Phase 3: ProofSystem — bridge axioms + Instances scoped-green [COMPLETED]
 
 - **Goal:** Establish the four bridge axioms and the rewired instances as scoped-green — the
   axiomatic foundation the entire metalogic repair consumes.
 - **Tasks:**
-  - [ ] `Axioms.lean`: verify the WIP's four bridge axioms `allFuture_to_classic`,
+  - [x] `Axioms.lean`: verify the WIP's four bridge axioms `allFuture_to_classic`,
     `classic_to_allFuture`, `allPast_to_classic`, `classic_to_allPast` are present and elaborate;
     confirm they fall under the `_ => .Base` `minFrameClass` fallback (`Axioms.lean:233`) with no
     explicit arm needed (F2).
-  - [ ] `Instances.lean`: verify the typeclass rewiring (`HasAxiomLeftMonoUntilG` etc.) routes
+  - [x] `Instances.lean`: verify the typeclass rewiring (`HasAxiomLeftMonoUntilG` etc.) routes
     through `classic_to_allFuture`; confirm `right_mono_until` and friends still resolve.
-  - [ ] `Derivation.lean`, `Derivable.lean`: build; fix any constructor-match or `Formula`-recursive
+  - [x] `Derivation.lean`, `Derivable.lean`: build; fix any constructor-match or `Formula`-recursive
     helper needing the new arms.
-  - [ ] Confirm notation scoping (`𝐆`/`𝐇`) still resolves to the constructors.
+  - [x] Confirm notation scoping (`𝐆`/`𝐇`) still resolves to the constructors.
 - **Timing:** 1.5-2 hours
 - **Depends on:** 2
 - **Estimated output:** ~50-150 lines (verification-heavy; WIP supplies axioms/instances)
@@ -271,6 +271,46 @@ dispatch and are out of scope. No deviations from plan.
   - `lake build Cslib.Logics.Temporal.ProofSystem` green
   - The four bridge axioms are usable via `.axiom [] _ (.allFuture_to_classic φ) trivial` (spot-check
     with `lean_multi_attempt`).
+
+**Phase 3 result:** `Axioms.lean`/`Derivation.lean`/`Derivable.lean` needed no changes — all
+verify-only per plan. `Instances.lean` (the canary risk, F1) required real repair, not just
+verification: the WIP's `by`-block instances (`HasAxiomLeftMonoUntilG`, `LeftMonoSinceH`,
+`RightMonoUntil`, `RightMonoSince`, `ConnectFuture`, `ConnectPast`, `TemporalNecessitation`) all
+failed to build. Root causes found and fixed:
+1. **Missing `intro`**: four mono-instance `by` blocks never introduced the leading `{φ ψ χ}`/`{φ}`
+   implicit binder, so underscore placeholders bound to disconnected fresh metavariables instead of
+   the goal's variables. Fixed by adding `intro φ ψ χ` / `intro φ` at the start of each block.
+2. **Unresolved `fc` metavariable**: `Temporal.DerivationTree.axiom [] _ (...) trivial` used inside
+   `let` bindings (not a directly-expected-typed `⟨...⟩`) left the frame-class parameter `fc` an
+   unassigned metavariable when `trivial : True` was checked, so the `h_fc` proof obligation could
+   not close even though `minFrameClass ≤ Base` is always true. Fixed by pinning
+   `(fc := Temporal.FrameClass.Base)` explicitly on every `let`-bound `DerivationTree.axiom` call.
+3. **Underscore formula placeholders**: `classic_to_allFuture (_ → _)`, `connect_future _`, etc. left
+   the axiom's formula argument as free metavariables never unified with the (now-introduced)
+   concrete `φ`/`ψ`/`χ`. Fixed by writing the formula arguments explicitly (`φ.imp ψ`, `φ.somePast`,
+   `φ.someFuture`) instead of `_`.
+4. Replaced the broken `imp_k`-based "Frege" derivation-tree gymnastics (which had the same
+   metavariable disease and, in `bridgeAllFutureAxiom`, an unused dead-code helper ending in a
+   literal `sorry`) with the existing-but-previously-unused `hyp_syl` helper (hypothetical
+   syllogism: `A→B` and `B→C` gives `A→C`), already present in the file and exactly fitted to the
+   bridge-then-axiom composition pattern needed by all six repaired instances.
+5. `TemporalNecessitation.tempNec`/`tempNecPast`: same `fc`/underscore disease; `tempNecPast`
+   additionally used `InferenceSystem.rwConclusion` whose `S` instance argument could not be
+   inferred from a stuck metavariable-headed type — replaced with a direct `▸` rewrite (defeq via
+   `swapTemporal_allFuture`/`swapTemporal_involution`, both already proved) which needs no instance
+   search.
+6. Deleted `bridgeAllFutureAxiom` — a private, unused dead-code helper containing a `sorry`
+   (PM3 violation latent in the WIP; safe to remove since it had zero call sites).
+No bridge axiom content, `Axioms.lean` frame-class fallback, or the `Instances.lean` typeclass
+routing *strategy* (classic→primitive bridge composed with the primitive-form axiom) was changed —
+only the broken Lean elaboration plumbing around that settled strategy (D1 preserved).
+`lake build Cslib.Logics.Temporal.ProofSystem` GREEN (585 jobs), 0 `sorry`, 0 new `axiom` keyword
+declarations (the four bridge axioms are `Axiom` inductive constructors, not new Lean axioms), 0
+vacuous definitions, no lint-style long-line warnings introduced. Only `Instances.lean` was
+modified (51 insertions / 107 deletions net); `Axioms.lean`, `Derivation.lean`, `Derivable.lean`
+untouched. Full project `lake exe checkInitImports`/`lake build` remain legitimately RED
+(build-exclusivity, PM2/PM7) due to unrelated pre-existing breakage elsewhere in the tree (task 241
+WIP); out of scope for this phase.
 
 ---
 

@@ -3,28 +3,33 @@
   "started_at": "2026-06-30T17:52:00Z",
   "artifacts": [
     {
-      "path": "Cslib/Logics/Temporal/Semantics/Satisfies.lean",
+      "path": "Cslib/Logics/Temporal/ProofSystem/Instances.lean",
       "type": "lean-source",
-      "summary": "Added sat_allFuture_iff_neg_someFuture_neg / sat_allPast_iff_neg_somePast_neg semantic bridge lemmas; verified WIP-provided total Satisfies clauses and definitional allFuture_iff/allPast_iff"
+      "summary": "Fixed seven broken typeclass instances (LeftMonoUntilG, LeftMonoSinceH, RightMonoUntil, RightMonoSince, ConnectFuture, ConnectPast, TemporalNecessitation): added missing intro, pinned fc explicitly, replaced underscore formula placeholders with concrete terms, replaced broken imp_k gymnastics with existing hyp_syl helper, replaced rwConclusion with direct triangle rewrite, deleted unused bridgeAllFutureAxiom dead code containing a sorry"
     },
     {
       "path": "specs/180_temporal_primitive_always_historically/plans/03_primitive-gh-metalogic-plan.md",
       "type": "plan",
-      "summary": "Phase 2 marked [COMPLETED] with result notes"
+      "summary": "Phase 3 marked [COMPLETED] with result notes"
     },
     {
       "path": "specs/180_temporal_primitive_always_historically/.orchestrator-handoff.json",
       "type": "handoff",
-      "summary": "Phase 2 -> Phase 3 continuation context"
+      "summary": "Phase 3 -> Phase 4 continuation context"
     }
   ],
   "partial_progress": {
-    "stage": "phase-2-complete",
-    "details": "Phase 2 (Semantics) scoped-green; task-level status remains partial pending Phases 3-9"
+    "stage": "phase-3-complete",
+    "details": "Phase 3 (ProofSystem) scoped-green; task-level status remains partial pending Phases 4-9"
   },
-  "phases_completed": 2,
+  "phases_completed": 3,
   "phases_total": 9,
-  "memory_candidates": [],
+  "memory_candidates": [
+    {
+      "topic": "lean4-elaboration",
+      "note": "DerivationTree.axiom [] _ (...) trivial inside a let binding (not a directly expected-typed anonymous constructor) can strand the frame-class/index metavariable unresolved, causing `trivial : True` term-mode proofs to fail against an always-true but metavariable-headed goal. Fix: pin implicit index params explicitly (e.g. (fc := ...)) and supply concrete argument terms instead of `_` placeholders that are only unified by later usage."
+    }
+  ],
   "verification": {
     "verification_passed": true,
     "sorry_count": 0,

@@ -362,7 +362,7 @@ After implementation:
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: Task 426, Task 427
+- **Dependencies**: Task 426
 
 **Description**: [Decomposed from task 301, blocker C.] Establish the finite model property (FMP) for Propositional Temporal Logic and use it to discharge temporalTruthLemma_untl and temporalTruthLemma_snce (Until/Since eventuality fulfilment), which in turn unblock eventualityDefect_unsat, temporalTableau_sound, openBranch_branchSat, temporalTableau_complete, and the final instDecidableValid in Cslib/Logics/Temporal/Tableau/. This is the theoretical gate for full decidability. Mirror the approach of COMPLETED task 421 (min_fmp_decidability), which added a sorry-free Decidable instance via FMP — reuse its pattern/infrastructure where possible. The hardest sub-part; gates task 301 completion. Independent of tasks 423 and 424 in principle, but final wiring of instDecidableValid needs all three landed.
 
@@ -372,7 +372,7 @@ After implementation:
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 417
+- **Dependencies**: None
 - **Research**: [419_generalize_derivation_lifting_intersystem/reports/02_virtuous-unification.md]
 - **Plan**: [419_generalize_derivation_lifting_intersystem/plans/02_proof-system-morphism-overlay.md]
 
@@ -404,7 +404,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
-- **Dependencies**: Task 180, Task 181, Task 215, Task 241, Task 299, Task 300, Task 301, Task 321, Task 444, Task 445, Task 446
+- **Dependencies**: Task 180, Task 181, Task 215, Task 299, Task 300, Task 301, Task 444, Task 445, Task 446
 
 **Description**: [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ proofs that use manual `simp only [listImp_*, bigconj_*, toTemporal_*, toBimodal_*]` lists or verbose tactic chains over the task-268 normalization lemmas (including the Temporal/FromPropositional and Bimodal/Embedding/TemporalEmbedding embedding simp lemmas); replace with `grind`/`simp` where the new co-tags make the explicit lists redundant. Sequence after the modal-family proof-development settles: Modal 299/300; Temporal 180 (G/H primitives rewrite FromPropositional.lean), 241, 301; Bimodal 181 (propagates constructors through TemporalEmbedding.lean), 215, 275; plus the file-structure pass 321. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake.
 
@@ -414,7 +414,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: PL-Hygiene
-- **Dependencies**: Task 317, Task 370, Task 375, Task 321
+- **Dependencies**: Task 317, Task 375
 
 **Description**: [Split from task 278.] Simplify Propositional/ proofs that use manual `simp only [listImp_*, bigconj_*]` lists or verbose tactic chains over the task-268 normalization lemmas; replace with `grind`/`simp` where the new co-tags make the explicit lists redundant. Covers Hilbert/ND/completeness/decidability proof sites in Cslib/Logics/Propositional/. Sequence after the major PL proof-development tasks land (317 tableau completeness, 370 int/min decidability, 375 proof-system equivalence) and the Logics/Foundations file-structure pass (321). Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake.
 
@@ -424,7 +424,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Foundations
-- **Dependencies**: Task 41, Task 321
+- **Dependencies**: Task 41
 
 **Description**: [Split from task 278.] Simplify proofs in Foundations/Logic/ that use manual `simp only [listImp_nil, listImp_cons, bigconj_nil, bigconj_singleton, bigconj_cons_cons, negBigconj_def, ...]` or verbose tactic chains over the task-268 normalization lemmas; replace with `grind`/`simp` where the @[simp, scoped grind =] co-tags (ListImplication.lean, Theorems/BigConj.lean) make the explicit lemma lists redundant. Audit ListImplication, BigConj, and downstream Foundations/Logic proof sites. Sequence after the Foundations completeness-infra abstraction (41) and the Logics/Foundations file-structure pass (321) to avoid re-sweeping moved code. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake.
 
@@ -444,7 +444,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Status**: [PR READY]
 - **Task Type**: cslib
 - **Topic**: PL-Base
-- **Dependencies**: Task 398
+- **Dependencies**: None
 - **Research**:
   - [407_mpl_base_structure_first_redesign/reports/01_mpl-base-structure-first.md]
   - [407_mpl_base_structure_first_redesign/reports/02_mpl-base-with-vs-without-bot.md]
@@ -512,7 +512,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: PL-Hygiene
-- **Dependencies**: Task 386, Task 391, Task 395
+- **Dependencies**: Task 391
 
 **Description**: Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING before refactor. (a) Factor one generic quotient-Lindenbaum construction over the 3 parallel builds (~2100 lines): HilbertLindenbaum, HilbertLindenbaumRel, HilbertAlgCompleteness (4th in Bimodal). (b) Make litCtx_congr public and parameterize the 3 Classical completeness files (~700 lines, litCtx_congr' copied 3x) over the axiom predicate via GenericMCSBridge/HasMinimalAxioms. (c) Assess 3 Soundness modules + 8 conservativity modules + LJ/LK helper duplication. Source: §5.5.
 
@@ -522,7 +522,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: PL-Hygiene
-- **Dependencies**: Task 317, Task 386, Task 387, Task 389, Task 395
+- **Dependencies**: Task 317, Task 389
 
 **Description**: [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls: Tableau/Classical/Soundness.lean:73-136 (12 classicalApplyOne_* private simp lemmas, 0 calls) + :486, Classical/Completeness.lean:435/447, Tableau/Defs.lean:81 propImpOrNegOf?, Intuitionistic/Rules.lean:114/203, Intuitionistic/Soundness.lean:431/505, NaturalDeduction/Equivalence.lean:305 hilbertAxiomToND, LK/Completeness.lean:69/73 mem_insert_*. Fix Extention->Extension typo (Equivalence.lean:256-257, Defs.lean:190/195). Rename underscore defs: modus_ponens constructor (Derivation.lean:77), lift_int_to_cl, goodSelection_seq, HasFresh to_infinite, emptyHrelation_apply. The LK/LJ cutAdm_*/ljCutAdm_* renames are DROPPED from this task — task 386 OWNS them (defsWithUnderscore). Sequence after 386. Source: §5.3-5.4 + 395.
 
@@ -532,7 +532,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: PL-Docs
-- **Dependencies**: Task 317, Task 389, Task 395
+- **Dependencies**: Task 317, Task 389
 
 **Description**: [Reconciled by task 395.] Tier-3. Remove internal task/process jargon from public docstrings: ClassicalConjImpCompleteness.lean (task 352, CL-B rung), ClassicalConjImpBotCompleteness.lean (task 378, CL-C rung), ConservativeChain.lean:44-45, HilbertLindenbaumRel.lean:21-23 (Route A2, 341 proof files), Tableau/RuleResult.lean:35, Foundations/Logic/Tableau/PropositionalTableau.lean:7, ListImplication.lean:83-139. Connectives.lean jargon (PR#607/task 340/173) is OWNED by task 400 (Connectives owner) — coordinate, do NOT double-edit. Stale-count fixes: re-verify post-task-398. NOTE StrongCompleteness 3-case counts (atom/bot/imp) remain CORRECT (398 changed derivation constructors, not formula structure). Fix only genuinely-stale counts: IntSoundness, MinSoundness, IntLindenbaum:320 misattached docstring, Tableau Int/Min DecisionProcedure sorry counts, Minimal/Completeness:50-51. Source: §5.1-5.2 + 395.
 
@@ -542,7 +542,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: PL-Docs
-- **Dependencies**: Task 387, Task 395
+- **Dependencies**: None
 
 **Description**: [Refreshed post-merge vet.] The Propositional section (~ORGANISATION.md:100-105) is a 4-item stub. Update to reflect the actual 95+-file tree: SequentCalculus/{LJ,LK} (Interpolation, CutElimination, SubformulaProperty, Decidability); CurryHoward/{Defs,Isomorphism,Reduction}; Semantics/Algebra (25+ files: Brouwerian, HilbertAlgebra, Kripke, Glivenko, Conservative variants); Tableau/{Classical,Intuitionistic,Minimal} (Completeness/Soundness/DecisionProcedure); Subformula.lean; ProofSystemEquivalence.lean. Also update the Namespace Convention section re Cslib.Logic.PL vs Cslib.Logic.Propositional (task 387). Do before the PR lands.
 
@@ -552,7 +552,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: PL-Docs
-- **Dependencies**: Task 317, Task 395
+- **Dependencies**: Task 317
 
 **Description**: [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAlgebra/FreeMeetExtension.lean: add docstrings to 7 undocumented def/abbrev (fld:50 also rename himpFold, fmeLe:106, fmeEquiv:123, fmeSetoid:125, FreeMeetExtension:152, mk:159, freeMeetEmbed:257) — only hard docBlame in Foundations. (b) DROPPED — the 4 Tableau barrels already carry copyright + import Cslib.Init (verified post-merge). (c) Add omit for 14 unusedSectionVars (mostly Tableau/Classical/Completeness, Minimal/Soundness:118, Minimal/Completeness:89). (d) Add references.bib entry NegriVonPlato2001 (Negri & von Plato, Structural Proof Theory, CUP 2001) cited by OrImpConservative.lean. Sequence the Tableau/Classical+Minimal Completeness edits AFTER task 317. Source: §4.3-4.6 + 395.
 
@@ -562,7 +562,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: PL-Equivalence
-- **Dependencies**: Task 317, Task 363
+- **Dependencies**: Task 317
 
 **Description**: Complete the cross-system equivalence story by folding the tableau (and remaining sequent) decision systems into the proof-system TFAE. Cslib/Logics/Propositional/ProofSystemEquivalence.lean currently proves Hilbert<->ND<->LK for CPL (cplProofSystemsTfae) and Hilbert<->ND<->LJ for IPL (iplProofSystemsTfae), plus the MPL Hilbert<->ND two-way. Add the missing edges so the equivalence is genuinely complete across all proof systems: classical Tautology <-> LK provability <-> closed classical tableau, and intuitionistic validity <-> LJ provability <-> closed intuitionistic tableau, extending the TFAE lists accordingly. Requires the tableau soundness+completeness to be green (task 316 done for soundness; task 317 for completeness) and the classical tableau build repaired (task 363). No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 317, 363.
 
@@ -572,7 +572,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: PL-Tableau
-- **Dependencies**: Task 316, Task 323, Task 363, Task 369
+- **Dependencies**: None
 - **Plan**: [plans/03_b2-fuel-sufficiency.md]
 
 **Description**: Fill the propositional tableau completeness sorries (7 real sorries; soundness is already sorry-free after task 316). The open obligations are the truth-lemma / countermodel-extraction proofs in the three Completeness modules. Classical (Tableau/Classical/Completeness.lean): classicalExpandBranches_hintikka (line ~462) -- note the module's separate build break (bad Mathlib lemma ref + unsolved goals) is repaired first under task 363. Intuitionistic (Tableau/Intuitionistic/Completeness.lean): intTruthLemma (line ~89), intuitionisticOpenBranch_countermodel (~98), intuitionisticTableau_complete (~112). Minimal (Tableau/Minimal/Completeness.lean): minTruthLemma (~168), minOpenBranch_countermodel (~179), minimalTableau_complete (~190). Core technique: Hintikka-set argument -- a saturated open branch satisfies Hintikka conditions, from which a countermodel is extracted (a Boolean valuation for classical; a finite Kripke model for intuitionistic/minimal) and a truth lemma by formula induction matches forced/not-forced to the signed formulas at each world. Because task 369 parameterizes the intuitionistic and minimal tableau over (closurePred, modelBot), the int and min cases should be discharged ONCE as a single parametric truth-lemma/countermodel pair rather than duplicated. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 316, 323, 363, 369.
@@ -583,7 +583,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: Task 426, Task 427, Task 425
+- **Dependencies**: Task 426, Task 425
 - **Research**: [301_temporal_tableau/reports/01_temporal-tableau-decision-procedure.md]
 - **Plan**: [301_temporal_tableau/plans/01_temporal-tableau-decision-procedure.md]
 
@@ -701,7 +701,7 @@ Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completenes
 - **Status**: [PR READY]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: Task 406
+- **Dependencies**: None
 - **Research**:
   - [180_temporal_primitive_always_historically/reports/01_primitive-always-historically-research.md]
   - [180_temporal_primitive_always_historically/reports/02_implementation-attempt-status.md]

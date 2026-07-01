@@ -16,7 +16,8 @@
         321,
         406,
         431
-      ]
+      ],
+      "dependencies": []
     },
     {
       "project_number": 446,
@@ -52,7 +53,8 @@
           "summary": "Domain-mismatch transfer feasibility: described route unsound; residual load-bearing obstruction"
         }
       ],
-      "session_id": "sess_1782884528_21222e_445"
+      "session_id": "sess_1782884528_21222e_445",
+      "dependencies": []
     },
     {
       "project_number": 444,
@@ -98,7 +100,8 @@
       "last_updated": "2026-06-30T17:38:50Z",
       "next_artifact_number": 1,
       "artifacts": [],
-      "topic": "pr-review"
+      "topic": "pr-review",
+      "dependencies": []
     },
     {
       "project_number": 389,
@@ -113,8 +116,7 @@
       "artifacts": [],
       "session_id": "sess_1782651207_1e893c_389",
       "dependencies": [
-        317,
-        395
+        317
       ],
       "topic": "PL-Docs"
     },
@@ -130,10 +132,7 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782651207_1e893c_390",
-      "dependencies": [
-        387,
-        395
-      ],
+      "dependencies": [],
       "topic": "PL-Docs"
     },
     {
@@ -150,8 +149,7 @@
       "session_id": "sess_1782651207_1e893c_391",
       "dependencies": [
         317,
-        389,
-        395
+        389
       ],
       "topic": "PL-Docs"
     },
@@ -169,10 +167,7 @@
       "session_id": "sess_1782651207_1e893c_392",
       "dependencies": [
         317,
-        386,
-        387,
-        389,
-        395
+        389
       ],
       "topic": "PL-Hygiene"
     },
@@ -189,9 +184,7 @@
       "artifacts": [],
       "session_id": "sess_1782651207_1e893c_393",
       "dependencies": [
-        386,
-        391,
-        395
+        391
       ],
       "topic": "PL-Hygiene"
     },
@@ -212,12 +205,7 @@
           "summary": "B2 fuel-sufficiency + none-case wiring plan (v3)"
         }
       ],
-      "dependencies": [
-        316,
-        323,
-        363,
-        369
-      ],
+      "dependencies": [],
       "parent_task": 298,
       "session_id": "sess_1782836570_11b1d4"
     },
@@ -294,7 +282,6 @@
       ],
       "dependencies": [
         426,
-        427,
         425
       ],
       "parent_task": 296,
@@ -537,9 +524,7 @@
       "project_name": "temporal_primitive_always_historically",
       "status": "pr_ready",
       "task_type": "cslib",
-      "dependencies": [
-        406
-      ],
+      "dependencies": [],
       "description": "Add allFuture (G) and allPast (H) as primitive constructors to Temporal.Formula, giving {atom, bot, imp, and, or, untl, snce, allFuture, allPast}. Currently G is derived as neg(someFuture(neg phi)) and H as neg(somePast(neg phi)), which are only valid classically. Making them primitive enables intuitionistic temporal logics. Note: someFuture (F) and somePast (P) remain derivable without negation (F = top U phi, P = top S phi). Scope: (1) Syntax/Formula.lean: add .allFuture/.allPast constructors, update complexity, subst, atoms, encodeNat, temporalDepth, swapTemporal. (2) Semantics: structural clauses for universal future/past quantification. (3) ProofSystem: temporal axioms referencing G/H now use primitive constructors. (4) Metalogic: cases in Soundness, Chronicle/TruthLemma, MCS, Completeness. (5) Classical equivalences become theorems. Verify full CI. Reference: Boudou et al. for intuitionistic temporal logic.",
       "artifacts": [
         {
@@ -629,8 +614,7 @@
       "topic": "PL-Equivalence",
       "description": "Complete the cross-system equivalence story by folding the tableau (and remaining sequent) decision systems into the proof-system TFAE. Cslib/Logics/Propositional/ProofSystemEquivalence.lean currently proves Hilbert<->ND<->LK for CPL (cplProofSystemsTfae) and Hilbert<->ND<->LJ for IPL (iplProofSystemsTfae), plus the MPL Hilbert<->ND two-way. Add the missing edges so the equivalence is genuinely complete across all proof systems: classical Tautology <-> LK provability <-> closed classical tableau, and intuitionistic validity <-> LJ provability <-> closed intuitionistic tableau, extending the TFAE lists accordingly. Requires the tableau soundness+completeness to be green (task 316 done for soundness; task 317 for completeness) and the classical tableau build repaired (task 363). No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 317, 363.",
       "dependencies": [
-        317,
-        363
+        317
       ],
       "created": "2026-06-27T05:29:32Z",
       "last_updated": "2026-06-27T05:29:32Z",
@@ -786,9 +770,7 @@
         }
       ],
       "session_id": "sess_1782750230_3ec4a4_407plan",
-      "dependencies": [
-        398
-      ],
+      "dependencies": [],
       "topic": "PL-Base",
       "plan_metadata": {
         "phases": 9,
@@ -878,8 +860,7 @@
         321
       ],
       "dependencies": [
-        41,
-        321
+        41
       ],
       "created": "2026-06-29T22:13:39Z",
       "last_updated": "2026-06-29T22:13:39Z"
@@ -900,9 +881,7 @@
       ],
       "dependencies": [
         317,
-        370,
-        375,
-        321
+        375
       ],
       "created": "2026-06-29T22:13:39Z",
       "last_updated": "2026-06-29T22:13:39Z"
@@ -930,11 +909,9 @@
         180,
         181,
         215,
-        241,
         299,
         300,
         301,
-        321,
         444,
         445,
         446
@@ -972,9 +949,7 @@
       "topic": "Modal Logic",
       "parent_task": 415,
       "description": "[Spawned from task 415 audit — supports the structure-first vision; SPIKE.] Investigate hoisting liftDerivation / Derivable_mono (Modal/Metalogic/InterSystem/Lifting.lean:47) and Bimodal's liftDerivationWith onto the shared InferenceSystem / algebraicDerivationSystem abstraction already used by GenericMCSBridge, yielding ONE axiom-subsumption derivation-lifting result reusable by Modal, Bimodal, and PL. SPIKE FIRST: commit only if the necessitation / temporal_duality constructor variance is cleanly abstractable; otherwise document precisely why and stop (mark BLOCKED, never sorry). Benefits from task 417's Foundations placement (soft dependency). Effort L (abstraction risk). CI green if landed. Source: report §6, Rank 4.",
-      "dependencies": [
-        417
-      ],
+      "dependencies": [],
       "next_artifact_number": 1,
       "artifacts": [
         {
@@ -1037,8 +1012,7 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "dependencies": [
-        426,
-        427
+        426
       ],
       "parent_task": 301
     },
@@ -1087,7 +1061,7 @@
       "created": "2026-06-30T16:29:40Z",
       "last_updated": "2026-06-30T16:29:40Z",
       "session_id": "sess_1782832854_3aada0",
-      "dependencies": null,
+      "dependencies": [],
       "parent_task": 431
     },
     {

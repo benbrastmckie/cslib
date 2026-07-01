@@ -1,0 +1,31 @@
+{
+  "status": "partial",
+  "phases_completed": 2,
+  "phases_total": 6,
+  "summary": "Resumed task 241 under plan v2 (Choueka route). Completed Phase 1 (deleted the subtask-434 sorry `buchiCongr_DMA_language_backward` and the unprovable `proof_wanted buchiCongr_DMA_language_eq`; updated the `IsRegular.iff_da_muller` docstring to describe the Choueka route; restored a sorry-free build) and Phase 4 (new file `Cslib/Computability/Automata/DA/MullerClosure.lean` providing `DA.Muller.union`/`union_language_eq`, the `infOcc`/image pigeonhole lemmas `prod_run_infOcc_fst`/`prod_run_infOcc_snd`, the base-case `Muller.empty`, and the finite-union lift `Muller.exists_iSup`/`exists_iSup_univ`). Both phases build green and are sorry-free, and were committed as separate green milestones. Phase 2 (`concat_language_eq` in `DA/Concat.lean`, the deepest single proof per the plan's own estimate) was investigated but deliberately NOT attempted this dispatch -- the exact recommended statement and a proof sketch (including which half is hardest) were recorded in the plan file for the next dispatch. Phases 3, 5, 6 depend on Phase 2 and were not started.",
+  "blockers": [],
+  "continuation_context": {
+    "what_is_done": [
+      "Phase 1 (COMPLETED): buchiCongr_DMA_language_backward and proof_wanted buchiCongr_DMA_language_eq deleted from Cslib/Computability/Languages/OmegaRegularLanguage.lean; docstring of IsRegular.iff_da_muller rewritten to describe the Choueka route; build green, zero sorry/admit in the file. Committed at ce381c24.",
+      "Phase 4 (COMPLETED): new file Cslib/Computability/Automata/DA/MullerClosure.lean added (and registered in Cslib.lean via `lake exe mk_all --module`). Provides: prod_run_infOcc_fst/prod_run_infOcc_snd (infOcc/image pigeonhole via ωSequence.frequently_in_finite_type), Muller.union + Muller.union_language_eq (language (a1.union a2) = language a1 sup language a2, requires [Finite State1] [Finite State2]), Muller.empty + Muller.empty_language_eq (base case, language = bot), Muller.exists_iSup / Muller.exists_iSup_univ (finite-union lift via Set.ncard induction mirroring IsRegular.iSup). Build green, zero sorry/admit, lake lint / lint-style / shake clean. Committed at ce84ec7c.",
+      "Reference DAG recorded in the plan file (from cached copies of ctchou/AutomataTheory's Languages/DetMullerLang.lean and Languages/OmegaRegLang.lean found in a prior session's scratchpad): confirms the Choueka identity M^omega = M* * U-uparrow-omega (route (a)) is required for Phase 3, NOT a direct omega-iteration DMA construction (route (b)). This is a stronger/more concrete requirement than the original Phase 3 risk table stated -- the supporting regular-language construction (AutomataTheory's ChouekaLang, via choueka_lang_regular / choueka_lang_omega_power_eq_omega_limit) is entirely new to CSLib, not just a top-level identity lemma.",
+      "Phase 2 investigation (documented, no code written): read Cslib/Computability/Automata/DA/Concat.lean in full. The exact recommended concat_language_eq statement and a forward/backward proof sketch are recorded in specs/241_mcnaughton_theorem/plans/02_mcnaughton-choueka-route.md under the Phase 2 section. The backward direction (extracting the breakpoint n from an infinitely-accepted run via the persistent-slot witness) is flagged as the harder half."
+    ],
+    "what_remains": [
+      "Phase 2: prove `concat_language_eq` in DA/Concat.lean (top-level correctness of the existing DA.concat flag construction). Recommended statement is in the plan file. This is the deepest remaining proof obligation and should get a dedicated dispatch.",
+      "Phase 3: prove `omegaPow_da_muller` (M^omega is DMA-recognizable) in OmegaRegularLanguage.lean, depends on Phase 2 and requires porting the Choueka identity M^omega = M* * U-uparrow-omega (a genuinely new construction, ChouekaLang-equivalent, not yet in CSLib).",
+      "Phase 5: assemble IsRegular.to_da_muller (forward direction) using eq_fin_iSup_hmul_omegaPow + Phase 2's concat_language_eq + Phase 3's omegaPow_da_muller + Phase 4's Muller.exists_iSup_univ (already available).",
+      "Phase 6: replace proof_wanted IsRegular.iff_da_muller with the final theorem combining Phase 5 and the already-green IsRegular.of_da_muller; delete the dead buchiCongr_DMA cluster (buchiCongr_DMA, buchiCongr_DMA_run_eq, buchiCongr_DMA_accept_mem, buchiCongr_DMA_language_forward, IsRegular.to_da_muller_scaffold) per the plan's Disposition section; run the full CI pipeline."
+    ],
+    "key_files": [
+      "Cslib/Computability/Languages/OmegaRegularLanguage.lean (Phase 1 done; Phase 3/5/6 target)",
+      "Cslib/Computability/Automata/DA/Concat.lean (Phase 2 target, unmodified this dispatch)",
+      "Cslib/Computability/Automata/DA/MullerClosure.lean (Phase 4, new, complete)",
+      "Cslib.lean (barrel import updated for MullerClosure.lean)",
+      "specs/241_mcnaughton_theorem/plans/02_mcnaughton-choueka-route.md (plan v2, Phase 1/4 completion records + Phase 2 statement/sketch appended)"
+    ]
+  },
+  "sorry_inventory": [],
+  "next_action_hint": "Dispatch a dedicated implementation run for Phase 2 (concat_language_eq in DA/Concat.lean) using the exact statement and proof sketch recorded in the plan file's Phase 2 section. This is the deepest remaining obligation (plan estimates 4 hours) and should not be combined with other phases in one dispatch. Phase 3 cannot start until Phase 2 lands, since it also needs a new Choueka-identity-style construction (M^omega = M* * U-uparrow-omega) that does not yet exist in CSLib -- flag this to the user/planner as it may itself warrant being split into its own sub-task rather than folded into Phase 3's existing time estimate.",
+  "environment_note": "An unrelated file (Cslib/Logics/Modal/Tableau/SoundnessStep.lean, owned by a different concurrent task in this shared working tree, not touched by this dispatch) was mid-edit/broken during this session, which blocks `lake exe checkInitImports` and a full-project `lake build`/`lake test`. All modules touched by task 241 in this dispatch were independently verified green via scoped `lake build`, plus `lake lint`, `lake exe lint-style`, and `lake shake` clean for both files."
+}

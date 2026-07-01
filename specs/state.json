@@ -637,7 +637,7 @@
     {
       "project_number": 180,
       "project_name": "temporal_primitive_always_historically",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "dependencies": [
         406
@@ -650,11 +650,6 @@
           "summary": "Primitive G/H motivation, axiom dependency analysis, scope assessment, intuitionistic temporal references"
         },
         {
-          "path": "specs/180_temporal_primitive_always_historically/plans/01_primitive-gh-implementation.md",
-          "type": "plan",
-          "summary": "8-phase plan to promote allFuture/allPast to primitive Temporal.Formula constructors"
-        },
-        {
           "path": "specs/180_temporal_primitive_always_historically/reports/02_implementation-attempt-status.md",
           "type": "report",
           "summary": "Where the parked implementation attempt left off; resume guidance for research/implement"
@@ -663,12 +658,51 @@
           "path": "specs/180_temporal_primitive_always_historically/reports/03_metalogic-obligations-research.md",
           "type": "report",
           "summary": "Metalogic obligations for primitive allFuture/allPast: root cause is the load-bearing 𝐆φ≡¬𝐅¬φ defeq disconnecting MCS/Chronicle proofs; four WIP bridge axioms shown necessary for completeness; two reusable MCS lemmas + TruthLemma reduction de-risk Phase 6; per-file obligation table and 8-phase-plan critique."
+        },
+        {
+          "path": "specs/180_temporal_primitive_always_historically/plans/03_primitive-gh-metalogic-plan.md",
+          "type": "plan",
+          "summary": "Hard-mode v2 plan (9 phases, one agent run each): starts from preserved WIP patch; carries the un-reached metalogic layer via four bridge axioms, two reusable MCS lemmas, and a TruthLemma reduction to existing standalone case lemmas; sequential build-exclusive phases, full CI green only at P9."
         }
       ],
       "topic": "Temporal Logic",
-      "last_updated": "2026-06-30T17:40:00Z",
-      "session_id": "sess_1782865763_3c9819",
-      "next_artifact_number": 2
+      "last_updated": "2026-06-30T17:48:00Z",
+      "session_id": "sess_1782866590_849a21",
+      "next_artifact_number": 2,
+      "plan_metadata": {
+        "phases": 9,
+        "total_effort_hours": 20,
+        "complexity": "complex",
+        "research_integrated": true,
+        "plan_version": 2,
+        "dependency_waves": [
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ],
+          [
+            4,
+            8
+          ],
+          [
+            5
+          ],
+          [
+            6
+          ],
+          [
+            7
+          ],
+          [
+            9
+          ]
+        ]
+      }
     },
     {
       "project_number": 181,

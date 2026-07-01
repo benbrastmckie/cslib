@@ -81,6 +81,7 @@ private lemma hasEdge_addEdge_cases {acc : Accessibility} {w w' a a' : WorldInde
   · exact Or.inl ⟨hw.symm, hw'.symm⟩
   · exact Or.inr h
 
+omit [Hashable Atom] in
 /-- The accessibility relation returned by `modalApplyOne` is either unchanged, or it adds a single
 fresh edge `sf.label → modalNextWorld b`; in the latter case the result is `.linear` with a head
 witness whose label is exactly the fresh world `modalNextWorld b`. -/
@@ -91,17 +92,18 @@ private lemma modalApplyOne_fresh
     (modalApplyOne sf b acc).snd = acc ∨
     (∃ wsf rest, (modalApplyOne sf b acc).fst = RuleResult.linear (wsf :: rest)
       ∧ (modalApplyOne sf b acc).snd = acc.addEdge sf.label wsf.label) := by
+  -- `modalApplyOne` first tries propositional rules (accessibility unchanged), then dispatches
+  -- on the modal rule. Split the outer `if` and the rule `match`; the two existential arms
+  -- (◇⁺, □⁻) add a fresh edge (right disjunct), every other arm leaves `acc` untouched (left).
   unfold modalApplyOne
-  extract_lets w propResult
-  repeat' first
-    | exact Or.inl rfl
-    | exact Or.inr ⟨_, _, rfl, rfl⟩
-    | split
-  -- remaining goals are acc-unchanged arms whose nested `if` has `acc` on both sides
-  all_goals first
-    | exact Or.inl rfl
-    | exact Or.inr ⟨_, _, rfl, rfl⟩
-    | (left; simp only [apply_ite Prod.snd, ite_self])
+  extract_lets
+  split
+  · exact Or.inl rfl
+  · split <;>
+      first
+        | exact Or.inl rfl
+        | exact Or.inr ⟨_, _, rfl, rfl⟩
+        | (left; simp only [apply_ite Prod.snd, ite_self])
 
 /-- **Freshness maintenance** (task-364 obligation 1): `modalStepBranch` preserves the per-branch
 freshness invariant `accFreshInv`. Every child branch produced satisfies `accFreshInv` against the
@@ -251,20 +253,14 @@ theorem modalExpandBranches_closed_unsat (fuel : Nat) :
                   obtain ⟨sf, _, hf⟩ := List.exists_of_findSome?_eq_some hstep_eq
                   rcases h_apply : (modalApplyOne sf bh a) with ⟨result, _⟩
                   simp only [h_apply] at hf
+                  -- Every applicable rule sets `newExps := List.replicate newBs.length e`,
+                  -- so the lengths agree; only `.notApplicable` is impossible here.
                   cases result with
                   | notApplicable => simp at hf
-                  | linear nf =>
-                    split_ifs at hf
-                    simp only [Option.some.injEq, Prod.mk.injEq] at hf
-                    obtain ⟨rfl, rfl, _⟩ := hf; simp
-                  | branching bs =>
+                  | _ =>
                     split_ifs at hf
                     simp only [Option.some.injEq, Prod.mk.injEq] at hf
                     obtain ⟨rfl, rfl, _⟩ := hf; simp [List.length_map]
-                  | persistent nf =>
-                    split_ifs at hf
-                    simp only [Option.some.injEq, Prod.mk.injEq] at hf
-                    obtain ⟨rfl, rfl, _⟩ := hf; simp
                 -- Build freshness invariant for all child branches
                 have hFreshNew : List.Forall₂ (fun b a => accFreshInv b a)
                     newBs (List.replicate newBs.length newAcc) :=

@@ -1,0 +1,23 @@
+{
+  "status": "implemented",
+  "phase_label": "P1b",
+  "declarations_added": [
+    "modalSubfmls_trans",
+    "mem_modalUniverse_of",
+    "mem_modalUniverse_of'",
+    "modalUniverse_mem_formula",
+    "modalUniverse_mem_label",
+    "mem_boxPositivesOf",
+    "boxProps_outputs_subset",
+    "diaNegProps_outputs_subset",
+    "modalApplyOne_diamondPos_outputs_subset",
+    "modalApplyOne_boxNeg_outputs_subset",
+    "mem_successorsOf_hasEdge",
+    "modalApplyOne_outputs_subset"
+  ],
+  "green": true,
+  "blockers": [],
+  "sorry_inventory": [],
+  "commit": "PENDING",
+  "session_id": "sess_1782868458_ecfcce"
+}

@@ -22,7 +22,7 @@
 | P0   | ✅ COMPLETED | `ef68c642` | FmpMeasure defs + exponential `modalFuel`; entry bridge lemma. Green, axiom-clean. `import Mathlib.Tactic.Ring` added (ring not transitive via Init). |
 | P1a  | ✅ COMPLETED | `325a8e8a` | Subformula closure (world-preserving rules). Green, axiom-clean. **Added `import Completeness` into `FmpMeasure.lean`** to reuse `tryAllPropRules_*`/`modal*Of?_eq` → forces architecture adjustment below. |
 | P4   | ✅ COMPLETED | `3766e609` | Saturation characterisation (`Completeness.lean`). Green. Finding: Łukasiewicz diamond patterns never reach `acc`-dependent arms (prop dispatch exhaustive over `.imp`); only `boxNeg` needs invariant carve-out. |
-| P1b  | 🔄 next | — | Serialized after P4 (FmpMeasure now imports Completeness → no concurrent Completeness edits). |
+| P1b  | ✅ COMPLETED | `PENDING` | Fresh-world rule closure (`diamondPos`/`boxNeg`) + top-level `modalApplyOne_outputs_subset` dispatch. Green, axiom-clean (propext/Quot.sound only). Added `public import SoundnessStep` (acyclic) for `accFreshInv`; five small glue lemmas factored out (subformula transitivity, `modalUniverse` membership chars, `successorsOf`/`hasEdge` bridge, shared `boxProps`/`diaNegProps` closure). |
 | P2 (CRUX) | ⏳ pending | — | — |
 | P3   | ⏳ pending | — | — |
 | P5a/P5b/P6 | ⏳ pending | — | Relocated to new `CompletenessLoop.lean` (see architecture adjustment). |
@@ -268,20 +268,34 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
 
 ---
 
-### Phase 1b: Subformula-closure — fresh-world rules + top lemma [NOT STARTED]
+### Phase 1b: Subformula-closure — fresh-world rules + top lemma [COMPLETED]
 - **Goal:** Prove closure for the two fresh-world-minting linear rules (which consume
   `maxWorld+1 ≤ W`) and assemble the top-level closure lemma by rule dispatch.
 - **Territory:**
   - [OWN] `FmpMeasure.lean` (continues the P1a block)
   - [RO] `Rules.lean:91-139`, `Soundness.lean:87` (`modalApplyOne_fresh`)
 - **Declarations to add** (research §3.3):
-  - [ ] `modalApplyOne_diamondPos_outputs_subset` — `T(◇φ)@w` emits witness `T(φ)@w'` + `boxProps` + `diaNegProps` all at fresh `w' = maxWorld+1`; **needs hypothesis `maxWorld b < modalWorldBound φ0`** so `w' ≤ W`. (`Rules.lean:91-114`)
-  - [ ] `modalApplyOne_boxNeg_outputs_subset` — identical with `witness = ⟨.neg,φ,w'⟩`. (`Rules.lean:117-139`)
-  - [ ] **Top:** `modalApplyOne_outputs_subset (φ0 sf b acc) (hb : ∀ x∈b, x∈modalUniverse φ0) (hW : modalMaxWorld b < modalWorldBound φ0) : ∀ x ∈ (emitted formulas), x ∈ modalUniverse φ0` — dispatch over `modalApplyOne` cases into the five sub-lemmas.
+  - [x] `modalApplyOne_diamondPos_outputs_subset` — `T(◇φ)@w` emits witness `T(φ)@w'` + `boxProps` + `diaNegProps` all at fresh `w' = maxWorld+1`; **needs hypothesis `maxWorld b < modalWorldBound φ0`** so `w' ≤ W`. (`Rules.lean:91-114`)
+  - [x] `modalApplyOne_boxNeg_outputs_subset` — identical with `witness = ⟨.neg,φ,w'⟩`. (`Rules.lean:117-139`)
+  - [x] **Top:** `modalApplyOne_outputs_subset (φ0 sf b acc) (hb : ∀ x∈b, x∈modalUniverse φ0) (hW : modalMaxWorld b < modalWorldBound φ0) : ∀ x ∈ (emitted formulas), x ∈ modalUniverse φ0` — dispatch over `modalApplyOne` cases into the five sub-lemmas.
 - **Reference template:** `Rules.lean:91-114, 117-139`; dispatch mirrors `Rules.lean:68-153`.
 - **Depends on:** P1a
 - **Timing:** ~3-4 h (~150-250 lines)
 - **Done = green:** `lake build Cslib.Logics.Modal.Tableau.FmpMeasure` succeeds; `modalApplyOne_outputs_subset` sorry-free. Commit `task 442 phase 1b: subformula closure (fresh-world rules + top lemma)`.
+- **Deviations from plan (documented, not design reopening):** (1) added `hsf : sf ∈ b` (and
+  the analogous `⟨sign,formula,w⟩ ∈ b` hypothesis on the two fresh-world lemmas) — necessary
+  because the source signed formula's own subformula bound must come from somewhere; the plan's
+  terse signature omitted it but every real invocation draws `sf` from `b`. (2) added
+  `hInv : accFreshInv b acc` (imported from `SoundnessStep.lean` via a new `public import`,
+  acyclic) to the top lemma only — needed to bound `acc.successorsOf w` by `modalMaxWorld b` for
+  the `boxPos`/`diamondNeg` dispatch cases, which P1a's lemmas only bound by `∈ acc.successorsOf w`
+  (not numerically). (3) added five small private glue lemmas: `modalSubfmls_trans` (subformula
+  transitivity), `mem_modalUniverse_of`/`mem_modalUniverse_of'`/`modalUniverse_mem_formula`/
+  `modalUniverse_mem_label` (`modalUniverse` membership characterization), `mem_boxPositivesOf`
+  (inverts `boxPositivesOf`), `mem_successorsOf_hasEdge` (bridges `successorsOf` to `hasEdge`),
+  and `boxProps_outputs_subset`/`diaNegProps_outputs_subset` (factored out since `boxProps`/
+  `diaNegProps` are byte-identical between `diamondPos` and `boxNeg`, avoiding duplicating the
+  trickiest proof twice).
 
 ---
 

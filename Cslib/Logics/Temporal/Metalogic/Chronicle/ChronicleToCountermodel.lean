@@ -35,7 +35,6 @@ and a point function `limitF`. We define:
 
 set_option linter.style.setOption false
 set_option linter.flexible false
-set_option maxHeartbeats 1600000
 
 @[expose] public section
 

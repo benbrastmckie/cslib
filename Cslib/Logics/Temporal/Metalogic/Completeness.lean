@@ -44,7 +44,6 @@ construction.
 -/
 
 set_option linter.style.setOption false
-set_option maxHeartbeats 3200000
 
 @[expose] public section
 

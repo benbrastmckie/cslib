@@ -29,7 +29,6 @@ base soundness theorem to `FrameClass.Dense`.
 -/
 
 set_option linter.style.setOption false
-set_option maxHeartbeats 1600000
 
 @[expose] public section
 

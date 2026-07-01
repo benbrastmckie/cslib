@@ -257,6 +257,44 @@ the reference proof structure **requires** it, and its supporting regular-langua
   `lean_verify` on `concat_language_eq` shows no `sorry`/new axioms. **If unclosable:** mark
   [BLOCKED] with the `lean_goal` state; do not add `sorry`.
 
+**Phase 2 status: NOT STARTED (not attempted this dispatch).** Read `DA/Concat.lean` in full
+(the flag-construction `concat`, `mullerAccConcat`, and the existing helpers
+`concat_run_fst`, `concat_tr_snd'`, `concat_run_stabilizes`, `concat_freeSlot`,
+`option_some_pigeonhole`, `antitone_fin_eventually`) and confirmed it is a genuinely deep,
+multi-step proof (flag-array dedup dynamics, breakpoint extraction from stabilization) matching
+the plan's own "4 hours, deepest single proof" estimate. Given Phases 1 and 4 were the safe,
+independent, mechanical wins for this dispatch, Phase 2 was deliberately left for a dedicated
+follow-up dispatch rather than risking an incomplete/`sorry`-laden attempt. **No code was added
+to `Concat.lean`** (no speculative `proof_wanted` stub either, to avoid repeating the
+scaffold-then-abandon pattern already flagged for cleanup in this plan's Disposition section).
+
+Recommended exact statement for the next dispatch (matches `mullerAccConcat`'s shape and the
+`FinAcc`/`Muller` `Acceptor`/`ωAcceptor` instances already in scope):
+```
+theorem concat_language_eq [Finite State1] [Finite State2]
+    (da1 : DA State1 Symbol) (acc1 : Set State1) (da2 : DA State2 Symbol)
+    (accSet2 : Set (Set State2)) :
+    language (Muller.mk (concat da1 acc1 da2) (mullerAccConcat da1 acc1 da2 accSet2)) =
+      language (FinAcc.mk da1 acc1) * language (Muller.mk da2 accSet2)
+```
+Proof sketch (forward, `⊇`): given `xs = u ++ω ys` with `u ∈ language (FinAcc.mk da1 acc1)`
+(i.e. `da1.mtr da1.start u ∈ acc1`, so `da1` reaches `acc1` at `n = u.length`) and
+`ys ∈ language (Muller.mk da2 accSet2)` (i.e. `(da2.run ys).infOcc ∈ accSet2`), show the slot
+that gets allocated for `ys` at breakpoint `n` (via `concat_freeSlot`) survives dedup forever
+after (since `da1` only enters `acc1` once more matters for *this* slot's persistence — actually
+need: the slot allocated at the LAST time `da1` enters `acc1` at/after `n` before settling; more
+carefully, since only one copy of `da2` ultimately needs to track `ys` from position `n` on,
+identify the slot tracking `da2`'s run on `ys` from `n` onward and show it is never zeroed by
+dedup beyond some point, then show `mullerAccConcat`'s witness `i` = that slot). Proof sketch
+(backward, `⊆`): given `mullerAccConcat` accepts (witness slot `i` persistently active with
+`{s2 | ∃ s ∈ infOcc, s.2 i = some s2} ∈ accSet2`), use `antitone_fin_eventually`-style reasoning
+to find the last time slot `i` was *freshly allocated* (i.e. the most recent `da1`-entry to
+`acc1` that started slot `i`'s current unbroken run) — call this breakpoint `n` — then show
+`xs.extract 0 n ∈ language (FinAcc.mk da1 acc1)` and `xs.drop n ∈ language (Muller.mk da2 accSet2)`
+by relating slot `i`'s post-`n` values to `da2.run (xs.drop n)` via `concat_tr_snd'`/`concatF2`.
+This backward direction is the harder half (must extract the breakpoint from the *infinite*
+accepted run) and is where the deepest new lemma-writing is needed.
+
 ### Phase 3: `omegaPow_da_muller` — `Mᵒᵐᵉᵍᵃ` is DMA-recognizable [NOT STARTED]
 
 - **Goal:** Prove that for a regular language `M`, the ω-power `M^ω` is recognized by a

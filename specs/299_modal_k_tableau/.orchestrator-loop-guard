@@ -1,9 +1,0 @@
-{
-  "session_id": "sess_1782865757_cb015d",
-  "cycle_count": 2,
-  "max_cycles": 5,
-  "current_state": "blocked",
-  "started": "2026-07-01T00:29:50Z",
-  "last_updated": "2026-07-01T01:08:11Z",
-  "note": "Phase 5c GREEN delivered; Phase 6 BLOCKED (polynomial modalFuel insufficient); spawned task 442; 299 depends on 442. Resume via /orchestrate 442."
-}

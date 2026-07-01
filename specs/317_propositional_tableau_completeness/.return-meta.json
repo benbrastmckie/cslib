@@ -1,15 +1,11 @@
 {
   "status": "in_progress",
-  "started_at": "2026-07-01T00:00:00Z",
-  "artifacts": [],
-  "partial_progress": {
-    "stage": "initializing",
-    "details": "Dispatch started: fix intFImpReuseWitness? Sfor-dedup soundness gap (Option B: append F(psi)@x on reuse), then repair Scheme.lean structural breaks at 470/1074/1201."
-  },
-  "metadata": {
-    "session_id": "sess_dispatch_317_sforfix",
-    "agent_type": "cslib-implementation-hard-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
-  }
+  "agent_type": "planner-hard-agent",
+  "task_number": 317,
+  "delegation_path": ["orchestrator", "plan", "planner-hard-agent"],
+  "plan_path": "specs/317_propositional_tableau_completeness/plans/05_frame-change-and-fuel-raise.md",
+  "reports_integrated": [
+    "specs/317_propositional_tableau_completeness/reports/07_option-b-fuel-bound.md",
+    "specs/317_propositional_tableau_completeness/reports/08_b1-truthlemma-timp.md"
+  ]
 }

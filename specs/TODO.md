@@ -11,8 +11,8 @@ next_project_number: 457
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,299,317,396,400,404,407,438,439,440,447,449,452,453 | -- | Foundations, Propositional Logic, Modal Logic, ... |
-| 2 | 39,40,215,300,375,389,405,409,426,430,441,450,451,455,456 | 36,37,181,299,317,404,407,439,449 | Propositional Logic, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,181,226,300,317,396,400,404,407,438,439,440,441,447,449,452,453 | -- | Foundations, Propositional Logic, Modal Logic, ... |
+| 2 | 39,40,215,375,389,405,409,426,430,450,451,455,456 | 36,37,181,317,404,407,439,449 | Propositional Logic, Modal Logic, Temporal Logic, ... |
 | 3 | 41,391,392,413,425,444,454 | 39,40,375,389,426,450 | Foundations, Temporal Logic, Bimodal Logic, ... |
 | 4 | 301,393,412 | 41,391,425 | Temporal Logic, Code Hygiene |
 | 5 | 414 | 215,300,301,444 | Code Hygiene |
@@ -27,7 +27,7 @@ next_project_number: 457
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-317 [IMPLEMENTING] — Fill the propositional tableau completeness sorries (7 real sorri
+317 [PLANNING] — Fill the propositional tableau completeness sorries (7 real sorri
   └─ 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
   └─ 430 [RESEARCHED] — Prove the atom-persistence / upward-closure structural lemma for 
 400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
@@ -36,12 +36,11 @@ next_project_number: 457
 
 ### Modal Logic
 
-299 [BLOCKED] — Implement tableau decision procedure for basic modal logic K with
-  └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
-  └─ 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
+300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 404 [PR READY] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
   └─ 405 [NOT STARTED] — Simplify the proof machinery in the task-402 modal tableau soundn
+441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 
 ### Temporal Logic
 
@@ -676,7 +675,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [IMPLEMENTING]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -709,7 +708,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 299. Modal k tableau
-- **Status**: [BLOCKED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 442
@@ -717,6 +716,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
   - [299_modal_k_tableau/reports/03_completeness-decomposition.md]
   - [299_modal_k_tableau/reports/04_truth-lemma-architecture.md]
 - **Plan**: [299_modal_k_tableau/plans/05_modal-k-tableau-plan.md]
+- **Summary**: [299_modal_k_tableau/summaries/06_finalization-summary.md]
 
 **Description**: Implement tableau decision procedure for basic modal logic K with world labels, box/diamond rules on top of propositional rules from shared infrastructure. Introduces world labels (accessibility relation tracking) and fundamental modal rule pattern: box-positive is universal/persistent, diamond-positive is existential (fresh accessible world). Use Lukasiewicz encoding for and/or. Prove soundness against Kripke semantics and completeness by extracting finite Kripke countermodels. Modal formula type: Cslib.Logic.Modal.Formula with atom, bot, imp, box primitives. Files under Cslib/Logics/Modal/Tableau/: Defs.lean, Rules.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 1,500-2,000 lines.
 

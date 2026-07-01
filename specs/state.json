@@ -240,12 +240,12 @@
     {
       "project_number": 317,
       "project_name": "propositional_tableau_completeness",
-      "status": "implementing",
+      "status": "planning",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Fill the propositional tableau completeness sorries (7 real sorries; soundness is already sorry-free after task 316). The open obligations are the truth-lemma / countermodel-extraction proofs in the three Completeness modules. Classical (Tableau/Classical/Completeness.lean): classicalExpandBranches_hintikka (line ~462) -- note the module's separate build break (bad Mathlib lemma ref + unsolved goals) is repaired first under task 363. Intuitionistic (Tableau/Intuitionistic/Completeness.lean): intTruthLemma (line ~89), intuitionisticOpenBranch_countermodel (~98), intuitionisticTableau_complete (~112). Minimal (Tableau/Minimal/Completeness.lean): minTruthLemma (~168), minOpenBranch_countermodel (~179), minimalTableau_complete (~190). Core technique: Hintikka-set argument -- a saturated open branch satisfies Hintikka conditions, from which a countermodel is extracted (a Boolean valuation for classical; a finite Kripke model for intuitionistic/minimal) and a truth lemma by formula induction matches forced/not-forced to the signed formulas at each world. Because task 369 parameterizes the intuitionistic and minimal tableau over (closurePred, modelBot), the int and min cases should be discharged ONCE as a single parametric truth-lemma/countermodel pair rather than duplicated. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 316, 323, 363, 369.",
       "created": "2026-06-23T19:55:52Z",
-      "last_updated": "2026-07-01T13:29:24Z",
+      "last_updated": "2026-07-01T15:10:01Z",
       "next_artifact_number": 3,
       "artifacts": [
         {
@@ -261,12 +261,12 @@
     {
       "project_number": 299,
       "project_name": "modal_k_tableau",
-      "status": "blocked",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Implement tableau decision procedure for basic modal logic K with world labels, box/diamond rules on top of propositional rules from shared infrastructure. Introduces world labels (accessibility relation tracking) and fundamental modal rule pattern: box-positive is universal/persistent, diamond-positive is existential (fresh accessible world). Use Lukasiewicz encoding for and/or. Prove soundness against Kripke semantics and completeness by extracting finite Kripke countermodels. Modal formula type: Cslib.Logic.Modal.Formula with atom, bot, imp, box primitives. Files under Cslib/Logics/Modal/Tableau/: Defs.lean, Rules.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 1,500-2,000 lines.",
       "created": "2026-06-23T17:47:17Z",
-      "last_updated": "2026-07-01T01:05:20Z",
+      "last_updated": "2026-07-01T15:14:51Z",
       "next_artifact_number": 4,
       "artifacts": [
         {
@@ -281,6 +281,11 @@
         {
           "path": "specs/299_modal_k_tableau/plans/05_modal-k-tableau-plan.md",
           "type": "plan"
+        },
+        {
+          "path": "specs/299_modal_k_tableau/summaries/06_finalization-summary.md",
+          "type": "summary",
+          "summary": "Finalization summary: Phases 1-7 complete, decision procedure + Decidable instance sorry-free"
         }
       ],
       "dependencies": [
@@ -288,8 +293,9 @@
       ],
       "parent_task": 296,
       "session_id": "sess_1782865757_cb015d",
-      "blockers": "Phase 5c completeness truth lemma DELIVERED GREEN + committed sorry-free (modalTruthLemma, 30->0 errors). Phase 6 BLOCKED by a DECISIVE definitional obstruction: the polynomial modalFuel = O(n^2) (Saturation.lean:89) is PROVABLY insufficient — K has an exponential minimal-model lower bound and diamondPos/boxNeg mint a fresh world per firing with no subset-blocking, so fuel=0 is reachable with an UNSATURATED (non-Hintikka) open branch. Hence modalExpandBranches_hintikka is FALSE as stated for the current fuel, and modalTableau_decides fails too. Zero-debt held (no sorry/admit/axiom; baseline green). Unblock (option A, in-scope, multi-dispatch ~400-800 lines): revise modalFuel upward to an exponential bound (soundness-safe — modalExpandBranches_closed_unsat is fuel-agnostic) THEN formalize the FMP measure (a-priori world-count bound + finite signed-subformula universe U(phi) + subformula-closure over all 4 modal rules + output-disjointness + 3^R per-branch weight). Option B (world-subset blocking) = rules/datatype refactor = task 441 (out of scope). Do NOT retry Phase 6 with the current polynomial fuel. Phase 7 (decision procedure + CI) gated on Phase 6. Pre-existing out-of-scope: SoundnessStep.lean RED lines 82/85/91.",
-      "previous_status": "implementing"
+      "blockers": "",
+      "previous_status": "implementing",
+      "completion_summary": "Modal K tableau decision procedure: sound + complete tableau calculus for basic modal logic K with world labels, proven against Kripke semantics, with a Decidable (kValid φ) instance from a terminating expansion loop. All 7 phases green, sorry/admit/axiom-free. Phase 6/7 unblocked by dependency task 442 (exponential modalFuel + FMP 3^R termination measure over a world-bounded signed-subformula universe). Deliverables in Cslib/Logics/Modal/Tableau/: Defs, Rules, Branch, Closure, Saturation, LoopInduction, Soundness, SoundnessStep, Completeness, FmpMeasure, CompletenessLoop. Modal subtree build verified green (778 jobs) post task-455 refactor; whole-library CI green at 442 completion."
     },
     {
       "project_number": 300,

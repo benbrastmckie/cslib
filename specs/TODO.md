@@ -11,7 +11,7 @@ next_project_number: 464
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,396,400,405,407,425,438,440,441,449,460,461,462,463 | -- | Propositional Logic, Modal Logic, Temporal Logic, ... |
+| 1 | 36,37,181,226,300,317,396,400,405,407,425,438,440,441,449,461,462,463 | -- | Propositional Logic, Modal Logic, Temporal Logic, ... |
 | 2 | 39,40,215,301,375,389,409,430,450,451,456 | 36,37,181,317,407,425,449 | Propositional Logic, Temporal Logic, Bimodal Logic, ... |
 | 3 | 41,391,392,413,444,454 | 39,40,375,389,450 | Foundations, Bimodal Logic, Code Hygiene |
 | 4 | 393,412,414 | 41,215,300,301,391,444 | Code Hygiene |
@@ -82,7 +82,6 @@ next_project_number: 464
 
 ### Uncategorized
 
-460 [PLANNED] — Vet of task 455 found lint warnings in the repointed consumer Csl
 461 [NOT STARTED] — Vet found 6 `linter.unusedSectionVars` warnings; add `omit [...] 
 462 [NOT STARTED] — Vet of task 299 flagged two maintainability items (both non-block
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
@@ -117,7 +116,7 @@ next_project_number: 464
 ---
 
 ### 460. Fix lake-build lint warnings in Classical/Completeness.lean (task 455 vet)
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
 

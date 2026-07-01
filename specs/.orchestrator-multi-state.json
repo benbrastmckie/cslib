@@ -15,23 +15,19 @@
     ]
   ],
   "max_cycles": 20,
-  "cycle_count": 3,
-  "failed_tasks": [
-    {
-      "task": 317,
-      "status": "blocked",
-      "reason": "Phase 2 STOP-gate R1 — needs architectural decision"
-    }
-  ],
+  "cycle_count": 4,
+  "failed_tasks": [],
   "completed_tasks": [
     457,
-    458
+    458,
+    459,
+    460
   ],
   "current_statuses": {
     "457": "completed",
     "458": "completed",
-    "459": "planned",
-    "460": "planned"
+    "459": "completed",
+    "460": "completed"
   },
   "task_dirs": {
     "457": "specs/457_vet_299_shake_import_hygiene",
@@ -51,7 +47,8 @@
     "459": "cslib-implementation-agent",
     "460": "cslib-implementation-agent"
   },
-  "exit_status": "in_progress",
-  "exit_reason": "Wave 0 task 317 BLOCKED at foundation (Phase 2); dependent Wave 1 tasks 430,375 gated. Human architectural decision required.",
-  "notes": "317 blocked at Phase 2; dispatched hard research (routes a vs b) per user choice. 430/375 remain gated."
+  "exit_status": "partial",
+  "exit_reason": "Stopped at user request with plan v6 ready. 317 [planned] (Route a, Wave A independently committable). 430/375 gated on 317 completeness green; both re-plan after Wave A lands.",
+  "notes": "Run outcome: 317 blocked->researched routes->re-planned v6. User chose not to implement yet. Resume: /implement 317 --hard (Wave A first).",
+  "in_flight": []
 }

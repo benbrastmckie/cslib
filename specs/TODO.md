@@ -86,7 +86,7 @@ next_project_number: 465
 - **Task Type**: general
 - **Topic**: Propositional Logic
 - **Dependencies**: None
-- **Research**: [464_typst_report_structure_first_mpl_arguments/reports/01_team-research.md]
+- **Research**: [464_typst_report_structure_first_mpl_arguments/reports/02_grounding-and-typst-scaffold.md]
 
 **Description**: Create a Typst report presenting the best arguments in support of the structure-first MPL design, output to /home/benjamin/Projects/cslib/typst/MPL/ (directory to be created; this is a document-writing/synthesis task — the deliverable is a compiled-clean Typst document, not Lean proofs).
 

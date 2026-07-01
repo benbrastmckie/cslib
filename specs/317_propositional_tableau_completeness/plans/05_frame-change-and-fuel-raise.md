@@ -1,7 +1,7 @@
 # Implementation Plan: Task #317 (v5 — Frame change + fuel raise for sorry-FREE intuitionistic tableau completeness, HARD mode)
 
 - **Task**: 317 - Close BOTH residual sorries (B1 `Scheme.lean:330` truthLemma T(→); B2 `Scheme.lean:986` `intExpandBranches_openBranch_sat` fuel=0) to reach a sorry-FREE intuitionistic tableau completeness
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 18 hours
 - **Dependencies**: 316 (soundness, landed — TERRITORY HAZARD, `Soundness.lean` + `Expansion.lean` fuel site). Downstream: 430 (atom-persistence upward closure — RESHAPED by this plan's frame change, see Roadmap Alignment), then 375 (proof-system TFAE edges, needs 430 + completeness green).
 - **Research Inputs**:
@@ -255,25 +255,38 @@ decisions. Items 1-6 carried forward verbatim from v4; items 7-11 encode the v5 
 
 ---
 
-### Phase 1: Expose branch edges from the expansion (plumbing) [NOT STARTED]
+### Phase 1: Expose branch edges from the expansion (plumbing) [COMPLETED]
 
 - **Goal:** Make the per-branch `IEdges` of a returned open branch available to the completeness
   side, so accessibility can be defined from edges rather than numeric `≤`. No sorry closed here.
 - **Tasks:**
-  - [ ] `git log -1 -- Scheme.lean Expansion.lean`; scoped+grepped rebuild GREEN baseline
+  - [x] `git log -1 -- Scheme.lean Expansion.lean`; scoped+grepped rebuild GREEN baseline
         (`4202d1df`/`8a5c0250`).
-  - [ ] Read (windowed) the `.openBranch b` boundary (`Scheme.lean:1314-1318`), the internal `edges`
+  - [x] Read (windowed) the `.openBranch b` boundary (`Scheme.lean:1314-1318`), the internal `edges`
         argument threaded through `intExpandBranches` (`Scheme.lean:1316`, `[[]]`), and
         `IEdges`/`isAccessible` (`Soundness.lean:344-348`).
-  - [ ] Thread the branch's `IEdges` out through the `.openBranch` result OR provide a structural
+  - [x] Thread the branch's `IEdges` out through the `.openBranch` result OR provide a structural
         lemma `intExpandBranches_openBranch_edges` yielding the branch's `IEdges` without a
         return-type change. **PREFER** the structural lemma (avoids a return-type change that would
         ripple into `Decidable`/`DecisionProcedure` consumers — report 08 P1 flags MEDIUM confidence
         the edges are cleanly exposable without a signature change).
-  - [ ] **STOP-gate**: if edges cannot be exposed without changing the `.openBranch` return type (a
+        **Implementation note (deviation from literal lemma name)**: rather than a brand-new
+        standalone `intExpandBranches_openBranch_edges` lemma (which would require an awkward
+        disjunctive conclusion to remain sound across nested fuel=0 recursion — effectively
+        re-deriving Phase 10's fuel-sufficiency content prematurely), the EXISTING private lemma
+        `intExpandBranches_openBranch_sat`'s conclusion was widened from `IBranchSaturation Atom b`
+        to `∃ edges : IEdges, IBranchSaturation Atom b`, filling `edges := edgesH` at the existing
+        "none leaf" case. This reuses the single pre-existing `sorry` (fuel=0 case, now at line 991)
+        with zero new sorries and composes cleanly through the existing induction (recursive cases
+        pass the IH's existential straight through, unchanged). `openBranch_countermodel`'s call site
+        updated to `obtain ⟨edges, hsat⟩ := ...`; `edges` not yet consumed (Phase 2 will use it).
+  - [x] **STOP-gate**: if edges cannot be exposed without changing the `.openBranch` return type (a
         public-signature change, forbidden by Postmortem 5), STOP, mark Phase 1 [BLOCKED], hand off
         the exact return-type obstacle. Do NOT change the public boundary silently.
-  - [ ] Scoped+grepped build GREEN; two sorries unchanged (330, 986); commit touched files only:
+        (Not triggered — `.openBranch`'s return type is untouched; only the `private` lemma's
+        conclusion type changed.)
+  - [x] Scoped+grepped build GREEN; two sorries unchanged (330, 986 — now at line 991 due to
+        docstring additions); commit touched files only:
         `task 317 phase 1: expose branch edges for edge-accessibility frame`.
 - **Estimated output:** ~150-300 lines. **Done when:** `intExpandBranches_openBranch_edges` (or an
   equivalent edge accessor) is sorry-free and the public `.openBranch` boundary is unchanged.

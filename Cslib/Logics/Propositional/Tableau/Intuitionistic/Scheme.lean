@@ -957,15 +957,20 @@ private lemma IAllConsistent_map {branches' : List (IBranch Atom)} (f : IBranch 
 
 /-- If `intExpandBranches` returns `.openBranch b`, then `b` is Hintikka-saturated:
 every compound formula on `b` has its rule-outputs also on `b` (see `IBranchSaturation`).
+Additionally exposes the accumulated `IEdges` active for `b` at the point of saturation
+(task 317 phase 1 plumbing), so the completeness side can install edge-accessibility as the
+countermodel frame (task 317 phase 2) instead of the ambient numeric `≤`.
 
 The proof mirrors `intExpandBranches_openBranch_closed`: induction on `fuel`, with inner
 induction on the `pending` list in the `go` helper, threading the combined `IAllConsistent`
 invariant (task 317 phase 1). In the recursive cases (`linearResult`, `branchingResult`), the
 fuel IH closes the goal once the invariant is re-established for the extended/branched state
-via `intStepBranch_linear_preserves`/`intStepBranch_branch_preserves`. In the `none` leaf case,
-the returned branch equals `bPers` directly and `IExpandedConsistent_sat` discharges saturation
-directly from the threaded invariant. The fuel-0 base case still has a gap (task 317 phase 2,
-`sorry`, entangled with the fuel-sufficiency argument, not this phase's scope). -/
+via `intStepBranch_linear_preserves`/`intStepBranch_branch_preserves` (the exposed `edges`
+witness passes through the IH unchanged). In the `none` leaf case, the returned branch equals
+`bPers` directly, `edgesH` (the edge list active at that point) is the exposed witness, and
+`IExpandedConsistent_sat` discharges saturation directly from the threaded invariant. The
+fuel-0 base case still has a gap (task 317 phase 10, `sorry`, entangled with the
+fuel-sufficiency argument, not this phase's scope). -/
 private lemma intExpandBranches_openBranch_sat (fuel : Nat)
     (branches : List (IBranch Atom))
     (expandedSets : List (List (ISF Atom)))
@@ -977,12 +982,12 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
     (hLen0 : branches.length = edgeSets.length)
     (h : intExpandBranches branches expandedSets nextWorlds edgeSets fuel closurePred
         = .openBranch b) :
-    IBranchSaturation Atom b := by
+    ∃ edges : IEdges, IBranchSaturation Atom b := by
   induction fuel generalizing branches expandedSets nextWorlds edgeSets hAC hLen0 with
   | zero =>
     -- fuel=0 base case: intExpandBranches returns the first open branch from the initial
     -- list without saturating it. Proving IBranchSaturation here requires the
-    -- fuel-sufficiency argument (task 317 phase 2 blocker; out of scope for phase 1).
+    -- fuel-sufficiency argument (task 317 phase 10 blocker; out of scope for phase 1).
     sorry
   | succ fuel' ih =>
     simp only [intExpandBranches] at h
@@ -1000,7 +1005,7 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
         done.length = doneEdges.length →
         intExpandBranches.go closurePred fuel' pending pendingExp pendingNW pendingEdges
             done doneExp doneNW doneEdges = .openBranch b →
-        IBranchSaturation Atom b from
+        ∃ edges : IEdges, IBranchSaturation Atom b from
       key branches expandedSets nextWorlds edgeSets [] [] [] []
         hAC hLen0 (by trivial) rfl h
     intro pending
@@ -1052,7 +1057,8 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
                 -- b = bPers; intStepBranch returned none, so every compound formula in
                 -- bPers is already recorded in eH (`intStepBranch_none_compound_mem`), and
                 -- `hIC_bPers` gives its rule-outputs on bPers -- exactly `IBranchSaturation`.
-                exact IExpandedConsistent_sat hstep hIC_bPers
+                -- `edgesH` is the edge list active for `b` at this point (task 317 phase 1).
+                exact ⟨edgesH, IExpandedConsistent_sat hstep hIC_bPers⟩
               | some step =>
                 obtain ⟨result, newExp⟩ := step
                 rw [hstep] at hgo
@@ -1328,8 +1334,10 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
               exact List.mem_cons_self)
           b h
     exact List.any_eq_true.mpr ⟨_, hmem, by simp⟩
-  -- Obtain saturation witness from the expansion structure.
-  have hsat : IBranchSaturation Atom b :=
+  -- Obtain saturation witness (and its accumulated edges, task 317 phase 1) from the
+  -- expansion structure. `edges` is not yet consumed here; task 317 phase 2 installs it
+  -- as the completeness frame.
+  obtain ⟨edges, hsat⟩ :=
     intExpandBranches_openBranch_sat _ _ _ _ _ _ _
       (by simp [IAllConsistent, IExpandedConsistent, ILabelBound]) rfl h
   -- Apply the truth lemma's F-branch direction.

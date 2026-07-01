@@ -35,7 +35,6 @@ set_option linter.style.setOption false
 set_option linter.dupNamespace false
 set_option linter.flexible false
 set_option linter.unusedSimpArgs false
-set_option maxHeartbeats 1600000
 
 @[expose] public section
 

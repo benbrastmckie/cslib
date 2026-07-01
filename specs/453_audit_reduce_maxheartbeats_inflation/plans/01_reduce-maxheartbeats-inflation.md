@@ -269,21 +269,25 @@ for residuals only).
 
 ---
 
-### Phase 4: Document irreducibles + final CI gate [NOT STARTED]
+### Phase 4: Document irreducibles + final CI gate [COMPLETED]
 
 **Goal**: Add one-line justification comments above every remaining high (>= 1.6M) scoped option and
 run the full CI pipeline as the final acceptance gate.
 
 **Tasks**:
-- [ ] For every surviving scoped option at >= 1.6M (Category B — genuinely high after bisection +
-      extraction), add a one-line comment above the option explaining why it is irreducible, e.g.
-      `-- 8-way MCS case dispatch over Burgess Lemma 2.7; irreducible without deep refactor`.
-- [ ] Produce a short reduction summary (before/after value distribution and unscoped count) for the
-      implementation summary artifact.
-- [ ] Add a follow-up note (in the summary, not code) flagging the 5 out-of-scope `maxHeartbeats`
-      sites elsewhere under `Cslib/Logics/` for a possible future task.
-- [ ] Note in the summary that this task must not have run concurrently with task 414 on shared files.
-- [ ] Run the full CI pipeline as the final gate.
+- [x] For every surviving scoped option at >= 1.6M (Category B — genuinely high after bisection +
+      extraction), add a one-line comment above the option explaining why it is irreducible.
+      *(deviation: N/A -- zero options survived to Phase 4; nothing to document. Category B is
+      empty.)*
+- [x] Produce a short reduction summary (before/after value distribution and unscoped count) for the
+      implementation summary artifact. *(summaries/01_reduce-maxheartbeats-inflation-summary.md)*
+- [x] Add a follow-up note (in the summary, not code) flagging the 5 out-of-scope `maxHeartbeats`
+      sites elsewhere under `Cslib/Logics/` for a possible future task. *(done in summary)*
+- [x] Note in the summary that this task must not have run concurrently with task 414 on shared files.
+      *(done in summary; confirmed task 414 status remained not_started throughout)*
+- [x] Run the full CI pipeline as the final gate. *(lake build/test/checkInitImports/lint-style all
+      green; lake lint clean on modified files; lake shake clean on modified files; mk_all
+      no-op)*
 
 **Timing**: ~1 hour.
 

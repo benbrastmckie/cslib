@@ -80,7 +80,7 @@ instance :
 
 -- Hypothetical-syllogism helper (private): from ⊢ A → B and ⊢ B → C, derive ⊢ A → C.
 -- Used to bridge between the new primitive G/H constructors and the Foundation-level encoding.
-private def hyp_syl {Atom : Type u}
+private def hypSyl {Atom : Type u}
     {A B C : Temporal.Formula Atom}
     (d1 : Temporal.DerivationTree Temporal.FrameClass.Base [] (A.imp B))
     (d2 : Temporal.DerivationTree Temporal.FrameClass.Base [] (B.imp C)) :
@@ -147,7 +147,7 @@ instance :
     HasAxiomLeftMonoUntilG Temporal.HilbertBX (F := Temporal.Formula Atom) where
   -- Foundation expects: ⊢ ¬F¬(φ→ψ) → (φ U χ → ψ U χ)   (old G encoding)
   -- We have axiom: ⊢ allFuture (φ→ψ) → (φ U χ → ψ U χ)   (new G constructor)
-  -- Bridge via classic_to_allFuture: ⊢ ¬F¬(φ→ψ) → allFuture (φ→ψ), then chain via hyp_syl.
+  -- Bridge via classic_to_allFuture: ⊢ ¬F¬(φ→ψ) → allFuture (φ→ψ), then chain via hypSyl.
   leftMonoUntilG := by
     intro φ ψ χ
     -- ⊢ ¬F¬(φ→ψ) → allFuture (φ→ψ)
@@ -156,7 +156,7 @@ instance :
     -- ⊢ allFuture (φ→ψ) → (φ U χ → ψ U χ)
     let d_ax := Temporal.DerivationTree.axiom (fc := Temporal.FrameClass.Base) []
       _ (Temporal.Axiom.left_mono_until_G φ ψ χ) trivial
-    exact ⟨hyp_syl d_bridge d_ax⟩
+    exact ⟨hypSyl d_bridge d_ax⟩
 
 instance :
     HasAxiomLeftMonoSinceH Temporal.HilbertBX (F := Temporal.Formula Atom) where
@@ -166,7 +166,7 @@ instance :
       _ (Temporal.Axiom.classic_to_allPast (φ.imp ψ)) trivial
     let d_ax := Temporal.DerivationTree.axiom (fc := Temporal.FrameClass.Base) []
       _ (Temporal.Axiom.left_mono_since_H φ ψ χ) trivial
-    exact ⟨hyp_syl d_bridge d_ax⟩
+    exact ⟨hypSyl d_bridge d_ax⟩
 
 instance :
     HasAxiomRightMonoUntil Temporal.HilbertBX (F := Temporal.Formula Atom) where
@@ -176,7 +176,7 @@ instance :
       _ (Temporal.Axiom.classic_to_allFuture (φ.imp ψ)) trivial
     let d_ax := Temporal.DerivationTree.axiom (fc := Temporal.FrameClass.Base) []
       _ (Temporal.Axiom.right_mono_until φ ψ χ) trivial
-    exact ⟨hyp_syl d_bridge d_ax⟩
+    exact ⟨hypSyl d_bridge d_ax⟩
 
 instance :
     HasAxiomRightMonoSince Temporal.HilbertBX (F := Temporal.Formula Atom) where
@@ -186,7 +186,7 @@ instance :
       _ (Temporal.Axiom.classic_to_allPast (φ.imp ψ)) trivial
     let d_ax := Temporal.DerivationTree.axiom (fc := Temporal.FrameClass.Base) []
       _ (Temporal.Axiom.right_mono_since φ ψ χ) trivial
-    exact ⟨hyp_syl d_bridge d_ax⟩
+    exact ⟨hypSyl d_bridge d_ax⟩
 
 instance :
     HasAxiomConnectFuture Temporal.HilbertBX (F := Temporal.Formula Atom) where
@@ -199,7 +199,7 @@ instance :
       _ (Temporal.Axiom.connect_future φ) trivial
     let d_bridge := Temporal.DerivationTree.axiom (fc := Temporal.FrameClass.Base) []
       _ (Temporal.Axiom.allFuture_to_classic φ.somePast) trivial
-    exact ⟨hyp_syl d_ax d_bridge⟩
+    exact ⟨hypSyl d_ax d_bridge⟩
 
 instance :
     HasAxiomConnectPast Temporal.HilbertBX (F := Temporal.Formula Atom) where
@@ -212,7 +212,7 @@ instance :
       _ (Temporal.Axiom.connect_past φ) trivial
     let d_bridge := Temporal.DerivationTree.axiom (fc := Temporal.FrameClass.Base) []
       _ (Temporal.Axiom.allPast_to_classic φ.someFuture) trivial
-    exact ⟨hyp_syl d_ax d_bridge⟩
+    exact ⟨hypSyl d_ax d_bridge⟩
 
 instance :
     HasAxiomEnrichmentUntil Temporal.HilbertBX (F := Temporal.Formula Atom) where

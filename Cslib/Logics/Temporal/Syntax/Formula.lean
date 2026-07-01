@@ -94,7 +94,7 @@ Primitives: atoms, falsum, implication, until, since, allFuture (G), allPast (H)
 `allFuture` and `allPast` are primitive universal temporal operators (task 180).
 The derived existential operators `someFuture` (F) and `somePast` (P) remain abbreviations:
 `𝐅φ = ⊤ U φ` and `𝐏φ = ⊤ S φ`. The classical equivalences `𝐆φ ↔ ¬𝐅¬φ` and `𝐇φ ↔ ¬𝐏¬φ`
-hold as theorems (see `allFuture_iff_neg_someFuture_neg`). -/
+hold as theorems (see `allFutureIffNegSomeFutureNeg`). -/
 inductive Formula (Atom : Type u) : Type u where
   /-- Atomic proposition. -/
   | atom (p : Atom)

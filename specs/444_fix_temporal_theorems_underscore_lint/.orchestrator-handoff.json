@@ -1,0 +1,41 @@
+{
+  "task": 444,
+  "session_id": "sess_1782924983_6bcecb_444",
+  "orchestrator_mode": true,
+  "phase": "implement",
+  "status": "implemented",
+  "change_class": "renames_and_docs_only",
+  "behavioural_change": false,
+  "sorry_inventory": [],
+  "axioms_introduced": [],
+  "report": "specs/444_fix_temporal_theorems_underscore_lint/reports/01_temporal-naming-lint-uniformity.md",
+  "plan": "specs/444_fix_temporal_theorems_underscore_lint/plans/01_temporal-underscore-rename-docs.md",
+  "summary": "specs/444_fix_temporal_theorems_underscore_lint/summaries/01_temporal-underscore-rename-docs-summary.md",
+  "phase_count": 2,
+  "phases_completed": 2,
+  "phases": [
+    {"number": 1, "name": "Rename flagged defs and update docstring references", "status": "completed"},
+    {"number": 2, "name": "Optional uniformity rename hyp_syl -> hypSyl", "status": "completed"}
+  ],
+  "files_modified": [
+    "Cslib/Logics/Temporal/Theorems.lean",
+    "Cslib/Logics/Bimodal/Embedding/TemporalEmbedding.lean",
+    "Cslib/Logics/Temporal/Syntax/Formula.lean",
+    "Cslib/Logics/Temporal/ProofSystem/Instances.lean"
+  ],
+  "verification": {
+    "lake_build_full": "green (3189/3189, re-verified 3198/3198 in lake test)",
+    "lake_exe_checkInitImports": "clean",
+    "lake_lint": "clean -- 'Linting passed for Cslib.'; both defsWithUnderscore findings cleared",
+    "lake_exe_lint_style": "clean",
+    "lake_shake": "pre-existing findings only, none touch the 4 modified files",
+    "lake_exe_mk_all_module": "no update necessary",
+    "lake_test": "green, 9180/9180 jobs",
+    "sorry_count_modified_files": 0,
+    "axiom_count_modified_files": 0,
+    "vacuous_defs_modified_files": 0,
+    "git_diff_scope": "renames + docstring text only, verified via git diff review"
+  },
+  "next_action": "none -- task complete, ready for PR/vet",
+  "notes": "Both phases (mandatory Phase 1 + optional Phase 2 hyp_syl rename) were applied. Line numbers matched plan/report exactly. Repo has unrelated concurrent modifications to specs/TODO.md, specs/state.json, specs/.orchestrator-multi-state.json, and specs/389.../plans/01_docstrings-headers-citations.md from other in-flight work -- these were left untouched and NOT included in this task's commit."
+}

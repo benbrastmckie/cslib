@@ -31,7 +31,7 @@ namespace Cslib.Logic
 abbreviations (`¬F¬φ`/`¬P¬φ`). The embedding therefore maps the temporal primitives to the
 bimodal classical encoding; this is a purely syntactic translation choice for the embedding
 target, not a re-derivation of the Temporal-side `𝐆φ ↔ ¬𝐅¬φ` bridge (that equivalence remains
-axiomatic within `Temporal.HilbertBX`, see `Theorems.allFuture_iff_neg_someFuture_neg`). -/
+axiomatic within `Temporal.HilbertBX`, see `Metalogic.allFutureIffNegSomeFutureNeg`). -/
 def Temporal.Formula.toBimodal : Temporal.Formula Atom → Bimodal.Formula Atom
   | .atom p => .atom p
   | .bot => .bot

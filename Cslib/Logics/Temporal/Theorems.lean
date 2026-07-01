@@ -55,7 +55,7 @@ constructively) and `Axiom.classic_to_allFuture` (`¬𝐅¬φ → 𝐆φ`, requi
 
 **D3 honesty caveat:** this `Iff` is a thin wrapper around the two axioms, not a derivation
 from the propositional/mono axiom fragment — see the module docstring. -/
-def allFuture_iff_neg_someFuture_neg (φ : Formula Atom) :
+def allFutureIffNegSomeFutureNeg (φ : Formula Atom) :
     DerivationTree FrameClass.Base [] (φ.allFuture ↔ ¬𝐅¬φ) :=
   let d_fwd : DerivationTree FrameClass.Base [] (φ.allFuture.imp (¬𝐅¬φ)) :=
     DerivationTree.axiom [] _ (Axiom.allFuture_to_classic φ) trivial
@@ -66,8 +66,8 @@ def allFuture_iff_neg_someFuture_neg (φ : Formula Atom) :
     (DerivationTree.modus_ponens [] _ _ d_pair d_fwd) d_bwd
 
 /-- Classical duality for `allPast` (`𝐇`): `𝐇φ ↔ ¬𝐏¬φ`. Past dual of
-`allFuture_iff_neg_someFuture_neg`; see its docstring for the D3 honesty caveat. -/
-def allPast_iff_neg_somePast_neg (φ : Formula Atom) :
+`allFutureIffNegSomeFutureNeg`; see its docstring for the D3 honesty caveat. -/
+def allPastIffNegSomePastNeg (φ : Formula Atom) :
     DerivationTree FrameClass.Base [] (φ.allPast ↔ ¬𝐏¬φ) :=
   let d_fwd : DerivationTree FrameClass.Base [] (φ.allPast.imp (¬𝐏¬φ)) :=
     DerivationTree.axiom [] _ (Axiom.allPast_to_classic φ) trivial

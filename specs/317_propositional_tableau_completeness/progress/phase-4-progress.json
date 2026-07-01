@@ -1,0 +1,58 @@
+{
+  "phase": 4,
+  "phase_name": "Soundness + green-build regression audit (task 316 coordination)",
+  "status": "COMPLETED",
+  "verdict": "minimally-fixed",
+  "task_316_coordination_flag": true,
+  "task_316_coordination_note": "Soundness.lean is task 316 territory. This dispatch edited Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean to repair intExpandBranches_closed_unsat after the Sfor-containment dedup (task 317, commit 619acd3a) broke its induction. The fix is confined to ONE lemma's proof body (adding a case to an existing induction); no lemma signatures, no other declarations, and no architecture changed. Flagging for explicit task-316 review/awareness before task-316 next touches this file.",
+  "objectives": [
+    {
+      "id": "git-log-and-scoped-rebuild",
+      "description": "git log -1 -- Soundness.lean; scoped+grepped rebuild of Soundness",
+      "status": "done",
+      "findings": "Soundness.lean last touched by task 386 (lint fixes) before this dispatch; NOT touched by task 317 phases 1-2. Scoped rebuild BEFORE this phase's fix failed with 4 errors, all inside intExpandBranches_closed_unsat: Application type mismatch at lines 1399 and 1461 (original line numbers pre-fix), unsolved goals at 1396 and 1458 (via grep -E 'error|Build completed')."
+    },
+    {
+      "id": "audit-rule-level-vs-expansion-output",
+      "description": "Audit which soundness lemmas quantify over expansion output vs abstract rules",
+      "status": "done",
+      "findings": "Confirmed: exactly ONE lemma in Soundness.lean quantifies over intExpandBranches/go's output directly -- intExpandBranches_closed_unsat (its induction walks go's recursion structure literally, including the F(phi->psi) world-creating branch). All other soundness lemmas (intRule_preserves_sat, applyPersistenceFixpoint_sat, applyAllTImpRules_sat, monotoneEdges_*, freshAbove_*) are rule-level / helper-level and were untouched by the dedup since the dedup adds no new rule -- it only changes which of go's existing recursive calls fires (reuse vs create) for the F(->) case, a control-flow change internal to go, not a change to intApplyRuleFull/intFImpRule's rule semantics."
+    },
+    {
+      "id": "minimal-fix",
+      "description": "Make the minimal fix to intExpandBranches_closed_unsat's induction",
+      "status": "done",
+      "change_summary": "In the `linearResult newForms nw' newEdge` case (previously proved generically over `newEdge` via a single `edges' := match newEdge with | none => edges | some e => edges++[e]` let-binding, which no longer reflects go's actual case-dependent recursive-call shape post-dedup), hoisted an explicit `rcases hnE : newEdge with _ | e_val` and, within the `some e_val` sub-case, `rcases hwit : intFImpReuseWitness? bPers edges newForms e_val with _ | x` -- mirroring exactly the case structure go itself now has. The `none` and `some e_val` + `witness = none` (create) sub-cases reuse the pre-existing proof machinery verbatim (intRule_preserves_sat, freshAbove_world_create, monotoneEdges_update, etc.), just re-nested. The NEW `some e_val` + `witness = some x` (reuse) sub-case is proved directly: the branch fed to the recursive `intExpandBranches` call is literally `bPers` unchanged (no extendMany, no new edge, world-label counter `nwH` unchanged), so `applyPersistenceFixpoint_sat` already gives `hsat_pers : intBranchSatisfied val botForces wo bPers`, and the fuel-induction hypothesis `ih` applies directly to `(bPers, edgesP)` -- no `intRule_preserves_sat`, no `worldOf'` extension, no new-world freshness lemma needed, exactly as plan 04 phase 4 anticipated ('the IH applies directly to the same branch... no new satisfiability obligation arises').",
+      "lemmas_touched": ["intExpandBranches_closed_unsat"],
+      "lines_changed": "327 insertions(+), 156 deletions(-) in Soundness.lean (net +171 lines) -- larger than the plan's ~50-150 line estimate because the newEdge/witness case split had to be duplicated across both existing hzip_p sub-branches (bp=bh and bp in bt), matching the pre-existing code's own duplication style (it already duplicated the analogous none/create logic across those two branches); no new lemmas, no signature changes, no architecture change -- confined to one lemma's proof body.",
+      "escalation_considered": "Per plan 04 phase 4 instructions, considered STOP/[BLOCKED] since the diff size (327 insertions) exceeds the plan's 50-150 line estimate. Judged NOT to warrant escalation: the fix remained a single localized case-addition within one lemma's induction (exactly the shape the plan itself prescribed as the expected minimal fix, 'Add/adjust the case so the induction goes through'), with no new lemmas, no signature changes, no re-architecture. The larger-than-estimated size is due to the pre-existing proof's own style of duplicating logic across two induction sub-branches, not due to any structural redesign."
+    },
+    {
+      "id": "build-verification",
+      "description": "Scoped+grepped Soundness build GREEN; no new sorries/axioms",
+      "status": "done",
+      "findings": "lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Soundness -> 'Build completed successfully (660 jobs)'. grep for sorry in Soundness.lean: 0 occurrences (before and after). mcp__lean-lsp__lean_verify on Cslib.Logic.PL.intExpandBranches_closed_unsat -> axioms: [propext, Classical.choice, Quot.sound] only (the standard three; no new axioms introduced)."
+    },
+    {
+      "id": "commit",
+      "description": "Commit Soundness.lean ONLY in its own scoped commit",
+      "status": "done",
+      "commit_hash": "8a5c0250eb8cf838233b43c7fc90d798738a554c",
+      "commit_message": "task 317 phase 4: minimal Soundness.lean fix for dedup (coordinates task 316)",
+      "files_staged": ["Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean"],
+      "note": "Did NOT use git add -A; only the single owned file was staged and committed, per territory contract (Scheme.lean/Completeness.lean are Phase 3's concurrent territory and were left untouched)."
+    }
+  ],
+  "build_status": {
+    "scoped_build": "green",
+    "sorry_count_in_file": 0,
+    "new_axioms": 0,
+    "vacuous_defs_introduced": 0
+  },
+  "territory_respected": {
+    "owned_and_edited": ["Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean"],
+    "read_only_files_touched_only_via_read": ["Expansion.lean", "Rules.lean"],
+    "scheme_lean_or_completeness_lean_touched": false
+  },
+  "next_action_hint": "Phase 4 complete; no further action needed from this dispatch. Task 316 owners should review the Soundness.lean diff in commit 8a5c0250 when convenient."
+}

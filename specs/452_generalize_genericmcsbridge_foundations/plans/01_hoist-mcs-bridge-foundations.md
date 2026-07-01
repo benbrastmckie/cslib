@@ -330,7 +330,7 @@ where feasible: `task 452 phase 4: retarget Temporal bridge to generic HilbertTr
 
 ---
 
-### Phase 5: Part B core.3 — Retarget PL & Modal to the generic machinery [NOT STARTED]
+### Phase 5: Part B core.3 — Retarget PL & Modal to the generic machinery [COMPLETED]
 
 **Goal**: Add `HilbertTree (DerivationTree Axioms)` instances for PL and Modal; delegate the
 backward helpers and the two consistency/MCS lemmas to the generic combinators; KEEP the public
@@ -338,15 +338,26 @@ backward helpers and the two consistency/MCS lemmas to the generic combinators; 
 `DeductionTheorem.lean`). Keep the `HilbertOf` tags local for now (Phase 6 optionally retires them).
 
 **Tasks**:
-- [ ] PL: add `HilbertTree (DerivationTree Axioms)` instance with `axiomK`/`axiomS` from
+- [x] PL: add `HilbertTree (DerivationTree Axioms)` instance with `axiomK`/`axiomS` from
       `HasMinimalAxioms.hasImplyK/hasImplyS` via `DerivationTree.ax` (§6); retarget
       `unfoldListImpInTree`/`listDerivToTree` bodies to the generic combinators; replace the two
       consistency lemmas with `*_iff_congr`; preserve `pl_deriv_iff_algebraic`, `propAlgDS`, and the
       public `listDerivToTree`.
-- [ ] Modal: same retarget; preserve `modal_deriv_iff_algebraic`, `modalAlgDS`, and the public
+- [x] Modal: same retarget; preserve `modal_deriv_iff_algebraic`, `modalAlgDS`, and the public
       `listDerivToTree`. Leave the `necessitation` arm of the forward induction untouched (per-logic).
-- [ ] Compile each retarget before deleting replaced bodies; grep to confirm `listDerivToTree`
+- [x] Compile each retarget before deleting replaced bodies; grep to confirm `listDerivToTree`
       callers in `DeductionTheorem.lean` still resolve.
+
+**Result**: PL 256L -> 236L, Modal 267L -> 246L. `lake build` of both bridge files AND their
+downstream importers (`Propositional/Metalogic/DeductionTheorem.lean`,
+`Modal/Metalogic/DeductionTheorem.lean`) green, confirming the public `listDerivToTree` name
+still resolves for both external callers. `#print axioms` on `listDerivToTree`,
+`unfoldListImpInTree`, `*_setMaxConsistent_iff_algebraic` for both logics: only
+`propext`/`Classical.choice` -- zero-debt confirmed. `unfoldListImpInTree` gained a new
+`[HasMinimalAxioms Axioms]` constraint (needed to supply the `HilbertTree` instance); safe per
+the research report's external-reference table (`unfoldListImpInTree` has no external callers).
+`lake exe lint-style` clean. Full-repo `lake build` still blocked by the same concurrently-running
+task 439 Saturation.lean issue noted in Phase 4 (unrelated file, unrelated to this diff).
 
 **Timing**: 1 hour
 

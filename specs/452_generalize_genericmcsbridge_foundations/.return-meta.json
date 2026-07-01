@@ -4,12 +4,14 @@
   "artifacts": [
     "Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean",
     "Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean",
+    "Cslib/Logics/Propositional/Metalogic/GenericMCSBridge.lean",
+    "Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean",
     "Cslib/Foundations/Logic/Metalogic/GenericMCS.lean"
   ],
   "partial_progress": {
-    "stage": "phase_4_done",
-    "details": "Phases 0-4 complete and committed. Temporal 370->299L, Bimodal 405->325L, Foundations GenericMCS 167->290L. HilbertTree instances added for Temporal/Bimodal; backward helpers + consistency lemmas retargeted to generic combinators. Discovered and fixed a Bimodal-only notation-shadowing issue (temporal F future operator shadows named-arg F). Full-repo lake build currently flaky due to concurrently-running tasks 317/439 editing unrelated Tableau files; verified via scoped builds + #print axioms instead.",
-    "phases_completed": 5
+    "stage": "phase_5_done",
+    "details": "Phases 0-5 complete and committed. All four bridges retargeted: Temporal 370->299L, Bimodal 405->325L, PL 256->236L, Modal 267->246L, Foundations GenericMCS 167->290L. All public names preserved and downstream importers verified green. Zero-debt confirmed via #print axioms on all retargeted defs. Full-repo lake build still blocked intermittently by concurrently-running task 439 editing Cslib/Logics/Temporal/Tableau/Saturation.lean (unrelated file). Phase 6 (optional) and Phase 7 (final CI gate) remain.",
+    "phases_completed": 6
   },
   "metadata": {
     "session_id": "sess_452_implement",

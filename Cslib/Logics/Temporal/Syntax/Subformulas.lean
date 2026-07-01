@@ -48,6 +48,8 @@ def subformulas : Formula Atom → List (Formula Atom)
   | φ@(.imp ψ χ) => φ :: (subformulas ψ ++ subformulas χ)
   | φ@(.untl χ ψ) => φ :: (subformulas ψ ++ subformulas χ)
   | φ@(.snce χ ψ) => φ :: (subformulas ψ ++ subformulas χ)
+  | φ@(.allFuture ψ) => φ :: subformulas ψ
+  | φ@(.allPast ψ) => φ :: subformulas ψ
 
 /-- Count of distinct subformulas (used for termination). -/
 def subformulaCount [DecidableEq (Formula Atom)] (φ : Formula Atom) : Nat :=
@@ -76,21 +78,17 @@ theorem imp_right_mem_subformulas (ψ χ : Formula Atom) :
 /-- Subformulas of allPast include the inner formula. -/
 theorem allPast_inner_mem_subformulas (ψ : Formula Atom) :
     ψ ∈ subformulas (𝐇ψ) := by
-  -- allPast ψ = ¬(⊤ S ¬ψ) in Pnueli (guard=⊤, event=¬ψ)
-  change ψ ∈ subformulas (Formula.imp (Formula.snce (Formula.imp Formula.bot Formula.bot)
-      (Formula.imp ψ Formula.bot)) Formula.bot)
-  simp only [subformulas, List.mem_cons, List.mem_append]
-  right; left; right; left; right; left
+  -- allPast ψ is now a primitive constructor (task 180)
+  simp only [subformulas, List.mem_cons]
+  right
   exact self_mem_subformulas ψ
 
 /-- Subformulas of allFuture include the inner formula. -/
 theorem allFuture_inner_mem_subformulas (ψ : Formula Atom) :
     ψ ∈ subformulas (𝐆ψ) := by
-  -- allFuture ψ = ¬(⊤ U ¬ψ) in Pnueli (guard=⊤, event=¬ψ)
-  change ψ ∈ subformulas (Formula.imp (Formula.untl (Formula.imp Formula.bot Formula.bot)
-      (Formula.imp ψ Formula.bot)) Formula.bot)
-  simp only [subformulas, List.mem_cons, List.mem_append]
-  right; left; right; left; right; left
+  -- allFuture ψ is now a primitive constructor (task 180)
+  simp only [subformulas, List.mem_cons]
+  right
   exact self_mem_subformulas ψ
 
 /--
@@ -141,6 +139,20 @@ theorem subformulas_trans {chi psi phi : Formula Atom}
     · simp only [subformulas, List.mem_cons, List.mem_append]
       right; right
       exact ihb hb
+  | allFuture a iha =>
+    simp only [subformulas, List.mem_cons] at h2
+    rcases h2 with rfl | ha
+    · exact h1
+    · simp only [subformulas, List.mem_cons]
+      right
+      exact iha ha
+  | allPast a iha =>
+    simp only [subformulas, List.mem_cons] at h2
+    rcases h2 with rfl | ha
+    · exact h1
+    · simp only [subformulas, List.mem_cons]
+      right
+      exact iha ha
 
 /-- Left side of implication is in subformulas of the implication. -/
 theorem mem_subformulas_of_imp_left {ψ χ phi : Formula Atom}

@@ -222,6 +222,33 @@ inductive Axiom : Formula Atom → Type u where
   | dense_indicator :
       Axiom (Formula.untl Formula.bot Formula.top).neg
 
+  -- Layer 4: G/H classical-equivalence bridge axioms (4)
+  -- These connect the primitive `allFuture`/`allPast` constructors (task 180)
+  -- to the Foundation-level derived encodings `¬F¬φ` / `¬P¬φ`.
+
+  /-- G-to-¬F¬ (bridge): allFuture φ → ¬(someFuture (¬φ)).
+      Holds constructively: if φ holds at all future times, then
+      there is no future time where ¬φ holds. -/
+  | allFuture_to_classic (φ : Formula Atom) :
+      Axiom (φ.allFuture.imp (Formula.neg (Formula.someFuture (Formula.neg φ))))
+
+  /-- ¬F¬-to-G (bridge): ¬(someFuture (¬φ)) → allFuture φ.
+      Requires classical logic (double-negation elimination);
+      justified by Peirce's law in the BX axiom system. -/
+  | classic_to_allFuture (φ : Formula Atom) :
+      Axiom ((Formula.neg (Formula.someFuture (Formula.neg φ))).imp φ.allFuture)
+
+  /-- H-to-¬P¬ (bridge): allPast φ → ¬(somePast (¬φ)).
+      Holds constructively: if φ held at all past times, then
+      there is no past time where ¬φ held. -/
+  | allPast_to_classic (φ : Formula Atom) :
+      Axiom (φ.allPast.imp (Formula.neg (Formula.somePast (Formula.neg φ))))
+
+  /-- ¬P¬-to-H (bridge): ¬(somePast (¬φ)) → allPast φ.
+      Requires classical logic; justified by Peirce's law in the BX system. -/
+  | classic_to_allPast (φ : Formula Atom) :
+      Axiom ((Formula.neg (Formula.somePast (Formula.neg φ))).imp φ.allPast)
+
 set_option linter.dupNamespace false in
 /-- Minimum frame class for each axiom constructor. Base BX axioms
     are valid on all linear temporal orders. Density axioms require

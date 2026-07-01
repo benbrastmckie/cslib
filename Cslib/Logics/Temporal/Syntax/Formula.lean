@@ -14,18 +14,18 @@ public import Mathlib.Data.Finset.Lattice.Basic
 /-! # Temporal Logic Formula
 
 This module defines the formula type for temporal logic with primitives
-`{atom, bot, imp, untl, snce}`. The `untl` (until) and `snce` (since) operators
-are the basic temporal modalities from which all other temporal operators
-(globally, eventually, etc.) are derived.
+`{atom, bot, imp, untl, snce, allFuture, allPast}`. The `untl` (until) and `snce` (since)
+operators are the basic existential temporal modalities; `allFuture` (G) and `allPast` (H)
+are primitive universal temporal modalities promoted to constructors (task 180).
 
 ## Main definitions
 
 - `Formula` : Inductive type for temporal logic formulas with constructors
-  `atom`, `bot`, `imp`, `untl`, `snce`
-- `Formula.someFuture` (𝐅): `φ U ⊤` — φ holds at some future point
-- `Formula.allFuture` (𝐆): `¬𝐅¬φ` — φ holds at all future points
-- `Formula.somePast` (𝐏): `φ S ⊤` — φ held at some past point
-- `Formula.allPast` (𝐇): `¬𝐏¬φ` — φ held at all past points
+  `atom`, `bot`, `imp`, `untl`, `snce`, `allFuture`, `allPast`
+- `Formula.someFuture` (𝐅): `⊤ U φ` — φ holds at some future point (derived)
+- `Formula.allFuture` (𝐆): primitive constructor — φ holds at all future points
+- `Formula.somePast` (𝐏): `⊤ S φ` — φ held at some past point (derived)
+- `Formula.allPast` (𝐇): primitive constructor — φ held at all past points
 
 ## Notation
 
@@ -54,9 +54,13 @@ the first argument is the **guard** (holds at all intermediate points) and the s
 expansion in `Axioms.lean`.
 
 - `someFuture φ` (𝐅 φ): `⊤ U φ` — φ holds at some future point (Pnueli: `untl ⊤ φ`)
-- `allFuture φ` (𝐆 φ): `¬𝐅¬φ` — φ holds at all future points
+- `allFuture φ` (𝐆 φ): primitive constructor — φ holds at all future points
 - `somePast φ` (𝐏 φ): `⊤ S φ` — φ held at some past point (Pnueli: `snce ⊤ φ`)
-- `allPast φ` (𝐇 φ): `¬𝐏¬φ` — φ held at all past points
+- `allPast φ` (𝐇 φ): primitive constructor — φ held at all past points
+
+The classical equivalences `𝐆φ ↔ ¬𝐅¬φ` and `𝐇φ ↔ ¬𝐏¬φ` hold as *theorems* (task 180,
+Phase 8), not as definitional equalities. Promoting G/H to constructors enables
+intuitionistic temporal logics where `Gφ` is strictly stronger than `¬𝐅¬φ`.
 
 ## Convention Note
 
@@ -83,7 +87,14 @@ without swapping arguments.
 
 namespace Cslib.Logic.Temporal
 
-/-- Temporal logic formula type. Primitives: atoms, falsum, implication, until, and since. -/
+/-- Temporal logic formula type.
+
+Primitives: atoms, falsum, implication, until, since, allFuture (G), allPast (H).
+
+`allFuture` and `allPast` are primitive universal temporal operators (task 180).
+The derived existential operators `someFuture` (F) and `somePast` (P) remain abbreviations:
+`𝐅φ = ⊤ U φ` and `𝐏φ = ⊤ S φ`. The classical equivalences `𝐆φ ↔ ¬𝐅¬φ` and `𝐇φ ↔ ¬𝐏¬φ`
+hold as theorems (see `allFuture_iff_neg_someFuture_neg`). -/
 inductive Formula (Atom : Type u) : Type u where
   /-- Atomic proposition. -/
   | atom (p : Atom)
@@ -95,6 +106,12 @@ inductive Formula (Atom : Type u) : Type u where
   | untl (φ₁ φ₂ : Formula Atom)
   /-- Since temporal operator: φ₁ S φ₂. -/
   | snce (φ₁ φ₂ : Formula Atom)
+  /-- All future (globally): G φ — φ holds at all strictly future times. Primitive constructor
+  (task 180). Classical equivalence `𝐆φ ↔ ¬𝐅¬φ` is a theorem, not a definition. -/
+  | allFuture (φ : Formula Atom)
+  /-- All past (historically): H φ — φ held at all strictly past times. Primitive constructor
+  (task 180). Classical equivalence `𝐇φ ↔ ¬𝐏¬φ` is a theorem, not a definition. -/
+  | allPast (φ : Formula Atom)
 deriving DecidableEq
 
 /-- Register `Temporal.Formula` as an instance of `TemporalConnectives`.
@@ -136,19 +153,14 @@ abbrev Formula.iff (φ₁ φ₂ : Formula Atom) : Formula Atom :=
 abbrev Formula.someFuture (φ : Formula Atom) : Formula Atom :=
   .untl .top φ
 
-/-- All future (globally): G φ := ¬F ¬φ -/
-abbrev Formula.allFuture (φ : Formula Atom) : Formula Atom :=
-  .neg (.someFuture (.neg φ))
+-- Note: `Formula.allFuture` and `Formula.allPast` are now inductive constructors
+-- (task 180 promotion). The notation `𝐆`/`𝐇` binds directly to the constructors.
 
 /-- Some past: 𝐏 φ := ⊤ S φ.
     Pnueli convention: `snce guard event` — ⊤ is the trivial guard,
     φ is the event (holds at witness). Agrees with LTL `somePast φ = ⊤ S φ`. -/
 abbrev Formula.somePast (φ : Formula Atom) : Formula Atom :=
   .snce .top φ
-
-/-- All past (historically): H φ := ¬P ¬φ -/
-abbrev Formula.allPast (φ : Formula Atom) : Formula Atom :=
-  .neg (.somePast (.neg φ))
 
 @[inherit_doc] scoped prefix:40 "¬" => Formula.neg
 @[inherit_doc] scoped infix:36 " ∧ " => Formula.and
@@ -194,8 +206,7 @@ Structural complexity of a formula (number of connectives + 1).
 Pattern-aware cases for derived temporal operators (Pnueli convention: `untl guard event`):
 - `F(φ) = ⊤ U φ` → treated as overhead 1, not 4
 - `P(φ) = ⊤ S φ` → treated as overhead 1, not 4
-- `G(φ) = ¬F(¬φ)` → treated as overhead 1, not 8
-- `H(φ) = ¬P(¬φ)` → treated as overhead 1, not 8
+- `G(φ)` and `H(φ)` are now primitive constructors → overhead 1 directly
 - `next(φ) = ⊥ U φ` → treated as overhead 1
 - `prev(φ) = ⊥ S φ` → treated as overhead 1
 - `R(φ, ψ) = ¬(¬ψ U ¬φ)` → treated as overhead 1
@@ -204,10 +215,9 @@ Pattern-aware cases for derived temporal operators (Pnueli convention: `untl gua
 def complexity : Formula Atom → Nat
   | .atom _ => 1
   | .bot => 1
-  -- G(φ) = imp (untl (imp bot bot) (imp φ bot)) bot  [¬(⊤ U ¬φ) in Pnueli: guard=⊤, event=¬φ]
-  | .imp (.untl (.imp .bot .bot) (.imp φ .bot)) .bot => 1 + complexity φ
-  -- H(φ) = imp (snce (imp bot bot) (imp φ bot)) bot  [¬(⊤ S ¬φ) in Pnueli: guard=⊤, event=¬φ]
-  | .imp (.snce (.imp .bot .bot) (.imp φ .bot)) .bot => 1 + complexity φ
+  -- G(φ) and H(φ) are now primitive constructors (task 180)
+  | .allFuture φ => 1 + complexity φ
+  | .allPast φ => 1 + complexity φ
   -- R(φ, ψ) = release = imp (untl (imp φ bot) (imp ψ bot)) bot  [¬(¬φ_guard U ¬ψ_event) in Pnueli]
   | .imp (.untl (.imp φ .bot) (.imp ψ .bot)) .bot =>
     1 + complexity φ + complexity ψ
@@ -234,7 +244,7 @@ def complexity : Formula Atom → Nat
 /--
 Temporal depth: nesting level of temporal operators.
 
-Computes the maximum nesting depth of temporal operators (U, S) in a formula.
+Computes the maximum nesting depth of temporal operators (U, S, G, H) in a formula.
 -/
 def temporalDepth : Formula Atom → Nat
   | .atom _ => 0
@@ -242,6 +252,8 @@ def temporalDepth : Formula Atom → Nat
   | .imp φ ψ => max φ.temporalDepth ψ.temporalDepth
   | .untl ψ φ => 1 + max φ.temporalDepth ψ.temporalDepth
   | .snce ψ φ => 1 + max φ.temporalDepth ψ.temporalDepth
+  | .allFuture φ => 1 + φ.temporalDepth
+  | .allPast φ => 1 + φ.temporalDepth
 
 /--
 Count implication operators in a formula.
@@ -254,6 +266,8 @@ def countImplications : Formula Atom → Nat
   | .imp φ ψ => 1 + φ.countImplications + ψ.countImplications
   | .untl ψ φ => φ.countImplications + ψ.countImplications
   | .snce ψ φ => φ.countImplications + ψ.countImplications
+  | .allFuture φ => φ.countImplications
+  | .allPast φ => φ.countImplications
 
 /-! ### Additional Derived Temporal Operators -/
 
@@ -357,6 +371,8 @@ def swapTemporal : Formula Atom → Formula Atom
   | .imp φ ψ => .imp (swapTemporal φ) (swapTemporal ψ)
   | .untl ψ φ => .snce (swapTemporal ψ) (swapTemporal φ)
   | .snce ψ φ => .untl (swapTemporal ψ) (swapTemporal φ)
+  | .allFuture φ => .allPast (swapTemporal φ)
+  | .allPast φ => .allFuture (swapTemporal φ)
 
 /-- swapTemporal is an involution (applying it twice gives identity). -/
 theorem swapTemporal_involution (φ : Formula Atom) :
@@ -367,6 +383,8 @@ theorem swapTemporal_involution (φ : Formula Atom) :
   | imp _ _ ihp ihq => simp only [swapTemporal, ihp, ihq]
   | untl _ _ ih2 ih1 => simp only [swapTemporal, ih1, ih2]
   | snce _ _ ih2 ih1 => simp only [swapTemporal, ih1, ih2]
+  | allFuture _ ih => simp only [swapTemporal, ih]
+  | allPast _ ih => simp only [swapTemporal, ih]
 
 /-- swapTemporal distributes over negation: swap(¬φ) = ¬(swap φ). -/
 theorem swapTemporal_neg (φ : Formula Atom) :
@@ -388,18 +406,14 @@ theorem swapTemporal_somePast (φ : Formula Atom) :
 /-- swapTemporal exchanges allFuture and allPast: swap(Gφ) = H(swap φ). -/
 @[simp]
 theorem swapTemporal_allFuture (φ : Formula Atom) :
-    (Formula.allFuture φ).swapTemporal = Formula.allPast φ.swapTemporal := by
-  simp only [Formula.allFuture, Formula.allPast, Formula.someFuture, Formula.somePast,
-    Formula.neg, PropositionalConnectives.neg, Formula.top, PropositionalConnectives.top,
-    swapTemporal]
+    (Formula.allFuture φ).swapTemporal = Formula.allPast φ.swapTemporal :=
+  rfl
 
 /-- swapTemporal exchanges allPast and allFuture: swap(Hφ) = G(swap φ). -/
 @[simp]
 theorem swapTemporal_allPast (φ : Formula Atom) :
-    (Formula.allPast φ).swapTemporal = Formula.allFuture φ.swapTemporal := by
-  simp only [Formula.allFuture, Formula.allPast, Formula.someFuture, Formula.somePast,
-    Formula.neg, PropositionalConnectives.neg, Formula.top, PropositionalConnectives.top,
-    swapTemporal]
+    (Formula.allPast φ).swapTemporal = Formula.allFuture φ.swapTemporal :=
+  rfl
 
 /-- swapTemporal distributes over next/prev: swap(X(φ)) = Y(swap(φ)). -/
 theorem swapTemporal_next (φ : Formula Atom) :
@@ -448,6 +462,12 @@ def needsPositiveHypotheses : Formula Atom → Bool
 @[simp] lemma needsPositiveHypotheses_imp (p q : Formula Atom) :
     (Formula.imp p q).needsPositiveHypotheses = false := rfl
 
+@[simp] lemma needsPositiveHypotheses_allFuture (p : Formula Atom) :
+    (Formula.allFuture p).needsPositiveHypotheses = true := rfl
+
+@[simp] lemma needsPositiveHypotheses_allPast (p : Formula Atom) :
+    (Formula.allPast p).needsPositiveHypotheses = true := rfl
+
 /-! ### Propositional Atoms -/
 
 section Atoms
@@ -461,6 +481,8 @@ def atoms : Formula Atom → Finset Atom
   | .imp φ ψ => atoms φ ∪ atoms ψ
   | .untl ψ φ => atoms φ ∪ atoms ψ
   | .snce ψ φ => atoms φ ∪ atoms ψ
+  | .allFuture φ => atoms φ
+  | .allPast φ => atoms φ
 
 /-- swapTemporal preserves atoms: swapping past/future does not change which atoms appear. -/
 theorem atoms_swapTemporal (φ : Formula Atom) :
@@ -471,6 +493,8 @@ theorem atoms_swapTemporal (φ : Formula Atom) :
   | imp _ _ ih1 ih2 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
   | untl _ _ ih2 ih1 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
   | snce _ _ ih2 ih1 => simp only [swapTemporal, atoms]; rw [ih1, ih2]
+  | allFuture _ ih => simp only [swapTemporal, atoms]; exact ih
+  | allPast _ ih => simp only [swapTemporal, atoms]; exact ih
 
 end Atoms
 

@@ -450,7 +450,7 @@ lemma ordFreshWRT_addFuture_of_witness (b : TBranch Atom) (ord : TimeOrdering) (
   · -- New constraint: (t, branchNextTime b)
     constructor
     · -- t < branchNextTime (nf ++ b)
-      apply branchNextTime_gt (nf ++ b) sf (List.mem_append_right _ hmem_sf)
+      exact ht ▸ branchNextTime_gt (nf ++ b) sf (List.mem_append_right _ hmem_sf)
     · -- branchNextTime b < branchNextTime (nf ++ b)
       obtain ⟨sf', hsf'_mem, hsf'_lab⟩ := ht'_in_nf
       rw [← hsf'_lab]
@@ -482,7 +482,7 @@ lemma ordFreshWRT_addPast_of_witness (b : TBranch Atom) (ord : TimeOrdering) (t 
       rw [← hsf'_lab]
       exact branchNextTime_gt (nf ++ b) sf' (List.mem_append_left _ hsf'_mem)
     · -- t < branchNextTime (nf ++ b)
-      apply branchNextTime_gt (nf ++ b) sf (List.mem_append_right _ hmem_sf)
+      exact ht ▸ branchNextTime_gt (nf ++ b) sf (List.mem_append_right _ hmem_sf)
   · -- Old constraint: both endpoints < branchNextTime b < branchNextTime (nf ++ b)
     obtain ⟨ha, hc⟩ := h a c hmem_old
     obtain ⟨sf', hsf'_mem, hsf'_lab⟩ := ht'_in_nf
@@ -513,8 +513,7 @@ lemma temporalApplyPos_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeO
   simp only [temporalApplyPos] at h
   -- Case 1: asAllFuture?
   rcases asAllFuture? sf.formula with _ | inner
-  · simp only at h
-    rcases asAllPast? sf.formula with _ | inner
+  · rcases asAllPast? sf.formula with _ | inner
     · simp only at h
       rcases asSomeFuture? sf.formula with _ | inner
       · -- someFuturePos: addFuture, linear result
@@ -590,7 +589,6 @@ lemma temporalApplyPos_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeO
           simp only [List.mem_singleton] at hnf; subst hnf
           exact ordFreshWRT_append_left _ b ord hOFW⟩
   · -- allFuture: ord unchanged, persistent result
-    simp only at h
     split_ifs at h with hemp
     · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
       exact ⟨hIS, fun nf hnf => by simp at hnf⟩
@@ -618,10 +616,8 @@ lemma temporalApplyNeg_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeO
       OrdFreshWRT (nf ++ b) newOrd := by
   simp only [temporalApplyNeg] at h
   rcases asUntl? sf.formula with _ | ⟨event, guard⟩
-  · simp only at h
-    rcases asSnce? sf.formula with _ | ⟨event, guard⟩
+  · rcases asSnce? sf.formula with _ | ⟨event, guard⟩
     · -- snceNeg
-      simp only at h
       set pastTimes := ord.pastOf sf.label
       set unprocessed := pastTimes.filter _
       rcases hunproc : unprocessed with _ | ⟨t', rest⟩
@@ -656,7 +652,6 @@ lemma temporalApplyNeg_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeO
       obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
       exact ⟨hIS, fun nf hnf => by simp at hnf⟩
   · -- untlNeg
-    simp only at h
     set futureTimes := ord.futureOf sf.label
     set unprocessed := futureTimes.filter _
     rcases hunproc : unprocessed with _ | ⟨t', rest⟩
@@ -712,16 +707,11 @@ lemma temporalApplyOne_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeO
     simp only [if_pos hprop] at h
     obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
     refine ⟨hIS, fun nf hnf => ?_⟩
-    -- propResult is linear or branching or persistent with output = original b or b ++ stuff
-    -- In all cases, the output branch includes b, so OrdFreshWRT holds by append
-    simp only [List.mem_cons, List.mem_singleton] at hnf
-    -- For the propositional case, output branches are subsets of b's branch
-    -- They're of the form (stuff ++ b), and OrdFreshWRT (stuff ++ b) ord holds
+    -- For the propositional case, all output branches are subsets of b's branch (ord unchanged).
+    -- OrdFreshWRT (nf ++ b) ord holds for any nf by the append monotonicity lemma.
     exact ordFreshWRT_append_left nf b ord hOFW
   · -- No propositional rule fires: dispatch to pos/neg
-    simp only [Bool.not_eq_true, RuleResult.isApplicable] at hprop
-    simp only [Bool.eq_false_iff_ne_true, ne_eq] at hprop
-    rw [if_neg (by rwa [RuleResult.isApplicable] at hprop)] at h
+    rw [if_neg hprop] at h
     rcases sf.sign with _ | _
     · -- Positive: temporalApplyPos
       exact temporalApplyPos_preserves sf b ord hIS hOFW hmem result newOrd h

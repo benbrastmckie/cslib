@@ -27,6 +27,11 @@ EVENT (holds at the witness point):
 This matches `Cslib.Logics.LTL` and the `Formula.someFuture` definition
 (`someFuture φ = untl ⊤ φ`, where ⊤ is the trivial guard and φ is the event).
 
+`allFuture` and `allPast` are now primitive constructors (task 180) with direct
+structural satisfaction clauses:
+- `allFuture φ` at `t`: `∀ s, t < s → Satisfies M s φ`
+- `allPast φ` at `t`: `∀ s, s < t → Satisfies M s φ`
+
 ## Main Definitions
 
 - `Temporal.Satisfies`: Recursive truth evaluation for all formula constructors.
@@ -34,9 +39,9 @@ This matches `Cslib.Logics.LTL` and the `Formula.someFuture` definition
 ## Main Results
 
 - `bot_false`, `atom_iff`, `imp_iff`, `untl_iff`, `snce_iff`: Constructor lemmas.
+- `allFuture_iff`, `allPast_iff`: Universal temporal operator characterizations (now definitional).
 - `neg_iff`, `top_true`: Derived connective lemmas.
 - `someFuture_iff`, `somePast_iff`: Existential temporal operator characterizations.
-- `allFuture_iff`, `allPast_iff`: Universal temporal operator characterizations.
 -/
 
 @[expose] public section
@@ -53,6 +58,8 @@ The evaluation is defined recursively on formula structure:
 - Implication: standard material conditional.
 - Until U(ψ,φ): ∃ s > t, φ(s) ∧ ∀ r ∈ (t,s), ψ(r).  (ψ=GUARD, φ=EVENT)
 - Since S(ψ,φ): ∃ s < t, φ(s) ∧ ∀ r ∈ (s,t), ψ(r).  (ψ=GUARD, φ=EVENT)
+- AllFuture G(φ): ∀ s > t, φ(s).  (primitive constructor, task 180)
+- AllPast H(φ): ∀ s < t, φ(s).  (primitive constructor, task 180)
 -/
 def Satisfies (M : TemporalModel D Atom) (t : D) : Formula Atom → Prop
   | .atom p => M.valuation t p
@@ -64,6 +71,8 @@ def Satisfies (M : TemporalModel D Atom) (t : D) : Formula Atom → Prop
   | .snce ψ φ =>
     ∃ s, s < t ∧ Satisfies M s φ ∧
       ∀ r, s < r → r < t → Satisfies M r ψ
+  | .allFuture φ => ∀ s, t < s → Satisfies M s φ
+  | .allPast φ => ∀ s, s < t → Satisfies M s φ
 
 namespace Satisfies
 
@@ -147,33 +156,25 @@ theorem somePast_iff (M : TemporalModel D Atom) (t : D)
   · rintro ⟨s, hlt, hs⟩
     exact ⟨s, hlt, hs, fun _ _ _ h => h⟩
 
-/-- All future (G φ): φ holds at all future times. -/
+/-- All future (G φ): φ holds at all future times.
+
+With `allFuture` as a primitive constructor (task 180), this is definitional. -/
+@[simp]
 theorem allFuture_iff (M : TemporalModel D Atom) (t : D)
     (φ : Formula Atom) :
     Satisfies M t (𝐆φ) ↔
-      ∀ s, t < s → Satisfies M s φ := by
-  simp only [Formula.allFuture, Formula.neg, PropositionalConnectives.neg,
-    Formula.someFuture, Formula.top, PropositionalConnectives.top, Satisfies]
-  constructor
-  · intro h s hlt
-    by_contra hns
-    exact h ⟨s, hlt, hns, fun _ _ _ h => h⟩
-  · intro h ⟨s, hlt, hevent, _⟩
-    exact hevent (h s hlt)
+      ∀ s, t < s → Satisfies M s φ :=
+  Iff.rfl
 
-/-- All past (H φ): φ holds at all past times. -/
+/-- All past (H φ): φ holds at all past times.
+
+With `allPast` as a primitive constructor (task 180), this is definitional. -/
+@[simp]
 theorem allPast_iff (M : TemporalModel D Atom) (t : D)
     (φ : Formula Atom) :
     Satisfies M t (𝐇φ) ↔
-      ∀ s, s < t → Satisfies M s φ := by
-  simp only [Formula.allPast, Formula.neg, PropositionalConnectives.neg,
-    Formula.somePast, Formula.top, PropositionalConnectives.top, Satisfies]
-  constructor
-  · intro h s hlt
-    by_contra hns
-    exact h ⟨s, hlt, hns, fun _ _ _ h => h⟩
-  · intro h ⟨s, hlt, hevent, _⟩
-    exact hevent (h s hlt)
+      ∀ s, s < t → Satisfies M s φ :=
+  Iff.rfl
 
 end Satisfies
 

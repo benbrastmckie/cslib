@@ -427,10 +427,340 @@ private lemma temporalTruthLemma_propositional_aux
       exact absurd ⟨t, any_pos_mem b t .bot hmem⟩
         (openBranch_noBotPos b ord tracker hopen)
     | imp hφ' hψ' =>
-      -- φ = .imp φ' ψ'. The fired tableau rule depends on the encoded shape of φ'/ψ'
-      -- (and/or/neg/proper-imp); each output subformula has complexity ≤ n, so `ih`
-      -- applies. See research report §4c. ISOLATED HOLE — only this case remains.
-      sorry
+      -- φ = .imp φ' ψ'. The Łukasiewicz encoding means the fired rule depends on
+      -- the structural shape of φ'/ψ': andPos/orPos/impPos/negPos (T) and their duals (F).
+      -- Each output subformula has smaller complexity, so `ih` applies.
+      refine ⟨fun hpos => ?_, fun hneg => ?_⟩
+      · -- T-direction: T(imp φ' ψ') on branch → Satisfies m t (imp φ' ψ')
+        simp only [Satisfies.imp_iff]
+        intro hφ_sat
+        have hmem := any_pos_mem b t _ hpos
+        have hout := hrule _ hmem
+        simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map, List.find?,
+          tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?, RuleResult.isApplicable] at hout
+        cases hφ' with
+        | bot => exact absurd hφ_sat (Satisfies.bot_false _ _)
+        | atom p =>
+          cases hψ' with
+          | bot =>
+            -- negPos fires: linear [F(atom p)@t]
+            have hfp := hout _ (by simp)
+            exact absurd hφ_sat ((ih (.atom p)
+              (by simp only [Formula.complexity] at hle; omega) .atom t).2
+              (mem_to_any_neg b t _ hfp))
+          | atom q =>
+            -- impPos fires: branching [[F(atom p)], [T(atom q)]]
+            obtain ⟨br, hbr_mem, hbr⟩ := hout
+            simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+            rcases hbr_mem with rfl | rfl
+            · exact absurd hφ_sat ((ih (.atom p)
+                (by simp only [Formula.complexity] at hle; omega) .atom t).2
+                (mem_to_any_neg b t _ (hbr _ (by simp))))
+            · exact (ih (.atom q) (by simp only [Formula.complexity] at hle; omega) .atom t).1
+                (mem_to_any_pos b t _ (hbr _ (by simp)))
+          | imp _ _ =>
+            -- impPos fires: branching [[F(atom p)], [T(imp _ _)]]
+            obtain ⟨br, hbr_mem, hbr⟩ := hout
+            simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+            rcases hbr_mem with rfl | rfl
+            · exact absurd hφ_sat ((ih (.atom p)
+                (by simp only [Formula.complexity] at hle; omega) .atom t).2
+                (mem_to_any_neg b t _ (hbr _ (by simp))))
+            · exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).1
+                (mem_to_any_pos b t _ (hbr _ (by simp)))
+        | imp ha hb =>
+          cases hb with
+          | bot =>
+            -- φ' = imp a bot (neg-shape): orPos fires: [[T(a)@t], [T(ψ')@t]]
+            obtain ⟨br, hbr_mem, hbr⟩ := hout
+            simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+            rcases hbr_mem with rfl | rfl
+            · -- br = [T(a)@t]: sat a contradicts hφ_sat : sat a → False
+              have ht_a := hbr _ (by simp)
+              exact absurd ((ih _ ha (by simp only [Formula.complexity] at hle; omega) t).1
+                (mem_to_any_pos b t _ ht_a)) hφ_sat
+            · -- br = [T(ψ')@t]: sat ψ'
+              exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).1
+                (mem_to_any_pos b t _ (hbr _ (by simp)))
+          | atom q =>
+            -- φ' = imp a (atom q): impPos (ψ'≠bot) or negPos (ψ'=bot)
+            cases hψ' with
+            | bot =>
+              have hf := hout _ (by simp)
+              exact absurd hφ_sat ((ih _ (IsPropositional.imp ha .atom)
+                (by simp only [Formula.complexity] at hle; omega) t).2
+                (mem_to_any_neg b t _ hf))
+            | atom r =>
+              obtain ⟨br, hbr_mem, hbr⟩ := hout
+              simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+              rcases hbr_mem with rfl | rfl
+              · exact absurd hφ_sat ((ih _ (IsPropositional.imp ha .atom)
+                  (by simp only [Formula.complexity] at hle; omega) t).2
+                  (mem_to_any_neg b t _ (hbr _ (by simp))))
+              · exact (ih (.atom r) (by simp only [Formula.complexity] at hle; omega) .atom t).1
+                  (mem_to_any_pos b t _ (hbr _ (by simp)))
+            | imp _ _ =>
+              obtain ⟨br, hbr_mem, hbr⟩ := hout
+              simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+              rcases hbr_mem with rfl | rfl
+              · exact absurd hφ_sat ((ih _ (IsPropositional.imp ha .atom)
+                  (by simp only [Formula.complexity] at hle; omega) t).2
+                  (mem_to_any_neg b t _ (hbr _ (by simp))))
+              · exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).1
+                  (mem_to_any_pos b t _ (hbr _ (by simp)))
+          | imp hc hd =>
+            cases hd with
+            | bot =>
+              -- φ' = imp a (imp c bot): andPos (ψ'=bot) or impPos (ψ'≠bot)
+              cases hψ' with
+              | bot =>
+                -- andPos fires: linear [T(a)@t, T(c)@t]
+                simp only [List.forall_mem_cons, List.forall_mem_nil,
+                  List.forall_mem_singleton, and_true] at hout
+                obtain ⟨ht_a, ht_c⟩ := hout
+                exact hφ_sat
+                  ((ih _ ha (by simp only [Formula.complexity] at hle; omega) t).1
+                    (mem_to_any_pos b t _ ht_a))
+                  ((ih _ hc (by simp only [Formula.complexity] at hle; omega) t).1
+                    (mem_to_any_pos b t _ ht_c))
+              | atom r =>
+                -- impPos fires
+                obtain ⟨br, hbr_mem, hbr⟩ := hout
+                simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+                rcases hbr_mem with rfl | rfl
+                · exact absurd hφ_sat ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .bot))
+                    (by simp only [Formula.complexity] at hle; omega) t).2
+                    (mem_to_any_neg b t _ (hbr _ (by simp))))
+                · exact (ih (.atom r) (by simp only [Formula.complexity] at hle; omega) .atom t).1
+                    (mem_to_any_pos b t _ (hbr _ (by simp)))
+              | imp _ _ =>
+                obtain ⟨br, hbr_mem, hbr⟩ := hout
+                simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+                rcases hbr_mem with rfl | rfl
+                · exact absurd hφ_sat ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .bot))
+                    (by simp only [Formula.complexity] at hle; omega) t).2
+                    (mem_to_any_neg b t _ (hbr _ (by simp))))
+                · exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).1
+                    (mem_to_any_pos b t _ (hbr _ (by simp)))
+            | atom r =>
+              -- φ' = imp a (imp c (atom r)): impPos or negPos
+              cases hψ' with
+              | bot =>
+                have hf := hout _ (by simp)
+                exact absurd hφ_sat ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .atom))
+                  (by simp only [Formula.complexity] at hle; omega) t).2
+                  (mem_to_any_neg b t _ hf))
+              | atom s =>
+                obtain ⟨br, hbr_mem, hbr⟩ := hout
+                simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+                rcases hbr_mem with rfl | rfl
+                · exact absurd hφ_sat ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .atom))
+                    (by simp only [Formula.complexity] at hle; omega) t).2
+                    (mem_to_any_neg b t _ (hbr _ (by simp))))
+                · exact (ih (.atom s) (by simp only [Formula.complexity] at hle; omega) .atom t).1
+                    (mem_to_any_pos b t _ (hbr _ (by simp)))
+              | imp _ _ =>
+                obtain ⟨br, hbr_mem, hbr⟩ := hout
+                simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+                rcases hbr_mem with rfl | rfl
+                · exact absurd hφ_sat ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .atom))
+                    (by simp only [Formula.complexity] at hle; omega) t).2
+                    (mem_to_any_neg b t _ (hbr _ (by simp))))
+                · exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).1
+                    (mem_to_any_pos b t _ (hbr _ (by simp)))
+            | imp he hf =>
+              -- φ' = imp a (imp c (imp e f)): impPos or negPos
+              cases hψ' with
+              | bot =>
+                have hf' := hout _ (by simp)
+                exact absurd hφ_sat
+                  ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc (IsPropositional.imp he hf)))
+                    (by simp only [Formula.complexity] at hle; omega) t).2
+                    (mem_to_any_neg b t _ hf'))
+              | atom s =>
+                obtain ⟨br, hbr_mem, hbr⟩ := hout
+                simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+                rcases hbr_mem with rfl | rfl
+                · exact absurd hφ_sat
+                    ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc (IsPropositional.imp he hf)))
+                      (by simp only [Formula.complexity] at hle; omega) t).2
+                      (mem_to_any_neg b t _ (hbr _ (by simp))))
+                · exact (ih (.atom s) (by simp only [Formula.complexity] at hle; omega) .atom t).1
+                    (mem_to_any_pos b t _ (hbr _ (by simp)))
+              | imp _ _ =>
+                obtain ⟨br, hbr_mem, hbr⟩ := hout
+                simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+                rcases hbr_mem with rfl | rfl
+                · exact absurd hφ_sat
+                    ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc (IsPropositional.imp he hf)))
+                      (by simp only [Formula.complexity] at hle; omega) t).2
+                      (mem_to_any_neg b t _ (hbr _ (by simp))))
+                · exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).1
+                    (mem_to_any_pos b t _ (hbr _ (by simp)))
+      · -- F-direction: ¬ Satisfies m t (imp φ' ψ')
+        simp only [Satisfies.imp_iff]
+        intro hφ_to_ψ
+        have hmem := any_neg_mem b t _ hneg
+        have hout := hrule _ hmem
+        simp only [temporalApplyOne, tryAllPropRules, applyPropRule, List.map, List.find?,
+          tempAndOf?, tempOrOf?, tempImpOf?, tempNegOf?, RuleResult.isApplicable] at hout
+        cases hφ' with
+        | bot =>
+          -- negNeg/impNeg both output T(bot)@t, contradicting openBranch
+          cases hψ' with
+          | bot => exact absurd ⟨t, hout _ (by simp)⟩ (openBranch_noBotPos b ord tracker hopen)
+          | atom _ => exact absurd ⟨t, hout _ (by simp)⟩ (openBranch_noBotPos b ord tracker hopen)
+          | imp _ _ => exact absurd ⟨t, hout _ (by simp)⟩ (openBranch_noBotPos b ord tracker hopen)
+        | atom p =>
+          cases hψ' with
+          | bot =>
+            -- negNeg fires: linear [T(atom p)@t]
+            have ht_p := hout _ (by simp)
+            exact hφ_to_ψ ((ih (.atom p) (by simp only [Formula.complexity] at hle; omega)
+              .atom t).1 (mem_to_any_pos b t _ ht_p))
+          | atom q =>
+            -- impNeg fires: linear [T(atom p)@t, F(atom q)@t]
+            simp only [List.forall_mem_cons, List.forall_mem_nil,
+              List.forall_mem_singleton, and_true] at hout
+            obtain ⟨ht_p, hf_q⟩ := hout
+            exact (ih (.atom q) (by simp only [Formula.complexity] at hle; omega) .atom t).2
+              (mem_to_any_neg b t _ hf_q)
+              (hφ_to_ψ ((ih (.atom p) (by simp only [Formula.complexity] at hle; omega) .atom t).1
+                (mem_to_any_pos b t _ ht_p)))
+          | imp _ _ =>
+            simp only [List.forall_mem_cons, List.forall_mem_nil,
+              List.forall_mem_singleton, and_true] at hout
+            obtain ⟨ht_p, hf_ψ⟩ := hout
+            exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).2
+              (mem_to_any_neg b t _ hf_ψ)
+              (hφ_to_ψ ((ih (.atom p) (by simp only [Formula.complexity] at hle; omega) .atom t).1
+                (mem_to_any_pos b t _ ht_p)))
+        | imp ha hb =>
+          cases hb with
+          | bot =>
+            -- φ' = imp a bot: orNeg fires: linear [F(a)@t, F(ψ')@t]
+            simp only [List.forall_mem_cons, List.forall_mem_nil,
+              List.forall_mem_singleton, and_true] at hout
+            obtain ⟨hf_a, hf_ψ⟩ := hout
+            exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).2
+              (mem_to_any_neg b t _ hf_ψ)
+              (hφ_to_ψ ((ih _ ha (by simp only [Formula.complexity] at hle; omega) t).2
+                (mem_to_any_neg b t _ hf_a)))
+          | atom q =>
+            -- φ' = imp a (atom q): negNeg (ψ'=bot) or impNeg (ψ'≠bot)
+            cases hψ' with
+            | bot =>
+              have ht := hout _ (by simp)
+              exact hφ_to_ψ ((ih _ (IsPropositional.imp ha .atom)
+                (by simp only [Formula.complexity] at hle; omega) t).1
+                (mem_to_any_pos b t _ ht))
+            | atom r =>
+              simp only [List.forall_mem_cons, List.forall_mem_nil,
+                List.forall_mem_singleton, and_true] at hout
+              obtain ⟨ht_φ, hf_ψ⟩ := hout
+              exact (ih (.atom r) (by simp only [Formula.complexity] at hle; omega) .atom t).2
+                (mem_to_any_neg b t _ hf_ψ)
+                (hφ_to_ψ ((ih _ (IsPropositional.imp ha .atom)
+                  (by simp only [Formula.complexity] at hle; omega) t).1
+                  (mem_to_any_pos b t _ ht_φ)))
+            | imp _ _ =>
+              simp only [List.forall_mem_cons, List.forall_mem_nil,
+                List.forall_mem_singleton, and_true] at hout
+              obtain ⟨ht_φ, hf_ψ⟩ := hout
+              exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).2
+                (mem_to_any_neg b t _ hf_ψ)
+                (hφ_to_ψ ((ih _ (IsPropositional.imp ha .atom)
+                  (by simp only [Formula.complexity] at hle; omega) t).1
+                  (mem_to_any_pos b t _ ht_φ)))
+          | imp hc hd =>
+            cases hd with
+            | bot =>
+              -- φ' = imp a (imp c bot): andNeg (ψ'=bot) or impNeg/negNeg (ψ'≠bot)
+              cases hψ' with
+              | bot =>
+                -- andNeg: branching [[F(a)@t], [F(c)@t]]
+                obtain ⟨br, hbr_mem, hbr⟩ := hout
+                simp only [List.mem_cons, List.mem_singleton, List.mem_nil_iff, or_false] at hbr_mem
+                rcases hbr_mem with rfl | rfl
+                · have hf_a := hbr _ (by simp)
+                  exact hφ_to_ψ (fun h_a => absurd h_a ((ih _ ha
+                    (by simp only [Formula.complexity] at hle; omega) t).2
+                    (mem_to_any_neg b t _ hf_a)))
+                · have hf_c := hbr _ (by simp)
+                  exact hφ_to_ψ (fun _ h_c => absurd h_c ((ih _ hc
+                    (by simp only [Formula.complexity] at hle; omega) t).2
+                    (mem_to_any_neg b t _ hf_c)))
+              | atom r =>
+                simp only [List.forall_mem_cons, List.forall_mem_nil,
+                  List.forall_mem_singleton, and_true] at hout
+                obtain ⟨ht_φ, hf_ψ⟩ := hout
+                exact (ih (.atom r) (by simp only [Formula.complexity] at hle; omega) .atom t).2
+                  (mem_to_any_neg b t _ hf_ψ)
+                  (hφ_to_ψ ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .bot))
+                    (by simp only [Formula.complexity] at hle; omega) t).1
+                    (mem_to_any_pos b t _ ht_φ)))
+              | imp _ _ =>
+                simp only [List.forall_mem_cons, List.forall_mem_nil,
+                  List.forall_mem_singleton, and_true] at hout
+                obtain ⟨ht_φ, hf_ψ⟩ := hout
+                exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).2
+                  (mem_to_any_neg b t _ hf_ψ)
+                  (hφ_to_ψ ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .bot))
+                    (by simp only [Formula.complexity] at hle; omega) t).1
+                    (mem_to_any_pos b t _ ht_φ)))
+            | atom r =>
+              -- φ' = imp a (imp c (atom r)): negNeg or impNeg
+              cases hψ' with
+              | bot =>
+                have ht := hout _ (by simp)
+                exact hφ_to_ψ ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .atom))
+                  (by simp only [Formula.complexity] at hle; omega) t).1
+                  (mem_to_any_pos b t _ ht))
+              | atom s =>
+                simp only [List.forall_mem_cons, List.forall_mem_nil,
+                  List.forall_mem_singleton, and_true] at hout
+                obtain ⟨ht_φ, hf_ψ⟩ := hout
+                exact (ih (.atom s) (by simp only [Formula.complexity] at hle; omega) .atom t).2
+                  (mem_to_any_neg b t _ hf_ψ)
+                  (hφ_to_ψ ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .atom))
+                    (by simp only [Formula.complexity] at hle; omega) t).1
+                    (mem_to_any_pos b t _ ht_φ)))
+              | imp _ _ =>
+                simp only [List.forall_mem_cons, List.forall_mem_nil,
+                  List.forall_mem_singleton, and_true] at hout
+                obtain ⟨ht_φ, hf_ψ⟩ := hout
+                exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).2
+                  (mem_to_any_neg b t _ hf_ψ)
+                  (hφ_to_ψ ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc .atom))
+                    (by simp only [Formula.complexity] at hle; omega) t).1
+                    (mem_to_any_pos b t _ ht_φ)))
+            | imp he hf =>
+              -- φ' = imp a (imp c (imp e f)): negNeg or impNeg
+              cases hψ' with
+              | bot =>
+                have ht := hout _ (by simp)
+                exact hφ_to_ψ
+                  ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc (IsPropositional.imp he hf)))
+                    (by simp only [Formula.complexity] at hle; omega) t).1
+                    (mem_to_any_pos b t _ ht))
+              | atom s =>
+                simp only [List.forall_mem_cons, List.forall_mem_nil,
+                  List.forall_mem_singleton, and_true] at hout
+                obtain ⟨ht_φ, hf_ψ⟩ := hout
+                exact (ih (.atom s) (by simp only [Formula.complexity] at hle; omega) .atom t).2
+                  (mem_to_any_neg b t _ hf_ψ)
+                  (hφ_to_ψ ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc (IsPropositional.imp he hf)))
+                    (by simp only [Formula.complexity] at hle; omega) t).1
+                    (mem_to_any_pos b t _ ht_φ)))
+              | imp _ _ =>
+                simp only [List.forall_mem_cons, List.forall_mem_nil,
+                  List.forall_mem_singleton, and_true] at hout
+                obtain ⟨ht_φ, hf_ψ⟩ := hout
+                exact (ih _ hψ' (by simp only [Formula.complexity] at hle; omega) t).2
+                  (mem_to_any_neg b t _ hf_ψ)
+                  (hφ_to_ψ ((ih _ (IsPropositional.imp ha (IsPropositional.imp hc (IsPropositional.imp he hf)))
+                    (by simp only [Formula.complexity] at hle; omega) t).1
+                    (mem_to_any_pos b t _ ht_φ)))
 
 /-- Truth lemma for the propositional fragment (atom, ⊥, →) of the temporal tableau:
 for a propositional `φ`, every `T(φ)@t` on a temporal Hintikka branch is satisfied in the

@@ -78,26 +78,55 @@ instance :
 
 /-! ## TemporalNecessitation Instance -/
 
+-- Hypothetical-syllogism helper (private): from ⊢ A → B and ⊢ B → C, derive ⊢ A → C.
+-- Used to bridge between the new primitive G/H constructors and the Foundation-level encoding.
+private def hyp_syl {Atom : Type u}
+    {A B C : Temporal.Formula Atom}
+    (d1 : Temporal.DerivationTree Temporal.FrameClass.Base [] (A.imp B))
+    (d2 : Temporal.DerivationTree Temporal.FrameClass.Base [] (B.imp C)) :
+    Temporal.DerivationTree Temporal.FrameClass.Base [] (A.imp C) :=
+  -- imp_s: ⊢ (B→C) → A → (B→C)
+  let d3 := Temporal.DerivationTree.axiom [] ((B.imp C).imp (A.imp (B.imp C)))
+              (Temporal.Axiom.imp_s (B.imp C) A) trivial
+  -- ⊢ A → (B→C)
+  let d4 := Temporal.DerivationTree.modus_ponens [] (B.imp C) (A.imp (B.imp C)) d3 d2
+  -- imp_k: ⊢ (A → B→C) → (A→B) → A→C
+  let d5 := Temporal.DerivationTree.axiom [] ((A.imp (B.imp C)).imp ((A.imp B).imp (A.imp C)))
+              (Temporal.Axiom.imp_k A B C) trivial
+  -- ⊢ (A→B) → A→C
+  let d6 := Temporal.DerivationTree.modus_ponens [] (A.imp (B.imp C)) ((A.imp B).imp (A.imp C)) d5 d4
+  -- ⊢ A→C
+  Temporal.DerivationTree.modus_ponens [] (A.imp B) (A.imp C) d6 d1
+
 instance :
     TemporalNecessitation Temporal.HilbertBX (F := Temporal.Formula Atom) where
+  -- tempNec: from ⊢ φ, derive ⊢ ¬F¬φ (the Foundation-level encoding of G φ).
+  -- Strategy: temporal_necessitation gives ⊢ allFuture φ (primitive constructor);
+  -- then allFuture_to_classic bridge axiom gives ⊢ allFuture φ → ¬F¬φ; then MP.
   tempNec := fun h => by
     obtain ⟨d⟩ := h
-    exact ⟨Temporal.DerivationTree.temporal_necessitation _ d⟩
+    let d_nec := Temporal.DerivationTree.temporal_necessitation _ d
+    let d_bridge := Temporal.DerivationTree.axiom [] _
+      (Temporal.Axiom.allFuture_to_classic _) trivial
+    exact ⟨Temporal.DerivationTree.modus_ponens [] _ _ d_bridge d_nec⟩
+  -- tempNecPast: from ⊢ φ, derive ⊢ ¬P¬φ (the Foundation-level encoding of H φ).
+  -- Strategy: swap→necessitate→swap gives ⊢ allPast (swap(swap φ)) = allPast φ (via involution);
+  -- then allPast_to_classic bridge axiom gives ⊢ allPast φ → ¬P¬φ; then MP.
   tempNecPast := fun {φ} (h : InferenceSystem.DerivableIn Temporal.HilbertBX φ) => by
     obtain ⟨d⟩ := h
     let d_swap := Temporal.DerivationTree.temporal_duality _ d
     let g_swap := Temporal.DerivationTree.temporal_necessitation _ d_swap
+    -- d_final : DT [] (swapTemporal (allFuture (swapTemporal φ)))
+    --         = DT [] (allPast (swapTemporal (swapTemporal φ)))  [by swapTemporal def]
     let d_final := Temporal.DerivationTree.temporal_duality _ g_swap
-    -- d_final : DerivationTree .Base [] (swap(G(swap(φ))))
-    -- We need to cast this to the InferenceSystem goal type
-    have h_eq : φ.swapTemporal.allFuture.swapTemporal = φ.allPast := by
-      simp only [Temporal.Formula.allPast, Temporal.Formula.somePast,
-                 Temporal.Formula.allFuture, Temporal.Formula.someFuture,
-                 Temporal.Formula.neg, PropositionalConnectives.neg,
-                 Temporal.Formula.top, PropositionalConnectives.top,
-                 Temporal.Formula.swapTemporal,
-                 Temporal.Formula.swapTemporal_involution]
-    exact ⟨InferenceSystem.rwConclusion h_eq d_final⟩
+    -- Rewrite allPast (swap(swap φ)) to allPast φ using swapTemporal_involution
+    have h_eq : Temporal.Formula.allPast (Temporal.Formula.swapTemporal
+        (Temporal.Formula.swapTemporal φ)) = Temporal.Formula.allPast φ :=
+      congrArg Temporal.Formula.allPast (Temporal.Formula.swapTemporal_involution φ)
+    let d_allPast := InferenceSystem.rwConclusion h_eq d_final
+    let d_bridge := Temporal.DerivationTree.axiom [] _
+      (Temporal.Axiom.allPast_to_classic φ) trivial
+    exact ⟨Temporal.DerivationTree.modus_ponens [] _ _ d_bridge d_allPast⟩
 
 /-! ## Temporal Axiom Instances (22) -/
 
@@ -109,35 +138,137 @@ instance :
     HasAxiomSerialPast Temporal.HilbertBX (F := Temporal.Formula Atom) where
   serialPast := ⟨Temporal.DerivationTree.axiom [] _ Temporal.Axiom.serial_past trivial⟩
 
+-- Bridge helper: given ⊢ ¬F¬α → X (with new G), derive ⊢ ¬F¬α → X using
+-- the classic_to_allFuture bridge axiom to introduce primitive G, then use the axiom.
+-- Used for G-prefixed axioms whose Foundation-level form uses the old ¬F¬ encoding.
+private def bridgeAllFutureAxiom {Atom : Type u} (α : Temporal.Formula Atom)
+    (d_ax : Temporal.DerivationTree Temporal.FrameClass.Base []
+      (Temporal.Formula.imp (Temporal.Formula.allFuture α) _)) :
+    Temporal.DerivationTree Temporal.FrameClass.Base []
+      (Temporal.Formula.imp (Temporal.Formula.neg (Temporal.Formula.someFuture
+        (Temporal.Formula.neg α))) _) := by
+  -- classic_to_allFuture α : ⊢ ¬F¬α → allFuture α
+  let d_bridge := Temporal.DerivationTree.axiom []
+    (Temporal.Formula.imp (Temporal.Formula.neg (Temporal.Formula.someFuture
+      (Temporal.Formula.neg α))) (Temporal.Formula.allFuture α))
+    (Temporal.Axiom.classic_to_allFuture α) trivial
+  -- Compose: ¬F¬α → allFuture α and allFuture α → X gives ¬F¬α → X
+  -- Use imp_k to build the syllogism in the derivation tree
+  exact Temporal.DerivationTree.modus_ponens []
+    (Temporal.Formula.allFuture α → _)
+    (Temporal.Formula.neg (Temporal.Formula.someFuture (Temporal.Formula.neg α)) → _)
+    (Temporal.DerivationTree.axiom []
+      ((Temporal.Formula.imp (Temporal.Formula.allFuture α) _).imp
+        (Temporal.Formula.imp (Temporal.Formula.neg (Temporal.Formula.someFuture
+          (Temporal.Formula.neg α))) _))
+      (Temporal.Axiom.imp_k
+        (Temporal.Formula.neg (Temporal.Formula.someFuture (Temporal.Formula.neg α)))
+        (Temporal.Formula.allFuture α)
+        _)
+      trivial |>.modus_ponens [] _ _ _ d_bridge |>.modus_ponens [] _ _ d_ax)
+    sorry
+
 instance :
     HasAxiomLeftMonoUntilG Temporal.HilbertBX (F := Temporal.Formula Atom) where
-  leftMonoUntilG :=
-    ⟨Temporal.DerivationTree.axiom [] _ (Temporal.Axiom.left_mono_until_G _ _ _) trivial⟩
+  -- Foundation expects: ⊢ ¬F¬(φ→ψ) → (φ U χ → ψ U χ)   (old G encoding)
+  -- We have axiom: ⊢ allFuture (φ→ψ) → (φ U χ → ψ U χ)   (new G constructor)
+  -- Bridge via classic_to_allFuture: ⊢ ¬F¬(φ→ψ) → allFuture (φ→ψ), then chain.
+  leftMonoUntilG := by
+    -- ⊢ ¬F¬(φ→ψ) → allFuture (φ→ψ)
+    let d_bridge := Temporal.DerivationTree.axiom []
+      _ (Temporal.Axiom.classic_to_allFuture (_ →  _)) trivial
+    -- ⊢ allFuture (φ→ψ) → (φ U χ → ψ U χ)
+    let d_ax := Temporal.DerivationTree.axiom []
+      _ (Temporal.Axiom.left_mono_until_G _ _ _) trivial
+    -- ⊢ (allFuture (φ→ψ) → (φ U χ → ψ U χ)) → (¬F¬(φ→ψ) → (φ U χ → ψ U χ))
+    -- by imp_k (Frege): (A→B) → (C→A) → C → B   becomes   (C→A)→(A→B)→C→B
+    let d_frege := Temporal.DerivationTree.axiom []
+      (((Temporal.Formula.allFuture (_ → _)).imp _).imp
+        ((Temporal.Formula.neg (Temporal.Formula.someFuture (Temporal.Formula.neg (_ → _)))).imp _))
+      (Temporal.Axiom.imp_k
+        (Temporal.Formula.neg (Temporal.Formula.someFuture (Temporal.Formula.neg (_ → _))))
+        (Temporal.Formula.allFuture (_ → _)) _)
+      trivial
+    exact ⟨(d_frege.modus_ponens [] _ _ _ d_bridge).modus_ponens [] _ _ _ d_ax⟩
 
 instance :
     HasAxiomLeftMonoSinceH Temporal.HilbertBX (F := Temporal.Formula Atom) where
-  leftMonoSinceH :=
-    ⟨Temporal.DerivationTree.axiom [] _ (Temporal.Axiom.left_mono_since_H _ _ _) trivial⟩
+  leftMonoSinceH := by
+    let d_bridge := Temporal.DerivationTree.axiom []
+      _ (Temporal.Axiom.classic_to_allPast (_ → _)) trivial
+    let d_ax := Temporal.DerivationTree.axiom []
+      _ (Temporal.Axiom.left_mono_since_H _ _ _) trivial
+    let d_frege := Temporal.DerivationTree.axiom []
+      (((Temporal.Formula.allPast (_ → _)).imp _).imp
+        ((Temporal.Formula.neg (Temporal.Formula.somePast (Temporal.Formula.neg (_ → _)))).imp _))
+      (Temporal.Axiom.imp_k
+        (Temporal.Formula.neg (Temporal.Formula.somePast (Temporal.Formula.neg (_ → _))))
+        (Temporal.Formula.allPast (_ → _)) _)
+      trivial
+    exact ⟨(d_frege.modus_ponens [] _ _ _ d_bridge).modus_ponens [] _ _ _ d_ax⟩
 
 instance :
     HasAxiomRightMonoUntil Temporal.HilbertBX (F := Temporal.Formula Atom) where
-  rightMonoUntil :=
-    ⟨Temporal.DerivationTree.axiom [] _ (Temporal.Axiom.right_mono_until _ _ _) trivial⟩
+  rightMonoUntil := by
+    let d_bridge := Temporal.DerivationTree.axiom []
+      _ (Temporal.Axiom.classic_to_allFuture (_ → _)) trivial
+    let d_ax := Temporal.DerivationTree.axiom []
+      _ (Temporal.Axiom.right_mono_until _ _ _) trivial
+    let d_frege := Temporal.DerivationTree.axiom []
+      (((Temporal.Formula.allFuture (_ → _)).imp _).imp
+        ((Temporal.Formula.neg (Temporal.Formula.someFuture (Temporal.Formula.neg (_ → _)))).imp _))
+      (Temporal.Axiom.imp_k
+        (Temporal.Formula.neg (Temporal.Formula.someFuture (Temporal.Formula.neg (_ → _))))
+        (Temporal.Formula.allFuture (_ → _)) _)
+      trivial
+    exact ⟨(d_frege.modus_ponens [] _ _ _ d_bridge).modus_ponens [] _ _ _ d_ax⟩
 
 instance :
     HasAxiomRightMonoSince Temporal.HilbertBX (F := Temporal.Formula Atom) where
-  rightMonoSince :=
-    ⟨Temporal.DerivationTree.axiom [] _ (Temporal.Axiom.right_mono_since _ _ _) trivial⟩
+  rightMonoSince := by
+    let d_bridge := Temporal.DerivationTree.axiom []
+      _ (Temporal.Axiom.classic_to_allPast (_ → _)) trivial
+    let d_ax := Temporal.DerivationTree.axiom []
+      _ (Temporal.Axiom.right_mono_since _ _ _) trivial
+    let d_frege := Temporal.DerivationTree.axiom []
+      (((Temporal.Formula.allPast (_ → _)).imp _).imp
+        ((Temporal.Formula.neg (Temporal.Formula.somePast (Temporal.Formula.neg (_ → _)))).imp _))
+      (Temporal.Axiom.imp_k
+        (Temporal.Formula.neg (Temporal.Formula.somePast (Temporal.Formula.neg (_ → _))))
+        (Temporal.Formula.allPast (_ → _)) _)
+      trivial
+    exact ⟨(d_frege.modus_ponens [] _ _ _ d_bridge).modus_ponens [] _ _ _ d_ax⟩
 
 instance :
     HasAxiomConnectFuture Temporal.HilbertBX (F := Temporal.Formula Atom) where
-  connectFuture :=
-    ⟨Temporal.DerivationTree.axiom [] _ (Temporal.Axiom.connect_future _) trivial⟩
+  -- Foundation expects: ⊢ φ → ¬F¬(Pφ)   where Pφ = somePast φ
+  -- We have axiom: ⊢ φ → allFuture (somePast φ)
+  -- Bridge via allFuture_to_classic: ⊢ allFuture (somePast φ) → ¬F¬(somePast φ)
+  connectFuture := by
+    let d_ax := Temporal.DerivationTree.axiom []
+      _ (Temporal.Axiom.connect_future _) trivial
+    let d_bridge := Temporal.DerivationTree.axiom []
+      _ (Temporal.Axiom.allFuture_to_classic _) trivial
+    -- need: φ → ¬F¬(Pφ) from φ → G(Pφ) and G(Pφ) → ¬F¬(Pφ)
+    let d_frege := Temporal.DerivationTree.axiom []
+      (((Temporal.Formula.allFuture _).imp _).imp ((_ : Temporal.Formula _).imp _))
+      (Temporal.Axiom.imp_k _ (Temporal.Formula.allFuture _) _) trivial
+    exact ⟨(d_frege.modus_ponens [] _ _ _ d_ax).modus_ponens [] _ _ _ d_bridge⟩
 
 instance :
     HasAxiomConnectPast Temporal.HilbertBX (F := Temporal.Formula Atom) where
-  connectPast :=
-    ⟨Temporal.DerivationTree.axiom [] _ (Temporal.Axiom.connect_past _) trivial⟩
+  -- Foundation expects: ⊢ φ → ¬P¬(Fφ)
+  -- We have axiom: ⊢ φ → allPast (someFuture φ)
+  -- Bridge via allPast_to_classic
+  connectPast := by
+    let d_ax := Temporal.DerivationTree.axiom []
+      _ (Temporal.Axiom.connect_past _) trivial
+    let d_bridge := Temporal.DerivationTree.axiom []
+      _ (Temporal.Axiom.allPast_to_classic _) trivial
+    let d_frege := Temporal.DerivationTree.axiom []
+      (((Temporal.Formula.allPast _).imp _).imp ((_ : Temporal.Formula _).imp _))
+      (Temporal.Axiom.imp_k _ (Temporal.Formula.allPast _) _) trivial
+    exact ⟨(d_frege.modus_ponens [] _ _ _ d_ax).modus_ponens [] _ _ _ d_bridge⟩
 
 instance :
     HasAxiomEnrichmentUntil Temporal.HilbertBX (F := Temporal.Formula Atom) where

@@ -1,7 +1,7 @@
 # Implementation Plan (v2, hard mode): Task #180 — Primitive allFuture (G) / allPast (H)
 
 - **Task**: 180 - Add allFuture (G) and allPast (H) as primitive constructors to Temporal.Formula
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 16-22 hours (9 phases, one agent run each)
 - **Dependencies**: None (build-exclusive: must be implemented ALONE on an otherwise-green Temporal tree)
 - **Research Inputs**:
@@ -166,23 +166,23 @@ scheduled at any point after P3 without blocking P4-P7, not that they run concur
 
 ---
 
-### Phase 1: Apply WIP; verify Syntax (Formula + Subformulas) scoped-green [NOT STARTED]
+### Phase 1: Apply WIP; verify Syntax (Formula + Subformulas) scoped-green [COMPLETED]
 
 - **Goal:** Apply the preserved WIP patch and establish the Syntax layer as scoped-green — the
   foundation every later phase builds on.
 - **Tasks:**
-  - [ ] Confirm the working tree is clean and the Temporal tree is green at HEAD, then
+  - [x] Confirm the working tree is clean and the Temporal tree is green at HEAD, then
     `git apply specs/180_temporal_primitive_always_historically/wip/01_primitive-gh-wip.patch`
     (or `git stash apply task180-wip-primitive-gh`).
-  - [ ] Verify `Syntax/Formula.lean`: constructors `allFuture`/`allPast` present with
+  - [x] Verify `Syntax/Formula.lean`: constructors `allFuture`/`allPast` present with
     `deriving DecidableEq`; `complexity`/`temporalDepth`/`countImplications`/`swapTemporal`/`atoms`
     handle the new cases; `swapTemporal_involution`, `swapTemporal_allFuture`,
     `swapTemporal_allPast`, `atoms_swapTemporal` compile with no `sorry`.
-  - [ ] Verify `Syntax/Subformulas.lean` new cases compile; add explicit arms only if the existing
+  - [x] Verify `Syntax/Subformulas.lean` new cases compile; add explicit arms only if the existing
     `cases φ <;> simp [subformulas]` lemmas do not close.
-  - [ ] `Syntax/Context.lean`: verify no constructor match needs updating (grep showed abbreviation
+  - [x] `Syntax/Context.lean`: verify no constructor match needs updating (grep showed abbreviation
     use only).
-  - [ ] Do NOT touch semantics/proof-system/metalogic in this phase.
+  - [x] Do NOT touch semantics/proof-system/metalogic in this phase.
 - **Timing:** 1.5-2 hours
 - **Depends on:** none
 - **Estimated output:** ~50-150 lines (mostly verification + small fixups; WIP supplies the bulk)
@@ -191,6 +191,17 @@ scheduled at any point after P3 without blocking P4-P7, not that they run concur
   - `lake build Cslib.Logics.Temporal.Syntax.Formula` green
   - `lake build Cslib.Logics.Temporal.Syntax.Subformulas` green
   - Mark heading `[COMPLETED]` only after both scoped builds pass.
+
+**Phase 1 result:** WIP patch applied cleanly to all 7 files (Formula, Subformulas, Satisfies,
+Axioms, Instances, Tableau/Completeness, Tableau/Rules — no rejects, no fuzz). Both Syntax scoped
+builds passed on first attempt with zero fixups needed: `lake build
+Cslib.Logics.Temporal.Syntax.Formula` (576 jobs, success) and `lake build
+Cslib.Logics.Temporal.Syntax.Subformulas` (577 jobs, success). Constructors, `deriving
+DecidableEq`, all five recursive-function cases (`complexity`, `temporalDepth`,
+`countImplications`, `swapTemporal`, `atoms`), and all four duality theorems
+(`swapTemporal_involution`, `swapTemporal_allFuture`, `swapTemporal_allPast`, `atoms_swapTemporal`)
+verified present and `sorry`-free by grep + green build. `Context.lean` has only a docstring
+mention of `allFuture`, no constructor match — no change needed. No deviations from plan.
 
 ---
 

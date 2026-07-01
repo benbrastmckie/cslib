@@ -1,21 +1,15 @@
 {
   "status": "partial",
-  "summary": "Implementation ATTEMPTED then parked. One agent run promoted allFuture/allPast toward primitive constructors (syntax layer green standalone) but exhausted its context window before completing the metalogic phases; no phase verified end-to-end. WIP preserved as a committed patch. Resume per-phase with --hard.",
-  "artifacts": [
-    {"path": "specs/180_temporal_primitive_always_historically/reports/01_primitive-always-historically-research.md", "type": "report", "summary": "Original research: primitive G/H motivation, axiom dependency analysis, scope assessment"},
-    {"path": "specs/180_temporal_primitive_always_historically/reports/02_implementation-attempt-status.md", "type": "report", "summary": "WHERE THINGS WERE LEFT: state after the parked implementation attempt — read this first"},
-    {"path": "specs/180_temporal_primitive_always_historically/plans/01_primitive-gh-implementation.md", "type": "plan", "summary": "8-phase plan; metadata Status=[PARTIAL] with an Implementation Status section + resume recipe"}
-  ],
-  "blockers": [
-    "Single multi-phase agent run exhausts context (Prompt too long) — task MUST be driven one phase per agent run (--hard).",
-    "Promoting the Formula constructor breaks the entire Temporal build until all 8 phases land, so #180 must be implemented alone on an otherwise-green Temporal tree (do not interleave with other Temporal-touching tasks)."
-  ],
+  "plan_path": "specs/180_temporal_primitive_always_historically/plans/03_primitive-gh-metalogic-plan.md",
+  "phases_completed": 1,
+  "phases_total": 9,
+  "phase_just_done": 1,
+  "summary": "Applied the preserved 1063-line WIP patch (git apply, clean, no rejects) touching Formula.lean, Subformulas.lean, Satisfies.lean, Axioms.lean, Instances.lean, Tableau/Completeness.lean, Tableau/Rules.lean. Verified only the Syntax layer per phase scope: `lake build Cslib.Logics.Temporal.Syntax.Formula` GREEN (576 jobs) and `lake build Cslib.Logics.Temporal.Syntax.Subformulas` GREEN (577 jobs), both on first attempt with zero fixups. Constructors allFuture/allPast present with deriving DecidableEq; all five recursive functions (complexity, temporalDepth, countImplications, swapTemporal, atoms) handle the new cases; all four duality theorems (swapTemporal_involution, swapTemporal_allFuture, swapTemporal_allPast, atoms_swapTemporal) compile with no sorry. Context.lean requires no change (docstring-only mention, no constructor match). Did not touch Semantics/ProofSystem/Metalogic/Tableau verification (patch applied them, but Phase 1 scope is Syntax-only per plan). Full Temporal build is legitimately RED until Phase 9 (build-exclusivity) — not attempted, per plan design.",
+  "sorry_inventory": [],
+  "blockers": [],
   "continuation_context": {
-    "phase_reached": "Attempt touched all 7 Temporal files (Syntax/Formula, Syntax/Subformulas, Semantics/Satisfies, ProofSystem/Axioms, ProofSystem/Instances, Tableau/Completeness, Tableau/Rules). Only the syntax layer is known-good: `lake build Cslib.Logics.Temporal.Syntax.Formula` is GREEN from the WIP. Semantics/proof-system/metalogic cases are incomplete and the full Temporal build is RED with the WIP applied.",
-    "wip_patch": "specs/180_temporal_primitive_always_historically/wip/01_primitive-gh-wip.patch (1063 lines; committed; applies cleanly to HEAD 8833bbd3; also in git stash@{0} 'task180-wip-primitive-gh')",
-    "resume_recipe": "git apply specs/180_temporal_primitive_always_historically/wip/01_primitive-gh-wip.patch, then drive ONE plan phase per agent run (--hard). Mark each `### Phase N` heading [COMPLETED] only after its scoped lake build is green.",
     "next_phase": 2,
-    "notes": "Phase 1 (syntax constructors) substantially in the WIP and building. Next real work is Phase 2/3 (recursive functions over Formula + structural G/H semantics in Satisfies.lean), then the high-risk metalogic phases (Chronicle/TruthLemma, Completeness). The original research report's axiom-dependency analysis still holds; a fresh /research pass should focus on the metalogic case obligations (Soundness, MCS, TruthLemma) rather than re-deriving syntax/semantics."
+    "notes": "Phase 2 (Semantics — structural Satisfies clauses scoped-green) is next. Satisfies.lean was already patched by the WIP in this dispatch (git apply covered it) but NOT verified — Phase 2 must complete the WIP's Satisfies.lean edits (allFuture_iff/allPast_iff re-proof, sat_allFuture_iff_neg_someFuture_neg bridge lemma) and run `lake build Cslib.Logics.Temporal.Semantics.Satisfies` and `...Semantics.Validity`."
   },
   "next_action_hint": "implement"
 }

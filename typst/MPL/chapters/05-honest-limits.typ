@@ -5,6 +5,6 @@
 
 #import "../template.typ": *
 
-= Honest Limits
+= Honest Limits <sec:honest-limits>
 
 (stub)

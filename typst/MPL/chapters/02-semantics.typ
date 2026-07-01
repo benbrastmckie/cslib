@@ -5,6 +5,6 @@
 
 #import "../template.typ": *
 
-= Semantics
+= Semantics <sec:semantics>
 
 (stub)

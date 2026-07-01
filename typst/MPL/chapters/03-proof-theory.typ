@@ -5,6 +5,6 @@
 
 #import "../template.typ": *
 
-= Proof Theory
+= Proof Theory <sec:proof-theory>
 
 (stub)

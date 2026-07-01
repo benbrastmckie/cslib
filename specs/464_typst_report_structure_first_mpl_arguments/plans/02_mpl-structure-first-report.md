@@ -133,19 +133,19 @@ MINIMAL clean `typst compile` before any content is written, surfacing font/pack
 
 ---
 
-### Phase 2: Introduction and Syntax chapters (Argument 1) [NOT STARTED]
+### Phase 2: Introduction and Syntax chapters (Argument 1) [COMPLETED]
 
 **Goal**: Write `00-introduction.typ` (thesis + codebase map) and `01-syntax.typ` (Argument 1:
 free monad / substitution-invariance), establishing the narrative spine and the `Proposition`
 inductive with its symbol table.
 
 **Tasks**:
-- [ ] `00-introduction.typ`: thesis statement (one signature; MPL ⊂ IPL ⊂ CPL as descending variety chain; "modularity around properties, not connectives"); a "Codebase Structure" map listing `Cslib/Logics/Propositional/{Defs.lean, ProofSystem/, NaturalDeduction/, SequentCalculus/, CurryHoward/, Semantics/}`.
-- [ ] `01-syntax.typ`: present the `Proposition` inductive (`Defs.lean:81-92`, 5 primitives; `bot` bare nullary at line 85), `subst | bot => .bot` (`Defs.lean:131`), the `Monad Proposition` instance (`Defs.lean:137-139`) with the source comment about lawfulness, and a symbol table (Symbol | Name | Lean | Reading) mirroring the Bimodal `01-syntax.typ` pattern.
-- [ ] Frame Argument 1 as the free monad on `Σ` realized by the inductive+subst pair; cite the module docstring `NaturalDeduction/Basic.lean:44-115` (esp. `:66-100`) as primary source; reference the decisive Zulip post #604219492.
-- [ ] Place the informal-categorical caveat INLINE at first use: no `LawfulMonad`/`Adjunction` instance exists; the free-monad framing is an external description, not a Lean-proved theorem ("realizes / is motivated by", not "proves").
-- [ ] Add/extend `mpl-notation.typ` macros only as the chapter's math demands.
-- [ ] Compile clean.
+- [x] `00-introduction.typ`: thesis statement (one signature; MPL ⊂ IPL ⊂ CPL as descending variety chain; "modularity around properties, not connectives"); a "Codebase Structure" map listing `Cslib/Logics/Propositional/{Defs.lean, ProofSystem/, NaturalDeduction/, SequentCalculus/, CurryHoward/, Semantics/}`. *(completed)*
+- [x] `01-syntax.typ`: present the `Proposition` inductive (`Defs.lean:81-92`, 5 primitives; `bot` bare nullary at line 85), `subst | bot => .bot` (`Defs.lean:131`), the `Monad Proposition` instance (`Defs.lean:137-139`) with the source comment about lawfulness, and a symbol table (Symbol | Name | Lean | Reading) mirroring the Bimodal `01-syntax.typ` pattern. *(completed)*
+- [x] Frame Argument 1 as the free monad on `Σ` realized by the inductive+subst pair; cite the module docstring `NaturalDeduction/Basic.lean:44-115` (esp. `:66-100`) as primary source; reference the decisive Zulip post #604219492. *(completed: docstring quoted verbatim)*
+- [x] Place the informal-categorical caveat INLINE at first use: no `LawfulMonad`/`Adjunction` instance exists; the free-monad framing is an external description, not a Lean-proved theorem ("realizes / is motivated by", not "proves"). *(completed: dedicated <sec:cat-caveat> in 00 + inline remark in 01)*
+- [x] Add/extend `mpl-notation.typ` macros only as the chapter's math demands. *(completed: existing macros sufficed)*
+- [x] Compile clean. *(completed: exit 0; two benign thmbox NCM-Sans fallback warnings, same as BimodalLogic baseline)*
 
 **Timing**: 2 hours
 

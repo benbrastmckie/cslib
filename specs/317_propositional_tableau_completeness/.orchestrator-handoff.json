@@ -1,24 +1,54 @@
 {
-  "status": "partial",
-  "summary": "Restored green build (was committed-RED), closed B2 notApplicable sorry (580), and landed all B2 expanded-set-invariant infrastructure sorry-free. Two residual B2 sorries + B1 remain.",
-  "phases_completed": 5,
-  "phases_total": 6,
+  "status": "blocked",
+  "summary": "Phase 2a R1 gate BLOCKED before any file edit: no natural decreasing measure (Sigma 3^complexity over unexpanded compound occurrences, or a subformula-replacement multiset measure) survives the world-creating F(phi->psi) rule, because propagatePersistence (Rules.lean:139-141) unconditionally duplicates ALL T-formulas at the parent world -- including already-expanded compounds -- onto the fresh world, unbounded by complexity(phi->psi). No def, sorry, axiom, or placeholder was introduced; Scheme.lean is untouched and remains at baseline commit 26508fe9. Phase 1 (B2 none-case) remains complete and committed.",
+  "phases_completed": 1,
+  "phases_total": 4,
   "build_green": true,
-  "b2_infrastructure_committed": true,
-  "blockers": [
-    {"id": "B2-none", "location": "Scheme.lean:713 (intExpandBranches_openBranch_sat none case)", "severity": "medium", "tractable": true, "next_action": "Thread IExpandedConsistent through the key/go recursion so hIC : IExpandedConsistent bPers eH is in scope at the none case, then close with the existing sorry-free bridge `IExpandedConsistent_sat hstep hIC`. This is wiring; all helper lemmas (IExpandedConsistent_sat, IExpandedConsistent_mono, intStepBranch_none_compound_mem, sfSatisfied_mono, any_mono_sub) already exist and are sorry-free."},
-    {"id": "B2-fuel0", "location": "Scheme.lean:658 (fuel=0 base case)", "severity": "high", "tractable": false, "next_action": "Requires a FUEL-SUFFICIENCY argument: prove the bound fuel = 2^(2*complexity+2) always reaches a saturated (intStepBranch=none) branch before fuel exhausts, so the fuel=0 path is never the one returning the open countermodel. A naive (hfuel : 1 <= fuel) precondition is UNSOUND (the recursion bottoms out at fuel'=0; IH would need 1<=fuel'). This is genuine new content (a measure/termination argument), best designed via /plan."},
-    {"id": "B1", "location": "Scheme.lean:330 (truthLemma T(imp) forward direction)", "severity": "high", "tractable": false, "next_action": "Needs branch completeness (T or F label at every formula/world pair) OR reformulation to only prove the F-direction sufficient for openBranch_countermodel. Independent of B2."},
-    {"id": "bridges", "location": "Intuitionistic/Completeness.lean:113 and Minimal/Completeness.lean:110", "severity": "medium", "next_action": "IValid->forcing bridge needs atom upward-closure of intExtractValuation (task 430 scope). 430 is gated on B2 (intExpandBranches saturation)."}
-  ],
   "sorry_inventory": {
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean": [330, 658, 713],
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean": [330, 985],
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean": [113],
     "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean": [110]
   },
-  "continuation_context": "B2 infrastructure done+committed (7bea4f6c + scaffolding commit). Next: close 713 (wiring, tractable) then 658 (fuel-sufficiency, needs design). Then 430 unblocks. Run /plan 317 --hard for the fuel-sufficiency argument; do it when no concurrent session is editing Scheme.lean (task 407/others collide on this file).",
-  "next_action_hint": "plan",
-  "environment_note": "4 cslib-implementation-agent dispatches overflowed context (Prompt too long) on this large, concurrently-edited file. The recursive proof intExpandBranches_openBranch_sat produces goal states that exceed agent context. Recommend interactive/expert session or /plan decomposition over further autonomous /implement dispatch.",
-  "task_430_gate": "still gated on B2 (intExpandBranches_openBranch_sat not yet sorry-free)",
-  "artifacts": []
+  "sorry_relocations": 0,
+  "blockers": [
+    {
+      "id": "R1-measure",
+      "severity": "high",
+      "tractable": false,
+      "description": "Neither plan-proposed measure candidate (Sigma 3^complexity over unexpanded compound occurrences; multiset measure replacing a compound by strictly-smaller subformulas) strictly decreases (or is even non-increasing) on the F(phi->psi) world-creating rule. intFImpRule (Rules.lean:154-159) emits T(phi)@w', F(psi)@w' (output complexity = complexity(phi->psi)-1, matches the classical identity from classicalApplyOne_output_complexity) PLUS propagatePersistence b w w' (Rules.lean:139-141), which copies EVERY T-signed formula at world w -- unconditionally, including compounds already marked expanded at w (per the (sign,formula,label)-triple equality used by intStepBranch's `expanded` set, Expansion.lean:150-157) -- to fresh labels at w'. These copies are NOT subformulas of phi->psi and are not bounded by complexity(phi->psi); they are bounded only by the ambient complexity of whatever T-formulas already accumulated at w. applyAllTImpRules/applyPersistenceFixpoint (Expansion.lean:118-139, run before intStepBranch each iteration) only handle T(phi->psi) modus-ponens propagation -- they do not pre-reduce compound T(and)/T(or) formulas at w, so a compound can legitimately still be sitting unexpanded at w (order-dependent via List.findSome?) when F(->) fires and gets duplicated. Net per-step change in raw unexpanded-complexity = -1 + (sum of copied compound complexities), which is positive whenever any compound is copied. The classical 3^x exponential trick cannot rescue this because it only works for a branching split (2*3^(c-1) < 3^c); F(->) is a .linearResult (Expansion.lean IntRuleResult), not a .branchingResult, so there is no branching-factor discount available. This is a genuine termination-argument gap: the algorithm DOES terminate (via a finite-model/bounded-worlds argument implicit in the 2^(2*complexity+2) fuel bound), but no simple per-step-decreasing Nat measure over raw branch contents captures it, because the same compound formula can be legitimately re-introduced at a new (larger) world label and must be re-expanded there.",
+      "next_action": "dedicated measure-design research spike -- candidate directions: (a) measure over the finite subformula x world closure (bound worlds a priori, measure 'closure slots not yet settled' rather than raw branch occurrences); (b) lexicographic/product measure with 'remaining world-creation budget' as primary decreasing component and per-world complexity as tie-breaker; (c) investigate whether propagatePersistence could be soundness-preservingly restricted to avoid duplicating already-fully-discharged compounds (this would require editing Rules.lean/Expansion.lean semantics with its own correctness argument -- out of this plan's Scheme.lean-only territory as currently scoped, would need a plan revision)."
+    },
+    {
+      "id": "B1",
+      "location": "Scheme.lean:330 (truthLemma T(imp) forward direction)",
+      "severity": "high",
+      "tractable": false,
+      "next_action": "Out of scope for this plan entirely. Do not touch."
+    },
+    {
+      "id": "bridges",
+      "location": "Intuitionistic/Completeness.lean:113 and Minimal/Completeness.lean:110",
+      "severity": "medium",
+      "next_action": "task 430 scope, gated on B2 fully closing (both the none-case, done, and the fuel=0 case, blocked on R1-measure)."
+    }
+  ],
+  "continuation_context": {
+    "is_successor_expected": true,
+    "next_action_hint": "research",
+    "resume_at": "Do not re-dispatch implementation for Phase 2a until a research spike (per blocker R1-measure) produces a measure candidate that provably survives F(->), or the plan is revised to change territory/scope (e.g. to permit Rules.lean/Expansion.lean edits) with its own risk analysis. Phase 1 remains [COMPLETED]; Phase 2a is now [BLOCKED] in plans/03_b2-fuel-sufficiency.md with the full failure analysis recorded there.",
+    "last_good_commit": "26508fe9"
+  },
+  "task_430_gate": "still gated on B2-fuel0 (sorry 985), now further gated on the R1-measure research spike",
+  "artifacts": [
+    {
+      "path": "specs/317_propositional_tableau_completeness/plans/03_b2-fuel-sufficiency.md",
+      "type": "plan",
+      "summary": "Phase 2a marked [BLOCKED] with detailed R1 gate failure analysis (propagatePersistence duplication) and candidate future directions for a measure-design research spike."
+    },
+    {
+      "path": "specs/317_propositional_tableau_completeness/progress/phase-2a-progress.json",
+      "type": "progress",
+      "summary": "Phase 2a progress tracking showing the exact R1 gate block point and reason."
+    }
+  ]
 }

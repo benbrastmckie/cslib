@@ -1,7 +1,7 @@
 # Implementation Plan: Task #317 (v3 — B2 fuel-sufficiency, HARD mode)
 
 - **Task**: 317 - Close the two residual B2 sorries in the propositional tableau completeness proof
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 7 hours
 - **Dependencies**: 316, 323, 363, 369 (all landed). B1 truthLemma (Scheme.lean:330) is a *separate* residual, NOT a dependency of this plan.
 - **Research Inputs**: specs/317_propositional_tableau_completeness/reports/03_tableau-completeness-approach.md
@@ -147,27 +147,47 @@ the file single-writer. Phases 2a→2b→2c→2d form the fuel-sufficiency depen
 
 ---
 
-### Phase 1: Close the B2 `none` case (Scheme.lean:713) [NOT STARTED]
+### Phase 1: Close the B2 `none` case (Scheme.lean:713) [COMPLETED]
 
 **Goal**: Discharge sorry 713 by threading `IExpandedConsistent` into scope at the `none` case
 and applying the existing bridge `IExpandedConsistent_sat`.
 
 **Tasks**:
-- [ ] Re-check `git log -1 -- Scheme.lean`; scoped+grepped rebuild to confirm GREEN baseline.
-- [ ] Read ~Scheme.lean:700–720 with `offset`/`limit` only; identify the `key`/`go` induction
+- [x] Re-check `git log -1 -- Scheme.lean`; scoped+grepped rebuild to confirm GREEN baseline.
+- [x] Read ~Scheme.lean:700–720 with `offset`/`limit` only; identify the `key`/`go` induction
       that reaches the `none` case and the names `bPers`, `eH`, `nwH`, `hstep` in scope.
-- [ ] Strengthen the inner induction: add an `IExpandedConsistent bPers eH`-carrying hypothesis
-      to the `suffices key` statement (or introduce a private `_aux` lemma carrying it). Keep
-      the **public** `intExpandBranches_openBranch_sat` signature byte-identical.
-- [ ] Establish the invariant at entry: initial `expandedSets = []` ⇒ `IExpandedConsistent _ []`
-      holds vacuously.
-- [ ] Maintain it across each `go`-step: the branch grows monotonically through
+- [x] Strengthen the inner induction: added a combined `IAllConsistent` (IExpandedConsistent +
+      ILabelBound, per-triple over the three parallel lists) hypothesis to the `suffices key`
+      statement, plus a `pending.length = pendingEdges.length` / `done.length = doneEdges.length`
+      length-parity pair. Kept the **public** surface stable: `intExpandBranches_openBranch_sat`
+      is `private` with exactly ONE call site (`openBranch_countermodel`), which was updated to
+      supply the two new hypotheses — no genuinely public signature changed.
+- [x] Establish the invariant at entry: initial call site supplies
+      `IAllConsistent [[⟨.neg, φ, 0⟩]] [[]] [1]` (via `simp [IAllConsistent, IExpandedConsistent,
+      ILabelBound]`) and `[[⟨.neg, φ, 0⟩]].length = [[]].length` (via `rfl`).
+- [x] Maintain it across each `go`-step: the branch grows monotonically through
       `applyPersistenceFixpoint` then `Branch.extendMany`, so apply `IExpandedConsistent_mono`
       plus the per-rule output additions to carry the invariant to the next iteration.
-- [ ] At the `none` case, close the sorry with `exact IExpandedConsistent_sat hstep hIC` (where
-      `hIC : IExpandedConsistent bPers eH`).
-- [ ] Scoped+grepped build GREEN; confirm sorry 713 gone, sorries 330 and 658 still present.
-- [ ] Commit `Scheme.lean` only: `task 317 phase 1: close B2 none case (Scheme.lean:713)`.
+      Per-step preservation lemmas (`ILabelBound`, `ILabelBound_extendMany`,
+      `intStepBranch_some_exists`, `intStepBranch_linear_preserves`,
+      `intStepBranch_branch_preserves`) were already committed sorry-free from a prior
+      dispatch; this dispatch additionally added `ILabelBound_applyAllTImpRules` +
+      `ILabelBound_applyPersistenceFixpoint` (label-bound survives persistence propagation)
+      and the `IAllConsistent`/`IAllConsistent_append`/`IAllConsistent_map` combinators, then
+      wired all of them into the main induction (the previously-missing step).
+- [x] At the `none` case, closed the sorry with `exact IExpandedConsistent_sat hstep hIC_bPers`.
+- [x] Scoped+grepped build GREEN; confirmed sorry 713 (now at line 985 pre-edit offset shift;
+      landed at line 985 post-edit for the fuel=0 case) gone; sorries 330 (B1) and the fuel=0
+      base case (now ~985) still present.
+- [x] Committed `Scheme.lean` only: `task 317 phase 1: close B2 none case via IAllConsistent
+      invariant` (commit `26508fe9`).
+
+**Deviation from plan**: the plan's Goals section said to keep the public signature "byte-
+identical" for `intExpandBranches_openBranch_sat`. This lemma is `private` with a single call
+site, so the two new hypotheses (`hAC`, `hLen0`) were added directly to its signature rather
+than via a separate `_aux` wrapper — R3's intent (no *externally visible* API break) is
+satisfied since nothing outside `Scheme.lean` can reference a `private` lemma, and the sole
+call site was updated in the same commit.
 
 **Timing**: 1 hour
 
@@ -185,28 +205,80 @@ and applying the existing bridge `IExpandedConsistent_sat`.
 
 ---
 
-### Phase 2a: Define the decreasing measure + boundedness (toward Scheme.lean:658) [NOT STARTED]
+### Phase 2a: Define the decreasing measure + boundedness (toward Scheme.lean:658) [BLOCKED]
 
 **Goal**: Define a measure on the expansion state that is intended to strictly decrease per
 expansion step, and prove it is well-defined and bounded by the complexity expression. This
 phase makes the **highest-risk design decision** (R1).
 
 **Tasks**:
-- [ ] Re-check `git log -1 -- Scheme.lean`; scoped+grepped rebuild GREEN.
-- [ ] **Measure spike** (lean-lsp, no edits yet): with `lean_multi_attempt`, prototype a measure
-      candidate — preferred `intExpMeasure := Σ 3^(sf.complexity)` over unexpanded compound
-      signed-formula/world occurrences on the branch (classical analog), or a multiset measure
-      where each step replaces a compound by strictly-smaller subformulas.
-- [ ] **R1 gate**: sanity-check on paper/`lean_multi_attempt` that the candidate does NOT
-      increase on the world-creating `F(→)` rule (fresh `w'` with T(φ),F(ψ)). If no natural
-      measure survives `F(→)`, STOP, mark [BLOCKED], escalate to a research spike. Do not proceed.
-- [ ] Define the chosen measure as a private `def` in `Scheme.lean` (mirror `classicalExpMeasure`
-      placement/style).
-- [ ] Prove a boundedness lemma `intExpMeasure_initial_le`:
-      `intExpMeasure (initial state for φ) ≤ 2^(2*φ.complexity+2)` (prefer `≤` with slack over
-      equality — see R2). Use the classical `classicalExpMeasure` bound proof as a template.
-- [ ] Scoped+grepped build GREEN (no new sorries introduced — measure + boundedness only).
-- [ ] Commit `Scheme.lean` only: `task 317 phase 2a: intExpMeasure + boundedness`.
+- [x] Re-check `git log -1 -- Scheme.lean`; scoped+grepped rebuild GREEN (26508fe9 confirmed,
+      `Build completed successfully`).
+- [x] **Measure spike** (read-only, no edits): studied `classicalBranchComplexity` /
+      `classicalExpMeasure` / `classicalApplyOne_output_complexity`
+      (`Classical/Completeness.lean:471-639`) as the template — a per-branch raw-complexity sum
+      of unexpanded formulas, exponentiated by base 3 and summed over the `branches`/`expandedSets`
+      zip. Confirmed via `Expansion.lean:150-258` (`intStepBranch`, `intExpandBranches`) that the
+      INT loop's world-creating `F(→)` rule is a `.linearResult` (NOT a `.branchingResult`) — it
+      extends the SAME branch with new formulas at a fresh world label, exactly like the classical
+      alpha-rule shape. This makes the classical-analog candidate `intExpMeasure := Σ 3^(raw
+      unexpanded-complexity per branch)` directly transplantable in *structure*.
+- [x] **R1 gate — BLOCKED.** Traced `intFImpRule` (`Rules.lean:154-159`): on firing, it emits
+      `[T(φ)@w', F(ψ)@w']` (output complexity = complexity(φ→ψ) − 1, matching the classical
+      identity) **PLUS** `propagatePersistence b w w'` (`Rules.lean:139-141`), which copies
+      **every** `T`-signed formula currently at world `w` — unconditionally, including compounds
+      that are already marked `expanded` at `w` — to fresh labels at `w'`. Key facts confirmed by
+      direct reads (no assumption):
+      - `Proposition.complexity`: atoms/`⊥` = 0, connectives = `1 + complexity(l) + complexity(r)`
+        (`Subformula.lean:191-226`) — so only compound T-formulas contribute, and there is no
+        complexity bound tying them to `φ→ψ`.
+      - `posFormulasAt`/`propagatePersistence` do not filter by `expanded`-membership or by any
+        subformula relation to `φ→ψ`; they copy **all** T-formulas at `w`, verbatim, to `w'`
+        (`Rules.lean:126-141`).
+      - `expanded`/`e` equality is by exact `(sign, formula, label)` triple (`intStepBranch`,
+        `Expansion.lean:150-157`), so a copy `T(α)@w'` of an already-`expanded` `T(α)@w` is a
+        **fresh, unexpanded** entry — it must be re-processed at `w'`.
+      - `applyAllTImpRules`/`applyPersistenceFixpoint` (`Expansion.lean:118-139`, run *before*
+        `intStepBranch` each iteration) only propagate `T(ψ)` for `T(φ→ψ)` pairs (modus-ponens
+        style); they do **not** pre-reduce/pre-expand compound `T(∧)`/`T(∨)` formulas at `w`
+        before a later `F(→)` step can fire and duplicate them.
+      - Consequence: if a compound `T(α)@w` (e.g. `T(p∧q)`) is still present in the branch list
+        when `F(φ→ψ)@w` fires — order-dependent via `List.findSome?`, and NOT excluded by any
+        existing invariant — `propagatePersistence` copies `T(α)@w'` at full `α.complexity`,
+        independent of and unbounded by `complexity(φ→ψ)`. The net per-step change in raw
+        unexpanded-complexity is `−1 + (Σ complexity of all T-formulas copied)`, which is
+        **positive** whenever any compound gets copied. Since `3^x` is strictly monotone in `x`,
+        wrapping in `3^(·)` cannot rescue this — the classical exponential trick works only
+        because classical beta-rules *split into two branches* (`2·3^(c−1) < 3^c`); INT's `F(→)`
+        does not split, it duplicates within one branch, so there is no branching-factor discount
+        to absorb the increase.
+      - Both plan-proposed candidates fail identically for this reason: (i) `Σ 3^complexity`
+        fails as shown above; (ii) "multiset measure replacing a compound by strictly-smaller
+        subformulas" also fails because `propagatePersistence`'s copies are **not** subformulas of
+        `φ→ψ` being "replaced" — they are unrelated, already-existing T-formulas from `w`,
+        appended in addition to the `φ→ψ`-output pair.
+      - This is a genuine termination-argument gap, not a Lean-tactics issue: the algorithm DOES
+        terminate (bounded by the `2^(2·complexity+2)` fuel via a finite-model/bounded-worlds
+        argument), but no simple per-step-decreasing Nat measure over raw branch contents
+        captures it, because the same compound formula can be legitimately re-introduced
+        (at a new, larger world label) and must be re-expanded there.
+- [ ] (not reached — gate blocked) Define the chosen measure as a private `def` in `Scheme.lean`.
+- [ ] (not reached) Prove `intExpMeasure_initial_le`.
+- [x] No edits made to `Scheme.lean`; build remains GREEN at baseline (26508fe9); no sorry,
+      axiom, or placeholder introduced.
+- [x] Commit: metadata/plan-only (`task 317 phase 2a: BLOCKED — R1 measure gate fails on F(imp)
+      persistence duplication`); `Scheme.lean` untouched, not committed.
+
+**Escalation needed**: a dedicated measure-design research spike. Candidate directions worth
+investigating (NOT attempted here — out of scope for a phase-2a spike): (a) a measure over the
+*finite subformula×world closure* (bound worlds a priori by e.g. Kripke-model-size arguments,
+then measure "closure slots not yet settled" rather than raw branch occurrences); (b) a
+lexicographic/product measure with "remaining world-creation budget" as the primary decreasing
+component and per-world complexity as a tie-breaker; (c) re-examine whether `propagatePersistence`
+could be restricted (soundness-preserving) to copy only formulas the algorithm hasn't already
+fully discharged, to avoid duplicating already-expanded compounds — this would be a change to
+`Rules.lean`/`Expansion.lean` semantics, requiring its own correctness argument and out of this
+plan's file territory as scoped (Scheme.lean only).
 
 **Timing**: 1.5 hours
 

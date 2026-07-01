@@ -505,23 +505,44 @@ own scoped builds are green independent of that unrelated breakage.
 - **Proof obligations:** `language (Muller.union …) = ⊔`; finite-union lift.
 - **Verification:** `lake build` green; `lean_verify` clean.
 
-### Phase 5: Forward assembly `IsRegular.to_da_muller` [NOT STARTED]
+### Phase 5: Forward assembly `IsRegular.to_da_muller` [COMPLETED]
 
 - **Goal:** Assemble the forward direction `(⇒)`: every ω-regular `p` is DMA-recognizable.
 - **Tasks:**
-  - [ ] `obtain ⟨n, l, m, hreg, rfl⟩ := (eq_fin_iSup_hmul_omegaPow p).mp hp` →
+  - [x] `obtain ⟨n, l, m, hreg, rfl⟩ := (eq_fin_iSup_hmul_omegaPow p).mp hp` →
     `p = ⨆ i, (l i) * (m i)^ω`.
-  - [ ] For each `i`: `(m i)^ω` DMA-recognizable (Phase 3); `(l i) * (m i)^ω` DMA-recognizable via
+  - [x] For each `i`: `(m i)^ω` DMA-recognizable (Phase 3); `(l i) * (m i)^ω` DMA-recognizable via
     `concat_language_eq` (Phase 2) with regular `l i`.
-  - [ ] Fold the finite family into a single DMA via `Muller.union` (Phase 4).
-  - [ ] Thread `Finite` / universe bookkeeping (`isRegular_iff`); conclude
+  - [x] Fold the finite family into a single DMA via `Muller.union` (Phase 4).
+    *(deviation: used `DA.Muller.exists_iSup_univ` directly — the existential-packaging finite-
+    union lift built in Phase 4 — rather than manually folding `Muller.union`; this is the exact
+    form Phase 4 designed for this consumer.)*
+  - [x] Thread `Finite` / universe bookkeeping (`isRegular_iff`); conclude
     `∃ S (_ : Finite S) (da : DA.Muller S Symbol), language da = p`.
-- **Timing:** 2 hours
+- **Timing:** 2 hours (actual: single dispatch, no blockers — all four dependency lemmas were
+  already green and slotted together mechanically, mirroring `omegaPow_da_muller`'s own
+  `concat_language_eq` usage pattern)
 - **Depends on:** 2, 3, 4
 - **Files to modify:** `Cslib/Computability/Languages/OmegaRegularLanguage.lean` —
   `IsRegular.to_da_muller` (forward lemma).
 - **Proof obligations:** `language (assembled DMA) = p`.
 - **Verification:** `lake build` green; `lean_verify` clean on `to_da_muller`.
+
+**Phase 5 result (COMPLETED, committed)**: `IsRegular.to_da_muller` added to
+`OmegaRegularLanguage.lean` (inserted between the dead `buchiCongr_DMA_language_forward` and the
+`to_da_muller_scaffold`, both removed in Phase 6). Required adding one new import,
+`Cslib.Computability.Automata.DA.MullerClosure` (for `DA.Muller.exists_iSup_univ`), to
+`OmegaRegularLanguage.lean`'s import list. Proof: decompose via `eq_fin_iSup_hmul_omegaPow`;
+`apply DA.Muller.exists_iSup_univ`; per-component `i`, obtain a DFA for `l i`
+(`Language.IsRegular.iff_dfa`) and a DMA for `(m i)^ω` (`omegaPow_da_muller`); assemble via
+`DA.concat`/`DA.mullerAccConcat` and `DA.concat_language_eq` (identical pattern to
+`omegaPow_da_muller`'s own assembly at line 96-112). Scoped build
+`lake build Cslib.Computability.Languages.OmegaRegularLanguage` green (only a pre-existing
+`linter.style.show` warning inside the doomed `buchiCongr_DMA_accept_mem`, unrelated to this
+edit and removed in Phase 6). Zero `sorry`/`admit` in the file.
+`#print axioms Cslib.ωLanguage.IsRegular.to_da_muller` (via `lean_run_code`; `lean_verify`'s
+theorem-name validator rejects the `ω` in the namespace) reports only `propext`,
+`Classical.choice`, `Quot.sound`.
 
 ### Phase 6: Assemble `iff_da_muller`, delete dead cluster, full CI [NOT STARTED]
 

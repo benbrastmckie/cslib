@@ -10,6 +10,7 @@ public import Cslib.Computability.Automata.DA.Buchi
 public import Cslib.Computability.Automata.DA.BuchiChar
 public import Cslib.Computability.Automata.DA.Choueka
 public import Cslib.Computability.Automata.DA.Concat
+public import Cslib.Computability.Automata.DA.MullerClosure
 public import Cslib.Computability.Automata.NA.BuchiEquiv
 public import Cslib.Computability.Automata.NA.BuchiInter
 public import Cslib.Computability.Automata.NA.Sum
@@ -563,6 +564,33 @@ private lemma buchiCongr_DMA_language_forward [Inhabited Symbol] {State : Type} 
   -- such that `buchiFamily (a, b)` meets `language na`.
   simp only [buchiCongr_DMA, Set.mem_setOf_eq]
   exact buchiCongr_DMA_accept_mem na xs hxs
+
+/-- Every ω-regular language is recognized by a finite-state deterministic Muller automaton
+(the forward direction `(⇒)` of McNaughton's theorem, task 241, Phase 5, Choueka route).
+
+**Proof**: decompose `p = ⨆ i, (l i) * (m i)^ω` via `eq_fin_iSup_hmul_omegaPow`; for each
+component `i`, obtain a DFA for the regular prefix `l i` (`Language.IsRegular.iff_dfa`) and a
+DMA for the ω-power `(m i)^ω` (`omegaPow_da_muller`, Phase 3); combine them into a single DMA
+for `(l i) * (m i)^ω` via the concat-automaton correctness lemma (`DA.concat_language_eq`,
+Phase 2); fold the finite family (indexed by `Fin n`) into one DMA via the finite-union lift
+`DA.Muller.exists_iSup_univ` (Phase 4). -/
+theorem IsRegular.to_da_muller [Inhabited Symbol] {p : ωLanguage Symbol}
+    (hp : p.IsRegular) :
+    ∃ (State : Type) (_ : Finite State) (da : DA.Muller State Symbol), language da = p := by
+  obtain ⟨n, l, m, hreg, rfl⟩ := (IsRegular.eq_fin_iSup_hmul_omegaPow p).mp hp
+  apply DA.Muller.exists_iSup_univ
+  intro i
+  obtain ⟨hl, hm⟩ := hreg i
+  obtain ⟨State1, hfin1, dfa1, hdfa1⟩ := Language.IsRegular.iff_dfa.mp hl
+  haveI := hfin1
+  obtain ⟨State2, hfin2, da2, hda2⟩ := IsRegular.omegaPow_da_muller hm
+  haveI := hfin2
+  refine ⟨State1 × (Fin (Nat.card State2 + 2) → Option State2), inferInstance,
+    DA.Muller.mk (DA.concat dfa1.toDA dfa1.accept da2.toDA)
+      (DA.mullerAccConcat dfa1.toDA dfa1.accept da2.toDA da2.accept), ?_⟩
+  rw [DA.concat_language_eq]
+  rw [show DA.FinAcc.mk dfa1.toDA dfa1.accept = dfa1 from rfl, hdfa1,
+    show DA.Muller.mk da2.toDA da2.accept = da2 from rfl, hda2]
 
 open NA.Buchi in
 /-- Forward direction scaffold for McNaughton's theorem: ω-regular → DMA-recognizable.

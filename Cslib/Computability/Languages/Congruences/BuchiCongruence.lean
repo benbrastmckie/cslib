@@ -322,9 +322,7 @@ open Finset in
 there exist congruence classes `a b` with `b` idempotent (`b * b = b`), `a` absorbing
 (`a * b = a`), and the prefix class `⟦xs.extract 0 k⟧` equal to `a` infinitely often.
 
-This is the core lemma (without DMA reference) used by `buchiCongr_recurrentClass` to
-establish the `infOcc` conclusion needed for the forward direction of `buchiCongr_DMA_language_eq`
-(task 241). The proof applies `infinite_graph_ramsey` to the coloring
+The proof applies `infinite_graph_ramsey` to the coloring
 `t ↦ ⟦xs.extract t.min' t.max'⟧`, mirroring the approach of `buchiFamily_cover`. -/
 lemma buchiCongruence_recurrentPrefixClass [Finite State]
     (na : Buchi State Symbol) (xs : ωSequence Symbol) :

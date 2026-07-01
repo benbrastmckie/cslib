@@ -4,12 +4,12 @@
     {
       "project_number": 464,
       "project_name": "typst_report_structure_first_mpl_arguments",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "general",
       "description": "Create a Typst report presenting the best arguments in support of the structure-first MPL design, output to /home/benjamin/Projects/cslib/typst/MPL/ (directory to be created; this is a document-writing/synthesis task — the deliverable is a compiled-clean Typst document, not Lean proofs).\n\nTHESIS TO ARGUE FOR: MPL (Minimal Propositional Logic) as the base logic in which bot (falsum) is a designated but TOTALLY UNCONSTRAINED nullary operator, added purely to keep the SAME SIGNATURE {bot, ->, and, or} as IPL — so at MPL strength bot is constrained only by type, carries NO proof rule, and its semantic clause is effectively vacuous (a free designated element bot_val : H). IPL = MPL PLUS a substantive semantic constraint (leastness: bot_val <= a for all a) AND a proof rule (efq: bot -> A). CPL adds classicality (peirce / double-negation elimination). Present and defend the conservative-extension ladder MPL < IPL < CPL.\n\nKEY ARGUMENTS (already established in the codebase — synthesis, not new research): (1) substitution-invariance / free-monad argument: Proposition Atom is the free monad on {bot,->,and,or}, so bot is an ELEMENT of the algebra, not meta-syntax — rules out a bot-free MPL language (Design B1) and encoding bot as a distinguished atom (Design B2); decisive case for shared-signature Design A. (2) structure-first vs language-first (core CSLib Zulip debate): fix ONE language, interpret bot weakly, strengthen conservatively — preserves a single foundational architecture across the broader programme (identity, induced orders, hyperintensionality, tense, modality, categorical semantics). (3) modularity around properties, not connectives (explosion/leastness/initiality as independent typeclass/mixin modules). (4) the Hilbert-vs-ND definitional controversy and its resolution: Option C (re-frame task-398's [IsIntuitionistic T]-gated efq constructor as the explosion property module; MPL = the theory where efq is structurally unconstructible) over Option B (physically bot-rule-free MinDerivation base + Explosion extension, which re-opens the Curry-Howard/Prawitz subformula-property difficulty). (5) three-tier semantic ladder: designated bot (GHAValid=MPL) / HasLeastBot (IPL) / canonical bot from OrderBot (IPL/CPL via Heyting/Boolean). (6) conservative-extension results already formalized (ConservativeChain; per-class completeness over GHA/Heyting/Boolean).\n\nSOURCE MATERIAL: CSLib Zulip \"Propositional Logic\" thread https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic (captured JSON snapshot at specs/407_mpl_base_structure_first_redesign/reports/zulip-propositional-logic.json — primary context for the debate); task-407 artifacts (mpl-base-design-note.md, reports/01-03, decisions.md); supporting audits task 415 (reports/01_lifting-audit.md) and task 419 (reports/04_abstract-picture-and-result-inventory.md); Lean source anchors for citing the realized design: Cslib/Logics/Propositional/Defs.lean, ProofSystem/Axioms.lean, NaturalDeduction/Basic.lean, Semantics/Algebra.lean + Semantics/Algebra/BotProperties.lean.\n\nTYPST CONVENTIONS: follow the template, structure, and notation macros from /home/benjamin/Projects/BimodalLogic/Theories/Bimodal/typst/ — BimodalReference.typ, template.typ, notation/bimodal-notation.typ, chapters/ layout, README.md. Match notation macros and document conventions; adapt the notation file for propositional-logic symbols. DoD: typst compile clean under /home/benjamin/Projects/cslib/typst/MPL/.\n\nCSLib Zulip AI policy: any prose intended for upstream posting must be human-authored; this document is an internal report.",
       "topic": "Propositional Logic",
       "created": "2026-07-01T18:56:38Z",
-      "last_updated": "2026-07-01T19:53:31Z",
+      "last_updated": "2026-07-01T20:19:09Z",
       "session_id": "sess_1782935591_308002",
       "researched": "2026-07-01T19:15:39Z",
       "next_artifact_number": 3,
@@ -23,6 +23,16 @@
           "path": "specs/464_typst_report_structure_first_mpl_arguments/plans/02_mpl-structure-first-report.md",
           "type": "plan",
           "summary": "Phased plan (7 phases, ~11h) for a compiled-clean Typst report under typst/MPL/ arguing the structure-first MPL design across two axes: narrative elegance (free-monad spine, KF6 keystone per C1) and full Lean 4 engineering fidelity (four-instantiated gate, Option C, graded faithfulness, two-strengths+classicality per C2, fair Zulip debate, O1-O5 honesty ledger). Compile-clean-per-phase discipline; cite-code-not-stale-note and inline categorical caveat encoded as risks."
+        },
+        {
+          "path": "specs/464_typst_report_structure_first_mpl_arguments/summaries/02_mpl-structure-first-report-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary for the compile-clean structure-first MPL Typst report (7 phases, 24-page PDF)."
+        },
+        {
+          "path": "typst/MPL/MplReport.typ",
+          "type": "document",
+          "summary": "Main Typst document: structure-first MPL report; title/abstract/ladder table, 7 chapters, source-anchor appendix; compiles clean to a 24-page PDF."
         }
       ],
       "memory_candidates": [
@@ -53,8 +63,50 @@
             "MPL",
             "IsInitialBot"
           ]
+        },
+        {
+          "content": "Typst figures (#figure blocks) are atomic and do NOT break across pages by default, so a table taller than one page overflows off the bottom and later rows overlap/collide instead of continuing. Fix: add `#show figure: set block(breakable: true)`. Additionally, `columns: (auto, ...)` lets a wide first column starve the rest; long unbreakable monospace tokens (file paths, `[Ident T]`) overflow into the next column. For A4 with wide margins, prefer 2 columns (merge description columns) and shorten path prefixes. Always render pages to PNG (pdftoppm) and inspect visually — Typst does not warn about table overflow.",
+          "category": "TECHNIQUE",
+          "source_artifact": "specs/464_typst_report_structure_first_mpl_arguments/summaries/02_mpl-structure-first-report-summary.md",
+          "confidence": 0.85,
+          "suggested_keywords": [
+            "typst",
+            "table overflow",
+            "breakable figure",
+            "pdftoppm",
+            "layout verification",
+            "column width"
+          ]
+        },
+        {
+          "content": "Typst bundles 'New Computer Modern' and 'New Computer Modern Math' as built-in fonts (verify with `typst fonts | grep -i 'new computer modern'`), so documents using `#set text(font: \"New Computer Modern\")` compile without external font install even when fc-list shows nothing. However thmbox 0.3.0's default theorem-title fonts request 'New Computer Modern Sans' (NOT bundled), producing two benign 'unknown font family' warnings that fall back cleanly. Also: `typst compile out.pdf` fails with 'No such file or directory' if the target directory (e.g. build/) does not exist — Typst does not create it; mkdir first.",
+          "category": "CONFIG",
+          "source_artifact": "specs/464_typst_report_structure_first_mpl_arguments/summaries/02_mpl-structure-first-report-summary.md",
+          "confidence": 0.8,
+          "suggested_keywords": [
+            "typst",
+            "fonts",
+            "new computer modern",
+            "thmbox",
+            "build directory",
+            "compile"
+          ]
+        },
+        {
+          "content": "In Typst table/grid cells, a cell whose content string begins with `+ ` or `- ` is parsed as a list/enum item and renders as '1.' or a bullet. To show a literal leading '+ classicality' in a cell, reword (e.g. 'least, and classical') or escape the leading marker.",
+          "category": "INSIGHT",
+          "source_artifact": "specs/464_typst_report_structure_first_mpl_arguments/summaries/02_mpl-structure-first-report-summary.md",
+          "confidence": 0.75,
+          "suggested_keywords": [
+            "typst",
+            "table cell",
+            "list item",
+            "escaping",
+            "leading plus"
+          ]
         }
-      ]
+      ],
+      "completion_summary": "Produced a compile-clean 24-page Typst report under typst/MPL/ arguing for the structure-first MPL design: elegant narrative (free monad on Sigma; MPL subset IPL subset CPL as a descending variety chain; KF6 keystone that leastness is a variety-defining identity only when bot is a nullary operation) with equal-weight Lean 4 engineering coverage (one gate across four proof systems, Option-C resolution, graded faithfulness, exact sorry-free scope) and a mandatory Honest-Limits chapter (O1-O5 + two caveats). Every Lean anchor cites source-of-truth code; all categorical claims carry the informal-reading caveat."
     },
     {
       "project_number": 457,

@@ -11,7 +11,7 @@ next_project_number: 465
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,464 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456 | 36,37,181,317,407,425,449 | propositional logic, temporal logic, bimodal logic, ... |
 | 3 | 41,413,414 | 39,40,181,215,300,301,375 | foundations, code hygiene |
 | 4 | 412 | 41 | code hygiene |
@@ -28,7 +28,6 @@ next_project_number: 465
 317 [PLANNED] — Fill the propositional tableau completeness sorries (7 real sorri
 400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 407 [PR READY] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
-464 [IMPLEMENTING] — Create a Typst report presenting the best arguments in support of
 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 430 [RESEARCHED] — Prove the atom-persistence / upward-closure structural lemma for 
@@ -82,12 +81,14 @@ next_project_number: 465
 ## Tasks
 
 ### 464. Typst report structure first mpl arguments
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: general
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [464_typst_report_structure_first_mpl_arguments/reports/02_grounding-and-typst-scaffold.md]
 - **Plan**: [464_typst_report_structure_first_mpl_arguments/plans/02_mpl-structure-first-report.md]
+- **Summary**: [464_typst_report_structure_first_mpl_arguments/summaries/02_mpl-structure-first-report-summary.md]
+- **Document**: [typst/MPL/MplReport.typ]
 
 **Description**: Create a Typst report presenting the best arguments in support of the structure-first MPL design, output to /home/benjamin/Projects/cslib/typst/MPL/ (directory to be created; this is a document-writing/synthesis task — the deliverable is a compiled-clean Typst document, not Lean proofs).
 

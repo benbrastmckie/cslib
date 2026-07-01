@@ -1,7 +1,7 @@
 # Implementation Plan: Structure-First MPL Typst Report
 
 - **Task**: 464 - Typst report presenting the best arguments for the structure-first MPL design
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 11 hours
 - **Dependencies**: None
 - **Research Inputs**: reports/01_team-research.md; reports/02_grounding-and-typst-scaffold.md

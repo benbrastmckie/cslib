@@ -199,7 +199,7 @@
       "topic": "Propositional Logic",
       "description": "Fill the propositional tableau completeness sorries (7 real sorries; soundness is already sorry-free after task 316). The open obligations are the truth-lemma / countermodel-extraction proofs in the three Completeness modules. Classical (Tableau/Classical/Completeness.lean): classicalExpandBranches_hintikka (line ~462) -- note the module's separate build break (bad Mathlib lemma ref + unsolved goals) is repaired first under task 363. Intuitionistic (Tableau/Intuitionistic/Completeness.lean): intTruthLemma (line ~89), intuitionisticOpenBranch_countermodel (~98), intuitionisticTableau_complete (~112). Minimal (Tableau/Minimal/Completeness.lean): minTruthLemma (~168), minOpenBranch_countermodel (~179), minimalTableau_complete (~190). Core technique: Hintikka-set argument -- a saturated open branch satisfies Hintikka conditions, from which a countermodel is extracted (a Boolean valuation for classical; a finite Kripke model for intuitionistic/minimal) and a truth lemma by formula induction matches forced/not-forced to the signed formulas at each world. Because task 369 parameterizes the intuitionistic and minimal tableau over (closurePred, modelBot), the int and min cases should be discharged ONCE as a single parametric truth-lemma/countermodel pair rather than duplicated. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 316, 323, 363, 369.",
       "created": "2026-06-23T19:55:52Z",
-      "last_updated": "2026-07-01T07:27:12Z",
+      "last_updated": "2026-07-01T13:29:24Z",
       "next_artifact_number": 3,
       "artifacts": [
         {
@@ -695,21 +695,32 @@
     {
       "project_number": 404,
       "project_name": "forall2_mathlib_cleanup_soundness",
-      "status": "researched",
+      "status": "pr_ready",
       "task_type": "cslib",
       "description": "Replace the local private re-proofs of List.Forall2 lemmas in Cslib/Logics/Modal/Tableau/Soundness.lean (forall2_append_aux, forall2_drop_aux, forall2_take_aux, forall2_of_zip_mem) with canonical Mathlib lemmas. These were added during task 402 because Mathlib.Data.List.Forall2 is not transitively imported by Cslib.Init. Either add the Mathlib import and switch call sites to library lemmas (List.Forall2.append/length_eq/etc.), or document why the local helpers are kept. Verify scoped + full lake build green, zero sorry, lint-style pass. Low-priority polish; helpers are correct as-is.",
       "dependencies": [],
       "parent_task": 402,
-      "last_updated": "2026-06-30T03:49:59Z",
+      "last_updated": "2026-07-01T13:29:09Z",
       "topic": "Modal Logic",
-      "session_id": "sess_1782791125_e726d9",
+      "session_id": "sess_1782912232_20267a_404",
       "artifacts": [
         {
           "path": "specs/404_forall2_mathlib_cleanup_soundness/reports/01_forall2-mathlib-cleanup.md",
           "type": "report",
           "summary": "Verified lemma mapping table, exact edits, build verification result."
+        },
+        {
+          "path": "specs/404_forall2_mathlib_cleanup_soundness/plans/01_forall2-mathlib-cleanup.md",
+          "type": "plan",
+          "summary": "Two-phase plan: add Mathlib import + delete four helpers + swap six call sites + scoped build (Phase 1), then full CSLib CI/lint/shake gate (Phase 2)."
+        },
+        {
+          "path": "specs/404_forall2_mathlib_cleanup_soundness/summaries/01_forall2-mathlib-cleanup-summary.md",
+          "type": "summary",
+          "summary": "Execution summary: replaced four local List.Forall2 helpers with canonical Mathlib lemmas; full CI pipeline green; zero sorry/axioms/vacuous defs."
         }
-      ]
+      ],
+      "completion_summary": "Replaced the four local List.Forall2 helper lemmas in Cslib/Logics/Modal/Tableau/Soundness.lean and LoopInduction.lean with canonical Mathlib lemmas (List.forall2_iff_zip.mpr, List.rel_append, List.forall2_drop, List.forall2_take) via a single import Mathlib.Data.List.Forall2. forall2_replicate_right retained (no Mathlib drop-in). Full CI gate green: build, test, checkInitImports, lint-style, shake (confirmed no changes needed for the two modified files). Zero sorry, zero new axioms, zero vacuous definitions. Ready for /pr."
     },
     {
       "project_number": 405,
@@ -1059,16 +1070,38 @@
     {
       "project_number": 438,
       "project_name": "pr_task431_comment_cleanups",
-      "status": "not_started",
+      "status": "pr_ready",
       "task_type": "cslib",
       "priority": "low",
       "description": "Upstream the comment/docstring cleanups identified by the task 431 audit via a CSLib PR. The edits are already applied and committed locally at 35436d7e (chore): (1) deleted the commented-out Term.subst_comm TODO stub in Cslib/Languages/LambdaCalculus/Named/Untyped/Basic.lean, (2) reworded the stale 'removing the sorry' docstring in Cslib/Logics/LTL/Semantics/GNBA.lean:37 to past tense. Both are comment-only (no proof/build impact). Remaining work: submit to leanprover/cslib via /pr (user-only command) with a 'chore'/'doc' prefixed title. Optionally bundle any further doc-hygiene found in those two modules. Source: task 431 audit.",
       "created": "2026-06-30T16:29:40Z",
-      "last_updated": "2026-06-30T16:29:40Z",
-      "session_id": "sess_1782832854_3aada0",
+      "last_updated": "2026-07-01T13:32:44Z",
+      "session_id": "sess_1782912232_20267a_438",
       "dependencies": [],
       "parent_task": 431,
-      "topic": "PR & Upstreaming"
+      "topic": "PR & Upstreaming",
+      "artifacts": [
+        {
+          "path": "specs/438_pr_task431_comment_cleanups/reports/01_pr-prep-comment-cleanups.md",
+          "type": "report",
+          "summary": "PR-prep research: verified committed edits, corrected scope (drop GNBA.lean as moot), confirmed zero build impact, recommended chore(LambdaCalculus) title and fresh-branch construction for /pr."
+        },
+        {
+          "path": "specs/438_pr_task431_comment_cleanups/plans/01_pr-prep-comment-cleanups.md",
+          "type": "plan",
+          "summary": "Two-phase PR-prep plan: verify Basic.lean stub deletion + upstream diff (Phase 1), author pr-description.md with chore(LambdaCalculus) title and transition to PR READY (Phase 2)."
+        },
+        {
+          "path": "specs/438_pr_task431_comment_cleanups/pr-description.md",
+          "type": "pr_description",
+          "summary": "PR title chore(LambdaCalculus): remove stale Term.subst_comm sorry stub; comment-only single-file scope, AI disclosure, task 431 reference, fresh-branch construction recipe."
+        },
+        {
+          "path": "specs/438_pr_task431_comment_cleanups/summaries/01_pr-prep-comment-cleanups-summary.md",
+          "type": "summary",
+          "summary": "PR-prep complete: verified single-file comment-only Basic.lean deletion vs upstream/main, authored pr-description.md, transitioned to PR READY."
+        }
+      ]
     },
     {
       "project_number": 439,
@@ -1293,7 +1326,7 @@
     {
       "project_number": 453,
       "project_name": "audit_reduce_maxheartbeats_inflation",
-      "status": "researched",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Code Hygiene",
       "priority": "medium",
@@ -1301,7 +1334,7 @@
       "description": "From review 2026-07-01-2 (MEDIUM+LOW, findings #2+#4). 72 set_option maxHeartbeats sites in Cslib/Logics/{Bimodal,Temporal}/Metalogic/**, up to 32x the 200000 default: 3200000 x33, 1600000 x13, 800000 x12, 1200000 x3, 400000 x5, and 6400000 x1 (Temporal/Metalogic/Chronicle/CounterexampleElimination/MainElimination.lean:38). The mature upstream dirs (Foundations/Computability/Languages/Crypto) have ZERO maxHeartbeats settings -- this inflation is entirely in the active logic area and signals proof terms/tactics that should be restructured (intermediate haves, lemma extraction) rather than given more budget. ALSO (finding #4, LOW): 15 sites use file-wide unscoped 'set_option maxHeartbeats N' (masking which declaration is expensive) vs 54 declaration-scoped 'set_option ... in'; unscoped sites include Bimodal/Metalogic/Algebraic/{UltrafilterMCS.lean:34,BooleanStructure.lean:33} and Temporal/Metalogic/{Chronicle/TruthLemma.lean:40,Chronicle/RRelation.lean:29,DenseSoundness.lean:32,Completeness.lean:47,Soundness.lean:32,MCS.lean:38,WitnessSeed.lean:29,Chronicle/Frame.lean:28,Chronicle/PointInsertion/{Seeds,Burgess,Splitting,Since}.lean}. Approach: audit the 3.2M/6.4M offenders, restructure the worst to lower the ceiling (or document why irreducible); convert all unscoped sites to 'set_option ... in' on the specific expensive declaration. NOT covered by 412-414 (which target simp only [listImp_*, bigconj_*] lists, not heartbeat budgets). Self-contained, independent of other tasks. DoD: heartbeat ceilings reduced where feasible, all remaining high budgets documented, unscoped sites converted to scoped, lake build/test green.",
       "dependencies": [],
       "created": "2026-07-01T07:42:45Z",
-      "last_updated": "2026-07-01T08:19:56Z",
+      "last_updated": "2026-07-01T08:29:09Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "session_id": "sess_1782893289_453aaa"

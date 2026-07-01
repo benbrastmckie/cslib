@@ -1,18 +1,16 @@
 {
-  "status": "planned",
-  "summary": "Single-phase plan to replace four local List.Forall₂ re-proofs in Cslib/Logics/Modal/Tableau/Soundness.lean with Mathlib lemmas: add one plain import (Mathlib.Data.List.Forall2), delete four private helpers, swap six call sites (List.forall₂_iff_zip, List.rel_append, List.forall₂_drop, List.forall₂_take). Edit set already trial-verified green during research (492 jobs, 0 errors, 0 sorry) and reverted. Full CI gate (lake build, checkInitImports, lint-style, test, shake) included as the phase verification. forall₂_replicate_right kept (out of scope).",
+  "status": "implemented",
+  "summary": "Task 404 complete. Replaced the four local private List.Forall₂ helper lemmas (forall₂_of_zip_mem, forall₂_append_aux, forall₂_drop_aux, forall₂_take_aux) with canonical Mathlib lemmas (List.forall₂_iff_zip.mpr, List.rel_append, List.forall₂_drop, List.forall₂_take) via a single import Mathlib.Data.List.Forall2 in Cslib/Logics/Modal/Tableau/Soundness.lean, deleting the helpers from Cslib/Logics/Modal/Tableau/LoopInduction.lean (where an intervening task had hoisted them) and rewriting all six call sites. forall₂_replicate_right retained (out of scope). Full CSLib CI pipeline green: scoped build 493/493, full build 3187 jobs, checkInitImports pass, lint-style clean, lake test exit 0, shake confirms no changes needed for the two modified files (repo-wide pre-existing shake/lint debt in unrelated files is documented and unaffected). Zero sorry, zero new axioms, zero vacuous definitions.",
   "artifacts": [
     {
-      "path": "specs/404_forall2_mathlib_cleanup_soundness/plans/01_forall2-mathlib-cleanup.md",
-      "type": "plan",
-      "summary": "Single-phase implementation plan with verified edit set and full CSLib CI verification gate."
-    },
-    {
-      "path": "specs/404_forall2_mathlib_cleanup_soundness/reports/01_forall2-mathlib-cleanup.md",
-      "type": "report",
-      "summary": "Verified Mathlib lemma mapping, exact text-anchored edits, scoped-build verification, CI/lint notes."
+      "path": "specs/404_forall2_mathlib_cleanup_soundness/summaries/01_forall2-mathlib-cleanup-summary.md",
+      "type": "summary",
+      "summary": "Execution summary: two-phase plan completed, plan deviations documented (helper deletion relocated to LoopInduction.lean, import placement adjusted), full CI verification results recorded."
     }
   ],
+  "next_action_hint": "Task complete; ready for PR submission via /pr 404 or standard task closure.",
+  "phases_completed": 2,
+  "phases_total": 2,
   "blockers": [],
-  "next_action_hint": "Run /implement 404 to apply the verified single-phase edit set and pass the full CSLib CI gate."
+  "continuation_context": null
 }

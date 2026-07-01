@@ -40,7 +40,7 @@ next_project_number: 455
   └─ 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
   └─ 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
-404 [RESEARCHED] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
+404 [PR READY] — Replace the local private re-proofs of List.Forall2 lemmas in Csl
   └─ 405 [NOT STARTED] — Simplify the proof machinery in the task-402 modal tableau soundn
 
 ### Temporal Logic
@@ -67,7 +67,7 @@ next_project_number: 455
 
 ### Code Hygiene
 
-453 [RESEARCHED] — From review 2026-07-01-2 (MEDIUM+LOW, findings #2+#4). 72 set_opt
+453 [IMPLEMENTING] — From review 2026-07-01-2 (MEDIUM+LOW, findings #2+#4). 72 set_opt
 389 [NOT STARTED] — [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAl
   └─ 391 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Remove internal task/process ja
     └─ 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
@@ -80,7 +80,7 @@ next_project_number: 455
 
 ### PR & Upstreaming
 
-438 [NOT STARTED] — Upstream the comment/docstring cleanups identified by the task 43
+438 [PR READY] — Upstream the comment/docstring cleanups identified by the task 43
 440 [NOT STARTED] — PR review: GitHub PR https://github.com/leanprover/cslib/pull/648
 447 [PR READY] — Vet (tasks 321/406/431/433/435) found 17 lake shake --add-public 
 
@@ -97,7 +97,7 @@ next_project_number: 455
 ---
 
 ### 453. Audit and reduce maxHeartbeats inflation across Bimodal/Temporal metalogic; normalize scoping to 'in'-scoped
-- **Status**: [RESEARCHED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
@@ -329,10 +329,14 @@ Reference: specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-st
 ---
 
 ### 438. Pr task431 comment cleanups
-- **Status**: [NOT STARTED]
+- **Status**: [PR READY]
 - **Task Type**: cslib
 - **Topic**: PR & Upstreaming
 - **Dependencies**: None
+- **Research**: [438_pr_task431_comment_cleanups/reports/01_pr-prep-comment-cleanups.md]
+- **Plan**: [438_pr_task431_comment_cleanups/plans/01_pr-prep-comment-cleanups.md]
+- **Pr_description**: [438_pr_task431_comment_cleanups/pr-description.md]
+- **Summary**: [438_pr_task431_comment_cleanups/summaries/01_pr-prep-comment-cleanups-summary.md]
 
 **Description**: Upstream the comment/docstring cleanups identified by the task 431 audit via a CSLib PR. The edits are already applied and committed locally at 35436d7e (chore): (1) deleted the commented-out Term.subst_comm TODO stub in Cslib/Languages/LambdaCalculus/Named/Untyped/Basic.lean, (2) reworded the stale 'removing the sorry' docstring in Cslib/Logics/LTL/Semantics/GNBA.lean:37 to past tense. Both are comment-only (no proof/build impact). Remaining work: submit to leanprover/cslib via /pr (user-only command) with a 'chore'/'doc' prefixed title. Optionally bundle any further doc-hygiene found in those two modules. Source: task 431 audit.
 
@@ -541,11 +545,13 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 404. Forall2 mathlib cleanup soundness
-- **Status**: [RESEARCHED]
+- **Status**: [PR READY]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
 - **Research**: [404_forall2_mathlib_cleanup_soundness/reports/01_forall2-mathlib-cleanup.md]
+- **Plan**: [404_forall2_mathlib_cleanup_soundness/plans/01_forall2-mathlib-cleanup.md]
+- **Summary**: [404_forall2_mathlib_cleanup_soundness/summaries/01_forall2-mathlib-cleanup-summary.md]
 
 **Description**: Replace the local private re-proofs of List.Forall2 lemmas in Cslib/Logics/Modal/Tableau/Soundness.lean (forall2_append_aux, forall2_drop_aux, forall2_take_aux, forall2_of_zip_mem) with canonical Mathlib lemmas. These were added during task 402 because Mathlib.Data.List.Forall2 is not transitively imported by Cslib.Init. Either add the Mathlib import and switch call sites to library lemmas (List.Forall2.append/length_eq/etc.), or document why the local helpers are kept. Verify scoped + full lake build green, zero sorry, lint-style pass. Low-priority polish; helpers are correct as-is.
 

@@ -1,5 +1,5 @@
 {
-  "next_project_number": 449,
+  "next_project_number": 452,
   "active_projects": [
     {
       "project_number": 447,
@@ -77,13 +77,13 @@
     {
       "project_number": 445,
       "project_name": "fix_temporal_conservativity_domain_mismatch_sorry",
-      "status": "blocked",
+      "status": "abandoned",
       "task_type": "cslib",
       "title": "Eliminate the domain-mismatch sorry in Bimodal to Temporal conservativity and refactor the model-transfer layer for generality",
       "description": "Vet fix for task 180 (Medium severity, PR-BLOCKING). HARD REQUIREMENT: absolutely no sorries are acceptable in any PR. `temporal_valid_of_bimodal_derivable` (TemporalConservativity.lean:269) must be proved outright and BOTH `set_option warn.sorry false in` (:248) and the `sorry` (:269) removed. Disclosure is NOT an acceptable outcome. (The sorry is pre-existing from task 277, but task 180's PR includes this file, so it must be closed here.)\n\nSUPERSEDES task #275 (abandoned): #275 (\"Prove Bimodal TM is conservative over Temporal BX\") was the original tracking task for exactly this theorem; its goal is fully subsumed here. Close out the conservativity story end-to-end.\n\nProve the model-transfer result described in the module's \"Domain Mismatch Resolution\" section: bimodal validity is established on AddCommGroup domains (`temporal_valid_on_addcommgroup`), while Temporal satisfaction is quantified over an arbitrary `Nontrivial`, `NoMaxOrder`, `NoMinOrder` `LinearOrder D`. Close the gap by transporting a countermodel: given a Temporal model over D falsifying phi, transfer it (via an order-embedding of the relevant sub-order into an ordered abelian group such as the rationals, or an order-completion/Hahn-embedding argument) to an AddCommGroup domain preserving `Satisfies`, then contrapose against `temporal_valid_on_addcommgroup` using the proven semantic bridge `bimodal_truthAt_toBimodal_iff_temporal_satisfies`.\n\nAmbitious refactor (not just plugging the hole):\n- State the transfer as a general, reusable lemma over any target domain meeting a clearly-specified order interface, so it is not welded to one concrete group; factor out the order-embedding and the satisfaction-transport as independent, named, docstringed lemmas.\n- Replace the current \"known gap\" prose in the module docstring with an elegant, self-contained account of the completed argument and the interface the transfer requires.\n- Sweep the surrounding conservativity development for uniformity with the rest of the Bimodal metalogic (naming, section variables, import minimality).\n\nVerification: `lean_verify` on `temporal_valid_of_bimodal_derivable` and `bimodal_conservative_over_temporal` must report only `[propext, Classical.choice, Quot.sound]` with zero sorry; full `lake build`/`lake lint`/`lake test` green. If a genuinely load-bearing mathematical obstruction is found, escalate to the user with the exact open goal state and candidate lemmas — do NOT reintroduce a sorry or a vacuous (`:= True`/`trivial`) placeholder.\n\nRoot of the 444/445/446 chain (no task deps): the foundational proof/refactor work; 446 (citations) then 444 (uniformity sweep) run after it.",
       "parent_task": 180,
       "created": "2026-07-01T05:12:18Z",
-      "last_updated": "2026-07-01T05:54:34Z",
+      "last_updated": "2026-07-01T07:00:00Z",
       "next_artifact_number": 1,
       "artifacts": [
         {
@@ -94,7 +94,7 @@
       ],
       "session_id": "sess_1782884528_21222e_445",
       "dependencies": [],
-      "blockers": "Theorem is FALSE: bimodal_conservative_over_temporal cannot be proved (machine-verified counterexample phi_T=(untl bot top)->G(untl bot top); TM non-conservative over Burgess/Xu BX due to 5 uniformity axioms in bimodal FrameClass.Base). sorry at TemporalConservativity.lean:269 marks a false prop. AWAITING USER DECISION among: (1) restate over metric base BX+ via box-erasure induction [recommended], (2) drop uniformity axioms from bimodal Base [refactor], (3) delete false theorem + document non-conservativity. Round-2 report: reports/02_literature-grounded-conservativity-obstruction.md"
+      "completion_summary": "ABANDONED (superseded). Deep research proved the target theorem bimodal_conservative_over_temporal FALSE: TM is genuinely non-conservative over plain Burgess/Xu BX (witness phi_T=(untl bot top)->G(untl bot top) on doubled rationals). The original framing (domain mismatch fixable by model transfer) rested on a false premise. Research reports preserved under specs/445_.../reports/ and cited by successor tasks 449 (define BX+) and 450 (prove conservativity over BX+, close the sorry)."
     },
     {
       "project_number": 444,
@@ -102,14 +102,15 @@
       "status": "not_started",
       "task_type": "cslib",
       "title": "Uniformity pass: mathlib-conformant naming, style, and docstrings across the entire task-180 Temporal diff",
-      "description": "Vet fix for task 180 (High), elevated scope. Do not merely rename the two flagged defs — bring the task-180 diff to a single, uniform, mathlib-conformant standard.\n\nHard fix (blocks PR): rename `allFuture_iff_neg_someFuture_neg` (Theorems.lean:51) and `allPast_iff_neg_somePast_neg` (Theorems.lean:68) to lowerCamelCase (they are data-carrying `noncomputable def`s returning `DerivationTree`, not `theorem`/`lemma`), updating every call site.\n\nAmbitious cleanup:\n- Audit every declaration introduced or modified by task 180 across Cslib/Logics/Temporal/{Syntax,Semantics,ProofSystem,Metalogic,Theorems} and the two Bimodal consumers (Embedding/TemporalEmbedding.lean, Metalogic/ConservativeExtension/TemporalConservativity.lean) for naming uniformity: data-returning `def`s in lowerCamelCase; propositions as `theorem`/`lemma` in snake_case; one consistent convention for the bridge-axiom wrappers, the MCS bridge lemmas (`mcs_allFuture_iff` family), and the Chronicle/TruthLemma helpers.\n- Make `lake lint` fully green on these files for defsWithUnderscore, defLemma, docBlame, dupNamespace, topNamespace, simpNF, unusedSectionVars — not just the two flagged lines.\n- Ensure every public declaration carries a concise, elegant docstring in the house style; unify the recurring \"D3 honesty caveat\" comment so it reads identically wherever it appears.\n- Remove dead code, leftover scaffolding comments, and any development-only `set_option`s no longer needed.\n\nSCOPE EXCLUSION (conflict avoidance): do NOT touch Cslib/Logics/Temporal/Tableau/ (Defs, Rules, Completeness, Saturation, ...). That subtree is being actively redesigned by the task-301 tableau line (426/439/425); its naming/style cleanup is owned there. Coordinate rather than double-edit.\n\nDepends on 446 (which depends on 445): run last so this sweep sees the final, settled declarations — including any new lemmas introduced by the #445 conservativity proof and the corrected citations from #446 — and can name/document them uniformly without churn.\n\nDefinition of done: `lake build`, `lake lint`, `lake exe lint-style` green on every in-scope task-180 file; consistent naming and docstrings verified by inspection; no behavioural change to any proof (renames + docs only).",
+      "description": "Vet fix for task 180 (High), elevated scope. Do not merely rename the two flagged defs; bring the task-180 diff to a single, uniform, mathlib-conformant standard.\n\nHard fix (blocks PR): rename allFuture_iff_neg_someFuture_neg (Theorems.lean:51) and allPast_iff_neg_somePast_neg (Theorems.lean:68) to lowerCamelCase (they are data-carrying noncomputable defs returning DerivationTree, not theorem/lemma), updating every call site.\n\nAmbitious cleanup:\n- Audit every declaration introduced or modified by task 180 across Cslib/Logics/Temporal/{Syntax,Semantics,ProofSystem,Metalogic,Theorems} and the two Bimodal consumers (Embedding/TemporalEmbedding.lean, Metalogic/ConservativeExtension/TemporalConservativity.lean) for naming uniformity: data-returning defs in lowerCamelCase; propositions as theorem/lemma in snake_case; one consistent convention for the bridge-axiom wrappers, the MCS bridge lemmas (mcs_allFuture_iff family), and the Chronicle/TruthLemma helpers. INCLUDE the new declarations introduced by tasks 449 (BX+ / FrameClass.Metric axioms) and 450 (eraseBox, restated conservativity) in the uniformity sweep.\n- Make lake lint fully green on these files for defsWithUnderscore, defLemma, docBlame, dupNamespace, topNamespace, simpNF, unusedSectionVars, not just the two flagged lines.\n- Ensure every public declaration carries a concise, elegant docstring in the house style; unify the recurring \"D3 honesty caveat\" comment so it reads identically wherever it appears.\n- Remove dead code, leftover scaffolding comments, and any development-only set_options no longer needed.\n\nSCOPE EXCLUSION (conflict avoidance): do NOT touch Cslib/Logics/Temporal/Tableau/ (Defs, Rules, Completeness, Saturation, ...). That subtree is being actively redesigned by the task-301 tableau line (426/439/425); its naming/style cleanup is owned there. Coordinate rather than double-edit.\n\nSEQUENCING: Depends on 449 (define BX+) and 450 (conservativity proof + close sorry). Run last so this sweep sees the final, settled declarations, including the new BX+ axioms from 449 and the restated conservativity theorem from 450. NOTE: TemporalConservativity.lean is REWRITTEN by task 450 (which removes the sorry and restates the theorem over BX+); once 450 is complete this file is settled and IS in scope for 444's naming/docstring sweep (it was excluded only while 450 was in flight). Task 446 (citation hygiene) is already COMPLETED. Original task 445 was ABANDONED (its theorem was proved false; superseded by 449/450).\n\nDefinition of done: lake build, lake lint, lake exe lint-style green on every in-scope task-180 file; consistent naming and docstrings verified by inspection; no behavioural change to any proof (renames + docs only).\n",
       "parent_task": 180,
       "created": "2026-07-01T05:12:18Z",
-      "last_updated": "2026-07-01T05:38:47Z",
+      "last_updated": "2026-07-01T07:00:00Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "dependencies": [
-        446
+        449,
+        450
       ]
     },
     {
@@ -1247,6 +1248,52 @@
       "last_updated": "2026-07-01T07:21:23Z",
       "session_id": "sess_1782889987_295b26",
       "researched": "2026-07-01T07:21:23Z"
+    },
+    {
+      "project_number": 449,
+      "project_name": "define_bxplus_metric_tense_base",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Define BX+ (metric tense logic): temporal uniformity axioms, Metric frame class, and soundness over ordered-abelian-group flows",
+      "description": "Foundation for the corrected TM-over-temporal conservativity result. Supersedes abandoned task 445; inherits its research at specs/445_fix_temporal_conservativity_domain_mismatch_sorry/reports/01_domain-mismatch-transfer-feasibility.md and 02_literature-grounded-conservativity-obstruction.md.\n\nBACKGROUND: Deep, machine-verified research established that bimodal_conservative_over_temporal as originally stated is FALSE. Bimodal TM's FrameClass.Base carries five \"uniformity\" axioms (discrete_symm_fwd/bwd, discrete_propagate_fwd/bwd, discrete_box_necessity at Cslib/Logics/Bimodal/ProofSystem/Axioms.lean:248-273) encoding the translation-homogeneity and negation-symmetry of ordered-abelian-group time, whereas pure Burgess/Xu Temporal FrameClass.Base (complete over ALL serial linear orders) has none of them. TM is genuinely non-conservative over plain BX (witness phi_T = (untl bot top) -> G(untl bot top), refuted on the doubled rationals Lex(Q x Bool)). The fix is to state conservativity over the matching metric temporal base BX+.\n\nGOAL: Introduce BX+ = the metric tense logic sound over ordered-abelian-group time.\n\n1. Add a new Temporal frame class FrameClass.Metric with Base < Metric (extend the FrameClass inductive plus its LE / PartialOrder / DecidableRel instances and minFrameClass in Cslib/Logics/Temporal/ProofSystem/Axioms.lean, mirroring how Dense is handled). Do NOT add uniformity axioms to Base: Temporal Base must remain sound over all serial linear orders (Cslib/Logics/Temporal/Metalogic/Soundness.lean:409); breaking that is out of scope.\n\n2. Add the FOUR pure-temporal uniformity axioms to the Temporal Axiom inductive, each gated to minFrameClass = .Metric:\n   - discrete_symm_fwd:      U(bot,top) -> S(bot,top)\n   - discrete_symm_bwd:      S(bot,top) -> U(bot,top)\n   - discrete_propagate_fwd: U(bot,top) -> G(U(bot,top))\n   - discrete_propagate_bwd: U(bot,top) -> H(U(bot,top))\n   (The bimodal discrete_box_necessity chi -> box chi has no pure-temporal form; it erases to a tautology and is handled in task 450, NOT here.)\n\n3. Define the semantic frame class of \"metric\" / ordered-abelian-group temporal frames (time D an ordered abelian group, matching the bimodal TaskFrame domain constraints AddCommGroup + LinearOrder + IsOrderedAddMonoid). Prove SOUNDNESS of each new axiom over this class: they are exactly the frame-validities of group-ordered time (propagation from translation-invariance, symmetry from negation). Extend the Temporal soundness result to FrameClass.Metric over the metric frame class.\n\n4. Provide the Derivable / DerivationTree plumbing and a BX+ derivability abbreviation (DerivationTree FrameClass.Metric).\n\nZero-debt: no sorry, no vacuous defs (def X := True / trivial are prohibited). Verify with lean_verify; full lake build / lake lint / lake exe lint-style / lake test green. Docstrings in house style on every new declaration.\n\nDefinition of done: FrameClass.Metric and the 4 temporal uniformity axioms defined and gated; metric temporal frame semantics defined; soundness of BX+ over ordered-abelian-group flows proved sorry-free; CI green.\n",
+      "parent_task": 180,
+      "created": "2026-07-01T07:00:00Z",
+      "last_updated": "2026-07-01T07:00:00Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "dependencies": []
+    },
+    {
+      "project_number": 450,
+      "project_name": "prove_tm_conservative_over_bxplus",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Prove TM (Bimodal Base) conservative over BX+ and close the TemporalConservativity sorry",
+      "description": "Core corrected conservativity result. PR-BLOCKING for task 180. Supersedes abandoned task 445 and inherits its research: specs/445_fix_temporal_conservativity_domain_mismatch_sorry/reports/01_domain-mismatch-transfer-feasibility.md and 02_literature-grounded-conservativity-obstruction.md. Depends on task 449 (BX+ definition).\n\nTARGET: Bimodal.ThDerivable = DerivationTree Bimodal.FrameClass.Base (Cslib/Logics/Bimodal/ProofSystem/Derivation.lean:111,119), and Bimodal Base includes the 5 uniformity axioms. The honest theorem is therefore:\n  bimodal_conservative_over_temporal : Bimodal.ThDerivable phi.toBimodal -> BXplus.ThDerivable phi\nwhere BXplus = DerivationTree Temporal.FrameClass.Metric (from task 449).\n\nRESEARCH PHASE MUST SETTLE THE PROOF ROUTE:\n- Route (i) SYNTACTIC box-erasure (preferred; needs no completeness result). Define eraseBox : Bimodal.Formula -> Temporal.Formula, prove Bimodal.DerivationTree FrameClass.Base G phi -> Temporal.DerivationTree FrameClass.Metric (G.map eraseBox) (eraseBox phi) by induction on the derivation tree, then specialise via eraseBox (phi.toBimodal) = phi (Cslib/Logics/Bimodal/Embedding/TemporalEmbedding.lean). CRUX to verify per-axiom with lean_multi_attempt: S5 axioms for box erase to tautologies; the pure-temporal and uniformity axioms erase to BX+ axioms; the MODAL-TEMPORAL INTERACTION axioms modal_future (box phi -> box(G phi)) and discrete_box_necessity (chi -> box chi) are the only load-bearing cases. The definition of eraseBox on box must be chosen so BOTH land as BX+ theorems: naive eraseBox(box psi) = eraseBox(psi) sends modal_future to phi -> G phi, which is FALSE, so a smarter erasure is required. Ground the correct construction in Thomason 1984 (Combinations of Tense and Modality).\n- Route (ii) SEMANTIC transfer. Uses BX+ completeness over group flows (task 451) + trivial bimodal expansion + Bimodal soundness, via contrapositive. Only viable once task 451 has landed; if research selects this route, add a dependency on task 451.\n\nIMPLEMENTATION: In Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/TemporalConservativity.lean, REPLACE the false temporal_valid_of_bimodal_derivable (:269), restate bimodal_conservative_over_temporal over BX+, and REMOVE set_option warn.sorry false in (:248) and the sorry (:269). Rewrite the module docstring's \"Domain Mismatch Resolution\" section to the correct account: TM is conservative over METRIC tense logic BX+, not over plain BX (cite Burgess1984 sec 6.1 and Thomason1984). This task OWNS TemporalConservativity.lean; task 444's naming/lint sweep runs AFTER this task so it sees the settled file.\n\nZero-debt: lean_verify on the restated bimodal_conservative_over_temporal must report only [propext, Classical.choice, Quot.sound] with zero sorry; full CI green. If a genuine load-bearing obstruction is hit, escalate with the exact open goal and candidate lemmas; do NOT reintroduce a sorry or a vacuous (:= True / trivial) placeholder.\n",
+      "parent_task": 180,
+      "created": "2026-07-01T07:00:00Z",
+      "last_updated": "2026-07-01T07:00:00Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "dependencies": [
+        449
+      ]
+    },
+    {
+      "project_number": 451,
+      "project_name": "bxplus_completeness_over_group_flows",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "BX+ completeness over ordered-abelian-group time flows",
+      "description": "Deeper metatheory for the metric tense logic BX+ (defined in task 449). Optional-but-desired for rigor; also unlocks the semantic proof route for task 450. Depends on task 449.\n\nGOAL: Prove BX+ (Temporal FrameClass.Metric) COMPLETE over the class of ordered-abelian-group temporal frames: every formula valid on all group-ordered flows is BX+-derivable (equivalently, every BX+-consistent formula has a group-ordered countermodel).\n\nResearch must decide the construction. Candidate routes (see specs/445_fix_temporal_conservativity_domain_mismatch_sorry/reports/02_literature-grounded-conservativity-obstruction.md):\n- Adapt the existing Temporal completeness machinery (Chronicle / MCS construction under Cslib/Logics/Temporal/Metalogic/Chronicle/) to yield a countermodel whose order embeds into an ordered abelian group.\n- Loewenheim-Skolem to a countable model, then Cantor (Order.iso_of_countable_dense) for the dense case plus a discreteness case-split, transporting satisfaction along the sound Satisfies.orderIso transport lemma sketched in the 445 report section 7.\nLiterature grounding: Xu1988, Burgess1984 sec 6.1, Gabbay1993 (irreflexivity rule), Reynolds. Confirm exactly which frame class BX+ is genuinely complete over before committing.\n\nZero-debt: no sorry, no vacuous defs; full CI green. If completeness turns out to need an open / research-level lemma, escalate with the exact goal rather than papering over it.\n",
+      "parent_task": 180,
+      "created": "2026-07-01T07:00:00Z",
+      "last_updated": "2026-07-01T07:00:00Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "dependencies": [
+        449
+      ]
     }
   ],
   "repository_health": {
